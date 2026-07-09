@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+*.egg
+build/
+dist/
+.eggs/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Virtual environments
+venv/
+.venv/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Notebooks
+.ipynb_checkpoints/
+
+# Large / generated data that should not be committed
+*.gdx
+*.7z
+capri_data/sources/capri_star/capreg_extracts/*.csv
+stored_fao_2021/
+*.lst
+
+# Model run outputs
+outputs/
+*.log

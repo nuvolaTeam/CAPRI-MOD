@@ -1,0 +1,20 @@
+cff-version: 1.2.0
+message: "If you use CAPRI-Python in your research, please cite it."
+title: "CAPRI-Python: A Python reimplementation of the core CAPRI agricultural economic model"
+type: software
+authors:
+  - name: "CAPRI-Python contributors"
+version: 0.1.0
+license: GPL-3.0-or-later
+repository-code: "https://github.com/USERNAME/capri-python"
+abstract: >
+  CAPRI-Python is an independent Python reimplementation of the core of the CAPRI
+  model (Common Agricultural Policy Regionalised Impact): a regional supply side
+  (Positive Mathematical Programming over EU NUTS-2 regions) linked to a global
+  Armington market. It reproduces CAPRI's 2017 base-year prices exactly but is not
+  validated against CAPRI's scenario magnitudes. It is not an official CAPRI product.
+references:
+  - type: software
+    title: "CAPRI model"
+    notes: "The original CAPRI model, developed by EuroCARE / Bonn University."
+    url: "https://www.capri-model.org"
