@@ -82,9 +82,24 @@ faithful, well-calibrated reimplementation — not a drop-in replacement for CAP
 
 ## 2. Input data
 
-All inputs live under `capri_data/` as CSV files. Every file is real CAPRI or FAO data;
-provenance and vintage are tracked in `capri_data/MANIFEST.json` and
-`capri_data/DATA_SOURCING_REGISTRY.json`.
+Inputs live under `capri_data/`, organised **by base year, then by module category**:
+
+```
+capri_data/2017/supply/      areas, yields, herds, costs, PMP params
+capri_data/2017/market/      producer & world prices, Armington params
+capri_data/2017/policy/      CAP payments, tariffs
+capri_data/2017/environment/ fertiliser N/P/K, manure, climate zones
+capri_data/2017/feed/        per-head feed requirements, availability
+capri_data/shared/           cross-vintage data (e.g. trade_flows_2021.csv)
+```
+
+Every file is real CAPRI or FAO data; provenance and vintage are tracked in
+`capri_data/MANIFEST.json` and `capri_data/DATA_SOURCING_REGISTRY.json`. See
+`capri_data/README.md` for the full layout and how to add a new base year.
+
+**For the variables inside each file** — columns, units, shape, and what every
+activity/commodity code means (SWHE = soft wheat, DCOW = dairy cows, …) — see the
+**[data dictionary](capri_data/DATA_DICTIONARY.md)**.
 
 ### Main data groups
 
@@ -145,7 +160,7 @@ pip install -r requirements.txt      # or: pip install -e ".[dev]"
 ```python
 from capri_python.model import CAPRIModel
 
-m = CAPRIModel(data_dir="capri_data", verbose=False)
+m = CAPRIModel(data_dir="capri_data", base_year="2017", verbose=False)
 
 results = m.run(
     scenario="BASELINE",
@@ -219,9 +234,12 @@ trade flows form an equilibrium at CAPRI's base-year prices. Verify with:
 pytest capri_python/tests/test_capri.py::test_base_year_market_fidelity -v
 ```
 
-### Changing the base year
+### Changing / adding a base year
 
-A newer base year is **not** just newer input files — it requires CAPRI's re-estimated
+Data is organised by base year (see Chapter 2), so a new base year is a new
+`capri_data/<year>/` folder with the same category subfolders, loaded via
+`CAPRIModel(data_dir="capri_data", base_year="<year>")`. Note that a newer base
+year is **not** just newer input files — it requires CAPRI's re-estimated
 PMP parameters for that year. Mixing newer prices/quantities onto 2017 PMP terms breaks
 calibration (and the validator will flag it). See `docs/DATA_LOCATION_MAP.md` for the
 upgrade path.
