@@ -1,40 +1,20 @@
-# Python
 __pycache__/
 *.py[cod]
 *.egg-info/
-*.egg
 build/
 dist/
-.eggs/
-.pytest_cache/
-.mypy_cache/
-.ruff_cache/
-
-# Virtual environments
-venv/
 .venv/
-env/
-ENV/
-
-# IDE
-.vscode/
-.idea/
-*.swp
-
-# OS
-.DS_Store
-Thumbs.db
-
-# Notebooks
+venv/
+.pytest_cache/
 .ipynb_checkpoints/
 
-# Large / generated data that should not be committed
-*.gdx
-*.7z
-capri_data/sources/capri_star/capreg_extracts/*.csv
-stored_fao_2021/
-*.lst
+# Pre-merge backups: recreated by the merge tools, not source of truth.
+*.pre_coco_merge
+*.pre_capreg_merge
 
-# Model run outputs
-outputs/
-*.log
+# Raw CAPRI exports. These are large gdxdump listings (ALL_DATA2.txt alone is
+# ~129 MB) and are inputs to tools/ingest_capreg_data2.py, not repository
+# content. Keep them outside the tree or attach them to a release.
+capri_export/
+DATA2_*.txt
+*.gdx

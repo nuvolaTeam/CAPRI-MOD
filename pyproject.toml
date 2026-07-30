@@ -1,39 +1,28 @@
 [build-system]
-requires = ["setuptools>=61.0", "wheel"]
+requires = ["setuptools>=61"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "capri-python"
 version = "0.1.0"
-description = "A Python reimplementation of the core of the CAPRI agricultural economic model"
+description = "A Python implementation of the CAPRI agricultural economic model"
 readme = "README.md"
-requires-python = ">=3.9"
-license = { text = "GPL-3.0-or-later" }
-authors = [{ name = "CAPRI-Python contributors" }]
-keywords = ["agriculture", "economics", "CAPRI", "CAP", "partial-equilibrium", "PMP"]
-classifiers = [
-    "Development Status :: 4 - Beta",
-    "Intended Audience :: Science/Research",
-    "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
-    "Programming Language :: Python :: 3",
-    "Topic :: Scientific/Engineering",
-]
+requires-python = ">=3.10"
+license = { text = "MIT" }
 dependencies = [
-    "numpy>=1.24",
     "pandas>=2.0",
+    "numpy>=1.24",
     "scipy>=1.10",
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=7.0"]
-
-[project.urls]
-Homepage = "https://github.com/USERNAME/capri-python"
-Issues = "https://github.com/USERNAME/capri-python/issues"
+dev = ["pytest>=7.0", "openpyxl>=3.1"]
 
 [tool.setuptools.packages.find]
-where = ["."]
 include = ["capri_python*"]
 
 [tool.setuptools.package-data]
-capri_python = ["../capri_data/**/*"]
+capri_python = ["*.csv"]
+
+[tool.pytest.ini_options]
+testpaths = ["capri_python/tests"]
