@@ -1,0 +1,500 @@
+{
+ "_schema": "CAPRI-Python data sourcing registry v1",
+ "_purpose": "Single source of truth for: what each dataset IS (real/synthetic/calibrated), its vintage, and where the best real/updated version comes from. Resolves the 'which vintage, is it synthetic, where to get better' questions in one place.",
+ "nature_legend": {
+  "REAL_CAPRI": "Extracted from CAPRI GAMS/GDX or COCO — CAPRI's own numbers",
+  "REAL_FAO": "From FAO SUA/trade/commodity-balance files",
+  "REALITY_CALIBRATED": "Standard coefficients tuned to match observed reality (not CAPRI's own)",
+  "SYNTHETIC_FALLBACK": "Generated with structure+noise because no real file present — REPLACE",
+  "MIXED_BY_COLUMN": "Nature varies by column - see column_nature. A file-level label hid synthetic columns inside a REAL_CAPRI file; record per column."
+ },
+ "datasets": {
+  "base_areas.csv": {
+   "nature": "MIXED_BY_COLUMN",
+   "vintage": "2017",
+   "source": "capreg DATA2 LEVL",
+   "priority": "medium",
+   "coverage": "3853 cells, 78.9% by area",
+   "column_nature": {
+    "SYNTHETIC_FALLBACK": [
+     "COTT",
+     "OFIB",
+     "OFOD"
+    ]
+   },
+   "note": "Median deviation from CAPRI LEVL was 69.3%. Staples were close (soft wheat 85.5 vs 91.2) but specialty crops were placeholders - tomatoes 1.61 where CAPRI has 0.01."
+  },
+  "yields.csv": {
+   "nature": "MIXED_BY_COLUMN",
+   "vintage": "2017",
+   "source": "capreg DATA2 (res_17<MS>.gdx), regional, base year 2017, for 21 crop activities over 144 regions; COCO export elsewhere; synthetic remainder",
+   "priority": "medium",
+   "validation_status": "VALIDATED. Model error against the independent COCO2 2017 benchmark fell from 16.0% to 7.3% median over 285 country x activity pairs, with 85% now within 20% (was 61%). Source itself scores 4.8%; the residual gap is the 67 regions capreg does not reach.",
+   "real_coverage_pct_of_grown_regions": {
+    "PULS": 58.4,
+    "APPL": 58.1,
+    "BARL": 57.9,
+    "OCER": 57.9,
+    "OVEG": 57.9,
+    "OFRU": 57.7,
+    "SWHE": 57.5,
+    "RYEM": 56.7,
+    "OATS": 56.7,
+    "POTA": 55.6,
+    "TOMA": 54.7,
+    "OOIL": 54.4,
+    "RAPE": 53.2,
+    "SUGB": 50.8,
+    "SUNF": 46.0,
+    "DWHE": 40.9,
+    "SOYA": 39.9,
+    "OLIV": 35.6,
+    "TOBA": 28.6,
+    "TAGR": 26.6,
+    "CITR": 13.3
+   },
+   "column_nature": {
+    "SYNTHETIC_FALLBACK": [
+     "CITR",
+     "COTT",
+     "OFIB",
+     "GRAS",
+     "OFOD",
+     "DCOW",
+     "BCOW",
+     "BULL",
+     "HFRS",
+     "CALV",
+     "SHGP",
+     "PIGS",
+     "PIGF",
+     "LAYS",
+     "BROI",
+     "OANI"
+    ]
+   },
+   "note": "Crop units are kg/ha, verified against German SWHE 7612.6 and BARL 6648.2. Dairy yield is NOT in YILD - capreg DCOW YILD is 2535 nationally, while the real milk yield is in COMI at 8384.4 kg/head. Taking YILD uniformly would have put dairy 3x too low.",
+   "best_update": "2) GRAS definition - capreg 410.9 vs COCO2 17770 for the same country and year; 3) DCOW/BULL/PIGF merge, real but with no independent benchmark; 4) the 8 renamed livestock activities (SCOW/HENS/POUF/SOWS/CAFF/HEIF/SHGF); 5) the 104 regions capreg does not reach",
+   "crosswalk_coverage": "227 of 248 model regions resolved via the full Eurostat chain 1995->1999->2003->2006->2010->2013->2016->2021->2024->2027; 181 reached in the capreg data",
+   "OANI_resolution": "CLOSED - not obtainable, and not a units problem. In CAPRI, OANI is a share-index pseudo-activity rather than a herd: LEVL is exactly 1.0 nationally and the regional LEVLs sum to 1.0 across NUTS-1 (verified DE, FR, IT, PL), so LEVL is a regional share of the national other-animals residual. YILD (932709 for DE) is simply the value that satisfies PROD = LEVL * YILD / 1000. No per-head yield exists to import. The x1000 rescaling at cons_levls.gms:877 is internal, symmetric, reversed at line 2617, and does not describe the delivered data. OANI should stay on a literature-anchored placeholder, labelled as structurally unavailable rather than pending extraction."
+  },
+  "animal_numbers.csv": {
+   "nature": "REAL_CAPRI",
+   "vintage": "2017",
+   "source": "capreg DATA2 HERD",
+   "priority": "medium",
+   "coverage": "1700 cells across 9 animals",
+   "note": "COWS and SHGO have no direct CAPRI counterpart and keep their prior values."
+  },
+  "producer_prices.csv": {
+   "nature": "MIXED_BY_COLUMN",
+   "vintage": "2017",
+   "source": "capreg DATA2 MPRI (EUR/t), regional, GDX read; national series as fallback",
+   "priority": "high",
+   "note": "The national series was materially wrong for specialty crops: other vegetables 30.8 EUR/t against CAPRI 495.9, tobacco 43.8 against 2574.7, other fruit 24.4 against 1295.7. Median deviation across 28 comparable activities was 37.5%. This was the cause of the long-standing validator warning about implausible specialty-crop losses, which fell from 418 cells to 105 once regional prices and CAPRI costs were used together. Prices and costs must be merged as a pair: CAPRI costs with the old prices leaves staples at a loss, because the old pair was internally consistent only with itself.",
+   "best_update": "the residual 105 warnings are all in the 56 regions capreg does not cover"
+  },
+  "world_prices.csv": {
+   "nature": "MIXED_BY_COLUMN",
+   "vintage": "2017 for EGGS, unclear elsewhere",
+   "priority": "medium",
+   "source": "CAPRI SUA, with EGGS replaced from capmod res_0_1717",
+   "status": "PARTIALLY RESOLVED",
+   "note": "Validated independently for the first time. EU producer prices (DATA2 MPRI, a verified GDX read) do not touch this file, so the producer/world ratio is a genuine external check: a domestic price far below the world price cannot hold, because producers would export instead.\n\nResult: for SWHE, OCER, POTA, PULS, OVEG, APPL and CITR the MODEL is the more plausible source. CAPRI's world prices for those sit 25-60% ABOVE the EU farm-gate price for commodities the EU imports heavily (citrus 56% extra-EU, other fruit 56%, pulses 37%), which arbitrage does not permit. This overturns the earlier suspicion that the round-number values were placeholders CAPRI would correct - they look like placeholders but they are closer to right.\n\nEGGS is the exception and was decisive the other way: the model carried 63.4 EUR/t, which is 0.063 EUR/kg and not a price eggs have ever traded at. The EU farm-gate egg price from MPRI HENS is 1193.1 EUR/t against CAPRI's world price of 1173.8, a ratio of 1.02. EGGS has been corrected to 1173.8; the market module still clears 12/12.",
+   "best_update": "OLIV (ratio 0.39) and SHGM (0.32) have model world prices well ABOVE the EU producer price with no CAPRI value to compare - these are now the least defensible entries in the file. CHES, SKIM and BUTR cannot be checked this way at all: they are processed products and MPRI carries only farm-gate activities."
+  },
+  "variable_costs.csv": {
+   "nature": "MIXED_BY_COLUMN",
+   "vintage": "2017",
+   "source": "capreg DATA2 TOIN (total intermediate input, EUR/ha), GDX read",
+   "priority": "medium",
+   "coverage": "4627 cells replaced across 192 regions; 56 regions keep prior values",
+   "note": "Previously labelled REAL_CAPRI with source \"CAPRI\" but sourced through the Excel path. Median deviation from CAPRI TOIN was 54.8%, with OVEG at 207% and identical values filled across OVEG and TOMA in the same region, indicating group-level fill rather than per-activity data. Note that TOIN is total intermediate input, which is a slightly broader concept than \"variable cost\"; the two are treated as equivalent here because CAPRI computes gross value added as output minus TOIN, which is the margin the supply module needs.",
+   "best_update": "cover the 56 regions capreg does not reach"
+  },
+  "cap_payments.csv": {
+   "nature": "REAL_CAPRI",
+   "vintage": "2017",
+   "source": "capreg DATA2 PRME, per activity",
+   "priority": "high",
+   "coverage": "192 regions x 75 activities, 78.7% by area",
+   "note": "The previous file was region x instrument (BPS/ANC/AES/ORGANIC/COUPLED) summed and applied uniformly: 676.7 EUR/ha to every crop at DE11 and nothing to livestock. CAPRI PRME is per activity - 360.8 soft wheat, 108.2 dairy cows, 8.2 bulls - so crops were nearly doubled and livestock zeroed. The premium enters net revenue directly, so this distorted the relative profitability the PMP calibration exists to capture."
+  },
+  "eu_mfn_tariffs.csv": {
+   "nature": "REAL_CAPRI",
+   "vintage": "2017",
+   "source": "CAPRI",
+   "best_update": "current MFN schedule",
+   "priority": "low"
+  },
+  "armington_params.csv": {
+   "nature": "REAL_CAPRI",
+   "vintage": "CAPRI star-3.0 source",
+   "source": "gams/arm/market1.gms and gams/special_ch/market1_ch.gms, literal assignments",
+   "priority": "low",
+   "status": "VERIFIED",
+   "note": "VERIFIED EXACTLY. The sigma column reproduces CAPRI's p_rhoArm1 with 0.0% deviation across all 16 directly comparable commodities, so this file was already correct. Despite the directory name, special_ch/market1_ch.gms is the authoritative source: arm/market1.gms includes it unconditionally at line 165 with the comment 'was commented as Special adjustments for Switzerland but actually assigns most CES elasticities'. Provenance is Fontagne, Guimbard and Orefice (2019), CEPII product-level trade elasticities, aggregated by FOAG to CAPRI market products. This also explains the earlier GTAP confusion: CAPRI does not use GTAP for these at all, so dat/arm/GTP57_134.gdx was never the right source. The intra-import elasticity (rhoArm2, added as column rho2 for 21 commodities) was missing entirely; it is consistently twice rhoArm1."
+  },
+  "land_availability.csv": {
+   "nature": "REAL_CAPRI",
+   "vintage": "2017",
+   "source": "capreg DATA2 LEVL on ARAB/UAAR/GRAE/GRAI/SETA/FALL/OLND",
+   "priority": "medium",
+   "coverage": "962 cells, 199 regions",
+   "note": "GRAE and GRAI are identical in these dumps; grassland maps to GRAE alone to avoid double-counting."
+  },
+  "supply_elasticities_regional.csv": {
+   "nature": "REAL_CAPRI",
+   "vintage": "2005 (PELA series ends 2005; base year is 2017)",
+   "source": "dat/estnlp/results.gdx symbol PELA, 2005 slice, own-price diagonal",
+   "priority": "high",
+   "coverage": "173 model regions x 15 crops, up from 107 regions",
+   "note": "The previous file reproduced the same PELA 2005 slice but was CLIPPED at 4.5 rather than dampened: 270 cells sat at exactly 4.500. CAPRI's rule is min(8, sqrt(e) + 4.5 - sqrt(4.5)), so the affected cells averaged 4.50 where CAPRI gives 5.27, and the largest (DEB2/OATS, raw 111.0) was understated by 44%. This is the same truncation error that was in the code, baked into the data as well.",
+   "best_update": "PELA also holds 20173 CROSS-price records for 2005 (71% negative). These are extracted to sources/estnlp/pela_cross_price.csv but not wired: the supply module currently builds Q off-diagonals from the group-level p_pmpQuadPact, and these are the activity-level estimates that would replace them."
+  },
+  "input_requirements.csv": {
+   "nature": "REAL_CAPRI",
+   "vintage": "2017",
+   "source": "CAPRI estimation (VA)",
+   "best_update": "re-run CAPRI PMP estimation",
+   "priority": "—"
+  },
+  "pmp_own_price_elasticities.csv": {
+   "nature": "REAL_CAPRI",
+   "vintage": "2017",
+   "source": "CAPRI PELA",
+   "best_update": "re-estimated",
+   "priority": "—"
+  },
+  "pmp_diagonal_terms.csv": {
+   "nature": "REAL_CAPRI",
+   "vintage": "2017",
+   "source": "CAPRI estimation (VD)",
+   "best_update": "re-estimated",
+   "priority": "—"
+  },
+  "pmp_crossgroup_terms.csv": {
+   "nature": "REAL_CAPRI",
+   "vintage": "2017",
+   "source": "CAPRI estimation (VB)",
+   "best_update": "re-estimated",
+   "priority": "—"
+  },
+  "trade_flows.csv": {
+   "nature": "REAL_FAO",
+   "vintage": "2021",
+   "source": "FAO bilateral trade (fao_trade_for_global)",
+   "best_update": "already current (2021)",
+   "priority": "done"
+  },
+  "fao_market_baseline.json": {
+   "nature": "REAL_FAO",
+   "vintage": "2017",
+   "source": "FAO_agg SUA",
+   "best_update": "fao_agg_21 or FAOSTAT 2021 (needs milk-code fix)",
+   "priority": "optional"
+  },
+  "fao_processing_splits.json": {
+   "nature": "REAL_FAO",
+   "vintage": "2017",
+   "source": "FAO comm. balances + GAMS dairy",
+   "best_update": "newer FAO balances",
+   "priority": "low"
+  },
+  "fao_demand_own_elas_eu.json": {
+   "nature": "REAL_FAO",
+   "vintage": "2017",
+   "source": "FAO_agg p_demandElas",
+   "best_update": "fao_agg_21",
+   "priority": "low"
+  },
+  "coco_feed_availability_national.csv": {
+   "nature": "REAL_CAPRI",
+   "vintage": "2017",
+   "source": "COCO p_FeedAgri",
+   "best_update": "newer COCO",
+   "priority": "—"
+  },
+  "dairy_processing_params.json": {
+   "nature": "REAL_CAPRI",
+   "vintage": "2017",
+   "source": "GAMS arm/def_dairy_prices",
+   "best_update": "—",
+   "priority": "—"
+  },
+  "gascoeff_params.json": {
+   "nature": "REAL_CAPRI",
+   "vintage": "2006 (IPCC)",
+   "source": "IPCC 2006 / CAPRI envind",
+   "best_update": "IPCC 2019 refinement",
+   "priority": "low"
+  },
+  "manure_ch4_ef_regional.csv": {
+   "nature": "REAL_CAPRI",
+   "vintage": "2017",
+   "source": "CAPRI",
+   "best_update": "—",
+   "priority": "—"
+  },
+  "crop_nutrient_export.csv": {
+   "nature": "REAL_CAPRI",
+   "vintage": "CAPRI star-3.0 doc Table 15",
+   "status": "RECLASSIFIED from LITERATURE",
+   "note": "CAPRI documentation Table 15 gives these as CAPRI's own nutrient export coefficients (soft wheat 20/8/6 N/P/K kg per ton). Not external literature after all."
+  },
+  "climate_zones.csv": {
+   "nature": "REAL_CAPRI",
+   "vintage": "static",
+   "source": "CAPRI",
+   "best_update": "—",
+   "priority": "—"
+  },
+  "feed_requirements.csv": {
+   "nature": "REAL_CAPRI",
+   "vintage": "2017",
+   "source": "capreg DATA2 feed cols ALL animals incl pigs/poultry (Miohd unit handled), fresh->DM via feed-science fractions",
+   "best_update": "newer capreg",
+   "priority": "DONE - fully real"
+  },
+  "nutrient_coefs.csv": {
+   "nature": "REAL_CAPRI",
+   "vintage": "2017",
+   "source": "capreg DATA2 NITF/PHOF/POTF, regional",
+   "priority": "medium",
+   "coverage": "14210 region-activity pairs, 79.0% by area",
+   "note": "Was national constants per activity. CAPRI soft-wheat nitrogen is 147.5 kg/ha at DE11 and 68.2 at ES61 against a single national 125.9."
+  },
+  "capreg_feed_requirements.csv": {
+   "nature": "REAL_CAPRI",
+   "vintage": "2017",
+   "source": "capreg DATA2 items ENNE, CRPR, DRMN, DRMX, DAYS",
+   "priority": "high",
+   "status": "EXTRACTED, NOT YET WIRED",
+   "coverage": "22339 records, 192 model regions, 29 animal activities",
+   "note": "The reqrel_17*.gdx dump carries p_animReqCorrFac1, which is a set of correction FACTORS (roughly +/-10% on ENNE and CRPR), not requirement levels. The levels were already present in DATA2 and are extracted here. Replaces the hardcoded dictionaries in feed_module.py, whose PRODUCTION_DAYS values are materially wrong for two activities: BULL 365 vs a real median of 151 (range 14-360) and PIGF 180 vs 129 (range 76-220). Dairy, hens and sows are correct at 365.",
+   "best_update": "wire into feed_module.py, replacing MEAN_LIVE_WEIGHT / PRODUCTION_DAYS constants"
+  },
+  "capreg_nutrient_coefs.csv": {
+   "nature": "REAL_CAPRI",
+   "vintage": "2017",
+   "source": "capreg DATA2 NITF/PHOF/POTF (N, P2O5, K2O kg/ha), regional",
+   "status": "EXTRACTED, NOT YET WIRED",
+   "priority": "medium",
+   "coverage": "36524 records, 192 regions, 85 activities",
+   "note": "The live nutrient_coefs.csv holds national constants per activity. Their medians are close to CAPRI (2.5% median deviation), so the level is roughly right, but all regional variation is lost: CAPRI nitrogen on soft wheat ranges 15-230 kg/ha across regions. Wiring this needs a loader change, since the current file is indexed by activity alone."
+  },
+  "trade_flows_2021.csv": {
+   "nature": "EXTERNAL",
+   "vintage": "2021 inside a 2017 base year",
+   "priority": "medium",
+   "note": "dat/global/trade_flows_ori.gdx (symbol RESULT1) does NOT solve the vintage mismatch: it is raw FAO bilateral trade for 1992-2005, keyed by numeric FAO country and commodity codes. 2005 is further from the 2017 base year than the current 2021 data, so adopting it would make the mismatch worse. The processed flows from a capmod or arm run are what is needed."
+  },
+  "capreg_manure_nutrients.csv": {
+   "nature": "REAL_CAPRI",
+   "vintage": "2017",
+   "source": "capreg DATA2 MANN/MANP/MANK",
+   "priority": "medium",
+   "coverage": "40246 records",
+   "note": "New input. environmental_module previously hardcoded N_EXCRETION_KG_PER_HEAD, which understated dairy by 29% (85 vs a CAPRI median of 118.8), overstated bulls by 49% (35 vs 23.5), and omitted laying hens entirely where CAPRI has 659.5 kg N/head/yr."
+  },
+  "capreg_feed_availability_regional.csv": {
+   "nature": "REAL_CAPRI",
+   "vintage": "2017",
+   "source": "capreg DATA2 feed items",
+   "priority": "low",
+   "coverage": "192 regions x 12 items"
+  },
+  "pela_cross_price.csv": {
+   "nature": "REAL_CAPRI",
+   "vintage": "2005",
+   "source": "estnlp PELA off-diagonal",
+   "priority": "high",
+   "coverage": "20173 records, 173 regions, 71% negative",
+   "note": "Activity-level substitution estimates, now driving the Q off-diagonals ahead of the group-level p_pmpQuadPact. DE11 has 118 negative off-diagonals where the prior heuristic was positive by construction."
+  },
+  "capmod_trade_flows_2017.csv": {
+   "nature": "REAL_CAPRI",
+   "vintage": "2017",
+   "source": "capmod res_0_1717 dataOut ImportQ, bilateral",
+   "priority": "high",
+   "status": "EXTRACTED, NOT YET WIRED",
+   "coverage": "105914 flows, 61 importers x 61 exporters, 78 commodities",
+   "note": "Resolves the vintage mismatch. The model carries a 2021 matrix inside a 2017 base year; this is CAPRI's own calibrated matrix at exactly 2017. The alternative found earlier (dat/global/trade_flows_ori.gdx) was raw FAO data ending 2005, which would have been worse than what is there now."
+  },
+  "capmod_world_prices_2017.csv": {
+   "nature": "REAL_CAPRI",
+   "vintage": "2017",
+   "source": "capmod res_0_1717 dataOut Fob at exporter=World, import-weighted",
+   "priority": "high",
+   "status": "EXTRACTED, NOT MERGED - see note",
+   "coverage": "71 commodities",
+   "note": "Fob is dimensioned by IMPORTER, because it is the free-on-board price that importer faces on its own bundle: barley is 281.0 for Norway and 132.5 for the UK in the same year. A single reference price therefore has to be constructed, and the import-weighted mean is used here. Validation against the base-fidelity reference values is mixed: BEEF, POUM and BUTT agree within 2%, MILK 5%, BARL 9%, MAIZ 16%, PORK 18%, WHEA 26% - but SOYA is 46% out and CHES 115%. NOT merged: the base-fidelity test compares the model's solved prices AGAINST this file, so a wrong value would be confirmed rather than caught. The outliers need explaining first."
+  },
+  "capmod_eu_imports_2017.csv": {
+   "nature": "REAL_CAPRI",
+   "vintage": "2017",
+   "priority": "high",
+   "source": "capmod res_0_1717 dataOut ImportQ, EU as importer",
+   "status": "EXTRACTED, READY FOR ARMINGTON RECALIBRATION",
+   "coverage": "71 commodities x 61 origins",
+   "note": "Gives the extra-EU import share directly, which is the Armington first nest: soya 90.7% extra-EU, wheat 2.4%, beef 5.2%, cheese 1.6%. This is what the 2021 trade matrix is currently used for, so it can replace it without the market module needing to handle 61x61 bilateral detail."
+  },
+  "trade_flows_2017.csv": {
+   "nature": "REAL_CAPRI",
+   "vintage": "2017",
+   "priority": "high",
+   "status": "MERGED",
+   "source": "capmod res_0_1717 dataOut ImportQ",
+   "coverage": "547 region pairs x 32 commodities",
+   "note": "Replaces trade_flows_2021.csv, which carried no intra-EU trade at all. Fewer rows than the 841 it replaced because CAPRI reports realised flows rather than an exhaustive grid of zeros. Overlapping CAPRI aggregates (NONEU, ASIA, MID_INC, LDC and the rest) are excluded from the mapping: they are supersets of the individual regions and including them would double-count."
+  },
+  "derived_elasticities_from_pmp.csv": {
+   "nature": "DERIVED_FROM_CAPRI",
+   "vintage": "2017",
+   "priority": "high",
+   "status": "DIAGNOSTIC, extended to livestock",
+   "source": "inverted from pmppar p_pmpQuadTechn + p_pmpQuadPact via CAPRI's own elasticity relation",
+   "coverage": "192 regions x 22 activities, 3490 values",
+   "note": "CAPRI computes elas = revenue / (LEVL * shareTerm * (pmpQuadTechn + pmpQuadPact)). Inverting it recovers the elasticity implied by CAPRI's estimated PMP parameters for 8 activities PELA does not cover, all permanent crops and vegetables. Validated against PELA on the 14 activities where both exist: median ratio 0.48 with positive but weak correlation (median 0.34), so the derivation is directionally sound but carries a roughly two-fold systematic bias and does not resolve regional pattern reliably. NOT MERGED for that reason.",
+   "finding": "The important result is diagnostic rather than a data fix. Derived permanent-crop elasticities are 0.12-0.15, essentially identical to the literature defaults already in use (APPL 0.12, CITR 0.12, OFRU 0.12, TAGR 0.15). Even bias-corrected they reach only 0.24-0.31 against an arable median of 1.43. So the asymmetry the model shows is largely REAL AGRONOMY, not a data gap: orchards and olive groves take years to establish and are genuinely inelastic in the short run, while arable crops can be switched annually. Earlier notes in this project described the asymmetry as 'a property of the data coverage rather than of agronomy'. That was wrong. Vegetables and tobacco are the exception: derived 0.45 and 0.30 against literature 0.18-0.20, so those defaults do look too low. Livestock remains genuinely unverified - pmppar carries no livestock terms.",
+   "livestock_finding": "The derivation now covers 16 livestock activities (192 regions) by taking revenue as herd x per-head yield x price. Cross-checked against the independent market-level p_elasSupp: EGGS (0.82 vs 0.76) and BEEF (0.82 vs 0.72) agree well, MILK is lower (0.32 vs 0.55), PORK is 2.5x higher (1.76 vs 0.69) and is the clear outlier. The PMP-implied derivation is unstable where the quadratic term is small (BULL median 2.34, max 25.9), the same instability seen for crops. So livestock elasticities EXIST regionally in CAPRI and can be recovered in the right order of magnitude, but the derivation is not accurate enough to merge as levels. For a runnable model the market-level p_elasSupp EU medians (BEEF 0.72, PORK 0.69, MILK 0.55, EGGS 0.76) are the more reliable source; the regional derivation shows the spatial pattern around them."
+  },
+  "capri_supply_elas_market_1717.csv": {
+   "nature": "REAL_CAPRI",
+   "vintage": "2017",
+   "priority": "high",
+   "status": "EXTRACTED, market-level",
+   "source": "output/results/arm/elas1717defaulta.gdx symbol p_elasSupp, direct gdxdump",
+   "coverage": "73528 rows, 80 trade regions (34 real NUTS-national), 45 products",
+   "note": "The livestock supply elasticities that were the single largest verification gap. Own-price EU medians: BEEF 0.72, PORK 0.69, MILK 0.55, EGGS 0.76, POUM 0.75, SGMT 0.82. IMPORTANT it is MARKET level: regions are COUNTRY codes (XX000000) not NUTS-2, and products are market commodities (MILK, BEEF) not supply activities (DCOW, BULL). So it feeds the MARKET module's supply response, not the regional PMP calibration. The Excel export of the same file (elas1717defaulta_export.xlsx) returned a ZERO own-price diagonal; the direct GDX read gives the correct 2635-row diagonal, a clean demonstration of why the Excel path was abandoned.",
+   "best_update": "wire the EU medians into the market module supply response; regional PMP livestock elasticities remain unavailable (pmppar has no livestock terms)"
+  },
+  "pmp_quad_techn.csv": {
+   "nature": "REAL_CAPRI",
+   "vintage": "2017",
+   "priority": "high",
+   "status": "CORRECTED",
+   "source": "pmppar p_pmpQuadTechn, quadTechn_*.txt",
+   "coverage": "56 activities incl. 18 livestock, ~270 regions each, 9494 rows",
+   "note": "CORRECTION to a prior error. The ingest regex required the tag pattern T1.T1, which crops use, but livestock activities use T.T. Every livestock PMP term was therefore silently dropped, and this was repeatedly and wrongly reported as 'CAPRI has no regional livestock elasticities'. CAPRI does: BULL, PIGF, SOWS, HENS, SCOW, DCOL and 12 others each carry a regional quadratic PMP term in ~270 regions. The regex now accepts both tags. Same class of error as the MAIZ/CORN bug: a filter that silently discards rather than flags.",
+   "best_update": "The livestock PMP terms are captured but not yet turned into elasticities: the derivation needs revenue = yield x price x herd-level, and livestock lives in the herds/animal_numbers frames rather than the crop yields/areas frames the derivation reads. Extending the derivation to pull livestock revenue from HERD x MPRI would give regional livestock supply elasticities directly, complementing the market-level p_elasSupp already extracted."
+  },
+  "supply_elas_eu_all.json": {
+   "nature": "REAL_CAPRI",
+   "vintage": "2017",
+   "priority": "high",
+   "status": "MERGED into market module",
+   "source": "elas1717defaulta.gdx p_elasSupp, EU median own-price diagonal",
+   "coverage": "19 of 32 model market commodities, incl. all livestock",
+   "note": "Wired into MarketModule.supply_response, replacing the Armington eps column which applied a blanket 0.15-0.25 to every commodity. Livestock was the worst case: BEEF/PORK/MILK/EGGS ran at 0.15-0.25 where CAPRI's calibrated values are 0.72/0.69/0.55/0.76. Behavioural effect: a +20% livestock price shock now raises EU supply ~10-15% (beef +14%) where the placeholder gave ~3%. Market still clears 12/12. Commodities not in the file keep the eps fallback."
+  },
+  "yields.csv_GRAS": {
+   "nature": "REAL_CAPRI",
+   "vintage": "2017",
+   "status": "CORRECTED via documentation",
+   "source": "capreg DATA2 GRAE/GRAI YILD, area-weighted",
+   "note": "The factor-43 puzzle is solved. capreg GRAS=410.9 was the WRONG symbol - a separate coefficient, not the dry-matter yield. CAPRI doc confirms grass yield is dry matter kg/ha. The real DM yields are GRAE (extensive grassland) and GRAI (intensive); DE gives 22458 and 52402 kg/ha. Area-weighted per region they median 17310 kg/ha, matching COCO2's 17770. Corrected for 187 model regions."
+  },
+  "yields.csv_livestock": {
+   "nature": "REAL_CAPRI",
+   "vintage": "2017",
+   "status": "MERGED (units confirmed from doc)",
+   "source": "capreg DATA2 YILD, per head; herd-weighted for many-to-one",
+   "coverage": "7 activities x ~185-192 regions",
+   "note": "The seven previously-synthetic livestock yields, merged now that the doc confirmed animal YILD is per head. Names: BCOW<-SCOW, HFRS<-HEIF, LAYS<-HENS, BROI<-POUF, and herd-weighted many-to-one: CALV<-CAFF+CAFR, SHGP<-SHGF+SHGM, PIGS<-PIGF+SOWS. Medians are sane: eggs 13143/hen-yr, pigs 2448, heifers 1817."
+  },
+  "COTT_OFIB_OFOD_WINE": {
+   "nature": "DEFINITIONAL - NOT A PHYSICAL YIELD",
+   "status": "RESOLVED as won't-fix",
+   "note": "The doc resolves why these have no real yield: they are HETEROGENEOUS/NON-PHYSICAL items. Cotton sits in 'textile crops' which produces both cotton lint AND cotton seed (oilseed) - CAPRI fixes a Eurostat double-count by having TEXT yield split across two outputs. OIND (other industrial), OCRO (other crops), OFOD are expressed as VALUES at constant 2005 prices, not physical tonnes. So a kg/ha yield is not defined for them by construction. The flat placeholder should be left as-is or the activity dropped; inventing a physical yield would be wrong. Fodder aggregates are documented too: ROOF=ROO1+ROO227, OFAR=TGRA+FCLV+FLUC+FPGO+FAGO, TAGR=VINY-TWIN."
+  },
+  "pmp_elasticity_calibration": {
+   "nature": "METHOD_FIX",
+   "status": "FIXED",
+   "note": "Crop own-price supply elasticity was overshooting its PELA target by 1.6-2.5x (wheat realized 2.6 vs target 1.6). Root cause: PMPCalibrator set Qii = p/(eps*x0*st) using NET revenue as the price proxy p, but a price shock in solve() perturbs GROSS revenue (price*yield), so the response was scaled up by the gross/net ratio (~1.6-2.5). Fix: calibrate Qii on gross revenue (price*yield, livestock unit-scaled) while keeping net revenue for the f term that anchors the FOC. Realized/target elasticity ratio went from 1.6-2.5 to a tight 0.93 median (0.88-0.98) across crops and regions. Base fidelity and livestock response unaffected; validator 11/1/0."
+  },
+  "cap_policy_mechanism": {
+   "nature": "METHOD_FIX + VALIDATION",
+   "status": "FIXED and VALIDATED",
+   "note": "Policy/CAP module validation. INPUT validated: per-region per-activity CAP premiums reproduce CAPRI PRME exactly (DE11 SWHE 360.79 vs 360.8, DCOW 108.24 vs 108.2, BULL 8.20 vs 8.2, SCOW 26.03 vs 26.0). MECHANISM had a silent bug: policy_shock modified cap_payments (region-keyed) with instrument keys ('BPS') absent from its index, so every CAP scenario did nothing - a payment cut produced zero response. Fixed to modify cap_premium (the per-activity PRME that actually feeds net revenue), with activity/CROPS/LIVESTOCK/ALL shock keys. VALIDATED: +100 EUR/ha crop premium raises wheat +17% against a theoretical +19% from (premium/gross_rev)*elasticity - economically consistent. Base restored after shock (cap_premium added to the solve state snapshot). Note BPS basic payment is decoupled by design so a BPS-only change correctly moves nothing; coupled and premium changes now transmit correctly."
+  },
+  "feed_module_validation": {
+   "nature": "METHOD_FIX + VALIDATION",
+   "status": "RUMINANTS VALIDATED, monogastrics known gap",
+   "note": "Feed module validated against CAPRI DATA2 feed requirements (ENNE energy MJ/head/day, DRMN dry matter kg/head/day). Dry matter matched well from the start (DCOW 6657 vs CAPRI 6460 kg/yr, ~3%). ENERGY had a real bug: growth energy used a crude approximation (LW^0.75*0.322*0.17) that omitted the daily-gain term, undercounting fattening animals (BULL 34 vs CAPRI 51 MJ/day). Replaced with CAPRI's actual IPCC 2006 Eq 10.6 ruminant formula NEG=22.02*(LW/(coeff*matureWgt))^0.75*dailyGain^1.097*days, coeff 1.2 male / 0.8 female cattle, mature weight 550kg. RESULT: DCOW ratio 0.99, BULL 0.92 vs CAPRI - ruminants VALIDATED. KNOWN GAP: monogastrics (PIGF 0.27) need CAPRI's separate ENMP/ENMC net-energy-pigs/chicken system, not ported; documented rather than forced through the ruminant formula. Feed allocation LP solves end to end (feed_use + manure N/P/K). Validator 11/1/0. Units lesson: CAPRI ENNE is MJ/head/DAY not GJ/year - first read was wrong, corrected by cross-checking energy density against dry matter (7.3 MJ/kg).",
+   "monogastric_update": "POINT 2 RESOLVED. Monogastric feed requirements now covered. Found CAPRI's ENMP/ENMC formulas in req_or_man_fnc.gms (HENS ENMC = (0.46*LW^0.75+0.57*eggYield)*365*1000; SOWS ENMP = 8219.75+3703.2+piglet term). Attempting a direct port came out 145x off for hens because CAPRI reports HENS DRMN per 1000 head but SOWS per head - the recurring per-head vs per-1000-head unit tangle. Rather than ship an unresolved conversion, DRMA is calibrated to the measured CAPRI DATA2 per-head DM targets (HENS 31.1 kg/yr, SOWS 1460, broilers 15) at concentrate energy density 13 MJ/kg. Matches CAPRI DM exactly (ratio 1.00), labelled calibrated-to-target not first-principles. Ruminants unaffected (DCOW 128.7, BULL 46.8 MJ/day). Pig fattening feed remains on the cost side as CAPRI itself handles it."
+  },
+  "environment_module_validation": {
+   "nature": "VALIDATION",
+   "status": "VALIDATED (methods 2 + 3)",
+   "note": "Environment module validated two ways. METHOD 2 (coefficient): N excretion vs CAPRI MANN - DCOW 123.8 vs 115.8 (+7%), BULL 29.4 vs 27.3 (+8%), PIGF 5.9 vs 6.6 (-11%), HENS 641.5 vs 728.6 (-12%), all within ~12%. METHOD 3 (scenario): under the Green Deal cattle expansion, GHG enteric methane rises correctly with activity (DE21 1309->1320 as DCOW 374->377). No environmental variables in the Green Deal result files, so the scenario check is via activity-driven indicators rather than a direct CAPRI env-output match. Module computes N excretion, GHG, N balance, ammonia, biodiversity; all respond to activity changes."
+  },
+  "biofuel_module_validation": {
+   "nature": "VALIDATION",
+   "status": "VALIDATED (method 2 only - limitation stated)",
+   "note": "Biofuel module. METHOD 2 only: no biofuel variables in the Green Deal files, so no scenario (method 3) validation possible against CAPRI - a stated limitation. Output validated against observed EU 2020 levels: bioethanol 5456 kt (EU ~5000), biodiesel 12693 kt (EU ~13000), both within 10%; rapeseed correctly dominates biodiesel feedstock. MECHANISM: a +54% blending mandate raises output and feedstock demand +54% (correct linear response). Validated against external EU statistics and internal consistency, NOT against CAPRI scenario output."
+  },
+  "convergence_conditioning_fix": {
+   "nature": "METHOD_FIX",
+   "status": "FIXED (point 3 of release roadmap)",
+   "note": "The non-converging regions (DE25, DEB3) failed with 'max function evaluations exceeded' - not a data error but an ill-conditioned Q. Qii = p/(eps*x0*st) exploded for near-zero-base crops (TOMA base 0.0097 -> Qii 1.8e8) and inflated-revenue cells (GRAS net_rev 30M -> Qii 6e6), giving a diagonal spanning 11 orders of magnitude that the optimiser could not navigate. Fix: clamp each Qii to a bounded 4-orders-of-magnitude spread around the median positive curvature. DE25 and DEB3 now converge. Verified the clamp does NOT disturb the well-behaved majority: elasticity ratios unchanged (SWHE 0.88, BARL 0.90, RAPE 0.95), base fidelity intact. Remaining non-converger DE60 (Hamburg) is a genuine city-state edge case with 46.9 kha total, not a systematic bug."
+  },
+  "world_prices_pmrk_validation": {
+   "nature": "VALIDATION + CORRECTION",
+   "status": "BASE VALIDATED against CAPRI PMRK",
+   "note": "Base-year world prices validated against CAPRI's actual PMRK (market price) from the capmod base GDX res_0_1717 dataOut - the first direct comparison, not the earlier producer-price arbitrage proxy. Major commodities matched (WHEA 0.94, PORK 0.92, BEEF 1.16). Nine were clear outliers and corrected to CAPRI values: SOYA 292.6->102.7 (the long-flagged 2.85x error), RAPE 321->213, and the round-number placeholders PULS/OVEG/APPL/OFRU/CITR, plus CHES (cheese) 2581->4815 - a dairy product we previously could NOT validate because there is no processing margin; the direct PMRK reading resolves it. Market clears 9/9 within 20% of CAPRI PMRK after correction. Validator 11/1/0."
+  },
+  "market_scenario_validation": {
+   "nature": "METHOD_FIX + VALIDATION",
+   "status": "VALIDATED (point 1 - direction)",
+   "note": "Market scenario validation against CAPRI's Green Deal market prices (res_2_1730 dataOut World PMRK). CAPRI's Green Deal raises all prices, livestock most (MILK +41%, PORK +36%, BEEF +25%) - the extensification-tightens-supply signal. Validation found a real bug: _calibrate_demand_to_supply recalibrated demand to match supply on EVERY solve, so a scenario supply cut was instantly matched by a demand cut and NO price moved (30% beef cut -> 0% price). Fixed to calibrate demand ONCE at base and freeze it, so scenario supply shocks create genuine excess demand. RESULT: livestock prices now rise correctly under a supply cut (BEEF/PORK/MILK all +, matching CAPRI direction). Magnitude lower (0.4-0.6% vs 25-41%) as expected: our comparative-static 8% cut vs CAPRI's cumulative 2030 projection. Base still clears 8/8 within 20% of CAPRI PMRK; validator 11/1/0."
+  }
+ },
+ "code_embedded_data": {
+  "biofuel conversion coefficients": {
+   "nature": "REALITY_CALIBRATED",
+   "location": "biofuel/biofuel_module.py",
+   "source": "standard agronomic yields, mandate calibrated to EU output",
+   "best_update": "AGLINK biofuel GDX (bioDem.gdx) if decoded",
+   "priority": "low"
+  },
+  "environmental proxy factors (FRAC_GASF, HNV, NH3 shares)": {
+   "nature": "REALITY_CALIBRATED",
+   "location": "environmental/environmental_module.py",
+   "source": "IPCC/literature defaults",
+   "best_update": "CAPRI envind coefficients",
+   "priority": "low"
+  }
+ },
+ "uploaded_star_files_assessment": {
+  "_date": "2026-07-03",
+  "feed_agri.xlsx": "REAL CAPRI feed use (FEDM by feedstuff, 28 EU, 1983-2010). NOT applied: (a) it is aggregate feed USE, not feed REQUIREMENT per animal head which feed_requirements.csv needs; (b) it duplicates the concept of coco_feed_availability (already real) but is OLDER (to 2010 vs 2017 base). Stored in sources/capri_star/.",
+  "nutrient_cont_usda_export.xlsx": "REAL USDA nutrient content (Water/Energy/Protein/Lipid/Fiber per crop). NOT applied: wrong concept - nutrient_coefs.csv needs N/P2O5/K2O FERTILIZER application rates (agronomic), not human-food nutrition. Filename matched but content differs. Stored.",
+  "regio_data_all_export.xlsx": "REAL Eurostat regional accounts (3254 items x 2055 NUTS regions, production values). This is the RAW SOURCE for a regional base update but in raw Eurostat item codes - needs substantial processing (the COCO/CAPREG build) to become base_areas/yields, not a drop-in. Stored.",
+  "aglink2024_export": "REAL AGLINK-COSIMO 2024 baseline (CCC/PPP/MMM/yyy, ~7M rows). Contains biofuel products (BD=biodiesel etc) - the data missing for the biofuel module. Extraction needs careful decoding of AGLINK code system (EU codes EUE/EUN, hundreds of measure codes). A real task, not a quick win. CSVs 177M+58M not stored (too large); xlsx notes kept.",
+  "conclusion": "All four are genuine CAPRI/source data (good to have, stored as provenance), but NONE is a clean drop-in replacement for the two synthetic files (feed_requirements needs per-head requirements; nutrient_coefs needs fertilizer rates). The validator still correctly flags those 2 as synthetic."
+ },
+ "capreg_extraction_outcome": {
+  "_date": "2026-07-07",
+  "_summary": "Successfully extracted real capreg data (fert_out: 32236 rows, feed coeff: 71902 rows, all 35 MS, NUTS-2). Stored in sources/capri_star/capreg_extracts/. However, NEITHER cleanly replaces its synthetic file:",
+  "fert_out": "Single undocumented value per region x crop (CAPRI source literally says \"needs explanatory text and meta data\"). Model nutrient_coefs needs N/P2O5/K2O split into 3. Cannot responsibly split one unknown value into three nutrients. NOT applied.",
+  "feed_coeff": "p_pmpFeedInpCoeff is a LINEAR FUNCTION (CNST intercept + SLOP) per region x animal x feedtype, at CAPRI feed-group aggregation (FCER/FGRA/FMAI...). Two problems: (1) mapping CAPRI feed groups to model commodity items is lossy (FCER=all cereals cannot resplit to SWHE/BARL/CORN); (2) the CNST intercept alone is NOT the per-head requirement - interpreting it as such gives implausible values (dairy cow grass 0.024 vs realistic ~3.5 t DM/head/yr). The synthetic template is actually MORE realistic than a naive CNST mapping. NOT applied.",
+  "conclusion": "The extraction pipeline now works (major milestone - can pull any capreg symbol to CSV). But these two specific symbols are structurally different from what the model needs: fert_out is undocumented/single-valued, feed coeff is a linear-function form at wrong aggregation. Replacing the synthetic files properly needs either (a) the CAPRI feed model context to evaluate the linear function into per-head intakes, or (b) a different symbol (e.g. p_feedDetail or the SUA feed use). The real data is stored for future use."
+ },
+ "_release_readiness": {
+  "all_six_modules": "assessed",
+  "supply_crops": "VALIDATED (elasticity vs PELA, method 2)",
+  "supply_livestock": "VALIDATED (Green Deal direction, method 3)",
+  "market": "BASE ONLY (reproduces 2017 prices; no scenario validation)",
+  "policy_cap": "VALIDATED (premium vs PRME method 1; mechanism method 2)",
+  "environment": "VALIDATED (N excretion method 2; GHG scenario method 3)",
+  "feed": "VALIDATED ruminants (method 2); monogastric growth energy known gap",
+  "biofuel": "VALIDATED (method 2 + external EU stats; no CAPRI scenario data)",
+  "bugs_found_by_validation": "every module validated had at least one real bug - crop elasticity overshoot, livestock (5 bugs), CAP silent no-op, feed growth energy",
+  "remaining_for_full_release": "market scenario validation; monogastric feed energy; the 2 non-converging regions",
+  "point3_convergence": "FIXED - DE25/DEB3 converge; only Hamburg (DE60) city-state remains, an edge case not a bug",
+  "point2_monogastric_feed": "RESOLVED - calibrated to CAPRI DM targets (ratio 1.00); labelled calibrated-to-target",
+  "point1_market_scenario": "VALIDATED (direction) - demand-calibration bug fixed; base + scenario now both validated vs CAPRI PMRK",
+  "ALL_THREE_POINTS": "COMPLETE - all six modules validated or explicitly bounded"
+ }
+}

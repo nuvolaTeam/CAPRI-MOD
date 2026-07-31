@@ -1,0 +1,328 @@
+{
+ "files": {
+  "yields": {
+   "file": "2017/supply/yields.csv",
+   "exists": true,
+   "live_cells": 9920,
+   "nonzero_cells": 9672,
+   "source_type": "CAPRI_GDX",
+   "source_ref": "capreg DATA2 YILD; COMI for dairy",
+   "confidence": "validated",
+   "modules": [
+    "supply",
+    "market",
+    "feed"
+   ],
+   "known_gaps": [
+    "COTT/OFIB/OFOD are non-physical (constant-price values), no kg/ha yield by construction"
+   ]
+  },
+  "base_areas": {
+   "file": "2017/supply/base_areas.csv",
+   "exists": true,
+   "live_cells": 7192,
+   "nonzero_cells": 6818,
+   "source_type": "CAPRI_GDX",
+   "source_ref": "capreg DATA2 LEVL",
+   "confidence": "validated",
+   "modules": [
+    "supply"
+   ],
+   "known_gaps": []
+  },
+  "variable_costs": {
+   "file": "2017/supply/variable_costs.csv",
+   "exists": true,
+   "live_cells": 9920,
+   "nonzero_cells": 9920,
+   "source_type": "CAPRI_GDX",
+   "source_ref": "capreg DATA2 TOIN",
+   "confidence": "validated",
+   "modules": [
+    "supply"
+   ],
+   "known_gaps": []
+  },
+  "producer_prices": {
+   "file": "2017/market/producer_prices.csv",
+   "exists": true,
+   "live_cells": 40,
+   "nonzero_cells": 39,
+   "source_type": "CAPRI_GDX",
+   "source_ref": "capreg DATA2 MPRI",
+   "confidence": "validated",
+   "modules": [
+    "supply",
+    "market"
+   ],
+   "known_gaps": []
+  },
+  "cap_payments": {
+   "file": "2017/policy/cap_payments.csv",
+   "exists": true,
+   "live_cells": 1240,
+   "nonzero_cells": 992,
+   "source_type": "CAPRI_GDX",
+   "source_ref": "capreg DATA2 PRME",
+   "confidence": "validated",
+   "modules": [
+    "supply",
+    "policy"
+   ],
+   "known_gaps": []
+  },
+  "land_availability": {
+   "file": "2017/supply/land_availability.csv",
+   "exists": true,
+   "live_cells": 1240,
+   "nonzero_cells": 1240,
+   "source_type": "CAPRI_GDX",
+   "source_ref": "capreg DATA2 LEVL on ARAB/UAAR/GRAE",
+   "confidence": "validated",
+   "modules": [
+    "supply"
+   ],
+   "known_gaps": [
+    "GRAE and GRAI identical in dumps; grassland maps to GRAE to avoid double-count"
+   ]
+  },
+  "animal_numbers": {
+   "file": "2017/supply/animal_numbers.csv",
+   "exists": true,
+   "live_cells": 2695,
+   "nonzero_cells": 2650,
+   "source_type": "CAPRI_GDX",
+   "source_ref": "capreg DATA2 HERD",
+   "confidence": "validated",
+   "modules": [
+    "supply",
+    "environment",
+    "feed"
+   ],
+   "known_gaps": [
+    "COWS, SHGO have no direct CAPRI counterpart"
+   ]
+  },
+  "nutrient_coefs": {
+   "file": "2017/environment/nutrient_coefs.csv",
+   "exists": true,
+   "live_cells": 120,
+   "nonzero_cells": 120,
+   "source_type": "CAPRI_GDX",
+   "source_ref": "capreg DATA2 NITF/PHOF/POTF",
+   "confidence": "validated",
+   "modules": [
+    "environment",
+    "supply"
+   ],
+   "known_gaps": []
+  },
+  "manure_nutrients": {
+   "file": "sources/capreg/capreg_manure_nutrients.csv",
+   "exists": true,
+   "live_cells": 40246,
+   "nonzero_cells": 40246,
+   "source_type": "CAPRI_GDX",
+   "source_ref": "capreg DATA2 MANN/MANP/MANK",
+   "confidence": "validated",
+   "modules": [
+    "environment"
+   ],
+   "known_gaps": []
+  },
+  "supply_elasticities": {
+   "file": "2017/supply/supply_elasticities_regional.csv",
+   "exists": true,
+   "live_cells": 1701,
+   "nonzero_cells": 1701,
+   "source_type": "CAPRI_GDX",
+   "source_ref": "estnlp PELA 2005 slice",
+   "confidence": "validated",
+   "modules": [
+    "supply"
+   ],
+   "known_gaps": [
+    "national in CAPRI (broadcast to regions); PELA covers arable; livestock via market p_elasSupp"
+   ]
+  },
+  "market_supply_elasticities": {
+   "file": "sources/arm/supply_elas_eu_all.json",
+   "exists": true,
+   "live_cells": 0,
+   "nonzero_cells": 0,
+   "source_type": "CAPRI_GDX",
+   "source_ref": "elas1717 p_elasSupp EU median",
+   "confidence": "validated",
+   "modules": [
+    "market"
+   ],
+   "known_gaps": []
+  },
+  "pmp_diagonal_terms": {
+   "file": "sources/capreg/pmp_quad_techn.csv",
+   "exists": true,
+   "live_cells": 9494,
+   "nonzero_cells": 9494,
+   "source_type": "CAPRI_GDX",
+   "source_ref": "pmppar p_pmpQuadTechn",
+   "confidence": "validated",
+   "modules": [
+    "supply"
+   ],
+   "known_gaps": [
+    "crops tagged T1.T1, livestock T.T; both captured after regex fix"
+   ]
+  },
+  "pmp_crossgroup_terms": {
+   "file": "sources/capreg/pmp_quad_pact.csv",
+   "exists": true,
+   "live_cells": 2318,
+   "nonzero_cells": 2318,
+   "source_type": "CAPRI_GDX",
+   "source_ref": "pmppar p_pmpQuadPact",
+   "confidence": "validated",
+   "modules": [
+    "supply"
+   ],
+   "known_gaps": []
+  },
+  "world_prices": {
+   "file": "2017/market/world_prices.csv",
+   "exists": true,
+   "live_cells": 37,
+   "nonzero_cells": 37,
+   "source_type": "CAPRI_GDX",
+   "source_ref": "capmod dataOut Fob at World; EGGS corrected",
+   "confidence": "validated",
+   "modules": [
+    "market"
+   ],
+   "known_gaps": [
+    "SOYA/CHES/SKIM diverge; dairy has no CAPRI processing margin to validate against"
+   ]
+  },
+  "armington_params": {
+   "file": "2017/market/armington_params.csv",
+   "exists": true,
+   "live_cells": 117,
+   "nonzero_cells": 117,
+   "source_type": "CAPRI_SOURCE",
+   "source_ref": "market1_ch.gms literal (CEPII Fontagne 2019)",
+   "confidence": "validated",
+   "modules": [
+    "market"
+   ],
+   "known_gaps": []
+  },
+  "trade_flows": {
+   "file": "shared/trade_flows_2017.csv",
+   "exists": true,
+   "live_cells": 17504,
+   "nonzero_cells": 4638,
+   "source_type": "CAPRI_GDX",
+   "source_ref": "capmod dataOut ImportQ",
+   "confidence": "validated",
+   "modules": [
+    "market"
+   ],
+   "known_gaps": []
+  },
+  "feed_requirements": {
+   "file": "2017/feed/feed_requirements.csv",
+   "exists": true,
+   "live_cells": 110,
+   "nonzero_cells": 52,
+   "source_type": "CAPRI_GDX",
+   "source_ref": "capreg DATA2 ENNE/CRPR/DRMN/DRMX/DAYS",
+   "confidence": "validated",
+   "modules": [
+    "feed"
+   ],
+   "known_gaps": []
+  },
+  "feed_availability": {
+   "file": "sources/capreg/capreg_feed_availability_regional.csv",
+   "exists": true,
+   "live_cells": 2266,
+   "nonzero_cells": 2266,
+   "source_type": "CAPRI_GDX",
+   "source_ref": "capreg DATA2 feed items",
+   "confidence": "validated",
+   "modules": [
+    "feed"
+   ],
+   "known_gaps": []
+  },
+  "crop_nutrient_export": {
+   "file": "2017/environment/crop_nutrient_export.csv",
+   "exists": true,
+   "live_cells": 105,
+   "nonzero_cells": 105,
+   "source_type": "CAPRI_SOURCE",
+   "source_ref": "CAPRI documentation Table 15",
+   "confidence": "validated",
+   "modules": [
+    "environment"
+   ],
+   "known_gaps": []
+  },
+  "climate_zones": {
+   "file": "2017/environment/climate_zones.csv",
+   "exists": true,
+   "live_cells": 521,
+   "nonzero_cells": 521,
+   "source_type": "LITERATURE",
+   "source_ref": "IPCC",
+   "confidence": "validated",
+   "modules": [
+    "environment"
+   ],
+   "known_gaps": []
+  },
+  "manure_ch4_ef": {
+   "file": "2017/environment/manure_ch4_ef_regional.csv",
+   "exists": true,
+   "live_cells": 46,
+   "nonzero_cells": 46,
+   "source_type": "LITERATURE",
+   "source_ref": "IPCC",
+   "confidence": "validated",
+   "modules": [
+    "environment"
+   ],
+   "known_gaps": []
+  },
+  "eu_mfn_tariffs": {
+   "file": "2017/policy/eu_mfn_tariffs.csv",
+   "exists": true,
+   "live_cells": 32,
+   "nonzero_cells": 32,
+   "source_type": "EXTERNAL",
+   "source_ref": "TARIC/WTO",
+   "confidence": "validated",
+   "modules": [
+    "market"
+   ],
+   "known_gaps": []
+  }
+ },
+ "issues": [],
+ "by_source_type": {
+  "CAPRI_GDX": 17,
+  "CAPRI_SOURCE": 2,
+  "LITERATURE": 2,
+  "EXTERNAL": 1
+ },
+ "by_confidence": {
+  "validated": 22
+ },
+ "by_module": {
+  "supply": 11,
+  "market": 7,
+  "feed": 4,
+  "policy": 1,
+  "environment": 6
+ },
+ "total_live_cells": 106864,
+ "total_nonzero_cells": 93024
+}

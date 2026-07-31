@@ -1,0 +1,169 @@
+{
+  "_doc": "Declarative input schema for CAPRI-Python. This is the single source of truth for what data the model needs, where it comes from, and which module consumes it. The rebuild reads THIS file and regenerates every input from the declared source, writing per-cell provenance. Adding a module = adding entries here, not changing code. Swapping GDX for an external source later = changing the 'source' block of an entry, not touching the loader.",
+
+  "_provenance_schema": {
+    "source_type": "CAPRI_GDX | CAPRI_SOURCE | DERIVED | LITERATURE | EXTERNAL | FALLBACK",
+    "source_ref": "the concrete origin, e.g. 'capreg DATA2 YILD' now, 'Eurostat apro_cpsh1' after a future swap",
+    "vintage": "year or CAPRI release the values represent",
+    "confidence": "validated | derived | placeholder",
+    "reproducibility": "public_code | access_controlled | internal_derivation | manual",
+    "_note": "reproducibility distinguishes a public Eurostat code (anyone can re-pull) from FADN (access-controlled, needs query+date+version) from a CAPRI GDX read. Carried now so a future external swap is a field edit, not a redesign."
+  },
+
+  "_module_ownership": "each input names the module(s) that consume it, so the dependency graph is explicit and a new module's needs are declared rather than discovered",
+
+  "modules": {
+    "supply": "regional PMP supply, 248 NUTS-2 x 40 activities",
+    "market": "Armington market, EU27 bloc x 32 commodities",
+    "policy": "CAP instruments",
+    "environment": "nutrient/manure/GHG indicators",
+    "feed": "feed requirements and availability",
+    "biofuel": "biofuel demand",
+    "_extension_pattern": "CAPRI's own optional modules (water, ghg, farmtype) attach by declaring inputs and reading core outputs. A new downstream-indicator module declares only outputs it reads; a new-behaviour module declares new inputs and any feedback into the supply/market solve via 'feeds_into'."
+  },
+
+  "inputs": {
+    "yields": {
+      "file": "2017/supply/yields.csv",
+      "concept": "output per unit of activity",
+      "unit": "kg/ha for crops, per head for animals",
+      "dimension": "region x activity",
+      "modules": ["supply", "market", "feed"],
+      "source": {"source_type": "CAPRI_GDX", "source_ref": "capreg DATA2 YILD; COMI for dairy", "vintage": "2017", "confidence": "validated", "reproducibility": "public_code"},
+      "unit_authority": "CAPRIunits.gms; animal per-head confirmed in documentation",
+      "known_gaps": ["COTT/OFIB/OFOD are non-physical (constant-price values), no kg/ha yield by construction"]
+    },
+    "base_areas": {
+      "file": "2017/supply/base_areas.csv",
+      "concept": "activity level", "unit": "1000 ha or 1000 head",
+      "dimension": "region x activity", "modules": ["supply"],
+      "source": {"source_type": "CAPRI_GDX", "source_ref": "capreg DATA2 LEVL", "vintage": "2017", "confidence": "validated", "reproducibility": "public_code"}
+    },
+    "variable_costs": {
+      "file": "2017/supply/variable_costs.csv",
+      "concept": "intermediate input cost", "unit": "EUR/ha",
+      "dimension": "region x activity", "modules": ["supply"],
+      "source": {"source_type": "CAPRI_GDX", "source_ref": "capreg DATA2 TOIN", "vintage": "2017", "confidence": "validated", "reproducibility": "public_code"}
+    },
+    "producer_prices": {
+      "file": "2017/market/producer_prices.csv",
+      "concept": "farm-gate price", "unit": "EUR/t",
+      "dimension": "region x activity", "modules": ["supply", "market"],
+      "source": {"source_type": "CAPRI_GDX", "source_ref": "capreg DATA2 MPRI", "vintage": "2017", "confidence": "validated", "reproducibility": "public_code"},
+      "coupling": "must merge paired with variable_costs; internally consistent only together"
+    },
+    "cap_payments": {
+      "file": "2017/policy/cap_payments.csv",
+      "concept": "CAP premium per activity", "unit": "EUR/ha or EUR/head",
+      "dimension": "region x activity", "modules": ["supply", "policy"],
+      "source": {"source_type": "CAPRI_GDX", "source_ref": "capreg DATA2 PRME", "vintage": "2017", "confidence": "validated", "reproducibility": "public_code"}
+    },
+    "land_availability": {
+      "file": "2017/supply/land_availability.csv",
+      "concept": "land endowment by category", "unit": "1000 ha",
+      "dimension": "region x land_class", "modules": ["supply"],
+      "source": {"source_type": "CAPRI_GDX", "source_ref": "capreg DATA2 LEVL on ARAB/UAAR/GRAE", "vintage": "2017", "confidence": "validated", "reproducibility": "public_code"},
+      "known_gaps": ["GRAE and GRAI identical in dumps; grassland maps to GRAE to avoid double-count"]
+    },
+    "animal_numbers": {
+      "file": "2017/supply/animal_numbers.csv",
+      "concept": "herd size", "unit": "1000 head",
+      "dimension": "region x animal", "modules": ["supply", "environment", "feed"],
+      "source": {"source_type": "CAPRI_GDX", "source_ref": "capreg DATA2 HERD", "vintage": "2017", "confidence": "validated", "reproducibility": "public_code"},
+      "known_gaps": ["COWS, SHGO have no direct CAPRI counterpart"]
+    },
+    "nutrient_coefs": {
+      "file": "2017/environment/nutrient_coefs.csv",
+      "concept": "fertiliser application", "unit": "kg/ha",
+      "dimension": "region x activity x nutrient", "modules": ["environment", "supply"],
+      "source": {"source_type": "CAPRI_GDX", "source_ref": "capreg DATA2 NITF/PHOF/POTF", "vintage": "2017", "confidence": "validated", "reproducibility": "public_code"}
+    },
+    "manure_nutrients": {
+      "file": "sources/capreg/capreg_manure_nutrients.csv",
+      "concept": "manure nutrient excretion", "unit": "kg/head/yr",
+      "dimension": "region x animal x nutrient", "modules": ["environment"],
+      "source": {"source_type": "CAPRI_GDX", "source_ref": "capreg DATA2 MANN/MANP/MANK", "vintage": "2017", "confidence": "validated", "reproducibility": "public_code"}
+    },
+    "supply_elasticities": {
+      "file": "2017/supply/supply_elasticities_regional.csv",
+      "concept": "own-price supply elasticity", "unit": "dimensionless",
+      "dimension": "region x activity", "modules": ["supply"],
+      "source": {"source_type": "CAPRI_GDX", "source_ref": "estnlp PELA 2005 slice", "vintage": "2005", "confidence": "validated", "reproducibility": "internal_derivation"},
+      "known_gaps": ["national in CAPRI (broadcast to regions); PELA covers arable; livestock via market p_elasSupp"]
+    },
+    "market_supply_elasticities": {
+      "file": "sources/arm/supply_elas_eu_all.json",
+      "concept": "market-level own-price supply elasticity", "unit": "dimensionless",
+      "dimension": "commodity", "modules": ["market"],
+      "source": {"source_type": "CAPRI_GDX", "source_ref": "elas1717 p_elasSupp EU median", "vintage": "2017", "confidence": "validated", "reproducibility": "public_code"}
+    },
+    "pmp_diagonal_terms": {
+      "file": "sources/capreg/pmp_quad_techn.csv",
+      "concept": "PMP own quadratic term", "unit": "EUR/ha^2",
+      "dimension": "region x activity", "modules": ["supply"],
+      "source": {"source_type": "CAPRI_GDX", "source_ref": "pmppar p_pmpQuadTechn", "vintage": "2017", "confidence": "validated", "reproducibility": "public_code"},
+      "known_gaps": ["crops tagged T1.T1, livestock T.T; both captured after regex fix"]
+    },
+    "pmp_crossgroup_terms": {
+      "file": "sources/capreg/pmp_quad_pact.csv",
+      "concept": "PMP cross-group term", "unit": "EUR/ha^2",
+      "dimension": "region x group x group", "modules": ["supply"],
+      "source": {"source_type": "CAPRI_GDX", "source_ref": "pmppar p_pmpQuadPact", "vintage": "2017", "confidence": "validated", "reproducibility": "public_code"}
+    },
+    "world_prices": {
+      "file": "2017/market/world_prices.csv",
+      "concept": "world market price", "unit": "EUR/t",
+      "dimension": "commodity", "modules": ["market"],
+      "source": {"source_type": "CAPRI_GDX", "source_ref": "capmod dataOut Fob at World; EGGS corrected", "vintage": "2017", "confidence": "validated", "reproducibility": "public_code"},
+      "known_gaps": ["SOYA/CHES/SKIM diverge; dairy has no CAPRI processing margin to validate against"]
+    },
+    "armington_params": {
+      "file": "2017/market/armington_params.csv",
+      "concept": "Armington substitution elasticities", "unit": "dimensionless",
+      "dimension": "commodity", "modules": ["market"],
+      "source": {"source_type": "CAPRI_SOURCE", "source_ref": "market1_ch.gms literal (CEPII Fontagne 2019)", "vintage": "CAPRI star-3.0", "confidence": "validated", "reproducibility": "public_code"}
+    },
+    "trade_flows": {
+      "file": "shared/trade_flows_2017.csv",
+      "concept": "bilateral trade / import shares", "unit": "1000 t",
+      "dimension": "exporter x importer x commodity", "modules": ["market"],
+      "source": {"source_type": "CAPRI_GDX", "source_ref": "capmod dataOut ImportQ", "vintage": "2017", "confidence": "validated", "reproducibility": "public_code"}
+    },
+    "feed_requirements": {
+      "file": "2017/feed/feed_requirements.csv",
+      "concept": "energy/protein/DM/days per animal", "unit": "mixed",
+      "dimension": "animal x requirement", "modules": ["feed"],
+      "source": {"source_type": "CAPRI_GDX", "source_ref": "capreg DATA2 ENNE/CRPR/DRMN/DRMX/DAYS", "vintage": "2017", "confidence": "validated", "reproducibility": "public_code"}
+    },
+    "feed_availability": {
+      "file": "sources/capreg/capreg_feed_availability_regional.csv",
+      "concept": "feed supply by item", "unit": "1000 t DM",
+      "dimension": "region x feed_item", "modules": ["feed"],
+      "source": {"source_type": "CAPRI_GDX", "source_ref": "capreg DATA2 feed items", "vintage": "2017", "confidence": "validated", "reproducibility": "public_code"}
+    },
+    "crop_nutrient_export": {
+      "file": "2017/environment/crop_nutrient_export.csv",
+      "concept": "nutrient removal per ton yield", "unit": "kg/t",
+      "dimension": "crop x nutrient", "modules": ["environment"],
+      "source": {"source_type": "CAPRI_SOURCE", "source_ref": "CAPRI documentation Table 15", "vintage": "CAPRI star-3.0", "confidence": "validated", "reproducibility": "manual"}
+    },
+    "climate_zones": {
+      "file": "2017/environment/climate_zones.csv",
+      "concept": "IPCC climate zone shares", "unit": "share",
+      "dimension": "region x zone", "modules": ["environment"],
+      "source": {"source_type": "LITERATURE", "source_ref": "IPCC", "vintage": "IPCC 2006", "confidence": "validated", "reproducibility": "manual"}
+    },
+    "manure_ch4_ef": {
+      "file": "2017/environment/manure_ch4_ef_regional.csv",
+      "concept": "methane emission factor", "unit": "kg CH4/head/yr",
+      "dimension": "region x animal", "modules": ["environment"],
+      "source": {"source_type": "LITERATURE", "source_ref": "IPCC", "vintage": "IPCC 2006", "confidence": "validated", "reproducibility": "manual"}
+    },
+    "eu_mfn_tariffs": {
+      "file": "2017/policy/eu_mfn_tariffs.csv",
+      "concept": "applied MFN tariff", "unit": "percent or EUR/t",
+      "dimension": "commodity", "modules": ["market"],
+      "source": {"source_type": "EXTERNAL", "source_ref": "TARIC/WTO", "vintage": "2017", "confidence": "validated", "reproducibility": "public_code"}
+    }
+  }
+}

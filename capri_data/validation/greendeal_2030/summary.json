@@ -1,0 +1,12 @@
+{
+ "scenario": "Green Deal 2030 vs Reference 2030",
+ "source": "CAPRI capmod scen_greendeal_2030 / scen_ref_2030",
+ "signal": "livestock extensification - cattle GVA +6 to +18%, input costs down",
+ "top_activities": {
+  "HEIR": 18.08,
+  "SCOW": 12.66,
+  "BEFM": 11.12,
+  "DCOL": 6.28,
+  "BULL": 6.28
+ }
+}

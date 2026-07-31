@@ -1,0 +1,40 @@
+{
+  "rhoArm1": {
+    "SUGA": 12.0,
+    "DDGS": 2.0,
+    "TAGR": 0.5,
+    "TABO": 0.5,
+    "SOYA": 6.0,
+    "CHES": 2.0,
+    "FRMI": 2.0,
+    "OVEG": 1.5,
+    "OFRU": 3.0,
+    "RICE": 2.0
+  },
+  "rhoArm2": {
+    "SUGA": 12.0,
+    "SOYA": 8.0,
+    "CHES": 4.0,
+    "FRMI": 4.0,
+    "OVEG": 1.5,
+    "OFRU": 3.0,
+    "RICE": 4.0
+  },
+  "eta": {},
+  "eps": {},
+  "rhoArm1_default": 8.0,
+  "rhoArm2_default": 10.0,
+  "allen_elas_subs": "TABLE p_AllenElasSubs\n             BRCE    MEAT    FRVP     MICE    FTOI    BEVE    SUGG   FISH   RESG\n STD.BRCE             2.      4.       2.      2.       2.     1.     2.     .1\n STD.MEAT                     6.       8.      6.       6.     1.     8.     .2\n STD.FRVP                              6.      2.       6.     1.     6.     .2\n STD.MICE                                      6.       6.     1.     8.     .2\n STD.FTOI                                               2.     1.     6.     .1\n STD.BEVE                                                      1.     6.     .2\n STD.SUGG        ",
+  "allen_elas_land_trans": "TABLE p_AllenElasTrans(landTypesMrk,landTypesMrk1) \"Assumed Allen elasticities of transformation (AET) for land supply\"\n                ARAC    FRUN     GRAS     FORE     OLND     ARTIF\nARAC                    -2.      -3       -1.      -3       -0.01\nFRUN           -2.               -1.      -.5      -1.5     -0.01\nGRAS           -3       -1.               -1.      -3       -0.01\nFORE           -1.      -.5      -1.               -2       -0.01\nOLND           -3       -1.5     -3       -2      ",
+  "supply_elas_nonEU": {
+    "USA": 0.2,
+    "CAN": 0.2,
+    "BRA": 0.4,
+    "ARG": 0.4,
+    "URU": 0.3,
+    "PAR": 0.3,
+    "CHL": 0.2,
+    "JAP": 0.01,
+    "CHN": 0.02
+  }
+}

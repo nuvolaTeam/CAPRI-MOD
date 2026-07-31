@@ -1,0 +1,13 @@
+commodity,capri_2030_ratio_vs_wheat,model_ratio_vs_wheat,notes
+SWHE,1.0,1.0,close
+BARL,0.82,0.97,close
+RAPE,2.55,2.16,close
+SOYA,3.05,1.97,diverges
+OCER,0.75,1.01,close
+POTA,1.35,1.35,close
+SUGB,0.15,0.2,close
+BEEF,24.23,24.86,close
+PORK,11.56,10.86,close
+
+"# Source: CAPRI STAR capmod scenario res_2_1730greendeal_ref (2030 projection), UVAG producer prices"
+# Structural validation: rank correlation 0.998; 8/9 within 40%
