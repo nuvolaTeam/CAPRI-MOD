@@ -1,0 +1,103 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 620" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" role="img" aria-label="CAPRI-mod model architecture: a supply and market equilibrium loop driven by policy, feeding post-equilibrium environment, feed and biofuel modules.">
+  <defs>
+    <filter id="soft" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3.5" flood-color="#1c2b2d" flood-opacity="0.16"/>
+    </filter>
+    <marker id="arr" markerWidth="10" markerHeight="10" refX="7.5" refY="3.2" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L7.5,3.2 L0,6.4 Z" fill="#4b5b60"/>
+    </marker>
+    <marker id="arrL" markerWidth="10" markerHeight="10" refX="7.5" refY="3.2" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L7.5,3.2 L0,6.4 Z" fill="#8a9aa0"/>
+    </marker>
+  </defs>
+
+  <!-- background panel: keeps it readable in light or dark themes -->
+  <rect x="0" y="0" width="900" height="620" rx="0" fill="#ffffff"/>
+
+  <!-- title -->
+  <text x="450" y="46" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="25" font-weight="700" fill="#1c2b2d">CAPRI&#8209;mod &#8212; model architecture</text>
+  <text x="450" y="70" text-anchor="middle" font-size="13.5" fill="#5c6b70">An iterative supply&#8211;market equilibrium, with post&#8211;equilibrium indicator modules</text>
+
+  <!-- input pills -->
+  <g font-size="12.5" fill="#4338ca">
+    <rect x="252" y="96" width="146" height="30" rx="15" fill="#eef2ff" stroke="#c7d2fe"/>
+    <text x="325" y="115.5" text-anchor="middle">policy shock</text>
+    <rect x="502" y="96" width="146" height="30" rx="15" fill="#eef2ff" stroke="#c7d2fe"/>
+    <text x="575" y="115.5" text-anchor="middle">price shock</text>
+  </g>
+  <line x1="325" y1="126" x2="325" y2="150" stroke="#8a9aa0" stroke-width="1.6" marker-end="url(#arrL)"/>
+  <line x1="575" y1="126" x2="575" y2="150" stroke="#8a9aa0" stroke-width="1.6" marker-end="url(#arrL)"/>
+
+  <!-- orchestrator -->
+  <rect x="300" y="152" width="300" height="60" rx="12" fill="#33454e" filter="url(#soft)"/>
+  <text x="450" y="180" text-anchor="middle" font-size="16.5" font-weight="600" fill="#ffffff">CAPRIModel.run( )</text>
+  <text x="450" y="199" text-anchor="middle" font-size="11.5" fill="#b8c4c8">orchestrates the equilibrium loop</text>
+  <line x1="450" y1="212" x2="450" y2="248" stroke="#4b5b60" stroke-width="1.8" marker-end="url(#arr)"/>
+
+  <!-- equilibrium loop container (the signature element) -->
+  <rect x="66" y="252" width="768" height="172" rx="14" fill="#f6f8f8" stroke="#c3cfd1" stroke-width="1.3" stroke-dasharray="6 5"/>
+  <text x="86" y="276" font-size="12.5" font-style="italic" fill="#5c6b70">equilibrium loop &#8212; iterates until prices converge (tolerance 0.5%)</text>
+
+  <!-- POLICY -->
+  <rect x="92" y="300" width="182" height="96" rx="10" fill="#9c6b1f" filter="url(#soft)"/>
+  <text x="183" y="334" text-anchor="middle" font-size="15" font-weight="600" fill="#ffffff">POLICY</text>
+  <text x="183" y="356" text-anchor="middle" font-size="11.5" fill="#f3e2c6">CAP premiums, TRQ,</text>
+  <text x="183" y="372" text-anchor="middle" font-size="11.5" fill="#f3e2c6">coupled &amp; eco-schemes</text>
+
+  <!-- SUPPLY (the core) -->
+  <rect x="356" y="290" width="188" height="116" rx="10" fill="#2e6f4e" filter="url(#soft)"/>
+  <rect x="356" y="290" width="188" height="116" rx="10" fill="none" stroke="#7bbf9a" stroke-width="1.4" opacity="0.7"/>
+  <text x="450" y="326" text-anchor="middle" font-size="16.5" font-weight="700" fill="#ffffff">SUPPLY</text>
+  <text x="450" y="348" text-anchor="middle" font-size="11.5" fill="#d6efe1">248 regions &#215; 40 activities</text>
+  <text x="450" y="364" text-anchor="middle" font-size="11.5" fill="#d6efe1">PMP quadratic program</text>
+  <text x="450" y="386" text-anchor="middle" font-size="10.5" fill="#a7e0c4" letter-spacing="0.4">&#9733; the model core</text>
+
+  <!-- MARKET -->
+  <rect x="626" y="300" width="182" height="96" rx="10" fill="#326b87" filter="url(#soft)"/>
+  <text x="717" y="334" text-anchor="middle" font-size="15" font-weight="600" fill="#ffffff">MARKET</text>
+  <text x="717" y="356" text-anchor="middle" font-size="11.5" fill="#cfe4ee">EU27 vs world,</text>
+  <text x="717" y="372" text-anchor="middle" font-size="11.5" fill="#cfe4ee">32 commodities (Armington)</text>
+
+  <!-- POLICY -> SUPPLY -->
+  <line x1="274" y1="348" x2="352" y2="348" stroke="#4b5b60" stroke-width="1.8" marker-end="url(#arr)"/>
+  <text x="313" y="340" text-anchor="middle" font-size="10.5" fill="#4b5b60">net revenue</text>
+
+  <!-- SUPPLY <-> MARKET (the loop's counter-flow) -->
+  <line x1="544" y1="332" x2="622" y2="332" stroke="#4b5b60" stroke-width="1.8" marker-end="url(#arr)"/>
+  <text x="583" y="324" text-anchor="middle" font-size="10.5" fill="#4b5b60">quantities</text>
+  <line x1="622" y1="364" x2="544" y2="364" stroke="#4b5b60" stroke-width="1.8" marker-end="url(#arr)"/>
+  <text x="583" y="380" text-anchor="middle" font-size="10.5" fill="#4b5b60">prices</text>
+
+  <!-- loop -> post-equilibrium distributor bus -->
+  <line x1="450" y1="424" x2="450" y2="446" stroke="#4b5b60" stroke-width="1.8"/>
+  <text x="462" y="440" font-size="10.5" fill="#5c6b70">activity + herd levels</text>
+  <line x1="200" y1="446" x2="700" y2="446" stroke="#4b5b60" stroke-width="1.8"/>
+  <line x1="200" y1="446" x2="200" y2="486" stroke="#4b5b60" stroke-width="1.8" marker-end="url(#arr)"/>
+  <line x1="450" y1="446" x2="450" y2="486" stroke="#4b5b60" stroke-width="1.8" marker-end="url(#arr)"/>
+  <line x1="700" y1="446" x2="700" y2="486" stroke="#4b5b60" stroke-width="1.8" marker-end="url(#arr)"/>
+
+  <!-- post-equilibrium cards (light "reader" style, colored accent bar) -->
+  <!-- ENVIRONMENT -->
+  <rect x="110" y="488" width="180" height="86" rx="10" fill="#ffffff" stroke="#e2e8e9"/>
+  <rect x="110" y="488" width="6" height="86" rx="3" fill="#2e6f4e"/>
+  <text x="130" y="514" font-size="13.5" font-weight="600" fill="#2e6f4e">ENVIRONMENT</text>
+  <text x="130" y="534" font-size="11" fill="#5c6b70">N balance &#183; GHG &#183; NH&#8323;</text>
+  <text x="130" y="550" font-size="11" fill="#5c6b70">&#183; biodiversity</text>
+
+  <!-- FEED -->
+  <rect x="360" y="488" width="180" height="86" rx="10" fill="#ffffff" stroke="#e2e8e9"/>
+  <rect x="360" y="488" width="6" height="86" rx="3" fill="#9c6b1f"/>
+  <text x="380" y="514" font-size="13.5" font-weight="600" fill="#9c6b1f">FEED</text>
+  <text x="380" y="534" font-size="11" fill="#5c6b70">energy &amp; protein needs</text>
+  <text x="380" y="550" font-size="11" fill="#5c6b70">&#183; feed allocation</text>
+
+  <!-- BIOFUEL -->
+  <rect x="610" y="488" width="180" height="86" rx="10" fill="#ffffff" stroke="#e2e8e9"/>
+  <rect x="610" y="488" width="6" height="86" rx="3" fill="#326b87"/>
+  <text x="630" y="514" font-size="13.5" font-weight="600" fill="#326b87">BIOFUEL</text>
+  <text x="630" y="534" font-size="11" fill="#5c6b70">bioethanol &#183; biodiesel</text>
+  <text x="630" y="550" font-size="11" fill="#5c6b70">&#183; crop feedstock</text>
+
+  <!-- caption -->
+  <text x="450" y="602" text-anchor="middle" font-size="11.5" fill="#8a9aa0">Post&#8209;equilibrium modules read the converged activity levels; they do not feed back into the loop.</text>
+</svg>
