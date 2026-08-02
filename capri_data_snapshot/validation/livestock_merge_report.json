@@ -1,0 +1,129 @@
+{
+  "source": "capreg DATA2, res_17<MS>.gdx, base year 2017",
+  "activities_merged": [
+    "DCOW",
+    "BULL",
+    "PIGF"
+  ],
+  "excluded": {
+    "OANI": "LEVL unit convention unresolved",
+    "GRAS": "definitional conflict, capreg 410.9 vs COCO2 17770",
+    "DCOW/BULL/PIGF": "no independent benchmark, separate pass",
+    "MAIF/OFOD/SETA": "non-market, margin guard inapplicable"
+  },
+  "cells_applied": 572,
+  "cells_rejected": 0,
+  "countries_rolled_back": [],
+  "per_country": {
+    "AT": {
+      "regions": 8,
+      "cells": 24,
+      "rejected": 0
+    },
+    "BE": {
+      "regions": 10,
+      "cells": 30,
+      "rejected": 0
+    },
+    "CY": {
+      "regions": 1,
+      "cells": 3,
+      "rejected": 0
+    },
+    "CZ": {
+      "regions": 8,
+      "cells": 24,
+      "rejected": 0
+    },
+    "DE": {
+      "regions": 32,
+      "cells": 95,
+      "rejected": 0
+    },
+    "EE": {
+      "regions": 1,
+      "cells": 3,
+      "rejected": 0
+    },
+    "EL": {
+      "regions": 13,
+      "cells": 39,
+      "rejected": 0
+    },
+    "ES": {
+      "regions": 17,
+      "cells": 51,
+      "rejected": 0
+    },
+    "FI": {
+      "regions": 2,
+      "cells": 6,
+      "rejected": 0
+    },
+    "FR": {
+      "regions": 22,
+      "cells": 66,
+      "rejected": 0
+    },
+    "HU": {
+      "regions": 6,
+      "cells": 18,
+      "rejected": 0
+    },
+    "IT": {
+      "regions": 12,
+      "cells": 36,
+      "rejected": 0
+    },
+    "LU": {
+      "regions": 1,
+      "cells": 3,
+      "rejected": 0
+    },
+    "LV": {
+      "regions": 1,
+      "cells": 3,
+      "rejected": 0
+    },
+    "MT": {
+      "regions": 1,
+      "cells": 3,
+      "rejected": 0
+    },
+    "NL": {
+      "regions": 12,
+      "cells": 36,
+      "rejected": 0
+    },
+    "NO": {
+      "regions": 3,
+      "cells": 6,
+      "rejected": 0
+    },
+    "PL": {
+      "regions": 15,
+      "cells": 45,
+      "rejected": 0
+    },
+    "PT": {
+      "regions": 7,
+      "cells": 21,
+      "rejected": 0
+    },
+    "RO": {
+      "regions": 8,
+      "cells": 24,
+      "rejected": 0
+    },
+    "SE": {
+      "regions": 8,
+      "cells": 24,
+      "rejected": 0
+    },
+    "SK": {
+      "regions": 4,
+      "cells": 12,
+      "rejected": 0
+    }
+  }
+}

@@ -68,7 +68,7 @@ def main() -> None:
 
     import sys
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-    from capri_python.supply.capri_pmp import (
+    from capri_mod.supply.capri_pmp import (
         share_term, ARABLE_ACTIVITIES, EPRD_TO_GRP, dampen_elasticity)
 
     qt = pd.read_csv(dd / "sources/capreg/pmp_quad_techn.csv")

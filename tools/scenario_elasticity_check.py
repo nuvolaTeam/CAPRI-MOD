@@ -28,13 +28,13 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import numpy as np
 import pandas as pd
 
-from capri_python.data.loaders import load_all_data
-from capri_python.data.definitions import ALL_ACTIVITIES
-from capri_python.supply.supply_module import SupplyModule
-from capri_python.supply.capri_pmp import (
+from capri_mod.data.loaders import load_all_data
+from capri_mod.data.definitions import ALL_ACTIVITIES
+from capri_mod.supply.supply_module import SupplyModule
+from capri_mod.supply.capri_pmp import (
     build_elasticity_table, asymmetry_report, EPRD_TO_GRP,
 )
-from capri_python.utils.utils import calibrate_supply_elasticities
+from capri_mod.utils.utils import calibrate_supply_elasticities
 
 SHOCKED = ["SWHE", "DWHE", "BARL", "RYEM", "OATS", "CORN", "OCER"]
 

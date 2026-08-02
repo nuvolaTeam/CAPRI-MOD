@@ -2,9 +2,9 @@
 import sys, warnings, inspect, pathlib
 warnings.filterwarnings("ignore")
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
-import capri_python.tests.test_capri as T
-from capri_python.data.loaders import load_all_data
-from capri_python.model import CAPRIModel
+import capri_mod.tests.test_capri as T
+from capri_mod.data.loaders import load_all_data
+from capri_mod.model import CAPRIModel
 
 data = load_all_data("capri_data")
 model = CAPRIModel(data_dir="capri_data", verbose=False)

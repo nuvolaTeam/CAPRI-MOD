@@ -16,7 +16,5 @@ venv/
 # ~129 MB) and are inputs to tools/ingest_capreg_data2.py, not repository
 # content. Keep them outside the tree or attach them to a release.
 capri_export/
-capri_data_snapshot/
 DATA2_*.txt
 *.gdx
-/.vs
