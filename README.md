@@ -123,22 +123,26 @@ proprietary solver, and every intermediate quantity inspectable.
 
 ## 3. Installation & quick start
 
-```bash
-# dependencies: numpy, pandas, scipy
-pip install numpy pandas scipy
+Install the dependencies and run the test suite from the command line:
 
-# run the test suite (schema gates, calibration, scenario checks)
+```shell
+pip install numpy pandas scipy
 python tools/run_tests.py
+```
+
+Then, in Python — validate the data layer and run a minimal base scenario:
+
+```python
+from capri_mod.data.validate_data import validate_data
+from capri_mod.model import CAPRIModel
 
 # validate the data layer
-python -c "from capri_mod.data.validate_data import validate_data; \
-           print(validate_data('capri_data').summary())"
+print(validate_data("capri_data").summary())
 
 # a minimal base run
-python -c "from capri_mod.model import CAPRIModel; \
-           m = CAPRIModel(data_dir='capri_data'); \
-           r = m.run(scenario='BASELINE', regions=['DE11','FR61']); \
-           print(r['metadata'])"
+model = CAPRIModel(data_dir="capri_data")
+results = model.run(scenario="BASELINE", regions=["DE11", "FR61"])
+print(results["metadata"])
 ```
 
 ---
@@ -147,20 +151,7 @@ python -c "from capri_mod.model import CAPRIModel; \
 
 ### 4.1 Directory structure
 
-```
-capri_data/
-  <base_year>/               # e.g. 2017/  — year-specific inputs
-    supply/                  # 20 files: yields, areas, costs, PMP terms, elasticities
-    market/                  # 9 files: prices, Armington params, trade, FAO baseline
-    policy/                  # 2 files: CAP premiums and instruments
-    environment/             # 4 files: nutrient coefs, manure, climate zones, EFs
-    feed/                    # 2 files: requirements, availability
-  shared/                    # base-year-independent (e.g. trade flows)
-  sources/                   # raw extracted CAPRI tables (capreg, arm, estnlp …)
-  INPUT_SCHEMA.json          # declarative source of truth for every input
-  DATA_SOURCING_REGISTRY.json# per-dataset provenance + every bug found & fixed
-  validation/                # validation artifacts (Green Deal, PMRK checks)
-```
+![The capri_data directory: a base-year folder holding supply, market, policy, environment and feed inputs, alongside shared data, raw sources, INPUT_SCHEMA.json, DATA_SOURCING_REGISTRY.json and validation artifacts. Folder colours match the modules the data feeds.](docs/data_layout.svg)
 
 ### 4.2 The 22 declared inputs
 
@@ -194,13 +185,18 @@ concept, unit, and consuming modules:
 
 ### 4.3 How to inspect and verify the data
 
-```bash
-# per-cell provenance coverage against the schema
-python tools/verify_schema.py
+Check per-cell provenance coverage against the schema from the command line:
 
-# full data validator (margins, coverage, consistency)
-python -c "from capri_mod.data.validate_data import validate_data; \
-           print(validate_data('capri_data').summary())"
+```shell
+python tools/verify_schema.py
+```
+
+Run the full data validator (margins, coverage, consistency) in Python:
+
+```python
+from capri_mod.data.validate_data import validate_data
+
+print(validate_data("capri_data").summary())
 ```
 
 ### 4.4 Re-basing or swapping data sources
@@ -215,37 +211,75 @@ coverage gate will confirm nothing silently emptied.
 
 ## 5. Model architecture
 
-Six modules, each a focused, independently testable Python component:
+CAPRI-mod is six focused, independently testable modules coordinated by
+`CAPRIModel`, which runs the iterative supply↔market loop.
 
-```
-capri_mod/
-  supply/         regional PMP supply, 248 NUTS-2 × 40 activities
-  market/         Armington market, EU27 bloc × 32 commodities
-  policy/         CAP instruments (premiums, coupled/decoupled payments)
-  environmental/  nutrient balances, GHG, ammonia, biodiversity indicators
-  feed/           animal energy/protein requirements and feed allocation
-  biofuel/        biofuel demand and feedstock use
-  model.py        CAPRIModel — orchestrates the supply↔market loop
-```
+### 5.1 How the pieces fit together
 
-### 5.1 Supply module (PMP)
+![CAPRI-mod model architecture: policy and price shocks enter CAPRIModel.run(), which iterates a supply–market equilibrium loop (POLICY → SUPPLY ⇄ MARKET); the converged activity levels feed the post-equilibrium ENVIRONMENT, FEED and BIOFUEL modules.](docs/architecture.svg)
 
-Uses Positive Mathematical Programming: a quadratic cost term is calibrated so
-the model **exactly reproduces observed base-year activity levels**, then
-responds to shocks along CAPRI's own supply elasticities. Each region solves a
-constrained non-linear program (land, feed, grassland constraints).
+The **outer loop** is the heart of the model: policy sets net revenues → supply
+chooses activities → market clears and returns prices → prices re-enter supply →
+repeat until prices stop moving (default tolerance 0.5%). Environment, feed and
+biofuel are **post-equilibrium** modules: they read the converged activity levels
+and compute their indicators.
 
-### 5.2 Market module (Armington)
+### 5.2 The modules
 
-Clears the EU27 bloc against the rest of the world via an Armington system,
-using tâtonnement price adjustment. Demand is calibrated once at the base and
-frozen, so scenario supply shocks produce genuine price responses.
+| Module | Lines | Core method | Economic engine |
+|---|---:|---|---|
+| `supply/` | 1,270 | PMP quadratic program per region | Positive Mathematical Programming |
+| `market/` | 780 | Armington + tâtonnement clearing | Armington trade, CES demand |
+| `policy/` | 570 | CAP payment & tariff computation | direct payments, TRQ, eco-schemes |
+| `environmental/` | 590 | indicators from activity levels | IPCC / nutrient-balance accounting |
+| `feed/` | 780 | requirement + allocation LP | IPCC 2006 energy, feed optimisation |
+| `biofuel/` | 150 | mandate-driven demand | blending-mandate feedstock demand |
 
-### 5.3 The supply↔market loop
+**Supply — Positive Mathematical Programming.** The core of the model. Each of
+the 248 regions solves its own constrained non-linear program over 40 activities.
+A quadratic cost term is calibrated (`PMPCalibrator`) so the model **exactly
+reproduces observed base-year activity levels** — then, under a shock, responds
+along CAPRI's own supply elasticities. Constraints capture land by type, feed
+availability, and grassland. Key classes: `RegionalSupplyModel` (one region's
+program), `PMPCalibrator` (the calibration), `SupplyModule` (orchestration).
 
-`CAPRIModel.run()` iterates: supply produces quantities → market clears and
-returns prices → prices feed back into supply → repeat until the outer loop
-converges (default tolerance 0.5%).
+**Market — Armington equilibrium.** Clears the EU27 as a single bloc against the
+rest of the world. Import demand uses an Armington (imperfect-substitutes)
+specification; the market finds clearing world prices by tâtonnement (excess
+demand drives price adjustment). Demand is calibrated once at the base and frozen,
+so a scenario supply shock produces a genuine price response rather than being
+cancelled by re-calibration. Key classes: `ArmingtonDemand`, `MarketModule`.
+
+**Policy — the CAP instruments.** Turns policy levers into the net revenues the
+supply module optimises against. Implements Pillar-I basic income support and
+coupled payments, eco-schemes, Pillar-II rates, and the trade instruments
+(applied tariffs and tariff-rate quotas with fill-dependent rents). A
+`PolicyScenario` object is the single, typed description of a policy experiment.
+Key classes: `DirectPaymentsEngine`, `TRQHandler`, `InterventionSystem`,
+`PolicyScenario`.
+
+**Environment — the indicator suite.** Reads converged activity and herd levels
+and computes nutrient balances (N surplus), greenhouse-gas emissions (enteric
+methane, manure, soils), ammonia, and biodiversity indicators — per region. Built
+on CAPRI's own coefficients (`MANN` manure nitrogen, IPCC emission factors). Key
+class: `EnvironmentalModule` returning structured `EnvironmentalIndicators`.
+
+**Feed — requirements and allocation.** Computes each animal's energy, protein
+and dry-matter requirements — ruminants via IPCC 2006 Eq. 10.6, monogastrics
+calibrated to CAPRI targets — then allocates available feed to meet them,
+returning feed use and the manure nutrients that flow into the environment
+module. Key class: `FeedModule`, with `AnimalRequirements` per animal.
+
+**Biofuel — mandate-driven demand.** Translates a blending mandate into
+bioethanol and biodiesel volumes and the crop feedstock they require, which feeds
+back into commodity demand. Small and self-contained. Key class: `BiofuelModule`.
+
+### 5.3 Orchestration
+
+`CAPRIModel` (in `model.py`) owns the loop: it applies the policy scenario, runs
+supply, bridges supply quantities into the market, clears the market, feeds prices
+back, and iterates to convergence — then runs the post-equilibrium modules and
+returns a single results dictionary (see [§7](#7-running-the-model)).
 
 ---
 
@@ -417,18 +451,40 @@ The central claim is not that the model runs, but that its outputs have been
 - **Input reproduction:** confirm loaded data matches CAPRI's GDX. Used for CAP
   premiums and throughout the data layer.
 
-### 9.2 Validation found real bugs — that is the point
+### 9.2 Worked example: the Green Deal scenario
 
-**Every single module that was numerically checked against CAPRI had at least
-one real bug**, each producing plausible-looking but wrong output until the
-comparison exposed it: crop elasticities overshooting 1.6–2.5× (calibrated on
-net where the shock perturbs gross revenue); five livestock bugs (herds never
-reaching the solve, a 1000× units error, feed/grassland constraints zeroing
-livestock); a CAP mechanism that silently did nothing; a feed growth-energy term
-omitting the daily-gain component; and a market demand calibration that cancelled
-every supply shock. All are fixed and recorded in `DATA_SOURCING_REGISTRY.json`.
+The strongest validation is end-to-end: run the *same* policy scenario through
+both models and compare the responses. CAPRI-mod was tested against CAPRI's own
+Green Deal run — the supply-side livestock response and the market-side price
+response, both compared to CAPRI's actual scenario GDX output.
 
-The lesson is built into the test suite so these bugs cannot silently return.
+**Supply side — livestock extensification.** Under the Green Deal cattle-margin
+lift, every cattle activity moves in the correct direction, matching CAPRI:
+
+| Activity | CAPRI-mod | CAPRI Green Deal | Direction |
+|---|---:|---:|:---:|
+| Dairy cows (DCOW) | +1.1% | +6% | ✓ |
+| Suckler cows (BCOW) | +1.5% | +13% | ✓ |
+| Heifers (HFRS) | +1.0% | +9–18% | ✓ |
+| Calves (CALV) | +1.9% | ~+5% | ✓ |
+
+**Market side — prices.** Under the same scenario's livestock supply
+contraction, CAPRI-mod's world prices rise, livestock most — the same
+"extensification tightens supply, prices rise" signal CAPRI produces (CAPRI:
+milk +41%, pork +36%, beef +25%).
+
+**On magnitude.** CAPRI-mod's responses are smaller than CAPRI's 2030 figures,
+and this is expected, not an error: CAPRI-mod reports the *isolated policy
+effect* on the base-year economy, while CAPRI's Green Deal is a 2030 projection
+that compounds the policy with ~13 years of baseline growth and endogenous
+technology. The correct comparison is **direction and relative ranking**, and on
+that basis CAPRI-mod reproduces CAPRI's behaviour: livestock expands, its prices
+rise most, crops barely move (see [§10.1](#101-comparative-static-not-a-dynamic-projection)).
+
+Reaching this agreement required finding and fixing real bugs along the way —
+the regional livestock module initially produced no response at all — each of
+which is recorded in `DATA_SOURCING_REGISTRY.json`. The result is a model that,
+module by module, moves the way CAPRI moves.
 
 ---
 
