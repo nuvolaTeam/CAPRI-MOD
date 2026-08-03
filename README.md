@@ -1,7 +1,7 @@
 # CAPRI-mod
 
 **An independent, validated Python reimplementation of the economic logic of the
-CAPRI model** (Common Agricultural Policy Regionalised Impact).
+CAPRI model** (Common Agricultural Policy Regional Impact).
 
 CAPRI-mod reproduces CAPRI's regional agricultural supply, market, policy,
 environmental, feed and biofuel behaviour across **248 NUTS-2 regions (EU27 +
