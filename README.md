@@ -67,7 +67,7 @@ CAPRI GDX data into a new `capri_data/<year>/` folder. Throughout this document,
 | Market method | Armington, EU27 vs rest-of-world, tâtonnement |
 | Data validator | 12 pass, 0 warn, 0 fail |
 | Convergence | 247 / 248 regions |
-| Test suite | 17 tests |
+| Test suite | 18 tests |
 
 ---
 

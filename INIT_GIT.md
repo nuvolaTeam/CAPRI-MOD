@@ -18,7 +18,7 @@ module, CAP policy instruments, environmental indicators.
 
 Data: capreg DATA2 yields for 192 regions, regional PMP elasticities
 for 132, per-column provenance tracking. Validator 11/1/0, base-year
-fidelity 12/12, supply convergence 247/248, 17 tests passing."
+fidelity 12/12, supply convergence 247/248, 18 tests passing."
 git branch -M main
 git remote add origin https://github.com/YOURNAME/capri-mod.git
 git push -u origin main
