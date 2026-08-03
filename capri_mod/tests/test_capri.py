@@ -188,11 +188,36 @@ def test_price_structure_vs_capri(model):
 # used others, so every 'other animals' lookup silently missed.
 # ---------------------------------------------------------------------------
 
-_ACTIVITY_CODE_VARIANTS = [
-    "O\u0410\u041d\u0418I",   # Cyrillic homoglyphs + doubled I
-    "O\u0410\u041d\u0418",    # Cyrillic homoglyphs
-    "OANII",                  # ASCII, doubled I
-]
+# These exist because a Cyrillic-homoglyph corruption of the activity code
+# `OANI` sat undetected across code and data: the canonical activity list used
+# one spelling, the feed/environmental/market modules used homoglyph variants,
+# so every 'other animals' lookup silently missed. A denylist of known-bad
+# variants is fragile — it only catches the spellings you thought to enumerate
+# (an ASCII-OANI + single trailing Cyrillic И slipped past exactly such a list).
+# The guard below is general: it flags ANY non-ASCII character sitting inside a
+# quoted token that otherwise looks like an activity/commodity code, wherever it
+# appears in code or data.
+# ---------------------------------------------------------------------------
+
+import re as _re
+
+# a "code token" is a short all-caps-alnum identifier (activity/commodity code).
+# Flag it if it contains ANY non-ASCII character. This catches both partial
+# corruption (ASCII OANI + trailing Cyrillic И) and full corruption (every
+# letter a Cyrillic homoglyph), which a "boundary-only" pattern would miss.
+def _looks_corrupted_code(token: str) -> bool:
+    # candidate code token: 3-6 chars, no spaces, letters/digits/homoglyphs only,
+    # at least one non-ASCII char, and (if it has ASCII letters) they're upper.
+    t = token.strip()
+    if not (3 <= len(t) <= 6) or " " in t:
+        return False
+    if all(ord(c) < 128 for c in t):
+        return False  # pure ASCII — a separate ASCII-only guard covers doubled-I
+    ascii_letters = [c for c in t if c.isascii() and c.isalpha()]
+    if ascii_letters and not all(c.isupper() for c in ascii_letters):
+        return False  # lowercase ASCII → prose word with an accent, not a code
+    # reject if it contains punctuation/space-like chars → not a bare code
+    return all(c.isalnum() for c in t)
 
 
 def _repo_root():
@@ -201,15 +226,22 @@ def _repo_root():
 
 
 def test_no_corrupted_activity_codes():
-    """No homoglyph or doubled-I variants of OANI anywhere in code or data."""
+    """No non-ASCII homoglyph adjacent to any uppercase code token, in code or data.
+
+    Generalises the original OANI-variant denylist: instead of enumerating known
+    bad spellings, it rejects any non-ASCII character touching an uppercase
+    alphanumeric code token — the shape every homoglyph corruption of an activity
+    or commodity code takes.
+    """
     import pathlib
     offenders = []
     for p in _repo_root().rglob("*"):
         if not p.is_file() or p.suffix.lower() not in {".py", ".csv", ".json"}:
             continue
-        # tools/ holds the normaliser and this file holds the guard list; both
-        # must name the variants in order to act on them.
-        if {"__pycache__", ".git", "tools"} & set(p.parts):
+        # tools/ holds the normaliser and this file holds the guard regex; both
+        # legitimately contain the pattern in order to act on it. Skip snapshot
+        # (a frozen restore point) and caches.
+        if {"__pycache__", ".git", "tools", "capri_data_snapshot"} & set(p.parts):
             continue
         if p.resolve() == pathlib.Path(__file__).resolve():
             continue
@@ -217,10 +249,16 @@ def test_no_corrupted_activity_codes():
             text = p.read_text(encoding="utf-8")
         except (UnicodeDecodeError, OSError):
             continue
-        for v in _ACTIVITY_CODE_VARIANTS:
-            if v in text:
-                offenders.append(f"{p.name}:{v!r}")
-    assert not offenders, f"corrupted activity codes: {offenders}"
+        for lineno, line in enumerate(text.splitlines(), 1):
+            # only inspect quoted string content, so prose comments with accents
+            # (Baden-Württemberg, Île-de-France) and math symbols don't trip it
+            for m in _re.finditer(r"""["']([^"']*)["']""", line):
+                token = m.group(1)
+                if _looks_corrupted_code(token):
+                    offenders.append(f"{p.name}:{lineno}: {token!r}")
+    assert not offenders, (
+        "non-ASCII homoglyph in code/commodity token:\n  " + "\n  ".join(offenders)
+    )
 
 
 def test_data_headers_are_ascii():
@@ -409,3 +447,48 @@ def test_schema_coverage_has_not_regressed():
     assert not emptied, (
         f"CAPRI-sourced inputs nearly empty (silent-drop?): "
         f"{ {n: f'{r:.1%}' for n, r in emptied.items()} }")
+
+
+# ---------------------------------------------------------------------------
+# Market-mapping consistency. The supply->market bridge and the processing
+# splits both reference commodity codes; if any referenced code is absent from
+# MARKET_COMMODITIES the market would silently drop that flow. This guards the
+# bridge (which must be fully covered) and pins the intended processing-output
+# exceptions (oilseed crush products that are feed items, not traded market
+# commodities) so an accidental omission is distinguishable from a known one.
+# ---------------------------------------------------------------------------
+
+def test_market_mapping_consistency():
+    import re
+    from capri_mod.data import definitions as D
+
+    market = set(D.MARKET_COMMODITIES)
+
+    # (a) every commodity the supply->market bridge writes to or guards on must
+    #     exist in MARKET_COMMODITIES -- a missing one is a silent dropped flow.
+    src = (_repo_root() / "capri_mod" / "model.py").read_text(encoding="utf-8")
+    bridge_refs = set(re.findall(r'market_supply\[\s*["\'](\w+)["\']\s*\]\s*=', src))
+    bridge_refs |= set(re.findall(r'["\'](\w+)["\']\s+in\s+market_supply', src))
+    bridge_missing = sorted(c for c in bridge_refs if c not in market)
+    assert not bridge_missing, (
+        f"_bridge_supply_to_market references commodities absent from "
+        f"MARKET_COMMODITIES: {bridge_missing}")
+
+    # (b) processing outputs either clear in the market or are known non-market
+    #     products (oilseed crush oil/meal, whey) that live only as feed items.
+    #     Listing them explicitly means a NEW unmapped product fails the test.
+    KNOWN_NON_MARKET_OUTPUTS = {
+        "RAPO", "RAPM",   # rapeseed oil / meal
+        "SOYO", "SOYM",   # soy oil / meal
+        "SUFO", "SUFM",   # sunflower oil / meal
+    }
+    outputs = set()
+    for v in D.PROCESSING_OUTPUTS.values():
+        outputs.update(v if isinstance(v, (list, tuple)) else [v])
+    unexpected = sorted(
+        p for p in outputs
+        if p not in market and p not in KNOWN_NON_MARKET_OUTPUTS)
+    assert not unexpected, (
+        f"PROCESSING_OUTPUTS products neither in MARKET_COMMODITIES nor in the "
+        f"known non-market set: {unexpected} -- add to MARKET_COMMODITIES if they "
+        f"should clear, or to KNOWN_NON_MARKET_OUTPUTS if intentionally untraded")

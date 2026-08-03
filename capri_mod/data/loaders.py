@@ -460,7 +460,7 @@ def load_feed_requirements(data_dir: Optional[Path] = None) -> pd.DataFrame:
         "PIGF":  [0.10, 0.12, 0.15, 0.05, 0.04, 0.06, 0.03, 0.00, 0.00, 0.05, 0.0],
         "LAYS":  [0.020,0.025,0.030,0.010,0.008,0.010,0.005,0.000,0.000,0.005,0.0],
         "BROI":  [0.002,0.003,0.004,0.001,0.001,0.002,0.001,0.000,0.000,0.001,0.0],
-        "OANIИ": [0.005,0.006,0.008,0.002,0.002,0.003,0.001,0.000,0.000,0.001,0.0],
+        "OANI": [0.005,0.006,0.008,0.002,0.002,0.003,0.001,0.000,0.000,0.001,0.0],
     }
     items = FEED_ITEMS
     df = pd.DataFrame(req_template).T
@@ -499,7 +499,7 @@ def load_nutrient_coefficients(data_dir: Optional[Path] = None) -> pd.DataFrame:
         "DCOW": [85, 30, 15],   "BCOW": [45, 15, 8],     "BULL": [35, 12, 6],
         "HFRS": [28, 10, 5],    "CALV": [8, 3, 1],       "SHGP": [10, 4, 2],
         "PIGS": [22, 9, 4],     "PIGF": [8, 3, 2],       "LAYS": [0.4, 0.2, 0.1],
-        "BROI": [0.05, 0.02, 0.01], "OANIИ": [0.1, 0.04, 0.02],
+        "BROI": [0.05, 0.02, 0.01], "OANI": [0.1, 0.04, 0.02],
     }
     df = pd.DataFrame(coef_template, index=NUTRIENTS).T
     return df

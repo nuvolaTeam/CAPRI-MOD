@@ -37,7 +37,7 @@ from capri_mod.data.definitions import (
 EF_ENTERIC_CH4 = {
     "DCOW": 117.0,  "BCOW": 65.0,  "BULL": 56.0,  "HFRS": 60.0,
     "CALV": 20.0,   "SHGP": 8.0,   "PIGS": 1.5,   "PIGF": 1.0,
-    "LAYS": 0.0,    "BROI": 0.0,   "OANIИ": 0.0,
+    "LAYS": 0.0,    "BROI": 0.0,   "OANI": 0.0,
 }
 
 # CH4 from manure management (kg CH4 / head / year)
@@ -66,7 +66,7 @@ EF_UREA = 0.20
 EF_NH3_HOUSING = {
     "DCOW": 0.08, "BCOW": 0.05, "BULL": 0.06, "HFRS": 0.06,
     "CALV": 0.04, "SHGP": 0.03, "PIGS": 0.20, "PIGF": 0.18,
-    "LAYS": 0.20, "BROI": 0.12, "OANIИ": 0.10,
+    "LAYS": 0.20, "BROI": 0.12, "OANI": 0.10,
 }
 
 # Global warming potentials (AR6, 100-year)
@@ -129,14 +129,14 @@ def regional_n_excretion(data_dir="capri_data"):
 N_EXCRETION_KG_PER_HEAD = {
     "DCOW": 85.0,  "BCOW": 45.0, "BULL": 35.0,  "HFRS": 28.0,
     "CALV": 8.0,   "SHGP": 10.0, "PIGS": 22.0,  "PIGF": 8.0,
-    "LAYS": 0.40,  "BROI": 0.05, "OANIИ": 0.10,
+    "LAYS": 0.40,  "BROI": 0.05, "OANI": 0.10,
 }
 
 # TAN (Total Ammoniacal Nitrogen) fraction of excretion
 TAN_FRACTION = {
     "DCOW": 0.60, "BCOW": 0.55, "BULL": 0.55, "HFRS": 0.55,
     "CALV": 0.50, "SHGP": 0.55, "PIGS": 0.65, "PIGF": 0.65,
-    "LAYS": 0.70, "BROI": 0.65, "OANIИ": 0.60,
+    "LAYS": 0.70, "BROI": 0.65, "OANI": 0.60,
 }
 
 

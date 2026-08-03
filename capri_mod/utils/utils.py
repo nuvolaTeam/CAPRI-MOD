@@ -66,7 +66,7 @@ def calibrate_supply_elasticities(
         "SETA": 0.00,
         "DCOW": 0.15, "BCOW": 0.12, "BULL": 0.18, "HFRS": 0.15,
         "CALV": 0.10, "SHGP": 0.12, "PIGS": 0.20, "PIGF": 0.22,
-        "LAYS": 0.18, "BROI": 0.25, "OANIИ": 0.18,
+        "LAYS": 0.18, "BROI": 0.25, "OANI": 0.18,
     }
     return pd.Series(elasticities)
 

@@ -501,7 +501,7 @@ class CAPRIModel:
             market_supply["PORK"] = pork_total
 
         # Poultry
-        poul_acts = ["BROI", "OANIИ"]
+        poul_acts = ["BROI", "OANI"]
         poul_total = sum(
             supply_agg[a] for a in poul_acts if a in supply_agg.columns
         )
