@@ -1,6 +1,6 @@
 # Regional PMP elasticity wiring
 
-All five scoped items handled. Gate unchanged: validator 11 pass / 1 warn / 0 fail,
+All five scoped items handled. Gate unchanged: validator 12 pass / 0 warn / 0 fail,
 base fidelity 12/12, supply convergence 30/30, test suite **15 passing** (up from 12).
 
 ---
@@ -120,11 +120,11 @@ fifth case — `variable_costs.csv` `OANI` is a flat 300.0 EUR in all 248 region
 
 | Path | |
 |---|---|
-| `capri_python/supply/capri_pmp.py` | new — dampening, share term, group map, provenance, guard |
-| `capri_python/supply/supply_module.py` | calibrator takes share terms; crude cap removed |
+| `capri_mod/supply/capri_pmp.py` | new — dampening, share term, group map, provenance, guard |
+| `capri_mod/supply/supply_module.py` | calibrator takes share terms; crude cap removed |
 | `tools/scenario_elasticity_check.py` | new — shock comparison and asymmetry report |
 | `tools/detect_synthetic_columns.py` | extended to constant placeholders |
-| `capri_python/tests/test_capri.py` | +3 guard tests |
+| `capri_mod/tests/test_capri.py` | +3 guard tests |
 | `capri_data/DATA_SOURCING_REGISTRY.json` | `base_areas.csv` and `variable_costs.csv` corrected |
 
 Legacy behaviour is preserved for comparison:

@@ -1,4 +1,4 @@
-# CAPRI-Python — Data Acquisition Reference
+# CAPRI-mod — Data Acquisition Reference
 
 Everything needed to retrieve updated/real data: exact filenames, where they live,
 how to access them, and the honest answer on APIs. Verified against CAPRI's own

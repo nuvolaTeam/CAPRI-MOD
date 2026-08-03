@@ -1,0 +1,9 @@
+{
+  "land_use_types": [],
+  "soil_vars": [],
+  "structure": {
+    "rYrs": 1.0,
+    "curFutu": 1.0,
+    "YrDist": 1.0
+  }
+}

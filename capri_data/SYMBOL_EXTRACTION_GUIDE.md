@@ -1,4 +1,4 @@
-# CAPRI-Python — Symbol Extraction Guide
+# CAPRI-mod — Symbol Extraction Guide
 
 **Solves the "which data out of hundreds of symbols" problem.** For each model input,
 the exact CAPRI symbol, what it means, which GDX holds it, and the command to export it.
@@ -6,9 +6,9 @@ the exact CAPRI symbol, what it means, which GDX holds it, and the command to ex
 Built from CAPRI's own GAMS source: 2,429 symbols mapped to their descriptions
 (`capri_symbol_dictionary.json`). Search any topic with:
 ```
-python capri_python/data/find_symbol.py search <keyword>
-python capri_python/data/find_symbol.py needs      # the table below
-python capri_python/data/find_symbol.py gdx <file>  # list symbols in YOUR gdx
+python capri_mod/data/find_symbol.py search <keyword>
+python capri_mod/data/find_symbol.py needs      # the table below
+python capri_mod/data/find_symbol.py gdx <file>  # list symbols in YOUR gdx
 ```
 
 ---

@@ -1,4 +1,4 @@
-# CAPRI-Python — Where the Data Lives: Folder / File / Symbol Map
+# CAPRI-mod — Where the Data Lives: Folder / File / Symbol Map
 
 **What you asked for:** for each thing the model needs — roughly *where* the file is in
 a CAPRI installation, and *which symbol* it must contain.
@@ -77,8 +77,8 @@ not just copied — mixing 2017 PMP with newer prices is what the validator bloc
 ## How to confirm a symbol is in *your* GDX before exporting
 
 ```
-python capri_python/data/find_symbol.py gdx  output/results/…/file.gdx   # lists symbols
-python capri_python/data/find_symbol.py search yield                     # search by concept
+python capri_mod/data/find_symbol.py gdx  output/results/…/file.gdx   # lists symbols
+python capri_mod/data/find_symbol.py search yield                     # search by concept
 ```
 Then export with GAMS:
 ```

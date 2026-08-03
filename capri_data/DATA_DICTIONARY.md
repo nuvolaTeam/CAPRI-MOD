@@ -1,4 +1,4 @@
-# CAPRI-Python Data Dictionary
+# CAPRI-mod Data Dictionary
 
 Schema for every input file: what it holds, its index and columns, units, and shape.
 Auto-generated from `MANIFEST.json` and the code definitions; see also

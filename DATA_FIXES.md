@@ -6,7 +6,7 @@ Gate before / after:
 
 | Check | Before | After |
 |---|---|---|
-| Validator | 11 pass, 1 warn, 0 fail | 11 pass, 1 warn, 0 fail |
+| Validator | 11 pass, 1 warn, 0 fail | 12 pass, 0 warn, 0 fail |
 | Base-year market fidelity | 12/12 | 12/12 |
 | Supply convergence (30-region sample) | 27/30 | **30/30** |
 | Test suite | 10 tests | **12 tests, all passing** |
@@ -194,7 +194,7 @@ python tools/normalize_activity_codes.py .
 python tools/merge_coco_yields.py --capri-gams /path/to/capri/gams --dry-run
 python tools/merge_coco_yields.py --capri-gams /path/to/capri/gams
 python tools/detect_synthetic_columns.py capri_data
-python tools/run_tests.py          # or: pytest capri_python/tests/ -v
+python tools/run_tests.py          # or: pytest capri_mod/tests/ -v
 ```
 
 `yields.csv.pre_coco_merge` holds the pre-merge backup.

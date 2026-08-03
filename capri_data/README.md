@@ -1,4 +1,4 @@
-# CAPRI-Python data layout
+# CAPRI-mod data layout
 
 Data is organised by **base year**, then by **module category**:
 
@@ -37,5 +37,5 @@ run selects one year folder and everything inside is guaranteed to match.
 
 ## File resolution
 
-`capri_python/data/loaders.py::resolve_data_file` maps each filename to its
+`capri_mod/data/loaders.py::resolve_data_file` maps each filename to its
 category and base year, with a flat-layout fallback for backward compatibility.

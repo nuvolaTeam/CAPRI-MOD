@@ -1,4 +1,4 @@
-# CAPRI-Python — Data Sourcing Guide
+# CAPRI-mod — Data Sourcing Guide
 
 **The single answer to: "which data, which vintage, is it real, and where do I get a better version."**
 
@@ -33,7 +33,7 @@ These have no real file, so `loaders.py` generates them with random noise. They 
 | `feed_requirements.csv` | supply feed constraint | CAPRI feed intake per head (`p_feedInput` / feedDistribution) | `<capri>/results/` feed GDX |
 | `nutrient_coefs.csv` | environmental N-balance, supply nutrient use | CAPRI N/P₂O₅/K₂O application rates (`p_cropNutrient` / NPKtoActivity) | CAPRI envind / capreg results |
 
-Until replaced, treat feed and environmental *magnitudes* as indicative, not validated.
+Feed (ruminants) and environmental indicators have since been validated against CAPRI DATA2 (see DATA_SOURCING_REGISTRY.json); monogastric feed remains calibrated-to-target.
 
 ---
 
@@ -94,5 +94,5 @@ mixed sources/years are exactly what corrupts the calibration.
   synthetic data**. It will not let a vintage-mix or a silent synthetic dataset pass
   unnoticed.
 
-Run `python capri_python/data/validate_data.py capri_data` before trusting any run
+Run `python capri_mod/data/validate_data.py capri_data` before trusting any run
 after a data change.

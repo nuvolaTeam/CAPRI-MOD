@@ -1,6 +1,6 @@
 # How to run a CAPRI scenario for shock-magnitude validation
 
-To complete the last validation (does CAPRI-Python move prices/quantities by the
+To complete the last validation (does CAPRI-mod move prices/quantities by the
 same magnitudes as CAPRI under a strong policy shock?), we need a CAPRI scenario
 with a **large, clear policy contrast** — unlike the Green Deal runs, which differ
 by <1%.
@@ -42,11 +42,11 @@ execute 'gdxdump <path>\res_<REFERENCE>.gdx symb=DATAOUT output=<path>\scen_ref.
 execute 'gdxdump <path>\res_<SHOCK>.gdx     symb=DATAOUT output=<path>\scen_shock.txt';
 ```
 Zip the two .txt files and upload. I compare the % changes in prices and quantities
-(reference → shock) against the same shock applied to CAPRI-Python.
+(reference → shock) against the same shock applied to CAPRI-mod.
 
 ## What I'll do with it
 
 1. Read CAPRI's price/quantity change for each commodity under the shock.
-2. Apply the equivalent shock to CAPRI-Python.
+2. Apply the equivalent shock to CAPRI-mod.
 3. Compare magnitudes — report where they match and where they diverge.
 That completes the shock-magnitude validation and closes the last gap.

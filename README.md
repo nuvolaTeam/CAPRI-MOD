@@ -18,7 +18,7 @@ not a copy of its code.
 ## Table of contents
 
 1. [Overview](#1-overview)
-2. [Why CAPRI-mod](#2-why-capri-python-strengths)
+2. [Why CAPRI-mod](#2-why-capri-mod-strengths)
 3. [Installation & quick start](#3-installation--quick-start)
 4. [The data layer](#4-the-data-layer)
 5. [Model architecture](#5-model-architecture)
@@ -29,7 +29,8 @@ not a copy of its code.
 10. [Differences from CAPRI, and why they are deliberate](#10-differences-from-capri-and-why-they-are-deliberate)
 11. [Known limitations](#11-known-limitations)
 12. [Provenance & reproducibility](#12-provenance--reproducibility)
-13. [Relationship to CAPRI](#13-relationship-to-capri)
+13. [Contributors](#13-contributors)
+14. [Relationship to CAPRI](#14-relationship-to-capri)
 
 ---
 
@@ -281,6 +282,33 @@ supply, bridges supply quantities into the market, clears the market, feeds pric
 back, and iterates to convergence — then runs the post-equilibrium modules and
 returns a single results dictionary (see [§7](#7-running-the-model)).
 
+### 5.4 Where CAPRI-mod is identical to CAPRI
+
+CAPRI-mod is an independent *implementation*, but it is not an approximation: in
+its economic structure and methods it follows CAPRI faithfully. The following are
+the **same method and structure** as CAPRI, not simplifications of it:
+
+- **PMP supply.** The same Positive Mathematical Programming approach — a
+  quadratic cost term calibrated to reproduce observed activity levels exactly —
+  over the same NUTS-2 region × activity structure.
+- **Supply elasticities.** CAPRI's own national `p_netPutElas` estimates,
+  broadcast to regions exactly as CAPRI does in its `calibrate_supply` step.
+- **Armington market.** The same imperfect-substitutes trade specification for
+  EU-vs-world price formation.
+- **CAP payments.** CAPRI's actual `PRME` premium values, in the same
+  per-activity payment structure.
+- **Feed energy.** CAPRI's ruminant energy formula — IPCC 2006 Eq. 10.6 from
+  `req_or_man_fnc.gms` — ported directly.
+- **Environmental coefficients.** CAPRI's `MANN` manure-nitrogen coefficients
+  and IPCC emission factors.
+- **Regional resolution.** 248 of CAPRI's 288 NUTS-2 units — the full EU27 +
+  Norway set, at CAPRI's own granularity.
+
+The deliberate *differences* — comparative-static scope, EU27 as a single bloc,
+and a few calibrated-to-target parameters — are set out in
+[§10](#10-differences-from-capri-and-why-they-are-deliberate). Everything else is
+CAPRI's method, reimplemented and validated against CAPRI's own output.
+
 ---
 
 ## 6. Baseline & scenarios
@@ -509,20 +537,67 @@ on baseline assumptions about a future that cannot be validated.
 outputs. **The fair comparison is direction and relative pattern, not absolute
 level** — and on direction, CAPRI-mod matches CAPRI.
 
-### 10.2 EU27 as a single market bloc
+**A validated core, and a milestone toward projection.** A recursive-dynamic
+projection is not a different model that would replace this one — it is a *time
+loop wrapped around the same economic core*, solving the comparative-static
+equilibrium period by period and carrying state forward. The supply, market,
+policy, environmental and feed modules validated here are precisely the
+per-period engine such a projection would run forward. This project therefore
+establishes and validates the hardest-to-trust component first: that each
+single-period solve reproduces CAPRI's behaviour. Extending CAPRI-mod to a
+projection system would principally require (a) the recursive-dynamic loop —
+bounded, mechanical engineering — and (b) constructing and defending a *baseline
+trajectory* (yield growth, demand shifts, technology, world prices), which is
+the substantial, open-ended part and shifts the model's epistemic basis from
+observed data toward forecast assumptions. **CAPRI-mod is best understood as a
+validated comparative-static model and a deliberate first milestone toward a
+future recursive-dynamic projection capability** — the load-bearing, empirically
+checked foundation that a projection layer would build on.
+
+### 10.2 Toward a recursive-dynamic projection
+
+A projection version would be a **time loop around the validated core**: the same
+supply, market and policy modules solve period by period (2017 → 2020 → 2025 →
+…), with herd sizes, perennial-crop areas and land allocation carried forward as
+each period's starting point. That loop is bounded engineering. The genuinely
+hard part is the **baseline trajectory** — the reference path the economy would
+follow with no new policy (yield growth, demand shifts, world prices) — and it
+cannot be validated the way everything else here has been, because the future has
+not happened. CAPRI-mod would manage it by principle, not by guesswork:
+
+- **Adopt a recognised external baseline**, not a home-made one — the EU
+  Agricultural Outlook and OECD-FAO *Aglink-Cosimo* projections (the same sources
+  CAPRI itself uses). This makes the trajectory an openly-cited authority's
+  assumptions rather than the model's own forecast.
+- **Always separate baseline drift from the policy increment** in results, so a
+  reader can see how much of any future figure is "the world changing anyway"
+  versus the policy — preserving the clean, validated policy-effect that is the
+  model's strength.
+- **Treat the baseline as a versioned, swappable input** in the data schema, with
+  its vintage and provenance recorded like any other source.
+- **Sensitivity-analyse the baseline itself.** A projection is not defended by
+  claiming the trajectory is correct, but by showing which conclusions are robust
+  across a range of plausible baselines and which are not — turning unavoidable
+  forecast uncertainty into disclosed analysis (the sensitivity machinery in
+  [§8](#8-sensitivity--uncertainty-analysis) is built for exactly this).
+
+This is future work, not a current capability — but the load-bearing component,
+a per-period solve validated against CAPRI, is already in place.
+
+### 10.3 EU27 as a single market bloc
 
 Treats the EU27 as one Armington bloc trading against the rest of the world,
 rather than resolving intra-EU bilateral trade. Sufficient for EU-vs-world price
 formation; keeps the market side transparent. Bilateral detail is in the
 extracted data and can be added if needed.
 
-### 10.3 248 regions, EU27 + Norway
+### 10.4 248 regions, EU27 + Norway
 
 CAPRI's installation defines 288 NUTS-2 units; CAPRI-mod covers 248. The 40
 not covered are non-EU (Turkey, Western Balkans), out of scope by design. Within
 EU27 + Norway the granularity matches.
 
-### 10.4 A few parameters calibrated-to-target
+### 10.5 A few parameters calibrated-to-target
 
 Monogastric feed requirements and a small number of specialty world prices are
 calibrated to match CAPRI's reported values rather than derived from CAPRI's
@@ -562,7 +637,20 @@ Stated plainly, because a defensible model names its limits:
 
 ---
 
-## 13. Relationship to CAPRI
+## 13. Contributors
+
+- **Gabriele Ghirimoldi** — IT Systems integration and workflow expert, JRC
+  Directorate S, Unit 3 CC-MOD. Project lead: data extraction and sourcing,
+  validation against the CAPRI star-3.0 installation, and direction of the
+  model's design and scope.
+
+- **Claude Opus 4.8 (Anthropic)** — Claude is a large language model used here,
+  under direction, for implementation, debugging, numerical validation against
+  CAPRI output, and documentation.
+
+---
+
+## 14. Relationship to CAPRI
 
 CAPRI is developed by the CAPRI Network (capri-model.org). CAPRI-mod is an
 independent reimplementation of its economic methods for research and policy

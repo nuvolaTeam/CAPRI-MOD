@@ -1,0 +1,36 @@
+{
+ "defaults": {
+  "rhoArm1": 8.0,
+  "rhoArm2": 10.0
+ },
+ "conditional": [
+  {
+   "commodity": "TAGR",
+   "param": "rhoArm1",
+   "condition": "RM_TO_RMTP(RM,\"TUR\")",
+   "value": 0.5,
+   "file": "market1.gms"
+  },
+  {
+   "commodity": "TABO",
+   "param": "rhoArm1",
+   "condition": "RM_TO_RMTP(RM,\"TUR\")",
+   "value": 0.5,
+   "file": "market1.gms"
+  },
+  {
+   "commodity": "RICE",
+   "param": "rhoArm1",
+   "condition": "RM_TO_RMTP(RM,\"EU\")",
+   "value": 2.0,
+   "file": "market1.gms"
+  },
+  {
+   "commodity": "RICE",
+   "param": "rhoArm2",
+   "condition": "RM_TO_RMTP(RM,\"EU\")",
+   "value": 4.0,
+   "file": "market1.gms"
+  }
+ ]
+}

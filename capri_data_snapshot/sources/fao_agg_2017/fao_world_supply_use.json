@@ -1,0 +1,102 @@
+{
+  "POTA": {
+    "production": 377345656,
+    "domestic_use": 373894922,
+    "balance_ratio": 0.991
+  },
+  "SUNF": {
+    "production": 58663715,
+    "domestic_use": 58426176,
+    "balance_ratio": 0.996
+  },
+  "MAIZ": {
+    "production": 1217100440,
+    "domestic_use": 1204186084,
+    "balance_ratio": 0.989
+  },
+  "MILK": {
+    "production": 884996666,
+    "domestic_use": 881548096,
+    "balance_ratio": 0.996
+  },
+  "SMIP": {
+    "production": 5011933,
+    "domestic_use": 4762492,
+    "balance_ratio": 0.95
+  },
+  "RAPE": {
+    "production": 71892758,
+    "domestic_use": 73104581,
+    "balance_ratio": 1.017
+  },
+  "SOYA": {
+    "production": 371194854,
+    "domestic_use": 369573111,
+    "balance_ratio": 0.996
+  },
+  "PULS": {
+    "production": 90875689,
+    "domestic_use": 92343657,
+    "balance_ratio": 1.016
+  },
+  "POUM": {
+    "production": 136637361,
+    "domestic_use": 135092972,
+    "balance_ratio": 0.989
+  },
+  "OCER": {
+    "production": 123133704,
+    "domestic_use": 125157376,
+    "balance_ratio": 1.016
+  },
+  "BARL": {
+    "production": 145114921,
+    "domestic_use": 141338409,
+    "balance_ratio": 0.974
+  },
+  "EGGS": {
+    "production": 92940545,
+    "domestic_use": 92387222,
+    "balance_ratio": 0.994
+  },
+  "BUTT": {
+    "production": 12280517,
+    "domestic_use": 12195935,
+    "balance_ratio": 0.993
+  },
+  "CHES": {
+    "production": 26108936,
+    "domestic_use": 26240689,
+    "balance_ratio": 1.005
+  },
+  "BEEF": {
+    "production": 73860845,
+    "domestic_use": 71886334,
+    "balance_ratio": 0.973
+  },
+  "PORK": {
+    "production": 122412976,
+    "domestic_use": 121357989,
+    "balance_ratio": 0.991
+  },
+  "SUGA": {
+    "production": 166794592,
+    "domestic_use": 169908384,
+    "balance_ratio": 1.019
+  },
+  "WHEA": {
+    "production": 780192846,
+    "domestic_use": 767708803,
+    "balance_ratio": 0.984
+  },
+  "SOYO": {
+    "production": 58742022,
+    "domestic_use": 58680477,
+    "balance_ratio": 0.999
+  },
+  "SOYC": {
+    "production": 249867294,
+    "domestic_use": 264573918,
+    "balance_ratio": 1.059
+  }
+}

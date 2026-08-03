@@ -1,11 +1,11 @@
-# CAPRI-Python
+# CAPRI-mod
 
 A Python implementation of the **CAPRI** (Common Agricultural Policy Regionalised Impact) modelling system.
 
 ## Structure
 
 ```
-capri_python/
+capri_mod/
 ├── model.py                   # Top-level CAPRIModel class
 ├── data/
 │   ├── definitions.py         # Commodity sets, 248 NUTS-2 regions, trade regions
@@ -29,7 +29,7 @@ capri_python/
 ## Quick Start
 
 ```python
-from capri_python import CAPRIModel
+from capri_mod import CAPRIModel
 
 # Use synthetic data (or pass data_dir= with your CSVs)
 model = CAPRIModel()
@@ -61,7 +61,7 @@ reporter.to_csv_folder("results/")
 
 Custom scenarios:
 ```python
-from capri_python.policy.policy_module import PolicyScenario
+from capri_mod.policy.policy_module import PolicyScenario
 my_scenario = PolicyScenario(
     name="MY_SCENARIO",
     biss_rate_change=-50,       # EUR/ha cut in direct payments

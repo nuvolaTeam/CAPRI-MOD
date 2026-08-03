@@ -8,19 +8,19 @@ Create an empty repository on GitHub first (no README, no .gitignore — both
 exist here), then:
 
 ```bash
-cd capri-python
+cd capri-mod
 git init
 git add .
-git commit -m "CAPRI-Python v0.1.0
+git commit -m "CAPRI-mod v0.1.0
 
 Regional PMP supply module over 248 NUTS-2 regions, Armington market
 module, CAP policy instruments, environmental indicators.
 
 Data: capreg DATA2 yields for 192 regions, regional PMP elasticities
 for 132, per-column provenance tracking. Validator 11/1/0, base-year
-fidelity 12/12, supply convergence 30/30, 15 tests passing."
+fidelity 12/12, supply convergence 247/248, 17 tests passing."
 git branch -M main
-git remote add origin https://github.com/YOURNAME/capri-python.git
+git remote add origin https://github.com/YOURNAME/capri-mod.git
 git push -u origin main
 ```
 

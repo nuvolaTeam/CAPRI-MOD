@@ -1,0 +1,13 @@
+{
+  "elasticity_validation": {
+    "source": "CAPRI PELA (estimated supply elasticities)",
+    "result": "major cereals within ~10%, minor crops noisier",
+    "crops_tested": 7
+  },
+  "price_structure_validation": {
+    "source": "CAPRI STAR capmod scenario (greendeal_ref 2030)",
+    "result": "rank correlation 0.998, 8/9 commodities within 40% of CAPRI relative prices",
+    "commodities_tested": 9
+  },
+  "scenario_magnitude_note": "The available scenario files (greendeal_ref vs _max variants) differ by <1% - too weak a policy contrast to validate shock magnitudes. Base->2030 comparison not apples-to-apples (CAPRI baseline bakes in exogenous productivity/macro trends the comparative-static model omits). Price STRUCTURE validation is the robust apples-to-apples result."
+}

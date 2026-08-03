@@ -1,0 +1,256 @@
+{
+ "_purpose": "Authoritative declaration of what every model input IS and where it must come from. This is the specification; DATA_SOURCING_REGISTRY.json records what the current build actually holds. Divergence between the two is the work queue.",
+ "_method": "CAPRI symbols are read from GDX dumps (gdxdump listing format), never from Excel exports. The Excel path produced homoglyph corruption, ragged vintages and dropped regional detail.",
+ "_status_values": {
+  "GDX": "sourced from a CAPRI GDX read, current",
+  "GDX_PENDING": "available in a dump already held, not yet wired",
+  "GDX_NEEDED": "requires a dump we do not have",
+  "LITERATURE": "correctly a published constant, not a CAPRI output",
+  "EXTERNAL": "belongs to another model or database, not CAPRI",
+  "UNRESOLVED": "definitional or mapping question, not an extraction problem"
+ },
+ "inputs": {
+  "yields.csv": {
+   "concept": "output per hectare (crops) or per head (livestock)",
+   "unit": "t/ha, t/head",
+   "dimension": "region x activity",
+   "capri_symbol": "DATA2 YILD; COMI for dairy",
+   "status": "GDX",
+   "coverage": "192 of 248 regions",
+   "note": "Dairy yield is in COMI, not YILD. Taking YILD uniformly puts dairy 3x too low.",
+   "gaps": [
+    "GRAS definitional",
+    "8 livestock activities need mapping",
+    "56 regions"
+   ]
+  },
+  "base_areas.csv": {
+   "concept": "activity levels in the base year",
+   "unit": "1000 ha, 1000 head",
+   "dimension": "region x activity",
+   "capri_symbol": "DATA2 LEVL",
+   "status": "GDX",
+   "coverage": "78.9% by area, 3853 cells from DATA2 LEVL",
+   "note": "COTT, OFIB and OFOD remain flat placeholders: CAPRI aggregates fibre as TEXT and fodder as OFAR/ROOF, which needs a documented split."
+  },
+  "variable_costs.csv": {
+   "concept": "intermediate input cost",
+   "unit": "EUR/ha, EUR/head",
+   "dimension": "region x activity",
+   "capri_symbol": "DATA2 TOIN, or the sum of FERT SEED REPM REPB ELEC EGAS EFUL ELUB INPO IRRO CAOF",
+   "status": "GDX",
+   "coverage": "76.0% by area",
+   "note": "TOIN is total intermediate input, marginally broader than 'variable cost'. Components sum to 67% of TOIN, so the remainder is items not itemised. PLAP must not be used: in these dumps it duplicates PESTOTAL, a quantity index."
+  },
+  "producer_prices.csv": {
+   "concept": "farm-gate output price",
+   "unit": "EUR/t",
+   "dimension": "region x activity",
+   "capri_symbol": "DATA2 MPRI",
+   "status": "GDX",
+   "coverage": "75.9% by area",
+   "note": "Must be merged together with variable_costs. The two were internally consistent only with each other; changing one alone puts staples at an implausible loss."
+  },
+  "cap_payments.csv": {
+   "concept": "CAP premium per unit of activity",
+   "unit": "EUR/ha",
+   "dimension": "region x activity",
+   "capri_symbol": "DATA2 PRME",
+   "status": "GDX",
+   "coverage": "78.7% by area, 192 regions x 75 activities",
+   "note": "Was region x instrument summed to 676.7 EUR/ha at DE11 and applied uniformly to all crops, nothing to livestock. CAPRI PRME is per activity: 360.8 soft wheat, 108.2 dairy cows, 8.2 bulls."
+  },
+  "land_availability.csv": {
+   "concept": "land endowment by category",
+   "unit": "1000 ha",
+   "dimension": "region x land type",
+   "capri_symbol": "DATA2 LEVL on the aggregate activities ARAB, UAAR, GRAE, GRAI, SETA, FALL, OLND",
+   "status": "GDX",
+   "coverage": "962 cells, 199 regions",
+   "note": "GRAE and GRAI are identical in these dumps, so grassland maps to GRAE alone; summing would double-count."
+  },
+  "animal_numbers.csv": {
+   "concept": "herd sizes",
+   "unit": "1000 head",
+   "dimension": "region x animal",
+   "capri_symbol": "DATA2 LEVL / HERD on animal activities",
+   "status": "GDX",
+   "coverage": "1700 cells across 9 animals",
+   "note": "COWS and SHGO have no direct CAPRI counterpart and keep prior values."
+  },
+  "nutrient_coefs.csv": {
+   "concept": "fertiliser application per hectare",
+   "unit": "kg/ha of N, P2O5, K2O",
+   "dimension": "region x activity x nutrient",
+   "capri_symbol": "DATA2 NITF, PHOF, POTF",
+   "status": "GDX",
+   "coverage": "79.0% by area, regional",
+   "note": "Was national constants per activity. Real variation is large: soft wheat nitrogen 147.5 kg/ha in DE11 against 68.2 in ES61, where 125.9 was used everywhere."
+  },
+  "manure_nutrients": {
+   "concept": "manure nutrient output",
+   "unit": "kg/head",
+   "dimension": "region x animal x nutrient",
+   "capri_symbol": "DATA2 MANN, MANP, MANK",
+   "status": "GDX",
+   "coverage": "40246 records, 192 regions, 82 activities",
+   "note": "New input. The hardcoded constants were wrong both ways: dairy understated 29% (85 vs 118.8), bulls overstated 49% (35 vs 23.5), laying hens absent where CAPRI has 659.5."
+  },
+  "feed_requirements.csv": {
+   "concept": "energy, protein and dry matter requirement per head",
+   "unit": "MJ NEL, kg CP, kg DM, days",
+   "dimension": "region x animal x item",
+   "capri_symbol": "DATA2 ENNE, CRPR, DRMN, DRMX, DAYS",
+   "status": "GDX",
+   "coverage": "192 regions, 29 animal activities",
+   "note": "reqrel_17*.gdx p_animReqCorrFac1 holds CORRECTION FACTORS, not levels. The levels are in DATA2."
+  },
+  "supply_elasticities_regional.csv": {
+   "concept": "own-price supply elasticity",
+   "unit": "dimensionless",
+   "dimension": "region x activity",
+   "capri_symbol": "estnlp PELA (2005 slice)",
+   "status": "GDX",
+   "coverage": "46.5% by area, 177 regions",
+   "note": "The single largest remaining gap. Arable-only coverage drives the 7.97 asymmetry ratio that distorts every scenario. Needs the estnlp results dump."
+  },
+  "pmp_diagonal_terms.csv": {
+   "concept": "PMP quadratic own-activity term",
+   "unit": "EUR/ha^2",
+   "dimension": "region x activity",
+   "capri_symbol": "pmppar p_pmpQuadTechn",
+   "status": "GDX",
+   "coverage": "4589 records, 192 regions"
+  },
+  "pmp_crossgroup_terms.csv": {
+   "concept": "PMP quadratic cross-group term",
+   "unit": "EUR/ha^2",
+   "dimension": "region x group x group",
+   "capri_symbol": "pmppar p_pmpQuadPact",
+   "status": "GDX",
+   "coverage": "2318 records, 173 regions",
+   "note": "57% negative, i.e. genuine substitutes. The heuristic it replaced was uniformly positive."
+  },
+  "input_requirements.csv": {
+   "concept": "physical input use per hectare",
+   "unit": "varies by input",
+   "dimension": "region x input x crop",
+   "capri_symbol": "DATA2 SEED, FERT, PLAP, REPM, REPB, ELEC, EGAS, EFUL, ELUB",
+   "status": "GDX",
+   "coverage": "cost components extracted, 105408 records",
+   "note": "Superseded in practice by the variable_costs merge from TOIN."
+  },
+  "world_prices.csv": {
+   "concept": "world market price",
+   "unit": "EUR/t",
+   "dimension": "commodity",
+   "capri_symbol": "capmod dataOut Fob at exporter=World",
+   "status": "GDX",
+   "coverage": "source recorded only as 'CAPRI SUA'",
+   "note": "Validated via the producer/world arbitrage ratio using verified MPRI prices. Model retained for 7 commodities where CAPRI implies a domestic price below world; EGGS corrected from CAPRI (63.4 -> 1173.8)."
+  },
+  "armington_params.csv": {
+   "concept": "Armington substitution elasticities",
+   "unit": "dimensionless",
+   "dimension": "commodity",
+   "capri_symbol": "p_rhoArm1 / p_rhoArm2, literal in GAMS source",
+   "status": "GDX",
+   "coverage": "verified exact for 16 commodities; rho2 added for 21",
+   "note": "No GDX or model run needed - the values are literal assignments in market1_ch.gms, included unconditionally by arm/market1.gms:165."
+  },
+  "trade_flows_2021.csv": {
+   "concept": "bilateral trade quantities",
+   "unit": "1000 t",
+   "dimension": "exporter x importer x commodity",
+   "capri_symbol": "capmod res_0_1717 dataOut ImportQ, 2017",
+   "status": "GDX",
+   "coverage": "547 region pairs x 32 commodities, 7468 records mapped",
+   "note": "Recalibrated to 2017. The 2021 matrix it replaced had a ZERO DIAGONAL - all 29 self-trade pairs summed to exactly 0.0 - so the Armington first nest saw a 100% extra-EU import share for every commodity, including milk, pork and barley where intra-EU trade dominates. CAPRI 2017 gives milk 0.0%, pork 0.7%, barley 1.4%, wheat 3.1%, beef 6.5%, soya 89.9%. Median change 96.1 percentage points. Soya is the sanity check: it is genuinely almost entirely imported, and it is the one commodity the old matrix had nearly right by accident."
+  },
+  "eu_mfn_tariffs.csv": {
+   "concept": "MFN applied tariffs",
+   "unit": "EUR/t or ad valorem",
+   "dimension": "commodity",
+   "capri_symbol": "pol_input",
+   "status": "EXTERNAL",
+   "note": "Ultimately from TARIC/WTO. CAPRI carries a processed version; either is defensible if the year is declared."
+  },
+  "climate_zones.csv": {
+   "concept": "regional climate zone shares",
+   "dimension": "region x zone",
+   "status": "LITERATURE",
+   "note": "IPCC zone classification, not a CAPRI output."
+  },
+  "crop_nutrient_export.csv": {
+   "concept": "nutrient removal per tonne of harvest",
+   "unit": "kg/t",
+   "dimension": "crop x nutrient",
+   "status": "GDX",
+   "note": "CAPRI doc Table 15, reclassified from LITERATURE."
+  },
+  "manure_ch4_ef_regional.csv": {
+   "concept": "methane emission factor for manure",
+   "dimension": "animal",
+   "status": "LITERATURE",
+   "note": "IPCC 2006/2019 factors. Correctly a constant."
+  },
+  "coco_feed_availability_national.csv": {
+   "concept": "feed supply by item",
+   "unit": "1000 t DM",
+   "dimension": "region x feed item",
+   "capri_symbol": "DATA2 FEED and the FCER/FGRA/FMAI/FPRO family",
+   "status": "GDX",
+   "coverage": "192 regions x 12 feed items",
+   "note": "Regional, replacing national figures. 86888 source records."
+  },
+  "pela_cross_price": {
+   "concept": "cross-price supply elasticity between crops",
+   "unit": "dimensionless",
+   "dimension": "region x crop x crop",
+   "capri_symbol": "estnlp PELA off-diagonal",
+   "status": "GDX",
+   "coverage": "20173 records, 173 regions",
+   "note": "Wired into the Q off-diagonals, taking precedence over the group-level p_pmpQuadPact. DE11 now has 118 negative off-diagonals; the previous heuristic was positive by construction."
+  },
+  "market_supply_elasticities": {
+   "concept": "own-price supply elasticity, market level",
+   "unit": "dimensionless",
+   "dimension": "commodity",
+   "capri_symbol": "p_elasSupp (elas1717)",
+   "status": "GDX",
+   "coverage": "19 commodities incl. all livestock",
+   "note": "EU medians wired into the market supply response."
+  }
+ },
+ "hardcoded_in_code": {
+  "_note": "277 numeric constants live in .py files, invisible to any data-file audit. Splitting them by whether they are legitimately constants matters more than the count.",
+  "environmental_module.py": {
+   "count": 88,
+   "verdict": "MOSTLY LITERATURE",
+   "note": "IPCC emission factors and TAN fractions are published constants and belong in code. N_EXCRETION_KG_PER_HEAD is the exception: CAPRI computes it regionally as MANN."
+  },
+  "capri_reference.py": {
+   "count": 79,
+   "verdict": "MIXED",
+   "note": "NVZ nitrogen limits are legislation; IPCC factors are literature; CAPRI_RHOARM should come from the arm module."
+  },
+  "feed_module.py": {
+   "count": 56,
+   "verdict": "SHOULD BE DATA",
+   "note": "PRODUCTION_DAYS now overridden regionally. MEAN_LIVE_WEIGHT, FEED_MIN_SHARE and FEED_MAX_SHARE still hardcoded; CAPRI has p_minFeedShare and p_maxFeedShare."
+  },
+  "loaders.py": {
+   "count": 27,
+   "verdict": "DUPLICATE",
+   "note": "NVZ_N_LIMITS_KG_HA duplicates CAPRI_NVZ_N_LIMITS in capri_reference.py. One of the two should go."
+  },
+  "biofuel_module.py": {
+   "count": 10,
+   "verdict": "LITERATURE"
+  },
+  "scenarios.py": {
+   "count": 6,
+   "verdict": "SCENARIO DEFINITION, not data"
+  }
+ }
+}

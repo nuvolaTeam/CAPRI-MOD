@@ -1,6 +1,6 @@
-# CAPRI-Python Validation Report
+# CAPRI-mod Validation Report
 
-This document consolidates the validation of CAPRI-Python against real CAPRI data.
+This document consolidates the validation of CAPRI-mod against real CAPRI data.
 Two independent checks are complete; a third (scenario shock magnitudes) is pending
 suitable CAPRI scenario runs.
 
