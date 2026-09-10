@@ -1,7 +1,7 @@
 # CAPRI-mod
 
-**An independent, validated Python reimplementation of the economic logic of the
-CAPRI model** (Common Agricultural Policy Regional Impact).
+**An AI-assisted, validated Python reimplementation of the economic logic of the
+CAPRI model** (Common Agricultural Policy Regionalised Impact).
 
 CAPRI-mod reproduces CAPRI's regional agricultural supply, market, policy,
 environmental, feed and biofuel behaviour across **248 NUTS-2 regions (EU27 +
@@ -107,7 +107,7 @@ CAPRI GDX data into a new `capri_data/<year>/` folder. Throughout this document,
 | Supply method | Positive Mathematical Programming (PMP) |
 | Market method | Armington, EU27 vs rest-of-world, tâtonnement |
 | Data validator | 12 pass, 0 warn, 0 fail |
-| Convergence | 247 / 248 regions |
+| Convergence | 248 / 248 regions (no QP-solver fallbacks) |
 | Test suite | 43 tests (all passing) |
 
 ---
@@ -582,7 +582,7 @@ N-per-hectare becomes a decision variable with a yield response.
 | **Supply — crops** | Validated | Realized own-price elasticities match CAPRI's PELA targets within ~10% |
 | **Supply — livestock** | Validated (direction) | Green Deal scenario: reproduces CAPRI's cattle-extensification signal |
 | **Policy — payment computation** | Validated | Premiums match CAPRI `PRME` exactly; EU budget computes to €58.8bn against the real ~€55–58bn |
-| **Policy — scenario response** | Published CAPRI (JRC121368) | All four Farm-to-Fork instruments run, with a CAPRI-derived plant-protection cost. Oilseeds −16.0% vs −15%, permanent crops −10.3% vs −12%; **cereals −23.6% vs −15%, an unexplained 1.57x overshoot**. See `CHANGELOG.md` |
+| **Policy — scenario response** | Published CAPRI (JRC121368) | All four Farm-to-Fork instruments run, with a CAPRI-derived plant-protection cost. Oilseeds −15.9% vs −15%, permanent crops −10.2% vs −12%; **cereals −23.6% vs −15%, an unexplained 1.57x overshoot**. Plant-protection costs derived from CAPRI data for two member states (ES, IT), units verified independently in each. See `CHANGELOG.md` |
 | **Policy — nitrogen instruments** | Fixed | An intensity margin now exists (`supply/intensity.py`), so N ceilings adjust application per hectare rather than forcing all adjustment onto area |
 | **Environment** | Validated | N excretion matches CAPRI `MANN` within ~12%; GHG responds correctly to scenario activity changes |
 | **Feed** | Validated (ruminants) | Energy & dry matter match CAPRI within ~10% via IPCC 2006 Eq. 10.6; monogastrics calibrated to CAPRI targets |

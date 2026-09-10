@@ -1,5 +1,5 @@
 cff-version: 1.2.0
-title: CAPRI-Python
+title: CAPRI-mod
 message: >-
   If you use this software, please cite it, and cite the original CAPRI
   model separately -- this is an independent reimplementation, not a
@@ -8,10 +8,13 @@ type: software
 version: 0.1.0
 license: MIT
 abstract: >-
-  A Python implementation of the CAPRI (Common Agricultural Policy
-  Regionalised Impact) model, covering the regional PMP supply module,
-  an Armington market module, CAP policy instruments and environmental
-  indicators, calibrated against data extracted from CAPRI star-3.0.
+  An AI-assisted Python reimplementation of the economic logic of the
+  CAPRI (Common Agricultural Policy Regionalised Impact) model, covering
+  the regional PMP supply module, an Armington market module, CAP policy
+  instruments, environmental, water and farm-income indicators, and a
+  recursive-dynamic projection layer, calibrated against data extracted
+  from CAPRI star-3.0 and validated against CAPRI's own outputs, the
+  EcAMPA 2 abatement study and published JRC scenario results.
 references:
   - type: software
     title: CAPRI modelling system

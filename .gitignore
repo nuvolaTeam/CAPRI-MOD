@@ -18,5 +18,5 @@ venv/
 capri_export/
 DATA2_*.txt
 *.gdx
-capri_data_snapshot/
 .vs/
+capri_data_snapshot/

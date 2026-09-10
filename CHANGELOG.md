@@ -91,10 +91,14 @@ from CAPRI data (see below), which removed the reason for reporting bounds.
 | Permanent / fruit & veg | −10.2% | −12% |
 
 Oilseeds (1.07x) and permanent crops (0.86x) are close. **Cereals still
-overshoots at 1.62x**, and the pesticide cost channel does not explain it — the
-real saving for cereals is small (4.3% of variable cost, halved = ~2% margin
-gain) and cannot offset a 10% yield loss. That residual is a genuine open
-question, not a rounding artefact.
+overshoots at 1.57x**, and the pesticide cost channel is now ruled out as the
+cause: that channel has been measured from CAPRI's own data, in two countries,
+with units verified independently in each, and improving it moved cereals by
+**0.7 percentage points**. A lever that small cannot close a 1.57x gap.
+
+The remaining candidates are narrowed to two: our cereal supply elasticity being
+too high, or CAPRI distributing its 10% yield loss differently across crops.
+That is the next thing to investigate.
 
 **The pesticide cost is CAPRI-derived, not assumed.** Built as
 `PESTOTAL (g a.i./ha, capreg) / 1000 x UVAB.PLAP (EUR/kg, coco)`. Two unit checks
@@ -113,24 +117,14 @@ costs run a median 1.15x Spanish, but from 0.95x for maize to ~1.7x for olives,
 citrus and apples. Mediterranean permanent crops are where the two disagree most.
 Shares are now the median across both countries.
 
----|---|---|---|
-| Cereals | −26.4% | −19.8% | −15% |
-| Oilseeds | −16.7% | −12.2% | **−15%** (inside) |
-| Permanent / fruit & veg | −10.6% | −7.7% | −12% |
-
-CAPRI's published figure falls **inside** our range for oilseeds. For cereals
-and permanent crops it falls just outside — but in **opposite** directions (we
-overstate the cereal decline, understate the permanent-crop one), which argues
-against a single systematic bias and points instead to residual differences in
-how the individual instruments are represented.
-
 ---
 
 ## Known assumptions carrying weight
 
-- **`PPP_COST_SHARE`** — plant-protection cost shares, anchored to farm-management
-  per-hectare figures, **not** CAPRI-derived. An `EAAB.PLAP` extract in million
-  euro would replace them with measured values.
+- **`PPP_COST_SHARE`** — now **CAPRI-derived** (from `PESTOTAL` x `UVAB.PLAP`,
+  two member states, units verified independently in each), no longer assumed.
+  The residual uncertainty is country coverage: ES and IT differ by a median
+  1.15x, and by ~1.7x for Mediterranean permanent crops.
 - **Permanent-crop elasticities** — CAPRI's *relative* structure (2.47× annuals),
   not its absolute levels, which are member-state market elasticities rather than
   regional PMP targets.
@@ -173,9 +167,10 @@ exists for.
 
 ## Still open
 
-- **Policy-scenario results are a range, not a single number.** Two offsetting
-  cost effects of the pesticide target cannot be computed from the available
-  data, so the model is run both ways and the answer lies between. An
-  `EAAB.PLAP` extract (plant-protection cost in million euro) would make both
-  computable and collapse the range to a single figure.
+- **Cereals overshoot CAPRI's published figure by 1.57x** (−23.6% against −15%).
+  The pesticide cost channel is ruled out as the cause. Candidates: our cereal
+  supply elasticity, or how CAPRI distributes its yield loss across crops.
+- **Pesticide cost shares rest on two member states** (ES, IT), whose costs differ
+  by a median 1.15x and by ~1.7x for Mediterranean permanent crops. A third
+  country would narrow that.
 - Phase 2 (base-year update) not started; the base year remains 2017.
