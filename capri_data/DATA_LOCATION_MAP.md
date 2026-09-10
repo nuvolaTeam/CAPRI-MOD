@@ -28,14 +28,19 @@ Fills: `base_areas.csv`, `yields.csv`, `animal_numbers.csv`, `producer_prices.cs
 
 ---
 
-## B. The two SYNTHETIC files — highest priority (get these first)
+## B. The two formerly-synthetic files — now resolved
+
+> **Status:** both files below now contain real CAPRI data and are marked
+> `REAL_CAPRI` in `DATA_SOURCING_REGISTRY.json`. The model no longer generates
+> synthetic values for them. This section is retained as a record of where the
+> data was sourced from.
 
 | Model file | Symbol | Meaning | Folder / GDX |
 |---|---|---|---|
 | `feed_requirements.csv` | **`p_feedInpCoeff`** | feed input coeff. per head | `restart_in/feed/mefed_<BAS>…gdx` |
 | `nutrient_coefs.csv` | **`p_FertPerHa`** | fertiliser use per ha, by region | results DB (fertiliser/envind output) |
 
-These remove the last two synthetic datasets in the model.
+These were the last two synthetic datasets in the model; both are now real.
 
 ---
 

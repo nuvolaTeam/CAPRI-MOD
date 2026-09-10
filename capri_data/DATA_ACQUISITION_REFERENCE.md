@@ -1,5 +1,7 @@
 # CAPRI-mod — Data Acquisition Reference
 
+> **STATUS (current):** The two datasets this guide prioritises — `feed_requirements.csv` and `nutrient_coefs.csv` — have since been replaced with real CAPRI data (`REAL_CAPRI` in `DATA_SOURCING_REGISTRY.json`). The model no longer runs on any synthetic fallback. This document is retained as a record of how that data was sourced and how to refresh it for a new base year.
+
 Everything needed to retrieve updated/real data: exact filenames, where they live,
 how to access them, and the honest answer on APIs. Verified against CAPRI's own
 source tree and current (2025/26) CAPRI documentation.
@@ -37,7 +39,7 @@ was done for `fao_agg_17`.
 
 ### 2a. To replace the TWO synthetic files (highest value)
 
-| Model file (synthetic now) | CAPRI source file | GDX symbol to export |
+| Model file (now real) | CAPRI source file | GDX symbol to export |
 |---|---|---|
 | `feed_requirements.csv` | `dat/coco/feed_agri.gdx` | `p_AgriProd` (feed rows: PMEA,PPAS,TGRA,FPEG,FLUC,FPGO,FAGO,MAIF) |
 | ″ (feed input coeffs) | `results/` feed build output | `p_feedInpCoeff`, `p_feedDetail` |

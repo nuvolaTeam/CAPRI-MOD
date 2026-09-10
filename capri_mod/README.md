@@ -9,7 +9,7 @@ capri_mod/
 ├── model.py                   # Top-level CAPRIModel class
 ├── data/
 │   ├── definitions.py         # Commodity sets, 248 NUTS-2 regions, trade regions
-│   └── loaders.py             # Data loading (CSV or synthetic fallback)
+│   └── loaders.py             # Data loading (real CSV data; fails loud if absent)
 ├── supply/
 │   └── supply_module.py       # 248 regional NLP models + PMP calibration
 ├── market/
@@ -31,8 +31,8 @@ capri_mod/
 ```python
 from capri_mod import CAPRIModel
 
-# Use synthetic data (or pass data_dir= with your CSVs)
-model = CAPRIModel()
+# Load the real, validated CAPRI data that ships with the repo
+model = CAPRIModel(data_dir="capri_data")
 
 # Run baseline
 baseline = model.run(scenario="BASELINE")
@@ -48,6 +48,13 @@ reporter = model.get_reporter(baseline)
 reporter.to_excel("results/baseline.xlsx")
 reporter.to_csv_folder("results/")
 ```
+
+> **The model runs on real, validated data or not at all.** `CAPRIModel(data_dir="capri_data")`
+> loads the CAPRI-derived inputs that ship with the repository. Calling
+> `CAPRIModel()` with no data directory now raises an error rather than silently
+> generating synthetic data — a policy model must use validated inputs, never
+> fabricated ones. A synthetic path remains only as an explicit opt-in
+> (`load_all_data(allow_synthetic=True)`) for isolated testing.
 
 ## Available Scenarios
 
@@ -81,7 +88,7 @@ results = model.run(
 
 ## Connecting Your Data
 
-Replace synthetic data by placing CSV files in a directory:
+Replace or extend the shipped data by placing CSV files in a directory:
 
 | File | Source | Content |
 |------|--------|---------|

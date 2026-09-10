@@ -264,10 +264,55 @@ WORLD_PRICE_SHOCKS: Dict[str, Dict[str, float]] = {
     },
 }
 
+
+def green_deal_f2f_scenario() -> PolicyScenario:
+    """Farm to Fork / Biodiversity Strategy bundle, as CAPRI defines it.
+
+    Mirrors the defaults in CAPRI's ``pol_input/greendeal/greendeal_scenarios.gms``:
+    landscape elements 10% of UAA, organic area 25%, pesticides -50%, mineral
+    fertiliser -20%, nutrient surplus -50%.
+
+    What maps onto CAPRI-mod instruments, and what does not
+    ------------------------------------------------------
+    - **Landscape elements 10% of UAA** -> ``set_aside_requirement=0.10``.
+      A mandatory non-productive share; binds the arable land constraint.
+    - **Nutrient surplus -50%** -> ``nitrate_limit_change``. The Nitrates
+      Directive ceiling is 170 kg N/ha; halving the surplus is represented as a
+      tightening of that ceiling. NOTE this is a *proxy*: CAPRI constrains the
+      N balance itself, we constrain applied N per hectare.
+    - **Organic area 25%** -> only partially. ``organic_rate_change`` is a
+      payment RATE, not a binding area target. A rate increase is a price signal
+      the PMP responds to; CAPRI imposes a share constraint. These are different
+      instruments and the difference is a known source of divergence.
+    - **Pesticides -50%** -> NOT represented. CAPRI implements it as a
+      plant-protection input/cost reduction (with ``yildReduction='off'``, i.e.
+      no yield penalty). CAPRI-mod carries no pesticide input, so there is
+      nothing to reduce. Omitted rather than approximated.
+    - **Mineral fertiliser -20%** -> NOT represented as a binding constraint.
+      The fert module computes application rates but the supply solve has no
+      mineral-N ceiling separate from the nitrate limit above.
+
+    So this scenario is a PARTIAL replication: two instruments bind properly,
+    one is a proxy, two are absent. Any comparison against CAPRI's full Green
+    Deal increment must state that, or it will attribute missing instruments to
+    a wrong economic response.
+    """
+    return PolicyScenario(
+        name="GREEN_DEAL_F2F",
+        description=("Farm to Fork / Biodiversity bundle (partial): 10% non-productive "
+                     "area + tightened N ceiling; pesticide and mineral-fertiliser "
+                     "targets not represented"),
+        set_aside_requirement=0.10,     # landscape elements, 10% of UAA
+        nitrate_limit_change=-30.0,     # nutrient-surplus proxy (170 -> 140 kg N/ha)
+        organic_rate_change=50.0,       # organic incentive (rate, not area target)
+    )
+
+
 SCENARIO_REGISTRY.update({
     "CAP_2023_2027":    cap_2023_2027_scenario,
     "FLAT_RATE_BPS":    flat_rate_bps_scenario,
     "SET_ASIDE_10PCT":  set_aside_10_scenario,
+    "GREEN_DEAL_F2F":   green_deal_f2f_scenario,
     "WTO_FALCONER":     wto_falconer_scenario,
     "N_LIMITS_TIGHTER": n_limits_scenario,
     "CARBON_TAX_100":   lambda: carbon_tax_scenario(100.0),

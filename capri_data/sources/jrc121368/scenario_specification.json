@@ -1,0 +1,47 @@
+{
+ "source": "Barreiro-Hurle et al. (2021), 'Modelling environmental and climate ambition in the agricultural sector with the CAPRI model', JRC121368, EUR 30317 EN, doi:10.2760/98160",
+ "why_this_matters": "Published CAPRI Green Deal scenario results. Lets us validate policy-scenario response WITHOUT running CAPRI - the same route used successfully for the MACC against EcAMPA 2.",
+ "targets_and_capri_implementation": {
+  "pesticides_50pct": {
+   "capri_method": "50% reduction in EXPENDITURE on plant protection products (CAPRI models PPP through cost, not quantity)",
+   "accompanying_shocks": [
+    "50% increase in other costs (mechanical weeding, alternative practices)",
+    "25% increase in cover/catch crop area",
+    "10% average annual yield loss, applied to cereals, oilseeds, vegetables, other arable and permanent crops"
+   ],
+   "yield_loss_basis": "Sanchez et al. (2019) review: 18.6% of EU production potentially affected by 20 pests; worst case of 50% production loss on that share",
+   "note": "CAPRI has NO dose-response function for PPP (unlike fertiliser) - the 10% yield loss is an explicit ASSUMPTION, stated as such"
+  },
+  "nutrient_surplus": {
+   "capri_method": "binding restriction on gross nitrogen balance (GNB) per region, with N mitigation technologies available",
+   "tiered_reduction": "25% on the first 50 kg/ha of GNB; 50% for 50-100; 75% for 100-150; 100% above 150",
+   "worked_example": "a region at 50 kg/ha GNB targets 37.5; a region at 100 kg/ha targets 62.5",
+   "spatial_level": "regional",
+   "note": "phosphorus and potassium NOT modelled - CAPRI has no P/K balance system"
+  },
+  "organic_25pct": {
+   "capri_method": "constraints plus I/O parameter adjustment on the representative regional farm",
+   "shocks": [
+    "zero mineral fertiliser use (max threshold by crop group: vegetables, permanent, other)",
+    "100% reduction in plant protection product use",
+    "lower crop yields reflecting the organic yield gap (FADN-based)",
+    "100% increase in other costs",
+    "12.5% increase in cover crops"
+   ],
+   "spatial_level": "EU-level target, allocated to regions by distance to target",
+   "note": "no adjustment for the higher market value of organic output - a stated model limitation"
+  },
+  "landscape_features_10pct": {
+   "capri_method": "minimum SET-ASIDE area constraint - 'landscape elements are not included in the model'",
+   "implementation": "increased FALLOW area, zero cost and zero production",
+   "spatial_level": "regional, homogeneous within MS based on MS distance to target"
+  }
+ },
+ "capri_own_caveats": [
+  "not a formal impact assessment; results are 'a first rough indicative estimate'",
+  "impacts on production can be OVERESTIMATED - positive co-benefits of the targets are not modelled",
+  "assumes the EU acts alone, so a significant part of EU emission gains leaks to other world regions",
+  "demand side not covered: no food waste reduction, no dietary shift, no organic action plan",
+  "'the magnitude of the specific findings on activity levels, trade flows, income and environmental indicators should not be taken as definitive in absolute terms'"
+ ]
+}

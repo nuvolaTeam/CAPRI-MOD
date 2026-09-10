@@ -183,7 +183,31 @@ class PolicyScenario:
 
     # Environmental constraints
     nitrate_limit_change: float = 0.0     # delta kg N/ha (negative = tighter)
-    set_aside_requirement: float = 0.0    # % arable land mandatory set-aside
+    set_aside_requirement: float = 0.0    # share of UAA as landscape elements
+    #: Farm-to-Fork organic AREA target (share of UAA, e.g. 0.25 for 25%).
+    #: Distinct from organic_rate_change, which is a payment RATE. CAPRI models
+    #: organic farming by adjusting the average input-output coefficients in
+    #: proportion to the organic share (pol_input/greendeal/organic_io.gms:
+    #: DATA(RU, organicCrops, "Yild", "percentageChange") = -yildReduction *
+    #: p_organicAreaTarget), rather than tracking organic and conventional
+    #: activities separately. This model does the same.
+    organic_area_target: float = 0.0
+    #: Farm-to-Fork nutrient-surplus target, applied as CAPRI applies it
+    #: (JRC121368): a TIERED reduction of the gross nitrogen balance - 25% on
+    #: the first 50 kg N/ha of surplus, 50% for 50-100, 75% for 100-150, 100%
+    #: above 150. Set True to activate. This acts on SURPLUS, not on applied
+    #: nitrogen; the two differ by roughly a factor of four in this model
+    #: (median surplus 54 kg N/ha against applied intensity 241), so the tiered
+    #: rule must never be applied to the applied-N basis directly.
+    nutrient_surplus_target: bool = False
+    #: Farm-to-Fork pesticide-reduction target, as a share (0.50 for -50%).
+    #: CAPRI implements this as FOUR shocks (JRC121368): a cut in plant-
+    #: protection EXPENDITURE, a 50% rise in other costs, 25% more cover crops,
+    #: and a 10% average YIELD LOSS across cereals, oilseeds, vegetables, other
+    #: arable and permanent crops. Only the yield loss is represented here --
+    #: see SupplyModel.apply_pesticide_reduction for why that is defensible and
+    #: what it omits.
+    pesticide_reduction: float = 0.0
 
     # Production quotas (dairy, sugar — historically important)
     milk_quota: Optional[float] = None    # 1000 t (None = no quota)
@@ -333,25 +357,26 @@ class DirectPaymentsEngine:
             uaa = land_data.loc[region, ["ARABLE", "PERMANENT", "GRASSLAND"]].sum() \
                   if region in land_data.index else 100.0
 
-            # BISS (formerly BPS)
+            # BISS (formerly BPS). rate is EUR/ha, uaa is 1000 ha, so
+            # rate * uaa is already in EUR 1000 — no further division.
             biss_rate = cap_data.at[region, "BPS"] if "BPS" in cap_data.columns else 200.0
             biss_rate += self.scenario.biss_rate_change
-            biss_total = biss_rate * uaa / 1000   # EUR 1000
+            biss_total = biss_rate * uaa   # EUR 1000
 
             # ANC (Pillar II)
             anc_rate = cap_data.at[region, "ANC"] if "ANC" in cap_data.columns else 0.0
             anc_rate += self.scenario.anc_rate_change
-            anc_total = anc_rate * uaa * 0.30 / 1000  # ~30% of land is ANC-eligible
+            anc_total = anc_rate * uaa * 0.30  # ~30% of land is ANC-eligible
 
             # AECS (Pillar II agri-environment)
             aecs_rate = cap_data.at[region, "AES"] if "AES" in cap_data.columns else 0.0
             aecs_rate += self.scenario.aecs_rate_change
-            aecs_total = aecs_rate * uaa * 0.20 / 1000  # ~20% of land in AECS
+            aecs_total = aecs_rate * uaa * 0.20  # ~20% of land in AECS
 
             # Organic
             org_rate = cap_data.at[region, "ORGANIC"] if "ORGANIC" in cap_data.columns else 0.0
             org_rate += self.scenario.organic_rate_change
-            organic_total = org_rate * uaa * 0.08 / 1000  # ~8% organic
+            organic_total = org_rate * uaa * 0.08  # ~8% organic
 
             # Eco-scheme (25% of Pillar I in 2023-2027 CAP)
             eco_total = biss_total * self.scenario.eco_scheme_budget_pct
@@ -486,7 +511,24 @@ class PolicyModule:
         self.intervention = InterventionSystem()
 
     def apply_scenario(self, scenario: PolicyScenario):
-        """Switch to a new policy scenario."""
+        """Switch to a new policy scenario.
+
+        Quota instruments are declared on PolicyScenario but are NOT implemented
+        anywhere in the supply solve. Rather than accept them and silently return
+        baseline results — the failure mode that left every CAP scenario inert
+        until it was caught by validating against CAPRI — they are refused
+        explicitly. Milk quotas ended in 2015 and sugar quotas in 2017, so for a
+        2017-based model they are historical instruments; if needed they must
+        first be implemented as constraints in SupplyModel._build_constraints.
+        """
+        for field_name in ("milk_quota", "sugar_quota"):
+            if getattr(scenario, field_name, None) is not None:
+                raise NotImplementedError(
+                    f"PolicyScenario.{field_name} is declared but not implemented "
+                    "in the supply solve, so setting it would silently produce "
+                    "baseline results. Implement it as a constraint in "
+                    "SupplyModel._build_constraints before using this instrument."
+                )
         self.scenario = scenario
         self.payments = DirectPaymentsEngine(scenario)
 
@@ -535,7 +577,17 @@ class PolicyModule:
     def get_supply_policy_adders(self) -> pd.Series:
         """
         Return per-activity policy payment to add to net revenues (EUR/ha or EUR/head).
-        Includes BISS, eco-schemes, coupled support.
+
+        Includes BISS, eco-schemes, coupled support, and the Pillar II rates
+        (AECS, ANC, organic). Previously only BISS and coupled support were
+        applied despite the docstring claiming otherwise, so every Pillar II
+        scenario (aecs_/anc_/organic_rate_change) was silently inert: the
+        adders came back bit-identical to the baseline.
+
+        Pillar II payments are area-based but reach only a share of land, so
+        each is scaled by the same participation share the payments engine uses
+        when computing regional budgets — applying the headline rate to every
+        hectare would overstate their effect several-fold.
         """
         regional_payments = self.get_payment_rates_by_region()
         avg_biss = regional_payments["BISS_EUR_ha"].mean()
@@ -547,6 +599,23 @@ class PolicyModule:
         eligible_crops = [c for c in CROPS if c not in ("SETA",)]
         for crop in eligible_crops:
             adders[crop] = avg_biss
+
+        # Eco-schemes: a share of Pillar I, paid per eligible hectare.
+        eco_rate = avg_biss * float(self.scenario.eco_scheme_budget_pct or 0.0)
+        for crop in eligible_crops:
+            adders[crop] += eco_rate
+
+        # Pillar II rates, scaled by the participation shares used in
+        # compute_payments_by_region (ANC ~30% of land, AECS ~20%, organic ~8%).
+        pillar2 = (
+            (float(self.scenario.anc_rate_change or 0.0), 0.30),
+            (float(self.scenario.aecs_rate_change or 0.0), 0.20),
+            (float(self.scenario.organic_rate_change or 0.0), 0.08),
+        )
+        for rate_change, share in pillar2:
+            if rate_change:
+                for crop in eligible_crops:
+                    adders[crop] += rate_change * share
 
         # Coupled support (voluntary, sector-specific)
         for comm, rate in self.scenario.coupled_support.items():

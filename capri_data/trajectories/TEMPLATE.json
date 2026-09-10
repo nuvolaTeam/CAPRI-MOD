@@ -1,0 +1,15 @@
+{
+  "name": "REPLACE_ME",
+  "source": "REPLACE with the citable authority, e.g. 'European Commission, EU Agricultural Outlook 2024-2035' or 'OECD-FAO Aglink-Cosimo 2024'",
+  "vintage": "REPLACE with the publication date, e.g. 2024-12",
+  "base_year": 2017,
+  "target_years": [2030],
+  "growth": {
+    "yields":       {"SWHE": {"2030": 1.12}, "_default": {"2030": 1.08}},
+    "demand":       {"BEEF": {"2030": 0.95}, "_default": {"2030": 1.05}},
+    "world_prices": {"_default": {"2030": 1.10}},
+    "herds":        {"DCOW": {"2030": 0.92}, "_default": {"2030": 1.00}},
+    "land":         {"_default": {"2030": 0.99}}
+  },
+  "_note": "Growth entries are CUMULATIVE multiplicative factors relative to the base year (1.12 = +12% by 2030), not annual rates. A _default supplies any key not named. A missing block or year means no change. The trajectory is an ADOPTED EXTERNAL ASSUMPTION SET, not a forecast the model makes - always fill in source and vintage, and sensitivity-analyse across plausible alternatives rather than asserting one is correct."
+}

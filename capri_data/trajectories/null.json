@@ -1,0 +1,9 @@
+{
+  "name": "null",
+  "source": "none (identity trajectory)",
+  "vintage": "n/a",
+  "base_year": 2017,
+  "target_years": [2017],
+  "growth": {},
+  "_note": "The identity trajectory. Projecting with it must reproduce the comparative-static result exactly; this is the projection layer's correctness gate and needs no forecast data."
+}

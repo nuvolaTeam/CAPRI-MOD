@@ -114,8 +114,12 @@ def detect_synthetic_base_activities(base_areas: pd.DataFrame,
 
 # --- 4b. provenance-tracked elasticity table --------------------------------
 
-REGIONAL_FILE = "2017/supply/supply_elasticities_regional.csv"
-PMP_ELAS_FILE = "2017/supply/pmp_own_price_elasticities.csv"
+#: Elasticity source files, resolved through the loaders' base-year-aware
+#: lookup rather than a hard-coded "2017/..." path. Baking the year in here
+#: meant re-basing the model to another year silently fell back to the
+#: literature defaults, because these two paths would no longer exist.
+REGIONAL_FILE = "supply_elasticities_regional.csv"
+PMP_ELAS_FILE = "pmp_own_price_elasticities.csv"
 CROSSWALK = "shared/nuts_crosswalk.json"
 
 # CAPRI names grain maize MAIZ; the model calls it CORN.
@@ -129,6 +133,7 @@ def build_elasticity_table(
     defaults: pd.Series,
     apply_dampening: bool = True,
     base_areas: Optional[pd.DataFrame] = None,
+    base_year: str = "2017",
 ) -> Tuple[pd.DataFrame, pd.DataFrame, dict]:
     """
     Return (elasticities, provenance, summary).
@@ -154,7 +159,8 @@ def build_elasticity_table(
     prov = pd.DataFrame("LITERATURE_DEFAULT", index=regions, columns=activities)
 
     # --- lower-precedence source first, so the better one overwrites it ---
-    pmp_path = data_dir / PMP_ELAS_FILE
+    from capri_mod.data.loaders import resolve_data_file
+    pmp_path = resolve_data_file(data_dir, PMP_ELAS_FILE, base_year=base_year)
     cw_path = data_dir / CROSSWALK
     n_pmp = 0
     if pmp_path.exists() and cw_path.exists():
@@ -177,7 +183,7 @@ def build_elasticity_table(
                 n_pmp += 1
 
     # --- higher-precedence source ---
-    reg_path = data_dir / REGIONAL_FILE
+    reg_path = resolve_data_file(data_dir, REGIONAL_FILE, base_year=base_year)
     n_reg = 0
     if reg_path.exists():
         rdf = pd.read_csv(reg_path, index_col=0)

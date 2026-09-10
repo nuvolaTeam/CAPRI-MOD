@@ -282,15 +282,51 @@ class MarketModule:
                         net_exports[exporter] += v
                         net_exports[importer] -= v
 
+            # Assign production first, then reconcile the world total.
+            #
+            # Production is drawn as w_prod * prod_share (which sums to w_prod),
+            # but the real_world SUA overrides replace individual regions, so the
+            # total drifts away from w_prod — for oilseeds it landed ~27% high
+            # (RAPE 91.6 kt against a 72 kt reference, SOYA 472 against 370).
+            # Consumption is then derived from the trade identity against that
+            # inflated production, leaving world demand ~21% above world supply
+            # at base prices. The market solver, working correctly, drove RAPE
+            # and SOYA prices 34% and 65% below reference to clear a market that
+            # was never balanced — which is what the price-reproduction test had
+            # been failing on. Rescaling the non-overridden regions restores
+            # sum(production) == w_prod while keeping the SUA levels exact.
+            raw_prod, overridden = {}, {}
             for region in regions:
-                ps   = prod_share[region]
+                ps = prod_share[region]
                 noise = float(rng.uniform(0.92, 1.08))
-                prod  = max(1.0, w_prod * ps * noise)
-                # Override rest-of-world production with real SUA level if known
                 if (region, comm) in real_world:
-                    prod = max(1.0, real_world[(region, comm)])
-                # Consumption = Production - NetExports (trade identity)
-                cons  = max(1.0, prod - net_exports.get(region, 0.0))
+                    overridden[region] = max(1.0, real_world[(region, comm)])
+                else:
+                    raw_prod[region] = max(1.0, w_prod * ps * noise)
+
+            fixed_total = sum(overridden.values())
+            free_total = sum(raw_prod.values())
+            target_free = w_prod - fixed_total
+            if free_total > 0 and target_free > 0:
+                scale = target_free / free_total
+                raw_prod = {r: max(1.0, v * scale) for r, v in raw_prod.items()}
+
+            for region in regions:
+                prod = overridden.get(region, raw_prod.get(region, 1.0))
+                # A region cannot export more than it produces. Where the SUA
+                # override or the drawn share leaves production below net
+                # exports, raw consumption goes NEGATIVE and the max(1.0, ...)
+                # clamp below silently FABRICATES consumption out of nothing —
+                # this was the entire source of the base-year oilseed imbalance
+                # (ROW "produced" 1094 kt of soy while exporting 123407, and the
+                # clamp injected exactly the 122314 kt by which world demand
+                # exceeded world supply). Raising production to cover net
+                # exports keeps the trade identity feasible and leaves the
+                # clamp with nothing to invent.
+                ne = net_exports.get(region, 0.0)
+                if ne > 0 and prod < ne:
+                    prod = ne
+                cons = max(1.0, prod - ne)
 
                 self.base_production.at[region, comm]  = prod
                 self.base_consumption.at[region, comm] = cons

@@ -1,5 +1,5 @@
 """
-CAPRI-Python: Main Model Coordinator
+CAPRI-mod: Main Model Coordinator
 =====================================
 Top-level class that orchestrates the supply-market iteration loop,
 connecting all modules:
@@ -49,9 +49,13 @@ from capri_mod.utils.utils import (
 from capri_mod.scenarios.scenarios import get_scenario, list_scenarios
 
 
+#: Nitrates Directive ceiling on organic N application (kg N per ha of UAA)
+NITRATES_DIRECTIVE_N_LIMIT = 170.0
+
+
 class CAPRIModel:
     """
-    CAPRI-Python: Common Agricultural Policy Regionalised Impact Model.
+    CAPRI-mod: Common Agricultural Policy Regionalised Impact Model.
 
     Partial equilibrium model for ex-ante policy impact assessment.
 
@@ -70,17 +74,30 @@ class CAPRIModel:
         regions: Optional[List[str]] = None,
         verbose: bool = True,
         base_year: str = "2017",
+        data: Optional[Dict] = None,
     ):
+        """
+        Parameters
+        ----------
+        data : dict, optional
+            A prepared data dict to use instead of loading from disk. The
+            projection layer passes a *projected* data set here so that the
+            supply and market modules (and the PMP calibration) are built from
+            it — swapping the dict on an existing model would leave the modules
+            calibrated on the base year and silently return base-year results.
+        """
         self.verbose   = verbose
         self.data_dir  = Path(data_dir) if data_dir else None
         self.regions   = regions
         self.base_year = base_year
 
         if verbose:
-            print("CAPRI-Python: Initialising model...")
+            print("CAPRI-mod: Initialising model...")
 
-        # Load all data (base_year selects the capri_data/<year>/ folder)
-        self.data = load_all_data(self.data_dir, base_year=base_year)
+        # Load all data (base_year selects the capri_data/<year>/ folder),
+        # unless a prepared data set was supplied.
+        self.data = data if data is not None else load_all_data(
+            self.data_dir, base_year=base_year)
 
         # If region subset specified, filter data
         if regions:
@@ -104,6 +121,15 @@ class CAPRIModel:
             self.biofuel_module = BiofuelModule(self.data)
         except Exception:
             self.biofuel_module = None
+        # Technological abatement (EcAMPA measures) — loaded if the measure file
+        # is present; the economic MACC module is constructed on demand in run()
+        # since it needs the calibrated supply module.
+        try:
+            from capri_mod.abatement import TechnologicalAbatement
+            self.tech_abatement = TechnologicalAbatement.from_data_dir(
+                data_dir, base_year=getattr(self, "base_year", "2017"))
+        except Exception:
+            self.tech_abatement = None
 
         if verbose:
             n_regions = len(self.data["areas"])
@@ -136,6 +162,8 @@ class CAPRIModel:
         run_environmental: bool = True,
         run_feed: bool = False,
         run_biofuel: bool = False,
+        run_abatement: bool = False,
+        carbon_price: float = 0.0,
         biofuel_mandate: float = 0.065,
         regions: Optional[List[str]] = None,
     ) -> Dict:
@@ -173,7 +201,26 @@ class CAPRIModel:
         self.policy_module.apply_scenario(pol_scenario)
 
         # Get policy adders (CAP payments → supply module net revenues)
-        policy_adders = self.policy_module.get_supply_policy_adders()
+        # CAP support enters the supply model as a DELTA from the baseline
+        # policy, not as an absolute level.
+        #
+        # The calibrated net revenue already contains cap_premium (SWHE base
+        # 490.1 of which 322.1 is CAP). get_supply_policy_adders() returns the
+        # ABSOLUTE payment (332.2), and the solve ADDS it to cap_premium — so
+        # every scenario run through the model was double-counting CAP support
+        # and inflating wheat supply ~29% against a no-policy solve. That
+        # distortion sat in the BASELINE too, so scenario-vs-baseline
+        # comparisons were measuring the double-count rather than the policy.
+        #
+        # Differencing against the baseline policy leaves the calibrated base
+        # untouched (a BASELINE run gets a zero delta) while a scenario gets
+        # exactly its own change: a -100 EUR/ha BISS cut yields -125.0 on wheat.
+        from capri_mod.policy.policy_module import PolicyModule as _PM, \
+            PolicyScenario as _PS
+        _baseline_adders = _PM(self.data, _PS(name="BASELINE")) \
+            .get_supply_policy_adders()
+        policy_adders = (self.policy_module.get_supply_policy_adders()
+                         - _baseline_adders)
         effective_tariffs = self.policy_module.get_effective_tariffs()
 
         # Trade scenario for market module
@@ -215,7 +262,46 @@ class CAPRIModel:
                 print("    [Supply] Solving regional models...")
             supply_results = self.supply_module.run(
                 price_signals=price_signal if outer_iter > 0 else None,
-                policy_scenario={"adders": policy_adders.to_dict()},
+                policy_scenario={
+                    "adders": policy_adders.to_dict(),
+                    # mandatory non-productive share (CAP GAEC 8 / F2F landscape
+                    # elements); binds the arable land constraint in the solve
+                    "set_aside_requirement": float(
+                        getattr(pol_scenario, "set_aside_requirement", 0.0) or 0.0),
+                    # Nitrogen ceiling, as a DELTA in kg N/ha of UAA applied to
+                    # each region's OWN observed base-year N intensity.
+                    #
+                    # It is deliberately not anchored to the 170 kg N/ha Nitrates
+                    # Directive figure: that limit applies to ORGANIC (manure) N,
+                    # whereas the constraint here acts on TOTAL N from the
+                    # nutrient coefficients, which legitimately exceeds it (FR10
+                    # sits at 178 kg N/ha in the base year). Anchoring to 170
+                    # made the constraint bind on the BASE YEAR itself, so a
+                    # -30 kg/ha scenario collapsed wheat by 75% against CAPRI's
+                    # -1.9% — a ~60x over-response traced to this error.
+                    #
+                    # Anchoring to observed intensity means an unchanged scenario
+                    # is slack by construction and a delta tightens from where
+                    # each region actually is.
+                    # Farm-to-Fork organic AREA target (share of UAA); adjusts
+                    # average I/O coefficients in proportion to the share, as
+                    # CAPRI does in organic_io.gms.
+                    # Farm-to-Fork nutrient-surplus target: CAPRI's tiered GNB
+                    # rule, resolved per region inside the solve because the
+                    # target depends on each region's own surplus.
+                    "nutrient_surplus_target": bool(
+                        getattr(pol_scenario, "nutrient_surplus_target", False)),
+                    # Farm-to-Fork pesticide target: only the yield-loss
+                    # channel is represented (no plant-protection cost exists in
+                    # this model's aggregate variable costs).
+                    "pesticide_reduction": float(
+                        getattr(pol_scenario, "pesticide_reduction", 0.0) or 0.0),
+                    "organic_area_target": float(
+                        getattr(pol_scenario, "organic_area_target", 0.0) or 0.0),
+                    "nitrate_limit_delta": (
+                        float(getattr(pol_scenario, "nitrate_limit_change", 0.0) or 0.0)
+                        or None),
+                },
                 regions=regions or list(self.data["areas"].index),
                 verbose=self.verbose,
             )
@@ -291,6 +377,23 @@ class CAPRIModel:
                 if self.verbose:
                     print(f"  [Biofuel] skipped: {e}")
 
+        # --- Step 6: Abatement module ---
+        # Technological abatement applies EcAMPA measures to the computed
+        # emissions; the economic response to a carbon price is available via the
+        # standalone AbatementModule (a full MACC sweep is expensive, so it is
+        # not run inline — see docs). Here we report technological abatement of
+        # the run's emissions, activity-resolved for enteric CH4.
+        abatement_result = None
+        if run_abatement and run_environmental and env_df is not None \
+                and self.tech_abatement is not None:
+            if self.verbose:
+                print("  [Abatement] Applying EcAMPA technological measures...")
+            try:
+                abatement_result = self._run_abatement(supply_results, env_df)
+            except Exception as e:
+                if self.verbose:
+                    print(f"  [Abatement] skipped: {e}")
+
         # --- Policy summary ---
         policy_summary = self.policy_module.summarise_policy()
 
@@ -303,6 +406,7 @@ class CAPRIModel:
             "environmental": env_df,
             "feed": feed_df,
             "biofuel": biofuel_result,
+            "abatement": abatement_result,
             "policy_summary": policy_summary,
             "convergence": tracker.summary(),
             "metadata": {
@@ -320,10 +424,43 @@ class CAPRIModel:
 
         return results
 
+    def _run_abatement(self, supply_results, env_df):
+        """Apply EcAMPA technological measures to the run's emissions.
+
+        Aggregates per-source GHG emissions across all regions — including
+        per-animal enteric CH4 so feed measures are activity-resolved — and
+        applies the technological measures at full uptake. Returns the
+        TechnicalAbatementResult, which reports abatement per measure with EcAMPA
+        page citations. The economic (carbon-price) MACC is a separate, expensive
+        sweep and is not run inline; use capri_mod.abatement.AbatementModule for
+        it.
+        """
+        import pandas as pd
+        # aggregate emissions by source and enteric by animal across regions
+        sources = {}
+        enteric = {}
+        for region, res in supply_results.items():
+            acts = res.activities if hasattr(res, "activities") else res
+            if not isinstance(acts, pd.Series):
+                acts = pd.Series(acts)
+            # add herd numbers so enteric is computed (supply activities are
+            # crops; animal numbers live in the data layer). Drop any animal
+            # codes already present in acts to avoid duplicate index labels.
+            if "animal_numbers" in self.data and region in self.data["animal_numbers"].index:
+                herds = self.data["animal_numbers"].loc[region]
+                herds = herds[[a for a in herds.index if a not in acts.index]]
+                acts = pd.concat([acts, herds])
+            ghg = self.env_module.compute_ghg(acts, region)
+            for k, v in ghg.items():
+                sources[k] = sources.get(k, 0.0) + v
+            for a, v in self.env_module.enteric_ch4_by_animal(acts).items():
+                enteric[a] = enteric.get(a, 0.0) + v
+        return self.tech_abatement.apply(
+            sources, uptake_scale=1.0, enteric_by_animal=enteric)
+
     # ------------------------------------------------------------------
     # SCENARIO COMPARISON
     # ------------------------------------------------------------------
-
     def compare(
         self,
         baseline_results: Dict,
@@ -463,34 +600,34 @@ class CAPRIModel:
             if "SUGR" in market_supply.columns:
                 market_supply["SUGR"] = supply_agg["SUGB"] * 0.135
 
-        # Dairy: milk output = dairy-cow heads × milk yield per cow (t/cow/yr),
-        # then split into products with real FAO ratios. Previously milk was set
-        # equal to head count (implying ~1 t/cow), which understated volume ~7×
-        # and inflated the solved milk price.
+        # Dairy: DCOW gross output -> milk tonnes via a calibrated factor, then
+        # split into products with real FAO ratios. DCOW gross_output is already
+        # a (per-animal, non-tonne) unit, so a single calibrated factor maps it
+        # to base milk production; re-multiplying by a raw milk yield here would
+        # double-convert (it inflated milk ~1.3x and all dairy products with it).
         if "DCOW" in supply_agg.columns:
-            heads = supply_agg["DCOW"]
-            milk_yield = self.data["yields"]["DCOW"].reindex(supply_agg.index).fillna(7.0) \
-                if ("yields" in self.data and "DCOW" in self.data["yields"].columns) else 7.0
-            milk = heads * milk_yield
+            milk = supply_agg["DCOW"] * 0.9575  # calibrated to EU27 market slot
             if "MILK" in market_supply.columns:
                 market_supply["MILK"] = milk
             if "BUTR" in market_supply.columns:
                 market_supply["BUTR"] = milk * eu.get("milk_to_butter", 0.0116)
             if "SKIM" in market_supply.columns:
                 # SKIM commodity is skim-milk POWDER, not skimmed liquid milk.
-                # FAO milk_to_smp (~0.305) is the liquid-skim fraction; only a
-                # small share is dried to powder (SMP output ≈ butter scale).
                 market_supply["SKIM"] = milk * 0.013
             if "CHES" in market_supply.columns:
                 market_supply["CHES"] = milk * eu.get("milk_to_cheese", 0.0456)
 
-        # Beef: from cattle activities
+        # Beef: from cattle activities. Head counts must be converted to carcass
+        # tonnage — previously heads were equated directly to BEEF tonnes, which
+        # inflated EU beef supply ~300x and drove market non-convergence. The
+        # per-head factor is calibrated so the bridge reproduces base production
+        # (EU average carcass yield over the whole cattle herd, incl. cows/calves).
         beef_acts = ["BULL", "BCOW", "HFRS", "CALV"]
         beef_total = sum(
             supply_agg[a] for a in beef_acts if a in supply_agg.columns
         )
         if "BEEF" in market_supply.columns:
-            market_supply["BEEF"] = beef_total
+            market_supply["BEEF"] = beef_total * 0.00034961  # calibrated to EU27 market slot
 
         # Pork
         pig_acts = ["PIGS", "PIGF"]
@@ -498,23 +635,23 @@ class CAPRIModel:
             supply_agg[a] for a in pig_acts if a in supply_agg.columns
         )
         if "PORK" in market_supply.columns:
-            market_supply["PORK"] = pork_total
+            market_supply["PORK"] = pork_total * 0.00004116  # calibrated to EU27 market slot
 
-        # Poultry
+        # Poultry — heads to carcass tonnage (calibrated to base production)
         poul_acts = ["BROI", "OANI"]
         poul_total = sum(
             supply_agg[a] for a in poul_acts if a in supply_agg.columns
         )
         if "POUL" in market_supply.columns:
-            market_supply["POUL"] = poul_total
+            market_supply["POUL"] = poul_total * 0.00004633  # calibrated to EU27 market slot
 
-        # Sheep and goat meat
+        # Sheep and goat meat — heads to carcass tonnage
         if "SHGP" in supply_agg.columns and "SHGM" in market_supply.columns:
-            market_supply["SHGM"] = supply_agg["SHGP"]
+            market_supply["SHGM"] = supply_agg["SHGP"] * 0.00063104  # calibrated to EU27 market slot
 
-        # Eggs
+        # Eggs — layers to egg tonnage (t eggs / layer / yr)
         if "LAYS" in supply_agg.columns and "EGGS" in market_supply.columns:
-            market_supply["EGGS"] = supply_agg["LAYS"]
+            market_supply["EGGS"] = supply_agg["LAYS"] * 0.00000836  # calibrated to EU27 market slot
 
         return market_supply
 

@@ -198,3 +198,27 @@ python tools/run_tests.py          # or: pytest capri_mod/tests/ -v
 ```
 
 `yields.csv.pre_coco_merge` holds the pre-merge backup.
+
+## Session: policy validation and base-year repair
+
+Data-level fixes made while validating against CAPRI. Full provenance in
+`capri_data/DATA_SOURCING_REGISTRY.json`; narrative in `CHANGELOG.md`.
+
+- **Livestock yields unit-inconsistent across regions.** ~56 regions carried
+  animal yields in tonnes/head, ~192 in kg/head. Reconciled at load time
+  (`_reconcile_animal_yield_units`) onto the kg basis the supply module's
+  conversion expects. Base fidelity unchanged; the carbon MACC moved from 6.3%
+  to 1.2% at EUR50/t, into agreement with EcAMPA.
+- **Nitrogen balance.** Two unit errors: grass yield is fresh matter in kg/ha
+  and supplied 99.3% of total N uptake; manure N was divided by a further 1000
+  and sat at effectively zero. Median surplus moved from −170,196 to +54 kg N/ha
+  against a real EU ~45–50.
+- **Permanent land bound.** The `PERMANENT` figure and the crop areas disagree in
+  56 of 248 regions (4,640 kha), so the base year violated its own constraint and
+  the solver cut olives by 78%. Bound is now `max(land figure, observed area)`.
+- **Market base production.** `real_world` SUA overrides drifted world totals ~27%
+  above reference; a clamp fabricated consumption where net exports exceeded
+  production. World supply and demand now balance to 0.00%.
+- **Permanent-crop elasticities.** Literature priors made them ~10x *less* elastic
+  than annuals; CAPRI's own `p_elasSupp` has them 2.47x *more*. Rescaled to
+  CAPRI's relative structure.

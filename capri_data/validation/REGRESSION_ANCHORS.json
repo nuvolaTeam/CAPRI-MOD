@@ -1,0 +1,68 @@
+{
+ "_purpose": "Machine-checkable snapshot of the numbers that EXTERNAL references validated. Its job is to tell you WHICH validation broke after a change to the data or the code - not merely that something moved. Every entry names the reference it was checked against, so a failure points at a source, not just a number.",
+ "_why_it_exists": "Eleven real defects were found in one working session, and every one was surfaced by an external reference rather than an internal consistency check. Several had been silently wrong for the life of the project: CAP support double-counted in every scenario, all policy instruments inert, permanent crops destroyed in every base solve. Internal checks only see what they are pointed at - the olive collapse sat invisible behind a base-fidelity measure that only looked at annual crops. A re-base is exactly the situation where that failure mode recurs.",
+ "_how_to_use": "Run tools/check_regression.py after any change to capri_data or to the supply, market, policy or environmental modules. A TIGHT anchor moving means a validated result changed and needs explaining before the change is accepted. A LOOSE anchor is a sanity bound, not a validated value - a breach means something is badly wrong.",
+ "base_year": "2017",
+ "anchors": {
+  "n_regions": {
+   "value": 248,
+   "tolerance": 0,
+   "kind": "tight",
+   "reference": "248 NUTS-2 regions, EU27 + Norway"
+  },
+  "n_converged": {
+   "value": 248,
+   "tolerance": 0,
+   "kind": "tight",
+   "reference": "all regions must solve; DE60 non-convergence was resolved"
+  },
+  "base_fidelity_pct": {
+   "value": 11.28,
+   "tolerance": 1.0,
+   "kind": "tight",
+   "reference": "PMP must reproduce observed base areas for annual crops. NOTE this measure looks ONLY at SWHE/BARL/RAPE/MAIZ/SUGB/POTA - it did not see the permanent-crop collapse, which is why the olive anchor below exists separately."
+  },
+  "olive_base_fidelity_pct": {
+   "value": 0.32,
+   "tolerance": 2.0,
+   "kind": "tight",
+   "reference": "permanent crops must survive the base solve; was 78% error until the PERMANENT land bound was reconciled with observed areas"
+  },
+  "n_surplus_median_kg_ha": {
+   "value": 54.4,
+   "tolerance": 15.0,
+   "kind": "tight",
+   "reference": "Eurostat gross nitrogen balance, EU ~45-50 kg N/ha"
+  },
+  "max_world_imbalance_pct": {
+   "value": 0.003,
+   "tolerance": 1.0,
+   "kind": "tight",
+   "reference": "world supply must equal world demand at base; a clamp once fabricated consumption where net exports exceeded production"
+  },
+  "price_reproduction_within_15pct": {
+   "value": 12,
+   "tolerance": 0,
+   "kind": "tight",
+   "reference": "CAPRI PMRK; the market must return the prices it was given"
+  },
+  "eu_cap_budget_bn_eur": {
+   "value": 58.8,
+   "tolerance": 6.0,
+   "kind": "tight",
+   "reference": "real EU CAP budget ~55-58 bn EUR/yr"
+  },
+  "macc_at_50eur_pct": {
+   "value": 1.2,
+   "tolerance": 1.5,
+   "kind": "loose",
+   "reference": "EcAMPA 2 implied economic-only response ~2-3% at EUR50/t; expensive to recompute, so checked on demand rather than every run"
+  },
+  "projection_corr_vs_capri_2030": {
+   "value": 0.997,
+   "tolerance": 0.05,
+   "kind": "loose",
+   "reference": "CAPRI's own 2030 reference run; requires the captrd trajectory"
+  }
+ }
+}

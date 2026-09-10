@@ -1,0 +1,24 @@
+{
+ "source": "Barreiro-Hurle et al. (2021), JRC121368, EUR 30317 EN, doi:10.2760/98160 - F2F + BDS targets scenario, 2030",
+ "scenario": "all four targets simultaneously (pesticides -50%, nutrient surplus, organic 25%, landscape 10%), CAP 2014-2020 unchanged",
+ "published_production_changes_pct": {
+  "cereals": -15,
+  "oilseeds": -15,
+  "fruit_vegetables_permanent": -12,
+  "all_sectors_range": [-5, -15],
+  "livestock": "most heavily impacted within that range"
+ },
+ "published_price_change_pct": {"producer_prices": 10},
+ "published_ghg_change_pct": {"with_cap_lp": -28.4},
+ "trade_effects": "net export position falls for cereals, pork and poultry; trade deficit worsens for oilseeds, fruit and vegetables, beef, sheep and goat meat",
+ "citation_of_numbers": [
+  "Production reductions ~15% cereals, ~15% oilseeds, ~12% fruit/veg/permanent - reported in Journal of Industrial and Business Economics (2025) summarising the JRC data",
+  "5-15% decline across all sectors, livestock worst, ~10% producer price rise, -28.4% GHG with CAP LP - Copa-Cogeca commentary on the report"
+ ],
+ "how_to_use": [
+  "This is a MAGNITUDE benchmark for a full four-target F2F bundle at EU level, comparable in kind to the EcAMPA 2 figures used to validate the carbon MACC.",
+  "CAPRI-mod can currently represent landscape elements (SETA floor), the nitrogen ceiling and the organic area target. It CANNOT represent the pesticide target (no PPP cost data). So a like-for-like comparison must either exclude pesticides from CAPRI's bundle or state the omission.",
+  "CAPRI's own caveat applies to any comparison: it states production impacts are likely OVERESTIMATED because co-benefits are not modelled, and that magnitudes 'should not be taken as definitive in absolute terms'."
+ ],
+ "important_caveat_on_our_side": "Our GREEN_DEAL_F2F scenario is a PARTIAL bundle. Comparing our partial result against CAPRI's full four-target result would attribute the missing instruments to a wrong economic response. The defensible comparison is instrument-by-instrument where both models represent the instrument."
+}

@@ -1,0 +1,10 @@
+measure,gas,emission_source,applies_to_animals,mechanism,reduction_pct,applies_to,cost_eur,cost_unit,max_uptake_pct,source_page,notes
+nitrification_inhibitors,N2O,N2O_SOIL,,slows nitrification of applied N,34.0,"mineral+manure N",86.0,per_tonne_N,100,34,"GAINS 2015; applies to mineral and manure N at same cost; acts on soil N2O"
+precision_farming_low,N2O,N2O_SOIL,,reduces N application via better placement,3.6,"fertilised crops",,per_ha,100,35,"tiered 3.6/7.1/14.3%; CAPRI baseline already assumes 6% N cut; non-additive with other fert-N measures"
+precision_farming_mid,N2O,N2O_SOIL,,reduces N application via better placement,7.1,"fertilised crops",,per_ha,100,35,"mid tier"
+precision_farming_high,N2O,N2O_SOIL,,reduces N application via better placement,14.3,"fertilised crops",,per_ha,100,35,"high tier; restricted by regional over-fertilisation factor"
+variable_rate_technology,N2O,N2O_SOIL,,site-specific variable fertiliser rate,8.8,"fertilised crops",462.52,per_tonne_N_applied,100,35,"gross EUR 462.5/t N applied; net EUR 364.6 after fertiliser saving; 12.34 kg N/ha saved"
+anaerobic_digestion,CH4,CH4_MAN,,captures manure CH4 for energy,,manure,,,100,33,"community+farm scale; 36% electricity gen efficiency, 12% own use; acts on manure CH4"
+feed_fat_supplementation,CH4,CH4_ENT,DCOW|BCOW|BULL|HFRS|CALV|SHGP,fat added to ruminant diet,5.0,"all ruminants",,per_pct_fat,100,38,"5% enteric CH4 per 1% fat; applies to all ruminants; enteric only"
+feed_energy_efficiency,CH4,CH4_ENT,BCOW|BULL|HFRS|CALV|SHGP,raises feed energy efficiency,10.0,"non-dairy ruminants",2.0,per_animal_min,100,39,"10% energy-need cut; NON-DAIRY ruminants only (excludes DCOW); min EUR 2/animal"
+nitrate_feed_additive,CH4,CH4_ENT,DCOW|BULL|HFRS,nitrate in ruminant diet,10.0,"dairy+fattening cattle",,per_animal,100,40,"up to 1.5% DM intake; max 15% CH4; DAIRY + FATTENING CATTLE only (DCOW dairy, BULL/HFRS fattening); not sheep/calves"

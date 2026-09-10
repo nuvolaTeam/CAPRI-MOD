@@ -32,9 +32,16 @@ CAPRI's own supply elasticities. Comparing the model's own-price supply response
 | Rapeseed | 0.96 | 1.92 | 0.50 |
 | Pulses | −2.03 | 2.43 | wrong sign |
 
-Major cereals match within ~10%. Minor crops are noisier; pulses shows a sign error
-(a known limitation for that minor crop). Data: `capri_pela_own_elasticities.csv`,
-`elasticity_comparison.csv`.
+Major cereals match within ~10%. Minor crops are noisier.
+
+**The pulse sign error recorded in the table above no longer occurs.** Measured
+directly from solved activity levels under a 10% own-price shock, PULS realises
+**+1.785**, and all 12 crops tested are positive across ~690 region-crop checks
+(zero negative responses). It was resolved as a side effect of the PMP/QP work
+and the note simply outlived the fix. Pinned by
+`test_no_negative_own_price_elasticities`.
+
+Data: `capri_pela_own_elasticities.csv`, `elasticity_comparison.csv`.
 
 ## 3. Price structure vs a real CAPRI scenario
 

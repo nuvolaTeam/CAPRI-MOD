@@ -12,9 +12,9 @@ and the validator (`validate_data.py`) together resolve the three data questions
 
 | Nature | Count | Meaning |
 |---|---|---|
-| REAL_CAPRI | 21 | CAPRI's own numbers (GAMS/GDX/COCO) |
+| REAL_CAPRI | 23 | CAPRI's own numbers (GAMS/GDX/COCO) |
 | REAL_FAO | 4 | FAO SUA / trade / balances |
-| SYNTHETIC_FALLBACK | **2** | **generated in code — no real file present** |
+| SYNTHETIC_FALLBACK | **0** | *(resolved — see note below)* |
 | Reality-calibrated (in code) | 2 groups | biofuel coeffs, environmental proxies |
 
 **Base year: 2017** for the calibrated core (quantities, prices, PMP terms).
@@ -22,11 +22,21 @@ and the validator (`validate_data.py`) together resolve the three data questions
 
 ---
 
-## 2. The two pieces of LIVE SYNTHETIC data (replace these first)
+## 2. Formerly-synthetic data — now resolved
 
-These have no real file, so `loaders.py` generates them with random noise. They do
-**not** affect base-year price validation (market-side), but they do affect the
-**feed constraint** and **environmental nitrogen** outputs.
+> **Status update:** the two datasets described below (`feed_requirements.csv`
+> and `nutrient_coefs.csv`) were previously synthetic fallbacks. **Both have
+> since been replaced with real CAPRI data** (marked `REAL_CAPRI` in
+> `DATA_SOURCING_REGISTRY.json`), and the loader no longer synthesises them. The
+> model runs entirely on real data; a bare `load_all_data()` with no data
+> directory now fails loudly rather than generating synthetic values. The
+> acquisition notes below are retained as a historical record of how they were
+> sourced.
+
+These previously had no real file, so `loaders.py` generated them with random
+noise. They do **not** affect base-year price validation (market-side), but they
+affect the **feed constraint** and **environmental nitrogen** outputs — which is
+why they were prioritised and replaced.
 
 | Dataset | Feeds | Real source to get | Where |
 |---|---|---|---|

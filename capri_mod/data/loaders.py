@@ -228,6 +228,66 @@ def load_regional_animal_numbers(data_dir: Optional[Path] = None) -> pd.DataFram
     return pd.DataFrame(rows, index=ANIMALS).T
 
 
+def _reconcile_animal_yield_units(yields: pd.DataFrame) -> pd.DataFrame:
+    """Fix unit-inconsistent animal yields across regions.
+
+    The shipped yields.csv has animal yields in two different units across
+    regions. For most activities ~192 regions carry yields in kg/head (e.g. beef
+    cow ~495, heifer ~2000), while ~56 regions carry the same quantity already in
+    tonnes/head (~0.27, ~0.22). The supply module converts animal yield to tonnes
+    with a fixed per-activity factor (``LIVESTOCK_YIELD_TO_TONNE``, 1e-3 for
+    kg-based activities), which is correct for the kg ("large") cluster but wrong
+    for the already-tonnes ("small") cluster — there the extra 1e-3 shrinks
+    revenue ~1000x, giving implausible/negative per-head margins. That distorts
+    any livestock-economics or livestock-emissions analysis, most visibly the
+    carbon-abatement MAC curve, where a carbon price over-drives the thin/negative
+    margins. Crop yields are unaffected; this touches animal activities only.
+
+    Reconciliation direction is established from how the supply module scales:
+    the fixed 1e-3 conversion expects kg, so the *kg (large) cluster is the
+    reference* and the already-tonnes (small) cluster is rescaled up onto the kg
+    basis (small * large_median/small_median). The large cluster is left
+    untouched. DCOW and BULL use a 1.0 conversion and are single-unit already.
+
+    This runs at load time so the reconciled yields feed PMP calibration
+    consistently. Base fidelity is preserved because PMP recalibrates its cost
+    term to the corrected net-revenue vector; the correction makes livestock
+    margins physically sensible rather than changing crop allocation.
+    """
+    ANIMAL_ACTS = ["DCOW", "BCOW", "BULL", "HFRS", "CALV", "SHGP",
+                   "PIGS", "PIGF", "LAYS", "BROI", "OANI"]
+    THRESHOLD = 10.0   # values >= this are in kg (the reference unit)
+
+    y = yields.copy()
+    reconciled = {}
+    for act in ANIMAL_ACTS:
+        if act not in y.columns:
+            continue
+        col = y[act]
+        pos = col[col > 0]
+        if pos.empty:
+            continue
+        small = pos[pos < THRESHOLD]    # already-tonnes cluster (corrupted here)
+        large = pos[pos >= THRESHOLD]   # kg cluster (the reference)
+        if large.empty or small.empty:
+            # single-unit activity (e.g. DCOW milk ~7 t everywhere): leave as is.
+            continue
+        # rescale the tonnes ("small") cluster UP onto the kg basis the supply
+        # module's 1e-3 conversion expects, preserving relative variation.
+        factor = large.median() / small.median()
+        fixed = col.copy()
+        mask = (col > 0) & (col < THRESHOLD)
+        fixed[mask] = col[mask] * factor
+        y[act] = fixed
+        reconciled[act] = {
+            "n_corrected": int(mask.sum()),
+            "factor": float(factor),
+        }
+    if reconciled:
+        y.attrs["animal_yield_reconciliation"] = reconciled
+    return y
+
+
 def load_yields(data_dir: Optional[Path] = None) -> pd.DataFrame:
     """
     Crop yields (t/ha) and animal yields (t/head or litre/head) by region.
@@ -235,7 +295,8 @@ def load_yields(data_dir: Optional[Path] = None) -> pd.DataFrame:
     Connect to: Eurostat apro_cpsh1 (crops), apro_mk_colm (milk)
     """
     if data_dir and (resolve_data_file(data_dir, "yields.csv")).exists():
-        return pd.read_csv(resolve_data_file(data_dir, "yields.csv"), index_col=0)
+        raw = pd.read_csv(resolve_data_file(data_dir, "yields.csv"), index_col=0)
+        return _reconcile_animal_yield_units(raw)
 
     base_yields = {   # EU average t/ha (crops) or appropriate units (animals)
         "SWHE": 5.8,  "DWHE": 4.2,  "RYEM": 4.0,  "BARL": 4.8,
@@ -708,14 +769,31 @@ def load_tariffs(data_dir: Optional[Path] = None) -> pd.DataFrame:
 # ---------------------------------------------------------------------------
 
 def load_all_data(data_dir: Optional[Path] = None, validate: bool = False,
-                  base_year: str = DEFAULT_BASE_YEAR) -> dict:
+                  base_year: str = DEFAULT_BASE_YEAR,
+                  allow_synthetic: bool = False) -> dict:
     """Load all baseline datasets, returning a nested dict.
 
     base_year selects the capri_data/<base_year>/ folder in the categorised
     layout. If validate=True, run the data validator against the manifest first
     and print a short report — a cheap guard against vintage-mixing, missing
     files, and shape drift.
+
+    By design this **fails loudly** when no real data directory is given, rather
+    than silently generating synthetic data. A policy tool must run on real,
+    validated inputs or not at all: a silent synthetic fallback produces
+    plausible-looking but fabricated results, which is the most dangerous failure
+    mode for a model whose output informs policy. The synthetic path remains
+    available only as an explicit, deliberate opt-in (allow_synthetic=True) for
+    isolated testing — never as a default.
     """
+    if data_dir is None and not allow_synthetic:
+        raise ValueError(
+            "load_all_data requires a real data directory (e.g. "
+            "data_dir='capri_data'). Refusing to run on synthetic data: a policy "
+            "model must use validated inputs, not fabricated ones. If you "
+            "genuinely want synthetic data for isolated testing, pass "
+            "allow_synthetic=True explicitly."
+        )
     # Point the resolver at the requested base year for this load.
     global DEFAULT_BASE_YEAR
     _prev_year = DEFAULT_BASE_YEAR

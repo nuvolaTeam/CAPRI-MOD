@@ -1,5 +1,7 @@
 # CAPRI-mod — Symbol Extraction Guide
 
+> **STATUS (current):** The two datasets this guide prioritises — `feed_requirements.csv` and `nutrient_coefs.csv` — have since been replaced with real CAPRI data (`REAL_CAPRI` in `DATA_SOURCING_REGISTRY.json`). The model no longer runs on any synthetic fallback. This document is retained as a record of how that data was sourced and how to refresh it for a new base year.
+
 **Solves the "which data out of hundreds of symbols" problem.** For each model input,
 the exact CAPRI symbol, what it means, which GDX holds it, and the command to export it.
 
@@ -15,13 +17,19 @@ python capri_mod/data/find_symbol.py gdx <file>  # list symbols in YOUR gdx
 
 ## The extraction list (priority order)
 
-### 1. Replace synthetic `feed_requirements.csv` — HIGH
+> **Status:** the two extractions below have been **completed** — both
+> `feed_requirements.csv` and `nutrient_coefs.csv` now hold real CAPRI data
+> (`REAL_CAPRI` in `DATA_SOURCING_REGISTRY.json`), and the model no longer uses
+> any synthetic fallback for them. The notes are retained as a record of the
+> symbols and export commands used.
+
+### 1. ~~Replace synthetic~~ `feed_requirements.csv` — DONE
 - **Symbol:** `p_feedInpCoeff` — *"feed input coefficients (fresh matter) by activity"*
   (or `v_feedInpCoeff` — *"feeding per head and year in kg"*)
 - **Where:** your **results** database (capreg/feed build output)
 - **Export:** `gdxdump <results>.gdx symb=p_feedInpCoeff format=csv > feed_req.csv`
 
-### 2. Replace synthetic `nutrient_coefs.csv` — HIGH
+### 2. ~~Replace synthetic~~ `nutrient_coefs.csv` — DONE
 - **Symbol:** `p_FertPerHa` — *"Fertiliser use per ha for CAPRI regions"*
   (or `v_minfert` — *"N input from mineral fertilizers [kg/ha]"*)
 - **Where:** your **results** database (fertiliser/envind output)

@@ -450,6 +450,17 @@ class FeedModule:
                           "using literature defaults")
             self._capri_days, self.days_provenance = pd.DataFrame(), {}
 
+        # CAPRI reference requirements for monogastrics (pigs, poultry). Their
+        # energy is a separate system from the IPCC ruminant formula, which
+        # undercounts them ~40-50%; use CAPRI's own per-region values directly.
+        from capri_mod.feed.capri_requirements import monogastric_requirements
+        try:
+            self._mono_req = monogastric_requirements(
+                Path(data.get("_data_dir", "capri_data")))
+        except Exception as exc:                          # pragma: no cover
+            warnings.warn(f"capreg monogastric requirements unavailable ({exc})")
+            self._mono_req = pd.DataFrame()
+
         # EU-average fallback requirements, used where capreg has no coverage.
         self.requirements = {
             animal: compute_animal_requirements(animal)
@@ -457,7 +468,33 @@ class FeedModule:
         }
 
     def requirements_for(self, region: str, animal: str):
-        """Requirements for one region, using capreg production days if present."""
+        """Requirements for one region, using capreg production days if present.
+
+        For monogastrics (pigs, poultry) CAPRI's own per-region reference values
+        are used directly where available, since the IPCC ruminant net-energy
+        formula does not apply to them and undercounts their requirements.
+        """
+        # Monogastrics: prefer CAPRI reference values (real, per-region).
+        MONO = {"PIGS", "PIGF", "LAYS", "BROI"}
+        if animal in MONO and not self._mono_req.empty:
+            key = (region, animal)
+            if key in self._mono_req.index:
+                row = self._mono_req.loc[key]
+                enne = row.get("ENNE")
+                drmn = row.get("DRMN")
+                drmx = row.get("DRMX")
+                crpr = row.get("CRPR")
+                if pd.notna(enne) and pd.notna(drmn):
+                    drma = float((drmn + drmx) / 2.0) if pd.notna(drmx) else float(drmn)
+                    return AnimalRequirements(
+                        animal=animal,
+                        nel_requirement=float(enne),
+                        crpr_requirement=float(crpr) if pd.notna(crpr) else 0.18 * drma,
+                        drma=drma,
+                        drmn=float(drmn),
+                        drmx=float(drmx) if pd.notna(drmx) else float(drmn) * 1.1,
+                        prod_days=365,
+                    )
         if (not self._capri_days.empty
                 and region in self._capri_days.index
                 and animal in self._capri_days.columns):

@@ -54,6 +54,26 @@ CAPRI_TO_MODEL = {
 }
 
 
+def monogastric_requirements(data_dir: Path) -> pd.DataFrame:
+    """CAPRI reference requirements for monogastrics (pigs, poultry).
+
+    Monogastric energy is NOT the IPCC ruminant net-energy system; CAPRI computes
+    it from separate pig/poultry functions (ENMP/ENMC, Nasuelli et al. CAPRI WP
+    97-12) whose fattening-pig branch is a tabulated integration over the growth
+    period, not a closed form. Rather than approximate that, we use CAPRI's own
+    per-region reference values directly (ENNE energy MJ/head/yr, DRMN/DRMX dry
+    matter kg/head/yr, CRPR crude protein), which the ruminant formula otherwise
+    undercounts by ~40-50%. Returns a frame indexed by (region, model_activity)
+    for the model's monogastric activities, or empty if the reference is absent.
+    """
+    req = load_requirements(data_dir)
+    if req.empty:
+        return pd.DataFrame()
+    mono = {"PIGS", "PIGF", "LAYS", "BROI"}
+    idx = req.index.get_level_values("model_activity").isin(mono)
+    return req[idx]
+
+
 def load_requirements(data_dir: Path) -> pd.DataFrame:
     """Wide frame indexed by (region, model activity), columns = requirement items."""
     path = Path(data_dir) / REQ_FILE

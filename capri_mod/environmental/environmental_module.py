@@ -250,9 +250,40 @@ class EnvironmentalModule:
     EnvironmentalIndicators for each region.
     """
 
-    def __init__(self, data: dict):
+    def __init__(self, data: dict, fertilizer_module=None):
         self.data = data
-        self.nutrient_coefs = data["nutrients"]
+        # Nutrient application rates (kg/ha per crop, N/P2O5/K2O). By default
+        # these are CAPRI's loaded p_FertPerHa (data["nutrients"]). If a
+        # calibrated FertilizerModule is supplied, its *derived* rates are used
+        # instead — the same quantity, re-derived from removal x yield x
+        # efficiency, which is what a re-based year (no ready-made file) needs.
+        # The env module is agnostic to the source; it just reads application
+        # rates, so its nitrogen-balance validation is unaffected by the switch.
+        if fertilizer_module is not None:
+            # Use the fert module's *derived* rates where it can produce them,
+            # falling back to CAPRI's loaded p_FertPerHa for any crop/nutrient
+            # the fert module does not cover (e.g. crops outside its calibration
+            # set). This preserves the env module's full crop coverage while
+            # sourcing application from the derivation wherever possible.
+            loaded = data["nutrients"].copy()
+            derived = fertilizer_module.per_crop_rates()
+            merged = loaded.copy()
+            for crop in derived.index:
+                for col in derived.columns:
+                    if col in merged.columns:
+                        val = derived.at[crop, col]
+                        # NaN = the fert module flagged this crop/nutrient as
+                        # unit-inconsistent (e.g. GRAS); keep the loaded value.
+                        if not (isinstance(val, float) and np.isnan(val)):
+                            if crop in merged.index:
+                                merged.at[crop, col] = val
+                            else:
+                                merged.loc[crop, col] = val
+            self.nutrient_coefs = merged
+            self._nutrient_source = "derived (fertilizer module) + loaded fallback"
+        else:
+            self.nutrient_coefs = data["nutrients"]
+            self._nutrient_source = "loaded (CAPRI p_FertPerHa)"
 
     def _n_excretion(self, region: str, animal: str) -> float:
         """Regional CAPRI nitrogen excretion, falling back to the constant."""
@@ -266,6 +297,24 @@ class EnvironmentalModule:
             if pd.notna(v) and v > 0:
                 return float(v)
         return N_EXCRETION_KG_PER_HEAD.get(animal, 0.0)
+
+    def enteric_ch4_by_animal(
+        self,
+        activities: pd.Series,
+    ) -> Dict[str, float]:
+        """Enteric CH4 (kt CO2-eq) broken out per animal activity.
+
+        Same computation as the ``CH4_ENT`` term of :meth:`compute_ghg`, but kept
+        per animal so an abatement measure can target the specific animals it
+        applies to (e.g. a nitrate feed additive for dairy and fattening cattle
+        only, not sheep or the whole enteric pool).
+        """
+        out = {}
+        for animal in ANIMALS:
+            heads = activities.get(animal, 0.0) * 1000
+            ef = EF_ENTERIC_CH4.get(animal, 0.0)
+            out[animal] = (heads * ef / 1e6) * GWP_CH4   # kt CO2-eq
+        return out
 
     def compute_ghg(
         self,
@@ -369,9 +418,16 @@ class EnvironmentalModule:
         # Organic N from manure
         n_organic = 0.0
         for animal in ANIMALS:
-            heads = activities.get(animal, 0.0) * 1000  # to heads
+            # Activity levels are in 1000 head and _n_excretion returns kg N per
+            # head per year (DCOW ~105, matching the literature 100-120), so the
+            # product is already in the same 1000-kg-N unit as every other term
+            # here (deposition is area in 1000 ha x 20 kg/ha). The previous
+            # `heads * 1000 ... / 1e6` divided by a further 1000 and left manure
+            # N at effectively ZERO in the balance — FR10 showed 0.0 kg N/ha of
+            # organic input against a real EU average near 55.
+            heads_1000 = activities.get(animal, 0.0)
             n_excr = self._n_excretion(region, animal)
-            n_organic += heads * n_excr / 1e6   # kt N → convert to same units
+            n_organic += heads_1000 * n_excr
 
         # Biological N fixation (for legumes and grass)
         n_fix_rates = {
@@ -401,6 +457,20 @@ class EnvironmentalModule:
             yld  = yields.get(crop, 0.0)
             area = activities.get(crop, 0.0)
             nc   = n_content_per_t.get(crop, 10.0)
+            # GRAS yield is FRESH MATTER in kg/ha (~36000), not t/ha like every
+            # other crop, so it entered this sum ~1000x too large and dominated
+            # it completely: 10.13m of a 10.20m total N uptake in FR10 (99.3%),
+            # driving the gross N balance to -10.1m kg and a nitrogen-use
+            # efficiency of 107. The same fresh-matter artifact previously
+            # corrupted the fertiliser and income modules.
+            #
+            # Grass is also not a marketed removal in the same sense: its N
+            # leaves the field only via the livestock that graze it, and that
+            # channel is already counted in n_animal_products. Converting to a
+            # dry-matter tonnage basis keeps it in the balance at the right
+            # scale rather than dropping it.
+            if crop == "GRAS" and yld > 100.0:
+                yld = yld / 1000.0 * 0.20   # fresh kg/ha -> t/ha, ~20% dry matter
             n_crop_uptake += area * yld * nc
 
         # N in livestock products
