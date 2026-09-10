@@ -21,4 +21,3 @@ DATA2_*.txt
 .vs/
 capri_data_snapshot/
 *.toml
-.gitignore
