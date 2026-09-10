@@ -20,3 +20,5 @@ DATA2_*.txt
 *.gdx
 .vs/
 capri_data_snapshot/
+*.toml
+.gitignore
