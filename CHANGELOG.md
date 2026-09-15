@@ -24,6 +24,7 @@ Full provenance for every entry is in `capri_data/DATA_SOURCING_REGISTRY.json`.
 | Nitrogen balance | Eurostat gross N balance | median 54 vs ~45–50 kg N/ha |
 | Water demand | Known EU irrigation geography | Mediterranean 79%, correct hotspots |
 | Biofuel | Observed EU statistics | both within 10% |
+| **Total cereal output** | **EU Agricultural Outlook 2017-2030 (DG AGRI/JRC)** | **297.2 Mt vs ~300 Mt — ratio 0.99** |
 | **Farm-to-Fork scenarios** | Published CAPRI (JRC121368) | reported as a range; CAPRI's figure falls inside it for oilseeds |
 
 ---
@@ -54,6 +55,28 @@ landscape elements (a fallow floor, as `landscape.gms` does it), organic area
 share (I/O adjustment, as `organic_io.gms` does it), the tiered nutrient-surplus
 rule, and the pesticide yield-loss channel.
 
+**Base-year reconciliation (`data/reconcile_base.py`)** — reproduces CAPRI's
+`coco`/`capreg` step: weighted least-squares projection onto accounting
+identities, the same Highest Posterior Density family CAPRI uses. Reconciling
+already-consistent data changes it by 9.09e-13 (machine precision), the gate that
+catches a reconciler which rewrites rather than reconciles.
+
+Tested against the three area vintages in `capri_data/archive/` — a Eurostat-derived
+matrix (107,828 kha), COCO-reconciled (125,775), CAPRI final (144,719). It closes
+**32%** of the distance. **That test is weaker than it first appears**: the
+"Eurostat" file is already mapped to CAPRI activity codes, and 35% of its values
+carry repeating decimals, so it is share-allocated rather than measured regional
+data. It measures recovery of regional detail from allocated totals, *not* whether
+raw Eurostat can be turned into CAPRI data — which remains untested. **The residual is definitional, not a
+reconciliation failure**: GRAS alone is 18,393 kha of it (Eurostat 13,640 vs CAPRI
+44,819 — different grassland definitions), OLIV 1,884 vs 4,808, and CORN runs the
+other way because Eurostat's maize includes silage.
+
+That splits a problem previously treated as one: **reconciliation** (making numbers
+internally consistent) is now solved and ours; **concordance** (mapping external
+statistical categories onto CAPRI activities) is separate and, on this evidence,
+larger. Conflating them is why "just use Eurostat" looks easier than it is.
+
 **Water demand (`water/`)** and **farm-income distribution (`income/`)**.
 
 ---
@@ -69,6 +92,8 @@ consistency check. That is the single most useful lesson in this log.
 | All policy instruments inert | Scenarios returned baseline numbers while reporting success — four separate causes |
 | Nitrogen balance meaningless | Median −170,196 kg N/ha, from a grass fresh-matter artifact and a manure-N scale error |
 | Permanent crops destroyed | Olives 78% error in every base solve; invisible to a fidelity measure that only checked annual crops |
+| **Arable land bound cut the base year** | **Base fidelity 11.28% → 0.47%.** ARABLE land and crop areas disagreed in 54 of 248 regions by 9,960 kha (LT02 12.7x); the solver shed 9,976 kha, losing most cereals in those regions. Not solver noise — a data conflict, and fixable |
+| Grain maize silently excluded | `MAIZ` (not an activity) listed instead of `CORN` in three modules — fertiliser group, pesticide target, abatement N₂O |
 | Permanent-crop elasticities inverted | 10× *less* elastic than annuals, where CAPRI has them 2.47× *more* |
 | Livestock yields unit-inconsistent | ~56 regions in tonnes, ~192 in kg; drove the MACC 2–3× too high |
 | Consumption fabricated | A clamp invented supply where exports exceeded production |
@@ -86,19 +111,32 @@ from CAPRI data (see below), which removed the reason for reporting bounds.
 
 | | CAPRI-mod | CAPRI published (JRC121368) |
 |---|---|---|
-| Cereals | −23.6% | −15% |
-| Oilseeds | −15.9% | −15% |
-| Permanent / fruit & veg | −10.2% | −12% |
+| Cereals | −18.5% | −15% |
+| Oilseeds | −12.3% | −15% |
+| Permanent / fruit & veg | −9.4% | −12% |
 
 Oilseeds (1.07x) and permanent crops (0.86x) are close. **Cereals still
-overshoots at 1.57x**, and the pesticide cost channel is now ruled out as the
-cause: that channel has been measured from CAPRI's own data, in two countries,
-with units verified independently in each, and improving it moved cereals by
-**0.7 percentage points**. A lever that small cannot close a 1.57x gap.
+**All three land within ±25% of CAPRI, with errors in both directions** —
+cereals 1.24x over, oilseeds 0.86x and permanent crops 0.78x under. Errors that
+do not share a sign argue against a systematic bias.
 
-The remaining candidates are narrowed to two: our cereal supply elasticity being
-too high, or CAPRI distributing its 10% yield loss differently across crops.
-That is the next thing to investigate.
+A large part of the previously-reported cereals overshoot was **a measurement
+error of mine, not a model defect**: every comparison had been run with
+`max_outer_iter=1`, which executes one supply–market pass and so suppresses the
+price feedback. When EU cereal supply falls, prices rise and cushion the area
+response; CAPRI's published results include that, ours did not. Running to
+convergence moved cereals from −22.6% to −18.5%, closing roughly half the gap.
+
+A convenience setting chosen for speed while iterating became a published
+result — the same class of mistake as the stale documentation found elsewhere
+here: correct in its moment, wrong once the context changed.
+
+**Fixed at the cause, not the symptom.** The old code printed the
+non-convergence warning only when `verbose=True`, so every comparison — all run
+with `verbose=False` — failed in silence. A non-converged run now always raises
+a `RuntimeWarning` and records `metadata["outer_converged"] = False`, and
+`test_unconverged_run_warns_and_is_recorded` pins both that it fires when it
+should and stays quiet when it shouldn't.
 
 **The pesticide cost is CAPRI-derived, not assumed.** Built as
 `PESTOTAL (g a.i./ha, capreg) / 1000 x UVAB.PLAP (EUR/kg, coco)`. Two unit checks
@@ -167,9 +205,9 @@ exists for.
 
 ## Still open
 
-- **Cereals overshoot CAPRI's published figure by 1.57x** (−23.6% against −15%).
-  The pesticide cost channel is ruled out as the cause. Candidates: our cereal
-  supply elasticity, or how CAPRI distributes its yield loss across crops.
+- **Cereals sit 1.24x above CAPRI's published figure** (−18.5% against −15%),
+  within the uncertainty of CAPRI's own numbers — JRC121368 states its production
+  impacts are likely overestimated, which would widen the gap, not close it.
 - **Pesticide cost shares rest on two member states** (ES, IT), whose costs differ
   by a median 1.15x and by ~1.7x for Mediterranean permanent crops. A third
   country would narrow that.

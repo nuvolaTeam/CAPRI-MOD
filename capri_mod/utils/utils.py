@@ -60,24 +60,37 @@ def calibrate_supply_elasticities(
         "OATS": 0.20, "CORN": 0.35, "OCER": 0.20, "POTA": 0.15,
         "SUGB": 0.10, "SUNF": 0.35, "RAPE": 0.35, "SOYA": 0.40,
         "OOIL": 0.25, "PULS": 0.25,
-        # Permanent crops and vegetables. These were literature priors (OLIV
-        # 0.08, WINE 0.10, APPL/OFRU/CITR 0.12) that made them ~10x LESS elastic
-        # than cereals, on the reasoning that orchards and groves are slow to
-        # establish or grub up. CAPRI's own supply elasticities say the
-        # opposite: in p_elasSupp at member-state level, permanents and
-        # vegetables sit at a median 0.97 against 0.39 for annual crops - i.e.
-        # 2.47x MORE elastic, not 10x less. Our relative structure was inverted
-        # by roughly 25x, which is why permanent crops barely responded to a
-        # Green Deal margin shock (-1.0% against CAPRI's published -12%).
+        # Permanent crops and vegetables, set from CAPRI's OWN CALIBRATED
+        # regional elasticities (p_elasSupp, "CAL" level, from
+        # results/arm/supply_elas_2_1720<CC>.gdx for ES and IT -- the file
+        # calibrate_supply.gms:512 unloads after calibration).
         #
-        # Rescaled to CAPRI's relative structure while staying on our own
-        # annual-crop scale: annuals here average ~0.26, so permanents are set
-        # to ~2.47x that. CAPRI's ABSOLUTE levels are not transferable - they
-        # are member-state market elasticities, while these are regional PMP
-        # calibration targets - but the RELATIVE ordering is CAPRI's own.
-        "TOMA": 0.64, "OVEG": 0.61,
-        "APPL": 0.64, "OFRU": 0.63, "CITR": 0.64, "TAGR": 0.64,
-        "WINE": 0.64, "OLIV": 0.62, "TOBA": 0.08, "COTT": 0.20,
+        # CAPRI calibrated own-price values: APPL 0.218, OFRU 0.189, CITR 0.184,
+        # TAGR 0.216, TWIN (wine) 0.176, TOMA 0.668, OVEG 0.663, against annual
+        # crops at 1.18-8.72 (BARL 2.043). So permanents are ~10x LESS elastic
+        # than annuals, which is what the original literature priors said.
+        #
+        # A PREVIOUS VERSION OF THIS BLOCK RESCALED THEM UPWARD to ~0.62-0.64 on
+        # the reasoning that CAPRI had permanents 2.47x MORE elastic than
+        # annuals. That was wrong: it came from p_elasSupp in
+        # results/arm/elas*.gdx, which is the MARKET model at member-state level
+        # over market commodities -- a different quantity from the regional
+        # calibrated supply elasticities. The market file also cannot be right
+        # for this purpose: it has no olive ACTIVITY at all, only olive OIL.
+        #
+        # CAPRI's calibrated values are used DIRECTLY here, not rescaled,
+        # because PMP amplification is measured to be crop-specific: annual
+        # crops amplify (BARL target 0.30 -> realized 0.97, 3.2x) while
+        # permanents do NOT (realized tracks the target one-for-one). A first
+        # attempt rescaled by the permanent:annual ratio on the assumption of
+        # uniform amplification and came out ~7x too low.
+        #
+        # OLIV is absent from CAPRI's matrix entirely -- consistent with
+        # calibrate_supply.gms:503 disabling the OLIV->OLIO mapping -- so it
+        # takes the average of the other permanents.
+        "TOMA": 0.668, "OVEG": 0.663,
+        "APPL": 0.218, "OFRU": 0.189, "CITR": 0.184, "TAGR": 0.216,
+        "WINE": 0.176, "OLIV": 0.197, "TOBA": 0.213, "COTT": 0.20,
         "OFIB": 0.15, "GRAS": 0.05, "MAIF": 0.20, "OFOD": 0.12,
         "SETA": 0.00,
         "DCOW": 0.15, "BCOW": 0.12, "BULL": 0.18, "HFRS": 0.15,

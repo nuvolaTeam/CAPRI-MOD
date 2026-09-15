@@ -17,13 +17,13 @@
    "reference": "all regions must solve; DE60 non-convergence was resolved"
   },
   "base_fidelity_pct": {
-   "value": 11.28,
+   "value": 0.48,
    "tolerance": 1.0,
    "kind": "tight",
-   "reference": "PMP must reproduce observed base areas for annual crops. NOTE this measure looks ONLY at SWHE/BARL/RAPE/MAIZ/SUGB/POTA - it did not see the permanent-crop collapse, which is why the olive anchor below exists separately."
+   "reference": "PMP must reproduce observed base areas for annual crops. Improved from 11.28% to 0.47% once the ARABLE land bound was reconciled with observed crop areas (the two disagreed in 54 of 248 regions by 9,960 kha, forcing the solver to cut). NOTE this measure looks ONLY at SWHE/BARL/RAPE/CORN/SUGB/POTA - it did not see the permanent-crop collapse, which is why the olive anchor exists separately."
   },
   "olive_base_fidelity_pct": {
-   "value": 0.32,
+   "value": 0.25,
    "tolerance": 2.0,
    "kind": "tight",
    "reference": "permanent crops must survive the base solve; was 78% error until the PERMANENT land bound was reconciled with observed areas"

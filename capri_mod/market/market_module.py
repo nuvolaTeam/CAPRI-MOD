@@ -264,6 +264,23 @@ class MarketModule:
                     r, c = key.split("|")
                     if r != "EU27" and rec.get("production", 0) > 0:
                         real_world[(r, c)] = rec["production"]
+            # Extended coverage from CAPRI's own FAO_agg SUA (p_dataMarket,
+            # item MAPR). Same source family as the file above, so the vintage
+            # is consistent; it adds the trade regions that were missing
+            # entirely (DZA, ETH, MAR, TUR, KOR via ALG/MOR/SKOR) and fills
+            # commodity gaps in regions already covered. Loaded SECOND and only
+            # where the primary file has no value, so the existing, validated
+            # cells are never displaced -- the market price test reproduces
+            # CAPRI's PMRK 12/12 off those, and this must not disturb them.
+            f2 = _b / "sources" / "fao_agg_2017" / "fao_agg_sua_2017_extended.json"
+            if f2.exists():
+                raw2 = _json.load(open(f2))
+                for key, rec in raw2.items():
+                    r, c = key.split("|")
+                    if r == "EU27" or (r, c) in real_world:
+                        continue
+                    if rec.get("production", 0) > 0:
+                        real_world[(r, c)] = rec["production"]
         except Exception:
             real_world = {}
 

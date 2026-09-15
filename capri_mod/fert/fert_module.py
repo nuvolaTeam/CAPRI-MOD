@@ -55,7 +55,12 @@ _REMOVAL_COL = {"N": "N_kg_t", "P2O5": "P_kg_t", "K2O": "K_kg_t"}
 # removal-need) differs systematically by group: oilseeds are fertilised well
 # above removal, cereals close to removal for N/P. Calibrated to CAPRI below.
 CROP_GROUPS = {
-    "cereals": ["SWHE", "DWHE", "RYEM", "BARL", "OATS", "OCER", "MAIZ",
+    # NOTE: grain maize is CORN in this model's activity set, not MAIZ. The
+    # group previously listed "MAIZ", which is not an activity, so grain maize
+    # -- 11,026 kha, the second-largest cereal by area -- was silently excluded
+    # from the cereals fertiliser group. A non-existent key raises nothing; it
+    # simply never matches. MAIF (fodder maize) is a separate activity and stays.
+    "cereals": ["SWHE", "DWHE", "RYEM", "BARL", "OATS", "OCER", "CORN",
                 "PARI", "MAIF"],
     "oilseeds": ["RAPE", "SUNF", "SOYA", "OOIL"],
     "roots_sugar": ["SUGB", "POTA"],

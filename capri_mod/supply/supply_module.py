@@ -490,7 +490,9 @@ class RegionalSupplyModel:
     PESTICIDE_OTHER_COST_RISE = 0.0
 
     PESTICIDE_AFFECTED = (
-        "SWHE", "DWHE", "RYEM", "BARL", "OATS", "MAIZ", "OCER",      # cereals
+        # CORN is grain maize in this activity set; "MAIZ" (used here before)
+        # is not an activity, so the pesticide target silently skipped it.
+        "SWHE", "DWHE", "RYEM", "BARL", "OATS", "CORN", "OCER",      # cereals
         "RAPE", "SUNF", "SOYA", "OOIL",                              # oilseeds
         "TOMA", "OVEG", "POTA", "SUGB", "PULS",                      # veg/other arable
         "APPL", "OFRU", "CITR", "TAGR", "WINE", "OLIV",              # permanent
@@ -773,7 +775,22 @@ class RegionalSupplyModel:
             if a in acts_idx:
                 row_arable[acts_idx[a]] = 1.0
         A_rows.append(row_arable)
-        arable_avail = self.data.land.get("ARABLE", 200.0)
+        # The ARABLE land figure and the crop areas come from different
+        # aggregations and disagree in 54 of 248 regions, by 9,960 kha in total,
+        # with ratios up to 12.7x (LT02, PL81, PL84, PL91, BG31, BG33). Taking
+        # the land figure literally makes the BASE YEAR infeasible, so the solver
+        # must cut: those regions lost most or all of their cereals in a plain
+        # base solve, and the 9,976 kha the solve shed matched the 9,960 kha of
+        # excess almost exactly. EU wheat came out 19,857 kha against a base of
+        # 22,095 and a real EU figure of ~22,000.
+        #
+        # Same treatment as the PERMANENT bound below: the bound is the larger of
+        # the land figure and what the region actually grows, so the constraint
+        # stays slack where the two sources agree and stops rewriting the base
+        # year where they do not.
+        arable_base = sum(float(self._base_levels().get(a, 0.0))
+                          for a in arable_crops if a in acts_idx)
+        arable_avail = max(self.data.land.get("ARABLE", 200.0), arable_base)
         b_rows.append(arable_avail)
 
         # 1b. Landscape-elements floor: at least `set_aside_requirement` of UAA

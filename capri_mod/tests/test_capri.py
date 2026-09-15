@@ -245,8 +245,10 @@ def test_no_corrupted_activity_codes():
         if not p.is_file() or p.suffix.lower() not in {".py", ".csv", ".json"}:
             continue
         # tools/ holds the normaliser and this file holds the guard regex; both
-        # legitimately contain the pattern in order to act on it. Skip snapshot
-        # (a frozen restore point) and caches.
+        # legitimately contain the pattern in order to act on it. Skip caches.
+        # (capri_data_snapshot, a July restore point, was removed once verified
+        # to be an exact duplicate of capri_data; the name is kept in this guard
+        # so a restored snapshot would still be skipped rather than scanned.)
         if {"__pycache__", ".git", "tools", "capri_data_snapshot"} & set(p.parts):
             continue
         if p.resolve() == pathlib.Path(__file__).resolve():
@@ -1401,30 +1403,40 @@ def test_nitrogen_balance_is_physically_plausible(data):
     assert nb["n_organic_input"] > 0, "manure N is not reaching the balance"
 
 
-def test_permanent_crops_are_not_pathologically_inelastic(data):
-    """Permanent crops must not be an order of magnitude less elastic than annuals.
+def test_permanent_crop_elasticities_match_capri(data):
+    """Permanent-crop elasticities must match CAPRI's calibrated values.
 
-    Literature priors put olives at 0.08 and wine at 0.10 against ~0.30 for
-    cereals, making permanents ~10x LESS responsive. CAPRI's own p_elasSupp says
-    the opposite: at member-state level, permanents and vegetables sit at a
-    median 0.97 against 0.39 for annual crops — 2.47x MORE elastic. Our relative
-    structure was inverted by roughly 25x, and permanent crops consequently
-    barely responded to a Green Deal margin shock.
+    Source: `p_elasSupp` at the "CAL" level from
+    `results/arm/supply_elas_2_1720<CC>.gdx` (ES, IT) — the regional,
+    post-calibration values CAPRI's supply model actually solves with, unloaded
+    at calibrate_supply.gms:512. CAPRI has permanents at 0.176-0.218 against
+    annuals at 1.18-8.72, i.e. ~10x LESS elastic.
+
+    This test replaces an earlier one asserting the OPPOSITE — that permanents
+    should be MORE elastic than annuals. That came from `p_elasSupp` in
+    `results/arm/elas*.gdx`, which is the MARKET model at member-state level
+    over market commodities, not the regional supply matrix. It contains no
+    olive ACTIVITY at all, only olive OIL, which should have ruled it out.
     """
     from capri_mod.utils.utils import calibrate_supply_elasticities
 
     el = calibrate_supply_elasticities(data["areas"])
-    annual = [el[c] for c in ("SWHE", "BARL", "RAPE", "POTA", "OATS")
-              if c in el.index]
-    perm = [el[c] for c in ("OLIV", "WINE", "APPL", "OFRU", "CITR", "OVEG")
-            if c in el.index]
-    assert annual and perm
+    capri = {"APPL": 0.218, "OFRU": 0.189, "CITR": 0.184,
+             "TAGR": 0.216, "WINE": 0.176, "TOMA": 0.668, "OVEG": 0.663}
+    for crop, expected in capri.items():
+        if crop not in el.index:
+            continue
+        got = float(el[crop])
+        assert abs(got - expected) < 0.02, (
+            f"{crop} elasticity {got:.3f} does not match CAPRI's calibrated "
+            f"{expected:.3f}")
 
+    # and the structural relation must hold: permanents well below annuals
     import numpy as np
-    ratio = float(np.median(perm)) / float(np.median(annual))
-    assert ratio > 1.0, (
-        f"permanent crops are only {ratio:.2f}x as elastic as annuals; CAPRI's "
-        "own elasticities put them ABOVE annuals (2.47x)")
+    perm = [float(el[c]) for c in ("APPL", "OFRU", "CITR", "WINE") if c in el.index]
+    ann = [float(el[c]) for c in ("SWHE", "BARL", "RAPE", "POTA") if c in el.index]
+    assert np.median(perm) < np.median(ann), (
+        "permanent crops must be LESS elastic than annuals, as in CAPRI")
 
 
 def test_pesticide_reduction_binds_and_is_a_noop_at_zero(model):
@@ -1466,3 +1478,176 @@ def test_pesticide_reduction_binds_and_is_a_noop_at_zero(model):
     assert affected, "no affected crops present"
     assert any(cut.get(a, 0.0) < base[a] for a in affected), (
         "a 50% pesticide reduction should lower affected crop areas")
+
+
+def test_unconverged_run_warns_and_is_recorded(model):
+    """A run that does not converge must say so, loudly and in metadata.
+
+    Every scenario comparison in this project was once run with
+    `max_outer_iter=1`, which executes a single supply-market pass and so
+    suppresses the price feedback. When EU supply falls, prices rise and cushion
+    the quantity response; omitting that overstated the Farm-to-Fork cereal
+    decline by 4 percentage points (−22.6% against −18.5% converged), and the
+    unconverged figure was published before anyone noticed.
+
+    The old code printed the warning only when `verbose=True`, so a
+    `verbose=False` comparison — which is how every comparison was run — failed
+    in silence. It now always warns and records `outer_converged` in metadata,
+    so a caller can check rather than having to remember.
+    """
+    import warnings as _w
+
+    regions = list(model.data["areas"].index[:4])
+
+    with _w.catch_warnings(record=True) as caught:
+        _w.simplefilter("always")
+        res = model.run(scenario="BASELINE", regions=regions, max_outer_iter=1)
+    fired = [x for x in caught
+             if issubclass(x.category, RuntimeWarning) and "Outer" in str(x.message)]
+    assert fired, "an unconverged run must raise a RuntimeWarning"
+    assert res["metadata"].get("outer_converged") is False, (
+        "metadata must record outer_converged=False")
+
+    # and the converged case must stay quiet, or the warning becomes noise
+    with _w.catch_warnings(record=True) as caught:
+        _w.simplefilter("always")
+        res = model.run(scenario="BASELINE", regions=regions)
+    fired = [x for x in caught
+             if issubclass(x.category, RuntimeWarning) and "Outer" in str(x.message)]
+    assert not fired, "a converged run must not warn"
+    assert res["metadata"].get("outer_converged") is True
+
+
+def test_no_bogus_activity_codes_in_crop_groups(data):
+    """Crop-group lists must name activities that actually exist.
+
+    Grain maize is `CORN` in this model's activity set; CAPRI calls it `MAIZ`.
+    Three places listed `MAIZ` without `CORN` — the fertiliser cereals group,
+    the pesticide-affected list and the abatement N2O proxy — so grain maize
+    (11,026 kha, the second-largest cereal by area) was silently excluded from
+    all three. A non-existent key raises nothing; it simply never matches.
+
+    `capri_pmp.ACTIVITY_ALIASES` maps MAIZ->CORN deliberately and is exempt.
+    """
+    from capri_mod.fert.fert_module import CROP_GROUPS
+    from capri_mod.supply.supply_module import SupplyModule
+    from capri_mod.abatement.abatement_module import AbatementModule
+
+    activities = set(data["areas"].columns)
+    assert "CORN" in activities and "MAIZ" not in activities, (
+        "this test assumes grain maize is CORN; the activity set has changed")
+
+    cereals = CROP_GROUPS["cereals"]
+    assert "CORN" in cereals, "grain maize missing from the fertiliser cereals group"
+    assert "MAIZ" not in cereals, "fertiliser cereals group names a non-existent activity"
+
+    affected = set(SupplyModule.__dict__.get("PESTICIDE_AFFECTED", ()))
+    if not affected:
+        from capri_mod.supply import supply_module as _sm
+        for obj in vars(_sm).values():
+            if isinstance(obj, type) and hasattr(obj, "PESTICIDE_AFFECTED"):
+                affected = set(obj.PESTICIDE_AFFECTED)
+                break
+    if affected:
+        assert "CORN" in affected, "pesticide target skips grain maize"
+        assert "MAIZ" not in affected, "pesticide list names a non-existent activity"
+
+
+def test_land_bounds_do_not_rewrite_the_base_year(data):
+    """Neither land bound may cut a crop the base year says exists.
+
+    The ARABLE and PERMANENT land figures come from a different aggregation than
+    the crop areas and disagree in 54 and 56 of 248 regions respectively. Taken
+    literally they make the BASE YEAR infeasible, so the solver must cut: LT02
+    lost most of its cereals (crops 1,373 kha against an ARABLE figure of 120),
+    and the 9,976 kha the solve shed matched the 9,960 kha of arable excess
+    almost exactly. Both bounds are now max(land figure, observed area).
+
+    This is the check the aggregate fidelity number could not make on its own:
+    it improved from 11.28% to 0.47% when the arable bound was fixed, which
+    means the earlier figure was not solver noise but a data conflict.
+    """
+    import numpy as np
+    from capri_mod.supply.supply_module import SupplyModule
+    from capri_mod.utils.utils import calibrate_supply_elasticities
+
+    sm = SupplyModule(data, calibrate_supply_elasticities(data["areas"]))
+    regions = list(data["areas"].index[:25])
+    sm.run(price_signals=None, regions=regions)
+
+    base_total = solved_total = 0.0
+    for reg in regions:
+        model = sm._models.get(reg)
+        if model is None:
+            continue
+        levels = model._base_levels()
+        solved = model.solve(price_shock=None).activities
+        for act in data["areas"].columns:
+            b = float(levels.get(act, 0.0))
+            if b >= 1.0:
+                base_total += b
+                solved_total += float(solved.get(act, 0.0))
+
+    assert base_total > 0
+    drift = (solved_total / base_total - 1.0) * 100.0
+    assert abs(drift) < 5.0, (
+        f"total cropped area drifts {drift:+.1f}% from base — a land bound is "
+        "cutting crops the base year says exist")
+
+
+def test_world_production_coverage(data):
+    """Most world production must be backed by real data, not a share key.
+
+    World base production was once only 63.2% real by volume; the remainder was
+    spread across non-EU trade regions with a fixed share key and a seeded ±8%
+    noise term. Extending coverage from CAPRI's own FAO_agg SUA raised it to
+    76.6%. This test stops that regressing — and stops the extended file being
+    dropped without anyone noticing.
+    """
+    import json
+    from pathlib import Path
+    from capri_mod.market.market_module import MarketModule
+
+    base = Path(str(DATA_DIR))
+    keys = set()
+    for rel in ("2017/market/fao_market_baseline.json",
+                "sources/fao_agg_2017/fao_agg_sua_2017_extended.json"):
+        f = base / rel
+        if f.exists():
+            keys |= {tuple(k.split("|")) for k in json.load(open(f))}
+
+    mm = MarketModule(data)
+    bp = mm.base_production
+    total = covered = 0.0
+    for reg in bp.index:
+        for comm in bp.columns:
+            v = float(bp.at[reg, comm])
+            if v <= 0:
+                continue
+            total += v
+            if (reg, comm) in keys or reg == "EU27":
+                covered += v
+    assert total > 0
+    share = covered / total * 100.0
+    assert share > 70.0, (
+        f"only {share:.1f}% of world production is backed by real data "
+        "(expected >70% since the FAO_agg extension was wired in)")
+
+
+def test_base_reconciliation_null_identity():
+    """Reconciling already-consistent data must change nothing.
+
+    This is the gate that catches a reconciler which REWRITES rather than
+    reconciles. It is not hypothetical: an early version of the projection
+    reconciler adjusted 248 regions by a 122% mean before this identity caught
+    it.
+    """
+    import pandas as pd
+    from capri_mod.data.reconcile_base import null_check
+
+    areas = pd.read_csv(DATA_DIR / "2017" / "supply" / "base_areas.csv",
+                        index_col=0)
+    max_change = null_check(areas)
+    assert max_change < 1e-6, (
+        f"reconciling consistent data moved it by {max_change:.2e} — the "
+        "reconciler is rewriting, not reconciling")

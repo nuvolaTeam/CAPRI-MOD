@@ -115,7 +115,10 @@ class AbatementModule:
             inten[act] = total_ch4 * GWP_CH4 / 1000.0        # t CO2-eq/head/yr
         # crop soil N2O proxy: ~3 kg N2O/ha for fertilised arable -> CO2-eq/ha
         crop_n2o_t = 3.0 * GWP_N2O / 1000.0 / 100.0          # modest per-ha value
-        for act in ["SWHE", "DWHE", "BARL", "OCER", "RAPE", "MAIZ", "MAIF"]:
+        # CORN is grain maize here; CAPRI calls it MAIZ (see capri_pmp's
+        # ACTIVITY_ALIASES). Listing only "MAIZ" left grain maize -- 11,026 kha
+        # -- with no crop N2O intensity in the MAC curve.
+        for act in ["SWHE", "DWHE", "BARL", "OCER", "RAPE", "CORN", "MAIF"]:
             inten.setdefault(act, crop_n2o_t)
         return pd.Series(inten)
 

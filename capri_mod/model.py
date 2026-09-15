@@ -36,6 +36,7 @@ import pandas as pd
 import numpy as np
 from pathlib import Path
 from typing import Optional, Dict, List
+import warnings
 import time
 
 from capri_mod.data.loaders import load_all_data
@@ -253,6 +254,7 @@ class CAPRIModel:
         supply_results = None
         market_eq = None
 
+        outer_converged = False
         for outer_iter in range(max_outer_iter):
             if self.verbose:
                 print(f"  Outer iteration {outer_iter + 1}/{max_outer_iter}")
@@ -337,10 +339,27 @@ class CAPRIModel:
             tracker.record(outer_iter, new_prices, agg_qty)
 
             if outer_iter > 0 and tracker.check_convergence():
+                outer_converged = True
                 if self.verbose:
                     print(f"  ✓ Outer loop converged at iteration {outer_iter + 1}")
                 break
         else:
+            # A non-converged run is NOT a quiet event. Suppressing the price
+            # feedback changes scenario results materially -- running a
+            # Farm-to-Fork comparison at max_outer_iter=1 overstated the cereal
+            # decline by 4 percentage points (-22.6% against -18.5% converged),
+            # and that unconverged figure was published before anyone noticed.
+            # The old code printed this only when verbose=True, so a
+            # verbose=False comparison failed silently. It now always warns and
+            # is recorded in metadata as outer_converged.
+            outer_converged = False
+            warnings.warn(
+                f"Outer supply-market loop did NOT converge in {max_outer_iter} "
+                "iterations. Price feedback is incomplete, so scenario results "
+                "will overstate quantity responses. Do not compare an "
+                "unconverged run against external references -- raise "
+                "max_outer_iter or check metadata['outer_converged'].",
+                RuntimeWarning, stacklevel=2)
             if self.verbose:
                 print(f"  ⚠ Outer loop did not fully converge in {max_outer_iter} iterations")
 
@@ -413,6 +432,9 @@ class CAPRIModel:
                 "n_regions": len(supply_results) if supply_results else 0,
                 "n_outer_iterations": outer_iter + 1,
                 "market_converged": market_eq.converged if market_eq else False,
+                # False means the supply-market price feedback is incomplete;
+                # such a run must not be compared against external references.
+                "outer_converged": outer_converged,
                 "elapsed_seconds": round(t_elapsed, 1),
             },
         }

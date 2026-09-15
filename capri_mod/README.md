@@ -1,6 +1,9 @@
 # CAPRI-mod
 
-A Python implementation of the **CAPRI** (Common Agricultural Policy Regionalised Impact) modelling system.
+An AI-assisted, validated Python reimplementation of the **economic logic** of the
+**CAPRI** (Common Agricultural Policy Regionalised Impact) model — not a release
+of the CAPRI modelling system itself. See the top-level `README.md` for scope,
+validation status and fitness for use.
 
 ## Structure
 

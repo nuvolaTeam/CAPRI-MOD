@@ -1,0 +1,7746 @@
+{
+"TUR|BARL": {
+"imports": 280.444663221518,
+"exports": 10.3810369717507,
+"feed": 5607.21002958163,
+"production": 7100.0
+},
+"TUR|OATS": {
+"imports": 4.27639807191679,
+"exports": 36.3820392453145,
+"feed": 115.699716805898,
+"consumption": 0.9330622323056279,
+"production": 265.857503735336
+},
+"TUR|MAIZ": {
+"imports": 636.831465990981,
+"exports": 564.429070121673,
+"feed": 4465.0,
+"consumption": 1643.0,
+"production": 5900.0
+},
+"TUR|OCER": {
+"imports": 2703.61763995716,
+"exports": 1730.66007982147,
+"feed": 155.895050913911,
+"consumption": 1.97740531757647,
+"production": 209.75648171724
+},
+"TUR|RAPE": {
+"imports": 29.563843712467797,
+"exports": 3.50271489726674,
+"consumption": 0.986678692716122,
+"production": 61.2691254335642
+},
+"TUR|SUNF": {
+"imports": 610.44420371425,
+"exports": 59.8481317826821,
+"feed": 4.00080536032851,
+"production": 1964.37703973891
+},
+"TUR|SOYA": {
+"imports": 2337.73540569783,
+"exports": 92.7819340117355,
+"feed": 1054.25815494174,
+"consumption": 1.0002449287872301,
+"production": 140.02819738167202
+},
+"TUR|OCRO": {
+"imports": 595.784377715117,
+"exports": 62.5287138375513,
+"feed": 29.0539568345324,
+"consumption": 314.30141251874,
+"production": 335.151471239383
+},
+"TUR|PULS": {
+"imports": 583.066870527423,
+"exports": 305.78429716454104,
+"feed": 173.8748135741,
+"consumption": 1046.35216330526,
+"production": 1197.9756097561
+},
+"TUR|POTA": {
+"imports": 49.1936482330105,
+"exports": 271.249790286473,
+"feed": 113.986200316229,
+"consumption": 3797.54025264068,
+"production": 4799.50469507791
+},
+"TUR|TEXT": {
+"imports": 807.967675469441,
+"exports": 80.58849590105021,
+"production": 869.5052417024591
+},
+"TUR|TOBA": {
+"imports": 116.002157614699,
+"exports": 135.516604445162,
+"production": 91.4097454744734
+},
+"TUR|TOMA": {
+"imports": 0.960472428283123,
+"exports": 1044.96332454074,
+"feed": 1858.92711804603,
+"consumption": 7920.6894577959,
+"production": 12750.4998627828
+},
+"TUR|OVEG": {
+"imports": 158.16473496671802,
+"exports": 771.0065367387019,
+"feed": 2084.93454305717,
+"consumption": 11622.7298130325,
+"production": 17988.406568649098
+},
+"TUR|APPL": {
+"imports": 65.92623329016419,
+"exports": 506.13905068269503,
+"consumption": 2369.0,
+"production": 3032.0
+},
+"TUR|OFRU": {
+"imports": 463.53344877429,
+"exports": 1613.85416405522,
+"consumption": 4050.40075285876,
+"production": 6494.02423565076
+},
+"TUR|CITR": {
+"imports": 111.277459603703,
+"exports": 174.324829923858,
+"consumption": 2878.8386012041296,
+"production": 4777.4977755808195
+},
+"TUR|TAGR": {
+"imports": 9.51474658051798,
+"exports": 594.6108875575129,
+"consumption": 2221.77847879425,
+"production": 3803.86119873817
+},
+"TUR|TABO": {
+"imports": 0.331499360536137,
+"exports": 13.14572833679,
+"consumption": 295.035124763917,
+"production": 491.558499577617
+},
+"TUR|TWIN": {
+"imports": 3.512,
+"exports": 2.01601354540666,
+"consumption": 40.4494382022472,
+"production": 24.7191011235955
+},
+"TUR|WHEA": {
+"imports": 4797.20057400385,
+"exports": 5983.748812331341,
+"feed": 2093.0,
+"consumption": 13890.0,
+"production": 21500.0
+},
+"TUR|BEEF": {
+"imports": 0.9231933520631831,
+"exports": 3.65536,
+"consumption": 1049.0,
+"production": 989.0
+},
+"TUR|PORK": {
+"imports": 2.18327115981866,
+"exports": 0.113182347311554,
+"consumption": 3.26654166870826,
+"production": 1.88586222770154
+},
+"TUR|SGMT": {
+"imports": 5.30658773325902,
+"consumption": 432.0859475187,
+"production": 400.920220011577
+},
+"TUR|EGGS": {
+"imports": 2.29840910594454,
+"exports": 328.816334949301,
+"consumption": 694.0,
+"production": 1205.0
+},
+"TUR|POUM": {
+"imports": 3.99271659285826,
+"exports": 426.837259892427,
+"consumption": 1759.5991801412001,
+"production": 2192.49920291505
+},
+"TUR|WHEP": {
+"imports": 0.40003252871296796,
+"exports": 42.0838886556633,
+"feed": 0.000709999999451686,
+"production": 41.732518982062
+},
+"TUR|WMIO": {
+"imports": 2.42605553308911,
+"production": 0.5158080799079
+},
+"TUR|BUTT": {
+"imports": 12.6246508076965,
+"consumption": 253.081101467811,
+"production": 244.33816433029
+},
+"TUR|SMIP": {
+"imports": 0.034182679373663705,
+"exports": 32.0356047760357,
+"consumption": 27.976102676452502,
+"production": 59.9771048406704
+},
+"TUR|CHES": {
+"imports": 9.811292028393051,
+"exports": 47.39113808145,
+"consumption": 198.154417821885,
+"production": 253.563887315201
+},
+"TUR|FRMI": {
+"imports": 1.6213546808742,
+"exports": 15.0179262023895,
+"feed": 3225.21608808902,
+"consumption": 14509.981941022299,
+"production": 18070.3085815978
+},
+"TUR|CREM": {
+"imports": 1.19978437120615,
+"exports": 2.94594361817674,
+"consumption": 5.69350972296342,
+"production": 8.05932970336295
+},
+"TUR|COCM": {
+"imports": 5.95048679001892,
+"exports": 4.39495692009572,
+"consumption": 0.32000892051836,
+"production": 4.366518
+},
+"TUR|RICE": {
+"imports": 238.22883612651,
+"exports": 71.1527931308266,
+"consumption": 863.158811615786,
+"production": 599.4
+},
+"TUR|MOLA": {
+"imports": 453.353834032021,
+"exports": 0.554665679585141,
+"feed": 598.966839801375,
+"production": 715.917976791351
+},
+"TUR|SUGA": {
+"imports": 254.989682808187,
+"exports": 211.185555473279,
+"consumption": 2279.38583948794,
+"production": 2568.1414213031303
+},
+"TUR|RAPO": {
+"imports": 2.46762428869582,
+"exports": 1.0808857383173098,
+"production": 47.1257584257676
+},
+"TUR|SUNO": {
+"imports": 602.3339764255189,
+"exports": 852.280976925208,
+"consumption": 412.124810663435,
+"production": 928.7185701302641
+},
+"TUR|SOYO": {
+"imports": 18.73415777086,
+"exports": 54.1108714154341,
+"production": 186.87383503385303
+},
+"TUR|OLIO": {
+"imports": 10.1564121648523,
+"exports": 56.4993298582767,
+"consumption": 172.97436539815502,
+"production": 241.191312110389
+},
+"TUR|OTHO": {
+"imports": 182.651151213562,
+"exports": 71.8433311544606,
+"consumption": 265.62440168282797,
+"production": 468.542705086135
+},
+"TUR|RAPC": {
+"imports": 33.202076097675196,
+"exports": 4.0248109457606,
+"feed": 91.6360284840003,
+"production": 62.169021193092604
+},
+"TUR|SUNC": {
+"imports": 1709.798079056,
+"exports": 6.6734735561894905,
+"feed": 3071.93769110683,
+"production": 1244.38807580623
+},
+"TUR|SOYC": {
+"imports": 1670.41566247111,
+"exports": 72.771433487603,
+"feed": 2464.3324237087,
+"production": 848.1058613504
+},
+"TUR|MILK": {
+"imports": 1.03108720795631,
+"exports": 8.24726902588061,
+"production": 20316.144328226997
+},
+"TUR|TEAS": {
+"imports": 23.9909331318474,
+"exports": 5.00188893086513,
+"consumption": 288.108802417831,
+"production": 1299.50887797507
+},
+"TUR|FFIS": {
+"imports": 10.419641591855,
+"exports": 50.2917297836481,
+"consumption": 94.9632662607918,
+"production": 134.945358236164
+},
+"TUR|SFIS": {
+"imports": 682.53,
+"exports": 159.63,
+"feed": 698.767857062541,
+"consumption": 259.382118649785,
+"production": 437.45
+},
+"TUR|OAQU": {
+"imports": 8.07,
+"exports": 19.67,
+"consumption": 43.8,
+"production": 55.4
+},
+"TUR|FPRI": {
+"imports": 0.798636201808547,
+"exports": 0.8630365889644069,
+"feed": 0.00440078467772572,
+"production": 0.120018198773696
+},
+"TUR|FENI": {
+"imports": 258.779,
+"feed": 258.12603599337,
+"consumption": 1.8181818181818201,
+"production": 0.18181818181818202
+},
+"TUR|RYEM": {
+"exports": 0.32504744078955,
+"feed": 29.4859766779964,
+"consumption": 201.318047663562,
+"production": 314.637498725557
+},
+"RUS|RYEM": {
+"imports": 1.0,
+"exports": 38.0,
+"feed": 1267.49842643588,
+"consumption": 764.300550747443,
+"production": 2549.0
+},
+"RUS|BARL": {
+"imports": 406.990325877683,
+"exports": 4694.11157329277,
+"feed": 10109.2402842813,
+"consumption": 123.002923629103,
+"production": 20628.5096622376
+},
+"RUS|OATS": {
+"imports": 33.0030057382275,
+"exports": 44.9959012660534,
+"feed": 3520.67929683942,
+"consumption": 299.972675107023,
+"production": 5456.49694872028
+},
+"RUS|MAIZ": {
+"imports": 72.0025965595586,
+"exports": 5217.81182155866,
+"feed": 7067.74510440333,
+"consumption": 78.997150997151,
+"production": 13208.4763244257
+},
+"RUS|OCER": {
+"imports": 10.7685423096615,
+"exports": 281.347080697408,
+"feed": 1965.14499495095,
+"consumption": 120.69050572127401,
+"production": 2563.62968233354
+},
+"RUS|RAPE": {
+"imports": 41.0,
+"exports": 230.0,
+"feed": 487.0,
+"consumption": 2.0,
+"production": 1609.0
+},
+"RUS|SUNF": {
+"imports": 44.0,
+"exports": 314.0,
+"feed": 48.0042068361087,
+"production": 10481.0
+},
+"RUS|SOYA": {
+"imports": 2255.81254673868,
+"exports": 520.043207312007,
+"feed": 1275.1059410054,
+"consumption": 19.0015787287079,
+"production": 3621.69904445368
+},
+"RUS|OCRO": {
+"imports": 163.28542277044,
+"exports": 719.178074729237,
+"feed": 95.51868233267939,
+"consumption": 53.5298848779409,
+"production": 824.554727793696
+},
+"RUS|PULS": {
+"imports": 42.426229508196705,
+"exports": 1254.98360655738,
+"feed": 1482.8360655737702,
+"consumption": 343.80327868852504,
+"production": 4262.065573770489
+},
+"RUS|POTA": {
+"imports": 704.985422137673,
+"exports": 194.004011496867,
+"feed": 4504.093132896341,
+"consumption": 13147.2718512851,
+"production": 21707.5511259072
+},
+"RUS|TOBA": {
+"imports": 206.489602231194,
+"exports": 57.1709903521711,
+"production": 0.004805363992506619
+},
+"RUS|TOMA": {
+"imports": 662.0,
+"exports": 18.0,
+"consumption": 3255.0,
+"production": 2669.0
+},
+"RUS|OVEG": {
+"imports": 1620.1276082807601,
+"exports": 203.985804995373,
+"feed": 2333.90501770236,
+"consumption": 11415.115923186098,
+"production": 12774.872252804
+},
+"RUS|APPL": {
+"imports": 795.826162917668,
+"exports": 41.0089539200699,
+"consumption": 1961.42825944529,
+"production": 1493.67372788819
+},
+"RUS|OFRU": {
+"imports": 3141.27313813823,
+"exports": 155.106145582621,
+"consumption": 4138.54791423231,
+"production": 1188.7749375360402
+},
+"RUS|TWIN": {
+"imports": 651.0,
+"exports": 6.0,
+"consumption": 1093.0,
+"production": 448.0
+},
+"RUS|WHEA": {
+"imports": 543.0,
+"exports": 33584.0,
+"feed": 17671.3413103102,
+"consumption": 20729.4003747055,
+"production": 86003.0
+},
+"RUS|BEEF": {
+"imports": 369.0,
+"exports": 11.0,
+"consumption": 1922.0010389610402,
+"production": 1569.0
+},
+"RUS|PORK": {
+"imports": 435.944831076806,
+"exports": 84.01062887511071,
+"consumption": 3863.48983597788,
+"production": 3515.55510565608
+},
+"RUS|SGMT": {
+"imports": 3.08091730831924,
+"exports": 11.0027340673536,
+"consumption": 196.551567906505,
+"production": 224.906963507304
+},
+"RUS|EGGS": {
+"imports": 92.0,
+"exports": 30.0,
+"consumption": 2338.09305932532,
+"production": 2519.0
+},
+"RUS|POUM": {
+"imports": 226.0,
+"exports": 116.0,
+"consumption": 4598.45258896228,
+"production": 4542.0
+},
+"RUS|CASE": {
+"imports": 5.5273036615839,
+"exports": 0.06442999814259401,
+"production": 28.901853466358503
+},
+"RUS|WMIO": {
+"imports": 46.2201798474134,
+"exports": 0.570428418834274,
+"feed": 16.4850156,
+"consumption": 94.7615967825027,
+"production": 46.0825879591696
+},
+"RUS|BUTT": {
+"imports": 99.9667720338128,
+"exports": 3.63198641860683,
+"consumption": 367.38008095047303,
+"production": 262.053129312792
+},
+"RUS|SMIP": {
+"imports": 123.41930884560699,
+"exports": 1.69413176552273,
+"feed": 160.223429126862,
+"consumption": 62.032927666571396,
+"production": 100.531179713349
+},
+"RUS|CHES": {
+"imports": 223.022389539859,
+"exports": 25.277639747467802,
+"consumption": 930.2894995061581,
+"production": 740.319316600076
+},
+"RUS|FRMI": {
+"imports": 157.89805684172998,
+"exports": 72.0583589949485,
+"feed": 6484.07974756533,
+"consumption": 15766.009105727799,
+"production": 22846.7475984227
+},
+"RUS|CREM": {
+"imports": 30.9157349888707,
+"exports": 3.75454066385457,
+"consumption": 415.500145762893,
+"production": 396.89451522632396
+},
+"RUS|COCM": {
+"imports": 90.065132032628,
+"exports": 40.918222843925896,
+"feed": 39.358691023084994,
+"consumption": 204.604125616787,
+"production": 160.71507923254902
+},
+"RUS|RICE": {
+"imports": 354.312,
+"exports": 197.136,
+"feed": 1.998,
+"consumption": 805.86,
+"production": 657.342
+},
+"RUS|MOLA": {
+"imports": 0.0586274937834397,
+"exports": 873.842336237229,
+"feed": 351.013516897575,
+"production": 1722.01617923511
+},
+"RUS|SUGA": {
+"imports": 336.72,
+"exports": 622.84,
+"consumption": 4982.72,
+"production": 6131.8
+},
+"RUS|RAPO": {
+"imports": 1.0013245033112599,
+"exports": 295.607947019868,
+"consumption": 3.9947019867549702,
+"production": 376.498013245033
+},
+"RUS|SUNO": {
+"imports": 26.0,
+"exports": 2326.0,
+"consumption": 1649.34184284005,
+"production": 4645.0
+},
+"RUS|SOYO": {
+"imports": 0.999259807549963,
+"exports": 521.385640266469,
+"consumption": 99.0732790525537,
+"production": 674.500370096225
+},
+"RUS|OTHO": {
+"imports": 183.545201120215,
+"exports": 188.037431191637,
+"consumption": 450.158001637629,
+"production": 579.779832613299
+},
+"RUS|RAPC": {
+"imports": 24.6457945611502,
+"exports": 299.92079078934705,
+"feed": 187.690118483737,
+"production": 462.965114711934
+},
+"RUS|SUNC": {
+"imports": 27.0807473069956,
+"exports": 2398.58427383132,
+"feed": 1911.55378542771,
+"production": 4283.0573119520395
+},
+"RUS|SOYC": {
+"imports": 136.07322007118898,
+"exports": 450.28331634624,
+"feed": 2707.46097166006,
+"production": 3021.67106793511
+},
+"RUS|MILK": {
+"imports": 274.465731360029,
+"exports": 38.038672157373405,
+"production": 26527.365057418203
+},
+"RUS|TEAS": {
+"imports": 170.0,
+"exports": 17.0,
+"consumption": 154.0,
+"production": 1.0
+},
+"RUS|FFIS": {
+"imports": 165.55,
+"exports": 125.78,
+"consumption": 808.42,
+"production": 768.68
+},
+"RUS|SFIS": {
+"imports": 546.031382422545,
+"exports": 2442.99754762597,
+"feed": 295.27796463232204,
+"consumption": 1847.7594878744399,
+"production": 4040.02361756149
+},
+"RUS|OAQU": {
+"imports": 180.593649744124,
+"exports": 156.578262306961,
+"consumption": 268.6567374666,
+"production": 245.64135002943698
+},
+"RUS|FPRI": {
+"imports": 1.93604997665435,
+"exports": 5.19880544226615,
+"feed": 49.49211057763279,
+"production": 53.4465748282416
+},
+"UKR|RYEM": {
+"imports": 13.5940721396462,
+"exports": 25.3293137630728,
+"feed": 72.9484236376497,
+"consumption": 364.742118188249,
+"production": 501.30834433435996
+},
+"UKR|BARL": {
+"imports": 20.0,
+"exports": 4987.0,
+"feed": 1715.49603524229,
+"consumption": 131.961233480176,
+"production": 8285.0
+},
+"UKR|OATS": {
+"imports": 2.0,
+"exports": 19.0,
+"feed": 211.54211663067,
+"consumption": 173.624190064795,
+"production": 471.0
+},
+"UKR|MAIZ": {
+"imports": 86.0,
+"exports": 19531.0,
+"feed": 2683.0,
+"consumption": 832.0,
+"production": 24669.0
+},
+"UKR|OCER": {
+"imports": 39.2787456123497,
+"exports": 268.895644880766,
+"feed": 47.508778038016395,
+"consumption": 212.78545669514298,
+"production": 516.900390913651
+},
+"UKR|RAPE": {
+"imports": 9.0,
+"exports": 2163.0,
+"feed": 3.7355769230769202,
+"production": 2226.0
+},
+"UKR|SUNF": {
+"imports": 24.999000759422803,
+"exports": 73.0029177824853,
+"feed": 21.0008393620848,
+"production": 12235.5109316919
+},
+"UKR|SOYA": {
+"imports": 11.0013800025091,
+"exports": 2866.64032116422,
+"feed": 66.20471101233089,
+"consumption": 0.827558887654137,
+"production": 3899.4891481620903
+},
+"UKR|OCRO": {
+"imports": 19.6078084312903,
+"exports": 83.06450353024461,
+"feed": 24.0,
+"consumption": 11.2571279581001,
+"production": 129.329574286972
+},
+"UKR|PULS": {
+"imports": 3.16089894746644,
+"exports": 586.066718424013,
+"feed": 218.813791283554,
+"consumption": 95.5707325457703,
+"production": 1287.42018948563
+},
+"UKR|POTA": {
+"imports": 37.999145894675294,
+"exports": 19.0004270526623,
+"feed": 6818.15324447641,
+"consumption": 6202.13939897957,
+"production": 22207.5008428671
+},
+"UKR|TOBA": {
+"imports": 86.9696877392487,
+"exports": 31.5108261379564,
+"production": 1.82063747400981
+},
+"UKR|TOMA": {
+"imports": 39.0,
+"exports": 234.0,
+"consumption": 2046.50067965564,
+"production": 2267.0
+},
+"UKR|OVEG": {
+"imports": 71.99694656488549,
+"exports": 82.0081424936387,
+"feed": 2016.0,
+"consumption": 5205.4715089190395,
+"production": 7475.50279898219
+},
+"UKR|APPL": {
+"imports": 69.0,
+"exports": 300.0,
+"feed": 87.39482200647251,
+"consumption": 313.032362459547,
+"production": 1076.0
+},
+"UKR|OFRU": {
+"imports": 361.461721929749,
+"exports": 116.050720429913,
+"consumption": 1177.77318642155,
+"production": 974.524017467249
+},
+"UKR|TAGR": {
+"imports": 49.0,
+"exports": 2.0,
+"consumption": 305.0,
+"production": 292.0
+},
+"UKR|TWIN": {
+"imports": 50.0,
+"exports": 50.0,
+"consumption": 80.0,
+"production": 80.0
+},
+"UKR|WHEA": {
+"imports": 81.00150987007659,
+"exports": 18026.6639700263,
+"feed": 1138.10816183535,
+"consumption": 5481.52094465689,
+"production": 26209.4885454918
+},
+"UKR|BEEF": {
+"imports": 1.99726402188782,
+"exports": 46.06292749658,
+"consumption": 318.468399452804,
+"production": 363.502051983584
+},
+"UKR|PORK": {
+"imports": 9.0,
+"exports": 6.0,
+"consumption": 739.0,
+"production": 736.0
+},
+"UKR|EGGS": {
+"imports": 6.0,
+"exports": 100.0,
+"feed": 12.951851851851899,
+"consumption": 635.637037037037,
+"production": 901.0
+},
+"UKR|POUM": {
+"imports": 120.95456252347,
+"exports": 273.10251595944396,
+"consumption": 1054.39579421705,
+"production": 1210.5452497183599
+},
+"UKR|WHEP": {
+"imports": 1.49180774768548,
+"exports": 30.1383010323048,
+"feed": 2.2207610762373,
+"production": 28.6464932846193
+},
+"UKR|CASE": {
+"imports": 0.0569499981867413,
+"exports": 7.1217383464901305,
+"feed": 4.17302892999299,
+"production": 11.237817278296399
+},
+"UKR|WMIO": {
+"imports": 0.138159974511524,
+"exports": 3.85667987407067,
+"consumption": 8.168116558268169,
+"production": 11.8866364578273
+},
+"UKR|BUTT": {
+"imports": 0.8844724721259151,
+"exports": 30.4736399513658,
+"consumption": 80.76773096451551,
+"production": 110.356898443755
+},
+"UKR|SMIP": {
+"imports": 0.383192090696376,
+"exports": 28.7245663354009,
+"feed": 104.533239175823,
+"consumption": 0.0197700003530525,
+"production": 132.89438342088002
+},
+"UKR|CHES": {
+"imports": 10.022314524110199,
+"exports": 9.08646384458021,
+"consumption": 206.071491362686,
+"production": 207.443667611959
+},
+"UKR|FRMI": {
+"imports": 4.70022831647281,
+"exports": 5.21063831940861,
+"feed": 1245.77910936563,
+"consumption": 4950.35776181956,
+"production": 6196.06695155359
+},
+"UKR|COCM": {
+"imports": 1.1994721162558502,
+"exports": 16.5762586450308,
+"feed": 4.99869210948615,
+"consumption": 61.7442380897313,
+"production": 69.6197589602545
+},
+"UKR|RICE": {
+"imports": 78.588,
+"exports": 1.332,
+"feed": 13.986,
+"consumption": 112.554,
+"production": 42.624
+},
+"UKR|MOLA": {
+"imports": 0.453683225837909,
+"exports": 93.1340387609355,
+"feed": 649.766985738465,
+"production": 742.447341273563
+},
+"UKR|SUGA": {
+"imports": 13.7966464155529,
+"exports": 679.1249963547999,
+"consumption": 1205.11631610649,
+"production": 1879.1032417983001
+},
+"UKR|RAPO": {
+"imports": 1.0,
+"exports": 64.0,
+"feed": 0.451102568921465,
+"consumption": 3.0,
+"production": 64.0
+},
+"UKR|SUNO": {
+"imports": 1.42934057782127,
+"exports": 4279.12301396164,
+"consumption": 240.013593575905,
+"production": 4574.23939437223
+},
+"UKR|SOYO": {
+"imports": 0.849853354910351,
+"exports": 166.930154624708,
+"consumption": 12.9945629348575,
+"production": 179.074864204655
+},
+"UKR|OTHO": {
+"imports": 37.5646600105598,
+"exports": 72.99950948233919,
+"consumption": 202.83604897536702,
+"production": 262.614268798105
+},
+"UKR|RAPC": {
+"imports": 0.26864504701963104,
+"exports": 81.29618710098619,
+"feed": 32.4778139707337,
+"production": 114.217739889964
+},
+"UKR|SUNC": {
+"imports": 2.43696890632812,
+"exports": 4706.252748496379,
+"feed": 375.955695665989,
+"production": 5083.2033726521495
+},
+"UKR|SOYC": {
+"imports": 9.338634861850199,
+"exports": 346.051103496878,
+"feed": 439.573245650686,
+"production": 776.285714285714
+},
+"UKR|MILK": {
+"imports": 0.142959989047718,
+"exports": 13.1169103403144,
+"production": 9509.75526540266
+},
+"UKR|FFIS": {
+"imports": 43.2,
+"exports": 5.94,
+"consumption": 94.27,
+"production": 57.01
+},
+"UKR|SFIS": {
+"imports": 366.16870093315896,
+"exports": 14.959533224288199,
+"feed": 19.0703599183115,
+"consumption": 377.87010395605,
+"production": 45.7312961654909
+},
+"UKR|OAQU": {
+"imports": 36.855121640331,
+"exports": 1.16721825011329,
+"consumption": 48.1976972972613,
+"production": 12.509793907043601
+},
+"UKR|FPRI": {
+"imports": 0.11990836202412,
+"exports": 0.559613923838172,
+"feed": 0.170255718273655,
+"production": 0.630887946327374
+},
+"UKR|SGMT": {
+"exports": 1.0,
+"consumption": 13.0,
+"production": 14.0
+},
+"KAZ|RYEM": {
+"imports": 2.0,
+"exports": 1.0,
+"feed": 14.411764705882401,
+"consumption": 16.4705882352941,
+"production": 39.0
+},
+"KAZ|BARL": {
+"imports": 13.0,
+"exports": 912.0,
+"feed": 717.529933481153,
+"consumption": 61.045084996304496,
+"production": 3305.0
+},
+"KAZ|OATS": {
+"imports": 10.981387478849399,
+"exports": 10.0169204737733,
+"feed": 115.194585448393,
+"consumption": 19.032148900169197,
+"production": 284.517766497462
+},
+"KAZ|MAIZ": {
+"imports": 5.99620493358634,
+"exports": 42.0265654648956,
+"feed": 360.524187691803,
+"consumption": 38.8064229807149,
+"production": 784.5034788108791
+},
+"KAZ|OCER": {
+"imports": 14.6475087737299,
+"exports": 32.1659893987924,
+"feed": 239.491763409053,
+"consumption": 97.2343629433952,
+"production": 429.45467614651795
+},
+"KAZ|RAPE": {
+"imports": 1.00169204737733,
+"exports": 132.774957698816,
+"feed": 19.246790086593,
+"consumption": 0.991796935458907,
+"production": 294.497461928934
+},
+"KAZ|SUNF": {
+"imports": 9.004931506849319,
+"exports": 307.83123287671197,
+"feed": 6.99616438356164,
+"production": 903.494794520548
+},
+"KAZ|SOYA": {
+"imports": 10.0190476190476,
+"exports": 17.965714285714302,
+"feed": 99.3409344958641,
+"consumption": 1.98681868991728,
+"production": 252.48
+},
+"KAZ|OCRO": {
+"imports": 15.2494934227708,
+"exports": 372.798121440775,
+"feed": 186.30443240502402,
+"consumption": 9.462721291946151,
+"production": 919.4975636166761
+},
+"KAZ|PULS": {
+"imports": 17.0,
+"exports": 139.0,
+"feed": 121.0,
+"consumption": 210.0,
+"production": 907.0
+},
+"KAZ|POTA": {
+"imports": 52.006715743252,
+"exports": 270.965000645745,
+"feed": 464.93994575745796,
+"consumption": 1934.75009686168,
+"production": 3551.45860777476
+},
+"KAZ|TEXT": {
+"imports": 0.248934438866976,
+"exports": 68.6641101746809,
+"production": 87.8118247135937
+},
+"KAZ|TOBA": {
+"imports": 23.6982378306655,
+"exports": 7.4000401903612,
+"production": 1.1303654512210501
+},
+"KAZ|TOMA": {
+"imports": 139.9203187251,
+"exports": 17.009675583380798,
+"consumption": 841.478656801366,
+"production": 738.579396698919
+},
+"KAZ|OVEG": {
+"imports": 268.0,
+"exports": 116.0,
+"feed": 1918.31043651673,
+"consumption": 3051.62574783957,
+"production": 5122.0
+},
+"KAZ|APPL": {
+"imports": 141.217928902627,
+"exports": 1.99690880989181,
+"feed": 0.998454404945904,
+"consumption": 304.528593508501,
+"production": 181.279752704791
+},
+"KAZ|OFRU": {
+"imports": 455.91480976476004,
+"exports": 45.28424448835,
+"feed": 0.047701045857035704,
+"consumption": 478.906466241199,
+"production": 76.0
+},
+"KAZ|CITR": {
+"imports": 58.532331018220695,
+"exports": 2.81723477848296,
+"consumption": 56.405714672772895,
+"production": 0.690618433035141
+},
+"KAZ|TAGR": {
+"imports": 267.0,
+"exports": 26.0,
+"consumption": 278.0,
+"production": 43.0
+},
+"KAZ|TWIN": {
+"imports": 21.0036364458514,
+"exports": 1.01852855743346,
+"consumption": 43.992380780120804,
+"production": 33.0057144149094
+},
+"KAZ|WHEA": {
+"imports": 130.995613888238,
+"exports": 7258.2430106806805,
+"feed": 1063.03559112063,
+"consumption": 1722.0576556065198,
+"production": 14802.5043693709
+},
+"KAZ|BEEF": {
+"imports": 21.0222693531283,
+"exports": 1.99787910922588,
+"feed": 15.983032873807,
+"consumption": 433.539766702015,
+"production": 450.47720042417797
+},
+"KAZ|PORK": {
+"imports": 50.0,
+"exports": 1.0,
+"consumption": 137.0,
+"production": 92.0
+},
+"KAZ|SGMT": {
+"imports": 0.8977592298471979,
+"exports": 0.999701921952907,
+"consumption": 167.949922888088,
+"production": 171.05097134605302
+},
+"KAZ|EGGS": {
+"imports": 3.9930915371329903,
+"exports": 19.0328151986183,
+"feed": 70.5996647363609,
+"consumption": 158.103474550442,
+"production": 285.506044905009
+},
+"KAZ|POUM": {
+"imports": 174.0,
+"exports": 6.0,
+"consumption": 328.0,
+"production": 171.0
+},
+"KAZ|CASE": {
+"imports": 0.32848003022303696,
+"exports": 0.035119999212722595,
+"feed": 1.67029687414214,
+"production": 1.3418168439190998
+},
+"KAZ|WMIO": {
+"imports": 3.0573790546938397,
+"exports": 0.000680000978504967,
+"feed": 0.0667376579191014,
+"consumption": 24.6900339482017,
+"production": 17.861280376302197
+},
+"KAZ|BUTT": {
+"imports": 6.331463666009911,
+"exports": 0.342100711759806,
+"feed": 0.0016600000670352899,
+"consumption": 22.8245693265038,
+"production": 16.8368663723207
+},
+"KAZ|SMIP": {
+"imports": 25.0806650102746,
+"exports": 0.145860036732089,
+"feed": 25.5306799206096,
+"consumption": 5.8873393516217405,
+"production": 6.48321429868891
+},
+"KAZ|CHES": {
+"imports": 22.8459464906916,
+"exports": 2.0553600441397997,
+"consumption": 45.5323736666132,
+"production": 24.7417872200614
+},
+"KAZ|FRMI": {
+"imports": 34.2877346440611,
+"exports": 8.65754251733744,
+"feed": 405.507460358667,
+"consumption": 4397.924773875,
+"production": 4843.2133282797195
+},
+"KAZ|CREM": {
+"imports": 5.3888392630565,
+"exports": 0.0244900002217512,
+"consumption": 24.1648035429794,
+"production": 18.8004542801446
+},
+"KAZ|COCM": {
+"imports": 35.9648998051856,
+"exports": 0.7701386733984761,
+"feed": 7.46579216379221,
+"consumption": 41.1408048746909,
+"production": 13.4118359066961
+},
+"KAZ|RICE": {
+"imports": 7.999968095712861,
+"exports": 100.465734795613,
+"consumption": 124.210837088734,
+"production": 325.998699900299
+},
+"KAZ|MOLA": {
+"imports": 8.30589219248236,
+"exports": 0.0248309372721007,
+"feed": 13.1912516351225,
+"production": 17.232386617100403
+},
+"KAZ|SUGA": {
+"imports": 461.84,
+"exports": 62.56,
+"feed": 12.88,
+"consumption": 446.2,
+"production": 48.76
+},
+"KAZ|RAPO": {
+"imports": 2.35156503131221,
+"exports": 9.31123654826191,
+"consumption": 25.8645459673942,
+"production": 15.4466905808677
+},
+"KAZ|SUNO": {
+"imports": 91.0,
+"exports": 50.0,
+"consumption": 275.0,
+"production": 260.0
+},
+"KAZ|SOYO": {
+"imports": 6.12244897959184,
+"exports": 17.632653061224502,
+"consumption": 6.857142857142859,
+"production": 18.367346938775498
+},
+"KAZ|OTHO": {
+"imports": 19.6750671265066,
+"exports": 49.0532059827224,
+"consumption": 74.8263009781494,
+"production": 116.288498452755
+},
+"KAZ|RAPC": {
+"imports": 1.40191239330338,
+"exports": 16.083567396149,
+"feed": 7.1794382337845,
+"production": 22.018570459820502
+},
+"KAZ|SUNC": {
+"imports": 3.3462900820759702,
+"exports": 115.304505387364,
+"feed": 115.352668820633,
+"production": 227.310884125921
+},
+"KAZ|SOYC": {
+"imports": 97.1884592109357,
+"exports": 70.39252401760099,
+"feed": 108.314428336072,
+"production": 81.51849314273721
+},
+"KAZ|MILK": {
+"imports": 22.7300535906171,
+"exports": 17.443660335843,
+"production": 5211.54886415201
+},
+"KAZ|FFIS": {
+"imports": 10.248787125783899,
+"exports": 29.073439829606,
+"consumption": 13.1715659778544,
+"production": 32.006212282570104
+},
+"KAZ|SFIS": {
+"imports": 45.324999239312305,
+"exports": 6.969400578122619,
+"feed": 2.9695481515289797,
+"consumption": 36.0960505096607,
+"production": 0.71
+},
+"KAZ|FPRI": {
+"imports": 0.37520295020058697,
+"exports": 0.474103983569094,
+"feed": 7.262143801299531,
+"production": 8.25365778802565
+},
+"MAR|BARL": {
+"imports": 432.210336592813,
+"exports": 15.273551172502899,
+"feed": 681.361127573555,
+"consumption": 1251.98860191041,
+"production": 2472.9250348906603
+},
+"MAR|OATS": {
+"imports": 3.0389610389610398,
+"exports": 0.987012987012987,
+"feed": 27.6363636363636,
+"consumption": 3.9480519480519503,
+"production": 35.4545454545455
+},
+"MAR|MAIZ": {
+"imports": 2390.47562189055,
+"exports": 1.99960199004975,
+"feed": 625.875422885572,
+"consumption": 1505.7002985074598,
+"production": 122.024278606965
+},
+"MAR|OCER": {
+"imports": 11.470504432451701,
+"exports": 4.0,
+"feed": 5.6838130540564595,
+"consumption": 5.0,
+"production": 10.264747783774201
+},
+"MAR|RAPE": {
+"imports": 1.0207596097698601,
+"exports": 0.124557658619154,
+"consumption": 0.979240390230141,
+"production": 2.0415192195397203
+},
+"MAR|SUNF": {
+"imports": 25.0,
+"production": 24.0
+},
+"MAR|SOYA": {
+"imports": 63.5038759689922,
+"consumption": 7.0,
+"production": 0.9922480620155041
+},
+"MAR|OCRO": {
+"imports": 34.5874830948816,
+"exports": 9.545613945953061,
+"consumption": 71.1956443245473,
+"production": 60.3669467787115
+},
+"MAR|PULS": {
+"imports": 75.1390044362294,
+"exports": 12.2469114018122,
+"feed": 44.0,
+"consumption": 218.762526321654,
+"production": 257.823558097045
+},
+"MAR|POTA": {
+"imports": 72.0,
+"exports": 43.0,
+"feed": 44.0226921093347,
+"consumption": 1515.7813305827701,
+"production": 1925.0
+},
+"MAR|TEXT": {
+"imports": 18.776229493417798,
+"exports": 0.0017899691904041798,
+"production": 0.100811109626965
+},
+"MAR|TOBA": {
+"imports": 13.3095663329496,
+"exports": 2.9211801445474697,
+"production": 1.31139289221292
+},
+"MAR|TOMA": {
+"imports": 33.0,
+"exports": 531.0,
+"consumption": 687.864150943396,
+"production": 1294.0
+},
+"MAR|OVEG": {
+"imports": 35.0054373155197,
+"exports": 593.5450374027979,
+"feed": 21.9464571188417,
+"consumption": 3027.54756979702,
+"production": 3938.3129878640502
+},
+"MAR|APPL": {
+"imports": 9.0,
+"exports": 1.0,
+"consumption": 522.0,
+"production": 821.0
+},
+"MAR|OFRU": {
+"imports": 158.20973852461,
+"exports": 106.895509590277,
+"feed": 39.1121772388646,
+"consumption": 1389.35327834284,
+"production": 1551.24665725999
+},
+"MAR|CITR": {
+"imports": 15.4663353109237,
+"exports": 702.175930683283,
+"consumption": 1498.89219417752,
+"production": 2373.90031777759
+},
+"MAR|TAGR": {
+"imports": 3.0,
+"exports": 8.0,
+"consumption": 315.0,
+"production": 324.0
+},
+"MAR|TABO": {
+"imports": 0.937911675971534,
+"exports": 85.99749432385431,
+"consumption": 19.4535274828039,
+"production": 197.665208432863
+},
+"MAR|TWIN": {
+"imports": 10.1123595505618,
+"exports": 4.9438202247191,
+"consumption": 29.4093921060213,
+"production": 34.382022471910105
+},
+"MAR|WHEA": {
+"imports": 3668.0,
+"exports": 22.0,
+"feed": 2568.0,
+"consumption": 6455.0,
+"production": 7091.0
+},
+"MAR|BEEF": {
+"imports": 7.98921019183726,
+"exports": 1.23392362044523,
+"consumption": 254.342576409167,
+"production": 276.626402892365
+},
+"MAR|SGMT": {
+"imports": 1.5925920537701699,
+"consumption": 181.703071126177,
+"production": 204.203703973115
+},
+"MAR|EGGS": {
+"imports": 1.00108931641598,
+"exports": 3.00000415241328,
+"consumption": 311.000430466843,
+"production": 392.99945603386095
+},
+"MAR|POUM": {
+"imports": 3.0,
+"exports": 1.0,
+"consumption": 730.0,
+"production": 745.0
+},
+"MAR|BUTT": {
+"imports": 20.2950648623331,
+"exports": 0.0814804446384977,
+"consumption": 58.414053329089995,
+"production": 38.200468911395404
+},
+"MAR|SMIP": {
+"imports": 5.65197986211219,
+"exports": 0.025025756261233698,
+"consumption": 5.4545198946545295,
+"production": 0.00431014029267802
+},
+"MAR|CHES": {
+"imports": 20.2032923071963,
+"exports": 12.0054136277807,
+"consumption": 42.7440764087466,
+"production": 55.5037758464835
+},
+"MAR|FRMI": {
+"imports": 0.897123735405404,
+"exports": 3.69402981222311,
+"feed": 55.6548311671607,
+"consumption": 1488.23703065993,
+"production": 1556.0128218785799
+},
+"MAR|RICE": {
+"imports": 12.7401109731176,
+"exports": 1.35941994142043,
+"consumption": 45.6412812028888,
+"production": 38.89086507583259
+},
+"MAR|MOLA": {
+"imports": 0.004638205547632959,
+"exports": 56.1778119872312,
+"feed": 95.6759447572551,
+"production": 151.849118538939
+},
+"MAR|SUGA": {
+"imports": 1073.94082376016,
+"exports": 432.278845615018,
+"consumption": 1147.83829644158,
+"production": 567.7990473522
+},
+"MAR|RAPO": {
+"imports": 6.69695047821017,
+"exports": 1.6262177824903898,
+"consumption": 4.41920793482486,
+"production": 1.11615841303503
+},
+"MAR|SUNO": {
+"imports": 60.0,
+"exports": 2.0,
+"consumption": 54.035087719298204,
+"production": 15.0
+},
+"MAR|SOYO": {
+"imports": 502.0,
+"exports": 20.0,
+"consumption": 216.0,
+"production": 10.0
+},
+"MAR|OLIO": {
+"imports": 8.0,
+"exports": 22.0,
+"consumption": 95.39823008849561,
+"production": 141.0
+},
+"MAR|OTHO": {
+"imports": 59.4098661407443,
+"exports": 22.657142857142897,
+"consumption": 30.3228352738101,
+"production": 18.3619047619048
+},
+"MAR|RAPC": {
+"imports": 169.99753201591702,
+"feed": 171.09853201591702,
+"production": 1.101
+},
+"MAR|SUNC": {
+"imports": 503.33989461422004,
+"feed": 524.956087471363,
+"production": 21.616192857142902
+},
+"MAR|SOYC": {
+"imports": 1150.97269647604,
+"exports": 0.10247524686658101,
+"feed": 1201.76321615303,
+"production": 50.8929949238579
+},
+"MAR|MILK": {
+"imports": 0.819014775480835,
+"exports": 0.7335001258385581,
+"production": 2074.95678493611
+},
+"MAR|FFIS": {
+"imports": 5.98864877058425,
+"exports": 4.27096323031807,
+"consumption": 17.884033385968902,
+"production": 16.1763501015114
+},
+"MAR|SFIS": {
+"imports": 44.069784869128696,
+"exports": 650.180606669057,
+"feed": 2.16,
+"consumption": 655.154392972392,
+"production": 1263.49521477232
+},
+"MAR|OAQU": {
+"imports": 43.077844592038005,
+"exports": 122.314167945901,
+"consumption": 19.6513086575914,
+"production": 98.9783430920869
+},
+"MAR|FPRI": {
+"imports": 0.443493094350325,
+"exports": 18.702447860790798,
+"feed": 23.9784227993723,
+"production": 59.2056778923941
+},
+"MAR|PORK": {
+"exports": 0.667264200342202,
+"consumption": 0.666367899828899,
+"production": 1.3336321001711
+},
+"MAR|RYEM": {
+"consumption": 2.0,
+"production": 2.0
+},
+"MAR|FENI": {
+"consumption": 14.875,
+"production": 17.0
+},
+"MIDEAST|RYEM": {
+"imports": 12.143648397977,
+"exports": 0.637442451598574,
+"feed": 5.63714160952365,
+"consumption": 4.00188779652634,
+"production": 3.09516515513142e-05
+},
+"MIDEAST|BARL": {
+"imports": 14818.602367471402,
+"exports": 530.200951002048,
+"feed": 17905.497693831298,
+"consumption": 306.77225544351603,
+"production": 4922.97476707807
+},
+"MIDEAST|OATS": {
+"imports": 70.3900126169915,
+"exports": 20.7783171683119,
+"feed": 23.9195368266422,
+"consumption": 26.9689310139691,
+"production": 2.36632037621901
+},
+"MIDEAST|MAIZ": {
+"imports": 14896.161769176399,
+"exports": 189.385006512984,
+"feed": 12774.366951694,
+"consumption": 1418.89762574696,
+"production": 1066.20014193313
+},
+"MIDEAST|OCER": {
+"imports": 350.294482399037,
+"exports": 30.099332933243,
+"feed": 314.151610336249,
+"consumption": 235.219956814678,
+"production": 249.155892889222
+},
+"MIDEAST|RAPE": {
+"imports": 949.364472233834,
+"exports": 2.019747422809,
+"feed": 15.9693963025589,
+"consumption": 3.9545041181574203,
+"production": 351.60755338601
+},
+"MIDEAST|SUNF": {
+"imports": 247.47639403052702,
+"exports": 8.10391488528552,
+"feed": 32.4283433857734,
+"consumption": 41.6485721795446,
+"production": 49.4058930010612
+},
+"MIDEAST|SOYA": {
+"imports": 3056.65683438073,
+"exports": 7.38504050037105,
+"feed": 506.774597875128,
+"consumption": 14.2652641524914,
+"production": 205.402919549502
+},
+"MIDEAST|OCRO": {
+"imports": 906.322913019854,
+"exports": 184.147870023061,
+"feed": 26.378016020423203,
+"consumption": 458.539423029525,
+"production": 273.708423922492
+},
+"MIDEAST|PULS": {
+"imports": 1627.11390039591,
+"exports": 361.67122377545104,
+"feed": 245.0261663513,
+"consumption": 1311.52990208112,
+"production": 792.252590896297
+},
+"MIDEAST|POTA": {
+"imports": 1759.37882492893,
+"exports": 774.1872286964909,
+"feed": 204.213261588576,
+"consumption": 5825.617407978139,
+"production": 6391.30767661928
+},
+"MIDEAST|TEXT": {
+"imports": 80.5914386497214,
+"exports": 20.0941028837501,
+"production": 77.94197266159509
+},
+"MIDEAST|TOBA": {
+"imports": 302.633296947016,
+"exports": 95.3214582811501,
+"production": 32.6915697165151
+},
+"MIDEAST|TOMA": {
+"imports": 2001.29555315599,
+"exports": 1408.54470224058,
+"feed": 1.34740866575167,
+"consumption": 7127.82283142938,
+"production": 7499.560998749859
+},
+"MIDEAST|OVEG": {
+"imports": 4715.5276629932805,
+"exports": 2558.7672782699296,
+"feed": 34.049356892548204,
+"consumption": 15559.763226608999,
+"production": 16053.4609010853
+},
+"MIDEAST|APPL": {
+"imports": 970.015090668165,
+"exports": 862.280863310882,
+"feed": 1.3706625404899901,
+"consumption": 2437.98964648137,
+"production": 2923.84948593737
+},
+"MIDEAST|OFRU": {
+"imports": 5065.76212400417,
+"exports": 2832.587118787,
+"feed": 270.035960172308,
+"consumption": 11649.941135370598,
+"production": 11704.5057698306
+},
+"MIDEAST|CITR": {
+"imports": 2068.71999642712,
+"exports": 388.044610705968,
+"feed": 11.007531513350498,
+"consumption": 5391.60411786642,
+"production": 5401.43887508059
+},
+"MIDEAST|TAGR": {
+"imports": 333.098654612995,
+"exports": 456.952033094914,
+"feed": 0.00268227713739973,
+"consumption": 1797.05346184775,
+"production": 2229.54172858393
+},
+"MIDEAST|TABO": {
+"imports": 85.0017496496379,
+"exports": 26.1591079547184,
+"consumption": 330.387151485237,
+"production": 423.713693824463
+},
+"MIDEAST|TWIN": {
+"imports": 58.5550657060172,
+"exports": 7.04854368932039,
+"consumption": 13.4897091718524,
+"production": 11.0
+},
+"MIDEAST|WHEA": {
+"imports": 13984.1050004292,
+"exports": 1799.78544931949,
+"feed": 2035.5966583362201,
+"consumption": 27032.6049104594,
+"production": 18519.0994637216
+},
+"MIDEAST|BEEF": {
+"imports": 646.911534604304,
+"exports": 50.048098020858,
+"feed": 0.011759623150349601,
+"consumption": 1215.02454415345,
+"production": 702.062250548488
+},
+"MIDEAST|PORK": {
+"imports": 28.995633485212,
+"exports": 2.47505252313945,
+"consumption": 11.0752734223367,
+"production": 0.923076923076923
+},
+"MIDEAST|SGMT": {
+"imports": 222.431792387766,
+"exports": 8.02994142148413,
+"feed": 0.121679800297377,
+"consumption": 1090.7689137801601,
+"production": 940.4590158937631
+},
+"MIDEAST|EGGS": {
+"imports": 567.104235161253,
+"exports": 105.042620675731,
+"feed": 0.07263239843110629,
+"consumption": 1634.64594437883,
+"production": 1451.18959418202
+},
+"MIDEAST|POUM": {
+"imports": 2217.96208310346,
+"exports": 162.894173544538,
+"consumption": 5373.0141221718095,
+"production": 3559.49138839446
+},
+"MIDEAST|WHEP": {
+"imports": 23.2523552449897,
+"exports": 7.40413843297278,
+"feed": 24.1920895619011,
+"consumption": 3.7253826603597098,
+"production": 12.0742237879227
+},
+"MIDEAST|BUTT": {
+"imports": 145.704904465134,
+"exports": 14.9069627341757,
+"feed": 1.43616081833768,
+"consumption": 353.797779121819,
+"production": 226.226011669567
+},
+"MIDEAST|SMIP": {
+"imports": 182.67657812603002,
+"exports": 57.9307926690884,
+"feed": 9.62532679904223,
+"consumption": 162.18048182786,
+"production": 50.888399749495896
+},
+"MIDEAST|CHES": {
+"imports": 496.809294864014,
+"exports": 165.188570121263,
+"consumption": 888.092671937658,
+"production": 556.471947194907
+},
+"MIDEAST|FRMI": {
+"imports": 516.927721052263,
+"exports": 567.5900218673321,
+"feed": 3875.02623013467,
+"consumption": 6089.90816389431,
+"production": 10392.0077332565
+},
+"MIDEAST|CREM": {
+"imports": 57.709445123813694,
+"exports": 3.01342723169022,
+"consumption": 160.588900887748,
+"production": 105.89288299562399
+},
+"MIDEAST|COCM": {
+"imports": 438.007830044551,
+"exports": 325.18744179755197,
+"feed": 7.90700332600048,
+"consumption": 334.102747555267,
+"production": 214.916411470521
+},
+"MIDEAST|RICE": {
+"imports": 4963.95256444801,
+"exports": 231.153389938052,
+"feed": 566.0231325879259,
+"consumption": 5587.88856120377,
+"production": 1480.00473724938
+},
+"MIDEAST|MOLA": {
+"imports": 124.697936773932,
+"exports": 191.736645648017,
+"feed": 389.616758027476,
+"consumption": 0.00524715165595101,
+"production": 503.423370675875
+},
+"MIDEAST|SUGA": {
+"imports": 7913.662195526,
+"exports": 2465.6124745712,
+"feed": 3.45980959293312,
+"consumption": 5437.81676544949,
+"production": 1733.4176897652999
+},
+"MIDEAST|RAPO": {
+"imports": 37.3405009888951,
+"exports": 344.276441718719,
+"feed": 0.282997708160935,
+"consumption": 97.154928276319,
+"production": 529.511318242343
+},
+"MIDEAST|SUNO": {
+"imports": 1701.8626484567399,
+"exports": 98.53948162264909,
+"feed": 0.0297616657857902,
+"consumption": 894.876399892029,
+"production": 77.0
+},
+"MIDEAST|SOYO": {
+"imports": 517.807732236162,
+"exports": 81.4186748030234,
+"feed": 0.0012991770367000099,
+"consumption": 769.488977225767,
+"production": 469.258017621071
+},
+"MIDEAST|OLIO": {
+"imports": 81.4355464627062,
+"exports": 46.705731863431296,
+"feed": 0.000427089828240623,
+"consumption": 248.280469327111,
+"production": 265.575873777762
+},
+"MIDEAST|OTHO": {
+"imports": 744.300737316152,
+"exports": 381.964653791902,
+"feed": 0.00100243734425297,
+"consumption": 455.126872621661,
+"production": 300.568334213518
+},
+"MIDEAST|RAPC": {
+"imports": 102.83226840024001,
+"exports": 386.818807050266,
+"feed": 425.48132379828996,
+"production": 784.396273696184
+},
+"MIDEAST|SUNC": {
+"imports": 372.642082614942,
+"exports": 0.623199996792182,
+"feed": 475.435096547767,
+"production": 103.461513548612
+},
+"MIDEAST|SOYC": {
+"imports": 6612.14212161979,
+"exports": 183.456310857694,
+"feed": 8434.31463868236,
+"production": 2005.62882792026
+},
+"MIDEAST|MILK": {
+"imports": 313.63784303181103,
+"exports": 200.32966208893,
+"production": 13383.355854453299
+},
+"MIDEAST|TEAS": {
+"imports": 337.18745888974195,
+"exports": 81.7261000400177,
+"feed": 0.0013863597605829501,
+"consumption": 313.51131497925604,
+"production": 101.0
+},
+"MIDEAST|FFIS": {
+"imports": 310.94841167026897,
+"exports": 23.2309304408607,
+"feed": 0.10073246635231,
+"consumption": 833.401910095939,
+"production": 546.2520967700419
+},
+"MIDEAST|SFIS": {
+"imports": 818.545319257319,
+"exports": 253.762853946355,
+"feed": 426.58145268613004,
+"consumption": 1269.5698966240502,
+"production": 1220.6639512115
+},
+"MIDEAST|OAQU": {
+"imports": 144.773609588005,
+"exports": 130.14613218461702,
+"feed": 0.185953600256904,
+"consumption": 103.992929062286,
+"production": 130.381566952438
+},
+"MIDEAST|FPRI": {
+"imports": 1.60125180528174,
+"exports": 0.499951091023585,
+"feed": 24.784728309720403,
+"production": 32.7892418396939
+},
+"MIDEAST|FENI": {
+"imports": 94.292186390279,
+"exports": 14.9636948329935,
+"feed": 12.28013550489,
+"consumption": 45.535800002760205,
+"production": 13.82254443955
+},
+"NGA|MAIZ": {
+"imports": 744.0,
+"exports": 4.0,
+"feed": 4082.0,
+"consumption": 6269.0,
+"production": 10420.0
+},
+"NGA|OCER": {
+"imports": 12.9376687435118,
+"exports": 8.77818132203571,
+"feed": 559.337836316128,
+"consumption": 7093.0607141662695,
+"production": 8520.41856694893
+},
+"NGA|SOYA": {
+"imports": 70.0,
+"exports": 123.0,
+"feed": 89.0,
+"consumption": 258.0,
+"production": 994.0
+},
+"NGA|OCRO": {
+"imports": 15.3785854780273,
+"exports": 230.18459323741502,
+"feed": 1.0,
+"consumption": 800.7460560482309,
+"production": 2946.3104295423
+},
+"NGA|PULS": {
+"imports": 4.194395237015691,
+"exports": 3.60540212333844,
+"feed": 824.711537197946,
+"consumption": 2109.5264572503197,
+"production": 3940.6006338031502
+},
+"NGA|POTA": {
+"imports": 9.00609059725119,
+"exports": 1.7919890579048798,
+"feed": 67.95398215410209,
+"consumption": 863.415302663886,
+"production": 1315.8899039317
+},
+"NGA|TEXT": {
+"imports": 0.89138845016448,
+"exports": 35.1116367366423,
+"production": 98.6842275163545
+},
+"NGA|TOBA": {
+"imports": 24.840493668946,
+"exports": 6.23969572490174,
+"production": 6.06248424365771
+},
+"NGA|TOMA": {
+"imports": 479.07282955754897,
+"exports": 0.999847954994678,
+"consumption": 2894.55982970959,
+"production": 2809.42709441995
+},
+"NGA|OVEG": {
+"imports": 10.2976771347016,
+"exports": 11.0,
+"consumption": 10637.1598617312,
+"production": 12257.8511614326
+},
+"NGA|OFRU": {
+"imports": 23.0050418588384,
+"exports": 223.32972262553,
+"feed": 0.127854129969476,
+"consumption": 7056.44998492833,
+"production": 7915.6588619037
+},
+"NGA|CITR": {
+"imports": 3.99987686245536,
+"exports": 1.0,
+"consumption": 3723.45807166605,
+"production": 4059.50006156877
+},
+"NGA|WHEA": {
+"imports": 5646.0,
+"exports": 19.0,
+"feed": 44.937338372787,
+"consumption": 4858.22558185797,
+"production": 67.0
+},
+"NGA|BEEF": {
+"imports": 1.3666289452493,
+"consumption": 301.683314472625,
+"production": 300.316685527375
+},
+"NGA|PORK": {
+"imports": 7.22983567819748,
+"consumption": 298.614917839099,
+"production": 291.385082160901
+},
+"NGA|EGGS": {
+"imports": 2.00142879391291,
+"exports": 0.9458615703463159,
+"consumption": 587.469407545632,
+"production": 660.47150199126
+},
+"NGA|POUM": {
+"imports": 15.970749542961599,
+"consumption": 273.499085923218,
+"production": 257.528336380256
+},
+"NGA|BUTT": {
+"imports": 2.5144313958083297,
+"exports": 0.0055799913295455,
+"consumption": 13.848311599685099,
+"production": 11.3394601952063
+},
+"NGA|SMIP": {
+"imports": 31.996491306446,
+"exports": 0.221766887966066,
+"feed": 0.29544063871931203,
+"consumption": 29.0985070796664,
+"production": 2.10699766491856
+},
+"NGA|CHES": {
+"imports": 1.0555476039943301,
+"exports": 0.00158467113954153,
+"consumption": 10.310858928767301,
+"production": 9.25689599591251
+},
+"NGA|FRMI": {
+"imports": 4.6347528269305505,
+"exports": 2.93118280531975,
+"feed": 90.1034067045342,
+"consumption": 328.823875535391,
+"production": 439.84161171637095
+},
+"NGA|RICE": {
+"imports": 112.561038584204,
+"exports": 1.33191670314552,
+"consumption": 4731.63408792446,
+"production": 5212.4419405915805
+},
+"NGA|MOLA": {
+"imports": 0.054584496216374,
+"feed": 27.257156843483298,
+"production": 27.2025723472669
+},
+"NGA|SUGA": {
+"imports": 1412.2,
+"exports": 0.92,
+"consumption": 1815.16,
+"production": 23.0
+},
+"NGA|SOYO": {
+"imports": 1.0418956043956,
+"exports": 7.54120879120879,
+"consumption": 86.22939560439559,
+"production": 85.4354395604396
+},
+"NGA|PLMO": {
+"imports": 1461.87364406508,
+"exports": 15.060440131131699,
+"consumption": 1471.87638190141,
+"production": 1163.06317796746
+},
+"NGA|OTHO": {
+"imports": 34.903563613193995,
+"exports": 17.875776925022002,
+"consumption": 548.560816446242,
+"production": 607.44318116026
+},
+"NGA|SOYC": {
+"imports": 3.49183898341304,
+"exports": 26.0492554448564,
+"feed": 335.65365436769997,
+"production": 358.211070829143
+},
+"NGA|MILK": {
+"imports": 3.03837948797451,
+"exports": 0.674086044180459,
+"production": 515.931239255346
+},
+"NGA|COFF": {
+"imports": 12.4175313856997,
+"exports": 0.904651335682662,
+"consumption": 5.79123430715015,
+"production": 1.03479428214164
+},
+"NGA|COCO": {
+"imports": 1.03440251911673,
+"exports": 294.827267414413,
+"production": 324.085503708558
+},
+"NGA|FFIS": {
+"imports": 0.480365120497286,
+"exports": 1.09023459154296,
+"consumption": 716.084882704229,
+"production": 716.694752175274
+},
+"NGA|SFIS": {
+"imports": 615.258440167493,
+"exports": 13.5490490779004,
+"feed": 77.5682929565296,
+"consumption": 956.832160020993,
+"production": 432.69106188792995
+},
+"NGA|OAQU": {
+"imports": 0.357520590135556,
+"exports": 5.65305268680041,
+"consumption": 60.7071735546151,
+"production": 66.00270565128001
+},
+"NGA|FPRI": {
+"imports": 6.83331182555203,
+"exports": 0.101155656826786,
+"feed": 6.00693373882018,
+"production": 0.013108703702099501
+},
+"NGA|FENI": {
+"imports": 11.8915075390755,
+"exports": 13.0168602236235,
+"feed": 35938.5342569302,
+"consumption": 64585.8797882815,
+"production": 116340.594876869
+},
+"NGA|SGMT": {
+"consumption": 414.0,
+"production": 414.0
+},
+"ETH|BARL": {
+"imports": 235.106998866262,
+"exports": 0.9992851989609539,
+"feed": 37.982698055668294,
+"consumption": 1649.2487313645402,
+"production": 1960.8924160760598
+},
+"ETH|OATS": {
+"imports": 1.05830892354176,
+"feed": 1.01356806312233,
+"consumption": 35.474882209281596,
+"production": 37.4844136013515
+},
+"ETH|MAIZ": {
+"imports": 40.0018996058318,
+"exports": 19.9990501970841,
+"feed": 809.961532981906,
+"consumption": 5999.715059125229,
+"production": 10488.498076649099
+},
+"ETH|OCER": {
+"imports": 307.000094616331,
+"exports": 13.0041149280271,
+"feed": 202.02011194341497,
+"consumption": 7946.614391637049,
+"production": 11483.0067925566
+},
+"ETH|RAPE": {
+"imports": 0.0705535676871185,
+"exports": 1.00086040936204,
+"feed": 0.984485607486584,
+"consumption": 3.08836926317429,
+"production": 40.9647232161564
+},
+"ETH|SUNF": {
+"imports": 1.0,
+"feed": 8.0,
+"production": 7.0
+},
+"ETH|SOYA": {
+"imports": 1.4299980703085,
+"exports": 50.1038642681905,
+"consumption": 46.2413118227881,
+"production": 85.8213534587124
+},
+"ETH|OCRO": {
+"imports": 15.469236826497799,
+"exports": 283.067319283406,
+"feed": 1.93283446747848,
+"consumption": 478.57507692945103,
+"production": 1268.3943633681502
+},
+"ETH|PULS": {
+"imports": 82.4485649272085,
+"exports": 316.08282806679296,
+"feed": 68.0164078472619,
+"consumption": 2672.5721846057,
+"production": 3207.27635189198
+},
+"ETH|POTA": {
+"imports": 1.25467670137654,
+"exports": 19.0123007519743,
+"feed": 29.0187748319607,
+"consumption": 707.4577174550429,
+"production": 968.372661649312
+},
+"ETH|TEXT": {
+"imports": 0.947272261429566,
+"exports": 1.6529546420554,
+"production": 37.0176535027586
+},
+"ETH|TOBA": {
+"imports": 1.28485943749938,
+"exports": 0.0154738351019061,
+"production": 2.17056144211913
+},
+"ETH|TOMA": {
+"imports": 9.0,
+"exports": 9.0,
+"consumption": 25.925925925925903,
+"production": 28.0
+},
+"ETH|OVEG": {
+"imports": 50.068814055636906,
+"exports": 26.9780380673499,
+"consumption": 1428.6638517265799,
+"production": 1494.4304538799402
+},
+"ETH|OFRU": {
+"imports": 19.0553789738202,
+"exports": 5.99523241954708,
+"consumption": 896.382350193321,
+"production": 965.468138880194
+},
+"ETH|CITR": {
+"imports": 28.565633061295898,
+"exports": 3.50573868965999,
+"consumption": 54.967931681942,
+"production": 49.0553241320115
+},
+"ETH|TAGR": {
+"imports": 3.0,
+"consumption": 4.0,
+"production": 3.0
+},
+"ETH|TWIN": {
+"imports": 0.666666666666667,
+"consumption": 1.3333333333333302,
+"production": 0.666666666666667
+},
+"ETH|WHEA": {
+"imports": 1178.0,
+"exports": 7.0,
+"feed": 102.0,
+"consumption": 3610.0,
+"production": 4643.0
+},
+"ETH|PORK": {
+"imports": 0.848116723311944,
+"consumption": 2.42405836165597,
+"production": 1.5759416383440301
+},
+"ETH|POUM": {
+"imports": 1.04165230818229,
+"consumption": 76.52082615409111,
+"production": 71.5065857487558
+},
+"ETH|BUTT": {
+"imports": 0.46703672312500205,
+"exports": 0.0176193359676922,
+"consumption": 15.0317190550169,
+"production": 14.5823016678596
+},
+"ETH|SMIP": {
+"imports": 0.6787957145446539,
+"exports": 0.00196374118103097,
+"feed": 0.00761282994701478,
+"consumption": 0.9560427758372909,
+"production": 0.26082674227935304
+},
+"ETH|CHES": {
+"imports": 0.188587468016755,
+"exports": 0.00016879918262814,
+"consumption": 5.11877137653913,
+"production": 4.9303527077050004
+},
+"ETH|FRMI": {
+"imports": 0.814064448949453,
+"exports": 1.09396403280307e-06,
+"feed": 35.5965529861697,
+"consumption": 2996.5722354040204,
+"production": 3034.29074215163
+},
+"ETH|RICE": {
+"imports": 240.66056195122002,
+"feed": 0.667173121282994,
+"consumption": 238.847977419312,
+"production": 100.66411317073201
+},
+"ETH|MOLA": {
+"imports": 0.00137683513235942,
+"exports": 65.5024859661088,
+"feed": 84.0085547345697,
+"production": 149.509663865546
+},
+"ETH|SUGA": {
+"imports": 352.44801787275503,
+"exports": 7.49546908764003,
+"consumption": 760.314795663362,
+"production": 416.27718646388297
+},
+"ETH|RAPO": {
+"imports": 2.19217076432149,
+"consumption": 16.096085382160698,
+"production": 13.9039146178393
+},
+"ETH|SOYO": {
+"imports": 3.05058757895873,
+"consumption": 6.18676552630158,
+"production": 2.37353105260316
+},
+"ETH|OTHO": {
+"imports": 6.63312013070008,
+"exports": 1.00050281075509,
+"consumption": 87.1079984156464,
+"production": 126.57561420400599
+},
+"ETH|MILK": {
+"imports": 0.215850099245004,
+"exports": 0.0304152683056519,
+"production": 3192.75514507568
+},
+"ETH|COFF": {
+"imports": 0.99888765294772,
+"exports": 194.215795328142,
+"consumption": 244.27141268075601,
+"production": 448.500556173526
+},
+"ETH|TEAS": {
+"imports": 1.2963503649635,
+"exports": 2.10802919708029,
+"consumption": 9.486131386861311,
+"production": 11.3518248175182
+},
+"ETH|FFIS": {
+"imports": 0.08,
+"exports": 0.89,
+"consumption": 55.32,
+"production": 56.13
+},
+"ETH|FPRI": {
+"imports": 0.28426355843009704,
+"exports": 0.255760118742412,
+"feed": 0.298117324485282,
+"production": 0.306256423521253
+},
+"ETH|BEEF": {
+"exports": 1.99743260590501,
+"consumption": 387.501925545571,
+"production": 389.49935815147603
+},
+"ETH|SGMT": {
+"exports": 16.0,
+"consumption": 174.0,
+"production": 190.0
+},
+"ETH|EGGS": {
+"exports": 0.990990990990991,
+"consumption": 42.612612612612594,
+"production": 55.495495495495504
+},
+"ETH|RAPC": {
+"exports": 8.474123397514841,
+"feed": 9.62324309463175,
+"production": 18.0973664921466
+},
+"ETH|FENI": {
+"exports": 4.71130515002341,
+"feed": 321.874574238934,
+"consumption": 6118.01365661035,
+"production": 7259.35565257501
+},
+"ZAF|RYEM": {
+"imports": 1.24404282332827,
+"exports": 1.0396572770019499,
+"consumption": 2.10219277316316,
+"production": 1.89780722683684
+},
+"ZAF|BARL": {
+"imports": 142.0,
+"exports": 42.0,
+"feed": 7.0,
+"consumption": 0.9991503823279531,
+"production": 307.0
+},
+"ZAF|OATS": {
+"imports": 84.0,
+"exports": 4.0,
+"feed": 13.122641509434,
+"consumption": 87.8207547169811,
+"production": 23.0
+},
+"ZAF|MAIZ": {
+"imports": 572.0,
+"exports": 2584.0,
+"feed": 5276.0,
+"consumption": 5480.0,
+"production": 16820.0
+},
+"ZAF|OCER": {
+"imports": 74.0458015267176,
+"exports": 31.8854961832061,
+"feed": 25.9389312977099,
+"consumption": 68.6717557251908,
+"production": 217.45038167938898
+},
+"ZAF|RAPE": {
+"imports": 3.0,
+"exports": 2.0,
+"feed": 2.36585365853659,
+"production": 93.0
+},
+"ZAF|SUNF": {
+"imports": 32.0,
+"exports": 1.0,
+"feed": 6.0,
+"production": 874.0
+},
+"ZAF|SOYA": {
+"imports": 32.0,
+"exports": 3.0,
+"feed": 147.0,
+"production": 1316.0
+},
+"ZAF|OCRO": {
+"imports": 99.4073265748549,
+"exports": 47.5604592994533,
+"feed": 1.9568642748393699,
+"consumption": 34.5791436073306,
+"production": 44.6227689159676
+},
+"ZAF|PULS": {
+"imports": 56.0449855934566,
+"exports": 29.0181243610001,
+"feed": 14.556495337237,
+"consumption": 81.3993400873687,
+"production": 84.943117390092
+},
+"ZAF|POTA": {
+"imports": 38.0,
+"exports": 191.0,
+"feed": 24.0,
+"consumption": 1881.0,
+"production": 2457.0
+},
+"ZAF|TEXT": {
+"imports": 22.226627268431102,
+"exports": 4.90746635437643,
+"production": 17.0315619238694
+},
+"ZAF|TOBA": {
+"imports": 39.3771276187182,
+"exports": 31.8105609410593,
+"production": 14.54023863807
+},
+"ZAF|TOMA": {
+"imports": 92.0601700457816,
+"exports": 37.9751471550033,
+"consumption": 620.44911932523,
+"production": 672.4395029430999
+},
+"ZAF|OVEG": {
+"imports": 116.0,
+"exports": 351.0,
+"feed": 49.5101733232856,
+"consumption": 1704.63602110023,
+"production": 2167.0
+},
+"ZAF|APPL": {
+"imports": 46.0,
+"exports": 579.0,
+"consumption": 81.0,
+"production": 929.0
+},
+"ZAF|OFRU": {
+"imports": 221.224713386144,
+"exports": 795.8867753237159,
+"feed": 0.518784112549762,
+"consumption": 700.08347389927,
+"production": 1445.44206008584
+},
+"ZAF|CITR": {
+"imports": 29.8600662997029,
+"exports": 2203.06684457713,
+"consumption": 290.99635355983196,
+"production": 2619.1891755462298
+},
+"ZAF|TAGR": {
+"imports": 25.9937000242307,
+"exports": 561.135934092561,
+"consumption": 115.96889416847901,
+"production": 794.343257128818
+},
+"ZAF|TWIN": {
+"imports": 2.99861687413555,
+"exports": 519.23928077455,
+"consumption": 228.700798433435,
+"production": 1081.50115260489
+},
+"ZAF|WHEA": {
+"imports": 1856.0,
+"exports": 263.0,
+"feed": 2.99907720701323,
+"consumption": 3085.05075361427,
+"production": 1594.0
+},
+"ZAF|BEEF": {
+"imports": 20.0,
+"exports": 46.0,
+"consumption": 998.0,
+"production": 1024.0
+},
+"ZAF|PORK": {
+"imports": 29.0,
+"exports": 29.0,
+"consumption": 226.0,
+"production": 235.0
+},
+"ZAF|SGMT": {
+"imports": 7.0,
+"exports": 1.0,
+"consumption": 182.0,
+"production": 167.0
+},
+"ZAF|EGGS": {
+"imports": 2.0,
+"exports": 15.0,
+"consumption": 329.0,
+"production": 445.0
+},
+"ZAF|POUM": {
+"imports": 514.0,
+"exports": 63.0,
+"consumption": 2110.0,
+"production": 1665.0
+},
+"ZAF|WHEP": {
+"imports": 7.05859260095323,
+"exports": 3.56517188409625,
+"feed": 6.1147721848413,
+"production": 2.62135146798433
+},
+"ZAF|WMIO": {
+"imports": 4.03904709976106,
+"exports": 6.407368271817609,
+"feed": 1.16340087278482,
+"consumption": 3.0420927022084,
+"production": 6.57381474704977
+},
+"ZAF|BUTT": {
+"imports": 5.364204232578181,
+"exports": 2.78618966418958,
+"consumption": 17.3152662824597,
+"production": 14.737251714071101
+},
+"ZAF|SMIP": {
+"imports": 11.2522253401384,
+"exports": 9.70420906890053,
+"feed": 1.5370732350260101,
+"consumption": 4.339607426225419,
+"production": 4.38271727077532
+},
+"ZAF|CHES": {
+"imports": 12.3525063872403,
+"exports": 9.891834613294542,
+"consumption": 56.045469009182995,
+"production": 53.5847972352373
+},
+"ZAF|FRMI": {
+"imports": 18.575900932072898,
+"exports": 55.9470306455885,
+"feed": 459.768431942485,
+"consumption": 2375.50668735726,
+"production": 2880.22800972379
+},
+"ZAF|CREM": {
+"imports": 0.0516195198848193,
+"exports": 1.83144754355551,
+"consumption": 1.17159651915955,
+"production": 2.95142454283024
+},
+"ZAF|COCM": {
+"imports": 1.95565011578703,
+"exports": 35.4581935908218,
+"consumption": 11.6833632949364,
+"production": 44.471648572354304
+},
+"ZAF|RICE": {
+"imports": 1079.90361871139,
+"exports": 113.18669020300099,
+"consumption": 866.111363881694,
+"production": 1.9985878199470402
+},
+"ZAF|MOLA": {
+"imports": 260.466994025584,
+"exports": 25.1518365119452,
+"production": 783.110620192895
+},
+"ZAF|SUGA": {
+"imports": 843.64,
+"exports": 579.6,
+"consumption": 1598.04,
+"production": 1945.8
+},
+"ZAF|RAPO": {
+"imports": 4.04123711340206,
+"exports": 0.989690721649485,
+"production": 44.4536082474227
+},
+"ZAF|SUNO": {
+"imports": 171.0,
+"exports": 74.0,
+"consumption": 313.0,
+"production": 291.0
+},
+"ZAF|SOYO": {
+"imports": 190.0,
+"exports": 49.0,
+"consumption": 260.0,
+"production": 148.0
+},
+"ZAF|OTHO": {
+"imports": 87.6081799021759,
+"exports": 76.8779359551449,
+"consumption": 94.0474942126128,
+"production": 132.66230339495
+},
+"ZAF|RAPC": {
+"imports": 8.58978361792056,
+"exports": 0.052012896234791,
+"feed": 78.3946629630651,
+"production": 69.8568922413793
+},
+"ZAF|SUNC": {
+"imports": 68.9398588707852,
+"exports": 19.2377610032692,
+"feed": 396.353796648483,
+"production": 346.65169878096697
+},
+"ZAF|SOYC": {
+"imports": 1096.69330673182,
+"exports": 90.3011087852495,
+"feed": 1720.37433472668,
+"production": 713.982136780105
+},
+"ZAF|MILK": {
+"imports": 39.159617822403504,
+"exports": 58.0057383827712,
+"production": 3387.95864284135
+},
+"ZAF|TEAS": {
+"imports": 27.4576271186441,
+"exports": 5.898305084745759,
+"consumption": 22.6101694915254,
+"production": 2.03389830508475
+},
+"ZAF|FFIS": {
+"imports": 15.0542097902098,
+"exports": 3.44903496503497,
+"consumption": 14.3859748251748,
+"production": 2.82078881118881
+},
+"ZAF|SFIS": {
+"imports": 230.541635629281,
+"exports": 396.526878113975,
+"feed": 25.179752552599798,
+"consumption": 328.42836928428903,
+"production": 519.593364321583
+},
+"ZAF|OAQU": {
+"imports": 39.3004668607528,
+"exports": 22.7917424602899,
+"consumption": 28.3749243569758,
+"production": 16.281446318589
+},
+"ZAF|FPRI": {
+"imports": 0.644212214366369,
+"exports": 0.784418964955766,
+"feed": 14.951565567399602,
+"production": 15.108424349871001
+},
+"ZAF|FENI": {
+"imports": 22.0939932856637,
+"exports": 4.07530424617805,
+"feed": 5.80984688021056,
+"consumption": 69.1343632575137,
+"production": 74.0
+},
+"IND|BARL": {
+"imports": 268.06648474324,
+"exports": 18.995286529397198,
+"feed": 216.946167204168,
+"consumption": 1458.63805507318,
+"production": 1747.43339121806
+},
+"IND|MAIZ": {
+"imports": 87.0,
+"exports": 884.0,
+"feed": 11682.52540927,
+"consumption": 10188.5860990372,
+"production": 25900.0
+},
+"IND|OCER": {
+"imports": 25.312717465530802,
+"exports": 120.96142127713699,
+"feed": 249.414452855293,
+"consumption": 14393.6444250183,
+"production": 16170.49251733
+},
+"IND|RAPE": {
+"imports": 1.0,
+"exports": 18.0,
+"feed": 1197.26100966702,
+"production": 7917.0
+},
+"IND|SUNF": {
+"imports": 2.0,
+"exports": 5.0,
+"feed": 36.1457489878543,
+"production": 251.0
+},
+"IND|SOYA": {
+"imports": 80.0,
+"exports": 295.0,
+"feed": 2470.0,
+"consumption": 229.0,
+"production": 13159.0
+},
+"IND|OCRO": {
+"imports": 658.009743077926,
+"exports": 1566.56151157788,
+"feed": 2104.0860070703,
+"consumption": 10664.09556671,
+"production": 21923.9490011109
+},
+"IND|PULS": {
+"imports": 7002.62255912674,
+"exports": 156.000485142511,
+"feed": 3683.9689872726203,
+"consumption": 22108.438303645802,
+"production": 23744.877380230402
+},
+"IND|POTA": {
+"imports": 1.99997991463721,
+"exports": 387.0038865177,
+"feed": 687.992982381351,
+"consumption": 34110.652066875395,
+"production": 48604.5118754708
+},
+"IND|TEXT": {
+"imports": 385.987541398664,
+"exports": 1064.65900734978,
+"production": 4825.59057980569
+},
+"IND|TOBA": {
+"imports": 4.53842237296457,
+"exports": 231.17823058792098,
+"production": 749.137580191517
+},
+"IND|TOMA": {
+"imports": 12.0,
+"exports": 35.0,
+"consumption": 18951.0,
+"production": 20708.0
+},
+"IND|OVEG": {
+"imports": 25.0,
+"exports": 2639.0,
+"consumption": 101815.703616239,
+"production": 114196.0
+},
+"IND|APPL": {
+"imports": 364.0,
+"exports": 7.0,
+"consumption": 2404.0,
+"production": 2265.0
+},
+"IND|OFRU": {
+"imports": 1465.5122191906798,
+"exports": 1032.02306881134,
+"consumption": 68908.4891503793,
+"production": 79615.0
+},
+"IND|CITR": {
+"imports": 83.7316256951126,
+"exports": 56.381970547787,
+"consumption": 10219.7444025552,
+"production": 11417.904774614699
+},
+"IND|TAGR": {
+"imports": 76.9871602467901,
+"exports": 281.04685676171397,
+"consumption": 2452.40887110222,
+"production": 2921.5127563781903
+},
+"IND|WHEA": {
+"imports": 5366.025828748559,
+"exports": 647.996880911467,
+"feed": 3288.8193833297396,
+"consumption": 87347.2030321129,
+"production": 98510.4741688447
+},
+"IND|PORK": {
+"imports": 1.0,
+"exports": 1.0,
+"consumption": 385.0,
+"production": 382.0
+},
+"IND|WHEP": {
+"imports": 15.6547702819463,
+"exports": 0.0488190767350195,
+"feed": 16.643445447841,
+"production": 1.31211728337511
+},
+"IND|CASE": {
+"imports": 0.17551999376695301,
+"exports": 2.97255178504973,
+"production": 13.5230848569041
+},
+"IND|WMIO": {
+"imports": 0.124239995030269,
+"exports": 2.1364914695942696,
+"feed": 0.037850001845022595,
+"consumption": 1.72366382586875,
+"production": 3.7737653022777797
+},
+"IND|BUTT": {
+"imports": 2.28124273135345,
+"exports": 13.945771060962,
+"feed": 2.29033228539271,
+"consumption": 4461.2343057755,
+"production": 4475.18916639051
+},
+"IND|SMIP": {
+"imports": 1.29430314297816,
+"exports": 9.5191487664909,
+"feed": 11.3901624855416,
+"consumption": 213.01858355220298,
+"production": 172.93206035794898
+},
+"IND|CHES": {
+"imports": 1.47994342741071,
+"exports": 6.5776413500752,
+"consumption": 1.1652582052560698,
+"production": 6.26295612792057
+},
+"IND|FRMI": {
+"imports": 43.625343908652,
+"exports": 5.95929761688466,
+"feed": 26114.3298416041,
+"consumption": 135254.731710992,
+"production": 161370.387447495
+},
+"IND|CREM": {
+"imports": 0.0315735931653958,
+"exports": 0.0159043528563214,
+"production": 2.1204353801829603
+},
+"IND|COCM": {
+"imports": 0.995120981971389,
+"exports": 1.1402364535412801,
+"feed": 0.0178186573686559,
+"consumption": 1.20095883424299,
+"production": 1.2861481101065102
+},
+"IND|RICE": {
+"imports": 1.998,
+"exports": 12046.608,
+"feed": 2743.2353804604604,
+"consumption": 89900.0658088942,
+"production": 112221.0
+},
+"IND|MOLA": {
+"imports": 69.073461537884,
+"exports": 76.3074657638448,
+"feed": 471.510449344738,
+"production": 9127.16056705325
+},
+"IND|SUGA": {
+"imports": 2354.28,
+"exports": 2031.36,
+"consumption": 24644.959656678,
+"production": 20424.0
+},
+"IND|RAPO": {
+"imports": 302.0,
+"exports": 3.0,
+"consumption": 2371.0,
+"production": 2069.0
+},
+"IND|SUNO": {
+"imports": 2255.5149430230103,
+"exports": 3.0006450225757897,
+"consumption": 2029.43625026876,
+"production": 69.9849494732316
+},
+"IND|SOYO": {
+"imports": 3338.66989619377,
+"exports": 2.00019772614928,
+"consumption": 2950.29164607019,
+"production": 1411.86040533861
+},
+"IND|OTHO": {
+"imports": 51.4414032068619,
+"exports": 716.1519745903499,
+"consumption": 2748.63280774201,
+"production": 4577.276567555629
+},
+"IND|RAPC": {
+"imports": 10.488523684641201,
+"exports": 1028.23024716396,
+"feed": 2416.6499124899897,
+"production": 3434.39163596932
+},
+"IND|SUNC": {
+"imports": 400.490990692911,
+"exports": 5.08314082609914,
+"feed": 486.45472665499904,
+"production": 91.04687678818641
+},
+"IND|SOYC": {
+"imports": 1.08416427425691,
+"exports": 4844.83211209446,
+"feed": 1409.83140610617,
+"production": 6253.5793539263805
+},
+"IND|MILK": {
+"imports": 0.700199928882456,
+"exports": 7.05808720992217,
+"production": 169363.017484376
+},
+"IND|COFF": {
+"imports": 85.7385859219808,
+"exports": 441.150114495383,
+"consumption": 2.40173099099091,
+"production": 323.669477533425
+},
+"IND|TEAS": {
+"imports": 19.0,
+"exports": 269.0,
+"consumption": 1075.08310502283,
+"production": 1325.0
+},
+"IND|COCO": {
+"imports": 33.2001156522116,
+"exports": 3.82536864142438,
+"production": 19.7125686685006
+},
+"IND|FFIS": {
+"imports": 31.31,
+"exports": 25.77,
+"consumption": 7010.79,
+"production": 7005.32
+},
+"IND|SFIS": {
+"imports": 43.04,
+"exports": 898.54,
+"feed": 383.33,
+"consumption": 1580.33,
+"production": 3069.16
+},
+"IND|OAQU": {
+"imports": 3.7923465099758102,
+"exports": 825.872326203017,
+"consumption": 648.893161452337,
+"production": 1535.0962548459
+},
+"IND|FPRI": {
+"imports": 1.7383257977761801,
+"exports": 2.16344779581447,
+"feed": 0.053448134195366696,
+"production": 3.06118397655377
+},
+"IND|FENI": {
+"imports": 247.971764694465,
+"exports": 24.1898065353596,
+"feed": 23.990088934663103,
+"consumption": 5481.93698164307,
+"production": 5636.1215586157305
+},
+"IND|BEEF": {
+"exports": 1317.0,
+"consumption": 1152.0,
+"production": 2469.0
+},
+"IND|SGMT": {
+"exports": 23.0,
+"consumption": 768.0,
+"production": 791.0
+},
+"IND|EGGS": {
+"exports": 62.0,
+"consumption": 4140.0,
+"production": 4848.0
+},
+"IND|POUM": {
+"exports": 4.0,
+"consumption": 3800.0,
+"production": 3804.0
+},
+"PAK|BARL": {
+"imports": 9.22406025464535,
+"exports": 2.3609038196802197,
+"feed": 3.9004176646020703,
+"consumption": 48.7552208075258,
+"production": 59.44394386326999
+},
+"PAK|MAIZ": {
+"imports": 36.0,
+"exports": 48.0,
+"feed": 1379.2157046769898,
+"consumption": 3900.6100422336904,
+"production": 5902.0
+},
+"PAK|OCER": {
+"imports": 56.7554453532099,
+"exports": 13.7381416778037,
+"feed": 192.634932853743,
+"consumption": 334.584526999037,
+"production": 530.932024921239
+},
+"PAK|RAPE": {
+"imports": 815.525569806325,
+"exports": 3.87952026915578,
+"feed": 57.799272679625695,
+"production": 196.367336218722
+},
+"PAK|SUNF": {
+"imports": 28.104089219330902,
+"feed": 10.9591078066914,
+"production": 106.39405204460999
+},
+"PAK|OCRO": {
+"imports": 278.27505971153204,
+"exports": 59.5166395976944,
+"feed": 343.478148114739,
+"consumption": 345.539069454345,
+"production": 834.588005434067
+},
+"PAK|PULS": {
+"imports": 1145.52570429891,
+"exports": 23.0805905233548,
+"feed": 288.962905941603,
+"consumption": 988.5255847357661,
+"production": 496.51034938303604
+},
+"PAK|POTA": {
+"imports": 36.9954971400755,
+"exports": 430.052330534258,
+"feed": 269.10590337715,
+"consumption": 2961.1653308415,
+"production": 3852.53109407326
+},
+"PAK|TEXT": {
+"imports": 270.73550307023004,
+"exports": 21.8946432562058,
+"production": 2007.1436583572702
+},
+"PAK|TOBA": {
+"imports": 2.27790666776508,
+"exports": 7.30182266856478,
+"production": 114.732179107989
+},
+"PAK|TOMA": {
+"imports": 68.0,
+"exports": 4.0,
+"consumption": 589.0,
+"production": 573.0
+},
+"PAK|OVEG": {
+"imports": 171.0,
+"exports": 207.0,
+"consumption": 4421.42661448141,
+"production": 5031.0
+},
+"PAK|APPL": {
+"imports": 118.0,
+"exports": 16.0,
+"consumption": 646.0,
+"production": 565.0
+},
+"PAK|OFRU": {
+"imports": 315.470633110054,
+"exports": 300.71096764060803,
+"consumption": 5380.29818342661,
+"production": 5947.61804437428
+},
+"PAK|CITR": {
+"imports": 15.9275895971527,
+"exports": 363.195807141039,
+"consumption": 1730.6045930750702,
+"production": 2263.85625946639
+},
+"PAK|TAGR": {
+"imports": 111.742116755792,
+"exports": 2.38012220776604,
+"consumption": 161.91022494419698,
+"production": 67.4479443480908
+},
+"PAK|WHEA": {
+"imports": 6.0,
+"exports": 425.0,
+"feed": 533.021194528392,
+"consumption": 22469.8934706537,
+"production": 26685.0
+},
+"PAK|BEEF": {
+"imports": 1.0,
+"exports": 47.0,
+"consumption": 1839.0,
+"production": 2079.0
+},
+"PAK|SGMT": {
+"imports": 1.0,
+"exports": 3.0,
+"consumption": 506.0,
+"production": 701.0
+},
+"PAK|EGGS": {
+"imports": 2.0,
+"exports": 7.0,
+"consumption": 680.0,
+"production": 815.0
+},
+"PAK|POUM": {
+"imports": 2.0,
+"exports": 4.0,
+"consumption": 1004.0,
+"production": 1281.0
+},
+"PAK|BUTT": {
+"imports": 1.28894113616852,
+"exports": 0.0832749104769885,
+"consumption": 1062.2355827343401,
+"production": 1061.0299165086499
+},
+"PAK|SMIP": {
+"imports": 43.3097322384758,
+"exports": 2.63912447123891,
+"feed": 3.415899738872,
+"consumption": 37.4448712995685,
+"production": 0.0389514343887353
+},
+"PAK|FRMI": {
+"imports": 3.73644915006183,
+"exports": 0.45116113040706896,
+"feed": 2513.75451510338,
+"consumption": 37288.6016337224,
+"production": 39799.4990409308
+},
+"PAK|CREM": {
+"imports": 0.014846872639349099,
+"exports": 0.041864005956528,
+"consumption": 2.1504581028020997,
+"production": 2.17747523611928
+},
+"PAK|COCM": {
+"imports": 1.07450255831303,
+"exports": 0.0885377825436618,
+"feed": 0.0614965821364299,
+"consumption": 3.31440890719324,
+"production": 2.17323332524625
+},
+"PAK|RICE": {
+"imports": 7.992,
+"exports": 3053.61,
+"feed": 6.66,
+"consumption": 2766.564,
+"production": 7442.55
+},
+"PAK|MOLA": {
+"imports": 0.010146266738810401,
+"exports": 178.18572638561,
+"feed": 348.44293310845495,
+"production": 2796.6432964721603
+},
+"PAK|SUGA": {
+"imports": 15.6411779769526,
+"exports": 815.978537320178,
+"consumption": 4210.522847028699,
+"production": 6091.77878737667
+},
+"PAK|RAPO": {
+"imports": 4.18309015560058,
+"exports": 30.0050480001105,
+"consumption": 19.5059462872201,
+"production": 483.91097892225497
+},
+"PAK|SUNO": {
+"imports": 1.34604728590753,
+"exports": 35.700809305271804,
+"consumption": 31.0116800914386,
+"production": 64.3562434295376
+},
+"PAK|SOYO": {
+"imports": 168.926944080129,
+"exports": 5.10922748928251,
+"consumption": 24.8620618928379,
+"production": 296.627669664512
+},
+"PAK|OTHO": {
+"imports": 18.5989743796442,
+"exports": 11.915878880741401,
+"consumption": 186.67177037819698,
+"production": 478.853651579189
+},
+"PAK|RAPC": {
+"imports": 1.49133625450755,
+"exports": 24.9346704979641,
+"feed": 658.3662880882349,
+"production": 681.809622331691
+},
+"PAK|SUNC": {
+"imports": 155.02460351500298,
+"exports": 1.55856971043543,
+"feed": 201.672869401757,
+"production": 48.2068355971897
+},
+"PAK|SOYC": {
+"imports": 600.542659460037,
+"exports": 5.07657588703231,
+"feed": 1863.70571727444,
+"production": 1268.23963370143
+},
+"PAK|MILK": {
+"imports": 0.191980013846398,
+"exports": 24.350737004033903,
+"production": 50724.041392684805
+},
+"PAK|FFIS": {
+"imports": 13.54,
+"exports": 45.65,
+"consumption": 265.5,
+"production": 297.71
+},
+"PAK|SFIS": {
+"imports": 0.570002566749575,
+"exports": 151.841166827226,
+"feed": 116.16727515406501,
+"consumption": 77.0915566832806,
+"production": 344.529996097822
+},
+"PAK|OAQU": {
+"imports": 0.178942423023449,
+"exports": 20.894992875623497,
+"consumption": 16.504761782303998,
+"production": 37.220812234903995
+},
+"PAK|FPRI": {
+"imports": 0.23434910951507298,
+"exports": 1.49454987262526,
+"feed": 0.335246224676224,
+"production": 1.59609843870852
+},
+"PAK|FENI": {
+"imports": 5.624074590322199,
+"exports": 1.08048513753093,
+"feed": 36.251924125946495,
+"consumption": 362.16536886783297,
+"production": 435.458083989222
+},
+"CHN|RYEM": {
+"imports": 134.807730989851,
+"exports": 36.1649911262676,
+"feed": 432.766166961235,
+"consumption": 110.37722945223399,
+"production": 479.131930103031
+},
+"CHN|BARL": {
+"imports": 8877.44548239666,
+"exports": 557.9720255135351,
+"feed": 362.034701756637,
+"consumption": 488.046780268616,
+"production": 1085.05449249159
+},
+"CHN|OATS": {
+"imports": 412.429228489478,
+"exports": 3.96496057243331,
+"feed": 546.4100804428531,
+"consumption": 208.787542682344,
+"production": 513.553251796739
+},
+"CHN|MAIZ": {
+"imports": 2867.0,
+"exports": 475.0,
+"feed": 185410.680109012,
+"consumption": 8799.116805513671,
+"production": 259071.0
+},
+"CHN|OCER": {
+"imports": 5138.46880146118,
+"exports": 164.268420351521,
+"feed": 4570.16920943135,
+"consumption": 5459.43531034267,
+"production": 6044.52288488211
+},
+"CHN|RAPE": {
+"imports": 4752.4022914321895,
+"exports": 1.5508375557668301,
+"feed": 5380.09501350205,
+"consumption": 2.00372277648296,
+"production": 13292.0
+},
+"CHN|SUNF": {
+"imports": 122.01864588109399,
+"exports": 409.937337612716,
+"feed": 1934.54831805503,
+"consumption": 2.00501612325331,
+"production": 3149.4812777013603
+},
+"CHN|SOYA": {
+"imports": 95578.56895159291,
+"exports": 166.00067677009199,
+"feed": 10831.007196134,
+"consumption": 7019.1982402473695,
+"production": 15282.9310461512
+},
+"CHN|OCRO": {
+"imports": 4009.67908293144,
+"exports": 889.710188174528,
+"feed": 434.231915667432,
+"consumption": 1208.6606987356101,
+"production": 6015.17193761397
+},
+"CHN|PULS": {
+"imports": 1434.5337493501102,
+"exports": 466.943081669869,
+"feed": 3078.9485466708697,
+"consumption": 1988.20605035654,
+"production": 5160.82023354958
+},
+"CHN|POTA": {
+"imports": 359.78760200113,
+"exports": 567.5441579320089,
+"feed": 15346.326551033299,
+"consumption": 64379.7745788857,
+"production": 88481.04375830799
+},
+"CHN|TEXT": {
+"imports": 1260.2852492515701,
+"exports": 15.5318975461505,
+"production": 6162.37415328284
+},
+"CHN|TOBA": {
+"imports": 229.039998536851,
+"exports": 278.159420869904,
+"production": 2525.16494136045
+},
+"CHN|TOMA": {
+"imports": 65.5645772647175,
+"exports": 3547.80078397526,
+"consumption": 48920.2575898155,
+"production": 58858.6004962779
+},
+"CHN|OVEG": {
+"imports": 1421.2358185946498,
+"exports": 10416.4625187721,
+"feed": 36789.9227895749,
+"consumption": 483367.397749868,
+"production": 575943.499722408
+},
+"CHN|APPL": {
+"imports": 252.498498498498,
+"exports": 2313.8528528528504,
+"consumption": 31133.840840840803,
+"production": 41390.0
+},
+"CHN|OFRU": {
+"imports": 4646.90742180644,
+"exports": 2654.8035293137,
+"consumption": 65608.7652339162,
+"production": 72880.6594195493
+},
+"CHN|CITR": {
+"imports": 1068.2272832272,
+"exports": 1021.0391010918399,
+"consumption": 34007.4784401836,
+"production": 38320.101357890206
+},
+"CHN|TAGR": {
+"imports": 635.347734105334,
+"exports": 542.6541587796461,
+"consumption": 9888.30030063467,
+"production": 10364.586386074301
+},
+"CHN|TABO": {
+"imports": 3.3171776626146996,
+"exports": 0.937474208812735,
+"consumption": 1.6484801919070802,
+"production": 3.20088733045987
+},
+"CHN|TWIN": {
+"imports": 814.053840785015,
+"exports": 35.8066838034295,
+"consumption": 2770.70317047295,
+"production": 1899.3465960941799
+},
+"CHN|WHEA": {
+"imports": 5282.51654587033,
+"exports": 599.072955500868,
+"feed": 16623.940190897,
+"consumption": 95072.0745714564,
+"production": 134241.482966422
+},
+"CHN|BEEF": {
+"imports": 1371.3455237902,
+"exports": 105.626948253504,
+"consumption": 7357.92170871104,
+"production": 6354.47052323535
+},
+"CHN|PORK": {
+"imports": 1968.60563380282,
+"exports": 364.0,
+"consumption": 54979.4929577465,
+"production": 54640.9014084507
+},
+"CHN|SGMT": {
+"imports": 261.82504019784903,
+"exports": 6.5210729299803,
+"consumption": 5140.42559167519,
+"production": 4711.0
+},
+"CHN|EGGS": {
+"imports": 180.98830063416898,
+"exports": 119.01062613077,
+"consumption": 28113.3867380653,
+"production": 30964.4690218933
+},
+"CHN|POUM": {
+"imports": 1381.5126276195601,
+"exports": 1239.35626007523,
+"consumption": 19222.5545316633,
+"production": 18432.987103707703
+},
+"CHN|CASE": {
+"imports": 18.7209527486295,
+"exports": 0.8667577248715159,
+"feed": 20.764993453653197,
+"production": 2.91079842989526
+},
+"CHN|BUTT": {
+"imports": 104.520310636136,
+"exports": 3.32508892611382,
+"feed": 0.995293631354603,
+"consumption": 187.291226541381,
+"production": 87.0912984627129
+},
+"CHN|SMIP": {
+"imports": 253.07214434125999,
+"exports": 2.18410081199672,
+"feed": 24.7296798432709,
+"consumption": 254.81241750062802,
+"production": 17.960350602972802
+},
+"CHN|CHES": {
+"imports": 125.810133980606,
+"exports": 1.5961192973876501,
+"consumption": 308.645896619545,
+"production": 194.22510124361202
+},
+"CHN|FRMI": {
+"imports": 186.715421374936,
+"exports": 8.59424512977898,
+"feed": 1533.17625851012,
+"consumption": 30995.1960846437,
+"production": 32549.847385992
+},
+"CHN|COCM": {
+"imports": 84.9262180704554,
+"exports": 9.769220396198511,
+"feed": 19.0594950873177,
+"consumption": 165.358688113931,
+"production": 105.624023733763
+},
+"CHN|RICE": {
+"imports": 4308.36303604389,
+"exports": 1174.15535103164,
+"feed": 4654.666080831529,
+"consumption": 118392.527471159,
+"production": 141642.53996319402
+},
+"CHN|MOLA": {
+"imports": 42.0151651618656,
+"exports": 1.20359665648118,
+"feed": 1606.74348237489,
+"production": 3477.37390938948
+},
+"CHN|SUGA": {
+"imports": 2420.0073935000196,
+"exports": 495.92402066335296,
+"feed": 745.843798379353,
+"consumption": 9378.80269219956,
+"production": 9391.07038455608
+},
+"CHN|RAPO": {
+"imports": 836.926454872243,
+"exports": 25.0020402215098,
+"consumption": 2062.0880533696,
+"production": 3587.65141358205
+},
+"CHN|SUNO": {
+"imports": 746.1062124392739,
+"exports": 2.95730755453437,
+"consumption": 242.642664245698,
+"production": 256.871692461308
+},
+"CHN|SOYO": {
+"imports": 683.450882166549,
+"exports": 134.88624587053,
+"consumption": 3690.43146118788,
+"production": 15813.5227691101
+},
+"CHN|PLMO": {
+"imports": 5706.9386763928405,
+"exports": 24.297727039454,
+"consumption": 3099.39672252445,
+"production": 138.04972308349002
+},
+"CHN|OTHO": {
+"imports": 754.745769389675,
+"exports": 102.662302393761,
+"consumption": 2919.1919327903397,
+"production": 4346.07521548266
+},
+"CHN|RAPC": {
+"imports": 2099.8280400696203,
+"exports": 26.9138145873265,
+"feed": 6397.04464141896,
+"production": 4894.013760500409
+},
+"CHN|SUNC": {
+"imports": 4.7414212943943,
+"exports": 43.7676905064514,
+"feed": 184.931742387522,
+"production": 324.05003099683
+},
+"CHN|SOYC": {
+"imports": 118.375712004628,
+"exports": 2194.45703389682,
+"feed": 68822.0071448849,
+"production": 70898.0884667771
+},
+"CHN|MILK": {
+"imports": 562.664578970324,
+"exports": 36.9033344890477,
+"production": 34531.6902459414
+},
+"CHN|COFF": {
+"imports": 211.062955599735,
+"exports": 137.230616302187,
+"consumption": 84.7077924609207,
+"production": 115.769383697813
+},
+"CHN|TEAS": {
+"imports": 52.3333333333333,
+"exports": 373.66666666666697,
+"consumption": 1609.42572359594,
+"production": 2460.0
+},
+"CHN|FFIS": {
+"imports": 469.79,
+"exports": 1125.07,
+"consumption": 25440.82,
+"production": 27096.1
+},
+"CHN|SFIS": {
+"imports": 10572.8413337007,
+"exports": 4255.01125500867,
+"feed": 9769.996091647221,
+"consumption": 7150.031367443249,
+"production": 10825.3586968248
+},
+"CHN|OAQU": {
+"imports": 1283.9352564539,
+"exports": 3059.3255525724,
+"consumption": 22606.511221269,
+"production": 24408.921349858803
+},
+"CHN|FPRI": {
+"imports": 43.2237129616754,
+"exports": 29.5248775705177,
+"feed": 192.556851722497,
+"production": 199.977913766102
+},
+"CHN|FENI": {
+"imports": 36238.9965406988,
+"exports": 201.440648855143,
+"feed": 45221.6612748853,
+"consumption": 34586.7037959573,
+"production": 58316.4842636343
+},
+"JPN|BARL": {
+"imports": 1742.0,
+"feed": 970.488947368421,
+"consumption": 88.9531578947369,
+"production": 185.0
+},
+"JPN|OATS": {
+"imports": 68.5073137160268,
+"exports": 7.00331618733498,
+"feed": 43.2904679208908,
+"consumption": 17.3161871683563,
+"production": 1.02667835703936
+},
+"JPN|MAIZ": {
+"imports": 14529.500017205199,
+"exports": 1.00003441037817,
+"feed": 10802.371700905001,
+"consumption": 1663.0572244589,
+"production": 0.9999655896218299
+},
+"JPN|OCER": {
+"imports": 628.368029739777,
+"exports": 0.996282527881041,
+"feed": 530.966542750929,
+"consumption": 122.57249070632,
+"production": 36.1301115241636
+},
+"JPN|RAPE": {
+"imports": 2450.50071297617,
+"exports": 22.0044815644734,
+"feed": 11.0022892819979,
+"consumption": 9.97742172510988,
+"production": 3.99918517009574
+},
+"JPN|SOYA": {
+"imports": 3219.0,
+"exports": 7.0,
+"feed": 30.0,
+"consumption": 982.0,
+"production": 253.0
+},
+"JPN|OCRO": {
+"imports": 839.939709962098,
+"exports": 5.30389688997088,
+"feed": 2.55678240700022,
+"consumption": 202.146179838048,
+"production": 59.142109603868604
+},
+"JPN|PULS": {
+"imports": 165.440073894172,
+"exports": 6.09236234458259,
+"feed": 2.00608416888343,
+"consumption": 180.548566523576,
+"production": 114.058848616744
+},
+"JPN|POTA": {
+"imports": 506.0,
+"exports": 2.0,
+"feed": 2.0,
+"consumption": 2528.0,
+"production": 2395.0
+},
+"JPN|TOBA": {
+"imports": 181.234173304574,
+"exports": 12.5990037005624,
+"production": 9.806475093669532
+},
+"JPN|TOMA": {
+"imports": 257.128564282141,
+"exports": 0.9994997498749371,
+"consumption": 894.448119851509,
+"production": 737.3686843421709
+},
+"JPN|OVEG": {
+"imports": 2346.90140507361,
+"exports": 24.0006234114995,
+"feed": 8.99956106045623,
+"consumption": 10951.534382686199,
+"production": 9598.59857094902
+},
+"JPN|APPL": {
+"imports": 84.0,
+"exports": 30.0,
+"consumption": 685.1467661691539,
+"production": 735.0
+},
+"JPN|OFRU": {
+"imports": 1894.52068126521,
+"exports": 14.0,
+"consumption": 2522.4371195848903,
+"production": 993.978102189781
+},
+"JPN|CITR": {
+"imports": 358.443257818629,
+"exports": 4.310794703317439,
+"consumption": 1035.98448815002,
+"production": 857.708462806259
+},
+"JPN|TAGR": {
+"imports": 133.0,
+"exports": 2.0,
+"consumption": 160.0,
+"production": 64.0
+},
+"JPN|TWIN": {
+"imports": 281.38973647711504,
+"exports": 0.998613037447989,
+"consumption": 352.51040221914,
+"production": 79.10957004160889
+},
+"JPN|WHEA": {
+"imports": 6044.56731801589,
+"exports": 259.018538400973,
+"feed": 735.052608975736,
+"consumption": 5637.40347863431,
+"production": 907.935008231336
+},
+"JPN|BEEF": {
+"imports": 730.0,
+"exports": 5.0,
+"consumption": 1171.0,
+"production": 469.0
+},
+"JPN|PORK": {
+"imports": 1511.0,
+"exports": 4.0,
+"consumption": 2727.0,
+"production": 1272.0
+},
+"JPN|EGGS": {
+"imports": 36.0,
+"exports": 4.0,
+"consumption": 2501.0,
+"production": 2601.0
+},
+"JPN|POUM": {
+"imports": 1068.8372163849601,
+"exports": 10.001522765341901,
+"consumption": 2359.38240268168,
+"production": 2214.66270747678
+},
+"JPN|WMIO": {
+"imports": 0.10979258398506199,
+"exports": 0.220649562135463,
+"consumption": 38.3575818615478,
+"production": 39.777905204283506
+},
+"JPN|BUTT": {
+"imports": 8.56095258447913,
+"exports": 0.00990580965120965,
+"consumption": 67.5266144876233,
+"production": 62.961539394156496
+},
+"JPN|SMIP": {
+"imports": 58.226716507953,
+"exports": 0.0434845959580339,
+"consumption": 156.474520274594,
+"production": 92.3046998584464
+},
+"JPN|CHES": {
+"imports": 273.49191374967,
+"exports": 0.762824195189972,
+"consumption": 365.767199864851,
+"production": 93.0381103103718
+},
+"JPN|FRMI": {
+"imports": 77.46759885727191,
+"exports": 0.386319983849274,
+"feed": 369.74549686345597,
+"consumption": 5502.02020313675,
+"production": 5784.12531464299
+},
+"JPN|COCM": {
+"imports": 6.29197406383995,
+"exports": 0.314330703155208,
+"consumption": 39.5229804498601,
+"production": 33.928864930283495
+},
+"JPN|RICE": {
+"imports": 626.678528558278,
+"exports": 32.635430500153404,
+"feed": 138.521875279081,
+"consumption": 6931.421528387869,
+"production": 6513.19448384693
+},
+"JPN|MOLA": {
+"imports": 112.994024010699,
+"exports": 0.9539666917373101,
+"feed": 110.96034955674601,
+"production": 93.6494868871152
+},
+"JPN|SUGA": {
+"imports": 1153.68,
+"exports": 11.04,
+"consumption": 1831.72,
+"production": 721.28
+},
+"JPN|RAPO": {
+"imports": 17.0,
+"exports": 1.0,
+"consumption": 894.0,
+"production": 1058.0
+},
+"JPN|SUNO": {
+"imports": 23.924509930538598,
+"exports": 1.00314541956089,
+"consumption": 19.059762971656898,
+"production": 1.1541255584836498
+},
+"JPN|SOYO": {
+"imports": 5.01159817281963,
+"exports": 2.22684918136845,
+"consumption": 434.98863933012905,
+"production": 476.101826417865
+},
+"JPN|PLMO": {
+"imports": 780.361666897197,
+"exports": 2.53347770933882,
+"consumption": 115.106920764431,
+"production": 1.77418799758911
+},
+"JPN|OTHO": {
+"imports": 297.426795409071,
+"exports": 41.6463562054009,
+"consumption": 520.730190118492,
+"production": 648.0663622245199
+},
+"JPN|RAPC": {
+"imports": 15.5638633366626,
+"exports": 8.93009303692687,
+"feed": 1350.31230459271,
+"production": 1343.6785342929702
+},
+"JPN|SUNC": {
+"imports": 0.000577658681855137,
+"feed": 0.034134172435660505,
+"production": 0.0335565137538052
+},
+"JPN|SOYC": {
+"imports": 3420.69094740429,
+"exports": 0.130394049669872,
+"feed": 5236.240382771301,
+"production": 1815.67982941668
+},
+"JPN|MILK": {
+"imports": 0.05140000031465761,
+"exports": 4.70002740283188,
+"production": 7244.4210796027
+},
+"JPN|TEAS": {
+"imports": 33.0,
+"exports": 6.0,
+"consumption": 105.0,
+"production": 82.0
+},
+"JPN|FFIS": {
+"imports": 514.3,
+"exports": 14.05,
+"consumption": 646.7,
+"production": 146.52
+},
+"JPN|SFIS": {
+"imports": 2292.3881693741896,
+"exports": 507.850570702544,
+"feed": 1350.51758739244,
+"consumption": 3261.7068652011903,
+"production": 2829.21683061871
+},
+"JPN|OAQU": {
+"imports": 1499.48241845101,
+"exports": 200.518996047897,
+"feed": 183.35,
+"consumption": 1934.5474623960401,
+"production": 843.662581254055
+},
+"JPN|FPRI": {
+"imports": 52.9556097206407,
+"exports": 14.347218336370899,
+"feed": 104.81167470443,
+"production": 72.8654565521029
+},
+"JPN|FENI": {
+"imports": 220.569554208209,
+"exports": 12.4849015576277,
+"feed": 19.8338340881543,
+"consumption": 803.594255580948,
+"production": 1179.14000755579
+},
+"MYS|MAIZ": {
+"imports": 4118.50864845521,
+"exports": 43.0051294286055,
+"feed": 3472.41417153764,
+"consumption": 359.042824764404,
+"production": 72.9912919002744
+},
+"MYS|OCRO": {
+"imports": 1341.8276420531502,
+"exports": 928.989797966879,
+"feed": 26.0538302277433,
+"consumption": 341.08098974646197,
+"production": 2203.47067953355
+},
+"MYS|TOBA": {
+"imports": 40.0612347470354,
+"exports": 26.2864431722539,
+"production": 2.58271653352438
+},
+"MYS|TOMA": {
+"imports": 19.0457831325301,
+"exports": 47.884337349397605,
+"consumption": 143.653012048193,
+"production": 188.453012048193
+},
+"MYS|OVEG": {
+"imports": 1309.0,
+"exports": 446.0,
+"consumption": 1861.7602873938602,
+"production": 1143.0
+},
+"MYS|OFRU": {
+"imports": 380.474918811562,
+"exports": 216.982849781261,
+"consumption": 1127.9109086338801,
+"production": 1090.51493598862
+},
+"MYS|CITR": {
+"imports": 214.203910490985,
+"exports": 39.3786505575623,
+"consumption": 190.393080915394,
+"production": 37.5506781248279
+},
+"MYS|WHEA": {
+"imports": 1873.0,
+"exports": 472.0,
+"feed": 60.5214152700186,
+"consumption": 1381.75046554935,
+"production": 20.0
+},
+"MYS|BEEF": {
+"imports": 154.613466334165,
+"exports": 8.01995012468828,
+"consumption": 173.43142144638398,
+"production": 45.8852867830424
+},
+"MYS|PORK": {
+"imports": 32.063872255489,
+"exports": 4.99001996007984,
+"consumption": 243.51297405189598,
+"production": 218.43512974051902
+},
+"MYS|SGMT": {
+"imports": 39.0,
+"consumption": 26.0,
+"production": 4.0
+},
+"MYS|EGGS": {
+"imports": 1.22214968853094,
+"exports": 117.08303804504,
+"consumption": 607.430804216573,
+"production": 860.388925155735
+},
+"MYS|POUM": {
+"imports": 68.0,
+"exports": 44.0,
+"consumption": 1207.4092105263198,
+"production": 1665.0
+},
+"MYS|SMIP": {
+"imports": 58.4714244902079,
+"exports": 18.482090671479103,
+"feed": 13.526780676049201,
+"consumption": 11.8353658810732,
+"production": 0.650133121914431
+},
+"MYS|FRMI": {
+"imports": 20.178314159402998,
+"exports": 5.68131465822948,
+"consumption": 69.2224559161457,
+"production": 69.5650313354126
+},
+"MYS|CREM": {
+"imports": 6.94235007637257,
+"exports": 0.456776925362361,
+"consumption": 6.780527840387109,
+"production": 0.294954689376901
+},
+"MYS|COCM": {
+"imports": 1.20005061469785,
+"exports": 81.0305385520883,
+"feed": 0.468233176437456,
+"consumption": 31.0985748620763,
+"production": 114.362251339258
+},
+"MYS|RICE": {
+"imports": 794.538,
+"exports": 25.974,
+"consumption": 2388.942,
+"production": 1712.286
+},
+"MYS|MOLA": {
+"imports": 7.83080657652881,
+"exports": 1.7668500297202498,
+"feed": 6.86395654680856,
+"production": 0.8
+},
+"MYS|SUGA": {
+"imports": 1868.52,
+"exports": 188.6,
+"consumption": 1203.36,
+"production": 1.84
+},
+"MYS|RAPO": {
+"imports": 70.0,
+"exports": 66.0,
+"consumption": 20.0,
+"production": 16.0
+},
+"MYS|SUNO": {
+"imports": 80.0,
+"exports": 68.0,
+"feed": 0.0166309253310556,
+"consumption": 15.0,
+"production": 3.0
+},
+"MYS|SOYO": {
+"imports": 113.0,
+"exports": 126.0,
+"consumption": 76.0,
+"production": 110.0
+},
+"MYS|PLMO": {
+"imports": 798.0,
+"exports": 14261.0,
+"consumption": 366.034136225873,
+"production": 22200.0
+},
+"MYS|OTHO": {
+"imports": 952.8861299067429,
+"exports": 1576.26794428112,
+"consumption": 92.2239874465715,
+"production": 2408.63772581666
+},
+"MYS|RAPC": {
+"imports": 11.2861756067463,
+"exports": 1.63915803396512,
+"feed": 25.8193252650888,
+"production": 16.1723076923077
+},
+"MYS|SUNC": {
+"imports": 21.8648445168705,
+"exports": 0.08508463388624579,
+"feed": 24.8551884544129,
+"production": 3.0754285714285703
+},
+"MYS|SOYC": {
+"imports": 3029.99332127972,
+"exports": 102.167029914439,
+"feed": 3383.2324886338397,
+"production": 455.406197268561
+},
+"MYS|MILK": {
+"imports": 28.7519919874027,
+"exports": 2.4456694717484804,
+"production": 44.2996056583378
+},
+"MYS|COFF": {
+"imports": 407.133173855016,
+"exports": 378.824597711891,
+"consumption": 49.649586233209895,
+"production": 21.341010090085
+},
+"MYS|TEAS": {
+"imports": 26.0,
+"exports": 10.0,
+"consumption": 27.1764705882353,
+"production": 10.0
+},
+"MYS|COCO": {
+"imports": 332.0,
+"exports": 177.0,
+"consumption": 0.880213104225234,
+"production": 1.0
+},
+"MYS|FFIS": {
+"imports": 42.75,
+"exports": 14.76,
+"consumption": 200.549997507353,
+"production": 172.61
+},
+"MYS|SFIS": {
+"imports": 429.500467018879,
+"exports": 219.799920931176,
+"feed": 93.2385995794533,
+"consumption": 1319.80647942974,
+"production": 1238.34453292149
+},
+"MYS|OAQU": {
+"imports": 136.603258403795,
+"exports": 147.75830411768698,
+"consumption": 266.706695538599,
+"production": 283.861741252492
+},
+"MYS|FPRI": {
+"imports": 4.05790104740125,
+"exports": 2.51662488847411,
+"feed": 6.302311100783469,
+"production": 5.53567183676911
+},
+"MYS|FENI": {
+"imports": 388.454545454545,
+"exports": 6.0,
+"feed": 23.590355251658,
+"consumption": 124.851809441908,
+"production": 89.0
+},
+"IDN|MAIZ": {
+"imports": 816.0,
+"exports": 68.0,
+"feed": 4700.0,
+"consumption": 6881.0,
+"production": 28924.0
+},
+"IDN|OCER": {
+"imports": 58.127321375168506,
+"exports": 1.44297558524274,
+"feed": 16.8832887394289,
+"consumption": 69.4270538117418,
+"production": 56.5941664174529
+},
+"IDN|SOYA": {
+"imports": 2542.58737627779,
+"exports": 4.00064903456109,
+"feed": 11.001784845043,
+"consumption": 336.054518903132,
+"production": 538.912542592893
+},
+"IDN|OCRO": {
+"imports": 127.48217925078501,
+"exports": 5033.289115511359,
+"feed": 1421.04129973552,
+"consumption": 4019.6799960630296,
+"production": 24703.8788894936
+},
+"IDN|PULS": {
+"imports": 109.709754038143,
+"exports": 29.619427439141102,
+"feed": 1.9600161274291599,
+"consumption": 277.17205800181597,
+"production": 244.059975808856
+},
+"IDN|POTA": {
+"imports": 165.0,
+"exports": 9.0,
+"feed": 116.08303507516099,
+"consumption": 1167.8353614889,
+"production": 1165.0
+},
+"IDN|TEXT": {
+"imports": 672.539491089835,
+"exports": 1.45965949545799,
+"production": 0.510058944444187
+},
+"IDN|TOBA": {
+"imports": 182.021647268121,
+"exports": 135.94667134628298,
+"production": 179.95016694814902
+},
+"IDN|TOMA": {
+"imports": 36.0023001974043,
+"exports": 1.1275970615640498,
+"consumption": 917.02248476102,
+"production": 963.0615302805639
+},
+"IDN|OVEG": {
+"imports": 736.023846205519,
+"exports": 74.2230217416904,
+"consumption": 10622.7909556338,
+"production": 10823.0858047146
+},
+"IDN|OFRU": {
+"imports": 409.382420270683,
+"exports": 984.424956940212,
+"feed": 0.00154794642895452,
+"consumption": 14642.4338351943,
+"production": 17115.3632150864
+},
+"IDN|CITR": {
+"imports": 174.261577986051,
+"exports": 7.45753543001899,
+"consumption": 2222.32187422508,
+"production": 2303.46769920522
+},
+"IDN|BEEF": {
+"imports": 201.85923344947702,
+"exports": 1.0006968641115,
+"consumption": 714.4975609756101,
+"production": 515.640418118467
+},
+"IDN|PORK": {
+"imports": 1.000526729056,
+"exports": 0.334999679618409,
+"consumption": 317.832500160191,
+"production": 317.166973110753
+},
+"IDN|SGMT": {
+"imports": 4.01544401544402,
+"consumption": 123.521235521236,
+"production": 125.482625482625
+},
+"IDN|EGGS": {
+"imports": 7.0,
+"exports": 1.0,
+"consumption": 4015.0,
+"production": 4996.0
+},
+"IDN|POUM": {
+"imports": 1.00046278077317,
+"exports": 2.97938261764781,
+"consumption": 2048.05176219578,
+"production": 3219.48922852805
+},
+"IDN|SMIP": {
+"imports": 162.798599908446,
+"exports": 0.7634062236820319,
+"feed": 2.62531137066958,
+"consumption": 160.11757676128698,
+"production": 0.707694447193068
+},
+"IDN|FRMI": {
+"imports": 47.3643657246907,
+"exports": 5.64087227268862,
+"consumption": 1261.65297090856,
+"production": 1260.1038169727601
+},
+"IDN|CREM": {
+"imports": 5.0202004565584,
+"exports": 0.7338678531994479,
+"consumption": 13.6822038257447,
+"production": 9.3958712223857
+},
+"IDN|COCM": {
+"imports": 23.612938860739998,
+"exports": 6.73566775096481,
+"consumption": 34.2151435150179,
+"production": 16.752358913712303
+},
+"IDN|RICE": {
+"imports": 301.034588698651,
+"exports": 14.6518740013931,
+"feed": 1164.4064083600601,
+"consumption": 35148.8730954881,
+"production": 36798.148439774
+},
+"IDN|MOLA": {
+"imports": 104.137381586747,
+"exports": 581.547249258753,
+"feed": 470.940121243308,
+"production": 1393.68012010951
+},
+"IDN|SUGA": {
+"imports": 3890.68,
+"exports": 47.84,
+"consumption": 5627.60679590229,
+"production": 2015.72
+},
+"IDN|SUNO": {
+"imports": 5.44506995849518,
+"exports": 1.95830781737877,
+"consumption": 8.19887407470868,
+"production": 6.53408395019421
+},
+"IDN|SOYO": {
+"imports": 24.4630585456277,
+"exports": 18.7152828857846,
+"consumption": 475.64235855710797,
+"production": 449.50870077590804
+},
+"IDN|PLMO": {
+"imports": 4.60608680833707,
+"exports": 28940.336786781198,
+"consumption": 2082.12740493195,
+"production": 41853.1969565958
+},
+"IDN|OTHO": {
+"imports": 92.21051727248081,
+"exports": 3875.2701455307197,
+"consumption": 574.5535524991891,
+"production": 5288.24870030927
+},
+"IDN|SUNC": {
+"imports": 9.21073689212531,
+"exports": 0.14275555419193298,
+"feed": 15.560870226822301,
+"production": 6.492888888888889
+},
+"IDN|SOYC": {
+"imports": 8940.81113116491,
+"exports": 0.0443653433218867,
+"feed": 10904.4296798085,
+"production": 1963.66291398687
+},
+"IDN|MILK": {
+"imports": 0.252380500636768,
+"exports": 5.589344431249731,
+"production": 1421.66212315491
+},
+"IDN|COFF": {
+"imports": 120.426076594711,
+"exports": 843.161036505559,
+"consumption": 24.8624201988702,
+"production": 776.3165771820101
+},
+"IDN|TEAS": {
+"imports": 20.0600600600601,
+"exports": 53.837837837837796,
+"consumption": 98.70270270270271,
+"production": 146.438438438438
+},
+"IDN|COCO": {
+"imports": 247.0,
+"exports": 53.0,
+"production": 591.0
+},
+"IDN|FFIS": {
+"imports": 9.94999102891574,
+"exports": 173.400156340303,
+"consumption": 5372.0148434929,
+"production": 5535.6450089665805
+},
+"IDN|SFIS": {
+"imports": 493.85062662904,
+"exports": 510.829738031092,
+"feed": 347.30054535269704,
+"consumption": 5036.89971659511,
+"production": 5401.219373349861
+},
+"IDN|OAQU": {
+"imports": 95.4498815099402,
+"exports": 515.027136998688,
+"consumption": 1416.37286269668,
+"production": 1901.87011818543
+},
+"IDN|FPRI": {
+"imports": 1.73911962720379,
+"exports": 7.06571335930827,
+"feed": 11.2333511306306,
+"production": 17.8556045583599
+},
+"IDN|FENI": {
+"imports": 1896.99885452463,
+"exports": 116.012119700878,
+"feed": 491.630965875026,
+"consumption": 20108.364074009198,
+"production": 21400.986246503202
+},
+"KOR|RYEM": {
+"imports": 2.41943315175053,
+"feed": 3.58056684824947,
+"production": 1.16113369649894
+},
+"KOR|BARL": {
+"imports": 299.09953934435197,
+"exports": 6.6199790530621305,
+"feed": 0.992930843958412,
+"consumption": 43.6889571341701,
+"production": 75.53018670311911
+},
+"KOR|MAIZ": {
+"imports": 9392.50382969732,
+"exports": 82.0043315197295,
+"feed": 6492.34292958639,
+"consumption": 783.041360731076,
+"production": 72.99614389097249
+},
+"KOR|OCER": {
+"imports": 36.330608326945494,
+"exports": 13.9636410631293,
+"feed": 16.1176359864213,
+"consumption": 24.455762971206,
+"production": 18.224893232272702
+},
+"KOR|RAPE": {
+"imports": 11.0280902777963,
+"exports": 0.0612878788282491,
+"feed": 0.996945087370962,
+"consumption": 5.98467803029294,
+"production": 1.00255366161784
+},
+"KOR|SOYA": {
+"imports": 1287.54854539082,
+"exports": 3.0010515247108303,
+"feed": 25.0087627059236,
+"consumption": 357.125131440589,
+"production": 85.96985629162279
+},
+"KOR|OCRO": {
+"imports": 681.136618507653,
+"exports": 8.460285826761659,
+"feed": 2.99027112090421,
+"consumption": 209.46669507535702,
+"production": 73.3108962805088
+},
+"KOR|PULS": {
+"imports": 54.2045333233335,
+"exports": 1.1095136988215,
+"feed": 7.16724565148545,
+"consumption": 63.2700345196676,
+"production": 16.3114407216739
+},
+"KOR|POTA": {
+"imports": 239.839249832552,
+"exports": 1.00066979236437,
+"feed": 39.026121902210306,
+"consumption": 576.385800401875,
+"production": 466.687206965841
+},
+"KOR|TEXT": {
+"imports": 218.427057403427,
+"exports": 2.30967611080375,
+"production": 0.159546822990631
+},
+"KOR|TOBA": {
+"imports": 91.48493157888039,
+"exports": 68.7247885880877,
+"production": 31.474997611170597
+},
+"KOR|TOMA": {
+"imports": 46.0,
+"exports": 4.0,
+"consumption": 343.866161616162,
+"production": 355.0
+},
+"KOR|OVEG": {
+"imports": 1307.05806775408,
+"exports": 129.993525721455,
+"feed": 1.00005151539592,
+"consumption": 9730.440044511919,
+"production": 9949.44190715182
+},
+"KOR|APPL": {
+"imports": 12.0,
+"exports": 3.0,
+"consumption": 105.0,
+"production": 545.0
+},
+"KOR|OFRU": {
+"imports": 822.164312187325,
+"exports": 67.8464255314489,
+"consumption": 1877.1891953004201,
+"production": 1335.34200864959
+},
+"KOR|CITR": {
+"imports": 220.09677432115998,
+"exports": 6.54483669852522,
+"consumption": 743.857558231534,
+"production": 598.142857142857
+},
+"KOR|TAGR": {
+"imports": 69.0,
+"exports": 1.0,
+"consumption": 241.0,
+"production": 190.0
+},
+"KOR|WHEA": {
+"imports": 4490.0,
+"exports": 129.0,
+"feed": 1581.63200744359,
+"consumption": 2662.38055361712,
+"production": 37.0
+},
+"KOR|BEEF": {
+"imports": 518.321539416511,
+"exports": 19.9875853507138,
+"consumption": 785.512104283054,
+"production": 281.174425822471
+},
+"KOR|PORK": {
+"imports": 664.829004885575,
+"exports": 2.00051427102083,
+"consumption": 1942.49935716122,
+"production": 1279.67086654667
+},
+"KOR|SGMT": {
+"imports": 17.455481599936302,
+"exports": 1.99134230574373,
+"consumption": 17.517725364773302,
+"production": 2.05358607058074
+},
+"KOR|EGGS": {
+"imports": 16.0125655841502,
+"exports": 1.19844258832465,
+"consumption": 622.510727567152,
+"production": 747.586655710012
+},
+"KOR|POUM": {
+"imports": 136.929707542329,
+"exports": 6.003078501795789,
+"consumption": 968.4966649563879,
+"production": 837.5700359158541
+},
+"KOR|WMIO": {
+"imports": 4.56684520570744,
+"exports": 0.0294823682904642,
+"feed": 0.955346640306085,
+"consumption": 8.46937816237617,
+"production": 4.40506451742222
+},
+"KOR|BUTT": {
+"imports": 9.847876553656421,
+"exports": 0.100212331495632,
+"consumption": 77.0192393094289,
+"production": 67.27157508726809
+},
+"KOR|SMIP": {
+"imports": 23.292142135052703,
+"exports": 0.115644381672712,
+"feed": 7.12984680862018,
+"consumption": 68.8637574802349,
+"production": 54.8150101570151
+},
+"KOR|FRMI": {
+"imports": 23.3967308615752,
+"exports": 7.31032410323035,
+"feed": 1189.4316241780998,
+"consumption": 285.19189327444604,
+"production": 1642.68781336674
+},
+"KOR|COCM": {
+"imports": 1.25941394921651,
+"exports": 3.77436168060405,
+"feed": 0.0558088942269017,
+"consumption": 5.45042827094727,
+"production": 8.07747429021149
+},
+"KOR|RICE": {
+"imports": 329.67,
+"exports": 2.664,
+"consumption": 3027.1139937931002,
+"production": 3520.476
+},
+"KOR|RAPO": {
+"imports": 139.78983857646702,
+"exports": 1.60240632060179,
+"consumption": 134.232890591201,
+"production": 2.01136458383406
+},
+"KOR|SOYO": {
+"imports": 310.0,
+"exports": 11.0,
+"consumption": 484.0,
+"production": 195.0
+},
+"KOR|OTHO": {
+"imports": 608.679824026418,
+"exports": 58.184211736646596,
+"consumption": 206.165768501337,
+"production": 144.105054351512
+},
+"KOR|RAPC": {
+"imports": 414.52830588723,
+"exports": 1.0589065649007101,
+"feed": 417.19108946317397,
+"production": 3.72169014084507
+},
+"KOR|SOYC": {
+"imports": 3503.54709137095,
+"exports": 186.122528845232,
+"feed": 4066.2618218688604,
+"production": 748.8372593431479
+},
+"KOR|MILK": {
+"imports": 3.43309065485896,
+"exports": 6.38315316519241,
+"production": 2047.31620755925
+},
+"KOR|TEAS": {
+"imports": 3.0,
+"exports": 2.0,
+"consumption": 4.0,
+"production": 3.0
+},
+"KOR|FFIS": {
+"imports": 49.1473289495136,
+"exports": 2.86015542633552,
+"consumption": 89.1448443019401,
+"production": 42.85767077876201
+},
+"KOR|SFIS": {
+"imports": 1381.79769922277,
+"exports": 403.060531885008,
+"feed": 275.590071167712,
+"consumption": 1789.80439647907,
+"production": 1086.65730030902
+},
+"KOR|OAQU": {
+"imports": 600.6670146108701,
+"exports": 205.992102293506,
+"feed": 104.43981048936399,
+"consumption": 1043.56308713006,
+"production": 773.327985302057
+},
+"KOR|FPRI": {
+"imports": 15.8449507921254,
+"exports": 14.1079264345061,
+"feed": 1.40679635392121,
+"production": 4.990326047299059
+},
+"KOR|FENI": {
+"imports": 317.441596395244,
+"exports": 0.516787125410129,
+"feed": 127.423455382677,
+"consumption": 252.342419154145,
+"production": 323.65477107910397
+},
+"VNM|MAIZ": {
+"imports": 7735.70451854398,
+"exports": 50.001909781902896,
+"feed": 10607.591713706299,
+"consumption": 1349.9480404886401,
+"production": 5109.80482028952
+},
+"VNM|OCER": {
+"imports": 0.8888888888888891,
+"exports": 1.11111111111111,
+"feed": 3.33333333333333,
+"production": 3.5555555555555602
+},
+"VNM|SOYA": {
+"imports": 1647.0,
+"exports": 1.0,
+"feed": 75.0,
+"consumption": 445.0,
+"production": 102.0
+},
+"VNM|OCRO": {
+"imports": 198.912178557961,
+"exports": 1063.87178744367,
+"feed": 164.82476872720798,
+"consumption": 371.328486972192,
+"production": 3540.01300043647
+},
+"VNM|PULS": {
+"imports": 42.0032786885246,
+"exports": 14.9967213114754,
+"feed": 27.3209818854119,
+"consumption": 288.040259135283,
+"production": 314.495081967213
+},
+"VNM|POTA": {
+"imports": 66.9095816464237,
+"exports": 5.0067476383265905,
+"consumption": 323.43589743589695,
+"production": 303.589743589744
+},
+"VNM|TEXT": {
+"imports": 1005.97349174994,
+"exports": 0.6145939248851781,
+"production": 0.093520465350784
+},
+"VNM|TOBA": {
+"imports": 65.3470701396285,
+"exports": 21.6627038223661,
+"production": 37.654206003750204
+},
+"VNM|OVEG": {
+"imports": 120.0,
+"exports": 408.0,
+"consumption": 15149.0304152014,
+"production": 16875.0
+},
+"VNM|OFRU": {
+"imports": 1621.0,
+"exports": 2684.0,
+"consumption": 4861.06812458582,
+"production": 6501.0
+},
+"VNM|CITR": {
+"imports": 29.2993198838762,
+"exports": 10.2993198838762,
+"consumption": 1244.0,
+"production": 1336.0
+},
+"VNM|TAGR": {
+"imports": 36.4025042527534,
+"exports": 1.38640353726173,
+"consumption": 49.4409663156203,
+"production": 16.4025042527534
+},
+"VNM|TWIN": {
+"imports": 5.0,
+"exports": 2.0,
+"consumption": 10.0,
+"production": 7.0
+},
+"VNM|BEEF": {
+"imports": 44.0,
+"exports": 2.0,
+"consumption": 452.0,
+"production": 410.0
+},
+"VNM|PORK": {
+"imports": 6.0,
+"exports": 17.0,
+"consumption": 3472.0,
+"production": 3733.0
+},
+"VNM|SGMT": {
+"imports": 1.0,
+"consumption": 11.0,
+"production": 16.0
+},
+"VNM|EGGS": {
+"imports": 3.0047846889952203,
+"exports": 1.9968102073365201,
+"consumption": 262.73684210526295,
+"production": 310.494417862839
+},
+"VNM|POUM": {
+"imports": 61.966862640299304,
+"exports": 8.00427578834848,
+"consumption": 927.49545697488,
+"production": 873.532870122929
+},
+"VNM|WMIO": {
+"imports": 43.0996880318871,
+"exports": 12.459110619978,
+"feed": 3.87837192359678,
+"consumption": 102.146594197581,
+"production": 59.728318248193204
+},
+"VNM|SMIP": {
+"imports": 75.7047718221154,
+"exports": 1.1414260047589802,
+"feed": 5.99089333536681,
+"consumption": 71.0796412946135,
+"production": 0.229794402123677
+},
+"VNM|FRMI": {
+"imports": 17.407946376189297,
+"exports": 2.10670894501794,
+"feed": 0.46052817976174903,
+"consumption": 498.812536702312,
+"production": 483.971827450902
+},
+"VNM|COCM": {
+"imports": 6.412034410995361,
+"exports": 6.2531565396567705,
+"consumption": 29.7286494306625,
+"production": 28.1485097096073
+},
+"VNM|RICE": {
+"imports": 59.274,
+"exports": 5997.33,
+"feed": 847.818,
+"consumption": 13729.59,
+"production": 28480.824
+},
+"VNM|MOLA": {
+"imports": 670.848513632504,
+"exports": 124.973674840113,
+"feed": 786.20178245868,
+"production": 449.430801729544
+},
+"VNM|SUGA": {
+"imports": 93.84,
+"exports": 70.84,
+"consumption": 832.6,
+"production": 1608.16
+},
+"VNM|SOYO": {
+"imports": 30.060120240480998,
+"exports": 35.9278557114228,
+"consumption": 213.57114228456902,
+"production": 219.438877755511
+},
+"VNM|OTHO": {
+"imports": 5.35538049008504,
+"exports": 8.45217559019831,
+"feed": 5.96362167962175e-05,
+"consumption": 140.691102095648,
+"production": 212.098043450728
+},
+"VNM|SOYC": {
+"imports": 10915.2644151003,
+"exports": 145.75259064768602,
+"production": 904.5417412184489
+},
+"VNM|MILK": {
+"imports": 15.659984267549401,
+"exports": 0.0918563604857826,
+"production": 827.69195253886
+},
+"VNM|COFF": {
+"imports": 67.74259462251851,
+"exports": 1664.22123570484,
+"production": 1789.20718035851
+},
+"VNM|TEAS": {
+"imports": 5.0,
+"exports": 148.0,
+"consumption": 96.0,
+"production": 260.0
+},
+"VNM|COCO": {
+"imports": 0.920163614278352,
+"exports": 1.81340752731964,
+"consumption": 0.0300146576197836,
+"production": 2.1396224919357403
+},
+"VNM|FFIS": {
+"imports": 73.76,
+"exports": 1504.08,
+"consumption": 1434.58,
+"production": 2864.9
+},
+"VNM|SFIS": {
+"imports": 1127.28,
+"exports": 1449.65,
+"feed": 999.39,
+"consumption": 1149.45,
+"production": 2471.21
+},
+"VNM|OAQU": {
+"imports": 113.31067034182,
+"exports": 811.119426953603,
+"feed": 80.0,
+"consumption": 984.6155690737329,
+"production": 1762.42432568552
+},
+"VNM|FPRI": {
+"imports": 7.53571521611006,
+"exports": 6.693158628229701,
+"feed": 2.38677904299006,
+"production": 2.7608077402377798
+},
+"VNM|FENI": {
+"imports": 519.971827231136,
+"exports": 9229.73688002675,
+"feed": 1059.7292696780198,
+"consumption": 1355.3134258677899,
+"production": 11877.5659991993
+},
+"THA|BARL": {
+"imports": 377.467288135972,
+"exports": 1.28163377346057,
+"consumption": 13.9826471249241,
+"production": 140.173528750759
+},
+"THA|MAIZ": {
+"imports": 126.0,
+"exports": 585.0,
+"feed": 3505.0,
+"consumption": 601.0,
+"production": 4821.0
+},
+"THA|OCER": {
+"imports": 28.3774402072906,
+"exports": 247.32384044932002,
+"feed": 84.553975718351,
+"consumption": 35.3873824017709,
+"production": 356.065070709858
+},
+"THA|SUNF": {
+"imports": 6.0,
+"feed": 7.15384615384615,
+"production": 25.0
+},
+"THA|SOYA": {
+"imports": 2749.0,
+"exports": 17.0,
+"feed": 7.997350993377481,
+"consumption": 118.96059602649001,
+"production": 43.0
+},
+"THA|OCRO": {
+"imports": 565.5492845699989,
+"exports": 4665.496243726509,
+"feed": 63.3277146233475,
+"consumption": 1081.20310234314,
+"production": 7961.62603615658
+},
+"THA|PULS": {
+"imports": 40.448283402580394,
+"exports": 57.9560463590641,
+"feed": 0.984375,
+"consumption": 174.470833627914,
+"production": 206.524163568773
+},
+"THA|POTA": {
+"imports": 152.0,
+"exports": 4.0,
+"feed": 0.9957081545064379,
+"consumption": 217.0,
+"production": 107.0
+},
+"THA|TEXT": {
+"imports": 267.940479772903,
+"exports": 0.282498739762831,
+"production": 1.060433793017
+},
+"THA|TOBA": {
+"imports": 21.932832340641397,
+"exports": 24.308411105503602,
+"production": 69.8866513450757
+},
+"THA|TOMA": {
+"imports": 51.8510028653295,
+"exports": 5.014326647564469,
+"consumption": 156.38621168707098,
+"production": 122.647564469914
+},
+"THA|OVEG": {
+"imports": 521.650516425001,
+"exports": 559.1797959581379,
+"feed": 9.00137467542386,
+"consumption": 2516.8064058321397,
+"production": 2824.34595892828
+},
+"THA|OFRU": {
+"imports": 331.32235214382,
+"exports": 4668.31194160842,
+"consumption": 4361.54460796393,
+"production": 10393.49818104
+},
+"THA|CITR": {
+"imports": 110.079136944958,
+"exports": 153.923252600569,
+"consumption": 773.270897727411,
+"production": 1111.41352213398
+},
+"THA|TAGR": {
+"imports": 171.666019417476,
+"exports": 2.00388349514563,
+"consumption": 237.460194174757,
+"production": 85.83300970873789
+},
+"THA|WHEA": {
+"imports": 3098.45903096755,
+"exports": 301.955252630019,
+"feed": 1748.74085049637,
+"consumption": 1298.80752704104,
+"production": 1.00014817009927
+},
+"THA|BEEF": {
+"imports": 17.0465753424658,
+"exports": 65.8191780821918,
+"consumption": 116.679452054795,
+"production": 165.45205479452102
+},
+"THA|PORK": {
+"imports": 1.0,
+"exports": 14.0,
+"consumption": 938.0,
+"production": 937.0
+},
+"THA|SGMT": {
+"imports": 1.0,
+"consumption": 3.0,
+"production": 2.0
+},
+"THA|EGGS": {
+"imports": 7.00320366132723,
+"exports": 16.9922196796339,
+"consumption": 827.621052631579,
+"production": 1085.4965675057201
+},
+"THA|POUM": {
+"imports": 1.99945429740791,
+"exports": 796.2171896316511,
+"consumption": 971.1143820762011,
+"production": 1702.53533424284
+},
+"THA|BUTT": {
+"imports": 12.8371051836648,
+"exports": 1.58483972790437,
+"consumption": 13.5990212336527,
+"production": 2.34675577789223
+},
+"THA|CHES": {
+"imports": 14.9391044687493,
+"exports": 0.442106655889184,
+"consumption": 18.6501730831654,
+"production": 4.15317527030534
+},
+"THA|FRMI": {
+"imports": 68.6430923544329,
+"exports": 118.821348776026,
+"feed": 25.4684517407199,
+"consumption": 882.632668693458,
+"production": 957.546705342147
+},
+"THA|CREM": {
+"imports": 2.59029696257873,
+"exports": 5.39266000493963,
+"consumption": 1.35374524691792,
+"production": 4.15610828927882
+},
+"THA|COCM": {
+"imports": 6.57982497789671,
+"exports": 17.777081368549,
+"feed": 0.0447884547216576,
+"consumption": 50.210442551399,
+"production": 61.2688214182348
+},
+"THA|RICE": {
+"imports": 57.942,
+"exports": 11727.594,
+"feed": 1733.0246453889301,
+"consumption": 7065.305702646349,
+"production": 21910.734
+},
+"THA|MOLA": {
+"imports": 287.68187775468,
+"exports": 226.382557071504,
+"production": 3871.0526696048
+},
+"THA|SUGA": {
+"imports": 23.0,
+"exports": 5437.2,
+"consumption": 2414.08,
+"production": 9919.44
+},
+"THA|SUNO": {
+"imports": 24.3380281690141,
+"exports": 3.94366197183099,
+"consumption": 26.6197183098592,
+"production": 11.1549295774648
+},
+"THA|SOYO": {
+"imports": 2.0,
+"exports": 57.0,
+"consumption": 391.0,
+"production": 427.0
+},
+"THA|PLMO": {
+"imports": 30.9969377990431,
+"exports": 424.06009569378,
+"consumption": 224.041722488038,
+"production": 2832.50296650718
+},
+"THA|OTHO": {
+"imports": 43.143793627819704,
+"exports": 76.7843324488429,
+"consumption": 77.9459626792383,
+"production": 113.707324664433
+},
+"THA|SOYC": {
+"imports": 5418.17030112725,
+"exports": 29.1679106823938,
+"feed": 7239.22779109969,
+"production": 1850.22540065483
+},
+"THA|MILK": {
+"imports": 0.104990054104298,
+"exports": 22.841388595767,
+"production": 1198.84445806939
+},
+"THA|COFF": {
+"imports": 94.0,
+"exports": 89.0,
+"consumption": 25.925925925925903,
+"production": 26.0
+},
+"THA|TEAS": {
+"imports": 11.0,
+"exports": 14.0,
+"consumption": 53.4153846153846,
+"production": 59.0
+},
+"THA|COCO": {
+"imports": 2.9139195086014302,
+"exports": 0.903700501155129,
+"production": 1.07586148395227
+},
+"THA|FFIS": {
+"imports": 147.19103290503202,
+"exports": 88.30938028505061,
+"consumption": 624.165619409767,
+"production": 565.31396705988
+},
+"THA|SFIS": {
+"imports": 1731.58,
+"exports": 1473.21,
+"feed": 420.09,
+"consumption": 884.69,
+"production": 1046.51
+},
+"THA|OAQU": {
+"imports": 308.708679896257,
+"exports": 495.13087467580397,
+"feed": 24.0005710614605,
+"consumption": 534.553554143765,
+"production": 757.436319984772
+},
+"THA|FPRI": {
+"imports": 12.279919028962901,
+"exports": 26.7337829579199,
+"feed": 240.78658461655198,
+"production": 255.7051794664
+},
+"THA|FENI": {
+"imports": 2377.44603652676,
+"exports": 29419.912048084698,
+"feed": 1360.0,
+"consumption": 525.2421875888721,
+"production": 30892.5031210986
+},
+"AUS|RYEM": {
+"imports": 0.908974097725849,
+"exports": 0.911953259724105,
+"consumption": 0.999950347300029,
+"production": 30.0014895809991
+},
+"AUS|BARL": {
+"imports": 11.0,
+"exports": 9729.0,
+"feed": 2325.0,
+"production": 13506.0
+},
+"AUS|OATS": {
+"imports": 3.0,
+"exports": 197.0,
+"feed": 1639.0,
+"consumption": 43.0,
+"production": 2266.0
+},
+"AUS|MAIZ": {
+"imports": 35.0,
+"exports": 76.0,
+"feed": 237.0,
+"consumption": 103.0,
+"production": 436.0
+},
+"AUS|OCER": {
+"imports": 164.513798457883,
+"exports": 339.593834480966,
+"feed": 799.484715218792,
+"consumption": 30.9947963751668,
+"production": 1142.74310077106
+},
+"AUS|RAPE": {
+"imports": 4.00046323103648,
+"exports": 2963.65674580197,
+"consumption": 1.99976838448176,
+"production": 4313.499478865079
+},
+"AUS|SUNF": {
+"imports": 7.362093948017811,
+"exports": 2.6898407567037497,
+"production": 17.879371016614698
+},
+"AUS|SOYA": {
+"imports": 18.0,
+"exports": 4.0,
+"feed": 2.0,
+"consumption": 19.0,
+"production": 31.0
+},
+"AUS|OCRO": {
+"imports": 67.2061086998669,
+"exports": 20.720907079221497,
+"feed": 5.4782608695652195,
+"consumption": 38.7380106817535,
+"production": 19.0
+},
+"AUS|PULS": {
+"imports": 16.0,
+"exports": 3459.0,
+"feed": 908.5733990147779,
+"consumption": 18.9645320197044,
+"production": 4916.0
+},
+"AUS|POTA": {
+"imports": 154.0,
+"exports": 45.0,
+"feed": 22.0,
+"consumption": 1087.0,
+"production": 1105.0
+},
+"AUS|TEXT": {
+"imports": 0.0297989147085558,
+"exports": 820.594088755855,
+"production": 820.931063844699
+},
+"AUS|TOBA": {
+"imports": 16.500246925838898,
+"exports": 2.63143870964686,
+"production": 1.6338458024210398
+},
+"AUS|TOMA": {
+"imports": 104.0,
+"exports": 5.0,
+"consumption": 452.0,
+"production": 372.0
+},
+"AUS|OVEG": {
+"imports": 286.016513761468,
+"exports": 189.948623853211,
+"consumption": 1858.59082568807,
+"production": 1843.48256880734
+},
+"AUS|APPL": {
+"imports": 27.039531478770098,
+"exports": 8.986822840409959,
+"consumption": 326.503184039232,
+"production": 314.459736456808
+},
+"AUS|OFRU": {
+"imports": 381.696833023031,
+"exports": 219.424986336159,
+"consumption": 1176.03266958533,
+"production": 1119.5409394536
+},
+"AUS|CITR": {
+"imports": 105.172736747938,
+"exports": 283.47287914199,
+"consumption": 307.571106619151,
+"production": 506.632829817715
+},
+"AUS|TAGR": {
+"imports": 115.02964681619,
+"exports": 130.966228409384,
+"consumption": 153.97456702048,
+"production": 306.085187654907
+},
+"AUS|TABO": {
+"imports": 31.896440129449797,
+"consumption": 32.1035598705502,
+"production": 9.23624595469254
+},
+"AUS|TWIN": {
+"imports": 176.0,
+"exports": 821.0,
+"consumption": 506.0,
+"production": 1369.0
+},
+"AUS|WHEA": {
+"imports": 260.0,
+"exports": 22294.0,
+"feed": 4086.0,
+"consumption": 1823.0,
+"production": 31819.0
+},
+"AUS|BEEF": {
+"imports": 13.0,
+"exports": 1388.0,
+"consumption": 695.0,
+"production": 2069.0
+},
+"AUS|PORK": {
+"imports": 274.0,
+"exports": 45.0,
+"consumption": 626.0,
+"production": 397.0
+},
+"AUS|SGMT": {
+"imports": 1.0,
+"exports": 455.0,
+"consumption": 249.0,
+"production": 703.0
+},
+"AUS|EGGS": {
+"imports": 3.0,
+"exports": 2.0,
+"consumption": 200.0,
+"production": 248.0
+},
+"AUS|POUM": {
+"imports": 16.0,
+"exports": 42.0,
+"consumption": 1245.0,
+"production": 1271.0
+},
+"AUS|WHEP": {
+"imports": 14.3820305994662,
+"exports": 33.0690747823125,
+"feed": 81.0060071543544,
+"production": 99.6930513372007
+},
+"AUS|CASE": {
+"imports": 2.38403373798297,
+"exports": 0.244689644582052,
+"feed": 6.8339508060788505,
+"production": 4.69460671267794
+},
+"AUS|WMIO": {
+"imports": 28.0293966183798,
+"exports": 54.7438567265298,
+"consumption": 36.519802565352,
+"production": 63.234262673502
+},
+"AUS|BUTT": {
+"imports": 33.931549919123604,
+"exports": 16.9545998694832,
+"feed": 8.17085349344717,
+"consumption": 117.856346853511,
+"production": 109.050250297318
+},
+"AUS|SMIP": {
+"imports": 9.183895532214779,
+"exports": 157.73903115173601,
+"feed": 7.38120853331137,
+"consumption": 73.7629039289218,
+"production": 229.699248081755
+},
+"AUS|CHES": {
+"imports": 116.894417412033,
+"exports": 173.883641452126,
+"consumption": 280.33499835141,
+"production": 351.218149525669
+},
+"AUS|FRMI": {
+"imports": 29.319664771772498,
+"exports": 36.2792159751884,
+"feed": 764.8318143726569,
+"consumption": 2663.70756142752,
+"production": 3462.69987129038
+},
+"AUS|CREM": {
+"imports": 1.17775102420605,
+"exports": 2.67353095749339,
+"consumption": 5.4549628087869895,
+"production": 6.95074274207433
+},
+"AUS|COCM": {
+"imports": 8.40635515642766,
+"exports": 41.7434841475305,
+"consumption": 1.3811030592928901,
+"production": 34.2315858205839
+},
+"AUS|RICE": {
+"imports": 177.822,
+"exports": 199.8,
+"consumption": 243.296949152542,
+"production": 537.462
+},
+"AUS|MOLA": {
+"imports": 1.94551899096169,
+"exports": 720.8590788515439,
+"feed": 188.140607971846,
+"production": 1010.793603102
+},
+"AUS|SUGA": {
+"imports": 73.6,
+"exports": 3498.76,
+"feed": 62.56,
+"consumption": 793.04,
+"production": 4543.88
+},
+"AUS|RAPO": {
+"imports": 19.9753390875462,
+"exports": 164.202219482121,
+"consumption": 206.254007398274,
+"production": 385.52404438964203
+},
+"AUS|SUNO": {
+"imports": 62.421768707483004,
+"exports": 1.9863945578231301,
+"consumption": 13.9047619047619,
+"production": 11.074829931972799
+},
+"AUS|SOYO": {
+"imports": 25.6,
+"exports": 3.04615384615385,
+"consumption": 11.1692307692308,
+"production": 5.907692307692311
+},
+"AUS|OLIO": {
+"imports": 28.0,
+"exports": 4.0,
+"consumption": 46.0,
+"production": 23.0
+},
+"AUS|OTHO": {
+"imports": 97.2811438150487,
+"exports": 67.8494231473954,
+"consumption": 219.305125762611,
+"production": 271.794518260809
+},
+"AUS|RAPC": {
+"imports": 11.250243762538599,
+"exports": 110.278209264112,
+"feed": 425.035997475726,
+"production": 524.0639629773
+},
+"AUS|SUNC": {
+"imports": 0.0132940570453787,
+"exports": 0.0234492381118899,
+"feed": 13.7629596951727,
+"production": 13.7731148762392
+},
+"AUS|SOYC": {
+"imports": 1757.96964555063,
+"exports": 2.08531596448757,
+"feed": 1781.81647652492,
+"production": 25.9321469387755
+},
+"AUS|MILK": {
+"imports": 5.12113637116557,
+"exports": 188.115922286675,
+"production": 9259.29166464417
+},
+"AUS|FFIS": {
+"imports": 54.1976374177237,
+"exports": 14.1906185432196,
+"consumption": 100.51438123883,
+"production": 60.5073623643259
+},
+"AUS|SFIS": {
+"imports": 398.585959053683,
+"exports": 24.5399251307937,
+"feed": 167.452565064873,
+"consumption": 339.31250911145196,
+"production": 132.719040253436
+},
+"AUS|OAQU": {
+"imports": 168.855365239295,
+"exports": 29.6712090680101,
+"consumption": 218.503778337531,
+"production": 79.3196221662468
+},
+"AUS|FPRI": {
+"imports": 16.2180052227645,
+"exports": 2.6708984435051697,
+"feed": 12.7072821132708,
+"production": 0.722067376722769
+},
+"AUS|FENI": {
+"imports": 18.5248583458952,
+"exports": 1.9618855155527999,
+"feed": 5.1895434897768,
+"consumption": 67.39510911700759,
+"production": 70.978119250832
+},
+"NZL|BARL": {
+"imports": 47.0,
+"exports": 3.0,
+"feed": 299.814713896458,
+"consumption": 1.00272479564033,
+"production": 298.0
+},
+"NZL|OATS": {
+"imports": 7.07358532766719,
+"exports": 0.883023932006263,
+"feed": 25.726683068664702,
+"consumption": 10.884365913665802,
+"production": 35.3679266383359
+},
+"NZL|MAIZ": {
+"imports": 45.0,
+"exports": 16.0,
+"feed": 127.690217391304,
+"consumption": 22.1195652173913,
+"production": 176.0
+},
+"NZL|OCER": {
+"imports": 43.134328358209004,
+"exports": 7.88059701492537,
+"feed": 34.0,
+"consumption": 18.6645718774548,
+"production": 24.3582089552239
+},
+"NZL|RAPE": {
+"imports": 8.0,
+"exports": 2.0,
+"feed": 8.0,
+"consumption": 1.0,
+"production": 3.0
+},
+"NZL|OCRO": {
+"imports": 18.5218814822989,
+"exports": 2.17496174125667,
+"feed": 4.70588235294118,
+"consumption": 9.85369669910668,
+"production": 2.1176470588235303
+},
+"NZL|PULS": {
+"imports": 13.7150326797386,
+"exports": 19.2522875816993,
+"feed": 1.0212765957446799,
+"consumption": 15.0849673202614,
+"production": 22.7555555555556
+},
+"NZL|POTA": {
+"imports": 40.0,
+"exports": 113.0,
+"feed": 14.0,
+"consumption": 220.0,
+"production": 473.0
+},
+"NZL|TOBA": {
+"imports": 5.75842109413209,
+"exports": 4.1900825640168,
+"production": 0.597663798670401
+},
+"NZL|TOMA": {
+"imports": 48.251308900523604,
+"exports": 8.95287958115183,
+"consumption": 82.565445026178,
+"production": 47.2460732984293
+},
+"NZL|OVEG": {
+"imports": 74.9631811487482,
+"exports": 473.232204221895,
+"consumption": 467.37218598779697,
+"production": 919.548355424644
+},
+"NZL|APPL": {
+"imports": 3.0,
+"exports": 361.0,
+"consumption": 48.566371681415895,
+"production": 470.0
+},
+"NZL|OFRU": {
+"imports": 180.31613702389998,
+"exports": 511.77816815351997,
+"feed": 0.174293358992408,
+"consumption": 211.32750959297,
+"production": 613.6930830390461
+},
+"NZL|CITR": {
+"imports": 27.7224595032094,
+"exports": 5.86560364464693,
+"consumption": 49.8945124648419,
+"production": 31.0499319796026
+},
+"NZL|TAGR": {
+"imports": 20.027301811976198,
+"exports": 1.13575537821005,
+"consumption": 26.0270727230922,
+"production": 40.1698878224815
+},
+"NZL|TWIN": {
+"imports": 39.938366718027694,
+"exports": 255.392912172573,
+"consumption": 31.047765793528498,
+"production": 284.560862865948
+},
+"NZL|WHEA": {
+"imports": 694.683947248749,
+"exports": 23.010459299681703,
+"feed": 428.19463392451104,
+"consumption": 432.19645293315097,
+"production": 404.815825375171
+},
+"NZL|BEEF": {
+"imports": 12.0,
+"exports": 555.0,
+"consumption": 102.0,
+"production": 645.0
+},
+"NZL|PORK": {
+"imports": 77.0,
+"exports": 1.0,
+"consumption": 123.0,
+"production": 47.0
+},
+"NZL|SGMT": {
+"imports": 2.0,
+"exports": 395.0,
+"consumption": 59.0,
+"production": 452.0
+},
+"NZL|EGGS": {
+"imports": 1.98425196850394,
+"exports": 2.0157480314960603,
+"consumption": 50.5725171450343,
+"production": 61.511811023622
+},
+"NZL|POUM": {
+"imports": 0.9977628635346759,
+"exports": 23.0514541387025,
+"consumption": 122.661858492771,
+"production": 222.501118568233
+},
+"NZL|WHEP": {
+"imports": 23.4978864772827,
+"exports": 35.9142364768775,
+"feed": 17.9813114940483,
+"production": 30.397661493643202
+},
+"NZL|CASE": {
+"imports": 0.0106700193334665,
+"exports": 89.56369426958841,
+"production": 120.494823385119
+},
+"NZL|WMIO": {
+"imports": 1.72496625895707,
+"exports": 1257.99429914521,
+"feed": 0.421927380670825,
+"consumption": 11.0136871092112,
+"production": 1237.54006472273
+},
+"NZL|BUTT": {
+"imports": 0.955411777913474,
+"exports": 528.5627783025479,
+"consumption": 39.587647876209395,
+"production": 549.206557484423
+},
+"NZL|SMIP": {
+"imports": 2.01361959694985,
+"exports": 418.53734222207,
+"feed": 46.568458721455706,
+"production": 506.842300431589
+},
+"NZL|CHES": {
+"imports": 11.4995239406086,
+"exports": 340.188885353163,
+"consumption": 41.343059280392595,
+"production": 394.397370336577
+},
+"NZL|FRMI": {
+"imports": 91.3074129589433,
+"exports": 35.1877777573242,
+"feed": 3325.7688321133896,
+"consumption": 118.064826334279,
+"production": 3861.87032953293
+},
+"NZL|CREM": {
+"imports": 1.11370834224558,
+"exports": 99.2084636454996,
+"consumption": 0.838931064417025,
+"production": 98.933686367671
+},
+"NZL|COCM": {
+"imports": 4.07113561479005,
+"exports": 1.75175703332655,
+"feed": 0.00735860516957783,
+"consumption": 4.32508839326234,
+"production": 2.01306841696842
+},
+"NZL|OTHO": {
+"imports": 23.5490107351376,
+"exports": 5.45533242091898,
+"consumption": 4.78234235491667,
+"production": 8.2601461845314
+},
+"NZL|MILK": {
+"imports": 1.36586137968249,
+"exports": 192.562046315419,
+"production": 22326.7722378
+},
+"NZL|FFIS": {
+"imports": 3.22914708212305,
+"exports": 6.66175864800634,
+"consumption": 12.2632455365475,
+"production": 15.7058515975706
+},
+"NZL|SFIS": {
+"imports": 29.849590830681997,
+"exports": 301.73496179450797,
+"feed": 45.0,
+"consumption": 82.4574168104164,
+"production": 399.346189302462
+},
+"NZL|OAQU": {
+"imports": 19.290801077826902,
+"exports": 127.094948532861,
+"consumption": 22.6550306624154,
+"production": 130.459178117449
+},
+"NZL|FPRI": {
+"imports": 3.9208408551075498,
+"exports": 14.154872862771201,
+"feed": 23.610722662778898,
+"production": 34.1632525629716
+},
+"NZL|FENI": {
+"imports": 16.9461552960773,
+"feed": 2.51584980972639,
+"consumption": 15.782244592182,
+"production": 11.526922351961401
+},
+"USA|RYEM": {
+"imports": 219.226943005181,
+"exports": 3.9958549222797903,
+"feed": 169.316667995217,
+"consumption": 161.955073734556,
+"production": 260.269430051813
+},
+"USA|BARL": {
+"imports": 878.0,
+"exports": 818.0,
+"feed": 41.012316010814104,
+"consumption": 25.0075097626915,
+"production": 3119.0
+},
+"USA|OATS": {
+"imports": 1946.65263157895,
+"exports": 84.0149866190901,
+"feed": 1264.4592523300998,
+"consumption": 1308.5206363254001,
+"production": 719.871543264942
+},
+"USA|MAIZ": {
+"imports": 1756.0,
+"exports": 53507.0,
+"feed": 134734.583163177,
+"consumption": 3917.9878786753798,
+"production": 371096.0
+},
+"USA|OCER": {
+"imports": 439.28905597326604,
+"exports": 6032.8111946533,
+"feed": 2672.09567734305,
+"consumption": 398.17616168800396,
+"production": 9782.21052631579
+},
+"USA|RAPE": {
+"imports": 710.0,
+"exports": 192.0,
+"feed": 10.8617395676219,
+"consumption": 74.0573152337858,
+"production": 1421.0
+},
+"USA|SUNF": {
+"imports": 60.9728285077951,
+"exports": 98.0436525612472,
+"feed": 319.142093541203,
+"consumption": 167.07438752784,
+"production": 969.567928730512
+},
+"USA|SOYA": {
+"imports": 742.0,
+"exports": 55412.0,
+"feed": 4117.93323172709,
+"consumption": 36.999400090797096,
+"production": 120065.0
+},
+"USA|OCRO": {
+"imports": 1620.3153132129,
+"exports": 2154.12434498109,
+"feed": 15.606472068646601,
+"consumption": 435.383540413248,
+"production": 2247.5809496000898
+},
+"USA|PULS": {
+"imports": 545.0,
+"exports": 1353.0,
+"feed": 219.35964912280699,
+"consumption": 1214.73099415205,
+"production": 2614.0
+},
+"USA|POTA": {
+"imports": 3193.0675152770996,
+"exports": 3526.92542236695,
+"feed": 132.00381205129,
+"consumption": 17165.495711063602,
+"production": 20453.4324741505
+},
+"USA|TEXT": {
+"imports": 1.17100003308645,
+"exports": 3269.2560895331703,
+"production": 4532.11834385727
+},
+"USA|TOBA": {
+"imports": 209.463059612434,
+"exports": 240.46540060142,
+"production": 334.659912661758
+},
+"USA|TOMA": {
+"imports": 1889.0,
+"exports": 1461.0,
+"consumption": 10643.0,
+"production": 11139.0
+},
+"USA|OVEG": {
+"imports": 8844.0,
+"exports": 3624.0,
+"feed": 311.987336634467,
+"consumption": 26264.0819465866,
+"production": 23638.0
+},
+"USA|APPL": {
+"imports": 2095.8571525932,
+"exports": 980.066789340966,
+"consumption": 5721.389899815989,
+"production": 5240.64281333061
+},
+"USA|OFRU": {
+"imports": 11643.991366083299,
+"exports": 4217.01830513178,
+"consumption": 13696.3427222804,
+"production": 7612.00520469014
+},
+"USA|CITR": {
+"imports": 8572.0,
+"exports": 2276.0,
+"consumption": 8646.8872241405,
+"production": 7039.0
+},
+"USA|TAGR": {
+"imports": 832.9458704269281,
+"exports": 1035.06725583209,
+"consumption": 2998.19481447787,
+"production": 3598.3632464747498
+},
+"USA|TABO": {
+"imports": 144.0,
+"exports": 9.0,
+"consumption": 193.0,
+"production": 67.0
+},
+"USA|TWIN": {
+"imports": 1230.0,
+"exports": 354.0,
+"consumption": 2551.0,
+"production": 2170.0
+},
+"USA|WHEA": {
+"imports": 5397.0,
+"exports": 28733.0,
+"feed": 1066.9103191388601,
+"consumption": 21798.6536822501,
+"production": 47479.0
+},
+"USA|BEEF": {
+"imports": 1454.0,
+"exports": 1363.0,
+"consumption": 12046.0,
+"production": 11907.0
+},
+"USA|PORK": {
+"imports": 627.0,
+"exports": 2518.0,
+"consumption": 8638.08629701753,
+"production": 11611.0
+},
+"USA|SGMT": {
+"imports": 122.0,
+"exports": 4.0,
+"feed": 29.0,
+"consumption": 166.0,
+"production": 77.0
+},
+"USA|EGGS": {
+"imports": 21.0,
+"exports": 249.0,
+"consumption": 5149.0,
+"production": 6363.0
+},
+"USA|POUM": {
+"imports": 123.0,
+"exports": 3692.0,
+"consumption": 18139.0090680651,
+"production": 21914.0
+},
+"USA|WHEP": {
+"imports": 13.696545247682,
+"exports": 513.4088578172041,
+"feed": 46.9149797657238,
+"consumption": 0.5467701814464171,
+"production": 499.712312569522
+},
+"USA|WMIO": {
+"imports": 6.0216697406277495,
+"exports": 28.1259803187839,
+"consumption": 29.420097443827398,
+"production": 43.7729388733281
+},
+"USA|BUTT": {
+"imports": 35.449495165605,
+"exports": 35.0191422129831,
+"consumption": 729.417894683036,
+"production": 840.3200856637139
+},
+"USA|SMIP": {
+"imports": 0.996450693978195,
+"exports": 611.931244116602,
+"feed": 1.8825986160248598,
+"consumption": 480.385881064295,
+"production": 1050.58743193661
+},
+"USA|CHES": {
+"imports": 124.218963390211,
+"exports": 370.798920882384,
+"consumption": 5647.45044010125,
+"production": 5880.150436961219
+},
+"USA|FRMI": {
+"imports": 60.9855226885594,
+"exports": 442.33137638780704,
+"feed": 25961.936871562102,
+"consumption": 33084.6146785709,
+"production": 59431.0200639405
+},
+"USA|CREM": {
+"imports": 9.100438508172491,
+"exports": 31.4095095309091,
+"consumption": 3.0995314119453,
+"production": 25.408602434682003
+},
+"USA|COCM": {
+"imports": 14.0066247425707,
+"exports": 36.0810776738279,
+"feed": 6.39135168515447,
+"consumption": 1048.67963489727,
+"production": 1069.916059777
+},
+"USA|RICE": {
+"imports": 729.27,
+"exports": 3172.824,
+"feed": 125.874,
+"consumption": 2308.356,
+"production": 5383.944
+},
+"USA|MOLA": {
+"imports": 748.624392920257,
+"exports": 232.741271112643,
+"feed": 1788.00243999552,
+"production": 2209.78120513557
+},
+"USA|SUGA": {
+"imports": 3197.92,
+"exports": 248.4,
+"consumption": 9854.13395605406,
+"production": 7518.24
+},
+"USA|RAPO": {
+"imports": 1992.0,
+"exports": 103.0,
+"consumption": 670.248978075065,
+"production": 757.0
+},
+"USA|SUNO": {
+"imports": 54.0,
+"exports": 35.0,
+"consumption": 36.8377192982456,
+"production": 200.0
+},
+"USA|SOYO": {
+"imports": 138.0,
+"exports": 1070.0,
+"consumption": 4418.0,
+"production": 10380.0
+},
+"USA|OLIO": {
+"imports": 318.0,
+"exports": 18.0,
+"consumption": 316.0,
+"production": 23.0
+},
+"USA|OTHO": {
+"imports": 1274.87146373084,
+"exports": 1159.75509330777,
+"consumption": 1006.55577363005,
+"production": 2789.15635268431
+},
+"USA|RAPC": {
+"imports": 6804.5877359016695,
+"exports": 70.1254130492642,
+"feed": 7752.41109500662,
+"production": 1017.94877215421
+},
+"USA|SUNC": {
+"imports": 4.66971376974797,
+"exports": 15.0445916987929,
+"feed": 213.579741195752,
+"production": 223.954619124797
+},
+"USA|SOYC": {
+"imports": 569.3645093205339,
+"exports": 18413.607897933503,
+"feed": 24440.295547347097,
+"production": 42284.538935960205
+},
+"USA|MILK": {
+"imports": 7.44033338681863,
+"exports": 70.84945841115261,
+"production": 99229.83505701479
+},
+"USA|COFF": {
+"imports": 1700.0,
+"exports": 183.0,
+"consumption": 1426.0,
+"production": 2.0
+},
+"USA|FFIS": {
+"imports": 1442.33659786155,
+"exports": 373.070879983772,
+"consumption": 1646.68388412812,
+"production": 677.418402126661
+},
+"USA|SFIS": {
+"imports": 1672.33883136954,
+"exports": 1944.5219127924,
+"feed": 702.6806309675001,
+"consumption": 2359.40210307432,
+"production": 3694.2661686234
+},
+"USA|OAQU": {
+"imports": 2536.32786439156,
+"exports": 318.189264659201,
+"consumption": 3277.21265472446,
+"production": 1104.1021346398102
+},
+"USA|FPRI": {
+"imports": 35.4171175162468,
+"exports": 36.131086719676,
+"feed": 6.84127283864599,
+"production": 7.55524204207513
+},
+"USA|FENI": {
+"imports": 412.003267280853,
+"exports": 318.010485144082,
+"feed": 137.15611531227202,
+"consumption": 1164.59893430081,
+"production": 1618.99392097264
+},
+"CAN|RYEM": {
+"imports": 1.0014598540146,
+"exports": 135.801459854015,
+"feed": 34.711157455683,
+"consumption": 47.603873082079595,
+"production": 341.497810218978
+},
+"CAN|BARL": {
+"imports": 201.012338100792,
+"exports": 2773.82972193236,
+"feed": 4298.736111963661,
+"consumption": 11.999263396967601,
+"production": 7891.48437787736
+},
+"CAN|OATS": {
+"imports": 29.0,
+"exports": 1801.0,
+"feed": 1548.0,
+"consumption": 86.0,
+"production": 3733.0
+},
+"CAN|MAIZ": {
+"imports": 1137.0,
+"exports": 1800.0,
+"feed": 10662.7846051954,
+"consumption": 707.052027375083,
+"production": 14096.0
+},
+"CAN|OCER": {
+"imports": 73.0059413080097,
+"exports": 495.183870959299,
+"feed": 32.4012472602698,
+"consumption": 12.119913205098602,
+"production": 485.535470189364
+},
+"CAN|RAPE": {
+"imports": 134.003077841836,
+"exports": 11779.7294255461,
+"feed": 3.00023144662678,
+"consumption": 48.0037031460285,
+"production": 21450.4926843834
+},
+"CAN|SUNF": {
+"imports": 25.0,
+"exports": 16.0,
+"feed": 2.04460456338995,
+"production": 58.0
+},
+"CAN|SOYA": {
+"imports": 543.0,
+"exports": 4665.0,
+"feed": 387.0,
+"consumption": 44.0,
+"production": 7717.0
+},
+"CAN|OCRO": {
+"imports": 249.370298775326,
+"exports": 525.666371757583,
+"feed": 0.9411764705882351,
+"consumption": 62.8848645076008,
+"production": 817.1348314606739
+},
+"CAN|PULS": {
+"imports": 283.14511851540595,
+"exports": 5465.27907935174,
+"feed": 465.519480261481,
+"consumption": 487.82266200547,
+"production": 7279.85420661545
+},
+"CAN|POTA": {
+"imports": 309.0,
+"exports": 2269.0,
+"feed": 133.783346806791,
+"consumption": 2846.3904607922404,
+"production": 5970.0
+},
+"CAN|TOBA": {
+"imports": 21.7166637554935,
+"exports": 21.4164576912844,
+"production": 29.0950515495424
+},
+"CAN|TOMA": {
+"imports": 503.0,
+"exports": 236.0,
+"consumption": 720.0,
+"production": 492.0
+},
+"CAN|OVEG": {
+"imports": 2267.0,
+"exports": 926.0,
+"consumption": 2984.80166435506,
+"production": 1888.0
+},
+"CAN|APPL": {
+"imports": 420.0,
+"exports": 63.0,
+"consumption": 720.0,
+"production": 402.0
+},
+"CAN|OFRU": {
+"imports": 1926.9975765617398,
+"exports": 417.88758340237,
+"consumption": 1910.08967776763,
+"production": 427.0
+},
+"CAN|TAGR": {
+"imports": 318.645161290323,
+"exports": 14.0155728587319,
+"consumption": 315.625924829831,
+"production": 29.9738445367432
+},
+"CAN|TWIN": {
+"imports": 422.0,
+"exports": 88.0,
+"consumption": 403.0,
+"production": 70.0
+},
+"CAN|WHEA": {
+"imports": 1368.02153754113,
+"exports": 23301.6331375852,
+"feed": 2681.28525605189,
+"consumption": 2702.2874904335004,
+"production": 30390.478454587002
+},
+"CAN|BEEF": {
+"imports": 227.918308849875,
+"exports": 438.15693299892496,
+"consumption": 957.342887853816,
+"production": 1167.5815120028699
+},
+"CAN|PORK": {
+"imports": 253.946783993296,
+"exports": 1332.27906976744,
+"consumption": 884.185208464278,
+"production": 2127.55415880997
+},
+"CAN|SGMT": {
+"imports": 25.2594167176486,
+"exports": 0.850886833887303,
+"feed": 2.96886999388217,
+"consumption": 35.6264399265861,
+"production": 16.1660266992951
+},
+"CAN|EGGS": {
+"imports": 55.045118949959,
+"exports": 9.99179655455291,
+"consumption": 529.5652173913039,
+"production": 554.454470877769
+},
+"CAN|POUM": {
+"imports": 182.0,
+"exports": 163.0,
+"consumption": 1431.0,
+"production": 1418.0
+},
+"CAN|WHEP": {
+"imports": 10.5715161957809,
+"exports": 52.4485284663267,
+"feed": 0.602224904121818,
+"consumption": 12.6529084778785,
+"production": 55.1321456525462
+},
+"CAN|CASE": {
+"imports": 3.46116922585433,
+"exports": 0.256290278381735,
+"production": 0.460578797863131
+},
+"CAN|WMIO": {
+"imports": 2.51624821383706,
+"exports": 0.819219392719472,
+"feed": 4.3106844434688805,
+"consumption": 4.5333954980013305,
+"production": 7.147051120352621
+},
+"CAN|BUTT": {
+"imports": 20.577579673873398,
+"exports": 1.18496064798678,
+"consumption": 129.323659026556,
+"production": 100.988461365221
+},
+"CAN|SMIP": {
+"imports": 4.14730215386499,
+"exports": 65.8792872976605,
+"feed": 7.00279545190782,
+"consumption": 47.561755447709494,
+"production": 139.1519292
+},
+"CAN|CHES": {
+"imports": 27.5901337553293,
+"exports": 13.102690893855101,
+"consumption": 638.822090065696,
+"production": 616.3434966
+},
+"CAN|FRMI": {
+"imports": 6.07345098376417,
+"exports": 11.3111900375446,
+"feed": 2846.91710391405,
+"consumption": 926.08310942146,
+"production": 3774.65792387122
+},
+"CAN|CREM": {
+"imports": 3.7756455197734597,
+"exports": 0.0441500129181698,
+"consumption": 225.058546839121,
+"production": 221.32705133226602
+},
+"CAN|COCM": {
+"imports": 23.9887883391527,
+"exports": 12.1419682290644,
+"feed": 14.2047530144178,
+"consumption": 59.7119738428548,
+"production": 53.7406219107537
+},
+"CAN|MOLA": {
+"imports": 157.428154783931,
+"exports": 12.642656692836999,
+"feed": 100.049352978338,
+"production": 9.73092517508293
+},
+"CAN|SUGA": {
+"imports": 1162.88,
+"exports": 195.04,
+"consumption": 1095.72,
+"production": 125.12
+},
+"CAN|RAPO": {
+"imports": 18.0,
+"exports": 3096.0,
+"consumption": 550.0,
+"production": 4046.0
+},
+"CAN|SUNO": {
+"imports": 23.0,
+"exports": 1.0,
+"consumption": 13.0,
+"production": 26.0
+},
+"CAN|SOYO": {
+"imports": 22.0,
+"exports": 142.0,
+"consumption": 26.0,
+"production": 341.0
+},
+"CAN|OTHO": {
+"imports": 184.39595311219801,
+"exports": 157.444967448885,
+"consumption": 363.374714542122,
+"production": 602.414965986395
+},
+"CAN|RAPC": {
+"imports": 34.903474954412,
+"exports": 4854.50079866852,
+"feed": 654.226592762585,
+"production": 5488.17403466292
+},
+"CAN|SUNC": {
+"imports": 5.8284481365371805,
+"exports": 0.956659310930019,
+"feed": 36.4547417201289,
+"production": 31.5829528945217
+},
+"CAN|SOYC": {
+"imports": 1819.22908842919,
+"exports": 361.341242745155,
+"feed": 2902.70620199184,
+"production": 1444.8183563077998
+},
+"CAN|MILK": {
+"imports": 40.2860331531973,
+"exports": 8.75500075046284,
+"production": 8546.14379741269
+},
+"CAN|FFIS": {
+"imports": 141.12,
+"exports": 144.09,
+"consumption": 189.25,
+"production": 195.55
+},
+"CAN|SFIS": {
+"imports": 464.294469650521,
+"exports": 331.53842427958296,
+"feed": 181.4,
+"consumption": 335.796572654813,
+"production": 384.440527283875
+},
+"CAN|OAQU": {
+"imports": 319.66,
+"exports": 386.27,
+"feed": 92.85416297608501,
+"consumption": 270.87583702391504,
+"production": 446.45
+},
+"CAN|FPRI": {
+"imports": 27.9100157128748,
+"exports": 23.1057949184944,
+"feed": 26.347548101226,
+"production": 25.584715707390203
+},
+"MEX|RYEM": {
+"imports": 0.672324402653532,
+"feed": 0.656738616459597,
+"consumption": 0.46622817675487604,
+"production": 0.668175911956647
+},
+"MEX|BARL": {
+"imports": 684.9410983549519,
+"exports": 14.5761179468296,
+"feed": 1.99137507813797,
+"production": 1012.34696061846
+},
+"MEX|OATS": {
+"imports": 249.428073874936,
+"exports": 1.10370854501605,
+"feed": 195.053500063356,
+"consumption": 116.43499748679899,
+"production": 72.1237803975719
+},
+"MEX|MAIZ": {
+"imports": 15508.0,
+"exports": 1944.0,
+"feed": 17197.4374825104,
+"consumption": 14716.3743671933,
+"production": 27763.0
+},
+"MEX|OCER": {
+"imports": 471.800984904703,
+"exports": 9.32805025578632,
+"feed": 5104.94108105445,
+"production": 4878.37093729556
+},
+"MEX|RAPE": {
+"imports": 1597.86145513374,
+"exports": 0.722823568572341,
+"feed": 59.00511523598821,
+"consumption": 8.00069359132043,
+"production": 0.999913301084946
+},
+"MEX|SUNF": {
+"imports": 28.0,
+"feed": 1.0,
+"consumption": 5.0,
+"production": 9.0
+},
+"MEX|SOYA": {
+"imports": 4343.0,
+"exports": 1.0,
+"feed": 865.818067226891,
+"consumption": 1.99957983193277,
+"production": 433.0
+},
+"MEX|OCRO": {
+"imports": 182.48971812363,
+"exports": 93.1653979371545,
+"feed": 175.818694463431,
+"consumption": 184.781093861164,
+"production": 1724.0102604870801
+},
+"MEX|PULS": {
+"imports": 259.394404895716,
+"exports": 243.00811789684002,
+"feed": 8.122054154995329,
+"consumption": 1296.94455256413,
+"production": 1516.5956038466302
+},
+"MEX|POTA": {
+"imports": 422.0,
+"exports": 8.0,
+"feed": 139.063644688645,
+"consumption": 1878.8598901098899,
+"production": 1715.0
+},
+"MEX|TEXT": {
+"imports": 205.229115967766,
+"exports": 43.298667657139,
+"production": 300.20895691162303
+},
+"MEX|TOBA": {
+"imports": 21.276553757462302,
+"exports": 16.0869491699624,
+"production": 16.712815597029103
+},
+"MEX|TOMA": {
+"imports": 176.0,
+"exports": 1772.0,
+"consumption": 2407.0,
+"production": 4243.0
+},
+"MEX|OVEG": {
+"imports": 316.027137437992,
+"exports": 5757.877152028011,
+"consumption": 6599.54224890978,
+"production": 13188.4727166618
+},
+"MEX|APPL": {
+"imports": 324.0,
+"exports": 9.0,
+"consumption": 859.0,
+"production": 714.0
+},
+"MEX|OFRU": {
+"imports": 519.996818714616,
+"exports": 3050.13827303715,
+"feed": 0.0118699849603065,
+"consumption": 7472.744885870889,
+"production": 11111.9002573779
+},
+"MEX|CITR": {
+"imports": 50.1926600849279,
+"exports": 1692.42608447535,
+"consumption": 5434.34862474838,
+"production": 8351.40494872991
+},
+"MEX|TAGR": {
+"imports": 129.879069767442,
+"exports": 209.194418604651,
+"consumption": 243.226046511628,
+"production": 353.575813953488
+},
+"MEX|TABO": {
+"imports": 8.790697674418599,
+"exports": 5.11627906976744,
+"consumption": 14.4459644322845,
+"production": 11.734610123119001
+},
+"MEX|TWIN": {
+"imports": 72.0,
+"exports": 1.0,
+"consumption": 12.0,
+"production": 36.0
+},
+"MEX|WHEA": {
+"imports": 5335.0,
+"exports": 1665.0,
+"feed": 411.0,
+"consumption": 3898.0,
+"production": 3504.0
+},
+"MEX|BEEF": {
+"imports": 170.0,
+"exports": 230.0,
+"consumption": 1867.0,
+"production": 1927.0
+},
+"MEX|PORK": {
+"imports": 879.0,
+"exports": 171.0,
+"consumption": 2153.0,
+"production": 1442.0
+},
+"MEX|SGMT": {
+"imports": 10.0748158912478,
+"exports": 0.698320731325294,
+"consumption": 113.147098839775,
+"production": 101.755640501603
+},
+"MEX|EGGS": {
+"imports": 68.0,
+"exports": 2.0,
+"consumption": 2458.0,
+"production": 2771.0
+},
+"MEX|POUM": {
+"imports": 972.115097690941,
+"exports": 8.99893428063943,
+"consumption": 4213.501006512731,
+"production": 3249.3847246891696
+},
+"MEX|WMIO": {
+"imports": 4.21142132915786,
+"exports": 25.3411463756235,
+"feed": 10.4015603125527,
+"consumption": 111.520181265604,
+"production": 160.839312
+},
+"MEX|BUTT": {
+"imports": 43.2577062479392,
+"exports": 7.90210390073695,
+"consumption": 57.4669537485138,
+"production": 22.1113514013116
+},
+"MEX|SMIP": {
+"imports": 257.04729541214,
+"exports": 29.4431006518689,
+"feed": 49.9697878916692,
+"consumption": 237.56616,
+"production": 10.360882029646
+},
+"MEX|CHES": {
+"imports": 121.52883669555,
+"exports": 6.66387786505513,
+"consumption": 282.22041512378104,
+"production": 167.35545629328698
+},
+"MEX|FRMI": {
+"imports": 78.6522441287336,
+"exports": 17.9131738528358,
+"feed": 779.664941750407,
+"consumption": 7386.70656042674,
+"production": 8149.17110207453
+},
+"MEX|COCM": {
+"imports": 10.7301840788216,
+"exports": 7.923705094746521,
+"consumption": 194.01404471129302,
+"production": 192.56810158240899
+},
+"MEX|RICE": {
+"imports": 869.13,
+"exports": 83.916,
+"feed": 9.982713347921221,
+"consumption": 720.7519037199121,
+"production": 177.156
+},
+"MEX|MOLA": {
+"imports": 4.01098573930037,
+"exports": 71.0510467792313,
+"feed": 878.195151720844,
+"production": 1931.05717212115
+},
+"MEX|SUGA": {
+"imports": 158.24,
+"exports": 1331.24,
+"consumption": 4365.4,
+"production": 6479.56
+},
+"MEX|RAPO": {
+"imports": 108.0,
+"exports": 6.0,
+"consumption": 212.0,
+"production": 621.0
+},
+"MEX|SUNO": {
+"imports": 28.0,
+"exports": 12.0,
+"consumption": 28.0333333333333,
+"production": 13.0
+},
+"MEX|SOYO": {
+"imports": 231.0,
+"exports": 26.0,
+"consumption": 548.0,
+"production": 765.0
+},
+"MEX|OLIO": {
+"imports": 17.1099950891767,
+"exports": 1.22754362557786,
+"consumption": 13.9094158089133,
+"production": 1.00755344722438
+},
+"MEX|PLMO": {
+"imports": 557.0,
+"exports": 4.0,
+"consumption": 415.760073260073,
+"production": 111.0
+},
+"MEX|OTHO": {
+"imports": 60.3864245842687,
+"exports": 49.766105002741,
+"consumption": 84.70899234836679,
+"production": 276.588088007706
+},
+"MEX|RAPC": {
+"imports": 61.9904397899556,
+"exports": 0.0729970985338466,
+"feed": 918.255825285758,
+"production": 856.338382594336
+},
+"MEX|SUNC": {
+"imports": 0.0402286870680324,
+"exports": 0.12356801718546301,
+"feed": 17.673220273269198,
+"production": 17.7565596033866
+},
+"MEX|SOYC": {
+"imports": 4120.35264149292,
+"exports": 27.203720504017802,
+"feed": 6646.74116786459,
+"production": 2553.59224687568
+},
+"MEX|MILK": {
+"imports": 30.9481296335561,
+"exports": 1.85984703974045,
+"production": 11983.4499379013
+},
+"MEX|COFF": {
+"imports": 58.0,
+"exports": 164.0,
+"consumption": 75.0952380952381,
+"production": 154.0
+},
+"MEX|COCO": {
+"imports": 62.0,
+"exports": 3.0,
+"production": 27.0
+},
+"MEX|FFIS": {
+"imports": 322.652832623678,
+"exports": 7.589933365523899,
+"consumption": 561.93506659058,
+"production": 246.87216733242602
+},
+"MEX|SFIS": {
+"imports": 174.13076016750998,
+"exports": 658.766914626313,
+"feed": 12.3009568207827,
+"consumption": 432.507941157277,
+"production": 1092.5942398067998
+},
+"MEX|OAQU": {
+"imports": 71.2487480692627,
+"exports": 81.5505934476872,
+"consumption": 522.204406145842,
+"production": 532.506251524266
+},
+"MEX|FPRI": {
+"imports": 0.893013221486741,
+"exports": 4.058812949082189,
+"feed": 7.28974724141829,
+"production": 10.492824026426801
+},
+"MEX|FENI": {
+"imports": 14.986545700594,
+"exports": 69.9569040946456,
+"feed": 13.013918452771101,
+"consumption": 210.959754473934,
+"production": 351.42445147794103
+},
+"ARG|RYEM": {
+"imports": 0.9126776683501401,
+"exports": 1.04315731729096,
+"feed": 51.9570573307283,
+"production": 79.0652398244704
+},
+"ARG|BARL": {
+"imports": 3.99950817656461,
+"exports": 3261.4009590557,
+"feed": 29.0035657199065,
+"production": 3740.5400221320497
+},
+"ARG|OATS": {
+"imports": 3.44183913313462,
+"exports": 3.00466296460815,
+"feed": 470.730531121943,
+"consumption": 56.0870420060188,
+"production": 783.779857594201
+},
+"ARG|MAIZ": {
+"imports": 13.999858555855301,
+"exports": 23785.2403034987,
+"feed": 18040.1822608836,
+"consumption": 516.005213227048,
+"production": 49475.5001363926
+},
+"ARG|OCER": {
+"imports": 3.34004434853225,
+"exports": 515.274627988294,
+"feed": 1952.2457985421602,
+"consumption": 31.443390894819498,
+"production": 2691.83151628727
+},
+"ARG|RAPE": {
+"imports": 1.0,
+"exports": 22.0,
+"feed": 35.8974358974359,
+"production": 50.0
+},
+"ARG|SUNF": {
+"imports": 9.44614554667806,
+"exports": 77.1025307593874,
+"feed": 112.149135650018,
+"production": 3542.27692722666
+},
+"ARG|SOYA": {
+"imports": 1898.0,
+"exports": 7401.0,
+"feed": 3931.92077372557,
+"consumption": 0.999979850896635,
+"production": 54972.0
+},
+"ARG|OCRO": {
+"imports": 51.9690862264381,
+"exports": 36.610204574299104,
+"feed": 1.5517567651117798,
+"consumption": 11.88613997371,
+"production": 68.4830735042972
+},
+"ARG|PULS": {
+"imports": 3.0893486678637703,
+"exports": 630.9304694772879,
+"consumption": 100.914082180928,
+"production": 754.984398182173
+},
+"ARG|POTA": {
+"imports": 50.0,
+"exports": 382.0,
+"consumption": 1820.0,
+"production": 2492.0
+},
+"ARG|TEXT": {
+"imports": 2.68842398769738,
+"exports": 35.4007449958389,
+"production": 241.059681215925
+},
+"ARG|TOBA": {
+"imports": 10.0009257984358,
+"exports": 79.92841515020119,
+"production": 125.845005342493
+},
+"ARG|TOMA": {
+"imports": 53.0,
+"exports": 15.0,
+"consumption": 639.0,
+"production": 656.0
+},
+"ARG|OVEG": {
+"imports": 59.0119337016575,
+"exports": 133.977900552486,
+"consumption": 2483.45052330306,
+"production": 2874.4879558011
+},
+"ARG|APPL": {
+"imports": 10.0,
+"exports": 110.0,
+"consumption": 335.0,
+"production": 459.0
+},
+"ARG|OFRU": {
+"imports": 601.8104640476539,
+"exports": 460.625490744108,
+"consumption": 1073.87106102897,
+"production": 947.573748863953
+},
+"ARG|CITR": {
+"imports": 74.0,
+"exports": 1137.66666666667,
+"consumption": 1933.66666666667,
+"production": 3273.3333333333303
+},
+"ARG|TAGR": {
+"imports": 6.0,
+"exports": 202.0,
+"consumption": 70.9582843713279,
+"production": 384.92890716803703
+},
+"ARG|TABO": {
+"imports": 4.766170547130829,
+"exports": 60.3574627910348,
+"consumption": 36.2144776746209,
+"production": 106.895135616284
+},
+"ARG|TWIN": {
+"imports": 80.0,
+"exports": 225.0,
+"consumption": 972.0626204238921,
+"production": 1182.0
+},
+"ARG|WHEA": {
+"imports": 13.0,
+"exports": 14017.0,
+"consumption": 4470.0,
+"production": 18416.0
+},
+"ARG|BEEF": {
+"imports": 13.988749303917,
+"exports": 307.754753257698,
+"consumption": 2280.49196298476,
+"production": 2838.0056253480398
+},
+"ARG|PORK": {
+"imports": 35.0,
+"exports": 3.0,
+"consumption": 590.0,
+"production": 566.0
+},
+"ARG|SGMT": {
+"imports": 1.5909195371384102,
+"exports": 2.02742964719204,
+"consumption": 56.7680301213772,
+"production": 57.2045402314308
+},
+"ARG|EGGS": {
+"imports": 1.65899969835519,
+"exports": 8.00816236013951,
+"consumption": 692.846385707076,
+"production": 812.170500150822
+},
+"ARG|POUM": {
+"imports": 7.99815625720212,
+"exports": 207.047706844895,
+"consumption": 1962.45217792118,
+"production": 2161.50172850887
+},
+"ARG|WHEP": {
+"imports": 0.458780897758587,
+"exports": 52.155648710895406,
+"consumption": 9.97960458893434,
+"production": 60.386443997677105
+},
+"ARG|CASE": {
+"imports": 0.7900816280458061,
+"exports": 3.96175215190989,
+"production": 13.3470366
+},
+"ARG|WMIO": {
+"imports": 0.400113640633937,
+"exports": 70.41448792487401,
+"consumption": 81.7259924777413,
+"production": 157.22706743915
+},
+"ARG|BUTT": {
+"imports": 0.744986701343659,
+"exports": 4.33011118443115,
+"consumption": 27.0511558859119,
+"production": 31.6350635943792
+},
+"ARG|SMIP": {
+"imports": 0.029593746825943998,
+"exports": 21.1366048259517,
+"consumption": 16.261231903246202,
+"production": 24.832326595662003
+},
+"ARG|CHES": {
+"imports": 4.677214007048,
+"exports": 45.8221944427678,
+"consumption": 370.684065198832,
+"production": 422.82180486402
+},
+"ARG|FRMI": {
+"imports": 4.4728951796175,
+"exports": 3.7091766652521403,
+"feed": 3010.5109660959997,
+"consumption": 2862.8909306596,
+"production": 5910.28759387783
+},
+"ARG|CREM": {
+"imports": 0.0378074064959745,
+"exports": 3.77908139029733e-06,
+"consumption": 3.0225684376029798,
+"production": 2.9847648101883903
+},
+"ARG|COCM": {
+"imports": 2.08503416254966,
+"exports": 0.100051067275403,
+"consumption": 9.422496625428739,
+"production": 7.437513530154489
+},
+"ARG|RICE": {
+"imports": 9.32747262569832,
+"exports": 391.46214972067,
+"consumption": 366.163575418994,
+"production": 884.777403351955
+},
+"ARG|MOLA": {
+"imports": 0.0168986228123684,
+"exports": 2.1675730248150598,
+"feed": 513.442947715605,
+"production": 662.229787234043
+},
+"ARG|SUGA": {
+"imports": 12.8830171000234,
+"exports": 303.528882642305,
+"consumption": 1646.41424221129,
+"production": 1708.84019676739
+},
+"ARG|RAPO": {
+"imports": 3.2699838387598903,
+"exports": 4.44012769244913,
+"consumption": 1.82001077416007,
+"production": 3.90016001492934
+},
+"ARG|SUNO": {
+"imports": 1.74234204866375,
+"exports": 758.4757547812991,
+"feed": 20.012552896604202,
+"consumption": 444.27867430461305,
+"production": 1316.17339175861
+},
+"ARG|SOYO": {
+"imports": 11.9287202168324,
+"exports": 4976.35795648059,
+"consumption": 106.071575183379,
+"production": 8060.55353368743
+},
+"ARG|OLIO": {
+"imports": 1.93558337650788,
+"exports": 37.730781478885596,
+"consumption": 7.1382559554648495,
+"production": 48.0322083117461
+},
+"ARG|OTHO": {
+"imports": 54.0238574085008,
+"exports": 461.237345833353,
+"consumption": 52.4528021169797,
+"production": 473.327443327982
+},
+"ARG|SUNC": {
+"imports": 1.1099457107055,
+"exports": 1231.80179091592,
+"feed": 307.029480901886,
+"production": 1540.52403314994
+},
+"ARG|SOYC": {
+"imports": 0.644296480704472,
+"exports": 32553.1617781814,
+"feed": 2995.40687161947,
+"production": 35696.283794161405
+},
+"ARG|MILK": {
+"imports": 7.99999999896081e-05,
+"exports": 1.51777374093298,
+"production": 9267.979390326129
+},
+"ARG|TEAS": {
+"imports": 0.998661311914324,
+"exports": 107.143239625167,
+"consumption": 262.36573760710803,
+"production": 372.500669344043
+},
+"ARG|FFIS": {
+"imports": 11.9115877882949,
+"exports": 23.966804426076497,
+"consumption": 13.5281962405013,
+"production": 25.5934115451273
+},
+"ARG|SFIS": {
+"imports": 49.273485706097304,
+"exports": 288.03955864440803,
+"feed": 3.12977573977216,
+"consumption": 186.815665257577,
+"production": 428.71151393566004
+},
+"ARG|OAQU": {
+"imports": 15.420035157907499,
+"exports": 279.606268816552,
+"consumption": 120.138731082419,
+"production": 384.324964741064
+},
+"ARG|FPRI": {
+"imports": 0.46941813847120395,
+"exports": 14.5135883419712,
+"feed": 11.6967061138502,
+"production": 26.444085101749998
+},
+"ARG|FENI": {
+"imports": 12.0231768714387,
+"exports": 2.0377096450712497,
+"feed": 94.78289406831911,
+"consumption": 392.762281095138,
+"production": 531.495758854965
+},
+"ARG|RAPC": {
+"exports": 3.2394417653118497,
+"feed": 1.44310027438979,
+"production": 4.714195689555011
+},
+"BRA|RYEM": {
+"imports": 1.1942949309661401,
+"feed": 3.2239302995561503,
+"consumption": 2.14928686637077,
+"production": 7.4028525345169305
+},
+"BRA|BARL": {
+"imports": 1613.59190897598,
+"exports": 9.00227560050569,
+"feed": 71.2374302520395,
+"production": 302.92338811630805
+},
+"BRA|OATS": {
+"imports": 0.9992031872509961,
+"exports": 2.00159362549801,
+"consumption": 575.458167330677,
+"production": 625.5011952191239
+},
+"BRA|MAIZ": {
+"imports": 1339.99324940429,
+"exports": 29555.1488909376,
+"feed": 45948.495656487,
+"consumption": 5963.934538189919,
+"production": 97910.50674807679
+},
+"BRA|OCER": {
+"imports": 45.7915028920561,
+"exports": 18.624296660779,
+"feed": 2207.1082354885298,
+"consumption": 92.68686868686869,
+"production": 2335.7152971650903
+},
+"BRA|RAPE": {
+"imports": 4.0,
+"exports": 1.0,
+"consumption": 2.0,
+"production": 50.0
+},
+"BRA|SUNF": {
+"imports": 11.0924369747899,
+"exports": 0.991596638655462,
+"consumption": 5.0,
+"production": 104.873949579832
+},
+"BRA|SOYA": {
+"imports": 254.00110447748202,
+"exports": 68155.7036347745,
+"feed": 678.011926055629,
+"production": 114732.49889334799
+},
+"BRA|OCRO": {
+"imports": 262.030643409373,
+"exports": 74.8122930773948,
+"feed": 20.0104571192501,
+"consumption": 2525.44208502748,
+"production": 3007.20908754864
+},
+"BRA|PULS": {
+"imports": 191.0,
+"exports": 122.0,
+"feed": 1.89514170040486,
+"consumption": 2853.39729744884,
+"production": 3059.0
+},
+"BRA|POTA": {
+"imports": 372.0,
+"exports": 21.0,
+"feed": 67.9832635983264,
+"consumption": 3484.14225941423,
+"production": 3655.0
+},
+"BRA|TEXT": {
+"imports": 30.083835286160703,
+"exports": 921.684789718119,
+"production": 1408.48405641666
+},
+"BRA|TOBA": {
+"imports": 12.1458689280252,
+"exports": 494.05497565641804,
+"production": 806.0038040910911
+},
+"BRA|TOMA": {
+"imports": 159.018132056107,
+"exports": 14.998289428669201,
+"consumption": 4012.54236514996,
+"production": 4225.481810924851
+},
+"BRA|OVEG": {
+"imports": 299.040662047548,
+"exports": 360.971961165049,
+"consumption": 6799.01889634954,
+"production": 7753.96805732574
+},
+"BRA|APPL": {
+"imports": 82.9701546206401,
+"exports": 133.047824523553,
+"consumption": 1061.47540784431,
+"production": 1307.52966558792
+},
+"BRA|OFRU": {
+"imports": 345.026231081846,
+"exports": 532.4290842474611,
+"feed": 0.0143026751218932,
+"consumption": 11361.9757765678,
+"production": 14151.568187829998
+},
+"BRA|CITR": {
+"imports": 40.0396326356717,
+"exports": 10720.7665349051,
+"consumption": 6043.53988552584,
+"production": 19854.8049214686
+},
+"BRA|TAGR": {
+"imports": 126.03369884996,
+"exports": 47.987162342872395,
+"consumption": 1128.3237716936999,
+"production": 1214.3143276851101
+},
+"BRA|TABO": {
+"imports": 114.0,
+"consumption": 105.0,
+"production": 1.0
+},
+"BRA|TWIN": {
+"imports": 126.0,
+"exports": 3.0,
+"consumption": 343.028248587571,
+"production": 360.0
+},
+"BRA|WHEA": {
+"imports": 6682.28211948491,
+"exports": 737.9688410386319,
+"feed": 499.933870783854,
+"consumption": 10242.6451446196,
+"production": 4345.183449440569
+},
+"BRA|BEEF": {
+"imports": 54.0,
+"exports": 1867.0,
+"consumption": 7701.0,
+"production": 9550.0
+},
+"BRA|PORK": {
+"imports": 3.0,
+"exports": 991.0,
+"consumption": 2837.0,
+"production": 3825.0
+},
+"BRA|SGMT": {
+"imports": 7.0260223048327095,
+"exports": 0.996282527881041,
+"consumption": 124.53531598513,
+"production": 127.472118959108
+},
+"BRA|EGGS": {
+"imports": 0.9998156002212799,
+"exports": 17.0031347962382,
+"consumption": 2145.5975085662903,
+"production": 2710.50009219989
+},
+"BRA|POUM": {
+"imports": 3.0,
+"exports": 4223.0,
+"consumption": 9902.0,
+"production": 14168.0
+},
+"BRA|WMIO": {
+"imports": 72.8188830225408,
+"exports": 5.47487919152294,
+"feed": 36.6347751997439,
+"consumption": 628.6662840657569,
+"production": 597.957055434483
+},
+"BRA|BUTT": {
+"imports": 5.10771505622809,
+"exports": 0.318470026982101,
+"feed": 1.11136131433673,
+"consumption": 111.990500819619,
+"production": 108.31261710471
+},
+"BRA|SMIP": {
+"imports": 30.864393359330702,
+"exports": 0.00597329240652504,
+"consumption": 44.5556067479462,
+"production": 13.7299267685454
+},
+"BRA|CHES": {
+"imports": 31.872341388982697,
+"exports": 3.5065004595589797,
+"consumption": 87.4565349862169,
+"production": 59.9079263379878
+},
+"BRA|FRMI": {
+"imports": 16.6326367492867,
+"exports": 0.7662185208515371,
+"feed": 1861.1396488043702,
+"consumption": 23414.9926626951,
+"production": 25412.9945532763
+},
+"BRA|CREM": {
+"imports": 0.000446580449147008,
+"exports": 7.12884109236533,
+"consumption": 0.6577527614260561,
+"production": 7.78614727334224
+},
+"BRA|COCM": {
+"imports": 6.14196204406256,
+"exports": 19.2954593968859,
+"feed": 0.00950049266972856,
+"consumption": 40.3092644780709,
+"production": 41.902482559215905
+},
+"BRA|RICE": {
+"imports": 741.230702706684,
+"exports": 564.788797937765,
+"feed": 10.6555424185134,
+"consumption": 6519.19404592672,
+"production": 8301.384285030379
+},
+"BRA|MOLA": {
+"imports": 2.29835973031608,
+"exports": 1.0899614006956002,
+"feed": 1649.5493512211801,
+"production": 16473.4697933227
+},
+"BRA|SUGA": {
+"imports": 13.8,
+"exports": 26913.68,
+"consumption": 7512.72,
+"production": 37202.96
+},
+"BRA|RAPO": {
+"imports": 10.2365994103359,
+"exports": 1.2303169337464601,
+"production": 16.3785590565374
+},
+"BRA|SUNO": {
+"imports": 43.257726923201105,
+"exports": 2.00093944592039,
+"consumption": 72.5624635954959,
+"production": 41.2457396244475
+},
+"BRA|SOYO": {
+"imports": 58.00339916779,
+"exports": 1342.92129168376,
+"consumption": 2647.21310007618,
+"production": 8433.49422727539
+},
+"BRA|PLMO": {
+"imports": 393.0,
+"exports": 93.0,
+"consumption": 578.0,
+"production": 503.0
+},
+"BRA|OTHO": {
+"imports": 89.5747590705318,
+"exports": 178.89899262507,
+"consumption": 807.604149226933,
+"production": 1234.65086367301
+},
+"BRA|RAPC": {
+"imports": 0.00841481224645187,
+"feed": 25.882070715105097,
+"production": 25.8736559028586
+},
+"BRA|SUNC": {
+"imports": 0.0913205563570162,
+"exports": 4.0383812556991,
+"feed": 56.452939300657896,
+"production": 60.4
+},
+"BRA|SOYC": {
+"imports": 2.83473894064108,
+"exports": 28604.0650645816,
+"feed": 4262.7805099211,
+"production": 32864.0108355621
+},
+"BRA|MILK": {
+"imports": 1.05637000606967,
+"exports": 0.06634999997605731,
+"production": 33167.5552963397
+},
+"BRA|COFF": {
+"imports": 6.998873692679,
+"exports": 1916.30828640386,
+"consumption": 1047.16846339501,
+"production": 2684.56798069187
+},
+"BRA|TEAS": {
+"imports": 2.00160642570281,
+"exports": 33.9726907630522,
+"consumption": 418.663453815261,
+"production": 620.4979919678709
+},
+"BRA|COCO": {
+"imports": 61.1025210084034,
+"exports": 9.98319327731092,
+"production": 236.396638655462
+},
+"BRA|FFIS": {
+"imports": 211.82,
+"exports": 1.99,
+"consumption": 942.59,
+"production": 732.76
+},
+"BRA|SFIS": {
+"imports": 504.600460287952,
+"exports": 84.7907193536961,
+"feed": 50.3608317230673,
+"consumption": 786.748448795205,
+"production": 417.309539584016
+},
+"BRA|OAQU": {
+"imports": 15.2816085940465,
+"exports": 3.3976006936843,
+"consumption": 159.765971869956,
+"production": 149.09196396959402
+},
+"BRA|FPRI": {
+"imports": 0.38281819840082604,
+"exports": 0.63018332514239,
+"feed": 37.5375057897149,
+"production": 37.8715086503273
+},
+"BRA|FENI": {
+"imports": 62.0,
+"exports": 65.9974375400384,
+"feed": 9648.812940422811,
+"consumption": 7061.86483023703,
+"production": 19533.4996796925
+},
+"DZA|BARL": {
+"imports": 566.955134721499,
+"exports": 0.756841268368715,
+"feed": 940.074379826793,
+"consumption": 431.034103941859,
+"production": 969.9232463489479
+},
+"DZA|OATS": {
+"imports": 7.0,
+"feed": 63.0,
+"production": 64.0
+},
+"DZA|MAIZ": {
+"imports": 4161.0,
+"feed": 3209.0,
+"consumption": 645.0,
+"production": 3.0
+},
+"DZA|OCER": {
+"imports": 8.46153846153846,
+"feed": 5.30769230769231,
+"consumption": 8.15384615384615,
+"production": 5.0
+},
+"DZA|RAPE": {
+"imports": 2.00004066518414,
+"exports": 0.00105729478754231,
+"consumption": 1.03997885410425,
+"production": 24.000487982209602
+},
+"DZA|OCRO": {
+"imports": 43.2331726207666,
+"exports": 0.005325184671015301,
+"feed": 4.06666666666667,
+"consumption": 41.0998734115023,
+"production": 16.0
+},
+"DZA|PULS": {
+"imports": 237.96551724137902,
+"exports": 0.982758620689655,
+"feed": 17.882708821233397,
+"consumption": 293.106557377049,
+"production": 107.01724137931
+},
+"DZA|POTA": {
+"imports": 148.015014710358,
+"exports": 0.999898549254337,
+"feed": 124.01258499897399,
+"consumption": 2781.28224904958,
+"production": 4606.46728213452
+},
+"DZA|TEXT": {
+"imports": 3.10561421475622,
+"exports": 0.0935271359764812,
+"production": 0.042497878728243
+},
+"DZA|TOBA": {
+"imports": 17.9089278658688,
+"exports": 0.0010881498789540001,
+"production": 9.384761445805399
+},
+"DZA|TOMA": {
+"imports": 79.0289271329183,
+"exports": 0.999633833760527,
+"consumption": 1255.5400952032198,
+"production": 1286.47088978396
+},
+"DZA|OVEG": {
+"imports": 61.9946417768559,
+"exports": 12.0010370754472,
+"consumption": 6234.04161898043,
+"production": 7143.50531501167
+},
+"DZA|APPL": {
+"imports": 61.0,
+"consumption": 588.0,
+"production": 494.0
+},
+"DZA|OFRU": {
+"imports": 166.898420418916,
+"exports": 50.1394523042031,
+"feed": 0.0456967279187191,
+"consumption": 2051.52450627894,
+"production": 2137.85787254998
+},
+"DZA|CITR": {
+"imports": 23.2440496998111,
+"exports": 2.37382536991708,
+"consumption": 1242.36633954253,
+"production": 1344.56488783505
+},
+"DZA|TAGR": {
+"imports": 47.0,
+"consumption": 558.9253731343281,
+"production": 534.946932006633
+},
+"DZA|TABO": {
+"imports": 8.0,
+"consumption": 131.782894736842,
+"production": 260.697368421053
+},
+"DZA|TWIN": {
+"imports": 9.527744390725509,
+"exports": 4.69421073507854,
+"consumption": 16.944511218549,
+"production": 24.3486801096318
+},
+"DZA|WHEA": {
+"imports": 8105.0,
+"exports": 10.0,
+"feed": 626.0,
+"consumption": 7115.0,
+"production": 2437.0
+},
+"DZA|BEEF": {
+"imports": 48.0,
+"consumption": 193.0,
+"production": 166.0
+},
+"DZA|SGMT": {
+"imports": 2.002886002886,
+"consumption": 327.52669552669596,
+"production": 344.496392496392
+},
+"DZA|EGGS": {
+"imports": 2.09340349649374,
+"consumption": 297.39367950527,
+"production": 327.45094406339996
+},
+"DZA|POUM": {
+"imports": 2.00365274315121,
+"exports": 1.04468454124601,
+"consumption": 285.477657729377,
+"production": 284.518689527472
+},
+"DZA|BUTT": {
+"imports": 11.7713080642747,
+"exports": 0.00328456164244358,
+"consumption": 16.4987767354842,
+"production": 4.73075323285189
+},
+"DZA|SMIP": {
+"imports": 138.664544710385,
+"exports": 0.0324870613627576,
+"feed": 2.60778375329505,
+"consumption": 153.09132060000002,
+"production": 1.0748774473943699
+},
+"DZA|CHES": {
+"imports": 26.0261771993395,
+"exports": 0.019156301950164403,
+"consumption": 28.8956971515065,
+"production": 2.8886762541172204
+},
+"DZA|FRMI": {
+"imports": 2.87884808076154,
+"exports": 0.381866795560396,
+"feed": 12.7439893056747,
+"consumption": 3181.89283515017,
+"production": 3203.6897726512098
+},
+"DZA|MOLA": {
+"imports": 0.0174794450115734,
+"exports": 0.0381546235616542,
+"feed": 0.452084879076157,
+"consumption": 0.00233739799088664,
+"production": 1.83809496027615
+},
+"DZA|SUGA": {
+"imports": 2070.95272577975,
+"exports": 499.737279533411,
+"consumption": 1056.64007812784,
+"production": 9.13454844049933
+},
+"DZA|RAPO": {
+"imports": 4.78160676102918,
+"exports": 4.44162385105275,
+"consumption": 4.0849957274941096,
+"production": 7.83000854501178
+},
+"DZA|SUNO": {
+"imports": 97.0,
+"exports": 3.0,
+"consumption": 95.0,
+"production": 4.0
+},
+"DZA|SOYO": {
+"imports": 715.818844686885,
+"exports": 90.295377032582,
+"consumption": 649.71156347582,
+"production": 56.362310626230695
+},
+"DZA|OLIO": {
+"imports": 0.865177987032958,
+"consumption": 78.4325889935165,
+"production": 74.5840490446957
+},
+"DZA|OTHO": {
+"imports": 123.90702668724501,
+"exports": 5.05774925421136,
+"consumption": 126.850419311423,
+"production": 48.5170171598947
+},
+"DZA|RAPC": {
+"imports": 0.264584521952068,
+"feed": 12.375657497758201,
+"production": 12.1110729758062
+},
+"DZA|SUNC": {
+"imports": 18.643764448770998,
+"feed": 22.852389448771,
+"production": 4.208625
+},
+"DZA|MILK": {
+"imports": 0.0598200119154541,
+"exports": 8.999999997302859e-05,
+"production": 3538.7720726923203
+},
+"DZA|FFIS": {
+"imports": 5.79,
+"exports": 0.08,
+"consumption": 6.85,
+"production": 1.14
+},
+"DZA|SFIS": {
+"imports": 55.1776547788873,
+"exports": 1.3900028530670498,
+"consumption": 144.48499572039898,
+"production": 90.7273437945792
+},
+"DZA|OAQU": {
+"imports": 6.18042628334922,
+"exports": 2.1511191991986403,
+"consumption": 8.327696824622521,
+"production": 4.29838974047193
+},
+"EGY|RYEM": {
+"imports": 20.701868872120997,
+"exports": 1.3221909014617,
+"feed": 2.25087580395091,
+"production": 83.75566989710181
+},
+"EGY|BARL": {
+"imports": 30.0,
+"exports": 6.0,
+"feed": 71.6228070175439,
+"consumption": 12.1052631578947,
+"production": 98.0
+},
+"EGY|MAIZ": {
+"imports": 8360.0,
+"exports": 14.0,
+"feed": 8430.0,
+"consumption": 5876.0,
+"production": 8543.0
+},
+"EGY|OCER": {
+"imports": 9.34083173555571,
+"exports": 3.84496859627084,
+"feed": 518.85921079742,
+"consumption": 253.828564626873,
+"production": 807.4978408389879
+},
+"EGY|SUNF": {
+"imports": 89.0,
+"exports": 3.0,
+"production": 20.0
+},
+"EGY|SOYA": {
+"imports": 2021.43697297297,
+"exports": 0.999783783783784,
+"feed": 199.95675675675702,
+"consumption": 23.994810810810797,
+"production": 36.0077837837838
+},
+"EGY|OCRO": {
+"imports": 90.4920789232864,
+"exports": 27.4070129966595,
+"feed": 1.08043217286915,
+"consumption": 158.370942830757,
+"production": 134.453754779631
+},
+"EGY|PULS": {
+"imports": 453.445760412239,
+"exports": 165.10077083413802,
+"feed": 68.0,
+"consumption": 480.65501042189896,
+"production": 340.511562512076
+},
+"EGY|POTA": {
+"imports": 163.0,
+"exports": 784.0,
+"consumption": 2905.0,
+"production": 4841.0
+},
+"EGY|TEXT": {
+"imports": 117.30459537408001,
+"exports": 59.5971068403094,
+"production": 74.6783851944855
+},
+"EGY|TOMA": {
+"imports": 4.99962872206133,
+"exports": 28.0020791564565,
+"consumption": 6074.63920403413,
+"production": 6728.500334150141
+},
+"EGY|OVEG": {
+"imports": 17.9989667420084,
+"exports": 848.025573135292,
+"feed": 0.995322367507844,
+"consumption": 8968.40685285673,
+"production": 10677.501905069399
+},
+"EGY|APPL": {
+"imports": 191.10523415978,
+"exports": 2.99834710743802,
+"consumption": 844.534435261708,
+"production": 716.3944903581271
+},
+"EGY|OFRU": {
+"imports": 69.0086984579481,
+"exports": 375.639904811505,
+"consumption": 4934.65439585298,
+"production": 6042.31271167375
+},
+"EGY|CITR": {
+"imports": 5.1070193360569505,
+"exports": 1455.32667622158,
+"consumption": 2730.87547813122,
+"production": 4564.19629373804
+},
+"EGY|TAGR": {
+"imports": 8.0,
+"exports": 104.0,
+"consumption": 1486.0,
+"production": 1721.9981458590898
+},
+"EGY|TABO": {
+"imports": 1.14693520606852,
+"exports": 86.0450394647132,
+"consumption": 793.4153057618321,
+"production": 1050.4034889499
+},
+"EGY|WHEA": {
+"imports": 10141.0,
+"exports": 419.0,
+"feed": 1662.7208482542499,
+"consumption": 14003.648948075199,
+"production": 8423.0
+},
+"EGY|BEEF": {
+"imports": 222.11320754717,
+"exports": 0.99949005609383,
+"consumption": 979.500254971953,
+"production": 758.386537480877
+},
+"EGY|PORK": {
+"imports": 1.96139429719951,
+"consumption": 1.01930285140025,
+"production": 1.0965142570012298
+},
+"EGY|SGMT": {
+"imports": 1.0062326048747,
+"exports": 1.18419492619364,
+"consumption": 94.40790253690321,
+"production": 94.58586485822211
+},
+"EGY|EGGS": {
+"imports": 1.14916949816867,
+"exports": 1.31990794765715,
+"consumption": 410.933040550821,
+"production": 524.085369224744
+},
+"EGY|POUM": {
+"imports": 133.0,
+"exports": 1.0,
+"consumption": 1554.0,
+"production": 1429.0
+},
+"EGY|BUTT": {
+"imports": 23.2817580148449,
+"exports": 0.35071030354576904,
+"consumption": 137.307687935051,
+"production": 114.37664022375199
+},
+"EGY|SMIP": {
+"imports": 56.7602301280914,
+"exports": 0.200103944586381,
+"consumption": 59.6431998812547,
+"production": 3.08307369774968
+},
+"EGY|CHES": {
+"imports": 21.1893978052819,
+"exports": 64.4976825276982,
+"consumption": 575.7658485757289,
+"production": 678.8622102604199
+},
+"EGY|FRMI": {
+"imports": 2.59707854267026,
+"exports": 12.469494902992299,
+"feed": 1963.6198936085998,
+"consumption": 1405.3308984254,
+"production": 3848.18548583645
+},
+"EGY|CREM": {
+"imports": 0.0847500438557197,
+"exports": 0.511938399760608,
+"consumption": 4.364984558764361,
+"production": 4.7921729146692496
+},
+"EGY|RICE": {
+"imports": 57.942,
+"exports": 29.97,
+"feed": 99.8842263157895,
+"consumption": 3252.91751052632,
+"production": 3304.026
+},
+"EGY|MOLA": {
+"imports": 0.14748749185510998,
+"exports": 396.02467396240297,
+"feed": 255.905994562397,
+"production": 841.11427393802
+},
+"EGY|SUGA": {
+"imports": 1133.44,
+"exports": 413.08,
+"feed": 215.28,
+"consumption": 2265.04,
+"production": 2346.0
+},
+"EGY|SUNO": {
+"imports": 331.538247566064,
+"exports": 32.0445062586926,
+"consumption": 160.222531293463,
+"production": 27.961057023643903
+},
+"EGY|SOYO": {
+"imports": 147.0,
+"exports": 40.0,
+"consumption": 244.0,
+"production": 358.0
+},
+"EGY|OLIO": {
+"imports": 1.0,
+"exports": 2.0,
+"consumption": 8.0,
+"production": 29.0
+},
+"EGY|OTHO": {
+"imports": 100.271207988956,
+"exports": 31.341007536314198,
+"consumption": 103.92563046524,
+"production": 54.0348997736793
+},
+"EGY|SUNC": {
+"imports": 424.330373648896,
+"exports": 0.379843757599739,
+"feed": 461.722554012837,
+"production": 37.7720241215407
+},
+"EGY|SOYC": {
+"imports": 3237.33984872495,
+"exports": 0.823602315251411,
+"feed": 4881.26857104738,
+"production": 1644.75232463768
+},
+"EGY|MILK": {
+"imports": 0.146980220968867,
+"exports": 0.630995927385323,
+"production": 5485.85121982773
+},
+"EGY|FFIS": {
+"imports": 6.32,
+"exports": 9.1,
+"consumption": 1360.34,
+"production": 1363.12
+},
+"EGY|SFIS": {
+"imports": 497.83,
+"exports": 24.11,
+"feed": 11.4197332835089,
+"consumption": 890.210266716491,
+"production": 427.91
+},
+"EGY|OAQU": {
+"imports": 17.074347499930603,
+"exports": 14.2506827309237,
+"consumption": 34.6988294590638,
+"production": 31.880311839016997
+},
+"EGY|FPRI": {
+"imports": 0.0935702632881471,
+"exports": 0.0732340078839762,
+"feed": 0.710727174656235,
+"production": 0.7777486334146351
+},
+"EGY|FENI": {
+"imports": 3.55261996025599,
+"exports": 15.6802394423587,
+"feed": 4.2320758114898,
+"consumption": 364.86837576977297,
+"production": 468.481398714757
+},
+"EGY|TWIN": {
+"consumption": 5.0,
+"production": 6.0
+}
+}

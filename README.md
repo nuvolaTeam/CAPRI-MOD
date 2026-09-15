@@ -84,8 +84,8 @@ economy-wide feedbacks.
   significant share of its emission gains abroad.
 
 The *question* is answered cleanly. Against published CAPRI results, oilseeds
-and permanent crops land close (1.07x and 0.86x); **cereals overshoot at 1.57x**
-and that residual is not yet explained — see `CHANGELOG.md`.
+all three aggregates land within ±25% of published CAPRI figures, with errors in
+both directions — see `CHANGELOG.md`.
 
 ### The base year is a parameter, not a fixed assumption
 
@@ -95,6 +95,21 @@ which CAPRI data has been extracted. The currently populated and validated base
 year is **2017**. Re-basing to a newer year requires extracting that year's
 CAPRI GDX data into a new `capri_data/<year>/` folder. Throughout this document,
 "2017" refers to the current base year, not a structural limitation.
+
+**2017 is CAPRI's own vintage, not a lag on our side.** The CAPRI star-3.0
+installation this model was built from is itself 2017-based: its `capreg`
+extracts carry no year dimension, and every result file is `res_17…`,
+`pmppar_17…`, `reqrel_17…`, with `_1720`/`_1725`/`_1730` being *simulation* years
+projected **from** base 2017. There is no newer base year inside that release.
+Matching it is therefore correct for a reimplementation — a newer base would need
+a newer CAPRI release with `coco`/`capreg` re-run, not a different extraction.
+
+The market side is less constrained: CAPRI's `p_dataMarket` carries 1984–2021, so
+world balances *could* be updated independently. That is deliberately not done. A
+2021 market against a 2017 supply base would be internally inconsistent — the
+market module's base balances supply and demand to 0.003% precisely because both
+sides share a vintage — and 2021 prices are atypical (post-COVID, already
+disrupted), which makes them a poor policy baseline regardless.
 
 ### At a glance
 
@@ -108,7 +123,7 @@ CAPRI GDX data into a new `capri_data/<year>/` folder. Throughout this document,
 | Market method | Armington, EU27 vs rest-of-world, tâtonnement |
 | Data validator | 12 pass, 0 warn, 0 fail |
 | Convergence | 248 / 248 regions (no QP-solver fallbacks) |
-| Test suite | 43 tests (all passing) |
+| Test suite | 48 tests (all passing) |
 
 ---
 
@@ -282,6 +297,7 @@ and compute their indicators.
 | `water/` | 240 | irrigation water demand | CNIR × irrigated area (CROPWAT + Eurostat FSS) |
 | `projection/` | 560 | recursive-dynamic time loop | external trajectory + reconciliation; validated vs CAPRI 2030 |
 | `supply/intensity.py` | 190 | nitrogen intensity margin | Mitscherlich yield response; N per ha as a decision |
+| `data/reconcile_base.py` | 190 | base-year reconciliation | weighted least squares onto accounting identities, as CAPRI's `coco` |
 
 **Supply — Positive Mathematical Programming.** The core of the model. Each of
 the 248 regions solves its own constrained non-linear program over 40 activities.
@@ -551,12 +567,46 @@ and 16/24 crops within 25%. Olives are the notable miss (0.35x).
 - Indicator layers: GHG, nutrient balances, irrigation water demand, farm-income
   distribution.
 
-**Permanent crops respond weakly.** Olives, wine, orchards, citrus and vegetables
-have no entry in CAPRI's PELA elasticity export, so all 248 regions fall back to
-literature defaults (0.10-0.33 against ~1.0 for cereals). Their policy response is
-therefore governed by literature priors, not CAPRI-derived values, and is roughly
-ten times less elastic than the cereals the model is validated on. Do not present
-permanent-crop scenario results as CAPRI-consistent.
+**Permanent-crop elasticities now match CAPRI exactly** (APPL 0.218, CITR 0.184,
+OVEG 0.660 against CAPRI's calibrated 0.218, 0.184, 0.663), taken from
+`results/arm/supply_elas_*.gdx`. They are ~10x less elastic than annuals, as in
+CAPRI. **But the Farm-to-Fork permanent-crop response is still only half CAPRI's**
+(−6.4% against −12%), and since the elasticities are now CAPRI's own, the gap lies
+in the direct shocks — CAPRI's pesticide yield loss and organic conversion bite
+harder on permanents than ours. Treat permanent-crop scenario magnitudes as
+understated.
+
+**Scenario comparisons must be run to convergence.** `max_outer_iter=1` gives a
+single supply–market pass and suppresses the price feedback, which overstates
+quantity responses — it moved the Farm-to-Fork cereal decline by 4 percentage
+points. An unconverged run now raises a `RuntimeWarning` and sets
+`metadata["outer_converged"] = False`; do not compare such a run against
+external references.
+
+**Roughly a quarter of world production is share-allocated, not measured.** 76.6%
+by volume comes from real FAO SUA data (CAPRI's own `FAO_agg` extract); the
+remaining 23.4% is spread across non-EU trade regions using fixed production shares
+with a seeded ±8% noise term. This is the rest-of-world side that sets world prices,
+so EU results depend on it. It is reproducible, and the market price test passes
+12/12 against CAPRI's `PMRK`. What remains is hard to close: Iran and Saudi Arabia
+sit inside CAPRI's `MIDEAST` aggregate rather than separately, and `ROW` is a
+residual that cannot be extracted directly.
+
+**Filter near-zero base cells before reading percentage changes.** An activity
+with a base of 0.0 in the selected regions produces meaningless percentages — a
+CAP scenario run on northern-European regions reported *pig fattening +118%* on a
+base of zero, and an organic scenario showed cotton and olives at +1600%. Restrict
+to activities that actually exist in the region set (a base threshold of ~50 kha
+works) before computing or reporting any percentage. This is a usage hazard, not a
+model defect, but it is the kind that produces a wrong headline number.
+
+**Re-basing needs a concordance, not just reconciliation.** The model can now
+make external data internally consistent on its own (`data/reconcile_base.py`,
+validated to machine precision on the null identity). But reconciling raw Eurostat
+areas toward CAPRI's closes only 32% of the gap — the rest is definitional (GRAS
+13,640 vs 44,819; Eurostat's maize includes silage, CAPRI's does not). Building a
+base year from public statistics therefore needs a category concordance as well,
+which is the larger of the two jobs.
 
 **Not sound for:**
 - **Nitrogen or mineral-fertiliser ceilings.** Structurally overstated, ~10x.
@@ -582,7 +632,7 @@ N-per-hectare becomes a decision variable with a yield response.
 | **Supply — crops** | Validated | Realized own-price elasticities match CAPRI's PELA targets within ~10% |
 | **Supply — livestock** | Validated (direction) | Green Deal scenario: reproduces CAPRI's cattle-extensification signal |
 | **Policy — payment computation** | Validated | Premiums match CAPRI `PRME` exactly; EU budget computes to €58.8bn against the real ~€55–58bn |
-| **Policy — scenario response** | Published CAPRI (JRC121368) | All four Farm-to-Fork instruments run, with a CAPRI-derived plant-protection cost. Oilseeds −15.9% vs −15%, permanent crops −10.2% vs −12%; **cereals −23.6% vs −15%, an unexplained 1.57x overshoot**. Plant-protection costs derived from CAPRI data for two member states (ES, IT), units verified independently in each. See `CHANGELOG.md` |
+| **Policy — scenario response** | Published CAPRI (JRC121368) | All four Farm-to-Fork instruments run, fully converged. Cereals −18.5% vs −15% (1.24x), oilseeds −12.9% vs −15% (0.86x), permanent crops −9.4% vs −12% (0.78x) — **all within ±25%, with errors in both directions**. Plant-protection costs derived from CAPRI data for two member states, units verified independently in each. See `CHANGELOG.md` |
 | **Policy — nitrogen instruments** | Fixed | An intensity margin now exists (`supply/intensity.py`), so N ceilings adjust application per hectare rather than forcing all adjustment onto area |
 | **Environment** | Validated | N excretion matches CAPRI `MANN` within ~12%; GHG responds correctly to scenario activity changes |
 | **Feed** | Validated (ruminants) | Energy & dry matter match CAPRI within ~10% via IPCC 2006 Eq. 10.6; monogastrics calibrated to CAPRI targets |
@@ -818,7 +868,7 @@ principled reason and extension path.
   validation against the CAPRI star-3.0 installation, and direction of the
   model's design and scope.
 
-- **Claude Opus 4.8 (Anthropic)** — Claude is a large language model used here,
+- **Claude Opus (Anthropic)** — Claude is a large language model (LLM) used here,
   under direction, for implementation, debugging, numerical validation against
   CAPRI output, and documentation.
 
