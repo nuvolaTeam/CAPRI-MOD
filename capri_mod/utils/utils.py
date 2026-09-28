@@ -57,7 +57,10 @@ def calibrate_supply_elasticities(
     # Literature-based defaults (CAPRI calibration values)
     elasticities = {
         "SWHE": 0.30, "DWHE": 0.25, "RYEM": 0.20, "BARL": 0.30,
-        "OATS": 0.20, "CORN": 0.35, "OCER": 0.20, "POTA": 0.15,
+        "OATS": 0.20, "CORN": 0.35, "OCER": 0.20, "PARI": 0.20, "POTA": 0.15,
+        # horticultural and minor industrial activities: CAPRI prices them
+        # like other specialty crops, inelastic relative to arable
+        "OCRO": 0.20, "OIND": 0.20, "NURS": 0.15, "FLOW": 0.15,
         "SUGB": 0.10, "SUNF": 0.35, "RAPE": 0.35, "SOYA": 0.40,
         "OOIL": 0.25, "PULS": 0.25,
         # Permanent crops and vegetables, set from CAPRI's OWN CALIBRATED

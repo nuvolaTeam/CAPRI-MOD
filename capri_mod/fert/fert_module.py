@@ -64,7 +64,14 @@ CROP_GROUPS = {
                 "PARI", "MAIF"],
     "oilseeds": ["RAPE", "SUNF", "SOYA", "OOIL"],
     "roots_sugar": ["SUGB", "POTA"],
-    "other": ["PULS", "OFAR", "TEXT", "TOBA", "OIND", "OLIV", "PULS"],
+    # NOTE: this group used to list OFAR, TEXT and OIND -- CAPRI's codes, not
+    # this model's columns, so they matched nothing (the same failure as MAIZ
+    # above). The model's fodder column is OFOD and its fibre columns are COTT
+    # and OFIB. It went unnoticed while OFOD held a 5 kha placeholder; once the
+    # real 14.3 Mha of fodder on arable land was mapped in, 14 Mha of crops
+    # were taking up nitrogen while receiving no mineral fertiliser, and the
+    # EU nitrogen surplus fell from 54 to 34 kg N/ha.
+    "other": ["PULS", "OFOD", "COTT", "OFIB", "TOBA", "OLIV"],
 }
 
 
@@ -167,7 +174,25 @@ class FertilizerModule:
             )
         rows = {}
         self._dropped_implausible = []
+        # Grassland is excluded from the derived arable rates, DELIBERATELY and
+        # explicitly. It used to be excluded by accident: GRAS yield arrived as
+        # fresh-matter kg/ha, removal x yield exploded past max_plausible, and
+        # the guard below dropped it. Once the unit was fixed at load time the
+        # rate became plausible, GRAS entered these rates for the first time,
+        # and the derived-vs-CAPRI nitrogen balance moved 20.8% against a 10%
+        # tolerance — because the module's calibration against CAPRI's
+        # p_FertPerHa was performed with grass absent.
+        #
+        # Keeping it out preserves that calibration and is defensible on its
+        # own terms: grassland fertilisation is not an arable removal-based
+        # rate. Much of its nitrogen arrives as grazing returns and manure
+        # rather than applied fertiliser, so a removal x yield derivation
+        # overstates it. Including grass properly means recalibrating the
+        # module against CAPRI with grass present, which is a separate task.
+        _EXCLUDE_FROM_DERIVED_RATES = {"GRAS"}
         for crop in self.removal.index:
+            if crop in _EXCLUDE_FROM_DERIVED_RATES:
+                continue
             if crop not in self.yields.columns:
                 continue
             yld = self.yields[crop][self.yields[crop] > 0].mean()

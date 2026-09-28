@@ -275,8 +275,13 @@ class MarketModule:
             f2 = _b / "sources" / "fao_agg_2017" / "fao_agg_sua_2017_extended.json"
             if f2.exists():
                 raw2 = _json.load(open(f2))
+                # FAO names paddy rice RICE; this model's activity is PARI.
+                # Reading the file without the alias would drop rice silently,
+                # the same failure as the MAIZ/CORN and TWIN/WINE codes.
+                FAO_ALIASES = {"RICE": "PARI"}
                 for key, rec in raw2.items():
                     r, c = key.split("|")
+                    c = FAO_ALIASES.get(c, c)
                     if r == "EU27" or (r, c) in real_world:
                         continue
                     if rec.get("production", 0) > 0:
@@ -315,11 +320,23 @@ class MarketModule:
             raw_prod, overridden = {}, {}
             for region in regions:
                 ps = prod_share[region]
-                noise = float(rng.uniform(0.92, 1.08))
                 if (region, comm) in real_world:
                     overridden[region] = max(1.0, real_world[(region, comm)])
                 else:
-                    raw_prod[region] = max(1.0, w_prod * ps * noise)
+                    # Residual regions take their production share of whatever
+                    # the real sources do not cover. A +/-8% random multiplier
+                    # used to be applied here; it was seeded, so it was
+                    # reproducible, but it was invented variation presented as
+                    # data and it served no modelling purpose. Removed: the
+                    # allocation is now a deterministic share.
+                    #
+                    # This affects little. After the FAO_agg extension only 6.7%
+                    # of world production is allocated this way, and 5.9 points
+                    # of that is ROW, a residual aggregate by construction; the
+                    # only genuinely allocated countries are Iran (0.54%) and
+                    # Saudi Arabia (0.25%), which CAPRI's own FAO aggregate does
+                    # not separate from MIDEAST either.
+                    raw_prod[region] = max(1.0, w_prod * ps)
 
             fixed_total = sum(overridden.values())
             free_total = sum(raw_prod.values())
@@ -369,16 +386,15 @@ class MarketModule:
                 if comm in tariffs.columns:
                     tariffs[comm] = (tariffs[comm] + change).clip(lower=0)
 
-        prices = pd.DataFrame(index=self.regions, columns=self.commodities, dtype=float)
-        for comm in self.commodities:
-            wp = world_prices.get(comm, 200.0)
-            for region in self.regions:
-                tariff = tariffs.at[region, comm] if (
-                    region in tariffs.index and comm in tariffs.columns
-                ) else 0.0
-                prices.at[region, comm] = wp * (1 + tariff / 100.0)
-
-        return prices
+        # Vectorised: this was a region x commodity loop of scalar .at[]
+        # lookups, which dominated the market solve (2.3 million pandas reads
+        # per run). The arithmetic is unchanged.
+        wp = pd.Series({c: float(world_prices.get(c, 200.0))
+                        for c in self.commodities})
+        tar = tariffs.reindex(index=self.regions,
+                              columns=self.commodities).fillna(0.0)
+        prices = tar.div(100.0).add(1.0).mul(wp, axis=1)
+        return prices.astype(float)
 
     # ------------------------------------------------------------------
     # Supply and demand responses
@@ -429,23 +445,18 @@ class MarketModule:
 
         eps = self.armington["eps"] if "eps" in self.armington.columns else pd.Series(0.25, index=self.commodities)
 
-        for comm in self.commodities:
-            wp0 = self.world_prices_base.get(comm, 200.0)
-            wp1 = world_prices.get(comm, 200.0)
-            price_ratio = wp1 / max(wp0, 0.01)
-            # real CAPRI elasticity first, eps fallback second
-            if comm in real_supply:
-                el = float(real_supply[comm])
-            else:
-                el = eps.get(comm, 0.25) if hasattr(eps, 'get') else 0.25
-
-            for region in self.regions:
-                # Price transmission: supply responds to world price signal
-                base = supply.at[region, comm] if (
-                    region in supply.index and comm in supply.columns
-                ) else self.base_production.at[region, comm]
-                supply.at[region, comm] = max(0, base * (price_ratio ** el))
-
+        # Vectorised over commodities; arithmetic unchanged.
+        ratio = pd.Series({
+            c: float(world_prices.get(c, 200.0))
+               / max(float(self.world_prices_base.get(c, 200.0)), 0.01)
+            for c in self.commodities})
+        el = pd.Series({
+            c: (float(real_supply[c]) if c in real_supply
+                else (float(eps.get(c, 0.25)) if hasattr(eps, "get") else 0.25))
+            for c in self.commodities})
+        factor = ratio.pow(el)
+        cols = [c for c in self.commodities if c in supply.columns]
+        supply[cols] = supply[cols].mul(factor[cols], axis=1).clip(lower=0.0)
         return supply
 
     def demand_response(
@@ -493,29 +504,31 @@ class MarketModule:
                 real_dem = {}
             self._real_demand_elas = real_dem
 
-        for comm in self.commodities:
-            eta = real_dem.get(comm)
-            if eta is None:
-                eta = self.armington.at[comm, "eta"] if comm in self.armington.index else -0.25
-            # Income elasticity: staples inelastic, livestock/processed higher
-            inc_elas = self._income_elasticity(comm)
-            wp0 = self.world_prices_base.get(comm, 200.0)
-            cal = self._demand_cal_factor(comm)
+        # Vectorised; arithmetic unchanged.
+        eta = pd.Series({
+            c: float(real_dem[c]) if c in real_dem else
+               (float(self.armington.at[c, "eta"])
+                if c in self.armington.index else -0.25)
+            for c in self.commodities})
+        inc = pd.Series({c: float(self._income_elasticity(c))
+                         for c in self.commodities})
+        cal = pd.Series({c: float(self._demand_cal_factor(c))
+                         for c in self.commodities})
+        wp0 = pd.Series({c: max(float(self.world_prices_base.get(c, 200.0)), 0.01)
+                         for c in self.commodities})
+        fallback = pd.Series({c: float(world_prices.get(c, 200.0))
+                              for c in self.commodities})
 
-            for region in self.regions:
-                pd_r = domestic_prices.at[region, comm] if (
-                    region in domestic_prices.index and comm in domestic_prices.columns
-                ) else world_prices.get(comm, 200.0)
-                price_ratio = pd_r / max(wp0, 0.01)
+        dp = domestic_prices.reindex(index=self.regions, columns=self.commodities)
+        dp = dp.fillna(fallback)
+        price_ratio = dp.div(wp0, axis=1)
 
-                base = self.base_consumption.at[region, comm] if (
-                    region in self.base_consumption.index
-                ) else 100.0
-                demand.at[region, comm] = max(
-                    0, cal * base * (price_ratio ** eta) * (income_ratio ** inc_elas)
-                )
-
-        return demand
+        base = self.base_consumption.reindex(
+            index=self.regions, columns=self.commodities).fillna(100.0)
+        demand = (base.mul(cal, axis=1)
+                      * price_ratio.pow(eta, axis=1)
+                      * inc.rpow(float(income_ratio)))
+        return demand.clip(lower=0.0).astype(float)
 
     @staticmethod
     def _income_elasticity(comm: str) -> float:

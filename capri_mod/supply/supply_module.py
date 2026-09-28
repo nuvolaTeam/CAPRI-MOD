@@ -115,6 +115,24 @@ class RegionData:
     # Optional: exogenous yield trend multipliers for projections
     yield_trend: Optional[pd.Series] = None
 
+    # Optional: marketed final-product output per head for livestock, in kt per
+    # 1000 head, built from CAPRI's COMI/BEEF/PORK/POUM/EGGS/SGMT/SGMI items by
+    # tools/build_livestock_output_coef.py. Used for gross_output in place of
+    # YILD, which for breeding and suckler activities is not a marketed product.
+    livestock_output_coef: Optional[pd.Series] = None
+
+    #: Market revenue per head for livestock, EUR/head, from CAPRI's MREV.
+    #: Used instead of price x YILD, which for breeding and suckler activities
+    #: values a quantity that is not a marketed product.
+    livestock_revenue_coef: Optional[pd.Series] = None
+
+    #: CAPRI's organic yield gaps by macro-region and product group.
+    organic_yield_gap: Optional[pd.DataFrame] = None
+
+    #: Low- and high-intensity dairy yields (CAPRI DCOL / DCOH), the bounds of
+    #: the livestock intensity margin.
+    livestock_intensity_bounds: Optional[pd.Series] = None
+
 
 @dataclass
 class SupplyResult:
@@ -412,6 +430,9 @@ class RegionalSupplyModel:
         if price_shock is not None:
             prices = prices * (1 + price_shock.reindex(prices.index).fillna(0))
 
+        # GRAS is already on a dry-matter tonnage basis: the conversion from
+        # CAPRI's fresh-matter kg/ha happens once at load time, in
+        # loaders._reconcile_grass_yield_units.
         yields  = self.data.yields
         costs   = self.data.variable_costs
         cap     = self.data.cap_payments
@@ -433,6 +454,15 @@ class RegionalSupplyModel:
             "BROI": 1e-3,
         }
 
+        # CAPRI's own market revenue per head (MREV), where available, replaces
+        # price x yield for livestock. For crops the two are identical (wheat in
+        # DE11: 135.6 EUR/t x 6.15 t/ha = 833.7 = MREV), but for breeding and
+        # suckler activities YILD is not a marketed product - suckler cows carry
+        # a YILD of 422.6 against 21.8 of beef - so a revenue built from it
+        # values the wrong quantity. That is why gross_margin was dominated by
+        # pigs and barely moved under policy.
+        rev_coef = getattr(self.data, "livestock_revenue_coef", None)
+
         r = {}
         for act in self.acts:
             price   = prices.get(act, 0.0)
@@ -446,13 +476,20 @@ class RegionalSupplyModel:
             # DE11 against CAPRI's 360.8 -- and zeroes livestock, where CAPRI
             # has 108.2 for dairy cows and 8.2 for bulls.
             premium = getattr(self.data, "cap_premium", None)
+            revenue = price * yld
+            if act in ANIMALS and rev_coef is not None and act in rev_coef.index \
+                    and pd.notna(rev_coef[act]) and float(rev_coef[act]) > 0:
+                revenue = float(rev_coef[act])
+                if price_shock is not None:
+                    revenue *= 1.0 + float(price_shock.get(act, 0.0))
+
             if premium is not None and act in premium.index and pd.notna(premium[act]):
                 payment = float(premium[act])
             else:
                 payment = cap.get("BPS", 0.0) if act in CROPS else 0.0
 
             # Crop gross margin (EUR/ha); animal gross margin (EUR/head)
-            r[act] = price * yld - cost + payment
+            r[act] = revenue - cost + payment
 
         self.net_revenues = pd.Series(r)
 
@@ -468,7 +505,80 @@ class RegionalSupplyModel:
     #: These are the assumed quantities in this instrument and are exposed here
     #: rather than buried, since a scenario's organic result depends on them.
     ORGANIC_YIELD_GAP = 0.20
-    ORGANIC_COST_PREMIUM = 0.15
+    #: CAPRI's country -> PESETA macro-region mapping for organic yield gaps
+    #: (gams/inputs/load_organic_yieldgap.gms).
+    PESETA_REGION = {
+        "BE": "CEN", "LU": "CEN", "DE": "CEN", "NL": "CEN", "PL": "CEN",
+        "AT": "CES", "CZ": "CES", "FR": "CES", "HU": "CES", "RO": "CES",
+        "SK": "CES",
+        "DK": "NE", "EE": "NE", "FI": "NE", "LT": "NE", "LV": "NE",
+        "SE": "NE", "NO": "NE",
+        "BG": "SE", "CY": "SE", "ES": "SE", "EL": "SE", "HR": "SE",
+        "IT": "SE", "MT": "SE", "PT": "SE", "SI": "SE",
+        "IE": "UK_IR",
+    }
+
+    #: CAPRI's crop -> yield-gap product group (same source).
+    YIELD_GAP_GROUP = {
+        "SWHE": "wheat", "DWHE": "wheat",
+        "RYEM": "cereals", "BARL": "cereals", "OATS": "cereals",
+        "OCER": "cereals", "PARI": "cereals",
+        "CORN": "maize", "MAIF": "maize",
+        "RAPE": "oilseeds", "SUNF": "oilseeds", "SOYA": "oilseeds",
+        "OOIL": "oilseeds",
+        "GRAS": "grass", "OFOD": "grass",
+        "TOMA": "vegetables", "POTA": "vegetables", "OVEG": "vegetables",
+        "APPL": "fruits", "OFRU": "fruits", "CITR": "fruits",
+        "TAGR": "nonfruit_perm", "WINE": "nonfruit_perm", "OLIV": "nonfruit_perm",
+    }
+
+    #: CAPRI raises other inputs by 100% on converted area (JRC121368). The
+    #: old flat ORGANIC_COST_PREMIUM of 0.15 applied to TOTAL cost, which both
+    #: understated horticulture (other inputs are 30-48% of its cost) and
+    #: ignored the fertiliser and plant-protection savings that make organic
+    #: arable cropping cheaper, not dearer.
+    ORGANIC_OTHER_COST_RISE = 1.00
+
+    #: EU organic area already in place, subtracted from the target to give the
+    #: share that actually CONVERTS. CAPRI sets this explicitly:
+    #: p_organicAreaTarget("EU27yr19") = 0.25 - 0.10 in
+    #: gams/pol_input/greendeal/load_organic_targets.gms, i.e. a 15 percentage
+    #: point shock, not 25. This model applied the full target as if every
+    #: hectare converted, nearly double CAPRI's shock, which is why oilseeds
+    #: (1.43x) and permanent crops (1.57x) overshot CAPRI's published results.
+    #: CAPRI breaks the 15 points down by member state from Eurostat organic
+    #: areas; that breakdown is not held here, so its EU figure is used
+    #: uniformly and the simplification recorded.
+    ORGANIC_BASELINE_SHARE = 0.10
+
+    #: Organic share of utilised agricultural area by country, from Eurostat
+    #: org_cropar as published in its 2019 release (2018 for Slovenia). CAPRI
+    #: breaks its 15-point EU shock down by member state from the same source,
+    #: in R code this project does not hold, so the published per-country
+    #: figures are used where Eurostat names them and ORGANIC_BASELINE_SHARE
+    #: applies elsewhere. Coverage is partial BY DESIGN and stated rather than
+    #: filled in by guesswork: the countries below are those Eurostat lists
+    #: explicitly, and they include the ones that matter most here - Italy and
+    #: Austria are far along and hold much of the EU's permanent-crop area, so
+    #: a uniform 10% baseline made them convert roughly twice as much land as
+    #: they should.
+    ORGANIC_BASELINE_BY_COUNTRY = {
+        "AT": 0.253, "EE": 0.223, "SE": 0.204, "CZ": 0.152, "IT": 0.152,
+        "LV": 0.148, "FI": 0.135, "SI": 0.100, "NL": 0.037, "PL": 0.035,
+        "RO": 0.029, "BG": 0.023, "IE": 0.016, "MT": 0.005,
+    }
+
+    def _organic_baseline(self) -> float:
+        """Organic share already in place in this region's country."""
+        reg = str(getattr(self.data, "region_id", "") or "")
+        return self.ORGANIC_BASELINE_BY_COUNTRY.get(
+            reg[:2], self.ORGANIC_BASELINE_SHARE)
+
+    #: Share of the measured organic yield gap NOT attributable to the loss of
+    #: plant protection. CAPRI applies this factor ONLY in its endogenous
+    #: pesticide variant (pest_disagg==on), where the plant-protection yield
+    #: effect is solved. Kept here for that case; not applied by default.
+    ORGANIC_GAP_PESTICIDE_SHARE = 0.45
 
 
     #: CAPRI's assumed average yield loss for a 50% pesticide reduction
@@ -480,14 +590,16 @@ class RegionalSupplyModel:
 
     #: The crop groups CAPRI applies the yield loss to.
     #: CAPRI raises "other costs" (mechanical weeding, alternative practices)
-    #: by 50% alongside the expenditure cut. In CAPRI "other costs" is a
-    #: SEPARATE cost category (INPO), not a share of plant protection. This
-    #: model has no INPO line, so the rise cannot be based correctly: applying
-    #: 50% to the PPP base instead makes it cancel the 50% expenditure saving
-    #: EXACTLY, which is an artefact of the wrong base rather than an economic
-    #: result. It is therefore left at zero and the omission stated, which
-    #: brackets the answer -- see apply_pesticide_reduction.
-    PESTICIDE_OTHER_COST_RISE = 0.0
+    #: by 50% alongside the expenditure cut - conventional_io.gms is called
+    #: with the other-cost change set equal to the plant-protection reduction.
+    #:
+    #: This was previously ZERO, because "other costs" is CAPRI's own INPO
+    #: category and this model had no equivalent, so the only available base
+    #: was the plant-protection share - where a 50% rise cancels the 50%
+    #: saving exactly, an artefact rather than a result. OTHER_COST_SHARE now
+    #: carries INPO from all 27 member-state dumps, so the shock can be applied
+    #: to the right base and the constant restored to CAPRI's value.
+    PESTICIDE_OTHER_COST_RISE = 0.50
 
     PESTICIDE_AFFECTED = (
         # CORN is grain maize in this activity set; "MAIZ" (used here before)
@@ -498,27 +610,135 @@ class RegionalSupplyModel:
         "APPL", "OFRU", "CITR", "TAGR", "WINE", "OLIV",              # permanent
     )
 
-    #: Plant-protection cost as a share of this model's variable cost, by crop.
-    #: DERIVED FROM CAPRI DATA for TWO member states, not assumed:
-    #:     cost/ha = PESTOTAL (g active ingredient per ha, capreg DATA2)
-    #:               / 1000 * UVAB.PLAP (EUR/kg, coco DATA2)
-    #: then divided by this model's own variable cost for the same crop.
+    #: Livestock activities whose gross-output unit is not established. Their
+    #: gross_output is reported as NaN rather than as a number that looks
+    #: plausible and is not. DCOW is excluded because it verifies against real
+    #: EU milk output (142,000 kt against ~155,000); every other animal activity
+    #: fails that check by a factor no single rescaling explains.
+    UNVERIFIED_OUTPUT_UNITS = ("BULL", "LAYS", "BROI", "CALV", "SHGP",
+                               "HFRS", "BCOW", "PIGS", "OANI")
+
+    #: Share of total input cost that CAPRI books as "other inputs" (INPO),
+    #: area-weighted over all 27 member-state capreg dumps. This is the category
+    #: the Farm-to-Fork scenarios raise: +50 per cent under the pesticide target
+    #: and +100 per cent under organic conversion (JRC121368).
     #:
-    #: Units were established by reconciliation, not assumption, and the check
-    #: was repeated independently per country: summing PESTOTAL x activity level
-    #: reproduces the national pesticide quantity within 8% for Spain (89,888 t
-    #: against 83,104) and within 2% for Italy (60,668 against 59,433), fixing
-    #: PESTOTAL as grams of active ingredient per hectare. UVAB x NETF reproduces
-    #: EAAB to the decimal in both (Italy: 947.6 against 947.59 m EUR), and those
-    #: totals match the countries' real annual pesticide spend.
+    #: The spread is the point. Permanent and horticultural crops carry far more
+    #: of their cost here than cereals do - table grapes 48, wine 41, fruit
+    #: 30-34, tomatoes 30 per cent, against wheat 9 and durum 5 - so CAPRI's
+    #: other-cost shock bites about four times harder on permanents. This model
+    #: previously applied the rise to the PLANT-PROTECTION share instead, where
+    #: it cancelled the expenditure saving almost exactly and left the cost
+    #: channel a no-op. That is the main reason permanent crops under-responded.
+    OTHER_COST_SHARE = {
+        "APPL": 0.304,
+        "BARL": 0.124,
+        "CITR": 0.318,
+        "CORN": 0.140,
+        "COTT": 0.199,
+        "DWHE": 0.053,
+        "GRAS": 0.104,
+        "MAIF": 0.144,
+        "OATS": 0.098,
+        "OCER": 0.063,
+        "OFOD": 0.122,
+        "OFRU": 0.343,
+        "OLIV": 0.080,
+        "OOIL": 0.113,
+        "OVEG": 0.215,
+        "PARI": 0.067,
+        "POTA": 0.403,
+        "PULS": 0.116,
+        "RAPE": 0.154,
+        "RYEM": 0.088,
+        "SOYA": 0.108,
+        "SUGB": 0.104,
+        "SUNF": 0.129,
+        "SWHE": 0.093,
+        "TAGR": 0.478,
+        "TOBA": 0.247,
+        "TOMA": 0.297,
+        "WINE": 0.407,
+    }
+
+    #: Share of total input cost that is fertiliser (CAPRI FERT), same basis.
+    #: Organic conversion sets mineral fertiliser to zero, so this is a cost
+    #: SAVING that partly offsets the other-cost rise - heavily for arable
+    #: crops (wheat 42, maize 44 per cent) and barely at all for fruit (1).
+    FERT_COST_SHARE = {
+        "APPL": 0.024,
+        "BARL": 0.367,
+        "CITR": 0.067,
+        "CORN": 0.443,
+        "COTT": 0.265,
+        "DWHE": 0.471,
+        "GRAS": 0.591,
+        "MAIF": 0.487,
+        "OATS": 0.371,
+        "OCER": 0.399,
+        "OFOD": 0.521,
+        "OFRU": 0.024,
+        "OLIV": 0.131,
+        "OOIL": 0.342,
+        "OVEG": 0.051,
+        "PARI": 0.621,
+        "POTA": 0.075,
+        "PULS": 0.356,
+        "RAPE": 0.291,
+        "RYEM": 0.313,
+        "SETA": 1.000,
+        "SOYA": 0.509,
+        "SUGB": 0.488,
+        "SUNF": 0.333,
+        "SWHE": 0.416,
+        "TAGR": 0.013,
+        "TOBA": 0.188,
+        "TOMA": 0.109,
+        "WINE": 0.026,
+    }
+
+    #: Plant-protection cost as a share of total input cost, by crop.
+    #: Derived from CAPRI data for ALL 27 member states: PESTOTAL (active
+    #: ingredient, g/ha, from each res_17<CC> dump) times the national unit
+    #: value UVAB.PLAP (EUR/kg, from coco), over TOIN, area-weighted.
     #:
-    #: COUNTRY VARIATION IS REAL and is why one country was not enough. Italian
-    #: costs run a median 1.15x Spanish, but the spread is wide -- 0.95x for maize
-    #: against 1.7x for olives, citrus and apples. These shares are the median
-    #: across both countries; a third would narrow them further, and Mediterranean
-    #: permanent crops are where the remaining uncertainty concentrates.
+    #: These replace shares derived from Spain and Italy alone, which were
+    #: understated roughly threefold: wheat 5.7 per cent against 17.6 here,
+    #: apples 7.3 against 17.6. The external check is decisive - applied to
+    #: the base year, the old shares implied 3.57 bn EUR of EU
+    #: plant-protection spending against a real market of 11-12 bn, while
+    #: these imply 10.78 bn. CAPRI's own documentation had hinted at this:
+    #: its Table 1 shows soft wheat plant protection at about 11.5 per cent
+    #: of input cost, roughly twice the old figure.
     PPP_COST_SHARE = {
-        "APPL": 0.073, "BARL": 0.049, "CITR": 0.168, "DWHE": 0.059, "GRAS": 0.009, "MAIF": 0.022, "OATS": 0.012, "OCER": 0.037, "OFRU": 0.037, "OLIV": 0.243, "OOIL": 0.025, "OVEG": 0.021, "POTA": 0.02, "PULS": 0.095, "RAPE": 0.018, "RYEM": 0.035, "SOYA": 0.021, "SUGB": 0.047, "SUNF": 0.032, "SWHE": 0.057, "TAGR": 0.021, "TOBA": 0.011, "TOMA": 0.006,
+        "APPL": 0.176,
+        "BARL": 0.134,
+        "CITR": 0.112,
+        "CORN": 0.053,
+        "COTT": 0.085,
+        "DWHE": 0.116,
+        "GRAS": 0.031,
+        "MAIF": 0.083,
+        "OATS": 0.036,
+        "OCER": 0.101,
+        "OFOD": 0.035,
+        "OFRU": 0.177,
+        "OLIV": 0.249,
+        "OOIL": 0.077,
+        "OVEG": 0.088,
+        "PARI": 0.011,
+        "POTA": 0.051,
+        "PULS": 0.281,
+        "RAPE": 0.066,
+        "RYEM": 0.112,
+        "SOYA": 0.043,
+        "SUGB": 0.168,
+        "SUNF": 0.062,
+        "SWHE": 0.176,
+        "TAGR": 0.013,
+        "TOBA": 0.029,
+        "TOMA": 0.023,
+        "WINE": 0.084,
     }
 
     def apply_pesticide_reduction(self, reduction: float) -> None:
@@ -562,6 +782,7 @@ class RegionalSupplyModel:
 
         prices = self.data.producer_prices
         ylds = self.data.yields
+        new_ylds = ylds.copy()
         nr = self.net_revenues.copy()
         for a in self.acts:
             if a not in self.PESTICIDE_AFFECTED:
@@ -570,22 +791,121 @@ class RegionalSupplyModel:
             y = float(ylds.get(a, 0.0)) if hasattr(ylds, "get") else 0.0
             if p <= 0 or y <= 0:
                 continue
-            # yield loss reduces revenue; the PPP saving and the offsetting
-            # rise in other costs are applied on the cost side below
+            # The yield loss must reach BOTH the objective and the reported
+            # yields. It used to change net revenue only, so it steered what
+            # farmers grew but left gross_output computed on unshocked yields:
+            # EU cereal PRODUCTION fell 6% where CAPRI reports 15%, even though
+            # our cereal AREA fell 5.9% against CAPRI's 4%. The area response
+            # was never the problem; the yield effect was missing from the
+            # output. CAPRI reports production, so this is what is compared.
+            new_ylds[a] = y * (1.0 - loss)
             nr[a] = float(nr.get(a, 0.0)) - p * y * loss
             # CAPRI cuts plant-protection expenditure by the target share and
             # raises other costs by 50%. Both are represented here relative to
             # the crop's assumed PPP share of variable cost: the saving is a
             # margin GAIN, the other-cost rise a partial offset.
+            c = float(self.data.variable_costs.get(a, 0.0))
             ppp = self.PPP_COST_SHARE.get(a)
-            if ppp:
-                c = float(self.data.variable_costs.get(a, 0.0))
-                saving = c * ppp * reduction
-                other_cost_rise = c * ppp * self.PESTICIDE_OTHER_COST_RISE
-                nr[a] = float(nr.get(a, 0.0)) + saving - other_cost_rise
+            if ppp and c > 0:
+                nr[a] = float(nr.get(a, 0.0)) + c * ppp * reduction
+            # CAPRI raises its OTHER INPUTS category by 50% at the 50% target.
+            # This used to be applied to the plant-protection share, where it
+            # cancelled the saving almost exactly and made the cost channel a
+            # no-op. Other inputs are 48% of cost for table grapes and 41% for
+            # wine but only 9% for wheat, so the shock is what makes CAPRI's
+            # permanent crops respond far more than its cereals.
+            other = self.OTHER_COST_SHARE.get(a)
+            if other and c > 0:
+                nr[a] = float(nr.get(a, 0.0)) - (
+                    c * other * self.PESTICIDE_OTHER_COST_RISE * (reduction / 0.50))
+        self.data.yields = new_ylds
         self.net_revenues = nr
 
-    def apply_organic_area_target(self, share: float) -> None:
+
+    #: Short-run yield response to a change in the crop's own price. CAPRI's
+    #: supply model determines yields "exogenously by trend analysis ... and
+    #: updated depending on price changes against the baseline" (documentation
+    #: ch. 5, two-stage decision process: stage one sets input coefficients per
+    #: hectare for given yields, stage two the activity mix). Without this the
+    #: model has a pure extensive margin for price shocks -- area moves, yield
+    #: does not -- which understates supply response and overstates the area
+    #: change needed to deliver it.
+    #:
+    #: 0.15 is a short-run own-price yield elasticity from the agronomic and
+    #: econometric literature (typically 0.1-0.3; intensification through
+    #: fertiliser, protection and management responds within a season, variety
+    #: and structure do not). It is an ASSUMPTION, exposed here rather than
+    #: buried, and is NOT tuned to any comparison.
+    YIELD_PRICE_ELASTICITY = 0.15
+
+    def apply_yield_price_response(self, price_shock: pd.Series) -> None:
+        """Let yields respond to own-price changes, as CAPRI's stage one does.
+
+        yield_new = yield_base * (1 + price_change) ** YIELD_PRICE_ELASTICITY
+
+        At an unchanged price the factor is exactly 1.0, so the base year is
+        reproduced bit-for-bit and PMP calibration is untouched -- the same
+        identity that protects the nitrogen intensity margin.
+
+        Net revenue is rebuilt from the adjusted yields, so the price effect
+        enters once through quantity and once through the yield, which is what
+        a two-stage decision implies. Mutates net_revenues and data.yields for
+        one solve; the caller's finally block restores both.
+        """
+        if price_shock is None:
+            return
+        eps = float(self.YIELD_PRICE_ELASTICITY)
+        if eps <= 0:
+            return
+
+        prices = self.data.producer_prices
+        ylds = self.data.yields
+        if not hasattr(ylds, "copy"):
+            return
+        new_ylds = ylds.copy()
+        nr = self.net_revenues.copy()
+        for a in self.acts:
+            if a not in CROPS:
+                continue
+            dp = float(price_shock.get(a, 0.0)) if hasattr(price_shock, "get") else 0.0
+            if dp == 0.0:
+                continue
+            # a price fall below -100% is not meaningful; clamp the base
+            factor = max(1.0 + dp, 0.01) ** eps
+            y0 = float(ylds.get(a, 0.0))
+            if y0 <= 0:
+                continue
+            new_ylds[a] = y0 * factor
+            p = float(prices.get(a, 0.0)) * (1.0 + dp)
+            # the extra revenue from the yield change alone
+            nr[a] = float(nr.get(a, 0.0)) + p * y0 * (factor - 1.0)
+        self.data.yields = new_ylds
+        self.net_revenues = nr
+
+
+    def _organic_yield_gap(self, activity: str) -> float:
+        """Organic yield gap for one activity in this region, as a fraction.
+
+        Falls back to ORGANIC_YIELD_GAP where CAPRI has no estimate for that
+        region and product (its own code borrows the Central-European value in
+        that case; the flat default is used here and recorded rather than
+        silently substituting a different region's number).
+        """
+        table = getattr(self.data, "organic_yield_gap", None)
+        group = self.YIELD_GAP_GROUP.get(activity)
+        reg_id = getattr(self.data, "region_id", "") or getattr(self, "region", "")
+        region = self.PESETA_REGION.get(str(reg_id)[:2])
+        if table is not None and group and region is not None:
+            try:
+                v = table.at[region, group]
+            except Exception:
+                v = None
+            if v is not None and v == v:
+                return abs(float(v)) / 100.0
+        return self.ORGANIC_YIELD_GAP
+
+    def apply_organic_area_target(self, share: float,
+                                  pesticide_active: bool = False) -> None:
         """Adjust average I/O coefficients for an organic AREA target.
 
         Follows CAPRI (pol_input/greendeal/organic_io.gms), which does not track
@@ -606,13 +926,13 @@ class RegionalSupplyModel:
         share = float(share)
         if share <= 0:
             return
-        yield_factor = 1.0 - self.ORGANIC_YIELD_GAP * share
-        cost_factor = 1.0 + self.ORGANIC_COST_PREMIUM * share
 
         prices = self.data.producer_prices
         ylds = self.data.yields
+        new_ylds = ylds.copy()
         costs = self.data.variable_costs
         nr = self.net_revenues.copy()
+        converted = max(0.0, float(share) - self._organic_baseline())
         for a in self.acts:
             if a not in CROPS:
                 continue
@@ -621,9 +941,45 @@ class RegionalSupplyModel:
             c = float(costs.get(a, 0.0))
             if p <= 0 or y <= 0:
                 continue
-            # revenue and cost move separately; the difference is the new margin
-            delta = (p * y * (yield_factor - 1.0)) - (c * (cost_factor - 1.0))
+            # CAPRI's organic conversion is three cost changes, not one flat
+            # premium: other inputs DOUBLE, mineral fertiliser goes to zero and
+            # plant protection goes to zero (JRC121368). The balance differs
+            # sharply by crop - wheat saves 42% of cost on fertiliser and pays
+            # only 9% more on other inputs, so it gets CHEAPER, while apples
+            # save 1% and pay 30% more. A flat premium hid that entirely.
+            # CAPRI's organic yield gaps are FADN-based estimates by macro-region
+            # and product group (JRC Seville for the SUPREMA project, loaded in
+            # gams/pol_input/greendeal/organic_area.gms). They differ sharply
+            # from the flat 20% used before and from each other: in Southern
+            # Europe fruits lose 22.5% and olives and vines 11.6%, while in
+            # Central Europe fruits lose 51.3% and cereals 42.9%.
+            gap = self._organic_yield_gap(a)
+            if pesticide_active:
+                # CAPRI scales the organic yield gap by 0.45 when the pesticide
+                # effect is modelled separately, because 55% of the measured
+                # organic gap is attributed to the loss of plant protection and
+                # would otherwise be counted twice (organic_area.gms, and the
+                # same 0.45 in capreg/inputs/pest_cor.gms). Applying the full
+                # gap alongside our own pesticide yield loss overstated cereals
+                # and oilseeds (1.22 and 1.25 of CAPRI).
+                gap *= self.ORGANIC_GAP_PESTICIDE_SHARE
+                # CAPRI converts the DISTANCE from the existing organic area to the
+            # target, not the whole target.
+            yield_factor = 1.0 - gap * converted
+            other = self.OTHER_COST_SHARE.get(a, 0.0)
+            fert = self.FERT_COST_SHARE.get(a, 0.0)
+            ppp = self.PPP_COST_SHARE.get(a, 0.0)
+            cost_change = c * converted * (
+                other * self.ORGANIC_OTHER_COST_RISE - fert - ppp)
+            # As with the pesticide instrument, the yield gap must reach the
+            # REPORTED yields too, not only the objective. CAPRI reports
+            # PRODUCTION, and a yield gap that never lands in yields is
+            # invisible there: EU cereal production fell 6% here against
+            # CAPRI's 15%, while cereal AREA fell 5.9% against CAPRI's 4%.
+            new_ylds[a] = y * yield_factor
+            delta = (p * y * (yield_factor - 1.0)) - cost_change
             nr[a] = float(nr.get(a, 0.0)) + delta
+        self.data.yields = new_ylds
         self.net_revenues = nr
 
 
@@ -681,7 +1037,8 @@ class RegionalSupplyModel:
         At full intensity the yield factor is exactly 1.0, so a slack ceiling is
         a true no-op and the base year is unaffected.
         """
-        from capri_mod.supply.intensity import optimal_intensity
+        from capri_mod.supply.intensity import (optimal_intensity,
+                                                 dairy_intensity_response)
 
         crops = [c for c in self.acts
                  if c in self.data.nutrient_coefs.index]
@@ -725,6 +1082,43 @@ class RegionalSupplyModel:
             if c in nr.index:
                 nr[c] = float(nr[c]) * float(res.yield_factor[c])
         self.net_revenues = nr
+
+        # (c) LIVESTOCK INTENSITY MARGIN. A nitrogen ceiling should let dairy
+        # extensify, not only shrink: CAPRI carries every dairy herd as a low-
+        # and a high-intensity variant (DCOL/DCOH) precisely so the herd can
+        # move between them under a nutrient target. Without this the only
+        # livestock margin is the number of animals.
+        #
+        # The pressure is the same intensity cut the crops face, so a slack
+        # ceiling leaves dairy untouched and the base year is reproduced
+        # exactly. Yield, milk revenue and manure nitrogen move together.
+        bounds = getattr(self.data, "livestock_intensity_bounds", None)
+        if bounds is not None and "DCOW" in self.acts:
+            # remember the base-intensity yield so gross_output can scale the
+            # per-head coefficient by however far the herd has extensified
+            if getattr(self, "_dairy_yield_base", None) is None:
+                self._dairy_yield_base = float(self.data.yields.get("DCOW", 0.0))
+            try:
+                low = float(bounds.get("DCOW_low", 0.0))
+                high = float(bounds.get("DCOW_high", 0.0))
+            except (TypeError, ValueError):
+                low = high = 0.0
+            pressure = float(np.clip(1.0 - np.mean(res.intensity.values), 0.0, 1.0))
+            y0 = float(self.data.yields.get("DCOW", 0.0))
+            y1 = dairy_intensity_response(y0, low, high, pressure)
+            if y1 > 0 and y0 > 0 and y1 != y0:
+                factor = y1 / y0
+                new_y = self.data.yields.copy()
+                new_y["DCOW"] = y1
+                self.data.yields = new_y
+                nr = self.net_revenues.copy()
+                if "DCOW" in nr.index:
+                    nr["DCOW"] = float(nr["DCOW"]) * factor
+                self.net_revenues = nr
+                try:
+                    res.livestock_intensity = factor
+                except Exception:
+                    pass          # result object may be frozen; the effect is applied regardless
         return res
 
     def _build_constraints(
@@ -956,29 +1350,37 @@ class RegionalSupplyModel:
         # restore it in a finally block so each solve starts from the calibrated
         # baseline regardless of what a previous solve did.
         _net_rev_backup = self.net_revenues.copy()
-        _cap_backup = (self.data.cap_payments.copy()
-                       if hasattr(self.data, "cap_payments")
-                       and self.data.cap_payments is not None else None)
-        _prem_backup = (self.data.cap_premium.copy()
-                        if getattr(self.data, "cap_premium", None) is not None
-                        else None)
-        # the intensity margin rewrites the N coefficients for the duration of
-        # one solve; without this snapshot the reduced application would leak
-        # into every subsequent solve on the same model
-        _nut_backup = (self.data.nutrient_coefs.copy()
-                       if getattr(self.data, "nutrient_coefs", None) is not None
-                       else None)
+        # SNAPSHOT EVERYTHING MUTABLE, rather than enumerating fields.
+        #
+        # A solve may rewrite several pieces of self.data for its own duration:
+        # cap_payments and cap_premium (policy adders), nutrient_coefs (the
+        # nitrogen intensity margin), yields (the yield-price response). The
+        # previous version listed those fields one by one, and that list fell
+        # behind TWICE -- nutrient_coefs leaked until the intensity margin was
+        # traced, and yields leaked again when the yield-price response was
+        # added. Each leak is silent: the altered value simply persists into
+        # every later solve on the same model.
+        #
+        # Enumerating what to restore puts the burden on whoever adds the next
+        # mutation to remember this block. Snapshotting every restorable
+        # attribute removes that burden: a new mutation is covered the moment it
+        # is written. The cost is copying a handful of small pandas objects per
+        # solve, which is negligible beside the QP itself.
+        _RESTORABLE = ("cap_payments", "cap_premium", "nutrient_coefs",
+                       "yields", "producer_prices", "variable_costs", "land")
+        _backup = {}
+        for _f in _RESTORABLE:
+            _v = getattr(self.data, _f, None)
+            if _v is not None and hasattr(_v, "copy"):
+                _backup[_f] = _v.copy()
+
         try:
             return self._solve_inner(price_shock, policy_shock, nitrate_limit,
                                      set_aside_requirement)
         finally:
             self.net_revenues = _net_rev_backup
-            if _cap_backup is not None:
-                self.data.cap_payments = _cap_backup
-            if _prem_backup is not None:
-                self.data.cap_premium = _prem_backup
-            if _nut_backup is not None:
-                self.data.nutrient_coefs = _nut_backup
+            for _f, _v in _backup.items():
+                setattr(self.data, _f, _v)
 
     def _solve_inner(
         self,
@@ -1035,6 +1437,11 @@ class RegionalSupplyModel:
                         if key in self.data.cap_payments.index:
                             self.data.cap_payments[key] += val
             self._compute_net_revenues(price_shock=price_shock)
+            # CAPRI's stage-one yield response: yields move with own price
+            # against the baseline, not just area. Applied after the net-revenue
+            # rebuild so it is not overwritten by it.
+            if price_shock is not None:
+                self.apply_yield_price_response(price_shock)
 
         # Initial guess = base levels
         x0 = self._base_levels().values
@@ -1062,9 +1469,21 @@ class RegionalSupplyModel:
         # a policy shock and would overwrite an earlier adjustment.
         if isinstance(policy_shock, dict):
             _org = float(policy_shock.get("organic_area_target", 0.0) or 0.0)
-            if _org:
-                self.apply_organic_area_target(_org)
             _pest = float(policy_shock.get("pesticide_reduction", 0.0) or 0.0)
+            if _org:
+                # CAPRI scales the organic yield gap by 0.45 when the pesticide
+                # yield effect is modelled separately, because 55% of the
+                # measured organic gap is attributed to the loss of plant
+                # protection and would otherwise be counted twice
+                # (organic_area.gms; the same 0.45 in capreg/inputs/pest_cor.gms).
+                # This model DOES apply its own pesticide yield loss, so the
+                # factor belongs here. An earlier version rejected it after
+                # testing on AREA - the wrong metric, since CAPRI reports
+                # PRODUCTION. On production the double count is plain: without
+                # the factor, EU cereals fall 18.6% against CAPRI's 15%,
+                # oilseeds 27.7% against 15% and permanent crops 22.7%
+                # against 12%.
+                self.apply_organic_area_target(_org, pesticide_active=bool(_pest))
             if _pest:
                 self.apply_pesticide_reduction(_pest)
 
@@ -1092,6 +1511,7 @@ class RegionalSupplyModel:
 
         if qp_ok:
             x_opt = np.maximum(x_qp, 0.0)
+            x_qp_feasible = x_opt.copy()
             solver_converged = True
             solver_method = "qp-active-set"
             solver_message = "QP active-set solve"
@@ -1161,16 +1581,79 @@ class RegionalSupplyModel:
                     lo = x0_base[i] * max(0.0, 1.0 - rail)
                     x_opt[i] = min(max(x_opt[i], lo), hi)
 
+            # The rail is applied AFTER the solve, so it can push the solution
+            # off constraints the QP had satisfied. It did: under any price
+            # shock, a 10% set-aside requirement was silently cut back to 1.5x
+            # the base level (FR10: floor 56.2 kha, QP solution 56.2, reported
+            # 24.7 = 16.5 x 1.5). Because price shocks only arise from the
+            # second outer iteration onward, every CONVERGED policy run had its
+            # land constraints quietly relaxed, while single-iteration runs
+            # looked correct - which is why the EU set-aside came to 9.9 Mha
+            # against a 15.6 Mha requirement.
+            #
+            # The rail's purpose is to bound pathological blowups, not to
+            # overrule policy. If clamping breaks feasibility, the constraint
+            # wins and the QP solution stands.
+            if A_ub is not None and len(b_ub):
+                if np.max(A_ub @ x_opt - b_ub) > 1e-6:
+                    x_opt = x_qp_feasible.copy()
+
         activities = pd.Series(x_opt, index=self.acts)
 
-        # Compute gross outputs
+        # Compute gross outputs.
+        #
+        # GRAS yield is FRESH MATTER in kg/ha (~36,000), not t/ha like every
+        # other crop, so a raw activities x yields product put grass output a
+        # thousandfold too high -- 4,540,503 kt of grass for a single region,
+        # which silently dominates any sum across activities. This is the same
+        # fresh-matter artifact already fixed in the nitrogen balance, the
+        # fertiliser module and the income module; this is the fourth place it
+        # surfaced. Converted here to a dry-matter tonnage basis so gross_output
+        # is in 1000 t throughout, as its type annotation states.
+        # GRAS is already dry-matter tonnes (converted at load time).
         yields = self.data.yields.reindex(self.acts).fillna(0.0)
         gross_output = activities * yields
 
+        # Livestock output comes from CAPRI's FINAL-PRODUCT coefficients, not
+        # YILD. For breeding and suckler activities CAPRI's YILD measures
+        # offspring or liveweight rather than a marketed product (suckler cows
+        # 422.6 of YILD against 21.8 of beef; sows 19,917 against 50.6 of pork),
+        # so level x YILD was not a tonnage of anything saleable. The
+        # coefficients (tools/build_livestock_output_coef.py) sum CAPRI's
+        # COMI/BEEF/PORK/POUM/EGGS/SGMT/SGMI items and reproduce real 2017 EU
+        # production to within 0.94-1.08 by product.
+        #
+        # An animal activity with no coefficient for this region is reported
+        # as NaN, not as level x YILD: refusing to report an unestablished
+        # quantity is safer than reporting it wrongly.
+        _coef = getattr(self.data, "livestock_output_coef", None)
+        for _a in ANIMALS:
+            if _a not in gross_output.index:
+                continue
+            _c = (float(_coef.get(_a)) if _coef is not None
+                  and _a in _coef.index and pd.notna(_coef.get(_a)) else None)
+            # The output coefficient is per head at BASE intensity. Where the
+            # livestock intensity margin has moved the yield — dairy extensifying
+            # under a nutrient ceiling — the reported product must move with it,
+            # or the extensification would steer the solve while leaving output
+            # unchanged, which is the failure the crop yield shocks had.
+            if _c is not None and _a == "DCOW":
+                _y0 = getattr(self, "_dairy_yield_base", None)
+                _y1 = float(self.data.yields.get("DCOW", 0.0))
+                if _y0 and _y1 > 0 and _y0 > 0:
+                    _c *= _y1 / _y0
+            gross_output[_a] = (float(activities.get(_a, 0.0)) * _c
+                                if _c is not None else float("nan"))
+
         # Gross margin
-        gm = float(self.net_revenues.values @ x_opt
-                   - 0.5 * x_opt @ self.Q @ x_opt
-                   - self.f @ x_opt)
+        # Reported gross margin is net revenue x activity levels. The PMP
+        # quadratic and linear terms are a CALIBRATION DEVICE - they exist to
+        # make the base year optimal - not economic costs, and including them
+        # made this field meaningless: for DE11 it returned 55,531,046 where
+        # the margin is 428,136 thousand EUR, because the quadratic term alone
+        # is over a hundred times the linear one. That is why farm income used
+        # to read as barely moving under policies that visibly changed land use.
+        gm = float(self.net_revenues.reindex(self.acts).fillna(0.0).values @ x_opt)
 
         # Shadow prices (dual variables from active constraints)
         # Approximated as constraint slack ≈ 0 → marginal value
@@ -1389,6 +1872,19 @@ class SupplyModule:
             cap_payments=d["cap_payments"].loc[region]
                          if region in d["cap_payments"].index
                          else pd.Series(dtype=float),
+            livestock_output_coef=(
+                d["livestock_output_coef"].loc[region]
+                if d.get("livestock_output_coef") is not None
+                and region in d["livestock_output_coef"].index else None),
+            organic_yield_gap=d.get("organic_yield_gap"),
+            livestock_intensity_bounds=(
+                d["livestock_intensity_bounds"].loc[region]
+                if d.get("livestock_intensity_bounds") is not None
+                and region in d["livestock_intensity_bounds"].index else None),
+            livestock_revenue_coef=(
+                d["livestock_revenue_coef"].loc[region]
+                if d.get("livestock_revenue_coef") is not None
+                and region in d["livestock_revenue_coef"].index else None),
         )
 
 

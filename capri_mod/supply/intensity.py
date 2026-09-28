@@ -182,3 +182,41 @@ def optimal_intensity(
             "n_after": float((n_coef.reindex(crops).fillna(0.0) * m * a).sum()),
         },
     )
+
+
+# ---------------------------------------------------------------------------
+# Livestock intensity margin
+# ---------------------------------------------------------------------------
+#: CAPRI carries every dairy herd twice, as a low- and a high-intensity variant
+#: (DCOL and DCOH). In the base year the split is mechanical — the two levels are
+#: exactly half the herd in every region — so the base year gains nothing from
+#: representing them separately: their yields average to the dairy yield this
+#: model already uses (DE11: 6,287 and 10,481 kg/head, average 8,384).
+#:
+#: What they carry is a RESPONSE CHANNEL. A herd can move between the two
+#: intensities under policy, which is how CAPRI lets dairy extensify under a
+#: nutrient target instead of only shrinking. Without it, the only margin
+#: available to livestock is the number of animals.
+#:
+#: The bounds are CAPRI's own per-region DCOL and DCOH yields, in
+#: capri_data/2017/supply/livestock_intensity_bounds.csv (235 regions, EU median
+#: 5.39 and 8.99 t milk/head).
+
+def dairy_intensity_response(base_yield: float, low: float, high: float,
+                             pressure: float) -> float:
+    """Dairy yield after an extensification pressure, bounded by CAPRI's variants.
+
+    ``pressure`` is 0 for no policy and 1 for full extensification to the
+    low-intensity variant; values in between interpolate. Identity at zero
+    pressure, which is what keeps the base year and its PMP calibration intact.
+
+    Returns the base yield unchanged when the bounds are missing or inconsistent,
+    so a region CAPRI does not split is simply not given the margin.
+    """
+    if not (low and high) or high <= low or base_yield <= 0:
+        return base_yield
+    p = min(max(float(pressure), 0.0), 1.0)
+    if p == 0.0:
+        return base_yield
+    # interpolate from the base toward the low-intensity variant
+    return float(base_yield + p * (low - base_yield))

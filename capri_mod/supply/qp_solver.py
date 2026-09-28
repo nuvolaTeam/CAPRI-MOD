@@ -103,8 +103,15 @@ def solve_qp(Q: np.ndarray,
                 working.discard(drop)
                 x = x_new
                 continue
-            # KKT satisfied: optimum found.
-            return np.maximum(x_new, 0.0), True
+            # KKT satisfied. The clip to zero below is not innocent: the
+            # feasibility test above was run on the UNCLIPPED point, so if any
+            # component is negative, clipping can move the solution off the
+            # feasible set. Re-check after clipping and report failure rather
+            # than returning an infeasible point as a success.
+            x_out = np.maximum(x_new, 0.0)
+            if m and np.max(A_all @ x_out - b_all) > 1e-6:
+                return None, False
+            return x_out, True
 
         # Add the most-violated constraint to the working set.
         _, add = max(viol)

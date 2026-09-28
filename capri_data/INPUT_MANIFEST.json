@@ -220,6 +220,68 @@
    "status": "GDX",
    "coverage": "19 commodities incl. all livestock",
    "note": "EU medians wired into the market supply response."
+  },
+  "livestock_output_coef.csv": {
+   "concept": "marketed product per head, by region and animal activity",
+   "unit": "kt per 1000 head",
+   "dimension": "region x animal activity",
+   "capri_symbol": "DATA2 COMI, BEEF, PORK, POUM, EGGS, SGMT, SGMI over elementary activities",
+   "status": "GDX",
+   "coverage": "248 regions",
+   "note": "Replaces YILD for livestock. CAPRI's YILD for breeding and suckler activities is not a marketed product - suckler cows carry 422.6 against 21.8 of beef - so gross_output built from it reported one region at 3.9 billion tonnes of pig. Built by tools/build_livestock_output_coef.py; EU totals match real 2017 production within 0.94-1.08 by product.",
+   "gaps": []
+  },
+  "livestock_revenue_coef.csv": {
+   "concept": "market revenue per head, by region and animal activity",
+   "unit": "EUR per head",
+   "dimension": "region x animal activity",
+   "capri_symbol": "DATA2 MREV over elementary activities",
+   "status": "GDX",
+   "coverage": "248 regions",
+   "note": "Used instead of price x YILD in livestock net revenue, for the same reason as the output coefficients. For crops MREV equals price x yield exactly (DE11 wheat: 135.6 x 6.15 = 833.7), which is what confirms it is the same concept. Dairy cow 2,771 EUR/head, laying hen 23.",
+   "gaps": []
+  },
+  "nutrients_regional.csv": {
+   "concept": "mineral nitrogen applied per hectare, by region and crop",
+   "unit": "kg N/ha",
+   "dimension": "region x crop",
+   "capri_symbol": "DATA2 NMIN",
+   "status": "GDX",
+   "coverage": "248 regions",
+   "note": "CAPRI reports mineral (NMIN) and manure (NMAN) nitrogen separately per activity; their EU totals, 9.47 and 5.89 Mt, match the real ~10.8 and ~7. NITF is NOT an application rate - it equals NRET, a requirement. Regional rates matter: a single EU-wide table gave German regions EU-average fertilisation and a surplus of 14 kg N/ha where Germany's is among Europe's highest.",
+   "gaps": []
+  },
+  "organic_yield_gap.csv": {
+   "concept": "organic vs conventional yield gap, by macro-region and product group",
+   "unit": "% difference (negative)",
+   "dimension": "PESETA region x product group",
+   "capri_symbol": "p_organicYieldGap, from dat/pesticides/yield_effects_ppp.xlsx (sheet yld_gap)",
+   "status": "GDX",
+   "coverage": "5 macro-regions x 9 product groups",
+   "note": "JRC Seville estimates from FADN data for the SUPREMA project; CAPRI loads them in gams/pol_input/greendeal/organic_area.gms rather than hard-coding them. Replaces a flat 20% assumption. The spread is the point: Southern Europe fruits -22.5% and olives -11.6%, Central Europe fruits -51.3% and cereals -42.9%. Reproduced in the report's Annex Table A3.3.",
+   "gaps": []
+  },
+  "capri_own_price_elasticities.csv": {
+   "concept": "CAPRI's calibrated own-price supply elasticities, national market level",
+   "unit": "elasticity",
+   "dimension": "country group x product",
+   "capri_symbol": "p_ElasSupp ('CAL') from results/arm/supply_elas_*.gdx",
+   "status": "GDX",
+   "coverage": "26 country groups x 32 products",
+   "note": "REFERENCE DATA, not a model input: the supply model uses the REGIONAL PELA elasticities (supply_elasticities_regional.csv). These are national MARKET elasticities, a different quantity at a different aggregation - confusing the two once produced a false finding that annual crops were 0.14-0.51 of CAPRI. Kept because permanent crops and livestock vary only 1.0-1.6x across member states while annuals vary up to 141x, which is why per-country values matter for annuals.",
+   "gaps": [
+    "wheat is absent from the parameter entirely; at market level it aggregates into WHEA"
+   ]
+  },
+  "livestock_intensity_bounds.csv": {
+   "concept": "low- and high-intensity dairy yields",
+   "unit": "t milk per head",
+   "dimension": "region x intensity variant",
+   "capri_symbol": "DATA2 DCOL/DCOH YILD",
+   "status": "GDX",
+   "coverage": "235 of 248 regions",
+   "note": "CAPRI splits every dairy herd 50/50 between DCOL and DCOH in the base year, so the split carries no base-year information; the value is the response channel, letting dairy extensify under a nutrient target instead of only shrinking.",
+   "gaps": []
   }
  },
  "hardcoded_in_code": {

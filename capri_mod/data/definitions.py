@@ -22,6 +22,11 @@ CROPS = [
     "OATS",  # Oats
     "CORN",  # Grain maize
     "OCER",  # Other cereals
+    "PARI",  # Paddy rice
+    "OCRO",  # Other marketable crops
+    "OIND",  # Other industrial crops
+    "NURS",  # Nursery plants
+    "FLOW",  # Flowers
     "POTA",  # Potatoes
     "SUGB",  # Sugar beet
     "SUNF",  # Sunflower seed
@@ -63,7 +68,7 @@ ANIMALS = [
 
 # Market module commodities (traded goods)
 MARKET_COMMODITIES = [
-    "SWHE", "DWHE", "BARL", "CORN", "OCER",  # Cereals
+    "SWHE", "DWHE", "BARL", "CORN", "OCER", "PARI",  # Cereals (PARI = paddy rice)
     "RAPE", "SUNF", "SOYA", "OOIL",            # Oilseeds
     "SUGB", "SUGR",                              # Sugar (beet + refined)
     "POTA",                                      # Potatoes

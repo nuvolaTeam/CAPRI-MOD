@@ -1,13 +1,13 @@
 {
  "_schema": "CAPRI-Python structured data manifest v2",
  "_base_year": "2017 (quantities, prices, PMP); trade flows 2021",
- "_total_size": "3.6 MB (flat CSV/JSON \u2014 appropriate for this scale; no DB needed)",
+ "_total_size": "3.6 MB (flat CSV/JSON — appropriate for this scale; no DB needed)",
  "_note": "Storage is flat files by design: 3.6 MB loads in <2s. Parquet/DB would add opacity and overhead with no benefit at this scale. Management is handled by this manifest + the validator (validate_data.py), not by a database.",
  "layout": {
   "root": "Live files loaded at runtime",
   "sources/": "Provenance extracts (coco, fao_agg_2017, gams, fao_trade)",
   "archive/": "Superseded/backup (older vintages)",
-  "fao_2021/": "2021 vintage \u2014 trade APPLIED, quantities/prices STORED"
+  "fao_2021/": "2021 vintage — trade APPLIED, quantities/prices STORED"
  },
  "files": {
   "base_areas.csv": {
@@ -18,7 +18,7 @@
    "status": "live",
    "shape": {
     "rows": 248,
-    "cols": 29,
+    "cols": 34,
     "columns": [
      "SWHE",
      "DWHE",
@@ -30,7 +30,7 @@
      "PULS"
     ]
    },
-   "known_issue": "Specialty-crop columns (TOMA, OVEG, and formerly COTT/OLIV/WINE) contain synthetic placeholder values, not observations. COTT and OLIV corrected to real geography. TOMA/OVEG still placeholder \u2014 replace with Eurostat apro_cpshr."
+   "known_issue": "Specialty-crop columns (TOMA, OVEG, and formerly COTT/OLIV/WINE) contain synthetic placeholder values, not observations. COTT and OLIV corrected to real geography. TOMA/OVEG still placeholder — replace with Eurostat apro_cpshr."
   },
   "yields.csv": {
    "source": "COCO",
@@ -40,7 +40,7 @@
    "status": "live",
    "shape": {
     "rows": 248,
-    "cols": 40,
+    "cols": 45,
     "columns": [
      "SWHE",
      "DWHE",
@@ -60,7 +60,7 @@
    "domain": "supply",
    "status": "live",
    "shape": {
-    "rows": 245,
+    "rows": 248,
     "cols": 11,
     "columns": [
      "DCOW",
@@ -72,7 +72,8 @@
      "PIGS",
      "SOWS"
     ]
-   }
+   },
+   "shape_note": "245 -> 248: the three Irish regions (IE04, IE05, IE06) were missing because CAPRI's NUTS-2013 Irish codes did not map onto NUTS-2016. Added by tools/build_ireland.py. The old 245 recorded the defect, not the intended shape."
   },
   "producer_prices.csv": {
    "source": "CAPRI SUA",
@@ -96,7 +97,7 @@
    "status": "live",
    "shape": {
     "rows": 248,
-    "cols": 40,
+    "cols": 45,
     "columns": [
      "SWHE",
      "DWHE",
@@ -135,7 +136,7 @@
    "domain": "prices",
    "status": "live",
    "shape": {
-    "rows": 37,
+    "rows": 38,
     "cols": 1,
     "columns": [
      "price"
@@ -171,8 +172,8 @@
    "domain": "market",
    "status": "live",
    "shape": {
-    "rows": 32,
-    "cols": 3,
+    "rows": 33,
+    "cols": 4,
     "columns": [
      "sigma",
      "eta",
@@ -422,6 +423,132 @@
    "shape": {
     "note": "real CAPRI ruminants; pigs/poultry synthetic"
    }
+  },
+  "livestock_output_coef.csv": {
+   "source": "capreg DATA2",
+   "vintage": "2017",
+   "units": "kt per 1000 head",
+   "domain": "supply",
+   "status": "live",
+   "shape": {
+    "rows": 248,
+    "cols": 9,
+    "columns": [
+     "BCOW",
+     "BROI",
+     "BULL",
+     "CALV",
+     "DCOW",
+     "HFRS",
+     "LAYS",
+     "PIGS"
+    ]
+   },
+   "note": "Marketed product per head: CAPRI's COMI/BEEF/PORK/POUM/EGGS/SGMT/SGMI over elementary activities, divided by this model's head count. Replaces YILD for livestock, which for breeding and suckler activities is not a marketed product."
+  },
+  "livestock_revenue_coef.csv": {
+   "source": "capreg DATA2 MREV",
+   "vintage": "2017",
+   "units": "EUR per head",
+   "domain": "supply",
+   "status": "live",
+   "shape": {
+    "rows": 248,
+    "cols": 9,
+    "columns": [
+     "BCOW",
+     "BROI",
+     "BULL",
+     "CALV",
+     "DCOW",
+     "HFRS",
+     "LAYS",
+     "PIGS"
+    ]
+   },
+   "note": "Market revenue per head, used instead of price x YILD in livestock net revenue."
+  },
+  "nutrients_regional.csv": {
+   "source": "capreg DATA2 NMIN",
+   "vintage": "2017",
+   "units": "kg N/ha",
+   "domain": "supply",
+   "status": "live",
+   "shape": {
+    "rows": 248,
+    "cols": 28,
+    "columns": [
+     "SWHE",
+     "DWHE",
+     "RYEM",
+     "BARL",
+     "OATS",
+     "CORN",
+     "OCER",
+     "PARI"
+    ]
+   },
+   "note": "Mineral nitrogen applied per hectare by region and crop. NITF is not an application rate; it equals NRET, a requirement."
+  },
+  "capri_own_price_elasticities.csv": {
+   "source": "results/arm supply_elas_*.gdx",
+   "vintage": "2017",
+   "units": "elasticity",
+   "domain": "supply",
+   "status": "live",
+   "shape": {
+    "rows": 26,
+    "cols": 32,
+    "columns": [
+     "RYEM",
+     "BARL",
+     "OATS",
+     "MAIZ",
+     "OCER",
+     "RAPE",
+     "SUNF",
+     "PULS"
+    ]
+   },
+   "note": "REFERENCE DATA, not a model input: CAPRI's national MARKET elasticities. The supply model uses the regional PELA values in supply_elasticities_regional.csv."
+  },
+  "organic_yield_gap.csv": {
+   "source": "dat/pesticides/yield_effects_ppp.xlsx",
+   "vintage": "2017",
+   "units": "% difference",
+   "domain": "policy",
+   "status": "live",
+   "shape": {
+    "rows": 5,
+    "cols": 9,
+    "columns": [
+     "cereals",
+     "fruits",
+     "grass",
+     "maize",
+     "milk",
+     "nonfruit_perm",
+     "oilseeds",
+     "vegetables"
+    ]
+   },
+   "note": "FADN-based organic yield gaps by PESETA macro-region and product group (JRC Seville, SUPREMA)."
+  },
+  "livestock_intensity_bounds.csv": {
+   "source": "capreg DATA2 DCOL/DCOH YILD",
+   "vintage": "2017",
+   "units": "t milk per head",
+   "domain": "supply",
+   "status": "live",
+   "shape": {
+    "rows": 235,
+    "cols": 2,
+    "columns": [
+     "DCOW_low",
+     "DCOW_high"
+    ]
+   },
+   "note": "Low- and high-intensity dairy yields: the bounds of the livestock intensity margin."
   }
  },
  "_vintage_summary": {

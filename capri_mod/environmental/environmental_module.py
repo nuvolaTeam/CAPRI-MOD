@@ -408,8 +408,20 @@ class EnvironmentalModule:
         # --- Inputs ---
         # Mineral fertilizer (from nutrient coefficients × area)
         n_mineral = 0.0
+        # CAPRI reports mineral (NMIN) and manure (NMAN) nitrogen separately per
+        # activity and region; their EU totals, 9.47 and 5.89 Mt N, match the
+        # real ~10.8 and ~7. Regional rates matter: a single EU-wide table gave
+        # German regions EU-average fertilisation and a surplus of 14 kg N/ha
+        # where Germany's is among Europe's highest.
+        _reg_n = self.data.get("mineral_n_regional") if hasattr(self, "data") else None
         for crop in CROPS:
             area = activities.get(crop, 0.0)
+            if area > 0 and _reg_n is not None and region in _reg_n.index \
+                    and crop in _reg_n.columns:
+                _v = _reg_n.at[region, crop]
+                if _v == _v and _v > 0:
+                    n_mineral += area * float(_v)
+                    continue
             rate = self.nutrient_coefs.at[crop, "N"] if (
                 crop in self.nutrient_coefs.index
             ) else 0.0
@@ -451,26 +463,23 @@ class EnvironmentalModule:
             "SWHE": 20.0, "DWHE": 22.0, "BARL": 18.0, "CORN": 14.0,
             "RAPE": 32.0, "SUNF": 28.0, "SOYA": 60.0, "PULS": 40.0,
             "POTA": 3.5,  "SUGB": 1.8,  "TOMA": 2.5,  "GRAS": 15.0,
+            # Fodder crops are reported as FRESH matter, unlike grass (converted
+            # to dry matter at load) and unlike grain. Without entries here they
+            # fell to the 10.0 default and were credited with about twice the
+            # nitrogen they remove: fodder maize at 42.9 t/ha fresh gave 429 kg
+            # N/ha against the ~180 a silage crop takes up. Per tonne FRESH.
+            "MAIF": 4.0,  "OFOD": 5.0,
         }
         n_crop_uptake = 0.0
         for crop in CROPS:
             yld  = yields.get(crop, 0.0)
             area = activities.get(crop, 0.0)
             nc   = n_content_per_t.get(crop, 10.0)
-            # GRAS yield is FRESH MATTER in kg/ha (~36000), not t/ha like every
-            # other crop, so it entered this sum ~1000x too large and dominated
-            # it completely: 10.13m of a 10.20m total N uptake in FR10 (99.3%),
-            # driving the gross N balance to -10.1m kg and a nitrogen-use
-            # efficiency of 107. The same fresh-matter artifact previously
-            # corrupted the fertiliser and income modules.
-            #
-            # Grass is also not a marketed removal in the same sense: its N
-            # leaves the field only via the livestock that graze it, and that
-            # channel is already counted in n_animal_products. Converting to a
-            # dry-matter tonnage basis keeps it in the balance at the right
-            # scale rather than dropping it.
-            if crop == "GRAS" and yld > 100.0:
-                yld = yld / 1000.0 * 0.20   # fresh kg/ha -> t/ha, ~20% dry matter
+            # GRAS arrives as dry-matter tonnes: the conversion from CAPRI's
+            # fresh-matter kg/ha happens once at load time, in
+            # loaders._reconcile_grass_yield_units. Before that existed, the
+            # raw value made grass 99.3% of total N uptake in FR10 and drove
+            # the balance to -10.1m kg.
             n_crop_uptake += area * yld * nc
 
         # N in livestock products

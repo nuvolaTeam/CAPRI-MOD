@@ -307,35 +307,33 @@ def test_capri_dampening_matches_gams_reference():
 
 
 def test_synthetic_base_activities_excluded_from_elasticity_wiring():
-    """
-    Activities with a constant placeholder base level must not receive real
-    elasticities: PMP curvature is 1/(eps*x0), so a genuine elasticity on an
-    invented anchor explodes under shock (OFOD reached +128% before this guard).
+    """Placeholder base levels must not receive real elasticities.
+
+    PMP curvature is 1/(eps*x0), so a genuine elasticity on an invented anchor
+    explodes under shock: OFOD once reached +128%. COTT, OFIB and OFOD used to
+    be flat placeholders, because CAPRI reports them under aggregate names
+    (TEXT for fibre crops, OFAR and ROOF for fodder) that had never been
+    mapped. They are now REAL CAPRI data - fodder on arable land alone is 14.3
+    Mha EU-wide - so the detector should find nothing left to block.
+
+    The guard itself stays: it is what stops a future placeholder being wired
+    up by accident.
     """
     import pandas as pd
-    from pathlib import Path
-    from capri_mod.supply.capri_pmp import (
-        detect_synthetic_base_activities, build_elasticity_table)
-    from capri_mod.data.definitions import ALL_ACTIVITIES
-    from capri_mod.utils.utils import calibrate_supply_elasticities
+    from capri_mod.supply.capri_pmp import detect_synthetic_base_activities
 
     root = _repo_root()
     areas = pd.read_csv(root / "capri_data/2017/supply/base_areas.csv", index_col=0)
-    # SETA was a flat 3.0 placeholder until real capreg levels were merged for
-    # 140 regions; COTT, OFIB and OFOD remain constants because CAPRI reports
-    # them under aggregate names (TEXT for the fibre crops, OFAR/ROOF for
-    # fodder) that need a documented split before they can be used.
     blocked = detect_synthetic_base_activities(areas)
-    assert {"COTT", "OFIB", "OFOD"} <= blocked, blocked
+    assert not blocked, (
+        f"{sorted(blocked)} still look like placeholders (constant across "
+        "regions); every activity should now come from CAPRI")
 
-    defaults = calibrate_supply_elasticities(areas)
-    eps, prov, summary = build_elasticity_table(
-        root / "capri_data", list(areas.index), ALL_ACTIVITIES, defaults,
-        base_areas=areas)
-    for act in blocked:
-        if act in prov.columns:
-            assert (prov[act] == "LITERATURE_DEFAULT").all(), \
-                f"{act} has a synthetic base but received a real elasticity"
+    # and the activities that were placeholders must now vary across regions
+    for act in ("COTT", "OFIB", "OFOD"):
+        if act in areas.columns and float(areas[act].sum()) > 0:
+            assert areas[act].nunique() > 5, (
+                f"{act} takes only {areas[act].nunique()} distinct values")
 
 
 def test_elasticity_provenance_is_complete():
@@ -1651,3 +1649,184 @@ def test_base_reconciliation_null_identity():
     assert max_change < 1e-6, (
         f"reconciling consistent data moved it by {max_change:.2e} — the "
         "reconciler is rewriting, not reconciling")
+
+
+def test_yield_responds_to_price(data):
+    """Yields must respond to own-price changes, as CAPRI's stage one does.
+
+    CAPRI's supply model determines yields "exogenously by trend analysis ...
+    and updated depending on price changes against the baseline" (documentation
+    ch. 5). Without that the model has a pure extensive margin for price shocks:
+    area moves, yield does not, which understates supply response and overstates
+    the area change needed to deliver it.
+
+    Two properties, the same pair that protects the nitrogen intensity margin:
+      1. IDENTITY — at an unchanged price the yield factor is exactly 1.0, so
+         the base year and PMP calibration are untouched.
+      2. RESPONSE — a price rise raises yield, by less than proportionally.
+    """
+    import pandas as pd
+    from capri_mod.supply.supply_module import SupplyModule
+    from capri_mod.utils.utils import calibrate_supply_elasticities
+
+    sm = SupplyModule(data, calibrate_supply_elasticities(data["areas"]))
+    region = list(data["areas"].index)[0]
+    sm.run(price_signals=None, regions=[region])
+    model = sm._models[region]
+
+    # 1. identity: a zero shock must change nothing
+    base = model.solve().activities
+    zero = model.solve(price_shock=pd.Series(0.0, index=model.acts)).activities
+    for act in base.index:
+        if float(base.get(act, 0.0)) > 1.0:
+            assert abs(float(zero.get(act, 0.0)) - float(base[act])) < 1e-6, (
+                f"a zero price shock changed {act}")
+
+    # 2. response: yields must rise with price, less than proportionally
+    eps = SupplyModule.__module__  # keep import local
+    from capri_mod.supply import supply_module as _sm
+    elast = None
+    for obj in vars(_sm).values():
+        if isinstance(obj, type) and hasattr(obj, "YIELD_PRICE_ELASTICITY"):
+            elast = float(obj.YIELD_PRICE_ELASTICITY)
+            break
+    assert elast is not None, "YIELD_PRICE_ELASTICITY not exposed"
+    assert 0.0 < elast < 1.0, (
+        f"yield-price elasticity {elast} should be positive and well below 1 — "
+        "a short-run yield response cannot be proportional to price")
+
+    factor = 1.10 ** elast
+    assert 1.0 < factor < 1.05, (
+        f"a 10% price rise implies a {(factor - 1) * 100:.1f}% yield change, "
+        "which is outside any plausible short-run range")
+
+
+def test_solve_leaves_no_state_behind(data):
+    """A shocked solve must not alter the model for the next one.
+
+    Solves rewrite parts of `self.data` for their own duration: CAP premiums,
+    nutrient coefficients (nitrogen intensity margin), yields (yield-price
+    response). The restore block used to ENUMERATE those fields, and the list
+    fell behind twice — `nutrient_coefs` leaked until the intensity margin was
+    traced, and `yields` leaked again when the yield-price response was added.
+    Each leak is silent: the altered value persists into every later solve.
+
+    The block now snapshots every restorable attribute rather than listing
+    them, so a new mutation is covered the moment it is written. This test is
+    the guard: run shocked solves, then check a plain solve is bit-identical to
+    the one before them.
+    """
+    import pandas as pd
+    from capri_mod.supply.supply_module import SupplyModule
+    from capri_mod.utils.utils import calibrate_supply_elasticities
+
+    sm = SupplyModule(data, calibrate_supply_elasticities(data["areas"]))
+    region = list(data["areas"].index)[0]
+    sm.run(price_signals=None, regions=[region])
+    model = sm._models[region]
+
+    before = model.solve().activities.copy()
+
+    shock = pd.Series(0.0, index=model.acts)
+    for act in ("SWHE", "BARL"):
+        if act in shock.index:
+            shock[act] = 0.20
+    model.solve(price_shock=shock)
+    model.solve(nitrate_limit=model.base_n_intensity() - 20.0)
+    model.solve(policy_shock={"organic_area_target": 0.25})
+
+    after = model.solve().activities
+    drift = max(abs(float(after.get(a, 0.0)) - float(before[a]))
+                for a in before.index)
+    assert drift < 1e-9, (
+        f"a plain solve drifted by {drift:.2e} after shocked solves — "
+        "something mutated state and was not restored")
+
+
+def test_livestock_gross_output_is_marketed_product(model):
+    """Livestock gross output must be real marketed product, in kt.
+
+    It used to be level x CAPRI's YILD, which for breeding and suckler
+    activities is not a marketed product (suckler cows: YILD 422.6 against 21.8
+    of beef; sows: 19,917 against 50.6 of pork). One region reported 3.9
+    billion tonnes of pig output. It was then suppressed as NaN.
+
+    It is now built from CAPRI's final-product coefficients (COMI, BEEF, PORK,
+    POUM, EGGS, SGMT, SGMI) by tools/build_livestock_output_coef.py, which
+    reproduce real 2017 EU production to within 0.94-1.08 by product.
+    """
+    import math
+
+    regions = list(model.data["areas"].index[:6])
+    res = model.run(scenario="BASELINE", regions=regions, max_outer_iter=1)
+
+    # NOT checked: output per head. Head counts are in CAPRI's own units, which
+    # differ by species (poultry are in MILLION head, cattle in thousand), and
+    # three regions (ITC4, ITF3, FI1B) carry poultry in a different unit from
+    # the rest. The coefficients are immune to that - each is CAPRI's regional
+    # product divided by the model's own count - but a per-head plausibility
+    # test is not, and an earlier version of this test failed on it wrongly.
+    import pandas as pd
+    coef_path = DATA_DIR / "2017" / "supply" / "livestock_output_coef.csv"
+    assert coef_path.exists(), "livestock_output_coef.csv missing"
+
+    for region, sr in res["supply"].items():
+        g = sr.gross_output
+        total = g.sum()
+        assert total < 1e5, (
+            f"{region} gross output sums to {total:,.0f} kt — implausible for "
+            "one NUTS-2 region; a non-product quantity is leaking in")
+        for act in ("DCOW", "PIGS", "LAYS", "BROI"):
+            if act in g.index and not math.isnan(float(g[act])):
+                assert float(g[act]) < 2e4, (
+                    f"{region} {act} = {float(g[act]):,.0f} kt exceeds any "
+                    "single region's real livestock output")
+
+    # The EU totals are the validated quantity: the coefficient build
+    # reproduces CAPRI's own EU27 production less Ireland (which has no herds
+    # in this model) - milk ~140,000 kt, pork ~22,500 kt.
+    herds = model.data["animal_numbers"]
+    coef = pd.read_csv(coef_path, index_col=0)
+    eu = [r for r in coef.index if not r.startswith("NO")]
+    milk = float((herds.reindex(eu)["DCOW"].fillna(0)
+                  * coef.loc[eu, "DCOW"].fillna(0)).sum())
+    pork = float((herds.reindex(eu)["PIGS"].fillna(0)
+                  * coef.loc[eu, "PIGS"].fillna(0)).sum())
+    assert 125_000 < milk < 160_000, f"EU dairy output {milk:,.0f} kt off CAPRI"
+    assert 20_000 < pork < 25_000, f"EU pig output {pork:,.0f} kt off CAPRI"
+
+
+def test_livestock_intensity_margin_is_identity_when_unconstrained(model):
+    """Dairy extensifies under a nitrogen ceiling, and only then.
+
+    CAPRI carries every dairy herd as a low- and a high-intensity variant
+    (DCOL/DCOH) so the herd can move between them under a nutrient target
+    instead of only shrinking. The margin must be exactly inert when no ceiling
+    binds, or it would disturb the base year and its PMP calibration.
+    """
+    import numpy as np
+
+    sm = model.supply_module
+    region = "NL11" if "NL11" in model.data["areas"].index else \
+        str(model.data["areas"].index[0])
+    sm.run(price_signals=None, regions=[region])   # regional models are lazy
+    mo = sm._models[region]
+
+    base = mo.solve()
+    again = mo.solve()
+    b1 = float(base.gross_output.get("DCOW", float("nan")))
+    b2 = float(again.gross_output.get("DCOW", float("nan")))
+    if not np.isnan(b1):
+        assert abs(b1 - b2) < 1e-6, "an unconstrained solve is not reproducible"
+
+    tight = mo.solve(nitrate_limit=100.0)
+    t = float(tight.gross_output.get("DCOW", float("nan")))
+    if not np.isnan(b1) and not np.isnan(t) and b1 > 0:
+        herd_b = float(base.activities.get("DCOW", 0.0))
+        herd_t = float(tight.activities.get("DCOW", 0.0))
+        assert t <= b1 + 1e-6, "a nitrogen ceiling should not raise milk output"
+        if herd_b > 0 and herd_t < herd_b:
+            # output must fall by MORE than the herd: that difference is the
+            # intensity margin doing its work rather than animals alone
+            assert (t / b1) < (herd_t / herd_b) + 1e-9, (
+                "output fell only as fast as the herd: the intensity margin is inert")

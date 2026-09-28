@@ -17,22 +17,22 @@
    "reference": "all regions must solve; DE60 non-convergence was resolved"
   },
   "base_fidelity_pct": {
-   "value": 0.48,
+   "value": 0.59,
    "tolerance": 1.0,
    "kind": "tight",
    "reference": "PMP must reproduce observed base areas for annual crops. Improved from 11.28% to 0.47% once the ARABLE land bound was reconciled with observed crop areas (the two disagreed in 54 of 248 regions by 9,960 kha, forcing the solver to cut). NOTE this measure looks ONLY at SWHE/BARL/RAPE/CORN/SUGB/POTA - it did not see the permanent-crop collapse, which is why the olive anchor exists separately."
   },
   "olive_base_fidelity_pct": {
-   "value": 0.25,
+   "value": 0.07,
    "tolerance": 2.0,
    "kind": "tight",
    "reference": "permanent crops must survive the base solve; was 78% error until the PERMANENT land bound was reconciled with observed areas"
   },
   "n_surplus_median_kg_ha": {
-   "value": 54.4,
+   "value": 47.1,
    "tolerance": 15.0,
    "kind": "tight",
-   "reference": "Eurostat gross nitrogen balance, EU ~45-50 kg N/ha"
+   "reference": "Eurostat gross nitrogen balance, EU ~45-50 kg N/ha UPDATED 54.4 -> 47.1. The old figure came from two errors that cancelled: manure was counted twice on the input side, and fodder crops were credited with about double the nitrogen they remove because their yields are fresh matter. Mineral nitrogen now comes from CAPRI's own NMIN per region and crop. Every component is independently right: mineral 10.17 Mt (real ~10.8), manure 7.22 (real ~7), crop uptake 13.71, EU average surplus 44.5 kg N/ha against a real ~46."
   },
   "max_world_imbalance_pct": {
    "value": 0.003,
@@ -47,10 +47,10 @@
    "reference": "CAPRI PMRK; the market must return the prices it was given"
   },
   "eu_cap_budget_bn_eur": {
-   "value": 58.8,
+   "value": 54.0,
    "tolerance": 6.0,
    "kind": "tight",
-   "reference": "real EU CAP budget ~55-58 bn EUR/yr"
+   "reference": "real EU CAP budget ~55-58 bn EUR/yr UPDATED 58.8 -> 60.1 bn EUR when Ireland was rebuilt from CAPRI: its eligible area rose from 694 kha of placeholder land to 4,118 kha. Ireland receives roughly 1.2 bn EUR a year in direct payments, so the direction and size are expected. Note this now sits slightly above the real ~55-58 bn EUR range. UPDATED 60.1 -> 61.1 when Bulgaria (+1.35 Mha) and Mazowieckie (+0.8 Mha) were rebuilt from CAPRI and Ceuta/Melilla's phantom 1.45 Mha removed. Now further above the real ~55-58 bn: the earlier closer figure was partly an artefact of missing land, which is worth investigating in the payment rates rather than tuning away. UPDATED 61.1 -> 54.0 when every region was rebuilt from CAPRI: Poland's duplicated rows (it carried 21 regions where NUTS has 17, counting four twice) and the phantom farmland in Ceuta, Melilla and Brussels came out. Now at the lower edge of the real ~55-58 bn rather than above it."
   },
   "macc_at_50eur_pct": {
    "value": 1.2,
@@ -59,10 +59,10 @@
    "reference": "EcAMPA 2 implied economic-only response ~2-3% at EUR50/t; expensive to recompute, so checked on demand rather than every run"
   },
   "projection_corr_vs_capri_2030": {
-   "value": 0.997,
+   "value": 0.993,
    "tolerance": 0.05,
    "kind": "loose",
-   "reference": "CAPRI's own 2030 reference run; requires the captrd trajectory"
+   "reference": "CAPRI's own 2030 reference run; requires the captrd trajectory UPDATED +0.997 -> +0.993 after the full CAPRI rebuild; on the same 60-region matched set the crops within 25% improved from 16/24 to 20/23, so the slightly lower correlation comes with a better match overall."
   }
  }
 }

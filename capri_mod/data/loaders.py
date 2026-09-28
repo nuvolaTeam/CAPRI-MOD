@@ -86,6 +86,13 @@ def _country_scale(region: str) -> float:
 # ---------------------------------------------------------------------------
 _FILE_CATEGORY = {
     "base_areas.csv": "supply", "yields.csv": "supply", "animal_numbers.csv": "supply",
+    "livestock_output_coef.csv": "supply", "nutrients_regional.csv": "supply",
+    "livestock_revenue_coef.csv": "supply",
+    "livestock_intensity_bounds.csv": "supply",
+    # reference data: not loaded by the model, but registered so the
+    # validator can resolve and shape-check it like any other input
+    "capri_own_price_elasticities.csv": "supply",
+    "organic_yield_gap.csv": "policy",
     "variable_costs.csv": "supply", "input_requirements.csv": "supply",
     "land_availability.csv": "supply", "supply_elasticities_regional.csv": "supply",
     "pmp_diagonal_terms.csv": "supply", "pmp_crossgroup_terms.csv": "supply",
@@ -210,7 +217,7 @@ def load_regional_animal_numbers(data_dir: Optional[Path] = None) -> pd.DataFram
                 else:
                     renamed[tgt] = renamed[tgt].where(
                         renamed[tgt].fillna(0) > 0, df[src])
-        return renamed
+        return _reconcile_poultry_units(renamed)
 
     base_animals = {
         "DCOW": 25.0, "BCOW": 10.0, "BULL": 8.0,  "HFRS": 12.0,
@@ -227,6 +234,60 @@ def load_regional_animal_numbers(data_dir: Optional[Path] = None) -> pd.DataFram
 
     return pd.DataFrame(rows, index=ANIMALS).T
 
+
+
+#: Grass dry-matter share. CAPRI reports GRAS yield as FRESH MATTER; this model
+#: works in dry-matter tonnes like every other crop.
+GRAS_DRY_MATTER_SHARE = 0.20
+
+
+#: CAPRI reports poultry in MILLION head while every other animal is in
+#: thousand head: EU laying hens come to 503 and broilers to 1,474, which are
+#: only plausible as millions (real EU laying hens are roughly 370-400 million,
+#: broiler places over a billion). Every consumer multiplies a head count by a
+#: per-head coefficient assuming thousands, so poultry manure, feed and
+#: emissions were understated a thousandfold. Converted once here, so all
+#: animal levels are in thousand head.
+POULTRY_MILLION_HEAD = ("LAYS", "BROI", "HENS", "POUL")
+
+
+def _reconcile_poultry_units(herds: pd.DataFrame) -> pd.DataFrame:
+    out = herds.copy()
+    for col in POULTRY_MILLION_HEAD:
+        if col in out.columns:
+            out[col] = out[col] * 1000.0
+    return out
+
+
+def _reconcile_grass_yield_units(yields: pd.DataFrame) -> pd.DataFrame:
+    """Put GRAS on the same dry-matter tonnage basis as every other crop.
+
+    CAPRI reports grass yield as FRESH MATTER in kg/ha (~36,000) while every
+    other crop is in t/ha. Converted here, ONCE, at load time.
+
+    It is done here rather than in each consumer because the raw value has
+    already caused the same defect FIVE times, in the nitrogen balance, the
+    fertiliser module, the income module, `gross_output` and net revenues. Each
+    was patched where it surfaced, which fixed the symptom and left the cause:
+    every consumer of `yields` was converting independently, and any new
+    consumer inherited the bug by default. The failures were severe — grass
+    supplied 99.3% of total nitrogen uptake in one case and 99.9% of regional
+    gross margin in another, in both cases silently.
+
+    Converting at the source inverts that default: a new consumer now gets the
+    right units without knowing this exists.
+    """
+    if "GRAS" not in yields.columns:
+        return yields
+    out = yields.copy()
+    # a fresh-matter figure is ~36,000 kg/ha; a dry-matter tonnage is single
+    # digits, so the threshold distinguishes them without ambiguity and makes
+    # the conversion idempotent if applied twice
+    mask = out["GRAS"] > 100.0
+    if mask.any():
+        out.loc[mask, "GRAS"] = (out.loc[mask, "GRAS"] / 1000.0
+                                 * GRAS_DRY_MATTER_SHARE)
+    return out
 
 def _reconcile_animal_yield_units(yields: pd.DataFrame) -> pd.DataFrame:
     """Fix unit-inconsistent animal yields across regions.
@@ -296,7 +357,7 @@ def load_yields(data_dir: Optional[Path] = None) -> pd.DataFrame:
     """
     if data_dir and (resolve_data_file(data_dir, "yields.csv")).exists():
         raw = pd.read_csv(resolve_data_file(data_dir, "yields.csv"), index_col=0)
-        return _reconcile_animal_yield_units(raw)
+        return _reconcile_grass_yield_units(_reconcile_animal_yield_units(raw))
 
     base_yields = {   # EU average t/ha (crops) or appropriate units (animals)
         "SWHE": 5.8,  "DWHE": 4.2,  "RYEM": 4.0,  "BARL": 4.8,
@@ -371,7 +432,33 @@ def load_regional_producer_prices(data_dir=None):
     p = Path(data_dir) / "sources" / "capreg" / "capreg_producer_prices.csv"
     if not p.exists():
         return pd.DataFrame()
-    return pd.read_csv(p, index_col=0)
+    prices = pd.read_csv(p, index_col=0)
+
+    # The file carries CAPRI's activity codes for five crops the model names
+    # differently, so those columns were never read and the crops silently fell
+    # back to the EU-wide price. The same silent-drop family as MAIZ/CORN and
+    # the grassland codes.
+    #
+    # Wine was the damaging case. CAPRI prices it at a median of 1,362 EUR/t
+    # (Spain's main wine region at 403); the EU fallback was 95.5, which left
+    # wine on a NEGATIVE gross margin in the largest wine regions - Spain -712,
+    # Aquitaine -1,413 EUR/ha - where real EU wine margins are strongly
+    # positive. An activity sitting at a negative margin responds erratically
+    # to any cost shock, which is why wine area fell 11.3% under Farm-to-Fork
+    # while olives, correctly priced, stayed flat at -0.1% exactly as CAPRI
+    # reports.
+    CAPRI_PRICE_ALIASES = {
+        "TWIN": ["WINE"],      # table wine
+        "TEXT": ["COTT", "OFIB"],   # textile crops: cotton and other fibre
+        "OFAR": ["OFOD"],      # fodder on arable land
+    }
+    for src, targets in CAPRI_PRICE_ALIASES.items():
+        if src not in prices.columns:
+            continue
+        for tgt in targets:
+            if tgt not in prices.columns or prices[tgt].isna().all():
+                prices[tgt] = prices[src]
+    return prices
 
 
 def load_producer_prices(data_dir: Optional[Path] = None) -> pd.Series:
@@ -768,6 +855,16 @@ def load_tariffs(data_dir: Optional[Path] = None) -> pd.DataFrame:
 # CONVENIENCE: LOAD ALL DATA AT ONCE
 # ---------------------------------------------------------------------------
 
+
+def _load_optional_csv(data_dir, filename):
+    """Load a region-indexed CSV if present, else None."""
+    if not data_dir:
+        return None
+    path = resolve_data_file(data_dir, filename)
+    if path is None or not path.exists():
+        return None
+    return pd.read_csv(path, index_col=0)
+
 def load_all_data(data_dir: Optional[Path] = None, validate: bool = False,
                   base_year: str = DEFAULT_BASE_YEAR,
                   allow_synthetic: bool = False) -> dict:
@@ -819,6 +916,32 @@ def load_all_data(data_dir: Optional[Path] = None, validate: bool = False,
         "producer_prices": load_producer_prices(data_dir),
         "producer_prices_regional": load_regional_producer_prices(data_dir),
         "cap_premium": load_cap_premium(data_dir),
+        # Marketed final-product output per head for livestock (kt per 1000
+        # head). Built from CAPRI capreg DATA2 by
+        # tools/build_livestock_output_coef.py; absent -> livestock gross
+        # output is reported as NaN rather than from YILD.
+        "livestock_output_coef": _load_optional_csv(
+            data_dir, "livestock_output_coef.csv"),
+        # Mineral nitrogen applied per hectare, by region and crop, from
+        # CAPRI's NMIN. Regional rates matter: German grassland gets 44 kg N/ha
+        # of mineral nitrogen where the EU average is far lower, and a single
+        # EU-wide table made high-fertiliser regions look unfertilised.
+        # NOTE: distinct from "nutrients_regional" below, which holds CAPRI's
+        # NITF. NITF equals NRET, a nitrogen REQUIREMENT, not an application
+        # rate; NMIN is the mineral nitrogen actually applied.
+        # Market revenue per head (CAPRI MREV), by region and animal activity.
+        "livestock_revenue_coef": _load_optional_csv(
+            data_dir, "livestock_revenue_coef.csv"),
+        # CAPRI's FADN-based organic yield gaps by macro-region and product
+        # group (JRC Seville, SUPREMA project), used by the organic instrument.
+        "organic_yield_gap": _load_optional_csv(
+            data_dir, "organic_yield_gap.csv"),
+        # CAPRI's low- and high-intensity dairy yields (DCOL / DCOH), the
+        # bounds of the livestock intensity margin.
+        "livestock_intensity_bounds": _load_optional_csv(
+            data_dir, "livestock_intensity_bounds.csv"),
+        "mineral_n_regional": _load_optional_csv(
+            data_dir, "nutrients_regional.csv"),
         "nutrients_regional": load_regional_nutrients(data_dir),
         "variable_costs":  load_variable_costs(data_dir),
         "variable_costs_regional": load_variable_costs_regional(data_dir),
