@@ -798,11 +798,14 @@ per-head coefficient understated poultry a thousandfold. All animal levels are n
 in thousand head.
 
 **Not sound for:**
-- **Farm income comparisons across scenarios** — `gross_margin` is contaminated (above).
-- **Individual results for Saxony, Croatia and `NO05`**, or Irish nitrogen and emissions.
-- **Permanent-crop magnitudes under Farm-to-Fork.** The response is about half
-  CAPRI's published figure (−6.4% against −12%). Elasticities match CAPRI exactly,
-  so the gap lies in how strongly the direct shocks bite on permanent crops.
+- **Individual results for Saxony, Croatia and `NO05`**, or Irish nitrogen and
+  emissions.
+- **Oilseed and permanent-crop magnitudes under Farm-to-Fork.** Both overshoot
+  CAPRI's published figures (1.40x and 1.39x on production); the residual is
+  concentrated in vegetables, which CAPRI reports merged with permanent crops.
+  Directions and rankings are usable; levels are overstated.
+- **Wine in the 101 regions where CAPRI carries no regional price**, which fall
+  back to the EU-wide figure.
 - **Multi-period projections.** The projection is validated for a single step to
   2030; the recursion runs but has no external check, and herds are re-optimised
   each period rather than carried.
@@ -1055,6 +1058,25 @@ principled reason and extension path.
 ---
 
 ## 12. Provenance & reproducibility
+
+- `capri_data/FITNESS_FOR_USE.json` — how far each OUTPUT can be trusted, in
+  machine-readable form, with `capri_mod/fitness.py` to query it. Every other
+  file here records where an *input* came from; this one records what a *result*
+  is worth, so a script or an agent can check a number before reporting it
+  rather than relying on someone having read §9:
+
+  ```python
+  from capri_mod.fitness import check, caveats
+
+  check("scenario.permanent_crops").status   # 'overstated'
+  check("supply.gross_margin").ok            # True
+  caveats(["scenario.oilseeds", "activities.WINE"])   # what to report alongside
+  ```
+
+  Statuses are `validated`, `use_with_care`, `overstated`, `understated` and
+  `not_supported`. Lookup falls back from the specific to the general, and an
+  unrecorded key returns `unknown` — which means no finding is recorded, *not*
+  that the output is validated.
 
 - `capri_data/INPUT_SCHEMA.json` — declarative source of truth for every input.
 - `capri_data/DATA_SOURCING_REGISTRY.json` — per-dataset provenance, including
