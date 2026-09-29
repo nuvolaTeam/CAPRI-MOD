@@ -798,19 +798,25 @@ per-head coefficient understated poultry a thousandfold. All animal levels are n
 in thousand head.
 
 **Not sound for:**
-- **Individual results for Saxony, Croatia and `NO05`**, or Irish nitrogen and
-  emissions.
+- **Individual results for Norway's `NO05`**, or Irish nitrogen and emissions.
+  Neither CAPRI's results nor its regional selection record the data needed:
+  no crop areas for Norway's redrawn regions, and no physical grass yield for
+  Ireland.
 - **Oilseed and permanent-crop magnitudes under Farm-to-Fork.** Both overshoot
   CAPRI's published figures (1.40x and 1.39x on production); the residual is
   concentrated in vegetables, which CAPRI reports merged with permanent crops.
   Directions and rankings are usable; levels are overstated.
-- **Wine in the 101 regions where CAPRI carries no regional price**, which fall
-  back to the EU-wide figure.
 - **Multi-period projections.** The projection is validated for a single step to
   2030; the recursion runs but has no external check, and herds are re-optimised
   each period rather than carried.
 - **Economy-wide effects** (labour, capital, GDP): outside the partial-equilibrium
   boundary, as in CAPRI.
+
+**Regional detail for Saxony and Croatia comes from CAPRI's own regional data**,
+crop by crop, so Croatia's olives and vineyards sit in the Adriatic region and
+Saxony's maize in lowland Leipzig rather than being spread by a single key. Where
+CAPRI has no regional price it falls back to the national one before the EU-wide
+figure, so every vine-growing region carries its own country's wine price.
 
 **Sound for, additionally:** nitrogen ceilings (an intensity margin plus CAPRI's
 tiered surplus rule), pesticide instruments (with plant-protection costs derived
