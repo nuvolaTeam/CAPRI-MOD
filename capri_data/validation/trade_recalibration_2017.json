@@ -1,37 +1,28 @@
 {
  "source": "capmod res_0_1717 dataOut ImportQ, 2017",
- "region_pairs": 547,
- "records_mapped": 7468,
+ "region_pairs": 556,
+ "records_mapped": 12961,
  "aggregates_excluded": [
   "ACP",
   "AFRICA",
-  "AFR_LDC",
-  "AFR_REST",
   "ANZ",
   "ASIA",
-  "ASOCE_LDC",
-  "ASOCE_REST",
   "A_EU_EAST",
   "A_EU_WEST",
-  "FSU",
+  "AllImporters",
+  "EU",
   "HI_INC",
   "LDC",
   "LDCACP",
-  "MED",
   "MER",
-  "MER_OTH",
   "MID_INC",
-  "MSA_ACP",
   "MS_AM",
   "NONEU",
   "NONEU_EU",
   "N_AM",
-  "REU",
-  "URUPAR",
-  "WBA",
   "World"
  ],
- "median_share_change_pp": 96.05000000000001,
+ "median_share_change_pp": 96.7,
  "extra_eu_share": {
   "MILK": {
    "share_2021": 100.0,
@@ -45,53 +36,58 @@
   },
   "PORK": {
    "share_2021": 100.0,
-   "share_2017": 0.7,
-   "change_pp": -99.3
+   "share_2017": 0.5,
+   "change_pp": -99.5
   },
   "BARL": {
    "share_2021": 100.0,
-   "share_2017": 1.4,
-   "change_pp": -98.6
-  },
-  "POTA": {
-   "share_2021": 100.0,
-   "share_2017": 2.7,
-   "change_pp": -97.3
+   "share_2017": 1.1,
+   "change_pp": -98.9
   },
   "SWHE": {
    "share_2021": 100.0,
-   "share_2017": 3.1,
-   "change_pp": -96.9
+   "share_2017": 2.4,
+   "change_pp": -97.6
+  },
+  "POTA": {
+   "share_2021": 100.0,
+   "share_2017": 2.4,
+   "change_pp": -97.6
   },
   "POUL": {
    "share_2021": 100.0,
-   "share_2017": 4.8,
-   "change_pp": -95.2
-  },
-  "SUNF": {
-   "share_2021": 100.0,
-   "share_2017": 5.0,
-   "change_pp": -95.0
+   "share_2017": 3.3,
+   "change_pp": -96.7
   },
   "BEEF": {
    "share_2021": 100.0,
-   "share_2017": 6.5,
-   "change_pp": -93.5
+   "share_2017": 5.2,
+   "change_pp": -94.8
+  },
+  "SUNF": {
+   "share_2021": 100.0,
+   "share_2017": 5.8,
+   "change_pp": -94.2
   },
   "CORN": {
    "share_2021": 100.0,
-   "share_2017": 19.9,
-   "change_pp": -80.1
+   "share_2017": 15.2,
+   "change_pp": -84.8
+  },
+  "SUGR": {
+   "share_2021": 100.0,
+   "share_2017": 28.8,
+   "change_pp": -71.2
   },
   "RAPE": {
    "share_2021": 100.0,
-   "share_2017": 45.9,
-   "change_pp": -54.1
+   "share_2017": 36.5,
+   "change_pp": -63.5
   },
   "SOYA": {
    "share_2021": 100.0,
-   "share_2017": 89.9,
-   "change_pp": -10.1
+   "share_2017": 90.7,
+   "change_pp": -9.3
   }
  }
 }

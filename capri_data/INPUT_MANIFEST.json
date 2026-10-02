@@ -282,6 +282,174 @@
    "coverage": "235 of 248 regions",
    "note": "CAPRI splits every dairy herd 50/50 between DCOL and DCOH in the base year, so the split carries no base-year information; the value is the response channel, letting dairy extensify under a nutrient target instead of only shrinking.",
    "gaps": []
+  },
+  "capri_ghg_mitigation.csv": {
+   "concept": "CAPRI mitigation technologies: shares, emissions under each technology, adoption costs",
+   "unit": "various",
+   "dimension": "member state x activity/source",
+   "capri_symbol": "p_ghgMiti; dataOut SHARE/CH4ENT/CH4MAN/N2OMAN",
+   "status": "GDX",
+   "coverage": "27 member states",
+   "note": "CAPRI mitigation technologies: shares, emissions under each technology, adoption costs",
+   "gaps": []
+  },
+  "capri_mitigation_potential.csv": {
+   "concept": "CAPRI technical mitigation potential by member state and source",
+   "unit": "fraction of emissions",
+   "dimension": "member state x activity/source",
+   "capri_symbol": "p_ghgMiti; dataOut SHARE/CH4ENT/CH4MAN/N2OMAN",
+   "status": "GDX",
+   "coverage": "27 member states",
+   "note": "CAPRI technical mitigation potential by member state and source",
+   "gaps": []
+  },
+  "eu_gross_trade_supplement.csv": {
+   "concept": "CAPRI's extra-EU gross trade for commodities the trade file does not record (sugar, durum wheat)",
+   "unit": "kt",
+   "dimension": "commodity",
+   "capri_symbol": "dataOut ImportQ (partner NONEU), EXPT-IMPT",
+   "status": "GDX",
+   "coverage": "SUGR, DWHE",
+   "note": "Durum proxied from CAPRI WHEA flows scaled by durum share of wheat production; CAPRI trades wheat as one commodity.",
+   "gaps": [
+    "durum is a proxy"
+   ]
+  },
+  "land_rent_regional.csv": {
+   "concept": "Land rent per hectare by region (Eurostat apri_lrnt, arable land and/or permanent grassland)",
+   "unit": "EUR/ha",
+   "dimension": "region",
+   "capri_symbol": "(Eurostat apri_lrnt)",
+   "status": "EXTERNAL",
+   "coverage": "209 of 248 regions from Eurostat (161 regional, 40 national, 8 arable-only national); 39 fallback",
+   "note": "Fallback for Germany and Cyprus: CAPRI 2030 accounts rent x median Eurostat/CAPRI ratio (0.41) - flagged in the source column; likely understates Germany.",
+   "gaps": [
+    "Germany and Cyprus not published in apri_lrnt"
+   ]
+  },
+  "capri_baseline_surplus_2030.csv": {
+   "concept": "CAPRI's own baseline gross N surplus per ha (2030 reference), input to the tiered nitrogen target",
+   "unit": "kg N/ha",
+   "dimension": "region",
+   "capri_symbol": "dataOut perHa.SURTOT.NITF",
+   "status": "CAPRI",
+   "coverage": "157 NUTS-2 direct, 82 scaled to national, 9 own",
+   "note": "Scenario-target input (vintage 2030, the scenario year), not base-year data.",
+   "gaps": [
+    "regions split or merged between NUTS versions use national scaling"
+   ]
+  },
+  "n_deposition_regional.csv": {
+   "concept": "Atmospheric N deposition per ha by region (CAPRI 2030 reference, EMEP-based)",
+   "unit": "kg N/ha",
+   "dimension": "region",
+   "capri_symbol": "dataOut perHa.ATMOSD.NITF",
+   "status": "CAPRI",
+   "coverage": "157 NUTS-2, 91 national",
+   "note": "Replaces a flat 20 kg N/ha.",
+   "gaps": []
+  },
+  "manure_trade_2030.csv": {
+   "concept": "Manure N trade between regions: export share of excretion, import per ha of cropland",
+   "unit": "share; kg N/ha",
+   "dimension": "region",
+   "capri_symbol": "dataOut MTRADE, EXCRET",
+   "status": "CAPRI",
+   "coverage": "matched regions via nuts_crosswalk",
+   "note": "See docs/FERTILISER_ALLOCATION.md.",
+   "gaps": [
+    "unmatched regions"
+   ]
+  },
+  "capri_fertiliser_allocation_2030.csv": {
+   "concept": "CAPRI fertiliser allocation per region and crop: need, mineral, manure, residues, losses (calibration data for the allocation module)",
+   "unit": "kg N/ha",
+   "dimension": "region x crop",
+   "capri_symbol": "dataOut fertDist_*, nutNed_*",
+   "status": "CAPRI",
+   "coverage": "matched regions via nuts_crosswalk",
+   "note": "See docs/FERTILISER_ALLOCATION.md.",
+   "gaps": [
+    "unmatched regions"
+   ]
+  },
+  "capri_regional_n_balance_2030.csv": {
+   "concept": "CAPRI regional N balance positions (MINFER, EXCRET, MTRADE, IMPORT, EXPPRD, CRESID, BIOFIX, ATMOSD, SURTOT)",
+   "unit": "kt N",
+   "dimension": "region",
+   "capri_symbol": "dataOut balance rows",
+   "status": "CAPRI",
+   "coverage": "matched regions via nuts_crosswalk",
+   "note": "See docs/FERTILISER_ALLOCATION.md.",
+   "gaps": [
+    "unmatched regions"
+   ]
+  },
+  "fertiliser_substitution_2030.csv": {
+   "concept": "Manure-N availability and mineral-N efficiency per region (CAPRI fertiliser allocation): manure displaces mineral fertiliser at availability/efficiency",
+   "unit": "share",
+   "dimension": "region",
+   "capri_symbol": "dataOut fertDist_*, nutNed_*",
+   "status": "CAPRI",
+   "coverage": "153 regions CAPRI, rest EU median",
+   "note": "See docs/FERTILISER_ALLOCATION.md, Stage 2.",
+   "gaps": [
+    "unmatched regions use EU medians"
+   ]
+  },
+  "livestock_manure_n_coef.csv": {
+   "concept": "Manure N per head (kg), CAPRI 2017 regional manure N total per activity divided by this model's herd (census stock)",
+   "unit": "kg N/head",
+   "dimension": "region x animal",
+   "capri_symbol": "dataOut MANN, LEVL",
+   "status": "CAPRI",
+   "coverage": "2084 region x animal cells",
+   "note": "Same construction as livestock_revenue_coef.csv.",
+   "gaps": [
+    "cells without CAPRI totals fall back to the previous per-unit table"
+   ]
+  },
+  "livestock_feed_coef.csv": {
+   "concept": "Feed per head (t): cereals, protein-rich and energy-rich feed - CAPRI 2017 regional totals (FCER/FPRO/FENE x LEVL) divided by this model's herd",
+   "unit": "t/head",
+   "dimension": "region x animal x feed",
+   "capri_symbol": "dataOut FCER, FPRO, FENE, LEVL",
+   "status": "CAPRI",
+   "coverage": "6252 cells",
+   "note": "Same construction as revenue and manure per head.",
+   "gaps": [
+    "empty cells fall back to feed_requirements.csv"
+   ]
+  },
+  "capri_oilseed_products_baseline.json": {
+   "concept": "Market balances of oilseed products (oils, cakes, seeds) by trade region; EU crushing and yields",
+   "unit": "kt; EUR/t",
+   "dimension": "region x product",
+   "capri_symbol": "p_dataMarket (FAO_agg)",
+   "status": "CAPRI",
+   "coverage": "21 trade regions x 9 products",
+   "note": "Not yet read by the model (Stage 1 calibration data).",
+   "gaps": []
+  },
+  "eu_demand_elas_overrides.json": {
+   "concept": "EU own-price demand elasticities for oils and cakes",
+   "unit": "elasticity",
+   "dimension": "commodity",
+   "capri_symbol": "p_ElasDem",
+   "status": "CAPRI",
+   "coverage": "6 commodities",
+   "note": "EU row only.",
+   "gaps": []
+  },
+  "feed_demand_nonEU.json": {
+   "concept": "Non-EU feed shares and feed-price elasticities",
+   "unit": "share; elasticity",
+   "dimension": "region x feed x feed",
+   "capri_symbol": "p_dataMarket FEDM/DOMM; p_ElasFeed",
+   "status": "CAPRI",
+   "coverage": "125 region x feed entries",
+   "note": "Non-EU only.",
+   "gaps": []
   }
  },
  "hardcoded_in_code": {

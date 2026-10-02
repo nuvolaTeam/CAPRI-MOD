@@ -5,7 +5,7 @@ CAPRI model** (Common Agricultural Policy Regionalised Impact).
 
 CAPRI-mod reproduces CAPRI's regional agricultural supply, market, policy,
 environmental, feed and biofuel behaviour across **248 NUTS-2 regions (EU27 +
-Norway)**, **45 activities** (34 crops, 11 livestock) and **33 market
+Norway)**, **45 activities** (34 crops, 11 livestock) and **39 market
 commodities** — in a few thousand lines of transparent, tested Python. Every
 input is traceable to a source, and every module's output has been checked
 against CAPRI's own data or scenario results.
@@ -92,10 +92,11 @@ economy-wide feedbacks.
   channel JRC121368 flags when it notes that an EU-only Farm-to-Fork leaks a
   significant share of its emission gains abroad.
 
-Against published CAPRI results (JRC121368), compared on production: cereals
-−13.9% against −15%, oilseeds −21.1% against −15%, permanent crops and vegetables
-−16.7% against −12%. Cereals are close; the other two overshoot, with the residual
-concentrated in vegetables — see [§9](#9-validation).
+Against published CAPRI results (JRC121368), Farm-to-Fork, converged: total farmland +3.6%
+against +3%, cereal area −3.7% against −4%, wheat and barley yields −11% as in CAPRI;
+production: oilseeds −16.3% against −15%, vegetables and permanent crops −13.9% against
+−12%, cereals −11.5% against −15%. A full baseline-plus-scenario comparison takes about
+three minutes — see [§9](#9-validation).
 
 ### The base year is a parameter, not a fixed assumption
 
@@ -158,13 +159,13 @@ lists and how they map to this model's names.
 |---|---|
 | Regions | 248 NUTS-2 (EU27 + Norway) |
 | Activities | 45 (34 crops, 11 livestock) |
-| Market commodities | 32 |
+| Market commodities | 39 |
 | Base year | 2017 (parameterised) |
 | Supply method | Positive Mathematical Programming (PMP) |
 | Market method | Armington, EU27 vs rest-of-world, tâtonnement |
 | Data validator | 12 pass, 0 warn, 0 fail |
 | Convergence | 248 / 248 regions (no QP-solver fallbacks) |
-| Test suite | 51 tests (all passing) |
+| Test suite | 61 tests (all passing) |
 
 ---
 
@@ -182,12 +183,12 @@ homoglyph corruption, dropped regional detail, and silent synthetic fallbacks).
 - **Provenance is tracked per column, not per file.** A file-level "real" label
   once concealed 16 synthetic columns inside a file marked real; per-column
   tracking makes that impossible.
-- **99.5% of live cells are real CAPRI data** (127,190 of 127,789) — an honest
-  per-cell count over all 30 declared inputs, not a flattering area-weighted
+- **99.6% of live cells are real CAPRI data** (145,116 of 145,715) — an honest
+  per-cell count over all 45 declared inputs, not a flattering area-weighted
   figure. Every non-real cell is explicitly labelled. Recomputed with
   `tools/verify_schema.py`.
 - **A declarative schema** (`INPUT_SCHEMA.json`) is the single source of truth:
-  30 declared inputs, each with its source, unit, dimension, consuming modules,
+  45 declared inputs, each with its source, unit, dimension, consuming modules,
   and known gaps. It is built to survive a future swap of CAPRI inputs for
   external sources (Eurostat, FADN) as a field edit rather than a rewrite.
 
@@ -267,7 +268,7 @@ capri_data/
 │                              fao_agg_2017, estnlp, jrc121368, gams
 ├── trajectories/              projection paths (captrd 2030)
 ├── validation/                REGRESSION_ANCHORS.json, VALIDATION.md
-├── INPUT_MANIFEST.json        the 30 declared inputs: source, unit, dimensions
+├── INPUT_MANIFEST.json        the 45 declared inputs: source, unit, dimensions
 ├── INPUT_SCHEMA.json          expected shape and dtype of every file
 └── DATA_SOURCING_REGISTRY.json   every data decision, fix and open issue
 ```
@@ -277,7 +278,7 @@ Each folder under the base year feeds the module named on its right. Anything in
 nothing in the model reads it directly, so the derivation from source to input is
 always a visible, re-runnable step in `tools/`.
 
-### 4.2 The 30 declared inputs
+### 4.2 The 45 declared inputs
 
 Every input the model consumes is declared in `INPUT_SCHEMA.json` with its
 concept, unit, and consuming modules:
@@ -403,7 +404,7 @@ and compute their indicators.
 | `feed/` | 840 | requirement + allocation LP | IPCC 2006 energy, feed optimisation |
 | `biofuel/` | 150 | mandate-driven demand | blending-mandate feedstock demand |
 | `fert/` | 320 | derive N/P/K application rates | removal × yield × calibrated efficiency |
-| `abatement/` | 460 | carbon-price MACC + EcAMPA measures | economic reallocation + technological measures |
+| `abatement/` | 460 | carbon-price MACC, CAPRI mitigation portfolio, EcAMPA comparison | economic reallocation + technological measures |
 | `income/` | 190 | farm income & its distribution | gross margin + CAP support, regional Gini |
 | `water/` | 260 | irrigation water demand | CNIR × irrigated area (CROPWAT + Eurostat FSS) |
 | `projection/` | 910 | recursive-dynamic time loop | external trajectory + reconciliation; validated vs CAPRI 2030 |
@@ -469,14 +470,14 @@ Key class: `FertilizerModule`.
 separate pieces. The **economic** layer (`AbatementModule`) derives CAPRI-mod's
 *own* marginal abatement cost curve by imposing a carbon price on the supply
 module and observing how production reallocates and emissions fall — no external
-abatement figures are ingested. The **technological** layer
-(`TechnologicalAbatement`) applies EcAMPA 2 (JRC 2016) mitigation measures —
-nitrification inhibitors, precision farming, feed additives, anaerobic digestion
-— as explicit, page-cited inputs, resolved to the correct emission source and,
-for feed measures, to the specific animals each affects. EcAMPA is used as an
-*independent* reference for the economic curve and as *cited input* for the
-technological layer — never to validate itself. Key classes: `AbatementModule`,
-`TechnologicalAbatement`.
+abatement figures are ingested. The **technological** layer is **CAPRI's own
+mitigation portfolio** (`CapriAbatement`, see §10.2b): per member state and source,
+the potential CAPRI reaches at full adoption, and CAPRI's own adoption rule for the
+response to a carbon price — results under `abatement_capri`. A second,
+**independent literature comparison** (`TechnologicalAbatement`) applies ten EcAMPA 2
+(JRC 2016) measures as page-cited inputs — results under `abatement`. It is kept as a
+cross-check, not as the model's estimate. Key classes: `AbatementModule`,
+`CapriAbatement`, `TechnologicalAbatement`.
 
 ### 5.3 Orchestration
 
@@ -605,7 +606,7 @@ delta = model.compare(base, scen)              # activity & price changes
 | `custom_scenario` | `None` | a `PolicyScenario` object |
 | `run_environmental` | `True` | also compute environmental indicators |
 | `run_feed` / `run_biofuel` | `False` | enable feed / biofuel modules |
-| `run_abatement` | `False` | apply EcAMPA technological abatement to run emissions |
+| `run_abatement` | `False` | technological abatement: CAPRI's portfolio (`abatement_capri`, primary) and the EcAMPA literature comparison (`abatement`) |
 | `regions` | all | restrict to a region subset |
 | `outer_tolerance` | `0.005` | supply↔market convergence tolerance |
 
@@ -690,10 +691,47 @@ within 25% — improved from 16 of 24 when the base data was rebuilt from CAPRI.
 CITR 0.184, OVEG 0.660 against 0.218, 0.184, 0.663). They are ~10x less elastic
 than annuals, as in CAPRI.
 
-**Farm-to-Fork responses, compared on production as CAPRI reports it.** EU-wide
-over all 248 regions: cereals −13.9% against CAPRI's −15% (0.93x), oilseeds −21.1%
-against −15% (1.40x), permanent crops and vegetables −16.7% against −12% (1.39x).
-On the area dimension, EU cereal area falls 2.4% against CAPRI's 4%.
+**Farm-to-Fork responses, compared with CAPRI's own area and supply split**
+(JRC121368, Figure 5). EU-wide over all 248 regions, converged in 16 outer iterations:
+
+| | This model | CAPRI |
+|---|---|---|
+| Total farmland | +3.6% | +3% |
+| Cereal area / production | −3.7% / −11.5% | −4% / −15% |
+| Wheat / barley yield | −11.3% / −10.9% | −11% (cereals) |
+| Oilseed area / production | −6.2% / −16.3% | −4% / −15.5% |
+| Vegetables and permanent crops, production | −13.9% | −12% |
+
+Landscape and organic targets are CAPRI's own, by member state; the pesticide target
+applies to the conventional area only; agricultural land responds to the land rent.
+The organic yield gap applies in full, as in the mode CAPRI's study used (an explicit 10%
+pesticide yield loss); CAPRI's 0.45 discount belongs to its endogenous-pesticide mode.
+Wheat and barley yields match. The nutrient target binds the full gross nitrogen balance —
+manure included — at JRC121368's tiered target, so herds respond: dairy −6.9% (CAPRI −10%),
+beef −12.7% (−14.5%), pigs −9.9% (−15.5%). Meat prices respond too, but far less than
+CAPRI's, because our pig supply falls less than the EU's export cushion, which absorbs
+the cut. The nitrogen target is a regional cap (tiered target times base farmland), settled
+within each iteration together with land; Farm-to-Fork converges in 7–8 iterations. Fertiliser falls through CAPRI's own
+efficiency technologies (precision farming, variable-rate application, inhibitors, timing),
+adopted under the nitrogen-balance shadow price with CAPRI's cost terms and no yield loss, and
+manure must be spread on land (Nitrates Directive). Animal feed costs follow cereal
+prices. The nitrogen balance follows CAPRI's definition (outputs are crop removals only;
+deposition per region from CAPRI), and each region's required cut comes from CAPRI's own
+baseline surplus. Organic land applies no mineral fertiliser; manure is traded between regions; and mineral
+fertiliser follows crop need minus what manure covers, with CAPRI's minimum-mineral floor (see
+[docs/FERTILISER_ALLOCATION.md](docs/FERTILISER_ALLOCATION.md)). Livestock respond to prices
+and feed costs with curvature calibrated on CAPRI's market revenue per head. Market prices reach the
+activities that earn them, and feed demand for cereals follows herd sizes. Manure and feed per head
+follow CAPRI's totals per animal. In 2030 (converged in 7 iterations), herd sizes: pigs −14.8%
+(CAPRI −14.5%), beef animals −10.3% (−18%), poultry −8.2% (−16.5%), dairy −7.7% (−10%); manure
+methane −11.7% (−12.2%), enteric methane −10.3% (−14.6%), fertiliser N₂O −35.1% (−40.4%);
+cereal price +11.4% (+8%); cereals 0.94×, oilseeds 1.09×, vegetables and permanent crops 1.07×. The open coupling
+gaps — above all feed demand independent of herd sizes — are reviewed in
+[docs/MODULE_COUPLING_REVIEW.md](docs/MODULE_COUPLING_REVIEW.md). Poultry does not yet respond (−16% in CAPRI; a unit inconsistency in its margin), and meat
+prices rise far less than CAPRI's. Against CAPRI's Table 15: nitrogen surplus −29.8% (−33.5%),
+enteric methane −13.1% (−14.6%), non-CO₂ GHG −12.4% (−14.8%); but mineral fertiliser barely
+falls (its N₂O −2% against −40%) — the per-hectare fertiliser response is not yet linked to
+the nitrogen-balance target.
 
 The instruments follow CAPRI's own specification (JRC121368): the organic target is
 the *distance* from the existing organic area to 25% — a 15 percentage point shock
@@ -702,18 +740,66 @@ pesticides cut plant-protection expenditure 50%, raise other input costs 50% and
 impose a 10% yield loss; landscape features act as a set-aside floor; and the
 nutrient target uses CAPRI's tiered surplus schedule.
 
-**Cereals are close; oilseeds and permanent crops overshoot.** The yield channel
-reproduces CAPRI (our cereal yield effect −11.5% against its published −11%), and
-within the permanent group olives — the largest at 4.5 Mha — move −0.10% against
-CAPRI's "stable", with citrus, fruit and apples at 2–4%. The residual is
-concentrated in **vegetables** (−9.3%), annual crops whose mobility is expected and
-which CAPRI reports *merged* with permanent crops — so its +0.1% reference for the
-combined group cannot be split to check them. Closing this would need CAPRI's
-results per product, which the published report does not give at that resolution.
-Six candidate explanations were tested and ruled out by measurement: the yield
-channel, land pinning, price feedback, supply elasticities, a uniform organic
-shock, and catch crops. **Treat oilseed and permanent-crop scenario magnitudes as
-overstated.**
+**Prices are formed in an Armington market.** EU and imported goods are imperfect
+substitutes, so when EU supply falls the EU price must rise before consumers turn
+to imports — by the standard first-order condition, with CAPRI's own substitution
+elasticities. Farmers respond to that EU price. It is what holds supply up under a
+policy shock: with EU prices tied rigidly to world prices instead, Farm-to-Fork
+prices rose only 1.6–3% and oilseed and permanent-crop output fell ~40% further
+than CAPRI's. The premium is exactly 1 in the base year.
+
+**CAPRI's Green Deal switchboard.** `greendeal_scenario()` takes CAPRI's own settings
+(`lndscpTarg`, `orgTarg`, `pestRedu`, `surpRedu`, …, in CAPRI's units) and returns a scenario
+with CAPRI's result name; options capri-mod does not implement are refused, not ignored:
+
+```python
+from capri_mod.policy.greendeal import greendeal_scenario
+f2f = greendeal_scenario(lndscpTarg=10, orgTarg=25, pestRedu=50, surpRedu=50)
+model.run(custom_scenario=f2f)                         # 2017 base
+ProjectionModule(model, traj).run(policy_scenario=f2f, years=[2030])   # as CAPRI runs it
+```
+
+Run in 2030 as CAPRI runs it, Farm-to-Fork gives farmland +3.6% (CAPRI +3%), cereal area
+−3.6% (−4%), and production at 0.85× CAPRI for cereals, 1.04× for oilseeds and 1.14× for
+vegetables and permanent crops — closer than on the 2017 base, because CAPRI's figures are
+2030 results.
+
+**Agricultural land responds to the land rent**, as in CAPRI's land market. When a
+policy makes land scarce, its value rises and farmland expands by absorbing other
+land, with an elasticity of 0.15 derived from CAPRI's land-use nest and each region's
+land rent from Eurostat (`apri_lrnt`, 2017; Germany and Cyprus, which Eurostat does not
+publish, on a flagged fallback). Under a 10% landscape floor, farmland grows 4.4% in
+Centre-Val de Loire and 6.6% in Bratislava, where land is cheaper. This is what closed
+the oilseed gap: with land fixed, a landscape floor took every hectare from crops, and
+oilseeds lost about three times CAPRI's share of area.
+
+**Where the landscape floor cannot fit, it is fitted.** In 11 mountain and island
+regions (Corsica, the Italian and Austrian Alps, three Greek regions) the floor, sized on
+total farmland, does not fit on their little arable land. It is met as far as the land
+allows and the unmet part — 81.7 kha EU-wide, ~0.8% of the requirement — is reported as
+`landscape_shortfall`. CAPRI avoids this by converting grassland to arable, which this
+model does not represent.
+
+**Land is conserved.** Every activity on arable land — fodder and set-aside
+included — competes for it, so a landscape floor displaces crops as it does in
+CAPRI rather than adding land.
+
+**The EU market balance is consistent.** EU production in the market is the model's
+own output and EU consumption keeps FAO's EU self-sufficiency, so the market sees a
+realistic EU — wheat consumption 99.4 Mt, maize 72.7 — and the baseline starts in
+equilibrium. EU prices carry an Armington premium from gross trade, for goods the EU
+actually trades; the market anticipates the supply response, so scenarios converge in
+a few iterations.
+
+**Cereals fall less than CAPRI's, and the remaining gap is maize.** Cereal area matches
+(−3.7% against −4%) and wheat and barley yields match CAPRI's −11%, but maize area rises
+1.1% and its yield falls only 8.6%, so cereal production falls 11.5% against 15%. Oilseeds
+(−16.3%) and vegetables and permanent crops (−13.9%) now slightly overshoot CAPRI's −15%
+and −12%. Price magnitudes are mixed: cereals +11.0% (CAPRI ~+7–8%), oilseeds +11.5%,
+vegetables and permanent crops +6.3% (CAPRI +10–15%). Sugar's EU trade comes from CAPRI's
+own 2030 reference; durum wheat's EU price follows the world price without a premium,
+because CAPRI trades wheat as one commodity and the market sees the EU durum balance as
+near-even.
 
 **Scenario comparisons must be run to convergence.** `max_outer_iter=1` gives a
 single supply–market pass and suppresses the price feedback, which overstates
@@ -802,10 +888,9 @@ in thousand head.
   Neither CAPRI's results nor its regional selection record the data needed:
   no crop areas for Norway's redrawn regions, and no physical grass yield for
   Ireland.
-- **Oilseed and permanent-crop magnitudes under Farm-to-Fork.** Both overshoot
-  CAPRI's published figures (1.40x and 1.39x on production); the residual is
-  concentrated in vegetables, which CAPRI reports merged with permanent crops.
-  Directions and rankings are usable; levels are overstated.
+- **Cereal magnitudes and price magnitudes under Farm-to-Fork.** Cereal output
+  falls 11.5% against CAPRI's 15% (maize responds too little); cereal prices rise too far and vegetable and
+  permanent-crop prices too little. Directions and rankings are usable.
 - **Multi-period projections.** The projection is validated for a single step to
   2030; the recursion runs but has no external check, and herds are re-optimised
   each period rather than carried.
@@ -828,7 +913,7 @@ adjustment with its FADN yield gaps).
 | **Supply — crops** | Validated | Realized own-price elasticities match CAPRI's own regional `PELA` values, which this model uses verbatim: 0.76–1.00, median 0.92 — wheat 0.92, barley 0.92, maize 0.98, rape 1.00 |
 | **Supply — livestock** | Validated (direction) | Green Deal scenario: reproduces CAPRI's cattle-extensification signal |
 | **Policy — payment computation** | Validated | Premiums match CAPRI `PRME` exactly; EU budget computes to €54.2bn against the real ~€55–58bn |
-| **Policy — scenario response** | Published CAPRI (JRC121368) | All four Farm-to-Fork instruments, EU-wide over all 248 regions, compared on PRODUCTION as CAPRI reports it: cereals −13.9% vs −15% (0.93x), oilseeds −21.1% vs −15% (1.40x), permanent crops and vegetables −16.7% vs −12% (1.39x). Cereal *area* −2.4% vs CAPRI's −4%. Plant-protection costs derived from all 27 member states, implying €10.8bn of EU spending against a real €11–12bn market. See `CHANGELOG.md` |
+| **Policy — scenario response** | Published CAPRI (JRC121368, Figure 5) | All four Farm-to-Fork instruments in CAPRI's own specification, EU-wide, converged: farmland +3.6% vs +3%, cereal area −3.7% vs −4%, wheat and barley yields −11% as in CAPRI, oilseeds −16.3% vs −15.5%, vegetables and permanent crops −13.9% vs −12%, cereals −11.5% vs −15% (maize) |
 | **Policy — nitrogen instruments** | Fixed | An intensity margin now exists (`supply/intensity.py`), so N ceilings adjust application per hectare rather than forcing all adjustment onto area |
 | **Environment** | Validated | EU nitrogen balance matches real figures component by component: mineral 10.2 Mt (real ~10.8), manure 7.5 (real ~7), crop uptake 13.7, surplus 44.5 kg N/ha (real ~46). Its regional distribution also matches CAPRI's own `SURSOI`: median 48.2 against 49.5 across 228 regions |
 | **Feed** | Validated (ruminants) | Energy & dry matter match CAPRI within ~10% via IPCC 2006 Eq. 10.6; monogastrics calibrated to CAPRI targets |
@@ -901,8 +986,8 @@ comparative-static equilibrium period by period along a baseline trajectory
 (`capri_mod/projection/`).
 
 **On comparing magnitudes with CAPRI.** Compared on **production** — the quantity
-CAPRI publishes — the Farm-to-Fork magnitudes are directly comparable: cereals
-−13.9% against CAPRI's −15%, permanent crops and vegetables −16.7% against −12%
+CAPRI publishes — the Farm-to-Fork magnitudes are directly comparable: oilseeds
+−13.9% against CAPRI's −15%, permanent crops and vegetables −12.6% against −12%
 (see [§9](#9-validation)).
 
 ### 10.2 The projection layer
@@ -963,11 +1048,26 @@ scenario reference agree on `SWHE.YILD.2030 = 8515.98`.
 increment reported separately from baseline drift. **Not for** multi-period herd
 dynamics or intermediate-year detail.
 
+### 10.2b Technological abatement from CAPRI's own portfolio
+
+With `run_abatement=True`, results carry `abatement_capri`: emission reductions at
+CAPRI's **full technical potential** and, when `carbon_price` is set, at that price.
+Potentials come per member state and source from CAPRI's own maximum-potential run
+against its 2030 reference, so they cover its whole portfolio — feed additives,
+diet, anaerobic digestion, ammonia measures. The price response follows CAPRI's own
+adoption rule, which reproduces CAPRI's calibrated adoption for all 245 options at
+zero price. At full potential, on this model's emissions: enteric methane −10.8%
+(CAPRI −12.0%), manure methane −22.3% (−21.8%), manure N₂O −29.4% (−30.0%).
+Assumption, stated: options defined in CAPRI's code (feed additives, diet, ammonia
+measures) follow the same price response as the options with published costs.
+
 ### 10.3 EU27 as a single market bloc
 
 Treats the EU27 as one Armington bloc trading against the rest of the world,
-rather than resolving intra-EU bilateral trade. Sufficient for EU-vs-world price
-formation; keeps the market side transparent. Bilateral detail is in the
+rather than resolving intra-EU bilateral trade. The EU price is the world price
+times the tariff wedge times an Armington premium that responds to EU supply
+relative to demand, so the EU is not a price-taker. Sufficient for EU-vs-world
+price formation; keeps the market side transparent. Bilateral detail is in the
 extracted data and can be added if needed.
 
 ### 10.4 248 regions, EU27 + Norway

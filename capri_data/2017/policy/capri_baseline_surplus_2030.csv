@@ -1,0 +1,249 @@
+region,surplus_kg_n_per_ha,source
+DE11,61.56,"CAPRI 2030 reference, NUTS-2 DE110000"
+DE12,33.62,"CAPRI 2030 reference, NUTS-2 DE120000"
+DE13,55.24,"CAPRI 2030 reference, NUTS-2 DE130000"
+DE14,81.73,"CAPRI 2030 reference, NUTS-2 DE140000"
+DE21,74.97,"CAPRI 2030 reference, NUTS-2 DE210000"
+DE22,71.54,"CAPRI 2030 reference, NUTS-2 DE220000"
+DE23,66.4,"CAPRI 2030 reference, NUTS-2 DE230000"
+DE24,51.58,"CAPRI 2030 reference, NUTS-2 DE240000"
+DE25,59.15,"CAPRI 2030 reference, NUTS-2 DE250000"
+DE26,33.18,"CAPRI 2030 reference, NUTS-2 DE260000"
+DE27,88.24,"CAPRI 2030 reference, NUTS-2 DE270000"
+DE30,,own balance (no CAPRI value)
+DE40,31.96,"CAPRI 2030 reference, NUTS-2 DE400000"
+DE50,,own balance (no CAPRI value)
+DE60,,own balance (no CAPRI value)
+DE71,41.09,"CAPRI 2030 reference, NUTS-2 DE710000"
+DE72,49.03,"CAPRI 2030 reference, NUTS-2 DE720000"
+DE73,54.29,"CAPRI 2030 reference, NUTS-2 DE730000"
+DE80,32.85,"CAPRI 2030 reference, NUTS-2 DE800000"
+DE91,31.12,"CAPRI 2030 reference, NUTS-2 DE910000"
+DE92,54.25,"CAPRI 2030 reference, NUTS-2 DE920000"
+DE93,67.61,"CAPRI 2030 reference, NUTS-2 DE930000"
+DE94,125.65,"CAPRI 2030 reference, NUTS-2 DE940000"
+DEA1,97.09,"CAPRI 2030 reference, NUTS-2 DEA10000"
+DEA2,61.74,"CAPRI 2030 reference, NUTS-2 DEA20000"
+DEA3,148.57,"CAPRI 2030 reference, NUTS-2 DEA30000"
+DEA4,74.75,"CAPRI 2030 reference, NUTS-2 DEA40000"
+DEA5,102.46,"CAPRI 2030 reference, NUTS-2 DEA50000"
+DEB1,40.01,"CAPRI 2030 reference, NUTS-2 DEB10000"
+DEB2,70.09,"CAPRI 2030 reference, NUTS-2 DEB20000"
+DEB3,24.39,"CAPRI 2030 reference, NUTS-2 DEB30000"
+DEC0,50.67,"CAPRI 2030 reference, NUTS-2 DEC00000"
+DED2,65.65,own regional pattern scaled to CAPRI 2030 national DE000000
+DED4,82.99,own regional pattern scaled to CAPRI 2030 national DE000000
+DED5,55.09,own regional pattern scaled to CAPRI 2030 national DE000000
+DEE0,42.62,"CAPRI 2030 reference, NUTS-2 DEE00000"
+DEF0,71.79,"CAPRI 2030 reference, NUTS-2 DEF00000"
+DEG0,40.15,"CAPRI 2030 reference, NUTS-2 DEG00000"
+FR10,50.69,"CAPRI 2030 reference, NUTS-2 FR100000"
+FRB0,47.25,"CAPRI 2030 reference, NUTS-2 FR240000"
+FRC1,57.96,"CAPRI 2030 reference, NUTS-2 FR260000"
+FRC2,66.76,"CAPRI 2030 reference, NUTS-2 FR430000"
+FRD1,97.13,"CAPRI 2030 reference, NUTS-2 FR250000"
+FRD2,68.98,"CAPRI 2030 reference, NUTS-2 FR230000"
+FRE1,97.2,"CAPRI 2030 reference, NUTS-2 FR300000"
+FRE2,64.44,"CAPRI 2030 reference, NUTS-2 FR220000"
+FRF1,84.03,"CAPRI 2030 reference, NUTS-2 FR420000"
+FRF2,55.47,"CAPRI 2030 reference, NUTS-2 FR210000"
+FRF3,62.29,"CAPRI 2030 reference, NUTS-2 FR410000"
+FRG0,104.84,"CAPRI 2030 reference, NUTS-2 FR510000"
+FRH0,176.2,"CAPRI 2030 reference, NUTS-2 FR520000"
+FRI1,74.78,"CAPRI 2030 reference, NUTS-2 FR610000"
+FRI2,93.17,"CAPRI 2030 reference, NUTS-2 FR630000"
+FRI3,53.05,"CAPRI 2030 reference, NUTS-2 FR530000"
+FRJ1,25.66,"CAPRI 2030 reference, NUTS-2 FR810000"
+FRJ2,65.32,"CAPRI 2030 reference, NUTS-2 FR620000"
+FRK1,90.05,"CAPRI 2030 reference, NUTS-2 FR720000"
+FRK2,65.3,"CAPRI 2030 reference, NUTS-2 FR710000"
+FRL0,23.88,"CAPRI 2030 reference, NUTS-2 FR820000"
+FRM0,20.76,"CAPRI 2030 reference, NUTS-2 FR830000"
+ITC1,215.86,own regional pattern scaled to CAPRI 2030 national IT000000
+ITC2,250.19,own regional pattern scaled to CAPRI 2030 national IT000000
+ITC3,115.11,own regional pattern scaled to CAPRI 2030 national IT000000
+ITC4,215.24,own regional pattern scaled to CAPRI 2030 national IT000000
+ITH1,176.13,own regional pattern scaled to CAPRI 2030 national IT000000
+ITH2,177.91,own regional pattern scaled to CAPRI 2030 national IT000000
+ITH3,80.3,own regional pattern scaled to CAPRI 2030 national IT000000
+ITH4,169.89,own regional pattern scaled to CAPRI 2030 national IT000000
+ITH5,-1.63,own regional pattern scaled to CAPRI 2030 national IT000000
+ITI1,111.41,own regional pattern scaled to CAPRI 2030 national IT000000
+ITI2,156.46,own regional pattern scaled to CAPRI 2030 national IT000000
+ITI3,123.97,own regional pattern scaled to CAPRI 2030 national IT000000
+ITI4,37.14,own regional pattern scaled to CAPRI 2030 national IT000000
+ITF1,144.79,own regional pattern scaled to CAPRI 2030 national IT000000
+ITF2,145.59,own regional pattern scaled to CAPRI 2030 national IT000000
+ITF3,29.99,own regional pattern scaled to CAPRI 2030 national IT000000
+ITF4,43.71,own regional pattern scaled to CAPRI 2030 national IT000000
+ITF5,25.45,own regional pattern scaled to CAPRI 2030 national IT000000
+ITF6,96.5,own regional pattern scaled to CAPRI 2030 national IT000000
+ITG1,-40.78,own regional pattern scaled to CAPRI 2030 national IT000000
+ITG2,65.45,own regional pattern scaled to CAPRI 2030 national IT000000
+ES11,107.88,"CAPRI 2030 reference, NUTS-2 ES110000"
+ES12,58.11,"CAPRI 2030 reference, NUTS-2 ES120000"
+ES13,69.37,"CAPRI 2030 reference, NUTS-2 ES130000"
+ES21,65.09,"CAPRI 2030 reference, NUTS-2 ES210000"
+ES22,72.17,"CAPRI 2030 reference, NUTS-2 ES220000"
+ES23,32.42,"CAPRI 2030 reference, NUTS-2 ES230000"
+ES24,76.98,"CAPRI 2030 reference, NUTS-2 ES240000"
+ES30,31.16,"CAPRI 2030 reference, NUTS-2 ES300000"
+ES41,62.64,"CAPRI 2030 reference, NUTS-2 ES410000"
+ES42,43.59,"CAPRI 2030 reference, NUTS-2 ES420000"
+ES43,53.52,"CAPRI 2030 reference, NUTS-2 ES430000"
+ES51,136.8,"CAPRI 2030 reference, NUTS-2 ES510000"
+ES52,34.57,"CAPRI 2030 reference, NUTS-2 ES520000"
+ES53,36.15,"CAPRI 2030 reference, NUTS-2 ES530000"
+ES61,34.53,"CAPRI 2030 reference, NUTS-2 ES610000"
+ES62,54.62,"CAPRI 2030 reference, NUTS-2 ES620000"
+ES63,,own balance (no CAPRI value)
+ES64,,own balance (no CAPRI value)
+ES70,72.4,"CAPRI 2030 reference, NUTS-2 ES700000"
+PL21,44.98,"CAPRI 2030 reference, NUTS-2 PL210000"
+PL22,49.93,"CAPRI 2030 reference, NUTS-2 PL220000"
+PL31,39.45,"CAPRI 2030 reference, NUTS-2 PL310000"
+PL32,48.46,"CAPRI 2030 reference, NUTS-2 PL320000"
+PL33,53.79,"CAPRI 2030 reference, NUTS-2 PL330000"
+PL34,70.03,"CAPRI 2030 reference, NUTS-2 PL340000"
+PL41,109.89,"CAPRI 2030 reference, NUTS-2 PL410000"
+PL42,42.84,"CAPRI 2030 reference, NUTS-2 PL420000"
+PL43,51.42,"CAPRI 2030 reference, NUTS-2 PL430000"
+PL51,53.76,"CAPRI 2030 reference, NUTS-2 PL510000"
+PL52,66.41,"CAPRI 2030 reference, NUTS-2 PL520000"
+PL61,58.78,"CAPRI 2030 reference, NUTS-2 PL610000"
+PL62,56.47,"CAPRI 2030 reference, NUTS-2 PL620000"
+PL63,59.81,"CAPRI 2030 reference, NUTS-2 PL630000"
+PL71,69.72,"CAPRI 2030 reference, NUTS-2 PL110000"
+PL72,53.79,"CAPRI 2030 reference, NUTS-2 PL330000"
+PL81,39.45,"CAPRI 2030 reference, NUTS-2 PL310000"
+PL82,48.46,"CAPRI 2030 reference, NUTS-2 PL320000"
+PL84,70.03,"CAPRI 2030 reference, NUTS-2 PL340000"
+PL91,35.95,own regional pattern scaled to CAPRI 2030 national PL000000
+PL92,38.97,own regional pattern scaled to CAPRI 2030 national PL000000
+NL11,245.26,"CAPRI 2030 reference, NUTS-2 NL110000"
+NL12,246.78,"CAPRI 2030 reference, NUTS-2 NL120000"
+NL13,253.47,"CAPRI 2030 reference, NUTS-2 NL130000"
+NL21,387.05,"CAPRI 2030 reference, NUTS-2 NL210000"
+NL22,377.33,"CAPRI 2030 reference, NUTS-2 NL220000"
+NL23,251.55,"CAPRI 2030 reference, NUTS-2 NL230000"
+NL31,321.2,"CAPRI 2030 reference, NUTS-2 NL310000"
+NL32,239.24,"CAPRI 2030 reference, NUTS-2 NL320000"
+NL33,160.99,"CAPRI 2030 reference, NUTS-2 NL330000"
+NL34,194.22,"CAPRI 2030 reference, NUTS-2 NL340000"
+NL41,539.16,"CAPRI 2030 reference, NUTS-2 NL410000"
+NL42,301.72,"CAPRI 2030 reference, NUTS-2 NL420000"
+BE10,,own balance (no CAPRI value)
+BE21,463.92,own regional pattern scaled to CAPRI 2030 national BL000000
+BE22,174.61,own regional pattern scaled to CAPRI 2030 national BL000000
+BE23,316.18,own regional pattern scaled to CAPRI 2030 national BL000000
+BE24,103.74,own regional pattern scaled to CAPRI 2030 national BL000000
+BE25,559.55,own regional pattern scaled to CAPRI 2030 national BL000000
+BE31,65.26,own regional pattern scaled to CAPRI 2030 national BL000000
+BE32,103.68,own regional pattern scaled to CAPRI 2030 national BL000000
+BE33,182.57,own regional pattern scaled to CAPRI 2030 national BL000000
+BE34,125.43,own regional pattern scaled to CAPRI 2030 national BL000000
+BE35,106.31,own regional pattern scaled to CAPRI 2030 national BL000000
+DK01,159.39,own regional pattern scaled to CAPRI 2030 national DK000000
+DK02,161.71,own regional pattern scaled to CAPRI 2030 national DK000000
+DK03,161.01,own regional pattern scaled to CAPRI 2030 national DK000000
+DK04,158.82,own regional pattern scaled to CAPRI 2030 national DK000000
+DK05,161.28,own regional pattern scaled to CAPRI 2030 national DK000000
+SE11,99.36,own regional pattern scaled to CAPRI 2030 national SE000000
+SE12,70.98,own regional pattern scaled to CAPRI 2030 national SE000000
+SE21,99.72,own regional pattern scaled to CAPRI 2030 national SE000000
+SE22,79.18,own regional pattern scaled to CAPRI 2030 national SE000000
+SE23,81.39,own regional pattern scaled to CAPRI 2030 national SE000000
+SE31,90.09,own regional pattern scaled to CAPRI 2030 national SE000000
+SE32,100.43,own regional pattern scaled to CAPRI 2030 national SE000000
+SE33,101.6,own regional pattern scaled to CAPRI 2030 national SE000000
+FI19,75.95,"CAPRI 2030 reference, NUTS-2 FI190000"
+FI1B,72.62,own regional pattern scaled to CAPRI 2030 national FI000000
+FI1C,72.59,own regional pattern scaled to CAPRI 2030 national FI000000
+FI1D,70.99,own regional pattern scaled to CAPRI 2030 national FI000000
+FI20,88.96,"CAPRI 2030 reference, NUTS-2 FI200000"
+AT11,21.31,"CAPRI 2030 reference, NUTS-2 AT110000"
+AT12,32.47,"CAPRI 2030 reference, NUTS-2 AT120000"
+AT13,,own balance (no CAPRI value)
+AT21,56.46,"CAPRI 2030 reference, NUTS-2 AT210000"
+AT22,61.58,"CAPRI 2030 reference, NUTS-2 AT220000"
+AT31,86.19,"CAPRI 2030 reference, NUTS-2 AT310000"
+AT32,42.8,"CAPRI 2030 reference, NUTS-2 AT320000"
+AT33,33.34,"CAPRI 2030 reference, NUTS-2 AT330000"
+AT34,40.7,"CAPRI 2030 reference, NUTS-2 AT340000"
+EL30,18.27,"CAPRI 2030 reference, NUTS-2 EL300000"
+EL41,38.51,"CAPRI 2030 reference, NUTS-2 EL410000"
+EL42,62.04,"CAPRI 2030 reference, NUTS-2 EL420000"
+EL43,60.33,"CAPRI 2030 reference, NUTS-2 EL430000"
+EL51,43.84,"CAPRI 2030 reference, NUTS-2 EL110000"
+EL52,48.59,"CAPRI 2030 reference, NUTS-2 EL120000"
+EL53,47.43,"CAPRI 2030 reference, NUTS-2 EL130000"
+EL54,72.09,"CAPRI 2030 reference, NUTS-2 EL210000"
+EL61,54.74,"CAPRI 2030 reference, NUTS-2 EL140000"
+EL62,23.15,"CAPRI 2030 reference, NUTS-2 EL220000"
+EL63,64.29,"CAPRI 2030 reference, NUTS-2 EL230000"
+EL64,36.95,"CAPRI 2030 reference, NUTS-2 EL240000"
+EL65,34.08,"CAPRI 2030 reference, NUTS-2 EL250000"
+PT11,43.27,"CAPRI 2030 reference, NUTS-2 PT110000"
+PT15,16.01,"CAPRI 2030 reference, NUTS-2 PT150000"
+PT16,92.8,"CAPRI 2030 reference, NUTS-2 PT160000"
+PT17,47.38,"CAPRI 2030 reference, NUTS-2 PT170000"
+PT18,51.05,"CAPRI 2030 reference, NUTS-2 PT180000"
+PT20,141.85,"CAPRI 2030 reference, NUTS-2 PT200000"
+PT30,258.86,"CAPRI 2030 reference, NUTS-2 PT300000"
+IE04,155.67,own regional pattern scaled to CAPRI 2030 national IR000000
+IE05,137.29,own regional pattern scaled to CAPRI 2030 national IR000000
+IE06,145.26,own regional pattern scaled to CAPRI 2030 national IR000000
+CZ01,75.17,"CAPRI 2030 reference, NUTS-2 CZ010000"
+CZ02,68.45,"CAPRI 2030 reference, NUTS-2 CZ020000"
+CZ03,61.32,"CAPRI 2030 reference, NUTS-2 CZ030000"
+CZ04,47.1,"CAPRI 2030 reference, NUTS-2 CZ040000"
+CZ05,62.37,"CAPRI 2030 reference, NUTS-2 CZ050000"
+CZ06,66.98,"CAPRI 2030 reference, NUTS-2 CZ060000"
+CZ07,60.64,"CAPRI 2030 reference, NUTS-2 CZ070000"
+CZ08,52.45,"CAPRI 2030 reference, NUTS-2 CZ080000"
+HU11,47.03,own regional pattern scaled to CAPRI 2030 national HU000000
+HU12,43.9,own regional pattern scaled to CAPRI 2030 national HU000000
+HU21,49.84,"CAPRI 2030 reference, NUTS-2 HU210000"
+HU22,46.4,"CAPRI 2030 reference, NUTS-2 HU220000"
+HU23,58.81,"CAPRI 2030 reference, NUTS-2 HU230000"
+HU31,43.13,"CAPRI 2030 reference, NUTS-2 HU310000"
+HU32,65.71,"CAPRI 2030 reference, NUTS-2 HU320000"
+HU33,51.95,"CAPRI 2030 reference, NUTS-2 HU330000"
+RO11,83.4,own regional pattern scaled to CAPRI 2030 national RO000000
+RO12,90.03,own regional pattern scaled to CAPRI 2030 national RO000000
+RO21,10.16,own regional pattern scaled to CAPRI 2030 national RO000000
+RO22,61.25,own regional pattern scaled to CAPRI 2030 national RO000000
+RO31,-88.51,own regional pattern scaled to CAPRI 2030 national RO000000
+RO32,118.52,own regional pattern scaled to CAPRI 2030 national RO000000
+RO41,-55.61,own regional pattern scaled to CAPRI 2030 national RO000000
+RO42,95.36,own regional pattern scaled to CAPRI 2030 national RO000000
+BG31,39.77,own regional pattern scaled to CAPRI 2030 national BG000000
+BG32,49.61,own regional pattern scaled to CAPRI 2030 national BG000000
+BG33,50.36,own regional pattern scaled to CAPRI 2030 national BG000000
+BG34,26.43,own regional pattern scaled to CAPRI 2030 national BG000000
+BG41,12.19,own regional pattern scaled to CAPRI 2030 national BG000000
+BG42,12.72,own regional pattern scaled to CAPRI 2030 national BG000000
+SK01,44.43,"CAPRI 2030 reference, NUTS-2 SK010000"
+SK02,54.07,"CAPRI 2030 reference, NUTS-2 SK020000"
+SK03,34.63,"CAPRI 2030 reference, NUTS-2 SK030000"
+SK04,29.6,"CAPRI 2030 reference, NUTS-2 SK040000"
+HR03,60.94,own regional pattern scaled to CAPRI 2030 national HR000000
+HR04,95.04,own regional pattern scaled to CAPRI 2030 national HR000000
+HR05,,own balance (no CAPRI value)
+HR06,,own balance (no CAPRI value)
+SI03,67.66,own regional pattern scaled to CAPRI 2030 national SI000000
+SI04,65.01,own regional pattern scaled to CAPRI 2030 national SI000000
+LT01,51.01,own regional pattern scaled to CAPRI 2030 national LT000000
+LT02,47.91,own regional pattern scaled to CAPRI 2030 national LT000000
+LV00,31.41,"CAPRI 2030 reference, NUTS-2 LV000000"
+EE00,43.04,"CAPRI 2030 reference, NUTS-2 EE000000"
+LU00,235.22,own regional pattern scaled to CAPRI 2030 national BL000000
+CY00,251.46,"CAPRI 2030 reference, NUTS-2 CY000000"
+MT00,273.9,"CAPRI 2030 reference, NUTS-2 MT000000"
+NO01,96.34,own regional pattern scaled to CAPRI 2030 national NO000000
+NO02,124.64,"CAPRI 2030 reference, NUTS-2 NO020000"
+NO03,95.98,own regional pattern scaled to CAPRI 2030 national NO000000
+NO04,97.05,own regional pattern scaled to CAPRI 2030 national NO000000
+NO05,101.17,own regional pattern scaled to CAPRI 2030 national NO000000
+NO06,126.76,"CAPRI 2030 reference, NUTS-2 NO060000"
+NO07,73.21,"CAPRI 2030 reference, NUTS-2 NO070000"

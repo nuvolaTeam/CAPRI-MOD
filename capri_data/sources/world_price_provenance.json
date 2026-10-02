@@ -1,0 +1,192 @@
+{
+ "SWHE": {
+  "capri_code": "SWHE",
+  "source": "FAO_agg_17_defaulta p_dataMarket 'World'.'PMRK'.'BAS'",
+  "previous": 148.5
+ },
+ "DWHE": {
+  "capri_code": "DWHE",
+  "source": "FAO_agg_17_defaulta p_dataMarket 'World'.'PMRK'.'BAS'",
+  "previous": 220.0
+ },
+ "BARL": {
+  "capri_code": "BARL",
+  "source": "FAO_agg_17_defaulta p_dataMarket 'World'.'PMRK'.'BAS'",
+  "previous": 144.6
+ },
+ "CORN": {
+  "capri_code": "MAIZ",
+  "source": "FAO_agg_17_defaulta p_dataMarket 'World'.'PMRK'.'BAS'",
+  "previous": 148.4
+ },
+ "OCER": {
+  "capri_code": "OCER",
+  "source": "FAO_agg_17_defaulta p_dataMarket 'World'.'PMRK'.'BAS'",
+  "previous": 150.0
+ },
+ "RAPE": {
+  "capri_code": "RAPE",
+  "source": "FAO_agg_17_defaulta p_dataMarket 'World'.'PMRK'.'BAS'",
+  "previous": 213.2
+ },
+ "SUNF": {
+  "capri_code": "SUNF",
+  "source": "FAO_agg_17_defaulta p_dataMarket 'World'.'PMRK'.'BAS'",
+  "previous": 203.7
+ },
+ "SOYA": {
+  "capri_code": "SOYA",
+  "source": "FAO_agg_17_defaulta p_dataMarket 'World'.'PMRK'.'BAS'",
+  "previous": 102.7
+ },
+ "OOIL": {
+  "capri_code": null,
+  "source": "unchanged - CAPRI counterpart ambiguous (other oilseeds)",
+  "previous": 360.5
+ },
+ "SUGB": {
+  "capri_code": "SUGB",
+  "source": "FAO_agg_17_defaulta p_dataMarket 'World'.'PMRK'.'BAS'",
+  "previous": 30.0
+ },
+ "SUGR": {
+  "capri_code": "SUGA",
+  "source": "FAO_agg_17_defaulta p_dataMarket 'World'.'PMRK'.'BAS'",
+  "previous": 338.2
+ },
+ "POTA": {
+  "capri_code": "POTA",
+  "source": "FAO_agg_17_defaulta p_dataMarket 'World'.'PMRK'.'BAS'",
+  "previous": 289.5
+ },
+ "PULS": {
+  "capri_code": "PULS",
+  "source": "FAO_agg_17_defaulta p_dataMarket 'World'.'PMRK'.'BAS'",
+  "previous": 466.9
+ },
+ "TOMA": {
+  "capri_code": "TOMA",
+  "source": "FAO_agg_17_defaulta p_dataMarket 'World'.'PMRK'.'BAS'",
+  "previous": 566.8
+ },
+ "OVEG": {
+  "capri_code": "OVEG",
+  "source": "FAO_agg_17_defaulta p_dataMarket 'World'.'PMRK'.'BAS'",
+  "previous": 894.0
+ },
+ "APPL": {
+  "capri_code": "APPL",
+  "source": "FAO_agg_17_defaulta p_dataMarket 'World'.'PMRK'.'BAS'",
+  "previous": 515.7
+ },
+ "OFRU": {
+  "capri_code": "OFRU",
+  "source": "FAO_agg_17_defaulta p_dataMarket 'World'.'PMRK'.'BAS'",
+  "previous": 760.4
+ },
+ "CITR": {
+  "capri_code": "CITR",
+  "source": "FAO_agg_17_defaulta p_dataMarket 'World'.'PMRK'.'BAS'",
+  "previous": 452.2
+ },
+ "WINE": {
+  "capri_code": "TWIN",
+  "source": "FAO_agg_17_defaulta p_dataMarket 'World'.'PMRK'.'BAS'",
+  "previous": 850.0
+ },
+ "OLIV": {
+  "capri_code": null,
+  "source": "unchanged - CAPRI counterpart ambiguous: olive oil OLIO 2447.5 or table olives TABO 990.0",
+  "previous": 1396.4
+ },
+ "MILK": {
+  "capri_code": "MILK",
+  "source": "FAO_agg_17_defaulta p_dataMarket 'World'.'PMRK'.'BAS'",
+  "previous": 319.2
+ },
+ "BUTR": {
+  "capri_code": "BUTT",
+  "source": "FAO_agg_17_defaulta p_dataMarket 'World'.'PMRK'.'BAS'",
+  "previous": 3782.5
+ },
+ "SKIM": {
+  "capri_code": "SMIP",
+  "source": "FAO_agg_17_defaulta p_dataMarket 'World'.'PMRK'.'BAS'",
+  "previous": 1428.8
+ },
+ "CHES": {
+  "capri_code": "CHES",
+  "source": "FAO_agg_17_defaulta p_dataMarket 'World'.'PMRK'.'BAS'",
+  "previous": 4815.2
+ },
+ "WHEY": {
+  "capri_code": "WHEP",
+  "source": "FAO_agg_17_defaulta p_dataMarket 'World'.'PMRK'.'BAS'",
+  "previous": 900.0
+ },
+ "BEEF": {
+  "capri_code": "BEEF",
+  "source": "FAO_agg_17_defaulta p_dataMarket 'World'.'PMRK'.'BAS'",
+  "previous": 3691.5
+ },
+ "PORK": {
+  "capri_code": "PORK",
+  "source": "FAO_agg_17_defaulta p_dataMarket 'World'.'PMRK'.'BAS'",
+  "previous": 1613.1
+ },
+ "POUL": {
+  "capri_code": "POUM",
+  "source": "FAO_agg_17_defaulta p_dataMarket 'World'.'PMRK'.'BAS'",
+  "previous": 1405.4
+ },
+ "SHGM": {
+  "capri_code": "SGMT",
+  "source": "FAO_agg_17_defaulta p_dataMarket 'World'.'PMRK'.'BAS'",
+  "previous": 2505.5
+ },
+ "EGGS": {
+  "capri_code": "EGGS",
+  "source": "FAO_agg_17_defaulta p_dataMarket 'World'.'PMRK'.'BAS'",
+  "previous": 1173.8
+ },
+ "FATS": {
+  "capri_code": null,
+  "source": "unchanged - placeholder market, to be replaced by the oil markets",
+  "previous": 900.0
+ },
+ "OFOD_M": {
+  "capri_code": null,
+  "source": "unchanged - placeholder market, to be replaced",
+  "previous": 400.0
+ },
+ "WMLK": {
+  "capri_code": null,
+  "source": "unchanged - no CAPRI world price (whole milk powder WMIO 2829.0 is a different product)",
+  "previous": 3200.0
+ },
+ "CREM": {
+  "capri_code": "CREM",
+  "source": "FAO_agg_17_defaulta p_dataMarket 'World'.'PMRK'.'BAS'",
+  "previous": 1800.0
+ },
+ "RAPO": {
+  "capri_code": "RAPO",
+  "source": "FAO_agg_17_defaulta p_dataMarket 'World'.'PMRK'.'BAS'",
+  "previous": 685.5
+ },
+ "SOYA_OIL": {
+  "capri_code": "SOYO",
+  "source": "FAO_agg_17_defaulta p_dataMarket 'World'.'PMRK'.'BAS'",
+  "previous": 659.7
+ },
+ "SOYM": {
+  "capri_code": "SOYC",
+  "source": "FAO_agg_17_defaulta p_dataMarket 'World'.'PMRK'.'BAS'",
+  "previous": 304.0
+ },
+ "PARI": {
+  "capri_code": "RICE",
+  "source": "FAO_agg_17_defaulta p_dataMarket 'World'.'PMRK'.'BAS'",
+  "previous": 411.42
+ }
+}

@@ -1,0 +1,1924 @@
+{
+ "_source": "CAPRI FAO_agg_17_defaulta p_dataMarket, year 'BAS' (base period), tonnes / 1000; regions mapped to this model's trade regions; EU27 = sum of the 26 CAPRI member-state codes (BL = Belgium-Luxembourg), which carry the base period",
+ "balances": {
+  "RUS|RAPE": {
+   "production": 1598.33,
+   "consumption": 1394.67,
+   "imports": 46.55,
+   "exports": 300.3,
+   "feed": 341.0,
+   "food": 1.67,
+   "industry": 959.0,
+   "stock_change": -20.33
+  },
+  "RUS|SUNF": {
+   "production": 11417.5,
+   "consumption": 11507.51,
+   "imports": 38.76,
+   "exports": 149.25,
+   "feed": 169.35,
+   "food": 0,
+   "industry": 10106.74,
+   "stock_change": -246.67
+  },
+  "RUS|SOYA": {
+   "production": 3597.23,
+   "consumption": 5252.49,
+   "imports": 2270.3,
+   "exports": 622.67,
+   "feed": 964.4,
+   "food": 19.33,
+   "industry": 3923.08,
+   "stock_change": -17.33
+  },
+  "RUS|RAPO": {
+   "production": 401.5,
+   "consumption": 95.3,
+   "imports": 41.55,
+   "exports": 291.68,
+   "feed": 0,
+   "food": 4.0,
+   "industry": 91.3,
+   "stock_change": 8.33
+  },
+  "RUS|SUNO": {
+   "production": 4501.67,
+   "consumption": 2495.67,
+   "imports": 14.08,
+   "exports": 1897.17,
+   "feed": 0,
+   "food": 1675.0,
+   "industry": 820.66,
+   "stock_change": -47.67
+  },
+  "RUS|SOYO": {
+   "production": 686.49,
+   "consumption": 163.62,
+   "imports": 11.78,
+   "exports": 537.79,
+   "feed": 0,
+   "food": 101.17,
+   "industry": 62.45,
+   "stock_change": 16.32
+  },
+  "RUS|RAPC": {
+   "production": 493.86,
+   "consumption": 144.94,
+   "imports": 39.94,
+   "exports": 407.84,
+   "feed": 143.18,
+   "food": 0,
+   "industry": 1.76,
+   "stock_change": -0.0
+  },
+  "RUS|SUNC": {
+   "production": 4230.31,
+   "consumption": 1792.97,
+   "imports": 21.38,
+   "exports": 3236.77,
+   "feed": 1792.97,
+   "food": 0,
+   "industry": 0,
+   "stock_change": 0
+  },
+  "RUS|SOYC": {
+   "production": 3074.97,
+   "consumption": 2692.78,
+   "imports": 302.73,
+   "exports": 735.29,
+   "feed": 2692.78,
+   "food": 0,
+   "industry": 0,
+   "stock_change": 0
+  },
+  "UKR|RAPE": {
+   "production": 2066.5,
+   "consumption": 189.32,
+   "imports": 7.34,
+   "exports": 2202.24,
+   "feed": 9.73,
+   "food": 0,
+   "industry": 154.52,
+   "stock_change": 2.33
+  },
+  "UKR|SUNF": {
+   "production": 13342.67,
+   "consumption": 13268.34,
+   "imports": 27.67,
+   "exports": 86.45,
+   "feed": 170.32,
+   "food": 0,
+   "industry": 12846.02,
+   "stock_change": -9.0
+  },
+  "UKR|SOYA": {
+   "production": 4212.33,
+   "consumption": 1569.36,
+   "imports": 3.31,
+   "exports": 2575.54,
+   "feed": 145.47,
+   "food": 1.34,
+   "industry": 1177.79,
+   "stock_change": 36.67
+  },
+  "UKR|RAPO": {
+   "production": 103.1,
+   "consumption": 11.0,
+   "imports": 1.58,
+   "exports": 89.21,
+   "feed": 0.45,
+   "food": 6.74,
+   "industry": 3.8,
+   "stock_change": -6.74
+  },
+  "UKR|SUNO": {
+   "production": 4696.55,
+   "consumption": 295.39,
+   "imports": 1.22,
+   "exports": 4386.22,
+   "feed": 0,
+   "food": 244.98,
+   "industry": 50.41,
+   "stock_change": 74.39
+  },
+  "UKR|SOYO": {
+   "production": 196.41,
+   "consumption": 18.7,
+   "imports": 0.84,
+   "exports": 185.2,
+   "feed": 0,
+   "food": 18.7,
+   "industry": 0,
+   "stock_change": 0.0
+  },
+  "UKR|RAPC": {
+   "production": 162.87,
+   "consumption": 35.18,
+   "imports": 0.43,
+   "exports": 135.17,
+   "feed": 34.43,
+   "food": 0,
+   "industry": 0.75,
+   "stock_change": -0.0
+  },
+  "UKR|SUNC": {
+   "production": 4779.96,
+   "consumption": 379.29,
+   "imports": 0.66,
+   "exports": 5920.12,
+   "feed": 374.69,
+   "food": 0,
+   "industry": 4.61,
+   "stock_change": -0.0
+  },
+  "UKR|SOYC": {
+   "production": 851.07,
+   "consumption": 458.73,
+   "imports": 12.27,
+   "exports": 453.03,
+   "feed": 458.73,
+   "food": 0,
+   "industry": 0,
+   "stock_change": 0
+  },
+  "NGA|SUNF": {
+   "production": 0,
+   "consumption": 0.01,
+   "imports": 0.01,
+   "exports": 0,
+   "feed": 0.0,
+   "food": 0.0,
+   "industry": 0.0,
+   "stock_change": -0.0
+  },
+  "NGA|SOYA": {
+   "production": 860.18,
+   "consumption": 851.15,
+   "imports": 59.94,
+   "exports": 54.59,
+   "feed": 74.61,
+   "food": 202.54,
+   "industry": 483.72,
+   "stock_change": 14.35
+  },
+  "NGA|SUNO": {
+   "production": 0,
+   "consumption": 0.7,
+   "imports": 1.21,
+   "exports": 0,
+   "feed": 0.0,
+   "food": 0.46,
+   "industry": 0.24,
+   "stock_change": 0.47
+  },
+  "NGA|SOYO": {
+   "production": 91.08,
+   "consumption": 83.6,
+   "imports": 1.48,
+   "exports": 7.82,
+   "feed": 0,
+   "food": 83.6,
+   "industry": 0,
+   "stock_change": 1.38
+  },
+  "NGA|SOYC": {
+   "production": 379.37,
+   "consumption": 362.29,
+   "imports": 0.8,
+   "exports": 20.12,
+   "feed": 362.29,
+   "food": 0,
+   "industry": 0,
+   "stock_change": 0
+  },
+  "NGA|RAPE": {
+   "production": 0,
+   "consumption": 0,
+   "imports": 0,
+   "exports": 0,
+   "feed": 0,
+   "food": 0,
+   "industry": 0,
+   "stock_change": 0
+  },
+  "NGA|RAPO": {
+   "production": 0,
+   "consumption": 0,
+   "imports": 0,
+   "exports": 0,
+   "feed": 0,
+   "food": 0,
+   "industry": 0,
+   "stock_change": 0
+  },
+  "NGA|RAPC": {
+   "production": 0,
+   "consumption": 0,
+   "imports": 0,
+   "exports": 0,
+   "feed": 0,
+   "food": 0,
+   "industry": 0,
+   "stock_change": 0
+  },
+  "NGA|SUNC": {
+   "production": 0,
+   "consumption": 0,
+   "imports": 0,
+   "exports": 0,
+   "feed": 0,
+   "food": 0,
+   "industry": 0,
+   "stock_change": 0
+  },
+  "ZAF|RAPE": {
+   "production": 100.83,
+   "consumption": 99.17,
+   "imports": 2.2,
+   "exports": 2.56,
+   "feed": 3.11,
+   "food": 0,
+   "industry": 90.04,
+   "stock_change": 1.33
+  },
+  "ZAF|SUNF": {
+   "production": 830.33,
+   "consumption": 799.33,
+   "imports": 37.84,
+   "exports": 1.02,
+   "feed": 7.33,
+   "food": 0,
+   "industry": 725.73,
+   "stock_change": 59.33
+  },
+  "ZAF|SOYA": {
+   "production": 1199.44,
+   "consumption": 1225.17,
+   "imports": 104.84,
+   "exports": 15.32,
+   "feed": 154.99,
+   "food": 0.33,
+   "industry": 996.86,
+   "stock_change": 63.31
+  },
+  "ZAF|RAPO": {
+   "production": 45.15,
+   "consumption": 50.17,
+   "imports": 6.93,
+   "exports": 1.05,
+   "feed": 0,
+   "food": 0,
+   "industry": 50.17,
+   "stock_change": 0
+  },
+  "ZAF|SUNO": {
+   "production": 274.22,
+   "consumption": 330.13,
+   "imports": 142.21,
+   "exports": 81.38,
+   "feed": 0,
+   "food": 296.45,
+   "industry": 33.68,
+   "stock_change": 1.68
+  },
+  "ZAF|SOYO": {
+   "production": 165.41,
+   "consumption": 282.87,
+   "imports": 197.63,
+   "exports": 85.98,
+   "feed": 0,
+   "food": 258.21,
+   "industry": 24.66,
+   "stock_change": -0.0
+  },
+  "ZAF|RAPC": {
+   "production": 71.3,
+   "consumption": 74.55,
+   "imports": 3.09,
+   "exports": 0.05,
+   "feed": 74.55,
+   "food": 0,
+   "industry": 0,
+   "stock_change": 0
+  },
+  "ZAF|SUNC": {
+   "production": 326.99,
+   "consumption": 405.93,
+   "imports": 66.97,
+   "exports": 17.44,
+   "feed": 405.93,
+   "food": 0,
+   "industry": 0,
+   "stock_change": 0
+  },
+  "ZAF|SOYC": {
+   "production": 797.13,
+   "consumption": 1755.86,
+   "imports": 922.01,
+   "exports": 87.13,
+   "feed": 1755.86,
+   "food": 0,
+   "industry": 0,
+   "stock_change": 0
+  },
+  "IND|RAPE": {
+   "production": 7714.64,
+   "consumption": 7596.03,
+   "imports": 2.45,
+   "exports": 19.93,
+   "feed": 1217.72,
+   "food": 0,
+   "industry": 5759.84,
+   "stock_change": 103.67
+  },
+  "IND|SUNF": {
+   "production": 241.33,
+   "consumption": 239.67,
+   "imports": 2.35,
+   "exports": 3.48,
+   "feed": 22.35,
+   "food": 0,
+   "industry": 200.65,
+   "stock_change": 0
+  },
+  "IND|SOYA": {
+   "production": 12416.84,
+   "consumption": 12253.83,
+   "imports": 87.54,
+   "exports": 204.72,
+   "feed": 2668.99,
+   "food": 248.32,
+   "industry": 7688.72,
+   "stock_change": 46.34
+  },
+  "IND|RAPO": {
+   "production": 2127.33,
+   "consumption": 2411.0,
+   "imports": 325.1,
+   "exports": 0.66,
+   "feed": 0,
+   "food": 2380.33,
+   "industry": 30.67,
+   "stock_change": 22.33
+  },
+  "IND|SUNO": {
+   "production": 72.34,
+   "consumption": 2081.69,
+   "imports": 2084.23,
+   "exports": 3.25,
+   "feed": 0,
+   "food": 1872.95,
+   "industry": 208.74,
+   "stock_change": 49.31
+  },
+  "IND|SOYO": {
+   "production": 1325.53,
+   "consumption": 4834.17,
+   "imports": 3245.41,
+   "exports": 3.33,
+   "feed": 0,
+   "food": 2820.9,
+   "industry": 2013.26,
+   "stock_change": -111.32
+  },
+  "IND|RAPC": {
+   "production": 3531.7,
+   "consumption": 2355.1,
+   "imports": 13.7,
+   "exports": 1333.42,
+   "feed": 2355.1,
+   "food": 0,
+   "industry": 0,
+   "stock_change": 0
+  },
+  "IND|SUNC": {
+   "production": 94.18,
+   "consumption": 454.72,
+   "imports": 249.5,
+   "exports": 6.41,
+   "feed": 454.72,
+   "food": 0,
+   "industry": 0,
+   "stock_change": 0
+  },
+  "IND|SOYC": {
+   "production": 5887.1,
+   "consumption": 2256.65,
+   "imports": 11.15,
+   "exports": 4096.56,
+   "feed": 2256.65,
+   "food": 0,
+   "industry": 0,
+   "stock_change": 0
+  },
+  "PAK|RAPE": {
+   "production": 219.36,
+   "consumption": 1022.64,
+   "imports": 751.84,
+   "exports": 0.68,
+   "feed": 45.84,
+   "food": 0.56,
+   "industry": 960.35,
+   "stock_change": 29.59
+  },
+  "PAK|SUNF": {
+   "production": 113.13,
+   "consumption": 144.17,
+   "imports": 32.39,
+   "exports": 0.0,
+   "feed": 10.65,
+   "food": 0,
+   "industry": 123.63,
+   "stock_change": -18.0
+  },
+  "PAK|SOYA": {
+   "production": 0,
+   "consumption": 1290.87,
+   "imports": 1297.74,
+   "exports": 0,
+   "feed": 0,
+   "food": 0,
+   "industry": 1290.87,
+   "stock_change": -0.0
+  },
+  "PAK|RAPO": {
+   "production": 477.51,
+   "consumption": 351.72,
+   "imports": 0.04,
+   "exports": 21.88,
+   "feed": 0,
+   "food": 19.78,
+   "industry": 331.94,
+   "stock_change": 99.78
+  },
+  "PAK|SUNO": {
+   "production": 71.93,
+   "consumption": 83.48,
+   "imports": 1.17,
+   "exports": 33.95,
+   "feed": 0,
+   "food": 31.01,
+   "industry": 52.46,
+   "stock_change": -26.02
+  },
+  "PAK|SOYO": {
+   "production": 293.48,
+   "consumption": 170.52,
+   "imports": 122.93,
+   "exports": 5.13,
+   "feed": 0,
+   "food": 24.48,
+   "industry": 146.04,
+   "stock_change": 245.41
+  },
+  "PAK|RAPC": {
+   "production": 672.93,
+   "consumption": 614.23,
+   "imports": 1.35,
+   "exports": 63.83,
+   "feed": 614.23,
+   "food": 0,
+   "industry": 0,
+   "stock_change": 0
+  },
+  "PAK|SUNC": {
+   "production": 55.25,
+   "consumption": 165.04,
+   "imports": 74.9,
+   "exports": 0.74,
+   "feed": 165.04,
+   "food": 0,
+   "industry": 0,
+   "stock_change": 0
+  },
+  "PAK|SOYC": {
+   "production": 1254.13,
+   "consumption": 1700.73,
+   "imports": 409.02,
+   "exports": 20.58,
+   "feed": 1700.73,
+   "food": 0,
+   "industry": 0,
+   "stock_change": 0
+  },
+  "BGD|RAPE": {
+   "production": 359.0,
+   "consumption": 481.0,
+   "imports": 130.92,
+   "exports": 0.01,
+   "feed": 14.01,
+   "food": 0,
+   "industry": 437.3,
+   "stock_change": 24.33
+  },
+  "BGD|SUNF": {
+   "production": 0,
+   "consumption": 20.13,
+   "imports": 17.87,
+   "exports": 0,
+   "feed": 8.29,
+   "food": 0.15,
+   "industry": 10.99,
+   "stock_change": 1.67
+  },
+  "BGD|SOYA": {
+   "production": 96.01,
+   "consumption": 1175.83,
+   "imports": 1109.59,
+   "exports": 0.0,
+   "feed": 0,
+   "food": 95.71,
+   "industry": 1072.12,
+   "stock_change": 4.64
+  },
+  "BGD|RAPO": {
+   "production": 156.62,
+   "consumption": 134.68,
+   "imports": 0.13,
+   "exports": 3.13,
+   "feed": 0,
+   "food": 134.68,
+   "industry": 0,
+   "stock_change": 18.37
+  },
+  "BGD|SUNO": {
+   "production": 0,
+   "consumption": 1.56,
+   "imports": 3.4,
+   "exports": 0,
+   "feed": 0,
+   "food": 1.56,
+   "industry": 0,
+   "stock_change": 2.9
+  },
+  "BGD|SOYO": {
+   "production": 196.32,
+   "consumption": 992.49,
+   "imports": 838.22,
+   "exports": 14.72,
+   "feed": 0,
+   "food": 366.15,
+   "industry": 626.34,
+   "stock_change": 61.32
+  },
+  "BGD|RAPC": {
+   "production": 275.16,
+   "consumption": 273.18,
+   "imports": 0.0,
+   "exports": 2.01,
+   "feed": 273.18,
+   "food": 0,
+   "industry": 0,
+   "stock_change": 0.0
+  },
+  "BGD|SOYC": {
+   "production": 0,
+   "consumption": 1130.64,
+   "imports": 984.0,
+   "exports": 0,
+   "feed": 1130.64,
+   "food": 0,
+   "industry": 0,
+   "stock_change": 0.0
+  },
+  "BGD|SUNC": {
+   "production": 0,
+   "consumption": 0,
+   "imports": 0,
+   "exports": 0,
+   "feed": 0,
+   "food": 0,
+   "industry": 0,
+   "stock_change": 0
+  },
+  "CHN|RAPE": {
+   "production": 13245.75,
+   "consumption": 17563.84,
+   "imports": 4045.9,
+   "exports": 1.89,
+   "feed": 5011.18,
+   "food": 2.0,
+   "industry": 11799.26,
+   "stock_change": 40.67
+  },
+  "CHN|SUNF": {
+   "production": 2751.31,
+   "consumption": 2454.72,
+   "imports": 117.8,
+   "exports": 313.36,
+   "feed": 1600.84,
+   "food": 2.0,
+   "industry": 741.04,
+   "stock_change": 21.32
+  },
+  "CHN|SOYA": {
+   "production": 14679.67,
+   "consumption": 102588.25,
+   "imports": 89096.8,
+   "exports": 193.43,
+   "feed": 8800.35,
+   "food": 6659.33,
+   "industry": 85420.61,
+   "stock_change": 1116.95
+  },
+  "CHN|RAPO": {
+   "production": 3806.55,
+   "consumption": 5622.02,
+   "imports": 1138.49,
+   "exports": 0.87,
+   "feed": 0,
+   "food": 2115.65,
+   "industry": 3506.37,
+   "stock_change": -844.68
+  },
+  "CHN|SUNO": {
+   "production": 259.22,
+   "consumption": 1033.66,
+   "imports": 836.16,
+   "exports": 2.62,
+   "feed": 0,
+   "food": 242.22,
+   "industry": 791.44,
+   "stock_change": 25.69
+  },
+  "CHN|SOYO": {
+   "production": 15368.51,
+   "consumption": 15904.83,
+   "imports": 608.73,
+   "exports": 149.65,
+   "feed": 0,
+   "food": 3658.96,
+   "industry": 12245.87,
+   "stock_change": -52.34
+  },
+  "CHN|RAPC": {
+   "production": 5192.71,
+   "consumption": 7139.98,
+   "imports": 1814.74,
+   "exports": 91.05,
+   "feed": 6555.94,
+   "food": 0,
+   "industry": 584.04,
+   "stock_change": 0
+  },
+  "CHN|SUNC": {
+   "production": 327.14,
+   "consumption": 441.73,
+   "imports": 113.93,
+   "exports": 37.28,
+   "feed": 286.73,
+   "food": 0,
+   "industry": 155.0,
+   "stock_change": 0
+  },
+  "CHN|SOYC": {
+   "production": 68902.73,
+   "consumption": 66015.85,
+   "imports": 31.93,
+   "exports": 3157.77,
+   "feed": 66015.85,
+   "food": 0,
+   "industry": 0,
+   "stock_change": 0
+  },
+  "JPN|RAPE": {
+   "production": 3.67,
+   "consumption": 2395.5,
+   "imports": 2185.9,
+   "exports": 8.21,
+   "feed": 11.0,
+   "food": 9.94,
+   "industry": 2374.55,
+   "stock_change": -7.67
+  },
+  "JPN|SUNF": {
+   "production": 0,
+   "consumption": 2.17,
+   "imports": 3.57,
+   "exports": 0,
+   "feed": 0.74,
+   "food": 0.02,
+   "industry": 1.33,
+   "stock_change": 1.49
+  },
+  "JPN|SOYA": {
+   "production": 234.0,
+   "consumption": 3449.0,
+   "imports": 3204.24,
+   "exports": 14.73,
+   "feed": 57.7,
+   "food": 989.12,
+   "industry": 2330.26,
+   "stock_change": -25.67
+  },
+  "JPN|RAPO": {
+   "production": 1040.33,
+   "consumption": 1056.0,
+   "imports": 19.41,
+   "exports": 1.44,
+   "feed": 0,
+   "food": 859.61,
+   "industry": 196.39,
+   "stock_change": -0.33
+  },
+  "JPN|SUNO": {
+   "production": 1.17,
+   "consumption": 19.06,
+   "imports": 24.79,
+   "exports": 1.0,
+   "feed": 0,
+   "food": 19.06,
+   "industry": 0,
+   "stock_change": 5.02
+  },
+  "JPN|SOYO": {
+   "production": 462.09,
+   "consumption": 465.9,
+   "imports": 6.59,
+   "exports": 2.28,
+   "feed": 0,
+   "food": 423.33,
+   "industry": 39.57,
+   "stock_change": 1.0
+  },
+  "JPN|RAPC": {
+   "production": 1321.36,
+   "consumption": 1328.07,
+   "imports": 11.45,
+   "exports": 5.13,
+   "feed": 1328.07,
+   "food": 0,
+   "industry": 0,
+   "stock_change": 0
+  },
+  "JPN|SUNC": {
+   "production": 0.03,
+   "consumption": 0.03,
+   "imports": 0.0,
+   "exports": 0.0,
+   "feed": 0.03,
+   "food": 0,
+   "industry": 0,
+   "stock_change": -0.0
+  },
+  "JPN|SOYC": {
+   "production": 1762.06,
+   "consumption": 5322.57,
+   "imports": 3094.29,
+   "exports": 0.15,
+   "feed": 5322.57,
+   "food": 0,
+   "industry": 0,
+   "stock_change": 0
+  },
+  "IDN|RAPE": {
+   "production": 0,
+   "consumption": 1.38,
+   "imports": 1.02,
+   "exports": 0,
+   "feed": 0.06,
+   "food": 0.0,
+   "industry": 1.28,
+   "stock_change": -0.0
+  },
+  "IDN|SUNF": {
+   "production": 0,
+   "consumption": 15.0,
+   "imports": 18.93,
+   "exports": 0,
+   "feed": 0,
+   "food": 0,
+   "industry": 15.0,
+   "stock_change": 0
+  },
+  "IDN|SOYA": {
+   "production": 784.26,
+   "consumption": 3130.99,
+   "imports": 2495.33,
+   "exports": 5.25,
+   "feed": 12.33,
+   "food": 336.37,
+   "industry": 2584.27,
+   "stock_change": 114.68
+  },
+  "IDN|RAPO": {
+   "production": 0,
+   "consumption": 6.97,
+   "imports": 8.16,
+   "exports": 0,
+   "feed": 0,
+   "food": 0,
+   "industry": 6.97,
+   "stock_change": -0.0
+  },
+  "IDN|SUNO": {
+   "production": 6.77,
+   "consumption": 8.37,
+   "imports": 6.62,
+   "exports": 2.04,
+   "feed": 0,
+   "food": 8.37,
+   "industry": 0,
+   "stock_change": 2.81
+  },
+  "IDN|SOYO": {
+   "production": 474.06,
+   "consumption": 475.88,
+   "imports": 35.04,
+   "exports": 27.67,
+   "feed": 0,
+   "food": 475.88,
+   "industry": 0,
+   "stock_change": 5.94
+  },
+  "IDN|RAPC": {
+   "production": 0,
+   "consumption": 67.03,
+   "imports": 62.83,
+   "exports": 0,
+   "feed": 67.03,
+   "food": 0,
+   "industry": 0,
+   "stock_change": 0
+  },
+  "IDN|SUNC": {
+   "production": 6.96,
+   "consumption": 19.48,
+   "imports": 8.67,
+   "exports": 0.21,
+   "feed": 19.48,
+   "food": 0,
+   "industry": 0,
+   "stock_change": 0
+  },
+  "IDN|SOYC": {
+   "production": 2072.76,
+   "consumption": 10872.19,
+   "imports": 7623.15,
+   "exports": 0.12,
+   "feed": 10872.19,
+   "food": 0,
+   "industry": 0,
+   "stock_change": 0
+  },
+  "VNM|RAPE": {
+   "production": 0,
+   "consumption": 4.26,
+   "imports": 0.84,
+   "exports": 0,
+   "feed": 3.0,
+   "food": 1.26,
+   "industry": 0,
+   "stock_change": -0.67
+  },
+  "VNM|SUNF": {
+   "production": 0,
+   "consumption": 1.3,
+   "imports": 1.26,
+   "exports": 0,
+   "feed": 0.36,
+   "food": 0.34,
+   "industry": 0.57,
+   "stock_change": 0
+  },
+  "VNM|SOYA": {
+   "production": 114.67,
+   "consumption": 1674.33,
+   "imports": 1582.94,
+   "exports": 1.67,
+   "feed": 88.04,
+   "food": 435.51,
+   "industry": 1116.11,
+   "stock_change": 13.33
+  },
+  "VNM|RAPO": {
+   "production": 0,
+   "consumption": 2.47,
+   "imports": 2.89,
+   "exports": 0,
+   "feed": 0,
+   "food": 2.47,
+   "industry": 0,
+   "stock_change": 0
+  },
+  "VNM|SUNO": {
+   "production": 0,
+   "consumption": 1.33,
+   "imports": 6.19,
+   "exports": 0,
+   "feed": 0,
+   "food": 1.33,
+   "industry": 0,
+   "stock_change": 4.67
+  },
+  "VNM|SOYO": {
+   "production": 212.03,
+   "consumption": 229.01,
+   "imports": 43.16,
+   "exports": 36.77,
+   "feed": 0,
+   "food": 229.01,
+   "industry": 0,
+   "stock_change": -30.94
+  },
+  "VNM|SUNC": {
+   "production": 0,
+   "consumption": 103.93,
+   "imports": 70.23,
+   "exports": 0,
+   "feed": 0,
+   "food": 0,
+   "industry": 103.93,
+   "stock_change": 0
+  },
+  "VNM|SOYC": {
+   "production": 874.49,
+   "consumption": 12340.12,
+   "imports": 10055.39,
+   "exports": 141.21,
+   "feed": 0,
+   "food": 0,
+   "industry": 12340.12,
+   "stock_change": 0
+  },
+  "VNM|RAPC": {
+   "production": 0,
+   "consumption": 0,
+   "imports": 0,
+   "exports": 0,
+   "feed": 0,
+   "food": 0,
+   "industry": 0,
+   "stock_change": 0
+  },
+  "THA|RAPE": {
+   "production": 0,
+   "consumption": 2.89,
+   "imports": 3.19,
+   "exports": 0,
+   "feed": 0,
+   "food": 2.89,
+   "industry": 0,
+   "stock_change": 0.96
+  },
+  "THA|SUNF": {
+   "production": 25.0,
+   "consumption": 31.0,
+   "imports": 7.57,
+   "exports": 0.0,
+   "feed": 7.22,
+   "food": 0,
+   "industry": 21.38,
+   "stock_change": 0
+  },
+  "THA|SOYA": {
+   "production": 40.66,
+   "consumption": 2857.82,
+   "imports": 2809.4,
+   "exports": 17.32,
+   "feed": 5.33,
+   "food": 118.99,
+   "industry": 2587.5,
+   "stock_change": -18.99
+  },
+  "THA|RAPO": {
+   "production": 0,
+   "consumption": 3.06,
+   "imports": 3.59,
+   "exports": 0,
+   "feed": 0,
+   "food": 0,
+   "industry": 3.06,
+   "stock_change": 0.0
+  },
+  "THA|SUNO": {
+   "production": 10.72,
+   "consumption": 26.52,
+   "imports": 22.21,
+   "exports": 3.49,
+   "feed": 0,
+   "food": 26.52,
+   "industry": 0,
+   "stock_change": 2.32
+  },
+  "THA|SOYO": {
+   "production": 404.67,
+   "consumption": 347.67,
+   "imports": 4.32,
+   "exports": 61.04,
+   "feed": 0,
+   "food": 347.67,
+   "industry": 0,
+   "stock_change": 2.33
+  },
+  "THA|RAPC": {
+   "production": 0,
+   "consumption": 608.51,
+   "imports": 552.95,
+   "exports": 0,
+   "feed": 608.51,
+   "food": 0,
+   "industry": 0,
+   "stock_change": 0
+  },
+  "THA|SUNC": {
+   "production": 0,
+   "consumption": 156.7,
+   "imports": 105.86,
+   "exports": 0,
+   "feed": 156.7,
+   "food": 0,
+   "industry": 0,
+   "stock_change": 0
+  },
+  "THA|SOYC": {
+   "production": 1752.2,
+   "consumption": 7234.68,
+   "imports": 4785.36,
+   "exports": 26.97,
+   "feed": 7234.68,
+   "food": 0,
+   "industry": 0,
+   "stock_change": 0
+  },
+  "AUS|RAPE": {
+   "production": 3660.65,
+   "consumption": 1036.91,
+   "imports": 2.53,
+   "exports": 2897.4,
+   "feed": 0,
+   "food": 2.33,
+   "industry": 951.28,
+   "stock_change": 150.97
+  },
+  "AUS|SUNF": {
+   "production": 23.55,
+   "consumption": 27.53,
+   "imports": 6.19,
+   "exports": 2.01,
+   "feed": 0,
+   "food": 0,
+   "industry": 25.93,
+   "stock_change": -0.7
+  },
+  "AUS|SOYA": {
+   "production": 33.24,
+   "consumption": 56.82,
+   "imports": 18.47,
+   "exports": 0.71,
+   "feed": 1.67,
+   "food": 20.39,
+   "industry": 31.74,
+   "stock_change": -5.0
+  },
+  "AUS|RAPO": {
+   "production": 380.33,
+   "consumption": 243.66,
+   "imports": 19.34,
+   "exports": 132.71,
+   "feed": 0,
+   "food": 203.0,
+   "industry": 40.66,
+   "stock_change": 1.67
+  },
+  "AUS|SUNO": {
+   "production": 11.66,
+   "consumption": 70.33,
+   "imports": 62.45,
+   "exports": 2.34,
+   "feed": 0,
+   "food": 14.0,
+   "industry": 56.33,
+   "stock_change": -0.99
+  },
+  "AUS|SOYO": {
+   "production": 5.64,
+   "consumption": 28.83,
+   "imports": 24.67,
+   "exports": 3.01,
+   "feed": 0,
+   "food": 11.19,
+   "industry": 17.64,
+   "stock_change": -0.99
+  },
+  "AUS|RAPC": {
+   "production": 545.29,
+   "consumption": 485.16,
+   "imports": 13.93,
+   "exports": 74.96,
+   "feed": 485.16,
+   "food": 0,
+   "industry": 0,
+   "stock_change": 0.0
+  },
+  "AUS|SUNC": {
+   "production": 14.88,
+   "consumption": 14.85,
+   "imports": 0.01,
+   "exports": 0.05,
+   "feed": 14.85,
+   "food": 0,
+   "industry": 0,
+   "stock_change": -0.0
+  },
+  "AUS|SOYC": {
+   "production": 24.15,
+   "consumption": 1662.96,
+   "imports": 1430.28,
+   "exports": 4.69,
+   "feed": 1662.96,
+   "food": 0,
+   "industry": 0,
+   "stock_change": 0
+  },
+  "NZL|RAPE": {
+   "production": 2.94,
+   "consumption": 10.14,
+   "imports": 7.87,
+   "exports": 1.82,
+   "feed": 9.12,
+   "food": 1.02,
+   "industry": 0,
+   "stock_change": 0
+  },
+  "NZL|SUNF": {
+   "production": 0,
+   "consumption": 2.0,
+   "imports": 2.55,
+   "exports": 0,
+   "feed": 0,
+   "food": 2.0,
+   "industry": 0,
+   "stock_change": 0
+  },
+  "NZL|SOYA": {
+   "production": 0,
+   "consumption": 6.0,
+   "imports": 6.03,
+   "exports": 0,
+   "feed": 0,
+   "food": 6.0,
+   "industry": 0,
+   "stock_change": 0
+  },
+  "NZL|RAPO": {
+   "production": 0,
+   "consumption": 50.67,
+   "imports": 62.11,
+   "exports": 0,
+   "feed": 0,
+   "food": 11.91,
+   "industry": 38.76,
+   "stock_change": 2.33
+  },
+  "NZL|SUNO": {
+   "production": 0,
+   "consumption": 15.53,
+   "imports": 16.8,
+   "exports": 0,
+   "feed": 0,
+   "food": 5.5,
+   "industry": 10.03,
+   "stock_change": 1.3
+  },
+  "NZL|SOYO": {
+   "production": 0,
+   "consumption": 11.94,
+   "imports": 11.6,
+   "exports": 0,
+   "feed": 0,
+   "food": 8.8,
+   "industry": 3.15,
+   "stock_change": -0.0
+  },
+  "NZL|RAPC": {
+   "production": 0,
+   "consumption": 42.51,
+   "imports": 39.78,
+   "exports": 0,
+   "feed": 42.51,
+   "food": 0,
+   "industry": 0,
+   "stock_change": 0
+  },
+  "NZL|SUNC": {
+   "production": 0,
+   "consumption": 3.83,
+   "imports": 2.59,
+   "exports": 0,
+   "feed": 3.83,
+   "food": 0,
+   "industry": 0,
+   "stock_change": 0
+  },
+  "NZL|SOYC": {
+   "production": 0,
+   "consumption": 515.39,
+   "imports": 448.7,
+   "exports": 0,
+   "feed": 515.39,
+   "food": 0,
+   "industry": 0,
+   "stock_change": 0
+  },
+  "USA|RAPE": {
+   "production": 1515.55,
+   "consumption": 1993.81,
+   "imports": 613.64,
+   "exports": 187.29,
+   "feed": 7.26,
+   "food": 67.36,
+   "industry": 1891.2,
+   "stock_change": -8.66
+  },
+  "USA|SUNF": {
+   "production": 1042.86,
+   "consumption": 1027.49,
+   "imports": 71.46,
+   "exports": 95.69,
+   "feed": 313.85,
+   "food": 153.6,
+   "industry": 486.42,
+   "stock_change": -18.99
+  },
+  "USA|SOYA": {
+   "production": 119170.17,
+   "consumption": 60160.75,
+   "imports": 557.93,
+   "exports": 52720.66,
+   "feed": 2380.98,
+   "food": 37.0,
+   "industry": 53676.12,
+   "stock_change": 6469.0
+  },
+  "USA|RAPO": {
+   "production": 808.33,
+   "consumption": 2593.0,
+   "imports": 1973.88,
+   "exports": 96.88,
+   "feed": 0,
+   "food": 643.42,
+   "industry": 1949.58,
+   "stock_change": -14.33
+  },
+  "USA|SUNO": {
+   "production": 207.14,
+   "consumption": 228.53,
+   "imports": 56.33,
+   "exports": 39.38,
+   "feed": 0,
+   "food": 36.92,
+   "industry": 191.61,
+   "stock_change": -5.0
+  },
+  "USA|SOYO": {
+   "production": 10429.33,
+   "consumption": 9503.33,
+   "imports": 146.35,
+   "exports": 1096.06,
+   "feed": 0,
+   "food": 4422.52,
+   "industry": 5080.81,
+   "stock_change": 13.33
+  },
+  "USA|RAPC": {
+   "production": 1086.9,
+   "consumption": 7829.96,
+   "imports": 6214.31,
+   "exports": 68.13,
+   "feed": 7829.96,
+   "food": 0,
+   "industry": 0,
+   "stock_change": 0
+  },
+  "USA|SUNC": {
+   "production": 231.9,
+   "consumption": 218.02,
+   "imports": 3.28,
+   "exports": 21.36,
+   "feed": 218.02,
+   "food": 0,
+   "industry": 0,
+   "stock_change": 0
+  },
+  "USA|SOYC": {
+   "production": 42485.05,
+   "consumption": 23323.03,
+   "imports": 371.04,
+   "exports": 22240.95,
+   "feed": 23323.03,
+   "food": 0,
+   "industry": 0,
+   "stock_change": 0
+  },
+  "CAN|RAPE": {
+   "production": 20600.66,
+   "consumption": 9960.84,
+   "imports": 136.57,
+   "exports": 11595.71,
+   "feed": 80.33,
+   "food": 45.33,
+   "industry": 9104.49,
+   "stock_change": -171.0
+  },
+  "CAN|SUNF": {
+   "production": 55.33,
+   "consumption": 65.71,
+   "imports": 24.79,
+   "exports": 20.16,
+   "feed": 2.04,
+   "food": 0,
+   "industry": 58.67,
+   "stock_change": -4.67
+  },
+  "CAN|SOYA": {
+   "production": 7243.36,
+   "consumption": 2599.11,
+   "imports": 619.9,
+   "exports": 4756.81,
+   "feed": 327.05,
+   "food": 43.67,
+   "industry": 1918.0,
+   "stock_change": 431.01
+  },
+  "CAN|RAPO": {
+   "production": 4006.5,
+   "consumption": 832.7,
+   "imports": 50.99,
+   "exports": 2883.03,
+   "feed": 0,
+   "food": 534.23,
+   "industry": 298.46,
+   "stock_change": 106.67
+  },
+  "CAN|SUNO": {
+   "production": 24.92,
+   "consumption": 46.82,
+   "imports": 26.15,
+   "exports": 1.0,
+   "feed": 0,
+   "food": 12.8,
+   "industry": 34.02,
+   "stock_change": 2.01
+  },
+  "CAN|SOYO": {
+   "production": 356.02,
+   "consumption": 214.85,
+   "imports": 20.95,
+   "exports": 164.08,
+   "feed": 0,
+   "food": 25.06,
+   "industry": 189.79,
+   "stock_change": 3.34
+  },
+  "CAN|RAPC": {
+   "production": 5449.36,
+   "consumption": 674.28,
+   "imports": 29.96,
+   "exports": 4933.67,
+   "feed": 659.92,
+   "food": 0,
+   "industry": 14.35,
+   "stock_change": 0.0
+  },
+  "CAN|SUNC": {
+   "production": 29.88,
+   "consumption": 33.36,
+   "imports": 3.2,
+   "exports": 0.84,
+   "feed": 33.36,
+   "food": 0,
+   "industry": 0,
+   "stock_change": 0
+  },
+  "CAN|SOYC": {
+   "production": 1509.91,
+   "consumption": 2833.46,
+   "imports": 1356.09,
+   "exports": 274.44,
+   "feed": 2833.46,
+   "food": 0,
+   "industry": 0,
+   "stock_change": 0
+  },
+  "MEX|RAPE": {
+   "production": 2.33,
+   "consumption": 1518.29,
+   "imports": 1396.91,
+   "exports": 0.47,
+   "feed": 48.34,
+   "food": 8.33,
+   "industry": 1446.61,
+   "stock_change": 0.0
+  },
+  "MEX|SUNF": {
+   "production": 9.28,
+   "consumption": 33.83,
+   "imports": 30.14,
+   "exports": 0.0,
+   "feed": 0.67,
+   "food": 2.34,
+   "industry": 29.82,
+   "stock_change": -0.66
+  },
+  "MEX|SOYA": {
+   "production": 422.03,
+   "consumption": 4931.65,
+   "imports": 4545.31,
+   "exports": 1.04,
+   "feed": 1013.11,
+   "food": 2.0,
+   "industry": 3765.56,
+   "stock_change": 10.33
+  },
+  "MEX|RAPO": {
+   "production": 592.85,
+   "consumption": 676.17,
+   "imports": 100.48,
+   "exports": 4.91,
+   "feed": 0,
+   "food": 205.05,
+   "industry": 471.11,
+   "stock_change": 4.67
+  },
+  "MEX|SUNO": {
+   "production": 12.99,
+   "consumption": 68.82,
+   "imports": 71.06,
+   "exports": 12.77,
+   "feed": 0,
+   "food": 67.83,
+   "industry": 0.99,
+   "stock_change": 4.0
+  },
+  "MEX|SOYO": {
+   "production": 751.67,
+   "consumption": 638.0,
+   "imports": 221.42,
+   "exports": 18.85,
+   "feed": 0,
+   "food": 547.71,
+   "industry": 90.29,
+   "stock_change": 324.33
+  },
+  "MEX|RAPC": {
+   "production": 817.53,
+   "consumption": 907.03,
+   "imports": 79.3,
+   "exports": 0.07,
+   "feed": 907.03,
+   "food": 0,
+   "industry": 0,
+   "stock_change": 0
+  },
+  "MEX|SUNC": {
+   "production": 17.56,
+   "consumption": 17.81,
+   "imports": 0.32,
+   "exports": 0.15,
+   "feed": 17.81,
+   "food": 0,
+   "industry": 0,
+   "stock_change": -0.0
+  },
+  "MEX|SOYC": {
+   "production": 2508.49,
+   "consumption": 7006.69,
+   "imports": 3704.0,
+   "exports": 27.95,
+   "feed": 7006.69,
+   "food": 0,
+   "industry": 0,
+   "stock_change": 0
+  },
+  "ARG|RAPE": {
+   "production": 50.8,
+   "consumption": 35.22,
+   "imports": 0.76,
+   "exports": 30.73,
+   "feed": 28.88,
+   "food": 0,
+   "industry": 0.99,
+   "stock_change": -9.02
+  },
+  "ARG|SUNF": {
+   "production": 3357.56,
+   "consumption": 3168.2,
+   "imports": 1.07,
+   "exports": 85.11,
+   "feed": 94.11,
+   "food": 0,
+   "industry": 3027.7,
+   "stock_change": 70.2
+  },
+  "ARG|SOYA": {
+   "production": 50519.83,
+   "consumption": 48067.53,
+   "imports": 2987.75,
+   "exports": 6533.61,
+   "feed": 3306.61,
+   "food": 0.67,
+   "industry": 43035.95,
+   "stock_change": -1111.67
+  },
+  "ARG|RAPO": {
+   "production": 2.1,
+   "consumption": 1.89,
+   "imports": 1.61,
+   "exports": 1.11,
+   "feed": 0,
+   "food": 1.89,
+   "industry": 0,
+   "stock_change": 0.64
+  },
+  "ARG|SUNO": {
+   "production": 1250.35,
+   "consumption": 657.52,
+   "imports": 0.02,
+   "exports": 614.96,
+   "feed": 28.35,
+   "food": 452.03,
+   "industry": 177.14,
+   "stock_change": -46.94
+  },
+  "ARG|SOYO": {
+   "production": 7990.73,
+   "consumption": 2904.64,
+   "imports": 15.17,
+   "exports": 5172.45,
+   "feed": 0,
+   "food": 113.39,
+   "industry": 2791.24,
+   "stock_change": 177.01
+  },
+  "ARG|RAPC": {
+   "production": 2.43,
+   "consumption": 1.06,
+   "imports": 0.0,
+   "exports": 1.45,
+   "feed": 1.04,
+   "food": 0,
+   "industry": 0.02,
+   "stock_change": 0.0
+  },
+  "ARG|SUNC": {
+   "production": 1424.13,
+   "consumption": 298.13,
+   "imports": 1.33,
+   "exports": 1465.18,
+   "feed": 295.48,
+   "food": 0,
+   "industry": 2.64,
+   "stock_change": -0.0
+  },
+  "ARG|SOYC": {
+   "production": 35102.63,
+   "consumption": 3199.5,
+   "imports": 1.37,
+   "exports": 36673.96,
+   "feed": 3037.58,
+   "food": 0,
+   "industry": 161.92,
+   "stock_change": -0.0
+  },
+  "BRA|RAPE": {
+   "production": 51.67,
+   "consumption": 59.33,
+   "imports": 7.88,
+   "exports": 1.04,
+   "feed": 0,
+   "food": 2.0,
+   "industry": 53.33,
+   "stock_change": 0
+  },
+  "BRA|SUNF": {
+   "production": 107.59,
+   "consumption": 118.67,
+   "imports": 11.41,
+   "exports": 1.02,
+   "feed": 0.97,
+   "food": 6.15,
+   "industry": 102.89,
+   "stock_change": -3.02
+  },
+  "BRA|SOYA": {
+   "production": 109679.68,
+   "consumption": 46335.33,
+   "imports": 288.75,
+   "exports": 67252.21,
+   "feed": 1756.01,
+   "food": 0,
+   "industry": 42927.31,
+   "stock_change": -4162.32
+  },
+  "BRA|RAPO": {
+   "production": 18.73,
+   "consumption": 27.06,
+   "imports": 11.03,
+   "exports": 1.28,
+   "feed": 0,
+   "food": 0,
+   "industry": 27.06,
+   "stock_change": 0.0
+  },
+  "BRA|SUNO": {
+   "production": 42.61,
+   "consumption": 77.19,
+   "imports": 36.43,
+   "exports": 1.98,
+   "feed": 0,
+   "food": 77.19,
+   "industry": 0,
+   "stock_change": -0.69
+  },
+  "BRA|SOYO": {
+   "production": 8384.66,
+   "consumption": 7059.05,
+   "imports": 51.61,
+   "exports": 1388.41,
+   "feed": 0,
+   "food": 2644.14,
+   "industry": 4414.91,
+   "stock_change": 41.33
+  },
+  "BRA|RAPC": {
+   "production": 29.36,
+   "consumption": 29.67,
+   "imports": 0.29,
+   "exports": 0.0,
+   "feed": 29.67,
+   "food": 0,
+   "industry": 0,
+   "stock_change": 0
+  },
+  "BRA|SUNC": {
+   "production": 62.34,
+   "consumption": 59.21,
+   "imports": 0.19,
+   "exports": 4.23,
+   "feed": 59.21,
+   "food": 0,
+   "industry": 0,
+   "stock_change": 0
+  },
+  "BRA|SOYC": {
+   "production": 32674.48,
+   "consumption": 2215.49,
+   "imports": 0.83,
+   "exports": 34975.81,
+   "feed": 2215.49,
+   "food": 0,
+   "industry": 0,
+   "stock_change": 0
+  },
+  "EGY|RAPE": {
+   "production": 0,
+   "consumption": 1.25,
+   "imports": 0.7,
+   "exports": 0,
+   "feed": 0.07,
+   "food": 0.54,
+   "industry": 0.6,
+   "stock_change": 0.0
+  },
+  "EGY|SUNF": {
+   "production": 20.04,
+   "consumption": 94.84,
+   "imports": 96.41,
+   "exports": 2.03,
+   "feed": 0,
+   "food": 0,
+   "industry": 89.49,
+   "stock_change": -25.12
+  },
+  "EGY|SOYA": {
+   "production": 42.67,
+   "consumption": 2526.16,
+   "imports": 2508.66,
+   "exports": 1.0,
+   "feed": 173.99,
+   "food": 16.0,
+   "industry": 2243.19,
+   "stock_change": -85.04
+  },
+  "EGY|RAPO": {
+   "production": 0,
+   "consumption": 1.46,
+   "imports": 1.17,
+   "exports": 0,
+   "feed": 0.04,
+   "food": 0.35,
+   "industry": 1.07,
+   "stock_change": 0
+  },
+  "EGY|SUNO": {
+   "production": 29.3,
+   "consumption": 272.96,
+   "imports": 269.11,
+   "exports": 39.48,
+   "feed": 0,
+   "food": 160.61,
+   "industry": 112.35,
+   "stock_change": -32.32
+  },
+  "EGY|SOYO": {
+   "production": 375.33,
+   "consumption": 515.67,
+   "imports": 169.15,
+   "exports": 36.56,
+   "feed": 0,
+   "food": 276.33,
+   "industry": 239.33,
+   "stock_change": -2.33
+  },
+  "EGY|RAPC": {
+   "production": 0,
+   "consumption": 0.3,
+   "imports": 0.28,
+   "exports": 0,
+   "feed": 0.3,
+   "food": 0,
+   "industry": 0,
+   "stock_change": 0
+  },
+  "EGY|SUNC": {
+   "production": 39.58,
+   "consumption": 325.65,
+   "imports": 193.18,
+   "exports": 0.07,
+   "feed": 325.65,
+   "food": 0,
+   "industry": 0,
+   "stock_change": -0.0
+  },
+  "EGY|SOYC": {
+   "production": 1723.42,
+   "consumption": 4873.49,
+   "imports": 2743.14,
+   "exports": 5.1,
+   "feed": 4873.49,
+   "food": 0,
+   "industry": 0,
+   "stock_change": 0
+  },
+  "EU27|RAPE": {
+   "production": 18662.87,
+   "consumption": 22874.34,
+   "imports": 12080.9,
+   "exports": 4967.7,
+   "feed": 919.77,
+   "food": 93.45,
+   "industry": 20954.73,
+   "stock_change": 1058.71
+  },
+  "EU27|SUNF": {
+   "production": 9682.12,
+   "consumption": 9274.5,
+   "imports": 3390.53,
+   "exports": 3551.92,
+   "feed": 583.26,
+   "food": 46.61,
+   "industry": 8308.83,
+   "stock_change": 527.04
+  },
+  "EU27|SOYA": {
+   "production": 2669.36,
+   "consumption": 16044.35,
+   "imports": 15003.89,
+   "exports": 1791.06,
+   "feed": 975.86,
+   "food": 124.98,
+   "industry": 14669.87,
+   "stock_change": 239.4
+  },
+  "EU27|RAPO": {
+   "production": 8757.63,
+   "consumption": 8070.34,
+   "imports": 2589.59,
+   "exports": 2922.48,
+   "feed": 696.71,
+   "food": 1118.04,
+   "industry": 6255.92,
+   "stock_change": 357.55
+  },
+  "EU27|SUNO": {
+   "production": 3487.94,
+   "consumption": 3570.69,
+   "imports": 3257.54,
+   "exports": 2519.51,
+   "feed": 0.0,
+   "food": 2170.84,
+   "industry": 1395.52,
+   "stock_change": 454.6
+  },
+  "EU27|SOYO": {
+   "production": 2722.44,
+   "consumption": 2017.37,
+   "imports": 1024.76,
+   "exports": 1192.83,
+   "feed": 17.43,
+   "food": 1448.9,
+   "industry": 552.65,
+   "stock_change": 10.65
+  },
+  "EU27|RAPC": {
+   "production": 11330.19,
+   "consumption": 10858.9,
+   "imports": 6475.6,
+   "exports": 8883.09,
+   "feed": 10853.01,
+   "food": 0.0,
+   "industry": 5.99,
+   "stock_change": -0.0
+  },
+  "EU27|SUNC": {
+   "production": 4386.75,
+   "consumption": 9824.85,
+   "imports": 9185.81,
+   "exports": 3451.22,
+   "feed": 9822.25,
+   "food": 0.0,
+   "industry": 2.59,
+   "stock_change": 0.0
+  },
+  "EU27|SOYC": {
+   "production": 11561.2,
+   "consumption": 43270.19,
+   "imports": 44853.16,
+   "exports": 13906.53,
+   "feed": 42885.7,
+   "food": 0.0,
+   "industry": 384.49,
+   "stock_change": -0.0
+  }
+ },
+ "world_market_price_eur_t": {
+  "RAPE": 419.4,
+  "SUNF": 356.9,
+  "SOYA": 325.7,
+  "RAPO": 737.2,
+  "SUNO": 665.0,
+  "SOYO": 699.5,
+  "RAPC": 212.7,
+  "SUNC": 203.8,
+  "SOYC": 353.6
+ },
+ "eu_crushing": {
+  "RAPE": {
+   "crush_kt": 20955,
+   "oil_yield": 0.418,
+   "cake_yield": 0.541
+  },
+  "SUNF": {
+   "crush_kt": 8309,
+   "oil_yield": 0.42,
+   "cake_yield": 0.528
+  },
+  "SOYA": {
+   "crush_kt": 14670,
+   "oil_yield": 0.186,
+   "cake_yield": 0.788
+  }
+ },
+ "_note": "Crushing = industrial use (INDM) of the seed (confirmed in CAPRI's raw p_dataMarket: Germany crushed 8.7 Mt of rapeseed in 2017). Yields = EU oil and cake production / EU crush, base period - CAPRI's PrcY concept (arm/market_model.gms ProcO_)."
+}

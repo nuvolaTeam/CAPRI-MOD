@@ -1,0 +1,249 @@
+model_region,rent_eur_per_ha,source,year
+DE11,171.6,CAPRI 2030 accounts rent x median Eurostat/CAPRI ratio 0.41,
+DE12,171.6,CAPRI 2030 accounts rent x median Eurostat/CAPRI ratio 0.41,
+DE13,171.6,CAPRI 2030 accounts rent x median Eurostat/CAPRI ratio 0.41,
+DE14,171.6,CAPRI 2030 accounts rent x median Eurostat/CAPRI ratio 0.41,
+DE21,171.6,CAPRI 2030 accounts rent x median Eurostat/CAPRI ratio 0.41,
+DE22,171.6,CAPRI 2030 accounts rent x median Eurostat/CAPRI ratio 0.41,
+DE23,171.6,CAPRI 2030 accounts rent x median Eurostat/CAPRI ratio 0.41,
+DE24,171.6,CAPRI 2030 accounts rent x median Eurostat/CAPRI ratio 0.41,
+DE25,171.6,CAPRI 2030 accounts rent x median Eurostat/CAPRI ratio 0.41,
+DE26,171.6,CAPRI 2030 accounts rent x median Eurostat/CAPRI ratio 0.41,
+DE27,171.6,CAPRI 2030 accounts rent x median Eurostat/CAPRI ratio 0.41,
+DE30,171.6,CAPRI 2030 accounts rent x median Eurostat/CAPRI ratio 0.41,
+DE40,171.6,CAPRI 2030 accounts rent x median Eurostat/CAPRI ratio 0.41,
+DE50,171.6,CAPRI 2030 accounts rent x median Eurostat/CAPRI ratio 0.41,
+DE60,171.6,CAPRI 2030 accounts rent x median Eurostat/CAPRI ratio 0.41,
+DE71,171.6,CAPRI 2030 accounts rent x median Eurostat/CAPRI ratio 0.41,
+DE72,171.6,CAPRI 2030 accounts rent x median Eurostat/CAPRI ratio 0.41,
+DE73,171.6,CAPRI 2030 accounts rent x median Eurostat/CAPRI ratio 0.41,
+DE80,171.6,CAPRI 2030 accounts rent x median Eurostat/CAPRI ratio 0.41,
+DE91,171.6,CAPRI 2030 accounts rent x median Eurostat/CAPRI ratio 0.41,
+DE92,171.6,CAPRI 2030 accounts rent x median Eurostat/CAPRI ratio 0.41,
+DE93,171.6,CAPRI 2030 accounts rent x median Eurostat/CAPRI ratio 0.41,
+DE94,171.6,CAPRI 2030 accounts rent x median Eurostat/CAPRI ratio 0.41,
+DEA1,171.6,CAPRI 2030 accounts rent x median Eurostat/CAPRI ratio 0.41,
+DEA2,171.6,CAPRI 2030 accounts rent x median Eurostat/CAPRI ratio 0.41,
+DEA3,171.6,CAPRI 2030 accounts rent x median Eurostat/CAPRI ratio 0.41,
+DEA4,171.6,CAPRI 2030 accounts rent x median Eurostat/CAPRI ratio 0.41,
+DEA5,171.6,CAPRI 2030 accounts rent x median Eurostat/CAPRI ratio 0.41,
+DEB1,171.6,CAPRI 2030 accounts rent x median Eurostat/CAPRI ratio 0.41,
+DEB2,171.6,CAPRI 2030 accounts rent x median Eurostat/CAPRI ratio 0.41,
+DEB3,171.6,CAPRI 2030 accounts rent x median Eurostat/CAPRI ratio 0.41,
+DEC0,171.6,CAPRI 2030 accounts rent x median Eurostat/CAPRI ratio 0.41,
+DED2,171.6,CAPRI 2030 accounts rent x median Eurostat/CAPRI ratio 0.41,
+DED4,171.6,CAPRI 2030 accounts rent x median Eurostat/CAPRI ratio 0.41,
+DED5,171.6,CAPRI 2030 accounts rent x median Eurostat/CAPRI ratio 0.41,
+DEE0,171.6,CAPRI 2030 accounts rent x median Eurostat/CAPRI ratio 0.41,
+DEF0,171.6,CAPRI 2030 accounts rent x median Eurostat/CAPRI ratio 0.41,
+DEG0,171.6,CAPRI 2030 accounts rent x median Eurostat/CAPRI ratio 0.41,
+FR10,149.0,eurostat country,2017.0
+FRB0,149.0,eurostat country,2017.0
+FRC1,149.0,eurostat country,2017.0
+FRC2,149.0,eurostat country,2017.0
+FRD1,149.0,eurostat country,2017.0
+FRD2,149.0,eurostat country,2017.0
+FRE1,149.0,eurostat country,2017.0
+FRE2,149.0,eurostat country,2017.0
+FRF1,149.0,eurostat country,2017.0
+FRF2,149.0,eurostat country,2017.0
+FRF3,149.0,eurostat country,2017.0
+FRG0,149.0,eurostat country,2017.0
+FRH0,149.0,eurostat country,2017.0
+FRI1,149.0,eurostat country,2017.0
+FRI2,149.0,eurostat country,2017.0
+FRI3,149.0,eurostat country,2017.0
+FRJ1,149.0,eurostat country,2017.0
+FRJ2,149.0,eurostat country,2017.0
+FRK1,149.0,eurostat country,2017.0
+FRK2,149.0,eurostat country,2017.0
+FRL0,149.0,eurostat country,2017.0
+FRM0,149.0,eurostat country,2017.0
+ITC1,790.0,eurostat NUTS-2,2017.0
+ITC2,539.0,eurostat NUTS-2,2017.0
+ITC3,643.0,eurostat NUTS-2,2017.0
+ITC4,914.0,eurostat NUTS-2,2017.0
+ITH1,706.0,eurostat country,2017.0
+ITH2,706.0,eurostat country,2017.0
+ITH3,772.0,eurostat NUTS-2,2017.0
+ITH4,803.0,eurostat NUTS-2,2017.0
+ITH5,800.0,eurostat NUTS-2,2017.0
+ITI1,767.0,eurostat NUTS-2,2017.0
+ITI2,762.0,eurostat NUTS-2,2017.0
+ITI3,645.0,eurostat NUTS-2,2017.0
+ITI4,748.0,eurostat NUTS-2,2017.0
+ITF1,619.0,eurostat NUTS-2,2017.0
+ITF2,485.0,eurostat NUTS-2,2017.0
+ITF3,775.0,eurostat NUTS-2,2017.0
+ITF4,816.0,eurostat NUTS-2,2017.0
+ITF5,510.0,eurostat NUTS-2,2017.0
+ITF6,598.0,eurostat NUTS-2,2017.0
+ITG1,559.0,eurostat NUTS-2,2017.0
+ITG2,516.0,eurostat NUTS-2,2017.0
+ES11,230.0,eurostat NUTS-2,2017.0
+ES12,178.0,eurostat NUTS-2,2017.0
+ES13,208.0,eurostat NUTS-2,2017.0
+ES21,237.0,eurostat NUTS-2,2017.0
+ES22,205.0,eurostat NUTS-2,2017.0
+ES23,235.0,eurostat NUTS-2,2017.0
+ES24,98.0,eurostat NUTS-2,2017.0
+ES30,135.0,eurostat NUTS-2,2017.0
+ES41,131.0,eurostat NUTS-2,2017.0
+ES42,115.0,eurostat NUTS-2,2017.0
+ES43,141.0,eurostat NUTS-2,2017.0
+ES51,155.0,eurostat NUTS-2,2017.0
+ES52,182.0,eurostat NUTS-2,2017.0
+ES53,113.0,eurostat NUTS-2,2017.0
+ES61,187.0,eurostat NUTS-2,2017.0
+ES62,471.0,eurostat NUTS-2,2017.0
+ES63,148.0,eurostat country,2017.0
+ES64,148.0,eurostat country,2017.0
+ES70,1119.0,eurostat NUTS-2,2017.0
+PL21,231.0,eurostat NUTS-2,2017.0
+PL22,221.0,eurostat NUTS-2,2017.0
+PL31,213.0,eurostat country,2017.0
+PL32,213.0,eurostat country,2017.0
+PL33,213.0,eurostat country,2017.0
+PL34,213.0,eurostat country,2017.0
+PL41,139.0,eurostat NUTS-2,2017.0
+PL42,150.0,eurostat NUTS-2,2017.0
+PL43,188.0,eurostat NUTS-2,2017.0
+PL51,188.0,eurostat NUTS-2,2017.0
+PL52,228.0,eurostat NUTS-2,2017.0
+PL61,241.0,eurostat NUTS-2,2017.0
+PL62,224.0,eurostat NUTS-2,2017.0
+PL63,250.0,eurostat NUTS-2,2017.0
+PL71,405.0,eurostat NUTS-2,2017.0
+PL72,131.0,eurostat NUTS-2,2017.0
+PL81,145.0,eurostat NUTS-2,2017.0
+PL82,324.0,eurostat NUTS-2,2017.0
+PL84,226.0,eurostat NUTS-2,2017.0
+PL91,275.0,eurostat NUTS-2,2017.0
+PL92,358.0,eurostat NUTS-2,2017.0
+NL11,958.0,eurostat NUTS-2,2017.0
+NL12,862.0,eurostat NUTS-2,2017.0
+NL13,762.0,eurostat NUTS-2,2017.0
+NL21,751.0,eurostat NUTS-2,2017.0
+NL22,687.0,eurostat NUTS-2,2017.0
+NL23,1507.0,eurostat NUTS-2,2017.0
+NL31,714.0,eurostat NUTS-2,2017.0
+NL32,780.0,eurostat NUTS-2,2017.0
+NL33,797.0,eurostat NUTS-2,2017.0
+NL34,794.0,eurostat NUTS-2,2017.0
+NL41,903.0,eurostat NUTS-2,2017.0
+NL42,822.0,eurostat NUTS-2,2017.0
+BE10,307.0,eurostat country,2021.0
+BE21,377.0,eurostat NUTS-2,2021.0
+BE22,330.0,eurostat NUTS-2,2021.0
+BE23,373.0,eurostat NUTS-2,2021.0
+BE24,295.0,eurostat NUTS-2,2021.0
+BE25,463.0,eurostat NUTS-2,2021.0
+BE31,263.0,eurostat NUTS-2,2021.0
+BE32,281.0,eurostat NUTS-2,2021.0
+BE33,273.0,eurostat NUTS-2,2021.0
+BE34,184.0,eurostat NUTS-2,2021.0
+BE35,207.0,eurostat NUTS-2,2021.0
+DK01,371.0,eurostat NUTS-2,2017.0
+DK02,569.0,eurostat NUTS-2,2017.0
+DK03,570.0,eurostat NUTS-2,2017.0
+DK04,528.0,eurostat NUTS-2,2017.0
+DK05,509.0,eurostat NUTS-2,2017.0
+SE11,148.0,eurostat NUTS-2,2017.0
+SE12,148.0,eurostat NUTS-2,2017.0
+SE21,122.0,eurostat NUTS-2,2017.0
+SE22,310.0,eurostat NUTS-2,2017.0
+SE23,176.0,eurostat NUTS-2,2017.0
+SE31,45.0,eurostat NUTS-2,2017.0
+SE32,29.0,eurostat NUTS-2,2017.0
+SE33,29.0,eurostat NUTS-2,2017.0
+FI19,251.0,eurostat NUTS-2,2017.0
+FI1B,243.0,eurostat NUTS-2,2017.0
+FI1C,293.0,eurostat NUTS-2,2017.0
+FI1D,139.0,eurostat NUTS-2,2017.0
+FI20,269.0,eurostat NUTS-2,2017.0
+AT11,234.0,eurostat NUTS-2,2017.0
+AT12,268.0,eurostat NUTS-2,2017.0
+AT13,503.0,eurostat NUTS-2,2022.0
+AT21,353.0,eurostat NUTS-2,2017.0
+AT22,388.0,eurostat NUTS-2,2017.0
+AT31,284.0,eurostat NUTS-2,2017.0
+AT32,362.0,eurostat NUTS-2,2017.0
+AT33,369.0,eurostat NUTS-2,2017.0
+AT34,173.0,eurostat NUTS-2,2017.0
+EL30,951.0,eurostat NUTS-2,2019.0
+EL41,854.0,eurostat NUTS-2,2019.0
+EL42,370.0,eurostat NUTS-2,2019.0
+EL43,823.0,eurostat NUTS-2,2019.0
+EL51,344.0,eurostat NUTS-2,2019.0
+EL52,425.0,eurostat NUTS-2,2019.0
+EL53,229.0,eurostat NUTS-2,2019.0
+EL54,312.0,eurostat NUTS-2,2019.0
+EL61,426.0,eurostat NUTS-2,2019.0
+EL62,225.0,eurostat NUTS-2,2019.0
+EL63,528.0,eurostat NUTS-2,2019.0
+EL64,553.0,eurostat NUTS-2,2019.0
+EL65,533.0,eurostat NUTS-2,2019.0
+PT11,270.0,eurostat NUTS-2,2017.0
+PT15,286.0,eurostat NUTS-2,2017.0
+PT16,133.0,eurostat country,2017.0
+PT17,133.0,eurostat country,2017.0
+PT18,133.0,eurostat country,2017.0
+PT20,344.0,eurostat NUTS-2,2017.0
+PT30,133.0,eurostat country,2017.0
+IE04,240.0,eurostat NUTS-2,2017.0
+IE05,311.0,eurostat NUTS-2,2017.0
+IE06,318.0,eurostat NUTS-2,2017.0
+CZ01,104.0,eurostat country,2017.0
+CZ02,108.0,eurostat NUTS-2,2017.0
+CZ03,99.0,eurostat NUTS-2,2017.0
+CZ04,110.0,eurostat NUTS-2,2017.0
+CZ05,90.0,eurostat NUTS-2,2017.0
+CZ06,112.0,eurostat NUTS-2,2017.0
+CZ07,115.0,eurostat NUTS-2,2017.0
+CZ08,97.0,eurostat NUTS-2,2017.0
+HU11,160.0,eurostat country,2017.0
+HU12,119.0,eurostat NUTS-2,2017.0
+HU21,149.0,eurostat NUTS-2,2017.0
+HU22,149.0,eurostat NUTS-2,2017.0
+HU23,196.0,eurostat NUTS-2,2017.0
+HU31,113.0,eurostat NUTS-2,2017.0
+HU32,160.0,eurostat NUTS-2,2017.0
+HU33,180.0,eurostat NUTS-2,2017.0
+RO11,93.0,"eurostat country, arable only",2018.0
+RO12,93.0,"eurostat country, arable only",2018.0
+RO21,93.0,"eurostat country, arable only",2018.0
+RO22,93.0,"eurostat country, arable only",2018.0
+RO31,93.0,"eurostat country, arable only",2018.0
+RO32,93.0,"eurostat country, arable only",2018.0
+RO41,93.0,"eurostat country, arable only",2018.0
+RO42,93.0,"eurostat country, arable only",2018.0
+BG31,230.0,eurostat NUTS-2,2017.0
+BG32,291.0,eurostat NUTS-2,2017.0
+BG33,348.0,eurostat NUTS-2,2017.0
+BG34,174.0,eurostat NUTS-2,2017.0
+BG41,143.0,eurostat NUTS-2,2017.0
+BG42,159.0,eurostat NUTS-2,2017.0
+SK01,51.0,eurostat NUTS-2,2017.0
+SK02,65.0,eurostat NUTS-2,2017.0
+SK03,36.0,eurostat NUTS-2,2017.0
+SK04,34.0,eurostat NUTS-2,2017.0
+HR03,66.0,eurostat NUTS-2,2017.0
+HR04,70.0,eurostat NUTS-2,2017.0
+HR05,105.0,eurostat NUTS-2,2020.0
+HR06,86.0,eurostat NUTS-2,2020.0
+SI03,124.0,eurostat NUTS-2,2017.0
+SI04,156.0,eurostat NUTS-2,2017.0
+LT01,76.0,eurostat NUTS-2,2017.0
+LT02,101.0,eurostat NUTS-2,2017.0
+LV00,57.0,eurostat NUTS-2,2017.0
+EE00,58.0,eurostat NUTS-2,2017.0
+LU00,243.0,eurostat NUTS-2,2017.0
+CY00,252.5,CAPRI 2030 accounts rent x median Eurostat/CAPRI ratio 0.41,
+MT00,95.0,eurostat NUTS-2,2017.0
+NO01,40.0,eurostat country,2016.0
+NO02,388.0,eurostat NUTS-2,2024.0
+NO03,40.0,eurostat country,2016.0
+NO04,40.0,eurostat country,2016.0
+NO05,17.0,eurostat NUTS-2,2016.0
+NO06,38.0,eurostat NUTS-2,2016.0
+NO07,11.0,eurostat NUTS-2,2016.0

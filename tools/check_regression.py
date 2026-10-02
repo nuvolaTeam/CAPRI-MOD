@@ -34,6 +34,7 @@ not a way to silence a failure.
 """
 
 from __future__ import annotations
+import os
 
 import argparse
 import json
@@ -112,9 +113,13 @@ def measure(data_dir: str) -> dict:
         if c in mm.base_production.columns:
             exo.at["EU27", c] = mm.base_production.at["EU27", c]
     eq = mm.solve(exogenous_supply=exo, max_iter=150, tolerance=0.01)
-    ref = {"SWHE": 148, "BARL": 145, "CORN": 148, "RAPE": 213, "SOYA": 103,
-           "BEEF": 3692, "PORK": 1613, "POUL": 1405, "MILK": 319,
-           "BUTR": 3782, "CHES": 4815, "SKIM": 1429}
+    # Reproduction test: the base market must return its own input prices.
+    # References are READ from world_prices.csv - they used to be hard-coded
+    # copies of it (including rapeseed 213 and soybeans 103, which were cake
+    # prices filed under the seeds) and would silently drift out of sync.
+    _wp = pd.read_csv(os.path.join("capri_data", "2017", "market", "world_prices.csv")).set_index("commodity")["price"]
+    ref = {c: float(_wp[c]) for c in ("SWHE", "BARL", "CORN", "RAPE", "SOYA", "BEEF", "PORK",
+                                      "POUL", "MILK", "BUTR", "CHES", "SKIM") if c in _wp.index}
     out["price_reproduction_within_15pct"] = int(sum(
         1 for c, r in ref.items()
         if abs((eq.world_prices.get(c, 0) - r) / r) <= 0.15))

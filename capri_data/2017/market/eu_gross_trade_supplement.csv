@@ -1,0 +1,3 @@
+commodity,imports_kt,exports_kt,source
+SUGR,2969.0,855.0,"CAPRI 2030 reference: extra-EU imports = ImportQ from partner NONEU (= World 18,651 - intra-EU 15,682); exports = imports + net exports (EXPT-IMPT, intra-EU flows cancel)"
+DWHE,176.88077642167195,1906.9960799898176,"CAPRI's market trades wheat as one commodity (WHEA), so durum has no trade of its own there; WHEA extra-EU flows (imports 3,171, exports 34185 kt) scaled by durum's share of wheat production (0.056)"

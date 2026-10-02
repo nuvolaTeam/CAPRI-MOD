@@ -191,8 +191,14 @@ GWP_N2O_SAR = 310.0
 GWP_CH4_SAR = 21.0
 
 
+@dataclass
 class EnvironmentalIndicators:
-    """Environmental indicators for a region or aggregate."""
+    """Environmental indicators for a region or aggregate.
+
+    The @dataclass decorator had gone missing, so constructing it with its
+    fields raised a TypeError - the second of two errors that left every
+    model run's environmental table empty.
+    """
     region: str
 
     # GHG (kt CO2-equivalent)
@@ -286,7 +292,23 @@ class EnvironmentalModule:
             self._nutrient_source = "loaded (CAPRI p_FertPerHa)"
 
     def _n_excretion(self, region: str, animal: str) -> float:
-        """Regional CAPRI nitrogen excretion, falling back to the constant."""
+        """Manure N per head (kg), consistent with this model's herd units.
+
+        First choice: CAPRI's 2017 regional manure N TOTAL for the activity
+        divided by this model's herd (livestock_manure_n_coef.csv), built the
+        same way as revenue per head. The previous source gave manure per CAPRI
+        UNIT (animals fattened per year, 1,000 birds ...), while herds here are
+        census stock, so EU totals were off by animal: bulls 0.17, heifers 0.10,
+        calves 0.35, broilers 0.08, pigs 1.28, sheep and goats 1.49 of CAPRI's
+        - near-cancelling in the EU total (0.93), but in the nitrogen constraint
+        it put the burden on pigs and barely touched beef and poultry.
+        """
+        mc = self.data.get("livestock_manure_n_coef") if hasattr(self, "data") else None
+        if mc is not None and region in mc.index and animal in mc.columns:
+            import pandas as pd
+            v = mc.at[region, animal]
+            if pd.notna(v) and v > 0:
+                return float(v)
         tbl = getattr(self, "_regional_n", None)
         if tbl is None:
             tbl = regional_n_excretion(getattr(self, "data_dir", "capri_data"))
@@ -320,6 +342,7 @@ class EnvironmentalModule:
         self,
         activities: pd.Series,   # activity levels (1000 ha / 1000 heads)
         region: str,
+        n_intensity: Optional[Dict[str, float]] = None,
     ) -> Dict[str, float]:
         """
         Compute GHG emissions (kt CO2-eq) for a region.
@@ -357,6 +380,8 @@ class EnvironmentalModule:
             n_rate = self.nutrient_coefs.at[crop, "N"] if (
                 crop in self.nutrient_coefs.index and "N" in self.nutrient_coefs.columns
             ) else 0.0
+            # fertiliser per ha follows the crop's N intensity (1 = base)
+            n_rate = n_rate * float((n_intensity or {}).get(crop, 1.0))
             total_n_applied += area * n_rate / 1e6   # kt N
 
         # Direct N2O from soils
@@ -381,11 +406,58 @@ class EnvironmentalModule:
 
         return ghg
 
+    def _substitution(self, region):
+        """(availability/efficiency, manure-covered need per ha of crops at base).
+
+        From CAPRI's fertiliser allocation (fertiliser_substitution_2030.csv).
+        The second term is the base manure N available to crops (after export,
+        plus imports) times availability/efficiency, spread per ha of base
+        cropland: the part of the crops' need that manure covered at base.
+        """
+        cache = self.__dict__.setdefault("_sub_cache", {})
+        if region in cache:
+            return cache[region]
+        out = None
+        try:
+            fs = self.data.get("fertiliser_substitution")
+            if fs is not None and region in fs.index:
+                ratio = float(fs.at[region, "manure_availability"]) / float(fs.at[region, "mineral_efficiency"])
+                # CAPRI's minimum-mineral floor (fert/fertpar.gms p_minShareMinFert:
+                # 40% of an arable crop's need must be mineral, 5% for grass...).
+                # Where crops sit at it, extra manure cannot replace fertiliser:
+                # it is unused, and herd cuts remove it first at no fertiliser
+                # cost. The floor binds far more where manure is dense (48% of
+                # need in the densest quarter of regions vs 16%; North Brabant
+                # 86%, Brittany 85%), so manure displaces fertiliser only on the
+                # need above the floor.
+                if "need_at_floor_share" in fs.columns:
+                    _fl = float(fs.at[region, "need_at_floor_share"])
+                    if _fl == _fl:
+                        ratio *= max(0.0, 1.0 - _fl)
+                A = self.data["areas"]; H = self.data.get("animal_numbers")
+                area0 = float(sum(float(A.at[region, c]) for c in A.columns if c in CROPS)) if region in A.index else 0.0
+                man0 = 0.0
+                if H is not None and region in H.index:
+                    man0 = sum(float(H.at[region, a]) * self._n_excretion(region, a) for a in H.columns if a in ANIMALS)
+                mt = self.data.get("manure_trade")
+                if mt is not None and region in mt.index:
+                    man0 *= max(0.0, 1.0 - float(mt.at[region, "export_share"]))
+                    imp_ha = float(mt.at[region, "import_kg_n_per_ha"])
+                else:
+                    imp_ha = 0.0
+                if area0 > 0 and ratio == ratio:
+                    out = (ratio, ratio * (man0 / area0 + imp_ha))
+        except Exception:
+            out = None
+        cache[region] = out
+        return out
+
     def compute_nitrogen_balance(
         self,
         activities: pd.Series,
         yields: pd.Series,
         region: str,
+        n_intensity: Optional[Dict[str, float]] = None,
     ) -> Dict[str, float]:
         """
         Compute soil nitrogen balance (OECD/Eurostat methodology).
@@ -414,18 +486,33 @@ class EnvironmentalModule:
         # German regions EU-average fertilisation and a surplus of 14 kg N/ha
         # where Germany's is among Europe's highest.
         _reg_n = self.data.get("mineral_n_regional") if hasattr(self, "data") else None
+        _sub = self._substitution(region)
+        _ybase = self.data["yields"].loc[region] if (hasattr(self, "data") and region in self.data["yields"].index) else None
+        n_mineral_plain = 0.0
+        n_need_manure_part = 0.0
         for crop in CROPS:
             area = activities.get(crop, 0.0)
+            _m = float((n_intensity or {}).get(crop, 1.0))
+            # need grows with the square root of yield (CAPRI NUTNED_)
+            _sq = 1.0
+            if _sub is not None and area > 0 and _ybase is not None:
+                _y0 = float(_ybase.get(crop, 0.0)); _y = float(yields.get(crop, _y0)) if hasattr(yields, "get") else _y0
+                if _y0 > 0 and _y > 0:
+                    _sq = (_y / _y0) ** 0.5
+            rate = None
             if area > 0 and _reg_n is not None and region in _reg_n.index \
                     and crop in _reg_n.columns:
                 _v = _reg_n.at[region, crop]
                 if _v == _v and _v > 0:
-                    n_mineral += area * float(_v)
-                    continue
-            rate = self.nutrient_coefs.at[crop, "N"] if (
-                crop in self.nutrient_coefs.index
-            ) else 0.0
-            n_mineral += area * rate
+                    rate = float(_v)
+            if rate is None:
+                rate = self.nutrient_coefs.at[crop, "N"] if (
+                    crop in self.nutrient_coefs.index
+                ) else 0.0
+            n_mineral_plain += area * rate * _m
+            n_mineral += area * rate * _m * _sq
+            if _sub is not None and area > 0:
+                n_need_manure_part += area * _sub[1] * _m * _sq
 
         # Organic N from manure
         n_organic = 0.0
@@ -440,6 +527,17 @@ class EnvironmentalModule:
             heads_1000 = activities.get(animal, 0.0)
             n_excr = self._n_excretion(region, animal)
             n_organic += heads_1000 * n_excr
+        # MANURE TRADE (CAPRI's manExportOrAppl_): exporting regions keep
+        # (1 - export share) of their manure N, importing regions receive
+        # manure spread over their cropland. 11% of EU manure N leaves its
+        # region of origin (Weser-Ems exports 31%); without trade all of it
+        # counted as local surplus. Shares from CAPRI's 2030 reference.
+        _mt = self.data.get("manure_trade") if hasattr(self, "data") else None
+        _exp_sh, _imp_ha = 0.0, 0.0
+        if _mt is not None and region in getattr(_mt, "index", []):
+            _exp_sh = float(_mt.at[region, "export_share"])
+            _imp_ha = float(_mt.at[region, "import_kg_n_per_ha"])
+        n_organic *= max(0.0, 1.0 - _exp_sh)
 
         # Biological N fixation (for legumes and grass)
         n_fix_rates = {
@@ -453,9 +551,33 @@ class EnvironmentalModule:
 
         # Atmospheric deposition (~20 kg N/ha/year EU average)
         total_uaa = sum(activities.get(a, 0.0) for a in CROPS)
-        n_deposition = total_uaa * 20.0
+        # Atmospheric deposition per region from CAPRI's 2030 reference
+        # (EMEP-based; median 10 kg N/ha, 1-48 by region), replacing a flat
+        # 20 kg N/ha that put EU deposition at 1.8x CAPRI's.
+        _dep = self.data.get("n_deposition_regional") if hasattr(self, "data") else None
+        _dep_ha = 20.0
+        if _dep is not None and region in getattr(_dep, "index", []):
+            _v = float(_dep.at[region, "deposition_kg_n_per_ha"])
+            if _v == _v and _v >= 0:
+                _dep_ha = _v
+        n_deposition = total_uaa * _dep_ha
 
-        total_inputs = n_mineral + n_organic + n_fixation + n_deposition
+        n_manure_import = sum(activities.get(a, 0.0) for a in CROPS) * _imp_ha
+        # MINERAL FERTILISER FOLLOWS CROP NEED (CAPRI supply_model.gms NUTNED_):
+        # mineral N covers what manure, residues and deposition leave of the
+        # crops' need, each net of losses. Linearised around the base: crops
+        # carry the share of their need that manure covered at base, and the
+        # manure actually available displaces mineral N at
+        # availability / efficiency (median 0.44 / 0.91 across CAPRI regions).
+        # At base the total equals the previous mineral input exactly. When
+        # herds shrink mineral N rises; when cropland shrinks it falls by the
+        # crop's full need. A region total is clipped at zero; single-animal
+        # unit balances are not - their negative term IS the displacement.
+        if _sub is not None:
+            n_mineral += n_need_manure_part - _sub[0] * (n_organic + n_manure_import)
+            if total_uaa > 0:
+                n_mineral = max(n_mineral, 0.0)
+        total_inputs = n_mineral + n_organic + n_fixation + n_deposition + n_manure_import
 
         # --- Outputs ---
         # Crop N uptake: yield × N content per t product
@@ -485,7 +607,12 @@ class EnvironmentalModule:
         # N in livestock products
         n_animal_output = n_organic * 0.25  # ~25% of excreted N is in products
 
-        total_outputs = n_crop_uptake + n_animal_output
+        # GROSS NITROGEN BALANCE outputs are crop and fodder removals only
+        # (OECD/Eurostat; CAPRI's land and soil budgets, Koeble et al. 2026,
+        # Table 4). Excretion already excludes the N retained in animal
+        # products, so subtracting a share of it double-counted - and made every
+        # animal look 25% cleaner in the nitrogen constraint. Reported only.
+        total_outputs = n_crop_uptake
 
         # Balance
         surplus = total_inputs - total_outputs
@@ -493,6 +620,7 @@ class EnvironmentalModule:
 
         return {
             "n_mineral_input": n_mineral,
+            "n_mineral_plain": n_mineral_plain,
             "n_organic_input": n_organic,
             "n_fixation": n_fixation,
             "n_deposition": n_deposition,
@@ -543,8 +671,15 @@ class EnvironmentalModule:
     def compute_ammonia(
         self,
         activities: pd.Series,
+        region: Optional[str] = None,
     ) -> Dict[str, float]:
-        """Ammonia emissions (kt NH3) from livestock housing and soils."""
+        """Ammonia emissions (kt NH3) from livestock housing and soils.
+
+        ``region`` selects the regional N excretion. It used to be missing from
+        the signature while the body referenced it, so every call raised a
+        NameError; run_all_regions swallowed the error per region and returned
+        an EMPTY environmental table from every model run, silently.
+        """
         nh3_livestock = 0.0
         for animal in ANIMALS:
             heads = activities.get(animal, 0.0) * 1000
@@ -579,23 +714,52 @@ class EnvironmentalModule:
 
         yields = self.data["yields"].loc[region] if region in self.data["yields"].index \
                  else pd.Series(dtype=float)
+        # Crop uptake must use the yields of THIS solution, not the base year's:
+        # under a scenario, lower fertiliser, pesticide and organic yields lower
+        # uptake too. With base yields the accounts counted the fertiliser cut
+        # but not the lost uptake, so the reported nitrogen surplus fell far more
+        # than it did (Farm-to-Fork: -47.5% against the constraint's own cut).
+        # Realised yield = gross output / area, wherever both are positive.
+        try:
+            go = getattr(supply_result, "gross_output", None)
+            ac = getattr(supply_result, "activities", None)
+            if go is not None and ac is not None:
+                realised = {c: float(go[c]) / float(ac[c]) for c in CROPS
+                            if c in go.index and c in ac.index
+                            and float(ac[c]) > 1e-9 and float(go[c]) > 0}
+                if realised:
+                    yields = yields.copy()
+                    for c, v in realised.items():
+                        yields[c] = v
+        except Exception:
+            pass
 
         if land is None:
             land = self.data["land"].loc[region] if region in self.data["land"].index \
                    else pd.Series(dtype=float)
 
         # GHG
-        ghg = self.compute_ghg(acts, region)
+        mint = dict(getattr(supply_result, "n_intensity", {}) or {})
+        ghg = self.compute_ghg(acts, region, mint)
         ghg_total = sum(ghg.values())
 
         # Nitrogen
-        nb = self.compute_nitrogen_balance(acts, yields, region)
+        nb = self.compute_nitrogen_balance(acts, yields, region, mint)
+        # soil N2O is driven by mineral fertiliser alone, linearly: scale it to
+        # the mineral input after substitution and the yield effect on need
+        _plain = float(nb.get("n_mineral_plain", 0.0) or 0.0)
+        if _plain > 0 and "N2O_SOIL" in ghg:
+            _f = float(nb["n_mineral_input"]) / _plain
+            _d = ghg["N2O_SOIL"] * (_f - 1.0)
+            ghg["N2O_SOIL"] += _d
+            if "TOTAL" in ghg:
+                ghg["TOTAL"] += _d
 
         # Biodiversity
         bio = self.compute_biodiversity_indicators(acts, land)
 
         # Ammonia
-        nh3 = self.compute_ammonia(acts)
+        nh3 = self.compute_ammonia(acts, region)
 
         # Land use
         arable = sum(acts.get(c, 0.0) for c in CROPS

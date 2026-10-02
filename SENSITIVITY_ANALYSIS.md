@@ -50,7 +50,7 @@ elasticities). That keeps the problem tractable and the results interpretable.
 `run()` returns a dict. `flatten_outputs()` reduces each run to **~40 scalar
 indicators** (the natural response variables for sensitivity analysis):
 
-- `price_<commodity>` — cleared world price for each of the 32 commodities
+- `price_<commodity>` — cleared world price for each of the 33 commodities
 - `prod_<commodity>` — production
 - `biofuel_bioethanol_kt`, `biofuel_biodiesel_kt`
 - `supply_total_gross_margin`

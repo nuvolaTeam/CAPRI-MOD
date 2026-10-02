@@ -152,21 +152,32 @@ def optimal_intensity(
     # only a single crop move and silently leaves the ceiling unmet.
     step = 0.01
     max_iter = int((1.0 - m_min) / step) * max(len(crops), 1) + 10
+    # The same greedy algorithm, on plain arrays. Inputs are read ONCE, with
+    # exactly the look-ups the per-step pandas version made (.get with the same
+    # defaults), and the choice uses Python's min over the same crop order, so
+    # eligibility, costs and tie-breaking are unchanged. The pandas version did
+    # thousands of scalar Series look-ups per region and was half of all run
+    # time in a profile.
+    nc_r = n_coef.reindex(crops).fillna(0.0).to_numpy(dtype=float)
+    a_get = [float(a.get(c, 0.0)) for c in crops]
+    n_get = [n_coef.get(c, 0.0) for c in crops]
+    pv = [float(price.get(c, 0.0)) * float(base_yield.get(c, 0.0)) for c in crops]
+    a_arr = a.to_numpy(dtype=float)
+    mv = m.to_numpy(dtype=float).copy()
     for _ in range(max_iter):
-        cur_n = float((n_coef.reindex(crops).fillna(0.0) * m * a).sum())
+        cur_n = float((nc_r * mv * a_arr).sum())
         if cur_n <= ceiling_n:
             break
         cost = {}
-        for c in crops:
-            if m[c] <= m_min or a.get(c, 0.0) <= 0 or n_coef.get(c, 0.0) <= 0:
+        for i in range(len(crops)):
+            if mv[i] <= m_min or a_get[i] <= 0 or n_get[i] <= 0:
                 continue
-            rev_loss = (float(price.get(c, 0.0)) * float(base_yield.get(c, 0.0))
-                        * float(marginal_yield(m[c], k)))
-            cost[c] = rev_loss / float(n_coef[c])
+            cost[i] = pv[i] * float(marginal_yield(mv[i], k)) / float(n_get[i])
         if not cost:
             break
         cheapest = min(cost, key=cost.get)
-        m[cheapest] = max(m_min, m[cheapest] - step)
+        mv[cheapest] = max(m_min, mv[cheapest] - step)
+    m = pd.Series(mv, index=crops)
 
     yf = pd.Series(yield_factor(m.values, k), index=crops)
     return IntensityResult(

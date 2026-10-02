@@ -45,31 +45,41 @@ import pandas as pd
 
 # CAPRI capmod region -> model trade region. Regions absent here fold into ROW.
 REGION_MAP = {
-    "EU": "EU27", "EU27yr19": "EU27",
+    "EU27yr19": "EU27",
     "USA": "USA", "CAN": "CAN", "BRA": "BRA", "ARG": "ARG",
     "AUS": "AUS", "NZL": "NZL", "CHN": "CHN", "IND": "IND",
     "RUS": "RUS", "UKR": "UKR", "TUR": "TUR", "MEX": "MEX",
     "INDO": "IDN", "JAP": "JPN", "SKOR": "KOR", "THAI": "THA",
     "VIET": "VNM", "PAK": "PAK", "BGD": "BGD", "NGA": "NGA",
-    "ZAF": "ZAF", "RSA": "ZAF", "ETH": "ETH", "MOR": "MAR",
+    "ZAF": "ZAF", "ETH": "ETH", "MOR": "MAR",
 }
 
 # Overlapping aggregates. These are supersets of the regions above and must be
 # dropped, not mapped: including them counts the same trade more than once.
 AGGREGATES = {
-    "World", "NONEU", "NONEU_EU", "ASIA", "AFRICA", "MID_INC", "HI_INC",
-    "LDC", "LDCACP", "ACP", "MSA_ACP", "AFR_LDC", "AFR_REST", "ASOCE_LDC",
-    "ASOCE_REST", "MER", "MER_OTH", "MED", "FSU", "N_AM", "MS_AM", "ANZ",
-    "A_EU_EAST", "A_EU_WEST", "WBA", "REU", "URUPAR",
+    # CAPRI REPORTING sums, derived from the data (2026-10): the 44 trading regions
+    # (39 behavioural regions + 5 trade-only blocks EU27yr19, URUPAR, WBA, MER_OTH,
+    # MED) reproduce ImportQ(World, World) exactly for all 71 traded products, and
+    # every code below overshoots when added. See sources/capri_trade_regions_2017.json.
+    # The previous hand-made list dropped GENUINE regions (URUPAR, MED, AFR_LDC,
+    # AFR_REST, ASOCE_LDC, ASOCE_REST, FSU, REU, MSA_ACP, WBA) and kept "EU" and
+    # "AllImporters", double-counting the EU and rest of world.
+    "ACP", "AFRICA", "ANZ", "ASIA", "A_EU_EAST", "A_EU_WEST", "AllImporters", "EU", "HI_INC", "LDC", "LDCACP", "MER", "MID_INC", "MS_AM", "NONEU", "NONEU_EU", "N_AM", "World",
 }
 
 # model commodity -> CAPRI market commodity
 COMMODITY_MAP = {
     "SWHE": "WHEA", "CORN": "MAIZ", "POUL": "POUM",
     "BUTR": "BUTT", "SKIM": "SMIP",
+    # added 2026-10, the same renames as the world prices: without them these
+    # commodities had NO trade at all in the matrix
+    "SUGR": "SUGA", "WINE": "TWIN", "WHEY": "WHEP", "SHGM": "SGMT",
 }
 
-DUMP = Path("/mnt/user-data/uploads/_symbols_base1717.txt")
+DUMP = Path("/mnt/user-data/uploads/res_0_1717cap_after_2014_cal_from_data_caldefaulta.csv")
+# RSA is a different CAPRI region from ZAF (South Africa) -> ROW.
+#: oilseed-crushing products, added for the crushing module
+EXTRA_COMMODITIES = ["RAPO", "SUNO", "SOYO", "RAPC", "SUNC", "SOYC"]
 RECORD = re.compile(
     r"^'([^']+)'\.'([^']+)'\.'ImportQ'\.'([A-Z0-9]+)'\.'2017'\s+([-\d.Ee+]+)")
 
@@ -101,7 +111,9 @@ def main() -> None:
 
     cur_path = args.data_dir / "shared" / "trade_flows_2021.csv"
     cur = pd.read_csv(cur_path, index_col=[0, 1])
-    commodities = list(cur.columns)
+    cur17_path = args.data_dir / "shared" / "trade_flows_2017.csv"
+    cur17_cols = list(pd.read_csv(cur17_path, index_col=[0, 1]).columns) if cur17_path.exists() else []
+    commodities = list(dict.fromkeys(list(cur.columns) + cur17_cols + EXTRA_COMMODITIES))
     print(f"current matrix: {cur.shape[0]} region pairs x {len(commodities)} commodities")
 
     inv_comm = {v: k for k, v in COMMODITY_MAP.items()}

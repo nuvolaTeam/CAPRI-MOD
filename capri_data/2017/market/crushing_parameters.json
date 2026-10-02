@@ -1,0 +1,351 @@
+{
+ "_source": "CAPRI: crush = seed industrial use (INDM) and oil/cake production (MAPR), FAO_agg_17_defaulta p_dataMarket BAS; elasticity = own crushing-margin elasticity p_ElasProc(r,seed,seed,'CAL'), elas_2_1717defaulta; EU27 crush_share_of_use = EU crush / EU domestic use (FAO_agg BAS) - the EU base crush is this share x the market's EU base seed use",
+ "parameters": {
+  "EU27|RAPE": {
+   "crush_kt": 20954.73,
+   "oil_yield": 0.4179,
+   "cake_yield": 0.5407,
+   "elasticity": 0.456,
+   "elasticity_source": "p_ElasProc median of member states",
+   "crush_share_of_use": 0.91608
+  },
+  "EU27|SUNF": {
+   "crush_kt": 8308.83,
+   "oil_yield": 0.4198,
+   "cake_yield": 0.528,
+   "elasticity": 0.869,
+   "elasticity_source": "p_ElasProc median of member states",
+   "crush_share_of_use": 0.89588
+  },
+  "EU27|SOYA": {
+   "crush_kt": 14669.87,
+   "oil_yield": 0.1856,
+   "cake_yield": 0.7881,
+   "elasticity": 0.856,
+   "elasticity_source": "p_ElasProc median of member states",
+   "crush_share_of_use": 0.91433
+  },
+  "ARG|SUNF": {
+   "crush_kt": 3027.7,
+   "oil_yield": 0.413,
+   "cake_yield": 0.4704,
+   "elasticity": 0.827,
+   "elasticity_source": "p_ElasProc region"
+  },
+  "ARG|SOYA": {
+   "crush_kt": 43035.95,
+   "oil_yield": 0.1857,
+   "cake_yield": 0.8157,
+   "elasticity": 0.769,
+   "elasticity_source": "p_ElasProc region"
+  },
+  "AUS|RAPE": {
+   "crush_kt": 951.28,
+   "oil_yield": 0.3998,
+   "cake_yield": 0.5732,
+   "elasticity": 0.409,
+   "elasticity_source": "p_ElasProc region"
+  },
+  "AUS|SUNF": {
+   "crush_kt": 25.93,
+   "oil_yield": 0.4499,
+   "cake_yield": 0.5738,
+   "elasticity": 0.918,
+   "elasticity_source": "p_ElasProc region"
+  },
+  "AUS|SOYA": {
+   "crush_kt": 31.74,
+   "oil_yield": 0.1776,
+   "cake_yield": 0.7608,
+   "elasticity": 0.787,
+   "elasticity_source": "p_ElasProc region"
+  },
+  "BGD|RAPE": {
+   "crush_kt": 437.3,
+   "oil_yield": 0.3581,
+   "cake_yield": 0.6292,
+   "elasticity": 0.77,
+   "elasticity_source": "p_ElasProc region"
+  },
+  "BRA|RAPE": {
+   "crush_kt": 53.33,
+   "oil_yield": 0.3513,
+   "cake_yield": 0.5505,
+   "elasticity": 0.874,
+   "elasticity_source": "p_ElasProc region"
+  },
+  "BRA|SUNF": {
+   "crush_kt": 102.89,
+   "oil_yield": 0.4142,
+   "cake_yield": 0.6059,
+   "elasticity": 0.874,
+   "elasticity_source": "p_ElasProc region"
+  },
+  "BRA|SOYA": {
+   "crush_kt": 42927.31,
+   "oil_yield": 0.1953,
+   "cake_yield": 0.7612,
+   "elasticity": 1.095,
+   "elasticity_source": "p_ElasProc region"
+  },
+  "CAN|RAPE": {
+   "crush_kt": 9104.49,
+   "oil_yield": 0.4401,
+   "cake_yield": 0.5985,
+   "elasticity": 0.911,
+   "elasticity_source": "p_ElasProc region"
+  },
+  "CAN|SUNF": {
+   "crush_kt": 58.67,
+   "oil_yield": 0.4248,
+   "cake_yield": 0.5094,
+   "elasticity": 0.881,
+   "elasticity_source": "p_ElasProc region"
+  },
+  "CAN|SOYA": {
+   "crush_kt": 1918.0,
+   "oil_yield": 0.1856,
+   "cake_yield": 0.7872,
+   "elasticity": 0.891,
+   "elasticity_source": "p_ElasProc region"
+  },
+  "CHN|RAPE": {
+   "crush_kt": 11799.26,
+   "oil_yield": 0.3226,
+   "cake_yield": 0.4401,
+   "elasticity": 0.645,
+   "elasticity_source": "p_ElasProc region"
+  },
+  "CHN|SUNF": {
+   "crush_kt": 741.04,
+   "oil_yield": 0.3498,
+   "cake_yield": 0.4415,
+   "elasticity": 0.887,
+   "elasticity_source": "p_ElasProc region"
+  },
+  "CHN|SOYA": {
+   "crush_kt": 85420.61,
+   "oil_yield": 0.1799,
+   "cake_yield": 0.8066,
+   "elasticity": 0.751,
+   "elasticity_source": "p_ElasProc region"
+  },
+  "EGY|SUNF": {
+   "crush_kt": 89.49,
+   "oil_yield": 0.3274,
+   "cake_yield": 0.4423,
+   "elasticity": 0.929,
+   "elasticity_source": "p_ElasProc region"
+  },
+  "EGY|SOYA": {
+   "crush_kt": 2243.19,
+   "oil_yield": 0.1673,
+   "cake_yield": 0.7683,
+   "elasticity": 0.305,
+   "elasticity_source": "p_ElasProc region"
+  },
+  "IDN|SUNF": {
+   "crush_kt": 15.0,
+   "oil_yield": 0.4512,
+   "cake_yield": 0.4638,
+   "elasticity": 0.927,
+   "elasticity_source": "p_ElasProc region"
+  },
+  "IDN|SOYA": {
+   "crush_kt": 2584.27,
+   "oil_yield": 0.1834,
+   "cake_yield": 0.8021,
+   "elasticity": 0.323,
+   "elasticity_source": "p_ElasProc region"
+  },
+  "IND|RAPE": {
+   "crush_kt": 5759.84,
+   "oil_yield": 0.3693,
+   "cake_yield": 0.6132,
+   "elasticity": 0.69,
+   "elasticity_source": "p_ElasProc region"
+  },
+  "IND|SUNF": {
+   "crush_kt": 200.65,
+   "oil_yield": 0.3605,
+   "cake_yield": 0.4694,
+   "elasticity": 0.888,
+   "elasticity_source": "p_ElasProc region"
+  },
+  "IND|SOYA": {
+   "crush_kt": 7688.72,
+   "oil_yield": 0.1724,
+   "cake_yield": 0.7657,
+   "elasticity": 0.625,
+   "elasticity_source": "p_ElasProc region"
+  },
+  "JPN|RAPE": {
+   "crush_kt": 2374.55,
+   "oil_yield": 0.4381,
+   "cake_yield": 0.5565,
+   "elasticity": 0.535,
+   "elasticity_source": "p_ElasProc region"
+  },
+  "JPN|SUNF": {
+   "crush_kt": 1.33,
+   "oil_yield": 0.8762,
+   "cake_yield": 0.0221,
+   "elasticity": 0.905,
+   "elasticity_source": "p_ElasProc region"
+  },
+  "JPN|SOYA": {
+   "crush_kt": 2330.26,
+   "oil_yield": 0.1983,
+   "cake_yield": 0.7562,
+   "elasticity": 0.783,
+   "elasticity_source": "p_ElasProc region"
+  },
+  "MEX|RAPE": {
+   "crush_kt": 1446.61,
+   "oil_yield": 0.4098,
+   "cake_yield": 0.5651,
+   "elasticity": 0.677,
+   "elasticity_source": "p_ElasProc region"
+  },
+  "MEX|SUNF": {
+   "crush_kt": 29.82,
+   "oil_yield": 0.4355,
+   "cake_yield": 0.5889,
+   "elasticity": 0.892,
+   "elasticity_source": "p_ElasProc region"
+  },
+  "MEX|SOYA": {
+   "crush_kt": 3765.56,
+   "oil_yield": 0.1996,
+   "cake_yield": 0.6662,
+   "elasticity": 0.827,
+   "elasticity_source": "p_ElasProc region"
+  },
+  "NGA|SOYA": {
+   "crush_kt": 483.72,
+   "oil_yield": 0.1883,
+   "cake_yield": 0.7843,
+   "elasticity": 0.961,
+   "elasticity_source": "p_ElasProc region"
+  },
+  "PAK|RAPE": {
+   "crush_kt": 960.35,
+   "oil_yield": 0.4972,
+   "cake_yield": 0.7007,
+   "elasticity": 0.453,
+   "elasticity_source": "p_ElasProc region"
+  },
+  "PAK|SUNF": {
+   "crush_kt": 123.63,
+   "oil_yield": 0.5818,
+   "cake_yield": 0.4469,
+   "elasticity": 0.803,
+   "elasticity_source": "p_ElasProc region"
+  },
+  "PAK|SOYA": {
+   "crush_kt": 1290.87,
+   "oil_yield": 0.2274,
+   "cake_yield": 0.9715,
+   "elasticity": 0.938,
+   "elasticity_source": "p_ElasProc region"
+  },
+  "RUS|RAPE": {
+   "crush_kt": 959.0,
+   "oil_yield": 0.4187,
+   "cake_yield": 0.515,
+   "elasticity": 0.905,
+   "elasticity_source": "p_ElasProc region"
+  },
+  "RUS|SUNF": {
+   "crush_kt": 10106.74,
+   "oil_yield": 0.4454,
+   "cake_yield": 0.4186,
+   "elasticity": 0.411,
+   "elasticity_source": "p_ElasProc region"
+  },
+  "RUS|SOYA": {
+   "crush_kt": 3923.08,
+   "oil_yield": 0.175,
+   "cake_yield": 0.7838,
+   "elasticity": 0.834,
+   "elasticity_source": "p_ElasProc region"
+  },
+  "THA|SOYA": {
+   "crush_kt": 2587.5,
+   "oil_yield": 0.1564,
+   "cake_yield": 0.6772,
+   "elasticity": 0.263,
+   "elasticity_source": "p_ElasProc region"
+  },
+  "UKR|RAPE": {
+   "crush_kt": 154.52,
+   "oil_yield": 0.6672,
+   "cake_yield": 1.0541,
+   "elasticity": 0.949,
+   "elasticity_source": "p_ElasProc region"
+  },
+  "UKR|SUNF": {
+   "crush_kt": 12846.02,
+   "oil_yield": 0.3656,
+   "cake_yield": 0.3721,
+   "elasticity": 0.243,
+   "elasticity_source": "p_ElasProc region"
+  },
+  "UKR|SOYA": {
+   "crush_kt": 1177.79,
+   "oil_yield": 0.1668,
+   "cake_yield": 0.7226,
+   "elasticity": 0.928,
+   "elasticity_source": "p_ElasProc region"
+  },
+  "USA|RAPE": {
+   "crush_kt": 1891.2,
+   "oil_yield": 0.4274,
+   "cake_yield": 0.5747,
+   "elasticity": 0.881,
+   "elasticity_source": "p_ElasProc region"
+  },
+  "USA|SUNF": {
+   "crush_kt": 486.42,
+   "oil_yield": 0.4258,
+   "cake_yield": 0.4767,
+   "elasticity": 0.883,
+   "elasticity_source": "p_ElasProc region"
+  },
+  "USA|SOYA": {
+   "crush_kt": 53676.12,
+   "oil_yield": 0.1943,
+   "cake_yield": 0.7915,
+   "elasticity": 0.972,
+   "elasticity_source": "p_ElasProc region"
+  },
+  "VNM|SOYA": {
+   "crush_kt": 1116.11,
+   "oil_yield": 0.19,
+   "cake_yield": 0.7835,
+   "elasticity": 0.745,
+   "elasticity_source": "p_ElasProc region"
+  },
+  "ZAF|RAPE": {
+   "crush_kt": 90.04,
+   "oil_yield": 0.5014,
+   "cake_yield": 0.7918,
+   "elasticity": 0.96,
+   "elasticity_source": "p_ElasProc region"
+  },
+  "ZAF|SUNF": {
+   "crush_kt": 725.73,
+   "oil_yield": 0.3779,
+   "cake_yield": 0.4506,
+   "elasticity": 0.314,
+   "elasticity_source": "p_ElasProc region"
+  },
+  "ZAF|SOYA": {
+   "crush_kt": 996.86,
+   "oil_yield": 0.1659,
+   "cake_yield": 0.7996,
+   "elasticity": 0.893,
+   "elasticity_source": "p_ElasProc region"
+  }
+ }
+}

@@ -125,6 +125,7 @@ class RegionData:
     #: Used instead of price x YILD, which for breeding and suckler activities
     #: values a quantity that is not a marketed product.
     livestock_revenue_coef: Optional[pd.Series] = None
+    livestock_feed_coef: Optional[pd.Series] = None
 
     #: CAPRI's organic yield gaps by macro-region and product group.
     organic_yield_gap: Optional[pd.DataFrame] = None
@@ -132,6 +133,14 @@ class RegionData:
     #: Low- and high-intensity dairy yields (CAPRI DCOL / DCOH), the bounds of
     #: the livestock intensity margin.
     livestock_intensity_bounds: Optional[pd.Series] = None
+
+    #: CAPRI's Green Deal targets for this region's member state: extra
+    #: landscape land (points of UAA) and organic conversion (points of arable,
+    #: grassland and permanent-crop area).
+    landscape_target_pp: Optional[float] = None
+    #: CAPRI's land rent for this region's country, EUR/ha
+    land_rent: Optional[float] = None
+    organic_targets_pp: Optional[pd.Series] = None
 
 
 @dataclass
@@ -261,7 +270,14 @@ class PMPCalibrator:
         if pos.size:
             med = float(np.median(pos))
             hi = med * 1e4          # allow 4 orders of magnitude spread
-            lo = med * 1e-4
+            # The LOWER bound reaches further. The clamp was added for the upper
+            # tail (near-zero bases with explosive curvature stopped the
+            # solver). Large activities with small per-unit revenue - poultry:
+            # tens of millions of places at ~12 EUR each - calibrate legitimately
+            # low; at 1e-4 x median both broilers and hens were lifted to the
+            # same floor, ~150x their calibrated curvature, and stopped
+            # responding to prices and feed costs.
+            lo = med * 1e-7
             Qdiag = np.clip(Qdiag, lo, hi)
 
         # Symmetric positive semi-definite Q (diagonal dominant)
@@ -394,8 +410,21 @@ class RegionalSupplyModel:
             "DCOW": 1.0, "BCOW": 1e-3, "BULL": 1.0, "HFRS": 1e-3, "CALV": 1e-3,
             "SHGP": 1e-3, "PIGS": 1e-3, "PIGF": 1e-3, "LAYS": 1e-3, "BROI": 1e-3,
         }
+        # Livestock: CAPRI's market revenue per head (MREV), the SAME value the
+        # margin calculation uses. price x yield is wrong for most animals -
+        # their output units are unverified (UNVERIFIED_OUTPUT_UNITS): a pig
+        # came to ~2,180 EUR/head, about twenty times too much, and a broiler
+        # place ~1,430. The curvature is proportional to this revenue, so every
+        # price or feed-cost change was damped by the same factor: a 26% cut in
+        # the pig margin moved pigs by 0.24%, broilers by 0.01%. Base levels are
+        # unaffected - calibration reproduces them whatever the curvature.
+        _rev = getattr(self.data, "livestock_revenue_coef", None)
         gross = {}
         for a in self.acts:
+            if a in ANIMALS and _rev is not None and a in _rev.index \
+                    and pd.notna(_rev[a]) and float(_rev[a]) > 0:
+                gross[a] = float(_rev[a])
+                continue
             yv = yields_ser.get(a, 0.0)
             if a in LIVESTOCK_YIELD_TO_TONNE:
                 yv = yv * LIVESTOCK_YIELD_TO_TONNE[a]
@@ -416,9 +445,58 @@ class RegionalSupplyModel:
     # ------------------------------------------------------------------
 
     def _base_levels(self) -> pd.Series:
-        crop_levels   = self.data.base_areas.reindex(CROPS).fillna(0.0)
-        animal_levels = self.data.base_animals.reindex(ANIMALS).fillna(0.0)
-        return pd.concat([crop_levels, animal_levels]).reindex(self.acts).fillna(0.0)
+        # Called ~80 times per solve, rebuilding the same Series each time (11%
+        # of run time in a profile). Base areas and herds are never modified in
+        # place, so the result is cached - keyed on the identity of the two
+        # inputs so it refreshes if either is replaced, and returned as a copy
+        # so no caller can alter the cached value.
+        key = (id(self.data.base_areas), id(self.data.base_animals))
+        cached = getattr(self, "_base_levels_cache", None)
+        if cached is None or cached[0] != key:
+            crop_levels   = self.data.base_areas.reindex(CROPS).fillna(0.0)
+            animal_levels = self.data.base_animals.reindex(ANIMALS).fillna(0.0)
+            cached = (key, pd.concat([crop_levels, animal_levels]).reindex(self.acts).fillna(0.0))
+            self._base_levels_cache = cached
+        return cached[1].copy()
+
+    #: broiler birds produced per census place and year (CAPRI 2030 reference)
+    BROILER_BIRDS_PER_PLACE = 4.35
+    #: protein-rich feed is priced by the CAKE markets (crushing Stage 3): a cake
+    #: price index weighted by CAPRI's EU cake feed use (2017 FAO_agg BAS), at
+    #: CAPRI's base world prices. Replaces the soybean-meal PROXY (0.89 x the
+    #: soybean price). Values read from the data files on first use.
+    _CAKE_INDEX = None
+
+    @classmethod
+    def _cake_index(cls):
+        """(weights, base prices) of the protein-feed cake index."""
+        if cls._CAKE_INDEX is None:
+            w, p = {}, {}
+            try:
+                import json
+                from pathlib import Path
+                root = Path(__file__).resolve().parents[2] / "capri_data" / "2017" / "market"
+                b = json.load(open(root / "capri_oilseed_products_baseline.json"))["balances"]
+                wp = pd.read_csv(root / "world_prices.csv").set_index("commodity")["price"]
+                for c in ("SOYC", "RAPC", "SUNC"):
+                    fe = float(b.get(f"EU27|{c}", {}).get("feed", 0.0))
+                    if fe > 0 and c in wp.index:
+                        w[c], p[c] = fe, float(wp[c])
+            except Exception:
+                w, p = {}, {}
+            cls._CAKE_INDEX = (w, p)
+        return cls._CAKE_INDEX
+
+    def _protein_feed_cost_change(self, q, price_shock) -> float:
+        """Cost change of q tonnes of protein-rich feed under the cake prices."""
+        w, p = self._cake_index()
+        ws = sum(w.values())
+        if q <= 0 or ws <= 0:
+            return 0.0
+        return q * sum((w[c] / ws) * p[c] * float(price_shock.get(c, 0.0)) for c in w)
+    #: EU feed use per cereal, CAPRI 2030 reference (FEDM, kt): the weights of
+    #: the feed-cereal price change (other cereals include rye and oats)
+    FEED_CEREAL_MIX = {"SWHE": 39911.0, "BARL": 27610.0, "CORN": 53489.0, "OCER": 23204.0}
 
     def _compute_net_revenues(self, price_shock: Optional[pd.Series] = None):
         """
@@ -488,6 +566,50 @@ class RegionalSupplyModel:
             else:
                 payment = cap.get("BPS", 0.0) if act in CROPS else 0.0
 
+            # FEED COSTS follow feed prices. Animal margins were revenue minus a
+            # FIXED variable cost, so dearer cereals never reached livestock:
+            # under Farm-to-Fork (cereals +14%) poultry changed by exactly 0.0%
+            # against CAPRI's -16%. The change in cost per head is the animal's
+            # purchased cereal ration (t/head, feed_requirements.csv) times the
+            # change in each cereal's price. Base costs already include feed, so
+            # at base nothing changes. Protein meals (SOYM, RAPM, SUFM) are not
+            # priced in this market and are left out.
+            if act in ANIMALS and price_shock is not None:
+                # FEED COSTS follow feed prices. Feed per head is CAPRI's 2017
+                # regional total for the activity divided by this model's herd
+                # (livestock_feed_coef.csv), so units and vintage match the
+                # herds; the old feed table used CAPRI per-UNIT values on
+                # census-stock herds (bulls 0.47 t of cereals per head against
+                # 1.89, pigs 0.91 against 0.45).
+                #  - cereals: price change of a cereal mix weighted by CAPRI's
+                #    2030 EU feed use per cereal (a SIMPLIFICATION: CAPRI
+                #    optimises the feed mix);
+                #  - protein-rich feed: the cake price index (crushing Stage 3);
+                #  - energy-rich feed: no market here, price unchanged.
+                fc = getattr(self.data, "livestock_feed_coef", None)
+                qc = float(fc.get(f"{act}_cereals", float("nan"))) if fc is not None else float("nan")
+                qp = float(fc.get(f"{act}_protein", float("nan"))) if fc is not None else float("nan")
+                if qc == qc:
+                    wsum = sum(self.FEED_CEREAL_MIX.values())
+                    for feed, w in self.FEED_CEREAL_MIX.items():
+                        p0 = float(self.data.producer_prices.get(feed, 0.0))
+                        cost += qc * (w / wsum) * p0 * float(price_shock.get(feed, 0.0))
+                    if qp == qp and qp > 0:
+                        cost += self._protein_feed_cost_change(qp, price_shock)
+                else:
+                    fr = getattr(self.data, "feed_requirements", None)
+                    if fr is not None and len(fr) and act in fr.index:
+                        mult = self.BROILER_BIRDS_PER_PLACE if act == "BROI" else 1.0
+                        for feed in ("SWHE", "BARL", "CORN", "OCER"):
+                            if feed in fr.columns:
+                                q = float(fr.at[act, feed]) * mult
+                                if q > 0:
+                                    p0 = float(self.data.producer_prices.get(feed, 0.0))
+                                    cost += q * p0 * float(price_shock.get(feed, 0.0))
+                        if "SOYM" in fr.columns:
+                            q = float(fr.at[act, "SOYM"]) * mult
+                            if q > 0:
+                                cost += self._protein_feed_cost_change(q, price_shock)
             # Crop gross margin (EUR/ha); animal gross margin (EUR/head)
             r[act] = revenue - cost + payment
 
@@ -550,6 +672,10 @@ class RegionalSupplyModel:
     #: areas; that breakdown is not held here, so its EU figure is used
     #: uniformly and the simplification recorded.
     ORGANIC_BASELINE_SHARE = 0.10
+
+    #: Crops occupying PERMANENT land - the same set the land data is built
+    #: with in tools/build_capri_base.py. Everything else except grass is arable.
+    PERMANENT_LAND_CROPS = ("WINE", "OLIV", "APPL", "OFRU", "CITR", "TAGR")
 
     #: Organic share of utilised agricultural area by country, from Eurostat
     #: org_cropar as published in its 2019 release (2018 for Slovenia). CAPRI
@@ -741,7 +867,8 @@ class RegionalSupplyModel:
         "WINE": 0.084,
     }
 
-    def apply_pesticide_reduction(self, reduction: float) -> None:
+    def apply_pesticide_reduction(self, reduction: float,
+                                  organic_share: Optional[float] = None) -> None:
         """Apply the Farm-to-Fork pesticide target's YIELD-LOSS channel.
 
         CAPRI implements the target as four simultaneous shocks: a cut in plant-
@@ -784,6 +911,18 @@ class RegionalSupplyModel:
         ylds = self.data.yields
         new_ylds = ylds.copy()
         nr = self.net_revenues.copy()
+        # CAPRI applies the pesticide target to the CONVENTIONAL area only
+        # (pol_input/greendeal/conventional_io.gms). The 50% cut is a TOTAL
+        # target: organic conversion already delivers part of it, since organic
+        # hectares use no plant protection, and only the REMAINING cut is made on
+        # conventional land, so the overall reduction stays 50%. The yield loss
+        # and the rise in other inputs likewise fall on the conventional share.
+        # Applying all three to every hectare double-counted wherever organic and
+        # pesticide instruments combine; it made oilseed area fall 12-13% under
+        # Farm-to-Fork against the ~5% implied by CAPRI's figures.
+        _targets = getattr(self.data, "organic_targets_pp", None)
+        _org_default = (max(0.0, float(organic_share) - self._organic_baseline())
+                        if organic_share else 0.0)
         for a in self.acts:
             if a not in self.PESTICIDE_AFFECTED:
                 continue
@@ -791,6 +930,11 @@ class RegionalSupplyModel:
             y = float(ylds.get(a, 0.0)) if hasattr(ylds, "get") else 0.0
             if p <= 0 or y <= 0:
                 continue
+            o = (self._organic_converted(a, organic_share, _targets, _org_default)
+                 if organic_share else 0.0)
+            o = min(max(o, 0.0), 0.99)
+            conv = 1.0 - o
+            ppp_cut = max(0.0, float(reduction) - o)      # remaining target, whole crop
             # The yield loss must reach BOTH the objective and the reported
             # yields. It used to change net revenue only, so it steered what
             # farmers grew but left gross_output computed on unshocked yields:
@@ -798,8 +942,8 @@ class RegionalSupplyModel:
             # our cereal AREA fell 5.9% against CAPRI's 4%. The area response
             # was never the problem; the yield effect was missing from the
             # output. CAPRI reports production, so this is what is compared.
-            new_ylds[a] = y * (1.0 - loss)
-            nr[a] = float(nr.get(a, 0.0)) - p * y * loss
+            new_ylds[a] = y * (1.0 - loss * conv)
+            nr[a] = float(nr.get(a, 0.0)) - p * y * loss * conv
             # CAPRI cuts plant-protection expenditure by the target share and
             # raises other costs by 50%. Both are represented here relative to
             # the crop's assumed PPP share of variable cost: the saving is a
@@ -807,7 +951,7 @@ class RegionalSupplyModel:
             c = float(self.data.variable_costs.get(a, 0.0))
             ppp = self.PPP_COST_SHARE.get(a)
             if ppp and c > 0:
-                nr[a] = float(nr.get(a, 0.0)) + c * ppp * reduction
+                nr[a] = float(nr.get(a, 0.0)) + c * ppp * ppp_cut
             # CAPRI raises its OTHER INPUTS category by 50% at the 50% target.
             # This used to be applied to the plant-protection share, where it
             # cancelled the saving almost exactly and made the cost channel a
@@ -817,7 +961,7 @@ class RegionalSupplyModel:
             other = self.OTHER_COST_SHARE.get(a)
             if other and c > 0:
                 nr[a] = float(nr.get(a, 0.0)) - (
-                    c * other * self.PESTICIDE_OTHER_COST_RISE * (reduction / 0.50))
+                    c * other * self.PESTICIDE_OTHER_COST_RISE * (reduction / 0.50) * conv)
         self.data.yields = new_ylds
         self.net_revenues = nr
 
@@ -904,6 +1048,39 @@ class RegionalSupplyModel:
                 return abs(float(v)) / 100.0
         return self.ORGANIC_YIELD_GAP
 
+
+    def _organic_converted(self, activity: str, share: float, targets,
+                           default: float) -> float:
+        """Share of this activity's area that converts to organic.
+
+        CAPRI does not move every member state to 25%. It burden-shares the EU's
+        15-point shock (25% target minus 10% existing) across member states and
+        crop groups: gams/pol_input/greendeal/organic_targets.gdx gives the extra
+        points for arable land, permanent grassland and permanent crops, per
+        member state, and those weight to exactly 15.0 points EU-wide. France
+        converts 45.6% of its permanent crops, Austria 5.0%; Austria, already
+        past 25%, still converts 7.5 points of UAA where a distance-to-25% rule
+        gave it nothing.
+
+        The requested share scales the ambition (0.25 = CAPRI's full target).
+        Falls back to the member state's UAA-wide figure, then to the
+        distance-to-target rule, where a crop group has no entry.
+        """
+        if targets is None:
+            return default
+        if activity in self.PERMANENT_LAND_CROPS:
+            col = "permanent_pp"
+        elif activity == "GRAS":
+            col = "grassland_pp"
+        else:
+            col = "arable_pp"
+        val = targets.get(col) if hasattr(targets, "get") else None
+        if val is None or pd.isna(val):
+            val = targets.get("uaa_pp") if hasattr(targets, "get") else None
+        if val is None or pd.isna(val):
+            return default
+        return max(0.0, min(1.0, float(val) / 100.0 * (float(share) / 0.25)))
+
     def apply_organic_area_target(self, share: float,
                                   pesticide_active: bool = False) -> None:
         """Adjust average I/O coefficients for an organic AREA target.
@@ -932,8 +1109,10 @@ class RegionalSupplyModel:
         new_ylds = ylds.copy()
         costs = self.data.variable_costs
         nr = self.net_revenues.copy()
-        converted = max(0.0, float(share) - self._organic_baseline())
+        converted_default = max(0.0, float(share) - self._organic_baseline())
+        _org = getattr(self.data, "organic_targets_pp", None)
         for a in self.acts:
+            converted = self._organic_converted(a, share, _org, converted_default)
             if a not in CROPS:
                 continue
             p = float(prices.get(a, 0.0))
@@ -954,15 +1133,17 @@ class RegionalSupplyModel:
             # Europe fruits lose 22.5% and olives and vines 11.6%, while in
             # Central Europe fruits lose 51.3% and cereals 42.9%.
             gap = self._organic_yield_gap(a)
-            if pesticide_active:
-                # CAPRI scales the organic yield gap by 0.45 when the pesticide
-                # effect is modelled separately, because 55% of the measured
-                # organic gap is attributed to the loss of plant protection and
-                # would otherwise be counted twice (organic_area.gms, and the
-                # same 0.45 in capreg/inputs/pest_cor.gms). Applying the full
-                # gap alongside our own pesticide yield loss overstated cereals
-                # and oilseeds (1.22 and 1.25 of CAPRI).
-                gap *= self.ORGANIC_GAP_PESTICIDE_SHARE
+            # NO 0.45 discount here. CAPRI's organic_area.gms scales the organic
+            # yield gap by 0.45 ONLY when %pest_disagg% is on - a mode in which
+            # the pesticide yield effect is endogenous (v_yldPestFac). The
+            # Farm-to-Fork study used the other mode: an explicit 10% yield loss
+            # (pesticides.gms argument), in which the organic gap applies IN
+            # FULL to organic land. This model had mixed the two. The discount
+            # once offset a double count, while the pesticide loss also fell on
+            # organic hectares; since the pesticide target applies to
+            # conventional land only, it discounted organic land a second time
+            # and understated the cereal yield loss (cereal area matched CAPRI,
+            # yields fell 8% against 11%).
                 # CAPRI converts the DISTANCE from the existing organic area to the
             # target, not the whole target.
             yield_factor = 1.0 - gap * converted
@@ -979,6 +1160,19 @@ class RegionalSupplyModel:
             new_ylds[a] = y * yield_factor
             delta = (p * y * (yield_factor - 1.0)) - cost_change
             nr[a] = float(nr.get(a, 0.0)) + delta
+            # Converted land uses NO mineral fertiliser (CAPRI's
+            # organic_minfert_redu.gms). Only its COST was removed here, so in
+            # the nitrogen balance and the environmental accounts organic land
+            # still spread full mineral N. The mineral-N factor travels the
+            # same path as the fertiliser technologies (multiplied with them).
+            if converted > 0:
+                self._n_intensity = getattr(self, "_n_intensity", {}) or {}
+                self._n_intensity[a] = self._n_intensity.get(a, 1.0) * max(0.0, 1.0 - converted)
+                nc_ = self.data.nutrient_coefs
+                if a in nc_.index and "N" in nc_.columns:
+                    nc_ = nc_.copy()
+                    nc_.at[a, "N"] = float(nc_.at[a, "N"]) * max(0.0, 1.0 - converted)
+                    self.data.nutrient_coefs = nc_
         self.data.yields = new_ylds
         self.net_revenues = nr
 
@@ -1025,6 +1219,76 @@ class RegionalSupplyModel:
                + self.data.land.get("GRASSLAND", 80.0))
         return base_n / uaa if uaa > 0 else 0.0
 
+
+    def _apply_balance_price(self, lam: float):
+        """Fertiliser response to the nitrogen-balance price, as CAPRI models it.
+
+        CAPRI's supply model has NO nitrogen yield response: crop yields are
+        exogenous shifts (capmod/shift_yields.gms). It meets a nitrogen target
+        partly through FERTILISER-EFFICIENCY TECHNOLOGIES - precision farming,
+        variable-rate application, nitrification inhibitors, timing - which let
+        the same crop need be met with less purchased fertiliser: in its crop
+        nutrient balance mineral N counts x (1 + SUM_tech share x NMIN).
+        JRC121368 states the GNB target was met 'with nitrogen mitigation
+        technologies made available to farmers'.
+
+        Each option's share follows CAPRI's adoption rule (as in CapriAbatement):
+            s = (value - a) / b ,  bounded to [0, MaxShare] ,
+        calibrated so that at zero extra value it is the observed initial share;
+        the value of full adoption is the balance price times the fertiliser it
+        saves per hectare. Shares summing above 1 are scaled down. Fertiliser per
+        ha then falls by (1 + E0) / (1 + E), E the share-weighted efficiency gain
+        and E0 its initial value. YIELDS DO NOT CHANGE; each hectare bears the
+        extra adoption cost, which in CAPRI's calibration is already net of the
+        fertiliser saved at base prices.
+
+        (This replaced a Mitscherlich intensity response that cut fertiliser
+        THROUGH yield loss - not CAPRI's mechanism - under which crops carried too
+        much of the adjustment: cereals 1.28x, oilseeds 1.42x CAPRI, herds too
+        little.)
+        """
+        # keep factors already set this solve (organic land: no mineral N)
+        self._n_intensity = getattr(self, "_n_intensity", {}) or {}
+        self._fert_tech_shares = {}
+        srow = getattr(self, "_surplus_row", None)
+        techs = srow[5] if (srow is not None and len(srow) > 5) else []
+        if not lam or lam <= 0 or not techs:
+            return None
+        nmin_ha = srow[2] if len(srow) > 2 else {}
+        base = self._base_levels()
+        crops = [c for c in CROPS if c in self.acts and float(nmin_ha.get(c, 0.0)) > 0]
+        area = sum(float(base.get(c, 0.0)) for c in crops)
+        if area <= 0:
+            return None
+        nbar = sum(float(nmin_ha.get(c, 0.0)) * float(base.get(c, 0.0)) for c in crops) / area
+        e0 = sum(nm * s0 for _, nm, _, _, s0, _ in techs)
+        shares = {}
+        for name, nm, a, b, s0, smax in techs:
+            value = lam * nbar * nm / (1.0 + e0)       # EUR/ha at full adoption
+            if b > 1e-12:
+                sh = (value - a) / b
+            else:
+                sh = smax if value > a else 0.0
+            shares[name] = (min(max(sh, s0, 0.0), smax), nm, a, b, s0)
+        total = sum(v[0] for v in shares.values())
+        if total > 1.0:
+            shares = {k: (v[0] / total,) + v[1:] for k, v in shares.items()}
+        e = sum(v[0] * v[1] for v in shares.values())
+        f = (1.0 + e0) / (1.0 + e)
+        if f >= 1.0 - 1e-9:
+            return None
+        dcost = sum(a * (sh - s0) + 0.5 * b * (sh * sh - s0 * s0)
+                    for sh, nm, a, b, s0 in shares.values())          # EUR/ha
+        nc = self.data.nutrient_coefs.copy()
+        for c in crops:
+            if c in nc.index and "N" in nc.columns:
+                nc.at[c, "N"] = float(nc.at[c, "N"]) * f
+            self._n_intensity[c] = self._n_intensity.get(c, 1.0) * f
+            if c in self.net_revenues.index:
+                self.net_revenues[c] = float(self.net_revenues[c]) - dcost
+        self.data.nutrient_coefs = nc
+        self._fert_tech_shares = {k: v[0] for k, v in shares.items()}
+        return self._n_intensity
 
     def _apply_intensity_margin(self, nitrate_limit: float):
         """Choose the cost-minimising N intensity and apply it in place.
@@ -1158,17 +1422,36 @@ class RegionalSupplyModel:
         acts_idx = {a: i for i, a in enumerate(self.acts)}
         n = self.n
         A_rows, b_rows = [], []
+        # one label per row, appended with it, so a shadow price is always
+        # reported under the constraint it belongs to
+        self._row_labels = []
 
         # 1. Arable land constraint
+        #
+        # Every activity that occupies ARABLE land must be in this row, including
+        # fodder on arable land (MAIF, OFOD) and fallow / set-aside (SETA). All
+        # three used to be left out, with two consequences:
+        #   - the right-hand side (arable land) counted the fodder area while the
+        #     sum did not, so the row carried ~14 Mha of built-in slack and could
+        #     never bind: the arable shadow price was zero in every region;
+        #   - a landscape-feature floor on SETA grew set-aside out of nothing,
+        #     without displacing a single crop. In CAPRI fallow competes for
+        #     arable land, which is where its -9% cereal-area effect under
+        #     Farm-to-Fork comes from; here cereals kept their land and fell only
+        #     9.8% against CAPRI's 15%, with the cereal price already matching.
         row_arable = np.zeros(n)
+        # One classification for both rows, the same one the land data is built
+        # with (tools/build_capri_base.py PERMANENT_CROPS): tobacco, cotton and
+        # other fibre are ANNUAL crops on arable land. They used to sit in the
+        # permanent row while the land data counted them as arable, so each row
+        # was measured against land built on a different definition.
         arable_crops = [a for a in CROPS
-                        if a not in ("GRAS", "MAIF", "OFOD", "SETA",
-                                     "WINE", "OLIV", "APPL", "OFRU",
-                                     "CITR", "TAGR", "TOBA", "COTT", "OFIB")]
+                        if a not in ("GRAS",) + self.PERMANENT_LAND_CROPS]
         for a in arable_crops:
             if a in acts_idx:
                 row_arable[acts_idx[a]] = 1.0
         A_rows.append(row_arable)
+        self._row_labels.append("arable_land")
         # The ARABLE land figure and the crop areas come from different
         # aggregations and disagree in 54 of 248 regions, by 9,960 kha in total,
         # with ratios up to 12.7x (LT02, PL81, PL84, PL91, BG31, BG33). Taking
@@ -1184,7 +1467,10 @@ class RegionalSupplyModel:
         # year where they do not.
         arable_base = sum(float(self._base_levels().get(a, 0.0))
                           for a in arable_crops if a in acts_idx)
-        arable_avail = max(self.data.land.get("ARABLE", 200.0), arable_base)
+        # arable land INCLUDING fallow, now that SETA is in the row
+        _land_arable = (float(self.data.land.get("ARABLE", 200.0))
+                        + float(self.data.land.get("FALLOW", 0.0) or 0.0))
+        arable_avail = max(_land_arable, arable_base) * (1.0 + getattr(self, "_land_expansion", 0.0))
         b_rows.append(arable_avail)
 
         # 1b. Landscape-elements floor: at least `set_aside_requirement` of UAA
@@ -1195,21 +1481,36 @@ class RegionalSupplyModel:
         if set_aside_requirement and set_aside_requirement > 0 and "SETA" in acts_idx:
             uaa_total = (self.data.land.get("ARABLE", 200.0)
                          + self.data.land.get("PERMANENT", 30.0)
-                         + self.data.land.get("GRASSLAND", 80.0))
-            floor = set_aside_requirement * uaa_total
+                         + self.data.land.get("GRASSLAND", 80.0)
+                         + (self.data.land.get("FALLOW", 0.0) or 0.0))
+            _pp = getattr(self.data, "landscape_target_pp", None)
+            if _pp is not None:
+                # CAPRI's own rule (pol_input/greendeal/landscape.gms):
+                #   FALL.FLOOR = lndscpTarg/10 * p_setAsideTarget * UAAR + SETF
+                # p_setAsideTarget is the member state's MISSING share - points
+                # of UAA still needed to reach 10%, net of fallow and of the
+                # landscape elements LUCAS already records - and the existing
+                # set-aside is added on top. A member state with no entry is
+                # already at the target. The requested share scales the
+                # ambition exactly as CAPRI's lndscpTarg does (10% = full).
+                _seta0 = float(self._base_levels().get("SETA", 0.0))
+                floor = (set_aside_requirement / 0.10) * (_pp / 100.0) * uaa_total + _seta0
+            else:
+                floor = set_aside_requirement * uaa_total
             row_seta = np.zeros(n)
             row_seta[acts_idx["SETA"]] = -1.0
             A_rows.append(row_seta)
+            self._row_labels.append("landscape_floor")
             b_rows.append(-floor)
 
         # 2. Permanent crops land constraint
         row_perm = np.zeros(n)
-        perm_crops = ["WINE", "OLIV", "APPL", "OFRU", "CITR", "TAGR",
-                      "TOBA", "COTT", "OFIB"]
+        perm_crops = list(self.PERMANENT_LAND_CROPS)
         for a in perm_crops:
             if a in acts_idx:
                 row_perm[acts_idx[a]] = 1.0
         A_rows.append(row_perm)
+        self._row_labels.append("permanent_land")
         # The PERMANENT land figure and the crop areas come from different
         # aggregations and disagree in 56 of 248 regions, by 4640 kha in total —
         # and the disagreement is concentrated in exactly the Mediterranean
@@ -1236,6 +1537,7 @@ class RegionalSupplyModel:
             if a in acts_idx:
                 row_grass[acts_idx[a]] = 1.0
         A_rows.append(row_grass)
+        self._row_labels.append("grassland")
         # RHS must admit the calibrated base fodder area. The land-availability
         # GRASSLAND figure and the sum of fodder-activity base areas come from
         # different CAPRI symbols and do not always reconcile (at DE21 the base
@@ -1258,6 +1560,7 @@ class RegionalSupplyModel:
                      self.data.land.get("PERMANENT", 30.0) +
                      self.data.land.get("GRASSLAND", 80.0))
         A_rows.append(row_N)
+        self._row_labels.append("N_limit")
         b_rows.append(n_limit * total_uaa)
 
         # 5. Feed constraint: animal roughage demand ≤ on-farm supply + buy-in.
@@ -1301,7 +1604,70 @@ class RegionalSupplyModel:
                     self.acts).fillna(0.0).values)
                 rhs = max(rhs, base_lhs + abs(base_lhs) * 0.5 + 1.0)
                 A_rows.append(row_feed)
+                self._row_labels.append("feed")
                 b_rows.append(rhs)
+
+        # Gross nitrogen balance (JRC121368's binding GNB restriction): surplus per
+        # ha of farmland <= the tiered target, i.e.
+        #   sum_a (s_a - target * [a is a crop]) * x_a <= 0
+        # with s_a each activity's own contribution to the balance.
+        srow = getattr(self, "_surplus_row", None)
+        if srow is not None:
+            coefs, target = srow[0], srow[1]
+            nmin = srow[2] if len(srow) > 2 else {}
+            upt = srow[3] if len(srow) > 3 else {}
+            ybase = srow[4] if len(srow) > 4 else None
+            mint = getattr(self, "_n_intensity", {}) or {}
+            ycur = self.data.yields
+            row_B = np.zeros(n)
+            for i, a in enumerate(self.acts):
+                sa = float(coefs.get(a, 0.0))
+                if a in mint:                       # less fertiliser applied
+                    sa -= float(nmin.get(a, 0.0)) * (1.0 - mint[a])
+                # Uptake at THIS solve's yields - after fertiliser intensity,
+                # pesticide and organic yield effects - as CAPRI's balance does.
+                # With base-year uptake the constraint believed the target was
+                # met while the true balance fell only half as far (Farm-to-Fork
+                # EU surplus -16% against a target cut of about a third).
+                if a in CROPS and ybase is not None:
+                    y0 = float(ybase.get(a, 0.0)) if hasattr(ybase, "get") else 0.0
+                    if y0 > 0:
+                        yc = float(ycur.get(a, y0)) if hasattr(ycur, "get") else y0
+                        sa += float(upt.get(a, 0.0)) * (1.0 - yc / y0)
+                        # crop NEED follows yield (CAPRI NUTNED_: x sqrt(yield)),
+                        # and so does the mineral N it calls for - exactly as the
+                        # environmental accounts compute it. Without this term the
+                        # constraint saw more fertiliser than the accounts after
+                        # yield losses, demanded extra cuts, and the surplus fell
+                        # past its target (Farm-to-Fork -45% vs CAPRI's -34%).
+                        if yc > 0:
+                            sa += (float(nmin.get(a, 0.0)) * float(mint.get(a, 1.0))
+                                   * ((yc / y0) ** 0.5 - 1.0))
+                row_B[i] = sa
+            # A REGIONAL CAP: the tiered per-ha target times BASE farmland. With
+            # current farmland as the denominator, land expansion diluted the
+            # surplus: in North Brabant the target made land worth ~28,000 EUR/ha,
+            # the land market expanded farmland to its 15% cap, the target went
+            # slack, and the nitrogen and land loops pulled against each other
+            # without settling. The required cut in kg N is unchanged; buying
+            # land no longer meets it.
+            base_area = float(sum(v for a, v in self._base_levels().items() if a in CROPS))
+            A_rows.append(row_B)
+            b_rows.append(float(target) * base_area)
+            self._row_labels.append("N_balance")
+            # manure must be spread on land: manure N <= limit x land in use
+            mrow = srow[6] if len(srow) > 6 else None
+            if mrow is not None:
+                man, lim = mrow
+                row_M = np.zeros(n)
+                for i, a in enumerate(self.acts):
+                    if a in man:
+                        row_M[i] = float(man[a])
+                    elif a in CROPS:
+                        row_M[i] = -float(lim)
+                A_rows.append(row_M)
+                b_rows.append(0.0)
+                self._row_labels.append("manure_application")
 
         A_ub = np.array(A_rows)
         b_ub = np.array(b_rows)
@@ -1326,7 +1692,83 @@ class RegionalSupplyModel:
     # Solve
     # ------------------------------------------------------------------
 
-    def solve(
+
+    #: Elasticity of agricultural land supply with respect to the land rent.
+    #: CAPRI's EU regions do not use its 0.05 market-model default; their land
+    #: supply comes from agricultural land competing with forest (Allen
+    #: elasticity of transformation -1) and other land (-3) in its land-use
+    #: nest (supply/declare_calibration_models_for_land_supply.gms). Weighted by
+    #: indicative rent shares (forest ~13% of land rents, other land ~1%), that
+    #: gives 1 x 0.13 + 3 x 0.01 ~ 0.15. The rent shares are an approximation.
+    LAND_SUPPLY_ELASTICITY = 0.15
+    LAND_EXPANSION_CAP = 0.15
+
+    def solve(self, *args, land_expansion: float = 0.0, surplus_row=None,
+              n_balance_price: float = 0.0, **kwargs):
+        """Solve, letting agricultural land respond to the land rent.
+
+        CAPRI has a land market: when a policy makes land scarce its value rises
+        and agricultural area expands, absorbing other land (Farm-to-Fork: EU
+        UAA +3% in JRC121368, Figure 5). With area fixed, a landscape floor had
+        to take every hectare from crops, and the least profitable - oilseeds -
+        lost about three times CAPRI's share of area.
+
+        The model's own base land value is a few EUR/ha, because PMP
+        calibration folds land rent into each crop's terms; CAPRI keeps rent
+        explicit. So the signal is the INCREASE in land's shadow
+        value against CAPRI's rent:  dL/L = elasticity x d(lambda) / rent.
+
+        STATELESS. ``land_expansion`` is the expansion to use for this solve;
+        the result carries ``land_expansion_next`` (a damped update) and
+        ``land_update``. The supply module holds each region's expansion and
+        passes it in on the next outer iteration, so the land market converges
+        together with prices with ONE solve per region per iteration. An earlier
+        version kept the expansion on the model itself, and a plain solve after
+        shocked solves drifted (test_solve_leaves_no_state_behind).
+        """
+        e = float(land_expansion or 0.0)
+        rent = getattr(self.data, "land_rent", None)
+        active = bool(self.LAND_SUPPLY_ELASTICITY) and bool(rent) and rent > 0
+        if active and getattr(self, "_lambda0", None) is None:
+            # land's value at base: a property of the base problem, cached
+            self._land_expansion = 0.0
+            self._lambda0 = float(self._solve_once().shadow_prices.get("arable_land", 0.0))
+        self._land_expansion = e
+        self.landscape_shortfall = 0.0          # reset on every solve
+        self.balance_shortfall = 0.0
+        self._surplus_row = surplus_row         # held for THIS solve only
+        self._nbal_price = float(n_balance_price or 0.0)
+        self._n_intensity = {}
+        try:
+            res = self._solve_once(*args, **kwargs)
+        finally:
+            self._land_expansion = 0.0
+            self._surplus_row = None
+            self._nbal_price = 0.0
+        res.n_intensity = dict(getattr(self, "_n_intensity", {}) or {})
+        res.fert_tech_shares = dict(getattr(self, "_fert_tech_shares", {}) or {})
+        self._n_intensity = {}
+        self._fert_tech_shares = {}
+        res.landscape_shortfall = float(getattr(self, "landscape_shortfall", 0.0))
+        res.balance_shortfall = float(getattr(self, "balance_shortfall", 0.0))
+        self.landscape_shortfall = 0.0
+        self.balance_shortfall = 0.0
+        res.land_expansion = e
+        res.land_target = e
+        res.land_expansion_next = 0.0
+        res.land_update = 0.0
+        if active:
+            lam = float(res.shadow_prices.get("arable_land", 0.0))
+            target = self.LAND_SUPPLY_ELASTICITY * max(0.0, lam - self._lambda0) / rent
+            res.land_target = min(target, self.LAND_EXPANSION_CAP)
+            # a damped step, used when no earlier point is available; the
+            # supply module replaces it with a secant step across iterations
+            e_next = min(e + 0.5 * (res.land_target - e), self.LAND_EXPANSION_CAP)
+            res.land_expansion_next = e_next if e_next >= 1e-6 else 0.0
+            res.land_update = abs(res.land_expansion_next - e)
+        return res
+
+    def _solve_once(
         self,
         price_shock: Optional[pd.Series] = None,
         policy_shock: Optional[Dict] = None,
@@ -1381,6 +1823,104 @@ class RegionalSupplyModel:
             self.net_revenues = _net_rev_backup
             for _f, _v in _backup.items():
                 setattr(self.data, _f, _v)
+
+    def _fit_balance_target(self, A_ub, b_ub, c_lin, x0):
+        """Relax the nitrogen-balance target where the region cannot reach it.
+
+        JRC121368, footnote 3 to its targets table: 'the reduction is relaxed
+        in a limited number of regions where the model is infeasible'. Some
+        regions must cut their surplus by over 80% under the tiered rule (North
+        Brabant: 417 -> 75 kg N/ha), and with every crop at minimum fertiliser
+        intensity no allocation reaches it. The target is set to the lowest
+        surplus the region CAN reach, found exactly by a linear program, and the
+        gap is recorded as balance_shortfall (kg N per ha of farmland above the
+        target). Only reached when the solver fails and a balance row exists.
+        """
+        from capri_mod.supply.qp_solver import solve_qp
+        self.balance_shortfall = 0.0
+        labels = getattr(self, "_row_labels", [])
+        if "N_balance" not in labels:
+            return None, False, b_ub
+        k = labels.index("N_balance")
+        try:
+            from scipy.optimize import linprog
+            others = [i for i in range(len(b_ub)) if i != k]
+            lp = linprog(A_ub[k], A_ub=A_ub[others], b_ub=b_ub[others],
+                         bounds=[(0, None)] * len(self.acts), method="highs")
+        except Exception:
+            return None, False, b_ub
+        if lp.status != 0:
+            return None, False, b_ub
+        least = float(lp.fun)                     # lowest reachable row value
+        if least <= float(b_ub[k]):
+            return None, False, b_ub              # not what makes it infeasible
+        x_start = np.maximum(np.asarray(lp.x, dtype=float), 0.0)
+        crop_area = float(sum(x_start[i] for i, a in enumerate(self.acts) if a in CROPS)) or 1.0
+        for slack in (1e-3, 1e-2, 5e-2):
+            b_fit = b_ub.copy()
+            b_fit[k] = least + slack * max(abs(least), 1.0)
+            x_qp, ok = solve_qp(self.Q, c_lin, A_ub, b_fit, x0=x_start)
+            if not ok:
+                x_qp, ok = solve_qp(self.Q, c_lin, A_ub, b_fit, x0=x0)
+            if ok:
+                self.balance_shortfall = (float(b_fit[k]) - float(b_ub[k])) / crop_area
+                return x_qp, ok, b_fit
+        return None, False, b_ub
+
+    def _fit_landscape_floor(self, A_ub, b_ub, c_lin, x0):
+        """Meet as much of the landscape floor as the region's land allows.
+
+        The floor is sized on TOTAL farmland, grassland included (CAPRI's rule),
+        but set-aside can only sit on ARABLE land here. In regions with little
+        arable land - Corsica, the Alpine regions of Italy and Austria, several
+        Greek regions - the requirement does not fit and the problem has NO
+        feasible solution: the general fallback then spent ~8 s per region
+        (79% of a Farm-to-Fork run) and returned a point violating the
+        constraints by up to 3.2 units, which the model used. CAPRI avoids this
+        because grassland can convert to arable and landscape elements can sit
+        on grassland; this model does not represent either. So the floor is
+        capped at the most set-aside the region can physically hold, found
+        exactly by a linear program, and the unmet part is recorded in
+        landscape_shortfall. Only reached when the solver fails and a floor row
+        exists; every feasible problem is untouched.
+        """
+        from capri_mod.supply.qp_solver import solve_qp
+        self.landscape_shortfall = 0.0
+        labels = getattr(self, "_row_labels", [])
+        if "landscape_floor" not in labels or "SETA" not in list(self.acts):
+            return None, False, b_ub
+        k = labels.index("landscape_floor")
+        j = list(self.acts).index("SETA")
+        try:
+            from scipy.optimize import linprog
+            others = [i for i in range(len(b_ub)) if i != k]
+            cobj = np.zeros(len(self.acts)); cobj[j] = -1.0
+            lp = linprog(cobj, A_ub=A_ub[others], b_ub=b_ub[others],
+                         bounds=[(0, None)] * len(self.acts), method="highs")
+        except Exception:
+            return None, False, b_ub
+        if lp.status != 0:
+            return None, False, b_ub
+        floor = -float(b_ub[k])
+        most = float(lp.x[j])
+        if most >= floor:
+            return None, False, b_ub          # the floor is not what binds
+        # fit the floor just inside the land limit; if the fitted problem sits
+        # so close to the limit that the solver's clipping check trips, step a
+        # little further inside (Salzburg needed this)
+        # the LP's point satisfies every fitted constraint: a feasible start,
+        # which keeps the active-set solver from cycling (Salzburg did)
+        x_start = np.maximum(np.asarray(lp.x, dtype=float), 0.0)
+        for share in (0.999, 0.99, 0.97):
+            b_fit = b_ub.copy()
+            b_fit[k] = -share * most
+            x_qp, ok = solve_qp(self.Q, c_lin, A_ub, b_fit, x0=x_start)
+            if not ok:
+                x_qp, ok = solve_qp(self.Q, c_lin, A_ub, b_fit, x0=x0)
+            if ok:
+                self.landscape_shortfall = floor - share * most
+                return x_qp, ok, b_fit
+        return None, False, b_ub
 
     def _solve_inner(
         self,
@@ -1485,11 +2025,13 @@ class RegionalSupplyModel:
                 # against 12%.
                 self.apply_organic_area_target(_org, pesticide_active=bool(_pest))
             if _pest:
-                self.apply_pesticide_reduction(_pest)
+                self.apply_pesticide_reduction(_pest, organic_share=_org or None)
 
         intensity_res = None
         if nitrate_limit is not None:
             intensity_res = self._apply_intensity_margin(nitrate_limit)
+        elif getattr(self, "_nbal_price", 0.0):
+            self._apply_balance_price(self._nbal_price)
 
         A_ub, b_ub, _, _ = self._build_constraints(
             nitrate_limit=nitrate_limit,
@@ -1504,10 +2046,17 @@ class RegionalSupplyModel:
         from capri_mod.supply.qp_solver import solve_qp
         c_lin = self.f - self.net_revenues.values
         import os as _os
+        # only set on the QP path; the fallback path must not read it unset
+        # (it used to, and a failed QP crashed the region instead of falling back)
+        x_qp_feasible = None
         if _os.environ.get("CAPRI_DISABLE_QP") == "1":
             x_qp, qp_ok = None, False   # force general solver for A/B testing
         else:
             x_qp, qp_ok = solve_qp(self.Q, c_lin, A_ub, b_ub, x0=x0)
+            if not qp_ok:
+                x_qp, qp_ok, b_ub = self._fit_landscape_floor(A_ub, b_ub, c_lin, x0)
+            if not qp_ok:
+                x_qp, qp_ok, b_ub = self._fit_balance_target(A_ub, b_ub, c_lin, x0)
 
         if qp_ok:
             x_opt = np.maximum(x_qp, 0.0)
@@ -1546,7 +2095,16 @@ class RegionalSupplyModel:
         # against pathological hyper-responses for small/near-zero-acreage crops
         # where the FOC solve can otherwise swing an activity by an unbounded
         # percentage. The cap only binds in the tail; normal responses pass through.
-        if price_shock is not None:
+        # NOT under a nitrogen-balance target. The rail clamps each activity to
+        # +-50% (or more) of base after the solve; it was meant for blow-ups of
+        # tiny activities under price shocks. Under the nitrogen target it
+        # (1) overrode the policy response - North Brabant's dairy herd sat at
+        # exactly -50.0%, the rail, against an optimum near -69% - and (2) left
+        # the shadow prices computed at the clamped, non-optimal point, where the
+        # balance looked slack: its price read zero and the nitrogen loop chased
+        # it down, so the region adopted no technologies. The policy constraint
+        # is what bounds the response there.
+        if price_shock is not None and getattr(self, "_surplus_row", None) is None:
             x0_base = self._base_levels().values
             eps_base = self.supply_elasticities.reindex(self.acts).fillna(0.25).values
             # max fractional move ≈ target elasticity × shock, with a modest 1.5×
@@ -1595,7 +2153,7 @@ class RegionalSupplyModel:
             # overrule policy. If clamping breaks feasibility, the constraint
             # wins and the QP solution stands.
             if A_ub is not None and len(b_ub):
-                if np.max(A_ub @ x_opt - b_ub) > 1e-6:
+                if np.max(A_ub @ x_opt - b_ub) > 1e-6 and x_qp_feasible is not None:
                     x_opt = x_qp_feasible.copy()
 
         activities = pd.Series(x_opt, index=self.acts)
@@ -1655,14 +2213,33 @@ class RegionalSupplyModel:
         # to read as barely moving under policies that visibly changed land use.
         gm = float(self.net_revenues.reindex(self.acts).fillna(0.0).values @ x_opt)
 
-        # Shadow prices (dual variables from active constraints)
-        # Approximated as constraint slack ≈ 0 → marginal value
+        # Shadow prices: REAL dual variables, from the optimality conditions.
+        # The solver minimises 1/2 x'Qx + c'x subject to A x <= b, x >= 0. On the
+        # activities that are positive, Qx + c + A_act' mu = 0 over the binding
+        # rows, which is solved for the multipliers mu >= 0 (objective units per
+        # unit of the constrained quantity - EUR per ha for land).
+        #
+        # This used to be max(0, -slack) * 10: non-zero only when a constraint
+        # was VIOLATED, so a binding constraint always read zero. The project's
+        # early finding that 'the arable shadow price is zero in all 248 regions'
+        # - used to rule land out as the binding channel - measured nothing.
         shadow = {}
         slack = b_ub - A_ub @ x_opt
-        for i, label in enumerate(["arable_land", "permanent_land",
-                                    "grassland", "N_limit"]):
-            if i < len(slack):
-                shadow[label] = float(np.maximum(0, -slack[i]) * 10)
+        try:
+            act_rows = np.where(np.abs(slack) <= 1e-6 * np.maximum(1.0, np.abs(b_ub)))[0]
+            free = np.where(x_opt > 1e-9)[0]
+            mu = np.zeros(len(b_ub))
+            if len(act_rows) and len(free):
+                grad = (self.Q @ x_opt + c_lin)[free]
+                At = A_ub[np.ix_(act_rows, free)].T
+                sol, *_ = np.linalg.lstsq(At, -grad, rcond=None)
+                mu[act_rows] = np.maximum(sol, 0.0)
+        except Exception:
+            mu = np.zeros(len(b_ub))
+        labels = getattr(self, "_row_labels", [])
+        for i, label in enumerate(labels):
+            if i < len(mu) and label != "feed":
+                shadow[label] = shadow.get(label, 0.0) + float(mu[i])
 
         # Nutrient balance
         nutr = {}
@@ -1733,6 +2310,34 @@ def _region_costs(data: Dict, region: str) -> pd.Series:
     if regional is not None and region in regional.index:
         return regional.loc[region].combine_first(eu_mean)
     return eu_mean
+
+
+
+#: Eurostat country codes where they differ from the model's region prefixes.
+_MS_ALIAS = {"GR": "EL", "UK": "UK"}
+
+
+def _ms_code(region: str) -> str:
+    return _MS_ALIAS.get(str(region)[:2], str(region)[:2])
+
+
+def _ms_row(table, region):
+    """A member state's row of a per-MS table, or None."""
+    if table is None:
+        return None
+    ms = _ms_code(region)
+    return table.loc[ms] if ms in table.index else None
+
+
+def _ms_value(table, region, column):
+    """A member state's value; 0.0 when the MS is absent (CAPRI's convention for
+    landscape: a member state with no entry is already at the target)."""
+    if table is None:
+        return None
+    ms = _ms_code(region)
+    if ms in table.index and pd.notna(table.at[ms, column]):
+        return float(table.at[ms, column])
+    return 0.0
 
 
 class SupplyModule:
@@ -1877,6 +2482,12 @@ class SupplyModule:
                 if d.get("livestock_output_coef") is not None
                 and region in d["livestock_output_coef"].index else None),
             organic_yield_gap=d.get("organic_yield_gap"),
+            land_rent=(float(d["land_rent_regional"].at[region, "rent_eur_per_ha"])
+                       if d.get("land_rent_regional") is not None
+                       and region in d["land_rent_regional"].index else None),
+            landscape_target_pp=_ms_value(d.get("landscape_targets_ms"), region,
+                                          "landscape_pp"),
+            organic_targets_pp=_ms_row(d.get("organic_targets_ms"), region),
             livestock_intensity_bounds=(
                 d["livestock_intensity_bounds"].loc[region]
                 if d.get("livestock_intensity_bounds") is not None
@@ -1885,8 +2496,124 @@ class SupplyModule:
                 d["livestock_revenue_coef"].loc[region]
                 if d.get("livestock_revenue_coef") is not None
                 and region in d["livestock_revenue_coef"].index else None),
+            livestock_feed_coef=(
+                d["livestock_feed_coef"].loc[region]
+                if d.get("livestock_feed_coef") is not None
+                and region in d["livestock_feed_coef"].index else None),
         )
 
+
+    #: CAPRI's exponent in othImpact.NMIN (envind/ghgMiti.gms, p_fertEffCor)
+    FERT_EFF_COR = 1.1
+
+    def _fert_techs(self, region):
+        """CAPRI's fertiliser-efficiency technologies for this region's member state.
+
+        For each option on target N2OSYN: its mineral-N efficiency gain, computed
+        as CAPRI does (envind/ghgMiti.gms)
+            NMIN = (QEmitt(NOC) / QEmitt(option) - 1) ** p_fertEffCor ,
+        and CAPRI's adoption terms a, b (cost and PMP, EUR/ha), initial share and
+        maximum share - the table CapriAbatement already uses.
+        """
+        cache = getattr(self, "_fert_tech_cache", None)
+        if cache is None:
+            cache = {}
+            try:
+                from capri_mod.abatement.capri_mitigation import CapriMitigation
+                from pathlib import Path as _P
+                ddir = (self.data.get("_data_dir") if isinstance(self.data, dict) else None) \
+                    or str(_P(__file__).resolve().parents[2] / "capri_data")
+                cm = CapriMitigation.from_data_dir(ddir)
+                t = cm.table if cm is not None else None
+            except Exception:
+                t = None
+            if t is not None:
+                t = t[(t["target"] == "N2OSYN") & (t["activity"] == "cropMiti")]
+                for ms, g in t.groupby("member_state"):
+                    rows = []
+                    for r in g.itertuples(index=False):
+                        q, q0 = float(r.QEmitt), float(r.Q_noc)
+                        if not (q > 0 and q0 > q):
+                            continue                    # saves no fertiliser
+                        nmin = (q0 / q - 1.0) ** self.FERT_EFF_COR
+                        rows.append((str(r.option), nmin, float(r.a), float(r.b),
+                                     float(r.IniShare), float(r.MaxShare)))
+                    cache[ms] = rows
+            self._fert_tech_cache = cache
+        ms = region[:2]
+        # CAPRI's member-state codes differ for a few countries
+        return cache.get({"GR": "EL", "BE": "BL", "LU": "BL", "IE": "IR"}.get(ms, ms),
+                         cache.get(ms, []))
+
+    #: Nitrates Directive limit on manure N, kg N per ha (91/676/EEC)
+    MANURE_LIMIT = 170.0
+
+    def _manure_limit(self, region, model):
+        """Manure N per head and the region's manure-application limit.
+
+        Manure has to be spread on land. Without this link a region under a
+        nitrogen cap could keep its animals and abandon its fields - North
+        Brabant dropped ALL cropland, since removing a hectare removes its
+        fertiliser and uptake and so cuts the surplus. CAPRI's fertiliser
+        allocation forces each region's manure onto its crops, and the Nitrates
+        Directive caps it at 170 kg N/ha, with derogations above that. The limit
+        here is 170 kg N/ha or the region's own base level where higher, so it
+        cannot bind at base. Manure N per 1000 head is the environmental module's
+        own (organic N input for one unit of each animal).
+        """
+        try:
+            if not hasattr(self, "_env_for_surplus"):
+                from capri_mod.environmental.environmental_module import EnvironmentalModule
+                self._env_for_surplus = EnvironmentalModule(self.data)
+            ylds = self.data["yields"].loc[region]
+            man = {}
+            for a in model.acts:
+                if a in CROPS:
+                    continue
+                nb = self._env_for_surplus.compute_nitrogen_balance({a: 1.0}, ylds, region)
+                v = float(nb.get("n_organic_input", 0.0))
+                if v > 0:
+                    man[a] = v
+            if not man:
+                return None
+            base = model._base_levels()
+            land = sum(float(base.get(c, 0.0)) for c in CROPS)
+            if land <= 0:
+                return None
+            base_rate = sum(man[a] * float(base.get(a, 0.0)) for a in man) / land
+            return (man, max(self.MANURE_LIMIT, base_rate * 1.001))
+        except Exception:
+            return None
+
+    def _balance_coefs(self, region, model):
+        """Each activity's contribution to the gross N balance, per unit.
+
+        Evaluated with the environmental module's own balance on ONE unit of
+        each activity (it is linear in activity levels), so the constraint and
+        the reported surplus cannot disagree. Crops: fertiliser + fixation +
+        deposition - uptake per ha; animals: manure N net of what leaves in
+        products, per 1000 head. Base-year yields.
+        """
+        try:
+            from capri_mod.environmental.environmental_module import EnvironmentalModule
+            if not hasattr(self, "_env_for_surplus"):
+                self._env_for_surplus = EnvironmentalModule(self.data)
+            cache = getattr(self, "_balance_cache", {})
+            if region in cache:
+                return cache[region]
+            ylds = self.data["yields"].loc[region]
+            out, nmin, upt = {}, {}, {}
+            for a in model.acts:
+                nb = self._env_for_surplus.compute_nitrogen_balance({a: 1.0}, ylds, region)
+                out[a] = float(nb["n_surplus"])
+                nmin[a] = float(nb.get("n_mineral_input", 0.0))
+                upt[a] = float(nb.get("n_crop_uptake", 0.0))
+            ser = (pd.Series(out).reindex(model.acts).fillna(0.0), nmin, upt)
+            cache[region] = ser
+            self._balance_cache = cache
+            return ser
+        except Exception:
+            return None
 
     def _surplus_per_ha(self, region, model):
         """Region's base gross N surplus per ha of cropped area, or None."""
@@ -1902,6 +2629,126 @@ class SupplyModule:
             return nb["n_surplus"] / area if area > 0 else None
         except Exception:
             return None
+
+    #: tolerance on the nitrogen-balance price, EUR per kg N: absolute + relative
+    NBAL_TOL_ABS = 0.01
+    NBAL_TOL_REL = 1e-3
+    #: at most this many solves per region and iteration to find its N price
+    NBAL_INNER_MAX = 8
+    #: land steps per outer iteration, and the land change (share of farmland)
+    #: below which a region's land counts as settled
+    LAND_INNER_MAX = 6
+    LAND_TOL = 1e-4
+
+    def _next_nbal(self, region, used: float, dual: float) -> float:
+        """Next nitrogen-balance price for a region: a BRACKETED fixed point.
+
+        The price we pass in sets fertiliser intensity; the solve then reports
+        the balance constraint's own shadow price. The answer is where the two
+        agree. Plain damping oscillated (North Brabant: 190 -> 95 -> ... -> 3 ->
+        188): a high price cuts fertiliser so far the constraint goes slack and
+        reports zero, then it binds again. The reported price falls as the
+        price passed in rises, so dual > used means the answer lies above, and
+        dual < used below. Each region keeps that interval and bisects inside it;
+        until an upper end is known, it steps to the reported price.
+        """
+        br = getattr(self, "_nbal_bracket", {})
+        lo, hi = br.get(region, (0.0, float("inf")))
+        g = dual - used
+        # At the answer, stay there: once the reported price matches the one
+        # used (to a cent per kg N plus 0.1%), a secant step only amplifies
+        # rounding noise and a bracket end left over from early iterations,
+        # when prices and land were different, threw regions away from it.
+        if abs(g) <= self.NBAL_TOL_ABS + self.NBAL_TOL_REL * abs(used):
+            return used
+        if g > 0:
+            lo = max(lo, used)
+        else:
+            hi = min(hi, used)
+        # SECANT inside the bracket (bisection alone halved the error per
+        # iteration and needed 20+ outer iterations); bisect when the secant
+        # would leave it, and step to the reported price while no upper end
+        # is known yet
+        prev = getattr(self, "_nbal_prev", {}).get(region)
+        nxt = None
+        if prev is not None and abs(g - prev[1]) > 1e-12 and abs(used - prev[0]) > 1e-12:
+            nxt = used - g * (used - prev[0]) / (g - prev[1])
+        if nxt is None or not (lo < nxt < hi):
+            if hi == float("inf"):
+                nxt = max(dual, 2.0 * used, 1e-3)
+            else:
+                nxt = 0.5 * (lo + hi)
+        self._nbal_prev = getattr(self, "_nbal_prev", {})
+        self._nbal_prev[region] = (used, g)
+        br[region] = (lo, hi)
+        self._nbal_bracket = br
+        return max(0.0, nxt)
+
+    def _next_land(self, region, result) -> float:
+        """Next land expansion for a region: a SECANT step on g(e) = target(e) - e.
+
+        A damped step oscillated where land rents are low and the response is
+        steep (SK01 swung between ~4.5% and ~9% without settling). The secant
+        uses this region's previous iterate; when two iterates straddle the
+        answer it lands between them, so it cannot keep swinging.
+        """
+        e = float(getattr(result, "land_expansion", 0.0))
+        g = float(getattr(result, "land_target", e)) - e
+        prev = getattr(self, "_land_prev", {}).get(region)
+        cap = getattr(result, "land_cap", None) or 0.15
+        # BRACKET. g(e) falls as land expands, so g > 0 means the answer lies
+        # above e and g < 0 below. Each region keeps that interval; a secant
+        # step that would leave it is replaced by bisection, which converges
+        # even where g jumps - as it does where the landscape floor is fitted
+        # to the land and moves with it (the outer loop hit 15 iterations with
+        # land updates of 0.03-0.13 while prices had long settled).
+        lo, hi = getattr(self, "_land_bracket", {}).get(region, (0.0, cap))
+        if g > 0:
+            lo = max(lo, e)
+        else:
+            hi = min(hi, e)
+        if hi < lo:
+            lo, hi = hi, lo
+        if prev is not None and abs(g - prev[1]) > 1e-9 and abs(e - prev[0]) > 1e-12:
+            e_new = e - g * (e - prev[0]) / (g - prev[1])
+        else:
+            e_new = e + 0.5 * g
+        if not (lo < e_new < hi) and hi - lo > 1e-9:
+            e_new = 0.5 * (lo + hi)
+        e_new = min(max(e_new, 0.0), cap)
+        if e_new < 1e-6:
+            e_new = 0.0
+        self._land_prev = getattr(self, "_land_prev", {})
+        self._land_prev[region] = (e, g)
+        self._land_bracket = getattr(self, "_land_bracket", {})
+        self._land_bracket[region] = (lo, hi)
+        result.land_expansion_next = e_new
+        result.land_update = abs(e_new - e)
+        return e_new
+
+    #: The market whose price each activity earns, where the codes differ.
+    #: The market-to-farm price signal is keyed by MARKET COMMODITY, but margins
+    #: and the yield-price response look it up by ACTIVITY: without this map no
+    #: animal ever saw a meat, milk or egg price change (the +7% pork price under
+    #: Farm-to-Fork never reached pig farmers), and rye and oats never saw the
+    #: other-cereals price.
+    ACTIVITY_PRICE_SOURCE = {
+        "DCOW": "MILK",
+        "BULL": "BEEF", "BCOW": "BEEF", "HFRS": "BEEF", "CALV": "BEEF",
+        "PIGS": "PORK", "PIGF": "PORK",
+        "BROI": "POUL", "LAYS": "EGGS", "SHGP": "SHGM",
+        "RYEM": "OCER", "OATS": "OCER",
+    }
+
+    def _activity_signals(self, price_signals):
+        """Add activity-keyed entries to a commodity-keyed price signal."""
+        if price_signals is None:
+            return None
+        sig = price_signals.copy()
+        for act, comm in self.ACTIVITY_PRICE_SOURCE.items():
+            if act not in sig.index and comm in sig.index:
+                sig[act] = float(sig[comm])
+        return sig
 
     def run(
         self,
@@ -1920,10 +2767,20 @@ class SupplyModule:
         regions : subset of regions to solve (default: all)
         verbose : print progress
         """
+        price_signals = self._activity_signals(price_signals)
         target_regions = regions or self.regions
         results = {}
         n_failed = 0
 
+        self.max_land_update = 0.0
+        # A new run (no price signal yet) starts from base land and no nitrogen
+        # price - reset ONCE, here. These resets used to sit inside the region
+        # loop, so on a run's first iteration every region wiped the land state,
+        # secant memory and bracket of all regions before it: only the last
+        # region kept them, and every other region lost an iteration.
+        if price_signals is None or not hasattr(self, "_land_state"):
+            self._land_state, self._land_prev, self._land_bracket = {}, {}, {}
+            self._nbal_state, self._nbal_bracket, self._nbal_prev = {}, {}, {}
         for i, region in enumerate(target_regions):
             if verbose and i % 50 == 0:
                 print(f"  Supply module: solving region {i+1}/{len(target_regions)}...")
@@ -1931,7 +2788,7 @@ class SupplyModule:
                 model = self._get_or_build_model(region)
                 # a mandatory non-productive share travels with the policy
                 # dict and binds the arable land constraint
-                sa, nlim = 0.0, None
+                sa, nlim, surplus_row = 0.0, None, None
                 if isinstance(policy_scenario, dict):
                     sa = float(policy_scenario.get("set_aside_requirement", 0.0) or 0.0)
                     nlim = policy_scenario.get("nitrate_limit")
@@ -1946,17 +2803,95 @@ class SupplyModule:
                     # CAPRI's tiered surplus rule needs the region's own gross
                     # N balance, so it is resolved here rather than in model.py
                     if policy_scenario.get("nutrient_surplus_target") and nlim is None:
+                        # JRC121368: a BINDING RESTRICTION ON THE GROSS NITROGEN
+                        # BALANCE, at the tiered target per hectare. Imposed on
+                        # the balance itself - fertiliser, manure, fixation and
+                        # deposition minus uptake - not on applied nitrogen: a
+                        # cap on applied N let cheap crop adjustments do work that
+                        # on the true balance falls on livestock (herds moved
+                        # -0.1 to -1% against CAPRI's -10 to -18%).
+                        bc = self._balance_coefs(region, model)
                         sp = self._surplus_per_ha(region, model)
-                        if sp is not None and sp > 0:
-                            nlim = model.applied_n_ceiling_for_surplus_cut(sp)
+                        if bc is not None and sp is not None and sp > 0:
+                            # The REQUIRED CUT comes from CAPRI's own baseline
+                            # surplus (its surptot.gms input), via the tiered
+                            # rule, as the same PERCENTAGE of the surplus. This model's base
+                            # surplus is lower than CAPRI's, above all in
+                            # livestock regions (Brittany 80 vs 176 kg/ha), and
+                            # the steep tiered rule turned that into cuts up to
+                            # four times too small - herds then hardly needed
+                            # to move. Unreachable cuts are relaxed (shortfall).
+                            target = model.tiered_surplus_target(sp)
+                            cs = self.data.get("capri_baseline_surplus")
+                            if cs is not None and region in cs.index:
+                                sp_c = float(cs.at[region, "surplus_kg_n_per_ha"])
+                                if sp_c == sp_c and sp_c > 0:
+                                    # CAPRI's PERCENTAGE cut, applied to this
+                                    # model's surplus. Imposing CAPRI's cut in
+                                    # kg/ha instead could exceed this model's
+                                    # whole surplus (Brittany: a 101 kg/ha cut
+                                    # against an 80 kg/ha surplus) and forced
+                                    # herds down ~58% - an artefact of mixing
+                                    # two differently composed balances.
+                                    target = sp * model.tiered_surplus_target(sp_c) / sp_c
+                            surplus_row = (bc[0], target, bc[1], bc[2],
+                                           self.data["yields"].loc[region],
+                                           self._fert_techs(region),
+                                           self._manure_limit(region, model))
 
-                result = model.solve(
-                    price_shock=price_signals,
-                    policy_shock=policy_scenario,
-                    nitrate_limit=nlim,
-                    set_aside_requirement=sa,
-                )
+                # each region's land expansion and balance price are held HERE,
+                # not on the model; they are reset once per run, before the loop
+                # Land and the nitrogen-balance price are both settled WITHIN the
+                # iteration, at fixed market prices: each depends only on this
+                # region's own shadow prices. Carried across outer iterations,
+                # their brackets went stale as market prices moved, and 12 regions
+                # kept the loop open on land after the nitrogen price had settled.
+                e_land = self._land_state.get(region, 0.0)
+                nb_used = getattr(self, "_nbal_state", {}).get(region, 0.0) if surplus_row else 0.0
+                self._land_bracket = getattr(self, "_land_bracket", {})
+                self._land_prev = getattr(self, "_land_prev", {})
+                self._land_bracket.pop(region, None)
+                self._land_prev.pop(region, None)
+                e_next = e_land
+                n_metric = 0.0
+                for _land_it in range(self.LAND_INNER_MAX):
+                    solve_kw = dict(
+                        land_expansion=e_land,
+                        price_shock=price_signals,
+                        policy_shock=policy_scenario,
+                        nitrate_limit=nlim,
+                        set_aside_requirement=sa,
+                        surplus_row=surplus_row,
+                    )
+                    result = model.solve(n_balance_price=nb_used, **solve_kw)
+                    if surplus_row:
+                        # nitrogen-balance price: a fresh bracket at this land level
+                        self._nbal_bracket[region] = (0.0, float("inf"))
+                        self._nbal_prev.pop(region, None)
+                        for _ in range(self.NBAL_INNER_MAX):
+                            dual = float(result.shadow_prices.get("N_balance", 0.0))
+                            nb_next = self._next_nbal(region, nb_used, dual)
+                            if nb_next == nb_used:
+                                break
+                            nb_used = nb_next
+                            result = model.solve(n_balance_price=nb_used, **solve_kw)
+                        self._nbal_state[region] = nb_used
+                        # settled when the price matches what the constraint
+                        # reports, or - at a kink, where it jumps from positive to
+                        # zero - when the bracket around it is within tolerance
+                        lo, hi = self._nbal_bracket.get(region, (0.0, float("inf")))
+                        gap = abs(float(result.shadow_prices.get("N_balance", 0.0)) - nb_used)
+                        tol = self.NBAL_TOL_ABS + self.NBAL_TOL_REL * abs(nb_used)
+                        n_metric = 1e-3 * min(gap, hi - lo) / tol
+                    e_next = self._next_land(region, result)
+                    if abs(e_next - e_land) <= self.LAND_TOL:
+                        break
+                    e_land = e_next
                 results[region] = result
+                self._land_state[region] = e_next
+                self.max_land_update = max(getattr(self, "max_land_update", 0.0), n_metric)
+                self.max_land_update = max(getattr(self, "max_land_update", 0.0),
+                                           float(getattr(result, "land_update", 0.0)))
                 if not result.converged:
                     n_failed += 1
             except Exception as e:

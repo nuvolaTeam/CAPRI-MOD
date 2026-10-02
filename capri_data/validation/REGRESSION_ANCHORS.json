@@ -29,10 +29,18 @@
    "reference": "permanent crops must survive the base solve; was 78% error until the PERMANENT land bound was reconciled with observed areas"
   },
   "n_surplus_median_kg_ha": {
-   "value": 47.1,
+   "value": 60.9,
    "tolerance": 15.0,
    "kind": "tight",
-   "reference": "Eurostat gross nitrogen balance, EU ~45-50 kg N/ha UPDATED 54.4 -> 47.1. The old figure came from two errors that cancelled: manure was counted twice on the input side, and fodder crops were credited with about double the nitrogen they remove because their yields are fresh matter. Mineral nitrogen now comes from CAPRI's own NMIN per region and crop. Every component is independently right: mineral 10.17 Mt (real ~10.8), manure 7.22 (real ~7), crop uptake 13.71, EU average surplus 44.5 kg N/ha against a real ~46."
+   "reference": "Eurostat gross nitrogen balance, EU ~45-50 kg N/ha UPDATED 54.4 -> 47.1. The old figure came from two errors that cancelled: manure was counted twice on the input side, and fodder crops were credited with about double the nitrogen they remove because their yields are fresh matter. Mineral nitrogen now comes from CAPRI's own NMIN per region and crop. Every component is independently right: mineral 10.17 Mt (real ~10.8), manure 7.22 (real ~7), crop uptake 13.71, EU average surplus 44.5 kg N/ha against a real ~46.",
+   "history": [
+    {
+     "value": 47.1,
+     "replaced": "2026-10-02"
+    }
+   ],
+   "rebased_because": "Nitrogen balance aligned with CAPRI's 2030 reference: no 'animal products' deduction, regional EMEP-based deposition, and manure trade between regions. On the 157 regions with CAPRI's own per-ha surplus, every measure moved toward CAPRI: median 52.4 -> 56.7 kg N/ha (CAPRI 59.1), correlation 0.85 -> 0.89, mean absolute gap 27.7 -> 23.6, regions within 25 kg/ha 104 -> 115. Tolerance unchanged.",
+   "eurostat_check": "EU-27 AREA-WEIGHTED average after re-basing: 48.0 kg N/ha (mineral 62.8, manure 41.4, fixation 12.8, deposition 11.3, uptake 84.4) - inside Eurostat's gross nitrogen balance ~45-50. The median (60.9) is higher than the average because many small regions are livestock-intensive; it tracks CAPRI's regional median (59.1)."
   },
   "max_world_imbalance_pct": {
    "value": 0.003,

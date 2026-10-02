@@ -19,6 +19,17 @@ from __future__ import annotations
 import json
 from pathlib import Path
 from capri_mod.data.loaders import resolve_data_file
+
+def _manifest_path(D, fn, meta):
+    """Where a manifest entry lives. Files under sources/ are raw CAPRI extracts
+    the model reads directly; they are declared with an explicit relative
+    'path', since the base-year category resolver does not look there. They
+    used to be left out of the manifest entirely, so a missing or truncated
+    price table or regional selection passed validation unnoticed."""
+    from pathlib import Path as _P
+    rel = (meta or {}).get("path")
+    return (_P(D) / rel) if rel else resolve_data_file(D, fn)
+
 import pandas as pd
 
 
@@ -63,7 +74,7 @@ def validate_data(data_dir="capri_data") -> ValidationReport:
     rep.add("manifest parseable", "PASS", f"{len(files)} live files catalogued")
 
     # --- 2. Every catalogued live file exists ---
-    missing = [fn for fn in files if not resolve_data_file(D, fn).exists()]
+    missing = [fn for fn in files if not _manifest_path(D, fn, files[fn]).exists()]
     if missing:
         rep.add("all live files present", "FAIL", f"missing: {missing}")
     else:
@@ -72,8 +83,8 @@ def validate_data(data_dir="capri_data") -> ValidationReport:
     # --- 3. Shape matches manifest (catches silent truncation/corruption) ---
     drift = []
     for fn, meta in files.items():
-        p = resolve_data_file(D, fn)
-        if not p.exists() or not fn.endswith(".csv"):
+        p = _manifest_path(D, fn, files.get(fn) if isinstance(files, dict) else None)
+        if not p.exists() or not (fn.endswith(".csv") or fn.endswith(".csv.gz")):
             continue
         exp = meta.get("shape") or {}
         if "rows" not in exp:
@@ -90,10 +101,19 @@ def validate_data(data_dir="capri_data") -> ValidationReport:
         rep.add("file shapes match manifest", "PASS")
 
     # --- 4. Vintage consistency: the base-year group must share one vintage ---
+    # A file may carry a different vintage ON PURPOSE, but only with a
+    # recorded reason ('vintage_exception' in its manifest entry); it is then
+    # listed in the check's detail instead of silently passing or warning.
+    exceptions = {fn: m["vintage_exception"] for fn, m in files.items()
+                  if m.get("vintage_exception")}
     base_group = {fn: m["vintage"] for fn, m in files.items()
                   if m.get("domain") in ("supply", "prices")
-                  and m.get("vintage") not in ("static", "2006")}
+                  and m.get("vintage") not in ("static", "2006")
+                  and fn not in exceptions}
     vintages = set(base_group.values())
+    if exceptions:
+        rep.add("documented vintage exceptions", "PASS",
+                "; ".join(f"{fn}: {why[:90]}" for fn, why in exceptions.items()))
     if len(vintages) > 1:
         rep.add("base-year vintage consistent", "WARN",
                 f"base group spans {sorted(vintages)} — mixing vintages risks "

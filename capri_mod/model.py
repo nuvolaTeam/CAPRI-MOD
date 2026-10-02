@@ -127,6 +127,9 @@ class CAPRIModel:
         # since it needs the calibrated supply module.
         try:
             from capri_mod.abatement import TechnologicalAbatement
+            from capri_mod.abatement.capri_mitigation import CapriAbatement as _CA
+            self.capri_abatement = _CA.from_data_dir(
+                data_dir or Path(__file__).parent.parent / "capri_data")
             self.tech_abatement = TechnologicalAbatement.from_data_dir(
                 data_dir, base_year=getattr(self, "base_year", "2017"))
         except Exception:
@@ -152,12 +155,15 @@ class CAPRIModel:
     # MAIN RUN METHOD
     # ------------------------------------------------------------------
 
+    #: Relaxation on the supply price signal between outer iterations.
+    PRICE_SIGNAL_RELAXATION = 0.5
+
     def run(
         self,
         scenario: str = "BASELINE",
         world_price_shock: Optional[Dict[str, float]] = None,
         custom_scenario: Optional[PolicyScenario] = None,
-        max_outer_iter: int = 15,
+        max_outer_iter: int = 25,
         outer_tolerance: float = 0.005,
         market_max_iter: int = 150,
         run_environmental: bool = True,
@@ -199,7 +205,53 @@ class CAPRIModel:
             print(f"  {pol_scenario.description}")
 
         # Apply policy scenario
+        self._run_carbon_price = float(carbon_price or 0.0) or None
         self.policy_module.apply_scenario(pol_scenario)
+
+        # EU Armington premium needs the EU's BASE supply and demand at this
+        # model's own levels, for the same region set. A baseline run records
+        # them at convergence; a scenario run uses them, running a baseline
+        # first if none is cached. In a baseline run the premium stays off,
+        # so the baseline is exactly what it was.
+        _key = tuple(sorted(regions or list(self.data["areas"].index)))
+        _is_base = (custom_scenario is None and str(scenario).upper() == "BASELINE")
+        _cache = getattr(self, "_eu_base_cache", {})
+        self._eu_base_cache = _cache
+        _mm = self.market_module
+        if _is_base:
+            _mm._eu_base_supply = None
+            _mm._eu_base_demand = None
+            # Recalibrate at THIS run's first market solve. The calibration used
+            # to freeze at the first solve an instance ever performed, so a model
+            # whose first run was price-shocked or on a region subset carried a
+            # calibration taken at the wrong point into every later run - results
+            # depended on the instance's history (a null-trajectory projection,
+            # built on a fresh instance, then differed from the base by 0.06%).
+            _mm._demand_cal_frozen = None
+            # ...and restore the market's PRISTINE base tables: EU rows of
+            # commodities without farm-model supply are not re-aligned per run
+            # and carried an earlier run's values (a model with a full-region
+            # run in its history had different EU oil and cake consumption
+            # than a fresh one; with crushing this reached farm results).
+            if getattr(_mm, "_base_production0", None) is not None:
+                _mm.base_production = _mm._base_production0.copy()
+                _mm.base_consumption = _mm._base_consumption0.copy()
+                _mm._dom0_cache = None          # base domestic prices for the feed terms
+        else:
+            if _key not in _cache:
+                _saved = self.verbose
+                self.verbose = False
+                self.run(scenario="BASELINE", regions=regions,
+                         max_outer_iter=max_outer_iter)
+                self.verbose = _saved
+                self.policy_module.apply_scenario(pol_scenario)
+            self.market_module.set_eu_base(*_cache[_key][:2])
+            # reuse the calibration of the baseline for the same region set
+            if len(_cache[_key]) > 2:
+                _cal, _bp, _bc = _cache[_key][2:]
+                _mm._demand_cal_frozen = _cal.copy()
+                _mm.base_production.loc["EU27"] = _bp
+                _mm.base_consumption.loc["EU27"] = _bc
 
         # Get policy adders (CAP payments → supply module net revenues)
         # CAP support enters the supply model as a DELTA from the baseline
@@ -240,9 +292,20 @@ class CAPRIModel:
                 if comm in world_prices_current.index:
                     world_prices_current[comm] *= (1 + shock)
 
-        # Override market module base prices if shocked
+        # Market base world prices for THIS run. A shocked run used to overwrite
+        # them and nothing restored them, so every later run on the same model
+        # silently inherited the shock (a baseline after a +20% wheat-price run
+        # gave DE11 wheat 111.2 instead of 91.2). Each run now starts from the
+        # true base and applies only its own shock.
+        _mm = self.market_module
+        if getattr(_mm, "_world_prices_base0", None) is None:
+            _mm._world_prices_base0 = _mm.world_prices_base.copy()
+        _wpb = _mm._world_prices_base0.copy()
         if world_price_shock:
-            self.market_module.world_prices_base = world_prices_current
+            for comm, shock in world_price_shock.items():
+                if comm in _wpb.index:
+                    _wpb[comm] *= (1 + shock)
+        _mm.world_prices_base = _wpb
 
         # ---- Outer iteration loop ----
         tracker = ConvergenceTracker(
@@ -319,6 +382,13 @@ class CAPRIModel:
             # --- Step 2: Market module ---
             if self.verbose:
                 print("    [Market] Solving spatial equilibrium...")
+            # the EU price (relative to base) at which this iteration's supply was
+            # produced, so the market can anticipate the supply response
+            self.market_module._eu_price_seen = (1.0 + price_signal).reindex(
+                self.market_module.commodities).fillna(1.0)
+            # FEED DEMAND FOLLOWS HERDS: EU feed use of each feed cereal from
+            # this iteration's herds x the feed table, relative to base.
+            self._set_feed_demand(supply_results)
             market_eq = self.market_module.solve(
                 exogenous_supply=eu_supply_market,
                 trade_scenario=trade_scenario,
@@ -330,15 +400,51 @@ class CAPRIModel:
             # Price signal for next supply iteration = relative deviation from base
             new_prices = market_eq.world_prices
             base_prices = self.data["world_prices"]
-            price_signal = (new_prices - base_prices) / base_prices.clip(lower=1.0)
+            # Farmers respond to the EU price, not the world price. The EU price
+            # is the world price times the fixed tariff wedge times the Armington
+            # premium, so relative to base it moves by (world/world_base) x
+            # premium. With no premium this is exactly the old world-price signal.
+            _prem = getattr(self.market_module, "eu_premium", None)
+            _prem = (_prem.reindex(new_prices.index).fillna(1.0)
+                     if _prem is not None else 1.0)
+            _target = (new_prices / base_prices.clip(lower=1.0)) * _prem - 1.0
+            # Damped update. With the Armington premium the EU price responds
+            # to EU supply, so supply and price feed back on each other; taking
+            # the new signal in full made the outer loop oscillate (a cobweb:
+            # the maximum price change grew 0.19 -> 0.33 between iterations).
+            # Relaxation changes the path to the equilibrium, not the
+            # equilibrium itself, so a converged result is unaffected.
+            price_signal = price_signal + self.PRICE_SIGNAL_RELAXATION * (
+                _target.reindex(price_signal.index).fillna(0.0) - price_signal)
 
             # Aggregate quantities for convergence
             agg_qty = eu_supply_market.sum() if eu_supply_market is not None \
                       else pd.Series(dtype=float)
 
             tracker.record(outer_iter, new_prices, agg_qty)
+            if self.verbose:
+                try:
+                    _dv = (new_prices / base_prices.clip(lower=1.0) - 1.0)
+                    _pr = getattr(self.market_module, 'eu_premium', None)
+                    _prev = getattr(self, '_trace_prev_prem', None)
+                    _top = ''
+                    if _pr is not None and _prev is not None:
+                        _d = (_pr - _prev.reindex(_pr.index).fillna(1.0)).abs().sort_values(ascending=False).head(3)
+                        _top = ' | premium swing: ' + ', '.join(f'{k} {float(_pr[k]):.3f} ({v:+.3f})' for k, v in _d.items())
+                    self._trace_prev_prem = _pr.copy() if _pr is not None else None
+                    _lu = float(getattr(self.supply_module, 'max_land_update', 0.0) or 0.0)
+                    print(f'  [outer {outer_iter + 1}] world max {_dv.abs().idxmax()} {float(_dv.abs().max()):.4f} | land update {_lu:.5f}{_top}', flush=True)
+                except Exception:
+                    pass
 
-            if outer_iter > 0 and tracker.check_convergence():
+            # Damped steps are small by design, so small successive price
+            # changes alone could signal a false convergence. Also require the
+            # signal to have reached the target it is being relaxed toward.
+            _gap = float((_target.reindex(price_signal.index).fillna(0.0)
+                          - price_signal).abs().max())
+            # land supply converges with prices: do not stop while it moves
+            _land = float(getattr(self.supply_module, "max_land_update", 0.0) or 0.0)
+            if outer_iter > 0 and tracker.check_convergence() and _gap < 0.005 and _land < 1e-3:
                 outer_converged = True
                 if self.verbose:
                     print(f"  ✓ Outer loop converged at iteration {outer_iter + 1}")
@@ -406,7 +512,7 @@ class CAPRIModel:
         if run_abatement and run_environmental and env_df is not None \
                 and self.tech_abatement is not None:
             if self.verbose:
-                print("  [Abatement] Applying EcAMPA technological measures...")
+                print("  [Abatement] CAPRI mitigation portfolio (primary) + EcAMPA measures (literature comparison)...")
             try:
                 abatement_result = self._run_abatement(supply_results, env_df)
             except Exception as e:
@@ -418,6 +524,17 @@ class CAPRIModel:
 
         t_elapsed = time.time() - t_start
 
+        if _is_base and market_eq is not None:
+            try:
+                self._eu_base_cache[_key] = (
+                    market_eq.production.loc["EU27"].copy(),
+                    market_eq.consumption.loc["EU27"].copy(),
+                    self.market_module._demand_cal_frozen.copy(),
+                    self.market_module.base_production.loc["EU27"].copy(),
+                    self.market_module.base_consumption.loc["EU27"].copy())
+            except Exception:
+                pass
+
         results = {
             "scenario": pol_scenario.name,
             "supply": supply_results,
@@ -426,6 +543,9 @@ class CAPRIModel:
             "feed": feed_df,
             "biofuel": biofuel_result,
             "abatement": abatement_result,
+            # CAPRI's own mitigation portfolio: full potential and, when a
+            # carbon price is set, abatement at that price (tonnes CO2e)
+            "abatement_capri": getattr(self, "_capri_abatement_result", None),
             "policy_summary": policy_summary,
             "convergence": tracker.summary(),
             "metadata": {
@@ -459,6 +579,7 @@ class CAPRIModel:
         """
         import pandas as pd
         # aggregate emissions by source and enteric by animal across regions
+        self._abatement_inputs = []
         sources = {}
         enteric = {}
         for region, res in supply_results.items():
@@ -473,10 +594,32 @@ class CAPRIModel:
                 herds = herds[[a for a in herds.index if a not in acts.index]]
                 acts = pd.concat([acts, herds])
             ghg = self.env_module.compute_ghg(acts, region)
+            self._abatement_inputs.append(
+                (region, ghg, self.env_module.enteric_ch4_by_animal(acts)))
             for k, v in ghg.items():
                 sources[k] = sources.get(k, 0.0) + v
             for a, v in self.env_module.enteric_ch4_by_animal(acts).items():
                 enteric[a] = enteric.get(a, 0.0) + v
+        # CAPRI's own mitigation portfolio, per member state: reductions at
+        # full technical potential and, if a carbon price is set, at that price.
+        self._capri_abatement_result = None
+        ca = getattr(self, "capri_abatement", None)
+        if ca is not None:
+            full, at_price = {}, {}
+            price = getattr(self, "_run_carbon_price", None)
+            herd = sum(float(v) for v in enteric.values()) or 1.0
+            e_unit = {"CH4ENT": 1.7, "CH4MAN": sources.get("CH4_MAN", 0.0) / max(herd, 1.0),
+                      "N2OSYN": 0.001}
+            for region, ghg, ent in self._abatement_inputs:
+                for k, v in ca.abate(ghg, region[:2], None, ent).items():
+                    full[k] = full.get(k, 0.0) + v
+                if price:
+                    for k, v in ca.abate(ghg, region[:2], price, ent).items():
+                        at_price[k] = at_price.get(k, 0.0) + v
+            self._capri_abatement_result = {
+                "emissions_by_source": dict(sources),
+                "full_potential": full, "carbon_price": price,
+                "at_carbon_price": at_price if price else None}
         return self.tech_abatement.apply(
             sources, uptake_scale=1.0, enteric_by_animal=enteric)
 
@@ -552,6 +695,126 @@ class CAPRIModel:
     # BRIDGE: Supply → Market commodities
     # ------------------------------------------------------------------
 
+    #: feed cereals whose EU demand is split into a feed part that follows
+    #: herd sizes and a remainder that keeps its own-price response
+    FEED_DEMAND_COMMODITIES = ("SWHE", "BARL", "CORN", "OCER")
+
+    def _feed_shares(self) -> dict:
+        """Each feed cereal's feed share of EU domestic use, CAPRI 2030 balance
+        (FEDM / (HCOM + FEDM + INDM + BIOF + LOSM)); other cereals include rye
+        and oats, which have no market of their own here."""
+        cached = getattr(self, "_feed_shares_cache", None)
+        if cached is not None:
+            return cached
+        out = {}
+        try:
+            import json
+            from pathlib import Path
+            f = Path(getattr(self, "data_dir", None) or Path(__file__).resolve().parents[1] / "capri_data") \
+                / "validation" / "capri_eu27_market_balance_2030_ref.json"
+            if not f.exists():
+                f = Path(__file__).resolve().parents[1] / "capri_data" / "validation" / "capri_eu27_market_balance_2030_ref.json"
+            p = json.load(open(f))["products"]
+            groups = {"SWHE": ("SWHE",), "BARL": ("BARL",), "CORN": ("MAIZ",), "OCER": ("OCER", "RYEM", "OATS")}
+            for c, src in groups.items():
+                fed = sum(float(p[x].get("FEDM", 0.0)) for x in src if x in p)
+                use = sum(float(p[x].get(k, 0.0)) for x in src if x in p
+                          for k in ("HCOM", "FEDM", "INDM", "BIOF", "LOSM"))
+                if use > 0 and fed > 0:
+                    out[c] = min(0.9, fed / use)
+        except Exception:
+            out = {}
+        self._feed_shares_cache = out
+        return out
+
+    def _cake_feed_shares(self) -> dict:
+        """Feed share of EU domestic use per cake, CAPRI 2017 base (FAO_agg BAS)."""
+        cached = getattr(self, "_cake_shares_cache", None)
+        if cached is not None:
+            return cached
+        out = {}
+        try:
+            import json
+            from pathlib import Path
+            f = Path(__file__).resolve().parents[1] / "capri_data" / "2017" / "market" / "capri_oilseed_products_baseline.json"
+            b = json.load(open(f))["balances"]
+            for c in ("RAPC", "SUNC", "SOYC"):
+                r = b.get(f"EU27|{c}", {})
+                if r.get("consumption", 0) > 0:
+                    out[c] = min(1.0, float(r.get("feed", 0.0)) / float(r["consumption"]))
+        except Exception:
+            out = {}
+        self._cake_shares_cache = out
+        return out
+
+    def _set_feed_demand(self, supply_results) -> None:
+        """Pass EU feed use (current and base) to the market.
+
+        The market module never referred to animals: feed demand was a fixed
+        part of each cereal's demand curve, so when herds shrank the market did
+        not see the feed they no longer ate (Farm-to-Fork: pigs -15%, cereal
+        prices +13% against CAPRI's +8%). Feed use = sum over regions and
+        animals of heads x feed requirement (t/head, feed_requirements.csv);
+        base use from each regional model's own base levels, so the base year
+        cannot move. Broilers are counted per census place (4.35 birds a year).
+        """
+        mm = self.market_module
+        try:
+            fr = self.data.get("feed_requirements")
+            if fr is None:
+                fr = self.data.get("feed_req")
+            if fr is None or not len(fr) or not supply_results:
+                mm._feed_use = None
+                return
+            from capri_mod.data.definitions import ANIMALS
+            mult = {"BROI": getattr(type(self.supply_module), "BROILER_BIRDS_PER_PLACE", 1.0)}
+            cur = {c: 0.0 for c in self.FEED_DEMAND_COMMODITIES}
+            prot = [0.0, 0.0]                       # protein-rich feed: now, base
+            base = {c: 0.0 for c in self.FEED_DEMAND_COMMODITIES}
+            for region, res in supply_results.items():
+                mo = getattr(self.supply_module, "_models", {}).get(region)
+                b0 = mo._base_levels() if mo is not None else None
+                fc = getattr(mo.data, "livestock_feed_coef", None) if mo is not None else None
+                for a in ANIMALS:
+                    x = float(res.activities.get(a, 0.0))
+                    x0 = float(b0.get(a, 0.0)) if b0 is not None else x
+                    q = float(fc.get(f"{a}_cereals", float("nan"))) if fc is not None else float("nan")
+                    qp = float(fc.get(f"{a}_protein", float("nan"))) if fc is not None else float("nan")
+                    if qp == qp:                    # protein-rich feed, t per head
+                        prot[0] += x * qp
+                        prot[1] += x0 * qp
+                    if q == q:                      # CAPRI total / our herd, t per head
+                        cur["OCER"] += x * q
+                        base["OCER"] += x0 * q
+                        continue
+                    if a not in fr.index:
+                        continue
+                    k = mult.get(a, 1.0)
+                    for c in self.FEED_DEMAND_COMMODITIES:
+                        if c in fr.columns:
+                            q = float(fr.at[a, c]) * k
+                            cur[c] += x * q
+                            base[c] += x0 * q
+            # The feed table files CAPRI's per-animal CEREAL AGGREGATE mostly
+            # under OCER (183.5 of 189 Mt), so per-commodity sums would put the
+            # whole herd effect on the small other-cereals market. Use ONE herd-
+            # driven index - total cereal feed now vs base - and each cereal's
+            # feed share of domestic use from CAPRI's 2030 market balance.
+            F, F0 = sum(cur.values()), sum(base.values())
+            shares = self._feed_shares()
+            mm._feed_use = ({c: (F / F0, sh) for c, sh in shares.items()}
+                            if F0 > 0 and shares else None)
+            # CAKES follow protein-rich feed (crushing Stage 3): each cake's EU
+            # feed share of domestic use from CAPRI's 2017 base (FAO_agg BAS).
+            if prot[1] > 0:
+                cs = self._cake_feed_shares()
+                if cs:
+                    mm._feed_use = dict(mm._feed_use or {})
+                    for c, sh in cs.items():
+                        mm._feed_use[c] = (prot[0] / prot[1], sh)
+        except Exception:
+            mm._feed_use = None
+
     def _bridge_supply_to_market(
         self,
         supply_agg: pd.DataFrame,
@@ -578,7 +841,32 @@ class CAPRIModel:
             "TOMA": "TOMA", "OVEG": "OVEG", "APPL": "APPL",
             "OFRU": "OFRU", "CITR": "CITR", "WINE": "WINE",
             "OLIV": "OLIV",
+            # paddy rice is a market commodity; without this entry the model's
+            # own rice production never reached the rice market
+            "PARI": "PARI",
         }
+        # LIVESTOCK (milk is handled by the dairy block below). The meat markets
+        # meat, milk and egg supply never moved with the herds: under
+        # Farm-to-Fork pig supply fell ~10% while the pork price changed by
+        # exactly 0.0% (CAPRI: +43%). Each product is the sum of the
+        # activities producing it, from their marketed gross output.
+        # The model's own animal codes (definitions.ANIMALS): BCOW suckler cows,
+        # HFRS heifers, PIGF a second pig activity, SHGP sheep and goats. An
+        # earlier version of this map used HEIF/SCOW/SOWS/SHEP/GOAT, which do not
+        # exist here, so beef came from bulls and calves only, pork from one pig
+        # activity of two, and sheep and goat meat got nothing.
+        livestock_maps = {
+            "BEEF": ("BULL", "BCOW", "HFRS", "CALV"),
+            "PORK": ("PIGS", "PIGF"),
+            "POUL": ("BROI",),
+            "EGGS": ("LAYS",),
+            "SHGM": ("SHGP",),
+        }
+        # (Oil and cake supply now comes from crushing inside the market.)
+        for mcomm, acts in livestock_maps.items():
+            present = [a for a in acts if a in supply_agg.columns]
+            if present and mcomm in market_supply.columns:
+                market_supply[mcomm] = supply_agg[present].sum(axis=1)
 
         for act, mcomm in direct_maps.items():
             if act in supply_agg.columns and mcomm in market_supply.columns:
@@ -609,10 +897,19 @@ class CAPRIModel:
         rape_oil = eu.get("rape_oil_yield", 0.42)
         sun_oil  = eu.get("sun_oil_yield", 0.42)
         soya_oil = eu.get("soya_oil_yield", 0.18)
+        # The market commodities RAPE and SUNF are the SEEDS: they carry seed
+        # world prices, and EU demand for them is calibrated to FAO seed use,
+        # crushing included (CAPRI's 2030 reference: rapeseed production 22.4
+        # Mt, of which 27.6 Mt processed with imports). The seed quantity used to
+        # be multiplied by the OIL extraction yield (0.42) and passed to the seed
+        # market, so the market saw EU rapeseed at 7.4 Mt and sunflower at 4.1
+        # instead of ~19 and ~10. Percentage changes survived the constant
+        # factor, which is why it went unnoticed; the EU's weight in world
+        # oilseed markets did not.
         if "RAPE" in supply_agg.columns:
-            market_supply["RAPE"] = supply_agg["RAPE"] * rape_oil
+            market_supply["RAPE"] = supply_agg["RAPE"]
         if "SUNF" in supply_agg.columns:
-            market_supply["SUNF"] = supply_agg["SUNF"] * sun_oil
+            market_supply["SUNF"] = supply_agg["SUNF"]
         if "SOYA" in supply_agg.columns:
             market_supply["SOYA"] = supply_agg["SOYA"]
 
@@ -644,36 +941,13 @@ class CAPRIModel:
         # inflated EU beef supply ~300x and drove market non-convergence. The
         # per-head factor is calibrated so the bridge reproduces base production
         # (EU average carcass yield over the whole cattle herd, incl. cows/calves).
-        beef_acts = ["BULL", "BCOW", "HFRS", "CALV"]
-        beef_total = sum(
-            supply_agg[a] for a in beef_acts if a in supply_agg.columns
-        )
-        if "BEEF" in market_supply.columns:
-            market_supply["BEEF"] = beef_total * 0.00034961  # calibrated to EU27 market slot
-
-        # Pork
-        pig_acts = ["PIGS", "PIGF"]
-        pork_total = sum(
-            supply_agg[a] for a in pig_acts if a in supply_agg.columns
-        )
-        if "PORK" in market_supply.columns:
-            market_supply["PORK"] = pork_total * 0.00004116  # calibrated to EU27 market slot
-
-        # Poultry — heads to carcass tonnage (calibrated to base production)
-        poul_acts = ["BROI", "OANI"]
-        poul_total = sum(
-            supply_agg[a] for a in poul_acts if a in supply_agg.columns
-        )
-        if "POUL" in market_supply.columns:
-            market_supply["POUL"] = poul_total * 0.00004633  # calibrated to EU27 market slot
-
-        # Sheep and goat meat — heads to carcass tonnage
-        if "SHGP" in supply_agg.columns and "SHGM" in market_supply.columns:
-            market_supply["SHGM"] = supply_agg["SHGP"] * 0.00063104  # calibrated to EU27 market slot
-
-        # Eggs — layers to egg tonnage (t eggs / layer / yr)
-        if "LAYS" in supply_agg.columns and "EGGS" in market_supply.columns:
-            market_supply["EGGS"] = supply_agg["LAYS"] * 0.00000836  # calibrated to EU27 market slot
+        # (An older meat-and-eggs block stood here. Its codes were right, but it
+        # scaled each product by an arbitrary "market slot" factor (pork x
+        # 0.00004116),
+        # so near-zero values reached the market, which then kept its own fixed
+        # base: meat prices never moved with the herds in any scenario. It also
+        # silently overwrote the livestock mapping above. Removed; dairy, which
+        # maps correctly, is kept as it was.)
 
         return market_supply
 

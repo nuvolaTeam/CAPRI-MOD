@@ -542,6 +542,282 @@
    "known_gaps": [
     "13 regions where CAPRI does not split the herd keep a single yield and no margin"
    ]
+  },
+  "capri_ghg_mitigation": {
+   "file": "2017/abatement/capri_ghg_mitigation.csv",
+   "concept": "CAPRI mitigation technologies: shares, emissions under each technology, adoption costs",
+   "unit": "various",
+   "dimension": "member state x activity/source",
+   "modules": [
+    "abatement"
+   ],
+   "source": {
+    "source_type": "CAPRI_GDX",
+    "source_ref": "p_ghgMiti; res_2_1730greendeal_refpol_endotech_all_max",
+    "vintage": "2030",
+    "confidence": "validated",
+    "reproducibility": "public_code"
+   },
+   "known_gaps": []
+  },
+  "capri_mitigation_potential": {
+   "file": "2017/abatement/capri_mitigation_potential.csv",
+   "concept": "CAPRI technical mitigation potential by member state and source",
+   "unit": "fraction of emissions",
+   "dimension": "member state x activity/source",
+   "modules": [
+    "abatement"
+   ],
+   "source": {
+    "source_type": "CAPRI_GDX",
+    "source_ref": "p_ghgMiti; res_2_1730greendeal_refpol_endotech_all_max",
+    "vintage": "2030",
+    "confidence": "validated",
+    "reproducibility": "public_code"
+   },
+   "known_gaps": []
+  },
+  "eu_gross_trade_supplement": {
+   "file": "2017/market/eu_gross_trade_supplement.csv",
+   "concept": "CAPRI's extra-EU gross trade for commodities the trade file does not record (sugar, durum wheat)",
+   "unit": "kt",
+   "dimension": "commodity",
+   "modules": [
+    "market"
+   ],
+   "source": {
+    "source_type": "CAPRI_GDX",
+    "source_ref": "res_2_1730greendeal_refdefaulta dataOut",
+    "vintage": "2030",
+    "confidence": "validated",
+    "reproducibility": "public_code"
+   },
+   "known_gaps": [
+    "durum is a proxy from wheat"
+   ]
+  },
+  "land_rent_regional": {
+   "file": "2017/supply/land_rent_regional.csv",
+   "concept": "Land rent per hectare by region (Eurostat apri_lrnt, arable land and/or permanent grassland)",
+   "unit": "EUR/ha",
+   "dimension": "region",
+   "modules": [
+    "supply"
+   ],
+   "source": {
+    "source_type": "EXTERNAL",
+    "source_ref": "Eurostat apri_lrnt",
+    "vintage": "2017",
+    "confidence": "validated",
+    "reproducibility": "public_data"
+   },
+   "known_gaps": [
+    "Germany and Cyprus on fallback"
+   ]
+  },
+  "capri_baseline_surplus": {
+   "file": "2017/policy/capri_baseline_surplus_2030.csv",
+   "concept": "CAPRI's own baseline gross N surplus per ha (2030 reference), input to the tiered nitrogen target",
+   "unit": "kg N/ha",
+   "dimension": "region",
+   "modules": [
+    "supply"
+   ],
+   "source": {
+    "source_type": "CAPRI_GDX",
+    "source_ref": "res_2_1730greendeal_refdefaulta dataOut",
+    "vintage": "2030",
+    "confidence": "validated",
+    "reproducibility": "capri_gdx"
+   },
+   "known_gaps": [
+    "national scaling for split/merged regions"
+   ]
+  },
+  "n_deposition_regional": {
+   "file": "2017/environment/n_deposition_regional.csv",
+   "concept": "Atmospheric N deposition per ha by region (CAPRI 2030 reference, EMEP-based)",
+   "unit": "kg N/ha",
+   "dimension": "region",
+   "modules": [
+    "environmental",
+    "supply"
+   ],
+   "source": {
+    "source_type": "CAPRI_GDX",
+    "source_ref": "res_2_1730greendeal_refdefaulta dataOut",
+    "vintage": "2030",
+    "confidence": "validated",
+    "reproducibility": "capri_gdx"
+   },
+   "known_gaps": []
+  },
+  "manure_trade": {
+   "file": "2017/environment/manure_trade_2030.csv",
+   "concept": "Manure N trade between regions: export share of excretion, import per ha of cropland",
+   "unit": "share; kg N/ha",
+   "dimension": "region",
+   "modules": [
+    "environmental"
+   ],
+   "source": {
+    "source_type": "CAPRI_GDX",
+    "source_ref": "res_2_1730greendeal_refdefaulta dataOut",
+    "vintage": "2030",
+    "confidence": "validated",
+    "reproducibility": "capri_gdx"
+   },
+   "known_gaps": [
+    "unmatched regions"
+   ]
+  },
+  "capri_fertiliser_allocation": {
+   "file": "2017/environment/capri_fertiliser_allocation_2030.csv",
+   "concept": "CAPRI fertiliser allocation per region and crop: need, mineral, manure, residues, losses (calibration data for the allocation module)",
+   "unit": "kg N/ha",
+   "dimension": "region x crop",
+   "modules": [
+    "environmental"
+   ],
+   "source": {
+    "source_type": "CAPRI_GDX",
+    "source_ref": "res_2_1730greendeal_refdefaulta dataOut",
+    "vintage": "2030",
+    "confidence": "validated",
+    "reproducibility": "capri_gdx"
+   },
+   "known_gaps": [
+    "unmatched regions"
+   ]
+  },
+  "capri_regional_n_balance": {
+   "file": "2017/environment/capri_regional_n_balance_2030.csv",
+   "concept": "CAPRI regional N balance positions (MINFER, EXCRET, MTRADE, IMPORT, EXPPRD, CRESID, BIOFIX, ATMOSD, SURTOT)",
+   "unit": "kt N",
+   "dimension": "region",
+   "modules": [
+    "environmental"
+   ],
+   "source": {
+    "source_type": "CAPRI_GDX",
+    "source_ref": "res_2_1730greendeal_refdefaulta dataOut",
+    "vintage": "2030",
+    "confidence": "validated",
+    "reproducibility": "capri_gdx"
+   },
+   "known_gaps": [
+    "unmatched regions"
+   ]
+  },
+  "fertiliser_substitution": {
+   "file": "2017/environment/fertiliser_substitution_2030.csv",
+   "concept": "Manure-N availability and mineral-N efficiency per region (CAPRI fertiliser allocation): manure displaces mineral fertiliser at availability/efficiency",
+   "unit": "share",
+   "dimension": "region",
+   "modules": [
+    "environmental"
+   ],
+   "source": {
+    "source_type": "CAPRI_GDX",
+    "source_ref": "res_2_1730greendeal_refdefaulta dataOut",
+    "vintage": "2030",
+    "confidence": "validated",
+    "reproducibility": "capri_gdx"
+   },
+   "known_gaps": [
+    "unmatched regions use EU medians"
+   ]
+  },
+  "livestock_manure_n_coef": {
+   "file": "2017/environment/livestock_manure_n_coef.csv",
+   "concept": "Manure N per head (kg), CAPRI 2017 regional manure N total per activity divided by this model's herd (census stock)",
+   "unit": "kg N/head",
+   "dimension": "region x animal",
+   "modules": [
+    "environmental",
+    "supply"
+   ],
+   "source": {
+    "source_type": "CAPRI_GDX",
+    "source_ref": "res_17 dataOut MANN, LEVL",
+    "vintage": "2017",
+    "confidence": "validated",
+    "reproducibility": "capri_gdx"
+   },
+   "known_gaps": [
+    "fallback to per-unit table where empty"
+   ]
+  },
+  "livestock_feed_coef": {
+   "file": "2017/feed/livestock_feed_coef.csv",
+   "concept": "Feed per head (t): cereals, protein-rich and energy-rich feed - CAPRI 2017 regional totals (FCER/FPRO/FENE x LEVL) divided by this model's herd",
+   "unit": "t/head",
+   "dimension": "region x animal x feed",
+   "modules": [
+    "supply",
+    "market"
+   ],
+   "source": {
+    "source_type": "CAPRI_GDX",
+    "source_ref": "res_17 dataOut FCER, FPRO, FENE, LEVL",
+    "vintage": "2017",
+    "confidence": "validated",
+    "reproducibility": "capri_gdx"
+   },
+   "known_gaps": [
+    "fallback to feed_requirements.csv"
+   ]
+  },
+  "capri_oilseed_products_baseline": {
+   "file": "2017/market/capri_oilseed_products_baseline.json",
+   "concept": "Market balances of oilseed products by trade region; EU crushing and yields",
+   "unit": "kt; EUR/t",
+   "dimension": "region x product",
+   "modules": [
+    "market"
+   ],
+   "source": {
+    "source_type": "CAPRI_GDX",
+    "source_ref": "FAO_agg_17_defaulta p_dataMarket",
+    "vintage": "2017",
+    "confidence": "validated",
+    "reproducibility": "capri_gdx"
+   },
+   "known_gaps": []
+  },
+  "eu_demand_elas_overrides": {
+   "file": "2017/market/eu_demand_elas_overrides.json",
+   "concept": "EU own-price demand elasticities for oils and cakes",
+   "unit": "elasticity",
+   "dimension": "commodity",
+   "modules": [
+    "market"
+   ],
+   "source": {
+    "source_type": "CAPRI_GDX",
+    "source_ref": "elas_2_1717defaulta p_ElasDem",
+    "vintage": "2017",
+    "confidence": "validated",
+    "reproducibility": "capri_gdx"
+   },
+   "known_gaps": []
+  },
+  "feed_demand_nonEU": {
+   "file": "2017/market/feed_demand_nonEU.json",
+   "concept": "Non-EU feed shares and feed-price elasticities",
+   "unit": "share; elasticity",
+   "dimension": "region x feed x feed",
+   "modules": [
+    "market"
+   ],
+   "source": {
+    "source_type": "CAPRI_GDX",
+    "source_ref": "FAO_agg p_dataMarket; elas_2_1717 p_ElasFeed",
+    "vintage": "2017",
+    "confidence": "validated",
+    "reproducibility": "capri_gdx"
+   },
+   "known_gaps": []
   }
  }
 }

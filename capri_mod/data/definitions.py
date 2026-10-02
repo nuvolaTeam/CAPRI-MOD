@@ -79,6 +79,8 @@ MARKET_COMMODITIES = [
     "MILK", "BUTR", "SKIM", "CHES", "WHEY",    # Dairy products
     "BEEF", "PORK", "POUL", "SHGM", "EGGS",    # Livestock products
     "FATS", "OFOD_M",                            # Fats, other food
+    # oilseed-crushing products (docs/OILSEED_CRUSHING.md): oils and cakes
+    "RAPO", "SUNO", "SOYO", "RAPC", "SUNC", "SOYC",
 ]
 
 # Processed / secondary products

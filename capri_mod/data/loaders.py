@@ -88,7 +88,24 @@ _FILE_CATEGORY = {
     "base_areas.csv": "supply", "yields.csv": "supply", "animal_numbers.csv": "supply",
     "livestock_output_coef.csv": "supply", "nutrients_regional.csv": "supply",
     "livestock_revenue_coef.csv": "supply",
+    "livestock_feed_coef.csv": "feed",
+    "capri_oilseed_products_baseline.json": "market",
+    "eu_demand_elas_overrides.json": "market",
+    "feed_demand_nonEU.json": "market",
     "livestock_intensity_bounds.csv": "supply",
+    "landscape_targets_ms.csv": "policy",
+    "capri_ghg_mitigation.csv": "abatement",
+    "capri_mitigation_potential.csv": "abatement",
+    "eu_gross_trade_supplement.csv": "market",
+    "land_rent_regional.csv": "supply",
+    "capri_baseline_surplus_2030.csv": "policy",
+    "n_deposition_regional.csv": "environment",
+    "manure_trade_2030.csv": "environment",
+    "fertiliser_substitution_2030.csv": "environment",
+    "livestock_manure_n_coef.csv": "environment",
+    "capri_fertiliser_allocation_2030.csv": "environment",
+    "capri_regional_n_balance_2030.csv": "environment",
+    "organic_targets_ms.csv": "policy",
     # reference data: not loaded by the model, but registered so the
     # validator can resolve and shape-check it like any other input
     "capri_own_price_elasticities.csv": "supply",
@@ -458,7 +475,37 @@ def load_regional_producer_prices(data_dir=None):
         for tgt in targets:
             if tgt not in prices.columns or prices[tgt].isna().all():
                 prices[tgt] = prices[src]
+
+    # Where CAPRI has no REGIONAL price, fall back to its NATIONAL one before the
+    # EU-wide figure. A missing regional price used to drop straight to the EU
+    # average; for wine that meant 95.5 EUR/t in eleven vine-growing regions -
+    # 338 kha, including Sicily's 127 kha - where CAPRI's own national prices are
+    # 1,362 (Italy), 1,923 (Croatia) and 1,858 (Slovenia). A national price is
+    # the same country's own market, so it is a far closer stand-in than the EU.
+    nat = _national_capri_prices(data_dir)
+    if nat is not None:
+        country_alias = {"BE": "BL", "LU": "BL", "IE": "IR"}
+        for col in prices.columns:
+            if col not in nat.columns:
+                continue
+            missing = prices[col].isna()
+            if not missing.any():
+                continue
+            for reg in prices.index[missing]:
+                cc = country_alias.get(str(reg)[:2], str(reg)[:2])
+                if cc in nat.index and pd.notna(nat.at[cc, col]) and nat.at[cc, col] > 0:
+                    prices.at[reg, col] = float(nat.at[cc, col])
     return prices
+
+
+def _national_capri_prices(data_dir):
+    """CAPRI's national market prices (MPRI) by country, if the file is held."""
+    import pandas as pd
+    from pathlib import Path
+    p = Path(data_dir) / "sources" / "capreg" / "capreg_national_prices.csv"
+    if not p.exists():
+        return None
+    return pd.read_csv(p, index_col=0)
 
 
 def load_producer_prices(data_dir: Optional[Path] = None) -> pd.Series:
@@ -676,6 +723,8 @@ def load_world_prices(data_dir: Optional[Path] = None) -> pd.Series:
         "MILK": 300,  "BUTR": 3200, "SKIM": 2100, "CHES": 3800,
         "WHEY": 650,  "BEEF": 3200, "PORK": 1800, "POUL": 1400,
         "SHGM": 3500, "EGGS": 1200, "FATS": 900,  "OFOD_M": 400,
+        # CAPRI FAO_agg World PMRK, base period
+        "RAPO": 737,  "SUNO": 665,  "SOYO": 700,  "RAPC": 213, "SUNC": 204, "SOYC": 354,
     }
     return pd.Series(prices)
 
@@ -771,6 +820,13 @@ def load_armington_parameters(data_dir: Optional[Path] = None) -> pd.DataFrame:
         "EGGS": {"sigma": 2.9, "eta": -0.2, "eps": 0.2},  # CAPRI GAMS
         "FATS": {"sigma": 3.0, "eta": -0.2, "eps": 0.22},  # literature
         "OFOD_M": {"sigma": 2.5, "eta": -0.25, "eps": 0.2},  # literature
+        # CAPRI market1_ch.gms p_rhoArm1; FAO_agg p_demandElas / p_supplyElas
+        "RAPO": {"sigma": 6.3, "eta": -0.143, "eps": 0.107},
+        "SUNO": {"sigma": 6.5, "eta": -0.143, "eps": 0.107},
+        "SOYO": {"sigma": 5.9, "eta": -0.143, "eps": 0.107},
+        "RAPC": {"sigma": 4.6, "eta": -0.15, "eps": 0.10},
+        "SUNC": {"sigma": 4.0, "eta": -0.15, "eps": 0.10},
+        "SOYC": {"sigma": 6.1, "eta": -0.15, "eps": 0.10},
     }
     return pd.DataFrame(base).T
 
@@ -832,6 +888,8 @@ def load_tariffs(data_dir: Optional[Path] = None) -> pd.DataFrame:
         "MILK": 0.0,  "BUTR": 82.0, "SKIM": 55.0, "CHES": 40.0,
         "WHEY": 12.0, "BEEF": 65.0, "PORK": 20.0, "POUL": 35.0,
         "SHGM": 52.0, "EGGS": 30.0, "FATS": 12.0, "OFOD_M": 8.0,
+        # CAPRI 2017 applied tariffs, EU27yr19 <- NONEU (TaAppl, ad valorem %)
+        "RAPO": 5.58, "SUNO": 5.18, "SOYO": 4.66, "RAPC": 0.07, "SUNC": 0.0, "SOYC": 0.0,
     }
 
     rows = {}
@@ -932,12 +990,37 @@ def load_all_data(data_dir: Optional[Path] = None, validate: bool = False,
         # Market revenue per head (CAPRI MREV), by region and animal activity.
         "livestock_revenue_coef": _load_optional_csv(
             data_dir, "livestock_revenue_coef.csv"),
+        # Feed per head (t): CAPRI 2017 regional FCER/FPRO/FENE totals / herds
+        "livestock_feed_coef": _load_optional_csv(
+            data_dir, "livestock_feed_coef.csv"),
         # CAPRI's FADN-based organic yield gaps by macro-region and product
         # group (JRC Seville, SUPREMA project), used by the organic instrument.
         "organic_yield_gap": _load_optional_csv(
             data_dir, "organic_yield_gap.csv"),
         # CAPRI's low- and high-intensity dairy yields (DCOL / DCOH), the
         # bounds of the livestock intensity margin.
+        # CAPRI's Green Deal targets by member state, from
+        # gams/pol_input/greendeal/{landscape,organic}_targets.gdx: the extra
+        # landscape land in points of UAA, and the organic conversion in points
+        # of arable, grassland and permanent-crop area.
+        # land rent per hectare by region: Eurostat apri_lrnt, 2017 or nearest
+        # year, regional where published, else national; see the 'source' column
+        "land_rent_regional": _load_optional_csv(data_dir, "land_rent_regional.csv"),
+        # CAPRI's own baseline N surplus per ha (2030 reference) - the input to
+        # its tiered nitrogen target (pol_input/greendeal/surptot.gms)
+        "capri_baseline_surplus": _load_optional_csv(data_dir, "capri_baseline_surplus_2030.csv"),
+        # atmospheric N deposition per region, CAPRI 2030 reference (EMEP-based)
+        "n_deposition_regional": _load_optional_csv(data_dir, "n_deposition_regional.csv"),
+        # manure N trade between regions, CAPRI 2030 reference (MTRADE/EXCRET)
+        "manure_trade": _load_optional_csv(data_dir, "manure_trade_2030.csv"),
+        # manure availability and mineral efficiency per region (CAPRI allocation)
+        "fertiliser_substitution": _load_optional_csv(data_dir, "fertiliser_substitution_2030.csv"),
+        # manure N per head: CAPRI 2017 regional totals / this model's herds
+        "livestock_manure_n_coef": _load_optional_csv(data_dir, "livestock_manure_n_coef.csv"),
+        "landscape_targets_ms": _load_optional_csv(
+            data_dir, "landscape_targets_ms.csv"),
+        "organic_targets_ms": _load_optional_csv(
+            data_dir, "organic_targets_ms.csv"),
         "livestock_intensity_bounds": _load_optional_csv(
             data_dir, "livestock_intensity_bounds.csv"),
         "mineral_n_regional": _load_optional_csv(

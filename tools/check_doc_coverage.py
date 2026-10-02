@@ -137,5 +137,62 @@ def main() -> int:
     return 0
 
 
+def _counts_gate() -> int:
+    probs = check_readme_counts(Path(__file__).resolve().parent.parent)
+    for p in probs:
+        print("  [COUNT] " + p)
+    if probs:
+        print("README counts disagree with the code - update the README.")
+        return 1
+    print("README counts (tests, commodities, activities, inputs) match the code.")
+    return 0
+
+
+
+
+
+# ---------------------------------------------------------------------------
+# Counts written into the README must match the code
+# ---------------------------------------------------------------------------
+# Counts in prose drift as the model grows: the README said 32 market
+# commodities after rice made it 33, and 51 tests after the suite reached 56.
+# Each was found by a reader, not a check. This compares them with the code.
+def check_readme_counts(root: Path) -> list:
+    import re, json, sys as _sys
+    _sys.path.insert(0, str(root))
+    from capri_mod.data.definitions import CROPS, ANIMALS, MARKET_COMMODITIES
+    import ast as _ast
+    # count tests by parsing, not importing: importing needs pytest, which a
+    # documentation check should not depend on
+    _tree = _ast.parse((root / "capri_mod" / "tests" / "test_capri.py").read_text())
+    readme = (root / "README.md").read_text()
+    actual = {
+        "tests": sum(1 for n in _tree.body if isinstance(n, _ast.FunctionDef)
+                     and n.name.startswith("test_")),
+        "market commodities": len(MARKET_COMMODITIES),
+        "activities": len(CROPS) + len(ANIMALS),
+        "crops": len(CROPS),
+        "livestock": len(ANIMALS),
+        "declared inputs": len(json.load(open(root / "capri_data" / "INPUT_MANIFEST.json"))["inputs"]),
+    }
+    patterns = {
+        "tests": [r"\| Test suite \| (\d+) tests"],
+        "market commodities": [r"\| Market commodities \| (\d+) \|", r"\*\*(\d+) market\s+commodities\*\*"],
+        "activities": [r"\| Activities \| (\d+) \(", r"\*\*(\d+) activities\*\*", r"over (\d+) activities"],
+        "crops": [r"\((\d+) crops, \d+ livestock\)"],
+        "livestock": [r"\(\d+ crops, (\d+) livestock\)"],
+        "declared inputs": [r"### 4\.2 The (\d+) declared inputs", r"(\d+) declared inputs, each"],
+    }
+    problems = []
+    for what, pats in patterns.items():
+        for pat in pats:
+            for m in re.finditer(pat, readme):
+                if int(m.group(1)) != actual[what]:
+                    problems.append(f"README says {m.group(1)} {what}; the code has {actual[what]}")
+    return problems
+
+
 if __name__ == "__main__":
-    sys.exit(main())
+    _rc = main()
+    _rc2 = _counts_gate()
+    sys.exit(_rc or _rc2)

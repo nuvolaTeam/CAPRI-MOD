@@ -264,6 +264,85 @@ def build_spec(capri: dict, regions) -> dict:
     return spec
 
 
+# ---------------------------------------------------------------------------
+# Crop-specific splits for Saxony and Croatia
+# ---------------------------------------------------------------------------
+#: CAPRI's own regional selection (capreg/regio_data_sel/p_REGIO), in CAPRI's
+#: codes. Where it holds per-crop areas for the child regions, those replace the
+#: single cattle key: a cattle key gives every crop the same split, which put
+#: 91% of Croatia's olives in continental Croatia, and gave upland Chemnitz the
+#: same share of maize as lowland Leipzig.
+REGIO = _ROOT / "capri_data" / "sources" / "capreg" / "p_REGIO.csv.gz"
+
+#: REGIO codes that differ from CAPRI's activity codes. VINE for wine is CAPRI's
+#: own concordance entry; OLIT for olives is not in the concordance, but HR03's
+#: OLIT for 2013 (18.6 kha) equals CAPRI's national Croatian olive area (18.6)
+#: exactly, which fixes its meaning.
+REGIO_CODE = {"TWIN": "VINE", "TAGR": "VINE", "OLIV": "OLIT", "TABO": "OLIT"}
+
+#: Saxony was renumbered in NUTS 2013; REGIO holds it under the old codes.
+SAXONY_OLD_TO_NEW = {"DED1": "DED4", "DED2": "DED2", "DED3": "DED5"}
+
+
+def _regio_levels():
+    import pandas as pd
+    if not REGIO.exists():
+        return None
+    d = pd.read_csv(REGIO)
+    return d[d["uni_1"] == "LEVL"]
+
+
+def apply_crop_specific_splits(areas, capri):
+    """Re-split Saxony and Croatia by crop, from CAPRI's own regional data.
+
+    Saxony: each crop's parent area is divided by that crop's 2003-2007 shares
+    across the three Direktionsbezirke. Croatia: HR03 (Adriatic) takes its own
+    per-crop areas for 2011-2013, capped at the national total, and HR04 is the
+    national remainder - exact, crop by crop. Any crop without regional data
+    keeps the value it already had.
+    """
+    L = _regio_levels()
+    if L is None:
+        return []
+    changed = []
+
+    # --- Saxony
+    sx = L[L["uni_0"].isin(SAXONY_OLD_TO_NEW) & L["uni_3"].between(2003, 2007)]
+    sx = sx.groupby(["uni_2", "uni_0"])["value"].mean().unstack(1).fillna(0.0)
+    parent = capri.get("DED00000", {}).get("LEVL", {})
+    kids = [SAXONY_OLD_TO_NEW[k] for k in SAXONY_OLD_TO_NEW]
+    if parent and all(k in areas.index for k in kids):
+        for col, items in CROP_MAP.items():
+            if col not in areas.columns:
+                continue
+            total = sum(parent.get(i, 0.0) for i in items)
+            code = REGIO_CODE.get(items[0], items[0])
+            if total <= 0 or code not in sx.index or sx.loc[code].sum() <= 0:
+                continue
+            row = sx.loc[code] / sx.loc[code].sum()
+            for old, new in SAXONY_OLD_TO_NEW.items():
+                areas.at[new, col] = total * float(row.get(old, 0.0))
+        changed += kids
+
+    # --- Croatia
+    hr3 = L[(L["uni_0"] == "HR03") & L["uni_3"].between(2011, 2013)]
+    hr3 = hr3.groupby("uni_2")["value"].mean()
+    nat = capri.get("HR000000", {}).get("LEVL", {})
+    if nat and {"HR03", "HR04"} <= set(areas.index):
+        for col, items in CROP_MAP.items():
+            if col not in areas.columns:
+                continue
+            total = sum(nat.get(i, 0.0) for i in items)
+            code = REGIO_CODE.get(items[0], items[0])
+            if total <= 0 or code not in hr3.index:
+                continue
+            adriatic = min(float(hr3[code]), total)
+            areas.at["HR03", col] = adriatic
+            areas.at["HR04", col] = total - adriatic
+        changed += ["HR03", "HR04"]
+    return changed
+
+
 def main(dump_dir: Path):
     capri = read_capri(dump_dir)
     areas = pd.read_csv(AREAS, index_col=0)
@@ -352,6 +431,16 @@ def main(dump_dir: Path):
         land.at[reg, "ARABLE"] = float(v.sum()) - perm - grass - fallow
         if reg in ZERO:
             land.loc[reg] = 0.0
+
+    # replace the single cattle key with crop-specific shares where CAPRI's own
+    # regional data allows it, then rebuild land for those regions
+    for reg in apply_crop_specific_splits(areas, capri):
+        v = areas.loc[reg]
+        perm = float(v[[c for c in PERMANENT_CROPS if c in v.index]].sum())
+        grass, fallow = float(v.get("GRAS", 0.0)), float(v.get("SETA", 0.0))
+        land.at[reg, "PERMANENT"], land.at[reg, "GRASSLAND"] = perm, grass
+        land.at[reg, "FALLOW"] = fallow
+        land.at[reg, "ARABLE"] = float(v.sum()) - perm - grass - fallow
 
     for df, p in ((areas, AREAS), (land, LAND), (herds, HERDS),
                   (yields, YIELDS), (costs, COSTS), (prices, PRICES),

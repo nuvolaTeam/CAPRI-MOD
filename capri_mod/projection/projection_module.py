@@ -184,6 +184,20 @@ class ProjectionModule:
                 self._carry_forward(data, carried)
             result.reconciliation[year] = report
 
+            if policy_scenario is not None and not isinstance(policy_scenario, str):
+                # A scenario OBJECT (e.g. greendeal_scenario()): baseline and
+                # scenario are solved on the SAME projected model, so the
+                # scenario reuses that year's baseline - its EU market base and
+                # calibration - instead of building and solving its own again.
+                pm = self._model_for(data)
+                base_res = pm.run(scenario="BASELINE", **run_kwargs)
+                result.baseline[year] = base_res
+                scen_res = pm.run(custom_scenario=policy_scenario, **run_kwargs)
+                result.scenario[year] = scen_res
+                result.increment[year] = self._difference(base_res, scen_res)
+                carried = self._state_from(base_res)
+                continue
+
             base_res = self._solve(data, scenario="BASELINE", **run_kwargs)
             result.baseline[year] = base_res
 
@@ -204,6 +218,12 @@ class ProjectionModule:
         return result
 
     # -------------------------------------------------------------- internals
+    def _model_for(self, data: Dict):
+        """A fresh model built on a projected data set (see _solve for why)."""
+        cls = type(self.model)
+        return cls(data=data, data_dir=getattr(self.model, "data_dir", None),
+                   verbose=False, base_year=getattr(self.model, "base_year", "2017"))
+
     def _solve(self, data: Dict, scenario: str, **kwargs) -> Dict:
         """Solve the comparative-static core against a projected data set.
 

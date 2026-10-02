@@ -1,0 +1,158 @@
+{
+ "_purpose": "Machine-readable fitness for use. Every other file in capri_data describes where an INPUT came from; this one describes how far an OUTPUT can be trusted. It exists so that a caller - a script, a notebook or an agent - can check a result before reporting it, instead of relying on a human having read the prose in README section 9.",
+ "_how_to_use": "Look up the output you are about to report, most specific key first: 'scenario.permanent_crops' before 'scenario', 'activities.WINE' before 'activities'. Act on 'status': 'validated' needs no caveat; 'use_with_care' should be reported with its note; 'overstated' and 'understated' mean the direction is usable but the level is not; 'not_supported' means the model cannot answer that question and the number should not be used. Absence of a key means no specific finding is recorded - not that the output is validated.",
+ "_status_values": {
+  "validated": "checked against CAPRI's own data or against external statistics, and matches",
+  "use_with_care": "usable, but carries a documented caveat that should travel with the number",
+  "overstated": "direction and ranking usable; magnitude is larger than the reference",
+  "understated": "direction and ranking usable; magnitude is smaller than the reference",
+  "not_supported": "the model cannot answer this; the number is an artefact of asking"
+ },
+ "_generated": "2026-09-29",
+ "_source_of_truth": "README.md section 9 and capri_data/DATA_SOURCING_REGISTRY.json",
+ "outputs": {
+  "supply.activities": {
+   "status": "validated",
+   "note": "Base fidelity 0.58%; all 248 regions converge. Crop areas reproduce CAPRI's agricultural area exactly (166,690 kha).",
+   "evidence": "regression anchors base_fidelity_pct, n_converged"
+  },
+  "supply.gross_output": {
+   "status": "validated",
+   "note": "Crops from area x yield; livestock from CAPRI's own product coefficients. EU livestock output equals CAPRI's EU27 total.",
+   "evidence": "DATA_SOURCING_REGISTRY: gross_output_unit_inconsistency"
+  },
+  "supply.gross_margin": {
+   "status": "validated",
+   "note": "Net revenue x activity levels, livestock revenue from CAPRI's MREV. Responds to policy: organic 25% costs -10.8% of income, the nutrient rule -5.3%.",
+   "evidence": "DATA_SOURCING_REGISTRY: gross_margin_contaminated"
+  },
+  "activities.WINE": {
+   "status": "validated",
+   "note": "Every vine-growing region carries a CAPRI price: regional where CAPRI has one, otherwise its country's national price (Italy 1,362, Croatia 1,923, Slovenia 1,858 EUR/t)."
+  },
+  "scenario": {
+   "status": "use_with_care",
+   "note": "Compare on PRODUCTION, as CAPRI reports it, not on area. Must be run to convergence: max_outer_iter=1 gives a partial answer.",
+   "evidence": "README section 9"
+  },
+  "scenario.cereals": {
+   "status": "validated",
+   "ratio_vs_reference": 0.96,
+   "note": "Farm-to-Fork 2030.",
+   "reference": "JRC121368 Figure 5"
+  },
+  "scenario.oilseeds": {
+   "status": "use_with_care",
+   "ratio_vs_reference": 1.12,
+   "note": "Farm-to-Fork 2030; price +12.2% vs +11%.",
+   "reference": "JRC121368 Figure 5"
+  },
+  "scenario.permanent_crops": {
+   "status": "validated",
+   "ratio_vs_reference": 0.99,
+   "note": "Farm-to-Fork 2030.",
+   "reference": "JRC121368 Figure 5"
+  },
+  "environmental.n_surplus": {
+   "status": "validated",
+   "note": "EU average 44.5 kg N/ha against a real ~46, with every component independently right: mineral 10.2 Mt (real ~10.8), manure 7.5 (real ~7), crop uptake 13.7. Regional distribution matches CAPRI's SURSOI (median 48.2 against 49.5 over 228 regions).",
+   "evidence": "DATA_SOURCING_REGISTRY: nitrogen_balance_rebuilt"
+  },
+  "environmental.n_surplus.IE": {
+   "status": "use_with_care",
+   "note": "Irish grass yield is not derivable from CAPRI (its grass price is a dummy and its 'yield' equals revenue), so Irish crop and grass uptake is uncertain and the Irish surplus runs high.",
+   "scope": "IE04, IE05, IE06"
+  },
+  "market.prices": {
+   "status": "validated",
+   "note": "Base prices reproduce CAPRI's PMRK 12/12; world imbalance 0.003%. Under a policy shock EU prices carry an Armington premium, so they respond to EU supply as CAPRI's do.",
+   "evidence": "regression anchors price_reproduction_within_15pct, max_world_imbalance_pct; test_eu_armington_premium_is_inert_at_base_and_responds_to_supply"
+  },
+  "market.PARI": {
+   "status": "use_with_care",
+   "note": "Rice is a market commodity with CAPRI's world price and FAO balances for 24 regions, but the EU27 base comes from share allocation rather than a FAO row.",
+   "scope": "EU27 rice base production"
+  },
+  "projection": {
+   "status": "use_with_care",
+   "note": "Validated for a SINGLE step to 2030 against CAPRI's own reference (correlation +0.993, 20 of 23 crops within 25%). A trajectory cannot be validated the way the rest of the model is; report the policy increment separately from baseline drift.",
+   "evidence": "regression anchor projection_corr_vs_capri_2030"
+  },
+  "projection.intermediate_years": {
+   "status": "not_supported",
+   "note": "Only the 2030 endpoint has an external reference. Intermediate years solve and return numbers that nothing checks."
+  },
+  "projection.livestock": {
+   "status": "not_supported",
+   "note": "Herds are re-optimised each period rather than carried as state, so multi-period livestock paths are not meaningful."
+  },
+  "regions.NO05": {
+   "status": "use_with_care",
+   "note": "Norway is held in NUTS-2021 by CAPRI and NUTS-2016 here; the four redrawn regions are split by 2016 cattle shares."
+  },
+  "economy_wide": {
+   "status": "not_supported",
+   "note": "Labour, capital and GDP effects are outside the partial-equilibrium boundary, as in CAPRI."
+  },
+  "regions.HR": {
+   "status": "use_with_care",
+   "note": "Split by crop from CAPRI's regional data: HR03 takes its own areas, HR04 the national remainder. Olives verified against CAPRI's national total. HR05 and HR06 are empty to avoid double counting.",
+   "scope": "HR03, HR04"
+  },
+  "regions.DED": {
+   "status": "use_with_care",
+   "note": "Split by crop from CAPRI's regional data for 2003-2007 under the pre-2013 codes; herds by cattle share. The Saxony total is exact; the split reflects 2003-2007 cropping patterns.",
+   "scope": "DED2, DED4, DED5"
+  },
+  "scenario.prices": {
+   "status": "use_with_care",
+   "note": "Cereals +9.7% (CAPRI ~+7-8%), oilseeds +10.1% (+8-12%), vegetables and permanent crops +5.1% (+10-15%).",
+   "reference": "JRC121368"
+  },
+  "market.eu_balance": {
+   "status": "validated",
+   "note": "EU production is the model's own output; consumption keeps FAO's EU self-sufficiency. Wheat consumption 99.4 Mt, maize 72.7."
+  },
+  "abatement_capri": {
+   "status": "validated",
+   "note": "CAPRI's own mitigation portfolio. At full potential, per source, on this model's emissions: enteric CH4 -10.8% (CAPRI max run -12.0%), manure CH4 -22.3% (-21.8%), manure N2O -29.4% (-30.0%). Zero carbon price abates nothing beyond the reference.",
+   "evidence": "test_capri_mitigation_reproduces_capri; res_2_1730greendeal_refpol_endotech_all_max"
+  },
+  "abatement_capri.at_carbon_price": {
+   "status": "use_with_care",
+   "note": "Price response follows CAPRI's adoption rule for options with published costs; code-defined options (feed additives, diet, ammonia measures) are ASSUMED to follow the same response. Soil N2O uses an EU-wide potential and an estimated per-hectare value."
+  },
+  "abatement": {
+   "status": "use_with_care",
+   "note": "EcAMPA 2 literature measures, kept as an independent cross-check. Use abatement_capri as the model's estimate."
+  },
+  "supply.land_expansion": {
+   "status": "validated",
+   "note": "Farm-to-Fork total farmland +3.6% against CAPRI's +3%. Germany and Cyprus rents on a fallback.",
+   "scope": "DE, CY rents"
+  },
+  "supply.shadow_prices": {
+   "status": "validated",
+   "note": "Real duals from the optimality conditions, labelled per constraint row."
+  },
+  "supply.landscape_shortfall": {
+   "status": "use_with_care",
+   "note": "Unmet landscape requirement in regions whose arable land cannot hold the floor (81.7 kha EU-wide under Farm-to-Fork); CAPRI would convert grassland instead."
+  },
+  "scenario.livestock": {
+   "status": "use_with_care",
+   "note": "Farm-to-Fork 2030 herds: pigs -14.8% (CAPRI -14.5%); beef -10.3% (-18%), poultry -8.2% (-16.5%), dairy -7.7% (-10%).",
+   "reference": "JRC121368 Figure 5"
+  },
+  "scenario.meat_prices": {
+   "status": "understated",
+   "note": "Beef +2.5%, pork +4.1%, poultry +0.6% against CAPRI's +24/+43/+18%: EU meat prices react far less to shrinking supply.",
+   "reference": "JRC121368 Figure 7"
+  },
+  "environmental.scenario": {
+   "status": "use_with_care",
+   "note": "Farm-to-Fork 2030 vs Table 15: manure CH4 -11.7% (-12.2%), enteric CH4 -10.3% (-14.6%), fertiliser N2O -35.1% (-40.4%), non-CO2 GHG -10.8% (-14.8%); ammonia -12.5% (-33%).",
+   "reference": "JRC121368 Table 15"
+  }
+ }
+}

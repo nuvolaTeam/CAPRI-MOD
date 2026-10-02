@@ -23,6 +23,10 @@ from __future__ import annotations
 import numpy as np
 
 
+#: why the last call gave up (None if it succeeded) - for diagnosis only
+LAST_FAIL = None
+
+
 def solve_qp(Q: np.ndarray,
              c: np.ndarray,
              A: np.ndarray,
@@ -35,6 +39,8 @@ def solve_qp(Q: np.ndarray,
     Returns (x, ok). ``ok`` is False if the method did not produce a valid KKT
     point, signalling the caller to fall back to the general solver.
     """
+    global LAST_FAIL
+    LAST_FAIL = None
     n = Q.shape[0]
 
     # Fold the non-negativity bounds x >= 0 into the inequality set as -x <= 0,
@@ -52,6 +58,7 @@ def solve_qp(Q: np.ndarray,
         # cheap PD check via Cholesky
         np.linalg.cholesky(Qs + 1e-12 * np.eye(n))
     except np.linalg.LinAlgError:
+        globals()["LAST_FAIL"] = "not positive definite"
         return None, False
 
     # Feasible start: project x0 (or zero) onto x >= 0; the unconstrained
@@ -59,6 +66,7 @@ def solve_qp(Q: np.ndarray,
     try:
         x_unc = np.linalg.solve(Qs, -c)
     except np.linalg.LinAlgError:
+        globals()["LAST_FAIL"] = "unconstrained solve singular"
         return None, False
     x = np.maximum(x_unc, 0.0) if x0 is None else np.maximum(x0, 0.0)
 
@@ -83,6 +91,7 @@ def solve_qp(Q: np.ndarray,
             try:
                 sol = np.linalg.solve(KKT, rhs)
             except np.linalg.LinAlgError:
+                globals()["LAST_FAIL"] = "singular KKT system"
                 return None, False
             x_new = sol[:n]
             lam = sol[n:]
@@ -110,6 +119,7 @@ def solve_qp(Q: np.ndarray,
             # than returning an infeasible point as a success.
             x_out = np.maximum(x_new, 0.0)
             if m and np.max(A_all @ x_out - b_all) > 1e-6:
+                globals()["LAST_FAIL"] = "infeasible after clipping"
                 return None, False
             return x_out, True
 
@@ -118,4 +128,5 @@ def solve_qp(Q: np.ndarray,
         working.add(add)
         x = x_new
 
+    globals()["LAST_FAIL"] = "iteration limit"
     return None, False

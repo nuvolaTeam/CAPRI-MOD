@@ -95,9 +95,12 @@ def test_market_module_reproduces_its_own_prices(data):
     # never updated to match, so the test had been asserting the OLD, known-wrong
     # numbers and failing at 9/12 for the life of the project. The model was
     # right; the reference was stale.
-    ref = {"SWHE": 148, "BARL": 145, "CORN": 148, "RAPE": 213, "SOYA": 103,
-           "BEEF": 3692, "PORK": 1613, "POUL": 1405, "MILK": 319,
-           "BUTR": 3782, "CHES": 4815, "SKIM": 1429}
+    # References READ from world_prices.csv: the old hard-coded copies held
+    # cake prices under the oilseeds (rapeseed 213, soybeans 103) and drifted
+    # out of sync when the prices were replaced with CAPRI's base world prices.
+    import pandas as _pd, os as _os
+    _wp = _pd.read_csv(_os.path.join(str(DATA_DIR), '2017', 'market', 'world_prices.csv')).set_index('commodity')['price']
+    ref = {c: float(_wp[c]) for c in ('SWHE', 'BARL', 'CORN', 'RAPE', 'SOYA', 'BEEF', 'PORK', 'POUL', 'MILK', 'BUTR', 'CHES', 'SKIM') if c in _wp.index}
     within = sum(1 for c, r in ref.items()
                  if abs((eq.world_prices.get(c, 0) - r) / r) <= 0.15)
     assert within == 12, f"only {within}/12 within 15%"
@@ -1830,3 +1833,308 @@ def test_livestock_intensity_margin_is_identity_when_unconstrained(model):
             # intensity margin doing its work rather than animals alone
             assert (t / b1) < (herd_t / herd_b) + 1e-9, (
                 "output fell only as fast as the herd: the intensity margin is inert")
+
+
+def test_fitness_for_use_is_consistent_with_the_model():
+    """The fitness file must describe outputs that exist, with valid statuses.
+
+    A fitness declaration that drifts from the model is worse than none: a
+    caller would be told a number is fine when nothing checked it. This pins
+    the structure, the vocabulary, and that every region named in a scope is a
+    real region.
+    """
+    import json
+    import pandas as pd
+    from capri_mod.fitness import check
+
+    root = _repo_root()
+    doc = json.load(open(root / "capri_data" / "FITNESS_FOR_USE.json", encoding="utf-8"))
+    allowed = set(doc["_status_values"])
+    entries = doc["outputs"]
+    assert entries, "no outputs declared"
+
+    for key, e in entries.items():
+        assert e.get("status") in allowed, f"{key}: unknown status {e.get('status')!r}"
+        assert e.get("note"), f"{key}: a finding without a note cannot be acted on"
+        if e["status"] != "validated":
+            assert check(key).caveat(), f"{key}: non-validated entry yields no caveat"
+
+    # every region named in a scope must be a real NUTS-2 region or a real
+    # trade region -- the model has both, and they are different sets
+    areas = pd.read_csv(root / "capri_data/2017/supply/base_areas.csv", index_col=0)
+    from capri_mod.data.definitions import TRADE_REGIONS
+    known = set(areas.index) | set(TRADE_REGIONS)
+    for key, e in entries.items():
+        for token in str(e.get("scope", "")).replace(",", " ").split():
+            if (len(token) == 4 and token.isupper()
+                    and token[:2].isalpha() and token.isalnum()):
+                assert token in known, f"{key}: scope names unknown region {token}"
+
+    # the vocabulary must behave: validated is clean, not_supported is unusable
+    for key, e in entries.items():
+        f = check(key)
+        assert f.ok == (e["status"] == "validated")
+        assert f.usable == (e["status"] != "not_supported")
+
+    # an unrecorded key must NOT come back looking validated
+    assert check("no.such.output").status == "unknown"
+    assert not check("no.such.output").ok
+
+
+def test_eu_armington_premium_is_inert_at_base_and_responds_to_supply():
+    """The EU price must respond to EU supply, and only when supply moves.
+
+    Without an Armington premium every EU price is a fixed wedge on the world
+    price, so the EU is a price-taker: under Farm-to-Fork its prices rose
+    1.6-3% where CAPRI reports 8-15%, and oilseed and permanent-crop output
+    overshot CAPRI's by ~40%. The premium must be exactly 1 at the base (or
+    calibration and price reproduction would move), rise above 1 when EU supply
+    falls relative to demand, and fall below 1 when it rises.
+    """
+    import pandas as pd
+    from capri_mod.data.loaders import load_all_data
+    from capri_mod.market.market_module import MarketModule
+
+    mm = MarketModule(load_all_data("capri_data"))
+    comms = [c for c in ("RAPE", "SWHE", "OFRU") if c in mm.commodities]
+    assert comms, "no test commodities in the market"
+
+    # an importer (demand above supply) and an exporter (supply above demand)
+    D0 = pd.Series({"RAPE": 20.0, "SWHE": 130.0, "OFRU": 30.0})
+    Q0 = pd.Series({"RAPE": 24.0, "SWHE": 100.0, "OFRU": 34.0})
+    mm.set_eu_base(D0, Q0)
+
+    at_base = mm.eu_armington_premium(D0, Q0)
+    for c in comms:
+        assert abs(float(at_base[c]) - 1.0) < 1e-12, f"{c}: premium not 1 at base"
+
+    cut = mm.eu_armington_premium(D0 * 0.8, Q0)
+    rise = mm.eu_armington_premium(D0 * 1.1, Q0)
+    for c in comms:
+        assert float(cut[c]) > 1.0, f"{c}: a supply cut did not raise the EU price"
+        assert float(rise[c]) < 1.0, f"{c}: a supply rise did not lower the EU price"
+
+    lo, hi = mm.ARMINGTON_PREMIUM_BOUNDS
+    extreme = mm.eu_armington_premium(D0 * 0.05, Q0)
+    for c in comms:
+        assert lo <= float(extreme[c]) <= hi, f"{c}: premium escaped its bounds"
+
+
+def test_pesticide_target_applies_to_conventional_area_only():
+    """CAPRI's rule (conventional_io.gms): the 50% pesticide cut is a TOTAL
+    target, and only the part organic conversion has not already delivered is
+    applied - to the conventional area. With no organic instrument the result
+    must be unchanged; with one, the pesticide shock on a converting crop must
+    be smaller, never larger.
+    """
+    from capri_mod.data.loaders import load_all_data
+    from capri_mod.supply.supply_module import SupplyModule
+    from capri_mod.utils.utils import calibrate_supply_elasticities
+
+    d = load_all_data("capri_data")
+    region = "FRJ1" if "FRJ1" in d["areas"].index else str(d["areas"].index[0])
+    sm = SupplyModule(d, calibrate_supply_elasticities(d["areas"]))
+    sm.run(price_signals=None, regions=[region])
+    mo = sm._models[region]
+    crop = next(c for c in ("SWHE", "RAPE", "BARL") if c in mo.net_revenues.index)
+
+    nr0 = float(mo.net_revenues[crop]); y0 = float(mo.data.yields[crop])
+    mo.apply_pesticide_reduction(0.50)
+    alone_y = float(mo.data.yields[crop]); alone_nr = float(mo.net_revenues[crop])
+    mo.data.yields[crop] = y0; mo.net_revenues[crop] = nr0
+
+    mo.apply_pesticide_reduction(0.50, organic_share=None)
+    assert abs(float(mo.data.yields[crop]) - alone_y) < 1e-12, "no organic share must mean no change"
+    mo.data.yields[crop] = y0; mo.net_revenues[crop] = nr0
+
+    mo.apply_pesticide_reduction(0.50, organic_share=0.25)
+    comb_y = float(mo.data.yields[crop])
+    assert y0 - comb_y <= y0 - alone_y + 1e-12, "the yield loss grew with organic conversion"
+    assert comb_y < y0, "the pesticide yield loss vanished on conventional land"
+
+
+def test_capri_mitigation_reproduces_capri():
+    """CAPRI's mitigation portfolio, checked against CAPRI itself.
+
+    1. At a zero carbon price the adoption rule reproduces CAPRI's calibrated
+       initial share for every option that has one (its cost function, signs and
+       calibration terms are CAPRI's).
+    2. A zero carbon price abates nothing beyond the reference, and abatement
+       rises with the price.
+    3. At full technical potential, per-source reductions stay close to CAPRI's
+       own max run (enteric -12.0%, manure CH4 -21.8%, manure N2O -30.0%).
+    """
+    import pandas as pd
+    from capri_mod.data.loaders import load_all_data
+    from capri_mod.environmental.environmental_module import EnvironmentalModule
+    from capri_mod.abatement.capri_mitigation import CapriMitigation, CapriAbatement
+
+    cm = CapriMitigation.from_data_dir("capri_data")
+    z = cm.adoption(0.0)
+    ini = z[z.initial > 0]
+    assert len(ini) > 100 and ((ini.share - ini.initial).abs() < 0.01).all(), \
+        "zero-price adoption does not reproduce CAPRI's calibration"
+
+    ca = CapriAbatement.from_data_dir("capri_data")
+    unit = {"CH4ENT": 1.7, "CH4MAN": 0.013, "N2OSYN": 0.001}
+    fr = [ca.price_response(p, unit) for p in (0, 20, 50, 100)]
+    assert all(abs(v) < 1e-12 for v in fr[0].values()), "a zero price must abate nothing"
+    for g in fr[0]:
+        seq = [f[g] for f in fr]
+        assert all(b >= a - 1e-12 for a, b in zip(seq, seq[1:])), f"{g}: abatement fell as price rose"
+
+    d = load_all_data("capri_data"); env = EnvironmentalModule(d)
+    tot, red = {}, {}
+    for r in list(d["areas"].index):
+        if r.startswith("NO"):
+            continue
+        acts = pd.concat([d["areas"].loc[r], d["animal_numbers"].loc[r]])
+        ghg = env.compute_ghg(acts, r); ent = env.enteric_ch4_by_animal(acts)
+        for k, v in ghg.items():
+            tot[k] = tot.get(k, 0.0) + v
+        for k, v in ca.abate(ghg, r[:2], None, ent).items():
+            red[k] = red.get(k, 0.0) + v
+    # N2O_MAN: 0.281, not CAPRI's EU 0.300. Weighting the member-state
+    # potentials by CAPRI's OWN 2030 manure-N2O emissions (reference run,
+    # sum over animals of LEVL x N2OMAN, EU-27) gives 0.281 - the figure this
+    # potential table can reproduce at all. The test checks our emission
+    # weights against that; before the per-head manure correction ours gave
+    # 0.292 partly because pig-heavy countries (high potentials) were
+    # overweighted. Tolerance unchanged.
+    capri = {"CH4_ENT": 0.120, "CH4_MAN": 0.218, "N2O_MAN": 0.281}
+    for src, ref in capri.items():
+        ours = red.get(src, 0.0) / tot[src]
+        assert abs(ours - ref) < 0.03, f"{src}: {ours:.3f} against CAPRI's {ref:.3f}"
+
+
+def test_land_supply_converges_resets_and_is_inert_at_base(data):
+    """Agricultural land responds to the land rent, as in CAPRI's land market.
+
+    With no policy the expansion must be exactly zero (the base year is
+    untouched). Under a landscape floor it must be positive, converge across
+    outer iterations (one solve per region each), and reset when a new run
+    starts. The expansion is carried by the supply module, never by the
+    regional model, so plain solves stay independent of history.
+    """
+    import pandas as pd
+    from capri_mod.supply.supply_module import SupplyModule
+    from capri_mod.utils.utils import calibrate_supply_elasticities
+
+    sm = SupplyModule(data, calibrate_supply_elasticities(data["areas"]))
+    region = "FRB0" if "FRB0" in data["areas"].index else str(data["areas"].index[0])
+    zero = pd.Series(0.0, index=data["world_prices"].index)
+
+    base = sm.run(price_signals=None, regions=[region])[region]
+    assert base.land_expansion == 0.0 and base.land_expansion_next == 0.0
+
+    updates = []
+    for it in range(6):
+        res = sm.run(price_signals=None if it == 0 else zero, regions=[region],
+                     policy_scenario={"set_aside_requirement": 0.10})[region]
+        updates.append(res.land_update)
+    assert res.land_expansion > 0.0, "land did not respond to a binding landscape floor"
+    assert updates[-1] < updates[0] * 0.1, "land expansion did not converge"
+
+    again = sm.run(price_signals=None, regions=[region])[region]
+    assert again.land_expansion == 0.0, "a new run did not start from base land"
+
+    # a low-rent region, where a damped update used to oscillate (SK01 swung
+    # between ~4.5% and ~9%): the secant update must settle
+    low = next((r for r in ("SK01", "SK02", "LV00") if r in data["areas"].index), None)
+    if low is not None:
+        seq = []
+        for it in range(10):
+            res = sm.run(price_signals=None if it == 0 else zero, regions=[low],
+                         policy_scenario={"set_aside_requirement": 0.10})[low]
+            seq.append(res.land_expansion)
+        assert abs(seq[-1] - seq[-2]) < 1e-4 and abs(seq[-2] - seq[-3]) < 1e-4, \
+            f"land expansion did not settle in a low-rent region: {seq[-4:]}"
+
+
+def test_landscape_floor_is_fitted_where_land_cannot_hold_it(data):
+    """A landscape floor sized on total farmland may not fit on a region's
+    arable land (Corsica, Alpine and Greek regions). The problem then has no
+    feasible solution; it used to fall to a slow general solver that returned
+    a constraint-violating point. It must now solve, with the floor fitted to
+    what the land can hold and the unmet part recorded.
+    """
+    import numpy as np
+    from capri_mod.supply.supply_module import SupplyModule
+    from capri_mod.utils.utils import calibrate_supply_elasticities
+
+    region = next((r for r in ("FRM0", "EL65", "ITH1") if r in data["areas"].index), None)
+    if region is None:
+        return
+    sm = SupplyModule(data, calibrate_supply_elasticities(data["areas"]))
+    sm.run(price_signals=None, regions=[region])
+    mo = sm._models[region]
+    res = mo.solve(set_aside_requirement=0.10)
+    assert res.converged, f"{region} did not converge under the landscape floor"
+    assert res.landscape_shortfall > 0, "the unmet landscape requirement was not recorded"
+    plain = mo.solve()
+    assert plain.landscape_shortfall == 0.0, "a shortfall leaked into a plain solve"
+
+
+def test_greendeal_switchboard_mirrors_capri():
+    """CAPRI's Green Deal switches, names and units, in capri-mod.
+
+    Farm-to-Fork defaults must map onto the four implemented instruments and
+    carry CAPRI's result name; an option capri-mod does not implement must be
+    refused, never silently ignored.
+    """
+    import pytest
+    from capri_mod.policy.greendeal import greendeal_scenario, scenario_name
+
+    f2f = greendeal_scenario()
+    assert f2f.name == "greendeal_lnds10_org25_pest50_mine00_surp50_diet00_oth00"
+    assert (f2f.set_aside_requirement, f2f.organic_area_target,
+            f2f.pesticide_reduction, f2f.nutrient_surplus_target) == (0.10, 0.25, 0.50, True)
+    assert scenario_name() == "greendeal_reference"
+    for opt in ("mineRedu", "dietShift", "othPol"):
+        with pytest.raises(NotImplementedError):
+            greendeal_scenario(**{opt: 20})
+    with pytest.raises(ValueError):
+        greendeal_scenario(surpRedu=30)
+
+
+def test_environmental_results_are_populated(model):
+    """Every run must return environmental indicators for its regions.
+
+    Two bugs - an undefined name in compute_ammonia and a missing @dataclass
+    decorator - made every region fail inside run_all_regions, which swallowed
+    the errors and returned an EMPTY table from every model run, unnoticed.
+    """
+    regions = [r for r in ("FRB0", "DE40") if r in model.data["areas"].index]
+    res = model.run(scenario="BASELINE", regions=regions, max_outer_iter=1)
+    env = res["environmental"]
+    assert env is not None and len(env) == len(regions), \
+        f"environmental table has {0 if env is None else len(env)} rows for {len(regions)} regions"
+    assert (env["n_surplus"] != 0).all() and (env["ghg_total"] > 0).all()
+
+
+def test_fertiliser_substitution_is_exact_at_base(data):
+    """Mineral N follows crop need minus what manure covers (CAPRI NUTNED_),
+    linearised so that at BASE the balance is identical to the balance without
+    substitution, in every region. A drift here would move the base year.
+    It must also make manure a weaker lever where it is well used and a strong
+    one where crops sit at CAPRI's minimum-mineral floor.
+    """
+    from capri_mod.environmental.environmental_module import EnvironmentalModule
+    A = data["areas"]; H = data.get("animal_numbers")
+    plain = dict(data); plain["fertiliser_substitution"] = None
+    e_sub, e_plain = EnvironmentalModule(data), EnvironmentalModule(plain)
+    worst = 0.0
+    for r in list(A.index)[::5]:
+        acts = {c: float(A.at[r, c]) for c in A.columns}
+        if H is not None and r in H.index:
+            acts.update({a: float(H.at[r, a]) for a in H.columns})
+        a = e_sub.compute_nitrogen_balance(acts, data["yields"].loc[r], r)["n_surplus"]
+        b = e_plain.compute_nitrogen_balance(acts, data["yields"].loc[r], r)["n_surplus"]
+        worst = max(worst, abs(a - b) / max(1.0, abs(b)))
+    assert worst < 1e-9, f"substitution moved the base balance (max relative {worst:.2e})"
+    fs = data.get("fertiliser_substitution")
+    if fs is not None and {"NL41", "FRB0"} <= set(fs.index) and {"NL41", "FRB0"} <= set(A.index):
+        cow = {r: e_sub.compute_nitrogen_balance({"DCOW": 1.0}, data["yields"].loc[r], r)["n_surplus"]
+               for r in ("NL41", "FRB0")}
+        assert cow["NL41"] > cow["FRB0"], \
+            f"a cow should weigh more where manure is saturated: {cow}"
