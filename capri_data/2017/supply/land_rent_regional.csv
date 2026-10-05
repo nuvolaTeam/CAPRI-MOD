@@ -1,42 +1,42 @@
 model_region,rent_eur_per_ha,source,year
-DE11,171.6,CAPRI 2030 accounts rent x median Eurostat/CAPRI ratio 0.41,
-DE12,171.6,CAPRI 2030 accounts rent x median Eurostat/CAPRI ratio 0.41,
-DE13,171.6,CAPRI 2030 accounts rent x median Eurostat/CAPRI ratio 0.41,
-DE14,171.6,CAPRI 2030 accounts rent x median Eurostat/CAPRI ratio 0.41,
-DE21,171.6,CAPRI 2030 accounts rent x median Eurostat/CAPRI ratio 0.41,
-DE22,171.6,CAPRI 2030 accounts rent x median Eurostat/CAPRI ratio 0.41,
-DE23,171.6,CAPRI 2030 accounts rent x median Eurostat/CAPRI ratio 0.41,
-DE24,171.6,CAPRI 2030 accounts rent x median Eurostat/CAPRI ratio 0.41,
-DE25,171.6,CAPRI 2030 accounts rent x median Eurostat/CAPRI ratio 0.41,
-DE26,171.6,CAPRI 2030 accounts rent x median Eurostat/CAPRI ratio 0.41,
-DE27,171.6,CAPRI 2030 accounts rent x median Eurostat/CAPRI ratio 0.41,
-DE30,171.6,CAPRI 2030 accounts rent x median Eurostat/CAPRI ratio 0.41,
-DE40,171.6,CAPRI 2030 accounts rent x median Eurostat/CAPRI ratio 0.41,
-DE50,171.6,CAPRI 2030 accounts rent x median Eurostat/CAPRI ratio 0.41,
-DE60,171.6,CAPRI 2030 accounts rent x median Eurostat/CAPRI ratio 0.41,
-DE71,171.6,CAPRI 2030 accounts rent x median Eurostat/CAPRI ratio 0.41,
-DE72,171.6,CAPRI 2030 accounts rent x median Eurostat/CAPRI ratio 0.41,
-DE73,171.6,CAPRI 2030 accounts rent x median Eurostat/CAPRI ratio 0.41,
-DE80,171.6,CAPRI 2030 accounts rent x median Eurostat/CAPRI ratio 0.41,
-DE91,171.6,CAPRI 2030 accounts rent x median Eurostat/CAPRI ratio 0.41,
-DE92,171.6,CAPRI 2030 accounts rent x median Eurostat/CAPRI ratio 0.41,
-DE93,171.6,CAPRI 2030 accounts rent x median Eurostat/CAPRI ratio 0.41,
-DE94,171.6,CAPRI 2030 accounts rent x median Eurostat/CAPRI ratio 0.41,
-DEA1,171.6,CAPRI 2030 accounts rent x median Eurostat/CAPRI ratio 0.41,
-DEA2,171.6,CAPRI 2030 accounts rent x median Eurostat/CAPRI ratio 0.41,
-DEA3,171.6,CAPRI 2030 accounts rent x median Eurostat/CAPRI ratio 0.41,
-DEA4,171.6,CAPRI 2030 accounts rent x median Eurostat/CAPRI ratio 0.41,
-DEA5,171.6,CAPRI 2030 accounts rent x median Eurostat/CAPRI ratio 0.41,
-DEB1,171.6,CAPRI 2030 accounts rent x median Eurostat/CAPRI ratio 0.41,
-DEB2,171.6,CAPRI 2030 accounts rent x median Eurostat/CAPRI ratio 0.41,
-DEB3,171.6,CAPRI 2030 accounts rent x median Eurostat/CAPRI ratio 0.41,
-DEC0,171.6,CAPRI 2030 accounts rent x median Eurostat/CAPRI ratio 0.41,
-DED2,171.6,CAPRI 2030 accounts rent x median Eurostat/CAPRI ratio 0.41,
-DED4,171.6,CAPRI 2030 accounts rent x median Eurostat/CAPRI ratio 0.41,
-DED5,171.6,CAPRI 2030 accounts rent x median Eurostat/CAPRI ratio 0.41,
-DEE0,171.6,CAPRI 2030 accounts rent x median Eurostat/CAPRI ratio 0.41,
-DEF0,171.6,CAPRI 2030 accounts rent x median Eurostat/CAPRI ratio 0.41,
-DEG0,171.6,CAPRI 2030 accounts rent x median Eurostat/CAPRI ratio 0.41,
+DE11,237.0,"Destatis Agrarstrukturerhebung 2016, Pachten insgesamt, Baden-Wuerttemberg (BT-Drs. 19/21083, Uebersicht 2)",2016.0
+DE12,237.0,"Destatis Agrarstrukturerhebung 2016, Pachten insgesamt, Baden-Wuerttemberg (BT-Drs. 19/21083, Uebersicht 2)",2016.0
+DE13,237.0,"Destatis Agrarstrukturerhebung 2016, Pachten insgesamt, Baden-Wuerttemberg (BT-Drs. 19/21083, Uebersicht 2)",2016.0
+DE14,237.0,"Destatis Agrarstrukturerhebung 2016, Pachten insgesamt, Baden-Wuerttemberg (BT-Drs. 19/21083, Uebersicht 2)",2016.0
+DE21,338.0,"Destatis Agrarstrukturerhebung 2016, Pachten insgesamt, Bayern (BT-Drs. 19/21083, Uebersicht 2)",2016.0
+DE22,338.0,"Destatis Agrarstrukturerhebung 2016, Pachten insgesamt, Bayern (BT-Drs. 19/21083, Uebersicht 2)",2016.0
+DE23,338.0,"Destatis Agrarstrukturerhebung 2016, Pachten insgesamt, Bayern (BT-Drs. 19/21083, Uebersicht 2)",2016.0
+DE24,338.0,"Destatis Agrarstrukturerhebung 2016, Pachten insgesamt, Bayern (BT-Drs. 19/21083, Uebersicht 2)",2016.0
+DE25,338.0,"Destatis Agrarstrukturerhebung 2016, Pachten insgesamt, Bayern (BT-Drs. 19/21083, Uebersicht 2)",2016.0
+DE26,338.0,"Destatis Agrarstrukturerhebung 2016, Pachten insgesamt, Bayern (BT-Drs. 19/21083, Uebersicht 2)",2016.0
+DE27,338.0,"Destatis Agrarstrukturerhebung 2016, Pachten insgesamt, Bayern (BT-Drs. 19/21083, Uebersicht 2)",2016.0
+DE30,145.0,"Destatis Agrarstrukturerhebung 2016, Pachten insgesamt, Berlin - Brandenburg value (city-state not published) (BT-Drs. 19/21083, Uebersicht 2)",2016.0
+DE40,145.0,"Destatis Agrarstrukturerhebung 2016, Pachten insgesamt, Brandenburg (BT-Drs. 19/21083, Uebersicht 2)",2016.0
+DE50,460.0,"Destatis Agrarstrukturerhebung 2016, Pachten insgesamt, Bremen - Niedersachsen value (city-state not published) (BT-Drs. 19/21083, Uebersicht 2)",2016.0
+DE60,428.0,"Destatis Agrarstrukturerhebung 2016, Pachten insgesamt, Hamburg - Schleswig-Holstein value (city-state not published) (BT-Drs. 19/21083, Uebersicht 2)",2016.0
+DE71,176.0,"Destatis Agrarstrukturerhebung 2016, Pachten insgesamt, Hessen (BT-Drs. 19/21083, Uebersicht 2)",2016.0
+DE72,176.0,"Destatis Agrarstrukturerhebung 2016, Pachten insgesamt, Hessen (BT-Drs. 19/21083, Uebersicht 2)",2016.0
+DE73,176.0,"Destatis Agrarstrukturerhebung 2016, Pachten insgesamt, Hessen (BT-Drs. 19/21083, Uebersicht 2)",2016.0
+DE80,245.0,"Destatis Agrarstrukturerhebung 2016, Pachten insgesamt, Mecklenburg-Vorpommern (BT-Drs. 19/21083, Uebersicht 2)",2016.0
+DE91,460.0,"Destatis Agrarstrukturerhebung 2016, Pachten insgesamt, Niedersachsen (BT-Drs. 19/21083, Uebersicht 2)",2016.0
+DE92,460.0,"Destatis Agrarstrukturerhebung 2016, Pachten insgesamt, Niedersachsen (BT-Drs. 19/21083, Uebersicht 2)",2016.0
+DE93,460.0,"Destatis Agrarstrukturerhebung 2016, Pachten insgesamt, Niedersachsen (BT-Drs. 19/21083, Uebersicht 2)",2016.0
+DE94,460.0,"Destatis Agrarstrukturerhebung 2016, Pachten insgesamt, Niedersachsen (BT-Drs. 19/21083, Uebersicht 2)",2016.0
+DEA1,452.0,"Destatis Agrarstrukturerhebung 2016, Pachten insgesamt, Nordrhein-Westfalen (BT-Drs. 19/21083, Uebersicht 2)",2016.0
+DEA2,452.0,"Destatis Agrarstrukturerhebung 2016, Pachten insgesamt, Nordrhein-Westfalen (BT-Drs. 19/21083, Uebersicht 2)",2016.0
+DEA3,452.0,"Destatis Agrarstrukturerhebung 2016, Pachten insgesamt, Nordrhein-Westfalen (BT-Drs. 19/21083, Uebersicht 2)",2016.0
+DEA4,452.0,"Destatis Agrarstrukturerhebung 2016, Pachten insgesamt, Nordrhein-Westfalen (BT-Drs. 19/21083, Uebersicht 2)",2016.0
+DEA5,452.0,"Destatis Agrarstrukturerhebung 2016, Pachten insgesamt, Nordrhein-Westfalen (BT-Drs. 19/21083, Uebersicht 2)",2016.0
+DEB1,233.0,"Destatis Agrarstrukturerhebung 2016, Pachten insgesamt, Rheinland-Pfalz (BT-Drs. 19/21083, Uebersicht 2)",2016.0
+DEB2,233.0,"Destatis Agrarstrukturerhebung 2016, Pachten insgesamt, Rheinland-Pfalz (BT-Drs. 19/21083, Uebersicht 2)",2016.0
+DEB3,233.0,"Destatis Agrarstrukturerhebung 2016, Pachten insgesamt, Rheinland-Pfalz (BT-Drs. 19/21083, Uebersicht 2)",2016.0
+DEC0,92.0,"Destatis Agrarstrukturerhebung 2016, Pachten insgesamt, Saarland (BT-Drs. 19/21083, Uebersicht 2)",2016.0
+DED2,173.0,"Destatis Agrarstrukturerhebung 2016, Pachten insgesamt, Sachsen (BT-Drs. 19/21083, Uebersicht 2)",2016.0
+DED4,173.0,"Destatis Agrarstrukturerhebung 2016, Pachten insgesamt, Sachsen (BT-Drs. 19/21083, Uebersicht 2)",2016.0
+DED5,173.0,"Destatis Agrarstrukturerhebung 2016, Pachten insgesamt, Sachsen (BT-Drs. 19/21083, Uebersicht 2)",2016.0
+DEE0,278.0,"Destatis Agrarstrukturerhebung 2016, Pachten insgesamt, Sachsen-Anhalt (BT-Drs. 19/21083, Uebersicht 2)",2016.0
+DEF0,428.0,"Destatis Agrarstrukturerhebung 2016, Pachten insgesamt, Schleswig-Holstein (BT-Drs. 19/21083, Uebersicht 2)",2016.0
+DEG0,166.0,"Destatis Agrarstrukturerhebung 2016, Pachten insgesamt, Thueringen (BT-Drs. 19/21083, Uebersicht 2)",2016.0
 FR10,149.0,eurostat country,2017.0
 FRB0,149.0,eurostat country,2017.0
 FRC1,149.0,eurostat country,2017.0

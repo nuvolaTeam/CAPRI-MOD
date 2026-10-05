@@ -130,3 +130,58 @@ def solve_qp(Q: np.ndarray,
 
     globals()["LAST_FAIL"] = "iteration limit"
     return None, False
+
+
+def solve_qp_ldp(Q: np.ndarray, c: np.ndarray, A: np.ndarray, b: np.ndarray,
+                 feas_tol: float = 1e-6):
+    """Exact strictly convex QP via least-distance programming (Lawson & Hanson).
+
+        min 1/2 x'Qx + c'x   s.t.  A x <= b,  x >= 0
+
+    With Q = L L' and z = L'x + L^-1 c the objective is 1/2 ||z||^2 + const, so
+    the problem is the least-distance programme  min ||z||  s.t.  G~ z >= h~,
+    which Lawson & Hanson solve exactly through one NNLS:
+        u = argmin_{u>=0} || [G~'; h~'] u - e_{n+1} ||,   r = residual,
+        z = -r[:n] / r[n]     (r = 0  =>  infeasible).
+    Finite and exact; needs no feasible start, so it cannot cycle - unlike the
+    heuristic active-set loop above. The QP has a UNIQUE optimum (Q positive
+    definite), so this returns the same solution as any other exact method.
+    Returns (x, ok).
+    """
+    global LAST_FAIL
+    from scipy.optimize import nnls
+    n = Q.shape[0]
+    Qs = 0.5 * (Q + Q.T)
+    try:
+        L = np.linalg.cholesky(Qs)
+    except np.linalg.LinAlgError:
+        LAST_FAIL = "ldp: not positive definite"
+        return None, False
+    G = np.vstack([-A, np.eye(n)]) if A.size else np.eye(n)
+    h = np.concatenate([-b, np.zeros(n)]) if b.size else np.zeros(n)
+    # scale rows of G for conditioning (does not change the feasible set)
+    s = np.linalg.norm(G, axis=1)
+    s[s == 0] = 1.0
+    G, h = G / s[:, None], h / s
+    Linv_c = np.linalg.solve(L, c)
+    Gt = np.linalg.solve(L, G.T).T                 # G L'^-1
+    ht = h + Gt @ Linv_c                           # h + G Q^-1 c
+    E = np.vstack([Gt.T, ht[None, :]])
+    f = np.zeros(n + 1)
+    f[-1] = 1.0
+    try:
+        u, _ = nnls(E, f, maxiter=50 * E.shape[1])
+    except Exception as exc:                       # pragma: no cover
+        LAST_FAIL = f"ldp: nnls failed ({exc})"
+        return None, False
+    r = E @ u - f
+    if abs(r[-1]) < 1e-14 or np.linalg.norm(r) < 1e-12:
+        LAST_FAIL = "ldp: infeasible"
+        return None, False
+    z = -r[:n] / r[-1]
+    x = np.linalg.solve(L.T, z - Linv_c)
+    x = np.maximum(x, 0.0)
+    if A.size and np.max(A @ x - b) > feas_tol * max(1.0, float(np.max(np.abs(b)))):
+        LAST_FAIL = "ldp: infeasible after recovery"
+        return None, False
+    return x, True

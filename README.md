@@ -184,11 +184,11 @@ homoglyph corruption, dropped regional detail, and silent synthetic fallbacks).
   once concealed 16 synthetic columns inside a file marked real; per-column
   tracking makes that impossible.
 - **99.6% of live cells are real CAPRI data** (145,116 of 145,715) — an honest
-  per-cell count over all 45 declared inputs, not a flattering area-weighted
+  per-cell count over all 49 declared inputs, not a flattering area-weighted
   figure. Every non-real cell is explicitly labelled. Recomputed with
   `tools/verify_schema.py`.
 - **A declarative schema** (`INPUT_SCHEMA.json`) is the single source of truth:
-  45 declared inputs, each with its source, unit, dimension, consuming modules,
+  49 declared inputs, each with its source, unit, dimension, consuming modules,
   and known gaps. It is built to survive a future swap of CAPRI inputs for
   external sources (Eurostat, FADN) as a field edit rather than a rewrite.
 
@@ -268,7 +268,7 @@ capri_data/
 │                              fao_agg_2017, estnlp, jrc121368, gams
 ├── trajectories/              projection paths (captrd 2030)
 ├── validation/                REGRESSION_ANCHORS.json, VALIDATION.md
-├── INPUT_MANIFEST.json        the 45 declared inputs: source, unit, dimensions
+├── INPUT_MANIFEST.json        the 49 declared inputs: source, unit, dimensions
 ├── INPUT_SCHEMA.json          expected shape and dtype of every file
 └── DATA_SOURCING_REGISTRY.json   every data decision, fix and open issue
 ```
@@ -278,7 +278,7 @@ Each folder under the base year feeds the module named on its right. Anything in
 nothing in the model reads it directly, so the derivation from source to input is
 always a visible, re-runnable step in `tools/`.
 
-### 4.2 The 45 declared inputs
+### 4.2 The 49 declared inputs
 
 Every input the model consumes is declared in `INPUT_SCHEMA.json` with its
 concept, unit, and consuming modules:
@@ -1234,3 +1234,8 @@ independent reimplementation of its economic methods for research and policy
 analysis, calibrated against a CAPRI star-3.0 installation. It reuses CAPRI's
 *methods and calibration data*, not its code. Any errors in this reimplementation
 are its own and should not be attributed to CAPRI.
+
+## Licence
+
+CAPRI-mod is licensed under the [Apache License, Version 2.0](LICENSE); see also
+[NOTICE](NOTICE). (It was previously released under the MIT licence.)

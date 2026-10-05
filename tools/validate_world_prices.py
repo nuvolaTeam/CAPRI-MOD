@@ -87,9 +87,18 @@ def main() -> None:
                          if ("EU27", "EU27") in flows.index else 0.0)
                 share[c] = 100 * (tot - intra) / tot
 
+    # Excluded from the arbitrage test, with the reason: the producer price is
+    # not on the world price's product basis, and the model does not use it.
+    SKIP = {"SHGM": ("CODE COLLISION: CAPRI's SHGM is the 'sheep and goats activity for MILK "
+                     "production' (sets.gms); sheep and goat MEAT is SGMT. The 796 EUR/t is that "
+                     "activity's price, not a meat price, so it cannot be compared with the meat "
+                     "world price (3,607). Unused by the model - livestock revenue comes from "
+                     "CAPRI's market revenue per head")}
+    for c, why in SKIP.items():
+        print(f"skipped {c}: {why}")
     rows = []
     for c in model_wp.index:
-        if c not in eu_price:
+        if c not in eu_price or c in SKIP:
             continue
         k = CODE_MAP.get(c, c)
         cw = capri.at[k, "Fob"] if (k in capri.index and "Fob" in capri.columns) else np.nan

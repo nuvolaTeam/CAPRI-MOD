@@ -818,6 +818,84 @@
     "reproducibility": "capri_gdx"
    },
    "known_gaps": []
+  },
+  "feed_ration_2017": {
+   "file": "2017/feed/feed_ration_2017.json",
+   "concept": "EU ration data per region and animal",
+   "unit": "mixed",
+   "dimension": "region x animal x feed",
+   "modules": [
+    "supply",
+    "feed"
+   ],
+   "source": {
+    "source_type": "CAPRI_GDX",
+    "source_ref": "res_17 dataOut",
+    "vintage": "2017",
+    "confidence": "validated",
+    "reproducibility": "capri_gdx"
+   },
+   "known_gaps": [
+    "dry-matter bounds trimmed at calibration"
+   ]
+  },
+  "fodder_balance_2017": {
+   "file": "2017/feed/fodder_balance_2017.json",
+   "concept": "Regional fodder balances",
+   "unit": "t/ha; EUR/t; t/head",
+   "dimension": "region x fodder",
+   "modules": [
+    "supply"
+   ],
+   "source": {
+    "source_type": "CAPRI_GDX",
+    "source_ref": "res_17 rations, UVAG; SUPBAL_",
+    "vintage": "2017",
+    "confidence": "validated",
+    "reproducibility": "capri_gdx"
+   },
+   "known_gaps": [
+    "CAPRI maize-yield anomalies in five regions"
+   ]
+  },
+  "land_market_2017": {
+   "file": "2017/supply/land_market_2017.json",
+   "concept": "CAPRI land-market data",
+   "unit": "1000 ha; cost",
+   "dimension": "region x land type",
+   "modules": [
+    "supply"
+   ],
+   "source": {
+    "source_type": "CAPRI_GDX",
+    "source_ref": "pmppar p_pmpQuadLandTypes; res_17 LEVL",
+    "vintage": "2017",
+    "confidence": "validated",
+    "reproducibility": "capri_gdx"
+   },
+   "known_gaps": [
+    "Trento split",
+    "3 singular matrices"
+   ]
+  },
+  "nh3_factors_capri": {
+   "file": "2017/environment/nh3_factors_capri.json",
+   "concept": "CAPRI ammonia emission factors",
+   "unit": "share of N",
+   "dimension": "region x animal",
+   "modules": [
+    "environmental"
+   ],
+   "source": {
+    "source_type": "CAPRI_GDX",
+    "source_ref": "dataOut GNH3/MANN, NH3MIN/MINFER",
+    "vintage": "2030",
+    "confidence": "validated",
+    "reproducibility": "capri_gdx"
+   },
+   "known_gaps": [
+    "NO/UK/CH not covered"
+   ]
   }
  }
 }

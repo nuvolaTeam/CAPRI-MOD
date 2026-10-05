@@ -221,8 +221,21 @@ class ProjectionModule:
     def _model_for(self, data: Dict):
         """A fresh model built on a projected data set (see _solve for why)."""
         cls = type(self.model)
-        return cls(data=data, data_dir=getattr(self.model, "data_dir", None),
-                   verbose=False, base_year=getattr(self.model, "base_year", "2017"))
+        pm = cls(data=data, data_dir=getattr(self.model, "data_dir", None),
+                 verbose=False, base_year=getattr(self.model, "base_year", "2017"))
+        return self._carry_settings(pm)
+
+    #: model settings carried to the fresh projected model. Without this, a
+    #: switch set on the outer model (use_ration) never reached the model that
+    #: runs the projected scenario - a Farm-to-Fork test with the EU ration
+    #: "on" ran with it off and looked identical.
+    CARRIED_SETTINGS = ("use_ration", "use_land_market", "grassland_allowance")
+
+    def _carry_settings(self, pm):
+        for a in self.CARRIED_SETTINGS:
+            if hasattr(self.model, a):
+                setattr(pm, a, getattr(self.model, a))
+        return pm
 
     def _solve(self, data: Dict, scenario: str, **kwargs) -> Dict:
         """Solve the comparative-static core against a projected data set.
@@ -240,6 +253,7 @@ class ProjectionModule:
             verbose=False,
             base_year=getattr(self.model, "base_year", "2017"),
         )
+        projected_model = self._carry_settings(projected_model)
         return projected_model.run(scenario=scenario, **kwargs)
 
     @staticmethod

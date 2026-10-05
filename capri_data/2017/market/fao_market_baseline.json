@@ -222,22 +222,22 @@
   "exports": 23908.0
  },
  "EU27|SOYA": {
-  "production": 2696.5,
-  "consumption": 17505.7,
-  "imports": 17109.8,
-  "exports": 2300.6
+  "production": 2669.36,
+  "consumption": 16044.35,
+  "imports": 15003.89,
+  "exports": 1791.06
  },
  "EU27|SUNF": {
-  "production": 10389.1,
-  "consumption": 10095.0,
-  "imports": 3280.6,
-  "exports": 3574.7
+  "production": 9682.12,
+  "consumption": 9274.5,
+  "imports": 3390.53,
+  "exports": 3551.92
  },
  "EU27|RAPE": {
-  "production": 16949.2,
-  "consumption": 23049.3,
-  "imports": 13813.7,
-  "exports": 7713.6
+  "production": 18662.87,
+  "consumption": 22874.34,
+  "imports": 12080.9,
+  "exports": 4967.7
  },
  "EU27|BEEF": {
   "production": 6904.9,

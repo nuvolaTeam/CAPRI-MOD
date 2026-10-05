@@ -92,6 +92,10 @@ _FILE_CATEGORY = {
     "capri_oilseed_products_baseline.json": "market",
     "eu_demand_elas_overrides.json": "market",
     "feed_demand_nonEU.json": "market",
+    "feed_ration_2017.json": "feed",
+    "fodder_balance_2017.json": "feed",
+    "land_market_2017.json": "supply",
+    "nh3_factors_capri.json": "environment",
     "livestock_intensity_bounds.csv": "supply",
     "landscape_targets_ms.csv": "policy",
     "capri_ghg_mitigation.csv": "abatement",
@@ -880,16 +884,48 @@ def load_tariffs(data_dir: Optional[Path] = None) -> pd.DataFrame:
 
     # EU MFN tariffs (approximate %)
     eu_tariffs = {
-        "SWHE": 0.0,  "DWHE": 0.0,  "BARL": 0.0,  "CORN": 0.0,
-        "OCER": 0.0,  "RAPE": 0.0,  "SUNF": 0.0,  "SOYA": 0.0,
-        "OOIL": 3.2,  "SUGB": 0.0,  "SUGR": 35.0, "POTA": 7.5,
-        "PULS": 0.0,  "TOMA": 14.4, "OVEG": 10.2, "APPL": 7.2,
-        "OFRU": 5.6,  "CITR": 6.4,  "WINE": 32.0, "OLIV": 7.5,
-        "MILK": 0.0,  "BUTR": 82.0, "SKIM": 55.0, "CHES": 40.0,
-        "WHEY": 12.0, "BEEF": 65.0, "PORK": 20.0, "POUL": 35.0,
-        "SHGM": 52.0, "EGGS": 30.0, "FATS": 12.0, "OFOD_M": 8.0,
-        # CAPRI 2017 applied tariffs, EU27yr19 <- NONEU (TaAppl, ad valorem %)
-        "RAPO": 5.58, "SUNO": 5.18, "SOYO": 4.66, "RAPC": 0.07, "SUNC": 0.0, "SOYC": 0.0,
+        # CAPRI 2017 TOTAL protection on EU imports from outside the EU:
+        # ImportP / (Fob + TCost) - 1, res_0_1717 EU27yr19<-NONEU (ad valorem +
+        # specific duties + quota effects). Kept where the EU imports nothing.
+        # Per-row detail: capri_data/sources/eu_tariff_provenance.json
+        "SWHE": 0.0,
+        "DWHE": 0.0,
+        "BARL": 0.0,
+        "CORN": 1.1,
+        "OCER": 0.0,
+        "RAPE": 0.1,
+        "SUNF": 0.0,
+        "SOYA": 0.4,
+        "OOIL": 3.2,
+        "SUGB": 0.0,
+        "SUGR": 17.7,
+        "POTA": 9.0,
+        "PULS": 0.7,
+        "TOMA": 20.0,
+        "OVEG": 13.7,
+        "APPL": 5.5,
+        "OFRU": 7.8,
+        "CITR": 11.1,
+        "WINE": 3.1,
+        "OLIV": 70.1,
+        "MILK": 0.0,
+        "BUTR": 38.2,
+        "SKIM": 17.0,
+        "CHES": 6.2,
+        "WHEY": 65.6,
+        "BEEF": 57.8,
+        "PORK": 17.2,
+        "POUL": 9.7,
+        "SHGM": 0.1,
+        "EGGS": 0.0,
+        "FATS": 12.0,
+        "OFOD_M": 8.0,
+        "RAPO": 5.6,
+        "SUNO": 5.2,
+        "SOYO": 4.7,
+        "RAPC": 0.1,
+        "SUNC": 0.0,
+        "SOYC": 0.0,
     }
 
     rows = {}
@@ -990,6 +1026,12 @@ def load_all_data(data_dir: Optional[Path] = None, validate: bool = False,
         # Market revenue per head (CAPRI MREV), by region and animal activity.
         "livestock_revenue_coef": _load_optional_csv(
             data_dir, "livestock_revenue_coef.csv"),
+        # CAPRI land market (docs/LAND_USE_FLEXIBILITY.md)
+        "land_market": (lambda p: __import__("json").load(open(p))["regions"] if p.exists() else None)(
+            Path(data_dir) / "2017" / "supply" / "land_market_2017.json"),
+        # Regional fodder balances (docs/FODDER_BALANCE.md)
+        "fodder_balance": (lambda p: __import__("json").load(open(p))["regions"] if p.exists() else None)(
+            Path(data_dir) / "2017" / "feed" / "fodder_balance_2017.json"),
         # Feed per head (t): CAPRI 2017 regional FCER/FPRO/FENE totals / herds
         "livestock_feed_coef": _load_optional_csv(
             data_dir, "livestock_feed_coef.csv"),

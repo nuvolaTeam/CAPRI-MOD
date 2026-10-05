@@ -450,6 +450,55 @@
    "coverage": "125 region x feed entries",
    "note": "Non-EU only.",
    "gaps": []
+  },
+  "feed_ration_2017.json": {
+   "concept": "EU ration data: base rations, nutrient requirements, nutrient contents and feed prices per region and animal",
+   "unit": "mixed (see file _units)",
+   "dimension": "region x animal x feed",
+   "capri_symbol": "dataOut FGRA..FENI, ENNE, CRPR, DRMN, DRMX, DAYS, LEVL, UVAG",
+   "status": "CAPRI",
+   "coverage": "235 regions, 2,084 region x animal entries",
+   "note": "Calibration data for the ration model.",
+   "gaps": [
+    "dry-matter bounds do not always contain the base ration; CAPRI trims requirements at calibration"
+   ]
+  },
+  "fodder_balance_2017.json": {
+   "concept": "Regional fodder balances: usable fodder per ha, base fodder value, fodder per head",
+   "unit": "t/ha; EUR/t; t/head",
+   "dimension": "region x fodder",
+   "capri_symbol": "SUPBAL_ (non-tradable fodder); UVAG",
+   "status": "CAPRI",
+   "coverage": "686 region x fodder balances",
+   "note": "Exact at base.",
+   "gaps": [
+    "five regions with implausible CAPRI fodder-maize yields; fallback regions"
+   ]
+  },
+  "land_market_2017.json": {
+   "concept": "CAPRI land-market data: land-type base areas and quadratic cost matrices",
+   "unit": "1000 ha; cost",
+   "dimension": "region x land type x land type",
+   "capri_symbol": "p_pmpQuadLandTypes; DATA LEVL",
+   "status": "CAPRI",
+   "coverage": "202 regions",
+   "note": "Constants recalibrated by the model.",
+   "gaps": [
+    "Trento split (ITH1/ITH2 from IT310000)",
+    "3 singular matrices"
+   ]
+  },
+  "nh3_factors_capri.json": {
+   "concept": "CAPRI ammonia emission factors",
+   "unit": "share of N",
+   "dimension": "region x animal; region",
+   "capri_symbol": "GNH3, MANN, NH3MIN, MINFER (dataOut)",
+   "status": "CAPRI",
+   "coverage": "244 regions",
+   "note": "Replaces the housing-only factors and the soils proxy.",
+   "gaps": [
+    "NO/UK/CH keep the old calculation"
+   ]
   }
  },
  "hardcoded_in_code": {

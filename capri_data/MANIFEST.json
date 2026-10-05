@@ -477,7 +477,7 @@
      "PIGS"
     ]
    },
-   "note": "Marketed product per head: CAPRI's COMI/BEEF/PORK/POUM/EGGS/SGMT/SGMI over elementary activities, divided by this model's head count. Replaces YILD for livestock, which for breeding and suckler activities is not a marketed product."
+   "note": "Marketed product per head: CAPRI's COMI/BEEF/PORK/POUM/EGGS/SGMT/SGMI over elementary activities, divided by this model's head count. Replaces YILD for livestock, which for breeding and suckler activities is not a marketed product. | Rebuilt 2026-10 with the corrected NUTS correspondence (73 regions now regional CAPRI values)."
   },
   "livestock_revenue_coef.csv": {
    "source": "capreg DATA2 MREV",
@@ -499,7 +499,7 @@
      "PIGS"
     ]
    },
-   "note": "Market revenue per head, used instead of price x YILD in livestock net revenue."
+   "note": "Market revenue per head, used instead of price x YILD in livestock net revenue. | Rebuilt 2026-10 with the corrected NUTS correspondence (73 regions now regional CAPRI values)."
   },
   "nutrients_regional.csv": {
    "source": "capreg DATA2 NMIN",
@@ -900,7 +900,7 @@
      "SHGP"
     ]
    },
-   "note": "Manure N per head (kg), CAPRI 2017 regional manure N total per activity divided by this model's herd (census stock)"
+   "note": "Manure N per head (kg), CAPRI 2017 regional manure N total per activity divided by this model's herd (census stock) | Rebuilt 2026-10 with the corrected NUTS correspondence (73 regions now regional CAPRI values)."
   },
   "livestock_feed_coef.csv": {
    "source": "CAPRI 2017 regional results (res_17*.txt), built by tools/build_livestock_output_coef.py",
@@ -941,7 +941,7 @@
      "SHGP_energy"
     ]
    },
-   "note": "Feed per head (t): cereals, protein-rich and energy-rich feed - CAPRI 2017 regional totals (FCER/FPRO/FENE x LEVL) divided by this model's herd"
+   "note": "Feed per head (t): cereals, protein-rich and energy-rich feed - CAPRI 2017 regional totals (FCER/FPRO/FENE x LEVL) divided by this model's herd | Rebuilt 2026-10 with the corrected NUTS correspondence (73 regions now regional CAPRI values)."
   },
   "capri_oilseed_products_baseline.json": {
    "source": "CAPRI FAO_agg_17_defaulta p_dataMarket (year BAS), supplied by the project lead; EU = sum of member states",
@@ -966,6 +966,38 @@
    "domain": "market",
    "status": "live",
    "note": "Non-EU feed demand for the model feed commodities: feed share of use and own/cross feed-price elasticities. EU feed demand comes from the supply models in CAPRI."
+  },
+  "feed_ration_2017.json": {
+   "source": "CAPRI 2017 regional results (res_17*, dataOut), built by tools/build_feed_ration.py",
+   "vintage": "2017",
+   "units": "kg/head/yr; per head per yr; per kg; EUR/kg",
+   "domain": "feed",
+   "status": "calibration",
+   "note": "EU ration data per region x animal: base ration by feed group, energy/protein/dry-matter requirements, nutrient contents, feed prices (CAPRI totals / herds; national remainder for regions without regional rows). 235 regions, 2,084 entries; energy and protein close to a median of 0.00%. Input to the EU ration choice (docs/FEED_RATION.md), not yet read by the model. | Rebuilt 2026-10 with the corrected NUTS correspondence (73 regions now regional CAPRI values)."
+  },
+  "fodder_balance_2017.json": {
+   "source": "Built by tools/build_fodder_balance.py from feed_ration_2017.json, base_areas.csv and CAPRI unit values",
+   "vintage": "2017",
+   "units": "t/ha; EUR/t; t/head",
+   "domain": "feed",
+   "status": "live",
+   "note": "Regional fodder balances (686 in 235 regions), exact at base; replaces the loose buy-in roughage constraint (docs/FODDER_BALANCE.md)."
+  },
+  "land_market_2017.json": {
+   "source": "CAPRI res_17 LEVL of land types and pmppar_17XX p_pmpQuadLandTypes (supplied by the project lead); built by tools/build_land_market.py",
+   "vintage": "2017",
+   "units": "1000 ha; quadratic land-market cost",
+   "domain": "supply",
+   "status": "live",
+   "note": "Land-type base areas (ARAC, GRAS, FRUN, FORE, OLND, ARTIF) and CAPRI land-market matrices for 236 regions: 202 regional; 13 parts of split CAPRI regions (DED00000, HU100000, IT310000, PL120000, PL300000; parent found by area match within 0.5%; matrix / share, registered); 21 from national matrices. Read by the supply model when use_land_market is on."
+  },
+  "nh3_factors_capri.json": {
+   "source": "CAPRI res_2_1730greendeal_refdefaulta dataOut (gd_full, supplied by the project lead); built by tools/build_nh3_factors.py",
+   "vintage": "2030 reference",
+   "units": "kg NH3-N per kg N excreted / applied",
+   "domain": "environment",
+   "status": "live",
+   "note": "Ammonia shares of excreted N per animal (GNH3/MANN, weighted by excreted N) and of mineral N (NH3MIN/MINFER) for 244 regions (204 regional, 40 national)."
   }
  },
  "_vintage_summary": {

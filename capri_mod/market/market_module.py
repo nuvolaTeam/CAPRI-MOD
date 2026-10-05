@@ -454,8 +454,8 @@ class MarketModule:
         try:
             _key = (tuple(round(float(self.world_prices_base.get(c, 0.0)), 9) for c in _cc),
                     tuple(map(tuple, self.tariffs.reindex(columns=_cc).fillna(0.0).round(9).values.tolist())),
-                    tuple(round(float(self.base_consumption.at["EU27", c]), 6) if "EU27" in self.base_consumption.index
-                          and c in self.base_consumption.columns else 0.0 for c in ("RAPE", "SUNF", "SOYA")))
+                    tuple(round(float((getattr(self, "_eu_aligned_use", None) or {}).get(c, 0.0)), 6)
+                          for c in ("RAPE", "SUNF", "SOYA")))
         except Exception:
             _key = None
         cached = getattr(self, "_crush_cache", None)
@@ -485,7 +485,11 @@ class MarketModule:
                     # consistently (on 12 regions EU rapeseed use is 581 kt -
                     # a fixed 20,955 kt crush made non-crush use negative).
                     share = float(v.get("crush_share_of_use") or 0.0)
-                    b = float(self.base_consumption.at["EU27", s]) if s in self.base_consumption.columns else 0.0
+                    # the ALIGNED EU seed use: base_consumption is later divided
+                    # by the calibration factor (EU exemption), which shifted the
+                    # base crush after calibration and moved base prices
+                    _al = getattr(self, "_eu_aligned_use", None) or {}
+                    b = float(_al.get(s, self.base_consumption.at["EU27", s] if s in self.base_consumption.columns else 0.0))
                     if share > 0 and b > 0:
                         q0 = share * b
                 ps, po, pc = (float(base_dom.at[r, x]) for x in (s, o, c))
@@ -496,6 +500,30 @@ class MarketModule:
             out = {}
         self._crush_cache = out
         return out
+
+    def _align_eu_crush_products(self, base_supply):
+        """EU oil and cake base production = EU base crush x yields.
+
+        The EU base crush follows the market's own EU base seed use (CAPRI's
+        crush share x that use), so EU oil and cake base production must follow
+        it too - otherwise crushing supplies less (or more) than the market was
+        calibrated on and base prices move (rapeseed oil +1.1% once the EU seed
+        rows were put on CAPRI's FAO_agg basis).
+        """
+        cp = self._crush_params()
+        tot = {}
+        for (r, s), p in cp.items():
+            if r != "EU27":
+                continue
+            o, c = self.CRUSH_CHAINS[s]
+            tot[o] = tot.get(o, 0.0) + p["q0"] * p["yo"]
+            tot[c] = tot.get(c, 0.0) + p["q0"] * p["yc"]
+        for prod, v in tot.items():
+            if prod in self.base_production.columns and v > 0:
+                self.base_production.at["EU27", prod] = v
+                if prod in base_supply.columns:
+                    base_supply.at["EU27", prod] = v
+        return base_supply
 
     def crush_quantities(self, dom_prices) -> dict:
         """Crush per (region, seed) at the given domestic prices (CAPRI ProcNQ_).
@@ -508,9 +536,13 @@ class MarketModule:
         floored at 1% of base (CAPRI's ProcFudge_ keeps processing positive).
         """
         out = {}
+        _ri = {r: i for i, r in enumerate(dom_prices.index)}
+        _ci = {c: j for j, c in enumerate(dom_prices.columns)}
+        _v = dom_prices.values
         for (r, s), p in self._crush_params().items():
             o, c = self.CRUSH_CHAINS[s]
-            m = p["yo"] * float(dom_prices.at[r, o]) + p["yc"] * float(dom_prices.at[r, c]) - float(dom_prices.at[r, s])
+            i = _ri[r]
+            m = p["yo"] * float(_v[i, _ci[o]]) + p["yc"] * float(_v[i, _ci[c]]) - float(_v[i, _ci[s]])
             out[(r, s)] = max(0.01 * p["q0"], p["q0"] * (1.0 + p["eps"] * (m - p["m0"]) / p["gross"]))
         return out
 
@@ -587,6 +619,157 @@ class MarketModule:
         return supply
 
     def demand_response(
+        self,
+        domestic_prices: pd.DataFrame,
+        world_prices: pd.Series,
+    ) -> pd.DataFrame:
+        """
+        Consumption quantities by region and commodity (1000 t).
+
+        Faithful to CAPRI's Generalised Leontief demand structure in that
+        quantity responds to own price AND to per-capita income (Engel effect):
+            QD = QD0 × (P/P0)^eta × (Y/Y0)^income_elas
+        where the income term is the demand-side counterpart of the GL
+        expenditure function's dependence on income per capita. Cross-price
+        effects are captured through the Armington layer.
+        """
+        demand = pd.DataFrame(index=self.regions, columns=self.commodities, dtype=float)
+
+        # Per-capita income proxy from GDP index (relative to base = 100)
+        income_ratio = getattr(self, "_income_ratio", None)
+        if income_ratio is None:
+            income_ratio = 1.0
+
+        # Real CAPRI demand elasticities (fao_agg p_demandElas), EU-average
+        # own-price, mapped to model commodity codes. Overrides the generic eta.
+        real_dem = getattr(self, "_real_demand_elas", None)
+        if real_dem is None:
+            real_dem = {}
+            try:
+                import json as _json
+                from pathlib import Path as _P
+                _b2 = _P(__file__).parent.parent.parent / "capri_data"
+                from capri_mod.data.loaders import resolve_data_file
+                f = resolve_data_file(_b2, "fao_demand_own_elas_eu.json")
+                if f.exists():
+                    raw = _json.load(open(f))
+                    cmap = {"WHEA":"SWHE","BARL":"BARL","MAIZ":"CORN","BEEF":"BEEF",
+                            "PORK":"PORK","POUM":"POUL","MILK":"MILK","BUTT":"BUTR",
+                            "CHES":"CHES","SMIP":"SKIM","SOYA":"SOYA","SUGA":"SUGR"}
+                    for sua, mc in cmap.items():
+                        if sua in raw:
+                            real_dem[mc] = raw[sua]
+            except Exception:
+                real_dem = {}
+            self._real_demand_elas = real_dem
+
+        # Vectorised; arithmetic unchanged.
+        eta = pd.Series({
+            c: float(real_dem[c]) if c in real_dem else
+               (float(self.armington.at[c, "eta"])
+                if c in self.armington.index else -0.25)
+            for c in self.commodities})
+        inc = pd.Series({c: float(self._income_elasticity(c))
+                         for c in self.commodities})
+        cal = pd.Series({c: float(self._demand_cal_factor(c))
+                         for c in self.commodities})
+        wp0 = pd.Series({c: max(float(self.world_prices_base.get(c, 200.0)), 0.01)
+                         for c in self.commodities})
+        fallback = pd.Series({c: float(world_prices.get(c, 200.0))
+                              for c in self.commodities})
+
+        dp = domestic_prices.reindex(index=self.regions, columns=self.commodities)
+        dp = dp.fillna(fallback)
+        price_ratio = dp.div(wp0, axis=1)
+
+        base = self.base_consumption.reindex(
+            index=self.regions, columns=self.commodities).fillna(100.0)
+        demand = (base.mul(cal, axis=1)
+                      * price_ratio.pow(eta, axis=1)
+                      * inc.rpow(float(income_ratio)))
+        # NON-EU FEED DEMAND responds to feed prices (CAPRI p_ElasFeed): the
+        # feed part of each region's use of a feed cereal or cake follows
+        # prod_j (P_j / P0_j)^eps_j over the model's feed commodities (own and
+        # cross), at that region's feed share of use (FAO_agg FEDM/DOMM). Prices
+        # are relative to the BASE domestic price, so the term is exactly 1 at
+        # base. EU feed demand is NOT handled here: in CAPRI it comes from the
+        # supply models' ration choice.
+        # ---- cell-level adjustments on NumPy arrays (same arithmetic and order
+        # as the reference loops; pandas single-cell access cost ~0.1 s per call)
+        R = {r: i for i, r in enumerate(self.regions)}
+        Cc = {c: j for j, c in enumerate(self.commodities)}
+        D = demand.values.astype(float).copy()
+        Bv = base.values.astype(float)
+        PR = price_ratio.values.astype(float)
+        DPv = dp.values.astype(float)
+        CAL = cal.reindex(self.commodities).values.astype(float)
+        ETA = eta.reindex(self.commodities).values.astype(float)
+        INC = inc.reindex(self.commodities).values.astype(float)
+        ir = float(income_ratio)
+        fdp = self._feed_demand_params()
+        if fdp:
+            dom0 = getattr(self, "_dom0_cache", None)
+            if dom0 is None:
+                dom0 = self.domestic_prices(self.world_prices_base)
+                self._dom0_cache = dom0
+            D0 = dom0.reindex(index=self.regions, columns=self.commodities).values.astype(float)
+            for (r, c), prm in fdp.items():
+                i, j = R.get(r), Cc.get(c)
+                if i is None or j is None:
+                    continue
+                sh = prm["feed_share"]
+                ft = 1.0
+                for jn, e in prm["elasticities"].items():
+                    jj = Cc.get(jn)
+                    if jj is not None and float(D0[i, jj]) > 0:
+                        ft *= (float(DPv[i, jj]) / float(D0[i, jj])) ** e
+                b = float(Bv[i, j]) * float(CAL[j])
+                food = float(PR[i, j]) ** float(ETA[j]) * ir ** float(INC[j])
+                D[i, j] = b * ((1.0 - sh) * food + sh * ft)
+        cp = self._crush_params()
+        if cp:
+            crush = self.crush_quantities(dp)
+            for (r, sd), q in crush.items():
+                i, j = R.get(r), Cc.get(sd)
+                if i is None or j is None:
+                    continue
+                q0 = cp[(r, sd)]["q0"]; b = float(Bv[i, j])
+                f = float(D[i, j]) / b if b > 0 else 0.0
+                D[i, j] = max(0.0, (b - q0) * f + float(CAL[j]) * q0 + (q - q0))
+        eu_eta = getattr(self, "_eu_eta_override", None)
+        if eu_eta is None:
+            eu_eta = {}
+            try:
+                import json as _json
+                from pathlib import Path as _P
+                _f = _P(__file__).resolve().parents[2] / "capri_data" / "2017" / "market" / "eu_demand_elas_overrides.json"
+                if _f.exists():
+                    eu_eta = {k: float(v) for k, v in _json.load(open(_f)).items() if not k.startswith("_")}
+            except Exception:
+                eu_eta = {}
+            self._eu_eta_override = eu_eta
+        ie = R.get("EU27")
+        if eu_eta and ie is not None:
+            for _c, _e in eu_eta.items():
+                j = Cc.get(_c)
+                if j is not None:
+                    D[ie, j] = (float(Bv[ie, j]) * float(CAL[j]) * float(PR[ie, j]) ** _e
+                                * ir ** float(INC[j]))
+        fu = getattr(self, "_feed_use", None)
+        if fu and ie is not None:
+            for c, (idx, sh) in fu.items():
+                j = Cc.get(c)
+                if j is None:
+                    continue
+                d0 = float(Bv[ie, j]) * float(CAL[j])
+                if d0 <= 0:
+                    continue
+                rest = float(PR[ie, j]) ** float(ETA[j]) * ir ** float(INC[j])
+                D[ie, j] = d0 * ((1.0 - sh) * rest + sh * idx)
+        demand = pd.DataFrame(D, index=demand.index, columns=demand.columns)
+        return demand.clip(lower=0.0).astype(float)
+
+    def _demand_response_ref(
         self,
         domestic_prices: pd.DataFrame,
         world_prices: pd.Series,
@@ -1062,6 +1245,12 @@ class MarketModule:
                 cons = max(1.0, p_model - float(ne.get(comm, 0.0)))
             self.base_production.at["EU27", comm] = p_model
             self.base_consumption.at["EU27", comm] = cons
+            # the ALIGNED EU use, before calibration rescales base_consumption
+            # (_exempt_eu_from_world_calibration divides it by the calibration
+            # factor); the EU base crush is anchored on this value
+            if not hasattr(self, "_eu_aligned_use") or self._eu_aligned_use is None:
+                self._eu_aligned_use = {}
+            self._eu_aligned_use[comm] = cons
             base_supply.at["EU27", comm] = p_model
         return base_supply
 
@@ -1193,6 +1382,7 @@ class MarketModule:
             if exogenous_supply is not None and len(exogenous_supply) > 0:
                 base_supply = self._align_eu_base_balance(
                     exogenous_supply.sum(axis=0))
+                base_supply = self._align_eu_crush_products(base_supply)
             self._calibrate_demand_to_supply(base_supply, prices, trade_scenario)
             self._exempt_eu_from_world_calibration(base_supply, prices, trade_scenario)
             self._demand_cal_frozen = self._demand_cal.copy()

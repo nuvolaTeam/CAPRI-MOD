@@ -44,6 +44,7 @@ results:
 | Environment → supply | each activity's nitrogen-balance coefficient | tight: the constraint uses the environmental module's own balance |
 | Supply → environment | activity levels, realised yields, fertiliser factors | post-solve accounting (consistent with the constraint) |
 | Feed requirements → supply | cereal and soybean-meal costs per head | one-way: costs only, no feed market |
+| Fodder balance | **none** (herds not tied to fodder area) | regional fodder use = production | **add** — before wiring the ration |
 | Feed module | feed balance vs availability | **post-solve, off by default** |
 | Biofuel module | biofuel demand | **post-solve, off by default** |
 | Abatement → supply | technology adoption | **post-solve**: does not change activity levels (CAPRI's reference makes technologies endogenous) |
@@ -83,9 +84,10 @@ CAPRI does the same.** Every current exception, against what CAPRI does:
 | Manure trade | **fixed** base export shares | endogenous, with a transport cost | **replace** |
 | Milk products | **fixed** FAO split of milk | dairy processing with fat/protein balance | **replace** |
 | Sugar | **fixed** extraction rate 0.135 | fixed processing coefficient | *as CAPRI* |
+| Olives, other oilseeds | raw products traded as markets | CAPRI trades olive oil, table olives and other oils | **replace** — processing chain like crushing |
 | `FATS`, `OFOD_M` markets | **placeholders**: literature parameters, hard-coded world totals and prices, linked to nothing | real products in CAPRI's market | **replace** — `FATS` by the oil markets of the crushing module |
 | EU oil and cake supply | crush × yields, crush driven by the margin | crush × yields | *done* |
-| EU tariffs | beef 65% in the tariff table | applied ~16% (`TaAppl`) | **check** all tariffs against `TaAppl` |
+| EU tariffs | CAPRI's 2017 total protection on EU imports (`ImportP/(Fob+TCost)−1`) | same | *done* — levels barely affect results (constant wedge) |
 | World prices | now CAPRI's base world prices (`FAO_agg` `PMRK`); five codes without an unambiguous counterpart kept | `FAO_agg` `PMRK` | *done* (5 codes to resolve) |
 | Mineral-fertiliser substitution | linearised around the base | allocation inside the supply model | *equivalent at the margin*; revisit if large changes |
 | Abatement technologies | **post-solve** | endogenous in the supply model ("endotech") | **replace** |

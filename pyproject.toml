@@ -3,9 +3,9 @@ requires = ["setuptools>=61"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "capri-python"
+name = "capri-mod"
 version = "0.1.0"
-description = "A Python implementation of the CAPRI agricultural economic model"
+description = "A Python re-implementation of the CAPRI agricultural economic model"
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }
@@ -19,10 +19,10 @@ dependencies = [
 dev = ["pytest>=7.0", "openpyxl>=3.1"]
 
 [tool.setuptools.packages.find]
-include = ["capri_python*"]
+include = ["capri_mod*"]
 
 [tool.setuptools.package-data]
-capri_python = ["*.csv"]
+capri_mod = ["*.csv"]
 
 [tool.pytest.ini_options]
-testpaths = ["capri_python/tests"]
+testpaths = ["capri_mod/tests"]

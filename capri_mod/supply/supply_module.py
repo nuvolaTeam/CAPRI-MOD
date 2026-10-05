@@ -126,6 +126,8 @@ class RegionData:
     #: values a quantity that is not a marketed product.
     livestock_revenue_coef: Optional[pd.Series] = None
     livestock_feed_coef: Optional[pd.Series] = None
+    fodder_balance: Optional[dict] = None
+    land_market: Optional[dict] = None
 
     #: CAPRI's organic yield gaps by macro-region and product group.
     organic_yield_gap: Optional[pd.DataFrame] = None
@@ -439,6 +441,12 @@ class RegionalSupplyModel:
             net_revenues=self.net_revenues,
             gross_revenues=gross_rev,
         )
+        # FODDER BALANCE carries a positive shadow price at base, as in CAPRI:
+        # f = r - Q x0 - A_f' lambda0 (lambda0 = CAPRI's unit value of the
+        # fodder), so the base is optimal with the balance binding and its dual
+        # equal to lambda0 - fodder crops earn it, animals pay it (two-way).
+        for row, lam0, _b, _lab in self._fodder_rows():
+            self.f = self.f - row * lam0
 
     # ------------------------------------------------------------------
     # Setup helpers
@@ -574,7 +582,12 @@ class RegionalSupplyModel:
             # change in each cereal's price. Base costs already include feed, so
             # at base nothing changes. Protein meals (SOYM, RAPM, SUFM) are not
             # priced in this market and are left out.
-            if act in ANIMALS and price_shock is not None:
+            _rs = getattr(self, "ration_state", None)
+            if act in ANIMALS and _rs and act in _rs:
+                # EU RATION CHOICE (docs/FEED_RATION.md): the feed-cost change per
+                # head comes from the ration chosen at the current feed prices
+                cost += float(_rs[act].get("dcost", 0.0))
+            elif act in ANIMALS and price_shock is not None:
                 # FEED COSTS follow feed prices. Feed per head is CAPRI's 2017
                 # regional total for the activity divided by this model's herd
                 # (livestock_feed_coef.csv), so units and vintage match the
@@ -1385,6 +1398,119 @@ class RegionalSupplyModel:
                     pass          # result object may be frozen; the effect is applied regardless
         return res
 
+    #: free land types of CAPRI's land market (artificial land held fixed)
+    LAND_TYPES = ("ARAC", "GRAS", "FRUN", "FORE", "OLND")
+
+    def _land_augment(self, A_ub, b_ub, c_lin, x0):
+        """Augment the regional QP with CAPRI's land market (LandMarket_,
+        trustee-land variant): land-type areas L as variables, cost 1/2 L'Q L
+        (p_pmpQuadLandTypes) with constants making the base areas optimal; land
+        rows become  activities - land <= base limit - base land, i.e. exactly
+        the current rows at base; total land <= base total; grassland >= (1 -
+        allowance) x base (CAPRI Green Deal default allowance 0%). Returns None
+        where the region has no land-market data."""
+        lm = getattr(self.data, "land_market", None)
+        if not lm or "quad" not in lm:
+            return None
+        labels = list(getattr(self, "_row_labels", []))
+        LTall = ["ARAC", "GRAS", "FRUN", "FORE", "OLND", "ARTIF"]
+        keep = [LTall.index(t) for t in self.LAND_TYPES]
+        Qf = np.array(lm["quad"], dtype=float)[np.ix_(keep, keep)]
+        # UNITS: CAPRI's land-market terms are per HECTARE, the model's land
+        # variables in 1000 ha - hence x 1000. Verified: with observed land
+        # rents the matrix then implies an arable land-supply elasticity of
+        # median 0.062 (10th 0.010, 90th 0.334), the range of CAPRI's priors;
+        # unscaled it implied a median of 62 and land converted far too easily.
+        Qf = 1000.0 * 0.5 * (Qf + Qf.T) + 1e-9 * np.eye(len(keep))
+        L0 = np.array([float(lm["base_kha"].get(t, 0.0)) for t in self.LAND_TYPES])
+        n, k = len(x0), len(keep)
+        Qa = np.zeros((n + k, n + k)); Qa[:n, :n] = self.Q; Qa[n:, n:] = Qf
+        ca = np.concatenate([c_lin, -Qf @ L0])
+        Aa = np.hstack([A_ub, np.zeros((A_ub.shape[0], k))]); ba = b_ub.astype(float).copy()
+        li = {t: j for j, t in enumerate(self.LAND_TYPES)}
+        rowmap = {"arable_land": [(li["ARAC"], 1.0)],
+                  "grassland": [(li["GRAS"], 1.0), (li["ARAC"], 0.2)],
+                  "permanent_land": [(li["FRUN"], 1.0)]}
+        rows = []
+        for lab, coeffs in rowmap.items():
+            if lab not in labels:
+                continue
+            i = labels.index(lab)
+            const = float(b_ub[i]) - sum(cf * L0[j] for j, cf in coeffs)
+            for j, cf in coeffs:
+                Aa[i, n + j] -= cf
+            ba[i] = const
+            rows.append((i, coeffs, const))
+        if not rows:
+            return None
+        # BASE SHADOW PRICES of the land rows, so the land market is in balance
+        # at base WITH them (a land row binding at base otherwise makes extra
+        # land look valuable and the base shifts). Recovered once, at the first
+        # (baseline) call, from the ordinary QP's OWN solution x*: multipliers of
+        # the rows and non-negativity bounds active at x*, by NNLS on
+        # Q x* + c + A_act' mu - I_bnd' nu = 0. Estimating them at the base DATA
+        # instead (not the solution) produced spurious prices - up to 163 kha of
+        # base shift. If the ordinary QP fails, the land market is not used.
+        mu0 = getattr(self, "_land_mu0", None)
+        if mu0 is None:
+            from scipy.optimize import nnls
+            from capri_mod.supply.qp_solver import solve_qp
+            xs, oks = solve_qp(self.Q, c_lin, A_ub, b_ub, x0=x0)
+            if not oks:
+                self._land_mu0 = {"__failed__": 1.0}
+                return None
+            tol = lambda v: 1e-7 * max(1.0, abs(float(v)))
+            act = [i for i in range(A_ub.shape[0]) if A_ub[i] @ xs >= b_ub[i] - tol(b_ub[i])]
+            bnd = [j for j in range(n) if xs[j] <= 1e-9]
+            M = np.hstack([A_ub[act].T if act else np.zeros((n, 0)), -np.eye(n)[:, bnd]])
+            g = -(self.Q @ xs + c_lin)
+            mu0 = {}
+            if M.shape[1]:
+                sc = np.maximum(np.abs(M).max(axis=0), 1e-12)
+                mu, rn = nnls(M / sc, g, maxiter=50 * M.shape[1])
+                mu = mu / sc
+                mu0 = {labels[i]: float(mu[jj]) for jj, i in enumerate(act) if i < len(labels)}
+                mu0["__residual__"] = float(rn) / max(1.0, float(np.linalg.norm(g)))
+            self._land_mu0 = mu0
+        if "__failed__" in mu0:
+            return None
+        for lab, coeffs in rowmap.items():
+            m_ = float(mu0.get(lab, 0.0))
+            for j, cf in coeffs:
+                ca[n + j] += m_ * cf
+        tot = np.zeros(n + k); tot[n:] = 1.0
+        allow = float(getattr(self, "grassland_allowance", 0.0))
+        grs = np.zeros(n + k); grs[n + li["GRAS"]] = -1.0
+        Aa = np.vstack([Aa, tot, grs]); ba = np.concatenate([ba, [L0.sum() + 1e-9], [-(1.0 - allow) * L0[li["GRAS"]] + 1e-9]])
+        self._land_types_used = list(self.LAND_TYPES)
+        return Qa, ca, Aa, ba, np.concatenate([x0, L0]), rows
+
+    def _fodder_rows(self):
+        """CAPRI-consistent fodder balance rows (non-tradable fodder, SUPBAL_):
+        sum_animals use_t_head x heads - u x area_crop <= 0, exact at base.
+        Returns [(row, base value EUR/t, rhs, label)]."""
+        fb = getattr(self.data, "fodder_balance", None) or {}
+        acts_idx = {a: i for i, a in enumerate(self.acts)}
+        x0 = self._base_levels().reindex(self.acts).fillna(0.0).values
+        out = []
+        for feed, rec in fb.items():
+            crop = rec.get("crop")
+            if crop not in acts_idx:
+                continue
+            row = np.zeros(len(self.acts))
+            _rs = getattr(self, "ration_state", None) or {}
+            for a, t in rec.get("use_t_head", {}).items():
+                if a in acts_idx:
+                    xr = (_rs.get(a) or {}).get("x", {})
+                    row[acts_idx[a]] = float(xr[feed]) / 1000.0 if feed in xr else float(t)
+            if not row.any():
+                continue
+            row[acts_idx[crop]] = -float(rec["u_t_per_ha"])
+            scale = float(np.abs(row) @ np.abs(x0)) or 1.0
+            rhs = max(0.0, float(row @ x0)) + 1e-9 * scale      # exact at base
+            out.append((row, float(rec.get("value_eur_t", 0.0)), rhs, "fodder_" + feed))
+        return out
+
     def _build_constraints(
         self,
         nitrate_limit: Optional[float] = None,
@@ -1573,8 +1699,29 @@ class RegionalSupplyModel:
         #    buy-in (roughage can be purchased, as it is in reality and in CAPRI)
         #    lets herds sit at their base level. The headroom is generous because
         #    this simplified module is not the place to model the feed market.
+        # REPLACED where CAPRI-consistent data exist: the hard fodder balance
+        # (docs/FODDER_BALANCE.md) - fodder is non-tradable in CAPRI. The loose
+        # 'buy-in' version below remains only as a fallback; it needed generous
+        # headroom because its old per-unit coefficients were inconsistent.
+        fodder_rows = self._fodder_rows()
+        x0b = self._base_levels().reindex(self.acts).fillna(0.0).values
+        for row, _lam, rhs, lab in fodder_rows:
+            A_rows.append(row)
+            self._row_labels.append(lab)
+            b_rows.append(rhs)
+            # CAPRI's SUPBAL_ for non-tradable fodder is an EQUALITY (production
+            # net of losses = use). The solver takes inequalities only, so the
+            # other side is a narrow band: production may exceed use by at most
+            # 0.1% of base use. Slack at base (the base cannot move); the two rows
+            # never bind together, so no degenerate working set.
+            use0 = float(np.clip(row, 0.0, None) @ x0b)
+            if not getattr(self, "fodder_band", True):
+                continue
+            A_rows.append(-row)
+            self._row_labels.append(lab + "_band")
+            b_rows.append(-(rhs - 1e-9 * max(1.0, use0)) + 1e-3 * max(1.0, use0))
         feed_req = self.data.feed_requirements
-        if not feed_req.empty:
+        if not feed_req.empty and not fodder_rows:
             for roughage in ["GRAS", "MAIF", "OFOD"]:
                 if roughage not in acts_idx:
                     continue
@@ -2052,11 +2199,52 @@ class RegionalSupplyModel:
         if _os.environ.get("CAPRI_DISABLE_QP") == "1":
             x_qp, qp_ok = None, False   # force general solver for A/B testing
         else:
-            x_qp, qp_ok = solve_qp(self.Q, c_lin, A_ub, b_ub, x0=x0)
+            aug = self._land_augment(A_ub, b_ub, c_lin, x0) if getattr(self, "use_land_market", False) else None
+            if aug is not None:
+                # CAPRI LAND MARKET: land-type areas as variables (see _land_augment)
+                Qa, ca, Aa, ba, ya0, rows = aug
+                y, qp_ok = solve_qp(Qa, ca, Aa, ba, x0=ya0)
+                if not qp_ok:
+                    from capri_mod.supply.qp_solver import solve_qp_ldp
+                    yl, okl = solve_qp_ldp(Qa, ca, Aa, ba)
+                    if okl:
+                        yp, okp = solve_qp(Qa, ca, Aa, ba, x0=yl)
+                        y = yp if okp else yl
+                        qp_ok = float(np.max(Aa @ y - ba)) <= 1e-7 * max(1.0, float(np.max(np.abs(ba))))
+                if qp_ok:
+                    n_ = len(x0); x_qp = y[:n_]
+                    self._last_land = dict(zip(getattr(self, "_land_types_used", []), y[n_:]))
+                    # land rows' limits at the solved land areas, so the shadow
+                    # prices computed below see the right slack
+                    b_ub = b_ub.copy()
+                    for i, coeffs, const in rows:
+                        b_ub[i] = const + sum(cf * float(y[n_ + k]) for k, cf in coeffs)
+                    self._land_solution = dict(zip(self._land_types_used, y[n_:].tolist()))
+            else:
+                x_qp, qp_ok = solve_qp(self.Q, c_lin, A_ub, b_ub, x0=x0)
             if not qp_ok:
                 x_qp, qp_ok, b_ub = self._fit_landscape_floor(A_ub, b_ub, c_lin, x0)
             if not qp_ok:
                 x_qp, qp_ok, b_ub = self._fit_balance_target(A_ub, b_ub, c_lin, x0)
+            if not qp_ok:
+                # EXACT solver before the slow general one. The heuristic active-
+                # set loop can fail on FEASIBLE problems ('iteration limit'); the
+                # least-distance/NNLS method is exact and finite. The QP has a
+                # unique optimum (Q positive definite), so on captured Farm-to-Fork
+                # failures it matched the trust-constr fallback in 29 of 30 cases
+                # (to 1e-6 of the objective) and found a 3.5% better optimum in the
+                # 30th, where trust-constr stopped short - ~0.5 ms instead of ~1 s.
+                # Polished by the active-set loop warm-started at its solution;
+                # accepted only if feasible. Infeasible problems return not-ok and
+                # continue down the existing path unchanged.
+                from capri_mod.supply.qp_solver import solve_qp_ldp
+                x_l, ok_l = solve_qp_ldp(self.Q, c_lin, A_ub, b_ub)
+                if ok_l:
+                    x_p, ok_p = solve_qp(self.Q, c_lin, A_ub, b_ub, x0=x_l)
+                    x_c = x_p if ok_p else x_l
+                    tol_b = 1e-7 * max(1.0, float(np.max(np.abs(b_ub)))) if b_ub.size else 0.0
+                    if not b_ub.size or float(np.max(A_ub @ x_c - b_ub)) <= tol_b:
+                        x_qp, qp_ok = x_c, True
 
         if qp_ok:
             x_opt = np.maximum(x_qp, 0.0)
@@ -2496,6 +2684,8 @@ class SupplyModule:
                 d["livestock_revenue_coef"].loc[region]
                 if d.get("livestock_revenue_coef") is not None
                 and region in d["livestock_revenue_coef"].index else None),
+            fodder_balance=(d.get("fodder_balance") or {}).get(region),
+            land_market=(d.get("land_market") or {}).get(region),
             livestock_feed_coef=(
                 d["livestock_feed_coef"].loc[region]
                 if d.get("livestock_feed_coef") is not None
@@ -2863,6 +3053,9 @@ class SupplyModule:
                         set_aside_requirement=sa,
                         surplus_row=surplus_row,
                     )
+                    model.ration_state = (getattr(self, "ration_state", None) or {}).get(region)
+                    model.use_land_market = getattr(self, "use_land_market", False)
+                    model.grassland_allowance = getattr(self, "grassland_allowance", 0.0)
                     result = model.solve(n_balance_price=nb_used, **solve_kw)
                     if surplus_row:
                         # nitrogen-balance price: a fresh bracket at this land level

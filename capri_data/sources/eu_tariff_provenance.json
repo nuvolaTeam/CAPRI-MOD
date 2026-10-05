@@ -1,0 +1,285 @@
+{
+ "_source": "CAPRI res_0_1717cap_after_2014_cal_from_data_caldefaulta dataOut, EU27yr19 <- NONEU, 2017: total ad-valorem equivalent = ImportP/(Fob+TCost)-1",
+ "rows": {
+  "SWHE": {
+   "previous": 0.0,
+   "capri_code": "WHEA",
+   "ad_valorem_pct": 0,
+   "specific_eur_t": -0.1,
+   "total_ave_pct": 0.0,
+   "eu_imports_kt": 2504.0
+  },
+  "DWHE": {
+   "previous": 0.0,
+   "kept": "no EU imports from outside the EU in CAPRI 2017 (or no CAPRI counterpart)"
+  },
+  "BARL": {
+   "previous": 0.0,
+   "capri_code": "BARL",
+   "ad_valorem_pct": 0,
+   "specific_eur_t": -0.1,
+   "total_ave_pct": 0.0,
+   "eu_imports_kt": 501.3
+  },
+  "CORN": {
+   "previous": 0.0,
+   "capri_code": "MAIZ",
+   "ad_valorem_pct": 0,
+   "specific_eur_t": -0.0,
+   "total_ave_pct": 1.12,
+   "eu_imports_kt": 10844.2
+  },
+  "OCER": {
+   "previous": 0.0,
+   "capri_code": "OCER",
+   "ad_valorem_pct": 0,
+   "specific_eur_t": 0.0,
+   "total_ave_pct": 0.0,
+   "eu_imports_kt": 5942.3
+  },
+  "RAPE": {
+   "previous": 0.0,
+   "capri_code": "RAPE",
+   "ad_valorem_pct": 0.09,
+   "specific_eur_t": 0,
+   "total_ave_pct": 0.09,
+   "eu_imports_kt": 9673.7
+  },
+  "SUNF": {
+   "previous": 0.0,
+   "capri_code": "SUNF",
+   "ad_valorem_pct": 0,
+   "specific_eur_t": 0,
+   "total_ave_pct": 0.0,
+   "eu_imports_kt": 557.5
+  },
+  "SOYA": {
+   "previous": 0.0,
+   "capri_code": "SOYA",
+   "ad_valorem_pct": 0.37,
+   "specific_eur_t": 0,
+   "total_ave_pct": 0.37,
+   "eu_imports_kt": 14570.8
+  },
+  "OOIL": {
+   "previous": 3.2,
+   "kept": "no EU imports from outside the EU in CAPRI 2017 (or no CAPRI counterpart)"
+  },
+  "SUGB": {
+   "previous": 0.0,
+   "kept": "no EU imports from outside the EU in CAPRI 2017 (or no CAPRI counterpart)"
+  },
+  "SUGR": {
+   "previous": 35.0,
+   "capri_code": "SUGA",
+   "ad_valorem_pct": 0,
+   "specific_eur_t": -0.2,
+   "total_ave_pct": 17.69,
+   "eu_imports_kt": 5375.5
+  },
+  "POTA": {
+   "previous": 7.5,
+   "capri_code": "POTA",
+   "ad_valorem_pct": 9.06,
+   "specific_eur_t": 0,
+   "total_ave_pct": 8.99,
+   "eu_imports_kt": 1078.0
+  },
+  "PULS": {
+   "previous": 0.0,
+   "capri_code": "PULS",
+   "ad_valorem_pct": 0.73,
+   "specific_eur_t": 0,
+   "total_ave_pct": 0.73,
+   "eu_imports_kt": 1151.9
+  },
+  "TOMA": {
+   "previous": 14.4,
+   "capri_code": "TOMA",
+   "ad_valorem_pct": 8.76,
+   "specific_eur_t": 0.0,
+   "total_ave_pct": 19.98,
+   "eu_imports_kt": 829.8
+  },
+  "OVEG": {
+   "previous": 10.2,
+   "capri_code": "OVEG",
+   "ad_valorem_pct": 13.76,
+   "specific_eur_t": 0,
+   "total_ave_pct": 13.69,
+   "eu_imports_kt": 4655.6
+  },
+  "APPL": {
+   "previous": 7.2,
+   "capri_code": "APPL",
+   "ad_valorem_pct": 4.22,
+   "specific_eur_t": 0.0,
+   "total_ave_pct": 5.45,
+   "eu_imports_kt": 975.0
+  },
+  "OFRU": {
+   "previous": 5.6,
+   "capri_code": "OFRU",
+   "ad_valorem_pct": 7.9,
+   "specific_eur_t": 0,
+   "total_ave_pct": 7.83,
+   "eu_imports_kt": 10915.3
+  },
+  "CITR": {
+   "previous": 6.4,
+   "capri_code": "CITR",
+   "ad_valorem_pct": 10.88,
+   "specific_eur_t": 0.0,
+   "total_ave_pct": 11.1,
+   "eu_imports_kt": 7551.3
+  },
+  "WINE": {
+   "previous": 32.0,
+   "capri_code": "TWIN",
+   "ad_valorem_pct": 3.16,
+   "specific_eur_t": 0,
+   "total_ave_pct": 3.12,
+   "eu_imports_kt": 735.5
+  },
+  "OLIV": {
+   "previous": 7.5,
+   "capri_code": "OLIO",
+   "ad_valorem_pct": 0,
+   "specific_eur_t": 1336.8,
+   "total_ave_pct": 70.15,
+   "eu_imports_kt": 165.4
+  },
+  "MILK": {
+   "previous": 0.0,
+   "kept": "no EU imports from outside the EU in CAPRI 2017 (or no CAPRI counterpart)"
+  },
+  "BUTR": {
+   "previous": 82.0,
+   "capri_code": "BUTT",
+   "ad_valorem_pct": 0,
+   "specific_eur_t": 729.8,
+   "total_ave_pct": 38.24,
+   "eu_imports_kt": 91.3
+  },
+  "SKIM": {
+   "previous": 55.0,
+   "capri_code": "SMIP",
+   "ad_valorem_pct": 0,
+   "specific_eur_t": 469.7,
+   "total_ave_pct": 16.96,
+   "eu_imports_kt": 39.1
+  },
+  "CHES": {
+   "previous": 40.0,
+   "capri_code": "CHES",
+   "ad_valorem_pct": 0,
+   "specific_eur_t": 0,
+   "total_ave_pct": 6.18,
+   "eu_imports_kt": 146.2
+  },
+  "WHEY": {
+   "previous": 12.0,
+   "capri_code": "WHEP",
+   "ad_valorem_pct": 59.44,
+   "specific_eur_t": 0,
+   "total_ave_pct": 65.6,
+   "eu_imports_kt": 65.7
+  },
+  "BEEF": {
+   "previous": 65.0,
+   "capri_code": "BEEF",
+   "ad_valorem_pct": 14.82,
+   "specific_eur_t": 0,
+   "total_ave_pct": 57.78,
+   "eu_imports_kt": 308.4
+  },
+  "PORK": {
+   "previous": 20.0,
+   "capri_code": "PORK",
+   "ad_valorem_pct": 0,
+   "specific_eur_t": 0,
+   "total_ave_pct": 17.18,
+   "eu_imports_kt": 88.9
+  },
+  "POUL": {
+   "previous": 35.0,
+   "capri_code": "POUM",
+   "ad_valorem_pct": 4.33,
+   "specific_eur_t": 0,
+   "total_ave_pct": 9.72,
+   "eu_imports_kt": 349.6
+  },
+  "SHGM": {
+   "previous": 52.0,
+   "capri_code": "SGMT",
+   "ad_valorem_pct": 0,
+   "specific_eur_t": 0,
+   "total_ave_pct": 0.11,
+   "eu_imports_kt": 188.6
+  },
+  "EGGS": {
+   "previous": 30.0,
+   "capri_code": "EGGS",
+   "ad_valorem_pct": 0,
+   "specific_eur_t": 0,
+   "total_ave_pct": 0.0,
+   "eu_imports_kt": 7.7
+  },
+  "FATS": {
+   "previous": 12.0,
+   "kept": "no EU imports from outside the EU in CAPRI 2017 (or no CAPRI counterpart)"
+  },
+  "OFOD_M": {
+   "previous": 8.0,
+   "kept": "no EU imports from outside the EU in CAPRI 2017 (or no CAPRI counterpart)"
+  },
+  "RAPO": {
+   "previous": 5.58,
+   "capri_code": "RAPO",
+   "ad_valorem_pct": 5.58,
+   "specific_eur_t": 0,
+   "total_ave_pct": 5.58,
+   "eu_imports_kt": 58.0
+  },
+  "SUNO": {
+   "previous": 5.18,
+   "capri_code": "SUNO",
+   "ad_valorem_pct": 5.18,
+   "specific_eur_t": 0,
+   "total_ave_pct": 5.18,
+   "eu_imports_kt": 1211.4
+  },
+  "SOYO": {
+   "previous": 4.66,
+   "capri_code": "SOYO",
+   "ad_valorem_pct": 4.66,
+   "specific_eur_t": 0,
+   "total_ave_pct": 4.66,
+   "eu_imports_kt": 476.2
+  },
+  "RAPC": {
+   "previous": 0.07,
+   "capri_code": "RAPC",
+   "ad_valorem_pct": 0.07,
+   "specific_eur_t": 0,
+   "total_ave_pct": 0.07,
+   "eu_imports_kt": 722.1
+  },
+  "SUNC": {
+   "previous": 0.0,
+   "capri_code": "SUNC",
+   "ad_valorem_pct": 0,
+   "specific_eur_t": 0,
+   "total_ave_pct": 0.0,
+   "eu_imports_kt": 6752.0
+  },
+  "SOYC": {
+   "previous": 0.0,
+   "capri_code": "SOYC",
+   "ad_valorem_pct": 0,
+   "specific_eur_t": 0,
+   "total_ave_pct": 0.0,
+   "eu_imports_kt": 32594.7
+  }
+ }
+}

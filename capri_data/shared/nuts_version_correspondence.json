@@ -1,7 +1,7 @@
 {
  "_source": "CAPRI GAMS source, gams/compile_rdp_data/build_general_set_structure.gms (the NUTS version correspondence CAPRI uses internally; 207 pairs, 184 distinct 8-character codes).",
  "_purpose": "Maps CAPRI's 8-character region codes to NUTS codes across coding-scheme versions. Needed because CAPRI's own result files use OLD numeric codes for member states that changed scheme - Italy writes IT110000 where NUTS-2016 says ITC1 - so validation lookups against CAPRI extracts silently matched zero Italian regions until this was found.",
- "_note": "A single CAPRI code can map to several NUTS codes across versions (IT110000 -> IT11 and ITC1). Consumers should prefer whichever candidate exists in the model's region set.",
+ "_note": "A single CAPRI code can map to several NUTS codes across versions (IT110000 -> IT11 and ITC1). Consumers should prefer whichever candidate exists in the model's region set. | 2026-10: 75 CAPRI NUTS-2 codes added, each verified by CAPRI's total agricultural area matching the model region's base area (exact to 0.2%, or within 1% and unambiguous): France NUTS-2013->2016, Germany (NRW, RP, SL, ST, SH, TH), Bulgaria (CAPRI's own order: BG04->BG41, BG05->BG42, BG06->BG34), Greece, Italy, Poland, Sweden, Norway. Splits (one CAPRI region -> several model regions) stay with the national-remainder fallback. Each added pair also confirmed by a second variable (dairy cows, else wheat+barley area, within 3%); IT310000 (Trentino-Alto Adige = ITH1+ITH2, a split) had been matched to ITH4 by a coincidence of total area - corrected to IT330000->ITH4; unconfirmed pairs removed: [('NO090000', 'NO03'), ('PL500000', 'PL81')].",
  "capri8_to_nuts": {
   "CY000000": [
    "CY00"
@@ -170,42 +170,55 @@
    "DE94"
   ],
   "EL110000": [
+   "EL51",
    "GR11"
   ],
   "EL120000": [
+   "EL52",
    "GR12"
   ],
   "EL130000": [
+   "EL53",
    "GR13"
   ],
   "EL140000": [
+   "EL61",
    "GR14"
   ],
   "EL210000": [
+   "EL54",
    "GR21"
   ],
   "EL220000": [
+   "EL62",
    "GR22"
   ],
   "EL230000": [
+   "EL63",
    "GR23"
   ],
   "EL240000": [
+   "EL64",
    "GR24"
   ],
   "EL250000": [
+   "EL65",
    "GR25"
   ],
   "EL300000": [
+   "EL30",
    "GR30"
   ],
   "EL410000": [
+   "EL41",
    "GR41"
   ],
   "EL420000": [
+   "EL42",
    "GR42"
   ],
   "EL430000": [
+   "EL43",
    "GR43"
   ],
   "ES110000": [
@@ -277,66 +290,87 @@
    "FR10"
   ],
   "FR210000": [
+   "FRF2",
    "FR21"
   ],
   "FR220000": [
+   "FRE2",
    "FR22"
   ],
   "FR230000": [
+   "FRD2",
    "FR23"
   ],
   "FR240000": [
+   "FRB0",
    "FR24"
   ],
   "FR250000": [
+   "FRD1",
    "FR25"
   ],
   "FR260000": [
+   "FRC1",
    "FR26"
   ],
   "FR300000": [
+   "FRE1",
    "FR30"
   ],
   "FR410000": [
+   "FRF3",
    "FR41"
   ],
   "FR420000": [
+   "FRF1",
    "FR42"
   ],
   "FR430000": [
+   "FRC2",
    "FR43"
   ],
   "FR510000": [
+   "FRG0",
    "FR51"
   ],
   "FR520000": [
+   "FRH0",
    "FR52"
   ],
   "FR530000": [
+   "FRI3",
    "FR53"
   ],
   "FR610000": [
+   "FRI1",
    "FR61"
   ],
   "FR620000": [
+   "FRJ2",
    "FR62"
   ],
   "FR630000": [
+   "FRI2",
    "FR63"
   ],
   "FR710000": [
+   "FRK2",
    "FR71"
   ],
   "FR720000": [
+   "FRK1",
    "FR72"
   ],
   "FR810000": [
+   "FRJ1",
    "FR81"
   ],
   "FR820000": [
+   "FRL0",
    "FR82"
   ],
   "FR830000": [
+   "FRM0",
    "FR83"
   ],
   "IR010000": [
@@ -386,27 +420,34 @@
    "ITD2"
   ],
   "IT320000": [
+   "ITH3",
    "ITD3",
    "IT32"
   ],
   "IT330000": [
+   "ITH4",
    "ITD4"
   ],
   "IT400000": [
+   "ITH5",
    "ITD5",
    "IT40"
   ],
   "IT510000": [
+   "ITI1",
    "ITE1",
    "IT51"
   ],
   "IT520000": [
+   "ITI2",
    "ITE2"
   ],
   "IT530000": [
+   "ITI3",
    "ITE3"
   ],
   "IT600000": [
+   "ITI4",
    "IT60",
    "ITE4"
   ],
@@ -467,6 +508,7 @@
    "NL42"
   ],
   "PL110000": [
+   "PL71",
    "PL11"
   ],
   "PL120000": [
@@ -577,6 +619,101 @@
   ],
   "SK040000": [
    "SK04"
+  ],
+  "BG010000": [
+   "BG31"
+  ],
+  "BG020000": [
+   "BG32"
+  ],
+  "BG030000": [
+   "BG33"
+  ],
+  "BG040000": [
+   "BG41"
+  ],
+  "BG050000": [
+   "BG42"
+  ],
+  "BG060000": [
+   "BG34"
+  ],
+  "DEA10000": [
+   "DEA1"
+  ],
+  "DEA20000": [
+   "DEA2"
+  ],
+  "DEA30000": [
+   "DEA3"
+  ],
+  "DEA40000": [
+   "DEA4"
+  ],
+  "DEA50000": [
+   "DEA5"
+  ],
+  "DEB10000": [
+   "DEB1"
+  ],
+  "DEB20000": [
+   "DEB2"
+  ],
+  "DEB30000": [
+   "DEB3"
+  ],
+  "DEC00000": [
+   "DEC0"
+  ],
+  "DEE00000": [
+   "DEE0"
+  ],
+  "DEF00000": [
+   "DEF0"
+  ],
+  "DEG00000": [
+   "DEG0"
+  ],
+  "ITA00000": [
+   "ITG1"
+  ],
+  "ITB00000": [
+   "ITG2"
+  ],
+  "NO020000": [
+   "NO02"
+  ],
+  "NO060000": [
+   "NO06"
+  ],
+  "NO070000": [
+   "NO07"
+  ],
+  "NO090000": [],
+  "PL500000": [],
+  "SE010000": [
+   "SE11"
+  ],
+  "SE020000": [
+   "SE12"
+  ],
+  "SE040000": [
+   "SE22"
+  ],
+  "SE060000": [
+   "SE31"
+  ],
+  "SE070000": [
+   "SE32"
+  ],
+  "SE080000": [
+   "SE33"
+  ],
+  "SE090000": [
+   "SE21"
+  ],
+  "SE0A0000": [
+   "SE23"
   ]
  }
 }

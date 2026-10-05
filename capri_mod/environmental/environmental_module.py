@@ -292,6 +292,13 @@ class EnvironmentalModule:
             self._nutrient_source = "loaded (CAPRI p_FertPerHa)"
 
     def _n_excretion(self, region: str, animal: str) -> float:
+        cache = self.__dict__.setdefault("_nexc_cache", {})
+        k = (region, animal)
+        if k not in cache:
+            cache[k] = self._n_excretion_uncached(region, animal)
+        return cache[k]
+
+    def _n_excretion_uncached(self, region: str, animal: str) -> float:
         """Manure N per head (kg), consistent with this model's herd units.
 
         First choice: CAPRI's 2017 regional manure N TOTAL for the activity
@@ -452,6 +459,25 @@ class EnvironmentalModule:
         cache[region] = out
         return out
 
+    def _cached_row(self, key: str, region: str):
+        """One region's row of a data table as a plain dict, cached (or None)."""
+        cache = self.__dict__.setdefault("_row_cache", {})
+        ck = (key, region)
+        if ck not in cache:
+            t = self.data.get(key) if hasattr(self, "data") else None
+            cache[ck] = (t.loc[region].to_dict()
+                         if t is not None and hasattr(t, "index") and region in t.index else None)
+        return cache[ck]
+
+    def _ncoef_n(self) -> dict:
+        """nutrient_coefs['N'] as a dict, cached."""
+        d = self.__dict__.get("_ncoef_n_cache")
+        if d is None:
+            nc = self.nutrient_coefs
+            d = {c: nc.at[c, "N"] for c in nc.index} if "N" in getattr(nc, "columns", []) else {}
+            self._ncoef_n_cache = d
+        return d
+
     def compute_nitrogen_balance(
         self,
         activities: pd.Series,
@@ -487,7 +513,15 @@ class EnvironmentalModule:
         # where Germany's is among Europe's highest.
         _reg_n = self.data.get("mineral_n_regional") if hasattr(self, "data") else None
         _sub = self._substitution(region)
-        _ybase = self.data["yields"].loc[region] if (hasattr(self, "data") and region in self.data["yields"].index) else None
+        # fixed per-region data, cached as plain dicts (identical values; pandas
+        # row and cell access dominated the cost of this function)
+        _ybase = self._cached_row("yields", region)
+        _regn = self._cached_row("mineral_n_regional", region)
+        _ncN = self._ncoef_n()
+        if hasattr(activities, "to_dict"):
+            activities = activities.to_dict()
+        if hasattr(yields, "to_dict"):
+            yields = yields.to_dict()
         n_mineral_plain = 0.0
         n_need_manure_part = 0.0
         for crop in CROPS:
@@ -500,15 +534,12 @@ class EnvironmentalModule:
                 if _y0 > 0 and _y > 0:
                     _sq = (_y / _y0) ** 0.5
             rate = None
-            if area > 0 and _reg_n is not None and region in _reg_n.index \
-                    and crop in _reg_n.columns:
-                _v = _reg_n.at[region, crop]
+            if area > 0 and _regn is not None and crop in _regn:
+                _v = _regn[crop]
                 if _v == _v and _v > 0:
                     rate = float(_v)
             if rate is None:
-                rate = self.nutrient_coefs.at[crop, "N"] if (
-                    crop in self.nutrient_coefs.index
-                ) else 0.0
+                rate = _ncN.get(crop, 0.0)
             n_mineral_plain += area * rate * _m
             n_mineral += area * rate * _m * _sq
             if _sub is not None and area > 0:
@@ -668,18 +699,43 @@ class EnvironmentalModule:
             "hnv_farmland_pct": min(100.0, hnv_pct),
         }
 
+    def _nh3_factors(self) -> dict:
+        d = self.__dict__.get("_nh3_fac_cache")
+        if d is None:
+            import json as _json
+            from pathlib import Path as _P
+            f = _P(__file__).resolve().parents[2] / "capri_data" / "2017" / "environment" / "nh3_factors_capri.json"
+            d = _json.load(open(f))["regions"] if f.exists() else {}
+            self._nh3_fac_cache = d
+        return d
+
     def compute_ammonia(
         self,
         activities: pd.Series,
         region: Optional[str] = None,
+        mineral_n_kt: Optional[float] = None,
     ) -> Dict[str, float]:
-        """Ammonia emissions (kt NH3) from livestock housing and soils.
+        """Ammonia emissions (kt NH3) from livestock manure and mineral fertiliser.
 
         ``region`` selects the regional N excretion. It used to be missing from
         the signature while the body referenced it, so every call raised a
         NameError; run_all_regions swallowed the error per region and returned
         an EMPTY environmental table from every model run, silently.
         """
+        # CAPRI's AMMONIA ACCOUNTING (replaces the housing-only factors and the
+        # "soils = 10% of livestock" proxy): per region, CAPRI's share of each
+        # animal's excreted N lost as NH3-N (housing + storage + application +
+        # grazing, GNH3/MANN) and the share of mineral N lost (NH3MIN/MINFER),
+        # from its 2030 reference run (tools/build_nh3_factors.py). Responds to
+        # herds AND to mineral fertiliser - which the proxy could not see.
+        fac = self._nh3_factors().get(region) if region else None
+        if fac:
+            man_n = sum(float(fac["manure_share"].get(a, 0.0))
+                        * self._n_excretion(region, a) * activities.get(a, 0.0) * 1000 / 1e6
+                        for a in ANIMALS)                                   # kt NH3-N
+            min_n = float(fac.get("mineral_share") or 0.0) * float(mineral_n_kt or 0.0)
+            return {"nh3_livestock": man_n * 17 / 14, "nh3_soils": min_n * 17 / 14,
+                    "nh3_total": (man_n + min_n) * 17 / 14}
         nh3_livestock = 0.0
         for animal in ANIMALS:
             heads = activities.get(animal, 0.0) * 1000
@@ -759,7 +815,8 @@ class EnvironmentalModule:
         bio = self.compute_biodiversity_indicators(acts, land)
 
         # Ammonia
-        nh3 = self.compute_ammonia(acts, region)
+        nh3 = self.compute_ammonia(acts, region,
+                                   mineral_n_kt=float(nb.get("n_mineral_input", 0.0)) / 1000.0)
 
         # Land use
         arable = sum(acts.get(c, 0.0) for c in CROPS

@@ -41,7 +41,7 @@
  },
  "OOIL": {
   "capri_code": null,
-  "source": "unchanged - CAPRI counterpart ambiguous (other oilseeds)",
+  "source": "unchanged - CAPRI has NO world market price for other oilseeds (its OOIL activity produces product OOIL, absent from FAO_agg World PMRK); not an unmapped code",
   "previous": 360.5
  },
  "SUGB": {
@@ -95,8 +95,8 @@
   "previous": 850.0
  },
  "OLIV": {
-  "capri_code": null,
-  "source": "unchanged - CAPRI counterpart ambiguous: olive oil OLIO 2447.5 or table olives TABO 990.0",
+  "capri_code": "OLIO x extraction",
+  "source": "CAPRI olive-oil world price (FAO_agg World PMRK OLIO BAS, 2447.5 EUR/t) x CAPRI EU olive-oil yield per t of olives (2,348 kt oil, FAO_agg MAPR BAS / 11,035 kt olives for oil, res_17 OLIV YILD x LEVL = 0.2128): our OLIV market is in tonnes of olives; CAPRI trades olive oil (OLIO.OLIV)",
   "previous": 1396.4
  },
  "MILK": {
@@ -160,8 +160,8 @@
   "previous": 400.0
  },
  "WMLK": {
-  "capri_code": null,
-  "source": "unchanged - no CAPRI world price (whole milk powder WMIO 2829.0 is a different product)",
+  "capri_code": "WMIO",
+  "source": "FAO_agg World PMRK WMIO BAS ('Whole milk powder only' in CAPRI's sets)",
   "previous": 3200.0
  },
  "CREM": {

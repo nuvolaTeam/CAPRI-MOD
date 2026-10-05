@@ -69,6 +69,18 @@ class CAPRIModel:
     verbose   : print progress messages
     """
 
+    #: CAPRI's land market, on by default as in CAPRI (p_landIsFixedinScenario
+    #: = 0 in supply/def_supply_model_par.gms): land-type areas are variables
+    #: with CAPRI's land-market costs (docs/LAND_USE_FLEXIBILITY.md). Set False
+    #: to hold land fixed.
+    use_land_market = True
+    #: permanent-grassland decline allowed under the Green Deal (CAPRI default 0)
+    grassland_allowance = 0.0
+    #: EU feed ration chosen at current feed prices (capri_mod/feed/ration.py),
+    #: on by default as in CAPRI, where rations are always endogenous in the
+    #: supply models. Set False for fixed rations per head.
+    use_ration = True
+
     def __init__(
         self,
         data_dir: Optional[str] = None,
@@ -237,6 +249,7 @@ class CAPRIModel:
                 _mm.base_production = _mm._base_production0.copy()
                 _mm.base_consumption = _mm._base_consumption0.copy()
                 _mm._dom0_cache = None          # base domestic prices for the feed terms
+                _mm._eu_aligned_use = None      # re-recorded by this run's alignment
         else:
             if _key not in _cache:
                 _saved = self.verbose
@@ -325,6 +338,10 @@ class CAPRIModel:
             # --- Step 1: Supply module ---
             if self.verbose:
                 print("    [Supply] Solving regional models...")
+            self.supply_module.use_land_market = getattr(self, "use_land_market", False)
+            self.supply_module.grassland_allowance = getattr(self, "grassland_allowance", 0.0)
+            if getattr(self, "use_ration", False):
+                self._update_rations(price_signal if outer_iter > 0 else None)
             supply_results = self.supply_module.run(
                 price_signals=price_signal if outer_iter > 0 else None,
                 policy_scenario={
@@ -727,6 +744,51 @@ class CAPRIModel:
         self._feed_shares_cache = out
         return out
 
+    def _update_rations(self, price_signal) -> None:
+        """Solve every EU region-animal ration at the current feed prices and hand
+        the result to the supply module (feed costs, fodder balance) and to the
+        market's feed demand. Cereals: CAPRI-weighted cereal price index; protein:
+        cake price index; fodder and feeds without a market at base value
+        (REGISTERED - fodder priced at its base value, not yet the balance dual)."""
+        from capri_mod.feed.ration import RationModel
+        from capri_mod.supply.supply_module import RegionalSupplyModel as _R
+        rm = getattr(self, "_ration_model", None)
+        if rm is None:
+            rm = RationModel(self.data_dir if hasattr(self, "data_dir") else None)
+            self._ration_model = rm
+        sig = price_signal if price_signal is not None else {}
+        g = (lambda c: float(sig.get(c, 0.0)) if hasattr(sig, "get") else 0.0)
+        mix = _R.FEED_CEREAL_MIX; wsum = sum(mix.values())
+        ci = 1.0 + sum(w * g(c) for c, w in mix.items()) / wsum
+        cw, _p = _R._cake_index(); cs = sum(cw.values()) or 1.0
+        pi = 1.0 + sum(w * g(c) for c, w in cw.items()) / cs
+        state = {}
+        # DAMPED like the price signal: each ration moves halfway from its
+        # previous value toward the new optimum. Undamped rations reacted at once
+        # to damped prices and the outer loop oscillated (Farm-to-Fork with the
+        # ration on exceeded the 25-iteration cap). A convex combination of
+        # feasible rations is feasible (linear, price-independent constraints),
+        # and the fixed point is unchanged.
+        prev = getattr(self, "_ration_prev", None)
+        if price_signal is None or prev is None:
+            prev = {}
+        alpha = getattr(self, "ration_damping", 0.5)
+        newprev = {}
+        for (reg, act), r in rm.rations.items():
+            p = rm.price_vector((reg, act), ci, pi)
+            x, ok = r.solve(p)
+            if not ok:
+                x = r.x0
+            xp = prev.get((reg, act))
+            if xp is not None:
+                x = xp + alpha * (x - xp)
+            newprev[(reg, act)] = x
+            state.setdefault(reg, {})[act] = {"x": dict(zip(r.feeds, x)),
+                                              "dcost": r.cost(x, p) - r.cost(r.x0, r.p0)}
+        self.supply_module.ration_state = state
+        self._ration_state = state
+        self._ration_prev = newprev
+
     def _cake_feed_shares(self) -> dict:
         """Feed share of EU domestic use per cake, CAPRI 2017 base (FAO_agg BAS)."""
         cached = getattr(self, "_cake_shares_cache", None)
@@ -780,6 +842,20 @@ class CAPRIModel:
                     x0 = float(b0.get(a, 0.0)) if b0 is not None else x
                     q = float(fc.get(f"{a}_cereals", float("nan"))) if fc is not None else float("nan")
                     qp = float(fc.get(f"{a}_protein", float("nan"))) if fc is not None else float("nan")
+                    # with the EU ration wired in: current cereals and protein
+                    # feed per head from the ration; base from the base ration
+                    _rr = ((getattr(self, "_ration_state", None) or {}).get(region) or {}).get(a)
+                    _r0 = getattr(self, "_ration_model", None)
+                    if _rr and _r0 is not None and (region, a) in _r0.rations:
+                        _rb = _r0.rations[(region, a)]
+                        xb = dict(zip(_rb.feeds, _rb.x0))
+                        if "FCER" in xb:
+                            cur["OCER"] += x * _rr["x"].get("FCER", 0.0) / 1000.0
+                            base["OCER"] += x0 * xb["FCER"] / 1000.0
+                        if "FPRO" in xb:
+                            prot[0] += x * _rr["x"].get("FPRO", 0.0) / 1000.0
+                            prot[1] += x0 * xb["FPRO"] / 1000.0
+                        continue
                     if qp == qp:                    # protein-rich feed, t per head
                         prot[0] += x * qp
                         prot[1] += x0 * qp
