@@ -6,15 +6,15 @@ message: >-
   release of the CAPRI modelling system.
 type: software
 version: 0.1.0
-license: MIT
+license: GPL-3.0-only
 abstract: >-
   An AI-assisted Python reimplementation of the economic logic of the
   CAPRI (Common Agricultural Policy Regionalised Impact) model, covering
   the regional PMP supply module, an Armington market module, CAP policy
   instruments, environmental, water and farm-income indicators, and a
   recursive-dynamic projection layer, calibrated against data extracted
-  from CAPRI star-3.0 and validated against CAPRI's own outputs, the
-  EcAMPA 2 abatement study and published JRC scenario results.
+  from CAPRI star-3.0 and validated against CAPRI's own outputs and
+  published JRC scenario results.
 references:
   - type: software
     title: CAPRI modelling system

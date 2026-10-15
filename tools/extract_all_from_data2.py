@@ -123,7 +123,7 @@ def main() -> None:
 
     # ---- cost components, EUR/ha ----------------------------------------
     co = df[df.item.isin(COST_ITEMS + [TOTAL_INPUT])]
-    co.to_csv(out / "capreg_cost_components.csv", index=False)
+    co.to_csv(out / "capreg_cost_components.csv.xz", index=False)
     comp = co[co.item != TOTAL_INPUT].groupby(
         ["model_region", "activity"]).value.sum().rename("components")
     tot = co[co.item == TOTAL_INPUT].set_index(

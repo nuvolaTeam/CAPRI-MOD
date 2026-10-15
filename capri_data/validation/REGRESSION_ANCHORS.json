@@ -29,7 +29,7 @@
    "reference": "permanent crops must survive the base solve; was 78% error until the PERMANENT land bound was reconciled with observed areas"
   },
   "n_surplus_median_kg_ha": {
-   "value": 60.9,
+   "value": 87.6,
    "tolerance": 15.0,
    "kind": "tight",
    "reference": "Eurostat gross nitrogen balance, EU ~45-50 kg N/ha UPDATED 54.4 -> 47.1. The old figure came from two errors that cancelled: manure was counted twice on the input side, and fodder crops were credited with about double the nitrogen they remove because their yields are fresh matter. Mineral nitrogen now comes from CAPRI's own NMIN per region and crop. Every component is independently right: mineral 10.17 Mt (real ~10.8), manure 7.22 (real ~7), crop uptake 13.71, EU average surplus 44.5 kg N/ha against a real ~46.",
@@ -37,9 +37,13 @@
     {
      "value": 47.1,
      "replaced": "2026-10-02"
+    },
+    {
+     "value": 60.9,
+     "replaced": "2026-10-09"
     }
    ],
-   "rebased_because": "Nitrogen balance aligned with CAPRI's 2030 reference: no 'animal products' deduction, regional EMEP-based deposition, and manure trade between regions. On the 157 regions with CAPRI's own per-ha surplus, every measure moved toward CAPRI: median 52.4 -> 56.7 kg N/ha (CAPRI 59.1), correlation 0.85 -> 0.89, mean absolute gap 27.7 -> 23.6, regions within 25 kg/ha 104 -> 115. Tolerance unchanged.",
+   "rebased_because": "Sprint 1 (docs/COUPLING_SPRINTS.md): gross N balance on CAPRI's definition (e_SURTOTHa) - crop removal, crop residues and biological fixation from CAPRI's per-crop 2030 coefficients (EXPPRD, CRESID, BIOFIX) instead of hard-coded N contents per tonne; residue N enters as an input and, at CAPRI's availability, displaces mineral N. On the 30 anchor regions (Germany) the output side now matches CAPRI's 2030 reference: removal 185.5 vs 182.7 kg/ha, residues 75.9 vs 77.5, fixation 8.7 vs 9.3, deposition 10.0 vs 10.0. The median surplus (87.6 vs CAPRI 61.6) is higher by the base-year INPUTS: mineral 84.9 vs 69.8 and manure 73.2 vs 59.8 (2017 rates and herds against CAPRI's 2030 projection). The old 60.9 matched only because removal (93 kg/ha EU, CAPRI 67 net of residues) and the missing residue input offset each other. EU-wide, 235 regions: correlation with CAPRI 0.89 -> 0.92.",
    "eurostat_check": "EU-27 AREA-WEIGHTED average after re-basing: 48.0 kg N/ha (mineral 62.8, manure 41.4, fixation 12.8, deposition 11.3, uptake 84.4) - inside Eurostat's gross nitrogen balance ~45-50. The median (60.9) is higher than the average because many small regions are livestock-intensive; it tracks CAPRI's regional median (59.1)."
   },
   "max_world_imbalance_pct": {

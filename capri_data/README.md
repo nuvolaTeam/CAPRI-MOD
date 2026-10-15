@@ -10,11 +10,14 @@ capri_data/
                             FAO baseline/processing/elasticity JSONs
     policy/                 CAP payments, tariffs
     environment/            fertiliser N/P/K, manure, climate zones
-    feed/                   per-head feed requirements, feed availability
+    feed/                   rations, requirements, fodder balance
+    abatement/              CAPRI's mitigation options (ammonia, fertiliser, breeding, feed)
   shared/                   cross-vintage data not tied to one base year
-    trade_flows_2021.csv    bilateral trade (FAO 2021)
+    trade_flows_2017.csv    bilateral trade (CAPRI 2017)
+  trajectories/             CAPRI's 2030 trend projection and prices
   validation/               validation reports & CAPRI reference values
-  sources/                  provenance: raw extracts, unit notes
+  sources/                  provenance: raw extracts the builders read, unit notes
+    fao_2021/               FAOSTAT 2021 extracts (not read by the model)
   archive/                  superseded files
   MANIFEST.json             per-file source / vintage / units / shape
   DATA_SOURCING_REGISTRY.json  per-dataset nature (real CAPRI / FAO)

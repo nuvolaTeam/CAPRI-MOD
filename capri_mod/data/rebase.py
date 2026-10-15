@@ -136,7 +136,7 @@ CARRY_FORWARD = {
     "policy": ["cap_payments.csv", "eu_mfn_tariffs.csv"],
     "environment": ["nutrient_coefs.csv", "crop_nutrient_export.csv",
                     "manure_ch4_ef_regional.csv", "climate_zones.csv"],
-    "feed": ["feed_requirements.csv", "coco_feed_availability_national.csv"],
+    "feed": ["feed_requirements.csv"],
 }
 
 
@@ -265,6 +265,13 @@ def write_animals(df: pd.DataFrame, out: Path) -> dict:
     t = df.pivot_table(index="geo", columns="activity", values="value", aggfunc="sum")
     if {"DCOW", "SCOW"} <= set(t.columns):
         t["COWS"] = t["DCOW"].fillna(0) + t["SCOW"].fillna(0)
+    # the model's pig activities are CAPRI's two (tools/build_pig_split.py): PIGS = breeding
+    # sows, PIGF = all other pigs (fattening and young); Eurostat gives total pigs and sows
+    if {"PIGS", "SOWS"} <= set(t.columns):
+        tot, sows = t["PIGS"].fillna(0.0), t["SOWS"].fillna(0.0)
+        t["PIGF"] = (tot - sows).clip(lower=0.0).where(tot > 0, 0.0)
+        t["PIGS"] = sows.where(tot > 0, 0.0)
+        t = t.drop(columns=["SOWS"])
     t.index.name = ""
     t.to_csv(out / "animal_numbers.csv")
     return {"file": "animal_numbers.csv", "regions": len(t), "activities": t.shape[1]}

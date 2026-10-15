@@ -118,3 +118,12 @@ model = CAPRIModel(data_dir="path/to/your/data/")
 - **Policy**: EU Reg. 2021/2115 (CAP Strategic Plans), WTO schedule TRQs
 
 **Reference**: Britz, W. & Witzke, H.P. (2012). *CAPRI Model Documentation 2012*. University of Bonn.
+
+## Added in October 2026
+
+- `supply/convex_qp.py` — convex quadratic programming for the manure-pool equilibrium:
+  Clarabel when installed (`pip install clarabel`), otherwise a built-in interior-point
+  method (Mehrotra predictor-corrector).
+- `feed/ration.py` — the EU feed ration, now on by default (`CAPRIModel.use_ration`).
+- Supply model: CAPRI's land market (`use_land_market`, on), fodder equality, and the
+  optional manure market (`use_manure_market`, off; see `docs/MANURE_MARKET.md`).

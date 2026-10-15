@@ -1,4 +1,11 @@
 CAPRI-mod
-Copyright 2026 CAPRI-Python contributors
+Copyright (C) 2026 CAPRI-mod contributors
 
-This product is licensed under the Apache License, Version 2.0 (see LICENSE).
+This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+License as published by the Free Software Foundation, version 3 (see LICENSE).
+
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+CAPRI-mod is an independent reimplementation of the methods of the CAPRI modelling system (CAPRI Network,
+www.capri-model.org); it does not contain CAPRI's code.

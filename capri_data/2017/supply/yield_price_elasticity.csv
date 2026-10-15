@@ -1,0 +1,12 @@
+crop,elasticity,source
+SWHE,0.3,"CAPRI supply/yield_elas.gms p_yieldElas(MS,CERE)"
+DWHE,0.3,"CAPRI supply/yield_elas.gms p_yieldElas(MS,CERE)"
+RYEM,0.3,"CAPRI supply/yield_elas.gms p_yieldElas(MS,CERE)"
+BARL,0.3,"CAPRI supply/yield_elas.gms p_yieldElas(MS,CERE)"
+OATS,0.3,"CAPRI supply/yield_elas.gms p_yieldElas(MS,CERE)"
+CORN,0.3,"CAPRI supply/yield_elas.gms p_yieldElas(MS,CERE) (MAIZ)"
+OCER,0.3,"CAPRI supply/yield_elas.gms p_yieldElas(MS,CERE)"
+RAPE,0.2,"CAPRI supply/yield_elas.gms p_yieldElas(MS,OILS)"
+SUNF,0.2,"CAPRI supply/yield_elas.gms p_yieldElas(MS,OILS)"
+SOYA,0.2,"CAPRI supply/yield_elas.gms p_yieldElas(MS,OILS)"
+POTA,0.2,"CAPRI supply/yield_elas.gms p_yieldElas(MS,POTA)"

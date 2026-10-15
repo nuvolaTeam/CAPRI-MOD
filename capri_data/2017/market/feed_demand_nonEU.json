@@ -1,538 +1,1584 @@
 {
- "_source": "CAPRI: feed share = FEDM/DOMM (FAO_agg_17_defaulta p_dataMarket BAS; other cereals incl. rye and oats); elasticities = p_ElasFeed(r, feed, price-of, 'CAL') from elas_2_1717defaulta, restricted to the model's feed commodities (WHEA->SWHE, MAIZ->CORN). NON-EU regions only: in CAPRI, EU feed demand comes from the supply models' ration choice.",
+ "_source": "CAPRI: feed share = FEDM/DOMM (FAO_agg_17_defaulta p_dataMarket BAS; other cereals incl. rye and oats; DDGS 1); elasticities = p_ElasFeed(r, feed, price-of, 'CAL') from elas_2_1717defaulta, restricted to the model's feed commodities (WHEA->SWHE, MAIZ->CORN, DDGS). NON-EU regions only: in CAPRI, EU feed demand comes from the supply models' feed bulks (tools/build_feed_bulks.py). tools/build_feed_demand_nonEU.py",
  "parameters": {
-  "ARG|SWHE": {
-   "feed_share": 0.0007,
+  "USA|SWHE": {
+   "feed_share": 0.093,
    "elasticities": {
-    "BARL": 0.003,
-    "CORN": 0.9546,
-    "OCER": 0.0811,
-    "SWHE": -1.9538,
-    "SUNC": 0.0651,
-    "SOYC": 0.0816
+    "SWHE": -2.2028,
+    "BARL": 0.0084,
+    "CORN": 1.6858,
+    "OCER": 0.0327,
+    "RAPC": 0.0141,
+    "SUNC": -0.002,
+    "SOYC": 0.0229,
+    "DDGS": 0.0447,
+    "FENI": -0.0005,
+    "FPRI": -0.0
    }
   },
-  "ARG|CORN": {
-   "feed_share": 0.7327,
+  "USA|BARL": {
+   "feed_share": 0.1049,
    "elasticities": {
-    "BARL": 0.0026,
-    "CORN": -0.8891,
-    "OCER": 0.1053,
-    "SWHE": 0.0019,
-    "SUNC": 0.0851,
-    "SOYC": 0.1267
+    "SWHE": 0.0058,
+    "BARL": -2.2048,
+    "CORN": 1.6956,
+    "OCER": 0.0325,
+    "RAPC": 0.0138,
+    "SUNC": -0.0022,
+    "SOYC": 0.0183,
+    "DDGS": 0.0432,
+    "FENI": 0.0005,
+    "FPRI": -0.0
    }
   },
-  "ARG|BARL": {
-   "feed_share": 0.0374,
+  "USA|CORN": {
+   "feed_share": 0.4248,
    "elasticities": {
-    "BARL": -1.9841,
-    "CORN": 0.8519,
-    "OCER": 0.0782,
-    "SWHE": 0.002,
-    "SUNC": 0.0677,
-    "SOYC": 0.0855
-   }
-  },
-  "ARG|OCER": {
-   "feed_share": 0.8406,
-   "elasticities": {
-    "BARL": 0.002,
-    "CORN": 0.8991,
-    "OCER": -1.8312,
-    "SWHE": 0.0014,
-    "SUNC": 0.0972,
-    "SOYC": 0.1271
-   }
-  },
-  "ARG|SOYC": {
-   "feed_share": 0.9494,
-   "elasticities": {
-    "BARL": 0.0002,
-    "CORN": 0.0808,
-    "OCER": 0.0095,
-    "SWHE": 0.0001,
-    "SUNC": 1.0681,
-    "SOYC": -1.8358
-   }
-  },
-  "ARG|SUNC": {
-   "feed_share": 0.9911,
-   "elasticities": {
-    "BARL": 0.0002,
-    "CORN": 0.0698,
-    "OCER": 0.0093,
-    "SWHE": 0.0001,
-    "SUNC": -2.0248,
-    "SOYC": 1.3747
-   }
-  },
-  "AUS|SWHE": {
-   "feed_share": 0.556,
-   "elasticities": {
-    "BARL": 0.6721,
-    "CORN": 0.05,
-    "OCER": 0.0652,
-    "SWHE": -1.6985,
-    "RAPC": 0.0317,
-    "SUNC": 0.0028,
-    "SOYC": 0.0595
-   }
-  },
-  "AUS|CORN": {
-   "feed_share": 0.6257,
-   "elasticities": {
-    "BARL": 0.4354,
-    "CORN": -2.0751,
-    "OCER": 0.1227,
-    "SWHE": 0.8758,
-    "RAPC": 0.0335,
-    "SUNC": -0.0001,
-    "SOYC": 0.0375
-   }
-  },
-  "AUS|BARL": {
-   "feed_share": 0.7785,
-   "elasticities": {
-    "BARL": -2.0244,
-    "CORN": 0.0584,
-    "OCER": 0.0955,
-    "SWHE": 1.5794,
-    "RAPC": -0.0247,
-    "SUNC": 0.0028,
-    "SOYC": -0.0661
-   }
-  },
-  "AUS|OCER": {
-   "feed_share": 0.8861,
-   "elasticities": {
-    "BARL": 0.284,
-    "CORN": 0.049,
-    "OCER": -1.3411,
-    "SWHE": 0.4553,
-    "RAPC": 0.1083,
-    "SUNC": 0.0049,
-    "SOYC": 0.2661
-   }
-  },
-  "AUS|SOYC": {
-   "feed_share": 1.0,
-   "elasticities": {
-    "BARL": -0.0266,
-    "CORN": 0.002,
-    "OCER": 0.036,
-    "SWHE": 0.0563,
-    "RAPC": 0.9401,
-    "SUNC": 0.027,
-    "SOYC": -1.7008
-   }
-  },
-  "AUS|RAPC": {
-   "feed_share": 1.0,
-   "elasticities": {
-    "BARL": -0.0154,
-    "CORN": 0.0028,
-    "OCER": 0.0226,
-    "SWHE": 0.0462,
-    "RAPC": -2.149,
-    "SUNC": 0.0176,
-    "SOYC": 1.4506
-   }
-  },
-  "AUS|SUNC": {
-   "feed_share": 1.0,
-   "elasticities": {
-    "BARL": 0.0348,
-    "CORN": -0.0002,
-    "OCER": 0.0203,
-    "SWHE": 0.0808,
-    "RAPC": 0.3523,
-    "SUNC": -2.0899,
-    "SOYC": 0.8332
-   }
-  },
-  "BGD|SWHE": {
-   "feed_share": 0.1557,
-   "elasticities": {
-    "BARL": 0.0001,
-    "CORN": 1.3032,
-    "OCER": 0.0001,
-    "SWHE": -2.3093,
-    "RAPC": 0.0135,
-    "SOYC": 0.2174
-   }
-  },
-  "BGD|CORN": {
-   "feed_share": 0.9333,
-   "elasticities": {
-    "BARL": 0.0004,
-    "CORN": -1.1718,
-    "OCER": 0.0003,
-    "SWHE": 0.8034,
-    "RAPC": 0.0076,
-    "SOYC": 0.0733
-   }
-  },
-  "BGD|BARL": {
-   "feed_share": 0.6009,
-   "elasticities": {
-    "BARL": -2.1032,
-    "CORN": 1.138,
-    "OCER": 0.0,
-    "SWHE": 0.2946,
-    "RAPC": 0.0166,
-    "SOYC": 0.0629
-   }
-  },
-  "BGD|OCER": {
-   "feed_share": 0.1516,
-   "elasticities": {
-    "BARL": 0.0,
-    "CORN": 1.2514,
-    "OCER": -1.8485,
-    "SWHE": 0.3511,
-    "RAPC": 0.036,
-    "SOYC": 0.3045
-   }
-  },
-  "BGD|SOYC": {
-   "feed_share": 1.0,
-   "elasticities": {
-    "BARL": 0.0,
-    "CORN": 0.0605,
-    "OCER": 0.0001,
-    "SWHE": 0.1107,
-    "RAPC": 0.213,
-    "SOYC": -0.8344
-   }
-  },
-  "BGD|RAPC": {
-   "feed_share": 1.0,
-   "elasticities": {
-    "BARL": 0.0,
-    "CORN": 0.0469,
-    "OCER": 0.0001,
-    "SWHE": 0.0516,
-    "RAPC": -2.226,
-    "SOYC": 1.6019
-   }
-  },
-  "BRA|SWHE": {
-   "feed_share": 0.0502,
-   "elasticities": {
-    "BARL": 0.0,
-    "CORN": 2.2016,
-    "OCER": 0.0,
-    "SWHE": -2.3335,
-    "RAPC": 0.0017,
-    "SUNC": 0.0014,
-    "SOYC": 0.0075
-   }
-  },
-  "BRA|CORN": {
-   "feed_share": 0.7442,
-   "elasticities": {
-    "BARL": 0.0099,
-    "CORN": -0.6608,
-    "OCER": 0.062,
-    "SWHE": 0.0813,
-    "RAPC": 0.0009,
+    "SWHE": 0.0065,
+    "BARL": 0.0096,
+    "CORN": -0.6859,
+    "OCER": 0.0283,
+    "RAPC": 0.0131,
     "SUNC": 0.0006,
-    "SOYC": -0.0761
+    "SOYC": -0.0557,
+    "DDGS": 0.1212,
+    "FENI": 0.0003,
+    "FPRI": 0.0
    }
   },
-  "BRA|BARL": {
-   "feed_share": 0.0391,
+  "USA|OCER": {
+   "feed_share": 0.5413,
    "elasticities": {
-    "BARL": -2.2866,
-    "CORN": 1.9868,
-    "OCER": 0.0,
+    "SWHE": 0.0069,
+    "BARL": 0.01,
+    "CORN": 1.5422,
+    "OCER": -2.1033,
+    "RAPC": 0.014,
+    "SUNC": -0.0002,
+    "SOYC": 0.0411,
+    "DDGS": 0.1724,
+    "FENI": 0.0001,
+    "FPRI": -0.0
+   }
+  },
+  "USA|RAPC": {
+   "feed_share": 1.0,
+   "elasticities": {
+    "SWHE": 0.0007,
+    "BARL": 0.001,
+    "CORN": 0.1689,
+    "OCER": 0.0033,
+    "RAPC": -2.1597,
+    "SUNC": 0.0271,
+    "SOYC": 1.4191,
+    "DDGS": 0.1372,
+    "FENI": 0.0016,
+    "FPRI": 0.0
+   }
+  },
+  "USA|SUNC": {
+   "feed_share": 1.0,
+   "elasticities": {
+    "SWHE": -0.0004,
+    "BARL": -0.0007,
+    "CORN": 0.0347,
+    "OCER": -0.0002,
+    "RAPC": 0.1164,
+    "SUNC": -2.156,
+    "SOYC": 1.3363,
+    "DDGS": 0.2553,
+    "FENI": 0.0013,
+    "FPRI": 0.0
+   }
+  },
+  "USA|SOYC": {
+   "feed_share": 1.0,
+   "elasticities": {
     "SWHE": 0.0001,
-    "RAPC": -0.0032,
-    "SUNC": -0.0026,
-    "SOYC": 0.0318
+    "BARL": 0.0001,
+    "CORN": -0.0743,
+    "OCER": 0.001,
+    "RAPC": 0.1473,
+    "SUNC": 0.0323,
+    "SOYC": -1.908,
+    "DDGS": 0.5963,
+    "FENI": 0.0016,
+    "FPRI": 0.0
    }
   },
-  "BRA|OCER": {
-   "feed_share": 0.6605,
-   "elasticities": {
-    "BARL": 0.0,
-    "CORN": 1.8062,
-    "OCER": -2.0348,
-    "SWHE": 0.0,
-    "RAPC": 0.002,
-    "SUNC": 0.0016,
-    "SOYC": 0.085
-   }
-  },
-  "BRA|SOYC": {
+  "USA|DDGS": {
    "feed_share": 1.0,
    "elasticities": {
+    "SWHE": 0.0006,
     "BARL": 0.0009,
-    "CORN": -0.4149,
-    "OCER": 0.0159,
-    "SWHE": 0.0015,
-    "RAPC": 0.0209,
-    "SUNC": 0.0192,
-    "SOYC": -1.9257
+    "CORN": 0.455,
+    "OCER": 0.0119,
+    "RAPC": 0.0401,
+    "SUNC": 0.0174,
+    "SOYC": 1.6784,
+    "DDGS": -1.4048,
+    "FENI": -0.002,
+    "FPRI": -0.0
    }
   },
-  "BRA|RAPC": {
-   "feed_share": 1.0,
+  "USA|FENI": {
+   "feed_share": 0.0994,
    "elasticities": {
-    "BARL": -0.0029,
-    "CORN": 0.1665,
-    "OCER": 0.0128,
-    "SWHE": 0.0118,
-    "RAPC": -2.0536,
-    "SUNC": 0.0204,
-    "SOYC": 0.7153
+    "SWHE": -0.0005,
+    "BARL": 0.0007,
+    "CORN": 0.0609,
+    "OCER": 0.0003,
+    "RAPC": 0.03,
+    "SUNC": 0.0057,
+    "SOYC": 0.2787,
+    "DDGS": -0.1224,
+    "FENI": -1.6133,
+    "FPRI": 0.0001
    }
   },
-  "BRA|SUNC": {
+  "USA|FPRI": {
    "feed_share": 1.0,
    "elasticities": {
-    "BARL": -0.0032,
-    "CORN": 0.1367,
-    "OCER": 0.0135,
-    "SWHE": 0.0124,
-    "RAPC": 0.0271,
-    "SUNC": -2.0299,
-    "SOYC": 0.8712
+    "SWHE": -0.0014,
+    "BARL": -0.0005,
+    "CORN": 0.1667,
+    "OCER": -0.013,
+    "RAPC": 0.0691,
+    "SUNC": 0.0385,
+    "SOYC": 0.6447,
+    "DDGS": -0.2921,
+    "FENI": 0.0196,
+    "FPRI": -2.3945
    }
   },
   "CAN|SWHE": {
    "feed_share": 0.3758,
    "elasticities": {
+    "SWHE": -2.1112,
     "BARL": 0.2389,
     "CORN": 1.049,
     "OCER": 0.0002,
-    "SWHE": -2.1112,
     "RAPC": 0.0153,
     "SUNC": 0.0007,
-    "SOYC": 0.2909
-   }
-  },
-  "CAN|CORN": {
-   "feed_share": 0.7861,
-   "elasticities": {
-    "BARL": 0.6062,
-    "CORN": -1.899,
-    "OCER": 0.0002,
-    "SWHE": 0.7558,
-    "RAPC": 0.0129,
-    "SUNC": 0.0006,
-    "SOYC": 0.1975
+    "SOYC": 0.2909,
+    "DDGS": 0.0405,
+    "FENI": 0.0001,
+    "FPRI": 0.0002
    }
   },
   "CAN|BARL": {
    "feed_share": 0.8135,
    "elasticities": {
+    "SWHE": 0.294,
     "BARL": -2.1067,
     "CORN": 1.0353,
     "OCER": 0.0001,
-    "SWHE": 0.294,
     "RAPC": 0.0158,
     "SUNC": 0.0007,
-    "SOYC": 0.2598
+    "SOYC": 0.2598,
+    "DDGS": 0.0372,
+    "FENI": 0.0002,
+    "FPRI": 0.0003
+   }
+  },
+  "CAN|CORN": {
+   "feed_share": 0.7861,
+   "elasticities": {
+    "SWHE": 0.7558,
+    "BARL": 0.6062,
+    "CORN": -1.899,
+    "OCER": 0.0002,
+    "RAPC": 0.0129,
+    "SUNC": 0.0006,
+    "SOYC": 0.1975,
+    "DDGS": 0.0548,
+    "FENI": -0.0001,
+    "FPRI": 0.0002
    }
   },
   "CAN|OCER": {
    "feed_share": 0.7101,
    "elasticities": {
+    "SWHE": 0.3665,
     "BARL": 0.2575,
     "CORN": 0.5311,
     "OCER": -2.0282,
-    "SWHE": 0.3665,
     "RAPC": 0.0233,
     "SUNC": -0.0015,
-    "SOYC": 0.2258
-   }
-  },
-  "CAN|SOYC": {
-   "feed_share": 1.0,
-   "elasticities": {
-    "BARL": 0.0561,
-    "CORN": 0.0729,
-    "OCER": 0.0,
-    "SWHE": 0.0774,
-    "RAPC": 0.1486,
-    "SUNC": 0.0061,
-    "SOYC": -1.3193
+    "SOYC": 0.2258,
+    "DDGS": 0.0395,
+    "FENI": -0.0087,
+    "FPRI": -0.0081
    }
   },
   "CAN|RAPC": {
    "feed_share": 0.9787,
    "elasticities": {
+    "SWHE": 0.0525,
     "BARL": 0.0443,
     "CORN": 0.0618,
     "OCER": 0.0,
-    "SWHE": 0.0525,
     "RAPC": -2.216,
     "SUNC": 0.0024,
-    "SOYC": 1.9239
+    "SOYC": 1.9239,
+    "DDGS": -0.1317,
+    "FENI": 0.0001,
+    "FPRI": -0.0025
    }
   },
   "CAN|SUNC": {
    "feed_share": 1.0,
    "elasticities": {
+    "SWHE": 0.0488,
     "BARL": 0.0419,
     "CORN": 0.0585,
     "OCER": -0.0,
-    "SWHE": 0.0488,
     "RAPC": 0.0494,
     "SUNC": -2.1875,
-    "SOYC": 1.649
+    "SOYC": 1.649,
+    "DDGS": -0.0556,
+    "FENI": -0.0004,
+    "FPRI": 0.0001
+   }
+  },
+  "CAN|SOYC": {
+   "feed_share": 1.0,
+   "elasticities": {
+    "SWHE": 0.0774,
+    "BARL": 0.0561,
+    "CORN": 0.0729,
+    "OCER": 0.0,
+    "RAPC": 0.1486,
+    "SUNC": 0.0061,
+    "SOYC": -1.3193,
+    "DDGS": 0.1577,
+    "FENI": 0.0001,
+    "FPRI": 0.0011
+   }
+  },
+  "CAN|DDGS": {
+   "feed_share": 1.0,
+   "elasticities": {
+    "SWHE": 0.165,
+    "BARL": 0.1232,
+    "CORN": 0.3101,
+    "OCER": 0.0001,
+    "RAPC": -0.1559,
+    "SUNC": -0.0032,
+    "SOYC": 2.4177,
+    "DDGS": -1.5825,
+    "FENI": -0.0004,
+    "FPRI": -0.0032
+   }
+  },
+  "CAN|FENI": {
+   "feed_share": 0.0892,
+   "elasticities": {
+    "SWHE": 0.0311,
+    "BARL": 0.0671,
+    "CORN": -0.0531,
+    "OCER": -0.0016,
+    "RAPC": 0.0194,
+    "SUNC": -0.0028,
+    "SOYC": 0.1685,
+    "DDGS": -0.046,
+    "FENI": -1.6531,
+    "FPRI": 0.0158
+   }
+  },
+  "CAN|FPRI": {
+   "feed_share": 0.867,
+   "elasticities": {
+    "SWHE": 0.0331,
+    "BARL": 0.0373,
+    "CORN": 0.0412,
+    "OCER": -0.0005,
+    "RAPC": -0.098,
+    "SUNC": 0.0003,
+    "SOYC": 0.5504,
+    "DDGS": -0.1061,
+    "FENI": 0.0048,
+    "FPRI": -2.3609
+   }
+  },
+  "BRA|SWHE": {
+   "feed_share": 0.0502,
+   "elasticities": {
+    "SWHE": -2.3335,
+    "BARL": 0.0,
+    "CORN": 2.2016,
+    "OCER": 0.0,
+    "RAPC": 0.0017,
+    "SUNC": 0.0014,
+    "SOYC": 0.0075,
+    "DDGS": 0.0104,
+    "FENI": -0.0928,
+    "FPRI": 0.0002
+   }
+  },
+  "BRA|BARL": {
+   "feed_share": 0.0391,
+   "elasticities": {
+    "SWHE": 0.0001,
+    "BARL": -2.2866,
+    "CORN": 1.9868,
+    "OCER": 0.0,
+    "RAPC": -0.0032,
+    "SUNC": -0.0026,
+    "SOYC": 0.0318,
+    "DDGS": 0.0074,
+    "FENI": -0.0415,
+    "FPRI": 0.0003
+   }
+  },
+  "BRA|CORN": {
+   "feed_share": 0.7442,
+   "elasticities": {
+    "SWHE": 0.0813,
+    "BARL": 0.0099,
+    "CORN": -0.6608,
+    "OCER": 0.062,
+    "RAPC": 0.0009,
+    "SUNC": 0.0006,
+    "SOYC": -0.0761,
+    "DDGS": 0.0446,
+    "FENI": 0.0186,
+    "FPRI": 0.0
+   }
+  },
+  "BRA|OCER": {
+   "feed_share": 0.6605,
+   "elasticities": {
+    "SWHE": 0.0,
+    "BARL": 0.0,
+    "CORN": 1.8062,
+    "OCER": -2.0348,
+    "RAPC": 0.002,
+    "SUNC": 0.0016,
+    "SOYC": 0.085,
+    "DDGS": 0.1274,
+    "FENI": -0.1732,
+    "FPRI": -0.0001
+   }
+  },
+  "BRA|RAPC": {
+   "feed_share": 1.0,
+   "elasticities": {
+    "SWHE": 0.0118,
+    "BARL": -0.0029,
+    "CORN": 0.1665,
+    "OCER": 0.0128,
+    "RAPC": -2.0536,
+    "SUNC": 0.0204,
+    "SOYC": 0.7153,
+    "DDGS": 0.2632,
+    "FENI": 0.1107,
+    "FPRI": 0.0023
+   }
+  },
+  "BRA|SUNC": {
+   "feed_share": 1.0,
+   "elasticities": {
+    "SWHE": 0.0124,
+    "BARL": -0.0032,
+    "CORN": 0.1367,
+    "OCER": 0.0135,
+    "RAPC": 0.0271,
+    "SUNC": -2.0299,
+    "SOYC": 0.8712,
+    "DDGS": 0.2947,
+    "FENI": 0.122,
+    "FPRI": 0.0015
+   }
+  },
+  "BRA|SOYC": {
+   "feed_share": 1.0,
+   "elasticities": {
+    "SWHE": 0.0015,
+    "BARL": 0.0009,
+    "CORN": -0.4149,
+    "OCER": 0.0159,
+    "RAPC": 0.0209,
+    "SUNC": 0.0192,
+    "SOYC": -1.9257,
+    "DDGS": 0.9483,
+    "FENI": 0.2886,
+    "FPRI": 0.0008
+   }
+  },
+  "BRA|DDGS": {
+   "feed_share": 1.0,
+   "elasticities": {
+    "SWHE": 0.0045,
+    "BARL": 0.0004,
+    "CORN": 0.5243,
+    "OCER": 0.0514,
+    "RAPC": 0.0166,
+    "SUNC": 0.014,
+    "SOYC": 2.0449,
+    "DDGS": -1.5536,
+    "FENI": -0.2601,
+    "FPRI": -0.0005
+   }
+  },
+  "BRA|FENI": {
+   "feed_share": 0.4998,
+   "elasticities": {
+    "SWHE": -0.0169,
+    "BARL": -0.001,
+    "CORN": 0.092,
+    "OCER": -0.0294,
+    "RAPC": 0.0029,
+    "SUNC": 0.0024,
+    "SOYC": 0.2618,
+    "DDGS": -0.1094,
+    "FENI": -1.5149,
+    "FPRI": 0.0006
+   }
+  },
+  "BRA|FPRI": {
+   "feed_share": 0.9977,
+   "elasticities": {
+    "SWHE": 0.0152,
+    "BARL": 0.0029,
+    "CORN": 0.0614,
+    "OCER": -0.0057,
+    "RAPC": 0.0289,
+    "SUNC": 0.0145,
+    "SOYC": 0.3399,
+    "DDGS": -0.0936,
+    "FENI": 0.299,
+    "FPRI": -2.367
+   }
+  },
+  "ARG|SWHE": {
+   "feed_share": 0.0007,
+   "elasticities": {
+    "SWHE": -1.9538,
+    "BARL": 0.003,
+    "CORN": 0.9546,
+    "OCER": 0.0811,
+    "SUNC": 0.0651,
+    "SOYC": 0.0816,
+    "DDGS": 0.017,
+    "FENI": 0.0317,
+    "FPRI": -0.0053
+   }
+  },
+  "ARG|BARL": {
+   "feed_share": 0.0374,
+   "elasticities": {
+    "SWHE": 0.002,
+    "BARL": -1.9841,
+    "CORN": 0.8519,
+    "OCER": 0.0782,
+    "SUNC": 0.0677,
+    "SOYC": 0.0855,
+    "DDGS": 0.0158,
+    "FENI": 0.035,
+    "FPRI": -0.0034
+   }
+  },
+  "ARG|CORN": {
+   "feed_share": 0.7327,
+   "elasticities": {
+    "SWHE": 0.0019,
+    "BARL": 0.0026,
+    "CORN": -0.8891,
+    "OCER": 0.1053,
+    "SUNC": 0.0851,
+    "SOYC": 0.1267,
+    "DDGS": 0.0869,
+    "FENI": 0.0026,
+    "FPRI": 0.0001
+   }
+  },
+  "ARG|OCER": {
+   "feed_share": 0.8406,
+   "elasticities": {
+    "SWHE": 0.0014,
+    "BARL": 0.002,
+    "CORN": 0.8991,
+    "OCER": -1.8312,
+    "SUNC": 0.0972,
+    "SOYC": 0.1271,
+    "DDGS": 0.0724,
+    "FENI": 0.0068,
+    "FPRI": -0.0002
+   }
+  },
+  "ARG|SUNC": {
+   "feed_share": 0.9911,
+   "elasticities": {
+    "SWHE": 0.0001,
+    "BARL": 0.0002,
+    "CORN": 0.0698,
+    "OCER": 0.0093,
+    "SUNC": -2.0248,
+    "SOYC": 1.3747,
+    "DDGS": 0.165,
+    "FENI": 0.01,
+    "FPRI": -0.0001
+   }
+  },
+  "ARG|SOYC": {
+   "feed_share": 0.9494,
+   "elasticities": {
+    "SWHE": 0.0001,
+    "BARL": 0.0002,
+    "CORN": 0.0808,
+    "OCER": 0.0095,
+    "SUNC": 1.0681,
+    "SOYC": -1.8358,
+    "DDGS": 0.0954,
+    "FENI": 0.0115,
+    "FPRI": 0.0002
+   }
+  },
+  "ARG|DDGS": {
+   "feed_share": 1.0,
+   "elasticities": {
+    "SWHE": 0.0002,
+    "BARL": 0.0003,
+    "CORN": 0.4927,
+    "OCER": 0.0481,
+    "SUNC": 1.1395,
+    "SOYC": 0.8484,
+    "DDGS": -1.5707,
+    "FENI": -0.058,
+    "FPRI": -0.0005
+   }
+  },
+  "ARG|FENI": {
+   "feed_share": 0.1743,
+   "elasticities": {
+    "SWHE": 0.0003,
+    "BARL": 0.0005,
+    "CORN": 0.0124,
+    "OCER": 0.0038,
+    "SUNC": 0.0574,
+    "SOYC": 0.085,
+    "DDGS": -0.0481,
+    "FENI": -1.4431,
+    "FPRI": 0.0004
+   }
+  },
+  "ARG|FPRI": {
+   "feed_share": 0.9433,
+   "elasticities": {
+    "SWHE": -0.0034,
+    "BARL": -0.0033,
+    "CORN": 0.0234,
+    "OCER": -0.0072,
+    "SUNC": -0.0312,
+    "SOYC": 0.0868,
+    "DDGS": -0.0308,
+    "FENI": 0.0276,
+    "FPRI": -2.6972
+   }
+  },
+  "AUS|SWHE": {
+   "feed_share": 0.556,
+   "elasticities": {
+    "SWHE": -1.6985,
+    "BARL": 0.6721,
+    "CORN": 0.05,
+    "OCER": 0.0652,
+    "RAPC": 0.0317,
+    "SUNC": 0.0028,
+    "SOYC": 0.0595,
+    "DDGS": 0.0192,
+    "FENI": -0.0001,
+    "FPRI": 0.0004
+   }
+  },
+  "AUS|BARL": {
+   "feed_share": 0.7785,
+   "elasticities": {
+    "SWHE": 1.5794,
+    "BARL": -2.0244,
+    "CORN": 0.0584,
+    "OCER": 0.0955,
+    "RAPC": -0.0247,
+    "SUNC": 0.0028,
+    "SOYC": -0.0661,
+    "DDGS": 0.0227,
+    "FENI": 0.0001,
+    "FPRI": 0.0001
+   }
+  },
+  "AUS|CORN": {
+   "feed_share": 0.6257,
+   "elasticities": {
+    "SWHE": 0.8758,
+    "BARL": 0.4354,
+    "CORN": -2.0751,
+    "OCER": 0.1227,
+    "RAPC": 0.0335,
+    "SUNC": -0.0001,
+    "SOYC": 0.0375,
+    "DDGS": 0.0219,
+    "FENI": 0.0005,
+    "FPRI": -0.0009
+   }
+  },
+  "AUS|OCER": {
+   "feed_share": 0.8861,
+   "elasticities": {
+    "SWHE": 0.4553,
+    "BARL": 0.284,
+    "CORN": 0.049,
+    "OCER": -1.3411,
+    "RAPC": 0.1083,
+    "SUNC": 0.0049,
+    "SOYC": 0.2661,
+    "DDGS": 0.0413,
+    "FENI": -0.0003,
+    "FPRI": -0.0021
+   }
+  },
+  "AUS|RAPC": {
+   "feed_share": 1.0,
+   "elasticities": {
+    "SWHE": 0.0462,
+    "BARL": -0.0154,
+    "CORN": 0.0028,
+    "OCER": 0.0226,
+    "RAPC": -2.149,
+    "SUNC": 0.0176,
+    "SOYC": 1.4506,
+    "DDGS": 0.0018,
+    "FENI": 0.0001,
+    "FPRI": 0.0034
+   }
+  },
+  "AUS|SUNC": {
+   "feed_share": 1.0,
+   "elasticities": {
+    "SWHE": 0.0808,
+    "BARL": 0.0348,
+    "CORN": -0.0002,
+    "OCER": 0.0203,
+    "RAPC": 0.3523,
+    "SUNC": -2.0899,
+    "SOYC": 0.8332,
+    "DDGS": 0.1186,
+    "FENI": -0.0003,
+    "FPRI": 0.0086
+   }
+  },
+  "AUS|SOYC": {
+   "feed_share": 1.0,
+   "elasticities": {
+    "SWHE": 0.0563,
+    "BARL": -0.0266,
+    "CORN": 0.002,
+    "OCER": 0.036,
+    "RAPC": 0.9401,
+    "SUNC": 0.027,
+    "SOYC": -1.7008,
+    "DDGS": 0.0905,
+    "FENI": 0.0001,
+    "FPRI": -0.0009
+   }
+  },
+  "AUS|DDGS": {
+   "feed_share": 1.0,
+   "elasticities": {
+    "SWHE": 0.4666,
+    "BARL": 0.2354,
+    "CORN": 0.0305,
+    "OCER": 0.144,
+    "RAPC": 0.0294,
+    "SUNC": 0.0988,
+    "SOYC": 2.3296,
+    "DDGS": -1.7049,
+    "FENI": -0.002,
+    "FPRI": -0.0183
+   }
+  },
+  "AUS|FENI": {
+   "feed_share": 0.0616,
+   "elasticities": {
+    "SWHE": -0.0379,
+    "BARL": 0.0101,
+    "CORN": 0.0129,
+    "OCER": -0.0178,
+    "RAPC": 0.0454,
+    "SUNC": -0.0046,
+    "SOYC": 0.0361,
+    "DDGS": -0.0384,
+    "FENI": -1.7849,
+    "FPRI": 0.0112
+   }
+  },
+  "AUS|FPRI": {
+   "feed_share": 0.8911,
+   "elasticities": {
+    "SWHE": 0.0321,
+    "BARL": 0.0018,
+    "CORN": -0.0041,
+    "OCER": -0.0241,
+    "RAPC": 0.1929,
+    "SUNC": 0.0242,
+    "SOYC": -0.0755,
+    "DDGS": -0.0617,
+    "FENI": 0.002,
+    "FPRI": -2.4901
+   }
+  },
+  "NZL|SWHE": {
+   "feed_share": 0.4269,
+   "elasticities": {
+    "SWHE": -1.441,
+    "BARL": 0.3658,
+    "CORN": 0.4176,
+    "OCER": 0.0158,
+    "RAPC": 0.0271,
+    "DDGS": 0.0014,
+    "FENI": -0.0008,
+    "FPRI": -0.0001
+   }
+  },
+  "NZL|BARL": {
+   "feed_share": 0.8151,
+   "elasticities": {
+    "SWHE": 1.9774,
+    "BARL": -2.0627,
+    "CORN": 0.0,
+    "OCER": 0.025,
+    "RAPC": 0.0114,
+    "DDGS": 0.0014,
+    "FENI": -0.001,
+    "FPRI": -0.0001
+   }
+  },
+  "NZL|CORN": {
+   "feed_share": 0.7137,
+   "elasticities": {
+    "SWHE": 1.8069,
+    "BARL": 0.0,
+    "CORN": -2.2069,
+    "OCER": 0.0,
+    "RAPC": 0.0102,
+    "DDGS": 0.0008,
+    "FENI": 0.0046,
+    "FPRI": 0.0012
+   }
+  },
+  "NZL|OCER": {
+   "feed_share": 0.5124,
+   "elasticities": {
+    "SWHE": 1.4421,
+    "BARL": 0.4206,
+    "CORN": 0.0002,
+    "OCER": -1.4684,
+    "RAPC": 0.0342,
+    "DDGS": 0.0142,
+    "FENI": -0.0188,
+    "FPRI": -0.0209
+   }
+  },
+  "NZL|RAPC": {
+   "feed_share": 1.0,
+   "elasticities": {
+    "SWHE": 0.3882,
+    "BARL": 0.0302,
+    "CORN": 0.0338,
+    "OCER": 0.0054,
+    "RAPC": -1.0518,
+    "DDGS": 0.064,
+    "FENI": 0.0022,
+    "FPRI": 0.0018
+   }
+  },
+  "NZL|DDGS": {
+   "feed_share": 1.0,
+   "elasticities": {
+    "SWHE": 0.6231,
+    "BARL": 0.1195,
+    "CORN": 0.0887,
+    "OCER": 0.0707,
+    "RAPC": 2.0237,
+    "DDGS": -1.4722,
+    "FENI": -0.0359,
+    "FPRI": -0.0427
+   }
+  },
+  "NZL|FENI": {
+   "feed_share": 0.0865,
+   "elasticities": {
+    "SWHE": -0.0635,
+    "BARL": -0.0146,
+    "CORN": 0.0812,
+    "OCER": -0.0158,
+    "RAPC": 0.0118,
+    "DDGS": -0.006,
+    "FENI": -1.7091,
+    "FPRI": 0.0128
+   }
+  },
+  "NZL|FPRI": {
+   "feed_share": 0.9867,
+   "elasticities": {
+    "SWHE": -0.0091,
+    "BARL": -0.0021,
+    "CORN": 0.0322,
+    "OCER": -0.0273,
+    "RAPC": 0.0146,
+    "DDGS": -0.0112,
+    "FENI": 0.02,
+    "FPRI": -2.4858
    }
   },
   "CHN|SWHE": {
    "feed_share": 0.1434,
    "elasticities": {
+    "SWHE": -2.233,
     "BARL": 0.0003,
     "CORN": 1.4061,
     "OCER": 0.0017,
-    "SWHE": -2.233,
     "RAPC": 0.0271,
     "SUNC": 0.0015,
-    "SOYC": 0.0583
-   }
-  },
-  "CHN|CORN": {
-   "feed_share": 0.7077,
-   "elasticities": {
-    "BARL": 0.0006,
-    "CORN": -0.9003,
-    "OCER": 0.0023,
-    "SWHE": 0.3057,
-    "RAPC": 0.0202,
-    "SUNC": 0.0012,
-    "SOYC": 0.0724
+    "SOYC": 0.0583,
+    "DDGS": 0.0087,
+    "FENI": 0.1293,
+    "FPRI": 0.0006
    }
   },
   "CHN|BARL": {
    "feed_share": 0.0428,
    "elasticities": {
+    "SWHE": 0.1811,
     "BARL": -2.056,
     "CORN": 1.3225,
     "OCER": 0.0016,
-    "SWHE": 0.1811,
     "RAPC": 0.0327,
     "SUNC": -0.0032,
-    "SOYC": 0.0499
+    "SOYC": 0.0499,
+    "DDGS": 0.0069,
+    "FENI": -0.3479,
+    "FPRI": -0.0075
+   }
+  },
+  "CHN|CORN": {
+   "feed_share": 0.7077,
+   "elasticities": {
+    "SWHE": 0.3057,
+    "BARL": 0.0006,
+    "CORN": -0.9003,
+    "OCER": 0.0023,
+    "RAPC": 0.0202,
+    "SUNC": 0.0012,
+    "SOYC": 0.0724,
+    "DDGS": 0.0188,
+    "FENI": -0.0135,
+    "FPRI": 0.0001
    }
   },
   "CHN|OCER": {
    "feed_share": 0.4469,
    "elasticities": {
+    "SWHE": 0.1585,
     "BARL": 0.0003,
     "CORN": 1.0028,
     "OCER": -1.9807,
-    "SWHE": 0.1585,
     "RAPC": 0.0548,
     "SUNC": 0.0033,
-    "SOYC": 0.0944
-   }
-  },
-  "CHN|SOYC": {
-   "feed_share": 1.0,
-   "elasticities": {
-    "BARL": 0.0,
-    "CORN": 0.1657,
-    "OCER": 0.0005,
-    "SWHE": 0.029,
-    "RAPC": 0.7526,
-    "SUNC": 0.0216,
-    "SOYC": -1.5937
+    "SOYC": 0.0944,
+    "DDGS": 0.024,
+    "FENI": -0.3321,
+    "FPRI": -0.0101
    }
   },
   "CHN|RAPC": {
    "feed_share": 0.9182,
    "elasticities": {
+    "SWHE": 0.0224,
     "BARL": 0.0001,
     "CORN": 0.0769,
     "OCER": 0.0005,
-    "SWHE": 0.0224,
     "RAPC": -2.1328,
     "SUNC": 0.0183,
-    "SOYC": 1.2494
+    "SOYC": 1.2494,
+    "DDGS": 0.0717,
+    "FENI": 0.107,
+    "FPRI": 0.0015
    }
   },
   "CHN|SUNC": {
    "feed_share": 0.6491,
    "elasticities": {
+    "SWHE": 0.0272,
     "BARL": -0.0001,
     "CORN": 0.0959,
     "OCER": 0.0006,
-    "SWHE": 0.0272,
     "RAPC": 0.3922,
     "SUNC": -2.0254,
-    "SOYC": 0.7697
+    "SOYC": 0.7697,
+    "DDGS": 0.1217,
+    "FENI": 0.0161,
+    "FPRI": 0.0035
    }
   },
-  "EGY|SWHE": {
-   "feed_share": 0.1361,
-   "elasticities": {
-    "BARL": 0.0008,
-    "CORN": 1.0077,
-    "OCER": 0.0,
-    "SWHE": -2.1077,
-    "SUNC": 0.0067,
-    "SOYC": 0.3089
-   }
-  },
-  "EGY|CORN": {
-   "feed_share": 0.477,
-   "elasticities": {
-    "BARL": 0.0049,
-    "CORN": -0.9967,
-    "OCER": 0.0213,
-    "SWHE": 0.7337,
-    "SUNC": 0.0008,
-    "SOYC": -0.1229
-   }
-  },
-  "EGY|BARL": {
-   "feed_share": 0.6007,
-   "elasticities": {
-    "BARL": -2.1621,
-    "CORN": 1.2969,
-    "OCER": 0.0337,
-    "SWHE": 0.145,
-    "SUNC": 0.0029,
-    "SOYC": 0.0206
-   }
-  },
-  "EGY|OCER": {
-   "feed_share": 0.5601,
-   "elasticities": {
-    "BARL": 0.0059,
-    "CORN": 0.989,
-    "OCER": -1.8431,
-    "SWHE": 0.0003,
-    "SUNC": 0.0118,
-    "SOYC": 0.4258
-   }
-  },
-  "EGY|SOYC": {
+  "CHN|SOYC": {
    "feed_share": 1.0,
    "elasticities": {
+    "SWHE": 0.029,
+    "BARL": 0.0,
+    "CORN": 0.1657,
+    "OCER": 0.0005,
+    "RAPC": 0.7526,
+    "SUNC": 0.0216,
+    "SOYC": -1.5937,
+    "DDGS": 0.0698,
+    "FENI": 0.1031,
+    "FPRI": 0.001
+   }
+  },
+  "CHN|DDGS": {
+   "feed_share": 1.0,
+   "elasticities": {
+    "SWHE": 0.0964,
     "BARL": 0.0001,
-    "CORN": -0.1133,
-    "OCER": 0.0085,
-    "SWHE": 0.2074,
-    "SUNC": 0.0894,
-    "SOYC": -0.6425
+    "CORN": 0.9569,
+    "OCER": 0.0029,
+    "RAPC": 0.9614,
+    "SUNC": 0.0762,
+    "SOYC": 1.5532,
+    "DDGS": -1.772,
+    "FENI": -0.8887,
+    "FPRI": -0.0107
    }
   },
-  "EGY|SUNC": {
+  "CHN|FENI": {
+   "feed_share": 0.4557,
+   "elasticities": {
+    "SWHE": 0.0268,
+    "BARL": -0.0001,
+    "CORN": -0.0129,
+    "OCER": -0.0007,
+    "RAPC": 0.0269,
+    "SUNC": 0.0002,
+    "SOYC": 0.043,
+    "DDGS": -0.0166,
+    "FENI": -1.3583,
+    "FPRI": 0.0021
+   }
+  },
+  "CHN|FPRI": {
+   "feed_share": 0.9014,
+   "elasticities": {
+    "SWHE": 0.0309,
+    "BARL": -0.0008,
+    "CORN": 0.0282,
+    "OCER": -0.0058,
+    "RAPC": 0.0935,
+    "SUNC": 0.0105,
+    "SOYC": 0.1078,
+    "DDGS": -0.0514,
+    "FENI": 0.5347,
+    "FPRI": -2.5736
+   }
+  },
+  "IND|SWHE": {
+   "feed_share": 0.0299,
+   "elasticities": {
+    "SWHE": -2.1981,
+    "BARL": 0.0038,
+    "CORN": 1.2049,
+    "OCER": 0.0057,
+    "RAPC": 0.0416,
+    "SUNC": 0.0073,
+    "SOYC": 0.0437,
+    "DDGS": 0.0119,
+    "FENI": 0.0001,
+    "FPRI": 0.0
+   }
+  },
+  "IND|BARL": {
+   "feed_share": 0.1151,
+   "elasticities": {
+    "SWHE": 0.255,
+    "BARL": -2.0906,
+    "CORN": 0.8611,
+    "OCER": 0.0082,
+    "RAPC": 0.0421,
+    "SUNC": 0.0022,
+    "SOYC": 0.0393,
+    "DDGS": 0.0113,
+    "FENI": -0.0003,
+    "FPRI": -0.0002
+   }
+  },
+  "IND|CORN": {
+   "feed_share": 0.4717,
+   "elasticities": {
+    "SWHE": 0.4921,
+    "BARL": 0.0052,
+    "CORN": -1.0249,
+    "OCER": 0.0066,
+    "RAPC": 0.0163,
+    "SUNC": 0.0063,
+    "SOYC": 0.0164,
+    "DDGS": 0.0189,
+    "FENI": -0.0,
+    "FPRI": -0.0
+   }
+  },
+  "IND|OCER": {
+   "feed_share": 0.0123,
+   "elasticities": {
+    "SWHE": 0.1905,
+    "BARL": 0.0041,
+    "CORN": 0.537,
+    "OCER": -1.9648,
+    "RAPC": 0.0669,
+    "SUNC": 0.0075,
+    "SOYC": 0.064,
+    "DDGS": 0.0336,
+    "FENI": -0.0004,
+    "FPRI": -0.0002
+   }
+  },
+  "IND|RAPC": {
    "feed_share": 1.0,
    "elasticities": {
+    "SWHE": 0.0268,
+    "BARL": 0.0004,
+    "CORN": 0.0257,
+    "OCER": 0.0013,
+    "RAPC": -1.9427,
+    "SUNC": 0.0799,
+    "SOYC": 1.0001,
+    "DDGS": 0.0948,
+    "FENI": 0.0,
+    "FPRI": -0.0
+   }
+  },
+  "IND|SUNC": {
+   "feed_share": 1.0,
+   "elasticities": {
+    "SWHE": 0.0333,
     "BARL": 0.0002,
-    "CORN": 0.0124,
-    "OCER": 0.0041,
-    "SWHE": 0.0787,
-    "SUNC": -2.1691,
-    "SOYC": 1.5608
+    "CORN": 0.0709,
+    "OCER": 0.001,
+    "RAPC": 0.5675,
+    "SUNC": -2.0493,
+    "SOYC": 0.5665,
+    "DDGS": 0.0377,
+    "FENI": -0.0,
+    "FPRI": 0.0001
+   }
+  },
+  "IND|SOYC": {
+   "feed_share": 1.0,
+   "elasticities": {
+    "SWHE": 0.0293,
+    "BARL": 0.0004,
+    "CORN": 0.027,
+    "OCER": 0.0013,
+    "RAPC": 1.0413,
+    "SUNC": 0.0831,
+    "SOYC": -1.9043,
+    "DDGS": 0.0522,
+    "FENI": 0.0,
+    "FPRI": 0.0
+   }
+  },
+  "IND|DDGS": {
+   "feed_share": 1.0,
+   "elasticities": {
+    "SWHE": 0.1909,
+    "BARL": 0.0027,
+    "CORN": 0.7428,
+    "OCER": 0.0163,
+    "RAPC": 2.3676,
+    "SUNC": 0.1324,
+    "SOYC": 1.2522,
+    "DDGS": -2.4186,
+    "FENI": -0.0006,
+    "FPRI": -0.0002
+   }
+  },
+  "IND|FENI": {
+   "feed_share": 0.0048,
+   "elasticities": {
+    "SWHE": 0.0601,
+    "BARL": -0.0039,
+    "CORN": -0.0465,
+    "OCER": -0.0108,
+    "RAPC": 0.017,
+    "SUNC": -0.0012,
+    "SOYC": 0.0175,
+    "DDGS": -0.0298,
+    "FENI": -1.8598,
+    "FPRI": 0.0032
+   }
+  },
+  "IND|FPRI": {
+   "feed_share": 0.0203,
+   "elasticities": {
+    "SWHE": 0.0174,
+    "BARL": -0.0068,
+    "CORN": -0.0016,
+    "OCER": -0.013,
+    "RAPC": -0.085,
+    "SUNC": 0.0693,
+    "SOYC": 0.0147,
+    "DDGS": -0.0313,
+    "FENI": 0.0102,
+    "FPRI": -2.6465
+   }
+  },
+  "RUS|SWHE": {
+   "feed_share": 0.2705,
+   "elasticities": {
+    "SWHE": -1.0166,
+    "BARL": 0.216,
+    "CORN": 0.0589,
+    "OCER": 0.017,
+    "RAPC": 0.0007,
+    "SUNC": 0.1598,
+    "SOYC": 0.0427,
+    "DDGS": 0.0095,
+    "FENI": -0.0,
+    "FPRI": -0.0
+   }
+  },
+  "RUS|BARL": {
+   "feed_share": 0.5959,
+   "elasticities": {
+    "SWHE": 1.8554,
+    "BARL": -2.2871,
+    "CORN": 0.0,
+    "OCER": 0.0,
+    "RAPC": 0.0011,
+    "SUNC": 0.0253,
+    "SOYC": 0.0228,
+    "DDGS": 0.0061,
+    "FENI": 0.0001,
+    "FPRI": 0.0001
+   }
+  },
+  "RUS|CORN": {
+   "feed_share": 0.8109,
+   "elasticities": {
+    "SWHE": 1.6429,
+    "BARL": 0.0,
+    "CORN": -2.2186,
+    "OCER": 0.0116,
+    "RAPC": 0.0006,
+    "SUNC": 0.0096,
+    "SOYC": 0.0181,
+    "DDGS": 0.0044,
+    "FENI": 0.0001,
+    "FPRI": 0.0001
+   }
+  },
+  "RUS|OCER": {
+   "feed_share": 0.6441,
+   "elasticities": {
+    "SWHE": 1.1438,
+    "BARL": 0.0001,
+    "CORN": 0.0281,
+    "OCER": -1.9242,
+    "RAPC": 0.0008,
+    "SUNC": 0.0863,
+    "SOYC": 0.0741,
+    "DDGS": 0.031,
+    "FENI": -0.0001,
+    "FPRI": -0.0003
+   }
+  },
+  "RUS|RAPC": {
+   "feed_share": 0.9879,
+   "elasticities": {
+    "SWHE": 0.1489,
+    "BARL": 0.0285,
+    "CORN": 0.0048,
+    "OCER": 0.0027,
+    "RAPC": -2.0945,
+    "SUNC": 0.7335,
+    "SOYC": 0.4553,
+    "DDGS": 0.0635,
+    "FENI": -0.0001,
+    "FPRI": 0.0006
+   }
+  },
+  "RUS|SUNC": {
+   "feed_share": 1.0,
+   "elasticities": {
+    "SWHE": 0.3787,
+    "BARL": 0.007,
+    "CORN": 0.0008,
+    "OCER": 0.003,
+    "RAPC": 0.0079,
+    "SUNC": -1.8188,
+    "SOYC": 0.7769,
+    "DDGS": 0.0099,
+    "FENI": 0.0,
+    "FPRI": 0.0004
+   }
+  },
+  "RUS|SOYC": {
+   "feed_share": 1.0,
+   "elasticities": {
+    "SWHE": 0.183,
+    "BARL": 0.0114,
+    "CORN": 0.0028,
+    "OCER": 0.0047,
+    "RAPC": 0.0089,
+    "SUNC": 1.4049,
+    "SOYC": -2.097,
+    "DDGS": 0.1066,
+    "FENI": 0.0,
+    "FPRI": -0.0005
+   }
+  },
+  "RUS|DDGS": {
+   "feed_share": 1.0,
+   "elasticities": {
+    "SWHE": 1.039,
+    "BARL": 0.0779,
+    "CORN": 0.0171,
+    "OCER": 0.0501,
+    "RAPC": 0.0315,
+    "SUNC": 0.4567,
+    "SOYC": 2.7082,
+    "DDGS": -2.8283,
+    "FENI": -0.0003,
+    "FPRI": -0.0011
+   }
+  },
+  "RUS|FENI": {
+   "feed_share": 0.1055,
+   "elasticities": {
+    "SWHE": -0.129,
+    "BARL": 0.0691,
+    "CORN": 0.0317,
+    "OCER": -0.01,
+    "RAPC": -0.0052,
+    "SUNC": 0.059,
+    "SOYC": 0.0213,
+    "DDGS": -0.0275,
+    "FENI": -1.636,
+    "FPRI": 0.0164
+   }
+  },
+  "RUS|FPRI": {
+   "feed_share": 0.9862,
+   "elasticities": {
+    "SWHE": -0.0204,
+    "BARL": 0.0211,
+    "CORN": 0.0065,
+    "OCER": -0.0171,
+    "RAPC": 0.0091,
+    "SUNC": 0.5889,
+    "SOYC": -0.4293,
+    "DDGS": -0.035,
+    "FENI": 0.0066,
+    "FPRI": -2.3162
+   }
+  },
+  "UKR|SWHE": {
+   "feed_share": 0.2131,
+   "elasticities": {
+    "SWHE": -2.0128,
+    "BARL": 0.9237,
+    "CORN": 0.272,
+    "OCER": 0.0148,
+    "RAPC": 0.0002,
+    "SUNC": 0.04,
+    "SOYC": 0.0182,
+    "DDGS": 0.0116,
+    "FENI": 0.0,
+    "FPRI": -0.0
+   }
+  },
+  "UKR|BARL": {
+   "feed_share": 0.6113,
+   "elasticities": {
+    "SWHE": 0.55,
+    "BARL": -1.6041,
+    "CORN": 0.4601,
+    "OCER": 0.0168,
+    "RAPC": 0.0002,
+    "SUNC": 0.0424,
+    "SOYC": 0.019,
+    "DDGS": 0.013,
+    "FENI": -0.0001,
+    "FPRI": -0.0
+   }
+  },
+  "UKR|CORN": {
+   "feed_share": 0.6006,
+   "elasticities": {
+    "SWHE": 0.3343,
+    "BARL": 0.95,
+    "CORN": -1.9822,
+    "OCER": 0.0126,
+    "RAPC": 0.0002,
+    "SUNC": 0.0362,
+    "SOYC": 0.0163,
+    "DDGS": 0.0129,
+    "FENI": 0.0,
+    "FPRI": -0.0
+   }
+  },
+  "UKR|OCER": {
+   "feed_share": 0.3014,
+   "elasticities": {
+    "SWHE": 0.3052,
+    "BARL": 0.5822,
+    "CORN": 0.2112,
+    "OCER": -1.6604,
+    "RAPC": 0.0013,
+    "SUNC": 0.0573,
+    "SOYC": 0.0391,
+    "DDGS": 0.0592,
+    "FENI": -0.0007,
+    "FPRI": -0.0016
+   }
+  },
+  "UKR|RAPC": {
+   "feed_share": 0.9787,
+   "elasticities": {
+    "SWHE": 0.0341,
+    "BARL": 0.0584,
+    "CORN": 0.0262,
+    "OCER": 0.009,
+    "RAPC": -1.9219,
+    "SUNC": 0.6245,
+    "SOYC": 0.3873,
+    "DDGS": 0.083,
+    "FENI": -0.0018,
+    "FPRI": -0.0026
+   }
+  },
+  "UKR|SUNC": {
+   "feed_share": 0.9879,
+   "elasticities": {
+    "SWHE": 0.0285,
+    "BARL": 0.0508,
+    "CORN": 0.021,
+    "OCER": 0.002,
+    "RAPC": 0.003,
+    "SUNC": -1.5703,
+    "SOYC": 0.6533,
+    "DDGS": 0.0611,
+    "FENI": 0.0001,
+    "FPRI": 0.0003
+   }
+  },
+  "UKR|SOYC": {
+   "feed_share": 1.0,
+   "elasticities": {
+    "SWHE": 0.0224,
+    "BARL": 0.0391,
+    "CORN": 0.0163,
+    "OCER": 0.0023,
+    "RAPC": 0.0032,
+    "SUNC": 1.1258,
+    "SOYC": -1.7728,
+    "DDGS": 0.0858,
+    "FENI": 0.0001,
+    "FPRI": 0.0002
+   }
+  },
+  "UKR|DDGS": {
+   "feed_share": 1.0,
+   "elasticities": {
+    "SWHE": 0.2057,
+    "BARL": 0.3876,
+    "CORN": 0.1862,
+    "OCER": 0.0507,
+    "RAPC": 0.01,
+    "SUNC": 1.519,
+    "SOYC": 1.2379,
+    "DDGS": -2.0714,
+    "FENI": -0.001,
+    "FPRI": -0.0022
+   }
+  },
+  "UKR|FENI": {
+   "feed_share": 0.1842,
+   "elasticities": {
+    "SWHE": 0.0113,
+    "BARL": -0.0565,
+    "CORN": 0.0088,
+    "OCER": -0.0104,
+    "RAPC": -0.0037,
+    "SUNC": 0.042,
+    "SOYC": 0.0226,
+    "DDGS": -0.0165,
+    "FENI": -1.8804,
+    "FPRI": 0.0066
+   }
+  },
+  "UKR|FPRI": {
+   "feed_share": 0.8867,
+   "elasticities": {
+    "SWHE": -0.0039,
+    "BARL": -0.0141,
+    "CORN": -0.0055,
+    "OCER": -0.0223,
+    "RAPC": -0.005,
+    "SUNC": 0.1322,
+    "SOYC": 0.0498,
+    "DDGS": -0.0354,
+    "FENI": 0.0062,
+    "FPRI": -2.6754
+   }
+  },
+  "MEX|SWHE": {
+   "feed_share": 0.0343,
+   "elasticities": {
+    "SWHE": -2.2282,
+    "BARL": 0.0002,
+    "CORN": 1.5882,
+    "OCER": 0.0004,
+    "RAPC": 0.0409,
+    "SUNC": -0.0011,
+    "SOYC": 0.0204,
+    "DDGS": -0.005,
+    "FENI": -0.0001,
+    "FPRI": -0.0007
+   }
+  },
+  "MEX|BARL": {
+   "feed_share": 0.0012,
+   "elasticities": {
+    "SWHE": 0.0044,
+    "BARL": -2.2241,
+    "CORN": 1.5816,
+    "OCER": 0.0092,
+    "RAPC": 0.0429,
+    "SUNC": -0.0071,
+    "SOYC": 0.0237,
+    "DDGS": -0.0052,
+    "FENI": -0.0064,
+    "FPRI": -0.007
+   }
+  },
+  "MEX|CORN": {
+   "feed_share": 0.4365,
+   "elasticities": {
+    "SWHE": 0.0066,
+    "BARL": 0.0003,
+    "CORN": -0.7744,
+    "OCER": 0.2452,
+    "RAPC": 0.0358,
+    "SUNC": 0.0001,
+    "SOYC": 0.1308,
+    "DDGS": 0.0025,
+    "FENI": 0.0001,
+    "FPRI": 0.0001
+   }
+  },
+  "MEX|OCER": {
+   "feed_share": 0.9335,
+   "elasticities": {
+    "SWHE": 0.0,
+    "BARL": 0.0,
+    "CORN": 1.518,
+    "OCER": -1.7945,
+    "RAPC": 0.0799,
+    "SUNC": 0.0003,
+    "SOYC": 0.1259,
+    "DDGS": 0.0097,
+    "FENI": -0.0008,
+    "FPRI": -0.0002
+   }
+  },
+  "MEX|RAPC": {
+   "feed_share": 1.0,
+   "elasticities": {
+    "SWHE": 0.0006,
+    "BARL": 0.0,
+    "CORN": 0.1163,
+    "OCER": 0.0419,
+    "RAPC": -2.2282,
+    "SUNC": 0.001,
+    "SOYC": 1.65,
+    "DDGS": 0.0293,
+    "FENI": 0.0002,
+    "FPRI": -0.0017
+   }
+  },
+  "MEX|SUNC": {
+   "feed_share": 1.0,
+   "elasticities": {
+    "SWHE": -0.0044,
+    "BARL": -0.0012,
+    "CORN": 0.1043,
+    "OCER": 0.0495,
+    "RAPC": 0.2919,
+    "SUNC": -2.1302,
+    "SOYC": 1.0409,
+    "DDGS": 0.0426,
+    "FENI": -0.0037,
+    "FPRI": -0.0019
+   }
+  },
+  "MEX|SOYC": {
+   "feed_share": 1.0,
+   "elasticities": {
+    "SWHE": 0.0001,
+    "BARL": 0.0,
+    "CORN": 0.2266,
+    "OCER": 0.0352,
+    "RAPC": 0.8799,
+    "SUNC": 0.0019,
+    "SOYC": -1.7469,
+    "DDGS": 0.0066,
+    "FENI": 0.0003,
+    "FPRI": 0.0013
+   }
+  },
+  "MEX|DDGS": {
+   "feed_share": 1.0,
+   "elasticities": {
+    "SWHE": -0.0033,
+    "BARL": -0.0001,
+    "CORN": 0.3848,
+    "OCER": 0.2461,
+    "RAPC": 1.4163,
+    "SUNC": 0.007,
+    "SOYC": 0.5942,
+    "DDGS": -1.5408,
+    "FENI": -0.0065,
+    "FPRI": -0.0086
+   }
+  },
+  "MEX|FENI": {
+   "feed_share": 0.0467,
+   "elasticities": {
+    "SWHE": -0.0005,
+    "BARL": -0.0012,
+    "CORN": 0.105,
+    "OCER": -0.1407,
+    "RAPC": 0.0714,
+    "SUNC": -0.0041,
+    "SOYC": 0.1575,
+    "DDGS": -0.045,
+    "FENI": -1.5873,
+    "FPRI": 0.0168
+   }
+  },
+  "MEX|FPRI": {
+   "feed_share": 0.9949,
+   "elasticities": {
+    "SWHE": -0.0034,
+    "BARL": -0.0015,
+    "CORN": 0.0962,
+    "OCER": -0.0373,
+    "RAPC": -0.642,
+    "SUNC": -0.0023,
+    "SOYC": 0.8813,
+    "DDGS": -0.0659,
+    "FENI": 0.0187,
+    "FPRI": -2.2323
    }
   },
   "IDN|CORN": {
@@ -542,7 +1588,9 @@
     "OCER": 0.0031,
     "RAPC": -0.0,
     "SUNC": 0.0,
-    "SOYC": 0.0982
+    "SOYC": 0.0982,
+    "FENI": -0.0073,
+    "FPRI": 0.0
    }
   },
   "IDN|OCER": {
@@ -552,17 +1600,9 @@
     "OCER": -1.8112,
     "RAPC": -0.0048,
     "SUNC": -0.0038,
-    "SOYC": 0.8989
-   }
-  },
-  "IDN|SOYC": {
-   "feed_share": 1.0,
-   "elasticities": {
-    "CORN": 0.0202,
-    "OCER": 0.0007,
-    "RAPC": 0.0016,
-    "SUNC": 0.0007,
-    "SOYC": -0.5171
+    "SOYC": 0.8989,
+    "FENI": -0.0976,
+    "FPRI": -0.0048
    }
   },
   "IDN|RAPC": {
@@ -572,7 +1612,9 @@
     "OCER": -0.0046,
     "RAPC": -2.3404,
     "SUNC": 0.0,
-    "SOYC": 1.9372
+    "SOYC": 1.9372,
+    "FENI": 0.0073,
+    "FPRI": -0.0019
    }
   },
   "IDN|SUNC": {
@@ -582,851 +1624,977 @@
     "OCER": -0.0083,
     "RAPC": 0.0,
     "SUNC": -2.3392,
-    "SOYC": 1.9458
+    "SOYC": 1.9458,
+    "FENI": 0.0074,
+    "FPRI": -0.0049
    }
   },
-  "IND|SWHE": {
-   "feed_share": 0.0299,
-   "elasticities": {
-    "BARL": 0.0038,
-    "CORN": 1.2049,
-    "OCER": 0.0057,
-    "SWHE": -2.1981,
-    "RAPC": 0.0416,
-    "SUNC": 0.0073,
-    "SOYC": 0.0437
-   }
-  },
-  "IND|CORN": {
-   "feed_share": 0.4717,
-   "elasticities": {
-    "BARL": 0.0052,
-    "CORN": -1.0249,
-    "OCER": 0.0066,
-    "SWHE": 0.4921,
-    "RAPC": 0.0163,
-    "SUNC": 0.0063,
-    "SOYC": 0.0164
-   }
-  },
-  "IND|BARL": {
-   "feed_share": 0.1151,
-   "elasticities": {
-    "BARL": -2.0906,
-    "CORN": 0.8611,
-    "OCER": 0.0082,
-    "SWHE": 0.255,
-    "RAPC": 0.0421,
-    "SUNC": 0.0022,
-    "SOYC": 0.0393
-   }
-  },
-  "IND|OCER": {
-   "feed_share": 0.0123,
-   "elasticities": {
-    "BARL": 0.0041,
-    "CORN": 0.537,
-    "OCER": -1.9648,
-    "SWHE": 0.1905,
-    "RAPC": 0.0669,
-    "SUNC": 0.0075,
-    "SOYC": 0.064
-   }
-  },
-  "IND|SOYC": {
+  "IDN|SOYC": {
    "feed_share": 1.0,
    "elasticities": {
-    "BARL": 0.0004,
-    "CORN": 0.027,
-    "OCER": 0.0013,
-    "SWHE": 0.0293,
-    "RAPC": 1.0413,
-    "SUNC": 0.0831,
-    "SOYC": -1.9043
+    "CORN": 0.0202,
+    "OCER": 0.0007,
+    "RAPC": 0.0016,
+    "SUNC": 0.0007,
+    "SOYC": -0.5171,
+    "FENI": -0.0,
+    "FPRI": 0.0
    }
   },
-  "IND|RAPC": {
-   "feed_share": 1.0,
+  "IDN|FENI": {
+   "feed_share": 0.0212,
    "elasticities": {
-    "BARL": 0.0004,
-    "CORN": 0.0257,
-    "OCER": 0.0013,
-    "SWHE": 0.0268,
-    "RAPC": -1.9427,
-    "SUNC": 0.0799,
-    "SOYC": 1.0001
+    "CORN": -0.0202,
+    "OCER": -0.001,
+    "RAPC": 0.0001,
+    "SUNC": 0.0,
+    "SOYC": -0.0004,
+    "FENI": -1.3706,
+    "FPRI": 0.0002
    }
   },
-  "IND|SUNC": {
-   "feed_share": 1.0,
+  "IDN|FPRI": {
+   "feed_share": 0.8966,
    "elasticities": {
-    "BARL": 0.0002,
-    "CORN": 0.0709,
-    "OCER": 0.001,
-    "SWHE": 0.0333,
-    "RAPC": 0.5675,
-    "SUNC": -2.0493,
-    "SOYC": 0.5665
+    "CORN": 0.0093,
+    "OCER": -0.0251,
+    "RAPC": -0.0101,
+    "SUNC": -0.0117,
+    "SOYC": 0.1118,
+    "FENI": 0.1122,
+    "FPRI": -2.3183
    }
   },
   "JPN|SWHE": {
    "feed_share": 0.1022,
    "elasticities": {
+    "SWHE": -2.1793,
     "BARL": 0.0506,
     "CORN": 1.2916,
     "OCER": 0.0233,
-    "SWHE": -2.1793,
     "RAPC": 0.0309,
-    "SOYC": 0.1124
-   }
-  },
-  "JPN|CORN": {
-   "feed_share": 0.7498,
-   "elasticities": {
-    "BARL": 0.0883,
-    "CORN": -0.7267,
-    "OCER": 0.0373,
-    "SWHE": 0.1321,
-    "RAPC": 0.0218,
-    "SOYC": -0.0541
+    "SOYC": 0.1124,
+    "DDGS": 0.0005,
+    "FENI": 0.0015,
+    "FPRI": 0.0004
    }
   },
   "JPN|BARL": {
    "feed_share": 0.5077,
    "elasticities": {
+    "SWHE": 0.0751,
     "BARL": -2.1864,
     "CORN": 1.2803,
     "OCER": 0.0353,
-    "SWHE": 0.0751,
     "RAPC": 0.0298,
-    "SOYC": 0.0596
+    "SOYC": 0.0596,
+    "DDGS": 0.0007,
+    "FENI": 0.0014,
+    "FPRI": 0.0003
+   }
+  },
+  "JPN|CORN": {
+   "feed_share": 0.7498,
+   "elasticities": {
+    "SWHE": 0.1321,
+    "BARL": 0.0883,
+    "CORN": -0.7267,
+    "OCER": 0.0373,
+    "RAPC": 0.0218,
+    "SOYC": -0.0541,
+    "DDGS": 0.0012,
+    "FENI": -0.0002,
+    "FPRI": 0.0001
    }
   },
   "JPN|OCER": {
    "feed_share": 0.8162,
    "elasticities": {
+    "SWHE": 0.0723,
     "BARL": 0.0737,
     "CORN": 1.1281,
     "OCER": -1.9043,
-    "SWHE": 0.0723,
     "RAPC": 0.0814,
-    "SOYC": 0.4135
-   }
-  },
-  "JPN|SOYC": {
-   "feed_share": 1.0,
-   "elasticities": {
-    "BARL": 0.0035,
-    "CORN": -0.046,
-    "OCER": 0.0116,
-    "SWHE": 0.0098,
-    "RAPC": 0.4033,
-    "SOYC": -0.9546
+    "SOYC": 0.4135,
+    "DDGS": 0.0013,
+    "FENI": 0.0004,
+    "FPRI": -0.0005
    }
   },
   "JPN|RAPC": {
    "feed_share": 1.0,
    "elasticities": {
+    "SWHE": 0.0125,
     "BARL": 0.0081,
     "CORN": 0.0863,
     "OCER": 0.0106,
-    "SWHE": 0.0125,
     "RAPC": -2.2874,
-    "SOYC": 1.8776
+    "SOYC": 1.8776,
+    "DDGS": 0.0053,
+    "FENI": 0.0002,
+    "FPRI": -0.0044
    }
   },
-  "MEX|SWHE": {
-   "feed_share": 0.0343,
-   "elasticities": {
-    "BARL": 0.0002,
-    "CORN": 1.5882,
-    "OCER": 0.0004,
-    "SWHE": -2.2282,
-    "RAPC": 0.0409,
-    "SUNC": -0.0011,
-    "SOYC": 0.0204
-   }
-  },
-  "MEX|CORN": {
-   "feed_share": 0.4365,
-   "elasticities": {
-    "BARL": 0.0003,
-    "CORN": -0.7744,
-    "OCER": 0.2452,
-    "SWHE": 0.0066,
-    "RAPC": 0.0358,
-    "SUNC": 0.0001,
-    "SOYC": 0.1308
-   }
-  },
-  "MEX|BARL": {
-   "feed_share": 0.0012,
-   "elasticities": {
-    "BARL": -2.2241,
-    "CORN": 1.5816,
-    "OCER": 0.0092,
-    "SWHE": 0.0044,
-    "RAPC": 0.0429,
-    "SUNC": -0.0071,
-    "SOYC": 0.0237
-   }
-  },
-  "MEX|OCER": {
-   "feed_share": 0.9335,
-   "elasticities": {
-    "BARL": 0.0,
-    "CORN": 1.518,
-    "OCER": -1.7945,
-    "SWHE": 0.0,
-    "RAPC": 0.0799,
-    "SUNC": 0.0003,
-    "SOYC": 0.1259
-   }
-  },
-  "MEX|SOYC": {
+  "JPN|SOYC": {
    "feed_share": 1.0,
    "elasticities": {
-    "BARL": 0.0,
-    "CORN": 0.2266,
-    "OCER": 0.0352,
-    "SWHE": 0.0001,
-    "RAPC": 0.8799,
-    "SUNC": 0.0019,
-    "SOYC": -1.7469
-   }
-  },
-  "MEX|RAPC": {
-   "feed_share": 1.0,
-   "elasticities": {
-    "BARL": 0.0,
-    "CORN": 0.1163,
-    "OCER": 0.0419,
-    "SWHE": 0.0006,
-    "RAPC": -2.2282,
-    "SUNC": 0.001,
-    "SOYC": 1.65
-   }
-  },
-  "MEX|SUNC": {
-   "feed_share": 1.0,
-   "elasticities": {
-    "BARL": -0.0012,
-    "CORN": 0.1043,
-    "OCER": 0.0495,
-    "SWHE": -0.0044,
-    "RAPC": 0.2919,
-    "SUNC": -2.1302,
-    "SOYC": 1.0409
-   }
-  },
-  "NGA|SWHE": {
-   "feed_share": 0.0038,
-   "elasticities": {
-    "BARL": 0.0002,
-    "CORN": 1.1991,
-    "OCER": 0.2083,
-    "SWHE": -1.9644,
-    "SOYC": 0.0089
-   }
-  },
-  "NGA|CORN": {
-   "feed_share": 0.3287,
-   "elasticities": {
-    "BARL": 0.0002,
-    "CORN": -0.738,
-    "OCER": 0.2362,
-    "SWHE": 0.0057,
-    "SOYC": 0.011
-   }
-  },
-  "NGA|BARL": {
-   "feed_share": 0.7225,
-   "elasticities": {
-    "BARL": -1.9312,
-    "CORN": 1.3627,
-    "OCER": 0.1713,
-    "SWHE": 0.0065,
-    "SOYC": 0.0009
-   }
-  },
-  "NGA|OCER": {
-   "feed_share": 0.0704,
-   "elasticities": {
-    "BARL": 0.0002,
-    "CORN": 1.3768,
-    "OCER": -1.9049,
-    "SWHE": 0.0058,
-    "SOYC": 0.017
-   }
-  },
-  "NGA|SOYC": {
-   "feed_share": 1.0,
-   "elasticities": {
-    "BARL": 0.0,
-    "CORN": 0.2706,
-    "OCER": 0.0718,
-    "SWHE": 0.001,
-    "SOYC": -0.795
-   }
-  },
-  "NZL|SWHE": {
-   "feed_share": 0.4269,
-   "elasticities": {
-    "BARL": 0.3658,
-    "CORN": 0.4176,
-    "OCER": 0.0158,
-    "SWHE": -1.441,
-    "RAPC": 0.0271
-   }
-  },
-  "NZL|CORN": {
-   "feed_share": 0.7137,
-   "elasticities": {
-    "BARL": 0.0,
-    "CORN": -2.2069,
-    "OCER": 0.0,
-    "SWHE": 1.8069,
-    "RAPC": 0.0102
-   }
-  },
-  "NZL|BARL": {
-   "feed_share": 0.8151,
-   "elasticities": {
-    "BARL": -2.0627,
-    "CORN": 0.0,
-    "OCER": 0.025,
-    "SWHE": 1.9774,
-    "RAPC": 0.0114
-   }
-  },
-  "NZL|OCER": {
-   "feed_share": 0.5124,
-   "elasticities": {
-    "BARL": 0.4206,
-    "CORN": 0.0002,
-    "OCER": -1.4684,
-    "SWHE": 1.4421,
-    "RAPC": 0.0342
-   }
-  },
-  "NZL|RAPC": {
-   "feed_share": 1.0,
-   "elasticities": {
-    "BARL": 0.0302,
-    "CORN": 0.0338,
-    "OCER": 0.0054,
-    "SWHE": 0.3882,
-    "RAPC": -1.0518
-   }
-  },
-  "PAK|SWHE": {
-   "feed_share": 0.0206,
-   "elasticities": {
-    "BARL": 0.0007,
-    "CORN": 1.0409,
-    "OCER": 0.0233,
-    "SWHE": -2.2185,
-    "RAPC": 0.0257,
-    "SUNC": 0.024,
-    "SOYC": 0.0141
-   }
-  },
-  "PAK|CORN": {
-   "feed_share": 0.2144,
-   "elasticities": {
-    "BARL": 0.001,
-    "CORN": -0.9428,
-    "OCER": 0.0852,
-    "SWHE": 0.5189,
-    "RAPC": 0.0265,
-    "SUNC": 0.0228,
-    "SOYC": 0.0148
-   }
-  },
-  "PAK|BARL": {
-   "feed_share": 0.0708,
-   "elasticities": {
-    "BARL": -2.0568,
-    "CORN": 1.0029,
-    "OCER": 0.0599,
-    "SWHE": 0.3179,
-    "RAPC": 0.0185,
-    "SUNC": 0.0167,
-    "SOYC": 0.0085
-   }
-  },
-  "PAK|OCER": {
-   "feed_share": 0.3449,
-   "elasticities": {
-    "BARL": 0.0011,
-    "CORN": 1.491,
-    "OCER": -1.4961,
-    "SWHE": 0.203,
-    "RAPC": 0.052,
-    "SUNC": 0.0463,
-    "SOYC": 0.0329
-   }
-  },
-  "PAK|SOYC": {
-   "feed_share": 1.0,
-   "elasticities": {
-    "BARL": 0.0001,
-    "CORN": 0.1108,
-    "OCER": 0.0141,
-    "SWHE": 0.0525,
-    "RAPC": 0.6069,
-    "SUNC": 0.5309,
-    "SOYC": -1.7599
-   }
-  },
-  "PAK|RAPC": {
-   "feed_share": 1.0,
-   "elasticities": {
-    "BARL": 0.0001,
-    "CORN": 0.1104,
-    "OCER": 0.0124,
-    "SWHE": 0.0534,
-    "RAPC": -1.6393,
-    "SUNC": 0.6475,
-    "SOYC": 0.3386
-   }
-  },
-  "PAK|SUNC": {
-   "feed_share": 1.0,
-   "elasticities": {
-    "BARL": 0.0001,
-    "CORN": 0.1017,
-    "OCER": 0.0118,
-    "SWHE": 0.0534,
-    "RAPC": 0.6918,
-    "SUNC": -1.7099,
-    "SOYC": 0.3165
-   }
-  },
-  "RUS|SWHE": {
-   "feed_share": 0.2705,
-   "elasticities": {
-    "BARL": 0.216,
-    "CORN": 0.0589,
-    "OCER": 0.017,
-    "SWHE": -1.0166,
-    "RAPC": 0.0007,
-    "SUNC": 0.1598,
-    "SOYC": 0.0427
-   }
-  },
-  "RUS|CORN": {
-   "feed_share": 0.8109,
-   "elasticities": {
-    "BARL": 0.0,
-    "CORN": -2.2186,
+    "SWHE": 0.0098,
+    "BARL": 0.0035,
+    "CORN": -0.046,
     "OCER": 0.0116,
-    "SWHE": 1.6429,
-    "RAPC": 0.0006,
-    "SUNC": 0.0096,
-    "SOYC": 0.0181
+    "RAPC": 0.4033,
+    "SOYC": -0.9546,
+    "DDGS": 0.003,
+    "FENI": 0.0001,
+    "FPRI": 0.0013
    }
   },
-  "RUS|BARL": {
-   "feed_share": 0.5959,
-   "elasticities": {
-    "BARL": -2.2871,
-    "CORN": 0.0,
-    "OCER": 0.0,
-    "SWHE": 1.8554,
-    "RAPC": 0.0011,
-    "SUNC": 0.0253,
-    "SOYC": 0.0228
-   }
-  },
-  "RUS|OCER": {
-   "feed_share": 0.6441,
-   "elasticities": {
-    "BARL": 0.0001,
-    "CORN": 0.0281,
-    "OCER": -1.9242,
-    "SWHE": 1.1438,
-    "RAPC": 0.0008,
-    "SUNC": 0.0863,
-    "SOYC": 0.0741
-   }
-  },
-  "RUS|SOYC": {
+  "JPN|DDGS": {
    "feed_share": 1.0,
    "elasticities": {
-    "BARL": 0.0114,
-    "CORN": 0.0028,
-    "OCER": 0.0047,
-    "SWHE": 0.183,
-    "RAPC": 0.0089,
-    "SUNC": 1.4049,
-    "SOYC": -2.097
+    "SWHE": 0.0333,
+    "BARL": 0.0349,
+    "CORN": 0.8717,
+    "OCER": 0.0306,
+    "RAPC": 0.9306,
+    "SOYC": 2.4404,
+    "DDGS": -1.9246,
+    "FENI": -0.0538,
+    "FPRI": -0.0605
    }
   },
-  "RUS|RAPC": {
-   "feed_share": 0.9879,
+  "JPN|FENI": {
+   "feed_share": 0.0146,
    "elasticities": {
-    "BARL": 0.0285,
-    "CORN": 0.0048,
-    "OCER": 0.0027,
-    "SWHE": 0.1489,
-    "RAPC": -2.0945,
-    "SUNC": 0.7335,
-    "SOYC": 0.4553
+    "SWHE": 0.0641,
+    "BARL": 0.0391,
+    "CORN": -0.0772,
+    "OCER": 0.0051,
+    "RAPC": 0.0257,
+    "SOYC": 0.0697,
+    "DDGS": -0.0322,
+    "FENI": -1.7234,
+    "FPRI": 0.0122
    }
   },
-  "RUS|SUNC": {
-   "feed_share": 1.0,
+  "JPN|FPRI": {
+   "feed_share": 0.9402,
    "elasticities": {
-    "BARL": 0.007,
-    "CORN": 0.0008,
-    "OCER": 0.003,
-    "SWHE": 0.3787,
-    "RAPC": 0.0079,
-    "SUNC": -1.8188,
-    "SOYC": 0.7769
+    "SWHE": 0.0197,
+    "BARL": 0.0098,
+    "CORN": 0.0485,
+    "OCER": -0.0076,
+    "RAPC": -0.5126,
+    "SOYC": 0.6884,
+    "DDGS": -0.0399,
+    "FENI": 0.0134,
+    "FPRI": -2.4517
    }
   },
   "THA|SWHE": {
    "feed_share": 0.6198,
    "elasticities": {
+    "SWHE": -2.0466,
     "CORN": 1.4391,
     "OCER": 0.0066,
-    "SWHE": -2.0466,
     "RAPC": 0.015,
     "SUNC": 0.0048,
-    "SOYC": 0.2248
+    "SOYC": 0.2248,
+    "FENI": -0.0336,
+    "FPRI": -0.0023
    }
   },
   "THA|CORN": {
    "feed_share": 0.7949,
    "elasticities": {
+    "SWHE": 0.1934,
     "CORN": -0.962,
     "OCER": 0.0045,
-    "SWHE": 0.1934,
     "RAPC": 0.0133,
     "SUNC": 0.0025,
-    "SOYC": -0.0553
+    "SOYC": -0.0553,
+    "FENI": -0.1188,
+    "FPRI": -0.0009
    }
   },
   "THA|OCER": {
    "feed_share": 0.5606,
    "elasticities": {
+    "SWHE": 0.1699,
     "CORN": 0.8722,
     "OCER": -1.7611,
-    "SWHE": 0.1699,
     "RAPC": 0.0278,
     "SUNC": 0.0196,
-    "SOYC": 0.6615
-   }
-  },
-  "THA|SOYC": {
-   "feed_share": 1.0,
-   "elasticities": {
-    "CORN": -0.0146,
-    "OCER": 0.0009,
-    "SWHE": 0.008,
-    "RAPC": 0.0641,
-    "SUNC": 0.0517,
-    "SOYC": -0.6901
+    "SOYC": 0.6615,
+    "FENI": -0.0477,
+    "FPRI": -0.0208
    }
   },
   "THA|RAPC": {
    "feed_share": 1.0,
    "elasticities": {
+    "SWHE": 0.0159,
     "CORN": 0.1053,
     "OCER": 0.0011,
-    "SWHE": 0.0159,
     "RAPC": -2.1219,
     "SUNC": 0.0457,
-    "SOYC": 1.9234
+    "SOYC": 1.9234,
+    "FENI": -0.0255,
+    "FPRI": -0.0197
    }
   },
   "THA|SUNC": {
    "feed_share": 1.0,
    "elasticities": {
+    "SWHE": 0.0062,
     "CORN": 0.0235,
     "OCER": 0.001,
-    "SWHE": 0.0062,
     "RAPC": 0.0548,
     "SUNC": -2.2358,
-    "SOYC": 1.8565
+    "SOYC": 1.8565,
+    "FENI": -0.0062,
+    "FPRI": -0.0073
    }
   },
-  "UKR|SWHE": {
-   "feed_share": 0.2131,
-   "elasticities": {
-    "BARL": 0.9237,
-    "CORN": 0.272,
-    "OCER": 0.0148,
-    "SWHE": -2.0128,
-    "RAPC": 0.0002,
-    "SUNC": 0.04,
-    "SOYC": 0.0182
-   }
-  },
-  "UKR|CORN": {
-   "feed_share": 0.6006,
-   "elasticities": {
-    "BARL": 0.95,
-    "CORN": -1.9822,
-    "OCER": 0.0126,
-    "SWHE": 0.3343,
-    "RAPC": 0.0002,
-    "SUNC": 0.0362,
-    "SOYC": 0.0163
-   }
-  },
-  "UKR|BARL": {
-   "feed_share": 0.6113,
-   "elasticities": {
-    "BARL": -1.6041,
-    "CORN": 0.4601,
-    "OCER": 0.0168,
-    "SWHE": 0.55,
-    "RAPC": 0.0002,
-    "SUNC": 0.0424,
-    "SOYC": 0.019
-   }
-  },
-  "UKR|OCER": {
-   "feed_share": 0.3014,
-   "elasticities": {
-    "BARL": 0.5822,
-    "CORN": 0.2112,
-    "OCER": -1.6604,
-    "SWHE": 0.3052,
-    "RAPC": 0.0013,
-    "SUNC": 0.0573,
-    "SOYC": 0.0391
-   }
-  },
-  "UKR|SOYC": {
+  "THA|SOYC": {
    "feed_share": 1.0,
    "elasticities": {
-    "BARL": 0.0391,
-    "CORN": 0.0163,
-    "OCER": 0.0023,
-    "SWHE": 0.0224,
-    "RAPC": 0.0032,
-    "SUNC": 1.1258,
-    "SOYC": -1.7728
+    "SWHE": 0.008,
+    "CORN": -0.0146,
+    "OCER": 0.0009,
+    "RAPC": 0.0641,
+    "SUNC": 0.0517,
+    "SOYC": -0.6901,
+    "FENI": 0.0021,
+    "FPRI": 0.0011
    }
   },
-  "UKR|RAPC": {
-   "feed_share": 0.9787,
+  "THA|FENI": {
+   "feed_share": 0.5694,
    "elasticities": {
-    "BARL": 0.0584,
-    "CORN": 0.0262,
-    "OCER": 0.009,
-    "SWHE": 0.0341,
-    "RAPC": -1.9219,
-    "SUNC": 0.6245,
-    "SOYC": 0.3873
+    "SWHE": -0.0162,
+    "CORN": -0.4253,
+    "OCER": -0.0009,
+    "RAPC": -0.0116,
+    "SUNC": -0.0023,
+    "SOYC": 0.0282,
+    "FENI": -1.5143,
+    "FPRI": 0.0051
    }
   },
-  "UKR|SUNC": {
-   "feed_share": 0.9879,
+  "THA|FPRI": {
+   "feed_share": 0.9981,
    "elasticities": {
-    "BARL": 0.0508,
-    "CORN": 0.021,
-    "OCER": 0.002,
-    "SWHE": 0.0285,
-    "RAPC": 0.003,
-    "SUNC": -1.5703,
-    "SOYC": 0.6533
-   }
-  },
-  "USA|SWHE": {
-   "feed_share": 0.093,
-   "elasticities": {
-    "BARL": 0.0084,
-    "CORN": 1.6858,
-    "OCER": 0.0327,
-    "SWHE": -2.2028,
-    "RAPC": 0.0141,
-    "SUNC": -0.002,
-    "SOYC": 0.0229
-   }
-  },
-  "USA|CORN": {
-   "feed_share": 0.4248,
-   "elasticities": {
-    "BARL": 0.0096,
-    "CORN": -0.6859,
-    "OCER": 0.0283,
-    "SWHE": 0.0065,
-    "RAPC": 0.0131,
-    "SUNC": 0.0006,
-    "SOYC": -0.0557
-   }
-  },
-  "USA|BARL": {
-   "feed_share": 0.1049,
-   "elasticities": {
-    "BARL": -2.2048,
-    "CORN": 1.6956,
-    "OCER": 0.0325,
-    "SWHE": 0.0058,
-    "RAPC": 0.0138,
-    "SUNC": -0.0022,
-    "SOYC": 0.0183
-   }
-  },
-  "USA|OCER": {
-   "feed_share": 0.5413,
-   "elasticities": {
-    "BARL": 0.01,
-    "CORN": 1.5422,
-    "OCER": -2.1033,
-    "SWHE": 0.0069,
-    "RAPC": 0.014,
-    "SUNC": -0.0002,
-    "SOYC": 0.0411
-   }
-  },
-  "USA|SOYC": {
-   "feed_share": 1.0,
-   "elasticities": {
-    "BARL": 0.0001,
-    "CORN": -0.0743,
-    "OCER": 0.001,
-    "SWHE": 0.0001,
-    "RAPC": 0.1473,
-    "SUNC": 0.0323,
-    "SOYC": -1.908
-   }
-  },
-  "USA|RAPC": {
-   "feed_share": 1.0,
-   "elasticities": {
-    "BARL": 0.001,
-    "CORN": 0.1689,
-    "OCER": 0.0033,
-    "SWHE": 0.0007,
-    "RAPC": -2.1597,
-    "SUNC": 0.0271,
-    "SOYC": 1.4191
-   }
-  },
-  "USA|SUNC": {
-   "feed_share": 1.0,
-   "elasticities": {
-    "BARL": -0.0007,
-    "CORN": 0.0347,
-    "OCER": -0.0002,
-    "SWHE": -0.0004,
-    "RAPC": 0.1164,
-    "SUNC": -2.156,
-    "SOYC": 1.3363
+    "SWHE": -0.0184,
+    "CORN": -0.0558,
+    "OCER": -0.0065,
+    "RAPC": -0.1487,
+    "SUNC": -0.0463,
+    "SOYC": 0.2483,
+    "FENI": 0.0859,
+    "FPRI": -2.3294
    }
   },
   "VNM|SWHE": {
    "feed_share": 0.5041,
    "elasticities": {
+    "SWHE": -2.122,
     "CORN": 1.6453,
     "OCER": 0.0,
-    "SWHE": -2.122
+    "FENI": 0.0461,
+    "FPRI": 0.0001
    }
   },
   "VNM|CORN": {
    "feed_share": 0.8148,
    "elasticities": {
+    "SWHE": 0.6276,
     "CORN": -1.3347,
     "OCER": 0.0001,
-    "SWHE": 0.6276
+    "FENI": -0.1482,
+    "FPRI": -0.0001
    }
   },
   "VNM|OCER": {
    "feed_share": 0.7143,
    "elasticities": {
+    "SWHE": 0.1643,
     "CORN": 1.5571,
     "OCER": -1.7929,
-    "SWHE": 0.1643
+    "FENI": -0.2358,
+    "FPRI": -0.0171
+   }
+  },
+  "VNM|FENI": {
+   "feed_share": 0.3362,
+   "elasticities": {
+    "SWHE": 0.1018,
+    "CORN": -0.8584,
+    "OCER": -0.0001,
+    "FENI": -1.6361,
+    "FPRI": 0.0006
+   }
+  },
+  "VNM|FPRI": {
+   "feed_share": 0.6624,
+   "elasticities": {
+    "SWHE": 0.0582,
+    "CORN": -0.2103,
+    "OCER": -0.0012,
+    "FENI": 0.1552,
+    "FPRI": -2.3687
+   }
+  },
+  "PAK|SWHE": {
+   "feed_share": 0.0206,
+   "elasticities": {
+    "SWHE": -2.2185,
+    "BARL": 0.0007,
+    "CORN": 1.0409,
+    "OCER": 0.0233,
+    "RAPC": 0.0257,
+    "SUNC": 0.024,
+    "SOYC": 0.0141,
+    "FENI": 0.0006,
+    "FPRI": 0.0
+   }
+  },
+  "PAK|BARL": {
+   "feed_share": 0.0708,
+   "elasticities": {
+    "SWHE": 0.3179,
+    "BARL": -2.0568,
+    "CORN": 1.0029,
+    "OCER": 0.0599,
+    "RAPC": 0.0185,
+    "SUNC": 0.0167,
+    "SOYC": 0.0085,
+    "FENI": -0.0056,
+    "FPRI": -0.0065
+   }
+  },
+  "PAK|CORN": {
+   "feed_share": 0.2144,
+   "elasticities": {
+    "SWHE": 0.5189,
+    "BARL": 0.001,
+    "CORN": -0.9428,
+    "OCER": 0.0852,
+    "RAPC": 0.0265,
+    "SUNC": 0.0228,
+    "SOYC": 0.0148,
+    "FENI": -0.0002,
+    "FPRI": -0.0
+   }
+  },
+  "PAK|OCER": {
+   "feed_share": 0.3449,
+   "elasticities": {
+    "SWHE": 0.203,
+    "BARL": 0.0011,
+    "CORN": 1.491,
+    "OCER": -1.4961,
+    "RAPC": 0.052,
+    "SUNC": 0.0463,
+    "SOYC": 0.0329,
+    "FENI": -0.0014,
+    "FPRI": -0.0003
+   }
+  },
+  "PAK|RAPC": {
+   "feed_share": 1.0,
+   "elasticities": {
+    "SWHE": 0.0534,
+    "BARL": 0.0001,
+    "CORN": 0.1104,
+    "OCER": 0.0124,
+    "RAPC": -1.6393,
+    "SUNC": 0.6475,
+    "SOYC": 0.3386,
+    "FENI": -0.0002,
+    "FPRI": -0.0002
+   }
+  },
+  "PAK|SUNC": {
+   "feed_share": 1.0,
+   "elasticities": {
+    "SWHE": 0.0534,
+    "BARL": 0.0001,
+    "CORN": 0.1017,
+    "OCER": 0.0118,
+    "RAPC": 0.6918,
+    "SUNC": -1.7099,
+    "SOYC": 0.3165,
+    "FENI": -0.0001,
+    "FPRI": -0.0001
+   }
+  },
+  "PAK|SOYC": {
+   "feed_share": 1.0,
+   "elasticities": {
+    "SWHE": 0.0525,
+    "BARL": 0.0001,
+    "CORN": 0.1108,
+    "OCER": 0.0141,
+    "RAPC": 0.6069,
+    "SUNC": 0.5309,
+    "SOYC": -1.7599,
+    "FENI": -0.0003,
+    "FPRI": 0.0001
+   }
+  },
+  "PAK|FENI": {
+   "feed_share": 0.077,
+   "elasticities": {
+    "SWHE": 0.0794,
+    "BARL": -0.0016,
+    "CORN": -0.0507,
+    "OCER": -0.0235,
+    "RAPC": -0.0104,
+    "SUNC": -0.0094,
+    "SOYC": -0.0128,
+    "FENI": -1.847,
+    "FPRI": 0.0024
+   }
+  },
+  "PAK|FPRI": {
+   "feed_share": 0.9981,
+   "elasticities": {
+    "SWHE": 0.028,
+    "BARL": -0.0082,
+    "CORN": -0.0146,
+    "OCER": -0.0189,
+    "RAPC": -0.0676,
+    "SUNC": -0.0213,
+    "SOYC": 0.0138,
+    "FENI": 0.0104,
+    "FPRI": -2.6639
+   }
+  },
+  "BGD|SWHE": {
+   "feed_share": 0.1557,
+   "elasticities": {
+    "SWHE": -2.3093,
+    "BARL": 0.0001,
+    "CORN": 1.3032,
+    "OCER": 0.0001,
+    "RAPC": 0.0135,
+    "SOYC": 0.2174,
+    "FENI": 0.1041,
+    "FPRI": 0.0002
+   }
+  },
+  "BGD|BARL": {
+   "feed_share": 0.6009,
+   "elasticities": {
+    "SWHE": 0.2946,
+    "BARL": -2.1032,
+    "CORN": 1.138,
+    "OCER": 0.0,
+    "RAPC": 0.0166,
+    "SOYC": 0.0629,
+    "FENI": 0.0215,
+    "FPRI": -0.0085
+   }
+  },
+  "BGD|CORN": {
+   "feed_share": 0.9333,
+   "elasticities": {
+    "SWHE": 0.8034,
+    "BARL": 0.0004,
+    "CORN": -1.1718,
+    "OCER": 0.0003,
+    "RAPC": 0.0076,
+    "SOYC": 0.0733,
+    "FENI": -0.0618,
+    "FPRI": -0.0002
+   }
+  },
+  "BGD|OCER": {
+   "feed_share": 0.1516,
+   "elasticities": {
+    "SWHE": 0.3511,
+    "BARL": 0.0,
+    "CORN": 1.2514,
+    "OCER": -1.8485,
+    "RAPC": 0.036,
+    "SOYC": 0.3045,
+    "FENI": -0.1164,
+    "FPRI": -0.017
+   }
+  },
+  "BGD|RAPC": {
+   "feed_share": 1.0,
+   "elasticities": {
+    "SWHE": 0.0516,
+    "BARL": 0.0,
+    "CORN": 0.0469,
+    "OCER": 0.0001,
+    "RAPC": -2.226,
+    "SOYC": 1.6019,
+    "FENI": 0.0121,
+    "FPRI": -0.0002
+   }
+  },
+  "BGD|SOYC": {
+   "feed_share": 1.0,
+   "elasticities": {
+    "SWHE": 0.1107,
+    "BARL": 0.0,
+    "CORN": 0.0605,
+    "OCER": 0.0001,
+    "RAPC": 0.213,
+    "SOYC": -0.8344,
+    "FENI": -0.007,
+    "FPRI": -0.0001
+   }
+  },
+  "BGD|FENI": {
+   "feed_share": 0.0003,
+   "elasticities": {
+    "SWHE": 0.2592,
+    "BARL": 0.0,
+    "CORN": -0.2496,
+    "OCER": -0.0001,
+    "RAPC": 0.0079,
+    "SOYC": -0.0343,
+    "FENI": -1.4315,
+    "FPRI": 0.0015
+   }
+  },
+  "BGD|FPRI": {
+   "feed_share": 0.886,
+   "elasticities": {
+    "SWHE": 0.0417,
+    "BARL": -0.0008,
+    "CORN": -0.0614,
+    "OCER": -0.0012,
+    "RAPC": -0.0122,
+    "SOYC": -0.0305,
+    "FENI": 0.1134,
+    "FPRI": -2.401
+   }
+  },
+  "NGA|SWHE": {
+   "feed_share": 0.0038,
+   "elasticities": {
+    "SWHE": -1.9644,
+    "BARL": 0.0002,
+    "CORN": 1.1991,
+    "OCER": 0.2083,
+    "SOYC": 0.0089,
+    "FENI": -0.1031,
+    "FPRI": -0.001
+   }
+  },
+  "NGA|BARL": {
+   "feed_share": 0.7225,
+   "elasticities": {
+    "SWHE": 0.0065,
+    "BARL": -1.9312,
+    "CORN": 1.3627,
+    "OCER": 0.1713,
+    "SOYC": 0.0009,
+    "FENI": -0.0403,
+    "FPRI": -0.01
+   }
+  },
+  "NGA|CORN": {
+   "feed_share": 0.3287,
+   "elasticities": {
+    "SWHE": 0.0057,
+    "BARL": 0.0002,
+    "CORN": -0.738,
+    "OCER": 0.2362,
+    "SOYC": 0.011,
+    "FENI": 0.0475,
+    "FPRI": 0.0
+   }
+  },
+  "NGA|OCER": {
+   "feed_share": 0.0704,
+   "elasticities": {
+    "SWHE": 0.0058,
+    "BARL": 0.0002,
+    "CORN": 1.3768,
+    "OCER": -1.9049,
+    "SOYC": 0.017,
+    "FENI": -1.0925,
+    "FPRI": 0.0
+   }
+  },
+  "NGA|SOYC": {
+   "feed_share": 1.0,
+   "elasticities": {
+    "SWHE": 0.001,
+    "BARL": 0.0,
+    "CORN": 0.2706,
+    "OCER": 0.0718,
+    "SOYC": -0.795,
+    "FENI": -0.3015,
+    "FPRI": 0.0003
+   }
+  },
+  "NGA|FENI": {
+   "feed_share": 0.3133,
+   "elasticities": {
+    "SWHE": -0.0001,
+    "BARL": -0.0,
+    "CORN": 0.0063,
+    "OCER": -0.025,
+    "SOYC": -0.0016,
+    "FENI": -1.3668,
+    "FPRI": 0.0001
+   }
+  },
+  "NGA|FPRI": {
+   "feed_share": 0.8859,
+   "elasticities": {
+    "SWHE": -0.0105,
+    "BARL": -0.0035,
+    "CORN": 0.0096,
+    "OCER": 0.001,
+    "SOYC": 0.0229,
+    "FENI": 1.7648,
+    "FPRI": -2.768
    }
   },
   "ZAF|SWHE": {
    "feed_share": 0.0009,
    "elasticities": {
+    "SWHE": -2.2582,
     "BARL": 0.0002,
     "CORN": 1.8746,
     "OCER": 0.0107,
-    "SWHE": -2.2582,
     "RAPC": -0.0061,
     "SUNC": 0.0271,
-    "SOYC": 0.0246
-   }
-  },
-  "ZAF|CORN": {
-   "feed_share": 0.4629,
-   "elasticities": {
-    "BARL": 0.002,
-    "CORN": -0.6396,
-    "OCER": 0.0058,
-    "SWHE": 0.0001,
-    "RAPC": 0.0002,
-    "SUNC": 0.1928,
-    "SOYC": -0.0048
+    "SOYC": 0.0246,
+    "DDGS": -0.0018,
+    "FENI": -0.0089,
+    "FPRI": -0.0094
    }
   },
   "ZAF|BARL": {
    "feed_share": 0.023,
    "elasticities": {
+    "SWHE": 0.0,
     "BARL": -2.2541,
     "CORN": 1.7856,
     "OCER": 0.0093,
-    "SWHE": 0.0,
     "RAPC": -0.0066,
     "SUNC": 0.0283,
-    "SOYC": 0.0242
+    "SOYC": 0.0242,
+    "DDGS": 0.0057,
+    "FENI": -0.0071,
+    "FPRI": -0.0078
+   }
+  },
+  "ZAF|CORN": {
+   "feed_share": 0.4629,
+   "elasticities": {
+    "SWHE": 0.0001,
+    "BARL": 0.002,
+    "CORN": -0.6396,
+    "OCER": 0.0058,
+    "RAPC": 0.0002,
+    "SUNC": 0.1928,
+    "SOYC": -0.0048,
+    "DDGS": 0.0008,
+    "FENI": 0.0,
+    "FPRI": 0.0001
    }
   },
   "ZAF|OCER": {
    "feed_share": 0.13,
    "elasticities": {
+    "SWHE": 0.0001,
     "BARL": 0.002,
     "CORN": 1.1061,
     "OCER": -2.1344,
-    "SWHE": 0.0001,
     "RAPC": -0.0016,
     "SUNC": 0.0779,
-    "SOYC": 0.0287
-   }
-  },
-  "ZAF|SOYC": {
-   "feed_share": 1.0,
-   "elasticities": {
-    "BARL": 0.0002,
-    "CORN": -0.0436,
-    "OCER": 0.0014,
-    "SWHE": 0.0,
-    "RAPC": 0.0042,
-    "SUNC": 1.6438,
-    "SOYC": -2.2266
+    "SOYC": 0.0287,
+    "DDGS": 0.0062,
+    "FENI": -0.0018,
+    "FPRI": -0.0029
    }
   },
   "ZAF|RAPC": {
    "feed_share": 1.0,
    "elasticities": {
+    "SWHE": -0.0001,
     "BARL": -0.0026,
     "CORN": 0.0764,
     "OCER": -0.003,
-    "SWHE": -0.0001,
     "RAPC": -2.1205,
     "SUNC": 1.2358,
-    "SOYC": 0.1611
+    "SOYC": 0.1611,
+    "DDGS": 0.0058,
+    "FENI": -0.0013,
+    "FPRI": 0.0012
    }
   },
   "ZAF|SUNC": {
    "feed_share": 1.0,
    "elasticities": {
+    "SWHE": 0.0,
     "BARL": 0.0001,
     "CORN": 0.3908,
     "OCER": 0.0008,
-    "SWHE": 0.0,
     "RAPC": 0.0072,
     "SUNC": -1.3572,
-    "SOYC": 0.3664
+    "SOYC": 0.3664,
+    "DDGS": 0.0063,
+    "FENI": 0.0002,
+    "FPRI": 0.0005
+   }
+  },
+  "ZAF|SOYC": {
+   "feed_share": 1.0,
+   "elasticities": {
+    "SWHE": 0.0,
+    "BARL": 0.0002,
+    "CORN": -0.0436,
+    "OCER": 0.0014,
+    "RAPC": 0.0042,
+    "SUNC": 1.6438,
+    "SOYC": -2.2266,
+    "DDGS": -0.0069,
+    "FENI": 0.0003,
+    "FPRI": -0.0004
+   }
+  },
+  "ZAF|DDGS": {
+   "feed_share": 1.0,
+   "elasticities": {
+    "SWHE": -0.0001,
+    "BARL": 0.0054,
+    "CORN": 0.6553,
+    "OCER": 0.0271,
+    "RAPC": 0.0139,
+    "SUNC": 2.6031,
+    "SOYC": -0.6365,
+    "DDGS": -1.4868,
+    "FENI": -0.0428,
+    "FPRI": -0.0524
+   }
+  },
+  "ZAF|FENI": {
+   "feed_share": 0.0609,
+   "elasticities": {
+    "SWHE": -0.0006,
+    "BARL": -0.0089,
+    "CORN": 0.0529,
+    "OCER": -0.0102,
+    "RAPC": -0.0042,
+    "SUNC": 0.0999,
+    "SOYC": 0.0366,
+    "DDGS": -0.0565,
+    "FENI": -1.589,
+    "FPRI": 0.0176
+   }
+  },
+  "ZAF|FPRI": {
+   "feed_share": 0.9989,
+   "elasticities": {
+    "SWHE": -0.0007,
+    "BARL": -0.0099,
+    "CORN": 0.0714,
+    "OCER": -0.0169,
+    "RAPC": 0.0038,
+    "SUNC": 0.2509,
+    "SOYC": -0.0438,
+    "DDGS": -0.0701,
+    "FENI": 0.0178,
+    "FPRI": -2.2327
+   }
+  },
+  "ETH|SWHE": {
+   "feed_share": 0.0169,
+   "elasticities": {
+    "SWHE": -2.3886,
+    "BARL": 0.0,
+    "CORN": 2.2836,
+    "OCER": 0.0,
+    "RAPC": 0.022,
+    "FENI": -0.1376,
+    "FPRI": 0.0004
+   }
+  },
+  "ETH|BARL": {
+   "feed_share": 0.0174,
+   "elasticities": {
+    "SWHE": 0.0001,
+    "BARL": -2.2567,
+    "CORN": 2.3356,
+    "OCER": 0.0315,
+    "RAPC": 0.0112,
+    "FENI": -0.3975,
+    "FPRI": -0.001
+   }
+  },
+  "ETH|CORN": {
+   "feed_share": 0.0793,
+   "elasticities": {
+    "SWHE": 0.2889,
+    "BARL": 0.033,
+    "CORN": -0.8682,
+    "OCER": 0.0267,
+    "RAPC": 0.0165,
+    "FENI": 0.0286,
+    "FPRI": -0.0
+   }
+  },
+  "ETH|OCER": {
+   "feed_share": 0.0178,
+   "elasticities": {
+    "SWHE": 0.0001,
+    "BARL": 0.0336,
+    "CORN": 2.0204,
+    "OCER": -1.7023,
+    "RAPC": 0.0561,
+    "FENI": -1.1987,
+    "FPRI": -0.0028
+   }
+  },
+  "ETH|RAPC": {
+   "feed_share": 1.0,
+   "elasticities": {
+    "SWHE": 0.0659,
+    "BARL": 0.0037,
+    "CORN": 0.3896,
+    "OCER": 0.0175,
+    "RAPC": -0.8807,
+    "FENI": 0.0463,
+    "FPRI": -0.0008
+   }
+  },
+  "ETH|FENI": {
+   "feed_share": 0.0469,
+   "elasticities": {
+    "SWHE": -0.0406,
+    "BARL": -0.0131,
+    "CORN": 0.0668,
+    "OCER": -0.0369,
+    "RAPC": 0.0046,
+    "FENI": -1.4899,
+    "FPRI": 0.0028
+   }
+  },
+  "ETH|FPRI": {
+   "feed_share": 0.8862,
+   "elasticities": {
+    "SWHE": 0.027,
+    "BARL": -0.0083,
+    "CORN": -0.0152,
+    "OCER": -0.0212,
+    "RAPC": -0.0192,
+    "FENI": 0.6861,
+    "FPRI": -2.3839
+   }
+  },
+  "EGY|SWHE": {
+   "feed_share": 0.1361,
+   "elasticities": {
+    "SWHE": -2.1077,
+    "BARL": 0.0008,
+    "CORN": 1.0077,
+    "OCER": 0.0,
+    "SUNC": 0.0067,
+    "SOYC": 0.3089,
+    "FENI": 0.0001,
+    "FPRI": 0.0
+   }
+  },
+  "EGY|BARL": {
+   "feed_share": 0.6007,
+   "elasticities": {
+    "SWHE": 0.145,
+    "BARL": -2.1621,
+    "CORN": 1.2969,
+    "OCER": 0.0337,
+    "SUNC": 0.0029,
+    "SOYC": 0.0206,
+    "FENI": -0.0001,
+    "FPRI": -0.0002
+   }
+  },
+  "EGY|CORN": {
+   "feed_share": 0.477,
+   "elasticities": {
+    "SWHE": 0.7337,
+    "BARL": 0.0049,
+    "CORN": -0.9967,
+    "OCER": 0.0213,
+    "SUNC": 0.0008,
+    "SOYC": -0.1229,
+    "FENI": -0.0,
+    "FPRI": -0.0
+   }
+  },
+  "EGY|OCER": {
+   "feed_share": 0.5601,
+   "elasticities": {
+    "SWHE": 0.0003,
+    "BARL": 0.0059,
+    "CORN": 0.989,
+    "OCER": -1.8431,
+    "SUNC": 0.0118,
+    "SOYC": 0.4258,
+    "FENI": -0.0,
+    "FPRI": -0.0001
+   }
+  },
+  "EGY|SUNC": {
+   "feed_share": 1.0,
+   "elasticities": {
+    "SWHE": 0.0787,
+    "BARL": 0.0002,
+    "CORN": 0.0124,
+    "OCER": 0.0041,
+    "SUNC": -2.1691,
+    "SOYC": 1.5608,
+    "FENI": 0.0,
+    "FPRI": 0.0002
+   }
+  },
+  "EGY|SOYC": {
+   "feed_share": 1.0,
+   "elasticities": {
+    "SWHE": 0.2074,
+    "BARL": 0.0001,
+    "CORN": -0.1133,
+    "OCER": 0.0085,
+    "SUNC": 0.0894,
+    "SOYC": -0.6425,
+    "FENI": 0.0,
+    "FPRI": -0.0
+   }
+  },
+  "EGY|FENI": {
+   "feed_share": 0.0105,
+   "elasticities": {
+    "SWHE": 0.3825,
+    "BARL": -0.0032,
+    "CORN": -0.2437,
+    "OCER": -0.0038,
+    "SUNC": 0.0092,
+    "SOYC": 0.0152,
+    "FENI": -1.6966,
+    "FPRI": 0.0122
+   }
+  },
+  "EGY|FPRI": {
+   "feed_share": 0.6685,
+   "elasticities": {
+    "SWHE": 0.141,
+    "BARL": -0.0077,
+    "CORN": -0.072,
+    "OCER": -0.0157,
+    "SUNC": 0.1085,
+    "SOYC": -0.0007,
+    "FENI": 0.015,
+    "FPRI": -2.3747
    }
   }
  }

@@ -1,7 +1,7 @@
 # Fodder balance — design
 
-Status: **implemented as use ≤ production**; equality (CAPRI) to come together with the ration wiring. Must come before the EU ration is wired in
-(docs/FEED_RATION.md): without it, extra fodder is free.
+Status: **implemented, as CAPRI's equality**: use ≤ production ≤ use + 0.1% of base use (the
+solver takes inequalities only; the band is slack at base). On in the default model.
 
 ## The gap
 

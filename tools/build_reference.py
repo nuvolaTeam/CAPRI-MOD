@@ -160,8 +160,6 @@ def build(path):
         ["cap_payments.csv", "248 x 5", "CAP premium, EUR/ha", "DATA2 PRME, per activity"],
         ["feed_requirements.csv", "10 x 11", "energy, protein, DM, days",
          "DATA2 ENNE, CRPR, DRMN, DRMX, DAYS"],
-        ["coco_feed_availability_national.csv", "28 x 11", "feed supply, 1000 t DM",
-         "DATA2 feed items"],
         ["nutrient_coefs.csv", "40 x 3", "N, P2O5, K2O applied, kg/ha",
          "DATA2 NITF, PHOF, POTF"],
         ["climate_zones.csv", "521 x 2", "zone shares", "literature, IPCC"],

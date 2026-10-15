@@ -26,8 +26,8 @@ Typical use
 -----------
     exp = Experiment("sensitivity_biofuel")          # -> outputs/sensitivity_biofuel/
     for i, mandate in enumerate(mandates):
-        r = model.run(..., biofuel_mandate=mandate)
-        exp.save_run(r, run_id=f"run_{i:04d}", inputs={"biofuel_mandate": mandate})
+        r = model.run(..., biofuel_output_scale={"BIOD": scale})
+        exp.save_run(r, run_id=f"run_{i:04d}", inputs={"biodiesel_output_scale": scale})
     exp.finalise()                                    # writes batch_summary.csv
 """
 from __future__ import annotations
@@ -83,7 +83,8 @@ def flatten_outputs(results: dict) -> dict:
     if bio is not None:
         out["biofuel_bioethanol_kt"] = float(getattr(bio, "bioethanol_kt", 0) or 0)
         out["biofuel_biodiesel_kt"] = float(getattr(bio, "biodiesel_kt", 0) or 0)
-        out["biofuel_mandate_share"] = float(getattr(bio, "mandate_share", 0) or 0)
+        for k, x in (getattr(bio, "feedstock_demand", None) or {}).items():
+            out[f"biofuel_feedstock_{k}_kt"] = float(x)
 
     sup = results.get("supply")
     if isinstance(sup, dict) and sup:

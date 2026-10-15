@@ -1,40 +1,37 @@
-FROM python:3.11-slim
+# CAPRI-mod in a container (Debian).
+#
+#   docker build -t capri-mod .
+#   docker run --rm capri-mod                                   # the test suite
+#   docker run --rm -v "$PWD/runs:/runs" capri-mod \
+#       python tools/run_f2f_2030.py /runs/f2f.pkl --verbose     # a full Farm-to-Fork 2030 run
+#
+# The image holds the code and the data layer (capri_data); results go to a mounted volume.
+FROM debian:bookworm-slim
 
-LABEL org.opencontainers.image.title="CAPRI-MOD"
-LABEL org.opencontainers.image.description="Python implementation of the CAPRI agricultural economic model"
-LABEL org.opencontainers.image.source="https://github.com/nuvolaTeam/CAPRI-MOD"
-
-# Avoid Python writing .pyc files and enable unbuffered output
-ENV PYTHONDONTWRITEBYTECODE=1 \
+ENV DEBIAN_FRONTEND=noninteractive \
+    PYTHONHASHSEED=0 \
+    PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    PIP_NO_CACHE_DIR=1
+    VIRTUAL_ENV=/opt/venv \
+    PATH=/opt/venv/bin:$PATH
+
+# Debian's Python 3.11 (the model needs >= 3.10); a virtual environment keeps pip away from the system packages
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends python3 python3-venv ca-certificates \
+ && rm -rf /var/lib/apt/lists/* \
+ && python3 -m venv "$VIRTUAL_ENV"
 
 WORKDIR /app
 
-# System libraries required by scientific Python packages
-RUN apt-get update && apt-get install -y --no-install-recommends \
-        build-essential \
-        gcc \
-    && rm -rf /var/lib/apt/lists/*
+# dependencies first, so code changes do not rebuild this layer
+COPY requirements.txt ./
+RUN pip install --no-cache-dir --upgrade pip \
+ && pip install --no-cache-dir -r requirements.txt
 
-# Copy dependency definition first to maximise Docker layer caching
-COPY requirements.txt .
-
-RUN pip install --upgrade pip \
-    && pip install -r requirements.txt
-
-# Copy CAPRI-MOD source code and model data
 COPY . .
 
-# Make the CAPRI-MOD package importable
-ENV PYTHONPATH=/app
+# run as an unprivileged user
+RUN useradd --create-home --uid 1000 capri && chown -R capri:capri /app
+USER capri
 
-# Default working directory
-WORKDIR /app
-
-# Basic import test during image creation
-RUN python -c "import capri_mod; print('CAPRI-MOD environment OK')"
-
-# Start an interactive shell by default.
-# Users can run the model, notebooks, tests, etc. from inside the container.
-CMD ["bash"]
+CMD ["python", "tools/run_tests.py", "--parts", "2"]

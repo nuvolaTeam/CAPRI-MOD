@@ -1,0 +1,13 @@
+manure_system,tech_class,storage_type,value
+LIQUID,normal,othStor,20.0
+LIQUID,HighEm,othStor,15.0
+LIQUID,LowEm,othStor,15.0
+SOLID,normal,concrStor,5.0
+SOLID,normal,fieldStor,10.0
+SOLID,normal,othStor,10.0
+SOLID,HighEm,concrStor,3.68133529587507
+SOLID,HighEm,fieldStor,7.36267059175013
+SOLID,HighEm,othStor,7.36267059175013
+SOLID,LowEm,concrStor,3.68133529587507
+SOLID,LowEm,fieldStor,7.36267059175013
+SOLID,LowEm,othStor,7.36267059175013

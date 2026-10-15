@@ -37,7 +37,7 @@ from pathlib import Path
 
 _ROOT = Path(__file__).resolve().parent.parent
 REGISTRY = _ROOT / "capri_data" / "DATA_SOURCING_REGISTRY.json"
-USER_DOCS = ("README.md", "CHANGELOG.md", "CAPRI_REFERENCE.md", "DATA_FIXES.md")
+USER_DOCS = ("README.md", "CHANGELOG.md", "docs/DATA_FIXES.md")
 
 #: Entry natures that a reader should be able to find in the docs. Pure
 #: investigations and verifications need not surface; new capabilities, fixed

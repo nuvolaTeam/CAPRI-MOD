@@ -59,7 +59,6 @@ KEEP = {"YILD", "LEVL", "COMI", "HERD", "PROD",
         # ENNE and CRPR), not the requirements.
         "ENNE", "CRPR", "DRMN", "DRMX", "DAYS"}
 
-REQUIREMENT_ITEMS = ["ENNE", "CRPR", "DRMN", "DRMX", "DAYS"]
 
 # Activity -> item that actually holds the yield.
 YIELD_ITEM = {"DCOW": "COMI", "DCOL": "COMI", "DCOH": "COMI"}
@@ -158,13 +157,8 @@ def main() -> None:
     yld.to_csv(args.out_dir / "capreg_yields.csv")
     lev.to_csv(args.out_dir / "capreg_levels.csv")
 
-    # Feed requirements, long format: one row per region x activity x item.
-    req = matched[matched.item.isin(REQUIREMENT_ITEMS)][
-        ["model_region", "activity", "item", "value"]]
-    req.to_csv(args.out_dir / "capreg_feed_requirements.csv", index=False)
-    print(f"feed requirements: {len(req):,} records, "
-          f"{req.model_region.nunique()} regions, "
-          f"{req.activity.nunique()} animal activities")
+    # (Feed requirements per region were written here for the post-solve feed module, retired in Sprint 9i:
+    # the rations carry CAPRI's requirements, tools/build_feed_ration.py.)
 
     print(f"\nyields : {yld.shape[0]} regions x {yld.shape[1]} activities, "
           f"{int(yld.notna().sum().sum()):,} values")

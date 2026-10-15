@@ -1,0 +1,11 @@
+.git
+**/__pycache__
+**/*.pyc
+*.pkl
+runs/
+qp_solver_comparison.csv
+*.pre_*
+*.gt
+*.superseded_by_2017
+Dockerfile
+.dockerignore

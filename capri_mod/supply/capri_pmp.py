@@ -38,11 +38,12 @@ from typing import Dict, Optional, Tuple
 
 import numpy as np
 import pandas as pd
+from capri_mod.params import param, param_table
 
 # --- 1. dampening ----------------------------------------------------------
 
-ELAS_HIGH = 4.5      # p_elasHigh
-ELAS_CAP = 8.0       # MIN(8, ...)
+ELAS_HIGH = param("ELAS_HIGH")      # p_elasHigh
+ELAS_CAP = param("ELAS_CAP")        # MIN(8, ...)
 
 
 def dampen_elasticity(eps):
@@ -55,7 +56,7 @@ def dampen_elasticity(eps):
 
 # --- 2. share term ---------------------------------------------------------
 
-SHARE_COEF = 0.2
+SHARE_COEF = param("SHARE_COEF")
 
 
 def share_term(activity_levels: pd.Series, arable_total: float,
@@ -124,6 +125,14 @@ CROSSWALK = "shared/nuts_crosswalk.json"
 
 # CAPRI names grain maize MAIZ; the model calls it CORN.
 ACTIVITY_ALIASES = {"MAIZ": "CORN"}
+LIVESTOCK_ELAS_FILE = "sources/arm/capri_supply_elas_market_1717.csv"
+LIVESTOCK_PRODUCT = {"DCOW": "MILK", "BCOW": "BEEF", "BULL": "BEEF", "HFRS": "BEEF", "CALV": "BEEF",
+                     "PIGS": "PORK", "PIGF": "PORK", "LAYS": "EGGS", "BROI": "POUM", "SHGP": "SGMT"}
+LIVESTOCK_MS = {"BE": "BL", "LU": "BL", "GR": "EL", "IE": "IR"}
+YOUNG_ELAS_FILE = "sources/arm/capri_supply_elas_young_1720.csv"
+#: young animals produced by each cattle activity (CAPRI YCAM/YCAF, YBUL/YHEI, YCOW)
+LIVESTOCK_YOUNG = {"DCOW": ("YCAM", "YCAF"), "BCOW": ("YCAM", "YCAF"), "CALV": ("YBUL", "YHEI"), "HFRS": ("YCOW",),
+                   "PIGS": ("YPIG",)}   # sows: piglets
 
 
 def build_elasticity_table(
@@ -202,6 +211,63 @@ def build_elasticity_table(
                     prov.at[r, a] = "REGIONAL_CAPRI"
                     n_reg += 1
 
+    # --- livestock: CAPRI's calibrated supply elasticities of the animal products ---
+    # (results/arm/elas_2_1717*: p_elasSupp(MS, product, product, "CAL"), the elasticities
+    # CAPRI's supply models are calibrated to reproduce; sources/arm/
+    # capri_supply_elas_market_1717.csv). Each animal activity takes its product's
+    # own-price value for its member state: dairy cows - milk; suckler cows, bulls, heifers,
+    # calves - beef; pigs - pork; hens - eggs; broilers - poultry meat; sheep and goats -
+    # sheep and goat meat. Replaces the literature priors (0.10-0.25; CAPRI 0.47-0.82).
+    n_lsk = 0
+    lsk_path = data_dir / LIVESTOCK_ELAS_FILE
+    if lsk_path.exists():
+        ldf = pd.read_csv(lsk_path)
+        ldf = ldf[(ldf["prod"] == ldf["wrt"]) & ldf["prod"].isin(set(LIVESTOCK_PRODUCT.values()))]
+        ms_val = {(r, p_): float(v) for r, p_, v in zip(ldf.region, ldf["prod"], ldf.value)}
+        # Young animals (calves, young cattle, cows) are part of the cattle activities' output
+        # (CAPRI's TOOU minus its market revenue MREV); CAPRI calibrates to their supply
+        # elasticities as well. Each activity's elasticity is the value-weighted mean of its
+        # final product's and its young animals' (suckler cows: 89% calves in Duesseldorf).
+        yel = {}
+        ypath = data_dir / YOUNG_ELAS_FILE
+        if ypath.exists():
+            for r_, i_, v_ in pd.read_csv(ypath).itertuples(index=False):
+                yel[(r_, i_)] = float(v_)
+        sup = data_dir / base_year / "supply"
+        try:
+            mrev = pd.read_csv(sup / "livestock_revenue_coef.csv", index_col=0)
+            toou = pd.read_csv(sup / "livestock_output_value_coef.csv", index_col=0)
+            # the product share is the value of final products (no young animals) in total output:
+            # CAPRI's MREV is young-animal sales for sows, raised calves and replacement heifers
+            try:
+                _pv = pd.read_csv(sup / "livestock_product_value_coef.csv", index_col=0)
+                for _a in _pv.columns:
+                    if _a in mrev.columns:
+                        mrev[_a] = _pv[_a].reindex(mrev.index)
+            except Exception:
+                pass
+        except Exception:
+            mrev = toou = None
+        for r in regions:
+            ms = LIVESTOCK_MS.get(str(r)[:2], str(r)[:2]) + "000000"
+            for a, prod_ in LIVESTOCK_PRODUCT.items():
+                if a not in eps.columns or a in blocked:
+                    continue
+                v = ms_val.get((ms, prod_))
+                if v is None or not np.isfinite(v) or v <= 0:
+                    continue
+                young = [yel.get((ms, i_)) for i_ in LIVESTOCK_YOUNG.get(a, ())]
+                young = [y_ for y_ in young if y_ is not None and y_ > 0]
+                if young and mrev is not None and r in mrev.index and r in toou.index \
+                        and a in mrev.columns and a in toou.columns:
+                    m_, t_ = float(mrev.at[r, a]), float(toou.at[r, a])
+                    if np.isfinite(m_) and np.isfinite(t_) and t_ > 0 and 0 <= m_ <= t_:
+                        sy = 1.0 - m_ / t_
+                        v = (1.0 - sy) * v + sy * float(np.mean(young))
+                eps.at[r, a] = v
+                prov.at[r, a] = "CAPRI_CAL_PRODUCT"
+                n_lsk += 1
+
     total = eps.size
     counts = prov.stack().value_counts().to_dict()
     summary = {
@@ -215,6 +281,7 @@ def build_elasticity_table(
         "dampening_applied": bool(apply_dampening),
         "cells_from_pmp_file": n_pmp,
         "cells_from_regional_file": n_reg,
+        "cells_from_livestock_products": n_lsk,
         "activities_blocked_synthetic_base": sorted(blocked),
     }
     return eps, prov, summary

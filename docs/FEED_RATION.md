@@ -1,10 +1,7 @@
 # EU feed ration choice — design
 
-Status: **data built** (`feed_ration_2017.json` by `tools/build_feed_ration.py`: 235 regions, 2,084 region × animal entries, energy and protein closing to a median of 0.00%) ; **ration programme built** (`capri_mod/feed/ration.py`), not yet wired into the model — waiting for CAPRI's feed-share bounds (below).
-Replaces the last fixed feed coefficients for the EU: today feed per head is
-fixed (CAPRI 2017 totals ÷ herds), so EU feed demand follows herds but not feed
-prices, and cake and cereal prices swing too much when herds change (Farm-to-Fork:
-sunflower cake −23%).
+Status: **on by default** (`CAPRIModel.use_ration = True`, as in CAPRI, where rations are always
+endogenous). The data, design and tests below are kept as the record of how it was built.
 
 ## How CAPRI does it
 
@@ -103,8 +100,9 @@ in-code comment says 0.1; the values are what count).
   production days now approximated by days in the year).
 - Registered approximations: nutrient shadow prices at base fitted by NNLS to
   feed prices (standing in for the calibration-step duals); slope reference =
-  base feeding; prices of on-farm fodder and of feeds without a market held at
-  base; feeds without a CAPRI elasticity (FRMI, FPRI, FENI) fixed.
+  base feeding; on-farm fodder at its balance shadow price; feeds without a CAPRI elasticity (FRMI, FPRI, FENI)
+  fixed. Since Sprint 9h every tradable bulk (FCER, FPRO, FENE, FOTH, FMIL) is priced at its member state's bulk
+  index (docs/FEED_MARKETS.md).
 
 ### CAPRI's own feed-PMP terms (received)
 
@@ -143,7 +141,7 @@ fresh and dry-matter bases: grass use/production 2.7, fodder maize 0.8).
 
 ### Wired in, behind a switch
 
-`CAPRIModel.use_ration` (default off) connects the ration to livestock feed
+`CAPRIModel.use_ration` (now on by default) connects the ration to livestock feed
 costs, the fodder balance and EU feed demand; the projection now carries the
 switch to its fresh 2030 model. Baseline identical with the switch on. Ration
 updates are damped between outer iterations (undamped they oscillated against
@@ -165,3 +163,10 @@ off by default.
 With the land market on, Farm-to-Fork with the ration runs in about 3 minutes;
 the ration brings the cereal price (+8.4%) and cereal production (−14.7%) onto
 CAPRI's (+8%, −15%). `use_ration = True` by default.
+
+### Current state (October 2026)
+
+On by default. The slow convergence diagnosed above came from two regions with no
+feasible solution under Farm-to-Fork (fixed by the land market), not from the
+ration: Farm-to-Fork with the ration runs in about 4 minutes, and the ration brings
+the cereal price and production close to CAPRI's.

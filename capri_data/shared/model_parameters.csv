@@ -1,0 +1,56 @@
+name,key,value,unit,kind,source,used_in
+EF_SOIL_N2O_DIRECT,,0.01,kg N2O-N per kg N,ipcc,"IPCC 2006 EF1 as CAPRI envind/gases.gms N2OSYN, N2OCRO",environmental_module
+EF_SOIL_N2O_INDIRECT,,0.01,kg N2O-N per kg NH3-N,ipcc,IPCC 2006 EF4 as CAPRI envind/gases.gms N2OAMM (volatilised share 10%),environmental_module
+GWP_CH4,,25.0,kg CO2-eq per kg,ipcc,"AR4, UNFCCC reporting; CAPRI p_globWarmPot","environmental_module, ghg_tax"
+GWP_N2O,,298.0,kg CO2-eq per kg,ipcc,"AR4, UNFCCC reporting; CAPRI p_globWarmPot",environmental_module
+MJ_PER_KG_CH4,,55.65,MJ per kg CH4,ipcc,"IPCC 2006 Eq. 10.21, as CAPRI envind/gases.gms CH4ENT",ghg_tax
+OVERFERT_MARKUP,,0.1,-,capri,CAPRI p_OverFertMarkUp (envind/ghgMiti.gms),supply_module
+P_FERT_EFF_COR,,1.1,-,capri,"CAPRI p_fertEffCor, exponent of othImpact NMIN (envind/ghgMiti.gms)",supply_module
+ELAS_HIGH,,4.5,-,capri,CAPRI p_elasHigh (PMP elasticity dampening),capri_pmp
+ELAS_CAP,,8.0,-,capri,"CAPRI MIN(8, ...) in the PMP elasticity dampening",capri_pmp
+SHARE_COEF,,0.2,-,capri,CAPRI PMP share term coefficient,capri_pmp
+TRQ_SLOPE,,200.0,-,capri,CAPRI p_trqSigmoidSlope (arm/market_model.gms trqSigmoidFunc_),bilateral
+RHO_FMIL,,0.5,-,capri,"CAPRI p_rhoFeed(RMSSUP,'FMIL') (arm/market1.gms)",market_module
+BROILER_BIRDS_PER_PLACE,,4.35,birds per place and year,capri,CAPRI 2030 reference: broilers produced per census place,supply_module
+NITR_PRICE,,0.873,EUR per kg,capri,CAPRI line_nitr.gms nitrate price (base year; REGISTERED: not inflated),ration
+NITR_CP,,1.54,kg crude protein per kg nitrate,capri,CAPRI line_nitr.gms,ration
+NITR_N_EXCR,,0.27999999999999997,kg N excreted per kg nitrate,capri,CAPRI line_nitr.gms: +0.42% of DM intake at 1.5% dosage,"ration, supply_module"
+NITR_MAX_DOSE,DCOW,0.015,share of DM,capri,CAPRI line_nitr.gms maximum nitrate dosage,ration
+NITR_STABLE_TIME,DCOW,0.8333333333333334,share of year,capri,CAPRI line_nitr.gms: fed in stables only,ration
+NITR_MAX_DOSE,BULL,0.015,share of DM,capri,CAPRI line_nitr.gms maximum nitrate dosage,ration
+NITR_STABLE_TIME,BULL,0.5,share of year,capri,CAPRI line_nitr.gms: fed in stables only,ration
+NITR_MAX_DOSE,HFRS,0.01,share of DM,capri,CAPRI line_nitr.gms maximum nitrate dosage,ration
+NITR_STABLE_TIME,HFRS,0.5,share of year,capri,CAPRI line_nitr.gms: fed in stables only,ration
+FIBRE_FACTOR,DCOW,0.6,-,capri,"CAPRI feed/req_or_man_fnc.gms fibre-rich feed factor (calves, sheep and goats: mean of CAPRI's activities, REGISTERED)",ration
+FIBRE_FACTOR,BCOW,0.9,-,capri,"CAPRI feed/req_or_man_fnc.gms fibre-rich feed factor (calves, sheep and goats: mean of CAPRI's activities, REGISTERED)",ration
+FIBRE_FACTOR,BULL,0.5,-,capri,"CAPRI feed/req_or_man_fnc.gms fibre-rich feed factor (calves, sheep and goats: mean of CAPRI's activities, REGISTERED)",ration
+FIBRE_FACTOR,HFRS,0.6,-,capri,"CAPRI feed/req_or_man_fnc.gms fibre-rich feed factor (calves, sheep and goats: mean of CAPRI's activities, REGISTERED)",ration
+FIBRE_FACTOR,CALV,0.3,-,capri,"CAPRI feed/req_or_man_fnc.gms fibre-rich feed factor (calves, sheep and goats: mean of CAPRI's activities, REGISTERED)",ration
+FIBRE_FACTOR,SHGP,0.65,-,capri,"CAPRI feed/req_or_man_fnc.gms fibre-rich feed factor (calves, sheep and goats: mean of CAPRI's activities, REGISTERED)",ration
+SMALL_MINE_KG_HA,,30.0,kg N per ha,capri,CAPRI minfert_redu_by_crop.gms: groups below 0.03 t/ha mineral N exempt,inner_fert_dist
+LIMCRES_FACTOR,,1.3,-,capri,CAPRI minfert_redu_by_crop.gms: limCres maximum = baseline residues x (1.3 + relaxation),inner_fert_dist
+REQ_NEM,,17080.22576723337,MJ NEL per year,capri,"CAPRI breeding.gms requirement function, maintenance of a 600 kg dairy cow",projection_module
+REQ_NEL_KG,,3.0700000000000003,MJ NEL per kg milk,capri,"CAPRI breeding.gms requirement function, 4% fat",projection_module
+REQ_CRPR_KG,,0.084,kg CP per kg milk,capri,CAPRI breeding.gms requirement function,projection_module
+REQ_CRPR_FIX,,228.70499999999998,kg CP per year,capri,CAPRI breeding.gms requirement function,projection_module
+REQ_DRMN_KG,,0.305,kg DM per kg milk,capri,CAPRI breeding.gms requirement function,projection_module
+REQ_DRMN_FIX,,4051.5,kg DM per year,capri,CAPRI breeding.gms requirement function,projection_module
+REQ_N_KG_MILK,,0.0086,kg N per kg milk,capri,CAPRI breeding.gms: manure N per kg of extra milk,projection_module
+ORGANIC_OTHER_COST_RISE,,1.0,share,jrc121368,JRC121368: other inputs +100% on converted area,supply_module
+ORGANIC_BASELINE_SHARE,,0.1,share of UAA,capri,CAPRI load_organic_targets.gms: p_organicAreaTarget(EU) = 0.25 - 0.10 (fallback where no member-state breakdown),supply_module
+ORGANIC_YIELD_GAP,,0.2,share,literature,"Seufert et al. 2012, Ponisio et al. 2015 (fallback where CAPRI has no yield gap for the region and product)",supply_module
+PESTICIDE_YIELD_LOSS_AT_50PCT,,0.1,share,jrc121368,JRC121368 (Sanchez et al. 2019): yield loss for a 50% pesticide cut,supply_module
+PESTICIDE_OTHER_COST_RISE,,0.5,share,jrc121368,"JRC121368, conventional_io.gms: other costs rise with the plant-protection cut",supply_module
+JRC_CAPPED_N_REGIONS,,9.0,regions,jrc121368,JRC121368 sect. 4.3.4: nine regions with the highest baseline surplus,supply_module
+JRC_CAPPED_CUT,,0.36,share,jrc121368,JRC121368 sect. 4.3.4: their cut set at the EU average,supply_module
+MANURE_LIMIT,,170.0,kg N per ha,legal,Nitrates Directive 91/676/EEC,supply_module
+BASE_CAL_ROUNDS,,4.0,rounds,model_setting,CAPRI-style baseline calibration rounds per baseline run (Sprint 9p),supply_module
+PRICE_SIGNAL_RELAXATION,,0.5,-,model_setting,outer loop: damping of the supply price signal,model
+YANI_RELAXATION,,0.7,-,model_setting,outer loop: damping of the young-animal price step,model
+LAND_SUPPLY_ELASTICITY,,0.15,-,model_setting,"land-rent elasticity, only when CAPRI's land market is switched off",supply_module
+LAND_EXPANSION_CAP,,0.15,share of farmland,model_setting,cap of the land-rent rule above,supply_module
+ARMINGTON_PREMIUM_LO,,0.67,-,model_setting,bounds of the EU Armington premium,market_module
+ARMINGTON_PREMIUM_HI,,1.5,-,model_setting,bounds of the EU Armington premium,market_module
+MIN_TRADE_SHARE_FOR_PREMIUM,,0.05,share of EU use,model_setting,minimum gross trade for the Armington premium,market_module
+INTENSITY_K,,3.0,-,literature,"Mitscherlich curvature, nitrate-limit option only (not CAPRI)",intensity
+INTENSITY_M_MIN,,0.5,-,literature,"floor of the N intensity factor, nitrate-limit option only (not CAPRI)",intensity

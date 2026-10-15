@@ -222,3 +222,25 @@ Data-level fixes made while validating against CAPRI. Full provenance in
 - **Permanent-crop elasticities.** Literature priors made them ~10x *less* elastic
   than annuals; CAPRI's own `p_elasSupp` has them 2.47x *more*. Rescaled to
   CAPRI's relative structure.
+
+## Session: October 2026 — correspondence, demand, reporting, environment
+
+- **NUTS correspondence**: CAPRI's regional rows for 73 regions (all of France, several
+  German states, Bulgaria, Greece, Italy, Sweden, Norway, part of Poland) never reached the
+  model, so they received national averages for revenue, manure and feed per head. Pairs
+  added only when CAPRI's agricultural area matched the model's (exact to 0.2%, or within 1%
+  and unambiguous) **and** dairy herds (or wheat + barley area) matched within 3%; the second
+  test rejected three coincidental matches (one Italian, one Norwegian, one Polish).
+  Bulgaria uses CAPRI's own region order.
+- **Demand price reference**: demand measured price changes against the base *world* price
+  instead of the base *domestic* price, cutting every tariff-protected region's base demand
+  by (1 + tariff)^elasticity (EU beef 17% too low). Fixed; base results unchanged.
+- **EU price reporting**: reported EU prices omitted the Armington premium farmers respond
+  to; `domestic_prices` now carries the producer price (`wedge_prices` keeps the old value).
+- **Ammonia**: a housing-only factor plus "soils = 10% of livestock" proxy replaced by CAPRI's
+  factors per region and animal (`nh3_factors_capri.json`, from the 2030 reference run).
+- **Land-market units**: CAPRI's land-market terms are per hectare, the model's land in
+  1000 ha (factor 1,000; land-supply elasticities then fall in CAPRI's range).
+- **Environmental module in regional models**: regional models had no access to it, so two
+  calculations silently fell back to cruder values; it is now passed to every regional model
+  and fallbacks warn.

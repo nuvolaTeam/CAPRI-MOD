@@ -543,40 +543,6 @@
     "13 regions where CAPRI does not split the herd keep a single yield and no margin"
    ]
   },
-  "capri_ghg_mitigation": {
-   "file": "2017/abatement/capri_ghg_mitigation.csv",
-   "concept": "CAPRI mitigation technologies: shares, emissions under each technology, adoption costs",
-   "unit": "various",
-   "dimension": "member state x activity/source",
-   "modules": [
-    "abatement"
-   ],
-   "source": {
-    "source_type": "CAPRI_GDX",
-    "source_ref": "p_ghgMiti; res_2_1730greendeal_refpol_endotech_all_max",
-    "vintage": "2030",
-    "confidence": "validated",
-    "reproducibility": "public_code"
-   },
-   "known_gaps": []
-  },
-  "capri_mitigation_potential": {
-   "file": "2017/abatement/capri_mitigation_potential.csv",
-   "concept": "CAPRI technical mitigation potential by member state and source",
-   "unit": "fraction of emissions",
-   "dimension": "member state x activity/source",
-   "modules": [
-    "abatement"
-   ],
-   "source": {
-    "source_type": "CAPRI_GDX",
-    "source_ref": "p_ghgMiti; res_2_1730greendeal_refpol_endotech_all_max",
-    "vintage": "2030",
-    "confidence": "validated",
-    "reproducibility": "public_code"
-   },
-   "known_gaps": []
-  },
   "eu_gross_trade_supplement": {
    "file": "2017/market/eu_gross_trade_supplement.csv",
    "concept": "CAPRI's extra-EU gross trade for commodities the trade file does not record (sugar, durum wheat)",
@@ -657,25 +623,6 @@
    "concept": "Manure N trade between regions: export share of excretion, import per ha of cropland",
    "unit": "share; kg N/ha",
    "dimension": "region",
-   "modules": [
-    "environmental"
-   ],
-   "source": {
-    "source_type": "CAPRI_GDX",
-    "source_ref": "res_2_1730greendeal_refdefaulta dataOut",
-    "vintage": "2030",
-    "confidence": "validated",
-    "reproducibility": "capri_gdx"
-   },
-   "known_gaps": [
-    "unmatched regions"
-   ]
-  },
-  "capri_fertiliser_allocation": {
-   "file": "2017/environment/capri_fertiliser_allocation_2030.csv",
-   "concept": "CAPRI fertiliser allocation per region and crop: need, mineral, manure, residues, losses (calibration data for the allocation module)",
-   "unit": "kg N/ha",
-   "dimension": "region x crop",
    "modules": [
     "environmental"
    ],
@@ -896,6 +843,133 @@
    "known_gaps": [
     "NO/UK/CH not covered"
    ]
+  },
+  "young_animals_2017": {
+   "file": "2017/supply/young_animals_2017.json",
+   "concept": "CAPRI young-animal balances",
+   "unit": "head per head",
+   "dimension": "region x balance",
+   "modules": [
+    "supply"
+   ],
+   "source": {
+    "source_type": "CAPRI_GDX",
+    "source_ref": "res_17 young-animal rows; INPANI_",
+    "vintage": "2017",
+    "confidence": "validated",
+    "reproducibility": "capri_gdx"
+   },
+   "known_gaps": [
+    "not yet used"
+   ]
+  },
+  "mineral_n_price": {
+   "file": "2017/supply/mineral_n_price.csv",
+   "concept": "Mineral fertiliser N price",
+   "unit": "EUR per t N",
+   "dimension": "country",
+   "modules": [
+    "supply"
+   ],
+   "source": {
+    "source_type": "CAPRI_GDX",
+    "source_ref": "res_17 UVAG NITF",
+    "vintage": "2017",
+    "confidence": "validated",
+    "reproducibility": "capri_gdx"
+   },
+   "known_gaps": [
+    "not yet used"
+   ]
+  },
+  "manure_pool_costs": {
+   "file": "2017/environment/manure_pool_costs.json",
+   "concept": "Manure pool trade costs",
+   "unit": "EUR/t N",
+   "dimension": "pool x pool",
+   "modules": [
+    "model"
+   ],
+   "source": {
+    "source_type": "CAPRI_GDX",
+    "source_ref": "nuts2_center_distance; p_mPoolTradeCost",
+    "vintage": "star 3.0",
+    "confidence": "validated",
+    "reproducibility": "capri_gdx"
+   },
+   "known_gaps": []
+  },
+  "fert_dist_priors": {
+   "file": "2017/environment/fert_dist_priors_2030.csv",
+   "concept": "Priors of CAPRI's inner fertiliser distribution model: mineral, manure and residue N per ha of each crop group, efficiencies",
+   "unit": "kg N/ha; 1000 ha",
+   "dimension": "CAPRI region x crop group",
+   "modules": [
+    "environmental",
+    "supply"
+   ],
+   "source": {
+    "source_type": "CAPRI_GDX",
+    "source_ref": "res_2_1730greendeal_refdefaulta dataOut (fertDist_* per crop, LEVL, AGGT nutNed_*); checked against priFertDist_<MS>1730defaulta postModePerHa",
+    "vintage": "2030",
+    "confidence": "validated",
+    "reproducibility": "capri_gdx"
+   },
+   "known_gaps": [
+    "model regions without a CAPRI region use the country (level nuts0)"
+   ]
+  },
+  "fert_dist_crop_groups": {
+   "file": "2017/environment/fert_dist_crop_groups_2030.csv",
+   "concept": "Model crop -> CAPRI crop group area shares",
+   "unit": "share",
+   "dimension": "CAPRI region x model crop x crop group",
+   "modules": [
+    "environmental",
+    "supply"
+   ],
+   "source": {
+    "source_type": "CAPRI_GDX",
+    "source_ref": "res_2_1730greendeal_refdefaulta dataOut LEVL; supply/define_ngrp_sets.gms",
+    "vintage": "2030",
+    "confidence": "validated",
+    "reproducibility": "capri_gdx"
+   },
+   "known_gaps": []
+  },
+  "mineral_redu_exemptions": {
+   "file": "2017/policy/mineral_redu_exemptions.csv",
+   "concept": "CAPRI's exemptions from the crop-specific mineral fertiliser reduction",
+   "unit": "factor x baseline",
+   "dimension": "CAPRI region x crop group",
+   "modules": [
+    "supply"
+   ],
+   "source": {
+    "source_type": "CAPRI_SOURCE",
+    "source_ref": "pol_input/greendeal/minfert_redu_by_crop.gms",
+    "vintage": "star 3.0",
+    "confidence": "validated",
+    "reproducibility": "capri_source"
+   },
+   "known_gaps": []
+  },
+  "mineral_redu_limcres": {
+   "file": "2017/policy/mineral_redu_limcres.csv",
+   "concept": "CAPRI's relaxations of the limCres regulation",
+   "unit": "factor increment",
+   "dimension": "CAPRI region x crop group",
+   "modules": [
+    "environmental"
+   ],
+   "source": {
+    "source_type": "CAPRI_SOURCE",
+    "source_ref": "pol_input/greendeal/minfert_redu_by_crop.gms",
+    "vintage": "star 3.0",
+    "confidence": "validated",
+    "reproducibility": "capri_source"
+   },
+   "known_gaps": []
   }
  }
 }

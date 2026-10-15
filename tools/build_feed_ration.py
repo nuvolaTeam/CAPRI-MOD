@@ -31,7 +31,7 @@ FEEDS = ["FGRA", "FMAI", "FOFA", "FROO", "FCOM", "FSGM", "FSTR", "FCER",
 CAPRI_TO_MODEL = {
     "DCOL": "DCOW", "DCOH": "DCOW", "SCOW": "BCOW", "BULF": "BULL",
     "HEIF": "HFRS", "HEIR": "HFRS", "CAMF": "CALV", "CAFF": "CALV",
-    "CAMR": "CALV", "CAFR": "CALV", "SOWS": "PIGS", "PIGF": "PIGS",
+    "CAMR": "CALV", "CAFR": "CALV", "SOWS": "PIGS", "PIGF": "PIGF",
     "HENS": "LAYS", "POUF": "BROI", "SHGM": "SHGP", "SHGF": "SHGP",
 }
 # value: a number starting with a digit or minus, or GAMS's Eps (read as 0) -
@@ -41,7 +41,7 @@ CAPRI_TO_MODEL = {
 #: applies to HEIF's ration (REGISTERED)
 PMP_ACTS = {"DCOL": "DCOW", "DCOH": "DCOW", "SCOW": "BCOW", "BULL": "BULL", "BULH": "BULL",
             "HEIR": "HFRS", "HEIF": "HFRS", "CAMF": "CALV", "CAFF": "CALV", "CAMR": "CALV",
-            "CAFR": "CALV", "SOWS": "PIGS", "PIGF": "PIGS", "HENS": "LAYS", "POUF": "BROI",
+            "CAFR": "CALV", "SOWS": "PIGS", "PIGF": "PIGF", "HENS": "LAYS", "POUF": "BROI",
             "SHGM": "SHGP", "SHGF": "SHGP"}
 ROW = re.compile(r"^'([^']+)'\.'([^']+)'\.'([^']+)'\.'Y'\s+(-?\d[\d.Ee+\-]*|[Ee][Pp][Ss])")
 
@@ -58,11 +58,13 @@ def main() -> None:
     corr = json.loads((_ROOT / "capri_data" / "shared" /
                        "nuts_version_correspondence.json").read_text())["capri8_to_nuts"]
 
-    def to_model(code8):
-        for cand in corr.get(code8, []):
-            if cand in herds.index:
-                return cand
-        return None
+    # CAPRI regions -> model regions in groups covering the same territory (tools/_model_regions.py:
+    # splits, merges, renamed regions); a group's CAPRI totals are spread over its model regions by
+    # their herds (the first-candidate rule put all of Etelae-Suomi on Uusimaa's herd)
+    import importlib.util as _ilu
+    _sp = _ilu.spec_from_file_location("_mr", _ROOT / "tools" / "_model_regions.py")
+    _mr = _ilu.module_from_spec(_sp); _sp.loader.exec_module(_mr)
+    code_to_group, groups = _mr.capri_groups(list(herds.index))
 
     anim = collections.defaultdict(dict)      # (capri region, capri act) -> item -> value
     var = collections.defaultdict(dict)       # bull variants BULL/BULH (the PMP file splits them)
@@ -92,18 +94,23 @@ def main() -> None:
     for (r8, a), d in anim.items():
         if r8.endswith("000000"):
             continue                               # regional rows only
-        reg = to_model(r8)
+        g = code_to_group.get(r8)
         lv, days = d.get("LEVL", 0.0), d.get("DAYS", 0.0)
-        if reg is None or lv <= 0 or days <= 0:
+        if g is None or lv <= 0 or days <= 0:
             continue
-        key = (reg, CAPRI_TO_MODEL[a])
-        reg8[reg] = r8
-        for f in FEEDS:
-            tot[key]["ration_" + f] += lv * d.get(f, 0.0)
-        for q in ("ENNE", "CRPR"):
-            tot[key]["req_" + q] += lv * d.get(q, 0.0) * days
-        tot[key]["req_DMIN"] += lv * d.get("DRMN", 0.0) * days
-        tot[key]["req_DMAX"] += lv * abs(d.get("DRMX", 0.0)) * days
+        act_m = CAPRI_TO_MODEL[a]
+        regs_g = sorted(groups[g][1])
+        hg = float(sum(herds.at[r_, act_m] for r_ in regs_g)) if act_m in herds.columns else 0.0
+        for reg in regs_g:
+            w = float(herds.at[reg, act_m]) / hg if hg > 0 else 1.0 / len(regs_g)
+            key = (reg, act_m)
+            reg8.setdefault(reg, min(groups[g][0]))
+            for f in FEEDS:
+                tot[key]["ration_" + f] += w * lv * d.get(f, 0.0)
+            for q in ("ENNE", "CRPR"):
+                tot[key]["req_" + q] += w * lv * d.get(q, 0.0) * days
+            tot[key]["req_DMIN"] += w * lv * d.get("DRMN", 0.0) * days
+            tot[key]["req_DMAX"] += w * lv * abs(d.get("DRMX", 0.0)) * days
 
     # NATIONAL REMAINDER, as in build_livestock_output_coef.py: where CAPRI
     # reports a member state's animals only nationally (or regional rows do

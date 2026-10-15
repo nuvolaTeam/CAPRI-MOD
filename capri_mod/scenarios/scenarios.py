@@ -94,20 +94,8 @@ def wto_liberalisation_scenario() -> PolicyScenario:
 
 
 def climate_policy_scenario(carbon_price_eur: float = 100.0) -> PolicyScenario:
-    """
-    Carbon pricing scenario:
-    - Carbon price on agricultural emissions
-    - Increased incentives for carbon sequestration
-    """
-    return PolicyScenario(
-        name=f"CARBON_PRICE_{int(carbon_price_eur)}",
-        description=f"Agricultural carbon price at {carbon_price_eur} EUR/t CO2-eq.",
-        # Carbon price translates to reduced payments for high-emission activities
-        # and increased payments for sequestration
-        aecs_rate_change=carbon_price_eur * 0.3,  # proxy for carbon farming payments
-        nitrate_limit_change=-20.0,
-        eco_scheme_budget_pct=0.30,
-    )
+    """Carbon pricing: CAPRI's emission tax in the supply models (see carbon_tax_scenario)."""
+    return carbon_tax_scenario(carbon_price_eur)
 
 
 def ukraine_war_trade_shock() -> PolicyScenario:
@@ -216,16 +204,15 @@ def n_limits_scenario() -> PolicyScenario:
 
 
 def carbon_tax_scenario(carbon_price: float = 100.0) -> PolicyScenario:
-    """
-    Agricultural carbon tax.
-    Source: gams/scen/ghg_emission_abatement/carbon_tax_eu_agri.gms
-    """
+    """CAPRI's emission tax (pol_input/ecampa/carbtax50_endotech_set12.gms: %ghgTax% on, p_carbonTax(ru, "GGWP") =
+    p_ghgEmisTax on the EU regions): EUR per t CO2-eq on agricultural emissions inside the supply models, with the
+    mitigation options endogenous (capri_mod/supply/ghg_tax.py). The tax is the scenario's only shock, as in CAPRI's
+    file (the earlier version stood in for it with agri-environment payments, a nitrate limit and an eco-scheme
+    budget: retired, Sprint 9i)."""
     return PolicyScenario(
         name=f"CARBON_TAX_{int(carbon_price)}",
-        description=f"Agricultural carbon tax at EUR {carbon_price}/t CO2-eq.",
-        aecs_rate_change=carbon_price * 0.30,
-        nitrate_limit_change=-15.0,
-        eco_scheme_budget_pct=0.30,
+        description=f"CAPRI emission tax at EUR {carbon_price}/t CO2-eq on EU agricultural emissions (ghgTax).",
+        carbon_tax=float(carbon_price),
     )
 
 

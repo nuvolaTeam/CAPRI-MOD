@@ -68,6 +68,36 @@ FINAL_PRODUCTS = ("COMI", "BEEF", "PORK", "POUM", "EGGS", "SGMT", "SGMI")
 #: the same concept, and for livestock it replaces a revenue built from YILD -
 #: which for breeding and suckler activities is not a marketed product at all.
 REVENUE_ITEM = "MREV"
+#: CAPRI final product -> the model's market whose price moves it. Sheep and goat milk is raw milk
+#: delivered to dairies with cow milk (CAPRI sets.gms PRCD MILK.(COMI,SGMI)), so it moves with MILK.
+PRODUCT_MARKET = {"COMI": "MILK", "BEEF": "BEEF", "PORK": "PORK", "POUM": "POUL", "EGGS": "EGGS", "SGMT": "SHGM",
+                  "SGMI": "MILK"}
+
+
+def build_product_quantities(dump_dir: Path) -> pd.DataFrame:
+    """Quantity of each final product per model head, columns 'ACT.PRODUCT' (kt per 1000 head): the
+    split of livestock_output_coef (their sum) into CAPRI's products - sheep and goats into meat SGMT
+    and milk SGMI, dairy cows into milk COMI and cull-cow beef."""
+    cols = {}
+    for prod in FINAL_PRODUCTS:
+        c = build(dump_dir, f"QTY:{prod}")
+        for act in c.columns:
+            if c[act].fillna(0).abs().sum() > 0:
+                cols[f"{act}.{prod}"] = c[act]
+    return pd.DataFrame(cols).sort_index(axis=1)
+
+
+def build_product_values_by_market(dump_dir: Path) -> pd.DataFrame:
+    """Value of each final product per model head, columns 'ACT.MARKET' (EUR per head): a market
+    price change moves an animal's revenue by quantity x price change, product by product (a dairy
+    cow's cull-cow beef moves with the beef price, her milk with the milk price)."""
+    cols = {}
+    for prod, mkt in PRODUCT_MARKET.items():
+        c = build(dump_dir, f"FINAL_VALUE:{prod}")
+        for act in c.columns:
+            if c[act].fillna(0).abs().sum() > 0:
+                cols[f"{act}.{mkt}"] = c[act]
+    return pd.DataFrame(cols).sort_index(axis=1)
 
 #: CAPRI elementary livestock activity -> this model's activity. Verified to
 #: reproduce CAPRI's aggregate rows exactly; intensity variants (DCOL, DCOH,
@@ -78,7 +108,7 @@ CAPRI_TO_MODEL = {
     "BULF": "BULL",
     "HEIF": "HFRS", "HEIR": "HFRS",
     "CAMF": "CALV", "CAFF": "CALV", "CAMR": "CALV", "CAFR": "CALV",
-    "SOWS": "PIGS", "PIGF": "PIGS",   # the model keeps all pigs in PIGS
+    "SOWS": "PIGS", "PIGF": "PIGF",   # PIGS = sows (with piglets to 20 kg), PIGF = fattening pigs (CAPRI's split)
     "HENS": "LAYS",
     "POUF": "BROI",
     "SHGM": "SHGP", "SHGF": "SHGP",
@@ -104,7 +134,7 @@ def _num(tok: str) -> float:
     return float(tok)
 
 
-def _capri_totals(dump_dir: Path, value_item: str = None):
+def _capri_totals(dump_dir: Path, value_item: str = None, products=FINAL_PRODUCTS):
     """(8-char region, model activity) -> final-product total in kt.
 
     With ``value_item`` (e.g. MREV) it returns LEVL x that item instead, i.e.
@@ -125,7 +155,7 @@ def _capri_totals(dump_dir: Path, value_item: str = None):
             elif value_item is not None:
                 if item == value_item:
                     coef[(reg, act)] += val
-            elif item in FINAL_PRODUCTS:
+            elif item in products:
                 coef[(reg, act)] += val
         for key, lv in levl.items():
             if key in coef:
@@ -134,6 +164,36 @@ def _capri_totals(dump_dir: Path, value_item: str = None):
                 # value (MREV) needs no such conversion
                 scale = 1.0 if value_item is not None else 1000.0
                 totals[(reg, CAPRI_TO_MODEL[act])] += lv * coef[key] / scale
+    return totals
+
+
+def _final_product_value_totals(dump_dir: Path, products=FINAL_PRODUCTS):
+    """(8-char region, model activity) -> value of final products, 1000 EUR: LEVL x quantity x the
+    member state's unit value (UVAG). Young animals are left out. This is the part of an animal's
+    output whose value moves with meat, milk and egg prices; it is not CAPRI's MREV, whose content
+    differs by activity: for activities that only raise young animals it IS their sales (sows: 24.0
+    piglets x EUR 25.43 = 610.9 = MREV in DE94; raised calves CAMR: YBUL x UVAG = 623.7 = MREV), for
+    suckler cows it is a quarter of their beef value."""
+    totals = defaultdict(float)
+    for path in sorted(glob.glob(str(dump_dir / "res_17*.txt"))):
+        levl, qty, uvag = {}, defaultdict(dict), {}
+        for line in open(path, errors="ignore"):
+            m = _ROW.match(line)
+            if not m:
+                continue
+            reg, act, item, val = m.group(1), m.group(2), m.group(3), _num(m.group(4))
+            if act == "UVAG" and reg.endswith("000000") and item in products:
+                uvag[(reg[:2], item)] = val
+            elif act in CAPRI_TO_MODEL:
+                if item == "LEVL":
+                    levl[(reg, act)] = val
+                elif item in products:
+                    qty[(reg, act)][item] = val
+        for key, lv in levl.items():
+            reg, act = key
+            v = sum(q * uvag.get((reg[:2], it), 0.0) for it, q in qty.get(key, {}).items()) / 1000.0
+            if v:
+                totals[(reg, CAPRI_TO_MODEL[act])] += lv * v
     return totals
 
 
@@ -148,33 +208,47 @@ def build(dump_dir: Path, value_item: str = None) -> pd.DataFrame:
     corr = json.loads((_ROOT / "capri_data" / "shared" /
                        "nuts_version_correspondence.json").read_text())["capri8_to_nuts"]
 
-    def to_model(code8):
-        for cand in corr.get(code8, []):
-            if cand in model_regions:
-                return cand
-        return None
+    # CAPRI regions -> model regions in GROUPS covering the same territory (tools/_model_regions.py:
+    # one to one, splits, merges). The first-candidate rule used before put a split parent's whole
+    # total on one part (Finland FI1B: all of Etelae-Suomi's manure on Uusimaa's herd, 990 kg N per
+    # dairy cow) and left renamed or split regions (Poland, Saxony, Bolzano/Trento, Budapest,
+    # Ireland) to the national-remainder average.
+    import importlib.util as _ilu
+    _sp = _ilu.spec_from_file_location("_mr", _ROOT / "tools" / "_model_regions.py")
+    _mr = _ilu.module_from_spec(_sp); _sp.loader.exec_module(_mr)
+    code_to_group, groups = _mr.capri_groups(sorted(model_regions))
 
-    totals = _capri_totals(dump_dir, value_item)
+    if value_item == "FINAL_VALUE":
+        totals = _final_product_value_totals(dump_dir)
+    elif value_item and value_item.startswith("FINAL_VALUE:"):          # one final product only
+        totals = _final_product_value_totals(dump_dir, (value_item.split(":", 1)[1],))
+    elif value_item and value_item.startswith("QTY:"):                  # one final product's quantity
+        totals = _capri_totals(dump_dir, None, (value_item.split(":", 1)[1],))
+    else:
+        totals = _capri_totals(dump_dir, value_item)
 
-    regional = defaultdict(float)          # (model region, act) -> kt
+    grouped = defaultdict(float)           # (group, act) -> kt
     national = defaultdict(float)          # (capri country, act) -> kt
     for (code8, act), kt in totals.items():
         if code8.endswith("000000"):
             national[(code8[:2], act)] += kt
             continue
-        # Only codes that map to a model region are used. NUTS-1 aggregates
-        # (DE100000, FR200000 ...) never map to a NUTS-2 model region, so this
-        # also stops them being added on top of their own NUTS-2 regions.
-        reg = to_model(code8)
-        if reg is not None:
-            regional[(reg, act)] += kt
+        # Only codes in a group with model regions are used. NUTS-1 aggregates
+        # (DE100000, FR200000 ...) are in none, so they are never added on top
+        # of their own NUTS-2 regions.
+        g = code_to_group.get(code8)
+        if g is not None:
+            grouped[(g, act)] += kt
 
     coef = pd.DataFrame(index=sorted(model_regions), columns=model_acts, dtype=float)
-
-    for (reg, act), kt in regional.items():
-        heads = float(herds.at[reg, act]) if act in herds.columns else 0.0
+    regional = defaultdict(float)          # (model region, act) -> kt placed (by heads within a group)
+    for (g, act), kt in grouped.items():
+        regs_g = sorted(groups[g][1])
+        heads = float(herds.loc[regs_g, act].sum()) if act in herds.columns else 0.0
         if heads > 0:
-            coef.at[reg, act] = kt / heads
+            for r in regs_g:
+                coef.at[r, act] = kt / heads
+                regional[(r, act)] += kt * float(herds.at[r, act]) / heads
 
     # Residual allocation: whatever part of the national total was NOT placed
     # on a mapped region is spread over the country's remaining model regions,
@@ -216,3 +290,21 @@ if __name__ == "__main__":
     rev.to_csv(dest2)
     print(f"wrote {dest2} — {rev.notna().sum().sum()} coefficients "
           f"(1000 EUR per 1000 head)")
+    # Livestock COSTS the same way: CAPRI's regional LEVL x TOIN (total inputs,
+    # incl. young-animal purchases and feed) divided by the model's head count.
+    # Costs used to be CAPRI's per-head TOIN while revenue was total / model
+    # heads: where model heads differ from CAPRI's activity level (bulls and
+    # heifers several-fold) revenue was inflated and costs were not - Brittany's
+    # bulls earned an 88% margin (CAPRI 15-34%).
+    cst = build(src, "TOIN")
+    dest3 = _ROOT / "capri_data" / "2017" / "supply" / "livestock_cost_coef.csv"
+    cst.to_csv(dest3)
+    print(f"wrote {dest3} — {cst.notna().sum().sum()} coefficients (1000 EUR per 1000 head)")
+    # ...and REVENUE on the matching basis: CAPRI's total output TOOU (incl. the
+    # young animals breeders produce), LEVL x TOOU / model heads. TOOU - TOIN is
+    # CAPRI's own margin (GVAP); MREV omits calves, so MREV - TOIN made suckler
+    # cows lose 11 times their revenue.
+    tou = build(src, "TOOU")
+    dest4 = _ROOT / "capri_data" / "2017" / "supply" / "livestock_output_value_coef.csv"
+    tou.to_csv(dest4)
+    print(f"wrote {dest4} — {tou.notna().sum().sum()} coefficients (1000 EUR per 1000 head)")

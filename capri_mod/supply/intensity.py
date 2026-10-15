@@ -49,14 +49,15 @@ from typing import Dict, Optional
 
 import numpy as np
 import pandas as pd
+from capri_mod.params import param, param_table
 
 #: Default Mitscherlich curvature. Higher = yield falls faster as N is withdrawn.
 #: k=3.0 gives ~5% yield loss for a 20% N reduction on cereals.
-DEFAULT_K = 3.0
+DEFAULT_K = param("INTENSITY_K")
 
 #: Floor on the intensity factor: below this, agronomic response data is not
 #: credible and the crop would realistically be abandoned rather than starved.
-DEFAULT_M_MIN = 0.5
+DEFAULT_M_MIN = param("INTENSITY_M_MIN")
 
 
 @dataclass

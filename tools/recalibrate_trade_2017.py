@@ -109,7 +109,7 @@ def main() -> None:
     ap.add_argument("--dry-run", action="store_true")
     args = ap.parse_args()
 
-    cur_path = args.data_dir / "shared" / "trade_flows_2021.csv"
+    cur_path = args.data_dir / "sources" / "fao_2021" / "trade_flows_2021.csv"
     cur = pd.read_csv(cur_path, index_col=[0, 1])
     cur17_path = args.data_dir / "shared" / "trade_flows_2017.csv"
     cur17_cols = list(pd.read_csv(cur17_path, index_col=[0, 1]).columns) if cur17_path.exists() else []

@@ -1,3 +1,10 @@
-numpy>=1.24
+# capri-mod runtime dependencies (as pyproject.toml)
 pandas>=2.0
+numpy>=1.24
 scipy>=1.10
+# Clarabel interior-point conic solver (Apache-2.0): the regional problems with feeding inside the supply models
+# and the manure-market pool equilibrium
+clarabel>=0.7
+# CasADi with IPOPT: tools/nlp_check, regional problems in CAPRI's original non-convex form (a check, not the model's solver)
+casadi>=3.6
+# the test runner uses its own stand-in; pytest is optional (python -m pytest capri_mod/tests)

@@ -1,6 +1,6 @@
 # Oilseed crushing — design
 
-Status: **Stages 1–3 done** — crushing live in all regions; cakes are feed and price livestock protein feed (soybean-meal proxy removed). Stage 4 (biofuels) open.
+Status: **Stages 1–4 done** — crushing live in all regions; cakes are feed and price livestock protein feed (soybean-meal proxy removed); biofuel feedstock demand (oils, cereals, sugar, wine) is inside the market (Stage 4, October 2026) and the post-solve biofuel module is retired.
 Replaces the soybean-meal **proxy price** (0.89 × soybean price), which breaks
 the project rule: no proxy prices unless CAPRI uses them. CAPRI does not: it
 forms oil and cake prices in their own markets.
@@ -28,8 +28,8 @@ step.
 | Crushing → oil and cake markets | inside the market | oil and cake supply = crush × yields (rapeseed 0.418 / 0.541, sunflower 0.420 / 0.528, soybean 0.186 / 0.788) |
 | Oil and cake markets → crushing | inside the market | oil and cake prices enter the margin, so crush responds to all three prices (CAPRI's `p_ElasProc`) |
 | Herds → cake demand | outer loop | protein-rich feed per head (`FPRO`, CAPRI totals ÷ herds) × herds sets cake feed demand, as cereals' feed demand already does |
-| Cake prices → livestock costs | outer loop, via the price signal | protein-feed cost per head follows the cake price index — **removes the soybean-meal proxy** |
-| Oil markets ↔ biofuels | Stage 4 | biodiesel demand for oils inside the market (CAPRI `p_biofuelData`) |
+| Cake prices → livestock costs | outer loop, via the price signal | protein-feed cost per head follows the cake price index — **removes the soybean-meal proxy**; since Sprint 9d CAPRI's FPRO bulk price per member state (docs/BIOFUEL_MARKET.md) |
+| Oil and feedstock markets ↔ biofuels | inside the market (Stage 4) | EU biofuel feedstock use per member state from CAPRI's CES at fixed biofuel output (`biofFeedCost_`, `biofFeedCostAgg_`, `Biof_`, `prodBiof_`) |
 | Seed prices → farm supply | existing price signal | unchanged path; now seed prices reflect oil and cake values |
 
 ## Base data (CAPRI FAO_agg, base period)
@@ -73,9 +73,33 @@ protein-feed cost follows the cake price index weighted by CAPRI's cake feed
 use (soybean 39.5, rapeseed 10.9, sunflower 9.8 Mt). **The soybean-meal proxy is
 then removed.**
 
-**Stage 4 — oils and biofuels.** Biodiesel demand for oils inside the market,
-retiring the post-solve biofuel module (CAPRI models biofuel demand in the
-market).
+**Stage 4 — oils and biofuels (done, October 2026).** CAPRI's biofuel block in the market model
+(`arm/market_model.gms`), as CAPRI runs it in a scenario without endogenous biofuel markets
+(`arm/prep_market.gms`: `p_endoBioMarket = 0` unless `BIOF_M=ON`; `arm/fix_biofuel_market_vars.gms`
+then fixes biofuel output and biofuel prices, while the feedstock mix stays free):
+
+- `biofFeedCost_`: net cost per t of feedstock = feedstock price − by-product yield × by-product price
+  (DDGS for cereals at CAPRI's 2030 producer price; glycerine for oils at CAPRI's fixed 600 €/t,
+  `arm/store_prices.gms`);
+- `biofFeedCostAgg_`: CES aggregate per biofuel, substitution elasticity 4 (`arm/market1.gms`
+  `p_rhoBioFuel`), share parameters as `biofuel/def_biofuel_params.gms` calibrates them;
+- `Biof_`: feedstock use = share × output × (aggregate cost / own cost)^4, for all but the numeraire
+  (the largest feedstock); `prodBiof_`: output = Σ feedstock × PRCB fixes the numeraire.
+
+Per member state, from CAPRI's 2030 Green Deal reference market results
+(`tools/build_biofuel_market.py`, formerly `build_biofuel_feedstock.py` → `market/biofuel_feedstock.csv`, `biofuel_use_share.csv`). The
+builder reproduces CAPRI's own `BiofFeedCost` exactly in every member state. EU feedstock use (kt):
+rapeseed oil 6,243, palm oil 2,166, sunflower oil 535, soybean oil 549; wheat 4,058, maize 3,107,
+barley 2,655, rye/oats/other cereals 1,723, sugar 2,275, wine 1,254. In the market the biofuel part of
+EU use (52% of rapeseed oil, 23% of soybean oil, 12% of sugar, 4–7% of cereals) follows the CES at
+fixed output; the rest keeps its food response. Palm oil and other oils have no model market (price at
+the 2030 reference); DDGS is not a model market either (CAPRI: endogenous feed price) — REGISTERED.
+`run(biofuel_output_scale={"BIOD": x})` sets a mandate scenario. Farm-to-Fork 2030: gap 4.64 → 4.62
+(small, as expected: biofuel output is fixed and feedstock prices move ≤ 20%).
+
+**Since Sprint 9c** the biofuel output is endogenous as well (CAPRI's `BIOF_M`, star 3.0's default): biofuel
+supply on the processing margin, use against fossil fuel and bilateral trade, in every CAPRI market region; the
+feedstock CES above then runs at that output, in non-EU regions too (docs/BIOFUEL_MARKET.md).
 
 **Data needed from the project lead:** CAPRI's calibrated market elasticities,
 `%results_in%\arm\elas<BAS><SIM><reg_agg>…gdx` (read by `arm/trim_elas.gms`):

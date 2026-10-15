@@ -167,6 +167,9 @@ class PolicyScenario:
     # Pillar I changes (relative to baseline)
     biss_rate_change: float = 0.0          # EUR/ha change in BISS rate
     coupled_support: Dict[str, float] = field(default_factory=dict)
+    #: premium factors by model region and activity, {region: {activity: new/old}}: a CAPRI
+    #: premium experiment applied as CAPRI's relative change of PRME (tools/run_vcs_2030.py)
+    premium_factor_regional: Dict[str, Dict[str, float]] = field(default_factory=dict)
     # {commodity: EUR/head or EUR/ha}
     eco_scheme_budget_pct: float = 0.25    # % of Pillar I for eco-schemes
 
@@ -200,6 +203,32 @@ class PolicyScenario:
     #: (median surplus 54 kg N/ha against applied intensity 241), so the tiered
     #: rule must never be applied to the applied-N basis directly.
     nutrient_surplus_target: bool = False
+    #: how the surplus target is set per region (a scenario-configuration setting; default star 3.0's):
+    #: "jrc121368" - the tiered rule and the nine-region 36% cap of JRC121368 (the 2020 CAPRI run);
+    #: "star3" - CAPRI star 3.0's pol_input/greendeal/surptot.gms: every EU NUTS2 region's baseline
+    #: surplus per hectare cut by surplus_cut (surpRedu/100), no tiers, no caps
+    surplus_rule: str = "star3"
+    surplus_cut: float = 0.5
+    #: CAPRI's manure trade (GUI "New Manure Trade Module", manureTradeNew) for this scenario and its baseline;
+    #: None = capri-mod's default (CAPRIModel.use_manure_market: on, as star 3.0's GUI)
+    manure_trade: Optional[bool] = None
+    #: CAPRI's endogenous biofuel markets (GUI "Endogenous bio-fuel markets", BIOF_M) for this scenario and its
+    #: baseline; None = capri-mod's default (CAPRIModel.biofuel_markets: on, as star 3.0's GUI)
+    biofuel_markets: Optional[bool] = None
+    #: CAPRI's biofuel mandate scenario (scen/bio_fuels/change_biof_mandate.gms): the EU member states' and the
+    #: UK's blending mandates (QUTS) times this factor; a policy shock of the scenario (None = unchanged). Acts
+    #: with endogenous biofuel markets.
+    biofuel_mandate: Optional[float] = None
+    #: CAPRI's Green Deal mineral fertiliser reduction (greendeal_scenarios.gms, mineRedu; a policy shock of the
+    #: scenario, EU27 only): "00" off; "20" minfert_redu_uaa.gms - mineral N per ha of UAA <= baseline x (1 - 20%)
+    #: (e_synNMax); "10crp"/"13crp"/"17crp"/"20crp" minfert_redu_by_crop.gms - mineral N per ha of each crop group
+    #: <= its baseline x (1 - r), groups below 30 kg/ha and CAPRI's listed exceptions held at baseline (nMax_ and the
+    #: "f2f"/"limCres" regulations of the inner fertiliser model). docs/FERTILISER_ALLOCATION.md
+    mineral_redu: str = "00"
+    #: CAPRI's emission tax (ghgTax: p_carbonTax(ru, "GGWP"), pol_input/ecampa/carbtax50_endotech_*.gms), EUR per t
+    #: CO2-eq on the EU regions' agricultural emissions inside the supply models; a policy shock of the scenario
+    #: (0 = no tax). capri_mod/supply/ghg_tax.py
+    carbon_tax: float = 0.0
     #: Farm-to-Fork pesticide-reduction target, as a share (0.50 for -50%).
     #: CAPRI implements this as FOUR shocks (JRC121368): a cut in plant-
     #: protection EXPENDITURE, a 50% rise in other costs, 25% more cover crops,
@@ -208,6 +237,12 @@ class PolicyScenario:
     #: see SupplyModel.apply_pesticide_reduction for why that is defensible and
     #: what it omits.
     pesticide_reduction: float = 0.0
+
+    #: CAPRI's endogenous-technology settings for this run (capri_mod/policy/endotech.py), e.g.
+    #: {"ghgTechMYld": 0.2}: scenario configuration parameters that, as in CAPRI (the scenario file loads
+    #: refpol_endotech_all_sup), hold for the scenario AND the baseline it is compared with. Empty = CAPRI
+    #: star 3.0 defaults (ghgTechMYld 0, ghgTechFEff 0.1).
+    endotech: Dict[str, float] = field(default_factory=dict)
 
     # Production quotas (dairy, sugar — historically important)
     milk_quota: Optional[float] = None    # 1000 t (None = no quota)

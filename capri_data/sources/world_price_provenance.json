@@ -39,11 +39,6 @@
   "source": "FAO_agg_17_defaulta p_dataMarket 'World'.'PMRK'.'BAS'",
   "previous": 102.7
  },
- "OOIL": {
-  "capri_code": null,
-  "source": "unchanged - CAPRI has NO world market price for other oilseeds (its OOIL activity produces product OOIL, absent from FAO_agg World PMRK); not an unmapped code",
-  "previous": 360.5
- },
  "SUGB": {
   "capri_code": "SUGB",
   "source": "FAO_agg_17_defaulta p_dataMarket 'World'.'PMRK'.'BAS'",
@@ -162,12 +157,13 @@
  "WMLK": {
   "capri_code": "WMIO",
   "source": "FAO_agg World PMRK WMIO BAS ('Whole milk powder only' in CAPRI's sets)",
-  "previous": 3200.0
+  "previous": 3200.0,
+  "removed_2026_10": "whole milk powder: not a market commodity of the model (no Armington row, no balance); read by no module; removed from world_prices.csv (orphan). Re-add from the source above if the market set grows (dairy processing)."
  },
  "CREM": {
   "capri_code": "CREM",
   "source": "FAO_agg_17_defaulta p_dataMarket 'World'.'PMRK'.'BAS'",
-  "previous": 1800.0
+  "previous": null
  },
  "RAPO": {
   "capri_code": "RAPO",
@@ -177,16 +173,63 @@
  "SOYA_OIL": {
   "capri_code": "SOYO",
   "source": "FAO_agg_17_defaulta p_dataMarket 'World'.'PMRK'.'BAS'",
-  "previous": 659.7
+  "previous": 659.7,
+  "removed_2026_10": "duplicate of SOYO (same CAPRI SOYO price) under an older name; read by no module; removed from world_prices.csv (orphan). Re-add from the source above if the market set grows (dairy processing)."
  },
  "SOYM": {
   "capri_code": "SOYC",
   "source": "FAO_agg_17_defaulta p_dataMarket 'World'.'PMRK'.'BAS'",
-  "previous": 304.0
+  "previous": 304.0,
+  "removed_2026_10": "duplicate of SOYC (same CAPRI SOYC price) under an older name; read by no module; removed from world_prices.csv (orphan). Re-add from the source above if the market set grows (dairy processing)."
  },
  "PARI": {
   "capri_code": "RICE",
   "source": "FAO_agg_17_defaulta p_dataMarket 'World'.'PMRK'.'BAS'",
   "previous": 411.42
+ },
+ "BIOE": {
+  "capri_code": "BIOE",
+  "source": "FAO_agg_17_defaulta p_dataMarket 'World'.'PMRK'.'BAS'",
+  "previous": null
+ },
+ "BIOD": {
+  "capri_code": "BIOD",
+  "source": "FAO_agg_17_defaulta p_dataMarket 'World'.'PMRK'.'BAS'",
+  "previous": null
+ },
+ "DDGS": {
+  "capri_code": "DDGS",
+  "source": "FAO_agg_17_defaulta p_dataMarket 'World'.'PMRK'.'BAS'",
+  "previous": null
+ },
+ "CASE": {
+  "capri_code": "CASE",
+  "source": "FAO_agg_17_defaulta p_dataMarket 'World'.'PMRK'.'BAS'",
+  "previous": null
+ },
+ "WMIO": {
+  "capri_code": "WMIO",
+  "source": "FAO_agg_17_defaulta p_dataMarket 'World'.'PMRK'.'BAS'",
+  "previous": null
+ },
+ "FRMI": {
+  "capri_code": "FRMI",
+  "source": "FAO_agg_17_defaulta p_dataMarket 'World'.'PMRK'.'BAS'",
+  "previous": null
+ },
+ "COCM": {
+  "capri_code": "COCM",
+  "source": "FAO_agg_17_defaulta p_dataMarket 'World'.'PMRK'.'BAS'",
+  "previous": null
+ },
+ "FENI": {
+  "capri_code": "FENI",
+  "source": "FAO_agg_17_defaulta p_dataMarket 'World'.'PMRK'.'BAS'",
+  "previous": null
+ },
+ "FPRI": {
+  "capri_code": "FPRI",
+  "source": "CAPRI market_base_1717: export-weighted PMRK of the exporting regions (FAO_agg has no World PMRK for FPRI); tools/build_feed_byproducts.py",
+  "previous": null
  }
 }

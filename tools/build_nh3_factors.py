@@ -33,22 +33,34 @@ def main() -> None:
         if m:
             v[m.group(1)][(m.group(2), m.group(3))] = float(m.group(4))
 
-    def factors(code):
-        d = v.get(code, {})
+    def factors(codes):
+        """factors over one CAPRI region or a group of them (splits and merges), N-weighted"""
+        codes = [codes] if isinstance(codes, str) else list(codes)
         num, den = defaultdict(float), defaultdict(float)
-        for (act, item), val in d.items():
-            if item == "GNH3" and act in CAPRI_TO_MODEL:
-                lev, mann = d.get((act, "LEVL"), 0.0), d.get((act, "MANN"), 0.0)
-                if lev > 0 and mann > 0:
-                    num[CAPRI_TO_MODEL[act]] += lev * val
-                    den[CAPRI_TO_MODEL[act]] += lev * mann
+        mf = mn = 0.0; tot = None
+        for code in codes:
+            d = v.get(code, {})
+            for (act, item), val in d.items():
+                if item == "GNH3" and act in CAPRI_TO_MODEL:
+                    lev, mann = d.get((act, "LEVL"), 0.0), d.get((act, "MANN"), 0.0)
+                    if lev > 0 and mann > 0:
+                        num[CAPRI_TO_MODEL[act]] += lev * val
+                        den[CAPRI_TO_MODEL[act]] += lev * mann
+            mf += d.get(("MINFER", "NITF"), 0.0); mn += d.get(("NH3MIN", "NITF"), 0.0)
+            if d.get(("NH3TOT", "NITF")) is not None:
+                tot = (tot or 0.0) + d.get(("NH3TOT", "NITF"))
         man = {a: num[a] / den[a] for a in num if den[a] > 0}
-        mf, mn = d.get(("MINFER", "NITF"), 0.0), d.get(("NH3MIN", "NITF"), 0.0)
-        return man, (mn / mf if mf > 0 else None), d.get(("NH3TOT", "NITF"))
+        return man, (mn / mf if mf > 0 else None), tot
 
+    # CAPRI regions per model region through the shared groups (splits, merges, renamed regions)
+    import importlib.util as _ilu
+    _sp = _ilu.spec_from_file_location("_mr", _ROOT / "tools" / "_model_regions.py")
+    _mr = _ilu.module_from_spec(_sp); _sp.loader.exec_module(_mr)
+    c2g, groups = _mr.capri_groups(list(areas.index))
+    reg_codes = {r: sorted(c for c in cs if c in v) for cs, rs in groups.values() for r in rs}
     out, src = {}, defaultdict(int)
     for reg in areas.index:
-        c8 = next((c for c, lst in corr.items() if reg in lst and not c.endswith("000000") and c in v), None)
+        c8 = reg_codes.get(reg) or None
         man, mi, tot = factors(c8) if c8 else ({}, None, None)
         nat = factors(reg[:2] + "000000")
         if not man and not nat[0]:

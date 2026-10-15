@@ -26,6 +26,43 @@ import numpy as np
 #: why the last call gave up (None if it succeeded) - for diagnosis only
 LAST_FAIL = None
 
+# ---- BACKEND SWITCH ------------------------------------------------------------
+# "builtin": this module's active-set method (+ exact least-distance solver).
+# "clarabel": Clarabel's interior-point method first (Apache-2.0, `pip install
+# clarabel`), through capri_mod/supply/convex_qp.py - the same problem
+# (1/2 x'Qx + c'x, A x <= b, x >= 0); its multipliers are kept in LAST_DUALS.
+# If Clarabel is missing or does not solve, the built-in chain runs as before.
+# Set per run by CAPRIModel.qp_solver (default "clarabel" since October 2026).
+BACKEND = "clarabel"
+LAST_DUALS = None
+_CLARABEL_WARNED = False
+
+
+def _try_clarabel(Q, c, A, b, tol=1e-9):
+    """(x, True) from Clarabel, or None to fall back to the built-in chain."""
+    global LAST_DUALS, _CLARABEL_WARNED
+    if BACKEND != "clarabel":
+        return None
+    try:
+        from capri_mod.supply.convex_qp import _clarabel
+        n = Q.shape[0]
+        A_ = np.asarray(A, float) if np.size(A) else np.zeros((0, n))
+        b_ = np.asarray(b, float) if np.size(b) else np.zeros(0)
+        x, ok, info = _clarabel(np.asarray(Q, float), np.asarray(c, float), A_, b_,
+                                np.zeros((0, n)), np.zeros(0), tol)
+        if ok:
+            LAST_DUALS = info.get("z")
+            return x, True
+    except ImportError:
+        if not _CLARABEL_WARNED:
+            import warnings as _w
+            _w.warn("qp_solver backend 'clarabel' requested but Clarabel is not installed "
+                    "(pip install clarabel); using the built-in solver")
+            _CLARABEL_WARNED = True
+    except Exception:
+        pass
+    return None
+
 
 def solve_qp(Q: np.ndarray,
              c: np.ndarray,
@@ -41,6 +78,9 @@ def solve_qp(Q: np.ndarray,
     """
     global LAST_FAIL
     LAST_FAIL = None
+    _cl = _try_clarabel(Q, c, A, b)
+    if _cl is not None:
+        return _cl
     n = Q.shape[0]
 
     # Fold the non-negativity bounds x >= 0 into the inequality set as -x <= 0,
@@ -148,6 +188,9 @@ def solve_qp_ldp(Q: np.ndarray, c: np.ndarray, A: np.ndarray, b: np.ndarray,
     definite), so this returns the same solution as any other exact method.
     Returns (x, ok).
     """
+    _cl = _try_clarabel(Q, c, A, b)
+    if _cl is not None:
+        return _cl
     global LAST_FAIL
     from scipy.optimize import nnls
     n = Q.shape[0]

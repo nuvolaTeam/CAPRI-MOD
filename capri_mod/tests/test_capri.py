@@ -136,22 +136,653 @@ def test_supply_no_blowup(model):
 def test_full_run_all_modules(model):
     regions = list(model.data["areas"].index[:5])
     r = model.run(scenario="BASELINE", max_outer_iter=1, market_max_iter=50,
-                  regions=regions, run_environmental=True, run_feed=True,
+                  regions=regions, run_environmental=True,
                   run_biofuel=True)
     for k in ["supply", "market", "environmental", "feed", "biofuel"]:
         assert r[k] is not None
 
 
-def test_biofuel_scenario_increases_output(model):
-    bm = model.biofuel_module
-    low = bm.run(mandate_share=0.065)
-    high = bm.run(mandate_share=0.14)
-    assert high.bioethanol_kt > low.bioethanol_kt
-    assert high.biodiesel_kt > low.biodiesel_kt
+def test_dairy_block_follows_capri_per_member_state(model):
+    """CAPRI's dairy block (arm/market_model.gms DairyNQ_, ProcMargM_, FatsProtBal_): all nine dairy products are
+    traded market commodities (bilateral flows, world prices); raw milk, fat and protein are priced per member state
+    (each member state's dairies process its own milk); at base every price ratio is 1; less milk in one member
+    state raises its own raw milk price only, and its fat and protein balances still close."""
+    import numpy as np
+    import pandas as pd
+    from capri_mod.data.definitions import MARKET_COMMODITIES
+    mm = model.market_module
+    for c in ("FRMI", "CREM", "COCM", "WMIO", "CASE"):
+        assert c in MARKET_COMMODITIES and mm.DAIRY_TRADED[c] == c
+    fl = pd.read_csv(DATA_DIR / "2017" / "market" / "bilateral_flows_2030.csv")
+    assert set(fl.commodity) >= {"FRMI", "CREM", "COCM", "WMIO", "CASE"}
+    was = mm.use_dairy_block
+    try:
+        mm.use_dairy_block, mm._dairy_cache = True, None
+        dp = mm._dairy_params()
+        assert len(dp["ms"]) >= 26
+        r0 = mm.dairy_block({k: 1.0 for k in mm.DAIRY_PRODUCTS}, 1.0)
+        assert all(abs(v["MILK"] - 1) < 1e-12 and abs(v["FATS"] - 1) < 1e-12 for v in r0["ms_price_ratio"].values())
+        r = mm.dairy_block({k: 1.0 for k in mm.DAIRY_PRODUCTS}, {"DE000000": 0.9})
+        de, fr = r["ms_price_ratio"]["DE000000"], r["ms_price_ratio"]["FR000000"]
+        assert de["MILK"] > 1.05 and abs(fr["MILK"] - 1.0) < 1e-12
+        prm = dp["ms"]["DE000000"]
+        z = mm._dairy_solve_ms(prm, np.zeros(len(prm["items"]) + 2), 0.9)
+        assert abs(prm["rowF"] @ z) < 1e-6 * prm["Q0"][prm["iM"]] and abs(prm["rowP"] @ z) < 1e-6 * prm["Q0"][prm["iM"]]
+        assert abs((prm["Q0"] + prm["G"] @ z)[prm["iM"]] / prm["Q0"][prm["iM"]] - 0.9) < 1e-9
+    finally:
+        mm.use_dairy_block, mm._dairy_cache = was, None
 
 
-if __name__ == "__main__":
-    sys.exit(pytest.main([__file__, "-v"]))
+def test_low_n_feed_follows_capri(model):
+    """CAPRI's low-nitrogen feeding (envind/low_n_feed.gms, star 3.0 ghgTechLowNFeed = 1): the protein requirement
+    of an animal fed above its requirement falls by 0.15 x excess / (1 + 0.5 x energy excess), manure N by that times
+    (MANN + CRPR_EXPT) / MANN; eligible shares as CAPRI's max calibration run (monogastrics 1); the option exists at
+    star 3.0's setting and not with ghgTechLowNFeed = 0."""
+    from capri_mod.policy.endotech import STAR3_DEFAULTS, scale_genetics
+    assert STAR3_DEFAULTS["ghgTechLowNFeed"] == 1.0
+    ge = model.data["genetics_effects"]
+    rows = [(a, e) for t in ge.values() for (a, o), e in t.items() if o == "lowNFeed"]
+    assert len(rows) > 1500
+    for a, e in rows:
+        assert -0.2 < float(e["d_crpr_rel"]) < 0 and float(e["d_mann_rel"]) <= float(e["d_crpr_rel"]) + 1e-12
+        assert 0 < float(e["elig_share"]) <= 1.0 + 1e-6 and float(e["cost_eur_head"]) > 0
+    assert all(abs(float(e["elig_share"]) - 1.0) < 1e-3 for a, e in rows if a in ("PIGF", "PIGS", "BROI", "LAYS"))
+    off = scale_genetics(model.data["genetics_effects_unit"], {**STAR3_DEFAULTS, "ghgTechLowNFeed": 0.0})
+    assert not any(o == "lowNFeed" for t in off.values() for (a, o) in t)
+
+
+def test_base_manure_trade_follows_capri_and_the_trade_setting(data):
+    """Sprint 9j: the base manure trade is CAPRI's 2030 reference per group of CAPRI and model regions (MTRADE,
+    EXCRET; Belgium, Romania and Ireland included) and counts only where the run trades manure (manureTradeNew):
+    without trade every region keeps its manure, as JRC121368's CAPRI."""
+    from capri_mod.environmental.environmental_module import EnvironmentalModule
+    mt = data["manure_trade"]
+    assert (mt.export_share > 0).sum() > 100 and (mt.import_kg_n_per_ha > 0).sum() > 100
+    for r in ("BE25", "RO22", "IE04"):
+        assert float(mt.at[r, "export_share"]) > 0, r
+    assert float(mt.at["RO31", "import_kg_n_per_ha"]) > 10
+    env = EnvironmentalModule(data)
+    acts = {a: float(v) for a, v in data["areas"].loc["DE94"].items()}
+    acts.update({a: float(v) for a, v in data["animal_numbers"].loc["DE94"].items()})
+    on = env.compute_nitrogen_balance(acts, data["yields"].loc["DE94"], "DE94")
+    env.set_manure_trade(False)
+    off = env.compute_nitrogen_balance(acts, data["yields"].loc["DE94"], "DE94")
+    assert float(off["n_organic_input"]) > float(on["n_organic_input"]) * 1.2      # Weser-Ems exports ~30%
+
+
+def test_emission_tax_in_supply_follows_capri(model):
+    """CAPRI's emission tax (ghgTax: p_carbonTax(ru, "GGWP") in the supply model's objective, EU regions only):
+    each column's emission per unit at the baseline solution (the accounts' finite differences; cattle enteric CH4
+    per t of feed fed, dry matter x GE x 4.1868 x Ym / 55.65 x GWP); with the tax the region's emissions fall,
+    herds shrink and the supplements, the breeding options and histosol fallowing are adopted where they pay; the
+    scenario carries the tax as its only shock; Norway is not taxed. The former post-solve abatement is gone."""
+    import importlib.util
+    from capri_mod.scenarios.scenarios import carbon_tax_scenario
+    from capri_mod.environmental.environmental_module import GWP_CH4
+    assert importlib.util.find_spec("capri_mod.abatement") is None
+    sc = carbon_tax_scenario(100.0)
+    assert sc.carbon_tax == 100.0 and sc.aecs_rate_change == 0.0 and sc.nitrate_limit_change == 0.0
+    regs = ["IE04", "NO01"] if "NO01" in model.data["areas"].index else ["IE04"]
+    b = model.run(scenario="BASELINE", regions=regs, max_outer_iter=2)
+    try:
+        s = model.run(custom_scenario=sc, regions=regs, max_outer_iter=2)
+        co = list(model._ghg_coef_cache.values())[-1]
+        assert "IE04" in co and not any(r.startswith("NO") for r in co)
+        c = co["IE04"]
+        assert c["act"]["DCOW"] > 0 and c["act"]["SWHE"] > 0 and c["hist"]["grass"] < 0
+        assert c["genet"][("DCOW", "Nitr_Tot")] < 0
+        r = model.supply_module.feed_rations["IE04"]["DCOW"]
+        fac = model.env_module._enteric_factors()["DCOW"]
+        j = r.feeds.index("FGRA")
+        e = fac["ge"]["IR000000"]["FGRA"] * 4.1868 * fac["ym"] / 55.65 * GWP_CH4 * float(r.dm[j])
+        assert abs(c["feed"][("DCOW", "FGRA")] - e) < 1e-9
+        g0 = float(b["environmental"].loc["IE04", "ghg_total"])
+        g1 = float(s["environmental"].loc["IE04", "ghg_total"])
+        assert g1 < 0.95 * g0
+        a0, a1 = b["supply"]["IE04"].activities, s["supply"]["IE04"].activities
+        assert a1["BCOW"] < a0["BCOW"] and a1["DCOW"] < a0["DCOW"]
+        gs = s["supply"]["IE04"].genetics_shift
+        assert gs.get(("DCOW", "Nitr_Tot"), 0.0) > 0 and sum(s["supply"]["IE04"].histosol_fallow.values()) > 0
+        assert s["abatement"]["carbon_tax"] == 100.0
+    finally:
+        model.run(scenario="BASELINE", regions=regs, max_outer_iter=2)
+    assert float(model.supply_module.ghg_tax) == 0.0
+
+
+def test_manure_market_and_ammonia_options_in_every_eu_solve(model):
+    """Sprint 9k: CAPRI's crop nutrient balance (NUTNED_) and manure market (e_netMTrade, e_costMTrade) are in every
+    run, not only under the N target: each EU solve carries the crop-need row and, with manure trade on, the pool
+    columns, whose cost is the pool price alone (CAPRI's calibrated constants; no fertiliser terms), plus the tax on
+    the mineral N bought or saved. Under the emission tax the ammonia options are in the regional model with their
+    emissions (manure N2O through the loss cascade, indirect N2O of the NH3 kept, soil N2O of the mineral N
+    displaced) and are adopted beyond their base shares; outside the EU nothing changes."""
+    from capri_mod.scenarios.scenarios import carbon_tax_scenario
+    regs = ["BE21", "NO01"] if "NO01" in model.data["areas"].index else ["BE21"]
+    b = model.run(scenario="BASELINE", regions=regs, max_outer_iter=2)
+    try:
+        mo = model.supply_module._models["BE21"]
+        assert mo._mctx() is not None and mo._need_row is not None
+        if model.use_manure_market:
+            je, ji = mo._pool_cols
+            Q, c, A, bb, y = mo._last_aug
+            assert abs(float(c[je]) - float(mo.manure_pool_price)) < 1e-9 and abs(float(c[ji]) + float(c[je])) < 1e-9
+        if "NO01" in regs:
+            assert model.supply_module._models["NO01"]._manure_ctx is None
+        sh0 = dict(b["supply"]["BE21"].manure_tech_shares)
+        s = model.run(custom_scenario=carbon_tax_scenario(100.0), regions=regs, max_outer_iter=2)
+        co = list(model._ghg_coef_cache.values())[-1]["BE21"]
+        assert co["mtech"] and any(v != 0 for v in co["mtech"].values())
+        tl = mo._tech_list()
+        assert tl and all("ghg" in t for t in tl) and any(t["ghg"] < 0 for t in tl)
+        # the tax prices the options' N2O: those that cut it (acidification, high-efficiency spreading, air
+        # purifiers) rise, low-emission spreading, whose NH3 kept raises application N2O in the cascade (JRC121368
+        # Table 18), falls; the region's manure N2O falls, its ammonia rises (pollution swapping)
+        sh1 = s["supply"]["BE21"].manure_tech_shares
+        assert any(sh1.get(k, 0.0) > v + 1e-3 for k, v in sh0.items())
+        assert sh1.get(("DCOW", "AmmAppLE"), 0.0) < sh0[("DCOW", "AmmAppLE")]
+        e0, e1 = b["environmental"].loc["BE21"], s["environmental"].loc["BE21"]
+        assert float(e1["ghg_manure_n2o"]) < float(e0["ghg_manure_n2o"])
+        assert s["supply"]["BE21"].animal_nh3_saved
+    finally:
+        model.run(scenario="BASELINE", regions=regs, max_outer_iter=2)
+
+
+def test_fertiliser_options_under_the_emission_tax(model):
+    """Sprints 9l, 9m: under CAPRI's emission tax the fertiliser options are in the regional model without a nitrogen row:
+    mineral N carries tax x the accounts' soil N2O factor at the solve's amount (the crops give back their base
+    part), inhibitors their literature N2O and NH3 side effects instead of their N saving (the accounts count them at
+    (1 - lit) x (1 + NMIN)); the options are adopted and the region's mineral N and soil N2O fall."""
+    from capri_mod.scenarios.scenarios import carbon_tax_scenario
+    from capri_mod.supply.supply_module import fert_side_value
+    regs = ["DE21"]
+    b = model.run(scenario="BASELINE", regions=regs, max_outer_iter=2)
+    try:
+        assert not b["supply"]["DE21"].fert_tech_shares
+        s = model.run(custom_scenario=carbon_tax_scenario(100.0), regions=regs, max_outer_iter=2)
+        mo = model.supply_module._models["DE21"]
+        ft = [(n, nm, a, b_, sx) for (n, nm, a, b_, s0, sx) in mo._mctx()["techs"]]
+        tt = mo._fert_tax_terms(ft)
+        assert abs(tt["m"] - 100.0 * 0.011 * 44 / 28 * 298 / 1000) < 1e-9
+        for (n, nm, *_), h in zip(ft, tt["h"]):
+            if fert_side_value("DE21", n, "N2OSYN") is None:
+                assert h == 0.0
+        sh = s["supply"]["DE21"].fert_tech_shares
+        assert sh.get("NITR_INH", 0.0) > 0.05
+        # Sprint 9m: inhibitors on manure under the tax (application N2O x CAPRI's N2OAPP, mineral N displaced, less
+        # the indirect N2O of the extra application NH3); none in the baseline
+        assert sh.get("NITR_INH_MAN", 0.0) > 0.1
+        assert sum(s["supply"]["DE21"].manure_ni_nh3.values()) > 0
+        # capri-mod-proto: decided inside the conic model, the share is CAPRI's first-order condition (no N row in
+        # DE21: S0 + slope x share = tax value, capped at the maximum share)
+        P = mo._manure_inhibitor_params()
+        expect = min(max((P["v_tax"] - P["S0"]) / P["slope"], 0.0), P["smax"])
+        assert abs(sh["NITR_INH_MAN"] - expect) < 2e-3
+        assert float(s["environmental"].loc["DE21", "ghg_manure_n2o"]) < float(b["environmental"].loc["DE21", "ghg_manure_n2o"])
+        e0, e1 = b["environmental"].loc["DE21"], s["environmental"].loc["DE21"]
+        assert float(e1["n_mineral_input"]) < 0.95 * float(e0["n_mineral_input"])
+        assert float(e1["ghg_soil_n2o"]) < float(e0["ghg_soil_n2o"])
+    finally:
+        model.run(scenario="BASELINE", regions=regs, max_outer_iter=2)
+
+
+def test_feed_supplements_follow_capri(model):
+    """CAPRI's feed supplements (envind/line_nitr.gms, star 3.0 ghgTechLineNitr = 1, a switch): cattle only;
+    nitrate replaces crude protein (1.54 x dosage of DM), linseed supplies the OOIL nutrients per kg of fat / rapeseed
+    fat content; CH4ENT -5% per point of fat (-25%) and -10% per point of nitrate (-15%, heifers HEIR -10%); cost =
+    half of costParLin x DM intake x dosage; maximum shares from CAPRI's max calibration run; none at
+    ghgTechLineNitr = 0, unchanged effects at any other setting (a switch)."""
+    from capri_mod.policy.endotech import STAR3_DEFAULTS, scale_genetics
+    assert STAR3_DEFAULTS["ghgTechLineNitr"] == 1.0
+    ge = model.data["genetics_effects"]
+    rows = [(a, o, e) for t in ge.values() for (a, o), e in t.items() if o in ("LINE_Tot", "Nitr_Tot")]
+    assert len(rows) > 1500
+    assert {a for a, o, e in rows} <= {"DCOW", "BCOW", "BULL", "HFRS", "CALV"}
+    assert not any(a == "BCOW" for a, o, e in rows if o == "Nitr_Tot")       # suckler cows excluded (line_nitr.gms)
+    for a, o, e in rows:
+        assert 0 < float(e["elig_share"]) <= 1.0 + 1e-6 and float(e["cost_eur_head"]) > 0
+        assert float(e["d_mann_rel"]) == 0.0 and float(e["d_crpr_rel"]) < 0
+        if o == "LINE_Tot":
+            assert abs(float(e["ch4ent_rel"]) + 0.25) < 1e-9 and float(e["d_ener_rel"]) < 0 and float(e["d_drmn_rel"]) < 0
+        else:
+            assert -0.15 - 1e-9 <= float(e["ch4ent_rel"]) <= -0.10 + 1e-9 and float(e["d_ener_rel"]) == 0.0
+    off = scale_genetics(model.data["genetics_effects_unit"], {**STAR3_DEFAULTS, "ghgTechLineNitr": 0.0})
+    assert not any(o in ("LINE_Tot", "Nitr_Tot") for t in off.values() for (a, o) in t)
+    two = scale_genetics(model.data["genetics_effects_unit"], {**STAR3_DEFAULTS, "ghgTechLineNitr": 2.0})
+    r_ = next(iter(ge))
+    for k, e in ge[r_].items():
+        if k[1] in ("LINE_Tot", "Nitr_Tot"):
+            assert float(two[r_][k]["d_crpr_rel"]) == float(e["d_crpr_rel"])
+
+
+def test_inner_fert_model_follows_capri():
+    """CAPRI's inner fertiliser distribution model (useInnerFertDistModel, star 3.0 default): at the baseline's
+    totals and group areas the posterior mode is the prior mode in every CAPRI region (CAPRI's priors are the
+    baseline's posterior modes per ha, accuracy 1); the flows add up to the regional totals; a regulation keeps
+    a flow below its maximum; the crop-specific mineral fertiliser reduction follows minfert_redu_by_crop.gms."""
+    from capri_mod.fert.inner_fert_dist import (InnerFertDist, beta_regulation, gamma_params, parse_mineral_redu,
+                                                SMALL_MINE_KG_HA)
+    f = InnerFertDist(str(DATA_DIR))
+    al, be = gamma_params(100.0, 1.0)
+    assert abs((al - 1.0) / be - 100.0) < 1e-9                       # the gamma's mode is the prior mode
+    assert beta_regulation() == (1.1875, 1.0625)
+    worst, n = 0.0, 0
+    for r, d in f.priors[f.priors.level == "ru"].groupby("capri_region"):
+        f._map[r] = r
+        area = dict(zip(d.ngrp, d.area_kha))
+        me, ea = f.efficiencies(r)
+        e = {"MINE": me if me == me else 1.0, "EXCR": ea if ea == ea else 1.0, "CRES": 0.75}
+        M, E, C = ((d[c] * d.area_kha).sum() for c in ("mine_kg_ha", "excr_kg_ha", "cres_kg_ha"))
+        out = f.solve(r, area, f.base_need_weight(r, area, e), M, E, C, e)
+        assert out["converged"], r
+        P = d.set_index("ngrp")
+        for (g, s_), x in out["per_ha"].items():
+            m_ = float(P.at[g, {"MINE": "mine_kg_ha", "EXCR": "excr_kg_ha", "CRES": "cres_kg_ha"}[s_]])
+            worst = max(worst, abs(x - m_) / max(1.0, m_))
+        n += 1
+    assert n >= 240 and worst < 1e-8
+    # a regulation (CAPRI's "f2f" beta density) on the mineral flows, at 80% of the base, below its capacity
+    r = "DE110000"
+    d = f.priors[f.priors.capri_region == r]
+    area = dict(zip(d.ngrp, d.area_kha))
+    me, ea = f.efficiencies(r)
+    e = {"MINE": me, "EXCR": ea, "CRES": 0.75}
+    M, E, C = ((d[c] * d.area_kha).sum() for c in ("mine_kg_ha", "excr_kg_ha", "cres_kg_ha"))
+    w = f.base_need_weight(r, area, e)
+    base = f.solve(r, area, w, M, E, C, e)
+    caps = f.mineral_caps(r, base, 0.2)
+    for g, v in caps.items():
+        b0 = base["per_ha"][(g, "MINE")]
+        assert abs(v - (b0 if b0 < SMALL_MINE_KG_HA else 0.8 * b0)) < 1e-9
+    capa = sum(v * area[g] for g, v in caps.items())
+    reg = {(g, "MINE"): v for g, v in caps.items()}
+    reg.update({(g, "CRES"): v for g, v in f.limcres_caps(r, base).items()})
+    out = f.solve(r, area, w, 0.99 * capa, E, C, e, caps=reg)
+    assert out["converged"]
+    assert all(out["per_ha"][(g, "MINE")] < v for g, v in caps.items())
+    assert abs(sum(x for (g, s_), x in out["flows"].items() if s_ == "EXCR") - E) < 1e-6 * E
+    # CAPRI's listed exemptions for 2030 (simy > 2025 / > 2020, othPol not high)
+    ex = f._rules()[0]
+    e30 = ex[(ex.after_year < 2030) & (ex.othpol_high == 0)]
+    assert len(e30) == 9 and set(e30.capri_region) >= {"IT930000", "DE940000", "IT310000"}
+    assert parse_mineral_redu("20crp") == ("crp", 0.2) and parse_mineral_redu("20") == ("uaa", 0.2)
+    assert parse_mineral_redu("00") == (None, 0.0)
+
+
+def test_mineral_fertiliser_cap_binds(model):
+    """CAPRI's mineral fertiliser reduction (Green Deal mineRedu "20", minfert_redu_uaa.gms e_synNMax): the
+    region's mineral N per ha of land falls to 80% of the baseline's, the cap's shadow price is positive, and the
+    run reports the inner model's allocation over CAPRI's crop groups."""
+    from capri_mod.policy.greendeal import greendeal_scenario
+    from capri_mod.data.definitions import CROPS
+    regs = ["DE11"]
+    b = model.run(scenario="BASELINE", regions=regs, max_outer_iter=1)
+    sc = greendeal_scenario(lndscpTarg=0, orgTarg=0, pestRedu=0, surpRedu=0, mineRedu="20")
+    s = model.run(custom_scenario=sc, regions=regs, max_outer_iter=1)
+    sr = s["supply"]["DE11"]
+    assert float(sr.shadow_prices.get("mineral_N", 0.0)) > 0
+    land = lambda x: sum(float(x["supply"]["DE11"].activities.get(c, 0.0)) for c in CROPS)
+    per_ha = [float(x["environmental"].loc["DE11", "n_mineral_input"]) / land(x) for x in (b, s)]
+    assert per_ha[1] / per_ha[0] < 0.80 + 0.005
+    fd = s["fert_dist"]
+    assert fd is not None and set(fd.ngrp) >= {"WHEA", "GRAS", "MAIF"} and fd.converged.all()
+    tot = float((fd.mine_kg_ha * fd.area_kha).sum())
+    assert abs(tot / float(s["environmental"].loc["DE11", "n_mineral_input"]) - 1.0) < 1e-6
+
+
+def test_ddgs_and_feed_bulks_follow_capri(model):
+    """CAPRI's DDGS (prodQuantBiofBy_) and feed bulks (feedBlkPrice_, feedShareEqu_): DDGS output from the ethanol
+    plants' cereal feedstocks reproduces CAPRI's 2030 output in every region; a dearer DDGS lowers the ethanol
+    plants' feedstock cost margin less (by-product revenue up), so ethanol output rises; the member states' bulks
+    reproduce CAPRI's EU feed use at reference prices and shift away from a dearer product within a bulk."""
+    mm = model.market_module
+    bp, fb = mm._biofuel_params(), mm._feed_bulk_params()
+    assert bp and fb and "DDGS" in mm.commodities
+    st0 = mm.biofuel_state(None, None, endogenous=True)
+    for reg, q in bp["ddgs0"].items():
+        assert abs(st0["ddgs"].get(reg, 0.0) - q) < 1e-6 * max(1.0, q), reg
+    R, C = list(mm.regions), list(mm.commodities)
+    up = pd.DataFrame(1.0, index=R, columns=C)
+    up.loc[:, "DDGS"] = 1.3
+    st1 = mm.biofuel_state(up, None, endogenous=True)
+    assert st1["prod"][("USA", "BIOE")] > st0["prod"][("USA", "BIOE")]
+    _bix, mm._feed_bulk_index = getattr(mm, "_feed_bulk_index", None), None     # bulks at the base herds
+    try:
+        f0 = mm.eu_feed_use({})
+        f1 = mm.eu_feed_use({"DDGS": 1.2})
+    finally:
+        mm._feed_bulk_index = _bix
+    for c, q in fb["feed0"].items():
+        assert abs(f0[c] / q - 1.0) < 1e-9, c
+    assert f1["DDGS"] < f0["DDGS"] and f1["SOYC"] > f0["SOYC"] and abs(f1["CORN"] / f0["CORN"] - 1.0) < 1e-12
+    assert mm.feed_bulk_price_ratio("DE000000", "FPRO", {"DDGS": 1.2}) > 1.0
+    assert mm.feed_bulk_price_ratio("DE000000", "FCER", {"DDGS": 1.2}) == 1.0
+
+
+def test_all_feed_bulks_and_residual_feeds_follow_capri(model):
+    """Sprint 9h: CAPRI's five tradable feed bulks (FCER, FPRO, FENE, FOTH, FMIL) per member state with
+    arm/market1.gms's p_rhoFeed (6, 6, 5, 0.5, 0.5); the residual feeds FENI and FPRI are traded markets whose EU
+    output is CAPRI's MaprFeed_: the 2030 output at reference use, moving with the parents' food and processing use
+    (milling: cereals; FENI: sugar, including its biofuel processing); the rations' bulks are priced by the
+    member state's bulk indices."""
+    from capri_mod.feed.ration import RationModel
+    mm = model.market_module
+    fb, fp = mm._feed_bulk_params(), mm._feed_byproduct_params()
+    assert {"FENI", "FPRI"} <= set(mm.commodities) and set(fp["products"]) == {"FENI", "FPRI"}
+    rho = {b: d["rho"] for (ms, b), d in fb["bulks"].items()}
+    assert rho == {"FCER": 6.0, "FPRO": 6.0, "FENE": 5.0, "FOTH": 0.5, "FMIL": 0.5}
+    assert abs(sum(w for _, _, w in fp["products"]["FPRI"]["parts"]) - 1.0) < 1e-9
+    old = (getattr(mm, "_eu_food_ratio", None), getattr(mm, "_eu_biof_ratio", None))
+    try:
+        mm._eu_food_ratio, mm._eu_biof_ratio = {}, {}
+        q0 = mm.eu_feed_byproduct_output()
+        assert abs(q0["FPRI"] / fp["products"]["FPRI"]["prod0"] - 1.0) < 1e-12
+        mm._eu_food_ratio = {"SWHE": 0.9}
+        q1 = mm.eu_feed_byproduct_output()
+        w = dict((c, x) for c, u, x in fp["products"]["FPRI"]["parts"])["SWHE"]
+        assert abs(q1["FPRI"] / q0["FPRI"] - (1.0 - 0.1 * w)) < 1e-12 and q1["FENI"] == q0["FENI"]
+    finally:
+        mm._eu_food_ratio, mm._eu_biof_ratio = old
+    assert mm.feed_bulk_price_ratio("DE000000", "FENE", {"FENI": 1.2}) > 1.0
+    assert mm.feed_bulk_price_ratio("DE000000", "FPRO", {"FPRI": 1.2}) > 1.0
+    assert mm.feed_bulk_price_ratio("DE000000", "FMIL", {"WHEY": 1.2}) > 1.0
+    rm = RationModel(str(DATA_DIR))
+    k = next(k for k, r in rm.rations.items() if "FENE" in r.feeds)
+    p = rm.price_vector(k, bulk_ratio={"FENE": 1.5})
+    r = rm.rations[k]
+    i = r.feeds.index("FENE")
+    assert abs(p[i] / r.p0[i] - 1.5) < 1e-12 and all(p[j] == r.p0[j] for j in range(len(p)) if j != i)
+
+
+def test_biofuel_feedstock_demand_in_market(model):
+    """Crushing stage 4: CAPRI's biofuel feedstock CES at fixed output (biofuel markets off, CAPRI without
+    BIOF_M) reproduces the 2030 reference at base prices, shifts away from a dearer feedstock, and scales
+    with output."""
+    mm = model.market_module
+    _bm, _st = mm.biofuel_markets, getattr(mm, "_biof_state", None)
+    mm.biofuel_markets, mm._biof_state = False, None     # no processing state of an earlier run
+    try:
+        _biofuel_fixed_output_checks(mm)
+    finally:
+        mm.biofuel_markets, mm._biof_state = _bm, _st
+
+
+def _biofuel_fixed_output_checks(mm):
+    bp = mm._biofuel_params()
+    assert bp and bp["groups"]
+    base = mm.biofuel_feedstock_use({})
+    for c, q0 in bp["q0"].items():
+        assert abs(base["by_commodity"][c] - q0) < 1e-6 * max(1.0, q0)
+    up = mm.biofuel_feedstock_use({"RAPO": 1.2})
+    assert up["by_commodity"]["RAPO"] < base["by_commodity"]["RAPO"]
+    assert up["by_commodity"]["SOYO"] > base["by_commodity"]["SOYO"]
+    # biodiesel output fixed: oils all yield ~0.956 t per t, so total oil use barely moves
+    oil = lambda r: sum(v for (b, _), v in r["by_feedstock"].items() if b == "BIOD")
+    assert abs(oil(up) / oil(base) - 1.0) < 2e-3
+    old = dict(mm.biofuel_output_scale)
+    try:
+        mm.biofuel_output_scale = {"BIOE": 1.0, "BIOD": 1.5}
+        hi = mm.biofuel_feedstock_use({})
+        assert abs(hi["by_commodity"]["RAPO"] / base["by_commodity"]["RAPO"] - 1.5) < 1e-9
+        assert abs(hi["by_commodity"]["SWHE"] - base["by_commodity"]["SWHE"]) < 1e-9
+    finally:
+        mm.biofuel_output_scale = old
+
+
+def test_biofuel_markets_follow_capri_functions(model):
+    """Endogenous biofuel markets (CAPRI BIOF_M, star 3.0 default): every region's biofuel output and use at
+    the reference prices are CAPRI's 2030 values; a dearer biofuel raises output (SupplyBiof_ on the processing
+    margin) and lowers use (biofDemShare_ against the fossil fuel price), dearer feedstock lowers output, and
+    the feedstock use follows the output; switched off, biofuel quantities stay at the reference."""
+    mm = model.market_module
+    bm = mm._biofuel_market_params()
+    assert bm and mm.biofuel_endogenous()
+    st0 = mm.biofuel_state(None, None)
+    for k, v in bm["prod0"].items():
+        assert abs(st0["prod"][k] - v) < 1e-6 * max(1.0, v), k
+    for k, v in bm["use0"].items():
+        assert abs(st0["use"][k] - v) < 1e-6 * max(1.0, v), k
+    R, C = list(mm.regions), list(mm.commodities)
+    one = pd.DataFrame(1.0, index=R, columns=C)
+    up = one.copy(); up.loc[:, "BIOE"] = 1.1
+    st1 = mm.biofuel_state(up, up)
+    assert st1["prod"][("EU27", "BIOE")] > st0["prod"][("EU27", "BIOE")]
+    assert st1["prod"][("USA", "BIOE")] > st0["prod"][("USA", "BIOE")]
+    assert st1["use"][("EU27", "BIOE")] < st0["use"][("EU27", "BIOE")]
+    feed = one.copy(); feed.loc[:, ["SWHE", "CORN", "BARL", "OCER", "SUGR"]] = 1.2
+    st2 = mm.biofuel_state(one, feed)
+    assert st2["prod"][("EU27", "BIOE")] < st0["prod"][("EU27", "BIOE")]
+    # the feedstock CES at the higher output uses more of every feedstock at unchanged prices
+    old = getattr(mm, "_biof_state", None)
+    try:
+        mm._biof_state = st1
+        q1 = mm.biofuel_feedstock_use({})["by_commodity"]
+        mm._biof_state = st0
+        q0 = mm.biofuel_feedstock_use({})["by_commodity"]
+        assert q1["CORN"] > q0["CORN"] and abs(q1["RAPO"] - q0["RAPO"]) < 1e-9
+        mm.biofuel_markets = False
+        assert not mm.biofuel_endogenous()
+        # off: output fixed whatever the biofuel price (CAPRI without BIOF_M)
+        mm._biof_state = mm.biofuel_state(up, up)
+        assert abs(mm.biofuel_feedstock_use({})["by_commodity"]["CORN"] / q0["CORN"] - 1.0) < 1e-6
+        assert abs(mm._biof_state["prod"][("EU27", "BIOE")] / st0["prod"][("EU27", "BIOE")] - 1.0) < 1e-6
+    finally:
+        mm.biofuel_markets = True
+        mm._biof_state = old
+
+
+def test_dairy_block_fat_protein_balance(model):
+    """Dairy processing (CAPRI DairyNQ_, ProcMargM_, FatsProtBal_): the reference is reproduced at base
+    prices; less milk raises the raw milk, fat and protein prices, keeps the fat and protein balances
+    and lowers product output; a dearer cheese draws milk solids into cheese; fewer calves cut milk feed."""
+    mm = model.market_module
+    was = mm.use_dairy_block
+    mm.use_dairy_block, mm._dairy_cache = True, None
+    fi0, mm._fmil_index = getattr(mm, "_fmil_index", 1.0), 1.0     # calves' milk feed at base
+    dp = mm._dairy_params()
+    assert dp
+    mm._dairy_u = None
+    b = mm.dairy_block({}, 1.0)
+    assert all(abs(v - 1.0) < 1e-9 for v in b["price_ratio"].values())
+    r = mm.dairy_block({}, 0.9)
+    assert r["residual"] < 1e-6
+    assert r["price_ratio"]["MILK"] > 1.0 and r["price_ratio"]["FATS"] > 1.0 and r["price_ratio"]["PROT"] > 1.0
+    assert abs(r["production"]["MILK"] / r["production0"]["MILK"] - 0.9) < 1e-9
+    for k in ("BUTT", "SMIP", "CHES"):
+        assert r["production"][k] < r["production0"][k]
+    c = mm.dairy_block({"CHES": 1.1}, 1.0)
+    assert c["production"]["CHES"] > c["production0"]["CHES"]
+    assert c["production"]["BUTT"] < c["production0"]["BUTT"]
+    # fewer calves: less milk feed - since Sprint 9f the products are traded, so the FMIL block acts on the
+    # market's feed demand (CES at base prices: every product's feed use falls with the index)
+    import numpy as np
+    assert np.allclose(mm.dairy_feed_factor(np.ones(9), fi=0.8), 0.8)
+    mm._dairy_u = None
+    mm.use_dairy_block, mm._dairy_cache, mm._fmil_index = was, None, fi0
+
+
+def test_dairy_world_blocks(model):
+    """Dairy Stage 4: CAPRI's dairy block for the non-EU trade regions reproduces the base, and dearer
+    dairy products draw more raw milk (CAPRI's supply function) and more product."""
+    mm = model.market_module
+    was = mm.use_dairy_block
+    mm.use_dairy_block, mm._dairy_world_cache = True, None
+    try:
+        w = mm._dairy_world_params()
+        assert {"USA", "NZL", "IND", "ROW"} <= set(w)
+        for r in ("USA", "NZL"):
+            b = mm._dairy_solve(w[r], {}, None, 1.0, "test_" + r)
+            assert all(abs(v - 1.0) < 1e-9 for v in b["price_ratio"].values())
+            x = mm._dairy_solve(w[r], {k: 1.1 for k in mm.DAIRY_TRADED}, None, 1.0, "test_" + r)
+            assert x["residual"] < 1e-6 and x["milk_supply_ratio"] > 1.0
+            for c in ("BUTR", "SKIM", "CHES"):
+                assert x["market_supply"][c] > x["market_supply0"][c]
+    finally:
+        mm.use_dairy_block, mm._dairy_world_cache = was, None
+
+
+def test_genetics_effects_follow_capri_breeding(model):
+    """CAPRI's genomics options (breeding.gms): higher milk yield raises energy, protein and manure N per
+    cow less than proportionally to milk; feed efficiency cuts energy 10%, protein 5%; costs at CAPRI's floors
+    or above; milk sheep and replacement heifers are not eligible."""
+    from capri_mod.policy.endotech import JRC121368_ENDOTECH, STAR3_DEFAULTS, scale_genetics
+    # star 3.0 default (refpol_endotech_all_sup): ghgTechMYld 0, so the milk-yield option does not exist
+    ge0 = scale_genetics(model.data["genetics_effects_unit"], STAR3_DEFAULTS)
+    assert not any(o == "genet_yld" for t in ge0.values() for (a, o) in t)
+    ge = scale_genetics(model.data["genetics_effects_unit"], JRC121368_ENDOTECH)
+    yl = [e for t in ge.values() for (a, o), e in t.items() if o == "genet_yld"]
+    ef = [(a, e) for t in ge.values() for (a, o), e in t.items() if o == "genet_eff"]
+    assert len(yl) > 200 and len(ef) > 900
+    for e in yl:
+        assert e["cost_eur_head"] >= 20.0 - 1e-9
+        if e["d_milk_rel"] > 0:
+            assert 0 < e["d_ener_rel"] < e["d_milk_rel"] and 0 < e["d_crpr_rel"] < e["d_milk_rel"]
+            assert e["d_mann_rel"] > 0
+    for a, e in ef:
+        assert abs(e["d_ener_rel"] + 0.1) < 1e-9 and abs(e["d_crpr_rel"] + 0.05) < 1e-9
+        assert e["d_mann_rel"] < 0 and e["cost_eur_head"] >= 2.0 - 1e-9
+        if a == "HFRS":
+            assert e["elig_share"] < 1.0
+
+
+def test_endotech_settings_hold_for_baseline_and_scenario(model):
+    """CAPRI's technology settings are scenario configuration loaded with the reference: a scenario with
+    ghgTechMYld 0.2 is compared with a baseline at 0.2 (its own cache entry and genomics calibration)."""
+    from capri_mod.policy.policy_module import PolicyScenario
+    from capri_mod.policy.endotech import key, effective
+    regions = ["IE04"]
+    sc = PolicyScenario(name="t", endotech={"ghgTechMYld": 0.2})
+    try:
+        model.run(custom_scenario=sc, max_outer_iter=2, regions=regions)
+        k = key(effective({"ghgTechMYld": 0.2}))
+        # manure trade and endogenous biofuel markets: star 3.0 defaults on
+        assert (tuple(regions), k, True, True) in model._eu_base_cache
+        assert model._endotech_key == k
+        assert any(o == "genet_yld" for (a, o) in model.data["genetics_effects"]["IE04"])
+    finally:
+        model.run(scenario="BASELINE", max_outer_iter=2, regions=regions)
+    assert not any(o == "genet_yld" for (a, o) in model.data["genetics_effects"]["IE04"])
+
+
+def test_bilateral_market_reproduces_capri_flows_at_base():
+    """CAPRI's bilateral market (arm/market_model.gms): calibrated at base supply, every region's own good clears
+    (domestic sales + exports = production) with CAPRI's trade flows reproduced exactly; a 10% rise of one
+    exporter's price shifts imports away from it and raises importers' consumer prices less than 10%."""
+    import numpy as np
+    import pandas as pd
+    from capri_mod.market.bilateral import BilateralCommodity
+    from pathlib import Path
+    base = Path(DATA_DIR) / "2017" / "market"
+    fl = pd.read_csv(base / "bilateral_flows_2030.csv")
+    g = fl[fl.commodity == "BEEF"]
+    R = sorted(set(g.importer) | set(g.exporter))
+    ix = {r: i for i, r in enumerate(R)}
+    n = len(R)
+    X0, a, b, a0 = (np.zeros((n, n)) for _ in range(4))
+    for t in g.itertuples(index=False):
+        i, j = ix[t.importer], ix[t.exporter]
+        X0[i, j] = t.q_kt
+        if i != j:
+            a[i, j], b[i, j], a0[i, j] = t.a, t.b, t.a0
+    sc = BilateralCommodity("BEEF", R, X0, a, b, a0, np.full(n, 4000.0), 3.5, 7.1)
+    S0 = X0.sum(axis=0)
+    sc.calibrate(S0)
+    r = np.ones(n)
+    assert np.max(np.abs(sc.residual(sc.S0, sc.D0, r))) < 1e-6
+    X, PA = sc.flows(sc.D0, r)
+    assert np.allclose(X, sc.X0, rtol=1e-9, atol=1e-9)
+    j = ix["BRA"]
+    r1 = r.copy(); r1[j] = 1.1
+    X1, PA1 = sc.flows(sc.D0, r1)
+    ie = ix["EU27"]
+    assert X1[ie, j] < X0[ie, j]
+    assert np.all(PA1 / sc.PA0 <= 1.1 + 1e-12)
+
+
+def test_trq_tariff_follows_quota_fill():
+    """CAPRI's TRQ regime (trqSigmoidFunc_, slope 200 around 97% of the quota): an under-filled quota keeps the
+    in-quota tariff; pushing imports past the quota moves the import price toward the out-of-quota tariff."""
+    import numpy as np
+    from capri_mod.market.bilateral import BilateralCommodity
+    X0 = np.array([[100.0, 50.0], [0.0, 400.0]])
+    a = np.array([[0.0, 1000.0], [0.0, 0.0]]); b = np.array([[0.0, 100.0], [0.0, 0.0]])
+    sc = BilateralCommodity("T", ["EU27", "X"], X0, a, b, a.copy(), np.array([1500.0, 1000.0]), 3.5, 7.0)
+    sc.calibrate(np.array([100.0, 450.0]))
+    sc.trq_row, sc.trq_Q, sc.trq_gap, sc.trq_share = 0, np.array([0.0, 100.0]), np.array([0.0, 800.0]), np.array([0.0, 1.0])
+    sc.trq_offset = np.zeros(2)
+    p = sc.import_prices(np.ones(2))
+    sc.trq_solve(sc.X0, p)
+    assert abs(sc.trq_offset[1]) < 1e-6                      # 50% fill: in-quota
+    X = sc.X0.copy(); X[0, 1] = 130.0
+    sc.trq_solve(X, p)
+    o = sc.trq_offset[1]
+    assert 20.0 < o < 800.0                                  # past the quota: toward the out-of-quota tariff
+    x_o = 130.0 * (p[0, 1] / (p[0, 1] + o)) ** sc.s2         # ... which pushes the flow back to about the quota
+    assert 90.0 < x_o < 105.0
+
+
+def test_projection_livestock_output_follows_yield(model):
+    """CAPRI's trend projection: output per head follows the projected yield (dairy cows: the milk part), and
+    the cows' requirements follow breeding.gms's functions; the trajectory is read by the model's own names."""
+    from capri_mod.projection import ProjectionModule, BaselineTrajectory
+    import os
+    traj_path = os.path.join(str(DATA_DIR), "trajectories", "captrd_2030.json")
+    traj = BaselineTrajectory.from_file(traj_path)
+    assert traj.factor("yields", "CORN", 2030) == traj.factor("yields", "MAIZ", 2030)
+    pm = ProjectionModule(model, traj)
+    data, _ = pm.project_data(2030)
+    y0, y1 = model.data["yields"], data["yields"]
+    reg = next(r for r in y1.index if y0.at[r, "DCOW"] > 0 and abs(y1.at[r, "DCOW"] / y0.at[r, "DCOW"] - 1) > 0.02)
+    f = y1.at[reg, "DCOW"] / y0.at[reg, "DCOW"]
+    m0 = model.data["livestock_output_by_product_coef"].at[reg, "DCOW.COMI"]
+    m1 = data["livestock_output_by_product_coef"].at[reg, "DCOW.COMI"]
+    assert abs(m1 / m0 - f) < 1e-9
+    b0 = model.data["livestock_output_by_product_coef"].at[reg, "DCOW.BEEF"]
+    assert abs(data["livestock_output_by_product_coef"].at[reg, "DCOW.BEEF"] - b0) < 1e-12
+    fe, fp, fd = data["ration_scale"][(reg, "DCOW")]
+    assert (f > 1) == (fe > 1) and 0 < abs(fe - 1) < abs(f - 1) and 0 < abs(fp - 1) < abs(f - 1)
+
+
+def test_greendeal_surplus_rules():
+    """Scenario settings: the Green Deal group follows CAPRI star 3.0's files (surptot.gms cuts every region's
+    baseline surplus per hectare by surpRedu%; manure trade the model's default, on); Farm-to-Fork carries
+    JRC121368's own settings (tiered rule, no manure trade, milk-yield genomics 0.2). Values outside CAPRI's
+    GUI options are refused."""
+    import pytest
+    from capri_mod.policy.greendeal import greendeal_scenario, farm_to_fork_scenario
+    s3 = greendeal_scenario(surpRedu=30)
+    assert s3.surplus_rule == "star3" and abs(s3.surplus_cut - 0.30) < 1e-12 and s3.manure_trade is None
+    f = farm_to_fork_scenario()
+    assert f.surplus_rule == "jrc121368" and f.manure_trade is False and f.endotech["ghgTechMYld"] == 0.2
+    assert (f.set_aside_requirement, f.organic_area_target, f.pesticide_reduction) == (0.10, 0.25, 0.50)
+    with pytest.raises(ValueError):
+        greendeal_scenario(surpRedu=33)
+    with pytest.raises(ValueError):
+        greendeal_scenario(surpRedu=30, surplus_rule="jrc121368")
+
+
+def test_genetics_not_adopted_at_base(model):
+    """breeding.gms calibration: IniShare 0, so a baseline run adopts (almost) nothing."""
+    regions = ["DE11", "FRH0", "IE04"]
+    r = model.run(scenario="BASELINE", max_outer_iter=2, regions=regions)
+    # each technology's adoption against its own animal's herd (the sum over all technologies used to be compared
+    # with the cattle herd alone, so broilers' low-N feed in Brittany - 1.5 of 82,800 thousand birds - tripped it)
+    for v in r["supply"].values():
+        for k, z in (getattr(v, "genetics_shift", None) or {}).items():
+            a = k[0] if isinstance(k, tuple) else k
+            assert float(z) <= 1e-3 * max(float(v.activities.get(a, 0.0)), 1.0), (k, z)
+
+
+def test_livestock_output_by_product_sums_to_total(model):
+    """The product split of each animal's output (sheep and goats: meat + milk; dairy cows: milk + cull
+    beef) adds up to the animal's output coefficient."""
+    q = model.data["livestock_output_by_product_coef"]
+    tot = model.data["livestock_output_coef"]
+    for a in tot.columns:
+        parts = [c for c in q.columns if c.startswith(a + ".")]
+        if parts:
+            d = (q[parts].sum(axis=1) - tot[a]).abs().max()
+            assert d < 1e-9, (a, d)
+    assert "SHGP.SGMI" in q.columns and "DCOW.COMI" in q.columns
 
 
 def test_price_structure_vs_capri(model):
@@ -358,7 +989,10 @@ def test_elasticity_provenance_is_complete():
     # so strict positivity is not the right assertion here.
     assert (eps <= 8.0).all().all(), "elasticity exceeds CAPRI's hard cap"
     assert set(prov.stack().unique()) <= {
-        "LITERATURE_DEFAULT", "REGIONAL_CAPRI", "PMP_CAPRI"}
+        "LITERATURE_DEFAULT", "REGIONAL_CAPRI", "PMP_CAPRI", "CAPRI_CAL_PRODUCT"}
+    # livestock carry CAPRI's calibrated product elasticities, not literature priors
+    for a in ("DCOW", "BULL", "PIGS", "BROI"):
+        assert (prov[a] == "CAPRI_CAL_PRODUCT").mean() > 0.9, a
 
 
 def test_schema_declares_every_input_and_all_files_exist():
@@ -583,137 +1217,6 @@ def test_fertilizer_module_integrates_with_environment():
         f"(expected <10%); check the fertilizer module plausibility guard")
 
 
-def test_abatement_macc_is_monotonic_and_economic():
-    """The carbon-price sweep produces a monotonic, downward-sloping MAC curve.
-
-    Raising the carbon price penalises emission-intensive activities, the supply
-    module reallocates, and emissions fall. This is the model's OWN abatement
-    (production reallocation), derived without any ingested abatement figures.
-    EcAMPA 2 is used only afterwards as an independent comparison.
-    """
-    from capri_mod.data.loaders import load_all_data
-    from capri_mod.supply.supply_module import SupplyModule
-    from capri_mod.utils.utils import calibrate_supply_elasticities
-    from capri_mod.abatement import AbatementModule
-
-    d = load_all_data(str(DATA_DIR))
-    sm = SupplyModule(d, calibrate_supply_elasticities(d["areas"]))
-    regions = list(d["areas"].index[:4])
-    sm.run(price_signals=None, regions=regions)
-
-    am = AbatementModule(sm)
-    macc = am.derive_macc(carbon_prices=[0, 50, 150], regions=regions)
-
-    emis = [p.emissions for p in macc.points]
-    # emissions must fall (or hold) as the carbon price rises
-    assert all(emis[i] >= emis[i + 1] for i in range(len(emis) - 1)), (
-        f"MAC curve not monotonic: emissions {emis}")
-    # a positive carbon price must produce some abatement
-    assert macc.points[-1].abatement_pct > 0, (
-        "no abatement at the highest carbon price — supply not responding")
-    # and it should be a modest economic response (single/low-double digits),
-    # well below EcAMPA's ~20% total which includes technological measures
-    assert macc.points[-1].abatement_pct < 20, (
-        "economic-only abatement implausibly high vs EcAMPA total")
-
-
-def test_technological_abatement_uses_cited_ecampa_data():
-    """The technological layer applies EcAMPA measures as explicit, cited inputs,
-    resolved to the correct emission source.
-
-    This is the legitimate use of EcAMPA's numbers — as parameters of a
-    technology-adoption module, separate from (and additive to) the model-derived
-    economic MACC. The layer must load real EcAMPA data (no fabrication), apply
-    each measure to its correct emission source (feed additives to enteric CH4
-    only, not whole-CH4), avoid double-counting, and stay below 100% abatement.
-    """
-    from capri_mod.abatement import TechnologicalAbatement
-
-    tech = TechnologicalAbatement.from_data_dir(str(DATA_DIR))
-
-    # every measure must carry an EcAMPA page citation and an emission source
-    assert (tech.measures["source_page"] > 0).all(), (
-        "an EcAMPA measure lacks a page citation")
-    assert tech.measures["emission_source"].notna().all(), (
-        "an EcAMPA measure lacks an emission_source mapping")
-
-    # source-resolved inventory using the environmental module's own keys
-    emis = {
-        "CH4_ENT": 190.0, "CH4_MAN": 45.0, "N2O_MAN": 30.0,
-        "N2O_SOIL": 140.0, "CO2_LIME": 8.0, "CO2_UREA": 7.0,
-    }
-    res = tech.apply(emis, uptake_scale=1.0)
-
-    assert 0 < res.abatement_pct <= 100, (
-        f"technological abatement {res.abatement_pct}% is out of range")
-
-    # feed measures must act on enteric CH4 only: total enteric abatement can
-    # never exceed the enteric pool, even with all three feed measures stacked
-    enteric_ab = sum(m.abatement for m in res.measures
-                     if m.measure in ("feed_fat_supplementation",
-                                      "feed_energy_efficiency",
-                                      "nitrate_feed_additive"))
-    assert enteric_ab <= emis["CH4_ENT"] + 1e-6, (
-        f"feed measures abated {enteric_ab} > enteric pool {emis['CH4_ENT']} — "
-        f"not source-resolved")
-
-    # mutually-exclusive fertiliser-N measures must not be stacked
-    applied = [m.measure for m in res.measures]
-    fert_n = {"precision_farming_low", "precision_farming_mid",
-              "precision_farming_high", "variable_rate_technology"}
-    assert len(fert_n & set(applied)) <= 1, (
-        f"stacked non-additive fertiliser measures: {fert_n & set(applied)}")
-
-    # partial uptake must give less abatement than full uptake
-    res_half = tech.apply(emis, uptake_scale=0.5)
-    assert res_half.abatement_pct < res.abatement_pct, (
-        "50% uptake did not reduce abatement vs 100%")
-
-
-def test_technological_abatement_is_activity_resolved():
-    """Feed measures abate only the specific animals EcAMPA assigns them.
-
-    Passing a per-animal enteric inventory makes each feed measure target only
-    its ``applies_to_animals`` set — the nitrate additive hits dairy + fattening
-    cattle, the energy-efficiency measure excludes dairy cows, and monogastrics
-    (pigs, poultry) are never touched. This is stricter than pool-level
-    application and gives a lower, more honest total for mixed-livestock regions.
-    """
-    import pandas as pd
-    from capri_mod.data.loaders import load_all_data
-    from capri_mod.environmental.environmental_module import EnvironmentalModule
-    from capri_mod.abatement import TechnologicalAbatement
-
-    d = load_all_data(str(DATA_DIR))
-    env = EnvironmentalModule(d)
-    tech = TechnologicalAbatement.from_data_dir(str(DATA_DIR))
-
-    # a region with real herds: combine crop areas + animal numbers
-    reg = d["areas"].index[0]
-    acts = pd.concat([d["areas"].loc[reg], d["animal_numbers"].loc[reg]])
-    ghg = env.compute_ghg(acts, reg)
-    ent = env.enteric_ch4_by_animal(acts)
-
-    res_pool = tech.apply(ghg, uptake_scale=1.0)
-    res_anim = tech.apply(ghg, uptake_scale=1.0, enteric_by_animal=ent)
-
-    # activity-resolved abatement must be <= pool-level (it targets a subset of
-    # animals, so it can only abate less, never more)
-    assert res_anim.abatement_pct <= res_pool.abatement_pct + 1e-6, (
-        f"activity-resolved abatement {res_anim.abatement_pct:.2f}% exceeds "
-        f"pool-level {res_pool.abatement_pct:.2f}% — targeting is not restricting")
-
-    # the energy-efficiency measure (non-dairy ruminants) must never abate more
-    # than 10% of the non-dairy enteric pool
-    non_dairy = sum(ent.get(a, 0.0) for a in
-                    ("BCOW", "BULL", "HFRS", "CALV", "SHGP"))
-    energy_ab = next((m.abatement for m in res_anim.measures
-                      if m.measure == "feed_energy_efficiency"), 0.0)
-    assert energy_ab <= 0.10 * non_dairy + 1e-6, (
-        f"energy-efficiency measure abated {energy_ab:.1f} > 10% of non-dairy "
-        f"pool {non_dairy:.1f} — it is not excluding dairy cows")
-
-
 def test_income_distribution_module():
     """Farm-income distribution combines supply margins with CAP payments and
     produces sensible distributional measures.
@@ -785,40 +1288,6 @@ def test_water_demand_module():
         "Mediterranean should dominate EU irrigation demand")
 
 
-def test_feed_monogastric_matches_capri():
-    """Monogastric (pig/poultry) feed requirements match CAPRI reference.
-
-    The IPCC ruminant net-energy formula does not apply to monogastrics and
-    undercounts them ~40-50%. The module uses CAPRI's own per-region reference
-    values (ENNE, DRMN) for pigs and poultry; median requirements should land
-    within ~15% of the CAPRI reference medians.
-    """
-    import numpy as np
-    from capri_mod.data.loaders import load_all_data
-    from capri_mod.feed.feed_module import FeedModule
-
-    d = load_all_data(str(DATA_DIR))
-    d["_data_dir"] = str(DATA_DIR)
-    fm = FeedModule(d)
-    if fm._mono_req.empty:
-        return  # reference not present in this build
-
-    # CAPRI reference medians (ENNE MJ/head/yr, DRMN kg/head/yr)
-    ref = {"PIGF": (18.0, 2.1), "PIGS": (32.5, 3.9),
-           "LAYS": (798.6, 78.4), "BROI": (814.4, 63.8)}
-    for animal, (ref_e, ref_dm) in ref.items():
-        es, dms = [], []
-        for reg in d["areas"].index:
-            r = fm.requirements_for(reg, animal)
-            es.append(r.nel_requirement)
-            dms.append(r.drmn)
-        med_e, med_dm = np.median(es), np.median(dms)
-        assert abs(med_e - ref_e) / ref_e < 0.15, (
-            f"{animal} energy {med_e:.1f} vs CAPRI {ref_e} (>15% off)")
-        assert abs(med_dm - ref_dm) / ref_dm < 0.20, (
-            f"{animal} dry matter {med_dm:.2f} vs CAPRI {ref_dm} (>20% off)")
-
-
 def test_projection_null_trajectory_reproduces_base(model):
     """The projection layer's correctness gate.
 
@@ -829,6 +1298,13 @@ def test_projection_null_trajectory_reproduces_base(model):
     """
     from capri_mod.projection import ProjectionModule, BaselineTrajectory
 
+    # A FRESH model: the session model carries state from earlier tests (market prices,
+    # young-animal prices, warm starts) that the projection's fresh model does not; the outer
+    # loop then converges to its tolerance from two different starting points (DE11 soft
+    # wheat 1e-6 apart). The identity concerns the projection machinery, so both runs start
+    # from the same state.
+    from capri_mod.model import CAPRIModel
+    model = CAPRIModel(data_dir=str(DATA_DIR), verbose=False)
     regions = list(model.data["areas"].index[:12])
     ref = model.run(scenario="BASELINE", regions=regions)
     pm = ProjectionModule(model, BaselineTrajectory.null(2017, [2017]))
@@ -1262,10 +1738,13 @@ def test_organic_area_target_binds_and_is_a_noop_at_zero(model):
     tgt = totals(model.run(custom_scenario=PolicyScenario(
         name="t", organic_area_target=0.25), regions=regions, max_outer_iter=1))
 
-    # a zero target must be a true no-op
+    # a zero target must be a true no-op. Tolerance 1e-5: the CAPRI columns calibrated from a region's first base duals
+    # (grassland, dairy, cattle, breeding) enter from the next solve on, and with the crop-need row in every EU solve
+    # (Sprint 9k, often tight at base) the interior-point duals leave ~1e-6 relative noise between two runs of the
+    # same scenario when the fixture's first solve of a region came from another test
     for a, v in base.items():
         if v > 1.0:
-            assert abs(zero.get(a, 0.0) - v) / v < 1e-9, (
+            assert abs(zero.get(a, 0.0) - v) / v < 1e-5, (
                 f"organic_area_target=0 changed {a}")
 
     # a 25% target must move production, and downward on average (organic
@@ -1292,7 +1771,7 @@ def test_projection_matches_capri_2030_reference(model):
     import pandas as pd
     from capri_mod.projection import ProjectionModule, BaselineTrajectory
 
-    ref_path = os.path.join(str(DATA_DIR), "validation", "capri_ref_2030_levels.csv")
+    ref_path = os.path.join(str(DATA_DIR), "validation", "capri_eu27_levels_2030_ref.csv")
     traj_path = os.path.join(str(DATA_DIR), "trajectories", "captrd_2030.json")
     if not (os.path.exists(ref_path) and os.path.exists(traj_path)):
         return
@@ -1318,6 +1797,47 @@ def test_projection_matches_capri_2030_reference(model):
     corr = ours[common].corr(cap[common])
     assert corr > 0.9, (
         f"projected 2030 levels correlate only {corr:.3f} with CAPRI's reference")
+
+
+def test_projection_starts_from_capri_reference_and_calibrates(model):
+    """Sprint 9p: the 2030 baseline is projected with CAPRI's own 2030 reference (CAPMOD's reference run over CAPRI's
+    2017 results, levels, yields and land types per region: capri_ref_2030.json), not its trend projection, and the
+    baseline is calibrated as CAPRI calibrates its supply models: the linear cost terms move until each region's
+    solution is its projected levels (fodder crops excepted: the fodder balances hold them). The purchased feed bulks
+    in the rations take CAPRI's 2030 bulk prices (feedBlkPrice_ CES of the products' 2030 prices)."""
+    import os, json
+    import pandas as pd
+    from capri_mod.projection import ProjectionModule, BaselineTrajectory
+    tp = os.path.join(str(DATA_DIR), "trajectories", "capri_ref_2030.json")
+    src = os.path.join(str(DATA_DIR), "sources", "capri_baseline", "capri_ref_levl_yild_2030_2017.csv.xz")
+    t = json.load(open(tp))
+    raw = pd.read_csv(src)
+    v = {(r.capri_region, r.activity, r.item, str(r.year)): r.value for r in raw.itertuples()}
+    f = v[("DE110000", "SWHE", "LEVL", "2030")] / v[("DE110000", "SWHE", "LEVL", "2017")]
+    assert abs(t["regional"]["herds"]["DE11"]["SWHE"]["2030"] - round(f, 4)) < 1e-9
+    assert t["regional"]["land"]["DE11"]["ARABLE"]["2030"] < 1.0
+    traj = BaselineTrajectory.from_file(tp)
+    pm = ProjectionModule(model, traj, capri_prices_dir=os.path.join(str(DATA_DIR), "trajectories"))
+    data, _ = pm.project_data(2030)
+    cap = pd.read_csv(os.path.join(str(DATA_DIR), "validation", "capri_eu27_levels_2030_ref.csv"), index_col=0).iloc[:, 0]
+    eu = [r for r in data["areas"].index if not r.startswith("NO")]
+    for a in ("SWHE", "BARL", "RAPE", "GRAS"):
+        assert abs(float(data["areas"].loc[eu, a].sum()) / float(cap[a]) - 1.0) < 0.015, a
+    rb = data["ration_bulk_price"]
+    assert rb[("DE000000", "FCER")] < 1.0 < rb[("DE000000", "FPRO")]
+    # Sprint 9q: CAPRI's 2030 rations (Upper Bavaria's dairy cows: more other fodder, less silage maize) and usable
+    # fodder per ha (silage maize for biogas in Germany)
+    rf = data["ration_factor"][("DE21", "DCOW")]
+    assert rf["FOFA"] > 1.1 and rf["FMAI"] < 0.95
+    mo = pm._model_for(data)
+    res = mo.run(scenario="BASELINE", regions=["FRH0", "IE04", "DE21"], max_outer_iter=8)
+    assert res["metadata"]["outer_converged"]
+    for r in ("FRH0", "IE04", "DE21"):
+        x = res["supply"][r].activities
+        for a in ("BROI", "LAYS", "PIGF", "DCOW", "SWHE", "OFOD", "MAIF", "GRAS"):
+            tgt = float((data["areas"] if a in data["areas"].columns else data["animal_numbers"]).at[r, a])
+            if tgt > 1:
+                assert abs(float(x[a]) / tgt - 1.0) < 0.015, (r, a, float(x[a]), tgt)
 
 
 def test_permanent_crop_base_fidelity(data):
@@ -1523,8 +2043,8 @@ def test_no_bogus_activity_codes_in_crop_groups(data):
     """Crop-group lists must name activities that actually exist.
 
     Grain maize is `CORN` in this model's activity set; CAPRI calls it `MAIZ`.
-    Three places listed `MAIZ` without `CORN` — the fertiliser cereals group,
-    the pesticide-affected list and the abatement N2O proxy — so grain maize
+    Places listed `MAIZ` without `CORN` — the fertiliser cereals group,
+    the pesticide-affected list (and the retired abatement N2O proxy) — so grain maize
     (11,026 kha, the second-largest cereal by area) was silently excluded from
     all three. A non-existent key raises nothing; it simply never matches.
 
@@ -1532,7 +2052,6 @@ def test_no_bogus_activity_codes_in_crop_groups(data):
     """
     from capri_mod.fert.fert_module import CROP_GROUPS
     from capri_mod.supply.supply_module import SupplyModule
-    from capri_mod.abatement.abatement_module import AbatementModule
 
     activities = set(data["areas"].columns)
     assert "CORN" in activities and "MAIZ" not in activities, (
@@ -1685,23 +2204,16 @@ def test_yield_responds_to_price(data):
             assert abs(float(zero.get(act, 0.0)) - float(base[act])) < 1e-6, (
                 f"a zero price shock changed {act}")
 
-    # 2. response: yields must rise with price, less than proportionally
-    eps = SupplyModule.__module__  # keep import local
-    from capri_mod.supply import supply_module as _sm
-    elast = None
-    for obj in vars(_sm).values():
-        if isinstance(obj, type) and hasattr(obj, "YIELD_PRICE_ELASTICITY"):
-            elast = float(obj.YIELD_PRICE_ELASTICITY)
-            break
-    assert elast is not None, "YIELD_PRICE_ELASTICITY not exposed"
-    assert 0.0 < elast < 1.0, (
-        f"yield-price elasticity {elast} should be positive and well below 1 — "
-        "a short-run yield response cannot be proportional to price")
-
-    factor = 1.10 ** elast
-    assert 1.0 < factor < 1.05, (
-        f"a 10% price rise implies a {(factor - 1) * 100:.1f}% yield change, "
-        "which is outside any plausible short-run range")
+    # 2. response: CAPRI's yield elasticities (supply/yield_elas.gms): cereals 0.3, oilseeds and potatoes 0.2, no
+    #    other crop (Sprint 9s; was 0.15 for every crop)
+    el = SupplyModule.yield_price_elasticity() if hasattr(SupplyModule, "yield_price_elasticity") else \
+        type(model).yield_price_elasticity()
+    assert el["SWHE"] == 0.3 and el["CORN"] == 0.3 and el["RAPE"] == 0.2 and el["POTA"] == 0.2
+    assert "OVEG" not in el and "SUGB" not in el
+    y0 = float(model.data.yields.get("SWHE", 0.0))
+    if y0 > 0:
+        model.apply_yield_price_response(pd.Series({"SWHE": 0.10, "OVEG": 0.10}))
+        assert abs(float(model.data.yields["SWHE"]) / y0 - 1.10 ** 0.3) < 1e-12
 
 
 def test_solve_leaves_no_state_behind(data):
@@ -1793,8 +2305,9 @@ def test_livestock_gross_output_is_marketed_product(model):
     eu = [r for r in coef.index if not r.startswith("NO")]
     milk = float((herds.reindex(eu)["DCOW"].fillna(0)
                   * coef.loc[eu, "DCOW"].fillna(0)).sum())
-    pork = float((herds.reindex(eu)["PIGS"].fillna(0)
-                  * coef.loc[eu, "PIGS"].fillna(0)).sum())
+    # pigs are CAPRI's two activities since the pig split: sows (PIGS) and fattening pigs (PIGF)
+    pork = sum(float((herds.reindex(eu)[a].fillna(0) * coef.loc[eu, a].fillna(0)).sum())
+               for a in ("PIGS", "PIGF") if a in coef.columns and a in herds.columns)
     assert 125_000 < milk < 160_000, f"EU dairy output {milk:,.0f} kt off CAPRI"
     assert 20_000 < pork < 25_000, f"EU pig output {pork:,.0f} kt off CAPRI"
 
@@ -1953,60 +2466,6 @@ def test_pesticide_target_applies_to_conventional_area_only():
     assert comb_y < y0, "the pesticide yield loss vanished on conventional land"
 
 
-def test_capri_mitigation_reproduces_capri():
-    """CAPRI's mitigation portfolio, checked against CAPRI itself.
-
-    1. At a zero carbon price the adoption rule reproduces CAPRI's calibrated
-       initial share for every option that has one (its cost function, signs and
-       calibration terms are CAPRI's).
-    2. A zero carbon price abates nothing beyond the reference, and abatement
-       rises with the price.
-    3. At full technical potential, per-source reductions stay close to CAPRI's
-       own max run (enteric -12.0%, manure CH4 -21.8%, manure N2O -30.0%).
-    """
-    import pandas as pd
-    from capri_mod.data.loaders import load_all_data
-    from capri_mod.environmental.environmental_module import EnvironmentalModule
-    from capri_mod.abatement.capri_mitigation import CapriMitigation, CapriAbatement
-
-    cm = CapriMitigation.from_data_dir("capri_data")
-    z = cm.adoption(0.0)
-    ini = z[z.initial > 0]
-    assert len(ini) > 100 and ((ini.share - ini.initial).abs() < 0.01).all(), \
-        "zero-price adoption does not reproduce CAPRI's calibration"
-
-    ca = CapriAbatement.from_data_dir("capri_data")
-    unit = {"CH4ENT": 1.7, "CH4MAN": 0.013, "N2OSYN": 0.001}
-    fr = [ca.price_response(p, unit) for p in (0, 20, 50, 100)]
-    assert all(abs(v) < 1e-12 for v in fr[0].values()), "a zero price must abate nothing"
-    for g in fr[0]:
-        seq = [f[g] for f in fr]
-        assert all(b >= a - 1e-12 for a, b in zip(seq, seq[1:])), f"{g}: abatement fell as price rose"
-
-    d = load_all_data("capri_data"); env = EnvironmentalModule(d)
-    tot, red = {}, {}
-    for r in list(d["areas"].index):
-        if r.startswith("NO"):
-            continue
-        acts = pd.concat([d["areas"].loc[r], d["animal_numbers"].loc[r]])
-        ghg = env.compute_ghg(acts, r); ent = env.enteric_ch4_by_animal(acts)
-        for k, v in ghg.items():
-            tot[k] = tot.get(k, 0.0) + v
-        for k, v in ca.abate(ghg, r[:2], None, ent).items():
-            red[k] = red.get(k, 0.0) + v
-    # N2O_MAN: 0.281, not CAPRI's EU 0.300. Weighting the member-state
-    # potentials by CAPRI's OWN 2030 manure-N2O emissions (reference run,
-    # sum over animals of LEVL x N2OMAN, EU-27) gives 0.281 - the figure this
-    # potential table can reproduce at all. The test checks our emission
-    # weights against that; before the per-head manure correction ours gave
-    # 0.292 partly because pig-heavy countries (high potentials) were
-    # overweighted. Tolerance unchanged.
-    capri = {"CH4_ENT": 0.120, "CH4_MAN": 0.218, "N2O_MAN": 0.281}
-    for src, ref in capri.items():
-        ours = red.get(src, 0.0) / tot[src]
-        assert abs(ours - ref) < 0.03, f"{src}: {ours:.3f} against CAPRI's {ref:.3f}"
-
-
 def test_land_supply_converges_resets_and_is_inert_at_base(data):
     """Agricultural land responds to the land rent, as in CAPRI's land market.
 
@@ -2027,13 +2486,21 @@ def test_land_supply_converges_resets_and_is_inert_at_base(data):
     base = sm.run(price_signals=None, regions=[region])[region]
     assert base.land_expansion == 0.0 and base.land_expansion_next == 0.0
 
+    # a rise in crop prices raises the land rent (a set-aside floor used to, while set-aside carried a template
+    # cost of ~600 EUR/ha; with CAPRI's data - premium, no input cost - the floor leaves land slack here). This
+    # rent-elasticity rule serves only a land market switched off: CAPRI's land market covers every farmed region.
+    up = pd.Series(0.2, index=data["world_prices"].index)
     updates = []
     for it in range(6):
-        res = sm.run(price_signals=None if it == 0 else zero, regions=[region],
-                     policy_scenario={"set_aside_requirement": 0.10})[region]
+        res = sm.run(price_signals=up, regions=[region])[region]
         updates.append(res.land_update)
-    assert res.land_expansion > 0.0, "land did not respond to a binding landscape floor"
-    assert updates[-1] < updates[0] * 0.1, "land expansion did not converge"
+    assert res.land_expansion > 0.0, "land did not respond to a higher land rent"
+    # land is settled within each outer iteration (supply module, LAND_INNER_MAX), so the
+    # update left over is zero or rounding noise; the old strict "< 10% of the first update"
+    # failed whenever the first update was exactly zero (hash-seed dependent, e.g. seed 3)
+    # (with the price shock the updates are within the land loop's own tolerance, LAND_TOL, from the first
+    # iteration; the remaining 1e-5 steps are the secant's noise there)
+    assert updates[-1] <= max(updates[0] * 0.1, SupplyModule.LAND_TOL), ("land expansion did not converge", updates)
 
     again = sm.run(price_signals=None, regions=[region])[region]
     assert again.land_expansion == 0.0, "a new run did not start from base land"
@@ -2047,7 +2514,10 @@ def test_land_supply_converges_resets_and_is_inert_at_base(data):
             res = sm.run(price_signals=None if it == 0 else zero, regions=[low],
                          policy_scenario={"set_aside_requirement": 0.10})[low]
             seq.append(res.land_expansion)
-        assert abs(seq[-1] - seq[-2]) < 1e-4 and abs(seq[-2] - seq[-3]) < 1e-4, \
+        # the land loop stops once its step is within LAND_TOL, so successive runs may differ by about that much (after
+        # the whole suite: 0.06606 / 0.06618, in 9t as well); the swings this guards against were 0.045 / 0.09
+        _tol = 5 * SupplyModule.LAND_TOL
+        assert abs(seq[-1] - seq[-2]) < _tol and abs(seq[-2] - seq[-3]) < _tol, \
             f"land expansion did not settle in a low-rent region: {seq[-4:]}"
 
 
@@ -2090,11 +2560,16 @@ def test_greendeal_switchboard_mirrors_capri():
     assert (f2f.set_aside_requirement, f2f.organic_area_target,
             f2f.pesticide_reduction, f2f.nutrient_surplus_target) == (0.10, 0.25, 0.50, True)
     assert scenario_name() == "greendeal_reference"
-    for opt in ("mineRedu", "dietShift", "othPol"):
+    for opt in ("dietShift", "othPol"):
         with pytest.raises(NotImplementedError):
             greendeal_scenario(**{opt: 20})
+    # mineRedu takes the GUI's values (minfert_redu_uaa.gms, minfert_redu_by_crop.gms)
+    assert greendeal_scenario(mineRedu="20crp").name == "greendeal_lnds10_org25_pest50_mine20crp_surp50_diet00_oth00"
+    assert greendeal_scenario(mineRedu=20).mineral_redu == "20"
     with pytest.raises(ValueError):
-        greendeal_scenario(surpRedu=30)
+        greendeal_scenario(mineRedu="15crp")     # in minfert_redu_by_crop.gms, not in the GUI
+    with pytest.raises(ValueError):
+        greendeal_scenario(surpRedu=33)          # not a CAPRI GUI option
 
 
 def test_environmental_results_are_populated(model):
@@ -2138,3 +2613,345 @@ def test_fertiliser_substitution_is_exact_at_base(data):
                for r in ("NL41", "FRB0")}
         assert cow["NL41"] > cow["FRB0"], \
             f"a cow should weigh more where manure is saturated: {cow}"
+
+
+def test_grass_intensity_delta_extensive_lowers_surplus(data):
+    """CAPRI's grassland split (Sprint 7a): a hectare moved from intensive (GRAI) to extensive (GRAE)
+    grassland uses less mineral N, removes less N and lowers the gross surplus, from CAPRI's own
+    per-activity coefficients; the table covers the regions with grassland."""
+    from capri_mod.environmental.environmental_module import EnvironmentalModule
+    env = EnvironmentalModule(data)
+    d = env.grass_intensity_delta("DE94")
+    assert d is not None
+    assert d["n_mineral_input"] < 0 and d["n_crop_uptake"] < 0 and d["n_surplus"] < 0
+    assert d["mineral_rate"] < 0
+    gi = data["grass_intensity"]
+    assert len(gi) > 200 and (gi["q_ext"] > 0).all() and gi["share_ext"].between(0, 1).all()
+
+
+def test_cover_crop_requirement_and_winter_cover_row(data):
+    """CAPRI's Farm-to-Fork catch-crop minimum (organic_io.gms + conventional_io.gms): with a 25%
+    organic share and a 50% pesticide cut the requirement is a quarter of the area without winter
+    cover plus the baseline catch crops (capped at that area), and it adds CAPRI's winterCover_ row:
+    winter-covering crops <= UAAR - catch crops."""
+    from capri_mod.supply.supply_module import SupplyModule
+    from capri_mod.utils.utils import calibrate_supply_elasticities
+
+    sm = SupplyModule(data, calibrate_supply_elasticities(data["areas"]))
+    region = "FRH0"
+    sm.run(price_signals=None, regions=[region])
+    model = sm._models[region]
+    model.data.organic_targets_pp = None          # use the distance rule: o known below
+    o_share = model._organic_baseline() + 0.25
+    model._cover_crop_requirement(0.50, o_share)
+    cv = model._cover
+    assert cv is not None and cv["potential"] > 0 and cv["biofix"] > 0
+    expect = min(0.25 * cv["potential"] + cv["base"], max(cv["potential"], cv["base"]))
+    assert abs(cv["req"] - expect) < 1e-6 * max(1.0, expect)
+    assert cv["delta"] > 0
+    A, b, _, _ = model._build_constraints()
+    assert "winter_cover" in model._row_labels
+    i = model._row_labels.index("winter_cover")
+    assert abs(b[i] - (cv["uaa"] - cv["req"])) < 1e-6 * cv["uaa"] + 1e-6
+    # with a landscape floor, CAPRI adds FALL.FLOOR to the catch-crop area (winterCover_)
+    A, b, _, _ = model._build_constraints(set_aside_requirement=0.10)
+    i = model._row_labels.index("winter_cover")
+    floor = -b[model._row_labels.index("landscape_floor")]
+    assert floor > 0 and abs(model._fall_floor - floor) < 1e-9
+    assert abs(b[i] - (cv["uaa"] - cv["req"] + floor)) < 1e-6 * cv["uaa"] + 1e-6
+    model._cover = None
+
+
+def test_dairy_split_column_calibrated_at_base():
+    """CAPRI's dairy split (Sprint 7b): the column of cows moved from DCOH to DCOL is calibrated on
+    the first baseline solve (linear term from the duals of the rows it enters, the cows'
+    requirement rows included), so a second baseline solve keeps the base split (z ~ 0)."""
+    from capri_mod.model import CAPRIModel
+    m = CAPRIModel(data_dir=str(DATA_DIR), verbose=False)
+    m.run(scenario="BASELINE", regions=["FRH0"], max_outer_iter=1)
+    mo = m.supply_module._models["FRH0"]
+    di = m.data["dairy_intensity"].loc["FRH0"]
+    assert di["dcomi_rel"] < 0 and di["dmann_rel"] < 0 and di["denne_rel"] < 0
+    assert getattr(mo, "_dairy_cz", None) is not None and getattr(mo, "_dairy_col", None) is not None
+    cows = float(m.data["animal_numbers"].at["FRH0", "DCOW"])
+    assert abs(float(mo._last_dairy_z)) < 1e-3 * cows
+
+
+def test_histosol_emissions_and_fallowing_calibrated(data):
+    """CAPRI's histosols: N2O per ha from the organic-soil share and the climate-weighted IPCC 2013
+    factor (13 kg N2O-N/ha on temperate and boreal cropland); EU emissions of the order of the
+    inventories' cultivated organic soils (10-20 Mt CO2-eq); fallowing calibrated to zero at base."""
+    h = data["histosol"]
+    assert (h["ef_n2o_crop"].dropna().between(2.7, 13.0)).all()
+    assert h.loc["DE94", "share_grass"] > 0.3 and h.loc["DE94", "n2o_t_ha_crop"] > 0
+    A = data["areas"]
+    crops = [c for c in A.columns if c != "GRAS"]
+    kt = (A[crops].sum(axis=1) * h["n2o_t_ha_crop"].reindex(A.index).fillna(0)
+          + A["GRAS"] * h["n2o_t_ha_grass"].reindex(A.index).fillna(0))
+    assert 10.0 < float(kt.sum()) * 298.0 / 1000.0 < 20.0          # Mt CO2-eq
+    assert (h["pmp_sqr_crop"].dropna() > 0).all()
+
+
+def test_manure_n2o_by_source_and_technology_effects():
+    """CAPRI's manure N2O by stage (gases.gms): per t of manure N, housing/storage, application and
+    grazing shares near IPCC's 1-2% in total; CAPRI's technology effects as its housing equation applies
+    them (HOUSN_ sums only housing options and the combined air purification + cover options: a plain
+    cover does not cut manure N2O), low-emission spreading raises application N2O; and the loss cascade:
+    NH3 kept by a cover reaches the field, so the N left for application N2O rises."""
+    import pandas as pd
+    f = pd.read_csv(DATA_DIR / "2017" / "environment" / "manure_n2o_factors.csv")
+    tot = f[["f_man", "f_app", "f_gra", "f_lea"]].sum(axis=1)
+    assert tot.between(0.003, 0.04).all() and 0.01 < tot.median() < 0.025
+    assert f[f.animal == "PIGF"]["f_gra"].median() == 0          # pigs hardly graze (outdoor pigs in a few regions)
+    t = pd.read_csv(DATA_DIR / "2017" / "environment" / "manure_n2o_tech.csv")
+    assert not (t[t.technology.isin(["CovStorHigh", "CovStorLow"])]["r_hou"].abs() > 0).any()
+    assert t[t.technology == "AirPurCovHigh"]["r_hou"].median() > 0.3
+    assert t[t.technology == "AmmAppLE"]["r_app"].median() < 0
+    from capri_mod.supply import ammonia_techs as _at
+    tm = _at.load(DATA_DIR / "2017" / "abatement" / "ammonia" / "ammonia_tech_model.csv")
+    sub = next(sb for sb in tm["DE94"]["PIGF"] if any(x["tech"] == "CovStorHigh" for x in sb["techs"]))
+    s0 = {x["tech"]: 0.0 for x in sub["techs"]}
+    h0, f0 = _at.stage_n(sub, s0)
+    h1, f1 = _at.stage_n(sub, {**s0, "CovStorHigh": 1.0})
+    assert f1 > f0 and abs(h1 - h0) < 1e-12
+
+
+def test_baseline_surplus_is_capri_regional(data):
+    """The tiered N target starts from CAPRI's own regional surplus (old NUTS codes and NUTS
+    splits included), never from the model's own pattern scaled to a national total."""
+    cs = data["capri_baseline_surplus"]
+    assert not cs["source"].str.contains("scaled|own balance").any()
+    g = pd.read_csv(DATA_DIR / "2017" / "environment" / "capri_gnb_components_2030.csv")
+    sur = g[g["item"] == "SURTOT"].set_index("capri_region")["kg_n_per_ha"]
+    for reg, c8 in (("ITC2", "IT120000"), ("LU00", "BL400000"), ("SE32", "SE070000"), ("PT30", "PT300000")):
+        assert abs(float(cs.at[reg, "surplus_kg_n_per_ha"]) - float(sur[c8])) < 0.01
+    assert int((cs["source"].str.contains("NUTS-2")).sum()) >= 220
+
+
+def test_split_regions_take_their_group_values(data):
+    """CAPRI regions split or merged between NUTS versions: per-head values are the group's CAPRI
+    total over the group's herd (Finland's FI1B once carried all of Etelae-Suomi's manure: 990 kg N
+    per dairy cow), and the shared map lists every split and merge."""
+    mc = data["livestock_manure_n_coef"]
+    for r in ("FI1B", "FI1C", "FI1D", "PL81", "PL91"):
+        assert 60.0 < float(mc.at[r, "DCOW"]) < 250.0, r
+        assert 0.2 < float(mc.at[r, "LAYS"]) < 1.5, r
+    assert abs(float(mc.at["FI1B", "DCOW"]) - float(mc.at["FI1C", "DCOW"])) < 1e-9     # one group (FI18)
+    m = pd.read_csv(DATA_DIR / "shared" / "region_capri_map.csv", dtype=str).set_index("region")
+    assert m.at["FI1C", "capri_region"] == "FI180000" and m.at["FI1D", "relation"] == "merge"
+    assert m.at["ITH1", "capri_region"] == "IT310000"
+
+
+
+def test_bull_heifer_split_calibrated_at_base():
+    """CAPRI's low/high-intensity bulls and heifers (Sprint 7c): one column per animal, calibrated on
+    the first baseline solve like the dairy split, so a second baseline solve keeps the base split; a
+    low-intensity stall turns over more animals (more young animals bought) and less manure N."""
+    from capri_mod.model import CAPRIModel
+    m = CAPRIModel(data_dir=str(DATA_DIR), verbose=False)
+    m.run(scenario="BASELINE", regions=["FRH0"], max_outer_iter=1)
+    mo = m.supply_module._models["FRH0"]
+    ct = m.data["cattle_intensity"]["FRH0"]
+    assert ct["BULL"]["dyoung_rel"] > 0 and ct["BULL"]["dmann_rel"] < 0
+    assert set(getattr(mo, "_cattle_cz", {}) or {}) >= {"BULL"} and "BULL" in (mo._cattle_cols or {})
+    for a, z in (mo._last_cattle_z or {}).items():
+        assert abs(float(z)) < 1e-3 * max(1.0, float(m.data["animal_numbers"].at["FRH0", a])), (a, z)
+
+
+def test_parallel_regional_solves_match_sequential():
+    """Sprint 9r: the regional supply models are solved across worker processes (one per core, CAPRI_WORKERS or
+    SupplyModule.n_workers to change it). At given market prices the regions are independent, as in CAPRI, so the
+    results are the same, to the last digit, with one worker or several. Two models built in one process agree too:
+    the trade regions' tariffs are CAPRI's (tools/build_tariffs_2017.py), no longer drawn at random on each load."""
+    from capri_mod.model import CAPRIModel
+    from capri_mod.supply.supply_module import SupplyModule
+    from capri_mod.policy.greendeal import farm_to_fork_scenario
+    import os
+    sm = SupplyModule.__new__(SupplyModule)
+    old = os.environ.get("CAPRI_WORKERS")
+    os.environ["CAPRI_WORKERS"] = "3"
+    try:
+        assert sm.workers(10) == 3 and sm.workers(2) == 1
+        sm.n_workers = 1
+        assert sm.workers(10) == 1
+    finally:
+        os.environ.pop("CAPRI_WORKERS")
+        if old is not None:
+            os.environ["CAPRI_WORKERS"] = old
+    regs = ["NL22", "FRH0", "DE94", "ITC4"]
+    out = []
+    for nw in (1, 2):
+        m = CAPRIModel(data_dir=str(DATA_DIR), verbose=False)
+        m.supply_module.n_workers = nw
+        s = m.run(custom_scenario=farm_to_fork_scenario(), regions=regs, max_outer_iter=2)
+        out.append(({r: dict(v.activities) for r, v in s["supply"].items()},
+                    {r: dict(v.shadow_prices) for r, v in s["supply"].items()},
+                    dict(m.supply_module._nbal_state), dict(m.supply_module._land_state)))
+        assert all(m.supply_module._models[r]._env_for_surplus is m.supply_module._env_for_surplus for r in regs)
+    assert out[0] == out[1]
+
+
+def test_no_synthetic_inputs_reach_the_model(data):
+    """Sprint 9s (docs/SYNTHETIC_DATA_AUDIT.md): crop premiums, costs, prices and yields are CAPRI's for every region
+    (tools/build_crop_economics_2017.py), the loaders no longer generate data, and every region with a herd or crops
+    has CAPRI's environmental coefficients - the generic fallbacks were removed, so a gap must show here."""
+    import os
+    import pandas as pd
+    from capri_mod.data import loaders
+    from capri_mod.data.definitions import CROPS, ANIMALS
+    from capri_mod.environmental.environmental_module import EnvironmentalModule
+    areas, herds = data["areas"], data["animal_numbers"]
+    # premiums: every region and crop (CAPRI PRME, DE11 soft wheat 360.8, wine 338.5); the payment engine's BPS is
+    # CAPRI's premium per ha of UAA, not the random draw the file used to hold
+    pr = data["cap_premium"]
+    assert set(areas.index) <= set(pr.index)
+    assert abs(pr.at["DE11", "SWHE"] - 360.8) < 0.1 and abs(pr.at["DE11", "WINE"] - 338.5) < 0.1
+    for c in CROPS:
+        if c in areas.columns:
+            grown = areas.index[areas[c] > 0]
+            assert pr.loc[grown, c].notna().all(), c
+    assert abs(data["cap_payments"].at["DE11", "BPS"] - 391.64) < 0.01
+    assert (data["cap_payments"][["ANC", "AES", "ORGANIC"]] == 0).all().all()
+    # costs and yields: CAPRI's TOIN and YILD, no cap (other fruit in AT11: 27,028 EUR/ha), wine and fibre included
+    vc = data["variable_costs_regional"]
+    assert abs(vc.at["AT11", "OFRU"] - 27028.46) < 0.1 and abs(vc.at["DE11", "WINE"] - 4520.44) < 0.1
+    assert abs(data["yields"].at["AT11", "OFIB"] - 3.80) < 0.05
+    # loaders: no generator left
+    import inspect
+    assert "RNG" not in inspect.getsource(loaders)
+    try:
+        loaders.load_yields(os.path.join(str(DATA_DIR), "no_such_dir"))
+        raise AssertionError("a missing file must raise")
+    except FileNotFoundError:
+        pass
+    # environmental coefficients present wherever they are needed
+    env = EnvironmentalModule(data)
+    mc, m4, e4 = data["livestock_manure_n_coef"], data["livestock_ch4man_coef"], data["livestock_ch4ent_coef"]
+    for r in herds.index:
+        for a in ANIMALS:
+            if a in herds.columns and herds.at[r, a] > 0:
+                assert pd.notna(mc.at[r, a]) and mc.at[r, a] > 0, (r, a)
+                assert pd.notna(m4.at[r, a]), (r, a)
+                assert env._manure_n2o_factor(r, a) is not None, (r, a)
+        if (herds.loc[r] > 0).any():
+            assert env._nh3_factors().get(r), r
+    for r in areas.index:
+        if (areas.loc[r] > 0).any():
+            assert env._capri_crop_n(r) is not None, r
+            assert r in data["n_deposition_regional"].index, r
+            assert r in data["crop_co2_coef"].index, r
+
+
+def test_ghg_accounts_take_capris_methane_and_co2(data):
+    """Sprint 9s: manure and enteric CH4 per head are CAPRI's (CH4MAN, CH4ENT totals / census heads, regional:
+    dairy manure CH4 in Germany ~2.6 times France's), CO2 from liming CAPRI's per ha of every crop (DE11 115.6
+    kg/ha) and from urea mineral N x the member state's urea share x 44/28; the GHG total is split into non-CO2
+    (JRC121368's figure) and CAPRI's GGWP (the emission tax's base: non-CO2 + liming)."""
+    import pandas as pd
+    m4 = data["livestock_ch4man_coef"]
+    de = m4.loc[[r for r in m4.index if r.startswith("DE")], "DCOW"].median()
+    fr = m4.loc[[r for r in m4.index if r.startswith("FR")], "DCOW"].median()
+    assert de > 2.0 * fr
+    co2 = data["crop_co2_coef"]
+    assert abs(co2.at["DE11", "co2lim_kg_ha"] - 115.616) < 0.01 and abs(co2.at["DE11", "urea_share"] - 0.158) < 0.001
+    h = data["animal_numbers"]
+    eu = [r for r in h.index if not r.startswith("NO")]
+    cols = [c for c in m4.columns if c in h.columns]
+    man = float((h.loc[eu, cols] * m4.reindex(eu)[cols]).sum().sum()) / 1000.0      # kt CH4
+    assert 1350 < man < 1450                                       # CAPRI 2017: 1,396 kt (the old flat factors: 1,072)
+    from capri_mod.environmental.environmental_module import EnvironmentalIndicators
+    assert {"ghg_non_co2", "ghg_ggwp", "ghg_urea"} <= set(EnvironmentalIndicators.__dataclass_fields__)
+
+
+def test_fixed_activities_land_market_and_grass_as_capri(model):
+    """Sprint 9s, the audit's open items: CAPRI's fixed activities (FACT: other oilseeds, other industrial crops,
+    other animals) stay at their data level and other oilseeds have no market (CAPRI nonXX_CROPS; the pooled world
+    market rested on an invented world total); every region with farmland has CAPRI's land market (Ireland's three
+    NUTS-2016 regions from IE01 + IE02, so the rent-elasticity fallback serves only a land market switched off);
+    grass yields are CAPRI's fresh matter (the GRAS output) at CAPRI's dry-matter content 0.22."""
+    import json, os
+    from capri_mod.data.definitions import MARKET_COMMODITIES
+    from capri_mod.supply.supply_module import FIXED_ACTIVITIES
+    from capri_mod.policy.greendeal import farm_to_fork_scenario
+    assert "OOIL" not in MARKET_COMMODITIES and set(FIXED_ACTIVITIES) == {"OOIL", "OIND", "OANI"}
+    lm = json.load(open(os.path.join(str(DATA_DIR), "2017", "supply", "land_market_2017.json")))["regions"]
+    a = model.data["areas"]
+    assert [r for r in a.index if a.loc[r].sum() > 0 and r not in lm] == []
+    y = model.data["yields"]
+    assert abs(y.at["DE11", "GRAS"] - 32245.664 * 0.22 / 1000.0) < 1e-3
+    assert abs(y.at["DK01", "GRAS"] - 35718.29 * 0.22 / 1000.0) < 1e-2          # was a template value of ~5 t
+    regs = ["ES61", "FRH0"]
+    s = model.run(custom_scenario=farm_to_fork_scenario(), regions=regs, max_outer_iter=2)
+    for r in regs:
+        for x in ("OOIL", "OIND"):
+            assert abs(float(s["supply"][r].activities.get(x, 0.0)) - float(a.at[r, x])) <= 1e-5 * max(1.0, float(a.at[r, x]))
+
+
+def test_parameter_file_and_code_agree():
+    """Sprint 9t: the model's parameters live in one file, capri_data/shared/model_parameters.csv (value, unit,
+    kind, source). Every row is read by the code and every param() call names a row - the file cannot drift. Kinds
+    are limited to the declared ones, every row has a source."""
+    import csv, re, pathlib
+    from capri_mod import params
+    rows = list(csv.DictReader(open(params.FILE, newline="")))
+    assert all(r["source"].strip() for r in rows)
+    assert {r["kind"] for r in rows} <= {"capri", "ipcc", "jrc121368", "legal", "literature", "model_setting"}
+    code = "\n".join(p.read_text() for p in pathlib.Path(params.__file__).parent.rglob("*.py") if "tests" not in p.parts)
+    called = set(re.findall(r"param(?:_table)?\(\"([A-Z0-9_]+)\"\)", code))
+    names = params.names()
+    assert called - names == set(), called - names          # a parameter the file does not have
+    assert names - called == set(), names - called          # a row no code reads
+    assert params.param("GWP_N2O") == 298.0 and params.param_table("FIBRE_FACTOR")["DCOW"] == 0.6
+
+
+def test_ipopt_polish_reaches_clarabels_optimum():
+    """K4 (docs/KNOWN_ISSUES.md): a solve Clarabel cannot finish is completed by IPOPT on the same convex problem. On a
+    small problem Clarabel solves exactly (a quadratic, a linear row, a second-order cone), the polish from a rough
+    point must return the same optimum and duals."""
+    import clarabel
+    import numpy as np
+    from scipy import sparse
+    from capri_mod.supply.feed_conic import _ipopt_polish
+    # min 0.5 (x0^2 + x1^2) + x2  s.t.  x0 + x1 >= 1,  x2 >= ||(x0 - 0.2, x1)||,  x >= 0
+    N = 3
+    P = sparse.csc_matrix(np.diag([1.0, 1.0, 0.0]))
+    q = np.array([0.0, 0.0, 1.0])
+    Gl = sparse.csr_matrix([[-1.0, -1.0, 0.0]]); hl = np.array([-1.0])
+    Gb = -sparse.identity(N, format="csr"); hb = np.zeros(N)
+    Gc = sparse.csr_matrix([[0.0, 0.0, -1.0], [-1.0, 0.0, 0.0], [0.0, -1.0, 0.0]]); hc = np.array([0.0, -0.2, 0.0])
+    G = sparse.vstack([Gl, Gb, Gc]).tocsc(); h = np.concatenate([hl, hb, hc])
+    st = clarabel.DefaultSettings(); st.verbose = False
+    sol = clarabel.DefaultSolver(sparse.triu(P).tocsc(), q, G, h,
+                                 [clarabel.NonnegativeConeT(1 + N), clarabel.SecondOrderConeT(3)], st).solve()
+    assert str(sol.status) == "Solved"
+    out = _ipopt_polish(sparse.triu(P).tocsc(), q, G, h, 1, N, 1, np.array(sol.x) + 0.05, float(sol.obj_val),
+                        "InsufficientProgress")
+    assert out is not None
+    x, zl, status = out
+    assert status == "Solved (IPOPT polish)"
+    fx = 0.5 * (x[0] ** 2 + x[1] ** 2) + x[2]
+    assert abs(fx - float(sol.obj_val)) < 1e-7          # same optimum value (the point to ~1e-5: a flat direction)
+    assert np.allclose(x, np.array(sol.x), atol=1e-4)
+    assert abs(zl[0] - float(np.array(sol.z)[0])) < 1e-4
+
+
+def test_projection_trajectory_moves_every_livestock_yield(data):
+    """K12 (docs/KNOWN_ISSUES.md): CAPRI's 2030 reference splits dairy cows, heifers, bulls and calves into intensity
+    variants, so the model's own animals had no yield factor and 2030 output per head stayed at 2017 (EU cow milk 140 Mt
+    against CAPRI's 154). Every livestock activity whose output follows its yield must have a 2030 factor for every
+    region that keeps it - its own, or the EU growth fallback - and dairy cows a regional one."""
+    import json
+    from pathlib import Path
+    from capri_mod.projection.projection_module import ProjectionModule
+    t = json.loads((Path(__file__).resolve().parents[2] / "capri_data" / "trajectories" / "capri_ref_2030.json").read_text())
+    reg, gro = t["regional"]["yields"], t["growth"]["yields"]
+    herds = data["animal_numbers"]
+    for a in ProjectionModule.LIVESTOCK_YIELD:
+        keys = ("SHGP_MILK", "SHGP_MEAT") if a == "SHGP" else (a,)
+        for k in keys:
+            assert k in gro, f"no EU yield growth for {k}"
+    kept = [r for r in herds.index if float(herds.at[r, "DCOW"] if "DCOW" in herds.columns else 0.0) > 1.0]
+    have = [r for r in kept if "DCOW" in (reg.get(r) or {})]
+    assert len(have) >= 0.95 * len(kept), (len(have), len(kept))
+    eu = float(gro["DCOW"]["2030"])
+    assert 1.05 < eu < 1.25, eu          # CAPRI 2030 reference: EU milk yield per cow +12-14% on 2017

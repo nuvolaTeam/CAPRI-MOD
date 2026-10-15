@@ -29,6 +29,13 @@ def main() -> None:
     rations = json.loads((data / "feed" / "feed_ration_2017.json").read_text())["regions"]
     areas = pd.read_csv(data / "supply" / "base_areas.csv", index_col=0)
     herds = pd.read_csv(data / "supply" / "animal_numbers.csv", index_col=0)
+    # The raw file uses CAPRI-style names (SCOW, HEIF, SHGO); the model and the rations
+    # use BCOW, HFRS, SHGP. Without the loader's aliases suckler cows, heifers and sheep
+    # were silently left out of every fodder balance (their fodder tied to no land).
+    import sys as _sys
+    _sys.path.insert(0, str(_ROOT))
+    from capri_mod.data.loaders import HERD_ALIASES
+    herds = herds.rename(columns=HERD_ALIASES)
     out, worst = {}, 0.0
     for reg, acts in rations.items():
         if reg not in areas.index:

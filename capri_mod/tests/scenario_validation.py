@@ -111,10 +111,10 @@ def test_market_shock(model, regions):
     print("TEST 3 — Market shock propagation (+30% world wheat)")
     print("=" * 70)
     base = model.run(scenario="BASELINE", max_outer_iter=3, market_max_iter=80,
-                     regions=regions, run_environmental=False, run_feed=False)
+                     regions=regions, run_environmental=False)
     shock = model.run(scenario="BASELINE", world_price_shock={"SWHE": 0.30},
                       max_outer_iter=3, market_max_iter=80, regions=regions,
-                      run_environmental=False, run_feed=False)
+                      run_environmental=False)
     wp0, wp1 = base["market"].world_prices, shock["market"].world_prices
 
     def wheat_supply(res):

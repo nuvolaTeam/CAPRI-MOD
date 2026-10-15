@@ -5,6 +5,33 @@ statement about CAPRI is read from CAPRI's GAMS code (star 3.0) or from CAPRI's
 own data and results supplied by the project lead. Where something was found by
 searching rather than by a full review, the text says so.*
 
+## Current state (October 2026)
+
+Since this comparison was written: the EU feed ration is endogenous and on by default;
+the fodder balance is CAPRI's equality; CAPRI's land market is on by default; ammonia
+uses CAPRI's factors; EU prices are reported as producer prices; and an endogenous
+manure market is available as an option (off by default, `docs/MANURE_MARKET.md`).
+Young-animal markets (herd links) are on, as CAPRI's `yaniMarket_` (docs/YOUNG_ANIMALS.md), and livestock
+respond at CAPRI's calibrated product supply elasticities (they had literature priors). Remaining structural differences: dairy processing, mitigation inside
+the supply model, biofuels, bilateral trade flows.
+
+| 2030 Farm-to-Fork (JRC121368 targets) | capri-mod | CAPRI |
+|---|---|---|
+| Cereal / oilseed / vegetables-and-permanent-crops price | +10.5 / +16.7 / +16.3% | +8 / +11 / +15% |
+| Beef / pork / poultry / milk price (EU producer prices) | +11.8 / +27.9 / +23.8 / +1.5% | +24 / +43 / +18 / +1.5% |
+| Dairy cows / beef animals / pigs / poultry / sheep | −6.2 / −8.0 / −21.4 / −12.9 / −10.2% | −10 / −18 / −14.5 / −16.5 / −9.5% |
+| Cereal / oilseed / vegetables-and-permanent-crops production | −14.9 / −16.6 / −11.6% | −15 / −15.5 / −12% |
+| Nitrogen surplus / fertiliser N₂O | −38.5 / −37.8% | −33.5 / −40.4% |
+| Enteric / manure CH₄ / non-CO₂ GHG | −8.2 / −14.2 / −10.8% | −14.6 / −12.2 / −14.8% |
+| Ammonia | −34.4% | −33% |
+| Beef production | −7.1% | −14% |
+
+Default model (land market, feed ration and CAPRI's ammonia technologies on, manure market off); full EU, converged
+in 7 iterations, about 8 minutes. Mean absolute deviation from CAPRI over the twenty
+indicators above, ammonia excluded: 4.5 points over twenty indicators, 4.3 with ammonia included (5.5 before CAPRI's over-fertilisation limit; 4.51 before CAPRI's livestock elasticities and young-animal markets). Adoption of CAPRI's options against JRC121368 Table 17 (baseline → Farm-to-Fork, share of animal units weighted by excreted N or of crop area): low-emission housing 16 → 19% (CAPRI 12 → 12), covered storage 15 → 36% (14 → 34), air purification 0 → 14% (0 → 10), nitrification inhibitors 0 → 13% (0 → 18), precision farming 0 → 9% (0 → 35).
+
+The sections below are the comparison as originally written.
+
 ## Summary
 
 capri-mod reproduces CAPRI's **core loop** — regional PMP supply models iterating
@@ -30,7 +57,7 @@ prices do not.
 | COCO / CAPREG | consistent national and regional database | data taken directly from CAPRI's outputs (`res_17*`, `FAO_agg`, `res_0_1717`); `reconcile_base.py`, `rebase.py` as standalone tools | **uses CAPRI's data**, does not rebuild it |
 | CAPTRD | baseline projection | `projection/` (recursive time loop, trajectories, `captrd_import.py`); passes the null-trajectory identity test | **partial** — trajectory imported, not estimated |
 | CAPMOD supply models | regional (and farm-type) PMP models: crops, animals, land, feed, fertiliser, emissions, mitigation, policy | `supply/supply_module.py` (248 NUTS-2 QPs), `capri_pmp.py`, `intensity.py`, `qp_solver.py` | **core equivalent at NUTS-2**; no farm types; feed ration, mitigation and herd linkages missing (§3) |
-| CAPMOD market model | spatial multi-commodity model, two-stage Armington, processing (dairy, oilseeds, biofuels), non-EU feed demand, tariffs and TRQs | `market/market_module.py` (39 commodities, 21 trade regions) | **partial** — oilseed crushing and non-EU feed demand as CAPRI; dairy and biofuels not; simplified Armington (§3) |
+| CAPMOD market model | spatial multi-commodity model, two-stage Armington, processing (dairy, oilseeds, biofuels), non-EU feed demand, tariffs and TRQs | `market/market_module.py` (35 commodities, 29 trade regions) | **partial** — oilseed crushing and non-EU feed demand as CAPRI; dairy and biofuels not; simplified Armington (§3) |
 | Nutrient balances and fertiliser allocation (inside supply) | crop need, manure, mineral fertiliser with minimum shares, manure trade | `environmental/environmental_module.py` (stages 1–2 of `docs/FERTILISER_ALLOCATION.md`) | **partial** — manure trade at fixed base shares; mineral N linearised around base |
 | GHG and ammonia accounting | emissions per activity and region | `environmental/environmental_module.py` | **equivalent in structure**; ammonia mitigation incomplete |
 | Mitigation technologies ("endotech", inside supply) | adoption chosen with production | `abatement/capri_mitigation.py`, `technological.py`, `abatement_module.py` | **post-solve** — adoption does not change production |
@@ -65,7 +92,7 @@ Farm-to-Fork 2030. Inside the loop:
   constraint, using the environmental module's own coefficients; organic farming;
   the nitrogen intensity margin; CAP premiums; feed costs from cereal and cake
   prices.
-- **Inside the market:** 39 commodities; oilseed crushing in 44 region–seed
+- **Inside the market:** 35 commodities; oilseed crushing in 44 region–seed
   pairs, linking seed, oil and cake markets both ways; EU cereal and cake feed
   demand following herds; non-EU feed demand responding to feed prices with
   CAPRI's elasticities, own and cross.
@@ -87,12 +114,12 @@ Farm-to-Fork 2030. Inside the loop:
 | Herds ↔ fodder ↔ land (fodder balance) | regional fodder use = regional fodder production (non-tradable) | **none** — only a grassland area limit; found while building the ration | **missing** |
 | Feed prices → EU ration | ration chosen in supply models | none | **missing** — designed |
 | Feed prices → non-EU feed demand | `p_ElasFeed` | `p_ElasFeed`, own and cross | **equivalent** |
-| Feed prices → livestock costs | through the ration | cereal mix and cake index on fixed rations | **partial** |
+| Feed prices → livestock costs | through the ration | rations at CAPRI's feed bulk prices per member state (feedBlkPrice_, CES rho 6; Sprint 9d) | *done* |
 | Seed ↔ oil ↔ cake prices (crushing) | margin-driven crushing | as CAPRI, CAPRI's elasticities | **equivalent** |
 | Milk ↔ dairy products | processing with fat and protein balance | fixed FAO split | **missing** |
 | Oils, cereals, sugar ↔ biofuels | biofuel functions in the market | post-solve module, off | **missing** |
 | Mitigation ↔ production | adoption inside supply | post-solve | **missing** |
-| Calves ↔ heifers ↔ cows (herd linkages) | young-animal and replacement balances | none found in the supply module (searched, not fully reviewed) | **missing** |
+| Calves ↔ heifers ↔ cows (herd linkages) | young-animal and replacement balances | EU young-animal markets at fixed net trade (`CAPRIModel._update_young_animal_prices`) | **done** (October 2026) |
 | Trade between regions | bilateral two-stage Armington, tariffs, TRQs | world price with tariff wedges, an EU Armington premium, CAPRI's trade matrix and Armington parameters | **partial** |
 
 ## 4. What the validation says about the coupling

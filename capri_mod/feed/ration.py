@@ -31,6 +31,7 @@ import json
 from pathlib import Path
 
 import numpy as np
+from capri_mod.params import param, param_table
 
 #: CAPRI supply/pmp_elas.gms: FODDI (incl. straw, overridden) and named feeds
 FEED_ELAS = {"FGRA": -10.0, "FMAI": -10.0, "FOFA": -10.0, "FROO": -10.0, "FCOM": -10.0,
@@ -42,13 +43,13 @@ FEED_ELAS = {"FGRA": -10.0, "FMAI": -10.0, "FOFA": -10.0, "FROO": -10.0, "FCOM":
 #: Ruminants: protein <= 0.3, energy-rich <= 0.1; dairy cows, fattening bulls,
 #: calves: cereals >= 0.2, protein >= 0.1; heifers cereals and protein >= 0.05;
 #: suckler cows cereals >= 0.05; non-ruminants: cereals >= 0.6, protein <= 0.2
-#: (sows 0.3 - pigs here are sows + fattening, 0.2 used, REGISTERED), energy-rich
+#: (sows 0.3, fattening pigs 0.2: PIGS = sows and PIGF = fattening since the pig split), energy-rich
 #: 0.05-0.15, no fodder; other feeds >= 0.005 (0.001 sheep, suckler cows).
 #: NOT YET: CAPRI's data-driven rules - maximum 'other' feed share from member-
 #: state feed balances, minimum fibre-rich (fodder) shares from regional fodder
 #: energy shares (REGISTERED, pending).
 _RUMI = ("DCOW", "BCOW", "BULL", "HFRS", "CALV", "SHGP")
-_NRUMI = ("PIGS", "BROI", "LAYS")
+_NRUMI = ("PIGS", "PIGF", "BROI", "LAYS")
 _FODDI = ("FGRA", "FMAI", "FOFA", "FROO", "FCOM", "FSGM", "FSTR")
 
 
@@ -56,7 +57,7 @@ _FIBRE = ("FOFA", "FGRA", "FMAI")              # CAPRI fibreRichFeed (without st
 #: CAPRI factor x regional fodder-energy share = minimum share of each fibre feed;
 #: the model's calves (raising + fattening: 0.4 / 0.2) and sheep and goats
 #: (milk + fattening: 0.8 / 0.5) take the mean factor (REGISTERED)
-_FIBRE_FACTOR = {"DCOW": 0.6, "BCOW": 0.9, "BULL": 0.5, "HFRS": 0.6, "CALV": 0.3, "SHGP": 0.65}
+_FIBRE_FACTOR = param_table("FIBRE_FACTOR")
 
 
 def share_rules(act: str, ctx: dict | None = None) -> dict:
@@ -75,7 +76,8 @@ def share_rules(act: str, ctx: dict | None = None) -> dict:
     if act in _RUMI:
         setr("FPRO", hi=0.3); setr("FENE", hi=0.1)
     if act in _NRUMI:
-        setr("FPRO", hi=0.2); setr("FCER", lo=0.6); setr("FENE", lo=0.05, hi=0.15)
+        # CAPRI: 0.2 for monogastrics, 0.3 for sows (PIGS, since the pig split)
+        setr("FPRO", hi=0.3 if act == "PIGS" else 0.2); setr("FCER", lo=0.6); setr("FENE", lo=0.05, hi=0.15)
         for f in _FODDI:
             setr(f, hi=0.0)
     if act in ("DCOW", "BULL", "CALV"):
@@ -110,8 +112,8 @@ def share_rules(act: str, ctx: dict | None = None) -> dict:
     return r
 
 
-#: feed groups whose price follows a market: cereals -> cereal mix, protein -> cakes
-MARKET_FEEDS = ("FCER", "FPRO")
+#: feed groups whose price follows the market: CAPRI's tradable bulks (FEED_TRD)
+MARKET_FEEDS = ("FCER", "FPRO", "FENE", "FOTH", "FMIL")
 
 
 def _nnls(A: np.ndarray, b: np.ndarray) -> np.ndarray:
@@ -138,6 +140,42 @@ def _nnls(A: np.ndarray, b: np.ndarray) -> np.ndarray:
     return x
 
 
+# ---- NITRATE FEED ADDITIVE (CAPRI envind/line_nitr.gms) ------------------------
+# A ration ingredient: 1% nitrate in dry matter supplies 1.54% crude protein
+# (0.246 N x 6.25), raises N excretion (+0.42% of DM intake at 1.5% dosage) and cuts
+# enteric CH4 by 10% per point of DM. Maximum dosage 1.5% of DM (replacement heifers
+# 1%), applied only in stables: dairy cows 10/12 of stable time (lactation), fattening
+# bulls and heifers 1/2; never calves or suckler cows. Price 873 EUR/t (base year;
+# CAPRI inflates to the simulation year - REGISTERED: not inflated). Linseed and 3-NOP
+# only cut methane, worthless without a carbon price, so not in the ration (yet).
+NITRATE = "NITR"
+NITR_PRICE = param("NITR_PRICE")          # EUR/kg
+NITR_CP = param("NITR_CP")                # kg crude protein per kg nitrate
+NITR_N_EXCR = param("NITR_N_EXCR")        # kg N excreted per kg nitrate
+NITR_RULES = {a: (d, param_table("NITR_STABLE_TIME")[a]) for a, d in param_table("NITR_MAX_DOSE").items()}
+_STABLE = None
+
+
+def stable_share(region: str, act: str) -> float:
+    """Share of the year in stables: 1 - grazing, grazing = (1 - HD/365)(1 - Et/100)
+    (MITERRA RCEmissions, CAPRI's default path; as in the ammonia technologies)."""
+    global _STABLE
+    if _STABLE is None:
+        import csv as _csv
+        _STABLE = {}
+        f = Path(__file__).resolve().parents[2] / "capri_data" / "2017" / "abatement" / "ammonia" / "RCEmissions.csv"
+        if f.exists():
+            for r in _csv.DictReader(open(f)):
+                _STABLE[(r["region"], r["animal_mitt"], r["item"])] = float(r["value"])
+    ctry = {"BE": "BL", "LU": "BL", "IE": "IR"}.get(region[:2], region[:2]) + "000000"
+    cat = "DAICOW_S" if act == "DCOW" else "OCOW_S"
+    hd, et = _STABLE.get((ctry, cat, "HD")), _STABLE.get((ctry, cat, "Et"))
+    if hd is None:
+        return 0.0
+    graz = max(0.0, (1 - hd / 365.0) * (1 - (et or 0.0) / 100.0))
+    return max(0.0, 1.0 - graz)
+
+
 class Ration:
     """One region-animal ration problem, calibrated to its base."""
 
@@ -149,6 +187,16 @@ class Ration:
         dm = np.array([rec["content"][f]["DRMA"] for f in self.feeds])
         p0 = np.array([rec["price"][f] for f in self.feeds])
         flex = np.array([f in FEED_ELAS for f in self.feeds])
+        # nitrate as an ingredient (zero in the base ration)
+        act_, reg_ = rec.get("_act"), rec.get("_region")
+        self.nitr_max = 0.0
+        if rec.get("_use_nitrate", False) and act_ in NITR_RULES and reg_:
+            dose, months = NITR_RULES[act_]
+            self.nitr_max = dose * months * stable_share(reg_, act_)
+            if self.nitr_max > 0:
+                self.feeds.append(NITRATE)
+                x0 = np.append(x0, 0.0); e = np.append(e, 0.0); cp = np.append(cp, NITR_CP)
+                dm = np.append(dm, 1.0); p0 = np.append(p0, NITR_PRICE); flex = np.append(flex, True)
         self.x0, self.p0, self.flex = x0, p0, flex
         E0, P0, D0 = e @ x0, cp @ x0, dm @ x0
         req = rec["req"]
@@ -178,6 +226,8 @@ class Ration:
                     self.shares.append((i, "min", lo_e))
                 if hi_e < 1.0:
                     self.shares.append((i, "max", hi_e))
+        if self.nitr_max > 0:
+            self.shares.append((self.feeds.index(NITRATE), "max", self.nitr_max))
         # feed PMP slope
         eps = np.array([abs(FEED_ELAS.get(f, 1.0)) for f in self.feeds])
         peff = np.maximum(p0, 0.1 * cereal_price)
@@ -207,6 +257,13 @@ class Ration:
         shadow = sum(self.lam.get(k, 0.0) * v for k, v in (("E", e), ("P", cp), ("DMIN", dm)))
         # CNST from the first-order conditions at base: p + CNST + SLOP x0 = shadow
         self.cnst = np.where(flex, shadow - p0 - self.slope * x0, 0.0)
+        if NITRATE in self.feeds:
+            j = self.feeds.index(NITRATE)
+            # tiny curvature only for numerical stability (CAPRI: pmpParSqr = 0)
+            dmi = float(dm[:j] @ x0[:j]) if j > 0 else 1.0
+            self.slope[j] = 1e-6 * NITR_PRICE / max(self.nitr_max * dmi, 1e-6)
+            # zero nitrate optimal at base: p + cnst >= shadow at x = 0 (never a gain)
+            self.cnst[j] = max(0.0, float(shadow[j]) - NITR_PRICE)
 
     def solve(self, price: np.ndarray):
         """Ration at feed prices ``price`` (aligned with self.feeds)."""
@@ -262,18 +319,65 @@ class Ration:
 
 
 class RationModel:
+    #: nitrate as a ration ingredient (CAPRI line_nitr.gms); OFF until its methane and
+    #: N-excretion effects reach the emission accounts and the nitrogen balance
+    use_nitrate = False
+
     """All EU region-animal rations, from feed_ration_2017.json."""
 
-    def __init__(self, data_dir: str | Path = None):
+    def __init__(self, data_dir: str | Path = None, scale: dict = None, price_scale: dict = None,
+                 factor: dict = None):
+        """scale: {(region, animal): (f_energy, f_protein, f_dry_matter)} - requirements of a projected year
+        (capri_mod/projection: output per head follows the projected yield); the base ration is scaled by
+        the largest factor so it stays feasible, and the ration is calibrated to it."""
         root = Path(data_dir) if data_dir else Path(__file__).resolve().parents[2] / "capri_data"
         f = root / "2017" / "feed" / "feed_ration_2017.json"
         raw = json.load(open(f))["regions"] if f.exists() else {}
         self.rations = {}
         ctx = self._contexts(root, raw)
+        scale = scale or {}
+        price_scale = price_scale or {}
         for reg, acts in raw.items():
+            # purchased feed bulks at a projected year's prices: {(member state, bulk): factor} (projection/prices.py)
+            _ms = {"BE": "BL", "LU": "BL", "IE": "IR", "GR": "EL"}.get(reg[:2], reg[:2]) + "000000"
             for act, rec in acts.items():
+                if price_scale:
+                    rec = dict(rec, price={f: float(v) * float(price_scale.get((_ms, f), 1.0))
+                                           for f, v in rec["price"].items()})
                 pc = float(rec["price"].get("FCER", 0.0)) or 0.2
+                sc = scale.get((reg, act))
+                fx = (factor or {}).get((reg, act))
+                if fx:
+                    # CAPRI's projected ration and requirements (projection: capri_ref_ration_2030.csv): each feed and
+                    # requirement by its own factor; the ration is lifted uniformly where it would fall short of the
+                    # energy or protein requirement (the rule of the uniform scaling below), so it stays feasible
+                    req = dict(rec["req"])
+                    for q in ("ENNE", "CRPR", "DMIN", "DMAX"):
+                        if float(req.get(q, 0.0) or 0.0) > 0:
+                            req[q] = float(req[q]) * float(fx.get("req_" + q, 1.0))
+                    ration = {k: float(v) * float(fx.get(k, 1.0)) for k, v in rec["ration"].items()}
+                    lift = 1.0
+                    for q in ("ENNE", "CRPR"):
+                        sup = sum(x * float(rec["content"][k][q]) for k, x in ration.items())
+                        if float(req.get(q, 0.0) or 0.0) > 0 and sup > 0:
+                            lift = max(lift, float(req[q]) / sup)
+                    rec = dict(rec, req=req, ration={k: v * lift for k, v in ration.items()})
+                    sc = None
+                if sc:
+                    fe, fp, fd = (float(x) for x in sc)
+                    s_ = max(fe, fp)
+                    req = dict(rec["req"])
+                    req["ENNE"] = float(req.get("ENNE", 0.0)) * fe
+                    req["CRPR"] = float(req.get("CRPR", 0.0)) * fp
+                    if float(req.get("DMIN", 0.0) or 0.0) > 0:
+                        req["DMIN"] = float(req["DMIN"]) * fd
+                    if float(req.get("DMAX", 0.0) or 0.0) > 0:
+                        req["DMAX"] = float(req["DMAX"]) * fd
+                    rec = dict(rec, req=req, ration={k: float(v) * s_ for k, v in rec["ration"].items()})
                 rec = dict(rec, _act=act, _ctx=ctx.get(reg))
+                rec["_region"] = reg
+                rec.setdefault("_act", act)
+                rec["_use_nitrate"] = bool(getattr(type(self), "use_nitrate", False))
                 self.rations[(reg, act)] = Ration(rec, pc)
 
     @staticmethod
@@ -316,15 +420,15 @@ class RationModel:
                 out[reg]["foth_max"] = 5.0 * ms_foth[cc] / ms_dm[cc]
         return out
 
-    def price_vector(self, key, cereal_index: float = 1.0, protein_index: float = 1.0):
-        """Feed prices for one ration: base prices with the market feed groups
-        scaled by the cereal-mix and cake price indices (others unchanged:
-        on-farm fodder and feeds without a market here - REGISTERED)."""
+    def price_vector(self, key, cereal_index: float = 1.0, protein_index: float = 1.0, bulk_ratio=None):
+        """Feed prices for one ration: base prices with the market's feed bulks scaled by their price indices
+        (CAPRI feedBlkPrice_ of the member state: FCER, FPRO, FENE, FOTH, FMIL; bulk_ratio {bulk: index}, else the
+        cereal and protein indices given); on-farm fodder at its base price here (the model values it at its
+        balance shadow price separately)."""
         r = self.rations[key]
         p = r.p0.copy()
+        br = dict(bulk_ratio) if bulk_ratio is not None else {"FCER": cereal_index, "FPRO": protein_index}
         for i, f in enumerate(r.feeds):
-            if f == "FCER":
-                p[i] *= cereal_index
-            elif f == "FPRO":
-                p[i] *= protein_index
+            if f in br:
+                p[i] *= float(br[f])
         return p

@@ -92,7 +92,7 @@ def main() -> None:
     # ---- bilateral trade, excluding the World aggregate -----------------
     bil = df[(df.item == "ImportQ") & (df.exporter != WORLD)]
     bil[["importer", "exporter", "commodity", "value"]].to_csv(
-        out / "capmod_trade_flows_2017.csv", index=False)
+        out / "capmod_trade_flows_2017.csv.xz", index=False)
     print(f"\nbilateral trade : {len(bil):,} flows, "
           f"{bil.importer.nunique()} importers x {bil.exporter.nunique()} exporters")
 

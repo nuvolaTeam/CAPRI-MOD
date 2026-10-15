@@ -68,19 +68,36 @@ ANIMALS = [
 
 # Market module commodities (traded goods)
 MARKET_COMMODITIES = [
-    "SWHE", "DWHE", "BARL", "CORN", "OCER", "PARI",  # Cereals (PARI = paddy rice)
-    "RAPE", "SUNF", "SOYA", "OOIL",            # Oilseeds
-    "SUGB", "SUGR",                              # Sugar (beet + refined)
+    # cereals: SWHE = CAPRI's wheat (soft + durum), OCER = other cereals + rye + oats, PARI = milled rice
+    "SWHE", "BARL", "CORN", "OCER", "PARI",
+    "RAPE", "SUNF", "SOYA",                    # Oilseeds (other oilseeds, OOIL: no CAPRI market - nonXX_CROPS;
+                                                 # a fixed activity, FACT; the pooled world market it had here
+                                                 # rested on an invented world total, removed in Sprint 9s)
+    # white sugar; sugar beet is processed in the member states (CAPRI: PRCY, beet price follows the sugar
+    # price), it has no world market (tools/build_sugar_processing.py)
+    "SUGR",
     "POTA",                                      # Potatoes
     "PULS",                                      # Pulses
     "TOMA", "OVEG",                              # Vegetables
     "APPL", "OFRU", "CITR",                     # Fruits
-    "WINE", "OLIV",                              # Wine, olive oil
+    "WINE", "OLIV",                              # Wine, olive oil (OLIV = CAPRI's olive oil OLIO)
     "MILK", "BUTR", "SKIM", "CHES", "WHEY",    # Dairy products
+    # CAPRI's other dairy products, traded as in CAPRI (Sprint 9f): fresh milk products, cream, concentrated
+    # milk, whole milk powder, casein (CAPRI codes)
+    "FRMI", "CREM", "COCM", "WMIO", "CASE",
     "BEEF", "PORK", "POUL", "SHGM", "EGGS",    # Livestock products
-    "FATS", "OFOD_M",                            # Fats, other food
+    # (FATS and OFOD_M, "fats" and "other food", were markets with no supply, no use and invented world
+    # totals; CAPRI has no such products - its FATS and PROT are the dairy block's milk fat and protein)
     # oilseed-crushing products (docs/OILSEED_CRUSHING.md): oils and cakes
     "RAPO", "SUNO", "SOYO", "RAPC", "SUNC", "SOYC",
+    # biofuels (CAPRI XXBIOF): bio-ethanol and bio-diesel, made from the feedstocks in the market; traded and
+    # priced with endogenous biofuel markets (BIOF_M, docs/BIOFUEL_MARKET.md), fixed at the reference without
+    "BIOE", "BIOD",
+    # distillers' dried grains, the ethanol plants' by-product (CAPRI prodQuantBiofBy_), a traded protein feed
+    "DDGS",
+    # CAPRI's residual feeds (RESIMP), traded; EU output from milling (FPRI) and sugar processing (FENI) - MaprFeed_
+    # (Sprint 9h)
+    "FENI", "FPRI",
 ]
 
 # Processed / secondary products

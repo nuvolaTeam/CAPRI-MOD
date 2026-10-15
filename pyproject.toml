@@ -5,24 +5,30 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "capri-mod"
 version = "0.1.0"
-description = "A Python re-implementation of the CAPRI agricultural economic model"
+description = "A Python reimplementation of the CAPRI star 3.0 agricultural economic model"
 readme = "README.md"
 requires-python = ">=3.10"
-license = { text = "MIT" }
+license = { text = "GPL-3.0-only" }
 dependencies = [
     "pandas>=2.0",
     "numpy>=1.24",
     "scipy>=1.10",
+    "clarabel>=0.7",
+    "casadi>=3.6",       # bundles IPOPT: tools/nlp_check, the check against CAPRI's original (non-convex) form
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=7.0", "openpyxl>=3.1"]
+dev = ["pytest>=7.0"]
 
 [tool.setuptools.packages.find]
 include = ["capri_mod*"]
 
 [tool.setuptools.package-data]
-capri_mod = ["*.csv"]
+capri_mod = ["*.json", "*.md"]
 
 [tool.pytest.ini_options]
 testpaths = ["capri_mod/tests"]
+# tests that check a mechanism (adoption, accounts, reporting) run the market loop for 1-2 iterations on purpose; the
+# model warns loudly about any unconverged run, so this one expected warning is filtered here and every other warning
+# (solver fallbacks, skipped technologies, library deprecations) still shows
+filterwarnings = ["ignore:Outer supply-market loop did NOT converge:RuntimeWarning"]

@@ -96,6 +96,9 @@ def calibrate_supply_elasticities(
         "WINE": 0.176, "OLIV": 0.197, "TOBA": 0.213, "COTT": 0.20,
         "OFIB": 0.15, "GRAS": 0.05, "MAIF": 0.20, "OFOD": 0.12,
         "SETA": 0.00,
+        # Livestock: FALLBACK ONLY. capri_pmp.build_elasticity_table replaces these with
+        # CAPRI's calibrated product supply elasticities per member state (elas_2_1717,
+        # milk 0.47-0.58, beef 0.65-0.70, pork 0.57-0.72...); used only where none exists.
         "DCOW": 0.15, "BCOW": 0.12, "BULL": 0.18, "HFRS": 0.15,
         "CALV": 0.10, "SHGP": 0.12, "PIGS": 0.20, "PIGF": 0.22,
         "LAYS": 0.18, "BROI": 0.25, "OANI": 0.18,
