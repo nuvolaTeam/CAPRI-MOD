@@ -2,9 +2,9 @@
 pandas>=2.0
 numpy>=1.24
 scipy>=1.10
-# Clarabel interior-point conic solver (Apache-2.0): the regional problems with feeding inside the supply models
-# and the manure-market pool equilibrium
-clarabel>=0.7
-# CasADi with IPOPT: tools/nlp_check, regional problems in CAPRI's original non-convex form (a check, not the model's solver)
+# CasADi with IPOPT (EPL): the regional supply models in CAPRI's NLP form, the default (CAPRIModel.supply_form = "nlp")
 casadi>=3.6
+# Clarabel interior-point conic solver (Apache-2.0): the conic form of the regional models (supply_form = "conic"),
+# the manure-market pool equilibrium and starting points
+clarabel>=0.7
 # the test runner uses its own stand-in; pytest is optional (python -m pytest capri_mod/tests)

@@ -36,6 +36,7 @@ from typing import Dict, Optional
 
 import numpy as np
 from capri_mod.params import param, param_table
+from capri_mod.data.definitions import capri_ms
 
 #: MJ per Mcal, MJ per kg CH4 (IPCC 2006 Eq. 10.21, as gases.gms and the accounts)
 MJ_PER_MCAL = 4.1868                       # unit conversion
@@ -55,7 +56,7 @@ def _enteric_per_t_dm(env, region: str, animal: str) -> Optional[Dict[str, float
     fac = env._enteric_factors().get(animal)
     if not fac:
         return None
-    ctry = {"BE": "BL", "LU": "BL", "IE": "IR", "GR": "EL"}.get(region[:2], region[:2]) + "000000"
+    ctry = capri_ms(region)
     ge = fac["ge"].get(ctry) or fac["ge"].get("EU")
     if not ge:
         return None
@@ -97,7 +98,10 @@ def ghg_coefficients(env, region: str, res, rations: Optional[dict]) -> dict:
         if fld == "histosol_fallow":
             keys |= {"crop", "grass"}
         if fld == "cattle_shift":
-            keys |= set(((env.data.get("cattle_intensity") or {}).get(region) or {}).keys())
+            # the cattle splits' keys; the member splits ("HFRS:rep", "CALV:male", ...) only when they are on
+            from capri_mod.supply.supply_module import RegionalSupplyModel as _RSM
+            _ms = bool(getattr(_RSM, "use_cattle_member_splits", False))
+            keys |= {k for k in ((env.data.get("cattle_intensity") or {}).get(region) or {}) if _ms or ":" not in k}
         for k in keys:
             def m(r1, h_, fld=fld, k=k, base=base):
                 d = dict(base)

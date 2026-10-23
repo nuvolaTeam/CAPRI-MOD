@@ -1,162 +1,166 @@
-# Market structure: regional producer prices with Armington trade — design
+# The bilateral Armington market
 
-Status (October 2026): **CAPRI's bilateral market built and default** (Sprint 8m, below). The earlier
-resolution - the EU Armington premium with reporting and demand fixes - is kept as `market_structure = "premium"`.
+Status: revised 21 October 2026 against the code (Norway as its own market region, K56). The last section ("Before the bilateral market") is historical.
 
-## The gap
+The market is CAPRI's market model (`arm/market_model.gms`, simulation model m_globmarket) for every traded product:
+a market price per region, total use an Armington aggregate of domestic sales and imports, imports a CES over
+origins, bilateral flows priced at the exporter's price plus transport costs and tariffs. It is the only market
+structure used by `CAPRIModel.run` (`MarketModule.market_structure = "bilateral"`, the default).
 
-Farm-to-Fork 2030 against JRC121368: beef price +2.6% (CAPRI +24%), pork +12.5%
-(+43%), poultry +8.7% (+18%). Cause: in `MarketModule.domestic_prices`, every
-region's price is the **world price × (1 + tariff)** — perfect transmission, one
-world price per commodity cleared by tatonnement. An EU supply cut can only move
-the EU price as far as it moves the world price. An Armington class exists and is
-calibrated at start-up but never sets prices.
+Code: `capri_mod/market/bilateral.py` (`BilateralCommodity`: one product's trade system, its calibration, TRQs) and
+`MarketModule._bilateral_raw`, `_bilateral_calibrate`, `_bilateral_eval`, `_solve_bilateral`,
+`_solve_bilateral_equilibrium` in `capri_mod/market/market_module.py`. How the system is solved:
+[MARKET_SOLVE_CHECK.md](MARKET_SOLVE_CHECK.md).
 
-## CAPRI's structure (`arm/market_model.gms`)
+## Regions and products
 
-- `SupBalM_`: each region's own good — domestic sales = production − exports
-  (− intervention and private stock changes).
-- `ArmFit1_`: total domestic use (first Armington aggregate) = imports aggregate
-  + domestic sales.
-- `arm2QuantShares_`: imports = use × δ × (composite price ÷ import price)^ρ₁;
-  domestic sales likewise against the producer price.
-- `ArmFit2_`, `impQuant_`, `impPrice_`: imports are bilateral flows; each import
-  price = exporter's producer price + transport cost + tariff (`TRQImports_` for
-  tariff-rate quotas).
-- `wldMarket_`, `PPri_`: producer prices per region; no single world price.
-- ρ₁ (`p_rhoArm1`, `arm/market1.gms`): 8.0 for agricultural products, 3.0 for
-  biofuels (subject to its Armington calibration); `special_ch/market1_ch.gms` sets 2.2 (ρ₂ 4.5), which capri-mod
-  uses since biofuels are traded (Sprint 9c, docs/BIOFUEL_MARKET.md).
+- 30 trade regions (`definitions.ALL_TRADE_REGIONS`): EU27, 28 non-EU countries and ROW. One of them is Norway (NOR,
+  since 21 October 2026, KNOWN_ISSUES K56): CAPRI's market region NO000000, its own market region in
+  `gams/aggregation/defaultA.agg` and linked to supply models (RMSSUP); before, CAPRI's bilateral data folded it into
+  ROW while its supply regions NO01-NO07 fed the EU's market supply.
+- The EU is one market region by default. With `MarketModule.eu_blocks = True` (`run_f2f_2030.py --eu-blocks`) it is
+  CAPRI's two trade blocks of `gams/aggregation/defaultA.agg`, EU_WEST (EU-14, with Belgium and Luxembourg as CAPRI's
+  BL) and EU_EAST (EU-13), each with its own market prices and bilateral trade between them
+  (`capri_data/shared/eu_market_blocks.csv`, data files `*_eu2.csv`). The EU's common external tariff and the EU's
+  tariff-rate quotas apply to both blocks; an `EU27` row (quantities summed, prices production-weighted) is added to
+  the results for reporting (`_with_eu_aggregate`). Norway is its own market region NOR in both settings, as in
+  CAPRI.
+- 58 market commodities (`definitions.MARKET_COMMODITIES`). 57 have CAPRI bilateral flows; raw milk (MILK) has none
+  and clears as a pooled market (one price ratio for the non-EU regions); the EU's raw milk is priced by the dairy
+  block ([DAIRY_PROCESSING.md](DAIRY_PROCESSING.md)).
+- Products follow CAPRI's market products: wheat is soft plus durum wheat (durum's price signal follows wheat's,
+  `model.py`), olives reach the market as olive oil and paddy rice as milled rice at CAPRI's member-state processing
+  yields (`processing_yields.csv`, `tools/build/build_processing_yields.py`), sugar beet as white sugar
+  ([WORLD_MARKET_BASELINE.md](WORLD_MARKET_BASELINE.md)); rye and oats are markets of their own.
 
-## Plan
+## Equations
 
-Step 1 — CAPRI's first stage, pooled second stage:
-1. Own producer price per region and commodity; supply and feed respond to it.
-2. Domestic use = CES composite of domestic sales and imports, ρ₁ per
-   commodity; shares calibrated so base flows and prices are reproduced exactly.
-3. Imports come from a world pool at pool price × (1 + tariff); exports go to
-   the pool with a CES export demand; the pool clears Σ exports = Σ imports.
-4. Region clears its own good: production = domestic sales + exports.
-5. Validation: base exact; anchors; Farm-to-Fork meat prices against CAPRI.
+Per product and region i (`bilateral.py` docstring); Pd_i = Pd0_i r_i is the region's market price, r_i its ratio to
+the reference:
 
-Step 2 — bilateral flows and tariff-rate quotas (beef, poultry, dairy), using
-CAPRI's trade flows already partitioned in `capri_trade_regions_2017.json`.
-
-Open data check: `armington_params.csv` gives ρ₁ of 3.5 (beef), 6.7 (pork),
-labelled "CAPRI", while CAPRI's code sets 8.0 by default — provenance to resolve
-before step 1 uses them.
-
-## Revision: the mechanism exists; the gap was mostly reporting
-
-`MarketModule.eu_armington_premium` already implements CAPRI's first-stage
-clearing for the EU (gross extra-EU trade, σ for domestic sales against
-imports, ρ₂ for exports), and farmers respond to (world × tariff) × premium.
-Results, however, report the EU price **without** the premium, and all
-Farm-to-Fork comparisons used it. With the premium (2017 base): poultry +19.5%
-(CAPRI +18%), wheat +9.5% (+8%), milk +1.7% (+1.5%), pork +25.5% (+43%),
-rapeseed +24.1% (+11%, overshoot), beef +5.4% (+24%). Elasticities confirmed as
-CAPRI's effective values (`special_ch/market1_ch.gms`, Fontagné, Guimbard &
-Orefice 2019). Next: report producer prices with the premium; then beef and the
-rapeseed overshoot.
-
-## Outcome (October 2026)
-
-- **Reporting**: `MarketEquilibrium.domestic_prices` now carries the EU producer price
-  (world price × tariff × Armington premium); the old value is kept as `wedge_prices`.
-- **Demand bug**: `demand_response` measured prices against the base world price
-  instead of the base domestic price, cutting every tariff-protected region's base
-  demand by (1 + tariff)^elasticity (EU beef 17% too low). Fixed; base unchanged.
-- **Beef**: with CAPRI's 18% beef supply cut the model's own market gives about +28%,
-  CAPRI's range; the remaining beef gap is on the supply side, not in the market.
-  Tariff-rate quotas were checked: the model's tariff already equals CAPRI's
-  out-of-quota cost at the margin.
-- Bilateral flows and quotas were therefore not built.
-
-## Sprint 8m (done, October 2026): CAPRI's bilateral market, default
-
-The planned structure below is built and is the default (`MarketModule.market_structure = "bilateral"`;
-`"premium"` keeps the earlier approximation). Code: `capri_mod/market/bilateral.py` (one commodity's system),
-`MarketModule._solve_bilateral*` (calibration, solve, reporting).
-
-**Data** (`tools/build_bilateral_market.py`, from CAPRI's own market results): every bilateral flow with its
-price components - ImportQ, ImportP, Fob, TCost, TaAppl - of CAPRI's base market (`market_base_1717`, 2017) and
-of its 2030 Green Deal reference (`markmarket_greendeal_1730et_base_1717`), aggregated to the model's 29 trade
-regions as `bilateral_flows_<year>.csv`: per (importer, exporter) the quantity and the import price split into
-the part that moves with the exporter's market price, a = Fob (1 + ad valorem), and the fixed part, b = TCost
-(1 + ad valorem) + specific tariffs and TRQ effects (ImportP minus the rest) - CAPRI's `impPrice_` aggregated
-exactly at the base composition. Market prices (PMRK) and production per region: `bilateral_regions_<year>.csv`.
-Substitution elasticities rho1, rho2 per product: `armington_rho.csv` from `arm/market1.gms` (8 / 10) with
-`special_ch/market1_ch.gms` (CEPII, Fontagne, Guimbard & Orefice 2019) as CAPRI includes it: beef 3.5 / 7.1,
-pork 6.7 / 13.4, wheat 3.9 / 7.8. The market year follows the run: a 2030 projection uses CAPRI's 2030 flows
-(`data["market_year"]`), so the non-EU world is CAPRI's 2030 world, not the base period's.
-
-**Products.** The market's products are now CAPRI's traded ones: wheat (soft + durum; durum's price follows
-it), other cereals with rye and oats, milled rice (paddy x CAPRI's EU ratio 0.40), olive oil (olives x CAPRI's
-member-state yield, EU 0.20), white sugar. `tools/build_processing_yields.py`. Raw milk and other oilseeds have
-no CAPRI bilateral trade and clear as pooled markets (one price ratio for all regions).
-
-**Equations** (per traded product and region): own good S = domestic sales + sum of exports; total use D at the
-consumer price PA, the CES aggregate of the region's market price and the import aggregate PM; imports by origin
-from a CES over import prices a r + b. Supply at the region's own market price (non-EU: CAPRI's market supply
-elasticities; EU: the supply models' output, anticipated against the price farmers last saw; crushing and the
-dairy blocks at regional prices); use from the existing demand functions at the consumer price.
-
-**Calibration.** CAPRI's flows are kept and each region's domestic sales absorb the difference between the
-model's own production and CAPRI's (exports capped at 98% of production); use at the reference prices is
-exactly the closure's. In a BASELINE run the market is recalibrated at each outer iteration, so the baseline
-sits at the reference prices (as CAPRI's calibrated reference does) and a scenario inherits the calibration
-at the converged baseline supply (cached with the baseline).
-
-**Solver.** Successive linearisation: the full model response (supply anticipation, crushing, dairy, feed and
-biofuel demand) is evaluated, each product's trade system is then solved exactly (Newton) with supply and use
-log-linear around that point (own-price responses measured once per calibration), and the step repeats until the
-largest relative supply-balance residual is below 1e-7 (about 0.07 s per evaluation, 40-60 evaluations).
-
-**Tariff-rate quotas.** CAPRI's EU bilateral TRQs (`TrqNT` of the policy block EU; `build_trq`,
-`bilateral_trq_<year>.csv`): per model exporter the quota, the gap between out-of-quota (MFN: TAMFN, TSMFN) and
-in-quota price, and the share of the flow under the quota regime. The specific tariff on the flow moves with
-CAPRI's sigmoid (`trqSigmoidFunc_`: slope 200 on (imports - 0.97 quota) / quota), relative to the base fill so
-the base is reproduced; each quota's tariff is solved consistently with its own flow (bisection) at every step.
-In CAPRI's 2030 reference the EU's meat quotas are far from filled (beef 13 of 157 kt from the exporters with
-bilateral quotas, poultry 108 of 422), so under Farm-to-Fork they do not bind: results are unchanged by them.
-REGISTERED: global (erga omnes) quotas, in-quota specific tariffs other than CAPRI's applied ones, and CAPRI's
-augmented-CES commitment terms (p_arm2Commit) are not represented.
-
-**Farm-to-Fork 2030** (default model): 20-indicator gap 4.51 -> **3.48** with the bilateral market; with the
-projection fixes of the same sprint (docs/BASELINE_REPRODUCTION.md) **3.30**. Prices against CAPRI (JRC121368):
-cereals +8.0% (+8), oilseeds +16.0% (+11), vegetables and permanent crops +12.3% (+15), beef +17.1% (+24), pork
-+33.8% (+43), poultry +22.7% (+18), milk +4.6% (+1.5). Pigs -21.1% (-14.5). Without the dairy block the EU's
-dairy products clear on their own markets while raw milk follows the pooled milk market: butter, cheese and
-whey prices rise 35-60% with EU milk supply and do not reach the milk price (with the block they would; the
-opt-in block was not re-run with the new market).
-
-## Sprint 8 (planned, October 2026): CAPRI's full market, region by region
-
-The decision above was taken before the world base was CAPRI's. With CAPRI's FAO_agg balances in every region
-([WORLD_MARKET_BASELINE.md](WORLD_MARKET_BASELINE.md)) the EU premium approximation gives Farm-to-Fork beef +9%
-(CAPRI +24) and pork +21% (+43), and the EU premium for beef fell when the EU's trade was put in a world of
-CAPRI's size. Every remaining meat-price gap now runs through the one piece of the market that is not CAPRI's:
-one world price per commodity, with the EU alone given an Armington premium. The plan is CAPRI's structure for
-every region (`arm/market_model.gms`, simulation model m_globmarket):
-
-| CAPRI equation | Content | Model |
+| CAPRI equation (`arm/market_model.gms`) | Content | capri-mod |
 |---|---|---|
-| `SupBalM_` | domestic sales = production − exports (− stock changes) | per region, own producer price `v_marketPrice` |
-| `ArmBal1_` | Armington aggregate = food + feed + processing + biofuel use | demand blocks as now, at the region's consumer price |
-| `arm1PriceAgg_`, `arm2QuantShares_` | first CES nest: domestic sales against the import aggregate, ρ₁ (`p_rhoArm1`), shares `p_dpCESTrade` calibrated to base flows | new |
-| second nest (`arm2Price_`, `ArmFit2_`) | import aggregate over origins, ρ₂, base bilateral flows `p_tradeFlows` | new; flows from CAPRI res_0_1717 (already in `trade_flows_2017.csv`) |
-| `impPrice_` | import price = exporter's market price + transport cost, × (1 + ad valorem) + specific tariff | transport costs and tariffs from CAPRI (`p_transpCost`, `p_tarAdVal`, `p_tarSpec`) |
-| `TRQImports_` / TRQ equations | in-quota and out-of-quota tariff, quota rent | EU beef, poultry, dairy, sugar first; CAPRI's `p_trqBilat` |
-| `expQuant_` | exports = Σ bilateral flows from the region | identity |
+| `SupBalM_` (l. 2632) | own good: production = domestic sales + exports | `BilateralCommodity.residual`; the unknowns are the r_i |
+| `ArmBal1_` (l. 2602) | total use D_i at the consumer (Armington) price PA_i | the demand blocks of `demand_response` at PA_i |
+| `arm2QuantShares_` (l. 2706), first nest | DS_i = D_i dd_i (PA_i/Pd_i)^s1, M_i = D_i dm_i (PA_i/PM_i)^s1 | `flows` |
+| second nest | PM_i = [Σ_j beta_ij p_ij^(1−s2)]^(1/(1−s2)), X_ij = M_i beta_ij (PM_i/p_ij)^s2 | `prices`, `flows` |
+| `impPrice_` (l. 2849) | import price = exporter's price + transport cost, with ad valorem and specific tariffs | p_ij = a_ij r_j + b_ij (below) |
+| `trqSigmoidFunc_` (l. 3275) | tariff under a TRQ as a sigmoid of the quota fill | `trq_solve` (below) |
 
-Unknowns per traded commodity: one producer price per region (29). Equations: each region's supply balance.
-Everything else (consumer prices, flows, imports) is explicit given the prices, so the system is 29 × 32 equations
-in prices, block-diagonal by commodity except for the cross-price, feed, crushing, dairy and biofuel links that
-already exist; Newton per commodity inside the existing Gauss-Seidel over commodities, as the dairy blocks are
-solved now. Calibration: CES share parameters so that base flows and base prices are reproduced exactly; check
-that a no-shock run returns every base flow.
+Import prices: per (importer, exporter) CAPRI's base import price is split into the part that moves with the
+exporter's market price, a = Fob (1 + ad valorem), and a fixed part, b = TCost (1 + ad valorem) + specific tariffs
+and TRQ effects (ImportP minus the rest): CAPRI's `impPrice_` aggregated exactly at the base composition of the
+model's trade regions. a0 (Fob without the ad valorem tariff) carries a tariff change: `PolicyScenario.tariff_changes`
+adds points of ad valorem tariff to the EU's imports (`import_prices`; flows between the EU blocks carry none).
 
-Stages: (1) data — CAPRI's bilateral flows, transport costs, tariffs and TRQs for the model's trade regions,
-with ρ₁, ρ₂ from `market1.gms` / `market1_ch.gms`; (2) the two-nest system without TRQs, replacing the world
-price and the EU premium, validated by base reproduction and the baseline check; (3) TRQs; (4) Farm-to-Fork.
-The EU block stays one region (CAPRI's EU trade block), as now.
+## Data
+
+`tools/build/build_bilateral_market.py`, from CAPRI's market results: the base market (`market_base_1717`) for 2017 and the
+2030 Green Deal reference (`markmarket_greendeal_1730et_base_1717`) for 2030, aggregated to the model's trade regions:
+
+- `bilateral_flows_<year>[_eu2].csv`: per importer, exporter and product the flow (ImportQ) and a, b, a0;
+- `bilateral_regions_<year>[_eu2].csv`: market prices (PMRK) and production per region;
+- `bilateral_trq_<year>.csv`: the EU's bilateral TRQs (below);
+- `armington_rho.csv`: s1 (rho1) and s2 (rho2) per product. CAPRI's defaults are 8 and 10 (`arm/market1.gms`
+  l. 108-109; 3 and 5 for biofuels, l. 119-120), overridden by `special_ch/market1_ch.gms` (CEPII; Fontagné,
+  Guimbard and Orefice 2019) as CAPRI includes it, e.g. wheat 3.9 / 7.8, beef 3.5 / 7.1, pork 6.7 / 13.4, butter
+  2.1 / 4.3, biofuels 2.2 / 4.5, DDGS 1.2 / 2.4. A product missing from the file would take 8 / 10 (code default).
+
+The market year follows the run (`data["market_year"]`, else 2017): a 2030 projection uses CAPRI's 2030 flows, so the
+non-EU world is CAPRI's 2030 world.
+
+## Supply and use at regional prices
+
+Supply (`supply_response`, region_ratio given):
+
+- Non-EU regions: base production × r_i^ε, with one own-price elasticity per product for every region: CAPRI's
+  p_elasSupp, EU median (`sources/arm/supply_elas_eu_all.json`), where it has the product, else the `eps` column of
+  `armington_params.csv`. Crushing, the non-EU dairy blocks and the biofuel markets set their products' supply at
+  the regional prices ([OILSEED_CRUSHING.md](OILSEED_CRUSHING.md), [DAIRY_PROCESSING.md](DAIRY_PROCESSING.md),
+  [BIOFUEL_MARKET.md](BIOFUEL_MARKET.md)).
+- EU: the supply models' output, anticipated against the price the supply models last saw:
+  S = S_seen (r / r_seen)^ε (`_eu_price_seen`, set by `model.py`); at a converged point r = r_seen and the
+  anticipation vanishes. Other vegetable oils and fish (`EU_MARKET_SUPPLY`: OTHO, FFIS, SFIS, OAQU), which have no
+  supply-model activity, respond to the price against base. With `CAPRIModel.market_supply_nq` (off by default) CAPRI's
+  market supply function, its Hessian measured on the supply models at the baseline, replaces the anticipation for
+  the supply models' products (`model._market_supply_hessian`).
+- Norway (`MarketModule.SUP_NONEU_REGIONS`, CAPRI's RMSSUP outside the EU): as the EU, its market supply is its supply
+  models' output (country NO of the bridged supply, `_split_supply`), fixed within one market solve and anticipated
+  against the prices its models last saw (`_sup_price_seen`) with Norway's own CAPRI elasticity (p_elasSupp of
+  NO000000, `supply_elas_region.csv`); products without a supply-model activity in Norway (fish) keep CAPRI's market
+  supply function at Norway's price against base (pork did until Norway's regions got CAPRI's pig herds, 21 October
+  2026: the switch is per product, by the supply models' output). Its raw milk goes to
+  its own dairy block (CAPRI's NO000000 block in `dairy_world_processing.csv`, raw milk delivered from its supply
+  models instead of the raw milk supply function: `market_model.gms` ProdNQ_ note 2). With `market_supply_nq` Norway
+  has its own Hessian (`model._split_hessian`).
+- The supply models of Norway see Norway's prices: `model.py` relaxes Norway's departure from the EU signal
+  (`_sup_dev`: its producer price ratios, raw milk its dairy block's) as it does the EU trade blocks', and hands it to
+  the supply module as a member-state departure (`price_dev_ms["NO000000"]`), to Norway's feed bulk price indices
+  (`feed_bulk_price_ratios`) and to its young-animal market (yaniMarket_ per market region: NOR).
+
+Use (`demand_response`, at the consumer price PA_i): CAPRI's GL food demand on the human-consumption share of use;
+feed (EU and Norway: CAPRI's feed bulks following the supply models' herds, [FEED_MARKETS.md](FEED_MARKETS.md),
+Norway's from `feed_bulks_no.csv` on CAPRI's feed share of its use; other non-EU regions: p_ElasFeed, which CAPRI
+has only outside RMSSUP); processing (ProcNQ_);
+crushing; biofuel feedstocks and biofuel use; dairy products; the remaining share of use keeps an own-price response
+QD0 (P/P0)^eta.
+
+## Calibration (`_bilateral_calibrate`, `BilateralCommodity.calibrate`)
+
+CAPRI's flows are kept and each region's domestic sales absorb the difference between the model's own production and
+CAPRI's (DS0 = S0 − exports; exports are scaled down where they would exceed 98% of production). Share parameters
+(beta, dd, dm) are calibrated so that base flows and base prices are reproduced exactly. The demand functions are
+then rescaled so that use at the reference prices is exactly the closure's D0. For the pooled product (raw milk)
+the demand of the regions without supply models is scaled so that the world clears at base (the EU's and Norway's
+raw milk use is their supply models' milk delivered to their own dairies). Norway's base is taken at its supply
+models' output as the EU's (`_align_sup_base`; the closure's domestic sales absorb the difference to CAPRI's
+flows).
+
+In a baseline run the market is recalibrated at every outer iteration at the current supply, and prices stay at the
+reference (CAPRI's reference run is a calibrated equilibrium at its reference prices); the calibration at the
+converged baseline supply is frozen and inherited by the scenario (cached with the baseline).
+
+## Tariff-rate quotas
+
+CAPRI's EU bilateral TRQs (`TrqNT` of the EU policy block; `build_trq` → `bilateral_trq_<year>.csv`): per model
+exporter the quota, the gap between the out-of-quota (MFN: TAMFN, TSMFN) and the in-quota price, and the share of the
+flow under the quota regime. The specific tariff on the flow moves with CAPRI's sigmoid, slope 200 on
+(fill − 0.97) (p_trqSigmoidSlope, `arm/market_model.gms` l. 339; `TRQ_SLOPE` in `model_parameters.csv`), relative to the
+base fill so that the base is reproduced. Each quota's tariff is solved by bisection consistently with its own flow
+at every market step (`trq_solve`); the market solve stops only when the tariffs have stopped moving. Switch:
+`MarketModule.use_trq` (True).
+
+In CAPRI's 2030 reference (`bilateral_trq_2030.csv`) the EU's meat quotas are far from filled: beef 13 of 157 kt,
+poultry 108 of 422 kt from the exporters with bilateral quotas. In the Farm-to-Fork runs of Sprint 8m (October 2026)
+they did not bind.
+
+REGISTERED: global (erga omnes) quotas, in-quota specific tariffs other than CAPRI's applied ones, and CAPRI's
+augmented-CES commitment terms of the second nest (p_arm2Commit) are not represented.
+
+## Reported prices and the price signal
+
+`MarketEquilibrium.domestic_prices` holds each region's market price (reference × r_i); `world_prices` a world index
+per product (the reference world price × the exporters' price ratios weighted by their base exports;
+`_bilateral_world_index`); `wedge_prices` the reference domestic price × that index. `eu_premium` (per EU market
+region, `eu_premium_reg`) is the EU's price ratio over the world index; `model.py` forms the farmers' price signal as
+world ratio × premium, i.e. the EU market price ratio. "Premium" is only this bookkeeping; no premium is solved.
+
+## Differences from CAPRI
+
+- EU market regions: one region by default (CAPRI's member states inside its trade blocks are available as
+  `eu_blocks`); member states are not market regions (raw milk, fat and protein are priced per member state in the
+  dairy block, young animals per EU market region).
+- Non-EU supply: one own-price elasticity per product (CAPRI's EU median), not CAPRI's regional market supply
+  functions with cross-price terms.
+- EU market supply between iterations: CAPRI's market supply elasticities as given; CAPRI recalibrates its supply
+  approximation to the supply models (available as `market_supply_nq`, off).
+- No p_arm2Commit, no global TRQs (above).
+- Solver: Newton per product with Anderson acceleration instead of CONOPT ([MARKET_SOLVE_CHECK.md](MARKET_SOLVE_CHECK.md)).
+
+## Before the bilateral market (historical)
+
+Until Sprint 8m (October 2026) the market had one world price per commodity, each region's price was world price ×
+(1 + tariff), and the EU alone had an Armington premium cleared on its gross extra-EU trade. That structure was
+removed from the code on 20 October 2026 (no run path used it; KNOWN_ISSUES K54-2). Its development and the results of that period (including the fixes to the
+reported EU price and to the demand reference price) are recorded in CHANGELOG.md (sections up to "Sprint 8m") and
+`docs/archive/MARKET_STRUCTURE_PLAN.md`. Current results: README section 9 (Validation).

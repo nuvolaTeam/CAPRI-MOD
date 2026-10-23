@@ -1,131 +1,80 @@
-# CAPRI-mod — Inputs, Outputs, and Sensitivity Analysis
+# Batch and sensitivity runs with capri-mod
 
-A reference for running sensitivity / uncertainty analysis on CAPRI-mod.
+*Rewritten 20 October 2026 against the code. capri-mod has no sensitivity module of its own; it has result
+persistence (`capri_mod/io_results.py`) and a parameter table, which make batch runs straightforward. The examples
+use SALib for the design and the analysis; install it separately (`pip install SALib`).*
 
-## 1. How many inputs and outputs?
+## 1. What you can vary
 
-### Inputs — two distinct senses (make sure you mean the right one)
+**Policy and run settings** (`PolicyScenario` in capri_mod/policy/policy_module.py; README section 6):
 
-**(a) Data inputs** — the numbers loaded from `capri_data/`:
+| Lever | Where | Note |
+|---|---|---|
+| landscape, organic, pesticide, mineral fertiliser, surplus targets | `PolicyScenario` fields or `greendeal_scenario(...)` | CAPRI's Green Deal switches; `greendeal_scenario` accepts only CAPRI's values |
+| emission tax | `PolicyScenario.carbon_tax` | EUR/t CO2-eq, EU regions |
+| CAP payments | `biss_rate_change`, `coupled_support`, `premium_factor_regional`, `lfa_budget_change`, `ae_budget_change`, `n2k_budget_change` (`eco_scheme_budget_pct` is a reporting split) | |
+| tariffs | `tariff_changes` | ad valorem points on EU imports |
+| surplus cut, biofuel mandate at 0 | `surplus_cut=0`, `biofuel_mandate=0` | read as given (0 used to be read as the default) |
+| biofuel mandate | `PolicyScenario.biofuel_mandate` | factor on the EU and UK mandates (not a `run()` argument) |
+| mitigation settings | `PolicyScenario.endotech` or `run(endotech=...)` | `ghgTechMYld`, `ghgTechFEff`, `ghgTechLowNFeed`, `ghgTechLineNitr` |
+| world prices | `run(world_price_shock={comm: change})` | a scenario against the unshocked baseline, also under `scenario="BASELINE"` |
+| biofuel output (biofuel markets off) | `run(biofuel_output_scale={"BIOE": x, "BIOD": y})` | |
+| model parameters | `capri_data/shared/model_parameters.csv` | every constant with its source; edit a copy of the data folder |
+| baseline | the trajectory (`capri_data/trajectories/`) | 2030 runs |
+| EU tariff-rate quotas | `PolicyScenario.trq_volume_changes` | `{commodity: change in 1000 t}` on CAPRI's quotas, spread over exporters by base volume; a commodity without a CAPRI quota raises an error |
 
-| Category | Files | Variable columns | Data points |
-|----------|------:|-----------------:|------------:|
-| supply | 10 | 150 | 145,954 |
-| shared (trade) | 1 | 33 | 27,753 |
-| policy | 2 | 37 | 1,272 |
-| environment | 4 | 10 | 1,359 |
-| feed | 2 | 22 | 418 |
-| market | 3 | 5 | 173 |
-| **Total** | **22** | **257** | **176,929** |
+Not levers: `milk_quota` / `sugar_quota` (raise an error) (KNOWN_ISSUES K52).
 
-So: **22 input files, 257 variable columns, ~177,000 individual data points.**
-For a global sensitivity analysis over *every* data point, the dimensionality is
-~177k — usually far too large; you normally pick a **subset** of variables or
-scale whole groups (e.g. "yields ±10%").
+## 2. Outputs per run
 
-**(b) Policy / scenario levers** — the 14 fields of `PolicyScenario` plus the
-`run()` arguments. These are the natural, low-dimensional "knobs" most sensitivity
-studies vary:
+`flatten_outputs(results)` reduces a run to one flat record:
 
-| Lever | Type |
-|-------|------|
-| `biss_rate_change` | Pillar-I basic income support | 
-| `coupled_support` | coupled payments per commodity |
-| `eco_scheme_budget_pct` | eco-scheme budget share |
-| `aecs_rate_change`, `organic_rate_change`, `anc_rate_change` | Pillar-II rates |
-| `tariff_changes` | import tariffs per region/commodity |
-| `trq_volume_changes` | tariff-rate-quota volumes |
-| `nitrate_limit_change` | N limit |
-| `set_aside_requirement` | set-aside share |
-| `milk_quota`, `sugar_quota` | quotas |
-| `run(biofuel_mandate=…)` | biofuel mandate share |
-| `run(world_price_shock=…)` | direct world-price shocks per commodity |
+- `price_<comm>`: world prices; `price_EU27_<comm>`, `prod_EU27_<comm>`: the EU's market price (EUR/t) and production
+  (1000 t);
+- `env_EU_<indicator>`: EU totals of the environmental accounts (`ghg_total`, `ghg_non_co2`, `ghg_enteric`,
+  `ghg_manure_ch4`, `ghg_manure_n2o`, `ghg_soil_n2o`, `ghg_leaching_n2o` in kt CO2-eq; `nh3_total` in kt NH3;
+  `n_surplus`, `n_mineral_input`, `n_organic_input` in t N);
+- `supply_total_gross_margin` (EUR 1000), `supply_n_regions`, `supply_all_converged`;
+- `biofuel_*` with `run_biofuel=True`;
+- `market_converged`, `market_iterations`, `outer_converged`.
 
-**Recommendation:** start sensitivity analysis on group (b) — ~15 interpretable
-levers — and optionally a handful of scaled data groups from (a) (yields, costs,
-elasticities). That keeps the problem tractable and the results interpretable.
+The full results (regional activities, market tables, environmental table) stay available per run.
 
-### Outputs
-
-`run()` returns a dict. `flatten_outputs()` reduces each run to **~40 scalar
-indicators** (the natural response variables for sensitivity analysis):
-
-- `price_<commodity>` — cleared world price for each of the 33 commodities
-- `prod_<commodity>` — production
-- `biofuel_bioethanol_kt`, `biofuel_biodiesel_kt`
-- `supply_total_gross_margin`
-- `market_converged`, `market_iterations`
-
-Full (non-scalar) outputs available per run: regional supply activities (region ×
-activity), market prices/production/consumption/trade, feed, environmental
-indicators, per-region GHG and nutrient balances.
-
-## 2. Where CAPRI-mod stores output data
-
-`run()` returns results **in memory only** — nothing is written unless you ask.
-Use `capri_mod.io_results` to persist them.
-
-Results go to a **git-ignored `outputs/` folder, created relative to the current
-working directory**. Run your script from the repo root and you get
-`<repo>/outputs/`; run it elsewhere and `outputs/` appears there. To pin the
-location explicitly, pass `root=`:
+## 3. Saving runs
 
 ```python
-exp = Experiment("my_study", root="/abs/path/to/results", model=m)
+from capri_mod.io_results import Experiment, load_experiment
+
+exp = Experiment("my_study", root="outputs", model=model)   # outputs/my_study/
+exp.save_run(results, run_id="run_0001", inputs={"carbon_tax": 50})
+table = exp.finalise()                                     # outputs/my_study/batch_summary.csv
+table = load_experiment("outputs/my_study")                # later, without re-running
 ```
 
-Layout (see `docs/OUTPUTS.md` for the full description):
+Layout: `outputs/<experiment>/manifest.json`, `batch_summary.csv` (one row per run: `in_*` inputs and the flat
+outputs), `runs/<run_id>/` with `summary.json`, the market tables (`market_world_prices.csv`,
+`market_production.csv`, ...), `supply_activities.csv`, `supply_indicators.csv`.
 
-```
-outputs/<experiment>/
-  manifest.json          experiment metadata (base year, run count, timestamps)
-  batch_summary.csv      ONE ROW PER RUN: in_* sampled inputs + output indicators
-  runs/<run_id>/
-    summary.json         scenario, inputs, metadata, scalar outputs
-    market_world_prices.csv     market_production.csv
-    market_domestic_prices.csv  market_consumption.csv
-    market_net_exports.csv      market_trade_flows.csv
-    supply_activities.csv       region x activity levels
-    supply_indicators.csv       region x gross margin, GHG, nutrient balance
-    feed.csv / environmental.csv   (when those modules ran)
-```
-
-`batch_summary.csv` is the file a sensitivity analysis actually consumes: the
-inputs you sampled (as `in_*` columns) sit alongside every output indicator.
-
-## 3. Running a sensitivity batch
+## 4. A batch: an emission-tax sweep
 
 ```python
-import numpy as np
 from capri_mod.model import CAPRIModel
 from capri_mod.io_results import Experiment
+from capri_mod.policy.policy_module import PolicyScenario
 
-m = CAPRIModel(data_dir="capri_data", verbose=False)
-regions = list(m.data["areas"].index[:30])     # >=30 for representative results
-rng = np.random.default_rng(0)
-
-exp = Experiment("sensitivity_biofuel", description="mandate x wheat shock", model=m)
-
-for i in range(200):
-    mandate = float(rng.uniform(0.03, 0.20))
-    shock   = float(rng.uniform(-0.30, 0.30))
-    r = m.run(scenario="BASELINE", regions=regions,
-              run_biofuel=True, biofuel_mandate=mandate,
-              world_price_shock={"SWHE": shock})
-    exp.save_run(r, run_id=f"run_{i:04d}",
-                 inputs={"biofuel_mandate": mandate, "wheat_shock": shock})
-
-table = exp.finalise()   # writes outputs/sensitivity_biofuel/batch_summary.csv
+model = CAPRIModel(data_dir="capri_data", verbose=False)
+exp = Experiment("tax_sweep", model=model)
+for tax in (25, 50, 100, 150):
+    r = model.run(custom_scenario=PolicyScenario(name=f"TAX{tax}", carbon_tax=tax))
+    if not r["metadata"]["outer_converged"]:
+        continue                                            # keep only converged runs
+    exp.save_run(r, run_id=f"tax_{tax}", inputs={"carbon_tax": tax})
+table = exp.finalise()
 ```
 
-`batch_summary.csv` has the sampled inputs as `in_*` columns and every output
-indicator beside them — ready for any SA library. Re-read it later with
-`load_experiment("outputs/sensitivity_biofuel")` without re-running the model.
+The baseline is solved once (first scenario run) and reused by every later run with the same settings.
 
-## 4. Plugging into a sensitivity library (SALib example)
-
-For a variance-based (Sobol) or Morris analysis, sample the inputs, run the model,
-and save every run — so the outputs are on disk, not just in memory.
+## 5. A Sobol design with SALib
 
 ```python
 import numpy as np
@@ -133,58 +82,32 @@ from SALib.sample import sobol as sobol_sample
 from SALib.analyze import sobol
 from capri_mod.model import CAPRIModel
 from capri_mod.io_results import Experiment, flatten_outputs
+from capri_mod.policy.policy_module import PolicyScenario
 
-m = CAPRIModel(data_dir="capri_data", verbose=False)
-regions = list(m.data["areas"].index[:30])
-
-problem = {
-    "num_vars": 2,
-    "names": ["biofuel_mandate", "wheat_price_shock"],
-    "bounds": [[0.03, 0.20], [-0.30, 0.30]],
-}
-X = sobol_sample.sample(problem, 256)      # parameter sets to run
-
-exp = Experiment("sobol_biofuel", description="Sobol on mandate x wheat shock", model=m)
-
+model = CAPRIModel(data_dir="capri_data", verbose=False)
+problem = {"num_vars": 2, "names": ["carbon_tax", "wheat_price_shock"],
+           "bounds": [[0.0, 150.0], [-0.30, 0.30]]}
+X = sobol_sample.sample(problem, 64)
+exp = Experiment("sobol_tax_wheat", model=model)
 Y = []
-for i, row in enumerate(X):
-    r = m.run(scenario="BASELINE", regions=regions, run_biofuel=True,
-              biofuel_mandate=float(row[0]),
-              world_price_shock={"SWHE": float(row[1])})
-    exp.save_run(r, run_id=f"run_{i:05d}",
-                 inputs={"biofuel_mandate": float(row[0]),
-                         "wheat_price_shock": float(row[1])})
-    Y.append(flatten_outputs(r)["biofuel_bioethanol_kt"])   # chosen response
-
-exp.finalise()                              # writes batch_summary.csv
-Si = sobol.analyze(problem, np.array(Y))    # first-order & total indices
-print("S1:", Si["S1"], " ST:", Si["ST"])
+for i, (tax, shock) in enumerate(X):
+    r = model.run(custom_scenario=PolicyScenario(name=f"S{i}", carbon_tax=float(tax)),
+                  world_price_shock={"SWHE": float(shock)})
+    exp.save_run(r, run_id=f"run_{i:05d}", inputs={"carbon_tax": float(tax), "wheat_price_shock": float(shock)})
+    Y.append(flatten_outputs(r)["env_EU_ghg_total"])
+exp.finalise()
+Si = sobol.analyze(problem, np.array(Y))
+print("S1:", Si["S1"], "ST:", Si["ST"])
 ```
 
-Swap the response (`biofuel_bioethanol_kt`) for any indicator produced by
-`flatten_outputs()`, and add levers to `problem` as needed.
+## 6. Practical notes
 
-**You can also analyse after the fact**, without re-running the model — everything
-needed is in `batch_summary.csv`:
-
-```python
-from capri_mod.io_results import load_experiment
-
-table = load_experiment("outputs/sobol_biofuel")
-table = table[table["market_converged"]]                 # drop non-converged runs
-Y = table["biofuel_bioethanol_kt"].to_numpy()
-X_cols = ["in_biofuel_mandate", "in_wheat_price_shock"]  # the sampled inputs
-```
-
-## 5. Practical notes
-
-- **Use ≥30 regions.** Fewer distorts the EU supply base and the market clearing.
-- **Runtime.** A full-region run is ~30 s; a subset is faster. For thousands of
-  runs, use a region subset, reduce `market_max_iter`, and/or parallelise
-  (each run is independent — the batch loop is embarrassingly parallel).
-- **Check convergence.** `market_converged` is saved per run; drop or flag
-  non-converged runs before analysing.
-- **Reproducibility.** Every run's `summary.json` records the scenario and
-  metadata; pass explicit `run_id`s to keep a clean audit trail.
-- **Input dimensionality.** Don't try to vary all 177k data points at once —
-  choose interpretable levers (Section 1b) or scale whole data groups.
+- **Run time.** A 2030 run (projection, baseline and scenario) takes 35-40 minutes on 2 cores in the NLP form; runs on
+  the 2017 base have not been timed in the NLP form. Plan the design size accordingly; runs are independent and can be
+  spread over machines. The conic form (`CAPRIModel.supply_form = "conic"`) is faster for some scenarios and further
+  from CAPRI's form.
+- **Region subsets** are for checks, not results: prices are formed on the whole market.
+- **Convergence.** Keep only runs with `outer_converged`; an unconverged run overstates quantity responses.
+- **Reproducibility.** Start Python with `PYTHONHASHSEED=0`.
+- **2030 runs.** Use `ProjectionModule` (README section 10.2 (The projection layer)); each year's baseline is calibrated to the trajectory, then
+  the scenario is solved against it. `ProjectionResult.increment[year]` holds the % changes of the flat outputs.

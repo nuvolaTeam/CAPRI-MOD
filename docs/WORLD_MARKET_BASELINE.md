@@ -1,76 +1,62 @@
-# World market base and the market placeholders
+# World market base and the retired market placeholders
 
-Status (October 2026): **done, default; for traded products superseded by CAPRI's bilateral market** (Sprint 8m,
-[ARMINGTON_MARKET.md](ARMINGTON_MARKET.md)), which takes every region's balance and trade from CAPRI's market results of
-the run's year. The FAO_agg base below still serves the pooled markets (raw milk) and the `premium` structure.
-Durum wheat, olives and paddy rice now reach the market as CAPRI's wheat, olive oil and milled rice.
+Status: revised 20 October 2026 against the code. Since the bilateral market (Sprint 8m, October 2026;
+[ARMINGTON_MARKET.md](ARMINGTON_MARKET.md)) every traded product's regional balances and trade come from CAPRI's
+market results of the run's year; the FAO_agg world base described here now serves only the product without
+bilateral trade (raw milk) and the retired `premium` structure. The sections "What was wrong" and the placeholders
+are historical; they are kept because they explain data choices still in the model.
 
-Earlier status: **done, default.** Every region's base balance comes from CAPRI's own database; sugar is
-made from beet the way CAPRI makes it; the two placeholder markets are gone; rye and oats reach a market; without
-the dairy block, dairy products leave the dairy at CAPRI's own yields.
+## What the model uses now
 
-## What was wrong
+Base production and use per market region are set in `MarketModule._calibrate_baseline`:
 
-The market builds each region's base production and use before it calibrates its demand (`MarketModule.
-_calibrate_baseline`). That base came from three sources stacked on each other: a FAO extract
-(`fao_market_baseline.json`), CAPRI's FAO_agg extended SUA where the extract had nothing, and, for whatever
-neither had under the model's code, a hard-coded world total split by fixed regional shares. Checked against
-CAPRI's FAO_agg (base period), the result was not CAPRI's world and in places not even the right product:
+1. Products with CAPRI bilateral flows (57 of 58): production = the region's market production (PROD) of
+   `bilateral_regions_<year>.csv`, use = domestic sales + imports of `bilateral_flows_<year>.csv`, for the market year
+   of the run (2017, or CAPRI's 2030 reference in a projection). The EU's rows are then set from the supply models
+   and the bilateral calibration closes every region (ARMINGTON_MARKET.md, "Calibration").
+2. Products without bilateral flows (raw milk): CAPRI's FAO_agg base-period balance,
+   `capri_data/2017/market/world_market_baseline.json` (`tools/build/build_world_market_baseline.py`), and
+   `dairy_world_baseline.json` for the dairy products where needed. With CAPRI's two EU trade blocks the EU row is split
+   by CAPRI's 2030 member-state production and use (`eu_ms_balance_2030.csv`).
+3. Neither: zero (no invented totals; a product without a world price raises an error).
 
-| Commodity | model world (kt) | CAPRI FAO_agg (kt) | cause |
-|---|---|---|---|
-| Sugar | 1,767,711 | 167,924 | the extract's "SUGR" is sugar cane (Brazil 715 Mt) |
-| Pork | 171,016 | 120,000 | invented allocation |
-| Eggs | 126,061 | 83,925 | invented allocation |
-| Maize | 1,590,721 | 1,135,640 | extract |
-| Wine | 70,000 | 27,259 | invented total (CAPRI code TWIN never matched) |
-| Other cereals | 83,625 | 155,507 | rye and oats missing |
+`world_market_baseline.json` holds CAPRI's FAO_agg base-period balances (MAPR, DOMM, IMPT, EXPT) of every CAPRI
+behavioural region, mapped to the model's trade regions (concordance of `tools/build/recalibrate_trade_2017.py`), under the
+model's codes (SWHE ← WHEA, CORN ← MAIZ, SUGR ← SUGA, POUL ← POUM, WINE ← TWIN, the rest by name; rye, oats and other
+cereals separate as in CAPRI). Its EU row also gives the EU's self-sufficiency (use / production) applied to the
+model's EU production in `_align_eu_base_balance` (where FAO_agg has no EU row, the older FAO extract
+`fao_market_baseline.json` is still read, `_fao_eu_rows`) before the bilateral closure replaces the use of the
+traded products.
 
-The world total decides how far an EU supply change moves the world price: with a world pork market 43% too
-large, the EU (23 Mt) weighed 13% instead of 19%; in sugar it weighed 1% instead of 10%.
+## Sugar beet, sugar and the dairy products
 
-Further placeholders in the market:
+- Sugar beet has no market, as in CAPRI: member states process beet into white sugar at their own yield
+  (`sugar_processing.csv`, `tools/build/build_sugar_processing.py`: CAPRI's 2030 reference beet harvest and processing,
+  sugar produced, PRCY 0.13-0.19, EU sugar per tonne of beet harvested 0.156). The supply bridge makes sugar = beet ×
+  the member state's sugar per beet (`model._sugar_per_beet`); beet's price signal is the sugar price change
+  (`model.py`, as CAPRI `arm/set_prices.gms`).
+- Without the dairy block (`MarketModule.use_dairy_block = False`) the dairy products are raw milk × CAPRI's
+  member-state 2030 yields (output less processing per tonne of raw milk, `dairy_processing.csv`;
+  `model._dairy_yield`). With the block (the default) the market replaces them by the block's output.
 
-- **Sugar beet** had its own world market (an invented 1,900 Mt) and every tonne of beet also became 0.135 t of
-  sugar. CAPRI has no beet market: member states process beet into white sugar at their own yield (PRCY, 0.13
-  to 0.19) and the beet price follows the sugar price.
-- **FATS and OFOD_M** ("fats", "other food") were markets with no supply, no use, invented world totals and
-  literature elasticities. CAPRI has no such products; its FATS and PROT are the dairy block's milk fat and
-  protein.
-- **Rye and oats** were supply activities whose output reached no market (their price came from OCER). EU
-  other cereals in the market: 15 Mt against CAPRI's 36 Mt.
-- **Dairy products without the dairy block** were fixed FAO EU-average ratios of milk (cheese 0.0456 t per t;
-  CAPRI's 2030 yield 0.068).
+## What was wrong (historical, before October 2026)
 
-## What the model does now
+The market's base came from three sources stacked on each other: a FAO extract (`fao_market_baseline.json`),
+CAPRI's FAO_agg where the extract had nothing, and a hard-coded world total split by fixed regional shares. Checked
+against CAPRI's FAO_agg it was not CAPRI's world and in places not the right product: the extract's sugar was sugar
+cane (model world 1,768 Mt against CAPRI's 168 Mt of sugar), pork and eggs carried invented allocations, wine an
+invented total, and other cereals lacked rye and oats. The world total decides how far an EU supply change moves a
+pooled world price, so these errors changed the EU's weight in world markets.
 
-- **`tools/build_world_market_baseline.py`** → `capri_data/2017/market/world_market_baseline.json`: CAPRI's
-  FAO_agg base-period balances (MAPR, DOMM, IMPT, EXPT) of every CAPRI behavioural region, mapped to the model's
-  trade regions (concordance of `tools/recalibrate_trade_2017.py`), for 32 market commodities (SWHE ← WHEA,
-  CORN ← MAIZ, OCER ← OCER + RYEM + OATS, SUGR ← SUGA, POUL ← POUM, SHGM ← SGMT, WINE ← TWIN, BUTR ← BUTT,
-  SKIM ← SMIP, WHEY ← WHEP, the rest by name). The market takes every region's production from it, and the EU's
-  base self-sufficiency (domestic use / production) from its EU row.
-- **`tools/build_sugar_processing.py`** → `sugar_processing.csv`: per member state CAPRI's beet harvest and
-  processing, sugar produced and PRCY (2030 reference). The supply bridge makes sugar = beet × sugar per beet
-  of the member state (EU 0.156); beet's price signal is the sugar price change (CAPRI `arm/set_prices.gms`).
-- FATS, OFOD_M and SUGB removed from `MARKET_COMMODITIES`.
-- OCER market supply = OCER + RYEM + OATS.
-- Dairy products without the block: output less processing per tonne of raw milk at CAPRI's member-state 2030
-  yields (`dairy_processing.csv`).
+Placeholders removed at the same time:
 
-REGISTERED: durum wheat, paddy rice, other oilseeds and olives have no CAPRI world balance under a matching
-product (CAPRI's world markets are wheat, milled rice, and olive oil) and keep the previous base; SWHE's world
-market is CAPRI's wheat, so durum is counted in both (about 5% of world wheat).
+- a world market for sugar beet (an invented 1,900 Mt) on top of sugar made from beet;
+- FATS and OFOD_M ("fats", "other food"): markets with no supply, no use and invented totals (CAPRI's FATS and PROT
+  are the dairy block's milk fat and protein);
+- rye and oats without a market (their price came from other cereals);
+- dairy products as fixed FAO EU-average ratios of milk (cheese 0.0456 t per t against CAPRI's 0.068).
 
-## Effect
-
-Farm-to-Fork 2030 (default model): 20-indicator gap 4.36 → 4.51. Pork price +19.6 → +21.1% (CAPRI +43), beef
-+12.8 → +9.0% (+24), poultry +20.6 → +16.4% (+18), other cereals +19.6 → +3.3% (the market now has rye and oats
-and its EU share is 20% of a 156 Mt world). The beef and poultry prices move away from CAPRI: their EU Armington
-premium falls (beef 1.115 → 1.077) once the EU's trade sits in a world of CAPRI's size. This is the premium
-approximation's response, not CAPRI's; the full bilateral market is the next step
-([ARMINGTON_MARKET.md](ARMINGTON_MARKET.md)). The data change is kept: it is CAPRI's data, and tuning the
-world back to a size CAPRI does not have would hide the structural gap.
-
-Baseline reproduction against CAPRI's own 2030 reference ([BASELINE_REPRODUCTION.md](BASELINE_REPRODUCTION.md)):
-EU sugar production −8% → +7% (beet area +11%), other cereals −58% → −2%, cheese −39% → −12%.
+The effect of the change on the results of that time is recorded in CHANGELOG.md ("Star 3.0 as the reference:
+technology settings, world market base, placeholders, baseline check"). The registered gaps of that version (durum
+wheat, paddy rice and olives without a matching CAPRI world product) are closed: durum is part of CAPRI's wheat
+market, olives and paddy rice reach the market as olive oil and milled rice.

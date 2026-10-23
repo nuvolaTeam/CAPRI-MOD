@@ -18,7 +18,6 @@ A trajectory is a JSON document::
       "target_years": [2020, 2025, 2030],
       "growth": {
          "yields":        {"SWHE": {"2030": 1.12}, "_default": {"2030": 1.08}},
-         "demand":        {"BEEF": {"2030": 0.95}, "_default": {"2030": 1.05}},
          "world_prices":  {"_default": {"2030": 1.10}},
          "herds":         {"DCOW": {"2030": 0.92}, "_default": {"2030": 1.00}},
          "land":          {"_default": {"2030": 0.99}}
@@ -30,7 +29,8 @@ year** (1.12 = +12% by 2030), not annual rates — this keeps them directly
 comparable to how the Outlook publishes its projections and avoids compounding
 ambiguity. A ``_default`` entry supplies the factor for any key not named
 explicitly; a missing block or missing year means "no change" (factor 1.0),
-so a trajectory can be as sparse as the evidence supports.
+so a trajectory can be as sparse as the evidence supports. A ``demand`` block is accepted only with factors of 1:
+the market's demand of a target year is CAPRI's market data of that year (docs/KNOWN_ISSUES.md K52m).
 
 The NULL trajectory (all factors 1.0) must reproduce the comparative-static
 result exactly — that identity is the projection layer's primary correctness
@@ -44,6 +44,13 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Dict, List, Optional
 
+
+
+def _traj_band():
+    """The setting projection.trajectory_factor_bounds."""
+    from capri_mod.settings import current as _settings
+    lo, hi = _settings().get("projection.trajectory_factor_bounds")
+    return float(lo), float(hi)
 
 class TrajectoryError(ValueError):
     """Raised when a trajectory is malformed or internally inconsistent."""
@@ -132,11 +139,19 @@ class BaselineTrajectory:
                             f"non-positive growth factor {f} for "
                             f"{block}/{key}/{year}; factors are cumulative "
                             "multipliers relative to the base year")
-                    if f > 10 or f < 0.1:
+                    _lo, _hi = _traj_band()
+                    if f > _hi or f < _lo:
                         raise TrajectoryError(
                             f"implausible growth factor {f} for "
                             f"{block}/{key}/{year} (>10x or <0.1x). If this is "
                             "intended, split the horizon into steps.")
+                    if block == "demand" and abs(f - 1.0) > 1e-12:
+                        # KNOWN_ISSUES K52m: the market's demand of a target year comes from CAPRI's market data of
+                        # that year (their balanced projection); a demand factor alone has no consistent closure in
+                        # the calibrated bilateral market (flows and supply fixed), so it is refused, not ignored
+                        raise TrajectoryError(
+                            f"demand/{key}/{year}: demand factors are not applied (the market's demand of a target "
+                            "year is CAPRI's market data of that year); see docs/KNOWN_ISSUES.md K52m")
 
     # ---------------------------------------------------------------- lookup
     def factor(self, block: str, key: str, year: int,

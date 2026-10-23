@@ -49,8 +49,11 @@ def flatten_outputs(results: dict) -> dict:
     """Reduce a run to a flat dict of scalar output indicators.
 
     This is the natural unit for sensitivity analysis: one record per run.
-    Keys are prefixed by block, e.g. 'price_SWHE', 'prod_BEEF',
-    'biofuel_bioethanol_kt', 'supply_total_gross_margin'.
+    Keys are prefixed by block: 'price_<comm>' (world prices), 'price_EU27_<comm>' and 'prod_EU27_<comm>' (the EU's
+    market price and production, 1000 t; Norway apart: 'price_NOR_<comm>', 'prod_NOR_<comm>'), 'env_EU_<indicator>'
+    (EU totals of the environmental accounts: GHG in kt CO2-eq, NH3 in kt, N in t, P in t P2O5, organic area in
+    1000 ha; Norway's regions apart: 'env_NO_<indicator>'), 'supply_total_gross_margin' (EUR 1000), 'biofuel_*' (with run_biofuel=True),
+    'market_converged', 'outer_converged'.
     """
     out: dict = {}
 
@@ -68,6 +71,33 @@ def flatten_outputs(results: dict) -> dict:
             for c, v in dict(prod).items():
                 try:
                     out[f"prod_{c}"] = float(v)
+                except (TypeError, ValueError):
+                    pass
+        elif prod is not None and hasattr(prod, "loc") and "EU27" in getattr(prod, "index", []):
+            # the market's production table (trade region x commodity, 1000 t): the EU's row
+            for c, v in prod.loc["EU27"].items():
+                try:
+                    out[f"prod_EU27_{c}"] = float(v)
+                except (TypeError, ValueError):
+                    pass
+        if prod is not None and hasattr(prod, "loc") and "NOR" in getattr(prod, "index", []):
+            # Norway's market region (its supply models' output; not part of the EU's, KNOWN_ISSUES K56)
+            for c, v in prod.loc["NOR"].items():
+                try:
+                    out[f"prod_NOR_{c}"] = float(v)
+                except (TypeError, ValueError):
+                    pass
+        dom = getattr(mkt, "domestic_prices", None)
+        if dom is not None and hasattr(dom, "loc") and "EU27" in getattr(dom, "index", []):
+            for c, v in dom.loc["EU27"].items():
+                try:
+                    out[f"price_EU27_{c}"] = float(v)
+                except (TypeError, ValueError):
+                    pass
+        if dom is not None and hasattr(dom, "loc") and "NOR" in getattr(dom, "index", []):
+            for c, v in dom.loc["NOR"].items():
+                try:
+                    out[f"price_NOR_{c}"] = float(v)
                 except (TypeError, ValueError):
                     pass
         welfare = getattr(mkt, "welfare", None)
@@ -110,6 +140,23 @@ def flatten_outputs(results: dict) -> dict:
         out["supply_all_converged"] = all(
             bool(getattr(r, "converged", True)) for r in sup.values()
         )
+    env = results.get("environmental")
+    if env is not None and hasattr(env, "columns") and len(env):
+        # EU totals of the environmental accounts (regions outside the EU, Norway's "NO..", left out) and Norway's
+        # totals apart (env_NO_*)
+        eu = [r for r in env.index if not str(r).startswith("NO")]
+        no = [r for r in env.index if str(r).startswith("NO")]
+        for c in ("ghg_total", "ghg_non_co2", "ghg_enteric", "ghg_manure_ch4", "ghg_manure_n2o", "ghg_soil_n2o",
+                  "ghg_leaching_n2o", "nh3_total", "n_surplus", "n_mineral_input", "n_organic_input",
+                  "p_input", "p_uptake", "p_surplus", "p_mineral_input", "p_manure_excretion", "p_manure_net_export",
+                  "p_crop_residues", "p_runoff", "p_surplus_soil", "organic_area"):
+            if c in env.columns:
+                out[f"env_EU_{c}"] = float(env.loc[eu, c].sum())
+                if no:
+                    out[f"env_NO_{c}"] = float(env.loc[no, c].sum())
+    md = results.get("metadata") or {}
+    if "outer_converged" in md:
+        out["outer_converged"] = bool(md["outer_converged"])
     return out
 
 

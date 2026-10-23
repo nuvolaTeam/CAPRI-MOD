@@ -1,4 +1,5 @@
-"""Recursive-dynamic projection — a time loop around the validated core.
+"""Multi-year projection — a time loop around the validated core (comparative static per year, as CAPRI;
+only perennial areas are carried, along the baseline path).
 
 What it does
 ------------
@@ -9,7 +10,7 @@ For each target year in the trajectory:
   2. **reconcile** the scaled data back onto its accounting identities
      (:mod:`capri_mod.projection.reconcile`),
   3. solve the validated comparative-static core against the projected data,
-  4. carry state forward (herds, perennial areas, land allocation) as the next
+  4. carry state forward (perennial areas only; herds and land allocation are not carried) as the next
      period's starting point.
 
 Baseline and policy are kept separate
@@ -209,7 +210,7 @@ class ProjectionModule:
 
         self._project_livestock(data, self.model.data, year)
         # CAPRI's own 2030 rations and requirements with its 2030 reference (Sprint 9q): factors per region, animal and
-        # feed on the 2017 rations (tools/build_ration_trajectory_2030.py); where present they replace the uniform
+        # feed on the 2017 rations (tools/build/build_ration_trajectory_2030.py); where present they replace the uniform
         # requirement scaling of _project_livestock for that ration
         if str(getattr(traj, "name", "")).startswith("capri_ref") and self.capri_prices_dir:
             from pathlib import Path as _P
@@ -248,12 +249,24 @@ class ProjectionModule:
         return data, report
 
     #: animals whose output per head follows their projected yield
-    LIVESTOCK_YIELD = ("DCOW", "BCOW", "BULL", "HFRS", "CALV", "SHGP", "PIGS", "PIGF", "LAYS", "BROI")
-    #: breeding.gms requirement functions of a 600 kg dairy cow at 4% fat (as tools/build_genetics_effects.py)
+    LIVESTOCK_YIELD = ("DCOW", "BCOW", "BULL", "HFRS", "CALV", "SHGM", "SHGF", "PIGS", "PIGF", "LAYS", "BROI")
+    #: breeding.gms requirement functions of a 600 kg dairy cow at 4% fat (as tools/build/build_genetics_effects.py)
     _NEM, _NEL_KG = param("REQ_NEM"), param("REQ_NEL_KG")
     _CRPR_KG, _CRPR_FIX = param("REQ_CRPR_KG"), param("REQ_CRPR_FIX")
     _DRMN_KG, _DRMN_FIX = param("REQ_DRMN_KG"), param("REQ_DRMN_FIX")
     _N_KG_MILK = param("REQ_N_KG_MILK")
+
+    @staticmethod
+    def _nea_share(data: Dict, region: str) -> float:
+        """NEA / NEM of the region's dairy cows: 0.17 (365 - HD)(1 - Et/100) / 365 (envind/breeding.gms l. 188-191)."""
+        from capri_mod.data.definitions import capri_ms
+        t = data.get("dairy_grazing_days")
+        if t is None:
+            raise ValueError("no MITERRA housing days for dairy cows (abatement/ammonia/RCEmissions.csv)")
+        ms = capri_ms(region)
+        hd = float(t.at[ms, "HD"]) if ms in t.index and "HD" in t.columns and pd.notna(t.at[ms, "HD"]) else 0.0
+        et = float(t.at[ms, "Et"]) if ms in t.index and "Et" in t.columns and pd.notna(t.at[ms, "Et"]) else 0.0
+        return 0.17 * (365.0 - hd) * (1.0 - et / 100.0) / 365.0
 
     def _project_livestock(self, data: Dict, base: Dict, year: Optional[int] = None) -> None:
         """Livestock output per head, and what it takes, follow the projected yields (CAPRI: the trend
@@ -276,23 +289,22 @@ class ProjectionModule:
             F = (Y1[acts] / Y0[acts].reindex(Y1.index)).replace([np.inf, -np.inf], np.nan).fillna(1.0).clip(0.5, 2.0)
         pv = data.get("livestock_product_value_by_market_coef")
         bp = data.get("livestock_output_by_product_coef")
-        # sheep and goats (K12): milk (SGMI) and meat (SGMT) per head follow their own CAPRI yields, SHGP_MILK (SHGM's
-        # milk per head) and SHGP_MEAT (SHGF's meat per head); SHGP's aggregate factor is their mix by the region's
-        # output value (as the dairy cow's milk part), and the yields table follows it
+        # sheep and goats (K12): CAPRI's SHGM YILD is milk per head, SHGF's meat per head. SHGF's output (meat) follows
+        # its own factor. SHGM has both outputs: its milk (SGMI) follows SHGM's factor, its meat (lambs and culls, SGMT)
+        # SHGF's meat yield factor (CAPRI's 2030 reference has no meat yield of SHGM); SHGM's aggregate factor is their
+        # mix by the region's output value (as the dairy cow's milk part), and the yields table keeps CAPRI's milk yield
         prod_f = {}
-        if year is not None and "SHGP" in F.columns:
-            traj = self.trajectory
+        if "SHGM" in F.columns:
             for r in F.index:
-                fm = float(np.clip(traj.factor("yields", "SHGP_MILK", year, region=r), 0.5, 2.0))
-                ft = float(np.clip(traj.factor("yields", "SHGP_MEAT", year, region=r), 0.5, 2.0))
+                fm = float(F.at[r, "SHGM"])
+                ft = float(F.at[r, "SHGF"]) if "SHGF" in F.columns else 1.0
                 if abs(fm - 1.0) < 1e-12 and abs(ft - 1.0) < 1e-12:
                     continue
-                prod_f[(r, "SHGP", "SGMI")] = fm
-                prod_f[(r, "SHGP", "SGMT")] = ft
-                sh = milk_share_static(pv, (("SHGP.SGMI",), ("SHGP.SGMT",)), r)
-                F.at[r, "SHGP"] = sh * fm + (1.0 - sh) * ft
-                if r in Y1.index and pd.notna(Y0.at[r, "SHGP"] if r in Y0.index else np.nan):
-                    Y1.at[r, "SHGP"] = float(Y0.at[r, "SHGP"]) * F.at[r, "SHGP"]
+                prod_f[(r, "SHGM", "SGMI")] = fm
+                prod_f[(r, "SHGM", "MILK")] = fm
+                prod_f[(r, "SHGM", "SGMT")] = ft
+                sh = milk_share_static(pv, (("SHGM.MILK",), ("SHGM.SGMT",)), r)
+                F.at[r, "SHGM"] = sh * fm + (1.0 - sh) * ft
         if bool((F.sub(1.0).abs() < 1e-12).all().all()):
             return
 
@@ -330,7 +342,7 @@ class ProjectionModule:
                 if a not in acts or (a == "DCOW" and prod == "BEEF"):
                     continue
                 idx = tab.index.intersection(F.index)
-                if a == "SHGP" and prod_f:
+                if a == "SHGM" and prod_f:
                     for r in idx:
                         f_ = prod_f.get((r, a, prod), float(F.at[r, a]))
                         if pd.notna(tab.at[r, col]):
@@ -339,6 +351,7 @@ class ProjectionModule:
                 tab.loc[idx, col] = tab.loc[idx, col] * F.loc[idx, a]
         scale = {}
         mann = data.get("livestock_manure_n_coef")
+        nexp = data.get("livestock_n_export_coef")
         for r in F.index:
             for a in acts:
                 f = float(F.at[r, a])
@@ -349,20 +362,34 @@ class ProjectionModule:
                     if not y0 > 0:
                         continue
                     y1, g = y0 * f, y0 * (f - 1.0)
-                    fe = (self._NEL_KG * y1 + 1.1 * self._NEM) / (self._NEL_KG * y0 + 1.1 * self._NEM)
+                    # energy apart from lactation, CAPRI envind/breeding.gms l. 184-198: maintenance NEM, pregnancy
+                    # NEP = 0.10 NEM, activity NEA = 0.17 NEM (365 - HD)(1 - Et/100) / 365 with the member state's
+                    # housing days HD and stable share of grazing time Et (p_rcEmissions); where CAPRI has no row the
+                    # GAMS zeros give HD = Et = 0 (NEA = 0.17 NEM), as here. Until 23 October 2026: 1.1 NEM (no NEA).
+                    nem = self._NEM * (1.1 + self._nea_share(data, r))
+                    fe = (self._NEL_KG * y1 + nem) / (self._NEL_KG * y0 + nem)
                     fp = (self._CRPR_KG * y1 + self._CRPR_FIX) / (self._CRPR_KG * y0 + self._CRPR_FIX)
                     fd = (self._DRMN_KG * y1 + self._DRMN_FIX) / (self._DRMN_KG * y0 + self._DRMN_FIX)
                     scale[(r, a)] = (fe, fp, fd)
                     if isinstance(mann, pd.DataFrame) and r in mann.index and a in mann.columns \
                             and pd.notna(mann.at[r, a]) and float(mann.at[r, a]) > 0:
                         mann.at[r, a] = float(mann.at[r, a]) + self._N_KG_MILK * g
+                    # N in products: CAPRI fert/calc_nexport.gms, 0.0054 kg N per kg of cow milk (COMI)
+                    if isinstance(nexp, pd.DataFrame) and r in nexp.index and a in nexp.columns \
+                            and pd.notna(nexp.at[r, a]):
+                        nexp.at[r, a] = float(nexp.at[r, a]) + 0.0054 * g
                 else:
                     scale[(r, a)] = (f, f, f)
+                    # meat, eggs and young animals per head follow the projected yield (calc_nexport.gms: linear in
+                    # the outputs per head)
+                    if isinstance(nexp, pd.DataFrame) and r in nexp.index and a in nexp.columns \
+                            and pd.notna(nexp.at[r, a]):
+                        nexp.at[r, a] = float(nexp.at[r, a]) * f
         data["ration_scale"] = scale
 
     # -------------------------------------------------------------------- run
     def run(self,
-            policy_scenario: Optional[str] = None,
+            policy_scenario=None,                  # a PolicyScenario, a registered scenario name or None
             years: Optional[List[int]] = None,
             **run_kwargs) -> ProjectionResult:
         """Solve the core along the trajectory, separating drift from policy.
@@ -437,26 +464,12 @@ class ProjectionModule:
         cls = type(self.model)
         pm = cls(data=data, data_dir=getattr(self.model, "data_dir", None),
                  verbose=False, base_year=getattr(self.model, "base_year", "2017"))
-        pm = self._carry_settings(pm)
         self._last_projected_model = pm      # kept for diagnostics (e.g. manure-pool trace)
         return pm
 
-    #: model settings carried to the fresh projected model. Without this, a
-    #: switch set on the outer model (use_ration) never reached the model that
-    #: runs the projected scenario - a Farm-to-Fork test with the EU ration
-    #: "on" ran with it off and looked identical.
-    CARRIED_SETTINGS = ("use_ration", "use_land_market", "grassland_allowance", "use_manure_market", "manure_pool_tolerance", "manure_max_outer_iter", "surplus_per_current_ha", "use_manure_techs", "use_nitrate", "qp_solver", "fodder_at_shadow_price", "use_feed_in_supply", "use_young_animal_market", "land_no_slack", "trace_outer", "jrc_capped_override")
-
-    def _carry_settings(self, pm):
-        for a in self.CARRIED_SETTINGS:
-            if hasattr(self.model, a):
-                setattr(pm, a, getattr(self.model, a))
-        # market-module switches
-        for a in ("use_dairy_block",):
-            mm0, mm1 = getattr(self.model, "market_module", None), getattr(pm, "market_module", None)
-            if mm0 is not None and mm1 is not None and hasattr(mm0, a):
-                setattr(mm1, a, getattr(mm0, a))
-        return pm
+    # The fresh projected model reads the same settings as the outer one (capri_mod/settings: one process-wide set),
+    # so nothing is carried by hand (the former CARRIED_SETTINGS list lost every switch it did not name, e.g.
+    # food_demand_gl, calibrate_baseline, the NLP tolerances).
 
     def _solve(self, data: Dict, scenario: str, **kwargs) -> Dict:
         """Solve the comparative-static core against a projected data set.
@@ -474,7 +487,7 @@ class ProjectionModule:
             verbose=False,
             base_year=getattr(self.model, "base_year", "2017"),
         )
-        projected_model = self._carry_settings(projected_model)
+        self._last_projected_model = projected_model     # kept for diagnostics and tests, as in _model_for
         return projected_model.run(scenario=scenario, **kwargs)
 
     @staticmethod
@@ -509,8 +522,10 @@ class ProjectionModule:
         areas = data.get("areas")
         if areas is None or not acts:
             return
-        PERENNIAL = [c for c in ("APPL", "OFRU", "CITR", "OLIV", "TAGR", "TWIN")
-                     if c in areas.columns]
+        # the crops on permanent land, as the supply model defines them (it used CAPRI's vineyard code TWIN, which
+        # the model does not use - its vineyards are WINE - so vineyards were never carried)
+        from capri_mod.supply.supply_module import RegionalSupplyModel
+        PERENNIAL = [c for c in RegionalSupplyModel.PERMANENT_LAND_CROPS if c in areas.columns]
         for reg, series in acts.items():
             if series is None or reg not in areas.index:
                 continue
@@ -520,11 +535,17 @@ class ProjectionModule:
 
     @staticmethod
     def _difference(baseline: Dict, scenario: Dict) -> Dict:
-        """Scenario minus baseline, for the headline aggregates."""
+        """The policy increment of a year, scenario against baseline, as % change of the flat outputs both runs
+        report (capri_mod.io_results.flatten_outputs: the EU's market production and prices, world prices, EU totals
+        of the environmental accounts, the supply models' gross margin). Before 20 October 2026 it looked for keys
+        CAPRIModel.run never returns and was always empty."""
+        from capri_mod.io_results import flatten_outputs
+        b, s = flatten_outputs(baseline), flatten_outputs(scenario)
         diff = {}
-        for key in ("total_production", "total_area", "ghg_emissions"):
-            b, s = baseline.get(key), scenario.get(key)
-            if isinstance(b, (int, float)) and isinstance(s, (int, float)):
-                diff[key] = s - b
-                diff[f"{key}_pct"] = ((s - b) / b * 100.0) if b else np.nan
+        for key, bv in b.items():
+            sv = s.get(key)
+            if isinstance(bv, bool) or isinstance(sv, bool) or not isinstance(bv, (int, float)) \
+                    or not isinstance(sv, (int, float)):
+                continue
+            diff[f"{key}_pct"] = ((sv - bv) / bv * 100.0) if bv else np.nan
         return diff

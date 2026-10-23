@@ -31,9 +31,11 @@ from dataclasses import dataclass, field
 from typing import Dict, Optional, List, Tuple
 
 from capri_mod.params import param, param_table
+from capri_mod.settings import setting, current as _settings
 from capri_mod.data.definitions import (
     MARKET_COMMODITIES, ALL_TRADE_REGIONS,
 )
+from capri_mod.data.definitions import MS_CODE
 
 
 # ---------------------------------------------------------------------------
@@ -53,8 +55,8 @@ class MarketEquilibrium:
     excess_demand: pd.Series         # residual per commodity (should ≈ 0)
     converged: bool = True
     iterations: int = 0
-    #: world price x (1 + tariff) for every region - the price before the EU
-    #: Armington premium (domestic_prices carries the EU's producer price)
+    #: each region's base domestic price moved by the world price index (no regional departure):
+    #: domestic_prices against it is the region's premium over the world market
     wedge_prices: Optional[pd.DataFrame] = None
     #: EU biofuel block at the equilibrium (MarketModule.biofuel_feedstock_use): feedstock use by
     #: commodity and by feedstock, biofuel output (kt)
@@ -65,120 +67,72 @@ class MarketEquilibrium:
 
 
 # ---------------------------------------------------------------------------
-# ARMINGTON DEMAND SYSTEM
-# ---------------------------------------------------------------------------
-
-class ArmingtonDemand:
-    """
-    CES/Armington demand aggregator for a single trade region and commodity.
-
-    Computes import demand allocation across origins given prices.
-
-    The CES aggregator:
-        Q_total = [Σ_j δ_j × q_j^((σ-1)/σ)]^(σ/(σ-1))
-    implies:
-        q_j / q_k = (δ_j / δ_k) × (p_k / p_j)^σ    (Armington demand)
-    """
-
-    def __init__(self, sigma: float, base_shares: pd.Series, base_price: float):
-        """
-        Parameters
-        ----------
-        sigma      : Armington substitution elasticity
-        base_shares: baseline import shares by origin (sums to 1)
-        base_price : baseline aggregate import price index
-        """
-        self.sigma       = sigma
-        self.base_shares = base_shares / base_shares.sum()
-        self.base_price  = base_price
-        # CES share parameters δ_j (calibrated to base shares)
-        # At base: δ_j ∝ s_j (share) when prices equal
-        self.delta = self.base_shares.copy()
-
-    def price_index(self, prices_by_origin: pd.Series) -> float:
-        """
-        CES price index (Armington composite price).
-        P = [Σ_j δ_j × p_j^(1-σ)]^(1/(1-σ))
-        """
-        p = prices_by_origin.reindex(self.delta.index).fillna(
-            prices_by_origin.mean()
-        ).values
-        d = self.delta.values
-        s = self.sigma
-
-        if s == 1.0:
-            # Cobb-Douglas case
-            return float(np.prod(p ** d))
-        else:
-            exponent = 1 - s
-            val = (d * p ** exponent).sum()
-            if val <= 0:
-                return float(prices_by_origin.mean())
-            return float(val ** (1.0 / exponent))
-
-    def import_shares(self, prices_by_origin: pd.Series) -> pd.Series:
-        """
-        Armington import shares: s_j = δ_j × (P/p_j)^σ
-        """
-        P = self.price_index(prices_by_origin)
-        p = prices_by_origin.reindex(self.delta.index).fillna(
-            prices_by_origin.mean()
-        )
-        shares = self.delta * (P / p.clip(lower=0.01)) ** self.sigma
-        shares = shares / shares.sum()   # normalise to sum to 1
-        return shares
-
-    def import_quantities(
-        self,
-        total_imports: float,
-        prices_by_origin: pd.Series,
-    ) -> pd.Series:
-        """Allocate total import quantity across origins."""
-        shares = self.import_shares(prices_by_origin)
-        return shares * total_imports
-
-
-# ---------------------------------------------------------------------------
 # MARKET MODULE
 # ---------------------------------------------------------------------------
 
 class MarketModule:
     """
-    Global agricultural market model.
+    CAPRI's global market model for the given EU supply (arm/market_model.gms).
 
-    Solves for world prices that clear markets in all commodities
-    simultaneously, given supply quantities from the supply module
-    and demand functions.
+    30 trade regions (or the EU as two blocks, eu_blocks) and 58 commodities: bilateral trade with two
+    Armington nests, transport costs, tariffs and the EU's tariff-rate quotas (market/bilateral.py),
+    Generalised Leontief food demand, processing (ProcNQ_, oilseed crushing), the dairy block (fat and
+    protein), biofuel markets and feed bulks per member state. Non-EU supply responds with own-price
+    elasticities; EU supply comes from the regional supply models (fixed within one solve), and so does the supply
+    of Norway (NOR, CAPRI's market region NO000000 with supply models; SUP_NONEU_REGIONS, KNOWN_ISSUES K56).
 
-    Convergence algorithm:
-      Tatonnement / Newton iterations on excess demand:
-        P_{t+1} = P_t × (1 + α × ED_t / QS_t)
-      until max|ED| < tolerance.
+    Solve: Newton per commodity on the bilateral system, with Anderson acceleration across the
+    commodities' links (solve -> _solve_bilateral_equilibrium -> _solve_bilateral).
     """
 
 
-    #: market equilibrium method: "root" (default: SciPy Newton-type solve of the
-    #: excess-demand equations; full-EU Farm-to-Fork residuals 1e-13 to 1e-16, one
-    #: outer iteration fewer, same results within 0.2 points) or "tatonnement"
-    #: (excess-demand price adjustment to 1%; also the automatic fallback)
-    market_solver = "root"
+    #: CAPRI's EU market structure (docs/archive/MARKET_STRUCTURE_PLAN.md step 3): False - the EU is one market region
+    #: (EU27); True - CAPRI's two trade blocks EU_WEST (EU-14) and EU_EAST (EU-13) of gams/aggregation/defaultA.agg,
+    #: each with its own market and Armington prices and bilateral trade between them, the member states inside
+    #: (capri_data/shared/eu_market_blocks.csv). Read when the module is built (data["eu_market_blocks"] overrides).
+    eu_blocks = setting("market.eu_blocks", run_state=True)
+    EU_BLOCK_REGIONS = ("EU_WEST", "EU_EAST")
+    #: market regions outside the EU whose market supply is their supply models' output (CAPRI's RMSSUP outside the
+    #: EU: Norway, NO000000, its own market region in aggregation/defaultA.agg; KNOWN_ISSUES K56). Like the EU's,
+    #: their supply is fixed within one market solve, anticipated against the prices their models last saw, and
+    #: the base calibration takes it at the model's own levels; their models see their own market's prices.
+    SUP_NONEU_REGIONS = ("NOR",)
+    #: supply-model country (NUTS-0 of the supply models) -> its non-EU market region
+    SUP_NONEU_COUNTRY = {"NO": "NOR"}
+    #: non-EU market region -> CAPRI code of its supply models' country (member-state keyed tables)
+    SUP_NONEU_MS = {"NOR": "NO000000"}
+
     def __init__(self, data: dict):
         self.data       = data
         self.commodities = MARKET_COMMODITIES
-        self.regions    = ALL_TRADE_REGIONS
+        _eb = data.get("eu_market_blocks") if isinstance(data, dict) else None
+        self.eu_blocks = bool(type(self).eu_blocks if _eb is None else _eb)
+        if self.eu_blocks:
+            self.regions = [x for r in ALL_TRADE_REGIONS for x in (self.EU_BLOCK_REGIONS if r == "EU27" else (r,))]
+            self.EU = tuple(self.EU_BLOCK_REGIONS)
+        else:
+            self.regions = ALL_TRADE_REGIONS
+            self.EU = ("EU27",)
         self.n_comm     = len(self.commodities)
         self.n_reg      = len(self.regions)
+        #: the non-EU market regions with supply models in this market (SUP_NONEU_REGIONS)
+        self.SUP = tuple(r for r in self.SUP_NONEU_REGIONS if r in self.regions)
 
         # Base data
-        self.world_prices_base = data["world_prices"].reindex(
-            self.commodities).fillna(200.0)
+        self.world_prices_base = data["world_prices"].reindex(self.commodities)
+        _miss = [c for c in self.commodities if not (float(self.world_prices_base.get(c, float("nan"))) > 0)]
+        if _miss:
+            # no invented price (a fixed 200 EUR/t was used here): every market product needs CAPRI's world price
+            raise ValueError(f"no base world price for market products {_miss} (capri_data world prices)")
         self.tariffs       = data["tariffs"]
-        self.trade_flows_base = data["trade_flows"]
+        if self.eu_blocks and "EU27" in self.tariffs.index:
+            # the EU's common external tariff applies to both blocks (no tariff between them: CAPRI's flows)
+            _t = self.tariffs.copy()
+            for _b in self.EU:
+                _t.loc[_b] = _t.loc["EU27"]
+            self.tariffs = _t.drop(index="EU27")
         self.armington     = data["armington"]
-        self._demand_cal   = None  # set by _calibrate_demand_to_supply at solve time
-
-        # Calibrate Armington aggregators
-        self._build_armington_systems()
+        self._demand_cal   = None  # set by the bilateral calibration at the first solve
 
         # Compute baseline consumption and production
         self._calibrate_baseline()
@@ -189,251 +143,169 @@ class MarketModule:
         self._base_production0 = self.base_production.copy()
         self._base_consumption0 = self.base_consumption.copy()
 
-    def _build_armington_systems(self):
-        """Build Armington demand aggregators for each (region, commodity)."""
-        self.armington_systems: Dict[Tuple[str,str], ArmingtonDemand] = {}
+    # ------------------------------------------------------------------
+    # EU market regions (one region EU27, or CAPRI's two trade blocks)
+    # ------------------------------------------------------------------
+    def _ms_block_map(self) -> Dict[str, str]:
+        m = getattr(self, "_ms_block_cache", None)
+        if m is None:
+            from pathlib import Path as _P
+            f = _P(__file__).resolve().parents[2] / "capri_data" / "shared" / "eu_market_blocks.csv"
+            m = pd.read_csv(f).set_index("ms")["block"].astype(str).to_dict()
+            self._ms_block_cache = m
+        return m
 
-        for comm in self.commodities:
-            sigma = self.armington.at[comm, "sigma"] if comm in self.armington.index else 3.0
+    def eu_region_of_ms(self, ms: str) -> Optional[str]:
+        """The EU market region of a CAPRI member state (BL000000, DE000000, ...): EU27, or its trade block; None for
+        the supply-model countries outside the EU (Norway, NO000000: market region NOR)."""
+        if ms in self.SUP_NONEU_MS.values():
+            return None
+        if not self.eu_blocks:
+            return "EU27"
+        return self._ms_block_map().get(ms)
 
-            for importer in self.regions:
-                # Base import shares from trade flows
-                flows = self.trade_flows_base
-                total_imports = 0.0
-                shares_dict = {}
+    def sup_region_of_country(self, cc: str) -> Optional[str]:
+        """The non-EU market region of a supply-model country (two letters, or a NUTS code): NOR for Norway; None
+        for the EU's countries."""
+        r = self.SUP_NONEU_COUNTRY.get(str(cc)[:2])
+        return r if r in getattr(self, "SUP", ()) else None
 
-                for exporter in self.regions:
-                    if exporter == importer:
-                        continue
-                    if (exporter, importer) in flows.index and comm in flows.columns:
-                        val = flows.at[(exporter, importer), comm]
-                        if val > 0:
-                            shares_dict[exporter] = val
-                            total_imports += val
+    def _split_supply(self, exo: Optional[pd.DataFrame]):
+        """The supply models' output by country split into the EU's rows (countries x products) and the non-EU
+        market regions' totals ({region: Series}, Norway: NOR). Norway's supply regions are not part of the EU's
+        market supply (KNOWN_ISSUES K56)."""
+        if exo is None:
+            return None, {}
+        c = getattr(self, "_split_cache", None)
+        if c is not None and c[0] is exo:
+            return c[1], c[2]
+        reg = [self.sup_region_of_country(x) for x in exo.index]
+        eu = exo.loc[[r is None for r in reg]]
+        sup = {}
+        for r in self.SUP:
+            rows = exo.loc[[x == r for x in reg]]
+            if len(rows):
+                sup[r] = rows.sum(axis=0).astype(float)
+        self._split_cache = (exo, eu, sup)
+        return eu, sup
 
-                if total_imports < 1.0:
-                    # Tiny importer — allocate uniformly across major exporters
-                    major = [r for r in self.regions if r != importer][:5]
-                    shares_dict = {r: 1.0 for r in major}
+    #: model country (NUTS-0 of the supply models) -> CAPRI member state
+    _COUNTRY_MS = MS_CODE
 
-                base_shares = pd.Series(shares_dict)
-                base_price = self.world_prices_base.get(comm, 200.0)
+    def eu_region_of_country(self, cc: str) -> Optional[str]:
+        """The EU market region of a supply-model country code (two letters, or a NUTS code)."""
+        return self.eu_region_of_ms(self._COUNTRY_MS.get(str(cc)[:2], str(cc)[:2]) + "000000")
 
-                self.armington_systems[(importer, comm)] = ArmingtonDemand(
-                    sigma=sigma,
-                    base_shares=base_shares,
-                    base_price=base_price,
-                )
+    def eu_rows(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Supply-model rows (countries) summed per EU market region (regions x columns); rows of countries outside
+        the EU (Norway) are left out."""
+        reg = [self.eu_region_of_country(c) for c in df.index]
+        keep = [r is not None for r in reg]
+        df = df.loc[keep]
+        reg = [r for r in reg if r is not None]
+        out = df.groupby(pd.Index(reg, name=None), sort=False).sum()
+        return out.reindex(list(self.EU)).fillna(0.0)
+
+    def _eu_ms_balance(self) -> pd.DataFrame:
+        """CAPRI's 2030 member-state balance (tools/build/build_eu_ms_balance.py), summed per EU market region and model
+        commodity: prod, hcon, feed, proc, biof (1000 t)."""
+        t = getattr(self, "_eu_msbal_cache", None)
+        if t is None:
+            from pathlib import Path as _P
+            f = _P(__file__).resolve().parents[2] / "capri_data" / "2017" / "market" / "eu_ms_balance_2030.csv"
+            try:
+                b = pd.read_csv(f, keep_default_na=False)
+                b = b[b["commodity"].astype(str) != ""]
+                b["region"] = [self.eu_region_of_ms(m) for m in b["ms"]]
+                t = b.groupby(["region", "commodity"])[["prod_kt", "hcon_kt", "feed_kt", "proc_kt", "biof_kt"]].sum()
+                t["use_kt"] = t[["hcon_kt", "feed_kt", "proc_kt", "biof_kt"]].sum(axis=1)
+            except Exception:
+                t = pd.DataFrame()
+            self._eu_msbal_cache = t
+        return t
+
+    def eu_split(self, commodity: str, item: str = "use_kt") -> Dict[str, float]:
+        """Each EU market region's part of the EU total of a balance item of a commodity in CAPRI's 2030
+        member-state data ({EU27: 1} with one EU region; equal parts where CAPRI has none of it)."""
+        if not self.eu_blocks:
+            return {"EU27": 1.0}
+        t = self._eu_ms_balance()
+        v = {r: (float(t.at[(r, commodity), item]) if (r, commodity) in t.index else 0.0) for r in self.EU}
+        tot = sum(v.values())
+        if tot <= 0:
+            return {r: 1.0 / len(self.EU) for r in self.EU}
+        return {r: x / tot for r, x in v.items()}
 
     def _calibrate_baseline(self):
         """
-        Calibrate baseline production and consumption.
+        Base production and use of every market region and product from CAPRI's own market data (October 2026):
 
-        Uses FAOSTAT-approximate world totals allocated across trade regions
-        via fixed production shares. Consumption = Production + NetImports,
-        ensuring markets balance at baseline world prices.
+        - CAPRI's bilateral market of the market year (bilateral_flows/regions_<year>[_eu2].csv, the data of the
+          bilateral market itself): production = the region's market production (PROD), use = domestic sales +
+          imports;
+        - products without bilateral trade (raw milk): CAPRI's FAO_agg world balance (world_market_baseline.json;
+          dairy_world_baseline.json for the dairy products);
+        - none of either: zero.
+
+        The EU's rows are then set from the supply models (_align_eu_base_balance) and the bilateral market
+        calibrates every region to its closure. This replaced hard-coded world production totals (~2012) allocated
+        with fixed regional shares, which were overwritten for every product with CAPRI data and only remained as
+        fall-backs (retired: docs/archive/MARKET_STRUCTURE_PLAN.md step 3).
         """
-        flows = self.trade_flows_base
         comms = self.commodities
         regions = self.regions
-
         self.base_production  = pd.DataFrame(0.0, index=regions, columns=comms)
         self.base_consumption = pd.DataFrame(0.0, index=regions, columns=comms)
-
-        # FAOSTAT-approximate world production totals (1000 t, ~2012 baseline)
-        world_prod_ref = {
-            "SWHE": 780000, "DWHE": 40000,  "BARL": 155000, "CORN": 1150000,
-            "OCER": 80000,  "RAPE": 72000,  "SUNF": 55000,  "SOYA": 370000,
-            "SUGB": 1900000,"SUGR": 180000, "POTA": 370000,
-            "PULS": 88000,  "TOMA": 180000, "OVEG": 900000, "APPL": 85000,
-            "OFRU": 220000, "CITR": 145000, "WINE": 70000,  "OLIV": 20000,
-            "MILK": 900000, "BUTR": 11000,  "SKIM": 8000,   "CHES": 22000,
-            "WHEY": 15000,  "BEEF": 70000,  "PORK": 120000, "POUL": 130000,
-            "SHGM": 15000,  "EGGS": 80000,  "FATS": 25000,  "OFOD_M": 50000,
-            # sum of the 21 trade regions, CAPRI FAO_agg p_dataMarket BAS
-            "RAPO": 22725, "SUNO": 14962, "SOYO": 50892, "RAPC": 30983, "SUNC": 16028, "SOYC": 215197,
-        }
-
-        # Production shares by trade region (must sum to ~1.0)
-        prod_share_base = {
-            "EU27": 0.18, "USA": 0.12, "CHN": 0.22, "IND": 0.11,
-            "BRA":  0.09, "RUS": 0.06, "IDN": 0.04, "JPN": 0.02,
-            "MEX":  0.02, "ARG": 0.05, "AUS": 0.03, "NZL": 0.01,
-            "CAN":  0.03, "TUR": 0.02, "KOR": 0.01, "THA": 0.02,
-            "VNM":  0.01, "PAK": 0.02, "BGD": 0.01, "NGA": 0.02,
-            "ZAF":  0.01, "ETH": 0.01, "EGY": 0.01, "MAR": 0.01,
-            "DZA":  0.005,"SAU": 0.005,"IRN": 0.01, "ROW": 0.07,
-        }
-        # Normalise so shares sum to 1 across known regions
-        total_share = sum(prod_share_base.get(r, 0.005) for r in regions)
-        prod_share  = {r: prod_share_base.get(r, 0.005) / total_share for r in regions}
-
-        rng = np.random.default_rng(123)
-
-        # Real production for NON-EU trade regions only (CAPRI FAO_agg SUA).
-        # Real bilateral trade flows are now used for the net-trade identity.
-        # EU27 base is left synthetic because its supply is overridden by the
-        # supply module at solve time; injecting real EU27 levels unbalances
-        # the base (supply-module output != SUA consumption at base price).
-        real_world = {}
-        try:
-            import json as _json
-            from pathlib import Path as _P
-            from capri_mod.data.loaders import resolve_data_file
-            _b = _P(__file__).parent.parent.parent / "capri_data"
-            f = resolve_data_file(_b, "fao_market_baseline.json")
+        self._base_net_exports_eu = {}
+        import json as _json
+        from pathlib import Path as _P
+        mk = _P(__file__).resolve().parents[2] / "capri_data" / "2017" / "market"
+        year = int(self.data.get("market_year", 2017) or 2017) if isinstance(self.data, dict) else 2017
+        sfx = "_eu2" if self.eu_blocks else ""
+        ff, fr = mk / f"bilateral_flows_{year}{sfx}.csv", mk / f"bilateral_regions_{year}{sfx}.csv"
+        if not ff.exists():
+            ff, fr = mk / f"bilateral_flows_2017{sfx}.csv", mk / f"bilateral_regions_2017{sfx}.csv"
+        bil = set()
+        if ff.exists() and fr.exists():
+            fl = pd.read_csv(ff)
+            rg = pd.read_csv(fr)
+            fl = fl[fl.commodity.isin(comms) & fl.importer.isin(regions) & fl.exporter.isin(regions)]
+            use = fl.groupby(["importer", "commodity"])["q_kt"].sum()
+            ext = fl[fl.importer != fl.exporter]
+            exp_ = ext.groupby(["exporter", "commodity"])["q_kt"].sum()
+            imp_ = ext.groupby(["importer", "commodity"])["q_kt"].sum()
+            for t in rg[rg.commodity.isin(comms) & rg.region.isin(regions)].itertuples(index=False):
+                self.base_production.at[t.region, t.commodity] = float(t.prod_kt)
+            for (r, c), q in use.items():
+                self.base_consumption.at[r, c] = float(q)
+            bil = set(fl.commodity.unique())
+            for r in self.EU:
+                for c in bil:
+                    self._base_net_exports_eu.setdefault(r, {})[c] = float(exp_.get((r, c), 0.0) - imp_.get((r, c), 0.0))
+        # products without bilateral trade: CAPRI's FAO_agg balances (one EU region: EU27; blocks: split by CAPRI's
+        # member-state production and use)
+        bal = {}
+        for fn in ("world_market_baseline.json", "dairy_world_baseline.json"):
+            f = mk / fn
             if f.exists():
-                raw = _json.load(open(f))
-                for key, rec in raw.items():
-                    r, c = key.split("|")
-                    if (r != "EU27" or c in ("RAPO", "SUNO", "SOYO", "RAPC", "SUNC", "SOYC")) \
-                            and rec.get("production", 0) > 0:
-                        real_world[(r, c)] = rec["production"]
-            # Extended coverage from CAPRI's own FAO_agg SUA (p_dataMarket,
-            # item MAPR). Same source family as the file above, so the vintage
-            # is consistent; it adds the trade regions that were missing
-            # entirely (DZA, ETH, MAR, TUR, KOR via ALG/MOR/SKOR) and fills
-            # commodity gaps in regions already covered. Loaded SECOND and only
-            # where the primary file has no value, so the existing, validated
-            # cells are never displaced -- the market price test reproduces
-            # CAPRI's PMRK 12/12 off those, and this must not disturb them.
-            f2 = _b / "sources" / "fao_agg_2017" / "fao_agg_sua_2017_extended.json"
-            if f2.exists():
-                raw2 = _json.load(open(f2))
-                # FAO names paddy rice RICE; this model's activity is PARI.
-                # Reading the file without the alias would drop rice silently,
-                # the same failure as the MAIZ/CORN and TWIN/WINE codes.
-                FAO_ALIASES = {"RICE": "PARI"}
-                for key, rec in raw2.items():
-                    r, c = key.split("|")
-                    c = FAO_ALIASES.get(c, c)
-                    if r == "EU27" or (r, c) in real_world:
-                        continue
-                    if rec.get("production", 0) > 0:
-                        real_world[(r, c)] = rec["production"]
-        except Exception:
-            real_world = {}
-        # DAIRY PRODUCTS: every region's base production from CAPRI's FAO_agg (dairy Stage 2,
-        # tools/build_dairy_world_markets.py), the world total their sum. The FAO_agg codes BUTT,
-        # SMIP, WHEP never matched the market's BUTR, SKIM, WHEY (so every region got an invented
-        # share of a hard-coded world total) and the primary file's cheese item is not cheese (USA 28 kt
-        # against CAPRI's 5,889).
-        try:
-            import json as _json
-            from pathlib import Path as _P
-            _fd = _P(__file__).resolve().parents[2] / "capri_data" / "2017" / "market" / "dairy_world_baseline.json"
-            if _fd.exists():
-                _bal = _json.load(open(_fd))["balances"]
-                _dc = {k.split("|")[1] for k in _bal}
-                for c in _dc:
-                    if c not in comms:
-                        continue
-                    world_prod_ref[c] = sum(float(v.get("production", 0.0)) for k, v in _bal.items()
-                                            if k.endswith("|" + c))
-                    for r in regions:
-                        real_world[(r, c)] = float(_bal.get(f"{r}|{c}", {}).get("production", 0.0))
-        except Exception:
-            pass
-
-        # EVERY REGION'S BASE BALANCE FROM CAPRI'S FAO_agg (tools/build_world_market_baseline.py), the world
-        # total their sum: one CAPRI source for all commodities it covers, replacing the mix above (whose sugar
-        # was sugar cane, and whose pork, eggs and maize totals were 40-50% above CAPRI's). Commodities without
-        # a CAPRI world balance (DWHE, PARI, OOIL, OLIV) keep the previous base.
-        try:
-            import json as _json
-            from pathlib import Path as _P
-            _fw = _P(__file__).resolve().parents[2] / "capri_data" / "2017" / "market" / "world_market_baseline.json"
-            if _fw.exists():
-                _bal = _json.load(open(_fw))["balances"]
-                self._capri_world_balance = _bal
-                for c in {k.split("|")[1] for k in _bal}:
-                    if c not in comms:
-                        continue
-                    world_prod_ref[c] = sum(float(v.get("production", 0.0)) for k, v in _bal.items()
-                                            if k.endswith("|" + c))
-                    for r in regions:
-                        real_world[(r, c)] = float(_bal.get(f"{r}|{c}", {}).get("production", 0.0))
-        except Exception:
-            pass
-
-        for comm in comms:
-            w_prod = world_prod_ref.get(comm, 10000)
-
-            # Pre-compute net trade per region from baseline flows
-            net_exports = {r: 0.0 for r in regions}
-            for exporter in regions:
-                for importer in regions:
-                    if exporter == importer:
-                        continue
-                    key = (exporter, importer)
-                    if key in flows.index and comm in flows.columns:
-                        v = float(flows.at[key, comm])
-                        net_exports[exporter] += v
-                        net_exports[importer] -= v
-
-            # Assign production first, then reconcile the world total.
-            #
-            # Production is drawn as w_prod * prod_share (which sums to w_prod),
-            # but the real_world SUA overrides replace individual regions, so the
-            # total drifts away from w_prod — for oilseeds it landed ~27% high
-            # (RAPE 91.6 kt against a 72 kt reference, SOYA 472 against 370).
-            # Consumption is then derived from the trade identity against that
-            # inflated production, leaving world demand ~21% above world supply
-            # at base prices. The market solver, working correctly, drove RAPE
-            # and SOYA prices 34% and 65% below reference to clear a market that
-            # was never balanced — which is what the price-reproduction test had
-            # been failing on. Rescaling the non-overridden regions restores
-            # sum(production) == w_prod while keeping the SUA levels exact.
-            raw_prod, overridden = {}, {}
-            for region in regions:
-                ps = prod_share[region]
-                if (region, comm) in real_world:
-                    overridden[region] = max(1.0, real_world[(region, comm)])
+                for k, v in _json.load(open(f))["balances"].items():
+                    bal.setdefault(k, v)
+        self._capri_world_balance = {k: v for k, v in bal.items()}
+        for c in comms:
+            if c in bil:
+                continue
+            for r in regions:
+                if r in self.EU and self.eu_blocks:
+                    rec = bal.get(f"EU27|{c}", {})
+                    sp, su = self.eu_split(c, "prod_kt")[r], self.eu_split(c, "use_kt")[r]
+                    p_, u_ = float(rec.get("production", 0.0) or 0.0) * sp, float(rec.get("consumption", 0.0) or 0.0) * su
                 else:
-                    # Residual regions take their production share of whatever
-                    # the real sources do not cover. A +/-8% random multiplier
-                    # used to be applied here; it was seeded, so it was
-                    # reproducible, but it was invented variation presented as
-                    # data and it served no modelling purpose. Removed: the
-                    # allocation is now a deterministic share.
-                    #
-                    # This affects little. After the FAO_agg extension only 6.7%
-                    # of world production is allocated this way, and 5.9 points
-                    # of that is ROW, a residual aggregate by construction; the
-                    # only genuinely allocated countries are Iran (0.54%) and
-                    # Saudi Arabia (0.25%), which CAPRI's own FAO aggregate does
-                    # not separate from MIDEAST either.
-                    raw_prod[region] = max(1.0, w_prod * ps)
-
-            fixed_total = sum(overridden.values())
-            free_total = sum(raw_prod.values())
-            target_free = w_prod - fixed_total
-            if free_total > 0 and target_free > 0:
-                scale = target_free / free_total
-                raw_prod = {r: max(1.0, v * scale) for r, v in raw_prod.items()}
-
-            for region in regions:
-                prod = overridden.get(region, raw_prod.get(region, 1.0))
-                # A region cannot export more than it produces. Where the SUA
-                # override or the drawn share leaves production below net
-                # exports, raw consumption goes NEGATIVE and the max(1.0, ...)
-                # clamp below silently FABRICATES consumption out of nothing —
-                # this was the entire source of the base-year oilseed imbalance
-                # (ROW "produced" 1094 kt of soy while exporting 123407, and the
-                # clamp injected exactly the 122314 kt by which world demand
-                # exceeded world supply). Raising production to cover net
-                # exports keeps the trade identity feasible and leaves the
-                # clamp with nothing to invent.
-                ne = net_exports.get(region, 0.0)
-                if region == "EU27":
-                    self._base_net_exports_eu = getattr(self, "_base_net_exports_eu", {})
-                    self._base_net_exports_eu[comm] = ne
-                if ne > 0 and prod < ne:
-                    prod = ne
-                cons = max(1.0, prod - ne)
-
-                self.base_production.at[region, comm]  = prod
-                self.base_consumption.at[region, comm] = cons
+                    rec = bal.get(f"{r}|{c}", {})
+                    p_, u_ = float(rec.get("production", 0.0) or 0.0), float(rec.get("consumption", 0.0) or 0.0)
+                self.base_production.at[r, c] = p_
+                self.base_consumption.at[r, c] = u_ if u_ > 0 else p_
+                if r in self.EU:
+                    self._base_net_exports_eu.setdefault(r, {})[c] = p_ - (u_ if u_ > 0 else p_)
 
         # BIOFUELS: every region's base output and biofuel use from CAPRI's 2030 market results (FAO_agg holds
         # biofuel trade only); the bilateral market replaces the use by the flows' total use at calibration
@@ -453,17 +325,22 @@ class MarketModule:
             for region in regions:
                 q = float(bp["ddgs0"].get(region, 0.0))
                 self.base_production.at[region, "DDGS"] = q
-                self.base_consumption.at[region, "DDGS"] = (float(fb.get("feed0", {}).get("DDGS", q))
-                                                            if region == "EU27" else q)
+                self.base_consumption.at[region, "DDGS"] = (float(fb.get("feed0_reg", {}).get(region, {}).get("DDGS", q))
+                                                            if region in self.EU else q)
         # RESIDUAL FEEDS (CAPRI MaprFeed_, Sprint 9h): the EU's output and feed use of the 2030 reference; the other
         # regions' bases come from the bilateral market at calibration
         fp = self._feed_byproduct_params()
-        if fp and "EU27" in regions:
+        if fp:
             fb = self._feed_bulk_params()
             for p, d in fp["products"].items():
-                if p in comms:
-                    self.base_production.at["EU27", p] = d["prod0"]
-                    self.base_consumption.at["EU27", p] = float(fb.get("feed0", {}).get(p, d["prod0"]))
+                if p not in comms:
+                    continue
+                for reg in self.EU:
+                    if reg not in regions:
+                        continue
+                    q0 = float(((d.get("reg") or {}).get(reg) or d)["prod0"])
+                    self.base_production.at[reg, p] = q0
+                    self.base_consumption.at[reg, p] = float(fb.get("feed0_reg", {}).get(reg, {}).get(p, q0))
 
     # ------------------------------------------------------------------
     # Domestic prices
@@ -489,7 +366,7 @@ class MarketModule:
         # Vectorised: this was a region x commodity loop of scalar .at[]
         # lookups, which dominated the market solve (2.3 million pandas reads
         # per run). The arithmetic is unchanged.
-        wp = pd.Series({c: float(world_prices.get(c, 200.0))
+        wp = pd.Series({c: float(world_prices.get(c, self.world_prices_base[c]))
                         for c in self.commodities})
         tar = tariffs.reindex(index=self.regions,
                               columns=self.commodities).fillna(0.0)
@@ -512,14 +389,14 @@ class MarketModule:
     #: fossil fuel (biofDemShare_, biofDem_), bilateral trade; feedstock use follows the biofuel output. Off:
     #: biofuel quantities fixed at the reference, only the feedstock mix responds. A scenario setting
     #: (PolicyScenario.biofuel_markets), docs/BIOFUEL_MARKET.md.
-    biofuel_markets: bool = True
+    biofuel_markets = setting("market.biofuel_markets", run_state=True)
     BIOFUELS = ("BIOE", "BIOD")
 
     def _biofuel_params(self) -> dict:
         """First-generation biofuel feedstock demand, CAPRI's market equations (biofFeedCost_, biofFeedCostAgg_,
         Biof_, prodBiof_, prodQuantBiofBy_), per CAPRI market region.
 
-        From capri_data/2017/market/biofuel_feedstock.csv (tools/build_biofuel_market.py): per CAPRI region and
+        From capri_data/2017/market/biofuel_feedstock.csv (tools/build/build_biofuel_market.py): per CAPRI region and
         biofuel, the feedstocks' 2030-reference quantities q0, PRCB, PRCBY, by-product, prices and the numeraire;
         and biofuel_use_share.csv: EU biofuel use as a share of the EU use of each model commodity.
         Returns {"groups": [...], "share": {commodity: EU share}, "q0": {commodity: EU kt},
@@ -539,6 +416,8 @@ class MarketModule:
             groups = []
             for (ms, fuel), g in f.groupby(["ms", "biofuel"], sort=True):
                 reg = str(g["region"].iloc[0])
+                if reg == "EU27" and self.eu_blocks:
+                    reg = self.eu_region_of_ms(ms) or reg
                 if reg not in self.regions:
                     continue
                 q0 = g["biof_kt"].astype(float).values
@@ -566,10 +445,24 @@ class MarketModule:
                 for c, q in zip(gr["comm"], gr["q0"]):
                     if c and c in self.commodities:
                         q0r[(gr["region"], c)] = q0r.get((gr["region"], c), 0.0) + float(q)
-                        if gr["region"] == "EU27" and c in share:
+                        if gr["region"] in self.EU and c in share:
                             q0c[c] = q0c.get(c, 0.0) + float(q)
                 dd0[gr["region"]] = dd0.get(gr["region"], 0.0) + float((gr["q0"] * gr["prcby"] * gr["ddgs"]).sum())
-            out = {"groups": groups, "share": share, "q0": q0c, "q0_reg": q0r, "ddgs0": dd0} if groups else {}
+            # biofuel share of use per EU market region: the region's feedstock use over its use (the EU use of the
+            # file split by CAPRI's member-state use); one EU region: the file's share
+            use_eu = {str(r.commodity): float(r.use_kt) for r in sh.itertuples()}
+            share_reg = {}
+            for reg in self.EU:
+                for c, sh_ in share.items():
+                    if not self.eu_blocks:
+                        share_reg[(reg, c)] = sh_
+                        continue
+                    u = use_eu.get(c, 0.0) * self.eu_split(c)[reg]
+                    q = q0r.get((reg, c), 0.0)
+                    if u > 0 and q > 0:
+                        share_reg[(reg, c)] = min(1.0, q / u)
+            out = {"groups": groups, "share": share, "q0": q0c, "q0_reg": q0r, "ddgs0": dd0,
+                   "share_reg": share_reg} if groups else {}
         except Exception:
             out = {}
         self._biof_cache = out
@@ -577,7 +470,7 @@ class MarketModule:
 
     def _biofuel_market_params(self) -> dict:
         """CAPRI's biofuel supply and demand functions per CAPRI market region (biofuel/def_biofuel_params.gms,
-        calibrated by tools/build_biofuel_market.py to the 2030 reference): {(ms, fuel): row} plus the region
+        calibrated by tools/build/build_biofuel_market.py to the 2030 reference): {(ms, fuel): row} plus the region
         totals at the reference (output, biofuel use, non-fuel processing). {} when the file is absent."""
         cached = getattr(self, "_biofm_cache", None)
         if cached is not None:
@@ -593,13 +486,15 @@ class MarketModule:
             gidx = {(g["ms"], g["fuel"]): k for k, g in enumerate(self._biofuel_params().get("groups", []))}
             rows = {}
             for r in m.itertuples(index=False):
+                if r.region == "EU27" and self.eu_blocks:
+                    r = r._replace(region=self.eu_region_of_ms(r.ms) or r.region)
                 if r.region not in self.regions or r.biofuel not in self.commodities:
                     continue
                 d = r._asdict()
                 d["group"] = gidx.get((r.ms, r.biofuel))
                 # CAPRI's mandate scenario (scen/bio_fuels/change_biof_mandate.gms) shifts the EU member states'
                 # and the UK's QUTS
-                d["mandate_region"] = (r.region == "EU27") or (r.ms == "UK000000")
+                d["mandate_region"] = (r.region in self.EU) or (r.ms == "UK000000")
                 rows[(r.ms, r.biofuel)] = d
             prod0, use0, proc0 = {}, {}, {}
             for (ms, fuel), d in rows.items():
@@ -678,7 +573,7 @@ class MarketModule:
         bp = self._biofuel_params()
         groups = bp.get("groups", [])
         scale = self.biofuel_output_scale or {}
-        mand = float(getattr(self, "biofuel_mandate", 1.0) or 1.0)
+        mand = float(1.0 if getattr(self, "biofuel_mandate", None) is None else self.biofuel_mandate)
         has_dd = "DDGS" in self.commodities
 
         # positional lookups (pandas scalar access here was a sizeable share of the market solve)
@@ -764,8 +659,6 @@ class MarketModule:
     # ------------------------------------------------------------------
     # DAIRY PROCESSING (CAPRI arm/market_model.gms DairyNQ_, ProcMargM_, FatsProtBal_)
     # ------------------------------------------------------------------
-    #: CAPRI dairy product -> the model's market commodity (traded products); the other five
-    #: (FRMI, CREM, COCM, WMIO, CASE) clear inside the EU dairy block
     #: CAPRI dairy product -> market commodity. CAPRI trades all nine products of its dairy block bilaterally
     #: (Sprint 9f; until then fresh milk products, cream, concentrated milk, whole milk powder and casein cleared
     #: inside each block with fixed extra-regional trade)
@@ -778,7 +671,7 @@ class MarketModule:
     #: CAPRI's dairy processing in the market (docs/DAIRY_PROCESSING.md): on, as in CAPRI, where the dairy
     #: block is part of the market model (no switch). Since Sprint 9f all nine dairy products are traded and raw
     #: milk, fat and protein are priced per member state. False: dairy products as fixed CAPRI yields of milk.
-    use_dairy_block = True
+    use_dairy_block = setting("market.use_dairy_block")
 
     def _dairy_algebra(self, tables):
         """CAPRI's dairy block as linear algebra for a set of regions that share price RATIOS.
@@ -831,10 +724,10 @@ class MarketModule:
                     p9=np.array([PQ[ix[k]] / Q0[ix[k]] if Q0[ix[k]] > 0 else 1.0 for k in P9]))
 
     def _dairy_params(self) -> dict:
-        """The EU dairy block (tools/build_dairy_processing.py): CAPRI's three equations per member state
-        (_dairy_algebra), EU-common price ratios applied to each member state's own 2030-reference level
-        (CAPRI prices raw milk, fat and protein per member state: REGISTERED), raw milk delivered from the
-        EU supply models; food demand among the nine products with CAPRI's own and cross elasticities;
+        """The EU dairy block (tools/build/build_dairy_processing.py): CAPRI's three equations (DairyNQ_, ProcMargM_,
+        FatsProtBal_) with one block per member state, raw milk, fat and protein priced per member state as in
+        CAPRI, the nine products at their EU market region's prices and traded bilaterally; raw milk delivered
+        from the EU supply models; food demand among the nine products with CAPRI's own and cross elasticities;
         feed demand through the FMIL block."""
         if not self.use_dairy_block:
             return {}
@@ -869,13 +762,32 @@ class MarketModule:
                        fd9=np.array([float(bal.at[k, "fedm_kt"]) for k in P9]),
                        cons9={k: float(bal.at[k, "prod_kt"] - bal.at[k, "proc_kt"] + bal.at[k, "net_imports_kt"]) for k in P9},
                        net_imports0={k: float(bal.at[k, "net_imports_kt"]) for k in P9})
+            # per EU market region: output and processing of its member states' blocks; food and feed use and total
+            # use the EU's split by CAPRI's member-state human consumption, feed and use; net imports the rest
+            reg = {}
+            for rg in self.EU:
+                if not self.eu_blocks:
+                    reg[rg] = dict(Q0=out["Q0"], proc0=out["proc0"], hc9=out["hc9"], fd9=out["fd9"],
+                                   cons9=out["cons9"], net_imports0=out["net_imports0"])
+                    continue
+                mss = [ms for ms in out["ms"] if self.eu_region_of_ms(ms) == rg]
+                Q0 = sum((out["ms"][ms]["Q0"] for ms in mss), np.zeros_like(out["Q0"]))
+                pr0 = sum((out["ms"][ms]["proc0"] for ms in mss), np.zeros_like(out["proc0"]))
+                cm = {k: self.DAIRY_TRADED[k] for k in P9}
+                hc = np.array([out["hc9"][i] * self.eu_split(cm[k], "hcon_kt")[rg] for i, k in enumerate(P9)])
+                fd = np.array([out["fd9"][i] * self.eu_split(cm[k], "feed_kt")[rg] for i, k in enumerate(P9)])
+                cons = {k: out["cons9"][k] * self.eu_split(cm[k], "use_kt")[rg] for k in P9}
+                ix = out["ix"]
+                ni = {k: cons[k] - float(Q0[ix[k]] - pr0[ix[k]]) for k in P9}
+                reg[rg] = dict(Q0=Q0, proc0=pr0, hc9=hc, fd9=fd, cons9=cons, net_imports0=ni)
+            out["reg"] = reg
         except Exception:
             out = {}
         self._dairy_cache = out
         return out
 
     def _dairy_world_params(self) -> dict:
-        """CAPRI's dairy block for the non-EU trade regions (dairy Stage 4, tools/build_dairy_world_blocks.py):
+        """CAPRI's dairy block for the non-EU trade regions (dairy Stage 4, tools/build/build_dairy_world_blocks.py):
         {trade region: params}, CAPRI's market regions of the trade region sharing price ratios; raw milk from
         CAPRI's own supply function (p_hessNQSupp MILK); food demand among the nine products with the
         regions' p_ElasDem weighted by food use; feed use of the products at CAPRI's level (FMIL index 1: the
@@ -1015,17 +927,29 @@ class MarketModule:
             self._dairy_u = "unset"
         items = dp["items"]
         n = len(items) + 2
-        zt = np.zeros(n)
-        for k, rho in traded_ratio.items():
-            if k in dp["ix"]:
-                zt[dp["ix"][k]] = float(rho) - 1.0
+        # traded_ratio: {product: ratio} for every member state, or {EU market region: {product: ratio}}
+        per_reg = bool(traded_ratio) and all(isinstance(v, dict) for v in traded_ratio.values())
+
+        def _zt(tr):
+            z_ = np.zeros(n)
+            for k, rho in tr.items():
+                if k in dp["ix"]:
+                    z_[dp["ix"][k]] = float(rho) - 1.0
+            return z_
+        zts = {rg: _zt(traded_ratio.get(rg, {}) if per_reg else traded_ratio) for rg in self.EU}
+        zt = zts[self.EU[0]]
         Q = np.zeros(len(items)); Q0 = np.zeros(len(items)); proc0 = np.zeros(len(items))
+        Qr = {rg: np.zeros(len(items)) for rg in self.EU}
         vm = vf = vp = vm0 = vf0 = vp0 = 0.0
+        vmr = {rg: [0.0, 0.0] for rg in self.EU}
         msr = {}
         for ms, prm in dp["ms"].items():
+            rg = self.eu_region_of_ms(ms) or self.EU[0]
             mr = float(milk_ratio.get(ms, 1.0)) if isinstance(milk_ratio, dict) else float(milk_ratio)
-            z = self._dairy_solve_ms(prm, zt, mr)
-            Q += prm["Q0"] + prm["G"] @ z
+            z = self._dairy_solve_ms(prm, zts[rg], mr)
+            q_ = prm["Q0"] + prm["G"] @ z
+            Q += q_
+            Qr[rg] += q_
             Q0 += prm["Q0"]; proc0 += prm["proc0"]
             msr[ms] = {"MILK": 1.0 + z[prm["iM"]], "FATS": 1.0 + z[prm["iF"]], "PROT": 1.0 + z[prm["iP"]],
                        "milk_delivered": mr}
@@ -1033,9 +957,14 @@ class MarketModule:
             w = prm["Q0"][prm["iM"]]
             vm += w * msr[ms]["MILK"]; vm0 += w
             vf += w * msr[ms]["FATS"]; vp += w * msr[ms]["PROT"]
+            vmr[rg][0] += w * msr[ms]["MILK"]; vmr[rg][1] += w
         ix = dp["ix"]
+        rgp = dp.get("reg") or {}
         res = {"price_ratio": {**{k: (1.0 + zt[ix[k]]) for k in items if k != "MILK"},
                                "MILK": vm / vm0, "FATS": vf / vm0, "PROT": vp / vm0},
+               "milk_price_ratio_reg": {rg: (v[0] / v[1] if v[1] > 0 else 1.0) for rg, v in vmr.items()},
+               "market_supply_reg": {rg: {self.DAIRY_TRADED[k]: float(Qr[rg][ix[k]] - rgp[rg]["proc0"][ix[k]])
+                                          for k in self.DAIRY_TRADED} for rg in self.EU if rg in rgp},
                "ms_price_ratio": msr,
                "production": {k: float(Q[ix[k]]) for k in items},
                "production0": {k: float(Q0[ix[k]]) for k in items},
@@ -1045,7 +974,7 @@ class MarketModule:
         return res
 
     #: model country -> CAPRI member state of the dairy block
-    _DAIRY_MS = {"BE": "BL", "LU": "BL", "IE": "IR", "GR": "EL"}
+    _DAIRY_MS = MS_CODE
 
     def _milk_by_ms(self, exogenous_supply) -> Dict[str, float]:
         """Raw milk delivered per CAPRI member state from the supply models' rows (one per country)."""
@@ -1075,13 +1004,19 @@ class MarketModule:
 
     def _dairy_eu_prices(self, world_prices) -> Dict[str, float]:
         """EU prices of the traded dairy products relative to base, as the dairy block sees them: the
-        wedge price x the current EU Armington premium (lagged within an outer iteration)."""
+        wedge price x the current EU Armington premium (lagged within an outer iteration). With two EU market
+        regions (bilateral market): {region: {product: ratio}}."""
         dom = self.domestic_prices(world_prices, getattr(self, "_trade_scenario_now", None))
         d0 = getattr(self, "_dom0_cache", None)
         if d0 is None:
             d0 = self.domestic_prices(self.world_prices_base)
             self._dom0_cache = d0
         bl = getattr(self, "_bilat_ratio_now", None)
+        if bl is not None and self.eu_blocks:
+            return {rg: {k: float(bl.at[rg, c]) if (c in bl.columns and rg in bl.index) else 1.0
+                         for k, c in self.DAIRY_TRADED.items()} for rg in self.EU}
+        if self.eu_blocks:
+            return {rg: {k: 1.0 for k in self.DAIRY_TRADED} for rg in self.EU}
         if bl is not None and "EU27" in bl.index:
             return {k: float(bl.at["EU27", c]) if c in bl.columns else 1.0 for k, c in self.DAIRY_TRADED.items()}
         prem = getattr(self, "eu_premium", None) if getattr(self, "_eu_base_supply", None) is not None else None
@@ -1093,18 +1028,21 @@ class MarketModule:
         return out
 
     def biofuel_feedstock_use(self, price_ratio: Dict[str, float]) -> dict:
-        """EU feedstock use for biofuels at EU feedstock prices (relative to base), CAPRI's equations
+        """EU feedstock use for biofuels at EU feedstock prices (relative to base; with two EU market regions
+        {region: {commodity: ratio}}), CAPRI's equations
         (MarketModule._biofuel_feed_group); first-generation output from the biofuel market when endogenous,
         else the 2030-reference output x biofuel_output_scale. Returns {"by_commodity": {c: kt},
         "by_feedstock": {(fuel, feedstock): kt}, "output": {fuel: kt}} (output: first generation).
         """
         byc, byf, outp = {}, {}, {}
         for g in self._biofuel_params().get("groups", []):
-            if g["region"] != "EU27":
+            if g["region"] not in self.EU:
                 continue
             X = self._biofuel_x(g)
             st = getattr(self, "_biof_state", None)
-            q, _ = self._biofuel_feed_group(g, price_ratio, X, float((st or {}).get("ddgs_ratio", {}).get("EU27", 1.0)))
+            pr = (price_ratio.get(g["region"], {}) if any(isinstance(v, dict) for v in price_ratio.values())
+                  else price_ratio)
+            q, _ = self._biofuel_feed_group(g, pr, X, float((st or {}).get("ddgs_ratio", {}).get(g["region"], 1.0)))
             outp[g["fuel"]] = outp.get(g["fuel"], 0.0) + X
             for c, f, x in zip(g["comm"], g["feed"], q):
                 byf[(g["fuel"], f)] = byf.get((g["fuel"], f), 0.0) + float(x)
@@ -1114,7 +1052,7 @@ class MarketModule:
 
     def _feed_bulk_params(self) -> dict:
         """CAPRI's feed bulks of the member states (arm/market_model.gms feedBlkPrice_, feedShareEqu_;
-        tools/build_feed_bulks.py): per (member state, bulk) the products' model commodities, 2030 feed quantities,
+        tools/build/build_feed_bulks.py): per (member state, bulk) the products' model commodities, 2030 feed quantities,
         value shares and the substitution elasticity; the feed share of EU use per commodity and the EU feed
         totals. {} when the files are absent."""
         cached = getattr(self, "_fbulk_cache", None)
@@ -1132,14 +1070,56 @@ class MarketModule:
                 v0 = q0 * g["arm1p"].astype(float).values
                 comm = [c if c in self.commodities else "" for c in g["commodity"].astype(str)]
                 bulks[(ms, b)] = dict(comm=comm, q0=q0, s=v0 / v0.sum(), rho=float(g["rho"].iloc[0]))
-            feed0 = {}
+            feed0, feed0_reg = {}, {r: {} for r in self.EU}
             for (ms, b), d in bulks.items():
+                reg = self.eu_region_of_ms(ms)
                 for c, q in zip(d["comm"], d["q0"]):
                     if c:
                         feed0[c] = feed0.get(c, 0.0) + float(q)
+                        if reg in feed0_reg:
+                            feed0_reg[reg][c] = feed0_reg[reg].get(c, 0.0) + float(q)
             share = {str(r.commodity): float(r.share) for r in sh.itertuples()
                      if r.commodity in self.commodities and r.commodity in feed0}
-            out = {"bulks": bulks, "feed0": feed0, "share": share} if bulks else {}
+            # per EU market region: the region's feed over its use, the EU use (file) split by CAPRI's member-state
+            # use (eu_split); one EU region: the file's share
+            use_eu = {str(r.commodity): float(r.use_kt) for r in sh.itertuples()}
+            share_reg = {}
+            for reg in self.EU:
+                share_reg[reg] = {}
+                for c, sh_ in share.items():
+                    if not self.eu_blocks:
+                        share_reg[reg][c] = sh_
+                        continue
+                    u = use_eu.get(c, 0.0) * self.eu_split(c)[reg]
+                    f = feed0_reg[reg].get(c, 0.0)
+                    if u > 0 and f > 0:
+                        share_reg[reg][c] = min(1.0, f / u)
+            out = {"bulks": bulks, "feed0": feed0, "share": share, "feed0_reg": feed0_reg,
+                   "share_reg": share_reg} if bulks else {}
+            # Norway's bulks (CAPRI's feedBlkPrice_, feedShareEqu_ hold for every NUTS0 with supply models, RMSSUP):
+            # its supply models' bulk price indices at its own market's prices, and its feed demand per product
+            # following its herds, in its own market region NOR (KNOWN_ISSUES K56; not part of the EU's feed demand).
+            # The feed share of Norway's use per commodity: CAPRI's 2030 feed over its use (HCOM + FEDM + INDM + BIOF
+            # + LOSM + PRCM, feed_bulks_no.csv use_kt), as the EU's (feed_bulks_eu_share.csv)
+            fno = base / "feed_bulks_no.csv"
+            if out and fno.exists():
+                pno, f0s, u0s, ms_reg = {}, {}, {}, {v: k for k, v in self.SUP_NONEU_MS.items()}
+                tno = pd.read_csv(fno, keep_default_na=False)
+                for (ms, b), g in tno.groupby(["ms", "bulk"], sort=True):
+                    q0 = g["feed_kt"].astype(float).values
+                    v0 = q0 * g["arm1p"].astype(float).values
+                    comm = [c if c in self.commodities else "" for c in g["commodity"].astype(str)]
+                    pno[(ms, b)] = dict(comm=comm, q0=q0, s=v0 / v0.sum(), rho=float(g["rho"].iloc[0]))
+                    rg = ms_reg.get(ms)
+                    uk = g["use_kt"].astype(float).values if "use_kt" in g.columns else np.zeros(len(g))
+                    for c, q, u in zip(comm, q0, uk):
+                        if c and rg is not None:
+                            f0s.setdefault(rg, {})[c] = f0s.setdefault(rg, {}).get(c, 0.0) + float(q)
+                            u0s.setdefault(rg, {})[c] = u0s.setdefault(rg, {}).get(c, 0.0) + float(u)
+                out["bulks_sup"] = pno
+                out["feed0_sup"] = f0s
+                out["share_sup"] = {rg: {c: min(1.0, q / u0s[rg][c]) for c, q in f0.items() if u0s[rg].get(c, 0.0) > 0}
+                                    for rg, f0 in f0s.items()}
         except Exception:
             out = {}
         self._fbulk_cache = out
@@ -1149,21 +1129,45 @@ class MarketModule:
         """CAPRI's bulk price index (feedBlkPrice_) of a member state relative to the reference:
         (sum_i s_i (p_i / p_i0)^(1 - rho))^(1 / (1 - rho)), s_i the reference value shares; products without a
         model market at the reference price. 1 where the member state has no such bulk."""
-        d = (self._feed_bulk_params().get("bulks") or {}).get((ms, bulk))
+        fb = self._feed_bulk_params()
+        d = (fb.get("bulks") or {}).get((ms, bulk)) or (fb.get("bulks_sup") or {}).get((ms, bulk))
         if d is None:
             return 1.0
         r = np.array([max(float(price_ratio.get(c, 1.0)), 1e-6) if c else 1.0 for c in d["comm"]])
         rho = d["rho"]
         return float((d["s"] * r ** (1.0 - rho)).sum()) ** (1.0 / (1.0 - rho))
 
-    def eu_feed_use(self, price_ratio: Dict[str, float]) -> Dict[str, float]:
+    def eu_feed_use(self, price_ratio: Dict[str, float], region: Optional[str] = None) -> Dict[str, float]:
         """EU feed use per model commodity (kt) from the member states' bulks at the EU price ratios (CAPRI
         feedShareEqu_): q_i = q_i0 x (B / B0) x (P_B / p_i)^rho with prices relative to the reference; B / B0 from
-        the supply models (_feed_bulk_index, 1 before any supply result)."""
+        the supply models (_feed_bulk_index, 1 before any supply result). region: only the member states of that
+        EU market region (their block's prices)."""
         fb = self._feed_bulk_params()
         bix = getattr(self, "_feed_bulk_index", None) or {}
         out = {}
         for (ms, b), d in (fb.get("bulks") or {}).items():
+            if region is not None and self.eu_region_of_ms(ms) != region:
+                continue
+            r = np.array([max(float(price_ratio.get(c, 1.0)), 1e-6) if c else 1.0 for c in d["comm"]])
+            rho = d["rho"]
+            pb = float((d["s"] * r ** (1.0 - rho)).sum()) ** (1.0 / (1.0 - rho))
+            q = d["q0"] * float(bix.get((ms, b), 1.0)) * (pb / r) ** rho
+            for c, x in zip(d["comm"], q):
+                if c:
+                    out[c] = out.get(c, 0.0) + float(x)
+        return out
+
+    def sup_feed_use(self, region: str, price_ratio: Dict[str, float]) -> Dict[str, float]:
+        """Feed use per model commodity (kt) of a non-EU market region with supply models (Norway) from its bulks
+        at its price ratios (CAPRI feedShareEqu_, as eu_feed_use): q_i = q_i0 x (B / B0) x (P_B / p_i)^rho, B / B0
+        from its supply models (_feed_bulk_index)."""
+        fb = self._feed_bulk_params()
+        bix = getattr(self, "_feed_bulk_index", None) or {}
+        ms0 = self.SUP_NONEU_MS.get(region)
+        out = {}
+        for (ms, b), d in (fb.get("bulks_sup") or {}).items():
+            if ms != ms0:
+                continue
             r = np.array([max(float(price_ratio.get(c, 1.0)), 1e-6) if c else 1.0 for c in d["comm"]])
             rho = d["rho"]
             pb = float((d["s"] * r ** (1.0 - rho)).sum()) ** (1.0 / (1.0 - rho))
@@ -1174,7 +1178,7 @@ class MarketModule:
         return out
 
     def _feed_byproduct_params(self) -> dict:
-        """CAPRI's residual feeds (MaprFeed_; tools/build_feed_byproducts.py): per product the EU's 2030 output and
+        """CAPRI's residual feeds (MaprFeed_; tools/build/build_feed_byproducts.py): per product the EU's 2030 output and
         its parent commodities' weights in the parents' food and processing use (food) or biofuel processing.
         {"products": {product: {"prod0": kt, "parts": [(commodity, use, weight)]}}, "parents": set} or {}."""
         cached = getattr(self, "_fbyp_cache", None)
@@ -1192,6 +1196,24 @@ class MarketModule:
                 ws = float(g["weight"].sum())                 # renormalised (the file's weights are rounded)
                 prods[p] = {"prod0": float(g["prod0_kt"].iloc[0]),
                             "parts": [(str(r.commodity), str(r.use), float(r.weight) / ws) for r in g.itertuples()]}
+                # per EU market region: output split by CAPRI's member-state production of the residual feed; the
+                # parents' weights from the region's own food + processing (biofuel processing) use of each parent
+                reg = {}
+                for rg, f in self.eu_split(p, "prod_kt").items():
+                    if not self.eu_blocks:
+                        reg[rg] = {"prod0": prods[p]["prod0"], "parts": prods[p]["parts"]}
+                        continue
+                    parts = []
+                    for r_ in g.itertuples():
+                        it = ("biof_kt",) if str(r_.use) == "biofuel" else ("hcon_kt", "proc_kt")
+                        tb = self._eu_ms_balance()
+                        k = (rg, str(r_.commodity))
+                        vb = sum(float(tb.at[k, x]) for x in it) if k in tb.index else 0.0
+                        parts.append((str(r_.commodity), str(r_.use), vb))
+                    tot = sum(x for _, _, x in parts)
+                    reg[rg] = {"prod0": prods[p]["prod0"] * f,
+                               "parts": [(c, u, x / tot) for c, u, x in parts] if tot > 0 else prods[p]["parts"]}
+                prods[p]["reg"] = reg
             if prods:
                 out = {"products": prods,
                        "parents": {c for d in prods.values() for c, _, _ in d["parts"] if c in self.commodities}}
@@ -1200,25 +1222,188 @@ class MarketModule:
         self._fbyp_cache = out
         return out
 
-    def eu_feed_byproduct_output(self) -> Dict[str, float]:
+    def eu_feed_byproduct_output(self, region: Optional[str] = None) -> Dict[str, float]:
         """EU output of the residual feeds (CAPRI MaprFeed_): prod0 x sum over the parents of weight x the
         parent's current food response (food and processing use) or biofuel feedstock use relative to the
-        reference, from the last demand evaluation (1 before any)."""
+        reference, from the last demand evaluation (1 before any). region: one EU market region (default: the
+        first; with one EU region, the EU)."""
+        region = region or self.EU[0]
         fp = self._feed_byproduct_params()
-        fr = getattr(self, "_eu_food_ratio", None) or {}
-        br = getattr(self, "_eu_biof_ratio", None) or {}
+        fr = (getattr(self, "_eu_food_ratio", None) or {}).get(region, {})
+        br = (getattr(self, "_eu_biof_ratio", None) or {}).get(region, {})
         out = {}
         for p, d in (fp.get("products") or {}).items():
-            x = sum(w * float((br if use == "biofuel" else fr).get(c, 1.0)) for c, use, w in d["parts"])
-            out[p] = d["prod0"] * x
+            dr = (d.get("reg") or {}).get(region, d)
+            x = sum(w * float((br if use == "biofuel" else fr).get(c, 1.0)) for c, use, w in dr["parts"])
+            out[p] = dr["prod0"] * x
         return out
 
     def _apply_feed_byproduct_supply(self, S: pd.DataFrame) -> None:
-        if "EU27" not in S.index:
-            return
-        for p, q in self.eu_feed_byproduct_output().items():
-            if p in S.columns:
-                S.at["EU27", p] = max(0.0, q)
+        for reg in self.EU:
+            if reg not in S.index:
+                continue
+            for p, q in self.eu_feed_byproduct_output(reg).items():
+                if p in S.columns:
+                    S.at[reg, p] = max(0.0, q)
+
+    #: Human consumption from CAPRI's Generalised Leontief demand system (arm/market_model.gms:826-916) per
+    #: behavioural region (EU member states, non-EU countries and country groups), with its cross-price and income
+    #: terms; parameters from CAPRI's 2030 calibration (tools/build/build_gl_demand.py). Off: the earlier own-price
+    #: constant-elasticity food response (no cross-price terms).
+    food_demand_gl = setting("market.food_demand_gl")
+
+    def _gl_params(self) -> dict:
+        """CAPRI's GL food demand per behavioural region, grouped by model region.
+
+        Returns {model region: [rms entries]} with, per CAPRI region: goods' model commodity column (-1: a good the
+        model has no market for; its price stays at CAPRI's, as INPE's), d, B (symmetric), consumer prices at the
+        calibration point (EUR/kg), income per head Y, inhabitants; plus "hs": (region, commodity) -> CAPRI's human
+        consumption share of total use, and "x0": the demand at the calibration point per (region, commodity)."""
+        cached = getattr(self, "_gl_cache", None)
+        if cached is not None:
+            return cached
+        out = {}
+        try:
+            from pathlib import Path as _P
+            d = _P(__file__).resolve().parents[2] / "capri_data" / "2017" / "market"
+            goods = pd.read_csv(d / "gl_demand_goods.csv", keep_default_na=False, na_values=[""])
+            bb = pd.read_csv(d / "gl_demand_b.csv")
+            regs = pd.read_csv(d / "gl_demand_regions.csv").set_index("rms")
+            Cc = {c: j for j, c in enumerate(self.commodities)}
+            Rr = {r: i for i, r in enumerate(self.regions)}
+            groups, hcon, use, x0 = {}, {}, {}, {}
+            bgr = {r: g for r, g in bb.groupby("rms")}
+            for rms, g in goods.groupby("rms", sort=True):
+                mr = str(g["model_region"].iloc[0])
+                if mr == "EU27" and self.eu_blocks:
+                    mr = self.eu_region_of_ms(rms) or mr
+                if mr not in Rr or rms not in regs.index or rms not in bgr:
+                    continue
+                names = list(g["good"])
+                idx = {n: k for k, n in enumerate(names)}
+                n = len(names)
+                B = np.zeros((n, n))
+                for i_, j_, v in bgr[rms][["i", "j", "b"]].itertuples(index=False):
+                    if i_ in idx and j_ in idx:
+                        B[idx[i_], idx[j_]] = v
+                        B[idx[j_], idx[i_]] = v
+                p0 = g["cpri"].to_numpy(dtype=float) / 1000.0
+                if not np.all(p0 > 0):
+                    continue
+                col = np.array([Cc.get(str(m), -1) if isinstance(m, str) and m else -1
+                                for m in g["model_commodity"]], dtype=int)
+                e = {"col": col, "d": g["d"].to_numpy(dtype=float), "B": B, "p0": p0,
+                     "Y": float(regs.at[rms, "Y"]), "inha": float(regs.at[rms, "inha"]), "rms": rms,
+                     "good": np.array(names), "hcon": g["hcon"].to_numpy(dtype=float),
+                     "use": g["use"].to_numpy(dtype=float)}
+                e["d_cal"] = e["d"].copy()
+                e["x0"] = self._gl_eval(e, p0, 1.0)
+                groups.setdefault(mr, []).append(e)
+                for k, j in enumerate(col):
+                    if j < 0:
+                        continue
+                    key = (mr, int(j))
+                    hcon[key] = hcon.get(key, 0.0) + float(g["hcon"].iloc[k])
+                    use[key] = use.get(key, 0.0) + float(g["use"].iloc[k])
+                    x0[key] = x0.get(key, 0.0) + float(e["x0"][k])
+            out = {"groups": groups,
+                   "hs": {k: min(1.0, hcon[k] / use[k]) for k in hcon if use[k] > 0 and hcon[k] > 0},
+                   "x0": x0, "x0_cal": dict(x0), "use": use}
+        except Exception as exc:  # never silent: the earlier food response is used instead
+            import warnings as _w
+            _w.warn(f"GL food demand not available ({exc}); own-price food response used", RuntimeWarning)
+            out = {}
+        self._gl_cache = out
+        return out
+
+    @staticmethod
+    def _gl_eval(e: dict, p: np.ndarray, ir: float) -> np.ndarray:
+        """CAPRI's GL demand of one region (1000 t): x_i = [G_i/G (Y - F) + d_i] INHA / 1000."""
+        sq = np.sqrt(p)
+        G = float(sq @ e["B"] @ sq)
+        Gi = (e["B"] @ sq) / sq
+        F = float(e["d"] @ p)
+        return (Gi / G * (e["Y"] * ir - F) + e["d"]) * e["inha"] / 1000.0
+
+    #: CAPRI's re-calibration of the GL commitments to given quantities and prices (arm/recalibrate_commitments.gms,
+    #: trim_gl_commits.gms): the commitments d are moved as little as possible (least squares) so that the system
+    #: reproduces the model's base human consumption at the calibration prices; b and income stay. The model's base
+    #: use per region and commodity sets the target: CAPRI's human consumption of each behavioural region scaled by
+    #: the ratio of the model's base use to CAPRI's use of the model region. False: CAPRI's 2030 commitments, the
+    #: GL applied as a ratio to the model's base.
+    gl_refit_commitments = setting("market.gl_refit_commitments")
+
+    def _gl_refit(self, D0c: np.ndarray) -> None:
+        """Re-fit the commitments of every behavioural region to the model's base use D0c (regions x commodities),
+        as CAPRI's m_trimGLCommits: min sum (d - d_CAPRI)^2 s.t. x_i(p0, d) = target_i for the goods with human
+        consumption (raw milk and INPE free; INPE absorbs the change in spending). The constraints are linear in d:
+        d_i - a_i sum_k p_k d_k = q_i - a_i Y, a_i = G_i / G, so the least-squares solution is exact."""
+        prm = self._gl_params()
+        Rr = {r: i for i, r in enumerate(self.regions)}
+        kfac = {}
+        for (mr, j), u in prm["use"].items():
+            if u > 0:
+                kfac[(mr, j)] = float(D0c[Rr[mr], j]) / u
+        info = []
+        x0 = {}
+        for mr, ents in prm["groups"].items():
+            i = Rr[mr]
+            for e in ents:
+                p, d0, col = e["p0"], e["d_cal"], e["col"]
+                sq = np.sqrt(p)
+                G = float(sq @ e["B"] @ sq)
+                a = (e["B"] @ sq) / sq / G
+                k = np.array([kfac.get((mr, int(j)), 1.0) if j >= 0 else 1.0 for j in col])
+                q = e["hcon"] * k * 1000.0 / e["inha"]                      # per head, kg
+                con = (e["hcon"] > 1e-6) & (np.abs(a) > 0) & (e["good"] != "INPE") & (e["good"] != "MILK")
+                A = np.where(con[:, None], -np.outer(a, p), 0.0)[con]
+                A[np.arange(con.sum()), np.where(con)[0]] += 1.0
+                b = (q - a * e["Y"])[con]
+                r = b - A @ d0
+                d = d0 + A.T @ np.linalg.solve(A @ A.T, r)
+                e["d"] = d
+                x = self._gl_eval(e, p, 1.0)
+                e["x0"] = x
+                err = float(np.max(np.abs(x[con] - (q * e["inha"] / 1000.0)[con]) / np.maximum(1e-9, x[con]))) if con.any() else 0.0
+                info.append((e["rms"], mr, err, float(np.max(np.abs(d - d0)[con] / np.maximum(np.abs(d0[con]), 1e-9))) if con.any() else 0.0))
+                for kk, j in enumerate(col):
+                    if j >= 0:
+                        x0[(mr, int(j))] = x0.get((mr, int(j)), 0.0) + float(x[kk])
+        prm["x0"] = x0
+        self.gl_refit_info = info
+
+    def gl_food_ratio(self, PR: np.ndarray, ref: np.ndarray, ir: float = 1.0, D0c: np.ndarray = None):
+        """Human consumption relative to the calibration point per (model region, commodity), and CAPRI's human
+        consumption share of use. Consumer prices move additively with the model's domestic price (CAPRI
+        Cpri_: Armington price + margin): p = CPRI0 + (PR - 1) x reference price."""
+        prm = self._gl_params() if self.food_demand_gl else {}
+        if not prm:
+            return None, None
+        if D0c is not None and self.gl_refit_commitments:
+            key = getattr(self, "_gl_refit_key", None)
+            if key is None or key.shape != D0c.shape or not np.array_equal(key, D0c):
+                self._gl_refit(D0c)
+                self._gl_refit_key = D0c.copy()
+        Rr = {r: i for i, r in enumerate(self.regions)}
+        num = np.zeros_like(PR, dtype=float)
+        for mr, ents in prm["groups"].items():
+            i = Rr[mr]
+            for e in ents:
+                col = e["col"]
+                p = e["p0"].copy()
+                m = col >= 0
+                p[m] = p[m] + (PR[i, col[m]] - 1.0) * ref[i, col[m]] / 1000.0
+                p = np.maximum(p, 0.05 * e["p0"])
+                x = self._gl_eval(e, p, ir)
+                np.add.at(num[i], col[m], np.maximum(x[m], 0.0))
+        GLR = np.ones_like(num)
+        HS = np.zeros_like(num)
+        for (mr, j), v0 in prm["x0"].items():
+            i = Rr[mr]
+            if v0 > 0:
+                GLR[i, j] = num[i, j] / v0
+                HS[i, j] = prm["hs"].get((mr, j), 0.0)
+        return GLR, HS
 
     def _feed_demand_params(self) -> dict:
         """(region, feed commodity) -> feed share and p_ElasFeed elasticities (non-EU)."""
@@ -1232,7 +1417,7 @@ class MarketModule:
             f = _P(__file__).resolve().parents[2] / "capri_data" / "2017" / "market" / "feed_demand_nonEU.json"
             for key, v in _json.load(open(f))["parameters"].items():
                 r, c = key.split("|")
-                if r in self.regions and r != "EU27" and c in self.commodities:
+                if r in self.regions and r not in self.EU and r != "EU27" and c in self.commodities:
                     out[(r, c)] = {"feed_share": float(v["feed_share"]),
                                    "elasticities": {k: float(x) for k, x in v["elasticities"].items() if k in self.commodities}}
         except Exception:
@@ -1240,14 +1425,72 @@ class MarketModule:
         self._fdp_cache = out
         return out
 
+    #: CAPRI's processing demand functions (arm/market_model.gms ProcNQ_; tools/build/build_processing_nq.py): oilseed
+    #: crushing linear in the crushing margins with CAPRI's Hessian (cross terms among the oilseeds), processing of
+    #: the other products linear in the prices (cross terms among the vegetable oils). False: the earlier own-margin
+    #: crushing elasticity and own-price response of processing.
+    processing_nq = setting("market.processing_nq")
+    #: products whose processing has its own block: dairy (fixed processing in the dairy block), biofuels (the
+    #: biofuel market's non-fuel processing), raw milk
+    _PROC_NQ_SKIP = frozenset({"MILK", "BUTR", "SKIM", "CHES", "WHEY", "FRMI", "CREM", "COCM", "WMIO", "CASE",
+                               "BIOE", "BIOD"})
+
+    def _proc_nq_params(self) -> dict:
+        """CAPRI's processing Hessian summed per model region (the behavioural regions of a region share its prices),
+        CAPRI's processing share of use per (region, commodity). {} when off or the files are absent."""
+        if not self.processing_nq:
+            return {}
+        cached = getattr(self, "_procnq_cache", None)
+        if cached is not None:
+            return cached
+        out = {}
+        try:
+            from pathlib import Path as _P
+            d = _P(__file__).resolve().parents[2] / "capri_data" / "2017" / "market"
+            hh = pd.read_csv(d / "processing_nq_hessian.csv", keep_default_na=False, na_values=[""])
+            bb = pd.read_csv(d / "processing_nq_base.csv", keep_default_na=False, na_values=[""])
+
+            def mreg(rms, mr):
+                if mr == "EU27" and self.eu_blocks:
+                    return self.eu_region_of_ms(rms) or mr
+                return mr
+            # ProcNQ_ divides H by the price of the non-agricultural good, DATA(RMS,"PPri","Inpe","CUR")
+            inpe_rms = bb.groupby("rms")["inpe"].first().to_dict()
+            H = {}
+            for r in hh.itertuples(index=False):
+                R = mreg(r.rms, r.model_region)
+                if R not in self.regions or r.x not in self.commodities or r.y not in self.commodities:
+                    continue
+                inpe = float(inpe_rms[r.rms])
+                k = H.setdefault(R, {})
+                k[(r.x, r.y)] = k.get((r.x, r.y), 0.0) + float(r.h) / inpe
+                if r.x != r.y:
+                    k[(r.y, r.x)] = k.get((r.y, r.x), 0.0) + float(r.h) / inpe
+            pr, us = {}, {}
+            for r in bb.itertuples(index=False):
+                R = mreg(r.rms, r.model_region)
+                pr[(R, r.commodity)] = pr.get((R, r.commodity), 0.0) + float(r.proc_kt)
+                us[(R, r.commodity)] = us.get((R, r.commodity), 0.0) + float(r.use_kt)
+            # the share of use CAPRI's processing function carries (ProcNQ_ moves the processing quantity itself); at
+            # most the whole use (where CAPRI's data have processing above use); before 23 October 2026 capped at 0.98
+            share = {k: min(1.0, pr[k] / us[k]) for k in pr if us.get(k, 0.0) > 0 and pr[k] > 0}
+            out = {"H": H, "share": share}
+        except Exception as exc:
+            import warnings as _w
+            _w.warn(f"CAPRI processing functions not available ({exc}); own-price processing used", RuntimeWarning)
+            out = {}
+        self._procnq_cache = out
+        return out
+
     def _crush_params(self) -> dict:
         """(region, seed) -> base crush, yields, elasticity and base margin terms.
 
-        CAPRI data (crushing_parameters.json): crush = the seed's industrial use,
-        yields = oil and cake production / crush, elasticity = p_ElasProc. Pairs
-        whose yields are physically impossible (oil + cake > 1.05 t per t, or a
-        yield outside 0.1-0.95) keep simple supply curves - three such pairs in
-        CAPRI's base data (UKR rapeseed, JPN sunflower, PAK soybeans).
+        CAPRI data (crushing_parameters.csv, tools/build/build_crushing_parameters.py): crush = the seed's industrial use,
+        yields = oil and cake production / crush, elasticity = p_ElasProc. Every
+        pair takes CAPRI's own yields, as CAPRI's market does: a band that dropped
+        five pairs whose yields look implausible (UKR, PAK, ZAF rapeseed, PAK
+        soybeans: oil + cake 1.2-1.7 t per t of seed crushed; JPN sunflower) was
+        removed 23 October 2026 (no proxies; the numbers had no source).
         """
         # The cache is keyed on what it depends on - the BASE prices and tariffs
         # of the oilseed-chain commodities. A plain cache built on first use
@@ -1259,8 +1502,8 @@ class MarketModule:
         try:
             _key = (tuple(round(float(self.world_prices_base.get(c, 0.0)), 9) for c in _cc),
                     tuple(map(tuple, self.tariffs.reindex(columns=_cc).fillna(0.0).round(9).values.tolist())),
-                    tuple(round(float((getattr(self, "_eu_aligned_use", None) or {}).get(c, 0.0)), 6)
-                          for c in ("RAPE", "SUNF", "SOYA")))
+                    tuple(round(float((getattr(self, "_eu_aligned_use", None) or {}).get(rg, {}).get(c, 0.0)), 6)
+                          for rg in self.EU for c in ("RAPE", "SUNF", "SOYA")))
         except Exception:
             _key = None
         cached = getattr(self, "_crush_cache", None)
@@ -1268,44 +1511,63 @@ class MarketModule:
             return cached
         self._crush_cache_key = _key
         out = {}
-        try:
-            import json as _json
-            from pathlib import Path as _P
-            f = _P(__file__).resolve().parents[2] / "capri_data" / "2017" / "market" / "crushing_parameters.json"
-            raw = _json.load(open(f))["parameters"]
-            base_dom = self.domestic_prices(self.world_prices_base)
-            for key, v in raw.items():
-                r, s = key.split("|")
-                if r not in self.regions or s not in self.CRUSH_CHAINS or v.get("elasticity") is None:
-                    continue
-                yo, yc = float(v["oil_yield"]), float(v["cake_yield"])
-                if not (0.1 <= yo <= 0.95 and 0.1 <= yc <= 0.95 and yo + yc <= 1.05):
-                    continue
-                o, c = self.CRUSH_CHAINS[s]
-                q0 = float(v["crush_kt"])
-                _ov = (getattr(self, "_crush_q0_override", None) or {}).get((r, s))
-                if _ov is not None:
-                    q0 = float(_ov)       # bilateral market: CAPRI's cake production of the market year / yield
-                if r == "EU27":
-                    # EU base crush = CAPRI's crush SHARE of EU seed use x the
-                    # market's own EU base seed use. With all regions modelled
-                    # this equals CAPRI's crush exactly; with a subset it scales
-                    # consistently (on 12 regions EU rapeseed use is 581 kt -
-                    # a fixed 20,955 kt crush made non-crush use negative).
-                    share = float(v.get("crush_share_of_use") or 0.0)
-                    # the ALIGNED EU seed use: base_consumption is later divided
-                    # by the calibration factor (EU exemption), which shifted the
-                    # base crush after calibration and moved base prices
-                    _al = getattr(self, "_eu_aligned_use", None) or {}
-                    b = float(_al.get(s, self.base_consumption.at["EU27", s] if s in self.base_consumption.columns else 0.0))
-                    if share > 0 and b > 0:
-                        q0 = share * b
-                ps, po, pc = (float(base_dom.at[r, x]) for x in (s, o, c))
-                gross = yo * po + yc * pc               # CAPRI: seed price + margin
-                out[(r, s)] = dict(q0=q0, yo=yo, yc=yc, eps=float(v["elasticity"]),
-                                   m0=gross - ps, gross=max(gross, 1.0))
-        except Exception:
-            out = {}
+        from pathlib import Path as _P
+        f = _P(__file__).resolve().parents[2] / "capri_data" / "2017" / "market" / "crushing_parameters.csv"
+        if not f.exists():
+            raise FileNotFoundError(f"{f} is missing (python tools/build/build_crushing_parameters.py)")
+        _t = pd.read_csv(f, keep_default_na=False)
+        raw = {f"{x['region']}|{x['seed']}": {k: (float(x[k]) if x[k] != "" else None)
+                                              for k in ("crush_kt", "oil_yield", "cake_yield", "elasticity",
+                                                        "crush_share_of_use")}
+               for x in _t.to_dict("records")}
+        base_dom = self.domestic_prices(self.world_prices_base)
+        for key, v in raw.items():
+            r, s = key.split("|")
+            if (r not in self.regions and not (r == "EU27" and self.eu_blocks)) or s not in self.CRUSH_CHAINS:
+                continue
+            yo, yc = float(v["oil_yield"]), float(v["cake_yield"])
+            o, c = self.CRUSH_CHAINS[s]
+            q0 = float(v["crush_kt"])
+            _ov = (getattr(self, "_crush_q0_override", None) or {}).get((r, s))
+            if _ov is not None:
+                q0 = float(_ov)       # bilateral market: CAPRI's cake production of the market year / yield
+            if r == "EU27" and self.eu_blocks:
+                # CAPRI's two trade blocks: the EU parameters for each block, its crush share of seed use from
+                # CAPRI's member-state processing and use (eu_ms_balance_2030.csv); base crush = share x the
+                # block's aligned seed use (below)
+                tb = self._eu_ms_balance()
+                for rb in self.EU:
+                    k = (rb, s)
+                    if k not in tb.index or float(tb.at[k, "use_kt"]) <= 0:
+                        continue
+                    shb = float(tb.at[k, "proc_kt"]) / float(tb.at[k, "use_kt"])
+                    _al = (getattr(self, "_eu_aligned_use", None) or {}).get(rb, {})
+                    bb = float(_al.get(s, self.base_consumption.at[rb, s] if s in self.base_consumption.columns else 0.0))
+                    if shb <= 0 or bb <= 0:
+                        continue
+                    ps, po, pc = (float(base_dom.at[rb, x]) for x in (s, o, c))
+                    gross = yo * po + yc * pc
+                    out[(rb, s)] = dict(q0=shb * bb, yo=yo, yc=yc, eps=float(v["elasticity"]),
+                                        m0=gross - ps, gross=max(gross, 1.0))
+                continue
+            if r == "EU27":
+                # EU base crush = CAPRI's crush SHARE of EU seed use x the
+                # market's own EU base seed use. With all regions modelled
+                # this equals CAPRI's crush exactly; with a subset it scales
+                # consistently (on 12 regions EU rapeseed use is 581 kt -
+                # a fixed 20,955 kt crush made non-crush use negative).
+                share = float(v.get("crush_share_of_use") or 0.0)
+                # the ALIGNED EU seed use: base_consumption is later divided
+                # by the calibration factor (EU exemption), which shifted the
+                # base crush after calibration and moved base prices
+                _al = (getattr(self, "_eu_aligned_use", None) or {}).get("EU27", {})
+                b = float(_al.get(s, self.base_consumption.at["EU27", s] if s in self.base_consumption.columns else 0.0))
+                if share > 0 and b > 0:
+                    q0 = share * b
+            ps, po, pc = (float(base_dom.at[r, x]) for x in (s, o, c))
+            gross = yo * po + yc * pc               # CAPRI: seed price + margin
+            out[(r, s)] = dict(q0=q0, yo=yo, yc=yc, eps=float(v["elasticity"]),
+                               m0=gross - ps, gross=max(gross, 1.0))
         self._crush_cache = out
         return out
 
@@ -1321,16 +1583,16 @@ class MarketModule:
         cp = self._crush_params()
         tot = {}
         for (r, s), p in cp.items():
-            if r != "EU27":
+            if r not in self.EU:
                 continue
             o, c = self.CRUSH_CHAINS[s]
-            tot[o] = tot.get(o, 0.0) + p["q0"] * p["yo"]
-            tot[c] = tot.get(c, 0.0) + p["q0"] * p["yc"]
-        for prod, v in tot.items():
+            tot[(r, o)] = tot.get((r, o), 0.0) + p["q0"] * p["yo"]
+            tot[(r, c)] = tot.get((r, c), 0.0) + p["q0"] * p["yc"]
+        for (r, prod), v in tot.items():
             if prod in self.base_production.columns and v > 0:
-                self.base_production.at["EU27", prod] = v
-                if prod in base_supply.columns:
-                    base_supply.at["EU27", prod] = v
+                self.base_production.at[r, prod] = v
+                if prod in base_supply.columns and r in base_supply.index:
+                    base_supply.at[r, prod] = v
         return base_supply
 
     def crush_quantities(self, dom_prices) -> dict:
@@ -1347,12 +1609,59 @@ class MarketModule:
         _ri = {r: i for i, r in enumerate(dom_prices.index)}
         _ci = {c: j for j, c in enumerate(dom_prices.columns)}
         _v = dom_prices.values
-        for (r, s), p in self._crush_params().items():
+        cp = self._crush_params()
+        dm = {}
+        for (r, s), p in cp.items():
             o, c = self.CRUSH_CHAINS[s]
             i = _ri[r]
             m = p["yo"] * float(_v[i, _ci[o]]) + p["yc"] * float(_v[i, _ci[c]]) - float(_v[i, _ci[s]])
-            out[(r, s)] = max(0.01 * p["q0"], p["q0"] * (1.0 + p["eps"] * (m - p["m0"]) / p["gross"]))
+            dm[(r, s)] = m - p["m0"]
+        Hn = (self._proc_nq_params() or {}).get("H", {})
+        for (r, s), p in cp.items():
+            Hr = Hn.get(r, {})
+            if (s, s) in Hr and Hr[(s, s)] > 0:
+                # CAPRI ProcNQ_: crush moves by the Hessian times the change of every oilseed's crushing margin
+                q = p["q0"] + sum(Hr.get((s, y), 0.0) * dm[(r, y)] for y in self.CRUSH_CHAINS if (r, y) in dm)
+            else:
+                q = p["q0"] * (1.0 + p["eps"] * dm[(r, s)] / p["gross"])
+            out[(r, s)] = max(0.01 * p["q0"], q)
         return out
+
+    def _region_supply_elas(self, regions, cols, el) -> np.ndarray:
+        """regions x cols own-price supply elasticities: CAPRI's per non-EU region (capri_data/2017/market/
+        supply_elas_region.csv), else 0 - where CAPRI has no p_elasSupp for a region and product its supply Hessian
+        p_hessNQSupp has no term (arm/market1.gms), so the supply does not respond to the price. Until 23 October 2026
+        those cells took the product's EU median or the Armington eps column (no CAPRI source; PROXY_AUDIT S176
+        note). The processed products' supply is set by their blocks (crushing, dairy, biofuels) where CAPRI has
+        them. EU rows: el (their supply comes from the supply models)."""
+        key = (tuple(regions), tuple(cols), tuple(np.round(el.reindex(cols).to_numpy(dtype=float), 12)))
+        cache = getattr(self, "_reg_elas_cache", None)
+        if cache is not None and cache[0] == key:
+            return cache[1]
+        EV = np.tile(el.reindex(cols).to_numpy(dtype=float), (len(regions), 1))
+        if getattr(self, "use_region_supply_elas", True):
+            eu_ = set(self.EU)
+            for i_, r_ in enumerate(regions):
+                if r_ not in eu_:
+                    EV[i_, :] = 0.0
+            from pathlib import Path as _P
+            f = _P(__file__).resolve().parents[2] / "capri_data" / "2017" / "market" / "supply_elas_region.csv"
+            if f.exists():
+                ri = {r: i for i, r in enumerate(regions)}
+                ci = {c: j for j, c in enumerate(cols)}
+                eu = set(self.EU)
+                for r_, c_, e_ in pd.read_csv(f)[["region", "commodity", "elasticity"]].itertuples(index=False):
+                    if r_ in ri and c_ in ci and r_ not in eu:
+                        EV[ri[r_], ci[c_]] = float(e_)
+        self._reg_elas_cache = (key, EV)
+        return EV
+
+    #: non-EU supply with CAPRI's own-price elasticity per region (True) or one value per product for every region
+    #: (False: CAPRI's EU median p_elasSupp, else the Armington eps; the market before 20 October 2026)
+    use_region_supply_elas = setting("market.use_region_supply_elas")
+    #: CAPRI's crushing margin (ProcMargO_): oil and cake at their producer prices, the seed at its Armington price
+    #: (False: all three at Armington price ratios, the market before 20 October 2026)
+    crush_margin_producer_prices = setting("market.crush_margin_producer_prices")
 
     def supply_response(
         self,
@@ -1363,7 +1672,8 @@ class MarketModule:
     ) -> pd.DataFrame:
         """
         Supply quantities by region and commodity (1000 t).
-        If exogenous_supply is given (from supply module), use it for EU27.
+        If exogenous_supply is given (from supply module, one row per country), use it for EU27 (or the EU
+        market regions) and, for Norway's rows, for its own market region NOR (SUP_NONEU_REGIONS).
         Otherwise, apply supply elasticity to price signal.
 
         region_ratio (bilateral market): each region's own market price relative to base, region x commodity; the
@@ -1371,18 +1681,37 @@ class MarketModule:
         anticipated against the EU price farmers last saw, and crushing and the dairy blocks see the
         regional prices (crush_dom: the price levels the crushers face).
         """
+        # the supply models' output: the EU's countries, and the non-EU market regions with supply models (Norway)
+        exo_all = exogenous_supply
+        exogenous_supply, exo_sup = self._split_supply(exo_all)
+        self._sup_active = set(exo_sup)
+        sup_cols = {}
         if exogenous_supply is not None:
             # Only override the EU27 row with the supply-module output; keep
             # all other trade regions (USA, BRA, CHN, ROW, ...) at their
             # calibrated base production. Otherwise global supply collapses to
             # the EU subset and excess demand explodes.
             supply = self.base_production.copy()
+            _ex = (self.eu_rows(exogenous_supply) if self.eu_blocks
+                   else pd.DataFrame([exogenous_supply.sum(axis=0)], index=["EU27"]))
+            # Norway (CAPRI RMSSUP outside the EU, K56): its market supply is its supply models' output, as the EU's
+            for reg, ser in exo_sup.items():
+                if reg not in supply.index:
+                    continue
+                for comm, v in ser.items():
+                    if comm in supply.columns and float(v) > 1e-6:
+                        supply.at[reg, comm] = float(v)
+                        sup_cols.setdefault(reg, set()).add(comm)
             for comm in exogenous_supply.columns:
                 if comm not in supply.columns:
                     continue
-                eu_val = exogenous_supply[comm].sum()
-                if eu_val > 0 and "EU27" in supply.index:
-                    supply.at["EU27", comm] = eu_val
+                for reg in self.EU:
+                    eu_val = float(_ex.at[reg, comm]) if reg in _ex.index else 0.0
+                    # 1e-6 (1 kg): solver noise in regions that do not grow the product is not supply. In a run on a
+                    # subset of regions (tests) a product none of them grows came back as 1e-15 and replaced the EU's
+                    # base supply, and the EU price ran to 1e7 (K16)
+                    if eu_val > 1e-6 and reg in supply.index:
+                        supply.at[reg, comm] = eu_val
         else:
             supply = self.base_production.copy()
 
@@ -1393,50 +1722,135 @@ class MarketModule:
         # 0.55-0.76. Commodities not in the file keep the eps fallback.
         real_supply = getattr(self, "_real_supply_elas", None)
         if real_supply is None:
-            real_supply = {}
-            try:
-                from capri_mod.data.loaders import resolve_data_file
-                import json as _json
-                _b = resolve_data_file("capri_data", "sources/arm")
-                _f = resolve_data_file(_b, "supply_elas_eu_all.json")
-                real_supply = _json.loads(open(_f).read())
-            except Exception:
-                real_supply = {}
+            import json as _json
+            from pathlib import Path as _P
+            # (was resolved from the working directory, and a failure fell back silently to the eps column)
+            _f = _P(__file__).resolve().parents[2] / "capri_data" / "sources" / "arm" / "supply_elas_eu_all.json"
+            if not _f.exists():                             # no silent fallback (23 October 2026)
+                raise FileNotFoundError("capri_data/sources/arm/supply_elas_eu_all.json (CAPRI's EU p_elasSupp) is missing")
+            real_supply = _json.loads(open(_f).read())
             self._real_supply_elas = real_supply
 
-        eps = self.armington["eps"] if "eps" in self.armington.columns else pd.Series(0.25, index=self.commodities)
+        if "eps" not in self.armington.columns:            # no stand-in (removed 23 October 2026: 0.25)
+            raise ValueError("armington_params.csv has no eps column")
+        eps = self.armington["eps"]
 
         # Vectorised over commodities; arithmetic unchanged.
         ratio = pd.Series({
-            c: float(world_prices.get(c, 200.0))
-               / max(float(self.world_prices_base.get(c, 200.0)), 0.01)
+            c: float(world_prices.get(c, self.world_prices_base[c]))
+               / max(float(self.world_prices_base[c]), 0.01)
             for c in self.commodities})
         el = pd.Series({
-            c: (float(real_supply[c]) if c in real_supply
-                else (float(eps.get(c, 0.25)) if hasattr(eps, "get") else 0.25))
+            c: (float(real_supply[c]) if c in real_supply else float(eps[c]))
             for c in self.commodities})
-        factor = ratio.pow(el)
         cols = [c for c in self.commodities if c in supply.columns]
+        # each non-EU region's own-price elasticity from CAPRI's market model (p_elasSupp "CAL" of its CAPRI regions,
+        # production-weighted; tools/build/build_supply_elas_nonEU.py; KNOWN_ISSUES K54-3); the per-product value above
+        # where CAPRI has none (processed products) and for the EU rows (their supply comes from the supply models)
+        EV = self._region_supply_elas(list(supply.index), cols, el)
         if region_ratio is None:
-            supply[cols] = supply[cols].mul(factor[cols], axis=1).clip(lower=0.0)
+            fac = ratio.reindex(cols).to_numpy(dtype=float)[None, :] ** EV
+            supply[cols] = np.maximum(supply[cols].to_numpy(dtype=float) * fac, 0.0)
         else:
             # in arrays (pandas arithmetic here was a sizeable share of each market evaluation; same values)
             rr = region_ratio.reindex(index=supply.index, columns=cols).to_numpy(dtype=float)
             rr = np.maximum(np.where(np.isnan(rr), 1.0, rr), 1e-6)
             ev = el.reindex(cols).to_numpy(dtype=float)
-            fac = rr ** ev[None, :]
-            if "EU27" in supply.index:
-                ie_ = list(supply.index).index("EU27")
-                seen = getattr(self, "_eu_price_seen", None)
+            fac = rr ** EV
+            # the EU market regions' supply before the price response (the supply models' latest output): EU27, or
+            # each of CAPRI's two trade blocks
+            s_exo_eu = ({r_: supply.loc[r_, cols].astype(float).copy() for r_ in self.EU if r_ in supply.index}
+                        if exogenous_supply is not None else None)
+            _sv_eu = {}
+            seen_all = getattr(self, "_eu_price_seen", None)
+            for reg in self.EU:
+                if reg not in supply.index:
+                    continue
+                ie_ = list(supply.index).index(reg)
+                # the price the supply models last saw: one Series (EU), or regions x commodities (EU market regions)
+                seen = (seen_all.loc[reg] if isinstance(seen_all, pd.DataFrame) and reg in seen_all.index
+                        else (seen_all if isinstance(seen_all, pd.Series) else None))
                 sv = (np.maximum(np.nan_to_num(seen.reindex(cols).to_numpy(dtype=float), nan=1.0), 0.2)
                       if seen is not None else np.ones(len(cols)))
+                # products the EU supplies through CAPRI's market supply function, not a supply-model activity
+                # (other vegetable oils): their EU supply responds to the EU price against base, not against the
+                # price the supply models last saw (that anticipation would vanish at convergence and hold them at base)
+                for j, c in enumerate(cols):
+                    if c in self.EU_MARKET_SUPPLY:
+                        sv[j] = 1.0
                 fac[ie_] = (rr[ie_] / sv) ** ev
+                _sv_eu[reg] = sv
+            # the non-EU market regions with supply models (Norway): the products of their supply models are
+            # anticipated against the prices those models last saw (own market's prices), with the region's own
+            # CAPRI elasticity (p_elasSupp of NO000000, supply_elas_region.csv); the products without a supply-model
+            # activity (fish, ...) keep CAPRI's market supply function at the region's price against base
+            seen_sup = getattr(self, "_sup_price_seen", None) or {}
+            _sv_sup = {}
+            for reg, sc_ in sup_cols.items():
+                i_ = list(supply.index).index(reg)
+                seen = seen_sup.get(reg)
+                sv = (np.maximum(np.nan_to_num(seen.reindex(cols).to_numpy(dtype=float), nan=1.0), 0.2)
+                      if seen is not None else np.ones(len(cols)))
+                _sv_sup[reg] = sv
+                for j, c in enumerate(cols):
+                    if c in sc_:
+                        fac[i_, j] = (rr[i_, j] / sv[j]) ** EV[i_, j]
+            s_exo_sup = {reg: supply.loc[reg, cols].astype(float).copy() for reg in sup_cols}
             supply[cols] = np.maximum(supply[cols].to_numpy(dtype=float) * fac, 0.0)
+            # CAPRI's market supply function for the supply models' products (arm/market_model.gms ProdNQ_, the
+            # Hessian measured on the supply models at the baseline, model._market_supply_hessian): linear in the
+            # prices, through the supply models' latest output at the prices they saw
+            # (arm/simu_calibration_to_supply.gms:360-368), with the cross-price terms; it replaces the own-price
+            # anticipation for those products
+            # one Hessian for EU27, or one per trade block (the sum of its member states', CAPRIModel._split_hessian)
+            _hs = getattr(self, "supply_hessian", None) or {}
+            _hreg = {"EU27": _hs.get("eu")} if not self.eu_blocks else dict(_hs.get("blocks") or {})
+            _hcache = getattr(self, "_hess_cache", None)
+            if not isinstance(_hcache, dict):
+                _hcache = {}
+            for reg_, H in _hreg.items():
+                if H is None or s_exo_eu is None or not len(H) or reg_ not in s_exo_eu or reg_ not in _sv_eu:
+                    continue
+                ie_ = list(supply.index).index(reg_)
+                ck = (id(H), tuple(cols), tuple(exogenous_supply.columns))
+                hc = _hcache.get(reg_)
+                if hc is None or hc[0] != ck:
+                    ex_cols = set(exogenous_supply.columns)
+                    xs = [x for x in H.index if x in cols and x in ex_cols]
+                    hc = (ck, xs, [cols.index(x) for x in xs],
+                          H.reindex(index=xs, columns=cols).fillna(0.0).to_numpy(dtype=float))
+                    _hcache[reg_] = hc
+                _, xs, xj, Hm = hc
+                if xs:
+                    s0 = s_exo_eu[reg_].to_numpy(dtype=float)[xj]
+                    q = s0 + Hm @ (rr[ie_] - _sv_eu[reg_])
+                    keep = s0 > 1e-6
+                    vals = supply.loc[reg_, cols].to_numpy(dtype=float).copy()
+                    vals[np.asarray(xj)[keep]] = np.maximum(q[keep], 0.0)
+                    supply.loc[reg_, cols] = vals
+            self._hess_cache = _hcache
+            # the same market supply function for Norway's supply models (its own Hessian, measured on its models)
+            for reg, Hs in ((getattr(self, "supply_hessian", None) or {}).get("sup") or {}).items():
+                if reg not in sup_cols or Hs is None or not len(Hs):
+                    continue
+                i_ = list(supply.index).index(reg)
+                xs = [x for x in Hs.index if x in cols and x in sup_cols[reg]]
+                if not xs:
+                    continue
+                xj = [cols.index(x) for x in xs]
+                Hm = Hs.reindex(index=xs, columns=cols).fillna(0.0).to_numpy(dtype=float)
+                s0 = s_exo_sup[reg].to_numpy(dtype=float)[xj]
+                q = s0 + Hm @ (rr[i_] - _sv_sup[reg])
+                keep = s0 > 1e-6
+                vals = supply.loc[reg, cols].to_numpy(dtype=float).copy()
+                vals[np.asarray(xj)[keep]] = np.maximum(q[keep], 0.0)
+                supply.loc[reg, cols] = vals
         # CRUSHING: oil and cake supply = crush x yields (CAPRI ProcO_, Leontief)
         cp = self._crush_params()
         if cp:
-            crush = self.crush_quantities(crush_dom if crush_dom is not None else
-                                          self.domestic_prices(world_prices, getattr(self, "_trade_scenario_now", None)))
+            _cpn = getattr(self, "_crush_prices_now", None)
+            crush = self.crush_quantities(_cpn if _cpn is not None else (crush_dom if crush_dom is not None else
+                                          self.domestic_prices(world_prices, getattr(self, "_trade_scenario_now", None))))
             done = set()
             for (r, s), q in crush.items():
                 o, c = self.CRUSH_CHAINS[s]
@@ -1449,9 +1863,13 @@ class MarketModule:
         # DAIRY (CAPRI DairyNQ_, ProcMargM_, FatsProtBal_): EU raw milk is delivered to dairies, not
         # traded on the world milk market; the EU supply of butter, skimmed milk powder, cheese and
         # whey comes from the dairy block at the EU product prices and the milk delivered.
-        if self._dairy_params() and "EU27" in supply.index:
-            S = float(exogenous_supply["MILK"].sum()) if (exogenous_supply is not None and "MILK" in exogenous_supply.columns) \
-                else float(self.base_production.at["EU27", "MILK"])
+        if self._dairy_params() and all(r in supply.index for r in self.EU):
+            if exogenous_supply is not None and "MILK" in exogenous_supply.columns and len(exogenous_supply):
+                Sr = ({r: float(v) for r, v in self.eu_rows(exogenous_supply[["MILK"]])["MILK"].items()} if self.eu_blocks
+                      else {"EU27": float(exogenous_supply["MILK"].sum())})
+            else:
+                Sr = {r: float(self.base_production.at[r, "MILK"]) for r in self.EU}
+            S = sum(Sr.values())
             S0 = float(getattr(self, "_dairy_S0", None) or S)
             _m0 = getattr(self, "_dairy_S0_ms", None) or {}
             _m = self._milk_by_ms(exogenous_supply)
@@ -1459,11 +1877,12 @@ class MarketModule:
                    else (S / S0 if S0 > 0 else 1.0))
             res = self.dairy_block(self._dairy_eu_prices(world_prices), _mr)
             if res is not None:
-                supply.at["EU27", "MILK"] = S
-                for c, q in res["market_supply"].items():
-                    if c in supply.columns:
-                        supply.at["EU27", c] = max(0.0, q)
-                self._eu_milk_supply_now = S
+                for r in self.EU:
+                    supply.at[r, "MILK"] = Sr[r]
+                    for c, q in (res["market_supply_reg"].get(r) or {}).items():
+                        if c in supply.columns:
+                            supply.at[r, c] = max(0.0, q)
+                self._eu_milk_supply_now = dict(Sr)
                 self._dairy_last = res
         # NON-EU DAIRY (dairy Stage 4): each trade region's butter, SMP, cheese and whey from CAPRI's dairy
         # block with CAPRI's raw milk supply function, at the region's domestic prices; the market's base
@@ -1476,6 +1895,7 @@ class MarketModule:
                 d0 = self.domestic_prices(self.world_prices_base)
                 self._dom0_cache = d0
             wl = {}
+            self._sup_milk_now = {}
             for r, prm in wpar.items():
                 if r not in supply.index:
                     continue
@@ -1485,7 +1905,18 @@ class MarketModule:
                 else:
                     tr = {k: float(dom.at[r, c]) / float(d0.at[r, c]) if float(d0.at[r, c]) > 0 else 1.0
                           for k, c in self.DAIRY_TRADED.items()}
-                res_r = self._dairy_solve(prm, tr, None, 1.0, r)
+                # Norway (RMSSUP): raw milk delivered from its supply models (CAPRI market_model.gms ProdNQ_ NOTE2:
+                # milk production in RMSSUP is covered by the supply models), its block's FMIL index from its herds;
+                # the other regions: CAPRI's raw milk supply function
+                mr_ = None
+                m0_ = (getattr(self, "_sup_milk0", None) or {}).get(r)
+                if r in exo_sup and "MILK" in exo_sup[r].index and m0_:
+                    m_now = float(exo_sup[r]["MILK"])
+                    mr_ = m_now / m0_
+                    supply.at[r, "MILK"] = m_now
+                    self._sup_milk_now[r] = m_now
+                fi_ = float((getattr(self, "_fmil_index_sup", None) or {}).get(r, 1.0)) if mr_ is not None else 1.0
+                res_r = self._dairy_solve(prm, tr, mr_, fi_, r)
                 wl[r] = res_r
                 for c, q in res_r["market_supply"].items():
                     q0 = res_r["market_supply0"][c]
@@ -1523,19 +1954,17 @@ class MarketModule:
         """
         Consumption quantities by region and commodity (1000 t).
 
-        Faithful to CAPRI's Generalised Leontief demand structure in that
-        quantity responds to own price AND to per-capita income (Engel effect):
-            QD = QD0 × (P/P0)^eta × (Y/Y0)^income_elas
-        where the income term is the demand-side counterpart of the GL
-        expenditure function's dependence on income per capita. Cross-price
-        effects are captured through the Armington layer.
+        Each block of use has its own response: feed (non-EU p_ElasFeed, EU feed bulks), crushing, biofuel
+        feedstocks, dairy products, and human consumption from CAPRI's Generalised Leontief system per behavioural
+        region (gl_food_ratio; own, cross-price and income terms) on CAPRI's HCON share of use. The rest of use
+        (processing, industrial use, losses) keeps QD0 (P/P0)^eta, as all of food did before
+        the GL (food_demand_gl False).
         """
         demand = pd.DataFrame(index=self.regions, columns=self.commodities, dtype=float)
 
-        # Per-capita income proxy from GDP index (relative to base = 100)
-        income_ratio = getattr(self, "_income_ratio", None)
-        if income_ratio is None:
-            income_ratio = 1.0
+        # No income change between a scenario and its baseline (comparative static, as CAPRI's scenario runs): the
+        # GL system's income term stays at the baseline's (ir = 1). An Engel-elasticity proxy (0.1 / 0.5 / 0.3 by
+        # group) applied to a GDP index was here; nothing ever set that index, so it never acted: removed (19 Oct 2026).
 
         # Real CAPRI demand elasticities (fao_agg p_demandElas), EU-average
         # own-price, mapped to model commodity codes. Overrides the generic eta.
@@ -1561,18 +1990,17 @@ class MarketModule:
             self._real_demand_elas = real_dem
 
         # Vectorised; arithmetic unchanged.
+        _noeta = [c for c in self.commodities if c not in real_dem and c not in self.armington.index]
+        if _noeta:
+            raise ValueError(f"no demand elasticity for market products {_noeta} (armington_params.csv eta)")
         eta = pd.Series({
-            c: float(real_dem[c]) if c in real_dem else
-               (float(self.armington.at[c, "eta"])
-                if c in self.armington.index else -0.25)
+            c: float(real_dem[c]) if c in real_dem else float(self.armington.at[c, "eta"])
             for c in self.commodities})
-        inc = pd.Series({c: float(self._income_elasticity(c))
-                         for c in self.commodities})
         cal = pd.Series({c: float(self._demand_cal_factor(c))
                          for c in self.commodities})
-        wp0 = pd.Series({c: max(float(self.world_prices_base.get(c, 200.0)), 0.01)
+        wp0 = pd.Series({c: max(float(self.world_prices_base[c]), 0.01)
                          for c in self.commodities})
-        fallback = pd.Series({c: float(world_prices.get(c, 200.0))
+        fallback = pd.Series({c: float(world_prices.get(c, self.world_prices_base[c]))
                               for c in self.commodities})
 
         dp = domestic_prices.reindex(index=self.regions, columns=self.commodities)
@@ -1600,7 +2028,8 @@ class MarketModule:
             ref = dom0.reindex(index=self.regions, columns=self.commodities)
             ref = ref.where(ref > 0).fillna(pd.DataFrame({c: [wp0[c]] * len(self.regions) for c in self.commodities},
                                                          index=self.regions))
-            base = self.base_consumption.reindex(index=self.regions, columns=self.commodities).fillna(100.0)
+            # a cell without base use has none (an invented 100 kt was used here; never hit with CAPRI's data)
+            base = self.base_consumption.reindex(index=self.regions, columns=self.commodities).fillna(0.0)
             _rc = (dom0, _bv.copy(), wp0, ref, base, list(self.base_consumption.index),
                    list(self.base_consumption.columns))
             self._demand_ref_cache = _rc
@@ -1608,8 +2037,7 @@ class MarketModule:
         price_ratio = dp / ref
 
         demand = (base.mul(cal, axis=1)
-                      * price_ratio.pow(eta, axis=1)
-                      * inc.rpow(float(income_ratio)))
+                      * price_ratio.pow(eta, axis=1))
         # NON-EU FEED DEMAND responds to feed prices (CAPRI p_ElasFeed): the
         # feed part of each region's use of a feed cereal or cake follows
         # prod_j (P_j / P0_j)^eps_j over the model's feed commodities (own and
@@ -1627,8 +2055,16 @@ class MarketModule:
         DPv = dp.values.astype(float)
         CAL = cal.reindex(self.commodities).values.astype(float)
         ETA = eta.reindex(self.commodities).values.astype(float)
-        INC = inc.reindex(self.commodities).values.astype(float)
-        ir = float(income_ratio)
+        ir = 1.0
+        # GL FOOD DEMAND (CAPRI arm/market_model.gms:826-916): the human-consumption part of each region's use
+        # (CAPRI's HCON share of use) follows CAPRI's GL system with its cross-price and income terms; the blocks
+        # below keep their own response for the other parts. OLDF is the factor each block applies to the part it
+        # treats as food, SH the share of use the blocks give a response of their own (feed, crushing, biofuels);
+        # the GL replaces OLDF on min(HCON share, 1 - SH) of use at the end.
+        with np.errstate(divide="ignore", invalid="ignore"):
+            OLDF = np.power(PR, ETA[None, :])
+        SH = np.zeros_like(PR)
+        GLR, HS = self.gl_food_ratio(PR, ref.values.astype(float), ir, D0c=Bv * CAL[None, :])
         fdp = self._feed_demand_params()
         if fdp:
             dom0 = getattr(self, "_dom0_cache", None)
@@ -1647,11 +2083,13 @@ class MarketModule:
                     if jj is not None and float(D0[i, jj]) > 0:
                         ft *= (float(DPv[i, jj]) / float(D0[i, jj])) ** e
                 b = float(Bv[i, j]) * float(CAL[j])
-                food = float(PR[i, j]) ** float(ETA[j]) * ir ** float(INC[j])
+                food = float(PR[i, j]) ** float(ETA[j])
                 D[i, j] = b * ((1.0 - sh) * food + sh * ft)
+                SH[i, j] = sh
         cp = self._crush_params()
         if cp:
-            crush = self.crush_quantities(dp)
+            _cpn = getattr(self, "_crush_prices_now", None)
+            crush = self.crush_quantities(_cpn if _cpn is not None else dp)
             for (r, sd), q in crush.items():
                 i, j = R.get(r), Cc.get(sd)
                 if i is None or j is None:
@@ -1659,6 +2097,8 @@ class MarketModule:
                 q0 = cp[(r, sd)]["q0"]; b = float(Bv[i, j])
                 f = float(D[i, j]) / b if b > 0 else 0.0
                 D[i, j] = max(0.0, (b - q0) * f + float(CAL[j]) * q0 + (q - q0))
+                if b > 0:
+                    SH[i, j] += q0 / b
         eu_eta = getattr(self, "_eu_eta_override", None)
         if eu_eta is None:
             eu_eta = {}
@@ -1671,77 +2111,126 @@ class MarketModule:
             except Exception:
                 eu_eta = {}
             self._eu_eta_override = eu_eta
-        ie = R.get("EU27")
-        if eu_eta and ie is not None:
-            for _c, _e in eu_eta.items():
-                j = Cc.get(_c)
-                if j is not None:
-                    D[ie, j] = (float(Bv[ie, j]) * float(CAL[j]) * float(PR[ie, j]) ** _e
-                                * ir ** float(INC[j]))
-        # EU FEED (CAPRI feedBlkPrice_, feedShareEqu_): the member states' feed bulks (cereals FCER, protein-rich
-        # feed FPRO) follow their herds and rations (_feed_bulk_index, set from the supply models), and each
-        # bulk is split into products with a CES on their prices (rho 6). The feed part of EU use of each product
-        # (CAPRI's 2030 feed share) follows it; the rest keeps its food response.
-        # Written as a correction of the row (feed part: bulk use instead of the food response), so that terms
-        # added before (oilseed crushing, whose seeds are also fed whole: CAPRI's FOTH bulk) are kept; the same
-        # as d0 ((1 - sh) rest + sh feed / f0) for the other rows (Sprint 9h).
-        # The food response of the EU's use per commodity is kept for the residual feeds' output (MaprFeed_).
+        ie = R.get(self.EU[0])                         # the first EU market region (EU27 with one)
         fb = self._feed_bulk_params()
         self._eu_food_ratio = {}
-        if ie is not None:
+        self._eu_feed_now = None
+        self._eu_feed_now_reg = {}
+        for _reg in self.EU:
+            ie = R.get(_reg)
+            if ie is None:
+                continue
+            if eu_eta:
+                for _c, _e in eu_eta.items():
+                    j = Cc.get(_c)
+                    if j is not None:
+                        D[ie, j] = (float(Bv[ie, j]) * float(CAL[j]) * float(PR[ie, j]) ** _e
+                                   )
+                        OLDF[ie, j] = float(PR[ie, j]) ** _e
+            # EU FEED (CAPRI feedBlkPrice_, feedShareEqu_): the member states' feed bulks (cereals FCER, protein-rich
+            # feed FPRO) follow their herds and rations (_feed_bulk_index, set from the supply models), and each
+            # bulk is split into products with a CES on their prices (rho 6). The feed part of EU use of each product
+            # (CAPRI's 2030 feed share) follows it; the rest keeps its food response.
+            # Written as a correction of the row (feed part: bulk use instead of the food response), so that terms
+            # added before (oilseed crushing, whose seeds are also fed whole: CAPRI's FOTH bulk) are kept; the same
+            # as d0 ((1 - sh) rest + sh feed / f0) for the other rows (Sprint 9h).
+            # The food response of the EU's use per commodity is kept for the residual feeds' output (MaprFeed_).
+            # Per EU market region: its member states' bulks at the region's prices.
+            fr = self._eu_food_ratio.setdefault(_reg, {})
             for c in (self._feed_byproduct_params().get("parents") or ()):
                 j = Cc.get(c)
                 if j is not None:
-                    self._eu_food_ratio[c] = float(PR[ie, j]) ** float(eu_eta.get(c, ETA[j])) * ir ** float(INC[j])
-        self._eu_feed_now = None
-        if fb and ie is not None:
-            feed = self.eu_feed_use({c: float(PR[ie, Cc[c]]) for c in fb["feed0"] if c in Cc})
-            self._eu_feed_now = feed
-            for c, sh in fb["share"].items():
+                    fr[c] = float(PR[ie, j]) ** float(eu_eta.get(c, ETA[j]))
+            if fb:
+                f0r = fb["feed0_reg"].get(_reg, {})
+                feed = self.eu_feed_use({c: float(PR[ie, Cc[c]]) for c in fb["feed0"] if c in Cc},
+                                        region=_reg if self.eu_blocks else None)
+                self._eu_feed_now_reg[_reg] = feed
+                if not self.eu_blocks:
+                    self._eu_feed_now = feed
+                for c, sh in fb["share_reg"].get(_reg, {}).items():
+                    j = Cc.get(c)
+                    f0 = f0r.get(c, 0.0)
+                    if j is None or f0 <= 0:
+                        continue
+                    d0 = float(Bv[ie, j]) * float(CAL[j])
+                    if d0 <= 0:
+                        continue
+                    rest = float(PR[ie, j]) ** float(eu_eta.get(c, ETA[j]))
+                    D[ie, j] = float(D[ie, j]) + d0 * sh * (feed.get(c, f0) / f0 - rest)
+                    SH[ie, j] += sh
+            # RAW MILK: the EU's milk goes to its dairies (the dairy block prices it); the EU takes no part
+            # in the world raw-milk market (CAPRI: raw milk is not traded with third countries)
+            _ms_now = getattr(self, "_eu_milk_supply_now", None)
+            if "MILK" in Cc and self._dairy_params() and _ms_now:
+                D[ie, Cc["MILK"]] = float(_ms_now.get(_reg, 0.0) if isinstance(_ms_now, dict) else _ms_now)
+                SH[ie, Cc["MILK"]] = 1.0
+            # DAIRY PRODUCTS (dairy Stage 3): EU food use with CAPRI's own and cross-price elasticities among
+            # the nine dairy products (p_ElasDem), EU feed use following the calves' milk feed (FMIL) with
+            # CES substitution; per EU market region at its prices, its food and feed use (dairy params "reg")
+            if self._dairy_params():
+                _dp = self._dairy_params()
+                _rp = _dp["reg"][_reg]
+                _P9 = list(self.DAIRY_PRODUCTS)
+                _dl = getattr(self, "_dairy_last", None) or {}
+                _rho = np.array([float(PR[ie, Cc[self.DAIRY_TRADED[k]]]) if k in self.DAIRY_TRADED and self.DAIRY_TRADED[k] in Cc
+                                 else float((_dl.get("price_ratio") or {}).get(k, 1.0)) for k in _P9])
+                _rho = np.maximum(_rho, 0.05)
+                _food = np.exp(_dp["E"] @ np.log(_rho))
+                _feed = self.dairy_feed_factor(_rho)
+                # CAPRI's FMIL bulk per member state (feedShareEqu_, Sprint 9h): each product's EU feed use from the
+                # member states' FMIL bulks at the products' prices, where the bulk table has the product
+                _fn = self._eu_feed_now_reg.get(_reg) or {}
+                _f0 = (fb or {}).get("feed0_reg", {}).get(_reg, {}) if fb else {}
+                for k, c in self.DAIRY_TRADED.items():
+                    if c in _fn and float(_f0.get(c, 0.0)) > 0:
+                        _feed[_P9.index(k)] = float(_fn[c]) / float(_f0[c])
+                for k, c in self.DAIRY_TRADED.items():
+                    j = Cc.get(c)
+                    kk = _P9.index(k)
+                    cons0 = float(_rp["cons9"].get(k, 0.0))
+                    if j is None or cons0 <= 0:
+                        continue
+                    sh = min(1.0, float(_rp["fd9"][kk]) / cons0)
+                    d0 = float(Bv[ie, j]) * float(CAL[j])
+                    D[ie, j] = d0 * ((1.0 - sh) * float(_food[kk]) + sh * float(_feed[kk]))
+                    OLDF[ie, j] = float(_food[kk])
+                    SH[ie, j] = sh
+        # NON-EU MARKET REGIONS WITH SUPPLY MODELS (Norway, CAPRI RMSSUP; K56): feed follows the supply models' herds
+        # through the region's bulks (feedBlkPrice_, feedShareEqu_; CAPRI has no feed demand function FeedBal_ for
+        # RMSSUP), at the region's prices, on CAPRI's feed share of its use; raw milk goes to its own dairies (not
+        # traded). The dairy products fed follow its FMIL bulk in the dairy block below.
+        _sup_now = getattr(self, "_sup_milk_now", None) or {}
+        self._sup_feed_now = {}
+        _dairy_cs = set(self.DAIRY_TRADED.values())
+        for _reg in self.SUP:
+            i = R.get(_reg)
+            if i is None:
+                continue
+            if "MILK" in Cc and _reg in _sup_now:
+                D[i, Cc["MILK"]] = float(_sup_now[_reg])
+                SH[i, Cc["MILK"]] = 1.0
+            if not fb or _reg not in (getattr(self, "_sup_active", None) or ()):
+                continue
+            f0r = (fb.get("feed0_sup") or {}).get(_reg, {})
+            feed = self.sup_feed_use(_reg, {c: float(PR[i, Cc[c]]) for c in f0r if c in Cc})
+            self._sup_feed_now[_reg] = feed
+            for c, sh in (fb.get("share_sup") or {}).get(_reg, {}).items():
                 j = Cc.get(c)
-                f0 = fb["feed0"].get(c, 0.0)
-                if j is None or f0 <= 0:
+                f0 = f0r.get(c, 0.0)
+                if j is None or f0 <= 0 or c in _dairy_cs:
                     continue
-                d0 = float(Bv[ie, j]) * float(CAL[j])
+                d0 = float(Bv[i, j]) * float(CAL[j])
                 if d0 <= 0:
                     continue
-                rest = float(PR[ie, j]) ** float(eu_eta.get(c, ETA[j])) * ir ** float(INC[j])
-                D[ie, j] = float(D[ie, j]) + d0 * sh * (feed.get(c, f0) / f0 - rest)
-        # RAW MILK: the EU's milk goes to its dairies (the dairy block prices it); the EU takes no part
-        # in the world raw-milk market (CAPRI: raw milk is not traded with third countries)
-        if ie is not None and "MILK" in Cc and self._dairy_params() and getattr(self, "_eu_milk_supply_now", None):
-            D[ie, Cc["MILK"]] = float(self._eu_milk_supply_now)
-        # DAIRY PRODUCTS (dairy Stage 3): EU food use with CAPRI's own and cross-price elasticities among
-        # the nine dairy products (p_ElasDem), EU feed use following the calves' milk feed (FMIL) with
-        # CES substitution; the five EU-cleared products' prices come from the dairy block
-        if ie is not None and self._dairy_params():
-            _dp = self._dairy_params()
-            _P9 = list(self.DAIRY_PRODUCTS)
-            _dl = getattr(self, "_dairy_last", None) or {}
-            _rho = np.array([float(PR[ie, Cc[self.DAIRY_TRADED[k]]]) if k in self.DAIRY_TRADED and self.DAIRY_TRADED[k] in Cc
-                             else float((_dl.get("price_ratio") or {}).get(k, 1.0)) for k in _P9])
-            _rho = np.maximum(_rho, 0.05)
-            _food = np.exp(_dp["E"] @ np.log(_rho))
-            _feed = self.dairy_feed_factor(_rho)
-            # CAPRI's FMIL bulk per member state (feedShareEqu_, Sprint 9h): each product's EU feed use from the
-            # member states' FMIL bulks at the products' prices, where the bulk table has the product
-            _fn = getattr(self, "_eu_feed_now", None) or {}
-            _f0 = (fb or {}).get("feed0", {}) if fb else {}
-            for k, c in self.DAIRY_TRADED.items():
-                if c in _fn and float(_f0.get(c, 0.0)) > 0:
-                    _feed[_P9.index(k)] = float(_fn[c]) / float(_f0[c])
-            for k, c in self.DAIRY_TRADED.items():
-                j = Cc.get(c)
-                kk = _P9.index(k)
-                cons0 = float(_dp["cons9"].get(k, 0.0))
-                if j is None or cons0 <= 0:
-                    continue
-                sh = min(0.95, float(_dp["fd9"][kk]) / cons0)
-                d0 = float(Bv[ie, j]) * float(CAL[j])
-                D[ie, j] = d0 * ((1.0 - sh) * float(_food[kk]) * ir ** float(INC[j]) + sh * float(_feed[kk]))
+                sh = min(sh, max(0.0, 1.0 - SH[i, j]))
+                rest = float(PR[i, j]) ** float(ETA[j])
+                D[i, j] = float(D[i, j]) + d0 * sh * (feed.get(c, f0) / f0 - rest)
+                SH[i, j] += sh
         # NON-EU DAIRY PRODUCTS (Sprint 9f): in the regions with CAPRI's dairy block, food use with the region's
         # own and cross p_ElasDem among the nine products, feed use with the FMIL CES at a fixed FMIL index (the
-        # model has no non-EU herds); weights: the block's 2030 human consumption and feed use
+        # model has no non-EU herds; Norway: its FMIL bulk from its supply models' herds); weights: the block's 2030
+        # human consumption and feed use
         _wpar = self._dairy_world_params()
         if _wpar:
             _P9 = list(self.DAIRY_PRODUCTS)
@@ -1754,6 +2243,12 @@ class MarketModule:
                 _rho = np.maximum(_rho, 0.05)
                 _food = np.exp(_prm["E"] @ np.log(_rho))
                 _feed = self.dairy_feed_factor(_rho, _prm, 1.0)
+                _fs = self._sup_feed_now.get(_r)
+                if _fs:
+                    _f0s = (fb.get("feed0_sup") or {}).get(_r, {})
+                    for k, c in self.DAIRY_TRADED.items():
+                        if c in _fs and float(_f0s.get(c, 0.0)) > 0:
+                            _feed[_P9.index(k)] = float(_fs[c]) / float(_f0s[c])
                 for kk, k in enumerate(_P9):
                     j = Cc.get(self.DAIRY_TRADED[k])
                     hc, fd = float(_prm["hc9"][kk]), float(_prm["fd9"][kk])
@@ -1761,7 +2256,9 @@ class MarketModule:
                         continue
                     sh = fd / (hc + fd)
                     d0 = float(Bv[i, j]) * float(CAL[j])
-                    D[i, j] = d0 * ((1.0 - sh) * float(_food[kk]) * ir ** float(INC[j]) + sh * float(_feed[kk]))
+                    D[i, j] = d0 * ((1.0 - sh) * float(_food[kk]) + sh * float(_feed[kk]))
+                    OLDF[i, j] = float(_food[kk])
+                    SH[i, j] = sh
         # BIOFUEL FEEDSTOCK USE (CAPRI biofFeedCost_, biofFeedCostAgg_, Biof_, prodBiof_): the biofuel part of
         # each region's use follows the CES feedstock choice at the biofuel output (the biofuel market's when
         # endogenous, else the reference), not the food response the rest of the row gets. The food factor that
@@ -1779,25 +2276,29 @@ class MarketModule:
                     j = Cc.get(c)
                     if j is None:
                         continue
-                    if reg == "EU27":
+                    if reg in self.EU:
                         # EU: CAPRI's biofuel share of EU use applied to the model's EU use (the EU base is the
-                        # supply models', not CAPRI's)
-                        sh = bp["share"].get(c, 0.0)
-                        q0 = bp["q0"].get(c, 0.0)
+                        # supply models', not CAPRI's); per EU market region its own share and feedstock use
+                        sh = bp["share_reg"].get((reg, c), 0.0)
+                        q0 = bp["q0_reg"].get((reg, c), 0.0)
                         if sh <= 0 or q0 <= 0:
                             continue
                         d0 = float(Bv[i, j]) * float(CAL[j])
                         e = float(eu_eta.get(c, ETA[j]))
-                        food = float(PR[i, j]) ** e * ir ** float(INC[j])
+                        food = float(PR[i, j]) ** e
                         D[i, j] = D[i, j] + d0 * sh * (q / q0 - food)
-                        self._eu_biof_ratio[c] = q / q0
+                        SH[i, j] += sh
+                        self._eu_biof_ratio.setdefault(reg, {})[c] = q / q0
                     else:
                         # non-EU: the region's use is CAPRI's, which holds CAPRI's feedstock quantity
                         q0 = bp["q0_reg"].get((reg, c), 0.0)
                         if q0 <= 0:
                             continue
-                        food = float(PR[i, j]) ** float(ETA[j]) * ir ** float(INC[j])
+                        food = float(PR[i, j]) ** float(ETA[j])
                         D[i, j] = D[i, j] + (q - q0 * food)
+                        _d0 = float(Bv[i, j]) * float(CAL[j])
+                        if _d0 > 0:
+                            SH[i, j] += q0 / _d0
         # BIOFUEL USE (CAPRI biofDemShare_, biofDem_, Cpri_, ProcNQ_): the biofuel part of each region's use follows
         # the mandate and the biofuel's consumer price against fossil fuel, non-fuel processing CAPRI's processing
         # function. Without endogenous biofuel markets, use is fixed at the reference (CAPRI: no biofuel market).
@@ -1817,261 +2318,60 @@ class MarketModule:
                 else:
                     p0 = float(bm["proc0"].get((reg, fuel), 0.0))
                     D[i, j] = max(0.0, d0 - u0 - p0 + st["use"].get((reg, fuel), u0) + st["proc"].get((reg, fuel), p0))
+        # PROCESSING (CAPRI ProcNQ_): the processing part of use (CAPRI's share) of the products other than the
+        # oilseeds (crushing, above) moves by CAPRI's Hessian times the change of the Armington prices (cross terms
+        # among the vegetable oils), replacing the own-price response that part had
+        pq = self._proc_nq_params()
+        if pq:
+            REFv = ref.values.astype(float)
+            for (reg, c), shp in pq["share"].items():
+                i, j = R.get(reg), Cc.get(c)
+                if i is None or j is None or c in self.CRUSH_CHAINS or c in self._PROC_NQ_SKIP:
+                    continue
+                Hr = pq["H"].get(reg, {})
+                if not (Hr.get((c, c), 0.0) > 0):
+                    continue
+                d0 = float(Bv[i, j]) * float(CAL[j])
+                if d0 <= 0:
+                    continue
+                shp = min(shp, max(0.0, 1.0 - SH[i, j]))
+                if shp <= 0:
+                    continue
+                dq = 0.0
+                for (x, y), hv in Hr.items():
+                    if x != c:
+                        continue
+                    jy = Cc.get(y)
+                    if jy is not None and y not in self.CRUSH_CHAINS:
+                        dq -= hv * (float(DPv[i, jy]) - float(REFv[i, jy]))
+                D[i, j] = float(D[i, j]) + d0 * shp * (1.0 - float(OLDF[i, j])) + dq
+                SH[i, j] += shp
+        if GLR is not None:
+            hs = np.minimum(HS, np.clip(1.0 - SH, 0.0, 1.0))
+            D0c = Bv * CAL[None, :]
+            m = (hs > 0) & np.isfinite(OLDF) & (D0c > 0)
+            D[m] = D[m] + (D0c * hs * (GLR - OLDF))[m]
+            # the food response of the EU's use per commodity (residual feeds' output) includes the GL part
+            for _reg, fr in self._eu_food_ratio.items():
+                ie = R.get(_reg)
+                for c in list(fr):
+                    j = Cc[c]
+                    w = 1.0 - min(SH[ie, j], 1.0)
+                    if hs[ie, j] > 0 and w > 0:
+                        fr[c] = OLDF[ie, j] + hs[ie, j] / w * (GLR[ie, j] - OLDF[ie, j])
+        self._gl_last = (GLR, None if GLR is None else hs) if GLR is not None else None
+        # share of each cell's base use left to the residual own-price response QD0 (P/P0)^eta (diagnostic)
+        self._rest_share = np.clip(1.0 - SH - (hs if GLR is not None else 0.0), 0.0, 1.0)
         demand = pd.DataFrame(D, index=demand.index, columns=demand.columns)
         return demand.clip(lower=0.0).astype(float)
 
-    @staticmethod
-    def _income_elasticity(comm: str) -> float:
-        """Engel income elasticities by commodity group (CAPRI-style):
-        staples low/negative, livestock and processed goods higher."""
-        staples = {"SWHE", "DWHE", "BARL", "CORN", "OCER", "POTA", "PULS"}
-        livestock = {"BEEF", "PORK", "POUL", "SHGM", "EGGS", "MILK", "BUTR",
-                     "CHES", "SKIM"}
-        if comm in ("RAPC", "SUNC", "SOYC"):
-            return 0.0      # cakes are feed: demand follows herds, not income
-        if comm in staples:
-            return 0.1
-        if comm in livestock:
-            return 0.5
-        return 0.3
-
-    def compute_trade_flows(
-        self,
-        supply: pd.DataFrame,
-        demand: pd.DataFrame,
-        world_prices: pd.Series,
-        domestic_prices: pd.DataFrame,
-    ) -> pd.DataFrame:
-        """
-        Compute bilateral trade flows using Armington allocation.
-
-        For each importing region r:
-          Total imports M_r = max(0, QD_r - QS_r)
-          Flow from j to r: TRD_{jr} = M_r × share_{jr}(prices)
-        """
-        flows_idx = pd.MultiIndex.from_product(
-            [self.regions, self.regions], names=["exporter", "importer"]
-        )
-        flows = pd.DataFrame(0.0, index=flows_idx, columns=self.commodities)
-
-        for comm in self.commodities:
-            for importer in self.regions:
-                sup = supply.at[importer, comm] if importer in supply.index else 0.0
-                dem = demand.at[importer, comm] if importer in demand.index else 0.0
-                total_imports = max(0.0, dem - sup)
-
-                if total_imports < 0.001:
-                    continue
-
-                # Price of goods from each exporting origin (CIF basis)
-                prices_by_origin = pd.Series({
-                    exp: world_prices.get(comm, 200.0) * 1.05  # +5% transport
-                    for exp in self.regions if exp != importer
-                })
-
-                arm_sys = self.armington_systems.get((importer, comm))
-                if arm_sys is None:
-                    # Uniform allocation
-                    exporters = [r for r in self.regions if r != importer]
-                    for exp in exporters:
-                        flows.at[(exp, importer), comm] = total_imports / len(exporters)
-                else:
-                    alloc = arm_sys.import_quantities(total_imports, prices_by_origin)
-                    for exp, qty in alloc.items():
-                        if (exp, importer) in flows.index:
-                            flows.at[(exp, importer), comm] = qty
-
-        return flows
-
-
     # ------------------------------------------------------------------
-    # Armington price premium for the EU
+    # The EU's base supply and demand
     # ------------------------------------------------------------------
-    #: Without this, every regional price is a fixed wedge on the world price,
-    #: so the EU is a price-taker: when EU supply falls, imports fill the gap at
-    #: an unchanged price. That is the law of one price, not an Armington
-    #: market. Under Farm-to-Fork it held EU prices to +1.6-3% where CAPRI
-    #: reports +8% (cereals), +12% (oilseeds) and +15% (vegetables and permanent
-    #: crops), and so let supply keep falling: oilseeds and permanent crops
-    #: overshot CAPRI's published production changes by ~40%.
-    #:
-    #: In an Armington market domestic and imported goods are imperfect
-    #: substitutes, so imports only expand if the domestic price rises relative
-    #: to the import price. The first-order condition gives
-    #:     (p_D / p_D0) = ((M/D) / (M0/D0)) ** (1/sigma)
-    #: for a net importer (M imports, D domestic supply), and the mirror image
-    #: on the export share for a net exporter. sigma is CAPRI's own substitution
-    #: elasticity from armington_params.csv. The premium is exactly 1 at the
-    #: base, so calibration, price reproduction and the base year are untouched.
-    ARMINGTON_PREMIUM_BOUNDS = (param("ARMINGTON_PREMIUM_LO"), param("ARMINGTON_PREMIUM_HI"))
-
-    #: Minimum recorded gross trade, as a share of EU consumption, for the
-    #: Armington premium to apply at all.
-    MIN_TRADE_SHARE_FOR_PREMIUM = param("MIN_TRADE_SHARE_FOR_PREMIUM")
-
     def set_eu_base(self, base_supply: pd.Series, base_demand: pd.Series):
         """Record the EU's base supply and demand at the model's own levels."""
         self._eu_base_supply = base_supply.astype(float)
         self._eu_base_demand = base_demand.astype(float)
-
-    def _eu_gross_trade(self) -> dict:
-        """Extra-EU gross imports and exports per commodity, from the trade file.
-
-        The trade file puts intra-EU flows on the EU27->EU27 diagonal, so its
-        EU rows to and from other regions are genuine extra-EU trade - unlike
-        FAO's EU27 totals, which sum member states and include intra-EU flows.
-        """
-        g = getattr(self, "_eu_gross_cache", None)
-        if g is not None:
-            return g
-        g = {}
-        try:
-            from pathlib import Path as _P
-            f = _P(__file__).resolve().parents[2] / "capri_data" / "shared" / "trade_flows_2017.csv"
-            t = pd.read_csv(f)
-            imp = t[(t["importer"] == "EU27") & (t["exporter"] != "EU27")]
-            exp = t[(t["exporter"] == "EU27") & (t["importer"] != "EU27")]
-            for c in self.commodities:
-                if c in t.columns:
-                    g[c] = (float(imp[c].sum()), float(exp[c].sum()))
-        except Exception:
-            g = {}
-        # Commodities the trade file records no trade for (sugar, durum wheat)
-        # get CAPRI's own extra-EU trade from its 2030 reference instead, so
-        # their EU price can respond. Without it they carried no premium, and
-        # durum - starting from zero imports - inflated the cereal import check.
-        try:
-            from pathlib import Path as _P
-            f2 = _P(__file__).resolve().parents[2] / "capri_data" / "2017" / "market" / "eu_gross_trade_supplement.csv"
-            if f2.exists():
-                sup = pd.read_csv(f2, index_col=0)
-                for c in sup.index:
-                    if c in self.commodities and max(g.get(c, (0.0, 0.0))) <= 0:
-                        g[c] = (float(sup.at[c, "imports_kt"]), float(sup.at[c, "exports_kt"]))
-        except Exception:
-            pass
-        self._eu_gross_cache = g
-        return g
-
-    def _net_ratio_premium(self, P0, Q0, P, Q, sig, r2) -> float:
-        """Fallback when gross flows cannot be closed consistently: the net-trade
-        ratio formula, never a silent 1.0."""
-        lo, hi = self.ARMINGTON_PREMIUM_BOUNDS
-        M0, M = Q0 - P0, Q - P
-        if M0 > 0.01 * Q0 and M > 0:
-            ratio, e = (M / P) / (M0 / P0), sig
-        elif M0 < -0.01 * Q0 and M < 0:
-            ratio, e = ((-M0) / Q0) / ((-M) / Q), r2
-        else:
-            ratio, e = (Q / P) / (Q0 / P0), sig
-        return float(min(max(ratio ** (1.0 / e), lo), hi))
-
-    def eu_armington_premium(self, supply: pd.Series, demand: pd.Series) -> pd.Series:
-        """Per-commodity EU price relative to the wedge price, from gross trade.
-
-        Two-sided Armington clearing. EU production P must equal domestic sales
-        D plus exports X. Domestic sales compete with imports M at the
-        first-level elasticity sigma: D/M = (D0/M0) * x**(-sigma), with D + M = Q.
-        Exports compete in foreign import markets at the second-level
-        elasticity rho2: X = X0 * x**(-rho2). Here x is the EU price relative to
-        its base (the premium). One monotone equation per commodity,
-            Q * r(x)/(1+r(x)) + X0 * x**(-rho2) = P,
-        solved by bisection. It holds exactly at x = 1 in the base.
-
-        An earlier version used NET trade in a ratio formula. With small net
-        positions (EU maize net imports ~6 Mt of 73) the ratio moved several-fold
-        for modest supply changes, making prices far too sensitive - cereal
-        prices rose +17-20% under Farm-to-Fork against CAPRI's +8% - and the
-        outer loop stopped converging. Gross base flows come from the trade
-        file; the smaller gross flow is taken as recorded and the larger one
-        closes the EU's base balance, so real two-way trade is kept.
-        """
-        prem = pd.Series(1.0, index=self.commodities)
-        P0s = getattr(self, "_eu_base_supply", None)
-        Q0s = getattr(self, "_eu_base_demand", None)
-        if P0s is None or Q0s is None:
-            return prem
-        lo, hi = self.ARMINGTON_PREMIUM_BOUNDS
-        gross = self._eu_gross_trade()
-        _dairy = bool(self._dairy_params())
-        for c in self.commodities:
-            if _dairy and c == "MILK":                 # priced by the dairy block (solve)
-                continue
-            P0, Q0 = float(P0s.get(c, 0.0)), float(Q0s.get(c, 0.0))
-            P, Q = float(supply.get(c, 0.0)), float(demand.get(c, 0.0))
-            if min(P0, Q0, P, Q) <= 1e-6:
-                continue
-            sig = float(self.armington.at[c, "sigma"]) if c in self.armington.index else 3.0
-            r2 = sig
-            if c in self.armington.index and "rho2" in self.armington.columns:
-                v = self.armington.at[c, "rho2"]
-                if pd.notna(v) and float(v) > 0:
-                    r2 = float(v)
-            if sig <= 0:
-                continue
-            # Gross trade enters as a SCALE-FREE intensity: the smaller gross
-            # flow relative to the larger. Levels cannot be used - the trade file
-            # records rapeseed imports of 28.6 Mt against a market EU consumption
-            # of 10.1 Mt (it counts products in seed equivalent), which made
-            # domestic sales negative and silently dropped the premium. The flows
-            # are rebuilt around the market's own EU net position, so the base
-            # closes exactly.
-            Mtf, Xtf = gross.get(c, (0.0, 0.0))
-            big = max(Mtf, Xtf)
-            # An Armington premium only describes a good the EU actually trades.
-            # Sugar beet is processed near where it is grown and barely traded;
-            # with no import share to work with, any supply change drove its
-            # premium to a bound and the anticipated supply response threw it to
-            # the other one, every outer iteration (1.500 -> 0.744 -> 1.500),
-            # which kept the whole loop from converging. Where recorded gross
-            # trade is under 5% of EU consumption, the EU price follows the world
-            # price through the wedge, with no premium.
-            if big < self.MIN_TRADE_SHARE_FOR_PREMIUM * Q0:
-                continue
-            g = min(Mtf, Xtf) / big if big > 0 else 0.0
-            g = min(max(g, 0.0), 0.9)
-            N0 = Q0 - P0                               # net imports at base
-            if N0 >= 0:
-                M0 = max(N0 / (1.0 - g), 0.01 * Q0)
-                X0 = M0 - N0
-            else:
-                X0 = max(-N0 / (1.0 - g), 0.01 * P0)
-                M0 = X0 + N0
-            M0 = min(M0, 0.9 * Q0)
-            X0 = P0 - Q0 + M0
-            D0 = Q0 - M0
-            if D0 <= 0 or M0 <= 0 or X0 < 0:
-                prem[c] = self._net_ratio_premium(P0, Q0, P, Q, sig, r2)
-                continue
-            # The traded-goods rule must hold for the flows the premium actually
-            # USES, not only for the recorded ones. Durum, given CAPRI-derived
-            # trade, passed the recorded-trade test, but the market sees its EU
-            # balance as almost exactly even, so the rebuilt flows fell to the
-            # 91 kt floor each way; with that import share the premium turned
-            # so steep that Farm-to-Fork stopped converging (15 iterations).
-            if M0 + X0 < self.MIN_TRADE_SHARE_FOR_PREMIUM * Q0:
-                continue
-            k = D0 / M0
-
-            def f(x):
-                r = k * x ** (-sig)
-                return Q * r / (1.0 + r) + X0 * x ** (-r2) - P
-
-            if f(lo) <= 0:
-                prem[c] = lo
-                continue
-            if f(hi) >= 0:
-                prem[c] = hi
-                continue
-            a, b = lo, hi
-            for _ in range(60):
-                m = 0.5 * (a + b)
-                if f(m) > 0:
-                    a = m
-                else:
-                    b = m
-            prem[c] = 0.5 * (a + b)
-        return prem
 
     def excess_demand(
         self,
@@ -2120,21 +2420,9 @@ class MarketModule:
         if rows is not None:
             return rows
         rows = {}
-        try:
-            import json as _json
-            from pathlib import Path as _P
-            from capri_mod.data.loaders import resolve_data_file
-            f = resolve_data_file(_P(__file__).parent.parent.parent / "capri_data",
-                                  "fao_market_baseline.json")
-            if f.exists():
-                for key, rec in _json.load(open(f)).items():
-                    r, c = key.split("|")
-                    if r == "EU27":
-                        rows[c] = rec
-        except Exception:
-            rows = {}
-        # CAPRI's own EU balance (FAO_agg, member states summed: production MAPR, domestic use DOMM) where it
-        # has the commodity; the FAO extract's EU sugar was 2.6 Mt produced and used (CAPRI 16.7 and 18.9)
+        # CAPRI's own EU balance (FAO_agg, member states summed: production MAPR, domestic use DOMM). The FAO
+        # extract (fao_market_baseline.json) was read first as a fallback; CAPRI's balance covers every EU
+        # commodity it had, so the fallback was inert and was removed (20 October 2026, KNOWN_ISSUES K54-6)
         for key, rec in (getattr(self, "_capri_world_balance", None) or {}).items():
             r, c = key.split("|")
             if r == "EU27" and float(rec.get("production", 0) or 0) > 0 and float(rec.get("consumption", 0) or 0) > 0:
@@ -2143,30 +2431,45 @@ class MarketModule:
         return rows
 
     def _align_eu_base_balance(self, eu_supply: pd.Series, by_country: Optional[pd.DataFrame] = None) -> pd.DataFrame:
-        """Set the EU's base production and consumption consistently."""
+        """Set the EU's base production and consumption consistently, per EU market region (one region: the EU;
+        CAPRI's two trade blocks: each block from its member states' supply-model rows, by_country)."""
         fao = self._fao_eu_rows()
-        ne = getattr(self, "_base_net_exports_eu", {}) or {}
-        base_supply = pd.DataFrame(0.0, index=["EU27"], columns=self.commodities)
-        for comm in self.commodities:
-            p_model = float(eu_supply.get(comm, 0.0) or 0.0)
-            if p_model <= 0:
-                base_supply.at["EU27", comm] = float(self.base_production.at["EU27", comm])
-                continue
-            rec = fao.get(comm, {})
-            fp, fc = float(rec.get("production", 0) or 0), float(rec.get("consumption", 0) or 0)
-            if fp > 0 and fc > 0:
-                cons = p_model * fc / fp                 # FAO's self-sufficiency
-            else:
-                cons = max(1.0, p_model - float(ne.get(comm, 0.0)))
-            self.base_production.at["EU27", comm] = p_model
-            self.base_consumption.at["EU27", comm] = cons
-            # the ALIGNED EU use, before calibration rescales base_consumption
-            # (_exempt_eu_from_world_calibration divides it by the calibration
-            # factor); the EU base crush is anchored on this value
-            if not hasattr(self, "_eu_aligned_use") or self._eu_aligned_use is None:
-                self._eu_aligned_use = {}
-            self._eu_aligned_use[comm] = cons
-            base_supply.at["EU27", comm] = p_model
+        if self.eu_blocks:
+            if by_country is None:
+                raise ValueError("two EU market regions need the supply per country (by_country)")
+            sup = self.eu_rows(by_country)
+        else:
+            sup = pd.DataFrame([eu_supply], index=["EU27"])
+        base_supply = pd.DataFrame(0.0, index=list(self.EU), columns=self.commodities)
+        if getattr(self, "_eu_aligned_use", None) is None:
+            self._eu_aligned_use = {}
+        tb = self._eu_ms_balance() if self.eu_blocks else None
+        for reg in self.EU:
+            ne = (getattr(self, "_base_net_exports_eu", {}) or {}).get(reg, {})
+            al = self._eu_aligned_use.setdefault(reg, {})
+            for comm in self.commodities:
+                p_model = float(sup.at[reg, comm]) if (reg in sup.index and comm in sup.columns) else 0.0
+                if p_model <= 0:
+                    base_supply.at[reg, comm] = float(self.base_production.at[reg, comm])
+                    continue
+                if self.eu_blocks:
+                    k = (reg, comm)
+                    fp = float(tb.at[k, "prod_kt"]) if k in tb.index else 0.0
+                    fc = float(tb.at[k, "use_kt"]) if k in tb.index else 0.0
+                else:
+                    rec = fao.get(comm, {})
+                    fp, fc = float(rec.get("production", 0) or 0), float(rec.get("consumption", 0) or 0)
+                if fp > 0 and fc > 0:
+                    cons = p_model * fc / fp                 # the source's self-sufficiency
+                else:
+                    cons = max(1.0, p_model - float(ne.get(comm, 0.0)))
+                self.base_production.at[reg, comm] = p_model
+                self.base_consumption.at[reg, comm] = cons
+                # the ALIGNED EU use, before calibration rescales base_consumption
+                # (_exempt_eu_from_world_calibration divides it by the calibration
+                # factor); the EU base crush is anchored on this value
+                al[comm] = cons
+                base_supply.at[reg, comm] = p_model
         # DAIRY: EU base production of the traded dairy products = CAPRI's 2030 reference output of the
         # dairy block, consumption = that + CAPRI's extra-EU net imports; raw milk is all used in the EU
         dp = self._dairy_params()
@@ -2174,87 +2477,45 @@ class MarketModule:
             self._dairy_S0 = float(eu_supply.get("MILK"))
             # raw milk delivered per member state at base (the dairy blocks' milk ratios)
             self._dairy_S0_ms = self._milk_by_ms(by_country) if by_country is not None else None
+            self._dairy_S0_reg = {reg: float(sup.at[reg, "MILK"]) if reg in sup.index else 0.0 for reg in self.EU}
             self._dairy_u = None
             self._dairy_u_all = {}
-            self.base_production.at["EU27", "MILK"] = self._dairy_S0
-            self.base_consumption.at["EU27", "MILK"] = self._dairy_S0
-            self._eu_aligned_use["MILK"] = self._dairy_S0
-            base_supply.at["EU27", "MILK"] = self._dairy_S0
-            self._eu_milk_supply_now = self._dairy_S0
-            for k, c in self.DAIRY_TRADED.items():
-                i = dp["ix"][k]
-                q = float(dp["Q0"][i] - dp["proc0"][i])
-                cons = q + float(dp["net_imports0"].get(k, 0.0))
-                self.base_production.at["EU27", c] = q
-                self.base_consumption.at["EU27", c] = cons
-                self._eu_aligned_use[c] = cons
-                base_supply.at["EU27", c] = q
+            self._eu_milk_supply_now = dict(self._dairy_S0_reg)
+            for reg in self.EU:
+                m0 = self._dairy_S0_reg[reg]
+                self.base_production.at[reg, "MILK"] = m0
+                self.base_consumption.at[reg, "MILK"] = m0
+                self._eu_aligned_use[reg]["MILK"] = m0
+                base_supply.at[reg, "MILK"] = m0
+                rp = dp["reg"][reg]
+                for k, c in self.DAIRY_TRADED.items():
+                    i = dp["ix"][k]
+                    q = float(rp["Q0"][i] - rp["proc0"][i])
+                    cons = q + float(rp["net_imports0"].get(k, 0.0))
+                    self.base_production.at[reg, c] = q
+                    self.base_consumption.at[reg, c] = cons
+                    self._eu_aligned_use[reg][c] = cons
+                    base_supply.at[reg, c] = q
         return base_supply
 
-    def _exempt_eu_from_world_calibration(self, base_supply, prices, trade_scenario):
-        """Close the world balance over the non-EU regions.
-
-        demand_response multiplies every region by one factor per commodity. The
-        EU's consumption is now set deliberately, so the factor is computed from
-        the other regions alone and the EU's base consumption is pre-divided by
-        it, leaving EU demand exactly where it was set.
-        """
-        dom = self.domestic_prices(prices, trade_scenario)
-        supply = self.supply_response(prices, base_supply)
-        self._demand_cal = pd.Series(1.0, index=self.commodities)
-        demand = self.demand_response(dom, prices)
-        others = [r for r in demand.index if r != "EU27"]
-        cal = pd.Series(1.0, index=self.commodities)
-        for comm in self.commodities:
-            s_all = float(supply[comm].sum()) if comm in supply.columns else 0.0
-            d_eu = float(demand.at["EU27", comm]) if "EU27" in demand.index else 0.0
-            d_oth = float(demand.loc[others, comm].sum())
-            if d_oth > 1.0 and s_all - d_eu > 1.0:
-                cal[comm] = (s_all - d_eu) / d_oth
-        cal = cal.clip(lower=0.2, upper=5.0)
-        if "EU27" in self.base_consumption.index:
-            for comm in self.commodities:
-                if cal[comm] > 0:
-                    self.base_consumption.at["EU27", comm] /= float(cal[comm])
-        self._demand_cal = cal
-
-    def _calibrate_demand_to_supply(
-        self,
-        exogenous_supply: Optional[pd.DataFrame],
-        prices: pd.Series,
-        trade_scenario: Optional[Dict],
-    ) -> None:
-        """
-        Calibrate the demand base so the base period is a market equilibrium.
-
-        At base prices, compute world supply (including the supply-module
-        override for EU27) and world demand. For each commodity, rescale the
-        per-region base consumption by supply/demand so that total demand
-        equals total supply at the base price. Cross-price and income terms
-        in demand_response then operate as deviations around this calibrated
-        base, so the solved base-period prices reproduce the reference levels.
-
-        The scaling is stored (self._demand_cal) and applied inside
-        demand_response, leaving the raw base_consumption untouched.
-        """
-        dom_prices = self.domestic_prices(prices, trade_scenario)
-        supply = self.supply_response(prices, exogenous_supply)
-        # Demand at base without any calibration factor (reset first)
-        self._demand_cal = pd.Series(1.0, index=self.commodities)
-        demand = self.demand_response(dom_prices, prices)
-
-        total_supply = supply.sum(axis=0)
-        total_demand = demand.sum(axis=0)
-
-        cal = pd.Series(1.0, index=self.commodities)
-        for comm in self.commodities:
-            d = float(total_demand.get(comm, 0.0))
-            s = float(total_supply.get(comm, 0.0))
-            if d > 1.0 and s > 1.0:
-                # factor that brings demand onto supply at base price
-                cal[comm] = s / d
-        # Clip to a sane range so a bad base datum can't distort things wildly
-        self._demand_cal = cal.clip(lower=0.2, upper=5.0)
+    def _align_sup_base(self, exo_sup: Dict[str, pd.Series]) -> None:
+        """Base of the non-EU market regions with supply models (Norway, K56) at their supply models' output, as the
+        EU's (_align_eu_base_balance): production of the supply models' products = the models' (bilateral products:
+        the closure's domestic sales absorb the difference to CAPRI's flows); raw milk all delivered to the region's
+        own dairies (use = production; CAPRI does not trade raw milk), the dairy block's base delivery recorded."""
+        self._sup_milk0 = {}
+        dairy = set(self.DAIRY_TRADED.values())
+        for reg, ser in (exo_sup or {}).items():
+            if reg not in self.base_production.index:
+                continue
+            for c, v in ser.items():
+                if c in self.base_production.columns and float(v) > 1e-6 and c not in dairy:
+                    self.base_production.at[reg, c] = float(v)
+            m0 = float(ser.get("MILK", 0.0) or 0.0)
+            if m0 > 0 and "MILK" in self.base_production.columns:
+                self._sup_milk0[reg] = m0
+                self.base_consumption.at[reg, "MILK"] = m0
+        self._sup_milk_now = dict(self._sup_milk0)
 
     def _demand_cal_factor(self, comm: str) -> float:
         cal = getattr(self, "_demand_cal", None)
@@ -2272,11 +2533,23 @@ class MarketModule:
 
     #: "bilateral": CAPRI's market model - a market price per region, total use an Armington aggregate of
     #: domestic sales and imports, imports a CES over origins, bilateral flows priced at the exporter's price
-    #: plus CAPRI's transport costs and tariffs (data: tools/build_bilateral_market.py). "premium": the
+    #: plus CAPRI's transport costs and tariffs (data: tools/build/build_bilateral_market.py). "premium": the
     #: earlier approximation - one world price per commodity and an Armington premium for the EU.
     market_structure = "bilateral"
+    #: EU products without a supply-model activity whose EU supply is CAPRI's market supply function (October 2026):
+    #: other vegetable oils OTHO and the fish products FFIS, SFIS, OAQU (own-price p_elasSupp, EU medians 0.95-0.98). Palm oil has no EU
+    #: supply in CAPRI's market model; FAO_agg's 105 kt (Belgian refining) stay at base.
+    EU_MARKET_SUPPLY = frozenset({"OTHO", "FFIS", "SFIS", "OAQU"})
+    #: CAPRI's market supply Hessian measured on the supply models at the baseline (model._market_supply_hessian)
+    supply_hessian = None
+    #: acceleration of the bilateral market's outer steps (_solve_bilateral): "anderson" (Anderson mixing over the last
+    #: MARKET_AA_MEMORY steps of the fixed-point map log r -> log new; CAPRI's group and full-system stages serve the
+    #: same purpose: the cross-product links a product-by-product step sees only between steps) or None (damped steps
+    #: alone). Same equations and stopping rule (every relative residual < tol): the path changes, not the equilibrium.
+    market_acceleration = setting("market.acceleration")
+    MARKET_AA_MEMORY = setting("market.aa_memory")
     #: CAPRI's EU tariff-rate quotas in the bilateral market (bilateral_trq_<year>.csv)
-    use_trq = True
+    use_trq = setting("market.use_trq")
     #: crushing products: their own-price supply response is the crushing margin's
     _CRUSH_PRODUCTS = ("RAPO", "SUNO", "SOYO", "RAPC", "SUNC", "SOYC")
 
@@ -2289,15 +2562,16 @@ class MarketModule:
         if cached is not None and cached[0] == year:
             return cached[1]
         base = _P(__file__).resolve().parents[2] / "capri_data" / "2017" / "market"
-        ff = base / f"bilateral_flows_{year}.csv"
+        sfx = "_eu2" if self.eu_blocks else ""          # CAPRI's two EU trade blocks (build_bilateral_market --eu-blocks)
+        ff = base / f"bilateral_flows_{year}{sfx}.csv"
         if not ff.exists():
             year = 2017
-            ff = base / "bilateral_flows_2017.csv"
+            ff = base / f"bilateral_flows_2017{sfx}.csv"
         if not ff.exists():
             self._bilat_raw_cache = (year, {})
             return {}
         fl = pd.read_csv(ff)
-        rg = pd.read_csv(base / f"bilateral_regions_{year}.csv")
+        rg = pd.read_csv(base / f"bilateral_regions_{year}{sfx}.csv")
         rho = pd.read_csv(base / "armington_rho.csv").set_index("commodity")
         R = list(self.regions)
         ix = {r: i for i, r in enumerate(R)}
@@ -2321,11 +2595,11 @@ class MarketModule:
             out[c] = BilateralCommodity(c, R, X0, a, b, a0, Pd0,
                                         float(rho.at[c, "rho1"]) if c in rho.index else 8.0,
                                         float(rho.at[c, "rho2"]) if c in rho.index else 10.0)
-        # EU tariff-rate quotas (tools/build_bilateral_market.py build_trq)
+        # EU tariff-rate quotas (tools/build/build_bilateral_market.py build_trq)
         ft = base / f"bilateral_trq_{year}.csv"
-        if ft.exists() and getattr(self, "use_trq", True) and "EU27" in ix:
+        if ft.exists() and getattr(self, "use_trq", True) and all(r in ix for r in self.EU):
             tq = pd.read_csv(ft)
-            ie = ix["EU27"]
+            rows = [ix[r] for r in self.EU]                # the EU's quotas: imports of every EU market region
             for c, g in tq.groupby("commodity"):
                 sc = out.get(c)
                 if sc is None:
@@ -2333,15 +2607,24 @@ class MarketModule:
                 Q, gap, sh = np.zeros(n), np.zeros(n), np.zeros(n)
                 for t in g.itertuples(index=False):
                     j = ix.get(t.exporter)
-                    if j is None or sc.X0[ie, j] <= 0:
+                    if j is None or float(sc.X0[rows, j].sum()) <= 0:
                         continue
                     Q[j], gap[j] = t.quota_kt, t.gap_eur_t
-                    sh[j] = min(1.0, float(t.imports_kt) / float(sc.X0[ie, j]))
+                    sh[j] = min(1.0, float(t.imports_kt) / float(sc.X0[rows, j].sum()))
                 if (Q > 0).any():
-                    sc.trq_row, sc.trq_Q, sc.trq_gap, sc.trq_share = ie, Q, gap, sh
+                    sc.trq_row = rows[0] if len(rows) == 1 else rows
+                    sc.trq_Q, sc.trq_gap, sc.trq_share = Q, gap, sh
                     sc.trq_offset = np.zeros(n)
         self._bilat_raw_cache = (year, out)
         return out
+
+    def _eu_rows_ix(self):
+        """Row index of the EU market region (one), or the list of the EU trade blocks' rows (None: no EU)."""
+        R = list(self.regions)
+        rows = [R.index(r) for r in self.EU if r in R]
+        if not rows:
+            return None
+        return rows[0] if len(rows) == 1 else rows
 
     def _bilateral_ratio_frame(self, value=1.0) -> pd.DataFrame:
         return pd.DataFrame(value, index=list(self.regions), columns=list(self.commodities), dtype=float)
@@ -2364,23 +2647,28 @@ class MarketModule:
         for c, sysc in raw.items():
             prod = sysc.X0.sum(axis=0)
             for i, r in enumerate(R):
-                if r != "EU27":
+                if r not in self.EU:
                     self.base_production.at[r, c] = float(prod[i])
         # non-EU crushing at CAPRI's cake production of the market year
         over = {}
         for (r, sd), prm in (self._crush_params() or {}).items():
-            if r == "EU27":
+            if r in self.EU:
                 continue
             o, ck = self.CRUSH_CHAINS[sd]
-            if ck in raw and prm["yc"] > 0:
-                q = float(self.base_production.at[r, ck]) / prm["yc"]
-                if q > 0:
-                    over[(r, sd)] = q
+            # the cake, or the oil where CAPRI records no cake from the crush (BGD soybeans, THA sunflower)
+            for prod_, y_ in ((ck, prm["yc"]), (o, prm["yo"])):
+                if prod_ in raw and y_ > 0:
+                    q = float(self.base_production.at[r, prod_]) / y_
+                    if q > 0:
+                        over[(r, sd)] = q
+                    break
         self._crush_q0_override = over
         self._crush_cache = None
         self._demand_cal = pd.Series(1.0, index=self.commodities)
-        base_supply = self._align_eu_base_balance(exogenous_supply.sum(axis=0), exogenous_supply) \
+        exo_eu, exo_sup = self._split_supply(exogenous_supply)
+        base_supply = self._align_eu_base_balance(exo_eu.sum(axis=0), exo_eu) \
             if exogenous_supply is not None else None
+        self._align_sup_base(exo_sup)
         if base_supply is not None:
             self._align_eu_crush_products(base_supply)
         one = self._bilateral_ratio_frame()
@@ -2398,7 +2686,8 @@ class MarketModule:
                 if c in self.CRUSH_CHAINS:
                     if getattr(self, "_eu_aligned_use", None) is None:
                         self._eu_aligned_use = {}
-                    self._eu_aligned_use[c] = float(sc.D0[R.index("EU27")])
+                    for _rg in self.EU:
+                        self._eu_aligned_use.setdefault(_rg, {})[c] = float(sc.D0[R.index(_rg)])
             self._crush_cache = None
             if base_supply is not None:
                 self._align_eu_crush_products(base_supply)
@@ -2421,15 +2710,32 @@ class MarketModule:
         pooled = [c for c in self.commodities if c not in sysd]
         S = self.supply_response(self.world_prices_base, exogenous_supply, region_ratio=one, crush_dom=dom0)
         D = self.demand_response(dom0, self.world_prices_base)
-        others = [r for r in R if r != "EU27"]
+        # the regions whose use is set by the supply models (the EU; Norway with its supply models, whose raw milk
+        # goes to its own dairies) keep it; the others' use is calibrated so that the world clears
+        fixed = list(self.EU) + [r for r in self.SUP if r in exo_sup]
+        others = [r for r in R if r not in fixed]
         cal = pd.Series(1.0, index=self.commodities)
+        # where the bounds [0.2, 5] (not CAPRI's: PROXY_AUDIT S185) bind: {commodity: unbounded factor}; and the
+        # bilateral systems' export-share caps (S192). Recorded for the runs' metadata and warned
+        self.calibration_bound_hits = {"non_eu_use": {}, "export_share": {
+            c: list(sc.export_cap_hits) for c, sc in sysd.items() if getattr(sc, "export_cap_hits", None)}}
         for c in pooled:
-            s_all, d_eu, d_oth = float(S[c].sum()), float(D.at["EU27", c]), float(D.loc[others, c].sum())
+            s_all, d_eu, d_oth = float(S[c].sum()), float(D.loc[fixed, c].sum()), float(D.loc[others, c].sum())
             if d_oth > 1.0 and s_all - d_eu > 1.0:
-                cal[c] = min(5.0, max(0.2, (s_all - d_eu) / d_oth))
+                _raw = (s_all - d_eu) / d_oth
+                cal[c] = min(5.0, max(0.2, _raw))
+                if cal[c] != _raw:
+                    self.calibration_bound_hits["non_eu_use"][c] = _raw
             if cal[c] != 1.0:
-                self.base_consumption.at["EU27", c] /= float(cal[c])
+                for _rg in fixed:
+                    self.base_consumption.at[_rg, c] /= float(cal[c])
         self._demand_cal = cal
+        _h = self.calibration_bound_hits
+        if _h["non_eu_use"] or _h["export_share"]:
+            import warnings as _w
+            _w.warn(f"market calibration bounds reached: non-EU use factor outside [0.2, 5] for "
+                    f"{sorted(_h['non_eu_use'])}; export share above 0.98 for {sorted(_h['export_share'])}",
+                    RuntimeWarning)
         for sc in sysd.values():
             if sc.trq_row is not None:
                 sc.trq_offset = np.zeros(len(R))
@@ -2444,7 +2750,7 @@ class MarketModule:
         PAr = r.copy()
         pcache = {}
         tadd = (trade_scenario or {}).get("tariff_change", {}) if trade_scenario else {}
-        ie = list(self.regions).index("EU27") if "EU27" in self.regions else None
+        ie = self._eu_rows_ix()
         for c, sc in sysd.items():
             rc = r[c].values
             p = sc.import_prices(rc, float(tadd.get(c, 0.0) or 0.0), ie)
@@ -2454,8 +2760,20 @@ class MarketModule:
         dp = dom0.reindex(index=r.index, columns=r.columns) * PAr
         world = self.world_prices_base * self._bilateral_world_index(r)
         self._bilat_ratio_now = r
-        S = self.supply_response(world, exogenous_supply, region_ratio=r, crush_dom=dp)
-        D = self.demand_response(dp, world)
+        # CAPRI's crushing margin (ProcMargO_, arm/market_model.gms): the seed at its Armington price (v_Arm1Price),
+        # oil and cake at their producer prices (v_prodPrice); KNOWN_ISSUES K54-4
+        cpd = dp
+        if self.CRUSH_CHAINS and getattr(self, "crush_margin_producer_prices", True):
+            cpd = dp.copy()
+            _oc = sorted({x for oc in self.CRUSH_CHAINS.values() for x in oc if x in r.columns})
+            d0r = dom0.reindex(index=r.index, columns=_oc)
+            cpd[_oc] = d0r * r[_oc]
+        self._crush_prices_now = cpd
+        try:
+            S = self.supply_response(world, exogenous_supply, region_ratio=r, crush_dom=dp)
+            D = self.demand_response(dp, world)
+        finally:
+            self._crush_prices_now = None
         self._apply_feed_byproduct_supply(S)
         F = {}
         for c, sc in sysd.items():
@@ -2498,6 +2816,9 @@ class MarketModule:
                                  np.log(np.maximum(D1[c], 1e-12) / D0[c]) / np.where(np.abs(dpa) > 1e-9, dpa, 1.0), 0.0)
         return es.clip(-0.5, 5.0).fillna(0.0), ed.clip(-5.0, 0.5).fillna(0.0)
 
+    #: the trade systems' Newton keeps its Jacobian while the residual keeps falling fast (chord steps)
+    TRADE_CHORD = setting("market.trade_chord")
+
     def _bilateral_inner(self, sc, Sk, Dk, rk, PAk, es, ed, tadd, ie):
         """Exact solve of one commodity's trade system with supply and use log-linear around the current
         point: S_i = Sk_i (r_i / rk_i)^es_i, D_i = Dk_i (PA_i / PAk_i)^ed_i."""
@@ -2518,16 +2839,21 @@ class MarketModule:
 
         z = np.log(rk[act])
         g = G(z)
-        for _ in range(40):
+        J = None
+        prev = None
+        for _ in range(60):
             nrm = float(np.max(np.abs(g)))
             if nrm < 1e-12:
                 break
-            m = len(z)
-            J = np.empty((m, m))
-            h = 1e-6
-            for k in range(m):
-                zk = z.copy(); zk[k] += h
-                J[:, k] = (G(zk) - g) / h
+            # Newton with a finite-difference Jacobian, kept while it keeps the residual falling fast (chord steps:
+            # a fresh Jacobian costs one evaluation per region; same root and tolerance)
+            if J is None or prev is None or nrm > 0.25 * prev or not self.TRADE_CHORD:
+                m = len(z)
+                J = np.empty((m, m))
+                h = 1e-6
+                for k in range(m):
+                    zk = z.copy(); zk[k] += h
+                    J[:, k] = (G(zk) - g) / h
             try:
                 dz = np.linalg.solve(J, -g)
             except np.linalg.LinAlgError:
@@ -2539,22 +2865,52 @@ class MarketModule:
                 if float(np.max(np.abs(g1))) < nrm:
                     break
                 t *= 0.5
+            prev = nrm
             z = z + t * dz
             g = G(z)
         out = rk.copy()
         out[act] = np.exp(z)
         return out
 
-    def _solve_bilateral(self, exogenous_supply, trade_scenario=None, tol=1e-7, max_outer=60, verbose=False):
+    #: scenario change of the EU's tariff-rate quota volumes, {commodity: change in 1000 t} (PolicyScenario.
+    #: trq_volume_changes, set by CAPRIModel.run; empty in a baseline run)
+    trq_volume_changes: dict = {}
+
+    def _apply_trq_volumes(self, sysd) -> None:
+        """Set each EU tariff-rate quota to its base volume plus the scenario's change: a commodity's change (1000 t)
+        is spread over its quotas (one per exporter, CAPRI's bilateral TrqNT) in proportion to their base volumes.
+        The base fill, at which the base tariff regime is calibrated, stays at the base quotas (trq_Q0)."""
+        ch = dict(getattr(self, "trq_volume_changes", None) or {})
+        for c, sc in (sysd or {}).items():
+            if getattr(sc, "trq_row", None) is None or sc.trq_Q is None:
+                continue
+            if sc.trq_Q0 is None:
+                sc.trq_Q0 = sc.trq_Q.copy()
+            tot = float(sc.trq_Q0.sum())
+            d = float(ch.get(c, 0.0))
+            sc.trq_Q = sc.trq_Q0 * max(0.0, 1.0 + d / tot) if (tot > 0 and d) else sc.trq_Q0.copy()
+
+    def trq_commodities(self) -> list:
+        """Commodities with an EU tariff-rate quota in CAPRI's bilateral data for the market year."""
+        return sorted(c for c, sc in (self._bilateral_raw() or {}).items() if getattr(sc, "trq_row", None) is not None)
+
+    def _solve_bilateral(self, exogenous_supply, trade_scenario=None, tol=None, max_outer=None, verbose=False):
         """CAPRI's market: successive linearisation - the full model response (supply module output anticipated,
         crushing, dairy blocks, feed and biofuel demand) is re-evaluated each step, and each commodity's trade
         system solved exactly with supply and use log-linear around that point."""
+        _st = _settings()                                   # market.* : tolerance, rounds, damping, step clip
+        if tol is None:
+            tol = float(_st.get("market.tol"))
+        if max_outer is None:
+            max_outer = int(_st.get("market.max_iter"))
+        _sclip = tuple(_st.get("market.step_clip"))
         # BASELINE RUN (no EU base recorded yet): the market is calibrated at THIS supply, prices stay at the
         # reference - CAPRI's reference run is a calibrated equilibrium at its reference prices. Each outer
         # iteration of the baseline recalibrates, so the calibration a scenario inherits is the one at the
         # converged baseline supply. Scenario runs keep it frozen.
         if getattr(self, "_eu_base_supply", None) is None or getattr(self, "_demand_cal_frozen", None) is None:
             self._bilateral_calibrate(exogenous_supply)
+            self._apply_trq_volumes(self._bilat)
             self._demand_cal_frozen = self._demand_cal.copy()
             r = self._bilateral_ratio_frame()
             S, D, PAr, F, pc = self._bilateral_eval(r, exogenous_supply, trade_scenario)
@@ -2569,8 +2925,9 @@ class MarketModule:
             return r, S, D, PAr, pc, True, 0
         self._demand_cal = self._demand_cal_frozen.copy()
         sysd = self._bilat
+        self._apply_trq_volumes(sysd)
         R = list(self.regions)
-        ie = R.index("EU27") if "EU27" in R else None
+        ie = self._eu_rows_ix()
         tadd = (trade_scenario or {}).get("tariff_change", {}) if trade_scenario else {}
         r = self._bilateral_ratio_frame()
         last = getattr(self, "_bilat_last_r", None)
@@ -2588,6 +2945,8 @@ class MarketModule:
         prev = np.inf
         damp = 1.0
         converged = False
+        aa = getattr(self, "market_acceleration", None) == "anderson" and __import__("os").environ.get("CAPRI_MARKET_AA", "1") != "0"
+        aa_z, aa_g = [], []                                  # history: log r and log new (the map's value)
         for it in range(max_outer):
             S, D, PAr, F, pc = self._bilateral_eval(r, exogenous_supply, trade_scenario)
             errs = {c: float(np.max(np.abs(F[c] / size(c)))) for c in F}
@@ -2606,16 +2965,17 @@ class MarketModule:
                 X, _ = sc.flows(D[c].values, r[c].values, pc[c])
                 old_off = sc.trq_offset.copy()
                 sc.trq_solve(X, pc[c])
-                trq_moved = max(trq_moved, float(np.max(np.abs(sc.trq_offset - old_off) / np.maximum(sc.Pd0[sc.trq_row], 1.0))))
+                trq_moved = max(trq_moved, float(np.max(np.abs(sc.trq_offset - old_off) / np.maximum(float(np.min(sc.Pd0[sc._rows()])), 1.0))))
             if err < tol and trq_moved < tol:
                 converged = True
                 break
-            if err > prev * 0.999:
-                damp = max(0.25, damp * 0.5)
-            elif damp < 1.0 and err < prev * 0.95:
+            prev_err = prev                                  # the previous step's residual (Anderson restart test)
+            if err > prev * _st.get("market.damping_increase_threshold"):
+                damp = max(_st.get("market.damping_min"), damp * _st.get("market.damping_down"))
+            elif damp < 1.0 and err < prev * _st.get("market.damping_recover_threshold"):
                 # the step came back under control: lengthen it again (a damping halved once stayed halved for the
                 # rest of the solve, and the dairy products then crept to the tolerance in 40+ steps)
-                damp = min(1.0, damp * 1.5)
+                damp = min(1.0, damp * _st.get("market.damping_up"))
             prev = err
             new = r.copy()
             for c in r.columns:
@@ -2630,29 +2990,79 @@ class MarketModule:
                     e_d = float((D[c] * ed[c]).sum() / max(d_, 1e-9))
                     if s_ > 0 and d_ > 0 and (e_s - e_d) > 1e-6:
                         new[c] = r[c] * (d_ / s_) ** (1.0 / (e_s - e_d))
-            r = r * (new / r).clip(lower=0.2, upper=5.0) ** damp
+            if aa:
+                z = np.log(r.to_numpy(dtype=float)).ravel()
+                g = np.log(np.maximum(new.to_numpy(dtype=float), 1e-300)).ravel()
+                if err > prev_err * 0.999 or not np.all(np.isfinite(g)):
+                    aa_z, aa_g = [], []                      # the residual did not fall: restart from a damped step
+                aa_z.append(z); aa_g.append(g)
+                aa_z, aa_g = aa_z[-(self.MARKET_AA_MEMORY + 1):], aa_g[-(self.MARKET_AA_MEMORY + 1):]
+                f = g - z
+                if len(aa_z) > 1:
+                    F = np.column_stack([(aa_g[i + 1] - aa_z[i + 1]) - (aa_g[i] - aa_z[i]) for i in range(len(aa_z) - 1)])
+                    Gd = np.column_stack([aa_g[i + 1] - aa_g[i] for i in range(len(aa_z) - 1)])
+                    gam = np.linalg.lstsq(F, f, rcond=None)[0]
+                    zn = g - Gd @ gam
+                else:
+                    zn = z + damp * f
+                step = np.clip(zn - z, np.log(_sclip[0]), np.log(_sclip[1]))
+                r = pd.DataFrame(np.exp(z + step).reshape(r.shape), index=r.index, columns=r.columns)
+            else:
+                r = r * (new / r).clip(lower=_sclip[0], upper=_sclip[1]) ** damp
         self._bilat_last_r = r.copy()
         self._bilat_converged = converged
         self._bilat_err = err
         return r, S, D, PAr, pc, converged, it + 1
 
-    def _solve_bilateral_equilibrium(self, exogenous_supply, trade_scenario, verbose=False) -> MarketEquilibrium:
-        r, S, D, PAr, pc, converged, iters = self._solve_bilateral(exogenous_supply, trade_scenario, verbose=verbose)
+    def _solve_bilateral_equilibrium(self, exogenous_supply, trade_scenario, verbose=False, max_outer=60) -> MarketEquilibrium:
+        r, S, D, PAr, pc, converged, iters = self._solve_bilateral(exogenous_supply, trade_scenario, verbose=verbose,
+                                                                    max_outer=max_outer)
+        if not converged:
+            # never silent: the market's balances are not met (largest relative residual and its product)
+            import warnings as _w
+            errs = getattr(self, "_bilat_errs", {}) or {}
+            worst = max(errs, key=errs.get) if errs else "-"
+            _w.warn(f"bilateral market did not converge in {iters} steps: largest relative residual "
+                    f"{float(getattr(self, '_bilat_err', float('nan'))):.2e} ({worst})", RuntimeWarning)
+        self._bilat_unconverged = None if converged else (iters, float(getattr(self, "_bilat_err", float("nan"))))
         sysd = self._bilat
         # RAW MILK with the dairy block: the EU milk price is the block's (fat and protein values of the products
         # less margins); raw milk is not traded, so it replaces the pooled market's ratio for the EU
-        _dl = getattr(self, "_dairy_last", None)
-        if self._dairy_params() and _dl is not None and "MILK" in r.columns and "EU27" in r.index:
-            r = r.copy()
-            r.at["EU27", "MILK"] = float(_dl["price_ratio"]["MILK"])
+        # world index from the market's own ratios, BEFORE the EU's raw milk takes the dairy block's price: for a
+        # pooled product the index is the first region's ratio, and EU27 is the first region, so the reported world
+        # raw milk price was the EU dairy block's (K17; the EU price signal itself was right: premium x world)
         widx = self._bilateral_world_index(r)
+        _dl = getattr(self, "_dairy_last", None)
+        if self._dairy_params() and _dl is not None and "MILK" in r.columns and all(x in r.index for x in self.EU):
+            r = r.copy()
+            for _rg in self.EU:
+                r.at[_rg, "MILK"] = float((_dl.get("milk_price_ratio_reg") or {}).get(_rg, _dl["price_ratio"]["MILK"]))
+        # Norway's raw milk: its dairy block's price (raw milk is not traded; CAPRI ProcMargM_ per RMS)
+        _wl = getattr(self, "_dairy_world_last", None) or {}
+        for _rg in self.SUP:
+            if _rg in (getattr(self, "_sup_milk_now", None) or {}) and _rg in _wl and "MILK" in r.columns:
+                r = r.copy()
+                r.at[_rg, "MILK"] = float(_wl[_rg]["price_ratio"]["MILK"])
+        #: producer price ratios (to base) of the non-EU market regions with supply models: the prices their
+        #: supply models see (CAPRIModel; K56)
+        self.sup_price_ratio = r.loc[[x for x in self.SUP if x in r.index]].copy()
         world = self.world_prices_base * widx
         dom0 = self._dom0()
         reported = dom0.reindex(index=r.index, columns=r.columns) * r
         wedge = dom0.reindex(index=r.index, columns=r.columns) * widx
-        # the EU price farmers see: premium over the world index (model.py: signal = world ratio x premium)
-        self.eu_premium = (r.loc["EU27"] / widx).reindex(self.commodities).fillna(1.0)
-        self._wedge_eu_last = wedge.loc["EU27"]
+        # the EU price farmers see: premium over the world index (model.py: signal = world ratio x premium); with two
+        # EU market regions, per region (eu_premium_reg) and the production-weighted EU average (eu_premium)
+        self.eu_premium_reg = pd.DataFrame({_rg: (r.loc[_rg] / widx).reindex(self.commodities).fillna(1.0)
+                                            for _rg in self.EU}).T
+        if self.eu_blocks:
+            _w = S.loc[list(self.EU)].reindex(columns=self.commodities).fillna(0.0)
+            _ws = _w.sum(axis=0)
+            _avg = (self.eu_premium_reg * _w).sum(axis=0) / _ws.where(_ws > 0, 1.0)
+            self.eu_premium = _avg.where(_ws > 0, self.eu_premium_reg.mean(axis=0))
+            self._wedge_eu_last = wedge.loc[self.EU[0]]
+        else:
+            self.eu_premium = self.eu_premium_reg.loc["EU27"]
+            self._wedge_eu_last = wedge.loc["EU27"]
         self._bilat_ratio_now = r
         idx = pd.MultiIndex.from_product([self.regions, self.regions], names=["exporter", "importer"])
         flows = pd.DataFrame(0.0, index=idx, columns=self.commodities)
@@ -2665,9 +3075,10 @@ class MarketModule:
         self.last_market_solver = "bilateral"
         welfare = self._compute_welfare(S, D, world, reported, trade_scenario)
         biof = None
-        if self._biofuel_params() and "EU27" in reported.index:
-            biof = self.biofuel_feedstock_use({c: float(PAr.at["EU27", c]) for c in self._biofuel_params()["share"]
-                                               if c in PAr.columns})
+        if self._biofuel_params() and all(x in reported.index for x in self.EU):
+            _pr = {_rg: {c: float(PAr.at[_rg, c]) for c in self._biofuel_params()["share"] if c in PAr.columns}
+                   for _rg in self.EU}
+            biof = self.biofuel_feedstock_use(_pr if self.eu_blocks else _pr["EU27"])
             # biofuel markets: output, use and prices of every region (BIOF_M); first-generation output and the
             # processing margin (producer price over feedstock cost) of every EU member state
             st = getattr(self, "_biof_state", None) if self.biofuel_endogenous() else None
@@ -2686,262 +3097,82 @@ class MarketModule:
                     biof["member_states"] = {
                         f"{ms}|{fuel}": {"first_generation": float(st["X"].get((ms, fuel), d["x0_kt"])),
                                          "first_generation0": float(d["x0_kt"]),
-                                         "margin": (float(d["ppri"]) * float(r.at["EU27", fuel]) / st["mub"][(ms, fuel)]
+                                         "margin": (float(d["ppri"]) * float(r.at[d["region"], fuel]) / st["mub"][(ms, fuel)]
                                                     if (ms, fuel) in st["mub"] else None),
                                          "margin0": float(d["pr0"]) or None}
-                        for (ms, fuel), d in bm["rows"].items() if d["region"] == "EU27"}
+                        for (ms, fuel), d in bm["rows"].items() if d["region"] in self.EU}
+        if self.eu_blocks:
+            S, D, reported, wedge, flows, world = self._with_eu_aggregate(S, D, reported, wedge, flows, world, dom0)
+            if biof is not None:
+                for k in ("markets",):
+                    for fuel, v in (biof.get(k) or {}).items():
+                        for it in ("production", "use"):
+                            v[it]["EU27"] = sum(v[it].get(x, 0.0) for x in self.EU)
+                        v["price_ratio"]["EU27"] = float(reported.at["EU27", fuel] / dom0.loc[list(self.EU), fuel].mean()) \
+                            if fuel in reported.columns else 1.0
         return MarketEquilibrium(
             dairy=getattr(self, "_dairy_last", None) if self._dairy_params() else None,
             biofuel=biof, world_prices=world, domestic_prices=reported, wedge_prices=wedge,
             production=S, consumption=D, trade_flows=flows, net_exports=S.subtract(D, fill_value=0),
-            welfare=welfare, excess_demand=D.sum() - S.sum(), converged=converged, iterations=iters)
+            welfare=welfare, excess_demand=(D.drop(index="EU27", errors="ignore").sum()
+                                            - S.drop(index="EU27", errors="ignore").sum()) if self.eu_blocks
+            else D.sum() - S.sum(), converged=converged, iterations=iters)
+
+    def _with_eu_aggregate(self, S, D, reported, wedge, flows, world, dom0):
+        """Two EU market regions: an EU27 reporting row (CAPRI's EU27yr19 aggregate) appended to production, use,
+        prices and flows - quantities summed, prices the production-weighted average of the blocks' (use-weighted
+        where the EU produces none). The market's own regions are unchanged; the row is for reporting and for the
+        callers that read the EU as a whole."""
+        eu = list(self.EU)
+        S = S.copy(); D = D.copy(); reported = reported.copy(); wedge = wedge.copy()
+        S.loc["EU27"] = S.loc[eu].sum(axis=0)
+        D.loc["EU27"] = D.loc[eu].sum(axis=0)
+        w = S.loc[eu].where(S.loc[eu].sum(axis=0) > 0, D.loc[eu], axis=1).reindex(columns=reported.columns).fillna(0.0)
+        ws = w.sum(axis=0)
+        for fr in (reported, wedge):
+            avg = (fr.loc[eu] * w).sum(axis=0) / ws.where(ws > 0, 1.0)
+            fr.loc["EU27"] = avg.where(ws > 0, fr.loc[eu].mean(axis=0))
+        # flows: extra-EU flows of the aggregate (intra-EU flows between the blocks are not EU trade)
+        fl = flows.copy()
+        add = {}
+        for (exp, imp), row in flows.iterrows():
+            e_eu, i_eu = exp in eu, imp in eu
+            if e_eu and i_eu:
+                continue
+            if e_eu or i_eu:
+                key = ("EU27" if e_eu else exp, "EU27" if i_eu else imp)
+                add[key] = add.get(key, 0.0) + row
+        if add:
+            extra = pd.DataFrame(add).T
+            extra.index = pd.MultiIndex.from_tuples(extra.index, names=fl.index.names)
+            fl = pd.concat([fl, extra])
+        self._eu_aggregate_reported = True
+        return S, D, reported, wedge, fl, world
 
     def solve(
         self,
         exogenous_supply: Optional[pd.DataFrame] = None,
         trade_scenario: Optional[Dict] = None,
         policy_scenario: Optional[Dict] = None,
-        max_iter: int = 200,
-        tolerance: float = 0.010,
-        step_size: float = 0.06,
+        max_iter: Optional[int] = None,
         verbose: bool = False,
     ) -> MarketEquilibrium:
-        """
-        Solve for market equilibrium prices.
+        """Solve CAPRI's bilateral spatial market (market/bilateral.py) for the given supply.
 
-        Uses tatonnement (excess demand proportional price adjustment):
-          P_{t+1} = P_t × exp(α × ED_t / QS_t)
-
-        Convergence criterion: max|ED_k / QS_k| < tolerance
-
-        Parameters
-        ----------
-        exogenous_supply : supply from supply module [region × commodity]
+        exogenous_supply : supply from the supply module [region x commodity]
         trade_scenario   : {"tariff_change": {commodity: delta_pct}}
-        policy_scenario  : additional policy instruments (export subsidies etc.)
-        max_iter         : maximum iterations
-        tolerance        : convergence threshold (relative excess demand)
-        step_size        : tatonnement step (α)
+        policy_scenario  : kept for the interface (the instruments act through the supply side)
+        max_iter         : Newton rounds of the bilateral solve (default 100)
         verbose          : print iteration progress
+
+        The premium market structure of earlier versions (SciPy root or tatonnement with an EU
+        Armington premium) was removed on 20 October 2026 (KNOWN_ISSUES K54-2): no run path used it.
         """
         self._trade_scenario_now = trade_scenario
-        if getattr(self, "market_structure", "premium") == "bilateral" and self._bilateral_raw():
-            return self._solve_bilateral_equilibrium(exogenous_supply, trade_scenario, verbose=verbose)
-        self._bilat_ratio_now = None
-        prices = self.world_prices_base.copy().astype(float)
-        converged = False
-        iteration = 0
-
-        # --- Market calibration (CAPRI-style cal_market step) ---
-        # Calibrate the demand base so the BASE period is an equilibrium -- but do
-        # this only ONCE, against base supply, then freeze it. The previous code
-        # recalibrated demand to match whatever supply was passed on every solve,
-        # so a scenario supply cut was instantly matched by an equal demand cut
-        # and no price ever moved (a 30% beef supply cut produced 0% price change).
-        # Freezing the calibration at base means scenario supply changes create
-        # genuine excess demand and the tatonnement moves prices, as a market
-        # model must.
-        if getattr(self, "_demand_cal_frozen", None) is None:
-            base_supply = pd.DataFrame(0.0, index=["EU27"], columns=self.commodities)
-            for comm in self.commodities:
-                if comm in getattr(self, "base_production", pd.DataFrame()).columns:
-                    base_supply.at["EU27", comm] = self.base_production.at["EU27", comm]
-            # Use the model's OWN EU output where it is known, and give the EU a
-            # base balance consistent with it (see _align_eu_base_balance).
-            # The supply module passes one row per member state; the EU total is
-            # their sum, exactly as supply_response forms it.
-            if exogenous_supply is not None and len(exogenous_supply) > 0:
-                base_supply = self._align_eu_base_balance(
-                    exogenous_supply.sum(axis=0), exogenous_supply)
-                base_supply = self._align_eu_crush_products(base_supply)
-            self._calibrate_demand_to_supply(base_supply, prices, trade_scenario)
-            self._exempt_eu_from_world_calibration(base_supply, prices, trade_scenario)
-            self._demand_cal_frozen = self._demand_cal.copy()
-        else:
-            self._demand_cal = self._demand_cal_frozen.copy()
-
-        # NEWTON-TYPE SOLVE (market_solver = "root"): the same equations - relative
-        # excess demand (demand - supply) / supply = 0 for every commodity - solved
-        # with SciPy's root (Powell hybrid) on log price ratios z = log(p / p_base),
-        # to 1e-8 instead of tatonnement's 1%. CAPRI solves its market model as a
-        # system of equations (CONOPT). Safeguard: if root fails or a price falls
-        # below the floor (half the base price), tatonnement runs as before.
-        self.last_market_solver = "tatonnement"
-        if getattr(self, "market_solver", "tatonnement") == "root":
-            from scipy.optimize import root as _root
-            comms = list(prices.index)
-            pb = self.world_prices_base.reindex(comms).astype(float).clip(lower=1e-9).values
-
-            def _f(z):
-                pr = pd.Series(pb * np.exp(z), index=comms)
-                dp = self.domestic_prices(pr, trade_scenario)
-                su = self.supply_response(pr, exogenous_supply).sum(axis=0)
-                de = self.demand_response(dp, pr).sum(axis=0)
-                return ((de - su) / su.clip(lower=1.0)).reindex(comms).fillna(0.0).values
-
-            z0 = np.log(np.maximum(prices.reindex(comms).values, 1e-9) / pb)
-            try:
-                sol = _root(_f, z0, method="hybr", options={"xtol": 1e-10, "maxfev": 4000})
-                pr = pd.Series(pb * np.exp(sol.x), index=comms)
-                resid = float(np.max(np.abs(_f(sol.x))))
-                self.last_root_info = {"success": bool(sol.success), "nfev": int(sol.nfev), "max_rel_ed": resid}
-                if resid < min(tolerance, 1e-6) and bool((pr >= self.world_prices_base.reindex(comms) * 0.5 - 1e-9).all()):
-                    prices = pr
-                    self.last_market_solver = "root"
-            except Exception as _exc:
-                self.last_root_info = {"success": False, "error": repr(_exc)}
-        for iteration in range(max_iter if self.last_market_solver != "root" else 1):
-            dom_prices = self.domestic_prices(prices, trade_scenario)
-            supply = self.supply_response(prices, exogenous_supply)
-            demand = self.demand_response(dom_prices, prices)
-
-            total_supply = supply.sum(axis=0)
-            total_demand = demand.sum(axis=0)
-            ed = total_demand - total_supply
-
-            # Relative excess demand
-            rel_ed = ed / total_supply.clip(lower=1.0)
-            max_rel = rel_ed.abs().max()
-
-            if verbose and iteration % 20 == 0:
-                print(f"  Market iter {iteration:3d}: max|rel_ED| = {max_rel:.6f}")
-
-            if max_rel < tolerance:
-                converged = True
-                break
-
-            # Tatonnement price update: raise prices where demand > supply
-            prices = prices * np.exp(step_size * rel_ed.clip(-0.3, 0.3))
-            # Price floor: 50% of base price (no collapse to zero)
-            price_floor = self.world_prices_base * 0.5
-            prices = prices.clip(lower=price_floor)
-
-        if verbose:
-            status = "CONVERGED" if converged else "NOT CONVERGED"
-            print(f"  Market module: {status} after {iteration+1} iterations")
-
-        # Final equilibrium quantities
-        dom_prices = self.domestic_prices(prices, trade_scenario)
-        supply_final = self.supply_response(prices, exogenous_supply)
-        demand_final = self.demand_response(dom_prices, prices)
-
-        # EU Armington premium, solved together with an ANTICIPATED EU supply
-        # response. The supply module produced exogenous_supply at the EU price
-        # it was shown (_eu_price_seen, relative to base). If the market set the
-        # premium treating that supply as fixed, the supply side would then
-        # react in full and the two would chase each other across many outer
-        # iterations - each one a full re-solve of 248 regional models. Instead
-        # the market lets EU supply respond with CAPRI's own market-level
-        # supply elasticities, as CAPRI's market module does, so the supply
-        # module only corrects the approximation. At a converged point the EU
-        # price equals the price seen and the anticipation vanishes: this
-        # changes the path to the equilibrium, not the equilibrium.
-        self.eu_premium = pd.Series(1.0, index=self.commodities)
-        if "EU27" in dom_prices.index and getattr(self, "_eu_base_supply", None) is not None:
-            wedge_eu = dom_prices.loc["EU27"].copy()
-            seen = getattr(self, "_eu_price_seen", None)
-            seen = (seen.reindex(self.commodities).fillna(1.0).clip(lower=0.2)
-                    if seen is not None else pd.Series(1.0, index=self.commodities))
-            wratio = pd.Series({c: float(prices.get(c, 200.0))
-                                / max(float(self.world_prices_base.get(c, 200.0)), 0.01)
-                                for c in self.commodities})
-            real = getattr(self, "_real_supply_elas", None) or {}
-            eps = self.armington["eps"] if "eps" in self.armington.columns else None
-            el = pd.Series({c: (float(real[c]) if c in real else
-                                (float(eps.get(c, 0.25)) if eps is not None else 0.25))
-                            for c in self.commodities})
-            p_exog = supply_final.loc["EU27"].copy()
-            prem = pd.Series(1.0, index=self.commodities)
-            for _ in range(40):
-                rel = wratio * prem
-                p_ant = p_exog * (rel / seen).clip(lower=0.2).pow(el)
-                target = self.eu_armington_premium(p_ant, demand_final.loc["EU27"])
-                new_prem = prem + 0.5 * (target.reindex(prem.index).fillna(1.0) - prem)
-                dom_prices.loc["EU27"] = wedge_eu * new_prem.reindex(dom_prices.columns).fillna(1.0)
-                demand_final = self.demand_response(dom_prices, prices)
-                done = float((new_prem - prem).abs().max()) < 1e-5
-                prem = new_prem
-                if done:
-                    break
-            # ADAPTIVE DAMPING OF THE PREMIUM between outer iterations. Where the EU barely
-            # imports and exports a tenth of output (eggs: imports 0.07% of use), the premium
-            # is steep in supply - a 10% fall in egg output takes it to its bound - and solver
-            # noise of 0.2% in regional output made it cycle between 1.23 and 1.42 for 25
-            # iterations. Each commodity's step toward the newly cleared premium is halved when
-            # its direction flips (floor 0.1) and recovers otherwise. Path only: at the fixed
-            # point the cleared premium equals the previous one.
-            prev = getattr(self, "_prem_prev", None)
-            if prev is not None:
-                w = getattr(self, "_prem_w", None)
-                if w is None:
-                    w = pd.Series(1.0, index=prem.index)
-                d = prem - prev.reindex(prem.index).fillna(1.0)
-                dprev = getattr(self, "_prem_d", None)
-                if dprev is not None:
-                    flip = (d * dprev.reindex(d.index).fillna(0.0)) < 0
-                    w = w.where(~flip, (w * 0.5).clip(lower=0.1))
-                    w = w.where(flip, (w * 1.25).clip(upper=1.0))
-                prem = prev.reindex(prem.index).fillna(1.0) + w * d
-                self._prem_w, self._prem_d = w, d
-            # RAW MILK: the EU milk price is the dairy block's (fat and protein values of the products
-            # less processing margins), carried as the premium over the world milk price
-            _dl = getattr(self, "_dairy_last", None)
-            if _dl is not None and "MILK" in prem.index and float(wratio.get("MILK", 0.0)) > 0:
-                prem["MILK"] = float(_dl["price_ratio"]["MILK"]) / float(wratio["MILK"])
-            self._prem_prev = prem.copy()
-            self.eu_premium = prem
-            # dom_prices carries the EU price ONCE: wedge x the (damped) premium. The loop above wrote
-            # wedge x its own premium into it, and the reported price then multiplied by the premium
-            # again: reported = wedge x premium x premium (Farm-to-Fork butter +32% reported against
-            # +18% paid; every premium commodity's reported EU price change was inflated the same way,
-            # while the supply side was always shown world x premium, once)
-            dom_prices.loc["EU27"] = wedge_eu * prem.reindex(dom_prices.columns).fillna(1.0).values
-            self._wedge_eu_last = wedge_eu
-        flows_final  = self.compute_trade_flows(
-            supply_final, demand_final, prices, dom_prices
-        )
-
-        net_exports = supply_final.subtract(demand_final, fill_value=0)
-        excess_dem  = demand_final.sum() - supply_final.sum()
-
-        # Welfare decomposition (consumer surplus + producer surplus + budget)
-        welfare = self._compute_welfare(
-            supply_final, demand_final, prices, dom_prices, trade_scenario
-        )
-
-        # REPORTED EU PRICE = the producer price farmers respond to: world x
-        # tariff x the Armington premium. Results used to report the EU row
-        # without the premium, and every Farm-to-Fork comparison with CAPRI read
-        # it (pork +13.9% reported vs +25.5% actually paid; poultry +9.9 vs
-        # +19.5%). The wedge prices stay available as wedge_prices.
-        reported = dom_prices.copy()                    # EU row: wedge x premium (set above)
-        wedge = dom_prices.copy()
-        if "EU27" in wedge.index and getattr(self, "_eu_base_supply", None) is not None \
-                and getattr(self, "_wedge_eu_last", None) is not None:
-            wedge.loc["EU27"] = self._wedge_eu_last
-        biof = None
-        if self._biofuel_params() and "EU27" in dom_prices.index:
-            d0 = getattr(self, "_dom0_cache", None)
-            if d0 is None:
-                d0 = self.domestic_prices(self.world_prices_base)
-            biof = self.biofuel_feedstock_use(
-                {c: float(dom_prices.at["EU27", c]) / float(d0.at["EU27", c])
-                 for c in self._biofuel_params()["share"] if float(d0.at["EU27", c]) > 0})
-        return MarketEquilibrium(
-            dairy=getattr(self, "_dairy_last", None) if self._dairy_params() else None,
-            biofuel=biof,
-            world_prices=prices,
-            domestic_prices=reported,
-            wedge_prices=wedge,
-            production=supply_final,
-            consumption=demand_final,
-            trade_flows=flows_final,
-            net_exports=net_exports,
-            welfare=welfare,
-            excess_demand=excess_dem,
-            converged=converged,
-            iterations=iteration + 1,
-        )
+        if self.market_structure != "bilateral" or not self._bilateral_raw():
+            raise ValueError("the market needs CAPRI's bilateral data (capri_data/2017/market/bilateral_flows_*.csv)")
+        return self._solve_bilateral_equilibrium(exogenous_supply, trade_scenario, verbose=verbose,
+                                                 max_outer=int(max_iter) if max_iter else int(_settings().get("market.max_iter")))
 
     # ------------------------------------------------------------------
     # Welfare
@@ -2968,8 +3199,8 @@ class MarketModule:
             cs, ps, budget = 0.0, 0.0, 0.0
 
             for comm in self.commodities:
-                wp0 = self.world_prices_base.get(comm, 200.0)
-                wp1 = world_prices.get(comm, 200.0)
+                wp0 = self.world_prices_base[comm]
+                wp1 = world_prices.get(comm, self.world_prices_base[comm])
                 dp0 = wp0  # baseline domestic ≈ world (no tariff change)
                 dp1 = domestic_prices.at[region, comm] if (
                     region in domestic_prices.index and comm in domestic_prices.columns
@@ -3010,53 +3241,3 @@ class MarketModule:
 
         return pd.DataFrame(welfare_rows).set_index("region")
 
-
-def eu_gross_trade(mm, supply: "pd.Series", demand: "pd.Series",
-                   premium: "pd.Series") -> "pd.DataFrame":
-    """EU gross imports and exports implied by the Armington clearing.
-
-    Rebuilds, per commodity, the base gross flows exactly as
-    MarketModule.eu_armington_premium does, then evaluates them at the solved
-    premium x: imports M = Q / (1 + r(x)) with r(x) = (D0/M0) x^-sigma, exports
-    X = X0 x^-rho2. These are the flows the model solves with, reported rather
-    than recomputed by a separate method.
-    """
-    import pandas as pd
-    P0s, Q0s = mm._eu_base_supply, mm._eu_base_demand
-    gross = mm._eu_gross_trade()
-    rows = []
-    for c in mm.commodities:
-        P0, Q0 = float(P0s.get(c, 0.0)), float(Q0s.get(c, 0.0))
-        P, Q = float(supply.get(c, 0.0)), float(demand.get(c, 0.0))
-        if min(P0, Q0, P, Q) <= 1e-6:
-            continue
-        sig = float(mm.armington.at[c, "sigma"]) if c in mm.armington.index else 3.0
-        r2 = sig
-        if c in mm.armington.index and "rho2" in mm.armington.columns:
-            v = mm.armington.at[c, "rho2"]
-            if pd.notna(v) and float(v) > 0:
-                r2 = float(v)
-        Mtf, Xtf = gross.get(c, (0.0, 0.0))
-        big = max(Mtf, Xtf)
-        if big < mm.MIN_TRADE_SHARE_FOR_PREMIUM * Q0:
-            rows.append((c, max(Q0 - P0, 0.0), max(P0 - Q0, 0.0),
-                         max(Q - P, 0.0), max(P - Q, 0.0), "net only"))
-            continue
-        g = min(max(min(Mtf, Xtf) / big, 0.0), 0.9)
-        N0 = Q0 - P0
-        if N0 >= 0:
-            M0 = max(N0 / (1.0 - g), 0.01 * Q0)
-        else:
-            X0 = max(-N0 / (1.0 - g), 0.01 * P0); M0 = X0 + N0
-        M0 = min(M0, 0.9 * Q0); X0 = P0 - Q0 + M0; D0 = Q0 - M0
-        if D0 <= 0 or M0 <= 0 or X0 < 0:
-            continue
-        if M0 + X0 < mm.MIN_TRADE_SHARE_FOR_PREMIUM * Q0:      # as in the premium
-            rows.append((c, max(Q0 - P0, 0.0), max(P0 - Q0, 0.0),
-                         max(Q - P, 0.0), max(P - Q, 0.0), "net only"))
-            continue
-        x = float(premium.get(c, 1.0))
-        rx = (D0 / M0) * x ** (-sig)
-        rows.append((c, M0, X0, Q / (1.0 + rx), X0 * x ** (-r2), "gross"))
-    return pd.DataFrame(rows, columns=["commodity", "imports_base", "exports_base",
-                                       "imports", "exports", "basis"]).set_index("commodity")

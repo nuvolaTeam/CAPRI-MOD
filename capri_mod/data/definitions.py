@@ -41,10 +41,10 @@ CROPS = [
     "CITR",  # Citrus
     "TAGR",  # Table grapes
     "WINE",  # Wine
-    "OLIV",  # Olives / olive oil
+    "OLIV",  # Olives for oil (CAPRI OLIV; market product: olive oil OLIO, model code OLIV)
+    "TABO",  # Table olives (CAPRI TABO, a market product of its own)
     "TOBA",  # Tobacco
-    "COTT",  # Cotton
-    "OFIB",  # Other fibre crops
+    "TEXT",  # Textile crops (CAPRI TEXT: cotton in EL, ES, BG, flax and hemp elsewhere; a market product of its own)
     "GRAS",  # Grass / fodder (permanent grassland)
     "MAIF",  # Maize for forage / silage
     "OFOD",  # Other fodder crops
@@ -58,7 +58,8 @@ ANIMALS = [
     "BULL",  # Bulls / fattening cattle
     "HFRS",  # Heifers
     "CALV",  # Calves (young animals)
-    "SHGP",  # Sheep and goats
+    "SHGM",  # Sheep and goats for milk (CAPRI SHGM)
+    "SHGF",  # Sheep and goats for fattening (CAPRI SHGF)
     "PIGS",  # Pigs (breeding sows)
     "PIGF",  # Fattening pigs
     "LAYS",  # Laying hens
@@ -68,28 +69,39 @@ ANIMALS = [
 
 # Market module commodities (traded goods)
 MARKET_COMMODITIES = [
-    # cereals: SWHE = CAPRI's wheat (soft + durum), OCER = other cereals + rye + oats, PARI = milled rice
-    "SWHE", "BARL", "CORN", "OCER", "PARI",
+    # cereals as CAPRI's market (arm/arm_sets.gms CERE_DEF): SWHE = wheat (soft + durum), BARL, CORN = maize,
+    # RYEM = rye and meslin, OATS, OCER = other cereals, PARI = milled rice
+    "SWHE", "BARL", "CORN", "RYEM", "OATS", "OCER", "PARI",
     "RAPE", "SUNF", "SOYA",                    # Oilseeds (other oilseeds, OOIL: no CAPRI market - nonXX_CROPS;
                                                  # a fixed activity, FACT; the pooled world market it had here
                                                  # rested on an invented world total, removed in Sprint 9s)
     # white sugar; sugar beet is processed in the member states (CAPRI: PRCY, beet price follows the sugar
-    # price), it has no world market (tools/build_sugar_processing.py)
+    # price), it has no world market (tools/build/build_sugar_processing.py)
     "SUGR",
     "POTA",                                      # Potatoes
     "PULS",                                      # Pulses
     "TOMA", "OVEG",                              # Vegetables
-    "APPL", "OFRU", "CITR",                     # Fruits
+    "APPL", "OFRU", "CITR", "TAGR",             # Fruits (TAGR table grapes: a CAPRI market, arm_sets CROPS_DEF)
+    "TOBA",                                      # Tobacco (a CAPRI market, arm_sets CROPS_DEF)
+    "TABO",                                      # Table olives (a CAPRI market, arm_sets CROPS_DEF)
+    "TEXT",                                      # Textile crops (a CAPRI market, arm_sets CROPS_DEF)
     "WINE", "OLIV",                              # Wine, olive oil (OLIV = CAPRI's olive oil OLIO)
     "MILK", "BUTR", "SKIM", "CHES", "WHEY",    # Dairy products
     # CAPRI's other dairy products, traded as in CAPRI (Sprint 9f): fresh milk products, cream, concentrated
     # milk, whole milk powder, casein (CAPRI codes)
     "FRMI", "CREM", "COCM", "WMIO", "CASE",
-    "BEEF", "PORK", "POUL", "SHGM", "EGGS",    # Livestock products
+    "BEEF", "PORK", "POUL", "SGMT", "EGGS",    # Livestock products
     # (FATS and OFOD_M, "fats" and "other food", were markets with no supply, no use and invented world
     # totals; CAPRI has no such products - its FATS and PROT are the dairy block's milk fat and protein)
     # oilseed-crushing products (docs/OILSEED_CRUSHING.md): oils and cakes
     "RAPO", "SUNO", "SOYO", "RAPC", "SUNC", "SOYC",
+    # palm oil and other vegetable oils (CAPRI PLMO, OTHO, arm/arm_sets.gms CROPS_DEF; October 2026): no supply-model
+    # activity; supplied by CAPRI's market supply functions (EU: other vegetable oils only)
+    "PLMO", "OTHO",
+    # fish and the tropical crop products (CAPRI FFIS freshwater fish, SFIS saltwater fish, OAQU other aquatic
+    # products, COFF coffee, TEAS tea, COCO cocoa; arm/arm_sets.gms; October 2026): no supply-model activity; supplied
+    # by CAPRI's market supply functions (EU: the fish products), demanded as food (GL) and fish as feed (FPRO bulk)
+    "FFIS", "SFIS", "OAQU", "COFF", "TEAS", "COCO",
     # biofuels (CAPRI XXBIOF): bio-ethanol and bio-diesel, made from the feedstocks in the market; traded and
     # priced with endogenous biofuel markets (BIOF_M, docs/BIOFUEL_MARKET.md), fixed at the reference without
     "BIOE", "BIOD",
@@ -100,19 +112,13 @@ MARKET_COMMODITIES = [
     "FENI", "FPRI",
 ]
 
-# Processed / secondary products
-PROCESSING_OUTPUTS = {
-    "SUGB": ["SUGR"],           # Sugar beet → white sugar
-    "RAPE": ["RAPO", "RAPM"],   # Rapeseed → oil + meal
-    "SUNF": ["SUFO", "SUFM"],   # Sunflower → oil + meal
-    "SOYA": ["SOYO", "SOYM"],   # Soybeans → oil + meal
-    "MILK": ["BUTR", "SKIM", "CHES", "WHEY"],
-}
+# (PROCESSING_OUTPUTS removed 23 October 2026: read by no model code; the market's processing is MarketModule's
+# CRUSH_CHAINS, dairy block and sugar processing, in CAPRI's codes)
 
 # Feed commodities
 FEED_ITEMS = [
     "SWHE", "BARL", "CORN", "OCER",        # Grain feeds
-    "RAPM", "SOYM", "SUFM",                 # Protein meals
+    "RAPC", "SOYC", "SUNC",                 # Oilseed cakes (CAPRI's codes)
     "GRAS", "MAIF", "OFOD",                 # Roughages
     "MILK",                                  # Milk for calves
 ]
@@ -261,7 +267,8 @@ REGION_TO_COUNTRY = {
 # ---------------------------------------------------------------------------
 
 TRADE_REGIONS = {
-    "EU27":  list(NUTS2_REGIONS.keys()) + ["LU", "CY", "MT"],  # handled as one block in market
+    # the EU's member states (Norway is not one: NUTS2_REGIONS also holds Norway's supply regions)
+    "EU27":  [c for c in NUTS2_REGIONS.keys() if c not in ("NO",)] + ["LU", "CY", "MT"],  # one block in market
     "USA":   ["US"],
     "CAN":   ["CA"],
     "BRA":   ["BR"],
@@ -289,6 +296,9 @@ TRADE_REGIONS = {
     "DZA":   ["DZ"],
     "SAU":   ["SA"],
     "IRN":   ["IR"],
+    # Norway: CAPRI's market region NO000000 (own market region, aggregation/defaultA.agg), linked to supply
+    # models (RMSSUP): its market supply is its supply models' output (KNOWN_ISSUES K56)
+    "NOR":   ["NO"],
     "ROW":   ["ROW"],  # Rest of world
 }
 
@@ -325,5 +335,28 @@ GHG_TYPES = [
 # TIME
 # ---------------------------------------------------------------------------
 
-BASE_YEAR = 2012          # CAPRI baseline calibration year
-PROJECTION_YEARS = [2030, 2040, 2050]
+# (BASE_YEAR = 2012 and PROJECTION_YEARS removed 23 October 2026: wrong and unused; the base year is 2017, the
+# setting run.base_year, and a projection's years come from its trajectory)
+
+
+# ---------------------------------------------------------------------------
+# CAPRI member-state codes (sets.gms NUTS0): Belgium and Luxembourg are one member state in CAPRI (BL000000), Ireland is
+# IR000000, Greece EL000000, the United Kingdom UK000000; every other country keeps its NUTS prefix. Data:
+# capri_data/shared/capri_member_state_codes.csv. MS_CODE maps a two-letter prefix to CAPRI's (identity where they
+# agree, so MS_CODE.get(p, p) works for any prefix); capri_ms(region) gives the 8-character CAPRI member state.
+# ---------------------------------------------------------------------------
+def _load_ms_codes():
+    import csv
+    from pathlib import Path
+    p = Path(__file__).resolve().parents[2] / "capri_data" / "shared" / "capri_member_state_codes.csv"
+    with open(p, newline="") as f:
+        return {r["nuts_prefix"]: r["capri_ms"][:2] for r in csv.DictReader(f)}
+
+
+MS_CODE = _load_ms_codes()
+
+
+def capri_ms(region: str) -> str:
+    """CAPRI member state of a model region or country prefix, e.g. 'BE21' -> 'BL000000', 'IE04' -> 'IR000000'."""
+    p = str(region)[:2]
+    return MS_CODE.get(p, p) + "000000"

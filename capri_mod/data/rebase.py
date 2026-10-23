@@ -130,7 +130,6 @@ CARRY_FORWARD = {
         "armington_params.csv",
         "world_prices.csv",
         "fao_market_baseline.json",
-        "fao_processing_splits.json",
         "fao_demand_own_elas_eu.json",
     ],
     "policy": ["cap_payments.csv", "eu_mfn_tariffs.csv"],

@@ -32,6 +32,7 @@ from pathlib import Path
 
 import numpy as np
 from capri_mod.params import param, param_table
+from capri_mod.data.definitions import capri_ms
 
 #: CAPRI supply/pmp_elas.gms: FODDI (incl. straw, overridden) and named feeds
 FEED_ELAS = {"FGRA": -10.0, "FMAI": -10.0, "FOFA": -10.0, "FROO": -10.0, "FCOM": -10.0,
@@ -45,10 +46,10 @@ FEED_ELAS = {"FGRA": -10.0, "FMAI": -10.0, "FOFA": -10.0, "FROO": -10.0, "FCOM":
 #: suckler cows cereals >= 0.05; non-ruminants: cereals >= 0.6, protein <= 0.2
 #: (sows 0.3, fattening pigs 0.2: PIGS = sows and PIGF = fattening since the pig split), energy-rich
 #: 0.05-0.15, no fodder; other feeds >= 0.005 (0.001 sheep, suckler cows).
-#: NOT YET: CAPRI's data-driven rules - maximum 'other' feed share from member-
-#: state feed balances, minimum fibre-rich (fodder) shares from regional fodder
-#: energy shares (REGISTERED, pending).
-_RUMI = ("DCOW", "BCOW", "BULL", "HFRS", "CALV", "SHGP")
+#: CAPRI's data-driven rules are applied in share_rules through ctx: the maximum 'other' feed share from the
+#: member state's feed balance (foth_max) and the minimum fibre-rich shares from the region's fodder energy
+#: shares (fibre_share x _FIBRE_FACTOR).
+_RUMI = ("DCOW", "BCOW", "BULL", "HFRS", "CALV", "SHGM", "SHGF")
 _NRUMI = ("PIGS", "PIGF", "BROI", "LAYS")
 _FODDI = ("FGRA", "FMAI", "FOFA", "FROO", "FCOM", "FSGM", "FSTR")
 
@@ -86,7 +87,7 @@ def share_rules(act: str, ctx: dict | None = None) -> dict:
         setr("FCER", lo=0.05); setr("FPRO", lo=0.05)
     if act == "BCOW":
         setr("FCER", lo=0.05)
-    setr("FOTH", lo=0.001 if act in ("SHGP", "BCOW") else 0.005)
+    setr("FOTH", lo=0.001 if act in ("SHGM", "SHGF", "BCOW") else 0.005)
     # --- data-driven rules
     fs = ctx.get("fibre_share") or {}
     if act in _FIBRE_FACTOR and fs:
@@ -95,7 +96,7 @@ def share_rules(act: str, ctx: dict | None = None) -> dict:
                 setr(f, lo=_FIBRE_FACTOR[act] * fs[f])
     if act in _RUMI and ctx.get("straw"):
         setr("FSTR", lo=0.01, hi=0.05)
-    if act == "SHGP":
+    if act in ("SHGM", "SHGF"):
         for f in ("FCER", "FPRO", "FENE", "FOTH", "FMIL", "FROO", "FSTR", "FCOM"):
             a, b = r.get(f, (0.0, 1.0)); r[f] = (a, min(b, 0.20))
     if act == "CALV":
@@ -104,7 +105,7 @@ def share_rules(act: str, ctx: dict | None = None) -> dict:
         setr("FCOM", hi=0.01)
     elif act in ("DCOW", "BCOW"):
         setr("FCOM", hi=0.0)
-    if act != "SHGP":
+    if act not in ("SHGM", "SHGF"):
         setr("FSGM", hi=0.0)
     fm = ctx.get("foth_max")
     if fm:
@@ -167,7 +168,7 @@ def stable_share(region: str, act: str) -> float:
         if f.exists():
             for r in _csv.DictReader(open(f)):
                 _STABLE[(r["region"], r["animal_mitt"], r["item"])] = float(r["value"])
-    ctry = {"BE": "BL", "LU": "BL", "IE": "IR"}.get(region[:2], region[:2]) + "000000"
+    ctry = capri_ms(region)
     cat = "DAICOW_S" if act == "DCOW" else "OCOW_S"
     hd, et = _STABLE.get((ctry, cat, "HD")), _STABLE.get((ctry, cat, "Et"))
     if hd is None:
@@ -230,11 +231,16 @@ class Ration:
             self.shares.append((self.feeds.index(NITRATE), "max", self.nitr_max))
         # feed PMP slope
         eps = np.array([abs(FEED_ELAS.get(f, 1.0)) for f in self.feeds])
+        # price per kg, at least 10% of the cereal price: CAPRI supply/pmp_terms/define_const_pmp_param.gms l. 107-110,
+        # MAX(0.1*DATA(MS,"UVAG","FCER","Y")/1000, DATA(MS,"UVAG",FEED,"Y")/1000). The quantity CAPRI divides by
+        # (l. 111-114: max of 10% of the dry-matter requirement and the feeding) is not reconstructed here; this slope
+        # is used only where CAPRI's own calibrated slope is missing (135 cells of FSTR, FCOM, FROO, FSGM and FGRA in
+        # 14 regions; PROXY_AUDIT S209)
         peff = np.maximum(p0, 0.1 * cereal_price)
         xref = np.maximum(x0, 1e-9)
         own = peff / (eps * xref)
         # CAPRI's OWN calibrated slope where available (pmppar p_pmpFeedInpCoeff,
-        # aggregated by tools/build_feed_ration.py); the reconstruction of its
+        # aggregated by tools/build/build_feed_ration.py); the reconstruction of its
         # formula above is the fallback
         cs = rec.get("capri_slope", {})
         capri = np.array([float(cs.get(f, 0.0)) for f in self.feeds])
@@ -326,7 +332,7 @@ class RationModel:
     """All EU region-animal rations, from feed_ration_2017.json."""
 
     def __init__(self, data_dir: str | Path = None, scale: dict = None, price_scale: dict = None,
-                 factor: dict = None):
+                 factor: dict = None, slope_key: str = "capri_slope"):
         """scale: {(region, animal): (f_energy, f_protein, f_dry_matter)} - requirements of a projected year
         (capri_mod/projection: output per head follows the projected yield); the base ration is scaled by
         the largest factor so it stays feasible, and the ration is calibrated to it."""
@@ -339,12 +345,17 @@ class RationModel:
         price_scale = price_scale or {}
         for reg, acts in raw.items():
             # purchased feed bulks at a projected year's prices: {(member state, bulk): factor} (projection/prices.py)
-            _ms = {"BE": "BL", "LU": "BL", "IE": "IR", "GR": "EL"}.get(reg[:2], reg[:2]) + "000000"
+            _ms = capri_ms(reg)
             for act, rec in acts.items():
+                if slope_key != "capri_slope" and rec.get(slope_key):
+                    # CAPRI's feed-PMP slopes of another calibration point (capri_slope_2030: its 2030 baseline)
+                    rec = dict(rec, capri_slope=rec[slope_key])
                 if price_scale:
                     rec = dict(rec, price={f: float(v) * float(price_scale.get((_ms, f), 1.0))
                                            for f, v in rec["price"].items()})
-                pc = float(rec["price"].get("FCER", 0.0)) or 0.2
+                pc = float(rec["price"].get("FCER", 0.0))
+                if not pc > 0:                             # no stand-in (removed 23 October 2026: 0.2)
+                    raise ValueError(f"{reg} {act}: no FCER price in the ration data")
                 sc = scale.get((reg, act))
                 fx = (factor or {}).get((reg, act))
                 if fx:

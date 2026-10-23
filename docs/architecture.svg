@@ -1,103 +1,251 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 620" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" role="img" aria-label="CAPRI-mod model architecture: a supply and market equilibrium loop driven by policy, feeding post-equilibrium environment, feed and biofuel modules.">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1540 1110" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" role="img" aria-label="capri-mod architecture from the source code: data, calibration and scenarios; core execution (supply-market loop); post-equilibrium outputs; projection and supporting components.">
   <defs>
-    <filter id="soft" x="-20%" y="-20%" width="140%" height="140%">
-      <feDropShadow dx="0" dy="2" stdDeviation="3.5" flood-color="#1c2b2d" flood-opacity="0.16"/>
-    </filter>
-    <marker id="arr" markerWidth="10" markerHeight="10" refX="7.5" refY="3.2" orient="auto" markerUnits="userSpaceOnUse">
-      <path d="M0,0 L7.5,3.2 L0,6.4 Z" fill="#4b5b60"/>
-    </marker>
-    <marker id="arrL" markerWidth="10" markerHeight="10" refX="7.5" refY="3.2" orient="auto" markerUnits="userSpaceOnUse">
-      <path d="M0,0 L7.5,3.2 L0,6.4 Z" fill="#8a9aa0"/>
-    </marker>
+    <marker id="a" markerWidth="12" markerHeight="12" refX="9" refY="4" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L9,4 L0,8 Z" fill="#1f4e9a"/></marker>
+    <marker id="g" markerWidth="12" markerHeight="12" refX="9" refY="4" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L9,4 L0,8 Z" fill="#5a7bb5"/></marker>
+    <style>
+      .t  { font-size: 13px; fill: #1c2b3d; }
+      .h  { font-size: 15px; font-weight: 700; fill: #12305f; }
+      .hb { font-size: 21px; font-weight: 800; fill: #12305f; }
+      .s  { font-size: 14.5px; fill: #24364f; }
+      .m  { font-size: 12px; fill: #5a6b82; }
+      .f  { stroke: #1f4e9a; stroke-width: 2; fill: none; }
+      .d  { stroke: #5a7bb5; stroke-width: 1.6; fill: none; stroke-dasharray: 7 5; }
+    </style>
   </defs>
+  <rect width="1540" height="1110" fill="#ffffff"/>
+  <text x="770" y="40" text-anchor="middle" font-size="30" font-weight="800" fill="#12305f">capri-mod — architecture from the source code (20 October 2026)</text>
 
-  <!-- background panel: keeps it readable in light or dark themes -->
-  <rect x="0" y="0" width="900" height="620" rx="0" fill="#ffffff"/>
+  <!-- ============ BAND 1 ============ -->
+  <rect x="12" y="62" width="1516" height="196" rx="12" fill="#f2f7fd" stroke="#8fb3e3" stroke-width="1.5"/>
+  <text x="30" y="92" class="hb">1.  DATA, CALIBRATION &amp; SCENARIOS</text>
+  <text x="30" y="118" class="s">CAPRI's data, its 2030</text>
+  <text x="30" y="137" class="s">reference, scenarios and</text>
+  <text x="30" y="156" class="s">parameters</text>
 
-  <!-- title -->
-  <text x="450" y="46" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="25" font-weight="700" fill="#1c2b2d">CAPRI&#8209;mod &#8212; model architecture</text>
-  <text x="450" y="70" text-anchor="middle" font-size="13.5" fill="#5c6b70">An iterative supply&#8211;market equilibrium, with post&#8211;equilibrium indicator modules</text>
+  <g>
+    <rect x="232" y="104" width="196" height="132" rx="8" fill="#e6f0fc" stroke="#2a62b8"/>
+    <text x="246" y="126" class="h">data/definitions.py</text>
+    <text x="246" y="148" class="t">• 248 regions</text>
+    <text x="246" y="166" class="t">• 34 crops, 12 animals</text>
+    <text x="246" y="184" class="t">• 58 market commodities</text>
+    <text x="246" y="202" class="t">• 30 trade regions</text>
 
-  <!-- input pills -->
-  <g font-size="12.5" fill="#4338ca">
-    <rect x="252" y="96" width="146" height="30" rx="15" fill="#eef2ff" stroke="#c7d2fe"/>
-    <text x="325" y="115.5" text-anchor="middle">policy shock</text>
-    <rect x="502" y="96" width="146" height="30" rx="15" fill="#eef2ff" stroke="#c7d2fe"/>
-    <text x="575" y="115.5" text-anchor="middle">price shock</text>
+    <rect x="448" y="104" width="232" height="132" rx="8" fill="#e6f0fc" stroke="#2a62b8"/>
+    <text x="462" y="126" class="h">capri_data/ (CSV + JSON)</text>
+    <text x="462" y="148" class="t">• CAPRI star 3.0 data, base 2017</text>
+    <text x="462" y="166" class="t">• CAPRI's 2030 reference</text>
+    <text x="462" y="184" class="t">• bilateral market 2017 / 2030</text>
+    <text x="462" y="202" class="t">• mitigation options, N cascade</text>
+    <text x="462" y="220" class="t">• trajectories, validation refs</text>
+
+    <rect x="700" y="104" width="196" height="132" rx="8" fill="#e6f0fc" stroke="#2a62b8"/>
+    <text x="714" y="126" class="h">data/loaders.py</text>
+    <text x="714" y="148" class="t">• load_all_data()</text>
+    <text x="714" y="166" class="t">• validate_data</text>
+    <text x="714" y="184" class="t">• region maps to CAPRI</text>
+    <text x="714" y="202" class="t">• modules read their own</text>
+    <text x="728" y="220" class="t">files (land, N cascade)</text>
+
+    <rect x="916" y="104" width="214" height="132" rx="8" fill="#e6f0fc" stroke="#2a62b8"/>
+    <text x="930" y="126" class="h">policy/greendeal.py</text>
+    <text x="930" y="148" class="t">• greendeal_scenario()</text>
+    <text x="930" y="166" class="t">• greendeal_2030_scenario()</text>
+    <text x="930" y="184" class="t">• farm_to_fork_scenario()</text>
+    <text x="930" y="202" class="t">scenarios/scenarios.py:</text>
+    <text x="930" y="220" class="t">• registry, carbon_tax_scenario()</text>
+
+    <rect x="1150" y="104" width="184" height="132" rx="8" fill="#e6f0fc" stroke="#2a62b8"/>
+    <text x="1164" y="126" class="h">policy/policy_module</text>
+    <text x="1164" y="148" class="t">• PolicyScenario</text>
+    <text x="1164" y="166" class="t">• premium adders</text>
+    <text x="1164" y="184" class="t">• CAP budget report</text>
+    <text x="1164" y="202" class="t">policy/endotech.py:</text>
+    <text x="1164" y="220" class="t">• ghgTech* settings</text>
+
+    <rect x="1354" y="104" width="160" height="132" rx="8" fill="#e6f0fc" stroke="#2a62b8"/>
+    <text x="1368" y="126" class="h">params.py</text>
+    <text x="1368" y="148" class="t">• model_parameters</text>
+    <text x="1378" y="166" class="t">.csv (with sources)</text>
+    <text x="1368" y="184" class="t">• IPCC factors as</text>
+    <text x="1378" y="202" class="t">CAPRI uses them</text>
   </g>
-  <line x1="325" y1="126" x2="325" y2="150" stroke="#8a9aa0" stroke-width="1.6" marker-end="url(#arrL)"/>
-  <line x1="575" y1="126" x2="575" y2="150" stroke="#8a9aa0" stroke-width="1.6" marker-end="url(#arrL)"/>
+  <line x1="680" y1="170" x2="696" y2="170" class="f" marker-end="url(#a)"/>
+  <line x1="1130" y1="170" x2="1146" y2="170" class="f" marker-end="url(#a)"/>
 
-  <!-- orchestrator -->
-  <rect x="300" y="152" width="300" height="60" rx="12" fill="#33454e" filter="url(#soft)"/>
-  <text x="450" y="180" text-anchor="middle" font-size="16.5" font-weight="600" fill="#ffffff">CAPRIModel.run( )</text>
-  <text x="450" y="199" text-anchor="middle" font-size="11.5" fill="#b8c4c8">orchestrates the equilibrium loop</text>
-  <line x1="450" y1="212" x2="450" y2="248" stroke="#4b5b60" stroke-width="1.8" marker-end="url(#arr)"/>
+  <!-- ============ BAND 2 ============ -->
+  <rect x="12" y="272" width="1516" height="402" rx="12" fill="#f1faf3" stroke="#86c497" stroke-width="1.5"/>
+  <path d="M798,236 V292" class="f" marker-end="url(#a)"/>
+  <text x="806" y="268" class="m">data</text>
+  <path d="M1242,236 V262 H1000 V292" class="f" marker-end="url(#a)"/>
+  <text x="1010" y="256" class="m">PolicyScenario (scenario)</text>
+  <path d="M330,236 V262 H700 V292" class="d" marker-end="url(#g)"/>
+  <text x="340" y="256" class="m">sets and codes, used by every module</text>
+  <path d="M1434,236 V312 H1124" class="d" marker-end="url(#g)"/>
+  <text x="1300" y="306" class="m">parameters</text>
+  <text x="30" y="302" class="hb">2.  CORE EXECUTION</text>
+  <text x="30" y="328" class="s">Supply-market fixed point,</text>
+  <text x="30" y="347" class="s">baseline (cached) and scenario</text>
 
-  <!-- equilibrium loop container (the signature element) -->
-  <rect x="66" y="252" width="768" height="172" rx="14" fill="#f6f8f8" stroke="#c3cfd1" stroke-width="1.3" stroke-dasharray="6 5"/>
-  <text x="86" y="276" font-size="12.5" font-style="italic" fill="#5c6b70">equilibrium loop &#8212; iterates until prices converge (tolerance 0.5%)</text>
+  <rect x="610" y="296" width="510" height="102" rx="9" fill="#f3eefc" stroke="#7a5cc2" stroke-width="1.5"/>
+  <text x="865" y="320" text-anchor="middle" class="h" font-size="16">model.py — CAPRIModel.run()</text>
+  <text x="630" y="342" class="t">• baseline cache; scenario solves its baseline first if needed</text>
+  <text x="630" y="360" class="t">• outer loop: damped price signals per commodity, convergence checks</text>
+  <text x="630" y="378" class="t">• switches: supply_form, manure trade, biofuel markets, land rules</text>
+  <text x="630" y="394" class="m">young-animal prices and manure pools updated inside the loop</text>
 
-  <!-- POLICY -->
-  <rect x="92" y="300" width="182" height="96" rx="10" fill="#9c6b1f" filter="url(#soft)"/>
-  <text x="183" y="334" text-anchor="middle" font-size="15" font-weight="600" fill="#ffffff">POLICY</text>
-  <text x="183" y="356" text-anchor="middle" font-size="11.5" fill="#f3e2c6">CAP premiums, TRQ,</text>
-  <text x="183" y="372" text-anchor="middle" font-size="11.5" fill="#f3e2c6">coupled &amp; eco-schemes</text>
+  <!-- left feeders -->
+  <rect x="30" y="372" width="230" height="64" rx="7" fill="#e7f5ea" stroke="#3f9a5b"/>
+  <text x="42" y="392" class="h" font-size="13.5">feed/ration.py</text>
+  <text x="42" y="410" class="t">• CAPRI's rations, requirements</text>
+  <text x="42" y="427" class="t">• feed bulk prices from the market</text>
+  <rect x="30" y="446" width="230" height="64" rx="7" fill="#e7f5ea" stroke="#3f9a5b"/>
+  <text x="42" y="466" class="h" font-size="13.5">fert/inner_fert_dist.py</text>
+  <text x="42" y="484" class="t">• inner fertiliser model (N, P, K)</text>
+  <text x="42" y="501" class="t">• priors, mineral caps (mineRedu)</text>
+  <rect x="30" y="520" width="230" height="82" rx="7" fill="#e7f5ea" stroke="#3f9a5b"/>
+  <text x="42" y="540" class="h" font-size="13.5">supply/n_cascade.py, …</text>
+  <text x="42" y="558" class="t">• N loss cascade, ammonia_techs</text>
+  <text x="42" y="575" class="t">• n_leaching (LEACHN_), ghg_tax</text>
+  <text x="42" y="592" class="t">• environmental/luc.py (LUC)</text>
+  <line x1="260" y1="404" x2="296" y2="440" class="f" marker-end="url(#a)"/>
+  <line x1="260" y1="478" x2="296" y2="478" class="f" marker-end="url(#a)"/>
+  <line x1="260" y1="560" x2="296" y2="520" class="f" marker-end="url(#a)"/>
 
-  <!-- SUPPLY (the core) -->
-  <rect x="356" y="290" width="188" height="116" rx="10" fill="#2e6f4e" filter="url(#soft)"/>
-  <rect x="356" y="290" width="188" height="116" rx="10" fill="none" stroke="#7bbf9a" stroke-width="1.4" opacity="0.7"/>
-  <text x="450" y="326" text-anchor="middle" font-size="16.5" font-weight="700" fill="#ffffff">SUPPLY</text>
-  <text x="450" y="348" text-anchor="middle" font-size="11.5" fill="#d6efe1">248 regions &#215; 40 activities</text>
-  <text x="450" y="364" text-anchor="middle" font-size="11.5" fill="#d6efe1">PMP quadratic program</text>
-  <text x="450" y="386" text-anchor="middle" font-size="10.5" fill="#a7e0c4" letter-spacing="0.4">&#9733; the model core</text>
+  <!-- supply -->
+  <rect x="300" y="416" width="380" height="226" rx="9" fill="#e3f4e7" stroke="#2f8a4c" stroke-width="2"/>
+  <text x="316" y="440" class="h" font-size="16.5">SupplyModule.run() — 248 regions</text>
+  <text x="316" y="462" class="t">• PMP calibration; crops, herds, intensity variants</text>
+  <text x="316" y="480" class="t">• land market and land rules</text>
+  <text x="316" y="498" class="t">• feeding: requirements (REQSE_), fodder balances</text>
+  <text x="316" y="516" class="t">• fertilisation per crop group (NUTNED_)</text>
+  <text x="316" y="534" class="t">• options: ammonia, AD, fertiliser techniques,</text>
+  <text x="330" y="551" class="t">breeding, low-N feed, cover crops, histosols</text>
+  <text x="316" y="569" class="t">• Green Deal targets, N target, CAP greening, tax</text>
+  <text x="316" y="630" class="m">parallel workers (CAPRI_WORKERS); warm starts</text>
 
-  <!-- MARKET -->
-  <rect x="626" y="300" width="182" height="96" rx="10" fill="#326b87" filter="url(#soft)"/>
-  <text x="717" y="334" text-anchor="middle" font-size="15" font-weight="600" fill="#ffffff">MARKET</text>
-  <text x="717" y="356" text-anchor="middle" font-size="11.5" fill="#cfe4ee">EU27 vs world,</text>
-  <text x="717" y="372" text-anchor="middle" font-size="11.5" fill="#cfe4ee">32 commodities (Armington)</text>
+  <!-- aggregation -->
+  <rect x="712" y="452" width="176" height="104" rx="8" fill="#eef3fb" stroke="#2a62b8"/>
+  <text x="726" y="476" class="h">Aggregation</text>
+  <text x="726" y="498" class="t">• regional supply</text>
+  <text x="738" y="515" class="t">→ market commodities</text>
+  <text x="726" y="533" class="t">• feed demand from herds</text>
+  <line x1="680" y1="504" x2="708" y2="504" class="f" marker-end="url(#a)"/>
+  <line x1="888" y1="504" x2="916" y2="504" class="f" marker-end="url(#a)"/>
 
-  <!-- POLICY -> SUPPLY -->
-  <line x1="274" y1="348" x2="352" y2="348" stroke="#4b5b60" stroke-width="1.8" marker-end="url(#arr)"/>
-  <text x="313" y="340" text-anchor="middle" font-size="10.5" fill="#4b5b60">net revenue</text>
+  <!-- market -->
+  <rect x="920" y="416" width="370" height="226" rx="9" fill="#e9f0fb" stroke="#2a62b8" stroke-width="2"/>
+  <text x="936" y="440" class="h" font-size="16.5">MarketModule.solve()</text>
+  <text x="936" y="462" class="t">• Generalised Leontief food demand</text>
+  <text x="936" y="480" class="t">• processing (ProcNQ_), oilseed crushing</text>
+  <text x="936" y="498" class="t">• dairy block: 9 products, fat and protein</text>
+  <text x="936" y="516" class="t">• endogenous biofuel markets, DDGS</text>
+  <text x="936" y="534" class="t">• feed bulks per member state, residual feeds</text>
+  <text x="936" y="560" class="m">Newton per commodity, Anderson acceleration</text>
+  <text x="936" y="630" class="m">EU as one region, or two blocks (eu_blocks)</text>
 
-  <!-- SUPPLY <-> MARKET (the loop's counter-flow) -->
-  <line x1="544" y1="332" x2="622" y2="332" stroke="#4b5b60" stroke-width="1.8" marker-end="url(#arr)"/>
-  <text x="583" y="324" text-anchor="middle" font-size="10.5" fill="#4b5b60">quantities</text>
-  <line x1="622" y1="364" x2="544" y2="364" stroke="#4b5b60" stroke-width="1.8" marker-end="url(#arr)"/>
-  <text x="583" y="380" text-anchor="middle" font-size="10.5" fill="#4b5b60">prices</text>
+  <!-- side boxes -->
+  <rect x="1314" y="416" width="200" height="104" rx="8" fill="#f3eefc" stroke="#7a5cc2"/>
+  <text x="1326" y="440" class="h">manure pools</text>
+  <text x="1326" y="460" class="m">(use_manure_market)</text>
+  <text x="1326" y="480" class="t">• CAPRI's manureTradeNew</text>
+  <text x="1326" y="498" class="t">• Clarabel; off in F2F</text>
+  <rect x="1314" y="534" width="200" height="108" rx="8" fill="#f3eefc" stroke="#7a5cc2"/>
+  <text x="1326" y="558" class="h">young animals</text>
+  <text x="1326" y="580" class="t">• calves, young cattle,</text>
+  <text x="1338" y="597" class="t">piglets, lambs markets</text>
+  <text x="1326" y="615" class="t">• Newton (yaniMarket_)</text>
+  <path d="M1314,468 H1300 V470 H1294" class="d" marker-end="url(#g)"/>
+  <path d="M1314,588 H1294" class="d" marker-end="url(#g)"/>
 
-  <!-- loop -> post-equilibrium distributor bus -->
-  <line x1="450" y1="424" x2="450" y2="446" stroke="#4b5b60" stroke-width="1.8"/>
-  <text x="462" y="440" font-size="10.5" fill="#5c6b70">activity + herd levels</text>
-  <line x1="200" y1="446" x2="700" y2="446" stroke="#4b5b60" stroke-width="1.8"/>
-  <line x1="200" y1="446" x2="200" y2="486" stroke="#4b5b60" stroke-width="1.8" marker-end="url(#arr)"/>
-  <line x1="450" y1="446" x2="450" y2="486" stroke="#4b5b60" stroke-width="1.8" marker-end="url(#arr)"/>
-  <line x1="700" y1="446" x2="700" y2="486" stroke="#4b5b60" stroke-width="1.8" marker-end="url(#arr)"/>
+  <!-- arrows from run() -->
+  <path d="M610,346 H490 V412" class="f" marker-end="url(#a)"/>
+  <text x="420" y="338" class="m">prices, policy settings</text>
+  <path d="M1060,398 V412" class="f" marker-end="url(#a)"/>
+  <text x="1142" y="394" class="m">tariffs, trade settings,</text>
+  <text x="1142" y="410" class="m">world price shocks</text>
+  <!-- loop -->
+  <path d="M1105,642 V660 H490 V646" class="f" marker-end="url(#a)"/>
+  <text x="797" y="655" text-anchor="middle" class="t" font-weight="700" fill="#1f4e9a">damped prices back to supply — until prices, supply, land, pools and young animals settle</text>
 
-  <!-- post-equilibrium cards (light "reader" style, colored accent bar) -->
-  <!-- ENVIRONMENT -->
-  <rect x="110" y="488" width="180" height="86" rx="10" fill="#ffffff" stroke="#e2e8e9"/>
-  <rect x="110" y="488" width="6" height="86" rx="3" fill="#2e6f4e"/>
-  <text x="130" y="514" font-size="13.5" font-weight="600" fill="#2e6f4e">ENVIRONMENT</text>
-  <text x="130" y="534" font-size="11" fill="#5c6b70">N balance &#183; GHG &#183; NH&#8323;</text>
-  <text x="130" y="550" font-size="11" fill="#5c6b70">&#183; biodiversity</text>
+  <!-- ============ BAND 3 ============ -->
+  <rect x="12" y="690" width="1516" height="178" rx="12" fill="#fff8ee" stroke="#e6b26a" stroke-width="1.5"/>
+  <text x="30" y="720" class="hb">3.  POST-EQUILIBRIUM OUTPUTS</text>
+  <text x="30" y="746" class="s">Accounts read the solution;</text>
+  <text x="30" y="765" class="s">they do not change it</text>
 
-  <!-- FEED -->
-  <rect x="360" y="488" width="180" height="86" rx="10" fill="#ffffff" stroke="#e2e8e9"/>
-  <rect x="360" y="488" width="6" height="86" rx="3" fill="#9c6b1f"/>
-  <text x="380" y="514" font-size="13.5" font-weight="600" fill="#9c6b1f">FEED</text>
-  <text x="380" y="534" font-size="11" fill="#5c6b70">energy &amp; protein needs</text>
-  <text x="380" y="550" font-size="11" fill="#5c6b70">&#183; feed allocation</text>
+  <rect x="300" y="738" width="430" height="112" rx="8" fill="#fff0db" stroke="#d48a26"/>
+  <text x="316" y="762" class="h">EnvironmentalModule.run_all_regions()</text>
+  <text x="316" y="784" class="t">• GHG by source (CH4, N2O incl. leaching, liming, urea)</text>
+  <text x="316" y="802" class="t">• gross N balance, NH3, leaching share</text>
+  <text x="316" y="820" class="t">• crop-group fertiliser allocation, land use</text>
+  <text x="316" y="838" class="m">environmental_module.py; CAPRI's gases.gms coefficients</text>
 
-  <!-- BIOFUEL -->
-  <rect x="610" y="488" width="180" height="86" rx="10" fill="#ffffff" stroke="#e2e8e9"/>
-  <rect x="610" y="488" width="6" height="86" rx="3" fill="#326b87"/>
-  <text x="630" y="514" font-size="13.5" font-weight="600" fill="#326b87">BIOFUEL</text>
-  <text x="630" y="534" font-size="11" fill="#5c6b70">bioethanol &#183; biodiesel</text>
-  <text x="630" y="550" font-size="11" fill="#5c6b70">&#183; crop feedstock</text>
+  <rect x="760" y="738" width="380" height="112" rx="8" fill="#fff0db" stroke="#d48a26"/>
+  <text x="776" y="762" class="h">Result assembly (dict)</text>
+  <text x="776" y="784" class="t">• supply, market, environmental, feed</text>
+  <text x="776" y="802" class="t">• fert_dist, fert_npk, luc, abatement</text>
+  <text x="776" y="820" class="t">• policy_summary, convergence, metadata</text>
+  <text x="776" y="838" class="m">io_results.py: Experiment, flatten_outputs</text>
 
-  <!-- caption -->
-  <text x="450" y="602" text-anchor="middle" font-size="11.5" fill="#8a9aa0">Post&#8209;equilibrium modules read the converged activity levels; they do not feed back into the loop.</text>
+  <rect x="1170" y="738" width="344" height="112" rx="8" fill="#fffaf2" stroke="#d48a26" stroke-dasharray="7 5"/>
+  <text x="1186" y="762" class="h">Optional biofuel report</text>
+  <text x="1186" y="784" class="t">• run_biofuel=True: results["biofuel"]</text>
+  <text x="1186" y="802" class="t">• computed inside the market in every run</text>
+  <text x="1186" y="820" class="t">• model.compare(), get_reporter()</text>
+
+  <line x1="560" y1="666" x2="560" y2="734" class="f" marker-end="url(#a)"/>
+  <line x1="1000" y1="666" x2="1000" y2="734" class="f" marker-end="url(#a)"/>
+  <line x1="730" y1="794" x2="756" y2="794" class="f" marker-end="url(#a)"/>
+  <line x1="1140" y1="794" x2="1166" y2="794" class="d" marker-end="url(#g)"/>
+
+  <!-- ============ BAND 4 ============ -->
+  <rect x="12" y="884" width="1516" height="190" rx="12" fill="#f2f7fd" stroke="#8fb3e3" stroke-width="1.5"/>
+  <text x="30" y="914" class="hb">4.  PROJECTION &amp; TOOLS</text>
+  <text x="30" y="940" class="s">2030 runs as CAPRI reports</text>
+  <text x="30" y="959" class="s">its scenarios</text>
+
+  <rect x="260" y="928" width="236" height="96" rx="8" fill="#e6f0fc" stroke="#2a62b8"/>
+  <text x="272" y="950" class="h">projection/trajectory.py</text>
+  <text x="272" y="972" class="t">• BaselineTrajectory</text>
+  <text x="272" y="990" class="t">• capri_ref_2030 (default),</text>
+  <text x="284" y="1008" class="t">captrd_2030, null</text>
+
+  <rect x="516" y="928" width="236" height="96" rx="8" fill="#e6f0fc" stroke="#2a62b8"/>
+  <text x="528" y="950" class="h">projection/prices.py, …</text>
+  <text x="528" y="972" class="t">• CAPRI's 2030 prices, premiums</text>
+  <text x="528" y="990" class="t">• rations and fodder 2030</text>
+  <text x="528" y="1008" class="t">• reconcile.py: area checks</text>
+
+  <rect x="772" y="928" width="250" height="96" rx="8" fill="#e6f0fc" stroke="#2a62b8"/>
+  <text x="784" y="950" class="h">projection_module.py</text>
+  <text x="784" y="972" class="t">• ProjectionModule.run()</text>
+  <text x="784" y="990" class="t">• a fresh CAPRIModel per year</text>
+  <text x="784" y="1008" class="t">• baseline calibrated, then scenario</text>
+
+  <rect x="1042" y="928" width="236" height="96" rx="8" fill="#e6f0fc" stroke="#2a62b8"/>
+  <text x="1054" y="950" class="h">tools/run_f2f_2030.py</text>
+  <text x="1054" y="972" class="t">• 2030 baseline and scenario</text>
+  <text x="1054" y="990" class="t">• --scenario f2f, greendeal,</text>
+  <text x="1066" y="1008" class="t">greendeal2030, carbontax</text>
+
+  <rect x="1298" y="928" width="216" height="96" rx="8" fill="#e6f0fc" stroke="#2a62b8"/>
+  <text x="1310" y="950" class="h">tools/compare_*.py</text>
+  <text x="1310" y="972" class="t">• runs against JRC121368</text>
+  <text x="1310" y="990" class="t">• baseline against CAPRI's</text>
+  <text x="1322" y="1008" class="t">2030 reference, outlook</text>
+
+  <path d="M378,1024 V1044 H880 V1028" class="f" marker-end="url(#a)"/>
+  <text x="520" y="1038" class="m">trajectory</text>
+  <line x1="752" y1="976" x2="768" y2="976" class="f" marker-end="url(#a)"/>
+  <line x1="1042" y1="976" x2="1026" y2="976" class="f" marker-end="url(#a)"/>
+  <line x1="1278" y1="976" x2="1294" y2="976" class="f" marker-end="url(#a)"/>
+  <text x="790" y="922" class="m">calls CAPRIModel.run() (band 2) per year</text>
+
+  <!-- legend -->
+  <line x1="30" y1="1096" x2="90" y2="1096" class="f" marker-end="url(#a)"/>
+  <text x="100" y="1100" class="t">run call / data flow</text>
+  <line x1="300" y1="1096" x2="360" y2="1096" class="d" marker-end="url(#g)"/>
+  <text x="370" y="1100" class="t">configuration / optional support</text>
+  <rect x="640" y="1086" width="44" height="20" rx="4" fill="#fffaf2" stroke="#d48a26" stroke-dasharray="7 5"/>
+  <text x="694" y="1100" class="t">optional output</text>
 </svg>

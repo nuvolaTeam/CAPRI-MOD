@@ -3,7 +3,7 @@
 #   docker build -t capri-mod .
 #   docker run --rm capri-mod                                   # the test suite
 #   docker run --rm -v "$PWD/runs:/runs" capri-mod \
-#       python tools/run_f2f_2030.py /runs/f2f.pkl --verbose     # a full Farm-to-Fork 2030 run
+#       python tools/run/run_f2f_2030.py /runs/f2f.pkl --verbose     # a full Farm-to-Fork 2030 run
 #
 # The image holds the code and the data layer (capri_data); results go to a mounted volume.
 FROM debian:bookworm-slim
@@ -34,4 +34,4 @@ COPY . .
 RUN useradd --create-home --uid 1000 capri && chown -R capri:capri /app
 USER capri
 
-CMD ["python", "tools/run_tests.py", "--parts", "2"]
+CMD ["python", "tools/run/run_tests.py", "--parts", "2"]

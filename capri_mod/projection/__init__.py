@@ -1,4 +1,5 @@
-"""Recursive-dynamic projection layer.
+"""Multi-year projection layer (comparative static per year, as CAPRI; perennial areas carried along the
+baseline path - not a recursive-dynamic model; CAPRI's recursive-dynamic mode, RECDYN, is not implemented).
 
 Wraps the validated comparative-static core in a time loop, driven by an
 externally-sourced, versioned baseline trajectory. Baseline drift and policy

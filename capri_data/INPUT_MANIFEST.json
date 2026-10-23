@@ -210,7 +210,7 @@
    "capri_symbol": "DATA2 COMI, BEEF, PORK, POUM, EGGS, SGMT, SGMI over elementary activities",
    "status": "GDX",
    "coverage": "248 regions",
-   "note": "Replaces YILD for livestock. CAPRI's YILD for breeding and suckler activities is not a marketed product - suckler cows carry 422.6 against 21.8 of beef - so gross_output built from it reported one region at 3.9 billion tonnes of pig. Built by tools/build_livestock_output_coef.py; EU totals match real 2017 production within 0.94-1.08 by product.",
+   "note": "Replaces YILD for livestock. CAPRI's YILD for breeding and suckler activities is not a marketed product - suckler cows carry 422.6 against 21.8 of beef - so gross_output built from it reported one region at 3.9 billion tonnes of pig. Built by tools/build/build_livestock_output_coef.py; EU totals match real 2017 production within 0.94-1.08 by product.",
    "gaps": []
   },
   "livestock_revenue_coef.csv": {
@@ -265,18 +265,6 @@
    "note": "CAPRI splits every dairy herd 50/50 between DCOL and DCOH in the base year, so the split carries no base-year information; the value is the response channel, letting dairy extensify under a nutrient target instead of only shrinking.",
    "gaps": []
   },
-  "eu_gross_trade_supplement.csv": {
-   "concept": "CAPRI's extra-EU gross trade for commodities the trade file does not record (sugar, durum wheat)",
-   "unit": "kt",
-   "dimension": "commodity",
-   "capri_symbol": "dataOut ImportQ (partner NONEU), EXPT-IMPT",
-   "status": "GDX",
-   "coverage": "SUGR, DWHE",
-   "note": "Durum proxied from CAPRI WHEA flows scaled by durum share of wheat production; CAPRI trades wheat as one commodity.",
-   "gaps": [
-    "durum is a proxy"
-   ]
-  },
   "land_rent_regional.csv": {
    "concept": "Land rent per hectare by region (Eurostat apri_lrnt, arable land and/or permanent grassland)",
    "unit": "EUR/ha",
@@ -315,7 +303,7 @@
    "concept": "Manure N trade between regions: export share of excretion, import per ha of cropland",
    "unit": "share; kg N/ha",
    "dimension": "region",
-   "capri_symbol": "CAPRI res_2_1730greendeal_refpol_endotech_all_ini dataOut MTRADE.NITF, EXCRET.NITF per CAPRI region (sources/environment/capri_manure_trade_2030.csv), per group of CAPRI and model regions; tools/build_manure_trade_base.py (Sprint 9j)",
+   "capri_symbol": "CAPRI res_2_1730greendeal_refpol_endotech_all_ini dataOut MTRADE.NITF, EXCRET.NITF per CAPRI region (sources/environment/capri_manure_trade_2030.csv), per group of CAPRI and model regions; tools/build/build_manure_trade_base.py (Sprint 9j)",
    "status": "CAPRI",
    "coverage": "matched regions via nuts_crosswalk",
    "note": "CAPRI's 2030 manure N trade between regions: export share of excretion, import per ha of cropland; counts only where the run trades manure (manureTradeNew).",
@@ -398,7 +386,7 @@
    "capri_symbol": "p_dataMarket FEDM/DOMM; p_ElasFeed",
    "status": "CAPRI",
    "coverage": "125 region x feed entries",
-   "note": "Non-EU only. Built by tools/build_feed_demand_nonEU.py (reproduces the earlier 125 entries exactly; adds CAPRI's DDGS rows and columns and Ethiopia, Sprint 9d).",
+   "note": "Non-EU only. Built by tools/build/build_feed_demand_nonEU.py (reproduces the earlier 125 entries exactly; adds CAPRI's DDGS rows and columns and Ethiopia, Sprint 9d).",
    "gaps": []
   },
   "feed_ration_2017.json": {
@@ -425,7 +413,7 @@
     "five regions with implausible CAPRI fodder-maize yields; fallback regions"
    ]
   },
-  "land_market_2017.json": {
+  "land_market_2017.csv": {
    "concept": "CAPRI land-market data: land-type base areas and quadratic cost matrices",
    "unit": "1000 ha; cost",
    "dimension": "region x land type x land type",
@@ -457,7 +445,7 @@
    "capri_symbol": "INPANI_; YCAM/YCAF/YBUL/YHEI/YCOW, ICAM/ICAF/IBUL/IHEI/ICOW, UVAG",
    "status": "CAPRI",
    "coverage": "232 regions",
-   "note": "Not yet used.",
+   "note": "The young-animal markets of the scenario runs (pooled calves and young cattle; the model's default).",
    "gaps": [
     "needs young-animal trade between regions"
    ]
@@ -489,7 +477,7 @@
    "capri_symbol": "res_17 GRAE/GRAI LEVL, YILD; p_pmpQuadTechn",
    "status": "live",
    "coverage": "230 regions with grassland; 183 with CAPRI's own PMP terms",
-   "note": "tools/build_grass_intensity.py; Sprint 7a"
+   "note": "tools/build/build_grass_intensity.py; Sprint 7a"
   },
   "plant_protection_cost.csv": {
    "concept": "plant protection, other input and fertiliser cost per ha by region and crop",
@@ -498,7 +486,7 @@
    "capri_symbol": "res_17 PLAP, UVAG.PLAP, INPO, FERT",
    "status": "live",
    "coverage": "EU regions with CAPRI crops; EU-wide shares as fallback",
-   "note": "tools/build_plant_protection_cost.py; pesticide and organic targets"
+   "note": "tools/build/build_plant_protection_cost.py; pesticide and organic targets"
   },
   "fert_side_effects.csv": {
    "concept": "emission side effects of nitrification inhibitors (mineral and manure)",
@@ -507,7 +495,7 @@
    "capri_symbol": "p_litRevFertTechs",
    "status": "live",
    "coverage": "248 regions (30 by country median)",
-   "note": "tools/build_fert_side_effects.py"
+   "note": "tools/build/build_fert_side_effects.py"
   },
   "cover_crops.csv": {
    "concept": "catch crops: 2030 share of UAAR, cost per ha, N fixation per ha",
@@ -516,7 +504,7 @@
    "capri_symbol": "CATC LEVL, TOIN (2030 ref); p_cInput winterCov",
    "status": "live",
    "coverage": "248 regions; 213 with N",
-   "note": "tools/build_cover_crops.py"
+   "note": "tools/build/build_cover_crops.py"
   },
   "winter_cover_share.csv": {
    "concept": "share of a crop's area under winter cover",
@@ -525,7 +513,7 @@
    "capri_symbol": "p_winterCoverShare0 / p_winterCoverShare",
    "status": "live",
    "coverage": "all regions (filled NUTS2 <- MS <- EU)",
-   "note": "tools/build_cover_crops.py"
+   "note": "tools/build/build_cover_crops.py"
   },
   "dairy_intensity.csv": {
    "concept": "CAPRI's two dairy activities (DCOL low yield, DCOH high yield)",
@@ -534,7 +522,7 @@
    "capri_symbol": "res_17 DCOL/DCOH LEVL, COMI, MANN, ENNE, CRPR, DRMN, DRMX; p_pmpQuadTechn",
    "status": "live",
    "coverage": "235 regions with dairy cows; 188 with CAPRI's own PMP terms",
-   "note": "tools/build_dairy_intensity.py; Sprint 7b"
+   "note": "tools/build/build_dairy_intensity.py; Sprint 7b"
   },
   "histosol.csv": {
    "concept": "histosols: organic-soil shares, N2O/CO2/CH4 per ha, fallowing cost terms",
@@ -543,7 +531,7 @@
    "capri_symbol": "p_shareOrganicSoil, p_BioHisBur, no_histosols.gms terms",
    "status": "live",
    "coverage": "241 EU regions; fallowing calibrated in 141 (crop) and 135 (grass)",
-   "note": "tools/build_histosol.py"
+   "note": "tools/build/build_histosol.py"
   },
   "cattle_intensity.csv": {
    "concept": "CAPRI's two-intensity fattening bulls (BULL/BULH) and heifers (HEIL/HEIH)",
@@ -552,7 +540,7 @@
    "capri_symbol": "res_17 BULL/BULH/HEIL/HEIH/HEIR LEVL, DAYS, MANN, BEEF, IBUL, IHEI, ENNE, CRPR, DRMN, DRMX; p_pmpQuadTechn",
    "status": "live",
    "coverage": "234 regions with bulls, 231 with heifers; 371 rows with CAPRI's own PMP terms",
-   "note": "tools/build_cattle_intensity.py; Sprint 7c"
+   "note": "tools/build/build_cattle_intensity.py; Sprint 7c"
   },
   "biofuel_feedstock.csv": {
    "concept": "First-generation biofuel feedstocks per CAPRI market region and biofuel",
@@ -561,7 +549,7 @@
    "capri_symbol": "CAPRI 2030 Green Deal reference market results (markmarket_greendeal_1730et_base_1717 dataOut: BIOF, PRCB, PRCBY, ARM1P, PPRI DDGS, BiofFeedCost); arm/market1.gms p_rhoBioFuel; arm/store_prices.gms glycerine",
    "status": "live",
    "coverage": "all CAPRI market regions with first-generation biofuel feedstocks",
-   "note": "First-generation biofuel feedstocks per CAPRI market region and biofuel (all regions; column region = model trade region): 2030-reference quantity, biofuel and by-product yields, feedstock and by-product prices, numeraire, CES elasticity (tools/build_biofuel_market.py). Reproduces CAPRI's BiofFeedCost exactly in every region."
+   "note": "First-generation biofuel feedstocks per CAPRI market region and biofuel (all regions; column region = model trade region): 2030-reference quantity, biofuel and by-product yields, feedstock and by-product prices, numeraire, CES elasticity (tools/build/build_biofuel_market.py). Reproduces CAPRI's BiofFeedCost exactly in every region."
   },
   "biofuel_use_share.csv": {
    "concept": "Share of the EU use of each model market commodity that goes to biofuels",
@@ -570,7 +558,7 @@
    "capri_symbol": "CAPRI 2030 reference: biofuel feedstock use over EU use (HCOM+FEDM+INDM+BIOF+LOSM) of the market group",
    "status": "live",
    "coverage": "EU27 member states",
-   "note": "Share of the EU use of each model market commodity that goes to biofuels (tools/build_biofuel_market.py)."
+   "note": "Share of the EU use of each model market commodity that goes to biofuels (tools/build/build_biofuel_market.py)."
   },
   "dairy_processing.csv": {
    "concept": "CAPRI's dairy block per member state",
@@ -579,7 +567,7 @@
    "capri_symbol": "CAPRI 2030 Green Deal reference market results (dataOut: PROD, PROC, GROF, HCOM, PPRI, FATS, PROT, CSEI, INPE)",
    "status": "live",
    "coverage": "EU27 member states",
-   "note": "CAPRI's dairy block per member state: quantities, processing, fat and protein contents, prices, raw milk, fat and protein prices (tools/build_dairy_processing.py)."
+   "note": "CAPRI's dairy block per member state: quantities, processing, fat and protein contents, prices, raw milk, fat and protein prices (tools/build/build_dairy_processing.py)."
   },
   "dairy_hessian.csv": {
    "concept": "Hessian of CAPRI's dairy normalised quadratic production function per member state; reproduces CAPRI's p_ElasDair own-price elasticities",
@@ -606,7 +594,7 @@
    "capri_symbol": "CAPRI FAO_agg p_dataMarket (fao_agg_17_datamarket), BAS: MAPR, DOMM, IMPT, EXPT",
    "status": "live",
    "coverage": "all regions",
-   "note": "World base balances of butter, skimmed milk powder, cheese and whey powder per model trade region (dairy Stage 2; tools/build_dairy_world_markets.py). Sprint 9f: + FRMI, CREM, COCM, WMIO, CASE (CAPRI's dairy products, traded)."
+   "note": "World base balances of butter, skimmed milk powder, cheese and whey powder per model trade region (dairy Stage 2; tools/build/build_dairy_world_markets.py). Sprint 9f: + FRMI, CREM, COCM, WMIO, CASE (CAPRI's dairy products, traded)."
   },
   "livestock_output_by_product_coef.csv": {
    "concept": "Each animal's output split into CAPRI's final products; sums to livestock_output_coef.csv",
@@ -615,7 +603,7 @@
    "capri_symbol": "CAPRI res_17 final products (COMI, BEEF, PORK, POUM, EGGS, SGMT, SGMI) per activity",
    "status": "live",
    "coverage": "all regions",
-   "note": "Each animal's output split into CAPRI's final products; sums to livestock_output_coef.csv (tools/build_livestock_products.py)."
+   "note": "Each animal's output split into CAPRI's final products; sums to livestock_output_coef.csv (tools/build/build_livestock_products.py)."
   },
   "genetics_effects.csv": {
    "concept": "CAPRI's cattle genomics options (higher milk yield, ruminant feed efficiency)",
@@ -624,7 +612,7 @@
    "capri_symbol": "p_ghgMiti genet_yld / genet_eff (othImpact, costParLin, relSubs0/1)",
    "status": "live",
    "coverage": "240 regions",
-   "note": "tools/build_genetics_effects.py; per unit of the technology parameter (ghgTechMYld, ghgTechFEff: CAPRI scenario settings, default star 3.0 0 / 0.1); scaled by capri_mod/policy/endotech.py and adopted inside the supply model (use_genetics)"
+   "note": "tools/build/build_genetics_effects.py; per unit of the technology parameter (ghgTechMYld, ghgTechFEff: CAPRI scenario settings, default star 3.0 0 / 0.1); scaled by capri_mod/policy/endotech.py and adopted inside the supply model (use_genetics)"
   },
   "dairy_eu_demand_elas.csv": {
    "concept": "EU dairy food demand elasticities (own and cross)",
@@ -633,7 +621,7 @@
    "capri_symbol": "p_ElasDem",
    "status": "live",
    "coverage": "9 x 9",
-   "note": "tools/build_dairy_processing.py"
+   "note": "tools/build/build_dairy_processing.py"
   },
   "dairy_world_processing.csv": {
    "concept": "CAPRI's dairy block data for the 53 non-EU market regions with a dairy Hessian, mapped to the model's trade regions",
@@ -642,7 +630,7 @@
    "capri_symbol": "CAPRI 2030 Green Deal reference market results (non-EU market regions: PROD, PROC, FATS, PROT, PPRI, HCON, FEED, extra-regional trade) and p_hessNQSupp(MILK)",
    "status": "live",
    "coverage": "53 non-EU market regions",
-   "note": "tools/build_dairy_world_blocks.py"
+   "note": "tools/build/build_dairy_world_blocks.py"
   },
   "dairy_world_hessian.csv": {
    "concept": "Dairy NQ Hessians of the non-EU market regions.",
@@ -651,7 +639,7 @@
    "capri_symbol": "CAPRI elas_2_1730defaulta p_hessNQDairy (non-EU, symmetric, MILK row reversed)",
    "status": "live",
    "coverage": "53 non-EU market regions",
-   "note": "tools/build_dairy_world_blocks.py"
+   "note": "tools/build/build_dairy_world_blocks.py"
   },
   "dairy_world_demand_elas.csv": {
    "concept": "Food demand elasticities among the nine dairy products, non-EU market regions.",
@@ -660,7 +648,7 @@
    "capri_symbol": "CAPRI elas_2_1730defaulta p_ElasDem (non-EU)",
    "status": "live",
    "coverage": "53 non-EU market regions",
-   "note": "tools/build_dairy_world_blocks.py"
+   "note": "tools/build/build_dairy_world_blocks.py"
   },
   "sugar_processing.csv": {
    "concept": "CAPRI's sugar processing per member state: beet harvested and processed, white sugar produced, processing yield",
@@ -669,7 +657,7 @@
    "capri_symbol": "GROF(SUGB), PRCM(SUGB), MAPR(SUGA), PRCY(SUGA), 2030 reference",
    "status": "live",
    "coverage": "EU member states, UK, Western Balkans",
-   "note": "tools/build_sugar_processing.py; supply bridge SUGR = beet x sugar_per_beet."
+   "note": "tools/build/build_sugar_processing.py; supply bridge SUGR = beet x sugar_per_beet."
   },
   "world_market_baseline.json": {
    "concept": "Base balances of the market commodities per model trade region",
@@ -678,16 +666,16 @@
    "capri_symbol": "CAPRI FAO_agg p_dataMarket (fao_agg_17_datamarket), BAS: MAPR, DOMM, IMPT, EXPT",
    "status": "live",
    "coverage": "all regions",
-   "note": "tools/build_world_market_baseline.py; one CAPRI source for every region's base production and the EU's self-sufficiency."
+   "note": "tools/build/build_world_market_baseline.py; one CAPRI source for every region's base production and the EU's self-sufficiency."
   },
   "bilateral_flows_2017.csv": {
-   "concept": "CAPRI's bilateral flows aggregated to the model's trade regions with the import price split into exporter-price part a and fixed part b (tools/build_bilateral_market.py)",
+   "concept": "CAPRI's bilateral flows aggregated to the model's trade regions with the import price split into exporter-price part a and fixed part b (tools/build/build_bilateral_market.py)",
    "unit": "kt; EUR/t",
    "dimension": "see note",
    "capri_symbol": "CAPRI market_base_1717 (BAS=SIM=2017): ImportQ, ImportP, Fob, TCost, TaAppl per bilateral flow",
    "status": "live",
    "coverage": "all regions",
-   "note": "CAPRI's bilateral flows aggregated to the model's trade regions with the import price split into exporter-price part a and fixed part b (tools/build_bilateral_market.py) Sprint 9f: + FRMI, CREM, COCM, WMIO, CASE (CAPRI's dairy products, traded)."
+   "note": "CAPRI's bilateral flows aggregated to the model's trade regions with the import price split into exporter-price part a and fixed part b (tools/build/build_bilateral_market.py) Sprint 9f: + FRMI, CREM, COCM, WMIO, CASE (CAPRI's dairy products, traded)."
   },
   "bilateral_flows_2030.csv": {
    "concept": "as bilateral_flows_2017.csv for the 2030 market year",
@@ -744,13 +732,13 @@
    "note": "Armington substitution elasticities of the two nests per market commodity Sprint 9f: + FRMI, CREM, COCM, WMIO, CASE (CAPRI's dairy products, traded)."
   },
   "processing_yields.csv": {
-   "concept": "olive oil per tonne of olives (member state) and milled rice per tonne of paddy (EU) (tools/build_processing_yields.py)",
+   "concept": "olive oil per tonne of olives (member state) and milled rice per tonne of paddy (EU) (tools/build/build_processing_yields.py)",
    "unit": "t/t",
    "dimension": "see note",
    "capri_symbol": "CAPRI 2030 reference: GROF(OLIV), MAPR(OLIO), GROF(PARI), MAPR(RICE)",
    "status": "live",
    "coverage": "all regions",
-   "note": "olive oil per tonne of olives (member state) and milled rice per tonne of paddy (EU) (tools/build_processing_yields.py)"
+   "note": "olive oil per tonne of olives (member state) and milled rice per tonne of paddy (EU) (tools/build/build_processing_yields.py)"
   },
   "biofuel_market.csv": {
    "concept": "CAPRI's biofuel supply and demand functions per CAPRI market region",
@@ -759,7 +747,7 @@
    "capri_symbol": "CAPRI 2030 Green Deal reference market results (markmarket_greendeal_1730et_base_1717 dataOut: PROD, NAGR, SECG, EXOG, BIOF, PPRI, PMRK, CPRI, ARM1P, QUTS, HCOM and CPRI of GASL/DISL, feedstock BIOF/PRCB/PRCBY/ARM1P); biofuel/def_biofuel_params.gms; arm/market_model.gms p_oilEqu",
    "status": "live",
    "coverage": "all CAPRI market regions with biofuel output or use (130 rows)",
-   "note": "CAPRI's biofuel supply (SupplyBiof_), demand (biofDemShare_, biofDem_) and non-fuel processing (ProcNQ_: proc_kt, proc_hess from p_hessNQProc, INPE price) functions per CAPRI market region, calibrated as biofuel/def_biofuel_params.gms to the 2030 reference; tools/build_biofuel_market.py, docs/BIOFUEL_MARKET.md."
+   "note": "CAPRI's biofuel supply (SupplyBiof_), demand (biofDemShare_, biofDem_) and non-fuel processing (ProcNQ_: proc_kt, proc_hess from p_hessNQProc, INPE price) functions per CAPRI market region, calibrated as biofuel/def_biofuel_params.gms to the 2030 reference; tools/build/build_biofuel_market.py, docs/BIOFUEL_MARKET.md."
   },
   "feed_bulks_eu.csv": {
    "concept": "CAPRI's feed bulks of the member states",
@@ -768,7 +756,7 @@
    "capri_symbol": "CAPRI 2030 Green Deal reference market results (markmarket_greendeal_1730et_base_1717 dataOut): FEED per member state and product, ARM1P of EU27yr19; arm/market1.gms p_rhoFeed",
    "status": "live",
    "coverage": "EU27 member states",
-   "note": "CAPRI's feed bulks of the member states (FCER cereals, FPRO protein-rich feed): per member state and bulk the market products' 2030 feed use, EU Arm1 prices and the CES elasticity (feedBlkPrice_, feedShareEqu_; tools/build_feed_bulks.py). Products sum to CAPRI's bulk totals."
+   "note": "CAPRI's feed bulks of the member states (FCER cereals, FPRO protein-rich feed): per member state and bulk the market products' 2030 feed use, EU Arm1 prices and the CES elasticity (feedBlkPrice_, feedShareEqu_; tools/build/build_feed_bulks.py). Products sum to CAPRI's bulk totals."
   },
   "feed_byproducts.csv": {
    "concept": "CAPRI's residual feed output shares (MaprFeed_)",
@@ -777,7 +765,7 @@
    "capri_symbol": "CAPRI markmarket_greendeal_1730et_base_1717 (EU PROD of FENI, FPRI via bilateral_regions_2030.csv), capri_eu27_market_balance_2030_ref.json (HCOM, PRCM, BIOF of the parents); arm/market_model.gms MaprFeed_",
    "status": "live",
    "coverage": "EU27",
-   "note": "CAPRI's residual feeds FENI and FPRI (MaprFeed_): EU 2030 output and the parent commodities' weights (cereals' food and processing use for FPRI, sugar's food and biofuel use for FENI); tools/build_feed_byproducts.py (Sprint 9h)."
+   "note": "CAPRI's residual feeds FENI and FPRI (MaprFeed_): EU 2030 output and the parent commodities' weights (cereals' food and processing use for FPRI, sugar's food and biofuel use for FENI); tools/build/build_feed_byproducts.py (Sprint 9h)."
   },
   "feed_bulks_eu_share.csv": {
    "concept": "Feed share of EU use per model commodity in the bulks",
@@ -786,7 +774,7 @@
    "capri_symbol": "CAPRI 2030 Green Deal reference market results (markmarket_greendeal_1730et_base_1717 dataOut): FEED per member state and product, ARM1P of EU27yr19; arm/market1.gms p_rhoFeed",
    "status": "live",
    "coverage": "EU27 member states",
-   "note": "Feed share of EU use per model commodity in the bulks (CAPRI 2030 reference FEED / (HCOM+FEDM+INDM+BIOF+LOSM)); tools/build_feed_bulks.py."
+   "note": "Feed share of EU use per model commodity in the bulks (CAPRI 2030 reference FEED / (HCOM+FEDM+INDM+BIOF+LOSM)); tools/build/build_feed_bulks.py."
   },
   "fert_dist_priors_2030.csv": {
    "concept": "Priors of CAPRI's inner fertiliser distribution model",
@@ -795,7 +783,7 @@
    "capri_symbol": "CAPRI 2030 Green Deal reference results (res_2_1730greendeal_refdefaulta dataOut): fertDist_mine/excr/cres per crop (summed to the NGRP groups), LEVL, AGGT nutNed_mine_loss / nutNed_excr_unavailable per ha; checked against priFertDist_<MS>1730defaulta postModePerHa and accuracy",
    "status": "live",
    "coverage": "CAPRI EU27 + UK, Norway, Western Balkans, Turkey regions",
-   "note": "Priors of CAPRI's inner fertiliser distribution model (supply/set_fert_priors.gms, simulation: baseline posterior mode per ha, accuracy 1): per CAPRI region and crop group the mineral, manure and residue N per ha, area, mineral efficiency and manure availability; tools/build_fert_dist_priors.py, docs/FERTILISER_ALLOCATION.md."
+   "note": "Priors of CAPRI's inner fertiliser distribution model (supply/set_fert_priors.gms, simulation: baseline posterior mode per ha, accuracy 1): per CAPRI region and crop group the mineral, manure and residue N per ha, area, mineral efficiency and manure availability; tools/build/build_fert_dist_priors.py, docs/FERTILISER_ALLOCATION.md."
   },
   "fert_dist_crop_groups_2030.csv": {
    "concept": "Model crop -> CAPRI crop group",
@@ -804,7 +792,7 @@
    "capri_symbol": "CAPRI 2030 reference crop areas (LEVL) per CAPRI region; supply/define_ngrp_sets.gms CACT_TO_NGRP",
    "status": "live",
    "coverage": "as fert_dist_priors_2030.csv",
-   "note": "Model crop -> CAPRI crop group (NGRP) with area shares per CAPRI region (OFOD = OFAR + ROOF, OLIV = OLIV + TABO, GRAS = GRAE + GRAI); tools/build_fert_dist_priors.py."
+   "note": "Model crop -> CAPRI crop group (NGRP) with area shares per CAPRI region (OFOD = OFAR + ROOF, OLIV = OLIV + TABO, GRAS = GRAE + GRAI); tools/build/build_fert_dist_priors.py."
   },
   "mineral_redu_exemptions.csv": {
    "concept": "CAPRI's listed exemptions from the crop-specific mineral fertiliser reduction",
@@ -813,7 +801,7 @@
    "capri_symbol": "CAPRI pol_input/greendeal/minfert_redu_by_crop.gms (p_checkSmallMine), kept as capri_data/sources/policy/minfert_redu_by_crop.gms",
    "status": "live",
    "coverage": "EU27 regions listed by CAPRI",
-   "note": "CAPRI's listed exemptions from the crop-specific mineral fertiliser reduction: (region, group) capped at factor x baseline from simulation year > after_year, some only with othPol high; tools/build_mineral_redu_rules.py."
+   "note": "CAPRI's listed exemptions from the crop-specific mineral fertiliser reduction: (region, group) capped at factor x baseline from simulation year > after_year, some only with othPol high; tools/build/build_mineral_redu_rules.py."
   },
   "mineral_redu_limcres.csv": {
    "concept": "CAPRI's relaxations of the limCres regulation",
@@ -822,7 +810,7 @@
    "capri_symbol": "CAPRI pol_input/greendeal/minfert_redu_by_crop.gms (p_priFertDistRegu limCres relaxations)",
    "status": "live",
    "coverage": "EU27 regions listed by CAPRI",
-   "note": "CAPRI's relaxations of the limCres regulation (crop residues to a group at most (1.3 + add) x baseline per ha) by simulation year; tools/build_mineral_redu_rules.py."
+   "note": "CAPRI's relaxations of the limCres regulation (crop residues to a group at most (1.3 + add) x baseline per ha) by simulation year; tools/build/build_mineral_redu_rules.py."
   },
   "lownfeed_effects.csv": {
    "concept": "CAPRI's low-nitrogen feeding option",
@@ -831,7 +819,7 @@
    "capri_symbol": "CAPRI p_animReqCorrFac (reqrel, animReq_*.txt), res_17 MANN/CRPR_EXPT/LEVL, costsavings_max_21730_jul15 v_Miti levels; envind/low_n_feed.gms",
    "status": "live",
    "coverage": "EU27 regions",
-   "note": "CAPRI's low-nitrogen feeding per model region and animal (envind/low_n_feed.gms): protein requirement and manure N change per unit of ghgTechLowNFeed, eligible share, cost, calibration terms; tools/build_lownfeed_effects.py."
+   "note": "CAPRI's low-nitrogen feeding per model region and animal (envind/low_n_feed.gms): protein requirement and manure N change per unit of ghgTechLowNFeed, eligible share, cost, calibration terms; tools/build/build_lownfeed_effects.py."
   },
   "supplement_effects.csv": {
    "concept": "CAPRI's feed supplement options (linseed, nitrate)",
@@ -840,7 +828,146 @@
    "capri_symbol": "CAPRI costsavings_max_21730_jul15 v_Miti levels (LINE_Tot, Nitr_Tot), p_nutCont OOIL (fedcof.gms), res_17 LEVL, model ration requirements; envind/line_nitr.gms",
    "status": "live",
    "coverage": "EU27 regions",
-   "note": "CAPRI's feed supplements linseed (LINE_Tot) and nitrate (Nitr_Tot) per model region and cattle animal (envind/line_nitr.gms, ghgTechLineNitr a switch): requirement changes, eligible share, cost, CH4ENT change, calibration terms; tools/build_supplement_effects.py."
+   "note": "CAPRI's feed supplements linseed (LINE_Tot) and nitrate (Nitr_Tot) per model region and cattle animal (envind/line_nitr.gms, ghgTechLineNitr a switch): requirement changes, eligible share, cost, CH4ENT change, calibration terms; tools/build/build_supplement_effects.py."
+  },
+  "p_balance_crop_coefs_2030.csv": {
+   "concept": "CAPRI's P2O5 retention (removal with crop products) and crop residue output per ha of the model's crops",
+   "unit": "kg P2O5/ha; 1000 ha",
+   "dimension": "CAPRI region x model crop",
+   "capri_symbol": "dataOut '' . <crop> . PRET / PCRD / LEVL . 2030 (res_2_1730greendeal_refdefaulta)",
+   "status": "GDX",
+   "coverage": "CAPRI regions of the 2030 reference (EU27 + UK, Norway, Western Balkans, Turkey; NUTS2 and national)",
+   "note": "CAPRI's P2O5 removal (retention) and crop residue output per ha of the model's crops, per CAPRI region (GRAE and GRAI also on their own), for the gross phosphate balance of the environmental accounts (EnvironmentalModule.compute_phosphorus_balance); tools/build/build_p_balance.py, docs/P_BALANCE.md. At CAPRI's own areas the coefficients give its EXPPRD and CRESID (PHOF) exactly.",
+   "gaps": []
+  },
+  "supply_elas_region.csv": {
+   "concept": "own-price supply elasticity of each non-EU trade region and commodity (CAPRI p_elasSupp CAL, production-weighted over its CAPRI regions)",
+   "unit": "elasticity",
+   "dimension": "trade region x commodity",
+   "capri_symbol": "p_elasSupp(region, product, product, CAL) (elas_2_1717); PROD (2017 market)",
+   "status": "live",
+   "coverage": "772 rows",
+   "note": "tools/build/build_supply_elas_nonEU.py"
+  },
+  "feed_bulks_no.csv": {
+   "concept": "Norway's feed bulks: feed quantities, Arm1 prices and Norway's use per bulk product, for its supply models' bulk price indices at Norway's prices and its feed demand in its own market region NOR (KNOWN_ISSUES K56)",
+   "unit": "1000 t; EUR/t",
+   "dimension": "bulk x product",
+   "capri_symbol": "FEED, ARM1P, HCOM, FEDM, INDM, BIOF, LOSM, PRCM of NO000000 (markmarket_greendeal_1730et_base_1717 dataOut)",
+   "status": "live",
+   "coverage": "23 rows",
+   "note": "tools/build/build_feed_bulks.py"
+  },
+  "winter_cover_option.csv": {
+   "concept": "winter cover (catch crops) as a mitigation option: initial and maximum share of UAAR, cost curve (costParLin, Subs0/1, pmpParSqr, pmpParLin)",
+   "unit": "share; EUR/ha",
+   "dimension": "model region",
+   "capri_symbol": "p_ghgMiti(CATC, WinterCov, CO2SEQ, IniShare/MaxShare/costParLin/pmpParSqr/pmpParLin) (envind/cover_crops.gms)",
+   "status": "live",
+   "coverage": "248 rows",
+   "note": "tools/build/build_winter_cover_option.py"
+  },
+  "land_rents_2030.csv": {
+   "concept": "CAPRI's land rents by land type (arable, permanent, grassland) at its 2030 calibration point: the land market's balance and the land multipliers of the NLP calibration",
+   "unit": "EUR/ha",
+   "dimension": "model region x land type",
+   "capri_symbol": "D_AREA of ARAC, FRUN, GRAS (dataOut)",
+   "status": "live",
+   "coverage": "248 rows",
+   "note": "tools/build/build_land_rents.py"
+  },
+  "pmp_capri_2030.csv": {
+   "concept": "CAPRI's PMP matrix of the crops at its 2030 baseline calibration, per model region",
+   "unit": "EUR/ha per 100% change of the levels",
+   "dimension": "model region x crop x crop",
+   "capri_symbol": "p_pmpQuadTechn, p_pmpQuadPact (QUADRA_)",
+   "status": "live",
+   "coverage": "242 regions",
+   "note": "tools/build/build_pmp_capri_2030.py; SupplyModule.pmp_source"
+  },
+  "pmp_capri_2030_animals.csv": {
+   "concept": "CAPRI's PMP terms of the animal activities at its 2030 calibration, per model region and model animal",
+   "unit": "EUR/head per 100% change of the levels",
+   "dimension": "model region x animal",
+   "capri_symbol": "p_pmpQuadTechn (QUADRA_)",
+   "status": "live",
+   "coverage": "model regions with CAPRI terms",
+   "note": "tools/build/build_animal_pmp_capri_2030.py"
+  },
+  "pmp_recipe_2017.csv": {
+   "concept": "capri-mod's own PMP terms at 2017, computed with CAPRI's recipe (define_pmp_terms.gms) from CAPRI's estimates",
+   "unit": "EUR/ha (head)",
+   "dimension": "model region x activity",
+   "capri_symbol": "p_pmpQuadTechn, p_pmpQuadPact (recipe of define_pmp_terms.gms)",
+   "status": "live",
+   "coverage": "model regions",
+   "note": "tools/build/build_pmp_recipe.py; SupplyModule.pmp_source='recipe'"
+  },
+  "pmp_recipe_2017_animals.csv": {
+   "concept": "capri-mod's own PMP terms at 2017, computed with CAPRI's recipe (define_pmp_terms.gms) from CAPRI's estimates",
+   "unit": "EUR/ha (head)",
+   "dimension": "model region x activity",
+   "capri_symbol": "p_pmpQuadTechn, p_pmpQuadPact (recipe of define_pmp_terms.gms)",
+   "status": "live",
+   "coverage": "model regions",
+   "note": "tools/build/build_pmp_recipe.py; SupplyModule.pmp_source='recipe'"
+  },
+  "pmp_recipe_2030.csv": {
+   "concept": "capri-mod's own PMP terms at 2030, computed with CAPRI's recipe (define_pmp_terms.gms) from CAPRI's estimates",
+   "unit": "EUR/ha (head)",
+   "dimension": "model region x activity",
+   "capri_symbol": "p_pmpQuadTechn, p_pmpQuadPact (recipe of define_pmp_terms.gms)",
+   "status": "live",
+   "coverage": "model regions",
+   "note": "tools/build/build_pmp_recipe.py; SupplyModule.pmp_source='recipe'"
+  },
+  "pmp_recipe_2030_animals.csv": {
+   "concept": "capri-mod's own PMP terms at 2030, computed with CAPRI's recipe (define_pmp_terms.gms) from CAPRI's estimates",
+   "unit": "EUR/ha (head)",
+   "dimension": "model region x activity",
+   "capri_symbol": "p_pmpQuadTechn, p_pmpQuadPact (recipe of define_pmp_terms.gms)",
+   "status": "live",
+   "coverage": "model regions",
+   "note": "tools/build/build_pmp_recipe.py; SupplyModule.pmp_source='recipe'"
+  },
+  "pmp_capri_2030_animals_members.csv": {
+   "concept": "CAPRI's PMP terms of the animal activities at its 2030 calibration, per model region and model animal",
+   "unit": "EUR/head per 100% change of the levels",
+   "dimension": "model region x animal",
+   "capri_symbol": "p_pmpQuadTechn (QUADRA_)",
+   "status": "live",
+   "coverage": "model regions with CAPRI terms",
+   "note": "grouped for the cattle member splits (build_animal_pmp_capri_2030.py --splits); used only with them on. KNOWN_ISSUES K65: off by default (RegionalSupplyModel.use_cattle_member_splits), the per-sex young-animal markets did not converge yet"
+  },
+  "pmp_recipe_2030_animals_members.csv": {
+   "concept": "capri-mod's own PMP terms at 2030, computed with CAPRI's recipe (define_pmp_terms.gms) from CAPRI's estimates",
+   "unit": "EUR/ha (head)",
+   "dimension": "model region x activity",
+   "capri_symbol": "p_pmpQuadTechn, p_pmpQuadPact (recipe of define_pmp_terms.gms)",
+   "status": "live",
+   "coverage": "model regions",
+   "note": "grouped for the cattle member splits (build_animal_pmp_capri_2030.py --splits); used only with them on. KNOWN_ISSUES K65: off by default (RegionalSupplyModel.use_cattle_member_splits), the per-sex young-animal markets did not converge yet"
+  },
+  "pmp_recipe_2017_animals_members.csv": {
+   "concept": "capri-mod's own PMP terms at 2017, computed with CAPRI's recipe (define_pmp_terms.gms) from CAPRI's estimates",
+   "unit": "EUR/ha (head)",
+   "dimension": "model region x activity",
+   "capri_symbol": "p_pmpQuadTechn, p_pmpQuadPact (recipe of define_pmp_terms.gms)",
+   "status": "live",
+   "coverage": "model regions",
+   "note": "grouped for the cattle member splits (build_animal_pmp_capri_2030.py --splits); used only with them on. KNOWN_ISSUES K65: off by default (RegionalSupplyModel.use_cattle_member_splits), the per-sex young-animal markets did not converge yet"
+  },
+  "young_animals_by_sex_2017.json": {
+   "concept": "CAPRI young-animal balances per sex (herd links)",
+   "unit": "head per head",
+   "dimension": "region x balance x activity",
+   "capri_symbol": "INPANI_; YCAM/YCAF/YBUL/YHEI/YCOW, ICAM/ICAF/IBUL/IHEI/ICOW, UVAG",
+   "status": "CAPRI",
+   "coverage": "232 regions",
+   "note": "per sex as CAPRI's INPANI_; used only with the cattle member splits on. KNOWN_ISSUES K65: off by default (RegionalSupplyModel.use_cattle_member_splits), the per-sex young-animal markets did not converge yet",
+   "gaps": [
+    "needs young-animal trade between regions"
+   ]
   }
  },
  "hardcoded_in_code": {
@@ -850,11 +977,6 @@
    "verdict": "MOSTLY LITERATURE",
    "note": "IPCC emission factors and TAN fractions are published constants and belong in code. N_EXCRETION_KG_PER_HEAD is the exception: CAPRI computes it regionally as MANN."
   },
-  "capri_reference.py": {
-   "count": 79,
-   "verdict": "MIXED",
-   "note": "NVZ nitrogen limits are legislation; IPCC factors are literature; CAPRI_RHOARM should come from the arm module."
-  },
   "feed_module.py": {
    "count": 56,
    "verdict": "SHOULD BE DATA",
@@ -863,7 +985,7 @@
   "loaders.py": {
    "count": 27,
    "verdict": "DUPLICATE",
-   "note": "NVZ_N_LIMITS_KG_HA duplicates CAPRI_NVZ_N_LIMITS in capri_reference.py. One of the two should go."
+   "note": "NVZ_N_LIMITS_KG_HA (capri_reference.py, which duplicated it, was removed 23 October 2026)."
   },
   "biofuel_module.py": {
    "count": 10,

@@ -134,7 +134,7 @@
   "source": "FAO_agg_17_defaulta p_dataMarket 'World'.'PMRK'.'BAS'",
   "previous": 1405.4
  },
- "SHGM": {
+ "SGMT": {
   "capri_code": "SGMT",
   "source": "FAO_agg_17_defaulta p_dataMarket 'World'.'PMRK'.'BAS'",
   "previous": 2505.5
@@ -229,7 +229,77 @@
  },
  "FPRI": {
   "capri_code": "FPRI",
-  "source": "CAPRI market_base_1717: export-weighted PMRK of the exporting regions (FAO_agg has no World PMRK for FPRI); tools/build_feed_byproducts.py",
+  "source": "CAPRI market_base_1717: export-weighted PMRK of the exporting regions (FAO_agg has no World PMRK for FPRI); tools/build/build_feed_byproducts.py",
+  "previous": null
+ },
+ "RYEM": {
+  "capri_code": "RYEM",
+  "source": "FAO_agg_17_defaulta p_dataMarket 'World'.'PMRK'.'BAS'",
+  "previous": null
+ },
+ "OATS": {
+  "capri_code": "OATS",
+  "source": "FAO_agg_17_defaulta p_dataMarket 'World'.'PMRK'.'BAS'",
+  "previous": null
+ },
+ "TOBA": {
+  "capri_code": "TOBA",
+  "source": "FAO_agg_17_defaulta p_dataMarket 'World'.'PMRK'.'BAS'",
+  "previous": null
+ },
+ "TAGR": {
+  "capri_code": "TAGR",
+  "source": "FAO_agg_17_defaulta p_dataMarket 'World'.'PMRK'.'BAS'",
+  "previous": null
+ },
+ "TABO": {
+  "capri_code": "TABO",
+  "source": "FAO_agg_17_defaulta p_dataMarket 'World'.'PMRK'.'BAS'",
+  "previous": null
+ },
+ "TEXT": {
+  "capri_code": "TEXT",
+  "source": "FAO_agg_17_defaulta p_dataMarket 'World'.'PMRK'.'BAS'",
+  "previous": null
+ },
+ "PLMO": {
+  "capri_code": "PLMO",
+  "source": "FAO_agg_17_defaulta p_dataMarket 'World'.'PMRK'.'BAS'",
+  "previous": null
+ },
+ "OTHO": {
+  "capri_code": "OTHO",
+  "source": "FAO_agg_17_defaulta p_dataMarket 'World'.'PMRK'.'BAS'",
+  "previous": null
+ },
+ "COFF": {
+  "capri_code": "COFF",
+  "source": "FAO_agg_17_defaulta p_dataMarket 'World'.'PMRK'.'BAS'",
+  "previous": null
+ },
+ "TEAS": {
+  "capri_code": "TEAS",
+  "source": "FAO_agg_17_defaulta p_dataMarket 'World'.'PMRK'.'BAS'",
+  "previous": null
+ },
+ "COCO": {
+  "capri_code": "COCO",
+  "source": "FAO_agg_17_defaulta p_dataMarket 'World'.'PMRK'.'BAS'",
+  "previous": null
+ },
+ "FFIS": {
+  "capri_code": "FFIS",
+  "source": "FAO_agg_17_defaulta p_dataMarket 'World'.'PMRK'.'BAS'",
+  "previous": null
+ },
+ "SFIS": {
+  "capri_code": "SFIS",
+  "source": "FAO_agg_17_defaulta p_dataMarket 'World'.'PMRK'.'BAS'",
+  "previous": null
+ },
+ "OAQU": {
+  "capri_code": "OAQU",
+  "source": "FAO_agg_17_defaulta p_dataMarket 'World'.'PMRK'.'BAS'",
   "previous": null
  }
 }

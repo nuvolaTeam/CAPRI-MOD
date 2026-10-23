@@ -1,78 +1,40 @@
-# CAPRI-mod Validation Report
+# CAPRI-mod validation: the early checks and where validation stands now
 
-This document consolidates the validation of CAPRI-mod against real CAPRI data.
-Two independent checks are complete; a third (scenario shock magnitudes) is pending
-suitable CAPRI scenario runs.
+Status: revised 20 October 2026 against the code. The current validation is README section 9 (Validation) (mechanisms against
+CAPRI, the 2030 baseline against CAPRI's 2030 reference, Farm-to-Fork against JRC121368, Green Deal 2030). This file
+documents the three early checks (data files of 8 October 2026 in this folder) and corrects what they were said to
+show; their numbers are historical.
 
-## Summary
+## Current references (README section 9 (Validation))
 
-| Check | Source | Result | Status |
-|-------|--------|--------|--------|
-| Base-year prices | CAPRI SUA 2017 | 12/12 commodities at 0% deviation | ✅ Exact |
-| Supply elasticities | CAPRI PELA (estimated) | major cereals within ~10% | ✅ Good |
-| Price structure | CAPRI capmod scenario (2030) | rank correlation 0.998, 8/9 within 40% | ✅ Strong |
-| Scenario shock magnitudes | — | no strong-shock scenario available | ⏳ Pending |
+1. CAPRI's own data and code: inputs reproduce CAPRI's symbols; mechanisms reproduce CAPRI's per-unit results from
+   its own inputs (N loss cascade, ammonia options' initial shares, anaerobic digestion, leaching, fertiliser
+   allocation, base reproduction, market parameters; tests in `capri_mod/tests/test_capri.py`).
+2. CAPRI star 3.0's 2030 reference for the 2030 baseline (`tools/check/compare_baseline_capri.py`;
+   docs/BASELINE_REPRODUCTION.md). Run r48 (20 October 2026): median deviation activities 1.0%, production 1.1%,
+   domestic use 1.7%, relative producer prices 26.7%.
+3. JRC121368 (CAPRI's published Farm-to-Fork results; not like-for-like, other CAPRI version) with
+   `tools/check/compare_runs.py --capri`.
+4. The EU agricultural outlook 2020-2030 (docs/OUTLOOK_2030_CHECK.md).
+5. A CAPRI scenario pair: CAPRI's 2030 run without voluntary coupled support against its reference
+   (`validation/coupled_support_2030/capri_vcs_effect.csv.xz`, `tools/run/run_vcs_2030.py`; KNOWN_ISSUES K48).
 
-## 1. Base-year price fidelity
+## The early checks (8 October 2026), and what they show
 
-The market module reproduces CAPRI's own 2017 base-year prices for all 12 reference
-commodities at 0% deviation, and the market clears (converges). This is the
-calibration anchor. Reproduce with `tests/test_capri.py::test_base_year_market_fidelity`.
+| Check | Data | What it was said to show | What it shows |
+|---|---|---|---|
+| Base-year prices | `test_market_module_reproduces_its_own_prices` | CAPRI's 2017 prices reproduced at 0% deviation | the market, given base-year supply, returns the world prices it was given (`world_prices.csv`) within 15% for 12 commodities: solver consistency, not price validation (the test's own docstring). The prices themselves are CAPRI's FAO_agg PMRK |
+| Supply elasticities | `elasticity_comparison.csv`, `capri_pela_own_elasticities.csv` | major cereals within about 10% of CAPRI's PELA | a measurement from before CAPRI's elasticities were wired into the PMP calibration for every region (KNOWN_ISSUES K30, K32) and before the NLP form; out of date. Its pulse entry had the wrong sign; measured from solved levels the sign is positive, pinned by `test_no_negative_own_price_elasticities`. Current checks: `test_supply_elasticities_reach_every_region_from_capri`, `test_permanent_crop_elasticities_match_capri` |
+| Price structure | `price_structure_vs_capri_scenario.csv`, `test_price_structure_vs_capri` | the model reproduces CAPRI's relative prices "very faithfully" (rank correlation 0.998) | the ratios to wheat of the input base world prices (2017) against CAPRI's 2030 producer prices (UVAG of the Green Deal reference) for 8-9 products; the test asserts a Pearson correlation above 0.95, which the large beef and pork ratios dominate. It is a check of input data, not of model results. The model's 2030 relative prices deviate from CAPRI's by 26.7% (median, r48; README 11.2) |
 
-## 2. Supply elasticities vs CAPRI PELA
+`VALIDATION_SUMMARY.json` in this folder records the same early checks and carries the same overstatement on price
+structure.
 
-CAPRI's PELA parameter (`p_pelaEst`, "estimated point elasticity of supply") provides
-CAPRI's own supply elasticities. Comparing the model's own-price supply response:
+## Shock magnitudes
 
-| Crop | Model | CAPRI PELA | Ratio |
-|------|-------|-----------|-------|
-| Soft wheat | 1.38 | 1.53 | 0.91 |
-| Barley | 1.37 | 1.53 | 0.89 |
-| Sugar beet | 2.80 | 2.04 | 1.37 |
-| Rapeseed | 0.96 | 1.92 | 0.50 |
-| Pulses | −2.03 | 2.43 | wrong sign |
-
-Major cereals match within ~10%. Minor crops are noisier.
-
-**The pulse sign error recorded in the table above no longer occurs.** Measured
-directly from solved activity levels under a 10% own-price shock, PULS realises
-**+1.785**, and all 12 crops tested are positive across ~690 region-crop checks
-(zero negative responses). It was resolved as a side effect of the PMP/QP work
-and the note simply outlived the fix. Pinned by
-`test_no_negative_own_price_elasticities`.
-
-Data: `capri_pela_own_elasticities.csv`, `elasticity_comparison.csv`.
-
-## 3. Price structure vs a real CAPRI scenario
-
-From a CAPRI STAR capmod run (Green Deal reference, 2030 projection), we extracted
-producer prices (UVAG) and compared the relative price structure (each commodity vs
-wheat) to the model's:
-
-| Commodity | CAPRI ratio | Model ratio | Match |
-|-----------|-------------|-------------|-------|
-| Barley | 0.82 | 0.97 | close |
-| Rapeseed | 2.55 | 2.16 | close |
-| Soya | 3.05 | 1.97 | diverges |
-| Potato | 1.35 | 1.35 | exact |
-| Sugar beet | 0.15 | 0.20 | close |
-| Beef | 24.2 | 24.9 | close |
-| Pork | 11.6 | 10.9 | close |
-
-**Rank correlation: 0.998** across 9 commodities; 8/9 within 40%. The model reproduces
-CAPRI's economic structure (relative pricing across commodities) very faithfully.
-Data: `price_structure_vs_capri_scenario.csv`.
-
-## 4. Pending: scenario shock magnitudes
-
-Validating how far the model moves prices/quantities under a strong policy shock
-requires a CAPRI scenario pair with a clear, large policy contrast. The scenario runs
-available so far (Green Deal reference/ini/max variants) differ by <1% — too weak to
-test against. A base→2030 comparison is not apples-to-apples because CAPRI's baseline
-projection includes exogenous productivity and macro trends that this
-comparative-static model deliberately omits.
-
-**To complete this validation**, run a CAPRI scenario with a strong shock (e.g. tariff
-change, full trade liberalisation, removal of direct payments) and extract the DATAOUT
-symbol from both the reference and the shocked run. The harness in
-`tests/scenario_validation.py` is ready to consume those numbers.
+The early report called this check pending because the CAPRI Green Deal runs then in hand (reference, ini and max
+variants) differ by less than 1%. A CAPRI scenario pair with a clear policy contrast is now in hand (item 5 above;
+as recorded in K48, from a run before the K46 fix: 28 indicators, mean absolute deviation 1.24 points, correlation
++0.85; the replacement-cow price is far more responsive than CAPRI's), and JRC121368 gives a published
+scenario. Still open: a CAPRI run of the Green Deal 2030 step (README 11.4) and CAPRI's Farm-to-Fork dairy market
+results (K13). How to produce a CAPRI run for comparison: `HOW_TO_RUN_A_VALIDATION_SCENARIO.md`.

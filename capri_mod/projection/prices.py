@@ -4,7 +4,7 @@ CAPRI's 2030 reference (the one JRC121368's Farm-to-Fork scenarios start from) i
 prices: every non-agricultural input moves by one index (2030/2017 = 1.277, every member
 state), agricultural outputs by their own projected prices, and CAP payments are nominal. The
 model works in 2017 money, so its 2030 baseline takes each product's CAPRI price ratio over
-that index (tools/build_price_trajectory_2030.py -> capri_data/trajectories/):
+that index (tools/build/build_price_trajectory_2030.py -> capri_data/trajectories/):
 
 - crop producer prices (regional and EU), by member state and product;
 - fodder (grass, silage maize, other fodder, fodder roots) is not marketed: its value is the shadow
@@ -27,24 +27,26 @@ from pathlib import Path
 from typing import Dict
 
 import pandas as pd
+from capri_mod.data.definitions import MS_CODE
 
 #: crop products whose CAPRI price is applied (model price-table code -> CAPRI product)
 CROP_PRODUCT = {c: c for c in (
     "SWHE", "DWHE", "RYEM", "BARL", "OATS", "OCER", "PARI", "RAPE", "SUNF", "SOYA", "OOIL", "PULS",
-    "POTA", "SUGB", "TOMA", "OVEG", "APPL", "OFRU", "CITR", "TAGR", "TWIN", "OLIV", "TOBA", "TEXT",
+    "POTA", "SUGB", "TOMA", "OVEG", "APPL", "OFRU", "CITR", "TAGR", "TWIN", "OLIV", "TABO", "TOBA", "TEXT",
     "NURS", "FLOW", "OCRO", "OIND")}
-CROP_PRODUCT.update({"CORN": "MAIZ", "MAIZ": "MAIZ", "WINE": "TWIN", "COTT": "TEXT", "OFIB": "TEXT"})
+CROP_PRODUCT.update({"CORN": "MAIZ", "MAIZ": "MAIZ", "WINE": "TWIN"})
 #: fodder crops of the fodder balance -> CAPRI product (unit value = fodder shadow price)
 FODDER_PRODUCT = {"GRAS": "GRAS", "MAIF": "MAIF", "OFOD": "OFAR", "ROOF": "ROOF"}
 #: livestock markets -> CAPRI product
 MARKET_PRODUCT = {"MILK": "COMI", "BEEF": "BEEF", "PORK": "PORK", "POUL": "POUM", "EGGS": "EGGS",
-                  "SHGM": "SGMT"}
+                  "SGMT": "SGMT"}
 #: young-animal goods -> CAPRI products (value = mean of their unit values, as in the builder)
-YOUNG_PRODUCTS = {"calves": ("YCAM", "YCAF"), "young": ("YBUL", "YHEI"), "cows": ("YCOW",),
+YOUNG_PRODUCTS = {"calves_m": ("YCAM",), "calves_f": ("YCAF",), "young_m": ("YBUL",), "young_f": ("YHEI",),
+                  "calves": ("YCAM", "YCAF"), "young": ("YBUL", "YHEI"), "cows": ("YCOW",),
                   "piglets": ("YPIG",)}
 #: feed cereals priced in livestock costs (the supply module's FEED_CEREAL_MIX)
-FEED_CEREAL_PRODUCT = {"SWHE": "SWHE", "BARL": "BARL", "CORN": "MAIZ", "OCER": "OCER"}
-_CTRY = {"IE": "IR", "GR": "EL", "BE": "BL", "LU": "BL"}
+FEED_CEREAL_PRODUCT = {"SWHE": "SWHE", "BARL": "BARL", "CORN": "MAIZ", "RYEM": "RYEM", "OATS": "OATS", "OCER": "OCER"}
+_CTRY = MS_CODE
 
 
 def _ms(region: str) -> str:
@@ -112,6 +114,8 @@ def apply_capri_prices_2030(data: Dict, traj_dir: Path, young_table: Dict, feed_
         for col in bym.columns:
             act, mkt = col.split(".", 1)
             prod = MARKET_PRODUCT.get(mkt)
+            if mkt == "MILK" and act in ("SHGM", "SHGF"):
+                prod = "SGMI"                 # sheep and goat milk: its own CAPRI price (SGMI), not cow milk's
             if prod is None:
                 continue
             f = pd.Series([r(reg, prod) or 1.0 for reg in bym.index], index=bym.index)
@@ -119,14 +123,8 @@ def apply_capri_prices_2030(data: Dict, traj_dir: Path, young_table: Dict, feed_
             bym[col] = bym[col] * f
             delta = bym[col].fillna(0.0) - old
             d_out[act] = d_out.get(act, 0.0) + delta
-        # sheep and goat milk: in the product total, not in a market column (base milk value =
-        # base product total - base meat value)
-        if isinstance(tot, pd.DataFrame) and "SHGP" in tot.columns and "SHGP.SHGM" in bym.columns:
-            f_meat = pd.Series([r(reg, "SGMT") or 1.0 for reg in bym.index], index=bym.index)
-            base_meat = (bym["SHGP.SHGM"].fillna(0.0) / f_meat).reindex(tot.index).fillna(0.0)
-            milk = (tot["SHGP"].fillna(0.0) - base_meat).clip(lower=0.0)
-            f = pd.Series([r(reg, "SGMI") or 1.0 for reg in tot.index], index=tot.index)
-            d_out["SHGP"] = d_out.get("SHGP", 0.0) + milk * (f - 1.0)
+        # (sheep and goat milk is the market column SHGM.MILK, valued at SGMI above; a second term here, written
+        # before that column existed, added the same milk value change again: K26)
         if isinstance(tot, pd.DataFrame):
             for act, dlt in d_out.items():
                 if act in tot.columns:
@@ -202,7 +200,7 @@ def apply_capri_prices_2030(data: Dict, traj_dir: Path, young_table: Dict, feed_
     # the member state's feed products at their 2030 prices; the rations were priced at 2017 bulk prices, so the 2030
     # baseline's ration choice used 2017 relative prices of purchased feed against fodder (whose 2030 values are
     # CAPRI's). Index per (member state, bulk): sum_i s_i r_i^(1-rho) ^ (1/(1-rho)), s_i the value shares of
-    # tools/build_feed_bulks.py, r_i CAPRI's 2030/2017 real price ratio; products without a CAPRI unit value
+    # tools/build/build_feed_bulks.py, r_i CAPRI's 2030/2017 real price ratio; products without a CAPRI unit value
     # (by-products, dairy products, fish meal, oils, sugar) at 1 (REGISTERED).
     data["ration_bulk_price"] = ration_bulk_price_index(r)
     summary["ration_bulk_price"] = {k: round(v, 3) for k, v in sorted(data["ration_bulk_price"].items())

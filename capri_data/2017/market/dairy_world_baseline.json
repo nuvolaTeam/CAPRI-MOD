@@ -1,5 +1,5 @@
 {
- "_source": "CAPRI FAO_agg p_dataMarket (fao_agg_17_datamarket), year BAS, items MAPR DOMM IMPT EXPT; tools/build_dairy_world_markets.py",
+ "_source": "CAPRI FAO_agg p_dataMarket (fao_agg_17_datamarket), year BAS, items MAPR DOMM IMPT EXPT; tools/build/build_dairy_world_markets.py",
  "_unit": "1000 t",
  "balances": {
   "ARG|BUTR": {
@@ -731,6 +731,60 @@
    "imports": 62.907,
    "consumption": 61.578
   },
+  "NOR|BUTR": {
+   "imports": 3.771,
+   "exports": 0.002,
+   "production": 15.766,
+   "consumption": 15.692
+  },
+  "NOR|CASE": {
+   "imports": 0.043,
+   "exports": 0.054,
+   "production": 1.667,
+   "consumption": 1.785
+  },
+  "NOR|CHES": {
+   "imports": 4.78,
+   "exports": 1.618,
+   "production": 78.801,
+   "consumption": 81.369
+  },
+  "NOR|COCM": {
+   "imports": 0.651,
+   "exports": 0.011,
+   "production": 12.835,
+   "consumption": 13.493
+  },
+  "NOR|CREM": {
+   "imports": 0.302,
+   "exports": 0.11,
+   "production": 36.899,
+   "consumption": 36.842
+  },
+  "NOR|FRMI": {
+   "imports": 0.687,
+   "exports": 0.899,
+   "production": 702.86,
+   "consumption": 709.67
+  },
+  "NOR|SKIM": {
+   "imports": 0.409,
+   "exports": 1.38,
+   "production": 16.05,
+   "consumption": 14.1
+  },
+  "NOR|WHEY": {
+   "imports": 0.204,
+   "exports": 14.143,
+   "production": 20.484,
+   "consumption": 5.226
+  },
+  "NOR|WMIO": {
+   "imports": 0.043,
+   "exports": 1.181,
+   "production": 0.772,
+   "consumption": 1.581
+  },
   "NZL|BUTR": {
    "imports": 0.862,
    "exports": 525.998,
@@ -832,58 +886,58 @@
    "consumption": 1.946
   },
   "ROW|BUTR": {
-   "imports": 426.806,
-   "exports": 154.874,
-   "production": 1202.504,
-   "consumption": 1458.668
+   "imports": 423.034,
+   "exports": 154.872,
+   "production": 1186.738,
+   "consumption": 1442.976
   },
   "ROW|CASE": {
-   "imports": 5.894,
-   "exports": 7.634,
-   "production": 17.945,
-   "consumption": 48.3
+   "imports": 5.851,
+   "exports": 7.58,
+   "production": 16.278,
+   "consumption": 46.516
   },
   "ROW|CHES": {
-   "imports": 1242.632,
-   "exports": 593.98,
-   "production": 3934.609,
-   "consumption": 4678.171
+   "imports": 1237.852,
+   "exports": 592.362,
+   "production": 3855.808,
+   "consumption": 4596.802
   },
   "ROW|COCM": {
-   "imports": 502.274,
-   "exports": 384.434,
-   "production": 1297.929,
-   "consumption": 1586.359
+   "imports": 501.623,
+   "exports": 384.423,
+   "production": 1285.094,
+   "consumption": 1572.866
   },
   "ROW|CREM": {
-   "imports": 135.247,
-   "exports": 38.164,
-   "production": 372.694,
-   "consumption": 475.033
+   "imports": 134.945,
+   "exports": 38.054,
+   "production": 335.795,
+   "consumption": 438.191
   },
   "ROW|FRMI": {
-   "imports": 1137.534,
-   "exports": 984.244,
-   "production": 96678.011,
-   "consumption": 97222.137
+   "imports": 1136.847,
+   "exports": 983.345,
+   "production": 95975.151,
+   "consumption": 96512.467
   },
   "ROW|SKIM": {
-   "imports": 943.463,
-   "exports": 246.529,
-   "production": 501.137,
-   "consumption": 1211.539
+   "imports": 943.054,
+   "exports": 245.149,
+   "production": 485.087,
+   "consumption": 1197.44
   },
   "ROW|WHEY": {
-   "imports": 345.564,
-   "exports": 194.087,
-   "production": 250.475,
-   "consumption": 371.551
+   "imports": 345.36,
+   "exports": 179.943,
+   "production": 229.991,
+   "consumption": 366.325
   },
   "ROW|WMIO": {
-   "imports": 984.803,
-   "exports": 191.489,
-   "production": 429.461,
-   "consumption": 1333.499
+   "imports": 984.76,
+   "exports": 190.308,
+   "production": 428.689,
+   "consumption": 1331.918
   },
   "RUS|BUTR": {
    "imports": 98.959,

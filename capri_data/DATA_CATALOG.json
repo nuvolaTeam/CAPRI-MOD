@@ -43,12 +43,6 @@
    "units": "EUR/t"
   },
   {
-   "file": "trade_flows.csv",
-   "vintage": "2021",
-   "domain": "market",
-   "units": "1000 t"
-  },
-  {
    "file": "armington_params.csv",
    "vintage": "2017",
    "domain": "market",
@@ -127,12 +121,6 @@
    "units": "1000 t"
   },
   {
-   "file": "fao_processing_splits.json",
-   "vintage": "2017",
-   "domain": "market",
-   "units": "ratio"
-  },
-  {
    "file": "fao_demand_own_elas_eu.json",
    "vintage": "2017",
    "domain": "market",
@@ -147,6 +135,90 @@
   {
    "file": "sources/fao_2021/fao_bilateral_trade_2021.json",
    "note": "2021 vintage"
+  },
+  {
+   "file": "2017/supply/land_rents_2030.csv",
+   "vintage": "2030",
+   "domain": "supply",
+   "units": "EUR/ha"
+  },
+  {
+   "file": "2017/supply/pmp_capri_2030.csv",
+   "vintage": "2030",
+   "domain": "supply",
+   "units": "EUR/ha"
+  },
+  {
+   "file": "2017/supply/land_market_2030.csv",
+   "vintage": "2030",
+   "domain": "supply",
+   "units": "1000 ha"
+  },
+  {
+   "file": "2017/supply/pmp_recipe_2017.csv",
+   "vintage": "2017",
+   "domain": "supply",
+   "units": "EUR/ha"
+  },
+  {
+   "file": "2017/supply/pmp_recipe_2017_animals.csv",
+   "vintage": "2017",
+   "domain": "supply",
+   "units": "EUR/ha"
+  },
+  {
+   "file": "2017/supply/pmp_recipe_2030.csv",
+   "vintage": "2030",
+   "domain": "supply",
+   "units": "EUR/ha"
+  },
+  {
+   "file": "2017/supply/pmp_recipe_2030_animals.csv",
+   "vintage": "2030",
+   "domain": "supply",
+   "units": "EUR/ha"
+  },
+  {
+   "file": "2017/supply/pmp_capri_2030_animals.csv",
+   "vintage": "2030",
+   "domain": "supply",
+   "units": "EUR/head"
+  },
+  {
+   "file": "2017/supply/labour_coef.csv",
+   "vintage": "2017",
+   "domain": "supply",
+   "units": "see MANIFEST"
+  },
+  {
+   "file": "2017/supply/livestock_units.csv",
+   "vintage": "2017",
+   "domain": "supply",
+   "units": "see MANIFEST"
+  },
+  {
+   "file": "2017/supply/set_aside_split.csv",
+   "vintage": "2017",
+   "domain": "supply",
+   "units": "see MANIFEST"
+  },
+  {
+   "file": "2017/supply/pmp_recipe_2017_animals_members.csv",
+   "vintage": "2017",
+   "domain": "supply",
+   "units": "EUR/ha"
+  },
+  {
+   "file": "2017/supply/pmp_recipe_2030_animals_members.csv",
+   "vintage": "2030",
+   "domain": "supply",
+   "units": "EUR/ha"
+  },
+  {
+   "file": "2017/supply/pmp_capri_2030_animals_members.csv",
+   "vintage": "2030",
+   "domain": "supply",
+   "units": "EUR/head"
   }
  ],
  "stored_not_applied": [
@@ -165,6 +237,10 @@
   {
    "file": "sources/fao_2021/prices/faostat_producer_prices_eu.json",
    "note": "2021 vintage"
+  },
+  {
+   "file": "shared/trade_flows_2017.csv",
+   "note": "tools input only (validate_world_prices, recalibrate_trade_2017); the model reads the bilateral files"
   }
  ],
  "archived": [

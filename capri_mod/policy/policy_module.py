@@ -39,118 +39,9 @@ from enum import Enum
 # ---------------------------------------------------------------------------
 
 
-# Non-Tariff Measure Ad Valorem Equivalents (%) for EU imports
-# Source: CAPRI GAMS arm/def_ntm.gms, based on Arita et al. (2015)
-NTM_AVE_PCT = {
-    "EU_USA_beef": {
-        "applied_rate": 70.0,
-        "AVE": 23.0
-    },
-    "EU_USA_poum": {
-        "applied_rate": 21.0,
-        "AVE": 102.0
-    },
-    "EU_USA_pork": {
-        "applied_rate": 25.0,
-        "AVE": 81.0
-    }
-}
 
 
-class PaymentType(Enum):
-    BISS       = "biss"       # Basic Income Support for Sustainability
-    CRIS       = "cris"       # Complementary Redistributive Income Support
-    COUPLED    = "coupled"    # Voluntary Coupled Support
-    ECO_SCHEME = "eco_scheme" # Eco-schemes (Pillar I greening successor)
-    YOUNG      = "young"      # Young farmers
-    ANC        = "anc"        # Areas of Natural Constraint (Pillar II)
-    AECS       = "aecs"       # Agri-Environment-Climate (Pillar II)
-    ORGANIC    = "organic"    # Organic farming support
-
-
-class TRQStatus(Enum):
-    CLOSED  = "closed"    # TRQ not used (import price > world + tariff)
-    PARTIAL = "partial"   # TRQ partially filled
-    FULL    = "full"      # TRQ fully utilised (in-quota rate binds)
-
-
-# ---------------------------------------------------------------------------
-# DATA STRUCTURES
-# ---------------------------------------------------------------------------
-
-@dataclass
-class TRQ:
-    """Tariff Rate Quota specification."""
-    commodity: str
-    importer: str
-    quota_volume: float        # 1000 t per year
-    in_quota_tariff: float     # ad valorem % within quota
-    out_quota_tariff: float    # ad valorem % over quota
-    current_fill: float = 0.0  # 1000 t used
-    status: TRQStatus = TRQStatus.CLOSED
-
-    @property
-    def effective_tariff(self) -> float:
-        """Effective tariff rate given current fill level."""
-        if self.current_fill < self.quota_volume * 0.999:
-            return self.in_quota_tariff
-        return self.out_quota_tariff
-
-    def update_fill(self, import_demand: float) -> float:
-        """
-        Fill TRQ given import demand. Returns effective tariff paid.
-        Returns: actual imports allowed under TRQ mechanism.
-        """
-        if import_demand <= self.quota_volume:
-            self.current_fill = import_demand
-            self.status = TRQStatus.PARTIAL
-            return self.in_quota_tariff
-        else:
-            self.current_fill = self.quota_volume
-            self.status = TRQStatus.FULL
-            # Out-of-quota imports face higher tariff
-            return self.out_quota_tariff
-
-
-@dataclass
-class DirectPaymentScheme:
-    """CAP direct payment configuration for a member state."""
-    country: str
-    payment_type: PaymentType
-    rate_per_ha: float          # EUR/ha
-    eligible_land: float        # 1000 ha eligible
-    conditionality: Dict[str, float] = field(default_factory=dict)
-    # conditionality: {requirement: compliance_rate}
-    # e.g. {"crop_rotation": 0.95, "soil_cover": 0.98}
-
-    @property
-    def total_budget(self) -> float:
-        """Total annual budget (EUR million)."""
-        return self.rate_per_ha * self.eligible_land / 1000.0
-
-    def effective_rate(self) -> float:
-        """Rate after conditionality deductions."""
-        compliance = np.prod(list(self.conditionality.values())) if self.conditionality else 1.0
-        return self.rate_per_ha * compliance
-
-
-@dataclass
-class EcoScheme:
-    """
-    Eco-scheme specification (CAP 2023-2027).
-
-    Eco-schemes are voluntary Pillar I payments for climate/environment
-    practices, replacing the former 'greening' requirements.
-    """
-    name: str
-    practice: str               # e.g. "cover_crops", "reduced_inputs", "wetland"
-    payment_rate: float         # EUR/ha additional payment
-    adoption_rate: float        # % of eligible area that adopts
-    eligible_activities: List[str] = field(default_factory=list)
-    # Environmental benefit coefficients
-    n_reduction: float = 0.0    # kg N/ha reduction vs. baseline
-    ghg_reduction: float = 0.0  # t CO2eq/ha reduction
-    biodiversity: float = 0.0   # index 0-1
+# (PaymentType, DirectPaymentScheme and EcoScheme - containers that no run used - were removed on 23 October 2026.)
 
 
 @dataclass
@@ -168,27 +59,34 @@ class PolicyScenario:
     biss_rate_change: float = 0.0          # EUR/ha change in BISS rate
     coupled_support: Dict[str, float] = field(default_factory=dict)
     #: premium factors by model region and activity, {region: {activity: new/old}}: a CAPRI
-    #: premium experiment applied as CAPRI's relative change of PRME (tools/run_vcs_2030.py)
+    #: premium experiment applied as CAPRI's relative change of PRME (tools/run/run_vcs_2030.py)
     premium_factor_regional: Dict[str, Dict[str, float]] = field(default_factory=dict)
-    # {commodity: EUR/head or EUR/ha}
-    eco_scheme_budget_pct: float = 0.25    # % of Pillar I for eco-schemes
+    #: share of Pillar I reported as eco-schemes (CAP 2023-2027: at least 25% of direct payments). Reporting only: the
+    #: eco-schemes are inside Pillar I's budget (CAPRI's DPPIL1), so the share moves nothing in the supply models.
+    eco_scheme_budget_pct: float = 0.25
 
-    # Pillar II changes
-    aecs_rate_change: float = 0.0
-    organic_rate_change: float = 0.0
-    anc_rate_change: float = 0.0
+    # Pillar II: relative changes of CAPRI's rural-development budgets (as CAPRI's RD scenarios change p_rdBudget,
+    # policy/rd_logic.gms), e.g. -0.2 for a 20% cut. Each activity's premium changes by the change times the part
+    # of its premium paid under the scheme (CAPRI's 2030 PRME by scheme, premium_scheme_shares_2030.csv). Until
+    # 23 October 2026 these were EUR/ha rate changes (aecs_/anc_/organic_rate_change) scaled by participation
+    # shares of 20%, 30% and 8% that had no source; CAPRI has no separate organic-farming scheme (its organic support
+    # is inside the agri-environment groups), so the organic rate change was removed (PROXY_AUDIT S289, S292).
+    lfa_budget_change: float = 0.0         # DPRD_LFA: areas of natural constraint (less favoured areas)
+    ae_budget_change: float = 0.0          # DPAE: agri-environment (DPRD_AE1..8 and national AE schemes)
+    n2k_budget_change: float = 0.0         # DPRD_N2K: Natura 2000
 
     # Trade measures
     tariff_changes: Dict[str, Dict[str, float]] = field(default_factory=dict)
     # {region: {commodity: delta_pct}}
     trq_volume_changes: Dict[str, float] = field(default_factory=dict)
-    # {commodity: delta_1000t}
+    # {commodity: change of the EU's tariff-rate quota volume, 1000 t}: spread over the commodity's quotas in CAPRI's
+    # bilateral data (one per exporter) in proportion to their base volumes (MarketModule._apply_trq_volumes)
 
     # Environmental constraints
     nitrate_limit_change: float = 0.0     # delta kg N/ha (negative = tighter)
     set_aside_requirement: float = 0.0    # share of UAA as landscape elements
     #: Farm-to-Fork organic AREA target (share of UAA, e.g. 0.25 for 25%).
-    #: Distinct from organic_rate_change, which is a payment RATE. CAPRI models
+    #: An area target, not a payment. CAPRI models
     #: organic farming by adjusting the average input-output coefficients in
     #: proportion to the organic share (pol_input/greendeal/organic_io.gms:
     #: DATA(RU, organicCrops, "Yild", "percentageChange") = -yildReduction *
@@ -229,14 +127,17 @@ class PolicyScenario:
     #: CO2-eq on the EU regions' agricultural emissions inside the supply models; a policy shock of the scenario
     #: (0 = no tax). capri_mod/supply/ghg_tax.py
     carbon_tax: float = 0.0
-    #: Farm-to-Fork pesticide-reduction target, as a share (0.50 for -50%).
-    #: CAPRI implements this as FOUR shocks (JRC121368): a cut in plant-
-    #: protection EXPENDITURE, a 50% rise in other costs, 25% more cover crops,
-    #: and a 10% average YIELD LOSS across cereals, oilseeds, vegetables, other
-    #: arable and permanent crops. Only the yield loss is represented here --
-    #: see SupplyModel.apply_pesticide_reduction for why that is defensible and
-    #: what it omits.
+    #: Farm-to-Fork pesticide-reduction target, as a share (0.50 for -50%): plant-protection expenditure cut by the
+    #: remaining target on the conventional area, other inputs (INPO) raised by the same percentage, a minimum
+    #: cover-crop area of half the target (pol_input/greendeal/pesticides.gms, conventional_io.gms;
+    #: SupplyModel.apply_pesticide_reduction), and a yield loss depending on pesticide_rule.
     pesticide_reduction: float = 0.0
+    #: Yield effect of the pesticide target. "jrc121368": the 2020 Farm-to-Fork study's assumption, an average
+    #: yield loss of 10% at a 50% cut (scaled linearly), on conventional land; the organic yield gap applies in
+    #: full to converted land (CAPRI scales it by 0.45 only with pest_disagg on, organic_area.gms). "star3": CAPRI star 3.0's Green Deal group as its code runs by default
+    #: (pesticides.gms calls conventional_io.gms with the yield shock 'off'; pestDisaggStage none, so no
+    #: endogenous pesticide yield response either): no pesticide yield loss, the full organic yield gap.
+    pesticide_rule: str = "jrc121368"
 
     #: CAPRI's endogenous-technology settings for this run (capri_mod/policy/endotech.py), e.g.
     #: {"ghgTechMYld": 0.2}: scenario configuration parameters that, as in CAPRI (the scenario file loads
@@ -250,273 +151,102 @@ class PolicyScenario:
 
 
 # ---------------------------------------------------------------------------
-# TRQ HANDLER
-# ---------------------------------------------------------------------------
-
-class TRQHandler:
-    """
-    Handles Tariff Rate Quota mechanisms for the market module.
-
-    TRQs create a two-tier tariff structure:
-      - In-quota: lower tariff, limited volume
-      - Out-of-quota: higher (MFN) tariff, unlimited volume
-
-    The equilibrium depends on whether the quota is filled:
-      - Underfilled: domestic price = world price × (1 + in-quota tariff)
-      - Filled: domestic price = world price × (1 + in-quota tariff) + rent
-      - Overfilled (import > quota): both tiers face their respective tariffs
-    """
-
-    # Key EU TRQs (WTO schedules + bilateral FTAs)
-    EU_TRQS = [
-        # commodity, importer, quota(1000t), in-quota%, out-quota%
-        ("BEEF",  "EU27", 300,  0.0,  65.0),
-        ("PORK",  "EU27", 150,  0.0,  20.0),
-        ("POUL",  "EU27", 250,  0.0,  35.0),
-        ("BUTR",  "EU27", 80,  17.0,  82.0),
-        ("CHES",  "EU27", 200,  5.0,  40.0),
-        ("SUGR",  "EU27", 1200, 0.0,  35.0),
-        ("SWHE",  "EU27", 500,  0.0,   0.0),
-        ("BARL",  "EU27", 300,  0.0,   0.0),
-        ("CORN",  "EU27", 2000, 0.0,   0.0),
-        ("WINE",  "EU27", 800,  0.0,  32.0),
-        ("SHGM",  "EU27", 200, 10.0,  52.0),
-    ]
-
-    def __init__(self, custom_trqs: Optional[List[TRQ]] = None):
-        self.trqs: List[TRQ] = []
-
-        # Load default EU TRQs
-        for comm, imp, vol, in_t, out_t in self.EU_TRQS:
-            self.trqs.append(TRQ(
-                commodity=comm, importer=imp,
-                quota_volume=vol,
-                in_quota_tariff=in_t,
-                out_quota_tariff=out_t,
-            ))
-
-        if custom_trqs:
-            self.trqs.extend(custom_trqs)
-
-        # Index for fast lookup
-        self._index: Dict[Tuple[str,str], TRQ] = {
-            (t.commodity, t.importer): t for t in self.trqs
-        }
-
-    def get_effective_tariff(
-        self,
-        commodity: str,
-        importer: str,
-        import_volume: float,
-        base_tariff: float,
-    ) -> float:
-        """
-        Return effective tariff given import volume and TRQ status.
-
-        If no TRQ exists, returns base_tariff.
-        """
-        key = (commodity, importer)
-        if key not in self._index:
-            return base_tariff
-
-        trq = self._index[key]
-        return trq.update_fill(import_volume)
-
-    def get_trq_rents(self) -> pd.DataFrame:
-        """
-        Compute TRQ rents (EUR million) = in-quota tariff × filled volume × price.
-        These are quota rents, accruing to licence holders.
-        """
-        rows = []
-        for trq in self.trqs:
-            if trq.status != TRQStatus.CLOSED and trq.current_fill > 0:
-                # Rent ≈ (out_quota - in_quota) tariff rate × filled volume × world price proxy
-                rent_rate = (trq.out_quota_tariff - trq.in_quota_tariff) / 100.0
-                rent = rent_rate * 200 * trq.current_fill / 1000   # EUR million
-                rows.append({
-                    "commodity": trq.commodity,
-                    "importer": trq.importer,
-                    "fill_rate": trq.current_fill / max(trq.quota_volume, 1),
-                    "status": trq.status.value,
-                    "rent_EUR_million": max(0, rent),
-                })
-        return pd.DataFrame(rows) if rows else pd.DataFrame()
-
-    def apply_trq_scenario(self, volume_changes: Dict[str, float]):
-        """Modify TRQ volumes for scenario analysis."""
-        for comm, delta in volume_changes.items():
-            for trq in self.trqs:
-                if trq.commodity == comm:
-                    trq.quota_volume = max(0, trq.quota_volume + delta)
-
-
-# ---------------------------------------------------------------------------
 # DIRECT PAYMENTS ENGINE
 # ---------------------------------------------------------------------------
 
 class DirectPaymentsEngine:
+    """CAP payments by region and their split over CAPRI's premium schemes (reporting and scenario premiums).
+
+    The regional total is CAPRI's premium per hectare of UAA (cap_payments.csv BPS: CAPRI's PRME over all schemes,
+    tools/build/build_crop_economics_2017.py) times the region's UAA. It is split over Pillar I (DPPIL1, coupled support
+    included), the rural-development schemes (DPRD_LFA, DPRD_N2K, DPAE) and national payments (DPNAT) as the region's
+    premiums are: each activity's base-year premium (crops: cap_premium x area; animals: livestock_premium_coef x
+    heads) split by the shares of its premium paid under each scheme in CAPRI's 2030 reference (PRME by scheme,
+    premium_scheme_shares_2030.csv). CAPRI's regional budgets (CEILVAL) are not used for the split: in the six
+    member states with the single area payment CAPRI books Pillar I only at national level. National envelopes are
+    CAPRI's 2030 total budgets (DPTOTAL) per CAPRI member state.
     """
-    Computes CAP direct payments and their distributional effects.
 
-    Based on CAP Strategic Plans 2023-2027 structure.
-    """
+    #: report column -> CAPRI scheme
+    COMPONENTS = {"pillar1": "DPPIL1", "LFA": "DPRD_LFA", "N2K": "DPRD_N2K", "AE": "DPAE", "national": "DPNAT"}
 
-    # National envelopes (EUR million/year) — approximate 2023-2027 values
-    NATIONAL_ENVELOPES = {
-        "FR": 7000, "DE": 5900, "IT": 3600, "ES": 4800, "PL": 3360,
-        "RO": 1930, "HU": 1340, "BG": 812,  "CZ": 859,  "NL": 729,
-        "BE": 481,  "DK": 881,  "SE": 720,  "FI": 524,  "AT": 693,
-        "EL": 1900, "PT": 608,  "IE": 1185, "SK": 398,  "HR": 343,
-        "SI": 137,  "LT": 410,  "LV": 302,  "EE": 199,  "LU": 33,
-        "CY": 51,   "MT": 5,    "NO": 0,
-    }
-
-    def __init__(self, scenario: Optional[PolicyScenario] = None):
+    def __init__(self, scenario: Optional[PolicyScenario] = None, data: Optional[dict] = None):
         self.scenario = scenario or PolicyScenario(name="baseline")
+        self.data = data or {}
+        self.ceilings = self.data.get("cap_ceilings_2030")
+        self._shares = None
 
-    def compute_payments_by_region(
-        self,
-        cap_data: pd.DataFrame,   # [region × {BPS, ANC, AES, ORGANIC, COUPLED}]
-        land_data: pd.DataFrame,  # [region × land_type]
-    ) -> pd.DataFrame:
-        """
-        Compute total CAP payments per region (EUR/ha and total EUR 1000).
+    def _scheme_shares(self) -> pd.DataFrame:
+        """region x scheme: the part of the region's base-year premiums paid under each CAPRI scheme."""
+        if self._shares is None:
+            sh = self.data.get("premium_scheme_shares_2030")
+            if sh is None:
+                raise ValueError("no CAPRI premium split by scheme (premium_scheme_shares_2030.csv, "
+                                 "tools/build/build_cap_ceilings_2030.py)")
+            prem, areas = self.data.get("cap_premium"), self.data.get("areas")
+            lpc, herds = self.data.get("livestock_premium_coef"), self.data.get("animal_numbers")
 
-        Returns DataFrame with payment components by region.
-        """
+            def w(r, a):
+                for p_, l_ in ((prem, areas), (lpc, herds)):
+                    if p_ is not None and l_ is not None and r in p_.index and a in p_.columns \
+                            and r in l_.index and a in l_.columns:
+                        v = float(p_.at[r, a]) * float(l_.at[r, a])
+                        return v if v == v and v > 0 else 0.0
+                return 0.0
+            schemes = list(self.COMPONENTS.values())
+            ww = pd.Series([w(r, a) for r, a in zip(sh["region"], sh["activity"])], index=sh.index)
+            num = sh[schemes].mul(ww, axis=0).groupby(sh["region"]).sum()
+            den = ww.groupby(sh["region"]).sum()
+            self._shares = num.div(den.where(den > 0), axis=0)
+        return self._shares
+
+    def compute_payments_by_region(self, cap_data: pd.DataFrame, land_data: pd.DataFrame) -> pd.DataFrame:
+        """CAP payments per region (EUR 1000) by CAPRI premium scheme, under the scenario's changes."""
         from capri_mod.data.definitions import REGION_TO_COUNTRY
-
-        results = []
+        sc = self.scenario
+        chg = {"LFA": sc.lfa_budget_change, "AE": sc.ae_budget_change, "N2K": sc.n2k_budget_change}
+        if "BPS" not in cap_data.columns:              # no stand-in (removed 23 October 2026: 200 EUR/ha)
+            raise ValueError("cap_payments.csv has no BPS column")
+        rows = []
         for region in cap_data.index:
-            country = REGION_TO_COUNTRY.get(region, "XX")
-            uaa = land_data.loc[region, ["ARABLE", "PERMANENT", "GRASSLAND"]].sum() \
-                  if region in land_data.index else 100.0
+            if region not in land_data.index:              # no stand-in (removed 23 October 2026: 100 kha)
+                raise ValueError(f"{region}: no land in land_availability.csv")
+            uaa = float(land_data.loc[region, ["ARABLE", "PERMANENT", "GRASSLAND"]].sum())
+            total0 = float(cap_data.at[region, "BPS"]) * uaa          # EUR/ha x 1000 ha = EUR 1000
+            shr = self._scheme_shares()
+            ceil = shr.loc[region] if region in shr.index and shr.loc[region].notna().all() else None
+            if ceil is None and total0 == 0.0:
+                ceil = pd.Series(0.0, index=list(self.COMPONENTS.values()))      # no farmland, no premiums
+            row = {"region": region, "country": REGION_TO_COUNTRY.get(region, "XX"), "UAA_1000ha": uaa,
+                   "premium_EUR_ha_UAA": float(cap_data.at[region, "BPS"])}
+            for col, scheme in self.COMPONENTS.items():
+                part = total0 * float(ceil[scheme]) if ceil is not None else float("nan")
+                row[col] = part * (1.0 + float(chg.get(col, 0.0) or 0.0))
+            if ceil is not None:
+                row["pillar1"] += float(sc.biss_rate_change or 0.0) * uaa
+            row["eco_scheme"] = row["pillar1"] * float(sc.eco_scheme_budget_pct or 0.0)   # inside Pillar I
+            row["pillar2"] = row["LFA"] + row["N2K"] + row["AE"]
+            row["total_payments"] = (row["pillar1"] + row["pillar2"] + row["national"]) if ceil is not None \
+                else total0 + float(sc.biss_rate_change or 0.0) * uaa
+            rows.append(row)
+        return pd.DataFrame(rows).set_index("region")
 
-            # BISS (formerly BPS). rate is EUR/ha, uaa is 1000 ha, so
-            # rate * uaa is already in EUR 1000 — no further division.
-            biss_rate = cap_data.at[region, "BPS"] if "BPS" in cap_data.columns else 200.0
-            biss_rate += self.scenario.biss_rate_change
-            biss_total = biss_rate * uaa   # EUR 1000
-
-            # ANC (Pillar II)
-            anc_rate = cap_data.at[region, "ANC"] if "ANC" in cap_data.columns else 0.0
-            anc_rate += self.scenario.anc_rate_change
-            anc_total = anc_rate * uaa * 0.30  # ~30% of land is ANC-eligible
-
-            # AECS (Pillar II agri-environment)
-            aecs_rate = cap_data.at[region, "AES"] if "AES" in cap_data.columns else 0.0
-            aecs_rate += self.scenario.aecs_rate_change
-            aecs_total = aecs_rate * uaa * 0.20  # ~20% of land in AECS
-
-            # Organic
-            org_rate = cap_data.at[region, "ORGANIC"] if "ORGANIC" in cap_data.columns else 0.0
-            org_rate += self.scenario.organic_rate_change
-            organic_total = org_rate * uaa * 0.08  # ~8% organic
-
-            # Eco-scheme (25% of Pillar I in 2023-2027 CAP)
-            eco_total = biss_total * self.scenario.eco_scheme_budget_pct
-
-            results.append({
-                "region": region,
-                "country": country,
-                "UAA_1000ha": uaa,
-                "BISS_EUR_ha": biss_rate,
-                "BISS_total": biss_total,
-                "eco_scheme": eco_total,
-                "ANC_total": anc_total,
-                "AECS_total": aecs_total,
-                "organic_total": organic_total,
-                "total_payments": biss_total + eco_total + anc_total + aecs_total + organic_total,
-            })
-
-        return pd.DataFrame(results).set_index("region")
-
-    def compute_national_budgets(
-        self,
-        regional_payments: pd.DataFrame,
-    ) -> pd.DataFrame:
-        """Aggregate regional payments to national level and compare to envelopes."""
-        from capri_mod.data.definitions import REGION_TO_COUNTRY
-
-        regional_payments = regional_payments.copy()
-        regional_payments["country"] = [
-            REGION_TO_COUNTRY.get(r, r) for r in regional_payments.index
-        ]
-        national = regional_payments.groupby("country")["total_payments"].sum()
-        envelope = pd.Series(self.NATIONAL_ENVELOPES)
-
-        budget = pd.DataFrame({
-            "simulated_EUR_million": national / 1000,
-            "envelope_EUR_million": envelope,
-        }).dropna()
-        budget["utilisation_pct"] = (
-            budget["simulated_EUR_million"] / budget["envelope_EUR_million"] * 100
-        ).clip(0, 150)
-
+    def compute_national_budgets(self, regional_payments: pd.DataFrame) -> pd.DataFrame:
+        """Payments by CAPRI member state against CAPRI's 2030 budgets (DPTOTAL, EUR million). The simulated
+        payments are CAPRI's 2017 premiums on the model's land, so the comparison is between years."""
+        from capri_mod.data.definitions import capri_ms
+        if self.ceilings is None:
+            raise ValueError("no CAPRI CAP budgets (cap_ceilings_2030.csv, tools/build/build_cap_ceilings_2030.py)")
+        sim = regional_payments["total_payments"].groupby([capri_ms(r) for r in regional_payments.index]).sum() / 1000.0
+        env = self.ceilings["DPTOTAL"].reindex(sim.index)
+        budget = pd.DataFrame({"simulated_EUR_million": sim, "envelope_EUR_million": env})
+        budget["utilisation_pct"] = budget["simulated_EUR_million"] / budget["envelope_EUR_million"] * 100.0
         return budget
 
 
-# ---------------------------------------------------------------------------
-# INTERVENTION / PUBLIC STORAGE
-# ---------------------------------------------------------------------------
-
-class InterventionSystem:
-    """
-    Public intervention buying and storage for cereals and dairy.
-
-    Intervention price sets a price floor:
-      If market price < intervention price → public buying starts
-      If market price > intervention price → stocks released
-
-    Reference: EU Reg. 1308/2013, Art. 7-14 (CMO Regulation)
-    """
-
-    INTERVENTION_PRICES = {
-        "SWHE": 101.31,   # EUR/t (official EU intervention price)
-        "BARL": 101.31,
-        "CORN": 101.31,
-        "BUTR": 2217.5,
-        "SKIM": 1698.0,
-        "BEEF": 2224.0,
-    }
-
-    def __init__(self):
-        self.stocks: Dict[str, float] = {k: 0.0 for k in self.INTERVENTION_PRICES}
-
-    def apply_intervention(
-        self,
-        market_prices: pd.Series,
-        production: pd.Series,
-        consumption: pd.Series,
-    ) -> Dict[str, float]:
-        """
-        Check intervention thresholds and adjust stocks.
-
-        Returns dict of {commodity: stock_change_1000t}.
-        """
-        stock_changes = {}
-
-        for comm, int_price in self.INTERVENTION_PRICES.items():
-            mkt_price = market_prices.get(comm, int_price * 1.1)
-            surplus = production.get(comm, 0) - consumption.get(comm, 0)
-
-            if mkt_price < int_price and surplus > 0:
-                # Buy into intervention
-                buying = min(surplus, surplus * 0.5)  # buy up to 50% of surplus
-                self.stocks[comm] += buying
-                stock_changes[comm] = buying
-            elif mkt_price > int_price * 1.05 and self.stocks.get(comm, 0) > 0:
-                # Release from stocks
-                release = min(self.stocks[comm], abs(surplus) * 0.3)
-                self.stocks[comm] -= release
-                stock_changes[comm] = -release
-            else:
-                stock_changes[comm] = 0.0
-
-        return stock_changes
-
-    def get_stock_summary(self) -> pd.Series:
-        return pd.Series(self.stocks)
+# (InterventionSystem, a stub with invented trigger factors that nothing called, was removed 23 October 2026; CAPRI's
+# intervention-stock system - arm/market_model.gms buyingToIntervStock_, releaseFromIntervStock_ - is to be ported
+# into the market module.)
 
 
 # ---------------------------------------------------------------------------
@@ -541,9 +271,7 @@ class PolicyModule:
         self.data     = data
         self.scenario = scenario or PolicyScenario(name="baseline")
 
-        self.payments   = DirectPaymentsEngine(self.scenario)
-        self.trq_handler = TRQHandler()
-        self.intervention = InterventionSystem()
+        self.payments   = self._engine(self.scenario)
 
     def apply_scenario(self, scenario: PolicyScenario):
         """Switch to a new policy scenario.
@@ -565,10 +293,11 @@ class PolicyModule:
                     "SupplyModel._build_constraints before using this instrument."
                 )
         self.scenario = scenario
-        self.payments = DirectPaymentsEngine(scenario)
+        self.payments = self._engine(scenario)
 
-        if scenario.trq_volume_changes:
-            self.trq_handler.apply_trq_scenario(scenario.trq_volume_changes)
+    def _engine(self, scenario: PolicyScenario) -> DirectPaymentsEngine:
+        return DirectPaymentsEngine(scenario, data=self.data)
+
 
     def get_payment_rates_by_region(self) -> pd.DataFrame:
         """Compute and return regional payment rates for supply module."""
@@ -577,12 +306,10 @@ class PolicyModule:
             land_data=self.data["land"],
         )
 
-    def get_effective_tariffs(
-        self,
-        import_volumes: Optional[pd.DataFrame] = None,
-    ) -> pd.DataFrame:
+    def get_effective_tariffs(self) -> pd.DataFrame:
         """
-        Return effective tariff matrix [region × commodity] accounting for TRQs.
+        Return the tariff matrix [region × commodity] with the scenario's tariff changes. The EU's tariff-rate
+        quotas act in the bilateral market (market/bilateral.py, CAPRI's TRQ regime; trq_volume_changes).
         """
         base_tariffs = self.data["tariffs"].copy()
 
@@ -594,81 +321,57 @@ class PolicyModule:
                         0, base_tariffs.at[region, comm] + delta
                     )
 
-        # Apply TRQ adjustments if import volumes known
-        if import_volumes is not None:
-            for comm in base_tariffs.columns:
-                for region in base_tariffs.index:
-                    vol = import_volumes.at[region, comm] if (
-                        region in import_volumes.index and comm in import_volumes.columns
-                    ) else 0.0
-                    base_tariff = base_tariffs.at[region, comm]
-                    effective = self.trq_handler.get_effective_tariff(
-                        comm, region, vol, base_tariff
-                    )
-                    base_tariffs.at[region, comm] = effective
-
         return base_tariffs
 
     def get_supply_policy_adders(self) -> pd.Series:
-        """
-        Return per-activity policy payment to add to net revenues (EUR/ha or EUR/head).
-
-        Includes BISS, eco-schemes, coupled support, and the Pillar II rates
-        (AECS, ANC, organic). Previously only BISS and coupled support were
-        applied despite the docstring claiming otherwise, so every Pillar II
-        scenario (aecs_/anc_/organic_rate_change) was silently inert: the
-        adders came back bit-identical to the baseline.
-
-        Pillar II payments are area-based but reach only a share of land, so
-        each is scaled by the same participation share the payments engine uses
-        when computing regional budgets — applying the headline rate to every
-        hectare would overstate their effect several-fold.
-        """
-        regional_payments = self.get_payment_rates_by_region()
-        avg_biss = regional_payments["BISS_EUR_ha"].mean()
-
-        from capri_mod.data.definitions import CROPS, ANIMALS, ALL_ACTIVITIES
+        """Per-activity premium changes added to net revenues (EUR/ha or EUR/head): the BISS rate change on every
+        crop but set-aside, and coupled support. The model differences them against the baseline's, so only the
+        scenario's change enters. Eco-schemes are inside Pillar I (eco_scheme_budget_pct is a reporting split), and
+        the Pillar II budget changes act per region and activity (get_premium_factors_regional)."""
+        from capri_mod.data.definitions import CROPS, ALL_ACTIVITIES
         adders = pd.Series(0.0, index=ALL_ACTIVITIES)
-
-        # BISS applied to all eligible crops (not SETA, not permanent for simplicity)
-        eligible_crops = [c for c in CROPS if c not in ("SETA",)]
-        for crop in eligible_crops:
-            adders[crop] = avg_biss
-
-        # Eco-schemes: a share of Pillar I, paid per eligible hectare.
-        eco_rate = avg_biss * float(self.scenario.eco_scheme_budget_pct or 0.0)
-        for crop in eligible_crops:
-            adders[crop] += eco_rate
-
-        # Pillar II rates, scaled by the participation shares used in
-        # compute_payments_by_region (ANC ~30% of land, AECS ~20%, organic ~8%).
-        pillar2 = (
-            (float(self.scenario.anc_rate_change or 0.0), 0.30),
-            (float(self.scenario.aecs_rate_change or 0.0), 0.20),
-            (float(self.scenario.organic_rate_change or 0.0), 0.08),
-        )
-        for rate_change, share in pillar2:
-            if rate_change:
-                for crop in eligible_crops:
-                    adders[crop] += rate_change * share
-
-        # Coupled support (voluntary, sector-specific)
+        d = float(self.scenario.biss_rate_change or 0.0)
+        if d:
+            for crop in CROPS:
+                if crop != "SETA":
+                    adders[crop] += d
         for comm, rate in self.scenario.coupled_support.items():
             if comm in adders.index:
                 adders[comm] += rate
-
         return adders
 
+    def get_premium_factors_regional(self) -> Dict[str, Dict[str, float]]:
+        """Premium factors {region: {activity: new/old}}: the scenario's own (premium_factor_regional) times the
+        Pillar II budget changes, 1 + sum_s change_s x share_s(region, activity), with share_s the part of the
+        activity's premium paid under scheme s in CAPRI's 2030 reference (premium_scheme_shares_2030.csv)."""
+        sc = self.scenario
+        out = {r: dict(v) for r, v in (getattr(sc, "premium_factor_regional", None) or {}).items()}
+        chg = {"DPRD_LFA": float(sc.lfa_budget_change or 0.0), "DPAE": float(sc.ae_budget_change or 0.0),
+               "DPRD_N2K": float(sc.n2k_budget_change or 0.0)}
+        if not any(chg.values()):
+            return out
+        sh = self.data.get("premium_scheme_shares_2030")
+        if sh is None:
+            raise ValueError("Pillar II budget changes need CAPRI's premium split by scheme "
+                             "(premium_scheme_shares_2030.csv, tools/build/build_cap_ceilings_2030.py)")
+        f = 1.0 + sum(c * sh[k] for k, c in chg.items() if c)
+        for r, a, v in zip(sh["region"], sh["activity"], f):
+            if v != 1.0:
+                out.setdefault(r, {})
+                out[r][a] = out[r].get(a, 1.0) * float(v)
+        return out
+
     def summarise_policy(self) -> Dict:
-        """Print policy scenario summary."""
+        """Policy scenario summary: payments by region and scheme, member-state budgets against CAPRI's 2030 ones."""
         regional = self.get_payment_rates_by_region()
         national = self.payments.compute_national_budgets(regional)
-
+        eu = [r for r in regional.index if not str(r).startswith("NO")]
+        uaa = float(regional.loc[eu, "UAA_1000ha"].sum())
         return {
             "scenario_name": self.scenario.name,
-            "total_EU_budget_EUR_billion": regional["total_payments"].sum() / 1e6,
-            "avg_BISS_EUR_ha": regional["BISS_EUR_ha"].mean(),
+            "total_EU_budget_EUR_billion": regional.loc[eu, "total_payments"].sum() / 1e6,
+            "pillar1_EUR_billion": regional.loc[eu, "pillar1"].sum() / 1e6,
+            "pillar2_EUR_billion": regional.loc[eu, "pillar2"].sum() / 1e6,
+            "premium_EUR_ha_UAA": regional.loc[eu, "total_payments"].sum() / uaa if uaa > 0 else float("nan"),
             "national_budgets": national,
-            "active_TRQs": len(self.trq_handler.trqs),
-            "intervention_stocks": self.intervention.get_stock_summary().to_dict(),
         }

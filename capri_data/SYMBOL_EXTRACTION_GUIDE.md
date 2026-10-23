@@ -1,69 +1,34 @@
-# CAPRI-mod — Symbol Extraction Guide
+# CAPRI-mod: symbol extraction guide
 
-> **STATUS (current):** The two datasets this guide prioritises — `feed_requirements.csv` and `nutrient_coefs.csv` — have since been replaced with real CAPRI data (`REAL_CAPRI` in `DATA_SOURCING_REGISTRY.json`). The model no longer runs on any synthetic fallback. This document is retained as a record of how that data was sourced and how to refresh it for a new base year.
+Status: revised 20 October 2026 against the code. The extraction list below was written to replace two inputs that
+were then synthetic (`feed_requirements.csv`, `nutrient_coefs.csv`); both have since been built from CAPRI's capreg
+results (`DATA2` of `res_17<MS>`, registry `REAL_CAPRI`), not from the symbols first proposed here. The list is kept
+as a reference for a rebuild or a new base year; the folder and file map is `DATA_LOCATION_MAP.md`.
 
-**Solves the "which data out of hundreds of symbols" problem.** For each model input,
-the exact CAPRI symbol, what it means, which GDX holds it, and the command to export it.
+## Finding a symbol
 
-Built from CAPRI's own GAMS source: 2,429 symbols mapped to their descriptions
-(`capri_symbol_dictionary.json`). Search any topic with:
+CAPRI's GAMS source declares 2,429 symbols with a one-line description each, collected in
+`capri_mod/data/capri_symbol_dictionary.json`:
+
+```shell
+python capri_mod/data/find_symbol.py search <keyword>   # search the descriptions
+python capri_mod/data/find_symbol.py needs              # the model's inputs and their candidate symbols
+python capri_mod/data/find_symbol.py gdx <file.gdx>     # list the symbols in a GDX
 ```
-python capri_mod/data/find_symbol.py search <keyword>
-python capri_mod/data/find_symbol.py needs      # the table below
-python capri_mod/data/find_symbol.py gdx <file>  # list symbols in YOUR gdx
-```
 
----
+Match on the description, not on the file name: `nutrient_cont_usda` sounds like fertiliser data but holds USDA food
+nutrient contents, and `feed_agri` holds feed use, not feed requirements.
 
-## The extraction list (priority order)
+## Extraction list
 
-> **Status:** the two extractions below have been **completed** — both
-> `feed_requirements.csv` and `nutrient_coefs.csv` now hold real CAPRI data
-> (`REAL_CAPRI` in `DATA_SOURCING_REGISTRY.json`), and the model no longer uses
-> any synthetic fallback for them. The notes are retained as a record of the
-> symbols and export commands used.
+| Model input | Symbol actually used | Alternatives considered | Export |
+|---|---|---|---|
+| `feed_requirements.csv` (feed per head) | `DATA2` feed rows of `res_17<MS>` (fresh matter to dry matter) | `p_feedInpCoeff` ("feed input coefficients (fresh matter) by activity"), `v_feedInpCoeff` | `gdxdump res_17<MS>.gdx symb=DATA2 format=csv` |
+| `nutrient_coefs.csv` (N, P2O5, K2O per ha) | `DATA2` NITF, PHOF, POTF | `p_FertPerHa` ("fertiliser use per ha for CAPRI regions"), `v_minfert` | as above |
+| areas, yields, herds (new base year) | `DATA2` LEVL, YILD, HERD | `p_regioData`, `p_nutsLevl` ("given hectares at NUTS-2 level") | as above |
+| prices and market balances (new base year) | `p_dataMarket` in `fao_agg_<BAS>_<agg>.gdx` | – | `gdxdump fao_agg_<BAS>_<agg>.gdx symb=p_dataMarket format=csv` |
+| biofuel data | CAPRI's 2030 market results and `biofuel/def_biofuel_params.gms` (`tools/build/build_biofuel_market.py`) | `p_bioDat` ("consolidated biofuel data from AGLINK and FO LICHT"), `p_bioDemPar` | – |
 
-### 1. ~~Replace synthetic~~ `feed_requirements.csv` — DONE
-- **Symbol:** `p_feedInpCoeff` — *"feed input coefficients (fresh matter) by activity"*
-  (or `v_feedInpCoeff` — *"feeding per head and year in kg"*)
-- **Where:** your **results** database (capreg/feed build output)
-- **Export:** `gdxdump <results>.gdx symb=p_feedInpCoeff format=csv > feed_req.csv`
-
-### 2. ~~Replace synthetic~~ `nutrient_coefs.csv` — DONE
-- **Symbol:** `p_FertPerHa` — *"Fertiliser use per ha for CAPRI regions"*
-  (or `v_minfert` — *"N input from mineral fertilizers [kg/ha]"*)
-- **Where:** your **results** database (fertiliser/envind output)
-- **Export:** `gdxdump <results>.gdx symb=p_FertPerHa format=csv > fert_perha.csv`
-
-### 3. Newer base-year quantities (areas, yields, herds) — for re-base
-- **Symbol:** `p_nutsLevl` (*"given hectares at NUTS-2 level"*) or `p_regioData`
-- **Where:** `output/results/capreg/…regio…gdx`
-- **Export:** `gdxdump <capreg>.gdx symb=p_regioData format=csv > regio.csv`
-
-### 4. Newer base-year prices/balances — for re-base
-- **Symbol:** market SUA in `fao_agg` (same file type as the 2017 one already used)
-- **Where:** `output/results/global/fao_agg_<BAS>_<regagg>.gdx`
-- **Export:** as done for `fao_agg_17` (the four CSV parts + elasticities xlsx)
-
-### 5. Real biofuel coefficients (upgrade the biofuel module) — MEDIUM
-- **Symbol:** `p_bioDat` — *"consolidated biofuel data from AGLINK and FO LICHT"*
-  (or `p_bioDemPar` — biofuel demand function parameters)
-- **Where:** **also inside `fao_agg`** (`%results_in%/global/fao_agg_%BAS%…gdx`) and
-  `baseline/trace_dataPrep.gdx`. So a newer `fao_agg` export delivers this too.
-- **Export:** `gdxdump fao_agg_<BAS>.gdx symb=p_bioDat format=csv > biodat.csv`
-
----
-
-## Why this is now easy (it wasn't before)
-
-The hard part was never access — it was that `nutrient_cont_usda` *sounds* like fertiliser
-data but is USDA food nutrition, and `feed_agri` *sounds* like feed requirements but is
-feed use. The symbol dictionary removes the guessing: it gives CAPRI's own one-line
-description for every symbol, so you match on **meaning**, not on a filename that can
-mislead. The two synthetic files map cleanly to `p_feedInpCoeff` and `p_FertPerHa`.
-
-## What to do
-Export the five symbols above from your STAR 2.8/3.0 **results** database (GAMS
-`gdxdump`, or the CAPRI GUI's export), upload the CSVs, and they get wired in — the
-validator then confirms vintage consistency before any run. Start with #1 and #2:
-those remove the last two synthetic datasets in the model.
+`tools/build/gdx_dump_symbol.py GDX SYMBOL OUT.csv` does the export in Python (needs the `gamsapi` package and GAMS's gdx
+library; `--nonzero` keeps non-zero rows only). After adding or replacing a file, run
+`python -m capri_mod.data.validate_data capri_data`.

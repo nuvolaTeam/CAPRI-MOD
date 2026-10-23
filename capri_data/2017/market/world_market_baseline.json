@@ -1,5 +1,5 @@
 {
- "_source": "CAPRI FAO_agg p_dataMarket (fao_agg_17_datamarket), year BAS, items MAPR DOMM IMPT EXPT; tools/build_world_market_baseline.py",
+ "_source": "CAPRI FAO_agg p_dataMarket (fao_agg_17_datamarket), year BAS, items MAPR DOMM IMPT EXPT; tools/build/build_world_market_baseline.py",
  "_unit": "1000 t",
  "_products": {
   "SWHE": [
@@ -12,8 +12,12 @@
    "MAIZ"
   ],
   "OCER": [
-   "OCER",
-   "RYEM",
+   "OCER"
+  ],
+  "RYEM": [
+   "RYEM"
+  ],
+  "OATS": [
    "OATS"
   ],
   "RAPE": [
@@ -49,6 +53,42 @@
   "CITR": [
    "CITR"
   ],
+  "TAGR": [
+   "TAGR"
+  ],
+  "TOBA": [
+   "TOBA"
+  ],
+  "TABO": [
+   "TABO"
+  ],
+  "TEXT": [
+   "TEXT"
+  ],
+  "PLMO": [
+   "PLMO"
+  ],
+  "OTHO": [
+   "OTHO"
+  ],
+  "FFIS": [
+   "FFIS"
+  ],
+  "SFIS": [
+   "SFIS"
+  ],
+  "OAQU": [
+   "OAQU"
+  ],
+  "COFF": [
+   "COFF"
+  ],
+  "TEAS": [
+   "TEAS"
+  ],
+  "COCO": [
+   "COCO"
+  ],
   "WINE": [
    "TWIN"
   ],
@@ -64,7 +104,7 @@
   "POUL": [
    "POUM"
   ],
-  "SHGM": [
+  "SGMT": [
    "SGMT"
   ],
   "EGGS": [
@@ -138,6 +178,14 @@
    "production": 3366.186,
    "consumption": 2214.023
   },
+  "ARG|COCO": {
+   "imports": 8.713,
+   "consumption": 8.723
+  },
+  "ARG|COFF": {
+   "imports": 35.188,
+   "consumption": 34.499
+  },
   "ARG|CORN": {
    "imports": 19.858,
    "exports": 22649.288,
@@ -150,17 +198,35 @@
    "production": 813.846,
    "consumption": 809.147
   },
+  "ARG|FFIS": {
+   "imports": 11.023,
+   "exports": 21.619,
+   "production": 23.838,
+   "consumption": 12.949
+  },
   "ARG|MILK": {
    "imports": 0.986,
    "exports": 1.397,
    "production": 9650.475,
    "consumption": 9650.382
   },
+  "ARG|OAQU": {
+   "imports": 13.545,
+   "exports": 274.932,
+   "production": 351.351,
+   "consumption": 103.263
+  },
+  "ARG|OATS": {
+   "imports": 2.18,
+   "exports": 2.683,
+   "production": 609.193,
+   "consumption": 628.801
+  },
   "ARG|OCER": {
-   "imports": 11.302,
-   "exports": 727.457,
-   "production": 3191.411,
-   "consumption": 2724.272
+   "imports": 8.917,
+   "exports": 724.433,
+   "production": 2507.0,
+   "consumption": 2020.358
   },
   "ARG|OFRU": {
    "imports": 580.365,
@@ -168,11 +234,21 @@
    "production": 1141.324,
    "consumption": 1217.145
   },
+  "ARG|OTHO": {
+   "imports": 5.524,
+   "exports": 355.538,
+   "production": 493.406,
+   "consumption": 122.77
+  },
   "ARG|OVEG": {
    "imports": 65.401,
    "exports": 169.371,
    "production": 2865.326,
    "consumption": 2755.708
+  },
+  "ARG|PLMO": {
+   "imports": 15.553,
+   "consumption": 15.389
   },
   "ARG|PORK": {
    "imports": 38.058,
@@ -216,7 +292,19 @@
    "production": 2.095,
    "consumption": 1.888
   },
-  "ARG|SHGM": {
+  "ARG|RYEM": {
+   "imports": 0.205,
+   "exports": 0.34,
+   "production": 75.218,
+   "consumption": 75.113
+  },
+  "ARG|SFIS": {
+   "imports": 46.222,
+   "exports": 338.737,
+   "production": 436.721,
+   "consumption": 191.098
+  },
+  "ARG|SGMT": {
    "imports": 0.324,
    "exports": 0.425,
    "production": 57.205,
@@ -276,6 +364,36 @@
    "production": 16096.883,
    "consumption": 5432.053
   },
+  "ARG|TABO": {
+   "imports": 0.277,
+   "exports": 76.558,
+   "production": 102.902,
+   "consumption": 56.752
+  },
+  "ARG|TAGR": {
+   "imports": 3.721,
+   "exports": 260.528,
+   "production": 391.594,
+   "consumption": 117.315
+  },
+  "ARG|TEAS": {
+   "imports": 0.677,
+   "exports": 108.574,
+   "production": 373.486,
+   "consumption": 265.698
+  },
+  "ARG|TEXT": {
+   "imports": 3.607,
+   "exports": 62.385,
+   "production": 262.953,
+   "consumption": 200.698
+  },
+  "ARG|TOBA": {
+   "imports": 3.05,
+   "exports": 74.061,
+   "production": 115.797,
+   "consumption": 55.173
+  },
   "ARG|TOMA": {
    "imports": 71.334,
    "exports": 19.487,
@@ -330,6 +448,14 @@
    "production": 549.54,
    "consumption": 359.112
   },
+  "AUS|COCO": {
+   "imports": 10.991,
+   "consumption": 11.059
+  },
+  "AUS|COFF": {
+   "imports": 145.041,
+   "consumption": 140.134
+  },
   "AUS|CORN": {
    "imports": 38.674,
    "exports": 71.172,
@@ -342,17 +468,35 @@
    "production": 247.836,
    "consumption": 249.832
   },
+  "AUS|FFIS": {
+   "imports": 55.612,
+   "exports": 10.055,
+   "production": 64.662,
+   "consumption": 109.125
+  },
   "AUS|MILK": {
    "imports": 4.683,
    "exports": 128.296,
    "production": 9481.394,
    "consumption": 9296.058
   },
+  "AUS|OAQU": {
+   "imports": 148.238,
+   "exports": 27.475,
+   "production": 73.813,
+   "consumption": 204.308
+  },
+  "AUS|OATS": {
+   "imports": 2.668,
+   "exports": 263.284,
+   "production": 1597.834,
+   "consumption": 1362.134
+  },
   "AUS|OCER": {
-   "imports": 11.683,
-   "exports": 909.587,
-   "production": 3094.019,
-   "consumption": 2453.128
+   "imports": 8.619,
+   "exports": 645.89,
+   "production": 1465.846,
+   "consumption": 1060.667
   },
   "AUS|OFRU": {
    "imports": 392.177,
@@ -360,11 +504,21 @@
    "production": 1098.65,
    "consumption": 1262.469
   },
+  "AUS|OTHO": {
+   "imports": 48.784,
+   "exports": 7.224,
+   "production": 275.169,
+   "consumption": 315.662
+  },
   "AUS|OVEG": {
    "imports": 305.519,
    "exports": 190.499,
    "production": 1803.473,
    "consumption": 1910.84
+  },
+  "AUS|PLMO": {
+   "imports": 138.319,
+   "consumption": 133.893
   },
   "AUS|PORK": {
    "imports": 277.579,
@@ -408,7 +562,19 @@
    "production": 380.331,
    "consumption": 243.659
   },
-  "AUS|SHGM": {
+  "AUS|RYEM": {
+   "imports": 0.396,
+   "exports": 0.414,
+   "production": 30.34,
+   "consumption": 30.326
+  },
+  "AUS|SFIS": {
+   "imports": 324.568,
+   "exports": 31.547,
+   "production": 137.369,
+   "consumption": 516.513
+  },
+  "AUS|SGMT": {
    "imports": 0.258,
    "exports": 441.288,
    "production": 737.153,
@@ -468,6 +634,34 @@
    "production": 25011.822,
    "consumption": 8234.928
   },
+  "AUS|TABO": {
+   "imports": 19.274,
+   "exports": 0.001,
+   "production": 7.517,
+   "consumption": 34.483
+  },
+  "AUS|TAGR": {
+   "imports": 109.174,
+   "exports": 140.738,
+   "production": 280.406,
+   "consumption": 246.404
+  },
+  "AUS|TEAS": {
+   "imports": 15.946,
+   "consumption": 15.849
+  },
+  "AUS|TEXT": {
+   "imports": 0.056,
+   "exports": 663.757,
+   "production": 735.106,
+   "consumption": 0.391
+  },
+  "AUS|TOBA": {
+   "imports": 13.471,
+   "exports": 0.647,
+   "production": 1.595,
+   "consumption": 15.571
+  },
   "AUS|TOMA": {
    "imports": 167.54,
    "exports": 19.526,
@@ -520,6 +714,10 @@
    "production": 158.591,
    "consumption": 273.506
   },
+  "BGD|COFF": {
+   "imports": 3.201,
+   "consumption": 0.963
+  },
   "BGD|CORN": {
    "imports": 1375.534,
    "exports": 4.586,
@@ -532,17 +730,33 @@
    "production": 647.439,
    "consumption": 650.561
   },
+  "BGD|FFIS": {
+   "imports": 25.646,
+   "exports": 8.918,
+   "production": 3402.018,
+   "consumption": 3418.325
+  },
   "BGD|MILK": {
    "imports": 0.223,
    "exports": 0.071,
    "production": 3582.909,
    "consumption": 3583.139
   },
+  "BGD|OAQU": {
+   "imports": 4.35,
+   "exports": 50.352,
+   "production": 256.787,
+   "consumption": 213.251
+  },
+  "BGD|OATS": {
+   "imports": 0.749,
+   "consumption": 1.3
+  },
   "BGD|OCER": {
-   "imports": 5.604,
+   "imports": 1.306,
    "exports": 0.009,
    "production": 11.145,
-   "consumption": 22.548
+   "consumption": 13.295
   },
   "BGD|OFRU": {
    "imports": 100.597,
@@ -550,11 +764,21 @@
    "production": 4663.925,
    "consumption": 4552.746
   },
+  "BGD|OTHO": {
+   "imports": 2.571,
+   "exports": 4.325,
+   "production": 62.396,
+   "consumption": 59.864
+  },
   "BGD|OVEG": {
    "imports": 318.385,
    "exports": 27.548,
    "production": 5472.515,
    "consumption": 5777.169
+  },
+  "BGD|PLMO": {
+   "imports": 1539.859,
+   "consumption": 1531.661
   },
   "BGD|POTA": {
    "imports": 2.188,
@@ -592,7 +816,17 @@
    "production": 156.619,
    "consumption": 134.68
   },
-  "BGD|SHGM": {
+  "BGD|RYEM": {
+   "imports": 3.549,
+   "consumption": 7.953
+  },
+  "BGD|SFIS": {
+   "imports": 188.234,
+   "exports": 15.114,
+   "production": 437.796,
+   "consumption": 660.048
+  },
+  "BGD|SGMT": {
    "imports": 1.019,
    "exports": 0.0,
    "production": 222.003,
@@ -640,6 +874,28 @@
    "production": 1252.694,
    "consumption": 7158.177
   },
+  "BGD|TAGR": {
+   "imports": 38.736,
+   "consumption": 32.25
+  },
+  "BGD|TEAS": {
+   "imports": 5.316,
+   "exports": 1.334,
+   "production": 75.0,
+   "consumption": 82.0
+  },
+  "BGD|TEXT": {
+   "imports": 897.936,
+   "exports": 1.103,
+   "production": 36.031,
+   "consumption": 882.283
+  },
+  "BGD|TOBA": {
+   "imports": 1.168,
+   "exports": 19.304,
+   "production": 111.171,
+   "consumption": 94.583
+  },
   "BGD|TOMA": {
    "imports": 13.865,
    "exports": 0.181,
@@ -686,6 +942,18 @@
    "production": 19538.166,
    "consumption": 7666.547
   },
+  "BRA|COCO": {
+   "imports": 59.771,
+   "exports": 9.35,
+   "production": 229.801,
+   "consumption": 282.171
+  },
+  "BRA|COFF": {
+   "imports": 4.584,
+   "exports": 1966.721,
+   "production": 3087.347,
+   "consumption": 1245.341
+  },
   "BRA|CORN": {
    "imports": 1816.853,
    "exports": 24002.398,
@@ -698,17 +966,35 @@
    "production": 2795.989,
    "consumption": 2769.007
   },
+  "BRA|FFIS": {
+   "imports": 194.376,
+   "exports": 2.526,
+   "production": 733.531,
+   "consumption": 921.342
+  },
   "BRA|MILK": {
    "imports": 1.174,
    "exports": 0.498,
    "production": 33494.674,
    "consumption": 33495.361
   },
+  "BRA|OAQU": {
+   "imports": 14.647,
+   "exports": 3.32,
+   "production": 142.052,
+   "consumption": 154.236
+  },
+  "BRA|OATS": {
+   "imports": 0.84,
+   "exports": 2.582,
+   "production": 799.012,
+   "consumption": 799.321
+  },
   "BRA|OCER": {
-   "imports": 438.375,
-   "exports": 428.215,
-   "production": 2806.916,
-   "consumption": 2836.312
+   "imports": 436.71,
+   "exports": 425.632,
+   "production": 2001.009,
+   "consumption": 2030.634
   },
   "BRA|OFRU": {
    "imports": 346.842,
@@ -716,11 +1002,23 @@
    "production": 14804.719,
    "consumption": 14570.969
   },
+  "BRA|OTHO": {
+   "imports": 10.594,
+   "exports": 101.444,
+   "production": 1257.5,
+   "consumption": 1014.579
+  },
   "BRA|OVEG": {
    "imports": 219.453,
    "exports": 213.964,
    "production": 7681.63,
    "consumption": 7677.037
+  },
+  "BRA|PLMO": {
+   "imports": 399.095,
+   "exports": 56.881,
+   "production": 495.6,
+   "consumption": 829.313
   },
   "BRA|PORK": {
    "imports": 2.606,
@@ -764,7 +1062,19 @@
    "production": 18.734,
    "consumption": 27.058
   },
-  "BRA|SHGM": {
+  "BRA|RYEM": {
+   "imports": 0.824,
+   "exports": 0.0,
+   "production": 6.895,
+   "consumption": 6.357
+  },
+  "BRA|SFIS": {
+   "imports": 376.971,
+   "exports": 87.085,
+   "production": 420.613,
+   "consumption": 781.26
+  },
+  "BRA|SGMT": {
    "imports": 6.742,
    "exports": 0.519,
    "production": 127.629,
@@ -824,6 +1134,36 @@
    "production": 5552.061,
    "consumption": 11947.177
   },
+  "BRA|TABO": {
+   "imports": 79.456,
+   "exports": 0.002,
+   "production": 1.33,
+   "consumption": 105.153
+  },
+  "BRA|TAGR": {
+   "imports": 131.81,
+   "exports": 39.918,
+   "production": 1090.945,
+   "consumption": 1171.319
+  },
+  "BRA|TEAS": {
+   "imports": 2.167,
+   "exports": 36.191,
+   "production": 587.498,
+   "consumption": 419.61
+  },
+  "BRA|TEXT": {
+   "imports": 36.306,
+   "exports": 896.302,
+   "production": 1438.07,
+   "consumption": 509.142
+  },
+  "BRA|TOBA": {
+   "imports": 9.562,
+   "exports": 519.396,
+   "production": 750.36,
+   "consumption": 265.188
+  },
   "BRA|TOMA": {
    "imports": 176.274,
    "exports": 6.31,
@@ -874,6 +1214,14 @@
    "imports": 760.708,
    "consumption": 753.476
   },
+  "CAN|COCO": {
+   "imports": 82.129,
+   "consumption": 82.848
+  },
+  "CAN|COFF": {
+   "imports": 289.68,
+   "consumption": 260.667
+  },
   "CAN|CORN": {
    "imports": 1808.039,
    "exports": 2240.179,
@@ -886,17 +1234,35 @@
    "production": 552.335,
    "consumption": 591.667
   },
+  "CAN|FFIS": {
+   "imports": 138.186,
+   "exports": 149.904,
+   "production": 207.577,
+   "consumption": 195.53
+  },
   "CAN|MILK": {
    "imports": 25.963,
    "exports": 6.77,
    "production": 8589.362,
    "consumption": 8624.375
   },
+  "CAN|OAQU": {
+   "imports": 263.48,
+   "exports": 355.322,
+   "production": 438.968,
+   "consumption": 353.387
+  },
+  "CAN|OATS": {
+   "imports": 21.663,
+   "exports": 2295.968,
+   "production": 3466.501,
+   "consumption": 1529.066
+  },
   "CAN|OCER": {
-   "imports": 1564.173,
-   "exports": 4694.09,
-   "production": 4282.726,
-   "consumption": 1761.509
+   "imports": 1541.984,
+   "exports": 2200.299,
+   "production": 478.558,
+   "consumption": 80.74
   },
   "CAN|OFRU": {
    "imports": 2223.498,
@@ -904,11 +1270,21 @@
    "production": 454.945,
    "consumption": 1971.79
   },
+  "CAN|OTHO": {
+   "imports": 62.525,
+   "exports": 37.317,
+   "production": 598.476,
+   "consumption": 505.148
+  },
   "CAN|OVEG": {
    "imports": 2316.224,
    "exports": 882.172,
    "production": 1881.826,
    "consumption": 3210.734
+  },
+  "CAN|PLMO": {
+   "imports": 112.744,
+   "consumption": 112.269
   },
   "CAN|PORK": {
    "imports": 286.328,
@@ -952,7 +1328,19 @@
    "production": 4006.501,
    "consumption": 832.698
   },
-  "CAN|SHGM": {
+  "CAN|RYEM": {
+   "imports": 0.526,
+   "exports": 197.822,
+   "production": 337.667,
+   "consumption": 151.703
+  },
+  "CAN|SFIS": {
+   "imports": 413.276,
+   "exports": 265.274,
+   "production": 391.134,
+   "consumption": 582.833
+  },
+  "CAN|SGMT": {
    "imports": 22.204,
    "exports": 0.208,
    "production": 16.175,
@@ -1012,6 +1400,30 @@
    "production": 31588.986,
    "consumption": 7625.251
   },
+  "CAN|TABO": {
+   "imports": 18.336,
+   "consumption": 26.673
+  },
+  "CAN|TAGR": {
+   "imports": 324.822,
+   "exports": 9.748,
+   "production": 21.658,
+   "consumption": 327.534
+  },
+  "CAN|TEAS": {
+   "imports": 32.279,
+   "consumption": 31.968
+  },
+  "CAN|TEXT": {
+   "imports": 0.823,
+   "consumption": 0.782
+  },
+  "CAN|TOBA": {
+   "imports": 22.855,
+   "exports": 20.184,
+   "production": 27.923,
+   "consumption": 30.917
+  },
   "CAN|TOMA": {
    "imports": 784.931,
    "exports": 369.834,
@@ -1066,6 +1478,16 @@
    "production": 39335.009,
    "consumption": 39351.921
   },
+  "CHN|COCO": {
+   "imports": 50.646,
+   "consumption": 50.7
+  },
+  "CHN|COFF": {
+   "imports": 182.873,
+   "exports": 134.584,
+   "production": 115.912,
+   "consumption": 110.789
+  },
   "CHN|CORN": {
    "imports": 3319.528,
    "exports": 517.398,
@@ -1078,17 +1500,35 @@
    "production": 31285.137,
    "consumption": 31348.123
   },
+  "CHN|FFIS": {
+   "imports": 751.362,
+   "exports": 1328.024,
+   "production": 26999.473,
+   "consumption": 26409.378
+  },
   "CHN|MILK": {
    "imports": 508.33,
    "exports": 2.616,
    "production": 34759.821,
    "consumption": 35292.146
   },
+  "CHN|OAQU": {
+   "imports": 1927.294,
+   "exports": 3587.958,
+   "production": 24237.534,
+   "consumption": 22760.601
+  },
+  "CHN|OATS": {
+   "imports": 225.444,
+   "exports": 0.872,
+   "production": 510.959,
+   "consumption": 706.474
+  },
   "CHN|OCER": {
-   "imports": 3668.374,
-   "exports": 962.003,
-   "production": 6577.357,
-   "consumption": 11720.677
+   "imports": 3375.856,
+   "exports": 960.695,
+   "production": 5592.189,
+   "consumption": 10426.948
   },
   "CHN|OFRU": {
    "imports": 5561.641,
@@ -1096,11 +1536,23 @@
    "production": 72904.834,
    "consumption": 74881.025
   },
+  "CHN|OTHO": {
+   "imports": 683.461,
+   "exports": 32.256,
+   "production": 4334.935,
+   "consumption": 5112.08
+  },
   "CHN|OVEG": {
    "imports": 176.633,
    "exports": 8477.429,
    "production": 575220.339,
    "consumption": 565827.317
+  },
+  "CHN|PLMO": {
+   "imports": 5363.055,
+   "exports": 25.277,
+   "production": 138.382,
+   "consumption": 6094.635
   },
   "CHN|PORK": {
    "imports": 1819.477,
@@ -1144,7 +1596,19 @@
    "production": 3806.55,
    "consumption": 5622.018
   },
-  "CHN|SHGM": {
+  "CHN|RYEM": {
+   "imports": 67.074,
+   "exports": 0.436,
+   "production": 474.209,
+   "consumption": 587.256
+  },
+  "CHN|SFIS": {
+   "imports": 14622.115,
+   "exports": 10322.231,
+   "production": 10904.052,
+   "consumption": 16072.885
+  },
+  "CHN|SGMT": {
    "imports": 272.923,
    "exports": 0.855,
    "production": 4688.029,
@@ -1204,6 +1668,36 @@
    "production": 132984.656,
    "consumption": 122467.513
   },
+  "CHN|TABO": {
+   "imports": 2.934,
+   "exports": 1.539,
+   "production": 3.067,
+   "consumption": 1.756
+  },
+  "CHN|TAGR": {
+   "imports": 461.091,
+   "exports": 365.425,
+   "production": 10394.529,
+   "consumption": 10388.827
+  },
+  "CHN|TEAS": {
+   "imports": 38.18,
+   "exports": 353.476,
+   "production": 2461.164,
+   "consumption": 1738.889
+  },
+  "CHN|TEXT": {
+   "imports": 1357.076,
+   "exports": 28.995,
+   "production": 6162.245,
+   "consumption": 7431.821
+  },
+  "CHN|TOBA": {
+   "imports": 131.742,
+   "exports": 184.881,
+   "production": 2529.202,
+   "consumption": 2483.286
+  },
   "CHN|TOMA": {
    "imports": 49.53,
    "exports": 2027.197,
@@ -1254,6 +1748,16 @@
    "production": 50.002,
    "consumption": 60.127
   },
+  "ETH|COCO": {
+   "imports": 1.111,
+   "consumption": 1.131
+  },
+  "ETH|COFF": {
+   "imports": 0.271,
+   "exports": 149.835,
+   "production": 469.272,
+   "consumption": 317.228
+  },
   "ETH|CORN": {
    "imports": 9.897,
    "exports": 7.841,
@@ -1266,17 +1770,33 @@
    "production": 53.829,
    "consumption": 52.838
   },
+  "ETH|FFIS": {
+   "imports": 0.05,
+   "exports": 0.827,
+   "production": 54.517,
+   "consumption": 53.72
+  },
   "ETH|MILK": {
    "imports": 0.262,
    "exports": 0.031,
    "production": 3238.518,
    "consumption": 3238.698
   },
+  "ETH|OAQU": {
+   "imports": 0.637,
+   "consumption": 0.685
+  },
+  "ETH|OATS": {
+   "imports": 0.799,
+   "exports": 0.001,
+   "production": 38.179,
+   "consumption": 40.843
+  },
   "ETH|OCER": {
-   "imports": 111.009,
-   "exports": 15.984,
-   "production": 11283.357,
-   "consumption": 11119.141
+   "imports": 109.163,
+   "exports": 15.983,
+   "production": 11245.178,
+   "consumption": 11076.852
   },
   "ETH|OFRU": {
    "imports": 19.062,
@@ -1284,11 +1804,21 @@
    "production": 988.152,
    "consumption": 995.512
   },
+  "ETH|OTHO": {
+   "imports": 10.665,
+   "exports": 0.233,
+   "production": 122.312,
+   "consumption": 126.863
+  },
   "ETH|OVEG": {
    "imports": 66.023,
    "exports": 32.374,
    "production": 1536.143,
    "consumption": 1572.84
+  },
+  "ETH|PLMO": {
+   "imports": 494.116,
+   "consumption": 487.018
   },
   "ETH|PORK": {
    "imports": 0.891,
@@ -1331,7 +1861,15 @@
    "production": 14.963,
    "consumption": 17.037
   },
-  "ETH|SHGM": {
+  "ETH|RYEM": {
+   "imports": 1.047,
+   "consumption": 1.447
+  },
+  "ETH|SFIS": {
+   "imports": 1.556,
+   "consumption": 2.179
+  },
+  "ETH|SGMT": {
    "imports": 0.001,
    "exports": 15.351,
    "production": 190.0,
@@ -1380,6 +1918,30 @@
    "exports": 12.591,
    "production": 4673.0,
    "consumption": 6349.333
+  },
+  "ETH|TAGR": {
+   "imports": 2.521,
+   "exports": 0.001,
+   "production": 3.41,
+   "consumption": 4.462
+  },
+  "ETH|TEAS": {
+   "imports": 0.459,
+   "exports": 0.996,
+   "production": 11.179,
+   "consumption": 10.67
+  },
+  "ETH|TEXT": {
+   "imports": 2.155,
+   "exports": 2.332,
+   "production": 36.577,
+   "consumption": 36.388
+  },
+  "ETH|TOBA": {
+   "imports": 1.702,
+   "exports": 0.006,
+   "production": 1.952,
+   "consumption": 3.814
   },
   "ETH|TOMA": {
    "imports": 7.99,
@@ -1433,6 +1995,16 @@
    "production": 11245.146,
    "consumption": 13496.41
   },
+  "EU27|COCO": {
+   "imports": 2763.093,
+   "exports": 863.013,
+   "consumption": 1670.74
+  },
+  "EU27|COFF": {
+   "imports": 4698.07,
+   "exports": 2452.615,
+   "consumption": 2247.681
+  },
   "EU27|CORN": {
    "imports": 33874.936,
    "exports": 23649.838,
@@ -1445,17 +2017,35 @@
    "production": 6346.665,
    "consumption": 5982.879
   },
+  "EU27|FFIS": {
+   "imports": 2865.747,
+   "exports": 1686.891,
+   "production": 452.327,
+   "consumption": 1621.802
+  },
   "EU27|MILK": {
    "imports": 7719.536,
    "exports": 7724.038,
    "production": 152169.318,
    "consumption": 152963.054
   },
+  "EU27|OAQU": {
+   "imports": 3208.368,
+   "exports": 1509.03,
+   "production": 1054.158,
+   "consumption": 2764.351
+  },
+  "EU27|OATS": {
+   "imports": 1669.772,
+   "exports": 1376.664,
+   "production": 7198.402,
+   "consumption": 6749.654
+  },
   "EU27|OCER": {
-   "imports": 12756.195,
-   "exports": 6776.457,
-   "production": 30382.614,
-   "consumption": 30431.93
+   "imports": 10058.585,
+   "exports": 4535.599,
+   "production": 16213.306,
+   "consumption": 16775.526
   },
   "EU27|OFRU": {
    "imports": 21447.431,
@@ -1463,11 +2053,23 @@
    "production": 15387.37,
    "consumption": 21940.686
   },
+  "EU27|OTHO": {
+   "imports": 7495.944,
+   "exports": 4899.998,
+   "production": 2574.923,
+   "consumption": 4668.05
+  },
   "EU27|OVEG": {
    "imports": 18765.998,
    "exports": 19684.801,
    "production": 48682.012,
    "consumption": 45325.209
+  },
+  "EU27|PLMO": {
+   "imports": 9523.712,
+   "exports": 2266.563,
+   "production": 104.966,
+   "consumption": 7252.817
   },
   "EU27|PORK": {
    "imports": 7301.213,
@@ -1511,7 +2113,19 @@
    "production": 8757.632,
    "consumption": 8070.341
   },
-  "EU27|SHGM": {
+  "EU27|RYEM": {
+   "imports": 1027.838,
+   "exports": 864.193,
+   "production": 6970.906,
+   "consumption": 6906.75
+  },
+  "EU27|SFIS": {
+   "imports": 10449.097,
+   "exports": 7345.432,
+   "production": 4368.65,
+   "consumption": 7494.761
+  },
+  "EU27|SGMT": {
    "imports": 374.93,
    "exports": 233.962,
    "production": 619.653,
@@ -1571,6 +2185,36 @@
    "production": 130784.514,
    "consumption": 106032.332
   },
+  "EU27|TABO": {
+   "imports": 190.631,
+   "exports": 283.906,
+   "consumption": 1606.75,
+   "production": 2128.696
+  },
+  "EU27|TAGR": {
+   "imports": 2667.718,
+   "exports": 1536.713,
+   "consumption": 4644.196,
+   "production": 3685.39
+  },
+  "EU27|TEAS": {
+   "imports": 295.604,
+   "exports": 169.517,
+   "consumption": 121.617,
+   "production": 4.877
+  },
+  "EU27|TEXT": {
+   "imports": 175.731,
+   "exports": 227.34,
+   "consumption": 424.258,
+   "production": 444.249
+  },
+  "EU27|TOBA": {
+   "imports": 1581.821,
+   "exports": 1170.59,
+   "production": 263.411,
+   "consumption": 593.216
+  },
   "EU27|TOMA": {
    "imports": 8415.366,
    "exports": 11520.325,
@@ -1617,6 +2261,18 @@
    "production": 2322.162,
    "consumption": 2438.906
   },
+  "IDN|COCO": {
+   "imports": 189.163,
+   "exports": 64.544,
+   "production": 671.819,
+   "consumption": 802.179
+  },
+  "IDN|COFF": {
+   "imports": 88.404,
+   "exports": 768.776,
+   "production": 757.965,
+   "consumption": 53.479
+  },
   "IDN|CORN": {
    "imports": 1322.302,
    "exports": 231.635,
@@ -1629,17 +2285,33 @@
    "production": 3962.56,
    "consumption": 3967.439
   },
+  "IDN|FFIS": {
+   "imports": 8.877,
+   "exports": 139.876,
+   "production": 5051.363,
+   "consumption": 4916.417
+  },
   "IDN|MILK": {
    "imports": 0.738,
    "exports": 2.141,
    "production": 1413.996,
    "consumption": 1408.832
   },
+  "IDN|OAQU": {
+   "imports": 111.057,
+   "exports": 579.228,
+   "production": 1816.247,
+   "consumption": 1387.718
+  },
+  "IDN|OATS": {
+   "imports": 10.476,
+   "consumption": 14.183
+  },
   "IDN|OCER": {
-   "imports": 52.514,
+   "imports": 42.038,
    "exports": 12.062,
    "production": 62.918,
-   "consumption": 114.839
+   "consumption": 100.656
   },
   "IDN|OFRU": {
    "imports": 338.674,
@@ -1647,11 +2319,23 @@
    "production": 17062.203,
    "consumption": 16457.31
   },
+  "IDN|OTHO": {
+   "imports": 11.81,
+   "exports": 3584.966,
+   "production": 5157.168,
+   "consumption": 1260.651
+  },
   "IDN|OVEG": {
    "imports": 703.895,
    "exports": 50.679,
    "production": 10842.929,
    "consumption": 11470.041
+  },
+  "IDN|PLMO": {
+   "imports": 6.612,
+   "exports": 27183.478,
+   "production": 40646.554,
+   "consumption": 12385.568
   },
   "IDN|PORK": {
    "imports": 3.847,
@@ -1689,7 +2373,13 @@
    "imports": 8.162,
    "consumption": 6.965
   },
-  "IDN|SHGM": {
+  "IDN|SFIS": {
+   "imports": 329.381,
+   "exports": 422.664,
+   "production": 5440.706,
+   "consumption": 5364.586
+  },
+  "IDN|SGMT": {
    "imports": 2.738,
    "exports": 0.0,
    "production": 130.658,
@@ -1745,6 +2435,28 @@
    "imports": 10685.625,
    "consumption": 9586.0
   },
+  "IDN|TAGR": {
+   "imports": 107.051,
+   "consumption": 97.731
+  },
+  "IDN|TEAS": {
+   "imports": 19.04,
+   "exports": 50.147,
+   "production": 143.479,
+   "consumption": 107.56
+  },
+  "IDN|TEXT": {
+   "imports": 698.665,
+   "exports": 5.689,
+   "production": 0.575,
+   "consumption": 654.903
+  },
+  "IDN|TOBA": {
+   "imports": 55.9,
+   "exports": 32.303,
+   "production": 180.857,
+   "consumption": 206.179
+  },
   "IDN|TOMA": {
    "imports": 47.377,
    "exports": 0.34,
@@ -1795,6 +2507,18 @@
    "production": 11846.434,
    "consumption": 11861.886
   },
+  "IND|COCO": {
+   "imports": 33.139,
+   "exports": 1.836,
+   "production": 19.347,
+   "consumption": 51.073
+  },
+  "IND|COFF": {
+   "imports": 78.617,
+   "exports": 406.732,
+   "production": 323.687,
+   "consumption": 13.533
+  },
   "IND|CORN": {
    "imports": 107.242,
    "exports": 1124.289,
@@ -1807,17 +2531,33 @@
    "production": 4882.0,
    "consumption": 4806.333
   },
+  "IND|FFIS": {
+   "imports": 26.744,
+   "exports": 28.138,
+   "production": 7191.17,
+   "consumption": 7189.737
+  },
   "IND|MILK": {
    "imports": 0.691,
    "exports": 3.936,
    "production": 169840.223,
    "consumption": 169835.0
   },
+  "IND|OAQU": {
+   "imports": 3.473,
+   "exports": 875.822,
+   "production": 1497.896,
+   "consumption": 709.312
+  },
+  "IND|OATS": {
+   "imports": 60.811,
+   "consumption": 82.333
+  },
   "IND|OCER": {
-   "imports": 276.907,
+   "imports": 216.096,
    "exports": 450.328,
    "production": 15738.435,
-   "consumption": 15805.046
+   "consumption": 15722.713
   },
   "IND|OFRU": {
    "imports": 1420.353,
@@ -1825,11 +2565,21 @@
    "production": 78363.933,
    "consumption": 78322.865
   },
+  "IND|OTHO": {
+   "imports": 41.138,
+   "exports": 686.817,
+   "production": 4525.051,
+   "consumption": 3813.39
+  },
   "IND|OVEG": {
    "imports": 41.984,
    "exports": 2849.835,
    "production": 112901.942,
    "consumption": 110062.826
+  },
+  "IND|PLMO": {
+   "imports": 8894.124,
+   "consumption": 9174.972
   },
   "IND|PORK": {
    "imports": 0.996,
@@ -1873,7 +2623,13 @@
    "production": 2127.333,
    "consumption": 2411.0
   },
-  "IND|SHGM": {
+  "IND|SFIS": {
+   "imports": 84.205,
+   "exports": 876.222,
+   "production": 2933.462,
+   "consumption": 2254.694
+  },
+  "IND|SGMT": {
    "imports": 0.002,
    "exports": 20.43,
    "production": 791.833,
@@ -1933,6 +2689,34 @@
    "production": 96890.313,
    "consumption": 97887.008
   },
+  "IND|TABO": {
+   "imports": 2.33,
+   "consumption": 2.0
+  },
+  "IND|TAGR": {
+   "imports": 84.264,
+   "exports": 272.23,
+   "production": 2810.504,
+   "consumption": 2590.483
+  },
+  "IND|TEAS": {
+   "imports": 20.405,
+   "exports": 261.399,
+   "production": 1304.503,
+   "consumption": 1075.134
+  },
+  "IND|TEXT": {
+   "imports": 382.121,
+   "exports": 1095.106,
+   "production": 4753.495,
+   "consumption": 4031.664
+  },
+  "IND|TOBA": {
+   "imports": 1.518,
+   "exports": 262.446,
+   "production": 757.594,
+   "consumption": 519.408
+  },
   "IND|TOMA": {
    "imports": 50.722,
    "exports": 105.9,
@@ -1985,6 +2769,14 @@
    "production": 887.569,
    "consumption": 1247.845
   },
+  "JPN|COCO": {
+   "imports": 76.253,
+   "consumption": 75.791
+  },
+  "JPN|COFF": {
+   "imports": 453.328,
+   "consumption": 452.831
+  },
   "JPN|CORN": {
    "imports": 15888.067,
    "exports": 0.98,
@@ -1997,17 +2789,35 @@
    "production": 2596.836,
    "consumption": 2631.5
   },
+  "JPN|FFIS": {
+   "imports": 537.63,
+   "exports": 14.858,
+   "production": 157.527,
+   "consumption": 658.84
+  },
   "JPN|MILK": {
    "imports": 0.098,
    "exports": 4.121,
    "production": 7295.706,
    "consumption": 7291.157
   },
+  "JPN|OAQU": {
+   "imports": 1410.581,
+   "exports": 202.526,
+   "production": 866.093,
+   "consumption": 2123.929
+  },
+  "JPN|OATS": {
+   "imports": 48.746,
+   "exports": 3.327,
+   "production": 1.032,
+   "consumption": 62.524
+  },
   "JPN|OCER": {
-   "imports": 381.736,
-   "exports": 13.814,
-   "production": 33.707,
-   "consumption": 796.348
+   "imports": 316.486,
+   "exports": 10.487,
+   "production": 32.675,
+   "consumption": 710.824
   },
   "JPN|OFRU": {
    "imports": 2271.523,
@@ -2015,11 +2825,23 @@
    "production": 987.886,
    "consumption": 2865.831
   },
+  "JPN|OTHO": {
+   "imports": 261.485,
+   "exports": 5.015,
+   "production": 651.004,
+   "consumption": 884.24
+  },
   "JPN|OVEG": {
    "imports": 2507.092,
    "exports": 23.076,
    "production": 9676.734,
    "consumption": 11904.66
+  },
+  "JPN|PLMO": {
+   "imports": 782.46,
+   "exports": 4.214,
+   "production": 1.774,
+   "consumption": 782.826
   },
   "JPN|PORK": {
    "imports": 1484.274,
@@ -2063,7 +2885,17 @@
    "production": 1040.333,
    "consumption": 1056.0
   },
-  "JPN|SHGM": {
+  "JPN|RYEM": {
+   "imports": 16.503,
+   "consumption": 23.0
+  },
+  "JPN|SFIS": {
+   "imports": 1901.216,
+   "exports": 466.38,
+   "production": 2812.605,
+   "consumption": 4576.646
+  },
+  "JPN|SGMT": {
    "imports": 24.074,
    "consumption": 19.0
   },
@@ -2119,6 +2951,32 @@
    "production": 821.978,
    "consumption": 6644.827
   },
+  "JPN|TABO": {
+   "imports": 2.777,
+   "consumption": 4.0
+  },
+  "JPN|TAGR": {
+   "imports": 143.333,
+   "exports": 1.665,
+   "production": 63.0,
+   "consumption": 192.667
+  },
+  "JPN|TEAS": {
+   "imports": 31.953,
+   "exports": 5.493,
+   "production": 82.665,
+   "consumption": 109.998
+  },
+  "JPN|TEXT": {
+   "imports": 86.167,
+   "consumption": 81.801
+  },
+  "JPN|TOBA": {
+   "imports": 138.032,
+   "exports": 5.178,
+   "production": 11.604,
+   "consumption": 157.579
+  },
   "JPN|TOMA": {
    "imports": 380.864,
    "exports": 1.004,
@@ -2169,6 +3027,14 @@
    "production": 610.381,
    "consumption": 824.423
   },
+  "KOR|COCO": {
+   "imports": 10.208,
+   "consumption": 10.268
+  },
+  "KOR|COFF": {
+   "imports": 112.68,
+   "consumption": 107.667
+  },
   "KOR|CORN": {
    "imports": 10166.305,
    "exports": 77.979,
@@ -2181,17 +3047,33 @@
    "production": 765.599,
    "consumption": 771.063
   },
+  "KOR|FFIS": {
+   "imports": 53.563,
+   "exports": 2.564,
+   "production": 39.315,
+   "consumption": 89.13
+  },
   "KOR|MILK": {
    "imports": 3.67,
    "exports": 7.186,
    "production": 2236.208,
    "consumption": 2233.037
   },
+  "KOR|OAQU": {
+   "imports": 587.005,
+   "exports": 213.265,
+   "production": 762.23,
+   "consumption": 1261.459
+  },
+  "KOR|OATS": {
+   "imports": 25.067,
+   "consumption": 31.667
+  },
   "KOR|OCER": {
-   "imports": 46.85,
+   "imports": 19.074,
    "exports": 7.121,
-   "production": 20.297,
-   "consumption": 81.042
+   "production": 19.075,
+   "consumption": 44.431
   },
   "KOR|OFRU": {
    "imports": 978.945,
@@ -2199,11 +3081,21 @@
    "production": 1258.221,
    "consumption": 1986.616
   },
+  "KOR|OTHO": {
+   "imports": 571.593,
+   "exports": 17.955,
+   "production": 141.832,
+   "consumption": 712.965
+  },
   "KOR|OVEG": {
    "imports": 1271.838,
    "exports": 99.138,
    "production": 9938.774,
    "consumption": 11053.506
+  },
+  "KOR|PLMO": {
+   "imports": 533.782,
+   "consumption": 532.944
   },
   "KOR|PORK": {
    "imports": 711.803,
@@ -2247,7 +3139,19 @@
    "production": 2.677,
    "consumption": 131.387
   },
-  "KOR|SHGM": {
+  "KOR|RYEM": {
+   "imports": 2.709,
+   "exports": 0.001,
+   "production": 1.222,
+   "consumption": 4.944
+  },
+  "KOR|SFIS": {
+   "imports": 1017.279,
+   "exports": 319.282,
+   "production": 1111.359,
+   "consumption": 2041.576
+  },
+  "KOR|SGMT": {
    "imports": 15.589,
    "exports": 0.594,
    "production": 2.097,
@@ -2299,6 +3203,34 @@
    "production": 34.0,
    "consumption": 4338.667
   },
+  "KOR|TABO": {
+   "imports": 3.239,
+   "consumption": 4.667
+  },
+  "KOR|TAGR": {
+   "imports": 78.452,
+   "exports": 1.386,
+   "production": 198.0,
+   "consumption": 267.0
+  },
+  "KOR|TEAS": {
+   "imports": 2.377,
+   "exports": 2.046,
+   "production": 3.0,
+   "consumption": 3.333
+  },
+  "KOR|TEXT": {
+   "imports": 223.35,
+   "exports": 3.704,
+   "production": 0.159,
+   "consumption": 222.448
+  },
+  "KOR|TOBA": {
+   "imports": 52.845,
+   "exports": 28.611,
+   "production": 30.728,
+   "consumption": 56.293
+  },
   "KOR|TOMA": {
    "imports": 62.323,
    "exports": 6.269,
@@ -2349,6 +3281,14 @@
    "production": 2234.219,
    "consumption": 1568.967
   },
+  "MAR|COCO": {
+   "imports": 0.929,
+   "consumption": 0.937
+  },
+  "MAR|COFF": {
+   "imports": 38.696,
+   "consumption": 34.467
+  },
   "MAR|CORN": {
    "imports": 2195.258,
    "exports": 1.145,
@@ -2361,17 +3301,35 @@
    "production": 352.833,
    "consumption": 351.832
   },
+  "MAR|FFIS": {
+   "imports": 5.748,
+   "exports": 3.457,
+   "production": 16.158,
+   "consumption": 18.389
+  },
   "MAR|MILK": {
    "imports": 0.967,
    "exports": 0.599,
    "production": 2093.26,
    "consumption": 2092.931
   },
+  "MAR|OAQU": {
+   "imports": 44.921,
+   "exports": 127.214,
+   "production": 101.089,
+   "consumption": 22.643
+  },
+  "MAR|OATS": {
+   "imports": 3.195,
+   "exports": 1.03,
+   "production": 24.084,
+   "consumption": 26.185
+  },
   "MAR|OCER": {
-   "imports": 9.978,
-   "exports": 4.66,
-   "production": 36.459,
-   "consumption": 44.695
+   "imports": 6.524,
+   "exports": 3.628,
+   "production": 10.375,
+   "consumption": 16.51
   },
   "MAR|OFRU": {
    "imports": 186.868,
@@ -2379,11 +3337,21 @@
    "production": 1444.059,
    "consumption": 1511.973
   },
+  "MAR|OTHO": {
+   "imports": 51.59,
+   "exports": 21.431,
+   "production": 17.6,
+   "consumption": 41.189
+  },
   "MAR|OVEG": {
    "imports": 25.348,
    "exports": 667.025,
    "production": 3894.767,
    "consumption": 3282.33
+  },
+  "MAR|PLMO": {
+   "imports": 48.191,
+   "consumption": 47.845
   },
   "MAR|PORK": {
    "imports": 0.001,
@@ -2427,7 +3395,19 @@
    "production": 1.163,
    "consumption": 4.239
   },
-  "MAR|SHGM": {
+  "MAR|RYEM": {
+   "imports": 0.26,
+   "exports": 0.001,
+   "production": 2.0,
+   "consumption": 2.0
+  },
+  "MAR|SFIS": {
+   "imports": 45.972,
+   "exports": 776.463,
+   "production": 1288.457,
+   "consumption": 662.09
+  },
+  "MAR|SGMT": {
    "imports": 1.632,
    "exports": 0.001,
    "production": 201.204,
@@ -2487,6 +3467,34 @@
    "production": 5714.185,
    "consumption": 10829.326
   },
+  "MAR|TABO": {
+   "imports": 0.543,
+   "exports": 111.294,
+   "production": 270.204,
+   "consumption": 213.845
+  },
+  "MAR|TAGR": {
+   "imports": 10.5,
+   "exports": 9.79,
+   "production": 341.667,
+   "consumption": 342.333
+  },
+  "MAR|TEAS": {
+   "imports": 69.895,
+   "consumption": 66.815
+  },
+  "MAR|TEXT": {
+   "imports": 20.468,
+   "exports": 0.049,
+   "production": 0.101,
+   "consumption": 18.43
+  },
+  "MAR|TOBA": {
+   "imports": 10.395,
+   "exports": 0.328,
+   "production": 1.279,
+   "consumption": 11.821
+  },
   "MAR|TOMA": {
    "imports": 23.531,
    "exports": 318.504,
@@ -2539,6 +3547,18 @@
    "production": 8398.434,
    "consumption": 6511.115
   },
+  "MEX|COCO": {
+   "imports": 58.497,
+   "exports": 2.025,
+   "production": 27.39,
+   "consumption": 85.491
+  },
+  "MEX|COFF": {
+   "imports": 63.972,
+   "exports": 147.862,
+   "production": 154.767,
+   "consumption": 85.934
+  },
   "MEX|CORN": {
    "imports": 15732.897,
    "exports": 1560.28,
@@ -2551,17 +3571,35 @@
    "production": 2787.829,
    "consumption": 2851.5
   },
+  "MEX|FFIS": {
+   "imports": 332.786,
+   "exports": 7.704,
+   "production": 273.041,
+   "consumption": 591.882
+  },
   "MEX|MILK": {
    "imports": 27.788,
    "exports": 2.374,
    "production": 12005.143,
    "consumption": 12037.167
   },
+  "MEX|OAQU": {
+   "imports": 69.126,
+   "exports": 75.283,
+   "production": 506.872,
+   "consumption": 496.04
+  },
+  "MEX|OATS": {
+   "imports": 199.49,
+   "exports": 1.048,
+   "production": 80.751,
+   "consumption": 336.294
+  },
   "MEX|OCER": {
-   "imports": 426.249,
-   "exports": 6.864,
-   "production": 4913.392,
-   "consumption": 5647.017
+   "imports": 226.28,
+   "exports": 5.815,
+   "production": 4831.976,
+   "consumption": 5309.399
   },
   "MEX|OFRU": {
    "imports": 558.783,
@@ -2569,11 +3607,23 @@
    "production": 11100.958,
    "consumption": 8490.034
   },
+  "MEX|OTHO": {
+   "imports": 61.748,
+   "exports": 52.139,
+   "production": 279.875,
+   "consumption": 282.828
+  },
   "MEX|OVEG": {
    "imports": 281.848,
    "exports": 5392.806,
    "production": 12965.491,
    "consumption": 7479.874
+  },
+  "MEX|PLMO": {
+   "imports": 535.837,
+   "exports": 3.985,
+   "production": 115.413,
+   "consumption": 641.509
   },
   "MEX|PORK": {
    "imports": 911.656,
@@ -2617,7 +3667,19 @@
    "production": 592.854,
    "consumption": 676.166
   },
-  "MEX|SHGM": {
+  "MEX|RYEM": {
+   "imports": 0.48,
+   "exports": 0.001,
+   "production": 0.664,
+   "consumption": 1.323
+  },
+  "MEX|SFIS": {
+   "imports": 136.167,
+   "exports": 432.086,
+   "production": 1073.924,
+   "consumption": 771.78
+  },
+  "MEX|SGMT": {
    "imports": 9.183,
    "exports": 0.265,
    "production": 101.644,
@@ -2677,6 +3739,34 @@
    "production": 3436.738,
    "consumption": 6579.552
   },
+  "MEX|TABO": {
+   "imports": 9.116,
+   "exports": 6.463,
+   "production": 15.562,
+   "consumption": 18.12
+  },
+  "MEX|TAGR": {
+   "imports": 143.535,
+   "exports": 181.869,
+   "production": 334.388,
+   "consumption": 302.173
+  },
+  "MEX|TEAS": {
+   "imports": 2.786,
+   "consumption": 3.0
+  },
+  "MEX|TEXT": {
+   "imports": 219.626,
+   "exports": 49.208,
+   "production": 281.2,
+   "consumption": 439.099
+  },
+  "MEX|TOBA": {
+   "imports": 17.198,
+   "exports": 12.98,
+   "production": 16.259,
+   "consumption": 20.82
+  },
   "MEX|TOMA": {
    "imports": 461.281,
    "exports": 1361.405,
@@ -2725,6 +3815,18 @@
    "production": 4059.5,
    "consumption": 4064.213
   },
+  "NGA|COCO": {
+   "imports": 0.21,
+   "exports": 279.752,
+   "production": 320.371,
+   "consumption": 71.138
+  },
+  "NGA|COFF": {
+   "imports": 13.439,
+   "exports": 0.702,
+   "production": 1.033,
+   "consumption": 7.729
+  },
   "NGA|CORN": {
    "imports": 449.235,
    "exports": 7.178,
@@ -2737,17 +3839,33 @@
    "production": 650.299,
    "consumption": 650.368
   },
+  "NGA|FFIS": {
+   "imports": 1.165,
+   "exports": 1.071,
+   "production": 694.942,
+   "consumption": 695.034
+  },
   "NGA|MILK": {
    "imports": 3.375,
    "exports": 0.42,
    "production": 516.15,
    "consumption": 519.054
   },
+  "NGA|OAQU": {
+   "imports": 0.515,
+   "exports": 6.101,
+   "production": 57.334,
+   "consumption": 52.048
+  },
+  "NGA|OATS": {
+   "imports": 5.663,
+   "consumption": 7.667
+  },
   "NGA|OCER": {
-   "imports": 11.127,
+   "imports": 5.464,
    "exports": 4.019,
    "production": 8903.327,
-   "consumption": 8861.371
+   "consumption": 8853.704
   },
   "NGA|OFRU": {
    "imports": 46.784,
@@ -2755,11 +3873,23 @@
    "production": 7909.877,
    "consumption": 7807.072
   },
+  "NGA|OTHO": {
+   "imports": 10.608,
+   "exports": 1.603,
+   "production": 599.154,
+   "consumption": 578.837
+  },
   "NGA|OVEG": {
    "imports": 15.466,
    "exports": 17.37,
    "production": 12225.837,
    "consumption": 12222.163
+  },
+  "NGA|PLMO": {
+   "imports": 1272.221,
+   "exports": 22.972,
+   "production": 1167.258,
+   "consumption": 2414.051
   },
   "NGA|PORK": {
    "imports": 7.856,
@@ -2785,7 +3915,13 @@
    "production": 3774.308,
    "consumption": 3366.268
   },
-  "NGA|SHGM": {
+  "NGA|SFIS": {
+   "imports": 514.943,
+   "exports": 11.82,
+   "production": 391.032,
+   "consumption": 1049.375
+  },
+  "NGA|SGMT": {
    "imports": 0.032,
    "exports": 0.015,
    "production": 414.166,
@@ -2835,6 +3971,26 @@
    "production": 62.335,
    "consumption": 4960.833
   },
+  "NGA|TAGR": {
+   "imports": 4.931,
+   "consumption": 4.667
+  },
+  "NGA|TEAS": {
+   "imports": 4.223,
+   "consumption": 0.926
+  },
+  "NGA|TEXT": {
+   "imports": 1.128,
+   "exports": 33.299,
+   "production": 96.907,
+   "consumption": 48.503
+  },
+  "NGA|TOBA": {
+   "imports": 16.463,
+   "exports": 0.042,
+   "production": 6.176,
+   "consumption": 24.021
+  },
   "NGA|TOMA": {
    "imports": 607.737,
    "exports": 2.1,
@@ -2848,6 +4004,268 @@
   "NGA|WINE": {
    "imports": 22.435,
    "consumption": 25.831
+  },
+  "NOR|APPL": {
+   "imports": 38.945,
+   "exports": 0.364,
+   "production": 13.711,
+   "consumption": 71.419
+  },
+  "NOR|BARL": {
+   "imports": 85.309,
+   "exports": 0.892,
+   "production": 550.165,
+   "consumption": 621.835
+  },
+  "NOR|BEEF": {
+   "imports": 8.378,
+   "exports": 0.421,
+   "production": 85.846,
+   "consumption": 96.087
+  },
+  "NOR|BUTR": {
+   "imports": 3.771,
+   "exports": 0.002,
+   "production": 15.766,
+   "consumption": 15.692
+  },
+  "NOR|CHES": {
+   "imports": 4.78,
+   "exports": 1.618,
+   "production": 78.801,
+   "consumption": 81.369
+  },
+  "NOR|CITR": {
+   "imports": 268.11,
+   "exports": 5.806,
+   "consumption": 110.512
+  },
+  "NOR|COCO": {
+   "imports": 4.358,
+   "exports": 0.645,
+   "consumption": 3.679
+  },
+  "NOR|COFF": {
+   "imports": 44.825,
+   "exports": 0.964,
+   "consumption": 45.828
+  },
+  "NOR|CORN": {
+   "imports": 111.408,
+   "exports": 12.823,
+   "consumption": 88.454
+  },
+  "NOR|EGGS": {
+   "imports": 1.05,
+   "exports": 0.999,
+   "production": 69.734,
+   "consumption": 69.594
+  },
+  "NOR|FFIS": {
+   "imports": 2.638,
+   "exports": 1228.165,
+   "production": 1310.158,
+   "consumption": 100.877
+  },
+  "NOR|MILK": {
+   "imports": 0.11,
+   "exports": 2.673,
+   "production": 1515.597,
+   "consumption": 1512.713
+  },
+  "NOR|OAQU": {
+   "imports": 37.953,
+   "exports": 48.973,
+   "production": 188.77,
+   "consumption": 174.419
+  },
+  "NOR|OATS": {
+   "imports": 23.166,
+   "exports": 2.258,
+   "production": 266.567,
+   "consumption": 281.099
+  },
+  "NOR|OCER": {
+   "imports": 16.135,
+   "exports": 0.0,
+   "production": 1.573,
+   "consumption": 20.837
+  },
+  "NOR|OFRU": {
+   "imports": 251.15,
+   "exports": 3.682,
+   "production": 16.268,
+   "consumption": 233.488
+  },
+  "NOR|OTHO": {
+   "imports": 48.249,
+   "exports": 24.229,
+   "production": 11.929,
+   "consumption": 36.549
+  },
+  "NOR|OVEG": {
+   "imports": 138.285,
+   "exports": 4.012,
+   "production": 182.253,
+   "consumption": 357.695
+  },
+  "NOR|PLMO": {
+   "imports": 1.553,
+   "exports": 1.11,
+   "consumption": 0.436
+  },
+  "NOR|PORK": {
+   "imports": 4.175,
+   "exports": 2.666,
+   "production": 137.172,
+   "consumption": 137.161
+  },
+  "NOR|POTA": {
+   "imports": 34.931,
+   "exports": 0.102,
+   "production": 331.56,
+   "consumption": 376.025
+  },
+  "NOR|POUL": {
+   "imports": 0.263,
+   "exports": 0.128,
+   "production": 99.0,
+   "consumption": 110.0
+  },
+  "NOR|PULS": {
+   "imports": 11.464,
+   "exports": 0.048,
+   "production": 21.008,
+   "consumption": 161.252
+  },
+  "NOR|RAPC": {
+   "imports": 8.217,
+   "exports": 4.429,
+   "production": 5.872,
+   "consumption": 375.941
+  },
+  "NOR|RAPE": {
+   "imports": 7.2,
+   "exports": 0.166,
+   "production": 9.385,
+   "consumption": 15.913
+  },
+  "NOR|RAPO": {
+   "imports": 14.69,
+   "exports": 2.374,
+   "production": 5.014,
+   "consumption": 456.425
+  },
+  "NOR|RYEM": {
+   "imports": 5.297,
+   "exports": 19.858,
+   "production": 27.0,
+   "consumption": 36.333
+  },
+  "NOR|SFIS": {
+   "imports": 1142.73,
+   "exports": 1792.662,
+   "production": 2072.371,
+   "consumption": 1444.675
+  },
+  "NOR|SGMT": {
+   "imports": 3.585,
+   "exports": 0.189,
+   "production": 26.92,
+   "consumption": 27.741
+  },
+  "NOR|SKIM": {
+   "imports": 0.409,
+   "exports": 1.38,
+   "production": 16.05,
+   "consumption": 14.1
+  },
+  "NOR|SOYA": {
+   "imports": 419.291,
+   "exports": 2.681,
+   "consumption": 410.185
+  },
+  "NOR|SOYC": {
+   "imports": 33.435,
+   "exports": 166.94,
+   "production": 329.802,
+   "consumption": 66.181
+  },
+  "NOR|SOYO": {
+   "imports": 53.645,
+   "exports": 69.654,
+   "production": 78.333,
+   "consumption": 14.0
+  },
+  "NOR|SUGR": {
+   "imports": 162.33,
+   "exports": 0.321,
+   "consumption": 135.704
+  },
+  "NOR|SUNC": {
+   "imports": 0.404,
+   "exports": 0.382,
+   "production": 6.741,
+   "consumption": 45.783
+  },
+  "NOR|SUNF": {
+   "imports": 12.354,
+   "exports": 0.014,
+   "consumption": 13.333
+  },
+  "NOR|SUNO": {
+   "imports": 6.875,
+   "exports": 0.052,
+   "production": 2.164,
+   "consumption": 9.042
+  },
+  "NOR|SWHE": {
+   "imports": 228.134,
+   "exports": 21.618,
+   "production": 282.667,
+   "consumption": 844.0
+  },
+  "NOR|TABO": {
+   "imports": 0.996,
+   "exports": 0.03,
+   "consumption": 3.0
+  },
+  "NOR|TAGR": {
+   "imports": 50.038,
+   "exports": 2.119,
+   "consumption": 30.647
+  },
+  "NOR|TEAS": {
+   "imports": 1.05,
+   "exports": 0.0,
+   "consumption": 1.0
+  },
+  "NOR|TEXT": {
+   "imports": 0.151,
+   "exports": 0.022,
+   "consumption": 0.123
+  },
+  "NOR|TOBA": {
+   "imports": 3.173,
+   "exports": 0.013,
+   "consumption": 3.522
+  },
+  "NOR|TOMA": {
+   "imports": 95.648,
+   "exports": 0.131,
+   "production": 11.677,
+   "consumption": 56.607
+  },
+  "NOR|WHEY": {
+   "imports": 0.204,
+   "exports": 14.143,
+   "production": 20.484,
+   "consumption": 5.226
+  },
+  "NOR|WINE": {
+   "imports": 87.142,
+   "exports": 2.362,
+   "consumption": 88.162
   },
   "NZL|APPL": {
    "imports": 7.099,
@@ -2885,6 +4303,14 @@
    "production": 30.634,
    "consumption": 52.908
   },
+  "NZL|COCO": {
+   "imports": 3.347,
+   "consumption": 3.338
+  },
+  "NZL|COFF": {
+   "imports": 19.41,
+   "consumption": 18.992
+  },
   "NZL|CORN": {
    "imports": 83.373,
    "exports": 21.385,
@@ -2897,17 +4323,35 @@
    "production": 62.341,
    "consumption": 62.32
   },
+  "NZL|FFIS": {
+   "imports": 3.905,
+   "exports": 6.034,
+   "production": 15.522,
+   "consumption": 13.334
+  },
   "NZL|MILK": {
    "imports": 1.334,
    "exports": 175.996,
    "production": 22326.772,
    "consumption": 22132.571
   },
+  "NZL|OAQU": {
+   "imports": 17.792,
+   "exports": 134.003,
+   "production": 133.258,
+   "consumption": 23.853
+  },
+  "NZL|OATS": {
+   "imports": 5.33,
+   "exports": 0.776,
+   "production": 35.544,
+   "consumption": 41.723
+  },
   "NZL|OCER": {
-   "imports": 24.919,
-   "exports": 5.853,
-   "production": 53.245,
-   "consumption": 87.092
+   "imports": 19.506,
+   "exports": 5.077,
+   "production": 17.701,
+   "consumption": 45.255
   },
   "NZL|OFRU": {
    "imports": 213.376,
@@ -2915,11 +4359,21 @@
    "production": 697.028,
    "consumption": 291.663
   },
+  "NZL|OTHO": {
+   "imports": 23.597,
+   "exports": 1.77,
+   "production": 8.048,
+   "consumption": 28.674
+  },
   "NZL|OVEG": {
    "imports": 62.591,
    "exports": 447.321,
    "production": 918.669,
    "consumption": 561.334
+  },
+  "NZL|PLMO": {
+   "imports": 21.994,
+   "consumption": 21.172
   },
   "NZL|PORK": {
    "imports": 83.761,
@@ -2959,7 +4413,17 @@
    "imports": 62.108,
    "consumption": 50.667
   },
-  "NZL|SHGM": {
+  "NZL|RYEM": {
+   "imports": 0.082,
+   "consumption": 0.114
+  },
+  "NZL|SFIS": {
+   "imports": 29.444,
+   "exports": 326.786,
+   "production": 381.007,
+   "consumption": 130.515
+  },
+  "NZL|SGMT": {
    "imports": 2.325,
    "exports": 392.372,
    "production": 469.0,
@@ -3004,6 +4468,30 @@
    "exports": 55.741,
    "production": 411.683,
    "consumption": 1007.994
+  },
+  "NZL|TABO": {
+   "imports": 1.629,
+   "consumption": 2.333
+  },
+  "NZL|TAGR": {
+   "imports": 21.787,
+   "exports": 1.122,
+   "production": 59.393,
+   "consumption": 78.933
+  },
+  "NZL|TEAS": {
+   "imports": 2.788,
+   "consumption": 2.8
+  },
+  "NZL|TEXT": {
+   "imports": 0.0,
+   "consumption": 0.0
+  },
+  "NZL|TOBA": {
+   "imports": 3.007,
+   "exports": 1.572,
+   "production": 0.589,
+   "consumption": 2.156
   },
   "NZL|TOMA": {
    "imports": 74.312,
@@ -3057,6 +4545,14 @@
    "production": 2289.025,
    "consumption": 1903.099
   },
+  "PAK|COCO": {
+   "imports": 0.933,
+   "consumption": 1.246
+  },
+  "PAK|COFF": {
+   "imports": 1.152,
+   "consumption": 0.832
+  },
   "PAK|CORN": {
    "imports": 49.561,
    "exports": 79.077,
@@ -3069,17 +4565,33 @@
    "production": 815.833,
    "consumption": 807.497
   },
+  "PAK|FFIS": {
+   "imports": 11.154,
+   "exports": 41.981,
+   "production": 296.578,
+   "consumption": 264.905
+  },
   "PAK|MILK": {
    "imports": 0.297,
    "exports": 21.556,
    "production": 50742.802,
    "consumption": 50720.258
   },
+  "PAK|OAQU": {
+   "imports": 0.187,
+   "exports": 22.484,
+   "production": 36.68,
+   "consumption": 15.453
+  },
+  "PAK|OATS": {
+   "imports": 8.131,
+   "consumption": 11.008
+  },
   "PAK|OCER": {
-   "imports": 125.938,
+   "imports": 114.883,
    "exports": 80.668,
    "production": 536.026,
-   "consumption": 616.405
+   "consumption": 601.235
   },
   "PAK|OFRU": {
    "imports": 260.215,
@@ -3087,11 +4599,21 @@
    "production": 6005.461,
    "consumption": 5944.068
   },
+  "PAK|OTHO": {
+   "imports": 9.382,
+   "exports": 1.94,
+   "production": 471.363,
+   "consumption": 521.853
+  },
   "PAK|OVEG": {
    "imports": 182.558,
    "exports": 264.759,
    "production": 5126.667,
    "consumption": 4916.333
+  },
+  "PAK|PLMO": {
+   "imports": 2797.413,
+   "consumption": 2802.996
   },
   "PAK|POTA": {
    "imports": 63.457,
@@ -3129,7 +4651,17 @@
    "production": 477.511,
    "consumption": 351.717
   },
-  "PAK|SHGM": {
+  "PAK|RYEM": {
+   "imports": 2.924,
+   "consumption": 4.161
+  },
+  "PAK|SFIS": {
+   "imports": 2.242,
+   "exports": 163.154,
+   "production": 342.922,
+   "consumption": 207.401
+  },
+  "PAK|SGMT": {
    "imports": 0.628,
    "exports": 4.039,
    "production": 636.86,
@@ -3187,6 +4719,32 @@
    "production": 25810.652,
    "consumption": 25112.351
   },
+  "PAK|TABO": {
+   "imports": 0.527,
+   "consumption": 0.093
+  },
+  "PAK|TAGR": {
+   "imports": 131.421,
+   "exports": 2.291,
+   "production": 67.493,
+   "consumption": 176.401
+  },
+  "PAK|TEAS": {
+   "imports": 189.188,
+   "consumption": 156.005
+  },
+  "PAK|TEXT": {
+   "imports": 447.45,
+   "exports": 42.017,
+   "production": 1843.758,
+   "consumption": 2228.523
+  },
+  "PAK|TOBA": {
+   "imports": 2.351,
+   "exports": 6.229,
+   "production": 118.612,
+   "consumption": 115.077
+  },
   "PAK|TOMA": {
    "imports": 232.161,
    "exports": 12.706,
@@ -3198,196 +4756,280 @@
    "consumption": 27.198
   },
   "ROW|APPL": {
-   "imports": 3805.576,
-   "exports": 2568.168,
-   "production": 12279.47,
-   "consumption": 12386.715
+   "imports": 3766.631,
+   "exports": 2567.804,
+   "production": 12265.759,
+   "consumption": 12315.295
   },
   "ROW|BARL": {
-   "imports": 18912.671,
-   "exports": 3787.935,
-   "production": 23248.964,
-   "consumption": 37198.097
+   "imports": 18827.362,
+   "exports": 3787.043,
+   "production": 22698.8,
+   "consumption": 36576.262
   },
   "ROW|BEEF": {
-   "imports": 2782.785,
-   "exports": 1312.416,
-   "production": 15161.181,
-   "consumption": 16047.371
+   "imports": 2774.408,
+   "exports": 1311.995,
+   "production": 15075.335,
+   "consumption": 15951.284
   },
   "ROW|BUTR": {
-   "imports": 426.806,
-   "exports": 154.874,
-   "production": 1202.504,
-   "consumption": 1458.668
+   "imports": 423.034,
+   "exports": 154.872,
+   "production": 1186.738,
+   "consumption": 1442.976
   },
   "ROW|CHES": {
-   "imports": 1242.632,
-   "exports": 593.98,
-   "production": 3934.609,
-   "consumption": 4678.171
+   "imports": 1237.852,
+   "exports": 592.362,
+   "production": 3855.808,
+   "consumption": 4596.802
   },
   "ROW|CITR": {
-   "imports": 6505.609,
-   "exports": 4258.847,
-   "consumption": 27437.104,
-   "production": 25290.325
+   "imports": 6237.499,
+   "exports": 4253.041,
+   "production": 25290.325,
+   "consumption": 27326.592
+  },
+  "ROW|COCO": {
+   "imports": 504.636,
+   "exports": 3331.038,
+   "consumption": 1225.06,
+   "production": 3853.823
+  },
+  "ROW|COFF": {
+   "imports": 2066.322,
+   "exports": 2666.821,
+   "consumption": 2308.135,
+   "production": 3373.14
   },
   "ROW|CORN": {
-   "imports": 68790.349,
-   "exports": 6435.918,
-   "consumption": 158354.951,
+   "imports": 68678.942,
+   "exports": 6423.095,
+   "consumption": 158266.496,
    "production": 104763.195
   },
   "ROW|EGGS": {
-   "imports": 914.383,
-   "exports": 258.045,
-   "production": 11476.231,
-   "consumption": 11987.412
+   "imports": 913.333,
+   "exports": 257.046,
+   "production": 11406.498,
+   "consumption": 11917.818
+  },
+  "ROW|FFIS": {
+   "imports": 1205.289,
+   "exports": 1450.309,
+   "production": 10231.516,
+   "consumption": 9997.451
   },
   "ROW|MILK": {
-   "imports": 863.558,
-   "exports": 1229.179,
-   "production": 129414.653,
-   "consumption": 129110.821
+   "imports": 863.448,
+   "exports": 1226.506,
+   "production": 127899.056,
+   "consumption": 127598.107
+  },
+  "ROW|OAQU": {
+   "imports": 1146.083,
+   "exports": 2231.373,
+   "production": 3431.069,
+   "consumption": 2451.109
+  },
+  "ROW|OATS": {
+   "imports": 555.875,
+   "exports": 404.03,
+   "production": 2614.035,
+   "consumption": 2808.479
   },
   "ROW|OCER": {
-   "imports": 6600.947,
-   "exports": 4767.968,
-   "production": 39169.331,
-   "consumption": 39832.829
+   "imports": 5889.665,
+   "exports": 4166.449,
+   "production": 35335.543,
+   "consumption": 35700.181
   },
   "ROW|OFRU": {
-   "imports": 12765.346,
-   "exports": 31799.964,
-   "production": 163461.445,
-   "consumption": 139282.621
+   "imports": 12514.196,
+   "exports": 31796.281,
+   "production": 163445.177,
+   "consumption": 139049.133
+  },
+  "ROW|OTHO": {
+   "imports": 3065.023,
+   "exports": 2952.143,
+   "production": 8660.421,
+   "consumption": 8498.188
   },
   "ROW|OVEG": {
-   "imports": 12385.823,
-   "exports": 6006.521,
-   "production": 138693.26,
-   "consumption": 142729.127
+   "imports": 12247.538,
+   "exports": 6002.509,
+   "production": 138511.007,
+   "consumption": 142371.432
+  },
+  "ROW|PLMO": {
+   "imports": 10244.477,
+   "exports": 17318.571,
+   "production": 27809.679,
+   "consumption": 19576.289
   },
   "ROW|PORK": {
-   "imports": 2109.517,
-   "exports": 441.307,
-   "production": 9870.831,
-   "consumption": 11488.564
+   "imports": 2105.342,
+   "exports": 438.642,
+   "production": 9733.659,
+   "consumption": 11351.403
   },
   "ROW|POTA": {
-   "imports": 5540.366,
-   "exports": 2358.233,
-   "production": 67368.401,
-   "consumption": 72071.085
+   "imports": 5505.435,
+   "exports": 2358.131,
+   "production": 67036.841,
+   "consumption": 71695.06
   },
   "ROW|POUL": {
-   "imports": 7028.888,
-   "exports": 695.61,
-   "production": 23595.484,
-   "consumption": 28742.891
+   "imports": 7028.626,
+   "exports": 695.482,
+   "production": 23496.484,
+   "consumption": 28632.891
   },
   "ROW|PULS": {
-   "imports": 4715.428,
-   "exports": 3157.061,
-   "production": 24079.684,
-   "consumption": 24456.106
+   "imports": 4703.964,
+   "exports": 3157.014,
+   "production": 24058.675,
+   "consumption": 24294.854
   },
   "ROW|RAPC": {
-   "imports": 668.228,
-   "exports": 786.513,
-   "production": 2508.987,
-   "consumption": 2768.341
+   "imports": 660.011,
+   "exports": 782.083,
+   "production": 2503.115,
+   "consumption": 2392.4
   },
   "ROW|RAPE": {
-   "imports": 1278.768,
-   "exports": 586.263,
-   "production": 4030.107,
-   "consumption": 4709.05
+   "imports": 1271.567,
+   "exports": 586.097,
+   "production": 4020.723,
+   "consumption": 4693.137
   },
   "ROW|RAPO": {
-   "imports": 527.792,
-   "exports": 586.492,
-   "production": 1801.371,
-   "consumption": 1912.174
+   "imports": 513.102,
+   "exports": 584.118,
+   "production": 1796.358,
+   "consumption": 1455.749
   },
-  "ROW|SHGM": {
-   "imports": 399.22,
-   "exports": 143.814,
-   "production": 5142.903,
-   "consumption": 5289.289
+  "ROW|RYEM": {
+   "imports": 110.81,
+   "exports": 175.374,
+   "production": 924.613,
+   "consumption": 985.9
+  },
+  "ROW|SFIS": {
+   "imports": 6975.583,
+   "exports": 12102.152,
+   "production": 22343.424,
+   "consumption": 19670.544
+  },
+  "ROW|SGMT": {
+   "imports": 395.636,
+   "exports": 143.625,
+   "production": 5115.983,
+   "consumption": 5261.549
   },
   "ROW|SKIM": {
-   "imports": 943.463,
-   "exports": 246.529,
-   "production": 501.137,
-   "consumption": 1211.539
+   "imports": 943.054,
+   "exports": 245.149,
+   "production": 485.087,
+   "consumption": 1197.44
   },
   "ROW|SOYA": {
-   "imports": 13857.291,
-   "exports": 8867.102,
-   "consumption": 24608.164,
+   "imports": 13438.0,
+   "exports": 8864.421,
+   "consumption": 24197.979,
    "production": 19707.236
   },
   "ROW|SOYC": {
-   "imports": 36952.058,
-   "exports": 6093.485,
-   "production": 15626.601,
-   "consumption": 51656.606
+   "imports": 36918.623,
+   "exports": 5926.545,
+   "production": 15296.799,
+   "consumption": 51590.425
   },
   "ROW|SOYO": {
-   "imports": 4562.958,
-   "exports": 1741.183,
-   "production": 3748.968,
-   "consumption": 6342.56
+   "imports": 4509.312,
+   "exports": 1671.529,
+   "production": 3670.634,
+   "consumption": 6328.56
   },
   "ROW|SUGR": {
-   "imports": 26065.402,
-   "exports": 9055.212,
-   "consumption": 41424.646,
-   "production": 27285.768
+   "imports": 25903.073,
+   "exports": 9054.892,
+   "production": 27285.768,
+   "consumption": 41288.943
   },
   "ROW|SUNC": {
-   "imports": 3077.187,
-   "exports": 727.719,
-   "production": 1864.779,
-   "consumption": 5310.735
+   "imports": 3076.783,
+   "exports": 727.337,
+   "production": 1858.038,
+   "consumption": 5264.953
   },
   "ROW|SUNF": {
-   "imports": 803.637,
-   "exports": 793.723,
-   "consumption": 4592.601,
+   "imports": 791.283,
+   "exports": 793.709,
+   "consumption": 4579.267,
    "production": 5100.41
   },
   "ROW|SUNO": {
-   "imports": 3633.942,
-   "exports": 604.574,
-   "production": 1668.569,
-   "consumption": 4316.93
+   "imports": 3627.067,
+   "exports": 604.522,
+   "production": 1666.404,
+   "consumption": 4307.888
   },
   "ROW|SWHE": {
-   "imports": 96571.895,
-   "exports": 17277.154,
-   "production": 94038.211,
-   "consumption": 167940.147
+   "imports": 96343.761,
+   "exports": 17255.536,
+   "production": 93755.544,
+   "consumption": 167096.147
+  },
+  "ROW|TABO": {
+   "imports": 168.483,
+   "exports": 159.095,
+   "consumption": 1812.588,
+   "production": 2119.299
+  },
+  "ROW|TAGR": {
+   "imports": 1474.113,
+   "exports": 2608.559,
+   "consumption": 9429.763,
+   "production": 10929.179
+  },
+  "ROW|TEAS": {
+   "imports": 970.691,
+   "exports": 955.785,
+   "consumption": 1490.991,
+   "production": 1435.956
+  },
+  "ROW|TEXT": {
+   "imports": 706.486,
+   "exports": 1465.414,
+   "consumption": 2421.462,
+   "production": 3363.661
+  },
+  "ROW|TOBA": {
+   "imports": 757.481,
+   "exports": 709.844,
+   "consumption": 1293.035,
+   "production": 1172.844
   },
   "ROW|TOMA": {
-   "imports": 5280.457,
-   "exports": 1609.965,
-   "production": 34186.51,
-   "consumption": 36268.386
+   "imports": 5184.809,
+   "exports": 1609.835,
+   "production": 34174.833,
+   "consumption": 36211.779
   },
   "ROW|WHEY": {
-   "imports": 345.564,
-   "exports": 194.087,
-   "production": 250.475,
-   "consumption": 371.551
+   "imports": 345.36,
+   "exports": 179.943,
+   "production": 229.991,
+   "consumption": 366.325
   },
   "ROW|WINE": {
-   "imports": 2316.33,
-   "exports": 1305.875,
-   "consumption": 3093.212,
-   "production": 2041.4
+   "imports": 2229.188,
+   "exports": 1303.513,
+   "production": 2041.4,
+   "consumption": 3005.05
   },
   "RUS|APPL": {
    "imports": 937.889,
@@ -3423,6 +5065,14 @@
    "imports": 1811.686,
    "consumption": 1761.145
   },
+  "RUS|COCO": {
+   "imports": 88.793,
+   "consumption": 83.212
+  },
+  "RUS|COFF": {
+   "imports": 223.965,
+   "consumption": 208.333
+  },
   "RUS|CORN": {
    "imports": 113.349,
    "exports": 5029.585,
@@ -3435,17 +5085,35 @@
    "production": 2494.0,
    "consumption": 2583.657
   },
+  "RUS|FFIS": {
+   "imports": 166.973,
+   "exports": 185.23,
+   "production": 905.517,
+   "consumption": 886.747
+  },
   "RUS|MILK": {
    "imports": 265.771,
    "exports": 10.489,
    "production": 26217.581,
    "consumption": 26411.354
   },
+  "RUS|OAQU": {
+   "imports": 174.226,
+   "exports": 135.638,
+   "production": 252.217,
+   "consumption": 292.919
+  },
+  "RUS|OATS": {
+   "imports": 22.606,
+   "exports": 61.535,
+   "production": 4980.661,
+   "consumption": 4996.672
+  },
   "RUS|OCER": {
-   "imports": 576.881,
-   "exports": 1098.239,
-   "production": 9686.456,
-   "consumption": 9415.9
+   "imports": 474.538,
+   "exports": 849.877,
+   "production": 2373.399,
+   "consumption": 2169.016
   },
   "RUS|OFRU": {
    "imports": 3415.966,
@@ -3453,11 +5121,21 @@
    "production": 1343.169,
    "consumption": 4218.781
   },
+  "RUS|OTHO": {
+   "imports": 130.379,
+   "exports": 136.29,
+   "production": 549.252,
+   "consumption": 558.006
+  },
   "RUS|OVEG": {
    "imports": 1511.27,
    "exports": 133.976,
    "production": 12773.983,
    "consumption": 14072.921
+  },
+  "RUS|PLMO": {
+   "imports": 966.022,
+   "consumption": 948.53
   },
   "RUS|PORK": {
    "imports": 343.662,
@@ -3501,7 +5179,19 @@
    "production": 401.499,
    "consumption": 95.298
   },
-  "RUS|SHGM": {
+  "RUS|RYEM": {
+   "imports": 79.737,
+   "exports": 186.827,
+   "production": 2332.395,
+   "consumption": 2250.211
+  },
+  "RUS|SFIS": {
+   "imports": 438.431,
+   "exports": 2835.495,
+   "production": 3941.449,
+   "consumption": 2045.044
+  },
+  "RUS|SGMT": {
    "imports": 3.078,
    "exports": 11.045,
    "production": 222.387,
@@ -3561,6 +5251,32 @@
    "production": 77161.812,
    "consumption": 44329.923
   },
+  "RUS|TABO": {
+   "imports": 59.276,
+   "consumption": 91.667
+  },
+  "RUS|TAGR": {
+   "imports": 369.104,
+   "exports": 3.188,
+   "production": 10.333,
+   "consumption": 283.611
+  },
+  "RUS|TEAS": {
+   "imports": 163.212,
+   "exports": 16.581,
+   "production": 1.017,
+   "consumption": 155.155
+  },
+  "RUS|TEXT": {
+   "imports": 56.003,
+   "consumption": 54.111
+  },
+  "RUS|TOBA": {
+   "imports": 154.769,
+   "exports": 6.224,
+   "production": 0.005,
+   "consumption": 156.711
+  },
   "RUS|TOMA": {
    "imports": 927.377,
    "exports": 20.607,
@@ -3611,6 +5327,18 @@
    "production": 1112.856,
    "consumption": 1083.467
   },
+  "THA|COCO": {
+   "imports": 2.582,
+   "exports": 0.935,
+   "production": 1.077,
+   "consumption": 2.75
+  },
+  "THA|COFF": {
+   "imports": 90.646,
+   "exports": 82.071,
+   "production": 26.969,
+   "consumption": 33.058
+  },
   "THA|CORN": {
    "imports": 193.504,
    "exports": 505.514,
@@ -3623,17 +5351,33 @@
    "production": 1093.499,
    "consumption": 1076.17
   },
+  "THA|FFIS": {
+   "imports": 144.542,
+   "exports": 88.517,
+   "production": 567.011,
+   "consumption": 621.575
+  },
   "THA|MILK": {
    "imports": 0.134,
    "exports": 13.929,
    "production": 1198.383,
    "consumption": 1176.125
   },
+  "THA|OAQU": {
+   "imports": 273.775,
+   "exports": 496.845,
+   "production": 767.616,
+   "consumption": 568.184
+  },
+  "THA|OATS": {
+   "imports": 1.765,
+   "consumption": 2.389
+  },
   "THA|OCER": {
-   "imports": 28.012,
+   "imports": 26.247,
    "exports": 397.478,
    "production": 363.217,
-   "consumption": 138.405
+   "consumption": 136.015
   },
   "THA|OFRU": {
    "imports": 334.231,
@@ -3641,11 +5385,23 @@
    "production": 9839.074,
    "consumption": 5837.519
   },
+  "THA|OTHO": {
+   "imports": 20.965,
+   "exports": 58.491,
+   "production": 116.328,
+   "consumption": 80.239
+  },
   "THA|OVEG": {
    "imports": 271.767,
    "exports": 287.657,
    "production": 2831.782,
    "consumption": 2797.938
+  },
+  "THA|PLMO": {
+   "imports": 38.445,
+   "exports": 335.199,
+   "production": 2611.66,
+   "consumption": 2231.046
   },
   "THA|PORK": {
    "imports": 1.216,
@@ -3683,7 +5439,13 @@
    "imports": 3.586,
    "consumption": 3.06
   },
-  "THA|SHGM": {
+  "THA|SFIS": {
+   "imports": 1816.864,
+   "exports": 1766.162,
+   "production": 1077.703,
+   "consumption": 1193.033
+  },
+  "THA|SGMT": {
    "imports": 1.61,
    "exports": 0.001,
    "production": 1.905,
@@ -3739,6 +5501,34 @@
    "production": 1.0,
    "consumption": 3495.524
   },
+  "THA|TABO": {
+   "imports": 0.492,
+   "consumption": 0.707
+  },
+  "THA|TAGR": {
+   "imports": 177.019,
+   "exports": 4.059,
+   "production": 83.674,
+   "consumption": 230.668
+  },
+  "THA|TEAS": {
+   "imports": 11.309,
+   "exports": 10.926,
+   "production": 57.469,
+   "consumption": 57.853
+  },
+  "THA|TEXT": {
+   "imports": 283.516,
+   "exports": 0.656,
+   "production": 1.051,
+   "consumption": 268.662
+  },
+  "THA|TOBA": {
+   "imports": 2.467,
+   "exports": 2.224,
+   "production": 66.839,
+   "consumption": 67.122
+  },
   "THA|TOMA": {
    "imports": 75.676,
    "exports": 6.18,
@@ -3789,6 +5579,16 @@
    "production": 4661.705,
    "consumption": 2898.27
   },
+  "TUR|COCO": {
+   "imports": 119.328,
+   "exports": 3.991,
+   "consumption": 115.341
+  },
+  "TUR|COFF": {
+   "imports": 66.524,
+   "exports": 8.354,
+   "consumption": 55.471
+  },
   "TUR|CORN": {
    "imports": 698.999,
    "exports": 592.663,
@@ -3801,17 +5601,35 @@
    "production": 1188.0,
    "consumption": 857.667
   },
+  "TUR|FFIS": {
+   "imports": 10.452,
+   "exports": 50.308,
+   "production": 135.938,
+   "consumption": 96.038
+  },
   "TUR|MILK": {
    "imports": 0.175,
    "exports": 24.452,
    "production": 20173.18,
    "consumption": 20146.449
   },
+  "TUR|OAQU": {
+   "imports": 8.428,
+   "exports": 20.614,
+   "production": 54.05,
+   "consumption": 41.864
+  },
+  "TUR|OATS": {
+   "imports": 4.175,
+   "exports": 36.552,
+   "production": 260.02,
+   "consumption": 224.891
+  },
   "TUR|OCER": {
-   "imports": 2473.359,
-   "exports": 1664.757,
-   "production": 834.448,
-   "consumption": 686.892
+   "imports": 2466.969,
+   "exports": 1628.04,
+   "production": 266.498,
+   "consumption": 171.065
   },
   "TUR|OFRU": {
    "imports": 490.039,
@@ -3819,11 +5637,22 @@
    "production": 6266.73,
    "consumption": 4730.324
   },
+  "TUR|OTHO": {
+   "imports": 167.064,
+   "exports": 78.913,
+   "production": 447.242,
+   "consumption": 508.992
+  },
   "TUR|OVEG": {
    "imports": 151.877,
    "exports": 815.721,
    "production": 17778.934,
    "consumption": 16975.916
+  },
+  "TUR|PLMO": {
+   "imports": 693.835,
+   "exports": 15.831,
+   "consumption": 711.112
   },
   "TUR|PORK": {
    "imports": 2.166,
@@ -3867,7 +5696,19 @@
    "production": 79.203,
    "consumption": 77.144
   },
-  "TUR|SHGM": {
+  "TUR|RYEM": {
+   "imports": 2.216,
+   "exports": 0.165,
+   "production": 307.929,
+   "consumption": 290.936
+  },
+  "TUR|SFIS": {
+   "imports": 664.532,
+   "exports": 160.574,
+   "production": 423.379,
+   "consumption": 935.498
+  },
+  "TUR|SGMT": {
    "imports": 5.6,
    "exports": 1.777,
    "production": 413.269,
@@ -3927,6 +5768,36 @@
    "production": 20700.0,
    "consumption": 20105.667
   },
+  "TUR|TABO": {
+   "imports": 0.508,
+   "exports": 15.023,
+   "production": 387.914,
+   "consumption": 315.637
+  },
+  "TUR|TAGR": {
+   "imports": 10.043,
+   "exports": 645.722,
+   "production": 3654.954,
+   "consumption": 2405.954
+  },
+  "TUR|TEAS": {
+   "imports": 20.617,
+   "exports": 5.255,
+   "production": 604.014,
+   "consumption": 282.865
+  },
+  "TUR|TEXT": {
+   "imports": 810.976,
+   "exports": 73.684,
+   "production": 889.632,
+   "consumption": 1659.476
+  },
+  "TUR|TOBA": {
+   "imports": 99.218,
+   "exports": 123.619,
+   "production": 82.295,
+   "consumption": 59.054
+  },
   "TUR|TOMA": {
    "imports": 1.559,
    "exports": 1072.697,
@@ -3979,6 +5850,14 @@
    "imports": 299.101,
    "consumption": 296.901
   },
+  "UKR|COCO": {
+   "imports": 17.414,
+   "consumption": 14.667
+  },
+  "UKR|COFF": {
+   "imports": 47.643,
+   "consumption": 47.0
+  },
   "UKR|CORN": {
    "imports": 59.622,
    "exports": 18570.731,
@@ -3991,17 +5870,35 @@
    "production": 906.501,
    "consumption": 850.671
   },
+  "UKR|FFIS": {
+   "imports": 45.565,
+   "exports": 5.237,
+   "production": 56.205,
+   "consumption": 95.577
+  },
   "UKR|MILK": {
    "imports": 1.005,
    "exports": 12.193,
    "production": 9288.662,
    "consumption": 9274.951
   },
+  "UKR|OAQU": {
+   "imports": 35.463,
+   "exports": 3.322,
+   "production": 16.281,
+   "consumption": 50.833
+  },
+  "UKR|OATS": {
+   "imports": 4.048,
+   "exports": 38.695,
+   "production": 463.154,
+   "consumption": 438.841
+  },
   "UKR|OCER": {
-   "imports": 117.458,
-   "exports": 497.116,
-   "production": 1451.189,
-   "consumption": 1199.082
+   "imports": 56.672,
+   "exports": 361.812,
+   "production": 560.379,
+   "consumption": 356.613
   },
   "UKR|OFRU": {
    "imports": 423.522,
@@ -4009,11 +5906,21 @@
    "production": 998.68,
    "consumption": 1225.34
   },
+  "UKR|OTHO": {
+   "imports": 15.752,
+   "exports": 40.054,
+   "production": 243.584,
+   "consumption": 212.999
+  },
   "UKR|OVEG": {
    "imports": 74.473,
    "exports": 73.465,
    "production": 7681.166,
    "consumption": 7655.165
+  },
+  "UKR|PLMO": {
+   "imports": 206.948,
+   "consumption": 196.45
   },
   "UKR|PORK": {
    "imports": 17.919,
@@ -4057,7 +5964,19 @@
    "production": 103.101,
    "consumption": 10.997
   },
-  "UKR|SHGM": {
+  "UKR|RYEM": {
+   "imports": 56.738,
+   "exports": 96.609,
+   "production": 427.656,
+   "consumption": 403.628
+  },
+  "UKR|SFIS": {
+   "imports": 293.049,
+   "exports": 12.793,
+   "production": 31.324,
+   "consumption": 393.129
+  },
+  "UKR|SGMT": {
    "imports": 0.003,
    "exports": 1.001,
    "production": 13.988,
@@ -4117,6 +6036,30 @@
    "production": 25653.977,
    "consumption": 9063.884
   },
+  "UKR|TABO": {
+   "imports": 6.22,
+   "consumption": 9.333
+  },
+  "UKR|TAGR": {
+   "imports": 50.653,
+   "exports": 1.882,
+   "production": 331.432,
+   "consumption": 380.765
+  },
+  "UKR|TEAS": {
+   "imports": 17.107,
+   "consumption": 16.993
+  },
+  "UKR|TEXT": {
+   "imports": 1.991,
+   "consumption": 1.835
+  },
+  "UKR|TOBA": {
+   "imports": 53.861,
+   "exports": 1.171,
+   "production": 1.56,
+   "consumption": 57.144
+  },
   "UKR|TOMA": {
    "imports": 56.638,
    "exports": 154.497,
@@ -4171,6 +6114,16 @@
    "production": 6862.593,
    "consumption": 10641.818
   },
+  "USA|COCO": {
+   "imports": 430.667,
+   "consumption": 423.0
+  },
+  "USA|COFF": {
+   "imports": 1648.198,
+   "exports": 178.899,
+   "production": 2.0,
+   "consumption": 1430.853
+  },
   "USA|CORN": {
    "imports": 1861.225,
    "exports": 60625.897,
@@ -4183,17 +6136,35 @@
    "production": 6311.333,
    "consumption": 6102.667
   },
+  "USA|FFIS": {
+   "imports": 1471.036,
+   "exports": 199.481,
+   "production": 546.899,
+   "consumption": 1761.755
+  },
   "USA|MILK": {
    "imports": 6.876,
    "exports": 64.4,
    "production": 98440.56,
    "consumption": 98368.188
   },
+  "USA|OAQU": {
+   "imports": 2349.586,
+   "exports": 234.652,
+   "production": 1111.008,
+   "consumption": 3285.728
+  },
+  "USA|OATS": {
+   "imports": 1726.603,
+   "exports": 171.629,
+   "production": 824.245,
+   "consumption": 2840.325
+  },
   "USA|OCER": {
-   "imports": 2018.254,
-   "exports": 8270.831,
-   "production": 11852.81,
-   "consumption": 8935.572
+   "imports": 123.117,
+   "exports": 8093.037,
+   "production": 10773.737,
+   "consumption": 5622.911
   },
   "USA|OFRU": {
    "imports": 12130.864,
@@ -4201,11 +6172,21 @@
    "production": 7667.751,
    "consumption": 14829.029
   },
+  "USA|OTHO": {
+   "imports": 1825.882,
+   "exports": 1609.565,
+   "production": 2734.977,
+   "consumption": 2376.658
+  },
   "USA|OVEG": {
    "imports": 8222.605,
    "exports": 2677.085,
    "production": 23099.69,
    "consumption": 28091.994
+  },
+  "USA|PLMO": {
+   "imports": 1695.237,
+   "consumption": 1697.983
   },
   "USA|PORK": {
    "imports": 620.089,
@@ -4249,7 +6230,19 @@
    "production": 808.333,
    "consumption": 2593.0
   },
-  "USA|SHGM": {
+  "USA|RYEM": {
+   "imports": 168.534,
+   "exports": 6.165,
+   "production": 254.828,
+   "consumption": 472.336
+  },
+  "USA|SFIS": {
+   "imports": 3052.917,
+   "exports": 3337.983,
+   "production": 3704.999,
+   "consumption": 3478.731
+  },
+  "USA|SGMT": {
    "imports": 118.953,
    "exports": 3.987,
    "production": 79.0,
@@ -4309,6 +6302,34 @@
    "production": 53939.0,
    "consumption": 32166.333
   },
+  "USA|TABO": {
+   "imports": 95.863,
+   "exports": 7.33,
+   "production": 52.622,
+   "consumption": 191.198
+  },
+  "USA|TAGR": {
+   "imports": 729.446,
+   "exports": 795.742,
+   "production": 3393.466,
+   "consumption": 3450.755
+  },
+  "USA|TEAS": {
+   "imports": 154.831,
+   "consumption": 152.003
+  },
+  "USA|TEXT": {
+   "imports": 9.09,
+   "exports": 2886.895,
+   "production": 4061.614,
+   "consumption": 916.447
+  },
+  "USA|TOBA": {
+   "imports": 148.858,
+   "exports": 150.82,
+   "production": 300.107,
+   "consumption": 295.487
+  },
   "USA|TOMA": {
    "imports": 1808.821,
    "exports": 1313.359,
@@ -4355,6 +6376,18 @@
    "production": 1327.667,
    "consumption": 1353.667
   },
+  "VNM|COCO": {
+   "imports": 1.434,
+   "exports": 2.194,
+   "production": 2.047,
+   "consumption": 1.693
+  },
+  "VNM|COFF": {
+   "imports": 58.401,
+   "exports": 1639.698,
+   "production": 1748.93,
+   "consumption": 162.847
+  },
   "VNM|CORN": {
    "imports": 8987.485,
    "exports": 110.999,
@@ -4367,17 +6400,33 @@
    "production": 377.165,
    "consumption": 378.501
   },
+  "VNM|FFIS": {
+   "imports": 44.173,
+   "exports": 1512.18,
+   "production": 2899.857,
+   "consumption": 1426.49
+  },
   "VNM|MILK": {
    "imports": 17.76,
    "exports": 0.72,
    "production": 818.041,
    "consumption": 834.772
   },
+  "VNM|OAQU": {
+   "imports": 93.661,
+   "exports": 773.559,
+   "production": 1663.836,
+   "consumption": 1046.4
+  },
+  "VNM|OATS": {
+   "imports": 1.054,
+   "consumption": 1.333
+  },
   "VNM|OCER": {
-   "imports": 5.5,
+   "imports": 4.446,
    "exports": 4.927,
    "production": 3.63,
-   "consumption": 4.667
+   "consumption": 3.333
   },
   "VNM|OFRU": {
    "imports": 1563.059,
@@ -4385,11 +6434,21 @@
    "production": 6614.146,
    "consumption": 5734.094
   },
+  "VNM|OTHO": {
+   "imports": 8.24,
+   "exports": 16.628,
+   "production": 214.323,
+   "consumption": 208.42
+  },
   "VNM|OVEG": {
    "imports": 136.494,
    "exports": 431.769,
    "production": 16903.15,
    "consumption": 16574.168
+  },
+  "VNM|PLMO": {
+   "imports": 418.26,
+   "consumption": 414.273
   },
   "VNM|PORK": {
    "imports": 10.766,
@@ -4423,7 +6482,13 @@
    "imports": 2.891,
    "consumption": 2.467
   },
-  "VNM|SHGM": {
+  "VNM|SFIS": {
+   "imports": 501.566,
+   "exports": 982.611,
+   "production": 2531.711,
+   "consumption": 2138.142
+  },
+  "VNM|SGMT": {
    "imports": 1.082,
    "exports": 0.001,
    "production": 15.987,
@@ -4475,6 +6540,30 @@
    "imports": 4279.315,
    "consumption": 3998.846
   },
+  "VNM|TAGR": {
+   "imports": 46.396,
+   "exports": 1.297,
+   "production": 12.929,
+   "consumption": 52.316
+  },
+  "VNM|TEAS": {
+   "imports": 7.626,
+   "exports": 124.236,
+   "production": 256.666,
+   "consumption": 110.001
+  },
+  "VNM|TEXT": {
+   "imports": 1106.694,
+   "exports": 5.023,
+   "production": 0.12,
+   "consumption": 990.604
+  },
+  "VNM|TOBA": {
+   "imports": 52.402,
+   "exports": 11.911,
+   "production": 36.829,
+   "consumption": 80.135
+  },
   "VNM|TOMA": {
    "imports": 26.148,
    "consumption": 18.667
@@ -4525,6 +6614,14 @@
    "production": 2631.435,
    "consumption": 445.523
   },
+  "ZAF|COCO": {
+   "imports": 5.17,
+   "consumption": 5.172
+  },
+  "ZAF|COFF": {
+   "imports": 68.548,
+   "consumption": 60.862
+  },
   "ZAF|CORN": {
    "imports": 1728.507,
    "exports": 2612.896,
@@ -4537,17 +6634,35 @@
    "production": 458.648,
    "consumption": 444.672
   },
+  "ZAF|FFIS": {
+   "imports": 15.395,
+   "exports": 4.323,
+   "production": 2.82,
+   "consumption": 13.615
+  },
   "ZAF|MILK": {
    "imports": 24.967,
    "exports": 64.179,
    "production": 3453.161,
    "consumption": 3421.748
   },
+  "ZAF|OAQU": {
+   "imports": 37.598,
+   "exports": 25.666,
+   "production": 17.383,
+   "consumption": 29.127
+  },
+  "ZAF|OATS": {
+   "imports": 46.15,
+   "exports": 5.773,
+   "production": 37.333,
+   "consumption": 92.0
+  },
   "ZAF|OCER": {
-   "imports": 118.263,
-   "exports": 57.336,
-   "production": 218.858,
-   "consumption": 306.643
+   "imports": 70.662,
+   "exports": 50.118,
+   "production": 179.741,
+   "consumption": 212.851
   },
   "ZAF|OFRU": {
    "imports": 243.653,
@@ -4555,11 +6670,21 @@
    "production": 1482.666,
    "consumption": 874.967
   },
+  "ZAF|OTHO": {
+   "imports": 24.892,
+   "exports": 7.027,
+   "production": 136.315,
+   "consumption": 157.591
+  },
   "ZAF|OVEG": {
    "imports": 127.937,
    "exports": 385.81,
    "production": 2142.989,
    "consumption": 1903.002
+  },
+  "ZAF|PLMO": {
+   "imports": 482.433,
+   "consumption": 478.989
   },
   "ZAF|PORK": {
    "imports": 28.199,
@@ -4603,7 +6728,19 @@
    "production": 45.151,
    "consumption": 50.168
   },
-  "ZAF|SHGM": {
+  "ZAF|RYEM": {
+   "imports": 1.451,
+   "exports": 1.445,
+   "production": 1.783,
+   "consumption": 1.792
+  },
+  "ZAF|SFIS": {
+   "imports": 194.606,
+   "exports": 422.708,
+   "production": 553.801,
+   "consumption": 366.313
+  },
+  "ZAF|SGMT": {
    "imports": 7.739,
    "exports": 0.895,
    "production": 169.813,
@@ -4662,6 +6799,34 @@
    "exports": 305.584,
    "production": 1829.333,
    "consumption": 3339.667
+  },
+  "ZAF|TABO": {
+   "imports": 0.761,
+   "consumption": 1.089
+  },
+  "ZAF|TAGR": {
+   "imports": 31.983,
+   "exports": 527.633,
+   "production": 760.223,
+   "consumption": 236.842
+  },
+  "ZAF|TEAS": {
+   "imports": 26.227,
+   "exports": 5.982,
+   "production": 2.0,
+   "consumption": 22.661
+  },
+  "ZAF|TEXT": {
+   "imports": 23.331,
+   "exports": 8.298,
+   "production": 19.442,
+   "consumption": 32.957
+  },
+  "ZAF|TOBA": {
+   "imports": 38.549,
+   "exports": 32.416,
+   "production": 17.732,
+   "consumption": 24.765
   },
   "ZAF|TOMA": {
    "imports": 118.599,

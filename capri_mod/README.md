@@ -40,8 +40,9 @@ model = CAPRIModel(data_dir="capri_data")
 # Run baseline
 baseline = model.run(scenario="BASELINE")
 
-# Run Farm-to-Fork counterfactual
-f2f = model.run(scenario="FARM_TO_FORK")
+# Run CAPRI's Farm-to-Fork counterfactual
+from capri_mod.policy.greendeal import farm_to_fork_scenario
+f2f = model.run(custom_scenario=farm_to_fork_scenario())
 
 # Compare
 comparison = model.compare(baseline, f2f)
@@ -64,10 +65,8 @@ reporter.to_csv_folder("results/")
 | Name | Description |
 |------|-------------|
 | `BASELINE` | Calibrated baseline, no policy change |
-| `FARM_TO_FORK` | EU F2F targets: organic +25%, fertiliser -20%, N limits |
-| `CAP_REFORM_2030` | Flat-rate BISS convergence, stronger eco-schemes |
-| `WTO_LIB` | 50% EU tariff cut + TRQ expansion |
-| `UKRAINE_SHOCK` | Black Sea trade disruption (cereal/oilseed price shocks) |
+| `SET_ASIDE_10PCT` | 10% set-aside (CAPRI scen/set_aside/set_aside_10.gms) |
+| `CARBON_TAX_50`, `CARBON_TAX_100` | CAPRI's emission tax on agricultural emissions |
 
 Custom scenarios:
 ```python
@@ -76,7 +75,7 @@ my_scenario = PolicyScenario(
     name="MY_SCENARIO",
     biss_rate_change=-50,       # EUR/ha cut in direct payments
     nitrate_limit_change=-30,   # stricter N limit
-    eco_scheme_budget_pct=0.40, # 40% of Pillar I to eco-schemes
+    lfa_budget_change=-0.2,     # CAPRI's LFA budget -20% (premium change by CAPRI's 2030 split by scheme)
 )
 results = model.run(custom_scenario=my_scenario)
 ```

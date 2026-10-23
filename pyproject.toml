@@ -13,8 +13,8 @@ dependencies = [
     "pandas>=2.0",
     "numpy>=1.24",
     "scipy>=1.10",
-    "clarabel>=0.7",
-    "casadi>=3.6",       # bundles IPOPT: tools/nlp_check, the check against CAPRI's original (non-convex) form
+    "casadi>=3.6",       # bundles IPOPT: the regional supply models in CAPRI's NLP form (default)
+    "clarabel>=0.7",     # conic form of the regional models, manure-market pools
 ]
 
 [project.optional-dependencies]
@@ -24,10 +24,12 @@ dev = ["pytest>=7.0"]
 include = ["capri_mod*"]
 
 [tool.setuptools.package-data]
-capri_mod = ["*.json", "*.md"]
+capri_mod = ["*.json", "*.md", "settings/*.toml"]
 
 [tool.pytest.ini_options]
-testpaths = ["capri_mod/tests"]
+markers = ["slow: full-EU or multi-solve tests over 30 s (deselect per step with -m 'not slow'; the batch-end run takes all)",
+           "online: live provider API tests of the data pipeline (run on request: -m online)"]
+testpaths = ["capri_mod/tests", "capri_mod/pipeline/tests"]
 # tests that check a mechanism (adoption, accounts, reporting) run the market loop for 1-2 iterations on purpose; the
 # model warns loudly about any unconverged run, so this one expected warning is filtered here and every other warning
 # (solver fallbacks, skipped technologies, library deprecations) still shows

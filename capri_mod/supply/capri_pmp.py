@@ -27,8 +27,9 @@ The four pieces
    terms. Taken verbatim from gams/sets.gms; the variant in gams/capdis/sets.gms
    uses a different group set and must not be used here.
 
-4. Provenance. Every region x activity elasticity is recorded as REGIONAL_CAPRI,
-   NATIONAL_CAPRI or LITERATURE_DEFAULT, and written out for audit.
+4. Provenance. Every region x activity elasticity is recorded as REGIONAL_CAPRI, PMP_CAPRI,
+   CAPRI_COUNTRY (member state's calibrated value), CAPRI_CAL_PRODUCT (livestock: the product's
+   calibrated elasticity) or NO_CAPRI_VALUE, and written out for audit.
 """
 from __future__ import annotations
 
@@ -39,6 +40,7 @@ from typing import Dict, Optional, Tuple
 import numpy as np
 import pandas as pd
 from capri_mod.params import param, param_table
+from capri_mod.data.definitions import MS_CODE
 
 # --- 1. dampening ----------------------------------------------------------
 
@@ -79,11 +81,12 @@ EPRD_TO_GRP: Dict[str, str] = {
     "RAPE": "OILS", "SUNF": "OILS", "SOYA": "OILS",
     "PULS": "OARA", "POTA": "OARA", "SUGB": "OARA",
     "MAIF": "FARA", "ROOF": "FARA", "OFAR": "FARA",
+    "OFOD": "FARA",          # the model's OFOD is CAPRI's OFAR (other fodder on arable land)
 }
 
 # Activities on arable land, used for the share term denominator. Permanent
 # crops, grassland and livestock are excluded.
-ARABLE_ACTIVITIES = set(EPRD_TO_GRP) | {"SETA", "OFOD", "COTT", "OFIB", "TOBA"}
+ARABLE_ACTIVITIES = set(EPRD_TO_GRP) | {"SETA", "OFOD", "TEXT", "TOBA"}
 
 
 # --- 4a. synthetic-anchor guard --------------------------------------------
@@ -121,14 +124,19 @@ def detect_synthetic_base_activities(base_areas: pd.DataFrame,
 #: literature defaults, because these two paths would no longer exist.
 REGIONAL_FILE = "supply_elasticities_regional.csv"
 PMP_ELAS_FILE = "pmp_own_price_elasticities.csv"
+COUNTRY_ELAS_FILE = "capri_own_price_elasticities.csv"
+#: the country file's CAPRI codes -> model activities (animal products and young animals are not activities)
+COUNTRY_ELAS_ALIASES = {"MAIZ": "CORN", "TWIN": "WINE"}
 CROSSWALK = "shared/nuts_crosswalk.json"
 
-# CAPRI names grain maize MAIZ; the model calls it CORN.
-ACTIVITY_ALIASES = {"MAIZ": "CORN"}
+# CAPRI names grain maize MAIZ; the model calls it CORN. Fodder on arable land OFAR is the model's OFOD (OFAR + ROOF;
+# CAPRI's sources carry OFAR only): without the alias the 14 Mha of other fodder stayed on the literature default
+# 0.12 against CAPRI's median 1.05 (K32).
+ACTIVITY_ALIASES = {"MAIZ": "CORN", "OFAR": "OFOD"}
 LIVESTOCK_ELAS_FILE = "sources/arm/capri_supply_elas_market_1717.csv"
 LIVESTOCK_PRODUCT = {"DCOW": "MILK", "BCOW": "BEEF", "BULL": "BEEF", "HFRS": "BEEF", "CALV": "BEEF",
-                     "PIGS": "PORK", "PIGF": "PORK", "LAYS": "EGGS", "BROI": "POUM", "SHGP": "SGMT"}
-LIVESTOCK_MS = {"BE": "BL", "LU": "BL", "GR": "EL", "IE": "IR"}
+                     "PIGS": "PORK", "PIGF": "PORK", "LAYS": "EGGS", "BROI": "POUM", "SHGM": "MILK", "SHGF": "SGMT"}
+LIVESTOCK_MS = MS_CODE
 YOUNG_ELAS_FILE = "sources/arm/capri_supply_elas_young_1720.csv"
 #: young animals produced by each cattle activity (CAPRI YCAM/YCAF, YBUL/YHEI, YCOW)
 LIVESTOCK_YOUNG = {"DCOW": ("YCAM", "YCAF"), "BCOW": ("YCAM", "YCAF"), "CALV": ("YBUL", "YHEI"), "HFRS": ("YCOW",),
@@ -140,7 +148,7 @@ def build_elasticity_table(
     regions,
     activities,
     defaults: pd.Series,
-    apply_dampening: bool = True,
+    apply_dampening: Optional[bool] = None,
     base_areas: Optional[pd.DataFrame] = None,
     base_year: str = "2017",
 ) -> Tuple[pd.DataFrame, pd.DataFrame, dict]:
@@ -150,22 +158,27 @@ def build_elasticity_table(
     Precedence, highest first:
       REGIONAL_CAPRI    supply_elasticities_regional.csv, already bounded at 4.5
       PMP_CAPRI         pmp_own_price_elasticities.csv, raw, needs dampening
-      LITERATURE_DEFAULT the EU-wide per-activity defaults
+      CAPRI_COUNTRY     crops neither regional source has anywhere: the member state's p_ElasSupp ("CAL")
+      CAPRI_CAL_PRODUCT livestock: the product's calibrated p_elasSupp, with the young animals' share
+      NO_CAPRI_VALUE     none of the above: no value (NaN); the activity is held at its level unless CAPRI's PMP
+                         terms cover it (no literature defaults since 23 October 2026)
 
     Both CAPRI sources are per region x activity. The second is keyed by CAPRI
     8-character region codes and is resolved through the NUTS crosswalk, which is
     why it reaches regions the first one misses.
     """
     data_dir = Path(data_dir)
-    # Activities anchored on a synthetic constant base level are held at their
-    # literature default: a real elasticity on a fake anchor is worse than a
-    # conservative one, because it looks legitimate.
-    blocked = (detect_synthetic_base_activities(base_areas)
-               if base_areas is not None else set())
+    if apply_dampening is None:                            # the setting supply.pmp_apply_dampening
+        from capri_mod.settings import current as _settings
+        apply_dampening = bool(_settings().get("supply.pmp_apply_dampening"))
+    # (The runtime guard against activities anchored on a constant placeholder base, detect_synthetic_base_activities,
+    # blocked none since the synthetic data was replaced and was removed from here on 23 October 2026; the function
+    # stays as a data check, test_capri.py.)
+    # no literature defaults (23 October 2026): a cell without a CAPRI value stays NaN, provenance NO_CAPRI_VALUE
     eps = pd.DataFrame(
-        np.tile(defaults.reindex(activities).fillna(0.25).values, (len(regions), 1)),
+        np.tile(defaults.reindex(activities).values.astype(float), (len(regions), 1)),
         index=regions, columns=activities, dtype=float)
-    prov = pd.DataFrame("LITERATURE_DEFAULT", index=regions, columns=activities)
+    prov = pd.DataFrame("NO_CAPRI_VALUE", index=regions, columns=activities)
 
     # --- lower-precedence source first, so the better one overwrites it ---
     from capri_mod.data.loaders import resolve_data_file
@@ -173,23 +186,38 @@ def build_elasticity_table(
     cw_path = data_dir / CROSSWALK
     n_pmp = 0
     if pmp_path.exists() and cw_path.exists():
+        # model region -> CAPRI region: the shared map (tools/build/build_region_map.py: the NUTS correspondence with its
+        # fixes, splits and merges), else the crosswalk; a region with neither, or whose CAPRI region has no row,
+        # takes its member state's national row (K32: the crosswalk alone reached 140 of 248 regions, so 13 Mha of
+        # arable crops in recoded regions - Denmark, Berlin, Saxony, Poland's renamed regions, Finland's - and every
+        # national-row region stayed on the literature defaults)
         cw = json.loads(cw_path.read_text())["resolved"]      # model -> CAPRI
-        rev = {v: k for k, v in cw.items()}
+        to8 = dict(cw)
+        rm = data_dir / "shared" / "region_capri_map.csv"
+        if rm.exists():
+            for _r in pd.read_csv(rm, dtype=str).fillna("").itertuples(index=False):
+                if _r.capri_region:
+                    to8[_r.region] = _r.capri_region
         df = pd.read_csv(pmp_path)
-        df["model_region"] = df["region"].map(rev)
         df["activity"] = df["crop"].replace(ACTIVITY_ALIASES)
-        df = df.dropna(subset=["model_region"])
-        df = df[df.model_region.isin(set(regions)) & df.activity.isin(set(activities))]
+        df = df[df.activity.isin(set(activities))]
         vals = df["own_price_elas"].values
         if apply_dampening:
             vals = dampen_elasticity(vals)
-        for r, a, v in zip(df.model_region, df.activity, vals):
-            if a in blocked:
-                continue
-            if np.isfinite(v) and v > 0:
-                eps.at[r, a] = float(v)
-                prov.at[r, a] = "PMP_CAPRI"
-                n_pmp += 1
+        val = {(c8, a): float(v) for c8, a, v in zip(df.region, df.activity, vals) if np.isfinite(v) and v > 0}
+        for r in regions:
+            own = to8.get(r)
+            nat = LIVESTOCK_MS.get(str(r)[:2], str(r)[:2]) + "000000"
+            for a in set(df.activity):
+                if a not in eps.columns:
+                    continue
+                v = val.get((own, a)) if own else None
+                if v is None:
+                    v = val.get((nat, a))
+                if v is not None:
+                    eps.at[r, a] = v
+                    prov.at[r, a] = "PMP_CAPRI"
+                    n_pmp += 1
 
     # --- higher-precedence source ---
     reg_path = resolve_data_file(data_dir, REGIONAL_FILE, base_year=base_year)
@@ -201,8 +229,6 @@ def build_elasticity_table(
         common_a = [c for c in rdf.columns if c in set(activities)]
         for r in common_r:
             for a in common_a:
-                if a in blocked:
-                    continue
                 v = rdf.at[r, a]
                 if pd.notna(v) and v > 0:
                     # This source is already bounded at 4.5 upstream; dampening
@@ -211,13 +237,42 @@ def build_elasticity_table(
                     prov.at[r, a] = "REGIONAL_CAPRI"
                     n_reg += 1
 
+    # --- crops neither regional source has: the member state's calibrated own-price supply elasticity (K30) ---
+    # CAPRI's p_ElasSupp ("CAL", results/arm supply_elas_*; capri_own_price_elasticities.csv, 26 country groups).
+    # Before October 2026 these crops (permanent crops, vegetables, tobacco, textile crops, table olives) took one
+    # EU-wide value each, hand-entered from Spain and Italy (tobacco 0.213 against CAPRI's 0.44 in every member
+    # state). Only for activities with no value from the two regional sources anywhere: where those sources miss a
+    # region for an arable crop the default stays (registered in docs/KNOWN_ISSUES.md K30). Dampened as the PMP
+    # source (values at or below the threshold pass unchanged); a crop the member state does not have keeps the default.
+    n_cty = 0
+    try:
+        from capri_mod.data.loaders import resolve_data_file as _rdf
+        cty_path = _rdf(data_dir, COUNTRY_ELAS_FILE, base_year=base_year)
+    except Exception:
+        cty_path = None
+    if cty_path is not None and Path(cty_path).exists():
+        cdf = pd.read_csv(cty_path, index_col=0).rename(columns=COUNTRY_ELAS_ALIASES)
+        covered = {a for a in prov.columns if prov[a].isin(["PMP_CAPRI", "REGIONAL_CAPRI"]).any()}
+        cols_ = [c for c in cdf.columns if c in set(activities) and c not in covered]
+        for r in regions:
+            cc = LIVESTOCK_MS.get(str(r)[:2], str(r)[:2])
+            if cc not in cdf.index:
+                continue
+            for a in cols_:
+                v = cdf.at[cc, a]
+                if pd.notna(v) and v > 0:
+                    eps.at[r, a] = float(dampen_elasticity([float(v)])[0]) if apply_dampening else float(v)
+                    prov.at[r, a] = "CAPRI_COUNTRY"
+                    n_cty += 1
+
     # --- livestock: CAPRI's calibrated supply elasticities of the animal products ---
     # (results/arm/elas_2_1717*: p_elasSupp(MS, product, product, "CAL"), the elasticities
     # CAPRI's supply models are calibrated to reproduce; sources/arm/
     # capri_supply_elas_market_1717.csv). Each animal activity takes its product's
     # own-price value for its member state: dairy cows - milk; suckler cows, bulls, heifers,
-    # calves - beef; pigs - pork; hens - eggs; broilers - poultry meat; sheep and goats -
-    # sheep and goat meat. Replaces the literature priors (0.10-0.25; CAPRI 0.47-0.82).
+    # calves - beef; pigs - pork; hens - eggs; broilers - poultry meat; sheep and goats for
+    # fattening (SHGF) - sheep and goat meat; for milk (SHGM) - raw milk (CAPRI's MILK market holds cow
+    # and sheep-goat milk; p_elasSupp has no separate SGMI). Replaces the literature priors (0.10-0.25; CAPRI 0.47-0.82).
     n_lsk = 0
     lsk_path = data_dir / LIVESTOCK_ELAS_FILE
     if lsk_path.exists():
@@ -251,7 +306,7 @@ def build_elasticity_table(
         for r in regions:
             ms = LIVESTOCK_MS.get(str(r)[:2], str(r)[:2]) + "000000"
             for a, prod_ in LIVESTOCK_PRODUCT.items():
-                if a not in eps.columns or a in blocked:
+                if a not in eps.columns:
                     continue
                 v = ms_val.get((ms, prod_))
                 if v is None or not np.isfinite(v) or v <= 0:
@@ -275,14 +330,14 @@ def build_elasticity_table(
         "activities": len(activities),
         "cells": int(total),
         "by_provenance": {k: int(v) for k, v in counts.items()},
-        "pct_real": round(100 * (total - counts.get("LITERATURE_DEFAULT", 0)) / total, 1),
-        "regions_with_any_real": int((prov != "LITERATURE_DEFAULT").any(axis=1).sum()),
-        "activities_with_any_real": int((prov != "LITERATURE_DEFAULT").any(axis=0).sum()),
+        "pct_real": round(100 * (total - counts.get("NO_CAPRI_VALUE", 0)) / total, 1),
+        "regions_with_any_real": int((prov != "NO_CAPRI_VALUE").any(axis=1).sum()),
+        "activities_with_any_real": int((prov != "NO_CAPRI_VALUE").any(axis=0).sum()),
         "dampening_applied": bool(apply_dampening),
         "cells_from_pmp_file": n_pmp,
+        "cells_from_country_file": n_cty,
         "cells_from_regional_file": n_reg,
         "cells_from_livestock_products": n_lsk,
-        "activities_blocked_synthetic_base": sorted(blocked),
     }
     return eps, prov, summary
 
@@ -296,7 +351,7 @@ def asymmetry_report(eps: pd.DataFrame, prov: pd.DataFrame) -> dict:
     block absorbs a disproportionate share of any adjustment. This is a property
     of the data coverage, not a bug, but it must be visible.
     """
-    real = prov != "LITERATURE_DEFAULT"
+    real = prov != "NO_CAPRI_VALUE"
     covered = eps.where(real).stack()
     uncovered = eps.where(~real).stack()
     ratio = (covered.median() / uncovered.median()) if len(uncovered) else float("nan")

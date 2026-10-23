@@ -1,4 +1,4 @@
-"""Feeding inside the regional supply model, as CAPRI (docs/FEED_IN_SUPPLY.md).
+"""Feeding inside the regional supply model, as CAPRI (docs/archive/FEED_IN_SUPPLY.md).
 
 CAPRI chooses feed per head (v_feedInpCoeff) in the same optimisation as herds and fodder:
 REQSN_/REQSE_ (requirements), FEDUSE_ (feed use = per-head feed x herd), SUPBAL_ (fodder),
@@ -157,8 +157,8 @@ def _rot_cone_rows(N, u_col, v_terms, w_terms):
 
 
 def solve_regional_conic(Q, c, A, b, acts, rations, fodder_rows, x_base, prices=None,
-                         techs=None, fert=None, n_row=None, tol=1e-8, req_extra=None, m_row=None, feed_ghg=None,
-                         mni=None):
+                         techs=None, fert=None, n_row=None, tol=None, req_extra=None, m_row=None, feed_ghg=None,
+                         mni=None, need_row=None):
     """Regional problem with feeding (CAPRI REQSN_/REQSE_/FEDUSE_/QUADRF_), CAPRI's ammonia
     technologies (v_Miti) and CAPRI's fertiliser technologies, as one convex conic program.
 
@@ -176,6 +176,9 @@ def solve_regional_conic(Q, c, A, b, acts, rations, fodder_rows, x_base, prices=
     S0 T + 0.5 slope T^2 / W (EUR, perspective: rotated cone U W >= T^2) less the emission tax saved
     vtax T. One regional share, as CAPRI (the perspective keeps it convex).
     """
+    if tol is None:                                       # the setting supply.conic_tol
+        from capri_mod.settings import current as _settings
+        tol = float(_settings().get("supply.conic_tol"))
     import clarabel
     from scipy import sparse
     Q = np.asarray(Q, float); A = np.asarray(A, float).copy(); b = np.asarray(b, float); c = np.asarray(c, float)
@@ -271,29 +274,39 @@ def solve_regional_conic(Q, c, A, b, acts, rations, fodder_rows, x_base, prices=
     for r_ in fert_rows:
         for col, nc in fc:
             A[r_, col] -= nc
+    # K9: the crop-need row (need_row: - mineral N + CAPRI's NUTMIN_ floor <= b) is written in MINUS mineral N, so
+    # everything that changes mineral N enters it with the opposite sign of the mineral N row: the crops' mineral
+    # part leaves (+ n_c), m_c enters with -1, the N kept by the ammonia options and the inhibitor's relief +
+    nr_ = need_row if (need_row is not None and need_row not in (n_row, m_row)) else None
+    if nr_ is not None:
+        for col, nc in fc:
+            A[nr_, col] += nc
     keep = np.ones(m_A, bool)
     keep[b > 1e4 * (np.abs(A) @ np.abs(xb) + 1.0)] = False
-    for r_ in fert_rows:
+    for r_ in fert_rows + ([nr_] if nr_ is not None else []):
         keep[r_] = True
     # assembled from blocks (a LIL matrix filled cell by cell was a visible share of each solve; same entries)
     A2 = A.copy()
     er, ec, ev = [], [], []                                  # entries of the columns after y | F | t
     # ammonia options: manure N kept from losses reaches the field and displaces mineral N (sub x ret per unit);
     # that is their whole effect on the N balance row and on the mineral N row (mineRedu) alike
-    for r_ in [r__ for r__ in (n_row, m_row) if r__ is not None]:
+    for r_, sg in [(r__, 1.0) for r__ in (n_row, m_row) if r__ is not None] + ([(nr_, -1.0)] if nr_ is not None else []):
         for k, t in enumerate(techs):
             coef = t["sub"] * t["ret"]
-            er.append(r_); ec.append(iM[k] - (n0 + 2 * nf)); ev.append(-coef * SM[k])
+            er.append(r_); ec.append(iM[k] - (n0 + 2 * nf)); ev.append(-sg * coef * SM[k])
             # tangent of CAPRI's loss cascade at the linearisation point s_lin: N saved per unit of the sub-activity
             # sub x [rel0 + ret x (share - s_lin)] (rel0 once per sub-activity); without s_lin/rel0, relative to the base
             s_lin = float(t.get("s_lin", t["s0"]))
-            A2[r_, act_idx[t["act"]]] = A2[r_, act_idx[t["act"]]] + coef * s_lin * t["w"] \
-                - t["sub"] * float(t.get("rel0", 0.0)) * t["w"]
-    for r_ in fert_rows:
+            A2[r_, act_idx[t["act"]]] = A2[r_, act_idx[t["act"]]] + sg * (coef * s_lin * t["w"]
+                                                                         - t["sub"] * float(t.get("rel0", 0.0)) * t["w"])
+    for r_, sg in [(r__, 1.0) for r__ in fert_rows] + ([(nr_, -1.0)] if nr_ is not None else []):
         for i in range(nfc):
-            er.append(r_); ec.append(iMin[i] - (n0 + 2 * nf)); ev.append(1.0)
-    if use_mni and n_row is not None:
-        er.append(n_row); ec.append(iT - (n0 + 2 * nf)); ev.append(-float(mni["eff"]) * ST)
+            er.append(r_); ec.append(iMin[i] - (n0 + 2 * nf)); ev.append(sg)
+    # the inhibitor's relief displaces mineral N (CAPRI NUTNED_: manure N x (1 + share x NMAN)): on the N row, on the
+    # mineral N row (K18: it was on the N row only) and, with the opposite sign, on the crop-need row (K9)
+    if use_mni:
+        for r_, sg in [(r__, 1.0) for r__ in (n_row, m_row) if r__ is not None] + ([(nr_, -1.0)] if nr_ is not None else []):
+            er.append(r_); ec.append(iT - (n0 + 2 * nf)); ev.append(-sg * float(mni["eff"]) * ST)
     _blocks = [sparse.csr_matrix(A2)]
     if 2 * nf:
         _blocks.append(B["fod_cols"] if B else sparse.csr_matrix((m_A, 2 * nf)))
@@ -352,6 +365,12 @@ def solve_regional_conic(Q, c, A, b, acts, rations, fodder_rows, x_base, prices=
             for tt in range(nft):
                 r_[iH[(i, tt)]] = float(ft[tt][1]) * nc
         rows.append(r_)
+    # activities absent from the region at base (level 0) whose PMP curvature holds them at zero anyway are fixed at zero,
+    # as CAPRI's regional model has no such activities (p_technFact LEVL): their curvature (~1e8 against a median ~1e3)
+    # spoiled the conditioning (K15: IE05 AlmostSolved); their levels were ~1e-6
+    for i_, a_ in enumerate(acts):
+        if i_ < n0 and xb[i_] <= 1e-12 and Q[i_, i_] > 1e4:
+            r_ = np.zeros(N); r_[i_] = 1.0; rows.append(r_)
     if use_mni:
         r_ = np.zeros(N); r_[iT] = ST
         for col, m in mw:
@@ -400,12 +419,15 @@ def solve_regional_conic(Q, c, A, b, acts, rations, fodder_rows, x_base, prices=
     cones = [clarabel.NonnegativeConeT(m_lin + N)] + [clarabel.SecondOrderConeT(3)] * n_soc
     # ---- scaling and solve ----
     sc = np.ones(N); sc[:n0] = np.maximum(np.abs(xb), 1.0)
+    Qs = 0.5 * (Q + Q.T)
     Dg = sparse.diags(sc)
-    P = sparse.block_diag([sparse.csc_matrix(0.5 * (Q + Q.T)), sparse.csc_matrix((N - n0, N - n0))]).tocsc()
+    P = sparse.block_diag([sparse.csc_matrix(Qs), sparse.csc_matrix((N - n0, N - n0))]).tocsc()
     P = sparse.triu(Dg @ P @ Dg).tocsc(); G = (G @ Dg).tocsc(); q = q * sc
     st = clarabel.DefaultSettings(); st.verbose = False
     st.tol_feas = st.tol_gap_abs = st.tol_gap_rel = tol
-    st.max_iter = 400; st.equilibrate_max_iter = 50
+    from capri_mod.settings import current as _settings
+    st.max_iter = int(_settings().get("supply.conic_max_iter"))
+    st.equilibrate_max_iter = int(_settings().get("supply.conic_equilibrate_max_iter"))
     sol = clarabel.DefaultSolver(P, q, G, h, cones, st).solve()
     # a stalled interior point (InsufficientProgress: IE05 under Farm-to-Fork with the inhibitor on manure at its
     # maximum share, relative gap 1e-4) is re-solved with more static regularisation of the KKT system; regions
@@ -458,6 +480,10 @@ def solve_regional_conic(Q, c, A, b, acts, rations, fodder_rows, x_base, prices=
             "fert_m": {fc[i][0]: float(y[iMin[i]]) for i in range(nfc)}, "req_duals": req_duals,
             "mni_T": (float(y[iT]) * ST if use_mni else 0.0),
             "mni_W": (float(sum(m * y[col] for col, m in mw)) if use_mni else 0.0)}
+    if nr_ is not None:
+        # the crop-need row's value at the solution, technology terms included (= - mineral N + floor)
+        p_ = int(keep[:nr_].sum())
+        info["need_row_lhs"] = float(np.asarray(G[p_:p_ + 1] @ xs).ravel()[0])
     return y[:n0], F, zA, info
 
 

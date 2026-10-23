@@ -59,7 +59,11 @@ ITEM_TO_BLOCK = {
 }
 
 #: factors outside this band are treated as artefacts, not signal
-MIN_FACTOR, MAX_FACTOR = 0.2, 5.0
+def _band():
+    """The setting projection.captrd_factor_bounds."""
+    from capri_mod.settings import current as _settings
+    lo, hi = _settings().get("projection.captrd_factor_bounds")
+    return float(lo), float(hi)
 
 
 def _iter_rows(path: Path, years: Iterable[str], datatype: str = "series"):
@@ -112,7 +116,7 @@ def extract_trajectory(
         if not b or not t or b == 0:
             continue
         f = t / b
-        if not np.isfinite(f) or not (MIN_FACTOR < f < MAX_FACTOR):
+        if not np.isfinite(f) or not (_band()[0] < f < _band()[1]):
             continue
         ratios[ITEM_TO_BLOCK[item]][act].append(f)
 
@@ -131,7 +135,7 @@ def extract_trajectory(
         if not b or not t or b < MIN_BASE:
             continue
         f = t / b
-        if not np.isfinite(f) or not (MIN_FACTOR < f < MAX_FACTOR):
+        if not np.isfinite(f) or not (_band()[0] < f < _band()[1]):
             continue
         model_region = region[:4]
         regional[ITEM_TO_BLOCK[item]][model_region][act] = {
@@ -165,7 +169,7 @@ def extract_trajectory(
             "datatype_read": "series (final reconciled trend in projection years; "
                              "BASM is a constant base-mean, not the projection)",
             "aggregation": "per-activity median of per-region cumulative ratios",
-            "factor_band": [MIN_FACTOR, MAX_FACTOR],
+            "factor_band": list(_band()),
             "min_cells_per_activity": 3,
             "regional_detail": ("per-region factors carried where the base value "
                                 f"is >= {MIN_BASE}; the per-activity median is "

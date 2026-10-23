@@ -1,0 +1,11 @@
+item,key,value,source
+active,permGras,1.0,star 3.0 scen/Premiums/Greening/cap_2013_2020_greening.gms
+active,cropDiv,1.0,star 3.0 scen/Premiums/Greening/cap_2013_2020_greening.gms
+active,ecoSetAside,1.0,star 3.0 scen/Premiums/Greening/cap_2013_2020_greening.gms
+setaside_rate_pct,ARAB,5.0,star 3.0 scen/Premiums/Greening/cap_2013_2020_greening.gms
+weight,ISET,0.0,star 3.0 scen/Premiums/Greening/cap_2013_2020_greening.gms
+weight,OFAR,0.7,star 3.0 scen/Premiums/Greening/cap_2013_2020_greening.gms
+weight,VSET,1.0,star 3.0 scen/Premiums/Greening/cap_2013_2020_greening.gms
+weight,FALL,1.0,star 3.0 scen/Premiums/Greening/cap_2013_2020_greening.gms
+weight,PULS,0.7,star 3.0 scen/Premiums/Greening/cap_2013_2020_greening.gms
+weight,CATC,0.3,star 3.0 scen/Premiums/Greening/cap_2013_2020_greening.gms

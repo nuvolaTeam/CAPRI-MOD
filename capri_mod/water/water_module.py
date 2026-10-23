@@ -110,7 +110,8 @@ class WaterDemandModule:
         Locations of the CROPWAT and irrigation-share CSVs. If not given, the
         module looks for them under the data directory's ``sources/water``.
     base_year : str
-        Year to read from the irrigation-share series (default "2017").
+        Year to read from CAPRI's irrigation-share series p_irriShare (default "2016": the survey year with full
+        regional coverage, 507 entries; 2017 has 110).
     """
 
     def __init__(self, data: dict,
