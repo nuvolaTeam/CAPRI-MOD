@@ -153,7 +153,7 @@ def validate_data(data_dir="capri_data") -> ValidationReport:
         except Exception as e:
             rep.add(f"non-negative values ({fn})", "WARN", str(e)[:30])
 
-    # --- 7. Trade flows reference valid regions/commodities ---
+    # --- 7. Trade flows (an input of tools/check/validate_world_prices.py; the model reads the bilateral files) ---
     try:
         tf = pd.read_csv(resolve_data_file(D, "trade_flows.csv"))
         rep.add("trade flows loadable", "PASS", f"{tf.shape[0]} rows")

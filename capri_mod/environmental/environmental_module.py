@@ -6,7 +6,7 @@ Computes environmental indicators from supply module outputs.
 Indicators implemented:
   1. GHG emissions (CH4, N2O, CO2) following IPCC Tier 1/2 methodology
   2. Nitrogen balance (inputs - outputs = surplus, a pollution proxy)
-  3. Phosphorus balance
+  3. Phosphate balance (CAPRI's gross balance in P2O5, calc_nbalance.gms)
   4. Land use indicators (UAA, crop diversity, HNV farmland)
   5. Pesticide use index (simplified)
   6. Ammonia emissions (NH3)
@@ -24,9 +24,11 @@ from dataclasses import dataclass, field
 from typing import Dict, Optional
 
 from capri_mod.params import param, param_table
+from capri_mod.settings import setting
 from capri_mod.data.definitions import (
     CROPS, ANIMALS, ALL_ACTIVITIES, NUTRIENTS, GHG_TYPES,
 )
+from capri_mod.data.definitions import MS_CODE, capri_ms
 
 
 # ---------------------------------------------------------------------------
@@ -65,6 +67,13 @@ class EnvironmentalIndicators:
     ghg_manure_n2o_tech: float = 0.0
     ghg_residue_n2o: float = 0.0
     ghg_indirect_n2o: float = 0.0
+    #: indirect N2O of the N leached and run off from the fields (CAPRI gases.gms N2OLEA allocated to crops;
+    #: capri_mod/supply/n_leaching.py); the housing runoff's is in ghg_manure_n2o
+    ghg_leaching_n2o: float = 0.0
+    #: CAPRI's leaching share of the soil surplus (v_nitrBalance(Leach)) and the N leached and run off from the
+    #: fields that carries the indirect N2O (t N)
+    leach_share: float = 0.0
+    n_runoff_leached: float = 0.0
     ghg_liming: float = 0.0
     ghg_urea: float = 0.0
     #: all items; non-CO2 (CH4 + N2O, JRC121368's "non-CO2 GHG"); CAPRI's GGWP, the emission tax's base
@@ -73,7 +82,7 @@ class EnvironmentalIndicators:
     ghg_non_co2: float = 0.0
     ghg_ggwp: float = 0.0
 
-    # Nitrogen (kt N)
+    # Nitrogen (t N: area in 1000 ha x kg N/ha)
     n_mineral_input: float = 0.0
     n_organic_input: float = 0.0
     n_fixation: float = 0.0
@@ -83,10 +92,18 @@ class EnvironmentalIndicators:
     n_surplus: float = 0.0        # Gross N surplus (potential pollution)
     n_use_efficiency: float = 0.0  # NUE = outputs / inputs
 
-    # Phosphorus (kt P2O5)
-    p_input: float = 0.0
-    p_uptake: float = 0.0
-    p_surplus: float = 0.0
+    # Phosphate: CAPRI's gross P balance, in P2O5 as CAPRI reports phosphate (reports/calc_nbalance.gms, FNUT = PHOF;
+    # compute_phosphorus_balance). t P2O5 (1000 ha x kg/ha, as the N items; CAPRI's tables are in 1000 t P2O5;
+    # P = 0.4364 x P2O5)
+    p_input: float = 0.0               # IMPORT = EXCRET - MTRADE + MINFER + CRESID
+    p_uptake: float = 0.0              # EXPPRD: removal with crop products (retention)
+    p_surplus: float = 0.0             # SURTOT = IMPORT - EXPPRD, the gross balance
+    p_mineral_input: float = 0.0       # MINFER: mineral P2O5 bought
+    p_manure_excretion: float = 0.0    # EXCRET
+    p_manure_net_export: float = 0.0   # MTRADE: manure P2O5 exported less imported
+    p_crop_residues: float = 0.0       # CRESID
+    p_runoff: float = 0.0              # RUNANI: manure P2O5 run off (CAPRI's N runoff share)
+    p_surplus_soil: float = 0.0        # SURSOI = SURTOT - RUNANI
 
     # Ammonia (kt NH3)
     nh3_livestock: float = 0.0
@@ -98,6 +115,9 @@ class EnvironmentalIndicators:
     arable_land: float = 0.0
     permanent_crops: float = 0.0
     grassland: float = 0.0
+    #: area under organic farming added by the scenario's organic area target (1000 ha): each crop's area x its
+    #: converted share (SupplyModel._organic_conv, organic_area.gms). CAPRI's targets are percentage points above the
+    #: baseline's organic area, which neither CAPRI's data nor capri-mod's hold, so it is 0 without a target
     organic_area: float = 0.0
 
     # Biodiversity proxy
@@ -120,40 +140,29 @@ class EnvironmentalModule:
     EnvironmentalIndicators for each region.
     """
 
-    def __init__(self, data: dict, fertilizer_module=None):
+    def __init__(self, data: dict):
         self.data = data
-        # Nutrient application rates (kg/ha per crop, N/P2O5/K2O). By default
-        # these are CAPRI's loaded p_FertPerHa (data["nutrients"]). If a
-        # calibrated FertilizerModule is supplied, its *derived* rates are used
-        # instead — the same quantity, re-derived from removal x yield x
-        # efficiency, which is what a re-based year (no ready-made file) needs.
-        # The env module is agnostic to the source; it just reads application
-        # rates, so its nitrogen-balance validation is unaffected by the switch.
-        if fertilizer_module is not None:
-            # Use the fert module's *derived* rates where it can produce them,
-            # falling back to CAPRI's loaded p_FertPerHa for any crop/nutrient
-            # the fert module does not cover (e.g. crops outside its calibration
-            # set). This preserves the env module's full crop coverage while
-            # sourcing application from the derivation wherever possible.
-            loaded = data["nutrients"].copy()
-            derived = fertilizer_module.per_crop_rates()
-            merged = loaded.copy()
-            for crop in derived.index:
-                for col in derived.columns:
-                    if col in merged.columns:
-                        val = derived.at[crop, col]
-                        # NaN = the fert module flagged this crop/nutrient as
-                        # unit-inconsistent (e.g. GRAS); keep the loaded value.
-                        if not (isinstance(val, float) and np.isnan(val)):
-                            if crop in merged.index:
-                                merged.at[crop, col] = val
-                            else:
-                                merged.loc[crop, col] = val
-            self.nutrient_coefs = merged
-            self._nutrient_source = "derived (fertilizer module) + loaded fallback"
-        else:
-            self.nutrient_coefs = data["nutrients"]
-            self._nutrient_source = "loaded (CAPRI p_FertPerHa)"
+        # Nutrient application rates (kg/ha per crop, N/P2O5/K2O): CAPRI's p_FertPerHa (data["nutrients"]). A
+        # removal x yield x efficiency derivation (FertilizerModule, not CAPRI's fert/ HPD estimation) that could
+        # replace them for a re-based year was never used in a run and was removed on 23 October 2026 (PROXY_AUDIT
+        # S213, S214).
+        self.nutrient_coefs = data["nutrients"]
+        self._nutrient_source = "loaded (CAPRI p_FertPerHa)"
+
+    def _manure_loss_shares(self, region: str) -> dict:
+        """CAPRI's manure N lost in housing and storage per kg excreted, by animal ((GASANI + RUNANI) / MANN, 2030
+        reference; capri_data/2017/environment/manure_housing_losses_2030.csv). Raises where the data is missing."""
+        c = self.__dict__.setdefault("_mloss_cache", {})
+        if region not in c:
+            t = self.data.get("manure_housing_losses") if hasattr(self, "data") else None
+            if t is None:
+                raise RuntimeError("no CAPRI manure housing losses (manure_housing_losses_2030.csv)")
+            if region not in t.index:
+                c[region] = {}
+            else:
+                r = t.loc[[region]]
+                c[region] = dict(zip(r["animal"], r["loss_share"].astype(float)))
+        return c[region]
 
     def _n_excretion(self, region: str, animal: str) -> float:
         cache = self.__dict__.setdefault("_nexc_cache", {})
@@ -181,16 +190,27 @@ class EnvironmentalModule:
             if pd.notna(v) and v > 0:
                 return float(v)
         if mc is None:
-            raise RuntimeError("livestock_manure_n_coef.csv is missing (tools/build_pig_split.py)")
+            raise RuntimeError("livestock_manure_n_coef.csv is missing (tools/build/build_shg_split.py --reproduce)")
         return 0.0          # CAPRI has no such animal in the region (no herd)
+
+    def _n_animal_products(self, region: str, activities) -> float:
+        """N exported in animal products, t N (1000 head x kg N per head): CAPRI's CRPR_EXPT per model head."""
+        tab = self.data.get("livestock_n_export_coef") if hasattr(self, "data") else None
+        if tab is None:
+            raise RuntimeError("livestock_n_export_coef.csv is missing (python tools/build/build_livestock_n_export_coef.py)")
+        if region not in tab.index:
+            return 0.0
+        row = tab.loc[region]
+        return float(sum(float(activities.get(a, 0.0)) * float(row[a]) for a in ANIMALS
+                         if a in row.index and pd.notna(row[a])))
 
     def _ch4_per_head(self, kind: str, region: str, animal: str) -> float:
         """CAPRI's manure ("man") or enteric ("ent") CH4 per model head, kg (CH4MAN / CH4ENT: CAPRI total over the
-        region's activities / the census herd; tools/build_ghg_coefs_2017.py; 2030 by CAPRI's reference factors).
+        region's activities / the census herd; tools/build/build_ghg_coefs_2017.py; 2030 by CAPRI's reference factors).
         An animal CAPRI gives no such emission (poultry: no enteric CH4) has none."""
         tab = self.data.get("livestock_ch4%s_coef" % kind) if hasattr(self, "data") else None
         if tab is None:
-            raise RuntimeError(f"livestock_ch4{kind}_coef.csv is missing (python tools/build_ghg_coefs_2017.py)")
+            raise RuntimeError(f"livestock_ch4{kind}_coef.csv is missing (python tools/build/build_ghg_coefs_2017.py)")
         if region not in tab.index or animal not in tab.columns:
             return 0.0
         v = tab.at[region, animal]
@@ -200,7 +220,7 @@ class EnvironmentalModule:
         """(CO2 from liming, kg/ha of crop activity; urea share of mineral N), CAPRI's (crop_co2_coef.csv)."""
         tab = self.data.get("crop_co2_coef") if hasattr(self, "data") else None
         if tab is None:
-            raise RuntimeError("crop_co2_coef.csv is missing (python tools/build_ghg_coefs_2017.py)")
+            raise RuntimeError("crop_co2_coef.csv is missing (python tools/build/build_ghg_coefs_2017.py)")
         if region not in tab.index:
             return 0.0, 0.0
         return float(tab.at[region, "co2lim_kg_ha"]), float(tab.at[region, "urea_share"])
@@ -233,7 +253,7 @@ class EnvironmentalModule:
             _fd = (getattr(self, "_feed_dm_now", None) or {}).get(animal)
             _fac = self._enteric_factors().get(animal) if _fd else None
             if _fd and _fac:
-                _ctry = {"BE": "BL", "LU": "BL", "IE": "IR", "GR": "EL"}.get(str(getattr(self, "_region_now", ""))[:2],
+                _ctry = MS_CODE.get(str(getattr(self, "_region_now", ""))[:2],
                                                                         str(getattr(self, "_region_now", ""))[:2]) + "000000"
                 _ge = _fac["ge"].get(_ctry) or _fac["ge"].get("EU")
                 if _ge:
@@ -252,7 +272,7 @@ class EnvironmentalModule:
 
             # N2O from manure: CAPRI's shares of manure N lost as N2O-N by stage - housing and
             # storage, application, grazing, leaching (gases.gms N2OMAN, N2OAPP, N2OGRA, N2OLEA;
-            # tools/build_manure_n2o.py); the technologies' effects are applied in the accounts.
+            # tools/build/build_manure_n2o.py); the technologies' effects are applied in the accounts.
             # Indirect N2O from volatilised NH3 is its own item (N2O_IND). Without CAPRI's factors
             # for the region and animal: none (no herd; tests check every herd has them).
             _mf = self._manure_n2o_factor(region, animal)
@@ -289,7 +309,7 @@ class EnvironmentalModule:
         ghg["N2O_SOIL"] += (n2o_indirect_n * 44 / 28) * GWP_N2O
 
         # 4. Liming (CO2): CAPRI's coefficient per ha of every crop activity, grassland and fallow included
-        # (gases.gms (16): the region's UAAR CO2LIM, kg CO2/ha; tools/build_ghg_coefs_2017.py)
+        # (gases.gms (16): the region's UAAR CO2LIM, kg CO2/ha; tools/build/build_ghg_coefs_2017.py)
         lim, urea_share = self._co2_coefs(region)
         ghg["CO2_LIME"] = sum(activities.get(c, 0.0) for c in CROPS) * lim / 1e3     # 1000 ha x kg/ha -> kt CO2
 
@@ -352,7 +372,7 @@ class EnvironmentalModule:
         self._capri_crop_n(region)                         # builds the region map
         r8 = getattr(type(self), "_CROP_N_MAP", {}).get(region)
         if r8 is None or r8 not in g.index:
-            r8 = {"GR": "EL", "BE": "BL", "LU": "BL", "IE": "IR"}.get(region[:2], region[:2]) + "000000"
+            r8 = capri_ms(region)
         return g.loc[r8].to_dict() if r8 in g.index else {}
 
     #: CAPRI's slope of manure availability on manure applied per ha (fert/endoManAvail.gms)
@@ -423,8 +443,8 @@ class EnvironmentalModule:
         return d
 
     #: CAPRI crop -> model crop (several CAPRI crops pooled by level)
-    _CAPRI_CROP = {"CORN": ("MAIZ",), "WINE": ("TWIN",), "OFIB": ("TEXT",), "GRAS": ("GRAE", "GRAI"),
-                   "OFOD": ("OFAR", "ROOF"), "SETA": ("SETA", "FALL", "VSET"), "OLIV": ("OLIV", "TABO")}
+    _CAPRI_CROP = {"CORN": ("MAIZ",), "WINE": ("TWIN",), "GRAS": ("GRAE", "GRAI"),
+                   "OFOD": ("OFAR", "ROOF"), "SETA": ("SETA", "FALL", "VSET")}
     _CROP_N = None
 
     def _capri_crop_n(self, region):
@@ -447,7 +467,7 @@ class EnvironmentalModule:
                     if not k.endswith("000000"):
                         for n2 in lst:
                             to8.setdefault(n2, k)
-                # the shared map (tools/build_region_map.py: correspondence fixes, NUTS splits and merges)
+                # the shared map (tools/build/build_region_map.py: correspondence fixes, NUTS splits and merges)
                 _rm = root / "shared" / "region_capri_map.csv"
                 if _rm.exists():
                     for _r in pd.read_csv(_rm, dtype=str).fillna("").itertuples(index=False):
@@ -501,7 +521,7 @@ class EnvironmentalModule:
         to8 = getattr(cls, "_CROP_N_MAP", {})
         r8 = to8.get(region)
         if r8 is None or r8 not in cls._CROP_N:
-            nc = {"GR": "EL", "BE": "BL", "LU": "BL", "IE": "IR"}.get(region[:2], region[:2]) + "000000"
+            nc = capri_ms(region)
             r8 = nc
         res = cls._CROP_N.get(r8)
         ov = self.__dict__.get("_grass_override")
@@ -515,7 +535,7 @@ class EnvironmentalModule:
     #: crops whose own residues cover their own need, CAPRI's permanent crop groups (supply/define_ngrp_sets.gms
     #: PERM_NGRP: GRAS, and PERM = OLIV, TABO, TAGR, TWIN, CITR, APPL); every other crop draws on the arable residue
     #: pool (fertDistCres_). Other fruit (VEGE in CAPRI) and nurseries (OAFC) were here until Sprint 9e.
-    OWN_RESIDUE_CROPS = frozenset({"GRAS", "APPL", "CITR", "TAGR", "WINE", "OLIV"})
+    OWN_RESIDUE_CROPS = frozenset({"GRAS", "APPL", "CITR", "TAGR", "WINE", "OLIV", "TABO"})
 
     def _base_mineral_rate(self, region, crop):
         """Base mineral N per ha of a crop: CAPRI's regional rate, else the EU table."""
@@ -629,7 +649,7 @@ class EnvironmentalModule:
             to8 = getattr(type(self), "_CROP_N_MAP", {})
             r8 = to8.get(region)
             if r8 is None or r8 not in g.index:
-                r8 = {"GR": "EL", "BE": "BL", "LU": "BL", "IE": "IR"}.get(region[:2], region[:2]) + "000000"
+                r8 = capri_ms(region)
             if r8 in g.index:
                 pool = float(g.at[r8, "CRESID"]) + float(g.at[r8, "ATMOSD"])
                 lost = -float(g.loc[r8].get("nutNed_cres_unavailable_perha", 0.0) or 0.0) \
@@ -742,6 +762,8 @@ class EnvironmentalModule:
 
         # Organic N from manure
         n_organic = 0.0
+        n_housing_loss = 0.0          # CAPRI GASANI + RUNANI: lost in housing and storage before application
+        _ls = self._manure_loss_shares(region)
         for animal in ANIMALS:
             # Activity levels are in 1000 head and _n_excretion returns kg N per
             # head per year (DCOW ~105, matching the literature 100-120), so the
@@ -753,10 +775,11 @@ class EnvironmentalModule:
             heads_1000 = activities.get(animal, 0.0)
             n_excr = self._n_excretion(region, animal)
             n_organic += heads_1000 * n_excr
+            n_housing_loss += heads_1000 * n_excr * float(_ls.get(animal, 0.0))
         # MANURE TRADE (CAPRI's manExportOrAppl_): exporting regions keep
         # (1 - export share) of their manure N, importing regions receive
         # manure spread over their cropland. Shares from CAPRI's 2030 reference
-        # (tools/build_manure_trade_base.py: 1.2 Mt N traded between regions).
+        # (tools/build/build_manure_trade_base.py: 1.2 Mt N traded between regions).
         # only where the run trades manure (CAPRI's manureTradeNew; a scenario setting held for its baseline: without
         # it, as JRC121368's CAPRI, every region keeps all its manure, Sprint 9j)
         _mt = self.data.get("manure_trade") if (hasattr(self, "data") and getattr(self, "manure_trade_on", True)) else None
@@ -858,7 +881,9 @@ class EnvironmentalModule:
         # Crop N uptake: CAPRI's per crop and region (_capri_crop_n)
         n_crop_uptake = n_crop_uptake_c
         # N in livestock products
-        n_animal_output = n_organic * 0.25  # ~25% of excreted N is in products
+        # N in livestock products: CAPRI's CRPR_EXPT per head (fert/calc_nexport.gms; livestock_n_export_coef.csv,
+        # tools/build/build_livestock_n_export_coef.py) x heads. Until 23 October 2026: 25% of excreted N (no source)
+        n_animal_output = self._n_animal_products(region, activities)
 
         # GROSS NITROGEN BALANCE outputs are crop and fodder removals only
         # (OECD/Eurostat; CAPRI's land and soil budgets, Koeble et al. 2026,
@@ -883,25 +908,33 @@ class EnvironmentalModule:
             "n_surplus": surplus,
             "n_use_efficiency": nue,
             # pools of CAPRI's fertiliser distribution (fertDistExcr_, fertDistCres_; inner model): manure N
-            # applied in the region (own after export, plus imports), the arable residue pool, own residues of
-            # the permanent groups
-            "n_manure_applied": n_organic + n_manure_import,
+            # applied in the region - CAPRI's v_ManureNPK: excreted, less the losses in housing and storage
+            # (GASANI, RUNANI), less net exports (EXCRET - MTRADE - GASANI - RUNANI, exact in CAPRI's 2030
+            # reference) - the arable residue pool, own residues of the permanent groups
+            "n_manure_applied": n_organic + n_manure_import - n_housing_loss,
+            "n_manure_import": n_manure_import,
+            "n_manure_housing_loss": n_housing_loss,
             "n_residue_pool": (n_residues - _own_res) if _cn else 0.0,
             "n_own_residues": _own_res if _cn else 0.0,
         }
 
-    def fert_distribution(self, region, acts, yields, nb, nb_raw, mineral_cap=None) -> Optional[list]:
+    def fert_distribution(self, region, acts, yields, nb, nb_raw, mineral_cap=None, mode_crops=None,
+                          cal_priors=None) -> Optional[list]:
         """CAPRI's inner fertiliser distribution model for one region (capri_mod.fert.inner_fert_dist): mineral N
         (the balance's), manure N applied (the balance's own manure plus imports, after endogenous trade and the
         herd adjustments) and the arable residue pool, distributed over CAPRI's crop groups; needs at CAPRI's base
         per ha x area x sqrt(yield / base yield) (NUTNED_). With the crop-specific mineral fertiliser reduction the
         "f2f" (mineral N) and "limCres" (residues) regulations apply. Rows: region, capri_region, ngrp, area_kha,
         mine/excr/cres kg_ha, mine_cap_kg_ha, cap_scale (> 1 where the accounts' mineral N exceeds the caps'
-        capacity and the caps were scaled to report an allocation), converged."""
+        capacity and the caps were scaled to report an allocation), converged. mode_crops: the crop areas CAPRI's
+        prior modes are fixed at (the supply model's starting point; None: the current areas)."""
         from capri_mod.fert.inner_fert_dist import InnerFertDist
         inner = self.__dict__.get("_inner_fert")
         if inner is None:
             inner = self._inner_fert = InnerFertDist()
+        inner.set_variant(bool(getattr(self, "manure_trade_on", True)))
+        if cal_priors is not None and cal_priors[0][1] == inner.variant:
+            inner._pri_cal[cal_priors[0]] = cal_priors[1]       # the regional model's calibrated priors
         if inner.capri_region(region) is None:
             return None
         if hasattr(acts, "to_dict"):
@@ -916,6 +949,9 @@ class EnvironmentalModule:
         M = float(nb.get("n_mineral_input", 0.0))
         E = float(nb_raw.get("n_manure_applied", 0.0)) + float(nb.get("n_organic_input", 0.0)) \
             - float(nb_raw.get("n_organic_input", 0.0))
+        # the N the ammonia options keep in housing, storage and spreading stays in the manure (CAPRI: lower GASANI,
+        # higher v_ManureNPK) - set per region by the accounts above
+        E += float(getattr(self, "_n_kept_last", getattr(self, "_nh3_saved_last", 0.0)) or 0.0)
         C = float(nb_raw.get("n_residue_pool", 0.0))
         av = float(self._residue_availability(region)[0] or 0.0)
         caps, gcaps = None, {}
@@ -924,7 +960,7 @@ class EnvironmentalModule:
             caps = {(g, "MINE"): v for g, v in gcaps.items() if v > 0}
             for g, v in (mineral_cap.get("limcres") or {}).items():
                 caps[(g, "CRES")] = v
-        out = inner.allocate(region, crops, M, E, C, av, crop_factor=fac, caps=caps)
+        out = inner.allocate(region, crops, M, E, C, av, crop_factor=fac, caps=caps, mode_crop_areas=mode_crops)
         cap_scale = 1.0
         if caps and (out is None or not out["converged"]):
             # The supply model holds mineral N at most at the caps' capacity, sum_g cap_g x area_g; the beta
@@ -937,10 +973,10 @@ class EnvironmentalModule:
             if capa > 0 and not free:
                 cap_scale = max(1.0, M / (0.998 * capa))
                 caps2 = {k: (v * cap_scale if (k[1] == "MINE" and not isinstance(v, tuple)) else v) for k, v in caps.items()}
-                out = inner.allocate(region, crops, M, E, C, av, crop_factor=fac, caps=caps2)
+                out = inner.allocate(region, crops, M, E, C, av, crop_factor=fac, caps=caps2, mode_crop_areas=mode_crops)
         if out is None and caps:
             # regulations infeasible at this solution: report the unregulated allocation, flagged
-            out = inner.allocate(region, crops, M, E, C, av, crop_factor=fac)
+            out = inner.allocate(region, crops, M, E, C, av, crop_factor=fac, mode_crop_areas=mode_crops)
             if out is not None:
                 out["converged"] = False
         if out is None:
@@ -996,7 +1032,7 @@ class EnvironmentalModule:
 
     def _enteric_factors(self) -> dict:
         """{animal: {"ym": Ym, "ge": {country: {feed: GE Mcal/kg DM, "_mean": ...}}}} from
-        capri_data/2017/environment/enteric_feed_factors.csv (tools/build_enteric_feed_factors.py)."""
+        capri_data/2017/environment/enteric_feed_factors.csv (tools/build/build_enteric_feed_factors.py)."""
         cls = type(self)
         if cls._ENT_CACHE is None:
             import csv as _csv
@@ -1019,7 +1055,7 @@ class EnvironmentalModule:
 
     def fert_side_factors(self, region, shares, nmin) -> Optional[Dict[str, float]]:
         """Emission factor multipliers on mineral N from CAPRI's nitrification-inhibitor side
-        effects (capri_data/2017/abatement/fert_side_effects.csv, tools/build_fert_side_effects.py):
+        effects (capri_data/2017/abatement/fert_side_effects.csv, tools/build/build_fert_side_effects.py):
         F = 1 - w + w (1 - lit) (1 + NMIN), w = the option's share of mineral N. None when the
         region has no inhibitor adoption."""
         s = float((shares or {}).get("NITR_INH", 0.0) or 0.0)
@@ -1094,6 +1130,143 @@ class EnvironmentalModule:
             H1 += w * h1; F1 += w * f1; H0 += w * h0; F0 += w * f0
         return (H1 / H0 if H0 > 0 else 1.0), (F1 / F0 if F0 > 0 else 1.0)
 
+    #: anaerobic digestion on dairy cows' manure CH4: "fix" applies CAPRI's CH4 factor to DCOL/DCOH as to the other
+    #: animals (the user's decision, 20 October 2026); "capri" reproduces CAPRI as coded, where ad_data_and_cali.gms
+    #: l. 588 zeroes the NOC CH4MAN_3k factor the dairy macro needs, so dairy AD has no CH4 effect (docs/AD_SPEC.md)
+    ad_dairy_ch4 = setting("environment.ad_dairy_ch4")
+
+    def _ad_ch4_factor(self, region, animal, ms, s0):
+        """Manure CH4 at the AD share against the base share (ratio), over the animal's sub-activities weighted by
+        their manure N; None without AD for the animal."""
+        subs = [sb for sb in ((getattr(self, "_amm_tm", None) or {}).get(region, {}).get(animal) or []) if sb.get("ad")]
+        if not subs:
+            return None
+        s1 = float(ms.get((animal, "AD_AnCh"), s0.get("AD_AnCh", 0.0)) or 0.0)
+        b0 = float(s0.get("AD_AnCh", 0.0) or 0.0)
+        F1 = F0 = W = 0.0
+        for sb in subs:
+            w = float(sb["w"]) * float(sb.get("mrel", 1.0) or 1.0)
+            lg, r = sb["ad"]
+            act = sb["key"].partition("|")[2]
+            k = 0.0 if (self.ad_dairy_ch4 == "capri" and act in ("DCOL", "DCOH")) else (1.0 - r) / lg
+            F1 += w * (1.0 - s1 * k); F0 += w * (1.0 - b0 * k); W += w
+        return F1 / F0 if F0 > 0 else 1.0
+
+    def _winter_cover_now(self, region, supply_result):
+        """(base, current) winter cover share (CAPRI's v_Miti(CATC, WinterCov)): the 2030 catch-crop share and, under
+        the catch-crop requirement, the required area over UAAR (supply result's cover_crops)."""
+        cc = self.data.get("cover_crops") if hasattr(self, "data") else None
+        w0 = 0.0
+        if cc is not None and region in getattr(cc, "index", []):
+            v = cc.at[region, "catc_share_2030"]
+            w0 = float(v) if v == v else 0.0
+        cv = getattr(supply_result, "cover_crops", None) or {}
+        w1 = float(cv["req"]) / float(cv["uaa"]) if cv.get("req") is not None and float(cv.get("uaa", 0.0) or 0.0) > 0 else w0
+        return w0, w1
+
+    def _leach_animals(self, region, acts, ms, wc, initial=False, fert_mrun=0.0):
+        """Per animal (t N excreted, RunSurf, GasRunTot, sum over the application options of no3mlea x share) through
+        CAPRI's cascade at the current option shares ms (or the initial shares), the sub-activities weighted by their
+        manure N; animals without cascade data are left out."""
+        from capri_mod.supply import ammonia_techs as _at, n_cascade as _nc
+        from capri_mod.supply.n_leaching import APPL
+        out = []
+        tm = (getattr(self, "_amm_tm", None) or {}).get(region, {})
+        for a_ in ANIMALS:
+            x_ = float(acts.get(a_, 0.0) or 0.0)
+            subs = tm.get(a_) or []
+            if x_ <= 0 or not subs or any(_at.cascade_data(sb) is None for sb in subs):
+                continue
+            n_a = self._n_excretion(region, a_) * x_ * 1000.0 / 1e3          # kg/head x 1000 heads -> t N
+            sh = {t: v for (aa, t), v in (ms or {}).items() if aa == a_}
+            W = RS = GR = AG = 0.0
+            for sb in subs:
+                w = float(sb["w"]) * float(sb.get("mrel", 1.0) or 1.0)
+                s_ = {t["tech"]: t["ini"] for t in sb["techs"]}
+                if not initial:
+                    s_ = {t_: sh.get(t_, v_) for t_, v_ in s_.items()}
+                f, rsurf, eff = _at.cascade_data(sb)
+                m = 1.0 - _nc.WINTERCOV_NO3 * wc - fert_mrun
+                L = _nc.losses(f, rsurf, s_, eff, m_runsurf=(m, 1.0), m_appl_run=1.0 - _nc.WINTERCOV_NO3 * wc)
+                W += w
+                RS += w * L[("N", "RunSurf")]
+                GR += w * L[("N", "GasRunTot")]
+                AG += w * sum(float(eff.get((t_, "no3mlea"), 0.0)) * float(s_.get(t_, 0.0)) for t_ in APPL)
+            if W > 0:
+                out.append((n_a, RS / W, GR / W, AG / W))
+        return out
+
+    def leaching(self, region, acts, nb, supply_result=None):
+        """CAPRI's leaching share of the soil surplus (LEACHN_) and the N leached and run off from the fields that
+        carries indirect N2O (gases.gms N2OLEA allocated to crops), capri_mod/supply/n_leaching.py. Returns {share,
+        components (t N), n2o_n (t N2O-N), leached (t N below the root zone)} or None without CAPRI's data."""
+        from capri_mod.supply import n_cascade as _nc, n_leaching as _nl
+        from capri_mod.supply.supply_module import fert_side_value as _fsv
+        rs = _nl.capri_region(region)
+        d = _nl.load().get(rs) if rs else None
+        if not d or d.get("exp_imp") is None:
+            return None
+        e = float(d["exp_imp"])
+        _, G, _ = _nc.load()
+        g = G.get(rs, {})
+        wc0, wc1 = self._winter_cover_now(region, supply_result)
+        fs = getattr(supply_result, "fert_tech_shares", None) or {}
+        nmin = getattr(supply_result, "fert_nmin", None) or {}
+        s_ni, s_nim = float(fs.get("NITR_INH", 0.0) or 0.0), float(fs.get("NITR_INH_MAN", 0.0) or 0.0)
+
+        def _eff(tech, item, nm):
+            v = _fsv(region, tech, item)
+            return 0.0 if v is None else _nl.fert_effect(v, nm)
+        e_slea = _eff("NITR_INH", "NO3SLEA", nmin.get("NITR_INH", 0.0))
+        e_srun = _eff("NITR_INH", "NO3SRUN", nmin.get("NITR_INH", 0.0))
+        e_mlea = _eff("NITR_INH_MAN", "NO3MLEA", nmin.get("NITR_INH_MAN", 0.0))
+        e_mrun = _eff("NITR_INH_MAN", "NO3MRUN", nmin.get("NITR_INH_MAN", 0.0))
+        # mineral N: CAPRI's NETF losses (GASTOTNETF_, RUNTOTNETF_ with winter cover and the inhibitor's NO3SRUN)
+        M = float(nb.get("n_mineral_input", 0.0) or 0.0)
+        nf = _nc.netf(g, float(g.get("run_surf", 0.0)), m_run=1.0 - _nc.WINTERCOV_NO3 * wc1 - s_ni * e_srun)
+        ms = getattr(supply_result, "manure_tech_shares", None) or {}
+        an1 = self._leach_animals(region, acts, ms, wc1, fert_mrun=s_nim * e_mrun)
+        an0 = self._leach_animals(region, acts, ms, wc0, initial=True)
+        man_net = float(nb.get("n_manure_applied", 0.0) or 0.0)
+        oth = (float(nb.get("n_crop_residues", 0.0) or 0.0) + float(nb.get("n_deposition", 0.0) or 0.0)) \
+            * (1.0 - nf["N2O"])
+        den = M * (1.0 - nf["GasRunTot"]) + man_net + oth
+        nmin_sh = M * (1.0 - nf["GasRunTot"]) / den if den > 0 else 0.0
+        nman_sh = man_net / den if den > 0 else 0.0
+
+        def _agg(an):
+            w = sum(n * (1.0 - gr) for n, _, gr, _ in an)
+            return sum(n * (1.0 - gr) * ag for n, _, gr, ag in an) / w if w > 0 else 0.0
+        b_now = _nl.b1(wc1, _agg(an1), nmin_sh, nman_sh, s_ni * e_slea, s_nim * e_mlea)
+        b_ini = _nl.b1(wc0, _agg(an0))
+        L = _nl.share(rs, b_now, b_ini)
+        if L is None:
+            return None
+        comp = _nl.crop_n(M, nf["RunTot"], nf["GasRunTot"], nf["N2O"], [(n, r_, gr) for n, r_, gr, _ in an1],
+                          -float(nb.get("n_manure_import", 0.0) or 0.0),
+                          float(nb.get("n_crop_residues", 0.0) or 0.0) + float(nb.get("n_deposition", 0.0) or 0.0),
+                          float(nb.get("n_fixation", 0.0) or 0.0), L, e)
+        tot = sum(comp.values())
+        return {"share": L, "b1": b_now, "b1_ini": b_ini, "components": comp, "n_runoff_leached": tot,
+                "n2o_n": tot * _nl.EF5}
+
+    def _manure_n2o_full(self, region, animal, sh, s0, wc=(0.0, 0.0)):
+        """(housing and storage, application) multipliers of manure N2O at option shares sh against the base shares
+        s0 through CAPRI's full cascade (ammonia_techs.n2o), the animal's sub-activities weighted by their manure N;
+        None where a sub-activity has no cascade data."""
+        from capri_mod.supply import ammonia_techs as _at
+        subs = (getattr(self, "_amm_tm", None) or {}).get(region, {}).get(animal) or []
+        if not subs or any(_at.cascade_data(sb) is None for sb in subs):
+            return None
+        full1 = {t: sh.get(t, s0.get(t, 0.0)) for t in set(s0) | set(sh)}
+        H1 = A1 = H0 = A0 = 0.0
+        for sb in subs:
+            w = float(sb["w"]) * float(sb.get("mrel", 1.0) or 1.0)
+            h1, a1 = _at.n2o(sb, full1, wc[1])
+            h0, a0 = _at.n2o(sb, {t["tech"]: t["ini"] for t in sb["techs"]}, wc[0])
+            H1 += w * h1; A1 += w * a1; H0 += w * h0; A0 += w * a0
+        return (H1 / H0 if H0 > 0 else 1.0), (A1 / A0 if A0 > 0 else 1.0)
+
     def _nh3_factors(self) -> dict:
         d = self.__dict__.get("_nh3_fac_cache")
         if d is None:
@@ -1121,7 +1294,7 @@ class EnvironmentalModule:
         # "soils = 10% of livestock" proxy): per region, CAPRI's share of each
         # animal's excreted N lost as NH3-N (housing + storage + application +
         # grazing, GNH3/MANN) and the share of mineral N lost (NH3MIN/MINFER),
-        # from its 2030 reference run (tools/build_nh3_factors.py). Responds to
+        # from its 2030 reference run (tools/build/build_nh3_factors.py). Responds to
         # herds AND to mineral fertiliser - which the proxy could not see.
         fac = self._nh3_factors().get(region) if region else None
         if fac:
@@ -1133,8 +1306,173 @@ class EnvironmentalModule:
                     "nh3_total": (man_n + min_n) * 17 / 14}
         # no CAPRI factors: only where there is no farming (Brussels); anything else fails loudly
         if any(activities.get(a, 0.0) > 0 for a in ANIMALS) or float(mineral_n_kt or 0.0) > 0:
-            raise RuntimeError(f"no CAPRI ammonia factors for {region} (tools/build_nh3_factors.py)")
+            raise RuntimeError(f"no CAPRI ammonia factors for {region} (tools/build/build_nh3_factors.py)")
         return {"nh3_livestock": 0.0, "nh3_soils": 0.0, "nh3_total": 0.0}
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # PHOSPHATE (P2O5) BALANCE: CAPRI's reports/calc_nbalance.gms with FNUT = PHOF (capri_mod/environmental/p_balance.py)
+    # ------------------------------------------------------------------------------------------------------------------
+
+    def _p_capri_region(self, region):
+        """The CAPRI region of the fertilisation block's data (InnerFertDist.capri_region, as SupplyModel._npk_spec)."""
+        inner = self.__dict__.get("_inner_fert")
+        if inner is None:
+            from capri_mod.fert.inner_fert_dist import InnerFertDist
+            inner = self._inner_fert = InnerFertDist()
+        return inner.capri_region(region)
+
+    def _p_applied_ratio(self, capri_region):
+        """Manure P2O5 applied in the region per unit excreted at CAPRI's 2030 reference, 1 - MTRADE / EXCRET (the
+        fertilisation block's ManureNPK_ for P, SupplyModel._npk_applied_ratio; npk_dataout_2030.csv.xz)."""
+        c = getattr(type(self), "_P_APPL", None)
+        if c is None:
+            from pathlib import Path as _P
+            f = _P(__file__).resolve().parents[2] / "capri_data" / "sources" / "environment" / "npk_dataout_2030.csv.xz"
+            s = pd.read_csv(f, keep_default_na=False)
+            s = s[(s.item == "") & (s.col == "PHOF") & (s.row.isin(["EXCRET", "MTRADE"]))]
+            v = {(t.region, t.row): float(t.value) for t in s.itertuples(index=False)}
+            c = {r: max(0.0, 1.0 - v.get((r, "MTRADE"), 0.0) / x) for (r, row), x in v.items() if row == "EXCRET" and x > 0}
+            type(self)._P_APPL = c
+        return c.get(capri_region, c.get(capri_region[:2] + "000000", 1.0))
+
+    def _p_runtot(self, region, ms=None, wc=0.0, fert_mrun=0.0, initial=False) -> Dict[str, float]:
+        """CAPRI's runoff share of excreted manure N, v_emiLoss(N, RunTot) = RunHous + RunSurf, per animal through the
+        loss cascade (capri_mod/supply/n_cascade.py) at the option shares ms (or CAPRI's initial shares), the winter cover
+        share wc and the manure inhibitor's runoff effect, the animal's CAPRI sub-activities weighted by their manure N
+        (as _leach_animals). CAPRI applies the same share to manure P2O5 (calc_nbalance.gms l. 71, 103-106, RUNANI). RunHous
+        and RunSurf are held within CAPRI's bounds of a loss share, [0, 1] (v_emiLoss.lo/up). A sub-activity without
+        cascade data runs off nothing (CAPRI reports no RUNANI there)."""
+        from capri_mod.supply import ammonia_techs as _at, n_cascade as _nc
+        self._manure_n2o_tech(region)                 # loads CAPRI's sub-activities (ammonia_tech_model.csv)
+        tm = (getattr(self, "_amm_tm", None) or {}).get(region, {})
+        out = {}
+        for a_ in ANIMALS:
+            subs = tm.get(a_) or []
+            sh = {t: v for (aa, t), v in (ms or {}).items() if aa == a_}
+            W = R = 0.0
+            for sb in subs:
+                w = float(sb["w"]) * float(sb.get("mrel", 1.0) or 1.0)
+                W += w
+                cd = _at.cascade_data(sb)
+                if cd is None:
+                    continue
+                s_ = {t["tech"]: t["ini"] for t in sb["techs"]}
+                if not initial:
+                    s_ = {t_: sh.get(t_, v_) for t_, v_ in s_.items()}
+                f, rsurf, eff = cd
+                L = _nc.losses(f, rsurf, s_, eff, m_runsurf=(1.0 - _nc.WINTERCOV_NO3 * wc - fert_mrun, 1.0),
+                               m_appl_run=1.0 - _nc.WINTERCOV_NO3 * wc)
+                # CAPRI bounds every loss share to [0, 1] (supply/set_supply_bounds.gms l. 240-243, v_emiLoss.lo/up), so
+                # options cannot drive the runoff below zero; the cascade evaluated at the solution's shares can
+                R += w * (min(max(float(L[("N", "RunHous")]), 0.0), 1.0) + min(max(float(L[("N", "RunSurf")]), 0.0), 1.0))
+            if W > 0:
+                out[a_] = R / W
+        return out
+
+    def compute_phosphorus_balance(self, acts, yields, region: str, supply_result=None) -> Dict[str, float]:
+        """CAPRI's gross phosphate balance of the region (reports/calc_nbalance.gms, FNUT = PHOF), t P2O5.
+
+        EXCRET  sum over animals of herd x manure P2O5 per head (CAPRI's 2017 MANP totals / the model's herds,
+                livestock_manure_p_coef.csv; the split and option columns leave it unchanged, as in the regional model's
+                fertilisation block)
+        MTRADE  EXCRET - manure P2O5 applied in the region (ManureNPK_): with the NLP form's fertilisation block the
+                sum of its manure flows; without it (conic form, or no supply result) CAPRI's 2030 share applied
+                (1 - MTRADE / EXCRET) plus the region's manure trade carried in the region's P/N proportion, as the
+                block builds it
+        MINFER  the block's P2O5 purchases (v_netPutQuant); without the block, CAPRI's NUTNED_ for P summed over the
+                crop groups with the block's data (p_balance.nutned_mineral; at the base levels the base purchases)
+        CRESID  sum over crops of area x CAPRI's residue output PCRD x yield / base yield
+        EXPPRD  sum over crops of area x CAPRI's retention PRET x yield / base yield (both with the grassland split
+                column's GRAE - GRAI difference)
+        RUNANI  sum over animals of manure P2O5 x CAPRI's N runoff share RunTot (_p_runtot)
+        IMPORT, SURTOT, SURSOI  CAPRI's sums (p_balance.balance).
+        Removal and residues follow the yield as the N accounts do (CAPRI: e_EXPPRD and e_CRESID scale with the yield
+        factors of its mitigation and pesticide options)."""
+        from capri_mod.environmental import p_balance as _pb
+        from capri_mod.fert.npk import NPKData, PERM_NGRP
+        if hasattr(acts, "to_dict"):
+            acts = acts.to_dict()
+        if hasattr(yields, "to_dict"):
+            yields = yields.to_dict()
+        cr = self._p_capri_region(region)
+        if cr is None:
+            raise RuntimeError(f"no CAPRI region for {region} (shared/region_capri_map.csv)")
+        D, C = NPKData.get(), _pb.PCropCoefs.get()
+        y0 = self._cached_row("yields", region) or {}
+        yr = {}
+        for c in CROPS:
+            b, y = float(y0.get(c, 0.0) or 0.0), yields.get(c)
+            yr[c] = float(y) / b if (b > 0 and y is not None and float(y) >= 0) else 1.0
+        x = {c: max(float(acts.get(c, 0.0) or 0.0), 0.0) for c in CROPS}
+        h = {a: max(float(acts.get(a, 0.0) or 0.0), 0.0) for a in ANIMALS}
+        z = float(getattr(supply_result, "grass_ext_shift", 0.0) or 0.0) if supply_result is not None else 0.0
+        # removal and residues (EXPPRD, CRESID)
+        expprd = sum(x[c] * C.coef(cr, c)[0] * yr[c] for c in CROPS)
+        cresid = sum(x[c] * C.coef(cr, c)[1] * yr[c] for c in CROPS)
+        if z:
+            ge, gi = C.coef(cr, "GRAE"), C.coef(cr, "GRAI")
+            expprd += z * (ge[0] - gi[0]) * yr.get("GRAS", 1.0)
+            cresid += z * (ge[1] - gi[1]) * yr.get("GRAS", 1.0)
+        # excretion (EXCRET)
+        manp = {a: D.manure_per_head(region, "P", a) for a in ANIMALS}
+        excret = sum(h[a] * manp[a] for a in ANIMALS)
+        npk = getattr(supply_result, "fert_npk", None) or {}
+        blk = npk.get("P") if isinstance(npk, dict) else None
+        ratio = self._p_applied_ratio(cr) if bool(getattr(self, "manure_trade_on", True)) else 1.0
+        # the need multiplier (kappa) is calibrated at the base and fixed in simulation (CAPRI's
+        # v_cropNutNeedMultFact): the regional model's block computes it once, at the run's baseline, with that
+        # baseline's manure trade setting; the base manure applied here follows the first setting seen for the region
+        ratio_base = self.__dict__.setdefault("_p_ratio_base", {}).setdefault(cr, ratio)
+        if blk is not None:
+            applied = sum(float(v) for (g, s_), v in blk["flows"].items() if s_ == "EXCR")
+            minfer = float(blk["purchase"])
+            src = "nlp"
+        else:
+            # CAPRI's NUTNED_ for P summed over the groups, with the block's own data (SupplyModel._npk_spec)
+            A0 = self.data["areas"].loc[region] if region in self.data["areas"].index else {}
+            H0 = self.data["animal_numbers"].loc[region] if region in self.data["animal_numbers"].index else {}
+            xb = {c: max(float(A0.get(c, 0.0) or 0.0), 0.0) for c in CROPS}
+            hb = {a: max(float(H0.get(a, 0.0) or 0.0), 0.0) for a in ANIMALS}
+            E0 = ratio_base * sum(hb[a] * manp[a] for a in ANIMALS)
+            applied = ratio * excret
+            mt = getattr(supply_result, "manure_trade", None) if supply_result is not None else None
+            if mt and (abs(float(mt[0])) > 0 or abs(float(mt[1])) > 0):
+                # traded manure carries P in the region's base manure P/N proportion (the block's pool columns)
+                ba = dict(xb); ba.update(hb)
+                rN = float(self.compute_nitrogen_balance(ba, dict(y0), region).get("n_manure_applied", 0.0))
+                applied += (E0 / rN if rN > 0 else 0.0) * (float(mt[1]) - float(mt[0]))
+            sh = D.crop_shares(cr)
+            col = lambda k: {c: D.crop_coef(cr, "P", c, k) for c in CROPS}
+            need, own, pool, mine0 = col("need_kg_ha"), col("own_kg_ha"), col("pool_kg_ha"), col("mine_kg_ha")
+            own_perm = {c: own[c] * sum(v for g, v in (sh.get(c) or {}).items() if g in PERM_NGRP) for c in CROPS}
+            sq = {c: (yr[c] ** 0.5 if yr[c] > 0 else 0.0) for c in CROPS}
+            grass = None
+            if z:
+                grass = (z, D.crop_coef(cr, "P", "GRAE", "need_kg_ha") - D.crop_coef(cr, "P", "GRAI", "need_kg_ha"),
+                         sq.get("GRAS", 1.0))
+            m = _pb.nutned_mineral(D, cr, need, own, own_perm, pool, mine0, xb, x, sq, E0, applied, grass)
+            if m is None:
+                raise RuntimeError(f"no CAPRI P need data for {region} ({cr})")
+            minfer = max(0.0, m)
+            src = "nutned"
+        # runoff of manure P (RUNANI): CAPRI's N runoff share at the solution's options and winter cover
+        ms = getattr(supply_result, "manure_tech_shares", None) if supply_result is not None else None
+        wc = self._winter_cover_now(region, supply_result)[1]
+        fmr = 0.0
+        if supply_result is not None:
+            fs = getattr(supply_result, "fert_tech_shares", None) or {}
+            s_nim = float(fs.get("NITR_INH_MAN", 0.0) or 0.0)
+            if s_nim > 0:
+                from capri_mod.supply import n_leaching as _nl
+                from capri_mod.supply.supply_module import fert_side_value as _fsv
+                v_ = _fsv(region, "NITR_INH_MAN", "NO3MRUN")
+                nm_ = float((getattr(supply_result, "fert_nmin", None) or {}).get("NITR_INH_MAN", 0.0) or 0.0)
+                fmr = s_nim * (_nl.fert_effect(v_, nm_) if v_ is not None else 0.0)
+        rt = self._p_runtot(region, ms, wc, fmr)
+        runani = sum(h[a] * manp[a] * float(rt.get(a, 0.0)) for a in ANIMALS)
+        b = _pb.balance(excret, excret - applied, minfer, cresid, expprd, runani)
+        b["mineral_source"] = src
+        return b
 
     def compute_indicators(
         self,
@@ -1249,9 +1587,11 @@ class EnvironmentalModule:
         # carry (MANN per stall, low - high) / average of the animal's manure N
         _kk = {"DCOW": _dk} if _dk else {}
         _ctab = (self.data.get("cattle_intensity") or {}).get(region) if hasattr(self, "data") else None
-        for _a, _z in (getattr(supply_result, "cattle_shift", None) or {}).items():
-            if _z and _ctab and _a in _ctab:
-                _kk[_a] = float(_z) * float(_ctab[_a]["dmann_rel"])
+        for _k, _z in (getattr(supply_result, "cattle_shift", None) or {}).items():
+            # every split of the animal (key "HFRS", "HFRS:rep", "CALV:male", ...)
+            _a = _k.split(":")[0]
+            if _z and _ctab and _k in _ctab:
+                _kk[_a] = float(_kk.get(_a, 0.0)) + float(_z) * float(_ctab[_k]["dmann_rel"])
         # cattle genomics (breeding.gms): g animals adopting excrete d_mann_rel more (genet_yld) or less
         # (genet_eff) manure N each; enteric CH4 follows the animals' feed as for the splits
         _gtab = (self.data.get("genetics_effects") or {}).get(region) if hasattr(self, "data") else None
@@ -1273,6 +1613,7 @@ class EnvironmentalModule:
                 ghg["N2O_MAN"] += float(_g_k.get("N2O_MAN", 0.0)) - float(ghg["N2O_MAN"])
         _rel = getattr(supply_result, "animal_n_relief", None) or {}
         self._nh3_saved_last = 0.0                  # per region: never carried over
+        self._n_kept_last = 0.0
         self._nitrate_share_now = dict(getattr(supply_result, "nitrate_share", None) or {})
         self._nitrate_nh3_extra = 0.0
         _nx = getattr(supply_result, "nitrate_n_extra", None) or {}
@@ -1297,16 +1638,20 @@ class EnvironmentalModule:
             nb["n_surplus"] = float(nb["n_surplus"]) - _d
             self._nh3_saved_last = sum(float(v) * float(_lv.get(a, 0.0))
                                        for a, v in (getattr(supply_result, "animal_nh3_saved", None) or {}).items())
+            # N kept in the manure: every loss CAPRI's cascade has (GasRunTot), the NH3 above being part of it
+            _kp = getattr(supply_result, "animal_n_kept", None)
+            self._n_kept_last = (sum(float(v) * float(_lv.get(a, 0.0)) for a, v in _kp.items()) if _kp
+                                 else self._nh3_saved_last)
         if _ma is not None:
             _d = float(_ma) - float(nb["n_mineral_input"])
             nb["n_mineral_input"] = float(_ma)
             nb["n_surplus"] = float(nb["n_surplus"]) + _d
-        # CAPRI's catch crops added by the Farm-to-Fork requirement (supply model's _cover): their
-        # N (BioFix x area) is an input of the balance and supplies crop need; with mineral N
-        # allocated in the supply model it is already net of it, else it replaces mineral N here
+        # CAPRI's catch crops beyond the base share (the Farm-to-Fork requirement, or the share the NLP form chose:
+        # supply result's cover_crops): their N (BioFix x area) is an input of the balance and supplies crop need;
+        # with mineral N allocated in the supply model it is already net of it, else it replaces mineral N here
         _cv = getattr(supply_result, "cover_crops", None) or {}
         _cn = float(_cv.get("delta", 0.0) or 0.0) * float(_cv.get("biofix", 0.0) or 0.0) * 1000.0
-        if _cn > 0:
+        if _cn != 0:
             nb["n_fixation"] = float(nb["n_fixation"]) + _cn
             nb["n_surplus"] = float(nb["n_surplus"]) + _cn
             if _ma is None:
@@ -1318,8 +1663,25 @@ class EnvironmentalModule:
         # mineral fertiliser reduction's regulations when the scenario has them (reporting; the regional totals
         # are the balance's own)
         try:
-            self._fert_dist_now = self.fert_distribution(region, acts, yields, nb, _nb_raw,
-                                                         getattr(supply_result, "mineral_cap", None))
+            _fdm = getattr(supply_result, "fert_dist_model", None)
+            if _fdm:
+                # the allocation the regional model solved (CAPRI reports v_fertDist of its supply model): the inner
+                # model at the model's own totals, or the coupled NLP where it had no solution there
+                _mc = getattr(supply_result, "mineral_cap", None) or {}
+                _gc = _mc.get("group_caps") or {}
+                self._fert_dist_now = [
+                    dict(region=region, capri_region=_fdm.get("capri_region"), ngrp=g, area_kha=float(A),
+                         mine_kg_ha=float(_fdm["flows"].get((g, "MINE"), 0.0)) / A if A > 0 else 0.0,
+                         excr_kg_ha=float(_fdm["flows"].get((g, "EXCR"), 0.0)) / A if A > 0 else 0.0,
+                         cres_kg_ha=float(_fdm["flows"].get((g, "CRES"), 0.0)) / A if A > 0 else 0.0,
+                         mine_cap_kg_ha=float(_gc.get(g, float("nan"))) if _gc else float("nan"),
+                         cap_scale=1.0, converged=True)
+                    for g, A in _fdm["area"].items()]
+            else:
+                self._fert_dist_now = self.fert_distribution(region, acts, yields, nb, _nb_raw,
+                                                             getattr(supply_result, "mineral_cap", None),
+                                                             getattr(supply_result, "fert_dist_mode_crops", None),
+                                                             getattr(supply_result, "fert_dist_priors", None))
         except Exception as _exc:
             import warnings as _w
             _w.warn(f"inner fertiliser distribution failed for {region}: {_exc!r}")
@@ -1339,7 +1701,7 @@ class EnvironmentalModule:
                            * self._co2_coefs(region)[1] * 44.0 / 28.0)
 
         # CAPRI's N2O from drained organic soils (gases.gms N2OHIS, agriculture): per ha of the land-use
-        # class, its organic-soil share x the climate-weighted IPCC 2013 factor (tools/build_histosol.py),
+        # class, its organic-soil share x the climate-weighted IPCC 2013 factor (tools/build/build_histosol.py),
         # on the area in use; the fallowed histosol area emits nothing (QEmitt = 0 in the Green Deal runs)
         _ht = self.data.get("histosol") if hasattr(self, "data") else None
         if _ht is not None and region in _ht.index:
@@ -1354,7 +1716,7 @@ class EnvironmentalModule:
                     _n2o_t -= _f * float(_h.get(f"ef_n2o_{_c}", 0.0) or 0.0) * 0.001 * 44.0 / 28.0
             ghg["N2O_HIS"] = max(0.0, _n2o_t) * GWP_N2O      # 1000 ha x t N2O/ha = kt N2O -> kt CO2-eq
         # crop-residue N2O of the added catch crops (CAPRI gases.gms N2OCRO: BioFix x area x EF1)
-        if _cn > 0:
+        if _cn != 0:
             ghg["N2O_CRO"] = ghg.get("N2O_CRO", 0.0) + _cn / 1e3 * EF_SOIL_N2O_DIRECT * 44.0 / 28.0 * GWP_N2O   # t N -> kt
         # CAPRI's technology effects on manure N2O (v_emiLoss in gases.gms; manure_n2o_tech.csv):
         # per animal, housing/storage N2O x (1 - sum_t s_t r_hou_t) / (1 - sum_t s0_t r_hou_t) and
@@ -1379,6 +1741,14 @@ class EnvironmentalModule:
                 e_ = _eff.get(a_, {})
                 sh = {t: v for (aa, t), v in _ms.items() if aa == a_}
                 b_ = _s0.get(a_, {})
+                _full = self._manure_n2o_full(region, a_, sh, b_, self._winter_cover_now(region, supply_result))
+                if _full is not None:
+                    # CAPRI's cascade (HOUSN_, STORN_, APPLN_ with every option's effect on every gas): the N2O
+                    # at the shares s against the base shares s0, per stage
+                    fh, fa = _full[0], _full[1] * (1.0 - _sni * _lit)
+                    kt_n = self._n_excretion(region, a_) * x_ * 1000.0 / 1e6
+                    _dm += kt_n * (_mf[0] * (fh - 1.0) + _mf[1] * (fa - 1.0))
+                    continue
                 h1 = sum(sh.get(t, b_.get(t, 0.0)) * rr[0] for t, rr in e_.items())
                 h0 = sum(b_.get(t, 0.0) * rr[0] for t, rr in e_.items())
                 p1 = sum(sh.get(t, b_.get(t, 0.0)) * rr[1] for t, rr in e_.items())
@@ -1396,6 +1766,17 @@ class EnvironmentalModule:
                 _dm += kt_n * (_mf[0] * (fh - 1.0) + _mf[1] * (fa - 1.0))
             ghg["N2O_MAN"] = ghg.get("N2O_MAN", 0.0) + _dm * 44.0 / 28.0 * GWP_N2O
             _n2o_tech = _dm * 44.0 / 28.0 * GWP_N2O
+            # CAPRI's anaerobic digestion on manure CH4 (supply_model.gms GWPCH4MAN_, MC_GHG_Miti_Factor): per sub-activity
+            # 1 - v (1 - QE_AD / QE_NOC), v = s / (L (1 - G)), at the shares s against the base shares
+            _dch4 = 0.0
+            for a_ in ANIMALS:
+                x_ = float(acts.get(a_, 0.0) or 0.0)
+                f_ = self._ad_ch4_factor(region, a_, _ms, _s0.get(a_, {}))
+                if f_ is None or x_ <= 0:
+                    continue
+                _dch4 += x_ * 1000.0 * self._ch4_per_head("man", region, a_) / 1e6 * GWP_CH4 * (f_ - 1.0)
+            if _dch4:
+                ghg["CH4_MAN"] = ghg.get("CH4_MAN", 0.0) + _dch4
         # CAPRI's emission side effects of nitrification inhibitors on mineral N
         # (p_litRevFertTechs, envind/ghgMiti.gms l. 552-555): per kg of N under the option the
         # emission factor is (1 - lit) x (1 + NMIN) times NOC's, NMIN being the option's N saving,
@@ -1408,6 +1789,12 @@ class EnvironmentalModule:
             _dir = EF_SOIL_N2O_DIRECT / (EF_SOIL_N2O_DIRECT + 0.10 * EF_SOIL_N2O_INDIRECT)
             _old = ghg["N2O_SOIL"]
             ghg["N2O_SOIL"] = _old * (_dir * f_side["N2OSYN"] + (1.0 - _dir) * f_side["NH3SYN"])
+        # CAPRI's leaching of the soil surplus (LEACHN_) and the indirect N2O of leached and run-off N allocated to
+        # crops (gases.gms N2OLEA; capri_mod/supply/n_leaching.py)
+        _lea = self.leaching(region, acts, nb, supply_result)
+        if _lea is not None:
+            ghg["N2O_LEA"] = _lea["n2o_n"] / 1000.0 * 44.0 / 28.0 * GWP_N2O       # t N2O-N -> kt CO2-eq
+            self._leaching_last = _lea
         # total after every adjustment of soil N2O (it was summed before the mineral-input
         # rescaling above, so GHG total missed the substitution and yield effects on soil N2O)
         ghg_total = sum(ghg.values())
@@ -1448,14 +1835,25 @@ class EnvironmentalModule:
             ghg["N2O_IND"] = float(nh3["nh3_livestock"]) * 14.0 / 17.0 * EF_SOIL_N2O_INDIRECT * 44.0 / 28.0 * GWP_N2O
             ghg_total = sum(ghg.values())
 
-        # Land use
-        arable = sum(acts.get(c, 0.0) for c in CROPS
-                     if c not in ("GRAS","MAIF","OFOD","WINE","OLIV",
-                                  "APPL","OFRU","CITR","TAGR","TOBA",
-                                  "COTT","OFIB","SETA"))
-        perm   = sum(acts.get(c, 0.0) for c in
-                     ["WINE","OLIV","APPL","OFRU","CITR","TAGR","TOBA","COTT","OFIB"])
-        grass  = sum(acts.get(c, 0.0) for c in ["GRAS","MAIF","OFOD"])
+        # Land use, CAPRI's aggregates (sets.gms landUse_TO_landUseAgg): arable crops ARAC (paddy, fallow and set-aside,
+        # every other arable crop including fodder on arable land, silage maize, tobacco and textile crops), permanent
+        # crops FRUN (fruit, olives, nurseries, vineyards), grassland GRAS. Before October 2026 tobacco and the textile
+        # crops counted as permanent crops, silage maize and other fodder as grassland, nurseries nowhere.
+        # CAPRI's gross phosphate balance (P2O5); a failure leaves the P items empty, not the region
+        try:
+            pb = self.compute_phosphorus_balance(acts, yields, region, supply_result)
+        except Exception as _exc:
+            import warnings as _w
+            _w.warn(f"phosphate balance failed for {region}: {_exc!r}")
+            from capri_mod.environmental.p_balance import ITEMS as _PIT
+            pb = {k: float("nan") for k in _PIT}
+        _oc = getattr(supply_result, "organic_conv", None) or {}
+        organic = sum(float(acts.get(c, 0.0) or 0.0) * (1.0 - float(v)) for c, v in _oc.items() if c in CROPS)
+
+        PERM = ("WINE", "OLIV", "TABO", "APPL", "OFRU", "CITR", "TAGR", "NURS")
+        perm   = sum(acts.get(c, 0.0) for c in PERM)
+        grass  = acts.get("GRAS", 0.0)
+        arable = sum(acts.get(c, 0.0) for c in CROPS if c not in PERM + ("GRAS",))
 
         return EnvironmentalIndicators(
             region=region,
@@ -1468,6 +1866,9 @@ class EnvironmentalModule:
             ghg_manure_n2o_tech=float(_n2o_tech),
             ghg_residue_n2o=float(ghg.get("N2O_CRO", 0.0)),
             ghg_indirect_n2o=float(ghg.get("N2O_IND", 0.0)),
+            ghg_leaching_n2o=float(ghg.get("N2O_LEA", 0.0)),
+            leach_share=float(_lea["share"]) if _lea is not None else 0.0,
+            n_runoff_leached=float(_lea["n_runoff_leached"]) if _lea is not None else 0.0,
             ghg_liming=ghg["CO2_LIME"],
             ghg_urea=float(ghg.get("CO2_UREA", 0.0)),
             ghg_total=ghg_total,
@@ -1482,6 +1883,16 @@ class EnvironmentalModule:
             n_animal_products=nb["n_animal_products"],
             n_surplus=nb["n_surplus"],
             n_use_efficiency=nb["n_use_efficiency"],
+            # Phosphate (t P2O5)
+            p_input=pb["IMPORT"],
+            p_uptake=pb["EXPPRD"],
+            p_surplus=pb["SURTOT"],
+            p_mineral_input=pb["MINFER"],
+            p_manure_excretion=pb["EXCRET"],
+            p_manure_net_export=pb["MTRADE"],
+            p_crop_residues=pb["CRESID"],
+            p_runoff=pb["RUNANI"],
+            p_surplus_soil=pb["SURSOI"],
             # Ammonia
             nh3_livestock=nh3["nh3_livestock"],
             nh3_soils=nh3["nh3_soils"],
@@ -1491,6 +1902,7 @@ class EnvironmentalModule:
             arable_land=arable,
             permanent_crops=perm,
             grassland=grass,
+            organic_area=organic,
             # Biodiversity
             shannon_crop_diversity=bio["shannon_crop_diversity"],
             hnv_farmland_pct=bio["hnv_farmland_pct"],
@@ -1519,7 +1931,7 @@ class EnvironmentalModule:
                 import warnings as _w
                 _w.warn(f"environmental indicators failed for {region}: {_e!r} - region left out of the table")
                 if verbose:
-                    print(f"    Warning: {region} environmental calc failed: {e}")
+                    print(f"    Warning: {region} environmental calc failed: {_e}")
 
         # CAPRI's inner fertiliser distribution per region and crop group (CAPRIModel.run: results["fert_dist"])
         self.last_fert_dist = pd.DataFrame(fd)

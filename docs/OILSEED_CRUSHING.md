@@ -1,49 +1,60 @@
-# Oilseed crushing — design
+# Oilseed crushing, oils and cakes
 
-Status: **Stages 1–4 done** — crushing live in all regions; cakes are feed and price livestock protein feed (soybean-meal proxy removed); biofuel feedstock demand (oils, cereals, sugar, wine) is inside the market (Stage 4, October 2026) and the post-solve biofuel module is retired.
-Replaces the soybean-meal **proxy price** (0.89 × soybean price), which breaks
-the project rule: no proxy prices unless CAPRI uses them. CAPRI does not: it
-forms oil and cake prices in their own markets.
+Status: revised 20 October 2026 against the code. Crushing, the oil and cake markets, cakes as feed and the biofuel
+feedstock demand are all inside the market (built in four stages in October 2026, then moved onto CAPRI's processing
+functions; the staging is summarised under "History"). There is no proxy price: oil and cake prices are formed in
+their own markets, as in CAPRI (the earlier soybean-meal proxy, 0.89 × the soybean price, is gone).
 
 ## CAPRI's mechanism (`arm/market_model.gms`)
 
-- **Crushing margin** per tonne of seed (`ProcMargO_`):
-  `margin = cake price × cake yield + oil price × oil yield − seed price`.
-- **Crushing quantity** responds to the margin through a calibrated
-  normalised-quadratic profit function (`ProcNQ_`, Hessian `p_hessNQProc`).
-- **Oil and cake output** = crushed seed × fixed yields (`ProcO_`, Leontief).
-- Oils and cakes are **full market commodities**: human and feed demand,
-  industrial and biofuel use, trade.
+- Crushing margin per tonne of seed (`ProcMargO_`, l. 1118): oil and cake producer prices × yields − the seed's
+  Arm1 price.
+- Crushing quantity (`ProcNQ_`, l. 1140): normalised quadratic in the margins, Hessian `p_hessNQProc` with cross terms
+  among the oilseeds, divided by the price of the non-agricultural good (INPE).
+- Oil and cake output = crushed seed × yields (`ProcO_`, l. 1168).
+- Oils and cakes are full market products: food, feed, processing, biofuel use, bilateral trade.
 
-## Coupling — every link this module creates
+## The model (`MarketModule._crush_params`, `crush_quantities`, `_align_eu_crush_products`)
 
-The module sits between five existing parts of the model. Each link is
-two-way and inside the outer loop; none is a fixed coefficient or a post-solve
-step.
+Market commodities: the seeds RAPE, SUNF, SOYA; the oils RAPO, SUNO, SOYO; the cakes RAPC, SUNC, SOYC (all traded
+bilaterally; [ARMINGTON_MARKET.md](ARMINGTON_MARKET.md)). Palm oil (PLMO) and other vegetable oils (OTHO) are market
+commodities too, without crushing in the model.
 
-| Link | Direction | What passes |
-|---|---|---|
-| Farm supply → seed markets | existing bridge | rapeseed, sunflower and soybean output |
-| Seed markets → crushing | inside the market | seed price enters the crushing margin; crush is a component of seed demand |
-| Crushing → oil and cake markets | inside the market | oil and cake supply = crush × yields (rapeseed 0.418 / 0.541, sunflower 0.420 / 0.528, soybean 0.186 / 0.788) |
-| Oil and cake markets → crushing | inside the market | oil and cake prices enter the margin, so crush responds to all three prices (CAPRI's `p_ElasProc`) |
-| Herds → cake demand | outer loop | protein-rich feed per head (`FPRO`, CAPRI totals ÷ herds) × herds sets cake feed demand, as cereals' feed demand already does |
-| Cake prices → livestock costs | outer loop, via the price signal | protein-feed cost per head follows the cake price index — **removes the soybean-meal proxy**; since Sprint 9d CAPRI's FPRO bulk price per member state (docs/BIOFUEL_MARKET.md) |
-| Oil and feedstock markets ↔ biofuels | inside the market (Stage 4) | EU biofuel feedstock use per member state from CAPRI's CES at fixed biofuel output (`biofFeedCost_`, `biofFeedCostAgg_`, `Biof_`, `prodBiof_`) |
-| Seed prices → farm supply | existing price signal | unchanged path; now seed prices reflect oil and cake values |
+Parameters (`crushing_parameters.csv`, `tools/build/build_crushing_parameters.py`, from CAPRI's FAO_agg base period): per
+(region, seed) the crush (the seed's industrial use), oil and cake yields (production / crush), the share of crush in
+seed use, and p_ElasProc (EU: median of the member states; rapeseed 0.456, sunflower 0.869, soybeans 0.856; ROW: the
+crush-weighted mean of its CAPRI regions; a pair without p_ElasProc in CAPRI has its crush fixed at base). 64 pairs, every
+trade region with CAPRI crushing data, CAPRI's yields as they are. Until 23 October 2026: JSON, 20 non-EU regions, pairs
+with yields outside a plausibility band left out, and those regions' oil and cake supply at a flat elasticity of 0.10.
 
-## Base data (CAPRI FAO_agg, base period)
+- Base crush: EU = CAPRI's crush share of seed use × the market's EU base seed use after the bilateral closure (with
+  `eu_blocks`, per block from CAPRI's member-state processing share); non-EU = CAPRI's cake production of the market
+  year / cake yield. EU oil and cake base production = base crush × yields, so the base is reproduced.
+- Response: where CAPRI's processing Hessian has the seed (`processing_nq_hessian.csv`,
+  `tools/build/build_processing_nq.py`), crush = q0 + Σ_y H_sy Δmargin_y with H divided by INPE (1.277 in 2030, KNOWN_ISSUES
+  K39); otherwise crush = q0 [1 + ε (margin − margin0) / gross value0] with ε = p_ElasProc. Crush is floored at 1% of
+  base (CAPRI's `ProcFudge_` keeps processing positive).
+- Oil and cake supply = crush × yields (`supply_response`); crush is part of seed use (`demand_response`).
 
-From `FAO_agg_17_defaulta` `p_dataMarket`, year `BAS`: balances for the six
-products and three seeds in all 21 trade regions (EU = sum of member states;
-crush = the seed's industrial use, confirmed in CAPRI's raw annual data). EU
-crush: rapeseed 21.0 Mt, sunflower 8.3 Mt, soybean 14.7 Mt. World prices
-(€/t): rapeseed oil 737, sunflower oil 665, soybean oil 699, rapeseed cake 213,
-sunflower cake 204, soybean cake 354.
+Links to the rest of the model:
 
-## Data (CAPRI 2030 reference balance, EU-27, kt)
+| Link | What passes |
+|---|---|
+| supply models → seed markets | rapeseed, sunflower and soybean output (`model._bridge_supply_to_market`) |
+| seed, oil and cake prices → crushing | inside the market, at every evaluation |
+| cakes → feed | EU: CAPRI's FPRO feed bulk per member state, following the supply models' feeding ([FEED_MARKETS.md](FEED_MARKETS.md)); non-EU: CAPRI's p_ElasFeed |
+| cake prices → livestock costs | the FPRO bulk price index per member state goes to the supply models' feed prices |
+| oils → biofuels | the biofuel part of oil use follows CAPRI's feedstock CES at the endogenous biofuel output ([BIOFUEL_MARKET.md](BIOFUEL_MARKET.md)) |
+| oils → processing | the processing part of oil use follows CAPRI's ProcNQ_ with cross terms among the vegetable oils |
+| seed prices → supply models | the price signal, as for every product |
 
-| | Production | Feed | Food | Industry | Biofuel | Imports | Exports | Unit value €/t |
+Difference from CAPRI (not registered elsewhere): the model evaluates the crushing margin at the regions' Armington
+(consumer) price ratios for seed, oil and cake alike (`crush_dom`); CAPRI's `ProcMargO_` takes the oil and cake at
+their producer prices and the seed at its Arm1 price.
+
+## Data: CAPRI's 2030 reference balance, EU27 (kt)
+
+| | Production | Feed | Food | Industry | Biofuel | Imports | Exports | Unit value EUR/t |
 |---|---|---|---|---|---|---|---|---|
 | Rapeseed oil | 12,008 | 272 | 2,260 | 3,163 | 6,243 | 3,268 | 3,213 | 949 |
 | Sunflower oil | 3,744 | 203 | 2,812 | 916 | 535 | 3,539 | 2,748 | 1,197 |
@@ -52,60 +63,18 @@ sunflower cake 204, soybean cake 354.
 | Sunflower cake | 4,546 | 9,832 | | 36 | | 9,312 | 3,960 | 466 |
 | Soybean cake | 11,185 | 39,542 | | 159 | | 43,727 | 15,124 | 468 |
 
-Oil and cake yields per tonne crushed follow from production ÷ crush
-(`PrcY` in CAPRI's data).
+FAO_agg base period (`crushing_parameters.csv`, `world_prices.csv`): EU crush rapeseed 21.0 Mt, sunflower 8.3 Mt,
+soybeans 14.7 Mt; world prices (EUR/t) rapeseed oil 737, sunflower oil 665, soybean oil 700, rapeseed cake 213,
+sunflower cake 204, soybean cake 354.
 
-## Model change, in stages
+## History (October 2026)
 
-**Stage 1 — six new market commodities** (`RAPO`, `SUNO`, `SOYO`, `RAPC`,
-`SUNC`, `SOYC`) with base balances from the table above and world prices; base
-year must be unchanged for the existing 33 commodities.
+1. Six oil and cake market commodities with CAPRI's base balances.
+2. Crushing on the margin with p_ElasProc; oil and cake supply from crush.
+3. Cakes as feed; the soybean-meal proxy removed.
+4. Biofuel feedstock demand inside the market (CAPRI's CES at fixed biofuel output, as CAPRI runs without
+   `BIOF_M`); since Sprint 9c the biofuel output is endogenous ([BIOFUEL_MARKET.md](BIOFUEL_MARKET.md)).
 
-**Stage 2 — crushing.** Crush per seed responds to the crushing margin;
-oil and cake supply = crush × yields; seed demand includes crush. The crushing
-response comes from CAPRI's `p_hessNQProc` if it can be found in the data,
-otherwise it is a registered simplification.
-
-**Stage 3 — cakes as feed.** Cake feed demand follows herds' protein-rich feed
-(`FPRO` per head, CAPRI 2017 totals ÷ herds — already in
-`livestock_feed_coef.csv`), at CAPRI's feed shares per cake; livestock
-protein-feed cost follows the cake price index weighted by CAPRI's cake feed
-use (soybean 39.5, rapeseed 10.9, sunflower 9.8 Mt). **The soybean-meal proxy is
-then removed.**
-
-**Stage 4 — oils and biofuels (done, October 2026).** CAPRI's biofuel block in the market model
-(`arm/market_model.gms`), as CAPRI runs it in a scenario without endogenous biofuel markets
-(`arm/prep_market.gms`: `p_endoBioMarket = 0` unless `BIOF_M=ON`; `arm/fix_biofuel_market_vars.gms`
-then fixes biofuel output and biofuel prices, while the feedstock mix stays free):
-
-- `biofFeedCost_`: net cost per t of feedstock = feedstock price − by-product yield × by-product price
-  (DDGS for cereals at CAPRI's 2030 producer price; glycerine for oils at CAPRI's fixed 600 €/t,
-  `arm/store_prices.gms`);
-- `biofFeedCostAgg_`: CES aggregate per biofuel, substitution elasticity 4 (`arm/market1.gms`
-  `p_rhoBioFuel`), share parameters as `biofuel/def_biofuel_params.gms` calibrates them;
-- `Biof_`: feedstock use = share × output × (aggregate cost / own cost)^4, for all but the numeraire
-  (the largest feedstock); `prodBiof_`: output = Σ feedstock × PRCB fixes the numeraire.
-
-Per member state, from CAPRI's 2030 Green Deal reference market results
-(`tools/build_biofuel_market.py`, formerly `build_biofuel_feedstock.py` → `market/biofuel_feedstock.csv`, `biofuel_use_share.csv`). The
-builder reproduces CAPRI's own `BiofFeedCost` exactly in every member state. EU feedstock use (kt):
-rapeseed oil 6,243, palm oil 2,166, sunflower oil 535, soybean oil 549; wheat 4,058, maize 3,107,
-barley 2,655, rye/oats/other cereals 1,723, sugar 2,275, wine 1,254. In the market the biofuel part of
-EU use (52% of rapeseed oil, 23% of soybean oil, 12% of sugar, 4–7% of cereals) follows the CES at
-fixed output; the rest keeps its food response. Palm oil and other oils have no model market (price at
-the 2030 reference); DDGS is not a model market either (CAPRI: endogenous feed price) — REGISTERED.
-`run(biofuel_output_scale={"BIOD": x})` sets a mandate scenario. Farm-to-Fork 2030: gap 4.64 → 4.62
-(small, as expected: biofuel output is fixed and feedstock prices move ≤ 20%).
-
-**Since Sprint 9c** the biofuel output is endogenous as well (CAPRI's `BIOF_M`, star 3.0's default): biofuel
-supply on the processing margin, use against fossil fuel and bilateral trade, in every CAPRI market region; the
-feedstock CES above then runs at that output, in non-EU regions too (docs/BIOFUEL_MARKET.md).
-
-**Data needed from the project lead:** CAPRI's calibrated market elasticities,
-`%results_in%\arm\elas<BAS><SIM><reg_agg>…gdx` (read by `arm/trim_elas.gms`):
-`p_elasProc` (crushing response — Stage 2), `p_ElasFeed` (feed demand — makes the
-feed mix endogenous, retiring the fixed feed shares), `p_elasDem` (food demand).
-Without `p_elasProc`, Stage 2 would need a registered simplification.
-
-**Validation:** EU balances of oils and cakes against the table; Farm-to-Fork
-oilseed, cake and livestock results against JRC121368.
+Later: CAPRI's processing Hessian (ProcNQ_) for crushing and oil processing, with the INPE correction of K39
+(19 October 2026); the cake feed demand through CAPRI's feed bulks (Sprints 9d, 9h). The results of each stage are in
+CHANGELOG.md and are not current.

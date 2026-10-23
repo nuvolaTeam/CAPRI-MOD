@@ -26,7 +26,8 @@ FIBRE_FACTOR,BCOW,0.9,-,capri,"CAPRI feed/req_or_man_fnc.gms fibre-rich feed fac
 FIBRE_FACTOR,BULL,0.5,-,capri,"CAPRI feed/req_or_man_fnc.gms fibre-rich feed factor (calves, sheep and goats: mean of CAPRI's activities, REGISTERED)",ration
 FIBRE_FACTOR,HFRS,0.6,-,capri,"CAPRI feed/req_or_man_fnc.gms fibre-rich feed factor (calves, sheep and goats: mean of CAPRI's activities, REGISTERED)",ration
 FIBRE_FACTOR,CALV,0.3,-,capri,"CAPRI feed/req_or_man_fnc.gms fibre-rich feed factor (calves, sheep and goats: mean of CAPRI's activities, REGISTERED)",ration
-FIBRE_FACTOR,SHGP,0.65,-,capri,"CAPRI feed/req_or_man_fnc.gms fibre-rich feed factor (calves, sheep and goats: mean of CAPRI's activities, REGISTERED)",ration
+FIBRE_FACTOR,SHGM,0.8,-,capri,"CAPRI feed/req_or_man_fnc.gms fibre-rich feed factor (p_minFeedShare SHGM: 0.8)",ration
+FIBRE_FACTOR,SHGF,0.5,-,capri,"CAPRI feed/req_or_man_fnc.gms fibre-rich feed factor (p_minFeedShare SHGF: 0.5)",ration
 SMALL_MINE_KG_HA,,30.0,kg N per ha,capri,CAPRI minfert_redu_by_crop.gms: groups below 0.03 t/ha mineral N exempt,inner_fert_dist
 LIMCRES_FACTOR,,1.3,-,capri,CAPRI minfert_redu_by_crop.gms: limCres maximum = baseline residues x (1.3 + relaxation),inner_fert_dist
 REQ_NEM,,17080.22576723337,MJ NEL per year,capri,"CAPRI breeding.gms requirement function, maintenance of a 600 kg dairy cow",projection_module
@@ -44,13 +45,10 @@ PESTICIDE_OTHER_COST_RISE,,0.5,share,jrc121368,"JRC121368, conventional_io.gms: 
 JRC_CAPPED_N_REGIONS,,9.0,regions,jrc121368,JRC121368 sect. 4.3.4: nine regions with the highest baseline surplus,supply_module
 JRC_CAPPED_CUT,,0.36,share,jrc121368,JRC121368 sect. 4.3.4: their cut set at the EU average,supply_module
 MANURE_LIMIT,,170.0,kg N per ha,legal,Nitrates Directive 91/676/EEC,supply_module
-BASE_CAL_ROUNDS,,4.0,rounds,model_setting,CAPRI-style baseline calibration rounds per baseline run (Sprint 9p),supply_module
-PRICE_SIGNAL_RELAXATION,,0.5,-,model_setting,outer loop: damping of the supply price signal,model
-YANI_RELAXATION,,0.7,-,model_setting,outer loop: damping of the young-animal price step,model
-LAND_SUPPLY_ELASTICITY,,0.15,-,model_setting,"land-rent elasticity, only when CAPRI's land market is switched off",supply_module
-LAND_EXPANSION_CAP,,0.15,share of farmland,model_setting,cap of the land-rent rule above,supply_module
-ARMINGTON_PREMIUM_LO,,0.67,-,model_setting,bounds of the EU Armington premium,market_module
-ARMINGTON_PREMIUM_HI,,1.5,-,model_setting,bounds of the EU Armington premium,market_module
-MIN_TRADE_SHARE_FOR_PREMIUM,,0.05,share of EU use,model_setting,minimum gross trade for the Armington premium,market_module
 INTENSITY_K,,3.0,-,literature,"Mitscherlich curvature, nitrate-limit option only (not CAPRI)",intensity
 INTENSITY_M_MIN,,0.5,-,literature,"floor of the N intensity factor, nitrate-limit option only (not CAPRI)",intensity
+FERT_CAL_PRIOR_ACCURACY,,2.0,ratio,capri,"CAPRI fert/ferttrm_years.gms: accuracy (mode / sd) of the calibration's blanket priors of the crop-group flows (2.0 at regional level)",inner_fert_dist
+FERT_CAL_CRES_ACCURACY,,5.0,ratio,capri,"CAPRI fert/ferttrm_years.gms: accuracy of the calibration's crop-residue priors (so residues cannot act as a readily available source)",inner_fert_dist
+FERT_CAL_MIN_NEED_SHARE,,0.1,share,capri,"CAPRI fert/ferttrm_years.gms: at least 10% of a crop's nutrient need is supplied by manure and mineral fertiliser (permanent groups, after their own residues)",inner_fert_dist
+FERT_CAL_GRAS_MINE_TO_EXCR,,0.5,share,capri,"CAPRI fert/ferttrm_years.gms: half of grassland's blanket mineral prior moved to manure",inner_fert_dist
+FERT_POST_ACCURACY,,1.0,ratio,capri,"CAPRI priFertDist results (postMode, 2030): accuracy of the posterior modes used as simulation priors, every region, group and source",inner_fert_dist

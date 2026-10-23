@@ -32,8 +32,7 @@ LAST_FAIL = None
 # clarabel`), through capri_mod/supply/convex_qp.py - the same problem
 # (1/2 x'Qx + c'x, A x <= b, x >= 0); its multipliers are kept in LAST_DUALS.
 # If Clarabel is missing or does not solve, the built-in chain runs as before.
-# Set per run by CAPRIModel.qp_solver (default "clarabel" since October 2026).
-BACKEND = "clarabel"
+# The setting supply.qp_solver (capri_mod/settings; default "clarabel" since October 2026).
 LAST_DUALS = None
 _CLARABEL_WARNED = False
 
@@ -41,7 +40,8 @@ _CLARABEL_WARNED = False
 def _try_clarabel(Q, c, A, b, tol=1e-9):
     """(x, True) from Clarabel, or None to fall back to the built-in chain."""
     global LAST_DUALS, _CLARABEL_WARNED
-    if BACKEND != "clarabel":
+    from capri_mod.settings import current as _settings
+    if _settings().get("supply.qp_solver") != "clarabel":
         return None
     try:
         from capri_mod.supply.convex_qp import _clarabel

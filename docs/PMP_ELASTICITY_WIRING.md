@@ -1,142 +1,78 @@
-# Regional PMP elasticity wiring
+# PMP supply elasticities and the PMP matrix
 
-All five scoped items handled. Gate unchanged: validator 12 pass / 0 warn / 0 fail,
-base fidelity 12/12, supply convergence 30/30, test suite **15 passing** (up from 12).
+Status: revised 20 October 2026 against the code. This file was a sprint report (coverage counts, test counts and a
+shock test of that time); those figures were superseded by K30 and K32 (KNOWN_ISSUES) and were removed. What follows
+describes `capri_mod/supply/capri_pmp.py` and `PMPCalibrator` in `capri_mod/supply/supply_module.py` as they are.
 
----
+capri-mod calibrates its own PMP matrix from CAPRI's elasticities (decision 5a.5 of `docs/SUPPLY_MODEL_MAP.md`); it
+does not use CAPRI's calibrated p_pmpQuad* values. The matrix is the same in the NLP and the conic form.
 
-## Correction first
+## Elasticity table and its provenance (`capri_pmp.build_elasticity_table`)
 
-I previously reported that `load_regional_supply_elasticities` was never called.
-That was wrong — it is called in `SupplyModule.__init__` and was already active
-for **107 of 248 regions** across 15 activities. I had misread a grep. The work
-below extends and corrects that wiring rather than creating it.
+Every region x activity elasticity is recorded with its source (`SupplyModule.elasticity_provenance`;
+`test_elasticity_provenance_is_complete`). Precedence, highest first:
 
----
+| Provenance | Source | Scope |
+|---|---|---|
+| `REGIONAL_CAPRI` | `supply_elasticities_regional.csv` (bounded at 4.5 upstream) | model regions in the file |
+| `PMP_CAPRI` | `pmp_own_price_elasticities.csv` (CAPRI region codes, raw, dampened on load) | mapped through `shared/region_capri_map.csv`, else the NUTS crosswalk; a region without a row takes its member state's national row (K32); CAPRI's OFAR is the model's OFOD, MAIZ its CORN |
+| `CAPRI_COUNTRY` | `capri_own_price_elasticities.csv` (CAPRI's calibrated p_ElasSupp per member state) | only activities neither regional source covers in any region: permanent crops, vegetables, tobacco, textile crops, table olives (K30) |
+| `CAPRI_CAL_PRODUCT` | `sources/arm/capri_supply_elas_market_1717.csv` (p_elasSupp of the animal products per member state), weighted with the young animals' elasticities (`capri_supply_elas_young_1720.csv`) by their share of output value | animal activities |
+| `LITERATURE_DEFAULT` | EU-wide defaults (`utils.calibrate_supply_elasticities`) | the rest: grass, set-aside, olives for oil, minor crops CAPRI has no elasticity for, Norway (K32) |
 
-## 1. Dampening — CAPRI's rule, not a truncation
+`SupplyModule(data, eps, use_capri_elasticities=False)` keeps the EU-wide defaults everywhere and no share term, for
+comparison.
 
-`gams/supply/pmp_terms/impose_upper_bound_on_elasticity.gms` does not clip high
-elasticities. Above `p_elasHigh = 4.5` it inflates the PMP quadratic slope so the
-effective elasticity becomes `min(8, sqrt(e) + 4.5 - sqrt(4.5))`. The source
-comment gives worked values: 10 to 5.6, 20 to 7.0, 40 to 8.
+## CAPRI's rules ported
 
-The Python code applied `min(e, ELAS_HIGH / dampen)` = `min(e, 2.25)`, which is
-wrong twice over — it truncated legitimate values in (2.25, 4.5] that CAPRI leaves
-alone, and it over-dampened everything above. Measured on the active file, **694
-of 3420 values (20.3%)** were being truncated, all of them in the range CAPRI
-does not touch.
+1. Dampening (`gams/supply/pmp_terms/impose_upper_bound_on_elasticity.gms`). CAPRI does not truncate high
+   elasticities: above `p_elasHigh = 4.5` it inflates the PMP slope so that the effective elasticity becomes
+   min(8, sqrt(e) + 4.5 - sqrt(4.5)); the source comment gives 10 -> 5.6, 20 -> 7.0, 40 -> 8. `dampen_elasticity`;
+   `test_capri_dampening_matches_gams_reference`. (An earlier truncation at 2.25 cut values CAPRI leaves alone.)
+2. Share term. CAPRI scales crop curvature by 1 - 0.2 sqrt(LEVL / arable total), so a crop with a large share of the
+   region's arable land responds less. `share_term` (floor 0.1); CAPRI's
+   elas = revenue / (LEVL x shareTerm x (pmpQuadTechn + pmpQuadPact)) rearranged gives the diagonal below. Constants
+   ELAS_HIGH, ELAS_CAP, SHARE_COEF in `capri_data/shared/model_parameters.csv`.
+3. Crop groups (`EPRD_TO_GRP`, `gams/sets.gms:2918`, the ESTNLP mapping): (SWHE, DWHE, RYEM, BARL, OATS) CERE;
+   (MAIZ, OCER, PARI) CER2; (RAPE, SUNF, SOYA) OILS; (PULS, POTA, SUGB) OARA; (MAIF, ROOF, OFAR) FARA. The variant in
+   `gams/capdis/sets.gms` uses another group set and is not used.
 
-`capri_pmp.dampen_elasticity` implements the real rule, tested against CAPRI's own
-worked examples in `test_capri_dampening_matches_gams_reference`.
+## The matrix (`PMPCalibrator.calibrate`)
 
-## 2. Share term
+- Diagonal: Q_ii = p_i / (eps_i x0_i shareTerm_i), with p the gross revenue per unit (a price shock moves gross
+  revenue, so this makes the realised own-price response match eps), eps clipped to [1e-4, 8], x0 at least 0.001;
+  then clamped to [1e-7, 1e4] x the median positive Q_ii (capri-mod's guard against near-zero bases).
+- Off-diagonals, CAPRI's structure (supply_model.gms QUADRA_ with GRPLEVL_, `PMPCalibrator.CROSS_TERMS = "capri"`,
+  since 21 October 2026): only between two crops that both belong to CAPRI's crop groups (EPRD_TO_GRP above; the
+  model's OFOD is CAPRI's OFAR in FARA). Per such pair: CAPRI's PELA activity-level cross-price elasticity where one
+  exists (`sources/estnlp/pela_cross_by_region.json`), else CAPRI's group term p_pmpQuadPact for the pair's groups
+  (`sources/capreg/pmp_quad_pact.csv`), each as sign x min(|value|, 0.05) x sqrt(Q_ii Q_jj) (the group term divided by
+  1000 first); else none. Then each row's off-diagonal sum is scaled down to at most half its diagonal. The caps are
+  capri-mod's. Before 21 October every other pair, permanent crops, vegetables, grass and animals included, carried a
+  uniform term 0.05 / (n - 1) x sqrt(Q_ii Q_jj) (`CROSS_TERMS = "previous"`); `"none"` keeps the diagonal only.
+- What the structure changes (tools/check/pmp_cross_term_check.py, CAPRI's decomposition experiment, 2008 documentation
+  sect. 7.3): the six regions DE11, FRH0, ITC4, PL41, ES41, IE04 at +20% on the cereal prices, regional models alone:
+  every group's response within 0.06 points across the three structures (cereals +8.90 / +8.88 / +8.88%, oilseeds
+  -5.83 / -5.81 / -5.81%). With the caps, the cross terms are too small to matter; CAPRI's own group curvature
+  (p_pmpQuadPact on the groups' levels, e.g. AT11 CERE-CERE 137 against SWHE's own term 52) is not represented at its
+  size. Doing that needs CAPRI's PMP terms of its 2030 calibration (p_pmpQuadTechn and p_pmpQuadPact as CAPMOD
+  simulates with them), not in hand (KNOWN_ISSUES K61).
+- Linear term f = r - Q x0 - lambda (net revenue r), so the base is optimal; in the NLP form the regional calibration
+  then makes the base a first-order point of the full model (`CapriRegionalNLP.calibrate`).
 
-CAPRI scales crop curvature by `1 - 0.2*sqrt(LEVL_activity / arable_total)`, so a
-crop occupying a large share of regional arable land gets a flatter response.
-Implemented in `capri_pmp.share_term`, computed per region in
-`RegionalSupplyModel.__init__` and passed to the calibrator. The diagonal is now
+## Synthetic-base guard
 
-```
-Q_ii = p_i / (eps_i * x0_i * shareTerm_i)
-```
+`detect_synthetic_base_activities` blocks real elasticities for activities whose base level is the same constant in
+every region (PMP curvature scales as 1 / (eps x0), so a real elasticity on an invented base level gives large
+responses). It was added when `base_areas.csv` held constant placeholders for COTT, OFIB, OFOD and SETA. With the
+current file it finds none (checked 20 October 2026: OFOD and SETA vary by region, COTT and OFIB are merged into TEXT,
+K35). `tools/check/detect_synthetic_columns.py` reports constant columns as well as lognormal fingerprints.
+`tools/check/scenario_elasticity_check.py` compares the response to a cereal price shock with and without CAPRI's
+elasticities.
 
-which is CAPRI's `elas = revenue / (LEVL * shareTerm * (pmpQuadTechn + pmpQuadPact))`
-rearranged.
+## Open
 
-## 3. EPRD_TO_GRP — found
-
-`gams/sets.gms:2918`, the ESTNLP mapping, whose groups match our VB extract exactly:
-
-```
-(SWHE,DWHE,RYEM,BARL,OATS).CERE     (RAPE,SUNF,SOYA).OILS
-(MAIZ,OCER,PARI).CER2               (PULS,POTA,SUGB).OARA
-(MAIF,ROOF,OFAR).FARA
-```
-
-The variant in `gams/capdis/sets.gms` uses a different group set (`INDU`, `PULS`,
-`SETA`) and must not be used here. Ported to `capri_pmp.EPRD_TO_GRP`. This unblocks
-Route B; the cross-group terms themselves are not yet wired.
-
-## 4. Explicit provenance
-
-`build_elasticity_table` merges two CAPRI sources and labels every one of the
-9920 region x activity cells:
-
-| provenance | cells |
-|---|---|
-| `REGIONAL_CAPRI` (`supply_elasticities_regional.csv`, pre-bounded) | 1033 |
-| `PMP_CAPRI` (`pmp_own_price_elasticities.csv`, raw, dampened on load) | 272 |
-| `LITERATURE_DEFAULT` | 8615 |
-
-**132 regions** now carry real estimates, up from 107, because the second source is
-keyed by CAPRI region codes and resolves through the NUTS crosswalk. Coverage is
-13.2% of cells across 14 activities. `test_elasticity_provenance_is_complete`
-asserts no cell is unlabelled and none exceeds the cap.
-
-## 5. Asymmetry — measured, and it found a real bug
-
-`tools/scenario_elasticity_check.py` runs a +20% cereal price shock under both
-configurations. The asymmetry is real:
-
-```
-covered activities   median elasticity 1.43
-uncovered activities median elasticity 0.18
-ratio                                  7.97
-```
-
-Where the adjustment lands, 25 regions:
-
-| config | total reallocation (kha) | share in covered arable | share elsewhere |
-|---|---|---|---|
-| legacy | 569.3 | 65.7% | 34.3% |
-| capri | 1306.4 | **86.8%** | 13.2% |
-
-So the model becomes markedly more responsive, and adjustment concentrates in
-arable. That is a property of the data coverage, not a defect in the wiring — but
-it is now visible rather than implicit, and it argues for extending coverage to
-permanent crops and livestock before using this for policy scenarios.
-
-### The bug it caught
-
-The first run showed `OFOD` at **+128%** acreage response. Cause: `base_areas.csv`
-carries flat constant placeholders — `COTT` 2.0, `OFIB` 1.0, `OFOD` 5.0, `SETA` 3.0
-kha in every one of the 248 regions — while `OFOD` has a genuine CAPRI elasticity
-of 4.27 against a default of 0.12. Since PMP curvature scales as `1/(eps * x0)`, a
-real elasticity on an invented anchor explodes under any shock.
-
-`detect_synthetic_base_activities` now blocks these four from receiving real
-elasticities. After the guard, `OFOD` sits at 9.0% in both configurations and the
-cereal responses are plausible (`CORN` +16.3%, `SWHE` +11.3% for a +20% shock).
-
-The lognormal fingerprint detector could not see these columns: it looks for a
-coefficient of variation near 0.10, and a flat constant has a CV of exactly zero.
-`tools/detect_synthetic_columns.py` now reports both signatures, which surfaced a
-fifth case — `variable_costs.csv` `OANI` is a flat 300.0 EUR in all 248 regions.
-
----
-
-## Files
-
-| Path | |
-|---|---|
-| `capri_mod/supply/capri_pmp.py` | new — dampening, share term, group map, provenance, guard |
-| `capri_mod/supply/supply_module.py` | calibrator takes share terms; crude cap removed |
-| `tools/scenario_elasticity_check.py` | new — shock comparison and asymmetry report |
-| `tools/detect_synthetic_columns.py` | extended to constant placeholders |
-| `capri_mod/tests/test_capri.py` | +3 guard tests |
-| `capri_data/DATA_SOURCING_REGISTRY.json` | `base_areas.csv` and `variable_costs.csv` corrected |
-
-Legacy behaviour is preserved for comparison:
-`SupplyModule(data, eps, use_capri_elasticities=False)`.
-
-## What is still open
-
-- **Route B** — cross-group VB terms replacing the `rho = 0.05/(n-1)` off-diagonal
-  heuristic. Unblocked now that `EPRD_TO_GRP` is known.
-- **Coverage** — 26 of 40 activities still on literature defaults. Permanent crops
-  and livestock are the gap, and they are what drives the 7.97 asymmetry ratio.
-- **The four placeholder base areas** — `COTT`, `OFIB`, `OFOD`, `SETA` need real
-  COCO or CAPREG activity levels before they can be wired.
-- **Validation against `capri_pela_own_elasticities.csv`** — already in
-  `capri_data/validation/`, not yet used to check realised versus target elasticities.
+- Realised against target elasticities: `capri_data/validation/capri_pela_own_elasticities.csv` is not used by any test
+  or tool.
+- The literature defaults that remain (above), in particular grass (no CAPRI grass elasticity in either regional
+  source).

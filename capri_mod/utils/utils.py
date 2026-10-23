@@ -15,118 +15,18 @@ from pathlib import Path
 # CALIBRATION UTILITIES
 # ---------------------------------------------------------------------------
 
-def calibrate_supply_elasticities(
-    base_areas: pd.DataFrame,
-    price_history: Optional[pd.DataFrame] = None,
-    default_eps: float = 0.25,
-) -> pd.Series:
-    """
-    Estimate supply price elasticities from price-area time series,
-    or return calibrated defaults from CAPRI literature.
+def calibrate_supply_elasticities(base_areas: pd.DataFrame, price_history: Optional[pd.DataFrame] = None) -> pd.Series:
+    """The default own-price supply elasticities per activity: none (NaN) since 23 October 2026.
 
-    If price history is provided: OLS log-log regression
-      ln(A_it) = α_i + ε_i × ln(P_it) + u_it
-
-    Reference: Jansson, T. (2007). Econometric specification of
-               constrained optimisation models. Agr. Econ. 36(3).
-    """
+    CAPRI's own values come per region from capri_mod.supply.capri_pmp.build_elasticity_table (CAPRI's regional,
+    PMP-implied, member-state and product elasticities), and CAPRI's PMP terms (2030 export, or its recipe) carry the
+    curvature where they exist. An activity with neither has no CAPRI calibration and is held at its level
+    (RegionalSupplyData.uncalibrated), as CAPRI holds activities it does not calibrate. The literature table that
+    stood in for missing values, and an unused regression branch, were removed (no proxies)."""
+    if price_history is not None:
+        raise ValueError("calibrate_supply_elasticities: estimation from price history is not available (removed)")
     from capri_mod.data.definitions import ALL_ACTIVITIES
-
-    if price_history is not None and len(price_history) >= 5:
-        elasticities = {}
-        for activity in ALL_ACTIVITIES:
-            if activity not in base_areas.columns or activity not in price_history.columns:
-                elasticities[activity] = default_eps
-                continue
-            # Panel OLS (simplified: pooled across regions)
-            areas_vec  = base_areas[activity].values.flatten()
-            prices_vec = price_history[activity].values.flatten()
-
-            valid = (areas_vec > 0) & (prices_vec > 0)
-            if valid.sum() < 5:
-                elasticities[activity] = default_eps
-                continue
-
-            log_a = np.log(areas_vec[valid])
-            log_p = np.log(prices_vec[valid])
-            # OLS: ε = Cov(ln A, ln P) / Var(ln P)
-            eps = np.cov(log_a, log_p)[0, 1] / np.var(log_p)
-            elasticities[activity] = float(np.clip(eps, 0.05, 1.5))
-        return pd.Series(elasticities)
-
-    # Literature-based defaults (CAPRI calibration values)
-    elasticities = {
-        "SWHE": 0.30, "DWHE": 0.25, "RYEM": 0.20, "BARL": 0.30,
-        "OATS": 0.20, "CORN": 0.35, "OCER": 0.20, "PARI": 0.20, "POTA": 0.15,
-        # horticultural and minor industrial activities: CAPRI prices them
-        # like other specialty crops, inelastic relative to arable
-        "OCRO": 0.20, "OIND": 0.20, "NURS": 0.15, "FLOW": 0.15,
-        "SUGB": 0.10, "SUNF": 0.35, "RAPE": 0.35, "SOYA": 0.40,
-        "OOIL": 0.25, "PULS": 0.25,
-        # Permanent crops and vegetables, set from CAPRI's OWN CALIBRATED
-        # regional elasticities (p_elasSupp, "CAL" level, from
-        # results/arm/supply_elas_2_1720<CC>.gdx for ES and IT -- the file
-        # calibrate_supply.gms:512 unloads after calibration).
-        #
-        # CAPRI calibrated own-price values: APPL 0.218, OFRU 0.189, CITR 0.184,
-        # TAGR 0.216, TWIN (wine) 0.176, TOMA 0.668, OVEG 0.663, against annual
-        # crops at 1.18-8.72 (BARL 2.043). So permanents are ~10x LESS elastic
-        # than annuals, which is what the original literature priors said.
-        #
-        # A PREVIOUS VERSION OF THIS BLOCK RESCALED THEM UPWARD to ~0.62-0.64 on
-        # the reasoning that CAPRI had permanents 2.47x MORE elastic than
-        # annuals. That was wrong: it came from p_elasSupp in
-        # results/arm/elas*.gdx, which is the MARKET model at member-state level
-        # over market commodities -- a different quantity from the regional
-        # calibrated supply elasticities. The market file also cannot be right
-        # for this purpose: it has no olive ACTIVITY at all, only olive OIL.
-        #
-        # CAPRI's calibrated values are used DIRECTLY here, not rescaled,
-        # because PMP amplification is measured to be crop-specific: annual
-        # crops amplify (BARL target 0.30 -> realized 0.97, 3.2x) while
-        # permanents do NOT (realized tracks the target one-for-one). A first
-        # attempt rescaled by the permanent:annual ratio on the assumption of
-        # uniform amplification and came out ~7x too low.
-        #
-        # OLIV is absent from CAPRI's matrix entirely -- consistent with
-        # calibrate_supply.gms:503 disabling the OLIV->OLIO mapping -- so it
-        # takes the average of the other permanents.
-        "TOMA": 0.668, "OVEG": 0.663,
-        "APPL": 0.218, "OFRU": 0.189, "CITR": 0.184, "TAGR": 0.216,
-        "WINE": 0.176, "OLIV": 0.197, "TOBA": 0.213, "COTT": 0.20,
-        "OFIB": 0.15, "GRAS": 0.05, "MAIF": 0.20, "OFOD": 0.12,
-        "SETA": 0.00,
-        # Livestock: FALLBACK ONLY. capri_pmp.build_elasticity_table replaces these with
-        # CAPRI's calibrated product supply elasticities per member state (elas_2_1717,
-        # milk 0.47-0.58, beef 0.65-0.70, pork 0.57-0.72...); used only where none exists.
-        "DCOW": 0.15, "BCOW": 0.12, "BULL": 0.18, "HFRS": 0.15,
-        "CALV": 0.10, "SHGP": 0.12, "PIGS": 0.20, "PIGF": 0.22,
-        "LAYS": 0.18, "BROI": 0.25, "OANI": 0.18,
-    }
-    return pd.Series(elasticities)
-
-
-def calibrate_demand_elasticities(
-    demand_history: Optional[pd.DataFrame] = None,
-) -> pd.Series:
-    """
-    Demand price elasticities from literature or regression.
-
-    Reference: OECD (2009). Methods to analyse agricultural
-               commodity price volatility. Chapter 3.
-    """
-    # Literature-based (CAPRI Witzke & Noleppa, 2010)
-    elasticities = {
-        "SWHE": -0.15, "DWHE": -0.15, "BARL": -0.20, "CORN": -0.18,
-        "OCER": -0.20, "RAPE": -0.22, "SUNF": -0.22, "SOYA": -0.20,
-        "SUGR": -0.12, "POTA": -0.25, "PULS": -0.18,
-        "TOMA": -0.30, "OVEG": -0.28, "APPL": -0.30, "OFRU": -0.28,
-        "CITR": -0.25, "WINE": -0.35, "OLIV": -0.30,
-        "MILK": -0.12, "BUTR": -0.18, "SKIM": -0.15, "CHES": -0.22,
-        "WHEY": -0.10, "BEEF": -0.40, "PORK": -0.35, "POUL": -0.30,
-        "SHGM": -0.35, "EGGS": -0.20, "FATS": -0.18,
-    }
-    return pd.Series(elasticities)
+    return pd.Series(float("nan"), index=list(ALL_ACTIVITIES))
 
 
 # ---------------------------------------------------------------------------
@@ -176,6 +76,15 @@ class ConvergenceTracker:
         ).max()
 
         return bool(max(price_change, qty_change) < self.tolerance)
+
+    def last_change(self) -> float:
+        """The largest relative change of prices or quantities between the last two iterations (inf before two)."""
+        if len(self.history) < 2:
+            return float("inf")
+        prev, curr = self.history[-2], self.history[-1]
+        pc = ((curr["prices"] - prev["prices"]).abs() / prev["prices"].clip(lower=1.0)).max()
+        qc = ((curr["quantities"] - prev["quantities"]).abs() / prev["quantities"].clip(lower=1.0)).max()
+        return float(max(pc, qc))
 
     def summary(self) -> pd.DataFrame:
         """Return convergence history as DataFrame."""
@@ -288,7 +197,7 @@ class ResultsReporter:
         env_df = self.results.get("environmental")
         if env_df is not None and not env_df.empty:
             total_ghg = env_df["ghg_total"].sum() / 1000  # Mt CO2-eq
-            total_n_surplus = env_df["n_surplus"].sum()
+            total_n_surplus = env_df["n_surplus"].sum() / 1000   # t N -> kt N
             print(f"\n[Environmental Module]")
             print(f"  Total GHG: {total_ghg:.1f} Mt CO2-eq")
             print(f"  Total N surplus: {total_n_surplus:.0f} kt N")

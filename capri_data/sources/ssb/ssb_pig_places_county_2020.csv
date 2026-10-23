@@ -1,0 +1,12 @@
+county_2020,nuts2016,holdings_with_pig_places,pig_places,partially_slatted_floor_pct,solid_floor_pct,deep_litter_pct,outdoors_pct
+The whole country,NO,1998,530173,82,12,4,2
+Oslo and Viken,NO01+NO03 (part),256,64722,75,11,10,4
+Innlandet,NO02,385,120504,81,11,5,4
+Vestfold og Telemark,NO03 (part),148,44164,73,11,13,3
+Agder,NO04 (part),69,9697,91,5,1,3
+Rogaland,NO04 (part),508,147238,91,7,1,1
+Vestland,NO05 (part),147,17150,89,9,0,2
+Møre og Romsdal,NO05 (part),60,9354,88,10,1,1
+Trøndelag - Trööndelage,NO06,310,90547,77,21,1,1
+Nordland - Nordlánnda,NO07 (part),93,24118,74,20,4,1
+Troms og Finnmark - Romsa ja Finnmárku,NO07 (part),22,2679,88,,,5

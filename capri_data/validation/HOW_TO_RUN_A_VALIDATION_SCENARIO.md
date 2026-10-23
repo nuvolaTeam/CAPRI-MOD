@@ -1,52 +1,52 @@
-# How to run a CAPRI scenario for shock-magnitude validation
+# How to run a CAPRI scenario for comparison with capri-mod
 
-To complete the last validation (does CAPRI-mod move prices/quantities by the
-same magnitudes as CAPRI under a strong policy shock?), we need a CAPRI scenario
-with a **large, clear policy contrast** — unlike the Green Deal runs, which differ
-by <1%.
+Status: revised 20 October 2026 against the code. The CAPRI-side steps were written in October 2026 from CAPRI's GUI
+and folder conventions and have not been re-checked in a CAPRI installation since.
 
-## What makes a good validation scenario
+A comparison of response magnitudes needs a CAPRI run pair (reference and scenario) with a clear policy contrast,
+from the same CAPRI version capri-mod is built from (star 3.0, base 2017, 2030). One such pair is in hand: CAPRI's
+2030 run without voluntary coupled support against its reference (`coupled_support_2030/capri_vcs_effect.csv.xz`,
+`tools/build/extract_capri_vcs_pair.py`, compared by `tools/run/run_vcs_2030.py`). Wanted next (README 11.4, 13; KNOWN_ISSUES
+K13):
 
-A strong, well-defined shock the Python model can also apply:
-- **Full trade liberalisation** (all tariffs → 0) — largest, cleanest price effects
-- **Removal of direct payments** (Pillar 1/2 to zero) — strong supply reallocation
-- **A large tariff change** on specific commodities
-- **A demand or biofuel-mandate shock**
+- **CAPRI's Green Deal 2030 step** (lnds 8, org 18, pest 20, mine 13crp, surp 30; result name
+  `res_2_1730greendeal_lnds8_org18_pest20_mine13crp_surp30_diet00_oth00defaultA`), against which capri-mod's
+  `greendeal_2030_scenario()` run is to be checked;
+- **CAPRI's Farm-to-Fork dairy market results** (raw milk and dairy product prices and quantities), for the milk
+  price gap (K13).
 
-Avoid technology/productivity scenarios (like Green Deal endotech) — those bake in
-exogenous trends the comparative-static Python model doesn't represent.
+## What makes a good comparison scenario
 
-## Route A — CAPRI GUI (recommended)
+A strong, well-defined shock that capri-mod applies in the same way:
 
-1. Open the CAPRI GUI (`gui/capri.jar` or the launcher).
-2. Task: **"Run scenario with market model"** (capmod).
-3. Baseline: pick the reference (e.g. the 2030 baseline you already have).
-4. Scenario: choose or define a strong shock. Built-in examples in `pol_input/`:
-   - `RemoveP2.gms` — removes Pillar-2 payments (regional; can be broadened)
-   - trade/tariff scenarios under `pol_input/` and `gams/global/`
-5. Run for a single year (e.g. 2030) to keep it fast.
-6. Results land in `output/results/capmod/res_<scenario>...gdx`.
+| CAPRI scenario | capri-mod |
+|---|---|
+| Green Deal switches (`pol_input/greendeal/greendeal_scenarios.gms`) | `greendeal_scenario(...)` with the same values (README 8.3) |
+| change of the direct payments or coupled support | `PolicyScenario.biss_rate_change`, `coupled_support`, `premium_factor_regional` (README 8.1) |
+| change of EU import tariffs | `PolicyScenario.tariff_changes` (acts on EU imports only; tariff-rate-quota changes have no effect, K52) |
+| biofuel mandate change (`scen/bio_fuels/change_biof_mandate.gms`) | `PolicyScenario.biofuel_mandate` |
+| emission tax (`pol_input/ecampa/carbtax50_endotech_*.gms`) | `PolicyScenario.carbon_tax` |
 
-## Route B — minimal tariff shock (simplest strong contrast)
+Avoid scenarios driven by exogenous trends or technology paths that capri-mod's comparative-static run does not
+represent. Run the scenario against the same 2030 reference, with the same technology (endotech) settings in both
+runs, as CAPRI's scenario files do.
 
-If you want the cleanest possible test, a full tariff removal is ideal because the
-Python model can replicate it exactly (set all import tariffs to zero):
-1. In the GUI scenario editor, set tariffs to zero for all commodities, or
-2. Use/adapt a liberalisation scenario file if present.
+## CAPRI side (GUI)
 
-## What to extract and send
+1. Open the CAPRI GUI; task "Run scenario with market model" (capmod).
+2. Choose the 2030 reference as baseline and define or select the scenario (examples under `pol_input/`).
+3. Run for the single year 2030.
+4. Results are written to `output/results/capmod/res_<scenario>...gdx`.
 
-From BOTH the reference run and the shocked run, extract DATAOUT (same as before):
+## What to extract
+
+From the reference and the scenario run, the result parameter `DATAOUT`:
+
 ```
-execute 'gdxdump <path>\res_<REFERENCE>.gdx symb=DATAOUT output=<path>\scen_ref.txt';
-execute 'gdxdump <path>\res_<SHOCK>.gdx     symb=DATAOUT output=<path>\scen_shock.txt';
+gdxdump <path>\res_<REFERENCE>.gdx symb=DATAOUT output=<path>\scen_ref.txt
+gdxdump <path>\res_<SCENARIO>.gdx  symb=DATAOUT output=<path>\scen_shock.txt
 ```
-Zip the two .txt files and upload. I compare the % changes in prices and quantities
-(reference → shock) against the same shock applied to CAPRI-mod.
 
-## What I'll do with it
-
-1. Read CAPRI's price/quantity change for each commodity under the shock.
-2. Apply the equivalent shock to CAPRI-mod.
-3. Compare magnitudes — report where they match and where they diverge.
-That completes the shock-magnitude validation and closes the last gap.
+or `tools/build/gdx_dump_symbol.py GDX DATAOUT OUT.csv --nonzero`. The comparison is of % changes from reference to
+scenario, as `tools/run/run_vcs_2030.py` does for the coupled-support pair (EU27 herds, crop areas, product and
+young-animal prices).

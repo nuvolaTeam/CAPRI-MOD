@@ -24,3 +24,7 @@ real, sourced CAPRI data worth preserving.
 
 - `base_areas_coco.csv`, `base_areas_eurostat.csv` — earlier vintages of base areas.
 - `trade_flows_2005_backup.csv` — superseded trade vintage (live trade is FAO 2021).
+- `eu_gross_trade_supplement.csv` — CAPRI's extra-EU gross trade for sugar and durum wheat, used only by the
+  premium market structure (removed 20 October 2026, KNOWN_ISSUES K54-2).
+- `fao_processing_splits.json` — FAO crush yields and dairy product ratios; the model read only oil yields it
+  no longer used (removed 20 October 2026, KNOWN_ISSUES K54-7).

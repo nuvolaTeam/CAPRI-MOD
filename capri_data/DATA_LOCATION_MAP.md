@@ -1,101 +1,73 @@
-# CAPRI-mod — Where the Data Lives: Folder / File / Symbol Map
+# CAPRI-mod: where the data live in CAPRI (folder, file, symbol)
 
-**What you asked for:** for each thing the model needs — roughly *where* the file is in
-a CAPRI installation, and *which symbol* it must contain.
+Status: revised 20 October 2026 against the code. A reference for rebuilding the data or moving to a new base year.
+The symbol names are CAPRI's (checked against its GAMS source and the symbol dictionary
+`capri_mod/data/capri_symbol_dictionary.json`, 2,429 symbols); the file locations follow CAPRI's folder conventions
+and should be confirmed in the installation at hand. Which CAPRI file each shipped input was actually built from is
+stated in the builder's docstring (`tools/build_*.py`) and in `DATA_SOURCING_REGISTRY.json`.
 
-Key idea (this makes it manageable): CAPRI does **not** store one symbol per model input.
-Most base data lives in a **handful of master multidimensional containers**. Export those
-few symbols and everything else is sliced out of them on the Python side. You are chasing
-**~6 symbols, not 25.**
+Paths use CAPRI's macros: `%RESULTS_OUT%` = the `output/results/` folder, `%results_in%` = the results database,
+`%BAS%` = base year, `%MS%` = member state.
 
-Paths use CAPRI's own macros: `%RESULTS_OUT%` = your `output/results/` folder,
-`%results_in%` = the results database you unzipped, `%BAS%` = base year, `%reg_agg%` =
-region aggregation, `%MS%` = member state.
+## A. Base data: CAPRI's regional results (what the 2017 inputs are built from)
 
----
+The 2017 regional inputs (areas, yields, prices, costs, premiums, herds' coefficients, feed, fertiliser) come from
+CAPRI's capreg results per member state, `res_17<MS>.gdx` (symbol `DATA2`: rows such as LEVL, YILD, MPRI, TOIN,
+PRME, NITF/PHOF/POTF, feed use), extracted for all 27 member states (`tools/build/build_capri_base.py`,
+`tools/build/build_crop_economics_2017.py`; region map `shared/region_capri_map.csv`).
 
-## A. The master containers (get these — they cover most files)
-
-| Symbol | Contains | Folder / GDX file |
+| Need | Symbol | Location |
 |---|---|---|
-| **`p_sua_final`** | areas, animal heads, **yields** (supply-utilisation sheet) | `results_in/fao/faodata.gdx` |
-| **`p_regioData`** | regional DB (areas, yields, herds, mapped from Eurostat) | `output/results/capreg/…regio…gdx` |
-| **`p_dataMarket`** | market balances **+ producer/world prices** (SUA) | `output/results/baseline/trace_dataPrep.gdx` (or `global/fao_agg_<BAS>_<agg>.gdx`) |
-| **`p_activityLevel`** | activity levels (1000 ha or heads) — areas + herds | results DB (capreg estimator output) |
+| regional database (areas, yields, herds, economics) | `DATA2` | `results/capreg/res_%BAS%<MS>.gdx` |
+| regional database before estimation | `p_regioData` | `results/capreg/...regio...gdx` |
+| market balances and prices (SUA) | `p_dataMarket` | `results/global/fao_agg_%BAS%_<agg>.gdx` (the 2017 file used: `FAO_agg_17_defaulta`) |
+| supply-utilisation sheet | `p_sua_final` | `results/fao/faodata.gdx` |
 
-Fills: `base_areas.csv`, `yields.csv`, `animal_numbers.csv`, `producer_prices.csv`,
-`world_prices.csv`, `fao_market_baseline.json`, `land_availability.csv`.
+Fills: `base_areas.csv`, `yields.csv`, `variable_costs.csv`, `crop_premium.csv`, the livestock coefficient files,
+`feed_requirements.csv`, `nutrient_coefs.csv` (from DATA2); `world_prices.csv` and the market base balances (from
+`p_dataMarket`).
 
----
+## B. Elasticities and PMP terms (for a full re-base; otherwise keep 2017)
 
-## B. The two formerly-synthetic files — now resolved
-
-> **Status:** both files below now contain real CAPRI data and are marked
-> `REAL_CAPRI` in `DATA_SOURCING_REGISTRY.json`. The model no longer generates
-> synthetic values for them. This section is retained as a record of where the
-> data was sourced from.
-
-| Model file | Symbol | Meaning | Folder / GDX |
-|---|---|---|---|
-| `feed_requirements.csv` | **`p_feedInpCoeff`** | feed input coeff. per head | `restart_in/feed/mefed_<BAS>…gdx` |
-| `nutrient_coefs.csv` | **`p_FertPerHa`** | fertiliser use per ha, by region | results DB (fertiliser/envind output) |
-
-These were the last two synthetic datasets in the model; both are now real.
-
----
-
-## C. Elasticities & PMP (for a full re-base; else keep 2017)
-
-| Model file | Symbol | Folder / GDX |
+| Model file | Symbol | Location |
 |---|---|---|
-| `fao_demand_own_elas_eu.json` | **`p_demandElas`** | `results_in/global/fao_agg_<BAS>_<agg>.gdx` |
-| `supply_elasticities_regional.csv`, `pmp_own_price_elasticities.csv` | **`p_supplyElas`** / `p_pelaEst` | results DB (PELA output) |
-| `pmp_diagonal_terms.csv`, `pmp_crossgroup_terms.csv`, `input_requirements.csv` | **`p_pmpQuadPact`** + PMP terms | results DB (supply estimation) |
+| `fao_demand_own_elas_eu.json` | `p_demandElas` | `%results_in%/global/fao_agg_%BAS%_<agg>.gdx` |
+| `supply_elasticities_regional.csv`, `pmp_own_price_elasticities.csv` | `p_supplyElas` / `p_pelaEst` | supply estimation results (PELA; the shipped file is from estnlp PELA) |
+| `pmp_diagonal_terms.csv`, `pmp_crossgroup_terms.csv`, `input_requirements.csv` | `p_pmpQuadPact` and the other PMP terms | supply estimation results |
+| land market (`land_market_2017.csv`) | `p_pmpQuadLandTypes` | pmppar results |
 
-Note: PMP terms are estimation outputs. A new base needs them **re-estimated** by CAPRI,
-not just copied — mixing 2017 PMP with newer prices is what the validator blocks.
+PMP terms are estimation outputs: a new base needs them re-estimated by CAPRI, not copied; mixing 2017 PMP terms
+with newer prices is what the validator's vintage check is meant to catch.
 
----
+## C. Market model parameters
 
-## D. Biofuel (upgrade the module from literature to CAPRI coefficients)
-
-| Need | Symbol | Meaning | Folder / GDX |
-|---|---|---|---|
-| biofuel conversion/demand | **`p_bioDat`** | "consolidated biofuel data from AGLINK and FO LICHT" | `output/results/baseline/trace_dataPrep.gdx` **and** `global/fao_agg_<BAS>…gdx` |
-
-(The 2017 `fao_agg` you already sent likely contains `p_bioDat` — it was there, just unnamed.)
-
----
-
-## E. Policy & environment (low priority — current values fine)
-
-| Model file | Symbol | Folder / GDX |
+| Model file | Symbol | Location |
 |---|---|---|
-| `cap_payments.csv` | `p_premium` / `p_directPay` | policy results |
-| `eu_mfn_tariffs.csv` | `p_tariffs` ("ad valorem tariff rates") | policy/market DB |
-| `armington_params.csv` | `p_sigma_up` (upper-nest substitution) | market DB |
-| `manure_ch4_ef_regional.csv`, `crop_nutrient_export.csv` | `p_emisManure`, `p_cropNutrient` | envind results |
-| `gascoeff_params.json` | `p_gasEmis` | envind results |
+| `bilateral_flows_<year>.csv`, `bilateral_regions_<year>.csv`, `bilateral_trq_<year>.csv` | CAPRI's market results of the year | capmod market results (`tools/build/build_bilateral_market.py`) |
+| `armington_rho.csv`, `armington_params.csv` (`sigma`, `rho2`) | `p_rhoArm1`, `p_rhoArm2` | `arm/market1.gms`, `special_ch/market1_ch.gms` |
+| biofuel files | `p_bioDat` and the biofuel parameters | `baseline/trace_dataPrep.gdx`, `fao_agg`; calibration as `biofuel/def_biofuel_params.gms` (`tools/build/build_biofuel_market.py`) |
+| dairy block | `p_hessNQDairy` and the dairy data | `elas_2_1730` and market results (`tools/build/build_dairy_processing.py`) |
 
----
+## D. Policy and environment
 
-## How to confirm a symbol is in *your* GDX before exporting
+| Model file | Symbol | Location |
+|---|---|---|
+| `crop_premium.csv`, `cap_payments.csv` | `DATA2` PRME | capreg results |
+| `tariffs.csv` | CAPRI's total protection from bilateral import and FOB prices | 2017 market results (`tools/build/build_tariffs_2017.py`) |
+| manure and enteric CH4, CO2 coefficients | CH4MAN, CH4ENT, CO2LIM, urea shares | capreg / envind results (`tools/build/build_ghg_coefs_2017.py`) |
+| mitigation options | `p_ghgMiti`, `p_litRevFertTechs`, ammonia technology tables | `dat/scen/ghgtech`, `dat/miterra`, `envind/*.gms` (`tools/build_*` named in `DATA_DICTIONARY.md`) |
 
+`gascoeff_params.json` (`p_gasEmis`, `envind/gascoeff.gms`) and `dairy_processing_params.json` are archived and not
+read by the model (`archive/README.md`).
+
+## Confirming a symbol before exporting
+
+```shell
+python capri_mod/data/find_symbol.py gdx  path/to/file.gdx      # list the symbols in a GDX
+python capri_mod/data/find_symbol.py search yield               # search CAPRI's symbol descriptions
+python tools/build/gdx_dump_symbol.py path/to/file.gdx SYMBOL OUT.csv # export (needs gamsapi and GAMS's gdx library)
+gdxdump path/to/file.gdx symb=SYMBOL format=csv > OUT.csv       # or with GAMS itself
 ```
-python capri_mod/data/find_symbol.py gdx  output/results/…/file.gdx   # lists symbols
-python capri_mod/data/find_symbol.py search yield                     # search by concept
-```
-Then export with GAMS:
-```
-gdxdump  <file>.gdx  symb=<SYMBOL>  format=csv  >  out.csv
-```
 
-## Realistic minimum to finish the model
-Just **B** (two symbols: `p_feedInpCoeff`, `p_FertPerHa`) makes every model input real.
-Add **A + C + D** only if you want a full newer-base rebuild.
-
-## Honest caveat
-Symbol names and folder patterns are verified against CAPRI's GAMS source. The exact
-*dimension layout* of each symbol (e.g. does `p_sua_final` come out region×item×year?)
-I can only confirm once you dump one — there may be a small reshaping step to fit the
-model's format. But you'll be extracting the **right** symbol, which was the hard part.
+The dimension layout of a symbol (e.g. region × item × year) is known only once it is dumped; expect a reshaping step
+to fit the model's format.

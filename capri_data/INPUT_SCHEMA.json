@@ -286,22 +286,6 @@
     "reproducibility": "public_code"
    }
   },
-  "trade_flows": {
-   "file": "shared/trade_flows_2017.csv",
-   "concept": "bilateral trade / import shares",
-   "unit": "1000 t",
-   "dimension": "exporter x importer x commodity",
-   "modules": [
-    "market"
-   ],
-   "source": {
-    "source_type": "CAPRI_GDX",
-    "source_ref": "capmod dataOut ImportQ",
-    "vintage": "2017",
-    "confidence": "validated",
-    "reproducibility": "public_code"
-   }
-  },
   "feed_requirements": {
    "file": "2017/feed/feed_requirements.csv",
    "concept": "energy/protein/DM/days per animal",
@@ -541,25 +525,6 @@
    },
    "known_gaps": [
     "13 regions where CAPRI does not split the herd keep a single yield and no margin"
-   ]
-  },
-  "eu_gross_trade_supplement": {
-   "file": "2017/market/eu_gross_trade_supplement.csv",
-   "concept": "CAPRI's extra-EU gross trade for commodities the trade file does not record (sugar, durum wheat)",
-   "unit": "kt",
-   "dimension": "commodity",
-   "modules": [
-    "market"
-   ],
-   "source": {
-    "source_type": "CAPRI_GDX",
-    "source_ref": "res_2_1730greendeal_refdefaulta dataOut",
-    "vintage": "2030",
-    "confidence": "validated",
-    "reproducibility": "public_code"
-   },
-   "known_gaps": [
-    "durum is a proxy from wheat"
    ]
   },
   "land_rent_regional": {
@@ -806,7 +771,7 @@
    ]
   },
   "land_market_2017": {
-   "file": "2017/supply/land_market_2017.json",
+   "file": "2017/supply/land_market_2017.csv",
    "concept": "CAPRI land-market data",
    "unit": "1000 ha; cost",
    "dimension": "region x land type",
@@ -970,6 +935,201 @@
     "reproducibility": "capri_source"
    },
    "known_gaps": []
+  },
+  "p_balance_crop_coefs": {
+   "file": "2017/environment/p_balance_crop_coefs_2030.csv",
+   "concept": "CAPRI's P2O5 retention and crop residue output per ha of the model's crops (gross phosphate balance)",
+   "unit": "kg P2O5/ha",
+   "dimension": "CAPRI region x model crop",
+   "modules": [
+    "environmental"
+   ],
+   "source": {
+    "source_type": "CAPRI_GDX",
+    "source_ref": "res_2_1730greendeal_refdefaulta dataOut (PRET, PCRD, LEVL)",
+    "vintage": "2030",
+    "confidence": "validated",
+    "reproducibility": "capri_gdx"
+   },
+   "known_gaps": [
+    "a crop CAPRI does not grow in the region takes the country's coefficient"
+   ]
+  },
+  "supply_elas_region": {
+   "file": "2017/market/supply_elas_region.csv",
+   "concept": "own-price supply elasticity of each non-EU trade region and commodity (CAPRI p_elasSupp CAL, production-weighted over its CAPRI regions)",
+   "unit": "elasticity",
+   "dimension": "trade region x commodity",
+   "modules": [
+    "market"
+   ],
+   "source": {
+    "source_type": "CAPRI_GDX",
+    "source_ref": "p_elasSupp(region, product, product, CAL) (elas_2_1717); PROD (2017 market)",
+    "vintage": "2017",
+    "confidence": "validated",
+    "reproducibility": "capri_gdx"
+   },
+   "known_gaps": []
+  },
+  "feed_bulks_no": {
+   "file": "2017/market/feed_bulks_no.csv",
+   "concept": "Norway's feed bulks: feed quantities, Arm1 prices and Norway's use per bulk product, for its supply models' bulk price indices at Norway's prices and its feed demand in its own market region NOR (KNOWN_ISSUES K56)",
+   "unit": "1000 t; EUR/t",
+   "dimension": "bulk x product",
+   "modules": [
+    "market"
+   ],
+   "source": {
+    "source_type": "CAPRI_GDX",
+    "source_ref": "FEED, ARM1P, HCOM, FEDM, INDM, BIOF, LOSM, PRCM of NO000000 (markmarket_greendeal_1730et_base_1717 dataOut)",
+    "vintage": "2030",
+    "confidence": "validated",
+    "reproducibility": "capri_gdx"
+   },
+   "known_gaps": []
+  },
+  "winter_cover_option": {
+   "file": "2017/abatement/mitigation/winter_cover_option.csv",
+   "concept": "winter cover (catch crops) as a mitigation option: initial and maximum share of UAAR, cost curve (costParLin, Subs0/1, pmpParSqr, pmpParLin)",
+   "unit": "share; EUR/ha",
+   "dimension": "model region",
+   "modules": [
+    "supply"
+   ],
+   "source": {
+    "source_type": "CAPRI_GDX",
+    "source_ref": "p_ghgMiti(CATC, WinterCov, CO2SEQ, IniShare/MaxShare/costParLin/pmpParSqr/pmpParLin) (envind/cover_crops.gms)",
+    "vintage": "2030",
+    "confidence": "validated",
+    "reproducibility": "capri_gdx"
+   },
+   "known_gaps": []
+  },
+  "land_rents_2030": {
+   "file": "2017/supply/land_rents_2030.csv",
+   "concept": "CAPRI's land rents by land type (arable, permanent, grassland) at its 2030 calibration point: the land market's balance and the land multipliers of the NLP calibration",
+   "unit": "EUR/ha",
+   "dimension": "model region x land type",
+   "modules": [
+    "supply"
+   ],
+   "source": {
+    "source_type": "CAPRI_GDX",
+    "source_ref": "D_AREA of ARAC, FRUN, GRAS, res_2_1730greendeal_refpol_endotech_all_inidefaulta",
+    "vintage": "2030",
+    "confidence": "validated",
+    "reproducibility": "capri_gdx"
+   },
+   "known_gaps": [
+    "27 model regions without their own CAPRI region take the member state's rents (Norway's seven, Ireland's split, ...)"
+   ]
+  },
+  "pmp_capri_2030": {
+   "file": "2017/supply/pmp_capri_2030.csv",
+   "concept": "CAPRI's PMP matrix of the crops at its 2030 baseline calibration, per model region",
+   "unit": "EUR/ha per 100% change of the levels",
+   "dimension": "model region x crop x crop",
+   "modules": [
+    "supply"
+   ],
+   "source": {
+    "source_type": "CAPRI_GDX",
+    "source_ref": "pmppar_21730<CC>defaulta.gdx p_pmpQuadTechn, p_pmpQuadPact",
+    "vintage": "2030",
+    "confidence": "validated",
+    "reproducibility": "capri_gdx"
+   },
+   "known_gaps": [
+    "DE30, DE50, DE60, ES63, ES64, BE10 without terms",
+    "animals in pmp_capri_2030_animals.csv; feed slopes in feed_ration_2017.json capri_slope_2030; land in land_market_2030.csv",
+    "CAPRI's T1/T2 technology split collapsed: the area response exact, the yield shift between the technologies not carried"
+   ]
+  },
+  "pmp_capri_2030_animals": {
+   "file": "2017/supply/pmp_capri_2030_animals.csv",
+   "concept": "CAPRI's PMP terms of the animal activities at its 2030 calibration, per model region and model animal",
+   "unit": "EUR/head per 100% change of the levels",
+   "dimension": "model region x animal",
+   "modules": [
+    "supply"
+   ],
+   "source": {
+    "source_type": "CAPRI_GDX",
+    "source_ref": "pmppar_21730<CC>defaulta.gdx p_pmpQuadTechn (animal activities)",
+    "vintage": "2030",
+    "confidence": "validated",
+    "reproducibility": "capri_gdx"
+   },
+   "known_gaps": [
+    "intensity variants collapsed (pairs by Schur complement, other members by fixed composition)"
+   ]
+  },
+  "pmp_recipe_2017": {
+   "file": "2017/supply/pmp_recipe_2017.csv",
+   "also": "2017/supply/pmp_recipe_2017_animals.csv",
+   "concept": "capri-mod's own PMP terms at 2017, computed with CAPRI's recipe (define_pmp_terms.gms) from CAPRI's estimates",
+   "unit": "EUR/ha (head) per 100% change of the levels",
+   "dimension": "model region x activity x activity",
+   "modules": [
+    "supply"
+   ],
+   "source": {
+    "source_type": "DERIVED",
+    "source_ref": "dat/estnlp/results.gdx VB, VD, PELA; supply/define_pmp_terms.gms, pmp_elas.gms",
+    "vintage": "2017",
+    "confidence": "derived",
+    "reproducibility": "internal_derivation"
+   },
+   "known_gaps": [
+    "land-nest adjustment (p_landNestElasContrib) not ported",
+    "grass at 2030, OOIL, VSET, NECR further from CAPRI's terms"
+   ],
+   "alternative_to": "pmp_capri_2030",
+   "note": "optional PMP terms (SupplyModule.pmp_source='recipe'); the default run uses CAPRI's exported terms (pmp_capri_2030), so these cells are left out of the real-CAPRI coverage share of the default inputs"
+  },
+  "pmp_recipe_2030": {
+   "file": "2017/supply/pmp_recipe_2030.csv",
+   "also": "2017/supply/pmp_recipe_2030_animals.csv",
+   "concept": "capri-mod's own PMP terms at 2030, computed with CAPRI's recipe (define_pmp_terms.gms) from CAPRI's estimates",
+   "unit": "EUR/ha (head) per 100% change of the levels",
+   "dimension": "model region x activity x activity",
+   "modules": [
+    "supply"
+   ],
+   "source": {
+    "source_type": "DERIVED",
+    "source_ref": "dat/estnlp/results.gdx VB, VD, PELA; supply/define_pmp_terms.gms, pmp_elas.gms",
+    "vintage": "2030",
+    "confidence": "derived",
+    "reproducibility": "internal_derivation"
+   },
+   "known_gaps": [
+    "land-nest adjustment (p_landNestElasContrib) not ported",
+    "grass at 2030, OOIL, VSET, NECR further from CAPRI's terms"
+   ],
+   "alternative_to": "pmp_capri_2030",
+   "note": "optional PMP terms (SupplyModule.pmp_source='recipe'); the default run uses CAPRI's exported terms (pmp_capri_2030), so these cells are left out of the real-CAPRI coverage share of the default inputs"
+  },
+  "young_animals_by_sex_2017": {
+   "file": "2017/supply/young_animals_by_sex_2017.json",
+   "concept": "CAPRI young-animal balances per sex",
+   "unit": "head per head",
+   "dimension": "region x balance",
+   "modules": [
+    "supply"
+   ],
+   "source": {
+    "source_type": "CAPRI_GDX",
+    "source_ref": "res_17 young-animal rows; INPANI_",
+    "vintage": "2017",
+    "confidence": "validated",
+    "reproducibility": "capri_gdx"
+   },
+   "known_gaps": [
+    "not yet used",
+    "used only with the cattle member splits on (K65)"
+   ]
   }
  }
 }

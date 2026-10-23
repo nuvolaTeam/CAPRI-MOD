@@ -1,0 +1,214 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1540 1080" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" role="img" aria-label="capri-mod data layer: CAPRI sources, extraction and build, the shipped capri_data folders, and how the model loads and checks them.">
+  <defs>
+    <marker id="a" markerWidth="12" markerHeight="12" refX="9" refY="4" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L9,4 L0,8 Z" fill="#1f4e9a"/></marker>
+    <marker id="g" markerWidth="12" markerHeight="12" refX="9" refY="4" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L9,4 L0,8 Z" fill="#5a7bb5"/></marker>
+    <style>
+      .t  { font-size: 13px; fill: #1c2b3d; }
+      .h  { font-size: 15px; font-weight: 700; fill: #12305f; }
+      .hb { font-size: 21px; font-weight: 800; fill: #12305f; }
+      .s  { font-size: 14.5px; fill: #24364f; }
+      .m  { font-size: 12px; fill: #5a6b82; }
+      .f  { stroke: #1f4e9a; stroke-width: 2; fill: none; }
+      .d  { stroke: #5a7bb5; stroke-width: 1.6; fill: none; stroke-dasharray: 7 5; }
+    </style>
+  </defs>
+  <rect width="1540" height="1080" fill="#ffffff"/>
+  <text x="770" y="40" text-anchor="middle" font-size="30" font-weight="800" fill="#12305f">capri-mod — data layer (20 October 2026)</text>
+
+  <!-- ============ BAND 1: SOURCES ============ -->
+  <rect x="12" y="62" width="1516" height="178" rx="12" fill="#f6f3fc" stroke="#a58fd6" stroke-width="1.5"/>
+  <text x="30" y="92" class="hb">1.  SOURCES</text>
+  <text x="30" y="118" class="s">Not shipped; needed only</text>
+  <text x="30" y="137" class="s">to rebuild the data</text>
+
+  <rect x="240" y="104" width="300" height="122" rx="8" fill="#efe9fb" stroke="#7a5cc2"/>
+  <text x="254" y="126" class="h">CAPRI star 3.0 results (GDX)</text>
+  <text x="254" y="148" class="t">• res_17*: base 2017 per member state</text>
+  <text x="254" y="166" class="t">• res_2_1730*: 2030 references (ref, ini,</text>
+  <text x="266" y="184" class="t">max, endotech), markmarket, data_market</text>
+  <text x="254" y="202" class="t">• elas_*, p_dataMarket, priFertDist</text>
+  <text x="254" y="219" class="m">from the user's CAPRI runs and installation</text>
+
+  <rect x="560" y="104" width="290" height="122" rx="8" fill="#efe9fb" stroke="#7a5cc2"/>
+  <text x="574" y="126" class="h">CAPRI dat/ and GAMS code</text>
+  <text x="574" y="148" class="t">• MITERRA tables, literature review</text>
+  <text x="574" y="166" class="t">• ghgtech, envind (nvz.gdx, cost savings)</text>
+  <text x="574" y="184" class="t">• rules written in the .gms (sets, caps,</text>
+  <text x="586" y="202" class="t">Green Deal targets, p_Nemidat)</text>
+  <text x="574" y="219" class="m">gams/ of star 3.0, read by the builders</text>
+
+  <rect x="870" y="104" width="290" height="122" rx="8" fill="#efe9fb" stroke="#7a5cc2"/>
+  <text x="884" y="126" class="h">Statistics and literature</text>
+  <text x="884" y="148" class="t">• FAO (FAO_agg), Eurostat</text>
+  <text x="884" y="166" class="t">• JRC121368 (Farm-to-Fork results)</text>
+  <text x="884" y="184" class="t">• EU agricultural outlook 2020-2030</text>
+  <text x="884" y="202" class="t">• IPCC factors as CAPRI uses them</text>
+
+  <rect x="1180" y="104" width="334" height="122" rx="8" fill="#efe9fb" stroke="#7a5cc2"/>
+  <text x="1194" y="126" class="h">Conversion</text>
+  <text x="1194" y="148" class="t">• tools/gdx_dump_symbol.py: GDX → CSV</text>
+  <text x="1206" y="166" class="t">(gamsapi + GAMS's gdx library)</text>
+  <text x="1194" y="184" class="t">• gdxdump text files → CSV</text>
+  <text x="1194" y="202" class="t">• the model never reads GDX</text>
+
+  <!-- ============ BAND 2: EXTRACTION & BUILD ============ -->
+  <rect x="12" y="266" width="1516" height="222" rx="12" fill="#f2f7fd" stroke="#8fb3e3" stroke-width="1.5"/>
+  <text x="30" y="296" class="hb">2.  EXTRACTION &amp; BUILD</text>
+  <text x="30" y="322" class="s">Each builder names its</text>
+  <text x="30" y="341" class="s">source and output</text>
+
+  <rect x="240" y="304" width="250" height="166" rx="8" fill="#e6f0fc" stroke="#2a62b8"/>
+  <text x="254" y="326" class="h">capri_data/sources/</text>
+  <text x="254" y="348" class="t">• the records the builders use,</text>
+  <text x="266" y="366" class="t">kept as CSV (capreg, capri_res,</text>
+  <text x="266" y="384" class="t">capri_dat, ghgtech, envind, fao,</text>
+  <text x="266" y="402" class="t">eurostat, jrc121368, gams)</text>
+  <text x="254" y="420" class="t">• a few read at run time</text>
+  <text x="266" y="438" class="t">(capreg, arm)</text>
+  <text x="254" y="460" class="m">re-run builders without the GDX</text>
+
+  <rect x="510" y="304" width="1004" height="166" rx="8" fill="#e6f0fc" stroke="#2a62b8"/>
+  <text x="524" y="326" class="h">tools/build_*.py (about 80 builders), by domain</text>
+  <text x="524" y="350" class="t">supply: build_capri_base, build_crop_economics_2017, build_livestock_output_coef, build_land_market,</text>
+  <text x="536" y="367" class="t">build_*_intensity, build_young_animals, build_cover_crops, build_plant_protection_cost</text>
+  <text x="524" y="389" class="t">market: build_bilateral_market, build_gl_demand, build_processing_nq, build_dairy_processing, build_biofuel_market,</text>
+  <text x="536" y="406" class="t">build_feed_bulks, build_world_market_baseline, build_tariffs_2017</text>
+  <text x="524" y="428" class="t">fertiliser, N cascade, options: build_fert_dist_priors, build_npk_balance_2030, build_n_cascade, build_n_leaching,</text>
+  <text x="536" y="445" class="t">build_ammonia_*, build_ad_option, build_nitrates_directive, build_fert_side_effects, build_genetics_effects</text>
+  <text x="524" y="464" class="t">environment, policy, projection: build_manure_n2o, build_luc_2030, build_cap_greening, build_trajectory_capri_ref</text>
+
+  <!-- band 1 -> band 2 -->
+  <line x1="390" y1="226" x2="390" y2="300" class="f" marker-end="url(#a)"/>
+  <path d="M1347,226 V246 H440 V300" class="d" marker-end="url(#g)"/>
+  <path d="M705,226 V256 H1012 V300" class="f" marker-end="url(#a)"/>
+  <line x1="1015" y1="226" x2="1015" y2="256" class="f"/>
+  <line x1="490" y1="387" x2="506" y2="387" class="f" marker-end="url(#a)"/>
+
+  <!-- ============ BAND 3: capri_data/ ============ -->
+  <rect x="12" y="508" width="1516" height="284" rx="12" fill="#f1faf3" stroke="#86c497" stroke-width="1.5"/>
+  <text x="30" y="538" class="hb">3.  capri_data/ (shipped, CSV + JSON)</text>
+  <text x="30" y="564" class="s">What the model reads:</text>
+  <text x="30" y="583" class="s">base 2017 and CAPRI's</text>
+  <text x="30" y="602" class="s">2030 reference</text>
+
+  <g>
+    <rect x="240" y="546" width="204" height="160" rx="8" fill="#e3f4e7" stroke="#2f8a4c"/>
+    <text x="254" y="568" class="h">2017/supply/</text>
+    <text x="254" y="590" class="t">• areas, yields, herds</text>
+    <text x="254" y="608" class="t">• costs, premiums</text>
+    <text x="254" y="626" class="t">• land market, rents</text>
+    <text x="254" y="644" class="t">• intensities (DCOL/</text>
+    <text x="266" y="662" class="t">DCOH, bulls, grass)</text>
+    <text x="254" y="680" class="t">• PMP terms, elasticities</text>
+
+    <rect x="454" y="546" width="204" height="160" rx="8" fill="#e3f4e7" stroke="#2f8a4c"/>
+    <text x="468" y="568" class="h">2017/market/</text>
+    <text x="468" y="590" class="t">• bilateral flows and</text>
+    <text x="480" y="608" class="t">regions 2017, 2030</text>
+    <text x="468" y="626" class="t">• TRQs, Armington rho</text>
+    <text x="468" y="644" class="t">• GL demand, ProcNQ</text>
+    <text x="468" y="662" class="t">• dairy, biofuels,</text>
+    <text x="480" y="680" class="t">feed bulks, prices</text>
+
+    <rect x="668" y="546" width="204" height="160" rx="8" fill="#e3f4e7" stroke="#2f8a4c"/>
+    <text x="682" y="568" class="h">2017/environment/</text>
+    <text x="682" y="590" class="t">• CH4, N2O, NH3 factors</text>
+    <text x="682" y="608" class="t">• N balance items 2030</text>
+    <text x="682" y="626" class="t">• fertiliser priors,</text>
+    <text x="694" y="644" class="t">crop groups (N, P, K)</text>
+    <text x="682" y="662" class="t">• manure losses, trade</text>
+    <text x="682" y="680" class="t">• histosols, LUC</text>
+
+    <rect x="882" y="546" width="204" height="160" rx="8" fill="#e3f4e7" stroke="#2f8a4c"/>
+    <text x="896" y="568" class="h">2017/abatement/</text>
+    <text x="896" y="590" class="t">• ammonia/: N cascade,</text>
+    <text x="908" y="608" class="t">AD, leaching, Nitrates</text>
+    <text x="908" y="626" class="t">Directive, options</text>
+    <text x="896" y="644" class="t">• mitigation/: genetics,</text>
+    <text x="908" y="662" class="t">low-N feed, supplements</text>
+    <text x="896" y="680" class="t">• fertiliser options</text>
+
+    <rect x="1096" y="546" width="204" height="160" rx="8" fill="#e3f4e7" stroke="#2f8a4c"/>
+    <text x="1110" y="568" class="h">2017/policy/, feed/</text>
+    <text x="1110" y="590" class="t">• CAP payments, greening</text>
+    <text x="1110" y="608" class="t">• tariffs</text>
+    <text x="1110" y="626" class="t">• Green Deal targets,</text>
+    <text x="1122" y="644" class="t">mineral fertiliser rules</text>
+    <text x="1110" y="662" class="t">• requirements, rations,</text>
+    <text x="1122" y="680" class="t">fodder balances</text>
+
+    <rect x="1310" y="546" width="204" height="160" rx="8" fill="#e3f4e7" stroke="#2f8a4c"/>
+    <text x="1324" y="568" class="h">shared/, trajectories/</text>
+    <text x="1324" y="590" class="t">• region_capri_map, NUTS</text>
+    <text x="1336" y="608" class="t">correspondences</text>
+    <text x="1324" y="626" class="t">• model_parameters.csv</text>
+    <text x="1324" y="644" class="t">• capri_ref_2030.json,</text>
+    <text x="1336" y="662" class="t">captrd, null; 2030 prices</text>
+    <text x="1324" y="680" class="t">• validation/: CAPRI refs</text>
+  </g>
+
+  <rect x="240" y="718" width="1274" height="58" rx="8" fill="#f7fbf8" stroke="#2f8a4c" stroke-dasharray="7 5"/>
+  <text x="254" y="741" class="t"><tspan class="h">Metadata</tspan>   MANIFEST.json (expected files and shapes) · INPUT_SCHEMA.json, INPUT_MANIFEST.json (declared inputs, units, consumers) ·</text>
+  <text x="254" y="764" class="t">DATA_SOURCING_REGISTRY.json (provenance of each dataset, fixes made) · FITNESS_FOR_USE.json (how far each output can be trusted) · archive/ (superseded)</text>
+
+  <!-- band 2 -> band 3 -->
+  <path d="M1012,470 V492 H770 V542" class="f" marker-end="url(#a)"/>
+  <text x="1022" y="502" class="m">CSV and JSON per domain</text>
+
+  <!-- ============ BAND 4: LOADING, CHECKS & USE ============ -->
+  <rect x="12" y="812" width="1516" height="214" rx="12" fill="#fff8ee" stroke="#e6b26a" stroke-width="1.5"/>
+  <text x="30" y="842" class="hb">4.  LOADING, CHECKS &amp; USE</text>
+  <text x="30" y="868" class="s">How the data reach the</text>
+  <text x="30" y="887" class="s">model, and how they are</text>
+  <text x="30" y="906" class="s">checked</text>
+
+  <rect x="240" y="854" width="296" height="152" rx="8" fill="#fff0db" stroke="#d48a26"/>
+  <text x="254" y="876" class="h">capri_mod/data/loaders.py</text>
+  <text x="254" y="898" class="t">• load_all_data(data_dir): core tables</text>
+  <text x="266" y="916" class="t">(areas, yields, herds, prices, costs,</text>
+  <text x="266" y="934" class="t">premiums, coefficients, land, tariffs)</text>
+  <text x="254" y="952" class="t">• resolve_data_file: shared/, then</text>
+  <text x="266" y="970" class="t">2017/&lt;category&gt;/</text>
+  <text x="254" y="995" class="m">CAPRIModel(data_dir="capri_data")</text>
+
+  <rect x="556" y="854" width="296" height="152" rx="8" fill="#fff0db" stroke="#d48a26"/>
+  <text x="570" y="876" class="h">Modules reading their own files</text>
+  <text x="570" y="898" class="t">• supply: land market, fodder, options,</text>
+  <text x="582" y="916" class="t">N cascade, leaching, fertiliser priors</text>
+  <text x="570" y="934" class="t">• market: bilateral flows, demand,</text>
+  <text x="582" y="952" class="t">dairy, biofuels (by market year)</text>
+  <text x="570" y="970" class="t">• projection: trajectory, 2030 prices</text>
+  <text x="570" y="995" class="m">params.py: model_parameters.csv</text>
+
+  <rect x="872" y="854" width="296" height="152" rx="8" fill="#fff0db" stroke="#d48a26"/>
+  <text x="886" y="876" class="h">Checks</text>
+  <text x="886" y="898" class="t">• python -m capri_mod.data.validate_data</text>
+  <text x="898" y="916" class="t">(files, shapes, sanity, provenance)</text>
+  <text x="886" y="934" class="t">• tools/verify_schema.py</text>
+  <text x="886" y="952" class="t">• tools/check_regression.py</text>
+  <text x="886" y="970" class="t">• tests: data loads, no synthetic data,</text>
+  <text x="898" y="988" class="t">CAPRI reproduced per mechanism</text>
+
+  <rect x="1188" y="854" width="326" height="152" rx="8" fill="#fffaf2" stroke="#d48a26" stroke-dasharray="7 5"/>
+  <text x="1202" y="876" class="h">Limits</text>
+  <text x="1202" y="898" class="t">• only base year 2017 exists; base_year</text>
+  <text x="1214" y="916" class="t">does not switch every file yet</text>
+  <text x="1202" y="934" class="t">• 2030 inputs (CAPRI's reference) are</text>
+  <text x="1214" y="952" class="t">stored next to the 2017 files</text>
+  <text x="1202" y="970" class="t">• rebuilding needs CAPRI's result dumps</text>
+  <text x="1214" y="988" class="t">(paths in each builder's docstring)</text>
+
+  <!-- band 3 -> band 4 -->
+  <path d="M560,776 V820 H388 V850" class="f" marker-end="url(#a)"/>
+  <line x1="704" y1="776" x2="704" y2="850" class="f" marker-end="url(#a)"/>
+  <line x1="1000" y1="776" x2="1000" y2="850" class="f" marker-end="url(#a)"/>
+  <path d="M1250,776 V820 H1080 V850" class="d" marker-end="url(#g)"/>
+
+  <!-- legend -->
+  <line x1="30" y1="1054" x2="90" y2="1054" class="f" marker-end="url(#a)"/>
+  <text x="100" y="1058" class="t">data flow</text>
+  <line x1="220" y1="1054" x2="280" y2="1054" class="d" marker-end="url(#g)"/>
+  <text x="290" y="1058" class="t">conversion / metadata checks</text>
+  <rect x="520" y="1044" width="44" height="20" rx="4" fill="#fffaf2" stroke="#d48a26" stroke-dasharray="7 5"/>
+  <text x="574" y="1058" class="t">notes and metadata</text>
+</svg>

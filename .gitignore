@@ -1,7 +1,7 @@
 __pycache__/
 *.py[cod]
 *.egg-info/
-build/
+/build/
 dist/
 .venv/
 venv/
@@ -13,10 +13,15 @@ venv/
 *.pre_capreg_merge
 
 # Raw CAPRI exports. These are large gdxdump listings (ALL_DATA2.txt alone is
-# ~129 MB) and are inputs to tools/ingest_capreg_data2.py, not repository
+# ~129 MB) and are inputs to tools/build/ingest_capreg_data2.py, not repository
 # content. Keep them outside the tree or attach them to a release.
 capri_export/
 DATA2_*.txt
 *.gdx
-capri_data_snapshot/
-.vs/
+.cache/
+
+# CAPRI's own files converted for the parity tests (large; rebuilt by tools/build/build_*_reference.py from the
+# uploads); only their README is versioned
+capri_reference/*/
+# the data pipeline's store (raw downloads, Delta tables, manifest): relocatable, rebuilt from the manifest
+capri_data/pipeline/store/

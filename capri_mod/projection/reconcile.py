@@ -227,7 +227,7 @@ def _feed_plausibility(data: Dict) -> List[str]:
     if animals is None or land is None or animals.empty or land.empty:
         return warnings_out
 
-    GRAZERS = [c for c in ("DCOW", "BCOW", "BULL", "HFRS", "CALV", "SHGP")
+    GRAZERS = [c for c in ("DCOW", "BCOW", "BULL", "HFRS", "CALV", "SHGM", "SHGF")
                if c in animals.columns]
     if not GRAZERS or "GRASSLAND" not in land.columns:
         return warnings_out

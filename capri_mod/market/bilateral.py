@@ -51,10 +51,14 @@ class BilateralCommodity:
         n = len(self.regions)
         X = self.X0.copy()
         off = ~np.eye(n, dtype=bool)
+        # regions whose CAPRI exports exceed the cap on the model's base supply: (region, exports / supply). Recorded
+        # so the runs show whether the 0.98 (not CAPRI's: PROXY_AUDIT S192) is ever reached
+        self.export_cap_hits = []
         for j in range(n):
             e = float(X[off[:, j], j].sum())
             cap = max_export_share * max(float(S0[j]), 0.0)
             if e > cap:
+                self.export_cap_hits.append((self.regions[j], e / float(S0[j]) if float(S0[j]) > 0 else float("inf")))
                 f = cap / e if e > 0 else 0.0
                 X[off[:, j], j] *= f
         E = np.array([X[off[:, j], j].sum() for j in range(n)])
@@ -78,16 +82,23 @@ class BilateralCommodity:
         self._has_imp = M > 0
         self._has_dom = DS > 0
 
-    # EU tariff-rate quotas (CAPRI TRQ regime, bilateral TrqNT): importer row, per exporter quota (1000 t),
-    # out-of-quota minus in-quota price gap (EUR/t), share of the flow under the quota regime at base
-    trq_row: Optional[int] = None
+    # EU tariff-rate quotas (CAPRI TRQ regime, bilateral TrqNT): importer row (or rows: the EU's quotas are filled
+    # by the imports of both EU trade blocks), per exporter quota (1000 t), out-of-quota minus in-quota price gap
+    # (EUR/t), share of the flow under the quota regime at base
+    trq_row: Optional[object] = None
     trq_Q: Optional[np.ndarray] = None
     trq_gap: Optional[np.ndarray] = None
     trq_share: Optional[np.ndarray] = None
     trq_offset: Optional[np.ndarray] = None
+    #: base quotas (1000 t) when a scenario changes the quota volumes (MarketModule._apply_trq_volumes); the base
+    #: fill, at which the base tariff regime is calibrated, is taken at these
+    trq_Q0: Optional[np.ndarray] = None
     #: CAPRI p_trqSigmoidSlope = 200 on (imports - 0.97 quota) / quota: the tariff moves from in- to
     #: out-of-quota within about +-3% of the quota (arm/market_model.gms trqSigmoidFunc_)
     TRQ_SLOPE = param("TRQ_SLOPE")
+
+    def _rows(self) -> np.ndarray:
+        return np.atleast_1d(np.asarray(self.trq_row, dtype=int))
 
     def _sig(self, f):
         return 1.0 / (1.0 + np.exp(-np.clip(self.TRQ_SLOPE * (f - 0.97), -60, 60)))
@@ -98,14 +109,17 @@ class BilateralCommodity:
         bisection, so the steep CAPRI sigmoid is solved without oscillating."""
         if self.trq_row is None:
             return
-        i = self.trq_row
+        rows = self._rows()
         new = self.trq_offset.copy()
         for j in np.where(self.trq_Q > 0)[0]:
-            xj, pj, oc, g = float(X[i, j]), float(p[i, j]), float(self.trq_offset[j]), float(self.trq_gap[j])
+            xj = float(X[rows, j].sum())
+            pj = float((X[rows, j] * p[rows, j]).sum() / xj) if xj > 0 else float(p[rows[0], j])
+            oc, g = float(self.trq_offset[j]), float(self.trq_gap[j])
             if xj <= 0 or pj <= 0 or g <= 0:
                 continue
             k = self.trq_share[j] / self.trq_Q[j]
-            s0 = self._sig(k * self.X0[i, j])
+            Qb = float(self.trq_Q0[j]) if self.trq_Q0 is not None else float(self.trq_Q[j])
+            s0 = self._sig(self.trq_share[j] / Qb * float(self.X0[rows, j].sum())) if Qb > 0 else 0.0
 
             def h(o):
                 xo = xj * (pj / max(pj + o - oc, 1e-6)) ** self.s2
@@ -127,18 +141,25 @@ class BilateralCommodity:
         smoothed the same way), relative to the base fill so the base is reproduced."""
         if self.trq_row is None:
             return None
-        i = self.trq_row
+        rows = self._rows()
         with np.errstate(divide="ignore", invalid="ignore"):
-            f = np.where(self.trq_Q > 0, self.trq_share * X[i] / np.where(self.trq_Q > 0, self.trq_Q, 1.0), 0.0)  # fill
-            f0 = np.where(self.trq_Q > 0, self.trq_share * self.X0[i] / np.where(self.trq_Q > 0, self.trq_Q, 1.0), 0.0)
+            f = np.where(self.trq_Q > 0, self.trq_share * X[rows].sum(axis=0) / np.where(self.trq_Q > 0, self.trq_Q, 1.0), 0.0)  # fill
+            Qb = self.trq_Q0 if self.trq_Q0 is not None else self.trq_Q
+            f0 = np.where(Qb > 0, self.trq_share * self.X0[rows].sum(axis=0) / np.where(Qb > 0, Qb, 1.0), 0.0)
         return np.where(self.trq_Q > 0, self.trq_gap * (self._sig(f) - self._sig(f0)), 0.0)
 
     def import_prices(self, r: np.ndarray, tariff_add: float = 0.0, importer: Optional[int] = None) -> np.ndarray:
         p = self.a * r[None, :] + self.b
         if self.trq_row is not None and self.trq_offset is not None:
-            p[self.trq_row] = p[self.trq_row] + self.trq_offset
+            rows = self._rows()
+            p[rows] = p[rows] + self.trq_offset[None, :]
         if tariff_add and importer is not None:
-            p[importer] = p[importer] + (self.a0[importer] * r + 0.0) * tariff_add / 100.0
+            # importer: a row, or the rows of the EU trade blocks (a change of the EU's external tariff); flows
+            # between the importer rows carry no tariff
+            imp = np.atleast_1d(np.asarray(importer, dtype=int))
+            for i_ in imp:
+                ext = ~np.isin(np.arange(len(r)), imp)
+                p[i_] = p[i_] + np.where(ext, self.a0[i_] * r, 0.0) * tariff_add / 100.0
         return p
 
     def prices(self, r: np.ndarray, p: Optional[np.ndarray] = None):

@@ -1,246 +1,126 @@
 # Data extraction fixes
 
-Two extraction faults, plus one solver-budget issue surfaced by the second fix.
+Status: revised 20 October 2026 against the code. This is a record of data-level faults found and fixed during the
+project, kept for their causes and the guards they left behind. All of it is historical: several fixes were later
+superseded by rebuilding the data from CAPRI's 2017 results (Sprint 9s; docs/SYNTHETIC_DATA_AUDIT.md), as noted per
+item. Full provenance of each dataset and fix: `capri_data/DATA_SOURCING_REGISTRY.json`; effect on results:
+CHANGELOG.md.
 
-Gate before / after:
+Current data checks (20 October 2026): `python -m capri_mod.data.validate_data capri_data` gives 12 pass, 1 warning
+(a stale row count in MANIFEST.json for `fert_side_effects.csv`), 0 fail; `python tools/check/verify_schema.py`;
+`python tools/check/check_regression.py`.
 
-| Check | Before | After |
-|---|---|---|
-| Validator | 11 pass, 1 warn, 0 fail | 12 pass, 0 warn, 0 fail |
-| Base-year market fidelity | 12/12 | 12/12 |
-| Supply convergence (30-region sample) | 27/30 | **30/30** |
-| Test suite | 10 tests | **12 tests, all passing** |
+## Activity-code corruption (OANI)
 
----
+Four spellings of CAPRI's `OANI` ("other animals", `capreg/regio_sets.gms`) were in circulation: the ASCII code,
+a form with Cyrillic homoglyphs (`OАНИ`, in `definitions.py`, `loaders.py`, `model.py`, `utils.py` and four data
+files), a doubled-I form (`OANII`, feed module and `producer_prices.csv`) and both together (environmental module).
+The canonical activity list used one spelling and the feed and environmental modules others, so every "other animals"
+feed requirement and emission coefficient silently fell through to a default, without an error.
 
-## Fix 1 — activity-code corruption
+Fixed by `tools/normalize_activity_codes.py` (25 occurrences in 12 files, idempotent). Guards:
+`test_no_corrupted_activity_codes`, `test_data_headers_are_ascii`. Still valid.
 
-Four spellings of CAPRI's `OANI` ("other animals") were in circulation, and the
-canonical activity list used none of the ones the modules used:
+`cons_levls.gms` rescales `OANI` by 1000 and reverses it later in the same file: an internal transform around CAPRI's
+own bounds, not a property of the delivered data; no unit correction was needed.
 
-| Spelling | Bytes | Where |
-|---|---|---|
-| `OANI` | `4F 41 4E 49` | CAPRI truth (`capreg/regio_sets.gms`) — reference files only |
-| `OАНИ` | `4F 0410 041D 0418` | Cyrillic homoglyphs — `definitions.py`, `loaders.py`, `model.py`, `utils.py`, 4 data files |
-| `OANII` | doubled I | `feed_module.py`, `producer_prices.csv` |
-| `OАНИИ` | Cyrillic + doubled I | `environmental_module.py` |
+## Crop yields: from synthetic values to CAPRI's (superseded)
 
-`definitions.py` declared the canonical activity list with the Cyrillic form
-while the feed and environmental modules looked up the doubled-I forms, so every
-"other animals" feed requirement and emission coefficient silently missed and
-fell through to a default. No error was ever raised.
+`yields.csv` was labelled `REAL_CAPRI` in the registry, but sixteen of its forty columns carried a synthetic
+fingerprint (a constant times lognormal noise at sigma 0.10: a coefficient of variation of 0.089-0.101 across all
+regions, where real regional yields scatter at 0.2-0.5). Every livestock yield and grass were generated; the +388%
+grass deviation recorded at the time was a synthetic value, not a fresh-versus-dry-matter unit problem.
 
-Fixed by `tools/normalize_activity_codes.py` — 25 occurrences across 12 files
-rewritten to `OANI`. Idempotent.
+Steps, in order (tools kept in `tools/`):
 
-Two guard tests now prevent recurrence: `test_no_corrupted_activity_codes` and
-`test_data_headers_are_ascii`.
+1. COCO yields merged where the region code matched (`tools/merge_coco_yields.py`; `NUTS2 + "0000"` validated
+   against `capreg/regio_sets.gms`; 160 of 248 regions; 1,026 cells). Against an independent COCO2 2017 national
+   benchmark the merge brought no measurable gain (median error 20.1% before, 20.9% after), plausibly because the
+   COCO export was "latest year per region/crop", a vintage mix (1988-2020 in its sibling price file).
+2. capreg DATA2 yields (`res_17<MS>`, base year 2017) for crops and livestock (per head; registry entries
+   `yields.csv` and `yields.csv_livestock`).
+3. Sprint 9s: every crop column rebuilt for all 248 regions from the 27 member-state dumps
+   (`tools/build/build_crop_economics_2017.py`), together with prices, costs and premiums.
 
-**Correction to an earlier concern.** `cons_levls.gms` does rescale `OANI` by
-1000, but it reverses the operation at line 2617, so it is an internal transform
-around CAPRI's own `cons_yields` bounds and not a property of the delivered data.
-No unit correction was needed. Checked empirically after the join: `OANI` sits at
-0.0031, in line with `BROI` at 0.0021 and `LAYS` at 0.0186.
+The pre-merge backup `yields.csv.pre_coco_merge` and its revert instruction no longer apply (the file is gone). The
+`detect_synthetic_columns.py` fingerprint audit remains available (`python tools/check/detect_synthetic_columns.py
+capri_data`).
 
-Convergence rose from 27/30 to 29/30 on this fix alone.
+## Solver budget of the regional QP (historical)
 
----
+After the COCO merge DE11 stopped converging: the general solver ("maximum number of function evaluations is
+exceeded") had run out of iterations within 8% of base, not diverged. `SOLVER_MAXITER` was raised from 1,000 to 3,000
+(`capri_mod/supply/supply_module.py`; 3,000 and 6,000 iterations gave the same activity levels). It concerns the
+general-solver fallback of the conic/QP form only; the default NLP form is solved by IPOPT (README 5.3).
 
-## Fix 2 — synthetic yields replaced with CAPRI's own
+## Policy validation and base-year repair
 
-`yields.csv` was labelled `REAL_CAPRI` in the sourcing registry. Sixteen of its
-forty columns carried a synthetic fingerprint: a constant multiplied by lognormal
-noise at sigma 0.10, giving a coefficient of variation between 0.089 and 0.101
-across all 248 regions. Real regional yields scatter at CV 0.2–0.5.
+Data-level fixes made while validating against CAPRI:
 
-Every livestock yield was generated. So was `GRAS` — which explains the +388%
-deviation against the trends file recorded in the point-3 notes. That was never a
-fresh-versus-dry-matter unit problem; the model side was simply synthetic, so the
-comparison had nothing to measure.
+- **Livestock yields unit-inconsistent across regions**: about 56 regions carried animal yields in tonnes per head,
+  about 192 in kg per head; reconciled at load time (`_reconcile_animal_yield_units` in
+  `capri_mod/data/loaders.py`). The thin or negative livestock margins this produced had distorted the carbon MACC
+  then in use (since retired).
+- **Nitrogen balance**: two unit errors. Grass yield (fresh matter, kg/ha) supplied 99.3% of total N uptake, and
+  manure N was divided by a further 1,000. The balance was later rebuilt on CAPRI's definition and items
+  (e_SURTOTHa; README 7.5).
+- **Permanent land bound**: the `PERMANENT` land figure and the crop areas disagreed in 56 of 248 regions
+  (4,640 kha), so the base year violated its own constraint and the solver cut olives by 78%. The bound became
+  `max(land figure, observed area)`; land is now CAPRI's land market with land types as variables.
+- **Market base production**: SUA overrides had pushed world totals about 27% above the reference, and a clamp
+  fabricated consumption where net exports exceeded production. World supply and demand were rebalanced; the market
+  now uses CAPRI's bilateral flows and balances (README 6).
+- **Permanent-crop elasticities**: literature priors made permanent crops about 10 times less elastic than annual
+  crops, while CAPRI's own `p_elasSupp` has them 2.47 times more elastic; rescaled to CAPRI's structure, and since
+  replaced by CAPRI's per-country values (KNOWN_ISSUES K30).
 
-CAPRI's real crop yields were already in the repository, unused, at
-`capri_data/sources/coco/coco_yields.csv`. They appeared incompatible because
-COCO keys regions as `DE110000` and the model uses `DE11`. The crosswalk is
-`NUTS2 + "0000"`, validated against the 1455 authoritative codes in
-`gams/capreg/regio_sets.gms`: **160 of 248 regions match**.
+Other entries of the same period (registry names in brackets; details in the registry and CHANGELOG.md):
 
-`tools/merge_coco_yields.py` applies it under the point-3 discipline — one input
-only, certain region matches only, non-market activities excluded, and a margin
-guard reusing the validator's own `_ARTIFACT_LOSS` threshold so no substitution
-may push a healthy crop into implausible loss.
+- fixed nitrogen coefficients per activity, so an N constraint could be met only by cutting area: a nitrogen
+  intensity margin was added (`nitrogen_intensity_margin`; the N target now acts through CAPRI's fertilisation
+  block), and likewise a livestock intensity margin, an identity at base (`livestock_intensity_margin`);
+- yields that did not respond to price, as CAPRI's do (`yield_price_response`; now CAPRI's yield elasticities);
+- state leaking from one solve into the next (`solve_state_leaks_fixed`);
+- grass yield in fresh matter (kg/ha) among crops in t/ha, the cause of five separate defects; the grass unit fixed
+  at its source (`grass_unit_fixed_at_source`);
+- Ireland's livestock missing (245 regions instead of 248; `ireland_livestock_missing`);
+- poultry head count units (million head; `poultry_head_count_units`);
+- NUTS transition regions carrying synthetic-looking values (`nuts_transition_synthetic_regions`);
+- a post-solve safety rail that pushed solutions off the policy constraints (`rail_overrode_policy_constraints`);
+- pesticide and organic yield shocks missing from the output (`yield_shocks_missing_from_output`);
+- the regional wine price dropped silently because of CAPRI's TWIN code (`wine_price_silent_drop`);
+- meat prices that never moved because the livestock market bridge passed no output (`livestock_market_bridge`);
+- the environmental table left empty by a swallowed error (`environmental_table_empty`);
+- the nitrogen balance's two offsetting errors (`nitrogen_balance_rebuilt`).
 
-Result: **1026 cells replaced, 0 rejected by the margin guard.** Median absolute
-deviation of the synthetic values that were overwritten:
+## October 2026: correspondence, demand, reporting, environment
 
-```
-TAGR 171.6   CITR 83.8   OLIV 80.9   TOMA 49.7   OATS 39.9
-OOIL 33.8    OCER 30.7   APPL 24.1   RYEM 17.3   PULS 15.7
-DWHE 14.8    POTA 14.7   SWHE 12.8   SUNF 12.7   BARL 12.6
-SOYA 12.1    SUGB 10.4   RAPE  9.4   TOBA  8.8
-```
+- **Estonian sugar beet yield (23 October 2026)**: `yields.csv` carried 500 t/ha for EE00 SUGB. Neither CAPRI nor
+  CAPREG has a sugar beet activity or yield in Estonia (CAPRI's Estonian SUGB rows are trade and use only), and the EU
+  median is 65 t/ha. The value has no source. It is set to 0, since the activity has no level. With zero-level
+  activities free to enter (KNOWN_ISSUES K69) it produced 80 Mt of beet on 171 kha and the EU sugar price cycle of
+  the Farm-to-Fork 2030 runs. The other 64 regions without sugar beet area carry yields filled from elsewhere; those
+  are inert once zero-level activities are held at zero as in CAPRI (K69).
+- **NUTS correspondence**: CAPRI's regional rows for 73 regions (all of France, several German states, Bulgaria,
+  Greece, Italy, Sweden, Norway, part of Poland) never reached the model, which gave them national averages for
+  revenue, manure and feed per head. Pairs were added only when CAPRI's agricultural area matched the model's (exact
+  to 0.2%, or within 1% and unambiguous) and dairy herds (or wheat + barley area) matched within 3%; the second test
+  rejected three coincidental matches. Bulgaria uses CAPRI's own region order. The runtime map is now
+  `capri_data/shared/region_capri_map.csv` (`tools/build/build_region_map.py`).
+- **Demand price reference**: demand measured price changes against the base world price instead of the base
+  domestic price, cutting every tariff-protected region's base demand by (1 + tariff)^elasticity (EU beef 17% too
+  low). Fixed; base results unchanged. Food demand is now CAPRI's Generalised Leontief system.
+- **EU price reporting**: reported EU prices omitted the Armington premium farmers respond to; `domestic_prices` now
+  carries the producer price (`wedge_prices` keeps the old value).
+- **Ammonia**: a housing-only factor plus a "soils = 10% of livestock" proxy replaced by CAPRI's factors per region
+  and animal (`nh3_factors_capri.json`, from the 2030 reference run); ammonia now follows CAPRI's N loss cascade
+  (docs/N_CASCADE_SPEC.md).
+- **Land-market units**: CAPRI's land-market terms are per hectare, the model's land in 1000 ha (factor 1,000).
+- **Environmental module in the regional models**: the regional models had no access to it, so two calculations
+  fell back silently to cruder values; it is now passed to every regional model and fallbacks warn.
 
-### Coverage is partial — read this before quoting the fix
+## Open from this record
 
-160 matched regions is not 160 regions of real data per column. COCO has gaps,
-and 1140 cells were skipped as zero or missing. Measured against regions where
-the crop is actually grown:
-
-- Best case 43% (`SWHE`, `BARL`); staples generally 30–43%
-- `TOBA` 10.5%, `OOIL`/`SOYA`/`DWHE` 17–19%
-- `CITR`, `TAGR`, `OLIV`, `OATS`, `TOMA`, `APPL` around 1% — still effectively synthetic
-
-The registry now records this per column, with measured coverage percentages, so
-the file can no longer claim more than it holds. `tools/detect_synthetic_columns.py`
-re-runs the fingerprint audit and cross-checks it against the registry; it reports
-no conflicts.
-
-### Update after coco2.csv arrived — the merge is NOT validated
-
-`coco2.csv` (the real COCO2 dump, 7.9M rows, explicit years) provides an
-independent 2017 national benchmark. Units are kg/ha; divide by 1000 for t/ha,
-confirmed against SWHE at 5143.9 kg/ha.
-
-Aggregating the model's regional yields to national level with area weights and
-comparing against COCO2 national 2017, over 328 country x crop pairs:
-
-| | median absolute error vs COCO2 2017 |
-|---|---|
-| synthetic yields (before merge) | 20.1% |
-| merged COCO yields (after) | 20.9% |
-
-Restricting to the 114 aggregates the merge actually moved by more than 1%:
-12.2% before, 13.8% after, with only **36% of aggregates improving**.
-
-**The merge produced no measurable accuracy gain.** The vintage corruption
-plausibly cancels the benefit of using real numbers.
-
-One caveat in the other direction: this test measures national aggregates, so it
-cannot see regional *signal* quality. The synthetic values were built around a
-national anchor with 10% noise, so they sit close to national means by
-construction while carrying no real regional variation at all. The merged values
-carry genuine regional pattern — which is what PMP cross-effects need — at a
-possibly wrong level. Whether that trade is worth making is a modelling judgement,
-not something this test settles.
-
-Revert with:
-
-    cp capri_data/2017/supply/yields.csv.pre_coco_merge \
-       capri_data/2017/supply/yields.csv
-
-### Vintage caveat — the underlying cause
-
-`coco_provenance.json` records the source of `coco_yields.csv` as
-`agriprod_and_fss_data_export.xlsx p_agriProd YILD, **latest year per region/crop**`.
-
-That is an Excel export, not a GDX read, and "latest year per cell" means the file
-is a ragged vintage mix rather than a 2017 snapshot. `coco_yields.csv` dropped its
-year column, so the per-cell vintage is not recoverable from it. Its sibling from
-the same pipeline, `coco_producer_prices.csv`, kept the column and shows the
-spread: 1988 to 2020, with 548 cells at 2020, 126 at 2005, 55 at 1999 — and only
-8 at 2017.
-
-If yields were exported the same way, the values merged in Fix 2 are real
-measurements from mostly the wrong years. That is likely still an improvement over
-invented numbers, since yields move far more slowly than prices and real agronomic
-variation across regions is the property PMP needs. But it is not the clean win the
-table above implies, and the base-fidelity test cannot detect it because that test
-runs on market prices, not yields.
-
-Treat the merged columns as *real but vintage-uncertain* until the file is
-re-exported at a fixed year. `yields.csv.pre_coco_merge` allows a revert.
-
-
-
-The yield merge dropped DE11 out of convergence. The cause was not a bad cell:
-all seven changed values moved by factors of 0.78–0.97, which is what real yields
-replacing generated ones should look like. The solver returned
-`maximum number of function evaluations is exceeded` while sitting within 8% of
-base on every activity — it had run out of iterations, not diverged.
-
-The regional programme is a convex QP with a positive-definite PMP matrix and
-linear constraints, so the optimum is unique and more iterations approach the
-same point. `SOLVER_MAXITER` raised from 1000 to 3000, which clears the full
-sample at roughly 8% extra runtime. Verified rather than assumed: the maximum
-relative difference in solved activity levels between 3000 and 6000 iterations is
-**0.0000%**.
-
----
-
-## What remains
-
-0. **Re-export COCO from the GDX at a fixed year** — highest value item. See the
-   vintage caveat above. Files to look for in the CAPRI tree:
-   `results/coco/coco1_output.gdx`, `results/coco/coco1_output/coco1_output_<MS>.gdx`,
-   and the `dat/` folder. None are in `gams.zip`, which holds only the source tree.
-1. **NUTS2 crosswalk for the 88 unmatched regions** — FR 21, IT 21, DE 15, EL 9,
-   PL 7, then FI/IE/HR/HU/SI/LT. These sit on the old classification
-   (`FR21 Champagne-Ardenne` vs `FRF2`) and need a real mapping table, not a rule.
-   `gams/capreg/` holds official Eurostat correspondence tables, but only for
-   1995-2010. The French and Italian renamings happened in NUTS 2016 and 2021, so
-   those tables stop short; the 2013/2016/2021 correspondence is needed.
-2. **COCO gaps** — even matched regions are only 30–43% real for staples. Worth
-   checking whether a fuller COCO extract exists in the CAPRI results tree.
-3. **Livestock yields** — all still synthetic. COCO carries no livestock, so these
-   need `capreg` output.
-4. **The margin warning** — 419 specialty crops still show implausible post-CAP
-   losses (`DEA1/OVEG -65593`). Unrelated to these fixes; points at price-data
-   gaps for specialty crops.
-5. **Vintage mixing** — 2017 base with 2021 trade is still live and untouched here.
-
-## Reproducing
-
-```bash
-python tools/normalize_activity_codes.py .
-python tools/merge_coco_yields.py --capri-gams /path/to/capri/gams --dry-run
-python tools/merge_coco_yields.py --capri-gams /path/to/capri/gams
-python tools/detect_synthetic_columns.py capri_data
-python tools/run_tests.py          # or: pytest capri_mod/tests/ -v
-```
-
-`yields.csv.pre_coco_merge` holds the pre-merge backup.
-
-## Session: policy validation and base-year repair
-
-Data-level fixes made while validating against CAPRI. Full provenance in
-`capri_data/DATA_SOURCING_REGISTRY.json`; narrative in `CHANGELOG.md`.
-
-- **Livestock yields unit-inconsistent across regions.** ~56 regions carried
-  animal yields in tonnes/head, ~192 in kg/head. Reconciled at load time
-  (`_reconcile_animal_yield_units`) onto the kg basis the supply module's
-  conversion expects. Base fidelity unchanged; the carbon MACC moved from 6.3%
-  to 1.2% at EUR50/t, into agreement with EcAMPA.
-- **Nitrogen balance.** Two unit errors: grass yield is fresh matter in kg/ha
-  and supplied 99.3% of total N uptake; manure N was divided by a further 1000
-  and sat at effectively zero. Median surplus moved from −170,196 to +54 kg N/ha
-  against a real EU ~45–50.
-- **Permanent land bound.** The `PERMANENT` figure and the crop areas disagree in
-  56 of 248 regions (4,640 kha), so the base year violated its own constraint and
-  the solver cut olives by 78%. Bound is now `max(land figure, observed area)`.
-- **Market base production.** `real_world` SUA overrides drifted world totals ~27%
-  above reference; a clamp fabricated consumption where net exports exceeded
-  production. World supply and demand now balance to 0.00%.
-- **Permanent-crop elasticities.** Literature priors made them ~10x *less* elastic
-  than annuals; CAPRI's own `p_elasSupp` has them 2.47x *more*. Rescaled to
-  CAPRI's relative structure.
-
-## Session: October 2026 — correspondence, demand, reporting, environment
-
-- **NUTS correspondence**: CAPRI's regional rows for 73 regions (all of France, several
-  German states, Bulgaria, Greece, Italy, Sweden, Norway, part of Poland) never reached the
-  model, so they received national averages for revenue, manure and feed per head. Pairs
-  added only when CAPRI's agricultural area matched the model's (exact to 0.2%, or within 1%
-  and unambiguous) **and** dairy herds (or wheat + barley area) matched within 3%; the second
-  test rejected three coincidental matches (one Italian, one Norwegian, one Polish).
-  Bulgaria uses CAPRI's own region order.
-- **Demand price reference**: demand measured price changes against the base *world* price
-  instead of the base *domestic* price, cutting every tariff-protected region's base demand
-  by (1 + tariff)^elasticity (EU beef 17% too low). Fixed; base results unchanged.
-- **EU price reporting**: reported EU prices omitted the Armington premium farmers respond
-  to; `domestic_prices` now carries the producer price (`wedge_prices` keeps the old value).
-- **Ammonia**: a housing-only factor plus "soils = 10% of livestock" proxy replaced by CAPRI's
-  factors per region and animal (`nh3_factors_capri.json`, from the 2030 reference run).
-- **Land-market units**: CAPRI's land-market terms are per hectare, the model's land in
-  1000 ha (factor 1,000; land-supply elasticities then fall in CAPRI's range).
-- **Environmental module in regional models**: regional models had no access to it, so two
-  calculations silently fell back to cruder values; it is now passed to every regional model
-  and fallbacks warn.
+- **Trade-flow vintage**: `capri_data/shared/trade_flows_2017.csv` (read as `trade_flows.csv`) is, per MANIFEST.json,
+  recalibrated from CAPRI's 2017 market results, while the registry entry `trade_flows.csv` still says FAO 2021. The
+  bilateral market itself reads CAPRI's `bilateral_flows_<year>.csv`. The registry entry should be brought in line.

@@ -1,0 +1,37 @@
+# CAPRI p_minShareMinFert(MS,MCACT,A,'NITF'): minimum share of a crop's N need covered by mineral fertiliser
+# (NUTMIN_, supply/supply_model.gms). Source: CAPRI star 3.0 fert/fertpar.gms l. 354-361, sets fert/fert_sets.gms
+# VEGPERM and sets.gms GRSACT; the same in every member state; 0 on organic land (A = 'ECO').
+crop,capri_crop,min_share,capri_rule
+SWHE,SWHE,0.4,default
+DWHE,DWHE,0.4,default
+RYEM,RYEM,0.4,default
+BARL,BARL,0.4,default
+OATS,OATS,0.4,default
+CORN,MAIZ,0.3,MAIZ
+OCER,OCER,0.4,default
+PARI,PARI,0.4,default
+OCRO,OCRO,0.5,VEGPERM
+OIND,OIND,0.4,default
+NURS,NURS,0.5,VEGPERM
+FLOW,FLOW,0.5,VEGPERM
+POTA,POTA,0.4,default
+SUGB,SUGB,0.4,default
+SUNF,SUNF,0.4,default
+RAPE,RAPE,0.4,default
+SOYA,SOYA,0.4,default
+OOIL,OOIL,0.4,default
+PULS,PULS,0.0,PULS (NITF)
+TOMA,TOMA,0.5,VEGPERM
+OVEG,OVEG,0.5,VEGPERM
+APPL,APPL,0.5,VEGPERM
+OFRU,OFRU,0.5,VEGPERM
+CITR,CITR,0.5,VEGPERM
+TAGR,TAGR,0.5,VEGPERM
+WINE,TWIN,0.5,VEGPERM
+OLIV,OLIV,0.5,VEGPERM
+TABO,TABO,0.5,VEGPERM
+TOBA,TOBA,0.4,default
+TEXT,TEXT,0.4,default
+GRAS,GRAE/GRAI,0.05,GRSACT
+MAIF,MAIF,0.2,MAIF
+OFOD,OFAR,0.05,OFAR

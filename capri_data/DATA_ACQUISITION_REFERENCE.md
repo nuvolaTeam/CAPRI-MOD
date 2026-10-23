@@ -1,127 +1,63 @@
-# CAPRI-mod — Data Acquisition Reference
+# CAPRI-mod: data acquisition reference
 
-> **STATUS (current):** The two datasets this guide prioritises — `feed_requirements.csv` and `nutrient_coefs.csv` — have since been replaced with real CAPRI data (`REAL_CAPRI` in `DATA_SOURCING_REGISTRY.json`). The model no longer runs on any synthetic fallback. This document is retained as a record of how that data was sourced and how to refresh it for a new base year.
+Status: revised 20 October 2026 against the code. How to obtain CAPRI's code, data and results for a rebuild or a
+new base year. The access routes (section 2) and the file list (section 3) were recorded in October 2026 from CAPRI's
+source tree and documentation and have not been re-checked against capri-model.org since; release names change. The
+shipped data do not need any of this: they are in `capri_data/` as CSV and JSON (README section 4 (The data layer)).
 
-Everything needed to retrieve updated/real data: exact filenames, where they live,
-how to access them, and the honest answer on APIs. Verified against CAPRI's own
-source tree and current (2025/26) CAPRI documentation.
+## 1. What a rebuild needs
 
----
-
-## 0. The API question — answered honestly
-
-**There is no data API/webservice for CAPRI.** I checked CAPRI's entire GAMS source:
-the only URLs in it are documentation/citation links (PDFs), never a REST/service
-endpoint. CAPRI is distributed as **files over SVN** (Apache Subversion) plus
-**zip downloads** from the website. So auth credentials for an "API" don't apply —
-what credentials get you is **SVN repository access**. See §3.
-
----
-
-## 1. What to retrieve (priority order)
-
-| Need | Why | Priority |
-|---|---|---|
-| STAR **database** zip (`results_2.8.zip`) | Compiled, calibrated baseline — replaces synthetic files + gives consistent newer base | HIGHEST |
-| STAR **code** zip (`STAR_2.8.zip`) | Raw data + build routines (self-contained) | HIGH |
-| Newer `fao_agg` / market GDX | Newer base-year prices+balances+elasticities | optional |
-
-The STAR **database** alone resolves the two synthetic files AND vintage consistency,
-because it is CAPRI's own mutually-compatible data.
-
----
-
-## 2. Exact filenames & locations (inside a CAPRI installation / STAR release)
-
-Paths are relative to the CAPRI system folder. Files are **GDX** (GAMS binary) —
-export the listed **symbol** to CSV/XLSX (via GAMS `gdxdump` or the GUI export), as
-was done for `fao_agg_17`.
-
-### 2a. To replace the TWO synthetic files (highest value)
-
-| Model file (now real) | CAPRI source file | GDX symbol to export |
-|---|---|---|
-| `feed_requirements.csv` | `dat/coco/feed_agri.gdx` | `p_AgriProd` (feed rows: PMEA,PPAS,TGRA,FPEG,FLUC,FPGO,FAGO,MAIF) |
-| ″ (feed input coeffs) | `results/` feed build output | `p_feedInpCoeff`, `p_feedDetail` |
-| `nutrient_coefs.csv` | `dat/arm/nutrient_cont_usda.gdx` | `p_nutrientCont` |
-
-### 2b. Regional base data (areas, yields, herds) — for a newer base year
-
-| Data | CAPRI source file | GDX symbol |
-|---|---|---|
-| Regional DB (2015 base) | `dat/capreg/p_regiodata2015.gdx` | `p_regioData` |
-| Regional DB (2009 base) | `dat/capreg/p_regiodata2009.gdx` | `p_regioData` |
-| Regional time series | `results/capreg/res_time_series.gdx` | (time-series regional) |
-| 2019 update | `dat/capreg/update_2019_regiodata.gdx` | `p_regioData` |
-
-### 2c. Market / prices / balances — for a newer base year
-
-| Data | CAPRI source file | Note |
-|---|---|---|
-| Market SUA (prices, balances) | `results/fao/fao_dataMarket.gdx` | newer analogue of `fao_agg_17` |
-| Global raw market | `results/global/data_market_raw.gdx` | |
-| AGLINK baseline (biofuel too) | `dat/baseline/aglink2024_oriEUdata.gdx` | 2024 vintage present; also 2019–2023 |
-
-### 2d. Environment / GHG (if refreshing those)
-
-| Data | CAPRI source file |
+| Need | Why |
 |---|---|
-| GHG/gas results | `results/envind/GASES.gdx` |
-| Energy indicators | `results/enerind/ENER_new.gdx` |
+| CAPRI's results database of a release (regional results `res_<BAS><MS>`, `fao_agg`, estimation and baseline results) | the builders (`tools/build_*.py`) read dumps of these; a consistent newer base needs CAPRI's own estimation for that year |
+| CAPRI's code (`gams/`) | several builders read parameters, sets and literals from the GAMS files (e.g. `arm/market1.gms`, `envind/*.gms`) |
+| CAPRI's raw data (`dat/`) | mitigation and MITERRA tables, Nitrates Directive data |
 
----
+There is no data web service for CAPRI. Its GAMS code contains no data API; the URLs in it are documentation and
+source links (wiki pages, a JRC SVN repository, R and GitHub sources). CAPRI is distributed as files: SVN checkouts
+and zip downloads.
 
-## 3. How to access — SVN + downloads (this is where credentials apply)
+## 2. Access routes
 
-### Route A — Website zip downloads (simplest, no credentials for public Stars)
-- Go to **capri-model.org** → "get CAPRI" / "getting started" page.
-- In the table of releases, click **"Code"** (e.g. `STAR_2.8.zip`) and **"Database"**
-  (e.g. `results_2.8.zip`).
-- Star 2.8 embeds GAMS + Java (no separate install). Latest recommended.
+- **Website downloads**: capri-model.org ("get CAPRI" / getting started) lists releases with a "Code" and a
+  "Database" zip each.
+- **SVN**: CAPRI installations are managed with SVN (host `svn1.agp.uni-bonn.de`, one path per release tag); developer
+  releases need a CAPRI SVN account, requested through the CAPRI network. A checkout gives `dat/`, `gams/` and `GUI/`.
 
-### Route B — SVN repository (this is the "API + credentials" analogue)
-CAPRI installation/management is SVN-based. Verified mechanism:
-- SVN server host: **`https://svn1.agp.uni-bonn.de/svn/<TAG>`**
-  (documented example tag `TS2015_1`, with example user/pass `ts2015`/`ts2015`
-  for that public teaching repo).
-- **Developer releases** need a **CAPRI SVN account** (your credentials) — request via
-  the CAPRI network. With it, `svn checkout` the release tag to get `dat/`, `gams/`,
-  `GUI/` folders including all raw data.
-- Client: any SVN client (TortoiseSVN on Windows, or `svn` CLI).
+  ```shell
+  svn checkout https://svn1.agp.uni-bonn.de/svn/<RELEASE_TAG> capri_src
+  ```
 
-```
-svn checkout https://svn1.agp.uni-bonn.de/svn/<RELEASE_TAG> capri_src
-#   -> prompts for username / password (your CAPRI SVN credentials)
-```
+- **Registration and network**: full COCO database access follows the procedure on the CAPRI website and may involve
+  a specific procedure or a fee; CAPRI training courses are another access path.
 
-> If you have credentials, they are **SVN credentials for `svn1.agp.uni-bonn.de`**,
-> not an API key. That is the auth you can help with.
+## 3. Files by topic (in a CAPRI installation)
 
-### Route C — Contact / registration
-Full COCO database access follows "the procedure described on the CAPRI website"
-and "could imply a specific procedure or a fee." Network/course participation
-(Humboldt/Thünen CAPRI course) is a common access path. For code access, the
-INMS record lists **Adrian Leip (JRC)** as a contact; the model is hosted at
-**Bonn University / EuroCARE**.
+Paths relative to the CAPRI system folder. GDX files are exported to CSV with `tools/build/gdx_dump_symbol.py` or GAMS
+`gdxdump` (symbols: `DATA_LOCATION_MAP.md`, `SYMBOL_EXTRACTION_GUIDE.md`).
 
----
+| Data | CAPRI file |
+|---|---|
+| regional results per member state (DATA2) | `results/capreg/res_<BAS><MS>.gdx` |
+| regional database (other base years) | `dat/capreg/p_regiodata2015.gdx`, `p_regiodata2009.gdx`, `update_2019_regiodata.gdx` (`p_regioData`) |
+| regional time series | `results/capreg/res_time_series.gdx` |
+| market balances and prices | `results/global/fao_agg_<BAS>_<agg>.gdx`; `results/fao/fao_dataMarket.gdx` |
+| global raw market data | `results/global/data_market_raw.gdx` |
+| AGLINK baseline (incl. biofuels) | `dat/baseline/aglink<year>_oriEUdata.gdx` |
+| GHG and energy indicators | `results/envind/GASES.gdx`, `results/enerind/ENER_new.gdx` |
+| mitigation options | `dat/scen/ghgtech/` (e.g. `miti_data_jul15`), `dat/miterra/`, `dat/envind/` |
 
-## 4. Also-public alternative datasets (not from CAPRI folders)
+Two files once proposed here for the feed requirements and the fertiliser rates are the wrong data:
+`dat/coco/feed_agri.gdx` holds feed use, and `dat/arm/nutrient_cont_usda.gdx` (`p_nutrientCont`) holds food nutrient
+contents. The shipped `feed_requirements.csv` and `nutrient_coefs.csv` are built from DATA2.
 
-| Source | What | Where |
+## 4. Public sources (not CAPRI)
+
+| Source | What | Use here |
 |---|---|---|
-| Scientific Data (2026) | EU disaggregated CAPRI data: crops, livestock, N, timeseries 2000–2018 (Eurostat to 2024) | nature.com/articles/s41597-026-06919-8 |
-| Eurostat | Crop (`APRO_CPSHR`) & animal (`AGR_R_ANIMAL`) production, NUTS0/1/2, 2000–2024 | ec.europa.eu/eurostat |
-| FAOSTAT | Producer prices, commodity balances, bilateral trade (already used) | fao.org/faostat |
+| Eurostat (REST/JSON API) | crop and animal production (`apro_cpshr`, `agr_r_animal`), gross nutrient balance | checks (`sources/eurostat/aei_pr_gnb_nitrogen.csv`; Eurostat cattle numbers for region splits) |
+| FAOSTAT | producer prices, commodity balances, bilateral trade | not a model input (2021 extracts kept in `sources/fao_2021/`, not read by the model) |
+| Scientific Data (2026), nature.com/articles/s41597-026-06919-8 | EU disaggregated CAPRI data (crops, livestock, N; 2000-2018) | not used |
 
-**Note:** Eurostat *does* have a real REST/JSON API (unlike CAPRI). If a data API is
-what you want, Eurostat's is the one to target for EU quantities/prices — but its
-vintages/units must be reconciled to a CAPRI base (the validator guards this).
-
----
-
-## 5. Once you have any of it
-
-Export the listed GDX **symbol** to CSV/XLSX (GAMS `gdxdump File.gdx symb=SYMBOL
-format=csv`, or the CAPRI GUI export), upload it, and it gets wired in the same way
-as the 2017 `fao_agg`. The validator then confirms vintage consistency before any run.
+Public data must be reconciled with a CAPRI base (units, codes, vintages) before use; mixing recent public values into
+the 2017 base breaks its consistency (`DATA_SOURCING_GUIDE.md`, section 3).

@@ -61,8 +61,11 @@ def _mine(v) -> str:
 def scenario_name(lndscpTarg=0, orgTarg=0, pestRedu=0, mineRedu=0,
                   surpRedu=0, dietShift=0, othPol=0) -> str:
     """CAPRI's name for the scenario (greendeal_scenarios.gms, 'scenNameFromGroup')."""
-    name = (f"greendeal_lnds{lndscpTarg:02d}_org{orgTarg:02d}_pest{pestRedu:02d}"
-            f"_mine{_mine(mineRedu)}_surp{surpRedu:02d}_diet{dietShift:02d}_oth{othPol:02d}")
+    # the GUI's option strings: "00" for zero, the number as written otherwise (lnds8, org18; CAPRI's result names,
+    # e.g. res_2_1730greendeal_lnds8_org18_pest20_mine13crp_surp30_diet00_oth00defaultA)
+    g = lambda v: "00" if int(v) == 0 else str(int(v))
+    name = (f"greendeal_lnds{g(lndscpTarg)}_org{g(orgTarg)}_pest{g(pestRedu)}"
+            f"_mine{_mine(mineRedu)}_surp{g(surpRedu)}_diet{g(dietShift)}_oth{g(othPol)}")
     if name == "greendeal_lnds00_org00_pest00_mine00_surp00_diet00_oth00":
         return "greendeal_reference"
     return name
@@ -71,7 +74,8 @@ def scenario_name(lndscpTarg=0, orgTarg=0, pestRedu=0, mineRedu=0,
 def greendeal_scenario(lndscpTarg: int = 10, orgTarg: int = 25, pestRedu: int = 50,
                        mineRedu=0, surpRedu: int = 50,
                        dietShift: int = 0, othPol: int = 0,
-                       surplus_rule: str = "star3", manure_trade=None, endotech=None) -> PolicyScenario:
+                       surplus_rule: str = "star3", manure_trade=None, endotech=None,
+                       pesticide_rule: str = "star3") -> PolicyScenario:
     """A Green Deal scenario with CAPRI's switches. Defaults are Farm-to-Fork.
 
     Values are CAPRI's: percentages as integers (lndscpTarg=10 is the 10%
@@ -93,6 +97,8 @@ def greendeal_scenario(lndscpTarg: int = 10, orgTarg: int = 25, pestRedu: int = 
                              f"(allowed: {list(allowed) if len(allowed) < 10 else '0-100'})")
     if surplus_rule not in ("jrc121368", "star3"):
         raise ValueError(f"surplus_rule={surplus_rule!r}: 'jrc121368' or 'star3'")
+    if pesticide_rule not in ("jrc121368", "star3"):
+        raise ValueError(f"pesticide_rule={pesticide_rule!r}: 'jrc121368' or 'star3'")
     if surplus_rule == "jrc121368" and surpRedu not in (0, 50):
         raise ValueError("the JRC121368 tiered rule is the 50% target; use surplus_rule='star3' for other values")
     return PolicyScenario(
@@ -107,6 +113,7 @@ def greendeal_scenario(lndscpTarg: int = 10, orgTarg: int = 25, pestRedu: int = 
         surplus_rule=surplus_rule,
         surplus_cut=surpRedu / 100.0,
         mineral_redu=_mine(mineRedu),
+        pesticide_rule=pesticide_rule,
         manure_trade=manure_trade,
         endotech=dict(endotech or {}),
     )
@@ -121,8 +128,26 @@ def farm_to_fork_scenario() -> PolicyScenario:
     report does not state takes capri-mod's (star 3.0's) setting."""
     from capri_mod.policy.endotech import JRC121368_ENDOTECH
     sc = greendeal_scenario(lndscpTarg=10, orgTarg=25, pestRedu=50, surpRedu=50, surplus_rule="jrc121368",
-                            manure_trade=False, endotech=JRC121368_ENDOTECH)
+                            manure_trade=False, endotech=JRC121368_ENDOTECH, pesticide_rule="jrc121368")
     sc.name = "farm_to_fork_jrc121368"
     sc.description = ("Farm-to-Fork as JRC121368: landscape 10%, organic 25%, pesticides -50%, nutrient surplus "
                       "-50% (tiered, 36% cap), no manure trade, milk-yield genomics 0.2")
     return sc
+
+
+#: CAPRI's own 2030 step of its Green Deal production series (P. Witzke's batch for the Green Deal scenarios,
+#: section "f2f": targets phased in 2025 / 2030 / 2035 / 2040; 2030: N surplus -30%, mineral fertiliser 13crp,
+#: organic 18%, pesticides -20%, landscape elements 8%; result res_2_1730greendeal_lnds8_org18_pest20_mine13crp_surp30
+#: _diet00_oth00defaultA, named in the batch as the reference of the 2035 step). Settings of that batch not in the
+#: GUI group: manure trade on, inner fertiliser model on.
+GREENDEAL_2030_TARGETS = dict(lndscpTarg=8, orgTarg=18, pestRedu=20, mineRedu="13crp", surpRedu=30)
+#: the full targets of the series, reached in 2040 (surplus -50%, 20crp, organic 25%, pesticides -32%, landscape 10%)
+GREENDEAL_2040_TARGETS = dict(lndscpTarg=10, orgTarg=25, pestRedu=32, mineRedu="20crp", surpRedu=50)
+
+
+def greendeal_2030_scenario(**kw) -> PolicyScenario:
+    """CAPRI's 2030 Green Deal settings of its production series (GREENDEAL_2030_TARGETS), with star 3.0's rules
+    (surptot.gms surplus rule, pesticides without a yield shock, manure trade on)."""
+    args = dict(GREENDEAL_2030_TARGETS, manure_trade=True)
+    args.update(kw)
+    return greendeal_scenario(**args)

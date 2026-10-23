@@ -1,6 +1,6 @@
 """CAPRI's ammonia technologies (v_Miti for NH3MAN and NH3APP) for one animal category of a region.
 
-Data: capri_data/2017/abatement/ammonia/ammonia_tech_model.csv (tools/build_ammonia_tech_model.py),
+Data: capri_data/2017/abatement/ammonia/ammonia_tech_model.csv (tools/build/build_ammonia_tech_model.py),
 one block per CAPRI sub-activity (e.g. DCOL and DCOH under the model's DCOW).
 
 CAPRI's structure, reproduced here (supply/supply_model.gms, envind/ammo_tech.gms):
@@ -15,7 +15,10 @@ CAPRI's structure, reproduced here (supply/supply_model.gms, envind/ammo_tech.gm
   systems); application interacts with them through the N reaching the field.
 * Cost per animal place (GHG_Mit_Cost_ with CAPRI's calibration): marginal cost of share s
   is thresh + slope (s - ini); thresh is the early-adopter subsidy S0 (non-zero only for
-  options not used at base), so the base shares are optimal at the base value of N.
+  options not used at base), so the base shares are optimal at the base value of N. (CAPRI's simulation also adds
+  costsavings0, the calibration run's marginal at the initial shares; capri-mod's NLP calibration nets the same
+  residuals, and without a policy incentive on N the options are held at their base shares, as CONOPT stays at the
+  calibrated point: RegionalSupplyModel.amm_fix_without_policy, KNOWN_ISSUES K63.)
 
 Under a nitrogen-balance price lam (EUR/kg N = kEUR/t), retained N saves mineral fertiliser
 (substitution factor sub); its value per animal place for option t is
@@ -23,8 +26,9 @@ lam x sub x (N saved per unit of share) / places per unit. Shares follow from th
 conditions with the group limit's multiplier (bisection), alternating between the two groups
 (their only link is the N reaching the field) until stable.
 
-REGISTERED: N2, N2O and NOx are not subtracted in the cascade (CAPRI subtracts them); the
-other gases' side effects are not passed to the accounts.
+loss, nh3, app_loss, n2o and marginal use CAPRI's full N loss cascade (capri_mod/supply/n_cascade.py: N2, N2O and NOx subtracted by stage,
+the N2O by stage passed to the manure N2O accounts; KNOWN_ISSUES K51); the NH3-only cascade above (_stage,
+_loss_simple) remains the fallback for a sub-activity without CAPRI's cascade data.
 """
 from __future__ import annotations
 
@@ -49,6 +53,9 @@ def load(path: Path) -> dict:
                     s = subs[r["sub"]] = dict(key=r["sub"], w=float(r["weight"]), stock=float(r["stock_factor"]),
                                               mrel=float(r["mann_rel"]), g=float(r["g"]), fG=float(r["fG"]),
                                               fH=float(r["fH"]), fS=float(r["fS"]), fA=float(r["fA"]), techs=[])
+                if r.get("lg"):
+                    # anaerobic digestion: L (1 - G) and the manure CH4 ratio QE_AD / QE_NOC (build_ad_option.py)
+                    s["ad"] = (float(r["lg"]), float(r["r_ch4"]))
                 s["techs"].append(dict(tech=r["technology"], group=r["group"], k1=float(r["kappa1"]),
                                        slope=float(r["slope"]) if r["slope"] not in ("", None) else None,
                                        th=float(r["thresh"] or 0.0), ini=float(r["ini"]), max=float(r["max"]),
@@ -66,8 +73,9 @@ def _stage(sub, rH, rS):
     return h + s, hm - h - s
 
 
-def loss(sub, sh: dict) -> float:
-    """NH3-N lost per unit of excreted N at shares sh {tech: share}."""
+def _loss_simple(sub, sh: dict) -> float:
+    """NH3-N lost per unit of excreted N at shares sh {tech: share} (capri-mod's earlier NH3-only cascade, the
+    fallback where CAPRI's cascade has no factors)."""
     RA = sum(sh.get(t["tech"], 0.0) * t["rA"] for t in sub["techs"] if t["group"] == "APP")
     man = [t for t in sub["techs"] if t["group"] == "MAN"]
     noc = 1.0 - sum(sh.get(t["tech"], 0.0) for t in man)
@@ -81,7 +89,7 @@ def loss(sub, sh: dict) -> float:
     return sub["g"] * sub["fG"] + L + P * sub["fA"] * (1.0 - RA)
 
 
-def app_loss(sub, sh: dict) -> float:
+def _app_loss_simple(sub, sh: dict) -> float:
     """NH3-N lost at field application per unit of excreted N at shares sh (the last term of
     loss): the base of the application side effects of manure options (NITR_INH_MAN)."""
     RA = sum(sh.get(t["tech"], 0.0) * t["rA"] for t in sub["techs"] if t["group"] == "APP")
@@ -118,8 +126,8 @@ def stage_n(sub, sh: dict) -> tuple:
     return H, F
 
 
-def marginal(sub, sh: dict) -> dict:
-    """d loss / d share for every option (negative: the option saves NH3), at shares sh."""
+def _marginal_simple(sub, sh: dict) -> dict:
+    """d _loss_simple / d share for every option, at shares sh."""
     RA = sum(sh.get(t["tech"], 0.0) * t["rA"] for t in sub["techs"] if t["group"] == "APP")
     man = [t for t in sub["techs"] if t["group"] == "MAN"]
     noc = 1.0 - sum(sh.get(t["tech"], 0.0) for t in man)
@@ -133,6 +141,81 @@ def marginal(sub, sh: dict) -> dict:
     for t in sub["techs"]:
         if t["group"] == "APP":
             out[t["tech"]] = -P * sub["fA"] * t["rA"]
+    return out
+
+
+# ---------------- CAPRI's full N loss cascade (capri_mod/supply/n_cascade.py) ----------------
+_CD = {}
+
+
+def cascade_data(sub):
+    """(p_Nemidat factors, runoff from the surface, the options' effects) of the sub-activity's CAPRI region and
+    activity (its key 'REGION|ACT'), or None outside CAPRI's cascade data."""
+    k = sub["key"]
+    if k not in _CD:
+        from capri_mod.supply import n_cascade as _nc
+        rs, _, act = k.partition("|")
+        F, G, E = _nc.load()
+        f = F.get((rs, act))
+        _CD[k] = None if f is None else (f, float(G.get(rs, {}).get("run_surf", 0.0)), E.get((rs, act), {}))
+    return _CD[k]
+
+
+def cascade(sub, sh: dict, wc=0.0):
+    """CAPRI's v_emiLoss of the sub-activity at option shares sh (missing options: 0) and the region's winter cover
+    share wc (v_Miti(CATC, WinterCov): it cuts the runoff from the surface by 0.35 x wc in RUNSURFN_ and APPLN_), or
+    None without cascade data. Works with CasADi expressions as shares."""
+    d = cascade_data(sub)
+    if d is None:
+        return None
+    from capri_mod.supply import n_cascade as _nc
+    f, rsurf, eff = d
+    m = 1.0 - _nc.WINTERCOV_NO3 * wc
+    return _nc.losses(f, rsurf, sh, eff, m_runsurf=(m, 1.0), m_appl_run=m)
+
+
+def loss(sub, sh: dict, wc=0.0):
+    """N lost per unit of excreted N at shares sh: CAPRI's GasRunTot (all gases at grazing, housing, storage and
+    application, runoff; manExportOrAppl_ takes the manure net of it), else the NH3-only cascade."""
+    L = cascade(sub, sh, wc)
+    return _loss_simple(sub, sh) if L is None else L[("N", "GasRunTot")]
+
+
+def nh3(sub, sh: dict, wc=0.0):
+    """NH3-N lost per unit of excreted N at shares sh (all stages)."""
+    L = cascade(sub, sh, wc)
+    if L is None:
+        return _loss_simple(sub, sh)
+    return L[("NH3", "Graz")] + L[("NH3", "Hous")] + L[("NH3", "Stor")] + L[("NH3", "Appl")]
+
+
+def app_loss(sub, sh: dict, wc=0.0):
+    """NH3-N lost at field application per unit of excreted N at shares sh."""
+    L = cascade(sub, sh, wc)
+    return _app_loss_simple(sub, sh) if L is None else L[("NH3", "Appl")]
+
+
+def n2o(sub, sh: dict, wc=0.0):
+    """(N2O-N in housing and storage, N2O-N at application) per unit of excreted N at shares sh, or None."""
+    L = cascade(sub, sh, wc)
+    if L is None:
+        return None
+    return L[("N2O", "Hous")] + L[("N2O", "Stor")], L[("N2O", "Appl")]
+
+
+def marginal(sub, sh: dict, wc=0.0) -> dict:
+    """d loss / d share for every option at shares sh (negative: the option keeps N). The cascade is polynomial in
+    the shares; central differences."""
+    if cascade_data(sub) is None:
+        return _marginal_simple(sub, sh)
+    out = {}
+    h = 1e-6
+    for t in sub["techs"]:
+        k = t["tech"]
+        up, dn = dict(sh), dict(sh)
+        up[k] = sh.get(k, 0.0) + h
+        dn[k] = sh.get(k, 0.0) - h
+        out[k] = (loss(sub, up, wc) - loss(sub, dn, wc)) / (2 * h)
     return out
 
 
@@ -174,7 +257,7 @@ def choose(sub, eur_per_n: float, n_per_unit_loss: float) -> dict:
     k = eur_per_n * n_per_unit_loss / max(sub["stock"], 1e-12)     # EUR per place per unit of loss
     for _ in range(20):
         prev = dict(sh)
-        for grp in ("MAN", "APP"):
+        for grp in ("MAN", "APP", "AD"):
             d = marginal(sub, sh)
             techs = [t for t in sub["techs"] if t["group"] == grp]
             if techs:

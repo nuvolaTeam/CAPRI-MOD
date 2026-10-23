@@ -1,0 +1,7 @@
+dim1,dim2,level,marginal
+N2O,Ureum,0.01,0.0
+N2O,Other,0.01,0.0
+NH3,Ureum,0.15,0.0
+NH3,Other,0.0073,0.0
+NOx,Ureum,0.003,0.0
+NOx,Other,0.003,0.0
