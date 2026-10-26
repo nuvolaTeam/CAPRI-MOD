@@ -49,11 +49,18 @@ is spread over several model regions, the builders split it on proxies (cattle s
 274 CSV files under capri_data carry region codes (archive and pipeline folders left out):
 - **99 use the model's codes**; 79 of them are read by the model (supply 44, environment 16, abatement 6, policy 3,
   feed 1, trajectories 4, sources read directly 4, shared/region_capri_map.csv). Each needs rebuilding on CAPRI's units.
-  A builder was found by file name for most; for 12 live files none was (to be traced before the change):
-  2017/environment/capri_regional_n_balance_2030.csv, fertiliser_substitution_2030.csv, n_deposition_regional.csv;
-  2017/supply/land_market_2017_regions.csv, land_market_2030_regions.csv, land_rent_regional.csv,
-  livestock_intensity_bounds.csv, pmp_capri_2030_animals_members.csv, pmp_recipe_2017_animals(_members).csv,
-  pmp_recipe_2030_animals(_members).csv.
+  A builder was found by file name for most; 12 were traced by hand: the land market's `_regions` files are written by
+  build_land_market.py (capri_mod/data/land_market_io.py), the animal PMP files by build_animal_pmp_capri_2030.py
+  (`--splits`, `--pmp recipe`). **Five have no builder in the repository** (made from files the project lead supplied):
+  - 2017/environment/n_deposition_regional.csv (CAPRI res_2 dataOut perHa ATMOSD) and fertiliser_substitution_2030.csv
+    (dataOut fertDist_, nutNed_): read by the environmental and supply modules; builders to be written from CAPRI's
+    results on the new units;
+  - 2017/supply/livestock_intensity_bounds.csv (CAPREG DATA2 DCOL/DCOH YILD): read by the supply module; builder to be
+    written;
+  - 2017/supply/land_rent_regional.csv (Eurostat apri_lrnt, national values where a region is not published): read by
+    the supply module; on CAPRI's units CAPRI's own rents (land_rents_<year>.csv, build_land_rents.py) may replace it
+    (to be checked);
+  - 2017/environment/capri_regional_n_balance_2030.csv: listed by the loader, read by no code (an orphan: remove).
 - **175 use CAPRI's 8-character codes** (mostly sources/ and the CAPRI exports under 2017/market and abatement): they
   stay; only the builders' mapping step changes.
 - **JSON files with model codes** (11): 2017/environment/nh3_factors_capri.json, 2017/feed/feed_ration_2017.json,
