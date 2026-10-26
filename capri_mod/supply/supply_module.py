@@ -4950,6 +4950,9 @@ class RegionalSupplyModel:
         self._nlp_failed = None
         self._nlp_status = None
         self._nlp_nonoptimal = None             # IPOPT's last point kept on the last attempt (as CAPRI), THIS solve only
+        # the price shock the split and genetics columns value their products at: set by THIS solve's net revenues
+        # (_compute_net_revenues, called only with a shock); a plain solve after a shocked one kept the old shock there
+        self._price_shock_now = None
         self._yield_price_factor = {}           # the price response's yield factor per crop, THIS solve only
         try:
             res = self._solve_once(*args, **kwargs)
