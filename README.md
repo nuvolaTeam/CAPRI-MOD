@@ -1336,8 +1336,8 @@ Three kinds of difference, kept apart because they call for different readings:
 - **Corrections of CAPRI's code**, where its effect contradicts CAPRI's own data or equations; each has a switch back to
   CAPRI's behaviour (10.2c).
 - **Departures to be switched to CAPRI's setting**, kept for a practical reason recorded at the time: the EU as one
-  trade block (10.3) and the others in docs/DEPARTURES_FROM_CAPRI.md, which is the complete list of defaults that are
-  not CAPRI's.
+  trade block (10.3) and the others in docs/DEPARTURES_FROM_CAPRI.md, the register of settings whose default is not
+  CAPRI's (method choices are registered in docs/KNOWN_ISSUES.md and the design notes it points to).
 
 Inputs not yet traced to a CAPRI source are in 10.5; method gaps and open differences from CAPRI's results in §11.
 
