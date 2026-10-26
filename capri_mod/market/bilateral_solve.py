@@ -27,8 +27,6 @@ class BilateralSolveMixin:
     #: alone). Same equations and stopping rule (every relative residual < tol): the path changes, not the equilibrium.
     market_acceleration = setting("market.acceleration")
     MARKET_AA_MEMORY = setting("market.aa_memory")
-    #: CAPRI's EU tariff-rate quotas in the bilateral market (bilateral_trq_<year>.csv)
-    use_trq = setting("market.use_trq")
 
     def _bilateral_raw(self):
         """Uncalibrated bilateral systems for the market year (data['market_year'], else 2017)."""
@@ -73,7 +71,7 @@ class BilateralSolveMixin:
                                         float(rho.at[c, "rho1"]) if c in rho.index else 8.0,
                                         float(rho.at[c, "rho2"]) if c in rho.index else 10.0, tc=tc)
         # EU tariff-rate quotas (tools/build/build_bilateral_market.py build_trq)
-        if inp.exists(f"bilateral_trq_{year}.csv") and getattr(self, "use_trq", True) and all(r in ix for r in self.EU):
+        if inp.exists(f"bilateral_trq_{year}.csv") and all(r in ix for r in self.EU):
             tq = inp.csv(f"bilateral_trq_{year}.csv")
             rows = [ix[r] for r in self.EU]                # the EU's quotas: imports of every EU market region
             for c, g in tq.groupby("commodity"):
@@ -256,7 +254,7 @@ class BilateralSolveMixin:
         # CAPRI's crushing margin (ProcMargO_, arm/market_model.gms): the seed at its Armington price (v_Arm1Price),
         # oil and cake at their producer prices (v_prodPrice); KNOWN_ISSUES K54-4
         cpd = dp
-        if self.CRUSH_CHAINS and getattr(self, "crush_margin_producer_prices", True):
+        if self.CRUSH_CHAINS:
             cpd = dp.copy()
             _oc = sorted({x for oc in self.CRUSH_CHAINS.values() for x in oc if x in r.columns})
             d0r = dom0.reindex(index=r.index, columns=_oc)

@@ -469,7 +469,7 @@ class ProjectionModule:
 
     # The fresh projected model reads the same settings as the outer one (capri_mod/settings: one process-wide set),
     # so nothing is carried by hand (the former CARRIED_SETTINGS list lost every switch it did not name, e.g.
-    # food_demand_gl, calibrate_baseline, the NLP tolerances).
+    # the GL food demand, the baseline calibration, the NLP tolerances).
 
     def _solve(self, data: Dict, scenario: str, **kwargs) -> Dict:
         """Solve the comparative-static core against a projected data set.

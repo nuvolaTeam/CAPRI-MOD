@@ -45,13 +45,6 @@ def test_model_region_and_no_data(data, monkeypatch):
     assert npk.need_yield_factor("FRK1", "SWHE", 0.0, 6.3) == 1.0
 
 
-def test_previous_rule_kept_for_comparison():
-    from capri_mod.settings import override
-    with override({"fertiliser.need_yield_rule": "sqrt"}):
-        assert npk.need_yield_factor("FR250000", "SWHE", 4.0, 1.0) == pytest.approx(0.5)
-    assert npk.need_yield_rule() == "capri"
-
-
 def test_builder_reads_capri_constants():
     import sys
     from pathlib import Path

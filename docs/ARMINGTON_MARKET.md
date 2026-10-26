@@ -127,8 +127,8 @@ exporter the quota, the gap between the out-of-quota (MFN: TAMFN, TSMFN) and the
 flow under the quota regime. The specific tariff on the flow moves with CAPRI's sigmoid, slope 200 on
 (fill − 0.97) (p_trqSigmoidSlope, `arm/market_model.gms` l. 339; `TRQ_SLOPE` in `model_parameters.csv`), relative to the
 base fill so that the base is reproduced. Each quota's tariff is solved by bisection consistently with its own flow
-at every market step (`trq_solve`); the market solve stops only when the tariffs have stopped moving. Switch:
-`MarketModule.use_trq` (True).
+at every market step (`trq_solve`); the market solve stops only when the tariffs have stopped moving. Always on (the switch `MarketModule.use_trq` was removed on 27 October
+2026).
 
 In CAPRI's 2030 reference (`bilateral_trq_2030.csv`) the EU's meat quotas are far from filled: beef 13 of 157 kt,
 poultry 108 of 422 kt from the exporters with bilateral quotas. In the Farm-to-Fork runs of Sprint 8m (October 2026)

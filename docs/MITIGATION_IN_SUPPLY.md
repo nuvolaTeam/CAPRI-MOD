@@ -7,8 +7,8 @@ removed (they predate the NLP form, the N loss cascade and anaerobic digestion);
 CAPRI chooses its mitigation options inside the regional supply model (supply/supply_model.gms, ghgAbatement block):
 in JRC121368's Farm-to-Fork run they were adopted without a carbon price, because the nitrogen target and the prices
 made them pay (report Table 17: storage covers 14 -> 34%, precision farming 0 -> 35%, air purification 0 -> 10%,
-higher milk yield 0 -> 15%). capri-mod does the same: the options are columns of each regional model whenever
-`CAPRIModel.use_manure_techs` (default True) is on (feeding is always inside the models),
+higher milk yield 0 -> 15%). capri-mod does the same: the options are columns of each regional model (always: the switch
+`use_manure_techs` was removed on 27 October 2026; feeding is always inside the models),
 the baseline included. In the default NLP form they are written in `capri_regional_nlp.CapriRegionalNLP._abatement_block`
 (ammonia options, AD, fertiliser options, inhibitor on manure) and as columns of the regional QP (breeding, low-N feed,
 linseed and nitrate, histosol fallowing).
@@ -105,7 +105,7 @@ breeding.gms defines it only `$ p_ghgTechMYld`; ghgTechFEff 0.1), set through `r
 baseline (baseline cache and calibration kept per setting, K53). `run_f2f_2030.py --endotech jrc121368` gives the
 JRC121368-era setting (milk yield 0.2, from CAPRI's ecampa reference `refpol_endotech_set14_ini.gms`).
 
-Regional model (`_genetics_columns`, `RegionalSupplyModel.use_genetics`, default True): one column per animal and
+Regional model (`_genetics_columns`, always on): one column per animal and
 option, heads adopting g <= eligible share x level; effects on the manure rows and the animal's requirement rows;
 extra milk at the current milk price; cost CAPRI's `GHG_Mit_Cost_` with breeding.gms's calibration: linear term from
 the base duals plus relSubs0 x cost, so nothing is adopted at base (IniShare 0); curvature max(floor x c,
@@ -163,8 +163,8 @@ animal and total (CAPRI's `LINE_Tot`, `Nitr_Tot`) (`tools/build/build_supplement
   the eligible share, the fall of the marginal value between CAPRI's ini and max runs netted (dsav, as for breeding).
 - CAPRI's MANN entry for nitrate (0.42) is defined but used by neither the supply model nor the accounts, so nitrate
   does not change manure N here either.
-- `ghgTechLineNitr` is a switch (0 off, anything else on), not a scale. `CAPRIModel.use_nitrate` (off) is an older
-  path with nitrate as an ingredient of the EU ration; it is ignored when these columns exist.
+- `ghgTechLineNitr` is a switch (0 off, anything else on), not a scale. The older path with nitrate as an
+  ingredient of the EU ration (`CAPRIModel.use_nitrate`, off) was removed on 27 October 2026.
 
 REGISTERED: DRMA is CAPRI's own estimate from breeding.gms, DRMN + (|DRMX| - DRMN) / 4; CAPRI's soft constraint on
 total ration fat (SupplementPerc_, 5% of DM) needs every feed's fat (p_digestPar, not among the inputs) and is not

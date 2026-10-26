@@ -34,27 +34,18 @@ class SupplyMixin:
         if cache is not None and cache[0] == key:
             return cache[1]
         EV = np.tile(el.reindex(cols).to_numpy(dtype=float), (len(regions), 1))
-        if getattr(self, "use_region_supply_elas", True):
-            eu_ = set(self.EU)
-            for i_, r_ in enumerate(regions):
-                if r_ not in eu_:
-                    EV[i_, :] = 0.0
-            if True:                                   # required input (24 October 2026: was skipped when absent)
-                ri = {r: i for i, r in enumerate(regions)}
-                ci = {c: j for j, c in enumerate(cols)}
-                eu = set(self.EU)
-                for r_, c_, e_ in self._inp().csv("supply_elas_region.csv")[["region", "commodity", "elasticity"]].itertuples(index=False):
-                    if r_ in ri and c_ in ci and r_ not in eu:
-                        EV[ri[r_], ci[c_]] = float(e_)
+        eu_ = set(self.EU)
+        for i_, r_ in enumerate(regions):
+            if r_ not in eu_:
+                EV[i_, :] = 0.0
+        ri = {r: i for i, r in enumerate(regions)}
+        ci = {c: j for j, c in enumerate(cols)}
+        for r_, c_, e_ in self._inp().csv("supply_elas_region.csv")[["region", "commodity", "elasticity"]].itertuples(index=False):
+            if r_ in ri and c_ in ci and r_ not in eu_:
+                EV[ri[r_], ci[c_]] = float(e_)
         self._reg_elas_cache = (key, EV)
         return EV
 
-    #: non-EU supply with CAPRI's own-price elasticity per region (True) or one value per product for every region
-    #: (False: CAPRI's EU median p_elasSupp, else the Armington eps; the market before 20 October 2026)
-    use_region_supply_elas = setting("market.use_region_supply_elas")
-    #: CAPRI's crushing margin (ProcMargO_): oil and cake at their producer prices, the seed at its Armington price
-    #: (False: all three at Armington price ratios, the market before 20 October 2026)
-    crush_margin_producer_prices = setting("market.crush_margin_producer_prices")
 
     def supply_response(
         self,
@@ -382,8 +373,7 @@ class SupplyMixin:
     #: CAPRI's raw milk inside the market (audit M5): each member state's raw milk supply follows its own milk price
     #: (ProdNQ_ MILK with p_hessNQSupp, the measured Hessian's member-state rows and columns) against its dairies'
     #: demand (DairyNQ_) in the dairy block, and its milk price moves the other products' and the young animals'
-    #: supply (the Hessian's MILK column per member state); false: raw milk delivered fixed within a market solve
-    milk_in_market = setting("market.milk_in_market")
+    #: supply (the Hessian's MILK column per member state)
     #: {CAPRI member state: raw milk price level its supply models saw (1 + signal)}, set by CAPRIModel each iteration
     _milk_seen_ms = None
     _dairy_m5_now = None
@@ -393,8 +383,8 @@ class SupplyMixin:
         to CAPRI's member state of the dairy block): {"ms": [...], "h": own response (kt per unit of price level),
         "row": member state x cols (MILK's response to the products' prices), "rowY": member state x young-animal
         goods, "col": xs x member state (the products' response to the member state's milk price), "colY": young
-        goods x member state, "goods": young-animal goods}; None when off or without data."""
-        if not getattr(type(self), "milk_in_market", False) or not self._milk_seen_ms or not self._dairy_params():
+        goods x member state, "goods": young-animal goods}; None without data."""
+        if not self._milk_seen_ms or not self._dairy_params():
             return None
         hs = (getattr(self, "supply_hessian", None) or {}).get("ms") or {}
         if not hs:

@@ -24,9 +24,7 @@ class DemandMixin:
 
     #: Human consumption from CAPRI's Generalised Leontief demand system (arm/market_model.gms:826-916) per
     #: behavioural region (EU member states, non-EU countries and country groups), with its cross-price and income
-    #: terms; parameters from CAPRI's 2030 calibration (tools/build/build_gl_demand.py). Off: the earlier own-price
-    #: constant-elasticity food response (no cross-price terms).
-    food_demand_gl = setting("market.food_demand_gl")
+    #: terms; parameters from CAPRI's 2030 calibration (tools/build/build_gl_demand.py)
 
     def _gl_params(self) -> dict:
         """CAPRI's GL food demand per behavioural region, grouped by model region.
@@ -108,9 +106,7 @@ class DemandMixin:
     #: trim_gl_commits.gms): the commitments d are moved as little as possible (least squares) so that the system
     #: reproduces the model's base human consumption at the calibration prices; b and income stay. The model's base
     #: use per region and commodity sets the target: CAPRI's human consumption of each behavioural region scaled by
-    #: the ratio of the model's base use to CAPRI's use of the model region. False: CAPRI's 2030 commitments, the
-    #: GL applied as a ratio to the model's base.
-    gl_refit_commitments = setting("market.gl_refit_commitments")
+    #: the ratio of the model's base use to CAPRI's use of the model region.
 
     def _gl_refit(self, D0c: np.ndarray) -> None:
         """Re-fit the commitments of every behavioural region to the model's base use D0c (regions x commodities),
@@ -158,10 +154,10 @@ class DemandMixin:
         price ratio, ARM1P0 CAPRI's Armington price of the CAPRI region's market region at the calibration point.
         (Until 24 October 2026 the change was formed on the model's base world price x (1 + AVE), `ref`; audit M1.)
         `ref` is kept in the signature for the callers."""
-        prm = self._gl_params() if self.food_demand_gl else {}
+        prm = self._gl_params()
         if not prm:
             return None, None
-        if D0c is not None and self.gl_refit_commitments:
+        if D0c is not None:
             key = getattr(self, "_gl_refit_key", None)
             if key is None or key.shape != D0c.shape or not np.array_equal(key, D0c):
                 self._gl_refit(D0c)

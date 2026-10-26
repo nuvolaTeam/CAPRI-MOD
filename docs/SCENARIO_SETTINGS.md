@@ -65,13 +65,13 @@ implemented (an error if not 0): dietShift, othPol. The JRC121368 surplus rule a
 | GUI setting | star 3.0 | capri-mod |
 |---|---|---|
 | Endogenous bio-fuel markets (`BIOF_M`) | true | true (`CAPRIModel.biofuel_markets`; a scenario may switch off; docs/BIOFUEL_MARKET.md) |
-| Dairy block (part of the market model, no GUI switch) | always | on: nine products traded, raw milk, fat and protein per member state (`MarketModule.use_dairy_block`; docs/DAIRY_PROCESSING.md) |
+| Dairy block (part of the market model, no GUI switch) | always | on: nine products traded, raw milk, fat and protein per member state (no switch; docs/DAIRY_PROCESSING.md) |
 | New Manure Trade Module | true | true (`CAPRIModel.use_manure_market`; a scenario may switch off) |
 | Use inner fertilizer model (`useInnerFertDistModel`) | **true** | true (always, in CAPRI's NLP form): CAPRI's inner fertiliser distribution model on its 2030 priors, per region and crop group, inside the regional model; it carries the crop-specific mineral fertiliser caps (`results["fert_dist"]`; docs/FERTILISER_ALLOCATION.md) |
-| Policy blocks | true | EU tariffs and tariff-rate quotas in the bilateral market. The EU is one market region by default; CAPRI's two EU trade blocks are an option (`MarketModule.eu_blocks`, `run_f2f_2030.py --eu-blocks`) |
+| Policy blocks | true | EU tariffs and tariff-rate quotas in the bilateral market. The EU is one market region by default; CAPRI's two EU trade blocks are an option (`market.eu_blocks`, `run_f2f_2030.py --set market.eu_blocks=true`) |
 | Non-homothetic Armington (`modArmington`) | off | plain CES (as off) |
 | Explicit NTMs | false | none |
-| Trustee land supply | true | CAPRI's land market with its land rules (`CAPRIModel.use_land_market`, `land_no_slack`) |
+| Trustee land supply | true | CAPRI's land market with its land rules (`supply.use_land_market`; the land rules LandBalNoSlak_ always) |
 | Stock changes (`stockChg`) | nost | none |
 | Allow minimum shares of anorganic fertilizers (`useMinimumAnorganicShares`) | false; NUTMIN_ is in the regional model only with the inner fertiliser model off | as star 3.0: NUTMIN_ off, the inner model being always on (K40; the switches of the conic form were removed on 26 October 2026) |
 | Water module, crop inputs in market | false | false (capri-mod's water module is standalone, not part of `run()`) |

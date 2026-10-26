@@ -7,6 +7,22 @@ script (it matches the quoted token on that exact line). `capri_equivalent` is t
 Numeric guards (1e-12, 1e-9 and the like), the 44/28 and 17/14 ratios and unit factors are grouped into one row per file.
 Inline numbers inside functions are covered for substantive model parameters only.
 
+## Update 27 October 2026: switches whose alternative never ran
+
+A review of the two reference runs (r150 Farm-to-Fork, r151 Green Deal 2030) and the recorded runs since about r100
+found no non-default value for any switch or choice setting. With the project lead's decision, the settings whose
+other value was an earlier capri-mod form (the "before 24 October" branches of the supply audit, the square-root need
+rule, the staged NLP tolerance, the secant young-animal update, the ration's nitrate ingredient, ...) or the model
+without a block CAPRI always has (manure techniques, intensities, genetics, dairy block, GL demand, TRQs, LUC, ...)
+were removed with the code of their unused value; 19 run options that only mirrored a setting were removed (use
+`--set`), and the unwired water and income modules. Kept: CAPRI's own options (manure trade, land market, biofuel
+markets, EU blocks, greening, PMP source), the parity switches of the CAPRI-ERROR-FIX corrections, the numerical and
+comparison options (price update, stop rule, acceleration, exact Jacobian), `market.market_supply_nq` (fast tests run
+without the Hessian), the fodder band rows (removed with the regional-units change, which recomputes the Hessian),
+`pmp_cross_terms` "none" (CAPRI's decomposition experiment) and two departures still to be brought to CAPRI's setting
+(`use_cattle_member_splits`, K65; `fert_slope_with_saving`, K77). Column `status_27oct` of the CSV marks every removed
+row; the rest of this survey is left as written on 23 October.
+
 ## Counts
 | proposed_home | rows | | module (file) | rows | toml / param / map / scen / cli / keep |
 |---|---|---|---|---|---|

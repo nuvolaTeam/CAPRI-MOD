@@ -31,7 +31,7 @@ import json
 from pathlib import Path
 
 import numpy as np
-from capri_mod.params import param, param_table
+from capri_mod.params import param_table
 from capri_mod.data.definitions import capri_ms
 
 #: CAPRI supply/pmp_elas.gms: FODDI (incl. straw, overridden) and named feeds
@@ -141,42 +141,6 @@ def _nnls(A: np.ndarray, b: np.ndarray) -> np.ndarray:
     return x
 
 
-# ---- NITRATE FEED ADDITIVE (CAPRI envind/line_nitr.gms) ------------------------
-# A ration ingredient: 1% nitrate in dry matter supplies 1.54% crude protein
-# (0.246 N x 6.25), raises N excretion (+0.42% of DM intake at 1.5% dosage) and cuts
-# enteric CH4 by 10% per point of DM. Maximum dosage 1.5% of DM (replacement heifers
-# 1%), applied only in stables: dairy cows 10/12 of stable time (lactation), fattening
-# bulls and heifers 1/2; never calves or suckler cows. Price 873 EUR/t (base year;
-# CAPRI inflates to the simulation year - REGISTERED: not inflated). Linseed and 3-NOP
-# only cut methane, worthless without a carbon price, so not in the ration (yet).
-NITRATE = "NITR"
-NITR_PRICE = param("NITR_PRICE")          # EUR/kg
-NITR_CP = param("NITR_CP")                # kg crude protein per kg nitrate
-NITR_N_EXCR = param("NITR_N_EXCR")        # kg N excreted per kg nitrate
-NITR_RULES = {a: (d, param_table("NITR_STABLE_TIME")[a]) for a, d in param_table("NITR_MAX_DOSE").items()}
-_STABLE = None
-
-
-def stable_share(region: str, act: str) -> float:
-    """Share of the year in stables: 1 - grazing, grazing = (1 - HD/365)(1 - Et/100)
-    (MITERRA RCEmissions, CAPRI's default path; as in the ammonia technologies)."""
-    global _STABLE
-    if _STABLE is None:
-        import csv as _csv
-        _STABLE = {}
-        f = Path(__file__).resolve().parents[2] / "capri_data" / "2017" / "abatement" / "ammonia" / "RCEmissions.csv"
-        if f.exists():
-            for r in _csv.DictReader(open(f)):
-                _STABLE[(r["region"], r["animal_mitt"], r["item"])] = float(r["value"])
-    ctry = capri_ms(region)
-    cat = "DAICOW_S" if act == "DCOW" else "OCOW_S"
-    hd, et = _STABLE.get((ctry, cat, "HD")), _STABLE.get((ctry, cat, "Et"))
-    if hd is None:
-        return 0.0
-    graz = max(0.0, (1 - hd / 365.0) * (1 - (et or 0.0) / 100.0))
-    return max(0.0, 1.0 - graz)
-
-
 class Ration:
     """One region-animal ration problem, calibrated to its base."""
 
@@ -188,16 +152,6 @@ class Ration:
         dm = np.array([rec["content"][f]["DRMA"] for f in self.feeds])
         p0 = np.array([rec["price"][f] for f in self.feeds])
         flex = np.array([f in FEED_ELAS for f in self.feeds])
-        # nitrate as an ingredient (zero in the base ration)
-        act_, reg_ = rec.get("_act"), rec.get("_region")
-        self.nitr_max = 0.0
-        if rec.get("_use_nitrate", False) and act_ in NITR_RULES and reg_:
-            dose, months = NITR_RULES[act_]
-            self.nitr_max = dose * months * stable_share(reg_, act_)
-            if self.nitr_max > 0:
-                self.feeds.append(NITRATE)
-                x0 = np.append(x0, 0.0); e = np.append(e, 0.0); cp = np.append(cp, NITR_CP)
-                dm = np.append(dm, 1.0); p0 = np.append(p0, NITR_PRICE); flex = np.append(flex, True)
         self.x0, self.p0, self.flex = x0, p0, flex
         E0, P0, D0 = e @ x0, cp @ x0, dm @ x0
         req = rec["req"]
@@ -227,8 +181,6 @@ class Ration:
                     self.shares.append((i, "min", lo_e))
                 if hi_e < 1.0:
                     self.shares.append((i, "max", hi_e))
-        if self.nitr_max > 0:
-            self.shares.append((self.feeds.index(NITRATE), "max", self.nitr_max))
         # feed PMP slope
         eps = np.array([abs(FEED_ELAS.get(f, 1.0)) for f in self.feeds])
         # price per kg, at least 10% of the cereal price: CAPRI supply/pmp_terms/define_const_pmp_param.gms l. 107-110,
@@ -263,20 +215,9 @@ class Ration:
         shadow = sum(self.lam.get(k, 0.0) * v for k, v in (("E", e), ("P", cp), ("DMIN", dm)))
         # CNST from the first-order conditions at base: p + CNST + SLOP x0 = shadow
         self.cnst = np.where(flex, shadow - p0 - self.slope * x0, 0.0)
-        if NITRATE in self.feeds:
-            j = self.feeds.index(NITRATE)
-            # tiny curvature only for numerical stability (CAPRI: pmpParSqr = 0)
-            dmi = float(dm[:j] @ x0[:j]) if j > 0 else 1.0
-            self.slope[j] = 1e-6 * NITR_PRICE / max(self.nitr_max * dmi, 1e-6)
-            # zero nitrate optimal at base: p + cnst >= shadow at x = 0 (never a gain)
-            self.cnst[j] = max(0.0, float(shadow[j]) - NITR_PRICE)
 
 
 class RationModel:
-    #: nitrate as a ration ingredient (CAPRI line_nitr.gms); OFF until its methane and
-    #: N-excretion effects reach the emission accounts and the nitrogen balance
-    use_nitrate = False
-
     """All EU region-animal rations, from feed_ration_2017.json."""
 
     def __init__(self, data_dir: str | Path = None, scale: dict = None, price_scale: dict = None,
@@ -336,7 +277,6 @@ class RationModel:
                 rec = dict(rec, _act=act, _ctx=ctx.get(reg))
                 rec["_region"] = reg
                 rec.setdefault("_act", act)
-                rec["_use_nitrate"] = bool(getattr(type(self), "use_nitrate", False))
                 self.rations[(reg, act)] = Ration(rec, pc)
 
     @staticmethod
@@ -393,16 +333,13 @@ class RationModel:
         return p
 
 
-def ration_model_for(data, data_dir=None, pmp_source: str = "elasticity", pmp_capri_parts=(),
-                     use_nitrate: bool = False) -> RationModel:
+def ration_model_for(data, data_dir=None, pmp_source: str = "elasticity", pmp_capri_parts=()) -> RationModel:
     """CAPRI's rations of a run: the RationModel the model builds once per run (CAPRIModel._update_rations) and a
-    SupplyModule used on its own builds at base (SupplyModule._base_rations), from the same data. The ration model's
-    own nitrate ingredient (an early approximation) is superseded by CAPRI's supplement options in the supply model
-    (envind/line_nitr.gms, Sprint 9g): never both. With CAPRI's 2030 PMP terms for feed, the feed-PMP slopes of
-    CAPRI's 2030 baseline calibration (K61)."""
+    SupplyModule used on its own builds at base (SupplyModule._base_rations), from the same data. (Nitrate is CAPRI's
+    supplement option in the supply model, envind/line_nitr.gms, Sprint 9g; the ration model's own nitrate ingredient
+    was removed 27 October 2026.) With CAPRI's 2030 PMP terms for feed, the feed-PMP slopes of CAPRI's 2030 baseline
+    calibration (K61)."""
     d = data if isinstance(data, dict) else {}
-    supp_in = any(o_ == "Nitr_Tot" for v_ in (d.get("genetics_effects") or {}).values() for (_a, o_) in v_)
-    RationModel.use_nitrate = bool(use_nitrate) and not supp_in
     slope_key = ("capri_slope_2030" if int(d.get("market_year", 2017) or 2017) == 2030
                  and str(pmp_source) in ("capri2030", "recipe") and "feed" in tuple(pmp_capri_parts or ())
                  else "capri_slope")

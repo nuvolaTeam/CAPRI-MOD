@@ -68,8 +68,8 @@ Pools (`CAPRIModel._update_manure_pools`): CAPRI's 34 country pools and 930 link
 Convergence: every pool within `manure_pool_tolerance` (0.03) of its manure supply and EU-wide conservation within the
 same tolerance; with trade on, the outer-iteration cap is raised to `manure_max_outer_iter` (60) when it is 25 or more.
 
-The N-surplus target with trade is per hectare of current farmland (`CAPRIModel.surplus_per_current_ha`, default True,
-CAPRI's e_SURTOTHa).
+The N-surplus target with trade is per hectare of current farmland (CAPRI's e_SURTOTHa; always on since
+27 October 2026, when its switch was removed).
 
 ## Open
 

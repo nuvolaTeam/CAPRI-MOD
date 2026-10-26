@@ -580,8 +580,7 @@ class CapriRegionalNLP:
                 self.synN_row = (len(g_rows), Pscale)
                 g_rows.append((P - pv(float(d["synNMax"])) * land) * pv(1.0 / Pscale)); lbg.append(-np.inf); ubg.append(0.0)
             obj = obj + pv(float(d["price"]) / 1000.0) * P
-            if nut == "N" and getattr(self, "_fert_tech_pending", None) is not None \
-                    and bool(_settings_now().get("supply.fert_cost_on_purchases")):
+            if nut == "N" and getattr(self, "_fert_tech_pending", None) is not None:
                 # the fertiliser options' cost on the N purchases (GHG_Mit_Cost_: - cost x v_netPutQuant(NITF), kt)
                 obj = obj + P * pv(1.0 / 1000.0) * self._fert_tech_pending[0]
                 self._fert_tech_pending = None
@@ -753,7 +752,7 @@ class CapriRegionalNLP:
             o_amm = nx0 + sum(int(v.shape[0]) for v in new)
             new.append(sig)
             if am.get("fixed"):
-                # CONOPT's behaviour without a policy incentive (supply_module: amm_fix_without_policy): the options
+                # CONOPT's behaviour without a policy incentive (supply_module, K63): the options
                 # stay at their base shares
                 lbx += [float(t["s0"]) for t in techs]; ubx += [float(t["s0"]) for t in techs]
             else:
@@ -907,8 +906,7 @@ class CapriRegionalNLP:
         # p_dualGreening = -|arable rent - grassland rent|, in GRAE's and GRAI's linear terms), not zero
         pg = (self.spec.get("cap_rules") or {}).get("permGras") or {}
         gi_pg = self.cap_rows.get("permGras") if hasattr(self, "cap_rows") else None
-        # (setting supply.perm_gras_cal_dual; false: zero, this model before 24 October 2026)
-        if gi_pg is not None and pg.get("cal_dual") is not None and bool(_settings_now().get("supply.perm_gras_cal_dual")):
+        if gi_pg is not None and pg.get("cal_dual") is not None:
             lam_fix[gi_pg] = float(pg["cal_dual"]) * max(float(pg.get("scale", 1.0)), 1e-6)
             land_rows = land_rows + [gi_pg]
             keep_act = ~np.isin(act, np.array([gi_pg]))

@@ -21,7 +21,6 @@ import numpy as np
 import pandas as pd
 
 from capri_mod.data.definitions import capri_ms
-from capri_mod.settings import current as _settings
 
 NUTRIENTS = ("N", "P", "K")
 SOURCES = ("MINE", "EXCR", "CRES")
@@ -147,13 +146,6 @@ class NPKData:
         return float(v) if pd.notna(v) and v > 0 else 0.0
 
 
-def need_yield_rule() -> str:
-    """How a crop's nutrient need per ha follows its yield (setting fertiliser.need_yield_rule): "capri"
-    (fert/fertned.gms, see need_yield_factor) or "sqrt" (the square root of the yield ratio on the whole need, this
-    model's rule before 24 October 2026)."""
-    return str(_settings().get("fertiliser.need_yield_rule"))
-
-
 def need_yield_factor(region: Optional[str], crop: str, y0: float, y: float, y_scen: Optional[float] = None,
                       nut: str = "N") -> float:
     """A crop's nutrient need per ha at yield y relative to its need at the base yield y0, CAPRI's rule.
@@ -171,8 +163,6 @@ def need_yield_factor(region: Optional[str], crop: str, y0: float, y: float, y_s
     not bounded here (the shares are fixed at the base). region: model or CAPRI region (None: (m, s) = (1, 0))."""
     if not (y0 > 0 and y > 0):
         return 1.0
-    if need_yield_rule() == "sqrt":
-        return (y / y0) ** 0.5
     D = NPKData.get()
     cr = None
     if region:

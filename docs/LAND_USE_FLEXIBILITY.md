@@ -44,7 +44,7 @@ base data, when built):
 - Land rows: arable crops against ARAC, grassland crops against GRAS, permanent crops against FRUN, as
   activities - land = base crops - base land (the grassland row too since 21 October 2026: it kept the land data's
   headroom above the base use, IE04 173 kha, on which grass could grow at no land cost; KNOWN_ISSUES K60). Idled
-  histosol area stays in its land type (crops + idled area = land; KNOWN_ISSUES K59). With `land_no_slack` (default True, CAPRI's LandBalNoSlak_) these are
+  histosol area stays in its land type (crops + idled area = land; KNOWN_ISSUES K59). Under CAPRI's LandBalNoSlak_ (always; the switch `land_no_slack` was removed on 27 October 2026) these are
   equalities on changes from the base use, because the model's land data carry idle land that CAPRI's data do not; land
   leaves farming only through the land market's costs. Arable fodder (MAIF, OFOD) sits on arable land.
 - Total land conserved (the land types add up to the region's base total): land leaving farming goes to forest and

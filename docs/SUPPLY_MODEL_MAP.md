@@ -32,8 +32,8 @@ Which equations are live depends on switches. Two configurations matter:
 | `envConst`, `NMINREST`, BFP, water | off | off |
 | CAP policy chain | the policy file decides (GUI default `mtr_rd_ref` looks legacy; CAP 2023-27 reference turns on the GAECs) | cap_after_2014 greening chain (permanent grassland, 5% ecological set-aside, crop diversification) |
 
-capri-mod has no switch named ghgAbatement. Its abatement options are inside the regional model whenever
-`use_manure_techs` is on (default True; feeding is always inside the models), baseline
+capri-mod has no switch named ghgAbatement. Its abatement options are inside the regional model (always, since the switch
+`use_manure_techs` was removed on 27 October 2026; feeding is always inside the models), baseline
 included, so in this respect every default run is in the Green Deal configuration. Decision 5a.1 (off by default) was
 not implemented that way.
 
@@ -61,7 +61,7 @@ missing / not needed (inactive in both configurations, or reporting only). GD = 
 | Set-aside (SETA_, SETAN_, MXSETA_, NONF_), sugar quota block, e_max/minLevl, BFP, fixTechfShares_, FixCosts_ | inactive (expected; sugar and set-aside data not inspected) | - | not needed |
 
 CAPRI's activity bounds (supply/set_supply_bounds.gms: 0.1 to max(10 x, + 100) the data level) are variable bounds in
-both forms (`RegionalSupplyModel.use_capri_activity_bounds`, K27); CAPRI's fixed activities are fixed.
+every regional model (always on; K27); CAPRI's fixed activities are fixed.
 
 ### 2.2 Feeding
 

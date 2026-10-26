@@ -150,7 +150,7 @@ K69). Two inconsistencies caused the failures, and both are fixed:
 
 Reference run r110 has CAPRI's setting as the default.
 
-### `market.market_supply_nq = true` and `young_animals.in_market = true` (24 October 2026; K75)
+### `market.market_supply_nq = true` and the young-animal markets inside the market (24 October 2026; K75)
 
 CAPRI's market supply functions (ProdNQ_, p_hessNQSupp measured by price shocks on the supply models,
 supply/calibrate_supply.gms, recalibrated to the supply models every iteration, arm/simu_calibration_to_supply.gms)
@@ -159,17 +159,18 @@ market anticipated the EU supply response with its own-price elasticities and th
 between market solves; the Farm-to-Fork runs then left a slow beef / calf price mode (calf price ratio still rising at
 the 25th iteration, the stopping rule reached 1.5-2 points of beef price short of the fixed point). Remaining
 differences: the Hessian is not built per EU trade block (`eu_blocks` keeps the update between solves). Raw milk:
-since 24 October 2026 (`market.milk_in_market = true`, audit M5) each member state's raw milk follows its own milk
+since 24 October 2026 (audit M5) each member state's raw milk follows its own milk
 price inside the market, through the Hessian's member-state rows and columns.
 
 ### Supply audit S5-S10 (24 October 2026)
 
-All of the following are CAPRI's rules, each with a switch back to the previous model:
-- `fertiliser.need_yield_rule = "capri"`: crop need follows yield as in fertned.gms, not the square root.
-- `supply.yield_dependent_inputs = true`: input costs follow yields, as in define_inputs.gms.
-- `supply.perm_gras_cal_dual = true`: the grassland rule's calibration dual from prep_cal.gms.
-- `supply.fert_cost_on_purchases = true`: the options' cost charged on N purchases, as in GHG_Mit_Cost_.
-- `supply.eco_setaside_catch_crops = true`: catch crops count on the ecoSetAside_ row.
+All of the following are CAPRI's rules (their switches back to the previous model were removed on 27 October 2026,
+with the other switches whose alternative was never run; docs/design/SETTINGS_INVENTORY.md):
+- crop need follows yield as in fertned.gms, not the square root;
+- input costs follow yields, as in define_inputs.gms;
+- the grassland rule's calibration dual from prep_cal.gms;
+- the options' cost charged on N purchases, as in GHG_Mit_Cost_;
+- catch crops count on the ecoSetAside_ row.
 - Idled histosols count on the landscape floor, and the diversification limit is lowered as in landscape.gms; these
   two have no switch.
 

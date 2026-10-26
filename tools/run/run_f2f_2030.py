@@ -5,9 +5,11 @@ settings unless options say otherwise. Saves a pickle read by tools/check/compar
 EU27 domestic price changes, activity and output totals (base, scenario), the
 environmental tables (base, scenario) and convergence metadata.
 
-Usage: python tools/run/run_f2f_2030.py OUT.pkl [--no-land-rules] [--manure-market] [--nitrate]
-                                            [--no-manure-techs]
+Usage: python tools/run/run_f2f_2030.py OUT.pkl [--scenario f2f|greendeal|greendeal2030|carbontax]
                                             [--targets lndscpTarg=0,orgTarg=0,pestRedu=0,surpRedu=0]
+                                            [--settings FILE.toml] [--set section.key=value] ...
+Any setting of capri_mod/settings/defaults.toml is changed with --set (e.g. --set market.eu_blocks=true,
+--set diagnostics.trace_outer=true for the outer-loop trace) or a --settings file.
 """
 import os as _os
 import sys as _sys
@@ -33,23 +35,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("out")
     ap.add_argument("--regions", default="", help="diagnostics: a comma-separated subset of regions")
-    ap.add_argument("--nitrate", action="store_true",
-                    help="the ration model's early nitrate ingredient; ignored when CAPRI's supplement options "
-                         "(line_nitr.gms, ghgTechLineNitr) are inside the supply models")
-    ap.add_argument("--surplus-per-ha", action="store_true", help="CAPRI e_SURTOTHa: surplus per ha of current land")
-    ap.add_argument("--land-no-slack", action="store_true", help="(default now) CAPRI LandBalNoSlak_: no idle farmland")
-    ap.add_argument("--young-animals", action="store_true", help="CAPRI's young-animal markets")
-    ap.add_argument("--no-young-animals", action="store_true")
-    ap.add_argument("--surplus-current-ha", action="store_true", help="N target per current hectare (CAPRI e_SURTOTHa)")
-    ap.add_argument("--manure-market", action="store_true")
-    ap.add_argument("--no-land-rules", action="store_true",
-                    help="idle farmland allowed, N target on base farmland (the default before October 2026)")
-    ap.add_argument("--no-manure-techs", action="store_true")
-    ap.add_argument("--no-dairy-block", action="store_true",
-                    help="dairy products by fixed ratios of milk (market.use_dairy_block false; the default is CAPRI's "
-                         "dairy block)")
-    ap.add_argument("--dairy-block", action="store_true",
-                    help="(default) CAPRI's dairy processing in the market (docs/DAIRY_PROCESSING.md)")
+    ap.add_argument("--manure-market", action="store_true", help="manure trade on (overrides the scenario)")
     ap.add_argument("--endotech", default="",
                     help="CAPRI endogenous-technology settings for baseline and scenario, e.g. ghgTechMYld=0.2 "
                          "(default: star 3.0's refpol_endotech_all_sup, ghgTechMYld 0, ghgTechFEff 0.1); "
@@ -79,19 +65,6 @@ def main():
                     help="override the scenario's nutrient-surplus rule")
     ap.add_argument("--mine-redu", default="", choices=("", "00", "20", "10crp", "13crp", "17crp", "20crp"),
                     help="CAPRI's mineral fertiliser reduction (Green Deal mineRedu; minfert_redu_*.gms)")
-    ap.add_argument("--pmp", choices=("elasticity", "capri2030", "recipe"), default=None,
-                    help="the crops' PMP matrix: elasticity-calibrated or CAPRI's 2030 terms (SupplyModule.pmp_source)")
-    ap.add_argument("--pmp-parts", default=None,
-                    help="with --pmp capri2030: which CAPRI 2030 terms, comma list of crops,animals,feed,land (default all)")
-    ap.add_argument("--market-nq", action="store_true",
-                    help="CAPRI's market supply functions measured on the supply models (Hessian at the baseline, cached)")
-    ap.add_argument("--no-market-nq", action="store_true",
-                    help="(default) the market's own-price anticipation of the EU supply response")
-    ap.add_argument("--eu-blocks", action="store_true",
-                    help="CAPRI's two EU trade blocks EU_WEST and EU_EAST in the market (default: the EU as one region)")
-    ap.add_argument("--no-gl-demand", action="store_true",
-                    help="food demand without CAPRI's GL system (own-price constant elasticities, no cross-price terms)")
-    ap.add_argument("--verbose", action="store_true", help="print the outer-loop trace")
     ap.add_argument("--targets", default="", help="CAPRI switches to change, e.g. "
                     "'lndscpTarg=0,orgTarg=0,pestRedu=0' for the nitrogen-balance target alone")
     ap.add_argument("--capped-regions", default="",
@@ -100,11 +73,6 @@ def main():
     ap.add_argument("--trajectory", default="capri_ref",
                     help="2030 baseline trajectory: capri_ref (CAPRI's 2030 reference, default), captrd (CAPRI's trend "
                          "projection) or a file name in capri_data/trajectories")
-    ap.add_argument("--cattle-member-splits", action="store_true",
-                    help="CAPRI's replacement heifers and calf activities with their own levels and the young-animal "
-                         "markets per sex (RegionalSupplyModel.use_cattle_member_splits; K65)")
-    ap.add_argument("--yani-pmp-response", action="store_true",
-                    help="young-animal price update from the PMP terms (Q^-1) instead of the solved models' response")
     ap.add_argument("--settings", action="append", default=[],
                     help="a TOML settings file (capri_mod/settings/defaults.toml's keys); repeatable, later files win")
     ap.add_argument("--set", action="append", default=[],
@@ -127,27 +95,7 @@ def main():
     # the run's settings (capri_mod/settings): defaults.toml, then --settings files, then the flags below, then --set
     from capri_mod import settings as _S
     ov = {}
-    flag_map = [  # (flag on, setting, value)
-        (a.eu_blocks, "market.eu_blocks", True),
-        (a.cattle_member_splits, "supply.use_cattle_member_splits", True),
-        (a.yani_pmp_response, "young_animals.use_exact", "off"),
-        (a.verbose, "diagnostics.trace_outer", True),
-        (a.nitrate, "supply.use_nitrate_in_ration", True),
-        (a.surplus_per_ha or a.surplus_current_ha, "supply.surplus_per_current_ha", True),
-        (a.land_no_slack, "supply.land_no_slack", True),
-        (a.young_animals, "young_animals.enabled", True),
-        (a.no_young_animals, "young_animals.enabled", False),
-        (a.no_land_rules, "supply.land_no_slack", False),
-        (a.no_land_rules, "supply.surplus_per_current_ha", False),
-        (a.no_manure_techs, "supply.use_manure_techs", False),
-        (a.no_dairy_block, "market.use_dairy_block", False),
-        (a.dairy_block, "market.use_dairy_block", True),
-        (bool(a.pmp), "supply.pmp_source", a.pmp),
-        (bool(a.pmp_parts), "supply.pmp_capri_parts",
-         [x.strip() for x in (a.pmp_parts or "").split(",") if x.strip()]),
-        (a.market_nq, "market.market_supply_nq", True),
-        (a.no_market_nq, "market.market_supply_nq", False),
-        (a.no_gl_demand, "market.food_demand_gl", False),
+    flag_map = [  # (flag on, setting, value); every other setting: --set or --settings
         (bool(a.capped_regions), "supply.jrc_capped_override", a.capped_regions),
     ]
     for on, k, v in flag_map:

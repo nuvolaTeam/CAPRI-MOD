@@ -36,8 +36,7 @@ class DairyMixin:
 
     #: CAPRI's dairy processing in the market (docs/DAIRY_PROCESSING.md): on, as in CAPRI, where the dairy
     #: block is part of the market model (no switch). Since Sprint 9f all nine dairy products are traded and raw
-    #: milk, fat and protein are priced per member state. False: dairy products as fixed CAPRI yields of milk.
-    use_dairy_block = setting("market.use_dairy_block")
+    #: milk, fat and protein are priced per member state.
 
     def _dairy_algebra(self, tables):
         """CAPRI's dairy block as linear algebra for a set of regions that share price RATIOS.
@@ -95,8 +94,6 @@ class DairyMixin:
         CAPRI, the nine products at their EU market region's prices and traded bilaterally; raw milk delivered
         from the EU supply models; food demand among the nine products with CAPRI's own and cross elasticities;
         feed demand through the FMIL block."""
-        if not self.use_dairy_block:
-            return {}
         cached = getattr(self, "_dairy_cache", None)
         if cached is not None:
             return cached
@@ -157,8 +154,6 @@ class DairyMixin:
         regions' p_ElasDem weighted by food use; feed use of the products at CAPRI's level (FMIL index 1: the
         model has no non-EU herds), with the CES price term; extra-regional trade of the five non-traded
         products fixed."""
-        if not self.use_dairy_block:
-            return {}
         cached = getattr(self, "_dairy_world_cache", None)
         if cached is not None:
             return cached

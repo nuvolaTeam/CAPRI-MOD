@@ -31,9 +31,7 @@ class ProcessingMixin:
 
     #: CAPRI's processing demand functions (arm/market_model.gms ProcNQ_; tools/build/build_processing_nq.py): oilseed
     #: crushing linear in the crushing margins with CAPRI's Hessian (cross terms among the oilseeds), processing of
-    #: the other products linear in the prices (cross terms among the vegetable oils). False: the earlier own-margin
-    #: crushing elasticity and own-price response of processing.
-    processing_nq = setting("market.processing_nq")
+    #: the other products linear in the prices (cross terms among the vegetable oils)
     #: products whose processing has its own block: dairy (fixed processing in the dairy block), biofuels (the
     #: biofuel market's non-fuel processing), raw milk
     _PROC_NQ_SKIP = frozenset({"MILK", "BUTR", "SKIM", "CHES", "WHEY", "FRMI", "CREM", "COCM", "WMIO", "CASE",
@@ -41,9 +39,7 @@ class ProcessingMixin:
 
     def _proc_nq_params(self) -> dict:
         """CAPRI's processing Hessian summed per model region (the behavioural regions of a region share its prices),
-        CAPRI's processing share of use per (region, commodity). {} when off or the files are absent."""
-        if not self.processing_nq:
-            return {}
+        CAPRI's processing share of use per (region, commodity). {} when the files are absent."""
         cached = getattr(self, "_procnq_cache", None)
         if cached is not None:
             return cached

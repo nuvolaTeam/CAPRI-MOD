@@ -18,7 +18,7 @@ CAPRI's structure, reproduced here (supply/supply_model.gms, envind/ammo_tech.gm
   options not used at base), so the base shares are optimal at the base value of N. (CAPRI's simulation also adds
   costsavings0, the calibration run's marginal at the initial shares; capri-mod's NLP calibration nets the same
   residuals, and without a policy incentive on N the options are held at their base shares, as CONOPT stays at the
-  calibrated point: RegionalSupplyModel.amm_fix_without_policy, KNOWN_ISSUES K63.)
+  calibrated point: the regional NLP solve, KNOWN_ISSUES K63.)
 
 Under a nitrogen-balance price lam (EUR/kg N = kEUR/t), retained N saves mineral fertiliser
 (substitution factor sub); its value per animal place for option t is

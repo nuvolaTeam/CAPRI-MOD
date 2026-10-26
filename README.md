@@ -359,7 +359,7 @@ Or in a container (Debian bookworm, `Dockerfile`):
 docker build -t capri-mod .
 docker run --rm capri-mod                                        # the test suite
 docker run --rm -v "$PWD/runs:/runs" capri-mod \
-    python tools/run/run_f2f_2030.py /runs/f2f.pkl --verbose          # a full Farm-to-Fork 2030 run (about 50 minutes on 2 cores)
+    python tools/run/run_f2f_2030.py /runs/f2f.pkl --set diagnostics.trace_outer=true   # a full Farm-to-Fork 2030 run (about 50 minutes on 2 cores)
 ```
 
 **Parameters.** Every constant the model's economics and accounting rest on - CAPRI's parameters, IPCC factors as
@@ -662,7 +662,7 @@ carries, per member state, all nine products traded bilaterally (on by default s
 **Fertilizer.** Application rates per crop and region are CAPRI's `p_FertPerHa`; the regional supply models
 carry CAPRI's inner fertiliser distribution and NPK block (`capri_mod/fert/inner_fert_dist.py`, `npk.py`). A crop's
 nutrient need follows its yield as CAPRI's fert/fertned.gms: the need per tonne of main product moves with the yield,
-the straw part only with scenario yield shifts (`fertiliser.need_yield_rule`). The
+the straw part only with scenario yield shifts (`capri_mod/fert/npk.py need_yield_factor`). The
 earlier `FertilizerModule` (removal factors x yields x a calibrated efficiency, not CAPRI's estimation) was never
 used in a run and was removed on 23 October 2026.
 
@@ -836,8 +836,8 @@ s.save("my_run.settings.toml")                         # the effective settings
 
 - From the command line: `tools/run/run_f2f_2030.py OUT.pkl --settings my_run.toml --set market.eu_blocks=true`. The run
   writes its effective settings next to the result (`OUT.settings.toml`, and `meta["settings"]` in the pickle).
-- In the code, a setting is a `setting("section.key")` class attribute: `RegionalSupplyModel.use_genetics` reads
-  `supply.use_genetics`. Assigning to it is an error, so no class or instance can hold a second value.
+- In the code, a setting is a `setting("section.key")` class attribute: `RegionalSupplyModel.use_land_market` reads
+  `supply.use_land_market`. Assigning to it is an error, so no class or instance can hold a second value.
 - **Where the defaults differ from CAPRI's:** docs/DEPARTURES_FROM_CAPRI.md lists them: corrections of CAPRI code
   errors (CAPRI-ERROR-FIX), each with a switch to CAPRI as coded, and departures to be switched to CAPRI's setting one
   at a time (DEPARTURE).
@@ -1406,7 +1406,7 @@ your own.
 
 **Baseline calibration (Sprint 9p).** As CAPMOD calibrates its supply models to the simulation year's baseline, the
 baseline of a projected year shifts each region's linear cost terms by Q (x − target) until the region reproduces its
-projected levels (fodder crops excepted, held by the fodder balances; `CAPRIModel.calibrate_baseline`). Against
+projected levels (fodder crops excepted, held by the fodder balances; `SupplyModule.calibrate_to_base`). Against
 CAPRI's 2030 reference the baseline is within 2.6% (activities), 1.4% (production) and 1.7% (domestic use) at the
 median; regional drift from the projected levels is 0.13% at the median. With CAPRI's 2030 rations,
 requirements and usable fodder per ha (Sprint 9q) the calibrated baseline reproduces the reference region by region

@@ -161,7 +161,6 @@ def test_dairy_block_follows_capri_per_member_state(model):
         assert c in MARKET_COMMODITIES and mm.DAIRY_TRADED[c] == c
     fl = pd.read_csv(DATA_DIR / "2017" / "market" / "bilateral_flows_2030.csv")
     assert set(fl.commodity) >= {"FRMI", "CREM", "COCM", "WMIO", "CASE"}
-    assert mm.use_dairy_block                           # the setting market.use_dairy_block (default on)
     try:
         mm._dairy_cache = None
         dp = mm._dairy_params()
@@ -550,7 +549,6 @@ def test_dairy_block_fat_protein_balance(model):
     prices; less milk raises the raw milk, fat and protein prices, keeps the fat and protein balances
     and lowers product output; a dearer cheese draws milk solids into cheese; fewer calves cut milk feed."""
     mm = model.market_module
-    assert mm.use_dairy_block                           # the setting market.use_dairy_block (default on)
     mm._dairy_cache = None
     fi0, mm._fmil_index = getattr(mm, "_fmil_index", 1.0), 1.0     # calves' milk feed at base
     dp = mm._dairy_params()
@@ -579,7 +577,6 @@ def test_dairy_world_blocks(model):
     """Dairy Stage 4: CAPRI's dairy block for the non-EU trade regions reproduces the base, and dearer
     dairy products draw more raw milk (CAPRI's supply function) and more product."""
     mm = model.market_module
-    assert mm.use_dairy_block                           # the setting market.use_dairy_block (default on)
     mm._dairy_world_cache = None
     try:
         w = mm._dairy_world_params()
@@ -799,8 +796,6 @@ def test_option_costsaving_drop_follows_capri(model):
                         for (a, o), e in t.items() if "dsav" in e and e["dsav"] == e["dsav"]],
                        columns=["o", "d"]).groupby("o").d.median()
     assert med["genet_eff"] < 0 and med["Nitr_Tot"] > 0 and med["lowNFeed"] > 0
-    from capri_mod.supply.supply_module import RegionalSupplyModel
-    assert RegionalSupplyModel.use_option_costsaving_drop is True
 
 
 def test_genetics_not_adopted_at_base(model):
@@ -1172,84 +1167,6 @@ def test_market_mapping_consistency():
         f"MARKET_COMMODITIES: {bridge_missing}")
 
     # (b) (the processing outputs' list PROCESSING_OUTPUTS was removed 23 October 2026: no model code read it)
-
-
-# ---------------------------------------------------------------------------
-# Fertilizer distribution module. Derives crop/region application rates
-# (CAPRI p_FertPerHa) from removal factors x yields x calibrated efficiency,
-# so a base year lacking a ready-made nutrient_coefs file can still be built.
-# Validated against CAPRI's own 2017 p_FertPerHa (nutrient_coefs.csv).
-# ---------------------------------------------------------------------------
-
-def test_income_distribution_module():
-    """Farm-income distribution combines supply margins with CAP payments and
-    produces sensible distributional measures.
-
-    The module is an accounting layer over validated quantities (supply gross
-    margins, policy CAP payments). It should produce a valid Gini in [0,1], a
-    plausible support share, and payments that are less concentrated than income
-    (CAP has redistributive intent). Grassland is excluded as on-farm fodder.
-    """
-    from capri_mod.data.loaders import load_all_data
-    from capri_mod.supply.supply_module import SupplyModule
-    from capri_mod.utils.utils import calibrate_supply_elasticities
-    from capri_mod.policy.policy_module import PolicyModule, PolicyScenario
-    from capri_mod.income import IncomeDistributionModule
-
-    d = load_all_data(str(DATA_DIR))
-    sm = SupplyModule(d, calibrate_supply_elasticities(d["areas"]))
-    sr = sm.run(price_signals=None, regions=list(d["areas"].index[:30]))
-    pm = PolicyModule(d, PolicyScenario(name="BASELINE"))
-    cap = pm.payments.compute_payments_by_region(d["cap_payments"], d["land"])
-
-    im = IncomeDistributionModule(d)
-    res = im.compute(sr, cap, supply_module=sm)
-
-    # valid concentration measures
-    assert 0.0 <= res.income_gini <= 1.0, f"income Gini out of range: {res.income_gini}"
-    assert 0.0 <= res.payment_gini <= 1.0, f"payment Gini out of range: {res.payment_gini}"
-    # support share is a sensible fraction
-    assert 0.0 <= res.support_share_eu <= 1.0, (
-        f"support share out of range: {res.support_share_eu}")
-    # market income must be finite and positive in aggregate (GRAS artifact excluded)
-    total_market = res.by_region["market_income"].sum()
-    assert total_market > 0 and total_market < 1e12, (
-        f"aggregate market income implausible: {total_market} (GRAS artifact?)")
-
-
-def test_water_demand_module():
-    """Irrigation water demand reproduces the known geography and magnitude.
-
-    The module computes demand = CNIR x irrigated area from CAPRI's CROPWAT data
-    and Eurostat irrigation shares, driven by crop areas. The physical test is
-    that demand concentrates in the Mediterranean (irrigation is a southern
-    phenomenon) and the EU total is the right order of magnitude (~10-20 km3 net
-    irrigation requirement).
-    """
-    import os
-    from capri_mod.data.loaders import load_all_data
-    from capri_mod.water import WaterDemandModule
-
-    cw = os.path.join(str(DATA_DIR), "sources", "water", "cropwat.csv")
-    ish = os.path.join(str(DATA_DIR), "sources", "water", "irrishare.csv")
-    if not (os.path.exists(cw) and os.path.exists(ish)):
-        return  # water data not present in this build
-
-    d = load_all_data(str(DATA_DIR))
-    wm = WaterDemandModule(d, cropwat_path=cw, irrishare_path=ish)
-    res = wm.compute()
-
-    # EU total is a physically plausible net irrigation requirement (km3 scale)
-    assert 5_000 < res.total_demand_Mm3 < 40_000, (
-        f"EU irrigation demand implausible: {res.total_demand_Mm3} Mm3")
-    # covers a substantial share of regions
-    assert res.n_regions_covered > 100, (
-        f"too few regions covered: {res.n_regions_covered}")
-    # Mediterranean dominates (the key physical signature)
-    df = res.by_region
-    south = df[df.index.str.startswith(("ES", "IT", "EL", "PT"))]["water_demand_Mm3"].sum()
-    assert south / res.total_demand_Mm3 > 0.5, (
-        "Mediterranean should dominate EU irrigation demand")
 
 
 @pytest.mark.slow
@@ -2421,10 +2338,9 @@ def test_pesticide_target_applies_to_conventional_area_only():
     assert comb_y < y0, "the pesticide yield loss vanished on conventional land"
 
 
-#: the settings a SupplyModule built on its own (without CAPRIModel) used to run with before the settings layer
-#: (23 October 2026): RegionalSupplyModel's own class defaults, which CAPRIModel overwrote at its first outer iteration
-#: (land market off, idle land allowed, N target on base land, no ammonia techs). The two tests of the fallback
-#: land supply and of the landscape floor's fitting check those paths, so they run with them explicitly.
+#: the land market off (CAPRI's p_landIsFixedinScenario): the two tests of fixed land and of the landscape floor's
+#: fitting check that path, so they run with it explicitly (CAPRI's land rules, the N target per current hectare and
+#: the ammonia techniques are always on since 27 October 2026)
 def _cold(model):
     """Clear a regional model's warm start (CAPRI's CONOPT, like IPOPT here, starts from the last solution). Two solves
     of the same problem from different starts end within IPOPT's tolerance of each other, not bit-identical (KNOWN_ISSUES
@@ -2434,8 +2350,7 @@ def _cold(model):
     return model
 
 
-STANDALONE_PRE_SETTINGS = {"supply.use_land_market": False, "supply.land_no_slack": False,
-                           "supply.surplus_per_current_ha": False, "supply.use_manure_techs": False}
+STANDALONE_PRE_SETTINGS = {"supply.use_land_market": False}
 
 
 def test_land_is_fixed_without_the_land_market(data, monkeypatch):
@@ -2905,13 +2820,13 @@ def test_settings_layer_is_the_one_source_of_run_settings():
     with pytest.raises(S.SettingsError):
         S.current().replace({"supply.no_such_key": 1})
     with pytest.raises(S.SettingsError):
-        S.current().replace({"supply.use_genetics": "yes"})
+        S.current().replace({"supply.use_land_market": "yes"})
     with pytest.raises(AttributeError):
-        RegionalSupplyModel.__dict__["use_genetics"].__set__(object(), False)
-    assert RegionalSupplyModel.use_genetics is True
-    with S.override({"supply.use_genetics": False}) as s_:
-        assert RegionalSupplyModel.use_genetics is False and s_.diff() == {"supply.use_genetics": False}
-    assert RegionalSupplyModel.use_genetics is True
+        RegionalSupplyModel.__dict__["use_land_market"].__set__(object(), False)
+    assert RegionalSupplyModel.use_land_market is True
+    with S.override({"supply.use_land_market": False}) as s_:
+        assert RegionalSupplyModel.use_land_market is False and s_.diff() == {"supply.use_land_market": False}
+    assert RegionalSupplyModel.use_land_market is True
     t = S.current().replace({"market.eu_blocks": True}).to_toml()
     assert S.load(overrides={k: v for sec, kv in tomllib.loads(t).items() for k, v in
                              ((f"{sec}.{k2}", v2) for k2, v2 in kv.items())}).get("market.eu_blocks") is True
@@ -3183,10 +3098,6 @@ def test_food_demand_is_capris_generalised_leontief(data):
     d0 = mm.demand_response(dom0, mm.world_prices_base)
     glr, hs = mm._gl_last
     assert np.max(np.abs(glr - 1.0)) < 1e-12
-    from capri_mod import settings as S
-    with S.override({"market.food_demand_gl": False}):
-        d0o = mm.demand_response(dom0, mm.world_prices_base)
-    assert float(((d0 - d0o).abs() / d0o.clip(lower=1.0)).max().max()) < 1e-12
     dp = dom0.copy(); dp["PORK"] *= 1.1
     d1 = mm.demand_response(dp, mm.world_prices_base)
     for c in ("BEEF", "POUL"):
@@ -4008,10 +3919,6 @@ def test_input_costs_follow_yields_as_capri(monkeypatch):
     mo._apply_yield_input_costs()
     want = (rest * tf + pl * 0.5 * tf + ip * 1.3 * tf) * (-0.1)
     assert abs((nr0[crop] - mo.net_revenues[crop]) - want) < 1e-6
-    monkeypatch.setattr(RegionalSupplyModel, "yield_dependent_inputs", False)
-    mo.net_revenues = nr0.copy()
-    mo._apply_yield_input_costs()
-    assert (mo.net_revenues == nr0).all()
     mo.data.yields, mo._yields_solve0, mo._greendeal_inputs = y0, None, {}
 
 

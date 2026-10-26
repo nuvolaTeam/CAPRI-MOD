@@ -148,7 +148,6 @@ def build_elasticity_table(
     regions,
     activities,
     defaults: pd.Series,
-    apply_dampening: Optional[bool] = None,
     base_areas: Optional[pd.DataFrame] = None,
     base_year: str = "2017",
 ) -> Tuple[pd.DataFrame, pd.DataFrame, dict]:
@@ -168,9 +167,7 @@ def build_elasticity_table(
     why it reaches regions the first one misses.
     """
     data_dir = Path(data_dir)
-    if apply_dampening is None:                            # the setting supply.pmp_apply_dampening
-        from capri_mod.settings import current as _settings
-        apply_dampening = bool(_settings().get("supply.pmp_apply_dampening"))
+    apply_dampening = True        # CAPRI's dampening (impose_upper_bound_on_elasticity.gms)
     # (The runtime guard against activities anchored on a constant placeholder base, detect_synthetic_base_activities,
     # blocked none since the synthetic data was replaced and was removed from here on 23 October 2026; the function
     # stays as a data check, test_capri.py.)
