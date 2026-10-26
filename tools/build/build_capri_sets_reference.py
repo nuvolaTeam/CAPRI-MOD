@@ -15,13 +15,15 @@ they are ported from sets_captrd.gms separately.
 """
 from __future__ import annotations
 
+import os
 import argparse
 import csv
 import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-DEFAULT_GDXLIB = "/home/claude/work/gdxlib"
+# folder of libgdxcclib64.so (README section 3): --gdxlib or the environment variable CAPRI_GDXLIB
+DEFAULT_GDXLIB = os.environ.get("CAPRI_GDXLIB", "")
 
 
 def main() -> None:

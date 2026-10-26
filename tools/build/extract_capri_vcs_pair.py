@@ -17,9 +17,10 @@ Kept, year 2030 (current prices, as CAPRI stores them):
 Output: capri_data/validation/coupled_support_2030/capri_vcs_effect.csv.xz
         (region, activity, item, ref, novcs, pct_change)
 
-    python tools/build/extract_capri_vcs_pair.py REF.gdx NOVCS.csv [--lib-dir /home/claude/work/gdxlib]
+    python tools/build/extract_capri_vcs_pair.py REF.gdx NOVCS.csv [--lib-dir DIR]  (default: $CAPRI_GDXLIB)
 """
 from __future__ import annotations
+import os
 import argparse, re
 from pathlib import Path
 
@@ -86,7 +87,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("ref_gdx", type=Path)
     ap.add_argument("novcs_dump", type=Path)
-    ap.add_argument("--lib-dir", default="/home/claude/work/gdxlib")
+    ap.add_argument("--lib-dir", default=os.environ.get("CAPRI_GDXLIB", ""))  # folder of libgdxcclib64.so (README section 3)
     a = ap.parse_args()
     ref = read_gdx(a.ref_gdx, a.lib_dir)
     nov = read_dump(a.novcs_dump)

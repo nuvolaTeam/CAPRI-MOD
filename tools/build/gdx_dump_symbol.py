@@ -5,10 +5,11 @@ through the low-level bindings of the `gamsapi` package. Output columns: the sym
 positions dim1..dimN and value (level for parameters; level and marginal for variables/equations;
 the element text for sets).
 
-    python tools/build/gdx_dump_symbol.py FILE.gdx SYMBOL OUT.csv [--lib-dir /home/claude/work/gdxlib]
+    python tools/build/gdx_dump_symbol.py FILE.gdx SYMBOL OUT.csv [--lib-dir DIR]  (default: $CAPRI_GDXLIB)
     python tools/build/gdx_dump_symbol.py FILE.gdx --list            (symbols in the file)
 """
 from __future__ import annotations
+import os
 import argparse, csv, sys
 
 
@@ -17,7 +18,7 @@ def main():
     ap.add_argument("gdx")
     ap.add_argument("symbol", nargs="?")
     ap.add_argument("out", nargs="?")
-    ap.add_argument("--lib-dir", default="/home/claude/work/gdxlib")
+    ap.add_argument("--lib-dir", default=os.environ.get("CAPRI_GDXLIB", ""))  # folder of libgdxcclib64.so (README section 3)
     ap.add_argument("--list", action="store_true")
     ap.add_argument("--filter", default="", help="keep records whose dim1..dimN contain all these comma-separated labels")
     ap.add_argument("--nonzero", action="store_true", help="skip records whose level and marginal are both 0")

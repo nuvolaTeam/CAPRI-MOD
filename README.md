@@ -319,14 +319,25 @@ solver, and every intermediate quantity inspectable.
 Install the dependencies (Python 3.10 or later) and run the test suite from the command line:
 
 ```shell
-pip install -r requirements.txt        # pandas, numpy, scipy, casadi (IPOPT), clarabel
+pip install -r requirements.txt        # the model, tests, data pipeline and reference tools
 python tools/run/run_tests.py
 ```
 
-Optional: `pip install -r requirements-dev.txt` adds pytest, pytest-xdist and coverage (`python -m pytest -n 2`
-runs the tests in two processes); `pip install -r requirements-pipeline.txt` adds requests, deltalake and pyarrow
-for the data pipeline (`capri_mod/pipeline`). The same sets are the `dev` and `pipeline` extras of `pyproject.toml`.
-The GAMS Python API is needed only by `tools/build/*`, which rebuild the CAPRI reference CSVs from GDX files.
+`requirements.txt` holds every package in sections: the model, the tests (pytest, pytest-xdist for
+`python -m pytest -n 2`, coverage), the data pipeline (requests, deltalake, pyarrow: about 300 MB, not needed to run
+the model) and the reference-building tools. The same sets are the dependencies and the `dev`, `pipeline` and
+`tools` extras of `pyproject.toml`.
+
+The reference-building tools (`tools/build/*`, which turn CAPRI's GDX files into the reference CSVs) read GDX files
+through the GAMS Python API (`gamsapi`) and the GDX library, which is open source (MIT) and needs no GAMS installation
+or licence. The library is built once with CMake and its folder passed as `--gdxlib` or the environment variable
+`CAPRI_GDXLIB`:
+
+```shell
+git clone https://github.com/GAMS-dev/gdx.git && cd gdx    # built here from commit 9e2a8c8
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DNO_TESTS=ON -DNO_EXAMPLES=ON && cmake --build build --target gdxcclib64
+export CAPRI_GDXLIB=$PWD/build                              # the folder holding libgdxcclib64.so
+```
 
 Or in a container (Debian bookworm, `Dockerfile`):
 

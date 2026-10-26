@@ -20,6 +20,7 @@ for the zero/missing fix of CAPTRD_MOD.md section 8.3.
 """
 from __future__ import annotations
 
+import os
 import argparse
 import csv
 import gzip
@@ -29,7 +30,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / "capri_reference" / "capreg_tseries" / "17"
-DEFAULT_GDXLIB = "/home/claude/work/gdxlib"
+# folder of libgdxcclib64.so (README section 3): --gdxlib or the environment variable CAPRI_GDXLIB
+DEFAULT_GDXLIB = os.environ.get("CAPRI_GDXLIB", "")
 
 
 def _read_data(path: Path, gdxlib: str):
