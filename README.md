@@ -36,7 +36,7 @@ not a copy of its code.
 7. [Running the model](#7-running-the-model)
 8. [Validation](#8-validation)
 9. [AI readiness, reusability and reproducibility](#9-ai-readiness-reusability-and-reproducibility)
-10. [Differences from CAPRI, and why they are deliberate](#10-differences-from-capri-and-why-they-are-deliberate)
+10. [Differences from CAPRI](#10-differences-from-capri)
 11. [Known limitations](#11-known-limitations)
 12. [Provenance & reproducibility](#12-provenance--reproducibility)
 13. [Relationship to CAPRI](#13-relationship-to-capri)
@@ -693,7 +693,7 @@ the **same method and structure** as CAPRI, not simplifications of it:
   Norway set, at CAPRI's own granularity.
 
 The differences from CAPRI are recorded, not hidden. The defaults that are not CAPRI's are listed in
-`docs/DEPARTURES_FROM_CAPRI.md` and summarised in [§10](#10-differences-from-capri-and-why-they-are-deliberate):
+`docs/DEPARTURES_FROM_CAPRI.md` and summarised in [§10](#10-differences-from-capri):
 corrections where CAPRI's code contradicts its own data, each with a switch back to CAPRI's behaviour, and
 departures to be switched to CAPRI's setting, such as the EU as one trade block instead of CAPRI's two. Method gaps
 and open differences from CAPRI's results are in [§11](#11-known-limitations) and `docs/KNOWN_ISSUES.md`. The rest
@@ -1326,9 +1326,20 @@ optimisation and equilibrium equations. Machine learning is considered only for 
 - **Convergence must be checked.** Some scenario runs do not yet converge (`docs/KNOWN_ISSUES.md`, K75); a tool must
   read the run's metadata before using its results.
 
-## 10. Differences from CAPRI, and why they are deliberate
+## 10. Differences from CAPRI
 
-Each difference is a considered design choice, not a shortfall.
+Three kinds of difference, kept apart because they call for different readings:
+
+- **Scope and additions:** the base-year mode and the projection layer (10.1-10.2), the 248 regions of EU27 + Norway
+  (10.4). How CAPRI's mitigation options and emission tax sit inside the supply models, with the simplifications
+  registered for them, is in 10.2b.
+- **Corrections of CAPRI's code**, where its effect contradicts CAPRI's own data or equations; each has a switch back to
+  CAPRI's behaviour (10.2c).
+- **Departures to be switched to CAPRI's setting**, kept for a practical reason recorded at the time: the EU as one
+  trade block (10.3) and the others in docs/DEPARTURES_FROM_CAPRI.md, which is the complete list of defaults that are
+  not CAPRI's.
+
+Inputs not yet traced to a CAPRI source are in 10.5; method gaps and open differences from CAPRI's results in §11.
 
 ### 10.1 Two modes: comparative-static and projected
 
@@ -1472,12 +1483,14 @@ CAPRI's installation defines 288 NUTS-2 units; CAPRI-mod covers 248. The 40
 not covered are non-EU (Turkey, Western Balkans), out of scope by design. Within
 EU27 + Norway the granularity matches.
 
-### 10.5 A few parameters calibrated-to-target
+### 10.5 Inputs not yet traced to a CAPRI source
 
-Monogastric feed requirements and a small number of specialty world prices are
-calibrated to match CAPRI's reported values rather than derived from CAPRI's
-formula — because their reported units could not be reconciled without risk of a
-compensating error. These cells are explicitly labelled *calibrated-to-target*.
+The parameters of `capri_data/shared/model_parameters.csv` each carry their source (CAPRI, IPCC, JRC121368, literature
+or legal), the feed requirements are CAPRI's (DATA2) and the world prices CAPRI's market data (p_dataMarket, World,
+PMRK). Two inputs have no builder that reproduces them from a CAPRI file (KNOWN_ISSUES K72, open): the own-price
+supply elasticity `eps` in `armington_params.csv`, used for EU market supply where CAPRI's EU p_elasSupp file has no
+value (32 of 62 products; which of them the solve still reaches now that CAPRI's market supply functions are on is to
+be checked), and the livestock rows of `producer_prices.csv`.
 
 ---
 
@@ -1497,8 +1510,8 @@ principled reason and extension path.
   run the projection layer (§10.1–10.2). Compared on *production*, as CAPRI
   reports it, the magnitudes are directly comparable with its published
   scenarios; comparing *area* against its production is not.
-- **Monogastric feed energy and a few specialty world prices are
-  calibrated-to-target**, not derived.
+- **Two inputs are not yet traced to a CAPRI source** (§10.5, KNOWN_ISSUES K72): the EU market supply elasticity
+  `eps` of about 30 products and the livestock producer prices.
 - **Biofuel and parts of the market module are validated against external data
   or documented behaviour**, not against a CAPRI scenario run.
 - **Supply elasticities** match CAPRI's regional `PELA` values at 0.76–1.00
