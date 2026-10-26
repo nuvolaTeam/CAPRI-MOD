@@ -7678,25 +7678,30 @@ class SupplyModule:
         from concurrent.futures import ProcessPoolExecutor
         from concurrent.futures.process import BrokenProcessPool
         done = set()
+        pool = ProcessPoolExecutor(nw, mp_context=multiprocessing.get_context("fork"))
+        broken = False
         try:
             try:
-                with ProcessPoolExecutor(nw, mp_context=multiprocessing.get_context("fork")) as pool:
-                    for out, model, state, caches in pool.map(_par_solve_region, rest, chunksize=1):
-                        region = out[0]
-                        if model is not None:
-                            model._env_for_surplus = self._env_for_surplus
-                            self._models[region] = model
-                        for name in self._PAR_STATE:
-                            d = self.__dict__.setdefault(name, {})
-                            if name in state:
-                                d[region] = state[name]
-                            else:
-                                d.pop(region, None)
-                        for name, new in caches.items():
-                            self.__dict__.setdefault(name, {}).update(new)
-                        done.add(region)
-                        yield out
+                for out, model, state, caches in pool.map(_par_solve_region, rest, chunksize=1):
+                    region = out[0]
+                    if model is not None:
+                        model._env_for_surplus = self._env_for_surplus
+                        self._models[region] = model
+                    for name in self._PAR_STATE:
+                        d = self.__dict__.setdefault(name, {})
+                        if name in state:
+                            d[region] = state[name]
+                        else:
+                            d.pop(region, None)
+                    for name, new in caches.items():
+                        self.__dict__.setdefault(name, {}).update(new)
+                    done.add(region)
+                    yield out
             except BrokenProcessPool as exc:
+                # the workers still alive can block for ever writing a result nobody reads any more (seen under
+                # coverage, 26 October 2026): kill them before the executor's shutdown waits for them
+                broken = True
+                _kill_pool_workers(pool)
                 left = [r for r in rest if r not in done]
                 warnings.warn(f"a worker process of the regional solves died ({exc!r}); the {len(left)} regions "
                               "left are solved in this process", RuntimeWarning, stacklevel=2)
@@ -7705,6 +7710,10 @@ class SupplyModule:
                     yield self._solve_region(r, _pol_all, price_signals, verbose)
         finally:
             _PAR_CTX = None
+            if broken:
+                pool.shutdown(wait=False, cancel_futures=True)
+            else:
+                pool.shutdown(wait=True)
 
     def aggregate_supply(
         self,
@@ -7737,6 +7746,16 @@ class SupplyModule:
 
 
 _PAR_CTX = None
+
+def _kill_pool_workers(pool) -> None:
+    """Kill the worker processes of a broken ProcessPoolExecutor (its private process table; nothing if absent)."""
+    for proc in list((getattr(pool, "_processes", None) or {}).values()):
+        try:
+            proc.kill()
+            proc.join(5)
+        except Exception:                                     # already gone
+            pass
+
 
 def _par_solve_region(region):
     """Worker process: one region's solves (SupplyModule._solve_region) with the state forked from the parent;
