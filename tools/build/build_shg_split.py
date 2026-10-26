@@ -34,7 +34,7 @@ STEPS = (["tools/build/build_livestock_premium_coef.py", "{dump}"], ["tools/buil
 
 
 def coefficient_tables(dump: Path):
-    sys.path.insert(0, str(ROOT)); sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check", "check/nlp_check")]
+    sys.path.insert(0, str(ROOT)); sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check")]
     import build_livestock_output_coef as B
     D = ROOT / "capri_data" / "2017"
     B.build(dump).to_csv(D / "supply" / "livestock_output_coef.csv")

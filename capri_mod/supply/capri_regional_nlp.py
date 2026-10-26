@@ -71,6 +71,30 @@ def _cache_max():
         return int(_settings().get("run.nlp_cache_size"))
 
 
+def _cascade_loss(sub, sh):
+    """CAPRI's NH3 loss per unit of excreted N (ammonia_techs.loss) with symbolic shares: sh {tech: expr}."""
+    def stage(rH, rS):
+        hm = 1.0 - sub["g"]
+        h = hm * sub["fH"] * (1.0 - rH)
+        s = (hm - h) * sub["fS"] * (1.0 - rS)
+        return h + s, hm - h - s
+    RA = 0
+    for t in sub["techs"]:
+        if t["group"] == "APP":
+            RA = RA + sh[t["tech"]] * t["rA"]
+    man = [t for t in sub["techs"] if t["group"] == "MAN"]
+    noc = 1.0
+    for t in man:
+        noc = noc - sh[t["tech"]]
+    L0, P0 = stage(0.0, 0.0)
+    L, P = noc * L0, noc * P0
+    for t in man:
+        l_, p_ = stage(t["rH"], t["rS"])
+        L = L + sh[t["tech"]] * l_
+        P = P + sh[t["tech"]] * p_
+    return sub["g"] * sub["fG"] + L + P * sub["fA"] * (1.0 - RA)
+
+
 class _AtP:
     """A CasADi function of (x, p) evaluated at the model's parameter values: f(x)."""
 
@@ -664,7 +688,6 @@ class CapriRegionalNLP:
             self.abat["catc"] = {"off": nx0, "uaa": uaa, "m0": m0}
         am = spec.get("amm")
         if am and am.get("techs"):
-            from capri_mod.supply.capri_nlp import _cascade_loss
             techs = [t for t in am["techs"] if t["act"] in self.act_idx and t["smax"] > 0]
             sig = ca.SX.sym("sig", len(techs))
             if techs:

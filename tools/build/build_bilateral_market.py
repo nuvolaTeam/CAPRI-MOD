@@ -241,7 +241,7 @@ def build_trq(year, REGION_MAP, AGGREGATES):
 
 
 def main():
-    sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check", "check/nlp_check")]
+    sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check")]
     from recalibrate_trade_2017 import REGION_MAP, AGGREGATES
     KEEP.mkdir(parents=True, exist_ok=True)
     blocks = "--eu-blocks" in sys.argv

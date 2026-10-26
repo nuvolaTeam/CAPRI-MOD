@@ -30,7 +30,7 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--dump-dir", type=Path, default=Path("/home/claude/work/capreg"))
     a = ap.parse_args()
-    sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check", "check/nlp_check")]
+    sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check")]
     from build_livestock_output_coef import CAPRI_TO_MODEL
     pat = re.compile(r"^'([A-Z]{2}[A-Z0-9]{6})'\.'([A-Z0-9]{4})'\.'LEVL'\.'Y'\s+([-\d.Ee+]+)")
     lev = defaultdict(float)                                  # (CAPRI code, model animal) -> LEVL

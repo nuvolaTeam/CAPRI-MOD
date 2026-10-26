@@ -15,7 +15,7 @@ from collections import defaultdict
 from pathlib import Path
 
 _ROOT = Path(__file__).resolve().parents[2]
-sys.path[:0] = [str(_ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check", "check/nlp_check")]
+sys.path[:0] = [str(_ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check")]
 from build_livestock_output_coef import CAPRI_TO_MODEL  # noqa: E402
 
 

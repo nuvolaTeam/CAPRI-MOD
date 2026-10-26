@@ -30,7 +30,7 @@ from pathlib import Path
 import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(ROOT)); sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check", "check/nlp_check")]
+sys.path.insert(0, str(ROOT)); sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check")]
 OUT = ROOT / "capri_data" / "2017" / "policy" / "tariffs.csv"
 SRC = ROOT / "capri_data" / "sources" / "market" / "bilateral_dataout_2017.csv.xz"
 PROV = ROOT / "capri_data" / "sources" / "eu_tariff_provenance.json"

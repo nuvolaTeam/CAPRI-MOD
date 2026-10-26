@@ -39,15 +39,15 @@ as one-key-per-line TOML (comments and [v] marks removed): it parses, 153 keys.
                milk_ms_min_share=0.01; sup_gap_min_prod=5.0 (10 x p_minAbsProdIterChg 0.5 [v]); norway_gap_last_iter=15 [v]
                nlp_staged_tol=false; nlp_tol_early=1e-6; nlp_tol_final=1e-8; nlp_tol_switch=4.0
                manure_pool_kappa_bounds=[0.05,1.5]; manure_pool_omega={up=1.25,down=0.5,min=0.25}
-               manure_pool_qp_tol=1e-8; manure_pool_qp_max_iter=300
-[supply]       supply_form="nlp"; qp_solver="clarabel"; pmp_source="capri2030" (K61)
+               manure_pool_qp_tol=1e-8
+[supply]       pmp_source="capri2030" (K61)
                pmp_capri_parts=["crops","animals","feed","land"]; pmp_cross_terms="capri" (p_useCropSpecificQMatrix 0)
                pmp_apply_dampening=true (impose_upper_bound_on_elasticity.gms [v]); pmp_share_term=true
                use_capri_elasticities=true; use_land_market=true (p_landIsFixedinScenario 0 [v])
                land_no_slack=true (LandBalNoSlak_ [v]); land_row_equality=true; surplus_per_current_ha=true (e_SURTOTHa [v])
-               use_manure_techs=true; use_feed_in_supply=true; use_ration=true; ration_damping=0.5
-               use_nitrate_in_ration=false; fodder_at_shadow_price=false (CAPRI: true); fodder_band=true
-               fodder_ratio_bounds=[0.2,5.0]; use_livestock_cost_coef=true; amm_fix_without_policy=true; nlp_calibrate=true
+               use_manure_techs=true; use_ration=true
+               use_nitrate_in_ration=false; fodder_band=true
+               use_livestock_cost_coef=true; amm_fix_without_policy=true; nlp_calibrate=true
                cap_greening=true (permGrasGreening_ [v]); winter_cover_endogenous=true; ni_inside_model=true
                use_grass_intensity=true; use_dairy_intensity=true; use_cattle_intensity=true; use_cattle_member_splits=false
                use_genetics=true; use_option_costsaving_drop=true; use_histosol_fallow=true; use_capri_activity_bounds=true
@@ -55,7 +55,7 @@ as one-key-per-line TOML (comments and [v] marks removed): it parses, 153 keys.
                nlp_n_relax=true; jrc_capped_override="" (land_supply_elasticity, land_expansion_cap: removed 23 Oct 2026)
                nbal_tol_abs=0.01; nbal_tol_rel=1e-3; nbal_inner_max=16 (land_inner_max, land_tol: removed)
                nlp_tol=1e-8; nlp_max_iter=3000; nlp_warm_max_iter=200; nlp_acceptable_tol=1e-6; nlp_max_cpu_time=60
-               nlp_cal_tol=1e-6; conic_tol=1e-8; conic_max_iter=400; trust_constr_maxiter=3000; manure_pool_slope=0.05
+               nlp_cal_tol=1e-6; manure_pool_slope=0.05
 [market]       biofuel_markets=true (BIOF_M [v]); eu_blocks=false (CAPRI defaultA.agg: two blocks); use_dairy_block=true
                food_demand_gl=true; gl_refit_commitments=true; processing_nq=true; use_region_supply_elas=true
                crush_margin_producer_prices=true; use_trq=true; market_supply_nq=false (calibrate_supply.gms)
@@ -68,10 +68,8 @@ as one-key-per-line TOML (comments and [v] marks removed): it parses, 153 keys.
 [projection]   trajectory="capri_ref"; capri_prices=true; calibrate_baseline=true; base_cal_rounds=4
                base_cal_fodder=false; base_cal_stall_ratio=0.95; sim_year=2030 (inner_fert_dist.SIM_YEAR)
                captrd_factor_bounds=[0.2,5.0]; trajectory_factor_bounds=[0.1,10.0]
-[fertiliser]   fert_dist_inside=true (useInnerFertDistModel [v]); use_min_mineral_share="capri" (NUTMIN_)
-               use_fert_allocation=false; use_nutned_always=true; nlp_fertilisation=true
+[fertiliser]   use_fert_allocation=false; use_nutned_always=true; nlp_fertilisation=true
                npk_dual_bound_wide=1000 (CAPRI +-10); exempt_cap_factor=1.0 (CAPRI p_checkSmallMine: 1.0 x baseline for exempted groups); fd_tol=1e-9; fd_max_iter=100
-               fd_nlp_max_iter=1000
 [environment]  luc_model=true; ad_dairy_ch4="fix" ("capri" = as coded); ammapp_sign="consistent" ("capri" = CAPRI's sign)
                luc_ipopt_tol=1e-12; luc_max_iter=500
 [diagnostics]  verbose=true; trace_outer=false; slow_region_seconds=60; disable_qp=false; dump_regions=""
@@ -102,13 +100,12 @@ toml.
    and `use_manure_pool` as False, while `CAPRIModel` declares True. The model overwrites them at outer iteration 0
    (model.py:607-612), so only a standalone `RegionalSupplyModel` sees the False values.
 2. **getattr fallbacks contradict declarations** (harmless today, wrong if the declaration goes):
-   - `supply_form` falls back to "conic" (model.py:413; supply_module.py:1172, 1852, 5560, 5841).
    - `nlp_staged_tol` falls back to True (model.py:589) and `market_supply_nq` to True (:1027).
    - Many True switches fall back to False, for example `use_land_market`, `use_ration`, `use_genetics`,
-     `fert_dist_inside`, `cap_greening`, `ni_inside_model` and `use_*_intensity`.
+     `cap_greening`, `ni_inside_model` and `use_*_intensity`.
    - `use_cattle_member_splits` falls back to True at supply_module.py:4337. `pmp_source` falls back to "elasticity".
-3. **Hidden switches** (read by getattr, never declared): `milk_ms_step`, `ration_damping`, `trace_outer`,
-   `jrc_capped_override`, `n_relax_sticky`, `nlp_n_relax`, `land_row_equality`, `fodder_band` and `CAPRI_DISABLE_QP`.
+3. **Hidden switches** (read by getattr, never declared): `milk_ms_step`, `trace_outer`,
+   `jrc_capped_override`, `n_relax_sticky`, `nlp_n_relax`, `land_row_equality` and `fodder_band`.
 4. **Projection carry-over:** `ProjectionModule.CARRIED_SETTINGS` copies 18 instance attributes plus market
    `use_dairy_block`. Instance changes to anything else are lost in 2030 runs:
    - `--no-gl-demand` (sets `market_module.food_demand_gl`) had no effect in run_f2f_2030: **fixed 23 October 2026**

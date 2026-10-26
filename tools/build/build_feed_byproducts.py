@@ -49,7 +49,7 @@ def main():
     # the EU's production: the model's EU27 trade region (tools/build/build_bilateral_market.py); the EU member states
     # are left out of the non-EU supply elasticities
     breg = pd.read_csv(MKT / "bilateral_regions_2030.csv")
-    sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check", "check/nlp_check")]
+    sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check")]
     from build_feed_bulks import EU_MS
     eu_ms = set(EU_MS) | {"EU27yr19"}
     rows = []

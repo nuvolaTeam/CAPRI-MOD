@@ -271,58 +271,6 @@ class Ration:
             # zero nitrate optimal at base: p + cnst >= shadow at x = 0 (never a gain)
             self.cnst[j] = max(0.0, float(shadow[j]) - NITR_PRICE)
 
-    def solve(self, price: np.ndarray):
-        """Ration at feed prices ``price`` (aligned with self.feeds)."""
-        from capri_mod.supply.qp_solver import solve_qp
-        fl = self.flex
-        if not fl.any():
-            return self.x0.copy(), True
-        fixed = ~fl
-        # requirements net of the fixed feeds
-        E = self.E - self.e[fixed] @ self.x0[fixed]
-        P = self.P - self.cp[fixed] @ self.x0[fixed]
-        Dlo = self.DMIN - self.dm[fixed] @ self.x0[fixed]
-        Dhi = self.DMAX - self.dm[fixed] @ self.x0[fixed]
-        Q = np.diag(self.slope[fl])
-        c = price[fl] + self.cnst[fl]
-        A, b = [-self.e[fl], -self.cp[fl]], [-E, -P]
-        if self.DMIN > 0:
-            A.append(-self.dm[fl]); b.append(-Dlo)
-        if np.isfinite(Dhi):
-            A.append(self.dm[fl]); b.append(Dhi)
-        # share constraints on dry matter: dm_i x_i >= lo * sum dm x  /  <= hi * sum dm x
-        for i, kind, v in self.shares:
-            row = -v * self.dm.copy()
-            row[i] += self.dm[i]                  # dm_i x_i - v * sum dm x
-            if kind == "min":
-                row = -row                        # v * sum dm x - dm_i x_i <= 0
-            const = row[fixed] @ self.x0[fixed]
-            A.append(row[fl]); b.append(-const)
-        A, b = np.array(A), np.array(b)
-        xf, ok = solve_qp(Q, c, A, b, x0=self.x0[fl])
-        if not ok:
-            # fallback, as in the supply model: a general solver when the compact
-            # active-set method cannot factor a degenerate working set (several
-            # share and nutrient constraints binding together)
-            from scipy.optimize import minimize
-            res = minimize(lambda z: c @ z + 0.5 * z @ Q @ z, self.x0[fl],
-                           jac=lambda z: c + Q @ z, method="SLSQP",
-                           bounds=[(0.0, None)] * int(fl.sum()),
-                           constraints=[{"type": "ineq", "fun": lambda z: b - A @ z, "jac": lambda z: -A}],
-                           options={"maxiter": 500, "ftol": 1e-12})
-            z = res.x
-            scale = np.maximum(np.abs(b), 1.0)
-            if res.success and np.all(A @ z - b <= 1e-6 * scale) and np.all(z >= -1e-9):
-                xf, ok = np.maximum(z, 0.0), True
-        x = self.x0.copy()
-        if ok:
-            x[fl] = xf
-        return x, ok
-
-    def cost(self, x: np.ndarray, price: np.ndarray) -> float:
-        """Feed cost per head incl. the PMP terms (CAPRI's objective contribution)."""
-        return float(price @ x + self.cnst @ x + 0.5 * (self.slope * x) @ x)
-
 
 class RationModel:
     #: nitrate as a ration ingredient (CAPRI line_nitr.gms); OFF until its methane and

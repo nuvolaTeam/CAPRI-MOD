@@ -249,7 +249,7 @@ def test_emission_tax_in_supply_follows_capri(model):
         a0, a1 = b["supply"]["IE04"].activities, s["supply"]["IE04"].activities
         assert a1["BCOW"] < a0["BCOW"] and a1["DCOW"] < a0["DCOW"]
         gs = s["supply"]["IE04"].genetics_shift
-        # the nitrate supplement is adopted for cattle; dairy cows in IE04 only in the conic form: the NLP form's REQSE_
+        # the nitrate supplement is adopted for cattle, not by IE04's dairy cows: CAPRI's REQSE_
         # holds crude protein as an equality (CAPRI's simulation model), and nitrate's lower protein requirement then
         # pushes grass out of a grass-based dairy ration (its dual: +200 EUR per unit against the tax's gain)
         assert any(v > 0 for (a_, o_), v in gs.items() if o_ == "Nitr_Tot")
@@ -295,49 +295,6 @@ def test_manure_market_and_ammonia_options_in_every_eu_solve(model):
         e0, e1 = b["environmental"].loc["BE21"], s["environmental"].loc["BE21"]
         assert float(e1["ghg_manure_n2o"]) < float(e0["ghg_manure_n2o"])
         assert s["supply"]["BE21"].animal_nh3_saved
-    finally:
-        model.run(scenario="BASELINE", regions=regs, max_outer_iter=2)
-
-
-@pytest.mark.slow
-def test_fertiliser_options_under_the_emission_tax(model, monkeypatch):
-    """Conic form (the checks below are the conic model's first-order conditions; the default NLP form's tax response is
-    test_emission_tax_in_supply_follows_capri). Sprints 9l, 9m: under CAPRI's emission tax the fertiliser options are in the regional model without a nitrogen row:
-    mineral N carries tax x the accounts' soil N2O factor at the solve's amount (the crops give back their base
-    part), inhibitors their literature N2O and NH3 side effects instead of their N saving (the accounts count them at
-    (1 - lit) x (1 + NMIN)); the options are adopted and the region's mineral N and soil N2O fall."""
-    from capri_mod.scenarios.scenarios import carbon_tax_scenario
-    from capri_mod.supply.supply_module import fert_side_value
-    _set(monkeypatch, {"supply.supply_form": "conic"})
-    regs = ["DE21"]
-    b = model.run(scenario="BASELINE", regions=regs, max_outer_iter=2)
-    try:
-        assert not b["supply"]["DE21"].fert_tech_shares
-        s = model.run(custom_scenario=carbon_tax_scenario(100.0), regions=regs, max_outer_iter=2)
-        mo = model.supply_module._models["DE21"]
-        ft = [(n, nm, a, b_, sx) for (n, nm, a, b_, s0, sx) in mo._mctx()["techs"]]
-        tt = mo._fert_tax_terms(ft)
-        # soil N2O (direct + volatilised x indirect) and the indirect N2O of the runoff and leaching (GWPN2OLEA_)
-        assert mo._ef_mineral_lea() > 0
-        assert abs(tt["m"] - 100.0 * (0.011 * 44 / 28 * 298 + mo._ef_mineral_lea()) / 1000) < 1e-9
-        for (n, nm, *_), h in zip(ft, tt["h"]):
-            if fert_side_value("DE21", n, "N2OSYN") is None:
-                assert h == 0.0
-        sh = s["supply"]["DE21"].fert_tech_shares
-        assert sh.get("NITR_INH", 0.0) > 0.05
-        # Sprint 9m: inhibitors on manure under the tax (application N2O x CAPRI's N2OAPP, mineral N displaced, less
-        # the indirect N2O of the extra application NH3); none in the baseline
-        assert sh.get("NITR_INH_MAN", 0.0) > 0.1
-        assert sum(s["supply"]["DE21"].manure_ni_nh3.values()) > 0
-        # capri-mod-proto: decided inside the conic model, the share is CAPRI's first-order condition (no N row in
-        # DE21: S0 + slope x share = tax value, capped at the maximum share)
-        P = mo._manure_inhibitor_params()
-        expect = min(max((P["v_tax"] - P["S0"]) / P["slope"], 0.0), P["smax"])
-        assert abs(sh["NITR_INH_MAN"] - expect) < 2e-3
-        assert float(s["environmental"].loc["DE21", "ghg_manure_n2o"]) < float(b["environmental"].loc["DE21", "ghg_manure_n2o"])
-        e0, e1 = b["environmental"].loc["DE21"], s["environmental"].loc["DE21"]
-        assert float(e1["n_mineral_input"]) < 0.95 * float(e0["n_mineral_input"])
-        assert float(e1["ghg_soil_n2o"]) < float(e0["ghg_soil_n2o"])
     finally:
         model.run(scenario="BASELINE", regions=regs, max_outer_iter=2)
 
@@ -675,8 +632,7 @@ def test_endotech_settings_hold_for_baseline_and_scenario(model):
         model.run(custom_scenario=sc, max_outer_iter=2, regions=regions)
         k = key(effective({"ghgTechMYld": 0.2}))
         # manure trade and endogenous biofuel markets: star 3.0 defaults on
-        from capri_mod.supply.supply_module import RegionalSupplyModel as _R
-        assert (tuple(regions), k, True, True, _R.nutmin_on(), bool(_R.fert_dist_inside), _R.supply_form) in model._eu_base_cache
+        assert (tuple(regions), k, True, True) in model._eu_base_cache
         assert model._endotech_key == k
         assert any(o == "genet_yld" for (a, o) in model.data["genetics_effects"]["IE04"])
     finally:
@@ -2019,11 +1975,10 @@ def test_pesticide_reduction_binds_and_is_a_noop_at_zero(model):
     cut = totals(model.run(custom_scenario=PolicyScenario(
         name="t", pesticide_reduction=0.50), regions=regions, max_outer_iter=1))
 
-    # conic: the same problem solved again gives the same point; NLP: IPOPT's own tolerance. A warm start from the
-    # previous point ended 1e-7 relative away before the K75 fix; since then the same baseline run twice differs by
-    # up to 3e-5 relative in small cereal activities (rye, oats, durum wheat: DE23 RYEM 5.43015 vs 5.43000 kha;
-    # KNOWN_ISSUES K80), and the zero shock by as much (up to 6e-5, DE11 RYEM)
-    tol = 1e-4 if str(getattr(model, "supply_form", "nlp")) == "nlp" else 1e-9
+    # IPOPT's own tolerance: a warm start from the previous point ended 1e-7 relative away before the K75 fix; since
+    # then the same baseline run twice differs by up to 3e-5 relative in small cereal activities (rye, oats, durum
+    # wheat: DE23 RYEM 5.43015 vs 5.43000 kha; KNOWN_ISSUES K80), and the zero shock by as much (up to 6e-5, DE11 RYEM)
+    tol = 1e-4
     for a, v in base.items():
         if v > 1.0:
             assert abs(zero.get(a, 0.0) - v) / v < tol, (
@@ -2942,37 +2897,6 @@ def test_settings_layer_is_the_one_source_of_run_settings():
 
 
 
-def test_ipopt_polish_reaches_clarabels_optimum():
-    """K4 (docs/KNOWN_ISSUES.md): a solve Clarabel cannot finish is completed by IPOPT on the same convex problem. On a
-    small problem Clarabel solves exactly (a quadratic, a linear row, a second-order cone), the polish from a rough
-    point must return the same optimum and duals."""
-    import clarabel
-    import numpy as np
-    from scipy import sparse
-    from capri_mod.supply.feed_conic import _ipopt_polish
-    # min 0.5 (x0^2 + x1^2) + x2  s.t.  x0 + x1 >= 1,  x2 >= ||(x0 - 0.2, x1)||,  x >= 0
-    N = 3
-    P = sparse.csc_matrix(np.diag([1.0, 1.0, 0.0]))
-    q = np.array([0.0, 0.0, 1.0])
-    Gl = sparse.csr_matrix([[-1.0, -1.0, 0.0]]); hl = np.array([-1.0])
-    Gb = -sparse.identity(N, format="csr"); hb = np.zeros(N)
-    Gc = sparse.csr_matrix([[0.0, 0.0, -1.0], [-1.0, 0.0, 0.0], [0.0, -1.0, 0.0]]); hc = np.array([0.0, -0.2, 0.0])
-    G = sparse.vstack([Gl, Gb, Gc]).tocsc(); h = np.concatenate([hl, hb, hc])
-    st = clarabel.DefaultSettings(); st.verbose = False
-    sol = clarabel.DefaultSolver(sparse.triu(P).tocsc(), q, G, h,
-                                 [clarabel.NonnegativeConeT(1 + N), clarabel.SecondOrderConeT(3)], st).solve()
-    assert str(sol.status) == "Solved"
-    out = _ipopt_polish(sparse.triu(P).tocsc(), q, G, h, 1, N, 1, np.array(sol.x) + 0.05, float(sol.obj_val),
-                        "InsufficientProgress")
-    assert out is not None
-    x, zl, status = out
-    assert status == "Solved (IPOPT polish)"
-    fx = 0.5 * (x[0] ** 2 + x[1] ** 2) + x[2]
-    assert abs(fx - float(sol.obj_val)) < 1e-7          # same optimum value (the point to ~1e-5: a flat direction)
-    assert np.allclose(x, np.array(sol.x), atol=1e-4)
-    assert abs(zl[0] - float(np.array(sol.z)[0])) < 1e-4
-
-
 def test_projection_trajectory_moves_every_livestock_yield(data):
     """K12 (docs/KNOWN_ISSUES.md): CAPRI's 2030 reference splits dairy cows, heifers, bulls and calves into intensity
     variants, so the model's own animals had no yield factor and 2030 output per head stayed at 2017 (EU cow milk 140 Mt
@@ -2991,89 +2915,6 @@ def test_projection_trajectory_moves_every_livestock_yield(data):
     assert len(have) >= 0.95 * len(kept), (len(have), len(kept))
     eu = float(gro["DCOW"]["2030"])
     assert 1.05 < eu < 1.25, eu          # CAPRI 2030 reference: EU milk yield per cow +12-14% on 2017
-
-
-def test_min_mineral_share_floor_follows_capri(model):
-    """K9: CAPRI's NUTMIN_ in the regional model - mineral N covers at least p_minShareMinFert x the crop's need
-    (fert/fertpar.gms: 0.4, vegetables and perennials 0.5, grass and other fodder 0.05, fodder maize 0.2, maize 0.3,
-    pulses 0), written on the crop-need row with CAPRI's base-calibrated correction, which a scenario's own
-    intensities do not move. As in star 3.0, NUTMIN_ is in the model only with the inner fertiliser distribution
-    model off (supply_model_e_list_linear.gms; prep_sim.gms aborts on the combination): off by default."""
-    import pandas as pd
-    from capri_mod.supply.supply_module import RegionalSupplyModel
-    ms = pd.read_csv(DATA_DIR / "2017" / "environment" / "min_share_mineral_fert.csv", comment="#").set_index("crop")["min_share"]
-    assert ms["SWHE"] == 0.4 and ms["WINE"] == 0.5 and ms["GRAS"] == 0.05 and ms["MAIF"] == 0.2
-    assert ms["CORN"] == 0.3 and ms["PULS"] == 0.0 and "SETA" not in ms.index
-    assert RegionalSupplyModel.use_min_mineral_share is None and RegionalSupplyModel.fert_dist_inside
-    assert not RegionalSupplyModel.nutmin_on()
-    from capri_mod import settings as S
-    with S.override({"fertiliser.fert_dist_inside": False}):
-        assert RegionalSupplyModel.nutmin_on()
-    with S.override({"fertiliser.use_min_mineral_share": "on"}):
-        model.run(scenario="BASELINE", regions=["AT32"], max_outer_iter=1)
-    mo = model.supply_module._models["AT32"]
-    assert mo._need_row is not None
-    _prev = S.activate(S.current().replace({"fertiliser.use_min_mineral_share": "on"}))
-    fl = mo._min_mineral_floor(need_ycur=None, ybase=None, organic=False)
-    acts = list(mo.acts)
-    env = mo._env_for_surplus
-    for c in ("SWHE", "GRAS", "PULS"):
-        if c in acts:
-            assert abs(fl[acts.index(c)] - ms[c] * env._need_weight("AT32", c)) < 1e-9
-    assert 0.0 <= mo._min_floor_corr <= 1.0
-    # organic land carries no floor (CAPRI: p_minShareMinFert(...,"ECO",...) = 0)
-    mo._organic_conv = {"SWHE": 0.0}
-    assert mo._min_mineral_floor()[acts.index("SWHE")] == 0.0 if "SWHE" in acts else True
-    mo._organic_conv = {}
-    S.activate(_prev)
-    assert mo._min_mineral_floor() is None
-
-
-@pytest.mark.slow
-def test_fert_dist_inside_follows_capri(model, monkeypatch):
-    """Conic form (in the NLP form the inner model is always inside the regional model). K9 (option 3): CAPRI's inner fertiliser distribution model is part of the regional model (supply_model.gms
-    with useInnerFertDistModel). Where its crop-group allocation does not exist at the conic solution, the region is
-    solved in CAPRI's coupled form (flows per group and source, NUTNED_, fertDistExcr_, the first-order conditions of
-    the inner model) with IPOPT; the allocation the model solved is what is reported. Where CAPRI's posterior has no
-    allocation at the run's own base, the priors are calibrated there as CAPRI calibrates them."""
-    from capri_mod.supply.supply_module import RegionalSupplyModel
-    from capri_mod.policy.greendeal import farm_to_fork_scenario
-    assert RegionalSupplyModel.fert_dist_inside
-    _set(monkeypatch, {"supply.supply_form": "conic"})
-    regs = ["FRI2", "RO22"]
-    model.run(scenario="BASELINE", regions=regs, max_outer_iter=1)
-    try:
-        s = model.run(custom_scenario=farm_to_fork_scenario(), regions=regs, max_outer_iter=2)
-        r = s["supply"]["FRI2"]
-        st = getattr(r, "fert_dist_status", None)
-        # FRI2's allocation does not exist at the conic solution: the coupled form is tried; where IPOPT solves it
-        # the report is the model's own allocation, where it does not (non-convex: FRI2 solves in the full
-        # Farm-to-Fork run, not in this two-region run without the market - KNOWN_ISSUES K9) the shortfall is
-        # reported and the conic solution stands
-        assert st is not None and st.startswith("NLP ")
-        fdm = r.fert_dist_model
-        if st.startswith("NLP Solve") or "Acceptable" in st:
-            assert fdm is not None and fdm["converged"] and all(v > 0 for v in fdm["flows"].values())
-            assert sum(fdm["area"].values()) > 0
-        else:
-            assert fdm is None
-        # RO22 exports two thirds of its manure in CAPRI's 2030 reference, which the star 3.0 posterior comes from;
-        # the Farm-to-Fork run trades no manure (as JRC121368's CAPRI), so RO22 keeps it: its priors are calibrated
-        # at the run's own base as CAPRI calibrates them (fert/ferttrm_years.gms; KNOWN_ISSUES K21) and the
-        # allocation exists, manure on every group
-        r = s["supply"]["RO22"]
-        assert getattr(r, "fert_dist_status", None) is None and getattr(r, "fert_dist_priors", None) is not None
-        key, tab = r.fert_dist_priors
-        assert key == ("RO020000", False) and (tab["excr_kg_ha"] > 0).all()
-        fd = s["fert_dist"]
-        f = fd[fd.region == "RO22"]
-        assert len(f) and f.converged.all()
-        # with manure trade, as the run the posterior comes from, CAPRI's star 3.0 posterior holds
-        b = model.run(scenario="BASELINE", regions=["RO22"], max_outer_iter=1, manure_trade=True)
-        rb = b["supply"]["RO22"]
-        assert getattr(rb, "fert_dist_status", None) is None and getattr(rb, "fert_dist_priors", None) is None
-    finally:
-        model.run(scenario="BASELINE", regions=regs, max_outer_iter=1)
 
 
 def test_manure_spread_follows_capri(data):
@@ -3097,10 +2938,9 @@ def test_manure_spread_follows_capri(data):
 
 @pytest.mark.slow
 def test_jrc_relaxed_n_target_is_kept(model, monkeypatch):
-    """Conic form, then the NLP form (below). JRC121368 sect. 4.3.4: where the tiered N target is infeasible the region's cut is the EU average (36%).
-    NL12's full regional model (feeding, technologies) has no solution at the tiered target; the target is relaxed
-    and the FULL model solved (not the reduced one), and later iterations start from the relaxed target instead of
-    failing the tiered one again."""
+    """JRC121368 sect. 4.3.4: where the tiered N target is infeasible the region's cut is the EU average (36%).
+    NL12's regional model in CAPRI's form has no solution at the target below; the target is relaxed in CAPRI's form
+    (K57), once, and kept: later iterations start from the relaxed target instead of failing the tiered one again."""
     import warnings
     from capri_mod.policy.greendeal import farm_to_fork_scenario
     from capri_mod.supply.supply_module import RegionalSupplyModel
@@ -3109,21 +2949,8 @@ def test_jrc_relaxed_n_target_is_kept(model, monkeypatch):
     # target by itself (dairy cows -80% at 2017 prices); the relaxation is tested with a target it cannot meet (a 95%
     # cut of its surplus)
     monkeypatch.setattr(RegionalSupplyModel, "tiered_surplus_target", lambda self, sp: 0.05 * sp)
-    _set(monkeypatch, {"supply.supply_form": "conic"})
     model.run(scenario="BASELINE", regions=regs, max_outer_iter=1)
     try:
-        with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter("always")
-            s = model.run(custom_scenario=farm_to_fork_scenario(), regions=regs, max_outer_iter=3)
-        r = s["supply"]["NL12"]
-        assert getattr(r, "n_target_relaxed", False) and float(r.balance_shortfall) > 0
-        assert getattr(r, "conic_failed", None) is None
-        assert sum("conic solve PrimalInfeasible for NL12" in str(x.message) for x in w) <= 1
-        # CAPRI's own form (feeding, inner fertiliser model inside): NL12 stays in it. In the full Farm-to-Fork run it
-        # meets the tiered target (r65, r67); alone, at this region set's prices, it does not, and JRC121368's
-        # relaxation is taken in CAPRI's form (K57), once, and kept - never the conic form
-        _set(monkeypatch, {"supply.supply_form": "nlp"})
-        model.run(scenario="BASELINE", regions=regs, max_outer_iter=1)
         s = model.run(custom_scenario=farm_to_fork_scenario(), regions=regs, max_outer_iter=3)
         r = s["supply"]["NL12"]
         mo = model.supply_module._models["NL12"]
@@ -3463,7 +3290,7 @@ def test_rations_are_chosen_only_inside_the_supply_models(model):
     """With feeding inside the regional models (CAPRI: v_feedInpCoeff only there), no ration is chosen outside them:
     the ration state is the feed per head of the last regional solution (the base ration before the first)."""
     from capri_mod.model import CAPRIModel
-    assert CAPRIModel.use_feed_in_supply and CAPRIModel.use_ration
+    assert CAPRIModel.use_ration
     model.run(scenario="BASELINE", regions=["IE04"], max_outer_iter=1)
     a = "DCOW"
     r0 = model._ration_model.rations[("IE04", a)]
@@ -3501,7 +3328,6 @@ def test_nlp_solver_cache_is_exact(model, tmp_path, monkeypatch):
     from capri_mod.model import CAPRIModel
     from capri_mod.supply import capri_regional_nlp as C
     monkeypatch.setenv("CAPRI_NLP_DUMP", str(tmp_path))
-    _set(monkeypatch, {"supply.supply_form": "nlp"})
     model.run(scenario="BASELINE", regions=["DE11"], max_outer_iter=1)
     d = pickle.load(open(tmp_path / "DE11.pkl", "rb"))
     spec = dict(d["spec"])
@@ -3684,27 +3510,28 @@ def test_n_leaching_follows_capri():
         assert nl.b1(agg=-0.1) < 1.0
 
 
-def test_nlp_failure_falls_back_to_the_conic_form(model, monkeypatch):
-    """KNOWN_ISSUES K55-1: where IPOPT fails for a region (every start), the solve is done in the conic form (the other
-    complete form of the regional model, with feeding), not the regional QP without feeding, and the run records it."""
+def test_nlp_failure_keeps_ipopts_last_point_as_capri(model, monkeypatch):
+    """KNOWN_ISSUES K55-1: where IPOPT fails for a region from every start and the relaxations do not help, CAPRI carries
+    on with the non-optimal solve and records it (supply/simu_supply.gms, widen_bounds.gms: p_INFES). IPOPT's last point
+    is kept, warned about and recorded (metadata nlp_fallback; the result's nlp_nonoptimal, converged False)."""
     import warnings
-    from capri_mod.supply.supply_module import RegionalSupplyModel
+    from capri_mod.supply import capri_regional_nlp as C
     regs = ["DE11"]
     model.run(scenario="BASELINE", regions=regs, max_outer_iter=1)
+    _solve = C.CapriRegionalNLP.solve
 
-    def _fail(self, Q, c, A, b, x_start):
-        self._conic_failed = "nlp:Test_Failure"
-        return None
-    monkeypatch.setattr(RegionalSupplyModel, "_capri_nlp_solve", _fail)
+    def _fail(self, *a, **k):
+        return dict(_solve(self, *a, **k), success=False, status="Test_Failure")
+    monkeypatch.setattr(C.CapriRegionalNLP, "solve", _fail)
     with warnings.catch_warnings(record=True) as w:
         warnings.simplefilter("always")
         r = model.run(scenario="BASELINE", regions=regs, max_outer_iter=1)
-    assert any("NLP form failed for DE11" in str(x.message) for x in w)
+    assert any("IPOPT's last point kept" in str(x.message) for x in w)
     fb = r["metadata"]["nlp_fallback"]
-    assert list(fb) == ["DE11"] and all(e.endswith("-> conic") for e in fb["DE11"])
-    mo = model.supply_module._models["DE11"]
-    assert getattr(mo, "_conic_ok", False) and getattr(mo, "_last_feed", None)       # feeding inside the solve
-    assert getattr(r["supply"]["DE11"], "conic_failed", None) is None
+    assert list(fb) == ["DE11"] and any("IPOPT's last point kept" in e for e in fb["DE11"]), fb
+    sr = r["supply"]["DE11"]
+    assert sr.nlp_nonoptimal == "Test_Failure" and not sr.converged
+    assert np.isfinite(sr.activities.values).all() and float(sr.activities.sum()) > 0
 
 
 @pytest.mark.slow
@@ -3712,7 +3539,7 @@ def test_nlp_form_takes_jrc121368_relaxation_where_the_tiered_n_target_fails(mod
     """KNOWN_ISSUES K57: NL32 (outside JRC121368's nine capped regions) has no solution in CAPRI's form at the tiered
     Farm-to-Fork N target (NL13 until the K75 fix of 26 October 2026; since then NL13 meets it and NL32 is the one
     region relaxed in the reference run r145); JRC121368's rule for such regions (the EU-average cut, 36%) is applied in CAPRI's form,
-    recorded, and kept for the scenario, instead of the conic form standing in at the strict target."""
+    recorded, and kept for the scenario."""
     from capri_mod.policy.greendeal import farm_to_fork_scenario
     from capri_mod import settings as S
     model.supply_module._jrc_capped_cache = None

@@ -7,14 +7,14 @@ Scripts around the model, by role. Run every tool from the repository root, e.g.
 |---|---|
 | `build/` | Builders of the model's data files in `capri_data/` (and of the CAPRI reference copies in `capri_reference/`). Each data file names its builder in `capri_data/DATA_SOURCING_REGISTRY.json` or in its own docstring. |
 | `run/` | Model runs: `run_f2f_2030.py` (Farm-to-Fork / Green Deal 2030), `run_vcs_2030.py`, `run_policy_comparison.py`, and the test runner `run_tests.py` (used by the Dockerfile). |
-| `check/` | Comparisons with CAPRI and diagnostics. They write only reports (`capri_data/validation/`, or paths given on the command line). `check/nlp_check/` holds the NLP form's original checks. |
+| `check/` | Comparisons with CAPRI and diagnostics. They write only reports (`capri_data/validation/`, or paths given on the command line). |
 | `gams/` | GAMS export scripts to run in a CAPRI installation; they produce the extracts the builders read. |
 | `lib/` | Modules shared by the tools: `_model_regions.py` (model ↔ CAPRI regions), `_capri_costsavings.py`, and `paths.py`. `paths.py` finds the repository root and any tool by name (`tool_file`, `load_tool`). |
 
 A tool that imports another adds the folders to `sys.path`:
 
 ```
-sys.path[:0] = [str(ROOT / "tools" / d) for d in ("lib", "build", "run", "check", "check/nlp_check")]
+sys.path[:0] = [str(ROOT / "tools" / d) for d in ("lib", "build", "run", "check")]
 ```
 
 or loads it by name with `paths.tool_file` or `paths.load_tool`. ROOT is the repository root:

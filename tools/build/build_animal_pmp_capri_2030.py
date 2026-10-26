@@ -127,7 +127,7 @@ def main() -> None:
     ap.add_argument("--splits", action="store_true",
                     help="the cattle member splits' grouping (MEMBERS_SPLITS); default output name <stem>_animals_members.csv")
     a = ap.parse_args()
-    sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check", "check/nlp_check")]
+    sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check")]
     import _model_regions as mr
     import build_capri_base as bcb
     t = pd.read_csv(a.techn or SRC)

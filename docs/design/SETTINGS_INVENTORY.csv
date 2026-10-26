@@ -10,10 +10,6 @@ S008,CAPRIModel.use_manure_techs,capri_mod/model.py:118,switch,True,toml:supply,
 S009,CAPRIModel.use_young_animal_market,capri_mod/model.py:122,switch,True,toml:young_animals,young_animals.enabled,yaniMarket_ (arm/market_model.gms) [v],yes: CAPRI,getattr fallback False at model.py:569; cli --young-animals/--no-young-animals
 S010,CAPRIModel.land_no_slack,capri_mod/model.py:127,switch,True,toml:supply,supply.land_no_slack,LandBalNoSlak_ [v],yes: Sprint 8 result in comment,copied to RegionalSupplyModel.land_no_slack (class default False) at model.py:612; cli --land-no-slack/--no-land-rules
 S011,CAPRIModel.use_nitrate,capri_mod/model.py:130,switch,False,toml:supply,supply.use_nitrate_in_ration,envind/line_nitr.gms,yes: 'off until validated',ration-model nitrate ingredient; superseded when ghgTechLineNitr options are inside the supply model (model.py:1375); cli --nitrate
-S012,CAPRIModel.qp_solver,capri_mod/model.py:135,switch,clarabel,toml:supply,supply.qp_solver,,yes: compare_qp_solvers.py agreed to 5e-5,algorithm choice; written to qp_solver.BACKEND (model.py:614); cli --qp-solver
-S013,CAPRIModel.fodder_at_shadow_price,capri_mod/model.py:139,switch,False,toml:supply,supply.fodder_at_shadow_price,fodder valued at fodder-balance dual (CAPRI),yes: did not converge,DEPARTURE FROM CAPRI (CAPRI prices fodder at its shadow price)
-S014,CAPRIModel.use_feed_in_supply,capri_mod/model.py:141,switch,True,toml:supply,supply.use_feed_in_supply,feeding inside supply_model.gms,yes: as CAPRI,copied to RegionalSupplyModel (class True) at model.py:611 (getattr fallback False); cli --feed-in-supply/--no-feed-in-supply
-S015,CAPRIModel.supply_form,capri_mod/model.py:147,switch,nlp,toml:supply,supply.supply_form,,yes: user decision 20 Oct 2026,"written to RegionalSupplyModel.supply_form each run (model.py:413, getattr fallback 'conic'); cli --supply-form"
 S016,CAPRIModel.nlp_staged_tol,capri_mod/model.py:152,switch,False,toml:outer_loop,outer_loop.nlp_staged_tol,,yes: timing test in comment,getattr fallback True at model.py:589
 S017,CAPRIModel.nlp_tol_early,capri_mod/model.py:153,tolerance,1e-6,toml:outer_loop,outer_loop.nlp_tol_early,,no,unsourced; IPOPT tol while prices move (only with nlp_staged_tol)
 S018,CAPRIModel.nlp_tol_final,capri_mod/model.py:154,tolerance,1e-8,toml:outer_loop,outer_loop.nlp_tol_final,,no,unsourced; written to RegionalSupplyModel.nlp_tol every outer iteration (model.py:594)
@@ -39,8 +35,6 @@ S037,CAPRIModel.jrc_capped_override (hidden),capri_mod/model.py:601,switch,"""""
 S038,CAPRIModel._MS_CODE,capri_mod/model.py:1238,table,"BE/LU->BL, IE->IR, GR->EL",mapping_csv,,MAP_RR member states,yes,one of 9 copies of the country->CAPRI MS map (see md)
 S039,CAPRIModel.MARKET_SUPPLY_SHOCK,capri_mod/model.py:1246,numeric_constant,0.01,toml:market,market.nq_price_shock,supply/calibrate_supply.gms (1% price shock),yes: CAPRI (cited),only with market_supply_nq
 S040,CAPRIModel.MARKET_SUPPLY_FEED_COLS,capri_mod/model.py:1248,code_list,RAPC SUNC SOYC FENI FPRI DDGS,mapping_csv,,feed-bulk columns,yes,
-S041,ration_damping (hidden),capri_mod/model.py:1406,numeric_constant,0.5,toml:supply,supply.ration_damping,,partial: path-only damping (comment),HIDDEN; unsourced numerical; not carried
-S042,fodder ratio bounds and damping,capri_mod/model.py:1432,numeric_constant,"[0.2, 5.0], step 0.5",toml:supply,supply.fodder_ratio_bounds,,partial,unsourced; only with fodder_at_shadow_price
 S043,CAPRIModel.POOL_OF_PREFIX,capri_mod/model.py:1496,table,"BE/LU->BL, IE->IR",mapping_csv,,,no,unsourced; copy of country map WITHOUT GR->EL (inconsistent with other copies)
 S044,CAPRIModel.SUP_GAP_MIN_PROD,capri_mod/model.py:1507,tolerance,5.0 (kt),toml:outer_loop,outer_loop.sup_gap_min_prod,10 x p_minAbsProdIterChg = 0.5 (capmod.gms:384) [v],yes,
 S045,CAPRIModel.SUP_GAP_LAST_ITER,capri_mod/model.py:1508,iteration_limit,15,toml:outer_loop,outer_loop.norway_gap_last_iter,"p_iterChg(NO000000,...) step ge 15 (capmod/price_forecast.gms) [v]",yes,
@@ -51,13 +45,12 @@ S049,young-animal small-market scale,capri_mod/model.py:1674,tolerance,0.1,toml:
 S050,young-animal secant thresholds,capri_mod/model.py:1703,numeric_constant,"step>=1%, phi in [0.1,1]",toml:young_animals,young_animals.secant_phi_bounds,,no,unsourced; only with use_yani_secant
 S051,young-animal max step,capri_mod/model.py:1714,numeric_constant,0.3,toml:young_animals,young_animals.max_step,,no,unsourced
 S052,manure pool kappa clip,capri_mod/model.py:1851,numeric_constant,"[0.05,1.5], min plan 0.002",toml:outer_loop,outer_loop.manure_pool_kappa_bounds,,no,unsourced numerical
-S053,manure pool QP tol / max_iter,capri_mod/model.py:1895,tolerance,1e-8 / 300,toml:outer_loop,"outer_loop.manure_pool_qp_tol, manure_pool_qp_max_iter",,n/a,
+S053,manure pool QP tol (Clarabel),capri_mod/model.py:1895,tolerance,1e-8,toml:outer_loop,outer_loop.manure_pool_qp_tol,,n/a,
 S054,manure pool omega step,capri_mod/model.py:1940,numeric_constant,"x1.25 up, x0.5 down, min 0.25",toml:outer_loop,outer_loop.manure_pool_omega,,partial: test in comment,unsourced numerical
 S055,CAPRIModel.FEED_BULKS,capri_mod/model.py:2050,code_list,FCER FPRO FENE FOTH FMIL,mapping_csv,,FEED_TRD (global/fromimpact/sets.gms),yes,duplicate of ration.MARKET_FEEDS
 S056,CAPRIModel.LIVESTOCK_PRODUCT_MARKET,capri_mod/model.py:2053,table,COMI->MILK ...,mapping_csv,,,yes: build_livestock_products.py,
 S057,raw-milk fallback factor,capri_mod/model.py:2189,numeric_constant,0.9575,param_csv,,,no,unsourced proxy fallback when livestock_output_by_product_coef lacks MILK; consider failing instead
 S058,CAPRIModel._CAPRI_MS,capri_mod/model.py:2218,table,"IE->IR, GR->EL, BE/LU->BL",mapping_csv,,,yes,duplicate country map
-S059,SOLVER_MAXITER,capri_mod/supply/supply_module.py:88,iteration_limit,3000,toml:supply,supply.trust_constr_maxiter,,yes: sample test,trust-constr fallback only
 S060,FIXED_ACTIVITIES,capri_mod/supply/supply_module.py:91,code_list,OOIL OIND OANI,mapping_csv,,sets.gms FACT / MFCACT,yes,
 S061,PMPCalibrator.CROSS_TERMS,capri_mod/supply/supply_module.py:311,switch,capri,toml:supply,supply.pmp_cross_terms,"p_useCropSpecificQMatrix 0, QUADRA_/GRPLEVL_ (supply_model.gms)",yes,options capri|previous|none
 S062,PMP base level fill,capri_mod/supply/supply_module.py:348,numeric_constant,0.01,keep_code,,,no,unsourced guard; elasticity-path PMP
@@ -66,11 +59,9 @@ S064,PMP default elasticity,capri_mod/supply/supply_module.py:360,numeric_consta
 S065,PMP cross-term heuristic rho_base,capri_mod/supply/supply_module.py:440,numeric_constant,0.05,param_csv,,,no,unsourced heuristic for pairs CAPRI does not relate
 S066,PMPCalibrator.verify_calibration tol,capri_mod/supply/supply_module.py:537,tolerance,0.01,keep_code,,,n/a,diagnostic check
 S067,RegionalSupplyModel.use_livestock_cost_coef,capri_mod/supply/supply_module.py:567,switch,True,toml:supply,supply.use_livestock_cost_coef,,yes,comment above still says 'OFF until...' (stale); getattr fallback False
-S068,RegionalSupplyModel.use_feed_in_supply,capri_mod/supply/supply_module.py:572,switch,True,toml:supply,supply.use_feed_in_supply,,yes,class copy of CAPRIModel switch; comment says 'OFF until validated' (stale)
 S069,RegionalSupplyModel.land_no_slack,capri_mod/supply/supply_module.py:574,switch,False,toml:supply,supply.land_no_slack,LandBalNoSlak_ [v],yes,"DEFAULT DIFFERS: class False, CAPRIModel True (overwritten each run)"
 S070,RegionalSupplyModel.yani_exact_response,capri_mod/supply/supply_module.py:615,switch,None,toml:young_animals,young_animals.exact_response,,yes: K65,derived from young_animals.use_exact
 S071,RegionalSupplyModel.amm_fix_without_policy,capri_mod/supply/supply_module.py:805,switch,True,toml:supply,supply.amm_fix_without_policy,,yes: K63,
-S072,RegionalSupplyModel.supply_form,capri_mod/supply/supply_module.py:866,switch,nlp,toml:supply,supply.supply_form,,yes,"class copy; getattr fallbacks 'conic' at supply_module.py:1172,1852,5560,5841"
 S073,RegionalSupplyModel.nlp_fertilisation,capri_mod/supply/supply_module.py:869,switch,True,toml:fertiliser,fertiliser.nlp_fertilisation,NUTNED_ fertilisation block,yes,
 S074,RegionalSupplyModel.nlp_calibrate,capri_mod/supply/supply_module.py:871,switch,True,toml:supply,supply.nlp_calibrate,PMP calibration,yes,
 S075,RegionalSupplyModel.luc_model,capri_mod/supply/supply_module.py:873,switch,True,toml:environment,environment.luc_model,LUC transition model,yes,
@@ -90,8 +81,6 @@ S088,PERMANENT_LAND_CROPS,capri_mod/supply/supply_module.py:2394,code_list,WINE 
 S089,PESTICIDE_AFFECTED,capri_mod/supply/supply_module.py:2425,code_list,crop list,mapping_csv,,JRC121368 crop groups,yes,
 S090,UNVERIFIED_OUTPUT_UNITS,capri_mod/supply/supply_module.py:2439,code_list,animals w/o verified output unit,keep_code,,,yes,reporting guard
 S091,pesticide yield-loss cap,capri_mod/supply/supply_module.py:2519,numeric_constant,0.90,param_csv,,,no,unsourced cap
-S092,RegionalSupplyModel.fert_dist_inside,capri_mod/supply/supply_module.py:2595,switch,True,toml:fertiliser,fertiliser.fert_dist_inside,useInnerFertDistModel [v],yes: star 3.0 default,getattr fallback False at :2773; acts in conic form only
-S093,RegionalSupplyModel.use_min_mineral_share,capri_mod/supply/supply_module.py:2923,switch,None (as CAPRI),toml:fertiliser,fertiliser.use_min_mineral_share,NUTMIN_ (supply_model_e_list_linear.gms) [v symbol],yes,cli --nutmin sets the CLASS attribute
 S094,"organic target scaling (12, 25)",capri_mod/supply/supply_module.py:3133,numeric_constant,"12, 25 (%)",param_csv,,load_organic_targets.gms (orgTarg-12)/(25-12),yes: CAPRI (cited),also at :3001
 S095,pesticide cover-crop share 0.5,capri_mod/supply/supply_module.py:3003,numeric_constant,0.5,param_csv,,pesticides.gms minimum cover-crop area half the target (cited in PolicyScenario),partial,
 S096,tiered surplus rule,capri_mod/supply/supply_module.py:3240,table,"0-50:25%, 50-100:50%, 100-150:75%, >150:100%",param_csv,,JRC121368 tiered GNB rule,yes: JRC121368,keyed rows (tier)
@@ -151,7 +140,6 @@ S149,land_cap fallback 0.15,capri_mod/supply/supply_module.py:7056,numeric_const
 S150,SupplyModule.ACTIVITY_PRICE_SOURCE,capri_mod/supply/supply_module.py:7093,table,activity -> market commodity,mapping_csv,,,yes,
 S151,SupplyModule.SLOW_REGION_SECONDS,capri_mod/supply/supply_module.py:7163,numeric_constant,60,toml:diagnostics,diagnostics.slow_region_seconds,,n/a,
 S152,SupplyModule.n_workers / CAPRI_WORKERS,capri_mod/supply/supply_module.py:7486,switch,None (cores),toml:run,run.n_workers,,yes,env CAPRI_WORKERS overrides (:7495); results independent of workers
-S153,fert-dist NLP max_iter,capri_mod/supply/supply_module.py:2882,iteration_limit,1000,toml:fertiliser,fertiliser.fd_nlp_max_iter,,no,unsourced
 S154,debug env vars (supply),capri_mod/supply/supply_module.py:1560,switch,unset,toml:diagnostics,diagnostics.trace_recal / nlp_dump / trace_yani / fd_dump / cal_debug,,n/a,"also CAPRI_NLP_DUMP :1673, CAPRI_TRACE_YANI :1766, CAPRI_FD_DUMP :2735, CAPRI_CAL_DEBUG :6835"
 S155,physical/unit constants (supply),capri_mod/supply/supply_module.py:759,numeric_constant,"44/28, 17/14, 1e3, 1e6",keep_code,,,yes: physical,group row; also environmental_module.py
 S156,MarketModule.eu_blocks,capri_mod/market/market_module.py:91,switch,False,toml:market,market.eu_blocks,EU_WEST/EU_EAST (aggregation/defaultA.agg),yes,DEPARTURE FROM CAPRI default aggregation; cli --eu-blocks sets CLASS attr
@@ -241,15 +229,11 @@ S239,IPOPT acceptable_tol,capri_mod/supply/capri_regional_nlp.py:1069,tolerance,
 S240,IPOPT max_cpu_time,capri_mod/supply/capri_regional_nlp.py:1073,numeric_constant,60 s,toml:supply,supply.nlp_max_cpu_time,,yes: guard,
 S241,calibration IPOPT tol,capri_mod/supply/capri_regional_nlp.py:952,tolerance,1e-10 / 3000,keep_code,,,n/a,
 S242,inside_regulations margin,capri_mod/supply/capri_regional_nlp.py:984,numeric_constant,0.95,keep_code,,,no,unsourced
-S243,conic solve tol,capri_mod/supply/feed_conic.py:160,tolerance,1e-8,toml:supply,supply.conic_tol,,n/a,
-S244,Clarabel max_iter,capri_mod/supply/feed_conic.py:425,iteration_limit,400 (equilibrate 50),toml:supply,supply.conic_max_iter,,n/a,
 S245,conic polish IPOPT,capri_mod/supply/feed_conic.py:518,tolerance,1e-9 / 3000,keep_code,,,n/a,
 S246,CAPRI_POLISH_LOG env,capri_mod/supply/feed_conic.py:452,switch,unset,toml:diagnostics,diagnostics.polish_log,,n/a,
 S247,RegionNLP options,capri_mod/supply/capri_nlp.py:50,switch,"uniform_fert True, cascade exact, feed perhead",toml:fertiliser,"fertiliser.fd_nlp_uniform_fert, fd_nlp_cascade, fd_nlp_feed",uniform per region (CAPRI),partial,
 S248,RegionNLP.solve max_iter,capri_mod/supply/capri_nlp.py:471,iteration_limit,3000,keep_code,,,n/a,callers pass 1000
 S249,convex_qp defaults,capri_mod/supply/convex_qp.py:23,tolerance,1e-9 / 200 / auto,keep_code,,,n/a,
-S250,qp_solver.BACKEND,capri_mod/supply/qp_solver.py:36,switch,clarabel,toml:supply,supply.qp_solver,,n/a,module global overwritten by CAPRIModel.qp_solver
-S251,solve_qp defaults,capri_mod/supply/qp_solver.py:72,iteration_limit,200 / 1e-8; ldp feas 1e-6,keep_code,,,n/a,
 S252,LUC IPOPT settings,capri_mod/environmental/luc.py:95,tolerance,1e-12 / 500,toml:environment,"environment.luc_ipopt_tol, luc_max_iter",,n/a,
 S253,luc CLS,capri_mod/environmental/luc.py:30,table,CRP->CROP ...,mapping_csv,,,n/a,
 S254,p_balance ITEMS,capri_mod/environmental/p_balance.py:27,code_list,EXCRET ... SURSOI,mapping_csv,,P balance items,n/a,
@@ -314,8 +298,6 @@ S312,n_limits_scenario,capri_mod/scenarios/scenarios.py:144,scenario_preset,"nit
 S313,carbon_tax_scenario,capri_mod/scenarios/scenarios.py:158,scenario_preset,100 EUR/t (run tool: 50),scenario_file,,pol_input/ecampa/carbtax50_endotech_set12.gms [v file],yes,"default 100 here, run tool uses 50 (run_f2f_2030.py:199)"
 S314,green_deal_f2f_scenario,capri_mod/scenarios/scenarios.py:184,scenario_preset,"set-aside 0.10, N -30, organic rate +50",scenario_file,,,partial: self-declared proxy,superseded by greendeal.farm_to_fork_scenario; registered as GREEN_DEAL_F2F
 S315,out (positional),tools/run/run_f2f_2030.py:34,cli_flag,,cli,,,n/a,output pickle path; CLI only
-S316,--feed-in-supply,tools/run/run_f2f_2030.py:35,cli_flag,,cli,supply.use_feed_in_supply=true,,n/a,no-op (already default)
-S317,--no-feed-in-supply,tools/run/run_f2f_2030.py:36,cli_flag,,cli,supply.use_feed_in_supply=false,,n/a,
 S318,--nitrate,tools/run/run_f2f_2030.py:37,cli_flag,,cli,supply.use_nitrate_in_ration=true,,n/a,
 S319,--surplus-per-ha,tools/run/run_f2f_2030.py:40,cli_flag,,cli,supply.surplus_per_current_ha=true,,n/a,no-op (default); duplicate of --surplus-current-ha
 S320,--land-no-slack,tools/run/run_f2f_2030.py:41,cli_flag,,cli,supply.land_no_slack=true,,n/a,no-op (default)
@@ -331,15 +313,12 @@ S329,--endotech,tools/run/run_f2f_2030.py:53,cli_flag,,cli,endotech.* (or preset
 S330,--carbon-tax,tools/run/run_f2f_2030.py:57,cli_flag,,cli,scenario carbon_tax,,n/a,scenario override; with --scenario carbontax default 50
 S331,--scenario,tools/run/run_f2f_2030.py:61,cli_flag,,cli,run.scenario,,n/a,f2f|greendeal|greendeal2030|carbontax
 S332,--pesticide-rule,tools/run/run_f2f_2030.py:69,cli_flag,,cli,scenario pesticide_rule,,n/a,scenario override
-S333,--nutmin,tools/run/run_f2f_2030.py:72,cli_flag,,cli,fertiliser.use_min_mineral_share,,n/a,capri|on|off; sets the CLASS attribute
 S334,--no-manure-market,tools/run/run_f2f_2030.py:75,cli_flag,,cli,run.manure_trade=false,,n/a,scenario override
 S335,--biofuel-markets,tools/run/run_f2f_2030.py:76,cli_flag,,cli,market.biofuel_markets=true,,n/a,scenario override
 S336,--biofuel-mandate,tools/run/run_f2f_2030.py:77,cli_flag,,cli,scenario biofuel_mandate,,n/a,scenario shock
 S337,--no-biofuel-markets,tools/run/run_f2f_2030.py:79,cli_flag,,cli,market.biofuel_markets=false,,n/a,scenario override
 S338,--surplus-rule,tools/run/run_f2f_2030.py:81,cli_flag,,cli,scenario surplus_rule,,n/a,scenario override
 S339,--mine-redu,tools/run/run_f2f_2030.py:83,cli_flag,,cli,scenario mineral_redu,,n/a,scenario override; also rewrites scenario name
-S340,--qp-solver,tools/run/run_f2f_2030.py:85,cli_flag,,cli,supply.qp_solver,,n/a,
-S341,--supply-form,tools/run/run_f2f_2030.py:86,cli_flag,,cli,supply.supply_form,,n/a,
 S342,--pmp,tools/run/run_f2f_2030.py:88,cli_flag,,cli,supply.pmp_source,,n/a,sets the CLASS attribute (fresh projected models)
 S343,--pmp-parts,tools/run/run_f2f_2030.py:90,cli_flag,,cli,supply.pmp_capri_parts,,n/a,sets the CLASS attribute
 S344,--market-nq,tools/run/run_f2f_2030.py:92,cli_flag,,cli,market.market_supply_nq=true,,n/a,
@@ -431,14 +410,14 @@ S429,organic_topup_at_fuel_cost,capri_mod/settings/defaults.toml [supply],switch
 S430,nlp_warm_check,capri_mod/settings/defaults.toml [supply],numeric_constant,0.01,toml:supply,supply.nlp_warm_check,,no,"numerical safeguard (solver), K75: warm-start solutions more than 1% worse than the last iteration's objective are re-checked from the previous point and the standard start"
 S431,in_market,capri_mod/settings/defaults.toml [young_animals],switch,true,toml:young_animals,young_animals.in_market,arm/market_model.gms yaniMarket_ (young-animal markets inside the market model),yes,CAPRI's structure (K75); false: price update between market solves
 S432,need_yield_rule,capri_mod/settings/defaults.toml [fertiliser],switch,capri,toml:fertiliser,fertiliser.need_yield_rule,"fert/fertned.gms l. 163-195 (need per ha = MIN(cap, MAX(15, O_HP x need per t + STRA x straw content))); supply/endog_yields.gms; capmod/define_inputs.gms",yes,"audit S6; ""sqrt"" = the previous rule (sqrt of the yield ratio on the whole need)"
-S433,yield_dependent_inputs,capri_mod/settings/defaults.toml [supply],switch,true,toml:supply,supply.yield_dependent_inputs,"capmod/define_inputs.gms l. 100-113; inputs/yieldIY.gms (p_inputDemandFactor)",yes,audit S7; false = costs fixed per ha (before 24 October 2026)
+S433,yield_dependent_inputs,capri_mod/settings/defaults.toml [supply],switch,true,toml:supply,supply.yield_dependent_inputs,capmod/define_inputs.gms l. 100-113; inputs/yieldIY.gms (p_inputDemandFactor),yes,audit S7; false = costs fixed per ha (before 24 October 2026)
 S434,perm_gras_cal_dual,capri_mod/settings/defaults.toml [supply],switch,true,toml:supply,supply.perm_gras_cal_dual,supply/prep_cal.gms l. 118-131 (p_dualGreening),yes,audit S8; false = zero multiplier at calibration
-S435,fert_slope_with_saving,capri_mod/settings/defaults.toml [supply],switch,false,toml:supply,supply.fert_slope_with_saving,envind/ghgMiti.gms l. 1016-1035 (pmpParSqr with p_fert x NMIN),no: CAPRI uses it,"audit S5; OFF by default (K77): with the cost on the purchases the baseline leaves its initial shares"
+S435,fert_slope_with_saving,capri_mod/settings/defaults.toml [supply],switch,false,toml:supply,supply.fert_slope_with_saving,envind/ghgMiti.gms l. 1016-1035 (pmpParSqr with p_fert x NMIN),no: CAPRI uses it,audit S5; OFF by default (K77): with the cost on the purchases the baseline leaves its initial shares
 S436,fert_cost_on_purchases,capri_mod/settings/defaults.toml [supply],switch,true,toml:supply,supply.fert_cost_on_purchases,supply/supply_model.gms GHG_Mit_Cost_ (- cost x v_netPutQuant(NITF)),yes,audit S5; false = on the crops' base mineral N
 S437,eco_setaside_catch_crops,capri_mod/settings/defaults.toml [supply],switch,true,toml:supply,supply.eco_setaside_catch_crops,supply/supply_model.gms ecoSetAside_ (setaEco includes CATC; p_DPgreeningWeight 0.3),yes,audit S9; false = without catch crops
 S438,milk_in_market,capri_mod/settings/defaults.toml [market],switch,true,toml:market,market.milk_in_market,"arm/market_model.gms ProdNQ_ (MILK, p_hessNQSupp), DairyNQ_ per member state",yes,audit M5; false = raw milk delivered fixed within a market solve
 S439,hessian_scenario_iter,capri_mod/settings/defaults.toml [market],numeric_constant,0,toml:market,market.hessian_scenario_iter,"supply/calibrate_supply.gms (p_hessNQSupp measured once per baseline; loaded in simulation, arm/market1.gms l. 505-674)",yes: 0 = CAPRI,"K75 option (b): >0 measures the market supply Hessian again at that outer iteration of a scenario; tried at 8 in r132 (+62 min, no effect on the calf price drift)"
-S440,price_update,capri_mod/settings/defaults.toml [outer_loop],switch,capri,toml:outer_loop,outer_loop.price_update,"capmod/define_stepWeights.gms; capmod/price_forecast.gms l. 376-397 (weighted average of the market's prices of the last steps)","yes (since 26 October 2026)","every price passed to the supply models (EU signal, member-state milk, EU blocks, Norway, young animals); ""capri"" = CAPRI's price forecast with outer_loop.capri_step_weights; ""adaptive"" = per-price step halved on a sign change (K62, r73)"
+S440,price_update,capri_mod/settings/defaults.toml [outer_loop],switch,capri,toml:outer_loop,outer_loop.price_update,capmod/define_stepWeights.gms; capmod/price_forecast.gms l. 376-397 (weighted average of the market's prices of the last steps),yes (since 26 October 2026),"every price passed to the supply models (EU signal, member-state milk, EU blocks, Norway, young animals); ""capri"" = CAPRI's price forecast with outer_loop.capri_step_weights; ""adaptive"" = per-price step halved on a sign change (K62, r73)"
 S441,stop_rule,capri_mod/settings/defaults.toml [outer_loop],switch,capri-mod,toml:outer_loop,outer_loop.stop_rule,"capmod/price_forecast.gms l. 96-371, capmod.gms l. 384-388 and 1369 (p_iterChg, p_minIterChg 0.05%)","no: CAPRI uses ""capri""","""capri"" = CAPRI's rule (capri_mod/utils/capri_stop.py): no more than two rows changing by more than 0.05% between iterations, young animals out of the maximum; ""capri-mod"" = this model's tests (changes and gaps to the market's prices). CAPRI's verdict is recorded in both"
 S442,nlp_fodder_band_dropped,capri_mod/settings/defaults.toml [supply],switch,true,toml:supply,supply.nlp_fodder_band_dropped,"supply/supply_model.gms SUPBAL_ (fodder production = use, an equality)",yes,"CAPRI-mod error fix (K75): in the NLP form the conic band rows (fodder per head from the previous solve) were a second, lagged fodder constraint; false = the former behaviour"
-S444,exact_jacobian,capri_mod/settings/defaults.toml [market],switch,false,toml:market,market.exact_jacobian,"arm/market_model.gms (CONOPT uses exact derivatives)",n/a: solver mechanics,"market programme step G1: each commodity's trade-system Newton with CasADi's exact Jacobian (capri_mod/market/trade_ad.py) instead of finite differences"
+S444,exact_jacobian,capri_mod/settings/defaults.toml [market],switch,false,toml:market,market.exact_jacobian,arm/market_model.gms (CONOPT uses exact derivatives),n/a: solver mechanics,market programme step G1: each commodity's trade-system Newton with CasADi's exact Jacobian (capri_mod/market/trade_ad.py) instead of finite differences

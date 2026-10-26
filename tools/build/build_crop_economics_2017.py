@@ -41,9 +41,9 @@ import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[2]
 import sys as _sys
-_sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check", "check/nlp_check")]
+_sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check")]
 from _model_regions import CTRY as MS_CODE  # noqa: E402  CAPRI member-state codes (capri_member_state_codes.csv)
-sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check", "check/nlp_check")]
+sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check")]
 import build_capri_base as B  # noqa: E402
 
 ITEMS = ("LEVL", "YILD", "TOIN", "MPRI", "PRME", "MREV", "GRAS")

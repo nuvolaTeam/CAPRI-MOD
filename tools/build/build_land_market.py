@@ -18,7 +18,7 @@ import numpy as np
 
 _ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(_ROOT))
-sys.path[:0] = [str(_ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check", "check/nlp_check")]
+sys.path[:0] = [str(_ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check")]
 LT = ["ARAC", "GRAS", "FRUN", "FORE", "OLND", "ARTIF"]
 
 

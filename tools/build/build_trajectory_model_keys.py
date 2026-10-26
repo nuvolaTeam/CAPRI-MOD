@@ -31,7 +31,7 @@ ALIASES = {
 def main():
     path = Path(sys.argv[1]) if len(sys.argv) > 1 else ROOT / "capri_data" / "trajectories" / "captrd_2030.json"
     t = json.loads(path.read_text())
-    sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check", "check/nlp_check")]
+    sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check")]
     import _model_regions as mr
     to_c8 = mr.region_to_capri()
     regions = mr.model_regions()

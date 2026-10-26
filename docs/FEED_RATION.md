@@ -60,22 +60,22 @@ Each feed coefficient carries a cost x (CNST + 1/2 SLOP x):
 ## Use in the model
 
 `capri_mod/feed/ration.py` builds one `Ration` per region and animal (feeds, base ration, contents, trimmed
-requirements, share limits, PMP terms). With `use_feed_in_supply` (default, as CAPRI) these are the data of the feeding
-block inside the regional models, and the ration is chosen only there:
+requirements, share limits, PMP terms). These are the data of the feeding block inside the regional models, and the
+ration is chosen only there (as CAPRI):
 
 - NLP form (default): REQSE_ equalities for energy and protein, FEDUSE_ bilinear, QUADRF_ per head, feed bounds; no
   dry-matter or share rows, as CAPRI's `_pw` simulation. The CNST are recalibrated so that the base ration is optimal
   under REQSE_ alone (`capri_regional_nlp.calibrate_feed_terms`), and the regional calibration makes the whole base a
   first-order point.
-- Conic form: requirements as inequalities, plus the dry-matter and share rows below, with total feed as the variable.
+- Conic form (removed 26 October 2026): requirements as inequalities, plus the dry-matter and share rows below, with
+  total feed as the variable.
 
 Feed prices: tradable bulks (FCER, FPRO, FENE, FOTH, FMIL) at the member state's bulk price index (CAPRI's
 `feedBlkPrice_`, `docs/FEED_MARKETS.md`); home-grown fodder is not priced but valued through its balance
 (`docs/FODDER_BALANCE.md`).
 
-Without feeding inside (`use_feed_in_supply = False`, an older path) an EU ration is chosen outside the supply models
-at current feed prices by the same programme with the share rules (damped by half each iteration); with
-`use_ration = False` rations are fixed per head and feed costs follow bulk prices.
+The older path without feeding inside (an EU ration chosen outside the supply models at current feed prices, with the
+share rules) was removed with the conic form on 26 October 2026.
 
 ## Feed-share rules (`feed/req_or_man_fnc.gms`)
 

@@ -2,7 +2,7 @@
 
     tools/build   builders of the model's data files (capri_data/)
     tools/run     model runs
-    tools/check   comparisons and diagnostics (check/nlp_check: the NLP form's original checks)
+    tools/check   comparisons and diagnostics
     tools/gams    GAMS export scripts to run in a CAPRI installation
     tools/lib     modules shared by the tools (_model_regions, _capri_costsavings, this one)
 
@@ -16,7 +16,7 @@ from pathlib import Path
 
 ROOT = next(p for p in Path(__file__).resolve().parents if (p / "pyproject.toml").exists())
 TOOLS = ROOT / "tools"
-FOLDERS = ("lib", "build", "run", "check", "check/nlp_check", "gams")
+FOLDERS = ("lib", "build", "run", "check", "gams")
 
 
 def tool_file(name: str) -> Path:

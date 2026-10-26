@@ -72,7 +72,7 @@ def main():
     elas = Path("/mnt/user-data/uploads/elas_2_1730defaulta.csv")
     if dump.exists() and elas.exists():
         extract(dump, elas)
-    sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check", "check/nlp_check")]
+    sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check")]
     from recalibrate_trade_2017 import REGION_MAP
     eu_block = set(pd.read_csv(ROOT / "capri_data" / "2017" / "market" / "dairy_processing.csv")["ms"])
     src = pd.read_csv(SRC_M)

@@ -174,20 +174,25 @@ files record how they map to this model's names.
 | Supply method | CAPRI's regional models as NLPs, PMP-calibrated (CAPRI's 2030 terms) |
 | Market method | CAPRI's bilateral Armington market: 30 trade regions (31 with CAPRI's EU blocks, optional), transport costs, tariffs, TRQs; dairy block, GL food demand, young animals, CAPRI's market supply functions; Newton + Anderson to < 1e-7 |
 | Data validator | 13 pass, 0 warn, 0 fail |
-| Convergence | all 248 regional models solve (five Dutch regions at JRC121368's relaxed N target); the Farm-to-Fork loop does not yet converge (K75) |
+| Convergence | all 248 regional models solve (one Dutch region, NL32, at JRC121368's relaxed N target); Farm-to-Fork 2030 converges in 9 iterations, Green Deal 2030 in 13 (reference runs r145, r142) |
 | Test suite | 181 tests (22 marked `slow`) |
 | On by default, as in CAPRI | land market and land rules, endogenous feed rations, fodder equality, ammonia technologies |
 | Optional | manure market (`use_manure_market`) |
-| 2030 Farm-to-Fork run | about 50 minutes on 2 cores (r130), plus about an hour once per new baseline for the market supply Hessian; regions solved in parallel (`CAPRI_WORKERS`), same results |
-| Solvers | IPOPT via CasADi (supply, default), Clarabel (conic fallback, manure pools), Newton (markets), HiGHS (LP checks) |
+| 2030 Farm-to-Fork run | about 27 minutes on 2 cores (r145), plus about an hour once per new baseline for the market supply Hessian; regions solved in parallel (`CAPRI_WORKERS`), same results |
+| Solvers | IPOPT via CasADi (supply), Clarabel (manure pools), Newton (markets), HiGHS (LP checks) |
 
 ### Where things stand (26 October 2026)
 
-**Current state.** The latest full Farm-to-Fork 2030 run with every current change (r130, 25 October 2026) deviates
-from CAPRI's published results (JRC121368) by 4.83 on average over 20 indicators (§8). It stops at 25 iterations
-without converging: Portugal's member-state milk price stays 0.0052-0.0053 from the market's (tolerance 0.005) and the
-calf price keeps rising by about 0.5% of base per iteration (KNOWN_ISSUES K75, under diagnosis; re-measuring the
-market supply Hessian at the scenario's state did not change it, r132). Since 24 October: CAPRI's market supply
+**Current state.** The reference Farm-to-Fork 2030 run (r145, 26 October 2026, the default settings) converges in 9
+iterations (about 27 minutes on 2 cores) and deviates from CAPRI's published results (JRC121368) by 4.44 on average
+over 20 indicators (§8); Green Deal 2030 converges in 13 iterations (r142). K75 is fixed: the calf price crept and
+the loop did not converge (r130: 25 iterations, deviation 4.83) because the regional models in CAPRI's form still
+carried the former conic form's fodder band rows, which held each animal's fodder per head at the previous solve's
+feeding; with CAPRI's fodder equality alone the suckler herd no longer shrinks by iteration. Since 26 October: CAPRI's
+price averaging is the default update of the supply-market loop, CAPRI's stop rule is recorded at every iteration
+(KNOWN_ISSUES K79: a few member-state productions keep moving by more than CAPRI's 0.05%), and the conic form of the
+regional models was removed (no run had used it since r110): where IPOPT still fails after the relaxations, the
+region's last IPOPT point is kept and recorded, as CAPRI keeps a non-optimal solve. Since 24 October: CAPRI's market supply
 functions and young-animal markets inside the market (K75), raw milk per member state inside the market (audit M5),
 tariffs on price plus transport (M10), the supply audit S5-S10 (need per yield, yield-dependent input costs,
 permanent-grassland calibration, catch crops on the eco set-aside, histosols), and CAPRI's stop rule and price
@@ -206,39 +211,48 @@ iterates supply and market with averaged prices.
 
 | Problem | Type | CAPRI-mod |
 |---|---|---|
-| Regional supply model, with feeding, fertilisation and options (default, `supply_form = "nlp"`) | non-convex NLP | IPOPT (CasADi), warm-started, tol 1e-8 |
+| Regional supply model, with feeding, fertilisation and options | non-convex NLP | IPOPT (CasADi), warm-started, tol 1e-8 |
 | ... where the tiered N target is infeasible | the same NLP at JRC121368's relaxed target (36%) | IPOPT (`metadata["nlp_fallback"]`; one Dutch region in Farm-to-Fork) |
-| ... where IPOPT fails from every start | conic form of the same model | Clarabel (warned) |
-| ... conic form chosen (`supply_form = "conic"`, cross-check) | convex conic program | Clarabel; SciPy last |
-| N-balance checks | LP | HiGHS |
-| Feed rations outside the supply models (option) | convex QP | own active-set QP |
+| ... where IPOPT still fails | the same NLP; its last point kept, as CAPRI keeps a non-optimal solve (p_INFES) | IPOPT (warned, `metadata["nlp_fallback"]`) |
+| Landscape-floor and N-target fits (lowest reachable value) | LP | HiGHS |
 | Market supply functions (Hessian) | 1% price shocks, regional models re-solved | IPOPT; cached per baseline |
 | Market (trade, TRQs, processing, dairy, biofuels, feed bulks, young animals) | square non-linear system | Newton per commodity, Anderson-accelerated, to < 1e-7; planned: joint Newton with an exact sparse Jacobian (CasADi) |
 | Manure trade between pools (option) | convex QP | Clarabel |
+| Inner fertiliser distribution (accounts) | concave posterior mode, few balances | own Newton on the duals |
+| Land-use change transitions | concave posterior mode | IPOPT, tol 1e-12 |
+| Duals and feed-term calibration | small non-negative least squares | SciPy `nnls` |
 | Supply–market loop | fixed point | CAPRI's price averaging (default since 26 October 2026) or the adaptive step, same equilibrium (r139–r142); CAPRI's stop rule recorded each iteration |
 
-**IPOPT trial.** A shadow trial (tools/check/nlp_check/shadow.py): in every regional solve of a full Farm-to-Fork run,
+**Why these solvers.** Clarabel solves convex conic problems only; the manure-pool equilibrium is the one convex problem
+with many constraints (an interior point handles any set of binding bounds; an active-set loop failed on the full EU).
+The regional models are non-convex (feeding per head x herd is bilinear; the fertilisation block and the ammonia
+cascade are non-linear), so they need a general NLP solver; a convex reformulation for Clarabel was a different,
+approximate model (the conic form, removed on 26 October 2026). The market is a system of equations, not an
+optimisation. In the fertiliser distribution each flow solves in closed form given the duals, which leaves a handful
+of unknowns: exact and faster than a general solver. LPs go to an LP solver.
+
+**IPOPT trial (early October 2026, history).** A shadow trial (tools/check/nlp_check/shadow.py, removed with the conic
+form on 26 October 2026): in every regional solve of a full Farm-to-Fork run,
 IPOPT also solved CAPRI's original NLP (exact ammonia cascade, one regional share per fertiliser technology): 4,243
 solves, 99.5% converged. Early iterations differ by up to 2% of the objective (the cascade linearised at base shares);
 at the converged solution the conic model equals CAPRI's exact NLP optimum within 1.5e-4 of the objective (median
-3.5e-8), N prices within 3%. IPOPT takes ~7x the supply time (docs/archive/NLP_CHECK.md). Decision: Clarabel stays the
-default.
+3.5e-8), N prices within 3%. IPOPT takes ~7x the supply time (docs/archive/NLP_CHECK.md). Decision at the time:
+Clarabel stayed the default; CAPRI's own NLP form replaced it on 20 October 2026 (below).
 
 **CAPRI's own NLP form (default, October 2026).** The regional supply models written in CAPRI's equations (feeding,
 NUTNED_ for N, P2O5 and K2O with the inner fertiliser model inside, CAP greening, the Green Deal caps as CAPRI's
 regulations, the options with CAPRI's loss cascade, the emission tax; LUC transitions after each solve) and solved with
-IPOPT: `CAPRIModel.supply_form = "nlp"` or `tools/run/run_f2f_2030.py --supply-form nlp` (docs/NLP_PORT_DESIGN.md). It
+IPOPT (`capri_mod/supply/capri_regional_nlp.py`, docs/NLP_PORT_DESIGN.md). It
 reproduces the base exactly; Farm-to-Fork converges in 33 min (deviation from JRC121368 5.6, conic 4.4 in 9 min),
 Green Deal 2030 in 30 min (conic 35 min). It is the default since 20 October 2026 (CAPRI's own form); the conic form
-with Clarabel stays as `--supply-form conic` (KNOWN_ISSUES K50). Latest full runs (23 October 2026: CAPRI's cap on the breeding options and their calibration as CAPRI's, KNOWN_ISSUES K67; before the cap 4.62 and 4.69, r94 / r95): Farm-to-Fork mean deviation from JRC121368 over 20 indicators 4.89 with CAPRI's own 2030 PMP terms for crops, animals, feed and land (r99, 15 iterations, 34 minutes; the default since 22 October 2026, the project lead's decision; docs/PMP_CAPRI_2030.md), 5.03 with capri-mod's own terms computed by CAPRI's recipe from its estimates (`--pmp recipe`, r100; for 2030 and 2017), 5.30 with the elasticity calibration (`--pmp elasticity`, r77, 21 October).
+with Clarabel stayed as an option until 26 October 2026, when it was removed (KNOWN_ISSUES K50). Latest full runs (23 October 2026: CAPRI's cap on the breeding options and their calibration as CAPRI's, KNOWN_ISSUES K67; before the cap 4.62 and 4.69, r94 / r95): Farm-to-Fork mean deviation from JRC121368 over 20 indicators 4.89 with CAPRI's own 2030 PMP terms for crops, animals, feed and land (r99, 15 iterations, 34 minutes; the default since 22 October 2026, the project lead's decision; docs/PMP_CAPRI_2030.md), 5.03 with capri-mod's own terms computed by CAPRI's recipe from its estimates (`--pmp recipe`, r100; for 2030 and 2017), 5.30 with the elasticity calibration (`--pmp elasticity`, r77, 21 October).
 
 **N loss cascade (October 2026).** CAPRI's GRAZN_ ... GASTOTNETF_ with its p_Nemidat drive the ammonia options in both
 forms (KNOWN_ISSUES K51, docs/N_CASCADE_SPEC.md); per-head losses of CAPRI's Green Deal reference reproduced to 1e-6.
 The concrete-storage options of CAPRI's endoLeach are in.
 
 **Phosphate balance (October 2026).** CAPRI's gross P balance (reports/calc_nbalance.gms with PHOF, in P2O5, t P2O5
-in the environmental table): excretion, manure net exports, mineral P2O5 (the NLP form's purchases; in the conic form
-CAPRI's NUTNED_ for P), crop residues, removal, manure runoff, surplus and soil surplus; and the area the organic target
+in the environmental table): excretion, manure net exports, mineral P2O5 (the fertilisation block's purchases), crop residues, removal, manure runoff, surplus and soil surplus; and the area the organic target
 converts (docs/P_BALANCE.md).
 
 **Future (not scheduled).** Base-year update (Phase 2; needs a newer CAPRI release). The Green Deal block in CAPRI's
@@ -248,8 +262,8 @@ digestion, leaching and winter cover are in (docs/AD_SPEC.md, docs/N_CASCADE_SPE
 cover share is chosen by the regional model with CAPRI's cost curve, the Farm-to-Fork requirement as its floor
 (docs/WINTER_COVER.md).
 
-**Open.** K75: the Farm-to-Fork supply-market loop does not converge (above). K13 Farm-to-Fork milk price (+18.9% in
-r130, +32% before raw milk was priced per member state inside the market, against CAPRI's +1.5%): diagnosed, no bug - our dairy block and market are
+**Open.** K79: member-state production swings flagged by CAPRI's stop rule (above). K13 Farm-to-Fork milk price (+21%
+in r145, +18.9% in r130, +32% before raw milk was priced per member state inside the market, against CAPRI's +1.5%): diagnosed, no bug - our dairy block and market are
 CAPRI's own parameters and give a derived demand for raw milk of about -0.2; needs CAPRI's Farm-to-Fork dairy market
 results. K9: CAPRI's crop-group allocation is inside the regional model (coupled form with IPOPT where needed, CAPRI's fixed priors); RO22's priors calibrated at its own no-trade base as CAPRI calibrates them (K21); no allocation open. K20: the crop-need row's mineral N and the balance's differ by 0.02%. JRC147659
 (MRL -> LOQ) scenarios, waiting for the DataM exports. Every bug found, and whether the 9t / 9t.1 releases carry it:
@@ -346,7 +360,6 @@ docker build -t capri-mod .
 docker run --rm capri-mod                                        # the test suite
 docker run --rm -v "$PWD/runs:/runs" capri-mod \
     python tools/run/run_f2f_2030.py /runs/f2f.pkl --verbose          # a full Farm-to-Fork 2030 run (about 50 minutes on 2 cores)
-    python tools/check/nlp_check/nlp.py CAPDIR                          # check against CAPRI's original form with IPOPT (docs/archive/NLP_CHECK.md)
 ```
 
 **Parameters.** Every constant the model's economics and accounting rest on - CAPRI's parameters, IPCC factors as
@@ -556,7 +569,7 @@ modules.
 
 | Module | Lines | Core method | Economic engine |
 |---|---:|---|---|
-| `supply/` | 11,800 | CAPRI's regional model per region as a non-linear program (IPOPT), conic form as fallback | Positive Mathematical Programming with CAPRI's 2030 terms |
+| `supply/` | 11,800 | CAPRI's regional model per region as a non-linear program (IPOPT) | Positive Mathematical Programming with CAPRI's 2030 terms |
 | `market/` | 3,800 | bilateral market, Newton per commodity | two-nest Armington trade, GL demand, dairy, biofuels, feed bulks, young animals |
 | `policy/` | 630 | CAP payment & tariff computation | direct payments, eco-schemes, Green Deal settings |
 | `environmental/` | 2,200 | indicators from activity levels | CAPRI's nutrient balances (N, P2O5), IPCC / CAPRI emission accounting |
@@ -578,7 +591,7 @@ equation, the source file and equation name are cited in the code comments and i
 
 **Supply — Positive Mathematical Programming.** The core of the model. Each of
 the 248 regions solves its own constrained non-linear program over 46 activities,
-written in CAPRI's equations (`supply_form = "nlp"`, the default; docs/NLP_PORT_DESIGN.md).
+written in CAPRI's equations (docs/NLP_PORT_DESIGN.md).
 A quadratic cost term **exactly reproduces the baseline's activity levels**; by
 default it is CAPRI's own 2030 PMP term for crops, animals, feed and land
 (`supply.pmp_source = "capri2030"`, docs/PMP_CAPRI_2030.md), the calibration to CAPRI's
@@ -618,7 +631,7 @@ class: `EnvironmentalModule` returning structured `EnvironmentalIndicators`.
 the same optimisation as its herds, fodder and technologies, against CAPRI's requirements and feed contents per
 head (res_17), with the five tradable feed bulks priced by the market per member state (docs/FEED_RATION.md,
 docs/FEED_MARKETS.md). The run reports feed use per region, animal and bulk (`results["feed"]`). Key classes:
-`RationModel` (`capri_mod/feed/ration.py`) and the conic feed block (`capri_mod/supply/feed_conic.py`). The
+`RationModel` (`capri_mod/feed/ration.py`) and the feeding block of the regional NLP (`capri_mod/supply/capri_regional_nlp.py`). The
 earlier post-solve feed module (IPCC requirement functions and a feed balance after the solve) was retired in
 Sprint 9i.
 
@@ -902,27 +915,28 @@ feedstock demand, DDGS and CAPRI's feed bulks inside the market; CAPRI's inner f
 supplements; all five of CAPRI's feed bulks and the residual feed markets FENI and FPRI; no manure trade in the
 scenario or its baseline (the report's setting); full EU). Since 24 October 2026 also: CAPRI's market supply functions
 with the young-animal markets inside the market (K75), raw milk per member state inside the market (audit M5), tariffs
-on price plus transport (M10) and the supply audit S5-S10 (CHANGELOG). The current run, r130 (25 October 2026), stops
-at 25 iterations without converging (K75), so its figures may still move slightly; the earlier column is the
-converged run before those changes (mean deviation 4.26, about 13 minutes on 2 cores). Cereal and oilseed
+on price plus transport (M10), the supply audit S5-S10 and the K75 fix (CHANGELOG). The current run is the
+reference r145 (26 October 2026, default settings: converged in 9 iterations, about 27 minutes on 2 cores); the earlier
+column is the converged run before the changes of 24-26 October (mean deviation 4.26, about 13 minutes on 2 cores). Cereal and oilseed
 price indices are weighted by base production value; EU prices are the EU's market (producer) prices:
 
-| 2030 Farm-to-Fork | capri-mod (r130) | capri-mod (earlier, 4.26) | CAPRI (JRC121368) |
+| 2030 Farm-to-Fork | capri-mod (r145) | capri-mod (earlier, 4.26) | CAPRI (JRC121368) |
 |---|---|---|---|
-| Cereal / oilseed / vegetables-and-permanent-crops price | +11.4 / +14.7 / +12.0% | +8.4 / +14.8 / +13.5% | +8 / +11 / +15% |
-| Beef / pork / poultry / milk price (EU producer prices) | +14.4 / +23.5 / +20.1 / +18.9% | +15.3 / +34.2 / +22.9 / +30.7% | +24 / +43 / +18 / +1.5% |
-| Dairy cows / beef animals / pigs / poultry / sheep | −2.6 / −13.3 / −16.7 / −15.2 / −4.7% | −7.0 / −15.7 / −20.9 / −18.6 / −6.2% | −10 / −18 / −14.5 / −16.5 / −9.5% |
-| Cereal / oilseed / vegetables-and-permanent-crops production | −12.1 / −13.7 / −12.9% | −14.9 / −14.5 / −13.5% | −15 / −15.5 / −12% |
-| Nitrogen surplus / fertiliser N₂O | −31.4 / −39.0% | −33.3 / −39.8% | −33.5 / −40.4% |
-| Enteric / manure CH₄ / non-CO₂ GHG | −9.1 / −12.4 / −17.5% | −13.3 / −14.6 / −18.6% | −14.6 / −12.2 / −14.8% |
-| Ammonia / manure N₂O | −37.0 / −17.3% | −43.2 / −22.1% | −33 / −3.2% |
-| Beef production | −10.4% | −13.8% | −14% |
-| Utilised agricultural area | +4.4% | – | +3% |
+| Cereal / oilseed / vegetables-and-permanent-crops price | +10.6 / +14.4 / +11.7% | +8.4 / +14.8 / +13.5% | +8 / +11 / +15% |
+| Beef / pork / poultry / milk price (EU producer prices) | +20.7 / +18.0 / +15.1 / +21.2% | +15.3 / +34.2 / +22.9 / +30.7% | +24 / +43 / +18 / +1.5% |
+| Dairy cows / beef animals / pigs / poultry / sheep | −3.4 / −20.5 / −13.9 / −11.9 / −10.7% | −7.0 / −15.7 / −20.9 / −18.6 / −6.2% | −10 / −18 / −14.5 / −16.5 / −9.5% |
+| Cereal / oilseed / vegetables-and-permanent-crops production | −15.5 / −13.5 / −13.3% | −14.9 / −14.5 / −13.5% | −15 / −15.5 / −12% |
+| Nitrogen surplus / fertiliser N₂O | −32.4 / −39.5% | −33.3 / −39.8% | −33.5 / −40.4% |
+| Enteric / manure CH₄ / non-CO₂ GHG | −11.4 / −12.3 / −18.8% | −13.3 / −14.6 / −18.6% | −14.6 / −12.2 / −14.8% |
+| Ammonia / manure N₂O | −37.4 / −18.2% | −43.2 / −22.1% | −33 / −3.2% |
+| Beef production | −14.8% | −13.8% | −14% |
+| Utilised agricultural area | +3.2% | – | +3% |
 
 Mean absolute deviation from CAPRI over the 20 indicators (the table without ammonia, manure N₂O, beef production and
-the area): **4.83** in r130, not converged; **4.26** in the earlier converged run (`tools/check/compare_runs.py --capri`;
-runs with the fixed hash seed). Against Table 17 of JRC121368, r130 adopts nitrification inhibitors on 16% (CAPRI 18%),
-precision farming 25% (35%), covered storage 28% (34%), low-emission housing 19% (12%) and air purification 8% (10%).
+the area): **4.44** in r145; **4.83** in r130 (25 October, not converged, before the K75 fix); **4.26** in the earlier
+converged run (`tools/check/compare_runs.py --capri`; runs with the fixed hash seed). Against Table 17 of JRC121368,
+r145 adopts nitrification inhibitors on 16% (CAPRI 18%), precision farming 25% (35%), covered storage 27% (34%),
+low-emission housing 19% (12%) and air purification 8% (10%).
 History of the earlier figure: Sprint 9p starts the 2030 baseline from CAPRI's own 2030 reference and calibrates it as CAPRI's
 (4.37 → 4.23), and Sprint 9q with CAPRI's 2030 rations and fodder (4.30); Sprint 9r's CAPRI tariffs for the non-EU trade regions
 (4.31); Sprint 9s's removal of the remaining synthetic data - crop premiums, costs and yields from CAPRI for
@@ -1149,12 +1163,12 @@ in thousand head.
   Neither CAPRI's results nor its regional selection record the data needed:
   no crop areas for Norway's redrawn regions, and no physical grass yield for
   Ireland.
-- **Cereal magnitudes and price magnitudes under Farm-to-Fork.** Cereal output
-  falls 12.1% against CAPRI's 15% (r130; 11.5% in earlier runs, where maize responded too little); cereal prices
-  rise too far (+11.4% against +8%), vegetable and permanent-crop prices too little (+12.0% against +15%), and meat
-  and milk prices are far from CAPRI's (§8, table). Directions and rankings are usable.
-- **Results of a run that has not converged.** The current Farm-to-Fork runs stop at the iteration limit with the
-  calf price still rising (KNOWN_ISSUES K75); check `metadata["outer_converged"]`.
+- **Price magnitudes under Farm-to-Fork.** Cereal output falls 15.5% against CAPRI's 15% (r145); cereal prices
+  rise too far (+10.6% against +8%), vegetable and permanent-crop prices too little (+11.7% against +15%), the pork
+  price far too little (+18% against +43%) and the milk price far too much (+21% against +1.5%, K13) (§8, table).
+  Directions and rankings are usable.
+- **Results of a run that has not converged.** The reference runs converge; a run that stops at the iteration limit
+  says so in `metadata["outer_converged"]`, to be checked before using its results.
 - **Multi-period projections.** The projection is validated for a single step to
   2030; the recursion runs but has no external check, and herds are re-optimised
   each period rather than carried.
@@ -1263,7 +1277,7 @@ and review), and statistical or machine-learning methods that learn from its inp
   the baseline's solution and the settings that change it, so a change to either leads to a new measurement.
 - **Considerations.** Re-deriving the inputs and the validation needs CAPRI itself (§1): the builders in `tools/build`
   read CAPRI's own files. A scenario run that has not converged is reproducible but not an equilibrium; its metadata
-  says so (§11, K75).
+  says so (§11).
 
 ### 9.3 AI readiness: what is in place
 
@@ -1323,8 +1337,8 @@ optimisation and equilibrium equations. Machine learning is considered only for 
 - **The orchestration is still large.** Much of the supply-market loop is in one file (`capri_mod/model.py`); splitting
   it into modules is under way (`docs/design/ARCHITECTURE_REFACTOR.md`). Smaller modules are easier to review for
   people and agents alike.
-- **Convergence must be checked.** Some scenario runs do not yet converge (`docs/KNOWN_ISSUES.md`, K75); a tool must
-  read the run's metadata before using its results.
+- **Convergence must be checked.** A run that stops at the iteration limit is not an equilibrium; a tool must read the
+  run's metadata (`outer_converged`, and CAPRI's stop rule, `capri_stop`) before using its results.
 
 ## 10. Differences from CAPRI
 
@@ -1365,8 +1379,8 @@ reported here solve 2030 alone.
 
 **On comparing magnitudes with CAPRI.** Compared on **production** — the quantity
 CAPRI publishes — the Farm-to-Fork magnitudes are directly comparable: oilseeds
-−13.7% against CAPRI's −15.5%, permanent crops and vegetables −12.9% against −12%,
-cereals −12.1% against −15% (r130, 2030; see [§8](#8-validation)).
+−13.5% against CAPRI's −15.5%, permanent crops and vegetables −13.3% against −12%,
+cereals −15.5% against −15% (r145, 2030; see [§8](#8-validation)).
 
 ### 10.2 The projection layer
 
@@ -1532,11 +1546,12 @@ principled reason and extension path.
   surplus schedule (25% of the first 50 kg N/ha, 50% on 50–100, 75% on 100–150,
   100% above), and the resulting regional surplus distribution matches CAPRI's own
   `SURSOI`: median 48.2 against 49.5 across 228 regions.
-- **All 248 regional models solve**, with no region on the conic fallback; in the Farm-to-Fork scenario five Dutch
-  regions cannot meet the tiered nitrogen target and are solved at JRC121368's relaxed 36% cut, as the report did
-  for its highest-surplus regions (`metadata["nlp_fallback"]`).
-- **The supply-market loop of the full Farm-to-Fork run does not yet converge** (KNOWN_ISSUES K75): at the iteration
-  limit Portugal's milk price misses its tolerance and the calf price is still rising slowly. Check
+- **All 248 regional models solve** in CAPRI's form; in the Farm-to-Fork scenario one Dutch region (NL32, r145) cannot
+  meet the tiered nitrogen target and is solved at JRC121368's relaxed 36% cut, as the report did for its
+  highest-surplus regions (`metadata["nlp_fallback"]`). A region whose IPOPT solve still fails would keep its last
+  IPOPT point, warned about and recorded there (none in r145 or r142).
+- **Convergence must be checked.** The reference runs converge (r145, r142); CAPRI's stop rule, recorded at every
+  iteration, still flags a few member-state productions moving by more than 0.05% (KNOWN_ISSUES K79). Check
   `metadata["outer_converged"]` before using a result.
 
 **Deliberate scope boundaries (not gaps — design choices, like §10):**

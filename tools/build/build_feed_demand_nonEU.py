@@ -51,7 +51,7 @@ def main():
     ap.add_argument("--elas", type=Path, default=Path("/mnt/user-data/uploads/elas_2_1730defaulta.csv"))
     ap.add_argument("--data", type=Path, default=Path("/mnt/user-data/uploads/data_market_1730defaulta.csv"))
     a = ap.parse_args()
-    sys.path.insert(0, str(ROOT)); sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check", "check/nlp_check")]
+    sys.path.insert(0, str(ROOT)); sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check")]
     from capri_mod.data.definitions import ALL_TRADE_REGIONS
     from recalibrate_trade_2017 import REGION_MAP
     import build_bilateral_market as BM

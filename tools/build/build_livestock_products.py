@@ -20,7 +20,7 @@ if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--dump-dir", default="/home/claude/work/capreg")
     a = ap.parse_args()
-    sys.path.insert(0, str(ROOT)); sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check", "check/nlp_check")]
+    sys.path.insert(0, str(ROOT)); sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check")]
     import build_livestock_output_coef as B
     D = ROOT / "capri_data" / "2017" / "supply"
     q = B.build_product_quantities(Path(a.dump_dir))

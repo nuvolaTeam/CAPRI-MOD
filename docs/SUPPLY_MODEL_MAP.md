@@ -1,8 +1,8 @@
 # CAPRI star 3.0 regional supply model, equation by equation, against capri-mod
 
 Status: revised 20 October 2026 against the code. Sections 1-3 map CAPRI's model; the capri-mod column describes the
-default NLP form (`CAPRIModel.supply_form = "nlp"`, `capri_mod/supply/capri_regional_nlp.py`) and notes the conic form
-(`"conic"`, Clarabel) where it differs. Section 5 is the record of the decisions taken before the port (historical).
+NLP form (`capri_mod/supply/capri_regional_nlp.py`); notes on the conic form (Clarabel, removed 26 October 2026)
+are history. Section 5 is the record of the decisions taken before the port (historical).
 
 This map was step 1 of the rewrite of the regional model in CAPRI's NLP form (docs/archive/HANDOFF_NLP_PORT.md); the
 design and the registered departures of the port are in `docs/NLP_PORT_DESIGN.md` and `docs/KNOWN_ISSUES.md` (K50,
@@ -33,7 +33,7 @@ Which equations are live depends on switches. Two configurations matter:
 | CAP policy chain | the policy file decides (GUI default `mtr_rd_ref` looks legacy; CAP 2023-27 reference turns on the GAECs) | cap_after_2014 greening chain (permanent grassland, 5% ecological set-aside, crop diversification) |
 
 capri-mod has no switch named ghgAbatement. Its abatement options are inside the regional model whenever
-`use_manure_techs` is on (default True) and feeding is inside the models (`use_feed_in_supply`, default True), baseline
+`use_manure_techs` is on (default True; feeding is always inside the models), baseline
 included, so in this respect every default run is in the Green Deal configuration. Decision 5a.1 (off by default) was
 not implemented that way.
 

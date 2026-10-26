@@ -77,7 +77,7 @@ def read_data(regions):
 
 
 def model_maps():
-    sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check", "check/nlp_check")]
+    sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check")]
     import build_bilateral_market as BM
     from recalibrate_trade_2017 import REGION_MAP
     good_to_model = {}

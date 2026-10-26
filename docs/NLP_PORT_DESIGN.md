@@ -26,7 +26,8 @@ variables**: they are CAPRI's.
   option limits), each switched as CAPRI switches it.
 - The spec (plain dicts and arrays) is assembled from the RegionalSupplyModel in `supply_module.py`
   (`_capri_nlp_solve`); no separate spec module was written.
-- `RegionalSupplyModel.supply_form`: `"nlp"` (default) or `"conic"` (option), set from `CAPRIModel.supply_form`. Results returned in
+- `RegionalSupplyModel.supply_form`: `"nlp"` (default) or `"conic"` (option) until 26 October 2026, when the conic form
+  was removed and the setting with it. Results returned in
   the same SupplyResult fields (activities, outputs, feed, fertiliser, emissions, duals), so the market, manure market,
   young-animal markets and the environmental accounts keep working.
 - Builders for the new data (all CSV, provenance in DATA_SOURCING_REGISTRY):
@@ -75,8 +76,8 @@ silent fallback to another model). Run time measured early, on the base and one 
 
 ## Status (20 October 2026)
 
-Implemented (`capri_mod/supply/capri_regional_nlp.py`; `CAPRIModel.supply_form = "nlp"`, `run_f2f_2030.py --supply-form nlp`;
-the default since 20 October 2026):
+Implemented (`capri_mod/supply/capri_regional_nlp.py`; the default since 20 October 2026, the only form since
+26 October 2026):
 
 | Block | CAPRI equations | Notes |
 |---|---|---|

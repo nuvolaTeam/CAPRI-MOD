@@ -8,7 +8,7 @@ CAPRI chooses its mitigation options inside the regional supply model (supply/su
 in JRC121368's Farm-to-Fork run they were adopted without a carbon price, because the nitrogen target and the prices
 made them pay (report Table 17: storage covers 14 -> 34%, precision farming 0 -> 35%, air purification 0 -> 10%,
 higher milk yield 0 -> 15%). capri-mod does the same: the options are columns of each regional model whenever
-`CAPRIModel.use_manure_techs` (default True) and feeding inside the models (`use_feed_in_supply`, default True) are on,
+`CAPRIModel.use_manure_techs` (default True) is on (feeding is always inside the models),
 the baseline included. In the default NLP form they are written in `capri_regional_nlp.CapriRegionalNLP._abatement_block`
 (ammonia options, AD, fertiliser options, inhibitor on manure) and as columns of the regional QP (breeding, low-N feed,
 linseed and nitrate, histosol fallowing).

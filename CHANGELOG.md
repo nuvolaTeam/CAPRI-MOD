@@ -30,6 +30,33 @@ Full provenance for every entry is in `capri_data/DATA_SOURCING_REGISTRY.json`.
 
 ---
 
+## 26 October 2026: the conic form removed; a failed regional solve kept as CAPRI keeps it
+
+- **Conic form removed** (the user's decision). No run had used it since r110: the coverage of the Farm-to-Fork and
+  Green Deal 2030 runs (r146, r147) showed no conic solve and no QP fallback. Removed: `capri_mod/supply/feed_conic.py`,
+  `capri_nlp.py` (its cascade-loss helper moved into `capri_regional_nlp.py`), `qp_solver.py`, the built-in
+  interior-point fallback of `convex_qp.py` (Clarabel is required and stays for the manure-market pools), the plain QP
+  path without feeding inside and its fallbacks (landscape-floor and balance-target fits on the QP, least-distance QP,
+  SciPy trust-constr), the conic form's crop-group allocation check (`fert_dist_inside`), CAPRI's NUTMIN_ floor of the
+  conic form (`use_min_mineral_share`, off in star 3.0 with the inner fertiliser model), the EU ration chosen outside
+  the supply models (`Ration.solve`; with it `supply.fodder_at_shadow_price` and the ration and fodder dampings, which
+  acted only there: DEPARTURES_FROM_CAPRI), `tools/check/nlp_check` and `tools/check/compare_qp_solvers.py`; settings
+  `supply.supply_form`, `supply.use_feed_in_supply`, `supply.qp_solver`, `supply.trust_constr_maxiter`,
+  `supply.conic_*`, `fertiliser.fd_nlp_max_iter`, `outer_loop.manure_pool_qp_max_iter`; run options `--supply-form`,
+  `--qp-solver`, `--feed-in-supply`, `--no-feed-in-supply`, `--nutmin`.
+- **Failed regional solve** (K55, the user's decision): where IPOPT fails from every start and JRC121368's N-target
+  relaxation and the landscape-floor fit do not help, the region's last IPOPT point is kept, warned about and recorded
+  (`result.nlp_nonoptimal`, `converged = False`, `metadata["nlp_fallback"]`, the run's `nlp_nonoptimal`), as CAPRI
+  re-solves with widened bounds and carries on with a non-optimal solve (supply/simu_supply.gms, widen_bounds.gms:
+  p_INFES); a regional model that cannot be built stops the run, as CAPRI aborts on an execution error.
+- Renamed with the form: `_last_conic_duals` -> `_last_duals`, `_conic_ok` / `_conic_failed` / `_conic_status` ->
+  `_nlp_ok` / `_nlp_failed` / `_nlp_status`; `result.conic_failed`, `conic_status`, `land_market_failed`,
+  `fert_dist_status`, `fert_dist_priors` and the run's `conic_fallbacks`, `ipopt_polished`, `fert_dist_nlp`,
+  `fert_dist_open` removed (always empty in the NLP form).
+- Tests: the conic-only tests removed (the emission-tax test of the conic model, IPOPT polish, NUTMIN_, fertiliser
+  distribution inside, the conic P accounts); the NLP failure test rewritten for CAPRI's handling.
+- Gate: the reference run r145 and the Green Deal 2030 run r142 reproduced (see below), the test suite passing.
+
 ## 26 October 2026: K75 found and fixed (a lagged fodder constraint in the NLP form); CAPRI's stop rule and price forecast as options
 
 - **K75 fixed.** In the NLP form CAPRI's fodder balance SUPBAL_ is the equality with the feed columns; the conic form's

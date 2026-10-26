@@ -81,14 +81,8 @@ manure_pool_omega_up = 1.25
 manure_pool_omega_down = 0.5
 manure_pool_omega_min = 0.25
 manure_pool_qp_tol = 1e-8
-manure_pool_qp_max_iter = 300
 
 [supply]
-# the regional supply models' form: "nlp" = CAPRI's own equations solved by IPOPT, "conic" = the convex
-# reformulation solved by Clarabel (cross-check)
-supply_form = "nlp"
-# solver of the remaining QPs (ration calibration, the conic form's pre-solve): "clarabel" or "builtin"
-qp_solver = "clarabel"
 # PMP terms: "capri2030" (CAPRI's exported 2030 terms at 2030; CAPRI's recipe at its 2017 point at 2017), "recipe"
 # (capri-mod's own with CAPRI's recipe), "elasticity" (legacy: CAPRI's elasticities only; activities without one are
 # held at their level)
@@ -101,9 +95,6 @@ pmp_cross_terms = "capri"
 pmp_apply_dampening = true
 # CAPRI's regional supply elasticities as calibration targets (with them, the PMP share term)
 use_capri_elasticities = true
-# trust-constr iterations (scipy fallback of the regional QP): the problem is a convex QP, so more iterations reach
-# the same optimum; 1000 truncated some regions with many active constraints, 3000 clears them at ~8% extra time
-trust_constr_maxiter = 3000
 # CAPRI's land market (p_landIsFixedinScenario 0, Trustee_land variant): land types as variables
 use_land_market = true
 # CAPRI's land balances without slack (LandBalNoSlak_)
@@ -118,19 +109,10 @@ grassland_allowance = 0.0
 use_manure_techs = true
 # without a policy incentive on N, the ammonia options stay at their calibrated shares (K63)
 amm_fix_without_policy = true
-# feeding inside the regional supply models (CAPRI)
-use_feed_in_supply = true
 # CAPRI's rations per region and animal
 use_ration = true
-# damping of the EU ration path (feeding outside the supply models only)
-ration_damping = 0.5
 # nitrate as a ration ingredient (line_nitr.gms); off until validated
 use_nitrate_in_ration = false
-# DEPARTURE: CAPRI values home-grown fodder in the rations at its fodder-balance dual; off because the first
-# Farm-to-Fork run with it did not converge (ration <-> fodder dual feedback); to be switched to CAPRI's setting
-fodder_at_shadow_price = false
-fodder_ratio_bounds = [0.2, 5.0]
-fodder_ratio_damping = 0.5
 # fodder balance band rows (the conic form's second side of CAPRI's fodder equality)
 fodder_band = true
 # CAPRI-mod error fix (K75, 26 October 2026): in the NLP form, where CAPRI's fodder equality uses the feed columns, the
@@ -192,10 +174,6 @@ nlp_acceptable_tol = 1e-6
 nlp_fixed_variable_treatment = "make_constraint"
 nlp_max_cpu_time = 60.0
 nlp_cal_tol = 1e-6
-# conic form (Clarabel): tolerance, iterations, equilibration iterations
-conic_tol = 1e-8
-conic_max_iter = 400
-conic_equilibrate_max_iter = 50
 # inner loop of the supply module: N-balance price
 nbal_tol_abs = 0.01
 nbal_tol_rel = 1e-3
@@ -231,10 +209,6 @@ fert_cost_on_purchases = true
 eco_setaside_catch_crops = true
 
 [fertiliser]
-# CAPRI's inner fertiliser distribution model (useInnerFertDistModel)
-fert_dist_inside = true
-# NUTMIN_ minimum mineral share: "capri" (CAPRI's rule), "on", "off"
-use_min_mineral_share = "capri"
 # the NLP form's fertilisation block (CAPRI's)
 nlp_fertilisation = true
 # NUTNED_ crop-need rows always present
@@ -246,10 +220,9 @@ npk_dual_bound_wide = 1000.0
 # (minfert_redu_by_crop.gms, p_checkSmallMine): its cap at this multiple of its baseline mineral N per ha (CAPRI: 1.0
 # for its small groups, "no backsliding"; 1.1-1.2 for its listed region x group pairs)
 exempt_cap_factor = 1.0
-# inner distribution solve: tolerance, iterations; NLP iterations
+# inner distribution solve: tolerance, iterations
 fd_tol = 1e-9
 fd_max_iter = 100
-fd_nlp_max_iter = 1000
 # how a crop's nutrient need per ha follows its yield: "capri" (fert/fertned.gms: the main-output part linearly, the
 # straw part with the scenario's yield shifts only, crops at the floor or cap fixed; capri_mod/fert/npk.py
 # need_yield_factor) or "sqrt" (the square root of the yield ratio on the whole need: this model's rule before

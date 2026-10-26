@@ -169,7 +169,7 @@ def main():
                     default=Path("/mnt/user-data/uploads/markmarket_greendeal_1730et_base_1717.txt"))
     ap.add_argument("--elas", type=Path, default=Path("/mnt/user-data/uploads/elas_2_1730defaulta.csv"))
     a = ap.parse_args()
-    sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check", "check/nlp_check")]
+    sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check")]
     from recalibrate_trade_2017 import REGION_MAP, AGGREGATES
     if a.dump.exists():
         src = extract(a.dump)

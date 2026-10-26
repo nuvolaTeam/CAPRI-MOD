@@ -20,7 +20,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--dump-dir", default="/home/claude/work/capreg")
     a = ap.parse_args()
-    sys.path.insert(0, str(ROOT)); sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check", "check/nlp_check")]
+    sys.path.insert(0, str(ROOT)); sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check")]
     import build_livestock_output_coef as B
     t = B.build(Path(a.dump_dir), "CRPR_EXPT")
     dest = ROOT / "capri_data" / "2017" / "environment" / "livestock_n_export_coef.csv"

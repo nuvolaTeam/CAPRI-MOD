@@ -5,10 +5,9 @@
 pandas>=2.0
 numpy>=1.24
 scipy>=1.10
-# CasADi with IPOPT (EPL): the regional supply models in CAPRI's NLP form, the default (CAPRIModel.supply_form = "nlp")
+# CasADi with IPOPT (EPL): the regional supply models in CAPRI's NLP form
 casadi>=3.6
-# Clarabel interior-point conic solver (Apache-2.0): the conic form of the regional models (supply_form = "conic"),
-# the manure-market pool equilibrium and starting points
+# Clarabel interior-point solver (Apache-2.0): the manure-market pool equilibrium
 clarabel>=0.7
 
 # --- tests (tools/run/run_tests.py also runs them without pytest, through its own stand-in) ---

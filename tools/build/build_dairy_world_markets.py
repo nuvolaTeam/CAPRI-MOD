@@ -40,7 +40,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--src", type=Path, default=Path("/mnt/user-data/uploads/fao_agg_17_datamarket.txt"))
     a = ap.parse_args()
-    sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check", "check/nlp_check")]
+    sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check")]
     from recalibrate_trade_2017 import REGION_MAP, AGGREGATES
     pat = re.compile(r"^'([^']+)'\.'(" + "|".join(ITEMS) + r")'\.'(" + "|".join(COMM) + r")'\.'BAS'\s+([-\d.Ee+]+)")
     if a.src.exists():

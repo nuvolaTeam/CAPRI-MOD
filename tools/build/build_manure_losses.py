@@ -23,9 +23,9 @@ from pathlib import Path
 
 _ROOT = Path(__file__).resolve().parents[2]
 import sys as _sys
-_sys.path[:0] = [str(_ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check", "check/nlp_check")]
+_sys.path[:0] = [str(_ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check")]
 from _model_regions import CTRY as MS_CODE  # noqa: E402  CAPRI member-state codes (capri_member_state_codes.csv)
-sys.path[:0] = [str(_ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check", "check/nlp_check")]
+sys.path[:0] = [str(_ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check")]
 
 #: CAPRI star 3.0 animals -> model animals. The 2030 results report the split activities (dairy cows DCOL / DCOH,
 #: bulls BULL / BULH, heifers HEIL / HEIH, supply/define_activities); the former aggregates (DCOW, BULF, HEIF)

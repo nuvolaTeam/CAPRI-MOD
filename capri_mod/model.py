@@ -134,23 +134,6 @@ class CAPRIModel:
     #: nitrate as a feed-ration ingredient (CAPRI envind/line_nitr.gms): replaces
     #: protein, cuts enteric CH4 (10 x share of DM), adds N excretion; off until validated
     use_nitrate = setting("supply.use_nitrate_in_ration")
-    #: solver of the quadratic programs that remain: the feed rations' calibration and the regional QP of the
-    #: conic form's pre-solve ("clarabel", interior point; or "builtin", active set + exact least-distance
-    #: solver, kept for comparison: tools/check/compare_qp_solvers.py agreed to 5e-5 on world prices, October 2026).
-    #: The regional models themselves are solved by IPOPT (NLP form, the default) or Clarabel (conic form).
-    qp_solver = setting("supply.qp_solver")
-    #: price home-grown fodder in the rations at its fodder-balance shadow price
-    #: (CAPRI) instead of its base value. OFF: the first 2030 Farm-to-Fork run with
-    #: it did not converge (feedback ration <-> fodder dual, needs damping)
-    fodder_at_shadow_price = setting("supply.fodder_at_shadow_price")
-    #: feeding inside the regional supply models, as CAPRI (docs/archive/FEED_IN_SUPPLY.md)
-    use_feed_in_supply = setting("supply.use_feed_in_supply")
-    #: the regional supply models' form: "nlp" = CAPRI's own equations (REQSE_ equalities per head, FEDUSE_ bilinear,
-    #: fodder balances as equalities; non-convex, IPOPT from the previous solution; docs/NLP_PORT_DESIGN.md) or
-    #: "conic" = the convex reformulation solved by Clarabel. Default "nlp" (20 October 2026, the user's decision:
-    #: CAPRI's own form); it converges for Farm-to-Fork and the Green Deal (KNOWN_ISSUES K50). The conic form stays as
-    #: an option and cross-check (`--supply-form conic` in tools/run/run_f2f_2030.py)
-    supply_form = setting("supply.supply_form")
     #: IPOPT's tolerance by stage of the outer loop (run(): loose while prices still move, tight to finish);
     #: nlp_staged_tol False keeps nlp_tol_final throughout. Off: on 40 regions (Farm-to-Fork, 4 outer iterations) the
     #: staged run took 275 s against 258 s at 1e-8 throughout (warm starts already need ~12 IPOPT iterations; the
@@ -159,10 +142,8 @@ class CAPRIModel:
     nlp_tol_early = setting("outer_loop.nlp_tol_early")
     nlp_tol_final = setting("outer_loop.nlp_tol_final")
     nlp_tol_switch = setting("outer_loop.nlp_tol_switch")
-    #: CAPRI's rations per region and animal (capri_mod/feed/ration.py: feeds, base ration, requirements, prices):
-    #: with use_feed_in_supply (the default, as CAPRI) they are the data of the feeding block inside the regional
-    #: models and the ration is chosen only there; without it, an EU ration is chosen outside the supply models at
-    #: current feed prices (the older path). Set False for fixed rations per head and bulk-price feed costs.
+    #: CAPRI's rations per region and animal (capri_mod/feed/ration.py: feeds, base ration, requirements, prices): the
+    #: data of the feeding block inside the regional models, where the ration is chosen (as CAPRI).
     use_ration = setting("supply.use_ration")
 
     def __init__(
@@ -429,16 +410,9 @@ class CAPRIModel:
         # them at convergence; a scenario run uses them, running a baseline
         # first if none is cached. In a baseline run the premium stays off,
         # so the baseline is exactly what it was.
-        from capri_mod.supply.supply_module import RegionalSupplyModel as _RSMk
         for _m in (getattr(self.supply_module, "_models", None) or {}).values():
             _m._nlp_fallback_log = []          # the NLP form's fallbacks of this run (metadata["nlp_fallback"])
-        if _RSMk.supply_form == "nlp" and (not bool(_RSMk.fert_dist_inside) or _RSMk.use_min_mineral_share):
-            # the NLP form always carries CAPRI's inner fertiliser model; these switches act in the conic form only
-            import warnings as _w
-            _w.warn("fert_dist_inside=False and use_min_mineral_share (NUTMIN_) act only in the conic form "
-                    "(supply_form='conic'); the NLP form keeps CAPRI's inner fertiliser model", UserWarning)
-        _key = (tuple(sorted(regions or list(self.data["areas"].index))), _et_key(_endotech), bool(_mt), bool(_bm),
-                _RSMk.nutmin_on(), bool(_RSMk.fert_dist_inside), _RSMk.supply_form)
+        _key = (tuple(sorted(regions or list(self.data["areas"].index))), _et_key(_endotech), bool(_mt), bool(_bm))
         # A world-price shock makes the run a scenario against the unshocked baseline, also
         # under scenario="BASELINE" (it used to replace the cached baseline; KNOWN_ISSUES K52c).
         _is_base = (custom_scenario is None and str(scenario).upper() == "BASELINE" and not world_price_shock)
@@ -606,7 +580,7 @@ class CAPRIModel:
         # on a pass solved at the tight tolerance
         from capri_mod.supply.supply_module import RegionalSupplyModel as _RSMt
         _tol_tight = float(self.nlp_tol_final)
-        _loose = bool(self.nlp_staged_tol) and _RSMt.supply_form == "nlp"
+        _loose = bool(self.nlp_staged_tol)
         self._nlp_tol_trace = []
         for outer_iter in range(max_outer_iter):
             self._outer_iter_now = outer_iter
@@ -760,11 +734,6 @@ class CAPRIModel:
                 self._young_animal_state_to_market(supply_results, _yani_ref)
             else:
                 self.market_module._yani_state = None
-            if _is_base:
-                # reference fodder shadow prices = this baseline's own (ratio exactly 1 at base)
-                self._fodder_dual_base = {_r: {k: float(v) for k, v in (getattr(_x, "shadow_prices", {}) or {}).items()
-                                                 if str(k).startswith("fodder_") and not str(k).endswith("_band")}
-                                          for _r, _x in supply_results.items()}
 
             # Aggregate EU supply for market module
             eu_supply_agg = self.supply_module.aggregate_supply(
@@ -1298,8 +1267,6 @@ class CAPRIModel:
                 "young_animal_prices": dict(self.supply_module.yani_price_ratio or {}),
                 "young_animal_imbalance": float(getattr(self, "_yani_imbalance", 0.0) or 0.0),
                 "young_animal_markets": dict(getattr(self, "_yani_detail", None) or {}),
-                "nutmin": bool(_RSMk.nutmin_on()),
-                "supply_form": _RSMk.supply_form,
                 "pmp_source": str(getattr(self.supply_module, "pmp_source", "elasticity")),
                 "pmp_capri_parts": list(getattr(self.supply_module, "pmp_capri_parts", ())),
                 # regions where the NLP form failed in this run and the solve fell back to the conic form (each
@@ -1446,7 +1413,7 @@ class CAPRIModel:
                         [round(float(v), 6) for v in sig0.values], self.MARKET_SUPPLY_SHOCK,
                         bool(getattr(self, "use_manure_market", False)), str(getattr(self, "_endotech_key", "")),
                         # the regional models' calibration (K58): a Hessian measured before the ridge fit is stale
-                        str(getattr(self.supply_module, "supply_form", "")),
+                        "nlp",               # the supply form, when there were two (keeps the cached Hessians' keys)
                         str(getattr(self.supply_module, "pmp_source", "elasticity")),
                         tuple(getattr(self.supply_module, "pmp_capri_parts", ())), __import__(
                             "capri_mod.supply.capri_regional_nlp", fromlist=["CAL_RIDGE"]).CAL_RIDGE,
@@ -1631,7 +1598,7 @@ class CAPRIModel:
         if rm is None:
             # the ration model's own nitrate ingredient (an early approximation) is superseded by CAPRI's
             # supplement options in the supply model (envind/line_nitr.gms, Sprint 9g): never both
-            _supp_in = bool(getattr(self, "use_feed_in_supply", False)) and any(
+            _supp_in = any(
                 o_ == "Nitr_Tot" for v_ in ((self.data.get("genetics_effects") if isinstance(self.data, dict) else None)
                                            or {}).values() for (_a, o_) in v_)
             RationModel.use_nitrate = bool(getattr(self, "use_nitrate", False)) and not _supp_in
@@ -1646,93 +1613,29 @@ class CAPRIModel:
                                         and "feed" in tuple(getattr(self.supply_module, "pmp_capri_parts", ()))
                                         else "capri_slope"))
             self._ration_model = rm
-        sig = price_signal if price_signal is not None else {}
-        g = (lambda c: float(sig.get(c, 0.0)) if hasattr(sig, "get") else 0.0)
         # FEED BULK PRICES per member state (CAPRI feedBlkPrice_): the CES price index of the member state's
         # cereals (FCER) and protein-rich feed (FPRO, with cakes, DDGS, pulses, oils, milling by-products)
         bix = self.feed_bulk_price_ratios(price_signal)
         self.supply_module.feed_bulk_ratio = bix
         state = {}
-        # DAMPED like the price signal: each ration moves halfway from its
-        # previous value toward the new optimum. Undamped rations reacted at once
-        # to damped prices and the outer loop oscillated (Farm-to-Fork with the
-        # ration on exceeded the 25-iteration cap). A convex combination of
-        # feasible rations is feasible (linear, price-independent constraints),
-        # and the fixed point is unchanged.
-        prev = getattr(self, "_ration_prev", None)
-        if price_signal is None or prev is None:
-            prev = {}
-        alpha = float(_settings().get("supply.ration_damping"))
         newprev = {}
-        # FODDER VALUED AT ITS BALANCE SHADOW PRICE, as CAPRI: home-grown fodder
-        # in the ration was priced at its base value, so dearer cereals pushed
-        # rations to maize as if land were no scarcer. Each fodder's price is
-        # scaled by (current fodder-balance dual / its base value) from the last
-        # regional solve - exactly 1 at base.
-        _fb = (self.data.get("fodder_balance") if isinstance(self.data, dict) else None) or {}
         _last = getattr(self, "_last_supply_results", None) or {}
-        _fratio = {}
-        for _reg, _res in (_last.items() if (price_signal is not None and getattr(self, "fodder_at_shadow_price", False)) else []):
-            _sp = getattr(_res, "shadow_prices", {}) or {}
-            for _feed, _rec in (_fb.get(_reg) or {}).items():
-                _ref = (getattr(self, "_fodder_dual_base", None) or {}).get(_reg, {})
-                _v0 = float(_ref.get("fodder_" + _feed, 0.0) or _rec.get("value_eur_t", 0.0) or 0.0)
-                _mu = _sp.get("fodder_" + _feed)
-                if _v0 > 0 and _mu is not None:
-                    _fratio[(_reg, _feed)] = max(0.0, float(_mu)) / _v0
-        # DAMPED and BOUNDED like the rations: halfway from the previous ratio each
-        # iteration (same fixed point; undamped, ration <-> fodder dual chased each
-        # other and Farm-to-Fork did not converge), kept within [0.2, 5] since a
-        # balance flipping between binding and slack makes its dual jump to 0
-        _fprev = getattr(self, "_fodder_ratio_prev", None) or {}
-        if price_signal is None:
-            _fprev = {}
-        for _k, _q in list(_fratio.items()):
-            _flo, _fhi = _settings().get("supply.fodder_ratio_bounds")
-            _q = min(_fhi, max(_flo, _q))
-            _qp = _fprev.get(_k, 1.0)
-            _fratio[_k] = _qp + _settings().get("supply.fodder_ratio_damping") * (_q - _qp)
-        self._fodder_ratio_prev = dict(_fratio)
         # FEEDING INSIDE THE SUPPLY MODELS (CAPRI: v_feedInpCoeff is chosen only there, together with herds and
         # fodder): no ration is chosen outside them. The ration state is the feed per head of each region's last
-        # regional solution (base ration before the first), kept for what reads it: the fodder rows of the model
-        # without feeding inside (fallback only) and the market's feed index where a region returned no feed.
-        _inside = bool(getattr(self, "use_feed_in_supply", False))
+        # regional solution (base ration before the first), kept for what reads it: the market's feed index where a
+        # region returned no feed.
         for (reg, act), r in rm.rations.items():
-            if _inside:
-                _res = _last.get(reg) if (price_signal is not None and hasattr(_last, "get")) else None
-                _ft = (getattr(_res, "feed_t", None) or {}).get(act) if _res is not None else None
-                _acts = getattr(_res, "activities", None) if _res is not None else None
-                _h = float(_acts.get(act, 0.0)) if _acts is not None else 0.0
-                if _ft and _h > 0:
-                    x = np.array([float(_ft.get(f_, 0.0)) / _h for f_ in r.feeds])
-                else:
-                    x = np.array(r.x0, dtype=float)
-                newprev[(reg, act)] = x
-                state.setdefault(reg, {})[act] = {"x": dict(zip(r.feeds, x)), "dcost": 0.0,
-                                                  "nitr_kg": 0.0, "nitr_share": 0.0}
-                continue
-            _ms = self.member_state_of(reg)
-            p = rm.price_vector((reg, act), bulk_ratio={b_: x_ for (m_, b_), x_ in bix.items() if m_ == _ms})
-            if _fratio:
-                for _i, _f in enumerate(r.feeds):
-                    _q = _fratio.get((reg, _f))
-                    if _q is not None:
-                        p[_i] = p[_i] * _q
-            x, ok = r.solve(p)
-            if not ok:
-                x = r.x0
-            xp = prev.get((reg, act))
-            if xp is not None:
-                x = xp + alpha * (x - xp)
+            _res = _last.get(reg) if (price_signal is not None and hasattr(_last, "get")) else None
+            _ft = (getattr(_res, "feed_t", None) or {}).get(act) if _res is not None else None
+            _acts = getattr(_res, "activities", None) if _res is not None else None
+            _h = float(_acts.get(act, 0.0)) if _acts is not None else 0.0
+            if _ft and _h > 0:
+                x = np.array([float(_ft.get(f_, 0.0)) / _h for f_ in r.feeds])
+            else:
+                x = np.array(r.x0, dtype=float)
             newprev[(reg, act)] = x
-            xd = dict(zip(r.feeds, x))
-            _dmi = float(r.dm @ x)
-            _nk = float(xd.get("NITR", 0.0))
-            state.setdefault(reg, {})[act] = {"x": xd,
-                                              "dcost": r.cost(x, p) - r.cost(r.x0, r.p0),
-                                              "nitr_kg": _nk,
-                                              "nitr_share": (_nk / _dmi) if _dmi > 0 else 0.0}
+            state.setdefault(reg, {})[act] = {"x": dict(zip(r.feeds, x)), "dcost": 0.0,
+                                              "nitr_kg": 0.0, "nitr_share": 0.0}
         self.supply_module.ration_state = state
         # rations and CURRENT feed prices for feeding inside the supply model
         # the per-region rations dicts are built ONCE per ration model and reused, so the
@@ -2236,7 +2139,7 @@ class CAPRIModel:
             # inside (its feed block is not in the stored QP, so duals recovered from the QP's
             # KKT conditions were wrong there and the pools stopped clearing); else recovered by
             # NNLS from the active rows of the stored QP
-            zc = getattr(mo, "_last_conic_duals", None)
+            zc = getattr(mo, "_last_duals", None)
             if zc is not None and len(zc) == A.shape[0]:
                 lam = np.maximum(np.asarray(zc, float), 0.0)
             else:
@@ -2305,7 +2208,6 @@ class CAPRIModel:
         # ---- PRIMAL spatial equilibrium on the exact schedules (shipment side),
         # solved with the model's own exact QP solver (the dual price problem
         # with SLSQP failed on the kinks and kept stale prices).
-        from capri_mod.supply.qp_solver import solve_qp_ldp, solve_qp
         reg_list = [(k, te, ti, sl, em) for k in keys for (te, ti, sl, em) in sched[k]]
         arcs = [(a, b_, cc) for (a, b_), cc in cost.items() if a in sched and b_ in sched]
         nr, na = len(reg_list), len(arcs)
@@ -2330,8 +2232,7 @@ class CAPRIModel:
                 if b_ == k: bal[2 * nr + t] += 1.0
             eqs.append(bal); eqb.append(0.0)                 # pool balance as a TRUE equality
         Ap, bp = np.array(rows), np.array(rhs)
-        # Interior point (Newton): Clarabel when installed, else the built-in
-        # primal-dual method (capri_mod/supply/convex_qp.py). The active-set loop
+        # Interior point (Clarabel, capri_mod/supply/convex_qp.py). An active-set loop
         # failed on the full EU (iteration limit; the balance written as two tight
         # inequalities made its KKT systems singular).
         from capri_mod.supply.convex_qp import solve_convex_qp
@@ -2341,8 +2242,7 @@ class CAPRIModel:
         # the realised clearing anyway; a failed solve keeps the old prices and is reported.
         _sc = max(float(np.abs(cp_).max()), float(np.abs(Qp).max()), 1e-9)
         sol, ok, _info = solve_convex_qp(Qp / _sc, cp_ / _sc, Ap, bp, np.array(eqs), np.array(eqb),
-                                         tol=float(_settings().get("outer_loop.manure_pool_qp_tol")),
-                                         max_iter=int(_settings().get("outer_loop.manure_pool_qp_max_iter")))
+                                         tol=float(_settings().get("outer_loop.manure_pool_qp_tol")))
         if not ok and "AlmostSolved" in str(_info.get("status", "")):
             ok = True
         if _info.get("y") is not None:

@@ -47,7 +47,7 @@ def num(s: str) -> float:
 
 
 def main() -> None:
-    sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check", "check/nlp_check")]
+    sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check")]
     import build_bilateral_market as BM
     from recalibrate_trade_2017 import REGION_MAP
     g2m = {g: m for m, gs in BM.MODEL.items() for g in gs}

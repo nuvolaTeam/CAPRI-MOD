@@ -128,7 +128,7 @@ def main() -> None:
                     help="levels of the calibration point: 2030 CAPRI's 2030 reference, 2017 CAPRI's 2017 results")
     ap.add_argument("--out", type=Path, default=None)
     a = ap.parse_args()
-    sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check", "check/nlp_check")]
+    sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check")]
     import _model_regions as mr
     ap_t = a.techn or SRC / "pmp_quad_techn_2030.csv"
     techn = pd.read_csv(ap_t)

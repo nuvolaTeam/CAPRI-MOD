@@ -13,8 +13,8 @@ dependencies = [
     "pandas>=2.0",
     "numpy>=1.24",
     "scipy>=1.10",
-    "casadi>=3.6",       # bundles IPOPT: the regional supply models in CAPRI's NLP form (default)
-    "clarabel>=0.7",     # conic form of the regional models, manure-market pools
+    "casadi>=3.6",       # bundles IPOPT: the regional supply models in CAPRI's NLP form
+    "clarabel>=0.7",     # the manure-market pool equilibrium
 ]
 
 [project.optional-dependencies]
