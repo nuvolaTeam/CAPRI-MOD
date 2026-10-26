@@ -700,8 +700,8 @@ the **same method and structure** as CAPRI, not simplifications of it:
   `req_or_man_fnc.gms` — ported directly.
 - **Environmental coefficients.** CAPRI's `MANN` manure-nitrogen coefficients
   and IPCC emission factors.
-- **Regional resolution.** 248 of CAPRI's 288 NUTS-2 units — the full EU27 +
-  Norway set, at CAPRI's own granularity.
+- **Regional resolution.** EU27 + Norway in 248 NUTS-2016 regions, of which 235 have agriculture. This is not yet
+  CAPRI's own regional detail (221 regional units for EU27 + Norway in CAPRI's 2030 runs); see §10.4.
 
 The differences from CAPRI are recorded, not hidden. The defaults that are not CAPRI's are listed in
 `docs/DEPARTURES_FROM_CAPRI.md` and summarised in [§10](#10-differences-from-capri):
@@ -1491,9 +1491,18 @@ with an Armington premium on the world price.
 
 ### 10.4 248 regions, EU27 + Norway
 
-CAPRI's installation defines 288 NUTS-2 units; CAPRI-mod covers 248. The 40
-not covered are non-EU (Turkey, Western Balkans), out of scope by design. Within
-EU27 + Norway the granularity matches.
+The model has 248 regions keyed by NUTS-2016 codes. CAPRI's 2030 runs solve 221 regional units for EU27 + Norway
+(215 + 6; CAPRI sets.gms SRNUTS2), plus the UK, Turkey and the Western Balkans (29), which the model does not cover
+yet. The two sets differ:
+- 13 of the model's regions are empty: DE30, DE50, DE60, AT13, BE10, ES63 and ES64 are CAPRI's regions without
+  agriculture (urbanNUTS; capreg/cons_levls.gms fixes their UAA at 0); PL31-34 and HR05-06 were emptied by the base
+  data builder (build_capri_base.py) as duplicates of other codes. They are solved as empty problems.
+- CAPRI keeps Denmark, Estonia, Lithuania, Latvia, Slovenia, Cyprus, Malta and Croatia as one unit each; the model
+  splits some of them (Denmark into five regions, Lithuania and Slovenia into two, Croatia into four) and shares one
+  CAPRI unit between several NUTS-2016 regions elsewhere (e.g. DED2/DED4/DED5, ITH1/ITH2, FI1B/FI1C, IE04-06), with
+  the splits made on proxies such as cattle shares (shared/region_capri_map.csv).
+The move to CAPRI's own regional units is planned (it removes the empty regions and the proxy splits). The earlier
+statement here ("288 NUTS-2 units; within EU27 + Norway the granularity matches") was not right.
 
 ### 10.5 Inputs not yet traced to a CAPRI source
 
