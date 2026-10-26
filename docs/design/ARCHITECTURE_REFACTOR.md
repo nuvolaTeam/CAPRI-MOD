@@ -43,6 +43,9 @@ adapter layer is the interface they need.
 - Moves and behaviour changes never share a commit.
 - A move must reproduce the reference run exactly: Farm-to-Fork 2030 with default settings (PYTHONHASHSEED = 0, so a
   run repeats exactly), compared result by result with the reference pickle, plus the test suite.
+- Reference run since 26 October 2026: r145 (Farm-to-Fork 2030, default settings after the K75 fix and with CAPRI's
+  price forecast; converged in 9 iterations; equal to r140 except metadata), kept as runs/REFERENCE_r145.pkl;
+  compared with tools/check/compare_pickles_exact.py.
 - Findings of the claim audit are fixed one at a time, each with its own full run, under the rule "follow CAPRI unless
   CAPRI's code is in error" (DEPARTURES_FROM_CAPRI.md).
 
