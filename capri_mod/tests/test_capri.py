@@ -2182,9 +2182,10 @@ def test_yield_responds_to_price(data):
     sm.run(price_signals=None, regions=[region])
     model = sm._models[region]
 
-    # 1. identity: a zero shock must change nothing
-    base = model.solve().activities
-    zero = model.solve(price_shock=pd.Series(0.0, index=model.acts)).activities
+    # 1. identity: a zero shock must change nothing (both solves from the same cold start, see _cold)
+    model.solve()                       # the split columns enter and are calibrated at the second solve, at base
+    base = _cold(model).solve().activities
+    zero = _cold(model).solve(price_shock=pd.Series(0.0, index=model.acts)).activities
     for act in base.index:
         if float(base.get(act, 0.0)) > 1.0:
             assert abs(float(zero.get(act, 0.0)) - float(base[act])) < 1e-6, (
@@ -2226,7 +2227,8 @@ def test_solve_leaves_no_state_behind(data):
     sm.run(price_signals=None, regions=[region])
     model = sm._models[region]
 
-    before = model.solve().activities.copy()
+    model.solve()                       # the split columns enter and are calibrated at the second solve, at base
+    before = _cold(model).solve().activities.copy()
 
     shock = pd.Series(0.0, index=model.acts)
     for act in ("SWHE", "BARL"):
@@ -2236,7 +2238,7 @@ def test_solve_leaves_no_state_behind(data):
     model.solve(nitrate_limit=model.base_n_intensity() - 20.0)
     model.solve(policy_shock={"organic_area_target": 0.25})
 
-    after = model.solve().activities
+    after = _cold(model).solve().activities
     drift = max(abs(float(after.get(a, 0.0)) - float(before[a]))
                 for a in before.index)
     assert drift < 1e-9, (
@@ -2423,6 +2425,15 @@ def test_pesticide_target_applies_to_conventional_area_only():
 #: (23 October 2026): RegionalSupplyModel's own class defaults, which CAPRIModel overwrote at its first outer iteration
 #: (land market off, idle land allowed, N target on base land, no ammonia techs). The two tests of the fallback
 #: land supply and of the landscape floor's fitting check those paths, so they run with them explicitly.
+def _cold(model):
+    """Clear a regional model's warm start (CAPRI's CONOPT, like IPOPT here, starts from the last solution). Two solves
+    of the same problem from different starts end within IPOPT's tolerance of each other, not bit-identical (KNOWN_ISSUES
+    K80); from the same cold start they coincide, which is what a check for leaked state needs."""
+    model._nlp_prev = None
+    model._nlp_prev_f = None
+    return model
+
+
 STANDALONE_PRE_SETTINGS = {"supply.use_land_market": False, "supply.land_no_slack": False,
                            "supply.surplus_per_current_ha": False, "supply.use_manure_techs": False}
 
@@ -2441,8 +2452,12 @@ def test_land_is_fixed_without_the_land_market(data, monkeypatch):
     _set(monkeypatch, STANDALONE_PRE_SETTINGS)
     sm = SupplyModule(data, calibrate_supply_elasticities(data["areas"]))
     region = "FRB0" if "FRB0" in data["areas"].index else str(data["areas"].index[0])
+    sm.run(price_signals=None, regions=[region])
+    # the split, genetics and histosol columns enter at the second solve and are calibrated there, at base prices, as
+    # in the model's baseline (two iterations at least): a first solve at shocked prices would calibrate them there
+    sm.run(price_signals=None, regions=[region])
+    mo = _cold(sm._models[region])
     base = sm.run(price_signals=None, regions=[region])[region]
-    mo = sm._models[region]
     from capri_mod.supply.supply_module import CROPS
     arable = [a for a in CROPS if a not in ("GRAS",) + mo.PERMANENT_LAND_CROPS]      # the arable_land row
     limit = max(float(mo._land_of("ARABLE")) + float(mo._land_of("FALLOW")),
@@ -2453,6 +2468,7 @@ def test_land_is_fixed_without_the_land_market(data, monkeypatch):
     assert not hasattr(shocked, "land_expansion"), "a land-expansion field is back on the result"
     used = sum(float(shocked.activities.get(a, 0.0)) for a in arable)
     assert used <= limit * (1 + 1e-6) + 1e-6, ("arable land expanded without the land market", used, limit)
+    _cold(mo)
     again = sm.run(price_signals=None, regions=[region])[region]
     assert np.allclose(again.activities.values, base.activities.values, rtol=1e-8, atol=1e-8), \
         "a plain solve after a shocked one did not return the base solution"

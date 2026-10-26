@@ -5084,16 +5084,17 @@ class RegionalSupplyModel:
         return (round(float(srow[1]), 9), round(float(srow[7]), 9))
 
     def _fit_aug_row(self, Qa, ca, Aa, ba, ya0, label):
-        """Relax one row of the LAND-MARKET problem to the closest value the region can reach.
+        """Relax one row of the regional problem (with the land market or without it) to the closest value the region
+        can reach.
 
-        The land-market counterpart of _fit_landscape_floor and _fit_balance_target. When the
+        (Until 26 October 2026 the plain problem had its own fits on the QP without feeding.) When the
         land-market problem had no solution, the solve used to drop to the plain problem, where
         land may idle and the land types are fixed - silently leaving CAPRI's land rules (no idle
         land, land supply through the land market) in exactly the regions where they bind: North
         Brabant's neighbour Zeeland halved its herds and grassland under the N target alone. Here
         the row (landscape floor: -SETA <= -floor; N balance: surplus <= target) is set to the
-        lowest value a linear program over the land-market rows can reach, plus a small margin,
-        and the QP is solved again. JRC121368: 'the reduction is relaxed in a limited number of
+        lowest value a linear program over the problem's rows can reach, plus a small margin,
+        and the regional model is solved again. JRC121368: 'the reduction is relaxed in a limited number of
         regions where the model is infeasible'. Records landscape_shortfall (1000 ha of set-aside)
         or balance_shortfall (kg N per ha of farmland)."""
         labels = list(getattr(self, "_row_labels", []))
@@ -5114,11 +5115,18 @@ class RegionalSupplyModel:
         y_start = np.maximum(np.asarray(lp.x, dtype=float), 0.0)
         n_ = self.n
         area = float(sum(y_start[i] for i, a in enumerate(self.acts) if a in CROPS)) or 1.0
-        for slack in (1e-3, 1e-2, 5e-2):
+        # the linear program sees the problem's linear rows only; CAPRI's form has more (feeding, fertilisation), so the
+        # floor is relaxed further in steps until the regional model solves (as CAPRI's widen_bounds.gms widens its
+        # bounds step by step), from the region's own start and from the linear program's point
+        for slack in (1e-3, 1e-2, 5e-2, 0.1, 0.25, 0.5):
             b_fit = ba.copy()
             b_fit[k] = least + slack * max(abs(least), 1.0)
-            self._last_duals = None
-            y = self._nlp_solve(Qa, ca, Aa, b_fit, y_start)
+            y = None
+            for start in (ya0, y_start):
+                self._last_duals = None
+                y = self._nlp_solve(Qa, ca, Aa, b_fit, start)
+                if y is not None:
+                    break
             if y is not None:
                 if label == "landscape_floor":
                     self.landscape_shortfall = float(b_fit[k]) - float(ba[k])
@@ -5382,7 +5390,13 @@ class RegionalSupplyModel:
             if _cols:
                 _yg = self._nlp_solve(Qg, cg, Ag, bg, sg)
                 if _yg is None:
-                    _yg = self._nlp_last_point(Qg, cg, Ag, bg, sg)
+                    # an unreachable landscape floor (Corsica, Alpine regions without the land market: the floor is
+                    # sized on total farmland, set-aside sits on arable land), fitted as on the land-market path
+                    _yg, _okf, _bf = self._fit_aug_row(Qg, cg, Ag, bg, sg, "landscape_floor")
+                    if not _okf:
+                        _yg = self._nlp_last_point(Qg, cg, Ag, bg, sg)
+                    else:
+                        b_ub = b_ub.copy(); b_ub[:len(b_ub)] = _bf[:len(b_ub)]
                 if getattr(self, "_grass_col", None) is not None:
                     self._last_grass_z = float(_yg[self._grass_col])
                 self._split_record(_yg)
@@ -5398,7 +5412,11 @@ class RegionalSupplyModel:
                 self._dairy_req_extra = None
                 _yc = self._nlp_solve(self.Q, c_lin, A_ub, b_ub, x0)
                 if _yc is None:
-                    _yc = self._nlp_last_point(self.Q, c_lin, A_ub, b_ub, x0)
+                    _yc, _okf, _bf = self._fit_aug_row(self.Q, c_lin, A_ub, b_ub, x0, "landscape_floor")
+                    if not _okf:
+                        _yc = self._nlp_last_point(self.Q, c_lin, A_ub, b_ub, x0)
+                    else:
+                        b_ub = _bf
                 if getattr(self, "_grass_pending_col", None) is not None:
                     self._grass_calibrate_from_duals(getattr(self, "_last_duals", None))
                 if self._split_pending():
