@@ -1,0 +1,275 @@
+file,keys,model_codes,builders,read_by,live,source
+2017/abatement/ammonia/ControlStrat_TS.csv,<index>:capri8:57; region:capri8:57,False,,,False,
+2017/abatement/ammonia/ControlStrategies.csv,<index>:capri8:56; region:capri8:56,False,build_ammonia_technologies.py,,False,
+2017/abatement/ammonia/CorrND.csv,<index>:capri8:58; region:capri8:58,False,,,False,
+2017/abatement/ammonia/EmFracFert.csv,<index>:capri8:33; region:capri8:33,False,,,False,
+2017/abatement/ammonia/FracEmAppl.csv,<index>:capri8:33; region:capri8:33,False,,,False,
+2017/abatement/ammonia/FracEmGrazing.csv,<index>:capri8:58; region:capri8:58,False,build_ammonia_tech_model.py,,False,
+2017/abatement/ammonia/FracEmHouse.csv,<index>:capri8:33; region:capri8:33,False,,,False,
+2017/abatement/ammonia/FracEmStorage.csv,<index>:capri8:33; region:capri8:33,False,,,False,
+2017/abatement/ammonia/FracNVZNuts2.csv,<index>:capri8:220; region:capri8:220,False,,,False,
+2017/abatement/ammonia/FracNVZNuts2_full.csv,<index>:capri8:190; region:capri8:190,False,,,False,
+2017/abatement/ammonia/FracToepHouse.csv,<index>:capri8:58; region:capri8:58,False,,,False,
+2017/abatement/ammonia/FracToepStorage.csv,<index>:capri8:58; region:capri8:58,False,,,False,
+2017/abatement/ammonia/FracUseFert.csv,<index>:capri8:33; region:capri8:33,False,,,False,
+2017/abatement/ammonia/NN_CorrFertFactDeviation.csv,<index>:capri8:58; region:capri8:58,False,,,False,
+2017/abatement/ammonia/PercPeat.csv,<index>:capri8:197; region:capri8:197,False,,,False,
+2017/abatement/ammonia/RCEmissions.csv,<index>:capri8:58; region:capri8:58,False,build_ammonia_technologies.py;build_enteric_feed_factors.py;build_genetics_effects.py,data/loaders.py;feed/ration.py;projection/projection_module.py,True,
+2017/abatement/ammonia/ad_option.csv,<index>:capri8:225; region:capri8:225,False,build_ad_option.py;build_ammonia_tech_model.py,,False,
+2017/abatement/ammonia/ammonia_cost_curves.csv,<index>:capri8:222; region:capri8:222,False,build_ammonia_cost_curves.py;build_ammonia_technologies.py,,False,
+2017/abatement/ammonia/ammonia_tech_model.csv,<index>:model:248; region:model:248,True,build_ammonia_tech_model.py;build_genetics_effects.py;build_manure_n2o.py;build_norway_pigs.py,environmental/environmental_module.py;supply/ammonia_techs.py;supply/supply_module.py,True,
+2017/abatement/ammonia/ammonia_technologies.csv,<index>:capri8:270; region:capri8:270,False,build_ammonia_tech_model.py;build_ammonia_technologies.py,,False,
+2017/abatement/ammonia/ammonia_technology_effects.csv,<index>:capri8:258; region:capri8:258,False,build_ammonia_tech_model.py;build_ammonia_technologies.py;build_manure_n2o.py;build_n_cascade.py,,False,
+2017/abatement/ammonia/bNumAniRAINS.csv,<index>:capri8:58; region:capri8:58,False,build_ammonia_technologies.py,,False,
+2017/abatement/ammonia/capri_mann_days_2030.csv,<index>:capri8:270; region:capri8:270,False,_capri_costsavings.py;build_ammonia_cost_curves.py;build_ammonia_herd_inputs.py;build_ammonia_tech_model.py,,False,
+2017/abatement/ammonia/costs/p_applic.csv,<index>:capri8:34; country:capri8:34,False,build_ammonia_technologies.py;build_n_cascade.py;build_nitrates_directive.py,,False,
+2017/abatement/ammonia/costs/p_inputCost.csv,<index>:capri8:34; country:capri8:34,False,build_ammonia_cost_curves.py,,False,
+2017/abatement/ammonia/costs/p_minStorCapND.csv,<index>:capri8:77; region:capri8:77,False,build_ammonia_cost_curves.py,,False,
+2017/abatement/ammonia/costs/p_sharGL.csv,<index>:capri8:34; country:capri8:34,False,build_ammonia_technologies.py,,False,
+2017/abatement/ammonia/costs/p_storTime.csv,<index>:capri8:34; region:capri8:34,False,build_ammonia_cost_curves.py,,False,
+2017/abatement/ammonia/n_cascade_effects.csv,<index>:capri8:270; region:capri8:270,False,build_ad_option.py;build_ammonia_tech_model.py;build_n_cascade.py,supply/n_cascade.py;supply/n_leaching.py,True,
+2017/abatement/ammonia/n_cascade_factors.csv,<index>:capri8:270; region:capri8:270,False,build_ad_option.py;build_fert_side_effects.py;build_n_cascade.py;build_nitrates_directive.py,supply/n_cascade.py,True,
+2017/abatement/ammonia/n_cascade_region.csv,<index>:capri8:251; region:capri8:251,False,build_n_cascade.py;build_n_leaching.py,supply/n_cascade.py,True,
+2017/abatement/ammonia/n_leaching_region.csv,<index>:capri8:270; region:capri8:270,False,build_n_leaching.py,supply/n_leaching.py,True,
+2017/abatement/ammonia/nitrates_directive_min_shares.csv,<index>:capri8:157; region:capri8:157,False,build_nitrates_directive.py,,False,
+2017/abatement/ammonia/nitrates_directive_obligations.csv,region:capri8:32,False,build_nitrates_directive.py,,False,
+2017/abatement/ammonia/nvz_p_nvzArea.csv,<index>:capri8:231; dim1:capri8:231,False,build_nitrates_directive.py,,False,
+2017/abatement/ammonia/nvz_p_slopeTypes.csv,<index>:capri8:231; dim1:capri8:231,False,build_nitrates_directive.py,,False,
+2017/abatement/ammonia/nvz_p_soilTypes.csv,<index>:capri8:231; dim1:capri8:231,False,,,False,
+2017/abatement/ammonia/p_Heads.csv,<index>:capri8:285; region:capri8:285,False,build_ad_option.py;build_ammonia_cost_curves.py;build_ammonia_herd_inputs.py,,False,
+2017/abatement/ammonia/p_fracStorType.csv,<index>:capri8:34; region:capri8:34,False,build_ammonia_technologies.py,,False,
+2017/abatement/ammonia/p_holdLSU.csv,<index>:capri8:226; region:capri8:226,False,build_ammonia_cost_curves.py,,False,
+2017/abatement/ammonia/p_litRevAmmoTechsAdd.csv,<index>:capri8:276; region:capri8:276,False,build_ammonia_tech_model.py;build_manure_n2o.py;build_n_cascade.py,,False,
+2017/abatement/ammonia/p_nvzShare_lu.csv,<index>:capri8:214; region:capri8:214,False,build_ammonia_cost_curves.py;build_nitrates_directive.py,,False,
+2017/abatement/ammonia/rCorrND.csv,<index>:capri8:265; region:capri8:265,False,,,False,
+2017/abatement/ammonia/rLFManureBasis.csv,<index>:capri8:265; region:capri8:265,False,,,False,
+2017/abatement/ammonia/rLFManureND.csv,<index>:capri8:265; region:capri8:265,False,,,False,
+2017/abatement/ammonia/rLFRest.csv,<index>:capri8:250; region:capri8:250,False,build_n_cascade.py,,False,
+2017/abatement/ammonia/reducBio.csv,<index>:capri8:58; region:capri8:58,False,,,False,
+2017/abatement/ammonia/reducControlStrategies.csv,<index>:capri8:34; region:capri8:34,False,build_ammonia_technologies.py,,False,
+2017/abatement/ammonia/reducEmHouse.csv,<index>:capri8:33; region:capri8:33,False,build_ammonia_technologies.py,,False,
+2017/abatement/ammonia/reducEmStorage.csv,<index>:capri8:34; region:capri8:34,False,build_ammonia_technologies.py,,False,
+2017/abatement/fert_options_jul15.csv,<index>:capri8:231; region:capri8:231,False,build_fert_options_jul15.py,supply/supply_module.py,True,
+2017/abatement/fert_side_effects.csv,<index>:model:248; region:model:248; capri_region:capri8:214,True,build_fert_side_effects.py,environmental/environmental_module.py;supply/n_leaching.py;supply/supply_module.py,True,CAPRI p_litRevFertTechs (LitRevFertTech.gdx)
+2017/abatement/mitigation/genetics_effects.csv,<index>:model:240; region:model:240,True,build_genetics_effects.py;build_lownfeed_effects.py;build_supplement_effects.py,data/loaders.py,True,"CAPRI envind/breeding.gms (genet_yld, genet_eff) with CAPRI 2030 trends (milk yields), MITERRA HD/Et, 2030 unit values, res_17 levels; tools/build/build_genetics_effects.py"
+2017/abatement/mitigation/lownfeed_effects.csv,<index>:model:228; region:model:228,True,build_lownfeed_effects.py;build_supplement_effects.py,data/loaders.py,True,"CAPRI p_animReqCorrFac (reqrel, animReq_*.txt), res_17 MANN/CRPR_EXPT/LEVL, costsavings_max_21730_jul15 v_Miti levels; envind/low_n_feed.gms"
+2017/abatement/mitigation/p_ccEfa.csv,<index>:capri8:134; region:capri8:134,False,,,False,
+2017/abatement/mitigation/p_tillageCover.csv,<index>:capri8:226; region:capri8:226,False,,,False,
+2017/abatement/mitigation/p_winterCoverShare0.csv,<index>:capri8:47; region:capri8:47,False,,,False,
+2017/abatement/mitigation/supplement_effects.csv,<index>:model:228; region:model:228,True,build_supplement_effects.py,data/loaders.py,True,"CAPRI costsavings_max_21730_jul15 v_Miti levels (LINE_Tot, Nitr_Tot), p_nutCont OOIL (fedcof.gms), res_17 LEVL, model ration requirements; envind/line_nitr.gms"
+2017/abatement/mitigation/trends_milk_yield_1730.csv,<index>:capri8:271; region:capri8:271,False,build_genetics_effects.py,,False,
+2017/abatement/mitigation/winter_cover_option.csv,<index>:model:248; region:model:248; capri_region:capri8:221,True,build_winter_cover_option.py,supply/supply_module.py,True,"p_ghgMiti(CATC, WinterCov, CO2SEQ, IniShare/MaxShare/costParLin/pmpParSqr/pmpParLin) (envind/cover_crops.gms)"
+2017/environment/capri_crop_n_coefs_2030.csv,<index>:capri8:270; capri_region:capri8:270,False,build_capri_crop_n_coefs.py;build_p_balance.py,environmental/environmental_module.py,True,
+2017/environment/capri_gnb_components_2030.csv,<index>:capri8:270; capri_region:capri8:270,False,build_capri_baseline_surplus.py;build_capri_gnb_components.py;build_n_leaching.py;build_npk_balance_2030.py,environmental/environmental_module.py,True,
+2017/environment/capri_regional_n_balance_2030.csv,<index>:model:153; region:model:153,True,,data/loaders.py,True,CAPRI res_2_1730greendeal_refdefaulta dataOut (supplied by the project lead)
+2017/environment/climate_zones.csv,<index>:capri8:145; region:capri8:145,False,build_ad_option.py,data/loaders.py;data/rebase.py,True,CAPRI
+2017/environment/crop_co2_coef.csv,<index>:model:248; region:model:248,True,build_ghg_coefs_2017.py,data/loaders.py;environmental/environmental_module.py,True,
+2017/environment/crop_nut_need_mult_fact_2030.csv,<index>:model:248; region:model:248; capri_region:capri8:225,True,build_overfert_factors.py,supply/supply_module.py,True,
+2017/environment/enteric_feed_factors.csv,<index>:capri8:27; country:capri8:27,False,build_enteric_feed_factors.py,environmental/environmental_module.py,True,
+2017/environment/fert_dist_crop_groups_2030.csv,<index>:capri8:270; capri_region:capri8:270,False,build_fert_dist_priors.py,data/loaders.py;fert/inner_fert_dist.py;fert/npk.py,True,CAPRI 2030 reference crop areas (LEVL) per CAPRI region; supply/define_ngrp_sets.gms CACT_TO_NGRP
+2017/environment/fert_dist_priors_2030.csv,<index>:capri8:270; capri_region:capri8:270,False,build_fert_dist_priors.py;build_npk_balance_2030.py,data/loaders.py;fert/inner_fert_dist.py,True,"CAPRI 2030 Green Deal reference results (res_2_1730greendeal_refdefaulta dataOut): fertDist_mine/excr/cres per crop (summed to the NGRP groups), LEVL, AGGT nutNed_mine_loss / nutNed_excr_unavailable per ha; checked against priFertDist_<MS>1730defaulta postModePerHa and accuracy"
+2017/environment/fert_dist_priors_npk_2030.csv,<index>:capri8:270; capri_region:capri8:270,False,build_npk_balance_2030.py,fert/npk.py,True,
+2017/environment/fertiliser_substitution_2030.csv,<index>:model:248; region:model:248,True,,data/loaders.py;environmental/environmental_module.py;supply/supply_module.py,True,"CAPRI res_2_1730greendeal_refdefaulta dataOut fertDist_*, nutNed_* (supplied by the project lead)"
+2017/environment/histosol.csv,<index>:model:241; region:model:241; capri_region:capri8:159,True,build_histosol.py,data/loaders.py,True,"CAPRI p_OrgSoilOri, IPCC 2013 wetlands factors, FAO land use 2000, costsavings"
+2017/environment/livestock_ch4ent_coef.csv,<index>:model:248; Unnamed: 0:model:248,True,build_ghg_coefs_2017.py,data/loaders.py,True,
+2017/environment/livestock_ch4man_coef.csv,<index>:model:248; Unnamed: 0:model:248,True,build_ghg_coefs_2017.py,data/loaders.py,True,
+2017/environment/livestock_manure_k_coef.csv,<index>:model:248; Unnamed: 0:model:248,True,build_npk_balance_2030.py,fert/npk.py,True,
+2017/environment/livestock_manure_n_coef.csv,<index>:model:248; Unnamed: 0:model:248,True,build_genetics_effects.py;build_livestock_n_export_coef.py;build_npk_balance_2030.py;build_shg_split.py,data/loaders.py;environmental/environmental_module.py,True,"CAPRI 2017 regional results (res_17*.txt, MANN x LEVL), built by tools/build/build_livestock_output_coef.py"
+2017/environment/livestock_manure_p_coef.csv,<index>:model:248; Unnamed: 0:model:248,True,build_npk_balance_2030.py,environmental/environmental_module.py;fert/npk.py,True,
+2017/environment/livestock_n_export_coef.csv,<index>:model:248; Unnamed: 0:model:248,True,build_livestock_n_export_coef.py,data/loaders.py;environmental/environmental_module.py,True,
+2017/environment/luc_2030.csv,<index>:capri8:270; capri_region:capri8:270,False,build_histosol.py;build_luc_2030.py,environmental/luc.py,True,
+2017/environment/manure_housing_losses_2030.csv,<index>:model:248; region:model:248,True,build_manure_losses.py,data/loaders.py;environmental/environmental_module.py,True,
+2017/environment/manure_n2o_factors.csv,<index>:model:248; region:model:248; capri_region:capri8:221,True,build_manure_n2o.py,environmental/environmental_module.py,True,CAPRI res_17 N2O by stage over MANN
+2017/environment/manure_n2o_tech.csv,<index>:model:248; region:model:248,True,build_manure_n2o.py;build_norway_pigs.py,environmental/environmental_module.py,True,CAPRI ammonia technology N2O effects
+2017/environment/manure_trade_2030.csv,<index>:model:248; region:model:248,True,build_manure_trade_base.py,data/loaders.py,True,"CAPRI res_2_1730greendeal_refpol_endotech_all_ini dataOut MTRADE.NITF, EXCRET.NITF per CAPRI region (sources/environment/capri_manure_trade_2030.csv), per group of CAPRI and model regions; tools/build/build_manure_trade_base.py (Sprint 9j)"
+2017/environment/n_deposition_regional.csv,<index>:model:248; region:model:248,True,,data/loaders.py;environmental/environmental_module.py,True,"CAPRI res_2_1730greendeal_refdefaulta dataOut(region,'perHa','ATMOSD','NITF','2030')"
+2017/environment/npk_crop_coefs_2030.csv,<index>:capri8:270; capri_region:capri8:270,False,build_npk_balance_2030.py,fert/npk.py,True,
+2017/environment/npk_region_2030.csv,<index>:capri8:270; capri_region:capri8:270,False,build_npk_balance_2030.py,fert/npk.py;supply/supply_module.py,True,
+2017/environment/p_balance_crop_coefs_2030.csv,<index>:capri8:270; capri_region:capri8:270,False,build_p_balance.py,environmental/p_balance.py,True,"CAPRI Green Deal 2030 reference results (res_2_1730greendeal_refdefaulta dataOut, 2030): per elementary crop LEVL, PRET (P2O5 retention, the coefficient of EXPPRD in reports/calc_nbalance.gms) and PCRD (P2O5 residue output, CRESID), pooled into the model's crops by area"
+2017/feed/livestock_feed_coef.csv,<index>:model:248; Unnamed: 0:model:248,True,build_shg_split.py,data/loaders.py;supply/supply_module.py,True,"CAPRI 2017 regional results (res_17*.txt), built by tools/build/build_livestock_output_coef.py"
+2017/market/biofuel_feedstock.csv,<index>:capri8:30; ms:capri8:30,False,build_biofuel_market.py,data/loaders.py;market/biofuel.py;market/inputs.py,True,"CAPRI 2030 Green Deal reference market results (markmarket_greendeal_1730et_base_1717 dataOut: BIOF, PRCB, PRCBY, ARM1P, PPRI DDGS, BiofFeedCost); arm/market1.gms p_rhoBioFuel; arm/store_prices.gms glycerine"
+2017/market/biofuel_market.csv,<index>:capri8:34; ms:capri8:34,False,build_biofuel_market.py,data/loaders.py;market/biofuel.py;market/inputs.py,True,"CAPRI 2030 Green Deal reference market results (markmarket_greendeal_1730et_base_1717 dataOut: PROD, NAGR, SECG, EXOG, BIOF, PPRI, PMRK, CPRI, ARM1P, QUTS, HCOM and CPRI of GASL/DISL, feedstock BIOF/PRCB/PRCBY/ARM1P); biofuel/def_biofuel_params.gms; arm/market_model.gms p_oilEqu"
+2017/market/dairy_hessian.csv,<index>:capri8:26; ms:capri8:26,False,build_dairy_processing.py,data/loaders.py;market/dairy.py;market/inputs.py,True,"CAPRI elas_2_1730defaulta p_hessNQDairy (CAL), symmetric, MILK row reversed (arm/market1.gms)"
+2017/market/dairy_processing.csv,<index>:capri8:26; ms:capri8:26,False,build_dairy_processing.py;build_dairy_world_blocks.py,data/loaders.py;market/dairy.py;market/inputs.py;model.py,True,"CAPRI 2030 Green Deal reference market results (dataOut: PROD, PROC, GROF, HCOM, PPRI, FATS, PROT, CSEI, INPE)"
+2017/market/dairy_world_demand_elas.csv,<index>:capri8:8; rms:capri8:8,False,build_dairy_world_blocks.py,data/loaders.py;market/dairy.py;market/inputs.py,True,CAPRI elas_2_1730defaulta p_ElasDem (non-EU)
+2017/market/dairy_world_hessian.csv,<index>:capri8:8; rms:capri8:8,False,build_dairy_world_blocks.py,data/loaders.py;market/dairy.py;market/inputs.py,True,"CAPRI elas_2_1730defaulta p_hessNQDairy (non-EU, symmetric, MILK row reversed)"
+2017/market/dairy_world_processing.csv,rms:capri8:8,False,build_dairy_trade_params.py;build_dairy_world_blocks.py,data/loaders.py;market/dairy.py;market/inputs.py;model.py,True,"CAPRI 2030 Green Deal reference market results (non-EU market regions: PROD, PROC, FATS, PROT, PPRI, HCON, FEED, extra-regional trade) and p_hessNQSupp(MILK)"
+2017/market/eu_ms_balance_2030.csv,<index>:capri8:26; ms:capri8:26,False,build_eu_ms_balance.py,market/inputs.py;market/market_module.py;market/processing.py,True,"CAPRI data_market_1730defaulta Data_CAL: PROD, HCON, FEED, PROC, BIOF per member state"
+2017/market/feed_bulks_eu.csv,<index>:capri8:26; ms:capri8:26,False,build_feed_bulks.py,data/loaders.py;market/feed.py;market/inputs.py;projection/prices.py,True,"CAPRI 2030 Green Deal reference market results (markmarket_greendeal_1730et_base_1717 dataOut): FEED per member state and product, ARM1P of EU27yr19; arm/market1.gms p_rhoFeed"
+2017/market/gl_demand_b.csv,<index>:capri8:34; rms:capri8:34,False,build_gl_demand.py,market/demand.py;market/inputs.py,True,CAPRI elas_2_1730defaulta p_pbGL (CAL)
+2017/market/gl_demand_goods.csv,<index>:capri8:34; rms:capri8:34,False,build_gl_demand.py,market/demand.py;market/inputs.py,True,"CAPRI elas_2_1730defaulta p_pdGL (CAL); data_market_1730defaulta Data_CAL CPRI, HCON, FEED, PROC, BIOF"
+2017/market/gl_demand_regions.csv,<index>:capri8:34; rms:capri8:34,False,build_gl_demand.py,market/demand.py;market/inputs.py,True,"CAPRI data_market_1730defaulta Data_CAL INCE, INHA"
+2017/market/processing_nq_base.csv,<index>:capri8:34; rms:capri8:34,False,build_feed_demand_nonEU.py;build_processing_nq.py,market/inputs.py;market/processing.py,True,"CAPRI data_market_1730defaulta Data_CAL PROC, HCON, FEED, BIOF; INPE price 2030 (PPRI INPE, markmarket_greendeal_1730et_base_1717 dump: 1.019^13)"
+2017/market/processing_nq_hessian.csv,<index>:capri8:34; rms:capri8:34,False,build_processing_nq.py;build_processing_seeds.py,market/inputs.py;market/processing.py,True,CAPRI elas_2_1730defaulta p_hessNQProc (CAL)
+2017/market/processing_seeds.csv,<index>:capri8:32; rms:capri8:32,False,build_processing_seeds.py,market/processing.py,True,
+2017/market/processing_yields.csv,<index>:capri8:10; ms:capri8:10,False,build_processing_yields.py,data/loaders.py;model.py,True,"CAPRI 2030 reference: GROF(OLIV), MAPR(OLIO), GROF(PARI), MAPR(RICE)"
+2017/market/sugar_processing.csv,<index>:capri8:23; ms:capri8:23,False,build_sugar_processing.py,data/loaders.py;model.py,True,"CAPRI 2030 Green Deal reference (markmarket_greendeal_1730et_base_1717): GROF(SUGB), PRCM(SUGB), MAPR(SUGA), PRCY(SUGA) per member state"
+2017/market/use_components.csv,<index>:capri8:34; rms:capri8:34,False,build_use_components.py,market/demand.py,True,
+2017/policy/cap_ceilings_2030.csv,<index>:capri8:289; capri_region:capri8:289,False,build_cap_ceilings_2030.py,data/loaders.py;policy/policy_module.py,True,"dataOut(R,'','CEILVAL',scheme,'2030') of res_2_1730greendeal_refpol_endotech_all_inidefaulta (p_premDataE ceilval)"
+2017/policy/cap_payments.csv,<index>:model:248; region:model:248,True,build_crop_economics_2017.py;extract_remaining_nine.py,data/loaders.py;data/rebase.py;data/validate_data.py;policy/policy_module.py,True,CAPRI
+2017/policy/capri_baseline_surplus_2030.csv,<index>:model:248; region:model:248,True,build_capri_baseline_surplus.py,data/loaders.py,True,"CAPRI res_2_1730greendeal_refdefaulta dataOut(region,'perHa','SURTOT','NITF','2030') (supplied by the project lead)"
+2017/policy/mineral_redu_exemptions.csv,<index>:capri8:59; capri_region:capri8:59,False,build_mineral_redu_rules.py,data/loaders.py;fert/inner_fert_dist.py,True,"CAPRI pol_input/greendeal/minfert_redu_by_crop.gms (p_checkSmallMine), kept as capri_data/sources/policy/minfert_redu_by_crop.gms"
+2017/policy/mineral_redu_limcres.csv,<index>:capri8:59; capri_region:capri8:59,False,build_mineral_redu_rules.py,data/loaders.py;fert/inner_fert_dist.py,True,CAPRI pol_input/greendeal/minfert_redu_by_crop.gms (p_priFertDistRegu limCres relaxations)
+2017/policy/premium_scheme_shares_2030.csv,<index>:model:248; region:model:248; capri_region:capri8:236,True,build_cap_ceilings_2030.py,data/loaders.py;policy/policy_module.py,True,"dataOut(R,'PRME',activity,scheme,'2030') / DPTOTAL, level-weighted over CAPRI members (LEVL 2030)"
+2017/supply/animal_numbers.csv,<index>:model:248; Unnamed: 0:model:248,True,build_capri_base.py;build_capri_level_ratio.py;build_fodder_balance.py;build_norway_pigs.py,data/loaders.py;data/rebase.py;data/validate_data.py;feed/ration.py,True,COCO
+2017/supply/base_areas.csv,<index>:model:248; region:model:248,True,build_capri_base.py;build_eu_producer_prices.py;build_fodder_balance.py;build_land_market.py,data/find_symbol.py;data/loaders.py;data/rebase.py;data/validate_data.py,True,COCO
+2017/supply/capri_level_ratio.csv,<index>:model:248; Unnamed: 0:model:248,True,_capri_costsavings.py;build_animal_pmp_capri_2030.py;build_animal_yields.py;build_capri_level_ratio.py,data/loaders.py;supply/supply_module.py,True,CAPRI res_17<MS> LEVL per model herd (tools/build/build_capri_level_ratio.py)
+2017/supply/cattle_intensity.csv,<index>:model:235; region:model:235; capri_region:capri8:219,True,build_animal_pmp_capri_2030.py;build_cattle_intensity.py;build_genetics_effects.py,data/loaders.py,True,"CAPRI res_17 (BULL, BULH, HEIL, HEIH, HEIR) and p_pmpQuadTechn"
+2017/supply/cover_crops.csv,<index>:model:248; region:model:248; capri_region:capri8:221,True,build_cover_crops.py;build_winter_cover_option.py,data/loaders.py;supply/supply_module.py,True,"CAPRI 2030 reference CATC LEVL/TOIN, UAAR; p_cInput winterCov"
+2017/supply/crop_premium.csv,<index>:model:248; region:model:248,True,build_crop_economics_2017.py,data/loaders.py,True,
+2017/supply/dairy_intensity.csv,<index>:model:235; region:model:235; capri_region:capri8:218,True,build_animal_pmp_capri_2030.py;build_dairy_intensity.py,data/loaders.py,True,"CAPRI res_17 (DCOL, DCOH) and p_pmpQuadTechn"
+2017/supply/grass_dm_content.csv,<index>:model:248; region:model:248,True,build_crop_economics_2017.py,data/loaders.py,True,
+2017/supply/grass_intensity.csv,<index>:model:230; region:model:230; capri_region:capri8:213,True,build_grass_intensity.py,data/loaders.py,True,"CAPRI res_17 (GRAE, GRAI: LEVL, YILD) and p_pmpQuadTechn (sources/capreg/pmp_quad_techn.csv)"
+2017/supply/input_requirements.csv,<index>:capri8:209; region:capri8:209,False,,data/loaders.py;data/rebase.py,True,CAPRI estimation
+2017/supply/labour_coef.csv,<index>:model:241; region:model:241; capri_region:capri8:217; capri_region_2030:capri8:217,True,build_labour_setaside.py,data/loaders.py,True,"CAPRI LABT, LABF, LABP per activity (res_17 'Y' and the 2030 reference), per model unit (tools/build/build_labour_setaside.py)"
+2017/supply/land_availability.csv,<index>:model:248; region:model:248,True,build_capri_base.py,data/loaders.py;data/rebase.py;policy/policy_module.py;supply/supply_module.py,True,CAPRI/COCO
+2017/supply/land_market_2017.csv,<index>:model:235; region:model:235,True,build_land_market.py,data/loaders.py,True,CAPRI res_17 LEVL of land types and pmppar_17XX p_pmpQuadLandTypes (supplied by the project lead); built by tools/build/build_land_market.py
+2017/supply/land_market_2017_regions.csv,<index>:model:235; region:model:235; quad_source:capri8:196,True,,data/loaders.py,True,
+2017/supply/land_market_2030.csv,<index>:model:235; region:model:235,True,build_land_market.py,data/loaders.py,True,"CAPRI 2030 reference LEVL of the land types (res_2_1730greendeal_refpol_endotech_all_inidefaulta) and p_pmpQuadLandTypes of the 2030 baseline calibration (pmppar_21730XX, exported by the project lead); built by tools/build/build_land_market.py --year 2030"
+2017/supply/land_market_2030_regions.csv,<index>:model:235; region:model:235; quad_source:capri8:196,True,,data/loaders.py,True,
+2017/supply/land_rent_regional.csv,<index>:model:248; model_region:model:248,True,,data/loaders.py,True,"Eurostat apri_lrnt (EUR_HA, ARA_J0000)"
+2017/supply/land_rents_2017.csv,<index>:model:248; region:model:248; capri_source:capri8:206,True,build_land_rents.py;build_pmp_recipe.py,data/loaders.py,True,"D_AREA of ARAC, FRUN and GRAS in CAPRI's 2017 results (res_17 dumps), CAPRI's rule where D_AREA is not positive (supply/cal_land_nests.gms l. 204-226)"
+2017/supply/land_rents_2030.csv,<index>:model:248; region:model:248; capri_source:capri8:202,True,build_land_rents.py;build_pmp_recipe.py,data/loaders.py,True,"D_AREA of the land types ARAC, FRUN and of the grassland activity GRAS at the 2030 calibration point (res_2_1730greendeal_refpol_endotech_all_inidefaulta dataOut; CAPRI's assumed land rents, supply/cal_land_nests.gms, prep_cal.gms)"
+2017/supply/livestock_cost_coef.csv,<index>:model:248; Unnamed: 0:model:248,True,build_livestock_output_coef.py;build_plant_protection_cost.py;build_shg_split.py,data/loaders.py;supply/supply_module.py,True,
+2017/supply/livestock_intensity_bounds.csv,<index>:model:235; model_region:model:235,True,,data/loaders.py;supply/intensity.py,True,capreg DATA2 DCOL/DCOH YILD
+2017/supply/livestock_output_by_product_coef.csv,<index>:model:248; Unnamed: 0:model:248,True,build_genetics_effects.py;build_livestock_products.py,data/loaders.py;model.py,True,"CAPRI res_17 final products (COMI, BEEF, PORK, POUM, EGGS, SGMT, SGMI) per activity"
+2017/supply/livestock_output_coef.csv,<index>:model:248; Unnamed: 0:model:248,True,build_livestock_output_coef.py;build_livestock_products.py;build_shg_split.py,data/loaders.py,True,capreg DATA2
+2017/supply/livestock_output_value_coef.csv,<index>:model:248; Unnamed: 0:model:248,True,build_livestock_output_coef.py;build_shg_split.py,data/loaders.py;supply/capri_pmp.py,True,
+2017/supply/livestock_premium_coef.csv,<index>:model:248; Unnamed: 0:model:248,True,build_livestock_premium_coef.py,data/loaders.py;supply/supply_module.py,True,
+2017/supply/livestock_product_value_by_market_coef.csv,<index>:model:248; Unnamed: 0:model:248,True,build_livestock_products.py;build_shg_split.py,data/loaders.py,True,
+2017/supply/livestock_product_value_coef.csv,<index>:model:248; Unnamed: 0:model:248,True,build_shg_split.py,data/loaders.py;supply/capri_pmp.py,True,
+2017/supply/livestock_revenue_coef.csv,<index>:model:248; Unnamed: 0:model:248,True,build_livestock_output_coef.py;build_shg_split.py,data/loaders.py;supply/capri_pmp.py,True,capreg DATA2 MREV
+2017/supply/livestock_units.csv,<index>:model:248; Unnamed: 0:model:248,True,build_livestock_units.py,data/loaders.py,True,"CAPRI LEVW / LEVL of the animals' CAPRI members (res_17 dumps, 'Y'; regional row, else the member-state row), per model head via capri_level_ratio.csv (tools/build/build_livestock_units.py)"
+2017/supply/nutrients_regional.csv,<index>:model:248; Unnamed: 0:model:248,True,build_capri_base.py,data/loaders.py,True,capreg DATA2 NMIN
+2017/supply/plant_protection_cost.csv,<index>:model:241; region:model:241; capri_region:capri8:231,True,build_crop_cost_shares.py;build_plant_protection_cost.py,data/loaders.py;supply/supply_module.py,True,"CAPRI res_17 PLAP x UVAG, INPO, FERT"
+2017/supply/pmp_capri_2030.csv,<index>:model:242; region:model:242; capri_regions:capri8:214,True,build_animal_pmp_capri_2030.py;build_pmp_capri_2030.py,data/loaders.py,True,"pmp_quad_techn_2030 / pmp_quad_pact_2030 of CAPRI's 2030 baseline calibration (pmppar_21730<CC>defaulta.gdx, baseline/fin_cal.gms l. 143), exported from the project lead's CAPRI installation with tools/gams/export_pmp_2030.gms; CAPRI 2030 levels LEVL of res_2_1730greendeal_refpol_endotech_all_inidefaulta"
+2017/supply/pmp_capri_2030_animals.csv,<index>:model:242; region:model:242; capri_regions:capri8:214,True,build_animal_pmp_capri_2030.py,data/loaders.py,True,"CAPRI star 3.0 pmppar_21730<CC>defaulta.gdx (p_pmpQuadTechn of the animal activities), exported by the project lead; model form by tools/build/build_animal_pmp_capri_2030.py (g = h X / capri_level_ratio)"
+2017/supply/pmp_capri_2030_animals_members.csv,<index>:model:242; region:model:242; capri_regions:capri8:214,True,,data/loaders.py,True,"CAPRI star 3.0 pmppar_21730<CC>defaulta.gdx (p_pmpQuadTechn of the animal activities), exported by the project lead; model form by tools/build/build_animal_pmp_capri_2030.py (g = h X / capri_level_ratio)"
+2017/supply/pmp_crossgroup_terms.csv,<index>:capri8:209; region:capri8:209,False,,data/loaders.py;data/rebase.py,True,CAPRI estimation
+2017/supply/pmp_diagonal_terms.csv,<index>:capri8:209; region:capri8:209,False,,data/loaders.py;data/rebase.py,True,CAPRI estimation
+2017/supply/pmp_own_price_elasticities.csv,<index>:capri8:228; region:capri8:228,False,,data/loaders.py;data/rebase.py;supply/capri_pmp.py;supply/supply_module.py,True,CAPRI PELA
+2017/supply/pmp_recipe_2017.csv,<index>:model:248; region:model:248; capri_regions:capri8:217,True,build_animal_pmp_capri_2030.py;build_intensity_q_2030.py;build_land_rents.py;build_pmp_capri_2030.py,data/loaders.py,True,"capri-mod's PMP terms computed with CAPRI's recipe (tools/build/build_pmp_recipe.py --year 2017) from CAPRI's estimates (estnlp VB, VD, PELA) and CAPRI's 2017 results; model form by tools/build/build_pmp_capri_2030.py / build_animal_pmp_capri_2030.py"
+2017/supply/pmp_recipe_2017_animals.csv,<index>:model:248; region:model:248; capri_regions:capri8:217,True,,data/loaders.py,True,"capri-mod's PMP terms computed with CAPRI's recipe (tools/build/build_pmp_recipe.py --year 2017) from CAPRI's estimates (estnlp VB, VD, PELA) and CAPRI's 2017 results; model form by tools/build/build_pmp_capri_2030.py / build_animal_pmp_capri_2030.py"
+2017/supply/pmp_recipe_2017_animals_members.csv,<index>:model:248; region:model:248; capri_regions:capri8:217,True,,data/loaders.py,True,"capri-mod's PMP terms computed with CAPRI's recipe (tools/build/build_pmp_recipe.py --year 2017) from CAPRI's estimates (estnlp VB, VD, PELA) and CAPRI's 2017 results; model form by tools/build/build_pmp_capri_2030.py / build_animal_pmp_capri_2030.py"
+2017/supply/pmp_recipe_2030.csv,<index>:model:248; region:model:248; capri_regions:capri8:217,True,build_animal_pmp_capri_2030.py;build_intensity_q_2030.py;build_land_rents.py;build_pmp_capri_2030.py,data/loaders.py,True,"capri-mod's PMP terms computed with CAPRI's recipe (tools/build/build_pmp_recipe.py --year 2030) from CAPRI's estimates (estnlp VB, VD, PELA) and CAPRI's 2030 reference; model form by tools/build/build_pmp_capri_2030.py / build_animal_pmp_capri_2030.py"
+2017/supply/pmp_recipe_2030_animals.csv,<index>:model:248; region:model:248; capri_regions:capri8:217,True,,data/loaders.py,True,"capri-mod's PMP terms computed with CAPRI's recipe (tools/build/build_pmp_recipe.py --year 2030) from CAPRI's estimates (estnlp VB, VD, PELA) and CAPRI's 2030 reference; model form by tools/build/build_pmp_capri_2030.py / build_animal_pmp_capri_2030.py"
+2017/supply/pmp_recipe_2030_animals_members.csv,<index>:model:248; region:model:248; capri_regions:capri8:217,True,,data/loaders.py,True,"capri-mod's PMP terms computed with CAPRI's recipe (tools/build/build_pmp_recipe.py --year 2030) from CAPRI's estimates (estnlp VB, VD, PELA) and CAPRI's 2030 reference; model form by tools/build/build_pmp_capri_2030.py / build_animal_pmp_capri_2030.py"
+2017/supply/set_aside_split.csv,<index>:model:241; region:model:241,True,build_labour_setaside.py,data/loaders.py,True,"CAPRI VSET / FALL levels, PRME, LABT (res_17 and the 2030 reference); w from CAPRI's PMP terms (tools/build/build_labour_setaside.py)"
+2017/supply/supply_elasticities_regional.csv,<index>:model:173; model_region:model:173,True,build_supply_elasticities_regional.py;derive_elasticities_from_pmp.py;ingest_pela_gtap.py,data/loaders.py;data/rebase.py;supply/capri_pmp.py;supply/supply_module.py,True,CAPRI PELA
+2017/supply/variable_costs.csv,<index>:model:248; region:model:248,True,build_capri_base.py;build_crop_economics_2017.py;build_shg_split.py,data/loaders.py;data/rebase.py;data/validate_data.py;supply/supply_module.py,True,CAPRI
+2017/supply/winter_cover_share.csv,<index>:model:248; region:model:248,True,build_cover_crops.py;build_winter_cover_option.py,data/loaders.py,True,CAPRI dat/policy/wintercovershare.gms
+2017/supply/yields.csv,<index>:model:248; region:model:248,True,build_animal_yields.py;build_capri_base.py;build_crop_economics_2017.py;build_eu_producer_prices.py,data/find_symbol.py;data/loaders.py;data/rebase.py;data/validate_data.py,True,COCO
+shared/capri_member_state_codes.csv,capri_ms:capri8:28,False,_model_regions.py;build_cover_crops.py;build_crop_economics_2017.py;build_crushing_parameters.py,data/definitions.py,True,"CAPRI sets.gms NUTS0 (BL = Belgium and Luxembourg, IR, EL, UK)"
+shared/eu_market_blocks.csv,<index>:capri8:27; ms:capri8:27,False,build_eu_ms_balance.py,market/inputs.py;market/market_module.py;model.py,True,"CAPRI gams/aggregation/defaultA.agg (EU_WEST, EU_EAST)"
+shared/region_capri_map.csv,<index>:model:248; region:model:248; capri_region:capri8:209; capri_group:capri8:206,True,build_region_map.py,environmental/environmental_module.py;fert/inner_fert_dist.py;fert/npk.py;supply/capri_pmp.py,True,
+shared/rms.csv,<index>:capri8:34; rms:capri8:34,False,build_gl_demand.py;build_processing_seeds.py;build_use_components.py,data/loaders.py;data/rebase.py,True,
+shared/rms_to_rm.csv,<index>:capri8:34; rms:capri8:34,False,build_gl_demand.py;build_processing_nq.py;build_processing_seeds.py,market/inputs.py,True,
+sources/arm/capri_supply_elas_market_1717.csv,<index>:capri8:34; region:capri8:34,False,build_feed_byproducts.py;build_supply_elas_nonEU.py,supply/capri_pmp.py,True,
+sources/arm/capri_supply_elas_young_1720.csv,<index>:capri8:26; region:capri8:26,False,build_young_animal_elasticities.py,supply/capri_pmp.py,True,
+sources/baseline_pmp/estnlp_vb.csv,<index>:capri8:209; region:capri8:209,False,build_pmp_2030.py;build_pmp_recipe.py,,False,"CAPRI star 3.0 dat/estnlp/results.gdx (VB, VD levels), exported with tools/gams/export_pmp_2030.gms"
+sources/baseline_pmp/estnlp_vd.csv,<index>:capri8:209; region:capri8:209,False,build_pmp_2030.py;build_pmp_recipe.py,,False,"CAPRI star 3.0 dat/estnlp/results.gdx (VB, VD levels), exported with tools/gams/export_pmp_2030.gms"
+sources/baseline_pmp/intensity_q_capri2030.csv,<index>:model:192; model_region:model:192,True,build_cattle_intensity.py;build_dairy_intensity.py;build_grass_intensity.py;build_labour_setaside.py,,False,"CAPRI's exported 2030 p_pmpQuadTechn (pmp_quad_techn_2030.csv), per model region through nuts_crosswalk.json (tools/build/build_intensity_q_2030.py)"
+sources/baseline_pmp/intensity_q_recipe2017.csv,<index>:model:192; model_region:model:192,True,build_labour_setaside.py,,False,capri-mod's recipe 2017 terms collapsed per activity (tools/build/build_intensity_q_2030.py)
+sources/baseline_pmp/intensity_q_recipe2030.csv,<index>:model:192; model_region:model:192,True,build_cattle_intensity.py;build_dairy_intensity.py;build_grass_intensity.py;build_labour_setaside.py,,False,"capri-mod's recipe 2030 terms (recipe_2030_quad_techn.csv), per model region through nuts_crosswalk.json (tools/build/build_intensity_q_2030.py)"
+sources/baseline_pmp/pmp_cnst_2030.csv,<index>:capri8:250; region:capri8:250,False,build_pmp_2030.py,,False,"CAPRI star 3.0 pmppar_21730<CC>defaulta.gdx (pmp_cnst_2030), exported with tools/gams/export_pmp_2030.gms"
+sources/baseline_pmp/pmp_cnst_landtypes_2030.csv,<index>:capri8:294; region:capri8:294,False,build_pmp_2030.py,,False,"CAPRI star 3.0 pmppar_21730<CC>defaulta.gdx (pmp_cnst_landtypes_2030), exported with tools/gams/export_pmp_2030.gms"
+sources/baseline_pmp/pmp_feed_inp_coeff_2030.csv,<index>:capri8:250; region:capri8:250,False,build_feed_ration.py;build_pmp_2030.py,,False,"CAPRI star 3.0 pmppar_21730<CC>defaulta.gdx (p_pmpFeedInpCoeff), exported with tools/gams/export_pmp_2030.gms"
+sources/baseline_pmp/pmp_quad_landtypes_2030.csv,<index>:capri8:314; region:capri8:314,False,build_land_market.py;build_pmp_2030.py;build_pmp_recipe.py,,False,"CAPRI star 3.0 pmppar_21730<CC>defaulta.gdx (pmp_quad_landtypes_2030), exported with tools/gams/export_pmp_2030.gms"
+sources/baseline_pmp/pmp_quad_pact_2030.csv,<index>:capri8:209; region:capri8:209,False,build_pmp_2030.py;build_pmp_capri_2030.py;derive_elasticities_from_pmp.py;ingest_pmp_terms.py,,False,"CAPRI star 3.0 pmppar_21730<CC>defaulta.gdx (pmp_quad_pact_2030), exported with tools/gams/export_pmp_2030.gms"
+sources/baseline_pmp/pmp_quad_techn_2030.csv,<index>:capri8:250; region:capri8:250,False,build_animal_pmp_capri_2030.py;build_cattle_intensity.py;build_dairy_intensity.py;build_grass_intensity.py,,False,"CAPRI star 3.0 pmppar_21730<CC>defaulta.gdx (pmp_quad_techn_2030), exported with tools/gams/export_pmp_2030.gms"
+sources/baseline_pmp/recipe_2017_quad_pact.csv,<index>:capri8:198; region:capri8:198,False,,,False,tools/build/build_pmp_recipe.py --year 2017 (CAPRI codes)
+sources/baseline_pmp/recipe_2017_quad_techn.csv,<index>:capri8:284; region:capri8:284,False,build_animal_pmp_capri_2030.py;build_intensity_q_2030.py;build_pmp_capri_2030.py,,False,tools/build/build_pmp_recipe.py --year 2017 (CAPRI codes)
+sources/baseline_pmp/recipe_2030_quad_pact.csv,<index>:capri8:198; region:capri8:198,False,,,False,tools/build/build_pmp_recipe.py --year 2030 (CAPRI codes)
+sources/baseline_pmp/recipe_2030_quad_techn.csv,<index>:capri8:270; region:capri8:270,False,build_intensity_q_2030.py,,False,tools/build/build_pmp_recipe.py --year 2030 (CAPRI codes)
+sources/baseline_pmp/simini_21730_data.csv,<index>:capri8:63; region:capri8:63,False,build_pmp_recipe.py,,False,
+sources/capreg/capreg_activity_levels.csv,<index>:model:199; model_region:model:199,True,build_livestock_premium_coef.py;extract_remaining_nine.py,,False,
+sources/capreg/capreg_cap_premium.csv,<index>:model:192; model_region:model:192,True,build_crop_economics_2017.py;build_livestock_premium_coef.py;extract_remaining_nine.py,data/loaders.py,True,
+sources/capreg/capreg_feed_availability_regional.csv,<index>:model:192; model_region:model:192,True,,,False,
+sources/capreg/capreg_feed_use.csv,<index>:model:192; model_region:model:192,True,extract_remaining_nine.py,,False,
+sources/capreg/capreg_herds.csv,<index>:model:192; model_region:model:192,True,derive_elasticities_from_pmp.py;extract_remaining_nine.py,,False,
+sources/capreg/capreg_land.csv,<index>:model:199; model_region:model:199,True,extract_remaining_nine.py,,False,
+sources/capreg/capreg_levels.csv,<index>:model:199; model_region:model:199,True,ingest_capreg_data2.py,,False,
+sources/capreg/capreg_manure_nutrients.csv,<index>:model:192; model_region:model:192,True,extract_remaining_nine.py,,False,
+sources/capreg/capreg_nutrient_coefs.csv,<index>:model:192; model_region:model:192,True,extract_all_from_data2.py;extract_remaining_nine.py,data/loaders.py,True,
+sources/capreg/capreg_producer_prices.csv,<index>:model:248; model_region:model:248,True,build_capri_base.py;build_crop_economics_2017.py;build_eu_producer_prices.py;build_patched_inputs.py,data/loaders.py;data/validate_data.py,True,CAPRI extract
+sources/capreg/capreg_yields.csv,<index>:model:192; model_region:model:192,True,derive_elasticities_from_pmp.py;ingest_capreg_data2.py,,False,
+sources/capreg/derived_elasticities_from_pmp.csv,<index>:model:192; region:model:192,True,derive_elasticities_from_pmp.py,,False,
+sources/capreg/pmp_quad_landtypes_2017.csv,<index>:capri8:314; region:capri8:314,False,build_land_market.py;build_pmp_2030.py;build_pmp_recipe.py,,False,"CAPRI star 3.0 pmppar_17<CC>.gdx p_pmpQuadLandTypes (the project lead's land export, CAPRI codes)"
+sources/capreg/pmp_quad_pact.csv,<index>:model:173; model_region:model:173,True,derive_elasticities_from_pmp.py;ingest_pmp_terms.py,supply/supply_module.py,True,
+sources/capreg/pmp_quad_techn.csv,<index>:model:192; model_region:model:192,True,build_cattle_intensity.py;build_dairy_intensity.py;build_grass_intensity.py;build_intensity_q_2030.py,,False,
+sources/capri_baseline/capri_market_prices_1730.csv,<index>:capri8:34; region:capri8:34,False,build_price_trajectory_2030.py,,False,
+sources/capri_baseline/capri_uvag_store_1730.csv,<index>:capri8:34; region:capri8:34,False,build_genetics_effects.py;build_price_trajectory_2030.py,,False,
+sources/capri_dat/envind/costsavings_ini_21730_jul15_p_manureShadVal.csv,<index>:capri8:250; dim1:capri8:250,False,,,False,
+sources/capri_dat/envind/costsavings_ini_21730_jul15_v_Miti.csv,<index>:capri8:80; dim1:capri8:80,False,,,False,
+sources/capri_dat/envind/costsavings_ini_21730_jul15_v_SupplementPerc.csv,<index>:capri8:215; dim1:capri8:215,False,,,False,
+sources/capri_dat/envind/costsavings_ini_21730_jul15_v_actLevl.csv,<index>:capri8:270; dim1:capri8:270,False,,,False,
+sources/capri_dat/envind/costsavings_ini_21730_jul15_v_fertDist.csv,<index>:capri8:250; dim1:capri8:250,False,,,False,
+sources/capri_dat/envind/costsavings_ini_21730_jul15_v_supplementSlack.csv,<index>:capri8:215; dim1:capri8:215,False,,,False,
+sources/capri_dat/envind/costsavings_max_21730_jul15_v_Miti.csv,<index>:capri8:80; dim1:capri8:80,False,,,False,
+sources/capri_dat/envind/costsavings_max_21730_jul15_v_SupplementPerc.csv,<index>:capri8:215; dim1:capri8:215,False,,,False,
+sources/capri_dat/envind/costsavings_max_21730_jul15_v_actLevl.csv,<index>:capri8:270; dim1:capri8:270,False,,,False,
+sources/capri_dat/envind/costsavings_max_21730_jul15_v_fertDist.csv,<index>:capri8:250; dim1:capri8:250,False,,,False,
+sources/capri_dat/envind/costsavings_max_21730_jul15_v_supplementSlack.csv,<index>:capri8:215; dim1:capri8:215,False,,,False,
+sources/capri_dat/envind/landscape_nuts2_p_featCharShares0.csv,<index>:capri8:214; dim1:capri8:214,False,,,False,
+sources/capri_dat/envind/soc_data_p_socData.csv,<index>:capri8:241; dim1:capri8:241,False,,,False,
+sources/capri_dat/envind/waterMetersPerHa_p_waterTMeters.csv,<index>:capri8:234; dim1:capri8:234,False,,,False,
+sources/capri_dat/ghgtech/AD_basedata_p_Clima.csv,<index>:capri8:146; dim1:capri8:146,False,,,False,
+sources/capri_dat/ghgtech/AD_basedata_p_CorrFac.csv,<index>:capri8:27; dim1:capri8:27,False,,,False,
+sources/capri_dat/ghgtech/AD_basedata_p_Heads.csv,<index>:capri8:285; dim1:capri8:285,False,build_ad_option.py,,False,
+sources/capri_dat/ghgtech/AD_basedata_p_HousShar.csv,<index>:capri8:26; dim1:capri8:26,False,build_ad_option.py,,False,
+sources/capri_dat/ghgtech/AD_basedata_p_MitiShar0.csv,<index>:capri8:20; dim1:capri8:20,False,build_ad_option.py,,False,
+sources/capri_dat/ghgtech/AD_basedata_p_SharLiq.csv,<index>:capri8:27; dim1:capri8:27,False,build_ad_option.py,,False,
+sources/capri_dat/ghgtech/AD_basedata_p_VSER.csv,<index>:capri8:27; dim1:capri8:27,False,build_ad_option.py,,False,
+sources/capri_dat/ghgtech/AD_basedata_p_sf.csv,<index>:capri8:285; dim1:capri8:285,False,build_ad_option.py,,False,
+sources/capri_dat/ghgtech/LitRevFertTech_p_litRevFertTechs.csv,<index>:capri8:276; dim1:capri8:276,False,build_fert_side_effects.py,,False,
+sources/capri_dat/miterra/ghgInvData_p_ShareADInv.csv,<index>:capri8:14; dim1:capri8:14,False,,,False,
+sources/capri_dat/miterra/ghgInvData_p_ShareGrazInv.csv,<index>:capri8:26; dim1:capri8:26,False,,,False,
+sources/capri_dat/miterra/ghgInvData_p_ShareLiquidInv.csv,<index>:capri8:27; dim1:capri8:27,False,,,False,
+sources/capri_dat/miterra_norway/mirror_miterra_inputs_norway_p_NO_LFRest.csv,<index>:capri8:6; dim1:capri8:6,False,,,False,
+sources/capri_dat/miterra_norway/mirror_miterra_inputs_norway_p_NO_rCorrND.csv,<index>:capri8:6; dim1:capri8:6,False,,,False,
+sources/capri_dat/miterra_norway/mirror_miterra_inputs_norway_p_NO_rLFmanureBasis.csv,<index>:capri8:6; dim1:capri8:6,False,,,False,
+sources/capri_dat/miterra_norway/mirror_miterra_inputs_norway_p_NO_rLFmanureND.csv,<index>:capri8:6; dim1:capri8:6,False,,,False,
+sources/capri_dat/miterra_norway/mirror_miterra_inputs_norway_p_NO_rLFrest.csv,<index>:capri8:6; dim1:capri8:6,False,,,False,
+sources/capri_dat/miterra_norway/mirror_non_changeable_parameters_norway_p_NO_PercPeat.csv,<index>:capri8:6; dim1:capri8:6,False,,,False,
+sources/capri_dat/policy/shannon_index_nuts2_ifmcap.csv,<index>:model:224; nuts2:model:224,True,,,False,
+sources/capri_dat/results_envind/cost_amm_1730_v_averCost.csv,<index>:capri8:198; dim1:capri8:198,False,,,False,
+sources/capri_land_rents/land_rents_capri_2017.csv,<index>:capri8:284; capri_region:capri8:284,False,build_land_rents.py;build_pmp_recipe.py,,False,
+sources/capri_land_rents/land_rents_capri_2030.csv,<index>:capri8:270; capri_region:capri8:270,False,build_land_rents.py;build_pmp_recipe.py,,False,
+sources/capri_res/gd2030_endotech_ini_nbalance.csv,<index>:capri8:270; region:capri8:270,False,build_n_leaching.py,,False,
+sources/capri_res/gd2030_endotech_ini_pbalance.csv,<index>:capri8:270; region:capri8:270,False,build_p_balance.py,,False,
+sources/capri_res/gd2030_ref_pbalance.csv,<index>:capri8:270; region:capri8:270,False,build_p_balance.py,,False,
+sources/capri_scenarios/greendeal_2030_increment.csv,<index>:capri8:270; region:capri8:270,False,,,False,
+sources/coco/coco_activity_levels.csv,<index>:capri8:344; region_full:capri8:344,False,,,False,
+sources/coco/coco_production.csv,<index>:capri8:344; region_full:capri8:344,False,,,False,
+sources/coco/coco_yields.csv,<index>:capri8:341; region_full:capri8:341,False,,,False,
+sources/envind/anim_req_corr_2017.csv,<index>:capri8:314; region:capri8:314,False,build_lownfeed_effects.py,,False,
+sources/envind/res17_mann_crpr_expt.csv,<index>:capri8:284; region:capri8:284,False,build_lownfeed_effects.py;build_supplement_effects.py,,False,
+sources/environment/capri_manure_trade_2030.csv,<index>:capri8:270; capri_region:capri8:270,False,build_manure_trade_base.py,,False,
+sources/estnlp/pela_own_price.csv,<index>:model:173; model_region:model:173,True,build_supply_elasticities_regional.py;ingest_pela_gtap.py,,False,
+sources/eurostat/apri_lrnt.csv,geo:model:169,True,,,False,
+sources/eurostat/ef_lsk_bovine_nuts2.csv,geo:model:248,True,build_capri_base.py,,False,
+sources/eurostat/tgs00045_bovines_nuts2.csv,geo:model:212,True,build_capri_base.py,,False,
+sources/fao_agg_2017/fao_agg_dairy_products_bas.csv,<index>:capri8:34; region:capri8:34,False,build_dairy_world_markets.py,,False,
+sources/fao_agg_2017/fao_agg_market_balances_bas.csv,<index>:capri8:34; region:capri8:34,False,build_world_market_baseline.py,,False,
+sources/ghgtech/LitRevFertTech_p_litRevFertTechs.csv,<index>:capri8:276; region:capri8:276,False,build_fert_side_effects.py,,False,
+sources/ghgtech/LitRevFertTech_p_litRevFertTechs_no3.csv,<index>:capri8:276; region:capri8:276,False,build_fert_side_effects.py,,False,
+sources/ghgtech/capri_costsavings_2030.csv,<index>:capri8:250; region:capri8:250,False,_capri_costsavings.py;build_genetics_effects.py;build_histosol.py;build_lownfeed_effects.py,,False,CAPRI costsavings_ini/max_21730_jul15.gdx v_Miti
+sources/ghgtech/miti_data_jul15_p_ghgMiti.csv,region:capri8:295,False,,,False,
+sources/ifs/Mapping_reg_IFSCAPRI_201020.csv,ifs_region:model:237; capri_region:capri8:214,True,,,False,
+sources/ifs/PACT_201020_IFS.csv,<index>:capri8:214; ru:capri8:214,False,,,False,
+sources/market/dairy_dataout_2030.csv,<index>:capri8:34; region:capri8:34,False,build_dairy_processing.py,,False,
+sources/market/dairy_elasticities_2030.csv,ms:capri8:34,False,build_dairy_processing.py,,False,
+sources/market/dairy_world_dataout_2030.csv,<index>:capri8:38; region:capri8:38,False,build_dairy_world_blocks.py,,False,
+sources/market/dairy_world_elasticities_2030.csv,rms:capri8:34,False,build_dairy_world_blocks.py,,False,
+sources/market/feed_bulks_dataout_2030.csv,<index>:capri8:27; region:capri8:27,False,build_feed_bulks.py,,False,
+sources/market/feed_demand_nonEU_use_2030.csv,<index>:capri8:34; rms:capri8:34,False,build_feed_demand_nonEU.py,,False,
+sources/market/processing_yields_dataout_2030.csv,<index>:capri8:16; ms:capri8:16,False,build_processing_yields.py,,False,
+sources/market/sugar_processing_dataout_2030.csv,<index>:capri8:23; ms:capri8:23,False,build_sugar_processing.py,,False,
+sources/ssb/ssb_pigs_county_2017.csv,nuts2016:model:7,True,build_norway_pigs.py;build_ssb_pigs.py,,False,"tools/build/build_ssb_pigs.py from SSB's file ssb_husdyr_fylke_2017_original.csv (tables 03710 / 03791); county sums equal the national 2017 row (89,138 and 1,607,644)"
+trajectories/capri_cap_premium_2030.csv,<index>:model:248; region:model:248,True,build_price_trajectory_2030.py,projection/prices.py,True,
+trajectories/capri_livestock_premium_ratio_2030.csv,<index>:model:248; Unnamed: 0:model:248,True,build_price_trajectory_2030.py,projection/prices.py,True,
+trajectories/capri_ref_fodder_2030.csv,<index>:model:248; region:model:248,True,build_ration_trajectory_2030.py,projection/projection_module.py,True,
+trajectories/capri_ref_ration_2030.csv,<index>:model:248; region:model:248,True,build_ration_trajectory_2030.py,feed/ration.py;projection/projection_module.py,True,
+validation/greendeal_2030/capri_greendeal_effect.csv,<index>:capri8:270; region:capri8:270,False,,,False,
+validation/greendeal_2030/capri_unit_values_ini_2030.csv,<index>:capri8:34; region:capri8:34,False,build_price_trajectory_2030.py,,False,
+validation/greendeal_2030/capri_unit_values_max_2030.csv,<index>:capri8:34; region:capri8:34,False,,,False,
