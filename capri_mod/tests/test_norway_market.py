@@ -298,4 +298,7 @@ def test_norway_prices_follow_its_own_market_in_a_scenario():
     assert float((d.loc["NOR"] - d.loc["EU27"]).abs().max()) > 1e-3
     ex = m._bridge_supply_to_market(m.supply_module.aggregate_supply(s["supply"], by_country=True))
     assert "NO" in ex.index and abs(float(ex.at["NO", "MILK"]) - float(s["market"].production.at["NOR", "MILK"])) < 1e-6
-    assert abs(float(s["market"].production.at["EU27", "MILK"]) - float(ex.drop(index="NO")["MILK"].sum())) < 1e-6
+    # EU raw milk: the EU supply models' output plus the member states' response to their milk prices in the dairy
+    # block (audit M5, MarketModule._milk_dq_now), with no Norwegian milk in it
+    eu_milk = float(ex.drop(index="NO")["MILK"].sum()) + float(mm._milk_dq_now or 0.0)
+    assert abs(float(s["market"].production.at["EU27", "MILK"]) - eu_milk) < 1e-6

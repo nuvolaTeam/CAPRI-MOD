@@ -2019,9 +2019,11 @@ def test_pesticide_reduction_binds_and_is_a_noop_at_zero(model):
     cut = totals(model.run(custom_scenario=PolicyScenario(
         name="t", pesticide_reduction=0.50), regions=regions, max_outer_iter=1))
 
-    # conic: the same problem solved again gives the same point; NLP: IPOPT's own tolerance (a warm start from the
-    # previous point ends 1e-7 relative away, DWHE 2.88 kha +- 9e-7)
-    tol = 1e-6 if str(getattr(model, "supply_form", "nlp")) == "nlp" else 1e-9
+    # conic: the same problem solved again gives the same point; NLP: IPOPT's own tolerance. A warm start from the
+    # previous point ended 1e-7 relative away before the K75 fix; since then the same baseline run twice differs by
+    # up to 3e-5 relative in small cereal activities (rye, oats, durum wheat: DE23 RYEM 5.43015 vs 5.43000 kha;
+    # KNOWN_ISSUES K80), and the zero shock by as much (up to 6e-5, DE11 RYEM)
+    tol = 1e-4 if str(getattr(model, "supply_form", "nlp")) == "nlp" else 1e-9
     for a, v in base.items():
         if v > 1.0:
             assert abs(zero.get(a, 0.0) - v) / v < tol, (
