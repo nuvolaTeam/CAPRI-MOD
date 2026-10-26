@@ -1498,7 +1498,8 @@ yet. The two sets differ:
   agriculture (urbanNUTS; capreg/cons_levls.gms fixes their UAA at 0); PL31-34 and HR05-06 were emptied by the base
   data builder (build_capri_base.py) as duplicates of other codes. They are solved as empty problems.
 - CAPRI keeps Denmark, Estonia, Lithuania, Latvia, Slovenia, Cyprus, Malta and Croatia as one unit each; the model
-  splits some of them (Denmark into five regions, Lithuania and Slovenia into two, Croatia into four) and shares one
+  splits some of them (Denmark into five regions, Lithuania and Slovenia into two, Croatia into four rows of which two are
+  empty) and shares one
   CAPRI unit between several NUTS-2016 regions elsewhere (e.g. DED2/DED4/DED5, ITH1/ITH2, FI1B/FI1C, IE04-06), with
   the splits made on proxies such as cattle shares (shared/region_capri_map.csv).
 The move to CAPRI's own regional units is planned (it removes the empty regions and the proxy splits). The earlier
