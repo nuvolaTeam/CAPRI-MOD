@@ -600,6 +600,14 @@ class CAPRIModel:
                 _RSM.use_fert_allocation = False      # substitution already in the balance
                 _RSM.use_manure_pool = _on
                 self.supply_module.manure_pool_price = {}     # fresh pools every run
+                if _is_base:
+                    # CAPRI calibrates its supply models in the baseline it simulates with (the base a first-order
+                    # point of that model): each regional model checks at its first solve that its calibration was
+                    # made on the same calibration problem, else calibrates again (found 26 October 2026: a
+                    # calibration left by a supply module run on its own, without the model's rations and manure
+                    # pools, was reused by DE11's mineral cap test)
+                    for _m in self.supply_module._models.values():
+                        _m._nlp_cal_check = True
                 self._pool_state = None
                 self._pool_accel = None
                 self._pool_trace = []

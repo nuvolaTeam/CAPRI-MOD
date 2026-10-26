@@ -111,6 +111,38 @@ def fert_option_table() -> dict:
     return _FERT_OPT
 
 
+def _spec_fingerprint(spec, **extra) -> str:
+    """A digest of a regional NLP's calibration problem (every array, number and label of the spec, and the base
+    point): two calibrations of equal digests solve the same problem."""
+    import hashlib
+    h = hashlib.sha1()
+
+    def feed(o):
+        if isinstance(o, np.ndarray):
+            a = np.ascontiguousarray(o)
+            h.update(str((a.dtype.str, a.shape)).encode()); h.update(a.tobytes())
+        elif isinstance(o, (pd.Series, pd.DataFrame)):
+            feed(o.to_numpy()); feed(list(map(str, o.index)))
+            if isinstance(o, pd.DataFrame):
+                feed(list(map(str, o.columns)))
+        elif isinstance(o, dict):
+            h.update(b"{")
+            for k in sorted(o, key=repr):
+                h.update(repr(k).encode()); feed(o[k])
+            h.update(b"}")
+        elif isinstance(o, (list, tuple, set, frozenset)):
+            h.update(b"[")
+            for x in (sorted(o, key=repr) if isinstance(o, (set, frozenset)) else o):
+                feed(x)
+            h.update(b"]")
+        elif isinstance(o, (float, np.floating)):
+            h.update(np.float64(o).tobytes())
+        else:
+            h.update(repr(o).encode())
+    feed(spec); feed(extra)
+    return h.hexdigest()
+
+
 def young_animal_table() -> dict:
     """CAPRI's young-animal coefficients per model region (calves, young cattle, cows, piglets, lambs): pooled across the
     sexes (young_animals_2017.json, the default) or per sex as CAPRI's balances (young_animals_by_sex_2017.json) with
@@ -1655,6 +1687,11 @@ class RegionalSupplyModel:
             pol_rows = [l_ for l_ in ("N_balance", "mineral_N", "landscape_floor", "winter_cover") if l_ in labels]
             spec_sim = spec
             spec = dict(spec_sim, drop_labels=list(drop) + pol_rows)
+            _fp = None
+            if self.__dict__.pop("_nlp_cal_check", False) or cal is None:
+                _fp = _spec_fingerprint(spec, yb_n=np.asarray(x_start, float), xb=xb[:n])
+                if cal is not None and cal.get("fp") != _fp:
+                    cal = None              # made on another calibration problem (a baseline checks it, see run)
             if cal is None and getattr(type(self), "nlp_calibrate", True):
                 nlp0 = CapriRegionalNLP(spec)
                 yb = np.asarray(x_start, float).copy()
@@ -1690,6 +1727,7 @@ class RegionalSupplyModel:
                     cal = {"dq": {}, "dcnst": {}, "failed": out.get("why")}
                     import warnings as _w
                     _w.warn(f"NLP calibration failed for {self.data.region_id}: {out.get('why')}", RuntimeWarning)
+                cal["fp"] = _fp
                 self._nlp_cal = cal
                 self._nlp_base_alloc = cal.get("base_alloc")
             # the simulation's spec: the policy rows back, in CAPRI's terms where the NLP form writes them

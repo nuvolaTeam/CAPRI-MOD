@@ -2755,7 +2755,12 @@ def test_parallel_regional_solves_match_sequential():
     # number of regions)
     regs = ["NL22", "ITC4"]
     out = []
+    from capri_mod.supply import capri_regional_nlp as C
     for nw in (1, 2):
+        # both runs build their IPOPT solvers afresh: a solver kept in this process from an earlier test solves to the
+        # same point within IPOPT's tolerance, not to the last digit (test_nlp_solver_cache_is_exact), and the worker
+        # processes start with none
+        C._SOLVERS.clear()
         m = CAPRIModel(data_dir=str(DATA_DIR), verbose=False)
         m.supply_module.n_workers = nw
         s = m.run(custom_scenario=farm_to_fork_scenario(), regions=regs, max_outer_iter=2)
