@@ -3707,23 +3707,24 @@ def test_nlp_failure_falls_back_to_the_conic_form(model, monkeypatch):
 
 @pytest.mark.slow
 def test_nlp_form_takes_jrc121368_relaxation_where_the_tiered_n_target_fails(model):
-    """KNOWN_ISSUES K57: NL13 (outside JRC121368's nine capped regions) has no solution in CAPRI's form at the tiered
-    Farm-to-Fork N target; JRC121368's rule for such regions (the EU-average cut, 36%) is applied in CAPRI's form,
+    """KNOWN_ISSUES K57: NL32 (outside JRC121368's nine capped regions) has no solution in CAPRI's form at the tiered
+    Farm-to-Fork N target (NL13 until the K75 fix of 26 October 2026; since then NL13 meets it and NL32 is the one
+    region relaxed in the reference run r145); JRC121368's rule for such regions (the EU-average cut, 36%) is applied in CAPRI's form,
     recorded, and kept for the scenario, instead of the conic form standing in at the strict target."""
     from capri_mod.policy.greendeal import farm_to_fork_scenario
     from capri_mod import settings as S
     model.supply_module._jrc_capped_cache = None
     try:
         with S.override({"supply.jrc_capped_override": "NL41,BE25,NL21,BE21,NL22,NL31,BE23,NL42,MT00"}):
-            model.run(scenario="BASELINE", regions=["NL13"], max_outer_iter=2)
-            r = model.run(custom_scenario=farm_to_fork_scenario(), regions=["NL13"], max_outer_iter=2)
+            model.run(scenario="BASELINE", regions=["NL32"], max_outer_iter=2)
+            r = model.run(custom_scenario=farm_to_fork_scenario(), regions=["NL32"], max_outer_iter=2)
     finally:
         model.supply_module._jrc_capped_cache = None
-    fb = r["metadata"]["nlp_fallback"].get("NL13") or []
+    fb = r["metadata"]["nlp_fallback"].get("NL32") or []
     assert len(fb) == 1 and "relaxed target" in fb[0], fb       # once, then kept (sticky)
-    mo = model.supply_module._models["NL13"]
+    mo = model.supply_module._models["NL32"]
     assert getattr(mo, "_n_target_relaxed", False) and getattr(mo, "_nlp_fb_last", True) is False   # CAPRI's form
-    assert getattr(r["supply"]["NL13"], "balance_shortfall", 0.0) > 0.0
+    assert getattr(r["supply"]["NL32"], "balance_shortfall", 0.0) > 0.0
 
 
 @pytest.mark.slow
