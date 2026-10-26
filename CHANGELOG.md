@@ -32,8 +32,12 @@ Full provenance for every entry is in `capri_data/DATA_SOURCING_REGISTRY.json`.
 
 ## 26 October 2026: the conic form removed; a failed regional solve kept as CAPRI keeps it
 
-- **Conic form removed** (the user's decision). No run had used it since r110: the coverage of the Farm-to-Fork and
-  Green Deal 2030 runs (r146, r147) showed no conic solve and no QP fallback. Removed: `capri_mod/supply/feed_conic.py`,
+- **Conic form removed** (the user's decision). No run had used it since r110 (no conic fallback in any run's
+  metadata). The plain QP (`qp_solver.solve_qp`, Clarabel) did run in r146/r147, for the 13 regions without any
+  agriculture in the data (zero areas and herds, no rations: PL31-PL34 and HR05-HR06, codes of a NUTS version the data
+  fill under PL7x/PL8x and HR02-HR04, and the city regions DE30, DE50, DE60, BE10, AT13, ES63, ES64); they now go
+  through the NLP with the same (zero) levels. A first coverage listing by function had missed this (it tested one line
+  per function; corrected to statement level, which also changes 11 other entries of the list of never-run functions). Removed: `capri_mod/supply/feed_conic.py`,
   `capri_nlp.py` (its cascade-loss helper moved into `capri_regional_nlp.py`), `qp_solver.py`, the built-in
   interior-point fallback of `convex_qp.py` (Clarabel is required and stays for the manure-market pools), the plain QP
   path without feeding inside and its fallbacks (landscape-floor and balance-target fits on the QP, least-distance QP,
@@ -55,7 +59,10 @@ Full provenance for every entry is in `capri_data/DATA_SOURCING_REGISTRY.json`.
   `fert_dist_open` removed (always empty in the NLP form).
 - Tests: the conic-only tests removed (the emission-tax test of the conic model, IPOPT polish, NUTMIN_, fertiliser
   distribution inside, the conic P accounts); the NLP failure test rewritten for CAPRI's handling.
-- Gate: the reference run r145 and the Green Deal 2030 run r142 reproduced (see below), the test suite passing.
+- Gate: r149 (these changes without K81) reproduces the reference r145 exactly: same converged prices and quantities,
+  same market supply Hessian (cache hit); differences only in metadata and in the duals of the 13 empty regions (zero
+  before, the NLP's now). r150 (with K81) moves the 2030 baseline slightly at member-state level (new Hessian),
+  converges in 10 iterations instead of 9, deviation from JRC121368 4.44 as before, indicators within 0.1 point.
 
 ## 26 October 2026: K75 found and fixed (a lagged fodder constraint in the NLP form); CAPRI's stop rule and price forecast as options
 
