@@ -1,0 +1,9 @@
+# data pipeline (capri_mod/pipeline; as the pipeline extra of pyproject.toml): pip install -r requirements-pipeline.txt
+-r requirements.txt
+# provider downloads (Eurostat, FAOSTAT); capri_mod/data/rebase.py falls back to urllib without it
+requests>=2.28
+# the versioned store: Delta tables (Apache-2.0) written through Arrow
+deltalake>=0.18
+pyarrow>=14
+# not listed: the GAMS Python API (gams), used only by tools/build/* to rebuild the CAPRI reference CSVs from GDX
+# files; it needs a GAMS installation and the model does not use it

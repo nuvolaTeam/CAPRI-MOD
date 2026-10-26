@@ -1,0 +1,7 @@
+# test tools (as the dev extra of pyproject.toml): pip install -r requirements-dev.txt
+-r requirements.txt
+pytest>=7.0
+# parallel test processes: python -m pytest -n 2 (CAPRI_WORKERS=1 on an 8 GB machine)
+pytest-xdist>=3.5
+# coverage runs (concurrency=multiprocessing for the regional worker processes)
+coverage>=7.0

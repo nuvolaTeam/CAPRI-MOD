@@ -323,6 +323,11 @@ pip install -r requirements.txt        # pandas, numpy, scipy, casadi (IPOPT), c
 python tools/run/run_tests.py
 ```
 
+Optional: `pip install -r requirements-dev.txt` adds pytest, pytest-xdist and coverage (`python -m pytest -n 2`
+runs the tests in two processes); `pip install -r requirements-pipeline.txt` adds requests, deltalake and pyarrow
+for the data pipeline (`capri_mod/pipeline`). The same sets are the `dev` and `pipeline` extras of `pyproject.toml`.
+The GAMS Python API is needed only by `tools/build/*`, which rebuild the CAPRI reference CSVs from GDX files.
+
 Or in a container (Debian bookworm, `Dockerfile`):
 
 ```shell
