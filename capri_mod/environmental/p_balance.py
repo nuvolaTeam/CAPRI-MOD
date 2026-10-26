@@ -74,7 +74,7 @@ def nutned_mineral(D, capri_region: str, need, own, own_perm, pool, mine0, xb, x
     kappa x (need0 - gc x own0) = eff x M0 + g0 x E0 + gc x C0 (CAPRI's v_cropNutNeedMultFact, calibrated at the
     base and fixed in simulation).
     Arguments are dicts by model crop (kg/ha, 1000 ha) and t; grass = (z, dn, sq) adds the grassland split column
-    (z x need difference GRAE - GRAI). Used where the regional model has no fertilisation block (conic form); at the
+    (z x need difference GRAE - GRAI). Used where there is no regional solution (the accounts at the base data); at the
     NLP form's solution the sum of its NUTNED_ rows is this equation exactly. None without CAPRI's data."""
     R = D.region(capri_region, "P")
     if R is None:

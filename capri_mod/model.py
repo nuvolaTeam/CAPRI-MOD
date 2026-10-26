@@ -317,8 +317,7 @@ class CAPRIModel:
     def _trace_nlp_regions(self, top=4):
         """Outer-loop trace of the NLP form: the regions whose activity levels moved most since the last outer
         iteration (max over the columns of |dy| / max(|y|, 1% of the region's largest column)), with the starts IPOPT
-        used (warm / prev / start, then a relaxation) and its iterations, and the counts of each path. Prints nothing
-        in the conic form."""
+        used (warm / prev / start, then a relaxation) and its iterations, and the counts of each path."""
         import numpy as _np
         prev = getattr(self, "_trace_nlp_prev", None) or {}
         cur, rows, paths = {}, [], {}
@@ -1237,8 +1236,8 @@ class CAPRIModel:
                 "young_animal_markets": dict(getattr(self, "_yani_detail", None) or {}),
                 "pmp_source": str(getattr(self.supply_module, "pmp_source", "elasticity")),
                 "pmp_capri_parts": list(getattr(self.supply_module, "pmp_capri_parts", ())),
-                # regions where the NLP form failed in this run and the solve fell back to the conic form (each
-                # fallback with IPOPT's status; supply_module._feed_conic_solve)
+                # regions whose NLP solve took a fallback in this run (JRC121368's relaxed N target, IPOPT's last
+                # point kept as CAPRI keeps a non-optimal solve), each with IPOPT's status (supply_module._nlp_solve)
                 "nlp_fallback": {r_: list(m_._nlp_fallback_log) for r_, m_ in self.supply_module._models.items()
                                  if getattr(m_, "_nlp_fallback_log", None)},
                 # regions whose NLP form needed the Green Deal's mineral caps relaxed (supply_module._capri_nlp_solve)
@@ -2051,10 +2050,9 @@ class CAPRIModel:
             Q, c, A, b, y = aug
             if max(pc) >= len(y):          # stored problem predates the market columns
                 continue
-            # row duals: the conic solve's own multipliers when the region was solved with feeding
-            # inside (its feed block is not in the stored QP, so duals recovered from the QP's
-            # KKT conditions were wrong there and the pools stopped clearing); else recovered by
-            # NNLS from the active rows of the stored QP
+            # row duals: the regional NLP's own multipliers (its feed block is not in the stored
+            # problem, so duals recovered from the stored problem's KKT conditions were wrong and the
+            # pools stopped clearing); else recovered by NNLS from the active rows of the stored problem
             zc = getattr(mo, "_last_duals", None)
             if zc is not None and len(zc) == A.shape[0]:
                 lam = np.maximum(np.asarray(zc, float), 0.0)

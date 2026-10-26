@@ -1394,7 +1394,7 @@ class EnvironmentalModule:
                 livestock_manure_p_coef.csv; the split and option columns leave it unchanged, as in the regional model's
                 fertilisation block)
         MTRADE  EXCRET - manure P2O5 applied in the region (ManureNPK_): with the NLP form's fertilisation block the
-                sum of its manure flows; without it (conic form, or no supply result) CAPRI's 2030 share applied
+                sum of its manure flows; without it (no supply result: the accounts at the base data) CAPRI's 2030 share applied
                 (1 - MTRADE / EXCRET) plus the region's manure trade carried in the region's P/N proportion, as the
                 block builds it
         MINFER  the block's P2O5 purchases (v_netPutQuant); without the block, CAPRI's NUTNED_ for P summed over the

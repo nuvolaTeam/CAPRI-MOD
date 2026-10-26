@@ -13,7 +13,7 @@ land-market columns, land and bound rows, with one label per row) and the calibr
     FEDUSE_  feed use = per-head feed x herd / 1000 (bilinear), entering the non-tradable fodder balances.
     QUADRF_  herd x sum_f f (CNST + 0.5 SLOP f), with the feed's price for tradable feeds.
     Bounds   0 <= v_feedInpCoeff <= 10 x DRMX / DM content (supply/set_supply_bounds.gms).
-* fodder (SUPBAL_ for FODDO): production = feed use, an EQUALITY (the conic model's one-sided band).
+* fodder (SUPBAL_ for FODDO): production = feed use, an EQUALITY (the former conic form had a one-sided band).
 * single-variable rows (CAPRI's activity bounds, fixed levels) as variable bounds; pairs of opposite rows as one ranged
   row (land balances: equal at base use, LandBalNoSlak_).
 
@@ -255,7 +255,7 @@ class CapriRegionalNLP:
             fl = np.asarray(r.flex, bool)
             # the herd's linear term carries the base ration's cost per head (CNST, 0.5 SLOP, tradable feeds at base
             # prices; fodder through its balance); it is taken out here and charged through QUADRF_ below, exactly as
-            # the conic model's compensation, with the calibrated CNST
+            # the feed block's compensation, with the calibrated CNST
             pz = np.array([0.0 if f in fod else float(r.p0[j]) for j, f in enumerate(r.feeds)])
             q0[act_idx[a]] -= float(np.sum(np.where(fl, r.x0 * (pz + cn + 0.5 * r.slope * r.x0), 0.0)))
         F = []
@@ -336,7 +336,7 @@ class CapriRegionalNLP:
         g_rows, lbg, ubg, gmap = [], [], [], []           # gmap: (kind, rows, scale)
         drop = set(spec.get("drop_labels") or ())
         if bool(_settings_now().get("supply.nlp_fodder_band_dropped")):
-            # CAPRI's SUPBAL_ for non-tradable fodder is the equality above (production = FEDUSE_). The conic form's
+            # CAPRI's SUPBAL_ for non-tradable fodder is the equality above (production = FEDUSE_). The former conic form's
             # other side, the "_band" row, carries the animals' fodder per head from the ration state - the previous
             # solve's feeding - not the feed columns: kept in this form it was a second, lagged fodder constraint not
             # in CAPRI, binding, whose coefficients moved with every iteration's feeding (K75: the suckler cows of FRD1
@@ -448,7 +448,7 @@ class CapriRegionalNLP:
         if spec.get("npk"):
             X, obj = self._fert_block(spec["npk"], X, y, obj, g_rows, lbg, ubg, lbx, ubx)
         if getattr(self, "_fert_tech_pending", None) is not None:
-            # no N purchases in the model: the options' cost on the crops' base mineral N (the conic form's weight)
+            # no N purchases in the model: the options' cost on the crops' base mineral N
             cost_, crops_ = self._fert_tech_pending
             obj = obj + self._lin(y, [(col, float(nc) / 1000.0) for col, nc in crops_]) * cost_
             self._fert_tech_base = sum(float(self.xb[int(col)]) * float(nc) / 1000.0 for col, nc in crops_)
@@ -1234,7 +1234,7 @@ class CapriRegionalNLP:
     # ---------------- results in the regional QP's terms ----------------
     def outputs(self, res):
         """(y, F {(act, feed): t}, zA (dual of each row of A, >= 0 for A y <= b), info) - the fields the supply module
-        reads from the conic model."""
+        reads from the regional model."""
         x, lam_g, lam_x = res["x"], res["lam_g"], res["lam_x"]
         y = np.asarray(self.f_y(x)).ravel()
         Fv = np.asarray(self.f_F(x)).ravel()

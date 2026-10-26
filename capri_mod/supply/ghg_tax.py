@@ -110,7 +110,7 @@ def ghg_coefficients(env, region: str, res, rations: Optional[dict]) -> dict:
             out[key][k] = diff(m, 0.01)
     # CAPRI's ammonia options (Sprint 9k): manure N2O per unit of an animal's option share, through the accounts'
     # loss cascade (housing/storage and application N2O on the N left after NH3 losses), per 1000 heads - so per
-    # unit of the conic's M (share x heads). The NH3 kept and the mineral N it displaces are priced in the supply
+    # unit of the regional model's M (share x heads). The NH3 kept and the mineral N it displaces are priced in the supply
     # model from the option's own N saving (SupplyModel._tech_list).
     out["mtech"] = {}
     try:

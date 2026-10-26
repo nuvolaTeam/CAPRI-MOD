@@ -779,7 +779,7 @@ class RegionalSupplyModel:
         return out
 
     def _fert_tax_terms(self, ft) -> dict:
-        """CAPRI's emission tax on mineral N and the fertiliser options (Sprint 9l), in the conic's 1000 EUR:
+        """CAPRI's emission tax on mineral N and the fertiliser options (Sprint 9l), in the regional model's 1000 EUR:
         "m" per t of mineral N (the accounts' soil N2O, direct + volatilised x indirect, and the indirect N2O of its
         runoff and leaching, _ef_mineral_lea); "h" per unit of adopted area
         (1000 ha) per kg N/ha of need, by option. The accounts (EnvironmentalModule.fert_side_factors) count an option
@@ -842,7 +842,7 @@ class RegionalSupplyModel:
                 or float(getattr(self, "ghg_tax", 0.0) or 0.0) > 0)
 
     def _tech_list(self):
-        """Ammonia technologies for the conic model (CAPRI v_Miti): one entry per sub-activity
+        """Ammonia technologies for the regional model (CAPRI v_Miti): one entry per sub-activity
         and option. The loss cascade couples the two groups (N reaching the field); the N saved
         per unit of share is linearised at the shares of the previous solve (successive
         linearisation across outer iterations; at convergence CAPRI's relation holds)."""
@@ -871,7 +871,7 @@ class RegionalSupplyModel:
                 d = _at.marginal(s, sh, wc1)
                 npl = sc * s["mrel"]
                 # N saved per unit of the sub-activity at the linearisation point, relative to the base shares (exact
-                # cascade): with it the conic model's relief is the TANGENT of CAPRI's cascade at that point,
+                # cascade): with it the regional model's relief is the TANGENT of CAPRI's cascade at that point,
                 # rel0 + ret x (share - share there), so at a converged point the N saved is CAPRI's exactly (before,
                 # ret x (share - base share) left out the cross term of the two option groups: the NLP check,
                 # tools/nlp_check, found CAPRI's N balance violated by 8-365 t N in the five regions checked)
@@ -947,7 +947,7 @@ class RegionalSupplyModel:
         # the split columns: the grassland split moves area from CAPRI's GRAI to GRAE (z = GRAE - base GRAE, each of the
         # two half the grassland at base), so the GRAS groups' need changes by z x (need GRAE - need GRAI); the animal
         # split and option columns change their animal's manure in the proportion their manure coefficient bears to the
-        # animal's (the conic form's manure-application row, else its N row), which reaches ManureNPK_
+        # animal's (the manure-application row, else its N row), which reaches ManureNPK_
         colsl = self._aug_col_labels(n_cols)
         j_gz = colsl.index("grass_z") if "grass_z" in colsl else None
         man_split = []
@@ -1254,14 +1254,14 @@ class RegionalSupplyModel:
 
     def _nlp_tax_terms(self, tax, c, abat):
         """CAPRI's emission tax (ghgTax) in the NLP form, where mineral N is the fertilisation block's purchases
-        (v_netPutQuant(NITF)): the soil N2O of mineral N is taxed on the purchases, so every term of the conic form that
-        priced mineral N through a fixed substitution comes out. The activities' own coefficients (ghg_tax.py, finite
+        (v_netPutQuant(NITF)): the soil N2O of mineral N is taxed on the purchases, so every term of the former conic form
+        that priced mineral N through a fixed substitution comes out. The activities' own coefficients (ghg_tax.py, finite
         differences of the accounts at the baseline) need no change: the baseline of the NLP form hands the accounts its
         purchases (mineral_n_alloc), which they hold fixed, so those coefficients carry no mineral N2O.
           purchases        tax x (direct + volatilised x indirect) per t N; with the nitrification inhibitor the
                            accounts' side-effect factor on its share of mineral N
           manure trade     the export and import columns lose the tax on the mineral N they were taken to move
-          ammonia options  their manure N2O through the cascade (as the conic form) and the indirect N2O of the NH3
+          ammonia options  their manure N2O through the cascade and the indirect N2O of the NH3
                            they keep; not the mineral N it displaces (purchases)
           inhibitor on manure  the tax value per t of manure N treated without the mineral N it displaces
         Returns (ghg_min for the NLP spec, c)."""
@@ -1606,7 +1606,7 @@ class RegionalSupplyModel:
         npk = self._npk_spec(Q.shape[0], x_start, A, labels)
         drop = []
         if npk is not None:
-            # CAPRI's fertilisation replaces the regional crop-need row (the conic form's NUTNED_ approximation) and
+            # CAPRI's fertilisation replaces the regional crop-need row (an approximation of NUTNED_) and
             # the fertiliser cost per ha: mineral N, P and K are bought at CAPRI's unit value (v_netPutQuant(FNUT))
             drop = ["crop_need"]
             oc_ = getattr(self, "_organic_conv", None) or {}
@@ -1617,7 +1617,7 @@ class RegionalSupplyModel:
                     c[j] -= float(self._input_cost(a, "fert", self.FERT_COST_SHARE)) * float(oc_.get(a, 1.0))
         abat = self._nlp_abatement_spec(labels) if npk is not None else {}
         if npk is not None:
-            # capri-mod's manure-application limit and the conic form's mineral-N allocation row are not CAPRI's
+            # capri-mod's manure-application limit and mineral-N allocation row are not CAPRI's
             drop += ["manure_application", "alloc_mineral_N"]
         tax_ = float(getattr(self, "ghg_tax", 0.0) or 0.0)
         ghg_min = None
@@ -1641,8 +1641,8 @@ class RegionalSupplyModel:
                 any(l_.startswith(_late) for l_ in set(cols) - set(cal["cols"])):
             if os.environ.get("CAPRI_TRACE_RECAL"):
                 print("RECAL", self.data.region_id, sorted(set(cols) - set(cal["cols"]))[:6], flush=True)
-            # the split and histosol columns enter after the region's first solve (the conic form calibrates them on
-            # that solve's duals, at the baseline's prices): calibrate again, so that the base is a first-order point
+            # the split and histosol columns enter after the region's first solve (their linear terms come from that
+            # solve's duals, at the baseline's prices): calibrate again, so that the base is a first-order point
             # of the problem with them
             cal = None
         try:
@@ -1739,7 +1739,7 @@ class RegionalSupplyModel:
                     # e_SURTOTHa): the row's linear mineral parts out, the purchases in
                     npk["n_rows"] = [("N_balance", self._n_row_mineral_parts(A, labels))]
                     if spec.get("catc"):
-                        # the requirement's catch-crop N was put on the row as a constant (the conic form's); the
+                        # the requirement's catch-crop N was put on the row as a constant; the
                         # NLP form's catch-crop share carries it (catc_n), so the constant is taken back out
                         npk["n_rows_rhs_add"] = {"N_balance": float(getattr(self, "_cover_dbf_nb", 0.0) or 0.0)}
                     spec["drop_labels"] = list(spec["drop_labels"]) + ["N_balance"]
@@ -1887,7 +1887,7 @@ class RegionalSupplyModel:
         if (_nonopt is None and _am and not _am.get("fixed")
                 and "N_balance" in labels and "mineral_N" not in labels
                 and not float(getattr(self, "ghg_tax", 0.0) or 0.0) > 0):
-            # the N-surplus row slack (dual ~0): as the conic form, the options at their base shares (CONOPT stays at
+            # the N-surplus row slack (dual ~0): the options at their base shares (CONOPT stays at
             # the calibrated shares unless moving pays through the policy row)
             _zA = nlp.outputs(res)[2]
             if float(_zA[labels.index("N_balance")]) <= 1e-9:
@@ -2258,7 +2258,7 @@ class RegionalSupplyModel:
             # soya cake row of feed_requirements.csv (_protein_feed_cost_change).
             if act in ANIMALS and price_shock is not None and act not in (getattr(self, "feed_rations", None) or {}):
                 # With feeding inside the regional model (a ration for the animal) the feed is
-                # bought in the model at its current prices (QUADRF_ in capri_regional_nlp.py / feed_conic.py, the base
+                # bought in the model at its current prices (QUADRF_ in capri_regional_nlp.py, the base
                 # ration's cost taken out of the linear term), as CAPRI costs feed once (supply_model.gms QUADRF_); the
                 # change below would count it twice (audit S1, fixed 24 October 2026). It applies where the animal's
                 # feeding is not in the model.
@@ -3071,7 +3071,7 @@ class RegionalSupplyModel:
         saved; the extra cost per unit comes off its margin. At lam = 0 the base shares are
         recorded (for reporting)."""
         if self._techs_inside():
-            return          # decided inside the regional conic model: keep its results
+            return          # decided inside the regional model: keep its results
         from capri_mod.supply import ammonia_techs as _at
         ctx = self._amm_context()
         shares = {}
@@ -3102,7 +3102,7 @@ class RegionalSupplyModel:
         REGISTERED: the crop-need floor on mineral N keeps a x manure without the gain."""
         self._manure_ni_relief, self._manure_ni_nh3, self._manure_ni_share = {}, {}, 0.0
         if self._ni_inside():
-            return                       # decided inside the regional conic model (capri-mod-proto)
+            return                       # decided inside the regional model
         tax = float(getattr(self, "ghg_tax", 0.0) or 0.0)
         lam = float(lam or 0.0)
         if lam <= 0 and tax <= 0:
@@ -3279,9 +3279,9 @@ class RegionalSupplyModel:
         # keep factors already set this solve (organic land: no mineral N)
         self._n_intensity = getattr(self, "_n_intensity", {}) or {}
         if self._techs_inside():
-            # decided inside the regional conic model: keep its results (a reset here, after
-            # the last solve, erased the reported shares). Inhibitors on manure are not in the
-            # conic block: decided here at the current N price, as outside
+            # decided inside the regional model: keep its results (a reset here, after
+            # the last solve, erased the reported shares; the inhibitor on manure is inside too,
+            # _apply_manure_inhibitor returns at once)
             self._apply_manure_inhibitor(lam)
             return None
         self._fert_tech_shares = {}
@@ -4202,7 +4202,7 @@ class RegionalSupplyModel:
         s0 x DCOW + z, DCOH = (1 - s0) x DCOW - z, so z = 0 is the base split), Sprint 7b:
           - rows driven by manure N (N balance, manure application, crop-need limit, mineral-N
             allocation): DCOW's own coefficient x (MANN_DCOL - MANN_DCOH) / MANN_DCOW;
-          - the cows' requirement rows in the conic feed block (energy, protein, dry-matter
+          - the cows' requirement rows in the feed block (energy, protein, dry-matter
             limits): DCOW's requirement x the relative change (req_extra; feeding inside only);
           - 0 <= DCOL, DCOH; PMP (q_DCOL + q_DCOH) z^2 / 2 (CAPRI's p_pmpQuadTechn);
           - linear term from the base duals (z = 0 optimal at base), plus the milk revenue change
@@ -4291,7 +4291,7 @@ class RegionalSupplyModel:
                 self._ghg_applied[a] = d
 
     def _ghg_feed_cost(self):
-        """Flexible feeds: tax x emission per t fed, in the conic objective's EUR/kg units ({(animal, feed)})."""
+        """Flexible feeds: tax x emission per t fed, in the regional objective's EUR/kg units ({(animal, feed)})."""
         tax = float(getattr(self, "ghg_tax", 0.0) or 0.0)
         co = getattr(self, "ghg_coef", None)
         if tax <= 0 or not co or not co.get("feed"):
@@ -4730,7 +4730,7 @@ class RegionalSupplyModel:
                                    * (self._need_yf(a, y0, yc) - 1.0))
                 if a in CROPS and float(nmin.get(a, 0.0)) > 0:
                     # mineral part of the coefficient (for CAPRI's fertiliser technologies
-                    # inside the conic model): nmin x intensity x need factor of the yield (_need_yf)
+                    # inside the regional model): nmin x intensity x need factor of the yield (_need_yf)
                     _y0 = float(ybase.get(a, 0.0)) if (ybase is not None and hasattr(ybase, "get")) else 0.0
                     _yc = float(ycur.get(a, _y0)) if hasattr(ycur, "get") else _y0
                     _r = self._need_yf(a, _y0, _yc) if (_y0 > 0 and _yc > 0) else 1.0
@@ -4802,7 +4802,7 @@ class RegionalSupplyModel:
             A_rows.append(row_m)
             b_rows.append(float(self._cover_n_increment()))
             self._row_labels.append("mineral_N")
-            # crops' mineral part, for CAPRI's fertiliser technologies inside the conic model
+            # crops' mineral part, for CAPRI's fertiliser technologies inside the regional model
             self._mineral_row_m = mrow_parts
 
         # CAPRI winterCover_: the catch crops need land not already under winter cover,
@@ -6672,7 +6672,7 @@ class SupplyModule:
             if surplus_row and model._ni_inside() and getattr(model, "_nlp_ok", False):
                 # capri-mod-proto: nothing in the regional model depends on the N price any more
                 # (fertiliser and ammonia technologies and the inhibitor on manure are all decided
-                # inside the conic model), so the target is a plain constraint, as in CAPRI's NLP:
+                # inside the regional model), so the target is a plain constraint, as in CAPRI's NLP:
                 # one solve, and its dual is the N-balance price (reporting)
                 nb_used = max(float(result.shadow_prices.get("N_balance", 0.0)), 0.0)
                 self._nbal_state[region] = nb_used
@@ -6936,7 +6936,7 @@ def _luc_of(model, land_types):
 
 def _mineral_n_for_accounts(model):
     """Mineral N of the region's solution for the environmental accounts: the purchases of the NLP form's
-    fertilisation block (CAPRI's v_netPutQuant(NITF)), else the conic form's allocation column (or None)."""
+    fertilisation block (CAPRI's v_netPutQuant(NITF)), else the mineral-N allocation column (or None)."""
     npk = getattr(model, "_last_npk", None) or {}
     if "N" in npk:
         return float(npk["N"]["purchase"])
