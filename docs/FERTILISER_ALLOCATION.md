@@ -106,8 +106,7 @@ A Green Deal policy shock (EU27; scenario only): `greendeal_scenario(mineRedu=..
 | "limCres": residues to a group at most 1.3 x baseline per ha (+0.5 for listed pairs), mode at baseline, accuracy 10, every nutrient | same |
 
 CAPRI caps from its baseline results (`p_baselineDataout`); capri-mod from its own baseline allocation, as for the
-surplus target. Where the caps leave a group's need unmet (IPOPT reports infeasibility), the duals are widened to
-+-1000, then every cap is raised to at least 1.1 x the base allocation (CAPRI's own ad hoc exemption level); the
+surplus target. Where the caps leave a group's need unmet (IPOPT reports infeasibility), the duals are widened to +-1000; if that is not enough, the crop groups are exempted one at a time as CAPRI exempts groups in minfert_redu_by_crop.gms (p_checkSmallMine: the group's cap at its baseline mineral N per ha, fertiliser.exempt_cap_factor = 1.0), those whose need is out of reach under the cap first, with CAPRI's duals and then the widened ones (K71); the
 relaxation is kept for the rest of the scenario and recorded in `metadata["nlp_relaxed"]` (REGISTERED, K50 departures
 11, 13).
 

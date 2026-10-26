@@ -31,7 +31,7 @@ full re-evaluated residuals.
 So the method is CAPRI's first stage carried to convergence, accelerated. At convergence the equilibrium is the same;
 what the missing group and full-system stages would change is the number of steps.
 
-Switches: `MarketModule.market_acceleration = None` or the environment variable `CAPRI_MARKET_AA=0` turn the
+Switches: the setting `market.acceleration` ("anderson" or none) turns the
 acceleration off (damped steps alone, same equations and stopping rule).
 
 ## Measured (October 2026, Farm-to-Fork 2030, full EU, 2 workers, before the NLP supply form)

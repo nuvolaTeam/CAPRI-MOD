@@ -50,7 +50,6 @@ _FILE_CATEGORY = {
     "capri_oilseed_products_baseline.json": "market",
     "biofuel_feedstock.csv": "market", "biofuel_use_share.csv": "market", "biofuel_market.csv": "market", "feed_bulks_eu.csv": "market", "feed_bulks_eu_share.csv": "market", "dairy_processing.csv": "market",
     "dairy_hessian.csv": "market", "dairy_eu_balance.csv": "market", "dairy_eu_demand_elas.csv": "market", "dairy_world_processing.csv": "market", "dairy_world_hessian.csv": "market", "dairy_world_demand_elas.csv": "market", "dairy_world_baseline.json": "market",
-    "eu_demand_elas_overrides.json": "market",
     "feed_demand_nonEU.json": "market",
     "feed_ration_2017.json": "feed",
     "fodder_balance_2017.json": "feed",
@@ -98,7 +97,6 @@ _FILE_CATEGORY = {
     "feed_requirements.csv": "feed",
     # JSON parameter files
     "fao_market_baseline.json": "market",
-    "fao_demand_own_elas_eu.json": "market",
 }
 _SHARED_FILES = {"trade_flows.csv": "trade_flows_2017.csv"}
 
@@ -676,9 +674,14 @@ def load_all_data(data_dir: Optional[Path] = None, validate: bool = False,
         "winter_cover_share": (lambda df: {r: g.set_index("crop")[["share", "share0"]]
                                            for r, g in df.reset_index().groupby("region")} if df is not None else None)(
             _load_optional_csv(data_dir, "winter_cover_share.csv")),
-        # CAPRI's plant-protection, other-input and fertiliser costs per ha by region and crop
-        # (tools/build/build_plant_protection_cost.py): what the pesticide and organic instruments shock
-        "plant_protection_cost": (lambda df: {r: g.set_index("activity")[["plap_eur_ha", "inpo_eur_ha", "fert_eur_ha"]]
+        # CAPRI's plant-protection, other-input, fertiliser and fuel costs per ha by region and crop, and the
+        # animals' other inputs as a share of their input cost (tools/build/build_plant_protection_cost.py): what
+        # the pesticide and organic instruments shock
+        "plant_protection_cost": (lambda df: {r: g.set_index("activity")[[c for c in (
+                                                  "plap_eur_ha", "inpo_eur_ha", "fert_eur_ha", "eful_eur_ha",
+                                                  "eful_inpo_eur_ha", "yd_rest_eur_ha", "yd_plap_eur_ha",
+                                                  "yd_inpo_eur_ha", "yield_growth", "inpo_toin_share")
+                                                  if c in g.columns]]
                                               for r, g in df.reset_index().groupby("region")} if df is not None else None)(
             _load_optional_csv(data_dir, "plant_protection_cost.csv")),
         # the same by product, columns 'ACT.MARKET' (EUR per head): what each market price moves

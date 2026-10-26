@@ -369,16 +369,6 @@
    "note": "Not yet read by the model (Stage 1 calibration data).",
    "gaps": []
   },
-  "eu_demand_elas_overrides.json": {
-   "concept": "EU own-price demand elasticities for oils and cakes",
-   "unit": "elasticity",
-   "dimension": "commodity",
-   "capri_symbol": "p_ElasDem",
-   "status": "CAPRI",
-   "coverage": "6 commodities",
-   "note": "EU row only.",
-   "gaps": []
-  },
   "feed_demand_nonEU.json": {
    "concept": "Non-EU feed shares and feed-price elasticities",
    "unit": "share; elasticity",

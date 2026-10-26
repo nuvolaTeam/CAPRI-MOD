@@ -47,6 +47,18 @@ relax_step_up = 1.25
 # milk price by member state: "adaptive" (the step above, floor milk_ms_relax_floor) or "capri" (CAPRI's price
 # forecast: weighted average of the last simulated prices, capmod/define_stepWeights.gms, price_forecast.gms)
 milk_ms_step = "adaptive"
+# every price passed to the supply models (EU signal, member-state milk, EU blocks, Norway, young animals): "adaptive"
+# (the step above) or "capri" (CAPRI's price forecast, capmod/define_stepWeights.gms and price_forecast.gms l. 376-397:
+# the weighted average of the market's prices of the last steps, weights below). CAPRI's, the default since 26 October
+# 2026 (the user's decision): with the K75 fix it converges in Farm-to-Fork (9 iterations, r140) and Green Deal 2030
+# (13, r142), to the equilibrium of the adaptive step (r139, r141); "adaptive" kept as an option
+price_update = "capri"
+# what stops the outer loop: "capri-mod" (this model's tests: price and quantity changes, the gap between each price
+# and the market's, member-state milk, young-animal balance, N-balance price, manure pools, base calibration) or
+# "capri" (CAPRI's stop rule, capmod/price_forecast.gms l. 96-371: no more than two items still changing by more than
+# 0.05% between iterations, young animals left out; capri_mod/utils/capri_stop.py). CAPRI's verdict is recorded in
+# either case (outer_history[...]["conv"]["capri"], metadata capri_stop)
+stop_rule = "capri-mod"
 milk_ms_relax_floor = 0.02
 capri_step_weights = [0.55, 0.30, 0.15]
 capri_step_weights_late = [0.4, 0.3, 0.2, 0.1]
@@ -119,12 +131,18 @@ use_nitrate_in_ration = false
 fodder_at_shadow_price = false
 fodder_ratio_bounds = [0.2, 5.0]
 fodder_ratio_damping = 0.5
-# fodder balance band rows
+# fodder balance band rows (the conic form's second side of CAPRI's fodder equality)
 fodder_band = true
+# CAPRI-mod error fix (K75, 26 October 2026): in the NLP form, where CAPRI's fodder equality uses the feed columns, the
+# conic form's band rows (fodder per head from the previous solve's feeding) are dropped; false = the former behaviour
+nlp_fodder_band_dropped = true
 # livestock cost coefficients from CAPRI's results
 use_livestock_cost_coef = true
 # CAPRI's greening rules (permGrasGreening_)
 cap_greening = true
+# the permanent-grassland rule's dual at calibration: CAPRI's assumption |arable rent - grassland rent| (supply/
+# prep_cal.gms l. 118-131) when true; zero (this model before 24 October 2026) when false
+perm_gras_cal_dual = true
 # CAPRI's winter cover endogenous (envind/cover_crops.gms)
 winter_cover_endogenous = true
 # nitrification inhibitors inside the model
@@ -163,6 +181,10 @@ nlp_calibrate = true
 # solve tolerance is outer_loop.nlp_tol_final / nlp_tol_early)
 nlp_max_iter = 3000
 nlp_warm_max_iter = 200
+# numerical safeguard (not a CAPRI parameter): a warm-started solution whose objective is more than this share worse
+# than the last iteration's is checked against the solves from the previous point and the standard start, keeping the
+# lowest objective; the warm start can end at a worse stationary point of the non-convex per-head feeding (K75)
+nlp_warm_check = 0.01
 nlp_acceptable_tol = 1e-6
 # IPOPT's treatment of fixed columns (lower = upper bound): "make_constraint" keeps them as variables held by an
 # equality (trial points may leave the bound), "make_parameter" removes them from the problem (CAPRI: an activity
@@ -181,6 +203,32 @@ nbal_inner_max = 16
 # manure trade cost slope: CAPRI define_manure_trade_costs.gms l. 66-71, EUR 50 per t N for each 1% of the region's
 # manure N traded (0.05 in the model's EUR 1000)
 manure_pool_slope = 0.05
+# Green Deal organic and pesticide targets: CAPRI's regional input changes (define_inputs.gms l. 66-73).
+# CAPRI-ERROR-FIX. conventional_io.gms l. 361 sets scenAugmentsTechChange off at compile time, after organic_io.gms
+# l. 94 and conventional_io.gms l. 171 set it on, so the scenario's input change REPLACES the 2017-2030 input-saving
+# progress TF_I instead of multiplying it (CAPRI's own notes call the off setting an oversight).
+# true: (1 + change) x TF_I; false: CAPRI's code as written (parity switch)
+greendeal_inputs_keep_tech_change = true
+# CAPRI-ERROR-FIX. organic_io.gms l. 107-115 tops up the organic crops' other inputs by EFUL x 2 x the crop's target
+# ("costs for EFUL+SERI would double") but adds the fuel coefficient to the INPO coefficient, valuing it at INPO's
+# unit value. true: valued at the fuel cost; false: CAPRI's code as written (parity switch)
+organic_topup_at_fuel_cost = true
+# CAPRI's yield-dependent input coefficients (capmod/define_inputs.gms, inputs/yieldIY.gms): the crops' input costs
+# follow their yields after the scenario's yield shifts and the price-driven yield response (S7). false: this model
+# before 24 October 2026 (costs fixed per ha)
+yield_dependent_inputs = true
+# CAPRI's fertiliser-option curvature with the fertiliser saving valued at the member state's NITF price (envind/
+# ghgMiti.gms l. 1016-1035, audit S5); false: without (this model before 24 October 2026). OFF by default (25 October
+# 2026): with it and the cost on the N purchases, the curvature turns negative where NMIN is large and the baseline
+# leaves the base share (FR10 precision farming 0.44 at the 2030 baseline, run r128: EU 9.6%); either part alone
+# keeps the base. Open (KNOWN_ISSUES K77)
+fert_slope_with_saving = false
+# the fertiliser options' cost on the N purchases (CAPRI's GHG_Mit_Cost_: - cost x v_netPutQuant(NITF), NLP form, audit
+# S5); false: on the crops' base mineral N (this model before 24 October 2026)
+fert_cost_on_purchases = true
+# catch crops on the ecological set-aside row at CAPRI's weight (setaEco includes CATC, audit S9); false: without (this
+# model before 24 October 2026)
+eco_setaside_catch_crops = true
 
 [fertiliser]
 # CAPRI's inner fertiliser distribution model (useInnerFertDistModel)
@@ -194,23 +242,38 @@ use_nutned_always = true
 # the inner model's duals widened to +-1000 where CAPRI's +-10 admit no allocation (REGISTERED, CAPRI's own
 # workaround is a slack)
 npk_dual_bound_wide = 1000.0
-# mineral caps relaxed to this multiple of the base allocation when the NLP fails (CAPRI: 1.1 x baseline,
-# minfert_redu_by_crop.gms)
-caps_relax_factor = 1.1
+# a crop group whose mineral cap leaves its N need out of reach (NLP infeasible) is exempted as CAPRI exempts groups
+# (minfert_redu_by_crop.gms, p_checkSmallMine): its cap at this multiple of its baseline mineral N per ha (CAPRI: 1.0
+# for its small groups, "no backsliding"; 1.1-1.2 for its listed region x group pairs)
+exempt_cap_factor = 1.0
 # inner distribution solve: tolerance, iterations; NLP iterations
 fd_tol = 1e-9
 fd_max_iter = 100
 fd_nlp_max_iter = 1000
+# how a crop's nutrient need per ha follows its yield: "capri" (fert/fertned.gms: the main-output part linearly, the
+# straw part with the scenario's yield shifts only, crops at the floor or cap fixed; capri_mod/fert/npk.py
+# need_yield_factor) or "sqrt" (the square root of the yield ratio on the whole need: this model's rule before
+# 24 October 2026, for comparisons)
+need_yield_rule = "capri"
 
 [market]
+# CAPRI's raw milk inside the market (audit M5): each member state's raw milk follows its milk price through the
+# market supply functions (ProdNQ_ MILK, the measured Hessian per member state) against its dairies' demand, solved
+# with the young-animal markets; false: raw milk delivered fixed within a market solve (before 24 October 2026)
+milk_in_market = true
+# the market supply Hessian measured again at the scenario's state, at this outer iteration of a scenario (0: never,
+# CAPRI's: once per baseline). Tried for K75 (run r132, iteration 8): +62 min per scenario, the calf price crept as
+# before; back to CAPRI's 0 (the user's go-ahead, 25 October 2026)
+hessian_scenario_iter = 0
 # CAPRI's endogenous biofuel markets (BIOF_M; star 3.0 GUI default on); a scenario may set its own
 biofuel_markets = true
 # DEPARTURE: CAPRI's default aggregation has two EU trade blocks (EU_WEST, EU_EAST; aggregation/defaultA.agg);
 # one EU27 block by default so far; to be switched to CAPRI's setting
 eu_blocks = false
-# DEPARTURE: CAPRI calibrates the market's supply functions to the supply models (calibrate_supply.gms); off so
-# far (no gain in speed, not available with the trade blocks yet); to be switched to CAPRI's setting
-market_supply_nq = false
+# CAPRI's market supply functions calibrated to the supply models (calibrate_supply.gms, ProdNQ_, recalibrated each
+# iteration by simu_calibration_to_supply.gms); CAPRI's setting since 24 October 2026 (K75). The Hessian is measured
+# once per baseline by price shocks on the supply models and cached on disk (.cache/market_supply_hessian)
+market_supply_nq = true
 # price shock of the market supply Hessian (calibrate_supply.gms)
 nq_price_shock = 0.01
 # CAPRI's dairy processing block
@@ -231,6 +294,9 @@ use_trq = true
 acceleration = "anderson"
 aa_memory = 5
 trade_chord = true
+# the trade systems' Newton with the exact Jacobian from CasADi (market programme step G1, capri_mod/market/trade_ad.py)
+# instead of finite differences; same equations and root
+exact_jacobian = false
 max_iter = 100
 tol = 1e-7
 damping_increase_threshold = 0.999
@@ -243,6 +309,10 @@ step_clip = [0.2, 5.0]
 [young_animals]
 # CAPRI's young-animal markets (yaniMarket_)
 enabled = true
+# cleared inside the market model with the products (CAPRI arm/market_model.gms yaniMarket_, the market's supply
+# functions with young-animal rows and columns); false: a price update between market solves, which leaves a slow
+# beef / calf price mode (K75). Needs market.market_supply_nq; the EU trade blocks keep the update between solves
+in_market = true
 tol = 0.005
 relaxation = 0.7
 # price-update variants: own-response secant (off), the supply models' exact response ("auto": with the member
@@ -316,6 +386,13 @@ c_grid_points = 30
 # false (default): the minimum over the first grid point only, CAPRI's stated intent;
 # true: CAPRI's code as written (the parity switch, CAPTRD_MOD.md section 8.3)
 short_series_grid_as_coded = false
+# Floor of the stored error variance (define_stats_and_supports.gms l. 327-329). CAPRI-ERROR-FIX. CAPRI's code takes
+# max(0.05 x |wAve|, wVarErr): a level against a variance (wVarErr is a sum of squared residuals, l. 118-123, its
+# 1-2 observation fall-back SQR(wAve) x 0.25, l. 130; sqrt(wVarErr) is used as a standard deviation,
+# define_eu_supports.gms l. 693). The floor binds in 19.5% of CAPRI's series (results_1770.gdx).
+# true (default): (0.05 x |wAve|)^2, a 5% coefficient of variation; false: CAPRI's code as written (parity switch).
+# No effect on results until Steps 2-3 are ported (the variance weights their penalty terms)
+variance_floor_squared = true
 # BASYRS5 = {ex-post years t with |t - BAS| <= h} (captrd.gms l. 703): the base-period window of the BAS average
 # (prep_data_for_estimation.gms l. 252-261) and of the market-balance exclusions (l. 31-32). CAPRI's h = 3 spans
 # seven calendar years under the name "5", but the set is restricted to ExPost, which ends at BAS + 1 in the

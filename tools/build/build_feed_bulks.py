@@ -105,6 +105,19 @@ def rho_feed():
     return rho
 
 
+def rho_feed_caps(region: str) -> dict:
+    """Region-specific caps on p_rhoFeed in arm/market1.gms (l. 96-100: "lower substitution for Norway and Western
+    Balkans"): p_rhoFeed("NO000000",FEED) = min(p_rhoFeed("NO000000",FEED), 2.0) -> {bulk or None: cap}."""
+    caps = {}
+    for line in open(GAMS / "arm" / "market1.gms", errors="ignore"):
+        if line.lstrip().startswith("*"):
+            continue
+        m = re.match(r'\s*p_rhoFeed\("([A-Z0-9_]+)",(?:"([A-Z]+)"|FEED)\)\s*=\s*min\(.*,\s*([0-9.]+)\)\s*;', line)
+        if m and m.group(1) == region:
+            caps[m.group(2)] = float(m.group(3))
+    return caps
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--dump", type=Path,
@@ -145,6 +158,8 @@ def main():
     # K56; Norway is not in the EU's feed demand); use_kt = its use of the product (HCOM + FEDM + INDM + BIOF + LOSM +
     # PRCM, as the EU's feed share of use below), for the feed share of Norway's use
     no = []
+    capno = rho_feed_caps("NO000000")                 # Norway's cap of 2.0 (market1.gms l. 98)
+    rho_no = {b: min(r_, capno.get(b, capno.get(None, r_))) for b, r_ in rho.items()}
     for b, items in BULKS.items():
         for p in items:
             q = v.get(("NO000000", "FEED", p), 0.0)
@@ -153,7 +168,7 @@ def main():
                 use = sum(v.get(("NO000000", k, x), 0.0) for k in USE_ITEMS
                           for x in GROUPS.get(COMMODITY.get(p, ""), (p,)))
                 no.append(dict(ms="NO000000", bulk=b, product=p, commodity=COMMODITY.get(p, ""), feed_kt=q, arm1p=pr,
-                               rho=rho[b], use_kt=use))
+                               rho=rho_no[b], use_kt=use))
     pd.DataFrame(no).to_csv(DEST / "feed_bulks_no.csv", index=False, float_format="%.8g")
     print(f"feed_bulks_no.csv: {len(no)} rows (Norway's bulks: price indices and feed demand)")
     bal = json.load(open(ROOT / "capri_data" / "validation" / "capri_eu27_market_balance_2030_ref.json"))["products"]

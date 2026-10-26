@@ -147,7 +147,7 @@ class ResultsReporter:
         })
 
     def welfare_summary(self) -> pd.DataFrame:
-        """Welfare effects by trade region (EUR billion)."""
+        """Welfare effects by trade region (EUR million)."""
         market_eq = self.results.get("market")
         if market_eq is None:
             return pd.DataFrame()

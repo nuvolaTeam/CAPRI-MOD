@@ -151,19 +151,6 @@ def main():
            "function that the model trades (CAPRI -> model products: tools/build/build_bilateral_market.py MODEL). Non-EU regions only: EU feed comes from the supply models' feed "
            "bulks (tools/build/build_feed_bulks.py). tools/build/build_feed_demand_nonEU.py")
     json.dump({"_source": src, "parameters": params}, open(DEST, "w"), indent=1)
-    # DDGS and the residual feeds FENI, FPRI are all feed: in the trade regions without a feed function their use
-    # follows the generic own-price response, whose elasticity (armington_params.csv eta) is CAPRI's own-price
-    # p_ElasFeed averaged over CAPRI's non-EU behavioural regions that have one (2030 calibration)
-    ARM = ROOT / "capri_data" / "2017" / "market" / "armington_params.csv"
-    arm = pd.read_csv(ARM, index_col=0)
-    for c_ in ("DDGS", "FENI", "FPRI"):
-        vals = [float(r.value) for r in el.itertuples(index=False)
-                if r.rms in beh and not is_eu(r.rms) and r.feed in g2m and g2m[r.feed] == c_ and r.price_of == r.feed]
-        if vals and c_ in arm.index:
-            arm.at[c_, "eta"] = round(sum(vals) / len(vals), 4)
-            print(f"{c_} own-price elasticity for regions without a feed function: {arm.at[c_, 'eta']} "
-                  f"(mean over {len(vals)} CAPRI regions)")
-    arm.to_csv(ARM)
     regs = sorted({k.split("|")[0] for k in params})
     print(f"wrote {DEST.relative_to(ROOT)}: {len(params)} entries, {len(regs)} regions {regs}")
     miss = sorted(trade - set(regs))

@@ -3169,8 +3169,8 @@ def test_rye_and_oats_are_markets(model):
 
 def test_table_grapes_and_tobacco_are_markets(model):
     """Table grapes (TAGR) and tobacco (TOBA) are CAPRI market products (arm/arm_sets.gms CROPS_DEF): the activities'
-    output reaches their own markets; CAPRI's world prices and Armington elasticities are in the data; the EU demand
-    elasticity of tobacco is CAPRI's processing one (-0.5, arm/trim_elas.gms)."""
+    output reaches their own markets; CAPRI's world prices and Armington elasticities are in the data; the EU's use of
+    tobacco is processing, with CAPRI's processing function (ProcNQ_: p_hessNQProc of the member states)."""
     import json
     from capri_mod.data.definitions import MARKET_COMMODITIES
     for c in ("TAGR", "TOBA"):
@@ -3178,10 +3178,11 @@ def test_table_grapes_and_tobacco_are_markets(model):
     agg = pd.DataFrame({"TAGR": [2.0], "TOBA": [0.5]}, index=["IT000000"])
     ms = model._bridge_supply_to_market(agg)
     assert ms.at["IT000000", "TAGR"] == 2.0 and ms.at["IT000000", "TOBA"] == 0.5
-    arm = pd.read_csv(DATA_DIR / "2017" / "market" / "armington_params.csv", index_col=0)
-    assert arm.at["TAGR", "sigma"] == 3.7 and arm.at["TOBA", "sigma"] == 1.8
-    ov = json.load(open(DATA_DIR / "2017" / "market" / "eu_demand_elas_overrides.json"))
-    assert ov["TOBA"] == -0.5
+    arm = pd.read_csv(DATA_DIR / "2017" / "market" / "armington_rho.csv", index_col=0)
+    assert arm.at["TAGR", "rho1"] == 3.7 and arm.at["TOBA", "rho1"] == 1.8
+    h = pd.read_csv(DATA_DIR / "2017" / "market" / "processing_nq_hessian.csv")
+    eu = h[(h.model_region == "EU27") & (h.x == "TOBA") & (h.y == "TOBA")]
+    assert len(eu) > 0 and (eu.h > 0).all() and (eu.arm1p_y > 0).all()
 
 
 def test_table_olives_are_a_market_of_their_own(model, data):
@@ -3199,15 +3200,14 @@ def test_table_olives_are_a_market_of_their_own(model, data):
     ms = model._bridge_supply_to_market(agg)
     assert ms.at["IT000000", "TABO"] == 2.0
     assert 0.0 < ms.at["IT000000", "OLIV"] < 10.0 * 0.5                              # olive oil, not olives
-    arm = pd.read_csv(DATA_DIR / "2017" / "market" / "armington_params.csv", index_col=0)
-    assert arm.at["TABO", "sigma"] == 4.1                                            # p_rhoArm1 (market1_ch.gms)
+    arm = pd.read_csv(DATA_DIR / "2017" / "market" / "armington_rho.csv", index_col=0)
+    assert arm.at["TABO", "rho1"] == 4.1                                            # p_rhoArm1 (market1_ch.gms)
 
 
 def test_textile_crops_are_one_activity_and_market(model, data):
     """CAPRI's textile crops are one activity and one market product, TEXT (sets.gms; arm/arm_sets.gms CROPS_DEF),
     cotton in Greece, Spain and Bulgaria, flax and hemp elsewhere; the model's former split into cotton (COTT) and
-    other fibre (OFIB) is gone. EU use is processing, with CAPRI's elasticity for other processing (-0.5 on a margin
-    of 0.2 x price: -2.5)."""
+    other fibre (OFIB) is gone. EU use is processing, with CAPRI's processing function (ProcNQ_)."""
     import json
     from capri_mod.data.definitions import MARKET_COMMODITIES, CROPS
     assert "TEXT" in CROPS and "TEXT" in MARKET_COMMODITIES and not {"COTT", "OFIB"} & set(CROPS)
@@ -3216,9 +3216,10 @@ def test_textile_crops_are_one_activity_and_market(model, data):
     assert ar.loc[[r for r in ar.index if r.startswith("EL")], "TEXT"].sum() > 300  # Greek cotton
     agg = pd.DataFrame({"TEXT": [3.0]}, index=["EL000000"])
     assert model._bridge_supply_to_market(agg).at["EL000000", "TEXT"] == 3.0
-    arm = pd.read_csv(DATA_DIR / "2017" / "market" / "armington_params.csv", index_col=0)
-    assert arm.at["TEXT", "sigma"] == 8.2                                            # p_rhoArm1 (market1_ch.gms)
-    assert json.load(open(DATA_DIR / "2017" / "market" / "eu_demand_elas_overrides.json"))["TEXT"] == -2.5
+    arm = pd.read_csv(DATA_DIR / "2017" / "market" / "armington_rho.csv", index_col=0)
+    assert arm.at["TEXT", "rho1"] == 8.2                                            # p_rhoArm1 (market1_ch.gms)
+    h = pd.read_csv(DATA_DIR / "2017" / "market" / "processing_nq_hessian.csv")
+    assert len(h[(h.model_region == "EU27") & (h.x == "TEXT") & (h.y == "TEXT") & (h.h > 0)]) > 0
 
 
 def test_palm_and_other_vegetable_oils_are_markets(model):
@@ -4073,3 +4074,150 @@ def test_labour_accounts_and_set_aside_split_as_capri(data):
         m = re.search(r"^'DE110000'\.'GROF'\.'LABT'\.'Y'\s+([\d.Ee+-]+)", dump.read_text(errors="ignore"), re.M)
         if m:
             assert abs(lab.at[reg, "LABT"] / float(m.group(1)) - 1.0) < 0.03
+
+
+def test_greendeal_input_changes_follow_capri(monkeypatch):
+    """CAPRI's plant-protection and other-input changes of the organic and pesticide targets (organic_io.gms,
+    conventional_io.gms, define_inputs.gms): one regional change per input on every activity, animals' other inputs
+    included, plus the organic crops' fuel top-up; the change multiplies the input-saving progress TF_I (the
+    CAPRI-ERROR-FIX default) or replaces it (CAPRI's code, the parity switch)."""
+    from capri_mod.data.loaders import load_all_data
+    from capri_mod.supply.supply_module import SupplyModule, RegionalSupplyModel
+    from capri_mod.utils.utils import calibrate_supply_elasticities
+
+    d = load_all_data("capri_data")
+    region = "FRJ1" if "FRJ1" in d["areas"].index else str(d["areas"].index[0])
+    sm = SupplyModule(d, calibrate_supply_elasticities(d["areas"]))
+    sm.run(price_signals=None, regions=[region])
+    mo = sm._models[region]
+    mo.data.sim_year = 2030
+    tf = 1.0 - 0.005 * 13
+    crop = next(c for c in ("SWHE", "BARL") if c in mo.net_revenues.index)
+    ani = next(a for a in ("DCOW", "PIGF") if a in mo.net_revenues.index and mo._input_row(a, "inpo_toin_share"))
+    plap, inpo = mo._input_row(crop, "plap_eur_ha"), mo._input_row(crop, "inpo_eur_ha")
+    eful = mo._input_row(crop, "eful_eur_ha")
+    assert plap and inpo and eful
+    nr0 = mo.net_revenues.copy()
+    o_R, o_a = mo._organic_region_target(0.25), mo._organic_crop_target(crop, 0.25)
+    assert 0 < o_R < 0.5 and o_a > 0
+    assert mo._organic_crop_target("GRAS", 0.25) == 0.0, "grassland is not one of CAPRI's organic crops"
+
+    mo._apply_greendeal_input_changes(0.25, 0.50)
+    topup = 2 * o_a * eful
+    d_plap = plap * (1 - 0.5) * tf - plap * tf                         # PLAP -50% overall
+    d_inpo = (inpo + topup) * (1 + 0.5 - o_R) * tf - inpo * tf         # INPO +(r - o_R), with the top-up
+    assert abs((nr0[crop] - mo.net_revenues[crop]) - (d_plap + d_inpo)) < 1e-6
+    sh = mo._input_row(ani, "inpo_toin_share") * mo._animal_cost_per_head(ani)
+    assert abs((nr0[ani] - mo.net_revenues[ani]) - sh * (0.5 - o_R) * tf) < 1e-6
+
+    # organic target alone: plant protection -o_R on every crop, the top-up, no change for animals
+    mo.net_revenues = nr0.copy()
+    mo._apply_greendeal_input_changes(0.25, 0.0)
+    assert abs((nr0[crop] - mo.net_revenues[crop]) - (-plap * o_R * tf + topup * tf)) < 1e-6
+    assert mo.net_revenues[ani] == nr0[ani]
+
+    # parity switch: CAPRI's code replaces TF_I by (1 + change)
+    monkeypatch.setattr(RegionalSupplyModel, "greendeal_inputs_keep_tech_change", False)
+    mo.net_revenues = nr0.copy()
+    mo._apply_greendeal_input_changes(0.25, 0.50)
+    assert abs((nr0[ani] - mo.net_revenues[ani]) - sh * ((1 + 0.5 - o_R) - tf)) < 1e-6
+
+
+def test_input_costs_follow_yields_as_capri(monkeypatch):
+    """CAPRI's yield-dependent inputs (capmod/define_inputs.gms, inputs/yieldIY.gms): a crop's input cost per ha moves
+    by sum_i f_i x cost_i x G x TF_I x (rho - 1) with its yield ratio rho against the 2030 reference, PLAP and INPO at
+    their Green Deal TF_I; nothing at the reference yields, nothing with the switch off."""
+    from capri_mod.data.loaders import load_all_data
+    from capri_mod.supply.supply_module import SupplyModule, RegionalSupplyModel
+    from capri_mod.utils.utils import calibrate_supply_elasticities
+
+    d = load_all_data("capri_data")
+    region = "FRJ1" if "FRJ1" in d["areas"].index else str(d["areas"].index[0])
+    sm = SupplyModule(d, calibrate_supply_elasticities(d["areas"]))
+    sm.run(price_signals=None, regions=[region])
+    mo = sm._models[region]
+    mo.data.sim_year = 2030
+    tf = 1.0 - 0.005 * 13
+    crop = next(c for c in ("SWHE", "BARL") if c in mo.net_revenues.index)
+    rest, pl, ip = (mo._input_row(crop, c) for c in ("yd_rest_eur_ha", "yd_plap_eur_ha", "yd_inpo_eur_ha"))
+    g = mo._input_row(crop, "yield_growth")
+    assert rest and pl and ip and 0.5 < g < 1.5
+    y0 = mo.data.yields.copy()
+    mo._yields_solve0 = y0
+    nr0 = mo.net_revenues.copy()
+    mo._greendeal_inputs = {}
+    mo._apply_yield_input_costs()                                   # at the reference yields: no change
+    assert (mo.net_revenues == nr0).all()
+    y1 = y0.copy(); y1[crop] = y0[crop] * 0.9
+    mo.data.yields = y1
+    mo._apply_yield_input_costs()
+    assert abs((nr0[crop] - mo.net_revenues[crop]) - (rest + pl + ip) * tf * (-0.1)) < 1e-6
+    # with the Green Deal's PLAP -50% and INPO +30%: those parts at (1 + change) x TF_I
+    mo.net_revenues = nr0.copy()
+    mo._greendeal_inputs = {"pc_plap": -0.5, "pc_inpo": 0.3, "keep_tf": True}
+    mo._apply_yield_input_costs()
+    want = (rest * tf + pl * 0.5 * tf + ip * 1.3 * tf) * (-0.1)
+    assert abs((nr0[crop] - mo.net_revenues[crop]) - want) < 1e-6
+    monkeypatch.setattr(RegionalSupplyModel, "yield_dependent_inputs", False)
+    mo.net_revenues = nr0.copy()
+    mo._apply_yield_input_costs()
+    assert (mo.net_revenues == nr0).all()
+    mo.data.yields, mo._yields_solve0, mo._greendeal_inputs = y0, None, {}
+
+
+def _dying_in_fr10(region):
+    """A regional-solve worker that dies on FR10 (test_dead_worker_does_not_hang_the_regional_solves)."""
+    import os
+    from capri_mod.supply import supply_module as smod
+    if region == "FR10":
+        os._exit(1)
+    return smod.__dict__["_par_solve_region_orig"](region)
+
+
+def test_dead_worker_does_not_hang_the_regional_solves(monkeypatch):
+    """A regional-solve worker that dies (killed for memory) must not hang the run: the regions left are solved in
+    the parent process, with a warning, and the results equal a run in one process (26 October 2026)."""
+    import os
+    import warnings
+    from capri_mod.supply import supply_module as smod
+    from capri_mod.settings import override
+    from capri_mod.model import CAPRIModel
+    regs = ["DE11", "DE12", "FR10", "FRK1"]
+    monkeypatch.setitem(smod.__dict__, "_par_solve_region_orig", smod._par_solve_region)
+    with override({"market.market_supply_nq": False}):
+        m1 = CAPRIModel(data_dir="capri_data", verbose=False)
+        monkeypatch.setenv("CAPRI_WORKERS", "1")
+        r1 = m1.run(scenario="BASELINE", regions=regs, max_outer_iter=1)
+        monkeypatch.setattr(smod, "_par_solve_region", _dying_in_fr10)
+        monkeypatch.setenv("CAPRI_WORKERS", "2")
+        m2 = CAPRIModel(data_dir="capri_data", verbose=False)
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter("always")
+            r2 = m2.run(scenario="BASELINE", regions=regs, max_outer_iter=1)
+        assert any("worker process of the regional solves died" in str(x.message) for x in w)
+    for g in regs:
+        a, b = r1["supply"][g].activities, r2["supply"][g].activities
+        assert float((a - b).abs().max()) < 1e-6, g
+
+
+def test_nlp_form_has_capri_fodder_equality_without_lagged_band(monkeypatch):
+    """CAPRI's fodder balance SUPBAL_ is an equality with the feed columns; the conic form's band rows, which carry
+    the previous solve's fodder per head, are not in the NLP form (K75, supply.nlp_fodder_band_dropped)."""
+    from capri_mod.supply import capri_regional_nlp as cnlp
+    from capri_mod.settings import override
+    from capri_mod.model import CAPRIModel
+    seen = []
+    orig = cnlp.CapriRegionalNLP.__init__
+
+    def spy(self, spec):
+        orig(self, spec)
+        seen.append(list(self.dropped))
+    monkeypatch.setattr(cnlp.CapriRegionalNLP, "__init__", spy)
+    monkeypatch.setenv("CAPRI_WORKERS", "1")
+    for flag in (True, False):
+        seen.clear()
+        with override({"supply.nlp_fodder_band_dropped": flag, "market.market_supply_nq": False}):
+            m = CAPRIModel(data_dir="capri_data", verbose=False)
+            m.run(scenario="BASELINE", regions=["FRD1"], max_outer_iter=1)
+        bands = [l for d in seen for l in d if l.startswith("fodder_") and l.endswith("_band")]
+        assert bool(bands) == flag, (flag, bands)

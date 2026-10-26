@@ -12,8 +12,10 @@ other uses for the food share), and checks that the stored parameters reproduce 
 calibration point.
 
 Outputs (capri_data/2017/market/):
-  gl_demand_goods.csv    rms, model_region, good, model_commodity, d, cpri, hcon, use   (use: HCON + FEED + PROC +
-                         BIOF + INDM + LOSM of the good, CAL)
+  gl_demand_goods.csv    rms, model_region, good, model_commodity, d, cpri, hcon, use, arm1p   (use: HCON + FEED +
+                         PROC + BIOF + INDM + LOSM of the good, CAL; arm1p: the Armington price ARM1P of the good in
+                         the region's market region RM (RMS_TO_RM), CAL: CAPRI's consumer price moves with it,
+                         Cpri_ = Arm1P + margins, market_model.gms l. 3032-3039)
   gl_demand_b.csv        rms, i, j, b                                                    (i <= j as CAPRI stores)
   gl_demand_regions.csv  rms, model_region, Y, inha, max_rel_err                         (check at CAL)
 
@@ -68,7 +70,8 @@ def read_data(regions):
         if not line.startswith("'"):
             continue
         m = pat.match(line)
-        if m and m.group(1) in regions and (m.group(2) in ("CPRI",) + USES or m.group(2) in ("INCE", "INHA")):
+        if m and (m.group(1) in regions and (m.group(2) in ("CPRI",) + USES or m.group(2) in ("INCE", "INHA"))
+                  or m.group(2) == "ARM1P"):
             v[(m.group(1), m.group(2), m.group(3))] = num(m.group(4))
     return v
 
@@ -84,8 +87,26 @@ def model_maps():
     return good_to_model, REGION_MAP
 
 
+#: CAPRI's mapping of behavioural regions to market regions (set RMS_TO_RM of CAPRI's own instantiation,
+#: capri_reference/sets/simini_21730, tools/build/build_capri_sets_reference.py), kept as model input
+RMS_TO_RM_SRC = ROOT / "capri_reference" / "sets" / "simini_21730" / "RMS_TO_RM.csv"
+RMS_TO_RM = ROOT / "capri_data" / "shared" / "rms_to_rm.csv"
+
+
+def rms_to_rm() -> dict:
+    if RMS_TO_RM_SRC.exists():
+        m = pd.read_csv(RMS_TO_RM_SRC)[["d0", "d1"]].rename(columns={"d0": "rms", "d1": "rm"})
+        m.to_csv(RMS_TO_RM, index=False)
+        # CAPRI's behavioural regions (set RMS), for the builders that read CAPRI's data rows per region
+        pd.read_csv(RMS_TO_RM_SRC.parent / "RMS.csv")[["d0"]].rename(columns={"d0": "rms"}) \
+            .to_csv(RMS_TO_RM.parent / "rms.csv", index=False)
+    m = pd.read_csv(RMS_TO_RM)
+    return dict(zip(m.rms, m.rm))
+
+
 def main() -> None:
     d, b = read_elas()
+    r2m = rms_to_rm()
     regions = sorted(d)
     v = read_data(set(regions))
     g2m, rmap = model_maps()
@@ -118,9 +139,10 @@ def main() -> None:
             err = float(max(abs(x[i] - q[i]) / q[i] for i in ok)) if ok else float("nan")
         for i, g in enumerate(goods):
             use = sum(v.get((r, u, g), 0.0) for u in USES)
-            rows_g.append((r, mr, g, g2m.get(g, ""), dv[i], p[i] * 1000.0, q[i], use))
+            rm = r2m.get(r, r)                      # a region that is its own market region (RM_AND_RMS)
+            rows_g.append((r, mr, g, g2m.get(g, ""), dv[i], p[i] * 1000.0, q[i], use, v.get((rm, "ARM1P", g), float("nan"))))
         rows_r.append((r, mr, Y, inha, err))
-    pd.DataFrame(rows_g, columns=["rms", "model_region", "good", "model_commodity", "d", "cpri", "hcon", "use"]) \
+    pd.DataFrame(rows_g, columns=["rms", "model_region", "good", "model_commodity", "d", "cpri", "hcon", "use", "arm1p"]) \
         .to_csv(OUT / "gl_demand_goods.csv", index=False, float_format="%.10g")
     pd.DataFrame(rows_b, columns=["rms", "i", "j", "b"]).to_csv(OUT / "gl_demand_b.csv", index=False, float_format="%.10g")
     reg = pd.DataFrame(rows_r, columns=["rms", "model_region", "Y", "inha", "max_rel_err"])

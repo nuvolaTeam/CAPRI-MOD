@@ -70,7 +70,7 @@ as one-key-per-line TOML (comments and [v] marks removed): it parses, 153 keys.
                captrd_factor_bounds=[0.2,5.0]; trajectory_factor_bounds=[0.1,10.0]
 [fertiliser]   fert_dist_inside=true (useInnerFertDistModel [v]); use_min_mineral_share="capri" (NUTMIN_)
                use_fert_allocation=false; use_nutned_always=true; nlp_fertilisation=true
-               npk_dual_bound_wide=1000 (CAPRI +-10); caps_relax_factor=1.1; fd_tol=1e-9; fd_max_iter=100
+               npk_dual_bound_wide=1000 (CAPRI +-10); exempt_cap_factor=1.0 (CAPRI p_checkSmallMine: 1.0 x baseline for exempted groups); fd_tol=1e-9; fd_max_iter=100
                fd_nlp_max_iter=1000
 [environment]  luc_model=true; ad_dairy_ch4="fix" ("capri" = as coded); ammapp_sign="consistent" ("capri" = CAPRI's sign)
                luc_ipopt_tol=1e-12; luc_max_iter=500

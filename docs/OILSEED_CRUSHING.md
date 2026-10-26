@@ -48,9 +48,9 @@ Links to the rest of the model:
 | oils → processing | the processing part of oil use follows CAPRI's ProcNQ_ with cross terms among the vegetable oils |
 | seed prices → supply models | the price signal, as for every product |
 
-Difference from CAPRI (not registered elsewhere): the model evaluates the crushing margin at the regions' Armington
-(consumer) price ratios for seed, oil and cake alike (`crush_dom`); CAPRI's `ProcMargO_` takes the oil and cake at
-their producer prices and the seed at its Arm1 price.
+The crushing margin takes the oil and cake at their producer prices and the seed at its Arm1 price, as CAPRI's
+`ProcMargO_` (setting `market.crush_margin_producer_prices`, KNOWN_ISSUES K54-4). Open difference: the price levels
+the changes are formed on (docs/design/ARCHITECTURE_REFACTOR.md 5.1, M1).
 
 ## Data: CAPRI's 2030 reference balance, EU27 (kt)
 

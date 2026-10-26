@@ -257,7 +257,7 @@ class InnerFertDist:
         return out
 
     def group_factors(self, region: str, crop_areas: Dict[str, float], crop_factor: Dict[str, float]) -> Dict[str, float]:
-        """Area-weighted mean of a per-crop factor over each group (e.g. the need factor sqrt(yield / base yield))."""
+        """Area-weighted mean of a per-crop factor over each group (e.g. CAPRI's need factor of the yield, need_yield_factor)."""
         sh = self.crop_shares(region)
         num, den = {}, {}
         for c, a in crop_areas.items():

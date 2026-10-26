@@ -43,6 +43,8 @@ class BilateralCommodity:
     PA0: Optional[np.ndarray] = None
     S0: Optional[np.ndarray] = None
     D0: Optional[np.ndarray] = None
+    #: n x n transport cost of each flow (EUR/t, CAPRI TCost): with a0 r the base of an ad valorem tariff change
+    tc: Optional[np.ndarray] = None
 
     def calibrate(self, S0: np.ndarray, max_export_share: float = 0.98) -> None:
         """Closure at the model's own base supply S0: CAPRI's trade flows are kept, domestic sales absorb the
@@ -135,31 +137,23 @@ class BilateralCommodity:
             new[j] = 0.5 * (lo + hi)
         self.trq_offset = new
 
-    def trq_target(self, X: np.ndarray) -> Optional[np.ndarray]:
-        """Specific-tariff offset on the importer's flows at flows X: the quota-regime part of each flow pays
-        the out-of-quota tariff as its fill passes the quota (logistic around fill 1, CAPRI's TRQ regime is
-        smoothed the same way), relative to the base fill so the base is reproduced."""
-        if self.trq_row is None:
-            return None
-        rows = self._rows()
-        with np.errstate(divide="ignore", invalid="ignore"):
-            f = np.where(self.trq_Q > 0, self.trq_share * X[rows].sum(axis=0) / np.where(self.trq_Q > 0, self.trq_Q, 1.0), 0.0)  # fill
-            Qb = self.trq_Q0 if self.trq_Q0 is not None else self.trq_Q
-            f0 = np.where(Qb > 0, self.trq_share * self.X0[rows].sum(axis=0) / np.where(Qb > 0, Qb, 1.0), 0.0)
-        return np.where(self.trq_Q > 0, self.trq_gap * (self._sig(f) - self._sig(f0)), 0.0)
-
-    def import_prices(self, r: np.ndarray, tariff_add: float = 0.0, importer: Optional[int] = None) -> np.ndarray:
+    def import_prices(self, r: np.ndarray, tariff_adds=None) -> np.ndarray:
+        """Import prices p_ij at the exporters' price ratios r. tariff_adds: [(importer rows, points of ad valorem
+        tariff added)], CAPRI impPrice_ (arm/market_model.gms l. 2849-2882): the ad valorem tariff applies to the
+        exporter's market price plus the transport cost; flows between the rows of one importer (the EU's trade
+        blocks) carry none."""
         p = self.a * r[None, :] + self.b
         if self.trq_row is not None and self.trq_offset is not None:
             rows = self._rows()
             p[rows] = p[rows] + self.trq_offset[None, :]
-        if tariff_add and importer is not None:
-            # importer: a row, or the rows of the EU trade blocks (a change of the EU's external tariff); flows
-            # between the importer rows carry no tariff
+        for importer, pts in (tariff_adds or ()):
+            if not pts:
+                continue
             imp = np.atleast_1d(np.asarray(importer, dtype=int))
+            ext = ~np.isin(np.arange(len(r)), imp)
+            tc = self.tc if self.tc is not None else np.zeros_like(self.a0)
             for i_ in imp:
-                ext = ~np.isin(np.arange(len(r)), imp)
-                p[i_] = p[i_] + np.where(ext, self.a0[i_] * r, 0.0) * tariff_add / 100.0
+                p[i_] = p[i_] + np.where(ext, self.a0[i_] * r + tc[i_], 0.0) * float(pts) / 100.0
         return p
 
     def prices(self, r: np.ndarray, p: Optional[np.ndarray] = None):

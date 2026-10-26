@@ -151,11 +151,10 @@ def set_herds(dump: Path) -> pd.DataFrame:
 # ---------------------------------------------------------------- rebuild --
 #: builders run after build_shg_split's steps (files those steps do not write)
 EXTRA_STEPS = (["tools/build/build_npk_balance_2030.py"], ["tools/build/build_capri_level_ratio.py", "--dump-dir", "{dump}"])
-#: files whose builder no longer reproduces the EU rows in the data: only Norway's rows are taken from it.
-#: manure_n2o_tech.csv: tools/build/build_manure_n2o.py now writes 29 AirPurCovHigh rows for pigs (PIGF, PIGS) in EU
-#: regions that the file in the data does not hold (BE10, CZ01, DE30, DE50, DE60, DK01-DK05, ES64, FI20, LT01, ...);
-#: its Norwegian rows are the same either way (check of 21 October 2026)
-GUARDED = ("capri_data/2017/environment/manure_n2o_tech.csv",)
+#: files whose builder does not reproduce the EU rows in the data: only Norway's rows are taken from it. Empty since
+#: 24 October 2026: manure_n2o_tech.csv was rebuilt with tools/build/build_manure_n2o.py (K70; it adds the 29
+#: AirPurCovHigh rows for pigs in 15 EU regions that ammonia_tech_model.csv offers and the old file lacked)
+GUARDED: tuple = ()
 
 
 def _norway_rows_only(path: Path, before: Path):

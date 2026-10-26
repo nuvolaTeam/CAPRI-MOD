@@ -78,6 +78,63 @@ lead's confirmation. `true` reproduces CAPRI for the parity runs.
 **Scope.** 93 of about 100,000 estimated series, mostly minor positions (DDGS, losses, a few NUTS2 crops). The fix
 changes their supports directly; other series can change only through the consistency equations of CAPTRD's Step 2.
 
+### `captrd.variance_floor_squared = true` (CAPRI as coded: `false`) — CAPTRD-MOD, supports
+
+**What CAPRI's code does.** The stored error variance of each series gets a floor: wVarErr = max(0.05 × |wAve|,
+wVarErr) (`captrd/define_stats_and_supports.gms` l. 327-329). The floor is a level, while wVarErr is a variance.
+
+**Evidence that it is an error.** wVarErr is a variance everywhere else in CAPRI's code:
+- its definition is a weighted sum of squared residuals (l. 118-123);
+- its fall-back for 1-2 observations is SQR(wAve) × 0.25 (l. 130);
+- it is later used as a variance: sqrt(wVarErr) serves as a standard deviation (`define_eu_supports.gms` l. 693, 705).
+The floor binds in 19.5% of the comparable series of CAPRI's own output (results_1770.gdx). Its weight depends on the
+series' unit: a level of 100 gives a floor of 5, a level of 0.01 a floor of 0.0005.
+
+**What capri-mod does.** The floor is (0.05 × |wAve|)², a 5% coefficient of variation. The intended form is not stated
+in CAPRI's code; this reading keeps CAPRI's 5% and makes it a variance. `false` reproduces CAPRI.
+
+**Scope.** No effect on results yet: the stored variance weights the penalty terms of CAPTRD's Steps 2-3, which are
+not ported. Decided on 24 October 2026 under the rule for CAPRI code errors ("fix the still open").
+
+### `supply.greendeal_inputs_keep_tech_change = true` (CAPRI as coded: `false`) — Green Deal input changes
+
+**What CAPRI's code does.** A scenario's regional input change DATA(RS, "GROF", I, "percentageChange") enters the
+input coefficients as TF_I = 1 + change when the global scenAugmentsTechChange is off, and as (1 + change) x the
+input-saving progress (1 - 0.005 per year from the base year, 0.935 in 2030) when it is on
+(`capmod/define_inputs.gms` l. 66-73). `organic_io.gms` l. 94 and `conventional_io.gms` l. 171 set it on;
+`conventional_io.gms` l. 361 sets it off in the file's other branch. $setglobal acts at compile time, whatever the run
+time if() selects, and l. 361 comes last, so the Green Deal runs compile with it off.
+
+**Evidence that it is an error.** CAPRI's comments state the intent and call the off setting a mistake:
+- "Note3: The global was set ==off in the runs of July 2023, presumably by oversight after testing." (`organic_io.gms`
+  l. 98, `conventional_io.gms` l. 176 and l. 367);
+- "The gdversion global variable was used in Catalyse to activate scenAugmentsTechChange==on ... This has been
+  rendered default now" (`greendeal_scenarios.gms` l. 137-138).
+With it off, plant protection and other inputs lose the 2017-2030 progress in every EU region with a Green Deal input
+change: in 2030 their coefficients are 1/0.935 = 7% higher than intended, on top of the scenario's change.
+
+**What capri-mod does.** (1 + change) x the progress. `false` reproduces CAPRI's code.
+
+**Scope.** Farm-to-Fork runs with the organic or pesticide target. Decided on 24 October 2026 under the rule for CAPRI
+code errors (S3/S4 of the supply audit).
+
+### `supply.organic_topup_at_fuel_cost = true` (CAPRI as coded: `false`) — organic other-input top-up
+
+**What CAPRI's code does.** For each organic crop, `organic_io.gms` l. 111-115 adds EFUL x 2 x the crop's organic
+target to the INPO coefficient (and SERI likewise, which has no activity rows in the 2017 data). An input coefficient is
+valued at its own unit value (cost = coefficient x UVAG / 1000; the inputs of Belgian soft wheat sum to its TOIN, 1139
+against 1140 EUR/ha), so the fuel quantity added to INPO is valued at INPO's unit value.
+
+**Evidence that it is an error.** The comment above it (l. 107) gives the intent: "The top up assumes that costs for
+EFUL+SERI would double, but the assignment occurs to INPO to have the effect on one position". The two unit values
+differ by region: Belgium values EFUL at 472 and INPO at 1212 per 1000 units, France 1828 and 1208. Belgian soft
+wheat's fuel costs 331 EUR/ha but its top-up as coded is 2 x 848 EUR/ha per unit of target (699.9 x 1212 / 1000).
+
+**What capri-mod does.** The top-up is 2 x the target x the crop's fuel cost (EFUL x UVAG.EFUL / 1000), CAPRI's factor 2
+kept. `false` reproduces CAPRI's code (plant_protection_cost.csv carries both values).
+
+**Scope.** Farm-to-Fork runs with the organic target. Decided on 24 October 2026 under the rule for CAPRI code errors.
+
 ## Switched to CAPRI's setting
 
 ### `supply.absent_activities_fixed = true` (23 October 2026)
@@ -93,11 +150,46 @@ K69). Two inconsistencies caused the failures, and both are fixed:
 
 Reference run r110 has CAPRI's setting as the default.
 
+### `market.market_supply_nq = true` and `young_animals.in_market = true` (24 October 2026; K75)
+
+CAPRI's market supply functions (ProdNQ_, p_hessNQSupp measured by price shocks on the supply models,
+supply/calibrate_supply.gms, recalibrated to the supply models every iteration, arm/simu_calibration_to_supply.gms)
+and its young-animal markets inside the market model (yaniMarket_, arm/market_model.gms l. 1579-1603). Before, the
+market anticipated the EU supply response with its own-price elasticities and the young-animal prices were updated
+between market solves; the Farm-to-Fork runs then left a slow beef / calf price mode (calf price ratio still rising at
+the 25th iteration, the stopping rule reached 1.5-2 points of beef price short of the fixed point). Remaining
+differences: the Hessian is not built per EU trade block (`eu_blocks` keeps the update between solves). Raw milk:
+since 24 October 2026 (`market.milk_in_market = true`, audit M5) each member state's raw milk follows its own milk
+price inside the market, through the Hessian's member-state rows and columns.
+
+### Supply audit S5-S10 (24 October 2026)
+
+All of the following are CAPRI's rules, each with a switch back to the previous model:
+- `fertiliser.need_yield_rule = "capri"`: crop need follows yield as in fertned.gms, not the square root.
+- `supply.yield_dependent_inputs = true`: input costs follow yields, as in define_inputs.gms.
+- `supply.perm_gras_cal_dual = true`: the grassland rule's calibration dual from prep_cal.gms.
+- `supply.fert_cost_on_purchases = true`: the options' cost charged on N purchases, as in GHG_Mit_Cost_.
+- `supply.eco_setaside_catch_crops = true`: catch crops count on the ecoSetAside_ row.
+- Idled histosols count on the landscape floor, and the diversification limit is lowered as in landscape.gms; these
+  two have no switch.
+
+### `outer_loop.price_update = "capri"` (26 October 2026)
+
+CAPRI's price forecast for every price passed to the supply models (EU signal, member-state milk, EU blocks, Norway,
+young animals): the weighted average of the market's prices of the last steps, 0.55 / 0.30 / 0.15, from the 20th step
+0.4 / 0.3 / 0.2 / 0.1 (capmod/define_stepWeights.gms, price_forecast.gms l. 376-397). Before: an adaptive step per
+price, halved when its gap changed sign (K62: CAPRI's weights on the member-state milk prices cycled in a Green Deal
+run, r73, 21 October 2026). With the K75 fix, CAPRI's forecast converges in Farm-to-Fork in 9 iterations (r140; the
+adaptive step 12, r139) and in Green Deal 2030 in 13 (r142; adaptive 11, r141), to the same equilibrium (indicators
+within 0.1 point, prices within 0.6). User's decision. `"adaptive"` stays as an option.
+
 ## DEPARTURE (to be removed)
 
 | Setting | CAPRI star 3.0 | Default now | Why it differs (recorded at the time) | What switching needs |
 |---|---|---|---|---|
+| `supply.fert_slope_with_saving` | the fertiliser options' pmpParSqr with the fertiliser-saving term (envind/ghgMiti.gms l. 1016-1035) | false (the curvature without it) | K77, 25 October 2026: with it and the cost on the N purchases, the 2030 baseline leaves the options' initial shares (FR10 precision farming 0.44; EU 9.6%, run r128); the saving runs through the NLP's fertilisation block, so the base becomes a saddle | the curvature of the saving in the NLP's terms (the fertilisation block's response), or CAPRI's N(m) = N0/(1 + nmE m) made explicit |
 | `market.eu_blocks` | two EU trade blocks, EU_WEST and EU_EAST (aggregation/defaultA.agg) | false (one EU27 block) | built 18 October 2026 as an option; Farm-to-Fork deviation 4.22 → 4.65 when tried | a run; the market supply Hessian (below) is not built for the blocks yet |
-| `market.market_supply_nq` | the market's supply functions calibrated to the supply models (supply/calibrate_supply.gms, arm/simu_calibration_to_supply.gms) | false (the market's own-price anticipation) | tested 18 October 2026: 13 iterations against 12, results within tolerance, about 9 min once to build the Hessian | the Hessian per trade block, for use with `eu_blocks` |
 | `supply.fodder_at_shadow_price` | home-grown fodder valued in the rations at its fodder-balance dual | false (base value) | the first Farm-to-Fork run with it did not converge (ration ↔ fodder dual feedback) | retest in the NLP form; damping if needed |
 | `supply.use_cattle_member_splits` | replacement heifers (HEIR) and the four calf activities with their own levels; young animals cleared per sex (INPANI_) | false (the model's animals with CAPRI's intensity pairs; pooled young-animal markets) | K65: with them on, the Farm-to-Fork run does not converge (male calves' price above 6 x base, female below zero, r96); no CAPRI per-sex Farm-to-Fork result exists to check against | find why the per-sex prices diverge (calf activities at their zero bounds) |
+| (no setting yet) non-EU feed demand, M3 | FeedNQ_ (normalised quadratic, p_hessNQFeed derived from p_elasFeed in arm/trim_elas.gms l. 1975-2135) with the feed-energy balance FeedBal_ (arm/market_model.gms l. 1018-1048): non-EU feed use follows non-EU livestock output | constant elasticities p_ElasFeed (capri_mod/market/feed.py) | market audit M3 (K73), 24 October 2026; the user decided on 25 October 2026 to port it at the refactor's market feed block step, after that block reproduces the frozen reference, as its own step | CAPRI's own p_hessNQFeed (elas_2_1730defaulta, in hand), else derived from p_elasFeed as CAPRI's trim_elas; p_calContent and pv_feedConv rebuilt from CAPRI's code (arm/feed_conv.gms) and CSV data; one full run |
+| `outer_loop.stop_rule` | CAPRI's stop rule: iterate while more than two rows change by more than 0.05% between iterations (prices at the trade blocks, production and feed per member state; young animals out of the maximum; Norway out from the 15th) (capmod/price_forecast.gms l. 96-371; capmod.gms l. 1369) | "capri-mod": price and quantity changes below outer_tolerance and the gaps between each price passed on and the market's price (EU, member-state milk, blocks, Norway), the young-animal balance, the N-balance price, manure pools, base calibration | a change test can pass while the loop still drifts slowly (r126 'converged' 1.5-2 points of beef price short of the fixed point); the gap tests check the fixed point itself. CAPRI's verdict is recorded every iteration in either case (capri_mod/utils/capri_stop.py) | none: switch with the setting. Items differ from CAPRI's where the model lacks them: one price per market region, the member states' raw milk at the EU's price level, young-animal prices as ratios, the aggregates EU_West and EU_East only |

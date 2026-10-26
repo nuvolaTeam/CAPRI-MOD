@@ -20,10 +20,9 @@ Outputs:
   capri_data/2017/market/world_prices.csv      + FENI, RYEM, OATS, TAGR, TOBA, TABO, TEXT, PLMO, OTHO (FAO_agg World PMRK BAS, as the other rows), FPRI (FAO_agg
                                                has no world price for it: CAPRI's 2017 market, export-weighted
                                                market prices of the exporting regions, bilateral_*_2017.csv)
-  capri_data/2017/market/armington_params.csv  + FENI, FPRI: sigma, rho2 = p_rhoArm1, p_rhoArm2
-                                               (armington_rho.csv); eps = production-weighted own-price p_elasSupp of
+  capri_data/2017/market/armington_params.csv  + FENI, FPRI: eps = production-weighted own-price p_elasSupp of
                                                the non-EU regions (capri_supply_elas_market_1717.csv, weights CAPRI's
-                                               2030 production); eta: tools/build/build_feed_demand_nonEU.py
+                                               2030 production)
   capri_data/sources/world_price_provenance.json  + FENI, FPRI
 
     python tools/build/build_feed_byproducts.py
@@ -113,16 +112,8 @@ def main():
                 num += w * float(e)
                 den += w
         eps = num / den if den > 0 else float(own.mean())
-        arm.loc[c, "sigma"] = float(rho.at[c, "rho1"])
-        arm.loc[c, "rho2"] = float(rho.at[c, "rho2"])
         arm.loc[c, "eps"] = round(eps, 4)
-        if c in ("RYEM", "OATS", "TAGR", "TOBA", "TABO", "TEXT", "PLMO", "OTHO", "FFIS", "SFIS", "OAQU", "COFF", "TEAS", "COCO"):
-            # demand elasticity: CAPRI's p_ElasDem, written by tools/build/build_demand_elas_capri.py (run it after this)
-            if "eta" not in arm.columns or c not in arm.index or pd.isna(arm.at[c, "eta"]):
-                arm.loc[c, "eta"] = float("nan")
-        elif pd.isna(arm.at[c, "eta"]) if "eta" in arm.columns and c in arm.index else True:
-            arm.loc[c, "eta"] = 0.0
-        print(f"{c}: sigma {arm.at[c, 'sigma']}, rho2 {arm.at[c, 'rho2']}, eps {eps:.4f} "
+        print(f"{c}: eps {eps:.4f} "
               f"(production-weighted over {len(own)} CAPRI regions)")
     arm.to_csv(MKT / "armington_params.csv")
 

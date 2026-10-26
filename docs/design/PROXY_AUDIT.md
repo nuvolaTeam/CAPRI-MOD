@@ -51,7 +51,10 @@ Done in the code and data (the rows below keep the audit as it was written):
     none for them). This removed the 5 capped pairs.
   - S185, S192: hits are recorded in `metadata["market_calibration_bound_hits"]` and warned. The reference runs show
     where they bind (CHANGELOG).
-  - S083 (mineral cap x1.1, HR03/HR04): next task.
+  - S083 (mineral cap x1.1): replaced on 24 October 2026 (KNOWN_ISSUES K71). No blanket factor: only the crop groups
+    whose need is out of reach under the cap are exempted, at their baseline (CAPRI's p_checkSmallMine level 1.0),
+    found by solving where CAPRI lists them by hand. Mostly PERM under Bulgaria's, Finland's, Croatia's and
+    Lithuania's organic targets.
   - Still open, waiting for a decision: S131 (removed earlier the same day), S165 reached part, S173 (removed earlier the
     same day), S256, S305, S306.
 - **Armington eps provenance (note to S176):**

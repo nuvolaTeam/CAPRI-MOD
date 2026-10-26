@@ -163,7 +163,9 @@ Farm-to-Fork, NLP form (r38): converged in 12 iterations, 1,346 s; deviation fro
 The conic form lets mineral N fall with the crop need met at a fixed substitution rate and takes converted organic
 land off mineral N with nothing to replace it; NUTNED_ requires every group's need to be met, so the NLP form cuts
 mineral N less and herds more. Where the Green Deal's caps leave a group's need unmet (HR03, HR04, LT01 in Farm-to-
-Fork) the duals are widened, then the caps raised to 1.1 x base, as CAPRI's own ad hoc exemptions (nlp_relaxed).
+Fork) the duals are widened, then the groups concerned exempted one at a time at their baseline (CAPRI's
+p_checkSmallMine), recorded as nlp_relaxed, e.g. "caps:PERM" (K71, 24 October 2026; until then every cap was raised
+to 1.1 x base).
 
 Green Deal 2030, NLP form (r39): stopped after 25 iterations (57 min); Finland's manure pool stayed 3.7% out of
 balance from iteration 6 (conic r32: 16 iterations, 1,692 s). Price changes stay within about 6%. With IPOPT's reduced

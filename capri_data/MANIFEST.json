@@ -1,7 +1,7 @@
 {
  "_schema": "CAPRI-Python structured data manifest v2",
  "_base_year": "2017 (quantities, prices, PMP); trade flows 2021",
- "_total_size": "3.6 MB (flat CSV/JSON \u2014 appropriate for this scale; no DB needed)",
+ "_total_size": "3.6 MB (flat CSV/JSON — appropriate for this scale; no DB needed)",
  "_note": "Storage is flat files by design: 3.6 MB loads in <2s. Parquet/DB would add opacity and overhead with no benefit at this scale. Management is handled by this manifest + the validator (validate_data.py), not by a database.",
  "layout": {
   "root": "Live files loaded at runtime",
@@ -30,7 +30,7 @@
      "PULS"
     ]
    },
-   "known_issue": "Specialty-crop columns (TOMA, OVEG, and formerly COTT/OLIV/WINE) contain synthetic placeholder values, not observations. COTT and OLIV corrected to real geography. TOMA/OVEG still placeholder \u2014 replace with Eurostat apro_cpshr."
+   "known_issue": "Specialty-crop columns (TOMA, OVEG, and formerly COTT/OLIV/WINE) contain synthetic placeholder values, not observations. COTT and OLIV corrected to real geography. TOMA/OVEG still placeholder — replace with Eurostat apro_cpshr."
   },
   "yields.csv": {
    "source": "COCO",
@@ -400,17 +400,6 @@
    "status": "live",
    "shape": {
     "entries": 328,
-    "type": "dict"
-   }
-  },
-  "fao_demand_own_elas_eu.json": {
-   "source": "FAO_agg",
-   "vintage": "2017",
-   "units": "elasticity",
-   "domain": "market",
-   "status": "live",
-   "shape": {
-    "entries": 18,
     "type": "dict"
    }
   },
@@ -843,14 +832,6 @@
    "domain": "market",
    "status": "calibration",
    "note": "Base balances of oils, cakes and seeds for the 21 trade regions, EU crushing quantities and yields - Stage 1 of oilseed crushing (docs/OILSEED_CRUSHING.md)."
-  },
-  "eu_demand_elas_overrides.json": {
-   "source": "CAPRI elas_2_1717defaulta p_ElasDem (supplied by the project lead)",
-   "vintage": "2017",
-   "units": "elasticity",
-   "domain": "market",
-   "status": "live",
-   "note": "EU-row own-price demand elasticities for the oilseed products (EU member-state medians); other regions use armington_params.csv."
   },
   "feed_demand_nonEU.json": {
    "source": "CAPRI data_market_1730defaulta CAL (HCON, FEED, PROC, BIOF) and elas_2_1730defaulta p_ElasFeed (supplied by the project lead), aggregated from CAPRI's 80 behavioural regions to the trade regions",

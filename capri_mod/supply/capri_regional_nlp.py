@@ -41,6 +41,8 @@ from collections import OrderedDict
 
 import numpy as np
 
+from capri_mod.settings import current as _settings_now
+
 #: IPOPT solvers by the structure of the problem (SOLVER CACHE). Every data value of the model enters its CasADi graph
 #: as a parameter, so two builds with the same structure (columns, rows, feeds, groups, options) give the same graph
 #: whatever the numbers; the graph's serialisation is the key. A data value left as a constant only costs a cache miss,
@@ -309,6 +311,13 @@ class CapriRegionalNLP:
         self._A, self._b = A, b
         g_rows, lbg, ubg, gmap = [], [], [], []           # gmap: (kind, rows, scale)
         drop = set(spec.get("drop_labels") or ())
+        if bool(_settings_now().get("supply.nlp_fodder_band_dropped")):
+            # CAPRI's SUPBAL_ for non-tradable fodder is the equality above (production = FEDUSE_). The conic form's
+            # other side, the "_band" row, carries the animals' fodder per head from the ration state - the previous
+            # solve's feeding - not the feed columns: kept in this form it was a second, lagged fodder constraint not
+            # in CAPRI, binding, whose coefficients moved with every iteration's feeding (K75: the suckler cows of FRD1
+            # fell 36 thousand head over iterations 12-25 through it alone). Dropped here (26 October 2026).
+            drop |= {labels[i] + "_band" for i in fod_rows if labels[i] + "_band" in lab_idx}
         self.dropped = [labels[i] for i in range(m_A) if labels[i] in drop]
         keep_rows = [i for i in range(m_A)
                      if not (i in bound_rows or (i in used and i not in pairs) or labels[i] in drop)]
@@ -414,6 +423,12 @@ class CapriRegionalNLP:
         self.fert = None
         if spec.get("npk"):
             X, obj = self._fert_block(spec["npk"], X, y, obj, g_rows, lbg, ubg, lbx, ubx)
+        if getattr(self, "_fert_tech_pending", None) is not None:
+            # no N purchases in the model: the options' cost on the crops' base mineral N (the conic form's weight)
+            cost_, crops_ = self._fert_tech_pending
+            obj = obj + self._lin(y, [(col, float(nc) / 1000.0) for col, nc in crops_]) * cost_
+            self._fert_tech_base = sum(float(self.xb[int(col)]) * float(nc) / 1000.0 for col, nc in crops_)
+            self._fert_tech_pending = None
 
         self._obj_rest, self._y = obj, y
         obj = obj + quad
@@ -437,7 +452,7 @@ class CapriRegionalNLP:
         """CAPRI's fertilisation block, per nutrient n (N, P, K), with ghgAbatement off (losses at CAPRI's fixed
         shares, supply_model.gms l. 860-1215, 1535-1725):
 
-          NUTNED_(g,n)    sum_c share_cg x_c need_cn          (need: CAPRI's per ha x sqrt(yield/base) x kappa_n)
+          NUTNED_(g,n)    sum_c share_cg x_c need_cn          (need: CAPRI's per ha x need factor of yield x kappa_n)
                           = eff_n x_g,MINE + avail_n x_g,EXCR + avail_C x (x_g,CRES  [arable groups]
                                                                         | own residues [permanent groups])
           fertDistMine_   sum_g x_g,MINE = v_netPutQuant(n)  (purchases, >= 0, priced at CAPRI's unit value)
@@ -541,6 +556,12 @@ class CapriRegionalNLP:
                 self.synN_row = (len(g_rows), Pscale)
                 g_rows.append((P - pv(float(d["synNMax"])) * land) * pv(1.0 / Pscale)); lbg.append(-np.inf); ubg.append(0.0)
             obj = obj + pv(float(d["price"]) / 1000.0) * P
+            if nut == "N" and getattr(self, "_fert_tech_pending", None) is not None \
+                    and bool(_settings_now().get("supply.fert_cost_on_purchases")):
+                # the fertiliser options' cost on the N purchases (GHG_Mit_Cost_: - cost x v_netPutQuant(NITF), kt)
+                obj = obj + P * pv(1.0 / 1000.0) * self._fert_tech_pending[0]
+                self._fert_tech_pending = None
+                self._fert_tech_P = True
             gt = self.spec.get("ghg_min") if nut == "N" else None
             if gt:
                 # CAPRI's emission tax on the soil N2O of mineral N (N2OSYN, direct + volatilised x indirect), on the
@@ -591,6 +612,7 @@ class CapriRegionalNLP:
         return X, obj
 
     def _abatement_block(self, spec, X, y, obj, g_rows, lbg, ubg, lbx, ubx):
+        self._fert_tech_pending = None; self._fert_tech_P = None
         """CAPRI's abatement options inside the regional model (ghgAbatement on; supply_model.gms GHG_Mit_Cost_,
         TotMit_, the v_emiLoss cascade), as far as capri-mod has their data:
           ammonia options per animal and sub-activity (housing/storage MAN group, application APP group): shares
@@ -625,6 +647,12 @@ class CapriRegionalNLP:
                           * self._pv(1.0 / uaa))
             lbg.append(-np.inf); ubg.append(float(cs["rhs"]) / uaa)
             self._catc_m = m
+            # ecoSetAside_: catch crops on the eligible side at CAPRI's weight (setaEco includes CATC)
+            eco = (spec.get("cap_rules") or {}).get("ecoSetAside") or {}
+            if float(eco.get("catc_w", 0.0) or 0.0) > 0 and "ecoSetAside" in getattr(self, "cap_rows", {}):
+                ie = self.cap_rows["ecoSetAside"]
+                sce = max(float(eco.get("scale", 1.0)), 1e-6)
+                g_rows[ie] = g_rows[ie] - self._pv(float(eco["catc_w"]) * uaa / sce) * m
             self.catc_n = self._pv(uaa * 1000.0 * float(cs["biofix"])) * (m - self._pv(m0))      # t N
             gt_ = spec.get("ghg_min")
             if gt_:
@@ -720,8 +748,10 @@ class CapriRegionalNLP:
                 Eff = Eff + pv(float(nm)) * phi[tt]
                 a_ = float(a_) + float((spec.get("dabat") or {}).get(("fert", name), 0.0))
                 cost = cost + (pv(a_) * phi[tt] + pv(0.5 * float(b_)) * phi[tt] * phi[tt])
-            obj = obj + self._lin(y, [(col, float(nc) / 1000.0) for col, nc in ft["crops"]]) * cost
-            self._fert_tech_base = sum(float(self.xb[int(col)]) * float(nc) / 1000.0 for col, nc in ft["crops"])
+            # CAPRI's GHG_Mit_Cost_: the fertiliser options' cost per t of mineral N purchased (- cost x
+            # v_netPutQuant(NITF)); the fertilisation block's N purchases take it (_fert_block), else the crops' base
+            # mineral N (the build's end)
+            self._fert_tech_pending = (cost, list(ft["crops"]))
             self.fert_eff = Eff
             g_rows.append(sum(phi[tt] for tt in range(len(T_)))); lbg.append(-np.inf); ubg.append(1.0)
             if ft.get("ecap") is not None:
@@ -850,6 +880,16 @@ class CapriRegionalNLP:
                 keep_act = ~np.isin(act, np.array(land_rows))
                 act, lo_l, hi_l = act[keep_act], lo_l[keep_act], hi_l[keep_act]
         self.cal_land_rows = land_rows
+        # the permanent-grassland rule's multiplier at CAPRI's assumed dual (supply/prep_cal.gms l. 118-131:
+        # p_dualGreening = -|arable rent - grassland rent|, in GRAE's and GRAI's linear terms), not zero
+        pg = (self.spec.get("cap_rules") or {}).get("permGras") or {}
+        gi_pg = self.cap_rows.get("permGras") if hasattr(self, "cap_rows") else None
+        # (setting supply.perm_gras_cal_dual; false: zero, this model before 24 October 2026)
+        if gi_pg is not None and pg.get("cal_dual") is not None and bool(_settings_now().get("supply.perm_gras_cal_dual")):
+            lam_fix[gi_pg] = float(pg["cal_dual"]) * max(float(pg.get("scale", 1.0)), 1e-6)
+            land_rows = land_rows + [gi_pg]
+            keep_act = ~np.isin(act, np.array([gi_pg]))
+            act, lo_l, hi_l = act[keep_act], lo_l[keep_act], hi_l[keep_act]
         grad_fit = grad + J.T @ lam_fix if (blk_rows or land_rows) else grad
         ib = np.array([i for i in ib if free[i]], int)
         # least squares on the free variables: grad + J' lam + nu = 0
@@ -924,6 +964,9 @@ class CapriRegionalNLP:
                 if xb[j] <= lbx[j] + 1e-12 and res[j] >= 0:
                     res[j] = 0.0; continue
                 den = getattr(self, "_fert_tech_base", 0.0)
+                if getattr(self, "_fert_tech_P", None) and self.fert and "N" in self.fert:
+                    fbN = self.fert["N"]
+                    den = float(xb[fbN["off_P"]]) * fbN["Pscale"] / 1000.0      # base N purchases, kt
                 if den > 0:
                     dabat[("fert", t[0])] = -res[j] / den
                     res[j] = 0.0

@@ -697,23 +697,6 @@
    },
    "known_gaps": []
   },
-  "eu_demand_elas_overrides": {
-   "file": "2017/market/eu_demand_elas_overrides.json",
-   "concept": "EU own-price demand elasticities for oils and cakes",
-   "unit": "elasticity",
-   "dimension": "commodity",
-   "modules": [
-    "market"
-   ],
-   "source": {
-    "source_type": "CAPRI_GDX",
-    "source_ref": "elas_2_1717defaulta p_ElasDem",
-    "vintage": "2017",
-    "confidence": "validated",
-    "reproducibility": "capri_gdx"
-   },
-   "known_gaps": []
-  },
   "feed_demand_nonEU": {
    "file": "2017/market/feed_demand_nonEU.json",
    "concept": "Non-EU feed shares and feed-price elasticities",

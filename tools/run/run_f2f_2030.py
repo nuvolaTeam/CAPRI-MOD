@@ -32,6 +32,7 @@ ROOT = Path(__file__).resolve().parents[2]
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("out")
+    ap.add_argument("--regions", default="", help="diagnostics: a comma-separated subset of regions")
     ap.add_argument("--feed-in-supply", action="store_true", help="(default now) feeding inside the supply models")
     ap.add_argument("--no-feed-in-supply", action="store_true", help="feeding solved apart (EU ration model)")
     ap.add_argument("--nitrate", action="store_true",
@@ -122,6 +123,9 @@ def main():
     warnings.filterwarnings("ignore")
     # K3: a regional solve that falls back to the model without feeding inside and technologies is always shown
     warnings.filterwarnings("always", message="conic solve")
+    warnings.filterwarnings("always", message="CAPRI's stop rule not evaluated")
+    warnings.filterwarnings("always", message="market supply Hessian not built")
+    warnings.filterwarnings("always", message="scenario market supply Hessian not measured")
     warnings.filterwarnings("always", message="bilateral market did not converge")
     warnings.filterwarnings("always", message="CAPRI's crop-group fertiliser allocation")
     warnings.filterwarnings("always", message="fertiliser distribution inside failed")
@@ -172,7 +176,8 @@ def main():
             ov[k.strip()] = v.strip()
     run_settings = _S.load(a.settings, overrides=ov)
     _S.activate(run_settings)
-    m = CAPRIModel(data_dir=str(ROOT / "capri_data"), verbose=False)
+    m = CAPRIModel(data_dir=str(ROOT / "capri_data"), verbose=False,
+                   regions=[x for x in a.regions.split(",") if x] or None)
     t0 = time.time()
     # CAPRI simulates from its calibrated 2030 reference (CAPMOD's reference run); the trend projection (CAPTRD) is
     # that calibration's input and stays available (--trajectory captrd)
@@ -354,6 +359,16 @@ def main():
                                            if "EU27" in s["market"].net_exports.index else {}),
                            "price": s["market"].domestic_prices.loc["EU27"].astype(float).to_dict(),
                            "world": s["market"].world_prices.astype(float).to_dict()},
+           # the outer loop's state per iteration, base and scenario (signals, targets, young-animal prices, member
+           # states' milk, EU herds; KNOWN_ISSUES K75)
+           "outer_history": tuple(x.get("outer_history") for x in (b, s)),
+           # raw milk per market region, base and scenario: production, use, domestic price (EUR/t). Raw milk is not
+           # traded in CAPRI, so production equals use in every region (audit M11)
+           "raw_milk": {lab: {rg: (float(x["market"].production.at[rg, "MILK"]),
+                                   float(x["market"].consumption.at[rg, "MILK"]),
+                                   float(x["market"].domestic_prices.at[rg, "MILK"]))
+                              for rg in x["market"].production.index}
+                        for lab, x in (("base", b), ("scen", s)) if "MILK" in x["market"].production.columns},
            # EU market regions (CAPRI's two trade blocks with --eu-blocks): production, use, price, base and scenario,
            # and the flows between them
            "eu_regions": {lab: {rg: {"prod": x["market"].production.loc[rg].astype(float).to_dict(),
@@ -439,7 +454,11 @@ def main():
                     "settings": run_settings.to_dict(), "settings_changed": run_settings.diff(),
                     "market_supply_hessian": getattr(getattr(pmod, "_last_projected_model", None) or m,
                                                      "market_supply_hessian_info", None),
+                    "market_supply_hessian_log": getattr(getattr(pmod, "_last_projected_model", None) or m,
+                                                         "market_supply_hessian_log", None),
                     "base_iterations": b.get("metadata", {}).get("n_outer_iterations"),
+                    # CAPRI's stop rule at the last iteration, baseline and scenario (capri_mod/utils/capri_stop.py)
+                    "capri_stop": {lab_: (d_.get("metadata") or {}).get("capri_stop") for lab_, d_ in (("base", b), ("scen", s))},
                      "prices": pmod.price_summary,
                      # regions where CAPRI's form failed (K55, K57): conic form instead, or JRC121368's relaxed N target
                      "nlp_fallback": {lab_: dict((d_.get("metadata") or {}).get("nlp_fallback") or {})

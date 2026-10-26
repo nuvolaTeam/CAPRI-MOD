@@ -69,8 +69,8 @@ def nutned_mineral(D, capri_region: str, need, own, own_perm, pool, mine0, xb, x
         kappa x (sum_c need_c sq_c x_c - gc x sum_c own_perm_c x_c) = eff x MINE + g0 x E + gc x C
 
     with the arable residue pool C = sum_c pool_c x_c, the permanent groups' own residues own_perm_c (own_c x the crop's
-    share in a permanent group), manure applied E, sq_c = sqrt(yield / base yield), and kappa the need factor that
-    closes the equation at the base levels xb with CAPRI's mineral flows mine0, as the block computes it:
+    share in a permanent group), manure applied E, sq_c = CAPRI's need factor of the yield
+    (capri_mod.fert.npk.need_yield_factor), and kappa the need factor that closes the equation at the base levels xb with CAPRI's mineral flows mine0, as the block computes it:
     kappa x (need0 - gc x own0) = eff x M0 + g0 x E0 + gc x C0 (CAPRI's v_cropNutNeedMultFact, calibrated at the
     base and fixed in simulation).
     Arguments are dicts by model crop (kg/ha, 1000 ha) and t; grass = (z, dn, sq) adds the grassland split column

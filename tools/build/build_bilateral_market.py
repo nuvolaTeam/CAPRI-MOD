@@ -19,6 +19,7 @@ Per (importer I, exporter J) of the model, over the CAPRI region pairs (i, j) ma
   so that the base import price ImportP (quantity-weighted) = a + b and, with the exporter's market price
   moving by r_J, the import price is a r_J + b - CAPRI's impPrice_ aggregated exactly at the base composition.
   a0     = sum ImportQ x Fob / q (the same without the ad valorem tariff, for tariff scenarios)
+  tc     = sum ImportQ x TCost / q (transport cost: with a0 the base of an ad valorem tariff change, impPrice_)
 For I = J the price is the region's own market price (a = 1 x PMRK, b = 0).
 Per region and product: PMRK (production-weighted), PROD.
 Substitution elasticities rho1, rho2 per product: arm/market1.gms (8 / 10) overridden by special_ch/
@@ -31,7 +32,7 @@ included; DDGS, the ethanol plants' feed by-product, too; the dairy products FRM
 oilseeds have no CAPRI bilateral trade (MILK: 31 cells of a few tonnes; OOIL: none).
 
 Outputs (capri_data/2017/market/):
-  bilateral_flows_<year>.csv    commodity, importer, exporter, q_kt, a, b, a0, ta_pct
+  bilateral_flows_<year>.csv    commodity, importer, exporter, q_kt, a, b, a0, ta_pct, tc
   bilateral_regions_<year>.csv  commodity, region, pmrk, prod_kt
   armington_rho.csv             commodity, capri, rho1, rho2
 
@@ -146,7 +147,7 @@ def build(year, REGION_MAP, AGGREGATES, eu_blocks=False):
         mi, mj, mc = mp(i), mp(j), CAPRI[p]
         if i == j or mi == mj:                        # domestic sales of the model region
             pm = reg.get((p, j), {}).get("PMRK", d.get("Fob", 0.0))
-            a, b, a0, ta = pm, 0.0, pm, 0.0
+            a, b, a0, ta, tc = pm, 0.0, pm, 0.0, 0.0
             mj = mi
         else:
             fob, tc, ta, ip = d.get("Fob", 0.0), d.get("TCost", 0.0), d.get("TaAppl", 0.0), d.get("ImportP", 0.0)
@@ -155,9 +156,10 @@ def build(year, REGION_MAP, AGGREGATES, eu_blocks=False):
             ts = ip - (fob + tc) * (1 + ta / 100.0)
             a, b, a0 = fob * (1 + ta / 100.0), tc * (1 + ta / 100.0) + ts, fob
         k = agg[(mc, mi, mj)]
-        k["q"] += q; k["qa"] += q * a; k["qb"] += q * b; k["qa0"] += q * a0; k["qta"] += q * ta
+        k["q"] += q; k["qa"] += q * a; k["qb"] += q * b; k["qa0"] += q * a0; k["qta"] += q * ta; k["qtc"] += q * tc
     rows = [dict(commodity=c, importer=i, exporter=j, q_kt=v["q"], a=v["qa"] / v["q"], b=v["qb"] / v["q"],
-                 a0=v["qa0"] / v["q"], ta_pct=v["qta"] / v["q"]) for (c, i, j), v in agg.items() if v["q"] > 0]
+                 a0=v["qa0"] / v["q"], ta_pct=v["qta"] / v["q"], tc=v["qtc"] / v["q"])
+            for (c, i, j), v in agg.items() if v["q"] > 0]
     fl = pd.DataFrame(rows).sort_values(["commodity", "importer", "exporter"])
     ra = defaultdict(lambda: defaultdict(float))
     for (p, r), d in reg.items():
