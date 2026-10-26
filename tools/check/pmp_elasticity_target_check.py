@@ -29,6 +29,7 @@ def measure(pmp: str, ms: str, shock: float) -> pd.DataFrame:
     from capri_mod.model import CAPRIModel
     from capri_mod.projection import ProjectionModule, BaselineTrajectory
     from capri_mod import settings as _S
+    from capri_mod.supply.supply_module import SupplyModule
     _S.activate(_S.current().replace({"supply.pmp_source": pmp}))
     m = CAPRIModel(data_dir=str(ROOT / "capri_data"), verbose=False)
     traj = BaselineTrajectory.from_file(str(ROOT / "capri_data" / "trajectories" / "capri_ref_2030.json"))
