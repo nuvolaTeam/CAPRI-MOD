@@ -544,22 +544,22 @@ CAPRI-mod is six focused, independently testable modules coordinated by
      │        └──── repeat until both converge ────┘       │
      └────────────────────────┬───────────────────────────┘
                               │ converged activity levels
-              ┌───────────────┼───────────────┐
-              ▼               ▼               ▼
-        ┌───────────┐   ┌──────────┐   ┌──────────┐
-        │ENVIRONMENT│   │  INCOME  │   │  WATER   │
-        │ N, P bal. │   │ regional │   │irrigation│
-        │ GHG, NH3  │   │ incomes  │   │ demand   │
-        └───────────┘   └──────────┘   └──────────┘
+                              ▼
+                        ┌───────────┐
+                        │ENVIRONMENT│
+                        │ N, P bal. │
+                        │ GHG, NH3  │
+                        └───────────┘
              post-equilibrium: read the solution, do not change it
 ```
 
 The **outer loop** is the heart of the model: policy sets net revenues → supply
 chooses activities → market clears and returns prices → prices re-enter supply →
 repeat until prices stop moving (default tolerance 0.5%, with the gaps between the
-prices passed on and the market's; CAPRI's stop rule is an option, §10). Environment,
-income and water are **post-equilibrium** modules: they read the converged activity
-levels and compute their indicators. Feeding, fertilisation and the mitigation
+prices passed on and the market's; CAPRI's stop rule is an option, §10). The
+environmental accounts are **post-equilibrium**: they read the converged activity
+levels and compute their indicators. (The income and water modules were removed on 27 October 2026: no run called
+them. They are to be restored on CAPRI's regional units; the water data stay in `capri_data/sources/water`.) Feeding, fertilisation and the mitigation
 options are chosen inside each regional supply model, as in CAPRI. Biofuel feedstock
 demand, dairy processing, feed bulks and the young-animal markets are part of the
 market (CAPRI's `Biof_`, `DairyNQ_`, `feedBlk_` and `yaniMarket_` blocks), not side
@@ -576,8 +576,6 @@ modules.
 | `feed/` | 450 | CAPRI's rations (requirements, contents, shares, feed PMP) | solved inside the supply models |
 | `biofuel/` | 40 | reporting of the market's biofuel block | (feedstock demand is in `market/`) |
 | `fert/` | 670 | CAPRI's inner fertiliser distribution and nutrient need (N, P2O5, K2O) | inside the supply models (fert/fertned.gms) |
-| `income/` | 190 | farm income & its distribution | gross margin + CAP support, regional Gini |
-| `water/` | 260 | irrigation water demand | CNIR × irrigated area (CROPWAT + Eurostat FSS) |
 | `projection/` | 1,460 | the baseline of a simulation year; multi-year loop (perennial areas carried) | CAPRI's 2030 reference or captrd trajectory, calibrated as CAPMOD; validated vs CAPRI 2030 |
 | `supply/intensity.py` | 190 | nitrogen intensity margin | Mitscherlich yield response; N per ha as a decision |
 | `supply/supply_module.py` | — | yield-price response | yields move with own price, as CAPRI's stage one |
@@ -868,8 +866,8 @@ within 25% — improved from 16 of 24 when the base data was rebuilt from CAPRI.
   order against CAPRI.
 - Emission-tax scenarios with CAPRI's mitigation options endogenous (CAPRI's ghgTax; no CAPRI tax result in hand
   to compare with, see docs/MITIGATION_IN_SUPPLY.md).
-- Indicator layers: GHG, nutrient balances, irrigation water demand, farm-income
-  distribution.
+- Indicator layers: GHG, nutrient balances (irrigation water demand and farm-income distribution: to be restored on
+  CAPRI's regional units).
 
 **Permanent-crop elasticities match CAPRI's calibrated values** (APPL 0.218,
 CITR 0.184, OVEG 0.660 against 0.218, 0.184, 0.663). They are ~10x less elastic
@@ -1576,18 +1574,15 @@ principled reason and extension path.
   it as the path. And the boundary is a
   feature: partial equilibrium is exactly what *isolates* the agricultural policy
   effect, which is the model's purpose (§10.1).
-- **Income distribution is across regions, not across farms.** The farm-income
-  module (§5.2) reports how income and CAP support are distributed across the 248
-  regions — a data-backed statement. Distribution across farm sizes or types would
-  need FADN farm-structure data the model does not carry, and is deliberately not
-  claimed.
+- **Income distribution is not reported.** The farm-income module (income and CAP support across regions) was
+  removed on 27 October 2026, no run having called it, and is to be restored on CAPRI's regional units. Distribution
+  across farm sizes or types would need FADN farm-structure data the model does not carry.
 - **Agricultural water demand and biodiversity pressure are in-domain indicator
   layers; their environmental *outcomes* are not.** Both pressure sides are now
   built: biodiversity *pressure* proxies (Shannon crop diversity, HNV-farmland
-  proxy) in the environmental module, and irrigation *water demand* in the water
-  module (CNIR × irrigated area, from CAPRI's CROPWAT data and Eurostat FSS
-  irrigation shares; validated against the known Mediterranean concentration of
-  EU irrigation). Their environmental *outcomes* remain out of scope: species-level
+  proxy) in the environmental module; the irrigation *water demand* module (CNIR × irrigated area, from CAPRI's
+  CROPWAT data and Eurostat FSS irrigation shares) was removed on 27 October 2026, no run having called it, and is
+  to be restored on CAPRI's regional units. Their environmental *outcomes* remain out of scope: species-level
   population change needs an ecological response model, and catchment *hydrology*
   (whether demand depletes a given aquifer) is a separate modelling domain. The
   pattern is consistent — the agricultural pressure/demand side is in-domain; the

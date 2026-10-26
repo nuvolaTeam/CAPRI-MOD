@@ -23,12 +23,33 @@ Full provenance for every entry is in `capri_data/DATA_SOURCING_REGISTRY.json`.
 | CAP budget | Real EU CAP | €54.0bn vs ~€55–58bn |
 | Nitrogen balance | CAPRI 2030 reference, item by item | EU items within 1–7 kg N/ha; regional correlation 0.92 |
 | Phosphate balance (P2O5) | CAPRI 2030 reference, item by item | with CAPRI's own levels the formulas give its items (within 1e-6; removal 0.02%); at the model's base data (not a solved 2030 run) EU items within 0.5 kg P2O5/ha (surplus 14.4 vs 13.9), regional surplus correlation 0.99 |
-| Water demand | Known EU irrigation geography | Mediterranean 79%, correct hotspots |
+| Water demand | Known EU irrigation geography | module removed 27 October 2026 (no run called it); to be restored on CAPRI's regional units |
 | Biofuel | CAPRI 2030 reference (BiofFeedCost, biofuel output and use per CAPRI market region) | exact; feedstock use and biofuel markets inside the market |
 | **Total cereal output** | **EU Agricultural Outlook 2017-2030 (DG AGRI/JRC)** | **297.2 Mt vs ~300 Mt — ratio 0.99** |
 | **Farm-to-Fork scenarios** | Published CAPRI (JRC121368) | reported as a range; CAPRI's figure falls inside it for oilseeds |
 
 ---
+
+## 27 October 2026: the switches whose alternative never ran removed; run options that mirrored a setting; water and income modules
+
+A review of the reference runs (r150 Farm-to-Fork, r151 Green Deal 2030; recorded runs since about r100) found no
+non-default value for any of the 79 switch or choice settings. The project lead's decision (docs/design/
+SETTINGS_INVENTORY.md, update of 27 October; the CSV's column `status_27oct`):
+- removed with the code of their unused value, the value every run used now built in: the earlier capri-mod forms
+  (the supply audit's "before 24 October" branches, the square-root need rule, the staged NLP tolerance, the secant
+  young-animal update, the legacy elasticity mode, the ration's own nitrate ingredient, the grassland row with a fifth
+  of arable land, PMP cross terms "previous", ...) and the "model without this block" switches of blocks CAPRI always
+  has (manure techniques, intensities, genetics, histosols, activity bounds, LUC, dairy block, GL demand, processing
+  functions, TRQs, young-animal markets, baseline calibration, ...): 49 keys of defaults.toml;
+- kept: CAPRI's own options, the CAPRI-ERROR-FIX parity switches, the numerical and comparison options,
+  `market.market_supply_nq` (the fast tests run without the Hessian), the fodder band rows (to go with the regional
+  units, which recompute the Hessian), and two departures still to be brought to CAPRI's setting (K65, K77);
+- 19 options of tools/run/run_f2f_2030.py that only set a setting (use `--set section.key=value`; `--verbose` is
+  `--set diagnostics.trace_outer=true`); the scenario overrides stay;
+- the water and income modules (no run called them; each had only its own test), to be restored on CAPRI's regional
+  units; tools/check/scenario_elasticity_check.py (it compared the removed legacy elasticity mode).
+The market supply Hessian's cache key keeps the removed rules' values, so the cached Hessians stay valid.
+Verification: pending (full tests; Farm-to-Fork and Green Deal 2030 against r150 and r151).
 
 ## 26 October 2026: the conic form removed; a failed regional solve kept as CAPRI keeps it
 
