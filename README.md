@@ -692,10 +692,12 @@ the **same method and structure** as CAPRI, not simplifications of it:
 - **Regional resolution.** 248 of CAPRI's 288 NUTS-2 units — the full EU27 +
   Norway set, at CAPRI's own granularity.
 
-The deliberate *differences* — comparative-static scope, EU27 as a single bloc,
-and a few calibrated-to-target parameters — are set out in
-[§10](#10-differences-from-capri-and-why-they-are-deliberate). Everything else is
-CAPRI's method, reimplemented and validated against CAPRI's own output.
+The differences from CAPRI are recorded, not hidden. The defaults that are not CAPRI's are listed in
+`docs/DEPARTURES_FROM_CAPRI.md` and summarised in [§10](#10-differences-from-capri-and-why-they-are-deliberate):
+corrections where CAPRI's code contradicts its own data, each with a switch back to CAPRI's behaviour, and
+departures to be switched to CAPRI's setting, such as the EU as one trade block instead of CAPRI's two. Method gaps
+and open differences from CAPRI's results are in [§11](#11-known-limitations) and `docs/KNOWN_ISSUES.md`. The rest
+follows CAPRI's method; how closely the results match CAPRI's own is shown in [§8](#8-validation).
 
 ---
 
