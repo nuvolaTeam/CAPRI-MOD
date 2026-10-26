@@ -109,8 +109,6 @@ grassland_allowance = 0.0
 use_manure_techs = true
 # without a policy incentive on N, the ammonia options stay at their calibrated shares (K63)
 amm_fix_without_policy = true
-# CAPRI's rations per region and animal
-use_ration = true
 # nitrate as a ration ingredient (line_nitr.gms); off until validated
 use_nitrate_in_ration = false
 # fodder balance band rows (the conic form's second side of CAPRI's fodder equality)

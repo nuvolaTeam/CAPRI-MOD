@@ -925,7 +925,8 @@ class CapriRegionalNLP:
         # rows and bounds that no free variable enters (rows on the activities alone: CAP rules, activity bounds)
         # get no multiplier from the fit: zero, as in CAPRI's calibration where only the calibration constraints'
         # duals enter the linear terms
-        keep = np.abs(M).max(axis=0) > 0
+        # (no free variable at all, e.g. a region whose columns are all fixed: nothing to fit)
+        keep = (np.abs(M).max(axis=0) > 0) if M.shape[0] else np.zeros(M.shape[1], bool)
         mult = np.zeros(M.shape[1])
         if keep.any():
             Mk = M[:, keep]

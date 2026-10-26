@@ -1764,6 +1764,9 @@ class RegionalSupplyModel:
                          open(os.path.join(os.environ["CAPRI_NLP_DUMP"], f"{self.data.region_id}.pkl"), "wb"))
         except Exception as _exc:
             import warnings as _w
+            if os.environ.get("CAPRI_TRACE_NLP_BUILD"):            # diagnostics: the build's traceback
+                import traceback as _tb
+                _tb.print_exc()
             _w.warn(f"NLP build failed for {self.data.region_id}: {_exc!r}")
             return None
         # warm start: the previous solution where the problem has the same columns, else the caller's start with the
@@ -6440,6 +6443,17 @@ class SupplyModule:
                 sig[act] = float(sig[comm])
         return sig
 
+    def _base_rations(self) -> None:
+        """CAPRI's rations and base feed prices for the regional models' feeding block, where no model has set them (a
+        SupplyModule used on its own): the same data the model hands over before its first solve
+        (CAPRIModel._update_rations, feed.ration.ration_model_for). Without them a regional model has no feeding block,
+        which CAPRI's form always has."""
+        from capri_mod.feed.ration import ration_model_for, rations_by_region, feed_prices_by_region
+        rm = ration_model_for(self.data, None, getattr(self, "pmp_source", "elasticity"),
+                              getattr(self, "pmp_capri_parts", ()))
+        self.feed_rations = rations_by_region(rm)
+        self.feed_prices = feed_prices_by_region(rm, None)
+
     def run(
         self,
         price_signals: Optional[pd.Series] = None,
@@ -6458,6 +6472,8 @@ class SupplyModule:
         verbose : print progress
         """
         price_signals = self._activity_signals(price_signals)
+        if getattr(self, "feed_rations", None) is None:
+            self._base_rations()
         target_regions = regions or self.regions
         results = {}
         n_failed = 0

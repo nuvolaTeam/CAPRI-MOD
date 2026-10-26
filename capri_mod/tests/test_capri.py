@@ -3290,7 +3290,6 @@ def test_rations_are_chosen_only_inside_the_supply_models(model):
     """With feeding inside the regional models (CAPRI: v_feedInpCoeff only there), no ration is chosen outside them:
     the ration state is the feed per head of the last regional solution (the base ration before the first)."""
     from capri_mod.model import CAPRIModel
-    assert CAPRIModel.use_ration
     model.run(scenario="BASELINE", regions=["IE04"], max_outer_iter=1)
     a = "DCOW"
     r0 = model._ration_model.rations[("IE04", a)]

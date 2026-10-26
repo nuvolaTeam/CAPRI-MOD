@@ -2,7 +2,7 @@
 
 Status: revised 20 October 2026 against the code. The build history (an EU ration chosen outside the supply models,
 its wiring and convergence diagnoses, response tests of that stage) was removed: since K42 the ration is chosen only
-inside the regional supply models. Rations are on by default (`CAPRIModel.use_ration = True`).
+inside the regional supply models. Rations are always on (the `use_ration` switch was removed on 26 October 2026: CAPRI always has the feeding block).
 
 ## How CAPRI does it
 

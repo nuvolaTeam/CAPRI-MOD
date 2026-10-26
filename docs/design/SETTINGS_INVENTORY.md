@@ -45,7 +45,7 @@ as one-key-per-line TOML (comments and [v] marks removed): it parses, 153 keys.
                pmp_apply_dampening=true (impose_upper_bound_on_elasticity.gms [v]); pmp_share_term=true
                use_capri_elasticities=true; use_land_market=true (p_landIsFixedinScenario 0 [v])
                land_no_slack=true (LandBalNoSlak_ [v]); land_row_equality=true; surplus_per_current_ha=true (e_SURTOTHa [v])
-               use_manure_techs=true; use_ration=true
+               use_manure_techs=true
                use_nitrate_in_ration=false; fodder_band=true
                use_livestock_cost_coef=true; amm_fix_without_policy=true; nlp_calibrate=true
                cap_greening=true (permGrasGreening_ [v]); winter_cover_endogenous=true; ni_inside_model=true
@@ -101,7 +101,7 @@ toml.
    (model.py:607-612), so only a standalone `RegionalSupplyModel` sees the False values.
 2. **getattr fallbacks contradict declarations** (harmless today, wrong if the declaration goes):
    - `nlp_staged_tol` falls back to True (model.py:589) and `market_supply_nq` to True (:1027).
-   - Many True switches fall back to False, for example `use_land_market`, `use_ration`, `use_genetics`,
+   - Many True switches fall back to False, for example `use_land_market`, `use_genetics`,
      `cap_greening`, `ni_inside_model` and `use_*_intensity`.
    - `use_cattle_member_splits` falls back to True at supply_module.py:4337. `pmp_source` falls back to "elasticity".
 3. **Hidden switches** (read by getattr, never declared): `milk_ms_step`, `trace_outer`,

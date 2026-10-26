@@ -14,7 +14,6 @@ S016,CAPRIModel.nlp_staged_tol,capri_mod/model.py:152,switch,False,toml:outer_lo
 S017,CAPRIModel.nlp_tol_early,capri_mod/model.py:153,tolerance,1e-6,toml:outer_loop,outer_loop.nlp_tol_early,,no,unsourced; IPOPT tol while prices move (only with nlp_staged_tol)
 S018,CAPRIModel.nlp_tol_final,capri_mod/model.py:154,tolerance,1e-8,toml:outer_loop,outer_loop.nlp_tol_final,,no,unsourced; written to RegionalSupplyModel.nlp_tol every outer iteration (model.py:594)
 S019,CAPRIModel.nlp_tol_switch,capri_mod/model.py:155,tolerance,4.0,toml:outer_loop,outer_loop.nlp_tol_switch,,no,unsourced; multiple of outer_tolerance below which staged tol tightens
-S020,CAPRIModel.use_ration,capri_mod/model.py:160,switch,True,toml:supply,supply.use_ration,feed/ration data (v_feedInpCoeff),yes,getattr fallback False at model.py:620
 S021,CAPRIModel.__init__ verbose,capri_mod/model.py:166,switch,True,toml:diagnostics,diagnostics.verbose,,n/a,constructor default; run tool passes verbose=False
 S022,CAPRIModel.__init__ base_year,capri_mod/model.py:167,switch,2017,toml:run,run.base_year,,n/a,only '2017' accepted (model.py:182)
 S023,CAPRIModel.run max_outer_iter,capri_mod/model.py:274,iteration_limit,25,toml:outer_loop,outer_loop.max_outer_iter,%STEPS% (capmod.gms STEP loop),no,unsourced; auto-raised to manure_max_outer_iter (60) when manure trade on

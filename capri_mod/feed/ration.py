@@ -391,3 +391,40 @@ class RationModel:
             if f in br:
                 p[i] *= float(br[f])
         return p
+
+
+def ration_model_for(data, data_dir=None, pmp_source: str = "elasticity", pmp_capri_parts=(),
+                     use_nitrate: bool = False) -> RationModel:
+    """CAPRI's rations of a run: the RationModel the model builds once per run (CAPRIModel._update_rations) and a
+    SupplyModule used on its own builds at base (SupplyModule._base_rations), from the same data. The ration model's
+    own nitrate ingredient (an early approximation) is superseded by CAPRI's supplement options in the supply model
+    (envind/line_nitr.gms, Sprint 9g): never both. With CAPRI's 2030 PMP terms for feed, the feed-PMP slopes of
+    CAPRI's 2030 baseline calibration (K61)."""
+    d = data if isinstance(data, dict) else {}
+    supp_in = any(o_ == "Nitr_Tot" for v_ in (d.get("genetics_effects") or {}).values() for (_a, o_) in v_)
+    RationModel.use_nitrate = bool(use_nitrate) and not supp_in
+    slope_key = ("capri_slope_2030" if int(d.get("market_year", 2017) or 2017) == 2030
+                 and str(pmp_source) in ("capri2030", "recipe") and "feed" in tuple(pmp_capri_parts or ())
+                 else "capri_slope")
+    return RationModel(data_dir, scale=d.get("ration_scale"), price_scale=d.get("ration_bulk_price"),
+                       factor=d.get("ration_factor"), slope_key=slope_key)
+
+
+def rations_by_region(rm: RationModel) -> dict:
+    """{region: {animal: Ration}}: the data of each regional model's feeding block."""
+    out = {}
+    for (reg, act), r in rm.rations.items():
+        out.setdefault(reg, {})[act] = r
+    return out
+
+
+def feed_prices_by_region(rm: RationModel, bulk_ratio=None) -> dict:
+    """{region: {animal: feed price vector}} at the member states' feed bulk price ratios (CAPRI feedBlkPrice_;
+    bulk_ratio {(member state, bulk): ratio}, None: base prices)."""
+    out = {}
+    for (reg, act), r in rm.rations.items():
+        ms = capri_ms(reg)
+        out.setdefault(reg, {})[act] = rm.price_vector((reg, act), bulk_ratio={b_: x_ for (m_, b_), x_ in
+                                                                              (bulk_ratio or {}).items() if m_ == ms})
+    return out
+

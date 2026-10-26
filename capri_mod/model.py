@@ -142,9 +142,6 @@ class CAPRIModel:
     nlp_tol_early = setting("outer_loop.nlp_tol_early")
     nlp_tol_final = setting("outer_loop.nlp_tol_final")
     nlp_tol_switch = setting("outer_loop.nlp_tol_switch")
-    #: CAPRI's rations per region and animal (capri_mod/feed/ration.py: feeds, base ration, requirements, prices): the
-    #: data of the feeding block inside the regional models, where the ration is chosen (as CAPRI).
-    use_ration = setting("supply.use_ration")
 
     def __init__(
         self,
@@ -607,11 +604,7 @@ class CAPRIModel:
                 self._pool_accel = None
                 self._pool_trace = []
                 self._pool_imbalance = 0.0
-            if self.use_ration:
-                self._update_rations(price_signal if outer_iter > 0 else None)
-            else:
-                # CAPRI's feed bulk prices for the feed costs per head (feedBlkPrice_)
-                self.supply_module.feed_bulk_ratio = self.feed_bulk_price_ratios(price_signal if outer_iter > 0 else None)
+            self._update_rations(price_signal if outer_iter > 0 else None)
             # CAPRI's raw milk price per member state (dairy block per RMS): the regional models get their member
             # state's milk price signal (relaxed like every price signal, below) as a departure from the EU's
             _ms_sig = getattr(self, "_milk_ms_signal", None) or {}
@@ -1589,29 +1582,17 @@ class CAPRIModel:
         return out
 
     def _update_rations(self, price_signal) -> None:
-        """Solve every EU region-animal ration at the current feed prices and hand
-        the result to the supply module (feed costs, fodder balance) and to the
-        market's feed demand. Cereals and protein-rich feed: the member state's CAPRI bulk price indices
-        (feedBlkPrice_); fodder at its balance shadow price; feeds without a market at base value."""
-        from capri_mod.feed.ration import RationModel
+        """CAPRI's rations and the current feed prices for the feeding block inside the regional models (the ration is
+        chosen there), and the ration state (feed per head of the last regional solution) for the market's feed
+        index. Cereals and protein-rich feed: the member state's CAPRI bulk price indices (feedBlkPrice_); home-grown
+        fodder through its balance; feeds without a market at base value."""
+        from capri_mod.feed.ration import ration_model_for, rations_by_region, feed_prices_by_region
         rm = getattr(self, "_ration_model", None)
         if rm is None:
-            # the ration model's own nitrate ingredient (an early approximation) is superseded by CAPRI's
-            # supplement options in the supply model (envind/line_nitr.gms, Sprint 9g): never both
-            _supp_in = any(
-                o_ == "Nitr_Tot" for v_ in ((self.data.get("genetics_effects") if isinstance(self.data, dict) else None)
-                                           or {}).values() for (_a, o_) in v_)
-            RationModel.use_nitrate = bool(getattr(self, "use_nitrate", False)) and not _supp_in
-            rm = RationModel(self.data_dir if hasattr(self, "data_dir") else None,
-                             scale=(self.data.get("ration_scale") if isinstance(self.data, dict) else None),
-                             price_scale=(self.data.get("ration_bulk_price") if isinstance(self.data, dict) else None),
-                             factor=(self.data.get("ration_factor") if isinstance(self.data, dict) else None),
-                             # CAPRI's feed-PMP slopes of its 2030 baseline calibration with CAPRI's 2030 PMP terms (K61)
-                             slope_key=("capri_slope_2030" if isinstance(self.data, dict)
-                                        and int(self.data.get("market_year", 2017) or 2017) == 2030
-                                        and str(getattr(self.supply_module, "pmp_source", "elasticity")) in ("capri2030", "recipe")
-                                        and "feed" in tuple(getattr(self.supply_module, "pmp_capri_parts", ()))
-                                        else "capri_slope"))
+            rm = ration_model_for(self.data, self.data_dir if hasattr(self, "data_dir") else None,
+                                  getattr(self.supply_module, "pmp_source", "elasticity"),
+                                  getattr(self.supply_module, "pmp_capri_parts", ()),
+                                  bool(getattr(self, "use_nitrate", False)))
             self._ration_model = rm
         # FEED BULK PRICES per member state (CAPRI feedBlkPrice_): the CES price index of the member state's
         # cereals (FCER) and protein-rich feed (FPRO, with cakes, DDGS, pulses, oils, milling by-products)
@@ -1641,16 +1622,9 @@ class CAPRIModel:
         # the per-region rations dicts are built ONCE per ration model and reused, so the
         # feed-in-supply block cache (keyed on the dict's identity) hits; only prices change
         if getattr(self, "_feed_rations_for", None) is not rm:
-            _fr = {}
-            for (reg, act), r in rm.rations.items():
-                _fr.setdefault(reg, {})[act] = r
-            self._feed_rations_stable = _fr
+            self._feed_rations_stable = rations_by_region(rm)
             self._feed_rations_for = rm
-        _fp = {}
-        for (reg, act), r in rm.rations.items():
-            _ms = self.member_state_of(reg)
-            _fp.setdefault(reg, {})[act] = rm.price_vector((reg, act), bulk_ratio={b_: x_ for (m_, b_), x_ in bix.items()
-                                                                                    if m_ == _ms})
+        _fp = feed_prices_by_region(rm, bix)
         self.supply_module.feed_rations = self._feed_rations_stable
         self.supply_module.feed_prices = _fp
         self._ration_state = state
