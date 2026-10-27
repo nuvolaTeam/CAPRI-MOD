@@ -562,6 +562,18 @@ class RegionalSupplyModel:
     Policy enters through r (net revenues include direct payments).
     """
 
+    #: the state a solve leaves for the next one (linearisation points, warm starts, splits, rations, last solutions),
+    #: besides the warm-start fields named _nlp*: what the market supply Hessian saves and restores so that every price
+    #: shock starts from the baseline's state (model._market_supply_hessian). Found by comparing the model's attributes
+    #: before and after a solve (27 October 2026); bookkeeping (_n_solves, _nlp_times) and the shared environmental
+    #: module are not state
+    SOLVE_STATE = ("_amm_cost", "_amm_last", "_animal_n_kept", "_animal_n_relief", "_animal_nh3_saved", "_cover_solved",
+                   "_fd_model", "_ghg_nr_obj", "_land_solution", "_last_aug", "_last_aug_A", "_last_aug_b",
+                   "_last_cattle_z", "_last_dairy_z", "_last_duals", "_last_feed", "_last_feed_dm", "_last_feed_t",
+                   "_last_genet_z", "_last_grass_z", "_last_hist_fallow", "_last_land", "_last_npk", "_last_req_duals",
+                   "_manure_ni_nh3", "_manure_ni_relief", "_manure_ni_share", "_manure_tech_shares", "_npk_cov",
+                   "_price_shock_now", "_wc_solved", "feed_rations")
+
 
     #: livestock costs from CAPRI's regional total inputs / model heads
     #: (livestock_cost_coef.csv), with revenue on CAPRI's total output (TOOU): with market revenue (MREV), which

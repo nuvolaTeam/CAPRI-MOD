@@ -1399,7 +1399,7 @@ class CAPRIModel:
                         "shocks-from-base")
                         # differences to the base re-solved from the same state, regions a shock does not reach not
                         # re-solved (27 October 2026, market.hessian_skip_unchanged; off: the key as before)
-                        + (("base-resolved-skip-unchanged",) if skip else ()))
+                        + (("base-resolved-skip-unchanged", "full-solve-state") if skip else ()))
                    # at a scenario's state (market.hessian_scenario_iter): its young-animal and member-state milk
                    # prices too (a baseline's key is unchanged)
                    + (repr((sorted((getattr(sm, "yani_price_ratio", None) or {}).items()),
@@ -1428,8 +1428,18 @@ class CAPRIModel:
         # base re-solve. Chained warm starts let IPOPT end the base re-solve at another stationary point of the
         # non-convex problem (DE11, 24 October 2026: 12 kt off the baseline, and the next baseline from that state
         # 2% less wheat), so the scenario started from a state the baseline never had
+        # the regional models' state: the warm-start fields (_nlp*) and everything else a solve leaves for the next one
+        # (RegionalSupplyModel.SOLVE_STATE: the ammonia options' linearisation point, rations, splits, last solutions).
+        # Until 27 October 2026 only the _nlp* fields were saved: each shock started from the state the previous shock
+        # left (the ammonia options' point differed at 1e-36, rations and splits possibly more)
+        def _state_key(mo_, k_):
+            if not skip:                                   # the measurement as before (cached Hessians keep their keys)
+                return k_.startswith("_nlp")
+            return (k_.startswith("_nlp") and k_ != "_nlp_times") or k_ in getattr(type(mo_), "SOLVE_STATE", ())
+
         def _snapshot():
-            mods = {r_: {k_: _cp.copy(v_) for k_, v_ in mo_.__dict__.items() if k_.startswith("_nlp")}
+            _c = _cp.deepcopy if skip else _cp.copy
+            mods = {r_: {k_: _c(v_) for k_, v_ in mo_.__dict__.items() if _state_key(mo_, k_)}
                     for r_, mo_ in sm._models.items()}
             return mods, {n_: _cp.deepcopy(sm.__dict__.get(n_)) for n_ in getattr(sm, "_PAR_STATE", ())}
 
@@ -1439,9 +1449,9 @@ class CAPRIModel:
                 mo_ = sm._models.get(r_)
                 if mo_ is None:
                     continue
-                for k_ in [k_ for k_ in mo_.__dict__ if k_.startswith("_nlp") and k_ not in d_]:
+                for k_ in [k_ for k_ in mo_.__dict__ if _state_key(mo_, k_) and k_ not in d_]:
                     del mo_.__dict__[k_]
-                mo_.__dict__.update({k_: _cp.copy(v_) for k_, v_ in d_.items()})
+                mo_.__dict__.update({k_: (_cp.deepcopy if skip else _cp.copy)(v_) for k_, v_ in d_.items()})
             for n_, v_ in par.items():
                 if v_ is None:
                     sm.__dict__.pop(n_, None)
