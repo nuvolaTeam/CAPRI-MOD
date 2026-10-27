@@ -224,7 +224,7 @@ iterates supply and market with averaged prices.
 | Inner fertiliser distribution (accounts) | concave posterior mode, few balances | own Newton on the duals |
 | Land-use change transitions | concave posterior mode | IPOPT, tol 1e-12 |
 | Duals and feed-term calibration | small non-negative least squares | SciPy `nnls` |
-| Supply–market loop | fixed point | CAPRI's price averaging (default since 26 October 2026) or the adaptive step, same equilibrium (r139–r142); CAPRI's stop rule recorded each iteration |
+| Supply–market loop | fixed point | CAPRI's price averaging (default since 26 October 2026) or the adaptive step, same equilibrium (r139–r142); CAPRI's stop rule decides (default since 27 October 2026) |
 
 **Why these solvers.** Clarabel solves convex conic problems only; the manure-pool equilibrium is the one convex problem
 with many constraints (an interior point handles any set of binding bounds; an active-set loop failed on the full EU).
@@ -555,8 +555,8 @@ CAPRI-mod is six focused, independently testable modules coordinated by
 
 The **outer loop** is the heart of the model: policy sets net revenues → supply
 chooses activities → market clears and returns prices → prices re-enter supply →
-repeat until prices stop moving (default tolerance 0.5%, with the gaps between the
-prices passed on and the market's; CAPRI's stop rule is an option, §10). The
+repeat until CAPRI's stop rule is met (no more than two items changing by more than
+0.05% between iterations; the model's own price tests are an option, §10). The
 environmental accounts are **post-equilibrium**: they read the converged activity
 levels and compute their indicators. Two reports read the solved regions as well, outside the run: the irrigation
 water requirement (`capri_mod/water`, CROPWAT's net requirements on the FSS irrigated areas) and the farm income
@@ -1558,9 +1558,9 @@ principled reason and extension path.
   meet the tiered nitrogen target and is solved at JRC121368's relaxed 36% cut, as the report did for its
   highest-surplus regions (`metadata["nlp_fallback"]`). A region whose IPOPT solve still fails would keep its last
   IPOPT point, warned about and recorded there (none in r145 or r142).
-- **Convergence must be checked.** The reference runs converge (r145, r142); CAPRI's stop rule, recorded at every
-  iteration, still flags a few member-state productions moving by more than 0.05% (KNOWN_ISSUES K79). Check
-  `metadata["outer_converged"]` before using a result.
+- **Convergence must be checked.** Since 27 October 2026 the loop stops on CAPRI's stop rule (KNOWN_ISSUES K79; until
+  then on the model's price tests, which ended Farm-to-Fork with member-state productions still moving by more than
+  0.05%). Check `metadata["outer_converged"]` before using a result.
 
 **Deliberate scope boundaries (not gaps — design choices, like §10):**
 

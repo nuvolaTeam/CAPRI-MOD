@@ -821,9 +821,9 @@ CAPRI's stop rule, recorded every iteration since r135, flags rows that move by 
   (2) French olives and table grapes moved by 66% and 35% at iterations 4 and 5 only, back at iteration 6, and not in
   r160 (the same scenario): the four French olive regions' and two table grape regions' models respond smoothly to
   their price (sweep of +-0.6% in 0.05-point steps at base settings: largest step 0.01%), so not a kink of the regional
-  model; cause not found (the region-solve warning added since r161 will show a failed solve if it recurs). Next: a run
-  with outer_loop.stop_rule = "capri" to measure the iterations CAPRI's rule needs (the project lead's decision whether
-  to make it the default)
+  model; cause not found (the region-solve warning added since r161 will show a failed solve if it recurs). CAPRI's stop
+  rule made the default (the project lead's decision, 27 October 2026), with the model's inner balances settled as well;
+  the next reference runs measure the iterations it needs
 
 <a id="k80"></a>
 ### K80: The same run repeated from a warm start differs by up to 3e-5 relative in small cereal activities (26 October 2026)

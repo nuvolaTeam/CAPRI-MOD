@@ -1083,8 +1083,13 @@ class CAPRIModel:
                        and _nbal < self.NBAL_UPDATE_TOL and _pool < _pool_tol and _yani < self.YANI_TOL
                        and _cal < self.BASE_CAL_TOL)
             if str(_settings().get("outer_loop.stop_rule")) == "capri":
-                # CAPRI's rule decides (capmod.gms l. 1369); this model's tests are still recorded above
-                _own_ok = bool(_cv is not None and outer_iter > 0 and not _cv["go_on"])
+                # CAPRI's rule decides on prices and quantities (capmod.gms l. 1369); this model's price and supply-gap
+                # tests are still recorded above. The model's inner balances (each region's N-balance price, the
+                # manure pools, the young-animal markets, the base calibration) must have settled as well: CAPRI
+                # solves them inside each step's simultaneous system, so a CAPRI step always has them closed
+                _own_ok = bool(_cv is not None and outer_iter > 0 and not _cv["go_on"]
+                               and _nbal < self.NBAL_UPDATE_TOL and _pool < _pool_tol and _yani < self.YANI_TOL
+                               and _cal < self.BASE_CAL_TOL)
             if _own_ok:
                 outer_converged = True
                 if self.verbose:
