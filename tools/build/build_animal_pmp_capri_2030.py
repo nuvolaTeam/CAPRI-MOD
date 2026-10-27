@@ -131,7 +131,6 @@ def main() -> None:
     a = ap.parse_args()
     sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check")]
     import _model_regions as mr
-    import build_capri_base as bcb
     t = _read_csv(a.techn or SRC)
     t = t[(t.tech1 == "T") & (t.tech2 == "T") & t.activity.isin(ACTS)]
     Q = defaultdict(dict)
@@ -146,13 +145,11 @@ def main() -> None:
     _c2g, groups = mr.capri_groups(regions)
     covered = {r for _, (_, rs) in groups.items() for r in rs}
     nat = defaultdict(set)
-    no_children = sorted(r for r in bcb.NORWAY_CHILDREN if r in regions)
     for r in regions:
-        if r not in covered and r not in no_children:
+        if r not in covered:
             nat[mr.national_code(r)].add(r)
     territory = [(sorted(cs), sorted(rs)) for _, (cs, rs) in groups.items()] + \
-                [([c], sorted(rs)) for c, rs in nat.items() if rs] + \
-                ([(list(bcb.NORWAY_PARENTS), no_children)] if no_children else [])
+                [([c], sorted(rs)) for c, rs in nat.items() if rs]
     ratio = _read_csv(ROOT / "capri_data" / "2017" / "supply" / "capri_level_ratio.csv", index_col=0)
     rows, missing = [], defaultdict(list)
     for cs, rs in territory:

@@ -145,15 +145,8 @@ def main() -> None:
     for r in regions:
         if r not in covered:
             nat[mr.national_code(r)].add(r)
-    # Norway: NO01, NO03, NO04, NO05 (NUTS 2016) against CAPRI's NO08, NO09, NO0A (NUTS 2021), one territory as in
-    # tools/build/build_capri_base.py (NORWAY_PARENTS / NORWAY_CHILDREN)
-    import build_capri_base as bcb
-    no_children = sorted(r for r in bcb.NORWAY_CHILDREN if r in regions)
-    for r in no_children:
-        nat.get(mr.national_code(r), set()).discard(r)
     territory = [(sorted(cs), sorted(rs)) for _, (cs, rs) in groups.items()] + \
-                [([c], sorted(rs)) for c, rs in nat.items() if rs] + \
-                ([(list(bcb.NORWAY_PARENTS), no_children)] if no_children else [])
+                [([c], sorted(rs)) for c, rs in nat.items() if rs]
     have = set(techn.region)
     rows, n_groups, n_pd_fail, missing = [], 0, 0, []
     for cs, rs in territory:

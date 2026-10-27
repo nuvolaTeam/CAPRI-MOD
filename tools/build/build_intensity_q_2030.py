@@ -13,9 +13,7 @@ beside the base year's:
 
 Term: the activity's curvature on its level, its technology block collapsed (c = 1 / (1' Qt^-1 1): Q(T, T) of a
 single-technology activity, as the animals and grassland; the set-aside and fodder crops have two).
-Model regions: CAPRI's codes through capri_data/shared/nuts_crosswalk.json (aliases, then resolved), as
-ingest_pmp_terms.py; a CAPRI code mapping to several model regions gives each the same term (the base-year file's
-rule: the term of the CAPRI region the model region is named for).
+Model regions: CAPRI's regional units, each its own CAPRI region's terms.
 
 Output: capri_data/sources/baseline_pmp/intensity_q_<tag>.csv (model_region, activity, value)
 
@@ -41,14 +39,12 @@ FILES = {"capri2030": SRC / "pmp_quad_techn_2030.csv", "recipe2030": SRC / "reci
 
 
 def crosswalk() -> dict:
-    cw = json.loads((ROOT / "capri_data" / "shared" / "nuts_crosswalk.json").read_text())
-    rev = {}
-    for model_region, codes in cw.get("aliases", {}).items():
-        for c in codes:
-            rev.setdefault(c, model_region)
-    for model_region, c in cw["resolved"].items():
-        rev.setdefault(c, model_region)
-    return rev
+    """CAPRI code -> model region: on CAPRI's units the identity (until 27 October 2026 shared/nuts_crosswalk.json,
+    which left 21 model regions without a term)."""
+    import sys as _sys
+    _sys.path.insert(0, str(ROOT / "tools" / "lib"))
+    from _model_regions import UNITS
+    return {u: u for u in UNITS}
 
 
 def build(path: Path, rev: dict) -> pd.DataFrame:
