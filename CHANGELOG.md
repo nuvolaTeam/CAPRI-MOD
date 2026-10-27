@@ -87,6 +87,12 @@ Full provenance for every entry is in `capri_data/DATA_SOURCING_REGISTRY.json`.
 - Tests: NUTS 2024 mapping and reporting (5), water and income (3), the own-price response in five contrasting units
   (arable, eastern arable, Mediterranean permanent crop, grassland cattle, intensive pigs). `tools/run/run_mini_eu.py`:
   the Farm-to-Fork run on 20 units covering the model's structures, against an earlier mini-EU run (task 239).
+- Verification: full test suite 205 passed, 1 skipped (the live Eurostat query); the five new response tests failed
+  at first with responses of 1e-6: their shock fell on a region's second solve, where the late split and histosol
+  columns are calibrated (at that solve's prices), so the calibration took the shock up. The tests now solve the base
+  twice, as a run's baseline does (wheat +15.0% in FR240000 for a 20% price, rye +39.1% in PL120000, bulls +17.0% in
+  IR010000, fattening pigs +18.7% in NL220000, olives +2.5% in ES610000); the DE110000 test, whose weak check (no fall)
+  had hidden the same effect, too. Reference runs on the units: r161 (Farm-to-Fork), r162 (Green Deal 2030).
 
 ## 27 October 2026 (morning): the test suite in half the time; two model issues found by its timing (K83, K84)
 
