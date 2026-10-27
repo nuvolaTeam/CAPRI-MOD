@@ -5419,8 +5419,10 @@ class RegionalSupplyModel:
                 _y1 = float(self.data.yields.get("DCOW", 0.0))
                 if _y0 and _y1 > 0 and _y0 > 0:
                     _c *= _y1 / _y0
-            gross_output[_a] = (float(activities.get(_a, 0.0)) * _c
-                                if _c is not None else float("nan"))
+            # no output coefficient: unknown (NaN) where the activity has a level, none where it has none (other
+            # animals, OANI, held at 0 in every region, read NaN until 27 October 2026)
+            _lv = float(activities.get(_a, 0.0))
+            gross_output[_a] = (_lv * _c if _c is not None else (float("nan") if abs(_lv) > 1e-12 else 0.0))
             # CAPRI's dairy split (Sprint 7b): z heads at DCOL instead of DCOH change milk by
             # (COMI_DCOL - COMI_DCOH) / COMI_DCOW per head (cull-cow beef, ~1% of the tonnage, is
             # the same for both and is scaled with it: REGISTERED)
