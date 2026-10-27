@@ -56,7 +56,15 @@ models' MGVA + the change of PSEs.
 4. **Not represented**: market PSE/CSE/FSE wedges, processing aids, export subsidies and intervention costs (the model
    has none); the land owners of the regions without supply models (no land market); CAPRI's emission tax revenues
    (not in CAPRI's total either, welfare.gms l. 790-795).
-5. **No CAPRI scenario welfare at hand to compare with**: the CAPRI result files in hand (res_2_1730greendeal...)
-   carry no welfare rows. The checks are internal: the GL money metric against the first-order term and the exact
+5. **CAPRI's welfare at hand: the 2030 reference's levels only** (capri_data/sources/capri_res/ref2030_welfare.csv,
+   from scen_ref_2030.txt). The Green Deal file of the same pair and the res_2_1730greendeal... files carry no welfare
+   rows, so no scenario change can be compared with CAPRI's. The levels the model also reports as levels can be
+   compared with the model's baseline: TariffRev (EU27 4,228), TRQRents (EU27 407), the supply models' MGVA (EU27
+   302,113) and PSEs (EU27 -47,259). Internal checks: the GL money metric against the first-order term and the exact
    equivalent variation, the dairy profit against a numerical line integral, the market report at base and after a
    supply shock (capri_mod/tests/test_welfare.py).
+6. **The land accounts of CAPRI's 2030 reference are SUPREMA's** (welfare.gms supremaMrk on): the farms' profit is MGVA
+   less the land rents (EU27: 302,113 - 58,994 = 243,119) and the rents are the land owners' (ProfitLandUse 58,994).
+   The port has the default accounts (ProfitAgr = MGVA, no ProfitLandUse of its own). The total is the same (the rent
+   is a transfer); the split follows CAPRI's run once the rent at the solution is taken from the supply models' land
+   rows (their duals x the land types' areas): next step.
