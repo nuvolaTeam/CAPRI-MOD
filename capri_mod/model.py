@@ -407,7 +407,6 @@ class CAPRIModel:
         _mm = self.market_module
         if _is_base:
             _mm._eu_base_supply = None
-            _mm._eu_base_demand = None
             # a baseline's market runs without a market supply Hessian (the one of an earlier baseline belonged to
             # another solution, possibly another region set); its own is measured when a scenario needs it
             _mm.supply_hessian = None
@@ -772,9 +771,6 @@ class CAPRIModel:
                 rg: (1.0 + price_signal + (_sdv[rg].reindex(price_signal.index).fillna(0.0) if rg in _sdv else 0.0)
                      ).reindex(self.market_module.commodities).fillna(1.0)
                 for rg in getattr(self.market_module, "SUP", ())}
-            # premium damping state belongs to one run (CAPRIModel.run resets it on its first iteration)
-            if outer_iter == 0:
-                self.market_module._prem_prev, self.market_module._prem_w, self.market_module._prem_d = None, None, None
             # FEED DEMAND FOLLOWS HERDS: EU feed use of each feed cereal from
             # this iteration's herds x the feed table, relative to base.
             self._set_feed_demand(supply_results)

@@ -1,5 +1,11 @@
 # Market state inventory (for refactor stage 2b, 26 October 2026)
 
+*Progress 27 October 2026 (branch market-2b): the per-evaluation carriers are in `MarketEvalState` (`ev`), the warm
+starts in `MarketSolveState` (`sv`) and the calibration parameters in `MarketParameters` (`par`),
+capri_mod/market/state.py, with their lifetimes unchanged; the write-only attributes of section 1 removed. Not yet: the
+file caches, the inputs set by model.py as arguments of `solve`, the parameters cached per baseline as one object, and
+the risk fixes of section 3.*
+
 Read-only survey of the mutable state of `MarketModule` (capri_mod/market/) and of what `model.py` sets on it: the map
 for stage 2b, which moves (a) what each block builds once per base or calibration into a parameters object and (b) what
 one market evaluation passes between blocks into an explicit state object (docs/design/ARCHITECTURE_REFACTOR.md

@@ -286,7 +286,6 @@ class DemandMixin(MarketStateMixin):
                 if jj is not None and REFv[i, jj] > 0:
                     ft *= (DPv[i, jj] / REFv[i, jj]) ** e
             F[i, j] = F0[i, j] * ft
-        self._eu_feed_now = None
         self.ev.eu_feed_now_reg = {}
         for _reg in self.EU:
             ie = R.get(_reg)
@@ -296,8 +295,6 @@ class DemandMixin(MarketStateMixin):
             feed = self.eu_feed_use({c: float(PR[ie, Cc[c]]) for c in fb["feed0"] if c in Cc},
                                     region=_reg if self.eu_blocks else None)
             self.ev.eu_feed_now_reg[_reg] = feed
-            if not self.eu_blocks:
-                self._eu_feed_now = feed
             for c, q in feed.items():
                 j = Cc.get(c)
                 f0 = float(f0r.get(c, 0.0))
@@ -452,6 +449,5 @@ class DemandMixin(MarketStateMixin):
                                   + st["proc"].get((reg, fuel), p0))
                 else:
                     D[i, j] = D0[i, j]
-        self._rest_share = np.where(D0 > 0, FIX / np.where(D0 > 0, D0, 1.0), 0.0)     # fixed share (diagnostic)
         return pd.DataFrame(D, index=self.regions, columns=self.commodities).clip(lower=0.0).astype(float)
 

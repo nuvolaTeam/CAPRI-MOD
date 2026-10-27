@@ -444,7 +444,6 @@ class BilateralSolveMixin(MarketStateMixin):
                 return np.array([max(float(S[c].sum()), 1.0)])
             self._bilat_base_resid = {c: float(np.max(np.abs(F[c] / _sz(c)))) for c in F}
             self._bilat_err = max(self._bilat_base_resid.values())
-            self._bilat_converged = True
             self.sv.bilat_last_r = r.copy()
             return r, S, D, PAr, pc, True, 0
         self.par.demand_cal = self.par.demand_cal_frozen.copy()
@@ -533,7 +532,6 @@ class BilateralSolveMixin(MarketStateMixin):
             else:
                 r = r * (new / r).clip(lower=_sclip[0], upper=_sclip[1]) ** damp
         self.sv.bilat_last_r = r.copy()
-        self._bilat_converged = converged
         self._bilat_err = err
         return r, S, D, PAr, pc, converged, it + 1
 
@@ -547,7 +545,6 @@ class BilateralSolveMixin(MarketStateMixin):
             worst = max(errs, key=errs.get) if errs else "-"
             _w.warn(f"bilateral market did not converge in {iters} steps: largest relative residual "
                     f"{float(getattr(self, '_bilat_err', float('nan'))):.2e} ({worst})", RuntimeWarning)
-        self._bilat_unconverged = None if converged else (iters, float(getattr(self, "_bilat_err", float("nan"))))
         sysd = self.par.bilat
         # CAPRI's welfare report (market/welfare.py) at the solution, at the prices the market's functions saw
         welfare = self._capri_welfare(r, PAr, S, D, pc)
@@ -590,10 +587,8 @@ class BilateralSolveMixin(MarketStateMixin):
             _ws = _w.sum(axis=0)
             _avg = (self.eu_premium_reg * _w).sum(axis=0) / _ws.where(_ws > 0, 1.0)
             self.eu_premium = _avg.where(_ws > 0, self.eu_premium_reg.mean(axis=0))
-            self._wedge_eu_last = wedge.loc[self.EU[0]]
         else:
             self.eu_premium = self.eu_premium_reg.loc["EU27"]
-            self._wedge_eu_last = wedge.loc["EU27"]
         self.ev.bilat_ratio_now = r
         idx = pd.MultiIndex.from_product([self.regions, self.regions], names=["exporter", "importer"])
         flows = pd.DataFrame(0.0, index=idx, columns=self.commodities)
@@ -603,7 +598,6 @@ class BilateralSolveMixin(MarketStateMixin):
                 for j, exp in enumerate(self.regions):
                     if i != j and X[i, j] > 0:
                         flows.at[(exp, imp), c] = X[i, j]
-        self.last_market_solver = "bilateral"
         biof = None
         if self._biofuel_params() and all(x in reported.index for x in self.EU):
             _pr = {_rg: {c: float(PAr.at[_rg, c]) for c in self._biofuel_params()["share"] if c in PAr.columns}
@@ -676,5 +670,4 @@ class BilateralSolveMixin(MarketStateMixin):
             extra = pd.DataFrame(add).T
             extra.index = pd.MultiIndex.from_tuples(extra.index, names=fl.index.names)
             fl = pd.concat([fl, extra])
-        self._eu_aggregate_reported = True
         return S, D, reported, wedge, fl, world

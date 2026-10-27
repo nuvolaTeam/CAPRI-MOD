@@ -458,7 +458,6 @@ class SupplyMixin(MarketStateMixin):
             if done:
                 break
         self.ev.dairy_m5_now = res
-        self.__dict__["_milk_dL_now"] = dict(zip(mss, (float(v) for v in dL)))
         # raw milk delivered against the supply models' (kt): the milk row of the market carries it
         self.ev.milk_dq_now = float(sum((float(res["ms_price_ratio"][m]["milk_delivered"]) - mr0[i]) * q0[i]
                                       for i, m in enumerate(mss)))
