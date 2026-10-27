@@ -30,6 +30,24 @@ Full provenance for every entry is in `capri_data/DATA_SOURCING_REGISTRY.json`.
 
 ---
 
+## 27 October 2026 (morning): the test suite in half the time; two model issues found by its timing (K83, K84)
+
+- **Every test gets a model as just built** (a copy, 0.7 s): the tests shared one model, so each started from the state
+  the tests before it left (warm starts, calibrations taken at another test's point, the market's state). Results and run
+  time depended on the order, and so did the market supply Hessian's cache key (the baseline solution): each suite run
+  measured its Hessians again (the CAP-support test 429 s measuring, 18 s from the cache). The cache file is now written
+  whole and renamed, so parallel test processes read a complete file or none (no change to any result: the Farm-to-Fork
+  and Green Deal 2030 reference runs equal r155 and r154 exactly).
+- **K83 (open)**: a one-region Farm-to-Fork run (DE11) with two supply-market iterations: the market diverged in both
+  scenario steps (2 x 100 steps, 550 of the winter-cover test's 590 s); with one iteration it converges in 27 steps. Full-EU
+  runs not affected. The winter-cover test runs one iteration.
+- **K84 (open)**: the landscape floor's fit (land market off) ends on its last margin step in the regions examined (EL65,
+  ITH1: 11 failed IPOPT solves; FRM0 ~580 s), so the recorded shortfall is mostly that margin. The test takes EL65 first.
+- The organic no-op test at IPOPT's tolerance between two solves (K80), 1e-4 as the pesticide no-op test (1e-5 was
+  exceeded by 1.08e-5).
+- Tests handed out longest first, one at a time (pytest-xdist maxschedchunk 1; durations in capri_mod/tests/durations.json,
+  refreshed by tools/check/test_durations.py). Full suite on 2 processes: 56 min -> 31 min (198 passed, 1 skipped).
+
 ## 27 October 2026: the switches whose alternative never ran removed; run options that mirrored a setting; water and income modules
 
 A review of the reference runs (r150 Farm-to-Fork, r151 Green Deal 2030; recorded runs since about r100) found no
