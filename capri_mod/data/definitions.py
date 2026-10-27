@@ -127,140 +127,32 @@ FEED_ITEMS = [
 ALL_ACTIVITIES = CROPS + ANIMALS
 
 # ---------------------------------------------------------------------------
-# REGIONS  (EU NUTS-2, Norway, Western Balkans)
+# REGIONS: CAPRI's regional units of the EU27 and Norway, under CAPRI's 8-character codes (DE110000, FR240000, BL400000,
+# DK000000), as CAPRI solves them (RU(SRNUTS2) $ MAP_RR, capmod/define_regional_sets.gms l. 230). Data:
+# capri_data/shared/regional_units.csv (tools/build/build_regional_units.py). Until 27 October 2026 the model had 248
+# NUTS-2016 regions listed here, mapped to CAPRI's units through crosswalks and split where they did not match
+# (docs/design/REGIONAL_UNITS_INVENTORY.md).
 # ---------------------------------------------------------------------------
+def _load_units():
+    import csv
+    from pathlib import Path
+    p = Path(__file__).resolve().parents[2] / "capri_data" / "shared" / "regional_units.csv"
+    with open(p, newline="") as f:
+        return [(r["region"], r["capri_ms"], r["country"]) for r in csv.DictReader(f)]
 
-# Selected representative NUTS-2 regions (full list has ~280)
-# Organised by member state for data loading convenience
-NUTS2_REGIONS = {
-    # Germany (DE)
-    "DE": [
-        "DE11", "DE12", "DE13", "DE14",  # Baden-Württemberg
-        "DE21", "DE22", "DE23", "DE24", "DE25", "DE26", "DE27",  # Bavaria
-        "DE30",  # Berlin
-        "DE40",  # Brandenburg
-        "DE50",  # Bremen
-        "DE60",  # Hamburg
-        "DE71", "DE72", "DE73",  # Hessen
-        "DE80",  # Mecklenburg-Vorpommern
-        "DE91", "DE92", "DE93", "DE94",  # Lower Saxony
-        "DEA1", "DEA2", "DEA3", "DEA4", "DEA5",  # NRW
-        "DEB1", "DEB2", "DEB3",  # Rhineland-Palatinate
-        "DEC0",  # Saarland
-        "DED2", "DED4", "DED5",  # Saxony
-        "DEE0",  # Saxony-Anhalt
-        "DEF0",  # Schleswig-Holstein
-        "DEG0",  # Thuringia
-    ],
-    # France (FR)
-    "FR": [
-        "FR10",  # Île-de-France
-        "FRB0", "FRC1", "FRC2",  # Centre, Bourgogne, Auvergne
-        "FRD1", "FRD2",  # Normandie
-        "FRE1", "FRE2",  # Nord
-        "FRF1", "FRF2", "FRF3",  # Grand Est
-        "FRG0",  # Pays de la Loire
-        "FRH0",  # Bretagne
-        "FRI1", "FRI2", "FRI3",  # Nouvelle-Aquitaine
-        "FRJ1", "FRJ2",  # Occitanie
-        "FRK1", "FRK2",  # Auvergne-Rhône-Alpes
-        "FRL0",  # Provence-Alpes-Côte d'Azur
-        "FRM0",  # Corse
-    ],
-    # Italy (IT)
-    "IT": [
-        "ITC1", "ITC2", "ITC3", "ITC4",  # NW Italy
-        "ITH1", "ITH2", "ITH3", "ITH4", "ITH5",  # NE Italy
-        "ITI1", "ITI2", "ITI3", "ITI4",  # Central Italy
-        "ITF1", "ITF2", "ITF3", "ITF4", "ITF5", "ITF6",  # South
-        "ITG1", "ITG2",  # Islands
-    ],
-    # Spain (ES)
-    "ES": [
-        "ES11", "ES12", "ES13",  # NW Spain
-        "ES21", "ES22", "ES23", "ES24",  # NE Spain
-        "ES30",  # Madrid
-        "ES41", "ES42", "ES43",  # Castile
-        "ES51", "ES52", "ES53",  # Catalonia/Valencia
-        "ES61", "ES62",  # Andalusia
-        "ES63", "ES64",  # Ceuta, Melilla
-        "ES70",  # Canarias
-    ],
-    # Poland (PL)
-    "PL": [
-        "PL21", "PL22",  # Małopolskie, Śląskie
-        "PL31", "PL32", "PL33", "PL34",  # Lubelskie, etc.
-        "PL41", "PL42", "PL43",  # Wielkopolskie
-        "PL51", "PL52",  # Lower Silesia
-        "PL61", "PL62", "PL63",  # Kujawy, Warmia
-        "PL71", "PL72",  # Łódź, Świętokrzyskie
-        "PL81", "PL82", "PL84",  # Lubelskie
-        "PL91", "PL92",  # Mazowieckie
-    ],
-    # Netherlands (NL)
-    "NL": ["NL11", "NL12", "NL13", "NL21", "NL22", "NL23",
-            "NL31", "NL32", "NL33", "NL34", "NL41", "NL42"],
-    # Belgium (BE)
-    "BE": ["BE10", "BE21", "BE22", "BE23", "BE24", "BE25",
-            "BE31", "BE32", "BE33", "BE34", "BE35"],
-    # Denmark (DK)
-    "DK": ["DK01", "DK02", "DK03", "DK04", "DK05"],
-    # Sweden (SE)
-    "SE": ["SE11", "SE12", "SE21", "SE22", "SE23",
-            "SE31", "SE32", "SE33"],
-    # Finland (FI)
-    "FI": ["FI19", "FI1B", "FI1C", "FI1D", "FI20"],
-    # Austria (AT)
-    "AT": ["AT11", "AT12", "AT13", "AT21", "AT22",
-            "AT31", "AT32", "AT33", "AT34"],
-    # Greece (EL)
-    "EL": ["EL30", "EL41", "EL42", "EL43", "EL51",
-            "EL52", "EL53", "EL54", "EL61", "EL62", "EL63", "EL64", "EL65"],
-    # Portugal (PT)
-    "PT": ["PT11", "PT15", "PT16", "PT17", "PT18", "PT20", "PT30"],
-    # Ireland (IE)
-    "IE": ["IE04", "IE05", "IE06"],
-    # Czech Republic (CZ)
-    "CZ": ["CZ01", "CZ02", "CZ03", "CZ04", "CZ05", "CZ06", "CZ07", "CZ08"],
-    # Hungary (HU)
-    "HU": ["HU11", "HU12", "HU21", "HU22", "HU23",
-            "HU31", "HU32", "HU33"],
-    # Romania (RO)
-    "RO": ["RO11", "RO12", "RO21", "RO22", "RO31", "RO32",
-            "RO41", "RO42"],
-    # Bulgaria (BG)
-    "BG": ["BG31", "BG32", "BG33", "BG34", "BG41", "BG42"],
-    # Slovakia (SK)
-    "SK": ["SK01", "SK02", "SK03", "SK04"],
-    # Croatia (HR)
-    "HR": ["HR03", "HR04", "HR05", "HR06"],
-    # Slovenia (SI)
-    "SI": ["SI03", "SI04"],
-    # Lithuania (LT)
-    "LT": ["LT01", "LT02"],
-    # Latvia (LV)
-    "LV": ["LV00"],
-    # Estonia (EE)
-    "EE": ["EE00"],
-    # Luxembourg (LU)
-    "LU": ["LU00"],
-    # Cyprus (CY)
-    "CY": ["CY00"],
-    # Malta (MT)
-    "MT": ["MT00"],
-    # Norway (NO)
-    "NO": ["NO01", "NO02", "NO03", "NO04", "NO05", "NO06", "NO07"],
-}
+
+_UNITS = _load_units()
+
+#: country (NUTS-0: BE, LU, IE, EL, ...) -> its regional units
+NUTS2_REGIONS = {}
+for _r, _m, _c in _UNITS:
+    NUTS2_REGIONS.setdefault(_c, []).append(_r)
 
 # Flat list of all regions
-ALL_REGIONS = [r for regions in NUTS2_REGIONS.values() for r in regions]
+ALL_REGIONS = [r for r, _, _ in _UNITS]
 
-# Country membership (for policy aggregation)
-REGION_TO_COUNTRY = {
-    r: country
-    for country, regions in NUTS2_REGIONS.items()
-    for r in regions
-}
+# Country membership (NUTS-0; the key of aggregate_supply(by_country=True), mapped to CAPRI's member state by MS_CODE)
+REGION_TO_COUNTRY = {r: c for r, _, c in _UNITS}
 
 # ---------------------------------------------------------------------------
 # TRADE REGIONS (market module — 77 countries aggregated to ~40 trade blocks)
@@ -268,7 +160,7 @@ REGION_TO_COUNTRY = {
 
 TRADE_REGIONS = {
     # the EU's member states (Norway is not one: NUTS2_REGIONS also holds Norway's supply regions)
-    "EU27":  [c for c in NUTS2_REGIONS.keys() if c not in ("NO",)] + ["LU", "CY", "MT"],  # one block in market
+    "EU27":  [c for c in NUTS2_REGIONS.keys() if c not in ("NO",)],  # one block in market
     "USA":   ["US"],
     "CAN":   ["CA"],
     "BRA":   ["BR"],
@@ -357,6 +249,7 @@ MS_CODE = _load_ms_codes()
 
 
 def capri_ms(region: str) -> str:
-    """CAPRI member state of a model region or country prefix, e.g. 'BE21' -> 'BL000000', 'IE04' -> 'IR000000'."""
+    """CAPRI member state of a model region (CAPRI's code) or a country prefix: 'BL210000' -> 'BL000000',
+    'IR010000' -> 'IR000000', 'BE' -> 'BL000000'."""
     p = str(region)[:2]
     return MS_CODE.get(p, p) + "000000"
