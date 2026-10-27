@@ -5,7 +5,7 @@ form, solved with IPOPT). The tables give one line per issue; the details follow
 was found, where it acts, whether the tagged release 9t (`capri-mod-9t.zip`) carries it, and its status. 9t.1 is 9t
 with every fix below except K5, which needs the prototype's model change.
 
-## Open (19)
+## Open (18)
 
 | # | Issue | Status |
 |---|---|---|
@@ -15,7 +15,6 @@ with every fix below except K5, which needs the prototype's model change.
 | [K45](#k45) | Egypt's oilseed rows | open |
 | [K47](#k47) | The cattle chain's equilibrium is sensitive to changes outside it | open |
 | [K48](#k48) | Young-animal prices against CAPRI's own market run | open |
-| [K49](#k49) | Diagnosis of the regions where CAPRI's crop-group allocation fails (20 October 2026): not the solver | diagnosed |
 | [K65](#k65) | Cattle member splits and per-sex young-animal markets do not converge yet | open |
 | [K66](#k66) | Farmland expands under the per-hectare N target more than in CAPRI | open |
 | [K72](#k72) | armington_params.csv: cells without a builder | open |
@@ -29,7 +28,7 @@ with every fix below except K5, which needs the prototype's model change.
 | [K86](#k86) | Ammonia housing and storage options without their farm-size cost curves in Denmark, Lithuania and Croatia | open |
 | [K88](#k88) | Builders that still round the values they write | open |
 
-## Resolved (69)
+## Resolved (70)
 
 | # | Issue | Status |
 |---|---|---|
@@ -75,6 +74,7 @@ with every fix below except K5, which needs the prototype's model change.
 | [K43](#k43) | Non-EU feed demand: other vintage than the other use blocks, and no feed function for ROW, Korea, Morocco, New Zealand | fixed |
 | [K44](#k44) | An inert income term and invented fallbacks in the market | fixed |
 | [K46](#k46) | The fodder balance's right-hand side moved with the rations | fixed |
+| [K49](#k49) | Diagnosis of the regions where CAPRI's crop-group allocation fails (20 October 2026): not the solver | resolved (NLP port) |
 | [K50](#k50) | The regional supply model in CAPRI's own NLP form | default |
 | [K51](#k51) | CAPRI's N loss cascade and the storage options of endoLeach | fixed |
 | [K52](#k52) | Interface audit for the README rewrite | fixed |
@@ -544,7 +544,7 @@ tools/check/diagnose_fert_dist.py (exact linear feasibility test of CAPRI's inne
 
 - **Effect:** the regions IPOPT 'fails' in (K41)
 - **In 9t:** yes
-- **Status:** **diagnosed**; decision (with the project lead): rewrite the regional supply model in CAPRI's own non-convex NLP form from supply_model.gms (IPOPT), the conic form kept only as an option - work continues in a new line of development (project doc claude/handoff_nlp_port.md)
+- **Status:** **resolved by the NLP port**: the regional supply model is CAPRI's own NLP (supply_model.gms) with its fertilisation block inside (NUTNED_ per crop group, purchases >= 0, the over-fertilisation factor fixed), solved by IPOPT; the conic form was removed on 26 October 2026, so the allocation is no longer made after a solve that did not contain it. r164 (Farm-to-Fork, 27 October 2026): no regional solve non-optimal (NL320000 at JRC121368's relaxed target, as the report)
 
 <a id="k50"></a>
 ### K50: The regional supply model in CAPRI's own NLP form (20 October 2026; docs/NLP_PORT_DESIGN.md)
