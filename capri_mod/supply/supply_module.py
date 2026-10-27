@@ -1778,7 +1778,28 @@ class RegionalSupplyModel:
                            "f_prev": getattr(self, "_nlp_prev_f", None), "keep": _keep},
                     {"tol": float(getattr(type(self), "nlp_tol", 1e-8)),
                      "warm_check": float(getattr(type(self), "nlp_warm_check", 0.01))}))
-            nlp = CapriRegionalNLP(spec)
+            # market supply Hessian, method "kkt" (model._market_supply_hessian): where this region's problem under a
+            # price shock differs from its base problem in the objective's linear terms only, the solution is the base
+            # optimum moved by its first-order response (implicit function theorem on the KKT conditions at the base
+            # optimum, CapriRegionalNLP.response) instead of an IPOPT solve; the rest of the region's results follow
+            # from that point as from a solve. Only for regions whose base was one solve without relaxations
+            _pred = None
+            _kk = self.__dict__.get("_hess_kkt")
+            if _kk is not None:
+                _kk["calls"] = int(_kk.get("calls", 0)) + 1
+                _n0 = _KKT_NLP0.get(self.data.region_id)
+                if _kk.get("mode") == "use" and _kk["calls"] == 1 and _n0 is not None:
+                    _s0, _fp0 = _kk["spec0"], _kk["fp0"]
+                    _diff = [k_ for k_ in set(spec) | set(_s0) if k_ != "c"
+                             and _crn.problem_fingerprint(spec.get(k_), {}, {}) != _fp0.get(k_)]
+                    _c1, _c0 = np.asarray(spec["c"], float), np.asarray(_s0["c"], float)
+                    if not _diff and _c1.shape == _c0.shape:
+                        _r0 = _kk["res0"]
+                        _dX = _n0.response(_r0, (_c1 - _c0)[:, None], full=True)[:, 0]
+                        _pred = dict(_r0, x=np.clip(np.asarray(_r0["x"], float) + _dX, _n0.lbx, _n0.ubx),
+                                     iterations=0, warm=False)
+                        _kk["used"] = True
+            nlp = _KKT_NLP0[self.data.region_id] if _pred is not None else CapriRegionalNLP(spec)
             if os.environ.get("CAPRI_NLP_DUMP"):
                 import pickle as _pk
                 _pk.dump(dict(spec=spec, x_start=np.asarray(x_start, float), cols=cols, cal=cal),
@@ -1802,12 +1823,14 @@ class RegionalSupplyModel:
                 starts.append(("warm", xw, prev[3]))       # IPOPT's warm start from the last primal-dual point
             starts.append(("prev", xw, None))
         starts.append(("start", nlp.start(np.asarray(x_start, float)), None))
+        if _pred is not None:
+            starts = [("kkt", _pred["x"], None)]
         res = None
         kinds = []
         _tol = float(getattr(type(self), "nlp_tol", 1e-8))
         _tried = []
         for kind, xs, lam_ in starts:
-            res = nlp.solve(xs, lam=lam_, tol=_tol)
+            res = _pred if _pred is not None else nlp.solve(xs, lam=lam_, tol=_tol)
             kinds.append(kind)
             _tried.append((kind, res["status"], float(res["f"]), int(res["iterations"] or 0)))
             if res["success"] or res["status"] in ("Solved_To_Acceptable_Level",):
@@ -1921,6 +1944,9 @@ class RegionalSupplyModel:
                         kinds.append("amm-fixed")
                 except Exception:
                     pass
+        if _kk is not None and _kk.get("mode") == "record" and _kk["calls"] == 1:
+            _kk.update(spec0=spec, kinds=list(kinds), ok=_ok(res) and _nonopt is None,
+                       res0={k_: (np.array(v_, float) if isinstance(v_, np.ndarray) else v_) for k_, v_ in res.items()})
         self._nlp_prev = (gk, res["x"], shape, (res["lam_x"], res["lam_g"]))
         self._nlp_prev_f = float(res["f"])
         # the starts tried and the last one's IPOPT iterations (diagnostics of the outer loop, model.trace_outer)
@@ -6900,6 +6926,11 @@ def _kill_pool_workers(pool) -> None:
             proc.join(5)
         except Exception:                                     # already gone
             pass
+
+
+#: market supply Hessian, market.hessian_method = "kkt": each region's base problem (CapriRegionalNLP), built in the main
+#: process before the regional solves are forked, so the workers share it (model._market_supply_hessian)
+_KKT_NLP0 = {}
 
 
 class _InputsUnchanged(BaseException):

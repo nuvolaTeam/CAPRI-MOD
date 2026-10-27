@@ -1374,6 +1374,12 @@ class CAPRIModel:
             return q_
         q0 = bridged(supply_results)
         skip = bool(_settings().get("market.hessian_skip_unchanged"))
+        # Hessian option 4 (market.hessian_method = "kkt"): regions a shock reaches through the objective's linear
+        # terms only take the first-order response of their base optimum instead of a re-solve (supply_module
+        # _capri_nlp_solve); needs the base re-solved first, as the skip of unchanged regions does
+        kkt = str(_settings().get("market.hessian_method")) == "kkt"
+        if kkt and not skip:
+            raise ValueError("market.hessian_method = 'kkt' needs market.hessian_skip_unchanged = true")
         cols_y = [c for c in sig0.index if c in q0.columns and float(q0[c].clip(lower=0).sum()) > 1e-6]
         cols_y += [c for c in self.MARKET_SUPPLY_FEED_COLS if c in sig0.index and c not in cols_y]
         cols_y += ["YANI:" + g for g in yani_goods]
@@ -1399,7 +1405,8 @@ class CAPRIModel:
                         "shocks-from-base")
                         # differences to the base re-solved from the same state, regions a shock does not reach not
                         # re-solved (27 October 2026, market.hessian_skip_unchanged; off: the key as before)
-                        + (("base-resolved-skip-unchanged", "full-solve-state") if skip else ()))
+                        + (("base-resolved-skip-unchanged", "full-solve-state") if skip else ())
+                        + (("kkt-first-order",) if kkt else ()))
                    # at a scenario's state (market.hessian_scenario_iter): its young-animal and member-state milk
                    # prices too (a baseline's key is unchanged)
                    + (repr((sorted((getattr(sm, "yani_price_ratio", None) or {}).items()),
@@ -1460,7 +1467,7 @@ class CAPRIModel:
         _snap0 = _snapshot()
         yr0 = (getattr(sm, "yani_price_ratio", None), getattr(sm, "yani_price_ratio_ms", None),
                getattr(sm, "yani_price_ratio_m", None))
-        q_ref, n_skipped, n_solved = q0, 0, 0
+        q_ref, n_skipped, n_solved, n_kkt, n_kkt_regions = q0, 0, 0, 0, 0
         verify = skip and __import__("os").environ.get("CAPRI_HESSIAN_SKIP_VERIFY", "") == "1"
         if skip:
             # the base re-solved from the baseline's state first, each region's first solve fingerprinted: a shock
@@ -1473,12 +1480,36 @@ class CAPRIModel:
             _restore(_snap0)
             sm._hess_fp, sm._hess_verify = {}, {}
             sm._hess_probe = "record"
+            if kkt:
+                for mo_ in sm._models.values():
+                    mo_._hess_kkt = {"mode": "record", "calls": 0}
             try:
                 res_b = sm.run(price_signals=sig0, policy_scenario=pol, regions=regs, verbose=False)
             finally:
                 sm._hess_probe = None
             q_ref = bridged(res_b)
             sm._hess_base_res = res_b
+            n_kkt_regions = 0
+            if kkt:
+                from capri_mod.supply import supply_module as _smod
+                from capri_mod.supply import capri_regional_nlp as _crn
+                _smod._KKT_NLP0.clear()
+                for r_, mo_ in sm._models.items():
+                    kk_ = mo_.__dict__.get("_hess_kkt")
+                    # one solve of the regional problem, optimal, from a plain start (no relaxation, no second
+                    # problem): the prediction then replaces exactly that solve
+                    if (kk_ and kk_.get("calls") == 1 and kk_.get("ok") and kk_.get("spec0") is not None
+                            and set(kk_.get("kinds") or []) <= {"warm", "prev", "start"}):
+                        try:
+                            _smod._KKT_NLP0[r_] = _crn.CapriRegionalNLP(kk_["spec0"])
+                        except Exception:
+                            mo_._hess_kkt = None
+                            continue
+                        kk_["fp0"] = {k_: _crn.problem_fingerprint(v_, {}, {}) for k_, v_ in kk_["spec0"].items()}
+                        kk_["mode"] = "use"
+                        n_kkt_regions += 1
+                    else:
+                        mo_._hess_kkt = None
         try:
             for y in cols_y:
                 sig = sig0.copy()
@@ -1512,11 +1543,19 @@ class CAPRIModel:
                 _restore(_snap0)
                 if skip:
                     sm._hess_probe, sm._hess_shock = ("verify" if verify else "compare"), y
+                if kkt:
+                    for mo_ in sm._models.values():
+                        kk_ = mo_.__dict__.get("_hess_kkt")
+                        if kk_:
+                            kk_["calls"] = 0
+                            kk_.pop("used", None)
                 try:
                     res = sm.run(price_signals=sig, policy_scenario=pol, regions=regs, verbose=False)
                 finally:
                     sm._hess_probe = None
                 n_skipped += sum(1 for r_ in res.values() if getattr(r_, "hess_unchanged", False))
+                if kkt:
+                    n_kkt += sum(1 for mo_ in sm._models.values() if (mo_.__dict__.get("_hess_kkt") or {}).get("used"))
                 n_solved += len(res)
                 # the price change each country's models saw (Norway's young-animal prices are its own market's)
                 div = pd.Series([float(dr_ms.get(capri_ms(str(cc)), dr)) for cc in q0.index], index=q0.index)
@@ -1529,6 +1568,11 @@ class CAPRIModel:
         finally:
             sm._hess_probe = None
             sm.__dict__.pop("_hess_base_res", None)
+            if kkt:
+                from capri_mod.supply import supply_module as _smod
+                _smod._KKT_NLP0.clear()
+                for mo_ in sm._models.values():
+                    mo_.__dict__.pop("_hess_kkt", None)
         # back to the base: the regional models' warm starts and states as the baseline left them
         sm.yani_price_ratio, sm.yani_price_ratio_ms, sm.yani_price_ratio_m = yr0
         sm.feed_bulk_ratio = fb0 if fb0 is not None else self.feed_bulk_price_ratios(sig0)
@@ -1557,6 +1601,8 @@ class CAPRIModel:
                                            "seconds": round(_t.time() - t0, 1), "base_resolve_max_dev_kt": dev}
         if skip:
             self.market_supply_hessian_info.update(regions_skipped=n_skipped, regions_shocked=n_solved)
+        if kkt:
+            self.market_supply_hessian_info.update(method="kkt", kkt_regions=n_kkt_regions, kkt_solves=n_kkt)
             if verify:
                 # CAPRI_HESSIAN_SKIP_VERIFY=1: the regions that would have been skipped were solved; their results must
                 # equal the base re-solve's (else the fingerprint misses an input of the regional solve)

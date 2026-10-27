@@ -1237,10 +1237,10 @@ class CapriRegionalNLP:
                 "iterations": st.get("iter_count"), "success": bool(st.get("success")), "warm": warm}
 
     # ---------------- sensitivity of the solution ----------------
-    def response(self, res, D, tol=1e-9):
+    def response(self, res, D, tol=1e-9, full=False):
         """The solution's first-order response to linear changes of the objective (implicit function theorem on the
         KKT conditions at res): for each column d of D (n0 x k, a change of the linear cost of the regional QP's
-        columns y per unit of a parameter), dy (n0 x k). Active set from IPOPT's solution: rows and variable bounds
+        columns y per unit of a parameter), dy (n0 x k); with full=True dX (every variable, scaled, nX x k). Active set from IPOPT's solution: rows and variable bounds
         within 1e-6 of their bound with a multiplier above tol, equalities and fixed variables always; the reduced
         system solved in the active rows' null space Z: dX_F = -Z (Z' H_FF Z)^-1 Z' d_F (H the Lagrangian's Hessian, J the
         rows' Jacobian, in the scaled variables). Used for the young-animal markets' price update (CAPRIModel._update_young_animal_prices):
@@ -1291,6 +1291,8 @@ class CapriRegionalNLP:
             wmax = float(np.max(np.abs(w))) if len(w) else 1.0
             inv = np.where(w > 1e-10 * wmax, 1.0 / np.where(w > 0, w, 1.0), 0.0)
             dX[Fr] = -Z @ (U @ (inv[:, None] * (U.T @ (Z.T @ DX[Fr]))))
+        if full:
+            return dX                                       # every variable, in the problem's scaled variables X
         return dX[:n0] * np.asarray(self.sc, float)[:, None]
 
     # ---------------- results in the regional QP's terms ----------------
