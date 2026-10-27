@@ -1768,6 +1768,16 @@ class RegionalSupplyModel:
             else:
                 _keep = None
                 spec0 = spec
+            from capri_mod.supply import capri_regional_nlp as _crn
+            if _crn.SOLVE_PROBE is not None:
+                # the market supply Hessian's skip test (SupplyModule._solve_region), before the build: the problem, the
+                # start and the warm-start state decide this solve and those after it (IPOPT and the build are
+                # deterministic), so a region whose digest is the base's is not built or solved again
+                _crn.SOLVE_PROBE(_crn.problem_fingerprint(
+                    spec, {"x_start": np.asarray(x_start, float), "prev": getattr(self, "_nlp_prev", None),
+                           "f_prev": getattr(self, "_nlp_prev_f", None), "keep": _keep},
+                    {"tol": float(getattr(type(self), "nlp_tol", 1e-8)),
+                     "warm_check": float(getattr(type(self), "nlp_warm_check", 0.01))}))
             nlp = CapriRegionalNLP(spec)
             if os.environ.get("CAPRI_NLP_DUMP"):
                 import pickle as _pk
