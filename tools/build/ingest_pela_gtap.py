@@ -127,6 +127,11 @@ def main() -> None:
 
     own.to_csv(out / "pela_own_price.csv")
     cross.to_csv(out / "pela_cross_price.csv", index=False)
+    # the supply module's form (SupplyModule.cross_price, used with the elasticity-based PMP terms): {region:
+    # {"crop|wrt": elasticity}}; until 27 October 2026 this file had no builder in the repository
+    byreg = {r: {f"{c}|{w}": float(v) for c, w, v in zip(g.crop, g.wrt, g.value)}
+             for r, g in cross.groupby("model_region", sort=True)}
+    (out / "pela_cross_by_region.json").write_text(json.dumps(byreg))
 
     print(f"PELA {PELA_YEAR}: {len(pela):,} records reaching "
           f"{pela.model_region.nunique()} model regions")
