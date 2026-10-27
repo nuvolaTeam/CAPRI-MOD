@@ -1001,6 +1001,12 @@ def test_data_headers_are_ascii():
         bad = [h for h in header if any(ord(ch) > 127 for ch in h)]
         if bad:
             offenders.append(f"{p.name}: {bad}")
+    # the builders' intermediates kept as Parquet (27 October 2026): their column names
+    import pyarrow.parquet as _pq
+    for p in (_repo_root() / "capri_data").rglob("*.parquet"):
+        bad = [h for h in _pq.read_schema(p).names if any(ord(ch) > 127 for ch in h)]
+        if bad:
+            offenders.append(f"{p.name}: {bad}")
     assert not offenders, f"non-ASCII CSV headers: {offenders}"
 
 

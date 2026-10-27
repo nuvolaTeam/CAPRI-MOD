@@ -22,7 +22,7 @@ zones weighted by the region's zone share). Animal categories without a farm-siz
 SIMPLIFICATION (registered): where a region has no heads data, CAPRI falls back to its NUTS-1
 parent; this builder falls back to the national figures.
 
-Output: capri_data/2017/abatement/ammonia/ammonia_cost_curves.csv
+Output: capri_data/2017/abatement/ammonia/ammonia_cost_curves.parquet (an intermediate)
 """
 from __future__ import annotations
 
@@ -212,10 +212,9 @@ def build():
                         continue
                     a, b = res
                     out.append([rs, act, sysm.capitalize(), tech, a, b, lb, len(acc), tot])
-    with open(D / "ammonia_cost_curves.csv", "w", newline="") as f:
-        w = csv.writer(f)
-        w.writerow(["region", "activity", "manure_system", "technology", "alpha", "beta", "lower_bound", "n_classes", "heads"])
-        w.writerows(out)
+    # a builder intermediate (read only by build_ammonia_technologies.py): Parquet, as decided 27 October 2026
+    pd.DataFrame(out, columns=["region", "activity", "manure_system", "technology", "alpha", "beta", "lower_bound",
+                               "n_classes", "heads"]).to_parquet(D / "ammonia_cost_curves.parquet", index=False)
     return out
 
 

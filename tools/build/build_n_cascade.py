@@ -82,7 +82,7 @@ GAS_ITEMS = [f"{g}{s}" for s in ("HOU", "STO", "APP") for g in ("NH3", "NOX", "N
 
 def _effects(pairs, _unused, rows_a, frs):
     """The options' othImpact on the cascade (envind/ammo_tech.gms l. 2208-2345) per CAPRI region and activity:
-    the gases at housing, storage and application (ammonia_technology_effects.csv, CAPRI's p_reducEm* and
+    the gases at housing, storage and application (ammonia_technology_effects.parquet, CAPRI's p_reducEm* and
     p_reducControlStrategies weighted by liquid share and applicability), the combinations (AirPurCov* = AirPur +
     cover for pigs and poultry, l. 2252-2255; AirPurCovLowC = AirPurCovLow, CovStorLowCon = max(CovStorLow, ManStorCon),
     l. 2262-2264), acidification and anaerobic digestion from the literature review (p_litRevAmmoTechsAdd, liquid;
@@ -94,7 +94,7 @@ def _effects(pairs, _unused, rows_a, frs):
     for r in rows_a:
         F[(r[0], r[1])][r[2]] = r[3]
     E = defaultdict(dict)
-    for r in _read_csv(D / "ammonia_technology_effects.csv").itertuples():
+    for r in pd.read_parquet(D / "ammonia_technology_effects.parquet").itertuples():
         E[(r.region, r.activity)][(r.technology, r.item)] = float(r.reduction)
     LIT = defaultdict(dict)
     for r in _read_csv(D / "p_litRevAmmoTechsAdd.csv").itertuples():

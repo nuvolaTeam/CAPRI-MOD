@@ -2,7 +2,7 @@
 model region, animal category and CAPRI sub-activity.
 
 Inputs (capri_data/2017/abatement/ammonia): ammonia_technologies.csv and
-ammonia_technology_effects.csv (build_ammonia_technologies.py, CAPRI p_ghgMiti entries),
+ammonia_technology_effects.parquet (build_ammonia_technologies.py, CAPRI p_ghgMiti entries),
 p_litRevAmmoTechsAdd.csv (acidification effect), capri_mann_days_2030.csv (LEVL, DAYS, MANN),
 FracEmHouse/Storage/Appl/Grazing.csv (MITERRA loss fractions).
 
@@ -111,7 +111,7 @@ def main():
     global AD
     AD = _ad_options()
     t = _read_csv(D / "ammonia_technologies.csv")
-    eff = _read_csv(D / "ammonia_technology_effects.csv")
+    eff = pd.read_parquet(D / "ammonia_technology_effects.parquet")
     E = {(r.region, r.activity, r.technology, r.item): r.reduction for r in eff.itertuples()}
     lit = _read_csv(D / "p_litRevAmmoTechsAdd.csv")
     LIT = {(r.region, r.activity): r.value for r in lit.itertuples()

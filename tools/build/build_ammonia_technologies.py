@@ -65,7 +65,7 @@ GAS_OF = {"NH3HOU": "NH3", "NH3STO": "NH3", "NH3APP": "NH3", "NOXHOU": "NOX", "N
 
 def build():
     INV, ADD, FOP, PRICE, STOR, MIN, KGN, nvz, HEADS, HOLD, MD = cc.load()
-    curves = _read_csv(D / "ammonia_cost_curves.csv")
+    curves = pd.read_parquet(D / "ammonia_cost_curves.parquet")
     CUR = {(r.region, r.activity, r.manure_system.lower(), r.technology): (r.alpha, r.beta) for r in curves.itertuples()}
     rains = _read_csv(D / "bNumAniRAINS.csv", dtype={"year": str})
     RN = {(r.region, r.animal_mitt): r.value for r in rains[rains.year == RAINS_YEAR].itertuples()}
@@ -210,10 +210,9 @@ def build():
         w.writerow(["region", "activity", "technology", "target", "CostParLin", "CostParSqr", "IniShare",
                     "MaxShare", "qemitt", "applicability", "liquid_share", "grazing_share"])
         w.writerows(out)
-    with open(D / "ammonia_technology_effects.csv", "w", newline="") as f:
-        w = csv.writer(f)
-        w.writerow(["region", "activity", "technology", "item", "reduction"])
-        w.writerows(effects)
+    # a builder intermediate (read by build_n_cascade, build_ammonia_tech_model, build_manure_n2o): Parquet
+    pd.DataFrame(effects, columns=["region", "activity", "technology", "item", "reduction"]).to_parquet(
+        D / "ammonia_technology_effects.parquet", index=False)
     return out
 
 

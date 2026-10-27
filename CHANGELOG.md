@@ -86,6 +86,12 @@ Full provenance for every entry is in `capri_data/DATA_SOURCING_REGISTRY.json`.
 - **Hessian cache Parquet only**: the 205 market supply Hessians cached as CSV were converted to Parquet (each read to
   the last digit and checked equal after the conversion) and the CSV reader removed. Caches are Parquet, the pipeline
   store Delta, model inputs CSV, as decided on 27 October.
+- **Builder intermediates as Parquet**: the two tables our builders compute and only other builders read,
+  `abatement/ammonia/ammonia_cost_curves` and `ammonia_technology_effects`, are Parquet (each equal to the exact CSV
+  read; the downstream builders' outputs unchanged to the last digit). Extracts of CAPRI, Eurostat and Outlook data stay
+  CSV (input data; for about 25 the repository's only copy). The ASCII-header test covers Parquet columns too. Found on
+  the way (K82 follow-up): the ammonia cost curves, technologies and technology model had not been rebuilt with exact
+  CSV reads (up to 2.6e-14 relative in the model's ammonia_tech_model.csv); rebuilt.
 - **Results on current NUTS (task 237)**: `capri_mod/nuts_reporting.to_nuts2024` maps unit results to the NUTS-2024
   regions (`capri_data/shared/capri_units_nuts2024.csv`, `tools/build/build_nuts2024_reporting.py`): unit -> NUTS 2016
   with CAPRI's correspondence and its splits and merges, then Eurostat's 2016-2021 and 2021-2024 changes (Croatia,
