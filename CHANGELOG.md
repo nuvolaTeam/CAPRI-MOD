@@ -49,14 +49,17 @@ Full provenance for every entry is in `capri_data/DATA_SOURCING_REGISTRY.json`.
     pela_cross_price.csv; a backup copy of the trade flows). Re-audit: every rebuilt builder reproduces its files; the
     base-table chain (extract_all_from_data2 ... build_eu_producer_prices) reproduces yields, variable costs and
     CAPREG producer prices.
-- **CAPRI's stop rule the default** (outer_loop.stop_rule = "capri", the project lead's decision, K79): the loop stops
+- **CAPRI's stop rule made the default and set back the same evening** (outer_loop.stop_rule; the project lead's
+  decisions, K79, DEPARTURES_FROM_CAPRI). With it the loop stops
   when no more than two items (member-state production and feed, trade-block prices) change by more than 0.05% between
   iterations (capmod/price_forecast.gms), with the model's inner balances settled as well (N-balance price, manure
   pools, young animals, base calibration). The model's own rule (prices within 0.5%) ended Farm-to-Fork with 14
   production rows still above CAPRI's threshold (r161, r163: largest Latvian oats 1.1%, halving each iteration: slow
   convergence of the price forecast, not solver creep). Farm-to-Fork with it (r164): CAPRI's rule stopped the loop after 12
   iterations (r163: 9 under the model's rule) with two rows above the threshold (Portuguese potatoes 0.93%, tomatoes
-  0.36%), which CAPRI's rule allows.
+  0.36%), which CAPRI's rule allows. The Green Deal 2030 scenario did not converge under it (r165: at iteration 20 of
+  the scenario 28 rows above 0.05%, the largest about 50%, an oscillation; stopped before its two-hour limit), so the
+  default is the model's rule again until that is found and fixed; CAPRI's verdict is still recorded every iteration.
 - **K33 retired** (the project lead's decision): the legacy nitrate_limit instrument (not CAPRI's; used by no CAPRI
   scenario), its constraint row, the Mitscherlich intensity margin it drove (supply/intensity.py), the livestock
   intensity bounds only it read (and their builder), and the unsourced per-head animal rows of nutrient_coefs.csv

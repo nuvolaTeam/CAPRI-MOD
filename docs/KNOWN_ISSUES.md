@@ -825,7 +825,12 @@ CAPRI's stop rule, recorded every iteration since r135, flags rows that move by 
   model; cause not found (the region-solve warning added since r161 will show a failed solve if it recurs). CAPRI's stop
   rule made the default (the project lead's decision, 27 October 2026), with the model's inner balances settled as well;
   the next reference runs measure the iterations it needs. r163 (the same scenario and rule as r161, the Hessian skip
-  and the K82 ammonia rebuild): the French jumps did not recur (largest change at iteration 4: 14.7%, r161 66%)
+  and the K82 ammonia rebuild): the French jumps did not recur (largest change at iteration 4: 14.7%, r161 66%).
+  r164 (Farm-to-Fork, CAPRI's rule): stopped by it after 12 iterations (two rows left, PT potatoes 0.93%, tomatoes
+  0.36%). r165 (Green Deal 2030, CAPRI's rule): no stop by iteration 20 of the scenario (28 rows above 0.05%, the
+  largest about 50%), stopped by hand before its two-hour limit. Default set back to the model's rule (the project
+  lead's decision, 27 October 2026, DEPARTURES_FROM_CAPRI); r166 (the same scenario, the model's rule) prints CAPRI's
+  verdict and its largest row at every iteration for the diagnosis
 
 <a id="k80"></a>
 ### K80: The same run repeated from a warm start differs by up to 3e-5 relative in small cereal activities (26 October 2026)

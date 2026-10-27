@@ -55,9 +55,11 @@ price_update = "capri"
 # the model's inner balances settled: N-balance price, manure pools, young-animal balance, base calibration) or
 # "capri-mod" (this model's tests: price and quantity changes, the gap between each price and the market's,
 # member-state milk, and the same inner balances). CAPRI's verdict is recorded in either case
-# (outer_history[...]["conv"]["capri"], metadata capri_stop). CAPRI's, the default since 27 October 2026 (the project
-# lead's decision, K79): the model's rule ended Farm-to-Fork with 14 production rows still moving by more than 0.05%
-stop_rule = "capri"
+# (outer_history[...]["conv"]["capri"], metadata capri_stop). CAPRI's was made the default on 27 October 2026 (the
+# project lead's decision, K79) and set back the same evening (the project lead's decision): Farm-to-Fork stopped by it
+# in 12 iterations (r164), but the Green Deal 2030 scenario did not (r165, stopped at iteration 20: 28 rows above 0.05%,
+# the largest about 50%, an oscillation); "capri" again once that is found and fixed (DEPARTURES_FROM_CAPRI)
+stop_rule = "capri-mod"
 milk_ms_relax_floor = 0.02
 capri_step_weights = [0.55, 0.30, 0.15]
 capri_step_weights_late = [0.4, 0.3, 0.2, 0.1]
