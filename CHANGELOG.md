@@ -30,6 +30,26 @@ Full provenance for every entry is in `capri_data/DATA_SOURCING_REGISTRY.json`.
 
 ---
 
+## 27 October 2026 (evening): market supply Hessian, regions a shock does not reach not re-solved; option 4 tried and dropped
+
+- **The market supply Hessian from the baseline's full state** (market.hessian_skip_unchanged, default true): the base is
+  re-solved first and every shock starts from the same state (the regional models' whole solve state, not only the
+  warm starts: RegionalSupplyModel.SOLVE_STATE); a region whose shocked problem, start and warm-start state equal the
+  base's (the price does not reach it) is not built or solved again, as its solve would repeat the base's exactly. The
+  same Hessian as re-solving every region from that state, entry by entry (five-region check, 5,183 entries); 111 of
+  250 regional solves skipped, measurement 80 s -> 59 s. With the switch off, the measurement as before.
+- **Faster regional build, results bit-identical**: the ammonia N cascade skips options without effect; crop nutrient
+  coefficients from a dictionary instead of a pandas lookup per call. A regional solve that raises is now always
+  warned about (before only with verbose).
+- **Option 4 (exact first-order response from the optimality conditions, sIPOPT-style) tried and removed** (the project
+  lead's decision): own-price responses agreed with re-solving (97% of entries within 1%), cross-price responses did not
+  (45%). Re-solving with shocks of -1%, +0.5%, +1%, +2% showed why: the re-solves are deterministic and linear for
+  upward shocks (Irish barley against the beef price -204.9, -205.3, -205.1), but the regional supply responses have
+  kinks at the baseline (Irish wheat against the beef price -51.5 for a fall, +3.4 for a rise; German wheat against the
+  sugar price +12.2 / -23.6): a constraint switches at the base point. The derivative at the base active set matches
+  neither side; CAPRI's measurement (calibrate_supply.gms, +1%) takes the upward side, as the re-solve does. No speed
+  gain either: building the regional problem, not IPOPT, is the cost. tools/check/compare_hessians.py kept.
+
 ## 27 October 2026 (afternoon): the model on CAPRI's regional units; results on NUTS 2024; water and income reports
 
 - **The model's regions are CAPRI's 221 regional units** (EU27 215, Norway 6) under CAPRI's 8-character codes

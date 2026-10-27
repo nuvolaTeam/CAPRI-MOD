@@ -164,12 +164,6 @@ hessian_scenario_iter = 0
 # Hessian as re-solving every region from that state, with fewer solves. false: every region re-solved, differences
 # to the baseline's own solution (until 27 October 2026; cached Hessians keep their keys)
 hessian_skip_unchanged = true
-# "resolve": every shocked region solved again (CAPRI's calibrate_supply.gms). "kkt" (Hessian option 4, for testing):
-# a region whose problem under a shock differs from its base only in the objective's linear terms, and whose base was
-# a single solve, takes the first-order response of its base optimum (implicit function theorem on the KKT conditions,
-# CapriRegionalNLP.response) instead of the IPOPT solve; the loops around the regional problem (N price, manure pools)
-# keep re-solving. Needs hessian_skip_unchanged = true
-hessian_method = "resolve"
 # CAPRI's endogenous biofuel markets (BIOF_M; star 3.0 GUI default on); a scenario may set its own
 biofuel_markets = true
 # DEPARTURE: CAPRI's default aggregation has two EU trade blocks (EU_WEST, EU_EAST; aggregation/defaultA.agg);
