@@ -123,12 +123,6 @@ class InnerFertDist:
         self._pri_cal = {}
         self.variant = None
         self._grp = {r: d for r, d in self.groups.groupby("capri_region")}
-        self._map = {}
-        rm = root / "shared" / "region_capri_map.csv"
-        if rm.exists():
-            for r in read_csv(rm, dtype=str).fillna("").itertuples(index=False):
-                if r.capri_region:
-                    self._map[r.region] = r.capri_region
 
     def prior_table(self, capri_region: Optional[str]):
         """The simulation priors of a CAPRI region: a calibration at the run's own base for the current variant
@@ -218,9 +212,9 @@ class InnerFertDist:
         return out
 
     def capri_region(self, region: str) -> Optional[str]:
-        """The CAPRI region (8-character NUTS2 code) of a model region (shared/region_capri_map.csv), else its
-        country's (CAPRI NUTS0 code)."""
-        c = self._map.get(region)
+        """The CAPRI region of a model region (the region itself: the model's regions are CAPRI's units), else its
+        country's (CAPRI NUTS0 code) where CAPRI has no priors for the region."""
+        c = region
         if c in self._pri:
             return c
         cc = capri_ms(region)

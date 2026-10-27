@@ -42,7 +42,7 @@ from capri_mod.settings import setting, tri_state, current as _settings
 from capri_mod.data.definitions import (
     CROPS, ANIMALS, ALL_ACTIVITIES, FEED_ITEMS, NUTRIENTS,
 )
-from capri_mod.data.definitions import MS_CODE, capri_ms
+from capri_mod.data.definitions import MS_CODE, capri_ms, IdentityMap
 from capri_mod.csvio import read_csv
 
 
@@ -2660,7 +2660,8 @@ class RegionalSupplyModel:
     def _organic_yield_gap_uncached(self, activity: str, table) -> float:
         group = self.YIELD_GAP_GROUP.get(activity)
         reg_id = getattr(self.data, "region_id", "") or getattr(self, "region", "")
-        region = self.PESETA_REGION.get(str(reg_id)[:2])
+        from capri_mod.data.definitions import country_of
+        region = self.PESETA_REGION.get(country_of(reg_id))
         if table is None or not group or region is None:
             return 0.0
         for reg_ in (region, "CEN"):
@@ -3500,7 +3501,8 @@ class RegionalSupplyModel:
             except Exception:
                 c["pf"] = {}
         a = c["av"].get(reg)
-        p = c["pf"].get(str(reg)[:2]) if reg else None
+        from capri_mod.data.definitions import country_of
+        p = c["pf"].get(country_of(reg)) if reg else None
         a = float(a) if a is not None and a == a else None
         return a, (float(p) if p is not None else None)
 
@@ -5590,7 +5592,10 @@ _MS_ALIAS = {"GR": "EL", "UK": "UK"}
 
 
 def _ms_code(region: str) -> str:
-    return _MS_ALIAS.get(str(region)[:2], str(region)[:2])
+    """The region's country as the per-country tables key it (NUTS-0: BE, LU, IE; definitions.country_of)."""
+    from capri_mod.data.definitions import country_of
+    c = country_of(region)
+    return _MS_ALIAS.get(c, c)
 
 
 def _ms_row(table, region):
@@ -5973,18 +5978,7 @@ class SupplyModule:
             root = _P(__file__).resolve().parents[2] / "capri_data"
             f = root / "2017" / "abatement" / "fert_options_jul15.csv"
             tab = read_csv(f) if f.exists() else pd.DataFrame()
-            c8 = _json.load(open(root / "shared" / "nuts_version_correspondence.json"))["capri8_to_nuts"]
-            to8 = {}
-            for k, lst in c8.items():
-                if not k.endswith("000000"):
-                    for n2 in lst:
-                        to8.setdefault(n2, k)
-            # the shared map (tools/build/build_region_map.py: correspondence fixes, NUTS splits and merges)
-            _rm = root / "shared" / "region_capri_map.csv"
-            if _rm.exists():
-                for _r in read_csv(_rm, dtype=str).fillna("").itertuples(index=False):
-                    if _r.capri_region:
-                        to8[_r.region] = _r.capri_region
+            to8 = IdentityMap()        # the model's regions are CAPRI's units: each its own CAPRI region
             cls._FERT_JUL15 = ({(r.region, str(r.option).upper()): r for r in tab.itertuples(index=False)}, to8)
         tab, to8 = cls._FERT_JUL15
         msc = capri_ms(region)

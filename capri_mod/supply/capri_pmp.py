@@ -128,7 +128,6 @@ PMP_ELAS_FILE = "pmp_own_price_elasticities.csv"
 COUNTRY_ELAS_FILE = "capri_own_price_elasticities.csv"
 #: the country file's CAPRI codes -> model activities (animal products and young animals are not activities)
 COUNTRY_ELAS_ALIASES = {"MAIZ": "CORN", "TWIN": "WINE"}
-CROSSWALK = "shared/nuts_crosswalk.json"
 
 # CAPRI names grain maize MAIZ; the model calls it CORN. Fodder on arable land OFAR is the model's OFOD (OFAR + ROOF;
 # CAPRI's sources carry OFAR only): without the alias the 14 Mha of other fodder stayed on the literature default
@@ -163,9 +162,7 @@ def build_elasticity_table(
       NO_CAPRI_VALUE     none of the above: no value (NaN); the activity is held at its level unless CAPRI's PMP
                          terms cover it (no literature defaults since 23 October 2026)
 
-    Both CAPRI sources are per region x activity. The second is keyed by CAPRI
-    8-character region codes and is resolved through the NUTS crosswalk, which is
-    why it reaches regions the first one misses.
+    Both CAPRI sources are per region x activity, keyed by CAPRI's 8-character region codes, the model's own.
     """
     data_dir = Path(data_dir)
     apply_dampening = True        # CAPRI's dampening (impose_upper_bound_on_elasticity.gms)
@@ -181,21 +178,11 @@ def build_elasticity_table(
     # --- lower-precedence source first, so the better one overwrites it ---
     from capri_mod.data.loaders import resolve_data_file
     pmp_path = resolve_data_file(data_dir, PMP_ELAS_FILE, base_year=base_year)
-    cw_path = data_dir / CROSSWALK
     n_pmp = 0
-    if pmp_path.exists() and cw_path.exists():
-        # model region -> CAPRI region: the shared map (tools/build/build_region_map.py: the NUTS correspondence with its
-        # fixes, splits and merges), else the crosswalk; a region with neither, or whose CAPRI region has no row,
-        # takes its member state's national row (K32: the crosswalk alone reached 140 of 248 regions, so 13 Mha of
-        # arable crops in recoded regions - Denmark, Berlin, Saxony, Poland's renamed regions, Finland's - and every
-        # national-row region stayed on the literature defaults)
-        cw = json.loads(cw_path.read_text())["resolved"]      # model -> CAPRI
-        to8 = dict(cw)
-        rm = data_dir / "shared" / "region_capri_map.csv"
-        if rm.exists():
-            for _r in read_csv(rm, dtype=str).fillna("").itertuples(index=False):
-                if _r.capri_region:
-                    to8[_r.region] = _r.capri_region
+    if pmp_path.exists():
+        # model region -> CAPRI region: the model's regions are CAPRI's regional units (27 October 2026); a region whose
+        # CAPRI row is missing takes its member state's national row
+        to8 = {r: r for r in regions}
         df = read_csv(pmp_path)
         df["activity"] = df["crop"].replace(ACTIVITY_ALIASES)
         df = df[df.activity.isin(set(activities))]

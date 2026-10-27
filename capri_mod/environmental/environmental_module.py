@@ -29,7 +29,7 @@ from capri_mod.fert.npk import need_yield_factor
 from capri_mod.data.definitions import (
     CROPS, ANIMALS, ALL_ACTIVITIES, NUTRIENTS, GHG_TYPES,
 )
-from capri_mod.data.definitions import MS_CODE, capri_ms
+from capri_mod.data.definitions import MS_CODE, capri_ms, IdentityMap
 from capri_mod.csvio import read_csv
 
 
@@ -463,19 +463,8 @@ class EnvironmentalModule:
             if f.exists() and g.exists():
                 t = read_csv(f)
                 tot = read_csv(g).pivot_table(index="capri_region", columns="item", values="kg_n_per_ha")
-                c8 = _json.load(open(root / "shared" / "nuts_version_correspondence.json"))["capri8_to_nuts"]
-                to8 = {}
-                for k, lst in c8.items():
-                    if not k.endswith("000000"):
-                        for n2 in lst:
-                            to8.setdefault(n2, k)
-                # the shared map (tools/build/build_region_map.py: correspondence fixes, NUTS splits and merges)
-                _rm = root / "shared" / "region_capri_map.csv"
-                if _rm.exists():
-                    for _r in read_csv(_rm, dtype=str).fillna("").itertuples(index=False):
-                        if _r.capri_region:
-                            to8[_r.region] = _r.capri_region
-                cls._CROP_N_MAP = to8
+                # the model's regions are CAPRI's units: each its own CAPRI region (a dict that returns the key)
+                cls._CROP_N_MAP = IdentityMap()
                 for r8, g8 in t.groupby("capri_region"):
                     d = {row.crop: row for row in g8.itertuples(index=False)}
                     if "GRAE" in d or "GRAI" in d:
@@ -1415,7 +1404,7 @@ class EnvironmentalModule:
             yields = yields.to_dict()
         cr = self._p_capri_region(region)
         if cr is None:
-            raise RuntimeError(f"no CAPRI region for {region} (shared/region_capri_map.csv)")
+            raise RuntimeError(f"no CAPRI fertilisation data for {region} (fert_dist_priors_2030.csv)")
         D, C = NPKData.get(), _pb.PCropCoefs.get()
         y0 = self._cached_row("yields", region) or {}
         yr = {}

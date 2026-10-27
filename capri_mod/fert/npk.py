@@ -62,12 +62,6 @@ class NPKData:
         for nut, f in (("P", "livestock_manure_p_coef.csv"), ("K", "livestock_manure_k_coef.csv")):
             if (env / f).exists():
                 self.man[nut] = read_csv(env / f, index_col=0)
-        self._map = {}
-        rm = root / "shared" / "region_capri_map.csv"
-        if rm.exists():
-            for r in read_csv(rm, dtype=str).fillna("").itertuples(index=False):
-                if r.capri_region:
-                    self._map[r.region] = r.capri_region
         gr = read_csv(env / "fert_dist_crop_groups_2030.csv")
         self.groups = {r: d for r, d in gr.groupby("capri_region")}
         w = gr.groupby(["model_crop", "ngrp"]).share.sum()
@@ -103,9 +97,9 @@ class NPKData:
         return 0.0
 
     def capri_region(self, region: str) -> Optional[str]:
-        """The CAPRI region of a model region (shared/region_capri_map.csv), else its country's when CAPRI's data have
-        it, else None (as InnerFertDist.capri_region)."""
-        c = self._map.get(region)
+        """The CAPRI region of a model region (the region itself: the model's regions are CAPRI's units), else its
+        country's when CAPRI's data have it, else None (as InnerFertDist.capri_region)."""
+        c = region
         if c is not None and any((c, n) in self.crop for n in NUTRIENTS):
             return c
         cc = capri_ms(region)

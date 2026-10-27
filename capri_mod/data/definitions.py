@@ -148,11 +148,32 @@ NUTS2_REGIONS = {}
 for _r, _m, _c in _UNITS:
     NUTS2_REGIONS.setdefault(_c, []).append(_r)
 
+class IdentityMap(dict):
+    """model region -> CAPRI region: the region itself, the model's regions being CAPRI's units (for code written for
+    a lookup table: .get(region) returns the region)."""
+
+    def get(self, key, default=None):
+        return key
+
+    def __getitem__(self, key):
+        return key
+
+    def __contains__(self, key):
+        return True
+
+
 # Flat list of all regions
 ALL_REGIONS = [r for r, _, _ in _UNITS]
 
 # Country membership (NUTS-0; the key of aggregate_supply(by_country=True), mapped to CAPRI's member state by MS_CODE)
 REGION_TO_COUNTRY = {r: c for r, _, c in _UNITS}
+
+
+def country_of(region: str) -> str:
+    """The NUTS-0 country of a model region (BE, LU, IE, EL ...), the key of the per-country tables (organic and
+    landscape targets, mineral fertiliser prices, PESETA regions). A region's first two characters are CAPRI's member
+    state (BL for Belgium and Luxembourg, IR for Ireland), not the country: BL400000 is Luxembourg."""
+    return REGION_TO_COUNTRY.get(str(region), str(region)[:2])
 
 # ---------------------------------------------------------------------------
 # TRADE REGIONS (market module — 77 countries aggregated to ~40 trade blocks)
