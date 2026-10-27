@@ -6762,8 +6762,10 @@ class SupplyModule:
                 pass
             return region, result, (0 if result.converged else 1), n_metric, "N price"
         except Exception as e:
-            if verbose:
-                print(f"    WARNING: Region {region} failed: {e}")
+            # a region whose solve raised has no result in this run: said always (until 27 October 2026 only with
+            # verbose, so a run on a subset of its regions could go on without anyone being told)
+            import warnings as _w
+            _w.warn(f"region {region}: the regional solve raised {e!r}; no result for it in this run", RuntimeWarning)
             return region, None, 1, 0.0, None
 
     #: worker processes for the regional solves: None = the machine's cores (CAPRI_WORKERS overrides), 1 = in this

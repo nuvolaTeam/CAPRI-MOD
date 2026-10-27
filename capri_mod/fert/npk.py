@@ -88,10 +88,16 @@ class NPKData:
 
     def crop_coef(self, capri_region: str, nut: str, crop: str, col: str) -> float:
         """A model crop's coefficient (kg/ha); a crop CAPRI does not grow in the region takes the country's, else 0."""
+        cache = self.__dict__.setdefault("_crop_dicts", {})
         for r in (capri_region, capri_region[:2] + "000000"):
-            d = self.crop.get((r, nut))
-            if d is not None and crop in d.index:
-                v = float(d.at[crop, col])
+            dd = cache.get((r, nut))
+            if dd is None:
+                d = self.crop.get((r, nut))
+                # the table as {crop: {column: value}}: the same floats, without a pandas lookup per call (12% of a
+                # regional problem's build, 27 October 2026)
+                dd = cache[(r, nut)] = {} if d is None else d.to_dict("index")
+            if crop in dd:
+                v = float(dd[crop][col])
                 if v == v:
                     return v
         return 0.0

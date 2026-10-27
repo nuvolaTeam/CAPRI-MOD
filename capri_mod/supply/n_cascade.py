@@ -44,6 +44,21 @@ def _e(eff, t, item):
     return eff.get((t, item), 0.0)
 
 
+_NZ = {}
+
+
+def _terms(eff, techs, item):
+    """The options of techs with a nonzero effect on item, with that effect: ((tech, effect), ...), cached per effect
+    table. A zero effect adds e x share = 0 exactly (CasADi drops such terms too), so leaving them out of the sums below
+    changes no result; it spares most of the cascade's work (27 October 2026: the cascade was 28% of a regional solve)."""
+    k = (id(eff), techs, item)
+    v = _NZ.get(k)
+    if v is None or v[0] is not eff:
+        v = (eff, tuple((t, eff[(t, item)]) for t in techs if eff.get((t, item), 0.0) != 0.0))
+        _NZ[k] = v
+    return v[1]
+
+
 def losses(f, run_surf, sh, eff, m_runsurf=(1.0, 1.0), m_appl_run=1.0, fert_appl=None):
     """CAPRI's v_emiLoss of one animal activity: {(gas, stage): fraction of excreted N}, stages Graz, Hous, Stor, Appl,
     and ("N", "RunHous"), ("N", "RunSurf"), ("N", "RunTot"), ("N", "GasRunTot").
@@ -63,8 +78,8 @@ def losses(f, run_surf, sh, eff, m_runsurf=(1.0, 1.0), m_appl_run=1.0, fert_appl
         if g == "N2O":
             base = base - (L[("NH3", "Hous")] + L[("NOX", "Hous")])
         red = 0.0
-        for t in HOUS_TECHS:
-            red = red + _e(eff, t, tag) * _s(sh, t)
+        for t, e in _terms(eff, HOUS_TECHS, tag):
+            red = red + e * _s(sh, t)
         v = base * f.get(f"hous_{g}", 0.0) * (1.0 - red)
         if g == "N2O":
             v = v * (1.0 - ad * _e(eff, "AD_AnCh", "N2OHOU"))
@@ -78,8 +93,8 @@ def losses(f, run_surf, sh, eff, m_runsurf=(1.0, 1.0), m_appl_run=1.0, fert_appl
         if g == "N2":
             base = base - (L[("NH3", "Stor")] + L[("NOX", "Stor")])
         red = 0.0
-        for t in STOR_TECHS:
-            red = red + _e(eff, t, tag) * _s(sh, t)
+        for t, e in _terms(eff, STOR_TECHS, tag):
+            red = red + e * _s(sh, t)
         v = base * f.get(f"stor_{g}", 0.0) * (1.0 - red)
         if g in ("NH3", "NOX"):
             v = v * (1.0 - ad * _e(eff, "AD_AnCh", tag))
@@ -88,15 +103,15 @@ def losses(f, run_surf, sh, eff, m_runsurf=(1.0, 1.0), m_appl_run=1.0, fert_appl
     hous_all = hous + L[("N2", "Hous")]
     # RUNHOUSN_
     red = 0.0
-    for t in RUNH_TECHS:
-        red = red + _e(eff, t, "no3runh") * _s(sh, t)
+    for t, e in _terms(eff, RUNH_TECHS, "no3runh"):
+        red = red + e * _s(sh, t)
     L[("N", "RunHous")] = (1.0 - tsg - hous - stor) * f.get("run_hous", 0.0) * (1.0 - red)
     graz = L[("NH3", "Graz")] + L[("NOX", "Graz")] + L[("N2O", "Graz")]
     left = 1.0 - tsg - hous_all - stor - L[("N", "RunHous")]
     # RUNSURFN_ (the application options' own runoff effect enters the first factor)
     app_run = 0.0
-    for t in APPL_TECHS:
-        app_run = app_run + _e(eff, t, "no3mrun") * _s(sh, t)
+    for t, e in _terms(eff, APPL_TECHS, "no3mrun"):
+        app_run = app_run + e * _s(sh, t)
     L[("N", "RunSurf")] = (tsg * (1.0 - graz) + left) * run_surf * (m_runsurf[0] - app_run) * m_runsurf[1]
     # APPLN_ (N2O after NH3 and NOX, inside the bracket)
     ro = 1.0 - run_surf * m_appl_run
@@ -106,8 +121,8 @@ def losses(f, run_surf, sh, eff, m_runsurf=(1.0, 1.0), m_appl_run=1.0, fert_appl
         if g == "N2O":
             base = base - (L[("NH3", "Appl")] + L[("NOX", "Appl")])
         red = 0.0
-        for t in APPL_TECHS:
-            red = red + _e(eff, t, tag) * _s(sh, t)
+        for t, e in _terms(eff, APPL_TECHS, tag):
+            red = red + e * _s(sh, t)
         red = red + fert_appl.get(g, 0.0)
         if g == "N2O":
             red = red + _e(eff, "AD_AnCh", "N2OAPP") * ad
