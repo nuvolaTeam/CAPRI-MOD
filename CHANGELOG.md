@@ -30,6 +30,48 @@ Full provenance for every entry is in `capri_data/DATA_SOURCING_REGISTRY.json`.
 
 ---
 
+## 27 October 2026 (night): builder reproduction audit (K86, K87), CAPRI's stop rule the default (K79), the legacy nitrate limit retired (K33), orphans removed
+
+- **Builder reproduction audit** (tools/check/reproduce_builders.py, which also records every builder's command): each
+  of the 117 builder invocations run on the committed inputs and its outputs compared with the committed files; files
+  several builders write in turn checked as a chain (`--chain`). Found and fixed:
+  - **K86:** the ammonia cost curves left out Denmark, Lithuania and Croatia (a fixed list of an older CAPRI's member
+    states without regional detail), and build_ammonia_technologies took the missing curves as 0: their housing,
+    storage and air-purification options had no farm-size cost terms and no curvature (air purification for pigs 0 EUR
+    against 7.9 in DE110000). Now every regional unit, as CAPRI (ammo_tech.gms); the builder lists the units left
+    without a curve (Prague: no holdings per farm-size class in the data; Norway: no ammonia options, registered). The
+    AD option and the Nitrates Directive tables had the same list; their outputs are unchanged (Croatia is not in
+    CAPRI's AD base data).
+  - **K87:** crop_cost_shares.csv rounded to 3 decimals and without the single-unit member states; the max-mitigation
+    unit values without TABO; files written before the full-precision decision (market, fertiliser distribution, land-use
+    change, greening, cost savings: 3e-10 to 5e-6) rebuilt, and the files built on the cost savings with them
+    (genetics, low-N feed and supplement effects, histosols). Two builders no longer write stray files (an uncommitted
+    pela_cross_price.csv; a backup copy of the trade flows). Re-audit: every rebuilt builder reproduces its files; the
+    base-table chain (extract_all_from_data2 ... build_eu_producer_prices) reproduces yields, variable costs and
+    CAPREG producer prices.
+- **CAPRI's stop rule the default** (outer_loop.stop_rule = "capri", the project lead's decision, K79): the loop stops
+  when no more than two items (member-state production and feed, trade-block prices) change by more than 0.05% between
+  iterations (capmod/price_forecast.gms), with the model's inner balances settled as well (N-balance price, manure
+  pools, young animals, base calibration). The model's own rule (prices within 0.5%) ended Farm-to-Fork with 14
+  production rows still above CAPRI's threshold (r161, r163: largest Latvian oats 1.1%, halving each iteration: slow
+  convergence of the price forecast, not solver creep). [r164: iterations, CAPRI's verdict]
+- **K33 retired** (the project lead's decision): the legacy nitrate_limit instrument (not CAPRI's; used by no CAPRI
+  scenario), its constraint row, the Mitscherlich intensity margin it drove (supply/intensity.py), the livestock
+  intensity bounds only it read (and their builder), and the unsourced per-head animal rows of nutrient_coefs.csv
+  (they also entered each region's reported nutrient_balance). Two tests that exercised only the instrument removed
+  (180 tests).
+- **Orphans removed** (the project lead's decision): input_requirements, pmp_diagonal_terms, pmp_crossgroup_terms
+  (2017/supply) and manure_ch4_ef_regional: no builder, read by nothing; their two loaders and metadata entries.
+  INPUT_MANIFEST.json: 93 declared inputs (also two entries of files removed earlier).
+- **OANI**: gross output 0 where the activity's level is 0 (it read NaN; no output coefficient).
+- **Docs**: DATA_DICTIONARY's core tables on the 221 units; README (NUTS 2024 reporting in place; nitrogen instruments);
+  KNOWN_ISSUES K79 diagnosis, K86, K87.
+- **Reference runs.** r163 (the evening entry's Hessian change and the K82 ammonia rebuild, before this entry's
+  changes; Farm-to-Fork): 9 iterations, mean absolute deviation from CAPRI 4.34 as r161, every indicator within 0.1
+  point; the Hessian skipped 4,169 of 15,219 regional re-solves (its time, 76 min, is not a clean measure: a builder
+  audit ran beside it). The French olive and table-grape jumps of r161 (K79) did not recur. [r164 Farm-to-Fork, r165
+  Green Deal 2030, test suite: to be filled in]
+
 ## 27 October 2026 (evening): market supply Hessian, regions a shock does not reach not re-solved; option 4 tried and dropped
 
 - **The market supply Hessian from the baseline's full state** (market.hessian_skip_unchanged, default true): the base is
