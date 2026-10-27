@@ -41,7 +41,6 @@ from collections import OrderedDict
 
 import numpy as np
 
-from capri_mod.settings import current as _settings_now
 
 #: IPOPT solvers by the structure of the problem (SOLVER CACHE). Every data value of the model enters its CasADi graph
 #: as a parameter, so two builds with the same structure (columns, rows, feeds, groups, options) give the same graph
@@ -327,7 +326,7 @@ class CapriRegionalNLP:
         for i, l in enumerate(labels):
             if i in used:
                 continue
-            for partner in (l + "_band", l + "_lo"):
+            for partner in (l + "_lo",):
                 jr = lab_idx.get(partner)
                 if jr is not None and jr not in used and np.allclose(A[jr], -A[i], rtol=0, atol=1e-12):
                     pairs[i] = jr; used.add(i); used.add(jr)
@@ -335,13 +334,6 @@ class CapriRegionalNLP:
         self._A, self._b = A, b
         g_rows, lbg, ubg, gmap = [], [], [], []           # gmap: (kind, rows, scale)
         drop = set(spec.get("drop_labels") or ())
-        if bool(_settings_now().get("supply.nlp_fodder_band_dropped")):
-            # CAPRI's SUPBAL_ for non-tradable fodder is the equality above (production = FEDUSE_). The former conic form's
-            # other side, the "_band" row, carries the animals' fodder per head from the ration state - the previous
-            # solve's feeding - not the feed columns: kept in this form it was a second, lagged fodder constraint not
-            # in CAPRI, binding, whose coefficients moved with every iteration's feeding (K75: the suckler cows of FRD1
-            # fell 36 thousand head over iterations 12-25 through it alone). Dropped here (26 October 2026).
-            drop |= {labels[i] + "_band" for i in fod_rows if labels[i] + "_band" in lab_idx}
         self.dropped = [labels[i] for i in range(m_A) if labels[i] in drop]
         keep_rows = [i for i in range(m_A)
                      if not (i in bound_rows or (i in used and i not in pairs) or labels[i] in drop)]

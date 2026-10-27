@@ -3982,24 +3982,12 @@ def test_dead_worker_does_not_hang_the_regional_solves(monkeypatch):
         assert float((a - b).abs().max()) < 1e-6, g
 
 
-def test_nlp_form_has_capri_fodder_equality_without_lagged_band(monkeypatch):
-    """CAPRI's fodder balance SUPBAL_ is an equality with the feed columns; the conic form's band rows, which carry
-    the previous solve's fodder per head, are not in the NLP form (K75, supply.nlp_fodder_band_dropped)."""
-    from capri_mod.supply import capri_regional_nlp as cnlp
-    from capri_mod.settings import override
+def test_nlp_form_has_capri_fodder_equality_without_lagged_band():
+    """CAPRI's fodder balance SUPBAL_ is an equality with the feed columns (capri_regional_nlp); the conic form's band
+    rows, which carried the previous solve's fodder per head (K75), are no longer built (27 October 2026)."""
     from capri_mod.model import CAPRIModel
-    seen = []
-    orig = cnlp.CapriRegionalNLP.__init__
-
-    def spy(self, spec):
-        orig(self, spec)
-        seen.append(list(self.dropped))
-    monkeypatch.setattr(cnlp.CapriRegionalNLP, "__init__", spy)
-    monkeypatch.setenv("CAPRI_WORKERS", "1")
-    for flag in (True, False):
-        seen.clear()
-        with override({"supply.nlp_fodder_band_dropped": flag, "market.market_supply_nq": False}):
-            m = CAPRIModel(data_dir="capri_data", verbose=False)
-            m.run(scenario="BASELINE", regions=["FR250000"], max_outer_iter=1)
-        bands = [l for d in seen for l in d if l.startswith("fodder_") and l.endswith("_band")]
-        assert bool(bands) == flag, (flag, bands)
+    m = CAPRIModel(data_dir="capri_data", verbose=False)
+    m.run(scenario="BASELINE", regions=["FR250000"], max_outer_iter=1)
+    labels = m.supply_module._models["FR250000"]._row_labels
+    assert any(l.startswith("fodder_") for l in labels)
+    assert not any(l.endswith("_band") for l in labels)

@@ -1393,7 +1393,7 @@ class CAPRIModel:
                             ("", "True"), ("supply.cap_greening", ""), ("supply.fert_slope_with_saving", ""),
                             ("", "True"), ("", "True"),         # fertiliser options' cost on purchases; catch crops
                             # 26 October 2026 (K75): the NLP form without the lagged fodder band rows
-                            ("supply.nlp_fodder_band_dropped", ""))),
+                            ("", "True"))),     # the fodder band rows, removed 27 October 2026
                         # the measurement: every shock from the baseline's state (24 October 2026)
                         "shocks-from-base"))
                    # at a scenario's state (market.hessian_scenario_iter): its young-animal and member-state milk

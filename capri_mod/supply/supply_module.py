@@ -573,8 +573,6 @@ class RegionalSupplyModel:
     #: CAPRI's land market and the grassland allowance (capri_mod/settings: supply.*)
     use_land_market = setting("supply.use_land_market")
     grassland_allowance = setting("supply.grassland_allowance")
-    #: fodder band rows (setting supply.fodder_band)
-    fodder_band = setting("supply.fodder_band")
 
     def _land_of(self, kind: str) -> float:
         """The region's land of a type (1000 ha; capri_data land_availability.csv, CAPRI's data). Missing data stop the
@@ -1595,7 +1593,7 @@ class RegionalSupplyModel:
         if labels is None:
             raise RuntimeError(f"{self.data.region_id}: no row labels for the {A.shape[0]} rows of the regional problem")
         fod = {l.replace("fodder_", ""): k for k, l in enumerate(labels)
-               if l.startswith("fodder_") and not l.endswith("_band")}
+               if l.startswith("fodder_")}
         n = len(self.acts)
         xb = np.maximum(np.asarray(x_start, float), 0.0).copy()
         xb[:n] = np.maximum(self._base_levels().reindex(list(self.acts)).fillna(0.0).values, 0.0)
@@ -4634,22 +4632,14 @@ class RegionalSupplyModel:
         # 'buy-in' version below remains only as a fallback; it needed generous
         # headroom because its old per-unit coefficients were inconsistent.
         fodder_rows = self._fodder_rows()
-        x0b = self._base_levels().reindex(self.acts).fillna(0.0).values
         for row, _lam, rhs, lab in fodder_rows:
             A_rows.append(row)
             self._row_labels.append(lab)
             b_rows.append(rhs)
-            # CAPRI's SUPBAL_ for non-tradable fodder is an EQUALITY (production
-            # net of losses = use). The solver takes inequalities only, so the
-            # other side is a narrow band: production may exceed use by at most
-            # 0.1% of base use. Slack at base (the base cannot move); the two rows
-            # never bind together, so no degenerate working set.
-            use0 = float(np.clip(row, 0.0, None) @ x0b)
-            if not getattr(self, "fodder_band", True):
-                continue
-            A_rows.append(-row)
-            self._row_labels.append(lab + "_band")
-            b_rows.append(-(rhs - 1e-9 * max(1.0, use0)) + 1e-3 * max(1.0, use0))
+            # CAPRI's SUPBAL_ for non-tradable fodder is an EQUALITY (production net of losses = use): the NLP form
+            # builds it with the feed columns (capri_regional_nlp). The conic form's other side, a "_band" row with the
+            # previous solve's fodder per head, was dropped from the NLP form on 26 October 2026 (K75) and is no longer
+            # built (27 October 2026: the same solution to the last digit in six regions, baseline and Farm-to-Fork)
         # (The roughage "buy-in" rows that stood in where the fodder balance had no data - headroom 1.5 x the base
         # shortfall plus 0.1 x on-farm supply - were removed 23 October 2026: every region with herds has CAPRI's fodder
         # balance; one without it stops the run.)

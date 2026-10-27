@@ -89,11 +89,6 @@ pmp_cross_terms = "capri"
 use_land_market = true
 # permanent-grassland decline allowed under the Green Deal (CAPRI default 0)
 grassland_allowance = 0.0
-# fodder balance band rows (the conic form's second side of CAPRI's fodder equality)
-fodder_band = true
-# CAPRI-mod error fix (K75, 26 October 2026): in the NLP form, where CAPRI's fodder equality uses the feed columns, the
-# conic form's band rows (fodder per head from the previous solve's feeding) are dropped; false = the former behaviour
-nlp_fodder_band_dropped = true
 # CAPRI's greening rules (permGrasGreening_)
 cap_greening = true
 # DEPARTURE: CAPRI optimises replacement heifers and the four calf activities on their own and clears young animals
