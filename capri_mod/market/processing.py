@@ -119,7 +119,7 @@ class ProcessingMixin(MarketStateMixin):
         try:
             _key = (tuple(round(float(self.world_prices_base.get(c, 0.0)), 9) for c in _cc),
                     tuple(map(tuple, self.tariffs.reindex(columns=_cc).fillna(0.0).round(9).values.tolist())),
-                    tuple(round(float((getattr(self, "_eu_aligned_use", None) or {}).get(rg, {}).get(c, 0.0)), 6)
+                    tuple(round(float((self.par.eu_aligned_use or {}).get(rg, {}).get(c, 0.0)), 6)
                           for rg in self.EU for c in ("RAPE", "SUNF", "SOYA")))
         except Exception:
             _key = None
@@ -141,7 +141,7 @@ class ProcessingMixin(MarketStateMixin):
             yo, yc = float(v["oil_yield"]), float(v["cake_yield"])
             o, c = self.CRUSH_CHAINS[s]
             q0 = float(v["crush_kt"])
-            _ov = (getattr(self, "_crush_q0_override", None) or {}).get((r, s))
+            _ov = (self.par.crush_q0_override or {}).get((r, s))
             if _ov is not None:
                 q0 = float(_ov)       # bilateral market: CAPRI's cake production of the market year / yield
             if r == "EU27" and self.eu_blocks:
@@ -154,8 +154,8 @@ class ProcessingMixin(MarketStateMixin):
                     if k not in tb.index or float(tb.at[k, "use_kt"]) <= 0:
                         continue
                     shb = float(tb.at[k, "proc_kt"]) / float(tb.at[k, "use_kt"])
-                    _al = (getattr(self, "_eu_aligned_use", None) or {}).get(rb, {})
-                    bb = float(_al.get(s, self.base_consumption.at[rb, s] if s in self.base_consumption.columns else 0.0))
+                    _al = (self.par.eu_aligned_use or {}).get(rb, {})
+                    bb = float(_al.get(s, self.par.base_consumption.at[rb, s] if s in self.par.base_consumption.columns else 0.0))
                     if shb <= 0 or bb <= 0:
                         continue
                     ps, po, pc = (float(base_dom.at[rb, x]) for x in (s, o, c))
@@ -173,8 +173,8 @@ class ProcessingMixin(MarketStateMixin):
                 # the ALIGNED EU seed use: base_consumption is later divided
                 # by the calibration factor (EU exemption), which shifted the
                 # base crush after calibration and moved base prices
-                _al = (getattr(self, "_eu_aligned_use", None) or {}).get("EU27", {})
-                b = float(_al.get(s, self.base_consumption.at["EU27", s] if s in self.base_consumption.columns else 0.0))
+                _al = (self.par.eu_aligned_use or {}).get("EU27", {})
+                b = float(_al.get(s, self.par.base_consumption.at["EU27", s] if s in self.par.base_consumption.columns else 0.0))
                 if share > 0 and b > 0:
                     q0 = share * b
             ps, po, pc = (float(base_dom.at[r, x]) for x in (s, o, c))
@@ -202,8 +202,8 @@ class ProcessingMixin(MarketStateMixin):
             tot[(r, o)] = tot.get((r, o), 0.0) + p["q0"] * p["yo"]
             tot[(r, c)] = tot.get((r, c), 0.0) + p["q0"] * p["yc"]
         for (r, prod), v in tot.items():
-            if prod in self.base_production.columns and v > 0:
-                self.base_production.at[r, prod] = v
+            if prod in self.par.base_production.columns and v > 0:
+                self.par.base_production.at[r, prod] = v
                 if prod in base_supply.columns and r in base_supply.index:
                     base_supply.at[r, prod] = v
         return base_supply

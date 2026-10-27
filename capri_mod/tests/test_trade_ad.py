@@ -18,7 +18,7 @@ def test_casadi_trade_residual_and_jacobian_match(market):
     from capri_mod.market.trade_ad import trade_function, import_price_matrices
     rng = np.random.default_rng(1)
     checked = 0
-    for c, sc in list(market._bilat.items())[:12]:
+    for c, sc in list(market.par.bilat.items())[:12]:
         act = np.where(sc.S0 > 1e-6)[0]
         if len(act) == 0:
             continue

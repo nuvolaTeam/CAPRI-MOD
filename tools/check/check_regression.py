@@ -109,16 +109,16 @@ def measure(data_dir: str) -> dict:
     mm = MarketModule(d)
     imb = []
     for c in ("SWHE", "RAPE", "SOYA", "BEEF"):
-        p = mm.base_production[c].sum()
-        q = mm.base_consumption[c].sum()
+        p = mm.par.base_production[c].sum()
+        q = mm.par.base_consumption[c].sum()
         if p > 0:
             imb.append(abs(q - p) / p * 100)
     out["max_world_imbalance_pct"] = round(float(max(imb)), 3)
 
     exo = pd.DataFrame(0.0, index=["EU27"], columns=MARKET_COMMODITIES)
     for c in MARKET_COMMODITIES:
-        if c in mm.base_production.columns:
-            exo.at["EU27", c] = mm.base_production.at["EU27", c]
+        if c in mm.par.base_production.columns:
+            exo.at["EU27", c] = mm.par.base_production.at["EU27", c]
     eq = mm.solve(exogenous_supply=exo, max_iter=150, tolerance=0.01)
     # Reproduction test: the base market must return its own input prices.
     # References are READ from world_prices.csv - they used to be hard-coded

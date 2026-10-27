@@ -109,8 +109,8 @@ def test_market_module_reproduces_its_own_prices(data):
     mm = MarketModule(data)
     exo = pd.DataFrame(0.0, index=["EU27"], columns=MARKET_COMMODITIES)
     for c in MARKET_COMMODITIES:
-        if c in mm.base_production.columns:
-            exo.at["EU27", c] = mm.base_production.at["EU27", c]
+        if c in mm.par.base_production.columns:
+            exo.at["EU27", c] = mm.par.base_production.at["EU27", c]
 
     eq = mm.solve(exogenous_supply=exo)
     assert eq.converged
@@ -2043,7 +2043,7 @@ def test_world_production_coverage(data):
             keys |= {tuple(k.split("|")) for k in json.load(open(f))}
 
     mm = MarketModule(data)
-    bp = mm.base_production
+    bp = mm.par.base_production
     total = covered = 0.0
     for reg in bp.index:
         for comm in bp.columns:
@@ -2959,11 +2959,11 @@ def test_palm_and_other_vegetable_oils_are_markets(model):
     assert (fs.loc[fs.feedstock == "PLMO", "commodity"] == "PLMO").all()
     mm = model.market_module
     cols = list(mm.commodities)
-    rr = pd.DataFrame(1.0, index=mm.base_production.index, columns=cols)
+    rr = pd.DataFrame(1.0, index=mm.par.base_production.index, columns=cols)
     rr.loc["EU27", "OTHO"] = 1.10
     mm._eu_price_seen = pd.Series(1.10, index=cols)            # the supply models saw the same price
     s = mm.supply_response(mm.world_prices_base, None, region_ratio=rr)
-    base = float(mm.base_production.at["EU27", "OTHO"])
+    base = float(mm.par.base_production.at["EU27", "OTHO"])
     assert base > 0
     assert abs(float(s.at["EU27", "OTHO"]) / base - 1.10 ** 0.977) < 1e-6         # p_elasSupp, EU median
     mm._eu_price_seen = None
@@ -3118,14 +3118,14 @@ def test_fish_and_tropical_products_are_markets_and_processing_is_capris(data):
     raw = mm._bilateral_raw()
     assert all(c in raw for c in new)
     for c in new:                                   # base = CAPRI's market: production of the flows' exporters
-        assert abs(float(mm.base_production[c].sum()) - float(raw[c].X0.sum())) < 1e-6 * max(1.0, float(raw[c].X0.sum()))
+        assert abs(float(mm.par.base_production[c].sum()) - float(raw[c].X0.sum())) < 1e-6 * max(1.0, float(raw[c].X0.sum()))
     gl = mm._gl_params()
     assert any((("EU27", mm.commodities.index(c)) in gl["x0"]) for c in ("COFF", "SFIS"))
     assert "SFIS" in mm._feed_bulk_params()["feed0"]
     pq = mm._proc_nq_params()
     H = pq["H"]["EU27"]
     assert H[("RAPE", "RAPE")] > 0 and H[("RAPE", "SOYA")] < 0 and H[("RAPO", "SUNO")] == H[("SUNO", "RAPO")]
-    mm._bilateral_calibrate(mm.base_production.loc[["EU27"]].copy())
+    mm._bilateral_calibrate(mm.par.base_production.loc[["EU27"]].copy())
     dom0 = mm._dom0()
     d0 = mm.demand_response(dom0, mm.world_prices_base)
     dp = dom0.copy(); dp["SUNO"] *= 1.05

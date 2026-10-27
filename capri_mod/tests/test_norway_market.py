@@ -90,8 +90,8 @@ def _exo_with_norway(mm):
     """Supply by country: the EU's row at CAPRI's EU base, Norway's 5% above CAPRI's (the supply models' output
     differs from CAPRI's), with raw milk."""
     cols = list(mm.commodities)
-    eu = mm.base_production.loc["EU27", cols].astype(float)
-    no = mm.base_production.loc["NOR", cols].astype(float) * 1.05
+    eu = mm.par.base_production.loc["EU27", cols].astype(float)
+    no = mm.par.base_production.loc["NOR", cols].astype(float) * 1.05
     return pd.DataFrame([eu, no], index=["DE", "NO"])
 
 
@@ -106,13 +106,13 @@ def test_norway_market_supply_is_its_models_and_the_base_is_reproduced(data):
     mm._bilateral_calibrate(exo)
     r = mm._bilateral_ratio_frame()
     S, D, PAr, F, pc = mm._bilateral_eval(r, exo)
-    size = {c: np.maximum(sc.S0 + sc.D0, 1.0) for c, sc in mm._bilat.items()}
-    assert max(float(np.max(np.abs(F[c] / size[c]))) for c in mm._bilat) < 1e-6
+    size = {c: np.maximum(sc.S0 + sc.D0, 1.0) for c, sc in mm.par.bilat.items()}
+    assert max(float(np.max(np.abs(F[c] / size[c]))) for c in mm.par.bilat) < 1e-6
     for c in ("BARL", "SWHE", "BEEF", "POUL", "OATS"):
         assert abs(float(S.at["NOR", c]) - float(exo.at["NO", c])) < 1e-9 * max(1.0, float(exo.at["NO", c])), c
         assert abs(float(S.at["EU27", c]) - float(exo.at["DE", c])) < 1e-6 * max(1.0, float(exo.at["DE", c])), c
     assert abs(float(D.at["NOR", "MILK"]) - float(exo.at["NO", "MILK"])) < 1e-9 * float(exo.at["NO", "MILK"])
-    assert abs(mm._sup_milk0["NOR"] - float(exo.at["NO", "MILK"])) < 1e-9
+    assert abs(mm.par.sup_milk0["NOR"] - float(exo.at["NO", "MILK"])) < 1e-9
     # Norway's barley 10% dearer than its models saw: Norway's supply follows (own CAPRI elasticity), the EU's not
     mm._sup_price_seen = {"NOR": pd.Series(1.0, index=mm.commodities)}
     r1 = r.copy()
@@ -125,14 +125,14 @@ def test_norway_market_supply_is_its_models_and_the_base_is_reproduced(data):
     S2 = mm.supply_response(mm.world_prices_base, exo, region_ratio=r1, crush_dom=mm._dom0())
     assert abs(float(S2.at["NOR", "BARL"]) - float(exo.at["NO", "BARL"])) < 1e-9 * float(exo.at["NO", "BARL"])
     # with CAPRI's market supply function measured on Norway's models (market_supply_nq): linear through their output
-    mm.supply_hessian = {"sup": {"NOR": pd.DataFrame([[50.0]], index=["BARL"], columns=["BARL"])}}
+    mm.par.supply_hessian = {"sup": {"NOR": pd.DataFrame([[50.0]], index=["BARL"], columns=["BARL"])}}
     mm._sup_price_seen = {"NOR": pd.Series(1.0, index=mm.commodities)}
     try:
         S3 = mm.supply_response(mm.world_prices_base, exo, region_ratio=r1, crush_dom=mm._dom0())
         assert abs(float(S3.at["NOR", "BARL"]) - (float(exo.at["NO", "BARL"]) + 50.0 * 0.10)) < 1e-6
         assert abs(float(S3.at["EU27", "BARL"]) - float(exo.at["DE", "BARL"])) < 1e-9 * float(exo.at["DE", "BARL"])
     finally:
-        mm.supply_hessian = None
+        mm.par.supply_hessian = None
 
 
 def test_norway_feed_and_dairy_follow_its_supply_models(data):
@@ -250,7 +250,7 @@ def test_norway_run_on_its_own_supply_models():
     for c in ("BARL", "OATS", "BEEF", "MILK", "SGMT", "PORK"):
         assert abs(float(P.at["NOR", c]) - float(ex.at["NO", c])) < 1e-6 * max(1.0, float(ex.at["NO", c])), c
         # no EU supply-model region in the run: the EU keeps CAPRI's base, Norway's output is not in it
-        assert abs(float(P.at["EU27", c]) - float(mm._base_production0.at["EU27", c])) < 1e-6 * max(
+        assert abs(float(P.at["EU27", c]) - float(mm.par.base_production0.at["EU27", c])) < 1e-6 * max(
             1.0, float(P.at["EU27", c])), c
     assert float(mm._bilat_err) < 1e-6
     assert float((mm.sup_price_ratio - 1.0).abs().max().max()) < 1e-9

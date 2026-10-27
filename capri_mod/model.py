@@ -418,17 +418,17 @@ class CAPRIModel:
             # calibration taken at the wrong point into every later run - results
             # depended on the instance's history (a null-trajectory projection,
             # built on a fresh instance, then differed from the base by 0.06%).
-            _mm._demand_cal_frozen = None
+            _mm.par.demand_cal_frozen = None
             # ...and restore the market's PRISTINE base tables: EU rows of
             # commodities without farm-model supply are not re-aligned per run
             # and carried an earlier run's values (a model with a full-region
             # run in its history had different EU oil and cake consumption
             # than a fresh one; with crushing this reached farm results).
-            if getattr(_mm, "_base_production0", None) is not None:
-                _mm.base_production = _mm._base_production0.copy()
-                _mm.base_consumption = _mm._base_consumption0.copy()
+            if _mm.par.base_production0 is not None:
+                _mm.par.base_production = _mm.par.base_production0.copy()
+                _mm.par.base_consumption = _mm.par.base_consumption0.copy()
                 _mm._dom0_cache = None          # base domestic prices for the feed terms
-                _mm._eu_aligned_use = None      # re-recorded by this run's alignment
+                _mm.par.eu_aligned_use = None      # re-recorded by this run's alignment
         else:
             _need_h = bool(getattr(self, "market_supply_nq", True))
             if _key not in _cache or (_need_h and getattr(self, "_hessian_key", None) != _key):
@@ -452,25 +452,25 @@ class CAPRIModel:
             # reuse the calibration of the baseline for the same region set
             if len(_cache[_key]) > 2:
                 _cal, _bp, _bc = _cache[_key][2:5]
-                _mm._demand_cal_frozen = _cal.copy()
-                _mm.base_production.loc[list(_mm.EU)] = _bp
-                _mm.base_consumption.loc[list(_mm.EU)] = _bc
+                _mm.par.demand_cal_frozen = _cal.copy()
+                _mm.par.base_production.loc[list(_mm.EU)] = _bp
+                _mm.par.base_consumption.loc[list(_mm.EU)] = _bc
                 if len(_cache[_key]) > 5 and _cache[_key][5][0] is not None:
                     _bs, _bpa, _bca, _cov, _eau = _cache[_key][5]
-                    _mm._bilat = _bs
+                    _mm.par.bilat = _bs
                     for _sc in (_bs or {}).values():
                         if getattr(_sc, "trq_row", None) is not None and _sc.trq_offset is not None:
                             _sc.trq_offset = _sc.trq_offset * 0.0
-                    _mm.base_production = _bpa.copy()
-                    _mm.base_consumption = _bca.copy()
-                    _mm._crush_q0_override = dict(_cov)
+                    _mm.par.base_production = _bpa.copy()
+                    _mm.par.base_consumption = _bca.copy()
+                    _mm.par.crush_q0_override = dict(_cov)
                     import copy as _cp
-                    _mm._eu_aligned_use = _cp.deepcopy(_eau)
+                    _mm.par.eu_aligned_use = _cp.deepcopy(_eau)
                     _mm._crush_cache = None
                     _mm.sv.bilat_local_el = None
                     _mm.sv.bilat_last_r = None
                 if len(_cache[_key]) > 6:
-                    _mm._sup_milk0 = dict(_cache[_key][6])
+                    _mm.par.sup_milk0 = dict(_cache[_key][6])
 
         # CAPRI's emission tax (ghgTax; pol_input/ecampa/carbtax50_endotech_*.gms, supply_model.gms objective): a
         # policy shock of the scenario, EUR per t CO2-eq on the EU regions' emissions; each column's emission per
@@ -720,10 +720,10 @@ class CAPRIModel:
             # measures it once per baseline (DEPARTURE)
             _hk = int(_settings().get("market.hessian_scenario_iter") or 0)
             if (not _is_base and _hk > 0 and outer_iter + 1 == _hk and bool(getattr(self, "market_supply_nq", True))
-                    and getattr(self.market_module, "supply_hessian", None)):
+                    and self.market_module.par.supply_hessian):
                 try:
                     self._hessian_at_scenario = True
-                    self.market_module.supply_hessian = self._market_supply_hessian(price_signal, supply_results,
+                    self.market_module.par.supply_hessian = self._market_supply_hessian(price_signal, supply_results,
                                                                                     regions)
                     self.market_supply_hessian_info = dict(self.market_supply_hessian_info, at_iteration=outer_iter + 1)
                     self.market_supply_hessian_log[-1] = dict(self.market_supply_hessian_info)
@@ -960,7 +960,7 @@ class CAPRIModel:
                     # the gap over the products the region produces, CAPRI's filter (SUP_GAP_MIN_PROD, 5 kt at base):
                     # Norway's producer prices of products it does not produce (maize, wine, olive oil, tobacco) swung
                     # by 13-75% between iterations (r54, r56, r58), its other cereals (about 2.6 kt) by 1-5% (r62)
-                    _bp = _mmk.base_production.loc[_rg] if _rg in _mmk.base_production.index else None
+                    _bp = _mmk.par.base_production.loc[_rg] if _rg in _mmk.par.base_production.index else None
                     _own = [c_ for c_ in _step.index if _bp is not None and c_ in _bp.index
                             and float(_bp[c_]) > self.SUP_GAP_MIN_PROD]
                     _own += [a_ for a_, c_ in (("SUGB", "SUGR"), ("DWHE", "SWHE"), ("DCOW", "MILK")) if c_ in _own]
@@ -1313,16 +1313,16 @@ class CAPRIModel:
                 self._eu_base_cache[_key] = (
                     market_eq.production.loc["EU27"].copy(),
                     market_eq.consumption.loc["EU27"].copy(),
-                    self.market_module._demand_cal_frozen.copy(),
-                    self.market_module.base_production.loc[list(self.market_module.EU)].copy(),
-                    self.market_module.base_consumption.loc[list(self.market_module.EU)].copy(),
+                    self.market_module.par.demand_cal_frozen.copy(),
+                    self.market_module.par.base_production.loc[list(self.market_module.EU)].copy(),
+                    self.market_module.par.base_consumption.loc[list(self.market_module.EU)].copy(),
                     # bilateral market: calibrated systems and full base tables of this baseline
-                    (getattr(self.market_module, "_bilat", None),
-                     self.market_module.base_production.copy(), self.market_module.base_consumption.copy(),
-                     dict(getattr(self.market_module, "_crush_q0_override", None) or {}),
-                     __import__("copy").deepcopy(getattr(self.market_module, "_eu_aligned_use", None) or {})),
+                    (self.market_module.par.bilat,
+                     self.market_module.par.base_production.copy(), self.market_module.par.base_consumption.copy(),
+                     dict(self.market_module.par.crush_q0_override or {}),
+                     __import__("copy").deepcopy(self.market_module.par.eu_aligned_use or {})),
                     # Norway's base raw milk delivery (its dairy block's reference; K56)
-                    dict(getattr(self.market_module, "_sup_milk0", None) or {}))
+                    dict(self.market_module.par.sup_milk0 or {}))
             except Exception as _exc:
                 warnings.warn(f"baseline market state not cached ({_exc!r}); scenarios will re-run the baseline")
 
@@ -2117,7 +2117,7 @@ class CAPRIModel:
         functions): with CAPRI's market supply functions (market.market_supply_nq) built and one EU market (the trade
         blocks keep the price update between solves)."""
         mm = self.market_module
-        hs = getattr(mm, "supply_hessian", None) or {}
+        hs = mm.par.supply_hessian or {}
         h_eu = hs.get("eu")
         return (bool(getattr(self, "market_supply_nq", False))
                 and not getattr(mm, "eu_blocks", False) and h_eu is not None and len(h_eu)

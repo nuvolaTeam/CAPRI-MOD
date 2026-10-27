@@ -77,9 +77,49 @@ class MarketSolveState:
     dairy_u: Any = "unset"
 
 
+@dataclass
+class MarketParameters:
+    """What the market's calibration builds once per base (or per calibration) and the blocks read, formerly
+    attributes of the module. Moved as they are: model.py still resets and caches them field by field where it did
+    (the baseline cache _eu_base_cache), so results are unchanged; caching this object per baseline is the next,
+    behaviour-changing step (MARKET_STATE_INVENTORY.md section 3, risks 3 and 4)."""
+    #: base production and consumption per market region and product (kt), as aligned to the supply models
+    base_production: Any = None
+    base_consumption: Any = None
+    #: their pristine copies, restored at every baseline run
+    base_production0: Any = None
+    base_consumption0: Any = None
+    #: the EU's base net exports per region, CAPRI's world balance records, the EU's aligned other uses
+    base_net_exports_eu: Any = None
+    capri_world_balance: Any = None
+    eu_aligned_use: Any = None
+    #: the dairy block's base raw milk supply: EU total, per member state, per market region
+    dairy_S0: Any = None
+    dairy_S0_ms: Any = None
+    dairy_S0_reg: Any = None
+    #: base raw milk delivery of the non-EU regions with supply models (Norway, K56)
+    sup_milk0: Any = None
+    #: crushing base quantities from the baseline's alignment
+    crush_q0_override: Any = None
+    #: the demand calibration (working copy) and its frozen copy (None: recalibrate at the next solve)
+    demand_cal: Any = None
+    demand_cal_frozen: Any = None
+    #: the calibrated bilateral trade systems per commodity
+    bilat: Any = None
+    #: the market supply Hessian (CAPRI's p_hessNQSupp, measured by model.py)
+    supply_hessian: Any = None
+
+
 class MarketStateMixin:
-    """`ev` and `sv`: the module's MarketEvalState and MarketSolveState, created on first use (also on modules built
-    without __init__, as the tests' stubs are)."""
+    """`par`, `ev` and `sv`: the module's MarketParameters, MarketEvalState and MarketSolveState, created on first use
+    (also on modules built without __init__, as the tests' stubs are)."""
+
+    @property
+    def par(self) -> MarketParameters:
+        st = self.__dict__.get("_par")
+        if st is None:
+            st = self.__dict__["_par"] = MarketParameters()
+        return st
 
     @property
     def ev(self) -> MarketEvalState:

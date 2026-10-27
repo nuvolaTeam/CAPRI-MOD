@@ -114,7 +114,7 @@ class MarketModule(CalibrationMixin, BiofuelMixin, DairyMixin, FeedMixin, Demand
                 _t.loc[_b] = _t.loc["EU27"]
             self.tariffs = _t.drop(index="EU27")
         self.armington     = data["armington"]
-        self._demand_cal   = None  # set by the bilateral calibration at the first solve
+        self.par.demand_cal   = None  # set by the bilateral calibration at the first solve
 
         # Compute baseline consumption and production
         self._calibrate_baseline()
@@ -122,8 +122,8 @@ class MarketModule(CalibrationMixin, BiofuelMixin, DairyMixin, FeedMixin, Demand
         # CAPRIModel.run): EU rows of commodities WITHOUT farm-model supply
         # (oils, cakes, rice, fats, other food) are not re-aligned per run, so
         # whatever an earlier run left there persisted into later runs.
-        self._base_production0 = self.base_production.copy()
-        self._base_consumption0 = self.base_consumption.copy()
+        self.par.base_production0 = self.par.base_production.copy()
+        self.par.base_consumption0 = self.par.base_consumption.copy()
 
     def _inp(self) -> MarketInputs:
         """The data adapter (one for the package's own data where the module was built without __init__)."""

@@ -141,7 +141,7 @@ class BilateralSolveMixin(MarketStateMixin):
             prod = sysc.X0.sum(axis=0)
             for i, r in enumerate(R):
                 if r not in self.EU:
-                    self.base_production.at[r, c] = float(prod[i])
+                    self.par.base_production.at[r, c] = float(prod[i])
         # non-EU crushing at CAPRI's cake production of the market year
         over = {}
         for (r, sd), prm in (self._crush_params() or {}).items():
@@ -151,13 +151,13 @@ class BilateralSolveMixin(MarketStateMixin):
             # the cake, or the oil where CAPRI records no cake from the crush (BGD soybeans, THA sunflower)
             for prod_, y_ in ((ck, prm["yc"]), (o, prm["yo"])):
                 if prod_ in raw and y_ > 0:
-                    q = float(self.base_production.at[r, prod_]) / y_
+                    q = float(self.par.base_production.at[r, prod_]) / y_
                     if q > 0:
                         over[(r, sd)] = q
                     break
-        self._crush_q0_override = over
+        self.par.crush_q0_override = over
         self._crush_cache = None
-        self._demand_cal = pd.Series(1.0, index=self.commodities)
+        self.par.demand_cal = pd.Series(1.0, index=self.commodities)
         exo_eu, exo_sup = self._split_supply(exogenous_supply)
         base_supply = self._align_eu_base_balance(exo_eu.sum(axis=0), exo_eu) \
             if exogenous_supply is not None else None
@@ -175,12 +175,12 @@ class BilateralSolveMixin(MarketStateMixin):
                 sc.calibrate(S[c].reindex(R).fillna(0.0).values)
                 sysd[c] = sc
                 for i, r in enumerate(R):
-                    self.base_consumption.at[r, c] = float(sc.D0[i])
+                    self.par.base_consumption.at[r, c] = float(sc.D0[i])
                 if c in self.CRUSH_CHAINS:
-                    if getattr(self, "_eu_aligned_use", None) is None:
-                        self._eu_aligned_use = {}
+                    if self.par.eu_aligned_use is None:
+                        self.par.eu_aligned_use = {}
                     for _rg in self.EU:
-                        self._eu_aligned_use.setdefault(_rg, {})[c] = float(sc.D0[R.index(_rg)])
+                        self.par.eu_aligned_use.setdefault(_rg, {})[c] = float(sc.D0[R.index(_rg)])
             self._crush_cache = None
             if base_supply is not None:
                 self._align_eu_crush_products(base_supply)
@@ -196,7 +196,7 @@ class BilateralSolveMixin(MarketStateMixin):
                     if d > 1e-9 and sc.D0[i] > 0:
                         f = float(sc.D0[i]) / d
                         worst = max(worst, abs(f - 1.0))
-                        self.base_consumption.at[r, c] = float(self.base_consumption.at[r, c]) * f
+                        self.par.base_consumption.at[r, c] = float(self.par.base_consumption.at[r, c]) * f
             if worst < 1e-12:
                 break
         # pooled commodities: non-EU demand calibrated so the world clears at base (EU use set by alignment)
@@ -221,8 +221,8 @@ class BilateralSolveMixin(MarketStateMixin):
                     self.calibration_bound_hits["non_eu_use"][c] = _raw
             if cal[c] != 1.0:
                 for _rg in fixed:
-                    self.base_consumption.at[_rg, c] /= float(cal[c])
-        self._demand_cal = cal
+                    self.par.base_consumption.at[_rg, c] /= float(cal[c])
+        self.par.demand_cal = cal
         _h = self.calibration_bound_hits
         if _h["non_eu_use"] or _h["export_share"]:
             import warnings as _w
@@ -232,13 +232,13 @@ class BilateralSolveMixin(MarketStateMixin):
         for sc in sysd.values():
             if sc.trq_row is not None:
                 sc.trq_offset = np.zeros(len(R))
-        self._bilat = sysd
+        self.par.bilat = sysd
         self.sv.bilat_last_r = None
         self.sv.bilat_local_el = None
 
     def _bilateral_eval(self, r: pd.DataFrame, exogenous_supply, trade_scenario=None):
         """Full model response at producer price ratios r: supply, demand, consumer price ratios, residuals."""
-        sysd = self._bilat
+        sysd = self.par.bilat
         dom0 = self._dom0()
         PAr = r.copy()
         pcache = {}
@@ -279,7 +279,7 @@ class BilateralSolveMixin(MarketStateMixin):
         """World price index per commodity: exporters' price ratios weighted by their base exports (bilateral
         commodities); the pooled commodities' common ratio."""
         out = pd.Series(1.0, index=self.commodities)
-        sysd = getattr(self, "_bilat", None) or {}
+        sysd = self.par.bilat or {}
         for c in self.commodities:
             if c in sysd:
                 sc = sysd[c]
@@ -432,23 +432,23 @@ class BilateralSolveMixin(MarketStateMixin):
         # reference - CAPRI's reference run is a calibrated equilibrium at its reference prices. Each outer
         # iteration of the baseline recalibrates, so the calibration a scenario inherits is the one at the
         # converged baseline supply. Scenario runs keep it frozen.
-        if getattr(self, "_eu_base_supply", None) is None or getattr(self, "_demand_cal_frozen", None) is None:
+        if getattr(self, "_eu_base_supply", None) is None or self.par.demand_cal_frozen is None:
             self._bilateral_calibrate(exogenous_supply)
-            self._apply_trq_volumes(self._bilat)
-            self._demand_cal_frozen = self._demand_cal.copy()
+            self._apply_trq_volumes(self.par.bilat)
+            self.par.demand_cal_frozen = self.par.demand_cal.copy()
             r = self._bilateral_ratio_frame()
             S, D, PAr, F, pc = self._bilateral_eval(r, exogenous_supply, trade_scenario)
             def _sz(c):
-                if c in self._bilat:
-                    return np.maximum(self._bilat[c].S0 + self._bilat[c].D0, 1.0)
+                if c in self.par.bilat:
+                    return np.maximum(self.par.bilat[c].S0 + self.par.bilat[c].D0, 1.0)
                 return np.array([max(float(S[c].sum()), 1.0)])
             self._bilat_base_resid = {c: float(np.max(np.abs(F[c] / _sz(c)))) for c in F}
             self._bilat_err = max(self._bilat_base_resid.values())
             self._bilat_converged = True
             self.sv.bilat_last_r = r.copy()
             return r, S, D, PAr, pc, True, 0
-        self._demand_cal = self._demand_cal_frozen.copy()
-        sysd = self._bilat
+        self.par.demand_cal = self.par.demand_cal_frozen.copy()
+        sysd = self.par.bilat
         self._apply_trq_volumes(sysd)
         R = list(self.regions)
         tadd = self._tariff_adds(trade_scenario)
@@ -463,7 +463,7 @@ class BilateralSolveMixin(MarketStateMixin):
         def size(c):
             if c in sysd:
                 return np.maximum(sysd[c].S0 + sysd[c].D0, 1.0)
-            return np.array([max(float(self.base_production[c].sum()), 1.0)])
+            return np.array([max(float(self.par.base_production[c].sum()), 1.0)])
 
         prev = np.inf
         damp = 1.0
@@ -548,7 +548,7 @@ class BilateralSolveMixin(MarketStateMixin):
             _w.warn(f"bilateral market did not converge in {iters} steps: largest relative residual "
                     f"{float(getattr(self, '_bilat_err', float('nan'))):.2e} ({worst})", RuntimeWarning)
         self._bilat_unconverged = None if converged else (iters, float(getattr(self, "_bilat_err", float("nan"))))
-        sysd = self._bilat
+        sysd = self.par.bilat
         # CAPRI's welfare report (market/welfare.py) at the solution, at the prices the market's functions saw
         welfare = self._capri_welfare(r, PAr, S, D, pc)
         # RAW MILK with the dairy block: the EU milk price is the block's (fat and protein values of the products

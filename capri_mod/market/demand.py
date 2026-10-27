@@ -252,7 +252,7 @@ class DemandMixin(MarketStateMixin):
         DPv = dp.to_numpy(dtype=float)
         REFv = ref.to_numpy(dtype=float)
         cal = np.array([float(self._demand_cal_factor(c)) for c in self.commodities])
-        Bv = self.base_consumption.reindex(index=self.regions, columns=self.commodities).fillna(0.0).to_numpy(dtype=float)
+        Bv = self.par.base_consumption.reindex(index=self.regions, columns=self.commodities).fillna(0.0).to_numpy(dtype=float)
         D0 = Bv * cal[None, :]                                          # calibrated base use
 
         # base components (kt) from CAPRI's shares
@@ -434,7 +434,7 @@ class DemandMixin(MarketStateMixin):
             for _reg, q_ in _wm.items():
                 i = R.get(_reg)
                 if i is not None:
-                    D[i, Cc["MILK"]] = D0[i, Cc["MILK"]] + (float(q_) - float(self.base_production.at[_reg, "MILK"]))
+                    D[i, Cc["MILK"]] = D0[i, Cc["MILK"]] + (float(q_) - float(self.par.base_production.at[_reg, "MILK"]))
         # BIOFUELS' OWN USE (biofDemShare_, biofDem_; non-fuel processing ProcNQ_)
         bm = self._biofuel_market_params()
         if bm:
