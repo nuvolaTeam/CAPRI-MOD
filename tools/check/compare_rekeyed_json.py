@@ -46,7 +46,9 @@ def main():
     a = ap.parse_args()
     old = json.loads(show(a.old_ref, a.path))
     new = json.loads((ROOT / a.path).read_text())
-    o, n = (old[a.key], new[a.key]) if a.key else (old, new)
+    o, n = old, new
+    for k in (a.key.split("/") if a.key else []):      # a path of keys: regional/herds
+        o, n = o[k], n[k]
     rmap = list(csv.DictReader(io.StringIO(show(a.old_ref, "capri_data/shared/region_capri_map.csv"))))
     one = {r["region"]: r["capri_region"] for r in rmap if r["relation"] == "one-to-one"}
     out, cmp_ = [], 0

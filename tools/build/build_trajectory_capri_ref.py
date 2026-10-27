@@ -121,7 +121,7 @@ def main():
             continue
         f = min(max(x30 / x17, BAND[0]), BAND[1])
         key = reg[:2] + "00" if reg.endswith("000000") else reg[:4]
-        regional[b][key][act] = {"2030": round(f, 4)}
+        regional[b][key][act] = {"2030": f}
         if not reg.endswith("000000"):
             cells[b][act].append(f)
     # land types (the model's land table) from CAPRI's land aggregates: arable crops ARAC, fruit and nurseries FRUN,
@@ -142,7 +142,7 @@ def main():
                 regional["land"][key][col] = dict(acts[ca])
     for col, ca in land_map.items():
         cells["land"][col] = list(cells["herds"].get(ca, []))
-    growth = {b: {act: {"2030": round(statistics.median(fs), 4)} for act, fs in c.items() if len(fs) >= 3}
+    growth = {b: {act: {"2030": statistics.median(fs)} for act, fs in c.items() if len(fs) >= 3}
               for b, c in cells.items()}
     out = {"name": "capri_ref_2030", "source": "CAPRI star 3.0 2030 Green Deal reference with endogenous technologies "
            "(res_2_1730greendeal_refpol_endotech_all_ini, LEVL and YILD) over CAPRI's 2017 results (res_17<MS>)",
