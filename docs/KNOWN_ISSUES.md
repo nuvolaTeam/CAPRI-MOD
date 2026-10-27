@@ -894,15 +894,18 @@ regional detail of an older CAPRI. DK000000, LT000000 and HR000000, regional uni
 terms as 0: e.g. air purification for fattening pigs and sows costs 0 in DK and LT (7.9 EUR in DE110000, 2.6 in
 EE000000), low-emission housing for dairy cows 28.9 and 10.5 (112.2 in EE000000), and every curvature term (CostParSqr)
 is 0 there. CAPRI computes the curves over all its regional units (ammo_tech.gms, rs). CZ010000 (Prague) also has no
-curve: it has one farm-size head row; CAPRI fills a region's missing p_Heads from its NUTS1 (l. 1349-1351), not done
-here (to check).
+curve, for another reason: the holdings per farm-size class (CAPRI's p_holdLSU, the heads per holding's denominator)
+are missing for it and for CZ000000 in the exported data, so no farm-size class has a cost; its heads fall back to
+the national ones (the builder's registered fallback). Whether CAPRI has holdings for CZ010000 in its own data: to check.
 
 - **Effect:** the cost and curvature of the ammonia housing, storage and air-purification options in DK000000,
   LT000000, HR000000 (and CZ010000); every run with the ammonia options
 - **In 9t:** not checked
-- **Status:** **open**: the list replaced by the model's regional units, then the ammonia chain rebuilt
-  (build_ammonia_cost_curves -> build_ammonia_technologies -> build_ammonia_tech_model -> build_manure_n2o,
-  build_n_cascade), with its own reference run
+- **Status:** **open**: fixed in the builders (branch data-fixes): the cost curves, the AD option
+  (build_ad_option.py, which had LU000000, not a unit, and missed HR000000) and the Nitrates Directive tables
+  (build_nitrates_directive.py, the same list) take the regional units; the ammonia chain to be rebuilt
+  (build_ammonia_cost_curves -> build_ammonia_technologies -> build_ad_option -> build_ammonia_tech_model ->
+  build_manure_n2o, build_n_cascade) with the reference runs of the next push
 
 <a id="k87"></a>
 ### K87: Builder outputs that do not follow from their builders (reproduction audit, 27 October 2026)
