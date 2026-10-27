@@ -334,7 +334,7 @@ class RationModel:
         return p
 
 
-def ration_model_for(data, data_dir=None, pmp_source: str = "elasticity", pmp_capri_parts=()) -> RationModel:
+def ration_model_for(data, data_dir=None, pmp_source: str = "capri2030", pmp_capri_parts=()) -> RationModel:
     """CAPRI's rations of a run: the RationModel the model builds once per run (CAPRIModel._update_rations) and a
     SupplyModule used on its own builds at base (SupplyModule._base_rations), from the same data. (Nitrate is CAPRI's
     supplement option in the supply model, envind/line_nitr.gms, Sprint 9g; the ration model's own nitrate ingredient

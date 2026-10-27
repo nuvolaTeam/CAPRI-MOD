@@ -121,7 +121,7 @@ S130,RegionalSupplyModel.nlp_n_relax (hidden),capri_mod/supply/supply_module.py:
 S131,price-response safety rail,capri_mod/supply/supply_module.py:6081,numeric_constant,"0.3, x4, [0.5,6.0]",param_csv,,,no,unsourced; QP path without surplus row,
 S132,SupplyModule default elasticity 0.25,capri_mod/supply/supply_module.py:6375,numeric_constant,0.25,param_csv,,,no,unsourced fallback,
 S133,_MS_ALIAS,capri_mod/supply/supply_module.py:6292,table,"GR->EL, UK->UK",mapping_csv,,,yes,,
-S134,SupplyModule.pmp_source,capri_mod/supply/supply_module.py:6333,switch,capri2030,toml:supply,supply.pmp_source,"p_pmpQuadTechn, p_pmpQuadPact (K61)",yes: project lead decision 22 Oct 2026,"getattr fallbacks 'elasticity' (:6466, model.py:1140,1275,1386); cli --pmp sets CLASS attr",
+S134,SupplyModule.pmp_source,capri_mod/supply/supply_module.py:6333,switch,capri2030,toml:supply,supply.pmp_source,"p_pmpQuadTechn, p_pmpQuadPact (K61)",yes: project lead decision 22 Oct 2026,"values capri2030 or recipe; 'elasticity' removed 28 Oct 2026 (audit S13); getattr fallbacks capri2030",
 S135,SupplyModule.pmp_capri_parts,capri_mod/supply/supply_module.py:6336,switch,all four,toml:supply,supply.pmp_capri_parts,,yes,cli --pmp-parts sets CLASS attr,
 S136,RegionalSupplyModel.__init__ use_share_term,capri_mod/supply/supply_module.py:2025,switch,True,toml:supply,supply.pmp_share_term,CAPRI PMP share term (SHARE_COEF),partial,SupplyModule passes use_capri_elasticities (:6514),
 S137,SupplyModule.__init__ use_capri_elasticities,capri_mod/supply/supply_module.py:6362,switch,True,toml:supply,supply.use_capri_elasticities,,n/a,,removed 27 Oct 2026: earlier CAPRI-mod alternative never run; CAPRI's form kept

@@ -126,7 +126,7 @@ Unregistered differences, by likely effect (auditor's reading; "checked" = re-re
 | S10 | landscape floor; diversification limit | the floor counts set-aside only (CAPRI also idled histosols); the diversification limit is not relaxed (landscape.gms l. 74-88) | fixed 24 Oct: idled histosol columns count on the landscape_floor row (setaFallow); cropDiv H0 = min(H0, CAPRI's formula with F added) under the floor. The floor's SETF = FALL + VSET = the model's SETA (checked in CAPRI's 2030 dump) |
 | S11 | pesticide target | a 23-crop list where CAPRI applies it to every crop | plant protection and other inputs fixed 24 Oct (every activity); the yield loss keeps the list (jrc121368 rule only; star 3.0 runs it off) |
 | S12 | emission tax on mineral N | IPCC factors where CAPRI uses its cascade losses | fixed 27 Oct: the tax and the accounts' soil N2O of mineral N take CAPRI's N2OSYN + mineral N2OAMM from the regional MITERRA fractions (n_cascade.mineral_n2o_n; 1.10-1.11% N2O-N per N against IPCC's 1.10%, the split direct/indirect regional) |
-| S13 | non-default PMP elasticity path | clip at 8, share term for some crops | not yet |
+| S13 | non-default PMP elasticity path | clip at 8, share term for some crops | **removed 28 Oct**: pmp_source "elasticity" gone; activities of a calibrated part without a CAPRI term held at their level (2030: 71 cells, at most 2% of an activity's EU level); docs/PMP_CAPRI_2030.md; run pending |
 
 **S3/S4 fix (24 October 2026).** SupplyModule._apply_greendeal_input_changes applies CAPRI's form (organic_io.gms,
 conventional_io.gms, define_inputs.gms l. 66-73): one regional change per input on the coefficient of every activity,

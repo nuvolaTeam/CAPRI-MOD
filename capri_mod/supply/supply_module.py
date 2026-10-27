@@ -2102,7 +2102,7 @@ class RegionalSupplyModel:
                 continue
             gross[a] = prices_ser.get(a, 0.0) * yields_ser.get(a, 0.0)
         gross_rev = pd.Series(gross)
-        self._gross_rev = gross_rev          # the curvature's revenue basis (diagnostics: tools/check/pmp_elasticity_target_check)
+        self._gross_rev = gross_rev          # the curvature's revenue basis of the activities CAPRI's terms do not cover
 
         calibrator = PMPCalibrator(self.acts, supply_elasticities, share_terms=st,
                                    cross_group_terms=cross_group_terms,
@@ -5461,8 +5461,8 @@ class SupplyModule:
     #: or 2030); at 2030 with CAPRI's 2030 feed slopes and land-type terms (their own calibrations are not ported).
     #: the PMP terms at the 2030 market year: "capri2030" (CAPRI's own terms of its 2030 baseline calibration, K61:
     #: crops' p_pmpQuadTechn and p_pmpQuadPact, animals' herd terms, feed-PMP slopes, land-type terms; the default since
-    #: 22 October 2026, the project lead's decision) or "elasticity" (calibrated per activity from CAPRI's supply
-    #: elasticities, with CAPRI's crop-group structure for small cross terms). Other years always "elasticity".
+    #: 22 October 2026, the project lead's decision); at 2017 CAPRI's recipe at CAPRI's 2017 point. "elasticity"
+    #: (calibrated per activity from CAPRI's supply elasticities) was removed on 28 October 2026 (audit S13).
     pmp_source = setting("supply.pmp_source")
     #: which of CAPRI's 2030 terms "capri2030" uses: the crops' matrix, the animals' herd terms, the feed-PMP slopes,
     #: the land market's land-type terms (all by default; subsets for diagnosis, run script --pmp-parts)
@@ -5587,9 +5587,12 @@ class SupplyModule:
 
     def _pmp_terms_for(self, d, region):
         """The region's PMP terms in the model's form for pmp_source and the market year: "capri2030" CAPRI's exported
-        2030 terms (2030 only), "recipe" capri-mod's own with CAPRI's recipe (2017 or 2030), else None (elasticity
-        calibration)."""
-        src = str(getattr(self, "pmp_source", "elasticity"))
+        2030 terms (2030; at 2017 CAPRI's recipe at CAPRI's 2017 point), "recipe" capri-mod's own with CAPRI's recipe
+        (2017 or 2030). The elasticity calibration ("elasticity") was removed on 28 October 2026 (audit S13)."""
+        src = str(getattr(self, "pmp_source", "capri2030"))
+        if src not in ("capri2030", "recipe"):
+            raise ValueError(f"supply.pmp_source {src!r}: 'capri2030' or 'recipe' (the elasticity calibration was "
+                             "removed on 28 October 2026, audit S13)")
         yr = int(d.get("market_year", 2017) or 2017)
         if src == "capri2030" and yr == 2030:
             return self._pmp_capri_parts_of((d.get("pmp_capri_2030") or {}).get(region))
@@ -5607,7 +5610,7 @@ class SupplyModule:
         else the base year's terms. The _capri2030 / _recipe2030 entries are removed either way."""
         if row is None:
             return row
-        src = str(getattr(self, "pmp_source", "elasticity"))
+        src = str(getattr(self, "pmp_source", "capri2030"))
         yr = int(d.get("market_year", 2017) or 2017)
         sfx = {"capri2030": "_capri2030", "recipe": "_recipe2030"}.get(src) if yr == 2030 else None
         if sfx and part not in tuple(getattr(self, "pmp_capri_parts", ())):
@@ -5621,16 +5624,22 @@ class SupplyModule:
         return out.drop([k for k in out.index if str(k).endswith(("_capri2030", "_recipe2030"))])
 
     def _uncalibrated(self, d, region) -> frozenset:
-        """Activities of the region without any CAPRI calibration: the elasticity table has no CAPRI value for them
-        (provenance NO_CAPRI_VALUE) and, with CAPRI's or the recipe's PMP terms, no own term either. CAPRI has no
-        own-price elasticity for them (e.g. OOIL, OIND in every member state) and no PMP term at the calibration
-        point; they are held at their level (no proxies, 23 October 2026: the former literature elasticities)."""
-        prov = getattr(self, "elasticity_provenance", None)
-        if prov is None or prov.empty or region not in prov.index:
-            return frozenset()
+        """Activities of the region held at their level: those of the parts calibrated with PMP terms (pmp_capri_parts:
+        crops, animals) without a positive own term at the calibration point, and those without any CAPRI value (no
+        elasticity, no term: OOIL, OIND in every member state). CAPRI calibrates every activity with a level; where
+        its calibration has no term for an activity of the model region (its level there zero or negligible: tobacco,
+        pulses in the Netherlands, durum wheat at 2030, 71 cells and at most 2% of an activity's EU level, r166), the
+        activity is held, as CAPRI holds what it does not calibrate. Until 28 October 2026 those cells took a curvature
+        from their CAPRI elasticity (the elasticity calibration, audit S13)."""
         pmp = self._pmp_terms_for(d, region) or {}
-        return frozenset(a for a in prov.columns
-                         if prov.at[region, a] == "NO_CAPRI_VALUE" and (a, a) not in pmp)
+        parts = tuple(getattr(self, "pmp_capri_parts", ()))
+        anim = set(ANIMALS)
+        held = {a for a in ALL_ACTIVITIES
+                if (("animals" in parts) if a in anim else ("crops" in parts)) and not float(pmp.get((a, a), 0.0) or 0.0) > 0}
+        prov = getattr(self, "elasticity_provenance", None)
+        if prov is not None and not prov.empty and region in prov.index:
+            held |= {a for a in prov.columns if prov.at[region, a] == "NO_CAPRI_VALUE" and (a, a) not in pmp}
+        return frozenset(held)
 
     def _pmp_capri_parts_of(self, g):
         """The region's CAPRI 2030 terms restricted to pmp_capri_parts (crops' matrix, animals' herd terms)."""
@@ -5751,7 +5760,7 @@ class SupplyModule:
             # CAPRI's land market of its 2030 baseline calibration with CAPRI's 2030 PMP terms (K61), else the 2017 one
             land_market=((d.get("land_market_2030") or {}).get(region)
                          if int(d.get("market_year", 2017) or 2017) == 2030
-                         and str(getattr(self, "pmp_source", "elasticity")) in ("capri2030", "recipe")
+                         and str(getattr(self, "pmp_source", "capri2030")) in ("capri2030", "recipe")
                          and "land" in tuple(getattr(self, "pmp_capri_parts", ()))
                          and (d.get("land_market_2030") or {}).get(region)
                          else (d.get("land_market") or {}).get(region)),
@@ -6229,7 +6238,7 @@ class SupplyModule:
         (CAPRIModel._update_rations, feed.ration.ration_model_for). Without them a regional model has no feeding block,
         which CAPRI's form always has."""
         from capri_mod.feed.ration import ration_model_for, rations_by_region, feed_prices_by_region
-        rm = ration_model_for(self.data, None, getattr(self, "pmp_source", "elasticity"),
+        rm = ration_model_for(self.data, None, getattr(self, "pmp_source", "capri2030"),
                               getattr(self, "pmp_capri_parts", ()))
         self.feed_rations = rations_by_region(rm)
         self.feed_prices = feed_prices_by_region(rm, None)

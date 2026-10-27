@@ -89,9 +89,9 @@ manure_pool_omega_min = 0.25
 manure_pool_qp_tol = 1e-8
 
 [supply]
-# PMP terms: "capri2030" (CAPRI's exported 2030 terms at 2030; CAPRI's recipe at its 2017 point at 2017), "recipe"
-# (capri-mod's own with CAPRI's recipe), "elasticity" (legacy: CAPRI's elasticities only; activities without one are
-# held at their level)
+# PMP terms: "capri2030" (CAPRI's exported 2030 terms at 2030; CAPRI's recipe at its 2017 point at 2017) or "recipe"
+# (capri-mod's own with CAPRI's recipe); activities without a term are held at their level ("elasticity", the legacy
+# calibration from CAPRI's elasticities, removed 28 October 2026, audit S13)
 pmp_source = "capri2030"
 # with capri2030: which parts take CAPRI's terms
 pmp_capri_parts = ["crops", "animals", "feed", "land"]

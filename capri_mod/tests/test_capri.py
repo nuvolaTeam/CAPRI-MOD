@@ -3899,3 +3899,25 @@ def test_nlp_form_has_capri_fodder_equality_without_lagged_band():
     labels = m.supply_module._models["FR250000"]._row_labels
     assert any(l.startswith("fodder_") for l in labels)
     assert not any(l.endswith("_band") for l in labels)
+
+
+def test_activities_without_a_capri_term_are_held():
+    """Audit S13: with CAPRI's PMP terms, an activity of a calibrated part (crops, animals) without a positive own term
+    is held at its level, as CAPRI holds what it does not calibrate; the elasticity calibration is gone
+    (pmp_source "elasticity" refused)."""
+    import pandas as pd
+    import pytest
+    from types import SimpleNamespace
+    from capri_mod.supply.supply_module import SupplyModule
+    from capri_mod.data.definitions import ALL_ACTIVITIES
+    terms = {(a, a): 1.0 for a in ALL_ACTIVITIES if a not in ("TOBA", "PULS", "BROI")}
+    terms[("DWHE", "DWHE")] = 0.0
+    prov = pd.DataFrame("REGIONAL_CAPRI", index=["XX110000"], columns=ALL_ACTIVITIES)
+    stub = SimpleNamespace(pmp_capri_parts=("crops", "animals"), elasticity_provenance=prov,
+                           _pmp_terms_for=lambda d, r: terms)
+    held = SupplyModule._uncalibrated(stub, {}, "XX110000")
+    assert {"TOBA", "PULS", "BROI", "DWHE"} <= held and "SWHE" not in held
+    stub2 = SimpleNamespace(pmp_capri_parts=("crops",), elasticity_provenance=prov, _pmp_terms_for=lambda d, r: terms)
+    assert "BROI" not in SupplyModule._uncalibrated(stub2, {}, "XX110000")       # animals not on CAPRI's terms
+    with pytest.raises(ValueError, match="removed"):
+        SupplyModule._pmp_terms_for(SimpleNamespace(pmp_source="elasticity"), {"market_year": 2030}, "XX110000")

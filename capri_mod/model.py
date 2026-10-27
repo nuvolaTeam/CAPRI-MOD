@@ -1339,7 +1339,7 @@ class CAPRIModel:
                 "young_animal_prices": dict(self.supply_module.yani_price_ratio or {}),
                 "young_animal_imbalance": float(getattr(self, "_yani_imbalance", 0.0) or 0.0),
                 "young_animal_markets": dict(getattr(self, "_yani_detail", None) or {}),
-                "pmp_source": str(getattr(self.supply_module, "pmp_source", "elasticity")),
+                "pmp_source": str(getattr(self.supply_module, "pmp_source", "capri2030")),
                 "pmp_capri_parts": list(getattr(self.supply_module, "pmp_capri_parts", ())),
                 # regions whose NLP solve took a fallback in this run (JRC121368's relaxed N target, IPOPT's last
                 # point kept as CAPRI keeps a non-optimal solve), each with IPOPT's status (supply_module._nlp_solve)
@@ -1568,7 +1568,7 @@ class CAPRIModel:
                         bool(getattr(self, "use_manure_market", False)), str(getattr(self, "_endotech_key", "")),
                         # the regional models' calibration (K58): a Hessian measured before the ridge fit is stale
                         "nlp",               # the supply form, when there were two (keeps the cached Hessians' keys)
-                        str(getattr(self.supply_module, "pmp_source", "elasticity")),
+                        str(getattr(self.supply_module, "pmp_source", "capri2030")),
                         tuple(getattr(self.supply_module, "pmp_capri_parts", ())), __import__(
                             "capri_mod.supply.capri_regional_nlp", fromlist=["CAL_RIDGE"]).CAL_RIDGE,
                         tuple(yani_goods),
@@ -1822,7 +1822,7 @@ class CAPRIModel:
         rm = getattr(self, "_ration_model", None)
         if rm is None:
             rm = ration_model_for(self.data, self.data_dir if hasattr(self, "data_dir") else None,
-                                  getattr(self.supply_module, "pmp_source", "elasticity"),
+                                  getattr(self.supply_module, "pmp_source", "capri2030"),
                                   getattr(self.supply_module, "pmp_capri_parts", ()))
             self._ration_model = rm
         # FEED BULK PRICES per member state (CAPRI feedBlkPrice_): the CES price index of the member state's
