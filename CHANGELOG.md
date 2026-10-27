@@ -49,7 +49,10 @@ SETTINGS_INVENTORY.md, update of 27 October; the CSV's column `status_27oct`):
 - the water and income modules (no run called them; each had only its own test), to be restored on CAPRI's regional
   units; tools/check/scenario_elasticity_check.py (it compared the removed legacy elasticity mode).
 The market supply Hessian's cache key keeps the removed rules' values, so the cached Hessians stay valid.
-Verification: pending (full tests; Farm-to-Fork and Green Deal 2030 against r150 and r151).
+Verification (with the calibration check of c4271af and the exact Hessian read of K82, e26234c): the full tests pass
+(198; the live Eurostat query skipped); Farm-to-Fork 2030 (r155) and Green Deal 2030 (r154), reading the Hessians from
+the cache, equal r150 and r151 to the last digit in every result (metadata only differ). Pushed to dev on 27 October
+2026. r150 (Farm-to-Fork) and r151 (Green Deal 2030) are the reference runs.
 
 ## 26 October 2026: the conic form removed; a failed regional solve kept as CAPRI keeps it
 
