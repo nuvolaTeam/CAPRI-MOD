@@ -91,8 +91,18 @@ Full provenance for every entry is in `capri_data/DATA_SOURCING_REGISTRY.json`.
 - **Reference runs.** r163 (the evening entry's Hessian change and the K82 ammonia rebuild, before this entry's
   changes; Farm-to-Fork): 9 iterations, mean absolute deviation from CAPRI 4.34 as r161, every indicator within 0.1
   point; the Hessian skipped 4,169 of 15,219 regional re-solves (its time, 76 min, is not a clean measure: a builder
-  audit ran beside it). The French olive and table-grape jumps of r161 (K79) did not recur. [r164 Farm-to-Fork, r165
-  Green Deal 2030, test suite: to be filled in]
+  audit ran beside it). The French olive and table-grape jumps of r161 (K79) did not recur.
+  r164 (this entry's changes, Farm-to-Fork, CAPRI's stop rule): 12 iterations, CAPRI's rule satisfied (two rows above
+  0.05%), mean absolute deviation from CAPRI 4.33 (r163 4.34), every indicator within 0.2 point of r163; the Hessian
+  43 min (r161 67 min); no non-optimal regional solve; IPOPT met NaN at trial points of one region (ES240000, a linear
+  row) and recovered (all solves optimal). r165 (Green Deal 2030, CAPRI's rule): no stop by the scenario's iteration 20
+  (28 rows above 0.05%), stopped by hand. r166 (Green Deal 2030, the model's rule, with the welfare report and the
+  progress lines): 9 iterations (r162: 8), 36 min; every indicator within 0.2 point of r162, mean absolute deviation
+  from CAPRI 8.58 (r162 8.55); no non-optimal regional solve; CAPRI's rule at the last iteration: 30 rows above 0.05%,
+  largest 2.8% (Norwegian pulses), the largest swing by iteration Bulgarian soybeans 133%, Bulgarian maize 54%, Spanish
+  maize 26%, Slovak pulses 19%, Slovak other cereals 26%, Cypriot wheat 9.9% and 4.6%. Market check of the welfare
+  merge: a market solve at base EU supply and with 10% less EU beef and 5% less wheat gives identical prices,
+  quantities and trade flows before and after it. [test suite: to be filled in]
 
 ## 27 October 2026 (evening): market supply Hessian, regions a shock does not reach not re-solved; option 4 tried and dropped
 
