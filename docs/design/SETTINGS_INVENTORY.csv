@@ -262,9 +262,10 @@ S277,captrd factor band,capri_mod/projection/captrd_import.py:62,numeric_constan
 S278,trajectory plausibility band,capri_mod/projection/trajectory.py:135,numeric_constant,"[0.1, 10]",toml:projection,projection.trajectory_factor_bounds,,no,unsourced guard,
 S279,projection price maps,capri_mod/projection/prices.py:32,table,model -> CAPRI product,mapping_csv,,,n/a,"CROP/FODDER/MARKET/YOUNG/FEED_CEREAL_PRODUCT, _CTRY (:32-48), _BULK_PRODUCT (:226)",
 S280,io_results DEFAULT_OUTPUT_ROOT,capri_mod/io_results.py:42,switch,outputs,toml:run,run.output_root,,n/a,,
-S281,water module base year 2016,capri_mod/water/water_module.py:119,switch,2016,toml:run,run.water_base_year,,no,unsourced; differs from model base 2017,removed 27 Oct 2026 with the water module
-S282,water MM_HA_TO_M3,capri_mod/water/water_module.py:55,numeric_constant,10,keep_code,,,yes: unit,,removed 27 Oct 2026 with the water module
-S283,income top decile,capri_mod/income/income_module.py:165,numeric_constant,0.10,keep_code,,,n/a,indicator definition,
+S281,irrigated-share survey year,tools/build/build_irrigation_2017.py:51,numeric_constant,latest FSS observation up to 2017 per unit (2016 for 194 units),keep_code,,p_irriShare years; CAPRI fills the years between surveys with trends (water_database.gms l. 325-440),yes: Eurostat FSS survey years,2017 has regional values for 8 units only,restored 27 Oct 2026 (builder; was the module run.water_base_year 2016)
+S282,water MM_HA_TO_M3,capri_mod/water/water_module.py:43,numeric_constant,10,keep_code,,CWRB = 10 x CNIR (water_database.gms l. 479),yes: unit,,restored 27 Oct 2026 with the water module
+S283,income top decile,capri_mod/income/income_module.py:164,numeric_constant,0.10,keep_code,,,n/a,indicator definition,restored 27 Oct 2026 with the income module
+S283a,minimum irrigated share,tools/build/build_irrigation_2017.py:60,numeric_constant,0.001,keep_code,,"max(0.001, IRR2 share) (water_database.gms l. 668)",yes: CAPRI,,added 27 Oct 2026
 S284,NTM_AVE_PCT,capri_mod/policy/policy_module.py:44,table,EU_USA beef/poum/pork,keep_code,,arm/def_ntm.gms (Arita et al. 2015),yes,ORPHAN (no reader),
 S285,PolicyScenario.eco_scheme_budget_pct,capri_mod/policy/policy_module.py:135,scenario_preset,0.25,scenario_file,,,partial: CAP 2023-27 25%,nonzero default on every PolicyScenario,
 S286,PolicyScenario.surplus_rule / surplus_cut,capri_mod/policy/policy_module.py:172,scenario_preset,star3 / 0.5,scenario_file,,pol_input/greendeal/surptot.gms,yes,rows :172-173,

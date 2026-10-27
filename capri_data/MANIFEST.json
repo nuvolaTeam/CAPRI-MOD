@@ -2821,6 +2821,28 @@
     ]
    },
    "note": "Reporting only (capri_mod/nuts_reporting.py): CAPRI's units -> NUTS-2024 regions; a group with several regions gets an area-weighted distribution of the group's result, not regional detail of its own."
+  },
+  "irrigation_2017.csv": {
+   "source": "CAPRI water database inputs p_irriShare (Eurostat FSS) and p_cropwatReq (CROPWAT), capri_data/sources/water/; CAPREG 2017 levels; tools/build/build_irrigation_2017.py",
+   "vintage": "2017 (FSS survey up to 2017)",
+   "units": "share (irrigated_share, irr2_share), mm (cnir_mm)",
+   "domain": "environment",
+   "status": "live",
+   "path": "2017/environment/irrigation_2017.csv",
+   "shape": {
+    "rows": 3882,
+    "cols": 7,
+    "columns": [
+     "region",
+     "activity",
+     "irrigated_share",
+     "cnir_mm",
+     "irr2_share",
+     "irr2_year",
+     "irr2_level"
+    ]
+   },
+   "note": "Read by capri_mod/water (indicator outside the run)."
   }
  },
  "_vintage_summary": {

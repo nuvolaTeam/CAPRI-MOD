@@ -2184,6 +2184,7 @@ class RegionalSupplyModel:
         rev_coef = getattr(self.data, "livestock_revenue_coef", None)
 
         r = {}
+        prem = {}
         for act in self.acts:
             price   = prices.get(act, 0.0)
             yld     = yields.get(act, 0.0)
@@ -2315,8 +2316,11 @@ class RegionalSupplyModel:
                                 cost += self._protein_feed_cost_change(q, price_shock)
             # Crop gross margin (EUR/ha); animal gross margin (EUR/head)
             r[act] = revenue - cost + payment
+            prem[act] = payment
 
         self.net_revenues = pd.Series(r)
+        #: the premium part of each net revenue (CAPRI's PRME per ha or head), for income reports (capri_mod/income)
+        self.premiums = pd.Series(prem, dtype=float)
 
     # ------------------------------------------------------------------
     # Constraint matrix

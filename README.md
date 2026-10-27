@@ -175,7 +175,7 @@ files record how they map to this model's names.
 | Market method | CAPRI's bilateral Armington market: 30 trade regions (31 with CAPRI's EU blocks, optional), transport costs, tariffs, TRQs; dairy block, GL food demand, young animals, CAPRI's market supply functions; Newton + Anderson to < 1e-7 |
 | Data validator | 13 pass, 0 warn, 0 fail |
 | Convergence | all 248 regional models solve (one Dutch region, NL32, at JRC121368's relaxed N target); Farm-to-Fork 2030 converges in 9 iterations, Green Deal 2030 in 13 (reference runs r145, r142) |
-| Test suite | 177 tests (22 marked `slow`) |
+| Test suite | 180 tests (22 marked `slow`) |
 | On by default, as in CAPRI | land market and land rules, endogenous feed rations, fodder equality, ammonia technologies |
 | Optional | manure market (`use_manure_market`) |
 | 2030 Farm-to-Fork run | about 27 minutes on 2 cores (r145), plus about an hour once per new baseline for the market supply Hessian; regions solved in parallel (`CAPRI_WORKERS`), same results |
@@ -558,8 +558,10 @@ chooses activities → market clears and returns prices → prices re-enter supp
 repeat until prices stop moving (default tolerance 0.5%, with the gaps between the
 prices passed on and the market's; CAPRI's stop rule is an option, §10). The
 environmental accounts are **post-equilibrium**: they read the converged activity
-levels and compute their indicators. (The income and water modules were removed on 27 October 2026: no run called
-them. They are to be restored on CAPRI's regional units; the water data stay in `capri_data/sources/water`.) Feeding, fertilisation and the mitigation
+levels and compute their indicators. Two reports read the solved regions as well, outside the run: the irrigation
+water requirement (`capri_mod/water`, CROPWAT's net requirements on the FSS irrigated areas) and the farm income
+(`capri_mod/income`, CAPRI's sum of market gross value added with premiums). Results on current NUTS-2 regions
+(NUTS 2024): `capri_mod/nuts_reporting`. Feeding, fertilisation and the mitigation
 options are chosen inside each regional supply model, as in CAPRI. Biofuel feedstock
 demand, dairy processing, feed bulks and the young-animal markets are part of the
 market (CAPRI's `Biof_`, `DairyNQ_`, `feedBlk_` and `yaniMarket_` blocks), not side
