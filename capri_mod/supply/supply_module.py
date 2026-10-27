@@ -2197,6 +2197,13 @@ class RegionalSupplyModel:
             if act in ANIMALS and _cc is not None and act in _cc.index \
                     and pd.notna(_cc[act]) and float(_cc[act]) > 0:
                 cost = float(_cc[act])
+            if not np.isfinite(float(cost)):
+                # no CAPRI input cost for an activity the region does not have (its level is fixed at 0, as CAPRI keeps
+                # an activity without base level out of its model): none. Until 27 October 2026 the per-head animal
+                # columns of variable_costs.csv held values of unknown origin here (written by no builder)
+                if float(self._base_levels().get(act, 0.0)) > 1e-8:
+                    raise ValueError(f"{self.data.region_id} {act}: no CAPRI input cost")
+                cost = 0.0
             # CAPRI's PRME is the premium actually attached to each activity.
             # The instrument-level fallback (BPS applied to every crop and
             # nothing to livestock) both overstates crops -- 676.7 EUR/ha at
@@ -2820,7 +2827,8 @@ class RegionalSupplyModel:
         if _cc is not None and act in _cc.index \
                 and pd.notna(_cc[act]) and float(_cc[act]) > 0:
             return float(_cc[act])
-        return float(self.data.variable_costs.get(act, 0.0))
+        v = float(self.data.variable_costs.get(act, 0.0))
+        return v if np.isfinite(v) else 0.0          # an activity the region does not have (level fixed at 0)
 
     def _organic_converted(self, activity: str, share: float, targets,
                            default: float) -> float:

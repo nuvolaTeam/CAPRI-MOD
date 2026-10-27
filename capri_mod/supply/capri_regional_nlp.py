@@ -212,6 +212,15 @@ class CapriRegionalNLP:
         if len(labels) != A.shape[0]:
             raise ValueError(f"{len(labels)} row labels for {A.shape[0]} rows")
         acts = list(spec["acts"])
+        # a missing input (NaN, inf) stops the build: IPOPT would stop at its first iteration (Invalid_Number_Detected)
+        # and the run keep its starting point as a non-optimal solve (27 October 2026: 16 regions, a NaN cost of an
+        # animal the region does not have); CAPRI stops on an execution error
+        for nm_, arr_ in (("Q", Q), ("c", c), ("A", A), ("b", b)):
+            bad_ = ~np.isfinite(arr_)
+            if bad_.any():
+                ix_ = np.argwhere(bad_)[0].tolist()
+                what_ = (acts[ix_[0]] if nm_ == "c" else labels[ix_[0]] if nm_ in ("A", "b") else ix_)
+                raise ValueError(f"non-finite {nm_} in the regional problem ({int(bad_.sum())} entries, first {what_})")
         n0, m_A = Q.shape[0], A.shape[0]
         self.n0, self.m_A, self.acts, self.labels = n0, m_A, acts, labels
         act_idx = {a: i for i, a in enumerate(acts)}
