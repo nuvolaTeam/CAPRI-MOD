@@ -69,7 +69,7 @@ def main(dump: Path):
         w = sum(wt * cap.get(c, {}).get("LEVL", {}).get("UAAR", 0.0) for c, wt in src)
         lim = (sum(wt * cap.get(c, {}).get("LEVL", {}).get("UAAR", 0.0) * cap.get(c, {}).get("CO2LIM", {}).get("UAAR", 0.0)
                    for c, wt in src) / w) if w > 0 else cap.get(ms + "000000", {}).get("CO2LIM", {}).get("UAAR", 0.0)
-        rows.append((reg, round(lim, 4), round(share.get(ms, 0.0), 5)))
+        rows.append((reg, lim, share.get(ms, 0.0)))
     out = pd.DataFrame(rows, columns=["region", "co2lim_kg_ha", "urea_share"]).set_index("region")
     out.to_csv(ENV / "crop_co2_coef.csv")
     print("crop_co2_coef.csv:", out.describe().round(3).loc[["min", "50%", "max"]].to_dict())
