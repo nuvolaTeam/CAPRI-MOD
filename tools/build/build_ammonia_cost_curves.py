@@ -227,3 +227,8 @@ def build():
 if __name__ == "__main__":
     rows = build()
     print(len(rows), "cost curves")
+    # never silent (K86): the model's regional units without any curve get no farm-size cost terms downstream
+    _with = {r[0] for r in rows}
+    _without = sorted(u for u in _mr.UNITS if u not in _with)
+    if _without:
+        print(f"WARNING: {len(_without)} regional units without a cost curve: {', '.join(_without)}")

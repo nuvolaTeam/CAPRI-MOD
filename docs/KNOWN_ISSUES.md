@@ -813,7 +813,17 @@ CAPRI's stop rule, recorded every iteration since r135, flags rows that move by 
 
 - **Effect:** member-state production of a few crops; whether CAPRI-mod's runs would pass CAPRI's stop rule
 - **In 9t:** –
-- **Status:** **open**: next, the regions behind them re-solved at fixed prices (solver creep or multiple optima, as K75's FRH0 case)
+- **Status:** **open**. Diagnosis of r161 (27 October 2026): (1) the rows still moving at the last iteration (Latvian
+  oats 10.3, 5.1, 2.6, 1.1% at iterations 6-9; Portuguese potatoes, Romanian pulses) follow prices that converge
+  geometrically under CAPRI's price forecast (the EU oats signal's steps 0.0036, 0.0020, 0.0010, 0.0004, 0.0002):
+  slow convergence of the supply-market loop, not solver creep. The model's stop rule (prices within 0.5%) ends the
+  loop before CAPRI's (production per member state within 0.05%; at r161's iteration 9, 14 rows above it, max 1.1%).
+  (2) French olives and table grapes moved by 66% and 35% at iterations 4 and 5 only, back at iteration 6, and not in
+  r160 (the same scenario): the four French olive regions' and two table grape regions' models respond smoothly to
+  their price (sweep of +-0.6% in 0.05-point steps at base settings: largest step 0.01%), so not a kink of the regional
+  model; cause not found (the region-solve warning added since r161 will show a failed solve if it recurs). Next: a run
+  with outer_loop.stop_rule = "capri" to measure the iterations CAPRI's rule needs (the project lead's decision whether
+  to make it the default)
 
 <a id="k80"></a>
 ### K80: The same run repeated from a warm start differs by up to 3e-5 relative in small cereal activities (26 October 2026)
