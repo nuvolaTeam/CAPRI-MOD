@@ -1373,6 +1373,7 @@ class CAPRIModel:
                     q_["YANI:" + g] = pd.Series({cc: v.get(g, 0.0) for cc, v in yn.items()}).reindex(q_.index).fillna(0.0)
             return q_
         q0 = bridged(supply_results)
+        skip = bool(_settings().get("market.hessian_skip_unchanged"))
         cols_y = [c for c in sig0.index if c in q0.columns and float(q0[c].clip(lower=0).sum()) > 1e-6]
         cols_y += [c for c in self.MARKET_SUPPLY_FEED_COLS if c in sig0.index and c not in cols_y]
         cols_y += ["YANI:" + g for g in yani_goods]
@@ -1395,7 +1396,10 @@ class CAPRIModel:
                             # 26 October 2026 (K75): the NLP form without the lagged fodder band rows
                             ("", "True"))),     # the fodder band rows, removed 27 October 2026
                         # the measurement: every shock from the baseline's state (24 October 2026)
-                        "shocks-from-base"))
+                        "shocks-from-base")
+                        # differences to the base re-solved from the same state, regions a shock does not reach not
+                        # re-solved (27 October 2026, market.hessian_skip_unchanged; off: the key as before)
+                        + (("base-resolved-skip-unchanged",) if skip else ()))
                    # at a scenario's state (market.hessian_scenario_iter): its young-animal and member-state milk
                    # prices too (a baseline's key is unchanged)
                    + (repr((sorted((getattr(sm, "yani_price_ratio", None) or {}).items()),
@@ -1446,52 +1450,89 @@ class CAPRIModel:
         _snap0 = _snapshot()
         yr0 = (getattr(sm, "yani_price_ratio", None), getattr(sm, "yani_price_ratio_ms", None),
                getattr(sm, "yani_price_ratio_m", None))
-        for y in cols_y:
-            sig = sig0.copy()
-            if y.startswith("YANI:"):
-                # a young animal's price raised by the shock in every regional model (EU and Norway), the products'
-                # prices at the base
-                # (relative to its current price: 1 at a baseline, the scenario's at a scenario's state; Norway's models
-                # their own market's)
-                g_ = y[5:]
-                eu0 = {g: 1.0 for g in yani_goods}
-                eu0.update({g: float(v) for g, v in (yr0[0] or {}).items()})
-                dr = self.MARKET_SUPPLY_SHOCK * eu0.get(g_, 1.0)
-                sm.yani_price_ratio = {**eu0, g_: eu0.get(g_, 1.0) + dr}
-                if yr0[1]:
-                    sm.yani_price_ratio_ms = {ms_: {**dict(d_), g_: float(dict(d_).get(g_, 1.0)) * (1.0 + self.MARKET_SUPPLY_SHOCK)}
-                                              for ms_, d_ in yr0[1].items()}
-                    dr_ms = {ms_: self.MARKET_SUPPLY_SHOCK * float(dict(d_).get(g_, 1.0)) for ms_, d_ in yr0[1].items()}
-                else:
-                    sm.yani_price_ratio_ms, dr_ms = None, {}
-                sm.yani_price_ratio_m = yr0[2]
-            else:
-                dr = self.MARKET_SUPPLY_SHOCK * (1.0 + float(sig0.get(y, 0.0)))
-                sig[y] = float(sig0.get(y, 0.0)) + dr
-                if y == "SUGR" and "SUGB" in sig.index:
-                    sig["SUGB"] = sig["SUGR"]
-                if y == "SWHE" and "DWHE" in sig.index:
-                    sig["DWHE"] = sig["SWHE"]
-                sm.yani_price_ratio, sm.yani_price_ratio_ms, sm.yani_price_ratio_m = yr0
-                dr_ms = {}
-            sm.feed_bulk_ratio = self.feed_bulk_price_ratios(sig)
+        q_ref, n_skipped, n_solved = q0, 0, 0
+        verify = skip and __import__("os").environ.get("CAPRI_HESSIAN_SKIP_VERIFY", "") == "1"
+        if skip:
+            # the base re-solved from the baseline's state first, each region's first solve fingerprinted: a shock
+            # whose first solve in a region has the same inputs (the region does not see the shocked price) would
+            # repeat this base solve exactly, so the region is not re-solved and its base result is taken. The
+            # differences are taken to this re-solved base: the shocks start from the same state, so a region a shock
+            # does not reach contributes exactly 0 (before, the re-solve's departure from the baseline's own solution,
+            # up to 0.04 kt in r161, entered every column)
+            sm.feed_bulk_ratio = fb0 if fb0 is not None else self.feed_bulk_price_ratios(sig0)
             _restore(_snap0)
-            res = sm.run(price_signals=sig, policy_scenario=pol, regions=regs, verbose=False)
-            # the price change each country's models saw (Norway's young-animal prices are its own market's)
-            div = pd.Series([float(dr_ms.get(capri_ms(str(cc)), dr)) for cc in q0.index], index=q0.index)
-            dq = (bridged(res) - q0).reindex(index=q0.index, columns=q0.columns).fillna(0.0).div(div, axis=0)
-            for ms in dq.index:
-                for x in dq.columns:
-                    v = float(dq.at[ms, x])
-                    if abs(v) > 1e-9:
-                        rows.append((ms, x, y, v))
+            sm._hess_fp, sm._hess_verify = {}, {}
+            sm._hess_probe = "record"
+            try:
+                res_b = sm.run(price_signals=sig0, policy_scenario=pol, regions=regs, verbose=False)
+            finally:
+                sm._hess_probe = None
+            q_ref = bridged(res_b)
+            sm._hess_base_res = res_b
+        try:
+            for y in cols_y:
+                sig = sig0.copy()
+                if y.startswith("YANI:"):
+                    # a young animal's price raised by the shock in every regional model (EU and Norway), the products'
+                    # prices at the base
+                    # (relative to its current price: 1 at a baseline, the scenario's at a scenario's state; Norway's models
+                    # their own market's)
+                    g_ = y[5:]
+                    eu0 = {g: 1.0 for g in yani_goods}
+                    eu0.update({g: float(v) for g, v in (yr0[0] or {}).items()})
+                    dr = self.MARKET_SUPPLY_SHOCK * eu0.get(g_, 1.0)
+                    sm.yani_price_ratio = {**eu0, g_: eu0.get(g_, 1.0) + dr}
+                    if yr0[1]:
+                        sm.yani_price_ratio_ms = {ms_: {**dict(d_), g_: float(dict(d_).get(g_, 1.0)) * (1.0 + self.MARKET_SUPPLY_SHOCK)}
+                                                  for ms_, d_ in yr0[1].items()}
+                        dr_ms = {ms_: self.MARKET_SUPPLY_SHOCK * float(dict(d_).get(g_, 1.0)) for ms_, d_ in yr0[1].items()}
+                    else:
+                        sm.yani_price_ratio_ms, dr_ms = None, {}
+                    sm.yani_price_ratio_m = yr0[2]
+                else:
+                    dr = self.MARKET_SUPPLY_SHOCK * (1.0 + float(sig0.get(y, 0.0)))
+                    sig[y] = float(sig0.get(y, 0.0)) + dr
+                    if y == "SUGR" and "SUGB" in sig.index:
+                        sig["SUGB"] = sig["SUGR"]
+                    if y == "SWHE" and "DWHE" in sig.index:
+                        sig["DWHE"] = sig["SWHE"]
+                    sm.yani_price_ratio, sm.yani_price_ratio_ms, sm.yani_price_ratio_m = yr0
+                    dr_ms = {}
+                sm.feed_bulk_ratio = self.feed_bulk_price_ratios(sig)
+                _restore(_snap0)
+                if skip:
+                    sm._hess_probe, sm._hess_shock = ("verify" if verify else "compare"), y
+                try:
+                    res = sm.run(price_signals=sig, policy_scenario=pol, regions=regs, verbose=False)
+                finally:
+                    sm._hess_probe = None
+                n_skipped += sum(1 for r_ in res.values() if getattr(r_, "hess_unchanged", False))
+                n_solved += len(res)
+                # the price change each country's models saw (Norway's young-animal prices are its own market's)
+                div = pd.Series([float(dr_ms.get(capri_ms(str(cc)), dr)) for cc in q0.index], index=q0.index)
+                dq = (bridged(res) - q_ref).reindex(index=q0.index, columns=q0.columns).fillna(0.0).div(div, axis=0)
+                for ms in dq.index:
+                    for x in dq.columns:
+                        v = float(dq.at[ms, x])
+                        if abs(v) > 1e-9:
+                            rows.append((ms, x, y, v))
+        finally:
+            sm._hess_probe = None
+            sm.__dict__.pop("_hess_base_res", None)
         # back to the base: the regional models' warm starts and states as the baseline left them
         sm.yani_price_ratio, sm.yani_price_ratio_ms, sm.yani_price_ratio_m = yr0
         sm.feed_bulk_ratio = fb0 if fb0 is not None else self.feed_bulk_price_ratios(sig0)
         _restore(_snap0)
-        res = sm.run(price_signals=sig0, policy_scenario=pol, regions=regs, verbose=False)
-        dev = float((bridged(res) - q0).abs().max().max())
+        if skip:
+            dev = float((q_ref - q0).abs().max().max())          # the base re-solved first
+        else:
+            res = sm.run(price_signals=sig0, policy_scenario=pol, regions=regs, verbose=False)
+            dev = float((bridged(res) - q0).abs().max().max())
         _restore(_snap0)
+        bad = sorted(k_ for k_, v_ in (getattr(sm, "_hess_verify", None) or {}).items() if not v_)
+        n_ver = len(getattr(sm, "_hess_verify", None) or {})
+        sm.__dict__.pop("_hess_fp", None)
+        sm.__dict__.pop("_hess_verify", None)
         self._ls_by_country = self._livestock_products_by_country(supply_results)
         t = pd.DataFrame(rows, columns=["ms", "x", "y", "dq"])
         cdir.mkdir(parents=True, exist_ok=True)
@@ -1504,6 +1545,15 @@ class CAPRIModel:
         eu, sup, blocks = self._split_hessian(ms_h)
         self.market_supply_hessian_info = {"source": "computed", "file": str(cfile), "products": len(cols_y),
                                            "seconds": round(_t.time() - t0, 1), "base_resolve_max_dev_kt": dev}
+        if skip:
+            self.market_supply_hessian_info.update(regions_skipped=n_skipped, regions_shocked=n_solved)
+            if verify:
+                # CAPRI_HESSIAN_SKIP_VERIFY=1: the regions that would have been skipped were solved; their results must
+                # equal the base re-solve's (else the fingerprint misses an input of the regional solve)
+                self.market_supply_hessian_info.update(verified=n_ver, verify_mismatch=bad[:20])
+                if bad:
+                    warnings.warn(f"market supply Hessian: {len(bad)} region solves with the base's inputs gave "
+                                  f"another result, e.g. {bad[:5]}", RuntimeWarning)
         self.__dict__.setdefault("market_supply_hessian_log", []).append(dict(self.market_supply_hessian_info))
         return {"eu": eu, "ms": ms_h, "sup": sup, "blocks": blocks}
 

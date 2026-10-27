@@ -60,6 +60,65 @@ CACHE_STATS = {"hit": 0, "miss": 0}
 #: ridge weight of the calibration's multiplier fit (CapriRegionalNLP.calibrate), relative to the scaled columns
 CAL_RIDGE = 1e-10
 
+#: called as SOLVE_PROBE(fingerprint) before each IPOPT solve when set (the market supply Hessian's skip of regions a
+#: price shock does not reach: SupplyModule._solve_region, model._market_supply_hessian); None otherwise
+SOLVE_PROBE = None
+
+
+def _feed_hash(h, o, depth=0):
+    """Everything in o that a solve can read, in a fixed order, into the hash h: arrays by dtype, shape and bytes,
+    floats exactly, containers in order (dicts and sets sorted by key), objects by their attributes."""
+    if depth > 12:
+        h.update(b"<deep>")
+        return
+    if o is None or isinstance(o, (bool, int, str, bytes)):
+        h.update(repr((type(o).__name__, o)).encode())
+    elif isinstance(o, float):
+        h.update(b"f" + np.float64(o).tobytes())
+    elif isinstance(o, np.generic):
+        h.update(repr(o.dtype).encode() + np.asarray(o).tobytes())
+    elif isinstance(o, np.ndarray):
+        a = np.ascontiguousarray(o)
+        if a.dtype == object:
+            h.update(b"objarr" + repr(a.shape).encode())
+            for v in a.ravel():
+                _feed_hash(h, v, depth + 1)
+        else:
+            h.update(repr((a.dtype.str, a.shape)).encode() + a.tobytes())
+    elif isinstance(o, (list, tuple)):
+        h.update(b"(" + str(len(o)).encode())
+        for v in o:
+            _feed_hash(h, v, depth + 1)
+        h.update(b")")
+    elif isinstance(o, dict):
+        h.update(b"{" + str(len(o)).encode())
+        for k in sorted(o, key=repr):
+            h.update(repr(k).encode())
+            _feed_hash(h, o[k], depth + 1)
+        h.update(b"}")
+    elif isinstance(o, (set, frozenset)):
+        _feed_hash(h, sorted(o, key=repr), depth + 1)
+    elif type(o).__name__ == "DM" and hasattr(o, "full"):          # CasADi numbers
+        _feed_hash(h, np.asarray(o.full()), depth + 1)
+    elif hasattr(o, "to_numpy") and hasattr(o, "index"):          # pandas
+        _feed_hash(h, (type(o).__name__, list(o.index), list(getattr(o, "columns", [])), o.to_numpy()), depth + 1)
+    elif hasattr(o, "__dict__"):
+        h.update(type(o).__qualname__.encode())
+        _feed_hash(h, vars(o), depth + 1)
+    else:
+        h.update(repr(o).encode())                                  # (a CasADi object: its printed expression)
+
+
+def problem_fingerprint(spec, kw, opts) -> str:
+    """A digest of one IPOPT solve's inputs: the problem specification, the start, bounds, parameters and warm-start
+    multipliers, and the options. Two solves with the same digest give the same result (IPOPT is deterministic)."""
+    import hashlib
+    h = hashlib.sha256()
+    _feed_hash(h, spec)
+    _feed_hash(h, kw)
+    _feed_hash(h, opts)
+    return h.hexdigest()
+
 
 def _cache_max():
     """Solver objects kept: CAPRI_NLP_CACHE if set (a property of the machine's memory), else run.nlp_cache_size."""
@@ -1167,6 +1226,8 @@ class CapriRegionalNLP:
         kw = dict(x0=x0, p=self.pval, lbx=self.lbx, ubx=self.ubx, lbg=self.lbg, ubg=self.ubg)
         if warm:
             kw.update(lam_x0=np.asarray(lam[0], float), lam_g0=np.asarray(lam[1], float))
+        if SOLVE_PROBE is not None:
+            SOLVE_PROBE(problem_fingerprint(self.spec, kw, opts))
         r = S(**kw)
         st = S.stats()
         self.solve_s = _t.time() - t0

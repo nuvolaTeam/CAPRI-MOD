@@ -157,6 +157,13 @@ fd_max_iter = 100
 # CAPRI's: once per baseline). Tried for K75 (run r132, iteration 8): +62 min per scenario, the calf price crept as
 # before; back to CAPRI's 0 (the user's go-ahead, 25 October 2026)
 hessian_scenario_iter = 0
+# How the market supply Hessian is measured (model._market_supply_hessian; CAPRI re-solves every regional model per
+# shocked price, calibrate_supply.gms). true: the base is re-solved first from the baseline's state and the shocks'
+# differences taken to it; a region whose first solve under a shock has the base's inputs (problem, start, options:
+# the shocked price does not reach it) is not re-solved, as its solve would repeat the base's exactly. The same
+# Hessian as re-solving every region from that state, with fewer solves. false: every region re-solved, differences
+# to the baseline's own solution (until 27 October 2026; cached Hessians keep their keys)
+hessian_skip_unchanged = true
 # CAPRI's endogenous biofuel markets (BIOF_M; star 3.0 GUI default on); a scenario may set its own
 biofuel_markets = true
 # DEPARTURE: CAPRI's default aggregation has two EU trade blocks (EU_WEST, EU_EAST; aggregation/defaultA.agg);

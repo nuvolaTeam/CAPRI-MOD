@@ -6412,7 +6412,46 @@ class SupplyModule:
     SLOW_REGION_SECONDS = setting("diagnostics.slow_region_seconds")
 
     def _solve_region(self, region, _pol_all, price_signals, verbose=False):
-        """_solve_region_impl, timed: a slow region is reported with its number of regional solves."""
+        """_solve_region_impl, timed: a slow region is reported with its number of regional solves.
+
+        With _hess_probe set (the market supply Hessian, model._market_supply_hessian), the region's first IPOPT solve
+        is fingerprinted (capri_regional_nlp.problem_fingerprint: problem, start, multipliers, options): "record" keeps
+        the digest of the base solve; "compare" stops the region before that solve where the digest is the base's (the
+        price shock does not reach the region: its solves would repeat the base's exactly, IPOPT being deterministic)
+        and returns the base result; "verify" solves anyway and records where the result differs from the base's."""
+        mode = getattr(self, "_hess_probe", None)
+        if mode is None:
+            return self._solve_region_timed(region, _pol_all, price_signals, verbose)
+        from capri_mod.supply import capri_regional_nlp as _crn
+        first = {"fp": None}
+
+        def probe(fp):
+            if first["fp"] is not None:
+                return
+            first["fp"] = fp
+            if mode == "record":
+                self.__dict__.setdefault("_hess_fp", {})[region] = fp
+            elif mode == "compare" and fp == (getattr(self, "_hess_fp", None) or {}).get(region):
+                raise _InputsUnchanged()
+        _crn.SOLVE_PROBE = probe
+        try:
+            out = self._solve_region_timed(region, _pol_all, price_signals, verbose)
+        except _InputsUnchanged:
+            import copy as _cp
+            base = _cp.copy(self._hess_base_res[region])
+            base.hess_unchanged = True
+            return region, base, 0, 0.0, "unchanged"
+        finally:
+            _crn.SOLVE_PROBE = None
+        if mode == "verify" and first["fp"] is not None \
+                and first["fp"] == (getattr(self, "_hess_fp", None) or {}).get(region) and out[1] is not None:
+            b, r = self._hess_base_res[region], out[1]
+            same = all(pd.Series(getattr(r, k_)).equals(pd.Series(getattr(b, k_)))
+                       for k_ in ("activities", "gross_output") if hasattr(b, k_))
+            self.__dict__.setdefault("_hess_verify", {})[(getattr(self, "_hess_shock", ""), region)] = same
+        return out
+
+    def _solve_region_timed(self, region, _pol_all, price_signals, verbose=False):
         import time as _t
         t0 = _t.time()
         mdl = (getattr(self, "_models", None) or {}).get(region)
@@ -6711,7 +6750,7 @@ class SupplyModule:
     n_workers = setting("run.n_workers", lambda v: None if int(v) == 0 else int(v), run_state=True)
     #: regional state carried between iterations, and the region-keyed caches, sent back from the workers
     _PAR_STATE = ("_nbal_state", "_nbal_bracket", "_nbal_prev")
-    _PAR_CACHES = ("_mctx_cache", "_balance_cache", "_mcap_cache")
+    _PAR_CACHES = ("_mctx_cache", "_balance_cache", "_mcap_cache", "_hess_fp", "_hess_verify")
 
     def workers(self, n_regions: int) -> int:
         """Number of worker processes for n_regions regional solves."""
@@ -6837,6 +6876,11 @@ def _kill_pool_workers(pool) -> None:
             proc.join(5)
         except Exception:                                     # already gone
             pass
+
+
+class _InputsUnchanged(BaseException):
+    """A region's first solve has the base's inputs (SupplyModule._solve_region, probe "compare"). BaseException, so the
+    regional model's handlers of solver failures (except Exception) let it through."""
 
 
 def _par_solve_region(region):
