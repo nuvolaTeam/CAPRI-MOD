@@ -108,7 +108,6 @@ def main() -> None:
     from capri_mod.data.loaders import load_all_data
     d = load_all_data(str(ROOT / "capri_data"))
     cap = d["cap_premium"]; herds = d["animal_numbers"]
-    corr = json.loads((ROOT / "capri_data" / "shared" / "nuts_version_correspondence.json").read_text())["capri8_to_nuts"]
     mr = _load(ROOT / "tools" / "lib" / "_model_regions.py")
     loc = _load(ROOT / "tools" / "build" / "build_livestock_output_coef.py")
     c2m = loc.CAPRI_TO_MODEL

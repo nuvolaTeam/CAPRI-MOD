@@ -64,16 +64,10 @@ def premium_factors(regions):
             model_of[col].append(a)
     for ca, ma in lsk.items():
         model_of[ma].append(ca)
-    corr = json.loads((ROOT / "capri_data" / "shared" / "nuts_version_correspondence.json").read_text())["capri8_to_nuts"]
-    to_c8 = {}
-    for c8, lst in corr.items():
-        if not c8.endswith("000000"):
-            for r in lst:
-                to_c8.setdefault(r, c8)
     have = set(prme.index.get_level_values(0))
     out = {}
     for reg in regions:
-        src = to_c8.get(reg) if to_c8.get(reg) in have else mr.national_code(reg)
+        src = reg if reg in have else mr.national_code(reg)        # the model's regions are CAPRI's units
         if src not in have:
             continue
         f = {}

@@ -302,22 +302,6 @@
     "reproducibility": "public_code"
    }
   },
-  "feed_availability": {
-   "file": "sources/capreg/capreg_feed_availability_regional.csv",
-   "concept": "feed supply by item",
-   "unit": "1000 t DM",
-   "dimension": "region x feed_item",
-   "modules": [
-    "feed"
-   ],
-   "source": {
-    "source_type": "CAPRI_GDX",
-    "source_ref": "capreg DATA2 feed items",
-    "vintage": "2017",
-    "confidence": "validated",
-    "reproducibility": "public_code"
-   }
-  },
   "crop_nutrient_export": {
    "file": "2017/environment/crop_nutrient_export.csv",
    "concept": "nutrient removal per ton yield",

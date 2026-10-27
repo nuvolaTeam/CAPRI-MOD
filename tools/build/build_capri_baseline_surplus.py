@@ -1,16 +1,9 @@
 """CAPRI's own baseline gross N surplus per ha (2030 reference), per model region: the starting point
 of the Farm-to-Fork tiered nitrogen target (JRC121368, CAPRI pol_input/greendeal/surptot.gms).
 
-CAPRI applies the tiered rule per CAPRI region, to its own surplus (dataOut perHa.SURTOT.NITF). This
-builder takes that value for every model region from CAPRI's regional results:
-
-  1. the CAPRI region(s) whose NUTS codes (shared/nuts_version_correspondence.json, old and new
-     NUTS versions) include the model region: their SURTOT, weighted by CAPRI's UAAR where several
-     CAPRI regions make up one model region (FI1D = FI13 + FI1A in NUTS 2013);
-  2. otherwise the member state's CAPRI value - where CAPRI itself holds the country as one region
-     (Denmark, Lithuania, Slovenia, Croatia), that IS the region CAPRI applies the target to;
-  3. otherwise (city regions CAPRI does not model: Berlin, Bremen, Hamburg, Vienna, Brussels, Ceuta,
-     Melilla) the member state's value as well, REGISTERED.
+CAPRI applies the tiered rule per CAPRI region, to its own surplus (dataOut perHa.SURTOT.NITF). The model's
+regions are CAPRI's regional units (27 October 2026), so each takes its own CAPRI value; a unit without one takes
+its member state's (REGISTERED).
 
 The earlier file (capri_baseline_surplus_2030.csv, 2026-10) matched only new-NUTS CAPRI codes and gave
 82 regions their own surplus pattern scaled to the national value - a proxy that badly misplaced the

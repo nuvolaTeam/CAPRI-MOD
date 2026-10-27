@@ -1,5 +1,7 @@
 # Rebuilding the region-keyed data: builders, their dependencies and a run order (27 October 2026)
 
+*Update 27 October 2026 (afternoon): `ingest_capreg_data2.py` and `derive_elasticities_from_pmp.py` and their outputs (`capreg_levels.csv`, `capreg_yields.csv`, `derived_elasticities_from_pmp.csv`) were removed as orphans (read only by each other); their rows below are kept as a record of the survey.*
+
 Read-only static analysis of `tools/build/*.py` and `tools/lib/*.py`, for the move to CAPRI's regional units
 (`REGIONAL_UNITS_INVENTORY.md`). No builder, test or model code was run and no data file was changed: every statement
 below comes from reading the code (and listing the existing files), so behaviour that depends on run-time data is

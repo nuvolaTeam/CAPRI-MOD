@@ -97,7 +97,6 @@ def main():
     base = _load(ROOT / "tools" / "build" / "build_capri_base.py")
     crop_map = dict(base.CROP_MAP)
     crop_map["GRAS"] = ("GRAE", "GRAI")
-    corr = json.loads((ROOT / "capri_data" / "shared" / "nuts_version_correspondence.json").read_text())["capri8_to_nuts"]
     import importlib.util as _ilu_
     _sp_ = _ilu_.spec_from_file_location("_mr_", ROOT / "tools" / "lib" / "_model_regions.py")
     _mr_ = _ilu_.module_from_spec(_sp_); _sp_.loader.exec_module(_mr_)

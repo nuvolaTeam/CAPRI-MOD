@@ -111,7 +111,7 @@
      "PARI"
     ]
    },
-   "note": "Region x activity matrix, used per-region by the supply model. Crop-specific via CAPRI TOIN-ratio redistribution (group area-weighted means preserved). 39 cells are CALIBRATED rather than observed - see sources/residual_cost_calibration.json."
+   "note": "Region x activity matrix, used per-region by the supply model. Crop-specific via CAPRI TOIN-ratio redistribution (group area-weighted means preserved). Built by tools/build/build_crop_economics_2017.py from CAPRI's input costs; the 39 cells calibrated to a +50 EUR/ha margin in an earlier version (sources/residual_cost_calibration.json, removed 27 October 2026) no longer exist."
   },
   "cap_payments.csv": {
    "source": "CAPRI",

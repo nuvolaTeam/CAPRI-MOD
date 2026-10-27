@@ -81,10 +81,15 @@ Differences, each explained:
 | pmp_recipe_2017, pmp_recipe_2030 (+ animals), intensity_q_recipe2017/2030, set_aside_split w_vset and w_vset_recipe2030 | built from an older version of recipe_*_quad_techn.csv | built from the current one | the old files did not follow their inputs (recipe_2017_quad_techn.csv itself reproduces from its builder to 2e-9). Used only with pmp_source = recipe, except w_vset (base-year set-aside weight) |
 | gtap_armington.csv | COTT, OFIB rows | TEXT row | the file predated the textile merge (read by no model code) |
 
-## Open: orphans found, not removed (not part of the move; for decision)
+## Orphans removed (27 October 2026, afternoon, the project lead's decision)
 
-`sources/residual_cost_calibration.json`, `sources/capreg/capreg_feed_availability_regional.csv` (read by nothing,
-written by nothing), `sources/capreg/capreg_levels.csv`, `capreg_yields.csv`, `derived_elasticities_from_pmp.csv` and
-their scripts `ingest_capreg_data2.py`, `derive_elasticities_from_pmp.py` (read only by each other),
-`sources/ifs/Mapping_reg_IFSCAPRI_201020.csv`, `sources/capri_dat/policy/shannon_index_nuts2_ifmcap.csv` (read by
-nothing). Several builders still load `nuts_version_correspondence.json` without using it.
+`sources/residual_cost_calibration.json` (the record of 39 cost cells calibrated to a +50 EUR/ha margin in an earlier
+version; variable_costs.csv now holds CAPRI's costs there), `sources/capreg/capreg_feed_availability_regional.csv` (read
+by nothing, written by nothing), `sources/capreg/capreg_levels.csv`, `capreg_yields.csv`, `derived_elasticities_from_pmp.csv`
+and their scripts `ingest_capreg_data2.py`, `derive_elasticities_from_pmp.py` (read only by each other),
+`sources/capri_dat/policy/shannon_index_nuts2_ifmcap.csv` (read by nothing; the model computes its own Shannon index).
+Kept: `sources/ifs/` (Integrated Farm Statistics 2010/2020 by CAPRI region and activity, supplied by the project lead,
+recorded as a source not yet used; `Mapping_reg_IFSCAPRI_201020.csv` is that data set's region key). The builders'
+loads of `nuts_version_correspondence.json` that were never used removed (11 builders); build_young_animals.py
+(`--old-json` path) and tools/run/run_vcs_2030.py read the units directly instead of through it. The correspondence
+itself stays: tools/build/build_nuts2024_reporting.py uses it.

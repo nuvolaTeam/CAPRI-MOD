@@ -113,7 +113,6 @@ def main():
     KEYS = ([(t, i) for t in sorted(set(m["technology"])) for i in ITEMS] + [("NITR_INH_MAN", i) for i in MAN_ITEMS]
             + [("NITR_INH", i) for i in NO3_MIN] + [("NITR_INH_MAN", i) for i in NO3_MAN])
     val = {(r.region, r.technology, r.item): float(r.value) for r in d.itertuples()}
-    corr = json.loads((ROOT / "capri_data" / "shared" / "nuts_version_correspondence.json").read_text())["capri8_to_nuts"]
     import importlib.util as _ilu_
     _sp_ = _ilu_.spec_from_file_location("_mr_", ROOT / "tools" / "lib" / "_model_regions.py")
     _mr_ = _ilu_.module_from_spec(_sp_); _sp_.loader.exec_module(_mr_)

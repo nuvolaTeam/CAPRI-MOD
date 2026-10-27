@@ -4,7 +4,7 @@ model region, animal category and CAPRI sub-activity.
 Inputs (capri_data/2017/abatement/ammonia): ammonia_technologies.csv and
 ammonia_technology_effects.csv (build_ammonia_technologies.py, CAPRI p_ghgMiti entries),
 p_litRevAmmoTechsAdd.csv (acidification effect), capri_mann_days_2030.csv (LEVL, DAYS, MANN),
-FracEmHouse/Storage/Appl/Grazing.csv (MITERRA loss fractions), nuts_version_correspondence.json.
+FracEmHouse/Storage/Appl/Grazing.csv (MITERRA loss fractions).
 
 What CAPRI does and this builder reproduces (envind/ammo_tech.gms, supply/supply_model.gms):
 
@@ -126,7 +126,6 @@ def main():
     gz = _read_csv(D / "FracEmGrazing.csv")
     for r in gz[gz.item.str.upper() == "NH3"].itertuples():
         fr[(r.region, r.animal_mitt, "G")] = r.value / 100.0
-    c8 = json.load(open(ROOT / "capri_data" / "shared" / "nuts_version_correspondence.json"))["capri8_to_nuts"]
 
     def losses(ctry, act, tl):
         lq, sd = MITT[act]

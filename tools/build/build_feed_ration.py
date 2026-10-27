@@ -96,8 +96,6 @@ def main() -> None:
 
     from capri_mod.data.loaders import load_all_data
     herds = load_all_data(str(_ROOT / "capri_data"))["animal_numbers"]
-    corr = json.loads((_ROOT / "capri_data" / "shared" /
-                       "nuts_version_correspondence.json").read_text())["capri8_to_nuts"]
 
     # CAPRI regions -> model regions in groups covering the same territory (tools/lib/_model_regions.py:
     # splits, merges, renamed regions); a group's CAPRI totals are spread over its model regions by

@@ -204,8 +204,6 @@ def build(dump_dir: Path, value_item: str = None) -> pd.DataFrame:
     model_regions = set(herds.index)
     model_acts = sorted(set(CAPRI_TO_MODEL.values()))
 
-    corr = json.loads((_ROOT / "capri_data" / "shared" /
-                       "nuts_version_correspondence.json").read_text())["capri8_to_nuts"]
 
     # CAPRI regions -> model regions in GROUPS covering the same territory (tools/lib/_model_regions.py:
     # one to one, splits, merges). The first-candidate rule used before put a split parent's whole

@@ -282,13 +282,6 @@
    "coverage": "40246 records",
    "note": "New input. environmental_module previously hardcoded N_EXCRETION_KG_PER_HEAD, which understated dairy by 29% (85 vs a CAPRI median of 118.8), overstated bulls by 49% (35 vs 23.5), and omitted laying hens entirely where CAPRI has 659.5 kg N/head/yr."
   },
-  "capreg_feed_availability_regional.csv": {
-   "nature": "REAL_CAPRI",
-   "vintage": "2017",
-   "source": "capreg DATA2 feed items",
-   "priority": "low",
-   "coverage": "192 regions x 12 items"
-  },
   "pela_cross_price.csv": {
    "nature": "REAL_CAPRI",
    "vintage": "2005",
@@ -332,17 +325,6 @@
    "source": "capmod res_0_1717 dataOut ImportQ",
    "coverage": "547 region pairs x 32 commodities",
    "note": "Replaces trade_flows_2021.csv, which carried no intra-EU trade at all. Fewer rows than the 841 it replaced because CAPRI reports realised flows rather than an exhaustive grid of zeros. Overlapping CAPRI aggregates (NONEU, ASIA, MID_INC, LDC and the rest) are excluded from the mapping: they are supersets of the individual regions and including them would double-count."
-  },
-  "derived_elasticities_from_pmp.csv": {
-   "nature": "DERIVED_FROM_CAPRI",
-   "vintage": "2017",
-   "priority": "high",
-   "status": "DIAGNOSTIC, extended to livestock",
-   "source": "inverted from pmppar p_pmpQuadTechn + p_pmpQuadPact via CAPRI's own elasticity relation",
-   "coverage": "192 regions x 22 activities, 3490 values",
-   "note": "CAPRI computes elas = revenue / (LEVL * shareTerm * (pmpQuadTechn + pmpQuadPact)). Inverting it recovers the elasticity implied by CAPRI's estimated PMP parameters for 8 activities PELA does not cover, all permanent crops and vegetables. Validated against PELA on the 14 activities where both exist: median ratio 0.48 with positive but weak correlation (median 0.34), so the derivation is directionally sound but carries a roughly two-fold systematic bias and does not resolve regional pattern reliably. NOT MERGED for that reason.",
-   "finding": "The important result is diagnostic rather than a data fix. Derived permanent-crop elasticities are 0.12-0.15, essentially identical to the literature defaults already in use (APPL 0.12, CITR 0.12, OFRU 0.12, TAGR 0.15). Even bias-corrected they reach only 0.24-0.31 against an arable median of 1.43. So the asymmetry the model shows is largely REAL AGRONOMY, not a data gap: orchards and olive groves take years to establish and are genuinely inelastic in the short run, while arable crops can be switched annually. Earlier notes in this project described the asymmetry as 'a property of the data coverage rather than of agronomy'. That was wrong. Vegetables and tobacco are the exception: derived 0.45 and 0.30 against literature 0.18-0.20, so those defaults do look too low. Livestock remains genuinely unverified - pmppar carries no livestock terms.",
-   "livestock_finding": "The derivation now covers 16 livestock activities (192 regions) by taking revenue as herd x per-head yield x price. Cross-checked against the independent market-level p_elasSupp: EGGS (0.82 vs 0.76) and BEEF (0.82 vs 0.72) agree well, MILK is lower (0.32 vs 0.55), PORK is 2.5x higher (1.76 vs 0.69) and is the clear outlier. The PMP-implied derivation is unstable where the quadratic term is small (BULL median 2.34, max 25.9), the same instability seen for crops. So livestock elasticities EXIST regionally in CAPRI and can be recovered in the right order of magnitude, but the derivation is not accurate enough to merge as levels. For a runnable model the market-level p_elasSupp EU medians (BEEF 0.72, PORK 0.69, MILK 0.55, EGGS 0.76) are the more reliable source; the regional derivation shows the spatial pattern around them."
   },
   "capri_supply_elas_market_1717.csv": {
    "nature": "REAL_CAPRI",
