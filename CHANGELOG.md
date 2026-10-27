@@ -54,7 +54,9 @@ Full provenance for every entry is in `capri_data/DATA_SOURCING_REGISTRY.json`.
   iterations (capmod/price_forecast.gms), with the model's inner balances settled as well (N-balance price, manure
   pools, young animals, base calibration). The model's own rule (prices within 0.5%) ended Farm-to-Fork with 14
   production rows still above CAPRI's threshold (r161, r163: largest Latvian oats 1.1%, halving each iteration: slow
-  convergence of the price forecast, not solver creep). [r164: iterations, CAPRI's verdict]
+  convergence of the price forecast, not solver creep). Farm-to-Fork with it (r164): CAPRI's rule stopped the loop after 12
+  iterations (r163: 9 under the model's rule) with two rows above the threshold (Portuguese potatoes 0.93%, tomatoes
+  0.36%), which CAPRI's rule allows.
 - **K33 retired** (the project lead's decision): the legacy nitrate_limit instrument (not CAPRI's; used by no CAPRI
   scenario), its constraint row, the Mitscherlich intensity margin it drove (supply/intensity.py), the livestock
   intensity bounds only it read (and their builder), and the unsourced per-head animal rows of nutrient_coefs.csv
@@ -67,8 +69,9 @@ Full provenance for every entry is in `capri_data/DATA_SOURCING_REGISTRY.json`.
 - **Exact-I/O guards** (capri_mod/tests/test_exact_io.py, static, seconds): every pandas CSV read of the model, builders
   and checks parses floats exactly (the last three inexact reads fixed); no builder adds a rounding of the values it
   writes. 72 roundings in 20 builders remain from before the exact-I/O decision (K88): listed, may only shrink, to be
-  removed with a rebuild. Delta Lake for the model's inputs considered and not taken: the format would not undo a value
-  rounded before it is written, and the inputs stay CSV (the project rule), reviewable in git.
+  removed with a rebuild. Delta Lake for the model's inputs considered and not taken (the format would not undo a value
+  rounded before it is written); the project lead decided that the builder-written inputs move to plain Parquet (a
+  separate step), sources and hand-maintained tables stay CSV.
 - **Docs**: DATA_DICTIONARY's core tables on the 221 units; README (NUTS 2024 reporting in place; nitrogen instruments);
   KNOWN_ISSUES K79 diagnosis, K86, K87.
 - **Reference runs.** r163 (the evening entry's Hessian change and the K82 ammonia rebuild, before this entry's
