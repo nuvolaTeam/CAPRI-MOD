@@ -5,7 +5,7 @@ form, solved with IPOPT). The tables give one line per issue; the details follow
 was found, where it acts, whether the tagged release 9t (`capri-mod-9t.zip`) carries it, and its status. 9t.1 is 9t
 with every fix below except K5, which needs the prototype's model change.
 
-## Open (19)
+## Open (20)
 
 | # | Issue | Status |
 |---|---|---|
@@ -28,6 +28,7 @@ with every fix below except K5, which needs the prototype's model change.
 | [K80](#k80) | The same run repeated from a warm start differs by up to 3e-5 relative in small cereal activities | open |
 | [K83](#k83) | A one-region Farm-to-Fork run's market diverges in its second step | open |
 | [K86](#k86) | Ammonia housing and storage options without their farm-size cost curves in Denmark, Lithuania and Croatia | open |
+| [K88](#k88) | Builders that still round the values they write | open |
 
 ## Resolved (68)
 
@@ -955,4 +956,21 @@ committed files. 117 invocations; most reproduce their files exactly. Found:
   reproduces its files exactly; the chain extract_all_from_data2 -> build_capri_base -> build_crop_economics_2017 ->
   build_shg_split -> build_animal_yields -> build_eu_producer_prices reproduces yields.csv, variable_costs.csv and
   capreg_producer_prices.csv. Not re-checked: the recipe PMP files (2e-9, used only with pmp_source = recipe)
+
+<a id="k88"></a>
+### K88: Builders that still round the values they write (found 27 October 2026)
+
+The exact-I/O decision of 27 October (K82) has every CSV read parse floats exactly and every builder write full
+precision. Reads are exact everywhere (capri_mod/tests/test_exact_io.py checks it statically; the last three inexact
+reads, in build_nuts2024_reporting.py and compare_baseline_capri.py, fixed). But 20 builders still round values before
+they write them: 72 calls, e.g. build_ammonia_technologies.py (costs and shares to 6 decimals), build_ad_option.py
+(6-9), build_tariffs_2017.py, build_feed_byproducts.py, build_n_cascade.py, build_enteric_feed_factors.py (4-5),
+build_biofuel_market.py and build_dairy_world_markets.py (3). The reproduction audit cannot see them (a builder that
+rounds reproduces its own rounded file). Some may round keys or comparisons rather than outputs: to sort out per call.
+
+- **Effect:** the last digits of these files (1e-6 and smaller relative for 6 decimals; up to 1e-3 for 3 decimals of
+  small values)
+- **In 9t:** –
+- **Status:** **open**: test_builders_do_not_round_what_they_write lists them (ROUNDING_ALLOWED, which may only shrink);
+  to remove with a rebuild and a reference run (next batch)
 

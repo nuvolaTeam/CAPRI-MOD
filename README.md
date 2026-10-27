@@ -175,7 +175,7 @@ files record how they map to this model's names.
 | Market method | CAPRI's bilateral Armington market: 30 trade regions (31 with CAPRI's EU blocks, optional), transport costs, tariffs, TRQs; dairy block, GL food demand, young animals, CAPRI's market supply functions; Newton + Anderson to < 1e-7 |
 | Data validator | 13 pass, 0 warn, 0 fail |
 | Convergence | all 221 regional models solve (one Dutch unit, NL320000, at JRC121368's relaxed N target); Farm-to-Fork 2030 converges in 9 iterations, Green Deal 2030 in 8 (reference runs r161, r162, on CAPRI's regional units) |
-| Test suite | 180 tests (22 marked `slow`) |
+| Test suite | 182 tests (22 marked `slow`) |
 | On by default, as in CAPRI | land market and land rules, endogenous feed rations, fodder equality, ammonia technologies |
 | Optional | manure market (`use_manure_market`) |
 | 2030 Farm-to-Fork run | about 36 minutes on 2 cores (r161), plus about an hour once per new baseline for the market supply Hessian (67 min for r161's); regions solved in parallel (`CAPRI_WORKERS`), same results |

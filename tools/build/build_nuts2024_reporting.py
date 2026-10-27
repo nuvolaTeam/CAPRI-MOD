@@ -101,7 +101,7 @@ def main():
     sp = importlib.util.spec_from_file_location("_mr", ROOT / "tools" / "lib" / "_model_regions.py")
     mr = importlib.util.module_from_spec(sp); sp.loader.exec_module(mr)
     units = mr.UNITS
-    ctry = {u: c for u, c in zip(units, pd.read_csv(ROOT / "capri_data" / "shared" / "regional_units.csv").country)}
+    ctry = {u: c for u, c in zip(units, pd.read_csv(ROOT / "capri_data" / "shared" / "regional_units.csv", dtype=str).country)}
 
     t13 = pd.read_csv(NUTS / "nuts2013_2016.csv", dtype=str).fillna("")
     n16 = sorted(level2(t13.code_2016) & {c for c in t13.code_2016 if c[:2] in set(ctry.values()) | {"EL"}})
@@ -168,7 +168,7 @@ def main():
     gid = {}
     for u, n in links:
         gid.setdefault(find(("u", u)), len(gid))
-    uaa_t = pd.read_csv(UAA)
+    uaa_t = pd.read_csv(UAA, float_precision="round_trip")
     uaa = uaa_t.set_index("nuts")["uaa_ha"]
     old = uaa_t[uaa_t.year == 2020].nuts
     assert not [c for c in old if c in n21 and c not in n24 and c[:2] in set(ctry.values())], \

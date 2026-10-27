@@ -59,11 +59,16 @@ Full provenance for every entry is in `capri_data/DATA_SOURCING_REGISTRY.json`.
   scenario), its constraint row, the Mitscherlich intensity margin it drove (supply/intensity.py), the livestock
   intensity bounds only it read (and their builder), and the unsourced per-head animal rows of nutrient_coefs.csv
   (they also entered each region's reported nutrient_balance). Two tests that exercised only the instrument removed
-  (180 tests).
+  (182 tests with the two guards below).
 - **Orphans removed** (the project lead's decision): input_requirements, pmp_diagonal_terms, pmp_crossgroup_terms
   (2017/supply) and manure_ch4_ef_regional: no builder, read by nothing; their two loaders and metadata entries.
   INPUT_MANIFEST.json: 93 declared inputs (also two entries of files removed earlier).
 - **OANI**: gross output 0 where the activity's level is 0 (it read NaN; no output coefficient).
+- **Exact-I/O guards** (capri_mod/tests/test_exact_io.py, static, seconds): every pandas CSV read of the model, builders
+  and checks parses floats exactly (the last three inexact reads fixed); no builder adds a rounding of the values it
+  writes. 72 roundings in 20 builders remain from before the exact-I/O decision (K88): listed, may only shrink, to be
+  removed with a rebuild. Delta Lake for the model's inputs considered and not taken: the format would not undo a value
+  rounded before it is written, and the inputs stay CSV (the project rule), reviewable in git.
 - **Docs**: DATA_DICTIONARY's core tables on the 221 units; README (NUTS 2024 reporting in place; nitrogen instruments);
   KNOWN_ISSUES K79 diagnosis, K86, K87.
 - **Reference runs.** r163 (the evening entry's Hessian change and the K82 ammonia rebuild, before this entry's
