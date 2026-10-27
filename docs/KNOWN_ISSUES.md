@@ -760,7 +760,7 @@ Ten findings M1-M10 in docs/design/ARCHITECTURE_REFACTOR.md section 5.1 (table d
 
 - **Effect:** market prices and quantities in scenarios (M1-M3, M6, M9, M10); reporting (M7)
 - **In 9t:** –
-- **Status:** **open**, in part. Fixed 24 October 2026: M1 and M8 (run r112), M2 (r113, the Armington balance), M11 raw milk cleared per region (r115, added to the audit), M6 (r117). Fixed 24 October 2026 (evening): M10 (tariff on price + transport per importer region), M7 label and base price; M5 implemented (raw milk per member state inside the market), run pending. Open: M3 (decided 25 October 2026: ported at the refactor's market feed block step, after the frozen reference), M4, M7's money-metric welfare, M9
+- **Status:** **open**, in part. Fixed 24 October 2026: M1 and M8 (run r112), M2 (r113, the Armington balance), M11 raw milk cleared per region (r115, added to the audit), M6 (r117). Fixed 24 October 2026 (evening): M10 (tariff on price + transport per importer region), M7 label and base price; M5 implemented (raw milk per member state inside the market), run pending. M7's welfare report ported 27 October 2026 (docs/WELFARE.md; reporting only). Open: M3 (decided 25 October 2026: ported at the refactor's market feed block step, after the frozen reference), M4, M9
 
 <a id="k74"></a>
 ### K74: Supply: differences from CAPRI that no register listed (CAPRI-claim audit, 24 October 2026)

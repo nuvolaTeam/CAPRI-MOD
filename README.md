@@ -658,6 +658,14 @@ and goat milk), fat and protein balances, raw milk priced by the fat and protein
 carries, per member state, all nine products traded bilaterally (on by default since Sprint 9f, as in CAPRI;
 `MarketModule.dairy_block`, `docs/DAIRY_PROCESSING.md`).
 
+**Welfare — CAPRI's report.** `MarketEquilibrium.welfare` holds CAPRI's welfare components per market region
+(reports/welfare.gms): the consumers' GL money metric, the profits of processors, crushers, biofuel plants and
+dairies from their NQ functions, the farms and feed users of the regions without supply models, tariff revenues
+and quota rents; `results["welfare_supply"]` the supply models' gross value added and the premiums' budget cost.
+`CAPRIModel.compare` sums them to CAPRI's total welfare change. The market's components are changes against the
+calibration point (CAPRI's levels add base values set by convention); method and differences in
+[docs/WELFARE.md](docs/WELFARE.md).
+
 **Fertilizer.** Application rates per crop and region are CAPRI's `p_FertPerHa`; the regional supply models
 carry CAPRI's inner fertiliser distribution and NPK block (`capri_mod/fert/inner_fert_dist.py`, `npk.py`). A crop's
 nutrient need follows its yield as CAPRI's fert/fertned.gms: the need per tonne of main product moves with the yield,

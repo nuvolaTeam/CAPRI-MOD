@@ -400,6 +400,8 @@ class DemandMixin:
                         self._eu_biof_ratio.setdefault(reg, {})[c] = q / q0
 
         D = FIX + H + F + P + Bf
+        # what the welfare report integrates over (market/welfare.py): the Armington price ratios and base levels
+        self._welfare_eval = {"PR": PR, "REF": REFv, "F0": F0, "P0": P0}
         # the food response of the EU's use per parent commodity (residual feeds' output, MaprFeed_: HCON + PROC)
         self._eu_food_ratio = {}
         for _reg in self.EU:

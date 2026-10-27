@@ -54,6 +54,7 @@ class DairyMixin:
         iF, iP, iM = len(items), len(items) + 1, ix["MILK"]
         G = np.zeros((len(items), nz)); rowF = np.zeros(nz); rowP = np.zeros(nz)
         Q0 = np.zeros(len(items)); proc0 = np.zeros(len(items)); PQ = np.zeros(len(items)); SM = 0.0
+        Mms, pMs = [], []
         for gi, Hd, msup in tables:
             if "MILK" not in gi.index:
                 continue
@@ -78,13 +79,18 @@ class DairyMixin:
                     H[ix[rw], ix[cl]] = float(h)
             Gs = H @ Mm / inpe
             G += Gs
+            Mms.append(Mm); pMs.append(float(gi.at["MILK", "price"]))
             sgn = -np.ones(len(items)); sgn[iM] = 1.0                 # milk in, products out
             rowF += (sgn * f) @ Gs
             rowP += (sgn * r) @ Gs
             if msup is not None:
                 SM += float(msup) * float(gi.at["MILK", "price"]) / inpe
         P9 = list(self.DAIRY_PRODUCTS)
+        # one region's block (a member state, a behavioural region): its margin matrix and raw milk price, for the
+        # welfare report (market/welfare.py); a block summed over several regions has no single one
+        one = len(Mms) == 1
         return dict(items=items, ix=ix, G=G, rowF=rowF, rowP=rowP, Q0=Q0, proc0=proc0, iF=iF, iP=iP, iM=iM,
+                    Mm=Mms[0] if one else None, pM=pMs[0] if one else None,
                     dom=[ix[k] for k in self.DAIRY_DOMESTIC if Q0[ix[k]] > 0], SM=SM,
                     p9=np.array([PQ[ix[k]] / Q0[ix[k]] if Q0[ix[k]] > 0 else 1.0 for k in P9]))
 
@@ -185,6 +191,9 @@ class DairyMixin:
                 prm = self._dairy_algebra(tables)
                 E = np.where(Ew[:, None] > 0, Enum / np.maximum(Ew[:, None], 1e-12), 0.0)
                 prm.update(E=E, hc9=hc, fd9=fd)
+                # each behavioural region's own block (the welfare report: margins and milk price per region)
+                prm["rms"] = {rms: self._dairy_algebra([tb]) for rms, tb in
+                              zip([x for x, _ in gt.groupby("rms")], tables)}
                 if prm["Q0"][prm["iM"]] > 0 and prm["SM"] > 0:
                     out[tr] = prm
         except Exception as exc:
@@ -255,7 +264,7 @@ class DairyMixin:
                                  for k in self.DAIRY_TRADED},
                "market_supply0": {self.DAIRY_TRADED[k]: float(dp["Q0"][dp["ix"][k]] - dp["proc0"][dp["ix"][k]])
                                   for k in self.DAIRY_TRADED},
-               "fmil_index": float(fi),
+               "fmil_index": float(fi), "z": z.copy(),
                "residual": float(np.max(np.abs(Au @ u + c - rhs0 - np.concatenate([np.zeros(3), demand_change(u[3:])]))))}
         if milk_ratio is None:
             res["milk_supply_ratio"] = 1.0 + dp["SM"] * z[iM] / dp["Q0"][iM]
@@ -319,7 +328,7 @@ class DairyMixin:
         Qr = {rg: np.zeros(len(items)) for rg in self.EU}
         vm = vf = vp = vm0 = vf0 = vp0 = 0.0
         vmr = {rg: [0.0, 0.0] for rg in self.EU}
-        msr = {}
+        msr, msz = {}, {}
         for ms, prm in dp["ms"].items():
             rg = self.eu_region_of_ms(ms) or self.EU[0]
             mr = float(milk_ratio.get(ms, 1.0)) if isinstance(milk_ratio, dict) else float(milk_ratio)
@@ -329,6 +338,7 @@ class DairyMixin:
                 mr = float(mb) + float(k_) * (1.0 + float(z[prm["iM"]]) - float(Ls_))
             else:
                 z = self._dairy_solve_ms(prm, zts[rg], mr)
+            msz[ms] = z.copy()
             q_ = prm["Q0"] + prm["G"] @ z
             Q += q_
             Qr[rg] += q_
@@ -347,7 +357,7 @@ class DairyMixin:
                "milk_price_ratio_reg": {rg: (v[0] / v[1] if v[1] > 0 else 1.0) for rg, v in vmr.items()},
                "market_supply_reg": {rg: {self.DAIRY_TRADED[k]: float(Qr[rg][ix[k]] - rgp[rg]["proc0"][ix[k]])
                                           for k in self.DAIRY_TRADED} for rg in self.EU if rg in rgp},
-               "ms_price_ratio": msr,
+               "ms_price_ratio": msr, "ms_z": msz,
                "production": {k: float(Q[ix[k]]) for k in items},
                "production0": {k: float(Q0[ix[k]]) for k in items},
                "market_supply": {self.DAIRY_TRADED[k]: float(Q[ix[k]] - proc0[ix[k]]) for k in self.DAIRY_TRADED},
