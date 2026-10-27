@@ -5,13 +5,12 @@ form, solved with IPOPT). The tables give one line per issue; the details follow
 was found, where it acts, whether the tagged release 9t (`capri-mod-9t.zip`) carries it, and its status. 9t.1 is 9t
 with every fix below except K5, which needs the prototype's model change.
 
-## Open (20)
+## Open (19)
 
 | # | Issue | Status |
 |---|---|---|
 | [K10](#k10) | Sub-sets of regions do not converge | note |
 | [K13](#k13) | Farm-to-Fork milk price | open |
-| [K20](#k20) | The crop-need row's mineral N and the balance's differ slightly | open |
 | [K29](#k29) | NL11 and NL13 meet the tiered N target only at corner solutions (Farm-to-Fork) | open |
 | [K45](#k45) | Egypt's oilseed rows | open |
 | [K47](#k47) | The cattle chain's equilibrium is sensitive to changes outside it | open |
@@ -30,7 +29,7 @@ with every fix below except K5, which needs the prototype's model change.
 | [K86](#k86) | Ammonia housing and storage options without their farm-size cost curves in Denmark, Lithuania and Croatia | open |
 | [K88](#k88) | Builders that still round the values they write | open |
 
-## Resolved (68)
+## Resolved (69)
 
 | # | Issue | Status |
 |---|---|---|
@@ -51,6 +50,7 @@ with every fix below except K5, which needs the prototype's model change.
 | [K17](#k17) | Reported world raw milk price was the EU's | fixed |
 | [K18](#k18) | Inhibitor relief missing on the mineral fertiliser cap row | fixed |
 | [K19](#k19) | Grassland split counted with the wrong mineral N on the crop-need row | fixed |
+| [K20](#k20) | The crop-need row's mineral N and the balance's differ slightly | no longer applies |
 | [K21](#k21) | The manure spread over the crop groups missed CAPRI's housing and storage losses | fixed |
 | [K22](#k22) | NL12's regional model has no solution at JRC121368's tiered N target; the warning said the wrong thing | fixed |
 | [K23](#k23) | Vineyards were not carried between projection periods | fixed |
@@ -283,7 +283,7 @@ DE11 under the Green Deal mineral reduction: mineral N read off the regional mod
 
 - **Effect:** the crop-group allocation's existence check (made at the row's totals); not the reported indicators
 - **In 9t:** yes (small)
-- **Status:** **open**: the report uses the balance's own totals wherever the allocation exists at the conic solution (as before option 3); the coupled NLP's own allocation is reported only where it was solved
+- **Status:** **no longer applies** (checked 27 October 2026): in every EU solve the regional NLP drops the crop-need row and solves CAPRI's fertilisation block (NUTNED_, CapriRegionalNLP._fert_block; supply_module `drop = ["crop_need"]` wherever the region has CAPRI's EU fertilisation data), and the conic form with its crop-group allocation check was removed (26 October 2026); mineral N is reported from that block. The row remains only where CAPRI's fertilisation data are missing (outside the EU data), where no allocation is made
 
 <a id="k21"></a>
 ### K21: The manure spread over the crop groups missed CAPRI's housing and storage losses
