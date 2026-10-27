@@ -915,7 +915,11 @@ the national ones (the builder's registered fallback). Whether CAPRI has holding
   (build_ad_option.py, which had LU000000, not a unit, and missed HR000000) and the Nitrates Directive tables
   (build_nitrates_directive.py, the same list) take the regional units; the ammonia chain to be rebuilt
   (build_ammonia_cost_curves -> build_ammonia_technologies -> build_ad_option -> build_ammonia_tech_model ->
-  build_manure_n2o, build_n_cascade) with the reference runs of the next push
+  build_manure_n2o, build_n_cascade) and rebuilt: DK000000, LT000000, HR000000 now have their curves (e.g. air
+  purification for fattening pigs 7.62, 2.61, 2.93 EUR; curvature terms no longer 0). The AD option and the Nitrates
+  Directive tables come out unchanged: Croatia is absent from CAPRI's AD base data (p_VSER) and from those tables'
+  sources, so CAPRI has no AD option there either. The builder now lists the units left without a curve: CZ010000 and
+  Norway's six (no ammonia options built for Norway, registered)
 
 <a id="k87"></a>
 ### K87: Builder outputs that do not follow from their builders (reproduction audit, 27 October 2026)
