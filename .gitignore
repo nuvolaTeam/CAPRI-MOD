@@ -25,3 +25,11 @@ DATA2_*.txt
 capri_reference/*/
 # the data pipeline's store (raw downloads, Delta tables, manifest): relocatable, rebuilt from the manifest
 capri_data/pipeline/store/
+
+# Run logs and check reports the tools write each time they run (not data; removed from the tree 27 October 2026)
+capri_data/validation/capmod_market_extraction.json
+capri_data/validation/data2_extraction_summary.json
+capri_data/validation/remaining_nine_extraction.json
+capri_data/validation/trade_recalibration_2017.json
+capri_data/validation/world_price_arbitrage_check.csv
+capri_data/validation/world_price_divergence.csv

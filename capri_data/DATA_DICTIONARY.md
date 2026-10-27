@@ -213,3 +213,23 @@ distillers' dried grains; `FENI`, `FPRI` CAPRI's residual feeds. Feed items in `
 | `2017/market/eu_ms_balance_2030.csv`, `shared/eu_market_blocks.csv` (EU trade blocks) | `tools/build/build_eu_ms_balance.py` |
 | `2017/environment/luc_2030.csv` (land-use change model) | `tools/build/build_luc_2030.py` |
 | `2017/environment/npk_crop_coefs_2030.csv`, `npk_region_2030.csv`, `fert_dist_priors_npk_2030.csv`, `livestock_manure_p_coef.csv`, `livestock_manure_k_coef.csv` (P and K) | `tools/build/build_npk_balance_2030.py` |
+
+## Extracted, not used yet
+
+CAPRI data that the extractors write and no model code, builder or test reads at present (inventory of 27 October 2026).
+Kept as the repository's copy of CAPRI's data, for the work that will need them; each is rewritten when its extractor
+runs.
+
+| File | Content | Written by |
+|---|---|---|
+| `2017/abatement/ammonia/ControlStrat_TS.csv`, `CorrND.csv`, `FracNVZNuts2.csv`, `FracNVZNuts2_full.csv`, `FracToepHouse.csv`, `FracToepStorage.csv`, `FracUseFert.csv`, `PercPeat.csv`, `ScalarArray.csv`, `rCorrND.csv`, `rLFManureBasis.csv`, `rLFManureND.csv`, `reducBio.csv` | MITERRA symbols of CAPRI's ammonia module not used by the model's ammonia options | `tools/build/build_ammonia_tech_inputs.py` (one file per GDX symbol) |
+| `2017/abatement/ammonia/nitrates_directive_min_shares.csv` | Nitrates Directive minimum option shares by region | `tools/build/build_nitrates_directive.py` |
+| `2017/abatement/ammonia/costs/scalars.csv` | scalar cost parameters of the ammonia options | `tools/build/build_ammonia_cost_tables.py` |
+| `2017/abatement/mitigation/p_ccEfa.csv`, `p_tillageCover.csv`, `p_winterCoverShare0.csv` | catch crops as ecological focus area, tillage cover, initial winter-cover shares | `tools/build/build_mitigation_inputs.py` |
+| `pipeline/captrd/sets/fixyield.csv`, `mrkbale.csv`, `reqst.csv` | empty CAPTRD sets, part of the complete set extraction | `tools/build/build_captrd_sets.py` |
+| `sources/capreg/capreg_feed_use.csv`, `capreg_herds.csv`, `capreg_land.csv` | CAPREG DATA2 feed use, herds, land | `tools/build/extract_remaining_nine.py` |
+| `sources/capreg/capreg_cost_components.csv.xz` | CAPREG DATA2 input cost components | `tools/build/extract_all_from_data2.py` |
+| `sources/capmod/capmod_trade_flows_2017.csv.xz`, `capmod_world_prices_2017.csv` | CAPRI's 2017 bilateral trade flows and world prices (capmod res_0_1717) | `tools/build/ingest_capmod_market.py` |
+| `sources/estnlp/gtap_armington.csv` | GTAP Armington elasticities mapped to the model's commodities | `tools/build/ingest_pela_gtap.py` |
+| `validation/greendeal_2030/capri_marginal_terms_max_2030.csv.xz`, `capri_unit_values_max_2030.csv` | CAPRI's maximum-mitigation Green Deal run: marginal terms and unit values | `tools/build/extract_capri_marginal_terms.py` |
+
