@@ -80,11 +80,12 @@ Full provenance for every entry is in `capri_data/DATA_SOURCING_REGISTRY.json`.
   profits of processors (ProcNQ_), crushers (in the margins), biofuel plants and dairies (DairyNQ_ in the margins,
   raw milk an input) from their own functions; the farms and feed users of the regions without supply models (the
   model's supply and feed functions, the dairy blocks' raw milk supply); tariff revenues and quota rents per flow;
-  for the regions with supply models their MGVA and the premiums' budget cost (results["welfare_supply"]).
+  for the regions with supply models their MGVA, land rents and the premiums' budget cost (results["welfare_supply"]).
   CAPRIModel.compare sums them to CAPRI's total change. The market's components are changes against the calibration
   point (CAPRI's levels add base values set by convention; to be decided). CAPRI's 2030 reference welfare levels
-  stored as a source (capri_res/ref2030_welfare.csv, from scen_ref_2030); its land accounts are SUPREMA's (rents
-  apart from the farms' profit), the next step. Tests: test_welfare.py.
+  stored as a source (capri_res/ref2030_welfare.csv, from scen_ref_2030); its land accounts (CAPRI's land market:
+  the farms' profit MGVA less the land rents, the rents the land owners') are the model's too, the rent at the
+  solution from the supply models' land rows. Tests: test_welfare.py.
 - **Docs**: DATA_DICTIONARY's core tables on the 221 units; README (NUTS 2024 reporting in place; nitrogen instruments);
   KNOWN_ISSUES K79 diagnosis, K86, K87.
 - **Reference runs.** r163 (the evening entry's Hessian change and the K82 ammonia rebuild, before this entry's
