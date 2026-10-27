@@ -16,9 +16,10 @@ from capri_mod.data.definitions import (
 )
 from capri_mod.data.definitions import MS_CODE
 from capri_mod.market.equilibrium import MarketEquilibrium  # noqa: F401
+from capri_mod.market.state import MarketStateMixin
 
 
-class BilateralSolveMixin:
+class BilateralSolveMixin(MarketStateMixin):
     """MarketModule methods for the bilateral market solve (calibration of the bilateral system, the Newton/Anderson loop, tariff-rate quotas)."""
 
     #: acceleration of the bilateral market's outer steps (_solve_bilateral): "anderson" (Anderson mixing over the last
@@ -232,8 +233,8 @@ class BilateralSolveMixin:
             if sc.trq_row is not None:
                 sc.trq_offset = np.zeros(len(R))
         self._bilat = sysd
-        self._bilat_last_r = None
-        self._bilat_local_el = None
+        self.sv.bilat_last_r = None
+        self.sv.bilat_local_el = None
 
     def _bilateral_eval(self, r: pd.DataFrame, exogenous_supply, trade_scenario=None):
         """Full model response at producer price ratios r: supply, demand, consumer price ratios, residuals."""
@@ -250,7 +251,7 @@ class BilateralSolveMixin:
             pcache[c] = p
         dp = dom0.reindex(index=r.index, columns=r.columns) * PAr
         world = self.world_prices_base * self._bilateral_world_index(r)
-        self._bilat_ratio_now = r
+        self.ev.bilat_ratio_now = r
         # CAPRI's crushing margin (ProcMargO_, arm/market_model.gms): the seed at its Armington price (v_Arm1Price),
         # oil and cake at their producer prices (v_prodPrice); KNOWN_ISSUES K54-4
         cpd = dp
@@ -259,12 +260,12 @@ class BilateralSolveMixin:
             _oc = sorted({x for oc in self.CRUSH_CHAINS.values() for x in oc if x in r.columns})
             d0r = dom0.reindex(index=r.index, columns=_oc)
             cpd[_oc] = d0r * r[_oc]
-        self._crush_prices_now = cpd
+        self.ev.crush_prices_now = cpd
         try:
             S = self.supply_response(world, exogenous_supply, region_ratio=r, crush_dom=dp)
             D = self.demand_response(dp, world)
         finally:
-            self._crush_prices_now = None
+            self.ev.crush_prices_now = None
         self._apply_feed_byproduct_supply(S)
         F = {}
         for c, sc in sysd.items():
@@ -444,7 +445,7 @@ class BilateralSolveMixin:
             self._bilat_base_resid = {c: float(np.max(np.abs(F[c] / _sz(c)))) for c in F}
             self._bilat_err = max(self._bilat_base_resid.values())
             self._bilat_converged = True
-            self._bilat_last_r = r.copy()
+            self.sv.bilat_last_r = r.copy()
             return r, S, D, PAr, pc, True, 0
         self._demand_cal = self._demand_cal_frozen.copy()
         sysd = self._bilat
@@ -452,12 +453,12 @@ class BilateralSolveMixin:
         R = list(self.regions)
         tadd = self._tariff_adds(trade_scenario)
         r = self._bilateral_ratio_frame()
-        last = getattr(self, "_bilat_last_r", None)
+        last = self.sv.bilat_last_r
         if last is not None:
             r = last.reindex(index=r.index, columns=r.columns).fillna(1.0)
-        if getattr(self, "_bilat_local_el", None) is None:
-            self._bilat_local_el = self._bilateral_local_el(self._bilateral_ratio_frame(), exogenous_supply, trade_scenario)
-        es, ed = self._bilat_local_el
+        if self.sv.bilat_local_el is None:
+            self.sv.bilat_local_el = self._bilateral_local_el(self._bilateral_ratio_frame(), exogenous_supply, trade_scenario)
+        es, ed = self.sv.bilat_local_el
 
         def size(c):
             if c in sysd:
@@ -531,7 +532,7 @@ class BilateralSolveMixin:
                 r = pd.DataFrame(np.exp(z + step).reshape(r.shape), index=r.index, columns=r.columns)
             else:
                 r = r * (new / r).clip(lower=_sclip[0], upper=_sclip[1]) ** damp
-        self._bilat_last_r = r.copy()
+        self.sv.bilat_last_r = r.copy()
         self._bilat_converged = converged
         self._bilat_err = err
         return r, S, D, PAr, pc, converged, it + 1
@@ -556,20 +557,20 @@ class BilateralSolveMixin:
         # pooled product the index is the first region's ratio, and EU27 is the first region, so the reported world
         # raw milk price was the EU dairy block's (K17; the EU price signal itself was right: premium x world)
         widx = self._bilateral_world_index(r)
-        _dl = getattr(self, "_dairy_last", None)
+        _dl = self.ev.dairy_last
         if self._dairy_params() and _dl is not None and "MILK" in r.columns and all(x in r.index for x in self.EU):
             r = r.copy()
             for _rg in self.EU:
                 r.at[_rg, "MILK"] = float((_dl.get("milk_price_ratio_reg") or {}).get(_rg, _dl["price_ratio"]["MILK"]))
         # Norway's raw milk: its dairy block's price (raw milk is not traded; CAPRI ProcMargM_ per RMS)
-        _wl = getattr(self, "_dairy_world_last", None) or {}
+        _wl = self.ev.dairy_world_last or {}
         for _rg in self.SUP:
-            if _rg in (getattr(self, "_sup_milk_now", None) or {}) and _rg in _wl and "MILK" in r.columns:
+            if _rg in (self.ev.sup_milk_now or {}) and _rg in _wl and "MILK" in r.columns:
                 r = r.copy()
                 r.at[_rg, "MILK"] = float(_wl[_rg]["price_ratio"]["MILK"])
         # the other regions with a dairy block: raw milk is cleared inside the block (ProdNQ_ MILK against
         # DairyNQ_, audit M11), so its price is the block's
-        for _rg in (getattr(self, "_world_milk_now", None) or {}):
+        for _rg in (self.ev.world_milk_now or {}):
             if _rg in _wl and _rg in r.index and "MILK" in r.columns:
                 r = r.copy()
                 r.at[_rg, "MILK"] = float(_wl[_rg]["price_ratio"]["MILK"])
@@ -593,7 +594,7 @@ class BilateralSolveMixin:
         else:
             self.eu_premium = self.eu_premium_reg.loc["EU27"]
             self._wedge_eu_last = wedge.loc["EU27"]
-        self._bilat_ratio_now = r
+        self.ev.bilat_ratio_now = r
         idx = pd.MultiIndex.from_product([self.regions, self.regions], names=["exporter", "importer"])
         flows = pd.DataFrame(0.0, index=idx, columns=self.commodities)
         for c, sc in sysd.items():
@@ -610,7 +611,7 @@ class BilateralSolveMixin:
             biof = self.biofuel_feedstock_use(_pr if self.eu_blocks else _pr["EU27"])
             # biofuel markets: output, use and prices of every region (BIOF_M); first-generation output and the
             # processing margin (producer price over feedstock cost) of every EU member state
-            st = getattr(self, "_biof_state", None) if self.biofuel_endogenous() else None
+            st = self.ev.biof_state if self.biofuel_endogenous() else None
             biof["endogenous"] = st is not None
             if "DDGS" in S.columns:
                 biof["ddgs"] = {"production": {r_: float(S.at[r_, "DDGS"]) for r_ in S.index},
@@ -640,7 +641,7 @@ class BilateralSolveMixin:
                         v["price_ratio"]["EU27"] = float(reported.at["EU27", fuel] / dom0.loc[list(self.EU), fuel].mean()) \
                             if fuel in reported.columns else 1.0
         return MarketEquilibrium(
-            dairy=getattr(self, "_dairy_last", None) if self._dairy_params() else None,
+            dairy=self.ev.dairy_last if self._dairy_params() else None,
             biofuel=biof, world_prices=world, domestic_prices=reported, wedge_prices=wedge,
             production=S, consumption=D, trade_flows=flows, net_exports=S.subtract(D, fill_value=0),
             welfare=welfare, excess_demand=(D.drop(index="EU27", errors="ignore").sum()

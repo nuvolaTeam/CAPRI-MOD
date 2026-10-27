@@ -16,9 +16,10 @@ from capri_mod.data.definitions import (
 )
 from capri_mod.data.definitions import MS_CODE
 from capri_mod.market.equilibrium import MarketEquilibrium  # noqa: F401
+from capri_mod.market.state import MarketStateMixin
 
 
-class DairyMixin:
+class DairyMixin(MarketStateMixin):
     """MarketModule methods for the dairy block (raw milk to the nine dairy products by fat and protein; EU member states and the non-EU dairy regions)."""
 
 
@@ -237,9 +238,9 @@ class DairyMixin:
             feed = self.dairy_feed_factor(rho, dp, fi)
             return (dp["hc9"] * (food - 1.0) + dp["fd9"] * (feed - 1.0))[dpos]
 
-        cache = getattr(self, "_dairy_u_all", None)
+        cache = self.sv.dairy_u_all
         if cache is None:
-            cache = self._dairy_u_all = {}
+            cache = self.sv.dairy_u_all = {}
         u = cache.get(key)
         u = np.zeros(len(unk)) if u is None or len(u) != len(unk) else u.copy()
         for _ in range(60):
@@ -325,9 +326,9 @@ class DairyMixin:
         if not dp:
             return None
         self._milk_floor_hits = {}                      # this solve's member states held at the milk price floor
-        if getattr(self, "_dairy_u", "unset") is None:                 # callers reset the start point
-            (getattr(self, "_dairy_u_all", None) or {}).pop("EU27", None)
-            self._dairy_u = "unset"
+        if self.sv.dairy_u is None:                 # callers reset the start point
+            (self.sv.dairy_u_all or {}).pop("EU27", None)
+            self.sv.dairy_u = "unset"
         items = dp["items"]
         n = len(items) + 2
         # traded_ratio: {product: ratio} for every member state, or {EU market region: {product: ratio}}
@@ -428,7 +429,7 @@ class DairyMixin:
         if d0 is None:
             d0 = self.domestic_prices(self.world_prices_base)
             self._dom0_cache = d0
-        bl = getattr(self, "_bilat_ratio_now", None)
+        bl = self.ev.bilat_ratio_now
         if bl is not None and self.eu_blocks:
             return {rg: {k: float(bl.at[rg, c]) if (c in bl.columns and rg in bl.index) else 1.0
                          for k, c in self.DAIRY_TRADED.items()} for rg in self.EU}

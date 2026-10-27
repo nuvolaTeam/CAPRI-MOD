@@ -467,8 +467,8 @@ class CAPRIModel:
                     import copy as _cp
                     _mm._eu_aligned_use = _cp.deepcopy(_eau)
                     _mm._crush_cache = None
-                    _mm._bilat_local_el = None
-                    _mm._bilat_last_r = None
+                    _mm.sv.bilat_local_el = None
+                    _mm.sv.bilat_last_r = None
                 if len(_cache[_key]) > 6:
                     _mm._sup_milk0 = dict(_cache[_key][6])
 
@@ -973,7 +973,7 @@ class CAPRIModel:
                 self._sup_dev = _nsd
             # member-state raw milk prices (dairy block per RMS): target = the member state's milk price relative to
             # the EU's, applied to the EU target; relaxed with the same adaptive step, per member state
-            _dl = getattr(self.market_module, "_dairy_last", None) if self.market_module._dairy_params() else None
+            _dl = self.market_module.ev.dairy_last if self.market_module._dairy_params() else None
             _ms_gap = _ms_small_gap = 0.0
             if _dl and _dl.get("ms_price_ratio") and "MILK" in _target.index:
                 _eu = float(_dl["price_ratio"]["MILK"]) or 1.0
@@ -1061,7 +1061,7 @@ class CAPRIModel:
                 _herd = {a_: float(sum(float(getattr(x_, "activities", pd.Series(dtype=float)).get(a_, 0.0))
                                        for r_, x_ in _sr_.items() if r_[:2] not in ("NO",)))
                          for a_ in ("DCOW", "BCOW", "BULL", "HFRS", "CALV", "PIGF", "PIGS", "BROI", "LAYS", "SHGM", "SHGF")}
-                _dlh = getattr(self.market_module, "_dairy_last", None) or {}
+                _dlh = self.market_module.ev.dairy_last or {}
                 _hist.append({"it": outer_iter + 1,
                               "signal": price_signal.astype(float).to_dict(),
                               "target": _target.astype(float).to_dict(),
@@ -1069,7 +1069,7 @@ class CAPRIModel:
                               "yani_imbalance": float(getattr(self, "_yani_imbalance", 0.0) or 0.0),
                               "milk_ms_signal": dict(getattr(self, "_milk_ms_signal", None) or {}),
                               "yani_state": __import__("copy").deepcopy(getattr(self.market_module, "_yani_state", None)),
-                              "yani_market": __import__("copy").deepcopy(getattr(self.market_module, "_yani_market_now", None)),
+                              "yani_market": __import__("copy").deepcopy(self.market_module.ev.yani_market_now),
                               "milk_ms": {k_: {kk: float(vv) for kk, vv in v_.items()} for k_, v_ in (_dlh.get("ms_price_ratio") or {}).items()},
                               "herd": _herd,
                               "herd_regional": {r_: {a_: round(float(getattr(x_, "activities", pd.Series(dtype=float)).get(a_, 0.0)), 4)
@@ -2147,7 +2147,7 @@ class CAPRIModel:
         self._yani_imbalance = worst
         self._yani_np = (net, prod)
         self.market_module._yani_state = st
-        self.market_module._yani_market_now = {}
+        self.market_module.ev.yani_market_now = {}
 
     def _capri_stop_step(self, supply_results, market_eq) -> Optional[dict]:
         """One step of CAPRI's stop rule (capri_mod.utils.capri_stop.CapriStopRule; capmod/price_forecast.gms): the
@@ -2208,13 +2208,13 @@ class CAPRIModel:
             if rg is None or rg not in dp.index:
                 continue
             price[ms] = {str(c): float(v) for c, v in dp.loc[rg].items() if v == v and float(v) > 0}
-        _dl = getattr(_mmk, "_dairy_last", None) or {}
+        _dl = _mmk.ev.dairy_last or {}
         _eu = float((_dl.get("price_ratio") or {}).get("MILK", 0.0) or 0.0)
         if _eu > 0:
             for ms, v in (_dl.get("ms_price_ratio") or {}).items():
                 if ms in price and "MILK" in price[ms]:
                     price[ms]["MILK"] = price[ms]["MILK"] * float(v["MILK"]) / _eu
-        ya = getattr(self.market_module, "_yani_market_now", None) or {}
+        ya = self.market_module.ev.yani_market_now or {}
         yrows = set()
         for mr, d in ya.items():
             for g, rt in d.items():
@@ -2279,7 +2279,7 @@ class CAPRIModel:
     def _young_animal_prices_from_market(self, ref) -> None:
         """The young-animal prices the market cleared, passed to the supply models with the same adaptive step as the
         products' prices (CAPRI passes every market price on through its price forecast, define_stepWeights.gms)."""
-        now = getattr(self.market_module, "_yani_market_now", None) or {}
+        now = self.market_module.ev.yani_market_now or {}
         if not now:
             return
         ratio_m = {k: dict(v) for k, v in (getattr(self.supply_module, "yani_price_ratio_m", None) or {}).items()}

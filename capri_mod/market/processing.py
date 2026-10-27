@@ -16,9 +16,10 @@ from capri_mod.data.definitions import (
 )
 from capri_mod.data.definitions import MS_CODE
 from capri_mod.market.equilibrium import MarketEquilibrium  # noqa: F401
+from capri_mod.market.state import MarketStateMixin
 
 
-class ProcessingMixin:
+class ProcessingMixin(MarketStateMixin):
     """MarketModule methods for processing demand (the normalised quadratic processing functions and oilseed crushing)."""
 
 

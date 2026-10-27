@@ -56,7 +56,7 @@ def test_young_animal_markets_clear_with_the_products():
     dP = np.array([0.1])                                    # beef price ratio up 0.1 against what the models saw
     extra = stub._yani_clear("EU27", H, ["BEEF"], ["BEEF"], dP)
     dr = (104.0 - 100.0 - (-10.0) * 0.1) / 40.0             # the calf price change that clears the market
-    assert abs(stub._yani_market_now["EU27"]["calves"] - (1.2 + dr)) < 1e-12
+    assert abs(stub.ev.yani_market_now["EU27"]["calves"] - (1.2 + dr)) < 1e-12
     assert abs(float(np.asarray(extra).ravel()[0]) - (-20.0 * dr)) < 1e-12
     stub._yani_state = None
     assert stub._yani_clear("EU27", H, ["BEEF"], ["BEEF"], dP) == 0.0

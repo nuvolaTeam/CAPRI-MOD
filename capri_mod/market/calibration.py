@@ -16,9 +16,10 @@ from capri_mod.data.definitions import (
 )
 from capri_mod.data.definitions import MS_CODE
 from capri_mod.market.equilibrium import MarketEquilibrium  # noqa: F401
+from capri_mod.market.state import MarketStateMixin
 
 
-class CalibrationMixin:
+class CalibrationMixin(MarketStateMixin):
     """MarketModule methods for the base calibration of the market (base quantities and prices, the EU rows aligned to the supply models, demand calibration factors)."""
 
 
@@ -206,9 +207,9 @@ class CalibrationMixin:
             # raw milk delivered per member state at base (the dairy blocks' milk ratios)
             self._dairy_S0_ms = self._milk_by_ms(by_country) if by_country is not None else None
             self._dairy_S0_reg = {reg: float(sup.at[reg, "MILK"]) if reg in sup.index else 0.0 for reg in self.EU}
-            self._dairy_u = None
-            self._dairy_u_all = {}
-            self._eu_milk_supply_now = dict(self._dairy_S0_reg)
+            self.sv.dairy_u = None
+            self.sv.dairy_u_all = {}
+            self.ev.eu_milk_supply_now = dict(self._dairy_S0_reg)
             for reg in self.EU:
                 m0 = self._dairy_S0_reg[reg]
                 self.base_production.at[reg, "MILK"] = m0
@@ -243,7 +244,7 @@ class CalibrationMixin:
             if m0 > 0 and "MILK" in self.base_production.columns:
                 self._sup_milk0[reg] = m0
                 self.base_consumption.at[reg, "MILK"] = m0
-        self._sup_milk_now = dict(self._sup_milk0)
+        self.ev.sup_milk_now = dict(self._sup_milk0)
 
     def _demand_cal_factor(self, comm: str) -> float:
         cal = getattr(self, "_demand_cal", None)

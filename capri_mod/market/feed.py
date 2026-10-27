@@ -16,9 +16,10 @@ from capri_mod.data.definitions import (
 )
 from capri_mod.data.definitions import MS_CODE
 from capri_mod.market.equilibrium import MarketEquilibrium  # noqa: F401
+from capri_mod.market.state import MarketStateMixin
 
 
-class FeedMixin:
+class FeedMixin(MarketStateMixin):
     """MarketModule methods for feed demand (the EU feed bulks per member state, the residual feeds FENI and FPRI, non-EU feed demand)."""
 
 
@@ -197,8 +198,8 @@ class FeedMixin:
         first; with one EU region, the EU)."""
         region = region or self.EU[0]
         fp = self._feed_byproduct_params()
-        fr = (getattr(self, "_eu_food_ratio", None) or {}).get(region, {})
-        br = (getattr(self, "_eu_biof_ratio", None) or {}).get(region, {})
+        fr = (self.ev.eu_food_ratio or {}).get(region, {})
+        br = (self.ev.eu_biof_ratio or {}).get(region, {})
         out = {}
         for p, d in (fp.get("products") or {}).items():
             dr = (d.get("reg") or {}).get(region, d)

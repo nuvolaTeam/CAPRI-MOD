@@ -31,7 +31,7 @@ for f in (0.95, 0.90):
     e2 = exo.copy(); e2["MILK"] = e2["MILK"] * f
     mm._eu_price_seen = CAP["seen"]
     eq = mm.solve(exogenous_supply=e2)
-    P = eq.domestic_prices.loc["EU27"]; dl = mm._dairy_last
+    P = eq.domestic_prices.loc["EU27"]; dl = mm.ev.dairy_last
     res[f] = {c: round(100 * (P[c] / P0[c] - 1), 1) for c in ["BUTR", "SKIM", "CHES", "WHEY", "FRMI", "CREM"]}
     res[f]["MILK(dairy)"] = round(100 * (dl["price_ratio"]["MILK"] - 1), 1)
     res[f]["converged"] = eq.converged

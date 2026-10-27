@@ -16,9 +16,10 @@ from capri_mod.data.definitions import (
 )
 from capri_mod.data.definitions import MS_CODE
 from capri_mod.market.equilibrium import MarketEquilibrium  # noqa: F401
+from capri_mod.market.state import MarketStateMixin
 
 
-class DemandMixin:
+class DemandMixin(MarketStateMixin):
     """MarketModule methods for human consumption (the Generalised Leontief food demand system and the demand response)."""
 
 
@@ -286,7 +287,7 @@ class DemandMixin:
                     ft *= (DPv[i, jj] / REFv[i, jj]) ** e
             F[i, j] = F0[i, j] * ft
         self._eu_feed_now = None
-        self._eu_feed_now_reg = {}
+        self.ev.eu_feed_now_reg = {}
         for _reg in self.EU:
             ie = R.get(_reg)
             if ie is None or not fb:
@@ -294,7 +295,7 @@ class DemandMixin:
             f0r = fb["feed0_reg"].get(_reg, {})
             feed = self.eu_feed_use({c: float(PR[ie, Cc[c]]) for c in fb["feed0"] if c in Cc},
                                     region=_reg if self.eu_blocks else None)
-            self._eu_feed_now_reg[_reg] = feed
+            self.ev.eu_feed_now_reg[_reg] = feed
             if not self.eu_blocks:
                 self._eu_feed_now = feed
             for c, q in feed.items():
@@ -302,15 +303,15 @@ class DemandMixin:
                 f0 = float(f0r.get(c, 0.0))
                 if j is not None and f0 > 0 and F0[ie, j] > 0:
                     F[ie, j] = F0[ie, j] * q / f0
-        self._sup_feed_now = {}
+        self.ev.sup_feed_now = {}
         _dairy_cs = set(self.DAIRY_TRADED.values())
         for _reg in self.SUP:
             i = R.get(_reg)
-            if i is None or not fb or _reg not in (getattr(self, "_sup_active", None) or ()):
+            if i is None or not fb or _reg not in (self.ev.sup_active or ()):
                 continue
             f0r = (fb.get("feed0_sup") or {}).get(_reg, {})
             feed = self.sup_feed_use(_reg, {c: float(PR[i, Cc[c]]) for c in f0r if c in Cc})
-            self._sup_feed_now[_reg] = feed
+            self.ev.sup_feed_now[_reg] = feed
             for c, q in feed.items():
                 j = Cc.get(c)
                 f0 = float(f0r.get(c, 0.0))
@@ -323,11 +324,11 @@ class DemandMixin:
                 ie = R.get(_reg)
                 if ie is None:
                     continue
-                _dl = getattr(self, "_dairy_last", None) or {}
+                _dl = self.ev.dairy_last or {}
                 _rho = np.array([float(PR[ie, Cc[self.DAIRY_TRADED[k]]]) if self.DAIRY_TRADED[k] in Cc
                                  else float((_dl.get("price_ratio") or {}).get(k, 1.0)) for k in _P9])
                 _feed = self.dairy_feed_factor(np.maximum(_rho, 0.05))
-                _fn = self._eu_feed_now_reg.get(_reg) or {}
+                _fn = self.ev.eu_feed_now_reg.get(_reg) or {}
                 _f0 = (fb or {}).get("feed0_reg", {}).get(_reg, {}) if fb else {}
                 for kk, k in enumerate(_P9):
                     c = self.DAIRY_TRADED[k]
@@ -344,7 +345,7 @@ class DemandMixin:
             _rho = np.maximum(np.array([float(PR[i, Cc[self.DAIRY_TRADED[k]]]) if self.DAIRY_TRADED[k] in Cc else 1.0
                                         for k in _P9]), 0.05)
             _feed = self.dairy_feed_factor(_rho, _prm, 1.0)
-            _fs = self._sup_feed_now.get(_r)
+            _fs = self.ev.sup_feed_now.get(_r)
             if _fs:
                 _f0s = (fb.get("feed0_sup") or {}).get(_r, {})
                 for k, c in self.DAIRY_TRADED.items():
@@ -358,7 +359,7 @@ class DemandMixin:
         # PROCESSING: crushing and ProcNQ_
         cp = self._crush_params()
         if cp:
-            _cpn = getattr(self, "_crush_prices_now", None)
+            _cpn = self.ev.crush_prices_now
             crush = self.crush_quantities(_cpn if _cpn is not None else dp)
             for (r, sd), q in crush.items():
                 i, j = R.get(r), Cc.get(sd)
@@ -383,7 +384,7 @@ class DemandMixin:
 
         # BIOFUEL PROCESSING (feedstocks)
         bp = self._biofuel_params()
-        self._eu_biof_ratio = {}
+        self.ev.eu_biof_ratio = {}
         if bp:
             for reg in sorted({g["region"] for g in bp["groups"]}):
                 i = R.get(reg)
@@ -397,38 +398,38 @@ class DemandMixin:
                         continue
                     Bf[i, j] = Bf0[i, j] * q / q0
                     if reg in self.EU:
-                        self._eu_biof_ratio.setdefault(reg, {})[c] = q / q0
+                        self.ev.eu_biof_ratio.setdefault(reg, {})[c] = q / q0
 
         D = FIX + H + F + P + Bf
         # what the welfare report integrates over (market/welfare.py): the Armington price ratios and base levels
         self._welfare_eval = {"PR": PR, "REF": REFv, "F0": F0, "P0": P0}
         # the food response of the EU's use per parent commodity (residual feeds' output, MaprFeed_: HCON + PROC)
-        self._eu_food_ratio = {}
+        self.ev.eu_food_ratio = {}
         for _reg in self.EU:
             ie = R.get(_reg)
             if ie is None:
                 continue
-            fr = self._eu_food_ratio.setdefault(_reg, {})
+            fr = self.ev.eu_food_ratio.setdefault(_reg, {})
             for c in (self._feed_byproduct_params().get("parents") or ()):
                 j = Cc.get(c)
                 if j is not None:
                     b0 = H0[ie, j] + P0[ie, j]
                     fr[c] = (H[ie, j] + P[ie, j]) / b0 if b0 > 0 else 1.0
         # RAW MILK: EU and Norway deliver their milk to their own dairies (not traded with third countries)
-        _ms_now = getattr(self, "_eu_milk_supply_now", None)
+        _ms_now = self.ev.eu_milk_supply_now
         if "MILK" in Cc and self._dairy_params() and _ms_now:
             for _reg in self.EU:
                 ie = R.get(_reg)
                 if ie is not None:
                     D[ie, Cc["MILK"]] = float(_ms_now.get(_reg, 0.0) if isinstance(_ms_now, dict) else _ms_now)
-        _sup_now = getattr(self, "_sup_milk_now", None) or {}
+        _sup_now = self.ev.sup_milk_now or {}
         for _reg in self.SUP:
             i = R.get(_reg)
             if i is not None and "MILK" in Cc and _reg in _sup_now:
                 D[i, Cc["MILK"]] = float(_sup_now[_reg])
         # other regions: raw milk is used by their own dairies (CAPRI: not traded; DairyNQ_ against ProdNQ_ in the
         # region's dairy block, audit M11); without a block it stays at its base
-        _wm = getattr(self, "_world_milk_now", None) or {}
+        _wm = self.ev.world_milk_now or {}
         if "MILK" in Cc:
             for _reg, q_ in _wm.items():
                 i = R.get(_reg)

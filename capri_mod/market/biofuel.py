@@ -16,9 +16,10 @@ from capri_mod.data.definitions import (
 )
 from capri_mod.data.definitions import MS_CODE
 from capri_mod.market.equilibrium import MarketEquilibrium  # noqa: F401
+from capri_mod.market.state import MarketStateMixin
 
 
-class BiofuelMixin:
+class BiofuelMixin(MarketStateMixin):
     """MarketModule methods for the biofuel block (feedstock demand, the biofuel markets BIOE and BIOD, blending mandates)."""
 
 
@@ -275,7 +276,7 @@ class BiofuelMixin:
     def _biofuel_x(self, g) -> float:
         """First-generation output of a feedstock group: the current biofuel state's (endogenous with biofuel
         markets, else the reference x biofuel_output_scale)."""
-        st = getattr(self, "_biof_state", None)
+        st = self.ev.biof_state
         if st is not None:
             return float(st["X"].get((g["ms"], g["fuel"]), g["X0"]))
         return g["X0"] * float((self.biofuel_output_scale or {}).get(g["fuel"], 1.0))
@@ -283,7 +284,7 @@ class BiofuelMixin:
     def biofuel_feedstock_use_region(self, region: str, price_ratio: Dict[str, float]) -> Dict[str, float]:
         """Feedstock use for biofuels of one trade region by model commodity (kt) at its feedstock price ratios."""
         out = {}
-        st = getattr(self, "_biof_state", None)
+        st = self.ev.biof_state
         dr = float((st or {}).get("ddgs_ratio", {}).get(region, 1.0))
         for g in self._biofuel_params().get("groups", []):
             if g["region"] != region:
@@ -306,7 +307,7 @@ class BiofuelMixin:
             if g["region"] not in self.EU:
                 continue
             X = self._biofuel_x(g)
-            st = getattr(self, "_biof_state", None)
+            st = self.ev.biof_state
             pr = (price_ratio.get(g["region"], {}) if any(isinstance(v, dict) for v in price_ratio.values())
                   else price_ratio)
             q, _ = self._biofuel_feed_group(g, pr, X, float((st or {}).get("ddgs_ratio", {}).get(g["region"], 1.0)))

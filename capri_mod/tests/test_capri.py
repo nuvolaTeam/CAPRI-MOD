@@ -515,17 +515,17 @@ def test_all_feed_bulks_and_residual_feeds_follow_capri(model):
     rho = {b: d["rho"] for (ms, b), d in fb["bulks"].items()}
     assert rho == {"FCER": 6.0, "FPRO": 6.0, "FENE": 5.0, "FOTH": 0.5, "FMIL": 0.5}
     assert abs(sum(w for _, _, w in fp["products"]["FPRI"]["parts"]) - 1.0) < 1e-9
-    old = (getattr(mm, "_eu_food_ratio", None), getattr(mm, "_eu_biof_ratio", None))
+    old = (mm.ev.eu_food_ratio, mm.ev.eu_biof_ratio)
     try:
-        mm._eu_food_ratio, mm._eu_biof_ratio = {}, {}
+        mm.ev.eu_food_ratio, mm.ev.eu_biof_ratio = {}, {}
         q0 = mm.eu_feed_byproduct_output()
         assert abs(q0["FPRI"] / fp["products"]["FPRI"]["prod0"] - 1.0) < 1e-12
-        mm._eu_food_ratio = {mm.EU[0]: {"SWHE": 0.9}}
+        mm.ev.eu_food_ratio = {mm.EU[0]: {"SWHE": 0.9}}
         q1 = mm.eu_feed_byproduct_output()
         w = dict((c, x) for c, u, x in fp["products"]["FPRI"]["parts"])["SWHE"]
         assert abs(q1["FPRI"] / q0["FPRI"] - (1.0 - 0.1 * w)) < 1e-12 and q1["FENI"] == q0["FENI"]
     finally:
-        mm._eu_food_ratio, mm._eu_biof_ratio = old
+        mm.ev.eu_food_ratio, mm.ev.eu_biof_ratio = old
     assert mm.feed_bulk_price_ratio("DE000000", "FENE", {"FENI": 1.2}) > 1.0
     assert mm.feed_bulk_price_ratio("DE000000", "FPRO", {"FPRI": 1.2}) > 1.0
     assert mm.feed_bulk_price_ratio("DE000000", "FMIL", {"WHEY": 1.2}) > 1.0
@@ -542,13 +542,13 @@ def test_biofuel_feedstock_demand_in_market(model):
     BIOF_M) reproduces the 2030 reference at base prices, shifts away from a dearer feedstock, and scales
     with output."""
     mm = model.market_module
-    _bm, _st = mm.biofuel_markets, getattr(mm, "_biof_state", None)
-    mm.biofuel_markets, mm._biof_state = False, None     # no processing state of an earlier run (run state)
+    _bm, _st = mm.biofuel_markets, mm.ev.biof_state
+    mm.biofuel_markets, mm.ev.biof_state = False, None     # no processing state of an earlier run (run state)
     try:
         _biofuel_fixed_output_checks(mm)
     finally:
         del mm.biofuel_markets                             # back to the setting market.biofuel_markets
-        mm._biof_state = _st
+        mm.ev.biof_state = _st
 
 
 def _biofuel_fixed_output_checks(mm):
@@ -597,22 +597,22 @@ def test_biofuel_markets_follow_capri_functions(model):
     st2 = mm.biofuel_state(one, feed)
     assert st2["prod"][("EU27", "BIOE")] < st0["prod"][("EU27", "BIOE")]
     # the feedstock CES at the higher output uses more of every feedstock at unchanged prices
-    old = getattr(mm, "_biof_state", None)
+    old = mm.ev.biof_state
     try:
-        mm._biof_state = st1
+        mm.ev.biof_state = st1
         q1 = mm.biofuel_feedstock_use({})["by_commodity"]
-        mm._biof_state = st0
+        mm.ev.biof_state = st0
         q0 = mm.biofuel_feedstock_use({})["by_commodity"]
         assert q1["CORN"] > q0["CORN"] and abs(q1["RAPO"] - q0["RAPO"]) < 1e-9
         mm.biofuel_markets = False
         assert not mm.biofuel_endogenous()
         # off: output fixed whatever the biofuel price (CAPRI without BIOF_M)
-        mm._biof_state = mm.biofuel_state(up, up)
+        mm.ev.biof_state = mm.biofuel_state(up, up)
         assert abs(mm.biofuel_feedstock_use({})["by_commodity"]["CORN"] / q0["CORN"] - 1.0) < 1e-6
-        assert abs(mm._biof_state["prod"][("EU27", "BIOE")] / st0["prod"][("EU27", "BIOE")] - 1.0) < 1e-6
+        assert abs(mm.ev.biof_state["prod"][("EU27", "BIOE")] / st0["prod"][("EU27", "BIOE")] - 1.0) < 1e-6
     finally:
         del mm.biofuel_markets                             # back to the setting market.biofuel_markets
-        mm._biof_state = old
+        mm.ev.biof_state = old
 
 
 def test_dairy_block_fat_protein_balance(model):
@@ -624,7 +624,7 @@ def test_dairy_block_fat_protein_balance(model):
     fi0, mm._fmil_index = getattr(mm, "_fmil_index", 1.0), 1.0     # calves' milk feed at base
     dp = mm._dairy_params()
     assert dp
-    mm._dairy_u = None
+    mm.sv.dairy_u = None
     b = mm.dairy_block({}, 1.0)
     assert all(abs(v - 1.0) < 1e-9 for v in b["price_ratio"].values())
     r = mm.dairy_block({}, 0.9)
@@ -640,7 +640,7 @@ def test_dairy_block_fat_protein_balance(model):
     # market's feed demand (CES at base prices: every product's feed use falls with the index)
     import numpy as np
     assert np.allclose(mm.dairy_feed_factor(np.ones(9), fi=0.8), 0.8)
-    mm._dairy_u = None
+    mm.sv.dairy_u = None
     mm._dairy_cache, mm._fmil_index = None, fi0
 
 
