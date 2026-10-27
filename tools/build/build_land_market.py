@@ -29,50 +29,6 @@ sys.path[:0] = [str(_ROOT / "tools" / _d) for _d in ("lib", "build", "run", "che
 LT = ["ARAC", "GRAS", "FRUN", "FORE", "OLND", "ARTIF"]
 
 
-def repair_splits():
-    """Split regions put whole on one part by the first-candidate rule (FI18 -> FI1B), fixed in the
-    existing file with the builder's own split rule: each part ARAC/GRAS/FRUN from its own base
-    areas, FORE/OLND/ARTIF = parent x the part's share of the parent's agricultural land, matrix =
-    parent's / share. The parent's levels and matrix are the entry the rule had written."""
-    import pandas as pd, importlib.util as _ilu
-    sys.path.insert(0, str(_ROOT))
-    from capri_mod.data import land_market_io as io
-    dest = _ROOT / "capri_data" / "2017" / "supply" / "land_market_2017"
-    R = io.read(dest)
-    areas = _read_csv(_ROOT / "capri_data" / "2017" / "supply" / "base_areas.csv", index_col=0)
-    _sp = _ilu.spec_from_file_location("_mr", _ROOT / "tools" / "lib" / "_model_regions.py")
-    _mr = _ilu.module_from_spec(_sp); _sp.loader.exec_module(_mr)
-    _c2g, groups = _mr.capri_groups(list(areas.index))
-    fixed = []
-    for cs, rs in groups.values():
-        if len(rs) < 2 or len(cs) != 1:
-            continue
-        code = next(iter(cs))
-        whole = [r for r in rs if r in R and R[r].get("quad_source") == code]
-        if len(whole) != 1:
-            continue
-        par = R[whole[0]]
-        pa = sum(par["base_kha"].get(t, 0.0) for t in ("ARAC", "GRAS", "FRUN"))
-        M0 = np.array(par["quad"], float)
-        for r in sorted(rs):
-            a = areas.loc[r]
-            ma = float(a.sum())
-            if ma <= 0 or pa <= 0:
-                continue
-            perm = sum(float(a.get(c, 0.0)) for c in ("WINE", "OLIV", "TABO", "APPL", "OFRU", "CITR", "TAGR"))
-            gras = float(a.get("GRAS", 0.0))
-            sh = ma / pa
-            bk = {"ARAC": ma - perm - gras, "GRAS": gras, "FRUN": perm}
-            for t in ("FORE", "OLND", "ARTIF"):
-                bk[t] = sh * par["base_kha"].get(t, 0.0)
-            M = M0 / max(sh, 1e-6)
-            R[r] = {"base_kha": bk, "quad": M.tolist(), "quad_source": code + " (split parent)", "share_of_source": sh,
-                    "min_eigenvalue": float(np.linalg.eigvalsh(M).min())}
-            fixed.append(r)
-    io.write(dest, R, ["ARAC", "GRAS", "FRUN", "FORE", "OLND", "ARTIF"])
-    print(f"re-split: {fixed}")
-
-
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--dump-dir", type=Path, default=Path("/home/claude/work/capreg"))
@@ -83,20 +39,10 @@ def main() -> None:
                          "capri_data/sources/baseline_pmp/pmp_quad_landtypes_2030.csv)")
     ap.add_argument("--ref", type=Path,
                     default=Path("/mnt/user-data/uploads/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv"))
-    ap.add_argument("--repair-splits", action="store_true",
-                    help="re-split, in the existing land_market_2017.csv, CAPRI regions that the first-candidate "
-                         "rule had put on one part of a split (no PMP exports needed)")
     args = ap.parse_args()
-    if args.repair_splits:
-        repair_splits()
-        return
     import pandas as pd
     areas = _read_csv(_ROOT / "capri_data" / "2017" / "supply" / "base_areas.csv", index_col=0)
-    corr = json.loads((_ROOT / "capri_data" / "shared" / "nuts_version_correspondence.json").read_text())["capri8_to_nuts"]
-    # CAPRI regions -> model regions in groups (tools/lib/_model_regions.py): one to one, merges
-    # (FI13 + FI1A = FI1D: levels summed, matrices area-weighted) and splits (FI18 = FI1B + FI1C,
-    # IT31, DED0, PL12, HU10, Ireland: handled as split parents below). The first-candidate rule
-    # gave FI1B all of Etelae-Suomi's land types (arable 709 kha on 121 kha of crops).
+    # CAPRI regions -> model regions (tools/lib/_model_regions.py): on CAPRI's units, each region is its own CAPRI region
     import importlib.util as _ilu
     _sp = _ilu.spec_from_file_location("_mr", _ROOT / "tools" / "lib" / "_model_regions.py")
     _mr = _ilu.module_from_spec(_sp); _sp.loader.exec_module(_mr)
@@ -122,7 +68,7 @@ def main() -> None:
                    for m in map(_rx.match, open(f, errors="ignore")) if m]
     lev, r8of = defaultdict(dict), {}
     for c8, t, v in LEVROWS:
-        if not c8.endswith("000000"):
+        if _mr.regional_row(c8):
             reg = to_model(c8)
             if reg:
                 lev[reg][t] = lev[reg].get(t, 0.0) + v
@@ -193,15 +139,10 @@ def main() -> None:
             notpd.append((reg, float(ev.min())))
         out[reg] = {"base_kha": {a: d.get(a, 0.0) for a in LT}, "quad": M.tolist(), "quad_source": src,
                     "min_eigenvalue": float(ev.min())}
-    # ---- SPLIT REGIONS: a CAPRI regional code that maps to no model region but
-    # whose agricultural area equals the SUM of unmapped model regions in the
-    # same country (within 0.5%) is their parent (e.g. IT310000 Trentino-Alto
-    # Adige = ITH1 + ITH2). Each part: ARAC/GRAS/FRUN from the model's own base
-    # areas (rows consistent at base); FORE/OLND/ARTIF = parent x the part's
-    # share of the parent's agricultural land; matrix = parent's / share, which
-    # keeps the relative responsiveness on a smaller area (REGISTERED). Model
-    # regions without any parent use the national matrix, scaled likewise.
-    from itertools import combinations
+    # REGIONS WITHOUT THEIR OWN LAND-TYPE DATA: the national matrix, scaled by the region's share of the country's
+    # agricultural land (REGISTERED). On CAPRI's units (27 October 2026) every unit has its own rows; until then the NUTS
+    # splits found their parent here (by the NUTS groups, or by area sums within 0.5%), Norway's four 2016 regions shared
+    # NO08 + NO09 + NO0A, and Ireland's three 2016 regions took fixed shares of IE01 and IE02.
     agri = {"ARAC", "GRAS", "FRUN"}
     lev_all = defaultdict(dict)
     for c8, t, v in LEVROWS:
@@ -213,48 +154,7 @@ def main() -> None:
         gras = float(a.get("GRAS", 0.0))
         return {"ARAC": model_area[r] - perm - gras, "GRAS": gras, "FRUN": perm}
     unmapped = [r for r in areas.index if r not in out and model_area[r] > 0]
-    orphans = [c for c in lev_all if not c.endswith("000000") and c[4:] == "0000"
-               and not any(x in areas.index for x in corr.get(c, [])) and c in Q]
     parent = {}
-    # splits known from the NUTS groups first: each part takes its group's CAPRI region(s)
-    for _g, (_cs, _rs) in _groups.items():
-        if len(_rs) > 1:
-            _codes = sorted(c for c in _cs if c in lev_all)
-            if not _codes:
-                continue
-            _key = _combine(_codes) if len(_codes) > 1 else _codes[0]
-            if _key not in Q:
-                continue
-            if _key not in lev_all:
-                lev_all[_key] = {t: sum(lev_all[c].get(t, 0.0) for c in _codes) for t in LT}
-            for _r in _rs:
-                if _r in unmapped:
-                    parent[_r] = _key
-    orphans = [c for c in orphans if c not in {cc for _cs, _rs in _groups.values() if len(_rs) > 1 for cc in _cs}]
-    for c in orphans:
-        pa = sum(v for k, v in lev_all[c].items() if k in agri)
-        cand = [r for r in unmapped if r[:2] == c[:2] and r not in parent]
-        hit = None
-        for size in (2, 3, 4):
-            for grp in combinations(cand, size):
-                if pa > 0 and abs(sum(model_area[g] for g in grp) / pa - 1) < 0.005:
-                    hit = grp; break
-            if hit: break
-        if hit:
-            for g in hit:
-                parent[g] = c
-    if args.year == 2030:
-        # Norway: NO01, NO03, NO04, NO05 (NUTS 2016) against CAPRI's NO08 + NO09 + NO0A (NUTS 2021), one territory as in
-        # tools/build/build_capri_base.py; NO000000's 2030 matrix has no diagonal (not usable as the national fallback)
-        import build_capri_base as _Bn
-        _no = [c for c in _Bn.NORWAY_PARENTS if c in Q and c in lev_all]
-        if _no:
-            _k = _combine(_no)
-            if _k not in lev_all:
-                lev_all[_k] = {t: sum(lev_all[c].get(t, 0.0) for c in _no) for t in LT}
-            for _r in _Bn.NORWAY_CHILDREN:
-                if _r in unmapped:
-                    parent[_r] = _k
     split_n = nat_n = 0
     for r in unmapped:
         src = parent.get(r) or (r[:2] + "000000" if r[:2] + "000000" in Q else None)
@@ -279,24 +179,6 @@ def main() -> None:
         if r in parent: split_n += 1
         else: nat_n += 1
     print(f"split parents: {sorted(set(parent.values()))} -> {sorted(parent)}; filled {split_n} split parts, {nat_n} from national matrices")
-    # IRELAND: NUTS 2016 redrew the boundaries, so each new region is a known share of each old one
-    # (build_capri_base.IRELAND: IE04 = 65.4% of IE01, IE05 = 86.2% of IE02, IE06 = the rest of both). A part
-    # responds as those shares of its parents' land owners: dL = sum_c w_c Q_c^-1 dr, so Q = (sum_c w_c Q_c^-1)^-1
-    # (Sprint 9t). Pooling IE01 and IE02 first gave every part the same mix, spreading IE01's flexible land supply
-    # onto IE05, which lies almost entirely in IE02.
-    import build_capri_base as _B
-    for r, parts in _B.IRELAND.items():
-        if r not in out or not all(c in Q for c, _ in parts):
-            continue
-        Minv = sum(w * np.linalg.inv(0.5 * (np.array([[Q[c].get((a, b), Q[c].get((b, a), 0.0)) for b in LT] for a in LT])
-                                            + np.array([[Q[c].get((b, a), Q[c].get((a, b), 0.0)) for b in LT] for a in LT])))
-                   for c, w in parts)
-        M = np.linalg.inv(Minv)
-        M = 0.5 * (M + M.T)
-        out[r]["quad"] = M.tolist()
-        out[r]["quad_source"] = " + ".join(f"{w:.3f} {c}" for c, w in parts) + " (shares of the NUTS-2013 regions)"
-        out[r]["min_eigenvalue"] = float(np.linalg.eigvalsh(M).min())
-
     sys.path.insert(0, str(_ROOT))
     from capri_mod.data import land_market_io as io
     dest = _ROOT / "capri_data" / "2017" / "supply" / f"land_market_{args.year}"

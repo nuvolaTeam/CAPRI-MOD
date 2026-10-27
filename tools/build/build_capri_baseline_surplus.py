@@ -35,7 +35,6 @@ import pandas as pd
 import functools as _ft
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
-#: NUTS splits and merges, shared with the other builders: tools/lib/_model_regions.py SPLITS_MERGES
 
 
 def main():
@@ -47,21 +46,9 @@ def main():
                     header=None, names=["region", "act", "item", "value"], dtype=str)
     t = t[(t["act"] == "UAAR") & (t["item"] == "LEVL")]
     uaar = pd.to_numeric(t.set_index("region")["value"], errors="coerce")
-    corr = json.loads((ROOT / "capri_data" / "shared" / "nuts_version_correspondence.json").read_text())["capri8_to_nuts"]
-    corr = {**corr, **mr.CORR_FIXES}
-    SPLITS_MERGES = mr.SPLITS_MERGES
-    to_capri = defaultdict(set)
-    for c8, lst in corr.items():
-        if c8.endswith("000000") or c8 not in sur.index:
-            continue
-        for r in lst or []:
-            to_capri[r].add(c8)
-    # NUTS changes the correspondence leaves out (it keeps one CAPRI code -> one model region only
-    # where the areas match): merges take CAPRI's regions UAAR-weighted, splits take the parent
-    # CAPRI region's surplus per ha - the region CAPRI sets the target on, so its percentage cut
-    for reg, parents in SPLITS_MERGES.items():
-        if all(p in sur.index for p in parents) and not to_capri.get(reg):
-            to_capri[reg] = set(parents)
+    # the model's regions are CAPRI's regional units: each takes its own row (until 27 October 2026 NUTS-2016 regions,
+    # through the NUTS correspondence, merges UAAR-weighted and split parts taking their parent's value)
+    to_capri = {r: {r} for r in mr.model_regions() if r in sur.index}
 
     rows = []
     for reg in mr.model_regions():
@@ -72,7 +59,7 @@ def main():
                 w = [1.0] * len(src)
             v = sum(wi * float(sur[c]) for wi, c in zip(w, src)) / sum(w)
             how = ("CAPRI 2030 reference, NUTS-2 " + "+".join(src) + (" UAAR-weighted" if len(src) > 1 else "")
-                   + (" (NUTS split/merge)" if reg in SPLITS_MERGES else ""))
+                   )
         else:
             ms = mr.national_code(reg)
             if ms not in sur.index:
@@ -80,10 +67,10 @@ def main():
                              "source": "no CAPRI value (model's own balance used)"})
                 continue
             v = float(sur[ms])
-            multi = any(ms[:2] == c[:2] and not c.endswith("000000") for c in sur.index)
+            multi = any(ms[:2] == c[:2] and mr.regional_row(c) and c != ms for c in sur.index)
             how = (f"CAPRI 2030 reference, national {ms} (region not modelled by CAPRI; REGISTERED)" if multi
                    else f"CAPRI 2030 reference, {ms} (CAPRI holds the country as one region)")
-        rows.append({"region": reg, "surplus_kg_n_per_ha": round(v, 2), "source": how})
+        rows.append({"region": reg, "surplus_kg_n_per_ha": v, "source": how})
     out = pd.DataFrame(rows)
     dest = ROOT / "capri_data" / "2017" / "policy" / "capri_baseline_surplus_2030.csv"
     old = _read_csv(dest).set_index("region")["surplus_kg_n_per_ha"] if dest.exists() else None
