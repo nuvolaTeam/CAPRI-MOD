@@ -1,21 +1,21 @@
 {
  "activity_levels": [
-  199,
-  138
+  221,
+  133
  ],
  "land": [
-  199,
+  221,
   7
  ],
  "cap_premium": [
-  192,
+  221,
   75
  ],
  "herds": [
-  192,
+  221,
   28
  ],
- "nutrients": 36524,
- "manure": 40246,
- "feed": 86888
+ "nutrients": 41958,
+ "manure": 46259,
+ "feed": 99759
 }

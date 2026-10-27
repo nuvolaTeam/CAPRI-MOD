@@ -1,16 +1,16 @@
 {
  "producer_prices": {
-  "regions": 192,
+  "regions": 221,
   "activities": 71,
-  "values": 12389
+  "values": 14227
  },
  "nutrient_coefs": {
-  "records": 36524,
-  "regions": 192,
+  "records": 41958,
+  "regions": 221,
   "activities": 85
  },
  "cost_components": {
-  "records": 105408,
-  "components_over_toin_median": 0.67
+  "records": 121370,
+  "components_over_toin_median": 0.66
  }
 }

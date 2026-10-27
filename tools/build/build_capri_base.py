@@ -153,9 +153,13 @@ def main(dump_dir: Path):
     assert not missing, f"no CAPRI rows for {missing}"
 
     def frame(path):
-        """the table's columns, on the units; columns other builders fill stay empty until they run"""
-        return pd.DataFrame(index=pd.Index(regs, name=_read_csv(path, index_col=0, nrows=0).index.name),
-                            columns=_read_csv(path, index_col=0, nrows=0).columns, dtype=float)
+        """the table on the units: as it is if it already holds exactly the units (this builder re-run, or the producer
+        prices written by extract_all_from_data2.py first), else its columns, empty (columns other builders fill stay
+        empty until they run)"""
+        t = _read_csv(path, index_col=0)
+        if sorted(map(str, t.index)) == sorted(regs):
+            return t.reindex(regs).astype(float)
+        return pd.DataFrame(index=pd.Index(regs, name=t.index.name), columns=t.columns, dtype=float)
     areas, land, herds = frame(AREAS), frame(LAND), frame(HERDS)
     # OTHER_AG (other agricultural land): written by no builder, of unknown origin (template-like values: 6.25, 2.97619);
     # read only by the environmental module's HNV indicator through the land total. Dropped 27 October 2026

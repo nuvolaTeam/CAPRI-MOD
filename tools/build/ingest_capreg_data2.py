@@ -126,14 +126,12 @@ def main() -> None:
     print(f"  {len(df):,} records kept "
           f"({df.region.nunique()} CAPRI regions, {df.activity.nunique()} activities)")
 
-    cw_path = args.data_dir / "shared" / "nuts_crosswalk.json"
-    cw_all = json.loads(cw_path.read_text())
-    rev = {}
-    for model_region, codes in cw_all.get("aliases", {}).items():
-        for c in codes:
-            rev.setdefault(c, model_region)
-    for model_region, c in cw_all["resolved"].items():
-        rev.setdefault(c, model_region)
+    # the model's regions are CAPRI's regional units (shared/regional_units.csv): each CAPRI code is its own region
+    # (until 27 October 2026 mapped through shared/nuts_crosswalk.json, which left 21 regions unmatched)
+    import sys as _sys
+    _sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'lib'))
+    from _model_regions import UNITS
+    rev = {u: u for u in UNITS}
     df["model_region"] = df.region.map(rev)
 
     model_regions = _read_csv(

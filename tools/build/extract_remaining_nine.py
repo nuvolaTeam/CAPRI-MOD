@@ -73,13 +73,12 @@ def main() -> None:
     df = pd.concat([parse(f) for f in files], ignore_index=True)
     df = df.drop_duplicates(["region", "activity", "item"], keep="last")
 
-    cw = json.loads((args.data_dir / "shared/nuts_crosswalk.json").read_text())
-    rev = {}
-    for mr, codes in cw.get("aliases", {}).items():
-        for c in codes:
-            rev.setdefault(c, mr)
-    for mr, c in cw["resolved"].items():
-        rev.setdefault(c, mr)
+    # the model's regions are CAPRI's regional units (shared/regional_units.csv): each CAPRI code is its own region
+    # (until 27 October 2026 mapped through shared/nuts_crosswalk.json, which left 21 regions unmatched)
+    import sys as _sys
+    _sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'lib'))
+    from _model_regions import UNITS
+    rev = {u: u for u in UNITS}
     df["model_region"] = df.region.map(rev)
     df = df.dropna(subset=["model_region"])
     df["activity"] = df.activity.replace({"MAIZ": "CORN"})
