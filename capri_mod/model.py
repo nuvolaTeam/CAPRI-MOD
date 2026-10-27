@@ -1406,7 +1406,9 @@ class CAPRIModel:
         cdir = _P(__file__).resolve().parents[1] / ".cache" / "market_supply_hessian"
         cfile = cdir / f"{key}.csv"
         if cfile.exists():
-            t = pd.read_csv(cfile)
+            # read back to the last digit (pandas' default float parser is off by an ulp in most values; 1e-12
+            # differences in the Hessian grew to 1e-4 in the results and an outer iteration more or less: K82)
+            t = pd.read_csv(cfile, float_precision="round_trip")
             ms_h = {ms: g.pivot(index="x", columns="y", values="dq").fillna(0.0) for ms, g in t.groupby("ms")}
             eu, sup, blocks = self._split_hessian(ms_h)
             self.market_supply_hessian_info = {"source": "cache", "file": str(cfile), "products": len(eu.columns)}
