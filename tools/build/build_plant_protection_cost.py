@@ -216,10 +216,10 @@ def main():
     out = pd.DataFrame(rows, columns=COLS)
     out.to_csv(a.out, index=False)
     crops = out[out.inpo_toin_share.isna()]
-    med = crops.groupby("activity")[COLS[2:10]].median().round(0)
+    med = crops.groupby("activity")[COLS[2:10]].median()
     print(f"wrote {a.out}: {len(out)} rows ({len(crops)} crop, {len(out) - len(crops)} animal), "
           f"{out.region.nunique()} regions ({n_reg} regional, {n_nat} national cells)")
-    print(med.loc[[c for c in ("SWHE", "CORN", "RAPE", "SUGB", "POTA", "APPL", "WINE", "OLIV", "GRAS") if c in med.index]].to_string())
+    print(med.loc[[c for c in ("SWHE", "CORN", "RAPE", "SUGB", "POTA", "APPL", "WINE", "OLIV", "GRAS") if c in med.index]].round(0).to_string())
     print(out[out.inpo_toin_share.notna()].groupby("activity").inpo_toin_share.median().round(3).to_string())
 
 

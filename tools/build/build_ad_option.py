@@ -232,9 +232,9 @@ def build():
             elif mzero < mlo and mlo - ini_v:
                 pmp_sqr = (S1 - S0) / (mlo - ini_v) - cps
         k2 = (cps + pmp_sqr) * INFL
-        rows.append([rs, act, round(lg, 9), round(ini_v * lg, 9), round(mx * lg, 9), round(r_ch4, 9),
-                     round(cpl * INFL, 6), round(cps * INFL, 6), round(rev * INFL, 6), round(pmp_sqr * INFL, 6),
-                     round(S0 * INFL / lg, 6), round(k2 / (lg * lg), 6), round(vs, 6),
+        rows.append([rs, act, lg, ini_v * lg, mx * lg, r_ch4,
+                     cpl * INFL, cps * INFL, rev * INFL, pmp_sqr * INFL,
+                     S0 * INFL / lg, k2 / (lg * lg), vs,
                      "table" if ad != "SWIN" else "table (CAPRI's own fallback)"])
     with open(A / "ad_option.csv", "w", newline="") as fh:
         w = csv.writer(fh)

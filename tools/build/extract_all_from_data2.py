@@ -132,7 +132,7 @@ def main() -> None:
     ratio = (cmp_.components / cmp_.toin).median()
     summary["cost_components"] = {
         "records": int(len(co)),
-        "components_over_toin_median": round(float(ratio), 3)}
+        "components_over_toin_median": float(ratio)}
     print(f"cost components : {len(co):,} records; "
           f"sum of components is {ratio:.0%} of TOIN")
 

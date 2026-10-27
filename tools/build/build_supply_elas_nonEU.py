@@ -72,8 +72,8 @@ def main():
             a = acc.setdefault(tr, [0.0, 0.0, []])
             a[0] += w * float(e); a[1] += w; a[2].append(r)
         for tr, (num, den, regs) in sorted(acc.items()):
-            rows.append({"region": tr, "commodity": c, "elasticity": round(num / den, 6),
-                         "capri_regions": " ".join(sorted(regs)), "prod_kt": round(den, 3)})
+            rows.append({"region": tr, "commodity": c, "elasticity": num / den,
+                         "capri_regions": " ".join(sorted(regs)), "prod_kt": den})
     out = pd.DataFrame(rows)
     out.to_csv(OUT, index=False)
     print(f"{OUT.relative_to(ROOT)}: {len(out)} region-commodity pairs, {out.region.nunique()} regions, "

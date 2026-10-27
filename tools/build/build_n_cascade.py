@@ -145,7 +145,7 @@ def _effects(pairs, _unused, rows_a, frs):
                         e[(t, it.lower())] = v
         for (t, it), v in sorted(e.items()):
             if v and (it in GAS_ITEMS or it in ("no3runh", "no3mrun", "no3mlea")):
-                out.append([reg, act, t, it, round(float(v), 12)])
+                out.append([reg, act, t, it, float(v)])
     return out
 
 
@@ -202,7 +202,7 @@ def build():
         f["run_hous"] = (frs[("LIQUID", "normal", "othStor")] / 100.0 * tsl
                          + frs[("SOLID", "normal", "othStor")] / 100.0 * (1.0 - tsl))
         for k, v in f.items():
-            rows_a.append([reg, act, k, round(v, 12)])
+            rows_a.append([reg, act, k, v])
         ms_seen.add(ms)
     for reg in regions:
         ms = reg[:2] + "000000"
@@ -219,7 +219,7 @@ def build():
             for g in ("NH3", "NOX", "N2O"):
                 out[f"netf_{g}"] = sum(share[ft] * ef.get((ms, g, ft), 0.0) for ft in share)
         for k, v in out.items():
-            rows_r.append([reg, k, round(v, 12)])
+            rows_r.append([reg, k, v])
     rows_e = _effects(pairs, {(r[0], r[1]): None for r in rows_a}, rows_a, frs)
     for reg in regions:
         ms = reg[:2] + "000000"
@@ -227,8 +227,8 @@ def build():
         if any(v is not None for v in share.values()) and (ms, "NH3", "Ureum") in ef:
             # urea substitution (ammo_tech.gms l. 2352-2361): othImpact nh3syn = EF(urea) - EF(other), maximum share
             # the urea share
-            rows_r.append([reg, "urea_eff", round(ef[(ms, "NH3", "Ureum")] - ef.get((ms, "NH3", "Other"), 0.0), 12)])
-            rows_r.append([reg, "urea_max", round(share["Ureum"] or 0.0, 12)])
+            rows_r.append([reg, "urea_eff", ef[(ms, "NH3", "Ureum")] - ef.get((ms, "NH3", "Other"), 0.0)])
+            rows_r.append([reg, "urea_max", share["Ureum"] or 0.0])
     with open(D / "n_cascade_effects.csv", "w", newline="") as fh_:
         w = csv.writer(fh_)
         w.writerow(["region", "activity", "technology", "item", "value"])

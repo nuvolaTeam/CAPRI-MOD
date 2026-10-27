@@ -110,7 +110,7 @@ def build():
         if ms == "MT000000" and act in ("SHGM", "SHGF"):
             v = L * aL("CovStorLow")
         if v:
-            rows.append([ru, act, "CovStorLow", round(v, 9)])
+            rows.append([ru, act, "CovStorLow", v])
         for tech, S in (("AmmAppLE", LE), ("AmmAppHE", HE)):
             v = 0.0
             for key in (ru, n1, ms):
@@ -122,7 +122,7 @@ def build():
                 if v:
                     break
             if v:
-                rows.append([ru, act, tech, round(v, 9)])
+                rows.append([ru, act, tech, v])
     with open(D / "nitrates_directive_min_shares.csv", "w", newline="") as fh:
         w = csv.writer(fh)
         w.writerow(["region", "activity", "technology", "value"])

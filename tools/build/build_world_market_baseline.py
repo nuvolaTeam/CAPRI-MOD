@@ -80,7 +80,7 @@ def main():
         tr = "EU27" if reg in EU_MS else REGION_MAP.get(reg, "ROW")
         out[f"{tr}|{CAPRI[prod]}"][ITEMS[item]] += float(t) / 1000.0
         seen.add(reg)
-    res = {k: {i: round(v, 3) for i, v in d.items()} for k, d in sorted(out.items())}
+    res = {k: dict(d) for k, d in sorted(out.items())}
     dest = ROOT / "capri_data" / "2017" / "market" / "world_market_baseline.json"
     json.dump({"_source": "CAPRI FAO_agg p_dataMarket (fao_agg_17_datamarket), year BAS, items MAPR DOMM IMPT EXPT; "
                           "tools/build/build_world_market_baseline.py",

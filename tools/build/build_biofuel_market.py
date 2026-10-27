@@ -236,7 +236,7 @@ def main():
     for c, grp in GROUPS.items():
         use = sum(float(bal.get(x, {}).get(k, 0.0)) for x in grp for k in ("HCOM", "FEDM", "INDM", "BIOF", "LOSM"))
         q = float(eu.loc[eu["commodity"] == c, "biof_kt"].sum())
-        us.append({"commodity": c, "biof_kt": round(q, 3), "use_kt": round(use, 3), "share": q / use if use > 0 else 0.0})
+        us.append({"commodity": c, "biof_kt": q, "use_kt": use, "share": q / use if use > 0 else 0.0})
     pd.DataFrame(us).to_csv(DEST / "biofuel_use_share.csv", index=False)
 
     # ---- biofuel supply and demand functions

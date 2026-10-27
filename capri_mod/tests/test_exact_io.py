@@ -6,8 +6,8 @@ Two risks, checked statically (seconds, nothing is run):
   (float_precision="round_trip", capri_mod/csvio.read_csv, or a wrapper that sets it) or read text (dtype=str). The
   csv module with float() is exact.
 - writing: to_csv without float_format writes each float exactly (its shortest round-trip form); what loses digits
-  is rounding the values before they are written. The builders' remaining roundings outside messages are listed in
-  ROUNDING_ALLOWED (K88, to be removed with a rebuild and a reference run); a new one fails the test.
+  is rounding the values before they are written. No builder rounds what it writes (K88); a rounding outside a printed
+  message fails the test.
 """
 from __future__ import annotations
 
@@ -17,16 +17,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 
-#: builder -> roundings of values outside print/f-strings, as on 27 October 2026 (K88): may only shrink
-ROUNDING_ALLOWED = {
-    "build_ad_option.py": 11, "build_ammonia_technologies.py": 15, "build_biofuel_market.py": 2,
-    "build_dairy_world_markets.py": 1, "build_enteric_feed_factors.py": 4, "build_feed_bulks.py": 3,
-    "build_feed_byproducts.py": 5, "build_feed_demand_nonEU.py": 2, "build_manure_pool_costs.py": 2,
-    "build_n_cascade.py": 5, "build_n_leaching.py": 2, "build_nitrates_directive.py": 2,
-    "build_plant_protection_cost.py": 1, "build_ration_trajectory_2030.py": 1, "build_supply_elas_nonEU.py": 2,
-    "build_tariffs_2017.py": 6, "build_world_market_baseline.py": 1, "extract_all_from_data2.py": 1,
-    "ingest_capmod_market.py": 3, "recalibrate_trade_2017.py": 3,
-}
+#: builder -> roundings of values outside print/f-strings that are allowed (none since K88 was fixed)
+ROUNDING_ALLOWED: dict = {}
 
 
 def _parents(tree):

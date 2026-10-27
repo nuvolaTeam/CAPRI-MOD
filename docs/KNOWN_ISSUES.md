@@ -988,6 +988,7 @@ rounds reproduces its own rounded file). Some may round keys or comparisons rath
 - **Effect:** the last digits of these files (1e-6 and smaller relative for 6 decimals; up to 1e-3 for 3 decimals of
   small values)
 - **In 9t:** –
-- **Status:** **open**: test_builders_do_not_round_what_they_write lists them (ROUNDING_ALLOWED, which may only shrink);
-  to remove with a rebuild and a reference run (next batch)
+- **Status:** **open**: the roundings removed in the builders (branch k88-rounding: every one rounded a written value,
+  none a key or a comparison; the roundings of printed summaries moved into the prints); ROUNDING_ALLOWED empty. To
+  rebuild the 20 builders' files and run a reference run
 

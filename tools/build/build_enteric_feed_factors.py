@@ -100,7 +100,7 @@ def main(gams, dumps):
                 w = NFIX / 0.75
                 mix = lambda g, l: (1 - w) * (ge(g) or 0) + w * (ge(l) or ge(g) or 0)
                 ge_gras = graz * mix("GRPS", "LGPS") + (1 - graz) * (0.5 * mix("GRSI", "LGSI") + 0.5 * mix("GRHA", "LGHA"))
-                rows.append([ctry, a, "FGRA", round(ge_gras, 5), ym.get(a, ""), round(graz, 4)])
+                rows.append([ctry, a, "FGRA", ge_gras, ym.get(a, ""), graz])
                 for grp, members in FEED_TO_O.items():
                     num = den = 0.0
                     for rw in members.split():
@@ -117,7 +117,7 @@ def main(gams, dumps):
                         val = sum(gs) / len(gs)
                     else:
                         val = num / den
-                    rows.append([ctry, a, grp, round(val, 5), ym.get(a, ""), round(graz, 4)])
+                    rows.append([ctry, a, grp, val, ym.get(a, ""), graz])
     OUT.mkdir(parents=True, exist_ok=True)
     with open(OUT / "enteric_feed_factors.csv", "w", newline="") as fh:
         w = csv.writer(fh); w.writerow(["country", "animal", "feed", "ge_mcal_per_kg_dm", "ym", "grazing_share"]); w.writerows(rows)

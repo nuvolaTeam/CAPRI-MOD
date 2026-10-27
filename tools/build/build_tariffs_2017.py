@@ -61,10 +61,10 @@ def main():
             d = v.get(c, {})
             if c in prov or not d.get("ImportP"):
                 continue
-            prov[c] = {"previous": None, "capri_code": c, "ad_valorem_pct": round(d.get("TaAppl", 0.0), 2),
-                       "specific_eur_t": round(d.get("TsAppl", 0.0), 1),
-                       "total_ave_pct": round(100.0 * (d["ImportP"] / (d["Fob"] + d.get("TCost", 0.0)) - 1.0), 2),
-                       "eu_imports_kt": round(d.get("ImportQ", 0.0), 1)}
+            prov[c] = {"previous": None, "capri_code": c, "ad_valorem_pct": d.get("TaAppl", 0.0),
+                       "specific_eur_t": d.get("TsAppl", 0.0),
+                       "total_ave_pct": 100.0 * (d["ImportP"] / (d["Fob"] + d.get("TCost", 0.0)) - 1.0),
+                       "eu_imports_kt": d.get("ImportQ", 0.0)}
         json.dump(_prov_all, open(PROV, "w"), indent=1)
     cols = list(prov)                                   # the commodities of the EU row
     df = _read_csv(SRC, keep_default_na=False)
@@ -88,16 +88,16 @@ def main():
         if reg == "EU27":
             rows[reg] = {c: float(v.get("total_ave_pct", v.get("previous", 0.0))) for c, v in prov.items()}
             continue
-        rows[reg] = {c: (round(100.0 * (num[(reg, c)] / den[(reg, c)] - 1.0), 4) if den.get((reg, c), 0) > 0 else 0.0)
+        rows[reg] = {c: (100.0 * (num[(reg, c)] / den[(reg, c)] - 1.0) if den.get((reg, c), 0) > 0 else 0.0)
                      for c in cols}
     out = pd.DataFrame(rows).T[cols]
     out.index.name = "region"
     OUT.parent.mkdir(parents=True, exist_ok=True)
     out.to_csv(OUT)
-    chk = {c: round(100.0 * (num[("EU27", c)] / den[("EU27", c)] - 1.0), 1) for c in ("BEEF", "BUTR", "SUGR", "OLIV", "PORK")
+    chk = {c: 100.0 * (num[("EU27", c)] / den[("EU27", c)] - 1.0) for c in ("BEEF", "BUTR", "SUGR", "OLIV", "PORK")
            if den.get(("EU27", c), 0) > 0}
     print(f"wrote {OUT.relative_to(ROOT)}: {out.shape[0]} regions x {out.shape[1]} commodities")
-    print("EU row kept:", {c: rows['EU27'][c] for c in chk}, "| recomputed from the member states:", chk)
+    print("EU row kept:", {c: rows['EU27'][c] for c in chk}, "| recomputed from the member states:", {c: round(v, 1) for c, v in chk.items()})
     print("median by region:", out.median(axis=1).round(1).to_dict())
 
 

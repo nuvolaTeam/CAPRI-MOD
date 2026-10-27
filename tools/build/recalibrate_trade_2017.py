@@ -150,12 +150,11 @@ def main() -> None:
     s_old = extra_eu_share(cur, commodities)
     s_new = extra_eu_share(new, commodities)
     common = [c for c in s_new.index if c in s_old.index]
-    cmp_ = pd.DataFrame({"share_2021": s_old[common].round(1),
-                         "share_2017": s_new[common].round(1)})
-    cmp_["change_pp"] = (cmp_.share_2017 - cmp_.share_2021).round(1)
+    cmp_ = pd.DataFrame({"share_2021": s_old[common], "share_2017": s_new[common]})
+    cmp_["change_pp"] = cmp_.share_2017 - cmp_.share_2021
     cmp_ = cmp_.reindex(cmp_.change_pp.abs().sort_values(ascending=False).index)
     print("\nextra-EU import share, the quantity the Armington first nest turns on:")
-    print(cmp_.head(12).to_string())
+    print(cmp_.head(12).round(1).to_string())
     print(f"\nmedian absolute change: {cmp_.change_pp.abs().median():.1f} pp")
 
     if args.dry_run:

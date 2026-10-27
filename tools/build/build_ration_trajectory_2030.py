@@ -182,9 +182,9 @@ def main():
     print(f"wrote {OUT_FODDER.relative_to(ROOT)}: {len(fo)} rows; median {fo.groupby('crop')['factor'].median().round(3).to_dict()}")
     out = pd.DataFrame(rows, columns=["region", "animal", "item", "factor", "level"])
     out.to_csv(OUT, index=False)
-    med = out.groupby("item")["factor"].median().round(3).to_dict()
+    med = out.groupby("item")["factor"].median().to_dict()
     print(f"wrote {OUT.relative_to(ROOT)}: {len(out)} rows, {out[['region', 'animal']].drop_duplicates().shape[0]} "
-          f"region x animal; median factors {med}")
+          f"region x animal; median factors { {k: round(v, 3) for k, v in med.items()} }")
 
 
 if __name__ == "__main__":
