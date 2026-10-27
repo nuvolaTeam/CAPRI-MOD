@@ -459,6 +459,7 @@ consuming modules:
 | supply_elasticities_regional | own-price supply elasticity by region | — | supply |
 | input_requirements | physical input use per hectare | various | supply, environment |
 | manure_ch4_ef_regional | methane emission factor for manure | kg CH4/head | environment |
+| pela_cross_price | cross-price elasticities (PELA) | — | supply |
 | livestock_output_coef | marketed product per head | kt/1000 head | supply |
 | livestock_revenue_coef | market revenue per head | EUR/head | supply |
 | nutrients_regional | mineral nitrogen applied | kg N/ha | supply, environment |
