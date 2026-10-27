@@ -293,6 +293,13 @@ def main():
                                            if "EU27" in s["market"].net_exports.index else {}),
                            "price": s["market"].domestic_prices.loc["EU27"].astype(float).to_dict(),
                            "world": s["market"].world_prices.astype(float).to_dict()},
+           # CAPRI's welfare report (docs/WELFARE.md), base and scenario: the market's components per market region
+           # (EUR million, changes against the calibration point; tariffs and quota rents levels) and the supply
+           # models' MGVA and premiums' budget cost per supply region (EUR million, levels)
+           "welfare": tuple({"market": (x["market"].welfare.astype(float).to_dict("index")
+                                        if getattr(x["market"], "welfare", None) is not None else None),
+                             "supply": (x["welfare_supply"].astype(float).to_dict("index")
+                                        if x.get("welfare_supply") is not None else None)} for x in (b, s)),
            # the outer loop's state per iteration, base and scenario (signals, targets, young-animal prices, member
            # states' milk, EU herds; KNOWN_ISSUES K75)
            "outer_history": tuple(x.get("outer_history") for x in (b, s)),
