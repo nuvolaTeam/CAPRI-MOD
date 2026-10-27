@@ -34,6 +34,10 @@ import numpy as np
 import pandas as pd
 
 import functools as _ft
+
+import importlib.util as _ilu
+_sp_mr = _ilu.spec_from_file_location("_mr", Path(__file__).resolve().parents[2] / "tools" / "lib" / "_model_regions.py")
+_mr = _ilu.module_from_spec(_sp_mr); _sp_mr.loader.exec_module(_mr)
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 D = Path(__file__).resolve().parents[2] / "capri_data" / "2017" / "abatement" / "ammonia"
 C = D / "costs"
@@ -148,7 +152,9 @@ def regress(share, accum, cost, lb):
 
 def build():
     INV, ADD, FOP, PRICE, STOR, MIN, KGN, nvz, HEADS, HOLD, MD = load()
-    regions = sorted({k[0] for k in MD if not k[0].endswith("000000") or k[0][:2] in ("MT", "CY", "LU", "EE", "LV", "SI")})
+    # every regional unit's own rows, the units of the member states without regional detail included (DK000000 ...;
+    # CAPRI loops over all its regions, ammo_tech.gms); a fixed list of an older CAPRI left out DK, LT, HR (K86)
+    regions = sorted({k[0] for k in MD if _mr.regional_row(k[0])})
     out = []
     for rs in regions:
         price = PRICE.get(nat(rs), {})

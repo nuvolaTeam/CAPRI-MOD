@@ -39,6 +39,10 @@ import math
 from collections import defaultdict
 from pathlib import Path
 
+import importlib.util as _ilu
+_sp_mr = _ilu.spec_from_file_location("_mr", Path(__file__).resolve().parents[2] / "tools" / "lib" / "_model_regions.py")
+_mr = _ilu.module_from_spec(_sp_mr); _sp_mr.loader.exec_module(_mr)
+
 ROOT = Path(__file__).resolve().parents[2]
 G = ROOT / "capri_data" / "sources" / "capri_dat" / "ghgtech"
 A = ROOT / "capri_data" / "2017" / "abatement" / "ammonia"
@@ -158,8 +162,8 @@ def build():
         mx = (h.get("200_500", 0.0) + h.get("h500", 0.0)) / tot
         return sl, acc[p1] - sl * acs[p1], mx
 
-    pairs = sorted({k for k in nem if k[1] in ADACT and not k[0].endswith("000000") or (k[1] in ADACT and k[0] in
-                    ("DK000000", "EE000000", "CY000000", "MT000000", "LU000000", "LV000000", "LT000000", "SI000000"))})
+    # the regional units' own rows (a fixed list of an older CAPRI had LU000000, not a unit, and missed HR000000; K86)
+    pairs = sorted({k for k in nem if k[1] in ADACT and _mr.regional_row(k[0])})
     rows = []
     for rs, act in pairs:
         ms, ad = _nat(rs), ADACT[act]

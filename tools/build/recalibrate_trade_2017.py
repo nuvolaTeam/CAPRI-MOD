@@ -37,7 +37,6 @@ from __future__ import annotations
 import argparse
 import json
 import re
-import shutil
 from pathlib import Path
 
 import numpy as np
@@ -165,9 +164,6 @@ def main() -> None:
 
     out = args.data_dir / "shared" / "trade_flows_2017.csv"
     new.to_csv(out)
-    backup = cur_path.with_suffix(".csv.superseded_by_2017")
-    if not backup.exists():
-        shutil.copy(cur_path, backup)
 
     rep = args.data_dir / "validation" / "trade_recalibration_2017.json"
     rep.write_text(json.dumps({

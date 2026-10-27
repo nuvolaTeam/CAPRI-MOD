@@ -922,7 +922,7 @@ committed files. 117 invocations; most reproduce their files exactly. Found:
   demand elasticities, feed by-product weights): the committed files' rounding.
 - `ingest_pela_gtap.py` writes `sources/estnlp/pela_cross_price.csv`, which is not committed (read by no model code;
   `pela_cross_by_region.json` carries the cross-price terms); `recalibrate_trade_2017.py` writes a backup copy
-  (`trade_flows_2021.csv.superseded_by_2017`) on every run.
+  (`trade_flows_2021.csv.superseded_by_2017`) wherever it is absent, so in every clean checkout.
 - Files several builders write in turn (`yields.csv`, `variable_costs.csv`, `capreg_producer_prices.csv`): a builder
   alone differs from the committed file where a later one overwrites its columns; to be checked as a chain
   (`--chain`), not done yet.

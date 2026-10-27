@@ -24,6 +24,10 @@ from pathlib import Path
 import pandas as pd
 
 import functools as _ft
+
+import importlib.util as _ilu
+_sp_mr = _ilu.spec_from_file_location("_mr", Path(__file__).resolve().parents[2] / "tools" / "lib" / "_model_regions.py")
+_mr = _ilu.module_from_spec(_sp_mr); _sp_mr.loader.exec_module(_mr)
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 DEST = ROOT / "capri_data" / "2017" / "supply" / "crop_cost_shares.csv"
@@ -41,7 +45,7 @@ def main():
     for f in glob.glob(str(a.dump_dir / "res_17*.txt")):
         for line in open(f, errors="ignore"):
             m = ROW.match(line)
-            if m and m.group(1)[:2] in EU27 and not m.group(1).endswith("000000"):
+            if m and m.group(1)[:2] in EU27 and _mr.regional_row(m.group(1)):     # the units of DK, EE ... included (K87)
                 v[m.group(1)][(m.group(2), m.group(3))] = float(m.group(4))
     sp = importlib.util.spec_from_file_location("base", ROOT / "tools" / "build" / "build_capri_base.py")
     base = importlib.util.module_from_spec(sp); sp.loader.exec_module(base)
