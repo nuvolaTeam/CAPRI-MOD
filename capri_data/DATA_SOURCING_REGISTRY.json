@@ -134,33 +134,12 @@
    "priority": "high",
    "coverage": "173 model regions x 15 crops, up from 107 regions",
    "note": "The previous file reproduced the same PELA 2005 slice but was CLIPPED at 4.5 rather than dampened: 270 cells sat at exactly 4.500. CAPRI's rule is min(8, sqrt(e) + 4.5 - sqrt(4.5)), so the affected cells averaged 4.50 where CAPRI gives 5.27, and the largest (DEB2/OATS, raw 111.0) was understated by 44%. This is the same truncation error that was in the code, baked into the data as well.",
-   "best_update": "PELA also holds 20173 CROSS-price records for 2005 (71% negative). These are extracted to sources/estnlp/pela_cross_price.csv but not wired: the supply module currently builds Q off-diagonals from the group-level p_pmpQuadPact, and these are the activity-level estimates that would replace them."
-  },
-  "input_requirements.csv": {
-   "nature": "REAL_CAPRI",
-   "vintage": "2017",
-   "source": "CAPRI estimation (VA)",
-   "best_update": "re-run CAPRI PMP estimation",
-   "priority": "—"
+   "best_update": "PELA also holds 20173 CROSS-price records for 2005 (71% negative). They are in sources/estnlp/pela_cross_by_region.json (tools/build/ingest_pela_gtap.py), read by the supply module (SupplyModule.cross_price) for activity-level PMP cross terms where it builds Q itself; with CAPRI's exported 2030 terms (the default) the cross terms are CAPRI's."
   },
   "pmp_own_price_elasticities.csv": {
    "nature": "REAL_CAPRI",
    "vintage": "2017",
    "source": "CAPRI PELA",
-   "best_update": "re-estimated",
-   "priority": "—"
-  },
-  "pmp_diagonal_terms.csv": {
-   "nature": "REAL_CAPRI",
-   "vintage": "2017",
-   "source": "CAPRI estimation (VD)",
-   "best_update": "re-estimated",
-   "priority": "—"
-  },
-  "pmp_crossgroup_terms.csv": {
-   "nature": "REAL_CAPRI",
-   "vintage": "2017",
-   "source": "CAPRI estimation (VB)",
    "best_update": "re-estimated",
    "priority": "—"
   },
@@ -209,13 +188,6 @@
    "source": "IPCC 2006 / CAPRI envind",
    "best_update": "IPCC 2019 refinement",
    "priority": "low"
-  },
-  "manure_ch4_ef_regional.csv": {
-   "nature": "REAL_CAPRI",
-   "vintage": "2017",
-   "source": "CAPRI",
-   "best_update": "—",
-   "priority": "—"
   },
   "crop_nutrient_export.csv": {
    "nature": "REAL_CAPRI",

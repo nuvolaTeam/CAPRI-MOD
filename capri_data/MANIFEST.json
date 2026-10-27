@@ -277,22 +277,6 @@
    },
    "note": "Rebuilt from estnlp PELA 2005 with CAPRI's dampening rule. The previous file was keyed by CAPRI region codes (228 rows, only 107 resolving to model regions) and was clipped at 4.5 rather than dampened, understating 270 cells."
   },
-  "input_requirements.csv": {
-   "source": "CAPRI estimation",
-   "vintage": "2017",
-   "units": "coefficient",
-   "domain": "supply",
-   "status": "live",
-   "shape": {
-    "rows": 26375,
-    "cols": 3,
-    "columns": [
-     "input",
-     "crop",
-     "requirement"
-    ]
-   }
-  },
   "pmp_own_price_elasticities.csv": {
    "source": "CAPRI PELA",
    "vintage": "2017",
@@ -305,52 +289,6 @@
     "columns": [
      "crop",
      "own_price_elas"
-    ]
-   }
-  },
-  "pmp_diagonal_terms.csv": {
-   "source": "CAPRI estimation",
-   "vintage": "2017",
-   "units": "EUR-based",
-   "domain": "supply",
-   "status": "live",
-   "shape": {
-    "rows": 2560,
-    "cols": 2,
-    "columns": [
-     "crop",
-     "pmp_diagonal"
-    ]
-   }
-  },
-  "pmp_crossgroup_terms.csv": {
-   "source": "CAPRI estimation",
-   "vintage": "2017",
-   "units": "EUR-based",
-   "domain": "supply",
-   "status": "live",
-   "shape": {
-    "rows": 7524,
-    "cols": 3,
-    "columns": [
-     "group1",
-     "group2",
-     "coef"
-    ]
-   }
-  },
-  "manure_ch4_ef_regional.csv": {
-   "source": "CAPRI",
-   "vintage": "2017",
-   "units": "kg CH4/head",
-   "domain": "environment",
-   "status": "live",
-   "shape": {
-    "rows": 46,
-    "cols": 2,
-    "columns": [
-     "animal",
-     "ch4_ef_avg"
     ]
    }
   },
@@ -403,7 +341,9 @@
    "domain": "environment",
    "status": "live",
    "shape": {
-    "note": "real CAPRI crop fertiliser + manure proxy for animals"
+    "rows": 29,
+    "cols": 3,
+    "note": "CAPRI crop fertiliser application (NITF, PHOF, POTF); the animal rows removed 27 October 2026 (K33)"
    }
   },
   "feed_requirements.csv": {
@@ -525,22 +465,6 @@
     ]
    },
    "note": "FADN-based organic yield gaps by PESETA macro-region and product group (JRC Seville, SUPREMA)."
-  },
-  "livestock_intensity_bounds.csv": {
-   "source": "capreg DATA2 DCOL/DCOH YILD",
-   "vintage": "2017",
-   "units": "t milk per head",
-   "domain": "supply",
-   "status": "live",
-   "shape": {
-    "rows": 221,
-    "cols": 2,
-    "columns": [
-     "DCOW_low",
-     "DCOW_high"
-    ]
-   },
-   "note": "Low- and high-intensity dairy yields: the bounds of the livestock intensity margin."
   },
   "FITNESS_FOR_USE.json": {
    "source": "authored from validation results",

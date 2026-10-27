@@ -270,7 +270,7 @@ def test_emission_tax_in_supply_follows_capri(model):
     from capri_mod.environmental.environmental_module import GWP_CH4
     assert importlib.util.find_spec("capri_mod.abatement") is None
     sc = carbon_tax_scenario(100.0)
-    assert sc.carbon_tax == 100.0 and sc.ae_budget_change == 0.0 and sc.nitrate_limit_change == 0.0
+    assert sc.carbon_tax == 100.0 and sc.ae_budget_change == 0.0
     regs = ["IR010000", "NO080000"] if "NO080000" in model.data["areas"].index else ["IR010000"]
     b = model.run(scenario="BASELINE", regions=regs, max_outer_iter=2)
     try:
@@ -1447,7 +1447,7 @@ def test_policy_instruments_are_not_inert(data):
 
 
 def test_constraint_instruments_reach_the_solve(data):
-    """Set-aside and the nitrogen ceiling must change the feasible set.
+    """Set-aside must change the feasible set (the legacy nitrogen ceiling was retired on 27 October 2026, K33).
 
     These act on constraints rather than net revenues, so they are checked at
     the constraint builder — cheap, and it is exactly where set-aside was
@@ -1473,21 +1473,6 @@ def test_constraint_instruments_reach_the_solve(data):
         # by position: constraint order is an implementation detail.
         assert any(float(v) < 0 for v in b_sa), (
             "the SETA floor should enter as a negative bound (-x <= -floor)")
-
-    # the nitrogen ceiling is anchored to observed base intensity, so an
-    # unchanged run must be SLACK (this is what the 170 kg/ha anchor got wrong)
-    base_int = model.base_n_intensity()
-    _, b_slack, _, _ = model._build_constraints(nitrate_limit=base_int)
-    _, b_tight, _, _ = model._build_constraints(nitrate_limit=base_int - 10.0)
-    # locate the nitrogen row by which bound moves, rather than assuming a
-    # position: the constraint order is an implementation detail and an
-    # index-based check silently passes/fails for the wrong reason.
-    moved = [i for i in range(len(b_slack))
-             if abs(float(b_slack[i]) - float(b_tight[i])) > 1e-9]
-    assert moved, "nitrate_limit did not tighten any constraint"
-    for i in moved:
-        assert float(b_tight[i]) < float(b_slack[i]), (
-            "tightening the nitrogen limit loosened a constraint")
 
 
 def test_no_negative_own_price_elasticities(data):
@@ -1527,65 +1512,6 @@ def test_no_negative_own_price_elasticities(data):
             assert elas > 0, (
                 f"{crop} has a NEGATIVE own-price elasticity ({elas:.3f}): "
                 "supply must rise when a crop's own price rises")
-
-
-def test_intensity_margin_identity_and_response(data):
-    """The N intensity margin must preserve the base year and respond sanely.
-
-    Nutrient coefficients are fixed per activity, so without this margin a
-    nitrogen constraint can only cut AREA — which overstated the response ~10x
-    against CAPRI's Green Deal run (wheat -24% vs -1.9%). CAPRI instead lets
-    application per hectare flex (`v_cropNutNeedMultFact`) and splits the
-    adjustment between intensity and area.
-
-    Two properties matter:
-      1. IDENTITY — at full intensity the yield factor is exactly 1.0, so
-         switching this on cannot disturb the base year or PMP calibration.
-      2. RESPONSE — a binding ceiling reduces intensity with diminishing
-         returns, and the yield loss is agronomically plausible rather than a
-         collapse.
-    """
-    from capri_mod.supply.intensity import yield_factor, optimal_intensity
-    from capri_mod.supply.supply_module import SupplyModule
-    from capri_mod.utils.utils import calibrate_supply_elasticities
-
-    # 1. base-year identity, exactly
-    assert abs(float(yield_factor(1.0)) - 1.0) < 1e-12, (
-        "yield_factor(1.0) must be exactly 1.0 or the base year shifts")
-
-    # monotone and diminishing-returns
-    fs = [float(yield_factor(m)) for m in (0.5, 0.6, 0.7, 0.8, 0.9, 1.0)]
-    assert all(b > a for a, b in zip(fs, fs[1:])), "yield must rise with N"
-    gaps = [b - a for a, b in zip(fs, fs[1:])]
-    assert all(b <= a + 1e-9 for a, b in zip(gaps, gaps[1:])), (
-        "N response must show diminishing returns")
-
-    # a 20% N cut should cost a few percent of yield, not a collapse
-    loss20 = (1.0 - float(yield_factor(0.8))) * 100.0
-    assert 1.0 < loss20 < 12.0, f"implausible yield loss for -20% N: {loss20:.1f}%"
-
-    # 2. response under a real regional ceiling
-    sm = SupplyModule(data, calibrate_supply_elasticities(data["areas"]))
-    region = list(data["areas"].index)[0]
-    sm.run(price_signals=None, regions=[region])
-    model = sm._models[region]
-    crops = [c for c in model.acts if c in data["nutrients"].index]
-    ncoef = data["nutrients"]["N"].reindex(crops).fillna(0.0)
-    price = data["producer_prices"].reindex(crops).fillna(0.0)
-    yld = data["yields"].loc[region].reindex(crops).fillna(0.0)
-    areas = model._base_levels().reindex(crops).fillna(0.0)
-    if float(areas.sum()) <= 0:
-        return
-    own = float((ncoef * areas).sum() / areas.sum())
-
-    slack = optimal_intensity(ncoef, price, yld, 1.0, own * 1.05, areas)
-    assert not slack.binding, "a ceiling above base intensity must not bind"
-    assert abs(float(slack.yield_factor.mean()) - 1.0) < 1e-9
-
-    tight = optimal_intensity(ncoef, price, yld, 1.0, own * 0.80, areas)
-    assert tight.binding, "a 20% ceiling below base intensity must bind"
-    wm = float((tight.intensity * areas).sum() / areas.sum())
-    assert 0.5 <= wm < 1.0, f"intensity should fall but not collapse: {wm:.3f}"
 
 
 def test_cap_support_not_double_counted(model):
@@ -2172,9 +2098,8 @@ def test_solve_leaves_no_state_behind(data):
     """A shocked solve must not alter the model for the next one.
 
     Solves rewrite parts of `self.data` for their own duration: CAP premiums,
-    nutrient coefficients (nitrogen intensity margin), yields (yield-price
-    response). The restore block used to ENUMERATE those fields, and the list
-    fell behind twice — `nutrient_coefs` leaked until the intensity margin was
+    nutrient coefficients, yields (yield-price response). The restore block used to ENUMERATE those fields, and the list
+    fell behind twice — `nutrient_coefs` leaked until the (since retired) intensity margin was
     traced, and `yields` leaked again when the yield-price response was added.
     Each leak is silent: the altered value persists into every later solve.
 
@@ -2200,7 +2125,6 @@ def test_solve_leaves_no_state_behind(data):
         if act in shock.index:
             shock[act] = 0.20
     model.solve(price_shock=shock)
-    model.solve(nitrate_limit=model.base_n_intensity() - 20.0)
     model.solve(policy_shock={"organic_area_target": 0.25})
 
     after = _cold(model).solve().activities
@@ -2263,48 +2187,6 @@ def test_livestock_gross_output_is_marketed_product(model):
                for a in ("PIGS", "PIGF") if a in coef.columns and a in herds.columns)
     assert 125_000 < milk < 160_000, f"EU dairy output {milk:,.0f} kt off CAPRI"
     assert 20_000 < pork < 25_000, f"EU pig output {pork:,.0f} kt off CAPRI"
-
-
-def test_livestock_intensity_margin_is_identity_when_unconstrained(model):
-    """Dairy extensifies under a nitrogen ceiling, and only then.
-
-    CAPRI carries every dairy herd as a low- and a high-intensity variant
-    (DCOL/DCOH) so the herd can move between them under a nutrient target
-    instead of only shrinking. The margin must be exactly inert when no ceiling
-    binds, or it would disturb the base year and its PMP calibration.
-    """
-    import numpy as np
-
-    sm = model.supply_module
-    region = "NL110000" if "NL110000" in model.data["areas"].index else \
-        str(model.data["areas"].index[0])
-    sm.run(price_signals=None, regions=[region])   # regional models are lazy
-    mo = sm._models[region]
-    mo.solve()          # the split columns calibrated on the first solve enter from the second (one solve per run)
-
-    base = mo.solve()
-    again = mo.solve()
-    b1 = float(base.gross_output.get("DCOW", float("nan")))
-    b2 = float(again.gross_output.get("DCOW", float("nan")))
-    if not np.isnan(b1):
-        # relative: the second solve starts warm and stops within the solver's tolerance (1.3e-6 on 931 kt, 1.4e-9
-        # relative, seen in the full suite on 21 October 2026 after other tests had solved the region)
-        # (4.2e-8 and 1.5e-7 relative in two full-suite runs on 23 October 2026, the region solved once per supply run
-        # since the land fallback's inner loop went: IPOPT's tolerance, 1e-8, is on the scaled problem; six digits of
-        # milk output are the reproducibility this checks)
-        assert abs(b1 - b2) < 1e-6 * max(1.0, abs(b1)), "an unconstrained solve is not reproducible"
-
-    tight = mo.solve(nitrate_limit=100.0)
-    t = float(tight.gross_output.get("DCOW", float("nan")))
-    if not np.isnan(b1) and not np.isnan(t) and b1 > 0:
-        herd_b = float(base.activities.get("DCOW", 0.0))
-        herd_t = float(tight.activities.get("DCOW", 0.0))
-        assert t <= b1 + 1e-6, "a nitrogen ceiling should not raise milk output"
-        if herd_b > 0 and herd_t < herd_b:
-            # output must fall by MORE than the herd: that difference is the
-            # intensity margin doing its work rather than animals alone
-            assert (t / b1) < (herd_t / herd_b) + 1e-9, (
-                "output fell only as fast as the herd: the intensity margin is inert")
 
 
 def test_fitness_for_use_is_consistent_with_the_model():

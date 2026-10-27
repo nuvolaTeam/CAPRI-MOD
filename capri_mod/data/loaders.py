@@ -60,7 +60,6 @@ _FILE_CATEGORY = {
     "land_market_2017.csv": "supply", "land_market_2030.csv": "supply",
     "land_market_2017_regions.csv": "supply", "land_market_2030_regions.csv": "supply",
     "nh3_factors_capri.json": "environment",
-    "livestock_intensity_bounds.csv": "supply",
     "landscape_targets_ms.csv": "policy",
     "cap_ceilings_2030.csv": "policy", "premium_scheme_shares_2030.csv": "policy",
     "capri_baseline_surplus_2030.csv": "policy",
@@ -79,9 +78,8 @@ _FILE_CATEGORY = {
     # validator can resolve and shape-check it like any other input
     "capri_own_price_elasticities.csv": "supply",
     "organic_yield_gap.csv": "policy",
-    "variable_costs.csv": "supply", "input_requirements.csv": "supply",
+    "variable_costs.csv": "supply",
     "land_availability.csv": "supply", "supply_elasticities_regional.csv": "supply",
-    "pmp_diagonal_terms.csv": "supply", "pmp_crossgroup_terms.csv": "supply",
     "pmp_capri_2030.csv": "supply", "pmp_capri_2030_animals.csv": "supply",
     "pmp_recipe_2030.csv": "supply", "pmp_recipe_2030_animals.csv": "supply",
     "pmp_recipe_2017.csv": "supply", "pmp_recipe_2017_animals.csv": "supply",
@@ -92,7 +90,7 @@ _FILE_CATEGORY = {
     "armington_params.csv": "market",
     "cap_payments.csv": "policy", "crop_premium.csv": "supply", "eu_mfn_tariffs.csv": "policy", "tariffs.csv": "policy",
     "nutrient_coefs.csv": "environment", "crop_nutrient_export.csv": "environment",
-    "manure_ch4_ef_regional.csv": "environment", "climate_zones.csv": "environment",
+    "climate_zones.csv": "environment",
     "feed_requirements.csv": "feed",
     # JSON parameter files
     "fao_market_baseline.json": "market",
@@ -755,8 +753,6 @@ def load_all_data(data_dir: Optional[Path] = None, validate: bool = False,
             data_dir, "landscape_targets_ms.csv"),
         "organic_targets_ms": _load_optional_csv(
             data_dir, "organic_targets_ms.csv"),
-        "livestock_intensity_bounds": _load_optional_csv(
-            data_dir, "livestock_intensity_bounds.csv"),
         # MITERRA housing days (HD) and share of the grazing time spent in the stable (Et, %) of dairy cows per member
         # state (CAPRI p_rcEmissions(RU,"DAICOW_L",...), abatement/ammonia/RCEmissions.csv): the activity term of the
         # dairy cow's energy requirement (envind/breeding.gms l. 188-191)
@@ -805,21 +801,3 @@ def load_regional_supply_elasticities(data_dir: Optional[Path] = None) -> pd.Dat
     return pd.DataFrame()
 
 
-def load_pmp_diagonal_terms(data_dir: Optional[Path] = None) -> pd.DataFrame:
-    """PMP diagonal cost terms (VD) from estnlp/results.gdx."""
-    if data_dir is None:
-        data_dir = Path(__file__).parent.parent.parent / 'capri_data'
-    f = resolve_data_file(data_dir, "pmp_diagonal_terms.csv")
-    if f.exists():
-        return read_csv(f)
-    return pd.DataFrame()
-
-
-def load_input_requirements(data_dir: Optional[Path] = None) -> pd.DataFrame:
-    """Per-hectare input requirement coefficients (VA) from estnlp/results.gdx."""
-    if data_dir is None:
-        data_dir = Path(__file__).parent.parent.parent / 'capri_data'
-    f = resolve_data_file(data_dir, "input_requirements.csv")
-    if f.exists():
-        return read_csv(f)
-    return pd.DataFrame()

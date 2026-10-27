@@ -114,32 +114,6 @@
    "coverage": "46.5% by area, 177 regions",
    "note": "The single largest remaining gap. Arable-only coverage drives the 7.97 asymmetry ratio that distorts every scenario. Needs the estnlp results dump."
   },
-  "pmp_diagonal_terms.csv": {
-   "concept": "PMP quadratic own-activity term",
-   "unit": "EUR/ha^2",
-   "dimension": "region x activity",
-   "capri_symbol": "pmppar p_pmpQuadTechn",
-   "status": "GDX",
-   "coverage": "4589 records, 192 regions"
-  },
-  "pmp_crossgroup_terms.csv": {
-   "concept": "PMP quadratic cross-group term",
-   "unit": "EUR/ha^2",
-   "dimension": "region x group x group",
-   "capri_symbol": "pmppar p_pmpQuadPact",
-   "status": "GDX",
-   "coverage": "2318 records, 173 regions",
-   "note": "57% negative, i.e. genuine substitutes. The heuristic it replaced was uniformly positive."
-  },
-  "input_requirements.csv": {
-   "concept": "physical input use per hectare",
-   "unit": "varies by input",
-   "dimension": "region x input x crop",
-   "capri_symbol": "DATA2 SEED, FERT, PLAP, REPM, REPB, ELEC, EGAS, EFUL, ELUB",
-   "status": "GDX",
-   "coverage": "cost components extracted, 105408 records",
-   "note": "Superseded in practice by the variable_costs merge from TOIN."
-  },
   "world_prices.csv": {
    "concept": "world market price",
    "unit": "EUR/t",
@@ -178,12 +152,6 @@
    "dimension": "crop x nutrient",
    "status": "GDX",
    "note": "CAPRI doc Table 15, reclassified from LITERATURE."
-  },
-  "manure_ch4_ef_regional.csv": {
-   "concept": "methane emission factor for manure",
-   "dimension": "animal",
-   "status": "LITERATURE",
-   "note": "IPCC 2006/2019 factors. Correctly a constant."
   },
   "pela_cross_price": {
    "concept": "cross-price supply elasticity between crops",
@@ -255,28 +223,6 @@
     "wheat is absent from the parameter entirely; at market level it aggregates into WHEA"
    ]
   },
-  "livestock_intensity_bounds.csv": {
-   "concept": "low- and high-intensity dairy yields",
-   "unit": "t milk per head",
-   "dimension": "region x intensity variant",
-   "capri_symbol": "DATA2 DCOL/DCOH YILD",
-   "status": "GDX",
-   "coverage": "235 of 248 regions",
-   "note": "CAPRI splits every dairy herd 50/50 between DCOL and DCOH in the base year, so the split carries no base-year information; the value is the response channel, letting dairy extensify under a nutrient target instead of only shrinking.",
-   "gaps": []
-  },
-  "land_rent_regional.csv": {
-   "concept": "Land rent per hectare by region (Eurostat apri_lrnt, arable land and/or permanent grassland)",
-   "unit": "EUR/ha",
-   "dimension": "region",
-   "capri_symbol": "(Eurostat apri_lrnt)",
-   "status": "EXTERNAL",
-   "coverage": "209 of 248 regions from Eurostat (161 regional, 40 national, 8 arable-only national); 39 fallback",
-   "note": "Fallback for Germany and Cyprus: CAPRI 2030 accounts rent x median Eurostat/CAPRI ratio (0.41) - flagged in the source column; likely understates Germany.",
-   "gaps": [
-    "Germany and Cyprus not published in apri_lrnt"
-   ]
-  },
   "capri_baseline_surplus_2030.csv": {
    "concept": "CAPRI's own baseline gross N surplus per ha (2030 reference), input to the tiered nitrogen target",
    "unit": "kg N/ha",
@@ -307,18 +253,6 @@
    "status": "CAPRI",
    "coverage": "matched regions via nuts_crosswalk",
    "note": "CAPRI's 2030 manure N trade between regions: export share of excretion, import per ha of cropland; counts only where the run trades manure (manureTradeNew).",
-   "gaps": [
-    "unmatched regions"
-   ]
-  },
-  "capri_regional_n_balance_2030.csv": {
-   "concept": "CAPRI regional N balance positions (MINFER, EXCRET, MTRADE, IMPORT, EXPPRD, CRESID, BIOFIX, ATMOSD, SURTOT)",
-   "unit": "kt N",
-   "dimension": "region",
-   "capri_symbol": "dataOut balance rows",
-   "status": "CAPRI",
-   "coverage": "matched regions via nuts_crosswalk",
-   "note": "See docs/FERTILISER_ALLOCATION.md.",
    "gaps": [
     "unmatched regions"
    ]

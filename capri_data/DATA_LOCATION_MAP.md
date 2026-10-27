@@ -31,9 +31,8 @@ Fills: `base_areas.csv`, `yields.csv`, `variable_costs.csv`, `crop_premium.csv`,
 
 | Model file | Symbol | Location |
 |---|---|---|
-| `fao_demand_own_elas_eu.json` | `p_demandElas` | `%results_in%/global/fao_agg_%BAS%_<agg>.gdx` |
 | `supply_elasticities_regional.csv`, `pmp_own_price_elasticities.csv` | `p_supplyElas` / `p_pelaEst` | supply estimation results (PELA; the shipped file is from estnlp PELA) |
-| `pmp_diagonal_terms.csv`, `pmp_crossgroup_terms.csv`, `input_requirements.csv` | `p_pmpQuadPact` and the other PMP terms | supply estimation results |
+| `sources/capreg/pmp_quad_techn.csv`, `pmp_quad_pact.csv`, `sources/baseline_pmp/pmp_quad_techn_2030.csv` ... | `p_pmpQuadTechn`, `p_pmpQuadPact` and the other PMP terms | pmppar results |
 | land market (`land_market_2017.csv`) | `p_pmpQuadLandTypes` | pmppar results |
 
 PMP terms are estimation outputs: a new base needs them re-estimated by CAPRI, not copied; mixing 2017 PMP terms

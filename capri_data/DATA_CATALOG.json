@@ -67,40 +67,16 @@
    "units": "elasticity"
   },
   {
-   "file": "input_requirements.csv",
-   "vintage": "2017",
-   "domain": "supply",
-   "units": "coefficient"
-  },
-  {
    "file": "pmp_own_price_elasticities.csv",
    "vintage": "2017",
    "domain": "supply",
    "units": "elasticity"
   },
   {
-   "file": "pmp_diagonal_terms.csv",
-   "vintage": "2017",
-   "domain": "supply",
-   "units": "EUR-based"
-  },
-  {
-   "file": "pmp_crossgroup_terms.csv",
-   "vintage": "2017",
-   "domain": "supply",
-   "units": "EUR-based"
-  },
-  {
    "file": "gascoeff_params.json",
    "vintage": "2006",
    "domain": "environment",
    "units": "kg/head or factor"
-  },
-  {
-   "file": "manure_ch4_ef_regional.csv",
-   "vintage": "2017",
-   "domain": "environment",
-   "units": "kg CH4/head"
   },
   {
    "file": "crop_nutrient_export.csv",

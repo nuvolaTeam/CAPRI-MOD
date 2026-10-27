@@ -102,7 +102,6 @@ INVOCATIONS: list[tuple[str, list[str], list[Path]]] = [
     ("build_dairy_intensity", [], [D17]),
     ("build_cattle_intensity", [], [D17]),
     ("build_grass_intensity", [], [D17]),
-    ("build_livestock_intensity_bounds", [], [D17]),
     ("build_animal_yields", [], [D17]),
     ("build_animal_pmp_capri_2030", [], [REF]),
     ("build_animal_pmp_capri_2030", ["--splits"], [REF]),

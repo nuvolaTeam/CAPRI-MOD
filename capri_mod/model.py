@@ -655,9 +655,6 @@ class CAPRIModel:
                         getattr(pol_scenario, "pesticide_reduction", 0.0) or 0.0),
                     "organic_area_target": float(
                         getattr(pol_scenario, "organic_area_target", 0.0) or 0.0),
-                    "nitrate_limit_delta": (
-                        float(getattr(pol_scenario, "nitrate_limit_change", 0.0) or 0.0)
-                        or None),
                 }
             supply_results = self.supply_module.run(
                 price_signals=price_signal if outer_iter > 0 else None,

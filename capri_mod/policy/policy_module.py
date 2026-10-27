@@ -83,7 +83,6 @@ class PolicyScenario:
     # bilateral data (one per exporter) in proportion to their base volumes (MarketModule._apply_trq_volumes)
 
     # Environmental constraints
-    nitrate_limit_change: float = 0.0     # delta kg N/ha (negative = tighter)
     set_aside_requirement: float = 0.0    # share of UAA as landscape elements
     #: Farm-to-Fork organic AREA target (share of UAA, e.g. 0.25 for 25%).
     #: An area target, not a payment. CAPRI models

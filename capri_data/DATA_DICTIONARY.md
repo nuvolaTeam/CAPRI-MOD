@@ -50,7 +50,7 @@ Files are under `capri_data/<base_year>/<category>/` (only `2017/` exists); `tra
 
 | File | Content | Source | Shape |
 |---|---|---|---|
-| `nutrient_coefs.csv` | N, P2O5, K2O per ha of crop (and per head of animal rows, used only by the legacy nitrate-limit instrument, K33) | capreg DATA2 NITF/PHOF/POTF | 39 × 3 |
+| `nutrient_coefs.csv` | N, P2O5, K2O per ha of crop (the per-head animal rows of unrecorded source removed with the legacy nitrate-limit instrument, K33) | capreg DATA2 NITF/PHOF/POTF | 29 × 3 |
 | `crop_nutrient_export.csv` | nutrient removed per t of crop (`N_kg_t`, `P_kg_t`, `K_kg_t`) | CAPRI | 35 × 3 |
 | `climate_zones.csv` | climate-zone shares per CAPRI region or member state (`region`, `zone`, `pct`; 145 codes); read by `tools/build/build_ad_option.py`, not by the model | CAPRI | 521 rows |
 | `feed_requirements.csv` | feed per head (t DM/head/yr) by animal and feed item | capreg DATA2 feed columns, fresh to dry matter | 9 animals × 11 feeds |
@@ -216,6 +216,11 @@ distillers' dried grains; `FENI`, `FPRI` CAPRI's residual feeds. Feed items in `
 
 ## Extracted, not used yet
 
+*Removed 27 October 2026 (the project lead's decision, no builder and no reader): `2017/supply/input_requirements.csv`,
+`pmp_diagonal_terms.csv`, `pmp_crossgroup_terms.csv` (CAPRI's estnlp VA/VD extracts of unrecorded origin; CAPRI's PMP
+terms are read from `sources/capreg/pmp_quad_techn.csv`, `pmp_quad_pact.csv` and the 2030 exports) and
+`2017/environment/manure_ch4_ef_regional.csv` (the accounts use `livestock_ch4man_coef.csv`).*
+
 CAPRI data that the extractors write and no model code, builder or test reads at present (inventory of 27 October 2026).
 Kept as the repository's copy of CAPRI's data, for the work that will need them; each is rewritten when its extractor
 runs.
@@ -232,6 +237,4 @@ runs.
 | `sources/capmod/capmod_trade_flows_2017.csv.xz`, `capmod_world_prices_2017.csv` | CAPRI's 2017 bilateral trade flows and world prices (capmod res_0_1717) | `tools/build/ingest_capmod_market.py` |
 | `sources/estnlp/gtap_armington.csv` | GTAP Armington elasticities mapped to the model's commodities | `tools/build/ingest_pela_gtap.py` |
 | `validation/greendeal_2030/capri_marginal_terms_max_2030.csv.xz`, `capri_unit_values_max_2030.csv` | CAPRI's maximum-mitigation Green Deal run: marginal terms and unit values | `tools/build/extract_capri_marginal_terms.py` |
-| `2017/supply/input_requirements.csv` (26,375 rows), `pmp_diagonal_terms.csv` (2,560 rows), `pmp_crossgroup_terms.csv` (7,524 rows) | CAPRI's estnlp results per CAPRI region (209 codes): input requirements per ha (VA), PMP diagonal terms (VD), cross terms between crop groups; listed in the loader's file map (`load_input_requirements`, `load_pmp_diagonal_terms` are defined but called nowhere) | no builder in `tools/build` (earlier extraction, command not recorded) |
-| `2017/environment/manure_ch4_ef_regional.csv` (46 rows) | manure CH4 per head (`region`, `animal`, `ch4_ef_avg`) for DK000000 and the two EU blocks; the accounts use `livestock_ch4man_coef.csv` since Sprint 9s | no builder in `tools/build` (source not recorded) |
 

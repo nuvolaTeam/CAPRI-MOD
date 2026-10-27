@@ -74,7 +74,7 @@ from capri_mod.policy.policy_module import PolicyScenario
 my_scenario = PolicyScenario(
     name="MY_SCENARIO",
     biss_rate_change=-50,       # EUR/ha cut in direct payments
-    nitrate_limit_change=-30,   # stricter N limit
+    nutrient_surplus_target=True,   # CAPRI's tiered N-balance target (JRC121368)
     lfa_budget_change=-0.2,     # CAPRI's LFA budget -20% (premium change by CAPRI's 2030 split by scheme)
 )
 results = model.run(custom_scenario=my_scenario)

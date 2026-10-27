@@ -62,7 +62,7 @@ Three tiers, most consistent first:
    input data.
 
 Rule: a full re-base must move prices, quantities and PMP terms to the same year, from CAPRI's own estimation. The
-PMP terms and elasticities (`input_requirements`, `pmp_diagonal_terms`, `pmp_crossgroup_terms`,
+PMP terms and elasticities (CAPRI's `pmp_quad_techn`, `pmp_quad_pact` and their 2030 exports,
 `pmp_own_price_elasticities`, `supply_elasticities_regional`) are estimation outputs: a new base year needs CAPRI's
 PMP/PELA estimation for that year, not a copy of the 2017 terms. The model's `base_year` switch is not complete yet
 (`capri_data/README.md`).

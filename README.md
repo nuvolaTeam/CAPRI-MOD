@@ -175,7 +175,7 @@ files record how they map to this model's names.
 | Market method | CAPRI's bilateral Armington market: 30 trade regions (31 with CAPRI's EU blocks, optional), transport costs, tariffs, TRQs; dairy block, GL food demand, young animals, CAPRI's market supply functions; Newton + Anderson to < 1e-7 |
 | Data validator | 13 pass, 0 warn, 0 fail |
 | Convergence | all 221 regional models solve (one Dutch unit, NL320000, at JRC121368's relaxed N target); Farm-to-Fork 2030 converges in 9 iterations, Green Deal 2030 in 8 (reference runs r161, r162, on CAPRI's regional units) |
-| Test suite | 182 tests (22 marked `slow`) |
+| Test suite | 180 tests (22 marked `slow`) |
 | On by default, as in CAPRI | land market and land rules, endogenous feed rations, fodder equality, ammonia technologies |
 | Optional | manure market (`use_manure_market`) |
 | 2030 Farm-to-Fork run | about 36 minutes on 2 cores (r161), plus about an hour once per new baseline for the market supply Hessian (67 min for r161's); regions solved in parallel (`CAPRI_WORKERS`), same results |
@@ -292,11 +292,11 @@ homoglyph corruption, dropped regional detail, and silent synthetic fallbacks).
   once concealed 16 synthetic columns inside a file marked real; per-column
   tracking makes that impossible.
 - **99.6% of live cells are real CAPRI data** (145,116 of 145,715) — an honest
-  per-cell count over all 100 declared inputs, not a flattering area-weighted
+  per-cell count over all 93 declared inputs, not a flattering area-weighted
   figure. Every non-real cell is explicitly labelled. Recomputed with
   `tools/check/verify_schema.py`.
 - **A declarative schema** (`INPUT_SCHEMA.json`) is the single source of truth:
-  100 declared inputs, each with its source, unit, dimension, consuming modules,
+  93 declared inputs, each with its source, unit, dimension, consuming modules,
   and known gaps. It is built to survive a future swap of CAPRI inputs for
   external sources (Eurostat, FADN) as a field edit rather than a rewrite.
 
@@ -417,7 +417,7 @@ capri_data/
 │                              fao_agg_2017, estnlp, jrc121368, gams
 ├── trajectories/              projection paths (captrd 2030)
 ├── validation/                REGRESSION_ANCHORS.json, VALIDATION.md
-├── INPUT_MANIFEST.json        the 100 declared inputs: source, unit, dimensions
+├── INPUT_MANIFEST.json        the 93 declared inputs: source, unit, dimensions
 ├── INPUT_SCHEMA.json          expected shape and dtype of every file
 └── DATA_SOURCING_REGISTRY.json   every data decision, fix and open issue
 ```
@@ -427,7 +427,7 @@ Each folder under the base year feeds the module named on its right. Anything in
 nothing in the model reads it directly, so the derivation from source to input is
 always a visible, re-runnable step in `tools/`.
 
-### 4.2 The 100 declared inputs
+### 4.2 The 93 declared inputs
 
 Every input the model consumes is declared in `INPUT_MANIFEST.json` with its
 concept, unit and CAPRI symbol; the core inputs below are also in `INPUT_SCHEMA.json` with their
@@ -454,11 +454,8 @@ consuming modules:
 | feed_availability | feed supply by item | 1000 t DM | feed |
 | crop_nutrient_export | nutrient removal per ton yield | kg/t | environment |
 | climate_zones | IPCC climate zone shares | share | environment |
-| manure_ch4_ef | methane emission factor | kg CH₄/head/yr | environment |
 | eu_mfn_tariffs | applied MFN tariff | % or EUR/t | market |
 | supply_elasticities_regional | own-price supply elasticity by region | — | supply |
-| input_requirements | physical input use per hectare | various | supply, environment |
-| manure_ch4_ef_regional | methane emission factor for manure | kg CH4/head | environment |
 | pela_cross_price | cross-price elasticities (PELA) | — | supply |
 | livestock_output_coef | marketed product per head | kt/1000 head | supply |
 | livestock_revenue_coef | market revenue per head | EUR/head | supply |
@@ -582,7 +579,6 @@ modules.
 | `biofuel/` | 40 | reporting of the market's biofuel block | (feedstock demand is in `market/`) |
 | `fert/` | 670 | CAPRI's inner fertiliser distribution and nutrient need (N, P2O5, K2O) | inside the supply models (fert/fertned.gms) |
 | `projection/` | 1,460 | the baseline of a simulation year; multi-year loop (perennial areas carried) | CAPRI's 2030 reference or captrd trajectory, calibrated as CAPMOD; validated vs CAPRI 2030 |
-| `supply/intensity.py` | 190 | nitrogen intensity margin | Mitscherlich yield response; N per ha as a decision |
 | `supply/supply_module.py` | — | yield-price response | yields move with own price, as CAPRI's stage one |
 | `data/reconcile_base.py` | 190 | base-year reconciliation | weighted least squares onto accounting identities, as CAPRI's `coco` |
 
@@ -757,7 +753,7 @@ their numbers): `CAP_2023_2027`, `CAP_REFORM_2030`, `GREEN_DEAL_F2F`, `N_LIMITS_
 ### 6.3 Custom scenarios
 
 A scenario is a set of shocks: CAP premium changes (per activity, `CROPS`,
-`LIVESTOCK`, or `ALL`), world-price shocks, or nitrate limits. Build a
+`LIVESTOCK`, or `ALL`), world-price shocks, or CAPRI's N-balance target. Build a
 `PolicyScenario` object or pass shocks directly to `run()` (see
 [§7](#7-running-the-model)).
 
@@ -1184,8 +1180,8 @@ Saxony's maize in lowland Leipzig rather than being spread by a single key. Wher
 CAPRI has no regional price it falls back to the national one before the EU-wide
 figure, so every vine-growing region carries its own country's wine price.
 
-**Sound for, additionally:** nitrogen ceilings (an intensity margin plus CAPRI's
-tiered surplus rule), pesticide instruments (with plant-protection costs derived
+**Sound for, additionally:** nitrogen targets (CAPRI's tiered surplus rule on the gross
+N balance inside the regional models), pesticide instruments (with plant-protection costs derived
 from all 27 member states) and organic area targets (CAPRI's input/output
 adjustment with its FADN yield gaps).
 
@@ -1195,7 +1191,7 @@ adjustment with its FADN yield gaps).
 | **Supply — livestock** | Validated (direction) | Green Deal scenario: reproduces CAPRI's cattle-extensification signal |
 | **Policy — payment computation** | Validated | Premiums match CAPRI `PRME` exactly; EU budget computes to €54.2bn against the real ~€55–58bn |
 | **Policy — scenario response** | Published CAPRI (JRC121368, Figure 5) | All four Farm-to-Fork instruments in CAPRI's own specification, EU-wide, converged: farmland +3.6% vs +3%, cereal area −3.7% vs −4%, wheat and barley yields −11% as in CAPRI, oilseeds −16.3% vs −15.5%, vegetables and permanent crops −13.9% vs −12%, cereals −11.5% vs −15% (maize) |
-| **Policy — nitrogen instruments** | Fixed | An intensity margin now exists (`supply/intensity.py`), so N ceilings adjust application per hectare rather than forcing all adjustment onto area |
+| **Policy — nitrogen instruments** | Fixed | CAPRI's tiered N-balance target inside the regional models, met through CAPRI's fertiliser options, its intensity variants and area; the model's own applied-N ceiling and its intensity margin were retired on 27 October 2026 (K33) |
 | **Environment** | Validated | Gross nitrogen balance on CAPRI's definition (`e_SURTOTHa`), item by item against CAPRI's 2030 reference (EU, kg N/ha): removal 125 vs 119, residues 57 vs 55, fixation 10 vs 8, deposition 11 vs 11, mineral 63 vs 57, manure 54 vs 53; regional surplus correlation 0.92 over 235 regions. Phosphate balance (P2O5, docs/P_BALANCE.md): with CAPRI's own levels the formulas give its items; at the model's base data EU kg P2O5/ha excretion 27.8 vs 27.6, mineral 15.6 vs 15.6, removal 53.1 vs 53.4, surplus 14.4 vs 13.9, regional surplus correlation 0.99 |
 | **Feed** | Validated (ruminants) | Energy & dry matter match CAPRI within ~10% via IPCC 2006 Eq. 10.6; monogastrics calibrated to CAPRI targets |
 | **Market** | Validated | Base prices match CAPRI `PMRK`; scenario supply shocks move prices in CAPRI's direction |
@@ -1547,21 +1543,18 @@ principled reason and extension path.
   (median 0.92). Measured directly, all 12 crops tested show positive own-price
   elasticities across ~690 region-crop checks, with zero negative responses.
   Pinned by `test_no_negative_own_price_elasticities`.
-- **Livestock has an intensity margin too.** CAPRI carries every dairy herd as a
-  low- and a high-intensity variant (`DCOL`/`DCOH`) so it can extensify under a
-  nutrient target rather than only shrink. Those bounds are extracted per region
-  (EU median 5.39 and 8.99 t milk/head) and a nitrogen ceiling moves the dairy
-  yield toward the low bound, carrying revenue and reported output with it: in
-  `NL11` under a 100 kg N/ha ceiling the herd falls 1.6% while milk output falls
-  10.5%. Exactly inert when no ceiling binds.
-- **Nitrogen instruments act on the intensity margin** (`supply/intensity.py`):
-  a nitrogen ceiling lowers application per hectare with a yield response, and the
-  adjustment splits between the intensity and extensive margins as in CAPRI, rather
-  than being met by cutting area alone. The nutrient target follows CAPRI's tiered
-  surplus schedule (25% of the first 50 kg N/ha, 50% on 50–100, 75% on 100–150,
+- **Livestock intensity as CAPRI's.** CAPRI carries dairy cows, fattening bulls and
+  heifers as low- and high-intensity activities (`DCOL`/`DCOH`, `BULL`/`BULH`,
+  `HEIL`/`HEIH`), and the regional models do the same, so herds can extensify under a
+  nutrient target rather than only shrink.
+- **Nitrogen instruments are CAPRI's.** The nutrient target is a restriction on the
+  gross N balance inside the regional models, met through CAPRI's fertiliser
+  options, intensity variants and areas (the model's own applied-N ceiling and its
+  Mitscherlich intensity margin were retired on 27 October 2026, K33). It follows
+  CAPRI's tiered surplus schedule (25% of the first 50 kg N/ha, 50% on 50–100, 75% on 100–150,
   100% above), and the resulting regional surplus distribution matches CAPRI's own
   `SURSOI`: median 48.2 against 49.5 across 228 regions.
-- **All 248 regional models solve** in CAPRI's form; in the Farm-to-Fork scenario one Dutch region (NL32, r145) cannot
+- **All regional models solve** in CAPRI's form; in the Farm-to-Fork scenario one Dutch region (NL32, r145) cannot
   meet the tiered nitrogen target and is solved at JRC121368's relaxed 36% cut, as the report did for its
   highest-surplus regions (`metadata["nlp_fallback"]`). A region whose IPOPT solve still fails would keep its last
   IPOPT point, warned about and recorded there (none in r145 or r142).

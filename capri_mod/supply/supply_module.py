@@ -272,10 +272,6 @@ class RegionData:
     #: CAPRI's organic yield gaps by macro-region and product group.
     organic_yield_gap: Optional[pd.DataFrame] = None
 
-    #: Low- and high-intensity dairy yields (CAPRI DCOL / DCOH), the bounds of
-    #: the livestock intensity margin.
-    livestock_intensity_bounds: Optional[pd.Series] = None
-
     #: CAPRI's Green Deal targets for this region's member state: extra
     #: landscape land (points of UAA) and organic conversion (points of arable,
     #: grassland and permanent-crop area).
@@ -2977,37 +2973,6 @@ class RegionalSupplyModel:
             target += max(0.0, min(surplus_per_ha, hi) - lo) * (1.0 - cut)
         return target
 
-    def applied_n_ceiling_for_surplus_cut(self, surplus_per_ha: float) -> float:
-        """Translate a tiered SURPLUS target into an applied-N ceiling.
-
-        The constraint in the solve acts on applied nitrogen, but CAPRI's target
-        acts on the surplus (inputs minus outputs). A surplus reduction has to
-        come out of inputs, so the applied-N ceiling falls by the same ABSOLUTE
-        amount as the required surplus cut — not the same proportional amount,
-        which is the trap: surplus and applied N differ by roughly a factor of
-        four here (median 54 against 241 kg N/ha), so applying a 27% surplus cut
-        as a 27% cut in applied N would be about four times too aggressive.
-        """
-        target = self.tiered_surplus_target(surplus_per_ha)
-        cut = max(0.0, surplus_per_ha - target)
-        return max(0.0, self.base_n_intensity() - cut)
-
-    def base_n_intensity(self) -> float:
-        """Observed base-year total N application per ha of UAA (kg N/ha).
-
-        Used as the anchor for nitrogen-ceiling scenarios. The constraint acts
-        on TOTAL N from the nutrient coefficients, which legitimately exceeds
-        the 170 kg N/ha Nitrates Directive figure (that applies to organic N
-        only), so the directive value is not a valid absolute anchor here.
-        """
-        coefs = self.data.nutrient_coefs.reindex(self.acts)["N"].fillna(0.0)
-        base_n = float((coefs.values * self._base_levels().values).sum())
-        uaa = (self._land_of("ARABLE")
-               + self._land_of("PERMANENT")
-               + self._land_of("GRASSLAND"))
-        return base_n / uaa if uaa > 0 else 0.0
-
-
     def _manure_techs(self):
         """CAPRI's ammonia technologies for this region: {animal: [sub-activity block]}
         (capri_data/2017/abatement/ammonia/ammonia_tech_model.csv, capri_mod/supply/ammonia_techs.py)."""
@@ -3387,101 +3352,6 @@ class RegionalSupplyModel:
         self.data.nutrient_coefs = nc
         self._fert_tech_shares.update({k: v[0] for k, v in shares.items()})
         return self._n_intensity
-
-    def _apply_intensity_margin(self, nitrate_limit: float):
-        """Choose the cost-minimising N intensity and apply it in place.
-
-        Returns the IntensityResult, or None if the ceiling is slack. Mutates
-        ``self.data.nutrient_coefs`` (N column) and ``self.net_revenues`` for the
-        duration of this solve; both are restored by the caller's finally block
-        via the same backup mechanism used for price and policy shocks.
-
-        At full intensity the yield factor is exactly 1.0, so a slack ceiling is
-        a true no-op and the base year is unaffected.
-        """
-        from capri_mod.supply.intensity import (optimal_intensity,
-                                                 dairy_intensity_response)
-
-        crops = [c for c in self.acts
-                 if c in self.data.nutrient_coefs.index]
-        if not crops:
-            return None
-        ncoef = self.data.nutrient_coefs.reindex(crops)["N"].fillna(0.0)
-        areas = self._base_levels().reindex(crops).fillna(0.0)
-        if float(areas.sum()) <= 0:
-            return None
-
-        prices = self.data.producer_prices.reindex(crops).fillna(0.0)
-        ylds = self.data.yields.reindex(crops).fillna(0.0) \
-            if hasattr(self.data.yields, "reindex") else pd.Series(0.0, index=crops)
-
-        # The ceiling is expressed per ha of UAA; convert to the crop-set basis
-        # the intensity optimiser works on, so the two are commensurate.
-        uaa = (self._land_of("ARABLE")
-               + self._land_of("PERMANENT")
-               + self._land_of("GRASSLAND"))
-        crop_area = float(areas.sum())
-        if uaa <= 0 or crop_area <= 0:
-            return None
-        ceiling_crop_basis = nitrate_limit * uaa / crop_area
-
-        res = optimal_intensity(
-            n_coef=ncoef, price=prices, base_yield=ylds,
-            n_price=1.0, n_ceiling_per_ha=ceiling_crop_basis, areas=areas)
-        if not res.binding:
-            return None
-
-        # (a) the constraint sees the reduced application
-        new_coefs = self.data.nutrient_coefs.copy()
-        for c in crops:
-            if c in new_coefs.index:
-                new_coefs.at[c, "N"] = float(ncoef[c] * res.intensity[c])
-        self.data.nutrient_coefs = new_coefs
-
-        # (b) the yield loss is paid for in net revenue
-        nr = self.net_revenues.copy()
-        for c in crops:
-            if c in nr.index:
-                nr[c] = float(nr[c]) * float(res.yield_factor[c])
-        self.net_revenues = nr
-
-        # (c) LIVESTOCK INTENSITY MARGIN. A nitrogen ceiling should let dairy
-        # extensify, not only shrink: CAPRI carries every dairy herd as a low-
-        # and a high-intensity variant (DCOL/DCOH) precisely so the herd can
-        # move between them under a nutrient target. Without this the only
-        # livestock margin is the number of animals.
-        #
-        # The pressure is the same intensity cut the crops face, so a slack
-        # ceiling leaves dairy untouched and the base year is reproduced
-        # exactly. Yield, milk revenue and manure nitrogen move together.
-        bounds = getattr(self.data, "livestock_intensity_bounds", None)
-        if bounds is not None and "DCOW" in self.acts:
-            # remember the base-intensity yield so gross_output can scale the
-            # per-head coefficient by however far the herd has extensified
-            if getattr(self, "_dairy_yield_base", None) is None:
-                self._dairy_yield_base = float(self.data.yields.get("DCOW", 0.0))
-            try:
-                low = float(bounds.get("DCOW_low", 0.0))
-                high = float(bounds.get("DCOW_high", 0.0))
-            except (TypeError, ValueError):
-                low = high = 0.0
-            pressure = float(np.clip(1.0 - np.mean(res.intensity.values), 0.0, 1.0))
-            y0 = float(self.data.yields.get("DCOW", 0.0))
-            y1 = dairy_intensity_response(y0, low, high, pressure)
-            if y1 > 0 and y0 > 0 and y1 != y0:
-                factor = y1 / y0
-                new_y = self.data.yields.copy()
-                new_y["DCOW"] = y1
-                self.data.yields = new_y
-                nr = self.net_revenues.copy()
-                if "DCOW" in nr.index:
-                    nr["DCOW"] = float(nr["DCOW"]) * factor
-                self.net_revenues = nr
-                try:
-                    res.livestock_intensity = factor
-                except Exception:
-                    pass          # result object may be frozen; the effect is applied regardless
-        return res
 
     #: free land types of CAPRI's land market (artificial land held fixed)
     LAND_TYPES = ("ARAC", "GRAS", "FRUN", "FORE", "OLND")
@@ -4464,7 +4334,6 @@ class RegionalSupplyModel:
 
     def _build_constraints(
         self,
-        nitrate_limit: Optional[float] = None,
         set_aside_requirement: float = 0.0,
     ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
         """
@@ -4636,20 +4505,8 @@ class RegionalSupplyModel:
         base_fodder = sum(self._base_levels().get(a, 0.0) for a in grass_acts)
         b_rows.append(max(grass_land_limit, base_fodder))
 
-        # 4. Nitrogen constraint (Nitrates Directive: 170 kg N/ha limit on organic N)
-        n_limit = nitrate_limit if nitrate_limit is not None else 999999.0
-        row_N = np.zeros(n)
-        n_coefs = self.data.nutrient_coefs.reindex(self.acts)["N"].fillna(0.0)
-        row_N = n_coefs.values
-        total_uaa = (self._land_of("ARABLE") +
-                     self._land_of("PERMANENT") +
-                     self._land_of("GRASSLAND"))
-        # only with a nitrate limit: without one the row was a placeholder (999999 kg N/ha x UAA, ~2e9) that never binds
-        # and spoiled the conditioning of the regional problem (K15: Clarabel left IE05 AlmostSolved / stalled)
-        if nitrate_limit is not None:
-            A_rows.append(row_N)
-            self._row_labels.append("N_limit")
-            b_rows.append(n_limit * total_uaa)
+        # (4. the legacy nitrate-limit row on total applied N, not CAPRI's, was retired on 27 October 2026, K33: nitrogen
+        # limits are CAPRI's N-balance target)
 
         # 5. Feed constraint: animal roughage demand ≤ on-farm supply + buy-in.
         #    Full CAPRI has a separate feed market; here we allow a buy-in
@@ -4970,7 +4827,6 @@ class RegionalSupplyModel:
         self,
         price_shock: Optional[pd.Series] = None,
         policy_shock: Optional[Dict] = None,
-        nitrate_limit: Optional[float] = None,
         set_aside_requirement: float = 0.0,
     ) -> SupplyResult:
         """
@@ -4980,7 +4836,6 @@ class RegionalSupplyModel:
         ----------
         price_shock : relative price changes {activity: fraction}, e.g. {"SWHE": 0.10}
         policy_shock: CAP payment changes {"BPS": EUR/ha, "COUPLED": ...}
-        nitrate_limit: override max organic N kg/ha (Nitrates Directive)
         """
         # Solving with a shock mutates net_revenues (and cap_payments for a
         # policy shock) in place. Because models are cached and reused across
@@ -5017,8 +4872,7 @@ class RegionalSupplyModel:
         self._yields_solve0 = _backup.get("yields")    # the calibrated yields (the 2030 reference), THIS solve only
         self._greendeal_inputs = {}                     # set by _apply_greendeal_input_changes for THIS solve
         try:
-            return self._solve_inner(price_shock, policy_shock, nitrate_limit,
-                                     set_aside_requirement)
+            return self._solve_inner(price_shock, policy_shock, set_aside_requirement)
         finally:
             self._yields_solve0 = None
             self.net_revenues = _net_rev_backup
@@ -5104,7 +4958,6 @@ class RegionalSupplyModel:
         self,
         price_shock: Optional[pd.Series] = None,
         policy_shock: Optional[Dict] = None,
-        nitrate_limit: Optional[float] = None,
         set_aside_requirement: float = 0.0,
     ) -> SupplyResult:
         self._cover = None              # catch-crop requirement: set by the pesticide/organic targets
@@ -5226,11 +5079,8 @@ class RegionalSupplyModel:
         # CAPRI's emission tax on the activities (ghgTax; zero unless the scenario sets one)
         self._apply_ghg_tax()
 
-        intensity_res = None
         self._manure_ni_relief, self._manure_ni_nh3, self._manure_ni_share = {}, {}, 0.0
-        if nitrate_limit is not None:
-            intensity_res = self._apply_intensity_margin(nitrate_limit)
-        elif getattr(self, "_nbal_price", 0.0):
+        if getattr(self, "_nbal_price", 0.0):
             self._apply_balance_price(self._nbal_price)
         else:
             # no N price: ammonia technologies at their base shares (resets any relief left
@@ -5240,7 +5090,6 @@ class RegionalSupplyModel:
             self._apply_manure_inhibitor(0.0)
 
         A_ub, b_ub, _, _ = self._build_constraints(
-            nitrate_limit=nitrate_limit,
             set_aside_requirement=set_aside_requirement)
 
         # The regional model in CAPRI's form, solved by IPOPT (_nlp_solve). Where a solve fails, CAPRI re-solves with
@@ -5845,10 +5694,6 @@ class SupplyModule:
             landscape_target_pp=_ms_value(d.get("landscape_targets_ms"), region,
                                           "landscape_pp"),
             organic_targets_pp=_ms_row(d.get("organic_targets_ms"), region),
-            livestock_intensity_bounds=(
-                d["livestock_intensity_bounds"].loc[region]
-                if d.get("livestock_intensity_bounds") is not None
-                and region in d["livestock_intensity_bounds"].index else None),
             livestock_revenue_coef=(
                 d["livestock_revenue_coef"].loc[region]
                 if d.get("livestock_revenue_coef") is not None
@@ -6295,7 +6140,7 @@ class SupplyModule:
     EU_POLICY_KEYS = frozenset({"set_aside_requirement", "nutrient_surplus_target", "surplus_rule", "surplus_cut",
                                 "mineral_redu",
                                 "pesticide_reduction",
-                                "organic_area_target", "nitrate_limit_delta", "nitrate_limit"})
+                                "organic_area_target"})
 
     #: tolerance on the nitrogen-balance price, EUR per kg N: absolute + relative
     NBAL_TOL_ABS = setting("supply.nbal_tol_abs")
@@ -6506,21 +6351,12 @@ class SupplyModule:
             model = self._get_or_build_model(region)
             # a mandatory non-productive share travels with the policy
             # dict and binds the arable land constraint
-            sa, nlim, surplus_row = 0.0, None, None
+            sa, surplus_row = 0.0, None
             if isinstance(policy_scenario, dict):
                 sa = float(policy_scenario.get("set_aside_requirement", 0.0) or 0.0)
-                nlim = policy_scenario.get("nitrate_limit")
-                # A delta is applied to the region's OWN base-year N
-                # intensity, so an unchanged scenario is slack by
-                # construction and a tightening starts from where the
-                # region actually is (see model.py for why the 170 kg/ha
-                # directive figure is not the right anchor here).
-                delta = policy_scenario.get("nitrate_limit_delta")
-                if delta is not None and nlim is None:
-                    nlim = model.base_n_intensity() + float(delta)
                 # CAPRI's tiered surplus rule needs the region's own gross
                 # N balance, so it is resolved here rather than in model.py
-                if policy_scenario.get("nutrient_surplus_target") and nlim is None:
+                if policy_scenario.get("nutrient_surplus_target"):
                     # JRC121368: a BINDING RESTRICTION ON THE GROSS NITROGEN
                     # BALANCE, at the tiered target per hectare. Imposed on
                     # the balance itself - fertiliser, manure, fixation and
@@ -6613,7 +6449,6 @@ class SupplyModule:
             solve_kw = dict(
                 price_shock=_ps_r,
                 policy_shock=policy_scenario,
-                nitrate_limit=nlim,
                 set_aside_requirement=sa,
                 surplus_row=surplus_row,
                 mineral_cap=mcap,

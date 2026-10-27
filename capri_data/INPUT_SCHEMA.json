@@ -334,22 +334,6 @@
     "reproducibility": "manual"
    }
   },
-  "manure_ch4_ef": {
-   "file": "2017/environment/manure_ch4_ef_regional.csv",
-   "concept": "methane emission factor",
-   "unit": "kg CH4/head/yr",
-   "dimension": "region x animal",
-   "modules": [
-    "environment"
-   ],
-   "source": {
-    "source_type": "LITERATURE",
-    "source_ref": "IPCC",
-    "vintage": "IPCC 2006",
-    "confidence": "validated",
-    "reproducibility": "manual"
-   }
-  },
   "eu_mfn_tariffs": {
    "file": "2017/policy/eu_mfn_tariffs.csv",
    "concept": "applied MFN tariff",
@@ -455,24 +439,6 @@
     "wheat absent from the parameter; at market level it aggregates into WHEA"
    ]
   },
-  "input_requirements": {
-   "file": "2017/supply/input_requirements.csv",
-   "concept": "physical input use per hectare",
-   "unit": "various",
-   "dimension": "region x activity x input",
-   "modules": [
-    "supply",
-    "environment"
-   ],
-   "source": {
-    "source_type": "CAPRI_GDX",
-    "source_ref": "capreg DATA2 input items",
-    "vintage": "2017",
-    "confidence": "validated",
-    "reproducibility": "public_code"
-   },
-   "known_gaps": []
-  },
   "pela_cross_price": {
    "file": "sources/estnlp/pela_cross_by_region.json",
    "concept": "cross-price supply elasticities (PELA)",
@@ -490,25 +456,6 @@
    },
    "known_gaps": [
     "2005 vintage; CAPRI has no newer PELA estimate in this release"
-   ]
-  },
-  "livestock_intensity_bounds": {
-   "file": "2017/supply/livestock_intensity_bounds.csv",
-   "concept": "low- and high-intensity dairy yields (bounds of the livestock intensity margin)",
-   "unit": "t milk per head",
-   "dimension": "region x intensity variant",
-   "modules": [
-    "supply"
-   ],
-   "source": {
-    "source_type": "CAPRI_GDX",
-    "source_ref": "capreg DATA2 DCOL/DCOH YILD",
-    "vintage": "2017",
-    "confidence": "validated",
-    "reproducibility": "public_code"
-   },
-   "known_gaps": [
-    "13 regions where CAPRI does not split the herd keep a single yield and no margin"
    ]
   },
   "capri_baseline_surplus": {

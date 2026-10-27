@@ -5,7 +5,7 @@ form, solved with IPOPT). The tables give one line per issue; the details follow
 was found, where it acts, whether the tagged release 9t (`capri-mod-9t.zip`) carries it, and its status. 9t.1 is 9t
 with every fix below except K5, which needs the prototype's model change.
 
-## Open (21)
+## Open (20)
 
 | # | Issue | Status |
 |---|---|---|
@@ -13,7 +13,6 @@ with every fix below except K5, which needs the prototype's model change.
 | [K13](#k13) | Farm-to-Fork milk price | open |
 | [K20](#k20) | The crop-need row's mineral N and the balance's differ slightly | open |
 | [K29](#k29) | NL11 and NL13 meet the tiered N target only at corner solutions (Farm-to-Fork) | open |
-| [K33](#k33) | The legacy nitrate-limit instrument reads unsourced per-head N coefficients | open |
 | [K45](#k45) | Egypt's oilseed rows | open |
 | [K47](#k47) | The cattle chain's equilibrium is sensitive to changes outside it | open |
 | [K48](#k48) | Young-animal prices against CAPRI's own market run | open |
@@ -31,7 +30,7 @@ with every fix below except K5, which needs the prototype's model change.
 | [K86](#k86) | Ammonia housing and storage options without their farm-size cost curves in Denmark, Lithuania and Croatia | open |
 | [K87](#k87) | Builder outputs that do not follow from their builders (reproduction audit) | open |
 
-## Resolved (66)
+## Resolved (67)
 
 | # | Issue | Status |
 |---|---|---|
@@ -63,6 +62,7 @@ with every fix below except K5, which needs the prototype's model change.
 | [K30](#k30) | Supply elasticities of permanent crops, vegetables, tobacco, textile crops and table olives were one EU-wide value per crop, while CAPRI's per-country values were in the data unused | fixed |
 | [K31](#k31) | crop_cost_shares.csv: the plant-protection share did not follow its stated method for every crop, and the file had no builder | fixed |
 | [K32](#k32) | Arable crops in many regions and the 14 Mha of other fodder were on literature elasticities although CAPRI's are in the data | fixed |
+| [K33](#k33) | The legacy nitrate-limit instrument reads unsourced per-head N coefficients | retired |
 | [K34](#k34) | The EU-wide crop producer prices (fallback) were of unrecorded source and far from CAPRI's | fixed |
 | [K35](#k35) | Splitting CAPRI's textile crops by country left gaps | fixed |
 | [K36](#k36) | Where the projected herds' fodder use was below the projected fodder output, the baseline missed the projected crop levels, and the difference fell on the most elastic crops | fixed |
@@ -399,7 +399,7 @@ SupplyModule.base_n_intensity (the anchor of `nitrate_limit` and `nitrate_limit_
 
 - **Effect:** only scenarios using nitrate_limit
 - **In 9t:** yes (same rows), not for the CAPRI scenarios
-- **Status:** **open** (data rows fixed: SHGP removed, OANI renamed; the per-head values left as they are): the instrument is not CAPRI's; retire it or document it as the model's own
+- **Status:** **retired** (27 October 2026, the project lead's decision): the instrument (`nitrate_limit`, `nitrate_limit_delta`, PolicyScenario.nitrate_limit_change), its N_limit row, the Mitscherlich intensity margin it drove (capri_mod/supply/intensity.py, SupplyModel._apply_intensity_margin, base_n_intensity) and the livestock intensity bounds only it read (livestock_intensity_bounds.csv and its builder) removed; nitrogen limits are CAPRI's N-balance target. nutrient_coefs.csv keeps its crop rows (other readers); its animal rows removed (they also entered the supply result's reported nutrient_balance)
 
 <a id="k34"></a>
 ### K34: The EU-wide crop producer prices (fallback) were of unrecorded source and far from CAPRI's
