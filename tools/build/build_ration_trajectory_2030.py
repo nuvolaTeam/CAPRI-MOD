@@ -109,7 +109,7 @@ def main():
                 if v17 > 0 and k in t30:
                     f = min(max(t30[k] / v17, 0.0 if not k.startswith("req_") else 0.2), 5.0)
                     for r in regs:
-                        rows.append((r, an, k, round(f, 5), "region"))
+                        rows.append((r, an, k, f, "region"))
                         covered.add((r, an))
     # national factors where a model region has no regional CAPRI rows
     for r in herds.index:
@@ -122,7 +122,7 @@ def main():
                 continue
             for k, v17 in t17.items():
                 if v17 > 0 and k in t30:
-                    rows.append((r, an, k, round(min(max(t30[k] / v17, 0.0 if not k.startswith("req_") else 0.2), 5.0), 5), "member state"))
+                    rows.append((r, an, k, min(max(t30[k] / v17, 0.0 if not k.startswith("req_") else 0.2), 5.0), "member state"))
     # FODDER per ha (the fodder balance's usable fodder, u = fed quantity / area): CAPRI's FEDM over LEVL of the
     # fodder crop, 2030 over 2017 (yield, losses and the non-feed use, e.g. silage maize for biogas in Germany: INDM
     # 3.6 of 6.9 Mt in Upper Bavaria's 2030 reference); per group, else member state
@@ -169,14 +169,14 @@ def main():
             f_ = u_ratio(codes, cc)
             if f_ is not None:
                 for r in regs:
-                    frows.append((r, mc, round(f_, 5), "region")); fcov.add((r, mc))
+                    frows.append((r, mc, f_, "region")); fcov.add((r, mc))
     for r in herds.index:
         ms = MS_CODE.get(r[:2], r[:2]) + "000000"
         for mc, cc in fcrop.items():
             if (r, mc) not in fcov:
                 f_ = u_ratio([ms], cc)
                 if f_ is not None:
-                    frows.append((r, mc, round(f_, 5), "member state"))
+                    frows.append((r, mc, f_, "member state"))
     fo = pd.DataFrame(frows, columns=["region", "crop", "factor", "level"])
     fo.to_csv(OUT_FODDER, index=False)
     print(f"wrote {OUT_FODDER.relative_to(ROOT)}: {len(fo)} rows; median {fo.groupby('crop')['factor'].median().round(3).to_dict()}")

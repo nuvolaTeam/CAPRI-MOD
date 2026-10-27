@@ -39,7 +39,7 @@ def main() -> None:
         ok = (q > 0) & p.notna() & (p > 0)
         if q[ok].sum() <= 0:
             continue
-        v = round(float((q[ok] * p[ok]).sum() / q[ok].sum()), 4)
+        v = float((q[ok] * p[ok]).sum() / q[ok].sum())
         old = float(pp.at[c, col]) if c in pp.index else float("nan")
         pp.loc[c, col] = v
         changed[c] = (old, v)
