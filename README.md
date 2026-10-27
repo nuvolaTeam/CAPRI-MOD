@@ -1507,8 +1507,10 @@ Turkey and the Western Balkans (29 units in CAPRI's 2030 runs) are not covered y
 Until then the model had 248 NUTS-2016 regions, 13 of them empty, mapped to CAPRI's units through crosswalks, with
 NUTS splits made on proxies (cattle shares, Ireland's 2016 boundary shares, Norway's pooled regions); the rebuild and
 every difference it made are in docs/design/REGIONAL_UNITS_REBUILD_LOG.md. Results on current NUTS regions are a
-reporting step (CAPRI's units mapped with the NUTS correspondence and area weights, planned), not regional detail of
-their own.
+reporting step, not regional detail of their own: `capri_mod/nuts_reporting.to_nuts2024` maps the units to NUTS 2024
+(capri_data/shared/capri_units_nuts2024.csv: the units through CAPRI's NUTS 2016 groups and Eurostat's 2016 -> 2021 ->
+2024 changes; extensive values split by Eurostat UAA within each connected group, intensive values weighted by a
+basis).
 
 ### 10.5 Inputs not yet traced to a CAPRI source
 
