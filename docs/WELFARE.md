@@ -14,15 +14,15 @@ simulation, per behavioural region (RMS), then summed (welfare.gms l. 780-812):
 | CSSP | consumers | money metric of the GL demand system, one good after the other (l. 95-140) | ported: per behavioural region, CAPRI's sequence and goods order (gl_demand_goods.csv), at the consumer prices the GL demand saw (CPRI0 + ARM1P0 (PR - 1)), the refitted commitments |
 | ProfitProc | processing industry | NQ processing functions (ProcNQ_), oilseed crushing in the margins (ProcMargO_), biofuel processors' margin x first-generation output, value of the residual feeds of RMSSUP (l. 155-213) | ported: ProcNQ_ per behavioural region (the model region's base processing spread by CAPRI's), crushing per behavioural region and seed (before ProcFudge_, as CAPRI's report), biofuel margin (PPRI0 x ratio - mu_b) x output, EU residual feeds' output value |
 | ProfitDairy | dairies | NQ dairy function (DairyNQ_) in the processing margins (ProcMargM_), raw milk an input (l. 215-260) | ported: per EU member state and per non-EU behavioural region |
-| ProfitAgr | farms | RMSSUP: the supply models' gross value added, EAAG MGVA (l. 360-380, 800-806); other regions: the NQ supply function with land and feed energy (l. 265-300) | RMSSUP (the EU, Norway): MGVA of the supply models (capri_mod/income, results["welfare_supply"]); other regions: the integral of the model's own supply function (constant elasticity, see below) and of CAPRI's raw milk supply function in the dairy blocks |
+| ProfitAgr | farms | RMSSUP: the supply models' gross value added, EAAG MGVA, less the land rents with CAPRI's land market (l. 360-380, 800-806); other regions: the NQ supply function with land and feed energy (l. 265-300) | RMSSUP (the EU, Norway): MGVA of the supply models (capri_mod/income) less the land rents at the solution (results["welfare_supply"]); other regions: the integral of the model's own supply function (constant elasticity, see below) and of CAPRI's raw milk supply function in the dairy blocks |
 | ProfitFeed | feed users | not RMSSUP: the NQ feed cost function FeedNQ_ (l. 455-540) | the integral of the model's non-EU feed demand (constant elasticities p_ElasFeed, M3), good by good in the model's commodity order |
 | TariffRev | budget | tariffs on every flow: specific or flexible levy + ad valorem on (PMrk + transport), TRQ regimes (l. 545-605) | per flow X (p - a0 r - tc), the quota rent taken out; flows between the EU's trade blocks excluded |
 | TRQRents | quota holders | (import price - in-quota price) x min(imports, quota), half importer, half exporter (l. 610-650; sol_market.gms l. 1127) | gap x sigmoid(fill) x min(share x imports, quota): under the sigmoid regime the import price is the in-quota price plus sigmoid x gap |
 | PSEs | budget | minus premiums (FEOP, FEOG of non-market products), PSE/CSE/FSE wedges, processing aids, export subsidies, intervention costs (l. 655-690) | minus the supply models' premiums (results["welfare_supply"]); the model has no market wedges, export subsidies or intervention |
-| ProfitLandUse | land owners | default (not SUPREMA): RMSSUP none of its own (land rents are in MGVA); other regions: the land supply function (l. 400-440) | none: the model's non-EU supply has no land market |
+| ProfitLandUse | land owners | with CAPRI's land market (supremaMrk, as CAPRI's 2030 reference run): the land rents, UAAR x d_area (sol_simy.gms l. 181); other regions: the land supply function (l. 400-440) | RMSSUP: the land rents at the solution (each land type's area x its land row's dual); other regions none: the model's non-EU supply has no land market |
 
-Total change (CAPRIModel.compare, `welfare_EUR_million_change`): the market's components + the change of the supply
-models' MGVA + the change of PSEs.
+Total change (CAPRIModel.compare, `welfare_EUR_million_change`): the market's components + the changes of the supply
+models' ProfitAgr, ProfitLandUse and PSEs.
 
 ## How each integral is taken
 
@@ -63,8 +63,9 @@ models' MGVA + the change of PSEs.
    302,113) and PSEs (EU27 -47,259). Internal checks: the GL money metric against the first-order term and the exact
    equivalent variation, the dairy profit against a numerical line integral, the market report at base and after a
    supply shock (capri_mod/tests/test_welfare.py).
-6. **The land accounts of CAPRI's 2030 reference are SUPREMA's** (welfare.gms supremaMrk on): the farms' profit is MGVA
-   less the land rents (EU27: 302,113 - 58,994 = 243,119) and the rents are the land owners' (ProfitLandUse 58,994).
-   The port has the default accounts (ProfitAgr = MGVA, no ProfitLandUse of its own). The total is the same (the rent
-   is a transfer); the split follows CAPRI's run once the rent at the solution is taken from the supply models' land
-   rows (their duals x the land types' areas): next step.
+6. **The land accounts are those of CAPRI's 2030 reference run, SUPREMA's** (welfare.gms supremaMrk on, CAPRI's land
+   market): the farms' profit is MGVA less the land rents (EU27 in CAPRI's reference: 302,113 - 58,994 = 243,119),
+   the rents are the land owners' (ProfitLandUse 58,994). The model takes the rent at the solution from the supply
+   models' land market: each land type's area x the dual of its land row (EUR/ha), CAPRI's UAAR x d_area
+   (results["welfare_supply"]: MGVA, RENT, ProfitAgr, ProfitLandUse, PSEs). The rent is a transfer: the total is the
+   same with or without the split.

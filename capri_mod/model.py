@@ -1281,8 +1281,13 @@ class CAPRIModel:
     def _welfare_supply(self, supply_results) -> Optional[pd.DataFrame]:
         """The welfare components CAPRI takes from the supply models for the regions that have them (RMSSUP: the EU,
         Norway; reports/welfare.gms l. 360-380, 690-700, 800-806), per supply-model region, EUR million (levels):
-          MGVA      the farms' profit: market gross value added including premiums, sum over activities of
-                    (revenue - input cost + premium) x level (CAPRI EAAG MGVA; capri_mod/income)
+          MGVA      market gross value added including premiums, sum over activities of (revenue - input cost +
+                    premium) x level (CAPRI EAAG MGVA; capri_mod/income)
+          RENT      the land rents: each land type's area x its rent at the solution, the dual of its land row
+                    (EUR/ha; CAPRI's UAAR x d_area, reports/sol_simy.gms l. 181)
+          ProfitAgr      the farms' profit, MGVA - RENT, and ProfitLandUse the land owners', RENT: CAPRI's accounts
+                    with its land market (welfare.gms supremaMrk), as in CAPRI's 2030 reference run (EU27: MGVA
+                    302,113 - rents 58,994 = ProfitAgr 243,119; capri_data/sources/capri_res/ref2030_welfare.csv)
           PSEs      the budget's cost of the premiums, minus the premiums paid (CAPRI -FEOP, -FEOG of the products
                     without a market)
         The market's agents' components are in results["market"].welfare. A failure here does not stop the run:
@@ -1293,9 +1298,16 @@ class CAPRIModel:
             from capri_mod.income.income_module import IncomeDistributionModule
             im = IncomeDistributionModule(self.data)
             rows = {}
+            rlab = {"arable_land": "ARAC", "grassland": "GRAS", "permanent_land": "FRUN"}
             for reg, res in supply_results.items():
                 inc, prem = im._income_parts(reg, res, self.supply_module)
-                rows[reg] = {"MGVA": inc / 1000.0, "PSEs": -prem / 1000.0}
+                sp = getattr(res, "shadow_prices", None) or {}
+                lt = getattr(res, "land_types", None) or {}
+                # EUR/ha x 1000 ha = EUR 1000
+                rent = sum((float(sp.get(lab, 0.0)) - float(sp.get(lab + "_lo", 0.0))) * float(lt.get(t, 0.0))
+                           for lab, t in rlab.items())
+                rows[reg] = {"MGVA": inc / 1000.0, "RENT": rent / 1000.0, "ProfitAgr": (inc - rent) / 1000.0,
+                             "ProfitLandUse": rent / 1000.0, "PSEs": -prem / 1000.0}
             return pd.DataFrame.from_dict(rows, orient="index")
         except Exception as exc:
             warnings.warn(f"welfare: the supply models' components could not be computed ({exc!r})")
@@ -1362,7 +1374,8 @@ class CAPRIModel:
                     tot += d_
             b_ws, s_ws = baseline_results.get("welfare_supply"), scenario_results.get("welfare_supply")
             if b_ws is not None and s_ws is not None:
-                for comp, lab in (("MGVA", "ProfitAgr_supply_models"), ("PSEs", "PSEs")):
+                for comp, lab in (("ProfitAgr", "ProfitAgr_supply_models"), ("ProfitLandUse", "ProfitLandUse"),
+                                  ("PSEs", "PSEs")):
                     d_ = float(s_ws[comp].sum() - b_ws[comp].sum())
                     diffs[f"welfare_{lab}_EUR_million_change"] = d_
                     tot += d_
