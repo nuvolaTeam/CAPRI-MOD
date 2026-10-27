@@ -111,10 +111,10 @@ class FeedMixin(MarketStateMixin):
     def eu_feed_use(self, price_ratio: Dict[str, float], region: Optional[str] = None) -> Dict[str, float]:
         """EU feed use per model commodity (kt) from the member states' bulks at the EU price ratios (CAPRI
         feedShareEqu_): q_i = q_i0 x (B / B0) x (P_B / p_i)^rho with prices relative to the reference; B / B0 from
-        the supply models (_feed_bulk_index, 1 before any supply result). region: only the member states of that
+        the supply models (seen.feed_bulk_index, 1 before any supply result). region: only the member states of that
         EU market region (their block's prices)."""
         fb = self._feed_bulk_params()
-        bix = getattr(self, "_feed_bulk_index", None) or {}
+        bix = self.seen.feed_bulk_index or {}
         out = {}
         for (ms, b), d in (fb.get("bulks") or {}).items():
             if region is not None and self.eu_region_of_ms(ms) != region:
@@ -131,9 +131,9 @@ class FeedMixin(MarketStateMixin):
     def sup_feed_use(self, region: str, price_ratio: Dict[str, float]) -> Dict[str, float]:
         """Feed use per model commodity (kt) of a non-EU market region with supply models (Norway) from its bulks
         at its price ratios (CAPRI feedShareEqu_, as eu_feed_use): q_i = q_i0 x (B / B0) x (P_B / p_i)^rho, B / B0
-        from its supply models (_feed_bulk_index)."""
+        from its supply models (seen.feed_bulk_index)."""
         fb = self._feed_bulk_params()
-        bix = getattr(self, "_feed_bulk_index", None) or {}
+        bix = self.seen.feed_bulk_index or {}
         ms0 = self.SUP_NONEU_MS.get(region)
         out = {}
         for (ms, b), d in (fb.get("bulks_sup") or {}).items():

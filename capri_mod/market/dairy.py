@@ -388,7 +388,7 @@ class DairyMixin(MarketStateMixin):
                "production0": {k: float(Q0[ix[k]]) for k in items},
                "market_supply": {self.DAIRY_TRADED[k]: float(Q[ix[k]] - proc0[ix[k]]) for k in self.DAIRY_TRADED},
                "market_supply0": {self.DAIRY_TRADED[k]: float(Q0[ix[k]] - proc0[ix[k]]) for k in self.DAIRY_TRADED},
-               "fmil_index": float(getattr(self, "_fmil_index", 1.0) or 1.0), "residual": 0.0}
+               "fmil_index": float(self.seen.fmil_index or 1.0), "residual": 0.0}
         return res
 
     #: model country -> CAPRI member state of the dairy block
@@ -417,7 +417,7 @@ class DairyMixin(MarketStateMixin):
         w = v / v.sum() if v.sum() > 0 else np.ones_like(fd) / len(fd)
         sg = self.RHO_FMIL
         pb = float((w * rho ** (1.0 - sg)).sum()) ** (1.0 / (1.0 - sg))
-        fi = float(getattr(self, "_fmil_index", 1.0) or 1.0) if fi is None else float(fi)
+        fi = float(self.seen.fmil_index or 1.0) if fi is None else float(fi)
         return fi * (pb / rho) ** sg
 
     def _dairy_eu_prices(self, world_prices) -> Dict[str, float]:
@@ -437,7 +437,7 @@ class DairyMixin(MarketStateMixin):
             return {rg: {k: 1.0 for k in self.DAIRY_TRADED} for rg in self.EU}
         if bl is not None and "EU27" in bl.index:
             return {k: float(bl.at["EU27", c]) if c in bl.columns else 1.0 for k, c in self.DAIRY_TRADED.items()}
-        prem = getattr(self, "eu_premium", None) if getattr(self, "_eu_base_supply", None) is not None else None
+        prem = getattr(self, "eu_premium", None) if self.seen.eu_base_supply is not None else None
         out = {}
         for k, c in self.DAIRY_TRADED.items():
             b = float(d0.at["EU27", c])

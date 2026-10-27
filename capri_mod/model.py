@@ -406,7 +406,7 @@ class CAPRIModel:
         self._eu_base_cache = _cache
         _mm = self.market_module
         if _is_base:
-            _mm._eu_base_supply = None
+            _mm.seen.eu_base_supply = None
             # a baseline's market runs without a market supply Hessian (the one of an earlier baseline belonged to
             # another solution, possibly another region set); its own is measured when a scenario needs it
             _mm.supply_hessian = None
@@ -552,7 +552,7 @@ class CAPRIModel:
         self._yani_imbalance = 0.0
         self._yani_trace = []
         self._yani_w, self._yani_gprev = {}, {}
-        self.market_module._yani_state = None
+        self.market_module.seen.yani_state = None
         _yani_ref = (getattr(self, "_yani_ref", {}) or {}).get(_key)
         _yani_on = not _is_base and bool(_yani_ref)
         if _yani_on:
@@ -619,7 +619,7 @@ class CAPRIModel:
             # the milk price level each member state's models see, for the market's raw milk response (audit M5)
             _dpm = self.market_module._dairy_params() or {}
             _sm_ = float(price_signal.get("MILK", 0.0)) if price_signal is not None else 0.0
-            self.market_module._milk_seen_ms = {
+            self.market_module.seen.milk_seen_ms = {
                 ms: 1.0 + _sm_ + float((self.supply_module.milk_price_dev_ms or {}).get(ms, 0.0))
                 for ms in (_dpm.get("ms") or {})} if _dpm else None
             # CAPRI's two EU trade blocks (MarketModule.eu_blocks): each member state's models get their block's
@@ -741,7 +741,7 @@ class CAPRIModel:
                 # supply functions, recalibrated to this solution); the prices come back after the market solve
                 self._young_animal_state_to_market(supply_results, _yani_ref)
             else:
-                self.market_module._yani_state = None
+                self.market_module.seen.yani_state = None
 
             # Aggregate EU supply for market module
             eu_supply_agg = self.supply_module.aggregate_supply(
@@ -757,17 +757,17 @@ class CAPRIModel:
                 print("    [Market] Solving spatial equilibrium...")
             # the EU price (relative to base) at which this iteration's supply was
             # produced, so the market can anticipate the supply response
-            self.market_module._eu_price_seen = (1.0 + price_signal).reindex(
+            self.market_module.seen.eu_price_seen = (1.0 + price_signal).reindex(
                 self.market_module.commodities).fillna(1.0)
             if getattr(self.market_module, "eu_blocks", False):
                 _dv = getattr(self, "_eu_dev", None) or {}
                 _cm = self.market_module.commodities
-                self.market_module._eu_price_seen = pd.DataFrame(
+                self.market_module.seen.eu_price_seen = pd.DataFrame(
                     {rg: (1.0 + price_signal + _dv.get(rg, 0.0)).reindex(_cm).fillna(1.0)
                      for rg in self.market_module.EU}).T
             # Norway's supply models saw Norway's prices (K56)
             _sdv = getattr(self, "_sup_dev", None) or {}
-            self.market_module._sup_price_seen = {
+            self.market_module.seen.sup_price_seen = {
                 rg: (1.0 + price_signal + (_sdv[rg].reindex(price_signal.index).fillna(0.0) if rg in _sdv else 0.0)
                      ).reindex(self.market_module.commodities).fillna(1.0)
                 for rg in getattr(self.market_module, "SUP", ())}
@@ -1064,7 +1064,7 @@ class CAPRIModel:
                               "yani_ratio": {k_: dict(v_) for k_, v_ in (getattr(self.supply_module, "yani_price_ratio_m", None) or {}).items()},
                               "yani_imbalance": float(getattr(self, "_yani_imbalance", 0.0) or 0.0),
                               "milk_ms_signal": dict(getattr(self, "_milk_ms_signal", None) or {}),
-                              "yani_state": __import__("copy").deepcopy(getattr(self.market_module, "_yani_state", None)),
+                              "yani_state": __import__("copy").deepcopy(self.market_module.seen.yani_state),
                               "yani_market": __import__("copy").deepcopy(self.market_module.ev.yani_market_now),
                               "milk_ms": {k_: {kk: float(vv) for kk, vv in v_.items()} for k_, v_ in (_dlh.get("ms_price_ratio") or {}).items()},
                               "herd": _herd,
@@ -2142,7 +2142,7 @@ class CAPRIModel:
                       "bounds": tuple(self.YANI_RATIO_BOUNDS)}
         self._yani_imbalance = worst
         self._yani_np = (net, prod)
-        self.market_module._yani_state = st
+        self.market_module.seen.yani_state = st
         self.market_module.ev.yani_market_now = {}
 
     def _capri_stop_step(self, supply_results, market_eq) -> Optional[dict]:
@@ -2570,7 +2570,7 @@ class CAPRIModel:
             if fr is None:
                 fr = self.data.get("feed_req")
             if fr is None or not len(fr) or not supply_results:
-                mm._feed_bulk_index = None
+                mm.seen.feed_bulk_index = None
                 return
             from capri_mod.data.definitions import ANIMALS
             mult = {"BROI": getattr(type(self.supply_module), "BROILER_BIRDS_PER_PLACE", 1.0)}
@@ -2630,13 +2630,13 @@ class CAPRIModel:
                             bc[1] += x0 * q
             # CAPRI's market splits each member state's bulks into products (feedShareEqu_,
             # MarketModule.eu_feed_use); the market gets each bulk's change against the base
-            mm._feed_bulk_index = {k: (v[0] / v[1] if v[1] > 0 else 1.0) for k, v in blk.items()}
+            mm.seen.feed_bulk_index = {k: (v[0] / v[1] if v[1] > 0 else 1.0) for k, v in blk.items()}
             # DAIRY PRODUCTS FED (dairy Stage 3): the FMIL block follows the calves' milk feed, as CAPRI's
             # feed block FMIL (SMIP, WMIO, CASE, WHEP, BUTT, CREM, COCM, CHES, FRMI) follows the supply models
-            mm._fmil_index = (fmil[0] / fmil[1]) if fmil[1] > 0 else 1.0
-            mm._fmil_index_sup = {rg: (v[0] / v[1] if v[1] > 0 else 1.0) for rg, v in fmil_sup.items()}
+            mm.seen.fmil_index = (fmil[0] / fmil[1]) if fmil[1] > 0 else 1.0
+            mm.seen.fmil_index_sup = {rg: (v[0] / v[1] if v[1] > 0 else 1.0) for rg, v in fmil_sup.items()}
         except Exception:
-            mm._feed_bulk_index = None
+            mm.seen.feed_bulk_index = None
 
     #: CAPRI's tradable feed bulks (global/fromimpact/sets.gms FEED_TRD), priced by the market (feedBlkPrice_)
     FEED_BULKS = ("FCER", "FPRO", "FENE", "FOTH", "FMIL")

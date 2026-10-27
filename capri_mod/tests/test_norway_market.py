@@ -114,19 +114,19 @@ def test_norway_market_supply_is_its_models_and_the_base_is_reproduced(data):
     assert abs(float(D.at["NOR", "MILK"]) - float(exo.at["NO", "MILK"])) < 1e-9 * float(exo.at["NO", "MILK"])
     assert abs(mm.par.sup_milk0["NOR"] - float(exo.at["NO", "MILK"])) < 1e-9
     # Norway's barley 10% dearer than its models saw: Norway's supply follows (own CAPRI elasticity), the EU's not
-    mm._sup_price_seen = {"NOR": pd.Series(1.0, index=mm.commodities)}
+    mm.seen.sup_price_seen = {"NOR": pd.Series(1.0, index=mm.commodities)}
     r1 = r.copy()
     r1.at["NOR", "BARL"] = 1.10
     S1 = mm.supply_response(mm.world_prices_base, exo, region_ratio=r1, crush_dom=mm._dom0())
     assert float(S1.at["NOR", "BARL"]) > float(exo.at["NO", "BARL"]) * 1.001
     assert abs(float(S1.at["EU27", "BARL"]) - float(exo.at["DE", "BARL"])) < 1e-9 * float(exo.at["DE", "BARL"])
     # ... and once the models have seen that price, the market takes their output as it is
-    mm._sup_price_seen = {"NOR": pd.Series(1.0, index=mm.commodities).where(lambda x: x.index != "BARL", 1.10)}
+    mm.seen.sup_price_seen = {"NOR": pd.Series(1.0, index=mm.commodities).where(lambda x: x.index != "BARL", 1.10)}
     S2 = mm.supply_response(mm.world_prices_base, exo, region_ratio=r1, crush_dom=mm._dom0())
     assert abs(float(S2.at["NOR", "BARL"]) - float(exo.at["NO", "BARL"])) < 1e-9 * float(exo.at["NO", "BARL"])
     # with CAPRI's market supply function measured on Norway's models (market_supply_nq): linear through their output
     mm.par.supply_hessian = {"sup": {"NOR": pd.DataFrame([[50.0]], index=["BARL"], columns=["BARL"])}}
-    mm._sup_price_seen = {"NOR": pd.Series(1.0, index=mm.commodities)}
+    mm.seen.sup_price_seen = {"NOR": pd.Series(1.0, index=mm.commodities)}
     try:
         S3 = mm.supply_response(mm.world_prices_base, exo, region_ratio=r1, crush_dom=mm._dom0())
         assert abs(float(S3.at["NOR", "BARL"]) - (float(exo.at["NO", "BARL"]) + 50.0 * 0.10)) < 1e-6

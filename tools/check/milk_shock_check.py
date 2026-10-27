@@ -16,7 +16,7 @@ CAP = {}
 _s = MarketModule.solve
 def solve(self, exogenous_supply=None, *a, **k):
     CAP["exo"] = None if exogenous_supply is None else exogenous_supply.copy()
-    CAP["seen"] = getattr(self, "_eu_price_seen", None)
+    CAP["seen"] = self.seen.eu_price_seen
     return _s(self, exogenous_supply, *a, **k)
 MarketModule.solve = solve
 m = CAPRIModel(data_dir=str(__import__("pathlib").Path(__file__).resolve().parents[2] / "capri_data"), verbose=False)
@@ -29,7 +29,7 @@ P0 = base.domestic_prices.loc["EU27"]; W0 = base.world_prices
 res = {}
 for f in (0.95, 0.90):
     e2 = exo.copy(); e2["MILK"] = e2["MILK"] * f
-    mm._eu_price_seen = CAP["seen"]
+    mm.seen.eu_price_seen = CAP["seen"]
     eq = mm.solve(exogenous_supply=e2)
     P = eq.domestic_prices.loc["EU27"]; dl = mm.ev.dairy_last
     res[f] = {c: round(100 * (P[c] / P0[c] - 1), 1) for c in ["BUTR", "SKIM", "CHES", "WHEY", "FRMI", "CREM"]}

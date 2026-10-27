@@ -489,12 +489,12 @@ def test_ddgs_and_feed_bulks_follow_capri(model):
     up.loc[:, "DDGS"] = 1.3
     st1 = mm.biofuel_state(up, None, endogenous=True)
     assert st1["prod"][("USA", "BIOE")] > st0["prod"][("USA", "BIOE")]
-    _bix, mm._feed_bulk_index = getattr(mm, "_feed_bulk_index", None), None     # bulks at the base herds
+    _bix, mm.seen.feed_bulk_index = mm.seen.feed_bulk_index, None     # bulks at the base herds
     try:
         f0 = mm.eu_feed_use({})
         f1 = mm.eu_feed_use({"DDGS": 1.2})
     finally:
-        mm._feed_bulk_index = _bix
+        mm.seen.feed_bulk_index = _bix
     for c, q in fb["feed0"].items():
         assert abs(f0[c] / q - 1.0) < 1e-9, c
     assert f1["DDGS"] < f0["DDGS"] and f1["SOYC"] > f0["SOYC"] and abs(f1["CORN"] / f0["CORN"] - 1.0) < 1e-12
@@ -621,7 +621,7 @@ def test_dairy_block_fat_protein_balance(model):
     and lowers product output; a dearer cheese draws milk solids into cheese; fewer calves cut milk feed."""
     mm = model.market_module
     mm._dairy_cache = None
-    fi0, mm._fmil_index = getattr(mm, "_fmil_index", 1.0), 1.0     # calves' milk feed at base
+    fi0, mm.seen.fmil_index = mm.seen.fmil_index, 1.0     # calves' milk feed at base
     dp = mm._dairy_params()
     assert dp
     mm.sv.dairy_u = None
@@ -641,7 +641,7 @@ def test_dairy_block_fat_protein_balance(model):
     import numpy as np
     assert np.allclose(mm.dairy_feed_factor(np.ones(9), fi=0.8), 0.8)
     mm.sv.dairy_u = None
-    mm._dairy_cache, mm._fmil_index = None, fi0
+    mm._dairy_cache, mm.seen.fmil_index = None, fi0
 
 
 def test_dairy_world_blocks(model):
@@ -2961,12 +2961,12 @@ def test_palm_and_other_vegetable_oils_are_markets(model):
     cols = list(mm.commodities)
     rr = pd.DataFrame(1.0, index=mm.par.base_production.index, columns=cols)
     rr.loc["EU27", "OTHO"] = 1.10
-    mm._eu_price_seen = pd.Series(1.10, index=cols)            # the supply models saw the same price
+    mm.seen.eu_price_seen = pd.Series(1.10, index=cols)            # the supply models saw the same price
     s = mm.supply_response(mm.world_prices_base, None, region_ratio=rr)
     base = float(mm.par.base_production.at["EU27", "OTHO"])
     assert base > 0
     assert abs(float(s.at["EU27", "OTHO"]) / base - 1.10 ** 0.977) < 1e-6         # p_elasSupp, EU median
-    mm._eu_price_seen = None
+    mm.seen.eu_price_seen = None
 
 
 def test_supply_elasticities_reach_every_region_from_capri(data):

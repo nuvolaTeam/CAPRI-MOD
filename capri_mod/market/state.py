@@ -110,9 +110,39 @@ class MarketParameters:
     supply_hessian: Any = None
 
 
+@dataclass
+class MarketSeen:
+    """What CAPRIModel sets on the market before a solve: the prices and quantities its supply models saw or delivered
+    (formerly attributes of the module). Kept for the whole run as before (cleared where model.py cleared them)."""
+    #: EU prices (as ratios to base) the EU's supply models saw, per EU market region (Series or frame)
+    eu_price_seen: Any = None
+    #: the same for the non-EU regions with supply models ({market region: Series})
+    sup_price_seen: Any = None
+    #: {CAPRI member state: raw milk price level its supply models saw (1 + signal)}
+    milk_seen_ms: Any = None
+    #: the young-animal markets cleared inside the market: {market region: {"goods": [...], "net": {good: net balance of
+    #: the supply models' latest solution}, "ref": {good: the baseline's net balance}, "seen": {good: price ratio those
+    #: models saw}}}
+    yani_state: Any = None
+    #: feed bulk use of the supply models relative to base, per (member state, bulk); None: 1
+    feed_bulk_index: Any = None
+    #: calves' milk feed relative to base, EU (None: 1) and per non-EU region with supply models
+    fmil_index: Any = None
+    fmil_index_sup: Any = None
+    #: the EU's base supply at the model's own levels (set_eu_base); None in a baseline run until it is recorded
+    eu_base_supply: Any = None
+
+
 class MarketStateMixin:
-    """`par`, `ev` and `sv`: the module's MarketParameters, MarketEvalState and MarketSolveState, created on first use
-    (also on modules built without __init__, as the tests' stubs are)."""
+    """`par`, `ev`, `sv` and `seen`: the module's MarketParameters, MarketEvalState, MarketSolveState and MarketSeen,
+    created on first use (also on modules built without __init__, as the tests' stubs are)."""
+
+    @property
+    def seen(self) -> MarketSeen:
+        st = self.__dict__.get("_seen")
+        if st is None:
+            st = self.__dict__["_seen"] = MarketSeen()
+        return st
 
     @property
     def par(self) -> MarketParameters:

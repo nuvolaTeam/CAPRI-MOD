@@ -432,7 +432,7 @@ class BilateralSolveMixin(MarketStateMixin):
         # reference - CAPRI's reference run is a calibrated equilibrium at its reference prices. Each outer
         # iteration of the baseline recalibrates, so the calibration a scenario inherits is the one at the
         # converged baseline supply. Scenario runs keep it frozen.
-        if getattr(self, "_eu_base_supply", None) is None or self.par.demand_cal_frozen is None:
+        if self.seen.eu_base_supply is None or self.par.demand_cal_frozen is None:
             self._bilateral_calibrate(exogenous_supply)
             self._apply_trq_volumes(self.par.bilat)
             self.par.demand_cal_frozen = self.par.demand_cal.copy()

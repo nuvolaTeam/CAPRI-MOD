@@ -145,7 +145,7 @@ class SupplyMixin(MarketStateMixin):
             s_exo_eu = ({r_: supply.loc[r_, cols].astype(float).copy() for r_ in self.EU if r_ in supply.index}
                         if exogenous_supply is not None else None)
             _sv_eu = {}
-            seen_all = getattr(self, "_eu_price_seen", None)
+            seen_all = self.seen.eu_price_seen
             for reg in self.EU:
                 if reg not in supply.index:
                     continue
@@ -167,7 +167,7 @@ class SupplyMixin(MarketStateMixin):
             # anticipated against the prices those models last saw (own market's prices), with the region's own
             # CAPRI elasticity (p_elasSupp of NO000000, supply_elas_region.csv); the products without a supply-model
             # activity (fish, ...) keep CAPRI's market supply function at the region's price against base
-            seen_sup = getattr(self, "_sup_price_seen", None) or {}
+            seen_sup = self.seen.sup_price_seen or {}
             _sv_sup = {}
             for reg, sc_ in sup_cols.items():
                 i_ = list(supply.index).index(reg)
@@ -314,7 +314,7 @@ class SupplyMixin(MarketStateMixin):
                     mr_ = m_now / m0_
                     supply.at[r, "MILK"] = m_now
                     self.ev.sup_milk_now[r] = m_now
-                fi_ = float((getattr(self, "_fmil_index_sup", None) or {}).get(r, 1.0)) if mr_ is not None else 1.0
+                fi_ = float((self.seen.fmil_index_sup or {}).get(r, 1.0)) if mr_ is not None else 1.0
                 res_r = self._dairy_solve(prm, tr, mr_, fi_, r)
                 wl[r] = res_r
                 if mr_ is None and "MILK" in supply.columns and "milk_supply_ratio" in res_r:
@@ -358,11 +358,6 @@ class SupplyMixin(MarketStateMixin):
                     if reg in supply.index:
                         supply.at[reg, "DDGS"] = q
         return supply
-    #: the young-animal markets cleared inside the market (CAPRIModel sets it each outer iteration):
-    #: {market region: {"goods": [...], "net": {good: net balance of the supply models' latest solution},
-    #: "ref": {good: the baseline's net balance}, "seen": {good: price ratio those models saw}}}
-    _yani_state = None
-
     #: prices the market's supply functions take as the supply models saw them: raw milk (the EU's and Norway's raw milk
     #: is priced by their dairy blocks and its supply is the supply models' within a market solve, audit M5; its ratio
     #: in the trade system is the pooled world ratio, not the dairy price). Taken at the models' price, a 0.1 gap
@@ -373,9 +368,7 @@ class SupplyMixin(MarketStateMixin):
     #: CAPRI's raw milk inside the market (audit M5): each member state's raw milk supply follows its own milk price
     #: (ProdNQ_ MILK with p_hessNQSupp, the measured Hessian's member-state rows and columns) against its dairies'
     #: demand (DairyNQ_) in the dairy block, and its milk price moves the other products' and the young animals'
-    #: supply (the Hessian's MILK column per member state)
-    #: {CAPRI member state: raw milk price level its supply models saw (1 + signal)}, set by CAPRIModel each iteration
-    _milk_seen_ms = None
+    #: supply (the Hessian's MILK column per member state; the member states' milk prices their models saw: seen.milk_seen_ms)
 
     def _milk_terms(self, cols, xs, H):
         """The member states' raw milk terms of the market supply Hessian (supply_hessian["ms"], per country summed
@@ -383,12 +376,12 @@ class SupplyMixin(MarketStateMixin):
         "row": member state x cols (MILK's response to the products' prices), "rowY": member state x young-animal
         goods, "col": xs x member state (the products' response to the member state's milk price), "colY": young
         goods x member state, "goods": young-animal goods}; None without data."""
-        if not self._milk_seen_ms or not self._dairy_params():
+        if not self.seen.milk_seen_ms or not self._dairy_params():
             return None
         hs = (self.par.supply_hessian or {}).get("ms") or {}
         if not hs:
             return None
-        st = (self._yani_state or {}).get("EU27") or {}
+        st = (self.seen.yani_state or {}).get("EU27") or {}
         goods = [g for g in (st.get("goods") or []) if ("YANI:" + g) in H.index and ("YANI:" + g) in H.columns]
         ck = (id(hs), tuple(cols), tuple(xs), tuple(goods))
         c_ = getattr(self, "_milk_terms_cache", None)
@@ -427,7 +420,7 @@ class SupplyMixin(MarketStateMixin):
         model); a few rounds of the two linear clearings. Returns the products' supply change from both (rows xs)
         and keeps the dairy block's solution for supply_response (ev.dairy_m5_now)."""
         mss = mt["ms"]
-        Ls = np.array([float(self._milk_seen_ms.get(m, 1.0)) for m in mss])
+        Ls = np.array([float(self.seen.milk_seen_ms.get(m, 1.0)) for m in mss])
         _m0 = self.par.dairy_S0_ms or {}
         _m = self._milk_by_ms(exogenous_supply)
         q0 = np.array([float(_m0.get(m, 0.0)) for m in mss])
@@ -435,7 +428,7 @@ class SupplyMixin(MarketStateMixin):
         # every member state's delivered milk as the dairy section sets it; the responding ones below
         mr_all = {m_: (_m[m_] / q_ if (q_ > 0 and m_ in _m) else 1.0) for m_, q_ in _m0.items()}
         tr = self._dairy_eu_prices(world_prices)
-        st = (self._yani_state or {}).get(reg) or {}
+        st = (self.seen.yani_state or {}).get(reg) or {}
         r_seen = np.array([float(st.get("seen", {}).get(g, 1.0)) for g in mt["goods"]])
         dL = np.zeros(len(mss))
         dY = np.zeros(len(mt["goods"]))
@@ -479,7 +472,7 @@ class SupplyMixin(MarketStateMixin):
         young-animal prices clearing it at the current product prices are solved here and their effect on the products'
         supply (the Hessian's young-animal columns) is returned for the rows xs. The prices are kept in
         ev.yani_market_now for the next supply solve. Returns 0 where no young-animal market is cleared here."""
-        st = (self._yani_state or {}).get(reg)
+        st = (self.seen.yani_state or {}).get(reg)
         if not st or H is None:
             return 0.0
         goods = [g for g in st["goods"] if ("YANI:" + g) in H.index and ("YANI:" + g) in H.columns]

@@ -263,7 +263,7 @@ class MarketModule(CalibrationMixin, BiofuelMixin, DairyMixin, FeedMixin, Demand
     # ------------------------------------------------------------------
     def set_eu_base(self, base_supply: pd.Series, base_demand: pd.Series):
         """Record the EU's base supply at the model's own levels (base_demand is not kept: nothing read it)."""
-        self._eu_base_supply = base_supply.astype(float)
+        self.seen.eu_base_supply = base_supply.astype(float)
 
 
     # ------------------------------------------------------------------
