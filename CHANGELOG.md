@@ -23,12 +23,58 @@ Full provenance for every entry is in `capri_data/DATA_SOURCING_REGISTRY.json`.
 | CAP budget | Real EU CAP | €54.0bn vs ~€55–58bn |
 | Nitrogen balance | CAPRI 2030 reference, item by item | EU items within 1–7 kg N/ha; regional correlation 0.92 |
 | Phosphate balance (P2O5) | CAPRI 2030 reference, item by item | with CAPRI's own levels the formulas give its items (within 1e-6; removal 0.02%); at the model's base data (not a solved 2030 run) EU items within 0.5 kg P2O5/ha (surplus 14.4 vs 13.9), regional surplus correlation 0.99 |
-| Water demand | Known EU irrigation geography | module removed 27 October 2026 (no run called it); to be restored on CAPRI's regional units |
+| Water demand | Known EU irrigation geography | restored 27 October 2026 on CAPRI's units: 11.2 Mha irrigated (FSS), 32 km3 net requirement, 83% of it in ES, IT, EL, PT |
 | Biofuel | CAPRI 2030 reference (BiofFeedCost, biofuel output and use per CAPRI market region) | exact; feedstock use and biofuel markets inside the market |
 | **Total cereal output** | **EU Agricultural Outlook 2017-2030 (DG AGRI/JRC)** | **297.2 Mt vs ~300 Mt — ratio 0.99** |
 | **Farm-to-Fork scenarios** | Published CAPRI (JRC121368) | reported as a range; CAPRI's figure falls inside it for oilseeds |
 
 ---
+
+## 27 October 2026 (afternoon): the model on CAPRI's regional units; results on NUTS 2024; water and income reports
+
+- **The model's regions are CAPRI's 221 regional units** (EU27 215, Norway 6) under CAPRI's 8-character codes
+  (`capri_data/shared/regional_units.csv`), as decided on 27 October: every region-keyed file rebuilt by its builder from
+  CAPRI's own row of the unit; the NUTS-2016 crosswalk, the region map and the splits, merges, national copies and
+  re-splits that stood between CAPRI's data and the 248 NUTS-2016 regions removed (with their sources: SSB, p_REGIO,
+  Eurostat cattle). On the 196 units that were one NUTS-2016 region each, the rebuilt files equal the old ones except
+  where the old value was a proxy or a stale fill; each difference and its cause is in
+  docs/design/REGIONAL_UNITS_REBUILD_LOG.md (Italy's regional N deposition instead of the national value; CAPRI's own
+  fertiliser substitution, grass and cattle intensity and set-aside terms instead of medians; crops absent from a member
+  state at 0 instead of a template; fattening pigs where CAPRI has them). Builders written for files that had none
+  (N deposition and substitution, livestock intensity bounds, PELA cross-price by region).
+- **The fodder band rows removed** (kept until the move, 27 October morning): the units' NLP form has CAPRI's fodder
+  equality only; bit-identical results in six regions, baseline and Farm-to-Fork.
+- **K85 (fixed)**: animals a region does not have read a NaN input cost once the unsourced per-head columns of
+  variable_costs.csv were emptied; 16 regions stopped at IPOPT's Invalid_Number_Detected in the first run on the units
+  (r160, not used). Such an activity (fixed at 0) now costs 0, one with a base level without CAPRI cost raises, and the
+  regional NLP refuses non-finite inputs.
+- **Farm-to-Fork 2030 on the units (r161)**: converges in 9 iterations (r156 on NUTS 2016: 10), every regional solve
+  optimal; the 20 indicators' mean absolute deviation from JRC121368 4.34 (r156: 4.44); indicators within 0.7 points of
+  r156 (pork price +18.7 against +18.0, sheep and goats -10.1 against -10.7). The market supply Hessian measured again
+  for the units (67 min); the run itself 36 min. Mineral fertiliser caps relaxed in BG020000-BG060000 (PERM), HR000000
+  (ROOF), duals in HU220000 (r156: the same Bulgarian and Croatian regions under NUTS-2016 codes, DEA1, LT01).
+- **Green Deal 2030 on the units (r162)**: GD_RESULT
+- **Results on current NUTS (task 237)**: `capri_mod/nuts_reporting.to_nuts2024` maps unit results to the NUTS-2024
+  regions (`capri_data/shared/capri_units_nuts2024.csv`, `tools/build/build_nuts2024_reporting.py`): unit -> NUTS 2016
+  with CAPRI's correspondence and its splits and merges, then Eurostat's 2016-2021 and 2021-2024 changes (Croatia,
+  Norway, NL31/NL33 -> NL35/NL36, Portugal's PT16-PT18). 202 of 217 groups are one unit to one region; the others are
+  split by the regions' UAA (Eurostat ef_lus_main 2023; the 2020 census for BG, EL, ES, IT, LT, PL, SI, which have no
+  NUTS-2 data for 2023 yet). Extensive values are split, intensive ones reported as the group's basis-weighted mean: a
+  region of a multi-region group gets an area share of the group's result, not a result of its own. CAPRI has no unit
+  for Brussels, Berlin, Bremen, Hamburg, Ceuta, Melilla, the French outermost regions and Svalbard.
+- **Water and income reports restored on the units (task 236)**, outside the run as before:
+  - water (`capri_mod/water`): irrigated areas from the FSS irrigated share (IRR2; the old module read the irrigable
+    share IRRI) of each unit times its UAA, rice entirely and one share for the other crops CAPRI's water module
+    irrigates (CAPRI fits crop shares to FSS crop data not among our sources: a departure, DEPARTURES_FROM_CAPRI.md);
+    maize and wine, missed before (CAPRI's MAIZ, TWIN), included; CROPWAT's net irrigation requirement. Base 2017:
+    11.2 Mha irrigated, 32 km3 net requirement; Ireland has no share in CAPRI's data, Norway no CROPWAT requirement;
+  - income (`capri_mod/income`): CAPRI's ProfitAgr form, the sum over activities of (revenue - input cost + premium) x
+    level; before, the policy module's CAP payments were added to net revenues that already held CAPRI's premiums
+    (counted twice) and grassland was left out. The supply models keep the premium part of each net revenue
+    (`premiums`; results unchanged).
+- Tests: NUTS 2024 mapping and reporting (5), water and income (3), the own-price response in five contrasting units
+  (arable, eastern arable, Mediterranean permanent crop, grassland cattle, intensive pigs). `tools/run/run_mini_eu.py`:
+  the Farm-to-Fork run on 20 units covering the model's structures, against an earlier mini-EU run (task 239).
 
 ## 27 October 2026 (morning): the test suite in half the time; two model issues found by its timing (K83, K84)
 

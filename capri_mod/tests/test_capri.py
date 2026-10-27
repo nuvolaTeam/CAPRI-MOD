@@ -144,6 +144,25 @@ def test_supply_responds_positively_to_price(model):
     assert q1 >= q0 - 1e-6
 
 
+@pytest.mark.parametrize("reg, product, act, strict", [
+    ("FR240000", "SWHE", "SWHE", True),        # arable (Centre)
+    ("PL120000", "RYEM", "RYEM", True),        # eastern arable (Mazowieckie, CAPRI unit of PL91 + PL92)
+    ("ES610000", "OLIV", "OLIV", False),       # Mediterranean permanent crop (Andalucia)
+    ("IR010000", "BEEF", "BULL", True),        # grassland cattle (Ireland)
+    ("NL220000", "PORK", "PIGF", True),        # intensive livestock (Gelderland)
+])
+def test_own_price_response_in_contrasting_regions(model, reg, product, act, strict):
+    """The mechanism of test_supply_responds_positively_to_price on CAPRI units of other structures: a 20% higher
+    price of the region's product raises (permanent crops: does not lower) the activity producing it."""
+    sm = model.supply_module
+    q0 = sm.run(price_signals=None, regions=[reg])[reg].activities.get(act, 0.0)
+    sig = pd.Series(0.0, index=model.data["world_prices"].index)
+    sig[product] = 0.20
+    q1 = sm.run(price_signals=sig, regions=[reg])[reg].activities.get(act, 0.0)
+    assert q0 > 0
+    assert (q1 > q0 * (1 + 1e-4)) if strict else (q1 >= q0 - 1e-6), f"{reg} {act}: {q0} -> {q1}"
+
+
 def test_supply_no_blowup(model):
     sm = model.supply_module
     for reg in _german_units(8):
