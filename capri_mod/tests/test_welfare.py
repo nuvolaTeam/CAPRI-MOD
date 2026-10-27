@@ -84,9 +84,9 @@ def test_dairy_profit_is_the_integral_of_its_nq_function():
 
 @pytest.mark.slow
 def test_market_welfare_at_base_and_after_a_supply_shock():
-    """The market's report at its base supply: the components measured against the calibration point are close to
-    zero, tariffs and quota rents are levels (the EU collects tariffs); with 10% less EU beef the EU's consumers lose
-    and the world's beef importers pay more."""
+    """The market's report at its base supply: the components measured against the calibration point are zero,
+    tariffs and quota rents are levels (the EU collects tariffs); with 10% less EU beef the EU beef price rises, the
+    EU's consumers lose and Brazil's farms gain."""
     from capri_mod.data.loaders import load_all_data
     from capri_mod.data.definitions import MARKET_COMMODITIES
     from capri_mod.market.market_module import MarketModule
@@ -96,11 +96,18 @@ def test_market_welfare_at_base_and_after_a_supply_shock():
         if c in mm.base_production.columns:
             exo.at["EU27", c] = mm.base_production.at["EU27", c]
     eq0 = mm.solve(exogenous_supply=exo)
+    mm.set_eu_base(exo.loc["EU27"], eq0.consumption.loc["EU27"])     # scenarios keep the base calibration
     w0 = eq0.welfare
     assert list(w0.columns) == list(mm.WELFARE_COMPONENTS) + ["Welfare"]
     assert np.isfinite(w0.to_numpy()).all()
     assert w0.at["EU27", "TariffRev"] > 0.0
+    chg = [c for c in mm.WELFARE_COMPONENTS if c not in ("TariffRev", "TRQRents")]
+    assert np.abs(w0[chg].to_numpy()).max() < 1e-6
     exo1 = exo.copy()
     exo1.at["EU27", "BEEF"] *= 0.9
-    w1 = mm.solve(exogenous_supply=exo1).welfare
+    eq1 = mm.solve(exogenous_supply=exo1)
+    w1 = eq1.welfare
+    assert eq1.domestic_prices.at["EU27", "BEEF"] > eq0.domestic_prices.at["EU27", "BEEF"]
     assert w1.at["EU27", "CSSP"] < w0.at["EU27", "CSSP"]
+    # dearer beef: the farms of the beef exporters without supply models gain
+    assert w1.at["BRA", "ProfitAgr"] > w0.at["BRA", "ProfitAgr"]
