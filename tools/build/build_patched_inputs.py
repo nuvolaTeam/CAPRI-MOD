@@ -35,6 +35,13 @@ import sys
 import tempfile
 from pathlib import Path
 
+
+def _read_csv(*a, **k):
+    """pandas.read_csv with floats parsed to the last digit (KNOWN_ISSUES K82)."""
+    import pandas as pd
+    k.setdefault("float_precision", "round_trip")
+    return pd.read_csv(*a, **k)
+
 ROOT = Path(__file__).resolve().parents[2]
 
 STEPS = (
@@ -57,7 +64,7 @@ def same(p: Path, q: Path) -> bool:
     import numpy as np
     import pandas as pd
     try:
-        a, b = pd.read_csv(p), pd.read_csv(q)
+        a, b = _read_csv(p), _read_csv(q)
     except Exception:
         return False
     if list(a.columns) != list(b.columns) or a.shape != b.shape:

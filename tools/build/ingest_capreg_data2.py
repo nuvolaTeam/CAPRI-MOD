@@ -41,6 +41,8 @@ from pathlib import Path
 
 import pandas as pd
 
+import functools as _ft
+_read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 RECORD = re.compile(
     r"^'([A-Z]{2}[A-Z0-9]{6})'\.'([A-Z0-9_]+)'\.'([A-Za-z0-9_]+)'\.'Y'\s+([-\d.Ee+]+)")
 
@@ -134,7 +136,7 @@ def main() -> None:
         rev.setdefault(c, model_region)
     df["model_region"] = df.region.map(rev)
 
-    model_regions = pd.read_csv(
+    model_regions = _read_csv(
         args.data_dir / "2017/supply/yields.csv", index_col=0).index
     matched = df.dropna(subset=["model_region"])
     print(f"  {matched.model_region.nunique()} of {len(model_regions)} "
@@ -165,7 +167,7 @@ def main() -> None:
     print(f"levels : {lev.shape[0]} regions x {lev.shape[1]} activities")
 
     # --- what this closes ----------------------------------------------
-    cur = pd.read_csv(args.data_dir / "2017/supply/yields.csv", index_col=0)
+    cur = _read_csv(args.data_dir / "2017/supply/yields.csv", index_col=0)
     livestock = ["DCOW", "BCOW", "BULL", "HFRS", "CALV", "SHGP",
                  "PIGS", "PIGF", "LAYS", "BROI", "OANI"]
     have_ls = [a for a in livestock if a in yld.columns]

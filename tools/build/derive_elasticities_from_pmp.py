@@ -54,6 +54,8 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+import functools as _ft
+_read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 warnings.filterwarnings("ignore")
 
 D = Path("capri_data")
@@ -71,19 +73,19 @@ def main() -> None:
     from capri_mod.supply.capri_pmp import (
         share_term, ARABLE_ACTIVITIES, EPRD_TO_GRP, dampen_elasticity)
 
-    qt = pd.read_csv(dd / "sources/capreg/pmp_quad_techn.csv")
-    qp = pd.read_csv(dd / "sources/capreg/pmp_quad_pact.csv")
-    yields = pd.read_csv(dd / "2017/supply/yields.csv", index_col=0)
-    areas = pd.read_csv(dd / "2017/supply/base_areas.csv", index_col=0)
-    prices = pd.read_csv(dd / "sources/capreg/capreg_producer_prices.csv", index_col=0)
-    pela = pd.read_csv(dd / "2017/supply/supply_elasticities_regional.csv", index_col=0)
+    qt = _read_csv(dd / "sources/capreg/pmp_quad_techn.csv")
+    qp = _read_csv(dd / "sources/capreg/pmp_quad_pact.csv")
+    yields = _read_csv(dd / "2017/supply/yields.csv", index_col=0)
+    areas = _read_csv(dd / "2017/supply/base_areas.csv", index_col=0)
+    prices = _read_csv(dd / "sources/capreg/capreg_producer_prices.csv", index_col=0)
+    pela = _read_csv(dd / "2017/supply/supply_elasticities_regional.csv", index_col=0)
 
     # Livestock revenue lives in different frames than crops: the "level" is the
     # herd size, the yield is output per head from the raw capreg extract, and
     # both are keyed by animal activity rather than crop. Loaded here so the
     # derivation can treat livestock on the same footing as crops.
-    herds = pd.read_csv(dd / "sources/capreg/capreg_herds.csv", index_col=0)
-    ls_yields = pd.read_csv(dd / "sources/capreg/capreg_yields.csv", index_col=0)
+    herds = _read_csv(dd / "sources/capreg/capreg_herds.csv", index_col=0)
+    ls_yields = _read_csv(dd / "sources/capreg/capreg_yields.csv", index_col=0)
     LIVESTOCK = {"DCOL", "DCOH", "BULL", "BULH", "SCOW", "HEIR", "HEIL", "HEIH",
                  "PIGF", "SOWS", "HENS", "POUF", "SHGF", "SHGM", "CAFF", "CAFR",
                  "CAMF", "CAMR"}

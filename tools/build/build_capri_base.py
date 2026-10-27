@@ -67,6 +67,8 @@ from pathlib import Path
 
 import pandas as pd
 
+import functools as _ft
+_read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 _ROOT = Path(__file__).resolve().parents[2]
 SUPPLY = _ROOT / "capri_data" / "2017" / "supply"
 AREAS, LAND = SUPPLY / "base_areas.csv", SUPPLY / "land_availability.csv"
@@ -286,7 +288,7 @@ def _regio_levels():
     import pandas as pd
     if not REGIO.exists():
         return None
-    d = pd.read_csv(REGIO)
+    d = _read_csv(REGIO)
     return d[d["uni_1"] == "LEVL"]
 
 
@@ -343,13 +345,13 @@ def apply_crop_specific_splits(areas, capri):
 
 def main(dump_dir: Path):
     capri = read_capri(dump_dir)
-    areas = pd.read_csv(AREAS, index_col=0)
-    land = pd.read_csv(LAND, index_col=0)
-    herds = pd.read_csv(HERDS, index_col=0)
-    yields = pd.read_csv(YIELDS, index_col=0)
-    costs = pd.read_csv(COSTS, index_col=0)
-    prices = pd.read_csv(PRICES, index_col=0)
-    nutrients = pd.DataFrame(index=sorted(pd.read_csv(AREAS, index_col=0).index),
+    areas = _read_csv(AREAS, index_col=0)
+    land = _read_csv(LAND, index_col=0)
+    herds = _read_csv(HERDS, index_col=0)
+    yields = _read_csv(YIELDS, index_col=0)
+    costs = _read_csv(COSTS, index_col=0)
+    prices = _read_csv(PRICES, index_col=0)
+    nutrients = pd.DataFrame(index=sorted(_read_csv(AREAS, index_col=0).index),
                              columns=[c for c in CROP_MAP], dtype=float)
 
     spec = build_spec(capri, list(areas.index))

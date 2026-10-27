@@ -33,6 +33,8 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+import functools as _ft
+_read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 D = Path(__file__).resolve().parents[2] / "capri_data" / "2017" / "abatement" / "ammonia"
 C = D / "costs"
 
@@ -57,9 +59,9 @@ def _lc(s):
 
 
 def load():
-    inv = pd.read_csv(C / "p_invCoeff.csv")
+    inv = _read_csv(C / "p_invCoeff.csv")
     INV = {(r.technology, _lc(r.animal_cat), _lc(r.manure_system), r.coefficient): r.value for r in inv.itertuples()}
-    add = pd.read_csv(C / "p_addDemand.csv")
+    add = _read_csv(C / "p_addDemand.csv")
     ADD = defaultdict(dict)
     for r in add.itertuples():
         ADD[(r.technology, _lc(r.animal_cat), _lc(r.manure_system))][r.input] = r.value
@@ -74,24 +76,24 @@ def load():
         if k[1] in ("hens", "pouf"):
             for i in list(d):
                 d[i] = d[i] * 1000.0
-    fop = pd.read_csv(C / "p_fixedOpCost.csv")
+    fop = _read_csv(C / "p_fixedOpCost.csv")
     FOP = {(r.technology, _lc(r.animal_cat), _lc(r.manure_system)): r.value for r in fop.itertuples()}
-    ic = pd.read_csv(C / "p_inputCost.csv")
+    ic = _read_csv(C / "p_inputCost.csv")
     PRICE = defaultdict(dict)
     for r in ic.itertuples():
         PRICE[r.country][r.item] = r.value
-    st = pd.read_csv(C / "p_storTime.csv")
+    st = _read_csv(C / "p_storTime.csv")
     STOR = {(r.region, _lc(r.manure_system), _lc(r.animal_cat)): r.value for r in st.itertuples()}
-    mn = pd.read_csv(C / "p_minStorCapND.csv")
+    mn = _read_csv(C / "p_minStorCapND.csv")
     MIN = {(r.region, _lc(r.manure_system), r.nvz, _lc(r.animal_cat)): r.value for r in mn.itertuples()}
-    kg = pd.read_csv(C / "p_kgNPerM3.csv")
+    kg = _read_csv(C / "p_kgNPerM3.csv")
     KGN = {(r.activity, _lc(r.manure_system)): r.value for r in kg.itertuples()}
-    nvz = pd.read_csv(D / "p_nvzShare_lu.csv").set_index("region")["value"].to_dict()
-    hd = pd.read_csv(D / "p_Heads.csv")
+    nvz = _read_csv(D / "p_nvzShare_lu.csv").set_index("region")["value"].to_dict()
+    hd = _read_csv(D / "p_Heads.csv")
     HEADS = defaultdict(dict)
     for r in hd.itertuples():
         HEADS[(r.region, r.ad_activity)][r.size_class] = r.value
-    hl = pd.read_csv(D / "p_holdLSU.csv")
+    hl = _read_csv(D / "p_holdLSU.csv")
     HOLD = defaultdict(dict)
     for r in hl.itertuples():
         g = r.animal_group.upper()
@@ -100,7 +102,7 @@ def load():
             HOLD[(r.region, g)]["200_500"] = HOLD[(r.region, g)].get("200_500", 0) + r.value * 3 / 4
         else:
             HOLD[(r.region, g)][r.size_class] = HOLD[(r.region, g)].get(r.size_class, 0) + r.value
-    md = pd.read_csv(D / "capri_mann_days_2030.csv")
+    md = _read_csv(D / "capri_mann_days_2030.csv")
     MD = {(r.region, r.activity, r.item): r.value for r in md.itertuples()}
     return INV, ADD, FOP, PRICE, STOR, MIN, KGN, nvz, HEADS, HOLD, MD
 

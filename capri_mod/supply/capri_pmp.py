@@ -41,6 +41,7 @@ import numpy as np
 import pandas as pd
 from capri_mod.params import param, param_table
 from capri_mod.data.definitions import MS_CODE
+from capri_mod.csvio import read_csv
 
 # --- 1. dampening ----------------------------------------------------------
 
@@ -192,10 +193,10 @@ def build_elasticity_table(
         to8 = dict(cw)
         rm = data_dir / "shared" / "region_capri_map.csv"
         if rm.exists():
-            for _r in pd.read_csv(rm, dtype=str).fillna("").itertuples(index=False):
+            for _r in read_csv(rm, dtype=str).fillna("").itertuples(index=False):
                 if _r.capri_region:
                     to8[_r.region] = _r.capri_region
-        df = pd.read_csv(pmp_path)
+        df = read_csv(pmp_path)
         df["activity"] = df["crop"].replace(ACTIVITY_ALIASES)
         df = df[df.activity.isin(set(activities))]
         vals = df["own_price_elas"].values
@@ -220,7 +221,7 @@ def build_elasticity_table(
     reg_path = resolve_data_file(data_dir, REGIONAL_FILE, base_year=base_year)
     n_reg = 0
     if reg_path.exists():
-        rdf = pd.read_csv(reg_path, index_col=0)
+        rdf = read_csv(reg_path, index_col=0)
         rdf = rdf.rename(columns=ACTIVITY_ALIASES)
         common_r = [r for r in rdf.index if r in set(regions)]
         common_a = [c for c in rdf.columns if c in set(activities)]
@@ -248,7 +249,7 @@ def build_elasticity_table(
     except Exception:
         cty_path = None
     if cty_path is not None and Path(cty_path).exists():
-        cdf = pd.read_csv(cty_path, index_col=0).rename(columns=COUNTRY_ELAS_ALIASES)
+        cdf = read_csv(cty_path, index_col=0).rename(columns=COUNTRY_ELAS_ALIASES)
         covered = {a for a in prov.columns if prov[a].isin(["PMP_CAPRI", "REGIONAL_CAPRI"]).any()}
         cols_ = [c for c in cdf.columns if c in set(activities) and c not in covered]
         for r in regions:
@@ -273,7 +274,7 @@ def build_elasticity_table(
     n_lsk = 0
     lsk_path = data_dir / LIVESTOCK_ELAS_FILE
     if lsk_path.exists():
-        ldf = pd.read_csv(lsk_path)
+        ldf = read_csv(lsk_path)
         ldf = ldf[(ldf["prod"] == ldf["wrt"]) & ldf["prod"].isin(set(LIVESTOCK_PRODUCT.values()))]
         ms_val = {(r, p_): float(v) for r, p_, v in zip(ldf.region, ldf["prod"], ldf.value)}
         # Young animals (calves, young cattle, cows) are part of the cattle activities' output
@@ -283,16 +284,16 @@ def build_elasticity_table(
         yel = {}
         ypath = data_dir / YOUNG_ELAS_FILE
         if ypath.exists():
-            for r_, i_, v_ in pd.read_csv(ypath).itertuples(index=False):
+            for r_, i_, v_ in read_csv(ypath).itertuples(index=False):
                 yel[(r_, i_)] = float(v_)
         sup = data_dir / base_year / "supply"
         try:
-            mrev = pd.read_csv(sup / "livestock_revenue_coef.csv", index_col=0)
-            toou = pd.read_csv(sup / "livestock_output_value_coef.csv", index_col=0)
+            mrev = read_csv(sup / "livestock_revenue_coef.csv", index_col=0)
+            toou = read_csv(sup / "livestock_output_value_coef.csv", index_col=0)
             # the product share is the value of final products (no young animals) in total output:
             # CAPRI's MREV is young-animal sales for sows, raised calves and replacement heifers
             try:
-                _pv = pd.read_csv(sup / "livestock_product_value_coef.csv", index_col=0)
+                _pv = read_csv(sup / "livestock_product_value_coef.csv", index_col=0)
                 for _a in _pv.columns:
                     if _a in mrev.columns:
                         mrev[_a] = _pv[_a].reindex(mrev.index)

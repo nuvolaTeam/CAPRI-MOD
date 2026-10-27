@@ -21,6 +21,7 @@ import numpy as np
 import pandas as pd
 
 from capri_mod.data.definitions import capri_ms
+from capri_mod.csvio import read_csv
 
 NUTRIENTS = ("N", "P", "K")
 SOURCES = ("MINE", "EXCR", "CRES")
@@ -50,24 +51,24 @@ class NPKData:
     def __init__(self, data_dir: Optional[str] = None):
         root = Path(data_dir) if data_dir else Path(__file__).resolve().parents[2] / "capri_data"
         env = root / "2017" / "environment"
-        c = pd.read_csv(env / "npk_crop_coefs_2030.csv")
+        c = read_csv(env / "npk_crop_coefs_2030.csv")
         self.has_yield_shares = {"main_share", "straw_share"} <= set(c.columns)
         self.crop = {(r, n): d.set_index("model_crop") for (r, n), d in c.groupby(["capri_region", "nutrient"])}
-        g = pd.read_csv(env / "npk_region_2030.csv")
+        g = read_csv(env / "npk_region_2030.csv")
         self.reg = {(t.capri_region, t.nutrient): t for t in g.itertuples(index=False)}
-        p = pd.read_csv(env / "fert_dist_priors_npk_2030.csv")
+        p = read_csv(env / "fert_dist_priors_npk_2030.csv")
         self.pri = {(r, n): d.set_index("ngrp") for (r, n), d in p.groupby(["capri_region", "nutrient"])}
         self.man = {}
         for nut, f in (("P", "livestock_manure_p_coef.csv"), ("K", "livestock_manure_k_coef.csv")):
             if (env / f).exists():
-                self.man[nut] = pd.read_csv(env / f, index_col=0)
+                self.man[nut] = read_csv(env / f, index_col=0)
         self._map = {}
         rm = root / "shared" / "region_capri_map.csv"
         if rm.exists():
-            for r in pd.read_csv(rm, dtype=str).fillna("").itertuples(index=False):
+            for r in read_csv(rm, dtype=str).fillna("").itertuples(index=False):
                 if r.capri_region:
                     self._map[r.region] = r.capri_region
-        gr = pd.read_csv(env / "fert_dist_crop_groups_2030.csv")
+        gr = read_csv(env / "fert_dist_crop_groups_2030.csv")
         self.groups = {r: d for r, d in gr.groupby("capri_region")}
         w = gr.groupby(["model_crop", "ngrp"]).share.sum()
         tot = w.groupby(level=0).transform("sum")

@@ -26,6 +26,8 @@ from pathlib import Path
 
 import pandas as pd
 
+import functools as _ft
+_read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 import sys as _sys
 _sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check")]
@@ -39,7 +41,7 @@ def main(dump: Path):
     import build_capri_base as B
     for item, name in (("CH4MAN", "livestock_ch4man_coef.csv"), ("CH4ENT", "livestock_ch4ent_coef.csv")):
         t = L.build(dump, item)
-        t.round(5).to_csv(ENV / name)
+        t.to_csv(ENV / name)
         print(name, t.shape, "median kg/head:", t.median().round(2).to_dict())
     # CO2LIM per region (UAAR) and urea share per member state
     import re
@@ -50,7 +52,7 @@ def main(dump: Path):
             m = row.match(line)
             if m and m.group(3) in ("LEVL", "CO2LIM", "CO2UREA", "NMIN"):
                 cap[m.group(1)][m.group(3)][m.group(2)] = B._num(m.group(4))
-    areas = pd.read_csv(B.AREAS, index_col=0)
+    areas = _read_csv(B.AREAS, index_col=0)
     spec = B.build_spec(cap, list(areas.index))
     share = {}
     for code, it in cap.items():

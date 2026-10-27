@@ -49,6 +49,8 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+import functools as _ft
+_read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 RECORD = re.compile(
     r"^'([A-Z]{2}[A-Z0-9]{6})'\.'([A-Z0-9_]+)'\.'([A-Za-z0-9_]+)'\.'Y'\s+([-\d.Ee+]+)")
 
@@ -138,7 +140,7 @@ def main() -> None:
 
     # ---- comparison with what the model currently uses -------------------
     print("\n--- against current model inputs ---")
-    cur_p = pd.read_csv(args.data_dir / "2017/market/producer_prices.csv", index_col=0)
+    cur_p = _read_csv(args.data_dir / "2017/market/producer_prices.csv", index_col=0)
     col = cur_p.columns[0]
     rows = []
     for a in pr.columns:
@@ -153,7 +155,7 @@ def main() -> None:
     print(dp.reindex(dp.dev_pct.abs().sort_values(ascending=False).index)
           .head(8).round(1).to_string(index=False))
 
-    cur_n = pd.read_csv(args.data_dir / "2017/environment/nutrient_coefs.csv",
+    cur_n = _read_csv(args.data_dir / "2017/environment/nutrient_coefs.csv",
                         index_col=0)
     npiv = nu.pivot_table(index="activity", columns="nutrient",
                           values="value", aggfunc="median")

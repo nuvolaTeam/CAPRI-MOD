@@ -38,6 +38,8 @@ from pathlib import Path
 
 import pandas as pd
 
+import functools as _ft
+_read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 DUMPS = Path("/home/claude/work/capreg")
 REF = Path("/mnt/user-data/uploads/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv")
@@ -92,7 +94,7 @@ def main() -> None:
     mr = importlib.util.module_from_spec(sp); sp.loader.exec_module(mr)
     regions = mr.model_regions()
     to_c8 = mr.region_to_capri()
-    ratio = pd.read_csv(ROOT / "capri_data" / "2017" / "supply" / "capri_level_ratio.csv", index_col=0)
+    ratio = _read_csv(ROOT / "capri_data" / "2017" / "supply" / "capri_level_ratio.csv", index_col=0)
     data = {"": read_2017(), "_2030": read_2030()}
     rows, srows = [], []
     for reg in regions:
@@ -141,7 +143,7 @@ def main() -> None:
         if len(rec) > 1:
             srows.append(rec)
     lab = pd.DataFrame(rows)
-    lab.to_csv(ROOT / "capri_data" / "2017" / "supply" / "labour_coef.csv", index=False, float_format="%.6g")
+    lab.to_csv(ROOT / "capri_data" / "2017" / "supply" / "labour_coef.csv", index=False)
     sa = pd.DataFrame(srows).set_index("region")
     # w = q_FALL / (q_VSET + q_FALL) of each PMP source (the model region's terms; else the country's median w)
     # base year: the recipe's 2017 terms (both technologies; CAPREG's file holds one diagonal term per activity, the
@@ -149,7 +151,7 @@ def main() -> None:
     for sfx, f in (("", ROOT / "capri_data" / "sources" / "baseline_pmp" / "intensity_q_recipe2017.csv"),
                    ("_capri2030", ROOT / "capri_data" / "sources" / "baseline_pmp" / "intensity_q_capri2030.csv"),
                    ("_recipe2030", ROOT / "capri_data" / "sources" / "baseline_pmp" / "intensity_q_recipe2030.csv")):
-        q = pd.read_csv(f).pivot_table(index="model_region", columns="activity", values="value")
+        q = _read_csv(f).pivot_table(index="model_region", columns="activity", values="value")
         w = (q["FALL"] / (q["VSET"] + q["FALL"])).where((q["VSET"] > 0) & (q["FALL"] > 0))
         col = "w_vset" + sfx
         sa[col] = w.reindex(sa.index)
@@ -157,7 +159,7 @@ def main() -> None:
         med = sa[col].groupby(ms).median()
         fill = ms.map(med).fillna(float(sa[col].median()))
         sa[col] = sa[col].fillna(fill)
-    sa.to_csv(ROOT / "capri_data" / "2017" / "supply" / "set_aside_split.csv", float_format="%.6g")
+    sa.to_csv(ROOT / "capri_data" / "2017" / "supply" / "set_aside_split.csv")
     print(f"labour_coef.csv: {len(lab)} region x activity rows, {lab.region.nunique()} regions; "
           f"set_aside_split.csv: {len(sa)} regions, VSET share median {sa['share_vset'].median():.2f} (2030 "
           f"{sa['share_vset_2030'].median():.2f}), w median {sa['w_vset'].median():.2f}")

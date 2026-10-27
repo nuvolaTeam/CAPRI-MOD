@@ -23,6 +23,8 @@ from pathlib import Path
 
 import pandas as pd
 
+import functools as _ft
+_read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 DEST = ROOT / "capri_data" / "2017" / "supply" / "crop_cost_shares.csv"
 ROW = re.compile(r"^'([A-Z]{2}[0-9A-Z]{6})'\.'([A-Za-z0-9_]+)'\.'(FERT|TOIN|LEVL)'\.'Y'\s+(-?\d[\d.]*(?:[Ee][+\-]?\d+)?)")
@@ -53,9 +55,8 @@ def main():
                     continue
                 tot[col]["toin"] += L * T
                 tot[col]["fert"] += L * d.get((act, "FERT"), 0.0)
-    old = pd.read_csv(DEST, index_col=0)
+    old = _read_csv(DEST, index_col=0)
     new = pd.DataFrame({c: {"fert_cost_share": t["fert"] / t["toin"]} for c, t in tot.items() if t["toin"] > 0}).T
-    new = new.round(3)
     if "SETA" in old.index:
         new.loc["SETA"] = old.loc["SETA", ["fert_cost_share"]]
     new = new.sort_index()

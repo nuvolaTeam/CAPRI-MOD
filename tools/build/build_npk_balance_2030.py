@@ -50,6 +50,8 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+import functools as _ft
+_read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 ENV = ROOT / "capri_data" / "2017" / "environment"
 SRC = ROOT / "capri_data" / "sources" / "environment" / "npk_dataout_2030.csv.xz"
@@ -121,9 +123,9 @@ def main():
     if a.dump.exists():
         src = extract(a.dump)
         SRC.parent.mkdir(parents=True, exist_ok=True)
-        src.to_csv(SRC, index=False, float_format="%.10g")
+        src.to_csv(SRC, index=False)
         print(f"extracted {len(src)} rows -> {SRC.relative_to(ROOT)}")
-    src = pd.read_csv(SRC, keep_default_na=False)
+    src = _read_csv(SRC, keep_default_na=False)
     v = {(r.region, r.item, r.row, r.col): r.value for r in src.itertuples(index=False)}
     regions = sorted({r for r in src.region if len(r) == 8})
     nuts0 = {r for r in regions if r.endswith("000000") and
@@ -258,9 +260,9 @@ def main():
     cdf = pd.DataFrame(crow).sort_values(["capri_region", "model_crop", "nutrient"])
     rdf = pd.DataFrame(rrow).sort_values(["capri_region", "nutrient"])
     pdf = pd.DataFrame(prow).sort_values(["capri_region", "nutrient", "ngrp"])
-    cdf.to_csv(out / "npk_crop_coefs_2030.csv", index=False, float_format="%.8g")
-    rdf.to_csv(out / "npk_region_2030.csv", index=False, float_format="%.8g")
-    pdf.to_csv(out / "fert_dist_priors_npk_2030.csv", index=False, float_format="%.8g")
+    cdf.to_csv(out / "npk_crop_coefs_2030.csv", index=False)
+    rdf.to_csv(out / "npk_region_2030.csv", index=False)
+    pdf.to_csv(out / "fert_dist_priors_npk_2030.csv", index=False)
     print(f"npk_crop_coefs_2030.csv {len(cdf)} rows; npk_region_2030.csv {len(rdf)} rows; "
           f"fert_dist_priors_npk_2030.csv {len(pdf)} rows")
     for nut in ("N", "P", "K"):
@@ -269,7 +271,7 @@ def main():
               f"{q.excr_avail.median():.3f}, residue availability median {q.cres_avail.median():.3f}, "
               f"pool scale median {q.pool_scale.median():.3f}, price median {q.uvag_eur_t.median():.0f} EUR/t")
     # the N priors must be those of fert_dist_priors_2030.csv
-    old = pd.read_csv(ENV / "fert_dist_priors_2030.csv")
+    old = _read_csv(ENV / "fert_dist_priors_2030.csv")
     m = pdf[pdf.nutrient == "N"].merge(old, on=["capri_region", "ngrp"], suffixes=("", "_old"))
     d = max((m[c] - m[c + "_old"]).abs().max() for c in ("mine_kg_ha", "excr_kg_ha", "cres_kg_ha"))
     print(f"N priors against fert_dist_priors_2030.csv: {len(m)} rows, largest difference {d:.2e} kg/ha")

@@ -39,6 +39,8 @@ from pathlib import Path
 
 import pandas as pd
 
+import functools as _ft
+_read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 D = ROOT / "capri_data" / "2017" / "abatement" / "ammonia"
 
@@ -58,7 +60,7 @@ RLF_FIX = {"BL400000": {"LFsurface": 6.850057, "LFsoil": 0.292021, "LFNmin": 8.2
 
 
 def _tab(name, keys, val="value", upper=None):
-    t = pd.read_csv(D / f"{name}.csv")
+    t = _read_csv(D / f"{name}.csv")
     out = {}
     for r in t.itertuples(index=False):
         k = tuple(str(getattr(r, c)).upper() if c == upper else getattr(r, c) for c in keys)
@@ -92,13 +94,13 @@ def _effects(pairs, _unused, rows_a, frs):
     for r in rows_a:
         F[(r[0], r[1])][r[2]] = r[3]
     E = defaultdict(dict)
-    for r in pd.read_csv(D / "ammonia_technology_effects.csv").itertuples():
+    for r in _read_csv(D / "ammonia_technology_effects.csv").itertuples():
         E[(r.region, r.activity)][(r.technology, r.item)] = float(r.reduction)
     LIT = defaultdict(dict)
-    for r in pd.read_csv(D / "p_litRevAmmoTechsAdd.csv").itertuples():
+    for r in _read_csv(D / "p_litRevAmmoTechsAdd.csv").itertuples():
         LIT[(r.region, r.activity)][(r.technology.upper(), r.manure_system.upper(), r.item.upper())] = float(r.value)
     AP = {(r.country, r.animal_cat.lower(), r.manure_system.lower(), r.technology): float(r.value) / 100.0
-          for r in pd.read_csv(D / "costs" / "p_applic.csv").itertuples()}
+          for r in _read_csv(D / "costs" / "p_applic.csv").itertuples()}
     out = []
     for reg, act in pairs:
         f = F.get((reg, act))
@@ -156,17 +158,17 @@ def build():
     ef = _tab("EmFracFert", ("region", "gas", "fertiliser"), upper="gas")
     nn = _tab("NN_CorrFertFactDeviation", ("region", "fertiliser", "year"))
     bn = _tab("bNumAniRAINS", ("region", "animal_mitt", "year"))
-    rs_ = pd.read_csv(D / "p_factRunStor.csv")
+    rs_ = _read_csv(D / "p_factRunStor.csv")
     frs = {(r.manure_system.upper(), r.tech_class, r.storage_type): float(r.value) for r in rs_.itertuples()}
     rlf = defaultdict(dict)
-    for r in pd.read_csv(D / "rLFRest.csv").itertuples():
+    for r in _read_csv(D / "rLFRest.csv").itertuples():
         rlf[r.region][r.item] = float(r.value)
     for k, v in RLF_FIX.items():
         rlf[k].update(v)
     for it in ("LFsurface", "LFsoil", "LFNmin"):
         if it not in rlf.get("ES120000", {}) and it in rlf.get("ES110000", {}) and it in rlf.get("ES130000", {}):
             rlf["ES120000"][it] = 0.5 * (rlf["ES110000"][it] + rlf["ES130000"][it])
-    md = pd.read_csv(D / "capri_mann_days_2030.csv")
+    md = _read_csv(D / "capri_mann_days_2030.csv")
     pairs = sorted({(r.region, r.activity) for r in md.itertuples() if r.item == "LEVL" and r.activity in MITT})
 
     rows_a, rows_r = [], []

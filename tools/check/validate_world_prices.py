@@ -44,6 +44,8 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+import functools as _ft
+_read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 CODE_MAP = {"SWHE": "WHEA", "CORN": "MAIZ", "POUL": "POUM",
             "BUTR": "BUTT", "SKIM": "SMIP"}
 
@@ -54,12 +56,12 @@ def main() -> None:
     args = ap.parse_args()
     dd = args.data_dir
 
-    model_wp = pd.read_csv(dd / "2017/market/world_prices.csv", index_col=0)
+    model_wp = _read_csv(dd / "2017/market/world_prices.csv", index_col=0)
     wcol = model_wp.columns[0]
-    capri = pd.read_csv(dd / "sources/capmod/capmod_world_reference_2017.csv",
+    capri = _read_csv(dd / "sources/capmod/capmod_world_reference_2017.csv",
                         index_col=0)
-    prod = pd.read_csv(dd / "sources/capreg/capreg_producer_prices.csv", index_col=0)
-    areas = pd.read_csv(dd / "2017/supply/base_areas.csv", index_col=0)
+    prod = _read_csv(dd / "sources/capreg/capreg_producer_prices.csv", index_col=0)
+    areas = _read_csv(dd / "2017/supply/base_areas.csv", index_col=0)
 
     # EU producer price: median across regions where the activity is grown.
     eu_price = {}
@@ -78,7 +80,7 @@ def main() -> None:
     share = {}
     tf = dd / "shared" / "trade_flows_2017.csv"
     if tf.exists():
-        flows = pd.read_csv(tf, index_col=[0, 1])
+        flows = _read_csv(tf, index_col=[0, 1])
         for c in flows.columns:
             rows = [(e, i) for (e, i) in flows.index if i == "EU27"]
             tot = float(flows.loc[rows, c].sum()) if rows else 0.0

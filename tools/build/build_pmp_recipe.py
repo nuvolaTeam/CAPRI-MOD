@@ -52,6 +52,8 @@ from pathlib import Path
 
 import pandas as pd
 
+import functools as _ft
+_read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 SRC = ROOT / "capri_data" / "sources" / "baseline_pmp"
 REF = Path("/mnt/user-data/uploads/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv")
@@ -177,7 +179,7 @@ def calibration_point_2030(ydat: dict, bas: dict) -> None:
     carry at "Y", stay those of CAPRI's 2030 results. The activities' L_BAS: DATA(..., "LEVL", "BAS") of the file."""
     if not SIMINI.exists():
         raise FileNotFoundError(f"{SIMINI} is missing (CAPRI's 2030 calibration point, sim_ini_21730.gdx)")
-    t = pd.read_csv(SIMINI)
+    t = _read_csv(SIMINI)
     for r in t.itertuples(index=False):
         if r.year == "Y":
             ydat.setdefault(r.region, {})[(r.col, r.row)] = float(r.value)
@@ -206,7 +208,7 @@ def rents(year: int, dat: dict, region: str) -> dict:
     if year not in _RENTS:
         f = ROOT / "capri_data" / "sources" / "capri_land_rents" / f"land_rents_capri_{year}.csv"
         tab = defaultdict(dict)
-        for r in pd.read_csv(f).itertuples():
+        for r in _read_csv(f).itertuples():
             tab[r.capri_region][r.land_type] = float(r.rent_eur_ha)
         _RENTS[year] = tab
     return dict(_RENTS[year].get(region, {}))
@@ -217,7 +219,7 @@ def land_quad(year: int) -> dict:
     f = (SRC / "pmp_quad_landtypes_2030.csv" if year == 2030
          else ROOT / "capri_data" / "sources" / "capreg" / "pmp_quad_landtypes_2017.csv")
     out = defaultdict(dict)
-    for r in pd.read_csv(f).itertuples():
+    for r in _read_csv(f).itertuples():
         out[r.region][(r.landtype1, r.landtype2)] = float(r.value)
     return out
 
@@ -408,9 +410,9 @@ def main() -> None:
     a = ap.parse_args()
     Y = a.year
     vb = defaultdict(dict)
-    for r in pd.read_csv(SRC / "estnlp_vb.csv").itertuples():
+    for r in _read_csv(SRC / "estnlp_vb.csv").itertuples():
         vb[r.region][(r.group1, r.group2)] = float(r.level)
-    vd = {(r.region, r.activity): float(r.level) for r in pd.read_csv(SRC / "estnlp_vd.csv").itertuples()}
+    vd = {(r.region, r.activity): float(r.level) for r in _read_csv(SRC / "estnlp_vd.csv").itertuples()}
     pela = pela_2004()
     bas = levels_2017()
     ydat = levels_ref(Y) if Y == 2030 else bas
@@ -427,9 +429,9 @@ def main() -> None:
         tech += t_
         pact += p_
     pd.DataFrame(tech, columns=["region", "activity", "tech1", "tech2", "value"]).to_csv(
-        SRC / f"recipe_{Y}_quad_techn.csv", index=False, float_format="%.10g")
+        SRC / f"recipe_{Y}_quad_techn.csv", index=False)
     pd.DataFrame(pact, columns=["region", "group1", "group2", "value"]).to_csv(
-        SRC / f"recipe_{Y}_quad_pact.csv", index=False, float_format="%.10g")
+        SRC / f"recipe_{Y}_quad_pact.csv", index=False)
     print(f"recipe {Y}: {len(tech)} technology terms, {len(pact)} group terms, {len({r[0] for r in tech})} CAPRI regions")
 
 

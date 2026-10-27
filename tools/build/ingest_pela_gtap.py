@@ -46,6 +46,8 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+import functools as _ft
+_read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 PELA_REC = re.compile(
     r"^'([A-Z]{2}[A-Z0-9]{6})'\.'([A-Z0-9]+)'\.'([A-Z0-9]+)'\.'(\d{4})'\s+([-\d.Ee+]+)")
 GTAP_REC = re.compile(r"^'([a-z_]+)'\s+([-\d.Ee+]+)")
@@ -135,7 +137,7 @@ def main() -> None:
 
     cur_path = args.data_dir / "2017/supply/supply_elasticities_regional.csv"
     if cur_path.exists():
-        cur = pd.read_csv(cur_path, index_col=0)
+        cur = _read_csv(cur_path, index_col=0)
         new_regions = [r for r in own.index if r not in cur.index]
         print(f"  regions gained over the current file: {len(new_regions)} "
               f"({cur.shape[0]} -> {own.shape[0]})")
@@ -157,7 +159,7 @@ def main() -> None:
 
     cur_arm_path = args.data_dir / "2017/market/armington_params.csv"
     if cur_arm_path.exists():
-        ca = pd.read_csv(cur_arm_path, index_col=0)
+        ca = _read_csv(cur_arm_path, index_col=0)
         common = [c for c in arm.index if c in ca.index]
         if common and "sigma" in ca.columns:
             d = ((ca.loc[common, "sigma"] - arm.loc[common, "esubd"]).abs()

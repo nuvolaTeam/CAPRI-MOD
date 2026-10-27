@@ -23,6 +23,8 @@ from pathlib import Path
 
 import pandas as pd
 
+import functools as _ft
+_read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 DATA = Path("/mnt/user-data/uploads/data_market_1730defaulta.csv")
 OUT = ROOT / "capri_data" / "2017" / "market" / "use_components.csv"
@@ -41,7 +43,7 @@ def main() -> None:
     import build_bilateral_market as BM
     from recalibrate_trade_2017 import REGION_MAP
     g2m = {g: m for m, gs in BM.MODEL.items() for g in gs}
-    rms_set = set(pd.read_csv(ROOT / "capri_data" / "shared" / "rms.csv")["rms"])
+    rms_set = set(_read_csv(ROOT / "capri_data" / "shared" / "rms.csv")["rms"])
     pat = re.compile(r"^'([^']*)'\.'(" + "|".join(ITEMS) + r")'\.'([A-Za-z]+)'\.'CAL'\s+(\S+)")
     v = defaultdict(float)
     for line in open(DATA, encoding="latin-1"):
@@ -63,7 +65,7 @@ def main() -> None:
         rows.append(dict(rms=r, model_region=mreg(r), commodity=c, hcon_kt=h, feed_kt=f, proc_kt=p, biof_kt=b,
                          arm1_kt=a if a else float("nan")))
     t = pd.DataFrame(rows)
-    t.to_csv(OUT, index=False, float_format="%.10g", lineterminator="\n")
+    t.to_csv(OUT, index=False, lineterminator="\n")
     print(f"wrote {OUT.relative_to(ROOT)}: {len(t)} region-commodities in {t.rms.nunique()} behavioural regions; "
           f"largest relative gap of HCON + FEED + PROC + BIOF to ARM1 where CAPRI stores ARM1 for the region: {worst:.2e}")
 

@@ -26,6 +26,8 @@ from pathlib import Path
 
 import pandas as pd
 
+import functools as _ft
+_read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check")]
@@ -41,9 +43,9 @@ def main():
     from build_feed_bulks import EU_MS
     from capri_mod.data.definitions import MARKET_COMMODITIES
 
-    el = pd.read_csv(ELAS)
+    el = _read_csv(ELAS)
     own = el[el["prod"] == el["wrt"]][["region", "prod", "value"]]
-    src = pd.read_csv(PROD, keep_default_na=False)
+    src = _read_csv(PROD, keep_default_na=False)
     prod = src[(src["item"] == "PROD") & (src["r2"] == "")][["r1", "product", "value"]]
     prod = prod.assign(value=pd.to_numeric(prod["value"], errors="coerce").fillna(0.0))
     pw = {(r, p): v for r, p, v in prod.itertuples(index=False)}

@@ -24,6 +24,8 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+import functools as _ft
+_read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 # CV window that catches constant * lognormal(0.10). Widened slightly on each
 # side so a sigma of 0.08 or 0.12 does not slip through.
 CV_LOW, CV_HIGH = 0.07, 0.13
@@ -34,7 +36,7 @@ def audit(data_dir: Path) -> pd.DataFrame:
     rows = []
     for path in sorted(data_dir.rglob("*.csv")):
         try:
-            df = pd.read_csv(path, index_col=0)
+            df = _read_csv(path, index_col=0)
         except Exception:
             continue
         num = df.select_dtypes("number")

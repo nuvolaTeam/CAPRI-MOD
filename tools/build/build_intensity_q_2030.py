@@ -28,6 +28,8 @@ from pathlib import Path
 
 import pandas as pd
 
+import functools as _ft
+_read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 SRC = ROOT / "capri_data" / "sources" / "baseline_pmp"
 ACTS = ("DCOL", "DCOH", "BULL", "BULH", "HEIL", "HEIH", "HEIR", "CAMF", "CAFF", "CAMR", "CAFR", "GRAE", "GRAI",
@@ -51,7 +53,7 @@ def crosswalk() -> dict:
 
 def build(path: Path, rev: dict) -> pd.DataFrame:
     import numpy as np
-    t = pd.read_csv(path)
+    t = _read_csv(path)
     t = t[t.activity.isin(ACTS)]
     # one term per CAPRI region and activity on its level: the technology block collapsed, c = 1 / (1' Qt^-1 1)
     # (Q(T, T) for one technology; for fallow, whose T2 carries no term, Q(T1, T1)); the animals and grassland
@@ -86,7 +88,7 @@ def main() -> None:
             continue
         d = build(path, rev)
         out = SRC / f"intensity_q_{tag}.csv"
-        d.to_csv(out, index=False, float_format="%.10g")
+        d.to_csv(out, index=False)
         print(f"wrote {out.name}: {len(d)} rows, {d.model_region.nunique()} model regions, "
               f"activities {sorted(d.activity.unique())}")
 

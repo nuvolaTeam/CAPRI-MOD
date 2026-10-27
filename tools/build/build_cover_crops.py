@@ -37,6 +37,8 @@ from pathlib import Path
 
 import pandas as pd
 
+import functools as _ft
+_read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 import sys as _sys
 _sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check")]
@@ -83,7 +85,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--gams-dir", type=Path, default=Path("/home/claude/work/allgms/gams"))
     a = ap.parse_args()
-    terms = pd.read_csv(ROOT / "capri_data" / "validation" / "greendeal_2030" / "capri_marginal_terms_ini_2030.csv.xz",
+    terms = _read_csv(ROOT / "capri_data" / "validation" / "greendeal_2030" / "capri_marginal_terms_ini_2030.csv.xz",
                         header=None, names=["region", "act", "item", "value"], dtype=str)
     terms["value"] = pd.to_numeric(terms["value"], errors="coerce")
     lev = terms[terms["item"] == "LEVL"].pivot_table(index="region", columns="act", values="value")
@@ -132,9 +134,9 @@ def main():
                           "share0": sum(f * share(c8 or ms, x, False) for x, f in w)})
     out = pd.DataFrame(rows)
     dest = ROOT / "capri_data" / "2017" / "supply"
-    out.to_csv(dest / "cover_crops.csv", index=False, float_format="%.6g")
+    out.to_csv(dest / "cover_crops.csv", index=False)
     s = pd.DataFrame(srows)
-    s[(s["share"] > 0) | (s["share0"] > 0)].to_csv(dest / "winter_cover_share.csv", index=False, float_format="%.6g")
+    s[(s["share"] > 0) | (s["share0"] > 0)].to_csv(dest / "winter_cover_share.csv", index=False)
     print(f"cover_crops.csv: {len(out)} regions, CATC share median {out.catc_share_2030.median():.3f}, "
           f"cost median {out.catc_cost_eur_ha.median():.0f} EUR/ha, biofix median {1000 * out.biofix_t_n_ha.median():.0f} kg N/ha "
           f"({int(out.biofix_t_n_ha.isna().sum())} without); winter_cover_share.csv: {len(s)} region-crop rows, "

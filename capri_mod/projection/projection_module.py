@@ -43,6 +43,7 @@ import pandas as pd
 from .trajectory import BaselineTrajectory
 from .reconcile import reconcile_projected_data, ReconciliationReport
 from capri_mod.params import param, param_table
+from capri_mod.csvio import read_csv
 
 
 @dataclass
@@ -216,7 +217,7 @@ class ProjectionModule:
             from pathlib import Path as _P
             f_ = _P(self.capri_prices_dir) / "capri_ref_ration_2030.csv"
             if f_.exists():
-                t_ = pd.read_csv(f_)
+                t_ = read_csv(f_)
                 rf = {}
                 ghg_f = {}
                 for r_ in t_.itertuples(index=False):
@@ -239,7 +240,7 @@ class ProjectionModule:
             f2 = _P(self.capri_prices_dir) / "capri_ref_fodder_2030.csv"
             fb = data.get("fodder_balance")
             if f2.exists() and isinstance(fb, dict):
-                uf = {(r_.region, r_.crop): float(r_.factor) for r_ in pd.read_csv(f2).itertuples(index=False)}
+                uf = {(r_.region, r_.crop): float(r_.factor) for r_ in read_csv(f2).itertuples(index=False)}
                 for reg_, feeds_ in fb.items():
                     for feed_, rec_ in (feeds_ or {}).items():
                         k_ = (reg_, rec_.get("crop"))

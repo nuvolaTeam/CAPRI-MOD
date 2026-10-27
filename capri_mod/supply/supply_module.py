@@ -43,6 +43,7 @@ from capri_mod.data.definitions import (
     CROPS, ANIMALS, ALL_ACTIVITIES, FEED_ITEMS, NUTRIENTS,
 )
 from capri_mod.data.definitions import MS_CODE, capri_ms
+from capri_mod.csvio import read_csv
 
 
 # ---------------------------------------------------------------------------
@@ -76,7 +77,7 @@ def overfert_factor(region: str):
         _OVERFERT = {}
         f = Path(__file__).resolve().parents[2] / "capri_data" / "2017" / "environment" / "crop_nut_need_mult_fact_2030.csv"
         if f.exists():
-            for r in pd.read_csv(f).itertuples(index=False):
+            for r in read_csv(f).itertuples(index=False):
                 _OVERFERT[str(r.region)] = float(r.x)
     x = _OVERFERT.get(region)
     if x is None and not _OVERFERT_WARNED:
@@ -103,7 +104,7 @@ def fert_option_table() -> dict:
         f = _P(__file__).resolve().parents[2] / "capri_data" / "2017" / "abatement" / "fert_options_jul15.csv"
         _FERT_OPT = {}
         if f.exists():
-            for r in pd.read_csv(f).itertuples(index=False):
+            for r in read_csv(f).itertuples(index=False):
                 _FERT_OPT.setdefault(r.region, []).append(r)
         else:
             import warnings as _w
@@ -167,7 +168,7 @@ def active_technologies():
         from pathlib import Path as _P
         f = _P(__file__).resolve().parents[2] / "capri_data" / "2017" / "abatement" / "active_technologies.csv"
         if f.exists():
-            _ACTIVE_TECH = set(pd.read_csv(f)["technology"].str.upper())
+            _ACTIVE_TECH = set(read_csv(f)["technology"].str.upper())
         else:
             import warnings as _w
             _w.warn("active_technologies.csv missing: all mitigation options with data are available")
@@ -186,7 +187,7 @@ def _csv_dict(rel: str, col: str) -> Dict[str, float]:
     """{key: value} of one column of a capri_data CSV (first column the key), NaN rows left out - CAPRI's tables the
     supply model reads at import (project rule: inputs in CSV)."""
     f = Path(__file__).resolve().parents[2] / "capri_data" / rel
-    s = pd.read_csv(f, index_col=0)[col].dropna()
+    s = read_csv(f, index_col=0)[col].dropna()
     return {str(k): float(v) for k, v in s.items()}
 
 
@@ -1195,7 +1196,7 @@ class RegionalSupplyModel:
         if type(self)._CATC_OPT is None:
             from pathlib import Path as _P
             f = _P(__file__).resolve().parents[2] / "capri_data" / "2017" / "abatement" / "mitigation" / "winter_cover_option.csv"
-            type(self)._CATC_OPT = pd.read_csv(f).set_index("region") if f.exists() else pd.DataFrame()
+            type(self)._CATC_OPT = read_csv(f).set_index("region") if f.exists() else pd.DataFrame()
         opt = type(self)._CATC_OPT
         cc = getattr(self.data, "cover_crops", None)
         wcs = getattr(self.data, "winter_cover_share", None)
@@ -1356,8 +1357,8 @@ class RegionalSupplyModel:
         cache = type(self).__dict__.get("_CAPG")
         if cache is None:
             root = _P(__file__).resolve().parents[2] / "capri_data" / "2017" / "policy"
-            st = _pd.read_csv(root / "cap_greening_2013_2020.csv")
-            fl = _pd.read_csv(root / "cap_greening_fleg_ms.csv").set_index("ms")["fleg_share"].to_dict()
+            st = read_csv(root / "cap_greening_2013_2020.csv")
+            fl = read_csv(root / "cap_greening_fleg_ms.csv").set_index("ms")["fleg_share"].to_dict()
             cache = ({(r.item, r.key): float(r.value) for r in st.itertuples(index=False)}, fl)
             type(self)._CAPG = cache
         st, fleg = cache
@@ -1482,7 +1483,7 @@ class RegionalSupplyModel:
             import pandas as _pd
             from pathlib import Path as _P
             f = _P(__file__).resolve().parents[2] / "capri_data" / "sources" / "environment" / "npk_dataout_2030.csv.xz"
-            s = _pd.read_csv(f, keep_default_na=False)
+            s = read_csv(f, keep_default_na=False)
             s = s[(s.item == "") & (s.row.isin(["EXCRET", "MTRADE"]))]
             v = {(t.region, t.row, t.col): float(t.value) for t in s.itertuples(index=False)}
             c = {}
@@ -2135,7 +2136,7 @@ class RegionalSupplyModel:
                 from pathlib import Path
                 root = Path(__file__).resolve().parents[2] / "capri_data" / "2017" / "market"
                 b = json.load(open(root / "capri_oilseed_products_baseline.json"))["balances"]
-                wp = pd.read_csv(root / "world_prices.csv").set_index("commodity")["price"]
+                wp = read_csv(root / "world_prices.csv").set_index("commodity")["price"]
                 for c in ("SOYC", "RAPC", "SUNC"):
                     fe = float(b.get(f"EU27|{c}", {}).get("feed", 0.0))
                     if fe > 0 and c in wp.index:
@@ -2589,7 +2590,7 @@ class RegionalSupplyModel:
         global _YIELD_ELAS
         if _YIELD_ELAS is None:
             f = Path(__file__).resolve().parents[2] / "capri_data" / "2017" / "supply" / "yield_price_elasticity.csv"
-            _YIELD_ELAS = {r.crop: float(r.elasticity) for r in pd.read_csv(f).itertuples()}
+            _YIELD_ELAS = {r.crop: float(r.elasticity) for r in read_csv(f).itertuples()}
         return _YIELD_ELAS
 
     def apply_yield_price_response(self, price_shock: pd.Series) -> None:
@@ -3489,12 +3490,12 @@ class RegionalSupplyModel:
             from pathlib import Path as _P
             root = _P(__file__).resolve().parents[2] / "capri_data" / "2017"
             try:
-                fs = pd.read_csv(root / "environment" / "fertiliser_substitution_2030.csv").set_index("region")
+                fs = read_csv(root / "environment" / "fertiliser_substitution_2030.csv").set_index("region")
                 c["av"] = fs["manure_availability"].to_dict()
             except Exception:
                 c["av"] = {}
             try:
-                fp = pd.read_csv(root / "supply" / "mineral_n_price.csv").set_index("country")
+                fp = read_csv(root / "supply" / "mineral_n_price.csv").set_index("country")
                 c["pf"] = (fp["eur_per_t_n"] / 1000.0).to_dict()
             except Exception:
                 c["pf"] = {}
@@ -5695,7 +5696,7 @@ class SupplyModule:
             pact_path = Path(data.get("_data_dir", "capri_data")) / \
                 "sources/capreg/pmp_quad_pact.csv"
             if pact_path.exists():
-                pv = pd.read_csv(pact_path)
+                pv = read_csv(pact_path)
                 for r, g in pv.groupby("model_region"):
                     self.cross_group[r] = {
                         (a, b): v for a, b, v in
@@ -5971,7 +5972,7 @@ class SupplyModule:
             import json as _json
             root = _P(__file__).resolve().parents[2] / "capri_data"
             f = root / "2017" / "abatement" / "fert_options_jul15.csv"
-            tab = pd.read_csv(f) if f.exists() else pd.DataFrame()
+            tab = read_csv(f) if f.exists() else pd.DataFrame()
             c8 = _json.load(open(root / "shared" / "nuts_version_correspondence.json"))["capri8_to_nuts"]
             to8 = {}
             for k, lst in c8.items():
@@ -5981,7 +5982,7 @@ class SupplyModule:
             # the shared map (tools/build/build_region_map.py: correspondence fixes, NUTS splits and merges)
             _rm = root / "shared" / "region_capri_map.csv"
             if _rm.exists():
-                for _r in pd.read_csv(_rm, dtype=str).fillna("").itertuples(index=False):
+                for _r in read_csv(_rm, dtype=str).fillna("").itertuples(index=False):
                     if _r.capri_region:
                         to8[_r.region] = _r.capri_region
             cls._FERT_JUL15 = ({(r.region, str(r.option).upper()): r for r in tab.itertuples(index=False)}, to8)
@@ -6962,6 +6963,6 @@ def fert_side_value(region: str, tech: str, item: str):
     if _FERT_SIDE_TAB is None:
         from pathlib import Path as _P
         f = _P(__file__).resolve().parents[2] / "capri_data" / "2017" / "abatement" / "fert_side_effects.csv"
-        _FERT_SIDE_TAB = ({(r.region, r.technology, r.item): float(r.value) for r in pd.read_csv(f).itertuples()}
+        _FERT_SIDE_TAB = ({(r.region, r.technology, r.item): float(r.value) for r in read_csv(f).itertuples()}
                           if f.exists() else {})
     return _FERT_SIDE_TAB.get((region, tech, item))

@@ -25,6 +25,8 @@ from pathlib import Path
 
 import pandas as pd
 
+import functools as _ft
+_read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 DUMP = Path("/mnt/user-data/uploads/markmarket_greendeal_1730et_base_1717.txt")
 SRC_KEEP = ROOT / "capri_data" / "sources" / "market" / "sugar_processing_dataout_2030.csv"
@@ -36,7 +38,7 @@ def main():
         pat = re.compile(r"^'([A-Z]{2}000000)'\.''\.'(GROF|PRCM|MAPR|PRCY)'\.'(SUGB|SUGA)'\.'2030'\s+([-\d.Ee+]+)")
         rows = [m.groups() for m in map(pat.match, open(DUMP, errors="ignore")) if m and (m.group(2), m.group(3)) in KEYS]
         pd.DataFrame(rows, columns=["ms", "item", "product", "value"]).to_csv(SRC_KEEP, index=False)
-    src = pd.read_csv(SRC_KEEP)
+    src = _read_csv(SRC_KEEP)
     v = {(r["ms"], r["item"], r["product"]): float(r["value"]) for _, r in src.iterrows()}
     out = []
     for ms in sorted({r for r, *_ in v}):
@@ -45,7 +47,7 @@ def main():
             out.append(dict(ms=ms, beet_grof_kt=g, beet_prcm_kt=p, sugar_mapr_kt=s,
                             prcy=v.get((ms, "PRCY", "SUGA"), s / p if p else 0.0), sugar_per_beet=s / g))
     df = pd.DataFrame(out)
-    df.to_csv(ROOT / "capri_data" / "2017" / "market" / "sugar_processing.csv", index=False, float_format="%.8g")
+    df.to_csv(ROOT / "capri_data" / "2017" / "market" / "sugar_processing.csv", index=False)
     print(df.to_string(index=False, float_format=lambda x: f"{x:.3f}"))
     print(f"total: beet {df.beet_grof_kt.sum():.0f} kt, sugar {df.sugar_mapr_kt.sum():.0f} kt, "
           f"sugar per beet {df.sugar_mapr_kt.sum() / df.beet_grof_kt.sum():.4f}")

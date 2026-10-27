@@ -42,6 +42,13 @@ import sys
 import warnings
 from pathlib import Path
 
+
+def _read_csv(*a, **k):
+    """pandas.read_csv with floats parsed to the last digit (KNOWN_ISSUES K82)."""
+    import pandas as pd
+    k.setdefault("float_precision", "round_trip")
+    return pd.read_csv(*a, **k)
+
 warnings.filterwarnings("ignore")
 
 # run from anywhere: put the repo root on the path
@@ -117,7 +124,7 @@ def measure(data_dir: str) -> dict:
     # References are READ from world_prices.csv - they used to be hard-coded
     # copies of it (including rapeseed 213 and soybeans 103, which were cake
     # prices filed under the seeds) and would silently drift out of sync.
-    _wp = pd.read_csv(os.path.join("capri_data", "2017", "market", "world_prices.csv")).set_index("commodity")["price"]
+    _wp = _read_csv(os.path.join("capri_data", "2017", "market", "world_prices.csv")).set_index("commodity")["price"]
     ref = {c: float(_wp[c]) for c in ("SWHE", "BARL", "CORN", "RAPE", "SOYA", "BEEF", "PORK",
                                       "POUL", "MILK", "BUTR", "CHES", "SKIM") if c in _wp.index}
     out["price_reproduction_within_15pct"] = int(sum(

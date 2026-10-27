@@ -28,6 +28,7 @@ from typing import Dict
 
 import pandas as pd
 from capri_mod.data.definitions import MS_CODE
+from capri_mod.csvio import read_csv
 
 #: crop products whose CAPRI price is applied (model price-table code -> CAPRI product)
 CROP_PRODUCT = {c: c for c in (
@@ -54,11 +55,11 @@ def _ms(region: str) -> str:
 
 
 def load_price_tables(traj_dir: Path):
-    pr = pd.read_csv(traj_dir / "capri_price_ratios_2030.csv")
+    pr = read_csv(traj_dir / "capri_price_ratios_2030.csv")
     ratio = {(r.ms, r.product): float(r.real_ratio) for r in pr.itertuples()}
     eu = pr[pr["ms"] != "NO"].groupby("product")["real_ratio"].median().to_dict()
-    cap = pd.read_csv(traj_dir / "capri_cap_premium_2030.csv", index_col=0)
-    lsk = pd.read_csv(traj_dir / "capri_livestock_premium_ratio_2030.csv", index_col=0)
+    cap = read_csv(traj_dir / "capri_cap_premium_2030.csv", index_col=0)
+    lsk = read_csv(traj_dir / "capri_livestock_premium_ratio_2030.csv", index_col=0)
     return ratio, eu, cap, lsk
 
 
@@ -234,7 +235,7 @@ def ration_bulk_price_index(ratio_fn) -> Dict:
     f = Path(__file__).resolve().parents[2] / "capri_data" / "2017" / "market" / "feed_bulks_eu.csv"
     if not f.exists():
         return {}
-    t = pd.read_csv(f, keep_default_na=False)
+    t = read_csv(f, keep_default_na=False)
     out = {}
     for (ms, b), g in t.groupby(["ms", "bulk"], sort=True):
         v = g["feed_kt"].astype(float).values * g["arm1p"].astype(float).values

@@ -19,12 +19,19 @@ sys.path[:0] = [str(_ROOT / "tools" / _d) for _d in ("lib", "build", "run", "che
 from build_livestock_output_coef import CAPRI_TO_MODEL  # noqa: E402
 
 
+def _read_csv(*a, **k):
+    """pandas.read_csv with floats parsed to the last digit (KNOWN_ISSUES K82)."""
+    import pandas as pd
+    k.setdefault("float_precision", "round_trip")
+    return pd.read_csv(*a, **k)
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--rows", type=Path, default=Path("/home/claude/work/nh3/nh3_rows.txt"))
     args = ap.parse_args()
     import pandas as pd
-    areas = pd.read_csv(_ROOT / "capri_data" / "2017" / "supply" / "base_areas.csv", index_col=0)
+    areas = _read_csv(_ROOT / "capri_data" / "2017" / "supply" / "base_areas.csv", index_col=0)
     corr = json.loads((_ROOT / "capri_data" / "shared" / "nuts_version_correspondence.json").read_text())["capri8_to_nuts"]
     pat = re.compile(r"^'([A-Z]{2}[0-9A-Z]{6})'\.''\.'([A-Z0-9]+)'\.'([A-Za-z0-9]+)'\.'2030'\s+(-?\d[\d.Ee+\-]*)")
     v = defaultdict(dict)

@@ -54,6 +54,8 @@ from pathlib import Path
 
 import pandas as pd
 
+import functools as _ft
+_read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 D = ROOT / "capri_data" / "2017" / "abatement" / "ammonia"
 MODEL_ANIMAL = {"DCOL": "DCOW", "DCOH": "DCOW", "BULL": "BULL", "BULH": "BULL", "HEIL": "HFRS", "HEIH": "HFRS",
@@ -108,20 +110,20 @@ def _ad_options():
 def main():
     global AD
     AD = _ad_options()
-    t = pd.read_csv(D / "ammonia_technologies.csv")
-    eff = pd.read_csv(D / "ammonia_technology_effects.csv")
+    t = _read_csv(D / "ammonia_technologies.csv")
+    eff = _read_csv(D / "ammonia_technology_effects.csv")
     E = {(r.region, r.activity, r.technology, r.item): r.reduction for r in eff.itertuples()}
-    lit = pd.read_csv(D / "p_litRevAmmoTechsAdd.csv")
+    lit = _read_csv(D / "p_litRevAmmoTechsAdd.csv")
     LIT = {(r.region, r.activity): r.value for r in lit.itertuples()
            if r.technology == "ManAcid" and r.item == "NH3STO" and r.manure_system.upper() == "LIQUID"}
-    md = pd.read_csv(D / "capri_mann_days_2030.csv")
+    md = _read_csv(D / "capri_mann_days_2030.csv")
     M = {(r.region, r.activity, r.item): r.value for r in md.itertuples()}
     fr = {}
     for f, k, scale in (("FracEmHouse", "H", 100.0), ("FracEmStorage", "S", 1.0), ("FracEmAppl", "A", 1.0)):
-        x = pd.read_csv(D / f"{f}.csv")
+        x = _read_csv(D / f"{f}.csv")
         for r in x[x.gas.str.upper() == "NH3"].itertuples():
             fr[(r.region, r.animal_mitt, k)] = r.value / scale
-    gz = pd.read_csv(D / "FracEmGrazing.csv")
+    gz = _read_csv(D / "FracEmGrazing.csv")
     for r in gz[gz.item.str.upper() == "NH3"].itertuples():
         fr[(r.region, r.animal_mitt, "G")] = r.value / 100.0
     c8 = json.load(open(ROOT / "capri_data" / "shared" / "nuts_version_correspondence.json"))["capri8_to_nuts"]

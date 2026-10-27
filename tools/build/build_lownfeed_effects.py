@@ -36,6 +36,8 @@ from pathlib import Path
 
 import pandas as pd
 
+import functools as _ft
+_read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 M = ROOT / "capri_data" / "2017" / "abatement" / "mitigation"
 SRC = ROOT / "capri_data" / "sources" / "envind"
@@ -61,7 +63,7 @@ def extract(zpath: Path, dump_dir: Path):
                     if m and m.group(2) in CAPRI_ACTS:
                         rows.append(dict(region=m.group(1), activity=m.group(2), item=m.group(3), value=float(m.group(4))))
         SRC.mkdir(parents=True, exist_ok=True)
-        pd.DataFrame(rows).to_csv(CORR, index=False, float_format="%.8g")
+        pd.DataFrame(rows).to_csv(CORR, index=False)
         print(f"p_animReqCorrFac1: {len(rows)} rows -> {CORR.relative_to(ROOT)}")
     files = glob.glob(str(dump_dir / "res_17*.txt"))
     if files:
@@ -72,7 +74,7 @@ def extract(zpath: Path, dump_dir: Path):
                 m = pat.match(line)
                 if m:
                     rows.append(dict(region=m.group(1), activity=m.group(2), item=m.group(3), value=float(m.group(4))))
-        pd.DataFrame(rows).drop_duplicates(["region", "activity", "item"]).to_csv(LEV, index=False, float_format="%.8g")
+        pd.DataFrame(rows).drop_duplicates(["region", "activity", "item"]).to_csv(LEV, index=False)
         print(f"res_17 LEVL, MANN, CRPR_EXPT: {len(rows)} rows -> {LEV.relative_to(ROOT)}")
 
 
@@ -85,11 +87,11 @@ def main():
     spec = importlib.util.spec_from_file_location("_mr", ROOT / "tools" / "lib" / "_model_regions.py")
     mr = importlib.util.module_from_spec(spec); spec.loader.exec_module(mr)
     to_c8 = mr.region_to_capri()
-    cr = pd.read_csv(CORR)
+    cr = _read_csv(CORR)
     C = {(r.region, r.activity, r.item): float(r.value) for r in cr.itertuples()}
-    lv = pd.read_csv(LEV)
+    lv = _read_csv(LEV)
     D = {(r.region, r.activity, r.item): float(r.value) for r in lv.itertuples()}
-    cs = pd.read_csv(ROOT / "capri_data" / "sources" / "ghgtech" / "capri_costsavings_2030.csv")
+    cs = _read_csv(ROOT / "capri_data" / "sources" / "ghgtech" / "capri_costsavings_2030.csv")
     cs = cs[cs.technology.str.lower() == "lownfeed"]
     MX = {(r.region, r.activity): float(r.level) for r in cs[cs.run == "max"].itertuples() if pd.notna(r.level)}
     rations = json.load(open(ROOT / "capri_data" / "2017" / "feed" / "feed_ration_2017.json"))["regions"]
@@ -144,7 +146,7 @@ def main():
     from _capri_costsavings import costsaving_drop
     ds = costsaving_drop(MAP, "lowNFeed")
     out["dsav"] = [ds.get((r.region, r.animal), float("nan")) for r in out.itertuples()]
-    out.to_csv(M / "lownfeed_effects.csv", index=False, float_format="%.6g")
+    out.to_csv(M / "lownfeed_effects.csv", index=False)
     g = out.groupby("animal").agg(n=("region", "size"), crpr=("d_crpr_rel", "median"), mann=("d_mann_rel", "median"),
                                   elig=("elig_share", "median"), cost=("cost_per_unit", "median"))
     print(f"lownfeed_effects.csv: {len(out)} region-animals ({nskip} without data)")

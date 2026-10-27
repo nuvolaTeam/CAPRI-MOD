@@ -21,6 +21,8 @@ from pathlib import Path
 
 import pandas as pd
 
+import functools as _ft
+_read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 
 #: builders run after the herd split, in dependency order (pig split order, plus the builders added since)
@@ -76,7 +78,7 @@ def per_head_tables(dump: Path):
             if m:
                 v[(m.group(1), m.group(2))][m.group(3)] = float(m.group(4))
     S = ROOT / "capri_data" / "2017" / "supply"
-    herds = pd.read_csv(S / "animal_numbers.csv", index_col=0)
+    herds = _read_csv(S / "animal_numbers.csv", index_col=0)
     _c2g, groups = mr.capri_groups(list(herds.index))
 
     def weighted(codes, act, item):
@@ -88,7 +90,7 @@ def per_head_tables(dump: Path):
         return num / den if den > 0 else None
 
     for fname, item in (("yields.csv", "YILD"), ("variable_costs.csv", "TOIN")):
-        t = pd.read_csv(S / fname, index_col=0)
+        t = _read_csv(S / fname, index_col=0)
         for act in ("SHGM", "SHGF"):
             col = pd.Series(float("nan"), index=t.index)
             for codes, regs in groups.values():
@@ -108,8 +110,8 @@ def per_head_tables(dump: Path):
             t = t[cols[:i] + ["SHGM", "SHGF"] + cols[i:]]
         t.to_csv(S / fname)
         print(f"{fname}: SHGM median {t['SHGM'].median():.2f}, SHGF median {t['SHGF'].median():.2f} ({item})")
-    pp = pd.read_csv(ROOT / "capri_data" / "2017" / "market" / "producer_prices.csv", index_col=0)
-    cp = pd.read_csv(ROOT / "capri_data" / "sources" / "capreg" / "capreg_producer_prices.csv", index_col=0)
+    pp = _read_csv(ROOT / "capri_data" / "2017" / "market" / "producer_prices.csv", index_col=0)
+    cp = _read_csv(ROOT / "capri_data" / "sources" / "capreg" / "capreg_producer_prices.csv", index_col=0)
     for act in ("SHGM", "SHGF"):
         w = herds[act].reindex(cp.index).fillna(0.0)
         x = cp[act].where(cp[act] > 0)
@@ -139,7 +141,7 @@ def split_herds(dump: Path):
     import glob, re
     from collections import defaultdict
     f = ROOT / "capri_data" / "2017" / "supply" / "animal_numbers.csv"
-    a = pd.read_csv(f, index_col=0)
+    a = _read_csv(f, index_col=0)
     if "SHGO" not in a.columns:
         print("animal_numbers.csv already split (no SHGO column)")
         return
@@ -174,7 +176,7 @@ def split_herds(dump: Path):
                 if nat.get("SHGM", 0.0) + nat.get("SHGF", 0.0) > 0 else 0.5
             src["national" if nat else "none (0.5)"] += 1
         sm[r] = s_
-    a["SHGM"] = (tot * sm).round(6)
+    a["SHGM"] = tot * sm
     a["SHGF"] = (tot - a["SHGM"]).clip(lower=0.0)
     cols = [c for c in a.columns if c not in ("SHGM", "SHGF")]
     i = cols.index("SHGO")

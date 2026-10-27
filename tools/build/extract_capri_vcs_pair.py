@@ -98,7 +98,7 @@ def main():
     df.loc[~(df["ref"].abs() > 1e-9), "pct_change"] = float("nan")
     dest = ROOT / "capri_data" / "validation" / "coupled_support_2030"
     dest.mkdir(parents=True, exist_ok=True)
-    df.to_csv(dest / "capri_vcs_effect.csv.xz", index=False, float_format="%.6g")
+    df.to_csv(dest / "capri_vcs_effect.csv.xz", index=False)
     eu = df[(df.region == "EU27yr19") & (df.item == "LEVL")].set_index("activity")["pct_change"].dropna()
     print(f"wrote capri_vcs_effect.csv.xz: {len(df)} rows ({len(ref)} ref, {len(nov)} without VCS)")
     print("EU27 levels, % change:", eu.reindex(["DCOL", "DCOH", "SCOW", "BULL", "BULH", "HEIL", "HEIH", "SHGM", "SHGF",

@@ -37,6 +37,8 @@ from pathlib import Path
 
 import pandas as pd
 
+import functools as _ft
+_read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 KEEP_E = ROOT / "capri_data" / "sources" / "market" / "feed_demand_nonEU_elas_2030.csv"
 KEEP_U = ROOT / "capri_data" / "sources" / "market" / "feed_demand_nonEU_use_2030.csv"
@@ -72,7 +74,7 @@ def main():
             m = pat.match(line)
             if m and m.group(2) in caps and m.group(3) in caps:
                 rows.append(dict(rms=m.group(1), feed=m.group(2), price_of=m.group(3), value=float(m.group(4))))
-        pd.DataFrame(rows).to_csv(KEEP_E, index=False, float_format="%.12g")
+        pd.DataFrame(rows).to_csv(KEEP_E, index=False)
         print(f"extracted {len(rows)} p_ElasFeed rows -> {KEEP_E.relative_to(ROOT)}")
     if a.data.exists():
         rows = []
@@ -81,13 +83,13 @@ def main():
             m = pat.match(line)
             if m and m.group(3) in caps:
                 rows.append(dict(rms=m.group(1), item=m.group(2), product=m.group(3), value=float(m.group(4))))
-        pd.DataFrame(rows).to_csv(KEEP_U, index=False, float_format="%.12g")
+        pd.DataFrame(rows).to_csv(KEEP_U, index=False)
         print(f"extracted {len(rows)} use rows -> {KEEP_U.relative_to(ROOT)}")
-    el = pd.read_csv(KEEP_E)
-    us = pd.read_csv(KEEP_U)
+    el = _read_csv(KEEP_E)
+    us = _read_csv(KEEP_U)
     # CAPRI's behavioural regions (RMS: the 80 regions of its processing functions, the same elasticity export);
     # the data also hold trade blocks and reporting sums of them (A_EU_*, EU, MED, MER, MER_OTH, URUPAR, WBA)
-    beh = set(pd.read_csv(ROOT / "capri_data" / "2017" / "market" / "processing_nq_base.csv").rms)
+    beh = set(_read_csv(ROOT / "capri_data" / "2017" / "market" / "processing_nq_base.csv").rms)
     rms_set = set(el.rms)
     is_eu = lambda r: r[:2] in EU and r.endswith("000000")
     mreg = lambda r: REGION_MAP.get(r, "ROW")

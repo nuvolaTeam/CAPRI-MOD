@@ -32,6 +32,8 @@ from pathlib import Path
 
 import pandas as pd
 
+import functools as _ft
+_read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 #: NUTS splits and merges, shared with the other builders: tools/lib/_model_regions.py SPLITS_MERGES
 
@@ -39,9 +41,9 @@ ROOT = Path(__file__).resolve().parents[2]
 def main():
     spec = importlib.util.spec_from_file_location("_mr", ROOT / "tools" / "lib" / "_model_regions.py")
     mr = importlib.util.module_from_spec(spec); spec.loader.exec_module(mr)
-    g = pd.read_csv(ROOT / "capri_data" / "2017" / "environment" / "capri_gnb_components_2030.csv")
+    g = _read_csv(ROOT / "capri_data" / "2017" / "environment" / "capri_gnb_components_2030.csv")
     sur = g[g["item"] == "SURTOT"].set_index("capri_region")["kg_n_per_ha"].astype(float)
-    t = pd.read_csv(ROOT / "capri_data" / "validation" / "greendeal_2030" / "capri_marginal_terms_ini_2030.csv.xz",
+    t = _read_csv(ROOT / "capri_data" / "validation" / "greendeal_2030" / "capri_marginal_terms_ini_2030.csv.xz",
                     header=None, names=["region", "act", "item", "value"], dtype=str)
     t = t[(t["act"] == "UAAR") & (t["item"] == "LEVL")]
     uaar = pd.to_numeric(t.set_index("region")["value"], errors="coerce")
@@ -84,7 +86,7 @@ def main():
         rows.append({"region": reg, "surplus_kg_n_per_ha": round(v, 2), "source": how})
     out = pd.DataFrame(rows)
     dest = ROOT / "capri_data" / "2017" / "policy" / "capri_baseline_surplus_2030.csv"
-    old = pd.read_csv(dest).set_index("region")["surplus_kg_n_per_ha"] if dest.exists() else None
+    old = _read_csv(dest).set_index("region")["surplus_kg_n_per_ha"] if dest.exists() else None
     out.to_csv(dest, index=False)
     kinds = out["source"].str.extract(r"^(CAPRI 2030 reference, NUTS-2|CAPRI 2030 reference, national|"
                                       r"CAPRI 2030 reference, [A-Z]{2}000000|no CAPRI)")[0].value_counts()

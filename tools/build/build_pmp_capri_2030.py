@@ -39,6 +39,8 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+import functools as _ft
+_read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 SRC = ROOT / "capri_data" / "sources" / "baseline_pmp"
 OUT = ROOT / "capri_data" / "2017" / "supply" / "pmp_capri_2030.csv"
@@ -131,8 +133,8 @@ def main() -> None:
     sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check")]
     import _model_regions as mr
     ap_t = a.techn or SRC / "pmp_quad_techn_2030.csv"
-    techn = pd.read_csv(ap_t)
-    pact = pd.read_csv(Path(str(ap_t).replace("_quad_techn", "_quad_pact")))
+    techn = _read_csv(ap_t)
+    pact = _read_csv(Path(str(ap_t).replace("_quad_techn", "_quad_pact")))
     lev = ref_levels(a.ref) if a.year == 2030 else levels_2017_dumps(set(CAPRI_TO_MODEL))
     OUT = a.out or (ROOT / "capri_data" / "2017" / "supply" / "pmp_capri_2030.csv")
     regions = mr.model_regions()
@@ -191,7 +193,7 @@ def main() -> None:
                     rows.append((r, macts[i], macts[j], Hm[ii, jj] * np.sqrt(X[i] * X[j]), X[i], X[j], " ".join(cs)))
     df = pd.DataFrame(rows, columns=["region", "act_i", "act_j", "g", "x_i", "x_j", "capri_regions"])
     OUT.parent.mkdir(parents=True, exist_ok=True)
-    df.to_csv(OUT, index=False, float_format="%.10g")
+    df.to_csv(OUT, index=False)
     print(f"{OUT.name}: {df.region.nunique()} model regions from {n_groups} territory groups, {len(df)} entries; "
           f"CAPRI regions with a non-positive-definite matrix skipped: {n_pd_fail}; without terms: {missing}")
 

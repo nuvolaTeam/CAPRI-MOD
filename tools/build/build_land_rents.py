@@ -133,7 +133,7 @@ def main() -> None:
         w.writerow(["capri_region", "land_type", "rent_eur_ha", "levl_kha"])
         for c in sorted(data):
             for t, (r_, l_) in sorted(data[c].items()):
-                w.writerow([c, t, f"{r_:.6f}", f"{l_:.6f}"])
+                w.writerow([c, t, repr(float(r_)), repr(float(l_))])
     print(f"wrote {src_out}")
     sp = importlib.util.spec_from_file_location("_mr", ROOT / "tools" / "lib" / "_model_regions.py")
     mr = importlib.util.module_from_spec(sp); sp.loader.exec_module(mr)
@@ -174,7 +174,7 @@ def main() -> None:
             d = rows[r]
             if not d:
                 continue
-            w.writerow([r, src.get(r, "")] + [("" if t not in d else f"{d[t]:.6f}") for t in TYPES])
+            w.writerow([r, src.get(r, "")] + [("" if t not in d else repr(float(d[t]))) for t in TYPES])
             n += 1
     print(f"wrote {out} ({n} regions)")
 

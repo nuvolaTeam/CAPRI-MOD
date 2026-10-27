@@ -20,6 +20,8 @@ from pathlib import Path
 
 import pandas as pd
 
+import functools as _ft
+_read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 _ROOT = Path(__file__).resolve().parents[2]
 FODDER = {"FGRA": "GRAS", "FMAI": "MAIF", "FOFA": "OFOD"}
 
@@ -27,8 +29,8 @@ FODDER = {"FGRA": "GRAS", "FMAI": "MAIF", "FOFA": "OFOD"}
 def main() -> None:
     data = _ROOT / "capri_data" / "2017"
     rations = json.loads((data / "feed" / "feed_ration_2017.json").read_text())["regions"]
-    areas = pd.read_csv(data / "supply" / "base_areas.csv", index_col=0)
-    herds = pd.read_csv(data / "supply" / "animal_numbers.csv", index_col=0)
+    areas = _read_csv(data / "supply" / "base_areas.csv", index_col=0)
+    herds = _read_csv(data / "supply" / "animal_numbers.csv", index_col=0)
     # The raw file uses CAPRI-style names (SCOW, HEIF, SHGO); the model and the rations
     # use BCOW, HFRS, SHGM and SHGF (split from SHGO by tools/build/build_shg_split.py). Without the loader's aliases suckler cows, heifers and sheep
     # were silently left out of every fodder balance (their fodder tied to no land).

@@ -83,6 +83,8 @@ from pathlib import Path
 
 import pandas as pd
 
+import functools as _ft
+_read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 HERDS = ROOT / "capri_data" / "2017" / "supply" / "animal_numbers.csv"
 #: model column -> CAPRI activity whose HERD it takes (build_pig_split: PIGS = sows, PIGF = fattening pigs)
@@ -108,7 +110,7 @@ SSB_COL = {"PIGS": "breeding_pigs_alssvin", "PIGF": "fattening_pigs_slaktesvin"}
 def ssb_shares() -> dict:
     """{model column: {NO01/NO03/NO04/NO05: share of the four}} from SSB's county census (sows: breeding pigs;
     fattening pigs: pigs slaughtered or sold live)."""
-    s = pd.read_csv(SSB)
+    s = _read_csv(SSB)
     B = _base()
     g = s[s.nuts2016.isin(B.NORWAY_CHILDREN)].groupby("nuts2016")[list(SSB_COL.values())].sum()
     return {col: (g[c] / g[c].sum()).to_dict() for col, c in SSB_COL.items()}
@@ -119,7 +121,7 @@ def norway_herds(dump: Path) -> pd.DataFrame:
     NO080000 + NO090000 + NO0A0000 (the same territory) split by Statistics Norway's county census (ssb_shares)."""
     B = _base()
     capri = B.read_capri(dump)
-    a = pd.read_csv(HERDS, index_col=0, float_precision="round_trip")
+    a = _read_csv(HERDS, index_col=0, float_precision="round_trip")
     nor = [r for r in a.index if r.startswith("NO")]
     spec = B.build_spec(capri, nor)
     sh = ssb_shares()
@@ -138,7 +140,7 @@ def norway_herds(dump: Path) -> pd.DataFrame:
 
 
 def set_herds(dump: Path) -> pd.DataFrame:
-    a = pd.read_csv(HERDS, index_col=0, float_precision="round_trip")
+    a = _read_csv(HERDS, index_col=0, float_precision="round_trip")
     h = norway_herds(dump)
     for col in PIG_HERD:
         a.loc[h.index, col] = h[col]

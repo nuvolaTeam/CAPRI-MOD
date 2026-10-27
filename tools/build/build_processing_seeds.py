@@ -26,6 +26,8 @@ from pathlib import Path
 
 import pandas as pd
 
+import functools as _ft
+_read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 DATA = Path("/mnt/user-data/uploads/data_market_1730defaulta.csv")
 OUT = ROOT / "capri_data" / "2017" / "market" / "processing_seeds.csv"
@@ -52,10 +54,10 @@ def main() -> None:
         m = pat.match(line)
         if m and m.group(3) in goods:
             v[(m.group(1), m.group(2), m.group(3))] = num(m.group(4))
-    r2m = pd.read_csv(ROOT / "capri_data" / "shared" / "rms_to_rm.csv")      # CAPRI's RMS_TO_RM
+    r2m = _read_csv(ROOT / "capri_data" / "shared" / "rms_to_rm.csv")      # CAPRI's RMS_TO_RM
     r2m = dict(zip(r2m.rms, r2m.rm))
     # CAPRI's behavioural regions (set RMS; aggregates such as EU, MER or the trade blocks also carry data rows)
-    rms_set = set(pd.read_csv(ROOT / "capri_data" / "shared" / "rms.csv")["rms"])
+    rms_set = set(_read_csv(ROOT / "capri_data" / "shared" / "rms.csv")["rms"])
     rms_all = sorted({r for (r, it, g) in v if it == "PROC" and r in rms_set})
     mreg = lambda r: "EU27" if (r[:2] in EU and r.endswith("000000")) else REGION_MAP.get(r, "ROW")
     rows = []
@@ -71,7 +73,7 @@ def main() -> None:
                              ppri_oil=v.get((r, "PPRI", o), 0.0), ppri_cake=v.get((r, "PPRI", c), 0.0),
                              prod_oil_kt=po, prod_cake_kt=pc, rho_proc=RHO_PROC))
     t = pd.DataFrame(rows)
-    t.to_csv(OUT, index=False, float_format="%.10g", lineterminator="\n")
+    t.to_csv(OUT, index=False, lineterminator="\n")
     bad = t[~(t.arm1p_seed > 0)]
     print(f"wrote {OUT.relative_to(ROOT)}: {len(t)} region-seeds in {t.rms.nunique()} regions; "
           f"without a seed Armington price: {len(bad)}")

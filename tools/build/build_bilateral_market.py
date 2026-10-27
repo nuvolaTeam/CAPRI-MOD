@@ -46,6 +46,8 @@ from pathlib import Path
 
 import pandas as pd
 
+import functools as _ft
+_read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 SRC = {2017: Path("/mnt/user-data/uploads/market_base_1717.txt"),
        2030: Path("/mnt/user-data/uploads/markmarket_greendeal_1730et_base_1717.txt")}
@@ -113,7 +115,7 @@ def extract(year, eu_blocks=False):
                 and (r[1] == "" or (r[0], r[1], r[3]) in flow)]
         pd.DataFrame(rows, columns=["r1", "r2", "item", "product", "value"]).to_csv(keep, index=False)
         print(f"{year}: extracted {len(rows)} rows -> {keep.relative_to(ROOT)}")
-    return pd.read_csv(keep, keep_default_na=False)
+    return _read_csv(keep, keep_default_na=False)
 
 
 def build(year, REGION_MAP, AGGREGATES, eu_blocks=False):
@@ -170,8 +172,8 @@ def build(year, REGION_MAP, AGGREGATES, eu_blocks=False):
              for (c, r), v in ra.items()]
     rg = pd.DataFrame(rrows).sort_values(["commodity", "region"])
     dest = ROOT / "capri_data" / "2017" / "market"
-    fl.to_csv(dest / f"bilateral_flows_{year}{sfx}.csv", index=False, float_format="%.8g")
-    rg.to_csv(dest / f"bilateral_regions_{year}{sfx}.csv", index=False, float_format="%.8g")
+    fl.to_csv(dest / f"bilateral_flows_{year}{sfx}.csv", index=False)
+    rg.to_csv(dest / f"bilateral_regions_{year}{sfx}.csv", index=False)
     # checks: exports + domestic sales = production (CAPRI SupBalM_, stock changes aside)
     worst = []
     for c in MODEL:
@@ -210,7 +212,7 @@ def build_trq(year, REGION_MAP, AGGREGATES):
         pat = re.compile(r"^'EU'\.'([^']*)'\.'([A-Za-z]+)'\.'([A-Z]+)'\.'\d+'\s+([-\d.Ee+]+)")
         rows = [m.groups() for m in map(pat.match, txt.splitlines()) if m]
         pd.DataFrame(rows, columns=["exporter", "item", "product", "value"]).to_csv(keep, index=False)
-    df = pd.read_csv(keep, keep_default_na=False)
+    df = _read_csv(keep, keep_default_na=False)
     d = defaultdict(dict)
     for r in df.itertuples(index=False):
         d[(r.product, r.exporter)][r.item] = float(r.value)
@@ -234,7 +236,7 @@ def build_trq(year, REGION_MAP, AGGREGATES):
     rows = [dict(commodity=c, exporter=j, quota_kt=v["quota"], gap_eur_t=v["qg"] / v["quota"], imports_kt=v["imp"])
             for (c, j), v in agg.items() if v["quota"] > 0]
     out = pd.DataFrame(rows).sort_values(["commodity", "exporter"])
-    out.to_csv(ROOT / "capri_data" / "2017" / "market" / f"bilateral_trq_{year}.csv", index=False, float_format="%.8g")
+    out.to_csv(ROOT / "capri_data" / "2017" / "market" / f"bilateral_trq_{year}.csv", index=False)
     tot = out.groupby("commodity")[["quota_kt", "imports_kt"]].sum()
     print(f"{year} EU TRQs: " + ", ".join(f"{c} {r.imports_kt:.0f}/{r.quota_kt:.0f}" for c, r in tot.iterrows()))
     return out

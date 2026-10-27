@@ -48,6 +48,8 @@ from pathlib import Path
 
 import pandas as pd
 
+import functools as _ft
+_read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 import sys as _sys
 _sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check")]
@@ -84,22 +86,22 @@ def main():
     # calibration run's level + 2e-6 where that is smaller (costsavings_max_21730_jul15.gdx ->
     # capri_data/sources/ghgtech/capri_costsavings_2030.csv: genet_eff 0.001999 in every record, so 0.002 stays).
     # Written as column max_share; the model applies it with the setting fixGenetToIni (capri_mod/policy/endotech.py)
-    _cs = pd.read_csv(ROOT / "capri_data" / "sources" / "ghgtech" / "capri_costsavings_2030.csv")
+    _cs = _read_csv(ROOT / "capri_data" / "sources" / "ghgtech" / "capri_costsavings_2030.csv")
     _cs = _cs[(_cs.technology.str.upper() == "GENET_EFF") & (_cs.run == "max")]
     EFF_MAX = {(r.region, r.activity): float(r.level) for r in _cs.itertuples() if pd.notna(r.level)}
 
-    t = pd.read_csv(M / "trends_milk_yield_1730.csv")
+    t = _read_csv(M / "trends_milk_yield_1730.csv")
     Y = {(r.region, r.activity): float(r.milk_yield_kg) for r in t.itertuples()}
     top = {x: sum(Y.get((c, x), 0.0) for c in ("DK000000", "PT000000", "SE000000", "FI000000")) / 4 for x in ("DCOL", "DCOH")}
-    md = pd.read_csv(A / "capri_mann_days_2030.csv")
+    md = _read_csv(A / "capri_mann_days_2030.csv")
     L = {(r.region, r.activity): float(r.value) for r in md[md.item == "LEVL"].itertuples()}
-    rce = pd.read_csv(A / "RCEmissions.csv")
+    rce = _read_csv(A / "RCEmissions.csv")
     R = {(r.region, r.animal_mitt, r.item): r.value for r in rce.itertuples()}
-    uv = pd.read_csv(ROOT / "capri_data" / "sources" / "capri_baseline" / "capri_uvag_store_1730.csv")
+    uv = _read_csv(ROOT / "capri_data" / "sources" / "capri_baseline" / "capri_uvag_store_1730.csv")
     UV = {(r.region, r.product): float(r.uvag_2030) for r in uv.itertuples()}
-    mann = pd.read_csv(ROOT / "capri_data" / "2017" / "environment" / "livestock_manure_n_coef.csv", index_col=0)
-    prod = pd.read_csv(ROOT / "capri_data" / "2017" / "supply" / "livestock_output_by_product_coef.csv", index_col=0)
-    ci = pd.read_csv(ROOT / "capri_data" / "2017" / "supply" / "cattle_intensity.csv")
+    mann = _read_csv(ROOT / "capri_data" / "2017" / "environment" / "livestock_manure_n_coef.csv", index_col=0)
+    prod = _read_csv(ROOT / "capri_data" / "2017" / "supply" / "livestock_output_by_product_coef.csv", index_col=0)
+    ci = _read_csv(ROOT / "capri_data" / "2017" / "supply" / "cattle_intensity.csv")
     # the intensity pair's row (split "int": HEIL + HEIH, the fattening heifers); the file also holds the member
     # splits' rows (HEIR against HEIH, ...) since 22 October 2026
     if "split" in ci.columns:
@@ -112,12 +114,12 @@ def main():
     # CAPRI unit), as the ammonia options' costs (K63). The proportional part is per model head already (feed cost per
     # model head; CAPRI's division by DAYS / 365 cancels against the places). Before 23 October 2026 the floors were
     # per model head (they bind for calves and fattening sheep)
-    _at = pd.read_csv(ROOT / "capri_data" / "2017" / "abatement" / "ammonia" / "ammonia_tech_model.csv",
+    _at = _read_csv(ROOT / "capri_data" / "2017" / "abatement" / "ammonia" / "ammonia_tech_model.csv",
                       usecols=["region", "animal", "sub", "weight", "stock_factor"]).drop_duplicates(["region", "animal", "sub"])
     _at["ws"] = _at.weight * _at.stock_factor
     _g = _at.groupby(["region", "animal"])[["ws", "weight"]].sum()
     SF = (_g.ws / _g.weight).to_dict()
-    _ratio = pd.read_csv(ROOT / "capri_data" / "2017" / "supply" / "capri_level_ratio.csv", index_col=0)
+    _ratio = _read_csv(ROOT / "capri_data" / "2017" / "supply" / "capri_level_ratio.csv", index_col=0)
 
     def per_head(floor_place, reg, an):
         """A floor per animal place in EUR per model head (None without the stock factor or the level ratio)."""
@@ -210,7 +212,7 @@ def main():
     ds = costsaving_drop(EFF_MEMBERS, "GENET_EFF")
     out["dsav"] = [ds[(r.region, r.animal)] / RUN_FEFF if (r.option == "genet_eff" and (r.region, r.animal) in ds)
                    else float("nan") for r in out.itertuples()]
-    out.to_csv(M / "genetics_effects.csv", index=False, float_format="%.6g")
+    out.to_csv(M / "genetics_effects.csv", index=False)
     y = out[out.option == "genet_yld"]; e = out[out.option == "genet_eff"]
     print(f"genet_yld per unit of ghgTechMYld: {len(y)} regions; milk +{y.d_milk_rel.median():.1%} (median, max "
           f"{y.d_milk_rel.max():.1%}); at 0.2: milk +{0.2 * y.d_milk_rel.median():.1%}, cost median EUR "

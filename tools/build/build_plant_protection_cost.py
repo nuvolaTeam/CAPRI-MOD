@@ -55,6 +55,8 @@ from pathlib import Path
 
 import pandas as pd
 
+import functools as _ft
+_read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 #: CAPRI's directly yield-dependent inputs of crops present in the 2017 data (sets.gms IY = I not IS, without ICHI,
 #: water and mitiI: CIREST and IGEN)
@@ -84,9 +86,9 @@ def yields_2030(dump: Path) -> dict:
         rows = [m.groups() for m in map(rx.match, out.splitlines()) if m]
         df = pd.DataFrame(rows, columns=["capri_region", "activity", "yild_kg_ha"]).astype({"yild_kg_ha": float})
         YILD30.parent.mkdir(parents=True, exist_ok=True)
-        df.to_csv(YILD30, index=False, float_format="%.10g")
+        df.to_csv(YILD30, index=False)
         print(f"extracted {len(df)} 2030 yields -> {YILD30.relative_to(ROOT)}")
-    df = pd.read_csv(YILD30)
+    df = _read_csv(YILD30)
     return {(r.capri_region, r.activity): float(r.yild_kg_ha) for r in df.itertuples(index=False)}
 
 
@@ -212,7 +214,7 @@ def main():
                             n_reg += kind == "regional"; n_nat += kind == "national"
                             break
     out = pd.DataFrame(rows, columns=COLS)
-    out.to_csv(a.out, index=False, float_format="%.6g")
+    out.to_csv(a.out, index=False)
     crops = out[out.inpo_toin_share.isna()]
     med = crops.groupby("activity")[COLS[2:10]].median().round(0)
     print(f"wrote {a.out}: {len(out)} rows ({len(crops)} crop, {len(out) - len(crops)} animal), "

@@ -16,6 +16,13 @@ from collections import defaultdict
 from pathlib import Path
 import numpy as np
 
+
+def _read_csv(*a, **k):
+    """pandas.read_csv with floats parsed to the last digit (KNOWN_ISSUES K82)."""
+    import pandas as pd
+    k.setdefault("float_precision", "round_trip")
+    return pd.read_csv(*a, **k)
+
 _ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(_ROOT))
 sys.path[:0] = [str(_ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check")]
@@ -32,7 +39,7 @@ def repair_splits():
     from capri_mod.data import land_market_io as io
     dest = _ROOT / "capri_data" / "2017" / "supply" / "land_market_2017"
     R = io.read(dest)
-    areas = pd.read_csv(_ROOT / "capri_data" / "2017" / "supply" / "base_areas.csv", index_col=0)
+    areas = _read_csv(_ROOT / "capri_data" / "2017" / "supply" / "base_areas.csv", index_col=0)
     _sp = _ilu.spec_from_file_location("_mr", _ROOT / "tools" / "lib" / "_model_regions.py")
     _mr = _ilu.module_from_spec(_sp); _sp.loader.exec_module(_mr)
     _c2g, groups = _mr.capri_groups(list(areas.index))
@@ -84,7 +91,7 @@ def main() -> None:
         repair_splits()
         return
     import pandas as pd
-    areas = pd.read_csv(_ROOT / "capri_data" / "2017" / "supply" / "base_areas.csv", index_col=0)
+    areas = _read_csv(_ROOT / "capri_data" / "2017" / "supply" / "base_areas.csv", index_col=0)
     corr = json.loads((_ROOT / "capri_data" / "shared" / "nuts_version_correspondence.json").read_text())["capri8_to_nuts"]
     # CAPRI regions -> model regions in groups (tools/lib/_model_regions.py): one to one, merges
     # (FI13 + FI1A = FI1D: levels summed, matrices area-weighted) and splits (FI18 = FI1B + FI1C,

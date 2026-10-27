@@ -69,7 +69,7 @@ def main() -> None:
                     out.at[r, an] = H / L
                     src["national"] += 1
     dest = ROOT / "capri_data" / "2017" / "supply" / "capri_level_ratio.csv"
-    out.round(6).to_csv(dest)
+    out.to_csv(dest)
     print(f"wrote {dest.relative_to(ROOT)}: {dict(src)}; median ratio "
           + ", ".join(f"{an} {out[an].median():.3g}" for an in animals))
 

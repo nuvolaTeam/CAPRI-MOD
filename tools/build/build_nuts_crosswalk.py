@@ -30,6 +30,8 @@ from pathlib import Path
 
 import pandas as pd
 
+import functools as _ft
+_read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 # (filename, sheet, older-version label, newer-version label)
 CHAIN = [
     ("nuts1995-1999.xlsx", "NUTS1995-NUTS1999", "1995", "1999"),
@@ -148,7 +150,7 @@ def main() -> None:
         return chain
 
     capri = load_capri_codes(args.capri_gams)
-    regions = pd.read_csv(args.model_regions, index_col=0).index
+    regions = _read_csv(args.model_regions, index_col=0).index
 
     # A model region can have several historical aliases, and regio_sets.gms
     # often contains more than one of them. Which one the *data* uses is a

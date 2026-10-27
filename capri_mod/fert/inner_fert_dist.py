@@ -39,6 +39,7 @@ import numpy as np
 import pandas as pd
 from capri_mod.params import param, param_table
 from capri_mod.data.definitions import capri_ms
+from capri_mod.csvio import read_csv
 
 SOURCES = ("MINE", "EXCR", "CRES")
 PERM_NGRP = frozenset({"GRAS", "PERM"})
@@ -114,8 +115,8 @@ class InnerFertDist:
         root = Path(data_dir) if data_dir else Path(__file__).resolve().parents[2] / "capri_data"
         env = root / "2017" / "environment"
         self._root = root
-        self.priors = pd.read_csv(env / "fert_dist_priors_2030.csv")
-        self.groups = pd.read_csv(env / "fert_dist_crop_groups_2030.csv")
+        self.priors = read_csv(env / "fert_dist_priors_2030.csv")
+        self.groups = read_csv(env / "fert_dist_crop_groups_2030.csv")
         self._pri = {r: d.set_index("ngrp") for r, d in self.priors.groupby("capri_region")}
         # priors calibrated at a run's own base where CAPRI's star 3.0 posterior has no allocation there
         # (calibrate()), by CAPRI region and configuration variant (the manure-trade setting)
@@ -125,7 +126,7 @@ class InnerFertDist:
         self._map = {}
         rm = root / "shared" / "region_capri_map.csv"
         if rm.exists():
-            for r in pd.read_csv(rm, dtype=str).fillna("").itertuples(index=False):
+            for r in read_csv(rm, dtype=str).fillna("").itertuples(index=False):
                 if r.capri_region:
                     self._map[r.region] = r.capri_region
 
@@ -294,8 +295,8 @@ class InnerFertDist:
     def _rules(self):
         if not hasattr(self, "_exm"):
             pol = self._root / "2017" / "policy"
-            self._exm = pd.read_csv(pol / "mineral_redu_exemptions.csv")
-            self._lim = pd.read_csv(pol / "mineral_redu_limcres.csv")
+            self._exm = read_csv(pol / "mineral_redu_exemptions.csv")
+            self._lim = read_csv(pol / "mineral_redu_limcres.csv")
         return self._exm, self._lim
 
     def mineral_caps(self, region: str, base: dict, reduction: float, year: Optional[int] = None) -> Dict[str, float]:

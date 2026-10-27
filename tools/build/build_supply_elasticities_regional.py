@@ -21,6 +21,8 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+import functools as _ft
+_read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 SRC = ROOT / "capri_data" / "sources" / "estnlp" / "pela_own_price.csv"
 OUT = ROOT / "capri_data" / "2017" / "supply" / "supply_elasticities_regional.csv"
@@ -29,7 +31,7 @@ OUT = ROOT / "capri_data" / "2017" / "supply" / "supply_elasticities_regional.cs
 def build() -> pd.DataFrame:
     sys.path.insert(0, str(ROOT))
     from capri_mod.supply.capri_pmp import dampen_elasticity
-    pela = pd.read_csv(SRC, index_col=0)
+    pela = _read_csv(SRC, index_col=0)
     out = pd.DataFrame(dampen_elasticity(pela.values), index=pela.index, columns=pela.columns)
     out = out.where(pela.notna())
     out.index.name = "model_region"
@@ -42,7 +44,7 @@ def main() -> int:
     a = ap.parse_args()
     new = build()
     if a.check:
-        cur = pd.read_csv(OUT, index_col=0)
+        cur = _read_csv(OUT, index_col=0)
         same = (cur.shape == new.shape and list(cur.columns) == list(new.columns) and list(cur.index) == list(new.index)
                 and bool(np.allclose(cur.values, new.values, rtol=1e-12, atol=0.0, equal_nan=True)))
         print("supply_elasticities_regional.csv:", "reproduced" if same else "DIFFERS")

@@ -55,6 +55,8 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+import functools as _ft
+_read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 RECORD = re.compile(
     r"^'([^']+)'\.'([^']+)'\.'(ImportQ|ImportP|Fob|TCost|TaAppl)'"
     r"\.'([A-Z0-9]+)'\.'(\d{4})'\s+([-\d.Ee+]+)")
@@ -115,7 +117,7 @@ def main() -> None:
     # ---- comparison with the incumbent ----------------------------------
     cur_path = args.data_dir / "2017/market/world_prices.csv"
     if cur_path.exists():
-        cur = pd.read_csv(cur_path, index_col=0)
+        cur = _read_csv(cur_path, index_col=0)
         col = cur.columns[0]
         common = [c for c in prices.index if c in cur.index]
         cmp_ = pd.DataFrame({

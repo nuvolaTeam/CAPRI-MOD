@@ -32,6 +32,8 @@ from pathlib import Path
 
 import pandas as pd
 
+import functools as _ft
+_read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 
 
@@ -46,15 +48,15 @@ def costsaving_drop(members: dict, technology: str) -> dict:
     """{(model region, model animal): dsav, EUR per model head adopting} for CAPRI's option `technology`
     (GENET_EFF, lowNFeed, LINE_Tot, Nitr_Tot as in the source file) over the model animals' CAPRI members
     {model animal: (CAPRI activity, ...)}. Missing where no member has both runs' records or no level ratio."""
-    cs = pd.read_csv(ROOT / "capri_data" / "sources" / "ghgtech" / "capri_costsavings_2030.csv")
+    cs = _read_csv(ROOT / "capri_data" / "sources" / "ghgtech" / "capri_costsavings_2030.csv")
     cs = cs[cs.technology == technology]
     p = cs.pivot_table(index=["region", "activity"], columns="run", values=["level", "marginal"])
     rec = {k: (float(r[("level", "max")]), float(r[("marginal", "ini")]), float(r[("marginal", "max")]))
            for k, r in p.iterrows()
            if pd.notna(r.get(("level", "max"))) and pd.notna(r.get(("marginal", "ini"))) and pd.notna(r.get(("marginal", "max")))}
-    md = pd.read_csv(ROOT / "capri_data" / "2017" / "abatement" / "ammonia" / "capri_mann_days_2030.csv")
+    md = _read_csv(ROOT / "capri_data" / "2017" / "abatement" / "ammonia" / "capri_mann_days_2030.csv")
     lev = {(r.region, r.activity): float(r.value) for r in md[md["item"] == "LEVL"].itertuples()}
-    ratio = pd.read_csv(ROOT / "capri_data" / "2017" / "supply" / "capri_level_ratio.csv", index_col=0)
+    ratio = _read_csv(ROOT / "capri_data" / "2017" / "supply" / "capri_level_ratio.csv", index_col=0)
     mr = _model_regions()
     to_c8 = mr.region_to_capri()
     out = {}

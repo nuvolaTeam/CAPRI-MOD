@@ -26,6 +26,8 @@ from pathlib import Path
 
 import pandas as pd
 
+import functools as _ft
+_read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 import sys as _sys
 _sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check")]
@@ -93,7 +95,7 @@ def main():
                     acc["ghg_" + q] += lv * d.get(q, 0.0)
         return ({k: v / lv_sum for k, v in acc.items()} if lv_sum > 0 else None)
 
-    herds = pd.read_csv(ROOT / "capri_data" / "2017" / "supply" / "animal_numbers.csv", index_col=0)
+    herds = _read_csv(ROOT / "capri_data" / "2017" / "supply" / "animal_numbers.csv", index_col=0)
     c2g, groups = mr.capri_groups(list(herds.index))
     animals = sorted(set(C2M.values()))
     rows = []

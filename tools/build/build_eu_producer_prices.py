@@ -15,16 +15,18 @@ from pathlib import Path
 
 import pandas as pd
 
+import functools as _ft
+_read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 SUP = ROOT / "capri_data" / "2017" / "supply"
 DEST = ROOT / "capri_data" / "2017" / "market" / "producer_prices.csv"
 
 
 def main() -> None:
-    areas = pd.read_csv(SUP / "base_areas.csv", index_col=0)
-    ylds = pd.read_csv(SUP / "yields.csv", index_col=0)
-    prices = pd.read_csv(ROOT / "capri_data" / "sources" / "capreg" / "capreg_producer_prices.csv", index_col=0)
-    pp = pd.read_csv(DEST, index_col=0)
+    areas = _read_csv(SUP / "base_areas.csv", index_col=0)
+    ylds = _read_csv(SUP / "yields.csv", index_col=0)
+    prices = _read_csv(ROOT / "capri_data" / "sources" / "capreg" / "capreg_producer_prices.csv", index_col=0)
+    pp = _read_csv(DEST, index_col=0)
     col = pp.columns[0]
     changed = {}
     for c in areas.columns:

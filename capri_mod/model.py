@@ -52,6 +52,7 @@ from capri_mod.scenarios.scenarios import get_scenario, list_scenarios
 from capri_mod.params import param, param_table
 from capri_mod.settings import setting, tri_state, current as _settings
 from capri_mod.data.definitions import MS_CODE, capri_ms, REGION_TO_COUNTRY
+from capri_mod.csvio import read_csv
 
 
 #: Nitrates Directive ceiling on organic N application (kg N per ha of UAA)
@@ -1403,11 +1404,15 @@ class CAPRIModel:
                       if getattr(self, "_hessian_at_scenario", False) else ""))
         key = hashlib.sha1(key_src.encode()).hexdigest()[:16]
         cdir = _P(__file__).resolve().parents[1] / ".cache" / "market_supply_hessian"
-        cfile = cdir / f"{key}.csv"
+        # Parquet (binary doubles, exact by construction); a Hessian cached earlier as CSV is read to the last digit
+        # (pandas' default float parser is off by an ulp in most values; 1e-12 differences in the Hessian grew to 1e-4
+        # in the results and an outer iteration more or less: K82)
+        cfile = cdir / f"{key}.parquet"
+        _cfile_csv = cdir / f"{key}.csv"
+        if not cfile.exists() and _cfile_csv.exists():
+            cfile = _cfile_csv
         if cfile.exists():
-            # read back to the last digit (pandas' default float parser is off by an ulp in most values; 1e-12
-            # differences in the Hessian grew to 1e-4 in the results and an outer iteration more or less: K82)
-            t = pd.read_csv(cfile, float_precision="round_trip")
+            t = pd.read_parquet(cfile) if cfile.suffix == ".parquet" else read_csv(cfile)
             ms_h = {ms: g.pivot(index="x", columns="y", values="dq").fillna(0.0) for ms, g in t.groupby("ms")}
             eu, sup, blocks = self._split_hessian(ms_h)
             self.market_supply_hessian_info = {"source": "cache", "file": str(cfile), "products": len(eu.columns)}
@@ -1497,7 +1502,7 @@ class CAPRIModel:
         # written whole, then renamed: another process (parallel test workers, two runs) reads a complete file or none
         import os as _os
         _tmp = cdir / f"{key}.{_os.getpid()}.tmp"
-        t.to_csv(_tmp, index=False)
+        t.to_parquet(_tmp, index=False)
         _os.replace(_tmp, cfile)
         ms_h = {ms: g.pivot(index="x", columns="y", values="dq").fillna(0.0) for ms, g in t.groupby("ms")}
         eu, sup, blocks = self._split_hessian(ms_h)
@@ -1872,7 +1877,7 @@ class CAPRIModel:
         if not supply_results:
             return None
         if getattr(self, "_capri_stop", None) is None:
-            blocks = pd.read_csv(Path(getattr(self, "data_dir", None) or Path(__file__).resolve().parents[1] / "capri_data") / "shared" / "eu_market_blocks.csv")
+            blocks = read_csv(Path(getattr(self, "data_dir", None) or Path(__file__).resolve().parents[1] / "capri_data") / "shared" / "eu_market_blocks.csv")
             aggs = {b: list(g["ms"]) for b, g in blocks.groupby("block")}
             self._capri_stop = CapriStopRule(aggs, yani_rows=(), no_abs_price_rows=())
         rule = self._capri_stop
@@ -2500,7 +2505,7 @@ class CAPRIModel:
             from capri_mod.data.loaders import resolve_data_file
             base = Path(getattr(self, "data_dir", None) or Path(__file__).resolve().parents[1] / "capri_data")
             f = resolve_data_file(base, "dairy_processing.csv")
-            dp = pd.read_csv(f)
+            dp = read_csv(f)
             net = (dp["q_kt"].fillna(0.0) - dp["proc_kt"].fillna(0.0))
             dp = dp.assign(net=net)
             raw = dp[dp["item"].isin(["COMI", "SGMI"])].groupby("ms")["q_kt"].sum()
@@ -2513,7 +2518,7 @@ class CAPRIModel:
             # output less processing per tonne of raw milk delivered (MILK), CAPRI 2030 reference
             fw = resolve_data_file(base, "dairy_world_processing.csv")
             if fw.exists():
-                wp_ = pd.read_csv(fw)
+                wp_ = read_csv(fw)
                 for ms in ("NO000000",):
                     g = wp_[wp_["rms"] == ms].set_index("item")
                     if "MILK" in g.index and float(g.at["MILK", "q_kt"]) > 0:
@@ -2534,7 +2539,7 @@ class CAPRIModel:
             from capri_mod.data.loaders import resolve_data_file
             base = Path(getattr(self, "data_dir", None) or Path(__file__).resolve().parents[1] / "capri_data")
             f = resolve_data_file(base, "processing_yields.csv")
-            py = pd.read_csv(f)
+            py = read_csv(f)
             tab = {(r["ms"], r["raw"]): float(r["yield"]) for _, r in py.iterrows()}
             self._proc_yield_cache = tab
         if raw == "PARI":

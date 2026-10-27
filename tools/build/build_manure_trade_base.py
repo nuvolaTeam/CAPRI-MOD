@@ -25,6 +25,8 @@ from pathlib import Path
 
 import pandas as pd
 
+import functools as _ft
+_read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 KEEP = ROOT / "capri_data" / "sources" / "environment" / "capri_manure_trade_2030.csv"
 DEST = ROOT / "capri_data" / "2017" / "environment" / "manure_trade_2030.csv"
@@ -43,7 +45,7 @@ def main():
         KEEP.parent.mkdir(parents=True, exist_ok=True)
         pd.DataFrame(rows, columns=["capri_region", "item", "kt_n"]).to_csv(KEEP, index=False)
         print(f"extracted {len(rows)} rows -> {KEEP.relative_to(ROOT)}")
-    src = pd.read_csv(KEEP)
+    src = _read_csv(KEEP)
     v = {(r.capri_region, r.item): float(r.kt_n) for r in src.itertuples()}
     spec = importlib.util.spec_from_file_location("_mr", ROOT / "tools" / "lib" / "_model_regions.py")
     mr = importlib.util.module_from_spec(spec); spec.loader.exec_module(mr)
@@ -68,7 +70,7 @@ def main():
                  import_kg_n_per_ha=round(out.get(r, (0.0, 0.0, ""))[1], 4),
                  source="CAPRI 2030 reference endotech_all_ini MTRADE/EXCRET " + out.get(r, (0, 0, "none"))[2])
             for r in regs]
-    old = pd.read_csv(DEST).set_index("region") if DEST.exists() else None
+    old = _read_csv(DEST).set_index("region") if DEST.exists() else None
     new = pd.DataFrame(rows)
     new.to_csv(DEST, index=False)
     if old is not None:

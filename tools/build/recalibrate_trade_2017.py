@@ -43,6 +43,8 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+import functools as _ft
+_read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 # CAPRI capmod region -> model trade region. Regions absent here fold into ROW.
 REGION_MAP = {
     "EU27yr19": "EU27",
@@ -114,9 +116,9 @@ def main() -> None:
     args = ap.parse_args()
 
     cur_path = args.data_dir / "sources" / "fao_2021" / "trade_flows_2021.csv"
-    cur = pd.read_csv(cur_path, index_col=[0, 1])
+    cur = _read_csv(cur_path, index_col=[0, 1])
     cur17_path = args.data_dir / "shared" / "trade_flows_2017.csv"
-    cur17_cols = list(pd.read_csv(cur17_path, index_col=[0, 1]).columns) if cur17_path.exists() else []
+    cur17_cols = list(_read_csv(cur17_path, index_col=[0, 1]).columns) if cur17_path.exists() else []
     commodities = list(dict.fromkeys(list(cur.columns) + cur17_cols + EXTRA_COMMODITIES))
     print(f"current matrix: {cur.shape[0]} region pairs x {len(commodities)} commodities")
 

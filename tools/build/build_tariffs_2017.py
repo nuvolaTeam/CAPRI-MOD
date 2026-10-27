@@ -29,6 +29,8 @@ from pathlib import Path
 
 import pandas as pd
 
+import functools as _ft
+_read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT)); sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check")]
 OUT = ROOT / "capri_data" / "2017" / "policy" / "tariffs.csv"
@@ -65,7 +67,7 @@ def main():
                        "eu_imports_kt": round(d.get("ImportQ", 0.0), 1)}
         json.dump(_prov_all, open(PROV, "w"), indent=1)
     cols = list(prov)                                   # the commodities of the EU row
-    df = pd.read_csv(SRC, keep_default_na=False)
+    df = _read_csv(SRC, keep_default_na=False)
     df = df[df["item"].isin(("ImportQ", "ImportP", "Fob", "TCost"))]
     skip = lambda r: r in AGGREGATES or r.startswith(("EU0", "EU_", "A_EU")) or (
         r.endswith("000000") and r not in ("UK000000", "NO000000"))

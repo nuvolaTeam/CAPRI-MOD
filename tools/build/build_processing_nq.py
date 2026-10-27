@@ -31,6 +31,8 @@ from pathlib import Path
 
 import pandas as pd
 
+import functools as _ft
+_read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 ELAS = Path("/mnt/user-data/uploads/elas_2_1730defaulta.csv")
 DATA = Path("/mnt/user-data/uploads/data_market_1730defaulta.csv")
@@ -65,7 +67,7 @@ def main() -> None:
             h.append((m.group(1), m.group(2), m.group(3), num(m.group(4))))
     regs = {r for r, _, _, _ in h}
     v = defaultdict(float)
-    r2m = pd.read_csv(ROOT / "capri_data" / "shared" / "rms_to_rm.csv")   # CAPRI's RMS_TO_RM (build_gl_demand.py)
+    r2m = _read_csv(ROOT / "capri_data" / "shared" / "rms_to_rm.csv")   # CAPRI's RMS_TO_RM (build_gl_demand.py)
     r2m = dict(zip(r2m.rms, r2m.rm))
     pat2 = re.compile(r"^'([^']*)'\.'(PROC|HCON|FEED|BIOF|PPRI|ARM1P)'\.'([A-Za-z]+)'\.'CAL'\s+(\S+)")
     for line in open(DATA, encoding="latin-1"):
@@ -100,8 +102,8 @@ def main() -> None:
             rows_b.append((r, mreg(r), g2m[p], pr, use, inpe[r]))
     hh = pd.DataFrame(rows_h, columns=["rms", "model_region", "x", "y", "h", "arm1p_x", "arm1p_y"])
     bb = pd.DataFrame(rows_b, columns=["rms", "model_region", "commodity", "proc_kt", "use_kt", "inpe"])
-    hh.to_csv(OUT / "processing_nq_hessian.csv", index=False, float_format="%.10g")
-    bb.to_csv(OUT / "processing_nq_base.csv", index=False, float_format="%.10g")
+    hh.to_csv(OUT / "processing_nq_hessian.csv", index=False)
+    bb.to_csv(OUT / "processing_nq_base.csv", index=False)
     print(f"{len(hh)} Hessian terms in {hh.rms.nunique()} regions; {len(bb)} region-products")
     print(hh[hh.x != hh.y].groupby("x").y.apply(lambda s: sorted(set(s))).to_dict())
 

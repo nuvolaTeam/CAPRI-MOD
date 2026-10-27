@@ -15,14 +15,15 @@ dependencies = [
     "scipy>=1.10",
     "casadi>=3.6",       # bundles IPOPT: the regional supply models in CAPRI's NLP form
     "clarabel>=0.7",     # the manure-market pool equilibrium
+    "pyarrow>=14",       # Parquet for the model's caches (the market supply Hessians)
 ]
 
 [project.optional-dependencies]
 # requirements.txt lists all of these together; the extras are for installing as a package (pip install ".[dev]")
 # the test tools: pytest, pytest-xdist for parallel test processes (python -m pytest -n 2), coverage
 dev = ["pytest>=7.0", "pytest-xdist>=3.5", "coverage>=7.0"]
-# the data pipeline (capri_mod/pipeline): provider downloads (requests) and the versioned Delta store (deltalake, pyarrow)
-pipeline = ["requests>=2.28", "deltalake>=0.18", "pyarrow>=14"]
+# the data pipeline (capri_mod/pipeline): provider downloads (requests) and the versioned Delta store (deltalake)
+pipeline = ["requests>=2.28", "deltalake>=0.18"]
 # the reference-building tools (tools/build/*): GDX bindings of the GAMS Python API; the GDX library is built separately
 tools = ["gamsapi>=54"]
 

@@ -33,6 +33,8 @@ from pathlib import Path
 
 import pandas as pd
 
+import functools as _ft
+_read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 MKT = ROOT / "capri_data" / "2017" / "market"
 FAO = Path("/mnt/user-data/uploads/fao_agg_17_datamarket.txt")
@@ -44,11 +46,11 @@ PARENTS = {"FPRI": {"SWHE": ("WHEA", "SWHE", "DWHE"), "BARL": ("BARL",), "CORN":
 
 def main():
     bal = json.load(open(ROOT / "capri_data" / "validation" / "capri_eu27_market_balance_2030_ref.json"))["products"]
-    src = pd.read_csv(ROOT / "capri_data" / "sources" / "market" / "bilateral_dataout_2030.csv.xz", keep_default_na=False)
+    src = _read_csv(ROOT / "capri_data" / "sources" / "market" / "bilateral_dataout_2030.csv.xz", keep_default_na=False)
     prod = src[(src["item"] == "PROD") & (src["r2"] == "")]
     # the EU's production: the model's EU27 trade region (tools/build/build_bilateral_market.py); the EU member states
     # are left out of the non-EU supply elasticities
-    breg = pd.read_csv(MKT / "bilateral_regions_2030.csv")
+    breg = _read_csv(MKT / "bilateral_regions_2030.csv")
     sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check")]
     from build_feed_bulks import EU_MS
     eu_ms = set(EU_MS) | {"EU27yr19"}
@@ -67,10 +69,10 @@ def main():
                 rows.append(dict(product=rp, commodity=c, use=use, base_kt=round(q, 3), weight=q / tot,
                                  prod0_kt=round(p0, 3)))
         print(f"{rp}: EU production {p0:.0f} kt = {p0 / tot:.4f} x {tot:.0f} kt of parent use")
-    pd.DataFrame(rows).to_csv(MKT / "feed_byproducts.csv", index=False, float_format="%.6g")
+    pd.DataFrame(rows).to_csv(MKT / "feed_byproducts.csv", index=False)
 
     # world prices
-    wp = pd.read_csv(MKT / "world_prices.csv", index_col=0)
+    wp = _read_csv(MKT / "world_prices.csv", index_col=0)
     col = wp.columns[0]
     prov_f = ROOT / "capri_data" / "sources" / "world_price_provenance.json"
     prov = json.load(open(prov_f))
@@ -83,9 +85,9 @@ def main():
                 wp.loc[p, col] = round(float(m.group(2)), 2)
                 prov[p] = {"capri_code": p, "source": "FAO_agg_17_defaulta p_dataMarket 'World'.'PMRK'.'BAS'",
                            "previous": None}
-    fl = pd.read_csv(MKT / "bilateral_flows_2017.csv")
+    fl = _read_csv(MKT / "bilateral_flows_2017.csv")
     f = fl[(fl.commodity == "FPRI") & (fl.importer != fl.exporter)]
-    rg = pd.read_csv(MKT / "bilateral_regions_2017.csv")
+    rg = _read_csv(MKT / "bilateral_regions_2017.csv")
     pm = rg[rg.commodity == "FPRI"].set_index("region")["pmrk"]
     ex = f.groupby("exporter")["q_kt"].sum()
     fp = float(sum(q * float(pm.get(r, 0.0)) for r, q in ex.items()) / ex.sum())
@@ -97,9 +99,9 @@ def main():
     print(f"world prices: FENI {wp.at['FENI', col]}, FPRI {fp:.2f}")
 
     # Armington and supply elasticities
-    rho = pd.read_csv(MKT / "armington_rho.csv").set_index("commodity")
-    arm = pd.read_csv(MKT / "armington_params.csv", index_col=0)
-    el = pd.read_csv(ROOT / "capri_data" / "sources" / "arm" / "capri_supply_elas_market_1717.csv")
+    rho = _read_csv(MKT / "armington_rho.csv").set_index("commodity")
+    arm = _read_csv(MKT / "armington_params.csv", index_col=0)
+    el = _read_csv(ROOT / "capri_data" / "sources" / "arm" / "capri_supply_elas_market_1717.csv")
     # FENI, FPRI, and rye and oats (separate markets as in CAPRI; before the split they were inside OCER)
     for c in ("FENI", "FPRI", "RYEM", "OATS", "TAGR", "TOBA", "TABO", "TEXT", "PLMO", "OTHO",
               "FFIS", "SFIS", "OAQU", "COFF", "TEAS", "COCO"):

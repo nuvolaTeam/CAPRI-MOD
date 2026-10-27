@@ -29,6 +29,8 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+import functools as _ft
+_read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 ELAS = Path("/mnt/user-data/uploads/elas_2_1730defaulta.csv")
 DATA = Path("/mnt/user-data/uploads/data_market_1730defaulta.csv")
@@ -95,12 +97,12 @@ RMS_TO_RM = ROOT / "capri_data" / "shared" / "rms_to_rm.csv"
 
 def rms_to_rm() -> dict:
     if RMS_TO_RM_SRC.exists():
-        m = pd.read_csv(RMS_TO_RM_SRC)[["d0", "d1"]].rename(columns={"d0": "rms", "d1": "rm"})
+        m = _read_csv(RMS_TO_RM_SRC)[["d0", "d1"]].rename(columns={"d0": "rms", "d1": "rm"})
         m.to_csv(RMS_TO_RM, index=False)
         # CAPRI's behavioural regions (set RMS), for the builders that read CAPRI's data rows per region
-        pd.read_csv(RMS_TO_RM_SRC.parent / "RMS.csv")[["d0"]].rename(columns={"d0": "rms"}) \
+        _read_csv(RMS_TO_RM_SRC.parent / "RMS.csv")[["d0"]].rename(columns={"d0": "rms"}) \
             .to_csv(RMS_TO_RM.parent / "rms.csv", index=False)
-    m = pd.read_csv(RMS_TO_RM)
+    m = _read_csv(RMS_TO_RM)
     return dict(zip(m.rms, m.rm))
 
 
@@ -143,10 +145,10 @@ def main() -> None:
             rows_g.append((r, mr, g, g2m.get(g, ""), dv[i], p[i] * 1000.0, q[i], use, v.get((rm, "ARM1P", g), float("nan"))))
         rows_r.append((r, mr, Y, inha, err))
     pd.DataFrame(rows_g, columns=["rms", "model_region", "good", "model_commodity", "d", "cpri", "hcon", "use", "arm1p"]) \
-        .to_csv(OUT / "gl_demand_goods.csv", index=False, float_format="%.10g")
-    pd.DataFrame(rows_b, columns=["rms", "i", "j", "b"]).to_csv(OUT / "gl_demand_b.csv", index=False, float_format="%.10g")
+        .to_csv(OUT / "gl_demand_goods.csv", index=False)
+    pd.DataFrame(rows_b, columns=["rms", "i", "j", "b"]).to_csv(OUT / "gl_demand_b.csv", index=False)
     reg = pd.DataFrame(rows_r, columns=["rms", "model_region", "Y", "inha", "max_rel_err"])
-    reg.to_csv(OUT / "gl_demand_regions.csv", index=False, float_format="%.10g")
+    reg.to_csv(OUT / "gl_demand_regions.csv", index=False)
     print(f"{len(reg)} regions, {len(rows_g)} region-goods, {len(rows_b)} b terms; worst reproduction of CAPRI's food "
           f"demand at CAL: {reg.max_rel_err.max():.2e}")
     print(reg.groupby("model_region").rms.count().to_dict())

@@ -39,6 +39,8 @@ from pathlib import Path
 
 import pandas as pd
 
+import functools as _ft
+_read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 import sys as _sys
 _sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check")]
@@ -93,10 +95,10 @@ def national(reg):
 
 def main(dump_dir: Path):
     capri = read(dump_dir)
-    yields = pd.read_csv(B.YIELDS, index_col=0)
-    costs = pd.read_csv(B.COSTS, index_col=0)
-    prices = pd.read_csv(B.PRICES, index_col=0)
-    areas = pd.read_csv(B.AREAS, index_col=0)
+    yields = _read_csv(B.YIELDS, index_col=0)
+    costs = _read_csv(B.COSTS, index_col=0)
+    prices = _read_csv(B.PRICES, index_col=0)
+    areas = _read_csv(B.AREAS, index_col=0)
     spec = B.build_spec(capri, list(areas.index))
     cmap = crop_codes()
     crops = [c for c in cmap if c in yields.columns or c in costs.columns]
@@ -130,7 +132,7 @@ def main(dump_dir: Path):
         v = v or values(capri, ((national(reg), 1.0),), ("UAAR",))
         pay.at[reg, "BPS"] = v[4] if v else 0.0
     pay.index.name = "region"
-    pay.round(3).to_csv(PAYMENTS)
+    pay.to_csv(PAYMENTS)
     # GRASS: CAPRI's dry-matter content (DRMA of GRAS, 0.22 in every region) for the loader's fresh-to-dry conversion,
     # and the grass price on that basis: CAPRI's revenue per ha (MREV; its grass MPRI is a dummy 1,000) over the
     # dry-matter yield (build_capri_base used a share of 0.20)
@@ -162,7 +164,7 @@ def main(dump_dir: Path):
     costs.to_csv(B.COSTS)
     prices.to_csv(B.PRICES)
     prem.index.name = "region"
-    prem.round(4).to_csv(PREMIUM)
+    prem.to_csv(PREMIUM)
     print(f"{n_reg} region x crop cells from the region's own CAPRI rows, {n_nat} from its member state; "
           f"wrote yields, costs, prices and {PREMIUM.relative_to(ROOT)}")
 

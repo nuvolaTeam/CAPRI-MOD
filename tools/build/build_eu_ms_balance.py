@@ -20,6 +20,8 @@ from pathlib import Path
 
 import pandas as pd
 
+import functools as _ft
+_read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 DATA = Path("/mnt/user-data/uploads/data_market_1730defaulta.csv")
 OUT = ROOT / "capri_data" / "2017" / "market" / "eu_ms_balance_2030.csv"
@@ -30,7 +32,7 @@ def main() -> None:
     sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check")]
     import build_bilateral_market as BM
     g2m = {g: m for m, gs in BM.MODEL.items() for g in gs}
-    bm = pd.read_csv(ROOT / "capri_data" / "shared" / "eu_market_blocks.csv")
+    bm = _read_csv(ROOT / "capri_data" / "shared" / "eu_market_blocks.csv")
     # CAPRI's member states only (Norway's row in the map is capri-mod's supply routing, not a CAPRI block member)
     blocks = bm[~bm["source"].astype(str).str.startswith("capri-mod")].set_index("ms")["block"].to_dict()
     pat = re.compile(r"^'([A-Z]{2}000000)'\.'(" + "|".join(ITEMS) + r")'\.'([A-Za-z]+)'\.'CAL'\s+([-\d.Ee+]+)")
@@ -42,7 +44,7 @@ def main() -> None:
     rows = [dict(ms=ms, block=blocks[ms], product=p, commodity=g2m.get(p, ""),
                  **{f"{i.lower()}_kt": d.get(i, 0.0) for i in ITEMS}) for (ms, p), d in sorted(v.items())]
     df = pd.DataFrame(rows)
-    df.to_csv(OUT, index=False, float_format="%.8g")
+    df.to_csv(OUT, index=False)
     t = df.groupby("block")[["prod_kt", "hcon_kt", "feed_kt", "proc_kt", "biof_kt"]].sum()
     print(f"wrote {OUT.relative_to(ROOT)}: {len(df)} rows, {df.ms.nunique()} member states")
     print(df[df["product"].isin(["WHEA", "MILK", "PORK"])].groupby(["product", "block"])[["prod_kt", "hcon_kt", "feed_kt"]].sum().round(0))

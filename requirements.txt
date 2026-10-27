@@ -9,6 +9,8 @@ scipy>=1.10
 casadi>=3.6
 # Clarabel interior-point solver (Apache-2.0): the manure-market pool equilibrium
 clarabel>=0.7
+# Apache Arrow (Apache-2.0): Parquet for the model's caches (the market supply Hessians), exact by construction
+pyarrow>=14
 
 # --- tests (tools/run/run_tests.py also runs them without pytest, through its own stand-in) ---
 pytest>=7.0
@@ -22,7 +24,6 @@ coverage>=7.0
 requests>=2.28
 # the versioned store: Delta tables (Apache-2.0) written through Arrow
 deltalake>=0.18
-pyarrow>=14
 
 # --- reference-building tools (tools/build/*: CAPRI's GDX files -> the reference CSVs; not needed to run the model) ---
 # GAMS Python API (MIT), used only for its GDX bindings; no GAMS installation or licence is needed, but the GDX

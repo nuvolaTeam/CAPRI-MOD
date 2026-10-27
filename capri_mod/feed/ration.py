@@ -33,6 +33,7 @@ from pathlib import Path
 import numpy as np
 from capri_mod.params import param_table
 from capri_mod.data.definitions import capri_ms
+from capri_mod.csvio import read_csv
 
 #: CAPRI supply/pmp_elas.gms: FODDI (incl. straw, overridden) and named feeds
 FEED_ELAS = {"FGRA": -10.0, "FMAI": -10.0, "FOFA": -10.0, "FROO": -10.0, "FCOM": -10.0,
@@ -291,7 +292,7 @@ class RationModel:
         """
         import pandas as pd
         try:
-            herds = pd.read_csv(Path(root) / "2017" / "supply" / "animal_numbers.csv", index_col=0)
+            herds = read_csv(Path(root) / "2017" / "supply" / "animal_numbers.csv", index_col=0)
         except Exception:
             return {}
         out, ms_dm, ms_foth = {}, {}, {}

@@ -23,6 +23,7 @@ from pathlib import Path
 from typing import Dict, Optional
 
 import pandas as pd
+from capri_mod.csvio import read_csv
 
 ITEMS = ("EXCRET", "MTRADE", "MINFER", "CRESID", "EXPPRD", "RUNANI", "IMPORT", "SURTOT", "SURSOI")
 
@@ -41,7 +42,7 @@ class PCropCoefs:
 
     def __init__(self, data_dir: Optional[str] = None):
         root = Path(data_dir) if data_dir else Path(__file__).resolve().parents[2] / "capri_data"
-        t = pd.read_csv(root / "2017" / "environment" / "p_balance_crop_coefs_2030.csv")
+        t = read_csv(root / "2017" / "environment" / "p_balance_crop_coefs_2030.csv")
         self.c = {(r.capri_region, r.model_crop): (float(r.pret_kg_ha), float(r.pcrd_kg_ha))
                   for r in t.itertuples(index=False)}
 

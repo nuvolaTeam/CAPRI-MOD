@@ -79,7 +79,7 @@ def main():
             rows.append((reg, act, tech, tgt, r, d["level"], d["marginal"]))
     out = pd.DataFrame(rows, columns=["region", "activity", "technology", "target", "run", "level", "marginal"])
     dest = ROOT / "capri_data" / "sources" / "ghgtech" / "capri_costsavings_2030.csv"
-    out.to_csv(dest, index=False, float_format="%.8g")
+    out.to_csv(dest, index=False)
     print(f"wrote {dest.name}: {len(out)} rows")
     print(out.groupby(["technology", "target", "run"]).agg(n=("level", "size"), level_med=("level", "median"),
                                                           marg_med=("marginal", "median")).to_string())

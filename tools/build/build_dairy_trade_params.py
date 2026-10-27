@@ -21,6 +21,8 @@ from pathlib import Path
 
 import pandas as pd
 
+import functools as _ft
+_read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 MKT = ROOT / "capri_data" / "2017" / "market"
 CODE = {"BUTT": "BUTR", "SMIP": "SKIM", "CHES": "CHES", "WHEP": "WHEY", "FRMI": "FRMI", "CREM": "CREM",
@@ -28,8 +30,8 @@ CODE = {"BUTT": "BUTR", "SMIP": "SKIM", "CHES": "CHES", "WHEP": "WHEY", "FRMI": 
 
 
 def main():
-    wp = pd.read_csv(MKT / "dairy_world_processing.csv")
-    arm = pd.read_csv(MKT / "armington_params.csv", index_col=0)
+    wp = _read_csv(MKT / "dairy_world_processing.csv")
+    arm = _read_csv(MKT / "armington_params.csv", index_col=0)
     for k, m in CODE.items():
         if m not in ("BUTR", "SKIM", "CHES", "WHEY"):
             arm.loc[m, "eps"] = 0.0
