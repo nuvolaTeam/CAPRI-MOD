@@ -31,6 +31,9 @@ import numpy as np
 ROOT = Path(__file__).resolve().parents[2]
 
 
+_T_START = time.time()
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("out")
@@ -110,8 +113,11 @@ def main():
             ov[k.strip()] = v.strip()
     run_settings = _S.load(a.settings, overrides=ov)
     _S.activate(run_settings)
+    # a timed line per stage and outer iteration (CAPRIModel._progress): wall clock and time since the start
+    CAPRIModel.progress, CAPRIModel.progress_t0 = True, _T_START
     m = CAPRIModel(data_dir=str(ROOT / "capri_data"), verbose=False,
                    regions=[x for x in a.regions.split(",") if x] or None)
+    m._progress("model built (data loaded)")
     t0 = time.time()
     # CAPRI simulates from its calibrated 2030 reference (CAPMOD's reference run); the trend projection (CAPTRD) is
     # that calibration's input and stays available (--trajectory captrd)
@@ -164,7 +170,9 @@ def main():
     if a.endotech:
         _scen.endotech = effective(_et)
     _scen.endotech = effective(_scen.endotech)
+    m._progress(f"projection to 2030: baseline, then {_scen.name}")
     res = pmod.run(policy_scenario=_scen, years=[2030])
+    m._progress("runs done; writing the results")
     b, s = res.baseline[2030], res.scenario[2030]
     _pmm = (getattr(pmod, "_last_projected_model", None) or m).market_module
     db, ds = b["market"].domestic_prices.loc["EU27"], s["market"].domestic_prices.loc["EU27"]

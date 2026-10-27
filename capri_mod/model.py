@@ -550,8 +550,11 @@ class CAPRIModel:
         from capri_mod.supply.supply_module import RegionalSupplyModel as _RSMt
         _tol_tight = float(self.nlp_tol_final)
         self._nlp_tol_trace = []
+        _lab = "baseline" if _is_base else str(getattr(pol_scenario, "name", scenario))
+        self._progress(f"{_lab}: start (at most {max_outer_iter} iterations)")
         for outer_iter in range(max_outer_iter):
             self._outer_iter_now = outer_iter
+            _t_it0 = time.time()
             if outer_iter == 0:
                 # CAPRI's price forecast and stop rule start afresh every run (outer_loop.price_update, stop_rule)
                 self._capri_yani_hist = {}
@@ -664,6 +667,7 @@ class CAPRIModel:
             )
             self._last_spol = _spol
             self._last_supply_results = supply_results   # fodder shadow prices for the rations
+            _t_sup = time.time()
             # CAPRI's baseline calibration (CAPMOD calibrates its supply models so that the simulation year's baseline
             # reproduces the projected levels): in the baseline of a projected year, the regional models' linear terms
             # are corrected until their solution is the projection's levels (Sprint 9p); the scenario then starts
@@ -740,12 +744,14 @@ class CAPRIModel:
             self._set_feed_demand(supply_results)
             if getattr(self, "use_manure_market", False):
                 self._update_manure_pools()
+            _t_mk0 = time.time()
             market_eq = self.market_module.solve(
                 exogenous_supply=eu_supply_market,
                 trade_scenario=trade_scenario,
                 max_iter=market_max_iter,
                 verbose=self.verbose,
             )
+            _t_mk1 = time.time()
             if _yani_mkt:
                 self._young_animal_prices_from_market(_yani_ref)
 
@@ -1090,6 +1096,15 @@ class CAPRIModel:
                 _own_ok = bool(_cv is not None and outer_iter > 0 and not _cv["go_on"]
                                and _nbal < self.NBAL_UPDATE_TOL and _pool < _pool_tol and _yani < self.YANI_TOL
                                and _cal < self.BASE_CAL_TOL)
+            _t_it1 = time.time()
+            self._progress(
+                f"{_lab} iteration {outer_iter + 1}: supply models {_t_sup - _t_it0:.0f} s, between "
+                f"{_t_mk0 - _t_sup:.0f} s, market {_t_mk1 - _t_mk0:.0f} s, stop tests {_t_it1 - _t_mk1:.0f} s; "
+                f"iteration {_t_it1 - _t_it0:.0f} s"
+                + (f" | CAPRI: {_cv['count']} rows above 0.05%, largest {_cv['max']:.3f}%"
+                   + (f" ({_cv['top'][0][0]} {_cv['top'][0][1]})" if _cv.get('top') else "") if _cv else "")
+                + f" | N-balance price {_nbal:.2e}, pools {_pool:.2e}, young animals {_yani:.2e}, calibration {_cal:.2e}"
+                + (" -> stop" if _own_ok else ""))
             if _own_ok:
                 outer_converged = True
                 if self.verbose:
@@ -1123,7 +1138,10 @@ class CAPRIModel:
         # supply models' latest output every iteration (arm/simu_calibration_to_supply.gms:360-368)
         if _is_base and supply_results and bool(getattr(self, "market_supply_nq", True)) and market_eq is not None:
             try:
+                self._progress("baseline: market supply Hessian ...")
+                _t_h = time.time()
                 self.market_module.supply_hessian = self._market_supply_hessian(price_signal, supply_results, regions)
+                self._progress(f"baseline: market supply Hessian {time.time() - _t_h:.0f} s")
             except Exception as _exc:
                 warnings.warn(f"market supply Hessian not built ({_exc!r}); the market keeps its own-price "
                               "anticipation", RuntimeWarning, stacklevel=2)
@@ -1286,6 +1304,18 @@ class CAPRIModel:
     # ------------------------------------------------------------------
     # SCENARIO COMPARISON
     # ------------------------------------------------------------------
+    #: print a timed line per stage and outer iteration (wall clock, time since progress_t0); run scripts switch it on
+    progress = False
+    progress_t0: Optional[float] = None
+
+    def _progress(self, msg: str) -> None:
+        if not self.progress:
+            return
+        now = time.time()
+        t0 = self.progress_t0 if self.progress_t0 is not None else now
+        el = int(now - t0)
+        print(f"[{time.strftime('%H:%M:%S')} +{el // 3600}:{el % 3600 // 60:02d}:{el % 60:02d}] {msg}", flush=True)
+
     def compare(
         self,
         baseline_results: Dict,
@@ -1518,7 +1548,11 @@ class CAPRIModel:
             q_ref = bridged(res_b)
             sm._hess_base_res = res_b
         try:
-            for y in cols_y:
+            _t_h0 = time.time()
+            for _k_y, y in enumerate(cols_y):
+                if _k_y and _k_y % 5 == 0:
+                    self._progress(f"  market supply Hessian: {_k_y}/{len(cols_y)} price shocks, "
+                                   f"{time.time() - _t_h0:.0f} s; {n_skipped} of {n_solved} regional solves skipped")
                 sig = sig0.copy()
                 if y.startswith("YANI:"):
                     # a young animal's price raised by the shock in every regional model (EU and Norway), the products'
