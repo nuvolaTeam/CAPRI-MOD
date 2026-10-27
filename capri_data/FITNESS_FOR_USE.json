@@ -8,13 +8,13 @@
   "understated": "direction and ranking usable; magnitude is smaller than the reference",
   "not_supported": "the model cannot answer this; the number is an artefact of asking"
  },
- "_generated": "2026-09-29",
+ "_generated": "2026-10-27 (refreshed for CAPRI's regional units and the Farm-to-Fork run r161; other entries as of 2026-09-29)",
  "_source_of_truth": "README.md section 9 and capri_data/DATA_SOURCING_REGISTRY.json",
  "outputs": {
   "supply.activities": {
    "status": "validated",
-   "note": "Base fidelity 0.58%; all 248 regions converge. Crop areas reproduce CAPRI's agricultural area exactly (166,690 kha).",
-   "evidence": "regression anchors base_fidelity_pct, n_converged"
+   "note": "221 regional models, CAPRI's regional units (EU27 215, Norway 6, CAPRI's codes). Farm-to-Fork 2030 on the units (r161, 27 October 2026): every regional solve optimal, NL320000 at JRC121368's relaxed N target (K22). Base crop areas are CAPRI's (166,690 kha).",
+   "evidence": "r161 metadata nlp_nonoptimal, nlp_fallback"
   },
   "supply.gross_output": {
    "status": "validated",
@@ -43,8 +43,8 @@
   },
   "scenario.oilseeds": {
    "status": "use_with_care",
-   "ratio_vs_reference": 1.12,
-   "note": "Farm-to-Fork 2030; price +12.2% vs +11%.",
+   "ratio_vs_reference": 1.3,
+   "note": "Farm-to-Fork 2030 (r161): price +14.3% vs +11%, production -13.5% vs -15.5%.",
    "reference": "JRC121368 Figure 5"
   },
   "scenario.permanent_crops": {
@@ -86,17 +86,13 @@
    "status": "not_supported",
    "note": "Herds are re-optimised each period rather than carried as state, so multi-period livestock paths are not meaningful."
   },
-  "regions.NO05": {
-   "status": "use_with_care",
-   "note": "Norway is held in NUTS-2021 by CAPRI and NUTS-2016 here; the four redrawn regions are split by 2016 cattle shares."
-  },
   "economy_wide": {
    "status": "not_supported",
    "note": "Labour, capital and GDP effects are outside the partial-equilibrium boundary, as in CAPRI."
   },
   "scenario.prices": {
    "status": "use_with_care",
-   "note": "Cereals +9.7% (CAPRI ~+7-8%), oilseeds +10.1% (+8-12%), vegetables and permanent crops +5.1% (+10-15%).",
+   "note": "Farm-to-Fork 2030 (r161): cereals +10.7% (CAPRI +8%), oilseeds +14.3% (+11%), vegetables and permanent crops +11.6% (+15%).",
    "reference": "JRC121368"
   },
   "market.eu_balance": {
@@ -118,8 +114,8 @@
   },
   "supply.land_expansion": {
    "status": "validated",
-   "note": "Farm-to-Fork total farmland +3.6% against CAPRI's +3%. Germany and Cyprus rents on a fallback.",
-   "scope": "DE, CY rents"
+   "note": "Farm-to-Fork 2030 (r161): total farmland +3.1% against CAPRI's +3% (JRC121368 section 5.1.1). Land rents are CAPRI's per unit and land type (land_rents_2030.csv).",
+   "reference": "JRC121368 section 5.1.1"
   },
   "supply.shadow_prices": {
    "status": "validated",
@@ -127,22 +123,40 @@
   },
   "supply.landscape_shortfall": {
    "status": "use_with_care",
-   "note": "Unmet landscape requirement in regions whose arable land cannot hold the floor (81.7 kha EU-wide under Farm-to-Fork); CAPRI would convert grassland instead."
+   "note": "Unmet landscape requirement in regions whose arable land cannot hold the floor (81.7 kha EU-wide under Farm-to-Fork); CAPRI would convert grassland instead. (measured September 2026, not re-measured on the units; with the land market off see K84)"
   },
   "scenario.livestock": {
    "status": "use_with_care",
-   "note": "Farm-to-Fork 2030 herds: pigs -14.8% (CAPRI -14.5%); beef -10.3% (-18%), poultry -8.2% (-16.5%), dairy -7.7% (-10%).",
+   "note": "Farm-to-Fork 2030 herds (r161): pigs -14.3% (CAPRI -14.5%), beef animals -20.3% (-18%), sheep and goats -10.1% (-9.5%), poultry -12.3% (-16.5%), dairy cows -3.5% (-10%).",
    "reference": "JRC121368 Figure 5"
   },
   "scenario.meat_prices": {
-   "status": "understated",
-   "note": "Beef +2.5%, pork +4.1%, poultry +0.6% against CAPRI's +24/+43/+18%: EU meat prices react far less to shrinking supply.",
+   "status": "use_with_care",
+   "note": "Farm-to-Fork 2030 (r161): beef +20.6% (CAPRI +24%), poultry +15.6% (+18%), pork +18.7% (+43%: understated).",
    "reference": "JRC121368 Figure 7"
   },
   "environmental.scenario": {
    "status": "use_with_care",
-   "note": "Farm-to-Fork 2030 vs Table 15: manure CH4 -11.7% (-12.2%), enteric CH4 -10.3% (-14.6%), fertiliser N2O -35.1% (-40.4%), non-CO2 GHG -10.8% (-14.8%); ammonia -12.5% (-33%).",
+   "note": "Farm-to-Fork 2030 (r161) vs Table 15: manure CH4 -12.5% (-12.2%), fertiliser N2O -39.5% (-40.4%), enteric CH4 -11.3% (-14.6%), non-CO2 GHG -18.8% (-14.8%), ammonia -37.7% (-33%), manure N2O -18.3% (-3.2%).",
    "reference": "JRC121368 Table 15"
+  },
+  "regions.nuts2024": {
+   "status": "use_with_care",
+   "note": "Results are per CAPRI regional unit. On NUTS 2024 (capri_mod/nuts_reporting) 202 of 217 groups are one unit to one region; in the others (member states without regional detail such as DK, SI, HR; units NUTS later split such as DED00000, PL120000, IT310000; NL31/NL33 and Portugal's 2024 changes; Ireland) each region gets a UAA share of the group's result, not a result of its own. No unit for BE10, DE30, DE50, DE60, ES63, ES64, FRY1-5, NO0B.",
+   "scope": "capri_data/shared/capri_units_nuts2024.csv"
+  },
+  "scenario.milk_price": {
+   "status": "overstated",
+   "note": "Farm-to-Fork 2030 (r161): raw milk +21.5% against CAPRI's +1.5% (K13).",
+   "reference": "JRC121368 Figure 7"
+  },
+  "water.irrigation": {
+   "status": "use_with_care",
+   "note": "Net irrigation requirement (CROPWAT CNIR) on the FSS irrigated area of each unit (capri_mod/water): crop shares are one share per region except rice (CAPRI fits crop shares to FSS crop data not in hand); no irrigation-method efficiency; Ireland and Norway not covered. Base 2017: 11.2 Mha irrigated, 32 km3."
+  },
+  "income.regional": {
+   "status": "use_with_care",
+   "note": "CAPRI's ProfitAgr form (capri_mod/income): sum of (revenue - input cost + premium) x level per region; distribution across regions only (no farm-level data)."
   }
  }
 }
