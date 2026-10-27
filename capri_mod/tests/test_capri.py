@@ -135,6 +135,7 @@ def test_market_module_reproduces_its_own_prices(data):
 def test_supply_responds_positively_to_price(model):
     sm = model.supply_module
     reg = "DE110000"
+    sm.run(price_signals=None, regions=[reg])            # the late columns calibrated at base prices (see the next test)
     base = sm.run(price_signals=None, regions=[reg])
     q0 = base[reg].activities.get("SWHE", 0)
     sig = pd.Series(0.0, index=model.data["world_prices"].index)
@@ -153,8 +154,11 @@ def test_supply_responds_positively_to_price(model):
 ])
 def test_own_price_response_in_contrasting_regions(model, reg, product, act, strict):
     """The mechanism of test_supply_responds_positively_to_price on CAPRI units of other structures: a 20% higher
-    price of the region's product raises (permanent crops: does not lower) the activity producing it."""
+    price of the region's product raises (permanent crops: does not lower) the activity producing it. The base is solved
+    twice first: the split and histosol columns enter at a region's second solve and are calibrated there, at that
+    solve's prices (in a run the baseline's), so a shock at the second solve would be calibrated away."""
     sm = model.supply_module
+    sm.run(price_signals=None, regions=[reg])
     q0 = sm.run(price_signals=None, regions=[reg])[reg].activities.get(act, 0.0)
     sig = pd.Series(0.0, index=model.data["world_prices"].index)
     sig[product] = 0.20
