@@ -179,7 +179,7 @@ def test_flatten_outputs_exports_eu_p_totals():
     """io_results.flatten_outputs: EU totals (Norway left out) of the P items and the organic area."""
     from capri_mod.io_results import flatten_outputs
     env = pd.DataFrame({"p_surplus": [1.0, 2.0, 40.0], "p_input": [3.0, 4.0, 50.0], "p_runoff": [0.1, 0.2, 9.0],
-                        "organic_area": [5.0, 6.0, 7.0]}, index=["DE11", "NL22", "NO01"])
+                        "organic_area": [5.0, 6.0, 7.0]}, index=["DE110000", "NL220000", "NO080000"])
     f = flatten_outputs({"environmental": env})
     assert f["env_EU_p_surplus"] == 3.0 and f["env_EU_p_input"] == 7.0 and f["env_EU_organic_area"] == 11.0
     assert abs(f["env_EU_p_runoff"] - 0.3) < 1e-12
@@ -203,9 +203,9 @@ def test_p_accounts_from_the_nlp_solution():
     from capri_mod.policy.greendeal import farm_to_fork_scenario
     m = CAPRIModel(data_dir=str(DATA_DIR), verbose=False)
     for kw in ({"scenario": "BASELINE"}, {"custom_scenario": farm_to_fork_scenario()}):
-        res = m.run(regions=["DE11", "NL22"], max_outer_iter=1, **kw)
+        res = m.run(regions=["DE110000", "NL220000"], max_outer_iter=1, **kw)
         env = res["environmental"]
-        for reg in ("DE11", "NL22"):
+        for reg in ("DE110000", "NL220000"):
             sr = res["supply"][reg]
             blk = (sr.fert_npk or {}).get("P")
             assert blk is not None, reg

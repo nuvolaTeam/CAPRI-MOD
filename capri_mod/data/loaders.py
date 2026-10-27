@@ -63,7 +63,6 @@ _FILE_CATEGORY = {
     "livestock_intensity_bounds.csv": "supply",
     "landscape_targets_ms.csv": "policy",
     "cap_ceilings_2030.csv": "policy", "premium_scheme_shares_2030.csv": "policy",
-    "land_rent_regional.csv": "supply",
     "capri_baseline_surplus_2030.csv": "policy",
     "n_deposition_regional.csv": "environment",
     "manure_trade_2030.csv": "environment",
@@ -75,7 +74,6 @@ _FILE_CATEGORY = {
     # CAPRI's inner fertiliser distribution model and mineRedu (read by capri_mod.fert.inner_fert_dist)
     "fert_dist_priors_2030.csv": "environment", "fert_dist_crop_groups_2030.csv": "environment",
     "mineral_redu_exemptions.csv": "policy", "mineral_redu_limcres.csv": "policy",
-    "capri_regional_n_balance_2030.csv": "environment",
     "organic_targets_ms.csv": "policy",
     # reference data: not loaded by the model, but registered so the
     # validator can resolve and shape-check it like any other input
@@ -733,9 +731,6 @@ def load_all_data(data_dir: Optional[Path] = None, validate: bool = False,
         # gams/pol_input/greendeal/{landscape,organic}_targets.gdx: the extra
         # landscape land in points of UAA, and the organic conversion in points
         # of arable, grassland and permanent-crop area.
-        # land rent per hectare by region: Eurostat apri_lrnt, 2017 or nearest
-        # year, regional where published, else national; see the 'source' column
-        "land_rent_regional": _load_optional_csv(data_dir, "land_rent_regional.csv"),
         # CAPRI's own baseline N surplus per ha (2030 reference) - the input to
         # its tiered nitrogen target (pol_input/greendeal/surptot.gms)
         "capri_baseline_surplus": _load_optional_csv(data_dir, "capri_baseline_surplus_2030.csv"),

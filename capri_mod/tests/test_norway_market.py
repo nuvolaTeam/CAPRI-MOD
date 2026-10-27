@@ -23,7 +23,7 @@ import pytest
 ROOT = Path(__file__).resolve().parents[2]
 DATA_DIR = ROOT / "capri_data"
 MKT = DATA_DIR / "2017" / "market"
-NO_REGIONS = ["NO01", "NO02", "NO03", "NO04", "NO05", "NO06", "NO07"]
+NO_REGIONS = ["NO020000", "NO060000", "NO070000", "NO080000", "NO090000", "NO0A0000"]
 
 
 @pytest.fixture(scope="module")
@@ -79,7 +79,7 @@ def test_eu_and_norway_rows_are_split(data):
     mm = MarketModule(data)
     assert mm.SUP == ("NOR",) and "NOR" in mm.regions
     assert mm.eu_region_of_ms("NO000000") is None and mm.eu_region_of_ms("DE000000") == "EU27"
-    assert mm.sup_region_of_country("NO03") == "NOR" and mm.sup_region_of_country("DE") is None
+    assert mm.sup_region_of_country("NO090000") == "NOR" and mm.sup_region_of_country("DE") is None
     exo = pd.DataFrame({"BARL": [10.0, 3.0, 2.0]}, index=["DE", "DK", "NO"])
     assert mm.eu_rows(exo).loc["EU27", "BARL"] == 13.0
     eu, sup = mm._split_supply(exo)
@@ -166,8 +166,8 @@ def test_norway_young_animals_hessian_and_bulk_prices_are_its_own(data):
     from capri_mod.market.market_module import MarketModule
     mm = MarketModule(data)
     fake = types.SimpleNamespace(market_module=mm, _sum_frames=CAPRIModel._sum_frames)
-    assert CAPRIModel._yani_market_region(fake, "NO03") == "NOR"
-    assert CAPRIModel._yani_market_region(fake, "DE11") == "EU27"
+    assert CAPRIModel._yani_market_region(fake, "NO090000") == "NOR"
+    assert CAPRIModel._yani_market_region(fake, "DE110000") == "EU27"
     h = lambda v: pd.DataFrame([[v]], index=["BARL"], columns=["BARL"])
     eu, sup, blocks = CAPRIModel._split_hessian(fake, {"DE": h(2.0), "DK": h(1.0), "NO": h(0.5)})
     assert float(eu.at["BARL", "BARL"]) == 3.0 and float(sup["NOR"].at["BARL", "BARL"]) == 0.5 and blocks == {}
@@ -197,14 +197,14 @@ def test_flatten_outputs_reports_norway_apart():
     mkt = MarketEquilibrium(world_prices=pd.Series({"BARL": 150.0}), domestic_prices=prod * 2, production=prod,
                             consumption=prod, trade_flows=pd.DataFrame(), net_exports=prod * 0,
                             welfare=pd.DataFrame(), excess_demand=pd.Series(dtype=float))
-    env = pd.DataFrame({"ghg_total": [10.0, 1.0, 2.0]}, index=["DE11", "NO01", "NO02"])
+    env = pd.DataFrame({"ghg_total": [10.0, 1.0, 2.0]}, index=["DE110000", "NO080000", "NO020000"])
     o = flatten_outputs({"market": mkt, "environmental": env})
     assert o["prod_EU27_BARL"] == 100.0 and o["prod_NOR_BARL"] == 5.0 and o["price_NOR_BARL"] == 10.0
     assert o["env_EU_ghg_total"] == 10.0 and o["env_NO_ghg_total"] == 3.0
 
 
 def test_norway_has_pig_herds_and_per_head_coefficients():
-    """Norway's supply regions have CAPRI's pig herds (K56, 21 October 2026 evening; tools/build/build_norway_pigs.py):
+    """Norway's supply regions have CAPRI's pig herds (K56, 21 October 2026 evening; tools/build/build_capri_base.py):
     positive sows (PIGS) and fattening pigs (PIGF), and finite, positive per-head pork output and manure N. Where
     CAPRI's dump is at hand, heads x coefficients give CAPRI's Norwegian totals (NO000000: HERD; LEVL x PORK,
     LEVL x MANN of SOWS and PIGF)."""
@@ -235,27 +235,6 @@ def test_norway_has_pig_herds_and_per_head_coefficients():
         assert abs(n - c[act]["LEVL"] * c[act]["MANN"]) < 1e-6 * n, col
 
 
-def test_norway_pig_split_follows_statistics_norway():
-    """NO01, NO03, NO04, NO05 (NUTS 2016) share CAPRI's NO08 + NO09 + NO0A pig herds by Statistics Norway's county
-    census of 2017 (capri_data/sources/ssb/ssb_pigs_county_2017.csv: breeding pigs for PIGS, fattening pigs for PIGF;
-    the cattle-share proxy replaced 22 October 2026). The four keep the pool's total, and the census table's county
-    sums are SSB's national totals."""
-    s = pd.read_csv(DATA_DIR / "sources" / "ssb" / "ssb_pigs_county_2017.csv")
-    # the table is SSB's own file, read by tools/build/build_ssb_pigs.py: every county cell as in the original
-    raw = (DATA_DIR / "sources" / "ssb" / "ssb_husdyr_fylke_2017_original.csv").read_text(encoding="utf-8-sig").splitlines()
-    rows = [l.split(";") for l in raw]
-    k0 = max(i for i, r in enumerate(rows) if r and r[0] == "2017")
-    orig = {r[0].strip(): (int(r[2]), int(r[3])) for r in rows[k0 + 1:] if r and r[0].strip()}
-    assert orig == {c: (a, f) for c, a, f in zip(s.county, s.breeding_pigs_alssvin, s.fattening_pigs_slaktesvin)}
-    assert int(s.breeding_pigs_alssvin.sum()) == 89138 and int(s.fattening_pigs_slaktesvin.sum()) == 1607644
-    four = ["NO01", "NO03", "NO04", "NO05"]
-    g = s[s.nuts2016.isin(four)].groupby("nuts2016")[["breeding_pigs_alssvin", "fattening_pigs_slaktesvin"]].sum()
-    h = pd.read_csv(DATA_DIR / "2017" / "supply" / "animal_numbers.csv", index_col=0).loc[four, ["PIGS", "PIGF"]]
-    for col, sc in (("PIGS", "breeding_pigs_alssvin"), ("PIGF", "fattening_pigs_slaktesvin")):
-        np.testing.assert_allclose((h[col] / h[col].sum()).to_numpy(), (g[sc] / g[sc].sum()).loc[four].to_numpy(),
-                                   rtol=1e-9)
-
-
 def test_norway_run_on_its_own_supply_models():
     """A baseline with Norway's supply regions: the EU's market supply holds none of Norway's output, Norway's market
     supply is its models' (pork too, since Norway's regions have pigs, K56), the base is reproduced at the reference
@@ -263,7 +242,7 @@ def test_norway_run_on_its_own_supply_models():
     from capri_mod.model import CAPRIModel
     m = CAPRIModel(data_dir=str(DATA_DIR), verbose=False)
     with pytest.warns(RuntimeWarning):
-        b = m.run(scenario="BASELINE", regions=["NO01"], max_outer_iter=1)
+        b = m.run(scenario="BASELINE", regions=["NO080000"], max_outer_iter=1)
     mm = m.market_module
     P = b["market"].production
     ex = m._bridge_supply_to_market(m.supply_module.aggregate_supply(b["supply"], by_country=True))
@@ -285,7 +264,7 @@ def test_norway_prices_follow_its_own_market_in_a_scenario():
     from capri_mod.model import CAPRIModel
     from capri_mod.policy.greendeal import farm_to_fork_scenario
     m = CAPRIModel(data_dir=str(DATA_DIR), verbose=False)
-    regs = ["IE04", "NO01"]
+    regs = ["IR010000", "NO080000"]
     import warnings
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")

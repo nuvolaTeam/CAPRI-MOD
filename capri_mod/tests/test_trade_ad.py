@@ -10,7 +10,7 @@ def market():
     from capri_mod.settings import override
     with override({"market.market_supply_nq": False}):
         m = CAPRIModel(data_dir="capri_data", verbose=False)
-        m.run(scenario="BASELINE", regions=["DE11", "FR10"], max_outer_iter=1)
+        m.run(scenario="BASELINE", regions=["DE110000", "FR100000"], max_outer_iter=1)
     return m.market_module
 
 

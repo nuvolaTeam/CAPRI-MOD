@@ -114,7 +114,7 @@ def test_market_supply_hessian_measured_at_base_and_at_scenario_state():
     from capri_mod.settings import override
     from capri_mod.model import CAPRIModel
     from capri_mod.policy.greendeal import greendeal_scenario
-    regs = ["DE11", "FR10"]
+    regs = ["DE110000", "FR100000"]
     with override({"market.hessian_scenario_iter": 2, "market.market_supply_nq": True}):
         m = CAPRIModel(data_dir="capri_data", verbose=False)
         m.run(scenario="BASELINE", regions=regs, max_outer_iter=2)

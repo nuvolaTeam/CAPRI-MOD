@@ -280,8 +280,6 @@ class RegionData:
     #: landscape land (points of UAA) and organic conversion (points of arable,
     #: grassland and permanent-crop area).
     landscape_target_pp: Optional[float] = None
-    #: CAPRI's land rent for this region's country, EUR/ha
-    land_rent: Optional[float] = None
     organic_targets_pp: Optional[pd.Series] = None
 
 
@@ -5868,9 +5866,6 @@ class SupplyModule:
                 if d.get("livestock_output_coef") is not None
                 and region in d["livestock_output_coef"].index else None),
             organic_yield_gap=d.get("organic_yield_gap"),
-            land_rent=(float(d["land_rent_regional"].at[region, "rent_eur_per_ha"])
-                       if d.get("land_rent_regional") is not None
-                       and region in d["land_rent_regional"].index else None),
             landscape_target_pp=_ms_value(d.get("landscape_targets_ms"), region,
                                           "landscape_pp"),
             organic_targets_pp=_ms_row(d.get("organic_targets_ms"), region),

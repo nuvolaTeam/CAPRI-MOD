@@ -134,7 +134,7 @@ def read_capri(dump_dir: Path) -> dict:
 
 def build_spec(capri: dict, regions) -> dict:
     """model region -> ((CAPRI code, weight), ...): on CAPRI's units, each region's own row (used by
-    build_crop_economics_2017, build_ghg_coefs_2017 and build_norway_pigs)."""
+    build_crop_economics_2017 and build_ghg_coefs_2017)."""
     missing = [r for r in regions if r not in capri]
     assert not missing, f"no CAPRI rows for {missing}"
     return {r: ((r, 1.0),) for r in regions}
@@ -186,7 +186,7 @@ def main(dump_dir: Path):
             herds.at[reg, "COWS"] = herds.at[reg, "DCOW"] + herds.at[reg, "SCOW"]
         # pigs: PIGS = sows (CAPRI SOWS), PIGF = the census total less the sows (CAPRI's 'PIGS' HERD - 'SOWS' HERD), as
         # tools/build_pig_split.py did (a one-off script, no longer in the repository); where CAPRI has no census total
-        # (Norway, res_17NO.txt), CAPRI's own PIGF herd (as tools/build/build_norway_pigs.py did for Norway's regions)
+        # (Norway, res_17NO.txt), CAPRI's own PIGF herd (as the removed tools/build/build_norway_pigs.py did for Norway)
         sows = sum(w * items(c, "HERD").get("SOWS", 0.0) for c, w in sources)
         census = sum(w * items(c, "HERD").get("PIGS", 0.0) for c, w in sources)
         herds.at[reg, "PIGS"] = sows

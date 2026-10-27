@@ -64,7 +64,7 @@ def test_model_records_capri_verdict_and_can_stop_on_it():
     with override({"outer_loop.stop_rule": "capri", "outer_loop.price_update": "capri",
                    "market.market_supply_nq": False}):
         m = CAPRIModel(data_dir="capri_data", verbose=False)
-        r = m.run(scenario="BASELINE", regions=["DE11", "FR10"], max_outer_iter=6)
+        r = m.run(scenario="BASELINE", regions=["DE110000", "FR100000"], max_outer_iter=6)
     cs = r["metadata"]["capri_stop"]
     assert cs is not None and cs["step"] >= 1
     hist = m._outer_history

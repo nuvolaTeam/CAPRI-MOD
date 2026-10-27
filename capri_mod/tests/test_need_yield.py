@@ -36,13 +36,13 @@ def test_price_driven_yield_moves_the_main_part_only(data, monkeypatch):
 
 
 def test_model_region_and_no_data(data, monkeypatch):
-    cr = data.capri_region("FRK1")
+    cr = data.capri_region("FR720000")
     assert cr is not None
-    assert npk.need_yield_factor("FRK1", "SWHE", 7.0, 6.3) == pytest.approx(
+    assert npk.need_yield_factor("FR720000", "SWHE", 7.0, 6.3) == pytest.approx(
         npk.need_yield_factor(cr, "SWHE", 7.0, 6.3))
     # no CAPRI region: the rule of a crop without straw (linear)
     assert npk.need_yield_factor(None, "SWHE", 7.0, 6.3) == pytest.approx(0.9)
-    assert npk.need_yield_factor("FRK1", "SWHE", 0.0, 6.3) == 1.0
+    assert npk.need_yield_factor("FR720000", "SWHE", 0.0, 6.3) == 1.0
 
 
 def test_builder_reads_capri_constants():
