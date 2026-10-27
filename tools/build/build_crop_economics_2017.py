@@ -116,7 +116,14 @@ def main(dump_dir: Path):
             else:
                 n_reg += 1
             if v is None:
-                continue                                 # CAPRI has the crop nowhere in the member state
+                # CAPRI has the crop nowhere in the member state: no yield and no cost (0, as the file had for rice
+                # outside the rice countries). Until 27 October 2026 such cells kept whatever the file held, in places
+                # values of the synthetic template removed in Sprint 9s (citrus yield 24.2 t/ha in DE11)
+                if col != "GRAS" and col in yields.columns:
+                    yields.at[reg, col] = 0.0
+                if col in costs.columns:
+                    costs.at[reg, col] = 0.0
+                continue
             _, y, p, cst, pr = v
             if col != "GRAS":
                 if col in yields.columns:

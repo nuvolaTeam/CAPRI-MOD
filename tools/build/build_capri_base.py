@@ -97,7 +97,7 @@ CROP_MAP = {
 
 #: animal_numbers column -> CAPRI HERD item
 HERD_MAP = {"DCOW": "DCOW", "SCOW": "SCOW", "BULL": "BULL", "HEIF": "HEIF",
-            "CALV": "CALV", "PIGS": "PIGS", "SOWS": "SOWS", "HENS": "HENS",
+            "CALV": "CALV", "HENS": "HENS",
             "POUL": "POUL", "SHGM": "SHGM", "SHGF": "SHGF"}   # CAPRI's two sheep and goat activities' herds
 #                                                        (until 27 October 2026 the census SHGT, split afterwards by
 #                                                        build_shg_split.py at CAPRI's HERD shares of the region group)
@@ -132,6 +132,14 @@ def read_capri(dump_dir: Path) -> dict:
     return out
 
 
+def build_spec(capri: dict, regions) -> dict:
+    """model region -> ((CAPRI code, weight), ...): on CAPRI's units, each region's own row (used by
+    build_crop_economics_2017, build_ghg_coefs_2017 and build_norway_pigs)."""
+    missing = [r for r in regions if r not in capri]
+    assert not missing, f"no CAPRI rows for {missing}"
+    return {r: ((r, 1.0),) for r in regions}
+
+
 def units() -> list:
     """The model's regions: CAPRI's regional units (shared/regional_units.csv)."""
     with open(_ROOT / "capri_data" / "shared" / "regional_units.csv", newline="") as f:
@@ -149,9 +157,12 @@ def main(dump_dir: Path):
         return pd.DataFrame(index=pd.Index(regs, name=_read_csv(path, index_col=0, nrows=0).index.name),
                             columns=_read_csv(path, index_col=0, nrows=0).columns, dtype=float)
     areas, land, herds = frame(AREAS), frame(LAND), frame(HERDS)
+    # OTHER_AG (other agricultural land): written by no builder, of unknown origin (template-like values: 6.25, 2.97619);
+    # read only by the environmental module's HNV indicator through the land total. Dropped 27 October 2026
+    land = land.drop(columns=["OTHER_AG"], errors="ignore")
     yields, costs, prices = frame(YIELDS), frame(COSTS), frame(PRICES)
     nutrients = pd.DataFrame(index=pd.Index(regs, name=areas.index.name), columns=[c for c in CROP_MAP], dtype=float)
-    spec = {r: ((r, 1.0),) for r in regs}
+    spec = build_spec(capri, regs)
 
     def items(code, item):
         return capri.get(code, {}).get(item, {})
@@ -169,6 +180,14 @@ def main(dump_dir: Path):
                                          for c, w in sources)
         if "COWS" in herds.columns:
             herds.at[reg, "COWS"] = herds.at[reg, "DCOW"] + herds.at[reg, "SCOW"]
+        # pigs: PIGS = sows (CAPRI SOWS), PIGF = the census total less the sows (CAPRI's 'PIGS' HERD - 'SOWS' HERD), as
+        # tools/build_pig_split.py did (a one-off script, no longer in the repository); where CAPRI has no census total
+        # (Norway, res_17NO.txt), CAPRI's own PIGF herd (as tools/build/build_norway_pigs.py did for Norway's regions)
+        sows = sum(w * items(c, "HERD").get("SOWS", 0.0) for c, w in sources)
+        census = sum(w * items(c, "HERD").get("PIGS", 0.0) for c, w in sources)
+        herds.at[reg, "PIGS"] = sows
+        herds.at[reg, "PIGF"] = (max(census - sows, 0.0) if census > 0
+                                 else sum(w * items(c, "HERD").get("PIGF", 0.0) for c, w in sources))
 
         # ---- intensive values: area-weighted across sources
         def intensive(item, capri_code_for):

@@ -1,9 +1,10 @@
 """Shared helpers for builders: the model's regions and the CAPRI national-code fallback.
 
-Model regions follow NUTS 2021; CAPRI's codes map to older versions, so some regions
-(Ireland, parts of Poland, Croatia, Lithuania, Hungary's capital split, Trento/Bolzano,
-Saxony, Aaland, city-states) have no regional CAPRI entry. As elsewhere in the model
-(REGISTERED), they take their country's national entry.
+Since 27 October 2026 the model's regions are CAPRI's regional units under CAPRI's own codes
+(capri_data/shared/regional_units.csv): each region is its own CAPRI region, including the units of the member states
+without regional detail, whose code is the member state's (DK000000, EE000000, ...). capri_groups and region_to_capri
+are then the identity. The NUTS correspondence below is kept only for regions that are not CAPRI units (none in the
+model's data; the functions refuse a mixed list).
 """
 from pathlib import Path
 import csv
@@ -13,6 +14,30 @@ ROOT = Path(__file__).resolve().parents[2]
 # (capri_mod.data.definitions.MS_CODE)
 with open(ROOT / "capri_data" / "shared" / "capri_member_state_codes.csv", newline="") as _f:
     CTRY = {r["nuts_prefix"]: r["capri_ms"][:2] for r in csv.DictReader(_f)}
+
+
+with open(ROOT / "capri_data" / "shared" / "regional_units.csv", newline="") as _f:
+    UNITS = [r["region"] for r in csv.DictReader(_f)]
+UNIT_SET = frozenset(UNITS)
+
+
+def is_unit(code: str) -> bool:
+    """A CAPRI regional unit of the model (a NUTS-2 unit, or a member state without regional detail: DK000000)."""
+    return code in UNIT_SET
+
+
+def regional_row(code: str) -> bool:
+    """A CAPRI row that is a regional unit's own: every code not ending in 000000, and the member-state codes that are
+    units (DK000000, ...). For a builder's 'regional rows, not national totals' test."""
+    return not code.endswith("000000") or code in UNIT_SET
+
+
+def _all_units(regs) -> bool:
+    regs = list(regs)
+    n = sum(1 for r in regs if r in UNIT_SET)
+    if 0 < n < len(regs):
+        raise ValueError(f"mixed region list: {n} CAPRI units and {len(regs) - n} other codes")
+    return n > 0
 
 
 def model_regions():
@@ -54,10 +79,13 @@ def capri_groups(model_regions=None):
     totals into per-head or per-ha values do it per GROUP - the group's CAPRI total over the
     group's model total - so a split never puts a parent region's total on one of its parts
     (Finland's FI1B carried all of Etelae-Suomi's manure on its own herd: 990 kg N per dairy cow)."""
+    regs = set(model_regions if model_regions is not None else model_regions_list())
+    if _all_units(regs):                       # CAPRI's units: each region is its own group
+        out = {i: ({r}, {r}) for i, r in enumerate(sorted(regs))}
+        return {r: i for i, (cs, _) in out.items() for r in cs}, out
     import json
     corr = json.loads((ROOT / "capri_data" / "shared" / "nuts_version_correspondence.json").read_text())["capri8_to_nuts"]
     corr = {**corr, **CORR_FIXES}
-    regs = set(model_regions if model_regions is not None else model_regions_list())
     edges = []
     for c8, lst in corr.items():
         if c8.endswith("000000"):
@@ -97,7 +125,10 @@ def region_to_capri():
     """{model region: CAPRI code} for builders that read ONE CAPRI region's per-unit values (shares,
     factors, per-ha terms): the NUTS correspondence with its fixes, then the splits and merges -
     a split part takes its parent's values; a merged region the first of its parents (REGISTERED;
-    FI1D: FI13 Itae-Suomi; IE06: IE01). Count-type builders use capri_groups instead."""
+    FI1D: FI13 Itae-Suomi; IE06: IE01). Count-type builders use capri_groups instead. On CAPRI's units: the
+    identity."""
+    if _all_units(model_regions_list()):
+        return {r: r for r in model_regions_list()}
     import json
     corr = json.loads((ROOT / "capri_data" / "shared" / "nuts_version_correspondence.json").read_text())["capri8_to_nuts"]
     corr = {**corr, **CORR_FIXES}
