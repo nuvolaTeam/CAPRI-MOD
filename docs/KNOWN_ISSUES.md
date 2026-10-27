@@ -5,7 +5,7 @@ form, solved with IPOPT). The tables give one line per issue; the details follow
 was found, where it acts, whether the tagged release 9t (`capri-mod-9t.zip`) carries it, and its status. 9t.1 is 9t
 with every fix below except K5, which needs the prototype's model change.
 
-## Open (19)
+## Open (21)
 
 | # | Issue | Status |
 |---|---|---|
@@ -28,6 +28,8 @@ with every fix below except K5, which needs the prototype's model change.
 | [K79](#k79) | Member-state production that keeps moving between iterations | open |
 | [K80](#k80) | The same run repeated from a warm start differs by up to 3e-5 relative in small cereal activities | open |
 | [K83](#k83) | A one-region Farm-to-Fork run's market diverges in its second step | open |
+| [K86](#k86) | Ammonia housing and storage options without their farm-size cost curves in Denmark, Lithuania and Croatia | open |
+| [K87](#k87) | Builder outputs that do not follow from their builders (reproduction audit) | open |
 
 ## Resolved (66)
 
@@ -881,3 +883,52 @@ The per-head animal columns of variable_costs.csv held values of unknown origin 
   19.9 → 19.5%, CAPRI 12; covered storage 41.9 → 41.3%, CAPRI 34); Green Deal within 0.5 points; no other EU indicator
   moves more than 0.2 points. Regionally larger (DE94 pigs and broilers ~2%).
 - Test suite: 92 passed, no warnings (K7).
+
+<a id="k86"></a>
+### K86: Ammonia housing and storage options without their farm-size cost curves in Denmark, Lithuania and Croatia (found 27 October 2026, builder reproduction audit)
+
+tools/build/build_ammonia_cost_curves.py fits CAPRI's farm-size cost curves (ammo_tech.gms m_CostAmm) for the regions of
+its manure data, keeping a member-state code only for a fixed list (MT, CY, LU, EE, LV, SI): the member states without
+regional detail of an older CAPRI. DK000000, LT000000 and HR000000, regional units of CAPRI star 3.0 with all the inputs
+(60 manure rows, 6 farm-size head rows, prices), get no curve, and build_ammonia_technologies.py then takes the curve's
+terms as 0: e.g. air purification for fattening pigs and sows costs 0 in DK and LT (7.9 EUR in DE110000, 2.6 in
+EE000000), low-emission housing for dairy cows 28.9 and 10.5 (112.2 in EE000000), and every curvature term (CostParSqr)
+is 0 there. CAPRI computes the curves over all its regional units (ammo_tech.gms, rs). CZ010000 (Prague) also has no
+curve: it has one farm-size head row; CAPRI fills a region's missing p_Heads from its NUTS1 (l. 1349-1351), not done
+here (to check).
+
+- **Effect:** the cost and curvature of the ammonia housing, storage and air-purification options in DK000000,
+  LT000000, HR000000 (and CZ010000); every run with the ammonia options
+- **In 9t:** not checked
+- **Status:** **open**: the list replaced by the model's regional units, then the ammonia chain rebuilt
+  (build_ammonia_cost_curves -> build_ammonia_technologies -> build_ammonia_tech_model -> build_manure_n2o,
+  build_n_cascade), with its own reference run
+
+<a id="k87"></a>
+### K87: Builder outputs that do not follow from their builders (reproduction audit, 27 October 2026)
+
+tools/check/reproduce_builders.py runs every builder on the committed inputs and compares what it writes with the
+committed files. 117 invocations; most reproduce their files exactly. Found:
+
+- `2017/supply/crop_cost_shares.csv` (the supply module's fertiliser cost share where CAPRI has no regional
+  coefficient): rounded to 3 decimals (up to 2.9% relative for small shares); its builder also leaves out the eight
+  member states that are one regional unit each (the old test "code does not end in 000000").
+- `validation/greendeal_2030/capri_unit_values_max_2030.csv`: without the 34 TABO rows its extractor writes now (the ini
+  file has them); read by no model code.
+- Files written before the full-precision decision of 27 October and not rebuilt since: the market builders' outputs
+  (bilateral flows, regions and quotas, biofuel, dairy, feed bulks, GL demand, processing, sugar, use components,
+  EU member-state balance, fertiliser distribution priors, land-use change, CAP greening, cost savings) differ from
+  their builders' output by 3e-10 to 5e-8 relative, five of them by up to 5e-6 (feed and biofuel use shares, dairy
+  demand elasticities, feed by-product weights): the committed files' rounding.
+- `ingest_pela_gtap.py` writes `sources/estnlp/pela_cross_price.csv`, which is not committed (read by no model code;
+  `pela_cross_by_region.json` carries the cross-price terms); `recalibrate_trade_2017.py` writes a backup copy
+  (`trade_flows_2021.csv.superseded_by_2017`) on every run.
+- Files several builders write in turn (`yields.csv`, `variable_costs.csv`, `capreg_producer_prices.csv`): a builder
+  alone differs from the committed file where a later one overwrites its columns; to be checked as a chain
+  (`--chain`), not done yet.
+
+- **Effect:** crop_cost_shares: the fertiliser cost of crops without CAPRI's regional coefficient; the rest no model
+  effect beyond the last digits
+- **In 9t:** –
+- **Status:** **open**: rebuild with the builders (one batch, one reference run), the two builder fixes, the chain check
+

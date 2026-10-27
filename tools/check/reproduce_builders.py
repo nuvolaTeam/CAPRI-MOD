@@ -25,9 +25,12 @@ import csv
 import json
 import math
 import os
+import shutil
 import subprocess
 import sys
+import tempfile
 import time
+import zipfile
 from io import BytesIO
 from pathlib import Path
 
@@ -137,7 +140,6 @@ INVOCATIONS: list[tuple[str, list[str], list[Path]]] = [
      [UP / "res_2_1730greendeal_refdefaulta.zip"]),
     ("build_capri_gnb_components", [str(UP / "res_2_1730greendeal_refdefaulta.zip")],
      [UP / "res_2_1730greendeal_refdefaulta.zip"]),
-    ("build_captrd_sets", [], []),
     ("build_crop_cost_shares", [], [D17]),
     ("build_crushing_parameters", [], [UP / "fao_agg_17_datamarket.txt", UP / "elas_2_1717defaulta.csv"]),
     ("build_dairy_processing", [], []),
@@ -171,8 +173,9 @@ INVOCATIONS: list[tuple[str, list[str], list[Path]]] = [
     ("build_tariffs_2017", [], []),
     ("build_use_components", [], []),
     ("build_world_market_baseline", [], []),
+    # the zip of the other member states' dumps is extracted first (the builder reads text files): see run()
     ("build_young_animal_elasticities", [str(UP / f"supply_elas_2_1720{c}defaulta.txt") for c in ("DE", "ES", "FR", "IT", "PL")]
-     + [str(UP / "supply_elas_2_1720REMAINI_NGdefaulta.zip")], [UP / "supply_elas_2_1720DEdefaulta.txt"]),
+     + ["unzip:" + str(UP / "supply_elas_2_1720REMAINI_NGdefaulta.zip")], [UP / "supply_elas_2_1720DEdefaulta.txt"]),
     ("extract_capri_costsavings", [str(WORK / "cs/costsavings_ini_21730_jul15.csv"),
                                    str(WORK / "cs/costsavings_max_21730_jul15.csv")], [WORK / "cs"]),
     ("extract_capri_marginal_terms", [str(REF), "ini"], [REF]),
@@ -192,6 +195,7 @@ NOT_AUDITED = {
     "build_n_cascade_validation": "a check, writes a validation table",
     "build_patched_inputs": "superseded one-off (see REGIONAL_UNITS_BUILDERS.md 4.4)",
     "extract_capri_vcs_pair": "input is a GDX inside a zip (cap_after_2014 reference)",
+    "build_captrd_sets": "reads capri_reference/sets (not committed; build_capri_sets_reference writes it)",
 }
 
 TOL_REL, TOL_ABS = 1e-12, 1e-15
@@ -325,13 +329,25 @@ def main():
         if missing:
             return cmd, "not run: input missing " + "; ".join(missing), ""
         t = time.time()
+        # "unzip:Z": the text files of zip Z, extracted to a temporary folder, as arguments
+        tmp = tempfile.mkdtemp(prefix="reproduce_builders_")
+        full = []
+        for a_ in args:
+            if a_.startswith("unzip:"):
+                with zipfile.ZipFile(a_[6:]) as z_:
+                    z_.extractall(tmp)
+                    full += sorted(str(Path(tmp) / n_) for n_ in z_.namelist() if not n_.endswith("/"))
+            else:
+                full.append(a_)
         try:
-            r = subprocess.run([sys.executable, str(ROOT / "tools" / "build" / f"{name}.py"), *args], cwd=ROOT, env=env,
+            r = subprocess.run([sys.executable, str(ROOT / "tools" / "build" / f"{name}.py"), *full], cwd=ROOT, env=env,
                                capture_output=True, text=True, timeout=o.timeout)
             err = r.stderr.strip().splitlines()[-1][:200] if r.stderr.strip() else ""
             status = "ok" if r.returncode == 0 else f"failed (exit {r.returncode}): {err}"
         except subprocess.TimeoutExpired:
             status = f"timeout after {o.timeout} s"
+        finally:
+            shutil.rmtree(tmp, ignore_errors=True)
         return cmd, status, round(time.time() - t, 1)
 
     def record(cmd, status, sec):
