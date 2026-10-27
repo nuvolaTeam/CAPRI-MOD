@@ -174,18 +174,21 @@ files record how they map to this model's names.
 | Supply method | CAPRI's regional models as NLPs, PMP-calibrated (CAPRI's 2030 terms) |
 | Market method | CAPRI's bilateral Armington market: 30 trade regions (31 with CAPRI's EU blocks, optional), transport costs, tariffs, TRQs; dairy block, GL food demand, young animals, CAPRI's market supply functions; Newton + Anderson to < 1e-7 |
 | Data validator | 13 pass, 0 warn, 0 fail |
-| Convergence | all 248 regional models solve (one Dutch region, NL32, at JRC121368's relaxed N target); Farm-to-Fork 2030 converges in 9 iterations, Green Deal 2030 in 13 (reference runs r145, r142) |
+| Convergence | all 221 regional models solve (one Dutch unit, NL320000, at JRC121368's relaxed N target); Farm-to-Fork 2030 converges in 9 iterations, Green Deal 2030 in 8 (reference runs r161, r162, on CAPRI's regional units) |
 | Test suite | 181 tests (22 marked `slow`) |
 | On by default, as in CAPRI | land market and land rules, endogenous feed rations, fodder equality, ammonia technologies |
 | Optional | manure market (`use_manure_market`) |
-| 2030 Farm-to-Fork run | about 27 minutes on 2 cores (r145), plus about an hour once per new baseline for the market supply Hessian; regions solved in parallel (`CAPRI_WORKERS`), same results |
+| 2030 Farm-to-Fork run | about 36 minutes on 2 cores (r161), plus about an hour once per new baseline for the market supply Hessian (67 min for r161's); regions solved in parallel (`CAPRI_WORKERS`), same results |
 | Solvers | IPOPT via CasADi (supply), Clarabel (manure pools), Newton (markets), HiGHS (LP checks) |
 
-### Where things stand (26 October 2026)
+### Where things stand (27 October 2026)
 
-**Current state.** The reference Farm-to-Fork 2030 run (r145, 26 October 2026, the default settings) converges in 9
-iterations (about 27 minutes on 2 cores) and deviates from CAPRI's published results (JRC121368) by 4.44 on average
-over 20 indicators (§8); Green Deal 2030 converges in 13 iterations (r142). K75 is fixed: the calf price crept and
+**Current state.** The model's regions are CAPRI's 221 regional units (EU27 215, Norway 6) under CAPRI's codes; results
+can be reported on the NUTS-2024 regions (`capri_mod/nuts_reporting`). The reference Farm-to-Fork 2030 run on the units
+(r161, the default settings) converges in 9 iterations (about 36 minutes on 2 cores) and deviates from CAPRI's published
+results (JRC121368) by 4.34 on average over 20 indicators (§8; r145 on the NUTS-2016 regions: 4.44); Green Deal 2030
+converges in 8 iterations (r162). Before 27 October, on the NUTS-2016 regions: r145 (Farm-to-Fork, 9 iterations) and
+r142 (Green Deal, 13). K75 is fixed: the calf price crept and
 the loop did not converge (r130: 25 iterations, deviation 4.83) because the regional models in CAPRI's form still
 carried the former conic form's fodder band rows, which held each animal's fodder per head at the previous solve's
 feeding; with CAPRI's fodder equality alone the suckler herd no longer shrinks by iteration. Since 26 October: CAPRI's

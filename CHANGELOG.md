@@ -53,7 +53,11 @@ Full provenance for every entry is in `capri_data/DATA_SOURCING_REGISTRY.json`.
   r156 (pork price +18.7 against +18.0, sheep and goats -10.1 against -10.7). The market supply Hessian measured again
   for the units (67 min); the run itself 36 min. Mineral fertiliser caps relaxed in BG020000-BG060000 (PERM), HR000000
   (ROOF), duals in HU220000 (r156: the same Bulgarian and Croatian regions under NUTS-2016 codes, DEA1, LT01).
-- **Green Deal 2030 on the units (r162)**: GD_RESULT
+- **Green Deal 2030 on the units (r162)**: converges in 8 iterations (r157 on NUTS 2016: 9), every regional solve
+  optimal; every indicator within 0.3 points of r157 (cereal production -7.3% against -7.5, sheep and goats -8.0
+  against -8.4, N surplus -27.1 and GHG -14.4 in both). Its own Hessian (the first attempt ran into the 2-hour limit
+  with the Hessian measured; the rerun read it from the cache: 37 min). Mineral caps relaxed in the same regions as r157
+  under CAPRI's codes (Bulgaria, Hungary, Ireland, Portugal's North and Azores).
 - **K84 fixed as CAPRI**: an unreachable landscape floor is no longer lowered. CAPRI keeps it (supply_model.gms
   e_setaLandscape; widen_bounds.gms widens feeding, nutrient, land-use-change and fertiliser bounds, never the floor)
   and carries on with the solver's last point; so does the model, recorded in nlp_fallback with the note that CAPRI's
