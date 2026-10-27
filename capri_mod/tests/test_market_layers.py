@@ -127,3 +127,26 @@ def test_market_supply_hessian_measured_at_base_and_at_scenario_state():
         assert "scenario_error" not in scen
         assert scen["file"] != base["file"]
         assert [d["file"] for d in m.market_supply_hessian_log[-2:]] == [base["file"], scen["file"]]
+
+
+def test_hessian_skip_of_unreached_regions_is_exact(monkeypatch):
+    """The market supply Hessian with the regions a shock does not reach not re-solved (market.hessian_skip_unchanged)
+    equals re-solving every region from the baseline's state: with CAPRI_HESSIAN_SKIP_VERIFY=1 the regions that would be
+    skipped are solved and their results must equal the base re-solve's (else the problem fingerprint misses an input)."""
+    import glob
+    import os
+    from capri_mod.settings import override
+    from capri_mod.model import CAPRIModel
+    monkeypatch.setenv("CAPRI_HESSIAN_SKIP_VERIFY", "1")
+    regs = ["DE110000", "NO080000"]
+    with override({"market.hessian_skip_unchanged": True, "market.market_supply_nq": True}):
+        m = CAPRIModel(data_dir="capri_data", verbose=False)
+        # the verification needs a measured Hessian, not the cache: the verify mode's file is removed after the run
+        m.run(scenario="BASELINE", regions=regs, max_outer_iter=2)
+        info = dict(m.market_supply_hessian_info or {})
+        if info.get("source") == "computed":
+            assert info.get("verified", 0) > 0, info
+            assert info.get("verify_mismatch") == [], info
+            os.remove(info["file"])
+        else:
+            assert info.get("source") == "cache", info

@@ -66,6 +66,7 @@
     "capri_mod/tests/test_capri.py::test_feed_supplements_follow_capri": 6.1,
     "capri_mod/tests/test_capri.py::test_projection_livestock_output_follows_yield": 5.2,
     "capri_mod/tests/test_capri.py::test_unreachable_landscape_floor_is_kept_as_capri": 16.3,
-    "capri_mod/tests/test_capri.py::test_own_price_response_in_contrasting_regions": 20.0
+    "capri_mod/tests/test_capri.py::test_own_price_response_in_contrasting_regions": 20.0,
+    "capri_mod/tests/test_market_layers.py::test_hessian_skip_of_unreached_regions_is_exact": 56.7
   }
 }

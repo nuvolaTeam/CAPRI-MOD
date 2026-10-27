@@ -33,6 +33,7 @@ S036,CAPRIModel.trace_outer (hidden),capri_mod/model.py:948,switch,False,toml:di
 S037,CAPRIModel.jrc_capped_override (hidden),capri_mod/model.py:601,switch,"""""",toml:supply,supply.jrc_capped_override,,n/a,HIDDEN; sensitivity on JRC121368 nine-region rule; cli --capped-regions; carried,
 S038,CAPRIModel._MS_CODE,capri_mod/model.py:1238,table,"BE/LU->BL, IE->IR, GR->EL",mapping_csv,,MAP_RR member states,yes,one of 9 copies of the country->CAPRI MS map (see md),
 S039,CAPRIModel.MARKET_SUPPLY_SHOCK,capri_mod/model.py:1246,numeric_constant,0.01,toml:market,market.nq_price_shock,supply/calibrate_supply.gms (1% price shock),yes: CAPRI (cited),only with market_supply_nq,
+S039a,market supply Hessian: regions a shock does not reach not re-solved,capri_mod/model.py (_market_supply_hessian),switch,true,toml:market,market.hessian_skip_unchanged,calibrate_supply.gms re-solves every region; same Hessian (exact skip),n/a: numerical,"false: every region re-solved, differences to the baseline's own solution (until 27 Oct 2026)",added 27 Oct 2026
 S040,CAPRIModel.MARKET_SUPPLY_FEED_COLS,capri_mod/model.py:1248,code_list,RAPC SUNC SOYC FENI FPRI DDGS,mapping_csv,,feed-bulk columns,yes,,
 S043,CAPRIModel.POOL_OF_PREFIX,capri_mod/model.py:1496,table,"BE/LU->BL, IE->IR",mapping_csv,,,no,unsourced; copy of country map WITHOUT GR->EL (inconsistent with other copies),
 S044,CAPRIModel.SUP_GAP_MIN_PROD,capri_mod/model.py:1507,tolerance,5.0 (kt),toml:outer_loop,outer_loop.sup_gap_min_prod,10 x p_minAbsProdIterChg = 0.5 (capmod.gms:384) [v],yes,,
