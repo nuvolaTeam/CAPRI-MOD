@@ -23,6 +23,14 @@ ROOT = Path(__file__).resolve().parents[2]
 DATA_DIR = ROOT / "capri_data"
 
 
+def _german_units(n):
+    """The first n German regional units (DE110000, DE120000, ...): the regions the tests took as the first n rows of
+    the region index when the model's regions were NUTS-2016 codes listed from Germany on (27 October 2026)."""
+    import pandas as _pd
+    units = _pd.read_csv(DATA_DIR / "shared" / "regional_units.csv").region
+    return [r for r in units if r.startswith("DE")][:n]
+
+
 def _set(monkeypatch, overrides):
     """Change settings for one test (capri_mod/settings); monkeypatch restores the previous ones afterwards."""
     from capri_mod import settings as S
@@ -138,7 +146,7 @@ def test_supply_responds_positively_to_price(model):
 
 def test_supply_no_blowup(model):
     sm = model.supply_module
-    for reg in list(model.data["areas"].index[:8]):
+    for reg in _german_units(8):
         base = sm.run(price_signals=None, regions=[reg])
         for act in ["SWHE", "CORN", "RAPE", "PULS"]:
             q0 = base[reg].activities.get(act, 0)
@@ -152,7 +160,7 @@ def test_supply_no_blowup(model):
 
 
 def test_full_run_all_modules(model):
-    regions = list(model.data["areas"].index[:5])
+    regions = _german_units(5)
     r = model.run(scenario="BASELINE", max_outer_iter=1, market_max_iter=50,
                   regions=regions, run_environmental=True,
                   run_biofuel=True)
@@ -1198,7 +1206,7 @@ def test_projection_null_trajectory_reproduces_base(model):
     # from the same state.
     from capri_mod.model import CAPRIModel
     model = CAPRIModel(data_dir=str(DATA_DIR), verbose=False)
-    regions = list(model.data["areas"].index[:12])
+    regions = _german_units(12)
     ref = model.run(scenario="BASELINE", regions=regions)
     pm = ProjectionModule(model, BaselineTrajectory.null(2017, [2017]))
     proj = pm.run(regions=regions).baseline[2017]
@@ -1321,7 +1329,7 @@ def test_set_aside_requirement_actually_binds(model):
     never enforced in the supply constraints, so the scenario returned results
     bit-identical to the baseline while reporting success.
     """
-    regions = list(model.data["areas"].index[:10])
+    regions = _german_units(10)
     # two outer iterations: the requirement acts in the first regional solve (the test checks that it binds, not the
     # converged equilibrium; 77 s with the full outer loop, 23 October 2026)
     base = model.run(scenario="BASELINE", regions=regions, max_outer_iter=2)
@@ -1467,7 +1475,7 @@ def test_no_negative_own_price_elasticities(data):
     from capri_mod.utils.utils import calibrate_supply_elasticities
 
     sm = SupplyModule(data, calibrate_supply_elasticities(data["areas"]))
-    regions = list(data["areas"].index[:12])
+    regions = _german_units(12)
     sm.run(price_signals=None, regions=regions)
 
     crops = ["SWHE", "BARL", "PULS", "RAPE", "POTA", "SUGB"]
@@ -1565,7 +1573,7 @@ def test_cap_support_not_double_counted(model):
     # Reference: the calibrated base levels. Until 23 October 2026 the reference was a bare SupplyModule.run without
     # the model's run state (feed rations and prices, manure pools); since the proxy removals of that day such a bare
     # solve no longer reproduces the base (DE11 wheat 71 against 91 kha; KNOWN_ISSUES K68), so it is no reference.
-    regions = list(model.data["areas"].index[:8])
+    regions = _german_units(8)
     base_wheat = float(model.data["areas"].loc[regions, "SWHE"].sum())
 
     res = model.run(scenario="BASELINE", regions=regions, max_outer_iter=1)
@@ -1619,7 +1627,7 @@ def test_organic_area_target_binds_and_is_a_noop_at_zero(model):
     """
     from capri_mod.policy.policy_module import PolicyScenario
 
-    regions = list(model.data["areas"].index[:8])
+    regions = _german_units(8)
 
     def totals(res):
         out = {}
@@ -1715,7 +1723,7 @@ def test_projection_starts_from_capri_reference_and_calibrates(model):
     raw = pd.read_csv(src)
     v = {(r.capri_region, r.activity, r.item, str(r.year)): r.value for r in raw.itertuples()}
     f = v[("DE110000", "SWHE", "LEVL", "2030")] / v[("DE110000", "SWHE", "LEVL", "2017")]
-    assert abs(t["regional"]["herds"]["DE110000"]["SWHE"]["2030"] - round(f, 4)) < 1e-9
+    assert abs(t["regional"]["herds"]["DE110000"]["SWHE"]["2030"] - f) < 1e-12          # written to the last digit
     assert t["regional"]["land"]["DE110000"]["ARABLE"]["2030"] < 1.0
     traj = BaselineTrajectory.from_file(tp)
     pm = ProjectionModule(model, traj, capri_prices_dir=os.path.join(str(DATA_DIR), "trajectories"))
@@ -1802,7 +1810,7 @@ def test_nitrogen_balance_is_physically_plausible(data):
 
     em = EnvironmentalModule(data)
     sm = SupplyModule(data, calibrate_supply_elasticities(data["areas"]))
-    regions = list(data["areas"].index[:12])
+    regions = _german_units(12)
     res = sm.run(price_signals=None, regions=regions)
 
     per_ha = []
@@ -1885,7 +1893,7 @@ def test_pesticide_reduction_binds_and_is_a_noop_at_zero(model):
     """
     from capri_mod.policy.policy_module import PolicyScenario
 
-    regions = list(model.data["areas"].index[:8])
+    regions = _german_units(8)
 
     def totals(res):
         out = {}
@@ -1936,7 +1944,7 @@ def test_unconverged_run_warns_and_is_recorded(model):
     """
     import warnings as _w
 
-    regions = list(model.data["areas"].index[:4])
+    regions = _german_units(4)
 
     with _w.catch_warnings(record=True) as caught:
         _w.simplefilter("always")
@@ -2004,7 +2012,7 @@ def test_land_bounds_do_not_rewrite_the_base_year(data):
 
     # in the model's run state (feed rations: the NLP form): a bare SupplyModule.run takes the plain QP path, which
     # no longer reproduces the base since the proxy removals of 23 October 2026 (KNOWN_ISSUES K68)
-    regions = list(data["areas"].index[:25])
+    regions = _german_units(25)
     m = CAPRIModel(data_dir=str(DATA_DIR), verbose=False)
     m.run(scenario="BASELINE", regions=regions, max_outer_iter=2)
     sm = m.supply_module
@@ -2188,7 +2196,7 @@ def test_livestock_gross_output_is_marketed_product(model):
     """
     import math
 
-    regions = list(model.data["areas"].index[:6])
+    regions = _german_units(6)
     res = model.run(scenario="BASELINE", regions=regions, max_outer_iter=1)
 
     # NOT checked: output per head. Head counts are in CAPRI's own units, which
@@ -2567,7 +2575,7 @@ def test_histosol_emissions_and_fallowing_calibrated(data):
     factor (13 kg N2O-N/ha on temperate and boreal cropland); EU emissions of the order of the
     inventories' cultivated organic soils (10-20 Mt CO2-eq); fallowing calibrated to zero at base."""
     h = data["histosol"]
-    assert (h["ef_n2o_crop"].dropna().between(2.7, 13.0)).all()
+    assert (h["ef_n2o_crop"].dropna().between(2.7, 13.0 + 1e-9)).all()    # 13.000000000000002: written to the last digit
     assert h.loc["DE940000", "share_grass"] > 0.3 and h.loc["DE940000", "n2o_t_ha_crop"] > 0
     A = data["areas"]
     crops = [c for c in A.columns if c != "GRAS"]
@@ -3273,7 +3281,7 @@ def test_nlp_solver_cache_is_exact(model, tmp_path, monkeypatch):
     from capri_mod.supply import capri_regional_nlp as C
     monkeypatch.setenv("CAPRI_NLP_DUMP", str(tmp_path))
     model.run(scenario="BASELINE", regions=["DE110000"], max_outer_iter=1)
-    d = pickle.load(open(tmp_path / "DE11.pkl", "rb"))
+    d = pickle.load(open(tmp_path / "DE110000.pkl", "rb"))
     spec = dict(d["spec"])
     x0 = np.asarray(d["x_start"], float)
     N1 = C.CapriRegionalNLP(spec)
@@ -3713,14 +3721,14 @@ def test_recipe_pmp_terms_reproduce_capris_own():
     src = DATA_DIR / "sources"
     cp = pd.read_csv(src / "capreg" / "pmp_quad_pact.csv")
     rp = pd.read_csv(src / "baseline_pmp" / "recipe_2017_quad_pact.csv")
-    rp["model_region"] = rp.region.str[:4]
+    rp["model_region"] = rp.region
     k = cp.merge(rp, on=["model_region", "group1", "group2"])
     r = k.value_y / k.value_x
     assert len(k) > 1000 and ((r - 1).abs() < 0.01).mean() > 0.99
     cap = pd.read_csv(src / "capreg" / "pmp_quad_techn.csv")
     rec = pd.read_csv(src / "baseline_pmp" / "recipe_2017_quad_techn.csv")
     rec = rec[(rec.tech1 == rec.tech2) & rec.tech1.isin(["T1", "T"])].drop_duplicates(["region", "activity"]).copy()
-    rec["model_region"] = rec.region.str[:4]
+    rec["model_region"] = rec.region
     j = cap.merge(rec, on=["model_region", "activity"], suffixes=("_c", "_r"))
     assert ((j.value_r / j.value_c - 1).abs() < 0.05).mean() > 0.88
     ex = C.collapsed(pd.read_csv(src / "baseline_pmp" / "pmp_quad_techn_2030.csv"))

@@ -61,7 +61,7 @@
   "environmental.n_surplus.IE": {
    "status": "use_with_care",
    "note": "Irish grass yield is not derivable from CAPRI (its grass price is a dummy and its 'yield' equals revenue), so Irish crop and grass uptake is uncertain and the Irish surplus runs high.",
-   "scope": "IE04, IE05, IE06"
+   "scope": "IR010000, IR020000"
   },
   "market.prices": {
    "status": "validated",
@@ -93,16 +93,6 @@
   "economy_wide": {
    "status": "not_supported",
    "note": "Labour, capital and GDP effects are outside the partial-equilibrium boundary, as in CAPRI."
-  },
-  "regions.HR": {
-   "status": "use_with_care",
-   "note": "Split by crop from CAPRI's regional data: HR03 takes its own areas, HR04 the national remainder. Olives verified against CAPRI's national total. HR05 and HR06 are empty to avoid double counting.",
-   "scope": "HR03, HR04"
-  },
-  "regions.DED": {
-   "status": "use_with_care",
-   "note": "Split by crop from CAPRI's regional data for 2003-2007 under the pre-2013 codes; herds by cattle share. The Saxony total is exact; the split reflects 2003-2007 cropping patterns.",
-   "scope": "DED2, DED4, DED5"
   },
   "scenario.prices": {
    "status": "use_with_care",

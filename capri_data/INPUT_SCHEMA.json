@@ -527,25 +527,6 @@
     "13 regions where CAPRI does not split the herd keep a single yield and no margin"
    ]
   },
-  "land_rent_regional": {
-   "file": "2017/supply/land_rent_regional.csv",
-   "concept": "Land rent per hectare by region (Eurostat apri_lrnt, arable land and/or permanent grassland)",
-   "unit": "EUR/ha",
-   "dimension": "region",
-   "modules": [
-    "supply"
-   ],
-   "source": {
-    "source_type": "EXTERNAL",
-    "source_ref": "Eurostat apri_lrnt",
-    "vintage": "2017",
-    "confidence": "validated",
-    "reproducibility": "public_data"
-   },
-   "known_gaps": [
-    "Germany and Cyprus on fallback"
-   ]
-  },
   "capri_baseline_surplus": {
    "file": "2017/policy/capri_baseline_surplus_2030.csv",
    "concept": "CAPRI's own baseline gross N surplus per ha (2030 reference), input to the tiered nitrogen target",
@@ -587,25 +568,6 @@
    "file": "2017/environment/manure_trade_2030.csv",
    "concept": "Manure N trade between regions: export share of excretion, import per ha of cropland",
    "unit": "share; kg N/ha",
-   "dimension": "region",
-   "modules": [
-    "environmental"
-   ],
-   "source": {
-    "source_type": "CAPRI_GDX",
-    "source_ref": "res_2_1730greendeal_refdefaulta dataOut",
-    "vintage": "2030",
-    "confidence": "validated",
-    "reproducibility": "capri_gdx"
-   },
-   "known_gaps": [
-    "unmatched regions"
-   ]
-  },
-  "capri_regional_n_balance": {
-   "file": "2017/environment/capri_regional_n_balance_2030.csv",
-   "concept": "CAPRI regional N balance positions (MINFER, EXCRET, MTRADE, IMPORT, EXPPRD, CRESID, BIOFIX, ATMOSD, SURTOT)",
-   "unit": "kt N",
    "dimension": "region",
    "modules": [
     "environmental"
