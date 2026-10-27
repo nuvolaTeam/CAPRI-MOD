@@ -18,7 +18,8 @@ a builder whose input is absent is reported as not run. INVOCATIONS records the 
 
 Comparison of a changed file with its committed version: CSV (also .csv.xz/.gz) and Parquet as tables (same columns
 and rows, numbers to rel. 1e-12 and abs. 1e-15, text equal), JSON as nested values with the same tolerance, other files
-byte by byte. "equal values" means the file's bytes changed (formatting, order of rows) but not its content.
+byte by byte. "equal values" means the file's bytes changed (formatting, order of rows) but not its content;
+"identical (rewritten)" a file the builder wrote with the same bytes (the report lists every file a builder writes).
 """
 from __future__ import annotations
 
@@ -302,6 +303,12 @@ def compare(path: str, old: bytes, new: bytes) -> str:
     return "bytes differ"
 
 
+def snapshot() -> dict:
+    """Modification time of every file under capri_data (to see what a builder wrote, also where it wrote the same
+    bytes)."""
+    return {str(f.relative_to(ROOT)): f.stat().st_mtime_ns for f in (ROOT / "capri_data").rglob("*") if f.is_file()}
+
+
 def reset():
     git("checkout", "--", ".")
     git("clean", "-fdq", "--", "capri_data", "capri_reference")
@@ -352,9 +359,13 @@ def main():
             shutil.rmtree(tmp, ignore_errors=True)
         return cmd, status, round(time.time() - t, 1)
 
-    def record(cmd, status, sec):
+    def record(cmd, status, sec, snap0):
         changed = [ln[3:] for ln in git("status", "--porcelain", "--untracked-files=all").splitlines() if ln not in before]
-        if not changed:
+        snap1 = snapshot()
+        # files written with the same bytes (git sees no change): reported as written, identical
+        for f in sorted(f for f, t in snap1.items() if snap0.get(f) != t and f not in changed):
+            rows.append({"builder": cmd, "status": status, "seconds": sec, "file": f, "result": "identical (rewritten)"})
+        if not changed and not any(r["builder"] == cmd for r in rows):
             rows.append({"builder": cmd, "status": status, "seconds": sec, "file": "", "result": "no file changed"})
         for f in changed:
             if not git("ls-files", "--", f).strip():
@@ -372,19 +383,21 @@ def main():
     selected = [inv for inv in INVOCATIONS if not o.only or inv[0] in o.only]
     if o.chain:
         # the selected builders one after the other, without a reset: the writers of one file in their order
+        snap0 = snapshot()
         steps = []
         for inv in selected:
             steps.append(run(*inv))
             print(f"{steps[-1][0]}: {steps[-1][1]}, {steps[-1][2]} s", flush=True)
         record("chain: " + " -> ".join(c for c, _, _ in steps),
                "; ".join(f"{c.split()[0]} {st}" for c, st, _ in steps if st != "ok") or "ok",
-               round(sum(x for _, _, x in steps if x != ""), 1))
+               round(sum(x for _, _, x in steps if x != ""), 1), snap0)
         if not o.keep:
             reset()
     else:
         for inv in selected:
+            snap0 = snapshot()
             cmd, status, sec = run(*inv)
-            record(cmd, status, sec)
+            record(cmd, status, sec, snap0)
             reset()
     with open(o.report, "w", newline="") as fh:
         w = csv.DictWriter(fh, fieldnames=["builder", "status", "seconds", "file", "result"])
