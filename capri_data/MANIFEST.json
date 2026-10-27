@@ -2801,6 +2801,26 @@
    },
    "path": "2017/policy/premium_scheme_shares_2030.csv",
    "note": "tools/build/build_cap_ceilings_2030.py; Pillar II budget changes (PolicyScenario.lfa_/ae_/n2k_budget_change) and the payments report's split by scheme"
+  },
+  "capri_units_nuts2024.csv": {
+   "source": "Eurostat NUTS correspondences 2013-2016, 2016-2021, 2021-2024 (sources/nuts/) and ef_lus_main UAA 2023 (2020 census for BG, EL, ES, IT, LT, PL, SI; sources/eurostat/ef_lus_main_uaa_nuts2024.csv); tools/build/build_nuts2024_reporting.py",
+   "vintage": "NUTS 2024",
+   "units": "ha (uaa_ha), share (weight)",
+   "domain": "reporting",
+   "status": "live",
+   "path": "shared/capri_units_nuts2024.csv",
+   "shape": {
+    "rows": 248,
+    "cols": 5,
+    "columns": [
+     "capri_unit",
+     "nuts2024",
+     "group",
+     "uaa_ha",
+     "weight"
+    ]
+   },
+   "note": "Reporting only (capri_mod/nuts_reporting.py): CAPRI's units -> NUTS-2024 regions; a group with several regions gets an area-weighted distribution of the group's result, not regional detail of its own."
   }
  },
  "_vintage_summary": {
