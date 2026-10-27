@@ -228,7 +228,7 @@ class ProcessingMixin:
         z = 0.01 * min(1000.0, max(1e-11, float(q0)))
         return float(q + z * np.logaddexp(0.0, -q / z) + 1e-11)
 
-    def _crush_state(self, dom_prices) -> dict:
+    def _crush_state(self, dom_prices, detail: Optional[dict] = None) -> dict:
         """Crush and oil and cake output per (region, seed) at the given prices (CAPRI ProcMargO_, ProcNQ_,
         ProcFudge_, ProcO_, procYield_; market_model.gms l. 1118-1176, 1480-1520).
 
@@ -240,7 +240,8 @@ class ProcessingMixin:
         their levels so; MarketModule._bilateral_eval). The model region's base crush (q0, CAPRI's, or the EU's
         aligned to the supply models) is spread over its behavioural regions by CAPRI's crush; a region-seed without a
         CAPRI Hessian term keeps its base crush (CAPRI: no processing function, constant processing).
-        Returns {(region, seed): (crush, oil output, cake output)}."""
+        Returns {(region, seed): (crush, oil output, cake output)}. detail (a dict, for the welfare report): filled
+        with {(region, seed, behavioural region): (base crush, crush change before ProcFudge_, margin change)}."""
         cp = self._crush_params()
         pq = self._proc_nq_params() or {}
         seeds = pq.get("seeds", {})
@@ -275,6 +276,11 @@ class ProcessingMixin:
                     m = -ey["a1"] * ratio(r, y) + ey["ppo"] * ratio(r, oy) * yo + ey["ppc"] * ratio(r, cy) * yc
                     m0 = -ey["a1"] + ey["ppo"] * ey["yo0"] + ey["ppc"] * ey["yc0"]
                     q += h * (m - m0)
+                if detail is not None:
+                    yo_, yc_ = self._cet_yields(e, ratio(r, o), ratio(r, c))
+                    dm_ = (-e["a1"] * ratio(r, s) + e["ppo"] * ratio(r, o) * yo_ + e["ppc"] * ratio(r, c) * yc_) \
+                        - (-e["a1"] + e["ppo"] * e["yo0"] + e["ppc"] * e["yc0"])
+                    detail[(r, s, e["rms"])] = (k * e["q0"], q - k * e["q0"], dm_)
                 q = self._proc_fudge(q, k * e["q0"])
                 yo, yc = self._cet_yields(e, ratio(r, o), ratio(r, c))
                 crush += q

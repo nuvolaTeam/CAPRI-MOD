@@ -548,6 +548,8 @@ class BilateralSolveMixin:
                     f"{float(getattr(self, '_bilat_err', float('nan'))):.2e} ({worst})", RuntimeWarning)
         self._bilat_unconverged = None if converged else (iters, float(getattr(self, "_bilat_err", float("nan"))))
         sysd = self._bilat
+        # CAPRI's welfare report (market/welfare.py) at the solution, at the prices the market's functions saw
+        welfare = self._capri_welfare(r, PAr, S, D, pc)
         # RAW MILK with the dairy block: the EU milk price is the block's (fat and protein values of the products
         # less margins); raw milk is not traded, so it replaces the pooled market's ratio for the EU
         # world index from the market's own ratios, BEFORE the EU's raw milk takes the dairy block's price: for a
@@ -601,7 +603,6 @@ class BilateralSolveMixin:
                     if i != j and X[i, j] > 0:
                         flows.at[(exp, imp), c] = X[i, j]
         self.last_market_solver = "bilateral"
-        welfare = self._compute_welfare(S, D, world, reported, trade_scenario)
         biof = None
         if self._biofuel_params() and all(x in reported.index for x in self.EU):
             _pr = {_rg: {c: float(PAr.at[_rg, c]) for c in self._biofuel_params()["share"] if c in PAr.columns}

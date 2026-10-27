@@ -12,6 +12,7 @@ market model, each in its own file of this package:
   biofuel.py          biofuel feedstock demand and the biofuel markets
   feed.py             feed demand (EU feed bulks per member state, residual feeds, non-EU feed demand)
   supply.py           supply response outside the supply models (non-EU regions)
+  welfare.py          CAPRI's welfare report (reports/welfare.gms)
   equilibrium.py      the result object (MarketEquilibrium)
 Known differences from CAPRI's market are listed in docs/design/ARCHITECTURE_REFACTOR.md section 5.1 and
 docs/KNOWN_ISSUES.md.
@@ -41,13 +42,15 @@ from capri_mod.market.demand import DemandMixin
 from capri_mod.market.processing import ProcessingMixin
 from capri_mod.market.supply import SupplyMixin
 from capri_mod.market.bilateral_solve import BilateralSolveMixin
+from capri_mod.market.welfare import WelfareMixin
 
 
 # ---------------------------------------------------------------------------
 # MARKET MODULE
 # ---------------------------------------------------------------------------
 
-class MarketModule(CalibrationMixin, BiofuelMixin, DairyMixin, FeedMixin, DemandMixin, ProcessingMixin, SupplyMixin, BilateralSolveMixin):
+class MarketModule(CalibrationMixin, BiofuelMixin, DairyMixin, FeedMixin, DemandMixin, ProcessingMixin, SupplyMixin, BilateralSolveMixin,
+                   WelfareMixin):
     """
     CAPRI's global market model for the given EU supply (arm/market_model.gms).
 
@@ -306,75 +309,3 @@ class MarketModule(CalibrationMixin, BiofuelMixin, DairyMixin, FeedMixin, Demand
             raise ValueError("the market needs CAPRI's bilateral data (capri_data/2017/market/bilateral_flows_*.csv)")
         return self._solve_bilateral_equilibrium(exogenous_supply, trade_scenario, verbose=verbose,
                                                  max_outer=int(max_iter) if max_iter else int(_settings().get("market.max_iter")))
-
-    # ------------------------------------------------------------------
-    # Welfare
-    # ------------------------------------------------------------------
-
-    def _compute_welfare(
-        self,
-        supply: pd.DataFrame,
-        demand: pd.DataFrame,
-        world_prices: pd.Series,
-        domestic_prices: pd.DataFrame,
-        trade_scenario: Optional[Dict] = None,
-    ) -> pd.DataFrame:
-        """
-        Welfare effects (EUR million) by region: a first-order approximation, not CAPRI's money-metric welfare
-        (reports/welfare.gms: Generalised Leontief consumer surplus, normalised-quadratic profits of farms, dairies and
-        processors, budget; audit M7, open).
-
-        CS change ≈ -ΔP × QD0 - ½ΔP × ΔQD  (consumer surplus, at the region's domestic price)
-        PS change ≈  ΔP × QS0 + ½ΔP × ΔQS  (producer surplus, at the region's domestic price)
-        Budget     = tariff revenue           (government budget)
-        Quantities in 1000 t and prices in EUR/t give EUR 1000; divided by 1000: EUR million (labelled billion
-        until 24 October 2026, and the base domestic price was taken as the base world price).
-        """
-        welfare_rows = []
-        dom0 = self._dom0()
-
-        for region in self.regions:
-            cs, ps, budget = 0.0, 0.0, 0.0
-
-            for comm in self.commodities:
-                wp0 = self.world_prices_base[comm]
-                wp1 = world_prices.get(comm, self.world_prices_base[comm])
-                dp0 = float(dom0.at[region, comm]) if (region in dom0.index and comm in dom0.columns) else wp0
-                dp1 = domestic_prices.at[region, comm] if (
-                    region in domestic_prices.index and comm in domestic_prices.columns
-                ) else wp1
-
-                qd0 = self.base_consumption.at[region, comm] if (
-                    region in self.base_consumption.index
-                ) else 0.0
-                qd1 = demand.at[region, comm] if region in demand.index else 0.0
-                qs0 = self.base_production.at[region, comm] if (
-                    region in self.base_production.index
-                ) else 0.0
-                qs1 = supply.at[region, comm] if region in supply.index else 0.0
-
-                delta_p_cons = dp1 - dp0
-                delta_p_prod = dp1 - dp0
-
-                # Consumer surplus (negative when price rises)
-                cs += -(delta_p_cons * qd0 + 0.5 * delta_p_cons * (qd1 - qd0))
-
-                # Producer surplus
-                ps +=  (delta_p_prod * qs0 + 0.5 * delta_p_prod * (qs1 - qs0))
-
-                # Budget / tariff revenue
-                tariff = self.tariffs.at[region, comm] if (
-                    region in self.tariffs.index and comm in self.tariffs.columns
-                ) else 0.0
-                imports = max(0.0, qd1 - qs1)
-                budget += (tariff / 100.0) * wp1 * imports
-
-            welfare_rows.append({
-                "region": region,
-                "consumer_surplus": cs / 1e3,   # EUR million
-                "producer_surplus": ps / 1e3,
-                "budget_effect":    budget / 1e3,
-                "total_welfare":   (cs + ps + budget) / 1e3,
-            })
-
-        return pd.DataFrame(welfare_rows).set_index("region")

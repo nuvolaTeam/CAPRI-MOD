@@ -1257,7 +1257,31 @@ class CAPRIModel:
             print(f"  Run completed in {t_elapsed:.1f}s")
 
         results["labour"] = _labour_table(supply_results, self.data, results.get("set_aside"))
+        results["welfare_supply"] = self._welfare_supply(supply_results)
         return results
+
+    def _welfare_supply(self, supply_results) -> Optional[pd.DataFrame]:
+        """The welfare components CAPRI takes from the supply models for the regions that have them (RMSSUP: the EU,
+        Norway; reports/welfare.gms l. 360-380, 690-700, 800-806), per supply-model region, EUR million (levels):
+          MGVA      the farms' profit: market gross value added including premiums, sum over activities of
+                    (revenue - input cost + premium) x level (CAPRI EAAG MGVA; capri_mod/income)
+          PSEs      the budget's cost of the premiums, minus the premiums paid (CAPRI -FEOP, -FEOG of the products
+                    without a market)
+        The market's agents' components are in results["market"].welfare. A failure here does not stop the run:
+        it is warned and the table is None."""
+        if not supply_results:
+            return None
+        try:
+            from capri_mod.income.income_module import IncomeDistributionModule
+            im = IncomeDistributionModule(self.data)
+            rows = {}
+            for reg, res in supply_results.items():
+                inc, prem = im._income_parts(reg, res, self.supply_module)
+                rows[reg] = {"MGVA": inc / 1000.0, "PSEs": -prem / 1000.0}
+            return pd.DataFrame.from_dict(rows, orient="index")
+        except Exception as exc:
+            warnings.warn(f"welfare: the supply models' components could not be computed ({exc!r})")
+            return None
 
     # ------------------------------------------------------------------
     # SCENARIO COMPARISON
@@ -1298,9 +1322,21 @@ class CAPRIModel:
         b_mkt = baseline_results.get("market")
         s_mkt = scenario_results.get("market")
         if b_mkt and s_mkt and hasattr(b_mkt, "welfare") and hasattr(s_mkt, "welfare"):
-            b_w = b_mkt.welfare["total_welfare"].sum()
-            s_w = s_mkt.welfare["total_welfare"].sum()
-            diffs["welfare_EUR_million_change"] = s_w - b_w
+            # CAPRI's welfare (reports/welfare.gms), world totals: the market's agents (market/welfare.py) and, for
+            # the regions with supply models, the farms' MGVA and the premiums' budget cost (_welfare_supply)
+            tot = 0.0
+            for comp in list(getattr(s_mkt.welfare, "columns", [])):
+                if comp in b_mkt.welfare.columns and comp != "Welfare":
+                    d_ = float(s_mkt.welfare[comp].sum() - b_mkt.welfare[comp].sum())
+                    diffs[f"welfare_{comp}_EUR_million_change"] = d_
+                    tot += d_
+            b_ws, s_ws = baseline_results.get("welfare_supply"), scenario_results.get("welfare_supply")
+            if b_ws is not None and s_ws is not None:
+                for comp, lab in (("MGVA", "ProfitAgr_supply_models"), ("PSEs", "PSEs")):
+                    d_ = float(s_ws[comp].sum() - b_ws[comp].sum())
+                    diffs[f"welfare_{lab}_EUR_million_change"] = d_
+                    tot += d_
+                diffs["welfare_EUR_million_change"] = tot
 
         # Environmental
         b_env = baseline_results.get("environmental")

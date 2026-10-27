@@ -1984,6 +1984,13 @@
    "source": "CAPRI LEVW and LEVL of the animal activities (res_17 dumps); capri_level_ratio.csv",
    "vintage": "2017",
    "note": "tools/build/build_livestock_units.py; reporting weights of the animal options' adoption shares"
+  },
+  "sources/capri_res/ref2030_welfare.csv": {
+   "nature": "REAL_CAPRI",
+   "vintage": "CAPRI 2030 reference run, scen_ref_2030.txt (scen_greendeal_2030.zip, uploaded 9 July and again 27 October 2026, identical)",
+   "source": "CAPRI's welfare report p_welfareRes as stored in dataOut: rows CSSP, PROFITAGR, PROFITPROC, PROFITDAIRY, PROFITFEED, TARIFFREV, TRQRents, PSES, ProfitLandUse, WELFARE (region, col, row, EUR million, 2030 levels)",
+   "priority": "medium",
+   "note": "Levels of CAPRI's 2030 reference; the run's Green Deal file in the same zip (scen_greendeal_2030.txt) carries no welfare rows, so no scenario change can be compared. The land accounts are SUPREMA's (welfare.gms supremaMrk): EU27yr19 ProfitAgr LAND -58,994 = -ProfitLandUse LAND, ProfitAgr INCE 243,119 = EAAG MGVA 302,113 - rents. Levels comparable with the model's: TariffRev (EU 4,228), TRQRents (EU 407), MGVA, PSEs (EU -47,259 = -FEOG)."
   }
  },
  "code_embedded_data": {

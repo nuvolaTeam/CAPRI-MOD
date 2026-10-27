@@ -129,6 +129,7 @@ class SupplyMixin:
         # (_region_supply_elas); the per-product value above only for the EU rows (their supply comes from the supply
         # models)
         EV = self._region_supply_elas(list(supply.index), cols, el)
+        self._welf_supply_EV = (list(supply.index), cols, EV)        # the welfare report (market/welfare.py)
         if region_ratio is None:
             fac = ratio.reindex(cols).to_numpy(dtype=float)[None, :] ** EV
             supply[cols] = np.maximum(supply[cols].to_numpy(dtype=float) * fac, 0.0)

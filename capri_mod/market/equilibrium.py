@@ -15,7 +15,7 @@ class MarketEquilibrium:
     consumption: pd.DataFrame        # [region × commodity], 1000 t
     trade_flows: pd.DataFrame        # MultiIndex (exp, imp) × commodity
     net_exports: pd.DataFrame        # [region × commodity]
-    welfare: pd.DataFrame            # [region × {consumer, producer, budget}]
+    welfare: pd.DataFrame            # [region × CAPRI's welfare components, EUR million] (market/welfare.py)
     excess_demand: pd.Series         # residual per commodity (should ≈ 0)
     converged: bool = True
     iterations: int = 0
