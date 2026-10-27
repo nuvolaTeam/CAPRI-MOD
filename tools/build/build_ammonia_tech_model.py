@@ -190,7 +190,7 @@ def main():
     # CAPRI regions -> model regions through the shared groups (splits, merges, renamed regions)
     _c2g, _groups = mr.capri_groups(mr.model_regions())
     for (rs, act) in subs:
-        if rs.endswith("000000") or rs not in _c2g:
+        if not mr.regional_row(rs) or rs not in _c2g:
             continue
         for n2 in sorted(_groups[_c2g[rs]][1]):
             by_reg[n2].append((rs, act))
@@ -218,21 +218,21 @@ def main():
             for tech, o in sorted(subs[(rs, act)].items()):
                 if o["slope"] is None and o["ini"] <= 0:
                     continue
-                rows.append([reg, cat, f"{rs}|{act}", round(L / lev[cat], 6), round(days / 365.0, 6), round(mrel, 6),
-                             tech, o["group"], round(o["k1"], 6),
-                             "" if o["slope"] is None else round(o["slope"], 6), round(o["S0"], 6),
-                             round(o["ini"], 6), round(o["max"], 6), round(o["rH"], 6), round(o["rS"], 6), round(o["rA"], 6),
-                             round(g, 6), round(fl["G"], 6), round(fl["H"], 6), round(fl["S"], 6), round(fl["A"], 6), "", ""])
+                rows.append([reg, cat, f"{rs}|{act}", L / lev[cat], days / 365.0, mrel,
+                             tech, o["group"], o["k1"],
+                             "" if o["slope"] is None else o["slope"], o["S0"],
+                             o["ini"], o["max"], o["rH"], o["rS"], o["rA"],
+                             g, fl["G"], fl["H"], fl["S"], fl["A"], "", ""])
             # anaerobic digestion (tools/build/build_ad_option.py): its own target CH4MAN (NOC + AD = 1, TotMit_), share as
             # CAPRI reports it (v L (1 - G)); cost per place thresh (s - s0) + 1/2 slope (s - s0)^2 at 2030 prices;
             # its N effects act through the cascade (n_cascade_effects.csv), its CH4 factor in the accounts
             o = AD.get((rs, act))
             if o is not None and float(o["max"]) > 0 and float(o["slope"]) > 0:
-                rows.append([reg, cat, f"{rs}|{act}", round(L / lev[cat], 6), round(days / 365.0, 6), round(mrel, 6),
-                             "AD_AnCh", "AD", round(float(o["costParLin"]), 6), round(float(o["slope"]), 6),
-                             round(float(o["thresh"]), 6), round(float(o["ini"]), 6), round(float(o["max"]), 6),
-                             0.0, 0.0, 0.0, round(g, 6), round(fl["G"], 6), round(fl["H"], 6), round(fl["S"], 6),
-                             round(fl["A"], 6), round(float(o["lg"]), 9), round(float(o["r_ch4"]), 9)])
+                rows.append([reg, cat, f"{rs}|{act}", L / lev[cat], days / 365.0, mrel,
+                             "AD_AnCh", "AD", float(o["costParLin"]), float(o["slope"]),
+                             float(o["thresh"]), float(o["ini"]), float(o["max"]),
+                             0.0, 0.0, 0.0, g, fl["G"], fl["H"], fl["S"],
+                             fl["A"], float(o["lg"]), float(o["r_ch4"])])
     with open(D / "ammonia_tech_model.csv", "w", newline="") as f:
         w = csv.writer(f)
         w.writerow(["region", "animal", "sub", "weight", "stock_factor", "mann_rel", "technology", "group", "kappa1",

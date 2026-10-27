@@ -32,6 +32,8 @@ def main():
     ap.add_argument("path")
     ap.add_argument("--old-ref", default="next")
     ap.add_argument("--tol", type=float, default=1e-9, help="relative tolerance for 'equal'")
+    ap.add_argument("--atol", type=float, default=0.0, help="absolute tolerance (an old file rounded to n decimals: "
+                                                           "0.5e-n)")
     ap.add_argument("--index-col", default="0", help="index column(s), comma-separated positions or names")
     a = ap.parse_args()
     ic = [int(x) if x.isdigit() else x for x in a.index_col.split(",")]
@@ -69,8 +71,9 @@ def main():
         y = new.loc[common, c].astype(float)
         lost = x.notna() & y.isna()
         both = x.notna() & y.notna()
-        d = (x[both] - y[both]).abs() / np.maximum(x[both].abs(), 1e-12)
-        nd = int((d > a.tol).sum())
+        ad = (x[both] - y[both]).abs()
+        d = ad / np.maximum(x[both].abs(), 1e-12)
+        nd = int(((d > a.tol) & (ad > a.atol)).sum())
         if lost.any() or nd:
             bad += 1
             worst = d.idxmax() if len(d) else None
