@@ -352,7 +352,6 @@ def test_inner_fert_model_follows_capri():
     assert beta_regulation() == (1.1875, 1.0625)
     worst, n = 0.0, 0
     for r, d in f.priors[f.priors.level == "ru"].groupby("capri_region"):
-        f._map[r] = r
         area = dict(zip(d.ngrp, d.area_kha))
         me, ea = f.efficiencies(r)
         e = {"MINE": me if me == me else 1.0, "EXCR": ea if ea == ea else 1.0, "CRES": 0.75}

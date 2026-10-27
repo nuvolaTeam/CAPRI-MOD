@@ -6912,7 +6912,7 @@ def _luc_of(model, land_types):
         inner = env_.__dict__.get("_inner_fert") if env_ is not None else None
         if inner is None:
             inner = InnerFertDist()
-        cr = inner._map.get(model.data.region_id)
+        cr = model.data.region_id              # the model's regions are CAPRI's units
         lm = getattr(model.data, "land_market", None) or {}
         L0 = lm.get("base_kha") or {}
         d = {t: float(land_types.get(t, L0.get(t, 0.0))) - float(L0.get(t, 0.0)) for t in ("ARAC", "FRUN", "GRAS", "FORE", "OLND")

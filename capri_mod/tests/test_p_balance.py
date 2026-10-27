@@ -167,9 +167,9 @@ def test_p_accounts_at_the_base_against_capri(data, ref):
     inner = InnerFertDist()
     xs, ys = [], []
     for reg, b in out.items():
-        c8 = inner._map.get(reg)
+        c8 = reg                                    # the model's regions are CAPRI's units
         a = float(data["areas"].loc[reg].sum())
-        if a > 0 and c8 in ref and not c8.endswith("000000") and ref[c8].get(("UAAR", "LEVL"), 0.0) > 0:
+        if a > 0 and c8 in ref and ref[c8].get(("UAAR", "LEVL"), 0.0) > 0:
             xs.append(b["SURTOT"] / a)
             ys.append(ref[c8][("SURTOT", "PHOF")] / ref[c8][("UAAR", "LEVL")] * 1000.0)
     assert len(xs) > 200 and np.corrcoef(xs, ys)[0, 1] > 0.95
