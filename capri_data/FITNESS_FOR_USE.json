@@ -121,10 +121,6 @@
    "status": "validated",
    "note": "Real duals from the optimality conditions, labelled per constraint row."
   },
-  "supply.landscape_shortfall": {
-   "status": "use_with_care",
-   "note": "Unmet landscape requirement in regions whose arable land cannot hold the floor (81.7 kha EU-wide under Farm-to-Fork); CAPRI would convert grassland instead. (measured September 2026, not re-measured on the units; with the land market off see K84)"
-  },
   "scenario.livestock": {
    "status": "use_with_care",
    "note": "Farm-to-Fork 2030 herds (r161): pigs -14.3% (CAPRI -14.5%), beef animals -20.3% (-18%), sheep and goats -10.1% (-9.5%), poultry -12.3% (-16.5%), dairy cows -3.5% (-10%).",
@@ -157,6 +153,10 @@
   "income.regional": {
    "status": "use_with_care",
    "note": "CAPRI's ProfitAgr form (capri_mod/income): sum of (revenue - input cost + premium) x level per region; distribution across regions only (no farm-level data)."
+  },
+  "supply.landscape_floor": {
+   "status": "use_with_care",
+   "note": "With the land market off, a region whose arable land cannot hold the landscape floor keeps the floor and the solver's last (non-optimal) point, as CAPRI does, recorded in the run's nlp_fallback. With the land market on (CAPRI's Green Deal set-up, the reference runs) every floor is met."
   }
  }
 }

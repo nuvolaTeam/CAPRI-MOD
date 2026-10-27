@@ -4899,7 +4899,6 @@ class RegionalSupplyModel:
 
         STATELESS: everything set for this solve is reset before returning (test_solve_leaves_no_state_behind).
         """
-        self.landscape_shortfall = 0.0          # reset on every solve
         self.balance_shortfall = 0.0
         self._surplus_row = surplus_row         # held for THIS solve only
         self._mineral_cap = mineral_cap         # CAPRI's mineral fertiliser reduction, THIS solve only
@@ -4941,9 +4940,7 @@ class RegionalSupplyModel:
             res.fert_dist_mode_crops = None
         self._n_intensity = {}
         self._fert_tech_shares = {}
-        res.landscape_shortfall = float(getattr(self, "landscape_shortfall", 0.0))
         res.balance_shortfall = float(getattr(self, "balance_shortfall", 0.0))
-        self.landscape_shortfall = 0.0
         self.balance_shortfall = 0.0
         return res
 
@@ -5051,57 +5048,20 @@ class RegionalSupplyModel:
             return None
         return (round(float(srow[1]), 9), round(float(srow[7]), 9))
 
-    def _fit_aug_row(self, Qa, ca, Aa, ba, ya0, label):
-        """Relax one row of the regional problem (with the land market or without it) to the closest value the region
-        can reach.
-
-        (Until 26 October 2026 the plain problem had its own fits on the QP without feeding.) When the
-        land-market problem had no solution, the solve used to drop to the plain problem, where
-        land may idle and the land types are fixed - silently leaving CAPRI's land rules (no idle
-        land, land supply through the land market) in exactly the regions where they bind: North
-        Brabant's neighbour Zeeland halved its herds and grassland under the N target alone. Here
-        the row (landscape floor: -SETA <= -floor; N balance: surplus <= target) is set to the
-        lowest value a linear program over the problem's rows can reach, plus a small margin,
-        and the regional model is solved again. JRC121368: 'the reduction is relaxed in a limited number of
-        regions where the model is infeasible'. Records landscape_shortfall (1000 ha of set-aside)
-        or balance_shortfall (kg N per ha of farmland)."""
-        labels = list(getattr(self, "_row_labels", []))
-        if label not in labels:
-            return None, False, ba
-        k = labels.index(label)
-        from scipy.optimize import linprog
-        others = [i for i in range(len(ba)) if i != k]
-        try:
-            lp = linprog(Aa[k], A_ub=Aa[others], b_ub=ba[others], bounds=[(0, None)] * Aa.shape[1], method="highs")
-        except Exception:
-            return None, False, ba
-        if lp.status != 0:
-            return None, False, ba
-        least = float(lp.fun)
-        if least <= float(ba[k]):
-            return None, False, ba                # not this row that makes it infeasible
-        y_start = np.maximum(np.asarray(lp.x, dtype=float), 0.0)
-        n_ = self.n
-        area = float(sum(y_start[i] for i, a in enumerate(self.acts) if a in CROPS)) or 1.0
-        # the linear program sees the problem's linear rows only; CAPRI's form has more (feeding, fertilisation), so the
-        # floor is relaxed further in steps until the regional model solves (as CAPRI's widen_bounds.gms widens its
-        # bounds step by step), from the region's own start and from the linear program's point
-        for slack in (1e-3, 1e-2, 5e-2, 0.1, 0.25, 0.5):
-            b_fit = ba.copy()
-            b_fit[k] = least + slack * max(abs(least), 1.0)
-            y = None
-            for start in (ya0, y_start):
-                self._last_duals = None
-                y = self._nlp_solve(Qa, ca, Aa, b_fit, start)
-                if y is not None:
-                    break
-            if y is not None:
-                if label == "landscape_floor":
-                    self.landscape_shortfall = float(b_fit[k]) - float(ba[k])
-                else:
-                    self.balance_shortfall = (float(b_fit[k]) - float(ba[k])) / area
-                return y, True, b_fit
-        return None, False, ba
+    def _note_floor_failure(self):
+        """Where the regional model has no solution with a landscape floor in it, say so in the run's record
+        (nlp_fallback): CAPRI keeps the floor as it is (supply_model.gms e_setaLandscape; widen_bounds.gms widens
+        feeding, nutrient, land-use-change and fertiliser bounds, never the floor) and carries on with the solver's last
+        point. CAPRI's Green Deal runs have the land market on, which lets grassland become arable land; without it a
+        floor sized on total farmland may not fit on the arable land (K84)."""
+        if "landscape_floor" not in list(getattr(self, "_row_labels", []) or []):
+            return
+        if getattr(self, "_nlp_fallback_log", None) is None:
+            self._nlp_fallback_log = []
+        msg = ("no solution with the landscape floor " + ("(land market on)" if getattr(self, "use_land_market", False)
+               else "(land market off: CAPRI's Green Deal runs have it on)") + "; the solver's last point kept, as CAPRI")
+        if msg not in self._nlp_fallback_log:
+            self._nlp_fallback_log.append(msg)
 
     def _nlp_last_point(self, Q, c, A, b, x_start):
         """The caller's last attempt: CAPRI's form solved again with IPOPT's last point kept where it fails, as CAPRI
@@ -5263,8 +5223,8 @@ class RegionalSupplyModel:
 
         # The regional model in CAPRI's form, solved by IPOPT (_nlp_solve). Where a solve fails, CAPRI re-solves with
         # widened bounds and then carries on with the non-optimal solution, recorded (supply/simu_supply.gms,
-        # widen_bounds.gms: p_INFES): here JRC121368's relaxed N target and the landscape floor fitted to the reachable
-        # set-aside are tried, then IPOPT's last point at the region's own problem is kept and recorded (_nlp_last_point)
+        # widen_bounds.gms: p_INFES): here JRC121368's relaxed N target is tried, then IPOPT's last point at the region's
+        # own problem is kept and recorded (_nlp_last_point); the landscape floor is kept as CAPRI keeps it (K84)
         c_lin = self.f - self.net_revenues.values
         aug = self._land_augment(A_ub, b_ub, c_lin, x0) if getattr(self, "use_land_market", False) else None
         if aug is not None:
@@ -5302,12 +5262,9 @@ class RegionalSupplyModel:
                         self._n_relax_sticky = None
                         self.balance_shortfall = 0.0
             if _yc is None:
-                # an unreachable landscape floor, relaxed INSIDE the land-market problem (CAPRI's land rules stay in
-                # force); see _fit_aug_row
-                y_f, ok_f, b_fit = self._fit_aug_row(Qa, ca, Aa, ba, ya0, "landscape_floor")
-                if ok_f:
-                    _yc, ba = y_f, b_fit
-            if _yc is None:
+                # CAPRI keeps the landscape floor (e_setaLandscape) and every other row as they are and carries on with
+                # the solver's last point (K84: until 27 October 2026 an unreachable floor was lowered here)
+                self._note_floor_failure()
                 _yc = self._nlp_last_point(Qa, ca, Aa, ba, ya0)
             y = _yc
             n_ = len(x0); x_qp = y[:n_]
@@ -5357,13 +5314,9 @@ class RegionalSupplyModel:
             if _cols:
                 _yg = self._nlp_solve(Qg, cg, Ag, bg, sg)
                 if _yg is None:
-                    # an unreachable landscape floor (Corsica, Alpine regions without the land market: the floor is
-                    # sized on total farmland, set-aside sits on arable land), fitted as on the land-market path
-                    _yg, _okf, _bf = self._fit_aug_row(Qg, cg, Ag, bg, sg, "landscape_floor")
-                    if not _okf:
-                        _yg = self._nlp_last_point(Qg, cg, Ag, bg, sg)
-                    else:
-                        b_ub = b_ub.copy(); b_ub[:len(b_ub)] = _bf[:len(b_ub)]
+                    # as on the land-market path: the floor kept, the solver's last point (K84)
+                    self._note_floor_failure()
+                    _yg = self._nlp_last_point(Qg, cg, Ag, bg, sg)
                 if getattr(self, "_grass_col", None) is not None:
                     self._last_grass_z = float(_yg[self._grass_col])
                 self._split_record(_yg)
@@ -5379,11 +5332,8 @@ class RegionalSupplyModel:
                 self._dairy_req_extra = None
                 _yc = self._nlp_solve(self.Q, c_lin, A_ub, b_ub, x0)
                 if _yc is None:
-                    _yc, _okf, _bf = self._fit_aug_row(self.Q, c_lin, A_ub, b_ub, x0, "landscape_floor")
-                    if not _okf:
-                        _yc = self._nlp_last_point(self.Q, c_lin, A_ub, b_ub, x0)
-                    else:
-                        b_ub = _bf
+                    self._note_floor_failure()
+                    _yc = self._nlp_last_point(self.Q, c_lin, A_ub, b_ub, x0)
                 if getattr(self, "_grass_pending_col", None) is not None:
                     self._grass_calibrate_from_duals(getattr(self, "_last_duals", None))
                 if self._split_pending():

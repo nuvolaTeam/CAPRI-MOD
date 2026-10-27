@@ -2427,31 +2427,28 @@ def test_land_is_fixed_without_the_land_market(data, monkeypatch):
         "a plain solve after a shocked one did not return the base solution"
 
 
-def test_landscape_floor_is_fitted_where_land_cannot_hold_it(data, monkeypatch):
-    """A landscape floor sized on total farmland may not fit on a region's
-    arable land (Corsica, Alpine and Greek regions). The problem then has no
-    feasible solution; it used to fall to a slow general solver that returned
-    a constraint-violating point. It must now solve, with the floor fitted to
-    what the land can hold and the unmet part recorded.
-    """
-    import numpy as np
+def test_unreachable_landscape_floor_is_kept_as_capri(data, monkeypatch):
+    """Where a landscape floor sized on total farmland cannot fit on a region's arable land (land market off: Greek,
+    Alpine, Corsican regions), CAPRI keeps the floor (supply_model.gms e_setaLandscape; widen_bounds.gms never widens
+    it) and carries on with the solver's last point, recorded. Until 27 October 2026 the floor was lowered in steps
+    to what a linear program said the land could hold, plus a margin (K84: the shortfall was mostly that margin)."""
     from capri_mod.supply.supply_module import SupplyModule
     from capri_mod.utils.utils import calibrate_supply_elasticities
 
-    # EL65 first: the floor is fitted there in 60 s (IT310000 106 s, FR830000 ~580 s: IPOPT to its iteration limit on each step
-    # of the fit; KNOWN_ISSUES K84)
-    region = next((r for r in ("EL250000", "IT310000", "FR830000") if r in data["areas"].index), None)
-    if region is None:
-        return
+    region = "EL250000"
     _set(monkeypatch, STANDALONE_PRE_SETTINGS)          # the land market off: the floor cannot be met by more land
     sm = SupplyModule(data, calibrate_supply_elasticities(data["areas"]))
     sm.run(price_signals=None, regions=[region])
     mo = sm._models[region]
+    mo._nlp_fallback_log = []
     res = mo.solve(set_aside_requirement=0.10)
-    assert res.converged, f"{region} did not converge under the landscape floor"
-    assert res.landscape_shortfall > 0, "the unmet landscape requirement was not recorded"
+    assert not hasattr(res, "landscape_shortfall")
+    log = " ".join(getattr(mo, "_nlp_fallback_log", None) or [])
+    assert "landscape floor" in log and "land market off" in log, log
+    assert not hasattr(mo, "_fit_aug_row")
+    mo._nlp_fallback_log = []
     plain = mo.solve()
-    assert plain.landscape_shortfall == 0.0, "a shortfall leaked into a plain solve"
+    assert plain.converged and not (getattr(mo, "_nlp_fallback_log", None) or []), "the plain solve failed"
 
 
 def test_greendeal_switchboard_mirrors_capri():

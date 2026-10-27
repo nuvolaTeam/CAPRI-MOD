@@ -1047,12 +1047,12 @@ cheaper. Land expansion is what closed the oilseed gap: with land fixed, a lands
 floor took every hectare from crops, and oilseeds lost about three times CAPRI's share
 of area.
 
-**Where the landscape floor cannot fit, it is fitted.** In 11 mountain and island
-regions (Corsica, the Italian and Austrian Alps, three Greek regions) the floor, sized on
-total farmland, does not fit on their little arable land. It is met as far as the land
-allows and the unmet part — 81.7 kha EU-wide, ~0.8% of the requirement — is reported as
-`landscape_shortfall`. CAPRI avoids this by converting grassland to arable, which this
-model does not represent.
+**Where the landscape floor cannot fit, it is kept, as in CAPRI.** With the land market off, a floor sized on total
+farmland may not fit on a region's arable land (Corsica, the Alps, Greek regions). CAPRI keeps the floor
+(e_setaLandscape; its widen_bounds.gms never relaxes it) and carries on with the solver's last point; the model does the
+same and records it in the run's `nlp_fallback`. CAPRI's Green Deal runs have the land market on, where grassland can
+become arable land; the reference runs do too and meet every floor. (Until 27 October 2026 the floor was lowered to
+what the land could hold plus a margin, K84.)
 
 **Land is conserved.** Every activity on arable land — fodder and set-aside
 included — competes for it, so a landscape floor displaces crops as it does in
