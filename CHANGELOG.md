@@ -30,7 +30,7 @@ Full provenance for every entry is in `capri_data/DATA_SOURCING_REGISTRY.json`.
 
 ---
 
-## 27 October 2026 (night): builder reproduction audit (K86, K87), CAPRI's stop rule the default (K79), the legacy nitrate limit retired (K33), orphans removed
+## 27 October 2026 (night): builder reproduction audit (K86, K87), CAPRI's stop rule the default (K79), the legacy nitrate limit retired (K33), orphans removed, CAPRI's welfare report (M7)
 
 - **Builder reproduction audit** (tools/check/reproduce_builders.py, which also records every builder's command): each
   of the 117 builder invocations run on the committed inputs and its outputs compared with the committed files; files
@@ -72,6 +72,16 @@ Full provenance for every entry is in `capri_data/DATA_SOURCING_REGISTRY.json`.
   removed with a rebuild. Delta Lake for the model's inputs considered and not taken (the format would not undo a value
   rounded before it is written); the project lead decided that the builder-written inputs move to plain Parquet (a
   separate step), sources and hand-maintained tables stay CSV.
+- **CAPRI's welfare report (M7)** replaces the first-order consumer and producer surplus (reporting only;
+  docs/WELFARE.md): per market region, the consumers' money metric of the GL demand system in CAPRI's sequence; the
+  profits of processors (ProcNQ_), crushers (in the margins), biofuel plants and dairies (DairyNQ_ in the margins,
+  raw milk an input) from their own functions; the farms and feed users of the regions without supply models (the
+  model's supply and feed functions, the dairy blocks' raw milk supply); tariff revenues and quota rents per flow;
+  for the regions with supply models their MGVA and the premiums' budget cost (results["welfare_supply"]).
+  CAPRIModel.compare sums them to CAPRI's total change. The market's components are changes against the calibration
+  point (CAPRI's levels add base values set by convention; to be decided). CAPRI's 2030 reference welfare levels
+  stored as a source (capri_res/ref2030_welfare.csv, from scen_ref_2030); its land accounts are SUPREMA's (rents
+  apart from the farms' profit), the next step. Tests: test_welfare.py.
 - **Docs**: DATA_DICTIONARY's core tables on the 221 units; README (NUTS 2024 reporting in place; nitrogen instruments);
   KNOWN_ISSUES K79 diagnosis, K86, K87.
 - **Reference runs.** r163 (the evening entry's Hessian change and the K82 ammonia rebuild, before this entry's
