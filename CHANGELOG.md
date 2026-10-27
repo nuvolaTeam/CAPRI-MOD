@@ -59,6 +59,9 @@ Full provenance for every entry is in `capri_data/DATA_SOURCING_REGISTRY.json`.
   and carries on with the solver's last point; so does the model, recorded in nlp_fallback with the note that CAPRI's
   Green Deal runs have the land market on. Only runs without the land market are concerned (the reference runs meet
   every floor). `landscape_shortfall` removed with the fit; the landscape test runs in 16 s instead of 80.
+- **Hessian cache Parquet only**: the 205 market supply Hessians cached as CSV were converted to Parquet (each read to
+  the last digit and checked equal after the conversion) and the CSV reader removed. Caches are Parquet, the pipeline
+  store Delta, model inputs CSV, as decided on 27 October.
 - **Results on current NUTS (task 237)**: `capri_mod/nuts_reporting.to_nuts2024` maps unit results to the NUTS-2024
   regions (`capri_data/shared/capri_units_nuts2024.csv`, `tools/build/build_nuts2024_reporting.py`): unit -> NUTS 2016
   with CAPRI's correspondence and its splits and merges, then Eurostat's 2016-2021 and 2021-2024 changes (Croatia,

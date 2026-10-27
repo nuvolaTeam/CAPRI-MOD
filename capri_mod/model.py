@@ -1404,15 +1404,11 @@ class CAPRIModel:
                       if getattr(self, "_hessian_at_scenario", False) else ""))
         key = hashlib.sha1(key_src.encode()).hexdigest()[:16]
         cdir = _P(__file__).resolve().parents[1] / ".cache" / "market_supply_hessian"
-        # Parquet (binary doubles, exact by construction); a Hessian cached earlier as CSV is read to the last digit
-        # (pandas' default float parser is off by an ulp in most values; 1e-12 differences in the Hessian grew to 1e-4
-        # in the results and an outer iteration more or less: K82)
+        # Parquet (binary doubles, exact by construction). The Hessians cached as CSV before 27 October 2026 were
+        # converted (read to the last digit, K82, and checked equal) and are no longer read
         cfile = cdir / f"{key}.parquet"
-        _cfile_csv = cdir / f"{key}.csv"
-        if not cfile.exists() and _cfile_csv.exists():
-            cfile = _cfile_csv
         if cfile.exists():
-            t = pd.read_parquet(cfile) if cfile.suffix == ".parquet" else read_csv(cfile)
+            t = pd.read_parquet(cfile)
             ms_h = {ms: g.pivot(index="x", columns="y", values="dq").fillna(0.0) for ms, g in t.groupby("ms")}
             eu, sup, blocks = self._split_hessian(ms_h)
             self.market_supply_hessian_info = {"source": "cache", "file": str(cfile), "products": len(eu.columns)}
