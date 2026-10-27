@@ -4,7 +4,7 @@
 CAPRI model** (Common Agricultural Policy Regionalised Impact).
 
 CAPRI-mod reproduces CAPRI's regional agricultural supply, market, policy,
-environmental, feed and biofuel behaviour across **248 NUTS-2 regions (EU27 +
+environmental, feed and biofuel behaviour across **CAPRI's 221 regional units (EU27 +
 Norway)**, **46 activities** (34 crops, 12 livestock) and **58 market
 commodities**. Every input is traceable to a source, and each module's output
 has been compared with CAPRI's own data or scenario results; §8 says which
@@ -137,9 +137,9 @@ This is a research tool for anyone working on EU agricultural economics — not 
 people with access to CAPRI. Two things follow.
 
 **You do not need a CAPRI installation to run it.** The calibrated base-year data
-ships with the repository: 248 NUTS-2 regions, 46 activities, market data for 29
+ships with the repository: CAPRI's 221 regional units, 46 activities, market data for 29
 trade regions. `pip install -r requirements.txt` and a two-region baseline runs in a
-few minutes; a full 248-region Farm-to-Fork 2030 run takes about 50 minutes on 2 cores
+few minutes; a full EU Farm-to-Fork 2030 run takes about 50 minutes on 2 cores
 (§1, At a glance). No GAMS licence, no proprietary solver.
 
 **You do need one to re-derive the validation.** Every comparison in §8 was made
@@ -167,7 +167,7 @@ files record how they map to this model's names.
 
 | | |
 |---|---|
-| Regions | 248 NUTS-2 (EU27 + Norway) |
+| Regions | CAPRI's 221 regional units (EU27 215, Norway 6), CAPRI's 8-character codes |
 | Activities | 46 (34 crops, 12 livestock) |
 | Market commodities | 58 |
 | Base year | 2017 (parameterised); scenarios usually solved in 2030 |
@@ -321,7 +321,7 @@ below its expected coverage, so a silent-drop regression cannot pass unnoticed.
 
 ### 2.5 Transparency and speed
 
-The economic core is about 29,000 lines of readable Python. A full 248-region
+The economic core is about 29,000 lines of readable Python. A full EU
 Farm-to-Fork 2030 run takes about 50 minutes on 2 cores (plus about an hour once per
 new baseline for the market supply Hessian), with no GAMS licence, no proprietary
 solver, and every intermediate quantity inspectable.
@@ -534,7 +534,7 @@ CAPRI-mod is six focused, independently testable modules coordinated by
      │        ▼                                            │
      │   ┌──────────┐   supply quantities   ┌──────────┐   │
      │   │  SUPPLY  │ ────────────────────▶ │  MARKET  │   │
-     │   │ 248 NLP  │                       │ Armington│   │
+     │   │ 221 NLP  │                       │ Armington│   │
      │   │ regions: │                       │ 30 regns,│   │
      │   │ feed,    │                       │ dairy,   │   │
      │   │ fert.,   │                       │ biofuel, │   │
@@ -588,7 +588,7 @@ equation, the source file and equation name are cited in the code comments and i
 
 
 **Supply — Positive Mathematical Programming.** The core of the model. Each of
-the 248 regions solves its own constrained non-linear program over 46 activities,
+CAPRI's 221 regional units solves its own constrained non-linear program over 46 activities,
 written in CAPRI's equations (docs/NLP_PORT_DESIGN.md).
 A quadratic cost term **exactly reproduces the baseline's activity levels**; by
 default it is CAPRI's own 2030 PMP term for crops, animals, feed and land
@@ -700,8 +700,8 @@ the **same method and structure** as CAPRI, not simplifications of it:
   `req_or_man_fnc.gms` — ported directly.
 - **Environmental coefficients.** CAPRI's `MANN` manure-nitrogen coefficients
   and IPCC emission factors.
-- **Regional resolution.** EU27 + Norway in 248 NUTS-2016 regions, of which 235 have agriculture. This is not yet
-  CAPRI's own regional detail (221 regional units for EU27 + Norway in CAPRI's 2030 runs); see §10.4.
+- **Regional resolution.** CAPRI's own regional units: 221 for EU27 + Norway, under CAPRI's codes (since 27 October
+  2026; before, 248 NUTS-2016 regions); see §10.4.
 
 The differences from CAPRI are recorded, not hidden. The defaults that are not CAPRI's are listed in
 `docs/DEPARTURES_FROM_CAPRI.md` and summarised in [§10](#10-differences-from-capri):
@@ -1342,7 +1342,7 @@ optimisation and equilibrium equations. Machine learning is considered only for 
 
 Three kinds of difference, kept apart because they call for different readings:
 
-- **Scope and additions:** the base-year mode and the projection layer (10.1-10.2), the 248 regions of EU27 + Norway
+- **Scope and additions:** the base-year mode and the projection layer (10.1-10.2), CAPRI's 221 regional units of EU27 + Norway
   (10.4). How CAPRI's mitigation options and emission tax sit inside the supply models, with the simplifications
   registered for them, is in 10.2b.
 - **Corrections of CAPRI's code**, where its effect contradicts CAPRI's own data or equations; each has a switch back to
@@ -1489,21 +1489,21 @@ their own raw milk prices through the dairy block. Earlier versions (before the
 bilateral market) treated the EU as one Armington bloc against the rest of the world,
 with an Armington premium on the world price.
 
-### 10.4 248 regions, EU27 + Norway
+### 10.4 CAPRI's regional units, EU27 + Norway
 
-The model has 248 regions keyed by NUTS-2016 codes. CAPRI's 2030 runs solve 221 regional units for EU27 + Norway
-(215 + 6; CAPRI sets.gms SRNUTS2), plus the UK, Turkey and the Western Balkans (29), which the model does not cover
-yet. The two sets differ:
-- 13 of the model's regions are empty: DE30, DE50, DE60, AT13, BE10, ES63 and ES64 are CAPRI's regions without
-  agriculture (urbanNUTS; capreg/cons_levls.gms fixes their UAA at 0); PL31-34 and HR05-06 were emptied by the base
-  data builder (build_capri_base.py) as duplicates of other codes. They are solved as empty problems.
-- CAPRI keeps Denmark, Estonia, Lithuania, Latvia, Slovenia, Cyprus, Malta and Croatia as one unit each; the model
-  splits some of them (Denmark into five regions, Lithuania and Slovenia into two, Croatia into four rows of which two are
-  empty) and shares one
-  CAPRI unit between several NUTS-2016 regions elsewhere (e.g. DED2/DED4/DED5, ITH1/ITH2, FI1B/FI1C, IE04-06), with
-  the splits made on proxies such as cattle shares (shared/region_capri_map.csv).
-The move to CAPRI's own regional units is planned (it removes the empty regions and the proxy splits). The earlier
-statement here ("288 NUTS-2 units; within EU27 + Norway the granularity matches") was not right.
+Since 27 October 2026 the model's regions are CAPRI's regional units, the units CAPRI solves one supply model for
+(RU(SRNUTS2) $ MAP_RR, capmod/define_regional_sets.gms l. 230): 221 for EU27 + Norway (215 + 6), under CAPRI's
+8-character codes (DE110000, FR240000, BL400000, DK000000; capri_data/shared/regional_units.csv,
+tools/build/build_regional_units.py). Every CAPRI file is read without a translation, and every region carries its own
+CAPRI data. The units follow CAPRI's own NUTS vintages (France's 22 regions, Italy's numeric codes, Poland's 16, Ireland's
+two); Denmark, Estonia, Lithuania, Latvia, Slovenia, Cyprus, Malta and Croatia are one unit each, as in CAPRI. The UK,
+Turkey and the Western Balkans (29 units in CAPRI's 2030 runs) are not covered yet.
+
+Until then the model had 248 NUTS-2016 regions, 13 of them empty, mapped to CAPRI's units through crosswalks, with
+NUTS splits made on proxies (cattle shares, Ireland's 2016 boundary shares, Norway's pooled regions); the rebuild and
+every difference it made are in docs/design/REGIONAL_UNITS_REBUILD_LOG.md. Results on current NUTS regions are a
+reporting step (CAPRI's units mapped with the NUTS correspondence and area weights, planned), not regional detail of
+their own.
 
 ### 10.5 Inputs not yet traced to a CAPRI source
 
