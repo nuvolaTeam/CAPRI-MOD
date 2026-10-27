@@ -52,7 +52,7 @@ def main() -> None:
     for codes, regs in groups.values():
         regs = [r for r in regs if r in herds.index]
         for an in animals:
-            L = sum(lev.get((c, an), 0.0) for c in codes if not c.endswith("000000"))
+            L = sum(lev.get((c, an), 0.0) for c in codes if mr.regional_row(c))
             H = float(herds.loc[regs, an].fillna(0.0).sum())
             if L > 0 and H > 0:
                 for r in regs:

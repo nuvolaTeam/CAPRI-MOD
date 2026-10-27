@@ -115,7 +115,6 @@ CAPRI_TO_MODEL = {
 }
 
 #: CAPRI country code -> NUTS country prefixes used by this model.
-COUNTRY_PREFIXES = {"BL": ("BE", "LU"), "IR": ("IE",)}
 
 # CAPRI region codes are 8 characters and MAY contain letters after the
 # country code (DEA10000, FRB00000). A first version accepted digits only and
@@ -230,7 +229,7 @@ def build(dump_dir: Path, value_item: str = None) -> pd.DataFrame:
     grouped = defaultdict(float)           # (group, act) -> kt
     national = defaultdict(float)          # (capri country, act) -> kt
     for (code8, act), kt in totals.items():
-        if code8.endswith("000000"):
+        if code8.endswith("000000") and not _mr.is_unit(code8):   # a member state's total (DK000000 is a unit)
             national[(code8[:2], act)] += kt
             continue
         # Only codes in a group with model regions are used. NUTS-1 aggregates
@@ -258,8 +257,7 @@ def build(dump_dir: Path, value_item: str = None) -> pd.DataFrame:
     for (cc, act), nat_kt in national.items():
         if act not in herds.columns:
             continue
-        prefixes = COUNTRY_PREFIXES.get(cc, (cc,))
-        regs = [r for r in model_regions if r.startswith(prefixes)]
+        regs = [r for r in model_regions if r.startswith(cc)]        # CAPRI's codes: BL, IR as CAPRI has them
         placed = sum(regional.get((r, act), 0.0) for r in regs)
         rest = [r for r in regs
                 if pd.isna(coef.at[r, act]) and float(herds.at[r, act]) > 0]

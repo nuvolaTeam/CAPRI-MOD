@@ -94,15 +94,15 @@ def per_head_tables(dump: Path):
         for act in ("SHGM", "SHGF"):
             col = pd.Series(float("nan"), index=t.index)
             for codes, regs in groups.values():
-                x = weighted([c for c in codes if not c.endswith("000000")], act, item)
+                x = weighted([c for c in codes if mr.regional_row(c)], act, item)
                 if x is not None:
                     for r in regs:
                         if r in col.index:
-                            col[r] = round(x, 4)
+                            col[r] = x
             for r in col.index[col.isna()]:
                 x = weighted([mr.national_code(r)], act, item)
                 if x is not None:
-                    col[r] = round(x, 4)
+                    col[r] = x
             t[act] = col
         if "SHGP" in t.columns:
             i = list(t.columns).index("SHGP")
@@ -116,7 +116,7 @@ def per_head_tables(dump: Path):
         w = herds[act].reindex(cp.index).fillna(0.0)
         x = cp[act].where(cp[act] > 0)
         ok = x.notna() & (w > 0)
-        pp.loc[act, pp.columns[0]] = round(float((x[ok] * w[ok]).sum() / w[ok].sum()), 4)
+        pp.loc[act, pp.columns[0]] = float((x[ok] * w[ok]).sum() / w[ok].sum())
     pp = pp.drop(index=["SHGP"], errors="ignore")
     pp.to_csv(ROOT / "capri_data" / "2017" / "market" / "producer_prices.csv")
     print("producer_prices.csv:", pp.loc[["SHGM", "SHGF"]].iloc[:, 0].to_dict())
