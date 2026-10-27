@@ -66,8 +66,8 @@ def main():
         kg = im * 1e6 / (crop * 1000.0) if crop > 0 else 0.0           # kt -> kg over 1000 ha -> kg/ha
         for r in mregs:
             out[r] = (sh, kg, "+".join(sorted(codes)))
-    rows = [dict(region=r, export_share=round(out.get(r, (0.0, 0.0, ""))[0], 6),
-                 import_kg_n_per_ha=round(out.get(r, (0.0, 0.0, ""))[1], 4),
+    rows = [dict(region=r, export_share=out.get(r, (0.0, 0.0, ""))[0],
+                 import_kg_n_per_ha=out.get(r, (0.0, 0.0, ""))[1],
                  source="CAPRI 2030 reference endotech_all_ini MTRADE/EXCRET " + out.get(r, (0, 0, "none"))[2])
             for r in regs]
     old = _read_csv(DEST).set_index("region") if DEST.exists() else None
@@ -78,7 +78,7 @@ def main():
         dif = j[(abs(j.export_share - j.export_share_old) > 0.01) | (abs(j.import_kg_n_per_ha - j.import_kg_n_per_ha_old) > 2)]
         print(f"wrote {DEST.relative_to(ROOT)}: {len(new)} regions; changed by > 1 point / 2 kg: {len(dif)}")
         print(dif[["export_share", "export_share_old", "import_kg_n_per_ha", "import_kg_n_per_ha_old"]].round(3).to_string())
-    print(f"CAPRI EU net trade sum (regional rows): exports {sum(max(0, x) for (c, i), x in v.items() if i == 'MTRADE' and not c.endswith('000000')):.0f} kt")
+    print(f"CAPRI EU net trade sum (regional rows): exports {sum(max(0, x) for (c, i), x in v.items() if i == 'MTRADE' and mr.regional_row(c)):.0f} kt")
 
 
 if __name__ == "__main__":

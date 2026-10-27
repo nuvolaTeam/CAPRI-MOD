@@ -114,7 +114,7 @@ def main() -> None:
         for a in sorted(set(nat) | set(own)):
             s = own.get(a, nat.get(a))
             kind = "regional" if a in own else "national"
-            rows.append(dict(region=reg, animal=a, loss_share=round(s, 10), source=kind))
+            rows.append(dict(region=reg, animal=a, loss_share=s, source=kind))
             src[kind] += 1
     dest = _ROOT / "capri_data" / "2017" / "environment" / "manure_housing_losses_2030.csv"
     pd.DataFrame(rows).to_csv(dest, index=False)
