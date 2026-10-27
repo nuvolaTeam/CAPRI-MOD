@@ -5,7 +5,7 @@ form, solved with IPOPT). The tables give one line per issue; the details follow
 was found, where it acts, whether the tagged release 9t (`capri-mod-9t.zip`) carries it, and its status. 9t.1 is 9t
 with every fix below except K5, which needs the prototype's model change.
 
-## Open (20)
+## Open (19)
 
 | # | Issue | Status |
 |---|---|---|
@@ -28,9 +28,8 @@ with every fix below except K5, which needs the prototype's model change.
 | [K80](#k80) | The same run repeated from a warm start differs by up to 3e-5 relative in small cereal activities | open |
 | [K83](#k83) | A one-region Farm-to-Fork run's market diverges in its second step | open |
 | [K86](#k86) | Ammonia housing and storage options without their farm-size cost curves in Denmark, Lithuania and Croatia | open |
-| [K87](#k87) | Builder outputs that do not follow from their builders (reproduction audit) | open |
 
-## Resolved (67)
+## Resolved (68)
 
 | # | Issue | Status |
 |---|---|---|
@@ -101,6 +100,7 @@ with every fix below except K5, which needs the prototype's model change.
 | [K82](#k82) | The market supply Hessian read from its cache differed from the measured one by an ulp | fixed |
 | [K84](#k84) | The landscape floor's fit ends on its last step | fixed (capri's form) |
 | [K85](#k85) | Input costs of animals a region does not have were NaN in its net revenues | fixed |
+| [K87](#k87) | Builder outputs that do not follow from their builders (reproduction audit) | fixed |
 
 ## Details
 
@@ -823,7 +823,8 @@ CAPRI's stop rule, recorded every iteration since r135, flags rows that move by 
   their price (sweep of +-0.6% in 0.05-point steps at base settings: largest step 0.01%), so not a kink of the regional
   model; cause not found (the region-solve warning added since r161 will show a failed solve if it recurs). CAPRI's stop
   rule made the default (the project lead's decision, 27 October 2026), with the model's inner balances settled as well;
-  the next reference runs measure the iterations it needs
+  the next reference runs measure the iterations it needs. r163 (the same scenario and rule as r161, the Hessian skip
+  and the K82 ammonia rebuild): the French jumps did not recur (largest change at iteration 4: 14.7%, r161 66%)
 
 <a id="k80"></a>
 ### K80: The same run repeated from a warm start differs by up to 3e-5 relative in small cereal activities (26 October 2026)
@@ -947,5 +948,11 @@ committed files. 117 invocations; most reproduce their files exactly. Found:
 - **Effect:** crop_cost_shares: the fertiliser cost of crops without CAPRI's regional coefficient; the rest no model
   effect beyond the last digits
 - **In 9t:** –
-- **Status:** **open**: rebuild with the builders (one batch, one reference run), the two builder fixes, the chain check
+- **Status:** **fixed** (27 October 2026, branch data-fixes, with the reference runs of that push): the two builder
+  fixes (crop cost shares over every unit; the two stray outputs dropped), every listed file rebuilt; the files
+  downstream of the full-precision cost savings rebuilt too (genetics, low-N feed and supplement effects: dsav up to
+  2e-4 relative, a difference of two calibration runs' savings; histosols 2e-6). Re-audit: every rebuilt builder
+  reproduces its files exactly; the chain extract_all_from_data2 -> build_capri_base -> build_crop_economics_2017 ->
+  build_shg_split -> build_animal_yields -> build_eu_producer_prices reproduces yields.csv, variable_costs.csv and
+  capreg_producer_prices.csv. Not re-checked: the recipe PMP files (2e-9, used only with pmp_source = recipe)
 
