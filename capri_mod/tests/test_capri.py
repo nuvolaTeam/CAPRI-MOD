@@ -36,9 +36,21 @@ def data():
 
 
 @pytest.fixture(scope="session")
-def model():
+def _fresh_model():
     from capri_mod.model import CAPRIModel
     return CAPRIModel(data_dir=str(DATA_DIR), verbose=False)
+
+
+@pytest.fixture
+def model(_fresh_model):
+    """A model as just built, for every test (a copy, 0.7 s; building one takes 12 s). Until 27 October 2026 the tests
+    shared one model, so each started from the state the tests before it left: warm starts, calibrations taken at
+    another test's point, the market's state. A test's results then depended on the order (a no-op check failed by
+    1.03e-5 in one order), and so did the market supply Hessian's cache key (the baseline solution), so each run of the
+    suite measured its Hessians again (the CAP-support test: 429 s measuring, 18 s from the cache). The regional models
+    are built in each test; IPOPT's compiled solvers are shared (capri_regional_nlp._SOLVERS, exact)."""
+    import copy
+    return copy.deepcopy(_fresh_model)
 
 
 def test_data_loads(data):
@@ -1620,17 +1632,22 @@ def test_organic_area_target_binds_and_is_a_noop_at_zero(model):
                 out[a] = out.get(a, 0.0) + float(val)
         return out
 
+    def cold():                                          # the same start for both runs (K80; _cold below)
+        for mo in model.supply_module._models.values():
+            _cold(mo)
+
+    cold()
     base = totals(model.run(scenario="BASELINE", regions=regions,
                             max_outer_iter=1))
+    cold()
     zero = totals(model.run(custom_scenario=PolicyScenario(
         name="t", organic_area_target=0.0), regions=regions, max_outer_iter=1))
     tgt = totals(model.run(custom_scenario=PolicyScenario(
         name="t", organic_area_target=0.25), regions=regions, max_outer_iter=1))
 
-    # a zero target must be a true no-op. Tolerance 1e-5: the CAPRI columns calibrated from a region's first base duals
-    # (grassland, dairy, cattle, breeding) enter from the next solve on, and with the crop-need row in every EU solve
-    # (Sprint 9k, often tight at base) the interior-point duals leave ~1e-6 relative noise between two runs of the
-    # same scenario when the fixture's first solve of a region came from another test
+    # a zero target must be a true no-op. Both runs start cold: from the warm start another test left, two solves of
+    # the same problem end within IPOPT's tolerance of each other (1e-5 relative was exceeded by OATS, 1.03e-5, when the
+    # tests ran longest-first on 27 October 2026). Tolerance 1e-5 as before
     for a, v in base.items():
         if v > 1.0:
             assert abs(zero.get(a, 0.0) - v) / v < 1e-5, (
@@ -2400,7 +2417,9 @@ def test_landscape_floor_is_fitted_where_land_cannot_hold_it(data, monkeypatch):
     from capri_mod.supply.supply_module import SupplyModule
     from capri_mod.utils.utils import calibrate_supply_elasticities
 
-    region = next((r for r in ("FRM0", "EL65", "ITH1") if r in data["areas"].index), None)
+    # EL65 first: the floor is fitted there in 60 s (ITH1 106 s, FRM0 ~580 s: IPOPT to its iteration limit on each step
+    # of the fit; KNOWN_ISSUES K84)
+    region = next((r for r in ("EL65", "ITH1", "FRM0") if r in data["areas"].index), None)
     if region is None:
         return
     _set(monkeypatch, STANDALONE_PRE_SETTINGS)          # the land market off: the floor cannot be met by more land
@@ -3493,12 +3512,15 @@ def test_winter_cover_is_chosen_in_the_nlp_form(model):
     build_winter_cover_option.py): the baseline keeps the base share (calibrated first-order point), the Farm-to-Fork
     requirement is its lower bound, and the accounts take the chosen share (supply result's cover_crops)."""
     from capri_mod.policy.greendeal import farm_to_fork_scenario
+    # one supply-market iteration: the choice is the supply model's. With two, the market of this one-region run
+    # (DE11 alone as the EU) diverged in the second Farm-to-Fork step, 2 x 100 market steps, ~550 of the test's 590 s
+    # (KNOWN_ISSUES K83)
     regs = ["DE11"]
-    b = model.run(scenario="BASELINE", regions=regs, max_outer_iter=2)
+    b = model.run(scenario="BASELINE", regions=regs, max_outer_iter=1)
     mo = model.supply_module._models["DE11"]
     cs = mo._cover_solved
     assert cs and cs["endogenous"] and abs(cs["share"] - cs["base"] / cs["uaa"]) < 2e-3
-    s = model.run(custom_scenario=farm_to_fork_scenario(), regions=regs, max_outer_iter=2)
+    s = model.run(custom_scenario=farm_to_fork_scenario(), regions=regs, max_outer_iter=1)
     cs = model.supply_module._models["DE11"]._cover_solved
     assert cs["lb_share"] > cs["base"] / cs["uaa"] + 0.01          # the requirement raises the floor
     assert cs["share"] >= cs["lb_share"] - 1e-6 and cs["share"] <= cs["max_share"] + 1e-6

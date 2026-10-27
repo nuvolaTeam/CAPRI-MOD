@@ -1494,7 +1494,11 @@ class CAPRIModel:
         self._ls_by_country = self._livestock_products_by_country(supply_results)
         t = pd.DataFrame(rows, columns=["ms", "x", "y", "dq"])
         cdir.mkdir(parents=True, exist_ok=True)
-        t.to_csv(cfile, index=False)
+        # written whole, then renamed: another process (parallel test workers, two runs) reads a complete file or none
+        import os as _os
+        _tmp = cdir / f"{key}.{_os.getpid()}.tmp"
+        t.to_csv(_tmp, index=False)
+        _os.replace(_tmp, cfile)
         ms_h = {ms: g.pivot(index="x", columns="y", values="dq").fillna(0.0) for ms, g in t.groupby("ms")}
         eu, sup, blocks = self._split_hessian(ms_h)
         self.market_supply_hessian_info = {"source": "computed", "file": str(cfile), "products": len(cols_y),
