@@ -30,7 +30,7 @@ from capri_mod.data.definitions import (
     CROPS, ANIMALS, ALL_ACTIVITIES, NUTRIENTS, GHG_TYPES,
 )
 from capri_mod.data.definitions import MS_CODE, capri_ms, IdentityMap
-from capri_mod.csvio import read_csv
+from capri_mod.tableio import read_input
 
 
 # ---------------------------------------------------------------------------
@@ -369,7 +369,7 @@ class EnvironmentalModule:
         if g is None:
             from pathlib import Path as _P
             f = _P(__file__).resolve().parents[2] / "capri_data" / "2017" / "environment" / "capri_gnb_components_2030.csv"
-            g = read_csv(f).pivot_table(index="capri_region", columns="item", values="kg_n_per_ha") if f.exists() else pd.DataFrame()
+            g = read_input(f).pivot_table(index="capri_region", columns="item", values="kg_n_per_ha") if f.exists() else pd.DataFrame()
             type(self)._GNB_TOT = g
         self._capri_crop_n(region)                         # builds the region map
         r8 = getattr(type(self), "_CROP_N_MAP", {}).get(region)
@@ -461,8 +461,8 @@ class EnvironmentalModule:
             g = root / "2017" / "environment" / "capri_gnb_components_2030.csv"
             cls._CROP_N = {}
             if f.exists() and g.exists():
-                t = read_csv(f)
-                tot = read_csv(g).pivot_table(index="capri_region", columns="item", values="kg_n_per_ha")
+                t = read_input(f)
+                tot = read_input(g).pivot_table(index="capri_region", columns="item", values="kg_n_per_ha")
                 # the model's regions are CAPRI's units: each its own CAPRI region (a dict that returns the key)
                 cls._CROP_N_MAP = IdentityMap()
                 for r8, g8 in t.groupby("capri_region"):
@@ -635,7 +635,7 @@ class EnvironmentalModule:
             g = getattr(type(self), "_GNB_TOT", None)
             if g is None:
                 f = _P(__file__).resolve().parents[2] / "capri_data" / "2017" / "environment" / "capri_gnb_components_2030.csv"
-                g = read_csv(f).pivot_table(index="capri_region", columns="item", values="kg_n_per_ha")
+                g = read_input(f).pivot_table(index="capri_region", columns="item", values="kg_n_per_ha")
                 type(self)._GNB_TOT = g
             to8 = getattr(type(self), "_CROP_N_MAP", {})
             r8 = to8.get(region)
@@ -1073,7 +1073,7 @@ class EnvironmentalModule:
         if cls._FERT_SIDE is None:
             from pathlib import Path as _P
             f = _P(__file__).resolve().parents[2] / "capri_data" / "2017" / "abatement" / "fert_side_effects.csv"
-            tab = read_csv(f) if f.exists() else pd.DataFrame(columns=["region", "technology", "item", "value"])
+            tab = read_input(f) if f.exists() else pd.DataFrame(columns=["region", "technology", "item", "value"])
             cls._FERT_SIDE = {(r.region, r.technology, r.item): float(r.value) for r in tab.itertuples()}
         tab = cls._FERT_SIDE
         lit = {i: tab.get((region, "NITR_INH", i)) for i in ("N2OSYN", "NH3SYN")}
@@ -1092,7 +1092,7 @@ class EnvironmentalModule:
             from pathlib import Path as _P
             f = _P(__file__).resolve().parents[2] / "capri_data" / "2017" / "environment" / "manure_n2o_factors.csv"
             tab = ({(r.region, r.animal): (float(r.f_man), float(r.f_app), float(r.f_gra), float(r.f_lea))
-                    for r in read_csv(f).itertuples()} if f.exists() else {})
+                    for r in read_input(f).itertuples()} if f.exists() else {})
             self._mn2o_cache = tab
         return tab.get((region, animal))
 
@@ -1105,7 +1105,7 @@ class EnvironmentalModule:
             d = _P(__file__).resolve().parents[2] / "capri_data" / "2017"
             if "_mn2o_tech_tab" not in self.__dict__:
                 f = d / "environment" / "manure_n2o_tech.csv"
-                self._mn2o_tech_tab = read_csv(f) if f.exists() else pd.DataFrame(
+                self._mn2o_tech_tab = read_input(f) if f.exists() else pd.DataFrame(
                     columns=["region", "animal", "technology", "r_hou", "r_app"])
                 from capri_mod.supply import ammonia_techs as _at
                 self._amm_tm = _at.load(d / "abatement" / "ammonia" / "ammonia_tech_model.csv")
@@ -1336,7 +1336,7 @@ class EnvironmentalModule:
         if c is None:
             from pathlib import Path as _P
             f = _P(__file__).resolve().parents[2] / "capri_data" / "sources" / "environment" / "npk_dataout_2030.csv.xz"
-            s = read_csv(f, keep_default_na=False)
+            s = read_input(f, keep_default_na=False)
             s = s[(s.item == "") & (s.col == "PHOF") & (s.row.isin(["EXCRET", "MTRADE"]))]
             v = {(t.region, t.row): float(t.value) for t in s.itertuples(index=False)}
             c = {r: max(0.0, 1.0 - v.get((r, "MTRADE"), 0.0) / x) for (r, row), x in v.items() if row == "EXCRET" and x > 0}

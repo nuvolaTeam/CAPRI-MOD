@@ -18,7 +18,7 @@ from pathlib import Path
 from typing import Optional
 
 import pandas as pd
-from capri_mod.csvio import read_csv
+from capri_mod.tableio import read_input
 
 REPO_DATA = Path(__file__).resolve().parents[2] / "capri_data"
 
@@ -89,7 +89,7 @@ class MarketInputs:
             if required:
                 self._require(p, name)
             return None
-        return read_csv(p, **read_kw)
+        return read_input(p, **read_kw)
 
     def json(self, name: str, where: str = "market", required: bool = True):
         p = self.path(name, where)

@@ -21,7 +21,7 @@ import numpy as np
 import pandas as pd
 
 from capri_mod.data.definitions import capri_ms
-from capri_mod.csvio import read_csv
+from capri_mod.tableio import read_input
 
 NUTRIENTS = ("N", "P", "K")
 SOURCES = ("MINE", "EXCR", "CRES")
@@ -51,18 +51,18 @@ class NPKData:
     def __init__(self, data_dir: Optional[str] = None):
         root = Path(data_dir) if data_dir else Path(__file__).resolve().parents[2] / "capri_data"
         env = root / "2017" / "environment"
-        c = read_csv(env / "npk_crop_coefs_2030.csv")
+        c = read_input(env / "npk_crop_coefs_2030.csv")
         self.has_yield_shares = {"main_share", "straw_share"} <= set(c.columns)
         self.crop = {(r, n): d.set_index("model_crop") for (r, n), d in c.groupby(["capri_region", "nutrient"])}
-        g = read_csv(env / "npk_region_2030.csv")
+        g = read_input(env / "npk_region_2030.csv")
         self.reg = {(t.capri_region, t.nutrient): t for t in g.itertuples(index=False)}
-        p = read_csv(env / "fert_dist_priors_npk_2030.csv")
+        p = read_input(env / "fert_dist_priors_npk_2030.csv")
         self.pri = {(r, n): d.set_index("ngrp") for (r, n), d in p.groupby(["capri_region", "nutrient"])}
         self.man = {}
         for nut, f in (("P", "livestock_manure_p_coef.csv"), ("K", "livestock_manure_k_coef.csv")):
             if (env / f).exists():
-                self.man[nut] = read_csv(env / f, index_col=0)
-        gr = read_csv(env / "fert_dist_crop_groups_2030.csv")
+                self.man[nut] = read_input(env / f, index_col=0)
+        gr = read_input(env / "fert_dist_crop_groups_2030.csv")
         self.groups = {r: d for r, d in gr.groupby("capri_region")}
         w = gr.groupby(["model_crop", "ngrp"]).share.sum()
         tot = w.groupby(level=0).transform("sum")

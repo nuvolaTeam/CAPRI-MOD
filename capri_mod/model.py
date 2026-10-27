@@ -52,7 +52,7 @@ from capri_mod.scenarios.scenarios import get_scenario, list_scenarios
 from capri_mod.params import param, param_table
 from capri_mod.settings import setting, tri_state, current as _settings
 from capri_mod.data.definitions import MS_CODE, capri_ms, REGION_TO_COUNTRY
-from capri_mod.csvio import read_csv
+from capri_mod.tableio import read_input
 
 
 #: Nitrates Directive ceiling on organic N application (kg N per ha of UAA)
@@ -2123,7 +2123,7 @@ class CAPRIModel:
         if not supply_results:
             return None
         if getattr(self, "_capri_stop", None) is None:
-            blocks = read_csv(Path(getattr(self, "data_dir", None) or Path(__file__).resolve().parents[1] / "capri_data") / "shared" / "eu_market_blocks.csv")
+            blocks = read_input(Path(getattr(self, "data_dir", None) or Path(__file__).resolve().parents[1] / "capri_data") / "shared" / "eu_market_blocks.csv")
             aggs = {b: list(g["ms"]) for b, g in blocks.groupby("block")}
             self._capri_stop = CapriStopRule(aggs, yani_rows=(), no_abs_price_rows=())
         rule = self._capri_stop
@@ -2779,7 +2779,7 @@ class CAPRIModel:
             from capri_mod.data.loaders import resolve_data_file
             base = Path(getattr(self, "data_dir", None) or Path(__file__).resolve().parents[1] / "capri_data")
             f = resolve_data_file(base, "dairy_processing.csv")
-            dp = read_csv(f)
+            dp = read_input(f)
             net = (dp["q_kt"].fillna(0.0) - dp["proc_kt"].fillna(0.0))
             dp = dp.assign(net=net)
             raw = dp[dp["item"].isin(["COMI", "SGMI"])].groupby("ms")["q_kt"].sum()
@@ -2792,7 +2792,7 @@ class CAPRIModel:
             # output less processing per tonne of raw milk delivered (MILK), CAPRI 2030 reference
             fw = resolve_data_file(base, "dairy_world_processing.csv")
             if fw.exists():
-                wp_ = read_csv(fw)
+                wp_ = read_input(fw)
                 for ms in ("NO000000",):
                     g = wp_[wp_["rms"] == ms].set_index("item")
                     if "MILK" in g.index and float(g.at["MILK", "q_kt"]) > 0:
@@ -2813,7 +2813,7 @@ class CAPRIModel:
             from capri_mod.data.loaders import resolve_data_file
             base = Path(getattr(self, "data_dir", None) or Path(__file__).resolve().parents[1] / "capri_data")
             f = resolve_data_file(base, "processing_yields.csv")
-            py = read_csv(f)
+            py = read_input(f)
             tab = {(r["ms"], r["raw"]): float(r["yield"]) for _, r in py.iterrows()}
             self._proc_yield_cache = tab
         if raw == "PARI":

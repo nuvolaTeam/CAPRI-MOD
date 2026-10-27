@@ -20,14 +20,14 @@ from pathlib import Path
 
 import pandas as pd
 
-from capri_mod.csvio import read_csv
+from capri_mod.tableio import read_input
 
 _MAP = Path(__file__).resolve().parents[1] / "capri_data" / "shared" / "capri_units_nuts2024.csv"
 
 
 def load_mapping(path: str | Path | None = None) -> pd.DataFrame:
     """The unit -> NUTS-2024 table: capri_unit, nuts2024, group, uaa_ha, weight."""
-    return read_csv(path or _MAP)
+    return read_input(path or _MAP)
 
 
 def _groups(m: pd.DataFrame):
