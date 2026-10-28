@@ -47,6 +47,7 @@ BUILDERS = {
     "processing_nq_hessian.csv": "build_processing_nq.py",
     "processing_nq_base.csv": "build_processing_nq.py",
     "welfare_base_2030.csv": "build_welfare_base.py",
+    "eu_market_supply_nq.csv": "build_eu_market_supply_nq.py",
     "crushing_parameters.csv": "build_crushing_parameters.py",
     "supply_elas_region.csv": "build_supply_elas_nonEU.py",
     "eu_ms_balance_2030.csv": "build_eu_ms_balance.py",

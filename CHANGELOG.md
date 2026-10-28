@@ -75,6 +75,13 @@ Full provenance for every entry is in `capri_data/DATA_SOURCING_REGISTRY.json`.
   and protein = the products' less their processing) and the block's net supply, and the processors' profit in CAPRI's
   welfare report (ProfitProc). Test: at a 10% dearer cheese, less cheese processed, fat and protein balanced in every
   member state with dairy processing.
+- **EU supply of other vegetable oils and fish as CAPRI's ProdNQ_** (market audit, programme step D): per EU member
+  state CAPRI's own terms (p_hessNQSupp at the calibration point: other oils 58 terms with raw milk cross terms, the
+  three fish products 23-29), in price ratios (h x PPRI0 / INPE, INPE the 2030 price of the non-agricultural good,
+  1.2772, as CAPRI's market model sets it), summed per EU market region; the constant not recalibrated, as in CAPRI
+  for products no supply model produces. They reproduce CAPRI's p_elasSupp at the calibration point (France's other
+  oils 0.979). Before, an EU median elasticity against base. New input eu_market_supply_nq.csv
+  (tools/build/build_eu_market_supply_nq.py); tested.
 - **Found with M9**: the dairy products' use in the market is net of processing (the dairy blocks' net supply is
   production less processing), but the use split gave them CAPRI's processing share: 4.5% of the EU's cheese use
   (about 413 kt) was labelled processing and held fixed, outside the food response. Their split now has no

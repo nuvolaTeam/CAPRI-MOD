@@ -134,6 +134,7 @@ class SupplyMixin(MarketStateMixin):
         if region_ratio is None:
             fac = ratio.reindex(cols).to_numpy(dtype=float)[None, :] ** EV
             supply[cols] = np.maximum(supply[cols].to_numpy(dtype=float) * fac, 0.0)
+            self._eu_market_supply_nq(supply, cols, lambda reg_: ratio.reindex(cols).to_numpy(dtype=float))
         else:
             # in arrays (pandas arithmetic here was a sizeable share of each market evaluation; same values)
             rr = region_ratio.reindex(index=supply.index, columns=cols).to_numpy(dtype=float)
@@ -180,6 +181,7 @@ class SupplyMixin(MarketStateMixin):
                         fac[i_, j] = (rr[i_, j] / sv[j]) ** EV[i_, j]
             s_exo_sup = {reg: supply.loc[reg, cols].astype(float).copy() for reg in sup_cols}
             supply[cols] = np.maximum(supply[cols].to_numpy(dtype=float) * fac, 0.0)
+            self._eu_market_supply_nq(supply, cols, lambda reg_: rr[list(supply.index).index(reg_)])
             # CAPRI's market supply function for the supply models' products (arm/market_model.gms ProdNQ_, the
             # Hessian measured on the supply models at the baseline, model._market_supply_hessian): linear in the
             # prices, through the supply models' latest output at the prices they saw
@@ -455,6 +457,41 @@ class SupplyMixin(MarketStateMixin):
         self.ev.milk_dq_now = float(sum((float(res["ms_price_ratio"][m]["milk_delivered"]) - mr0[i]) * q0[i]
                                       for i, m in enumerate(mss)))
         return yq + mt["col"] @ dL
+
+    def _eu_market_supply_nq_params(self) -> dict:
+        """CAPRI's market supply functions of the EU products no supply model produces (EU_MARKET_SUPPLY: other
+        vegetable oils, the fish products; ProdNQ_, tools/build/build_eu_market_supply_nq.py), summed per EU market
+        region: {region: {(x, y): kt per unit change of y's price ratio}}."""
+        c = getattr(self, "_eu_msnq_cache", None)
+        if c is not None:
+            return c
+        out: dict = {}
+        for r in self._inp().csv("eu_market_supply_nq.csv").itertuples(index=False):
+            rg = (self.eu_region_of_ms(r.ms) if self.eu_blocks else "EU27") or "EU27"
+            d = out.setdefault(rg, {})
+            d[(r.x, r.y)] = d.get((r.x, r.y), 0.0) + float(r.h_ratio)
+        self._eu_msnq_cache = out
+        return out
+
+    def _eu_market_supply_nq(self, supply, cols, ratio_of):
+        """The EU supply of EU_MARKET_SUPPLY as CAPRI's ProdNQ_ (audit, programme step D): per EU market region, base
+        supply + sum_y h_xy x (y's price ratio - 1), h in kt per unit of price ratio (CAPRI's p_hessNQSupp x PPRI0 /
+        INPE); the constant is not recalibrated (no supply model produces these products). It replaces the EU median
+        elasticity against base (p_elasSupp) these products took before 28 October 2026."""
+        P = self._eu_market_supply_nq_params()
+        ci = {c: j for j, c in enumerate(cols)}
+        for rg, terms in P.items():
+            if rg not in supply.index:
+                continue
+            r_ = ratio_of(rg)
+            for x in self.EU_MARKET_SUPPLY:
+                if x not in ci or x not in supply.columns:
+                    continue
+                q0 = float(self.par.base_production.at[rg, x]) if x in self.par.base_production.columns else 0.0
+                if q0 <= 0:
+                    continue
+                dq = sum(h * (float(r_[ci[y]]) - 1.0) for (x_, y), h in terms.items() if x_ == x and y in ci)
+                supply.at[rg, x] = max(q0 + dq, 0.0)
 
     def _nq_price_change(self, dP, cols):
         """The price changes the market's supply functions respond to (relative to the prices the supply models saw),

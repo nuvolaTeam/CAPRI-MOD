@@ -236,3 +236,28 @@ def test_dairy_processing_follows_capri_procnq_and_balances_fat_and_protein():
         if abs(dproc).sum() > 0:
             n_checked += 1
     assert n_checked >= 5                                                       # member states with dairy processing
+
+
+def test_eu_fish_and_other_oils_supply_as_capri_prodnq():
+    """Programme step D: the EU supply of other vegetable oils and the fish products is CAPRI's ProdNQ_ per member
+    state (p_hessNQSupp x PPRI0 / INPE, summed per EU market region), linear in the price ratios against base; at
+    the calibration prices it gives CAPRI's own p_elasSupp (about 0.98 for France's other oils)."""
+    import numpy as np
+    import pandas as pd
+    from capri_mod.csvio import read_csv
+    from capri_mod.model import CAPRIModel
+    m = CAPRIModel(data_dir="capri_data", verbose=False, regions=["DE110000"])
+    mm = m.market_module
+    P = mm._eu_market_supply_nq_params()
+    assert set(x for (x, _) in P["EU27"]) == set(mm.EU_MARKET_SUPPLY)
+    cols = list(mm.commodities)
+    sup = mm.par.base_production.reindex(columns=cols).fillna(0.0).copy()
+    r = np.ones(len(cols)); r[cols.index("FFIS")] = 1.10
+    mm._eu_market_supply_nq(sup, cols, lambda rg: r)
+    q0 = float(mm.par.base_production.at["EU27", "FFIS"])
+    own = sum(h for (x, y), h in P["EU27"].items() if x == "FFIS" and y == "FFIS")
+    assert abs(float(sup.at["EU27", "FFIS"]) - (q0 + own * 0.10)) < 1e-9
+    assert float(sup.at["EU27", "OTHO"]) == float(mm.par.base_production.at["EU27", "OTHO"])    # its prices unchanged
+    t = read_csv("capri_data/2017/market/eu_market_supply_nq.csv")
+    fr = t[(t.ms == "FR000000") & (t.x == "OTHO") & (t.y == "OTHO")].iloc[0]
+    assert abs(fr.h * fr.ppri_y / fr.inpe - fr.h_ratio) < 1e-9 and abs(fr.inpe - 1.019 ** 13) < 1e-3

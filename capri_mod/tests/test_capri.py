@@ -2947,9 +2947,9 @@ def test_textile_crops_are_one_activity_and_market(model, data):
 
 def test_palm_and_other_vegetable_oils_are_markets(model):
     """Palm oil (PLMO) and other vegetable oils (OTHO) are CAPRI market products (arm/arm_sets.gms CROPS_DEF) without a
-    supply-model activity: the EU supplies other vegetable oils through CAPRI's market supply function, which responds
-    to the EU price against base (not against the price the supply models last saw); palm oil is a biodiesel feedstock
-    priced by its market."""
+    supply-model activity: the EU supplies other vegetable oils through CAPRI's market supply function (ProdNQ_ per
+    member state), which responds to the EU price against base (not against the price the supply models last saw); palm
+    oil is a biodiesel feedstock priced by its market."""
     import numpy as np
     from capri_mod.data.definitions import MARKET_COMMODITIES
     from capri_mod.market.market_module import MarketModule
@@ -2965,7 +2965,9 @@ def test_palm_and_other_vegetable_oils_are_markets(model):
     s = mm.supply_response(mm.world_prices_base, None, region_ratio=rr)
     base = float(mm.par.base_production.at["EU27", "OTHO"])
     assert base > 0
-    assert abs(float(s.at["EU27", "OTHO"]) / base - 1.10 ** 0.977) < 1e-6         # p_elasSupp, EU median
+    # CAPRI's ProdNQ_ per member state (since 28 October 2026; before: the EU median p_elasSupp, 1.10 ** 0.977)
+    own = sum(h for (x, y), h in mm._eu_market_supply_nq_params()["EU27"].items() if x == "OTHO" and y == "OTHO")
+    assert abs(float(s.at["EU27", "OTHO"]) - (base + own * 0.10)) < 1e-6
     mm.seen.eu_price_seen = None
 
 
