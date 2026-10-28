@@ -1075,6 +1075,18 @@ class CAPRIModel:
                               "herd_regional": {r_: {a_: round(float(getattr(x_, "activities", pd.Series(dtype=float)).get(a_, 0.0)), 4)
                                                      for a_ in ("BCOW", "DCOW", "CALV", "BULL", "HFRS", "GRAS", "MAIF", "OFOD")}
                                                 for r_, x_ in _sr_.items()}})
+                if _settings().get("diagnostics.record_regional_levels"):
+                    # every region's activity levels at this iteration, unrounded (K79: the rows CAPRI's stop rule
+                    # flags, traced to regions and activities)
+                    _hist[-1]["act_regional"] = {r_: {str(a_): float(v_) for a_, v_ in
+                                                      getattr(x_, "activities", pd.Series(dtype=float)).items()}
+                                                 for r_, x_ in _sr_.items()}
+                    # each region's solve: the starts tried / IPOPT's iterations of the last, its objective, its
+                    # relaxation (K79: a region jumping between two states)
+                    _hist[-1]["nlp_regional"] = {
+                        r_: {"path": getattr(m_, "_nlp_path", None), "f": getattr(m_, "_nlp_prev_f", None),
+                             "relaxed": getattr(m_, "_nlp_relaxed", None)}
+                        for r_, m_ in (getattr(self.supply_module, "_models", None) or {}).items()}
                 self._outer_history = _hist
             except Exception as _e:
                 warnings.warn(f"outer history not recorded: {_e!r}")
@@ -1357,7 +1369,7 @@ class CAPRIModel:
                 "young_animal_prices": dict(self.supply_module.yani_price_ratio or {}),
                 "young_animal_imbalance": float(getattr(self, "_yani_imbalance", 0.0) or 0.0),
                 "young_animal_markets": dict(getattr(self, "_yani_detail", None) or {}),
-                "pmp_source": str(getattr(self.supply_module, "pmp_source", "elasticity")),
+                "pmp_source": str(getattr(self.supply_module, "pmp_source", "capri2030")),
                 "pmp_capri_parts": list(getattr(self.supply_module, "pmp_capri_parts", ())),
                 # regions whose NLP solve took a fallback in this run (JRC121368's relaxed N target, IPOPT's last
                 # point kept as CAPRI keeps a non-optimal solve), each with IPOPT's status (supply_module._nlp_solve)
@@ -1586,10 +1598,16 @@ class CAPRIModel:
                         bool(getattr(self, "use_manure_market", False)), str(getattr(self, "_endotech_key", "")),
                         # the regional models' calibration (K58): a Hessian measured before the ridge fit is stale
                         "nlp",               # the supply form, when there were two (keeps the cached Hessians' keys)
-                        str(getattr(self.supply_module, "pmp_source", "elasticity")),
+                        str(getattr(self.supply_module, "pmp_source", "capri2030")),
                         tuple(getattr(self.supply_module, "pmp_capri_parts", ())), __import__(
                             "capri_mod.supply.capri_regional_nlp", fromlist=["CAL_RIDGE"]).CAL_RIDGE,
                         tuple(yani_goods),
+                        # 28 October 2026 (audit S13): activities of a calibrated part without a positive own PMP term
+                        # are held at their level; their price response changes, their base level does not, so the
+                        # base totals above would not tell a Hessian measured before from one measured after
+                        "held-without-own-term",
+                        # 28 October 2026 (K79): the regional solves' jump check changes which local optimum is kept
+                        ("nlp_jump_check", str(_settings().get("supply.nlp_jump_check"))),
                         # the supply models' rules that change their price response (24 October 2026: S6-S10)
                         # (the rules whose switches were removed 27 October 2026 keep their values' place, so the
                         # cached Hessians' keys stay valid)
@@ -1840,7 +1858,7 @@ class CAPRIModel:
         rm = getattr(self, "_ration_model", None)
         if rm is None:
             rm = ration_model_for(self.data, self.data_dir if hasattr(self, "data_dir") else None,
-                                  getattr(self.supply_module, "pmp_source", "elasticity"),
+                                  getattr(self.supply_module, "pmp_source", "capri2030"),
                                   getattr(self.supply_module, "pmp_capri_parts", ()))
             self._ration_model = rm
         # FEED BULK PRICES per member state (CAPRI feedBlkPrice_): the CES price index of the member state's

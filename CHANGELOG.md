@@ -30,6 +30,34 @@ Full provenance for every entry is in `capri_data/DATA_SOURCING_REGISTRY.json`.
 
 ---
 
+## 28 October 2026 (pending the gate): supply audit S12, S13; nurseries in the PMP recipe; the regional solves' jump check (K79)
+
+- **S12** (KNOWN_ISSUES K74): the emission tax on mineral N and the accounts' soil N2O of mineral N take CAPRI's
+  N2OSYN and mineral N2OAMM from the region's MITERRA loss fractions (gases.gms (7), (9)); IPCC's factors only where
+  CAPRI's fractions are missing (Norway).
+- **S13** (the project lead's decision): the elasticity calibration path removed; an activity without a positive own
+  PMP term is held at its level, as CAPRI (docs/PMP_CAPRI_2030.md). The market supply Hessian's cache key carries it.
+- **Nurseries (NURS)** in the PMP recipe builder's activity list, as CAPRI's 2030 terms.
+- **Why Farm-to-Fork's tomato price differs from dev's** (r172 on this branch +13.8%, dev's r170 +9.1%): S13. In dev's
+  market supply Hessian two cells without a CAPRI PMP term, Swedish and Irish tomatoes, carried own-price terms of
+  111,240 and 40,132 (95% of the EU's tomato term, 159,653); held, they are 5.9 and 1.3, the EU term 8,288, every other
+  member state's term unchanged. The market therefore took EU tomato supply as about 19 times more price-responsive
+  than the supply models are: its price moved little per step and climbed slowly (the price passed to the supply
+  models: +1.7% at the first step, +8.9% at the twelfth, still rising 0.4 points per step). CAPRI's stop rule ended
+  r170 there with two rows above 0.05% (Portuguese potatoes 0.93%, tomatoes 0.36%), which the rule allows (it counts
+  products, the largest change over the trade blocks: price_forecast.gms l. 345-371, as here). r170's tomato result is
+  therefore not at its equilibrium: its supply models produced 15,403 kt where its market reported 16,452 kt. In r172
+  the price reaches +13.8% by the eighth step and stays, supply models and market agree (15,805 kt). A geometric
+  extrapolation of r170's last steps gives roughly +13.5% (a rough figure). Other products whose Hessian S13 changes
+  at EU level: tobacco +16%, pulses +4.5%, apples +1%; the rest less. Swedish tomatoes are also what swung in r168's
+  iterations 17-20 (K79; not checked yet whether the same cells).
+- **Jump check** (`supply.nlp_jump_check`, 0.1; K79): when a regional solution's levels move by more than 10% (of the
+  larger of the level and 1% of the region's largest) from the previous iteration's, the other starting points are
+  solved too and the lowest objective is kept. Beyond CAPRI's practice (its CONOPT solve starts from the previous
+  solution only); it addresses solutions that alternate between local optima of non-convex regional problems
+  (BG010000, HU330000, HU230000). Off with 0.
+- [gate: test suite, Farm-to-Fork and Green Deal 2030 runs: to be filled in]
+
 ## 28 October 2026: a report of items still moving one way when the loop stops (beyond CAPRI)
 
 - `outer_loop.drift_report_steps` (3; the project lead's decision; decides nothing): when the supply-market loop ends,

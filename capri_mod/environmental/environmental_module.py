@@ -1204,6 +1204,17 @@ class EnvironmentalModule:
                 out.append((n_a, RS / W, GR / W, AG / W))
         return out
 
+    def _mineral_n2o_n(self, region):
+        """(direct, indirect) N2O-N per unit of mineral N: CAPRI's from the region's MITERRA fractions
+        (n_cascade.mineral_n2o_n), else IPCC's EF1 and 10% x EF4."""
+        c_ = self.__dict__.setdefault("_min_n2o_cache", {})
+        if region not in c_:
+            from capri_mod.supply import n_cascade as _nc, n_leaching as _nl
+            rs = _nl.capri_region(region)
+            dn = _nc.mineral_n2o_n(_nc.load()[1].get(rs, {}), EF_SOIL_N2O_INDIRECT) if rs else None
+            c_[region] = dn if dn else (EF_SOIL_N2O_DIRECT, 0.10 * EF_SOIL_N2O_INDIRECT)
+        return c_[region]
+
     def leaching(self, region, acts, nb, supply_result=None):
         """CAPRI's leaching share of the soil surplus (LEACHN_) and the N leached and run off from the fields that
         carries indirect N2O (gases.gms N2OLEA allocated to crops), capri_mod/supply/n_leaching.py. Returns {share,
@@ -1709,9 +1720,13 @@ class EnvironmentalModule:
         # (direct + volatilised share x indirect factor). It used to be crops' N coefficients (16.6 Mt N
         # in the EU, mineral and organic) rescaled by the mineral ratio, so manure-borne soil N2O moved
         # with mineral N; manure N2O is N2O_MAN. Crop residues are their own source (CAPRI N2OCRO).
+        # The factors are CAPRI's (gases.gms (7) N2OSYN = NMIN x emiLoss(NETF, N2O) and the mineral part of (9) N2OAMM =
+        # NMIN x (emiLoss(NETF, NH3) + emiLoss(NETF, NOx)) x EF4), from the region's MITERRA loss fractions (K74 S12,
+        # 27 October 2026; before, IPCC's EF1 + 10% x EF4 everywhere); IPCC's where CAPRI's fractions are missing
+        _dn = self._mineral_n2o_n(region)
         if "N2O_SOIL" in ghg:
             ghg["N2O_SOIL"] = (max(0.0, float(nb.get("n_mineral_input", 0.0))) / 1000.0
-                               * (EF_SOIL_N2O_DIRECT + 0.10 * EF_SOIL_N2O_INDIRECT) * 44.0 / 28.0 * GWP_N2O)
+                               * (_dn[0] + _dn[1]) * 44.0 / 28.0 * GWP_N2O)
         ghg["N2O_CRO"] = (max(0.0, float(nb.get("n_crop_residues", 0.0) or 0.0)) / 1000.0
                           * EF_SOIL_N2O_DIRECT * 44.0 / 28.0 * GWP_N2O)
         # CO2 from urea on the same mineral N (CAPRI gases.gms (17): NMIN x urea share x 44/28)
@@ -1804,7 +1819,7 @@ class EnvironmentalModule:
         f_side = self.fert_side_factors(region, getattr(supply_result, "fert_tech_shares", None),
                                         getattr(supply_result, "fert_nmin", None))
         if f_side and "N2O_SOIL" in ghg:
-            _dir = EF_SOIL_N2O_DIRECT / (EF_SOIL_N2O_DIRECT + 0.10 * EF_SOIL_N2O_INDIRECT)
+            _dir = _dn[0] / (_dn[0] + _dn[1]) if (_dn[0] + _dn[1]) > 0 else 1.0
             _old = ghg["N2O_SOIL"]
             ghg["N2O_SOIL"] = _old * (_dir * f_side["N2OSYN"] + (1.0 - _dir) * f_side["NH3SYN"])
         # CAPRI's leaching of the soil surplus (LEACHN_) and the indirect N2O of leached and run-off N allocated to

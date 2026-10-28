@@ -153,6 +153,17 @@ def netf(fr, run_surf, urea=0.0, urea_eff=0.0, fert_syn=None, till_n2o=0.0, m_ru
     return L
 
 
+def mineral_n2o_n(fr, ef4):
+    """CAPRI's soil N2O of mineral fertiliser per unit of mineral N, as N2O-N (envind/gases.gms (7) N2OSYN and the
+    mineral part of (9) N2OAMM): direct emiLoss(NETF, N2O, GasTot) and indirect (emiLoss(NETF, NH3) + emiLoss(NETF,
+    NOx)) x EF4, from the region's MITERRA fractions (netf; before the fertiliser options' side effects, which the
+    accounts apply as factors). Returns (direct, indirect); None without the region's fractions."""
+    if not fr or "netf_N2O" not in fr:
+        return None
+    L = netf(fr, 0.0)
+    return float(L["N2O"]), float(L["NH3"] + L["NOX"]) * float(ef4)
+
+
 _DATA = {}
 
 

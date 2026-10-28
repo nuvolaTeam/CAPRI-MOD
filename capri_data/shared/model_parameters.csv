@@ -1,6 +1,6 @@
 name,key,value,unit,kind,source,used_in
-EF_SOIL_N2O_DIRECT,,0.01,kg N2O-N per kg N,ipcc,"IPCC 2006 EF1 as CAPRI envind/gases.gms N2OSYN, N2OCRO",environmental_module
-EF_SOIL_N2O_INDIRECT,,0.01,kg N2O-N per kg NH3-N,ipcc,IPCC 2006 EF4 as CAPRI envind/gases.gms N2OAMM (volatilised share 10%),environmental_module
+EF_SOIL_N2O_DIRECT,,0.01,kg N2O-N per kg N,ipcc,"IPCC 2006 EF1 as CAPRI envind/gases.gms N2OCRO; mineral N (N2OSYN) takes CAPRI's MITERRA loss fractions, EF1 only where they are missing",environmental_module
+EF_SOIL_N2O_INDIRECT,,0.01,kg N2O-N per kg NH3-N,ipcc,IPCC 2006 EF4 as CAPRI envind/gases.gms N2OAMM (on the MITERRA NH3 + NOx losses; a 10% volatilised share only where they are missing),environmental_module
 GWP_CH4,,25.0,kg CO2-eq per kg,ipcc,"AR4, UNFCCC reporting; CAPRI p_globWarmPot","environmental_module, ghg_tax"
 GWP_N2O,,298.0,kg CO2-eq per kg,ipcc,"AR4, UNFCCC reporting; CAPRI p_globWarmPot",environmental_module
 MJ_PER_KG_CH4,,55.65,MJ per kg CH4,ipcc,"IPCC 2006 Eq. 10.21, as CAPRI envind/gases.gms CH4ENT",ghg_tax

@@ -96,9 +96,9 @@ manure_pool_omega_min = 0.25
 manure_pool_qp_tol = 1e-8
 
 [supply]
-# PMP terms: "capri2030" (CAPRI's exported 2030 terms at 2030; CAPRI's recipe at its 2017 point at 2017), "recipe"
-# (capri-mod's own with CAPRI's recipe), "elasticity" (legacy: CAPRI's elasticities only; activities without one are
-# held at their level)
+# PMP terms: "capri2030" (CAPRI's exported 2030 terms at 2030; CAPRI's recipe at its 2017 point at 2017) or "recipe"
+# (capri-mod's own with CAPRI's recipe); activities without a term are held at their level ("elasticity", the legacy
+# calibration from CAPRI's elasticities, removed 28 October 2026, audit S13)
 pmp_source = "capri2030"
 # with capri2030: which parts take CAPRI's terms
 pmp_capri_parts = ["crops", "animals", "feed", "land"]
@@ -128,6 +128,12 @@ nlp_warm_max_iter = 200
 # than the last iteration's is checked against the solves from the previous point and the standard start, keeping the
 # lowest objective; the warm start can end at a worse stationary point of the non-convex per-head feeding (K75)
 nlp_warm_check = 0.01
+# numerical safeguard (not a CAPRI parameter; K79): where a regional solution's activity levels move by more than this
+# share between outer iterations (|dy| over the larger of the level and 1% of the region's largest column), the region
+# is also solved from its previous point (cold) and from the standard start and the lowest objective is kept. A warm
+# start in a non-convex regional problem can end at a worse local optimum (HU330000, Green Deal 2030: 2,200 worse, the
+# region switching between two states every few iterations; r174). 0 = off
+nlp_jump_check = 0.1
 nlp_acceptable_tol = 1e-6
 # IPOPT's treatment of fixed columns (lower = upper bound): "make_constraint" keeps them as variables held by an
 # equality (trial points may leave the bound), "make_parameter" removes them from the problem (CAPRI: an activity
@@ -262,6 +268,8 @@ fixGenetToIni = 1.0
 verbose = true
 # outer-loop trace
 trace_outer = false
+# every region's activity levels per outer iteration in the outer history (K79 diagnosis; large)
+record_regional_levels = false
 # regions slower than this (s) are reported
 slow_region_seconds = 60.0
 
