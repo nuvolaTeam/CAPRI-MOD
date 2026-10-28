@@ -77,7 +77,7 @@ def check_2017(a) -> None:
     cap = _read_csv(ROOT / "capri_data" / "sources" / "capreg" / "pmp_quad_techn.csv")
     rec = _read_csv(SRC / "recipe_2017_quad_techn.csv")
     rec = rec[(rec.tech1 == rec.tech2) & rec.tech1.isin(["T1", "T"])].drop_duplicates(["region", "activity"]).copy()
-    rec["model_region"] = rec.region.str[:4]
+    rec["model_region"] = rec.region            # the model's regions are CAPRI's units since 27 October 2026
     j = cap.merge(rec, on=["model_region", "activity"], suffixes=("_capri", "_recipe"))
     j["ratio"] = j.value_recipe / j.value_capri
     g = j.groupby("activity")["ratio"]
@@ -89,7 +89,7 @@ def check_2017(a) -> None:
           f"within 20%: {((j.ratio - 1).abs() < 0.2).mean():.1%}")
     cp = _read_csv(ROOT / "capri_data" / "sources" / "capreg" / "pmp_quad_pact.csv")
     rp = _read_csv(SRC / "recipe_2017_quad_pact.csv")
-    rp["model_region"] = rp.region.str[:4]
+    rp["model_region"] = rp.region
     k = cp.merge(rp, on=["model_region", "group1", "group2"])
     rr = k.value_y / k.value_x
     print(f"group terms: {len(k)}, within 5%: {((rr - 1).abs() < 0.05).mean():.1%}")

@@ -96,7 +96,9 @@ ANNUAL = {"SWHE", "DWHE", "RYEM", "BARL", "OATS", "MAIZ", "OCER", "PARI", "RAPE"
 FRUN_ACTS = {"TWIN", "CITR", "OFRU", "TAGR", "TABO", "OLIV", "APPL", "NURS", "NECR"}
 LAND_MRK = ["GRAS", "ARAC", "FRUN", "FORE", "ARTIF", "OLND"]
 LAND_SCALE = 1000.0          # p_landMarketScale (supply/def_supply_model_par.gms l. 61)
-ACTS = sorted(set(GRP) | set(ASSUMED) | TACT | ANIMALS | {"OOIL", "OIND", "OCRO", "FLOW", "NECR", "TOMA"})
+#: (NURS added 28 October 2026: CAPRI's 2030 terms have it in 224 regions, one technology, CAPRI's assumed elasticity 1 as
+#: every activity pmp_elas.gms does not list; it was missing here, so the recipe held nurseries at their level)
+ACTS = sorted(set(GRP) | set(ASSUMED) | TACT | ANIMALS | {"OOIL", "OIND", "OCRO", "FLOW", "NECR", "TOMA", "NURS"})
 
 
 def _damp(e: float) -> float:
