@@ -30,6 +30,23 @@ Full provenance for every entry is in `capri_data/DATA_SOURCING_REGISTRY.json`.
 
 ---
 
+## 28 October 2026: CAPRI's switches of its Green Deal scenario file
+
+- **Slower price smoothing for problem products** (`outer_loop.capri_step_special`, CAPRI's p_stepWgtSpecial,
+  define_stepWeights.gms l. 41-50): entries [member state, product, srt]; the price passed to that member state's
+  supply models averages the baseline price and every step's market price, step j of k weighted max(0, 1 - srt (k + 1
+  - j)). Empty by default, as CAPRI's Green Deal runs (greendeal_scenarios.gms l. 82: the Maltese milk entry is
+  commented out). CAPRI's member-state producer prices follow their block's market price with a fixed margin (PPri_),
+  as here; the smoothed price reaches the member state's models as a departure from its market's price.
+- **Negative raw milk prices** (`PolicyScenario.negative_milk_price`, CAPRI's negProdPriceAllowed(rms, "MILK"),
+  greendeal_scenarios.gms l. 66-67): set by the Green Deal group (Farm-to-Fork and Green Deal 2030 too); without it a
+  member state's raw milk price is held at its positive floor (1e-7 of base), fat and protein still clearing, the
+  member state recorded (metadata milk_price_floor, a warning). Before, the price had no lower bound in any scenario.
+- Gate (with the Hessian change below): test suite 192 passed; Farm-to-Fork r169 equal to the dev run r170 and Green
+  Deal 2030 r171 equal to r168 in every result (prices, activities, production, 19,006 environmental values); only run
+  metadata differs. r164 was not a clean reference for dev (it ran on the data before the K87 rebuild of the mitigation
+  effects): its baseline differs from dev's by up to 6e-7 relative.
+
 ## 28 October 2026: the market supply Hessian measured when a scenario needs it
 
 - **Why**: the test suite's time was mostly the market supply Hessian (CAPRI's p_hessNQSupp, calibrate_supply.gms),
@@ -46,6 +63,8 @@ Full provenance for every entry is in `capri_data/DATA_SOURCING_REGISTRY.json`.
   (another solution, possibly another region set): it runs as a model's first baseline always did. A scenario whose
   baseline is in the cache but whose Hessian is not at hand (another run came after the baseline) runs its baseline
   again and measures from it, where the Hessian of whichever baseline ran last was used before.
+- Checked: measured lazily, the 6-region Hessian of test_livestock_gross_output_is_marketed_product equals the one
+  the eager code measured, term by term (513 terms, bit for bit); the reference runs reproduce dev's (above).
 - Tests: test_market_supply_hessian_measured_at_base_and_at_scenario_state (a baseline alone measures nothing; the
   scenario's log holds the baseline's Hessian, then the scenario-state one), test_hessian_skip_of_unreached_regions_is_exact
   (measured by a world-price-shock scenario on the baseline).
