@@ -171,5 +171,6 @@ list (tools/build/build_pmp_recipe.py ACTS); with it the recipe gives CAPRI's NU
 all 213 at 2017 (within 5%, median ratio 1.000). No result changes: NURS is one of CAPRI's fixed activities (FACT,
 sets.gms l. 131; prep_sim.gms l. 250: v_actLevl.FX), held at its level in every simulation, here and in CAPRI. The
 rebuild also wrote the recipe's committed terms at full precision (they had been written with about ten significant
-digits: relative differences up to 2e-9).
+digits: relative differences up to 2e-9), which moves the 2017-year solutions (tests, the recipe option) in their last digits;
+the 2030 reference runs use CAPRI's own terms and do not read these files.
 
