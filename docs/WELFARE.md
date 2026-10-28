@@ -39,14 +39,15 @@ models' ProfitAgr, ProfitLandUse and PSEs.
 
 ## Differences from CAPRI
 
-1. **Changes, not levels** (a choice, to be decided by the project lead). CAPRI reports levels: the change plus a base
-   value set by convention: household expenditure on the good at base prices (CSSP), processing margin x quantity
-   (ProfitProc, ProfitDairy), 50% of the revenue as the farms' profit of the regions without supply models (100%
-   under SUPREMA), the feed cost less 20% (ProfitFeed). The model reports the market's components as changes against
-   the market's calibration point: the base values are conventions without data behind them (the 50% and the 20%),
-   and they cancel in the comparison of two runs, which is what the welfare report is read for. TariffRev, TRQRents,
-   MGVA and PSEs are levels, as in CAPRI. The levels can be added (the base values are in the model's data) if the
-   CAPRI tables are wanted as such.
+1. **Levels, as CAPRI** (the project lead's decision, 28 October 2026; before, the components other than tariffs
+   and quota rents were changes only). Each market component is the change from the calibration point plus CAPRI's
+   base value of that component (welfare.gms): household expenditure at the calibration prices (CSSP), processing x
+   price or crushing margin (ProfitProc), dairy products x processing margin (ProfitDairy), the revenue of the regions
+   without supply models less their land and feed-energy netputs (ProfitAgr), minus 20% of their feed cost
+   (ProfitFeed). The base values per CAPRI region come from CAPRI's 2030 data with welfare.gms's formulas
+   (tools/build/build_welfare_base.py, capri_data/2017/market/welfare_base_2030.csv); against CAPRI's 2030 reference
+   levels, CSSP and ProfitDairy are equal in all 80 regions, ProfitAgr and ProfitProc within a median 4-5%, ProfitFeed
+   not comparable (CHANGELOG 28 October 2026). Comparisons of two runs take the difference of the levels.
 2. **Non-EU farms and feed users**: the integrals of the model's constant-elasticity functions, not CAPRI's NQ
    functions with land and feed energy (the model's non-EU supply has no land or feed-energy netputs; non-EU feed is
    M3, K73). The welfare follows the functions the market solved with, so it is consistent with the model's

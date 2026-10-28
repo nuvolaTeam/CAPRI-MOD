@@ -158,7 +158,8 @@ and its young-animal markets inside the market model (yaniMarket_, arm/market_mo
 market anticipated the EU supply response with its own-price elasticities and the young-animal prices were updated
 between market solves; the Farm-to-Fork runs then left a slow beef / calf price mode (calf price ratio still rising at
 the 25th iteration, the stopping rule reached 1.5-2 points of beef price short of the fixed point). Remaining
-differences: the Hessian is not built per EU trade block (`eu_blocks` keeps the update between solves). Raw milk:
+differences: with CAPRI's EU trade blocks (`market.eu_blocks`) the Hessian is summed per block
+(`CAPRIModel._split_hessian`), but the young-animal markets keep the update between market solves. Raw milk:
 since 24 October 2026 (audit M5) each member state's raw milk follows its own milk
 price inside the market, through the Hessian's member-state rows and columns.
 
