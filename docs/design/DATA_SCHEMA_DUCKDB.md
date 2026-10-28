@@ -62,8 +62,13 @@ Beyond CAPRI (for the project lead to note): range checks, and enforcement at lo
    headers are checked against the code list by a rule, or the validator reads the file long (region, item, value).
 2. `MANIFEST.json` and `INPUT_SCHEMA.json`: retired once their content is in the declarations; `verify_schema.py`'s
    coverage count moves onto the declarations.
-3. `DATA_SOURCING_REGISTRY.json`: its provenance goes into the table comments; its issue records are not data
-   declarations (where they go is the project lead's choice: `KNOWN_ISSUES.md`, `PROXY_AUDIT`, or kept as a log).
+3. `DATA_SOURCING_REGISTRY.json` (276 entries): the 37 that name a file give their provenance to the table comments.
+   The other 239 are not data declarations but a log of the project's checks and decisions: 143 closed (fixed,
+   implemented, retired), 59 with another status (validations, diagnoses, settings, "comparison pending"), 37 without
+   a status. The project lead's decision (28 October 2026): they go to `KNOWN_ISSUES.md`. Each still-open item is
+   checked against today's code and becomes a K item (or joins the K item it duplicates); the closed and historical
+   entries are kept verbatim in an appendix of `KNOWN_ISSUES.md`, so nothing is lost and the K list stays current.
+   Its `code_embedded_data` section (2 entries: constants in code) goes to the proxy audit's hardcoded-data list.
 4. "No orphan rows": a row whose key is not in a code list (the foreign keys) and a table nothing reads (rule above).
 
 ## Order
