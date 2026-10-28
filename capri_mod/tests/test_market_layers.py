@@ -200,3 +200,39 @@ def test_moved_market_attributes_fail_loudly():
         m.supply_hessian = None
     assert getattr(m, "no_such_attribute", 1) == 1
     assert "base_production" in MOVED and "last_market_solver" in MOVED
+
+
+def test_dairy_processing_follows_capri_procnq_and_balances_fat_and_protein():
+    """Audit M9: the dairy products' processing is CAPRI's ProcNQ_ per member state (37 own-price terms; cheese,
+    casein, butter, fresh milk products), falling as the product's price rises, kept positive by ProcFudge_; it enters
+    each member state's FatsProtBal_, so fat and protein still balance: raw milk's = sum (production - processing)."""
+    import numpy as np
+    from capri_mod.model import CAPRIModel
+    m = CAPRIModel(data_dir="capri_data", verbose=False, regions=["DE110000"])
+    mm = m.market_module
+    dp = mm._dairy_params()
+    tr = {k: 1.0 for k in mm.DAIRY_TRADED}
+    base = mm.dairy_block(dict(tr), 1.0)
+    assert max(abs(v) for v in base["processing_change"].values()) < 1e-9       # at base prices: base processing
+    tr["CHES"] = 1.10
+    res = mm.dairy_block(dict(tr), 1.0)
+    assert res["processing_change"]["CHES"] < 0                                   # dearer cheese: less processed
+    n_checked = 0
+    for ms, prm in dp["ms"].items():
+        z = res["ms_z"][ms]
+        Q = prm["Q0"] + prm["G"] @ z
+        part = prm["parts"][0]
+        dproc, _, _ = mm._dairy_proc_change(prm, z)
+        net = Q - part["proc0"] - dproc
+        iM = prm["iM"]
+        for c in ("f", "r"):
+            w = part[c]
+            milk_side = w[iM] * Q[iM]
+            prod_side = sum(w[i] * net[i] for i in range(len(net)) if i != iM)
+            base_milk = w[iM] * prm["Q0"][iM]
+            base_prod = sum(w[i] * (prm["Q0"][i] - part["proc0"][i]) for i in range(len(net)) if i != iM)
+            # FatsProtBal_ in changes: the change of the milk side equals the change of the product side
+            assert abs((milk_side - base_milk) - (prod_side - base_prod)) < 1e-6 * max(1.0, abs(base_milk))
+        if abs(dproc).sum() > 0:
+            n_checked += 1
+    assert n_checked >= 5                                                       # member states with dairy processing

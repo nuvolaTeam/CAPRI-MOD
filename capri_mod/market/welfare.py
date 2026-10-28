@@ -135,16 +135,18 @@ class WelfareMixin:
         return out
 
     def _welfare_proc_nq(self, PR: np.ndarray, P0: np.ndarray) -> Dict[str, float]:
-        """ProfitProc of the ProcNQ_ processing (the products other than oilseeds, dairy and biofuels) per model
-        region: per behavioural region, the processed goods are inputs priced at the Armington price, so
+        """ProfitProc of the ProcNQ_ processing (the products other than oilseeds and biofuels) per model region: per
+        behavioural region, the processed goods are inputs priced at the Armington price, so
             change = - sum_x (q0_x + dq_x / 2) dp_x,   dp_x = ARM1P_x (PR_x - 1),   dq_x = - sum_y H_xy dp_y
         (the model's ProcNQ_, before ProcFudge_ as in CAPRI's report); q0 the model region's base processing P0
-        spread over its behavioural regions by CAPRI's processing."""
+        spread over its behavioural regions by CAPRI's processing; for the dairy products (processed in the dairy
+        blocks, ProcNQ_ per member state since audit M9) the behavioural region's own base processing."""
         pq = self._proc_nq_params() or {}
         tb = self._welfare_proc_tables()
         Rr = {r: i for i, r in enumerate(self.regions)}
         Cc = {c: j for j, c in enumerate(self.commodities)}
         skip = set(self.CRUSH_CHAINS) | set(self._PROC_NQ_SKIP)
+        dairy = set(self.DAIRY_TRADED.values())
         active = {k for k in (pq.get("share") or {}) if k[1] not in skip and k[1] in Cc and k[0] in Rr
                   and P0[Rr[k[0]], Cc[k[1]]] > 0}
         tot = {}
@@ -165,9 +167,14 @@ class WelfareMixin:
                         dp[g] = tb["arm1p"].get((rms, g), 0.0) * (PR[i, Cc[g]] - 1.0)
             val = 0.0
             for x in {x for (x, _) in Hr}:
-                if (R, x) not in active or tot.get((R, x), 0.0) <= 0:
+                if x in dairy:
+                    q0 = tb["q"].get((rms, x), 0.0)
+                    if q0 <= 0 or x not in dp:
+                        continue
+                elif (R, x) not in active or tot.get((R, x), 0.0) <= 0:
                     continue
-                q0 = P0[i, Cc[x]] * tb["q"].get((rms, x), 0.0) / tot[(R, x)]
+                else:
+                    q0 = P0[i, Cc[x]] * tb["q"].get((rms, x), 0.0) / tot[(R, x)]
                 dq = -sum(h * dp.get(y, 0.0) for (x_, y), h in Hr.items() if x_ == x)
                 val -= (q0 + 0.5 * dq) * dp.get(x, 0.0)
             out[R] = out.get(R, 0.0) + val / 1000.0

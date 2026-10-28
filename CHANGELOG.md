@@ -68,6 +68,17 @@ Full provenance for every entry is in `capri_data/DATA_SOURCING_REGISTRY.json`.
 - **A regional solve that raises stops the run.** Until now the region was dropped with a warning and the run went on,
   able to report convergence without it: the mini-EU run solved Norway's unit alone and "converged" (the cause: a fault
   of this batch's S5 change, fixed before any gate run). No reference run ever dropped a region.
+- **Market audit M9, dairy processing as CAPRI's ProcNQ_**: the processing of the dairy products (CAPRI's 37
+  own-price terms per member state, Norway and the Western Balkans: cheese 429 kt of EU processing, fresh milk products
+  83, butter 10, casein 8) falls as the product's Armington price rises (- h / INPE x ARM1P0 x (ratio - 1)), kept
+  positive by ProcFudge_; before, it was held at base. Its change enters each block's FatsProtBal_ (raw milk's fat
+  and protein = the products' less their processing) and the block's net supply, and the processors' profit in CAPRI's
+  welfare report (ProfitProc). Test: at a 10% dearer cheese, less cheese processed, fat and protein balanced in every
+  member state with dairy processing.
+- **Found with M9**: the dairy products' use in the market is net of processing (the dairy blocks' net supply is
+  production less processing), but the use split gave them CAPRI's processing share: 4.5% of the EU's cheese use
+  (about 413 kt) was labelled processing and held fixed, outside the food response. Their split now has no
+  processing part.
 - Reports and tools: reproduce_builders.py --trace (each builder under strace: reads, writes, read-modify-writes,
   code, CAPRI sources); docs/design/DATA_PIPELINE_DOIT.md (the data pipeline as doit tasks: findings and steps).
 - [gate: to be filled in]

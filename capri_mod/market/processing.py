@@ -57,6 +57,9 @@ class ProcessingMixin(MarketStateMixin):
             # ProcNQ_ divides H by the price of the non-agricultural good, DATA(RMS,"PPri","Inpe","CUR")
             inpe_rms = bb.groupby("rms")["inpe"].first().to_dict()
             H, Ha, Hrms = {}, {}, {}
+            # per behavioural region, scaled as Ha (H / INPE x ARM1P0 of the price's product): the dairy blocks' processing
+            # (audit M9: ProcNQ_ per member state, its change entering FatsProtBal_)
+            Harms = {}
             for r in hh.itertuples(index=False):
                 R = mreg(r.rms, r.model_region)
                 if R not in self.regions or r.x not in self.commodities or r.y not in self.commodities:
@@ -70,7 +73,10 @@ class ProcessingMixin(MarketStateMixin):
                 # ProcNQ_ (market_model.gms l. 1140-1152): H x the change of v_arm1Price in the behavioural region's
                 # market region, i.e. H x ARM1P0 x (Armington price ratio - 1)
                 ka[(r.x, r.y)] = ka.get((r.x, r.y), 0.0) + float(r.h) / inpe * float(r.arm1p_y)
+                kar = Harms.setdefault(r.rms, {})
+                kar[(r.x, r.y)] = kar.get((r.x, r.y), 0.0) + float(r.h) / inpe * float(r.arm1p_y)
                 if r.x != r.y:
+                    kar[(r.y, r.x)] = kar.get((r.y, r.x), 0.0) + float(r.h) / inpe * float(r.arm1p_x)
                     k[(r.y, r.x)] = k.get((r.y, r.x), 0.0) + float(r.h) / inpe
                     kr[(r.y, r.x)] = kr.get((r.y, r.x), 0.0) + float(r.h) / inpe
                     ka[(r.y, r.x)] = ka.get((r.y, r.x), 0.0) + float(r.h) / inpe * float(r.arm1p_x)
@@ -93,7 +99,7 @@ class ProcessingMixin(MarketStateMixin):
                 seeds.setdefault((R, r.seed), []).append(dict(
                     rms=r.rms, q0=float(r.proc_kt), yo0=float(r.prcy_oil), yc0=float(r.prcy_cake),
                     ppo=float(r.ppri_oil), ppc=float(r.ppri_cake), a1=float(r.arm1p_seed), rho=float(r.rho_proc)))
-            out = {"H": H, "Ha": Ha, "Hrms": Hrms, "share": share, "seeds": seeds}
+            out = {"H": H, "Ha": Ha, "Hrms": Hrms, "Harms": Harms, "share": share, "seeds": seeds}
         except Exception as exc:
             raise RuntimeError(f"market: the processing functions (ProcNQ_) could not be read ({exc!r})") from exc
         self._procnq_cache = out

@@ -202,8 +202,14 @@ class DemandMixin(MarketStateMixin):
             d = tot.setdefault((R, r.commodity), {"hcon": 0.0, "feed": 0.0, "proc": 0.0, "biof": 0.0})
             d["hcon"] += float(r.hcon_kt); d["feed"] += float(r.feed_kt)
             d["proc"] += float(r.proc_kt); d["biof"] += float(r.biof_kt)
+        # the dairy products' use in the market is net of their processing (the dairy blocks' net supply is production
+        # less processing, CAPRI's ProcNQ_ there: audit M9), so their split has no processing part (until 28 October
+        # 2026 4.5% of the EU's cheese use was labelled processing and held fixed, outside the food response)
+        dairy = set(self.DAIRY_TRADED.values())
         out = {}
         for k, d in tot.items():
+            if k[1] in dairy:
+                d = dict(d, proc=0.0)
             s = sum(d.values())
             if s > 0:
                 out[k] = {x: v / s for x, v in d.items()}

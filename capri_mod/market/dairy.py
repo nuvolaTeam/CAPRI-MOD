@@ -55,8 +55,10 @@ class DairyMixin(MarketStateMixin):
         iF, iP, iM = len(items), len(items) + 1, ix["MILK"]
         G = np.zeros((len(items), nz)); rowF = np.zeros(nz); rowP = np.zeros(nz)
         Q0 = np.zeros(len(items)); proc0 = np.zeros(len(items)); PQ = np.zeros(len(items)); SM = 0.0
-        Mms, pMs = [], []
-        for gi, Hd, msup in tables:
+        Mms, pMs, parts = [], [], []
+        for tb in tables:
+            gi, Hd, msup = tb[:3]
+            rms = tb[3] if len(tb) > 3 else None
             if "MILK" not in gi.index:
                 continue
             inpe = float(gi.at["INPE", "price"]); pf0 = float(gi.at["FATS", "price"])
@@ -81,6 +83,11 @@ class DairyMixin(MarketStateMixin):
             Gs = H @ Mm / inpe
             G += Gs
             Mms.append(Mm); pMs.append(float(gi.at["MILK", "price"]))
+            # the region's fat and protein contents and base processing: the processing change of ProcNQ_ (audit M9)
+            # enters its FatsProtBal_ rows
+            prc = np.array([float(gi.at[k, "proc_kt"]) if (k in gi.index and pd.notna(gi.at[k, "proc_kt"])) else 0.0
+                            for k in items])
+            parts.append({"rms": rms, "f": f.copy(), "r": r.copy(), "proc0": prc})
             sgn = -np.ones(len(items)); sgn[iM] = 1.0                 # milk in, products out
             rowF += (sgn * f) @ Gs
             rowP += (sgn * r) @ Gs
@@ -90,7 +97,7 @@ class DairyMixin(MarketStateMixin):
         # one region's block (a member state, a behavioural region): its margin matrix and raw milk price, for the
         # welfare report (market/welfare.py); a block summed over several regions has no single one
         one = len(Mms) == 1
-        return dict(items=items, ix=ix, G=G, rowF=rowF, rowP=rowP, Q0=Q0, proc0=proc0, iF=iF, iP=iP, iM=iM,
+        return dict(items=items, ix=ix, G=G, rowF=rowF, rowP=rowP, Q0=Q0, proc0=proc0, iF=iF, iP=iP, iM=iM, parts=parts,
                     Mm=Mms[0] if one else None, pM=pMs[0] if one else None,
                     dom=[ix[k] for k in self.DAIRY_DOMESTIC if Q0[ix[k]] > 0], SM=SM,
                     p9=np.array([PQ[ix[k]] / Q0[ix[k]] if Q0[ix[k]] > 0 else 1.0 for k in P9]))
@@ -110,7 +117,7 @@ class DairyMixin(MarketStateMixin):
             dp = inp.csv("dairy_processing.csv")
             hh = inp.csv("dairy_hessian.csv")
             bal = inp.csv("dairy_eu_balance.csv").set_index("product")
-            tables = [(g.set_index("item"), {(e.row, e.col): e.h for e in hh[hh.ms == ms].itertuples()}, None)
+            tables = [(g.set_index("item"), {(e.row, e.col): e.h for e in hh[hh.ms == ms].itertuples()}, None, ms)
                       for ms, g in dp.groupby("ms")]
             out = self._dairy_algebra(tables)
             # CAPRI clears raw milk, milk fat and protein per member state (FatsProtBal_, ProcMargM_, DairyNQ_ per
@@ -179,7 +186,7 @@ class DairyMixin(MarketStateMixin):
                 for rms, g in gt.groupby("rms"):
                     gi = g.set_index("item")
                     ms_ = float(gi.at["MILKSUP", "price"]) if "MILKSUP" in gi.index else 0.0
-                    tables.append((gi, {(e.row, e.col): e.h for e in hh[hh.rms == rms].itertuples()}, ms_))
+                    tables.append((gi, {(e.row, e.col): e.h for e in hh[hh.rms == rms].itertuples()}, ms_, rms))
                     for k in P9:
                         if k in gi.index:
                             h_ = float(gi.at[k, "hcon_kt"] or 0.0); hc[P9.index(k)] += h_
@@ -201,6 +208,41 @@ class DairyMixin(MarketStateMixin):
             raise RuntimeError(f"market: the non-EU dairy block inputs could not be read ({exc!r})") from exc
         self._dairy_world_cache = out
         return out
+
+    def _dairy_proc_change(self, dp, zt):
+        """CAPRI's processing of the dairy products (ProcNQ_, market_model.gms l. 1140-1152; ProcFudge_ l. 1158-1163;
+        audit M9) in each region of a block at the products' price ratios zt (ratio - 1, CAPRI's dairy codes): the
+        change from base, -h / INPE x ARM1P0 x (ratio - 1) summed over the prices, kept positive by ProcFudge_. Returns
+        (dproc per item of the block, the fat row's right-hand side, the protein row's): FatsProtBal_ in changes,
+        f_MILK dQ_MILK - sum_k f_k dQ_k = - sum_k f_k dproc_k."""
+        n_it = len(dp["items"])
+        dproc = np.zeros(n_it)
+        rF = rP = 0.0
+        H = (self._proc_nq_params() or {}).get("Harms") or {}
+        if not H:
+            return dproc, rF, rP
+        mk = {c: k for k, c in self.DAIRY_TRADED.items()}               # market code -> the block's code
+        ix = dp["ix"]
+        for part in dp.get("parts") or ():
+            hr = H.get(part["rms"])
+            if not hr:
+                continue
+            d = np.zeros(n_it)
+            for (x, y), hv in hr.items():
+                kx, ky = mk.get(x), mk.get(y)
+                if kx is None or kx not in ix or ky is None or ky not in ix:
+                    continue
+                i = ix[kx]
+                if part["proc0"][i] <= 0:
+                    continue
+                d[i] -= hv * float(zt[ix[ky]])
+            for i in np.nonzero(d)[0]:
+                q0 = float(part["proc0"][i])
+                d[i] = self._proc_fudge(q0 + d[i], q0) - q0
+            dproc += d
+            rF -= float(part["f"] @ d)
+            rP -= float(part["r"] @ d)
+        return dproc, rF, rP
 
     def _dairy_solve(self, dp, traded_ratio, milk_ratio=None, fi=1.0, key="EU27"):
         """Solve one dairy block. Unknowns: fat, protein and raw milk price ratios, and the prices of the products
@@ -224,7 +266,9 @@ class DairyMixin(MarketStateMixin):
         else:
             mrhs = dp["Q0"][iM] * (float(milk_ratio) - 1.0)
         A = np.vstack([dp["rowF"], dp["rowP"], mrow, G[dom]])
-        rhs0 = np.concatenate([[0.0, 0.0, mrhs], np.zeros(len(dom))])
+        # the block's dairy processing at these prices (ProcNQ_, audit M9): its FatsProtBal_ terms
+        dproc, rF_, rP_ = self._dairy_proc_change(dp, zt)
+        rhs0 = np.concatenate([[rF_, rP_, mrhs], np.zeros(len(dom))])
         Au, c = A[:, unk], A @ zt
         nd = len(dom)
         P9 = list(self.DAIRY_PRODUCTS)
@@ -261,8 +305,10 @@ class DairyMixin(MarketStateMixin):
         res = {"price_ratio": {**{k: 1.0 + z[dp["ix"][k]] for k in items}, "FATS": 1.0 + z[iF], "PROT": 1.0 + z[iP]},
                "production": {k: float(Q[dp["ix"][k]]) for k in items},
                "production0": {k: float(dp["Q0"][dp["ix"][k]]) for k in items},
-               "market_supply": {self.DAIRY_TRADED[k]: float(Q[dp["ix"][k]] - dp["proc0"][dp["ix"][k]])
+               "market_supply": {self.DAIRY_TRADED[k]: float(Q[dp["ix"][k]] - dp["proc0"][dp["ix"][k]]
+                                                             - dproc[dp["ix"][k]])
                                  for k in self.DAIRY_TRADED},
+               "processing_change": {self.DAIRY_TRADED[k]: float(dproc[dp["ix"][k]]) for k in self.DAIRY_TRADED},
                "market_supply0": {self.DAIRY_TRADED[k]: float(dp["Q0"][dp["ix"][k]] - dp["proc0"][dp["ix"][k]])
                                   for k in self.DAIRY_TRADED},
                "fmil_index": float(fi), "z": z.copy(),
@@ -272,20 +318,21 @@ class DairyMixin(MarketStateMixin):
         return res
 
     @staticmethod
-    def _dairy_solve_ms(prm, zt, milk_ratio):
+    def _dairy_solve_ms(prm, zt, milk_ratio, rfp=(0.0, 0.0)):
         """One member state's block with every product at its (EU) market price: the fat and protein balances
-        (FatsProtBal_) and dairies' milk demand = milk delivered (DairyNQ_ for MILK) give the member state's
-        fat, protein and raw milk prices; returns the full z (price ratios - 1)."""
+        (FatsProtBal_, their right-hand sides rfp from the processing change, _dairy_proc_change) and dairies' milk
+        demand = milk delivered (DairyNQ_ for MILK) give the member state's fat, protein and raw milk prices; returns
+        the full z (price ratios - 1)."""
         iF, iP, iM = prm["iF"], prm["iP"], prm["iM"]
         unk = [iF, iP, iM]
         A = np.vstack([prm["rowF"], prm["rowP"], prm["G"][iM]])
-        rhs = np.array([0.0, 0.0, prm["Q0"][iM] * (float(milk_ratio) - 1.0)])
+        rhs = np.array([float(rfp[0]), float(rfp[1]), prm["Q0"][iM] * (float(milk_ratio) - 1.0)])
         u = np.linalg.solve(A[:, unk], rhs - A @ zt)
         z = zt.copy(); z[unk] = u
         return z
 
     @staticmethod
-    def _dairy_solve_ms_resp(prm, zt, mr_base, k, L_seen):
+    def _dairy_solve_ms_resp(prm, zt, mr_base, k, L_seen, rfp=(0.0, 0.0)):
         """_dairy_solve_ms with the member state's raw milk supply responding to its own milk price (audit M5):
         delivered (relative to base) = mr_base + k x (milk price ratio - L_seen), k the supply response per unit of
         price level over base delivery; the dairies' demand equals it (DairyNQ_ = ProdNQ_ MILK)."""
@@ -295,7 +342,7 @@ class DairyMixin(MarketStateMixin):
         mrow = prm["G"][iM].copy()
         mrow[iM] -= Q0 * float(k)
         A = np.vstack([prm["rowF"], prm["rowP"], mrow])
-        rhs = np.array([0.0, 0.0, Q0 * (float(mr_base) - 1.0) + Q0 * float(k) * (1.0 - float(L_seen))])
+        rhs = np.array([float(rfp[0]), float(rfp[1]), Q0 * (float(mr_base) - 1.0) + Q0 * float(k) * (1.0 - float(L_seen))])
         u = np.linalg.solve(A[:, unk], rhs - A @ zt)
         z = zt.copy(); z[unk] = u
         return z
@@ -305,14 +352,15 @@ class DairyMixin(MarketStateMixin):
     MILK_PRICE_FLOOR = 1e-7
 
     @staticmethod
-    def _dairy_solve_ms_at(prm, zt, milk_price_ratio):
+    def _dairy_solve_ms_at(prm, zt, milk_price_ratio, rfp=(0.0, 0.0)):
         """A member state's block with its raw milk price fixed (held at its lower bound): the fat and protein balances
         give the fat and protein prices; the dairies' milk demand then differs from the milk delivered."""
         iF, iP, iM = prm["iF"], prm["iP"], prm["iM"]
         z = zt.copy()
         z[iM] = float(milk_price_ratio) - 1.0
         A = np.vstack([prm["rowF"], prm["rowP"]])
-        u = np.linalg.solve(A[:, [iF, iP]], -A @ z + A[:, [iF, iP]] @ z[[iF, iP]])
+        u = np.linalg.solve(A[:, [iF, iP]], np.array([float(rfp[0]), float(rfp[1])]) - A @ z
+                            + A[:, [iF, iP]] @ z[[iF, iP]])
         z[[iF, iP]] = u
         return z
 
@@ -347,20 +395,27 @@ class DairyMixin(MarketStateMixin):
         vm = vf = vp = vm0 = vf0 = vp0 = 0.0
         vmr = {rg: [0.0, 0.0] for rg in self.EU}
         msr, msz = {}, {}
+        dproc = np.zeros(len(items))
+        dproc_r = {rg: np.zeros(len(items)) for rg in self.EU}
         for ms, prm in dp["ms"].items():
             rg = self.eu_region_of_ms(ms) or self.EU[0]
             mr = float(milk_ratio.get(ms, 1.0)) if isinstance(milk_ratio, dict) else float(milk_ratio)
+            # the member state's dairy processing at these prices (ProcNQ_, audit M9) and its FatsProtBal_ terms
+            dpr, rF_, rP_ = self._dairy_proc_change(prm, zts[rg])
+            rfp = (rF_, rP_)
+            dproc += dpr
+            dproc_r[rg] += dpr
             if milk_resp and ms in milk_resp:
                 mb, k_, Ls_ = milk_resp[ms]
-                z = self._dairy_solve_ms_resp(prm, zts[rg], mb, k_, Ls_)
+                z = self._dairy_solve_ms_resp(prm, zts[rg], mb, k_, Ls_, rfp)
                 mr = float(mb) + float(k_) * (1.0 + float(z[prm["iM"]]) - float(Ls_))
             else:
-                z = self._dairy_solve_ms(prm, zts[rg], mr)
+                z = self._dairy_solve_ms(prm, zts[rg], mr, rfp)
             if not bool(getattr(self, "negative_milk_price", False)) and 1.0 + float(z[prm["iM"]]) < self.MILK_PRICE_FLOOR:
                 # CAPRI without negProdPriceAllowed: the price cannot cross zero; held at the bound, the member state's
                 # milk market does not clear (recorded)
                 self.__dict__.setdefault("_milk_floor_hits", {})[ms] = 1.0 + float(z[prm["iM"]])
-                z = self._dairy_solve_ms_at(prm, zts[rg], self.MILK_PRICE_FLOOR)
+                z = self._dairy_solve_ms_at(prm, zts[rg], self.MILK_PRICE_FLOOR, rfp)
                 if milk_resp and ms in milk_resp:
                     mb, k_, Ls_ = milk_resp[ms]
                     mr = float(mb) + float(k_) * (self.MILK_PRICE_FLOOR - float(Ls_))
@@ -381,13 +436,17 @@ class DairyMixin(MarketStateMixin):
         res = {"price_ratio": {**{k: (1.0 + zt[ix[k]]) for k in items if k != "MILK"},
                                "MILK": vm / vm0, "FATS": vf / vm0, "PROT": vp / vm0},
                "milk_price_ratio_reg": {rg: (v[0] / v[1] if v[1] > 0 else 1.0) for rg, v in vmr.items()},
-               "market_supply_reg": {rg: {self.DAIRY_TRADED[k]: float(Qr[rg][ix[k]] - rgp[rg]["proc0"][ix[k]])
+               "market_supply_reg": {rg: {self.DAIRY_TRADED[k]: float(Qr[rg][ix[k]] - rgp[rg]["proc0"][ix[k]]
+                                                                      - dproc_r[rg][ix[k]])
                                           for k in self.DAIRY_TRADED} for rg in self.EU if rg in rgp},
                "ms_price_ratio": msr, "ms_z": msz,
                "production": {k: float(Q[ix[k]]) for k in items},
                "production0": {k: float(Q0[ix[k]]) for k in items},
-               "market_supply": {self.DAIRY_TRADED[k]: float(Q[ix[k]] - proc0[ix[k]]) for k in self.DAIRY_TRADED},
+               "market_supply": {self.DAIRY_TRADED[k]: float(Q[ix[k]] - proc0[ix[k]] - dproc[ix[k]])
+                                 for k in self.DAIRY_TRADED},
                "market_supply0": {self.DAIRY_TRADED[k]: float(Q0[ix[k]] - proc0[ix[k]]) for k in self.DAIRY_TRADED},
+               # the dairy processing of this solve (CAPRI's ProcNQ_, audit M9), relative to base
+               "processing_change": {self.DAIRY_TRADED[k]: float(dproc[ix[k]]) for k in self.DAIRY_TRADED},
                "fmil_index": float(self.seen.fmil_index or 1.0), "residual": 0.0}
         return res
 
