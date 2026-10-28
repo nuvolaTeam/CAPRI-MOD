@@ -379,6 +379,9 @@ class CAPRIModel:
         # scenario, not of its baseline
         _bmand = getattr(pol_scenario, "biofuel_mandate", None)
         self.market_module.biofuel_mandate = float(_bmand) if _bmand is not None else 1.0
+        # CAPRI's negProdPriceAllowed(rms, "MILK") of the scenario file (PolicyScenario.negative_milk_price)
+        self.market_module.negative_milk_price = bool(getattr(pol_scenario, "negative_milk_price", False))
+        self.market_module._milk_floor_hits = {}
 
         # CAPRI's endogenous-technology settings: scenario configuration, the same in the baseline
         from capri_mod.policy.endotech import effective as _et_eff, key as _et_key
@@ -1194,6 +1197,11 @@ class CAPRIModel:
             self._hessian_pending = {"key": _key, "price_signal": price_signal.copy(), "supply_results": supply_results,
                                      "regions": regions}
 
+        if getattr(self.market_module, "_milk_floor_hits", None):
+            warnings.warn(f"raw milk price held just above zero in {sorted(self.market_module._milk_floor_hits)} "
+                          "(negative milk prices not allowed in this scenario, CAPRI's negProdPriceAllowed): their milk "
+                          "markets do not clear", RuntimeWarning, stacklevel=2)
+
         # --- Step 3: Environmental module ---
         env_df = None
         if run_environmental and supply_results:
@@ -1284,6 +1292,9 @@ class CAPRIModel:
                 # False means the supply-market price feedback is incomplete;
                 # such a run must not be compared against external references.
                 "outer_converged": outer_converged,
+                # member states whose raw milk price was held just above zero (negative milk prices not allowed by
+                # the scenario, CAPRI's negProdPriceAllowed): the price ratio the dairy block would have given
+                "milk_price_floor": dict(getattr(self.market_module, "_milk_floor_hits", None) or {}),
                 # CAPRI's stop rule at the last iteration (outer_loop.stop_rule; capri_mod/utils/capri_stop.py)
                 "capri_stop": ({k_: v_ for k_, v_ in (getattr(self, "_capri_stop_verdict", None) or {}).items() if k_ != "rows"}
                                or None),

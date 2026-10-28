@@ -215,12 +215,15 @@ CAPRI's scenario files set a few market-loop switches of their own. Two were fou
   has one EU price per product (a member state's own price only for raw milk, and Norway's), so an entry other than
   raw milk is for region EU27 and acts on every member state.
 - **Negative raw milk producer prices** (`negProdPriceAllowed(rms, "MILK")` and `negProdPriceAllowedFromStart(rmssup,
-  "MILK")` for every market region, greendeal_scenarios.gms; arm/set_start_val.gms l. 565, widen_bounds.gms l. 452-457):
-  the Green Deal runs let the milk price go below zero (lower bound -max(100, price)). Without the switch CAPRI's lower
-  bound on a producer price is widened toward zero when it binds but stays positive. capri-mod's member-state dairy
-  blocks have no lower bound on the raw milk price in any scenario: as CAPRI's Green Deal runs, and a difference from
-  CAPRI's other scenarios that has never been active (lowest member-state raw milk price at the end of r163 Farm-to-Fork
-  1.10 of base, r166 Green Deal 1.05).
+  "MILK")` for every market region, greendeal_scenarios.gms l. 66-67; arm/set_start_val.gms l. 565, widen_bounds.gms
+  l. 452-457): the Green Deal runs let the milk price go below zero (lower bound -max(100, price)). Without the switch
+  CAPRI's lower bound on a producer price (0.1 x the price) is lowered tenfold each time it binds but stays positive.
+  capri-mod as CAPRI since 28 October 2026: `PolicyScenario.negative_milk_price`, set by the Green Deal group
+  (greendeal_scenario, so Farm-to-Fork and Green Deal 2030 too); without it a member state's raw milk price is held at
+  1e-7 of its base (MarketModule.MILK_PRICE_FLOOR), its fat and protein prices still clearing, and the member state is
+  recorded (metadata "milk_price_floor", a warning) as its milk market does not clear there. Before, the price had no
+  lower bound in any scenario; never active (lowest member-state raw milk price at the end of r163 Farm-to-Fork 1.10 of
+  base, r166 Green Deal 1.05).
 
 ## DEPARTURE (to be removed)
 

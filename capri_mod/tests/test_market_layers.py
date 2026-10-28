@@ -154,3 +154,34 @@ def test_hessian_skip_of_unreached_regions_is_exact(monkeypatch):
             os.remove(info["file"])
         else:
             assert info.get("source") == "cache", info
+
+
+def test_milk_price_held_above_zero_unless_the_scenario_allows_negative_prices():
+    """CAPRI's negProdPriceAllowed(rms, "MILK") (greendeal_scenarios.gms l. 66-67): with it a member state's raw milk
+    price may go below zero; without it the price is held at its positive lower bound (the milk market then does not
+    clear, recorded), the fat and protein balances still hold. The Green Deal group sets it."""
+    import numpy as np
+    from capri_mod.data.loaders import load_all_data
+    from capri_mod.market.market_module import MarketModule
+    from capri_mod.policy.greendeal import farm_to_fork_scenario, greendeal_2030_scenario
+    from capri_mod.policy.policy_module import PolicyScenario
+    assert farm_to_fork_scenario().negative_milk_price and greendeal_2030_scenario().negative_milk_price
+    assert not PolicyScenario(name="x", description="").negative_milk_price
+    m = MarketModule(load_all_data("capri_data"))
+    prm = m._dairy_params()["ms"]
+    cls = type(m)
+    p = prm["PT000000"]
+    zt = np.zeros(p["G"].shape[1])
+    # a glut: three times the base milk delivered drives the free price below zero
+    z = cls._dairy_solve_ms(p, zt, 3.0)
+    assert 1.0 + z[p["iM"]] < 0.0
+    za = cls._dairy_solve_ms_at(p, zt, cls.MILK_PRICE_FLOOR)
+    assert abs(1.0 + za[p["iM"]] - cls.MILK_PRICE_FLOOR) < 1e-15
+    assert abs(float(p["rowF"] @ za)) < 1e-9 and abs(float(p["rowP"] @ za)) < 1e-9
+    # through the block: held and recorded without the switch, free with it
+    m.negative_milk_price = False
+    m.dairy_block({}, {"PT000000": 3.0})
+    assert "PT000000" in m._milk_floor_hits and m._milk_floor_hits["PT000000"] < 0.0
+    m.negative_milk_price = True
+    m.dairy_block({}, {"PT000000": 3.0})
+    assert m._milk_floor_hits == {}

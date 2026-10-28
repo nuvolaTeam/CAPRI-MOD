@@ -299,6 +299,22 @@ class DairyMixin:
         z = zt.copy(); z[unk] = u
         return z
 
+    #: the raw milk price ratio a member state's price is held at where negative milk prices are not allowed (CAPRI's
+    #: lower bound, 0.1 x the price, lowered tenfold at each widening while it binds: positive, toward zero)
+    MILK_PRICE_FLOOR = 1e-7
+
+    @staticmethod
+    def _dairy_solve_ms_at(prm, zt, milk_price_ratio):
+        """A member state's block with its raw milk price fixed (held at its lower bound): the fat and protein balances
+        give the fat and protein prices; the dairies' milk demand then differs from the milk delivered."""
+        iF, iP, iM = prm["iF"], prm["iP"], prm["iM"]
+        z = zt.copy()
+        z[iM] = float(milk_price_ratio) - 1.0
+        A = np.vstack([prm["rowF"], prm["rowP"]])
+        u = np.linalg.solve(A[:, [iF, iP]], -A @ z + A[:, [iF, iP]] @ z[[iF, iP]])
+        z[[iF, iP]] = u
+        return z
+
     def dairy_block(self, traded_ratio: Dict[str, float], milk_ratio, milk_resp=None) -> Optional[dict]:
         """The EU dairy block at given EU prices of the dairy products (relative to base, CAPRI codes) and raw milk
         delivered relative to base: per member state ({ms: ratio}, CAPRI: each member state's dairies process its
@@ -308,6 +324,7 @@ class DairyMixin:
         dp = self._dairy_params()
         if not dp:
             return None
+        self._milk_floor_hits = {}                      # this solve's member states held at the milk price floor
         if getattr(self, "_dairy_u", "unset") is None:                 # callers reset the start point
             (getattr(self, "_dairy_u_all", None) or {}).pop("EU27", None)
             self._dairy_u = "unset"
@@ -338,6 +355,14 @@ class DairyMixin:
                 mr = float(mb) + float(k_) * (1.0 + float(z[prm["iM"]]) - float(Ls_))
             else:
                 z = self._dairy_solve_ms(prm, zts[rg], mr)
+            if not bool(getattr(self, "negative_milk_price", False)) and 1.0 + float(z[prm["iM"]]) < self.MILK_PRICE_FLOOR:
+                # CAPRI without negProdPriceAllowed: the price cannot cross zero; held at the bound, the member state's
+                # milk market does not clear (recorded)
+                self.__dict__.setdefault("_milk_floor_hits", {})[ms] = 1.0 + float(z[prm["iM"]])
+                z = self._dairy_solve_ms_at(prm, zts[rg], self.MILK_PRICE_FLOOR)
+                if milk_resp and ms in milk_resp:
+                    mb, k_, Ls_ = milk_resp[ms]
+                    mr = float(mb) + float(k_) * (self.MILK_PRICE_FLOOR - float(Ls_))
             msz[ms] = z.copy()
             q_ = prm["Q0"] + prm["G"] @ z
             Q += q_

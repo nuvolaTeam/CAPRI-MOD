@@ -116,6 +116,12 @@ class PolicyScenario:
     #: UK's blending mandates (QUTS) times this factor; a policy shock of the scenario (None = unchanged). Acts
     #: with endogenous biofuel markets.
     biofuel_mandate: Optional[float] = None
+    #: CAPRI's negProdPriceAllowed(rms, "MILK") / negProdPriceAllowedFromStart(rmssup, "MILK") (set by the Green Deal
+    #: scenario file, pol_input/greendeal/greendeal_scenarios.gms l. 66-67): a member state's raw milk price may fall
+    #: below zero. Without it CAPRI's lower bound on the price is widened toward zero but stays positive
+    #: (arm/set_start_val.gms, widen_bounds.gms), and capri-mod holds the price just above zero, recording the member
+    #: state whose milk market then does not clear (MarketModule.dairy_block)
+    negative_milk_price: bool = False
     #: CAPRI's Green Deal mineral fertiliser reduction (greendeal_scenarios.gms, mineRedu; a policy shock of the
     #: scenario, EU27 only): "00" off; "20" minfert_redu_uaa.gms - mineral N per ha of UAA <= baseline x (1 - 20%)
     #: (e_synNMax); "10crp"/"13crp"/"17crp"/"20crp" minfert_redu_by_crop.gms - mineral N per ha of each crop group
