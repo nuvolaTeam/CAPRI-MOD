@@ -30,6 +30,22 @@ Full provenance for every entry is in `capri_data/DATA_SOURCING_REGISTRY.json`.
 
 ---
 
+## 28 October 2026: CAPRI's welfare report as levels (M7)
+
+- The market's welfare components are reported as CAPRI reports them (the project lead's decision): levels, the change
+  from the calibration point plus CAPRI's base value of each component (reports/welfare.gms): household expenditure at
+  the calibration prices (CSSP), processing x price or crushing margin (ProfitProc), dairy products x processing
+  margin (ProfitDairy), the revenue of the regions without supply models less their land and feed-energy netputs
+  (ProfitAgr, CAPRI's SUPREMA accounts as its 2030 reference), minus 20% of their feed cost (ProfitFeed). Before, the
+  components other than tariffs and quota rents were changes only.
+- The base values per CAPRI region come from CAPRI's own 2030 data with welfare.gms's formulas
+  (tools/build/build_welfare_base.py, capri_data/2017/market/welfare_base_2030.csv). Against CAPRI's 2030 reference
+  levels (ref2030_welfare.csv): CSSP and ProfitDairy equal in all 80 regions; ProfitAgr median ratio 1.04, ProfitProc
+  1.05 (the reference run's own change from its trend point is in CAPRI's levels); ProfitFeed not comparable (the
+  reference's level is dominated by that change).
+- Comparisons of two runs (CAPRIModel.compare) take the difference of the levels: unchanged.
+- [test suite and runs: to be filled in]
+
 ## 28 October 2026: CAPRI's switches of its Green Deal scenario file
 
 - **Slower price smoothing for problem products** (`outer_loop.capri_step_special`, CAPRI's p_stepWgtSpecial,

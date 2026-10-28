@@ -1862,6 +1862,7 @@
     "2017/market/gl_demand_regions.csv",
     "2017/market/processing_nq_base.csv",
     "2017/market/processing_nq_hessian.csv",
+    "2017/market/welfare_base_2030.csv",
     "2017/market/feed_demand_nonEU.json",
     "2017/market/biofuel_market.csv",
     "2017/market/supply_elas_region.csv",

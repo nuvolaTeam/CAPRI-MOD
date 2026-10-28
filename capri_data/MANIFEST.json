@@ -2767,6 +2767,25 @@
     ]
    },
    "note": "Read by capri_mod/water (indicator outside the run)."
+  },
+  "welfare_base_2030.csv": {
+   "source": "CAPRI data_market_1730defaulta Data_CAL PROD, PPRI, PROC, FEED, ARM1P, HCON, CPRI; elas_2_1730defaulta p_hessNQProc, p_hessNQDairy, p_hessNQSupp (own terms, CAL); PROCMARG 2030 of the markmarket_greendeal_1730et_base_1717 dump",
+   "vintage": "2030 calibration point",
+   "units": "EUR million",
+   "domain": "market",
+   "status": "live",
+   "path": "2017/market/welfare_base_2030.csv",
+   "shape": {
+    "rows": 346,
+    "cols": 4,
+    "columns": [
+     "rms",
+     "model_region",
+     "component",
+     "value"
+    ]
+   },
+   "note": "CAPRI's welfare report base values per behavioural region (reports/welfare.gms conventions; tools/build/build_welfare_base.py): the welfare levels are these plus the change from the calibration point"
   }
  },
  "_vintage_summary": {

@@ -84,9 +84,10 @@ def test_dairy_profit_is_the_integral_of_its_nq_function():
 
 @pytest.mark.slow
 def test_market_welfare_at_base_and_after_a_supply_shock():
-    """The market's report at its base supply: the components measured against the calibration point are zero,
-    tariffs and quota rents are levels (the EU collects tariffs); with 10% less EU beef the EU beef price rises, the
-    EU's consumers lose and Brazil's farms gain."""
+    """The market's report at its base supply: CAPRI's levels, i.e. its base values (welfare_base_2030.csv: no change
+    at the calibration point), tariffs and quota rents (the EU collects tariffs); the EU's consumer surplus is CAPRI's
+    2030 reference level (household expenditure at the calibration prices); with 10% less EU beef the EU beef price
+    rises, the EU's consumers lose and Brazil's farms gain."""
     from capri_mod.data.loaders import load_all_data
     from capri_mod.data.definitions import MARKET_COMMODITIES
     from capri_mod.market.market_module import MarketModule
@@ -101,8 +102,16 @@ def test_market_welfare_at_base_and_after_a_supply_shock():
     assert list(w0.columns) == list(mm.WELFARE_COMPONENTS) + ["Welfare"]
     assert np.isfinite(w0.to_numpy()).all()
     assert w0.at["EU27", "TariffRev"] > 0.0
-    chg = [c for c in mm.WELFARE_COMPONENTS if c not in ("TariffRev", "TRQRents")]
-    assert np.abs(w0[chg].to_numpy()).max() < 1e-6
+    base = mm._welfare_base()
+    for reg in w0.index:
+        for c in mm.WELFARE_COMPONENTS:
+            if c not in ("TariffRev", "TRQRents"):
+                assert abs(w0.at[reg, c] - base.get(reg, {}).get(c, 0.0)) < 1e-6 * max(1.0, abs(w0.at[reg, c])), (reg, c)
+    ref = pd.read_csv(Path(__file__).resolve().parents[2] / "capri_data" / "sources" / "capri_res" / "ref2030_welfare.csv")
+    ref = ref[(ref["col"].str.upper() == "CSSP") & (ref["row"].str.upper() == "INCE")].set_index("region")["value"]
+    gl = pd.read_csv(Path(__file__).resolve().parents[2] / "capri_data" / "2017" / "market" / "gl_demand_goods.csv")
+    eu_rms = sorted(set(gl.loc[gl.model_region == "EU27", "rms"]))
+    assert abs(w0.at["EU27", "CSSP"] - float(ref.reindex(eu_rms).sum())) < 1e-6 * w0.at["EU27", "CSSP"]
     exo1 = exo.copy()
     exo1.at["EU27", "BEEF"] *= 0.9
     eq1 = mm.solve(exogenous_supply=exo1)

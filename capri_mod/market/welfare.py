@@ -31,10 +31,15 @@ functions. Each component is the exact integral of the function the market solve
   - the constant-elasticity non-EU feed demand with cross-price terms: good by good in the model's commodity order
     (its integral depends on the order, as CAPRI's GL money metric does).
 
-Values are changes against the market's calibration point (EUR million). CAPRI reports levels: the changes plus
-base values set by conventions (household expenditure at base prices; processing margin x quantity; 50% of the
-revenue as the farms' profit of the regions without supply models; feed cost less 20%). Those base values cancel
-in any comparison of two runs, which is what the model compares (CAPRIModel.compare); they are not reproduced.
+Values are levels, as CAPRI reports them (EUR million; the project lead's decision, 28 October 2026): the change from
+the market's calibration point plus CAPRI's base value of each component, set by its conventions (welfare.gms):
+household expenditure at the calibration point (CSSP), processing x price or crushing margin (ProfitProc), dairy
+products x processing margin (ProfitDairy), the revenue of the regions without supply models less their land and
+feed-energy netputs (ProfitAgr, with CAPRI's SUPREMA land accounts, as its 2030 reference), minus 20% of their feed
+cost (ProfitFeed). The base values per CAPRI region are CAPRI's own data, computed with those formulas by
+tools/build/build_welfare_base.py (welfare_base_2030.csv); CSSP and ProfitDairy reproduce the levels of CAPRI's 2030
+reference run exactly. TariffRev and TRQRents are levels by construction. A comparison of two runs takes the difference
+of the levels (CAPRIModel.compare), in which the base values cancel.
 """
 
 from __future__ import annotations
@@ -48,7 +53,7 @@ import pandas as pd
 class WelfareMixin:
     """MarketModule methods for CAPRI's welfare report (reports/welfare.gms)."""
 
-    #: the components of the market's welfare report (EUR million, change against the calibration point)
+    #: the components of the market's welfare report (EUR million, levels as CAPRI's: base value plus change)
     WELFARE_COMPONENTS = ("CSSP", "ProfitProc", "ProfitDairy", "ProfitAgr", "ProfitFeed", "TariffRev", "TRQRents")
 
     # ------------------------------------------------------------------
@@ -373,13 +378,29 @@ class WelfareMixin:
                     rent[exp] = rent.get(exp, 0.0) + 0.5 * rt / 1000.0
         return {"tariff": tar, "rent": rent}
 
+    def _welfare_base(self) -> Dict[str, Dict[str, float]]:
+        """CAPRI's base value of each component per model region (welfare_base_2030.csv: per CAPRI region, summed
+        to the model's market regions; the EU's member states to their trade block with eu_blocks)."""
+        cached = getattr(self, "_welf_base_cache", None)
+        if cached is not None:
+            return cached
+        bb = self._inp().csv("welfare_base_2030.csv")
+        out: Dict[str, Dict[str, float]] = {}
+        for rms, mr, comp, v in bb[["rms", "model_region", "component", "value"]].itertuples(index=False):
+            if mr == "EU27" and self.eu_blocks:
+                mr = self.eu_region_of_ms(rms) or mr
+            d = out.setdefault(str(mr), {})
+            d[str(comp)] = d.get(str(comp), 0.0) + float(v)
+        self._welf_base_cache = out
+        return out
+
     # ------------------------------------------------------------------
     # the report
     # ------------------------------------------------------------------
     def _capri_welfare(self, r: pd.DataFrame, PAr: pd.DataFrame, S: pd.DataFrame, D: pd.DataFrame,
                        pc: dict) -> pd.DataFrame:
-        """CAPRI's welfare components per market region at the market solution (EUR million; TariffRev and TRQRents
-        levels, the others changes against the calibration point), and their sum, Welfare. The EU's and Norway's
+        """CAPRI's welfare components per market region at the market solution (EUR million, levels: CAPRI's base
+        value plus the change from the calibration point), and their sum, Welfare. The EU's and Norway's
         farm profit, land rents and budget (ProfitAgr, ProfitLandUse, PSEs of the regions with supply models) come
         from the supply models (model level)."""
         ev = getattr(self, "_welfare_eval", None) or {}
@@ -410,6 +431,11 @@ class WelfareMixin:
         tr = self._welfare_trade(r, D, pc)
         add("TariffRev", tr["tariff"])
         add("TRQRents", tr["rent"])
+        for reg, comps in self._welfare_base().items():           # CAPRI's levels: the base values
+            if reg in rows:
+                for comp, v in comps.items():
+                    if comp in rows[reg]:
+                        rows[reg][comp] += float(v)
         df = pd.DataFrame.from_dict(rows, orient="index")
         df["Welfare"] = df[list(self.WELFARE_COMPONENTS)].sum(axis=1)
         df.index.name = "region"
