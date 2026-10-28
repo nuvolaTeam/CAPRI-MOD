@@ -192,7 +192,7 @@ class WelfareMixin:
           residual feeds of the regions with supply models (RESIMPX: FENI, FPRI; the EU): the change of their output
               value, output x producer price."""
         out: Dict[str, float] = {}
-        st = getattr(self, "_biof_state", None)
+        st = self.ev.biof_state
         bm = self._biofuel_market_params() or {}
         bp = self._biofuel_params() or {}
         if st is not None and bm:
@@ -218,7 +218,7 @@ class WelfareMixin:
                 if p not in S.columns or p not in r.columns or reg not in dom0.index:
                     continue
                 p0 = float(dom0.at[reg, p])
-                q0 = float(self.base_production.at[reg, p])
+                q0 = float(self.par.base_production.at[reg, p])
                 out[reg] = out.get(reg, 0.0) + (float(S.at[reg, p]) * p0 * float(r.at[reg, p]) - q0 * p0) / 1000.0
         return out
 
@@ -246,7 +246,7 @@ class WelfareMixin:
         MILK: change = sum over the behavioural regions of (Q0 + dQ / 2) dp_MILK). {"dairy": {...}, "milk": {...}}."""
         out = {"dairy": {}, "milk": {}}
         dp = self._dairy_params() or {}
-        last = getattr(self, "_dairy_last", None) or {}
+        last = self.ev.dairy_last or {}
         msz = last.get("ms_z") or {}
         for ms, prm in (dp.get("ms") or {}).items():
             z = msz.get(ms)
@@ -255,7 +255,7 @@ class WelfareMixin:
             rg = self.eu_region_of_ms(ms) or self.EU[0]
             out["dairy"][rg] = out["dairy"].get(rg, 0.0) + self._dairy_profit(prm, z) / 1000.0
         wp = self._dairy_world_params() or {}
-        wl = getattr(self, "_dairy_world_last", None) or {}
+        wl = self.ev.dairy_world_last or {}
         for tr, prm in wp.items():
             res = wl.get(tr)
             if res is None or "z" not in res:
@@ -286,13 +286,13 @@ class WelfareMixin:
         ev_regs, cols, EVm = getattr(self, "_welf_supply_EV", (None, None, None))
         skip = set(self.EU) | set(getattr(self, "SUP", ()))
         for reg in S.index:
-            if (reg in skip or reg not in r.index or reg not in self.base_production.index or ev_regs is None
+            if (reg in skip or reg not in r.index or reg not in self.par.base_production.index or ev_regs is None
                     or reg not in ev_regs):
                 continue
             EV = EVm[ev_regs.index(reg)]
             v = 0.0
             for j, c in enumerate(cols):
-                s0 = float(self.base_production.at[reg, c])
+                s0 = float(self.par.base_production.at[reg, c])
                 p0 = float(dom0.at[reg, c]) if (reg in dom0.index and c in dom0.columns) else 0.0
                 rr = max(float(r.at[reg, c]), 1e-6) if c in r.columns else 1.0
                 if c == "MILK" or s0 <= 0 or not p0 > 0 or rr == 1.0:
@@ -346,7 +346,7 @@ class WelfareMixin:
         rent: Dict[str, float] = {}
         R = list(self.regions)
         eu = set(self.EU)
-        for c, sc in (getattr(self, "_bilat", None) or {}).items():
+        for c, sc in (self.par.bilat or {}).items():
             if c not in r.columns or c not in pc:
                 continue
             rc = r[c].reindex(R).to_numpy(dtype=float)

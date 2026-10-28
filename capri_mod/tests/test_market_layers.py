@@ -120,7 +120,7 @@ def test_market_supply_hessian_measured_at_base_and_at_scenario_state():
         m.run(scenario="BASELINE", regions=regs, max_outer_iter=2)
         # a baseline alone does not measure it (28 October 2026): the scenario on it does, first thing
         assert not getattr(m, "market_supply_hessian_log", None)
-        assert m.market_module.supply_hessian is None
+        assert m.market_module.par.supply_hessian is None
         sc = greendeal_scenario(lndscpTarg=10, orgTarg=25, pestRedu=50, surpRedu=50, mineRedu=20)
         m.run(custom_scenario=sc, regions=regs, max_outer_iter=3)
         base, scen = (dict(d) for d in m.market_supply_hessian_log[-2:])
@@ -185,3 +185,18 @@ def test_milk_price_held_above_zero_unless_the_scenario_allows_negative_prices()
     m.negative_milk_price = True
     m.dairy_block({}, {"PT000000": 3.0})
     assert m._milk_floor_hits == {}
+
+
+def test_moved_market_attributes_fail_loudly():
+    """Refactor stage 2b moved the market's state into par/ev/sv/seen; a read or a write of an old name raises
+    (RuntimeError: getattr(obj, name, default) cannot hide it), naming the new place."""
+    import pytest
+    from capri_mod.market.market_module import MarketModule
+    from capri_mod.market.state import MOVED
+    m = MarketModule.__new__(MarketModule)
+    with pytest.raises(RuntimeError, match="ev.dairy_last"):
+        getattr(m, "_dairy_last", None)
+    with pytest.raises(RuntimeError, match="par.supply_hessian"):
+        m.supply_hessian = None
+    assert getattr(m, "no_such_attribute", 1) == 1
+    assert "base_production" in MOVED and "last_market_solver" in MOVED

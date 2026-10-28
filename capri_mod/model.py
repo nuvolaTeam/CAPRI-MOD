@@ -409,7 +409,7 @@ class CAPRIModel:
             _mm.seen.eu_base_supply = None
             # a baseline's market runs without a market supply Hessian (the one of an earlier baseline belonged to
             # another solution, possibly another region set); its own is measured when a scenario needs it
-            _mm.supply_hessian = None
+            _mm.par.supply_hessian = None
             self._hessian_key = None
             # Recalibrate at THIS run's first market solve. The calibration used
             # to freeze at the first solve an instance ever performed, so a model
@@ -1556,14 +1556,14 @@ class CAPRIModel:
         try:
             self._progress("market supply Hessian of the baseline ...")
             _t_h = time.time()
-            self.market_module.supply_hessian = self._market_supply_hessian(pend["price_signal"], pend["supply_results"],
+            self.market_module.par.supply_hessian = self._market_supply_hessian(pend["price_signal"], pend["supply_results"],
                                                                             pend["regions"])
             self._hessian_key = pend["key"]
             self._progress(f"market supply Hessian of the baseline: {time.time() - _t_h:.0f} s")
         except Exception as _exc:
             warnings.warn(f"market supply Hessian not built ({_exc!r}); the market keeps its own-price "
                           "anticipation", RuntimeWarning, stacklevel=2)
-            self.market_module.supply_hessian = None
+            self.market_module.par.supply_hessian = None
             self._hessian_key = pend["key"]
             # recorded, so a run without CAPRI's market supply function shows it in its metadata (r131)
             self.market_supply_hessian_info = {"source": "failed", "error": repr(_exc)}

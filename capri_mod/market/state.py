@@ -133,9 +133,82 @@ class MarketSeen:
     eu_base_supply: Any = None
 
 
+#: the module attributes refactor stage 2b moved (old name: new place) or removed (step 3, write-only): a read or a
+#: write of an old name raises (RuntimeError, so that getattr(obj, name, default) cannot hide it)
+MOVED = {
+    "base_consumption": "par.base_consumption",
+    "_base_consumption0": "par.base_consumption0",
+    "_base_net_exports_eu": "par.base_net_exports_eu",
+    "base_production": "par.base_production",
+    "_base_production0": "par.base_production0",
+    "_bilat": "par.bilat",
+    "_bilat_last_r": "sv.bilat_last_r",
+    "_bilat_local_el": "sv.bilat_local_el",
+    "_bilat_ratio_now": "ev.bilat_ratio_now",
+    "_biof_state": "ev.biof_state",
+    "_capri_world_balance": "par.capri_world_balance",
+    "_crush_prices_now": "ev.crush_prices_now",
+    "_crush_q0_override": "par.crush_q0_override",
+    "_dairy_S0": "par.dairy_S0",
+    "_dairy_S0_ms": "par.dairy_S0_ms",
+    "_dairy_S0_reg": "par.dairy_S0_reg",
+    "_dairy_last": "ev.dairy_last",
+    "_dairy_m5_now": "ev.dairy_m5_now",
+    "_dairy_u": "sv.dairy_u",
+    "_dairy_u_all": "sv.dairy_u_all",
+    "_dairy_world_last": "ev.dairy_world_last",
+    "_demand_cal": "par.demand_cal",
+    "_demand_cal_frozen": "par.demand_cal_frozen",
+    "_eu_aligned_use": "par.eu_aligned_use",
+    "_eu_base_supply": "seen.eu_base_supply",
+    "_eu_biof_ratio": "ev.eu_biof_ratio",
+    "_eu_feed_now_reg": "ev.eu_feed_now_reg",
+    "_eu_food_ratio": "ev.eu_food_ratio",
+    "_eu_milk_supply_now": "ev.eu_milk_supply_now",
+    "_eu_price_seen": "seen.eu_price_seen",
+    "_feed_bulk_index": "seen.feed_bulk_index",
+    "_fmil_index": "seen.fmil_index",
+    "_fmil_index_sup": "seen.fmil_index_sup",
+    "_milk_dq_now": "ev.milk_dq_now",
+    "_milk_seen_ms": "seen.milk_seen_ms",
+    "_sup_active": "ev.sup_active",
+    "_sup_feed_now": "ev.sup_feed_now",
+    "_sup_milk0": "par.sup_milk0",
+    "_sup_milk_now": "ev.sup_milk_now",
+    "_sup_price_seen": "seen.sup_price_seen",
+    "supply_hessian": "par.supply_hessian",
+    "_world_milk_now": "ev.world_milk_now",
+    "_yani_market_now": "ev.yani_market_now",
+    "_yani_state": "seen.yani_state",
+    "_prem_prev": "removed (stage 2b step 3: written, never read)",
+    "_prem_w": "removed (stage 2b step 3: written, never read)",
+    "_prem_d": "removed (stage 2b step 3: written, never read)",
+    "_eu_base_demand": "removed (stage 2b step 3: written, never read)",
+    "_eu_feed_now": "removed (stage 2b step 3: written, never read)",
+    "_milk_dL_now": "removed (stage 2b step 3: written, never read)",
+    "_wedge_eu_last": "removed (stage 2b step 3: written, never read)",
+    "last_market_solver": "removed (stage 2b step 3: written, never read)",
+    "_eu_aggregate_reported": "removed (stage 2b step 3: written, never read)",
+    "_rest_share": "removed (stage 2b step 3: written, never read)",
+    "_bilat_converged": "removed (stage 2b step 3: written, never read)",
+    "_bilat_unconverged": "removed (stage 2b step 3: written, never read)",
+}
+
+
 class MarketStateMixin:
     """`par`, `ev`, `sv` and `seen`: the module's MarketParameters, MarketEvalState, MarketSolveState and MarketSeen,
     created on first use (also on modules built without __init__, as the tests' stubs are)."""
+
+    def __getattr__(self, name):
+        # only reached for names the instance and its class do not have
+        if name in MOVED:
+            raise RuntimeError(f"market attribute {name} is now {MOVED[name]} (refactor stage 2b)")
+        raise AttributeError(f"{type(self).__name__!r} object has no attribute {name!r}")
+
+    def __setattr__(self, name, value):
+        if name in MOVED:
+            raise RuntimeError(f"market attribute {name} is now {MOVED[name]} (refactor stage 2b)")
+        object.__setattr__(self, name, value)
 
     @property
     def seen(self) -> MarketSeen:

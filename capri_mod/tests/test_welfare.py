@@ -94,8 +94,8 @@ def test_market_welfare_at_base_and_after_a_supply_shock():
     mm = MarketModule(load_all_data(str(Path(__file__).resolve().parents[2] / "capri_data")))
     exo = pd.DataFrame(0.0, index=["EU27"], columns=MARKET_COMMODITIES)
     for c in MARKET_COMMODITIES:
-        if c in mm.base_production.columns:
-            exo.at["EU27", c] = mm.base_production.at["EU27", c]
+        if c in mm.par.base_production.columns:
+            exo.at["EU27", c] = mm.par.base_production.at["EU27", c]
     eq0 = mm.solve(exogenous_supply=exo)
     mm.set_eu_base(exo.loc["EU27"], eq0.consumption.loc["EU27"])     # scenarios keep the base calibration
     w0 = eq0.welfare
