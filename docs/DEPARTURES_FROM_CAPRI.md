@@ -226,6 +226,19 @@ CAPRI's scenario files set a few market-loop switches of their own. Two were fou
   lower bound in any scenario; never active (lowest member-state raw milk price at the end of r163 Farm-to-Fork 1.10 of
   base, r166 Green Deal 1.05).
 
+## Beyond CAPRI: reports only (results unchanged)
+
+### `outer_loop.drift_report_steps = 3` (28 October 2026; the project lead's decision)
+
+CAPRI's stop rule (price_forecast.gms l. 345-371) counts rows (products, each at its largest change over the trade
+blocks) and stops when two or fewer change by more than 0.05%. It can therefore stop while one or two products still
+move one way, iteration after iteration: Farm-to-Fork r170 stopped with the tomato price rising 0.36% per iteration
+(a market supply Hessian far more price-responsive than the supply models, CHANGELOG 28 October 2026), its supply
+models' tomato output 6% below the market's. capri-mod keeps CAPRI's rule and reports, when the loop ends, the items of
+the rule (trade-block prices, member-state production and feed, after the rule's filters) whose last n changes had one
+sign, the last above 0.05%: their changes, the rate they shrink at and a rough estimate of the movement still to come
+(metadata capri_stop drift; a warning when the loop stopped). It decides nothing; 0 turns it off.
+
 ## DEPARTURE (to be removed)
 
 | Setting | CAPRI star 3.0 | Default now | Why it differs (recorded at the time) | What switching needs |

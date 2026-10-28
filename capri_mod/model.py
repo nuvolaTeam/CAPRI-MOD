@@ -1210,6 +1210,23 @@ class CAPRIModel:
                 RuntimeWarning, stacklevel=2)
             if self.verbose:
                 print(f"  ⚠ Outer loop did not fully converge in {max_outer_iter} iterations")
+        # Not CAPRI's (a report, the project lead's decision): items still moving one way when the loop ended
+        # (outer_loop.drift_report_steps; CapriStopRule.drift)
+        self._capri_drift = []
+        _nd = int(_settings().get("outer_loop.drift_report_steps") or 0)
+        if _nd > 0 and getattr(self, "_capri_stop", None) is not None:
+            self._capri_drift = self._capri_stop.drift(_nd)
+            if self._capri_drift:
+                _top = "; ".join(f"{e['row']} {e['where']} ({e['kind']}) {e['changes'][-1]:+.3f}%"
+                                 + (f", about {e['to_come']:.2f}% to come" if e["to_come"] is not None else ", not shrinking")
+                                 for e in self._capri_drift[:5])
+                self._progress(f"{_lab}: {len(self._capri_drift)} item(s) still moving one way for {_nd} iterations "
+                               f"at the end: {_top}")
+                if outer_converged:
+                    warnings.warn(f"{_lab}: the loop stopped with {len(self._capri_drift)} item(s) still moving one way "
+                                  f"for {_nd} iterations ({_top}); CAPRI's rule allows it (two rows or fewer above "
+                                  "0.05%), their results are not at their equilibrium yet: metadata capri_stop drift",
+                                  RuntimeWarning, stacklevel=2)
         _RSMt.nlp_tol = _tol_tight                # later solves outside the loop at the tight tolerance
 
         # CAPRI's market supply functions calibrated to the supply models (supply/calibrate_supply.gms:193-508): at the
@@ -1324,8 +1341,9 @@ class CAPRIModel:
                 # the scenario, CAPRI's negProdPriceAllowed): the price ratio the dairy block would have given
                 "milk_price_floor": dict(getattr(self.market_module, "_milk_floor_hits", None) or {}),
                 # CAPRI's stop rule at the last iteration (outer_loop.stop_rule; capri_mod/utils/capri_stop.py)
-                "capri_stop": ({k_: v_ for k_, v_ in (getattr(self, "_capri_stop_verdict", None) or {}).items() if k_ != "rows"}
-                               or None),
+                "capri_stop": ({**{k_: v_ for k_, v_ in (getattr(self, "_capri_stop_verdict", None) or {}).items() if k_ != "rows"},
+                                "drift": list(getattr(self, "_capri_drift", None) or [])}
+                               if getattr(self, "_capri_stop_verdict", None) else None),
                 # Norway's last price gap (its own products > 5 kt; out of the convergence test from iteration 15,
                 # as CAPRI's) and the product, reported as it is
                 "nor_price_gap": (float(getattr(self, "_sup_dev_gap", 0.0) or 0.0),

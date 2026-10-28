@@ -74,6 +74,11 @@ capri_step_weights_late_from = 20
 # Green Deal scenarios set none (greendeal_scenarios.gms l. 82: the Maltese milk entry is commented out). Acts with
 # price_update = "capri"
 capri_step_special = []
+# Not CAPRI's (a report; it decides nothing): when the loop ends, the items of CAPRI's stop rule whose last n changes
+# all had the same sign, the last still above 0.05% (CAPRI's rule allows stopping with two such rows), with the rate at
+# which their changes shrink and a rough estimate of the movement still to come; in metadata capri_stop drift, and a
+# warning when the loop stopped. 0: off
+drift_report_steps = 3
 # member states whose milk delivery is below this share of the EU's do not hold the milk gap open
 milk_ms_min_share = 0.01
 # supply gap: products below this production (kt) do not count (CAPRI 10 x p_minAbsProdIterChg 0.5)
