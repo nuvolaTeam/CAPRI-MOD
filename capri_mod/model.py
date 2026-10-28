@@ -1572,6 +1572,10 @@ class CAPRIModel:
                         tuple(getattr(self.supply_module, "pmp_capri_parts", ())), __import__(
                             "capri_mod.supply.capri_regional_nlp", fromlist=["CAL_RIDGE"]).CAL_RIDGE,
                         tuple(yani_goods),
+                        # 28 October 2026 (audit S13): activities of a calibrated part without a positive own PMP term
+                        # are held at their level; their price response changes, their base level does not, so the
+                        # base totals above would not tell a Hessian measured before from one measured after
+                        "held-without-own-term",
                         # the supply models' rules that change their price response (24 October 2026: S6-S10)
                         # (the rules whose switches were removed 27 October 2026 keep their values' place, so the
                         # cached Hessians' keys stay valid)
