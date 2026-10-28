@@ -803,9 +803,18 @@ With CAPRI's pmpParSqr including the fertiliser-saving term (ghgMiti.gms l. 1016
 
 Run r129: 52.7% of the histosol area fallowed (r123: 21.7%; JRC121368 Table 17: 2% -> 9%). Since the S10 fix idled histosols count towards the landscape floor (CAPRI star 3.0's setaFallow includes iHisCr, iHisGr). The floor's dual is high: one-iteration landscape-only solves give 240-6,300 EUR/ha (DE94 239, NL13 490, FRK1 682, IE04 3,148, DE12 6,318), from CAPRI's own 2030 curvature of FALL + VSET (DE12: g 6,936 over a base of 10.8 kha, so about 640 EUR/ha per thousand ha more), against fallowing's CAPRI curvature of about 300-440 EUR/ha per unit share. Not a defect found yet: JRC121368 ran an earlier CAPRI version (whether its setaFallow held the idled histosols is not checked), and CAPRI's own Farm-to-Fork results with star 3.0 are not in hand. To check: the landscape floor (p_setAsideTarget x UAAR + SETF) and CAPRI's land-use options under it (prep_sim_luc.gms l. 599-607: forest's lower bound at 0.99 of its level when the floor is set)
 
+- **28 October 2026, checked:** CAPRI star 3.0 counts the idled histosols in the floor (sets.gms l. 2265 setaFallow;
+  supply_model.gms e_setaLandscape), with no histosol rule of their own in the Green Deal files (histomax is the AFOLU
+  scenarios' switch only), so the model's rule is CAPRI's. The floor is CAPRI's formula (landscape.gms l. 54-57) on
+  CAPRI's targets (landscape_targets.csv, same values). The histosol data reproduce CAPRI's: in CAPRI's maximum-mitigation
+  run (scen_greendeal_2030, refpol_endotech_all_max; not a Green Deal targets run, it has no landscape floor) EU27 idles
+  3,517 kha, against the model's maximum (MaxShare x histosol area on Green Deal 2030 land, r176) 3,532 kha, per member
+  state within 2% where CAPRI is at its maximum (DE 1,031 / 1,018, PL 950 / 970, NL 299 / 296, IE 296 / 296). The
+  reference run idles none (res_2_1730greendeal_refdefaulta), as the model's calibration (IniShare 0). Still missing: a
+  CAPRI star 3.0 run with the landscape floor (lndscpTarg > 0) to compare the share fallowed under it.
 - **Effect:** Farm-to-Fork land use, histosol N2O and CO2, set-aside premiums
 - **In 9t:** –
-- **Status:** **open**
+- **Status:** **open** (needs CAPRI's Green Deal or Farm-to-Fork result with the floor)
 
 <a id="k79"></a>
 ### K79: Member-state production that keeps moving between iterations (26 October 2026)
