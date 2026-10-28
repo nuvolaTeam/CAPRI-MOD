@@ -9,6 +9,8 @@ files.
 
     python tools/check/reproduce_builders.py REPORT.csv [--only NAME ...] [--timeout S]
     python tools/check/reproduce_builders.py REPORT.csv --chain --only A B ...   (the writers of one file, in order)
+    python tools/check/reproduce_builders.py REPORT.csv --chain --keep          (rebuild: every builder in order, the
+                                                                                 outputs left in the tree to commit)
 
 The working tree must be a clean git checkout: after each builder the tree is reset (git checkout, git clean of
 capri_data). The external inputs (CAPRI dumps and the project lead's uploads) are looked up under UP and WORK below;
@@ -311,6 +313,7 @@ def main():
     ap.add_argument("--only", nargs="*", default=None)
     ap.add_argument("--timeout", type=int, default=1800)
     ap.add_argument("--chain", action="store_true", help="run the --only builders in order without resetting between them")
+    ap.add_argument("--keep", action="store_true", help="with --chain: leave the outputs in the tree (a rebuild)")
     o = ap.parse_args()
     if git("status", "--porcelain", "--untracked-files=no").strip():
         sys.exit("the working tree has changes: run on a clean checkout (the tree is reset after each builder)")
@@ -369,11 +372,15 @@ def main():
     selected = [inv for inv in INVOCATIONS if not o.only or inv[0] in o.only]
     if o.chain:
         # the selected builders one after the other, without a reset: the writers of one file in their order
-        steps = [run(*inv) for inv in selected]
+        steps = []
+        for inv in selected:
+            steps.append(run(*inv))
+            print(f"{steps[-1][0]}: {steps[-1][1]}, {steps[-1][2]} s", flush=True)
         record("chain: " + " -> ".join(c for c, _, _ in steps),
                "; ".join(f"{c.split()[0]} {st}" for c, st, _ in steps if st != "ok") or "ok",
                round(sum(x for _, _, x in steps if x != ""), 1))
-        reset()
+        if not o.keep:
+            reset()
     else:
         for inv in selected:
             cmd, status, sec = run(*inv)
