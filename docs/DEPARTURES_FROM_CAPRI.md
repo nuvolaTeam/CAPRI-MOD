@@ -210,10 +210,11 @@ CAPRI's scenario files set a few market-loop switches of their own. Two were fou
   l. 41-50, price_forecast.gms l. 384-386): for the products listed, the price passed to the supply models averages
   the baseline price and every step's market price, step j of k weighted max(0, 1 - srt (k + 1 - j)), instead of the
   last three or four steps. The Green Deal file lists none (its one entry, Malta's milk at 0.15, is commented out).
-  capri-mod: `outer_loop.capri_step_special` (entries [region, product, srt]; empty by default, as CAPRI's Green Deal
-  runs). One difference of form: CAPRI keys it by member state, as it has a producer price per member state; capri-mod
-  has one EU price per product (a member state's own price only for raw milk, and Norway's), so an entry other than
-  raw milk is for region EU27 and acts on every member state.
+  capri-mod: `outer_loop.capri_step_special` (entries [member state, product, srt]; empty by default, as CAPRI's Green
+  Deal runs). As in CAPRI the smoothed price is the one passed to that member state's supply models: CAPRI's member-state
+  producer price is its block's market price times a fixed margin (arm/market_model.gms PPri_, price transmission
+  elasticity one), as here, and CAPRI smooths what it hands to the member state's models; here those models get the
+  smoothed price as a departure from the price the rest of the market sees (raw milk: the member state's own price).
 - **Negative raw milk producer prices** (`negProdPriceAllowed(rms, "MILK")` and `negProdPriceAllowedFromStart(rmssup,
   "MILK")` for every market region, greendeal_scenarios.gms l. 66-67; arm/set_start_val.gms l. 565, widen_bounds.gms
   l. 452-457): the Green Deal runs let the milk price go below zero (lower bound -max(100, price)). Without the switch

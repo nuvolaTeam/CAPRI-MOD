@@ -98,8 +98,9 @@ def test_capri_special_smoothing_setting_is_checked():
     from capri_mod.settings import override
     import pytest
     assert CAPRIModel._capri_step_special() == {}                       # CAPRI's Green Deal scenarios set none
-    with override({"outer_loop.capri_step_special": [["MT000000", "MILK", 0.15], ["EU27", "SOYA", 0.1]]}):
-        assert CAPRIModel._capri_step_special() == {("MT000000", "MILK"): 0.15, ("EU27", "SOYA"): 0.1}
-    with override({"outer_loop.capri_step_special": [["BG000000", "SOYA", 0.15]]}):
-        with pytest.raises(ValueError):
-            CAPRIModel._capri_step_special()
+    with override({"outer_loop.capri_step_special": [["MT000000", "MILK", 0.15], ["BG000000", "SOYA", 0.1]]}):
+        assert CAPRIModel._capri_step_special() == {("MT000000", "MILK"): 0.15, ("BG000000", "SOYA"): 0.1}
+    for bad in (["EU27", "SOYA", 0.1], ["BG000000", "SOYA", 1.5]):
+        with override({"outer_loop.capri_step_special": [bad]}):
+            with pytest.raises(ValueError):
+                CAPRIModel._capri_step_special()

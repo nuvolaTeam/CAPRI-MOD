@@ -639,6 +639,18 @@ class CAPRIModel:
                 _smap = getattr(self.market_module, "SUP_NONEU_MS", {}) or {}
                 self.supply_module.price_dev_ms = {**self.supply_module.price_dev_ms,
                                                    **{_smap[rg]: d for rg, d in _sdev.items() if rg in _smap}}
+            # CAPRI's slower smoothing for a member state's problem products (outer_loop.capri_step_special)
+            _sdm = getattr(self, "_special_ms_dev", None) or {}
+            if outer_iter > 0 and _sdm:
+                _pdm = dict(self.supply_module.price_dev_ms or {})
+                for _ms_s, _d_s in _sdm.items():
+                    _base_s = _pdm.get(_ms_s)
+                    _base_s = (pd.Series(0.0, index=price_signal.index) if _base_s is None
+                               else _base_s.reindex(price_signal.index).fillna(0.0))
+                    _pdm[_ms_s] = _base_s.add(pd.Series(_d_s).reindex(price_signal.index).fillna(0.0))
+                self.supply_module.price_dev_ms = _pdm
+            elif outer_iter == 0:
+                self._special_ms_dev = {}
             _spol = {
                     "adders": policy_adders.to_dict(),
                     # premium factors by region and activity (a CAPRI premium experiment)
@@ -826,18 +838,6 @@ class CAPRIModel:
                 _th = (_th + [_target.reindex(price_signal.index).fillna(0.0)])[-4:]
                 self._capri_target_hist = _th
                 _ps_new = self._capri_forecast(_th, outer_iter)
-                # CAPRI's slower smoothing for problem products (outer_loop.capri_step_special, region EU27)
-                _sp = self._capri_step_special()
-                _tf = (getattr(self, "_capri_target_full", None) or []) if outer_iter > 0 else []
-                _tf = _tf + [_target.reindex(price_signal.index).fillna(0.0)]
-                self._capri_target_full = _tf
-                for (_rg_s, _p_s), _srt in _sp.items():
-                    if _rg_s == "EU27" and _p_s in _ps_new.index:
-                        _ps_new[_p_s] = float(self._capri_special_forecast([float(x_[_p_s]) for x_ in _tf], _srt))
-                        # beet follows sugar, durum soft wheat (as their targets above)
-                        for _a_s, _c_s in (("SUGB", "SUGR"), ("DWHE", "SWHE")):
-                            if _p_s == _c_s and _a_s in _ps_new.index:
-                                _ps_new[_a_s] = _ps_new[_c_s]
                 _w = pd.Series(1.0, index=price_signal.index)          # the step the blocks and Norway take below
                 _g = _ps_new - price_signal
                 self._relax_w = _w
@@ -861,6 +861,7 @@ class CAPRIModel:
                     for _c in ("MILK", "DCOW"):                 # raw milk: priced per member state (dairy blocks)
                         if _c in _dt.index:
                             _dt[_c] = 0.0
+                    self.__dict__.setdefault("_blockdev_target_now", {})[_rg] = _dt
                     _d0 = _dev0.get(_rg)
                     _d0 = pd.Series(0.0, index=price_signal.index) if _d0 is None else _d0.reindex(price_signal.index).fillna(0.0)
                     if self._capri_price_update():
@@ -872,6 +873,33 @@ class CAPRIModel:
                         _newdev[_rg] = _d0 + _w * (_dt - _d0)
                     self._eu_dev_gap = max(self._eu_dev_gap, float((_dt - _d0).abs().max()))
                 self._eu_dev = _newdev
+            # CAPRI's slower smoothing for problem products of a member state (outer_loop.capri_step_special;
+            # define_stepWeights.gms, price_forecast.gms l. 384-386): CAPRI smooths the price it passes to that member
+            # state's supply models (DATA(MS, "UVAG", product, "Y")); here the member state's models get the smoothed
+            # price as a departure from the price the others in its market see (applied with price_dev_ms next
+            # iteration). The member state's market price each step: the EU target plus its block's departure
+            self._special_ms_dev = {}
+            _spm = {k_: v_ for k_, v_ in self._capri_step_special().items() if k_[1] != "MILK" and k_[0] != "NO000000"}
+            if _spm and self._capri_price_update():
+                _hs = (getattr(self, "_capri_special_hist", None) or {}) if outer_iter > 0 else {}
+                _bmap_s = (self.market_module._ms_block_map()
+                           if getattr(self.market_module, "eu_blocks", False) else {})
+                _bdt = getattr(self, "_blockdev_target_now", None) or {}
+                _edv = getattr(self, "_eu_dev", None) or {}
+                for (_ms_s, _p_s), _srt in _spm.items():
+                    if _p_s not in price_signal.index:
+                        raise ValueError(f"outer_loop.capri_step_special: {_p_s!r} has no price signal")
+                    _rg_s = _bmap_s.get(_ms_s)
+                    _tg = float(_target.get(_p_s, 0.0)) + (float(_bdt[_rg_s].get(_p_s, 0.0)) if _rg_s in _bdt else 0.0)
+                    _hs[(_ms_s, _p_s)] = (_hs.get((_ms_s, _p_s)) or []) + [_tg]
+                    _seen = float(price_signal[_p_s]) + (float(_edv[_rg_s].get(_p_s, 0.0)) if _rg_s in _edv else 0.0)
+                    _d_s = float(self._capri_special_forecast(_hs[(_ms_s, _p_s)], _srt)) - _seen
+                    _dd = self._special_ms_dev.setdefault(_ms_s, {})
+                    _dd[_p_s] = _d_s
+                    for _a_s, _c_s in (("SUGB", "SUGR"), ("DWHE", "SWHE")):   # beet follows sugar, durum wheat
+                        if _p_s == _c_s and _a_s in price_signal.index:
+                            _dd[_a_s] = _d_s
+                self._capri_special_hist = _hs
             # NORWAY (CAPRI RMSSUP outside the EU, its own market region NOR; K56): its supply models see its own market's
             # producer prices (raw milk: its dairy block's), relaxed as a price level of their own, as the member states'
             # milk prices above. A departure from the EU signal relaxed toward a departure from the EU target (the first
@@ -2189,16 +2217,15 @@ class CAPRIModel:
 
     @staticmethod
     def _capri_step_special() -> dict:
-        """outer_loop.capri_step_special as {(region, product): srt}; a region other than EU27, a member state (raw
-        milk only) or NO000000 is refused rather than ignored."""
+        """outer_loop.capri_step_special as {(member state, product): srt}, as CAPRI's p_stepWgtSpecial(ms, product,
+        "srt")."""
         out = {}
         for e in (_settings().get("outer_loop.capri_step_special") or []):
             rg, pr, srt = str(e[0]), str(e[1]), float(e[2])
             if not (0.0 < srt < 1.0):
                 raise ValueError(f"outer_loop.capri_step_special {e!r}: srt in (0, 1)")
-            if rg != "EU27" and rg != "NO000000" and pr != "MILK":
-                raise ValueError(f"outer_loop.capri_step_special {e!r}: a member state's own price here is its raw milk "
-                                 "price only (the other products have one EU price, region EU27)")
+            if not (len(rg) == 8 and rg.endswith("000000")):
+                raise ValueError(f"outer_loop.capri_step_special {e!r}: a member state as CAPRI (e.g. MT000000)")
             out[(rg, pr)] = srt
         return out
 
