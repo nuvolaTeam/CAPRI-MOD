@@ -809,7 +809,7 @@ Run r129: 52.7% of the histosol area fallowed (r123: 21.7%; JRC121368 Table 17: 
   CAPRI's targets (landscape_targets.csv, same values). The histosol data reproduce CAPRI's: in CAPRI's maximum-mitigation
   run (scen_greendeal_2030, refpol_endotech_all_max; not a Green Deal targets run, it has no landscape floor) EU27 idles
   3,517 kha, against the model's maximum (MaxShare x histosol area on Green Deal 2030 land, r176) 3,532 kha, per member
-  state within 2% where CAPRI is at its maximum (DE 1,031 / 1,018, PL 950 / 970, NL 299 / 296, IE 296 / 296). The
+  state within about 2% where CAPRI is at its maximum (DE 1,031 / 1,018, PL 950 / 970, NL 299 / 296, IE 296 / 296). The
   reference run idles none (res_2_1730greendeal_refdefaulta), as the model's calibration (IniShare 0). Still missing: a
   CAPRI star 3.0 run with the landscape floor (lndscpTarg > 0) to compare the share fallowed under it.
 - **Effect:** Farm-to-Fork land use, histosol N2O and CO2, set-aside premiums
