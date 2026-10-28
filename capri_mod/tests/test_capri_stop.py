@@ -100,6 +100,11 @@ def test_model_records_capri_verdict_and_can_stop_on_it():
         assert not cs["go_on"]
     # the drift report (not CAPRI's) is recorded with the verdict, as the stop rule computes it
     assert cs["drift"] == m._capri_stop.drift(3)
+    # the jump check's record (K79): one entry per iteration where it acted, its regions a subset of those solved
+    jc = r["metadata"]["nlp_jump_check"]
+    assert isinstance(jc, list)
+    for e in jc:
+        assert set(e["switched"]) <= set(e["checked"]) <= {"DE110000", "FR100000"}
 
 
 def test_capri_special_smoothing_weights():

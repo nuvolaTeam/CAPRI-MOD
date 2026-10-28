@@ -30,6 +30,21 @@ Full provenance for every entry is in `capri_data/DATA_SOURCING_REGISTRY.json`.
 
 ---
 
+## 28 October 2026 (batch 2, pending the gate): the ammonia chain in dependency order (K88 census); the jump check recorded
+
+- **K88 census** (tools/check/reproduce_builders.py, each builder alone on dev): 305 of 314 outputs byte-identical, 7
+  files written by several builders in turn reproduced by their last writer, 2 not reproduced: the build list ran the
+  ammonia technology model (which reads ad_option.csv) before the AD option, and the AD option (which reads
+  n_cascade_factors.csv) before the N loss cascade. The list now runs CAPRI's ammonia input tables, the cost curves, the
+  technologies, the cascade, the fertiliser side effects, the AD option and the technology model in that order; the
+  chain was rebuilt: ammonia_tech_model.csv (initial technology shares, up to 1.6e-4 relative) and ad_option.csv
+  (2.6e-11) change, fert_side_effects.csv is rewritten with equal values, nothing else changes. The other reads of
+  files built later in the list are of CAPRI extracts that the census shows unchanged.
+- **The jump check recorded** (K79): metadata nlp_jump_check (per outer iteration, the regions checked and those whose
+  solution another start replaced) and outer_history[...]["jump_check"] (per region: the largest move, the starts
+  solved, the one kept, the objectives). Results unchanged.
+- [gate: to be filled in]
+
 ## 28 October 2026: supply audit S12, S13; nurseries in the PMP recipe; the regional solves' jump check (K79) (batch 1)
 
 - **S12** (KNOWN_ISSUES K74): the emission tax on mineral N and the accounts' soil N2O of mineral N take CAPRI's

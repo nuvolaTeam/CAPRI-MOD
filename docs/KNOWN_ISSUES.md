@@ -26,7 +26,7 @@ with every fix below except K5, which needs the prototype's model change.
 | [K80](#k80) | The same run repeated from a warm start differs by up to 3e-5 relative in small cereal activities | open |
 | [K83](#k83) | A one-region Farm-to-Fork run's market diverges in its second step | open |
 | [K86](#k86) | Ammonia housing and storage options without their farm-size cost curves in Denmark, Lithuania and Croatia | open |
-| [K88](#k88) | Builders that still round the values they write | open |
+| [K88](#k88) | Builders that still round the values they write | fixed |
 
 ## Resolved (70)
 
@@ -823,7 +823,7 @@ CAPRI's stop rule, recorded every iteration since r135, flags rows that move by 
 
 - **Effect:** member-state production of a few crops; whether CAPRI-mod's runs would pass CAPRI's stop rule
 - **In 9t:** –
-- **Status:** **open**. Diagnosis of r161 (27 October 2026): (1) the rows still moving at the last iteration (Latvian
+- **Status:** **open**. Diagnosis of r161 (27 October 2026): (1) the rows still moving at the last iteration (Latvian 28 October 2026 (batch 1, r177): with the jump check (supply.nlp_jump_check 0.1) and S13 (the Swedish tomato cells held), Green Deal 2030 stops by CAPRI's rule after 18 iterations (r171: 30; the supply-audit run r174 without the jump check: not in 60). The recurring moves of r171 (Bulgarian maize and rapeseed, Hungarian pulses, 30% every few iterations; Swedish tomatoes up to 76%) do not appear; one single move left (Bulgarian oats, 85% at iteration 13). Which of the two removed which moves is not separated (the run did not record the jump check's action; recorded from batch 2: metadata nlp_jump_check, outer_history[...]["jump_check"]).
   oats 10.3, 5.1, 2.6, 1.1% at iterations 6-9; Portuguese potatoes, Romanian pulses) follow prices that converge
   geometrically under CAPRI's price forecast (the EU oats signal's steps 0.0036, 0.0020, 0.0010, 0.0004, 0.0002):
   slow convergence of the supply-market loop, not solver creep. The model's stop rule (prices within 0.5%) ends the
@@ -997,7 +997,12 @@ rounds reproduces its own rounded file). Some may round keys or comparisons rath
 - **Effect:** the last digits of these files (1e-6 and smaller relative for 6 decimals; up to 1e-3 for 3 decimals of
   small values)
 - **In 9t:** –
-- **Status:** **open**: the roundings removed in the builders (branch k88-rounding: every one rounded a written value,
-  none a key or a comparison; the roundings of printed summaries moved into the prints); ROUNDING_ALLOWED empty. To
-  rebuild the 20 builders' files and run a reference run
+- **Status:** **fixed** (28 October 2026). The roundings removed in the builders (every one rounded a written value,
+  none a key or a comparison; the roundings of printed summaries moved into the prints); ROUNDING_ALLOWED empty. Every
+  builder run in order on the committed sources (reproduce_builders.py --chain --keep; pushed with batch 1, reference
+  runs r177, r178). Census on dev afterwards (each builder alone on the committed inputs, 314 outputs): 305
+  byte-identical; 7 written by several builders in turn, reproduced by their last writer; 2 not reproduced because the
+  build list ran a reader before its input's builder (ammonia_tech_model.csv read ad_option.csv, which read
+  n_cascade_factors.csv, each built later in the list than its reader): the technology model's initial shares off by up to 1.6e-4
+  relative, the AD option by 2.6e-11. The ammonia chain now runs in dependency order and was rebuilt (batch 2).
 

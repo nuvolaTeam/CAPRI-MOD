@@ -1075,6 +1075,11 @@ class CAPRIModel:
                               "herd_regional": {r_: {a_: round(float(getattr(x_, "activities", pd.Series(dtype=float)).get(a_, 0.0)), 4)
                                                      for a_ in ("BCOW", "DCOW", "CALV", "BULL", "HFRS", "GRAS", "MAIF", "OFOD")}
                                                 for r_, x_ in _sr_.items()}})
+                # the regions whose jump check acted at this iteration (supply.nlp_jump_check, K79): the largest move, the
+                # starts solved, the one kept and the objectives
+                _hist[-1]["jump_check"] = {r_: dict(m_._nlp_jump) for r_, m_ in
+                                           (getattr(self.supply_module, "_models", None) or {}).items()
+                                           if getattr(m_, "_nlp_jump", None)}
                 if _settings().get("diagnostics.record_regional_levels"):
                     # every region's activity levels at this iteration, unrounded (K79: the rows CAPRI's stop rule
                     # flags, traced to regions and activities)
@@ -1373,6 +1378,12 @@ class CAPRIModel:
                 "pmp_capri_parts": list(getattr(self.supply_module, "pmp_capri_parts", ())),
                 # regions whose NLP solve took a fallback in this run (JRC121368's relaxed N target, IPOPT's last
                 # point kept as CAPRI keeps a non-optimal solve), each with IPOPT's status (supply_module._nlp_solve)
+                # the jump check per outer iteration (supply.nlp_jump_check, K79): the regions checked and those whose
+                # solution it replaced with another start's lower objective
+                "nlp_jump_check": [{"it": e_.get("it"), "checked": sorted(e_["jump_check"]),
+                                    "switched": sorted(r_ for r_, v_ in e_["jump_check"].items()
+                                                       if str(v_.get("kept", "")).startswith("jump:"))}
+                                   for e_ in (getattr(self, "_outer_history", None) or []) if e_.get("jump_check")],
                 "nlp_fallback": {r_: list(m_._nlp_fallback_log) for r_, m_ in self.supply_module._models.items()
                                  if getattr(m_, "_nlp_fallback_log", None)},
                 # regions whose NLP form needed the Green Deal's mineral caps relaxed (supply_module._capri_nlp_solve)

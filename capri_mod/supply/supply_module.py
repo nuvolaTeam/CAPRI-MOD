@@ -1834,6 +1834,9 @@ class RegionalSupplyModel:
                     res = r_
                     kinds.append("checked:" + kind)
         _jt = float(getattr(type(self), "nlp_jump_check", 0.0) or 0.0)
+        # the jump check of this solve, None where it did not act: the largest move, the starts it solved and the one
+        # kept (model metadata nlp_jump_check, the outer history's "jump_check")
+        self._nlp_jump = None
         _y0 = getattr(self, "_nlp_y", None)
         if (_jt > 0 and _y0 is not None and res is not None and res.get("x") is not None
                 and (res["success"] or res["status"] in ("Solved_To_Acceptable_Level",))
@@ -1845,8 +1848,10 @@ class RegionalSupplyModel:
             _y0 = np.asarray(_y0, float).ravel()
             if len(_y1) == len(_y0) and len(_y0):
                 _sc = np.maximum(np.abs(_y0), 0.01 * float(np.max(np.abs(_y0))))
-                if float(np.max(np.abs(_y1 - _y0) / np.maximum(_sc, 1e-12))) > _jt:
+                _mv = float(np.max(np.abs(_y1 - _y0) / np.maximum(_sc, 1e-12)))
+                if _mv > _jt:
                     _done = {k_[0] for k_ in _tried}
+                    _f0, _n0 = float(res["f"]), len(_tried)
                     for kind, xs, lam_ in [s_ for s_ in starts if s_[0] not in _done and s_[0] != "warm"]:
                         r_ = nlp.solve(xs, lam=lam_, tol=_tol)
                         _tried.append(("jump:" + kind, r_["status"], float(r_["f"]), int(r_["iterations"] or 0)))
@@ -1854,6 +1859,8 @@ class RegionalSupplyModel:
                                 and float(r_["f"]) < float(res["f"])):
                             res = r_
                             kinds.append("jump:" + kind)
+                    self._nlp_jump = {"move": round(_mv, 6), "f": _f0, "solved": [t_[0] for t_ in _tried[_n0:]],
+                                      "kept": kinds[-1], "f_kept": float(res["f"])}
         _ok = lambda r_: r_["success"] or r_["status"] in ("Solved_To_Acceptable_Level",)
         _lab = lambda k_: ((k_[1] if k_[1] == "duals" else "caps:" + "+".join(k_[2]) + (",duals" if k_[3] else ""))
                            if k_ is not None else None)
