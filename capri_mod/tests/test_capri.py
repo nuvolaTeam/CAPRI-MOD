@@ -430,10 +430,10 @@ def test_option_saving_term_as_capri():
     """CAPRI's saving term of the fertiliser options' curvature (ghgMiti.gms l. 1016-1050): nmE x value x
     ((1 + nmE m1)^-2 - (1 + nmE m0)^-2) / (m1 - m0); for the inhibitor on manure with IniShare 0, NMAN 0.25, a manure
     value of 600 EUR/t and MaxShare 0.8: 0.25 x 600 x (1.2^-2 - 1) / 0.8 = -57.29..."""
-    from capri_mod.supply.supply_module import RegionalSupplyModel as R
-    v = R._saving_slope(0.25, 600.0, 0.0, 0.8)
+    from capri_mod.supply.supply_module import saving_slope
+    v = saving_slope(0.25, 600.0, 0.0, 0.8)
     assert abs(v - 0.25 * 600.0 * (1.2 ** -2 - 1.0) / 0.8) < 1e-12 and v < 0
-    assert R._saving_slope(0.25, 600.0, 0.5, 0.5) == 0.0
+    assert saving_slope(0.25, 600.0, 0.5, 0.5) == 0.0
 
 
 def test_organic_and_mineral_caps_merge_as_capri():
