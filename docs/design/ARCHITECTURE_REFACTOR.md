@@ -196,7 +196,13 @@ To be written in the layered market code (stage 2b done) and gated together (the
   base use is net of processing: 4.5% of the EU's cheese use (about 413 kt) is labelled processing and held fixed, so
   the food response acts on 95.5% of it (butter 0.5%, casein 4%). Fix with M9: the dairy products' split without
   processing (food, feed, biofuel shares of their sum).
-- **M4** (feedBlk_ inside the market solve, simu_calibration_to_supply.gms l. 264-275), **EU supply of OTHO, FFIS,
+- **M4** (feedBlk_, market_model.gms l. 972-995: log-linear bulk demand in the bulk prices and the supply models'
+  product prices, its constant re-anchored to the supply models' bulks every iteration, simu_calibration_to_supply.gms
+  l. 259-275). Its elasticities p_feedBlkElas are measured on the supply models in calibrate_supply.gms (l. 521-560,
+  from p_netPutElas: the bulks' response to shocks of the bulk prices and of the product prices), the same procedure
+  as the market supply Hessian; not in CAPRI's exports at hand. The port would extend the model's Hessian measurement
+  (bulk-price shocks, the bulks recorded at every shock). Path only (the fixed point is the same): last of the four.
+- **EU supply of OTHO, FFIS,
   SFIS, OAQU** (CAPRI's NQ per member state with cross terms instead of an EU median elasticity). CAPRI's own terms
   are in hand: p_hessNQSupp per EU member state in elas_2_1730defaulta.csv (OTHO 101 terms, with cross terms to the
   crops; FFIS 70, SFIS 54, OAQU 54, own price and INPE). Change: a builder writes them (as the supply-model products'
