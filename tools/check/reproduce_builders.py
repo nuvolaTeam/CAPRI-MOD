@@ -308,6 +308,58 @@ def compare(path: str, old: bytes, new: bytes) -> str:
     return "bytes differ"
 
 
+_OPEN = __import__("re").compile(r'^\d+\s+openat\(AT_FDCWD, "([^"]+)", ([A-Z_|]+)')
+_REN = __import__("re").compile(r'^\d+\s+rename(?:at2?)?\((?:AT_FDCWD, )?"([^"]+)", (?:AT_FDCWD, )?"([^"]+)"')
+_SKIP = ("/usr/", "/proc/", "/sys/", "/dev/", "/etc/", "/lib", "/opt/", "/root/", "/var/", "/run/")
+
+
+def parse_strace(log: Path, tmp: str) -> dict:
+    """A builder's strace log as {"reads", "writes", "code", "external"}: files under the repository (relative paths,
+    the builder's working directory is the repository) read or written; the Python files it ran (code, the builder's
+    own modules and capri_mod); files read outside the repository (CAPRI's sources). Failed opens, directories,
+    Python's libraries and the temporary folder of zip arguments are left out. A file whose first access is a read is
+    an input, also when the builder writes it afterwards (a read-modify-write, listed under "rewrites" as well)."""
+    first, writes, code, ext = {}, set(), set(), set()
+    if not log.exists():
+        return {"reads": [], "writes": [], "code": [], "external": []}
+    for line in log.read_text(errors="replace").splitlines():
+        if "= -1" in line:
+            continue
+        m = _OPEN.match(line)
+        if m:
+            path, flags = m.group(1), m.group(2)
+            if "O_DIRECTORY" in flags:
+                continue
+            new = [(path, "O_WRONLY" in flags or "O_RDWR" in flags or "O_CREAT" in flags)]
+        else:
+            m = _REN.match(line)
+            if not m:
+                continue
+            new = [(m.group(1), True), (m.group(2), True)]
+        for path, w in new:
+            ap_ = Path(path) if path.startswith("/") else ROOT / path
+            ap_ = Path(os.path.normpath(ap_))
+            sp_ = str(ap_)
+            if sp_.startswith(tmp) or sp_.startswith(_SKIP) or "__pycache__" in sp_ or "site-packages" in sp_ \
+                    or "dist-packages" in sp_:
+                continue
+            try:
+                rel = str(ap_.relative_to(ROOT))
+            except ValueError:
+                if not w:
+                    ext.add(sp_)
+                continue
+            if rel.endswith(".py"):
+                code.add(rel)
+                continue
+            first.setdefault(rel, "w" if w else "r")
+            if w:
+                writes.add(rel)
+    reads = {f for f, k in first.items() if k == "r"}
+    return {"reads": sorted(reads), "writes": sorted(writes), "rewrites": sorted(reads & writes), "code": sorted(code),
+            "external": sorted(ext)}
+
+
 def snapshot() -> dict:
     """Modification time of every file under capri_data (to see what a builder wrote, also where it wrote the same
     bytes)."""
@@ -326,6 +378,7 @@ def main():
     ap.add_argument("--timeout", type=int, default=1800)
     ap.add_argument("--chain", action="store_true", help="run the --only builders in order without resetting between them")
     ap.add_argument("--keep", action="store_true", help="with --chain: leave the outputs in the tree (a rebuild)")
+    ap.add_argument("--trace", default="", help="run each builder under strace and write its reads and writes (JSON)")
     o = ap.parse_args()
     if git("status", "--porcelain", "--untracked-files=no").strip():
         sys.exit("the working tree has changes: run on a clean checkout (the tree is reset after each builder)")
@@ -353,9 +406,16 @@ def main():
                     full += sorted(str(Path(tmp) / n_) for n_ in z_.namelist() if not n_.endswith("/"))
             else:
                 full.append(a_)
+        pre = []
+        if o.trace:
+            # every file the builder and its child processes open or rename (strace: also Parquet and other C-level
+            # readers that a Python hook does not see)
+            pre = ["strace", "-f", "-qq", "-e", "trace=openat,rename,renameat,renameat2", "-o", str(Path(tmp) / "strace.log")]
         try:
-            r = subprocess.run([sys.executable, str(ROOT / "tools" / "build" / f"{name}.py"), *full], cwd=ROOT, env=env,
+            r = subprocess.run(pre + [sys.executable, str(ROOT / "tools" / "build" / f"{name}.py"), *full], cwd=ROOT, env=env,
                                capture_output=True, text=True, timeout=o.timeout)
+            if o.trace:
+                traces[cmd] = parse_strace(Path(tmp) / "strace.log", tmp)
             err = r.stderr.strip().splitlines()[-1][:200] if r.stderr.strip() else ""
             status = "ok" if r.returncode == 0 else f"failed (exit {r.returncode}): {err}"
         except subprocess.TimeoutExpired:
@@ -385,6 +445,7 @@ def main():
             if row["builder"] == cmd and row["file"]:
                 print(f"    {row['file']}: {row['result']}", flush=True)
 
+    traces = {}
     selected = [inv for inv in INVOCATIONS if not o.only or inv[0] in o.only]
     if o.chain:
         # the selected builders one after the other, without a reset: the writers of one file in their order
@@ -409,6 +470,9 @@ def main():
         w.writeheader()
         w.writerows(rows)
     print(f"report: {o.report}")
+    if o.trace:
+        Path(o.trace).write_text(json.dumps(traces, indent=1, sort_keys=True))
+        print(f"trace: {o.trace}")
 
 
 if __name__ == "__main__":
