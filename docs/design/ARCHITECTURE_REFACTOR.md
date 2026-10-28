@@ -179,6 +179,27 @@ A guard that binds at a solution is a difference and is treated as one.
 Order: A and B first (no results effect), then C, D, E one item at a time; G with each block's layered rewrite. Decided 26 October 2026 (user): the refactor first; G2 onward (the joint Newton over all market blocks) inside the refactor's market stage, after the reference run is frozen. Each step is recorded in CHANGELOG and
 the audit table's status column is updated.
 
+### 6.0a The market batch: M9, M4, EU fish and other oils, the world price (design notes, 28 October 2026)
+
+To be written in the layered market code (stage 2b done) and gated together (the project lead's decision).
+
+- **M9, dairy processing (CAPRI ProcNQ_, market_model.gms l. 1140-1152; FatsProtBal_ l. 1104-1116).** CAPRI's
+  processing Hessian has 37 dairy terms, own-price only, per member state (and NO, the Western Balkans): cheese 16
+  (429 kt EU processing), casein 15 (8 kt), butter 5 (10 kt), fresh milk products 1 (83 kt). Processing falls with the
+  product's Arm1 price: -h x (Arm1 price - PRCA) / INPE, kept positive by ProcFudge_. It enters the product's Arm1 use
+  and the dairy block's fat and protein balance (production - processing). In the model, processing is on the supply
+  side: the dairy block's net supply is production - processing (dairy.py market_supply), and the EU's base use of a
+  dairy product is net of it (cheese 9,179 kt = food + feed). Change: processing per member state from CAPRI's terms at
+  the evaluation's prices, in the fat and protein rows and the net supply, before the block solves (the product prices
+  are the block's inputs, so the processing is determined there, as in CAPRI's simultaneous system).
+- **Found on the way:** the use split (_use_components) gives the dairy products CAPRI's processing share, though their
+  base use is net of processing: 4.5% of the EU's cheese use (about 413 kt) is labelled processing and held fixed, so
+  the food response acts on 95.5% of it (butter 0.5%, casein 4%). Fix with M9: the dairy products' split without
+  processing (food, feed, biofuel shares of their sum).
+- **M4** (feedBlk_ inside the market solve, simu_calibration_to_supply.gms l. 264-275), **EU supply of OTHO, FFIS,
+  SFIS, OAQU** (CAPRI's NQ per member state with cross terms instead of an EU median elasticity), **world price**
+  (wldPrice_: production and Arm1 weights; reporting only): to be read in CAPRI's code before writing.
+
 ### 6.0b The supply-market fixed point (tried and removed, 26 October 2026)
 
 An Anderson (secant) update of the supply-market fixed point was tried at the user's request, as
