@@ -60,6 +60,14 @@ Full provenance for every entry is in `capri_data/DATA_SOURCING_REGISTRY.json`.
 - The supply audit's claims table (docs/design/audit/supply_claims.csv) brought up to date with S1-S13: 15
   "unregistered difference" rows now fixed (14) or open (the inhibitor's slope; the PMP calibrator's elasticity cap and
   share term, whose reach after S13 is not checked).
+- **Refactor stage 2b** (the market's calibration parameters and per-evaluation state as explicit objects: par, ev,
+  sv, seen; capri_mod/market/state.py): rebased onto this batch; 13 uses of the old attribute names in code written
+  after it (the welfare report, the lazy market supply Hessian, their tests; 7 of them string getattr reads or writes
+  that would have done nothing) moved; a guard makes any read or write of an old name raise (state.MOVED). Check: the
+  mini-EU Farm-to-Fork run (20 units, 7 iterations) identical to 1e-12 with and without stage 2b.
+- **A regional solve that raises stops the run.** Until now the region was dropped with a warning and the run went on,
+  able to report convergence without it: the mini-EU run solved Norway's unit alone and "converged" (the cause: a fault
+  of this batch's S5 change, fixed before any gate run). No reference run ever dropped a region.
 - Reports and tools: reproduce_builders.py --trace (each builder under strace: reads, writes, read-modify-writes,
   code, CAPRI sources); docs/design/DATA_PIPELINE_DOIT.md (the data pipeline as doit tasks: findings and steps).
 - [gate: to be filled in]
