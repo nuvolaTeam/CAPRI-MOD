@@ -30,7 +30,7 @@ Full provenance for every entry is in `capri_data/DATA_SOURCING_REGISTRY.json`.
 
 ---
 
-## 28 October 2026 (batch 2, pending the gate): the ammonia chain in dependency order (K88 census); the jump check recorded
+## 28-29 October 2026 (batches 2 and 3, one gate): the ammonia chain in dependency order (K88 census); the jump check recorded
 
 - **K88 census** (tools/check/reproduce_builders.py, each builder alone on dev): 305 of 314 outputs byte-identical, 7
   files written by several builders in turn reproduced by their last writer, 2 not reproduced: the build list ran the
@@ -88,7 +88,20 @@ Full provenance for every entry is in `capri_data/DATA_SOURCING_REGISTRY.json`.
   processing part.
 - Reports and tools: reproduce_builders.py --trace (each builder under strace: reads, writes, read-modify-writes,
   code, CAPRI sources); docs/design/DATA_PIPELINE_DOIT.md (the data pipeline as doit tasks: findings and steps).
-- [gate: to be filled in]
+- **Gate of batches 2 and 3** (the project lead's decisions of 28 October: one gate per batch, batches 2 and 3 merged;
+  this batch: the K88 ammonia rebuild in dependency order, the jump record, the drift report, supply audit S2 and S5,
+  refactor stage 2b, market M9 and the EU supply of other oils and fish): test suite 220 passed, 5 skipped (the four
+  pipeline tests whose CAPRI reference files are not built here, the live-API test), 19 min. Green Deal 2030 (r181):
+  converged under CAPRI's rule in 37 iterations (r177: 18), the market supply Hessian from the cache (measured by r179
+  on this batch's baseline; the code changed after it does not touch the baseline's supply models: S2 acts under the
+  Green Deal's caps only, S5 is off, the rest is market side; the key's base totals matched); EU indicators as r177's
+  (largest price difference 0.17 points, tobacco; milk +0.06, cheese -0.10), mean deviation from CAPRI over 20
+  indicators 8.66 both; nothing drifting at the stop. The iterations: a Hungarian swing at iteration 30 (pulses 52%,
+  HU230000; KNOWN_ISSUES K79 with the jump record). Farm-to-Fork (r180): 12 iterations (r178: 13), its Hessian
+  measured in the run (50 shocks, 2,261 s); EU indicators as r178's (cheese price -0.26 points, milk +0.14, whey
+  +0.17; mean deviation from CAPRI 4.29 against 4.28). The data pipeline steps (one writer per table, dodo.py, the full
+  rebuild) moved to the data batch (docs/design/DATA_PIPELINE_DOIT.md): they change how the data is built, not the
+  model, and their check is a byte-identical rebuild.
 
 ## 28 October 2026: supply audit S12, S13; nurseries in the PMP recipe; the regional solves' jump check (K79) (batch 1)
 
