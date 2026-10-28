@@ -121,6 +121,12 @@ nlp_warm_max_iter = 200
 # than the last iteration's is checked against the solves from the previous point and the standard start, keeping the
 # lowest objective; the warm start can end at a worse stationary point of the non-convex per-head feeding (K75)
 nlp_warm_check = 0.01
+# numerical safeguard (not a CAPRI parameter; K79): where a regional solution's activity levels move by more than this
+# share between outer iterations (|dy| over the larger of the level and 1% of the region's largest column), the region
+# is also solved from its previous point (cold) and from the standard start and the lowest objective is kept. A warm
+# start in a non-convex regional problem can end at a worse local optimum (HU330000, Green Deal 2030: 2,200 worse, the
+# region switching between two states every few iterations; r174). 0 = off
+nlp_jump_check = 0.1
 nlp_acceptable_tol = 1e-6
 # IPOPT's treatment of fixed columns (lower = upper bound): "make_constraint" keeps them as variables held by an
 # equality (trial points may leave the bound), "make_parameter" removes them from the problem (CAPRI: an activity

@@ -1588,6 +1588,8 @@ class CAPRIModel:
                         # are held at their level; their price response changes, their base level does not, so the
                         # base totals above would not tell a Hessian measured before from one measured after
                         "held-without-own-term",
+                        # 28 October 2026 (K79): the regional solves' jump check changes which local optimum is kept
+                        ("nlp_jump_check", str(_settings().get("supply.nlp_jump_check"))),
                         # the supply models' rules that change their price response (24 October 2026: S6-S10)
                         # (the rules whose switches were removed 27 October 2026 keep their values' place, so the
                         # cached Hessians' keys stay valid)

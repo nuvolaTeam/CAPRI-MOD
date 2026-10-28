@@ -577,6 +577,8 @@ class RegionalSupplyModel:
     #: a warm-started NLP solution more than this much (relative) worse than the last iteration's objective is checked
     #: against the solves from the previous point and the standard start (KNOWN_ISSUES K75)
     nlp_warm_check = setting("supply.nlp_warm_check")
+    #: a solution whose levels jump by more than this between outer iterations is checked against the other starts (K79)
+    nlp_jump_check = setting("supply.nlp_jump_check")
 
     #: CAPRI's land market and the grassland allowance (capri_mod/settings: supply.*)
     use_land_market = setting("supply.use_land_market")
@@ -1781,7 +1783,8 @@ class RegionalSupplyModel:
                     spec, {"x_start": np.asarray(x_start, float), "prev": getattr(self, "_nlp_prev", None),
                            "f_prev": getattr(self, "_nlp_prev_f", None), "keep": _keep},
                     {"tol": float(getattr(type(self), "nlp_tol", 1e-8)),
-                     "warm_check": float(getattr(type(self), "nlp_warm_check", 0.01))}))
+                     "warm_check": float(getattr(type(self), "nlp_warm_check", 0.01)),
+                     "jump_check": float(getattr(type(self), "nlp_jump_check", 0.0) or 0.0)}))
             nlp = CapriRegionalNLP(spec)
             if os.environ.get("CAPRI_NLP_DUMP"):
                 import pickle as _pk
@@ -1830,6 +1833,27 @@ class RegionalSupplyModel:
                 if (r_["success"] or r_["status"] in ("Solved_To_Acceptable_Level",)) and float(r_["f"]) < float(res["f"]):
                     res = r_
                     kinds.append("checked:" + kind)
+        _jt = float(getattr(type(self), "nlp_jump_check", 0.0) or 0.0)
+        _y0 = getattr(self, "_nlp_y", None)
+        if (_jt > 0 and _y0 is not None and res is not None and res.get("x") is not None
+                and (res["success"] or res["status"] in ("Solved_To_Acceptable_Level",))
+                and list(getattr(self, "_nlp_cols", None) or []) == list(cols)):
+            # K79: a jump of the activity levels between outer iterations (a non-convex regional problem whose warm
+            # start, or the cold restart after a failed warm start, ended at another local optimum): the region is
+            # also solved from the starts not yet tried and the lowest objective is kept
+            _y1 = np.asarray(nlp.outputs(res)[0], float).ravel()
+            _y0 = np.asarray(_y0, float).ravel()
+            if len(_y1) == len(_y0) and len(_y0):
+                _sc = np.maximum(np.abs(_y0), 0.01 * float(np.max(np.abs(_y0))))
+                if float(np.max(np.abs(_y1 - _y0) / np.maximum(_sc, 1e-12))) > _jt:
+                    _done = {k_[0] for k_ in _tried}
+                    for kind, xs, lam_ in [s_ for s_ in starts if s_[0] not in _done and s_[0] != "warm"]:
+                        r_ = nlp.solve(xs, lam=lam_, tol=_tol)
+                        _tried.append(("jump:" + kind, r_["status"], float(r_["f"]), int(r_["iterations"] or 0)))
+                        if ((r_["success"] or r_["status"] in ("Solved_To_Acceptable_Level",))
+                                and float(r_["f"]) < float(res["f"])):
+                            res = r_
+                            kinds.append("jump:" + kind)
         _ok = lambda r_: r_["success"] or r_["status"] in ("Solved_To_Acceptable_Level",)
         _lab = lambda k_: ((k_[1] if k_[1] == "duals" else "caps:" + "+".join(k_[2]) + (",duals" if k_[3] else ""))
                            if k_ is not None else None)
