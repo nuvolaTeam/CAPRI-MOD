@@ -43,6 +43,17 @@ Full provenance for every entry is in `capri_data/DATA_SOURCING_REGISTRY.json`.
 - **The jump check recorded** (K79): metadata nlp_jump_check (per outer iteration, the regions checked and those whose
   solution another start replaced) and outer_history[...]["jump_check"] (per region: the largest move, the starts
   solved, the one kept, the objectives). Results unchanged.
+- **Supply audit S2** (KNOWN_ISSUES K74): with the organic target and CAPRI's crop-specific mineral reduction together
+  (Green Deal 2030: org18, mine13crp), a crop group in CAPRI's small groups (p_checkSmallMine: below 30 kg mineral N
+  per ha at baseline, or CAPRI's listed region x group pairs) now keeps the mineral reduction's cap (factor x
+  baseline, no backsliding), as CAPRI's minfert_redu_by_crop.gms sets it after the organic target's file
+  (greendeal_scenarios.gms l. 140, 154; l. 233-235); before, the lower organic cap was kept. Other groups: the more
+  stringent of the two, unchanged. Farm-to-Fork (JRC121368: no mineral reduction) is not affected.
+- The supply audit's claims table (docs/design/audit/supply_claims.csv) brought up to date with S1-S13: 15
+  "unregistered difference" rows now fixed (14) or open (the inhibitor's slope; the PMP calibrator's elasticity cap and
+  share term, whose reach after S13 is not checked).
+- Reports and tools: reproduce_builders.py --trace (each builder under strace: reads, writes, read-modify-writes,
+  code, CAPRI sources); docs/design/DATA_PIPELINE_DOIT.md (the data pipeline as doit tasks: findings and steps).
 - [gate: to be filled in]
 
 ## 28 October 2026: supply audit S12, S13; nurseries in the PMP recipe; the regional solves' jump check (K79) (batch 1)

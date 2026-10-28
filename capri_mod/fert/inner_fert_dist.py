@@ -307,17 +307,32 @@ class InnerFertDist:
         fx = {}
         for t in ex.itertuples(index=False):
             fx[t.ngrp] = float(t.factor)            # later assignments win, as in the GAMS file
+        small = self.small_mine_groups(region, base, year)
         caps = {}
         for (g, s_), v in base["per_ha"].items():
             if s_ != "MINE" or v <= 0:
                 continue
-            if g in fx:
-                caps[g] = fx[g] * v
-            elif v < SMALL_MINE_KG_HA:
-                caps[g] = v
+            if g in small:
+                caps[g] = fx.get(g, 1.0) * v
             else:
                 caps[g] = v * (1.0 - reduction)
         return caps
+
+    def small_mine_groups(self, region: str, base: dict, year: Optional[int] = None) -> set:
+        """CAPRI's p_checkSmallMine (minfert_redu_by_crop.gms l. 96-235): the crop groups with mineral N at baseline
+        below 30 kg/ha, and CAPRI's listed (region, group) pairs for the simulation year (othPol not high). Their cap
+        is set at factor x baseline (no backsliding), replacing any cap set before (the organic target's,
+        organic_minfert_redu.gms, included first: greendeal_scenarios.gms l. 140, 154); the other groups take the
+        more stringent of the two (min, l. 243-246)."""
+        if year is None:
+            from capri_mod.settings import current as _settings
+            year = int(_settings().get("projection.sim_year"))
+        exm, _ = self._rules()
+        r = base.get("capri_region") or self.capri_region(region)
+        ex = exm[(exm.capri_region == r) & (exm.after_year < year) & (exm.othpol_high == 0)]
+        listed = set(ex.ngrp)
+        return {g for (g, s_), v in base["per_ha"].items()
+                if s_ == "MINE" and v > 0 and (g in listed or v < SMALL_MINE_KG_HA)}
 
     def limcres_caps(self, region: str, base: dict, year: Optional[int] = None) -> Dict[str, Tuple[float, float, float]]:
         """CAPRI's "limCres" regulation with the crop-specific reduction: residues to a group at most

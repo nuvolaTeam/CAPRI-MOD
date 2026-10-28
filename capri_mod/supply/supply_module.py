@@ -1151,6 +1151,22 @@ class RegionalSupplyModel:
                     r_[(g, "CRES")] = (v * f, c1, 10.0 + 2.0 - c1)
         return out
 
+    @staticmethod
+    def _merge_organic_regs(cur: dict, org: dict, small: set) -> dict:
+        """The organic target's regulations ({(group, source): (max per ha, beta1, beta2)}) merged into those of the
+        mineral reduction (cur), as CAPRI's files in their order (greendeal_scenarios.gms: organic_minfert_redu.gms,
+        then minfert_redu_by_crop.gms): a regulation only the organic target sets is kept; for a mineral flow both
+        set, the more stringent (min, minfert_redu_by_crop.gms l. 243-246), except for CAPRI's small groups
+        (p_checkSmallMine, `small`), whose cap the mineral reduction sets at factor x baseline, replacing the organic
+        one (l. 233-235; audit S2); the residue regulation (limCres) is the mineral reduction's."""
+        out = dict(cur)
+        for k_, v_ in org.items():
+            if k_ not in out:
+                out[k_] = v_
+            elif k_[1] == "MINE" and v_[0] < out[k_][0] and k_[0] not in small:
+                out[k_] = v_
+        return out
+
     def _npk_mineral_cap(self, npk):
         """The Green Deal's mineral N reduction (self._mineral_cap) on the fertilisation block: "crp" - CAPRI's "f2f"
         regulation on each capped group's mineral flow (max per ha = the base allocation per ha x (1 - r), CAPRI's
@@ -1170,6 +1186,8 @@ class RegionalSupplyModel:
             if inner is None:
                 return
             caps = inner.mineral_caps(self.data.region_id, base, r)
+            # CAPRI's small groups (p_checkSmallMine): their cap replaces the organic target's (S2)
+            self._nlp_mine_small = inner.small_mine_groups(self.data.region_id, base)
             lim = inner.limcres_caps(self.data.region_id, base)
             b1, b2 = beta_regulation(0.25, 0.75)
             regs = {(g, "MINE"): (float(v), b1, b2) for g, v in caps.items() if v > 0}
@@ -1733,6 +1751,7 @@ class RegionalSupplyModel:
                 # (organic_minfert_redu.gms), set before the mineral fertiliser reduction, which keeps the more
                 # stringent of the two (minfert_redu_by_crop.gms: min(); its limCres replaces the organic one)
                 org_regs = self._npk_organic_cap(npk)
+                self._nlp_mine_small = set()
                 if "mineral_N" in labels:
                     # CAPRI's mineral fertiliser reduction in its own terms: the inner model's regulations by crop
                     # group (minfert_redu_by_crop.gms) or e_synNMax (minfert_redu_uaa.gms); the summed row goes
@@ -1742,13 +1761,8 @@ class RegionalSupplyModel:
                     d_ = npk["nutrients"].get(nut_)
                     if d_ is None:
                         continue
-                    cur = dict(d_.get("regs") or {})
-                    for k_, v_ in rg.items():
-                        if k_ not in cur:
-                            cur[k_] = v_
-                        elif k_[1] == "MINE" and v_[0] < cur[k_][0]:
-                            cur[k_] = v_
-                    d_["regs"] = cur
+                    d_["regs"] = self._merge_organic_regs(d_.get("regs") or {}, rg,
+                                                          self._nlp_mine_small if nut_ == "N" else set())
                 if "N_balance" in labels:
                     # the N-surplus target with the mineral N of the fertilisation block (CAPRI SURTOT_REST_ /
                     # e_SURTOTHa): the row's linear mineral parts out, the purchases in

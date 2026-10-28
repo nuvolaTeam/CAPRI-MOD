@@ -408,6 +408,9 @@ def test_inner_fert_model_follows_capri():
     for g, v in caps.items():
         b0 = base["per_ha"][(g, "MINE")]
         assert abs(v - (b0 if b0 < SMALL_MINE_KG_HA else 0.8 * b0)) < 1e-9
+    # CAPRI's small groups (p_checkSmallMine): below 30 kg/ha at baseline here (no listed pair for DE110000)
+    small = f.small_mine_groups(r, base)
+    assert small == {g for (g, s_), v in base["per_ha"].items() if s_ == "MINE" and 0 < v < SMALL_MINE_KG_HA}
     capa = sum(v * area[g] for g, v in caps.items())
     reg = {(g, "MINE"): v for g, v in caps.items()}
     reg.update({(g, "CRES"): v for g, v in f.limcres_caps(r, base).items()})
@@ -421,6 +424,22 @@ def test_inner_fert_model_follows_capri():
     assert len(e30) == 9 and set(e30.capri_region) >= {"IT930000", "DE940000", "IT310000"}
     assert parse_mineral_redu("20crp") == ("crp", 0.2) and parse_mineral_redu("20") == ("uaa", 0.2)
     assert parse_mineral_redu("00") == (None, 0.0)
+
+
+def test_organic_and_mineral_caps_merge_as_capri():
+    """Audit S2: CAPRI's mineral reduction (minfert_redu_by_crop.gms, after the organic target's file) takes the more
+    stringent cap per crop group, except for its small groups (p_checkSmallMine), whose cap it sets at factor x
+    baseline, replacing the organic one; the residue regulation stays the mineral reduction's."""
+    from capri_mod.supply.supply_module import RegionalSupplyModel as R
+    cur = {("WHEA", "MINE"): (120.0, 2.0, 1.5), ("PULS", "MINE"): (20.0, 2.0, 1.5), ("WHEA", "CRES"): (30.0, 3.0, 9.0)}
+    org = {("WHEA", "MINE"): (100.0, 2.0, 1.5), ("PULS", "MINE"): (12.0, 2.0, 1.5), ("WHEA", "CRES"): (25.0, 3.0, 9.0),
+           ("GRAS", "MINE"): (50.0, 2.0, 1.5)}
+    out = R._merge_organic_regs(cur, org, small={"PULS"})
+    assert out[("WHEA", "MINE")][0] == 100.0           # the more stringent
+    assert out[("PULS", "MINE")][0] == 20.0            # a small group: the mineral reduction's cap (no backsliding)
+    assert out[("WHEA", "CRES")][0] == 30.0            # limCres: the mineral reduction's
+    assert out[("GRAS", "MINE")][0] == 50.0            # set by the organic target only
+    assert R._merge_organic_regs(cur, org, small=set())[("PULS", "MINE")][0] == 12.0
 
 
 def test_mineral_fertiliser_cap_binds(model):
