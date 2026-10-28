@@ -42,7 +42,7 @@ Full provenance for every entry is in `capri_data/DATA_SOURCING_REGISTRY.json`.
   between two states (BG010000 maize +-115 to 131 kha, iterations 3-10; HU230000 and HU330000 fodder and maize,
   iterations 4-16; Swedish tomatoes, 17-20), then a geometric tail (KNOWN_ISSUES K79, open for the jumps).
 - Farm-to-Fork under CAPRI's rule: r164, 12 iterations.
-- [test suite: to be filled in]
+- Test suite: 189 passed (20 min, the stored Hessians of the dev worktree: no Hessian measured).
 
 ## 27 October 2026 (night): builder reproduction audit (K86, K87), CAPRI's stop rule the default (K79), the legacy nitrate limit retired (K33), orphans removed, CAPRI's welfare report (M7)
 
