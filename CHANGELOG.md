@@ -30,6 +30,25 @@ Full provenance for every entry is in `capri_data/DATA_SOURCING_REGISTRY.json`.
 
 ---
 
+## 28 October 2026: the market supply Hessian measured when a scenario needs it
+
+- **Why**: the test suite's time was mostly the market supply Hessian (CAPRI's p_hessNQSupp, calibrate_supply.gms),
+  measured at the end of every baseline run, also in the 21 tests that only check a baseline (the projection test:
+  1,449 s measuring, 61 s from the cache; a 6-region baseline test 301 s against 14 s). CAPRI calibrates its market
+  supply functions as a task of its own after the baseline (calibrate_supply), and its simulations load them.
+- **Now** (the project lead's decision): a baseline run records what the measurement needs (its price signal, its
+  supply results, its region set and settings); the next run, if it is a scenario on that baseline, measures the Hessian
+  (or reads it from the cache) first, from the state the baseline left, before it changes anything. A scenario that runs
+  its own baseline measures it right after that baseline. A baseline run alone measures nothing.
+- **Unchanged**: a baseline followed by its scenario (every reference run, ProjectionModule): the measurement starts from
+  the same state with the same inputs, so the cache key and the Hessian are the same.
+- **Changed in multi-run sequences only**: a baseline's market no longer uses the Hessian an earlier baseline left
+  (another solution, possibly another region set): it runs as a model's first baseline always did. A scenario whose
+  baseline is in the cache but whose Hessian is not at hand (another run came after the baseline) runs its baseline
+  again and measures from it, where the Hessian of whichever baseline ran last was used before.
+- Tests: test_market_supply_hessian_measured_at_base_and_at_scenario_state (a baseline alone measures nothing; the
+  scenario's log holds the baseline's Hessian, then the scenario-state one), test_hessian_skip_of_unreached_regions_is_exact
+  (measured by a world-price-shock scenario on the baseline).
 ## 28 October 2026: CAPRI's stop rule the default (K79)
 
 - `outer_loop.stop_rule = "capri"` (the project lead's decision): CAPRI's rule (capmod/price_forecast.gms: the loop goes

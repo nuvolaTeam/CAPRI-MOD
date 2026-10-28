@@ -118,15 +118,17 @@ def test_market_supply_hessian_measured_at_base_and_at_scenario_state():
     with override({"market.hessian_scenario_iter": 2, "market.market_supply_nq": True}):
         m = CAPRIModel(data_dir="capri_data", verbose=False)
         m.run(scenario="BASELINE", regions=regs, max_outer_iter=2)
-        base = dict(m.market_supply_hessian_info or {})
-        assert base.get("source") in ("computed", "cache"), base
+        # a baseline alone does not measure it (28 October 2026): the scenario on it does, first thing
+        assert not getattr(m, "market_supply_hessian_log", None)
+        assert m.market_module.supply_hessian is None
         sc = greendeal_scenario(lndscpTarg=10, orgTarg=25, pestRedu=50, surpRedu=50, mineRedu=20)
         m.run(custom_scenario=sc, regions=regs, max_outer_iter=3)
-        scen = dict(m.market_supply_hessian_info or {})
+        base, scen = (dict(d) for d in m.market_supply_hessian_log[-2:])
+        assert len(m.market_supply_hessian_log) == 2
+        assert base.get("source") in ("computed", "cache") and "at_iteration" not in base, base
         assert scen.get("source") in ("computed", "cache") and scen.get("at_iteration") == 2, scen
         assert "scenario_error" not in scen
         assert scen["file"] != base["file"]
-        assert [d["file"] for d in m.market_supply_hessian_log[-2:]] == [base["file"], scen["file"]]
 
 
 def test_hessian_skip_of_unreached_regions_is_exact(monkeypatch):
@@ -141,9 +143,11 @@ def test_hessian_skip_of_unreached_regions_is_exact(monkeypatch):
     regs = ["DE110000", "NO080000"]
     with override({"market.hessian_skip_unchanged": True, "market.market_supply_nq": True}):
         m = CAPRIModel(data_dir="capri_data", verbose=False)
-        # the verification needs a measured Hessian, not the cache: the verify mode's file is removed after the run
+        # the verification needs a measured Hessian, not the cache: the verify mode's file is removed after the run.
+        # A scenario on the baseline measures it (a world-price shock is a scenario), first thing in its run
         m.run(scenario="BASELINE", regions=regs, max_outer_iter=2)
-        info = dict(m.market_supply_hessian_info or {})
+        m.run(world_price_shock={"SWHE": 0.05}, regions=regs, max_outer_iter=1)
+        info = dict(m.market_supply_hessian_log[0])
         if info.get("source") == "computed":
             assert info.get("verified", 0) > 0, info
             assert info.get("verify_mismatch") == [], info
