@@ -44,7 +44,10 @@ Full provenance for every entry is in `capri_data/DATA_SOURCING_REGISTRY.json`.
   1.05 (the reference run's own change from its trend point is in CAPRI's levels); ProfitFeed not comparable (the
   reference's level is dominated by that change).
 - Comparisons of two runs (CAPRIModel.compare) take the difference of the levels: unchanged.
-- [test suite and runs: to be filled in]
+- Gate: test suite 192 passed; Farm-to-Fork r175 equal to dev's r170 and Green Deal 2030 r176 equal to r171 in every
+  result but the market welfare levels (prices, activities, production, environment, supply welfare to 1e-10); the
+  market welfare changes (scenario less baseline) equal within 4e-16 of their levels in all 240 cells; same iterations
+  (12 and 30).
 - outer_loop.max_outer_iter raised from 25 to 60 (the project lead's decision). CAPRI's GUI default is 99 steps; a
   scenario that has not met CAPRI's stop rule after 60 iterations ends there and is reported as not converged
   (unchanged). Runs that converge before 25 iterations are not affected.
