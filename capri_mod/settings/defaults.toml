@@ -57,7 +57,7 @@ price_update = "capri"
 # member-state milk, and the same inner balances). CAPRI's verdict is recorded in either case
 # (outer_history[...]["conv"]["capri"], metadata capri_stop). CAPRI's since 28 October 2026 (the project lead's
 # decision, K79): Farm-to-Fork stops by it after 12 iterations (r164), the Green Deal 2030 scenario after 30 (r168;
-# r165 had been cut by the run time limit at iteration 20)
+# r165 was stopped by hand at iteration 20, before its time limit)
 stop_rule = "capri"
 milk_ms_relax_floor = 0.02
 capri_step_weights = [0.55, 0.30, 0.15]

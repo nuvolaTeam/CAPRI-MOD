@@ -34,9 +34,9 @@ Full provenance for every entry is in `capri_data/DATA_SOURCING_REGISTRY.json`.
 
 - `outer_loop.stop_rule = "capri"` (the project lead's decision): CAPRI's rule (capmod/price_forecast.gms: the loop goes
   on while more than two items change by more than 0.05% between iterations), with the model's inner balances settled.
-  Set back on 27 October because the Green Deal 2030 run r165 had not stopped by iteration 20; r165 had been cut by the
-  run time limit, its Hessian measured inside the run.
-- r168 (Green Deal 2030 under CAPRI's rule, the Hessian from the cache, every region's levels recorded per iteration,
+  Set back on 27 October because the Green Deal 2030 run r165 had not stopped by iteration 20; r165 was stopped by hand
+  there, before its two-hour limit (r168 too had 14 rows above 0.05% at iteration 20).
+- r168 (Green Deal 2030 under CAPRI's rule, its Hessian measured in the run (38 min), every region's levels recorded per iteration,
   diagnostics.record_regional_levels): stops after 30 iterations (5,761 s), 0 rows above 0.05% at the last. EU
   indicators within 0.4 points of r166 (the model's rule, 9 iterations). The large swings were single regions jumping
   between two states (BG010000 maize +-115 to 131 kha, iterations 3-10; HU230000 and HU330000 fodder and maize,

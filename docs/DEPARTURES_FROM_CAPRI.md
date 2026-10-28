@@ -188,9 +188,9 @@ within 0.1 point, prices within 0.6). User's decision. `"adaptive"` stays as an 
 
 CAPRI's stop rule (capmod/price_forecast.gms l. 96-371: the loop goes on while more than two items change by more than
 0.05% between iterations), with the model's inner balances settled as well. Made the default on 27 October 2026 and set
-back the same evening when the Green Deal 2030 run (r165) did not stop by iteration 20; that run had been cut by the run
-time limit (its Hessian was measured inside it). With the Hessian from the cache the same scenario stops by CAPRI's rule
-after 30 iterations (r168, 1 h 36 min), Farm-to-Fork after 12 (r164); EU indicators within 0.4 points of the model's
+back the same evening when the Green Deal 2030 run (r165) did not stop by iteration 20; it was stopped by hand there, before its two-hour
+limit (r168 too had 14 rows above 0.05% at iteration 20). The same scenario stops by CAPRI's rule after 30 iterations
+(r168, 1 h 36 min including the 38 min of its Hessian's measurement), Farm-to-Fork after 12 (r164); EU indicators within 0.4 points of the model's
 rule (r166). The model's rule stays as `"capri-mod"`.
 
 ### `supply.fodder_at_shadow_price` removed (26 October 2026, with the conic form)

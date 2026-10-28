@@ -831,9 +831,10 @@ CAPRI's stop rule, recorded every iteration since r135, flags rows that move by 
   largest about 50%), stopped by hand before its two-hour limit. Default set back to the model's rule (the project
   lead's decision, 27 October 2026, DEPARTURES_FROM_CAPRI); r166 (the same scenario, the model's rule) prints CAPRI's
   verdict and its largest row at every iteration for the diagnosis. r168 (28 October 2026: Green Deal 2030, CAPRI's
-  rule, the Hessian from the cache, every region's levels recorded per iteration, tools/check/k79_trace.py):
-  **converged under CAPRI's rule after 30 iterations** (0 rows above 0.05% at the last, 5,761 s; r165 had been cut by
-  the run time limit, not by a divergence: its Hessian was measured inside the run). EU indicators within 0.4 points of
+  rule, its Hessian measured in the run (38 min), every region's levels recorded per iteration, tools/check/k79_trace.py):
+  **converged under CAPRI's rule after 30 iterations** (0 rows above 0.05% at the last; 5,761 s with the Hessian, the
+  scenario's 30 iterations about 53 min). r165 was stopped by hand at iteration 20, before its two-hour limit, not by a
+  divergence: r168 too had 14 rows above 0.05% at iteration 20. EU indicators within 0.4 points of
   r166 (the model's rule, 9 iterations): oilseed price +7.1 (+6.8), fertiliser N2O -32.5 (-32.8), sheep and goats -7.7
   (-8.0). The large swings are single regions jumping between two states: BG010000 (maize -115, +128, -115 ... +131 kha,
   rapeseed +-55, broilers +-4,000 thousand head, iterations 3-10), HU230000 and HU330000 (other fodder +-45 to 70 kha,
