@@ -66,8 +66,8 @@ def main():
         tot = sum(q for _, _, q in parts)
         for c, use, q in parts:
             if q > 0:
-                rows.append(dict(product=rp, commodity=c, use=use, base_kt=round(q, 3), weight=q / tot,
-                                 prod0_kt=round(p0, 3)))
+                rows.append(dict(product=rp, commodity=c, use=use, base_kt=q, weight=q / tot,
+                                 prod0_kt=p0))
         print(f"{rp}: EU production {p0:.0f} kt = {p0 / tot:.4f} x {tot:.0f} kt of parent use")
     pd.DataFrame(rows).to_csv(MKT / "feed_byproducts.csv", index=False)
 
@@ -82,7 +82,7 @@ def main():
             m = re.match(r"^'World'\.'PMRK'\.'(FENI|RYEM|OATS|TAGR|TOBA|TABO|TEXT|PLMO|OTHO|FFIS|SFIS|OAQU|COFF|TEAS|COCO)'\.'BAS'\s+([-\d.Ee+]+)", line)
             if m:
                 p = m.group(1)
-                wp.loc[p, col] = round(float(m.group(2)), 2)
+                wp.loc[p, col] = float(m.group(2))
                 prov[p] = {"capri_code": p, "source": "FAO_agg_17_defaulta p_dataMarket 'World'.'PMRK'.'BAS'",
                            "previous": None}
     fl = _read_csv(MKT / "bilateral_flows_2017.csv")
@@ -91,7 +91,7 @@ def main():
     pm = rg[rg.commodity == "FPRI"].set_index("region")["pmrk"]
     ex = f.groupby("exporter")["q_kt"].sum()
     fp = float(sum(q * float(pm.get(r, 0.0)) for r, q in ex.items()) / ex.sum())
-    wp.loc["FPRI", col] = round(fp, 2)
+    wp.loc["FPRI", col] = fp
     prov["FPRI"] = {"capri_code": "FPRI", "source": "CAPRI market_base_1717: export-weighted PMRK of the exporting "
                     "regions (FAO_agg has no World PMRK for FPRI); tools/build/build_feed_byproducts.py", "previous": None}
     wp.to_csv(MKT / "world_prices.csv")
@@ -114,7 +114,7 @@ def main():
                 num += w * float(e)
                 den += w
         eps = num / den if den > 0 else float(own.mean())
-        arm.loc[c, "eps"] = round(eps, 4)
+        arm.loc[c, "eps"] = eps
         print(f"{c}: eps {eps:.4f} "
               f"(production-weighted over {len(own)} CAPRI regions)")
     arm.to_csv(MKT / "armington_params.csv")

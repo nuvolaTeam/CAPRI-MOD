@@ -144,8 +144,8 @@ def main():
         if f <= 0 or not members[(R, c)]:
             continue
         fe = sum(U.get((rm, "FEED", c), 0.0) for rm in members[(R, c)])
-        params[f"{R}|{c}"] = {"feed_share": round(f / u, 4),
-                              "elasticities": {c2: round(v / fe, 4) for c2, v in wel[(R, c)].items()},
+        params[f"{R}|{c}"] = {"feed_share": f / u,
+                              "elasticities": {c2: v / fe for c2, v in wel[(R, c)].items()},
                               "capri_regions": sorted(members[(R, c)])}
     src = ("CAPRI 2030 calibration: feed share = sum FEED / sum (HCON + FEED + PROC + BIOF) over the trade region's "
            "CAPRI regions (data_market_1730defaulta CAL); elasticities = p_ElasFeed(RMS, feed, price-of, 'CAL') from "

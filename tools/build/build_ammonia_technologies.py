@@ -200,10 +200,10 @@ def build():
                 if "N2OSTO" in side:                                  # l. 2236-2237: N2O at housing level
                     side["N2OHOU"] = side.pop("N2OSTO")
                 for item, val in side.items():
-                    effects.append([rs, act, tech, item, round(val, 6)])
+                    effects.append([rs, act, tech, item, val])
                 out.append([rs, act, tech, TARGET[tech], lin if lin is not None else "", sqr if sqr is not None else "",
-                            round(ini, 6), round(mx, 6), "" if qe is None else round(qe, 6),
-                            round(den, 6), round(tl, 6), round(gz, 6)])
+                            ini, mx, "" if qe is None else qe,
+                            den, tl, gz])
     out = endo_leach(out, MD, KGN, STOR, MIN, nvz, AP)
     with open(D / "ammonia_technologies.csv", "w", newline="") as f:
         w = csv.writer(f)
@@ -275,32 +275,32 @@ def endo_leach(out, MD, KGN, STOR, MIN, nvz, AP):
         msc_ini = max(0.0, ini0 * (1 - cslc_ini - csl_ini) - csh_ini - leh_ini)
         if "CovStorLow" in d:
             r = list(d["CovStorLow"])
-            r[6] = round(csl_ini, 6)
+            r[6] = csl_ini
             d["CovStorLow"] = r
             c = list(d["CovStorLow"])
             c[2] = "CovStorLowCon"
             c[4] = (float(r[4]) if r[4] != "" else 0.0) + lin
-            c[6] = round(cslc_ini, 6)
+            c[6] = cslc_ini
             d["CovStorLowCon"] = c
         for t in ("LowEmHous", "CovStorHigh"):
             if t in d and d[t][4] != "":
                 r = list(d[t]); r[4] = float(r[4]) + lin; d[t] = r
         if lin > 0 or msc_ini > 0:
-            d["ManStorCon"] = [rs, act, "ManStorCon", "NH3MAN", lin, 0.0, round(msc_ini, 6), 1.0, 1.0, 1.0,
-                               round(tl, 6), round(gz, 6)]
+            d["ManStorCon"] = [rs, act, "ManStorCon", "NH3MAN", lin, 0.0, msc_ini, 1.0, 1.0, 1.0,
+                               tl, gz]
         # the Nitrates Directive's covered storage: minimum share and the initial shares (l. 2596-2621, 2676-2709)
         env = _env_cov(rs, act, tl, ctry, cat, nvz, AP) if APPLY_ENV_COVER else 0.0
         tot = sum(g(t, 6) for t in ("CovStorLow", "CovStorLowCon", "CovStorHigh", "LowEmHous"))
         if env > tot and "ManStorCon" in d and "CovStorLowCon" in d:
             h = min(float(d["ManStorCon"][6]), env - tot)
             if h > 0:
-                c = list(d["CovStorLowCon"]); c[6] = round(float(c[6]) + h, 6); c[7] = max(float(c[7]), float(c[6]))
+                c = list(d["CovStorLowCon"]); c[6] = float(c[6]) + h; c[7] = max(float(c[7]), float(c[6]))
                 d["CovStorLowCon"] = c
-                m = list(d["ManStorCon"]); m[6] = round(float(m[6]) - h, 6); d["ManStorCon"] = m
+                m = list(d["ManStorCon"]); m[6] = float(m[6]) - h; d["ManStorCon"] = m
         tot = sum(g(t, 6) for t in ("CovStorLow", "CovStorLowCon", "CovStorHigh", "LowEmHous"))
         if env > tot and "CovStorLow" in d:
             r = list(d["CovStorLow"])
-            r[6] = round(env - g("CovStorLowCon", 6) - g("CovStorHigh", 6) - g("LowEmHous", 6), 6)
+            r[6] = env - g("CovStorLowCon", 6) - g("CovStorHigh", 6) - g("LowEmHous", 6)
             r[7] = max(float(r[7]), float(r[6]))
             d["CovStorLow"] = r
         res.extend(d.values())

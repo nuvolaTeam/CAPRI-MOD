@@ -185,13 +185,13 @@ def main():
             use = sum(float(bal.get(x, {}).get("FEDM", 0.0)) for x in grp)
         fed = float(df.loc[df.commodity == c, "feed_kt"].sum())
         if use > 0 and fed > 0:
-            sh.append(dict(commodity=c, feed_kt=round(fed, 3), use_kt=round(use, 3), share=min(1.0, fed / use)))
+            sh.append(dict(commodity=c, feed_kt=fed, use_kt=use, share=min(1.0, fed / use)))
     pd.DataFrame(sh).to_csv(DEST / "feed_bulks_eu_share.csv", index=False)
     # EU27 2030 feed use of the FCER cereals with a model producer price: the weights of the feed cereal price
     # level in the supply models (supply_module FEED_CEREAL_MIX, projection/prices.py). RICE (milled) is left out:
     # the model has no producer price for it (0.2% of FCER).
     mix = (df[(df.bulk == "FCER") & df.commodity.isin(FEED_CEREAL_MIX)].groupby("commodity")["feed_kt"].sum()
-           .reindex(FEED_CEREAL_MIX).round(1))
+           .reindex(FEED_CEREAL_MIX))
     mix.rename("fedm_kt").rename_axis("cereal").to_csv(ROOT / "capri_data" / "2017" / "feed" / "feed_cereal_mix_2030.csv")
     print("feed_cereal_mix_2030.csv:", mix.to_dict())
     worst.sort(reverse=True)

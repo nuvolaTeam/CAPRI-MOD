@@ -108,8 +108,8 @@ def main() -> None:
     weighted = merged.groupby("commodity").apply(
         lambda g: np.average(g.value_p, weights=g.value_q), include_groups=False)
     unweighted = merged.groupby("commodity").value_p.mean()
-    prices = pd.DataFrame({"world_price_eur_t": weighted.round(2),
-                           "unweighted_mean": unweighted.round(2),
+    prices = pd.DataFrame({"world_price_eur_t": weighted,
+                           "unweighted_mean": unweighted,
                            "n_importers": merged.groupby("commodity").size()})
     prices.to_csv(out / "capmod_world_prices_2017.csv")
     print(f"world prices    : {len(prices)} commodities")
@@ -123,11 +123,10 @@ def main() -> None:
         cmp_ = pd.DataFrame({
             "model": cur.loc[common, col],
             "capmod": prices.loc[common, "world_price_eur_t"]})
-        cmp_["dev_pct"] = ((cmp_.model - cmp_.capmod).abs()
-                           / cmp_.capmod * 100).round(1)
+        cmp_["dev_pct"] = (cmp_.model - cmp_.capmod).abs() / cmp_.capmod * 100
         print(f"\nagainst the current world_prices.csv, {len(common)} commodities:")
         print(f"  median |deviation| : {cmp_.dev_pct.median():.1f}%")
-        print(cmp_.sort_values("dev_pct", ascending=False).head(10).to_string())
+        print(cmp_.sort_values("dev_pct", ascending=False).head(10).round(1).to_string())
 
     (args.data_dir / "validation" / "capmod_market_extraction.json").write_text(
         json.dumps({

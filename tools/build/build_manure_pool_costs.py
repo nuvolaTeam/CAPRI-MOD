@@ -42,8 +42,8 @@ def main() -> None:
                 continue
             km = dist.get((centre[a], centre[b])) or dist.get((centre[b], centre[a]))
             if km:
-                out[f"{a}|{b}"] = {"km": round(km, 1),
-                                   "eur_per_t_n": round((1.0 + 0.18 * km) / content * 100.0, 2)}
+                out[f"{a}|{b}"] = {"km": km,
+                                   "eur_per_t_n": (1.0 + 0.18 * km) / content * 100.0}
     dest = _ROOT / "capri_data" / "2017" / "environment" / "manure_pool_costs.json"
     dest.write_text(json.dumps({"_source": "CAPRI define_manure_market_structure.gms (rManPool_centre, p_mPoolTradeCost) with "
                                 "nuts2_center_distance.gdx (supplied by the project lead)",

@@ -84,7 +84,7 @@ def build():
         e = g["EXPPRD"] / g["IMPORT"] if g.get("IMPORT", 0.0) > 0 and "EXPPRD" in g else None
         if reg not in base and ini is None:
             continue
-        rows.append([reg, base.get(reg, ""), "" if ini is None else round(ini, 12), "" if e is None else round(e, 12)])
+        rows.append([reg, base.get(reg, ""), "" if ini is None else ini, "" if e is None else e])
     with open(OUT, "w", newline="") as fh:
         w = csv.writer(fh)
         w.writerow(["region", "leach_base", "leach_ini", "exp_imp"])

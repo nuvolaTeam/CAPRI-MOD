@@ -38,7 +38,7 @@ from typing import Dict, Optional
 import numpy as np
 import pandas as pd
 
-from capri_mod.csvio import read_csv
+from capri_mod.tableio import read_input
 
 MM_HA_TO_M3 = 10.0   # 1 mm depth over 1 ha = 10 m3
 _DEFAULT = Path(__file__).resolve().parents[2] / "capri_data" / "2017" / "environment" / "irrigation_2017.csv"
@@ -64,7 +64,7 @@ class WaterDemandModule:
 
     def __init__(self, data: dict, irrigation_path: Optional[Path] = None):
         self.data = data
-        self.table = read_csv(irrigation_path or _DEFAULT)
+        self.table = read_input(irrigation_path or _DEFAULT)
 
     def _areas(self, supply_results: Optional[Dict]) -> pd.DataFrame:
         base = self.data["areas"]
