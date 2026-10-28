@@ -852,6 +852,17 @@ CAPRI's stop rule, recorded every iteration since r135, flags rows that move by 
   BG020000, BG060000 (SOYA), DEF00000 (PERM), RO050000 (ROOF): the exemption set depends on the path. Default switched to
   CAPRI's rule (28 October 2026, the project lead's decision). Open: the two-state jumps (candidates: two local optima of
   the non-convex regional problem, as K75's FRH0, or an exemption switching), which cost iterations
+  29 October 2026 (batch 2 and 3; the jump record of model._nlp_jump in outer_history[...]["jump_check"]): Green Deal
+  2030 (r181) converged under CAPRI's rule in 37 iterations (r177, batch 1: 18), the EU indicators as r177's (largest
+  price difference 0.17 points, tobacco). 1,655 regional checks in the scenario; 961 kept another start's solution,
+  but only 23 lowered the objective by more than 1e-5 relative (the other 938: the same optimum within that, so the
+  record's "switched" overstates how often the check acts). The 23 are almost all Hungary: HU230000 (gain about 5e-3,
+  at iterations 2, 4, 6, 7, 32, 34: the warm start returns to the worse optimum and the check corrects it each time),
+  HU210000 (1.7e-3), HU330000 (2e-4); EL210000 and RO070000 once or twice. The iteration-30 jump (HU pulses 52% in
+  CAPRI's rows): HU230000 moved by 34 (relative); the standard start gave no lower objective, so the jump stayed; gone
+  by iteration 32. Farm-to-Fork (r180): 12 iterations (r178: 13), 492 checks, none with a gain above 1e-5. Next, for
+  the project lead's decision: switch (and count) only above a gain tolerance (a behaviour change: its own runs);
+  compare HU230000's two optima (activities, feeding) to see what makes its warm start leave the better one
 
 <a id="k80"></a>
 ### K80: The same run repeated from a warm start differs by up to 3e-5 relative in small cereal activities (26 October 2026)
