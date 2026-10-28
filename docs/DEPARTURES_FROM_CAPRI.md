@@ -201,10 +201,32 @@ CAPRI's form, home-grown fodder carries no purchase price and enters through its
 feed use (capri_regional_nlp.py QUADRF_ and the fodder rows), so its value is that equality's dual, as in CAPRI. The
 setting, its ratio bounds and damping, and the outside ration solve were removed with the conic form.
 
+## Switches of CAPRI's policy files (28 October 2026)
+
+CAPRI's scenario files set a few market-loop switches of their own. Two were found in its Green Deal scenarios
+(pol_input/greendeal/greendeal_scenarios.gms):
+
+- **Slower price smoothing for problem products** (`p_stepWgtSpecial(ms, product, "srt")`, define_stepWeights.gms
+  l. 41-50, price_forecast.gms l. 384-386): for the products listed, the price passed to the supply models averages
+  the baseline price and every step's market price, step j of k weighted max(0, 1 - srt (k + 1 - j)), instead of the
+  last three or four steps. The Green Deal file lists none (its one entry, Malta's milk at 0.15, is commented out).
+  capri-mod: `outer_loop.capri_step_special` (entries [region, product, srt]; empty by default, as CAPRI's Green Deal
+  runs). One difference of form: CAPRI keys it by member state, as it has a producer price per member state; capri-mod
+  has one EU price per product (a member state's own price only for raw milk, and Norway's), so an entry other than
+  raw milk is for region EU27 and acts on every member state.
+- **Negative raw milk producer prices** (`negProdPriceAllowed(rms, "MILK")` and `negProdPriceAllowedFromStart(rmssup,
+  "MILK")` for every market region, greendeal_scenarios.gms; arm/set_start_val.gms l. 565, widen_bounds.gms l. 452-457):
+  the Green Deal runs let the milk price go below zero (lower bound -max(100, price)). Without the switch CAPRI's lower
+  bound on a producer price is widened toward zero when it binds but stays positive. capri-mod's member-state dairy
+  blocks have no lower bound on the raw milk price in any scenario: as CAPRI's Green Deal runs, and a difference from
+  CAPRI's other scenarios that has never been active (lowest member-state raw milk price at the end of r163 Farm-to-Fork
+  1.10 of base, r166 Green Deal 1.05).
+
 ## DEPARTURE (to be removed)
 
 | Setting | CAPRI star 3.0 | Default now | Why it differs (recorded at the time) | What switching needs |
 |---|---|---|---|---|
+| `outer_loop.stop_rule` | CAPRI's stop rule (capmod/price_forecast.gms l. 96-371: no more than two items still changing by more than 0.05%) | "capri-mod" (the model's tests on prices, quantities and price gaps; CAPRI's verdict recorded every iteration) | made "capri" on 27 October 2026 (K79), set back the same evening (the project lead's decision): Farm-to-Fork stopped by CAPRI's rule in 12 iterations (r164); the Green Deal 2030 scenario did not converge under it (r165 stopped at iteration 20: 28 rows above 0.05%, the largest about 50%: an oscillation, not slow convergence) | find and fix the oscillating rows (r166 records CAPRI's verdict and its largest row per iteration), then a Farm-to-Fork and a Green Deal run with "capri" |
 | `supply.fert_slope_with_saving` | the fertiliser options' pmpParSqr with the fertiliser-saving term (envind/ghgMiti.gms l. 1016-1035) | false (the curvature without it) | K77, 25 October 2026: with it and the cost on the N purchases, the 2030 baseline leaves the options' initial shares (FR10 precision farming 0.44; EU 9.6%, run r128); the saving runs through the NLP's fertilisation block, so the base becomes a saddle | the curvature of the saving in the NLP's terms (the fertilisation block's response), or CAPRI's N(m) = N0/(1 + nmE m) made explicit |
 | `market.eu_blocks` | two EU trade blocks, EU_WEST and EU_EAST (aggregation/defaultA.agg) | false (one EU27 block) | built 18 October 2026 as an option; Farm-to-Fork deviation 4.22 → 4.65 when tried | a run; the market supply Hessian (below) is not built for the blocks yet |
 | `supply.use_cattle_member_splits` | replacement heifers (HEIR) and the four calf activities with their own levels; young animals cleared per sex (INPANI_) | false (the model's animals with CAPRI's intensity pairs; pooled young-animal markets) | K65: with them on, the Farm-to-Fork run does not converge (male calves' price above 6 x base, female below zero, r96); no CAPRI per-sex Farm-to-Fork result exists to check against | find why the per-sex prices diverge (calf activities at their zero bounds) |

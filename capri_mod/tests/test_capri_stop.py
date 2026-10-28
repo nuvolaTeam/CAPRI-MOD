@@ -75,3 +75,31 @@ def test_model_records_capri_verdict_and_can_stop_on_it():
     assert last["prod"]["DE000000"].get("MILK", 0) > 0 and last["feed"]["FR000000"].get("FCER", 0) > 0
     if r["metadata"]["outer_converged"]:
         assert not cs["go_on"]
+
+
+def test_capri_special_smoothing_weights():
+    """CAPRI's slower smoothing for problem products (define_stepWeights.gms l. 41-50): at step k, step j (the
+    baseline j = 0) weighs max(0, 1 - srt (k + 1 - j)), normalised; the baseline is the signal 0."""
+    from capri_mod.model import CAPRIModel
+    f = CAPRIModel._capri_special_forecast
+    # srt 0.15 at step 3: baseline 0.4, S1 0.55, S2 0.7, S3 0.85
+    w = [0.4, 0.55, 0.7, 0.85]
+    hist = [1.0, 2.0, 4.0]
+    assert abs(f(hist, 0.15) - (w[1] * 1 + w[2] * 2 + w[3] * 4) / sum(w)) < 1e-12
+    # weights reaching zero: srt 0.5 at step 3, only S3 (0.5) and S2 (0) of the steps; the baseline 0
+    assert abs(f(hist, 0.5) - 4.0) < 1e-12
+    import pandas as pd
+    s = f([pd.Series({"a": 1.0}), pd.Series({"a": 3.0})], 0.15)
+    assert abs(float(s["a"]) - (0.7 * 1 + 0.85 * 3) / (0.55 + 0.7 + 0.85)) < 1e-12
+
+
+def test_capri_special_smoothing_setting_is_checked():
+    from capri_mod.model import CAPRIModel
+    from capri_mod.settings import override
+    import pytest
+    assert CAPRIModel._capri_step_special() == {}                       # CAPRI's Green Deal scenarios set none
+    with override({"outer_loop.capri_step_special": [["MT000000", "MILK", 0.15], ["EU27", "SOYA", 0.1]]}):
+        assert CAPRIModel._capri_step_special() == {("MT000000", "MILK"): 0.15, ("EU27", "SOYA"): 0.1}
+    with override({"outer_loop.capri_step_special": [["BG000000", "SOYA", 0.15]]}):
+        with pytest.raises(ValueError):
+            CAPRIModel._capri_step_special()

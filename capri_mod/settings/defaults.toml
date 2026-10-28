@@ -63,6 +63,14 @@ milk_ms_relax_floor = 0.02
 capri_step_weights = [0.55, 0.30, 0.15]
 capri_step_weights_late = [0.4, 0.3, 0.2, 0.1]
 capri_step_weights_late_from = 20
+# CAPRI's slower smoothing for "problem products which tend to fluctuate a lot in the market" (define_stepWeights.gms
+# l. 41-50, price_forecast.gms l. 384-386; p_stepWgtSpecial(ms, product, "srt"), assigned in a policy file): entries
+# [region, product, srt]; at step k the price passed on is the average of the baseline price and the market prices of
+# steps 1..k, step j weighted max(0, 1 - srt (k + 1 - j)) (the baseline j = 0). Region: "EU27" (the EU's common price
+# signal: the model has one EU price per product where CAPRI has one per member state), a member state for its raw
+# milk price (MILK), "NO000000" for Norway's own prices. CAPRI's Green Deal scenarios set none (greendeal_scenarios.gms
+# l. 82: the Maltese milk entry is commented out). Acts with price_update = "capri"
+capri_step_special = []
 # member states whose milk delivery is below this share of the EU's do not hold the milk gap open
 milk_ms_min_share = 0.01
 # supply gap: products below this production (kt) do not count (CAPRI 10 x p_minAbsProdIterChg 0.5)
