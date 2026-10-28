@@ -830,7 +830,18 @@ CAPRI's stop rule, recorded every iteration since r135, flags rows that move by 
   0.36%). r165 (Green Deal 2030, CAPRI's rule): no stop by iteration 20 of the scenario (28 rows above 0.05%, the
   largest about 50%), stopped by hand before its two-hour limit. Default set back to the model's rule (the project
   lead's decision, 27 October 2026, DEPARTURES_FROM_CAPRI); r166 (the same scenario, the model's rule) prints CAPRI's
-  verdict and its largest row at every iteration for the diagnosis
+  verdict and its largest row at every iteration for the diagnosis. r168 (28 October 2026: Green Deal 2030, CAPRI's
+  rule, the Hessian from the cache, every region's levels recorded per iteration, tools/check/k79_trace.py):
+  **converged under CAPRI's rule after 30 iterations** (0 rows above 0.05% at the last, 5,761 s; r165 had been cut by
+  the run time limit, not by a divergence: its Hessian was measured inside the run). EU indicators within 0.4 points of
+  r166 (the model's rule, 9 iterations): oilseed price +7.1 (+6.8), fertiliser N2O -32.5 (-32.8), sheep and goats -7.7
+  (-8.0). The large swings are single regions jumping between two states: BG010000 (maize -115, +128, -115 ... +131 kha,
+  rapeseed +-55, broilers +-4,000 thousand head, iterations 3-10), HU230000 and HU330000 (other fodder +-45 to 70 kha,
+  maize +-25 to 114, barley +-24, iterations 4-16), then Swedish tomatoes (39-76% at iterations 17-20), then a geometric
+  tail. The mineral-cap exemptions (K71: kept for the rest of the scenario once needed) differ from r166's: more groups in
+  BG020000, BG060000 (SOYA), DEF00000 (PERM), RO050000 (ROOF): the exemption set depends on the path. Default switched to
+  CAPRI's rule (28 October 2026, the project lead's decision). Open: the two-state jumps (candidates: two local optima of
+  the non-convex regional problem, as K75's FRH0, or an exemption switching), which cost iterations
 
 <a id="k80"></a>
 ### K80: The same run repeated from a warm start differs by up to 3e-5 relative in small cereal activities (26 October 2026)
