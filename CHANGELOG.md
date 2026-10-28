@@ -30,6 +30,16 @@ Full provenance for every entry is in `capri_data/DATA_SOURCING_REGISTRY.json`.
 
 ---
 
+## 28 October 2026: a report of items still moving one way when the loop stops (beyond CAPRI)
+
+- `outer_loop.drift_report_steps` (3; the project lead's decision; decides nothing): when the supply-market loop ends,
+  the items of CAPRI's stop rule whose last three changes had one sign, the last still above 0.05%, with the rate at
+  which their changes shrink and a rough estimate of the movement still to come (metadata capri_stop drift; a warning
+  when the loop stopped). CAPRI's rule stops with two rows or fewer above 0.05% (it counts products,
+  price_forecast.gms l. 345-371, as here), so it can stop while a product still drifts: Farm-to-Fork r170 stopped with
+  the tomato price rising 0.36% per iteration (DEPARTURES_FROM_CAPRI, "Beyond CAPRI").
+- [test suite: to be filled in]
+
 ## 28 October 2026: CAPRI's switches of its Green Deal scenario file
 
 - **Slower price smoothing for problem products** (`outer_loop.capri_step_special`, CAPRI's p_stepWgtSpecial,

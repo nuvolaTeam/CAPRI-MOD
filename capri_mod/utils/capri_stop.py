@@ -20,7 +20,10 @@ maximum exceeds p_minIterChg (0.05%) and more than two rows exceed it (l. 366-37
 What this module needs from the caller, per step: production (kt) and feed use (kt) per member state and row, and the
 market's prices per member state and row (EUR/t; CAPRI's p_itemsInIters "UVAG" is the market's solution of the step,
 before the price forecast's averaging), and the aggregates' members. Differences from CAPRI's items are the caller's
-and are listed where it builds them (model.CAPRIModel._capri_stop_step)."""
+and are listed where it builds them (model.CAPRIModel._capri_stop_step).
+
+Not CAPRI's: CapriStopRule.drift, a report of the items still moving one way when the loop ends
+(outer_loop.drift_report_steps); it decides nothing."""
 from __future__ import annotations
 
 from typing import Dict, Iterable, List, Mapping, Optional, Set
@@ -31,6 +34,12 @@ Table = Mapping[str, Mapping[str, float]]          # {member state or aggregate:
 def _chg(x1: float, x0: float) -> float:
     s = abs(x1 + x0)
     return 200.0 * abs(x1 - x0) / s if s > 0 else 0.0
+
+
+def _schg(x1: float, x0: float) -> float:
+    """_chg with the sign of x1 - x0 (for the drift report)."""
+    s = abs(x1 + x0)
+    return 200.0 * (x1 - x0) / s if s > 0 else 0.0
 
 
 class CapriStopRule:
@@ -81,6 +90,8 @@ class CapriStopRule:
         rec = {"prod": {m: dict(v) for m, v in prod.items()}, "feed": {m: dict(v) for m, v in feed.items()},
                "aggp": aggp}
         chg: Dict[str, Dict[str, float]] = {}
+        # the same changes with their sign, per item (kind, member state or aggregate, row): the drift report
+        sgn: Dict[tuple, float] = {}
         if self.steps:
             prev = self.steps[-1]
             # prices at the aggregates (l. 103-125)
@@ -92,8 +103,10 @@ class CapriStopRule:
                     if r in self.no_abs_price_rows:
                         if p and p0:
                             chg.setdefault(a, {})[r] = _chg(p, p0)
+                            sgn[("price", a, r)] = _schg(p, p0)
                     elif p and p0 and gprod.get(r, 0.0) > 10 * self.min_abs_prod and abs(p - p0) > self.min_abs_price:
                         chg.setdefault(a, {})[r] = _chg(p, p0)
+                        sgn[("price", a, r)] = _schg(p, p0)
             # production per member state (l. 127-141)
             for ms, d in prod.items():
                 d0 = prev["prod"].get(ms, {})
@@ -102,6 +115,7 @@ class CapriStopRule:
                     if x and x0 and abs(x - x0) > self.min_abs_prod:
                         c = chg.setdefault(ms, {})
                         c[r] = max(c.get(r, 0.0), _chg(x, x0))
+                        sgn[("prod", ms, r)] = _schg(x, x0)
             # feed per member state (l. 143-159)
             for ms, d in feed.items():
                 d0 = prev["feed"].get(ms, {})
@@ -110,9 +124,12 @@ class CapriStopRule:
                     if x and x0 and abs(x - x0) > self.min_abs_feed:
                         c = chg.setdefault(ms, {})
                         c[r] = max(c.get(r, 0.0), _chg(x, x0))
+                        sgn[("feed", ms, r)] = _schg(x, x0)
             # Norway out from the 15th step (l. 317)
             if k >= self.norway_last_step:
                 chg.pop(self.norway, None)
+                sgn = {key: v for key, v in sgn.items() if key[1] != self.norway}
+        rec["signed"] = sgn
         # per row: the largest over member states and aggregates (l. 321, 354-355)
         rows: Dict[str, float] = {}
         for _who, d in chg.items():
@@ -130,3 +147,27 @@ class CapriStopRule:
         rec["verdict"] = verdict
         self.steps.append(rec)
         return verdict
+
+    def drift(self, n: int = 3) -> List[dict]:
+        """Not CAPRI's (a report, it decides nothing): the items whose last n changes all had the same sign and whose
+        last change still exceeds p_minIterChg, each change having passed the rule's filters. CAPRI's rule can stop
+        with up to two rows above p_minIterChg, also rows moving steadily one way (a price forecast still approaching
+        its equilibrium). Per item: its last n changes (%, signed, oldest first), the rate r at which they shrink
+        ((|last| / |first|) ** (1 / (n - 1))) and, where r < 1, a rough estimate of the movement still to come in the
+        same measure, |last| r / (1 - r) (a geometric tail; None where the changes do not shrink). Young-animal rows
+        are left out as from the step's maximum. Sorted by the last change, largest first."""
+        n = int(n)
+        if n < 2 or len(self.steps) < n + 1:
+            return []
+        last = [s.get("signed") or {} for s in self.steps[-n:]]
+        out = []
+        for key, v in last[-1].items():
+            if key[2] in self.yani_rows or abs(v) <= self.min_iter_chg:
+                continue
+            ch = [d.get(key) for d in last]
+            if any(c is None or c == 0.0 for c in ch) or len({c > 0 for c in ch}) != 1:
+                continue
+            r = (abs(ch[-1]) / abs(ch[0])) ** (1.0 / (n - 1))
+            out.append({"kind": key[0], "where": key[1], "row": key[2], "changes": [round(c, 4) for c in ch],
+                        "rate": round(r, 4), "to_come": (round(abs(ch[-1]) * r / (1.0 - r), 4) if r < 1.0 else None)})
+        return sorted(out, key=lambda e: -abs(e["changes"][-1]))

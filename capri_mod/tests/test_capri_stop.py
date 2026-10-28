@@ -49,6 +49,29 @@ def test_norway_out_from_the_15th_step():
     assert v["step"] == 15 and v["rows"] == {} and not v["go_on"]
 
 
+def test_drift_report_lists_items_still_moving_one_way():
+    """Not CAPRI's (outer_loop.drift_report_steps): items whose last n changes had one sign, the last above 0.05%.
+    A price approaching its equilibrium geometrically (steps 10 x 0.9^k on 1,000; the limit 1,100) is listed with the
+    rate its changes shrink at and the movement still to come; an alternating row and a row below 0.05% are not."""
+    r = CapriStopRule({"EU_WEST": ["FR000000"]})
+    prod = {"FR000000": {"TOMA": 5000.0, "POTA": 6000.0, "SWHE": 30000.0}}
+    p = 1000.0
+    for k in range(12):
+        if k:
+            p += 10.0 * 0.9 ** (k - 1)
+        price = {"FR000000": {"TOMA": p, "POTA": 200.0 + (2.0 if k % 2 else 0.0), "SWHE": 180.0 + 0.001 * k}}
+        r.record(prod, {}, price)
+    d = r.drift(3)
+    assert [(e["kind"], e["where"], e["row"]) for e in d] == [("price", "EU_WEST", "TOMA")]
+    e = d[0]
+    assert all(c > 0 for c in e["changes"]) and e["changes"][-1] > 0.05
+    assert e["rate"] == pytest.approx(0.9, abs=0.005)
+    # still to come: from p to the limit 1,100, in CAPRI's measure; the geometric estimate within 2%
+    true = 200.0 * (1100.0 - p) / (1100.0 + p)
+    assert e["to_come"] == pytest.approx(true, rel=0.02)
+    assert r.drift(0) == [] and r.drift(20) == []                 # off; fewer steps than asked
+
+
 def test_capri_forecast_weights():
     from capri_mod.model import CAPRIModel
     f = CAPRIModel._capri_forecast
@@ -75,6 +98,8 @@ def test_model_records_capri_verdict_and_can_stop_on_it():
     assert last["prod"]["DE000000"].get("MILK", 0) > 0 and last["feed"]["FR000000"].get("FCER", 0) > 0
     if r["metadata"]["outer_converged"]:
         assert not cs["go_on"]
+    # the drift report (not CAPRI's) is recorded with the verdict, as the stop rule computes it
+    assert cs["drift"] == m._capri_stop.drift(3)
 
 
 def test_capri_special_smoothing_weights():
