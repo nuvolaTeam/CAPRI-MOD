@@ -197,8 +197,11 @@ To be written in the layered market code (stage 2b done) and gated together (the
   the food response acts on 95.5% of it (butter 0.5%, casein 4%). Fix with M9: the dairy products' split without
   processing (food, feed, biofuel shares of their sum).
 - **M4** (feedBlk_ inside the market solve, simu_calibration_to_supply.gms l. 264-275), **EU supply of OTHO, FFIS,
-  SFIS, OAQU** (CAPRI's NQ per member state with cross terms instead of an EU median elasticity): to be read in
-  CAPRI's code before writing.
+  SFIS, OAQU** (CAPRI's NQ per member state with cross terms instead of an EU median elasticity). CAPRI's own terms
+  are in hand: p_hessNQSupp per EU member state in elas_2_1730defaulta.csv (OTHO 101 terms, with cross terms to the
+  crops; FFIS 70, SFIS 54, OAQU 54, own price and INPE). Change: a builder writes them (as the supply-model products'
+  market terms), and supply_response treats the four products with CAPRI's ProdNQ_ (linear in the price changes over
+  INPE, the form the market supply Hessian already uses) in place of the EU median elasticity against base.
 - **World price: not a rewrite.** CAPRI's wldPrice_ (production + Arm1 weights) is in its calibration models only
   (arm/cal_models.gms, ini_netTradeModel.gms), not in the simulation model; its reports aggregate prices by quantity
   weights (reports/aggreg_res_mrk.gms). The model's world price index (exporters' ratios at base export weights) is a
