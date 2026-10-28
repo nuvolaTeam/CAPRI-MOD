@@ -23,8 +23,10 @@ report_biofuel = false
 nlp_cache_size = 64
 
 [outer_loop]
-# CAPRI's supply-market iterations (%STEPS%); runs with manure trade use manure_max_outer_iter
-max_outer_iter = 25
+# the supply-market iterations at most (CAPRI's %STEPS%: 99 in its GUI for a scenario run, gui/capri_gui_definition.xml
+# l. 2891-2897); 60 since 28 October 2026 (the project lead's decision; 25 before): CAPRI's stop rule needs 30 in the
+# Green Deal 2030 scenario (r168)
+max_outer_iter = 60
 # convergence of the outer loop: largest relative price change between iterations (CAPRI p_minIterChg 0.05%, on
 # a different metric)
 outer_tolerance = 0.005

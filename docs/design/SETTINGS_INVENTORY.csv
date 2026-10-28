@@ -16,7 +16,7 @@ S018,CAPRIModel.nlp_tol_final,capri_mod/model.py:154,tolerance,1e-8,toml:outer_l
 S019,CAPRIModel.nlp_tol_switch,capri_mod/model.py:155,tolerance,4.0,toml:outer_loop,outer_loop.nlp_tol_switch,,no,unsourced; multiple of outer_tolerance below which staged tol tightens,removed 27 Oct 2026: earlier CAPRI-mod alternative never run; CAPRI's form kept
 S021,CAPRIModel.__init__ verbose,capri_mod/model.py:166,switch,True,toml:diagnostics,diagnostics.verbose,,n/a,constructor default; run tool passes verbose=False,
 S022,CAPRIModel.__init__ base_year,capri_mod/model.py:167,switch,2017,toml:run,run.base_year,,n/a,only '2017' accepted (model.py:182),
-S023,CAPRIModel.run max_outer_iter,capri_mod/model.py:274,iteration_limit,25,toml:outer_loop,outer_loop.max_outer_iter,%STEPS% (capmod.gms STEP loop),no,unsourced; auto-raised to manure_max_outer_iter (60) when manure trade on,
+S023,CAPRIModel.run max_outer_iter,capri_mod/model.py:274,iteration_limit,60,toml:outer_loop,outer_loop.max_outer_iter,%STEPS% (capmod.gms STEP loop),"no: CAPRI's GUI 99 (DEPARTURE, the project lead's choice)",unsourced; auto-raised to manure_max_outer_iter (60) when manure trade on,"25 -> 60 on 28 Oct 2026 (the project lead's decision; CAPRI's stop rule: Green Deal 2030 needs 30, r168)"
 S024,CAPRIModel.run market_max_iter,capri_mod/model.py:276,iteration_limit,100,toml:market,market.max_iter,,yes: 60 before 21 Oct 2026 (residuals 2e-7..1e-6),MarketModule.solve() alone defaults to 60 (market_module.py:3167),
 S025,CAPRIModel.run run_environmental,capri_mod/model.py:277,switch,True,toml:run,run.run_environmental,,n/a,,
 S026,CAPRIModel.run run_biofuel,capri_mod/model.py:278,switch,False,toml:run,run.report_biofuel,,n/a,reporting only,
