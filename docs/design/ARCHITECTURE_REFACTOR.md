@@ -102,7 +102,7 @@ glycerine price 600, the CES calibration reproducing BiofFeedCost within 4e-8 in
 
 Order of the fixes: one at a time, each with a full run (section 2). Status 24 October: M1 and M8 done (run r112,
 with the crushing CET yields); M2 done by the Armington balance (run r113: no generic elasticity is left); M11 done
-(run r115); M6 data rebuilt (run r117); M3-M5, M7, M9, M10 open. M7 ported 27 October (reporting only, docs/WELFARE.md).
+(run r115); M6 data rebuilt (run r117); M3-M5, M7, M9, M10 open. M7 ported 27 October (reporting only, docs/WELFARE.md). Status 28 October (claims table brought up to date, each item checked in the code): fixed M1, M2, M5, M6, M7, M8 (CAPRI's ProcFudge_), M10, M11, the CET crushing yields and the three documentation items; open M3 (waits on the feed-energy data decision), M4 (path only), M9 (dairy processing), the EU supply of other vegetable oils and fish (step D) and the world price index (step B, reporting).
 
 ### 5.1b Supply module (audit of 24 October 2026; table: docs/design/audit/supply_claims.csv)
 
