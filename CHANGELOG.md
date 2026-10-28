@@ -30,7 +30,7 @@ Full provenance for every entry is in `capri_data/DATA_SOURCING_REGISTRY.json`.
 
 ---
 
-## 28 October 2026 (pending the gate): supply audit S12, S13; nurseries in the PMP recipe; the regional solves' jump check (K79)
+## 28 October 2026: supply audit S12, S13; nurseries in the PMP recipe; the regional solves' jump check (K79) (batch 1)
 
 - **S12** (KNOWN_ISSUES K74): the emission tax on mineral N and the accounts' soil N2O of mineral N take CAPRI's
   N2OSYN and mineral N2OAMM from the region's MITERRA loss fractions (gases.gms (7), (9)); IPCC's factors only where
@@ -56,7 +56,19 @@ Full provenance for every entry is in `capri_data/DATA_SOURCING_REGISTRY.json`.
   solved too and the lowest objective is kept. Beyond CAPRI's practice (its CONOPT solve starts from the previous
   solution only); it addresses solutions that alternate between local optima of non-convex regional problems
   (BG010000, HU330000, HU230000). Off with 0.
-- [gate: test suite, Farm-to-Fork and Green Deal 2030 runs: to be filled in]
+- **Gate of batch 1** (the project lead's decision of 28 October: one gate per batch of changes; this batch: S12, S13,
+  NURS, the jump check, the drift report, the K88 rebuild, the Parquet reader): test suite 194 passed (26 min).
+  Green Deal 2030 (r177): converged in 18 iterations under CAPRI's rule (dev's r171: 30; the supply-audit run r174
+  without the jump check: not converged in 60), its Hessian measured in the run (2,525 s); EU results within half a
+  point of r171 (cereal area -5.17% against -5.28%, maize price +8.86% against +9.34%; milk, beef, pork within 0.02
+  points; histosol fallow the same); the Swedish tomato swings of r171's iterations 17-26 are gone (S13), and so are the
+  recurring 30% moves of Bulgarian maize and rapeseed and Hungarian pulses (iterations 9-16 of r171); one single swing
+  left (Bulgarian oats, iteration 13). The run does not record when the jump check acts, so the two causes are not
+  separated. Farm-to-Fork (r178): 13 iterations; equal to the supply-audit run r172 within 8e-5 relative (the K88
+  rebuild: base values within 1e-6); against dev's r175 tomato price +13.80% against +9.09% (above), pulses price
+  +4.28% against +4.62% (S13 holds the Danish and Dutch pulse cells without a CAPRI term), everything else within 0.05
+  points. The drift report: Green Deal 2030 one item at the stop (Slovak maize production -0.051%, about 0.09% to
+  come); Farm-to-Fork none (Portuguese potatoes alternate).
 
 ## 28 October 2026: a report of items still moving one way when the loop stops (beyond CAPRI)
 
@@ -66,7 +78,7 @@ Full provenance for every entry is in `capri_data/DATA_SOURCING_REGISTRY.json`.
   when the loop stopped). CAPRI's rule stops with two rows or fewer above 0.05% (it counts products,
   price_forecast.gms l. 345-371, as here), so it can stop while a product still drifts: Farm-to-Fork r170 stopped with
   the tomato price rising 0.36% per iteration (DEPARTURES_FROM_CAPRI, "Beyond CAPRI").
-- [test suite: to be filled in]
+- Gate: batch 1 (above).
 
 ## 28 October 2026: CAPRI's welfare report as levels (M7)
 
