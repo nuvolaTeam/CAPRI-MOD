@@ -255,6 +255,8 @@ fixGenetToIni = 1.0
 verbose = true
 # outer-loop trace
 trace_outer = false
+# every region's activity levels per outer iteration in the outer history (K79 diagnosis; large)
+record_regional_levels = false
 # regions slower than this (s) are reported
 slow_region_seconds = 60.0
 

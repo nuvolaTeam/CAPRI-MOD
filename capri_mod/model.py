@@ -1075,6 +1075,12 @@ class CAPRIModel:
                               "herd_regional": {r_: {a_: round(float(getattr(x_, "activities", pd.Series(dtype=float)).get(a_, 0.0)), 4)
                                                      for a_ in ("BCOW", "DCOW", "CALV", "BULL", "HFRS", "GRAS", "MAIF", "OFOD")}
                                                 for r_, x_ in _sr_.items()}})
+                if _settings().get("diagnostics.record_regional_levels"):
+                    # every region's activity levels at this iteration, unrounded (K79: the rows CAPRI's stop rule
+                    # flags, traced to regions and activities)
+                    _hist[-1]["act_regional"] = {r_: {str(a_): float(v_) for a_, v_ in
+                                                      getattr(x_, "activities", pd.Series(dtype=float)).items()}
+                                                 for r_, x_ in _sr_.items()}
                 self._outer_history = _hist
             except Exception as _e:
                 warnings.warn(f"outer history not recorded: {_e!r}")
