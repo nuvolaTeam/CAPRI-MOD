@@ -3184,6 +3184,15 @@ class RegionalSupplyModel:
         """Inhibitors on manure as a decision of the regional model (no N-price search)."""
         return self._techs_inside()
 
+    @staticmethod
+    def _saving_slope(nme: float, value: float, m0: float, m1: float) -> float:
+        """CAPRI's saving term of an option's curvature (envind/ghgMiti.gms l. 1016-1050): nmE x value x ((1 + nmE
+        m1)^-2 - (1 + nmE m0)^-2) / (m1 - m0), the N saved valued at its price (mineral N: the member state's unit
+        value; manure N: p_manureShadVal); 0 where it is not defined (m1 <= m0, or 1 + nmE m <= 0)."""
+        if not m1 > m0 or 1.0 + nme * m0 <= 0 or 1.0 + nme * m1 <= 0:
+            return 0.0
+        return nme * value * ((1.0 + nme * m1) ** -2 - (1.0 + nme * m0) ** -2) / (m1 - m0)
+
     def _manure_inhibitor_params(self):
         """The parameters of CAPRI's inhibitor on manure for this region (see _apply_manure_inhibitor), or None:
         sub, nman, smax, S0, slope (EUR per t of manure N), app_nh3 (t NH3-N per activity unit at full adoption),
@@ -3226,6 +3235,19 @@ class RegionalSupplyModel:
         if smax <= 0:
             return
         S0, slope = 0.2 * k1, k1 * (1.2 - 0.2) / smax
+        if getattr(type(self), "fert_slope_with_saving", True):
+            # CAPRI's pmpParSqr of the inhibitor on manure (envind/ghgMiti.gms l. 1036-1050), as the mineral options'
+            # (_fert_techs, the same switch): + nmE x p_manureShadVal x ((1 + nmE m1)^-2 - (1 + nmE m0)^-2) / (m1 - m0),
+            # m0 = IniShare 0, m1 = MaxShare; nmE = NMAN (EmiCalman is commented out in CAPRI, l. 945-958);
+            # p_manureShadVal = the member state's unit value of mineral N x the region's availability of excreted
+            # manure N (v_nutAvailFactExcr, l. 871; npk_region_2030.csv excr_avail)
+            from capri_mod.fert.npk import NPKData as _NPK
+            _npk = _NPK.get()
+            _t = _npk.region(_npk.capri_region(self.data.region_id) or self.data.region_id, "N")
+            _av = getattr(_t, "excr_avail", None) if _t is not None else None
+            _pf = self._nitf_price_ms(_ms)
+            if _pf and _av is not None and _av == _av:
+                slope += self._saving_slope(nman, _pf * float(_av), 0.0, smax)
         # application NH3 side effect (ghgMiti.gms l. 557-563, p_litRevFertTechs NH3APP): on
         # treated manure the application emission factor is (1 - lit) x (1 + NMAN) times
         # NOC's; base = the cascade's application loss at the ammonia options' latest shares
@@ -5923,8 +5945,8 @@ class SupplyModule:
                     # NITF price p: + nmE x p x ((1 + nmE m1)^-2 - (1 + nmE m0)^-2) / (m1 - m0), nmE = NMIN + EmiCalmin
                     pf = self._nitf_price_ms(msc)
                     nme = nmin + self._emi_cal_min(region, r8, name)
-                    if pf and nme > -1.0 / max(smax, 1e-9):
-                        slope += nme * pf * ((1.0 + nme * smax) ** -2 - (1.0 + nme * s0) ** -2) / (smax - s0)
+                    if pf:
+                        slope += self._saving_slope(nme, pf, s0, smax)
                 # CAPRI's curvature can be negative (precision farming, NMIN about 0.5): its total cost with the
                 # endogenous fertiliser saving (convex: N(m) = N0 / (1 + nmE m)) has its stationary points at both
                 # shares. The NLP form carries the saving through the fertilisation block and takes it as it is

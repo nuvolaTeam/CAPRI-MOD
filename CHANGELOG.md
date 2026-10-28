@@ -49,6 +49,14 @@ Full provenance for every entry is in `capri_data/DATA_SOURCING_REGISTRY.json`.
   baseline, no backsliding), as CAPRI's minfert_redu_by_crop.gms sets it after the organic target's file
   (greendeal_scenarios.gms l. 140, 154; l. 233-235); before, the lower organic cap was kept. Other groups: the more
   stringent of the two, unchanged. Farm-to-Fork (JRC121368: no mineral reduction) is not affected.
+- **Supply audit S5, the inhibitor on manure:** CAPRI's curvature carries a manure-saving term (ghgMiti.gms
+  l. 1036-1050: NMAN x p_manureShadVal x ((1 + NMAN MaxShare)^-2 - 1) / MaxShare, p_manureShadVal = the member state's
+  unit value of mineral N x the availability of excreted manure N; EmiCalman is commented out in CAPRI). Added behind
+  supply.fert_slope_with_saving, the switch of the same term for the mineral options, off by default (K77): results
+  unchanged. The term as RegionalSupplyModel._saving_slope, shared by both, tested. The inhibitor's maximum share
+  (1 - grazing share of manure N) found in CAPRI (l. 115-119; it was listed as unsourced).
+- The PMP calibrator's elasticity cap and share term (left after S13) reach only 14 cells: set-aside of 2e-6 to 5e-5
+  thousand ha in Belgian and Dutch regions with a positive CAPRI term; held activities do not use it.
 - The supply audit's claims table (docs/design/audit/supply_claims.csv) brought up to date with S1-S13: 15
   "unregistered difference" rows now fixed (14) or open (the inhibitor's slope; the PMP calibrator's elasticity cap and
   share term, whose reach after S13 is not checked).
