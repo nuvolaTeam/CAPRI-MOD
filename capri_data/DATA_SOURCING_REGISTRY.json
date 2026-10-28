@@ -1780,7 +1780,7 @@
     "shared/model_parameters.csv"
    ],
    "nature": "MIXED_BY_COLUMN",
-   "note": "Sprint 9t: every constant of the model's economics and accounts, one row each, with unit, kind (capri, ipcc, jrc121368, legal, literature, model_setting) and source; read by capri_mod/params.py. Literature: Mitscherlich curvature and N-intensity floor (nitrate-limit option only), organic yield gap fallback. Model settings: outer-loop damping, Armington premium bounds, land-rent rule (land market off)."
+   "note": "Sprint 9t: every constant of the model's economics and accounts, one row each, with unit, kind (capri, ipcc, jrc121368, legal, literature, model_setting) and source; read by capri_mod/params.py. Literature: organic yield gap fallback (the Mitscherlich curvature and N-intensity floor removed 27 October 2026 with the nitrate-limit option, K33). Model settings: outer-loop damping, Armington premium bounds, land-rent rule (land market off)."
   },
   "land_market_merge_9t": {
    "files": [
