@@ -102,7 +102,7 @@ Full provenance for every entry is in `capri_data/DATA_SOURCING_REGISTRY.json`.
   largest 2.8% (Norwegian pulses), the largest swing by iteration Bulgarian soybeans 133%, Bulgarian maize 54%, Spanish
   maize 26%, Slovak pulses 19%, Slovak other cereals 26%, Cypriot wheat 9.9% and 4.6%. Market check of the welfare
   merge: a market solve at base EU supply and with 10% less EU beef and 5% less wheat gives identical prices,
-  quantities and trade flows before and after it. [test suite: to be filled in]
+  quantities and trade flows before and after it. Test suite (28 October 2026, 189 tests): 188 passed in two runs (the 14 longest, then the rest); test_parameter_file_and_code_agree failed on two parameters left by the K33 removal (INTENSITY_K, INTENSITY_M_MIN), removed in 7021a20, then passed. The tests' time is mostly the market supply Hessian, measured at the end of every baseline run and stored per worktree (the projection test: 1,449 s measuring, 61 s from the store).
 
 ## 27 October 2026 (evening): market supply Hessian, regions a shock does not reach not re-solved; option 4 tried and dropped
 
