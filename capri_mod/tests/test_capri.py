@@ -115,12 +115,9 @@ def test_market_module_reproduces_its_own_prices(data):
     eq = mm.solve(exogenous_supply=exo)
     assert eq.converged
 
-    # RAPE and SOYA were corrected to CAPRI's actual PMRK values (SOYA
-    # 292.6 -> 102.7, the long-flagged 2.85x error; RAPE 321 -> 213) when world
-    # prices were validated against the capmod base GDX. These references were
-    # never updated to match, so the test had been asserting the OLD, known-wrong
-    # numbers and failing at 9/12 for the life of the project. The model was
-    # right; the reference was stale.
+    # (Until October 2026 this comment recorded RAPE and SOYA "corrected to CAPRI's PMRK" values, 213 and 102.7: those
+    # were cake prices and CAPRI's 2017 market rows; world_prices.csv holds FAO_agg's world prices since 29 October 2026,
+    # SOYA 325.67, KNOWN_ISSUES K95.)
     # References READ from world_prices.csv: the old hard-coded copies held
     # cake prices under the oilseeds (rapeseed 213, soybeans 103) and drifted
     # out of sync when the prices were replaced with CAPRI's base world prices.
@@ -2058,25 +2055,6 @@ def test_world_production_coverage(data):
     assert share > 70.0, (
         f"only {share:.1f}% of world production is backed by real data "
         "(expected >70% since the FAO_agg extension was wired in)")
-
-
-def test_base_reconciliation_null_identity():
-    """Reconciling already-consistent data must change nothing.
-
-    This is the gate that catches a reconciler which REWRITES rather than
-    reconciles. It is not hypothetical: an early version of the projection
-    reconciler adjusted 248 regions by a 122% mean before this identity caught
-    it.
-    """
-    import pandas as pd
-    from capri_mod.data.reconcile_base import null_check
-
-    areas = pd.read_csv(DATA_DIR / "2017" / "supply" / "base_areas.csv",
-                        index_col=0)
-    max_change = null_check(areas)
-    assert max_change < 1e-6, (
-        f"reconciling consistent data moved it by {max_change:.2e} — the "
-        "reconciler is rewriting, not reconciling")
 
 
 def test_yield_responds_to_price(data):

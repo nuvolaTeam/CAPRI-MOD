@@ -15,11 +15,11 @@ Full provenance for every entry is in `capri_data/DATA_SOURCING_REGISTRY.json`.
 
 | Component | Reference | Result |
 |---|---|---|
-| Market prices | CAPRI `PMRK` | 12/12 within 15% |
+| Market prices | CAPRI's market data (bilateral, FAO_agg world prices) | the base reproduces it; the 12/12 test is solver consistency (KNOWN_ISSUES K95) |
 | 2030 projection | CAPRI 2030 reference run | correlation **+0.997**, total area within 2% |
 | Emission tax | CAPRI's ghgTax inside the supply models (Sprint 9i) | no CAPRI tax result in hand; the earlier post-solve MACC check against EcAMPA 2 was retired with the module |
 | Fertiliser | CAPRI `p_FertPerHa` | ~10% |
-| Feed, monogastrics | CAPRI capreg reference | within ~5% |
+| Feed | CAPRI's base rations and requirement rows (REQSE_) | rations chosen inside the regional models; no independent check (the monogastric calibration this row reported was removed with the feeding inside the models) |
 | CAP budget | Real EU CAP | €54.0bn vs ~€55–58bn |
 | Nitrogen balance | CAPRI 2030 reference, item by item | EU items within 1–7 kg N/ha; regional correlation 0.92 |
 | Phosphate balance (P2O5) | CAPRI 2030 reference, item by item | with CAPRI's own levels the formulas give its items (within 1e-6; removal 0.02%); at the model's base data (not a solved 2030 run) EU items within 0.5 kg P2O5/ha (surplus 14.4 vs 13.9), regional surplus correlation 0.99 |

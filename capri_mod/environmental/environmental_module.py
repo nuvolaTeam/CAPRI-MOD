@@ -7,7 +7,7 @@ Indicators implemented:
   1. GHG emissions (CH4, N2O, CO2) following IPCC Tier 1/2 methodology
   2. Nitrogen balance (inputs - outputs = surplus, a pollution proxy)
   3. Phosphate balance (CAPRI's gross balance in P2O5, calc_nbalance.gms)
-  4. Land use indicators (UAA, crop diversity, HNV farmland)
+  4. Land use indicators (UAA, crop diversity)
   5. Pesticide use index (simplified)
   6. Ammonia emissions (NH3)
   7. Water use / irrigation demand
@@ -124,7 +124,6 @@ class EnvironmentalIndicators:
 
     # Biodiversity proxy
     shannon_crop_diversity: float = 0.0
-    hnv_farmland_pct: float = 0.0     # High Nature Value farmland %
 
     def to_series(self) -> pd.Series:
         return pd.Series(self.__dict__)
@@ -1004,15 +1003,14 @@ class EnvironmentalModule:
         land: pd.Series,
     ) -> Dict[str, float]:
         """
-        Shannon crop diversity index and HNV farmland proxy.
+        Shannon crop diversity index.
+
+        (Until 29 October 2026 also an HNV farmland proxy: permanent grassland plus 0.5 x the area of pulses, soya and
+        grass, a hand-set weight with grass counted twice; removed, no CAPRI source: KNOWN_ISSUES K96.)
 
         Shannon H' = -Σ p_i × ln(p_i)
         where p_i = share of crop i in total arable area.
 
-        HNV (High Nature Value) farmland is proxied by share of:
-          - Permanent grassland
-          - Legumes + extensive crops
-          - Organic area
         """
         # Shannon diversity
         crop_areas = activities.reindex(CROPS).fillna(0.0)
@@ -1024,16 +1022,8 @@ class EnvironmentalModule:
         else:
             shannon = 0.0
 
-        # HNV proxy (% of UAA)
-        total_uaa = land.sum() if not land.empty else total_crop
-        grassland = land.get("GRASSLAND", 0.0)
-        legume_area = sum(activities.get(c, 0.0) for c in ["PULS", "SOYA", "GRAS"])
-        hnv_area = grassland + legume_area * 0.5
-        hnv_pct = 100.0 * hnv_area / max(total_uaa, 1.0)
-
         return {
             "shannon_crop_diversity": shannon,
-            "hnv_farmland_pct": min(100.0, hnv_pct),
         }
 
     _ENT_CACHE = None
@@ -1938,7 +1928,6 @@ class EnvironmentalModule:
             organic_area=organic,
             # Biodiversity
             shannon_crop_diversity=bio["shannon_crop_diversity"],
-            hnv_farmland_pct=bio["hnv_farmland_pct"],
         )
 
     def run_all_regions(

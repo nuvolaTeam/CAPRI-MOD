@@ -2139,7 +2139,7 @@ class RegionalSupplyModel:
         yields_ser = self.data.yields
         # Livestock: CAPRI's market revenue per head (MREV), the SAME value the
         # margin calculation uses. price x yield is wrong for most animals -
-        # their output units are unverified (UNVERIFIED_OUTPUT_UNITS): a pig
+        # their output units were unverified then: a pig
         # came to ~2,180 EUR/head, about twenty times too much, and a broiler
         # place ~1,430. The curvature is proportional to this revenue, so every
         # price or feed-cost change was damped by the same factor: a 26% cut in
@@ -2523,14 +2523,6 @@ class RegionalSupplyModel:
         "TOMA", "OVEG", "POTA", "SUGB", "PULS",                      # veg/other arable
         "APPL", "OFRU", "CITR", "TAGR", "WINE", "OLIV", "TABO",      # permanent
     )
-
-    #: Livestock activities whose gross-output unit is not established. Their
-    #: gross_output is reported as NaN rather than as a number that looks
-    #: plausible and is not. DCOW is excluded because it verifies against real
-    #: EU milk output (142,000 kt against ~155,000); every other animal activity
-    #: fails that check by a factor no single rescaling explains.
-    UNVERIFIED_OUTPUT_UNITS = ("BULL", "LAYS", "BROI", "CALV", "SHGM", "SHGF",
-                               "HFRS", "BCOW", "PIGS", "OANI")
 
     #: Share of total input cost that is fertiliser (CAPRI FERT, EU-wide, all 27 member states' 2017 data;
     #: tools/build/build_crop_cost_shares.py): FALLBACK for the fertiliser cost per ha of a crop CAPRI does not grow

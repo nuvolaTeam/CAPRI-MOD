@@ -25,17 +25,16 @@ What is still not CAPRI's data, and where it acts:
 | ~~`NATIONAL_ENVELOPES` ("approximate 2023-2027")~~ | replaced 23 October 2026 by CAPRI's 2030 budgets (CEILVAL, `cap_ceilings_2030.csv`) | - |
 | `INTERVENTION_PRICES` | `capri_mod/policy/policy_module.py`; not called by `run()` | none |
 | The registry scenarios (`capri_mod/scenarios/scenarios.py`) | `run(scenario=NAME)` | simplified policy packages, not CAPRI's settings (README 8.2, K52); CAPRI's settings are in `capri_mod/policy/greendeal.py` |
-| Biodiversity indicators `shannon_crop_diversity`, `hnv_farmland_pct` | environmental accounts | reporting only; proxies, not CAPRI indicators (README 7.5) |
+| Biodiversity indicator `shannon_crop_diversity` (the `hnv_farmland_pct` proxy removed 29 October 2026, K96) | environmental accounts | reporting only; not a CAPRI indicator (README 7.5) |
 | Armington `eta` of products other than the cereals and DDGS/FENI/FPRI | market | unrecorded source, acts on 1.3% of world use (registered, K44) |
 
 Registered on purpose (CAPRI's data, a different basis): herds are CAPRI's herd sizes (DATA2 HERD, census-based;
 Eurostat cattle numbers only to split regions), not its activity levels, with every per-head coefficient built as
 CAPRI's total over those heads (totals match CAPRI's).
 
-The sourcing registry (`capri_data/DATA_SOURCING_REGISTRY.json`) still lists, under `code_embedded_data`, "biofuel
-conversion coefficients" in `biofuel/biofuel_module.py` and "environmental proxy factors (FRAC_GASF, HNV, NH3 shares)";
-the biofuel module no longer exists (`capri_mod/biofuel/` holds only `__init__.py`; biofuels are CAPRI's functions in
-the market) and FRAC_GASF is not in the environmental module. Those two registry entries are out of date.
+The sourcing registry's `code_embedded_data` entries ("biofuel conversion coefficients" in `biofuel/biofuel_module.py`,
+"environmental proxy factors (FRAC_GASF, HNV, NH3 shares)") moved to docs/design/PROXY_AUDIT.md on 29 October 2026:
+the biofuel module no longer exists, FRAC_GASF is not in the code, the HNV proxy was removed (K96).
 
 ## How the audit was made (October 2026)
 

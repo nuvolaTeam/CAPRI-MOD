@@ -261,8 +261,9 @@ The concrete-storage options of CAPRI's endoLeach are in.
 in the environmental table): excretion, manure net exports, mineral P2O5 (the fertilisation block's purchases), crop residues, removal, manure runoff, surplus and soil surplus; and the area the organic target
 converts (docs/P_BALANCE.md).
 
-**Future (not scheduled).** Base-year update (Phase 2; needs a newer CAPRI release). The Green Deal block in CAPRI's
-form: legume share, tillage, buffer strips, urea substitution, 3-NOP, linseed. The Nitrates Directive minimum shares
+**Future (not scheduled).** Base-year update (Phase 2; needs a newer CAPRI release). CAPRI's mitigation options not built
+yet: legume share, tillage, buffer strips, urea substitution, 3-NOP, biodiversity options, biochar (KNOWN_ISSUES K93;
+linseed and nitrate are in). The Nitrates Directive minimum shares
 are built and not applied, as in CAPRI's Green Deal runs (NDtech off in their settings; KNOWN_ISSUES K51). Anaerobic
 digestion, leaching and winter cover are in (docs/AD_SPEC.md, docs/N_CASCADE_SPEC.md); in the NLP form the winter
 cover share is chosen by the regional model with CAPRI's cost curve, the Farm-to-Fork requirement as its floor
@@ -603,7 +604,6 @@ modules.
 | `fert/` | 670 | CAPRI's inner fertiliser distribution and nutrient need (N, P2O5, K2O) | inside the supply models (fert/fertned.gms) |
 | `projection/` | 1,460 | the baseline of a simulation year; multi-year loop (perennial areas carried) | CAPRI's 2030 reference or captrd trajectory, calibrated as CAPMOD; validated vs CAPRI 2030 |
 | `supply/supply_module.py` | — | yield-price response | yields move with own price, as CAPRI's stage one |
-| `data/reconcile_base.py` | 190 | base-year reconciliation | weighted least squares onto accounting identities, as CAPRI's `coco` |
 
 For CAPRI's own data pipeline, estimation method and activity codes, see its
 documentation (the January 2022 manual); where this model follows a specific CAPRI
@@ -731,8 +731,9 @@ the **same method and structure** as CAPRI, not simplifications of it:
   EU-vs-world price formation.
 - **CAP payments.** CAPRI's actual `PRME` premium values, in the same
   per-activity payment structure.
-- **Feed energy.** CAPRI's ruminant energy formula — IPCC 2006 Eq. 10.6 from
-  `req_or_man_fnc.gms` — ported directly.
+- **Feed requirements.** CAPRI's requirement rows (REQSE_), each animal's energy and protein requirement being what
+  its base ration from CAPRI's feeding data supplies (`capri_regional_nlp.py`; until October 2026 the model computed
+  ruminant energy with IPCC 2006 Eq. 10.6, removed with the feeding inside the regional models).
 - **Environmental coefficients.** CAPRI's `MANN` manure-nitrogen coefficients
   and IPCC emission factors.
 - **Regional resolution.** CAPRI's own regional units: 221 for EU27 + Norway, under CAPRI's codes (since 27 October
@@ -1120,17 +1121,12 @@ points. An unconverged run now raises a `RuntimeWarning` and sets
 `metadata["outer_converged"] = False`; do not compare such a run against
 external references.
 
-**6.7% of world production is share-allocated, not measured.** The rest comes from
-real FAO SUA data (CAPRI's own `FAO_agg` extract), covering 26 of the 29 trade regions of that measurement
-(Norway, a trade region of its own since K56, has CAPRI's FAO_agg balance too).
-Of the remainder, 5.9 points are `ROW` — a residual aggregate by construction, since
-"rest of world" is not a country and cannot have a data source — leaving Iran (0.54%)
-and Saudi Arabia (0.25%) as the only genuinely allocated countries; CAPRI's own FAO
-aggregate does not separate them from `MIDEAST` either, and both are small producers
-whose importance lies on the demand side. The allocation is a deterministic
-production share (a seeded ±8% noise term was removed: reproducible, but invented
-variation presented as data). The market price test passes 12/12 against CAPRI's
-`PMRK`.
+**World production and trade are CAPRI's market data.** The market runs on CAPRI's bilateral market (2017 and 2030
+market data) for its 26 trade regions, `ROW` being CAPRI's other market regions summed; no region is allocated by a
+share any more (the allocation that stood for Iran and Saudi Arabia went with those trade regions, KNOWN_ISSUES K45).
+The base world prices are CAPRI's FAO_agg world prices (`tools/build/build_world_prices.py`; the wheat market's is
+CAPRI's soft-wheat price, K90). The base-price test (`test_market_module_reproduces_its_own_prices`) checks that the
+market reproduces its own base prices: solver consistency, not a validation against an independent price (K95).
 
 **Filter near-zero base cells before reading percentage changes.** An activity
 with a base of 0.0 in the selected regions produces meaningless percentages — a
@@ -1140,13 +1136,10 @@ to activities that actually exist in the region set (a base threshold of ~50 kha
 works) before computing or reporting any percentage. This is a usage hazard, not a
 model defect, but it is the kind that produces a wrong headline number.
 
-**Re-basing needs a concordance as well as reconciliation — both are now in hand.**
-`data/reconcile_base.py` makes external data internally consistent (validated to
-machine precision on the null identity, and using the same least-squares method
-CAPRI's COCO documents). The concordance — CAPRI's own REGIO-to-activity mapping —
-is at `capri_data/shared/capri_regio_concordance.json`, taken from the published
-Annex Code Lists. What remains is applying the mapping to raw REGIO extracts and
-validating against CAPRI's reconciled base; the pieces exist, the work does not.
+**Re-basing is not available yet.** The base year is CAPRI's (2017); a new base needs CAPRI's data steps (COCO,
+CAPREG, the market database) ported or a newer CAPRI release. The port is planned through the data pipeline
+(`docs/design/CAPTRD_MOD.md`). The reconciliation module that stood here (`data/reconcile_base.py`, tested only on
+already consistent data) and the REGIO concordance were removed (KNOWN_ISSUES K94).
 
 **Livestock `gross_output` is marketed product from CAPRI's own coefficients.**
 It is built from CAPRI's final-product items — milk, beef, pork, poultry
@@ -1197,9 +1190,6 @@ per-head coefficient understated poultry a thousandfold. All animal levels are n
 in thousand head.
 
 **Not sound for:**
-- **Irish nitrogen and emissions.** CAPRI's results record no physical grass
-  yield for Ireland. (Norway's limitation of the NUTS regions is gone: the model
-  runs on CAPRI's own units, each with its crop areas.)
 - **Price magnitudes under Farm-to-Fork.** Cereal output falls 15.5% against CAPRI's 15% (r145); cereal prices
   rise too far (+10.6% against +8%), vegetable and permanent-crop prices too little (+11.7% against +15%), the pork
   price far too little (+18% against +43%) and the milk price far too much (+21% against +1.5%, K13) (§8, table).
@@ -1212,11 +1202,9 @@ in thousand head.
 - **Economy-wide effects** (labour, capital, GDP): outside the partial-equilibrium
   boundary, as in CAPRI.
 
-**Regional detail for Saxony and Croatia comes from CAPRI's own regional data**,
-crop by crop, so Croatia's olives and vineyards sit in the Adriatic region and
-Saxony's maize in lowland Leipzig rather than being spread by a single key. Where
-CAPRI has no regional price it falls back to the national one before the EU-wide
-figure, so every vine-growing region carries its own country's wine price.
+**Regional detail is CAPRI's own:** each of the 221 units carries its CAPRI row (Saxony and Croatia are single units
+in CAPRI, DED00000 and HR000000). Where CAPRI has no regional value for a crop, the unit takes its member state's
+(`tools/build/build_crop_economics_2017.py`).
 
 **Sound for, additionally:** nitrogen targets (CAPRI's tiered surplus rule on the gross
 N balance inside the regional models), pesticide instruments (with plant-protection costs derived
@@ -1231,8 +1219,8 @@ adjustment with its FADN yield gaps).
 | **Policy — scenario response** | Published CAPRI (JRC121368, Figure 5) | All four Farm-to-Fork instruments in CAPRI's own specification, EU-wide, converged: farmland +3.6% vs +3%, cereal area −3.7% vs −4%, wheat and barley yields −11% as in CAPRI, oilseeds −16.3% vs −15.5%, vegetables and permanent crops −13.9% vs −12%, cereals −11.5% vs −15% (maize) |
 | **Policy — nitrogen instruments** | Fixed | CAPRI's tiered N-balance target inside the regional models, met through CAPRI's fertiliser options, its intensity variants and area; the model's own applied-N ceiling and its intensity margin were retired on 27 October 2026 (K33) |
 | **Environment** | Validated | Gross nitrogen balance on CAPRI's definition (`e_SURTOTHa`), item by item against CAPRI's 2030 reference (EU, kg N/ha): removal 125 vs 119, residues 57 vs 55, fixation 10 vs 8, deposition 11 vs 11, mineral 63 vs 57, manure 54 vs 53; regional surplus correlation 0.92 over 235 regions. Phosphate balance (P2O5, docs/P_BALANCE.md): with CAPRI's own levels the formulas give its items; at the model's base data EU kg P2O5/ha excretion 27.8 vs 27.6, mineral 15.6 vs 15.6, removal 53.1 vs 53.4, surplus 14.4 vs 13.9, regional surplus correlation 0.99 |
-| **Feed** | Validated (ruminants) | Energy & dry matter match CAPRI within ~10% via IPCC 2006 Eq. 10.6; monogastrics calibrated to CAPRI targets |
-| **Market** | Validated | Base prices match CAPRI `PMRK`; scenario supply shocks move prices in CAPRI's direction |
+| **Feed** | CAPRI data | Rations chosen inside the regional models against CAPRI's requirement rows (REQSE_) at CAPRI's base rations; the requirements equal the base rations' supply by construction, no independent check |
+| **Market** | CAPRI data | The base is CAPRI's market data (bilateral flows, balances; world prices from FAO_agg, K90); the base-price test is solver consistency (K95); scenario supply shocks move prices in CAPRI's direction |
 | **Biofuel** | CAPRI structure | Feedstock CES reproduces CAPRI's 2030 BiofFeedCost exactly in every CAPRI market region; endogenous biofuel markets (`BIOF_M`) reproduce every region's 2030 biofuel output and use at reference prices |
 
 ### 8.1 Validation methods
@@ -1628,8 +1616,8 @@ principled reason and extension path.
   types would need FADN farm-structure data the model does not carry.
 - **Agricultural water demand and biodiversity pressure are in-domain indicator
   layers; their environmental *outcomes* are not.** Both pressure sides are now
-  built: biodiversity *pressure* proxies (Shannon crop diversity, HNV-farmland
-  proxy) in the environmental module; the irrigation *water demand* module (CNIR × irrigated area, from CAPRI's
+  built: a biodiversity *pressure* indicator (Shannon crop diversity; the HNV-farmland proxy, a hand-set weight
+  without a CAPRI source, was removed on 29 October 2026, KNOWN_ISSUES K96) in the environmental module; the irrigation *water demand* module (CNIR × irrigated area, from CAPRI's
   CROPWAT data and Eurostat FSS irrigation shares, `capri_mod/water`) was restored on CAPRI's regional units on
   27 October 2026, as a report outside the run (its irrigated shares a registered departure,
   docs/DEPARTURES_FROM_CAPRI.md). Their environmental *outcomes* remain out of scope: species-level
@@ -1662,10 +1650,10 @@ principled reason and extension path.
   that the output is validated.
 
 - `capri_data/INPUT_SCHEMA.json` — declarative source of truth for every input.
-- `capri_data/DATA_SOURCING_REGISTRY.json` — per-dataset provenance, including
-  every bug found and fixed during validation.
+- `capri_data/DATA_SOURCING_REGISTRY.json` — per-dataset provenance; its log of the bugs found and fixed during
+  validation moved to `docs/KNOWN_ISSUES_REGISTRY_LOG.md` (29 October 2026).
 - `capri_data/validation/` — validation artifacts: the Green Deal comparison
-  (`greendeal_2030/`) and world-price checks against CAPRI `PMRK`.
+  (`greendeal_2030/`) and the world-price divergence report (`tools/check/report_world_price_divergence.py`).
 - `capri_data/MANIFEST.json` — expected row and column counts for every live
   file, so a missing or truncated input is caught rather than absorbed.
 - `tools/check/verify_schema.py`, `tools/run/run_tests.py` — coverage and test gates.

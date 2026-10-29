@@ -9,7 +9,7 @@ The data sourcing registry's log of checks, fixes and decisions (201 entries, mo
 [KNOWN_ISSUES_REGISTRY_LOG.md](KNOWN_ISSUES_REGISTRY_LOG.md), verbatim, with the triage of its open entries against
 the code: they became K92-K96, joined K73, K80, K91, or were closed or historical.
 
-## Open (25)
+## Open (22)
 
 | # | Issue | Status |
 |---|---|---|
@@ -34,12 +34,9 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K91](#k91) | CAPRI's trend projection (captrd_2030.json): no builder calls its extractor | open |
 | [K92](#k92) | Farm-to-Fork changes furthest from JRC121368, besides the milk price | open |
 | [K93](#k93) | CAPRI mitigation options not built; documents disagree on which are in | open |
-| [K94](#k94) | reconcile_base.py orphan; README's re-basing note points at a removed concordance | open |
-| [K95](#k95) | The "12/12 against PMRK" market-price validation is a solver-consistency check | open |
-| [K96](#k96) | Documents and one constant still describe removed mechanisms | open |
 | [K97](#k97) | NaN in the crop-diversification row during Green Deal solves | open |
 
-## Resolved (72)
+## Resolved (75)
 
 | # | Issue | Status |
 |---|---|---|
@@ -115,6 +112,9 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K87](#k87) | Builder outputs that do not follow from their builders (reproduction audit) | fixed |
 | [K88](#k88) | Builders that still round the values they write | fixed |
 | [K45](#k45) | Egypt's oilseed rows | fixed |
+| [K94](#k94) | reconcile_base.py orphan; README's re-basing note points at a removed concordance | fixed |
+| [K95](#k95) | The "12/12 against PMRK" market-price validation is a solver-consistency check | fixed |
+| [K96](#k96) | Documents and one constant still describe removed mechanisms | fixed |
 
 ## Details
 
@@ -1174,8 +1174,9 @@ recorded only inside the status texts of K50 and K51 (resolved table) and README
 - **Effect:** runs with an emission tax (3-NOP acts on enteric CH4); leaching and runoff where tillage or buffer strips
   would act (held at CAPRI's reference); size in the model not measured
 - **In 9t:** –
-- **Status:** **open**: build them, or register them as departures (a decision for the project lead); make the linseed
-  statements agree with the code
+- **Status:** **open**: registered as a departure (docs/DEPARTURES_FROM_CAPRI.md, 29 October 2026) and the linseed
+  statements made to agree with the code (linseed and nitrate are in: columns of the regional model from
+  `supplement_effects.csv`); building the options remains
 
 <a id="k94"></a>
 ### K94: `capri_mod/data/reconcile_base.py` is an orphan, and README's re-basing note points at a removed concordance (found 29 October 2026, registry migration)
@@ -1188,8 +1189,8 @@ statistics into CAPRI's base was never tested.
 
 - **Effect:** none on results; the documentation claims a capability the code does not use
 - **In 9t:** –
-- **Status:** **open**: remove the module and the paragraph (re-basing is planned through the data pipeline,
-  docs/design/CAPTRD_MOD.md), or keep it as a tool with the concordance restored and its untested parts stated
+- **Status:** **fixed** 29 October 2026 (batch 5): the module and its test removed (git history keeps them); README
+  says re-basing is not available yet and is planned through the data pipeline (docs/design/CAPTRD_MOD.md)
 
 <a id="k95"></a>
 ### K95: The "12/12 against CAPRI's PMRK" market-price validation is a solver-consistency check (found 29 October 2026, registry migration)
@@ -1202,8 +1203,8 @@ docstring says "Solver consistency, NOT price validation". The CHANGELOG validat
 
 - **Effect:** documentation only (an overstated validation claim)
 - **In 9t:** –
-- **Status:** **open**: reword the claims as solver consistency; report `tools/check/report_world_price_divergence.py`'s
-  current output
+- **Status:** **fixed** 29 October 2026 (batch 5): the claims reworded as solver consistency (CHANGELOG validation table,
+  README sections 7 and 8, FITNESS `market.prices`), the test's comment corrected
 
 <a id="k96"></a>
 ### K96: Documents and one constant still describe removed mechanisms (found 29 October 2026, registry migration)
@@ -1226,7 +1227,13 @@ docstring says "Solver consistency, NOT price validation". The CHANGELOG validat
 
 - **Effect:** none on results; the fitness file is the machine-readable source of caveats, so stale entries mislead
 - **In 9t:** –
-- **Status:** **open**
+- **Status:** **fixed** 29 October 2026 (batch 5): FITNESS entries brought up to date (the three abatement entries
+  replaced by `mitigation` and `mitigation.at_carbon_price` with r182's adoption against JRC121368; market prices, EU
+  balance, rice and gross margin rewritten; the Irish entry removed: Ireland's units carry their own CAPRI grass output,
+  37.7 and 46.9 t fresh matter per ha, res_17IR GRAS.GRAS, while CAPRI's YILD item of grass equals MREV there); the
+  README passages corrected (regional detail, world production, feed, the Irish item of "Not sound for");
+  MITIGATION_IN_SUPPLY.md corrected (no QP; winter cover a choice); the dead constant removed; the HNV proxy removed
+  (no CAPRI source; reporting only)
 
 <a id="k97"></a>
 ### K97: NaN in the crop-diversification row during Green Deal solves (found 29 October 2026)

@@ -10,8 +10,9 @@ made them pay (report Table 17: storage covers 14 -> 34%, precision farming 0 ->
 higher milk yield 0 -> 15%). capri-mod does the same: the options are columns of each regional model (always: the switch
 `use_manure_techs` was removed on 27 October 2026; feeding is always inside the models),
 the baseline included. In the default NLP form they are written in `capri_regional_nlp.CapriRegionalNLP._abatement_block`
-(ammonia options, AD, fertiliser options, inhibitor on manure) and as columns of the regional QP (breeding, low-N feed,
-linseed and nitrate, histosol fallowing).
+(ammonia options, AD, fertiliser options, inhibitor on manure, winter cover) and as linear columns the supply module
+adds to the regional model (breeding, low-N feed, linseed and nitrate, histosol fallowing; until 26 October 2026
+columns of the regional QP).
 
 | Option (CAPRI) | CAPRI file | capri-mod | Data |
 |---|---|---|---|
@@ -21,7 +22,7 @@ linseed and nitrate, histosol fallowing).
 | Breeding: milk yield (genet_yld), feed efficiency (genet_eff) | envind/breeding.gms | in | `tools/build/build_genetics_effects.py` |
 | Low-N feed (LowNFeed) | envind/low_n_feed.gms | in | `tools/build/build_lownfeed_effects.py` |
 | Linseed (LINE), nitrate (NITR), their combination (AComLN) | envind/line_nitr.gms | in | `tools/build/build_supplement_effects.py` |
-| Winter cover (WinterCov) | envind/cover_crops.gms | the catch-crop share acts in the cascade and in leaching; the share is CAPRI's 2030 value or the Farm-to-Fork requirement, not a choice | `cover_crops.csv`, `p_winterCoverShare0.csv` |
+| Winter cover (WinterCov) | envind/cover_crops.gms | a choice of the regional model with CAPRI's cost curve, the Farm-to-Fork requirement as its floor (`capri_regional_nlp.py`, catcMiti_; docs/WINTER_COVER.md); it acts in the cascade and in leaching | `cover_crops.csv`, `p_winterCoverShare0.csv` |
 | Histosol fallowing (FALLOW) | envind/no_histosols.gms | in, as a linear column (approximated) | `histosol.csv` |
 | 3-NOP, legume share (LegSh), tillage (ConsTill, NoTill), urea substitution (UreaSubst), buffer strips, biodiversity options, biochar | various | not built; their LEACHN_/RUNSURFN_ terms held at CAPRI's reference | - |
 
@@ -204,5 +205,4 @@ land-market columns carry no coefficient of their own; no CAPRI tax run is in ha
 CAPRI's technology contributions in Farm-to-Fork (kt CO2-eq, as reported): winter cover crops -16,097, peatland
 fallowing -4,138, mineral-fertiliser application -3,568, nitrification inhibitors -1,771, feed additives -1,462,
 anaerobic digestion -495; ammonia measures +922 and +5,240 (more N2O); no genetics line. Technologies give 38% of total
-mitigation there, production changes the rest. Winter cover, the largest item, is not a choice in capri-mod (table
-above).
+mitigation there, production changes the rest. Winter cover, the largest item, is a choice of the regional models (table above).

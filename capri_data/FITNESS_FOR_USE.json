@@ -8,7 +8,7 @@
   "understated": "direction and ranking usable; magnitude is smaller than the reference",
   "not_supported": "the model cannot answer this; the number is an artefact of asking"
  },
- "_generated": "2026-10-27 (refreshed for CAPRI's regional units and the Farm-to-Fork run r161; other entries as of 2026-09-29)",
+ "_generated": "2026-10-29 (market, mitigation, gross margin and the Irish entry brought up to date in the registry migration, KNOWN_ISSUES K96; others as of 2026-10-27 and 2026-09-29)",
  "_source_of_truth": "README.md section 9 and capri_data/DATA_SOURCING_REGISTRY.json",
  "outputs": {
   "supply.activities": {
@@ -19,12 +19,12 @@
   "supply.gross_output": {
    "status": "validated",
    "note": "Crops from area x yield; livestock from CAPRI's own product coefficients. EU livestock output equals CAPRI's EU27 total.",
-   "evidence": "DATA_SOURCING_REGISTRY: gross_output_unit_inconsistency"
+   "evidence": "docs/KNOWN_ISSUES_REGISTRY_LOG.md (the registry log, moved 29 October 2026): gross_output_unit_inconsistency"
   },
   "supply.gross_margin": {
    "status": "validated",
-   "note": "Net revenue x activity levels, livestock revenue from CAPRI's MREV. Responds to policy: organic 25% costs -10.8% of income, the nutrient rule -5.3%.",
-   "evidence": "DATA_SOURCING_REGISTRY: gross_margin_contaminated"
+   "note": "Net revenue x activity levels, livestock revenue from CAPRI's output value per head (TOOU; until October 2026 MREV). Responds to policy: organic 25% costs -10.8% of income, the nutrient rule -5.3%. (the policy effects measured on 29 September 2026, not re-measured)",
+   "evidence": "docs/KNOWN_ISSUES_REGISTRY_LOG.md (the registry log, moved 29 October 2026): gross_margin_contaminated"
   },
   "activities.WINE": {
    "status": "validated",
@@ -56,22 +56,16 @@
   "environmental.n_surplus": {
    "status": "validated",
    "note": "EU average 44.5 kg N/ha against a real ~46, with every component independently right: mineral 10.2 Mt (real ~10.8), manure 7.5 (real ~7), crop uptake 13.7. Regional distribution matches CAPRI's SURSOI (median 48.2 against 49.5 over 228 regions).",
-   "evidence": "DATA_SOURCING_REGISTRY: nitrogen_balance_rebuilt"
-  },
-  "environmental.n_surplus.IE": {
-   "status": "use_with_care",
-   "note": "Irish grass yield is not derivable from CAPRI (its grass price is a dummy and its 'yield' equals revenue), so Irish crop and grass uptake is uncertain and the Irish surplus runs high.",
-   "scope": "IR010000, IR020000"
+   "evidence": "docs/KNOWN_ISSUES_REGISTRY_LOG.md (the registry log, moved 29 October 2026): nitrogen_balance_rebuilt"
   },
   "market.prices": {
-   "status": "validated",
-   "note": "Base prices reproduce CAPRI's PMRK 12/12; world imbalance 0.003%. Under a policy shock EU prices carry an Armington premium, so they respond to EU supply as CAPRI's do.",
-   "evidence": "regression anchors price_reproduction_within_15pct, max_world_imbalance_pct; test_eu_armington_premium_is_inert_at_base_and_responds_to_supply"
+   "status": "use_with_care",
+   "note": "Base world prices are CAPRI's FAO_agg world prices (tools/build/build_world_prices.py), except the wheat market, which takes CAPRI's soft-wheat price instead of its wheat product's (KNOWN_ISSUES K90); EU and non-EU prices come from CAPRI's bilateral Armington market, calibrated to CAPRI's market data, so the base reproduces it (r183: two baseline iterations, no row of CAPRI's stop rule above 0.05%). The base price test is a solver-consistency check, not a validation against an independent price (K95).",
+   "evidence": "r183 baseline; test_market_module_reproduces_its_own_prices (solver consistency)"
   },
   "market.PARI": {
-   "status": "use_with_care",
-   "note": "Rice is a market commodity with CAPRI's world price and FAO balances for 24 regions, but the EU27 base comes from share allocation rather than a FAO row.",
-   "scope": "EU27 rice base production"
+   "status": "validated",
+   "note": "Rice is a market commodity in CAPRI's bilateral market data for every trade region, the EU27 included (bilateral_regions_2030.csv), with CAPRI's world price (FAO_agg RICE)."
   },
   "projection": {
    "status": "use_with_care",
@@ -97,20 +91,8 @@
   },
   "market.eu_balance": {
    "status": "validated",
-   "note": "EU production is the model's own output; consumption keeps FAO's EU self-sufficiency. Wheat consumption 99.4 Mt, maize 72.7."
-  },
-  "abatement_capri": {
-   "status": "validated",
-   "note": "CAPRI's own mitigation portfolio. At full potential, per source, on this model's emissions: enteric CH4 -10.8% (CAPRI max run -12.0%), manure CH4 -22.3% (-21.8%), manure N2O -29.4% (-30.0%). Zero carbon price abates nothing beyond the reference.",
-   "evidence": "test_capri_mitigation_reproduces_capri; res_2_1730greendeal_refpol_endotech_all_max"
-  },
-  "abatement_capri.at_carbon_price": {
-   "status": "use_with_care",
-   "note": "Price response follows CAPRI's adoption rule for options with published costs; code-defined options (feed additives, diet, ammonia measures) are ASSUMED to follow the same response. Soil N2O uses an EU-wide potential and an estimated per-hectare value."
-  },
-  "abatement": {
-   "status": "use_with_care",
-   "note": "EcAMPA 2 literature measures, kept as an independent cross-check. Use abatement_capri as the model's estimate."
+   "note": "EU use follows CAPRI's Armington balance (food, feed, processing, biofuels, each with CAPRI's function) on CAPRI's 2030 market data; EU production is the supply models' output; at the base the balance is CAPRI's (r183: no row of CAPRI's stop rule above 0.05%).",
+   "evidence": "r183 baseline"
   },
   "supply.land_expansion": {
    "status": "validated",
@@ -157,6 +139,15 @@
   "supply.landscape_floor": {
    "status": "use_with_care",
    "note": "With the land market off, a region whose arable land cannot hold the landscape floor keeps the floor and the solver's last (non-optimal) point, as CAPRI does, recorded in the run's nlp_fallback. With the land market on (CAPRI's Green Deal set-up, the reference runs) every floor is met."
+  },
+  "mitigation": {
+   "status": "use_with_care",
+   "note": "CAPRI's mitigation technologies are choices inside the regional models (ammonia measures, fertiliser options, breeding, feed measures; Sprint 9i replaced the post-solve abatement). Adoption under Farm-to-Fork 2030 (r182) against JRC121368 Table 17: nitrification inhibitors 16.1% (18), precision farming 24.7% (35), low-emission housing 18.9% (12), covered manure storage 27.1% (34), air purification 8.2% (10), catch crops 40.9% of eligible area (32). Several CAPRI options are not built (KNOWN_ISSUES K93).",
+   "evidence": "r182; tools/check/compare_runs.py --capri"
+  },
+  "mitigation.at_carbon_price": {
+   "status": "use_with_care",
+   "note": "An emission tax acts inside the supply models (CAPRI's ghgTax); no CAPRI result with a tax is in hand to compare, and 3-NOP, which acts on enteric methane, is not built (K93)."
   }
  }
 }
