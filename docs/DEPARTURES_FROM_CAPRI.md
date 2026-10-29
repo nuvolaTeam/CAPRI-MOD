@@ -266,6 +266,21 @@ sign, the last above 0.05%: their changes, the rate they shrink at and a rough e
 
 ## Beyond CAPRI: options (default CAPRI's)
 
+### `market.solver = "newton_krylov"` (29 October 2026; the project lead's choice for step G; default `"fixed_point"`)
+
+CAPRI solves its market model as one simultaneous system (CONOPT on arm/market_model.gms, exact derivatives). The
+model's default market solve is a successive linearisation: each commodity's trade system solved exactly, the links
+across commodities and blocks (processing, dairy blocks, feed, biofuels, young animals, the market supply functions)
+taken up between steps. "newton_krylov" (capri_mod/market/market_nk.py) solves the same equations at once: Newton on
+every price, the linear systems by GMRES with directional finite differences of the full model response, preconditioned
+by the fixed point's own Jacobian (each commodity's trade system, exact from CasADi). The agreed design of step G (26
+October 2026) wrote every block in CasADi for one exact sparse Jacobian; the project lead chose this lighter form on
+29 October 2026: no block is rewritten, the derivatives across blocks are finite differences. Same equations and
+stopping rule, so the same equilibrium; the path differs. The reason is robustness (K83: a fixed point diverges where
+a simultaneous solve would not), not time: the market takes 6-29 s of a model iteration. Test: after a supply shock of
+the full market both solves stop at the same prices (relative 1e-6). Default to change only after a full-run
+comparison.
+
 ### `market.hessian_method = "kkt"` (29 October 2026; the project lead's decision; default `"capri"`)
 
 CAPRI measures the market supply functions' Hessian by re-solving every supply model at a 1% shock of each price

@@ -240,6 +240,15 @@ trade_chord = true
 # the trade systems' Newton with the exact Jacobian from CasADi (market programme step G1, capri_mod/market/trade_ad.py)
 # instead of finite differences; same equations and root
 exact_jacobian = false
+# the market solve (market programme step G2, docs/design/ARCHITECTURE_REFACTOR.md section 6): "fixed_point", the
+# successive linearisation above (each commodity's trade system exact, the links across commodities and blocks between
+# steps), or "newton_krylov", the same equations at once (capri_mod/market/market_nk.py: Newton on all prices, GMRES
+# with finite-difference directional derivatives, the fixed point's Jacobian as preconditioner); the same stopping rule.
+# The project lead's choice of 29 October 2026; the default until its full-run comparison
+solver = "fixed_point"
+# Newton-Krylov: step of the directional differences in log prices; Krylov vectors per Newton step
+nk_fd_step = 1e-6
+nk_max_krylov = 30
 max_iter = 100
 tol = 1e-7
 damping_increase_threshold = 0.999
