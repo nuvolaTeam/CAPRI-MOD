@@ -643,13 +643,14 @@
    },
    "note": "Feed per head (t): cereals, protein-rich and energy-rich feed - CAPRI 2017 regional totals (FCER/FPRO/FENE x LEVL) divided by this model's herd | Rebuilt 2026-10 with the corrected NUTS correspondence (73 regions now regional CAPRI values). | Norway's pig cells rebuilt 21 October 2026 (tools/build/build_norway_pigs.py --rebuild)"
   },
-  "capri_oilseed_products_baseline.json": {
-   "source": "CAPRI FAO_agg_17_defaulta p_dataMarket (year BAS), supplied by the project lead; EU = sum of member states",
+  "eu_cake_feed_bas.csv": {
+   "source": "CAPRI FAO_agg_17 p_dataMarket FEDM BAS (tools/build/build_eu_cake_feed.py)",
    "vintage": "2017",
-   "units": "kt; EUR/t",
-   "domain": "market",
-   "status": "calibration",
-   "note": "Base balances of oils, cakes and seeds for the 21 trade regions, EU crushing quantities and yields - Stage 1 of oilseed crushing (docs/OILSEED_CRUSHING.md)."
+   "units": "1000 t",
+   "domain": "supply",
+   "status": "live",
+   "path": "2017/market/eu_cake_feed_bas.csv",
+   "note": "the EU's base-period feed use of RAPC, SUNC, SOYC: the weights of the protein-feed cake index"
   },
   "feed_demand_nonEU.json": {
    "source": "CAPRI data_market_1730defaulta CAL (HCON, FEED, PROC, BIOF) and elas_2_1730defaulta p_ElasFeed (supplied by the project lead), aggregated from CAPRI's 80 behavioural regions to the trade regions",

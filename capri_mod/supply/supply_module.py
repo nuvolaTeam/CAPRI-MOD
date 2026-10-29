@@ -2216,21 +2216,18 @@ class RegionalSupplyModel:
 
     @classmethod
     def _cake_index(cls):
-        """(weights, base prices) of the protein-feed cake index."""
+        """(weights, base prices) of the protein-feed cake index: the EU's base-period feed use of each cake (CAPRI's
+        FAO_agg FEDM, eu_cake_feed_bas.csv, tools/build/build_eu_cake_feed.py) and its world price."""
         if cls._CAKE_INDEX is None:
+            from pathlib import Path
+            root = Path(__file__).resolve().parents[2] / "capri_data" / "2017" / "market"
+            fe_ = read_input(root / "eu_cake_feed_bas.csv").set_index("product")["feed_kt"]
+            wp = read_input(root / "world_prices.csv").set_index("commodity")["price"]
             w, p = {}, {}
-            try:
-                import json
-                from pathlib import Path
-                root = Path(__file__).resolve().parents[2] / "capri_data" / "2017" / "market"
-                b = json.load(open(root / "capri_oilseed_products_baseline.json"))["balances"]
-                wp = read_input(root / "world_prices.csv").set_index("commodity")["price"]
-                for c in ("SOYC", "RAPC", "SUNC"):
-                    fe = float(b.get(f"EU27|{c}", {}).get("feed", 0.0))
-                    if fe > 0 and c in wp.index:
-                        w[c], p[c] = fe, float(wp[c])
-            except Exception:
-                w, p = {}, {}
+            for c in ("SOYC", "RAPC", "SUNC"):
+                fe = float(fe_.get(c, 0.0))
+                if fe > 0 and c in wp.index:
+                    w[c], p[c] = fe, float(wp[c])
             cls._CAKE_INDEX = (w, p)
         return cls._CAKE_INDEX
 

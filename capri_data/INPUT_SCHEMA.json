@@ -543,17 +543,17 @@
     "cells without a coefficient are region-animal pairs without a base herd: no feed (feed_requirements.csv, the fallback without builder, removed 29 October 2026, KNOWN_ISSUES K99)"
    ]
   },
-  "capri_oilseed_products_baseline": {
-   "file": "2017/market/capri_oilseed_products_baseline.json",
-   "concept": "Market balances of oilseed products by trade region; EU crushing and yields",
-   "unit": "kt; EUR/t",
-   "dimension": "region x product",
+  "eu_cake_feed_bas": {
+   "file": "2017/market/eu_cake_feed_bas.csv",
+   "concept": "EU feed use of the oilseed cakes, base period: the weights of the supply models' protein-feed cake index",
+   "unit": "1000 t",
+   "dimension": "product",
    "modules": [
-    "market"
+    "supply"
    ],
    "source": {
     "source_type": "CAPRI_GDX",
-    "source_ref": "FAO_agg_17_defaulta p_dataMarket",
+    "source_ref": "FAO_agg_17 p_dataMarket FEDM BAS of RAPC, SUNC, SOYC, summed over the EU member states (tools/build/build_eu_cake_feed.py)",
     "vintage": "2017",
     "confidence": "validated",
     "reproducibility": "capri_gdx"

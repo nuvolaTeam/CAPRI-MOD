@@ -9,7 +9,7 @@ The data sourcing registry's log of checks, fixes and decisions (201 entries, mo
 [KNOWN_ISSUES_REGISTRY_LOG.md](KNOWN_ISSUES_REGISTRY_LOG.md), verbatim, with the triage of its open entries against
 the code: they became K92-K96, joined K73, K80, K91, or were closed or historical.
 
-## Open (17)
+## Open (18)
 
 | # | Issue | Status |
 |---|---|---|
@@ -30,6 +30,7 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K89](#k89) | Failing regional solves take most of IPOPT's time | open |
 | [K92](#k92) | Farm-to-Fork changes furthest from JRC121368, besides the milk price | open |
 | [K93](#k93) | CAPRI mitigation options not built; documents disagree on which are in | open |
+| [K101](#k101) | Model inputs without a builder (census of a run's reads) | open, in part fixed |
 
 ## Resolved (83)
 
@@ -778,7 +779,9 @@ With every cell blanked, the builders refilled 102 of 248. The eta column (a gen
   `producer_prices.csv` (DCOW 869.4, BCOW 844.05, BULL 1400, HFRS 900, CALV 300, PIGS 905, PIGF 844.72, LAYS 688.2, BROI
   748, OANI 8; origin not recorded), removed: no model code reads an animal's EU producer price (the supply models'
   livestock revenue is CAPRI's output value per head, `livestock_output_value_coef.csv`, and replaces price x yield
-  for every animal; the other readers take crops only), to be confirmed by the batch's gate runs. Earlier steps: eta,
+  for every animal; the other readers take crops only), to be confirmed by the batch's gate runs. ("The last inputs without a
+  builder" held for the cells of armington_params.csv and producer_prices.csv only: a census of every file a run reads,
+  K101, found 17 more.) Earlier steps: eta,
   sigma, rho2 removed 24 October 2026; eps and the file removed 29 October 2026. eps acted
   on no result: it was read only for the EU rows of the 28 products without CAPRI's EU p_elasSupp, and every one of
   them has its EU supply set afterwards in the same market step (PARI, SUGR, WINE, OLIV by CAPRI's market supply
@@ -1361,4 +1364,34 @@ by the regional CAPRI values). It is the base the regional values override:
   70 -> 158, SETA 4.8 -> 0.47, WINE 70 -> 25 kg/ha; reported in the supply result's nutrient balance, which no result
   table reads). The environmental accounts take no mineral N where CAPRI has no NMIN (fallow, set-aside): EU mineral N
   about -39 kt. nutrient_coefs.csv and its loader removed. Tests and run pending (batch-6 gate)
+
+<a id="k101"></a>
+### K101: Model inputs without a builder (census of a run's reads, found 29 October 2026)
+
+K72 closed the inputs without a builder it had found. A census of every file a Green Deal run reads (the run manifest
+of a one-region run, lv_gd4, 164 files) against the outputs of the pipeline's builders (tools/pipeline/builders.json)
+found 17 read files that no builder writes (settings/defaults.toml aside). Two were of unrecorded origin and are removed
+(K99 feed_requirements.csv, K100 nutrient_coefs.csv); the others had a recorded CAPRI source but no code that turns it
+into the file.
+
+| File | Source | Status |
+|---|---|---|
+| policy/landscape_targets_ms.csv, organic_targets_ms.csv | CAPRI's pol_input/greendeal GDX (p_landscapeTargets, p_organicTargetMS, p_organicTargetUAA) | built: build_greendeal_targets.py (tools/lib/_gdx.py), same values (largest relative difference 4e-15: the files held 15 significant digits) |
+| shared/eu_market_blocks.csv | CAPRI's aggregation/defaultA.agg section 4; Norway's row capri-mod's (registered) | built: build_eu_market_blocks.py, byte-identical |
+| policy/organic_yield_gap.csv | CAPRI's dat/pesticides/yield_effects_ppp.xlsx, sheet yld_gap | built: build_organic_yield_gap.py (the file held 3 decimals; at most 0.0005 points) |
+| supply/yield_price_elasticity.csv | CAPRI's supply/yield_elas.gms with sets.gms CERE_COLS, OILS_COLS | built: build_yield_price_elasticity.py, byte-identical |
+| supply/mineral_n_price.csv | CAPRI's res_17 national UVAG of NITF | built: build_mineral_n_price.py (the file held 2 decimals) |
+| supply/pmp_own_price_elasticities.csv | CAPRI's PELA (estnlp results.gdx), latest year up to 2005 | built: build_pmp_own_price_elasticities.py, same values (1e-14); the year rule is the committed file's (116 pairs from before 2005; CAPRI's slope forecast reads 2004) |
+| market/capri_oilseed_products_baseline.json | CAPRI's FAO_agg p_dataMarket | replaced: only the EU's three cake feed uses were read (the cake index's weights): market/eu_cake_feed_bas.csv, build_eu_cake_feed.py, same values; the JSON removed |
+| supply/capri_own_price_elasticities.csv | CAPRI's p_ElasSupp 'CAL' per member state (results/arm supply_elas_*) | open: the source file is not identified among the exports here; read by the elasticity-calibrated PMP only (not the default) |
+| sources/arm/capri_supply_elas_market_1717.csv, supply_elas_eu_all.json | CAPRI's elas1717defaulta.gdx p_elasSupp (gdxdump) | open: extracts without extractor; supply_elas_eu_all.json gives the EU rows' own-price anticipation (market) |
+| sources/capreg/capreg_national_prices.csv | CAPRI's national prices (extract) | open: extract without extractor |
+| shared/model_parameters.csv | each row with its CAPRI or literature source | open: a parameter table by construction; its rows to be checked one by one |
+| shared/capri_member_state_codes.csv | CAPRI's sets.gms NUTS0 | open: a code list, to be written by build_code_lists.py |
+
+- **Effect:** reproducibility (no result changes from the builders added: the values are the files'; small rounding
+  gains); K100's fallow mineral N
+- **In 9t:** –
+- **Status:** open, in part fixed 29 October 2026 (batch 6): seven files built, one replaced; five left as above. The
+  census to be repeated on the gate runs' manifests (a full EU run reads files a one-region run may not)
 
