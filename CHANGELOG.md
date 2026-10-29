@@ -30,6 +30,38 @@ Full provenance for every entry is in `capri_data/DATA_SOURCING_REGISTRY.json`.
 
 ---
 
+## 29 October 2026 (batch 5, one gate): non-EU market supply as CAPRI's, 3-NOP, K79's warm start, K97, the registry migration, the run manifest
+
+**Model.**
+- **Market step D, non-EU supply as CAPRI's market supply functions (K54-3)**: every non-EU market region's supply
+  is CAPRI's ProdNQ_ (p_hessNQSupp at the 2030 calibration point, summed over the region's CAPRI regions) with the
+  cross-price terms and raw milk's (its cross terms shift the region's dairy-block milk supply), instead of one
+  own-price constant elasticity per product (`market.noneu_supply_nq`, CAPRI's form by default). CAPRI's Hessian is
+  completed as its market model completes it on loading (tools/lib/_capri_nq.py, arm/market1.gms l. 539-574:
+  symmetric, tiny terms and products without ProdNQ_ deleted); the stored terms reproduce CAPRI's p_elasSupp (23,647
+  terms, 1e-14). Held at calibration: the feed energy price (M3) and the land rents of CAPRI's market land use (4.4%
+  of the terms' size). The welfare report integrates the linear functions.
+- **K98**: the EU's other oils and fish builder had read only the stored half of the cross terms (133 of 817).
+- **K93, 3-NOP** (envind/line_nitr.gms): dairy and suckler cows, CH4ENT -25% to -57% (median -35%) by CAPRI's formula
+  in the ration's fibre and fat (CAPRI's digestibility table from its code to CSV, digestibility.gms's regional steps),
+  about EUR 95 per cow and year; acts under an emission price only. The accounts keep linseed and nitrate's overlap
+  with 3-NOP present. In CAPRI's own Green Deal 2030 result the options still not built carry no level (LegSh 0.002%).
+- **K79 (the project lead's decision)**: the regional warm start from the last solution as it is.
+- **K97**: the crop-diversification row's log floors sized to IPOPT's bound relaxation (LV000000's jump-check cold
+  starts: 3000 iterations of NaN).
+- K72, K86, K90, K91, K94-K96 (see KNOWN_ISSUES).
+
+**Data and tools.** Registry migration (KNOWN_ISSUES_REGISTRY_LOG.md); run manifest (commit, software, every input
+read with its SHA-256; compare_runs lists differing inputs); declarations for the market supply functions, CAPRI's
+XX1, FEED_TO_O, MS_RU; the builder tracer records imported modules; CAPRIModel imported on first use.
+
+**Gate.** Test suite 228 passed, 5 skipped (the four pipeline tests whose CAPRI reference files are not built here,
+the live-API test). Farm-to-Fork 2030 (r186): converged under CAPRI's rule in 12 iterations (r182: 12), no NaN warning;
+the aggregated EU indicators within 0.2 points of r182; mean absolute deviation from JRC121368 4.28 (r182: 4.29).
+Green Deal 2030 (r187): converged in 17 iterations (r183: 21), no non-optimal regional solve, no NaN warning; the
+aggregated EU indicators within 0.2 points of r183 (cereal price -0.2, cereal production +0.2, the others within 0.1);
+mean absolute deviation from JRC121368 over compare_runs' 20 indicators 8.65 (r183: 8.63).
+
 ## 29 October 2026 (batch 4 and the data batch, one gate): the data pipeline in doit, one writer per table, the data declared in DuckDB; K45, K72, K79
 
 **Batch 4 (model).**
