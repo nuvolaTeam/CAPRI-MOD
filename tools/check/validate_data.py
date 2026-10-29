@@ -18,11 +18,15 @@ For each declared CSV, in an in-memory database, the check lists every violation
   keys      duplicate PRIMARY KEY / UNIQUE values
   refs      values not in the referenced table (a code no code list knows)
   checks    rows that fail a CHECK expression
-then loads the file into the declared table, so DuckDB enforces the same declarations. A rule runs where it stands, in file order: it can use the tables declared before it.
-The CSVs stay the stored data; the database is built for the check and not kept.
+then loads the file into the declared table, so DuckDB enforces the same declarations. A CSV under capri_data
+(archive/ left out) without a declaration is a violation too. The rules can use the temporary table
+_declared (file, tbl): the files declared so far and their tables. A rule runs where it stands, in file order: it can use the tables declared before it.
+The CSVs stay the stored data; the database is built for the check and not kept, unless --db names a file to keep
+it in (a copy for querying, rebuilt from the CSVs each time; a table whose file breaks a declaration stays empty).
 
     python tools/check/validate_data.py                  # every declaration; exit 1 on a violation
     python tools/check/validate_data.py --root DIR       # another checkout (the tests' copies)
+    python tools/check/validate_data.py --db data.duckdb # also keep the database (built anew; not kept in git)
 """
 from __future__ import annotations
 
@@ -159,11 +163,15 @@ def _ncols(path):
     return len(_header(path))
 
 
-def validate(root=ROOT, verbose=True):
-    """All declarations under root/capri_data/schema checked; returns the violations as (where, kind, message)."""
+def validate(root=ROOT, verbose=True, con=None, declarations_only=False):
+    """All declarations under root/capri_data/schema checked; returns the violations as (where, kind, message).
+    con: the connection to build the database in (a new in-memory one by default; tools/check/make_schema_json.py
+    passes its own to read the catalogue afterwards). declarations_only: the tables are created and only the code
+    lists (00_codes.sql) loaded, the rules are not run: the catalogue without the data checks."""
     import duckdb
     root = Path(root)
-    con = duckdb.connect()
+    con = con if con is not None else duckdb.connect()
+    con.execute("CREATE TEMP TABLE _declared (file VARCHAR PRIMARY KEY, tbl VARCHAR)")   # for the rules
     found, declared = [], []
     for sql_file in sorted((root / "capri_data" / "schema").glob("*.sql")):
         for kind, arg, stmt in parse(sql_file.read_text(encoding="utf-8")):
@@ -172,19 +180,31 @@ def validate(root=ROOT, verbose=True):
                 table = re.match(r"\s*CREATE\s+TABLE\s+(\w+)", stmt, re.I).group(1)
                 path = root / arg
                 declared.append(arg)
+                con.execute("INSERT INTO _declared VALUES (?, ?)", [arg, table])
+                if declarations_only and not sql_file.name.startswith("00_"):
+                    continue
                 if not path.exists():
                     found.append((arg, "file", "declared file missing"))
                     continue
-                for k, msg in check_table(con, table, path, layout(stmt)):
-                    found.append((arg, k, msg))
+                try:
+                    for k, msg in check_table(con, table, path, layout(stmt)):
+                        found.append((arg, k, msg))
+                except duckdb.Error as e:                    # not a CSV the declaration can read (ragged lines)
+                    found.append((arg, "file", str(e).splitlines()[0]))
             elif kind == "rule":
+                if declarations_only:
+                    continue
                 rows = con.execute(stmt).fetchall()
                 if rows:
                     found.append((f"{sql_file.name}: {arg}", "rule", f"{len(rows)} rows, e.g. {rows[:SHOW]}"))
             else:
                 con.execute(stmt)
+    if declarations_only:
+        return found
+    all_csv = sorted(str(p.relative_to(root)) for p in (root / "capri_data").rglob("*.csv") if "archive" not in p.parts)
+    found += [(f, "undeclared", "a CSV file under capri_data without a declaration") for f in all_csv
+              if f not in set(declared)]
     if verbose:
-        all_csv = [p for p in (root / "capri_data").rglob("*.csv") if "archive" not in p.parts]
         print(f"{len(declared)} files declared of {len(all_csv)} CSV files under capri_data; "
               f"{len(found)} violations")
         for where, k, msg in found:
@@ -195,8 +215,18 @@ def validate(root=ROOT, verbose=True):
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--root", default=str(ROOT))
+    ap.add_argument("--db", default=None, help="also keep the database: a DuckDB file built anew at this path")
     a = ap.parse_args()
-    sys.exit(1 if validate(a.root) else 0)
+    con = None
+    if a.db:
+        import duckdb
+        Path(a.db).unlink(missing_ok=True)
+        con = duckdb.connect(a.db)
+    found = validate(a.root, con=con)
+    if con is not None:
+        con.close()
+        print(f"database kept: {a.db}")
+    sys.exit(1 if found else 0)
 
 
 if __name__ == "__main__":

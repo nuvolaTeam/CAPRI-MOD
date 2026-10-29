@@ -36,3 +36,7 @@ capri_data/validation/world_price_divergence.csv
 
 # doit state (dodo.py)
 .doit.db*
+
+# a DuckDB copy of the data (tools/check/validate_data.py --db): generated, not kept in git
+*.duckdb
+*.duckdb.wal

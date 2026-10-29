@@ -40,7 +40,7 @@ def main() -> None:
     rows = {}
     for c in areas.columns:
         # set-aside has no output; other marketable and industrial crops, nurseries and flowers are carried in CAPRI as
-        # values, not tonnes (DATA_SOURCING_REGISTRY), so a per-tonne EU price is not defined for them
+        # values, not tonnes (docs/design/DATA_SCHEMA_DUCKDB.md, the units of OCRO, OIND, NURS, FLOW), so a per-tonne EU price is not defined for them
         if c in ("SETA", "OCRO", "OIND", "NURS", "FLOW") or c not in ylds.columns or c not in prices.columns:
             continue
         q = (areas[c] * ylds[c]).reindex(prices.index).fillna(0.0)

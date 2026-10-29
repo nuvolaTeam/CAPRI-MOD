@@ -39,7 +39,6 @@ Usage
 from __future__ import annotations
 
 import argparse
-import json
 import re
 from pathlib import Path
 
@@ -126,12 +125,8 @@ def main() -> None:
         ["model_region", "crop", "wrt", "value"]]
 
     own.to_csv(out / "pela_own_price.csv")
-    # the supply module's form (SupplyModule.cross_price, used with the elasticity-based PMP terms): {region:
-    # {"crop|wrt": elasticity}}; until 27 October 2026 this file had no builder in the repository
-    byreg = {r: {f"{c}|{w}": float(v) for c, w, v in zip(g.crop, g.wrt, g.value)}
-             for r, g in cross.groupby("model_region", sort=True)}
-    (out / "pela_cross_by_region.json").write_text(json.dumps(byreg))
-
+    # (the cross-price records were also written to pela_cross_by_region.json for the supply module's legacy cross
+    # terms; that path and the file were removed on 29 October 2026: KNOWN_ISSUES K105)
     print(f"PELA {PELA_YEAR}: {len(pela):,} records reaching "
           f"{pela.model_region.nunique()} model regions")
     print(f"  own-price   : {own.shape[0]} regions x {own.shape[1]} crops")

@@ -2,9 +2,9 @@
 water-demand indicator (capri_mod/water).
 
 Sources (CAPRI's water database inputs, gams/water_database.gms, as uploaded):
-  capri_data/sources/water/irrishare.csv   p_irriShare(region, IRRI|IRR2, IRSH, year): share of irrigable (IRRI) and
+  capri_data/sources/water/irrishare.gms   p_irriShare(region, IRRI|IRR2, IRSH, year): share of irrigable (IRRI) and
                                            irrigated (IRR2, 'irrigated once a year') area in UAAR, Eurostat FSS
-  capri_data/sources/water/cropwat.csv     p_cropwatReq(region, crop, CPET|CRAIN|CNIR|YRATIO|YFACT): CROPWAT crop
+  capri_data/sources/water/cropwat.gms     p_cropwatReq(region, crop, CPET|CRAIN|CNIR|YRATIO|YFACT): CROPWAT crop
                                            water requirements, mm
   capri_data/sources/capreg/capreg_activity_levels.csv   CAPRI's 2017 levels (ROOF and OFAR, the model's OFOD)
 
@@ -68,11 +68,11 @@ def gams_records(path, n):
 
 def main():
     units = list(read_csv(ROOT / "capri_data" / "shared" / "regional_units.csv").region)
-    sh = pd.DataFrame(gams_records(SRC / "irrishare.csv", 4), columns=["region", "item", "type", "year", "value"])
+    sh = pd.DataFrame(gams_records(SRC / "irrishare.gms", 4), columns=["region", "item", "type", "year", "value"])
     sh = sh[(sh["item"] == "IRR2") & (sh.type == "IRSH")].astype({"year": int, "value": float})
     sh = sh[sh.year <= BASE_YEAR]
     latest = sh.sort_values("year").groupby("region").last()
-    cw = pd.DataFrame(gams_records(SRC / "cropwat.csv", 3), columns=["region", "crop", "item", "value"])
+    cw = pd.DataFrame(gams_records(SRC / "cropwat.gms", 3), columns=["region", "crop", "item", "value"])
     cnir = cw[cw["item"] == "CNIR"].astype({"value": float}).pivot_table(index="region", columns="crop", values="value")
     lev = read_csv(ROOT / "capri_data" / "sources" / "capreg" / "capreg_activity_levels.csv", index_col=0)
 

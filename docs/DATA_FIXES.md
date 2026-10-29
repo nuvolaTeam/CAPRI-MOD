@@ -3,8 +3,8 @@
 Status: revised 20 October 2026 against the code. This is a record of data-level faults found and fixed during the
 project, kept for their causes and the guards they left behind. All of it is historical: several fixes were later
 superseded by rebuilding the data from CAPRI's 2017 results (Sprint 9s; docs/SYNTHETIC_DATA_AUDIT.md), as noted per
-item. Full provenance of each dataset and fix: `capri_data/DATA_SOURCING_REGISTRY.json`; effect on results:
-CHANGELOG.md.
+item. Provenance of each data file: `capri_data/schema/01_provenance.sql` and `02_provenance_notes.sql`; the record
+of each fix: `docs/KNOWN_ISSUES_REGISTRY_LOG.md`; effect on results: CHANGELOG.md.
 
 Current data checks (20 October 2026): `python -m capri_mod.data.validate_data capri_data` gives 12 pass, 1 warning
 (a stale row count in MANIFEST.json for `fert_side_effects.csv`), 0 fail; `python tools/check/verify_schema.py`;

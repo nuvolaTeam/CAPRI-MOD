@@ -37,7 +37,7 @@ def _edit(root, rel, fn):
 
 def test_each_kind_of_violation_is_found_with_its_line(tmp_path):
     root = _copy(tmp_path)
-    assert V.validate(root, verbose=False) == []
+    assert set(V.validate(root, verbose=False)) == set(V.validate(ROOT, verbose=False))   # the copy is the repository
     acts, comms = "capri_data/schema/codes/model_activities.csv", "capri_data/schema/codes/model_commodities.csv"
     units = "capri_data/shared/regional_units.csv"
     # a duplicate key: line 2 repeated at the end
@@ -55,14 +55,15 @@ def test_each_kind_of_violation_is_found_with_its_line(tmp_path):
 
 def test_a_wrong_header_and_a_wrong_type_are_found(tmp_path):
     root = _copy(tmp_path)
+    base = V.validate(root, verbose=False)                 # the repository's own violations, if any, left aside
     sql = root / "capri_data" / "schema" / "99_test.sql"
     (root / "t.csv").write_text("key,value\nA,1.5\nB,x\nC,\n")
     sql.write_text("-- file: t.csv\nCREATE TABLE t (key VARCHAR PRIMARY KEY, value DOUBLE NOT NULL CHECK (value >= 0));\n")
-    found = V.validate(root, verbose=False)
+    found = [x for x in V.validate(root, verbose=False) if x not in base]
     assert [(w, k) for w, k, _ in found] == [("t.csv", "types"), ("t.csv", "not null")]
     assert "line 3: 'x'" in found[0][2] and "[4]" in found[1][2]
     (root / "t.csv").write_text("value,key\n1,A\n")
-    assert [k for _, k, _ in V.validate(root, verbose=False)] == ["columns"]
+    assert [k for x in V.validate(root, verbose=False) if x not in base for _, k, _ in [x]] == ["columns"]
 
 
 def test_a_wide_file_is_checked_long(tmp_path):
@@ -79,3 +80,12 @@ def test_a_wide_file_is_checked_long(tmp_path):
     assert "XXXX" in found[(y, "refs")] and "not in model_activities" in found[(y, "refs")]
     rule = [m for (w, k), m in found.items() if k == "rule" and "unit declared" in w]
     assert rule and "('yields', 'SWHE', 'unit declared for an item not in the table')" in rule[0]
+
+
+@pytest.mark.parametrize("tool", ["make_provenance.py", "make_code_data.py", "make_schema_json.py"])
+def test_the_generated_declarations_are_up_to_date(tool):
+    """01_provenance.sql (from the pipeline's trace), 03_code_data.sql (the numbers in the model's code) and schema.json
+    (the declarations as JSON) are generated: each matches what its tool writes today."""
+    import subprocess
+    r = subprocess.run([sys.executable, str(ROOT / "tools" / "check" / tool), "--check"], capture_output=True, text=True)
+    assert r.returncode == 0, r.stdout[-2000:] + r.stderr[-2000:]

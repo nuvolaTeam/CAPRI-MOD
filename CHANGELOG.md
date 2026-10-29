@@ -7,7 +7,9 @@ elasticity sign error and the DE60 non-convergence had both been resolved long
 before anyone retired the note). Limitations should be re-measured, not
 inherited.
 
-Full provenance for every entry is in `capri_data/DATA_SOURCING_REGISTRY.json`.
+The provenance of every data file is in `capri_data/schema` (`01_provenance.sql`, generated from the pipeline's
+trace; `02_provenance_notes.sql`, checked notes); the record of the fixes is in `docs/KNOWN_ISSUES_REGISTRY_LOG.md`
+and `docs/KNOWN_ISSUES.md`.
 
 ---
 
@@ -20,7 +22,7 @@ Full provenance for every entry is in `capri_data/DATA_SOURCING_REGISTRY.json`.
 | Emission tax | CAPRI's ghgTax inside the supply models (Sprint 9i) | no CAPRI tax result in hand; the earlier post-solve MACC check against EcAMPA 2 was retired with the module |
 | Fertiliser | CAPRI `p_FertPerHa` | ~10% |
 | Feed | CAPRI's base rations and requirement rows (REQSE_) | rations chosen inside the regional models; no independent check (the monogastric calibration this row reported was removed with the feeding inside the models) |
-| CAP budget | Real EU CAP | €54.0bn vs ~€55–58bn |
+| CAP budget | Real EU CAP | €49.1bn (CAPRI's 2017 premiums per ha of UAAR x UAAR; fallow counted since K104, before €46.9bn) vs ~€55–58bn |
 | Nitrogen balance | CAPRI 2030 reference, item by item | EU items within 1–7 kg N/ha; regional correlation 0.92 |
 | Phosphate balance (P2O5) | CAPRI 2030 reference, item by item | with CAPRI's own levels the formulas give its items (within 1e-6; removal 0.02%); at the model's base data (not a solved 2030 run) EU items within 0.5 kg P2O5/ha (surplus 14.4 vs 13.9), regional surplus correlation 0.99 |
 | Water demand | Known EU irrigation geography | restored 27 October 2026 on CAPRI's units: 11.2 Mha irrigated (FSS), 32 km3 net requirement, 83% of it in ES, IT, EL, PT |

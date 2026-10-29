@@ -9,7 +9,8 @@ farm structure differ across Europe.
 
 This is how `yields.csv` was caught claiming REAL_CAPRI in the sourcing registry
 while 16 of its 40 columns were generated. Run it against the whole data tree
-after any extraction or merge, and cross-check the result against the registry.
+after any extraction or merge; the result is cross-checked against each file's
+provenance (capri_data/schema/01_provenance.sql).
 
 Usage
 -----
@@ -17,7 +18,6 @@ Usage
 """
 from __future__ import annotations
 
-import json
 import sys
 from pathlib import Path
 
@@ -83,32 +83,29 @@ def main() -> None:
           f"{n_logn} lognormal fallback(s) (CV in [{CV_LOW}, {CV_HIGH}]):\n")
     print(flagged.to_string(index=False))
 
-    # Cross-check against the sourcing registry: a flagged column inside a file
-    # the registry calls REAL is the failure mode that matters.
-    reg_path = data_dir / "DATA_SOURCING_REGISTRY.json"
-    if not reg_path.exists():
+    # Cross-check against the provenance (capri_data/schema/01_provenance.sql): a flagged column inside a file whose
+    # origin is CAPRI or its publication is the failure mode that matters (no file may hold generated values).
+    prov_path = data_dir / "schema" / "01_provenance.sql"
+    if not prov_path.exists():
         return
-    datasets = json.loads(reg_path.read_text(encoding="utf-8"))["datasets"]
+    import duckdb
+    con = duckdb.connect()
+    con.execute(prov_path.read_text(encoding="utf-8"))
+    nature = dict(con.execute("SELECT file, nature FROM provenance").fetchall())
     conflicts = []
     for _, r in flagged.iterrows():
-        entry = datasets.get(Path(r["file"]).name)
-        if not entry:
-            continue
-        nature = entry.get("nature", "")
-        if nature.startswith("REAL"):
-            conflicts.append(f'{r["file"]}:{r["column"]} labelled {nature}')
-        elif nature == "MIXED_BY_COLUMN":
-            declared = entry.get("column_nature", {}).get("SYNTHETIC_FALLBACK", [])
-            if r["column"] not in declared:
-                conflicts.append(
-                    f'{r["file"]}:{r["column"]} not declared synthetic')
+        rel = "capri_data/" + str(r["file"])          # audit() gives the path relative to data_dir
+        n = nature.get(rel, "")
+        if n in ("capri", "capri-publication", "mixed"):
+            conflicts.append(f'{r["file"]}:{r["column"]} in a file of origin {n}')
     print()
     if conflicts:
-        print("REGISTRY CONFLICTS — flagged but labelled real:")
+        print(f"{len(conflicts)} flagged columns in files built from CAPRI's data (a column constant across regions, or of "
+              "narrow spread, can be CAPRI's own value: each is a column to look at, not a finding):")
         for c in conflicts:
             print(f"  {c}")
     else:
-        print("No registry conflicts: every flagged column is declared synthetic.")
+        print("No provenance conflicts.")
 
 
 if __name__ == "__main__":

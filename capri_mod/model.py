@@ -933,8 +933,11 @@ class CAPRIModel:
                     elif _gp_ is not None:
                         _fl = (_step * _gp_.reindex(_step.index).fillna(0.0)) < 0
                         _wn = _wn.reindex(_step.index).fillna(self.PRICE_SIGNAL_RELAXATION)
-                        _wn = _wn.where(~_fl, (_wn * 0.5).clip(lower=0.1))
-                        _wn = _wn.where(_fl, (_wn * 1.25).clip(upper=self.PRICE_SIGNAL_RELAXATION))
+                        _stn = _settings()                     # the EU signal's adaptive step, same settings
+                        _wn = _wn.where(~_fl, (_wn * _stn.get("outer_loop.relax_step_down"))
+                                        .clip(lower=_stn.get("outer_loop.relax_floor")))
+                        _wn = _wn.where(_fl, (_wn * _stn.get("outer_loop.relax_step_up"))
+                                        .clip(upper=self.PRICE_SIGNAL_RELAXATION))
                     _wn_all[_rg] = _wn
                     self._sup_gprev[_rg] = _step
                     _s1 = _s0 + _wn.reindex(_step.index).fillna(self.PRICE_SIGNAL_RELAXATION) * _step

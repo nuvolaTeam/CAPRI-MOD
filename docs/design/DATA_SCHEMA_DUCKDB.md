@@ -98,7 +98,8 @@ Beyond CAPRI (for the project lead to note): range checks, and enforcement at lo
    product t/ha, prices EUR/t), not to the supply data's per-activity items, and the old `CAPRIunits.gdx` gives the
    activities' LEVL units only (crops 1000 ha, animals 1000 heads, hens and poultry million heads, OANI an index).
 2. `MANIFEST.json` and `INPUT_SCHEMA.json`: retired once their content is in the declarations; `verify_schema.py`'s
-   coverage count moves onto the declarations.
+   coverage count moves onto the declarations. **INPUT_SCHEMA.json done 29 October 2026** (see "Provenance, the numbers
+   in the code and the JSON catalogue" below); MANIFEST.json still to do.
 3. `DATA_SOURCING_REGISTRY.json` (276 entries): the 37 that name a file give their provenance to the table comments.
    The other 239 are not data declarations but a log of the project's checks and decisions: 143 closed (fixed,
    implemented, retired), 59 with another status (validations, diagnoses, settings, "comparison pending"), 37 without
@@ -110,7 +111,10 @@ Beyond CAPRI (for the project lead to note): range checks, and enforcement at lo
    capreg_extraction_outcome, _release_readiness and cattle_member_splits are verbatim in
    docs/KNOWN_ISSUES_REGISTRY_LOG.md (a file of its own, linked from KNOWN_ISSUES.md, because of its size), with the
    triage of the 71 entries not marked closed (new K92-K96; K91 corrected); code_embedded_data in
-   docs/design/PROXY_AUDIT.md; the registry keeps its 74 dataset entries.
+   docs/design/PROXY_AUDIT.md; the registry keeps its 74 dataset entries. **Retired 29 October 2026**: of its dataset
+   entries, the 18 that name a live file were checked against the code and the data; what still holds is in
+   `02_provenance_notes.sql`, the rest (most of it: coverage counts, synthetic columns and fixes of earlier states)
+   was dropped. The entries' text stays in git history.
 4. "No orphan rows": a row whose key is not in a code list (the foreign keys) and a table nothing reads (rule above).
 
 ## Order
@@ -121,3 +125,34 @@ Beyond CAPRI (for the project lead to note): range checks, and enforcement at lo
 4. The extracts under `sources/`, each declared with its CAPRI symbol.
 
 Each step: declarations, check, violations listed; the data unchanged.
+
+## Provenance, the numbers in the code and the JSON catalogue (29 October 2026, the project lead's request)
+
+The hand-kept JSON stores `DATA_SOURCING_REGISTRY.json` (per-dataset provenance), `INPUT_MANIFEST.json` (the declared
+inputs and the data held in code) and `INPUT_SCHEMA.json` (54 inputs with modules and known gaps) are replaced by
+tables of the declarations, two generated and two kept by hand:
+
+| File | Table | Kept | Content |
+|---|---|---|---|
+| `01_provenance.sql` | `provenance (file, nature, origins, builder, sources)` | generated: `tools/check/make_provenance.py` | every CSV's nature (capri, capri-publication, external, mixed, source-extract, declared, no-builder), from the pipeline's trace: the origins of the leaves its builder chain reads (CAPRI, JRC121368, Eurostat, FAO, EC, unsourced) and the files outside the repository it reads. Builders added after the last retrace (the CAPTRD sets and data, the code lists, ...) are listed in the script with their origin until a retrace takes them in. |
+| `02_provenance_notes.sql` | `provenance_notes (file, kind, n, note, evidence, checked)` | by hand | statements on a file's origin (kind `origin`) or a limitation a user should know (kind `gap`), each checked against the code and the data, with file:line evidence and the date |
+| `03_code_data.sql` | `code_data (file, scope, value, n, lines, excerpt)` | generated: `tools/check/make_code_data.py` | the numbers in the model's code that may be data: every number of a module- or class-level assignment but 0, 1, -1; every other number but small integers, 0.5, powers of ten, tolerances below 1e-5 and numbers in messages |
+| `04_code_data_status.sql` | `code_data_status (file, scope, value, status, action, source, note)` | by hand | where each number comes from (capri with the gms line, capri-data, literature, physical, numerical, capri-mod, technical, open) and what to do (keep, to-data, to-setting, register, check) |
+
+`schema.json` is generated from all the declarations (`tools/check/make_schema_json.py`): per table its file,
+columns, keys, references, checks, units, provenance, notes and the code that names the file (the builders from the
+trace; the model, checks and tests from a static scan of string literals, which misses names assembled otherwise).
+A test fails when a generated file is out of date. Rules: every CSV under `capri_data` is declared; every declared
+file has its provenance and no provenance row is left without a declared file; every data file has a known origin
+; a file without a builder has a checked note
+on its origin; every number in the code has its classification and no classification is left without its number.
+
+Two source files in GAMS text form, `sources/water/cropwat.csv` and `irrishare.csv`, were CSV only by name; they are
+`.gms` now (the builder's output is unchanged, byte for byte).
+
+The nine validation files without a builder were settled by the project lead (29 October 2026, KNOWN_ISSUES K103):
+the seven read by no code removed, with three unread source extracts (their builders no longer write them); the two
+read by the baseline check given a builder (tools/build/build_capri_eu27_levels.py, the 2030 file reproduced exactly,
+the 2017 file at full precision). `validate_data.py --db FILE` keeps the database it builds (a copy for querying,
+rebuilt from the CSVs; not in git). Still to move: `MANIFEST.json`, `DATA_CATALOG.json`, `SYMBOL_EXTRACTION_MAP.json`, `FITNESS_FOR_USE.json` and `DATA_DICTIONARY.md`
+still to move.

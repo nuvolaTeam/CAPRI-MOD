@@ -9,7 +9,7 @@
   "not_supported": "the model cannot answer this; the number is an artefact of asking"
  },
  "_generated": "2026-10-29 (market, mitigation, gross margin and the Irish entry brought up to date in the registry migration, KNOWN_ISSUES K96; others as of 2026-10-27 and 2026-09-29)",
- "_source_of_truth": "README.md section 9 and capri_data/DATA_SOURCING_REGISTRY.json",
+ "_source_of_truth": "README.md section 9 and capri_data/schema (01_provenance.sql, 02_provenance_notes.sql)",
  "outputs": {
   "supply.activities": {
    "status": "validated",

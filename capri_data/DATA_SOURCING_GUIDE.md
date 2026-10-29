@@ -25,21 +25,21 @@ What is still not CAPRI's data, and where it acts: docs/SYNTHETIC_DATA_AUDIT.md,
 
 Known inconsistencies in the metadata (the data themselves are not affected):
 
-- `DATA_SOURCING_REGISTRY.json` still describes `trade_flows.csv` as FAO 2021 and `world_prices.csv` as "CAPRI SUA,
-  partially resolved", while MANIFEST.json records `shared/trade_flows_2017.csv` as recalibrated from CAPRI's
-  capmod `res_0_1717` and `world_prices.csv` as CAPRI's FAO_agg PMRK; its `code_embedded_data` section names a
-  biofuel module that no longer exists.
 - MANIFEST.json still gives `base_areas.csv` and `yields.csv` the source "COCO" and shape notes from before Sprint 9s.
 
 ## 2. How the files fit together
 
-- **`DATA_SOURCING_REGISTRY.json`**: per dataset, its nature (REAL_CAPRI, REAL_FAO, MIXED_BY_COLUMN, ...), vintage,
-  source and the fixes made; also a log of findings. `tools/check/check_doc_coverage.py` checks that its significant
-  entries are mentioned in README.md, CHANGELOG.md or docs/DATA_FIXES.md.
+- **`schema/`**: the declaration of every CSV in DuckDB SQL, enforced by `tools/check/validate_data.py`; each file's
+  provenance (`01_provenance.sql`, generated from the pipeline's trace by `tools/check/make_provenance.py`), the
+  statements on its origin and gaps checked against the code and the data (`02_provenance_notes.sql`), the numbers
+  held in the model's code and their classification (`03_code_data.sql`, `04_code_data_status.sql`), and
+  `schema.json`, the same catalogue as JSON (`tools/check/make_schema_json.py`). These replaced
+  `DATA_SOURCING_REGISTRY.json`, `INPUT_SCHEMA.json` and `INPUT_MANIFEST.json` (29 October 2026; the registry's log of
+  findings is in docs/KNOWN_ISSUES_REGISTRY_LOG.md).
 - **`MANIFEST.json`**: every live file's source, units, domain and expected shape; the validator compares the files
   with it.
-- **`INPUT_SCHEMA.json`, `INPUT_MANIFEST.json`**: the declared inputs and where each must come from
-  (`tools/check/verify_schema.py`; `test_schema_declares_every_input_and_all_files_exist`).
+- **Coverage**: `tools/check/verify_schema.py` counts the non-zero cells of the files the model reads by origin;
+  `test_schema_declares_every_input_and_all_files_exist` and `test_schema_coverage_has_not_regressed` hold it.
 - **`FITNESS_FOR_USE.json`**: how far each output can be trusted (`capri_mod/fitness.py`).
 - **The builders** (`tools/build_*.py`): each names its CAPRI source in its docstring. They need CAPRI's result
   dumps and code, which are not shipped; the data as shipped is what the model and the tests use.

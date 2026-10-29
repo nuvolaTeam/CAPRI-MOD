@@ -28,14 +28,13 @@ import numpy as np
 import pandas as pd
 from dataclasses import dataclass, field
 from typing import Dict, Optional, List, Tuple
-import json
 import multiprocessing
 import os
 import warnings
 from pathlib import Path
 
 from capri_mod.supply.capri_pmp import (
-    ELAS_CAP, share_term, ARABLE_ACTIVITIES, EPRD_TO_GRP,
+    ELAS_CAP, share_term, ARABLE_ACTIVITIES,
 )
 from capri_mod.params import param, param_table
 from capri_mod.settings import setting, tri_state, current as _settings
@@ -315,8 +314,6 @@ class PMPCalibrator:
 
     def __init__(self, activities: List[str], supply_elasticities: pd.Series,
                  share_terms: Optional[pd.Series] = None,
-                 cross_group_terms: Optional[dict] = None,
-                 cross_price_elas: Optional[dict] = None,
                  capri_g: Optional[dict] = None):
         self.activities = activities
         # CAPRI's 2030 PMP matrix of the crops (K61), {(act_i, act_j): g}: replaces the elasticity-calibrated block
@@ -326,11 +323,6 @@ class PMPCalibrator:
         self.supply_elasticities = supply_elasticities
         # CAPRI's 1 - 0.2*sqrt(share of arable) curvature scaler; None -> 1.0
         self.share_terms = share_terms
-        # CAPRI p_pmpQuadPact cross-group terms, {(grp1, grp2): value}
-        self.cross_group_terms = cross_group_terms or {}
-        # PELA activity-level cross-price elasticities, {(act_i, act_j): value}
-        self.cross_price_elas = cross_price_elas or {}
-        self.n_real_cross_terms = 0
 
     def calibrate(
         self,
@@ -435,73 +427,17 @@ class PMPCalibrator:
         # Symmetric positive semi-definite Q (diagonal dominant)
         Q = np.diag(Qdiag)
 
-        # Off-diagonal terms for substitution effects: CAPRI's own cross-group terms (p_pmpQuadPact) and PELA
-        # cross-price elasticities, capped at rho_base x sqrt(Q_ii Q_jj)
-        rho_base = 0.05
-        pact = self.cross_group_terms          # {(grp1, grp2): value} or {}
-        n_real = 0
-        # CAPRI's structure (supply_model.gms QUADRA_ with GRPLEVL_, p_useCropSpecificQMatrix 0): cross terms only
-        # through the crop groups' levels (EPRD_TO_GRP: CERE, CER2, OILS, OARA, FARA), so only between two crops that
-        # are both in a group; "for fruits & vegetables, permanent crops, grassland and the animal sectors, only
-        # diagonal terms" (CAPRI documentation, ch. 5). Before 21 October 2026 every other pair carried a uniform term
-        # (0.05 / (n - 1) x sqrt(Q_ii Q_jj)) and PELA cross terms outside the groups (all 312 permanent-crop pairs of
-        # ES61): capri-mod's, not CAPRI's (removed 27 October 2026). The linear terms are computed after
-        # (f = r - Q x0 - lambda), so the base still calibrates.
+        # Off-diagonal terms: CAPRI's structure (supply_model.gms QUADRA_ with GRPLEVL_, p_useCropSpecificQMatrix 0) has
+        # cross terms only through the crop groups' levels (EPRD_TO_GRP: CERE, CER2, OILS, OARA, FARA); "for fruits &
+        # vegetables, permanent crops, grassland and the animal sectors, only diagonal terms" (CAPRI documentation,
+        # ch. 5). They come with CAPRI's own PMP terms (capri_g, below: pmp_source capri2030 or recipe). A crop without
+        # CAPRI terms in the region has none in CAPRI's QUADRA_ either, so its row here is diagonal. Until 29 October
+        # 2026 such crops (and every crop when pmp_capri_parts left out "crops") could take a PELA cross-price
+        # elasticity or a scaled p_pmpQuadPact term capped at 0.05 x sqrt(Q_ii Q_jj): capri-mod's, not CAPRI's
+        # (PROXY_AUDIT S065; KNOWN_ISSUES K105), removed with the two inputs it read.
         # CROSS_TERMS: "capri" (default) or "none" (diagonal only: CAPRI's decomposition experiment, 2008
-        # documentation sect. 7.3, tools/check/pmp_cross_term_check.py)
+        # documentation sect. 7.3, tools/check/pmp_cross_term_check.py): with "none" CAPRI's terms enter diagonal only.
         mode = str(getattr(type(self), "CROSS_TERMS", "capri"))
-        # With CAPRI's own PMP terms (pmp_source capri2030 or recipe, below) the covered crops take CAPRI's matrix,
-        # cross terms included, and a crop CAPRI has no terms for in the region has none in CAPRI's QUADRA_ either:
-        # no cross terms are built here. Until 23 October 2026 such crops of one group kept a PELA cross elasticity or
-        # a scaled p_pmpQuadPact term capped at 0.05 (5 pairs in DEA5, EL65, ITH4, PT16 and PT17; PROXY_AUDIT S065).
-        skip_cross = bool(self.capri_g)
-        for i in range(n):
-            if mode == "none" or skip_cross:
-                break
-            gi = EPRD_TO_GRP.get(self.activities[i])
-            for j in range(i + 1, n):
-                gj = EPRD_TO_GRP.get(self.activities[j])
-                if not (gi and gj):
-                    continue
-                q_ij = None
-                # Activity-level cross-price elasticities (PELA off-diagonal)
-                # take precedence over the group-level p_pmpQuadPact: they are
-                # estimated per crop pair rather than per group pair, and 71%
-                # are negative, i.e. genuine substitutes.
-                xp = self.cross_price_elas
-                if xp:
-                    e = xp.get((self.activities[i], self.activities[j]))
-                    if e is None:
-                        e = xp.get((self.activities[j], self.activities[i]))
-                    if e is not None and np.isfinite(e) and abs(e) > 1e-9:
-                        scale = np.sqrt(max(Q[i, i], 0.0) * max(Q[j, j], 0.0))
-                        q_ij = np.sign(e) * min(abs(e), rho_base) * scale
-                        n_real += 1
-                if q_ij is None and pact and gi and gj:
-                    v = pact.get((gi, gj), pact.get((gj, gi)))
-                    if v is not None and np.isfinite(v):
-                        # CAPRI's term is at group level; share it over the pairs
-                        # of activities that realise it, and scale to the local
-                        # curvature so the units match this Q.
-                        scale = np.sqrt(max(Q[i, i], 0.0) * max(Q[j, j], 0.0))
-                        q_ij = np.sign(v) * min(abs(v) / 1000.0, rho_base) * scale
-                        n_real += 1
-                if q_ij is None:
-                    continue                       # no group term for the pair: none in CAPRI's QUADRA_ either
-                Q[i, j] = q_ij
-                Q[j, i] = q_ij
-        self.n_real_cross_terms = n_real
-
-        # Safety: enforce strict diagonal dominance (guards against any residual
-        # instability / numerical blow-up for small-acreage activities).
-        for i in range(n):
-            off = np.sum(np.abs(Q[i, :])) - abs(Q[i, i])
-            if off > 0.5 * abs(Q[i, i]):
-                scale = (0.5 * abs(Q[i, i])) / off
-                for j in range(n):
-                    if j != i:
-                        Q[i, j] *= scale
-                        Q[j, i] *= scale
 
         # CAPRI's own PMP matrix of the crops at its 2030 baseline calibration (pmp_source "capri2030", K61): technology
         # terms and the crop groups' terms on the groups' levels (QUADRA_ / GRPLEVL_), collapsed to the model's activities
@@ -518,6 +454,8 @@ class PMPCalibrator:
                 Q[:, cov] = 0.0
                 for i in cov:
                     for j in cov:
+                        if mode == "none" and i != j:
+                            continue
                         g = self.capri_g.get((self.activities[i], self.activities[j]))
                         if g is not None:
                             Q[i, j] = g / np.sqrt(x0[i] * x0[j])
@@ -2148,9 +2086,7 @@ class RegionalSupplyModel:
         return y
 
     def __init__(self, region_data: RegionData, supply_elasticities: pd.Series,
-                 use_share_term: bool = True,
-                 cross_group_terms: Optional[dict] = None,
-                 cross_price_elas: Optional[dict] = None):
+                 use_share_term: bool = True):
         self.data = region_data
         self.rid  = region_data.region_id
         self.acts = ALL_ACTIVITIES
@@ -2209,8 +2145,6 @@ class RegionalSupplyModel:
         self._gross_rev = gross_rev          # the curvature's revenue basis of the activities CAPRI's terms do not cover
 
         calibrator = PMPCalibrator(self.acts, supply_elasticities, share_terms=st,
-                                   cross_group_terms=cross_group_terms,
-                                   cross_price_elas=cross_price_elas,
                                    capri_g=getattr(self.data, "pmp_capri", None))
         self.Q, self.f = calibrator.calibrate(
             base_levels=self._base_levels(),
@@ -5600,33 +5534,6 @@ class SupplyModule:
         # resolved through the NUTS crosswalk, which is why it reaches regions the
         # former misses. Everything not covered falls back to the EU-wide literature
         # defaults, and every cell is recorded so no default is silent.
-        # PELA activity-level cross-price elasticities, keyed by model region.
-        self.cross_price = {}
-        try:
-            xp = Path(data.get("_data_dir", "capri_data")) / \
-                "sources/estnlp/pela_cross_by_region.json"
-            if xp.exists():
-                raw = json.loads(xp.read_text())
-                self.cross_price = {
-                    r: {tuple(k.split("|")): v for k, v in d.items()}
-                    for r, d in raw.items()}
-        except Exception as exc:                          # pragma: no cover
-            warnings.warn(f"PELA cross-price elasticities unavailable ({exc})")
-
-        # CAPRI cross-group PMP terms (Route B), keyed by model region.
-        self.cross_group = {}
-        try:
-            pact_path = Path(data.get("_data_dir", "capri_data")) / \
-                "sources/capreg/pmp_quad_pact.csv"
-            if pact_path.exists():
-                pv = read_input(pact_path)
-                for r, g in pv.groupby("model_region"):
-                    self.cross_group[r] = {
-                        (a, b): v for a, b, v in
-                        zip(g.group1, g.group2, g.value)}
-        except Exception as exc:                          # pragma: no cover
-            warnings.warn(f"CAPRI cross-group terms unavailable ({exc})")
-
         from capri_mod.supply.capri_pmp import build_elasticity_table
         self.elasticity_provenance = pd.DataFrame()
         self.elasticity_summary: dict = {}
@@ -5747,10 +5654,7 @@ class SupplyModule:
                     and region in self.regional_elasticities.index):
                 row = self.regional_elasticities.loc[region]
                 eps = row.reindex(ALL_ACTIVITIES).fillna(eps)
-            self._models[region] = RegionalSupplyModel(
-                rd, eps, use_share_term=True,
-                cross_group_terms=self.cross_group.get(region),
-                cross_price_elas=self.cross_price.get(region))
+            self._models[region] = RegionalSupplyModel(rd, eps, use_share_term=True)
             self._models[region]._genet_key = getattr(self, "genetics_key", None)
         return self._models[region]
 

@@ -161,31 +161,25 @@ def validate_data(data_dir="capri_data") -> ValidationReport:
     except Exception as e:
         rep.add("trade flows loadable", "WARN", str(e)[:40])
 
-    # --- 8. Synthetic-data detection (from the sourcing registry) ---
-    reg_path = D / "DATA_SOURCING_REGISTRY.json"
-    if reg_path.exists():
-        reg = json.load(open(reg_path))
-        synthetic_live = []
-        for fn, meta in reg.get("datasets", {}).items():
-            if meta.get("nature") == "SYNTHETIC_FALLBACK":
-                # is the real file actually absent (so the fallback fires)?
-                if not resolve_data_file(D, fn).exists():
-                    synthetic_live.append(fn)
-        if synthetic_live:
-            rep.add("no live synthetic data", "WARN",
-                    f"{len(synthetic_live)} dataset(s) using synthetic fallback: "
-                    f"{', '.join(synthetic_live)} — see registry for real source")
-        else:
-            rep.add("no live synthetic data", "PASS")
-        # report the data-nature breakdown
-        from collections import Counter
-        nat = Counter(m.get("nature") for m in reg["datasets"].values())
-        rep.add("data provenance known", "PASS",
-                f"{nat.get('REAL_CAPRI',0)} CAPRI, {nat.get('REAL_FAO',0)} FAO, "
-                f"{nat.get('SYNTHETIC_FALLBACK',0)} synthetic")
+    # --- 8. Provenance: every data file's origin (capri_data/schema/01_provenance.sql, from the pipeline's trace) ---
+    prov = D / "schema" / "01_provenance.sql"
+    if prov.exists():
+        try:
+            import duckdb
+            con = duckdb.connect()
+            con.execute(prov.read_text(encoding="utf-8"))
+            nat = dict(con.execute("SELECT nature, count(*) FROM provenance GROUP BY 1").fetchall())
+            unknown = [r[0] for r in con.execute("SELECT file FROM provenance WHERE nature = 'no-builder' "
+                                                 "ORDER BY 1").fetchall()]
+            detail = ", ".join(f"{v} {k}" for k, v in sorted(nat.items()))
+            if unknown:
+                rep.add("data provenance known", "WARN", f"{detail}; without a known origin: {', '.join(unknown)}")
+            else:
+                rep.add("data provenance known", "PASS", detail)
+        except ImportError:
+            rep.add("data provenance known", "WARN", "duckdb not installed: 01_provenance.sql not read")
     else:
-        rep.add("sourcing registry present", "WARN",
-                "DATA_SOURCING_REGISTRY.json missing")
+        rep.add("data provenance known", "WARN", "capri_data/schema/01_provenance.sql missing")
 
     # --- 8. Input consistency: gross margins before calibration ---
     # This is the gate that catches mismatched input sources. PMP calibration
@@ -242,19 +236,9 @@ def _check_margins(D, rep):
     try:
         y = read_input(resolve_data_file(D, "yields.csv"), index_col=0)
         c = read_input(resolve_data_file(D, "variable_costs.csv"), index_col=0)
-        # Apply the same greenhouse-artifact cost cap the supply loader applies
-        # (load_variable_costs_regional), so the margin check evaluates the costs
-        # the model actually uses rather than the raw file's greenhouse values
-        # misapplied to field-scale specialty crops.
-        if c.shape[0] > 50:
-            _SPECIALTY = ["OVEG", "TOMA", "APPL", "OFRU", "CITR", "OLIV",
-                          "PULS", "TAGR", "TWIN", "TABO"]
-            for _crop in _SPECIALTY:
-                if _crop in c.columns:
-                    _pos = c[_crop][c[_crop] > 0]
-                    if len(_pos):
-                        _cap = 2.0 * _pos.median()
-                        c.loc[c[_crop] > _cap, _crop] = _cap
+        # The costs as the model reads them: the loader's cap on specialty-crop costs (2 x the median, the
+        # "greenhouse artefact") was dropped when the costs were rebuilt from CAPRI's TOIN, and this check's copy of
+        # it was removed on 29 October 2026 (KNOWN_ISSUES K105), so the check sees the costs the model uses.
         areas = read_input(resolve_data_file(D, "base_areas.csv"), index_col=0)
         pr = read_input(resolve_data_file(D, "producer_prices.csv"), index_col=0)
         price = pr[pr.columns[0]]

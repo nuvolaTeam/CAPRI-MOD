@@ -1,5 +1,5 @@
 """
-Ingest world prices and bilateral trade flows from the capmod base-year result.
+Ingest the bilateral trade flows from the capmod base-year result.
 
 Source
 ------
@@ -30,16 +30,9 @@ have been worse. This is CAPRI's own calibrated matrix at exactly the right year
 
 On world prices
 ---------------
-There is no single world price in dataOut. `Fob` is dimensioned by importer,
-because it is the free-on-board price that importer faces on its own import
-bundle -- barley is 281.0 for Norway and 132.5 for the UK in the same year, which
-reflects different origins, not a contradiction.
-
-A single reference price therefore has to be constructed, and the choice is a
-judgement rather than a lookup. The import-quantity-weighted mean across
-importers is used here: it answers "what did a tonne of this commodity cost on
-the world market in 2017", which is what the model's world_prices.csv means.
-The unweighted mean is also reported so the two can be compared.
+There is no single world price in dataOut: `Fob` is dimensioned by importer. Until 29 October 2026 this tool built
+an import-quantity-weighted reference price from it (capmod_world_prices_2017.csv); nothing read that file (the
+model's world prices are CAPRI's FAO_agg PMRK) and it was removed (KNOWN_ISSUES K103).
 
 Usage
 -----
@@ -52,7 +45,6 @@ import json
 import re
 from pathlib import Path
 
-import numpy as np
 import pandas as pd
 
 import functools as _ft
@@ -98,45 +90,15 @@ def main() -> None:
     print(f"\nbilateral trade : {len(bil):,} flows, "
           f"{bil.importer.nunique()} importers x {bil.exporter.nunique()} exporters")
 
-    # ---- world reference price -----------------------------------------
-    fob = df[(df.item == "Fob") & (df.exporter == WORLD)]
-    qty = df[(df.item == "ImportQ") & (df.exporter == WORLD)]
-    merged = fob.merge(qty, on=["importer", "commodity"],
-                       suffixes=("_p", "_q"))
-    merged = merged[(merged.value_p > 0) & (merged.value_q > 0)]
-
-    weighted = merged.groupby("commodity").apply(
-        lambda g: np.average(g.value_p, weights=g.value_q), include_groups=False)
-    unweighted = merged.groupby("commodity").value_p.mean()
-    prices = pd.DataFrame({"world_price_eur_t": weighted,
-                           "unweighted_mean": unweighted,
-                           "n_importers": merged.groupby("commodity").size()})
-    prices.to_csv(out / "capmod_world_prices_2017.csv")
-    print(f"world prices    : {len(prices)} commodities")
-
-    # ---- comparison with the incumbent ----------------------------------
-    cur_path = args.data_dir / "2017/market/world_prices.csv"
-    if cur_path.exists():
-        cur = _read_csv(cur_path, index_col=0)
-        col = cur.columns[0]
-        common = [c for c in prices.index if c in cur.index]
-        cmp_ = pd.DataFrame({
-            "model": cur.loc[common, col],
-            "capmod": prices.loc[common, "world_price_eur_t"]})
-        cmp_["dev_pct"] = (cmp_.model - cmp_.capmod).abs() / cmp_.capmod * 100
-        print(f"\nagainst the current world_prices.csv, {len(common)} commodities:")
-        print(f"  median |deviation| : {cmp_.dev_pct.median():.1f}%")
-        print(cmp_.sort_values("dev_pct", ascending=False).head(10).round(1).to_string())
+    # (an import-weighted world reference price from Fob was written to capmod_world_prices_2017.csv until 29 October
+    # 2026; nothing read it - the model's world prices are CAPRI's FAO_agg PMRK, tools/build/build_world_prices.py -
+    # and it was removed: KNOWN_ISSUES K103)
 
     (args.data_dir / "validation" / "capmod_market_extraction.json").write_text(
         json.dumps({
             "source": "res_0_1717cap_after_2014_cal_from_data_caldefaulta.gdx",
             "year": YEAR,
             "trade_flows": int(len(bil)),
-            "world_prices": int(len(prices)),
-            "note": ("Fob is dimensioned by importer, so a single world price is "
-                     "constructed as the import-weighted mean. The unweighted "
-                     "mean is retained alongside it for comparison."),
         }, indent=1))
     print(f"\nwritten to {out}")
 

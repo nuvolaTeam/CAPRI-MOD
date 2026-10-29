@@ -25,8 +25,10 @@ capri_data/
 ├── sources/               the extracts the builders read (CAPRI result rows, MITERRA tables, literature review);
 │                          not read by the model
 ├── archive/               superseded files, not read by the model
-├── MANIFEST.json, INPUT_SCHEMA.json, INPUT_MANIFEST.json   expected files, shapes, declared inputs
-├── DATA_SOURCING_REGISTRY.json                             provenance of each dataset and the fixes made
+├── schema/                the declarations of every CSV (DuckDB SQL: types, keys, code lists, ranges, units), each
+│                          file's provenance and checked notes, the numbers held in the model's code, and
+│                          schema.json (the same as JSON, generated)
+├── MANIFEST.json                                           expected files and shapes
 ├── FITNESS_FOR_USE.json                                    how far each output can be trusted (capri_mod/fitness.py)
 ├── DATA_CATALOG.json, SYMBOL_EXTRACTION_MAP.json           catalogue of files and CAPRI symbols
 └── *.md                                                    this file and the guides below

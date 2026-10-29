@@ -1116,102 +1116,81 @@ def test_elasticity_provenance_is_complete():
 
 def test_schema_declares_every_input_and_all_files_exist():
     """
-    The declarative schema (INPUT_SCHEMA.json) is the single source of truth for
-    what the model loads and where each input comes from. This gate asserts the
-    data on disk matches the declaration: every declared file must exist and be
-    readable.
+    The data declarations (capri_data/schema/*.sql, as JSON in schema.json, generated) name every data file with its
+    provenance (01_provenance.sql, from the pipeline's trace). Every declared file must exist and be readable, and
+    every file the model names in its code must be declared with a known origin.
 
-    This is the check that would have caught the silent-drop bugs in the
-    project's history -- maize yields, grassland, the livestock PMP terms -- each
-    of which left a declared input under-covered while the file still looked
-    fine. It fails loudly the moment declaration and reality diverge.
+    This is the check that would have caught the silent-drop bugs in the project's history -- maize yields,
+    grassland, the livestock PMP terms -- each of which left a declared input under-covered while the file still
+    looked fine. (Until 29 October 2026 it read the hand-kept INPUT_SCHEMA.json, now retired.)
     """
     import json
     import pandas as pd
 
     root = _repo_root()
-    schema = json.loads((root / "capri_data/INPUT_SCHEMA.json").read_text())
-    inputs = schema["inputs"]
-    assert len(inputs) >= 20, "schema unexpectedly small"
+    tables = json.loads((root / "capri_data/schema/schema.json").read_text())["tables"]
+    assert len(tables) >= 300, "declarations unexpectedly few"
 
-    missing = []
-    unreadable = []
-    for name, spec in inputs.items():
-        f = root / "capri_data" / spec["file"]
+    missing, unreadable, unknown = [], [], []
+    for name, t in tables.items():
+        f = root / t["file"]
         if not f.exists():
-            missing.append((name, spec["file"]))
+            missing.append((name, t["file"]))
             continue
-        # provenance must be structured, so a later source swap is a field edit
-        src = spec["source"]
-        for field in ("source_type", "source_ref", "vintage", "confidence"):
-            assert field in src, f"{name} missing provenance field {field}"
-        if str(f).endswith(".csv"):
-            try:
-                pd.read_csv(f, index_col=0, nrows=5)
-            except Exception as exc:            # pragma: no cover
-                unreadable.append((name, str(exc)[:80]))
+        if t["read_by"]["model"] and (t["provenance"] or {}).get("nature") in (None, "no-builder"):
+            unknown.append(t["file"])
+        try:
+            pd.read_csv(f, index_col=0, nrows=5)
+        except Exception as exc:            # pragma: no cover
+            unreadable.append((name, str(exc)[:80]))
 
     assert not missing, f"declared files absent: {missing}"
     assert not unreadable, f"declared files unreadable: {unreadable}"
+    assert not unknown, f"files the model reads without a known origin: {unknown}"
 
 
 def test_schema_coverage_has_not_regressed():
     """
-    Guards the honest per-cell coverage figure. Real-CAPRI-sourced cells must
-    stay above a floor; a drop that isn't explained by a schema change is a
-    silent-drop regression of exactly the kind this project kept hitting.
-
-    The floor is set well below the current 99% so ordinary data edits don't
-    trip it, but a whole input quietly emptying (the failure mode of the maize
-    and grassland bugs) would.
+    Guards the per-cell coverage of the files the model reads (schema.json read_by.model: named in the model's code).
+    Non-zero cells in files of CAPRI origin (provenance nature capri or capri-publication) must stay above a floor;
+    a drop that isn't explained by a declaration change is a silent-drop regression of exactly the kind this project
+    kept hitting. And a single CAPRI file read by the model that is almost entirely zero is a regression whatever
+    the aggregate.
     """
     import json
     import numpy as np
     import pandas as pd
 
     root = _repo_root()
-    schema = json.loads((root / "capri_data/INPUT_SCHEMA.json").read_text())
-    real_types = {"CAPRI_GDX", "CAPRI_SOURCE"}
+    tables = json.loads((root / "capri_data/schema/schema.json").read_text())["tables"]
+    real_natures = {"capri", "capri-publication"}
 
     real = total = 0
     per_input = {}
-    for name, spec in schema["inputs"].items():
-        f = root / "capri_data" / spec["file"]
-        if not (f.exists() and str(f).endswith(".csv")):
+    for name, t in tables.items():
+        if not t["read_by"]["model"]:
             continue
-        if spec.get("alternative_to"):
-            # an optional alternative to another input (e.g. the recipe PMP terms, pmp_recipe_<Y>, alternative to
-            # CAPRI's exported terms): not read by the default run, so not part of the default inputs' coverage
-            continue
+        f = root / t["file"]
         try:
-            num = pd.read_csv(f, index_col=0).select_dtypes(include=[np.number])
+            num = pd.read_csv(f, index_col=0, float_precision="round_trip").select_dtypes(include=[np.number])
         except Exception:
             continue
         live = int(num.notna().sum().sum())
         nz = int(((num != 0) & num.notna()).sum().sum())
         total += nz
-        if spec["source"]["source_type"] in real_types:
+        if (t["provenance"] or {}).get("nature") in real_natures:
             real += nz
-        # per-input fill ratio: a CAPRI-sourced input that empties out is the
-        # silent-drop failure mode (maize, grassland, livestock terms), and the
-        # aggregate floor is too coarse to see one input among twenty go dark.
-        if live > 0:
-            per_input[name] = nz / live
+            if live > 0:
+                per_input[t["file"]] = nz / live
 
     assert total > 0
     frac = real / total
     assert frac >= 0.80, (
-        f"real-CAPRI cell coverage {frac:.1%} below floor 80% -- "
+        f"CAPRI-origin cell coverage {frac:.1%} below floor 80% -- "
         "a declared input may have silently emptied")
-
-    # any single CAPRI-sourced numeric input that is almost entirely zero is a
-    # regression, regardless of the aggregate. 5% floor tolerates genuinely
-    # sparse inputs (e.g. specialty crops) without tolerating a dead file.
-    emptied = {n: r for n, r in per_input.items()
-               if r < 0.05
-               and schema["inputs"][n]["source"]["source_type"] in real_types}
+    emptied = {n: r for n, r in per_input.items() if r < 0.05}
     assert not emptied, (
-        f"CAPRI-sourced inputs nearly empty (silent-drop?): "
+        f"CAPRI-origin inputs nearly empty (silent-drop?): "
         f"{ {n: f'{r:.1%}' for n, r in emptied.items()} }")
 
 

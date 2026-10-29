@@ -13,10 +13,19 @@ SELECT c.table_name, c.column_name, 'no unit declared' AS what
 FROM information_schema.columns c
 WHERE c.data_type IN ('DOUBLE', 'FLOAT', 'DECIMAL', 'INTEGER', 'BIGINT')
   AND c.table_name NOT IN (SELECT tbl FROM itemised)
-  AND c.table_name <> 'value_units' AND NOT starts_with(c.table_name, '_')
+  AND c.table_name IN (SELECT tbl FROM _declared)          -- the data tables (not value_units, provenance, ...)
   AND NOT EXISTS (SELECT 1 FROM value_units v WHERE v.tbl = c.table_name AND v.item = c.column_name)
 UNION ALL
 SELECT tbl, item, 'unit not in the catalogue' FROM value_units WHERE unit IS NOT NULL AND unit NOT IN (SELECT code FROM units);
 
 -- rule: every table named in value_units is declared
 SELECT DISTINCT tbl FROM value_units WHERE tbl NOT IN (SELECT table_name FROM information_schema.tables);
+
+-- rule: every declared file has its provenance (01_provenance.sql: run tools/check/make_provenance.py)
+SELECT file FROM _declared WHERE file NOT IN (SELECT file FROM provenance);
+
+-- rule: no provenance row for a file that is not declared (the file was removed or renamed: run make_provenance.py)
+SELECT file FROM provenance WHERE file NOT IN (SELECT file FROM _declared);
+
+-- rule: every data file has a known origin: a traced builder, a source folder, a declared table or a checked note
+SELECT file, nature FROM provenance WHERE nature = 'no-builder';

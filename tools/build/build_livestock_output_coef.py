@@ -17,8 +17,8 @@ instead: ``COMI`` (cow milk), ``BEEF``, ``PORK``, ``POUM`` (poultry meat),
 (``YCAM``, ``YCAF``, ``YPIG`` …) are deliberately excluded: they are produced by
 one activity and consumed by another, so counting them would double-count.
 
-Validation (recorded in DATA_SOURCING_REGISTRY)
-------------------------------------------------
+Validation (recorded when the builder was written)
+-----------------------------------------------
 Summing LEVL x final-product coefficient over CAPRI's *elementary* activities
 reproduces CAPRI's own aggregate rows exactly, and the EU27 totals match real
 2017 EU production: milk 0.95, beef 0.94, pork 1.01, poultry 0.98, eggs 1.08,

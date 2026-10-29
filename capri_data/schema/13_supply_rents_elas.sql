@@ -51,7 +51,7 @@ CREATE TABLE pmp_own_price_elasticities (
     own_price_elas DOUBLE NOT NULL CHECK (own_price_elas > 0),
     PRIMARY KEY (region, crop)
 );
-COMMENT ON TABLE pmp_own_price_elasticities IS 'CAPRI''s estimated own-price elasticities (PELA) per CAPRI region and CAPRI activity, raw (bounded on load, capri_pmp.dampen_elasticity); the elasticity-calibrated PMP''s PMP_CAPRI source (docs/PMP_ELASTICITY_WIRING.md), not the default PMP (CAPRI''s 2030 terms). No builder in the repository (DATA_SOURCING_REGISTRY: CAPRI PELA)';
+COMMENT ON TABLE pmp_own_price_elasticities IS 'CAPRI''s estimated own-price elasticities (PELA) per CAPRI region and CAPRI activity, raw (bounded on load, capri_pmp.dampen_elasticity); the elasticity-calibrated PMP''s PMP_CAPRI source (docs/PMP_ELASTICITY_WIRING.md), not the default PMP (CAPRI''s 2030 terms). Built by tools/build/build_pmp_own_price_elasticities.py from PELA''s 2005 own-price slice (an earlier year where 2005 is missing)';
 INSERT INTO value_units VALUES
   ('pmp_own_price_elasticities', 'own_price_elas', 'U_Elasticity', 'capri', 'CAPRI''s PELA, own-price, unbounded');
 

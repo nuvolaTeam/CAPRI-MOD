@@ -9,7 +9,7 @@ The data sourcing registry's log of checks, fixes and decisions (201 entries, mo
 [KNOWN_ISSUES_REGISTRY_LOG.md](KNOWN_ISSUES_REGISTRY_LOG.md), verbatim, with the triage of its open entries against
 the code: they became K92-K96, joined K73, K80, K91, or were closed or historical.
 
-## Open (16)
+## Open (17)
 
 | # | Issue | Status |
 |---|---|---|
@@ -29,11 +29,14 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K89](#k89) | Failing regional solves take most of IPOPT's time | open |
 | [K92](#k92) | Farm-to-Fork changes furthest from JRC121368, besides the milk price | open: waiting for CAPRI's scenario results |
 | [K93](#k93) | CAPRI mitigation options not built; documents disagree on which are in | open |
+| [K105](#k105) | Numbers in the model's code to check, register or move to the settings | open |
 
-## Resolved (86)
+## Resolved (88)
 
 | # | Issue | Status |
 |---|---|---|
+| [K103](#k103) | Data files without a known origin or read by no code (data declarations) | fixed: removed, or given a builder |
+| [K104](#k104) | The payments report's area left fallow out of CAPRI's UAAR | fixed |
 | [K73](#k73) | Market: differences from CAPRI that no register listed | fixed (batch 6 gate) |
 | [K101](#k101) | Model inputs without a builder (census of a run's reads) | fixed (batch 6 gate) |
 | [K1](#k1) | Ammonia loss cascade linearised without its value | fixed |
@@ -1463,3 +1466,74 @@ capri_data/2017 and shared/, 46 files are in neither. By kind:
   the IFS maps); kept as reference: the JRC121368 report text and published results, the NUTS correspondences; the
   others are named by a builder or extractor (their own outputs, or read in an untraced invocation)
 
+### K103: Data files without a known origin or read by no code (data declarations, found 29 October 2026)
+
+With every CSV declared and given its provenance (capri_data/schema/01_provenance.sql) the rule "every data file has
+a known origin" finds nine files under capri_data/validation that no builder writes and no source folder or checked
+note explains:
+
+- read by no code (the static scan of schema.json and a grep): baseline_reproduction_2030.csv,
+  capri_mitigation_shares_2030.csv, capri_pela_own_elasticities.csv, capri_ref_2030_levels.csv,
+  elasticity_comparison.csv, greendeal_2030/capri_greendeal_effect.csv, price_structure_vs_capri_scenario.csv (this
+  one is not a well-formed CSV: comment lines after the data; the validator reports it);
+- read by checks and a test: capri_eu27_levels_2017_capreg.csv (tools/check/compare_baseline_capri.py),
+  capri_eu27_levels_2030_ref.csv (the same, tools/check/compare_outlook_2030.py and test_capri.py); both arrived in
+  the repository's first commit, without builder.
+
+The check of the registry's notes (02_provenance_notes.sql) found three source extracts read by no code:
+sources/capreg/capreg_nutrient_coefs.csv (build_nutrient_coefs_regional reads CAPRI's dumps directly),
+capreg_manure_nutrients.csv and sources/capmod/capmod_world_prices_2017.csv (the world-price checks read
+capmod_world_reference_2017.csv). sources/capri_dat/ghgtech/LitRevFertTech_p_litRevFertTechs.csv is a second, fuller
+dump of the table that sources/ghgtech/LitRevFertTech_p_litRevFertTechs.csv holds (the one build_fert_side_effects
+reads); no code names the first.
+
+- **Effect:** none on results
+- **In 9t:** –
+- **Status:** **fixed** 29 October 2026 (the project lead's decision): the seven unread validation files and the
+  three unread extracts removed (extract_all_from_data2, extract_remaining_nine and ingest_capmod_market no longer
+  write them); the two reference files given a builder, tools/build/build_capri_eu27_levels.py (2030: dataOut EU27yr19
+  LEVL of markmarket_greendeal_1730et_base_1717, reproduced exactly; 2017: the 26 CAPREG dumps summed, equal to the
+  old file's four decimals, now at full precision). sources/capri_dat/ghgtech/LitRevFertTech_p_litRevFertTechs.csv
+  (unread second dump) and further builder outputs that no code reads remain to be settled (see the census in
+  capri_data/schema/schema.json, read_by).
+
+### K104: The payments report's area left fallow out of CAPRI's UAAR (found 29 October 2026, data declarations)
+
+cap_payments.csv's BPS is CAPRI's premiums per ha of UAAR (UAAR PRME; tools/build/build_crop_economics_2017.py), and
+CAPRI's UAAR holds the fallow land (SETA, FALL; base_areas' SETA column). The DirectPaymentsEngine
+(capri_mod/policy/policy_module.py, compute_payments_by_region) multiplied it by arable + permanent + grassland only,
+without FALLOW: AT110000 175.9 kha against CAPRI's 190.3. The EU total of the baseline payments was 46.9 bn EUR
+(regression anchor 54.0 +- 6), 49.1 bn EUR with fallow.
+
+- **Effect:** the policy report's payment totals only (the crop premiums in the margins come from crop_premium.csv
+  and livestock_premium_coef.csv)
+- **In 9t:** yes
+- **Status:** **fixed** 29 October 2026: the area is the four land columns, CAPRI's UAAR
+
+### K105: Numbers in the model's code to check, register or move to the settings (found 29 October 2026)
+
+The census of the numbers held in the model's code (capri_data/schema/03_code_data.sql, classified in
+04_code_data_status.sql; docs/design/PROXY_AUDIT.md) left five with an action; the project lead's decisions (29
+October 2026):
+
+- the manure-application limit (SupplyModule._manure_limit: 170 kg N/ha, or 1.001 x the base rate where higher): it
+  builds the manure_application row of the N-surplus scenarios (manure N <= limit x crop land), capri-mod's own (the
+  Nitrates Directive cap is CAPRI's NDtech, off in its Green Deal runs), and the function returned None on any error
+  (the row then silently absent). The classification first said the limit was read nowhere; it is read. Decision: to
+  be replaced by CAPRI's own mechanism (open);
+- capri_mod/data/validate_data.py _check_margins capped specialty-crop costs at 2 x the median, a cap the loader had
+  dropped: **removed** (the check sees the model's costs; 12 pass, 0 warn);
+- BilateralCommodity's export cap at 0.98 of the model's base supply (PROXY_AUDIT S192): a consequence of step F (the
+  market calibrated to the supply models' baseline, where a region's base production can fall below CAPRI's recorded
+  exports); open, explained to the project lead;
+- PMPCalibrator.calibrate's 0.05 cap on PELA / p_pmpQuadPact cross terms of crops without CAPRI's terms (S065):
+  **removed** with the path, its two inputs' loading and sources/estnlp/pela_cross_by_region.json (no longer written);
+  such crops have diagonal rows, as in CAPRI's QUADRA_; default runs unchanged (with CAPRI's terms the path was
+  skipped). Found with it: supply.pmp_cross_terms = "none" did not act on CAPRI's terms (the default ones); it does now;
+- CAPRIModel._run_scenario's adaptive price step for Norway (1.25, 0.5, 0.1) now reads outer_loop.relax_step_up,
+  relax_step_down and relax_floor (the same values): **done**.
+
+- **Effect:** none on default results from the three done (the checks, the settings with equal values, a path the
+  default skips)
+- **In 9t:** yes
+- **Status:** open (the manure row, the export cap); three done 29 October 2026

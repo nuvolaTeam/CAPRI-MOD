@@ -1,154 +1,25 @@
 #!/usr/bin/env python3
-"""Check that capabilities recorded in the registry reach the user-facing docs.
+"""Check that the counts the README states match the code and the data declarations.
 
-Why this exists
----------------
-Over the course of this project, every new capability went into
-`DATA_SOURCING_REGISTRY.json` immediately and the README or CHANGELOG lagged —
-five separate times, each caught by a human asking "did you update the docs?"
-rather than by anything mechanical. The registry is where the work is recorded;
-the README and CHANGELOG are what people actually read. An asymmetry that
-reliable deserves a check rather than a resolution to remember.
+Counts in prose drift as the model grows (the README said 32 market commodities after rice made it 33, and 51 tests
+after the suite reached 56); each was found by a reader, not a check. This compares them with the code: the tests
+pytest collects, the market commodities, the activities, and the data files declared under capri_data/schema
+(capri_data/schema/schema.json, generated from the declarations).
 
-This is the documentation equivalent of `check_regression.py`: it does not judge
-whether the prose is good, only whether a capability or fix recorded as
-significant is mentioned anywhere a reader would find it.
+Until 29 October 2026 the script also checked that every capability recorded in DATA_SOURCING_REGISTRY.json was
+mentioned in the README or the CHANGELOG. The registry's log moved to docs/KNOWN_ISSUES_REGISTRY_LOG.md and the
+registry was retired (its provenance notes are checked statements in capri_data/schema/02_provenance_notes.sql), so
+that check went with it.
 
-Exit codes
-----------
-0 = every flagged entry is mentioned in at least one user-facing document
-1 = at least one is not
+Exit codes: 0 = the counts match; 1 = at least one does not.
 
-Usage
------
-    python tools/check/check_doc_coverage.py [--list]
-
-``--list`` prints every checked entry and where it was found, rather than only
-the failures.
+    python tools/check/check_doc_coverage.py
 """
 
 from __future__ import annotations
 
-import argparse
-import json
-import re
 import sys
 from pathlib import Path
-
-_ROOT = Path(__file__).resolve().parents[2]
-REGISTRY = _ROOT / "capri_data" / "DATA_SOURCING_REGISTRY.json"
-USER_DOCS = ("README.md", "CHANGELOG.md", "docs/DATA_FIXES.md")
-
-#: Entry natures that a reader should be able to find in the docs. Pure
-#: investigations and verifications need not surface; new capabilities, fixed
-#: bugs and acquired data must.
-MUST_SURFACE = {
-    "NEW_CAPABILITY", "STRUCTURAL_EXTENSION", "SILENT_FAILURE_BUG",
-    "DESIGN_FIX", "DATA_ACQUIRED", "BUG_FOUND", "CALIBRATION_FIX",
-    "DATA_INCONSISTENCY_BUG", "MEASUREMENT_ERROR_CORRECTED",
-    "CORRECTION_OF_MY_OWN_ERROR", "NEW_INSTRUMENT",
-}
-
-
-def _keywords(name: str, entry: dict) -> list[str]:
-    """Search terms that would indicate this entry is mentioned.
-
-    Terms must be SPECIFIC. A first version split the registry key into words
-    and matched them as substrings, which passed a deliberately-undocumented
-    probe entry because "deliberate" occurs inside "deliberately" in the README.
-    A checker that cannot fail is worse than none, so:
-
-      * matching is on WORD BOUNDARIES, not substrings
-      * single generic words are not enough on their own — an entry qualifies
-        only via its full key, a file path it names, or a PAIR of its
-        distinctive words appearing together in one document
-    """
-    stop = {"and", "the", "for", "with", "from", "not", "was", "are", "our",
-            "its", "own", "new", "fix", "fixed", "bug", "data", "capri", "mod",
-            "deliberate", "probe", "found", "error", "check", "test", "base"}
-    parts = [p for p in re.split(r"[_\-]", name)
-             if len(p) > 4 and p not in stop]
-    note = json.dumps(entry)
-    paths = re.findall(r"[a-z_]+/[a-z_]+\.(?:py|json)", note)[:3]
-    return {"key": name.replace("_", " "), "words": parts, "paths": paths}
-
-
-def main() -> int:
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--list", action="store_true",
-                    help="show every checked entry, not only failures")
-    args = ap.parse_args()
-
-    registry = json.loads(REGISTRY.read_text())
-    datasets = registry.get("datasets", {})
-
-    corpus = {}
-    for doc in USER_DOCS:
-        path = _ROOT / doc
-        corpus[doc] = path.read_text().lower() if path.exists() else ""
-
-    checked, missing, found = 0, [], []
-    for name, entry in datasets.items():
-        if not isinstance(entry, dict):
-            continue
-        if entry.get("nature", "") not in MUST_SURFACE:
-            continue
-        checked += 1
-        k = _keywords(name, entry)
-
-        def _mentions(text: str) -> bool:
-            # the full key, spaced out, is an unambiguous mention
-            if k["key"].lower() in text:
-                return True
-            # a file path the entry names is a strong, specific signal
-            if any(pth.lower() in text for pth in k["paths"]):
-                return True
-            # otherwise require TWO distinctive words, on word boundaries,
-            # in the same document
-            seen = sum(1 for w in k["words"]
-                       if re.search(r"\b" + re.escape(w.lower()) + r"\w{0,3}\b",
-                                    text))
-            return seen >= 2
-
-        hits = [d for d, text in corpus.items() if _mentions(text)]
-        if hits:
-            found.append((name, hits))
-        else:
-            missing.append((name, entry.get("nature", "?")))
-
-    print(f"Documentation coverage — {checked} entries require a mention\n")
-    if args.list:
-        for name, hits in found:
-            print(f"  [ok  ] {name}  → {', '.join(hits)}")
-        print()
-
-    if missing:
-        print(f"{len(missing)} recorded in the registry but NOT in any "
-              "user-facing document:\n")
-        for name, nature in missing:
-            print(f"  [MISSING] {name}  ({nature})")
-        print("\nThe registry is where the work is recorded; the README and "
-              "CHANGELOG are what people read. Add a mention, or change the "
-              "entry's nature if it genuinely need not surface.")
-        return 1
-
-    print(f"All {checked} entries are mentioned in at least one of: "
-          f"{', '.join(USER_DOCS)}.")
-    return 0
-
-
-def _counts_gate() -> int:
-    probs = check_readme_counts(Path(__file__).resolve().parents[2])
-    for p in probs:
-        print("  [COUNT] " + p)
-    if probs:
-        print("README counts disagree with the code - update the README.")
-        return 1
-    print("README counts (tests, commodities, activities, inputs) match the code.")
-    return 0
-
-
-
 
 
 # ---------------------------------------------------------------------------
@@ -181,7 +52,7 @@ def check_readme_counts(root: Path) -> list:
         "activities": len(CROPS) + len(ANIMALS),
         "crops": len(CROPS),
         "livestock": len(ANIMALS),
-        "declared inputs": len(json.load(open(root / "capri_data" / "INPUT_MANIFEST.json"))["inputs"]),
+        "declared data files": len(json.load(open(root / "capri_data" / "schema" / "schema.json"))["tables"]),
     }
     patterns = {
         "tests": [r"\| Test suite \| (\d+) tests"],
@@ -189,7 +60,7 @@ def check_readme_counts(root: Path) -> list:
         "activities": [r"\| Activities \| (\d+) \(", r"\*\*(\d+) activities\*\*", r"over (\d+) activities"],
         "crops": [r"\((\d+) crops, \d+ livestock\)"],
         "livestock": [r"\(\d+ crops, (\d+) livestock\)"],
-        "declared inputs": [r"### 4\.2 The (\d+) declared inputs", r"(\d+) declared inputs, each"],
+        "declared data files": [r"### 4\.2 The (\d+) declared data files", r"(\d+) declared data files"],
     }
     problems = []
     for what, pats in patterns.items():
@@ -202,7 +73,16 @@ def check_readme_counts(root: Path) -> list:
     return problems
 
 
+def main() -> int:
+    probs = check_readme_counts(Path(__file__).resolve().parents[2])
+    for p in probs:
+        print("  [COUNT] " + p)
+    if probs:
+        print("README counts disagree with the code - update the README.")
+        return 1
+    print("README counts (tests, commodities, activities, declared data files) match the code.")
+    return 0
+
+
 if __name__ == "__main__":
-    _rc = main()
-    _rc2 = _counts_gate()
-    sys.exit(_rc or _rc2)
+    sys.exit(main())
