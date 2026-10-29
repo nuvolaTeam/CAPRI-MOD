@@ -16,10 +16,11 @@ Columns kept: the prices the model has for the region: its market products (the 
 build_bilateral_market.MODEL) and raw milk (the region's dairy block, capri_mod/market/dairy.py). Columns written with
 the model code empty and held at their calibration value by the market (registered, docs/DEPARTURES_FROM_CAPRI.md):
 the feed energy price FEDE (CAPRI's FeedBal_ of the non-EU regions, market audit M3, not built; no FEDE price in
-CAPRI's calibration data, so these terms are written with h_ratio 0) and products that are not market products of the
-model (FRUN, TCRP, FODFAL). The young animals carry only a placeholder own term (1) in CAPRI's export, no cross
-terms. Rows: every model market product and raw milk; rows the model does not market
-(FEDE as an input, young animals, FRUN, ...) are left out.
+CAPRI's calibration data, so these terms are written with h_ratio 0) and the rents of the land inputs of CAPRI's
+market land use (TCRP land for temporary crops, FRUN for permanent crops, FODFAL fodder and fallow: xx1Land,
+arm/arm_sets.gms l. 140-150; the model has no land market outside the EU's supply models). The young animals carry
+only a placeholder own term (1) in CAPRI's export, no cross terms. Rows: every model market product and raw milk;
+the input rows (FEDE, the land types) and the young animals are left out.
 
 The Hessian is completed as CAPRI's market model completes it on loading (tools/lib/_capri_nq.py, arm/market1.gms
 l. 539-574): tiny cross terms deleted, products without ProdNQ_ deleted (for the regions with supply models in CAPRI,

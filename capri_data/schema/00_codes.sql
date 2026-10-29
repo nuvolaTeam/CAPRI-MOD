@@ -23,6 +23,10 @@ COMMENT ON TABLE capri_maact IS 'CAPRI MAACT(PACT), animal activities in the sup
 CREATE TABLE capri_xx (code VARCHAR PRIMARY KEY, text VARCHAR);
 COMMENT ON TABLE capri_xx IS 'CAPRI XX, the market model''s products (arm/arm_sets.gms)';
 
+-- file: capri_data/schema/codes/capri/XX1.csv
+CREATE TABLE capri_xx1 (code VARCHAR PRIMARY KEY, text VARCHAR);
+COMMENT ON TABLE capri_xx1 IS 'CAPRI''s XX1: the market model''s products with the non-agricultural good, income, the land inputs and feed energy (arm/arm_sets.gms)';
+
 -- file: capri_data/schema/codes/capri/RALL.csv
 CREATE TABLE capri_rall (code VARCHAR PRIMARY KEY, text VARCHAR);
 COMMENT ON TABLE capri_rall IS 'CAPRI RALL, all regional units of the CAPRI system (sets.gms)';

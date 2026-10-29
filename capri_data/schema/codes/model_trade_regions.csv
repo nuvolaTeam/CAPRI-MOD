@@ -1,0 +1,27 @@
+code,capri_rm,mapping_source
+EU27,EU27yr19,tools/build/recalibrate_trade_2017.py REGION_MAP
+USA,USA,tools/build/recalibrate_trade_2017.py REGION_MAP
+CAN,CAN,tools/build/recalibrate_trade_2017.py REGION_MAP
+BRA,BRA,tools/build/recalibrate_trade_2017.py REGION_MAP
+ARG,ARG,tools/build/recalibrate_trade_2017.py REGION_MAP
+AUS,AUS,tools/build/recalibrate_trade_2017.py REGION_MAP
+NZL,NZL,tools/build/recalibrate_trade_2017.py REGION_MAP
+CHN,CHN,tools/build/recalibrate_trade_2017.py REGION_MAP
+IND,IND,tools/build/recalibrate_trade_2017.py REGION_MAP
+RUS,RUS,tools/build/recalibrate_trade_2017.py REGION_MAP
+UKR,UKR,tools/build/recalibrate_trade_2017.py REGION_MAP
+TUR,TUR,tools/build/recalibrate_trade_2017.py REGION_MAP
+MEX,MEX,tools/build/recalibrate_trade_2017.py REGION_MAP
+IDN,INDO,tools/build/recalibrate_trade_2017.py REGION_MAP
+JPN,JAP,tools/build/recalibrate_trade_2017.py REGION_MAP
+KOR,SKOR,tools/build/recalibrate_trade_2017.py REGION_MAP
+THA,THAI,tools/build/recalibrate_trade_2017.py REGION_MAP
+VNM,VIET,tools/build/recalibrate_trade_2017.py REGION_MAP
+PAK,PAK,tools/build/recalibrate_trade_2017.py REGION_MAP
+BGD,BGD,tools/build/recalibrate_trade_2017.py REGION_MAP
+NGA,NGA,tools/build/recalibrate_trade_2017.py REGION_MAP
+ZAF,ZAF,tools/build/recalibrate_trade_2017.py REGION_MAP
+ETH,ETH,tools/build/recalibrate_trade_2017.py REGION_MAP
+MAR,MOR,tools/build/recalibrate_trade_2017.py REGION_MAP
+NOR,NO000000,tools/build/recalibrate_trade_2017.py REGION_MAP
+ROW,,the CAPRI market regions not mapped to another trade region (tools/build/recalibrate_trade_2017.py REGION_MAP)

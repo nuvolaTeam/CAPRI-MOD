@@ -540,7 +540,7 @@ class SupplyMixin(MarketStateMixin):
         {trade region: {"rows": {x: {y: h}}, "milk": {y: h}}}, h in kt per unit change of y's price ratio (CAPRI's
         p_hessNQSupp x PPRI0_y / INPE). "rows": the market products' supply, y over the market products and raw milk;
         "milk": per CAPRI region, the raw milk supply's terms in the other prices (its own term is the dairy block's).
-        Columns without a model price (feed energy FEDE, products the model does not market) are not in the file's
+        Columns without a model price (feed energy FEDE, the land rents TCRP, FRUN, FODFAL) are not in the file's
         model columns: held at their calibration value (registered)."""
         c = getattr(self, "_noneu_nq_cache", None)
         if c is not None:

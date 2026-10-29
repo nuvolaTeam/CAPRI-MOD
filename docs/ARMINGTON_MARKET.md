@@ -81,8 +81,8 @@ Supply (`supply_response`, region_ratio given):
   cross-price terms over the market products and raw milk (the region's dairy block's price); raw milk's own supply
   function in the dairy block takes its cross-price terms as a shift (`noneu_market_supply_nq.csv`,
   `tools/build/build_noneu_market_supply_nq.py`; KNOWN_ISSUES K54-3). Held at the calibration point: the feed energy
-  price FEDE (market audit M3) and the prices of products the model does not market (TCRP, FODFAL, FRUN: 4.4% of
-  the terms' absolute size). `market.noneu_supply_nq = false`: one own-price constant elasticity per region and
+  price FEDE (market audit M3) and the rents of CAPRI's land inputs (TCRP, FRUN, FODFAL: CAPRI's market land use,
+  which the model does not have outside the EU; 4.4% of the terms' absolute size). `market.noneu_supply_nq = false`: one own-price constant elasticity per region and
   product, CAPRI's 2017 p_elasSupp (`supply_elas_region.csv`), the form from 20 to 29 October 2026. Crushing, the non-EU dairy blocks and the biofuel markets set their products' supply at
   the regional prices ([OILSEED_CRUSHING.md](OILSEED_CRUSHING.md), [DAIRY_PROCESSING.md](DAIRY_PROCESSING.md),
   [BIOFUEL_MARKET.md](BIOFUEL_MARKET.md)).

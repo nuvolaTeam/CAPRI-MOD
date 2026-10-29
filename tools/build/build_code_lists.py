@@ -5,7 +5,8 @@ throughout may follow later). This builder writes:
 
   capri_data/schema/codes/capri/<SET>.csv     CAPRI's code lists as instantiated in a CAPMOD run: code, text
                                               (PACT all production activities, MPACT, MCACT, MAACT, XX the market
-                                              products, RALL all regional units)
+                                              products, XX1 the market model's products with the non-agricultural good, income,
+                                              land and feed energy, RALL all regional units)
   capri_data/schema/codes/model_activities.csv  the model's 46 activities (capri_mod/data/definitions.py CROPS,
                                               ANIMALS): code, kind, capri_codes (";"-joined CAPRI activities summed
                                               into it), mapping_source
@@ -36,7 +37,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 OUT = ROOT / "capri_data" / "schema" / "codes"
-CAPRI_SETS = ("PACT", "MPACT", "MCACT", "MAACT", "XX", "RALL")
+CAPRI_SETS = ("PACT", "MPACT", "MCACT", "MAACT", "XX", "XX1", "RALL")
 
 
 def literal(path, name):

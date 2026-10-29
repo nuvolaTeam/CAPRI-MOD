@@ -1,0 +1,73 @@
+code,text
+APPL,Apples pears peaches
+BARL,Barley
+BEEF,Beef
+BIOD,Biodiesel
+BIOE,Bioethanol
+BUTT,Butter
+CASE,Casein
+CHES,Cheese
+CITR,Citrus
+COCM,Concentraded milk
+COCO,"Cocoa beans, dry equivalent"
+COFF,"Coffee, dry equivalent"
+CREM,Cream
+DDGS,destilled dried grains from bio-ethanol production
+EGGS,Eggs
+FEDE,Feed energy - output of the feed industry
+FENI,"Energy rich feed (by-products of sugar-beet processing), manioc, cassava, yams, other root and tubers etc."
+FFIS,Freshwater fish
+FODFAL,Fodder and fallow land as an input (row)
+FPRI,Protein rich feed (by-products of milling and brewing industry)
+FRMI,Fresh milk products
+FRUN,Land for permanent crops as an input (row)
+INCE,Income elasticities
+INPE,All non agricultural goods
+MAIZ,Maize
+MILK,Raw milk at dairy
+OAQU,Other acquatic product
+OATS,Oats
+OCER,other cereals
+OFRU,Other fruits
+OLIO,Olive oil
+OTHO,Other vegetable oil
+OVEG,Other vegetables
+PLMO,Palm oil
+PORK,Pork meat
+POTA,Potatoes
+POUM,Poultry
+PULS,Pulses
+RAPC,Rape seed cake
+RAPE,Rapeseed
+RAPO,Rape oil
+RICE,Rice
+RYEM,Rye
+SFIS,Saltwater fish
+SGMT,Sheep and goat meat
+SMIP,Skimmed milk powder
+SOYA,Soybean
+SOYC,Soya cake
+SOYO,Soya oil
+SUGA,Sugar
+SUNC,Sunflower seed cake
+SUNF,Sunflower
+SUNO,Sunflower oil
+TABO,Table olives
+TAGR,Table grapes
+TCRP,Land for temporary crops as an input (row)
+TEAS,"Tea, dry equivalent"
+TEXT,Textiles
+TOBA,Tobacco
+TOMA,Tomatoes
+TWIN,Table wine
+WHEA,Wheat
+WHEP,Whey poweder
+WMIO,Whole milk powder
+YBUL,Young bull
+YCAF,Young female calf
+YCAM,Young male calf
+YCOW,Young cow
+YHEI,Young heifer
+YILD,Yield response
+YLAM,Young lamb
+YPIG,Young piglet
