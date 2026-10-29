@@ -38,8 +38,8 @@ history may still name a removed tool.
   - `checks/ad_check.py`, hard-coded to another copy of the repository; its logic is in
     `build/build_ad_option.py`;
   - `diag_n_abatement.py`, which set attributes the model no longer has.
-- **One-off migrations, already applied:** `build_pig_split.py` (`build/build_shg_split.py --reproduce` rebuilds its
-  tables), `build_tabo_split.py`, `build_text_merge.py`, `merge_coco_yields.py`, `merge_capreg_yields.py`,
+- **One-off migrations, already applied:** `build_pig_split.py` (its tables are rebuilt by the regular builders; `build_shg_split.py`, the sheep-and-goat
+  split, retired on 29 October 2026 once a rebuild without it reproduced every file), `build_tabo_split.py`, `build_text_merge.py`, `merge_coco_yields.py`, `merge_capreg_yields.py`,
   `validate_capreg_yields.py`, `normalize_activity_codes.py`. Today's builders write the files these patched. Their
   reports in `capri_data/validation/` are kept as the record.
 - **Builders of files no code reads:**
