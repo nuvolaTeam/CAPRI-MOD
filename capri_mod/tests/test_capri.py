@@ -3954,3 +3954,22 @@ def test_activities_without_a_capri_term_are_held():
     assert "BROI" not in SupplyModule._uncalibrated(stub2, {}, "XX110000")       # animals not on CAPRI's terms
     with pytest.raises(ValueError, match="removed"):
         SupplyModule._pmp_terms_for(SimpleNamespace(pmp_source="elasticity"), {"market_year": 2030}, "XX110000")
+
+
+@pytest.mark.slow
+def test_warm_start_from_the_last_solution_as_it_is(model, tmp_path, monkeypatch):
+    """K79: the warm start takes the last solution as it is (a regulated flow moved only where it lies outside its
+    support), so the point fits the last solution's multipliers and IPOPT's warm start ends at once; the cold start's
+    rule (every flow above 0.95 of its maximum pulled back) is kept for the cold starts."""
+    import pickle
+    from capri_mod.supply import capri_regional_nlp as C
+    monkeypatch.setenv("CAPRI_NLP_DUMP", str(tmp_path))
+    model.run(scenario="BASELINE", regions=["DE110000"], max_outer_iter=1)
+    d = pickle.load(open(tmp_path / "DE110000.pkl", "rb"))
+    N = C.CapriRegionalNLP(dict(d["spec"]))
+    r = N.solve(N.start(np.asarray(d["x_start"], float)))
+    assert r["success"]
+    x = np.clip(r["x"], N.lbx, N.ubx)
+    assert np.array_equal(N.inside_regulations(x, only_outside=True), x)
+    w = N.solve(N.inside_regulations(x, only_outside=True), lam=(r["lam_x"], r["lam_g"]))
+    assert w["success"] and w["iterations"] <= 10 and abs(w["f"] - r["f"]) <= 1e-7 * abs(r["f"])

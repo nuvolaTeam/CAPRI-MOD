@@ -1617,6 +1617,8 @@ class CAPRIModel:
                         ("nlp_jump_check", str(_settings().get("supply.nlp_jump_check"))),
                         # 29 October 2026 (K79): the gain the jump check needs to switch
                         ("nlp_jump_gain", str(_settings().get("supply.nlp_jump_gain"))),
+                        # 29 October 2026 (K79): the warm start from the last solution as it is
+                        "warm-start-last-solution",
                         # the supply models' rules that change their price response (24 October 2026: S6-S10)
                         # (the rules whose switches were removed 27 October 2026 keep their values' place, so the
                         # cached Hessians' keys stay valid)

@@ -919,6 +919,11 @@ CAPRI's stop rule, recorded every iteration since r135, flags rows that move by 
   standard start's -5.0202e6; iteration 8: 2e-4 relative). Proposed fix (for the project lead): the warm start from
   the last solution as it is, as CAPRI's CONOPT restarts from its last solution, the regulated flows moved only where
   they lie outside the support (not to 0.95 of it); `inside_regulations` kept for the cold starts
+  29 October 2026, the project lead's decision: fix implemented (batch 5): the warm start from the last solution as it
+  is (`inside_regulations(..., only_outside=True)`), the cold starts unchanged; replayed on HU230000's five failed warm
+  starts, the fixed start moves no value and converges in 10-22 iterations (test
+  `test_warm_start_from_the_last_solution_as_it_is`); the market supply Hessian's key changes with it. Results: the
+  batch's gate runs
 
 <a id="k80"></a>
 ### K80: The same run repeated from a warm start differs by up to 3e-5 relative in small cereal activities (26 October 2026)

@@ -1116,10 +1116,12 @@ class CapriRegionalNLP:
             x = self.inside_regulations(np.clip(x, self.lbx, self.ubx))
         return np.clip(x, self.lbx, self.ubx)
 
-    def inside_regulations(self, x, margin=0.95):
+    def inside_regulations(self, x, margin=0.95, only_outside=False):
         """x with every regulated flow (CAPRI's beta-density regulations) moved inside its support: at most margin x
         its maximum at x's own column levels. A start outside the support (the prior mode above a Green Deal cap)
-        leaves IPOPT on the wrong side of the density's pole."""
+        leaves IPOPT on the wrong side of the density's pole. With only_outside, a flow is moved (to margin x its
+        maximum) only where it lies outside the support; the warm start from the last solution (K79): a solution's
+        flows near their maximum stay where they are, so the point fits the last solution's multipliers."""
         x = np.asarray(x, float).copy()
         y = x[:self.n0] * self.sc
         for nut, fb in (self.fert or {}).items():
@@ -1129,7 +1131,7 @@ class CapriRegionalNLP:
                     continue
                 Y = sum(v * y[j] for j, v in cols)
                 k = fb["off"] + i
-                if Y > 0 and x[k] * m > margin * Y:
+                if Y > 0 and x[k] * m > (Y if only_outside else margin * Y):
                     x[k] = max(margin * Y / m, self.lbx[k])
         return np.clip(x, self.lbx, self.ubx)
 

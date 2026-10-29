@@ -1832,7 +1832,14 @@ class RegionalSupplyModel:
         if prev is not None and len(prev) == 4 and prev[2] == shape:
             xw = nlp.inside_regulations(np.clip(prev[1], nlp.lbx, nlp.ubx))
             if prev[0] == gk:
-                starts.append(("warm", xw, prev[3]))       # IPOPT's warm start from the last primal-dual point
+                # IPOPT's warm start from the last primal-dual point: the last solution as it is (as CAPRI's CONOPT
+                # restarts from its last solution), its regulated flows moved only where they lie outside their
+                # support. Until 29 October 2026 the warm start took the point with every flow above 0.95 of its
+                # maximum pulled back (the cold start's rule) and the last solution's multipliers: an inconsistent
+                # start that stopped at the iteration cap where flows sat near their maximum, and the cold restart
+                # that followed could end at another local optimum (HU230000, Green Deal 2030; KNOWN_ISSUES K79)
+                xl = nlp.inside_regulations(np.clip(prev[1], nlp.lbx, nlp.ubx), only_outside=True)
+                starts.append(("warm", xl, prev[3]))
             starts.append(("prev", xw, None))
         starts.append(("start", nlp.start(np.asarray(x_start, float)), None))
         res = None
