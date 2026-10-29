@@ -1204,7 +1204,11 @@ recorded only inside the status texts of K50 and K51 (resolved table) and README
   CSV; tools/lib/_capri_digest.py: digestibility.gms's steps; build_supplement_effects.py: 3NOP_Tot rows, CH4ENT -25%
   to -57% (median -35%), about EUR 95 per dairy cow and year; the accounts' combination of the supplements corrected so linseed and
   nitrate keep their overlap term with 3-NOP present); acts in the carbon-tax runs only. Remaining: LegSh, ConsTill,
-  NoTill, UreaSubst, buffer strips, biodiversity options, biochar
+  NoTill, UreaSubst, buffer strips, biodiversity options, biochar. **Where the rest would act** (checked 29 October 2026 in CAPRI's own Green Deal 2030 result,
+  scen_greendeal_2030.txt): LegSh is adopted on 0.002% of the EU's other fodder (NL12 1.8%, every other region 0), 3-NOP
+  at its 1e-6 floor, and UreaSubst, the tillage options, buffer strips and the biodiversity options carry no level at
+  all (not active in that run); so none of them moves CAPRI's Green Deal or Farm-to-Fork result, and their port matters
+  for the emission-tax runs (and scenarios that switch them on)
 
 <a id="k94"></a>
 ### K94: `capri_mod/data/reconcile_base.py` is an orphan, and README's re-basing note points at a removed concordance (found 29 October 2026, registry migration)
