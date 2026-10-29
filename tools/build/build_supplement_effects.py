@@ -45,6 +45,8 @@ from pathlib import Path
 
 import pandas as pd
 
+import functools as _ft
+_read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 M = ROOT / "capri_data" / "2017" / "abatement" / "mitigation"
 LEV = ROOT / "capri_data" / "sources" / "envind" / "res17_mann_crpr_expt.csv"
@@ -62,12 +64,12 @@ def main():
     spec = importlib.util.spec_from_file_location("_mr", ROOT / "tools" / "lib" / "_model_regions.py")
     mr = importlib.util.module_from_spec(spec); spec.loader.exec_module(mr)
     to_c8 = mr.region_to_capri()
-    lv = pd.read_csv(LEV)
+    lv = _read_csv(LEV)
     L = {(r.region, r.activity): float(r.value) for r in lv[lv["item"] == "LEVL"].itertuples()}
-    cs = pd.read_csv(ROOT / "capri_data" / "sources" / "ghgtech" / "capri_costsavings_2030.csv")
+    cs = _read_csv(ROOT / "capri_data" / "sources" / "ghgtech" / "capri_costsavings_2030.csv")
     cs = cs[(cs.run == "max") & cs.technology.isin(list(OPT))]
     MX = {(r.region, r.activity, r.technology): float(r.level) for r in cs.itertuples() if pd.notna(r.level)}
-    nut = pd.read_csv(M / "p_nutCont.csv")
+    nut = _read_csv(M / "p_nutCont.csv")
     ooil = {r.nutrient: float(r.value) for r in nut[nut.feed == "OOIL"].itertuples()}
     tot_fat = RAPE_EE / 100.0 * RAPE_DM / 100.0
     rations = json.load(open(ROOT / "capri_data" / "2017" / "feed" / "feed_ration_2017.json"))["regions"]
@@ -129,7 +131,7 @@ def main():
     from _capri_costsavings import costsaving_drop
     ds = {o_: costsaving_drop(MAP, o_) for o_ in OPT}
     out["dsav"] = [ds[r.option].get((r.region, r.animal), float("nan")) for r in out.itertuples()]
-    out.to_csv(M / "supplement_effects.csv", index=False, float_format="%.6g")
+    out.to_csv(M / "supplement_effects.csv", index=False)
     g = out.groupby(["option", "animal"]).agg(n=("region", "size"), elig=("elig_share", "median"),
                                              ener=("d_ener_rel", "median"), crpr=("d_crpr_rel", "median"),
                                              cost=("cost_per_unit", "median"), ch4=("ch4ent_rel", "median"))

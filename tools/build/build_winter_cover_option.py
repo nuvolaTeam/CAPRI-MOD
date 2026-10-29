@@ -36,6 +36,8 @@ from pathlib import Path
 
 import pandas as pd
 
+import functools as _ft
+_read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / "capri_data" / "2017" / "abatement" / "mitigation" / "winter_cover_option.csv"
 
@@ -48,7 +50,7 @@ def _load(path):
 
 def main():
     cc = _load(ROOT / "tools" / "build" / "build_cover_crops.py")
-    terms = pd.read_csv(ROOT / "capri_data" / "validation" / "greendeal_2030" / "capri_marginal_terms_ini_2030.csv.xz",
+    terms = _read_csv(ROOT / "capri_data" / "validation" / "greendeal_2030" / "capri_marginal_terms_ini_2030.csv.xz",
                         header=None, names=["region", "act", "item", "value"], dtype=str)
     terms["value"] = pd.to_numeric(terms["value"], errors="coerce")
     lev = terms[terms["item"] == "LEVL"].pivot_table(index="region", columns="act", values="value")
@@ -57,7 +59,7 @@ def main():
     crop_map = dict(base.CROP_MAP)
     crop_map["GRAS"] = ("GRAE", "GRAI")
     capri_acts = sorted({x for v in crop_map.values() for x in v})
-    cover = pd.read_csv(ROOT / "capri_data" / "2017" / "supply" / "cover_crops.csv")
+    cover = _read_csv(ROOT / "capri_data" / "2017" / "supply" / "cover_crops.csv")
 
     def share_filled(c8, act):
         if (c8, act) in wcs0:
@@ -98,7 +100,7 @@ def main():
                          cost_lin_eur_ha=k1, subs0=s0, subs1=s1, pmp_sqr=sqr, pmp_lin=lin, case=case))
     out = pd.DataFrame(rows)
     OUT.parent.mkdir(parents=True, exist_ok=True)
-    out.to_csv(OUT, index=False, float_format="%.6g")
+    out.to_csv(OUT, index=False)
     on = out[out.case != "none"]
     print(f"{OUT.relative_to(ROOT)}: {len(out)} regions ({len(on)} with a cost curve); ini share median "
           f"{on.ini_share.median():.3f}, max share median {on.max_share.median():.3f}, cost median "

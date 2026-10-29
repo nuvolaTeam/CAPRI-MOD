@@ -27,6 +27,8 @@ from pathlib import Path
 
 import pandas as pd
 
+import functools as _ft
+_read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 D = ROOT / "capri_data" / "2017" / "abatement" / "ammonia"
 C = D / "costs"
@@ -63,26 +65,26 @@ GAS_OF = {"NH3HOU": "NH3", "NH3STO": "NH3", "NH3APP": "NH3", "NOXHOU": "NOX", "N
 
 def build():
     INV, ADD, FOP, PRICE, STOR, MIN, KGN, nvz, HEADS, HOLD, MD = cc.load()
-    curves = pd.read_csv(D / "ammonia_cost_curves.csv")
+    curves = pd.read_parquet(D / "ammonia_cost_curves.parquet")
     CUR = {(r.region, r.activity, r.manure_system.lower(), r.technology): (r.alpha, r.beta) for r in curves.itertuples()}
-    rains = pd.read_csv(D / "bNumAniRAINS.csv", dtype={"year": str})
+    rains = _read_csv(D / "bNumAniRAINS.csv", dtype={"year": str})
     RN = {(r.region, r.animal_mitt): r.value for r in rains[rains.year == RAINS_YEAR].itertuples()}
-    rce = pd.read_csv(D / "RCEmissions.csv")
+    rce = _read_csv(D / "RCEmissions.csv")
     RCE = {(r.region, r.animal_mitt, r.item): r.value for r in rce.itertuples()}
-    cs = pd.read_csv(D / "ControlStrategies.csv", dtype={"item": str})
+    cs = _read_csv(D / "ControlStrategies.csv", dtype={"item": str})
     CS = {(r.region, r.animal_mitt, r.strategy): r.value for r in cs[cs["item"] == "2020"].itertuples()}
-    ap = pd.read_csv(C / "p_applic.csv")
+    ap = _read_csv(C / "p_applic.csv")
     AP = {(r.country, r.animal_cat.lower(), r.manure_system.lower(), r.technology): r.value / 100 for r in ap.itertuples()}
-    ca = pd.read_csv(C / "p_costParAppl.csv")
+    ca = _read_csv(C / "p_costParAppl.csv")
     CA = {(r.technology, r.animal_cat.lower(), r.manure_system.lower(), r.coefficient): r.value for r in ca.itertuples()}
     U = lambda x: str(x).upper()
-    rh = pd.read_csv(D / "reducEmHouse.csv")
+    rh = _read_csv(D / "reducEmHouse.csv")
     RH = {(r.region, U(r.animal_mitt), U(r.gas), U(r.tech_class)): r.value for r in rh.itertuples()}
-    rsx = pd.read_csv(D / "reducEmStorage.csv")
+    rsx = _read_csv(D / "reducEmStorage.csv")
     RS = {(r.region, U(r.animal_mitt), U(r.gas), U(r.tech_class)): r.value for r in rsx.itertuples()}
-    rc = pd.read_csv(D / "reducControlStrategies.csv")
+    rc = _read_csv(D / "reducControlStrategies.csv")
     RC = {(r.region, U(r.animal_mitt), U(r.strategy), U(r.item)): r.value for r in rc.itertuples()}
-    gl = pd.read_csv(C / "p_sharGL.csv")
+    gl = _read_csv(C / "p_sharGL.csv")
     GL = {(r.country, r.manure_system.lower(), r.animal_cat.lower()): r.value for r in gl.itertuples()}
 
     def liquid_share(ctry, act):
@@ -198,20 +200,19 @@ def build():
                 if "N2OSTO" in side:                                  # l. 2236-2237: N2O at housing level
                     side["N2OHOU"] = side.pop("N2OSTO")
                 for item, val in side.items():
-                    effects.append([rs, act, tech, item, round(val, 6)])
+                    effects.append([rs, act, tech, item, val])
                 out.append([rs, act, tech, TARGET[tech], lin if lin is not None else "", sqr if sqr is not None else "",
-                            round(ini, 6), round(mx, 6), "" if qe is None else round(qe, 6),
-                            round(den, 6), round(tl, 6), round(gz, 6)])
+                            ini, mx, "" if qe is None else qe,
+                            den, tl, gz])
     out = endo_leach(out, MD, KGN, STOR, MIN, nvz, AP)
     with open(D / "ammonia_technologies.csv", "w", newline="") as f:
         w = csv.writer(f)
         w.writerow(["region", "activity", "technology", "target", "CostParLin", "CostParSqr", "IniShare",
                     "MaxShare", "qemitt", "applicability", "liquid_share", "grazing_share"])
         w.writerows(out)
-    with open(D / "ammonia_technology_effects.csv", "w", newline="") as f:
-        w = csv.writer(f)
-        w.writerow(["region", "activity", "technology", "item", "reduction"])
-        w.writerows(effects)
+    # a builder intermediate (read by build_n_cascade, build_ammonia_tech_model, build_manure_n2o): Parquet
+    pd.DataFrame(effects, columns=["region", "activity", "technology", "item", "reduction"]).to_parquet(
+        D / "ammonia_technology_effects.parquet", index=False)
     return out
 
 
@@ -248,7 +249,7 @@ def endo_leach(out, MD, KGN, STOR, MIN, nvz, AP):
                   shares to it (p_helpManStor, l. 2676-2709)
     (The pigs' combinations AirPurCovLowC / AirPurCovHigh with the basin's cost: tools/build/build_ammonia_tech_model.py.)
     Rows: [region, activity, technology, target, lin, sqr, ini, max, qemitt, applicability, liquid share, grazing]."""
-    fst = pd.read_csv(D / "p_fracStorType.csv")
+    fst = _read_csv(D / "p_fracStorType.csv")
     FST = {(r.region, r.manure_system.upper(), r.storage_type): float(r.value) for r in fst.itertuples()}
     by = {}
     for r in out:
@@ -274,32 +275,32 @@ def endo_leach(out, MD, KGN, STOR, MIN, nvz, AP):
         msc_ini = max(0.0, ini0 * (1 - cslc_ini - csl_ini) - csh_ini - leh_ini)
         if "CovStorLow" in d:
             r = list(d["CovStorLow"])
-            r[6] = round(csl_ini, 6)
+            r[6] = csl_ini
             d["CovStorLow"] = r
             c = list(d["CovStorLow"])
             c[2] = "CovStorLowCon"
             c[4] = (float(r[4]) if r[4] != "" else 0.0) + lin
-            c[6] = round(cslc_ini, 6)
+            c[6] = cslc_ini
             d["CovStorLowCon"] = c
         for t in ("LowEmHous", "CovStorHigh"):
             if t in d and d[t][4] != "":
                 r = list(d[t]); r[4] = float(r[4]) + lin; d[t] = r
         if lin > 0 or msc_ini > 0:
-            d["ManStorCon"] = [rs, act, "ManStorCon", "NH3MAN", lin, 0.0, round(msc_ini, 6), 1.0, 1.0, 1.0,
-                               round(tl, 6), round(gz, 6)]
+            d["ManStorCon"] = [rs, act, "ManStorCon", "NH3MAN", lin, 0.0, msc_ini, 1.0, 1.0, 1.0,
+                               tl, gz]
         # the Nitrates Directive's covered storage: minimum share and the initial shares (l. 2596-2621, 2676-2709)
         env = _env_cov(rs, act, tl, ctry, cat, nvz, AP) if APPLY_ENV_COVER else 0.0
         tot = sum(g(t, 6) for t in ("CovStorLow", "CovStorLowCon", "CovStorHigh", "LowEmHous"))
         if env > tot and "ManStorCon" in d and "CovStorLowCon" in d:
             h = min(float(d["ManStorCon"][6]), env - tot)
             if h > 0:
-                c = list(d["CovStorLowCon"]); c[6] = round(float(c[6]) + h, 6); c[7] = max(float(c[7]), float(c[6]))
+                c = list(d["CovStorLowCon"]); c[6] = float(c[6]) + h; c[7] = max(float(c[7]), float(c[6]))
                 d["CovStorLowCon"] = c
-                m = list(d["ManStorCon"]); m[6] = round(float(m[6]) - h, 6); d["ManStorCon"] = m
+                m = list(d["ManStorCon"]); m[6] = float(m[6]) - h; d["ManStorCon"] = m
         tot = sum(g(t, 6) for t in ("CovStorLow", "CovStorLowCon", "CovStorHigh", "LowEmHous"))
         if env > tot and "CovStorLow" in d:
             r = list(d["CovStorLow"])
-            r[6] = round(env - g("CovStorLowCon", 6) - g("CovStorHigh", 6) - g("LowEmHous", 6), 6)
+            r[6] = env - g("CovStorLowCon", 6) - g("CovStorHigh", 6) - g("LowEmHous", 6)
             r[7] = max(float(r[7]), float(r[6]))
             d["CovStorLow"] = r
         res.extend(d.values())

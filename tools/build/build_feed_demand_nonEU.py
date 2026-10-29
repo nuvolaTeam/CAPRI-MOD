@@ -37,6 +37,8 @@ from pathlib import Path
 
 import pandas as pd
 
+import functools as _ft
+_read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 KEEP_E = ROOT / "capri_data" / "sources" / "market" / "feed_demand_nonEU_elas_2030.csv"
 KEEP_U = ROOT / "capri_data" / "sources" / "market" / "feed_demand_nonEU_use_2030.csv"
@@ -51,7 +53,7 @@ def main():
     ap.add_argument("--elas", type=Path, default=Path("/mnt/user-data/uploads/elas_2_1730defaulta.csv"))
     ap.add_argument("--data", type=Path, default=Path("/mnt/user-data/uploads/data_market_1730defaulta.csv"))
     a = ap.parse_args()
-    sys.path.insert(0, str(ROOT)); sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check", "check/nlp_check")]
+    sys.path.insert(0, str(ROOT)); sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check")]
     from capri_mod.data.definitions import ALL_TRADE_REGIONS
     from recalibrate_trade_2017 import REGION_MAP
     import build_bilateral_market as BM
@@ -72,7 +74,7 @@ def main():
             m = pat.match(line)
             if m and m.group(2) in caps and m.group(3) in caps:
                 rows.append(dict(rms=m.group(1), feed=m.group(2), price_of=m.group(3), value=float(m.group(4))))
-        pd.DataFrame(rows).to_csv(KEEP_E, index=False, float_format="%.12g")
+        pd.DataFrame(rows).to_csv(KEEP_E, index=False)
         print(f"extracted {len(rows)} p_ElasFeed rows -> {KEEP_E.relative_to(ROOT)}")
     if a.data.exists():
         rows = []
@@ -81,13 +83,13 @@ def main():
             m = pat.match(line)
             if m and m.group(3) in caps:
                 rows.append(dict(rms=m.group(1), item=m.group(2), product=m.group(3), value=float(m.group(4))))
-        pd.DataFrame(rows).to_csv(KEEP_U, index=False, float_format="%.12g")
+        pd.DataFrame(rows).to_csv(KEEP_U, index=False)
         print(f"extracted {len(rows)} use rows -> {KEEP_U.relative_to(ROOT)}")
-    el = pd.read_csv(KEEP_E)
-    us = pd.read_csv(KEEP_U)
+    el = _read_csv(KEEP_E)
+    us = _read_csv(KEEP_U)
     # CAPRI's behavioural regions (RMS: the 80 regions of its processing functions, the same elasticity export);
     # the data also hold trade blocks and reporting sums of them (A_EU_*, EU, MED, MER, MER_OTH, URUPAR, WBA)
-    beh = set(pd.read_csv(ROOT / "capri_data" / "2017" / "market" / "processing_nq_base.csv").rms)
+    beh = set(_read_csv(ROOT / "capri_data" / "2017" / "market" / "processing_nq_base.csv").rms)
     rms_set = set(el.rms)
     is_eu = lambda r: r[:2] in EU and r.endswith("000000")
     mreg = lambda r: REGION_MAP.get(r, "ROW")
@@ -142,8 +144,8 @@ def main():
         if f <= 0 or not members[(R, c)]:
             continue
         fe = sum(U.get((rm, "FEED", c), 0.0) for rm in members[(R, c)])
-        params[f"{R}|{c}"] = {"feed_share": round(f / u, 4),
-                              "elasticities": {c2: round(v / fe, 4) for c2, v in wel[(R, c)].items()},
+        params[f"{R}|{c}"] = {"feed_share": f / u,
+                              "elasticities": {c2: v / fe for c2, v in wel[(R, c)].items()},
                               "capri_regions": sorted(members[(R, c)])}
     src = ("CAPRI 2030 calibration: feed share = sum FEED / sum (HCON + FEED + PROC + BIOF) over the trade region's "
            "CAPRI regions (data_market_1730defaulta CAL); elasticities = p_ElasFeed(RMS, feed, price-of, 'CAL') from "
@@ -151,19 +153,6 @@ def main():
            "function that the model trades (CAPRI -> model products: tools/build/build_bilateral_market.py MODEL). Non-EU regions only: EU feed comes from the supply models' feed "
            "bulks (tools/build/build_feed_bulks.py). tools/build/build_feed_demand_nonEU.py")
     json.dump({"_source": src, "parameters": params}, open(DEST, "w"), indent=1)
-    # DDGS and the residual feeds FENI, FPRI are all feed: in the trade regions without a feed function their use
-    # follows the generic own-price response, whose elasticity (armington_params.csv eta) is CAPRI's own-price
-    # p_ElasFeed averaged over CAPRI's non-EU behavioural regions that have one (2030 calibration)
-    ARM = ROOT / "capri_data" / "2017" / "market" / "armington_params.csv"
-    arm = pd.read_csv(ARM, index_col=0)
-    for c_ in ("DDGS", "FENI", "FPRI"):
-        vals = [float(r.value) for r in el.itertuples(index=False)
-                if r.rms in beh and not is_eu(r.rms) and r.feed in g2m and g2m[r.feed] == c_ and r.price_of == r.feed]
-        if vals and c_ in arm.index:
-            arm.at[c_, "eta"] = round(sum(vals) / len(vals), 4)
-            print(f"{c_} own-price elasticity for regions without a feed function: {arm.at[c_, 'eta']} "
-                  f"(mean over {len(vals)} CAPRI regions)")
-    arm.to_csv(ARM)
     regs = sorted({k.split("|")[0] for k in params})
     print(f"wrote {DEST.relative_to(ROOT)}: {len(params)} entries, {len(regs)} regions {regs}")
     miss = sorted(trade - set(regs))

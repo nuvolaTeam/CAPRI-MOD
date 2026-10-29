@@ -22,7 +22,7 @@ zones weighted by the region's zone share). Animal categories without a farm-siz
 SIMPLIFICATION (registered): where a region has no heads data, CAPRI falls back to its NUTS-1
 parent; this builder falls back to the national figures.
 
-Output: capri_data/2017/abatement/ammonia/ammonia_cost_curves.csv
+Output: capri_data/2017/abatement/ammonia/ammonia_cost_curves.parquet (an intermediate)
 """
 from __future__ import annotations
 
@@ -33,6 +33,12 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+import functools as _ft
+
+import importlib.util as _ilu
+_sp_mr = _ilu.spec_from_file_location("_mr", Path(__file__).resolve().parents[2] / "tools" / "lib" / "_model_regions.py")
+_mr = _ilu.module_from_spec(_sp_mr); _sp_mr.loader.exec_module(_mr)
+_read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 D = Path(__file__).resolve().parents[2] / "capri_data" / "2017" / "abatement" / "ammonia"
 C = D / "costs"
 
@@ -57,9 +63,9 @@ def _lc(s):
 
 
 def load():
-    inv = pd.read_csv(C / "p_invCoeff.csv")
+    inv = _read_csv(C / "p_invCoeff.csv")
     INV = {(r.technology, _lc(r.animal_cat), _lc(r.manure_system), r.coefficient): r.value for r in inv.itertuples()}
-    add = pd.read_csv(C / "p_addDemand.csv")
+    add = _read_csv(C / "p_addDemand.csv")
     ADD = defaultdict(dict)
     for r in add.itertuples():
         ADD[(r.technology, _lc(r.animal_cat), _lc(r.manure_system))][r.input] = r.value
@@ -74,24 +80,24 @@ def load():
         if k[1] in ("hens", "pouf"):
             for i in list(d):
                 d[i] = d[i] * 1000.0
-    fop = pd.read_csv(C / "p_fixedOpCost.csv")
+    fop = _read_csv(C / "p_fixedOpCost.csv")
     FOP = {(r.technology, _lc(r.animal_cat), _lc(r.manure_system)): r.value for r in fop.itertuples()}
-    ic = pd.read_csv(C / "p_inputCost.csv")
+    ic = _read_csv(C / "p_inputCost.csv")
     PRICE = defaultdict(dict)
     for r in ic.itertuples():
         PRICE[r.country][r.item] = r.value
-    st = pd.read_csv(C / "p_storTime.csv")
+    st = _read_csv(C / "p_storTime.csv")
     STOR = {(r.region, _lc(r.manure_system), _lc(r.animal_cat)): r.value for r in st.itertuples()}
-    mn = pd.read_csv(C / "p_minStorCapND.csv")
+    mn = _read_csv(C / "p_minStorCapND.csv")
     MIN = {(r.region, _lc(r.manure_system), r.nvz, _lc(r.animal_cat)): r.value for r in mn.itertuples()}
-    kg = pd.read_csv(C / "p_kgNPerM3.csv")
+    kg = _read_csv(C / "p_kgNPerM3.csv")
     KGN = {(r.activity, _lc(r.manure_system)): r.value for r in kg.itertuples()}
-    nvz = pd.read_csv(D / "p_nvzShare_lu.csv").set_index("region")["value"].to_dict()
-    hd = pd.read_csv(D / "p_Heads.csv")
+    nvz = _read_csv(D / "p_nvzShare_lu.csv").set_index("region")["value"].to_dict()
+    hd = _read_csv(D / "p_Heads.csv")
     HEADS = defaultdict(dict)
     for r in hd.itertuples():
         HEADS[(r.region, r.ad_activity)][r.size_class] = r.value
-    hl = pd.read_csv(D / "p_holdLSU.csv")
+    hl = _read_csv(D / "p_holdLSU.csv")
     HOLD = defaultdict(dict)
     for r in hl.itertuples():
         g = r.animal_group.upper()
@@ -100,7 +106,7 @@ def load():
             HOLD[(r.region, g)]["200_500"] = HOLD[(r.region, g)].get("200_500", 0) + r.value * 3 / 4
         else:
             HOLD[(r.region, g)][r.size_class] = HOLD[(r.region, g)].get(r.size_class, 0) + r.value
-    md = pd.read_csv(D / "capri_mann_days_2030.csv")
+    md = _read_csv(D / "capri_mann_days_2030.csv")
     MD = {(r.region, r.activity, r.item): r.value for r in md.itertuples()}
     return INV, ADD, FOP, PRICE, STOR, MIN, KGN, nvz, HEADS, HOLD, MD
 
@@ -146,7 +152,9 @@ def regress(share, accum, cost, lb):
 
 def build():
     INV, ADD, FOP, PRICE, STOR, MIN, KGN, nvz, HEADS, HOLD, MD = load()
-    regions = sorted({k[0] for k in MD if not k[0].endswith("000000") or k[0][:2] in ("MT", "CY", "LU", "EE", "LV", "SI")})
+    # every regional unit's own rows, the units of the member states without regional detail included (DK000000 ...;
+    # CAPRI loops over all its regions, ammo_tech.gms); a fixed list of an older CAPRI left out DK, LT, HR (K86)
+    regions = sorted({k[0] for k in MD if _mr.regional_row(k[0])})
     out = []
     for rs in regions:
         price = PRICE.get(nat(rs), {})
@@ -210,13 +218,17 @@ def build():
                         continue
                     a, b = res
                     out.append([rs, act, sysm.capitalize(), tech, a, b, lb, len(acc), tot])
-    with open(D / "ammonia_cost_curves.csv", "w", newline="") as f:
-        w = csv.writer(f)
-        w.writerow(["region", "activity", "manure_system", "technology", "alpha", "beta", "lower_bound", "n_classes", "heads"])
-        w.writerows(out)
+    # a builder intermediate (read only by build_ammonia_technologies.py): Parquet, as decided 27 October 2026
+    pd.DataFrame(out, columns=["region", "activity", "manure_system", "technology", "alpha", "beta", "lower_bound",
+                               "n_classes", "heads"]).to_parquet(D / "ammonia_cost_curves.parquet", index=False)
     return out
 
 
 if __name__ == "__main__":
     rows = build()
     print(len(rows), "cost curves")
+    # never silent (K86): the model's regional units without any curve get no farm-size cost terms downstream
+    _with = {r[0] for r in rows}
+    _without = sorted(u for u in _mr.UNITS if u not in _with)
+    if _without:
+        print(f"WARNING: {len(_without)} regional units without a cost curve: {', '.join(_without)}")

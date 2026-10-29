@@ -404,7 +404,8 @@ Each defect gets a fix, and a parity switch reproduces CAPRI's behaviour.
 
 The defects (details in CAPTRD_MAP.md):
 - the upper bound on artificial land, non-binding through a misplaced parenthesis (fix_est.gms:810);
-- the error-variance floor comparing a level with a variance;
+- the error-variance floor comparing a level with a variance: fixed 24 October 2026 as (0.05 × |wAve|)², setting
+  `captrd.variance_floor_squared` (section 12.4; docs/DEPARTURES_FROM_CAPRI.md);
 - the base-year window labelled "5 years" spanning 7: on inspection (23 October 2026) not a defect where ExPost ends
   at BAS + 1, as in the reference run (BASYRS5 = 2014-2018, five years; section 12.4). Setting
   `captrd.basyrs5_halfwidth` = 3, CAPRI's;
@@ -555,6 +556,7 @@ runs pass before it enters a package.
 | 23 Oct 2026 | Settings layer agreed: one TOML defaults file with sections (run, outer_loop, supply, market, young_animals, endotech, projection; the pipeline gets its own section), user overrides, validation, the effective settings saved with each run; sourced constants stay in the parameter CSV, CAPRI structure in mapping CSVs, scenarios in scenario files, CLI flags as thin wrappers. Built before the pipeline, behaviour-neutral (reference runs reproduced). |
 | 23 Oct 2026 | No proxies: every unsourced number is replaced by CAPRI's data or rules, or removed with a loud failure; where data cannot be found, the project lead helps (docs/design/PROXY_AUDIT.md). Settings follow CAPRI's, except corrections of CAPRI code errors (marked CAPRI-ERROR-FIX); every difference is described (docs/DEPARTURES_FROM_CAPRI.md). CAPRI's Pillar II budgets and intervention stocks are to be ported. |
 | 23 Oct 2026 | CAPTRD-MOD started with Step 1 (section 12). CAPRI's CAPREG time series and CAPTRD results (results_1770.gdx) are the parity references in `capri_reference/`. The Step-1 estimator is ported and matches CAPTRD for 99.78% of comparable series. The short-series grid error is confirmed and corrected by default (CAPRI-ERROR-FIX, with a parity switch), pending the project lead's confirmation. |
+| 24 Oct 2026 | The error-variance floor is corrected to a variance, (0.05 × |wAve|)², by default (CAPRI-ERROR-FIX, parity switch `captrd.variance_floor_squared`). |
 | 23 Oct 2026 | The recursive-dynamic module is named CAPSIM-DYN (project lead); code in `capri_mod/projection/capsim_dyn/` (replaces the provisional `projection/recursive/`). |
 
 ## 12. Detailed design: Step 1 (work plan step 1, started 23 October 2026)
@@ -644,8 +646,11 @@ data preparation is ported.
   term is the binding one. The remaining 2.9% (e.g. AL EXPT, ×25) come from later rules not yet ported.
 
   The term is in the units of the series, not squared, so its weight relative to the trend's variance depends on the
-  series' unit: a level of 100 gives a "variance" of 5, a level of 0.01 gives 0.0005. A fix (e.g. (0.05 × |wAve|)²)
-  is listed in section 8.3. It needs the project lead's decision, because it changes the weight of about a fifth of
-  the series in Step 2.
+  series' unit: a level of 100 gives a "variance" of 5, a level of 0.01 gives 0.0005. That wVarErr is a variance in
+  CAPRI's own code is shown by its definition (a sum of squared residuals, l. 118-123), its fall-back for 1-2
+  observations (SQR(wAve) × 0.25, l. 130) and its later use as one (sqrt(wVarErr) as a standard deviation,
+  define_eu_supports.gms l. 693, 705). Fixed on 24 October 2026 (project lead: "fix the still open"): the floor is
+  (0.05 × |wAve|)², a 5% coefficient of variation; `captrd.variance_floor_squared = false` reproduces CAPRI. It has no
+  effect until Steps 2-3 are ported; then it changes the weight of about a fifth of the series.
 - **DOMM and NTRD in CAPTRD's output** are reporting re-aggregates in every position, Step1 included. A parity test
   must use DEMD for DOMM, and cannot test NTRD's estimated Step1.

@@ -1,0 +1,12 @@
+activity,price,note
+SETA,0.0,set-aside has no output: 0 by convention
+DCOW,869.4226,origin not recorded; no builder reproduces it (KNOWN_ISSUES K72)
+BCOW,844.05,origin not recorded; no builder reproduces it (KNOWN_ISSUES K72)
+BULL,1400.0,origin not recorded; no builder reproduces it (KNOWN_ISSUES K72)
+HFRS,900.0,origin not recorded; no builder reproduces it (KNOWN_ISSUES K72)
+CALV,300.0,origin not recorded; no builder reproduces it (KNOWN_ISSUES K72)
+PIGS,905.0,origin not recorded; no builder reproduces it (KNOWN_ISSUES K72)
+PIGF,844.72,origin not recorded; no builder reproduces it (KNOWN_ISSUES K72)
+LAYS,688.2,origin not recorded; no builder reproduces it (KNOWN_ISSUES K72)
+BROI,748.0,origin not recorded; no builder reproduces it (KNOWN_ISSUES K72)
+OANI,8.0,origin not recorded; no builder reproduces it (KNOWN_ISSUES K72)

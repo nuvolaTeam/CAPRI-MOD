@@ -18,6 +18,8 @@ from pathlib import Path
 
 import pandas as pd
 
+import functools as _ft
+_read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 DUMPS = Path("/home/claude/work/capreg")
 ANIMALS = {"DCOW": ("DCOL", "DCOH"), "BCOW": ("SCOW",), "BULL": ("BULL", "BULH"), "HFRS": ("HEIL", "HEIH", "HEIR"),
@@ -37,7 +39,7 @@ def main() -> None:
     sp = importlib.util.spec_from_file_location("_mr", ROOT / "tools" / "lib" / "_model_regions.py")
     mr = importlib.util.module_from_spec(sp); sp.loader.exec_module(mr)
     to_c8 = mr.region_to_capri()
-    ratio = pd.read_csv(ROOT / "capri_data" / "2017" / "supply" / "capri_level_ratio.csv", index_col=0)
+    ratio = _read_csv(ROOT / "capri_data" / "2017" / "supply" / "capri_level_ratio.csv", index_col=0)
     rows = []
     for reg in mr.model_regions():
         for an, mem in ANIMALS.items():
@@ -55,7 +57,7 @@ def main() -> None:
     # region x animal, as capri_level_ratio.csv (empty: no CAPRI herd in the region or its member state)
     wide = out.pivot(index="region", columns="animal", values="lu_per_head").sort_index()
     wide.index.name = None
-    wide.to_csv(ROOT / "capri_data" / "2017" / "supply" / "livestock_units.csv", float_format="%.6g")
+    wide.to_csv(ROOT / "capri_data" / "2017" / "supply" / "livestock_units.csv")
     nat = int((out.capri_region.str[2:] == "000000").sum())
     print(f"livestock_units.csv: {wide.shape[0]} regions x {wide.shape[1]} animals, {len(out)} values "
           f"({nat} from the member-state row); median LU per model head "

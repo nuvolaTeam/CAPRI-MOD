@@ -26,6 +26,7 @@ import pandas as pd
 
 from capri_mod.pipeline import http
 from capri_mod.pipeline.config import setting
+from capri_mod.csvio import read_csv
 
 PROVIDER = "eurostat"
 LICENCE = "Eurostat: Commission Decision 2011/833/EU"
@@ -111,7 +112,7 @@ def _async(dataset: str, msg: bytes) -> bytes:
 def parse(raw: RawDownload) -> pd.DataFrame:
     """Long table: the dataset's dimension columns, time, value (NaN where empty), flag, conf_status, last_update."""
     data = gzip.decompress(raw.data) if raw.data[:2] == b"\x1f\x8b" else raw.data
-    df = pd.read_csv(io.BytesIO(data), dtype=str, keep_default_na=False)
+    df = read_csv(io.BytesIO(data), dtype=str, keep_default_na=False)
     missing = [c for c in ("TIME_PERIOD", "OBS_VALUE") if c not in df.columns]
     if missing:
         raise http.DownloadError(f"eurostat: not an SDMX-CSV answer (no {missing})")

@@ -1,8 +1,8 @@
 # CAPRI star 3.0 regional supply model, equation by equation, against capri-mod
 
 Status: revised 20 October 2026 against the code. Sections 1-3 map CAPRI's model; the capri-mod column describes the
-default NLP form (`CAPRIModel.supply_form = "nlp"`, `capri_mod/supply/capri_regional_nlp.py`) and notes the conic form
-(`"conic"`, Clarabel) where it differs. Section 5 is the record of the decisions taken before the port (historical).
+NLP form (`capri_mod/supply/capri_regional_nlp.py`); notes on the conic form (Clarabel, removed 26 October 2026)
+are history. Section 5 is the record of the decisions taken before the port (historical).
 
 This map was step 1 of the rewrite of the regional model in CAPRI's NLP form (docs/archive/HANDOFF_NLP_PORT.md); the
 design and the registered departures of the port are in `docs/NLP_PORT_DESIGN.md` and `docs/KNOWN_ISSUES.md` (K50,
@@ -32,8 +32,8 @@ Which equations are live depends on switches. Two configurations matter:
 | `envConst`, `NMINREST`, BFP, water | off | off |
 | CAP policy chain | the policy file decides (GUI default `mtr_rd_ref` looks legacy; CAP 2023-27 reference turns on the GAECs) | cap_after_2014 greening chain (permanent grassland, 5% ecological set-aside, crop diversification) |
 
-capri-mod has no switch named ghgAbatement. Its abatement options are inside the regional model whenever
-`use_manure_techs` is on (default True) and feeding is inside the models (`use_feed_in_supply`, default True), baseline
+capri-mod has no switch named ghgAbatement. Its abatement options are inside the regional model (always, since the switch
+`use_manure_techs` was removed on 27 October 2026; feeding is always inside the models), baseline
 included, so in this respect every default run is in the Green Deal configuration. Decision 5a.1 (off by default) was
 not implemented that way.
 
@@ -61,7 +61,7 @@ missing / not needed (inactive in both configurations, or reporting only). GD = 
 | Set-aside (SETA_, SETAN_, MXSETA_, NONF_), sugar quota block, e_max/minLevl, BFP, fixTechfShares_, FixCosts_ | inactive (expected; sugar and set-aside data not inspected) | - | not needed |
 
 CAPRI's activity bounds (supply/set_supply_bounds.gms: 0.1 to max(10 x, + 100) the data level) are variable bounds in
-both forms (`RegionalSupplyModel.use_capri_activity_bounds`, K27); CAPRI's fixed activities are fixed.
+every regional model (always on; K27); CAPRI's fixed activities are fixed.
 
 ### 2.2 Feeding
 
@@ -85,7 +85,7 @@ Feed bounds: 0 <= per-head feed <= 10 x DRMX / dry-matter content (set_supply_bo
 | NUTMIN_ | no with the inner model on | - | same (K40). In the NLP form the inner model is always inside |
 | fertDistExcr_/Mine_/Cres_, ManureNPK_, manExportOrAppl_ | yes | linear (GD: v_emiLoss, v_Miti products) | same for N, P2O5, K2O: manure applied = excretion less CAPRI's housing and storage loss shares, net of trade, plus the N the ammonia options keep through the cascade; permanent groups take no residues from the pool |
 | Inner model: e_fertDistPartial, e_focFertDist, e_fertDistPerHa | yes, part of every solve | non-convex (FOC system, bilinear) | same, inside every solve; duals within +-10, widened to +-1000 where a tiny group needs more (REGISTERED); where CAPRI's 2030 posterior admits no allocation at the model's base, CAPRI's fertiliser calibration (blanket priors) at that base (REGISTERED) |
-| e_fertDistReguMax, e_fertDistPartialRegu (regulations: GD mineral caps by crop group, residue limits, organic) | GD | linear / non-convex | same: "f2f" caps on each group's mineral flow, "limCres" on residues (N, P2O5, K2O), caps from the model's own base allocation; the organic target's caps (organic_minfert_redu.gms) with capri-mod's conversion shares (REGISTERED); where the caps leave a group's need unmet, duals widened, then caps raised to 1.1 x base and kept for the scenario (REGISTERED, recorded as `nlp_relaxed`). Conic form: their sum on one row (K49) |
+| e_fertDistReguMax, e_fertDistPartialRegu (regulations: GD mineral caps by crop group, residue limits, organic) | GD | linear / non-convex | same: "f2f" caps on each group's mineral flow, "limCres" on residues (N, P2O5, K2O), caps from the model's own base allocation; the organic target's caps (organic_minfert_redu.gms) with capri-mod's conversion shares (REGISTERED); where the caps leave a group's need unmet, duals widened, then the groups concerned exempted one at a time at their baseline, CAPRI's p_checkSmallMine (REGISTERED, kept for the scenario, recorded as `nlp_relaxed`, e.g. `caps:PERM`). Conic form: their sum on one row (K49) |
 | e_manureLimit_ | in the list with manure trade (e_list_linear:69), active only where p_manure_limit is set (supply_model.gms:1245; pol_input/manure/ManureNLimit*.gms): not by default, not in GD | linear | NLP form: none. The conic form adds a manure N limit (170 kg/ha or the base level) where an N target applies: not CAPRI's |
 | e_netMTrade, e_costMTrade (manure trade) | yes | quadratic cost | same in substance: export and import columns with CAPRI's quadratic cost, CAPRI's country pools cleared between solves (`docs/MANURE_MARKET.md`); P and K follow N in the region's proportions (REGISTERED) |
 | SURTOT_REST_ (GD surplus cap) | GD | linear in the surplus | same: the regional N-balance row with its mineral parts replaced by the purchases (e_SURTOTHa per ha of current land with `surplus_per_current_ha`) |

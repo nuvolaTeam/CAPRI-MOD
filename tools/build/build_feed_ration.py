@@ -94,10 +94,8 @@ def main() -> None:
                     help="gdxdump CSVs of p_pmpFeedInpCoeff (pmppar_17XX_feedpmp.csv)")
     args = ap.parse_args()
 
-    from capri_mod.data.loaders import load_all_data
-    herds = load_all_data(str(_ROOT / "capri_data"))["animal_numbers"]
-    corr = json.loads((_ROOT / "capri_data" / "shared" /
-                       "nuts_version_correspondence.json").read_text())["capri8_to_nuts"]
+    from capri_mod.data.loaders import load_regional_animal_numbers  # the one table needed (load_all_data read every model input, a dependency cycle in the data pipeline; 29 Oct 2026)
+    herds = load_regional_animal_numbers(str(_ROOT / "capri_data"))
 
     # CAPRI regions -> model regions in groups covering the same territory (tools/lib/_model_regions.py:
     # splits, merges, renamed regions); a group's CAPRI totals are spread over its model regions by
@@ -133,8 +131,8 @@ def main() -> None:
     tot = collections.defaultdict(lambda: collections.defaultdict(float))
     reg8 = {}
     for (r8, a), d in anim.items():
-        if r8.endswith("000000"):
-            continue                               # regional rows only
+        if not _mr.regional_row(r8):
+            continue                               # regional rows only (DK000000 ... are units)
         g = code_to_group.get(r8)
         lv, days = d.get("LEVL", 0.0), d.get("DAYS", 0.0)
         if g is None or lv <= 0 or days <= 0:
@@ -158,10 +156,9 @@ def main() -> None:
     # not cover all model regions), the national total minus the regional sums
     # is spread over the model regions of that member state that have no
     # regional row, per head of their herds.
-    PREFIX = {"BL": ("BE", "LU"), "IR": ("IE",)}
     nat = collections.defaultdict(lambda: collections.defaultdict(float))
     for (r8, a), d in anim.items():
-        if not r8.endswith("000000"):
+        if _mr.regional_row(r8):
             continue
         lv, days = d.get("LEVL", 0.0), d.get("DAYS", 0.0)
         if lv <= 0 or days <= 0:
@@ -174,8 +171,7 @@ def main() -> None:
         nat[key]["req_DMIN"] += lv * d.get("DRMN", 0.0) * days
         nat[key]["req_DMAX"] += lv * abs(d.get("DRMX", 0.0)) * days
     for (cc, act), t in nat.items():
-        prefixes = PREFIX.get(cc, (cc,))
-        regs = [r for r in herds.index if r[:2] in prefixes]
+        regs = [r for r in herds.index if r[:2] == cc]          # CAPRI's codes (BL, IR)
         covered = [r for r in regs if (r, act) in tot]
         rest = [r for r in regs if (r, act) not in tot and act in herds.columns and herds.at[r, act] > 0]
         if not rest:

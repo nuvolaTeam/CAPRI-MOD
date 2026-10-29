@@ -30,7 +30,7 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--dump-dir", type=Path, default=Path("/home/claude/work/capreg"))
     a = ap.parse_args()
-    sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check", "check/nlp_check")]
+    sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check")]
     from build_livestock_output_coef import CAPRI_TO_MODEL
     pat = re.compile(r"^'([A-Z]{2}[A-Z0-9]{6})'\.'([A-Z0-9]{4})'\.'LEVL'\.'Y'\s+([-\d.Ee+]+)")
     lev = defaultdict(float)                                  # (CAPRI code, model animal) -> LEVL
@@ -41,8 +41,10 @@ def main() -> None:
                 lev[(m.group(1), CAPRI_TO_MODEL[m.group(2)])] += float(m.group(3))
     # the herds as the model loads them (poultry converted to thousand head, loaders._reconcile_poultry_units)
     sys.path.insert(0, str(ROOT))
-    from capri_mod.data.loaders import load_all_data
-    herds = load_all_data(str(ROOT / "capri_data"))["animal_numbers"]
+    # only the herds' loader (the same table as load_all_data's, checked 29 October 2026): the whole data load made this
+    # builder read about 80 model inputs, its own output and the yields among them (a cycle in the data pipeline)
+    from capri_mod.data.loaders import load_regional_animal_numbers
+    herds = load_regional_animal_numbers(str(ROOT / "capri_data"))
     animals = sorted(set(CAPRI_TO_MODEL.values()) & set(herds.columns))
     sp = importlib.util.spec_from_file_location("_mr", ROOT / "tools" / "lib" / "_model_regions.py")
     mr = importlib.util.module_from_spec(sp); sp.loader.exec_module(mr)
@@ -52,7 +54,7 @@ def main() -> None:
     for codes, regs in groups.values():
         regs = [r for r in regs if r in herds.index]
         for an in animals:
-            L = sum(lev.get((c, an), 0.0) for c in codes if not c.endswith("000000"))
+            L = sum(lev.get((c, an), 0.0) for c in codes if mr.regional_row(c))
             H = float(herds.loc[regs, an].fillna(0.0).sum())
             if L > 0 and H > 0:
                 for r in regs:
@@ -69,7 +71,7 @@ def main() -> None:
                     out.at[r, an] = H / L
                     src["national"] += 1
     dest = ROOT / "capri_data" / "2017" / "supply" / "capri_level_ratio.csv"
-    out.round(6).to_csv(dest)
+    out.to_csv(dest)
     print(f"wrote {dest.relative_to(ROOT)}: {dict(src)}; median ratio "
           + ", ".join(f"{an} {out[an].median():.3g}" for an in animals))
 

@@ -69,7 +69,8 @@ def rows(o):
     # activity levels (animals fattened a year); the growth rates are comparable
     try:
         import pandas as _pd
-        an = _pd.read_csv(ROOT / "capri_data" / "2017" / "supply" / "animal_numbers.csv", index_col=0)
+        an = _pd.read_csv(ROOT / "capri_data" / "2017" / "supply" / "animal_numbers.csv", index_col=0,
+                         float_precision="round_trip")
         an = an[[not str(r).startswith("NO") for r in an.index]].sum()
         l17 = {}
         for line in open(ROOT / "capri_data" / "validation" / "capri_eu27_levels_2017_capreg.csv").read().splitlines()[1:]:

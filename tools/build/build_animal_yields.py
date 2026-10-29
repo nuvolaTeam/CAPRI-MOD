@@ -1,4 +1,5 @@
-"""CAPRI's animal yields per model head: the animal columns of capri_data/2017/supply/yields.csv.
+"""CAPRI's animal yields per model head: the animal columns of capri_data/2017/supply/yields.csv (written by
+build_crop_economics_2017.py, the table's one writer, from build() here).
 
 Per model region and animal: CAPRI's YILD level-weighted over the animal's CAPRI members (2017 results, res_17* dumps,
 item 'Y'; the region's row, else its member state's, as tools/build/build_livestock_units.py), divided by 1000 and by
@@ -23,6 +24,8 @@ from pathlib import Path
 
 import pandas as pd
 
+import functools as _ft
+_read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 DUMPS = Path("/home/claude/work/capreg")
 YIELDS = ROOT / "capri_data" / "2017" / "supply" / "yields.csv"
@@ -48,7 +51,7 @@ def build() -> tuple[pd.DataFrame, pd.DataFrame]:
     sp = importlib.util.spec_from_file_location("_mr", ROOT / "tools" / "lib" / "_model_regions.py")
     mr = importlib.util.module_from_spec(sp); sp.loader.exec_module(mr)
     to_c8 = mr.region_to_capri()
-    ratio = pd.read_csv(ROOT / "capri_data" / "2017" / "supply" / "capri_level_ratio.csv", index_col=0)
+    ratio = _read_csv(ROOT / "capri_data" / "2017" / "supply" / "capri_level_ratio.csv", index_col=0)
     rows = []
     for reg in mr.model_regions():
         for an, mem in ANIMALS.items():
@@ -72,7 +75,7 @@ def main() -> None:
     ap.add_argument("--check", action="store_true", help="compare with the animal columns now in yields.csv, write nothing")
     a = ap.parse_args()
     wide, out = build()
-    y = pd.read_csv(YIELDS, index_col=0)
+    y = _read_csv(YIELDS, index_col=0)
     cols = [c for c in ANIMALS if c in y.columns]
     if a.check:
         for c in cols:
@@ -82,14 +85,11 @@ def main() -> None:
             print(f"{c}: {int(m.sum())} cells, old/new ratio median {r.median():.4g} (min {r.min():.4g}, max {r.max():.4g}); "
                   f"old>0 & new missing {int(((old > 0) & ~(new > 0)).sum())}, new>0 & old 0 {int((~(old > 0) & (new > 0)).sum())}")
         return
-    # the other columns are written back as read (text), so a parse/format round trip cannot move their last digit
-    ys = pd.read_csv(YIELDS, index_col=0, dtype=str, keep_default_na=False)
-    for c in cols:
-        v = wide[c].reindex(ys.index).fillna(0.0) if c in wide.columns else pd.Series(0.0, index=ys.index)
-        ys[c] = [repr(float(x)) for x in v]
-    ys.to_csv(YIELDS)
+    # yields.csv is written by build_crop_economics_2017.py, its one writer since 29 October 2026, with these animal
+    # columns (build()); run on its own this builder reports what it computes
     nat = int((out.capri_region.str[2:] == "000000").sum())
-    print(f"yields.csv: animal columns {cols} rebuilt from CAPRI YILD, {len(out)} values ({nat} from the member-state row)")
+    print(f"animal yields: {cols}, {len(out)} values ({nat} from the member-state row); written into yields.csv by "
+          f"build_crop_economics_2017.py")
 
 
 if __name__ == "__main__":

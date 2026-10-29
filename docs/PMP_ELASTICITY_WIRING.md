@@ -20,8 +20,8 @@ Every region x activity elasticity is recorded with its source (`SupplyModule.el
 | `CAPRI_CAL_PRODUCT` | `sources/arm/capri_supply_elas_market_1717.csv` (p_elasSupp of the animal products per member state), weighted with the young animals' elasticities (`capri_supply_elas_young_1720.csv`) by their share of output value | animal activities |
 | `LITERATURE_DEFAULT` | EU-wide defaults (`utils.calibrate_supply_elasticities`) | the rest: grass, set-aside, olives for oil, minor crops CAPRI has no elasticity for, Norway (K32) |
 
-`SupplyModule(data, eps, use_capri_elasticities=False)` keeps the EU-wide defaults everywhere and no share term, for
-comparison.
+(The legacy mode `SupplyModule(data, eps, use_capri_elasticities=False)`, EU-wide defaults everywhere and no share
+term, was removed on 27 October 2026.)
 
 ## CAPRI's rules ported
 
@@ -67,8 +67,8 @@ every region (PMP curvature scales as 1 / (eps x0), so a real elasticity on an i
 responses). It was added when `base_areas.csv` held constant placeholders for COTT, OFIB, OFOD and SETA. With the
 current file it finds none (checked 20 October 2026: OFOD and SETA vary by region, COTT and OFIB are merged into TEXT,
 K35). `tools/check/detect_synthetic_columns.py` reports constant columns as well as lognormal fingerprints.
-`tools/check/scenario_elasticity_check.py` compares the response to a cereal price shock with and without CAPRI's
-elasticities.
+(`tools/check/scenario_elasticity_check.py`, which compared the response to a cereal price shock with and without
+CAPRI's elasticities, was removed with the legacy elasticity mode on 27 October 2026.)
 
 ## Open
 

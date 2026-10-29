@@ -26,9 +26,11 @@ from pathlib import Path
 
 import pandas as pd
 
+import functools as _ft
+_read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
-sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check", "check/nlp_check")]
+sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check")]
 
 ELAS = ROOT / "capri_data" / "sources" / "arm" / "capri_supply_elas_market_1717.csv"
 PROD = ROOT / "capri_data" / "sources" / "market" / "bilateral_dataout_2017.csv.xz"
@@ -41,9 +43,9 @@ def main():
     from build_feed_bulks import EU_MS
     from capri_mod.data.definitions import MARKET_COMMODITIES
 
-    el = pd.read_csv(ELAS)
+    el = _read_csv(ELAS)
     own = el[el["prod"] == el["wrt"]][["region", "prod", "value"]]
-    src = pd.read_csv(PROD, keep_default_na=False)
+    src = _read_csv(PROD, keep_default_na=False)
     prod = src[(src["item"] == "PROD") & (src["r2"] == "")][["r1", "product", "value"]]
     prod = prod.assign(value=pd.to_numeric(prod["value"], errors="coerce").fillna(0.0))
     pw = {(r, p): v for r, p, v in prod.itertuples(index=False)}
@@ -70,8 +72,8 @@ def main():
             a = acc.setdefault(tr, [0.0, 0.0, []])
             a[0] += w * float(e); a[1] += w; a[2].append(r)
         for tr, (num, den, regs) in sorted(acc.items()):
-            rows.append({"region": tr, "commodity": c, "elasticity": round(num / den, 6),
-                         "capri_regions": " ".join(sorted(regs)), "prod_kt": round(den, 3)})
+            rows.append({"region": tr, "commodity": c, "elasticity": num / den,
+                         "capri_regions": " ".join(sorted(regs)), "prod_kt": den})
     out = pd.DataFrame(rows)
     out.to_csv(OUT, index=False)
     print(f"{OUT.relative_to(ROOT)}: {len(out)} region-commodity pairs, {out.region.nunique()} regions, "

@@ -7,14 +7,19 @@ Scripts around the model, by role. Run every tool from the repository root, e.g.
 |---|---|
 | `build/` | Builders of the model's data files in `capri_data/` (and of the CAPRI reference copies in `capri_reference/`). Each data file names its builder in `capri_data/DATA_SOURCING_REGISTRY.json` or in its own docstring. |
 | `run/` | Model runs: `run_f2f_2030.py` (Farm-to-Fork / Green Deal 2030), `run_vcs_2030.py`, `run_policy_comparison.py`, and the test runner `run_tests.py` (used by the Dockerfile). |
-| `check/` | Comparisons with CAPRI and diagnostics. They write only reports (`capri_data/validation/`, or paths given on the command line). `check/nlp_check/` holds the NLP form's original checks. |
+| `check/` | Comparisons with CAPRI and diagnostics. They write only reports (`capri_data/validation/`, or paths given on the command line). |
 | `gams/` | GAMS export scripts to run in a CAPRI installation; they produce the extracts the builders read. |
 | `lib/` | Modules shared by the tools: `_model_regions.py` (model ↔ CAPRI regions), `_capri_costsavings.py`, and `paths.py`. `paths.py` finds the repository root and any tool by name (`tool_file`, `load_tool`). |
+
+`pipeline/builders.json` declares, per builder invocation, the files it reads and writes (generated from a traced run
+by `check/make_pipeline.py`); `dodo.py` at the repository root runs the builders with doit in the order those
+declarations give, and `check/rebuild_from_blank.py` checks that the whole data set is reproduced from the sources
+(docs/design/DATA_PIPELINE_DOIT.md).
 
 A tool that imports another adds the folders to `sys.path`:
 
 ```
-sys.path[:0] = [str(ROOT / "tools" / d) for d in ("lib", "build", "run", "check", "check/nlp_check")]
+sys.path[:0] = [str(ROOT / "tools" / d) for d in ("lib", "build", "run", "check")]
 ```
 
 or loads it by name with `paths.tool_file` or `paths.load_tool`. ROOT is the repository root:
@@ -38,8 +43,8 @@ history may still name a removed tool.
   - `checks/ad_check.py`, hard-coded to another copy of the repository; its logic is in
     `build/build_ad_option.py`;
   - `diag_n_abatement.py`, which set attributes the model no longer has.
-- **One-off migrations, already applied:** `build_pig_split.py` (`build/build_shg_split.py --reproduce` rebuilds its
-  tables), `build_tabo_split.py`, `build_text_merge.py`, `merge_coco_yields.py`, `merge_capreg_yields.py`,
+- **One-off migrations, already applied:** `build_pig_split.py` (its tables are rebuilt by the regular builders; `build_shg_split.py`, the sheep-and-goat
+  split, retired on 29 October 2026 once a rebuild without it reproduced every file), `build_tabo_split.py`, `build_text_merge.py`, `merge_coco_yields.py`, `merge_capreg_yields.py`,
   `validate_capreg_yields.py`, `normalize_activity_codes.py`. Today's builders write the files these patched. Their
   reports in `capri_data/validation/` are kept as the record.
 - **Builders of files no code reads:**

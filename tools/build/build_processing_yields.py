@@ -21,6 +21,8 @@ from pathlib import Path
 
 import pandas as pd
 
+import functools as _ft
+_read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 DUMP = Path("/mnt/user-data/uploads/markmarket_greendeal_1730et_base_1717.txt")
 KEEP = ROOT / "capri_data" / "sources" / "market" / "processing_yields_dataout_2030.csv"
@@ -34,7 +36,7 @@ def main():
         pat = re.compile(r"^'([A-Z]{2}000000)'\.''\.'(GROF|MAPR)'\.'(OLIV|OLIO|PARI|RICE)'\.'2030'\s+([-\d.Ee+]+)")
         rows = [m.groups() for m in map(pat.match, open(DUMP, errors="ignore")) if m]
         pd.DataFrame(rows, columns=["ms", "item", "product", "value"]).to_csv(KEEP, index=False)
-    src = pd.read_csv(KEEP)
+    src = _read_csv(KEEP)
     v = {(r["ms"], r["item"], r["product"]): float(r["value"]) for _, r in src.iterrows()}
     out = []
     for raw, prod in PAIRS:
@@ -47,7 +49,7 @@ def main():
                 out.append(dict(ms=ms, raw=raw, product=prod, raw_kt=g, product_kt=q, **{"yield": q / g}))
         out.append(dict(ms="_EU", raw=raw, product=prod, raw_kt=tr, product_kt=tp, **{"yield": tp / tr if tr else 0.0}))
     df = pd.DataFrame(out)
-    df.to_csv(ROOT / "capri_data" / "2017" / "market" / "processing_yields.csv", index=False, float_format="%.8g")
+    df.to_csv(ROOT / "capri_data" / "2017" / "market" / "processing_yields.csv", index=False)
     print(df.to_string(index=False, float_format=lambda x: f"{x:.3f}"))
 
 

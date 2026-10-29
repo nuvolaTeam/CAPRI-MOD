@@ -1,10 +1,36 @@
-# capri-mod runtime dependencies (as pyproject.toml)
+# capri-mod: every Python package the model, the tests, the data pipeline and the reference-building tools use.
+# pip install -r requirements.txt   (the same sets are the dependencies and the extras of pyproject.toml)
+
+# --- the model ---
 pandas>=2.0
 numpy>=1.24
 scipy>=1.10
-# CasADi with IPOPT (EPL): the regional supply models in CAPRI's NLP form, the default (CAPRIModel.supply_form = "nlp")
+# CasADi with IPOPT (EPL): the regional supply models in CAPRI's NLP form
 casadi>=3.6
-# Clarabel interior-point conic solver (Apache-2.0): the conic form of the regional models (supply_form = "conic"),
-# the manure-market pool equilibrium and starting points
+# Clarabel interior-point solver (Apache-2.0): the manure-market pool equilibrium
 clarabel>=0.7
-# the test runner uses its own stand-in; pytest is optional (python -m pytest capri_mod/tests)
+# Apache Arrow (Apache-2.0): Parquet for the model's caches (the market supply Hessians), exact by construction
+pyarrow>=14
+
+# --- tests (tools/run/run_tests.py also runs them without pytest, through its own stand-in) ---
+pytest>=7.0
+# parallel test processes: python -m pytest -n 2 (with CAPRI_WORKERS=1 on an 8 GB machine)
+pytest-xdist>=3.5
+# coverage runs (concurrency=multiprocessing for the regional worker processes)
+coverage>=7.0
+# DuckDB (MIT): the data declarations and checks (capri_data/schema, tools/check/validate_data.py), in the tests
+# and after every rebuild; not needed to run the model
+duckdb>=2.0
+# doit (MIT): the data pipeline (dodo.py, tools/pipeline/builders.json); not needed to run the model
+doit>=0.37
+
+# --- data pipeline (capri_mod/pipeline; about 300 MB installed, not needed to run the model) ---
+# provider downloads (Eurostat, FAOSTAT); capri_mod/data/rebase.py falls back to urllib without it
+requests>=2.28
+# the versioned store: Delta tables (Apache-2.0) written through Arrow
+deltalake>=0.18
+
+# --- reference-building tools (tools/build/*: CAPRI's GDX files -> the reference CSVs; not needed to run the model) ---
+# GAMS Python API (MIT), used only for its GDX bindings; no GAMS installation or licence is needed, but the GDX
+# library itself (libgdxcclib64.so, MIT, github.com/GAMS-dev/gdx) is built separately: README section 3
+gamsapi>=54

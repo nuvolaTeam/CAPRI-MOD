@@ -38,6 +38,8 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+import functools as _ft
+_read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 SRC_M = ROOT / "capri_data" / "sources" / "market" / "dairy_dataout_2030.csv"
 SRC_E = ROOT / "capri_data" / "sources" / "market" / "dairy_elasticities_2030.csv"
@@ -56,7 +58,7 @@ def extract(dump: Path, elas: Path):
             m = pat.match(line)
             if m and m.group(3) in PRODS:
                 rows.append((m.group(1), m.group(2), m.group(3), float(m.group(4))))
-    pd.DataFrame(rows, columns=["region", "item", "product", "value"]).to_csv(SRC_M, index=False, float_format="%.10g")
+    pd.DataFrame(rows, columns=["region", "item", "product", "value"]).to_csv(SRC_M, index=False)
     # elasticity file: three parameters, CAL rows of dairy items
     want = {"p_hessNQDairy", "p_ElasDair", "p_ElasDem"}
     cur, out = None, []
@@ -69,7 +71,7 @@ def extract(dump: Path, elas: Path):
             m = pe.match(line)
             if m and m.group(2) in MLK and m.group(3) in MLK:
                 out.append((cur, m.group(1), m.group(2), m.group(3), float(m.group(4))))
-    pd.DataFrame(out, columns=["param", "ms", "row", "col", "value"]).to_csv(SRC_E, index=False, float_format="%.10g")
+    pd.DataFrame(out, columns=["param", "ms", "row", "col", "value"]).to_csv(SRC_E, index=False)
     print(f"extracted {len(rows)} market rows, {len(out)} elasticity rows")
 
 
@@ -81,9 +83,9 @@ def main():
     if a.dump.exists() and a.elas.exists():
         SRC_M.parent.mkdir(parents=True, exist_ok=True)
         extract(a.dump, a.elas)
-    src = pd.read_csv(SRC_M)
+    src = _read_csv(SRC_M)
     v = {(r.region, r.item, r.product): r.value for r in src.itertuples()}
-    el = pd.read_csv(SRC_E)
+    el = _read_csv(SRC_E)
 
     spec = importlib.util.spec_from_file_location("_mr", ROOT / "tools" / "lib" / "_model_regions.py")
     mr = importlib.util.module_from_spec(spec); spec.loader.exec_module(mr)
@@ -130,8 +132,8 @@ def main():
                 checks.append((ms, k, imp, float(e[(k, k)])))
     out = pd.DataFrame(rows)
     dest = ROOT / "capri_data" / "2017" / "market"
-    out.to_csv(dest / "dairy_processing.csv", index=False, float_format="%.10g")
-    pd.DataFrame(hrows).to_csv(dest / "dairy_hessian.csv", index=False, float_format="%.10g")
+    out.to_csv(dest / "dairy_processing.csv", index=False)
+    pd.DataFrame(hrows).to_csv(dest / "dairy_hessian.csv", index=False)
 
     # EU balance of the products (CAPRI's EU = the member states; trade without intra-EU flows)
     dem = el[el.param == "p_ElasDem"]
@@ -153,7 +155,7 @@ def main():
         rec["eta_hcom"] = eta
         bal.append(rec)
     bal = pd.DataFrame(bal)
-    bal.to_csv(dest / "dairy_eu_balance.csv", index=False, float_format="%.8g")
+    bal.to_csv(dest / "dairy_eu_balance.csv", index=False)
     # EU food demand elasticities among the nine products (CAPRI p_ElasDem, own and cross), each row
     # weighted by the member states' food use (HCOM) of the row product
     em = []
@@ -165,7 +167,7 @@ def main():
             w = sum(hc[m] for m in vals if hc.get(m, 0) > 0)
             if w > 0:
                 em.append({"row": k, "col": j, "elas": sum(vals[m] * hc[m] for m in vals if hc.get(m, 0) > 0) / w})
-    pd.DataFrame(em).to_csv(dest / "dairy_eu_demand_elas.csv", index=False, float_format="%.6g")
+    pd.DataFrame(em).to_csv(dest / "dairy_eu_demand_elas.csv", index=False)
 
     print(f"dairy_processing.csv: {out.ms.nunique()} member states; dairy_hessian.csv: {len(hrows)} entries")
     print(bal.round(2).to_string(index=False))

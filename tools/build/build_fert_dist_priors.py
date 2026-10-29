@@ -35,6 +35,8 @@ from pathlib import Path
 
 import pandas as pd
 
+import functools as _ft
+_read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 ENV = ROOT / "capri_data" / "2017" / "environment"
 GROUP = {"SWHE": "WHEA", "DWHE": "WHEA", "BARL": "BARL", "MAIZ": "MAIZ", "RYEM": "CERE", "OATS": "CERE",
@@ -120,9 +122,9 @@ def main():
     if a.dump.exists():
         src = extract(a.dump)
         SRC.parent.mkdir(parents=True, exist_ok=True)
-        src.to_csv(SRC, index=False, float_format="%.10g")
+        src.to_csv(SRC, index=False)
         print(f"extracted {len(src)} rows -> {SRC.relative_to(ROOT)}")
-    src = pd.read_csv(SRC)
+    src = _read_csv(SRC)
     v = {(r.region, r.item, r.product): r.value for r in src.itertuples(index=False)}
     # CAPRI's regions (RU: NUTS2, or the country where it has one region) and, for the model regions without a
     # CAPRI region of their own (Berlin, Hamburg, Bremen, ...), the country (NUTS0 code; level "nuts0")
@@ -165,10 +167,10 @@ def main():
         for c, x in area.items():
             mrows.append(dict(capri_region=r, model_crop=rev.get(c, c), ngrp=ngrp(c), area=x))
     pri = pd.DataFrame(rows).sort_values(["capri_region", "ngrp"])
-    pri.to_csv(ENV / "fert_dist_priors_2030.csv", index=False, float_format="%.8g")
+    pri.to_csv(ENV / "fert_dist_priors_2030.csv", index=False)
     mg = pd.DataFrame(mrows).groupby(["capri_region", "model_crop", "ngrp"], as_index=False).area.sum()
     mg["share"] = mg.area / mg.groupby(["capri_region", "model_crop"]).area.transform("sum")
-    mg.drop(columns="area").to_csv(ENV / "fert_dist_crop_groups_2030.csv", index=False, float_format="%.8g")
+    mg.drop(columns="area").to_csv(ENV / "fert_dist_crop_groups_2030.csv", index=False)
     print(f"fert_dist_priors_2030.csv: {len(pri)} rows, {pri[pri.level == 'ru'].capri_region.nunique()} CAPRI regions in "
           f"{pri.capri_region.str[:2].nunique()} countries")
     print(f"mineral efficiency: median {pri.mine_eff.median():.3f}; manure availability median {pri.excr_avail.median():.3f}")

@@ -55,7 +55,7 @@ def main():
             rows.append(dict(ms=ms, fpeg_kha=v.get("FPEG", 0.0), ofar_kha=v["OFAR"],
                              fleg_share=v.get("FPEG", 0.0) / v["OFAR"]))
     t = pd.DataFrame(rows)
-    t.to_csv(POL / "cap_greening_fleg_ms.csv", index=False, float_format="%.8g")
+    t.to_csv(POL / "cap_greening_fleg_ms.csv", index=False)
     print(t.to_string(index=False))
 
 

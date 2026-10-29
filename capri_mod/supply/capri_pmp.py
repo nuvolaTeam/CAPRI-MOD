@@ -41,6 +41,7 @@ import numpy as np
 import pandas as pd
 from capri_mod.params import param, param_table
 from capri_mod.data.definitions import MS_CODE
+from capri_mod.tableio import read_input
 
 # --- 1. dampening ----------------------------------------------------------
 
@@ -127,7 +128,6 @@ PMP_ELAS_FILE = "pmp_own_price_elasticities.csv"
 COUNTRY_ELAS_FILE = "capri_own_price_elasticities.csv"
 #: the country file's CAPRI codes -> model activities (animal products and young animals are not activities)
 COUNTRY_ELAS_ALIASES = {"MAIZ": "CORN", "TWIN": "WINE"}
-CROSSWALK = "shared/nuts_crosswalk.json"
 
 # CAPRI names grain maize MAIZ; the model calls it CORN. Fodder on arable land OFAR is the model's OFOD (OFAR + ROOF;
 # CAPRI's sources carry OFAR only): without the alias the 14 Mha of other fodder stayed on the literature default
@@ -148,7 +148,6 @@ def build_elasticity_table(
     regions,
     activities,
     defaults: pd.Series,
-    apply_dampening: Optional[bool] = None,
     base_areas: Optional[pd.DataFrame] = None,
     base_year: str = "2017",
 ) -> Tuple[pd.DataFrame, pd.DataFrame, dict]:
@@ -163,14 +162,10 @@ def build_elasticity_table(
       NO_CAPRI_VALUE     none of the above: no value (NaN); the activity is held at its level unless CAPRI's PMP
                          terms cover it (no literature defaults since 23 October 2026)
 
-    Both CAPRI sources are per region x activity. The second is keyed by CAPRI
-    8-character region codes and is resolved through the NUTS crosswalk, which is
-    why it reaches regions the first one misses.
+    Both CAPRI sources are per region x activity, keyed by CAPRI's 8-character region codes, the model's own.
     """
     data_dir = Path(data_dir)
-    if apply_dampening is None:                            # the setting supply.pmp_apply_dampening
-        from capri_mod.settings import current as _settings
-        apply_dampening = bool(_settings().get("supply.pmp_apply_dampening"))
+    apply_dampening = True        # CAPRI's dampening (impose_upper_bound_on_elasticity.gms)
     # (The runtime guard against activities anchored on a constant placeholder base, detect_synthetic_base_activities,
     # blocked none since the synthetic data was replaced and was removed from here on 23 October 2026; the function
     # stays as a data check, test_capri.py.)
@@ -183,22 +178,12 @@ def build_elasticity_table(
     # --- lower-precedence source first, so the better one overwrites it ---
     from capri_mod.data.loaders import resolve_data_file
     pmp_path = resolve_data_file(data_dir, PMP_ELAS_FILE, base_year=base_year)
-    cw_path = data_dir / CROSSWALK
     n_pmp = 0
-    if pmp_path.exists() and cw_path.exists():
-        # model region -> CAPRI region: the shared map (tools/build/build_region_map.py: the NUTS correspondence with its
-        # fixes, splits and merges), else the crosswalk; a region with neither, or whose CAPRI region has no row,
-        # takes its member state's national row (K32: the crosswalk alone reached 140 of 248 regions, so 13 Mha of
-        # arable crops in recoded regions - Denmark, Berlin, Saxony, Poland's renamed regions, Finland's - and every
-        # national-row region stayed on the literature defaults)
-        cw = json.loads(cw_path.read_text())["resolved"]      # model -> CAPRI
-        to8 = dict(cw)
-        rm = data_dir / "shared" / "region_capri_map.csv"
-        if rm.exists():
-            for _r in pd.read_csv(rm, dtype=str).fillna("").itertuples(index=False):
-                if _r.capri_region:
-                    to8[_r.region] = _r.capri_region
-        df = pd.read_csv(pmp_path)
+    if pmp_path.exists():
+        # model region -> CAPRI region: the model's regions are CAPRI's regional units (27 October 2026); a region whose
+        # CAPRI row is missing takes its member state's national row
+        to8 = {r: r for r in regions}
+        df = read_input(pmp_path)
         df["activity"] = df["crop"].replace(ACTIVITY_ALIASES)
         df = df[df.activity.isin(set(activities))]
         vals = df["own_price_elas"].values
@@ -223,7 +208,7 @@ def build_elasticity_table(
     reg_path = resolve_data_file(data_dir, REGIONAL_FILE, base_year=base_year)
     n_reg = 0
     if reg_path.exists():
-        rdf = pd.read_csv(reg_path, index_col=0)
+        rdf = read_input(reg_path, index_col=0)
         rdf = rdf.rename(columns=ACTIVITY_ALIASES)
         common_r = [r for r in rdf.index if r in set(regions)]
         common_a = [c for c in rdf.columns if c in set(activities)]
@@ -251,7 +236,7 @@ def build_elasticity_table(
     except Exception:
         cty_path = None
     if cty_path is not None and Path(cty_path).exists():
-        cdf = pd.read_csv(cty_path, index_col=0).rename(columns=COUNTRY_ELAS_ALIASES)
+        cdf = read_input(cty_path, index_col=0).rename(columns=COUNTRY_ELAS_ALIASES)
         covered = {a for a in prov.columns if prov[a].isin(["PMP_CAPRI", "REGIONAL_CAPRI"]).any()}
         cols_ = [c for c in cdf.columns if c in set(activities) and c not in covered]
         for r in regions:
@@ -276,7 +261,7 @@ def build_elasticity_table(
     n_lsk = 0
     lsk_path = data_dir / LIVESTOCK_ELAS_FILE
     if lsk_path.exists():
-        ldf = pd.read_csv(lsk_path)
+        ldf = read_input(lsk_path)
         ldf = ldf[(ldf["prod"] == ldf["wrt"]) & ldf["prod"].isin(set(LIVESTOCK_PRODUCT.values()))]
         ms_val = {(r, p_): float(v) for r, p_, v in zip(ldf.region, ldf["prod"], ldf.value)}
         # Young animals (calves, young cattle, cows) are part of the cattle activities' output
@@ -286,16 +271,16 @@ def build_elasticity_table(
         yel = {}
         ypath = data_dir / YOUNG_ELAS_FILE
         if ypath.exists():
-            for r_, i_, v_ in pd.read_csv(ypath).itertuples(index=False):
+            for r_, i_, v_ in read_input(ypath).itertuples(index=False):
                 yel[(r_, i_)] = float(v_)
         sup = data_dir / base_year / "supply"
         try:
-            mrev = pd.read_csv(sup / "livestock_revenue_coef.csv", index_col=0)
-            toou = pd.read_csv(sup / "livestock_output_value_coef.csv", index_col=0)
+            mrev = read_input(sup / "livestock_revenue_coef.csv", index_col=0)
+            toou = read_input(sup / "livestock_output_value_coef.csv", index_col=0)
             # the product share is the value of final products (no young animals) in total output:
             # CAPRI's MREV is young-animal sales for sows, raised calves and replacement heifers
             try:
-                _pv = pd.read_csv(sup / "livestock_product_value_coef.csv", index_col=0)
+                _pv = read_input(sup / "livestock_product_value_coef.csv", index_col=0)
                 for _a in _pv.columns:
                     if _a in mrev.columns:
                         mrev[_a] = _pv[_a].reindex(mrev.index)

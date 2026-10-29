@@ -17,6 +17,7 @@ eps = 1, an absent record stays absent.
 """
 from __future__ import annotations
 
+import os
 import argparse
 import csv
 import gzip
@@ -24,7 +25,8 @@ from collections import Counter
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-DEFAULT_GDXLIB = "/home/claude/work/gdxlib"
+# folder of libgdxcclib64.so (README section 3): --gdxlib or the environment variable CAPRI_GDXLIB
+DEFAULT_GDXLIB = os.environ.get("CAPRI_GDXLIB", "")
 KEEP = ["Step1", "Support", "Support1", "wVarErr", "CoefVarErr", "DATA", "p_data", "BASM", "BAST", "BSY", "coco",
         "Expert", "TrustLevl", "DGAgri", "DGAgri1", "step2", "step3", "series", "lo", "up", "nObs"]
 

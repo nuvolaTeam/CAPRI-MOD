@@ -26,6 +26,8 @@ from pathlib import Path
 
 import pandas as pd
 
+import functools as _ft
+_read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 #: (column suffix, terms per model region): the base year's (CAPREG), CAPRI's 2030 calibration and capri-mod's
 #: recipe at 2030 (tools/build/build_intensity_q_2030.py); the model takes the suffix of its PMP source at the 2030 market
@@ -48,16 +50,15 @@ def main():
                 v[m.group(1)][(m.group(2), m.group(3))] = float(m.group(4))
     spec = importlib.util.spec_from_file_location("_mr", ROOT / "tools" / "lib" / "_model_regions.py")
     mr = importlib.util.module_from_spec(spec); spec.loader.exec_module(mr)
-    corr = json.loads((ROOT / "capri_data" / "shared" / "nuts_version_correspondence.json").read_text())["capri8_to_nuts"]
     import importlib.util as _ilu_
     _sp_ = _ilu_.spec_from_file_location("_mr_", ROOT / "tools" / "lib" / "_model_regions.py")
     _mr_ = _ilu_.module_from_spec(_sp_); _sp_.loader.exec_module(_mr_)
     to_c8 = _mr_.region_to_capri()          # correspondence + NUTS splits and merges (tools/lib/_model_regions.py)
     import sys
     sys.path.insert(0, str(ROOT))
-    from capri_mod.data.loaders import load_all_data
-    areas = load_all_data(str(ROOT / "capri_data"))["areas"]
-    Q = {sfx: pd.read_csv(f)[lambda d: d["activity"].isin(["GRAE", "GRAI"])].pivot_table(
+    from capri_mod.data.loaders import load_regional_base_areas  # the one table needed (load_all_data read every model input, a dependency cycle in the data pipeline; 29 Oct 2026)
+    areas = load_regional_base_areas(str(ROOT / "capri_data"))
+    Q = {sfx: _read_csv(f)[lambda d: d["activity"].isin(["GRAE", "GRAI"])].pivot_table(
              index="model_region", columns="activity", values="value") for sfx, f in Q_SOURCES if f.exists()}
 
     rows = []
@@ -94,7 +95,7 @@ def main():
                 out.at[r, "q_source" + sfx] = "country median of q x area (REGISTERED fallback)"
     out = out.drop(columns=["ms"])
     dest = ROOT / "capri_data" / "2017" / "supply" / "grass_intensity.csv"
-    out.to_csv(dest, float_format="%.6g")
+    out.to_csv(dest)
     print(f"wrote {dest.name}: {len(out)} regions, {int((out.q_source == 'CAPRI p_pmpQuadTechn').sum())} with CAPRI's own PMP terms; "
           f"extensive share median {out.share_ext.median():.2f}, yield ext/int median "
           f"{(out.yield_ext_rel / out.yield_int_rel).median():.2f}")

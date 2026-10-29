@@ -5,9 +5,11 @@ settings unless options say otherwise. Saves a pickle read by tools/check/compar
 EU27 domestic price changes, activity and output totals (base, scenario), the
 environmental tables (base, scenario) and convergence metadata.
 
-Usage: python tools/run/run_f2f_2030.py OUT.pkl [--no-land-rules] [--manure-market] [--nitrate]
-                                            [--no-manure-techs] [--qp-solver builtin|clarabel]
+Usage: python tools/run/run_f2f_2030.py OUT.pkl [--scenario f2f|greendeal|greendeal2030|carbontax]
                                             [--targets lndscpTarg=0,orgTarg=0,pestRedu=0,surpRedu=0]
+                                            [--settings FILE.toml] [--set section.key=value] ...
+Any setting of capri_mod/settings/defaults.toml is changed with --set (e.g. --set market.eu_blocks=true,
+--set diagnostics.trace_outer=true for the outer-loop trace) or a --settings file.
 """
 import os as _os
 import sys as _sys
@@ -29,28 +31,14 @@ import numpy as np
 ROOT = Path(__file__).resolve().parents[2]
 
 
+_T_START = time.time()
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("out")
-    ap.add_argument("--feed-in-supply", action="store_true", help="(default now) feeding inside the supply models")
-    ap.add_argument("--no-feed-in-supply", action="store_true", help="feeding solved apart (EU ration model)")
-    ap.add_argument("--nitrate", action="store_true",
-                    help="the ration model's early nitrate ingredient; ignored when CAPRI's supplement options "
-                         "(line_nitr.gms, ghgTechLineNitr) are inside the supply models")
-    ap.add_argument("--surplus-per-ha", action="store_true", help="CAPRI e_SURTOTHa: surplus per ha of current land")
-    ap.add_argument("--land-no-slack", action="store_true", help="(default now) CAPRI LandBalNoSlak_: no idle farmland")
-    ap.add_argument("--young-animals", action="store_true", help="CAPRI's young-animal markets")
-    ap.add_argument("--no-young-animals", action="store_true")
-    ap.add_argument("--surplus-current-ha", action="store_true", help="N target per current hectare (CAPRI e_SURTOTHa)")
-    ap.add_argument("--manure-market", action="store_true")
-    ap.add_argument("--no-land-rules", action="store_true",
-                    help="idle farmland allowed, N target on base farmland (the default before October 2026)")
-    ap.add_argument("--no-manure-techs", action="store_true")
-    ap.add_argument("--no-dairy-block", action="store_true",
-                    help="dairy products by fixed ratios of milk (market.use_dairy_block false; the default is CAPRI's "
-                         "dairy block)")
-    ap.add_argument("--dairy-block", action="store_true",
-                    help="(default) CAPRI's dairy processing in the market (docs/DAIRY_PROCESSING.md)")
+    ap.add_argument("--regions", default="", help="diagnostics: a comma-separated subset of regions")
+    ap.add_argument("--manure-market", action="store_true", help="manure trade on (overrides the scenario)")
     ap.add_argument("--endotech", default="",
                     help="CAPRI endogenous-technology settings for baseline and scenario, e.g. ghgTechMYld=0.2 "
                          "(default: star 3.0's refpol_endotech_all_sup, ghgTechMYld 0, ghgTechFEff 0.1); "
@@ -70,9 +58,6 @@ def main():
     ap.add_argument("--pesticide-rule", default="", choices=("", "jrc121368", "star3"),
                     help="yield effect of the pesticide target: 'jrc121368' (10%% at a 50%% cut) or 'star3' (none, "
                          "CAPRI star 3.0's Green Deal group); default: the scenario's (f2f jrc121368, greendeal star3)")
-    ap.add_argument("--nutmin", default="capri", choices=("capri", "on", "off"),
-                    help="CAPRI's minimum mineral share NUTMIN_: 'capri' (star 3.0: only without the inner fertiliser "
-                         "model, so off by default), or forced on / off")
     ap.add_argument("--no-manure-market", action="store_true", help="manure trade off (overrides the scenario)")
     ap.add_argument("--biofuel-markets", action="store_true", help="endogenous biofuel markets on (BIOF_M)")
     ap.add_argument("--biofuel-mandate", type=float, default=None,
@@ -83,22 +68,6 @@ def main():
                     help="override the scenario's nutrient-surplus rule")
     ap.add_argument("--mine-redu", default="", choices=("", "00", "20", "10crp", "13crp", "17crp", "20crp"),
                     help="CAPRI's mineral fertiliser reduction (Green Deal mineRedu; minfert_redu_*.gms)")
-    ap.add_argument("--qp-solver", default=None)
-    ap.add_argument("--supply-form", choices=("conic", "nlp"), default=None,
-                    help="the regional supply models' form (CAPRIModel.supply_form; default nlp)")
-    ap.add_argument("--pmp", choices=("elasticity", "capri2030", "recipe"), default=None,
-                    help="the crops' PMP matrix: elasticity-calibrated or CAPRI's 2030 terms (SupplyModule.pmp_source)")
-    ap.add_argument("--pmp-parts", default=None,
-                    help="with --pmp capri2030: which CAPRI 2030 terms, comma list of crops,animals,feed,land (default all)")
-    ap.add_argument("--market-nq", action="store_true",
-                    help="CAPRI's market supply functions measured on the supply models (Hessian at the baseline, cached)")
-    ap.add_argument("--no-market-nq", action="store_true",
-                    help="(default) the market's own-price anticipation of the EU supply response")
-    ap.add_argument("--eu-blocks", action="store_true",
-                    help="CAPRI's two EU trade blocks EU_WEST and EU_EAST in the market (default: the EU as one region)")
-    ap.add_argument("--no-gl-demand", action="store_true",
-                    help="food demand without CAPRI's GL system (own-price constant elasticities, no cross-price terms)")
-    ap.add_argument("--verbose", action="store_true", help="print the outer-loop trace")
     ap.add_argument("--targets", default="", help="CAPRI switches to change, e.g. "
                     "'lndscpTarg=0,orgTarg=0,pestRedu=0' for the nitrogen-balance target alone")
     ap.add_argument("--capped-regions", default="",
@@ -107,11 +76,6 @@ def main():
     ap.add_argument("--trajectory", default="capri_ref",
                     help="2030 baseline trajectory: capri_ref (CAPRI's 2030 reference, default), captrd (CAPRI's trend "
                          "projection) or a file name in capri_data/trajectories")
-    ap.add_argument("--cattle-member-splits", action="store_true",
-                    help="CAPRI's replacement heifers and calf activities with their own levels and the young-animal "
-                         "markets per sex (RegionalSupplyModel.use_cattle_member_splits; K65)")
-    ap.add_argument("--yani-pmp-response", action="store_true",
-                    help="young-animal price update from the PMP terms (Q^-1) instead of the solved models' response")
     ap.add_argument("--settings", action="append", default=[],
                     help="a TOML settings file (capri_mod/settings/defaults.toml's keys); repeatable, later files win")
     ap.add_argument("--set", action="append", default=[],
@@ -120,11 +84,13 @@ def main():
                     help="keep 2017 prices in the 2030 baseline (default: CAPRI's 2030 prices in 2017 money)")
     a = ap.parse_args()
     warnings.filterwarnings("ignore")
-    # K3: a regional solve that falls back to the model without feeding inside and technologies is always shown
-    warnings.filterwarnings("always", message="conic solve")
+    # a regional solve whose last IPOPT point is kept (non-optimal, as CAPRI) is always shown
+    warnings.filterwarnings("always", message=".*IPOPT's last point kept")
+    warnings.filterwarnings("always", message="CAPRI's stop rule not evaluated")
+    warnings.filterwarnings("always", message="market supply Hessian not built")
+    warnings.filterwarnings("always", message="scenario market supply Hessian not measured")
     warnings.filterwarnings("always", message="bilateral market did not converge")
     warnings.filterwarnings("always", message="CAPRI's crop-group fertiliser allocation")
-    warnings.filterwarnings("always", message="fertiliser distribution inside failed")
     sys.path.insert(0, str(ROOT))
     from capri_mod.model import CAPRIModel
     from capri_mod.projection import ProjectionModule, BaselineTrajectory
@@ -132,32 +98,7 @@ def main():
     # the run's settings (capri_mod/settings): defaults.toml, then --settings files, then the flags below, then --set
     from capri_mod import settings as _S
     ov = {}
-    flag_map = [  # (flag on, setting, value)
-        (a.eu_blocks, "market.eu_blocks", True),
-        (a.cattle_member_splits, "supply.use_cattle_member_splits", True),
-        (a.yani_pmp_response, "young_animals.use_exact", "off"),
-        (a.nutmin != "capri", "fertiliser.use_min_mineral_share", a.nutmin),
-        (a.verbose, "diagnostics.trace_outer", True),
-        (a.feed_in_supply, "supply.use_feed_in_supply", True),
-        (a.no_feed_in_supply, "supply.use_feed_in_supply", False),
-        (a.nitrate, "supply.use_nitrate_in_ration", True),
-        (a.surplus_per_ha or a.surplus_current_ha, "supply.surplus_per_current_ha", True),
-        (a.land_no_slack, "supply.land_no_slack", True),
-        (a.young_animals, "young_animals.enabled", True),
-        (a.no_young_animals, "young_animals.enabled", False),
-        (a.no_land_rules, "supply.land_no_slack", False),
-        (a.no_land_rules, "supply.surplus_per_current_ha", False),
-        (a.no_manure_techs, "supply.use_manure_techs", False),
-        (a.no_dairy_block, "market.use_dairy_block", False),
-        (a.dairy_block, "market.use_dairy_block", True),
-        (bool(a.qp_solver), "supply.qp_solver", a.qp_solver),
-        (bool(a.supply_form), "supply.supply_form", a.supply_form),
-        (bool(a.pmp), "supply.pmp_source", a.pmp),
-        (bool(a.pmp_parts), "supply.pmp_capri_parts",
-         [x.strip() for x in (a.pmp_parts or "").split(",") if x.strip()]),
-        (a.market_nq, "market.market_supply_nq", True),
-        (a.no_market_nq, "market.market_supply_nq", False),
-        (a.no_gl_demand, "market.food_demand_gl", False),
+    flag_map = [  # (flag on, setting, value); every other setting: --set or --settings
         (bool(a.capped_regions), "supply.jrc_capped_override", a.capped_regions),
     ]
     for on, k, v in flag_map:
@@ -172,7 +113,11 @@ def main():
             ov[k.strip()] = v.strip()
     run_settings = _S.load(a.settings, overrides=ov)
     _S.activate(run_settings)
-    m = CAPRIModel(data_dir=str(ROOT / "capri_data"), verbose=False)
+    # a timed line per stage and outer iteration (CAPRIModel._progress): wall clock and time since the start
+    CAPRIModel.progress, CAPRIModel.progress_t0 = True, _T_START
+    m = CAPRIModel(data_dir=str(ROOT / "capri_data"), verbose=False,
+                   regions=[x for x in a.regions.split(",") if x] or None)
+    m._progress("model built (data loaded)")
     t0 = time.time()
     # CAPRI simulates from its calibrated 2030 reference (CAPMOD's reference run); the trend projection (CAPTRD) is
     # that calibration's input and stays available (--trajectory captrd)
@@ -225,7 +170,9 @@ def main():
     if a.endotech:
         _scen.endotech = effective(_et)
     _scen.endotech = effective(_scen.endotech)
+    m._progress(f"projection to 2030: baseline, then {_scen.name}")
     res = pmod.run(policy_scenario=_scen, years=[2030])
+    m._progress("runs done; writing the results")
     b, s = res.baseline[2030], res.scenario[2030]
     _pmm = (getattr(pmod, "_last_projected_model", None) or m).market_module
     db, ds = b["market"].domestic_prices.loc["EU27"], s["market"].domestic_prices.loc["EU27"]
@@ -354,6 +301,23 @@ def main():
                                            if "EU27" in s["market"].net_exports.index else {}),
                            "price": s["market"].domestic_prices.loc["EU27"].astype(float).to_dict(),
                            "world": s["market"].world_prices.astype(float).to_dict()},
+           # CAPRI's welfare report (docs/WELFARE.md), base and scenario: the market's components per market region
+           # (EUR million, changes against the calibration point; tariffs and quota rents levels) and the supply
+           # models' MGVA and premiums' budget cost per supply region (EUR million, levels)
+           "welfare": tuple({"market": (x["market"].welfare.astype(float).to_dict("index")
+                                        if getattr(x["market"], "welfare", None) is not None else None),
+                             "supply": (x["welfare_supply"].astype(float).to_dict("index")
+                                        if x.get("welfare_supply") is not None else None)} for x in (b, s)),
+           # the outer loop's state per iteration, base and scenario (signals, targets, young-animal prices, member
+           # states' milk, EU herds; KNOWN_ISSUES K75)
+           "outer_history": tuple(x.get("outer_history") for x in (b, s)),
+           # raw milk per market region, base and scenario: production, use, domestic price (EUR/t). Raw milk is not
+           # traded in CAPRI, so production equals use in every region (audit M11)
+           "raw_milk": {lab: {rg: (float(x["market"].production.at[rg, "MILK"]),
+                                   float(x["market"].consumption.at[rg, "MILK"]),
+                                   float(x["market"].domestic_prices.at[rg, "MILK"]))
+                              for rg in x["market"].production.index}
+                        for lab, x in (("base", b), ("scen", s)) if "MILK" in x["market"].production.columns},
            # EU market regions (CAPRI's two trade blocks with --eu-blocks): production, use, price, base and scenario,
            # and the flows between them
            "eu_regions": {lab: {rg: {"prod": x["market"].production.loc[rg].astype(float).to_dict(),
@@ -422,10 +386,10 @@ def main():
                                         if x_ is not None and np.isfinite(x_)},
                               "manure_trade": tuple(float(t_) for t_ in (getattr(v, "manure_trade", None) or (0.0, 0.0))),
                               "land_types": dict(getattr(v, "land_types", None) or {}),
-                              "land_market_failed": bool(getattr(v, "land_market_failed", False)),
                               "n_target_relaxed": bool(getattr(v, "n_target_relaxed", False)),
-                              "shortfall": (float(getattr(v, "landscape_shortfall", 0.0) or 0.0),
-                                            float(getattr(v, "balance_shortfall", 0.0) or 0.0)),
+                              # (0, the N balance's shortfall): the first item was the landscape floor's, which is
+                              # no longer relaxed (K84, 27 October 2026); kept so earlier runs compare
+                              "shortfall": (0.0, float(getattr(v, "balance_shortfall", 0.0) or 0.0)),
                               "manure_pool_price": float((getattr((getattr(pmod, "_last_projected_model", None) or m).supply_module, "manure_pool_price", None) or {}).get(reg[:2], 0.0) or 0.0)}
                         for reg, v in s["supply"].items()},
            # baseline manure trade per region (t N exported, imported), for the check against CAPRI's MTRADE
@@ -439,37 +403,30 @@ def main():
                     "settings": run_settings.to_dict(), "settings_changed": run_settings.diff(),
                     "market_supply_hessian": getattr(getattr(pmod, "_last_projected_model", None) or m,
                                                      "market_supply_hessian_info", None),
+                    "market_supply_hessian_log": getattr(getattr(pmod, "_last_projected_model", None) or m,
+                                                         "market_supply_hessian_log", None),
                     "base_iterations": b.get("metadata", {}).get("n_outer_iterations"),
+                    # CAPRI's stop rule at the last iteration, baseline and scenario (capri_mod/utils/capri_stop.py)
+                    "capri_stop": {lab_: (d_.get("metadata") or {}).get("capri_stop") for lab_, d_ in (("base", b), ("scen", s))},
+                    # the regional solves' jump check per iteration (supply.nlp_jump_check, K79): the regions checked
+                    # and those it switched to another start's solution (the detail per region: outer_history)
+                    "nlp_jump_check": {lab_: (d_.get("metadata") or {}).get("nlp_jump_check") for lab_, d_ in (("base", b), ("scen", s))},
                      "prices": pmod.price_summary,
-                     # regions where CAPRI's form failed (K55, K57): conic form instead, or JRC121368's relaxed N target
+                     # regions where CAPRI's form failed (K55, K57): JRC121368's relaxed N target, or IPOPT's last point
+                     # kept (non-optimal, as CAPRI)
                      "nlp_fallback": {lab_: dict((d_.get("metadata") or {}).get("nlp_fallback") or {})
                                       for lab_, d_ in (("baseline", b), ("scenario", s))},
                      # Norway's last price gap and product (K56; out of the convergence test from iteration 15)
                      "nor_price_gap": (s.get("metadata") or {}).get("nor_price_gap"),
                      "market_calibration_bound_hits": {lab_: (d_.get("metadata") or {}).get("market_calibration_bound_hits")
                                                        for lab_, d_ in (("base", b), ("scen", s))},
-                     "supply_form": (s.get("metadata") or {}).get("supply_form"),
                      "pmp_source": (s.get("metadata") or {}).get("pmp_source"),
                      "pmp_capri_parts": (s.get("metadata") or {}).get("pmp_capri_parts"),
                      # regions whose NLP form needed the Green Deal's mineral caps relaxed (KNOWN_ISSUES K50)
                      "nlp_relaxed": dict((s.get("metadata") or {}).get("nlp_relaxed") or {}),
-                     "conic_fallbacks": {lab_: sorted(r_ for r_, v_ in d_["supply"].items()
-                                                      if getattr(v_, "conic_failed", None))
-                                         for lab_, d_ in (("baseline", b), ("scenario", s))},
-                     # K4: regions whose final solve Clarabel could not finish and IPOPT completed
-                     "ipopt_polished": {lab_: sorted(r_ for r_, v_ in d_["supply"].items()
-                                                     if "IPOPT" in str(getattr(v_, "conic_status", "") or ""))
-                                        for lab_, d_ in (("baseline", b), ("scenario", s))},
-                     # CAPRI's crop-group fertiliser allocation (K9): regions whose final solve needed the coupled NLP,
-                     # and regions where it had no solution (status other than a solved NLP or the plain check)
-                     "fert_dist_nlp": {lab_: sorted(r_ for r_, v_ in d_["supply"].items()
-                                                    if str(getattr(v_, "fert_dist_status", "") or "").startswith("NLP Solve")
-                                                    or "Acceptable" in str(getattr(v_, "fert_dist_status", "") or ""))
-                                       for lab_, d_ in (("baseline", b), ("scenario", s))},
-                     "fert_dist_open": {lab_: sorted(f"{r_}: {getattr(v_, 'fert_dist_status', '')}" for r_, v_ in d_["supply"].items()
-                                                     if getattr(v_, "fert_dist_status", None)
-                                                     and not str(getattr(v_, "fert_dist_status", "")).startswith("NLP Solve")
-                                                     and "Acceptable" not in str(getattr(v_, "fert_dist_status", "")))
+                     # regions whose last IPOPT point was kept (non-optimal, as CAPRI keeps a non-optimal solve)
+                     "nlp_nonoptimal": {lab_: sorted(r_ for r_, v_ in d_["supply"].items()
+                                                     if getattr(v_, "nlp_nonoptimal", None))
                                         for lab_, d_ in (("baseline", b), ("scenario", s))},
                      # the final market solve of the baseline and of the scenario met its balances (residual < 1e-7)
                      "market_converged": {lab_: bool(getattr(d_["market"], "converged", True))
@@ -486,9 +443,9 @@ def main():
             md_ = _pm.supply_module._models.get(r_)
             if md_ is None:
                 continue
-            _d[r_] = {k_: getattr(md_, k_, None) for k_ in ("_last_aug", "_last_plain", "_row_labels", "_last_conic_duals",
+            _d[r_] = {k_: getattr(md_, k_, None) for k_ in ("_last_aug", "_last_plain", "_row_labels", "_last_duals",
                                                             "_land_types_used", "_fert_tech_shares", "_n_intensity",
-                                                            "_land_market_failed", "_cover", "_fall_floor", "_last_grass_z")}
+                                                            "_cover", "_fall_floor", "_last_grass_z")}
             _d[r_].update({"acts": list(md_.acts), "Q": md_.Q, "f": md_.f, "net_revenues": md_.net_revenues.copy(),
                            "base": md_._base_levels(), "nb_price": getattr(_pm.supply_module, "_nbal_state", {}).get(r_),
                            "surplus_row": getattr(md_, "_surplus_row", None),
@@ -496,15 +453,12 @@ def main():
         pickle.dump(_d, open(a.out.replace(".pkl", "_dump.pkl"), "wb"))
     pickle.dump(out, open(a.out, "wb"))
     run_settings.save(str(a.out).rsplit(".", 1)[0] + ".settings.toml")
-    _fb = out["meta"]["conic_fallbacks"]
+    _no = out["meta"]["nlp_nonoptimal"]
     print(f"saved {a.out} | converged {out['meta']['conv']} in {out['meta']['it']} iterations, {out['meta']['seconds']} s"
-          f" | conic fallbacks: baseline {len(_fb['baseline'])}, scenario {len(_fb['scenario'])}"
-          + (f" ({', '.join(_fb['baseline'] + _fb['scenario'])})" if _fb['baseline'] or _fb['scenario'] else "")
-          + f" | form {out['meta'].get('supply_form')}" + f" | PMP {out['meta'].get('pmp_source')}"
+          f" | non-optimal regional solves kept: baseline {len(_no['baseline'])}, scenario {len(_no['scenario'])}"
+          + (f" ({', '.join(_no['baseline'] + _no['scenario'])})" if _no['baseline'] or _no['scenario'] else "")
+          + f" | PMP {out['meta'].get('pmp_source')}"
           + (f", mineral caps relaxed: {out['meta']['nlp_relaxed']}" if out['meta'].get('nlp_relaxed') else "")
-          + f" | IPOPT polish: {', '.join(out['meta']['ipopt_polished']['baseline'] + out['meta']['ipopt_polished']['scenario']) or 'none'}"
-          + f" | crop-group allocation by NLP: {out['meta']['fert_dist_nlp']['scenario'] or 'none'}"
-          + (f" | allocation open: {out['meta']['fert_dist_open']['scenario']}" if out['meta']['fert_dist_open']['scenario'] else "")
           + ("" if all(out["meta"]["market_converged"].values()) else
              f" | MARKET NOT CONVERGED: {[k_ for k_, v_ in out['meta']['market_converged'].items() if not v_]}"))
 

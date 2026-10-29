@@ -2,11 +2,10 @@
 cross terms between crop groups, only leaving the diagonal terms while recalibrating the linear term").
 
 For a set of regions, the regional supply models are solved at base prices and at a price shock (default: +20% on the
-cereals), with three structures of the PMP matrix (PMPCalibrator.CROSS_TERMS):
+cereals), with two structures of the PMP matrix (PMPCalibrator.CROSS_TERMS):
   capri     cross terms only between crops of CAPRI's crop groups (QUADRA_ with GRPLEVL_), the default
-  previous  the structure before 21 October 2026 (cross terms between every pair, a uniform term where no CAPRI term)
   none      diagonal only (CAPRI's decomposition variant)
-The linear terms are recalibrated in each case, so the base is reproduced in all three. Reported: the response of each
+The linear terms are recalibrated in each case, so the base is reproduced in both. Reported: the response of each
 activity group to the shock (% change of area or herd, summed over the regions), per structure.
 
     python tools/check/pmp_cross_term_check.py [--shock 0.20] [--regions DE11,FRH0,ITC4,PL41,ES41,IE04] [--out FILE]
@@ -63,7 +62,7 @@ def main() -> None:
     ap.add_argument("--out", type=Path, default=None)
     a = ap.parse_args()
     regions = a.regions.split(",")
-    df = pd.concat([run(mode, regions, a.shock) for mode in ("capri", "previous", "none")], axis=1)
+    df = pd.concat([run(mode, regions, a.shock) for mode in ("capri", "none")], axis=1)
     print(f"Regional models at +{a.shock:.0%} on the cereal prices (no market feedback), % change summed over {', '.join(regions)}")
     print(df.round(2).to_string())
     if a.out:

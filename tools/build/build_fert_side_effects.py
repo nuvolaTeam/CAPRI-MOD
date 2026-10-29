@@ -41,6 +41,8 @@ from pathlib import Path
 
 import pandas as pd
 
+import functools as _ft
+_read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 ITEMS = ("N2OSYN", "NH3SYN")
 MAN_ITEMS = ("NH3APP", "N2OAPP")
@@ -59,8 +61,8 @@ def no3_records():
         pat = re.compile(r"'([^']+)'\.'(NITR_INH)'\.'([^']+)'\.'([^']+)'\.'(NO3[A-Z]+)'\s+([-0-9.eE+]+)")
         rows = [m.groups() for m in map(pat.match, open(txt)) if m]
         pd.DataFrame(rows, columns=["region", "technology", "activity", "system", "item", "value"]).astype(
-            {"value": float}).to_csv(out, index=False, float_format="%.12g")
-    return pd.read_csv(out)
+            {"value": float}).to_csv(out, index=False)
+    return _read_csv(out)
 
 
 def no3_weighted():
@@ -72,10 +74,10 @@ def no3_weighted():
     for r in mn.itertuples():
         out[(r.region, "NITR_INH", r.item)] = float(r.value)
     A = ROOT / "capri_data" / "2017" / "abatement" / "ammonia"
-    fac = pd.read_csv(A / "n_cascade_factors.csv")
+    fac = _read_csv(A / "n_cascade_factors.csv")
     tsl = {(r.region[:2], r.activity): float(r.value) for r in fac[fac.factor == "tsl"].itertuples()
            if r.region.endswith("000000")}
-    md = pd.read_csv(A / "capri_mann_days_2030.csv")
+    md = _read_csv(A / "capri_mann_days_2030.csv")
     md = md[md["item"].isin(["LEVL", "MANN"])].pivot_table(index=["region", "activity"], columns="item",
                                                            values="value", aggfunc="first").fillna(0.0)
     w = (md["LEVL"] * md["MANN"]).to_dict()
@@ -101,7 +103,7 @@ def no3_weighted():
 def main():
     spec = importlib.util.spec_from_file_location("_mr", ROOT / "tools" / "lib" / "_model_regions.py")
     mr = importlib.util.module_from_spec(spec); spec.loader.exec_module(mr)
-    raw = pd.read_csv(ROOT / "capri_data" / "sources" / "ghgtech" / "LitRevFertTech_p_litRevFertTechs.csv")
+    raw = _read_csv(ROOT / "capri_data" / "sources" / "ghgtech" / "LitRevFertTech_p_litRevFertTechs.csv")
     m = raw[(raw["system"] == "Mineral") & raw["item"].isin(ITEMS)][["region", "technology", "item", "value"]]
     mm = raw[(raw["technology"] == "NITR_INH") & raw["system"].isin(["LIQUID", "SOLID"]) & raw["item"].isin(MAN_ITEMS)]
     mm = mm.groupby(["region", "item"], as_index=False)["value"].mean().assign(technology="NITR_INH_MAN")
@@ -111,7 +113,6 @@ def main():
     KEYS = ([(t, i) for t in sorted(set(m["technology"])) for i in ITEMS] + [("NITR_INH_MAN", i) for i in MAN_ITEMS]
             + [("NITR_INH", i) for i in NO3_MIN] + [("NITR_INH_MAN", i) for i in NO3_MAN])
     val = {(r.region, r.technology, r.item): float(r.value) for r in d.itertuples()}
-    corr = json.loads((ROOT / "capri_data" / "shared" / "nuts_version_correspondence.json").read_text())["capri8_to_nuts"]
     import importlib.util as _ilu_
     _sp_ = _ilu_.spec_from_file_location("_mr_", ROOT / "tools" / "lib" / "_model_regions.py")
     _mr_ = _ilu_.module_from_spec(_sp_); _sp_.loader.exec_module(_mr_)
@@ -133,7 +134,7 @@ def main():
                 n_med += 1
     out = pd.DataFrame(rows, columns=["region", "technology", "item", "value", "capri_region"])
     dest = ROOT / "capri_data" / "2017" / "abatement" / "fert_side_effects.csv"
-    out.to_csv(dest, index=False, float_format="%.6g")
+    out.to_csv(dest, index=False)
     print(f"wrote {dest.name}: {out.region.nunique()} regions ({n_reg} regional, {n_nat} national entries, {n_med} country medians); "
           + ", ".join(f"{i} median {out[out.item == i].value.median():+.3f}" for i in ITEMS + MAN_ITEMS + NO3_MIN + NO3_MAN))
 

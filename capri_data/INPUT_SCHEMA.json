@@ -270,22 +270,6 @@
     "SOYA/CHES/SKIM diverge; dairy has no CAPRI processing margin to validate against"
    ]
   },
-  "armington_params": {
-   "file": "2017/market/armington_params.csv",
-   "concept": "Armington substitution elasticities",
-   "unit": "dimensionless",
-   "dimension": "commodity",
-   "modules": [
-    "market"
-   ],
-   "source": {
-    "source_type": "CAPRI_SOURCE",
-    "source_ref": "market1_ch.gms literal (CEPII Fontagne 2019)",
-    "vintage": "CAPRI star-3.0",
-    "confidence": "validated",
-    "reproducibility": "public_code"
-   }
-  },
   "feed_requirements": {
    "file": "2017/feed/feed_requirements.csv",
    "concept": "energy/protein/DM/days per animal",
@@ -297,22 +281,6 @@
    "source": {
     "source_type": "CAPRI_GDX",
     "source_ref": "capreg DATA2 ENNE/CRPR/DRMN/DRMX/DAYS",
-    "vintage": "2017",
-    "confidence": "validated",
-    "reproducibility": "public_code"
-   }
-  },
-  "feed_availability": {
-   "file": "sources/capreg/capreg_feed_availability_regional.csv",
-   "concept": "feed supply by item",
-   "unit": "1000 t DM",
-   "dimension": "region x feed_item",
-   "modules": [
-    "feed"
-   ],
-   "source": {
-    "source_type": "CAPRI_GDX",
-    "source_ref": "capreg DATA2 feed items",
     "vintage": "2017",
     "confidence": "validated",
     "reproducibility": "public_code"
@@ -339,22 +307,6 @@
    "concept": "IPCC climate zone shares",
    "unit": "share",
    "dimension": "region x zone",
-   "modules": [
-    "environment"
-   ],
-   "source": {
-    "source_type": "LITERATURE",
-    "source_ref": "IPCC",
-    "vintage": "IPCC 2006",
-    "confidence": "validated",
-    "reproducibility": "manual"
-   }
-  },
-  "manure_ch4_ef": {
-   "file": "2017/environment/manure_ch4_ef_regional.csv",
-   "concept": "methane emission factor",
-   "unit": "kg CH4/head/yr",
-   "dimension": "region x animal",
    "modules": [
     "environment"
    ],
@@ -471,24 +423,6 @@
     "wheat absent from the parameter; at market level it aggregates into WHEA"
    ]
   },
-  "input_requirements": {
-   "file": "2017/supply/input_requirements.csv",
-   "concept": "physical input use per hectare",
-   "unit": "various",
-   "dimension": "region x activity x input",
-   "modules": [
-    "supply",
-    "environment"
-   ],
-   "source": {
-    "source_type": "CAPRI_GDX",
-    "source_ref": "capreg DATA2 input items",
-    "vintage": "2017",
-    "confidence": "validated",
-    "reproducibility": "public_code"
-   },
-   "known_gaps": []
-  },
   "pela_cross_price": {
    "file": "sources/estnlp/pela_cross_by_region.json",
    "concept": "cross-price supply elasticities (PELA)",
@@ -506,44 +440,6 @@
    },
    "known_gaps": [
     "2005 vintage; CAPRI has no newer PELA estimate in this release"
-   ]
-  },
-  "livestock_intensity_bounds": {
-   "file": "2017/supply/livestock_intensity_bounds.csv",
-   "concept": "low- and high-intensity dairy yields (bounds of the livestock intensity margin)",
-   "unit": "t milk per head",
-   "dimension": "region x intensity variant",
-   "modules": [
-    "supply"
-   ],
-   "source": {
-    "source_type": "CAPRI_GDX",
-    "source_ref": "capreg DATA2 DCOL/DCOH YILD",
-    "vintage": "2017",
-    "confidence": "validated",
-    "reproducibility": "public_code"
-   },
-   "known_gaps": [
-    "13 regions where CAPRI does not split the herd keep a single yield and no margin"
-   ]
-  },
-  "land_rent_regional": {
-   "file": "2017/supply/land_rent_regional.csv",
-   "concept": "Land rent per hectare by region (Eurostat apri_lrnt, arable land and/or permanent grassland)",
-   "unit": "EUR/ha",
-   "dimension": "region",
-   "modules": [
-    "supply"
-   ],
-   "source": {
-    "source_type": "EXTERNAL",
-    "source_ref": "Eurostat apri_lrnt",
-    "vintage": "2017",
-    "confidence": "validated",
-    "reproducibility": "public_data"
-   },
-   "known_gaps": [
-    "Germany and Cyprus on fallback"
    ]
   },
   "capri_baseline_surplus": {
@@ -587,25 +483,6 @@
    "file": "2017/environment/manure_trade_2030.csv",
    "concept": "Manure N trade between regions: export share of excretion, import per ha of cropland",
    "unit": "share; kg N/ha",
-   "dimension": "region",
-   "modules": [
-    "environmental"
-   ],
-   "source": {
-    "source_type": "CAPRI_GDX",
-    "source_ref": "res_2_1730greendeal_refdefaulta dataOut",
-    "vintage": "2030",
-    "confidence": "validated",
-    "reproducibility": "capri_gdx"
-   },
-   "known_gaps": [
-    "unmatched regions"
-   ]
-  },
-  "capri_regional_n_balance": {
-   "file": "2017/environment/capri_regional_n_balance_2030.csv",
-   "concept": "CAPRI regional N balance positions (MINFER, EXCRET, MTRADE, IMPORT, EXPPRD, CRESID, BIOFIX, ATMOSD, SURTOT)",
-   "unit": "kt N",
    "dimension": "region",
    "modules": [
     "environmental"
@@ -691,23 +568,6 @@
    "source": {
     "source_type": "CAPRI_GDX",
     "source_ref": "FAO_agg_17_defaulta p_dataMarket",
-    "vintage": "2017",
-    "confidence": "validated",
-    "reproducibility": "capri_gdx"
-   },
-   "known_gaps": []
-  },
-  "eu_demand_elas_overrides": {
-   "file": "2017/market/eu_demand_elas_overrides.json",
-   "concept": "EU own-price demand elasticities for oils and cakes",
-   "unit": "elasticity",
-   "dimension": "commodity",
-   "modules": [
-    "market"
-   ],
-   "source": {
-    "source_type": "CAPRI_GDX",
-    "source_ref": "elas_2_1717defaulta p_ElasDem",
     "vintage": "2017",
     "confidence": "validated",
     "reproducibility": "capri_gdx"

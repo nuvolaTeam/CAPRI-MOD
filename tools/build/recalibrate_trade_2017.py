@@ -37,12 +37,13 @@ from __future__ import annotations
 import argparse
 import json
 import re
-import shutil
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
 
+import functools as _ft
+_read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 # CAPRI capmod region -> model trade region. Regions absent here fold into ROW.
 REGION_MAP = {
     "EU27yr19": "EU27",
@@ -82,8 +83,10 @@ COMMODITY_MAP = {
 
 DUMP = Path("/mnt/user-data/uploads/res_0_1717cap_after_2014_cal_from_data_caldefaulta.csv")
 # RSA is a different CAPRI region from ZAF (South Africa) -> ROW.
-#: oilseed-crushing products, added for the crushing module
-EXTRA_COMMODITIES = ["RAPO", "SUNO", "SOYO", "RAPC", "SUNC", "SOYC"]
+#: the commodities beyond the 2021 matrix's columns: sheep and goat meat, and the oilseed-crushing products (added for
+#: the crushing module). Until 29 October 2026 the builder took SGMT from the columns of its own output (a read of the
+#: file it writes); the column list is now declared here, in the same order.
+EXTRA_COMMODITIES = ["SGMT", "RAPO", "SUNO", "SOYO", "RAPC", "SUNC", "SOYC"]
 RECORD = re.compile(
     r"^'([^']+)'\.'([^']+)'\.'ImportQ'\.'([A-Z0-9]+)'\.'2017'\s+([-\d.Ee+]+)")
 
@@ -114,10 +117,8 @@ def main() -> None:
     args = ap.parse_args()
 
     cur_path = args.data_dir / "sources" / "fao_2021" / "trade_flows_2021.csv"
-    cur = pd.read_csv(cur_path, index_col=[0, 1])
-    cur17_path = args.data_dir / "shared" / "trade_flows_2017.csv"
-    cur17_cols = list(pd.read_csv(cur17_path, index_col=[0, 1]).columns) if cur17_path.exists() else []
-    commodities = list(dict.fromkeys(list(cur.columns) + cur17_cols + EXTRA_COMMODITIES))
+    cur = _read_csv(cur_path, index_col=[0, 1])
+    commodities = list(dict.fromkeys(list(cur.columns) + EXTRA_COMMODITIES))
     print(f"current matrix: {cur.shape[0]} region pairs x {len(commodities)} commodities")
 
     inv_comm = {v: k for k, v in COMMODITY_MAP.items()}
@@ -149,12 +150,11 @@ def main() -> None:
     s_old = extra_eu_share(cur, commodities)
     s_new = extra_eu_share(new, commodities)
     common = [c for c in s_new.index if c in s_old.index]
-    cmp_ = pd.DataFrame({"share_2021": s_old[common].round(1),
-                         "share_2017": s_new[common].round(1)})
-    cmp_["change_pp"] = (cmp_.share_2017 - cmp_.share_2021).round(1)
+    cmp_ = pd.DataFrame({"share_2021": s_old[common], "share_2017": s_new[common]})
+    cmp_["change_pp"] = cmp_.share_2017 - cmp_.share_2021
     cmp_ = cmp_.reindex(cmp_.change_pp.abs().sort_values(ascending=False).index)
     print("\nextra-EU import share, the quantity the Armington first nest turns on:")
-    print(cmp_.head(12).to_string())
+    print(cmp_.head(12).round(1).to_string())
     print(f"\nmedian absolute change: {cmp_.change_pp.abs().median():.1f} pp")
 
     if args.dry_run:
@@ -163,9 +163,6 @@ def main() -> None:
 
     out = args.data_dir / "shared" / "trade_flows_2017.csv"
     new.to_csv(out)
-    backup = cur_path.with_suffix(".csv.superseded_by_2017")
-    if not backup.exists():
-        shutil.copy(cur_path, backup)
 
     rep = args.data_dir / "validation" / "trade_recalibration_2017.json"
     rep.write_text(json.dumps({

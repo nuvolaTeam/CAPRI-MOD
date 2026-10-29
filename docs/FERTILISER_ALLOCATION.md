@@ -106,8 +106,7 @@ A Green Deal policy shock (EU27; scenario only): `greendeal_scenario(mineRedu=..
 | "limCres": residues to a group at most 1.3 x baseline per ha (+0.5 for listed pairs), mode at baseline, accuracy 10, every nutrient | same |
 
 CAPRI caps from its baseline results (`p_baselineDataout`); capri-mod from its own baseline allocation, as for the
-surplus target. Where the caps leave a group's need unmet (IPOPT reports infeasibility), the duals are widened to
-+-1000, then every cap is raised to at least 1.1 x the base allocation (CAPRI's own ad hoc exemption level); the
+surplus target. Where the caps leave a group's need unmet (IPOPT reports infeasibility), the duals are widened to +-1000; if that is not enough, the crop groups are exempted one at a time as CAPRI exempts groups in minfert_redu_by_crop.gms (p_checkSmallMine: the group's cap at its baseline mineral N per ha, fertiliser.exempt_cap_factor = 1.0), those whose need is out of reach under the cap first, with CAPRI's duals and then the widened ones (K71); the
 relaxation is kept for the rest of the scenario and recorded in `metadata["nlp_relaxed"]` (REGISTERED, K50 departures
 11, 13).
 
@@ -117,19 +116,11 @@ below 10 kg N/ha at base capped at the base; "limCres" at 1.2 x base for every n
 stringent mineral cap of the two holds and mineRedu's limCres. The group's conversion is capri-mod's (its organic
 targets per member state and crop class, weighted by base area; REGISTERED, K50 departure 10).
 
-## Conic form (`supply_form = "conic"`)
+## Conic form (removed 26 October 2026)
 
-The conic form has no flows per crop group in the regional problem:
-
-- one regional crop-need row for N (NUTNED_ summed over the groups), with the terms that change mineral N (manure,
-  traded manure, the ammonia options' N kept, the inhibitor's relief, the fertiliser options, catch crops), mineral N
-  substituted at fixed rates from the balance (`EnvironmentalModule` substitution factor); P and K are not modelled;
-- NUTMIN_ as a floor on that row only when `RegionalSupplyModel.fert_dist_inside` is off
-  (`use_min_mineral_share = None`: as CAPRI, K40);
-- with `fert_dist_inside` (default) the inner model (`capri_mod/fert/inner_fert_dist.py`, Newton's method on the group
-  and pool duals) is checked after the solve; where no allocation exists at the conic solution, the region is solved
-  again in CAPRI's coupled form with IPOPT (`capri_mod/supply/capri_nlp.py`, K9);
-- the mineral caps by crop group enter through their sum (mineral N <= sum_g cap_g x area_g) and the inner model then
-  allocates under the regulations; the diagnosis of K49 showed that this sum can be met where the per-group caps
-  cannot, one reason for the NLP form;
-- a manure-application limit (170 kg N/ha or the base level, where an N target applies) that CAPRI does not have.
+The conic form (Clarabel) had no flows per crop group in the regional problem: one regional crop-need row for N with
+mineral N substituted at fixed rates, NUTMIN_ as a floor on it only without the inner model (K40), the inner model
+checked after the solve with CAPRI's coupled form re-solved by IPOPT where no allocation existed (K9), the mineral caps
+by group entering through their sum (which K49 showed can be met where the per-group caps cannot, one reason for the
+NLP form), and a manure-application limit CAPRI does not have. It was removed with its settings (`supply_form`,
+`fert_dist_inside`, `use_min_mineral_share`) on 26 October 2026; no run had used it since r110.

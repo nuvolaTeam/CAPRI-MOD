@@ -25,6 +25,7 @@ from capri_mod.data.definitions import (
 )
 from capri_mod.data.definitions import MS_CODE
 from capri_mod.data import land_market_io as _land_market_io
+from capri_mod.tableio import read_input
 
 
 
@@ -50,7 +51,6 @@ _FILE_CATEGORY = {
     "capri_oilseed_products_baseline.json": "market",
     "biofuel_feedstock.csv": "market", "biofuel_use_share.csv": "market", "biofuel_market.csv": "market", "feed_bulks_eu.csv": "market", "feed_bulks_eu_share.csv": "market", "dairy_processing.csv": "market",
     "dairy_hessian.csv": "market", "dairy_eu_balance.csv": "market", "dairy_eu_demand_elas.csv": "market", "dairy_world_processing.csv": "market", "dairy_world_hessian.csv": "market", "dairy_world_demand_elas.csv": "market", "dairy_world_baseline.json": "market",
-    "eu_demand_elas_overrides.json": "market",
     "feed_demand_nonEU.json": "market",
     "feed_ration_2017.json": "feed",
     "fodder_balance_2017.json": "feed",
@@ -60,10 +60,8 @@ _FILE_CATEGORY = {
     "land_market_2017.csv": "supply", "land_market_2030.csv": "supply",
     "land_market_2017_regions.csv": "supply", "land_market_2030_regions.csv": "supply",
     "nh3_factors_capri.json": "environment",
-    "livestock_intensity_bounds.csv": "supply",
     "landscape_targets_ms.csv": "policy",
     "cap_ceilings_2030.csv": "policy", "premium_scheme_shares_2030.csv": "policy",
-    "land_rent_regional.csv": "supply",
     "capri_baseline_surplus_2030.csv": "policy",
     "n_deposition_regional.csv": "environment",
     "manure_trade_2030.csv": "environment",
@@ -75,15 +73,13 @@ _FILE_CATEGORY = {
     # CAPRI's inner fertiliser distribution model and mineRedu (read by capri_mod.fert.inner_fert_dist)
     "fert_dist_priors_2030.csv": "environment", "fert_dist_crop_groups_2030.csv": "environment",
     "mineral_redu_exemptions.csv": "policy", "mineral_redu_limcres.csv": "policy",
-    "capri_regional_n_balance_2030.csv": "environment",
     "organic_targets_ms.csv": "policy",
     # reference data: not loaded by the model, but registered so the
     # validator can resolve and shape-check it like any other input
     "capri_own_price_elasticities.csv": "supply",
     "organic_yield_gap.csv": "policy",
-    "variable_costs.csv": "supply", "input_requirements.csv": "supply",
+    "variable_costs.csv": "supply",
     "land_availability.csv": "supply", "supply_elasticities_regional.csv": "supply",
-    "pmp_diagonal_terms.csv": "supply", "pmp_crossgroup_terms.csv": "supply",
     "pmp_capri_2030.csv": "supply", "pmp_capri_2030_animals.csv": "supply",
     "pmp_recipe_2030.csv": "supply", "pmp_recipe_2030_animals.csv": "supply",
     "pmp_recipe_2017.csv": "supply", "pmp_recipe_2017_animals.csv": "supply",
@@ -91,14 +87,12 @@ _FILE_CATEGORY = {
     "pmp_recipe_2017_animals_members.csv": "supply",
     "pmp_own_price_elasticities.csv": "supply",
     "producer_prices.csv": "market", "world_prices.csv": "market",
-    "armington_params.csv": "market",
     "cap_payments.csv": "policy", "crop_premium.csv": "supply", "eu_mfn_tariffs.csv": "policy", "tariffs.csv": "policy",
     "nutrient_coefs.csv": "environment", "crop_nutrient_export.csv": "environment",
-    "manure_ch4_ef_regional.csv": "environment", "climate_zones.csv": "environment",
+    "climate_zones.csv": "environment",
     "feed_requirements.csv": "feed",
     # JSON parameter files
     "fao_market_baseline.json": "market",
-    "fao_demand_own_elas_eu.json": "market",
 }
 _SHARED_FILES = {"trade_flows.csv": "trade_flows_2017.csv"}
 
@@ -147,7 +141,7 @@ def load_regional_base_areas(data_dir: Optional[Path] = None) -> pd.DataFrame:
     Returns: DataFrame [region × crop], values in 1000 ha
     """
     if data_dir and (resolve_data_file(data_dir, "base_areas.csv")).exists():
-        return pd.read_csv(resolve_data_file(data_dir, "base_areas.csv"), index_col=0)
+        return read_input(resolve_data_file(data_dir, "base_areas.csv"), index_col=0)
     raise FileNotFoundError(f"base_areas.csv not found under {data_dir}: the model runs on CAPRI's data only "
                             f"(the synthetic generator that stood here was removed, Sprint 9s)")
 
@@ -174,7 +168,7 @@ def load_regional_animal_numbers(data_dir: Optional[Path] = None) -> pd.DataFram
     Returns: DataFrame [region × animal]
     """
     if data_dir and (resolve_data_file(data_dir, "animal_numbers.csv")).exists():
-        df = pd.read_csv(resolve_data_file(data_dir, "animal_numbers.csv"), index_col=0)
+        df = read_input(resolve_data_file(data_dir, "animal_numbers.csv"), index_col=0)
         # CAPRI's herd data uses its own activity codes; the model's ANIMALS set
         # uses aggregate names. Without this map, BCOW/HFRS/SHGP/PIGF/LAYS/BROI
         # silently reindex to zero in the supply base -- the same silent-drop
@@ -225,7 +219,7 @@ def _reconcile_poultry_units(herds: pd.DataFrame) -> pd.DataFrame:
 
 def _grass_dm_share():
     f = Path(__file__).resolve().parents[2] / "capri_data" / "2017" / "supply" / "grass_dm_content.csv"
-    return pd.read_csv(f, index_col=0)["drma"]
+    return read_input(f, index_col=0)["drma"]
 
 
 def _reconcile_grass_yield_units(yields: pd.DataFrame) -> pd.DataFrame:
@@ -264,7 +258,7 @@ def load_yields(data_dir: Optional[Path] = None) -> pd.DataFrame:
     Crop yields (t/ha) and animal yields (CAPRI's YILD per model head / 1000: t of milk or meat per head) by region.
     """
     if data_dir and (resolve_data_file(data_dir, "yields.csv")).exists():
-        raw = pd.read_csv(resolve_data_file(data_dir, "yields.csv"), index_col=0)
+        raw = read_input(resolve_data_file(data_dir, "yields.csv"), index_col=0)
         # animal columns: CAPRI's YILD per model head / 1000 (tools/build/build_animal_yields.py)
         return _reconcile_grass_yield_units(raw)
     raise FileNotFoundError(f"yields.csv not found under {data_dir}: the model runs on CAPRI's data only "
@@ -284,7 +278,7 @@ def load_regional_nutrients(data_dir=None):
     p = Path(data_dir) / "sources" / "capreg" / "capreg_nutrient_coefs.csv"
     if not p.exists():
         return None
-    df = pd.read_csv(p)
+    df = read_input(p)
     return df.pivot_table(index=["model_region", "activity"],
                           columns="nutrient", values="value", aggfunc="last")
 
@@ -298,13 +292,13 @@ def load_cap_premium(data_dir=None):
     p = Path(data_dir) / "sources" / "capreg" / "capreg_cap_premium.csv"
     if not p.exists():
         return None
-    base = pd.read_csv(p, index_col=0)
+    base = read_input(p, index_col=0)
     # crops: every region, model codes (tools/build/build_crop_economics_2017.py). The capreg file covers 192 regions in
     # CAPRI's codes, so 56 regions, and fodder, set-aside, wine and fibre everywhere, used to fall back to the
     # random cap_payments.csv
     c = resolve_data_file(data_dir, "crop_premium.csv")
     if c is not None and Path(c).exists():
-        crop = pd.read_csv(c, index_col=0)
+        crop = read_input(c, index_col=0)
         base = crop.join(base[[k for k in base.columns if k not in crop.columns]], how="left")
     return base
 
@@ -325,7 +319,7 @@ def load_regional_producer_prices(data_dir=None):
     p = Path(data_dir) / "sources" / "capreg" / "capreg_producer_prices.csv"
     if not p.exists():
         return pd.DataFrame()
-    prices = pd.read_csv(p, index_col=0)
+    prices = read_input(p, index_col=0)
 
     # The file carries CAPRI's activity codes for five crops the model names
     # differently, so those columns were never read and the crops silently fell
@@ -380,7 +374,7 @@ def _national_capri_prices(data_dir):
     p = Path(data_dir) / "sources" / "capreg" / "capreg_national_prices.csv"
     if not p.exists():
         return None
-    return pd.read_csv(p, index_col=0)
+    return read_input(p, index_col=0)
 
 
 def load_producer_prices(data_dir: Optional[Path] = None) -> pd.Series:
@@ -390,7 +384,7 @@ def load_producer_prices(data_dir: Optional[Path] = None) -> pd.Series:
     Connect to: Eurostat apri_ap_ina, FADN prices
     """
     if data_dir and (resolve_data_file(data_dir, "producer_prices.csv")).exists():
-        return pd.read_csv(resolve_data_file(data_dir, "producer_prices.csv"),
+        return read_input(resolve_data_file(data_dir, "producer_prices.csv"),
                            index_col=0).squeeze()
     raise FileNotFoundError(f"producer_prices.csv not found under {data_dir}: the model runs on CAPRI's data only "
                             f"(the synthetic generator that stood here was removed, Sprint 9s)")
@@ -405,7 +399,7 @@ def load_variable_costs_regional(data_dir: Optional[Path] = None) -> Optional[pd
     representative cost vector (e.g. quick diagnostics, non-regional contexts).
     """
     if data_dir and (resolve_data_file(data_dir, "variable_costs.csv")).exists():
-        df = pd.read_csv(resolve_data_file(data_dir, "variable_costs.csv"), index_col=0)
+        df = read_input(resolve_data_file(data_dir, "variable_costs.csv"), index_col=0)
         if df.shape[0] > 50:          # region-level file
             # CAPRI's own regional input costs (TOIN), as they are. A cap at twice the EU median used to cut
             # permanent and horticultural crops' costs (other fruit in Austria 8,747 EUR/ha against CAPRI's
@@ -421,7 +415,7 @@ def load_variable_costs(data_dir: Optional[Path] = None) -> pd.Series:
     Connect to: FADN SE costs, Eurostat ef_mpric
     """
     if data_dir and (resolve_data_file(data_dir, "variable_costs.csv")).exists():
-        df = pd.read_csv(resolve_data_file(data_dir, "variable_costs.csv"), index_col=0)
+        df = read_input(resolve_data_file(data_dir, "variable_costs.csv"), index_col=0)
         # If region-level (rows=NUTS-2), return EU mean per activity
         if df.shape[0] > 50:
             return df.mean()
@@ -437,7 +431,7 @@ def load_land_availability(data_dir: Optional[Path] = None) -> pd.DataFrame:
     Connect to: Eurostat ef_oluaa, LUCAS land use survey
     """
     if data_dir and (resolve_data_file(data_dir, "land_availability.csv")).exists():
-        return pd.read_csv(resolve_data_file(data_dir, "land_availability.csv"), index_col=0)
+        return read_input(resolve_data_file(data_dir, "land_availability.csv"), index_col=0)
     raise FileNotFoundError(f"land_availability.csv not found under {data_dir}: the model runs on CAPRI's data only "
                             f"(the synthetic generator that stood here was removed, Sprint 9s)")
 
@@ -449,7 +443,7 @@ def load_feed_requirements(data_dir: Optional[Path] = None) -> pd.DataFrame:
     Connect to: CAPRI feed module parameters / INRA FEALQ tables
     """
     if data_dir and (resolve_data_file(data_dir, "feed_requirements.csv")).exists():
-        return pd.read_csv(resolve_data_file(data_dir, "feed_requirements.csv"), index_col=0)
+        return read_input(resolve_data_file(data_dir, "feed_requirements.csv"), index_col=0)
     raise FileNotFoundError(f"feed_requirements.csv not found under {data_dir}: the model runs on CAPRI's data only "
                             f"(the synthetic generator that stood here was removed, Sprint 9s)")
 
@@ -461,7 +455,7 @@ def load_nutrient_coefficients(data_dir: Optional[Path] = None) -> pd.DataFrame:
     Connect to: Eurostat env_ac_ainah_r2, CAPRI nitrogen module
     """
     if data_dir and (resolve_data_file(data_dir, "nutrient_coefs.csv")).exists():
-        return pd.read_csv(resolve_data_file(data_dir, "nutrient_coefs.csv"), index_col=0)
+        return read_input(resolve_data_file(data_dir, "nutrient_coefs.csv"), index_col=0)
     raise FileNotFoundError(f"nutrient_coefs.csv not found under {data_dir}: the model runs on CAPRI's data only "
                             f"(the synthetic generator that stood here was removed, Sprint 9s)")
 
@@ -477,22 +471,9 @@ def load_world_prices(data_dir: Optional[Path] = None) -> pd.Series:
     Connect to: FAOSTAT prices, OECD-FAO Agricultural Outlook
     """
     if data_dir and (resolve_data_file(data_dir, "world_prices.csv")).exists():
-        return pd.read_csv(resolve_data_file(data_dir, "world_prices.csv"),
+        return read_input(resolve_data_file(data_dir, "world_prices.csv"),
                            index_col=0).squeeze()
     raise FileNotFoundError(f"world_prices.csv not found under {data_dir}: the model runs on CAPRI's data only "
-                            f"(the synthetic generator that stood here was removed, Sprint 9s)")
-
-
-def load_armington_parameters(data_dir: Optional[Path] = None) -> pd.DataFrame:
-    """
-    Armington elasticities (substitution between domestic and imported goods).
-
-    Based on CAPRI calibrated parameters (Jansson 2007, Britz 2008).
-    """
-    if data_dir and (resolve_data_file(data_dir, "armington_params.csv")).exists():
-        df = pd.read_csv(resolve_data_file(data_dir, "armington_params.csv"), index_col=0)
-        return df
-    raise FileNotFoundError(f"armington_params.csv not found under {data_dir}: the model runs on CAPRI's data only "
                             f"(the synthetic generator that stood here was removed, Sprint 9s)")
 
 
@@ -507,7 +488,7 @@ def load_cap_payments(data_dir: Optional[Path] = None) -> pd.DataFrame:
     Connect to: EU DG-AGRI IACS data, Eurostat agr_r_accts
     """
     if data_dir and (resolve_data_file(data_dir, "cap_payments.csv")).exists():
-        return pd.read_csv(resolve_data_file(data_dir, "cap_payments.csv"), index_col=0)
+        return read_input(resolve_data_file(data_dir, "cap_payments.csv"), index_col=0)
     raise FileNotFoundError(f"cap_payments.csv not found under {data_dir}: the model runs on CAPRI's data only "
                             f"(the synthetic generator that stood here was removed, Sprint 9s)")
 
@@ -520,7 +501,7 @@ def load_tariffs(data_dir: Optional[Path] = None) -> pd.DataFrame:
     Returns: DataFrame [region × commodity]
     """
     if data_dir and (resolve_data_file(data_dir, "tariffs.csv")).exists():
-        return pd.read_csv(resolve_data_file(data_dir, "tariffs.csv"), index_col=0)
+        return read_input(resolve_data_file(data_dir, "tariffs.csv"), index_col=0)
     raise FileNotFoundError(f"tariffs.csv not found under {data_dir}: the model runs on CAPRI's data only "
                             f"(the synthetic generator that stood here was removed, Sprint 9s)")
 
@@ -537,7 +518,7 @@ def _load_optional_csv(data_dir, filename):
     path = resolve_data_file(data_dir, filename)
     if path is None or not path.exists():
         return None
-    return pd.read_csv(path, index_col=0)
+    return read_input(path, index_col=0)
 
 def _load_pmp_capri_2030(d: Path, stem: str = "pmp_capri_2030"):
     """{region: {(act_i, act_j): g}} of a set of PMP terms in the model's form: the crops' matrix (<stem>.csv) and the
@@ -547,7 +528,7 @@ def _load_pmp_capri_2030(d: Path, stem: str = "pmp_capri_2030"):
     f = d / f"{stem}.csv"
     if not f.exists():
         return None
-    out = {r: {(a, b): float(v) for a, b, v in zip(g.act_i, g.act_j, g.g)} for r, g in pd.read_csv(f).groupby("region")}
+    out = {r: {(a, b): float(v) for a, b, v in zip(g.act_i, g.act_j, g.g)} for r, g in read_input(f).groupby("region")}
     fa = d / f"{stem}_animals.csv"
     # the animals' herd terms grouped for the cattle member splits (HEIL/HEIH/HEIR, the calves per sex) when those are
     # on (RegionalSupplyModel.use_cattle_member_splits, off by default; tools/build/build_animal_pmp_capri_2030.py --splits)
@@ -558,7 +539,7 @@ def _load_pmp_capri_2030(d: Path, stem: str = "pmp_capri_2030"):
     except ImportError:
         pass
     if fa.exists():
-        for r, a, v in pd.read_csv(fa)[["region", "animal", "g"]].itertuples(index=False):
+        for r, a, v in read_input(fa)[["region", "animal", "g"]].itertuples(index=False):
             out.setdefault(r, {})[(a, a)] = float(v)
     return out
 
@@ -676,9 +657,14 @@ def load_all_data(data_dir: Optional[Path] = None, validate: bool = False,
         "winter_cover_share": (lambda df: {r: g.set_index("crop")[["share", "share0"]]
                                            for r, g in df.reset_index().groupby("region")} if df is not None else None)(
             _load_optional_csv(data_dir, "winter_cover_share.csv")),
-        # CAPRI's plant-protection, other-input and fertiliser costs per ha by region and crop
-        # (tools/build/build_plant_protection_cost.py): what the pesticide and organic instruments shock
-        "plant_protection_cost": (lambda df: {r: g.set_index("activity")[["plap_eur_ha", "inpo_eur_ha", "fert_eur_ha"]]
+        # CAPRI's plant-protection, other-input, fertiliser and fuel costs per ha by region and crop, and the
+        # animals' other inputs as a share of their input cost (tools/build/build_plant_protection_cost.py): what
+        # the pesticide and organic instruments shock
+        "plant_protection_cost": (lambda df: {r: g.set_index("activity")[[c for c in (
+                                                  "plap_eur_ha", "inpo_eur_ha", "fert_eur_ha", "eful_eur_ha",
+                                                  "eful_inpo_eur_ha", "yd_rest_eur_ha", "yd_plap_eur_ha",
+                                                  "yd_inpo_eur_ha", "yield_growth", "inpo_toin_share")
+                                                  if c in g.columns]]
                                               for r, g in df.reset_index().groupby("region")} if df is not None else None)(
             _load_optional_csv(data_dir, "plant_protection_cost.csv")),
         # the same by product, columns 'ACT.MARKET' (EUR per head): what each market price moves
@@ -705,7 +691,7 @@ def load_all_data(data_dir: Optional[Path] = None, validate: bool = False,
         # docs/LAND_RENT_CALIBRATION_PLAN.md): {year: {region: {land type: EUR/ha}}}
         "land_rents": {y: (lambda p: {r: {t: float(v) for t, v in (("ARAC", row["rent_arac"]), ("FRUN", row["rent_frun"]),
                                                                    ("GRAS", row["rent_gras"])) if v == v}
-                                      for r, row in pd.read_csv(p, index_col=0).iterrows()} if p.exists() else None)(
+                                      for r, row in read_input(p, index_col=0).iterrows()} if p.exists() else None)(
             Path(data_dir) / "2017" / "supply" / f"land_rents_{y}.csv") for y in (2017, 2030)},
         # CAPRI's PMP matrix of the crops at its 2030 baseline calibration, per model region (tools/build/build_pmp_capri_2030.py,
         # KNOWN_ISSUES K61): {region: {(act_i, act_j): g}}, g in EUR/ha per 100% change of the levels
@@ -729,9 +715,6 @@ def load_all_data(data_dir: Optional[Path] = None, validate: bool = False,
         # gams/pol_input/greendeal/{landscape,organic}_targets.gdx: the extra
         # landscape land in points of UAA, and the organic conversion in points
         # of arable, grassland and permanent-crop area.
-        # land rent per hectare by region: Eurostat apri_lrnt, 2017 or nearest
-        # year, regional where published, else national; see the 'source' column
-        "land_rent_regional": _load_optional_csv(data_dir, "land_rent_regional.csv"),
         # CAPRI's own baseline N surplus per ha (2030 reference) - the input to
         # its tiered nitrogen target (pol_input/greendeal/surptot.gms)
         "capri_baseline_surplus": _load_optional_csv(data_dir, "capri_baseline_surplus_2030.csv"),
@@ -756,18 +739,16 @@ def load_all_data(data_dir: Optional[Path] = None, validate: bool = False,
             data_dir, "landscape_targets_ms.csv"),
         "organic_targets_ms": _load_optional_csv(
             data_dir, "organic_targets_ms.csv"),
-        "livestock_intensity_bounds": _load_optional_csv(
-            data_dir, "livestock_intensity_bounds.csv"),
         # MITERRA housing days (HD) and share of the grazing time spent in the stable (Et, %) of dairy cows per member
         # state (CAPRI p_rcEmissions(RU,"DAICOW_L",...), abatement/ammonia/RCEmissions.csv): the activity term of the
         # dairy cow's energy requirement (envind/breeding.gms l. 188-191)
         "dairy_grazing_days": (lambda p: (lambda t: t[t.animal_mitt == "DAICOW_L"].pivot(
-            index="region", columns="item", values="value"))(pd.read_csv(p)) if p is not None and p.exists() else None)(
+            index="region", columns="item", values="value"))(read_input(p)) if p is not None and p.exists() else None)(
             Path(data_dir) / "2017" / "abatement" / "ammonia" / "RCEmissions.csv" if data_dir else None),
         # CAPRI's 2030 CAP budgets per premium scheme (CEILVAL, Mio EUR, CAPRI regions) and the split of each model
         # activity's premium over the schemes (PRME by scheme / DPTOTAL); tools/build/build_cap_ceilings_2030.py
         "cap_ceilings_2030": _load_optional_csv(data_dir, "cap_ceilings_2030.csv"),
-        "premium_scheme_shares_2030": (lambda p: pd.read_csv(p) if p is not None and p.exists() else None)(
+        "premium_scheme_shares_2030": (lambda p: read_input(p) if p is not None and p.exists() else None)(
             resolve_data_file(data_dir, "premium_scheme_shares_2030.csv")),
         "mineral_n_regional": _load_optional_csv(
             data_dir, "nutrients_regional.csv"),
@@ -778,7 +759,6 @@ def load_all_data(data_dir: Optional[Path] = None, validate: bool = False,
         "feed_req":        load_feed_requirements(data_dir),
         "nutrients":       load_nutrient_coefficients(data_dir),
         "world_prices":    load_world_prices(data_dir),
-        "armington":       load_armington_parameters(data_dir),
         "cap_payments":    load_cap_payments(data_dir),
         "tariffs":         load_tariffs(data_dir),
     }
@@ -802,25 +782,7 @@ def load_regional_supply_elasticities(data_dir: Optional[Path] = None) -> pd.Dat
         data_dir = Path(__file__).parent.parent.parent / 'capri_data'
     f = resolve_data_file(data_dir, "supply_elasticities_regional.csv")
     if f.exists():
-        return pd.read_csv(f, index_col=0)
+        return read_input(f, index_col=0)
     return pd.DataFrame()
 
 
-def load_pmp_diagonal_terms(data_dir: Optional[Path] = None) -> pd.DataFrame:
-    """PMP diagonal cost terms (VD) from estnlp/results.gdx."""
-    if data_dir is None:
-        data_dir = Path(__file__).parent.parent.parent / 'capri_data'
-    f = resolve_data_file(data_dir, "pmp_diagonal_terms.csv")
-    if f.exists():
-        return pd.read_csv(f)
-    return pd.DataFrame()
-
-
-def load_input_requirements(data_dir: Optional[Path] = None) -> pd.DataFrame:
-    """Per-hectare input requirement coefficients (VA) from estnlp/results.gdx."""
-    if data_dir is None:
-        data_dir = Path(__file__).parent.parent.parent / 'capri_data'
-    f = resolve_data_file(data_dir, "input_requirements.csv")
-    if f.exists():
-        return pd.read_csv(f)
-    return pd.DataFrame()

@@ -74,7 +74,7 @@ from capri_mod.policy.policy_module import PolicyScenario
 my_scenario = PolicyScenario(
     name="MY_SCENARIO",
     biss_rate_change=-50,       # EUR/ha cut in direct payments
-    nitrate_limit_change=-30,   # stricter N limit
+    nutrient_surplus_target=True,   # CAPRI's tiered N-balance target (JRC121368)
     lfa_budget_change=-0.2,     # CAPRI's LFA budget -20% (premium change by CAPRI's 2030 split by scheme)
 )
 results = model.run(custom_scenario=my_scenario)
@@ -123,6 +123,6 @@ model = CAPRIModel(data_dir="path/to/your/data/")
 - `supply/convex_qp.py` — convex quadratic programming for the manure-pool equilibrium:
   Clarabel when installed (`pip install clarabel`), otherwise a built-in interior-point
   method (Mehrotra predictor-corrector).
-- `feed/ration.py` — the EU feed ration, now on by default (`CAPRIModel.use_ration`).
+- `feed/ration.py` — CAPRI's rations per region and animal, the data of the feeding block inside the regional models.
 - Supply model: CAPRI's land market (`use_land_market`, on), fodder equality, and the
   optional manure market (`use_manure_market`, off; see `docs/MANURE_MARKET.md`).

@@ -78,7 +78,7 @@ def main():
             rows.append(dict(capri_region=r, item=k, value=g(k)))
         for k, x in (("shG", shG), ("shW", shW), ("shR", shR), ("step", f)):
             rows.append(dict(capri_region=r, item=k, value=x))
-    pd.DataFrame(rows).to_csv(OUT, index=False, float_format="%.10g")
+    pd.DataFrame(rows).to_csv(OUT, index=False)
     print(f"{OUT.relative_to(ROOT)}: {len(regions)} regions; step length median {np.median(fs):.3f} "
           f"(min {min(fs):.3f}, max {max(fs):.3f})")
     print(f"identities: initial classes worst {worst_i:.2e}, final classes worst {worst_f:.2e}, "

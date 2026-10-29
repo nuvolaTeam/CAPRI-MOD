@@ -3,9 +3,9 @@
 CAPRI measures its supply models' elasticities by perturbing the prices one product at a time in the supply models
 (capmod: supply_elas_<NTS><BAS><SIM><MS>.gdx, p_ElasSupp(MS, product, price, 'CAL'); the project lead's files are for
 2020, supply_elas_2_1720<MS>defaulta). Here the same experiment on the model's regional supply models at its 2030
-baseline, with the crops' PMP matrix calibrated from elasticities ("elasticity") and with CAPRI's own 2030 terms
-("capri2030", KNOWN_ISSUES K61): each product's price +/- shock (central difference), all other prices fixed, no market
-feedback; the member state's production (gross output) summed over its regions.
+baseline, with CAPRI's own 2030 terms ("capri2030", KNOWN_ISSUES K61; the elasticity calibration it was compared with
+was removed on 28 October 2026, audit S13): each product's price +/- shock (central difference), all other prices
+fixed, no market feedback; the member state's production (gross output) summed over its regions.
 
 The CAPRI values are for 2020, not 2030: a guide to magnitudes, not a target to match.
 
@@ -18,7 +18,7 @@ from pathlib import Path
 warnings.filterwarnings("ignore")
 ROOT = Path(__file__).resolve().parents[2]
 import sys as _sys
-_sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check", "check/nlp_check")]
+_sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check")]
 from _model_regions import CTRY as MS_CODE  # noqa: E402  CAPRI member-state codes (capri_member_state_codes.csv)
 sys.path.insert(0, str(ROOT))
 import pandas as pd
@@ -74,8 +74,7 @@ def main() -> None:
     ap.add_argument("--out", type=Path, default=None)
     a = ap.parse_args()
     prods = a.products.split(",")
-    tab = pd.DataFrame({"elasticity": model_elas("elasticity", a.ms, prods, a.shock),
-                        "capri2030": model_elas("capri2030", a.ms, prods, a.shock),
+    tab = pd.DataFrame({"capri2030": model_elas("capri2030", a.ms, prods, a.shock),
                         "CAPRI 2020": capri_elas(a.ms, prods)})
     print(f"{a.ms}: own-price supply elasticities of the crops (production), model at its 2030 baseline vs CAPRI's 2020")
     print(tab.round(2).to_string())

@@ -41,6 +41,8 @@ from pathlib import Path
 
 import pandas as pd
 
+import functools as _ft
+_read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 SRC = ROOT / "capri_data" / "sources" / "market" / "feed_bulks_dataout_2030.csv"
 DEST = ROOT / "capri_data" / "2017" / "market"
@@ -105,6 +107,19 @@ def rho_feed():
     return rho
 
 
+def rho_feed_caps(region: str) -> dict:
+    """Region-specific caps on p_rhoFeed in arm/market1.gms (l. 96-100: "lower substitution for Norway and Western
+    Balkans"): p_rhoFeed("NO000000",FEED) = min(p_rhoFeed("NO000000",FEED), 2.0) -> {bulk or None: cap}."""
+    caps = {}
+    for line in open(GAMS / "arm" / "market1.gms", errors="ignore"):
+        if line.lstrip().startswith("*"):
+            continue
+        m = re.match(r'\s*p_rhoFeed\("([A-Z0-9_]+)",(?:"([A-Z]+)"|FEED)\)\s*=\s*min\(.*,\s*([0-9.]+)\)\s*;', line)
+        if m and m.group(1) == region:
+            caps[m.group(2)] = float(m.group(3))
+    return caps
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--dump", type=Path,
@@ -121,7 +136,7 @@ def main():
                 and (r[1] in ("FEED", "ARM1P") or r[0] == "NO000000")]
         pd.DataFrame(rows, columns=["region", "item", "product", "value"]).to_csv(SRC, index=False)
         print(f"extracted {len(rows)} rows -> {SRC.relative_to(ROOT)}")
-    src = pd.read_csv(SRC)
+    src = _read_csv(SRC)
     v = {(r.region, r.item, r.product): float(r.value) for r in src.itertuples()}
     rho = rho_feed()
     out, worst = [], []
@@ -139,12 +154,14 @@ def main():
             if bt > 10:
                 worst.append((abs(tot / bt - 1), ms, b, tot, bt))
     df = pd.DataFrame(out)
-    df.to_csv(DEST / "feed_bulks_eu.csv", index=False, float_format="%.8g")
+    df.to_csv(DEST / "feed_bulks_eu.csv", index=False)
     # Norway (CAPRI RMSSUP = NUTS0, so feedBlkPrice_ and feedShareEqu_ hold for it too): its bulks at its own Arm1
     # prices, for its supply models' bulk price indices and its feed demand in its own market region NOR (KNOWN_ISSUES
     # K56; Norway is not in the EU's feed demand); use_kt = its use of the product (HCOM + FEDM + INDM + BIOF + LOSM +
     # PRCM, as the EU's feed share of use below), for the feed share of Norway's use
     no = []
+    capno = rho_feed_caps("NO000000")                 # Norway's cap of 2.0 (market1.gms l. 98)
+    rho_no = {b: min(r_, capno.get(b, capno.get(None, r_))) for b, r_ in rho.items()}
     for b, items in BULKS.items():
         for p in items:
             q = v.get(("NO000000", "FEED", p), 0.0)
@@ -153,8 +170,8 @@ def main():
                 use = sum(v.get(("NO000000", k, x), 0.0) for k in USE_ITEMS
                           for x in GROUPS.get(COMMODITY.get(p, ""), (p,)))
                 no.append(dict(ms="NO000000", bulk=b, product=p, commodity=COMMODITY.get(p, ""), feed_kt=q, arm1p=pr,
-                               rho=rho[b], use_kt=use))
-    pd.DataFrame(no).to_csv(DEST / "feed_bulks_no.csv", index=False, float_format="%.8g")
+                               rho=rho_no[b], use_kt=use))
+    pd.DataFrame(no).to_csv(DEST / "feed_bulks_no.csv", index=False)
     print(f"feed_bulks_no.csv: {len(no)} rows (Norway's bulks: price indices and feed demand)")
     bal = json.load(open(ROOT / "capri_data" / "validation" / "capri_eu27_market_balance_2030_ref.json"))["products"]
     sh = []
@@ -168,13 +185,13 @@ def main():
             use = sum(float(bal.get(x, {}).get("FEDM", 0.0)) for x in grp)
         fed = float(df.loc[df.commodity == c, "feed_kt"].sum())
         if use > 0 and fed > 0:
-            sh.append(dict(commodity=c, feed_kt=round(fed, 3), use_kt=round(use, 3), share=min(1.0, fed / use)))
-    pd.DataFrame(sh).to_csv(DEST / "feed_bulks_eu_share.csv", index=False, float_format="%.6g")
+            sh.append(dict(commodity=c, feed_kt=fed, use_kt=use, share=min(1.0, fed / use)))
+    pd.DataFrame(sh).to_csv(DEST / "feed_bulks_eu_share.csv", index=False)
     # EU27 2030 feed use of the FCER cereals with a model producer price: the weights of the feed cereal price
     # level in the supply models (supply_module FEED_CEREAL_MIX, projection/prices.py). RICE (milled) is left out:
     # the model has no producer price for it (0.2% of FCER).
     mix = (df[(df.bulk == "FCER") & df.commodity.isin(FEED_CEREAL_MIX)].groupby("commodity")["feed_kt"].sum()
-           .reindex(FEED_CEREAL_MIX).round(1))
+           .reindex(FEED_CEREAL_MIX))
     mix.rename("fedm_kt").rename_axis("cereal").to_csv(ROOT / "capri_data" / "2017" / "feed" / "feed_cereal_mix_2030.csv")
     print("feed_cereal_mix_2030.csv:", mix.to_dict())
     worst.sort(reverse=True)

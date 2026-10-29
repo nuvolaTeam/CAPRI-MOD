@@ -1,0 +1,481 @@
+code,text
+ACP,ACP countries
+AFRICA,Africa
+AFR_LDC,Africcan LDCs
+AFR_REST,Africa Rest (practically ACP)
+AL000000,Albania
+ALG,Algeria
+ANZ,
+ARG,Argentina
+ASIA,Asia
+ASOCE_LDC,"Asian and Ociania LDC (Afghanistan, Bhutan, Cambodia, Laos, Maldives, Myanmar, Nepal, Timor Este, Kiribati, Solomones, Samoa, Tuvalu, Vanuatu"
+ASOCE_REST,Rest of Asia
+AT000000,Austria
+AT100000,Ostoesterreich
+AT110000,Burgenland
+AT120000,Niederoesterreich
+AT130000,Wien
+AT200000,Suedoesterreich
+AT210000,Kaernten
+AT220000,Steiermark
+AT300000,Westoesterreich
+AT310000,Oberoesterreich
+AT320000,Salzburg
+AT330000,Tirol
+AT340000,Vorarlberg
+AUS,Australia
+A_EU_EAST,EU East
+A_EU_WEST,EU West
+AllImporters,
+BA000000,Bosnia and Herzegovina
+BEL,Belarus
+BG000000,Bulgaria
+BG010000,Severozapaden
+BG020000,Severen tsentralen
+BG030000,Severoiztochen
+BG040000,Yugozazapaden
+BG050000,Yuzhen tsentralen
+BG060000,Yugoiztochen
+BGD,Bangladesh
+BL000000,Belgium and Luxembourg
+BL100000,Region de Bruxelles-Capitale
+BL200000,Vlaams Gewest
+BL210000,Antwerpen (Arrondissement)
+BL220000,Limburg (B)
+BL230000,Oost-Vlaanderen
+BL240000,Vlaams Brabant
+BL250000,West-Vlaanderen
+BL300000,Region wallonne
+BL310000,Brabant Wallon
+BL320000,Hainaut
+BL330000,Verviers
+BL340000,Luxembourg (B)
+BL350000,Namur
+BL400000,Luxembourg (Grand-Duche)
+BOL,Bolivia
+BRA,Brazil
+BUR,Bulgaria and Romania
+CAN,Canada
+CH,Switzerland
+CHL,Chile
+CHN,China
+CS000000,Serbia
+CY000000,Cyprus
+CZ000000,Czech Republic
+CZ010000,Praha
+CZ020000,Strední Cechy
+CZ030000,Jihozápad
+CZ040000,Severozápad
+CZ050000,Severovýchod
+CZ060000,Jihovýchod
+CZ070000,Strední Morava
+CZ080000,Moravskoslezko
+DE000000,Germany
+DE100000,Baden-Wuerttemberg
+DE110000,Stuttgart
+DE120000,Karlsruhe
+DE130000,Freiburg
+DE140000,Tuebingen
+DE200000,Bayern
+DE210000,Oberbayern
+DE220000,Niederbayern
+DE230000,Oberpfalz
+DE240000,Oberfranken
+DE250000,Mittelfranken
+DE260000,Unterfranken
+DE270000,Schwaben
+DE300000,Berlin
+DE400000,Brandenburg
+DE410000,
+DE420000,
+DE500000,Bremen
+DE600000,Hamburg
+DE700000,Hessen
+DE710000,Darmstadt
+DE720000,Giessen
+DE730000,Kassel
+DE800000,Mecklenburg-Vorpommern
+DE900000,Niedersachsen
+DE910000,Braunschweig
+DE920000,Hannover
+DE930000,Lueneburg
+DE940000,Weser-Ems
+DEA00000,Nordrhein-Westfalen
+DEA10000,Duesseldorf
+DEA20000,Koeln
+DEA30000,Muenster
+DEA40000,Detmold
+DEA50000,Arnsberg
+DEB00000,Rheinland-Pfalz
+DEB10000,Koblenz
+DEB20000,Trier
+DEB30000,Rheinhessen-Pfalz
+DEC00000,Saarland
+DED00000,Sachsen
+DED10000,
+DED20000,
+DED30000,
+DEE00000,Sachsen-Anhalt
+DEE10000,
+DEE20000,
+DEE30000,
+DEF00000,Schleswig-Holstein
+DEG00000,Thueringen
+DK000000,Denmark
+DK010000,
+DK020000,
+DK030000,
+DK040000,
+DK050000,
+EE000000,Estonia
+EGY,Egypt
+EL000000,Greece
+EL100000,Voreia Ellada
+EL110000,"Anatoliki Makedonia, Thraki"
+EL120000,Kentriki Makedonia
+EL130000,Dytiki Makedonia
+EL140000,Thessalia
+EL200000,Kentriki Ellada
+EL210000,Ipeiros
+EL220000,Ionia Nisia
+EL230000,Dytiki Ellada
+EL240000,Sterea Ellada
+EL250000,Peloponnisos
+EL300000,Attiki
+EL400000,"Nisia aigaiou, Kriti"
+EL410000,Voreio Aigaio
+EL420000,Notio Aigaio
+EL430000,Kriti
+ES000000,Spain
+ES100000,Noroeste
+ES110000,Galicia
+ES120000,Asturias
+ES130000,Cantabria
+ES200000,Noreste
+ES210000,Pais Vasco
+ES220000,Navarra
+ES230000,Rioja
+ES240000,Aragon
+ES300000,Madrid
+ES400000,Centro (E)
+ES410000,Castilla-Leon
+ES420000,Castilla-La Mancha
+ES430000,Extremadura
+ES500000,Este
+ES510000,Cataluna
+ES520000,Comunidad Valenciana
+ES530000,Baleares
+ES600000,Sur
+ES610000,Andalucia
+ES620000,Murcia
+ES630000,Ciudad Autonoma de Ceuta (ES)
+ES640000,Ciudad Autonoma de Melilla (ES)
+ES700000,Canarias
+ETH,Ethiopia
+EU,European Union
+EU000000,European Union
+EU010000,European Union 10 untill 2013
+EU011000,European Union 11 from 2013 onwards
+EU012000,European Union 12 until 2013
+EU013000,European Union 13 from 2013 onwards
+EU014000,European Union 14 after Brexit 2019
+EU015000,European Union 15
+EU025000,European Union 25
+EU027000,European Union 27
+EU028000,European Union 28
+EU27yr19,European Union 27 after Brexit year 2019
+EU_EAST,European Union 10
+EU_WEST,European Union 15
+FI000000,Finland
+FI100000,Manner-Suomi
+FI130000,Itae-Suomi
+FI180000,Etelae-Suomi
+FI190000,Laensi-Suomi
+FI1A0000,Pohjois-Suomi
+FI200000,Ahvenanmaa/Aaland
+FR000000,France
+FR100000,Ile de France
+FR200000,Bassin Parisien
+FR210000,Champagne-Ardenne
+FR220000,Picardie
+FR230000,Haute-Normandie
+FR240000,Centre
+FR250000,Basse-Normandie
+FR260000,Bourgogne
+FR300000,Nord-Pas-de-Calais
+FR400000,Est
+FR410000,Lorraine
+FR420000,Alsace
+FR430000,Franche-Comte
+FR500000,Ouest
+FR510000,Pays de la Loire
+FR520000,Bretagne
+FR530000,Poitou-Charentes
+FR600000,Sud-Ouest
+FR610000,Aquitaine
+FR620000,Midi-Pyrenees
+FR630000,Limousin
+FR700000,Centre-Est
+FR710000,Rhone-Alpes
+FR720000,Auvergne
+FR800000,Mediterranee
+FR810000,Languedoc-Roussillon
+FR820000,Provence-Alpes-Cote d'Azur
+FR830000,Corse
+FSU,Former Soviet Union without Russia
+HI_INC,
+HR000000,Croatia
+HU000000,Hungary
+HU100000,Közép-Magyarország
+HU200000,Dunántúl
+HU210000,Közép-Dunántúl
+HU220000,Nyugat-Dunántúl
+HU230000,Dél-Dunántúl
+HU300000,Alföld és Észak
+HU310000,Észak-Magyarország
+HU320000,Észak-Alföld
+HU330000,Dél-Alföld
+IND,India
+INDO,Indonesia
+IR000000,Irland
+IR010000,"Border, Midlands and Western"
+IR020000,Southern and Eastern
+ISR,Israel
+IT000000,Italy
+IT100000,Nord Ovest
+IT110000,Piemonte
+IT120000,Valle d'Aosta
+IT130000,Liguria
+IT200000,Lombardia
+IT300000,Nord Est
+IT310000,Trentino-Alto Adige
+IT320000,Veneto
+IT330000,Friuli-Venezia Giulia
+IT400000,Emilia-romagna
+IT500000,Centro (I)
+IT510000,Toscana
+IT520000,Umbria
+IT530000,Marche
+IT600000,Lazio
+IT700000,Abruzzo-Molise
+IT710000,Abruzzo
+IT720000,Molise
+IT800000,Campania
+IT900000,Sud
+IT910000,Puglia
+IT920000,Basilicata
+IT930000,Calabria
+ITA00000,Sicilia
+ITB00000,Sardegna
+ITC10000,
+ITC20000,
+ITC30000,
+ITC40000,
+ITD10000,
+ITD20000,
+ITD30000,
+ITD40000,
+ITD50000,
+ITE10000,
+ITE20000,
+ITE30000,
+ITE40000,
+ITF10000,
+ITF20000,
+ITF30000,
+ITF40000,
+ITF50000,
+ITF60000,
+ITG10000,
+ITG20000,
+JAP,Japan
+KAZ,Kazathan
+KO000000,Kosovo
+LDC,LDC countries
+LDCACP,LDC and ACP
+LT000000,Lithuania
+LV000000,Latvia
+MAL,Malaysia
+MED,Other mediterrean countries
+MER,Mercosur
+MER_OTH,"Bolivia, Chile, Venezuela"
+MEX,Mexico
+MIDEAST,Middle East
+MID_INC,
+MK000000,Macedonia
+MO000000,Montenegro
+MOR,Morocco
+MSA_ACP,Middle and South America ACP
+MS_AM,Middle and South America
+MT000000,Malta
+NGA,Nigeria
+NL000000,The Netherlands
+NL100000,Noord-Nederland
+NL110000,Groningen
+NL120000,Friesland
+NL130000,Drenthe
+NL200000,Oost-Nederland
+NL210000,Overijssel
+NL220000,Gelderland
+NL230000,Flevoland
+NL300000,West-Nederland
+NL310000,Utrecht
+NL320000,Noord-Holland
+NL330000,Zuid-Holland
+NL340000,Zeeland
+NL400000,Zuid-Nederland
+NL410000,Noord-Brabant
+NL420000,Limburg (NL)
+NO000000,Norway
+NO020000,Innlandet
+NO060000,Trøndelag
+NO070000,NordNorge
+NO080000,Oslo og Viken
+NO090000,Agder og Sør-Østlandet
+NO0A0000,Vestlandet
+NONEU,
+NONEU_EU,"Europe, non EU"
+NON_ROW_ESIM,Sum of regions explicitly covered in ESIM
+NZL,New Zealand
+N_AM,North America
+PAK,Pakistan
+PAR,Paraguay
+PL000000,Poland
+PL100000,Centralny
+PL110000,Lódzkie
+PL120000,Mazowieckie
+PL200000,Poludniowy
+PL210000,Malopolskie
+PL220000,Slaskie
+PL300000,Wschodni
+PL310000,Lubelskie
+PL320000,Podkarpackie
+PL330000,Swietokrzyskie
+PL340000,Podlaskie
+PL400000,Pólnocno-Zachodni
+PL410000,Wielkopolskie
+PL420000,Zachodniopomorskie
+PL430000,Lubuskie
+PL500000,Poludniowo-Zachodni
+PL510000,Dolnoslaskie
+PL520000,Opolskie
+PL600000,Pólnocny
+PL610000,Kujawsko-Pomorskie
+PL620000,Warminsko-Mazurskie
+PL630000,Pomorskie
+PT000000,Portugal
+PT100000,Continente
+PT110000,Norte
+PT150000,Algarve
+PT160000,Centro (PT)
+PT170000,Lisboa
+PT180000,Alentejo
+PT200000,Acores
+PT300000,Madeira
+REU,Rest of Europe
+RO000000,Romania
+RO010000,Nord-Est
+RO020000,Sud-Est
+RO030000,Sud
+RO040000,Sud-Vest
+RO050000,Vest
+RO060000,Nord-Vest
+RO070000,Centru
+RO080000,Bucuresti
+ROW,
+ROW_ESIM,Rest of the world aggregate in ESIM definition
+RSA,Rest of South and Middle America
+RUS,Russia
+RW,
+SE000000,Sweden
+SE010000,Stockholm
+SE020000,Oestra Mellansverige
+SE040000,Sydsverige
+SE060000,Norra Mellansverige
+SE070000,Mellersta Norrland
+SE080000,Oevre Norrland
+SE090000,Smaaland med Oearna
+SE0A0000,Vaestsverige
+SI000000,Slovenia
+SK000000,Slovak Republic
+SK010000,Bratislavsky
+SK020000,Západné Slovensko
+SK030000,Stredné Slovensko
+SK040000,Východné Slovensko
+SKOR,South Korea
+TAW,Taiwan
+THAI,
+TOP,
+TR100000,Istanbul
+TR200000,Bati Marmara
+TR300000,Ege
+TR400000,Dogu Marmara
+TR500000,Bati Anadolu
+TR600000,Akdeniz
+TR700000,Orta Anadolu
+TR800000,Bati Karadeniz
+TR900000,Dogu Karadeniz
+TRA00000,Kuzeydogu Anadolu
+TRB00000,Ortadogu Anadolu
+TRC00000,Güneydogu Anadolu
+TUN,Tunesia
+TUR,Turkey
+UK000000,United Kingdom
+UKC00000,North East
+UKC10000,
+UKC20000,
+UKD00000,North West (including Merseyside)
+UKD10000,
+UKD20000,
+UKD30000,
+UKD40000,
+UKD50000,
+UKE00000,Yorkshire and The Humber
+UKE10000,
+UKE20000,
+UKE30000,
+UKE40000,
+UKF00000,East Midlands
+UKF10000,
+UKF20000,
+UKF30000,
+UKG00000,West Midlands
+UKG10000,
+UKG20000,
+UKG30000,
+UKH00000,Eastern
+UKH10000,
+UKH20000,
+UKH30000,
+UKI00000,Greater London
+UKJ00000,South East
+UKJ10000,
+UKJ20000,
+UKJ30000,
+UKJ40000,
+UKK00000,South West
+UKK10000,
+UKK20000,
+UKK30000,
+UKK40000,
+UKL00000,Wales
+UKL10000,
+UKL20000,
+UKM00000,Scotland
+UKM20000,
+UKM30000,
+UKM50000,
+UKM60000,
+UKN00000,Northern Ireland
+UKR,Ukraine
+URU,Uruguay
+URUPAR,Uruguay and Paraguay
+USA,USA
+VEN,Venezuela
+VIET,
+WBA,Western balcans
+WBA6,Western Balcans 6 countries from 2013 onwards
+WBA7,Western Balcans 7 countries untill 2013
+WOR,
+World,
+ZAF,South Africa

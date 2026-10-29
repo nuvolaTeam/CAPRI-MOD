@@ -29,6 +29,10 @@ import re
 from collections import defaultdict
 from pathlib import Path
 
+import importlib.util as _ilu
+_sp_mr = _ilu.spec_from_file_location("_mr", Path(__file__).resolve().parents[2] / "tools" / "lib" / "_model_regions.py")
+_mr = _ilu.module_from_spec(_sp_mr); _sp_mr.loader.exec_module(_mr)
+
 ROOT = Path(__file__).resolve().parents[2]
 D = ROOT / "capri_data" / "2017" / "abatement" / "ammonia"
 GAMS = Path("/home/claude/work/allgms/gams/envind/ammo_tech.gms")
@@ -88,8 +92,7 @@ def build():
 
     rows = []
     for (ru, act), L in sorted(tsl.items()):
-        if ru.endswith("000000") and ru not in ("DK000000", "EE000000", "CY000000", "MT000000", "LU000000",
-                                                  "LV000000", "LT000000", "SI000000"):
+        if not _mr.regional_row(ru):        # member-state totals; the single-unit member states are units (K86)
             continue
         ms, n1 = ru[:2] + "000000", ru[:3] + "00000"
         cat = APPLIC_CAT.get(act, "ocat")
@@ -107,7 +110,7 @@ def build():
         if ms == "MT000000" and act in ("SHGM", "SHGF"):
             v = L * aL("CovStorLow")
         if v:
-            rows.append([ru, act, "CovStorLow", round(v, 9)])
+            rows.append([ru, act, "CovStorLow", v])
         for tech, S in (("AmmAppLE", LE), ("AmmAppHE", HE)):
             v = 0.0
             for key in (ru, n1, ms):
@@ -119,7 +122,7 @@ def build():
                 if v:
                     break
             if v:
-                rows.append([ru, act, tech, round(v, 9)])
+                rows.append([ru, act, tech, v])
     with open(D / "nitrates_directive_min_shares.csv", "w", newline="") as fh:
         w = csv.writer(fh)
         w.writerow(["region", "activity", "technology", "value"])

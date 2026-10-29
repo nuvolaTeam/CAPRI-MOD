@@ -18,6 +18,8 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+import functools as _ft
+_read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 SRC = ROOT / "capri_data" / "sources" / "baseline_pmp"
 
@@ -47,8 +49,8 @@ def main() -> None:
     if a.year == 2017:
         check_2017(a)
         return
-    ex = collapsed(pd.read_csv(SRC / "pmp_quad_techn_2030.csv"))
-    rc = collapsed(pd.read_csv(SRC / f"recipe_{a.year}_quad_techn.csv"))
+    ex = collapsed(_read_csv(SRC / "pmp_quad_techn_2030.csv"))
+    rc = collapsed(_read_csv(SRC / f"recipe_{a.year}_quad_techn.csv"))
     j = pd.concat({"capri": ex, "recipe": rc}, axis=1).dropna()
     j["ratio"] = j.recipe / j.capri
     j.index.names = ["region", "activity"]
@@ -59,8 +61,8 @@ def main() -> None:
     print(tab.round(3).to_string())
     print(f"all activities: {len(j)} region x activity pairs, within 5%: {((j.ratio - 1).abs() < 0.05).mean():.1%}, "
           f"within 20%: {((j.ratio - 1).abs() < 0.2).mean():.1%}")
-    pe = pd.read_csv(SRC / "pmp_quad_pact_2030.csv").set_index(["region", "group1", "group2"])["value"]
-    pr = pd.read_csv(SRC / f"recipe_{a.year}_quad_pact.csv").set_index(["region", "group1", "group2"])["value"]
+    pe = _read_csv(SRC / "pmp_quad_pact_2030.csv").set_index(["region", "group1", "group2"])["value"]
+    pr = _read_csv(SRC / f"recipe_{a.year}_quad_pact.csv").set_index(["region", "group1", "group2"])["value"]
     k = pd.concat({"capri": pe, "recipe": pr}, axis=1).dropna()
     d = k[k.index.get_level_values(1) == k.index.get_level_values(2)]
     rr = d.recipe / d.capri
@@ -72,10 +74,10 @@ def main() -> None:
 
 
 def check_2017(a) -> None:
-    cap = pd.read_csv(ROOT / "capri_data" / "sources" / "capreg" / "pmp_quad_techn.csv")
-    rec = pd.read_csv(SRC / "recipe_2017_quad_techn.csv")
+    cap = _read_csv(ROOT / "capri_data" / "sources" / "capreg" / "pmp_quad_techn.csv")
+    rec = _read_csv(SRC / "recipe_2017_quad_techn.csv")
     rec = rec[(rec.tech1 == rec.tech2) & rec.tech1.isin(["T1", "T"])].drop_duplicates(["region", "activity"]).copy()
-    rec["model_region"] = rec.region.str[:4]
+    rec["model_region"] = rec.region            # the model's regions are CAPRI's units since 27 October 2026
     j = cap.merge(rec, on=["model_region", "activity"], suffixes=("_capri", "_recipe"))
     j["ratio"] = j.value_recipe / j.value_capri
     g = j.groupby("activity")["ratio"]
@@ -85,9 +87,9 @@ def check_2017(a) -> None:
     print(tab.round(3).to_string())
     print(f"all: {len(j)} pairs, within 5%: {((j.ratio - 1).abs() < 0.05).mean():.1%}, "
           f"within 20%: {((j.ratio - 1).abs() < 0.2).mean():.1%}")
-    cp = pd.read_csv(ROOT / "capri_data" / "sources" / "capreg" / "pmp_quad_pact.csv")
-    rp = pd.read_csv(SRC / "recipe_2017_quad_pact.csv")
-    rp["model_region"] = rp.region.str[:4]
+    cp = _read_csv(ROOT / "capri_data" / "sources" / "capreg" / "pmp_quad_pact.csv")
+    rp = _read_csv(SRC / "recipe_2017_quad_pact.csv")
+    rp["model_region"] = rp.region
     k = cp.merge(rp, on=["model_region", "group1", "group2"])
     rr = k.value_y / k.value_x
     print(f"group terms: {len(k)}, within 5%: {((rr - 1).abs() < 0.05).mean():.1%}")

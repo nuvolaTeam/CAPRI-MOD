@@ -19,6 +19,7 @@ Per (importer I, exporter J) of the model, over the CAPRI region pairs (i, j) ma
   so that the base import price ImportP (quantity-weighted) = a + b and, with the exporter's market price
   moving by r_J, the import price is a r_J + b - CAPRI's impPrice_ aggregated exactly at the base composition.
   a0     = sum ImportQ x Fob / q (the same without the ad valorem tariff, for tariff scenarios)
+  tc     = sum ImportQ x TCost / q (transport cost: with a0 the base of an ad valorem tariff change, impPrice_)
 For I = J the price is the region's own market price (a = 1 x PMRK, b = 0).
 Per region and product: PMRK (production-weighted), PROD.
 Substitution elasticities rho1, rho2 per product: arm/market1.gms (8 / 10) overridden by special_ch/
@@ -31,7 +32,7 @@ included; DDGS, the ethanol plants' feed by-product, too; the dairy products FRM
 oilseeds have no CAPRI bilateral trade (MILK: 31 cells of a few tonnes; OOIL: none).
 
 Outputs (capri_data/2017/market/):
-  bilateral_flows_<year>.csv    commodity, importer, exporter, q_kt, a, b, a0, ta_pct
+  bilateral_flows_<year>.csv    commodity, importer, exporter, q_kt, a, b, a0, ta_pct, tc
   bilateral_regions_<year>.csv  commodity, region, pmrk, prod_kt
   armington_rho.csv             commodity, capri, rho1, rho2
 
@@ -45,6 +46,8 @@ from pathlib import Path
 
 import pandas as pd
 
+import functools as _ft
+_read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 SRC = {2017: Path("/mnt/user-data/uploads/market_base_1717.txt"),
        2030: Path("/mnt/user-data/uploads/markmarket_greendeal_1730et_base_1717.txt")}
@@ -112,7 +115,7 @@ def extract(year, eu_blocks=False):
                 and (r[1] == "" or (r[0], r[1], r[3]) in flow)]
         pd.DataFrame(rows, columns=["r1", "r2", "item", "product", "value"]).to_csv(keep, index=False)
         print(f"{year}: extracted {len(rows)} rows -> {keep.relative_to(ROOT)}")
-    return pd.read_csv(keep, keep_default_na=False)
+    return _read_csv(keep, keep_default_na=False)
 
 
 def build(year, REGION_MAP, AGGREGATES, eu_blocks=False):
@@ -146,7 +149,7 @@ def build(year, REGION_MAP, AGGREGATES, eu_blocks=False):
         mi, mj, mc = mp(i), mp(j), CAPRI[p]
         if i == j or mi == mj:                        # domestic sales of the model region
             pm = reg.get((p, j), {}).get("PMRK", d.get("Fob", 0.0))
-            a, b, a0, ta = pm, 0.0, pm, 0.0
+            a, b, a0, ta, tc = pm, 0.0, pm, 0.0, 0.0
             mj = mi
         else:
             fob, tc, ta, ip = d.get("Fob", 0.0), d.get("TCost", 0.0), d.get("TaAppl", 0.0), d.get("ImportP", 0.0)
@@ -155,9 +158,10 @@ def build(year, REGION_MAP, AGGREGATES, eu_blocks=False):
             ts = ip - (fob + tc) * (1 + ta / 100.0)
             a, b, a0 = fob * (1 + ta / 100.0), tc * (1 + ta / 100.0) + ts, fob
         k = agg[(mc, mi, mj)]
-        k["q"] += q; k["qa"] += q * a; k["qb"] += q * b; k["qa0"] += q * a0; k["qta"] += q * ta
+        k["q"] += q; k["qa"] += q * a; k["qb"] += q * b; k["qa0"] += q * a0; k["qta"] += q * ta; k["qtc"] += q * tc
     rows = [dict(commodity=c, importer=i, exporter=j, q_kt=v["q"], a=v["qa"] / v["q"], b=v["qb"] / v["q"],
-                 a0=v["qa0"] / v["q"], ta_pct=v["qta"] / v["q"]) for (c, i, j), v in agg.items() if v["q"] > 0]
+                 a0=v["qa0"] / v["q"], ta_pct=v["qta"] / v["q"], tc=v["qtc"] / v["q"])
+            for (c, i, j), v in agg.items() if v["q"] > 0]
     fl = pd.DataFrame(rows).sort_values(["commodity", "importer", "exporter"])
     ra = defaultdict(lambda: defaultdict(float))
     for (p, r), d in reg.items():
@@ -168,8 +172,8 @@ def build(year, REGION_MAP, AGGREGATES, eu_blocks=False):
              for (c, r), v in ra.items()]
     rg = pd.DataFrame(rrows).sort_values(["commodity", "region"])
     dest = ROOT / "capri_data" / "2017" / "market"
-    fl.to_csv(dest / f"bilateral_flows_{year}{sfx}.csv", index=False, float_format="%.8g")
-    rg.to_csv(dest / f"bilateral_regions_{year}{sfx}.csv", index=False, float_format="%.8g")
+    fl.to_csv(dest / f"bilateral_flows_{year}{sfx}.csv", index=False)
+    rg.to_csv(dest / f"bilateral_regions_{year}{sfx}.csv", index=False)
     # checks: exports + domestic sales = production (CAPRI SupBalM_, stock changes aside)
     worst = []
     for c in MODEL:
@@ -208,7 +212,7 @@ def build_trq(year, REGION_MAP, AGGREGATES):
         pat = re.compile(r"^'EU'\.'([^']*)'\.'([A-Za-z]+)'\.'([A-Z]+)'\.'\d+'\s+([-\d.Ee+]+)")
         rows = [m.groups() for m in map(pat.match, txt.splitlines()) if m]
         pd.DataFrame(rows, columns=["exporter", "item", "product", "value"]).to_csv(keep, index=False)
-    df = pd.read_csv(keep, keep_default_na=False)
+    df = _read_csv(keep, keep_default_na=False)
     d = defaultdict(dict)
     for r in df.itertuples(index=False):
         d[(r.product, r.exporter)][r.item] = float(r.value)
@@ -232,14 +236,14 @@ def build_trq(year, REGION_MAP, AGGREGATES):
     rows = [dict(commodity=c, exporter=j, quota_kt=v["quota"], gap_eur_t=v["qg"] / v["quota"], imports_kt=v["imp"])
             for (c, j), v in agg.items() if v["quota"] > 0]
     out = pd.DataFrame(rows).sort_values(["commodity", "exporter"])
-    out.to_csv(ROOT / "capri_data" / "2017" / "market" / f"bilateral_trq_{year}.csv", index=False, float_format="%.8g")
+    out.to_csv(ROOT / "capri_data" / "2017" / "market" / f"bilateral_trq_{year}.csv", index=False)
     tot = out.groupby("commodity")[["quota_kt", "imports_kt"]].sum()
     print(f"{year} EU TRQs: " + ", ".join(f"{c} {r.imports_kt:.0f}/{r.quota_kt:.0f}" for c, r in tot.iterrows()))
     return out
 
 
 def main():
-    sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check", "check/nlp_check")]
+    sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check")]
     from recalibrate_trade_2017 import REGION_MAP, AGGREGATES
     KEEP.mkdir(parents=True, exist_ok=True)
     blocks = "--eu-blocks" in sys.argv

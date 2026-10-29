@@ -31,6 +31,7 @@ def _manifest_path(D, fn, meta):
     return (_P(D) / rel) if rel else resolve_data_file(D, fn)
 
 import pandas as pd
+from capri_mod.tableio import read_input
 
 
 class ValidationReport:
@@ -90,7 +91,7 @@ def validate_data(data_dir="capri_data") -> ValidationReport:
         if "rows" not in exp:
             continue
         try:
-            df = pd.read_csv(p, index_col=0)
+            df = read_input(p, index_col=0)
             if df.shape[0] != exp["rows"]:
                 drift.append(f"{fn}: {df.shape[0]} rows (manifest {exp['rows']})")
         except Exception as e:
@@ -124,7 +125,7 @@ def validate_data(data_dir="capri_data") -> ValidationReport:
 
     # --- 5. Key economic sanity checks on live values ---
     try:
-        wp = pd.read_csv(resolve_data_file(D, "world_prices.csv"), index_col=0)
+        wp = read_input(resolve_data_file(D, "world_prices.csv"), index_col=0)
         col = wp.columns[0]
         # livestock prices should exceed crop prices (basic economics)
         beef = wp.at["BEEF", col] if "BEEF" in wp.index else None
@@ -144,7 +145,7 @@ def validate_data(data_dir="capri_data") -> ValidationReport:
         if not p.exists():
             continue
         try:
-            df = pd.read_csv(p, index_col=0).select_dtypes("number")
+            df = read_input(p, index_col=0).select_dtypes("number")
             neg = (df < 0).sum().sum()
             if neg > 0:
                 rep.add(f"non-negative values ({fn})", "FAIL", f"{neg} negatives")
@@ -155,7 +156,7 @@ def validate_data(data_dir="capri_data") -> ValidationReport:
 
     # --- 7. Trade flows (an input of tools/check/validate_world_prices.py; the model reads the bilateral files) ---
     try:
-        tf = pd.read_csv(resolve_data_file(D, "trade_flows.csv"))
+        tf = read_input(resolve_data_file(D, "trade_flows.csv"))
         rep.add("trade flows loadable", "PASS", f"{tf.shape[0]} rows")
     except Exception as e:
         rep.add("trade flows loadable", "WARN", str(e)[:40])
@@ -239,8 +240,8 @@ def _check_margins(D, rep):
         almost certainly a data error (as with the sugar-price bug). Flagged.
     """
     try:
-        y = pd.read_csv(resolve_data_file(D, "yields.csv"), index_col=0)
-        c = pd.read_csv(resolve_data_file(D, "variable_costs.csv"), index_col=0)
+        y = read_input(resolve_data_file(D, "yields.csv"), index_col=0)
+        c = read_input(resolve_data_file(D, "variable_costs.csv"), index_col=0)
         # Apply the same greenhouse-artifact cost cap the supply loader applies
         # (load_variable_costs_regional), so the margin check evaluates the costs
         # the model actually uses rather than the raw file's greenhouse values
@@ -254,14 +255,14 @@ def _check_margins(D, rep):
                     if len(_pos):
                         _cap = 2.0 * _pos.median()
                         c.loc[c[_crop] > _cap, _crop] = _cap
-        areas = pd.read_csv(resolve_data_file(D, "base_areas.csv"), index_col=0)
-        pr = pd.read_csv(resolve_data_file(D, "producer_prices.csv"), index_col=0)
+        areas = read_input(resolve_data_file(D, "base_areas.csv"), index_col=0)
+        pr = read_input(resolve_data_file(D, "producer_prices.csv"), index_col=0)
         price = pr[pr.columns[0]]
         # CAPRI regional prices (MPRI) where extracted. The margin check must use
         # the same prices the supply module does, or it reports losses the model
         # does not actually see.
         try:
-            reg_price = pd.read_csv(
+            reg_price = read_input(
                 Path(D) / "sources" / "capreg" / "capreg_producer_prices.csv",
                 index_col=0)
         except Exception:
@@ -272,7 +273,7 @@ def _check_margins(D, rep):
         return
 
     try:
-        cap = pd.read_csv(resolve_data_file(D, "cap_payments.csv"), index_col=0)
+        cap = read_input(resolve_data_file(D, "cap_payments.csv"), index_col=0)
         cap_per_ha = cap.sum(axis=1) if cap.shape[1] > 1 else cap[cap.columns[0]]
     except Exception:
         cap_per_ha = None

@@ -1,0 +1,3 @@
+code,description,used_by
+U_TonPerHd,Metric ton per head,"2017/supply/yields.csv, animal columns whose output is a mass (not PIGS: piglets per sow, a head count)"
+U_HdPerHd,Heads per head,"2017/supply/yields.csv, PIGS (piglets per sow)"

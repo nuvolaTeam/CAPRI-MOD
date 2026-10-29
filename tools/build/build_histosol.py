@@ -41,6 +41,8 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+import functools as _ft
+_read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 SRC = ROOT / "capri_data" / "sources"
 ZONE_AGG = {"Boreal": "boreal", "CoolTempDry": "temperate", "CoolTempWet": "temperate", "WarmTempDry": "temperate",
@@ -129,17 +131,16 @@ def main():
         t = sum(z.values())
         return {k: v / t for k, v in z.items()} if t > 0 else {}
 
-    cs = pd.read_csv(SRC / "ghgtech" / "capri_costsavings_2030.csv")
+    cs = _read_csv(SRC / "ghgtech" / "capri_costsavings_2030.csv")
     cs = cs[cs["technology"] == "FALLOW"]
-    terms = pd.read_csv(ROOT / "capri_data" / "validation" / "greendeal_2030" / "capri_marginal_terms_ini_2030.csv.xz",
+    terms = _read_csv(ROOT / "capri_data" / "validation" / "greendeal_2030" / "capri_marginal_terms_ini_2030.csv.xz",
                         header=None, names=["region", "act", "item", "value"], dtype=str)
     terms = terms[(terms["item"] == "LEVL") & terms["act"].isin(["CROP", "GRAS"])]
     lev = {(r.region, r.act): float(r.value) for r in terms.itertuples()}
-    pr = pd.read_csv(ROOT / "capri_data" / "trajectories" / "capri_price_ratios_2030.csv")
+    pr = _read_csv(ROOT / "capri_data" / "trajectories" / "capri_price_ratios_2030.csv")
     defl = float(pr["deflator"].median())
 
     mr = _load(ROOT / "tools" / "lib" / "_model_regions.py")
-    corr = json.loads((ROOT / "capri_data" / "shared" / "nuts_version_correspondence.json").read_text())["capri8_to_nuts"]
     import importlib.util as _ilu_
     _sp_ = _ilu_.spec_from_file_location("_mr_", ROOT / "tools" / "lib" / "_model_regions.py")
     _mr_ = _ilu_.module_from_spec(_sp_); _sp_.loader.exec_module(_mr_)
@@ -181,7 +182,7 @@ def main():
         rows.append(rec)
     out = pd.DataFrame(rows).set_index("region")
     dest = ROOT / "capri_data" / "2017" / "environment" / "histosol.csv"
-    out.to_csv(dest, float_format="%.6g")
+    out.to_csv(dest)
     print(f"wrote {dest.name}: {len(out)} regions; cropland share median {out.share_crop.median():.4f}, "
           f"grassland {out.share_grass.median():.4f}; N2O factor crop {out.ef_n2o_crop.median():.1f}, grass "
           f"{out.ef_n2o_grass.median():.1f} kg N2O-N/ha; fallowing calibrated: crop "

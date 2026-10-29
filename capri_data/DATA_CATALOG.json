@@ -43,12 +43,6 @@
    "units": "EUR/t"
   },
   {
-   "file": "armington_params.csv",
-   "vintage": "2017",
-   "domain": "market",
-   "units": "elasticity"
-  },
-  {
    "file": "eu_mfn_tariffs.csv",
    "vintage": "2017",
    "domain": "policy",
@@ -67,40 +61,16 @@
    "units": "elasticity"
   },
   {
-   "file": "input_requirements.csv",
-   "vintage": "2017",
-   "domain": "supply",
-   "units": "coefficient"
-  },
-  {
    "file": "pmp_own_price_elasticities.csv",
    "vintage": "2017",
    "domain": "supply",
    "units": "elasticity"
   },
   {
-   "file": "pmp_diagonal_terms.csv",
-   "vintage": "2017",
-   "domain": "supply",
-   "units": "EUR-based"
-  },
-  {
-   "file": "pmp_crossgroup_terms.csv",
-   "vintage": "2017",
-   "domain": "supply",
-   "units": "EUR-based"
-  },
-  {
    "file": "gascoeff_params.json",
    "vintage": "2006",
    "domain": "environment",
    "units": "kg/head or factor"
-  },
-  {
-   "file": "manure_ch4_ef_regional.csv",
-   "vintage": "2017",
-   "domain": "environment",
-   "units": "kg CH4/head"
   },
   {
    "file": "crop_nutrient_export.csv",
@@ -119,12 +89,6 @@
    "vintage": "2017",
    "domain": "market",
    "units": "1000 t"
-  },
-  {
-   "file": "fao_demand_own_elas_eu.json",
-   "vintage": "2017",
-   "domain": "market",
-   "units": "elasticity"
   },
   {
    "file": "dairy_processing_params.json",

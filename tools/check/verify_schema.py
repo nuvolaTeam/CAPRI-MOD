@@ -36,6 +36,8 @@ import numpy as np
 import pandas as pd
 
 
+import functools as _ft
+_read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 def load_schema(data_dir: Path) -> dict:
     return json.loads((data_dir / "INPUT_SCHEMA.json").read_text())
 
@@ -43,7 +45,7 @@ def load_schema(data_dir: Path) -> dict:
 def cell_coverage(path: Path) -> tuple[int, int]:
     """(live_cells, non_zero_cells) for a 2-D numeric CSV; (0,0) otherwise."""
     try:
-        df = pd.read_csv(path, index_col=0)
+        df = _read_csv(path, index_col=0)
     except Exception:
         return 0, 0
     num = df.select_dtypes(include=[np.number])

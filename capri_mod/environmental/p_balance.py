@@ -23,6 +23,7 @@ from pathlib import Path
 from typing import Dict, Optional
 
 import pandas as pd
+from capri_mod.tableio import read_input
 
 ITEMS = ("EXCRET", "MTRADE", "MINFER", "CRESID", "EXPPRD", "RUNANI", "IMPORT", "SURTOT", "SURSOI")
 
@@ -41,7 +42,7 @@ class PCropCoefs:
 
     def __init__(self, data_dir: Optional[str] = None):
         root = Path(data_dir) if data_dir else Path(__file__).resolve().parents[2] / "capri_data"
-        t = pd.read_csv(root / "2017" / "environment" / "p_balance_crop_coefs_2030.csv")
+        t = read_input(root / "2017" / "environment" / "p_balance_crop_coefs_2030.csv")
         self.c = {(r.capri_region, r.model_crop): (float(r.pret_kg_ha), float(r.pcrd_kg_ha))
                   for r in t.itertuples(index=False)}
 
@@ -69,12 +70,12 @@ def nutned_mineral(D, capri_region: str, need, own, own_perm, pool, mine0, xb, x
         kappa x (sum_c need_c sq_c x_c - gc x sum_c own_perm_c x_c) = eff x MINE + g0 x E + gc x C
 
     with the arable residue pool C = sum_c pool_c x_c, the permanent groups' own residues own_perm_c (own_c x the crop's
-    share in a permanent group), manure applied E, sq_c = sqrt(yield / base yield), and kappa the need factor that
-    closes the equation at the base levels xb with CAPRI's mineral flows mine0, as the block computes it:
+    share in a permanent group), manure applied E, sq_c = CAPRI's need factor of the yield
+    (capri_mod.fert.npk.need_yield_factor), and kappa the need factor that closes the equation at the base levels xb with CAPRI's mineral flows mine0, as the block computes it:
     kappa x (need0 - gc x own0) = eff x M0 + g0 x E0 + gc x C0 (CAPRI's v_cropNutNeedMultFact, calibrated at the
     base and fixed in simulation).
     Arguments are dicts by model crop (kg/ha, 1000 ha) and t; grass = (z, dn, sq) adds the grassland split column
-    (z x need difference GRAE - GRAI). Used where the regional model has no fertilisation block (conic form); at the
+    (z x need difference GRAE - GRAI). Used where there is no regional solution (the accounts at the base data); at the
     NLP form's solution the sum of its NUTNED_ rows is this equation exactly. None without CAPRI's data."""
     R = D.region(capri_region, "P")
     if R is None:

@@ -26,6 +26,13 @@ import argparse, glob, json, re, sys
 from collections import defaultdict
 from pathlib import Path
 
+
+def _read_csv(*a, **k):
+    """pandas.read_csv with floats parsed to the last digit (KNOWN_ISSUES K82)."""
+    import pandas as pd
+    k.setdefault("float_precision", "round_trip")
+    return pd.read_csv(*a, **k)
+
 _ROOT = Path(__file__).resolve().parents[2]
 MAP = {"DCOW": "DCOW", "SCOW": "BCOW", "BULF": "BULL", "HEIF": "HFRS", "HEIR": "HFRS",
        "CAMF": "CALV", "CAFF": "CALV", "CAMR": "CALV", "CAFR": "CALV",
@@ -68,8 +75,7 @@ def build(dest_name: str) -> None:
     ap.add_argument("--old-json", default=None, help="earlier build (per CAPRI head) for Spain")
     args = ap.parse_args()
     import pandas as pd
-    herds = pd.read_csv(_ROOT / "capri_data" / "2017" / "supply" / "animal_numbers.csv", index_col=0)
-    corr = json.loads((_ROOT / "capri_data" / "shared" / "nuts_version_correspondence.json").read_text())["capri8_to_nuts"]
+    herds = _read_csv(_ROOT / "capri_data" / "2017" / "supply" / "animal_numbers.csv", index_col=0)
     items = {i for b in BAL.values() for i in b[0] | b[1]}
     row = re.compile(r"^'([A-Z]{2}[0-9A-Z]{6})'\.'([A-Z0-9]{4})'\.'([A-Z0-9]{4})'\.'Y'\s+(-?\d[\d.Ee+\-]*)")
     v = defaultdict(dict)
@@ -81,11 +87,6 @@ def build(dest_name: str) -> None:
             r8, a, it, val = m.group(1), m.group(2), m.group(3), float(m.group(4))
             if (a in MAP and (it in items or it == "LEVL")) or (a == "UVAG" and r8.endswith("000000")):
                 v[r8][(a, it)] = val
-
-    def to_model(c8):
-        for c in corr.get(c8, []):
-            if c in herds.index:
-                return c
 
     import importlib.util as _iu
     _sp = _iu.spec_from_file_location("_mr", _ROOT / "tools" / "lib" / "_model_regions.py")
@@ -127,14 +128,13 @@ def build(dest_name: str) -> None:
     old_es = {}
     _old = Path(args.old_json) if args.old_json else None
     if _old and _old.exists():
-        md = pd.read_csv(_ROOT / "capri_data" / "2017" / "abatement" / "ammonia" / "capri_mann_days_2030.csv")
+        md = _read_csv(_ROOT / "capri_data" / "2017" / "abatement" / "ammonia" / "capri_mann_days_2030.csv")
         L30 = defaultdict(float)
         SUB = {"DCOL": "DCOW", "DCOH": "DCOW", "BULL": "BULL", "BULH": "BULL", "HEIL": "HFRS", "HEIH": "HFRS", "HEIR": "HFRS",
                "SCOW": "BCOW", "CAMR": "CALV", "CAFR": "CALV", "CAMF": "CALV", "CAFF": "CALV"}
         for r in md[md["item"] == "LEVL"].itertuples():
             if r.activity in SUB:
-                for n2 in corr.get(r.region, []):
-                    L30[(n2, SUB[r.activity])] += float(r.value)
+                L30[(r.region, SUB[r.activity])] += float(r.value)     # the model's regions are CAPRI's units
         for reg, rec in json.loads(_old.read_text())["regions"].items():
             if not reg.startswith("ES") or reg not in herds.index:
                 continue

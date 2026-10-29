@@ -23,9 +23,16 @@ from pathlib import Path
 
 _ROOT = Path(__file__).resolve().parents[2]
 import sys as _sys
-_sys.path[:0] = [str(_ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check", "check/nlp_check")]
+_sys.path[:0] = [str(_ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check")]
 from _model_regions import CTRY as MS_CODE  # noqa: E402  CAPRI member-state codes (capri_member_state_codes.csv)
-sys.path[:0] = [str(_ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check", "check/nlp_check")]
+
+
+def _read_csv(*a, **k):
+    """pandas.read_csv with floats parsed to the last digit (KNOWN_ISSUES K82)."""
+    import pandas as pd
+    k.setdefault("float_precision", "round_trip")
+    return pd.read_csv(*a, **k)
+sys.path[:0] = [str(_ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check")]
 
 #: CAPRI star 3.0 animals -> model animals. The 2030 results report the split activities (dairy cows DCOL / DCOH,
 #: bulls BULL / BULH, heifers HEIL / HEIH, supply/define_activities); the former aggregates (DCOW, BULF, HEIF)
@@ -93,7 +100,7 @@ def main() -> None:
                     den[m] += lev * mann
         return {m: num[m] / den[m] for m in num if den[m] > 0}
 
-    areas = pd.read_csv(_ROOT / "capri_data" / "2017" / "supply" / "base_areas.csv", index_col=0)
+    areas = _read_csv(_ROOT / "capri_data" / "2017" / "supply" / "base_areas.csv", index_col=0)
     sp = importlib.util.spec_from_file_location("_mr", _ROOT / "tools" / "lib" / "_model_regions.py")
     mr = importlib.util.module_from_spec(sp); sp.loader.exec_module(mr)
     _c2g, groups = mr.capri_groups(list(areas.index))
@@ -107,7 +114,7 @@ def main() -> None:
         for a in sorted(set(nat) | set(own)):
             s = own.get(a, nat.get(a))
             kind = "regional" if a in own else "national"
-            rows.append(dict(region=reg, animal=a, loss_share=round(s, 10), source=kind))
+            rows.append(dict(region=reg, animal=a, loss_share=s, source=kind))
             src[kind] += 1
     dest = _ROOT / "capri_data" / "2017" / "environment" / "manure_housing_losses_2030.csv"
     pd.DataFrame(rows).to_csv(dest, index=False)

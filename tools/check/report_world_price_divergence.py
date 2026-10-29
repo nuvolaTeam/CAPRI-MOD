@@ -32,6 +32,8 @@ from pathlib import Path
 
 import pandas as pd
 
+import functools as _ft
+_read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 # model commodity -> CAPRI market commodity
 CODE_MAP = {
     "SWHE": "WHEA", "CORN": "MAIZ", "POUL": "POUM",
@@ -48,8 +50,8 @@ def main() -> None:
     if not ref_path.exists():
         raise SystemExit(f"not found: {ref_path}\n"
                          "Run tools/build/ingest_capmod_market.py first.")
-    capri = pd.read_csv(ref_path, index_col=0)
-    model = pd.read_csv(args.data_dir / "2017/market/world_prices.csv", index_col=0)
+    capri = _read_csv(ref_path, index_col=0)
+    model = _read_csv(args.data_dir / "2017/market/world_prices.csv", index_col=0)
     col = model.columns[0]
 
     rows = []

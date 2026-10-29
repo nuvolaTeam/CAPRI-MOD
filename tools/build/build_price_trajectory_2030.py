@@ -36,6 +36,8 @@ from pathlib import Path
 
 import pandas as pd
 
+import functools as _ft
+_read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 CAKES = ("SOYC", "RAPC", "SUNC")
 INPUTS = ("EFUL", "ELEC", "EGAS", "ELUB", "NITF", "PHOF", "POTF", "SEED", "PLAP", "REPM", "REPB", "INPO", "IPHA")
@@ -54,8 +56,8 @@ def main() -> None:
     args = ap.parse_args()
     val = ROOT / "capri_data" / "validation" / "greendeal_2030"
     out = ROOT / "capri_data" / "trajectories"
-    uv30 = pd.read_csv(val / "capri_unit_values_ini_2030.csv")
-    terms = pd.read_csv(val / "capri_marginal_terms_ini_2030.csv.xz")
+    uv30 = _read_csv(val / "capri_unit_values_ini_2030.csv")
+    terms = _read_csv(val / "capri_marginal_terms_ini_2030.csv.xz")
     products = set(uv30["product"])
 
     # --- CAPRI 2017: national UVAG, regional PRME and LEVL
@@ -89,7 +91,7 @@ def main() -> None:
     # oilcakes: CAPRI's 2017 results carry no oilcake UVAG; the market baseline
     # (results/baseline/data_market_1730defaulta: PPRI at the base point BAS = 2017 and at the 2030
     # calibration point CAL) gives the same producer-price concept at both points
-    mk = pd.read_csv(ROOT / "capri_data" / "sources" / "capri_baseline" / "capri_market_prices_1730.csv")
+    mk = _read_csv(ROOT / "capri_data" / "sources" / "capri_baseline" / "capri_market_prices_1730.csv")
     mk = mk[(mk["item"] == "PPRI") & mk["product"].isin(CAKES)].pivot_table(
         index=["region", "product"], columns="point", values="value")
     for (reg, prod), v in mk.iterrows():
@@ -97,16 +99,14 @@ def main() -> None:
             rows.append((reg[:2], prod, float(v["BAS"]), float(v["CAL"]), defl[reg],
                          float(v["CAL"]) / float(v["BAS"]) / defl[reg]))
     pr = pd.DataFrame(rows, columns=["ms", "product", "uvag_2017", "uvag_2030", "deflator", "real_ratio"])
-    pr.to_csv(out / "capri_price_ratios_2030.csv", index=False, float_format="%.6g")
+    pr.to_csv(out / "capri_price_ratios_2030.csv", index=False)
 
     # --- premiums: 2030 PRME per unit (CAPRI regions and national rows) in 2017 money
     p30 = terms[terms["item"] == "PRME"].pivot_table(index="region", columns="activity", values="value")
     sys_path = str(ROOT)
     import sys; sys.path.insert(0, sys_path)
-    from capri_mod.data.loaders import load_all_data
-    d = load_all_data(str(ROOT / "capri_data"))
-    cap = d["cap_premium"]; herds = d["animal_numbers"]
-    corr = json.loads((ROOT / "capri_data" / "shared" / "nuts_version_correspondence.json").read_text())["capri8_to_nuts"]
+    from capri_mod.data.loaders import load_cap_premium, load_regional_animal_numbers  # the tables needed (load_all_data read every model input, a dependency cycle in the data pipeline; 29 Oct 2026)
+    cap = load_cap_premium(str(ROOT / "capri_data")); herds = load_regional_animal_numbers(str(ROOT / "capri_data"))
     mr = _load(ROOT / "tools" / "lib" / "_model_regions.py")
     loc = _load(ROOT / "tools" / "build" / "build_livestock_output_coef.py")
     c2m = loc.CAPRI_TO_MODEL
@@ -135,7 +135,7 @@ def main() -> None:
             v = p30.at[src, a] if a in p30.columns else float("nan")
             if pd.notna(v):
                 capn.at[reg, col] = float(v) / df_
-    capn.to_csv(out / "capri_cap_premium_2030.csv", float_format="%.6g")
+    capn.to_csv(out / "capri_cap_premium_2030.csv")
 
     lsk = pd.DataFrame(index=herds.index, columns=sorted(set(c2m.values())), dtype=float)
     for reg in herds.index:
@@ -153,7 +153,7 @@ def main() -> None:
         for ma in num:
             if den[ma] > 1e-9:
                 lsk.at[reg, ma] = num[ma] / den[ma]
-    lsk.to_csv(out / "capri_livestock_premium_ratio_2030.csv", float_format="%.6g")
+    lsk.to_csv(out / "capri_livestock_premium_ratio_2030.csv")
     print(f"price ratios: {len(pr)} rows, deflator median {statistics.median(defl.values()):.4f} "
           f"(range {min(defl.values()):.4f}-{max(defl.values()):.4f}); cap premiums {int(capn.notna().sum().sum())} cells; "
           f"livestock premium ratios {int(lsk.notna().sum().sum())} cells")

@@ -58,8 +58,17 @@ def best_three_yields(levels_bas: pd.Series, yields: pd.DataFrame, eightlst: Seq
 
 
 def supports(st: pd.DataFrame, step1: pd.DataFrame, years: Sequence[int], bas_year: int, bast_year: int,
-             sets: SupportSets) -> Tuple[pd.DataFrame, pd.Series]:
-    """Supports per series and ex-ante year (DataFrame, years as columns) and the stored error variance."""
+             sets: SupportSets, floor_squared: Optional[bool] = None) -> Tuple[pd.DataFrame, pd.Series]:
+    """Supports per series and ex-ante year (DataFrame, years as columns) and the stored error variance.
+
+    floor_squared (setting captrd.variance_floor_squared; CAPRI-ERROR-FIX): the stored variance's floor is
+    (0.05 x |wAve|)^2, a variance, where CAPRI's code takes 0.05 x |wAve|, a level (l. 327-329). wVarErr is a variance
+    in CAPRI's own code (a sum of squared residuals, l. 118-123; the fall-back for 1-2 observations is
+    SQR(wAve) x 0.25, l. 130) and is used as one later (sqrt(wVarErr) as a standard deviation,
+    define_eu_supports.gms l. 693, 705). False reproduces CAPRI as coded."""
+    if floor_squared is None:
+        from capri_mod.settings import current as _settings
+        floor_squared = bool(_settings().get("captrd.variance_floor_squared"))
     idx = st.index
     cols = idx.get_level_values(1)
     rows = idx.get_level_values(2)
@@ -129,9 +138,11 @@ def supports(st: pd.DataFrame, step1: pd.DataFrame, years: Sequence[int], bas_ye
         S[rq] = 1.0
         out[t] = S
     sup = pd.DataFrame(out, index=idx)
-    # l. 327-329: the stored error variance, with its floor 0.05 x |wAve| (a level against a variance; CAPTRD_MOD.md
-    # section 12.4) except for requirements and feed
+    # l. 327-329: the stored error variance with its floor, except for requirements and feed: CAPRI's 0.05 x |wAve|
+    # (a level against a variance; CAPTRD_MOD.md section 12.4), or its square (floor_squared)
     no_floor = np.isin(rows, list(sets.reqst)) | np.isin(rows, list(sets.feed))
-    wv = np.where(no_floor, st["wvarerr"].to_numpy(float),
-                  np.maximum(np.abs(st["wave"].to_numpy(float)) * 0.05, st["wvarerr"].to_numpy(float)))
+    fl = np.abs(st["wave"].to_numpy(float)) * 0.05
+    if floor_squared:
+        fl = fl * fl
+    wv = np.where(no_floor, st["wvarerr"].to_numpy(float), np.maximum(fl, st["wvarerr"].to_numpy(float)))
     return sup, pd.Series(np.where(has, wv, np.nan), index=idx)

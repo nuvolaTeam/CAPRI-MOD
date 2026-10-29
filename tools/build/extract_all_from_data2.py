@@ -35,6 +35,10 @@ PLAP is also unsafe: in these dumps it carries the same value as PESTOTAL
 (4706.3 for DE11 SWHE), which is a pesticide quantity index rather than EUR/ha.
 It is excluded.
 
+Until 29 October 2026 it also printed a comparison with the model's producer_prices.csv and nutrient_coefs.csv; that
+made the extract read tables built from it (a cycle in the data pipeline, docs/design/DATA_PIPELINE_DOIT.md) and was
+removed: the extract reads CAPRI's dumps and the regional units only.
+
 Usage
 -----
     python tools/build/extract_all_from_data2.py --export-dir /path/to/capri_export
@@ -46,9 +50,10 @@ import json
 import re
 from pathlib import Path
 
-import numpy as np
 import pandas as pd
 
+import functools as _ft
+_read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 RECORD = re.compile(
     r"^'([A-Z]{2}[A-Z0-9]{6})'\.'([A-Z0-9_]+)'\.'([A-Za-z0-9_]+)'\.'Y'\s+([-\d.Ee+]+)")
 
@@ -84,14 +89,12 @@ def main() -> None:
     df = pd.concat([parse(f, WANTED) for f in files], ignore_index=True)
     df = df.drop_duplicates(["region", "activity", "item"], keep="last")
 
-    cw = json.loads((args.data_dir / "shared/nuts_crosswalk.json").read_text())
-    rev = {}
-    for mr, codes in cw.get("aliases", {}).items():
-        for c in codes:
-            rev.setdefault(c, mr)
-    for mr, c in cw["resolved"].items():
-        rev.setdefault(c, mr)
-    df["model_region"] = df.region.map(rev)
+    # the model's regions are CAPRI's regional units (shared/regional_units.csv): each CAPRI row is its own region's
+    # (until 27 October 2026 mapped to NUTS-2016 regions through shared/nuts_crosswalk.json, 21 regions unmatched)
+    import sys as _sys
+    _sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "lib"))
+    from _model_regions import is_unit
+    df["model_region"] = df.region.where(df.region.map(is_unit))
     df = df.dropna(subset=["model_region"])
     df["activity"] = df.activity.replace({"MAIZ": "CORN"})
 
@@ -103,7 +106,9 @@ def main() -> None:
     pr = df[df.item == PRICE_ITEM].pivot_table(
         index="model_region", columns="activity", values="value", aggfunc="last")
     pr = pr.where(pr > 0)
-    pr.to_csv(out / "capreg_producer_prices.csv")
+    # CAPRI's regional producer prices as extracted (CAPRI's codes); the model's table capreg_producer_prices.csv is
+    # assembled from it by tools/build/build_crop_economics_2017.py (one writer per file, 29 October 2026)
+    pr.to_csv(out / "capreg_producer_prices_extract.csv")
     summary["producer_prices"] = {
         "regions": int(pr.shape[0]), "activities": int(pr.shape[1]),
         "values": int(pr.notna().sum().sum())}
@@ -132,45 +137,9 @@ def main() -> None:
     ratio = (cmp_.components / cmp_.toin).median()
     summary["cost_components"] = {
         "records": int(len(co)),
-        "components_over_toin_median": round(float(ratio), 3)}
+        "components_over_toin_median": float(ratio)}
     print(f"cost components : {len(co):,} records; "
           f"sum of components is {ratio:.0%} of TOIN")
-
-    # ---- comparison with what the model currently uses -------------------
-    print("\n--- against current model inputs ---")
-    cur_p = pd.read_csv(args.data_dir / "2017/market/producer_prices.csv", index_col=0)
-    col = cur_p.columns[0]
-    rows = []
-    for a in pr.columns:
-        if a in cur_p.index:
-            capri = float(pr[a].median())
-            model = float(cur_p.at[a, col])
-            if capri > 0 and model > 0:
-                rows.append((a, model, capri, 100 * (model - capri) / capri))
-    dp = pd.DataFrame(rows, columns=["activity", "model", "capri_median", "dev_pct"])
-    print(f"\nproducer prices, {len(dp)} activities comparable:")
-    print(f"  median |deviation| : {dp.dev_pct.abs().median():.1f}%")
-    print(dp.reindex(dp.dev_pct.abs().sort_values(ascending=False).index)
-          .head(8).round(1).to_string(index=False))
-
-    cur_n = pd.read_csv(args.data_dir / "2017/environment/nutrient_coefs.csv",
-                        index_col=0)
-    npiv = nu.pivot_table(index="activity", columns="nutrient",
-                          values="value", aggfunc="median")
-    common = [a for a in npiv.index if a in cur_n.index]
-    devs = []
-    for a in common:
-        for n in ("N", "P2O5", "K2O"):
-            if n in cur_n.columns and n in npiv.columns:
-                m, c = cur_n.at[a, n], npiv.at[a, n]
-                if c and c > 0 and pd.notna(m):
-                    devs.append(abs(m - c) / c * 100)
-    print(f"\nnutrient coefficients, {len(common)} activities comparable:")
-    print(f"  median |deviation| : {np.median(devs):.1f}%")
-    print("  model values are national constants; CAPRI's vary by region "
-          f"(N across regions for SWHE: "
-          f"{nu[(nu.activity=='SWHE') & (nu.nutrient=='N')].value.min():.0f}"
-          f"-{nu[(nu.activity=='SWHE') & (nu.nutrient=='N')].value.max():.0f} kg/ha)")
 
     (args.data_dir / "validation").mkdir(exist_ok=True)
     (args.data_dir / "validation" / "data2_extraction_summary.json").write_text(

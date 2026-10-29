@@ -30,6 +30,8 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+import functools as _ft
+_read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 
 #: indicators compared: model key -> CAPRI (region EU27yr19) activity or product
@@ -50,7 +52,7 @@ def _load(path):
 
 
 def premium_factors(regions):
-    eff = pd.read_csv(ROOT / "capri_data" / "validation" / "coupled_support_2030" / "capri_vcs_effect.csv.xz")
+    eff = _read_csv(ROOT / "capri_data" / "validation" / "coupled_support_2030" / "capri_vcs_effect.csv.xz")
     prme = eff[eff["item"] == "PRME"].set_index(["region", "activity"])[["ref", "novcs"]]
     levl = eff[eff["item"] == "LEVL"].set_index(["region", "activity"])["ref"]
     mr = _load(ROOT / "tools" / "lib" / "_model_regions.py")
@@ -62,16 +64,10 @@ def premium_factors(regions):
             model_of[col].append(a)
     for ca, ma in lsk.items():
         model_of[ma].append(ca)
-    corr = json.loads((ROOT / "capri_data" / "shared" / "nuts_version_correspondence.json").read_text())["capri8_to_nuts"]
-    to_c8 = {}
-    for c8, lst in corr.items():
-        if not c8.endswith("000000"):
-            for r in lst:
-                to_c8.setdefault(r, c8)
     have = set(prme.index.get_level_values(0))
     out = {}
     for reg in regions:
-        src = to_c8.get(reg) if to_c8.get(reg) in have else mr.national_code(reg)
+        src = reg if reg in have else mr.national_code(reg)        # the model's regions are CAPRI's units
         if src not in have:
             continue
         f = {}
@@ -134,7 +130,7 @@ def main():
         return o
     ab, as_ = agg(b), agg(s)
     db, ds = b["market"].domestic_prices.loc["EU27"], s["market"].domestic_prices.loc["EU27"]
-    eff = pd.read_csv(ROOT / "capri_data" / "validation" / "coupled_support_2030" / "capri_vcs_effect.csv.xz")
+    eff = _read_csv(ROOT / "capri_data" / "validation" / "coupled_support_2030" / "capri_vcs_effect.csv.xz")
     rows = []
     for k, ref in capri_eu(eff, "LEVL", HERDS).items():
         rows.append(("herd", k, 100 * (as_.get(k, 0) / ab[k] - 1) if ab.get(k) else np.nan, ref))

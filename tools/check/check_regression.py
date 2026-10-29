@@ -42,6 +42,13 @@ import sys
 import warnings
 from pathlib import Path
 
+
+def _read_csv(*a, **k):
+    """pandas.read_csv with floats parsed to the last digit (KNOWN_ISSUES K82)."""
+    import pandas as pd
+    k.setdefault("float_precision", "round_trip")
+    return pd.read_csv(*a, **k)
+
 warnings.filterwarnings("ignore")
 
 # run from anywhere: put the repo root on the path
@@ -102,22 +109,22 @@ def measure(data_dir: str) -> dict:
     mm = MarketModule(d)
     imb = []
     for c in ("SWHE", "RAPE", "SOYA", "BEEF"):
-        p = mm.base_production[c].sum()
-        q = mm.base_consumption[c].sum()
+        p = mm.par.base_production[c].sum()
+        q = mm.par.base_consumption[c].sum()
         if p > 0:
             imb.append(abs(q - p) / p * 100)
     out["max_world_imbalance_pct"] = round(float(max(imb)), 3)
 
     exo = pd.DataFrame(0.0, index=["EU27"], columns=MARKET_COMMODITIES)
     for c in MARKET_COMMODITIES:
-        if c in mm.base_production.columns:
-            exo.at["EU27", c] = mm.base_production.at["EU27", c]
+        if c in mm.par.base_production.columns:
+            exo.at["EU27", c] = mm.par.base_production.at["EU27", c]
     eq = mm.solve(exogenous_supply=exo, max_iter=150, tolerance=0.01)
     # Reproduction test: the base market must return its own input prices.
     # References are READ from world_prices.csv - they used to be hard-coded
     # copies of it (including rapeseed 213 and soybeans 103, which were cake
     # prices filed under the seeds) and would silently drift out of sync.
-    _wp = pd.read_csv(os.path.join("capri_data", "2017", "market", "world_prices.csv")).set_index("commodity")["price"]
+    _wp = _read_csv(os.path.join("capri_data", "2017", "market", "world_prices.csv")).set_index("commodity")["price"]
     ref = {c: float(_wp[c]) for c in ("SWHE", "BARL", "CORN", "RAPE", "SOYA", "BEEF", "PORK",
                                       "POUL", "MILK", "BUTR", "CHES", "SKIM") if c in _wp.index}
     out["price_reproduction_within_15pct"] = int(sum(

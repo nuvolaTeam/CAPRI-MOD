@@ -13,7 +13,7 @@ land-market columns, land and bound rows, with one label per row) and the calibr
     FEDUSE_  feed use = per-head feed x herd / 1000 (bilinear), entering the non-tradable fodder balances.
     QUADRF_  herd x sum_f f (CNST + 0.5 SLOP f), with the feed's price for tradable feeds.
     Bounds   0 <= v_feedInpCoeff <= 10 x DRMX / DM content (supply/set_supply_bounds.gms).
-* fodder (SUPBAL_ for FODDO): production = feed use, an EQUALITY (the conic model's one-sided band).
+* fodder (SUPBAL_ for FODDO): production = feed use, an EQUALITY (the former conic form had a one-sided band).
 * single-variable rows (CAPRI's activity bounds, fixed levels) as variable bounds; pairs of opposite rows as one ranged
   row (land balances: equal at base use, LandBalNoSlak_).
 
@@ -41,6 +41,7 @@ from collections import OrderedDict
 
 import numpy as np
 
+
 #: IPOPT solvers by the structure of the problem (SOLVER CACHE). Every data value of the model enters its CasADi graph
 #: as a parameter, so two builds with the same structure (columns, rows, feeds, groups, options) give the same graph
 #: whatever the numbers; the graph's serialisation is the key. A data value left as a constant only costs a cache miss,
@@ -59,6 +60,65 @@ CACHE_STATS = {"hit": 0, "miss": 0}
 #: ridge weight of the calibration's multiplier fit (CapriRegionalNLP.calibrate), relative to the scaled columns
 CAL_RIDGE = 1e-10
 
+#: called as SOLVE_PROBE(fingerprint) before each IPOPT solve when set (the market supply Hessian's skip of regions a
+#: price shock does not reach: SupplyModule._solve_region, model._market_supply_hessian); None otherwise
+SOLVE_PROBE = None
+
+
+def _feed_hash(h, o, depth=0):
+    """Everything in o that a solve can read, in a fixed order, into the hash h: arrays by dtype, shape and bytes,
+    floats exactly, containers in order (dicts and sets sorted by key), objects by their attributes."""
+    if depth > 12:
+        h.update(b"<deep>")
+        return
+    if o is None or isinstance(o, (bool, int, str, bytes)):
+        h.update(repr((type(o).__name__, o)).encode())
+    elif isinstance(o, float):
+        h.update(b"f" + np.float64(o).tobytes())
+    elif isinstance(o, np.generic):
+        h.update(repr(o.dtype).encode() + np.asarray(o).tobytes())
+    elif isinstance(o, np.ndarray):
+        a = np.ascontiguousarray(o)
+        if a.dtype == object:
+            h.update(b"objarr" + repr(a.shape).encode())
+            for v in a.ravel():
+                _feed_hash(h, v, depth + 1)
+        else:
+            h.update(repr((a.dtype.str, a.shape)).encode() + a.tobytes())
+    elif isinstance(o, (list, tuple)):
+        h.update(b"(" + str(len(o)).encode())
+        for v in o:
+            _feed_hash(h, v, depth + 1)
+        h.update(b")")
+    elif isinstance(o, dict):
+        h.update(b"{" + str(len(o)).encode())
+        for k in sorted(o, key=repr):
+            h.update(repr(k).encode())
+            _feed_hash(h, o[k], depth + 1)
+        h.update(b"}")
+    elif isinstance(o, (set, frozenset)):
+        _feed_hash(h, sorted(o, key=repr), depth + 1)
+    elif type(o).__name__ == "DM" and hasattr(o, "full"):          # CasADi numbers
+        _feed_hash(h, np.asarray(o.full()), depth + 1)
+    elif hasattr(o, "to_numpy") and hasattr(o, "index"):          # pandas
+        _feed_hash(h, (type(o).__name__, list(o.index), list(getattr(o, "columns", [])), o.to_numpy()), depth + 1)
+    elif hasattr(o, "__dict__"):
+        h.update(type(o).__qualname__.encode())
+        _feed_hash(h, vars(o), depth + 1)
+    else:
+        h.update(repr(o).encode())                                  # (a CasADi object: its printed expression)
+
+
+def problem_fingerprint(spec, kw, opts) -> str:
+    """A digest of one IPOPT solve's inputs: the problem specification, the start, bounds, parameters and warm-start
+    multipliers, and the options. Two solves with the same digest give the same result (IPOPT is deterministic)."""
+    import hashlib
+    h = hashlib.sha256()
+    _feed_hash(h, spec)
+    _feed_hash(h, kw)
+    _feed_hash(h, opts)
+    return h.hexdigest()
+
 
 def _cache_max():
     """Solver objects kept: CAPRI_NLP_CACHE if set (a property of the machine's memory), else run.nlp_cache_size."""
@@ -67,6 +127,30 @@ def _cache_max():
         return int(os.environ.get("CAPRI_NLP_CACHE", "") or _settings().get("run.nlp_cache_size"))
     except ValueError:
         return int(_settings().get("run.nlp_cache_size"))
+
+
+def _cascade_loss(sub, sh):
+    """CAPRI's NH3 loss per unit of excreted N (ammonia_techs.loss) with symbolic shares: sh {tech: expr}."""
+    def stage(rH, rS):
+        hm = 1.0 - sub["g"]
+        h = hm * sub["fH"] * (1.0 - rH)
+        s = (hm - h) * sub["fS"] * (1.0 - rS)
+        return h + s, hm - h - s
+    RA = 0
+    for t in sub["techs"]:
+        if t["group"] == "APP":
+            RA = RA + sh[t["tech"]] * t["rA"]
+    man = [t for t in sub["techs"] if t["group"] == "MAN"]
+    noc = 1.0
+    for t in man:
+        noc = noc - sh[t["tech"]]
+    L0, P0 = stage(0.0, 0.0)
+    L, P = noc * L0, noc * P0
+    for t in man:
+        l_, p_ = stage(t["rH"], t["rS"])
+        L = L + sh[t["tech"]] * l_
+        P = P + sh[t["tech"]] * p_
+    return sub["g"] * sub["fG"] + L + P * sub["fA"] * (1.0 - RA)
 
 
 class _AtP:
@@ -187,6 +271,15 @@ class CapriRegionalNLP:
         if len(labels) != A.shape[0]:
             raise ValueError(f"{len(labels)} row labels for {A.shape[0]} rows")
         acts = list(spec["acts"])
+        # a missing input (NaN, inf) stops the build: IPOPT would stop at its first iteration (Invalid_Number_Detected)
+        # and the run keep its starting point as a non-optimal solve (27 October 2026: 16 regions, a NaN cost of an
+        # animal the region does not have); CAPRI stops on an execution error
+        for nm_, arr_ in (("Q", Q), ("c", c), ("A", A), ("b", b)):
+            bad_ = ~np.isfinite(arr_)
+            if bad_.any():
+                ix_ = np.argwhere(bad_)[0].tolist()
+                what_ = (acts[ix_[0]] if nm_ == "c" else labels[ix_[0]] if nm_ in ("A", "b") else ix_)
+                raise ValueError(f"non-finite {nm_} in the regional problem ({int(bad_.sum())} entries, first {what_})")
         n0, m_A = Q.shape[0], A.shape[0]
         self.n0, self.m_A, self.acts, self.labels = n0, m_A, acts, labels
         act_idx = {a: i for i, a in enumerate(acts)}
@@ -229,7 +322,7 @@ class CapriRegionalNLP:
             fl = np.asarray(r.flex, bool)
             # the herd's linear term carries the base ration's cost per head (CNST, 0.5 SLOP, tradable feeds at base
             # prices; fodder through its balance); it is taken out here and charged through QUADRF_ below, exactly as
-            # the conic model's compensation, with the calibrated CNST
+            # the feed block's compensation, with the calibrated CNST
             pz = np.array([0.0 if f in fod else float(r.p0[j]) for j, f in enumerate(r.feeds)])
             q0[act_idx[a]] -= float(np.sum(np.where(fl, r.x0 * (pz + cn + 0.5 * r.slope * r.x0), 0.0)))
         F = []
@@ -301,7 +394,7 @@ class CapriRegionalNLP:
         for i, l in enumerate(labels):
             if i in used:
                 continue
-            for partner in (l + "_band", l + "_lo"):
+            for partner in (l + "_lo",):
                 jr = lab_idx.get(partner)
                 if jr is not None and jr not in used and np.allclose(A[jr], -A[i], rtol=0, atol=1e-12):
                     pairs[i] = jr; used.add(i); used.add(jr)
@@ -414,6 +507,12 @@ class CapriRegionalNLP:
         self.fert = None
         if spec.get("npk"):
             X, obj = self._fert_block(spec["npk"], X, y, obj, g_rows, lbg, ubg, lbx, ubx)
+        if getattr(self, "_fert_tech_pending", None) is not None:
+            # no N purchases in the model: the options' cost on the crops' base mineral N
+            cost_, crops_ = self._fert_tech_pending
+            obj = obj + self._lin(y, [(col, float(nc) / 1000.0) for col, nc in crops_]) * cost_
+            self._fert_tech_base = sum(float(self.xb[int(col)]) * float(nc) / 1000.0 for col, nc in crops_)
+            self._fert_tech_pending = None
 
         self._obj_rest, self._y = obj, y
         obj = obj + quad
@@ -437,7 +536,7 @@ class CapriRegionalNLP:
         """CAPRI's fertilisation block, per nutrient n (N, P, K), with ghgAbatement off (losses at CAPRI's fixed
         shares, supply_model.gms l. 860-1215, 1535-1725):
 
-          NUTNED_(g,n)    sum_c share_cg x_c need_cn          (need: CAPRI's per ha x sqrt(yield/base) x kappa_n)
+          NUTNED_(g,n)    sum_c share_cg x_c need_cn          (need: CAPRI's per ha x need factor of yield x kappa_n)
                           = eff_n x_g,MINE + avail_n x_g,EXCR + avail_C x (x_g,CRES  [arable groups]
                                                                         | own residues [permanent groups])
           fertDistMine_   sum_g x_g,MINE = v_netPutQuant(n)  (purchases, >= 0, priced at CAPRI's unit value)
@@ -541,6 +640,11 @@ class CapriRegionalNLP:
                 self.synN_row = (len(g_rows), Pscale)
                 g_rows.append((P - pv(float(d["synNMax"])) * land) * pv(1.0 / Pscale)); lbg.append(-np.inf); ubg.append(0.0)
             obj = obj + pv(float(d["price"]) / 1000.0) * P
+            if nut == "N" and getattr(self, "_fert_tech_pending", None) is not None:
+                # the fertiliser options' cost on the N purchases (GHG_Mit_Cost_: - cost x v_netPutQuant(NITF), kt)
+                obj = obj + P * pv(1.0 / 1000.0) * self._fert_tech_pending[0]
+                self._fert_tech_pending = None
+                self._fert_tech_P = True
             gt = self.spec.get("ghg_min") if nut == "N" else None
             if gt:
                 # CAPRI's emission tax on the soil N2O of mineral N (N2OSYN, direct + volatilised x indirect), on the
@@ -591,6 +695,7 @@ class CapriRegionalNLP:
         return X, obj
 
     def _abatement_block(self, spec, X, y, obj, g_rows, lbg, ubg, lbx, ubx):
+        self._fert_tech_pending = None; self._fert_tech_P = None
         """CAPRI's abatement options inside the regional model (ghgAbatement on; supply_model.gms GHG_Mit_Cost_,
         TotMit_, the v_emiLoss cascade), as far as capri-mod has their data:
           ammonia options per animal and sub-activity (housing/storage MAN group, application APP group): shares
@@ -625,6 +730,12 @@ class CapriRegionalNLP:
                           * self._pv(1.0 / uaa))
             lbg.append(-np.inf); ubg.append(float(cs["rhs"]) / uaa)
             self._catc_m = m
+            # ecoSetAside_: catch crops on the eligible side at CAPRI's weight (setaEco includes CATC)
+            eco = (spec.get("cap_rules") or {}).get("ecoSetAside") or {}
+            if float(eco.get("catc_w", 0.0) or 0.0) > 0 and "ecoSetAside" in getattr(self, "cap_rows", {}):
+                ie = self.cap_rows["ecoSetAside"]
+                sce = max(float(eco.get("scale", 1.0)), 1e-6)
+                g_rows[ie] = g_rows[ie] - self._pv(float(eco["catc_w"]) * uaa / sce) * m
             self.catc_n = self._pv(uaa * 1000.0 * float(cs["biofix"])) * (m - self._pv(m0))      # t N
             gt_ = spec.get("ghg_min")
             if gt_:
@@ -636,7 +747,6 @@ class CapriRegionalNLP:
             self.abat["catc"] = {"off": nx0, "uaa": uaa, "m0": m0}
         am = spec.get("amm")
         if am and am.get("techs"):
-            from capri_mod.supply.capri_nlp import _cascade_loss
             techs = [t for t in am["techs"] if t["act"] in self.act_idx and t["smax"] > 0]
             sig = ca.SX.sym("sig", len(techs))
             if techs:
@@ -702,7 +812,7 @@ class CapriRegionalNLP:
             o_amm = nx0 + sum(int(v.shape[0]) for v in new)
             new.append(sig)
             if am.get("fixed"):
-                # CONOPT's behaviour without a policy incentive (supply_module: amm_fix_without_policy): the options
+                # CONOPT's behaviour without a policy incentive (supply_module, K63): the options
                 # stay at their base shares
                 lbx += [float(t["s0"]) for t in techs]; ubx += [float(t["s0"]) for t in techs]
             else:
@@ -720,8 +830,10 @@ class CapriRegionalNLP:
                 Eff = Eff + pv(float(nm)) * phi[tt]
                 a_ = float(a_) + float((spec.get("dabat") or {}).get(("fert", name), 0.0))
                 cost = cost + (pv(a_) * phi[tt] + pv(0.5 * float(b_)) * phi[tt] * phi[tt])
-            obj = obj + self._lin(y, [(col, float(nc) / 1000.0) for col, nc in ft["crops"]]) * cost
-            self._fert_tech_base = sum(float(self.xb[int(col)]) * float(nc) / 1000.0 for col, nc in ft["crops"])
+            # CAPRI's GHG_Mit_Cost_: the fertiliser options' cost per t of mineral N purchased (- cost x
+            # v_netPutQuant(NITF)); the fertilisation block's N purchases take it (_fert_block), else the crops' base
+            # mineral N (the build's end)
+            self._fert_tech_pending = (cost, list(ft["crops"]))
             self.fert_eff = Eff
             g_rows.append(sum(phi[tt] for tt in range(len(T_)))); lbg.append(-np.inf); ubg.append(1.0)
             if ft.get("ecap") is not None:
@@ -850,6 +962,15 @@ class CapriRegionalNLP:
                 keep_act = ~np.isin(act, np.array(land_rows))
                 act, lo_l, hi_l = act[keep_act], lo_l[keep_act], hi_l[keep_act]
         self.cal_land_rows = land_rows
+        # the permanent-grassland rule's multiplier at CAPRI's assumed dual (supply/prep_cal.gms l. 118-131:
+        # p_dualGreening = -|arable rent - grassland rent|, in GRAE's and GRAI's linear terms), not zero
+        pg = (self.spec.get("cap_rules") or {}).get("permGras") or {}
+        gi_pg = self.cap_rows.get("permGras") if hasattr(self, "cap_rows") else None
+        if gi_pg is not None and pg.get("cal_dual") is not None:
+            lam_fix[gi_pg] = float(pg["cal_dual"]) * max(float(pg.get("scale", 1.0)), 1e-6)
+            land_rows = land_rows + [gi_pg]
+            keep_act = ~np.isin(act, np.array([gi_pg]))
+            act, lo_l, hi_l = act[keep_act], lo_l[keep_act], hi_l[keep_act]
         grad_fit = grad + J.T @ lam_fix if (blk_rows or land_rows) else grad
         ib = np.array([i for i in ib if free[i]], int)
         # least squares on the free variables: grad + J' lam + nu = 0
@@ -862,7 +983,8 @@ class CapriRegionalNLP:
         # rows and bounds that no free variable enters (rows on the activities alone: CAP rules, activity bounds)
         # get no multiplier from the fit: zero, as in CAPRI's calibration where only the calibration constraints'
         # duals enter the linear terms
-        keep = np.abs(M).max(axis=0) > 0
+        # (no free variable at all, e.g. a region whose columns are all fixed: nothing to fit)
+        keep = (np.abs(M).max(axis=0) > 0) if M.shape[0] else np.zeros(M.shape[1], bool)
         mult = np.zeros(M.shape[1])
         if keep.any():
             Mk = M[:, keep]
@@ -924,6 +1046,9 @@ class CapriRegionalNLP:
                 if xb[j] <= lbx[j] + 1e-12 and res[j] >= 0:
                     res[j] = 0.0; continue
                 den = getattr(self, "_fert_tech_base", 0.0)
+                if getattr(self, "_fert_tech_P", None) and self.fert and "N" in self.fert:
+                    fbN = self.fert["N"]
+                    den = float(xb[fbN["off_P"]]) * fbN["Pscale"] / 1000.0      # base N purchases, kt
                 if den > 0:
                     dabat[("fert", t[0])] = -res[j] / den
                     res[j] = 0.0
@@ -1101,6 +1226,8 @@ class CapriRegionalNLP:
         kw = dict(x0=x0, p=self.pval, lbx=self.lbx, ubx=self.ubx, lbg=self.lbg, ubg=self.ubg)
         if warm:
             kw.update(lam_x0=np.asarray(lam[0], float), lam_g0=np.asarray(lam[1], float))
+        if SOLVE_PROBE is not None:
+            SOLVE_PROBE(problem_fingerprint(self.spec, kw, opts))
         r = S(**kw)
         st = S.stats()
         self.solve_s = _t.time() - t0
@@ -1169,7 +1296,7 @@ class CapriRegionalNLP:
     # ---------------- results in the regional QP's terms ----------------
     def outputs(self, res):
         """(y, F {(act, feed): t}, zA (dual of each row of A, >= 0 for A y <= b), info) - the fields the supply module
-        reads from the conic model."""
+        reads from the regional model."""
         x, lam_g, lam_x = res["x"], res["lam_g"], res["lam_x"]
         y = np.asarray(self.f_y(x)).ravel()
         Fv = np.asarray(self.f_F(x)).ravel()

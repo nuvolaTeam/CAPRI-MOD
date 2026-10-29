@@ -55,6 +55,8 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+import functools as _ft
+_read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 RECORD = re.compile(
     r"^'([^']+)'\.'([^']+)'\.'(ImportQ|ImportP|Fob|TCost|TaAppl)'"
     r"\.'([A-Z0-9]+)'\.'(\d{4})'\s+([-\d.Ee+]+)")
@@ -106,8 +108,8 @@ def main() -> None:
     weighted = merged.groupby("commodity").apply(
         lambda g: np.average(g.value_p, weights=g.value_q), include_groups=False)
     unweighted = merged.groupby("commodity").value_p.mean()
-    prices = pd.DataFrame({"world_price_eur_t": weighted.round(2),
-                           "unweighted_mean": unweighted.round(2),
+    prices = pd.DataFrame({"world_price_eur_t": weighted,
+                           "unweighted_mean": unweighted,
                            "n_importers": merged.groupby("commodity").size()})
     prices.to_csv(out / "capmod_world_prices_2017.csv")
     print(f"world prices    : {len(prices)} commodities")
@@ -115,17 +117,16 @@ def main() -> None:
     # ---- comparison with the incumbent ----------------------------------
     cur_path = args.data_dir / "2017/market/world_prices.csv"
     if cur_path.exists():
-        cur = pd.read_csv(cur_path, index_col=0)
+        cur = _read_csv(cur_path, index_col=0)
         col = cur.columns[0]
         common = [c for c in prices.index if c in cur.index]
         cmp_ = pd.DataFrame({
             "model": cur.loc[common, col],
             "capmod": prices.loc[common, "world_price_eur_t"]})
-        cmp_["dev_pct"] = ((cmp_.model - cmp_.capmod).abs()
-                           / cmp_.capmod * 100).round(1)
+        cmp_["dev_pct"] = (cmp_.model - cmp_.capmod).abs() / cmp_.capmod * 100
         print(f"\nagainst the current world_prices.csv, {len(common)} commodities:")
         print(f"  median |deviation| : {cmp_.dev_pct.median():.1f}%")
-        print(cmp_.sort_values("dev_pct", ascending=False).head(10).to_string())
+        print(cmp_.sort_values("dev_pct", ascending=False).head(10).round(1).to_string())
 
     (args.data_dir / "validation" / "capmod_market_extraction.json").write_text(
         json.dumps({

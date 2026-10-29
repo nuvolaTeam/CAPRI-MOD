@@ -46,6 +46,8 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+import functools as _ft
+_read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 PELA_REC = re.compile(
     r"^'([A-Z]{2}[A-Z0-9]{6})'\.'([A-Z0-9]+)'\.'([A-Z0-9]+)'\.'(\d{4})'\s+([-\d.Ee+]+)")
 GTAP_REC = re.compile(r"^'([a-z_]+)'\s+([-\d.Ee+]+)")
@@ -104,13 +106,12 @@ def main() -> None:
     out = args.data_dir / "sources" / "estnlp"
     out.mkdir(parents=True, exist_ok=True)
 
-    cw = json.loads((args.data_dir / "shared/nuts_crosswalk.json").read_text())
-    rev = {}
-    for mr, codes in cw.get("aliases", {}).items():
-        for c in codes:
-            rev.setdefault(c, mr)
-    for mr, c in cw["resolved"].items():
-        rev.setdefault(c, mr)
+    # the model's regions are CAPRI's regional units (shared/regional_units.csv): each CAPRI code is its own region
+    # (until 27 October 2026 mapped through shared/nuts_crosswalk.json, which left 21 regions unmatched)
+    import sys as _sys
+    _sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'lib'))
+    from _model_regions import UNITS
+    rev = {u: u for u in UNITS}
 
     # ---- PELA ---------------------------------------------------------
     pela = parse_pela(args.dump_dir / "estnlp_PELA.txt", PELA_YEAR)
@@ -125,7 +126,11 @@ def main() -> None:
         ["model_region", "crop", "wrt", "value"]]
 
     own.to_csv(out / "pela_own_price.csv")
-    cross.to_csv(out / "pela_cross_price.csv", index=False)
+    # the supply module's form (SupplyModule.cross_price, used with the elasticity-based PMP terms): {region:
+    # {"crop|wrt": elasticity}}; until 27 October 2026 this file had no builder in the repository
+    byreg = {r: {f"{c}|{w}": float(v) for c, w, v in zip(g.crop, g.wrt, g.value)}
+             for r, g in cross.groupby("model_region", sort=True)}
+    (out / "pela_cross_by_region.json").write_text(json.dumps(byreg))
 
     print(f"PELA {PELA_YEAR}: {len(pela):,} records reaching "
           f"{pela.model_region.nunique()} model regions")
@@ -133,12 +138,6 @@ def main() -> None:
     print(f"  cross-price : {len(cross):,} records "
           f"({100*(cross.value < 0).mean():.0f}% negative, i.e. substitutes)")
 
-    cur_path = args.data_dir / "2017/supply/supply_elasticities_regional.csv"
-    if cur_path.exists():
-        cur = pd.read_csv(cur_path, index_col=0)
-        new_regions = [r for r in own.index if r not in cur.index]
-        print(f"  regions gained over the current file: {len(new_regions)} "
-              f"({cur.shape[0]} -> {own.shape[0]})")
 
     # ---- GTAP ---------------------------------------------------------
     esubd = parse_gtap(args.dump_dir / "gtap_esubd.txt")
@@ -155,18 +154,6 @@ def main() -> None:
     arm.to_csv(args.data_dir / "sources" / "estnlp" / "gtap_armington.csv")
     print(f"\nGTAP: {len(esubd)} sectors, {len(arm)} model commodities mapped")
 
-    cur_arm_path = args.data_dir / "2017/market/armington_params.csv"
-    if cur_arm_path.exists():
-        ca = pd.read_csv(cur_arm_path, index_col=0)
-        common = [c for c in arm.index if c in ca.index]
-        if common and "sigma" in ca.columns:
-            d = ((ca.loc[common, "sigma"] - arm.loc[common, "esubd"]).abs()
-                 / arm.loc[common, "esubd"] * 100)
-            print(f"  model sigma vs GTAP esubd, {len(common)} commodities: "
-                  f"median deviation {d.median():.1f}%")
-            cmp_ = pd.DataFrame({"model_sigma": ca.loc[common, "sigma"],
-                                 "gtap_esubd": arm.loc[common, "esubd"]})
-            print(cmp_.head(8).round(2).to_string())
 
     print(f"\nwritten to {out}")
 

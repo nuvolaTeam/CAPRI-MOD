@@ -31,9 +31,8 @@ Fills: `base_areas.csv`, `yields.csv`, `variable_costs.csv`, `crop_premium.csv`,
 
 | Model file | Symbol | Location |
 |---|---|---|
-| `fao_demand_own_elas_eu.json` | `p_demandElas` | `%results_in%/global/fao_agg_%BAS%_<agg>.gdx` |
 | `supply_elasticities_regional.csv`, `pmp_own_price_elasticities.csv` | `p_supplyElas` / `p_pelaEst` | supply estimation results (PELA; the shipped file is from estnlp PELA) |
-| `pmp_diagonal_terms.csv`, `pmp_crossgroup_terms.csv`, `input_requirements.csv` | `p_pmpQuadPact` and the other PMP terms | supply estimation results |
+| `sources/capreg/pmp_quad_techn.csv`, `pmp_quad_pact.csv`, `sources/baseline_pmp/pmp_quad_techn_2030.csv` ... | `p_pmpQuadTechn`, `p_pmpQuadPact` and the other PMP terms | pmppar results |
 | land market (`land_market_2017.csv`) | `p_pmpQuadLandTypes` | pmppar results |
 
 PMP terms are estimation outputs: a new base needs them re-estimated by CAPRI, not copied; mixing 2017 PMP terms
@@ -44,7 +43,7 @@ with newer prices is what the validator's vintage check is meant to catch.
 | Model file | Symbol | Location |
 |---|---|---|
 | `bilateral_flows_<year>.csv`, `bilateral_regions_<year>.csv`, `bilateral_trq_<year>.csv` | CAPRI's market results of the year | capmod market results (`tools/build/build_bilateral_market.py`) |
-| `armington_rho.csv`, `armington_params.csv` (`sigma`, `rho2`) | `p_rhoArm1`, `p_rhoArm2` | `arm/market1.gms`, `special_ch/market1_ch.gms` |
+| `armington_rho.csv` | `p_rhoArm1`, `p_rhoArm2` | `arm/market1.gms`, `special_ch/market1_ch.gms` |
 | biofuel files | `p_bioDat` and the biofuel parameters | `baseline/trace_dataPrep.gdx`, `fao_agg`; calibration as `biofuel/def_biofuel_params.gms` (`tools/build/build_biofuel_market.py`) |
 | dairy block | `p_hessNQDairy` and the dairy data | `elas_2_1730` and market results (`tools/build/build_dairy_processing.py`) |
 

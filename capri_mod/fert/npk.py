@@ -4,7 +4,8 @@ distribution model; capri_mod/supply/capri_regional_nlp.py).
 
 Data (tools/build/build_npk_balance_2030.py, from CAPRI's 2030 reference results):
   npk_crop_coefs_2030.csv        per CAPRI region, model crop and nutrient: need, contribution to the arable residue
-                                 pool, permanent crops' own residues, CAPRI's mineral flow (kg/ha)
+                                 pool, permanent crops' own residues, CAPRI's mineral flow (kg/ha), and the parts of
+                                 the need that follow the main output's yield and the straw yield (need_yield_factor)
   npk_region_2030.csv            per CAPRI region and nutrient: mineral efficiency, manure and residue availability,
                                  CAPRI's unit value (EUR/t)
   fert_dist_priors_npk_2030.csv  the inner model's priors per crop group, source and nutrient (posterior mode per ha)
@@ -18,6 +19,9 @@ from typing import Dict, Optional
 
 import numpy as np
 import pandas as pd
+
+from capri_mod.data.definitions import capri_ms
+from capri_mod.tableio import read_input
 
 NUTRIENTS = ("N", "P", "K")
 SOURCES = ("MINE", "EXCR", "CRES")
@@ -47,17 +51,18 @@ class NPKData:
     def __init__(self, data_dir: Optional[str] = None):
         root = Path(data_dir) if data_dir else Path(__file__).resolve().parents[2] / "capri_data"
         env = root / "2017" / "environment"
-        c = pd.read_csv(env / "npk_crop_coefs_2030.csv")
+        c = read_input(env / "npk_crop_coefs_2030.csv")
+        self.has_yield_shares = {"main_share", "straw_share"} <= set(c.columns)
         self.crop = {(r, n): d.set_index("model_crop") for (r, n), d in c.groupby(["capri_region", "nutrient"])}
-        g = pd.read_csv(env / "npk_region_2030.csv")
+        g = read_input(env / "npk_region_2030.csv")
         self.reg = {(t.capri_region, t.nutrient): t for t in g.itertuples(index=False)}
-        p = pd.read_csv(env / "fert_dist_priors_npk_2030.csv")
+        p = read_input(env / "fert_dist_priors_npk_2030.csv")
         self.pri = {(r, n): d.set_index("ngrp") for (r, n), d in p.groupby(["capri_region", "nutrient"])}
         self.man = {}
         for nut, f in (("P", "livestock_manure_p_coef.csv"), ("K", "livestock_manure_k_coef.csv")):
             if (env / f).exists():
-                self.man[nut] = pd.read_csv(env / f, index_col=0)
-        gr = pd.read_csv(env / "fert_dist_crop_groups_2030.csv")
+                self.man[nut] = read_input(env / f, index_col=0)
+        gr = read_input(env / "fert_dist_crop_groups_2030.csv")
         self.groups = {r: d for r, d in gr.groupby("capri_region")}
         w = gr.groupby(["model_crop", "ngrp"]).share.sum()
         tot = w.groupby(level=0).transform("sum")
@@ -83,13 +88,44 @@ class NPKData:
 
     def crop_coef(self, capri_region: str, nut: str, crop: str, col: str) -> float:
         """A model crop's coefficient (kg/ha); a crop CAPRI does not grow in the region takes the country's, else 0."""
+        cache = self.__dict__.setdefault("_crop_dicts", {})
         for r in (capri_region, capri_region[:2] + "000000"):
-            d = self.crop.get((r, nut))
-            if d is not None and crop in d.index:
-                v = float(d.at[crop, col])
+            dd = cache.get((r, nut))
+            if dd is None:
+                d = self.crop.get((r, nut))
+                # the table as {crop: {column: value}}: the same floats, without a pandas lookup per call (12% of a
+                # regional problem's build, 27 October 2026)
+                dd = cache[(r, nut)] = {} if d is None else d.to_dict("index")
+            if crop in dd:
+                v = float(dd[crop][col])
                 if v == v:
                     return v
         return 0.0
+
+    def capri_region(self, region: str) -> Optional[str]:
+        """The CAPRI region of a model region (the region itself: the model's regions are CAPRI's units), else its
+        country's when CAPRI's data have it, else None (as InnerFertDist.capri_region)."""
+        c = region
+        if c is not None and any((c, n) in self.crop for n in NUTRIENTS):
+            return c
+        cc = capri_ms(region)
+        return cc if cc is not None and any((cc, n) in self.crop for n in NUTRIENTS) else None
+
+    def yield_shares(self, capri_region: Optional[str], nut: str, crop: str) -> tuple:
+        """(main, straw): the shares of a crop's need per ha that follow the main output's yield and the straw yield
+        (fert/fertned.gms; tools/build/build_npk_balance_2030.py); the rest is at fertned's floor or cap and does not
+        move. A crop or region without CAPRI data: (1, 0), the rule of a crop without straw."""
+        if not self.has_yield_shares:
+            raise RuntimeError("npk_crop_coefs_2030.csv has no main_share/straw_share: rerun "
+                               "tools/build/build_npk_balance_2030.py")
+        if capri_region:
+            for r in (capri_region, capri_region[:2] + "000000"):
+                d = self.crop.get((r, nut))
+                if d is not None and crop in d.index:
+                    m, s_ = float(d.at[crop, "main_share"]), float(d.at[crop, "straw_share"])
+                    if m == m and s_ == s_:
+                        return m, s_
+        return 1.0, 0.0
 
     def region(self, capri_region: str, nut: str):
         t = self.reg.get((capri_region, nut))
@@ -109,3 +145,29 @@ class NPKData:
             return 0.0
         v = t.at[region, animal]
         return float(v) if pd.notna(v) and v > 0 else 0.0
+
+
+def need_yield_factor(region: Optional[str], crop: str, y0: float, y: float, y_scen: Optional[float] = None,
+                      nut: str = "N") -> float:
+    """A crop's nutrient need per ha at yield y relative to its need at the base yield y0, CAPRI's rule.
+
+    fert/fertned.gms sets the need per ha to MIN(cap, MAX(15, O_HP x need per t of main output + STRA x straw
+    content)): the main-output part is linear in the yield (O_HP moves with it: capmod/define_inputs.gms after
+    capmod/shift_yields.gms, and again after each yield update in supply/endog_yields.gms); the straw part moves with
+    the scenario's yield shifts (shift_yields.gms scales every output of the crop, straw included) but not with the
+    price-driven yields (endog_yields.gms updates the main output only). So with m and s the main and straw shares
+    of the base need (NPKData.yield_shares; 0 for crops at the floor or cap):
+        factor = (1 - m - s) + m x y / y0 + s x y_scen / y0
+    y_scen: the yield before the price response (the scenario's shifted yield); None: y (no price response).
+    The square root in CAPRI's NUTNED_ (SQRT(1 + p_technFact(yield, A))) acts on the technology variants' yield
+    factor, which the model does not have, not on yield changes. A change that would cross the floor or the cap is
+    not bounded here (the shares are fixed at the base). region: model or CAPRI region (None: (m, s) = (1, 0))."""
+    if not (y0 > 0 and y > 0):
+        return 1.0
+    D = NPKData.get()
+    cr = None
+    if region:
+        cr = region if any((region, n) in D.crop for n in NUTRIENTS) else D.capri_region(region)
+    m, s = D.yield_shares(cr, nut, crop)
+    ys = y if (y_scen is None or not y_scen > 0) else float(y_scen)
+    return (1.0 - m - s) + m * (y / y0) + s * (ys / y0)

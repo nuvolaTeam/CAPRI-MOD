@@ -1,6 +1,6 @@
 # Young-animal markets and livestock supply elasticities
 
-Status: revised 20 October 2026 against the code. Both are on by default (`CAPRIModel.use_young_animal_market`;
+Status: revised 20 October 2026 against the code. Both are always on (the young-animal markets' switch was removed on 27 October 2026;
 livestock elasticities in `capri_pmp.build_elasticity_table`). Earlier run results (October 2026) are left to
 CHANGELOG.md; current results: README section 9 (Validation) and KNOWN_ISSUES K47, K48.
 

@@ -65,21 +65,20 @@ implemented (an error if not 0): dietShift, othPol. The JRC121368 surplus rule a
 | GUI setting | star 3.0 | capri-mod |
 |---|---|---|
 | Endogenous bio-fuel markets (`BIOF_M`) | true | true (`CAPRIModel.biofuel_markets`; a scenario may switch off; docs/BIOFUEL_MARKET.md) |
-| Dairy block (part of the market model, no GUI switch) | always | on: nine products traded, raw milk, fat and protein per member state (`MarketModule.use_dairy_block`; docs/DAIRY_PROCESSING.md) |
+| Dairy block (part of the market model, no GUI switch) | always | on: nine products traded, raw milk, fat and protein per member state (no switch; docs/DAIRY_PROCESSING.md) |
 | New Manure Trade Module | true | true (`CAPRIModel.use_manure_market`; a scenario may switch off) |
-| Use inner fertilizer model (`useInnerFertDistModel`) | **true** | true (`RegionalSupplyModel.fert_dist_inside`): CAPRI's inner fertiliser distribution model on its 2030 priors, per region and crop group, inside the regional model; it carries the crop-specific mineral fertiliser caps (`results["fert_dist"]`; docs/FERTILISER_ALLOCATION.md) |
-| Policy blocks | true | EU tariffs and tariff-rate quotas in the bilateral market. The EU is one market region by default; CAPRI's two EU trade blocks are an option (`MarketModule.eu_blocks`, `run_f2f_2030.py --eu-blocks`) |
+| Use inner fertilizer model (`useInnerFertDistModel`) | **true** | true (always, in CAPRI's NLP form): CAPRI's inner fertiliser distribution model on its 2030 priors, per region and crop group, inside the regional model; it carries the crop-specific mineral fertiliser caps (`results["fert_dist"]`; docs/FERTILISER_ALLOCATION.md) |
+| Policy blocks | true | EU tariffs and tariff-rate quotas in the bilateral market. The EU is one market region by default; CAPRI's two EU trade blocks are an option (`market.eu_blocks`, `run_f2f_2030.py --set market.eu_blocks=true`) |
 | Non-homothetic Armington (`modArmington`) | off | plain CES (as off) |
 | Explicit NTMs | false | none |
-| Trustee land supply | true | CAPRI's land market with its land rules (`CAPRIModel.use_land_market`, `land_no_slack`) |
+| Trustee land supply | true | CAPRI's land market with its land rules (`supply.use_land_market`; the land rules LandBalNoSlak_ always) |
 | Stock changes (`stockChg`) | nost | none |
-| Allow minimum shares of anorganic fertilizers (`useMinimumAnorganicShares`) | false; NUTMIN_ is in the regional model only with the inner fertiliser model off | as star 3.0: `RegionalSupplyModel.use_min_mineral_share = None` puts NUTMIN_ on only with the inner model off (K40); `run_f2f_2030.py --nutmin on` forces it |
+| Allow minimum shares of anorganic fertilizers (`useMinimumAnorganicShares`) | false; NUTMIN_ is in the regional model only with the inner fertiliser model off | as star 3.0: NUTMIN_ off, the inner model being always on (K40; the switches of the conic form were removed on 26 October 2026) |
 | Water module, crop inputs in market | false | false (capri-mod's water module is standalone, not part of `run()`) |
 | Iterations (`STEPS`) / lower weights after (`LOWSTEPS`) | 99 / 20 | `max_outer_iter` 25 (raised to 60 with manure trade), adaptive damping per commodity (README 7.4) |
 
 Outside the GUI table: CAPRI solves its regional supply models as NLPs with CONOPT; capri-mod solves the same form
-with IPOPT by default (`CAPRIModel.supply_form = "nlp"`), with a conic reformulation (Clarabel) as an option
-(README 5.3).
+with IPOPT (a conic reformulation with Clarabel was an option until 26 October 2026).
 
 capri-mod has every star 3.0 default of this table except the iteration scheme. Farm-to-Fork: JRC121368 does not
 state its biofuel setting, so it runs with the star 3.0 default, endogenous biofuel markets on.

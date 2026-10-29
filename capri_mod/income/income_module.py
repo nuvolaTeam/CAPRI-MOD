@@ -2,16 +2,27 @@
 
 What it computes
 ----------------
-For each region, agricultural income is split into two transparent parts:
+For each region, agricultural income as CAPRI's reports compute it (reports/welfare.gms, ProfitAgr): the sum over
+activities of the market gross value added including premiums, MGVA = TOOU + PRME - TOIN (capinv.gms), times the
+activity level:
 
-    market income   = supply gross margin (revenue - variable cost)   [EUR 1000]
-    public support  = total CAP payments (BISS, eco-scheme, ANC, ...)  [EUR 1000]
-    farm income     = market income + public support
+    farm income     = sum_a (revenue_a - input cost_a + premium_a) x level_a   [EUR 1000]
+    public support  = sum_a premium_a x level_a          (CAPRI's PRME: the premiums attached to the activities)
+    market income   = farm income - public support
+
+Fodder is an internal flow: the supply module values it in the fodder balance rows, not in the activities' net
+revenues, so it is neither a revenue of the fodder crops nor a cost of the animals here, as in CAPRI's sum, where the
+fodder's output value and the animals' fodder cost cancel.
 
 From the regional vector it derives the distributional measures CAP debates turn
 on: the share of income that comes from public support (the "support
 dependency"), income per hectare, and the concentration of both income and
 payments across regions (a Gini coefficient and top-decile share).
+
+Until 27 October 2026 the module added the policy module's CAP payments (DirectPaymentsEngine, pillars 1 and 2) to
+the sum of the net revenues, which already hold CAPRI's premiums: the premiums were counted twice. It also left
+grassland out, for a fresh-matter yield artefact that no longer exists. The policy module's payments are now reported
+beside the income (cap_payments_policy), not added to it.
 
 Why this is a faithful, buildable module
 ----------------------------------------
@@ -85,72 +96,60 @@ class IncomeDistributionModule:
     def __init__(self, data: dict):
         self.data = data
 
-    def _market_income(self, region, res, supply_module) -> float:
-        """Clean market income (EUR 1000) = sum(net_revenue_per_unit x level).
-
-        Uses the supply module's per-region net revenues and the solved activity
-        levels. Falls back to the SupplyResult's gross_margin only if no supply
-        module is provided (noting that value is the PMP objective, not a clean
-        income figure).
-
-        Grassland (GRAS) is excluded: it is on-farm fodder consumed by livestock,
-        not a marketed output, and its "net revenue" carries a fresh-matter
-        yield-unit artifact (yield ~18000 kg/ha) that would otherwise dominate the
-        total. Excluding it both matches the economics (grass income is realised
-        through the livestock it feeds, already counted) and avoids the artifact.
-        """
-        EXCLUDE = {"GRAS"}
+    def _income_parts(self, region, res, supply_module):
+        """(farm income, premiums) in EUR 1000: sum over activities of net revenue x level and of premium x level.
+        Net revenues are per ha or per head in EUR; levels in 1000 ha or 1000 heads."""
         acts = getattr(res, "activities", None)
-        if supply_module is not None and acts is not None:
-            m = getattr(supply_module, "_models", {}).get(region)
-            if m is not None:
-                nr = m.net_revenues
-                return float(sum(
-                    float(nr.get(a, 0.0)) * float(acts.get(a, 0.0))
-                    for a in getattr(m, "acts", nr.index) if a not in EXCLUDE))
-        return float(getattr(res, "gross_margin", 0.0) or 0.0)
+        m = getattr(supply_module, "_models", {}).get(region)
+        if m is None or acts is None:
+            raise ValueError(f"{region}: no solved supply model (run the supply module for the region first)")
+        nr, pr = m.net_revenues, getattr(m, "premiums", None)
+        if pr is None:
+            raise ValueError(f"{region}: the supply model carries no premiums")
+        lev = {a: float(acts.get(a, 0.0)) for a in nr.index}
+        return (float(sum(float(nr[a]) * lev[a] for a in nr.index)),
+                float(sum(float(pr.get(a, 0.0)) * lev[a] for a in nr.index)))
 
     def compute(self,
                 supply_results: Dict,
-                cap_payments_by_region: pd.DataFrame,
-                supply_module=None) -> IncomeResult:
-        """Combine supply gross margins with CAP payments into regional income.
+                supply_module,
+                cap_payments_by_region: Optional[pd.DataFrame] = None) -> IncomeResult:
+        """Regional farm income (CAPRI's ProfitAgr form) and its distribution.
 
         Parameters
         ----------
         supply_results : dict[region -> SupplyResult]
-            Each carries ``activities`` and ``gross_output``.
-        cap_payments_by_region : DataFrame
-            Output of ``DirectPaymentsEngine.compute_payments_by_region`` — must
-            carry ``total_payments`` (EUR 1000) and ``UAA_1000ha``.
-        supply_module : SupplyModule, optional
-            If given, market income is computed cleanly as
-            sum(net_revenue_per_unit x activity_level) per region, in EUR 1000.
-            This is preferred over ``SupplyResult.gross_margin``, which is the
-            PMP *objective value* (it includes the calibrated quadratic cost term
-            and is not a directly interpretable income figure).
+            Each carries ``activities`` (solved levels).
+        supply_module : SupplyModule
+            The module that solved them: its regional models carry the net revenues and premiums per activity.
+        cap_payments_by_region : DataFrame, optional
+            ``DirectPaymentsEngine.compute_payments_by_region``: its ``total_payments`` (EUR 1000) are reported beside
+            the income for comparison (cap_payments_policy), not added to it; its ``UAA_1000ha`` is the area for the
+            per-hectare measures. Without it the area is the region's solved crop area.
         """
         rows = []
         for region, res in supply_results.items():
-            market = self._market_income(region, res, supply_module)
-            if region in cap_payments_by_region.index:
-                support = float(cap_payments_by_region.at[region, "total_payments"])
+            income, support = self._income_parts(region, res, supply_module)
+            acts = res.activities
+            if cap_payments_by_region is not None and region in cap_payments_by_region.index:
+                pol = float(cap_payments_by_region.at[region, "total_payments"])
                 uaa = float(cap_payments_by_region.at[region, "UAA_1000ha"])
             else:
-                support, uaa = 0.0, np.nan
-            income = market + support
+                pol = np.nan
+                uaa = float(sum(float(acts.get(c, 0.0)) for c in self.data["areas"].columns))
             rows.append({
                 "region": region,
-                "market_income": market,
+                "market_income": income - support,
                 "public_support": support,
                 "farm_income": income,
+                "cap_payments_policy": pol,
                 "UAA_1000ha": uaa,
                 "support_share": (support / income) if income > 0 else np.nan,
                 "income_per_ha": (income / uaa) if uaa and uaa > 0 else np.nan,
             })
         df = pd.DataFrame(rows).set_index("region")
 
-        total_income = df["farm_income"].clip(lower=0).sum()
+        total_income = df["farm_income"].sum()           # (until 27 October 2026 regions with a loss counted as 0)
         total_support = df["public_support"].sum()
         support_share_eu = (total_support / total_income) if total_income > 0 else np.nan
 

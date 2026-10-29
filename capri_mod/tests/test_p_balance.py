@@ -167,9 +167,9 @@ def test_p_accounts_at_the_base_against_capri(data, ref):
     inner = InnerFertDist()
     xs, ys = [], []
     for reg, b in out.items():
-        c8 = inner._map.get(reg)
+        c8 = reg                                    # the model's regions are CAPRI's units
         a = float(data["areas"].loc[reg].sum())
-        if a > 0 and c8 in ref and not c8.endswith("000000") and ref[c8].get(("UAAR", "LEVL"), 0.0) > 0:
+        if a > 0 and c8 in ref and ref[c8].get(("UAAR", "LEVL"), 0.0) > 0:
             xs.append(b["SURTOT"] / a)
             ys.append(ref[c8][("SURTOT", "PHOF")] / ref[c8][("UAAR", "LEVL")] * 1000.0)
     assert len(xs) > 200 and np.corrcoef(xs, ys)[0, 1] > 0.95
@@ -179,7 +179,7 @@ def test_flatten_outputs_exports_eu_p_totals():
     """io_results.flatten_outputs: EU totals (Norway left out) of the P items and the organic area."""
     from capri_mod.io_results import flatten_outputs
     env = pd.DataFrame({"p_surplus": [1.0, 2.0, 40.0], "p_input": [3.0, 4.0, 50.0], "p_runoff": [0.1, 0.2, 9.0],
-                        "organic_area": [5.0, 6.0, 7.0]}, index=["DE11", "NL22", "NO01"])
+                        "organic_area": [5.0, 6.0, 7.0]}, index=["DE110000", "NL220000", "NO080000"])
     f = flatten_outputs({"environmental": env})
     assert f["env_EU_p_surplus"] == 3.0 and f["env_EU_p_input"] == 7.0 and f["env_EU_organic_area"] == 11.0
     assert abs(f["env_EU_p_runoff"] - 0.3) < 1e-12
@@ -197,15 +197,15 @@ def _realised_yields(m, reg, sr):
 def test_p_accounts_from_the_nlp_solution():
     """NLP form, baseline and Farm-to-Fork (one market iteration, DE11 and NL22): mineral P2O5 is the fertilisation
     block's purchase, manure P2O5 applied the sum of its manure flows (MTRADE = EXCRET - applied); CAPRI's NUTNED_ for
-    P summed over the groups at the solution (the conic form's path) gives the same purchase; the organic area is the
+    P summed over the groups at the solution gives the same purchase; the organic area is the
     crops' area times their converted share (0 at the baseline)."""
     from capri_mod.model import CAPRIModel
     from capri_mod.policy.greendeal import farm_to_fork_scenario
     m = CAPRIModel(data_dir=str(DATA_DIR), verbose=False)
     for kw in ({"scenario": "BASELINE"}, {"custom_scenario": farm_to_fork_scenario()}):
-        res = m.run(regions=["DE11", "NL22"], max_outer_iter=1, **kw)
+        res = m.run(regions=["DE110000", "NL220000"], max_outer_iter=1, **kw)
         env = res["environmental"]
-        for reg in ("DE11", "NL22"):
+        for reg in ("DE110000", "NL220000"):
             sr = res["supply"][reg]
             blk = (sr.fert_npk or {}).get("P")
             assert blk is not None, reg
@@ -228,23 +228,3 @@ def test_p_accounts_from_the_nlp_solution():
             assert abs(row["p_surplus"] - (row["p_input"] - row["p_uptake"])) < 1e-6
             assert row["p_runoff"] >= 0.0
 
-
-@pytest.mark.slow
-def test_p_accounts_in_the_conic_form():
-    """Conic form (no fertilisation block): mineral P2O5 from CAPRI's NUTNED_ for P summed over the groups at the
-    solution, at least zero; the baseline gives the base purchases within 2% (the conic baseline moves the levels)."""
-    from capri_mod.model import CAPRIModel
-    from capri_mod import settings as S
-    m = CAPRIModel(data_dir=str(DATA_DIR), verbose=False)
-    with S.override({"supply.supply_form": "conic"}):
-        res = m.run(scenario="BASELINE", regions=["DE11"], max_outer_iter=1)
-    sr = res["supply"]["DE11"]
-    assert not (sr.fert_npk or {}).get("P")
-    row = res["environmental"].loc["DE11"]
-    from capri_mod.fert.npk import NPKData
-    from capri_mod.data.definitions import CROPS
-    D = NPKData.get()
-    m0 = sum(D.crop_coef("DE110000", "P", c, "mine_kg_ha") * float(m.data["areas"].at["DE11", c])
-             for c in CROPS if c in m.data["areas"].columns)
-    assert row["p_mineral_input"] >= 0.0
-    assert abs(row["p_mineral_input"] / m0 - 1.0) < 0.02, (row["p_mineral_input"], m0)

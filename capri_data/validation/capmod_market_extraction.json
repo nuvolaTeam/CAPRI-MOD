@@ -1,7 +1,0 @@
-{
- "source": "res_0_1717cap_after_2014_cal_from_data_caldefaulta.gdx",
- "year": "2017",
- "trade_flows": 105914,
- "world_prices": 71,
- "note": "Fob is dimensioned by importer, so a single world price is constructed as the import-weighted mean. The unweighted mean is retained alongside it for comparison."
-}

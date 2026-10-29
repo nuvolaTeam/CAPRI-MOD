@@ -17,6 +17,8 @@ from pathlib import Path
 
 import pandas as pd
 
+import functools as _ft
+_read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 _sp = importlib.util.spec_from_file_location("_loc", ROOT / "tools" / "build" / "build_livestock_output_coef.py")
 _loc = importlib.util.module_from_spec(_sp); _sp.loader.exec_module(_loc)
@@ -26,11 +28,11 @@ CAPRI_TO_MODEL = _loc.CAPRI_TO_MODEL
 def main():
     import sys
     sys.path.insert(0, str(ROOT))
-    from capri_mod.data.loaders import load_all_data
-    herds = load_all_data(str(ROOT / "capri_data"))["animal_numbers"]
+    from capri_mod.data.loaders import load_regional_animal_numbers  # the one table needed (load_all_data read every model input, a dependency cycle in the data pipeline; 29 Oct 2026)
+    herds = load_regional_animal_numbers(str(ROOT / "capri_data"))
     src = ROOT / "capri_data" / "sources" / "capreg"
-    lev = pd.read_csv(src / "capreg_activity_levels.csv", index_col=0)
-    prm = pd.read_csv(src / "capreg_cap_premium.csv", index_col=0)
+    lev = _read_csv(src / "capreg_activity_levels.csv", index_col=0)
+    prm = _read_csv(src / "capreg_cap_premium.csv", index_col=0)
     tot = defaultdict(float)
     for reg in prm.index.intersection(lev.index):
         for ca, ma in CAPRI_TO_MODEL.items():

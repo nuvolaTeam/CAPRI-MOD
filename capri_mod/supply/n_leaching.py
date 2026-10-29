@@ -42,7 +42,6 @@ WINTERCOV_NO3LEA = 0.35          # envind/cover_crops.gms l. 402
 APPL = ("AmmAppLE", "AmmAppHE")
 
 _REG = {}
-_MAP = {}
 
 
 def load(data_dir=None):
@@ -62,24 +61,11 @@ def load(data_dir=None):
 
 
 def capri_region(region, data_dir=None):
-    """The model region's CAPRI region (capri_data/shared/region_capri_map.csv), else None."""
-    import csv
-    from pathlib import Path
-    d = Path(data_dir) if data_dir else Path(__file__).resolve().parents[2] / "capri_data"
-    key = str(d)
-    if key not in _MAP:
-        m = {}
-        f = d / "shared" / "region_capri_map.csv"
-        if f.exists():
-            for r in csv.DictReader(open(f)):
-                if r.get("capri_region"):
-                    m[r["region"]] = r["capri_region"]
-        _MAP[key] = m
-    rs = _MAP[key].get(region)
-    if rs is None or rs not in load(data_dir):
-        # model regions without a CAPRI NUTS 2 counterpart (DK01-05: CAPRI keeps Denmark national) take the member
-        # state's row
-        ms = (rs or (str(region)[:2] + "000000"))[:2] + "000000"
+    """The model region's CAPRI region: the region itself (the model's regions are CAPRI's units), else its member
+    state's row where CAPRI's table has no row for the region."""
+    rs = str(region)
+    if rs not in load(data_dir):
+        ms = rs[:2] + "000000"
         rs = ms if ms in load(data_dir) else rs
     return rs
 

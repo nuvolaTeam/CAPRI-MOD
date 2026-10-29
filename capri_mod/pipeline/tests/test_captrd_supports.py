@@ -63,3 +63,18 @@ def test_step1_supports_match_captrd():
     ok = np.isclose(c.ours, c.ref, rtol=1e-6, atol=1e-9)
     assert len(c) > 40000
     assert ok.mean() > 0.997, c[~ok].head(20)
+
+
+def test_variance_floor():
+    """The stored error variance's floor: CAPRI's 0.05 x |wAve| (as coded) or its square (CAPRI-ERROR-FIX)."""
+    idx = pd.MultiIndex.from_tuples([("R", "WHEA", "YILD"), ("R", "DCOL", "ENNE")])
+    st = pd.DataFrame({"nobs": [10.0, 10.0], "wr2": [0.5, 0.5], "wave": [8.0, 8.0], "wvar": [1.0, 1.0],
+                       "wvarerr": [0.01, 0.01], "basm": [8.0, 8.0], "bast": [0.0, 0.0], "bas": [8.0, 8.0],
+                       "bsy": [0.0, 0.0]}, index=idx)
+    s1 = pd.DataFrame({2030: [8.0, 8.0]}, index=idx)
+    sets = SU.SupportSets(pact_to_y=set(), mcact=set(), no_yield_drop=set(), breed_act=set(), grs_act=set(),
+                          reqst={"ENNE"}, feed=set(), mpact=set())
+    _, wv_capri = SU.supports(st, s1, [2030], 2017, 2018, sets, floor_squared=False)
+    _, wv_fix = SU.supports(st, s1, [2030], 2017, 2018, sets, floor_squared=True)
+    assert wv_capri.iloc[0] == pytest.approx(0.4) and wv_fix.iloc[0] == pytest.approx(0.16)
+    assert wv_capri.iloc[1] == wv_fix.iloc[1] == pytest.approx(0.01)        # requirements: no floor

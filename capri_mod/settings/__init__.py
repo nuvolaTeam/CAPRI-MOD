@@ -16,7 +16,7 @@ Use:
     s.save("run.settings.toml")              # the effective settings of a run
 
 In the code a setting is read through a ``setting("section.key")`` class attribute (a descriptor), so classes keep
-their attribute names (``RegionalSupplyModel.use_genetics``) but the value always comes from the active settings:
+their attribute names (``RegionalSupplyModel.use_land_market``) but the value always comes from the active settings:
 there is no second default to drift apart (getattr fallbacks, class duplicates) and nothing to carry to a projected
 model by hand. Assigning to such an attribute is an error: change the settings instead.
 
@@ -254,7 +254,7 @@ class setting:
     """Class attribute reading one setting from the active settings.
 
         class RegionalSupplyModel:
-            use_genetics = setting("supply.use_genetics")
+            use_land_market = setting("supply.use_land_market")
 
     `convert` maps the stored value to the one the code expects (e.g. "auto" -> None). With `run_state=True` an
     instance may hold its own value for the run in hand (CAPRI's scenario settings that a scenario may set, e.g. the

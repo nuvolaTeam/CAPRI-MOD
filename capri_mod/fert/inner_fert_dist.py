@@ -39,6 +39,7 @@ import numpy as np
 import pandas as pd
 from capri_mod.params import param, param_table
 from capri_mod.data.definitions import capri_ms
+from capri_mod.tableio import read_input
 
 SOURCES = ("MINE", "EXCR", "CRES")
 PERM_NGRP = frozenset({"GRAS", "PERM"})
@@ -114,20 +115,14 @@ class InnerFertDist:
         root = Path(data_dir) if data_dir else Path(__file__).resolve().parents[2] / "capri_data"
         env = root / "2017" / "environment"
         self._root = root
-        self.priors = pd.read_csv(env / "fert_dist_priors_2030.csv")
-        self.groups = pd.read_csv(env / "fert_dist_crop_groups_2030.csv")
+        self.priors = read_input(env / "fert_dist_priors_2030.csv")
+        self.groups = read_input(env / "fert_dist_crop_groups_2030.csv")
         self._pri = {r: d.set_index("ngrp") for r, d in self.priors.groupby("capri_region")}
         # priors calibrated at a run's own base where CAPRI's star 3.0 posterior has no allocation there
         # (calibrate()), by CAPRI region and configuration variant (the manure-trade setting)
         self._pri_cal = {}
         self.variant = None
         self._grp = {r: d for r, d in self.groups.groupby("capri_region")}
-        self._map = {}
-        rm = root / "shared" / "region_capri_map.csv"
-        if rm.exists():
-            for r in pd.read_csv(rm, dtype=str).fillna("").itertuples(index=False):
-                if r.capri_region:
-                    self._map[r.region] = r.capri_region
 
     def prior_table(self, capri_region: Optional[str]):
         """The simulation priors of a CAPRI region: a calibration at the run's own base for the current variant
@@ -217,9 +212,9 @@ class InnerFertDist:
         return out
 
     def capri_region(self, region: str) -> Optional[str]:
-        """The CAPRI region (8-character NUTS2 code) of a model region (shared/region_capri_map.csv), else its
-        country's (CAPRI NUTS0 code)."""
-        c = self._map.get(region)
+        """The CAPRI region of a model region (the region itself: the model's regions are CAPRI's units), else its
+        country's (CAPRI NUTS0 code) where CAPRI has no priors for the region."""
+        c = region
         if c in self._pri:
             return c
         cc = capri_ms(region)
@@ -257,7 +252,7 @@ class InnerFertDist:
         return out
 
     def group_factors(self, region: str, crop_areas: Dict[str, float], crop_factor: Dict[str, float]) -> Dict[str, float]:
-        """Area-weighted mean of a per-crop factor over each group (e.g. the need factor sqrt(yield / base yield))."""
+        """Area-weighted mean of a per-crop factor over each group (e.g. CAPRI's need factor of the yield, need_yield_factor)."""
         sh = self.crop_shares(region)
         num, den = {}, {}
         for c, a in crop_areas.items():
@@ -294,8 +289,8 @@ class InnerFertDist:
     def _rules(self):
         if not hasattr(self, "_exm"):
             pol = self._root / "2017" / "policy"
-            self._exm = pd.read_csv(pol / "mineral_redu_exemptions.csv")
-            self._lim = pd.read_csv(pol / "mineral_redu_limcres.csv")
+            self._exm = read_input(pol / "mineral_redu_exemptions.csv")
+            self._lim = read_input(pol / "mineral_redu_limcres.csv")
         return self._exm, self._lim
 
     def mineral_caps(self, region: str, base: dict, reduction: float, year: Optional[int] = None) -> Dict[str, float]:
@@ -312,17 +307,32 @@ class InnerFertDist:
         fx = {}
         for t in ex.itertuples(index=False):
             fx[t.ngrp] = float(t.factor)            # later assignments win, as in the GAMS file
+        small = self.small_mine_groups(region, base, year)
         caps = {}
         for (g, s_), v in base["per_ha"].items():
             if s_ != "MINE" or v <= 0:
                 continue
-            if g in fx:
-                caps[g] = fx[g] * v
-            elif v < SMALL_MINE_KG_HA:
-                caps[g] = v
+            if g in small:
+                caps[g] = fx.get(g, 1.0) * v
             else:
                 caps[g] = v * (1.0 - reduction)
         return caps
+
+    def small_mine_groups(self, region: str, base: dict, year: Optional[int] = None) -> set:
+        """CAPRI's p_checkSmallMine (minfert_redu_by_crop.gms l. 96-235): the crop groups with mineral N at baseline
+        below 30 kg/ha, and CAPRI's listed (region, group) pairs for the simulation year (othPol not high). Their cap
+        is set at factor x baseline (no backsliding), replacing any cap set before (the organic target's,
+        organic_minfert_redu.gms, included first: greendeal_scenarios.gms l. 140, 154); the other groups take the
+        more stringent of the two (min, l. 243-246)."""
+        if year is None:
+            from capri_mod.settings import current as _settings
+            year = int(_settings().get("projection.sim_year"))
+        exm, _ = self._rules()
+        r = base.get("capri_region") or self.capri_region(region)
+        ex = exm[(exm.capri_region == r) & (exm.after_year < year) & (exm.othpol_high == 0)]
+        listed = set(ex.ngrp)
+        return {g for (g, s_), v in base["per_ha"].items()
+                if s_ == "MINE" and v > 0 and (g in listed or v < SMALL_MINE_KG_HA)}
 
     def limcres_caps(self, region: str, base: dict, year: Optional[int] = None) -> Dict[str, Tuple[float, float, float]]:
         """CAPRI's "limCres" regulation with the crop-specific reduction: residues to a group at most

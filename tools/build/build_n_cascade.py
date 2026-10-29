@@ -39,6 +39,8 @@ from pathlib import Path
 
 import pandas as pd
 
+import functools as _ft
+_read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 D = ROOT / "capri_data" / "2017" / "abatement" / "ammonia"
 
@@ -58,7 +60,7 @@ RLF_FIX = {"BL400000": {"LFsurface": 6.850057, "LFsoil": 0.292021, "LFNmin": 8.2
 
 
 def _tab(name, keys, val="value", upper=None):
-    t = pd.read_csv(D / f"{name}.csv")
+    t = _read_csv(D / f"{name}.csv")
     out = {}
     for r in t.itertuples(index=False):
         k = tuple(str(getattr(r, c)).upper() if c == upper else getattr(r, c) for c in keys)
@@ -80,7 +82,7 @@ GAS_ITEMS = [f"{g}{s}" for s in ("HOU", "STO", "APP") for g in ("NH3", "NOX", "N
 
 def _effects(pairs, _unused, rows_a, frs):
     """The options' othImpact on the cascade (envind/ammo_tech.gms l. 2208-2345) per CAPRI region and activity:
-    the gases at housing, storage and application (ammonia_technology_effects.csv, CAPRI's p_reducEm* and
+    the gases at housing, storage and application (ammonia_technology_effects.parquet, CAPRI's p_reducEm* and
     p_reducControlStrategies weighted by liquid share and applicability), the combinations (AirPurCov* = AirPur +
     cover for pigs and poultry, l. 2252-2255; AirPurCovLowC = AirPurCovLow, CovStorLowCon = max(CovStorLow, ManStorCon),
     l. 2262-2264), acidification and anaerobic digestion from the literature review (p_litRevAmmoTechsAdd, liquid;
@@ -92,13 +94,13 @@ def _effects(pairs, _unused, rows_a, frs):
     for r in rows_a:
         F[(r[0], r[1])][r[2]] = r[3]
     E = defaultdict(dict)
-    for r in pd.read_csv(D / "ammonia_technology_effects.csv").itertuples():
+    for r in pd.read_parquet(D / "ammonia_technology_effects.parquet").itertuples():
         E[(r.region, r.activity)][(r.technology, r.item)] = float(r.reduction)
     LIT = defaultdict(dict)
-    for r in pd.read_csv(D / "p_litRevAmmoTechsAdd.csv").itertuples():
+    for r in _read_csv(D / "p_litRevAmmoTechsAdd.csv").itertuples():
         LIT[(r.region, r.activity)][(r.technology.upper(), r.manure_system.upper(), r.item.upper())] = float(r.value)
     AP = {(r.country, r.animal_cat.lower(), r.manure_system.lower(), r.technology): float(r.value) / 100.0
-          for r in pd.read_csv(D / "costs" / "p_applic.csv").itertuples()}
+          for r in _read_csv(D / "costs" / "p_applic.csv").itertuples()}
     out = []
     for reg, act in pairs:
         f = F.get((reg, act))
@@ -143,7 +145,7 @@ def _effects(pairs, _unused, rows_a, frs):
                         e[(t, it.lower())] = v
         for (t, it), v in sorted(e.items()):
             if v and (it in GAS_ITEMS or it in ("no3runh", "no3mrun", "no3mlea")):
-                out.append([reg, act, t, it, round(float(v), 12)])
+                out.append([reg, act, t, it, float(v)])
     return out
 
 
@@ -156,17 +158,17 @@ def build():
     ef = _tab("EmFracFert", ("region", "gas", "fertiliser"), upper="gas")
     nn = _tab("NN_CorrFertFactDeviation", ("region", "fertiliser", "year"))
     bn = _tab("bNumAniRAINS", ("region", "animal_mitt", "year"))
-    rs_ = pd.read_csv(D / "p_factRunStor.csv")
+    rs_ = _read_csv(D / "p_factRunStor.csv")
     frs = {(r.manure_system.upper(), r.tech_class, r.storage_type): float(r.value) for r in rs_.itertuples()}
     rlf = defaultdict(dict)
-    for r in pd.read_csv(D / "rLFRest.csv").itertuples():
+    for r in _read_csv(D / "rLFRest.csv").itertuples():
         rlf[r.region][r.item] = float(r.value)
     for k, v in RLF_FIX.items():
         rlf[k].update(v)
     for it in ("LFsurface", "LFsoil", "LFNmin"):
         if it not in rlf.get("ES120000", {}) and it in rlf.get("ES110000", {}) and it in rlf.get("ES130000", {}):
             rlf["ES120000"][it] = 0.5 * (rlf["ES110000"][it] + rlf["ES130000"][it])
-    md = pd.read_csv(D / "capri_mann_days_2030.csv")
+    md = _read_csv(D / "capri_mann_days_2030.csv")
     pairs = sorted({(r.region, r.activity) for r in md.itertuples() if r.item == "LEVL" and r.activity in MITT})
 
     rows_a, rows_r = [], []
@@ -200,7 +202,7 @@ def build():
         f["run_hous"] = (frs[("LIQUID", "normal", "othStor")] / 100.0 * tsl
                          + frs[("SOLID", "normal", "othStor")] / 100.0 * (1.0 - tsl))
         for k, v in f.items():
-            rows_a.append([reg, act, k, round(v, 12)])
+            rows_a.append([reg, act, k, v])
         ms_seen.add(ms)
     for reg in regions:
         ms = reg[:2] + "000000"
@@ -217,7 +219,7 @@ def build():
             for g in ("NH3", "NOX", "N2O"):
                 out[f"netf_{g}"] = sum(share[ft] * ef.get((ms, g, ft), 0.0) for ft in share)
         for k, v in out.items():
-            rows_r.append([reg, k, round(v, 12)])
+            rows_r.append([reg, k, v])
     rows_e = _effects(pairs, {(r[0], r[1]): None for r in rows_a}, rows_a, frs)
     for reg in regions:
         ms = reg[:2] + "000000"
@@ -225,8 +227,8 @@ def build():
         if any(v is not None for v in share.values()) and (ms, "NH3", "Ureum") in ef:
             # urea substitution (ammo_tech.gms l. 2352-2361): othImpact nh3syn = EF(urea) - EF(other), maximum share
             # the urea share
-            rows_r.append([reg, "urea_eff", round(ef[(ms, "NH3", "Ureum")] - ef.get((ms, "NH3", "Other"), 0.0), 12)])
-            rows_r.append([reg, "urea_max", round(share["Ureum"] or 0.0, 12)])
+            rows_r.append([reg, "urea_eff", ef[(ms, "NH3", "Ureum")] - ef.get((ms, "NH3", "Other"), 0.0)])
+            rows_r.append([reg, "urea_max", share["Ureum"] or 0.0])
     with open(D / "n_cascade_effects.csv", "w", newline="") as fh_:
         w = csv.writer(fh_)
         w.writerow(["region", "activity", "technology", "item", "value"])

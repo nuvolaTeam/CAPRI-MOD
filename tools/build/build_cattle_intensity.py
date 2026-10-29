@@ -31,6 +31,8 @@ from pathlib import Path
 
 import pandas as pd
 
+import functools as _ft
+_read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 #: (column suffix, terms per model region): the base year's (CAPREG), CAPRI's 2030 calibration and capri-mod's
 #: recipe at 2030 (tools/build/build_intensity_q_2030.py); the model takes the suffix of its PMP source at the 2030 market
@@ -75,9 +77,9 @@ def main():
     to_c8 = mr.region_to_capri()
     import sys
     sys.path.insert(0, str(ROOT))
-    from capri_mod.data.loaders import load_all_data
-    herds = load_all_data(str(ROOT / "capri_data"))["animal_numbers"]
-    Q = {sfx: pd.read_csv(f).pivot_table(index="model_region", columns="activity", values="value")
+    from capri_mod.data.loaders import load_regional_animal_numbers  # the one table needed (load_all_data read every model input, a dependency cycle in the data pipeline; 29 Oct 2026)
+    herds = load_regional_animal_numbers(str(ROOT / "capri_data"))
+    Q = {sfx: _read_csv(f).pivot_table(index="model_region", columns="activity", values="value")
          for sfx, f in Q_SOURCES if f.exists()}
 
     def stall(d, act, young):
@@ -180,7 +182,7 @@ def main():
                          and not (c.endswith("_capri2030") or c.endswith("_recipe2030"))]
     out = out[first + [c for c in out.columns if c not in first]]
     dest = ROOT / "capri_data" / "2017" / "supply" / "cattle_intensity.csv"
-    out.to_csv(dest, index=False, float_format="%.6g")
+    out.to_csv(dest, index=False)
     for animal, split, *_ in SPLITS:
         s = out[(out["animal"] == animal) & (out["split"] == split)]
         print(f"{animal} {split}: {len(s)} regions ({int((s.q_source == 'CAPRI p_pmpQuadTechn').sum())} own PMP terms); "

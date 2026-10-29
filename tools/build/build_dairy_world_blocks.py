@@ -34,6 +34,8 @@ from pathlib import Path
 
 import pandas as pd
 
+import functools as _ft
+_read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 SRC_M = ROOT / "capri_data" / "sources" / "market" / "dairy_world_dataout_2030.csv"
 SRC_E = ROOT / "capri_data" / "sources" / "market" / "dairy_world_elasticities_2030.csv"
@@ -72,12 +74,12 @@ def main():
     elas = Path("/mnt/user-data/uploads/elas_2_1730defaulta.csv")
     if dump.exists() and elas.exists():
         extract(dump, elas)
-    sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check", "check/nlp_check")]
+    sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check")]
     from recalibrate_trade_2017 import REGION_MAP
-    eu_block = set(pd.read_csv(ROOT / "capri_data" / "2017" / "market" / "dairy_processing.csv")["ms"])
-    src = pd.read_csv(SRC_M)
+    eu_block = set(_read_csv(ROOT / "capri_data" / "2017" / "market" / "dairy_processing.csv")["ms"])
+    src = _read_csv(SRC_M)
     v = {(r.region, r.item, r.product): float(r.value) for r in src.itertuples()}
-    el = pd.read_csv(SRC_E)
+    el = _read_csv(SRC_E)
     hrms = set(el.loc[el.param == "p_hessNQDairy", "rms"])
     rms_all = sorted(r for r in hrms if r not in eu_block and v.get((r, "PROD", "MILK"), 0) > 0
                      and v.get((r, "PPRI", "INPE")))
@@ -112,9 +114,9 @@ def main():
                 erows.append({"rms": r, "row": e.row, "col": e.col, "elas": e.value})
     out = pd.DataFrame(rows)
     dest = ROOT / "capri_data" / "2017" / "market"
-    out.to_csv(dest / "dairy_world_processing.csv", index=False, float_format="%.10g")
-    pd.DataFrame(hrows).to_csv(dest / "dairy_world_hessian.csv", index=False, float_format="%.10g")
-    pd.DataFrame(erows).to_csv(dest / "dairy_world_demand_elas.csv", index=False, float_format="%.6g")
+    out.to_csv(dest / "dairy_world_processing.csv", index=False)
+    pd.DataFrame(hrows).to_csv(dest / "dairy_world_hessian.csv", index=False)
+    pd.DataFrame(erows).to_csv(dest / "dairy_world_demand_elas.csv", index=False)
 
     # checks: fat and protein balance per region; raw milk supply elasticity
     print(f"{len(rms_all)} CAPRI regions -> trade regions {sorted(out.trade_region.unique())}")

@@ -26,9 +26,11 @@ from pathlib import Path
 
 import pandas as pd
 
+import functools as _ft
+_read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 import sys as _sys
-_sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check", "check/nlp_check")]
+_sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check")]
 from _model_regions import CTRY as MS_CODE  # noqa: E402  CAPRI member-state codes (capri_member_state_codes.csv)
 OUT = ROOT / "capri_data" / "trajectories" / "capri_ref_ration_2030.csv"
 OUT_FODDER = ROOT / "capri_data" / "trajectories" / "capri_ref_fodder_2030.csv"
@@ -93,7 +95,7 @@ def main():
                     acc["ghg_" + q] += lv * d.get(q, 0.0)
         return ({k: v / lv_sum for k, v in acc.items()} if lv_sum > 0 else None)
 
-    herds = pd.read_csv(ROOT / "capri_data" / "2017" / "supply" / "animal_numbers.csv", index_col=0)
+    herds = _read_csv(ROOT / "capri_data" / "2017" / "supply" / "animal_numbers.csv", index_col=0)
     c2g, groups = mr.capri_groups(list(herds.index))
     animals = sorted(set(C2M.values()))
     rows = []
@@ -107,7 +109,7 @@ def main():
                 if v17 > 0 and k in t30:
                     f = min(max(t30[k] / v17, 0.0 if not k.startswith("req_") else 0.2), 5.0)
                     for r in regs:
-                        rows.append((r, an, k, round(f, 5), "region"))
+                        rows.append((r, an, k, f, "region"))
                         covered.add((r, an))
     # national factors where a model region has no regional CAPRI rows
     for r in herds.index:
@@ -120,7 +122,7 @@ def main():
                 continue
             for k, v17 in t17.items():
                 if v17 > 0 and k in t30:
-                    rows.append((r, an, k, round(min(max(t30[k] / v17, 0.0 if not k.startswith("req_") else 0.2), 5.0), 5), "member state"))
+                    rows.append((r, an, k, min(max(t30[k] / v17, 0.0 if not k.startswith("req_") else 0.2), 5.0), "member state"))
     # FODDER per ha (the fodder balance's usable fodder, u = fed quantity / area): CAPRI's FEDM over LEVL of the
     # fodder crop, 2030 over 2017 (yield, losses and the non-feed use, e.g. silage maize for biogas in Germany: INDM
     # 3.6 of 6.9 Mt in Upper Bavaria's 2030 reference); per group, else member state
@@ -167,22 +169,22 @@ def main():
             f_ = u_ratio(codes, cc)
             if f_ is not None:
                 for r in regs:
-                    frows.append((r, mc, round(f_, 5), "region")); fcov.add((r, mc))
+                    frows.append((r, mc, f_, "region")); fcov.add((r, mc))
     for r in herds.index:
         ms = MS_CODE.get(r[:2], r[:2]) + "000000"
         for mc, cc in fcrop.items():
             if (r, mc) not in fcov:
                 f_ = u_ratio([ms], cc)
                 if f_ is not None:
-                    frows.append((r, mc, round(f_, 5), "member state"))
+                    frows.append((r, mc, f_, "member state"))
     fo = pd.DataFrame(frows, columns=["region", "crop", "factor", "level"])
     fo.to_csv(OUT_FODDER, index=False)
     print(f"wrote {OUT_FODDER.relative_to(ROOT)}: {len(fo)} rows; median {fo.groupby('crop')['factor'].median().round(3).to_dict()}")
     out = pd.DataFrame(rows, columns=["region", "animal", "item", "factor", "level"])
     out.to_csv(OUT, index=False)
-    med = out.groupby("item")["factor"].median().round(3).to_dict()
+    med = out.groupby("item")["factor"].median().to_dict()
     print(f"wrote {OUT.relative_to(ROOT)}: {len(out)} rows, {out[['region', 'animal']].drop_duplicates().shape[0]} "
-          f"region x animal; median factors {med}")
+          f"region x animal; median factors { {k: round(v, 3) for k, v in med.items()} }")
 
 
 if __name__ == "__main__":

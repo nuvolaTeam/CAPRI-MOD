@@ -14,7 +14,8 @@ Code: `capri_mod/market/bilateral.py` (`BilateralCommodity`: one product's trade
 
 ## Regions and products
 
-- 30 trade regions (`definitions.ALL_TRADE_REGIONS`): EU27, 28 non-EU countries and ROW. One of them is Norway (NOR,
+- 26 trade regions (`definitions.ALL_TRADE_REGIONS`): EU27, 24 non-EU countries and ROW (Egypt, Algeria, Saudi
+  Arabia and Iran, regions without data, removed on 29 October 2026: KNOWN_ISSUES K45). One of them is Norway (NOR,
   since 21 October 2026, KNOWN_ISSUES K56): CAPRI's market region NO000000, its own market region in
   `gams/aggregation/defaultA.agg` and linked to supply models (RMSSUP); before, CAPRI's bilateral data folded it into
   ROW while its supply regions NO01-NO07 fed the EU's market supply.
@@ -73,9 +74,10 @@ non-EU world is CAPRI's 2030 world.
 
 Supply (`supply_response`, region_ratio given):
 
-- Non-EU regions: base production × r_i^ε, with one own-price elasticity per product for every region: CAPRI's
-  p_elasSupp, EU median (`sources/arm/supply_elas_eu_all.json`), where it has the product, else the `eps` column of
-  `armington_params.csv`. Crushing, the non-EU dairy blocks and the biofuel markets set their products' supply at
+- Non-EU regions: base production × r_i^ε, with each region's own-price elasticity from CAPRI's p_elasSupp of its
+  CAPRI regions (`supply_elas_region.csv`, `tools/build/build_supply_elas_nonEU.py`), 0 where CAPRI has none
+  (KNOWN_ISSUES K54-3; until 23 October 2026 one EU-median or `eps` value per product, the `eps` column removed with
+  `armington_params.csv` on 29 October 2026, K72). Crushing, the non-EU dairy blocks and the biofuel markets set their products' supply at
   the regional prices ([OILSEED_CRUSHING.md](OILSEED_CRUSHING.md), [DAIRY_PROCESSING.md](DAIRY_PROCESSING.md),
   [BIOFUEL_MARKET.md](BIOFUEL_MARKET.md)).
 - EU: the supply models' output, anticipated against the price the supply models last saw:
@@ -127,8 +129,8 @@ exporter the quota, the gap between the out-of-quota (MFN: TAMFN, TSMFN) and the
 flow under the quota regime. The specific tariff on the flow moves with CAPRI's sigmoid, slope 200 on
 (fill − 0.97) (p_trqSigmoidSlope, `arm/market_model.gms` l. 339; `TRQ_SLOPE` in `model_parameters.csv`), relative to the
 base fill so that the base is reproduced. Each quota's tariff is solved by bisection consistently with its own flow
-at every market step (`trq_solve`); the market solve stops only when the tariffs have stopped moving. Switch:
-`MarketModule.use_trq` (True).
+at every market step (`trq_solve`); the market solve stops only when the tariffs have stopped moving. Always on (the switch `MarketModule.use_trq` was removed on 27 October
+2026).
 
 In CAPRI's 2030 reference (`bilateral_trq_2030.csv`) the EU's meat quotas are far from filled: beef 13 of 157 kt,
 poultry 108 of 422 kt from the exporters with bilateral quotas. In the Farm-to-Fork runs of Sprint 8m (October 2026)

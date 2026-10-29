@@ -22,10 +22,13 @@ A crop the region does not grow (A = 0) takes its member state's CAPRI values (t
 enters later has CAPRI's own numbers, not a template. Grass keeps its own yield and price (build_capri_base: dry
 matter and MREV-based price; CAPRI's grass price is a dummy of 1,000 EUR/t).
 
-Outputs (crop columns only; animal columns untouched):
-  capri_data/2017/supply/yields.csv, variable_costs.csv
+Outputs (this builder is the one writer of the three tables, 29 October 2026):
+  capri_data/2017/supply/yields.csv, variable_costs.csv: the crop columns as above; the animal yields from
+      build_animal_yields.build(); the animal costs of DCOW, BULL, PIGF, OANI from build_capri_base.intensive_values
+      (TOIN) and of SHGM, SHGF from tools/lib/_sheep_goat.costs
   capri_data/2017/supply/crop_premium.csv               (new: region x model crop, EUR/ha)
-  capri_data/sources/capreg/capreg_producer_prices.csv  (model-coded crop columns written for all regions)
+  capri_data/sources/capreg/capreg_producer_prices.csv  CAPRI's extract (capreg_producer_prices_extract.csv) with
+      the model-coded crop columns written for all regions and the four animal columns from intensive_values (MPRI)
   capri_data/2017/policy/cap_payments.csv               (the payment engine's per-region rates: BPS = CAPRI's
       premiums per ha of UAA, UAAR PRME; ANC, AES, ORGANIC, COUPLED = 0 - CAPRI's results carry no split by
       instrument. The file held the loader's random draw.)
@@ -39,12 +42,21 @@ from pathlib import Path
 
 import pandas as pd
 
+import functools as _ft
+_read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 import sys as _sys
-_sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check", "check/nlp_check")]
+_sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check")]
 from _model_regions import CTRY as MS_CODE  # noqa: E402  CAPRI member-state codes (capri_member_state_codes.csv)
-sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check", "check/nlp_check")]
+sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check")]
 import build_capri_base as B  # noqa: E402
+import build_animal_yields as AY  # noqa: E402
+import _sheep_goat as SG  # noqa: E402
+sys.path.insert(0, str(ROOT))
+from capri_mod.data import definitions as D  # noqa: E402
+
+#: CAPRI's regional producer prices as extracted (tools/build/extract_all_from_data2.py), CAPRI's codes
+PRICES_EXTRACT = ROOT / "capri_data" / "sources" / "capreg" / "capreg_producer_prices_extract.csv"
 
 ITEMS = ("LEVL", "YILD", "TOIN", "MPRI", "PRME", "MREV", "GRAS")
 GRASS_DM = ROOT / "capri_data" / "2017" / "supply" / "grass_dm_content.csv"
@@ -93,11 +105,32 @@ def national(reg):
 
 def main(dump_dir: Path):
     capri = read(dump_dir)
-    yields = pd.read_csv(B.YIELDS, index_col=0)
-    costs = pd.read_csv(B.COSTS, index_col=0)
-    prices = pd.read_csv(B.PRICES, index_col=0)
-    areas = pd.read_csv(B.AREAS, index_col=0)
-    spec = B.build_spec(capri, list(areas.index))
+    areas = _read_csv(B.AREAS, index_col=0)
+    regs = list(areas.index)
+    spec = B.build_spec(capri, regs)
+    # the three tables built here from scratch, their one writer (29 October 2026): no cell survives from an earlier
+    # file. Columns: the model's crops and animals in definitions' order; prices: CAPRI's extract with the model's
+    # columns, the four animal columns first from build_capri_base.intensive_values (its rule, unchanged), then the
+    # crops below
+    cols = list(D.CROPS) + list(D.ANIMALS)
+    yields = pd.DataFrame(index=pd.Index(regs, name="region"), columns=cols, dtype=float)
+    costs = pd.DataFrame(index=pd.Index(regs, name="region"), columns=cols, dtype=float)
+    ext = _read_csv(PRICES_EXTRACT, index_col=0)
+    prices = ext.reindex(regs).astype(float)
+    prices.index.name = ext.index.name
+    price_cols = [c for c in prices.columns if c in B.CROP_MAP or c in B.COST_ANIMALS]
+    for reg in regs:
+        src = spec.get(reg, ())
+        for col, v in B.intensive_values(capri, src, "TOIN", B.COST_ANIMALS).items():
+            costs.at[reg, col] = v
+        for col, v in B.intensive_values(capri, src, "MPRI", price_cols).items():
+            prices.at[reg, col] = v
+    wide, _ = AY.build()
+    for c in D.ANIMALS:
+        yields[c] = wide[c].reindex(regs).fillna(0.0) if c in wide.columns else 0.0
+    sg = SG.costs(dump_dir, regs)
+    for c in SG.ACTS:
+        costs[c] = sg[c].reindex(regs)
     cmap = crop_codes()
     crops = [c for c in cmap if c in yields.columns or c in costs.columns]
     prem = pd.DataFrame(0.0, index=areas.index, columns=crops)
@@ -114,7 +147,14 @@ def main(dump_dir: Path):
             else:
                 n_reg += 1
             if v is None:
-                continue                                 # CAPRI has the crop nowhere in the member state
+                # CAPRI has the crop nowhere in the member state: no yield and no cost (0, as the file had for rice
+                # outside the rice countries). Until 27 October 2026 such cells kept whatever the file held, in places
+                # values of the synthetic template removed in Sprint 9s (citrus yield 24.2 t/ha in DE11)
+                if col != "GRAS" and col in yields.columns:
+                    yields.at[reg, col] = 0.0
+                if col in costs.columns:
+                    costs.at[reg, col] = 0.0
+                continue
             _, y, p, cst, pr = v
             if col != "GRAS":
                 if col in yields.columns:
@@ -130,7 +170,7 @@ def main(dump_dir: Path):
         v = v or values(capri, ((national(reg), 1.0),), ("UAAR",))
         pay.at[reg, "BPS"] = v[4] if v else 0.0
     pay.index.name = "region"
-    pay.round(3).to_csv(PAYMENTS)
+    pay.to_csv(PAYMENTS)
     # GRASS: CAPRI's dry-matter content (DRMA of GRAS, 0.22 in every region) for the loader's fresh-to-dry conversion,
     # and the grass price on that basis: CAPRI's revenue per ha (MREV; its grass MPRI is a dummy 1,000) over the
     # dry-matter yield (build_capri_base used a share of 0.20)
@@ -162,7 +202,7 @@ def main(dump_dir: Path):
     costs.to_csv(B.COSTS)
     prices.to_csv(B.PRICES)
     prem.index.name = "region"
-    prem.round(4).to_csv(PREMIUM)
+    prem.to_csv(PREMIUM)
     print(f"{n_reg} region x crop cells from the region's own CAPRI rows, {n_nat} from its member state; "
           f"wrote yields, costs, prices and {PREMIUM.relative_to(ROOT)}")
 

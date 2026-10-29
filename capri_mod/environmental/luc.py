@@ -26,6 +26,7 @@ from typing import Dict, Optional
 
 import numpy as np
 import pandas as pd
+from capri_mod.tableio import read_input
 
 CLS = {"CRP": "CROP", "FOR": "FORE", "ART": "ARTIF", "GRS": "GRSLND", "WET": "WETLND", "RES": "RESLND"}
 
@@ -35,7 +36,7 @@ class LUCModel:
 
     def __init__(self, data_dir: Optional[str] = None):
         root = Path(data_dir) if data_dir else Path(__file__).resolve().parents[2] / "capri_data"
-        t = pd.read_csv(root / "2017" / "environment" / "luc_2030.csv")
+        t = read_input(root / "2017" / "environment" / "luc_2030.csv")
         self.v = {r: dict(zip(d.item, d.value)) for r, d in t.groupby("capri_region")}
 
     @classmethod

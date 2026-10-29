@@ -115,7 +115,6 @@ CAPRI_TO_MODEL = {
 }
 
 #: CAPRI country code -> NUTS country prefixes used by this model.
-COUNTRY_PREFIXES = {"BL": ("BE", "LU"), "IR": ("IE",)}
 
 # CAPRI region codes are 8 characters and MAY contain letters after the
 # country code (DEA10000, FRB00000). A first version accepted digits only and
@@ -198,15 +197,12 @@ def _final_product_value_totals(dump_dir: Path, products=FINAL_PRODUCTS):
 
 
 def build(dump_dir: Path, value_item: str = None) -> pd.DataFrame:
-    from capri_mod.data.loaders import load_all_data
+    from capri_mod.data.loaders import load_regional_animal_numbers  # the one table needed (load_all_data read every model input, a dependency cycle in the data pipeline; 29 Oct 2026)
 
-    data = load_all_data(str(_ROOT / "capri_data"))
-    herds = data["animal_numbers"]
+    herds = load_regional_animal_numbers(str(_ROOT / "capri_data"))
     model_regions = set(herds.index)
     model_acts = sorted(set(CAPRI_TO_MODEL.values()))
 
-    corr = json.loads((_ROOT / "capri_data" / "shared" /
-                       "nuts_version_correspondence.json").read_text())["capri8_to_nuts"]
 
     # CAPRI regions -> model regions in GROUPS covering the same territory (tools/lib/_model_regions.py:
     # one to one, splits, merges). The first-candidate rule used before put a split parent's whole
@@ -230,7 +226,7 @@ def build(dump_dir: Path, value_item: str = None) -> pd.DataFrame:
     grouped = defaultdict(float)           # (group, act) -> kt
     national = defaultdict(float)          # (capri country, act) -> kt
     for (code8, act), kt in totals.items():
-        if code8.endswith("000000"):
+        if code8.endswith("000000") and not _mr.is_unit(code8):   # a member state's total (DK000000 is a unit)
             national[(code8[:2], act)] += kt
             continue
         # Only codes in a group with model regions are used. NUTS-1 aggregates
@@ -258,8 +254,7 @@ def build(dump_dir: Path, value_item: str = None) -> pd.DataFrame:
     for (cc, act), nat_kt in national.items():
         if act not in herds.columns:
             continue
-        prefixes = COUNTRY_PREFIXES.get(cc, (cc,))
-        regs = [r for r in model_regions if r.startswith(prefixes)]
+        regs = [r for r in model_regions if r.startswith(cc)]        # CAPRI's codes: BL, IR as CAPRI has them
         placed = sum(regional.get((r, act), 0.0) for r in regs)
         rest = [r for r in regs
                 if pd.isna(coef.at[r, act]) and float(herds.at[r, act]) > 0]
@@ -308,3 +303,23 @@ if __name__ == "__main__":
     dest4 = _ROOT / "capri_data" / "2017" / "supply" / "livestock_output_value_coef.csv"
     tou.to_csv(dest4)
     print(f"wrote {dest4} — {tou.notna().sum().sum()} coefficients (1000 EUR per 1000 head)")
+    # Manure N, final product value and purchased feed per head, the same way (LEVL x item / model heads). Written by
+    # build_shg_split.py's coefficient step until 29 October 2026 (its only writer; the one-time sheep-and-goat split
+    # was retired once a rebuild without it reproduced every file): one writer per file
+    # (docs/design/DATA_PIPELINE_DOIT.md)
+    man = build(src, "MANN")
+    dest5 = _ROOT / "capri_data" / "2017" / "environment" / "livestock_manure_n_coef.csv"
+    man.to_csv(dest5)
+    print(f"wrote {dest5} — {man.notna().sum().sum()} coefficients (t N per 1000 head)")
+    fin = build(src, "FINAL_VALUE")
+    dest6 = _ROOT / "capri_data" / "2017" / "supply" / "livestock_product_value_coef.csv"
+    fin.to_csv(dest6)
+    print(f"wrote {dest6} — {fin.notna().sum().sum()} coefficients (1000 EUR per 1000 head)")
+    import pandas as _pd
+    feed = []
+    for item, suf in (("FCER", "cereals"), ("FPRO", "protein"), ("FENE", "energy")):
+        t = build(src, item) / 1000.0
+        feed.append(t.rename(columns=lambda c, s=suf: f"{c}_{s}"))
+    dest7 = _ROOT / "capri_data" / "2017" / "feed" / "livestock_feed_coef.csv"
+    _pd.concat(feed, axis=1).to_csv(dest7)
+    print(f"wrote {dest7} — purchased feed per head (FCER, FPRO, FENE)")

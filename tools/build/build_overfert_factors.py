@@ -13,7 +13,7 @@ p_OverFertMarkUp = 0.1; supply/supply_model.gms Tot_MitFert_):
 and lowers each option's maximum share where crop need lies above precision farming's level.
 
 Output: capri_data/2017/environment/crop_nut_need_mult_fact_2030.csv
-        (region = model NUTS 2 code, capri_region, x); model regions without a regional CAPRI
+        (region = the model's region, CAPRI's regional unit; capri_region, x); model regions without a regional CAPRI
         entry take their country's value (the model's registered national fallback).
 Usage:  python tools/build/build_overfert_factors.py <dump file> [<dump file> ...] [--year 2030]
 """
@@ -42,14 +42,14 @@ def main():
                 x[m.group(1)] = float(m.group(5))
     if not x:
         raise SystemExit("no p_CropNutNeedMultFact(ru,'NITF','T','%s') records found" % a.year)
-    c8 = json.load(open(ROOT / "capri_data" / "shared" / "nuts_version_correspondence.json"))["capri8_to_nuts"]
     spec = importlib.util.spec_from_file_location("_mr", ROOT / "tools" / "lib" / "_model_regions.py")
     mr = importlib.util.module_from_spec(spec); spec.loader.exec_module(mr)
+    # the model's regions are CAPRI's regional units: each takes its own entry (until 27 October 2026 every NUTS code
+    # the correspondence listed for a CAPRI code, model region or not; split parts took the national value)
     rows, have = [], set()
-    for r8, nuts in c8.items():
-        if r8 in x and not r8.endswith("000000"):
-            for n2 in nuts:
-                rows.append([n2, r8, x[r8]]); have.add(n2)
+    for reg in mr.model_regions():
+        if reg in x:
+            rows.append([reg, reg, x[reg]]); have.add(reg)
     for reg in mr.model_regions():
         if reg in have:
             continue

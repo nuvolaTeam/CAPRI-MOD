@@ -25,6 +25,8 @@ from pathlib import Path
 
 import pandas as pd
 
+import functools as _ft
+_read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 KEEP = ROOT / "capri_data" / "sources" / "environment" / "capri_manure_trade_2030.csv"
 DEST = ROOT / "capri_data" / "2017" / "environment" / "manure_trade_2030.csv"
@@ -43,15 +45,14 @@ def main():
         KEEP.parent.mkdir(parents=True, exist_ok=True)
         pd.DataFrame(rows, columns=["capri_region", "item", "kt_n"]).to_csv(KEEP, index=False)
         print(f"extracted {len(rows)} rows -> {KEEP.relative_to(ROOT)}")
-    src = pd.read_csv(KEEP)
+    src = _read_csv(KEEP)
     v = {(r.capri_region, r.item): float(r.kt_n) for r in src.itertuples()}
     spec = importlib.util.spec_from_file_location("_mr", ROOT / "tools" / "lib" / "_model_regions.py")
     mr = importlib.util.module_from_spec(spec); spec.loader.exec_module(mr)
     sys.path.insert(0, str(ROOT))
-    from capri_mod.data.loaders import load_all_data
+    from capri_mod.data.loaders import load_regional_base_areas  # the tables needed (load_all_data read every model input, a dependency cycle in the data pipeline; 29 Oct 2026)
     from capri_mod.data.definitions import CROPS
-    d = load_all_data(str(ROOT / "capri_data"))
-    A = d["areas"]
+    A = load_regional_base_areas(str(ROOT / "capri_data"))
     regs = list(A.index)
     code_to_group, groups = mr.capri_groups(regs)
     out = {}
@@ -64,19 +65,14 @@ def main():
         kg = im * 1e6 / (crop * 1000.0) if crop > 0 else 0.0           # kt -> kg over 1000 ha -> kg/ha
         for r in mregs:
             out[r] = (sh, kg, "+".join(sorted(codes)))
-    rows = [dict(region=r, export_share=round(out.get(r, (0.0, 0.0, ""))[0], 6),
-                 import_kg_n_per_ha=round(out.get(r, (0.0, 0.0, ""))[1], 4),
+    rows = [dict(region=r, export_share=out.get(r, (0.0, 0.0, ""))[0],
+                 import_kg_n_per_ha=out.get(r, (0.0, 0.0, ""))[1],
                  source="CAPRI 2030 reference endotech_all_ini MTRADE/EXCRET " + out.get(r, (0, 0, "none"))[2])
             for r in regs]
-    old = pd.read_csv(DEST).set_index("region") if DEST.exists() else None
     new = pd.DataFrame(rows)
     new.to_csv(DEST, index=False)
-    if old is not None:
-        j = new.set_index("region").join(old, rsuffix="_old")
-        dif = j[(abs(j.export_share - j.export_share_old) > 0.01) | (abs(j.import_kg_n_per_ha - j.import_kg_n_per_ha_old) > 2)]
-        print(f"wrote {DEST.relative_to(ROOT)}: {len(new)} regions; changed by > 1 point / 2 kg: {len(dif)}")
-        print(dif[["export_share", "export_share_old", "import_kg_n_per_ha", "import_kg_n_per_ha_old"]].round(3).to_string())
-    print(f"CAPRI EU net trade sum (regional rows): exports {sum(max(0, x) for (c, i), x in v.items() if i == 'MTRADE' and not c.endswith('000000')):.0f} kt")
+    print(f"wrote {DEST.relative_to(ROOT)}: {len(new)} regions")
+    print(f"CAPRI EU net trade sum (regional rows): exports {sum(max(0, x) for (c, i), x in v.items() if i == 'MTRADE' and mr.regional_row(c)):.0f} kt")
 
 
 if __name__ == "__main__":

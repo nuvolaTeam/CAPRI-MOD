@@ -23,6 +23,7 @@ from typing import Dict, Iterator, Optional
 import pandas as pd
 
 from capri_mod.pipeline import http
+from capri_mod.csvio import read_csv
 
 PROVIDER = "faostat"
 LICENCE = "FAO: CC BY 4.0"
@@ -75,7 +76,7 @@ def parse_chunks(raw: RawDownload) -> Iterator[pd.DataFrame]:
     """The normalized CSV in chunks: the file's own columns (snake_case), time, value (NaN where empty), flag."""
     z = zipfile.ZipFile(io.BytesIO(raw.data))
     with z.open(_csv_member(z)) as fh:
-        for ch in pd.read_csv(fh, dtype=str, keep_default_na=False, chunksize=CHUNK, encoding="latin-1"):
+        for ch in read_csv(fh, dtype=str, keep_default_na=False, chunksize=CHUNK, encoding="latin-1"):
             for col, v in (raw.filters or {}).items():
                 if col not in ch.columns:
                     raise ValueError(f"faostat: no column {col!r} (columns: {list(ch.columns)})")

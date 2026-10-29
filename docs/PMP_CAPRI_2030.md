@@ -93,7 +93,7 @@ elasticity calibration (fattening pigs: 420 against 1,480 EUR per head for a 100
 
 The project lead's decision: CAPRI's exported 2030 terms are the default for now, and capri-mod needs its own
 calibration. The elasticity calibration (Howitt-type, each activity's term from a target elasticity) was internally
-right - `tools/check/pmp_elasticity_target_check.py` (Austria, 2030): the realised elasticities equal their targets for almost
+right - tools/check/pmp_elasticity_target_check.py, removed with it on 28 October 2026 (Austria, 2030): the realised elasticities equal their targets for almost
 every activity - but its targets (CAPRI's estimated elasticities) and its nearly diagonal structure (cross terms capped at
 5% of the diagonal) left out CAPRI's within-group substitution (rapeseed 2.4 against 9.4 with CAPRI's terms).
 
@@ -127,6 +127,13 @@ Check against CAPRI (`tools/check/pmp_recipe_check.py`):
 |---|---|---|---|
 | 2030 against CAPRI's exported 2030 terms | 80.5% of 11,694 (before the land nest: 76.8%) | 89.8% | 88.6% of the diagonals |
 | 2017 against CAPRI's CAPREG terms | 89.6% of 5,718 (87.1%) | 97.4% | 100% of 1,447 (within 1%: 100%) |
+| 28 October 2026, on CAPRI's regional units and with NURS: 2030 | 83.3% of 11,918 (without NURS 83.0% of 11,694) | 91.4% | 88.6% of the diagonals |
+| 28 October 2026: 2017 | 99.9% of 10,687 | 99.9% | 100% of 2,649 |
+
+The 2017 rows of 28 October compare the recipe with CAPRI's CAPREG terms region by region on CAPRI's own regional units
+(the model's regions since 27 October 2026; the check had compared 4-character NUTS codes and found no pair after the
+move, fixed the same day); the tail of the estimated crops described below came from regions whose model and CAPRI
+codes differed and is gone at 2017. The 2030 tail remains.
 
 Exact or nearly: the animals, vegetables, tobacco, flowers, olives and fruit, grassland in 2017 (|D_OBJC| + rent
 reproduces CAPRI's terms to four digits); the main cereals and oilseeds at medians 1.00. Still off: a tail of regions
@@ -150,3 +157,20 @@ terms (their calibrations are not ported); at 2017 the 2017 ones.
 
 Both matrices are computed from the data at every run; nothing is overwritten. CAPRI's terms are rebuilt from a CAPRI
 installation with the export script and the two builders.
+
+## The elasticity calibration removed (28 October 2026, audit S13)
+
+`supply.pmp_source = "elasticity"` is gone. With CAPRI's terms (or the recipe's), an activity of a calibrated part
+(crops, animals) without a positive own term is held at its level (SupplyModule._uncalibrated), as the activities
+without any CAPRI value already were. At the 2030 baseline (r166) that is 71 region-activity cells in 63 regions, at
+most 2% of an activity's EU level: tobacco 0.76 of 38 kha, pulses 23 of 1,809 kha (mostly Dutch regions), durum wheat
+3.5 of 2,115 kha; everything else 0.07% or less. Until then they took a curvature from their CAPRI elasticity (capped at
+8, with CAPRI's share term). At the 2017 market year the recipe had no term for nurseries (NURS, 181 kha in 213
+regions); CAPRI's 2030 terms do cover NURS. Fixed 28 October 2026: NURS was missing from the recipe builder's activity
+list (tools/build/build_pmp_recipe.py ACTS); with it the recipe gives CAPRI's NURS term in all 224 regions at 2030 and
+all 213 at 2017 (within 5%, median ratio 1.000). No result changes: NURS is one of CAPRI's fixed activities (FACT,
+sets.gms l. 131; prep_sim.gms l. 250: v_actLevl.FX), held at its level in every simulation, here and in CAPRI. The
+rebuild also wrote the recipe's committed terms at full precision (they had been written with about ten significant
+digits: relative differences up to 2e-9), which moves the 2017-year solutions (tests, the recipe option) in their last digits;
+the 2030 reference runs use CAPRI's own terms and do not read these files.
+

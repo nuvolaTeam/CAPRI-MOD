@@ -7,7 +7,7 @@ CAPRI (envind/gases.gms) computes manure N2O per activity from its manure N (MAN
   N2OLEA  leaching              (indirect)
   N2OAMM  volatilisation        (NH3 + NOx)-N x EF4 x 44/28 (indirect)
 The loss shares move with the ammonia technologies (v_emiLoss): CAPRI's technology effects on N2O
-(ammo_tech.gms; capri_data/2017/abatement/ammonia/ammonia_technology_effects.csv, N2OHOU and N2OAPP; manure
+(ammo_tech.gms; capri_data/2017/abatement/ammonia/ammonia_technology_effects.parquet, N2OHOU and N2OAPP; manure
 acidification from p_litRevAmmoTechsAdd) - covered storage cuts housing/storage N2O, low-emission
 application raises application N2O (slurry injected, less NH3, more N2O).
 
@@ -30,6 +30,8 @@ from pathlib import Path
 
 import pandas as pd
 
+import functools as _ft
+_read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 ITEMS = ("LEVL", "MANN", "N2OMAN", "N2OAPP", "N2OGRA", "N2OLEA")
 ROW = re.compile(r"^'([A-Z]{2}[0-9A-Z]{6})'\.'([A-Z0-9]+)'\.'(" + "|".join(ITEMS) + r")'\.'Y'\s+(-?\d[\d.]*(?:[Ee][+\-]?\d+)?)")
@@ -60,7 +62,6 @@ def main():
             if m and m.group(2) in c2m:
                 v[m.group(1)][m.group(2)][m.group(3)] = float(m.group(4))
     mr = _load(ROOT / "tools" / "lib" / "_model_regions.py")
-    corr = json.loads((ROOT / "capri_data" / "shared" / "nuts_version_correspondence.json").read_text())["capri8_to_nuts"]
     import importlib.util as _ilu_
     _sp_ = _ilu_.spec_from_file_location("_mr_", ROOT / "tools" / "lib" / "_model_regions.py")
     _mr_ = _ilu_.module_from_spec(_sp_); _sp_.loader.exec_module(_mr_)
@@ -92,15 +93,15 @@ def main():
 
     # technology effects on N2O
     amm = ROOT / "capri_data" / "2017" / "abatement" / "ammonia"
-    eff = pd.read_csv(amm / "ammonia_technology_effects.csv")
+    eff = pd.read_parquet(amm / "ammonia_technology_effects.parquet")
     eff = eff[eff["item"].isin(["N2OHOU", "N2OAPP"])]
-    lit = pd.read_csv(amm / "p_litRevAmmoTechsAdd.csv")
+    lit = _read_csv(amm / "p_litRevAmmoTechsAdd.csv")
     lit = lit[lit["item"].isin(["N2OHOU", "N2OAPP"]) & (lit["technology"] == "ManAcid")]
     lit = lit.groupby(["region", "technology", "activity", "item"], as_index=False)["value"].mean()
     E = {(r.region, r.activity, r.technology, r.item): float(r.reduction) for r in eff.itertuples()}
     for r in lit.itertuples():
         E[(r.region, r.activity, r.technology, r.item)] = float(r.value)
-    tm = pd.read_csv(amm / "ammonia_tech_model.csv")
+    tm = _read_csv(amm / "ammonia_tech_model.csv")
     out = defaultdict(lambda: [0.0, 0.0, 0.0])       # (region, animal, tech) -> [w, w r_hou, w r_app]
     for r in tm.itertuples():
         creg, cact = str(r.sub).split("|")
@@ -115,8 +116,8 @@ def main():
                          for k, v_ in out.items() if v_[0] > 0])
     tech = tech[(tech["r_hou"].abs() > 1e-9) | (tech["r_app"].abs() > 1e-9)]
     dest = ROOT / "capri_data" / "2017" / "environment"
-    fac.to_csv(dest / "manure_n2o_factors.csv", index=False, float_format="%.6g")
-    tech.to_csv(dest / "manure_n2o_tech.csv", index=False, float_format="%.6g")
+    fac.to_csv(dest / "manure_n2o_factors.csv", index=False)
+    tech.to_csv(dest / "manure_n2o_tech.csv", index=False)
     tot = fac[["f_man", "f_app", "f_gra", "f_lea"]].sum(axis=1)
     print(f"manure_n2o_factors.csv: {len(fac)} rows, {fac.region.nunique()} regions; direct N2O-N / manure N median "
           f"{tot.median():.4f} (model's flat factor 0.02); manure_n2o_tech.csv: {len(tech)} rows; median effects "

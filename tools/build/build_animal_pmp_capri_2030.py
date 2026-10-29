@@ -40,6 +40,8 @@ from pathlib import Path
 
 import pandas as pd
 
+import functools as _ft
+_read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 SRC = ROOT / "capri_data" / "sources" / "baseline_pmp" / "pmp_quad_techn_2030.csv"
 OUT = ROOT / "capri_data" / "2017" / "supply" / "pmp_capri_2030_animals.csv"
@@ -127,10 +129,9 @@ def main() -> None:
     ap.add_argument("--splits", action="store_true",
                     help="the cattle member splits' grouping (MEMBERS_SPLITS); default output name <stem>_animals_members.csv")
     a = ap.parse_args()
-    sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check", "check/nlp_check")]
+    sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check")]
     import _model_regions as mr
-    import build_capri_base as bcb
-    t = pd.read_csv(a.techn or SRC)
+    t = _read_csv(a.techn or SRC)
     t = t[(t.tech1 == "T") & (t.tech2 == "T") & t.activity.isin(ACTS)]
     Q = defaultdict(dict)
     for r in t.itertuples():
@@ -144,14 +145,12 @@ def main() -> None:
     _c2g, groups = mr.capri_groups(regions)
     covered = {r for _, (_, rs) in groups.items() for r in rs}
     nat = defaultdict(set)
-    no_children = sorted(r for r in bcb.NORWAY_CHILDREN if r in regions)
     for r in regions:
-        if r not in covered and r not in no_children:
+        if r not in covered:
             nat[mr.national_code(r)].add(r)
     territory = [(sorted(cs), sorted(rs)) for _, (cs, rs) in groups.items()] + \
-                [([c], sorted(rs)) for c, rs in nat.items() if rs] + \
-                ([(list(bcb.NORWAY_PARENTS), no_children)] if no_children else [])
-    ratio = pd.read_csv(ROOT / "capri_data" / "2017" / "supply" / "capri_level_ratio.csv", index_col=0)
+                [([c], sorted(rs)) for c, rs in nat.items() if rs]
+    ratio = _read_csv(ROOT / "capri_data" / "2017" / "supply" / "capri_level_ratio.csv", index_col=0)
     rows, missing = [], defaultdict(list)
     for cs, rs in territory:
         for animal, members in members_of.items():
@@ -179,7 +178,7 @@ def main() -> None:
                     continue
                 rows.append((r, animal, h * X / rr, X, rr, " ".join(used)))
     df = pd.DataFrame(rows, columns=["region", "animal", "g", "x_capri", "level_ratio", "capri_regions"])
-    df.to_csv(OUT, index=False, float_format="%.10g")
+    df.to_csv(OUT, index=False)
     print(f"{OUT.name}: {len(df)} region x animal entries, {df.region.nunique()} regions; "
           f"territories without terms: { {k: len(v) for k, v in missing.items()} }")
 

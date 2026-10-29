@@ -35,7 +35,7 @@ traded products.
   sugar produced, PRCY 0.13-0.19, EU sugar per tonne of beet harvested 0.156). The supply bridge makes sugar = beet ×
   the member state's sugar per beet (`model._sugar_per_beet`); beet's price signal is the sugar price change
   (`model.py`, as CAPRI `arm/set_prices.gms`).
-- Without the dairy block (`MarketModule.use_dairy_block = False`) the dairy products are raw milk × CAPRI's
+- Without the dairy block's data (its switch `market.use_dairy_block` was removed on 27 October 2026) the dairy products are raw milk × CAPRI's
   member-state 2030 yields (output less processing per tonne of raw milk, `dairy_processing.csv`;
   `model._dairy_yield`). With the block (the default) the market replaces them by the block's output.
 

@@ -240,19 +240,6 @@
    ],
    "known_gaps": []
   },
-  "feed_availability": {
-   "file": "sources/capreg/capreg_feed_availability_regional.csv",
-   "exists": true,
-   "live_cells": 2266,
-   "nonzero_cells": 2266,
-   "source_type": "CAPRI_GDX",
-   "source_ref": "capreg DATA2 feed items",
-   "confidence": "validated",
-   "modules": [
-    "feed"
-   ],
-   "known_gaps": []
-  },
   "crop_nutrient_export": {
    "file": "2017/environment/crop_nutrient_export.csv",
    "exists": true,

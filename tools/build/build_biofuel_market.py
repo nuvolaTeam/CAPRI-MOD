@@ -72,6 +72,8 @@ from pathlib import Path
 
 import pandas as pd
 
+import functools as _ft
+_read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 SRC = ROOT / "capri_data" / "sources" / "market" / "biofuel_dataout_2030.csv.xz"
 DEST = ROOT / "capri_data" / "2017" / "market"
@@ -169,13 +171,13 @@ def main():
                     default=Path("/mnt/user-data/uploads/markmarket_greendeal_1730et_base_1717.txt"))
     ap.add_argument("--elas", type=Path, default=Path("/mnt/user-data/uploads/elas_2_1730defaulta.csv"))
     a = ap.parse_args()
-    sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check", "check/nlp_check")]
+    sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check")]
     from recalibrate_trade_2017 import REGION_MAP, AGGREGATES
     if a.dump.exists():
         src = extract(a.dump)
         src = src[src.region.map(lambda r: is_rms(r, AGGREGATES))]
         SRC.parent.mkdir(parents=True, exist_ok=True)
-        src.to_csv(SRC, index=False, float_format="%.10g")
+        src.to_csv(SRC, index=False)
         print(f"extracted {len(src)} rows -> {SRC.relative_to(ROOT)}")
     if a.elas.exists():
         # p_hessNQProc rows of the biofuels (own and cross terms, CAL)
@@ -185,12 +187,12 @@ def main():
         pat = re.compile(r"^'([^']+)'\.'(BIOE|BIOD)'\.'([^']+)'\.'CAL'\s+([-\d.Ee+]+)", re.M)
         hrows = [dict(region=m.group(1), product=m.group(2), price_of=m.group(3), value=float(m.group(4)))
                  for m in pat.finditer(txt[i:j])]
-        pd.DataFrame(hrows).to_csv(HESS, index=False, float_format="%.10g")
+        pd.DataFrame(hrows).to_csv(HESS, index=False)
         print(f"extracted {len(hrows)} p_hessNQProc rows -> {HESS.relative_to(ROOT)}")
-    hs = pd.read_csv(HESS)
+    hs = _read_csv(HESS)
     assert (hs["product"] == hs["price_of"]).all(), "cross terms in CAPRI's biofuel processing Hessian: extend the model"
     hess = {(r.region, r.product): r.value for r in hs.itertuples()}
-    src = pd.read_csv(SRC)
+    src = _read_csv(SRC)
     v = {(r.region, r.item, r.product): r.value for r in src.itertuples()}
     regions = sorted({r for r in src.region if is_rms(r, AGGREGATES)})
 
@@ -226,7 +228,7 @@ def main():
             x0[(ms, fuel)] = (X, mub)
             checks.append((ms, fuel, X, mub, v.get((ms, "BiofFeedCost", fuel))))
     fs = pd.DataFrame(frows)
-    fs.to_csv(DEST / "biofuel_feedstock.csv", index=False, float_format="%.8g")
+    fs.to_csv(DEST / "biofuel_feedstock.csv", index=False)
 
     bal = json.load(open(ROOT / "capri_data" / "validation" / "capri_eu27_market_balance_2030_ref.json"))["products"]
     eu = fs[fs.region == "EU27"]
@@ -234,8 +236,8 @@ def main():
     for c, grp in GROUPS.items():
         use = sum(float(bal.get(x, {}).get(k, 0.0)) for x in grp for k in ("HCOM", "FEDM", "INDM", "BIOF", "LOSM"))
         q = float(eu.loc[eu["commodity"] == c, "biof_kt"].sum())
-        us.append({"commodity": c, "biof_kt": round(q, 3), "use_kt": round(use, 3), "share": q / use if use > 0 else 0.0})
-    pd.DataFrame(us).to_csv(DEST / "biofuel_use_share.csv", index=False, float_format="%.6g")
+        us.append({"commodity": c, "biof_kt": q, "use_kt": use, "share": q / use if use > 0 else 0.0})
+    pd.DataFrame(us).to_csv(DEST / "biofuel_use_share.csv", index=False)
 
     # ---- biofuel supply and demand functions
     mrows = []
@@ -273,7 +275,7 @@ def main():
                        inpe=v.get((ms, "PPRI", "INPE"), 0.0))
             mrows.append(row)
     mk = pd.DataFrame(mrows)
-    mk.to_csv(DEST / "biofuel_market.csv", index=False, float_format="%.10g")
+    mk.to_csv(DEST / "biofuel_market.csv", index=False)
 
     print(f"biofuel_feedstock.csv: {len(fs)} rows, {fs.ms.nunique()} CAPRI regions")
     print(f"biofuel_market.csv: {len(mk)} rows; supply functions {int((mk.pr0 > 0).sum())}, "

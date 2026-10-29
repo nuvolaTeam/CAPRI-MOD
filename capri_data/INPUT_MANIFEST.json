@@ -114,49 +114,14 @@
    "coverage": "46.5% by area, 177 regions",
    "note": "The single largest remaining gap. Arable-only coverage drives the 7.97 asymmetry ratio that distorts every scenario. Needs the estnlp results dump."
   },
-  "pmp_diagonal_terms.csv": {
-   "concept": "PMP quadratic own-activity term",
-   "unit": "EUR/ha^2",
-   "dimension": "region x activity",
-   "capri_symbol": "pmppar p_pmpQuadTechn",
-   "status": "GDX",
-   "coverage": "4589 records, 192 regions"
-  },
-  "pmp_crossgroup_terms.csv": {
-   "concept": "PMP quadratic cross-group term",
-   "unit": "EUR/ha^2",
-   "dimension": "region x group x group",
-   "capri_symbol": "pmppar p_pmpQuadPact",
-   "status": "GDX",
-   "coverage": "2318 records, 173 regions",
-   "note": "57% negative, i.e. genuine substitutes. The heuristic it replaced was uniformly positive."
-  },
-  "input_requirements.csv": {
-   "concept": "physical input use per hectare",
-   "unit": "varies by input",
-   "dimension": "region x input x crop",
-   "capri_symbol": "DATA2 SEED, FERT, PLAP, REPM, REPB, ELEC, EGAS, EFUL, ELUB",
-   "status": "GDX",
-   "coverage": "cost components extracted, 105408 records",
-   "note": "Superseded in practice by the variable_costs merge from TOIN."
-  },
   "world_prices.csv": {
    "concept": "world market price",
    "unit": "EUR/t",
    "dimension": "commodity",
    "capri_symbol": "FAO_agg_17_defaulta p_dataMarket 'World'.'PMRK'.<product>.'BAS'",
    "status": "GDX",
-   "coverage": "39 market commodities; per-row CAPRI code in sources/world_price_provenance.json",
+   "coverage": "the 58 market commodities and DWHE, SUGB; per-row CAPRI code in sources/world_price_provenance.json (tools/build/build_world_prices.py)",
    "note": "Validated via the producer/world arbitrage ratio using verified MPRI prices. Model retained for 7 commodities where CAPRI implies a domestic price below world; EGGS corrected from CAPRI (63.4 -> 1173.8). Rows = the market module's 39 traded commodities, as armington_params.csv (October 2026: four price-only rows - SOYA_OIL and SOYM, older names duplicating SOYO and SOYC, and WMLK, CREM, dairy products outside the market set - removed as orphans; provenance kept in sources/world_price_provenance.json). Sprint 9f: + FRMI, CREM, COCM, WMIO, CASE (CAPRI's dairy products, traded)."
-  },
-  "armington_params.csv": {
-   "concept": "Armington substitution elasticities",
-   "unit": "dimensionless",
-   "dimension": "commodity",
-   "capri_symbol": "p_rhoArm1 / p_rhoArm2, literal in GAMS source",
-   "status": "GDX",
-   "coverage": "verified exact for 16 commodities; rho2 added for 21",
-   "note": "No GDX or model run needed - the values are literal assignments in market1_ch.gms, included unconditionally by arm/market1.gms:165. Sprint 9f: + FRMI, CREM, COCM, WMIO, CASE (CAPRI's dairy products, traded)."
   },
   "eu_mfn_tariffs.csv": {
    "concept": "MFN applied tariffs",
@@ -178,12 +143,6 @@
    "dimension": "crop x nutrient",
    "status": "GDX",
    "note": "CAPRI doc Table 15, reclassified from LITERATURE."
-  },
-  "manure_ch4_ef_regional.csv": {
-   "concept": "methane emission factor for manure",
-   "dimension": "animal",
-   "status": "LITERATURE",
-   "note": "IPCC 2006/2019 factors. Correctly a constant."
   },
   "pela_cross_price": {
    "concept": "cross-price supply elasticity between crops",
@@ -255,28 +214,6 @@
     "wheat is absent from the parameter entirely; at market level it aggregates into WHEA"
    ]
   },
-  "livestock_intensity_bounds.csv": {
-   "concept": "low- and high-intensity dairy yields",
-   "unit": "t milk per head",
-   "dimension": "region x intensity variant",
-   "capri_symbol": "DATA2 DCOL/DCOH YILD",
-   "status": "GDX",
-   "coverage": "235 of 248 regions",
-   "note": "CAPRI splits every dairy herd 50/50 between DCOL and DCOH in the base year, so the split carries no base-year information; the value is the response channel, letting dairy extensify under a nutrient target instead of only shrinking.",
-   "gaps": []
-  },
-  "land_rent_regional.csv": {
-   "concept": "Land rent per hectare by region (Eurostat apri_lrnt, arable land and/or permanent grassland)",
-   "unit": "EUR/ha",
-   "dimension": "region",
-   "capri_symbol": "(Eurostat apri_lrnt)",
-   "status": "EXTERNAL",
-   "coverage": "209 of 248 regions from Eurostat (161 regional, 40 national, 8 arable-only national); 39 fallback",
-   "note": "Fallback for Germany and Cyprus: CAPRI 2030 accounts rent x median Eurostat/CAPRI ratio (0.41) - flagged in the source column; likely understates Germany.",
-   "gaps": [
-    "Germany and Cyprus not published in apri_lrnt"
-   ]
-  },
   "capri_baseline_surplus_2030.csv": {
    "concept": "CAPRI's own baseline gross N surplus per ha (2030 reference), input to the tiered nitrogen target",
    "unit": "kg N/ha",
@@ -307,18 +244,6 @@
    "status": "CAPRI",
    "coverage": "matched regions via nuts_crosswalk",
    "note": "CAPRI's 2030 manure N trade between regions: export share of excretion, import per ha of cropland; counts only where the run trades manure (manureTradeNew).",
-   "gaps": [
-    "unmatched regions"
-   ]
-  },
-  "capri_regional_n_balance_2030.csv": {
-   "concept": "CAPRI regional N balance positions (MINFER, EXCRET, MTRADE, IMPORT, EXPPRD, CRESID, BIOFIX, ATMOSD, SURTOT)",
-   "unit": "kt N",
-   "dimension": "region",
-   "capri_symbol": "dataOut balance rows",
-   "status": "CAPRI",
-   "coverage": "matched regions via nuts_crosswalk",
-   "note": "See docs/FERTILISER_ALLOCATION.md.",
    "gaps": [
     "unmatched regions"
    ]
@@ -367,16 +292,6 @@
    "status": "CAPRI",
    "coverage": "21 trade regions x 9 products",
    "note": "Not yet read by the model (Stage 1 calibration data).",
-   "gaps": []
-  },
-  "eu_demand_elas_overrides.json": {
-   "concept": "EU own-price demand elasticities for oils and cakes",
-   "unit": "elasticity",
-   "dimension": "commodity",
-   "capri_symbol": "p_ElasDem",
-   "status": "CAPRI",
-   "coverage": "6 commodities",
-   "note": "EU row only.",
    "gaps": []
   },
   "feed_demand_nonEU.json": {

@@ -92,7 +92,7 @@ def main() -> None:
     eu = sorted(r for r in ceil if re.fullmatch(r"[A-Z]{2}[0-9A-Z]{6}", r) and not r.startswith("EU"))
     c = pd.DataFrame({r: {s: ceil[r].get(s, 0.0) for s in SCHEMES} for r in eu}).T[list(SCHEMES)]
     c.index.name = "capri_region"
-    c.to_csv(OUT_CEIL, float_format="%.10g")
+    c.to_csv(OUT_CEIL)
 
     sp = importlib.util.spec_from_file_location("_mr", ROOT / "tools" / "lib" / "_model_regions.py")
     mr = importlib.util.module_from_spec(sp); sp.loader.exec_module(mr)
@@ -113,7 +113,7 @@ def main() -> None:
                 rows.append(row)
                 break
     sh = pd.DataFrame(rows)
-    sh.to_csv(OUT_SHARE, index=False, float_format="%.8g")
+    sh.to_csv(OUT_SHARE, index=False)
     nat = int((sh.capri_region.str[2:] == "000000").sum())
     chk = (sh[list(SHARES)].sum(axis=1) - 1.0).abs()
     print(f"cap_ceilings_2030.csv: {len(c)} CAPRI regions; premium_scheme_shares_2030.csv: {len(sh)} region x activity "

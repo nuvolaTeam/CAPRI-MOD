@@ -3,1292 +3,1292 @@
  "_unit": "1000 t",
  "balances": {
   "ARG|BUTR": {
-   "imports": 0.417,
-   "exports": 5.236,
-   "production": 34.595,
-   "consumption": 29.367
+   "imports": 0.417043820137896,
+   "exports": 5.23579234479439,
+   "production": 34.594858133812,
+   "consumption": 29.3674114464871
   },
   "ARG|CASE": {
-   "imports": 0.466,
-   "exports": 0.371,
-   "production": 9.503,
-   "consumption": 6.422
+   "imports": 0.465782249778127,
+   "exports": 0.371322549897272,
+   "production": 9.502699262738389,
+   "consumption": 6.4223446279467
   },
   "ARG|CHES": {
-   "imports": 3.76,
-   "exports": 52.784,
-   "production": 468.24,
-   "consumption": 418.214
+   "imports": 3.75968173605949,
+   "exports": 52.7836577100351,
+   "production": 468.240421388703,
+   "consumption": 418.214248541301
   },
   "ARG|COCM": {
-   "imports": 1.527,
-   "exports": 0.235,
-   "production": 8.336,
-   "consumption": 9.758
+   "imports": 1.52681895680999,
+   "exports": 0.234711416525551,
+   "production": 8.33557827661844,
+   "consumption": 9.7575156534619
   },
   "ARG|CREM": {
-   "imports": 0.02,
-   "exports": 0.022,
-   "production": 3.359,
-   "consumption": 3.357
+   "imports": 0.0203405959820445,
+   "exports": 0.0216346390923771,
+   "production": 3.35852392383796,
+   "consumption": 3.3573273826717
   },
   "ARG|FRMI": {
-   "imports": 3.298,
-   "exports": 3.187,
-   "production": 6106.873,
-   "consumption": 6107.691
+   "imports": 3.29777252749384,
+   "exports": 3.18721009550876,
+   "production": 6106.87312871434,
+   "consumption": 6107.6907355268895
   },
   "ARG|SKIM": {
-   "imports": 0.078,
-   "exports": 21.625,
-   "production": 36.839,
-   "consumption": 17.74
+   "imports": 0.0783573307968101,
+   "exports": 21.6250945683558,
+   "production": 36.8390740117272,
+   "consumption": 17.7403515752782
   },
   "ARG|WHEY": {
-   "imports": 0.818,
-   "exports": 53.361,
-   "production": 65.493,
-   "consumption": 12.589
+   "imports": 0.817698407036156,
+   "exports": 53.3614614134235,
+   "production": 65.4933410782572,
+   "consumption": 12.5886198092532
   },
   "ARG|WMIO": {
-   "imports": 0.298,
-   "exports": 110.727,
-   "production": 185.256,
-   "consumption": 73.948
+   "imports": 0.29819045936182104,
+   "exports": 110.726597880859,
+   "production": 185.256272104473,
+   "consumption": 73.9479189153631
   },
   "AUS|BUTR": {
-   "imports": 36.225,
-   "exports": 23.693,
-   "production": 113.019,
-   "consumption": 125.286
+   "imports": 36.2252806531555,
+   "exports": 23.6933219814044,
+   "production": 113.019319623411,
+   "consumption": 125.28647727280699
   },
   "AUS|CASE": {
-   "imports": 0.953,
-   "exports": 7.19,
-   "production": 6.521,
-   "consumption": 8.644
+   "imports": 0.952576599756245,
+   "exports": 7.18963380886467,
+   "production": 6.52060710640617,
+   "consumption": 8.643647007347619
   },
   "AUS|CHES": {
-   "imports": 109.733,
-   "exports": 179.705,
-   "production": 366.822,
-   "consumption": 301.546
+   "imports": 109.733238488847,
+   "exports": 179.704887845868,
+   "production": 366.82229820351597,
+   "consumption": 301.546350380517
   },
   "AUS|COCM": {
-   "imports": 7.195,
-   "exports": 38.51,
-   "production": 30.409,
-   "consumption": 1.461
+   "imports": 7.19544241555363,
+   "exports": 38.509771206881204,
+   "production": 30.4088544249948,
+   "consumption": 1.4612778435688598
   },
   "AUS|CREM": {
-   "imports": 0.893,
-   "exports": 2.974,
-   "production": 7.391,
-   "consumption": 5.46
+   "imports": 0.89262029669769,
+   "exports": 2.9742621489611203,
+   "production": 7.391465451314111,
+   "consumption": 5.4598028986088805
   },
   "AUS|FRMI": {
-   "imports": 81.469,
-   "exports": 99.4,
-   "production": 3465.06,
-   "consumption": 3454.973
+   "imports": 81.46903878653251,
+   "exports": 99.4004749359086,
+   "production": 3465.05990034045,
+   "consumption": 3454.97275302008
   },
   "AUS|SKIM": {
-   "imports": 10.285,
-   "exports": 153.654,
-   "production": 224.174,
-   "consumption": 79.015
+   "imports": 10.2851171052819,
+   "exports": 153.654433161102,
+   "production": 224.17359527968,
+   "consumption": 79.0145479439297
   },
   "AUS|WHEY": {
-   "imports": 14.497,
-   "exports": 36.848,
-   "production": 101.08,
-   "consumption": 76.939
+   "imports": 14.496547601312999,
+   "exports": 36.848267512755,
+   "production": 101.08000974104499,
+   "consumption": 76.9392595048391
   },
   "AUS|WMIO": {
-   "imports": 21.741,
-   "exports": 59.131,
-   "production": 75.209,
-   "consumption": 36.991
+   "imports": 21.7406982599221,
+   "exports": 59.1306093579836,
+   "production": 75.2087788075772,
+   "consumption": 36.9906721554649
   },
   "BGD|BUTR": {
-   "imports": 1.188,
-   "exports": 0.064,
-   "production": 29.026,
-   "consumption": 30.134
+   "imports": 1.18846779395011,
+   "exports": 0.0640892992937182,
+   "production": 29.0264511818005,
+   "consumption": 30.133746071277802
   },
   "BGD|CASE": {
-   "imports": 0.012,
-   "consumption": 0.08
+   "imports": 0.0119988865980872,
+   "consumption": 0.0799600000013668
   },
   "BGD|CHES": {
-   "imports": 0.521,
-   "exports": 0.012,
-   "production": 1.119,
-   "consumption": 1.655
+   "imports": 0.520646693212907,
+   "exports": 0.011978840799366999,
+   "production": 1.1192772583692,
+   "consumption": 1.65544443613395
   },
   "BGD|COCM": {
-   "imports": 0.071,
-   "consumption": 0.066
+   "imports": 0.070977899016348,
+   "consumption": 0.0659013611490043
   },
   "BGD|CREM": {
-   "imports": 0.015,
-   "consumption": 0.048
+   "imports": 0.015107126048031301,
+   "consumption": 0.048376325041500697
   },
   "BGD|FRMI": {
-   "imports": 0.948,
-   "exports": 0.465,
-   "production": 3341.846,
-   "consumption": 3345.421
+   "imports": 0.948477699491065,
+   "exports": 0.46499336386100704,
+   "production": 3341.84606838992,
+   "consumption": 3345.42142467937
   },
   "BGD|SKIM": {
-   "imports": 45.217,
-   "exports": 0.007,
-   "production": 0.328,
-   "consumption": 53.109
+   "imports": 45.2172660151264,
+   "exports": 0.00663153342611255,
+   "production": 0.328485906870794,
+   "consumption": 53.109404484349305
   },
   "BGD|WHEY": {
-   "imports": 9.193,
-   "consumption": 8.748
+   "imports": 9.19299920092122,
+   "consumption": 8.7484940008778
   },
   "BGD|WMIO": {
-   "imports": 56.966,
-   "consumption": 72.733
+   "imports": 56.9661798018291,
+   "consumption": 72.7329140637009
   },
   "BRA|BUTR": {
-   "imports": 6.066,
-   "exports": 0.178,
-   "production": 108.245,
-   "consumption": 114.045
+   "imports": 6.06643246701483,
+   "exports": 0.17750817144925599,
+   "production": 108.24513167320501,
+   "consumption": 114.04484761794899
   },
   "BRA|CASE": {
-   "imports": 0.743,
-   "consumption": 3.491
+   "imports": 0.7434237856743361,
+   "consumption": 3.49072999948503
   },
   "BRA|CHES": {
-   "imports": 30.695,
-   "exports": 3.188,
-   "production": 58.597,
-   "consumption": 90.05
+   "imports": 30.6947811008618,
+   "exports": 3.18757978981552,
+   "production": 58.596892184401,
+   "consumption": 90.05019921765489
   },
   "BRA|COCM": {
-   "imports": 2.601,
-   "exports": 17.797,
-   "production": 42.724,
-   "consumption": 39.856
+   "imports": 2.60094480989729,
+   "exports": 17.7968356550065,
+   "production": 42.724000153721796,
+   "consumption": 39.855597568001805
   },
   "BRA|CREM": {
-   "imports": 0.0,
-   "exports": 7.184,
-   "production": 7.606,
-   "consumption": 1.046
+   "imports": 0.00045423577903462597,
+   "exports": 7.18399820673729,
+   "production": 7.605689817114491,
+   "consumption": 1.04570503508157
   },
   "BRA|FRMI": {
-   "imports": 7.197,
-   "exports": 5.208,
-   "production": 25912.81,
-   "consumption": 25927.521
+   "imports": 7.197066095571871,
+   "exports": 5.20776698592541,
+   "production": 25912.810342706598,
+   "consumption": 25927.5211669445
   },
   "BRA|SKIM": {
-   "imports": 33.404,
-   "exports": 0.005,
-   "production": 13.62,
-   "consumption": 45.126
+   "imports": 33.403803685864794,
+   "exports": 0.0053607893353453005,
+   "production": 13.619602125544699,
+   "consumption": 45.1258429391221
   },
   "BRA|WHEY": {
-   "imports": 20.931,
-   "consumption": 19.832
+   "imports": 20.9310192249261,
+   "consumption": 19.8324306906019
   },
   "BRA|WMIO": {
-   "imports": 86.531,
-   "exports": 9.26,
-   "production": 577.604,
-   "consumption": 659.611
+   "imports": 86.53149695816961,
+   "exports": 9.25958790346612,
+   "production": 577.6036475364499,
+   "consumption": 659.610901201797
   },
   "CAN|BUTR": {
-   "imports": 21.965,
-   "exports": 1.417,
-   "production": 99.377,
-   "consumption": 127.924
+   "imports": 21.9648339408832,
+   "exports": 1.4169894861233499,
+   "production": 99.37687333939179,
+   "consumption": 127.92398226028101
   },
   "CAN|CASE": {
-   "imports": 2.868,
-   "exports": 0.11,
-   "production": 0.452,
-   "consumption": 3.881
+   "imports": 2.86751906708706,
+   "exports": 0.109531821968061,
+   "production": 0.451847061660072,
+   "consumption": 3.88090930407945
   },
   "CAN|CHES": {
-   "imports": 27.213,
-   "exports": 11.885,
-   "production": 610.861,
-   "consumption": 628.844
+   "imports": 27.212802918606002,
+   "exports": 11.8845197339441,
+   "production": 610.861418851868,
+   "consumption": 628.843690676142
   },
   "CAN|COCM": {
-   "imports": 25.493,
-   "exports": 10.902,
-   "production": 54.446,
-   "consumption": 77.748
+   "imports": 25.4925765205167,
+   "exports": 10.9021252168303,
+   "production": 54.4464275021101,
+   "consumption": 77.7478599468771
   },
   "CAN|CREM": {
-   "imports": 3.885,
-   "exports": 0.036,
-   "production": 227.77,
-   "consumption": 231.762
+   "imports": 3.88506355936472,
+   "exports": 0.0357816072319211,
+   "production": 227.770247018222,
+   "consumption": 231.761526691906
   },
   "CAN|FRMI": {
-   "imports": 7.78,
-   "exports": 13.183,
-   "production": 4214.712,
-   "consumption": 4215.97
+   "imports": 7.77988367794455,
+   "exports": 13.183090048725001,
+   "production": 4214.71177957429,
+   "consumption": 4215.96953633304
   },
   "CAN|SKIM": {
-   "imports": 4.462,
-   "exports": 48.943,
-   "production": 125.661,
-   "consumption": 69.864
+   "imports": 4.46184204653211,
+   "exports": 48.942767834497204,
+   "production": 125.66106605509701,
+   "consumption": 69.86393065414491
   },
   "CAN|WHEY": {
-   "imports": 16.11,
-   "exports": 51.593,
-   "production": 53.425,
-   "consumption": 14.673
+   "imports": 16.1102211364298,
+   "exports": 51.592518878509296,
+   "production": 53.4245338555367,
+   "consumption": 14.6729364213186
   },
   "CAN|WMIO": {
-   "imports": 2.299,
-   "exports": 0.896,
-   "production": 7.211,
-   "consumption": 8.707
+   "imports": 2.29862234992539,
+   "exports": 0.895954906002168,
+   "production": 7.211172369058859,
+   "consumption": 8.70709448421409
   },
   "CHN|BUTR": {
-   "imports": 110.148,
-   "exports": 3.215,
-   "production": 87.696,
-   "consumption": 192.918
+   "imports": 110.148329627867,
+   "exports": 3.21476447754935,
+   "production": 87.69609206489399,
+   "consumption": 192.917797441683
   },
   "CHN|CASE": {
-   "exports": 0.027,
-   "production": 2.892,
-   "consumption": 23.695
+   "exports": 0.026965612623776402,
+   "production": 2.8918376593617,
+   "consumption": 23.6950898936731
   },
   "CHN|CHES": {
-   "imports": 115.665,
-   "exports": 0.316,
-   "production": 195.401,
-   "consumption": 315.735
+   "imports": 115.66510214173,
+   "exports": 0.316076531780223,
+   "production": 195.400772047809,
+   "consumption": 315.735250816354
   },
   "CHN|COCM": {
-   "imports": 65.518,
-   "exports": 2.824,
-   "production": 107.478,
-   "consumption": 183.13
+   "imports": 65.5183206758026,
+   "exports": 2.82430923168639,
+   "production": 107.477599590343,
+   "consumption": 183.12990217947598
   },
   "CHN|CREM": {
-   "imports": 115.569,
-   "consumption": 127.078
+   "imports": 115.56890544036,
+   "consumption": 127.077740667838
   },
   "CHN|FRMI": {
-   "imports": 70.963,
-   "exports": 46.375,
-   "production": 32768.803,
-   "consumption": 32952.007
+   "imports": 70.96340289234621,
+   "exports": 46.37455449596639,
+   "production": 32768.8034028656,
+   "consumption": 32952.0072994067
   },
   "CHN|SKIM": {
-   "imports": 253.348,
-   "exports": 2.686,
-   "production": 17.845,
-   "consumption": 268.92
+   "imports": 253.34825151066,
+   "exports": 2.6862783899595803,
+   "production": 17.8446566060884,
+   "consumption": 268.920133462681
   },
   "CHN|WHEY": {
-   "imports": 574.213,
-   "consumption": 526.021
+   "imports": 574.2125383094331,
+   "consumption": 526.021493516731
   },
   "CHN|WMIO": {
-   "imports": 497.885,
-   "consumption": 526.076
+   "imports": 497.885327521769,
+   "consumption": 526.076474617544
   },
   "ETH|BUTR": {
-   "imports": 0.434,
-   "exports": 0.015,
-   "production": 14.817,
-   "consumption": 15.229
+   "imports": 0.434471871495905,
+   "exports": 0.0154275903491317,
+   "production": 14.816858194731099,
+   "consumption": 15.2285953577222
   },
   "ETH|CASE": {
-   "imports": 0.005,
-   "consumption": 0.02
+   "imports": 0.004678303790087291,
+   "consumption": 0.019516666666666703
   },
   "ETH|CHES": {
-   "imports": 0.174,
-   "exports": 0.0,
-   "production": 4.999,
-   "consumption": 5.182
+   "imports": 0.17375657174631398,
+   "exports": 0.00018225129010932402,
+   "production": 4.99898797699646,
+   "consumption": 5.18170974693819
   },
   "ETH|COCM": {
-   "imports": 0.26,
-   "consumption": 0.309
+   "imports": 0.260342956921306,
+   "consumption": 0.30852552206850403
   },
   "ETH|CREM": {
-   "imports": 0.007,
-   "consumption": 0.008
+   "imports": 0.00726760977836083,
+   "consumption": 0.00780435489914752
   },
   "ETH|FRMI": {
-   "imports": 0.099,
-   "exports": 0.0,
-   "production": 3077.744,
-   "consumption": 3078.543
+   "imports": 0.0992149716609983,
+   "exports": 3.1035029626112698e-06,
+   "production": 3077.74401086301,
+   "consumption": 3078.5434005246498
   },
   "ETH|SKIM": {
-   "imports": 0.562,
-   "exports": 0.002,
-   "production": 0.262,
-   "consumption": 0.821
+   "imports": 0.561619107808217,
+   "exports": 0.00218113984516669,
+   "production": 0.261875158498914,
+   "consumption": 0.821033939846613
   },
   "ETH|WHEY": {
-   "imports": 0.683,
-   "consumption": 0.641
+   "imports": 0.682629783540452,
+   "consumption": 0.6413889198458971
   },
   "ETH|WMIO": {
-   "imports": 1.294,
-   "consumption": 1.329
+   "imports": 1.29369265470817,
+   "consumption": 1.32912460432089
   },
   "EU27|BUTR": {
-   "imports": 740.697,
-   "exports": 839.7,
-   "production": 1935.487,
-   "consumption": 1795.702
+   "imports": 740.6965568214908,
+   "exports": 839.7003434152682,
+   "production": 1935.4868769394477,
+   "consumption": 1795.702260913061
   },
   "EU27|CASE": {
-   "imports": 112.085,
-   "exports": 110.27,
-   "consumption": 201.71,
-   "production": 267.998
+   "imports": 112.08456559796242,
+   "exports": 110.27048537575311,
+   "consumption": 201.71003991341144,
+   "production": 267.9977478428221
   },
   "EU27|CHES": {
-   "imports": 3600.696,
-   "exports": 4424.911,
-   "production": 9510.861,
-   "consumption": 8502.252
+   "imports": 3600.6963855446074,
+   "exports": 4424.911408949622,
+   "production": 9510.861381692026,
+   "consumption": 8502.252206506317
   },
   "EU27|COCM": {
-   "imports": 498.17,
-   "exports": 620.369,
-   "production": 1651.824,
-   "consumption": 1589.649
+   "imports": 498.17015527650364,
+   "exports": 620.3686857633431,
+   "production": 1651.82369908995,
+   "consumption": 1589.6489694097884
   },
   "EU27|CREM": {
-   "imports": 193.431,
-   "exports": 330.056,
-   "production": 2424.294,
-   "consumption": 2205.16
+   "imports": 193.4313752967754,
+   "exports": 330.0562934600268,
+   "production": 2424.2941463410857,
+   "consumption": 2205.1598509491287
   },
   "EU27|FRMI": {
-   "imports": 5207.225,
-   "exports": 4461.549,
-   "production": 63395.16,
-   "consumption": 61746.004
+   "imports": 5207.225124004039,
+   "exports": 4461.548546652271,
+   "production": 63395.1600652683,
+   "consumption": 61746.00430981088
   },
   "EU27|SKIM": {
-   "imports": 608.375,
-   "exports": 1180.681,
-   "production": 1846.595,
-   "consumption": 1199.454
+   "imports": 608.375396662845,
+   "exports": 1180.6805665283073,
+   "production": 1846.5947927373531,
+   "consumption": 1199.4544087486317
   },
   "EU27|WHEY": {
-   "imports": 879.301,
-   "exports": 1476.501,
-   "production": 1755.665,
-   "consumption": 1171.801
+   "imports": 879.301146390394,
+   "exports": 1476.5010677225073,
+   "production": 1755.6648577986803,
+   "consumption": 1171.8008462982327
   },
   "EU27|WMIO": {
-   "imports": 344.776,
-   "exports": 510.999,
-   "production": 731.32,
-   "consumption": 498.41
+   "imports": 344.7757751198498,
+   "exports": 510.99931745491835,
+   "production": 731.3200071855919,
+   "consumption": 498.4101784185151
   },
   "IDN|BUTR": {
-   "imports": 31.675,
-   "consumption": 31.15
+   "imports": 31.6753646679439,
+   "consumption": 31.1502917355195
   },
   "IDN|CASE": {
-   "imports": 1.287,
-   "consumption": 8.694
+   "imports": 1.28699628103292,
+   "consumption": 8.694063214000211
   },
   "IDN|CHES": {
-   "imports": 28.183,
-   "consumption": 30.24
+   "imports": 28.1827006618458,
+   "consumption": 30.239753200966998
   },
   "IDN|COCM": {
-   "imports": 24.882,
-   "exports": 9.823,
-   "production": 17.231,
-   "consumption": 34.094
+   "imports": 24.8820263271629,
+   "exports": 9.822667142367932,
+   "production": 17.2311161078103,
+   "consumption": 34.094152368039005
   },
   "IDN|CREM": {
-   "imports": 4.206,
-   "exports": 0.898,
-   "production": 9.423,
-   "consumption": 13.009
+   "imports": 4.2063950968572,
+   "exports": 0.898338844969608,
+   "production": 9.42321723300717,
+   "consumption": 13.0092612267324
   },
   "IDN|FRMI": {
-   "imports": 48.612,
-   "exports": 43.412,
-   "production": 1252.325,
-   "consumption": 1290.777
+   "imports": 48.6117460989141,
+   "exports": 43.4120215834399,
+   "production": 1252.32471322628,
+   "consumption": 1290.77656446476
   },
   "IDN|SKIM": {
-   "imports": 168.593,
-   "exports": 1.059,
-   "production": 0.534,
-   "consumption": 161.141
+   "imports": 168.59314587809598,
+   "exports": 1.05858129145822,
+   "production": 0.534053969720905,
+   "consumption": 161.141300679546
   },
   "IDN|WHEY": {
-   "imports": 128.934,
-   "consumption": 122.63
+   "imports": 128.933507725614,
+   "consumption": 122.630083541847
   },
   "IDN|WMIO": {
-   "imports": 50.435,
-   "consumption": 53.693
+   "imports": 50.4354465980022,
+   "consumption": 53.693104011348
   },
   "IND|BUTR": {
-   "imports": 2.725,
-   "exports": 17.426,
-   "production": 4477.511,
-   "consumption": 4462.576
+   "imports": 2.72543329688984,
+   "exports": 17.4259125478335,
+   "production": 4477.511153521231,
+   "consumption": 4462.57595563089
   },
   "IND|CASE": {
-   "imports": 0.168,
-   "exports": 6.117,
-   "production": 13.93,
-   "consumption": 9.482
+   "imports": 0.167707611743451,
+   "exports": 6.11698532772387,
+   "production": 13.929821573733399,
+   "consumption": 9.48150571773433
   },
   "IND|CHES": {
-   "imports": 1.612,
-   "exports": 7.155,
-   "production": 6.314,
-   "consumption": 1.109
+   "imports": 1.61224186174786,
+   "exports": 7.15493949431901,
+   "production": 6.31419996588699,
+   "consumption": 1.10864370229625
   },
   "IND|COCM": {
-   "imports": 0.82,
-   "exports": 0.98,
-   "production": 1.128,
-   "consumption": 1.068
+   "imports": 0.820293226581604,
+   "exports": 0.9803957476562809,
+   "production": 1.12785096122592,
+   "consumption": 1.06796885724375
   },
   "IND|CREM": {
-   "imports": 0.048,
-   "exports": 0.028,
-   "production": 2.094,
-   "consumption": 2.115
+   "imports": 0.0476018158869648,
+   "exports": 0.0281828165471982,
+   "production": 2.09395723842711,
+   "consumption": 2.11507609054581
   },
   "IND|FRMI": {
-   "imports": 10.173,
-   "exports": 5.108,
-   "production": 161849.452,
-   "consumption": 161886.906
+   "imports": 10.173082265407,
+   "exports": 5.1082794818223105,
+   "production": 161849.45234977902,
+   "consumption": 161886.906457705
   },
   "IND|SKIM": {
-   "imports": 0.525,
-   "exports": 22.673,
-   "production": 172.655,
-   "consumption": 207.212
+   "imports": 0.525136190114442,
+   "exports": 22.6731304479246,
+   "production": 172.65500430856798,
+   "consumption": 207.211827865526
   },
   "IND|WHEY": {
-   "imports": 11.536,
-   "exports": 0.293,
-   "production": 1.319,
-   "consumption": 11.777
+   "imports": 11.5358492587768,
+   "exports": 0.293275570127232,
+   "production": 1.31867301515898,
+   "consumption": 11.7769792288508
   },
   "IND|WMIO": {
-   "imports": 0.111,
-   "exports": 2.034,
-   "production": 4.257,
-   "consumption": 2.441
+   "imports": 0.110535073684358,
+   "exports": 2.03390497078082,
+   "production": 4.25738391049675,
+   "consumption": 2.4411247921685697
   },
   "JPN|BUTR": {
-   "imports": 12.754,
-   "exports": 0.068,
-   "production": 61.214,
-   "consumption": 74.022
+   "imports": 12.753623804763599,
+   "exports": 0.0679568768512695,
+   "production": 61.2138759216451,
+   "consumption": 74.0223682745041
   },
   "JPN|CASE": {
-   "imports": 6.759,
-   "consumption": 13.316
+   "imports": 6.7588600313569795,
+   "consumption": 13.3164593336548
   },
   "JPN|CHES": {
-   "imports": 259.145,
-   "exports": 0.753,
-   "production": 96.873,
-   "consumption": 368.905
+   "imports": 259.144889489207,
+   "exports": 0.752510156742947,
+   "production": 96.8732013842866,
+   "consumption": 368.905021711139
   },
   "JPN|COCM": {
-   "imports": 6.337,
-   "exports": 0.409,
-   "production": 35.158,
-   "consumption": 40.986
+   "imports": 6.33711359835238,
+   "exports": 0.40927232123532503,
+   "production": 35.1579139486631,
+   "consumption": 40.9864753452326
   },
   "JPN|CREM": {
-   "imports": 0.011,
-   "consumption": 0.012
+   "imports": 0.0111672518304046,
+   "consumption": 0.0118654908441091
   },
   "JPN|FRMI": {
-   "imports": 11.131,
-   "exports": 0.781,
-   "production": 5795.758,
-   "consumption": 5882.176
+   "imports": 11.1305059427725,
+   "exports": 0.780574922604083,
+   "production": 5795.75843644968,
+   "consumption": 5882.1763361551
   },
   "JPN|SKIM": {
-   "imports": 50.055,
-   "exports": 0.048,
-   "production": 102.948,
-   "consumption": 153.59
+   "imports": 50.05473988776,
+   "exports": 0.0482206217576031,
+   "production": 102.947527036834,
+   "consumption": 153.589733512079
   },
   "JPN|WHEY": {
-   "imports": 57.057,
-   "consumption": 54.333
+   "imports": 57.056654226666794,
+   "consumption": 54.333357358730304
   },
   "JPN|WMIO": {
-   "imports": 0.127,
-   "exports": 0.175,
-   "production": 40.622,
-   "consumption": 39.811
+   "imports": 0.12711286848768,
+   "exports": 0.17505076381083,
+   "production": 40.621906383263294,
+   "consumption": 39.8105159547928
   },
   "KOR|BUTR": {
-   "imports": 10.44,
-   "exports": 0.067,
-   "production": 73.437,
-   "consumption": 83.653
+   "imports": 10.440198682928699,
+   "exports": 0.0673929764452995,
+   "production": 73.43694277086149,
+   "consumption": 83.65290492231941
   },
   "KOR|CASE": {
-   "imports": 1.945,
-   "consumption": 6.792
+   "imports": 1.9448275051225101,
+   "consumption": 6.79194666666527
   },
   "KOR|CHES": {
-   "imports": 113.624,
-   "consumption": 119.274
+   "imports": 113.624157792347,
+   "consumption": 119.273509428344
   },
   "KOR|COCM": {
-   "imports": 0.335,
-   "exports": 4.036,
-   "production": 8.19,
-   "consumption": 5.473
+   "imports": 0.334916942530292,
+   "exports": 4.03559568885933,
+   "production": 8.19023584245112,
+   "consumption": 5.47275514582304
   },
   "KOR|CREM": {
-   "imports": 20.555,
-   "consumption": 22.174
+   "imports": 20.5552252774086,
+   "consumption": 22.1740058265417
   },
   "KOR|FRMI": {
-   "imports": 21.836,
-   "exports": 19.568,
-   "production": 1793.071,
-   "consumption": 1810.506
+   "imports": 21.8356041897402,
+   "exports": 19.5680357352171,
+   "production": 1793.0709271011,
+   "consumption": 1810.50621985125
   },
   "KOR|SKIM": {
-   "imports": 23.845,
-   "exports": 0.091,
-   "production": 58.203,
-   "consumption": 80.666
+   "imports": 23.84544934145,
+   "exports": 0.0913442327097998,
+   "production": 58.2034943230679,
+   "consumption": 80.6662282386515
   },
   "KOR|WHEY": {
-   "imports": 36.333,
-   "consumption": 34.506
+   "imports": 36.332680264156,
+   "consumption": 34.5062284147252
   },
   "KOR|WMIO": {
-   "imports": 4.117,
-   "exports": 0.042,
-   "production": 4.688,
-   "consumption": 9.688
+   "imports": 4.11684322473433,
+   "exports": 0.0418171644841008,
+   "production": 4.68803693016661,
+   "consumption": 9.68807201937744
   },
   "MAR|BUTR": {
-   "imports": 21.458,
-   "exports": 0.092,
-   "production": 37.965,
-   "consumption": 59.005
+   "imports": 21.4576261236509,
+   "exports": 0.0921538474224326,
+   "production": 37.9649213727783,
+   "consumption": 59.0054956173116
   },
   "MAR|CASE": {
-   "imports": 0.987,
-   "consumption": 2.022
+   "imports": 0.986878045177249,
+   "consumption": 2.02199542956095
   },
   "MAR|CHES": {
-   "imports": 20.043,
-   "exports": 12.432,
-   "production": 55.277,
-   "consumption": 63.524
+   "imports": 20.0430768363,
+   "exports": 12.4318916704903,
+   "production": 55.2767314257153,
+   "consumption": 63.5238636042028
   },
   "MAR|COCM": {
-   "imports": 1.026,
-   "consumption": 1.033
+   "imports": 1.02640240537832,
+   "consumption": 1.0332455669495701
   },
   "MAR|CREM": {
-   "imports": 1.499,
-   "consumption": 1.618
+   "imports": 1.49909044186621,
+   "consumption": 1.61809266614895
   },
   "MAR|FRMI": {
-   "imports": 0.01,
-   "exports": 3.552,
-   "production": 1622.039,
-   "consumption": 1620.14
+   "imports": 0.010422965252131601,
+   "exports": 3.55184144606768,
+   "production": 1622.03862700822,
+   "consumption": 1620.13998854397
   },
   "MAR|SKIM": {
-   "imports": 5.866,
-   "exports": 0.343,
-   "production": 3.804,
-   "consumption": 8.547
+   "imports": 5.86629304953097,
+   "exports": 0.343188572919503,
+   "production": 3.80396182739675,
+   "consumption": 8.54652805685461
   },
   "MAR|WHEY": {
-   "imports": 3.223,
-   "consumption": 3.048
+   "imports": 3.2230053355834696,
+   "consumption": 3.04773443583779
   },
   "MAR|WMIO": {
-   "imports": 0.171,
-   "consumption": 0.179
+   "imports": 0.170810229168507,
+   "consumption": 0.179066144182012
   },
   "MEX|BUTR": {
-   "imports": 37.601,
-   "exports": 4.165,
-   "production": 22.157,
-   "consumption": 54.661
+   "imports": 37.6009161228095,
+   "exports": 4.16454371909987,
+   "production": 22.1567190871824,
+   "consumption": 54.661228100401
   },
   "MEX|CASE": {
-   "imports": 10.501,
-   "consumption": 19.387
+   "imports": 10.5012205212729,
+   "consumption": 19.3872566666637
   },
   "MEX|CHES": {
-   "imports": 117.367,
-   "exports": 5.724,
-   "production": 167.664,
-   "consumption": 285.281
+   "imports": 117.36678121913401,
+   "exports": 5.72447356811335,
+   "production": 167.66365779556102,
+   "consumption": 285.280965119242
   },
   "MEX|COCM": {
-   "imports": 11.22,
-   "exports": 9.897,
-   "production": 193.879,
-   "consumption": 193.202
+   "imports": 11.2202327736745,
+   "exports": 9.896824403292891,
+   "production": 193.879462241098,
+   "consumption": 193.202143996144
   },
   "MEX|CREM": {
-   "imports": 3.207,
-   "consumption": 5.405
+   "imports": 3.2066525705222197,
+   "consumption": 5.40519333112246
   },
   "MEX|FRMI": {
-   "imports": 59.293,
-   "exports": 50.97,
-   "production": 8176.174,
-   "consumption": 8251.007
+   "imports": 59.293366584704,
+   "exports": 50.970316930806405,
+   "production": 8176.173833552771,
+   "consumption": 8251.00714473005
   },
   "MEX|SKIM": {
-   "imports": 271.757,
-   "exports": 15.392,
-   "production": 10.5,
-   "consumption": 280.197
+   "imports": 271.757253590893,
+   "exports": 15.392333664743001,
+   "production": 10.5003023424863,
+   "consumption": 280.197486266119
   },
   "MEX|WHEY": {
-   "imports": 57.747,
-   "consumption": 53.165
+   "imports": 57.746577727375204,
+   "consumption": 53.165447359781695
   },
   "MEX|WMIO": {
-   "imports": 8.794,
-   "exports": 24.855,
-   "production": 151.482,
-   "consumption": 130.08
+   "imports": 8.79414308648661,
+   "exports": 24.8547774022105,
+   "production": 151.482497218817,
+   "consumption": 130.080109495525
   },
   "NGA|BUTR": {
-   "imports": 2.753,
-   "exports": 0.009,
-   "production": 11.36,
-   "consumption": 14.062
+   "imports": 2.75252780189421,
+   "exports": 0.009429608874339801,
+   "production": 11.360427860951601,
+   "consumption": 14.0622474760287
   },
   "NGA|CASE": {
-   "imports": 0.051,
-   "consumption": 0.335
+   "imports": 0.0510523956883657,
+   "consumption": 0.335167336500748
   },
   "NGA|CHES": {
-   "imports": 0.948,
-   "exports": 0.001,
-   "production": 9.275,
-   "consumption": 10.295
+   "imports": 0.947503250729975,
+   "exports": 0.0012864621642040199,
+   "production": 9.27512504816213,
+   "consumption": 10.2954002912712
   },
   "NGA|COCM": {
-   "imports": 13.899,
-   "consumption": 15.121
+   "imports": 13.898593493706299,
+   "consumption": 15.1205286891511
   },
   "NGA|CREM": {
-   "imports": 0.086,
-   "consumption": 0.093
+   "imports": 0.0861501569365171,
+   "consumption": 0.09285326939184049
   },
   "NGA|FRMI": {
-   "imports": 1.832,
-   "exports": 1.522,
-   "production": 441.004,
-   "consumption": 443.475
+   "imports": 1.83209360999295,
+   "exports": 1.52195503633304,
+   "production": 441.003996520289,
+   "consumption": 443.474820168788
   },
   "NGA|SKIM": {
-   "imports": 34.905,
-   "exports": 0.19,
-   "production": 2.161,
-   "consumption": 32.671
+   "imports": 34.9052389878358,
+   "exports": 0.19032401599962,
+   "production": 2.1610135076645203,
+   "consumption": 32.6706646115997
   },
   "NGA|WHEY": {
-   "imports": 4.09,
-   "consumption": 4.114
+   "imports": 4.0900153148525105,
+   "consumption": 4.11404185300076
   },
   "NGA|WMIO": {
-   "imports": 62.907,
-   "consumption": 61.578
+   "imports": 62.9071906457892,
+   "consumption": 61.5783993945384
   },
   "NOR|BUTR": {
-   "imports": 3.771,
-   "exports": 0.002,
-   "production": 15.766,
-   "consumption": 15.692
+   "imports": 3.7713329355342897,
+   "exports": 0.002103675,
+   "production": 15.766319864953902,
+   "consumption": 15.6917217601655
   },
   "NOR|CASE": {
-   "imports": 0.043,
-   "exports": 0.054,
-   "production": 1.667,
-   "consumption": 1.785
+   "imports": 0.0433416623154733,
+   "exports": 0.054032209856330705,
+   "production": 1.66695336152599,
+   "consumption": 1.78480252205677
   },
   "NOR|CHES": {
-   "imports": 4.78,
-   "exports": 1.618,
-   "production": 78.801,
-   "consumption": 81.369
+   "imports": 4.780257125,
+   "exports": 1.61805692551682,
+   "production": 78.8011321857352,
+   "consumption": 81.3687877956054
   },
   "NOR|COCM": {
-   "imports": 0.651,
-   "exports": 0.011,
-   "production": 12.835,
-   "consumption": 13.493
+   "imports": 0.650637392730204,
+   "exports": 0.010503674999999999,
+   "production": 12.8352709194579,
+   "consumption": 13.4932425182445
   },
   "NOR|CREM": {
-   "imports": 0.302,
-   "exports": 0.11,
-   "production": 36.899,
-   "consumption": 36.842
+   "imports": 0.30231246526989797,
+   "exports": 0.110323371756321,
+   "production": 36.8988519835697,
+   "consumption": 36.8418602734873
   },
   "NOR|FRMI": {
-   "imports": 0.687,
-   "exports": 0.899,
-   "production": 702.86,
-   "consumption": 709.67
+   "imports": 0.686848575,
+   "exports": 0.8985252,
+   "production": 702.859914565493,
+   "consumption": 709.6697860751809
   },
   "NOR|SKIM": {
-   "imports": 0.409,
-   "exports": 1.38,
-   "production": 16.05,
-   "consumption": 14.1
+   "imports": 0.40918780075467703,
+   "exports": 1.38034036658843,
+   "production": 16.0498176186229,
+   "consumption": 14.0997373575092
   },
   "NOR|WHEY": {
-   "imports": 0.204,
-   "exports": 14.143,
-   "production": 20.484,
-   "consumption": 5.226
+   "imports": 0.203532626079954,
+   "exports": 14.1434050664619,
+   "production": 20.4844738230957,
+   "consumption": 5.2258382501688505
   },
   "NOR|WMIO": {
-   "imports": 0.043,
-   "exports": 1.181,
-   "production": 0.772,
-   "consumption": 1.581
+   "imports": 0.0427485749999999,
+   "exports": 1.18081183674276,
+   "production": 0.771632039140963,
+   "consumption": 1.58099776550306
   },
   "NZL|BUTR": {
-   "imports": 0.862,
-   "exports": 525.998,
-   "production": 568.554,
-   "consumption": 38.631
+   "imports": 0.862053810972578,
+   "exports": 525.99833713991,
+   "production": 568.554117759113,
+   "consumption": 38.6308448013784
   },
   "NZL|CASE": {
-   "imports": 0.042,
-   "exports": 45.317,
-   "production": 120.332,
-   "consumption": 29.059
+   "imports": 0.0422752715254615,
+   "exports": 45.3173107037274,
+   "production": 120.331770032602,
+   "consumption": 29.059021484989298
   },
   "NZL|CHES": {
-   "imports": 12.25,
-   "exports": 345.354,
-   "production": 393.317,
-   "consumption": 71.648
+   "imports": 12.2504702460919,
+   "exports": 345.35435616683804,
+   "production": 393.317267858167,
+   "consumption": 71.64758260656609
   },
   "NZL|COCM": {
-   "imports": 6.793,
-   "exports": 5.32,
-   "production": 2.745,
-   "consumption": 4.365
+   "imports": 6.79257688471898,
+   "exports": 5.320480511767959,
+   "production": 2.74540523794758,
+   "consumption": 4.365416568083431
   },
   "NZL|CREM": {
-   "imports": 0.92,
-   "exports": 96.403,
-   "production": 88.605,
-   "consumption": 0.831
+   "imports": 0.920009119232707,
+   "exports": 96.4028084799701,
+   "production": 88.60490235472899,
+   "consumption": 0.830580941761375
   },
   "NZL|FRMI": {
-   "imports": 90.194,
-   "exports": 83.654,
-   "production": 4106.0,
-   "consumption": 4154.365
+   "imports": 90.1942387362219,
+   "exports": 83.65397058835191,
+   "production": 4106.00021380255,
+   "consumption": 4154.36535644294
   },
   "NZL|SKIM": {
-   "imports": 3.012,
-   "exports": 392.247,
-   "production": 496.488,
-   "consumption": 44.852
+   "imports": 3.01206474683702,
+   "exports": 392.247362042422,
+   "production": 496.488376590549,
+   "consumption": 44.8515523489364
   },
   "NZL|WHEY": {
-   "imports": 21.923,
-   "exports": 27.734,
-   "production": 21.596,
-   "consumption": 17.019
+   "imports": 21.9232871870458,
+   "exports": 27.7337188389947,
+   "production": 21.596161548988302,
+   "consumption": 17.019352014612302
   },
   "NZL|WMIO": {
-   "imports": 2.38,
-   "exports": 1297.248,
-   "production": 1236.818,
-   "consumption": 11.039
+   "imports": 2.37961331934206,
+   "exports": 1297.24792302363,
+   "production": 1236.81772636198,
+   "consumption": 11.0385883972492
   },
   "PAK|BUTR": {
-   "imports": 1.4,
-   "exports": 0.109,
-   "production": 1061.37,
-   "consumption": 1062.642
+   "imports": 1.40005577053367,
+   "exports": 0.10864815786452,
+   "production": 1061.3703161426602,
+   "consumption": 1062.64200657361
   },
   "PAK|CASE": {
-   "imports": 0.056,
-   "consumption": 0.066
+   "imports": 0.0556008742840618,
+   "consumption": 0.06634999999999999
   },
   "PAK|CHES": {
-   "imports": 4.327,
-   "consumption": 4.655
+   "imports": 4.327032359406551,
+   "consumption": 4.65514238190329
   },
   "PAK|COCM": {
-   "imports": 1.052,
-   "exports": 0.17,
-   "production": 2.116,
-   "consumption": 3.336
+   "imports": 1.05222318869466,
+   "exports": 0.169801409175367,
+   "production": 2.11576676332028,
+   "consumption": 3.3359312277835302
   },
   "PAK|CREM": {
-   "imports": 0.011,
-   "exports": 0.003,
-   "production": 2.161,
-   "consumption": 2.169
+   "imports": 0.0112158941223371,
+   "exports": 0.00340949312046293,
+   "production": 2.16123944362773,
+   "consumption": 2.16933381811909
   },
   "PAK|FRMI": {
-   "imports": 46.354,
-   "exports": 45.948,
-   "production": 39817.189,
-   "consumption": 39820.196
+   "imports": 46.354255008291894,
+   "exports": 45.9483616384923,
+   "production": 39817.1892916129,
+   "consumption": 39820.196154374695
   },
   "PAK|SKIM": {
-   "imports": 43.487,
-   "exports": 2.344,
-   "production": 0.039,
-   "consumption": 39.646
+   "imports": 43.487256195893096,
+   "exports": 2.34369561091438,
+   "production": 0.0389779162483228,
+   "consumption": 39.645548974488406
   },
   "PAK|WHEY": {
-   "imports": 29.149,
-   "consumption": 27.198
+   "imports": 29.1490969149249,
+   "consumption": 27.1979882035509
   },
   "PAK|WMIO": {
-   "imports": 1.911,
-   "consumption": 1.946
+   "imports": 1.9114973890259,
+   "consumption": 1.94618453951462
   },
   "ROW|BUTR": {
-   "imports": 423.034,
-   "exports": 154.872,
-   "production": 1186.738,
-   "consumption": 1442.976
+   "imports": 423.0343542578299,
+   "exports": 154.87190384655221,
+   "production": 1186.73761317944,
+   "consumption": 1442.9761016623736
   },
   "ROW|CASE": {
-   "imports": 5.851,
-   "exports": 7.58,
-   "production": 16.278,
-   "consumption": 46.516
+   "imports": 5.850648394405621,
+   "exports": 7.579672233128754,
+   "production": 16.277548692879137,
+   "consumption": 46.51552263185406
   },
   "ROW|CHES": {
-   "imports": 1237.852,
-   "exports": 592.362,
-   "production": 3855.808,
-   "consumption": 4596.802
+   "imports": 1237.8520198719089,
+   "exports": 592.3621093184355,
+   "production": 3855.8079265992665,
+   "consumption": 4596.802362760626
   },
   "ROW|COCM": {
-   "imports": 501.623,
-   "exports": 384.423,
-   "production": 1285.094,
-   "consumption": 1572.866
+   "imports": 501.62317001666884,
+   "exports": 384.4230682934187,
+   "production": 1285.0940472765694,
+   "consumption": 1572.866223137262
   },
   "ROW|CREM": {
-   "imports": 134.945,
-   "exports": 38.054,
-   "production": 335.795,
-   "consumption": 438.191
+   "imports": 134.94510162072092,
+   "exports": 38.05387204439132,
+   "production": 335.7951696733439,
+   "consumption": 438.1912169170419
   },
   "ROW|FRMI": {
-   "imports": 1136.847,
-   "exports": 983.345,
-   "production": 95975.151,
-   "consumption": 96512.467
+   "imports": 1136.8471528973555,
+   "exports": 983.3450084250593,
+   "production": 95975.15149074394,
+   "consumption": 96512.46696469918
   },
   "ROW|SKIM": {
-   "imports": 943.054,
-   "exports": 245.149,
-   "production": 485.087,
-   "consumption": 1197.44
+   "imports": 943.0536470406822,
+   "exports": 245.14850095340373,
+   "production": 485.08721575526914,
+   "consumption": 1197.4397079827713
   },
   "ROW|WHEY": {
-   "imports": 345.36,
-   "exports": 179.943,
-   "production": 229.991,
-   "consumption": 366.325
+   "imports": 345.3604616664312,
+   "exports": 179.94331385948178,
+   "production": 229.9907202801278,
+   "consumption": 366.32480749457363
   },
   "ROW|WMIO": {
-   "imports": 984.76,
-   "exports": 190.308,
-   "production": 428.689,
-   "consumption": 1331.918
+   "imports": 984.7600402509593,
+   "exports": 190.3082754822781,
+   "production": 428.6894005967767,
+   "consumption": 1331.9182068713599
   },
   "RUS|BUTR": {
-   "imports": 98.959,
-   "exports": 3.274,
-   "production": 258.897,
-   "consumption": 352.66
+   "imports": 98.95910301059891,
+   "exports": 3.2744064403680198,
+   "production": 258.89693244369903,
+   "consumption": 352.660007590143
   },
   "RUS|CASE": {
-   "imports": 0.744,
-   "exports": 2.615,
-   "production": 27.827,
-   "consumption": 32.882
+   "imports": 0.744091093943454,
+   "exports": 2.61496868167223,
+   "production": 27.826504407213697,
+   "consumption": 32.8824415403002
   },
   "RUS|CHES": {
-   "imports": 227.874,
-   "exports": 26.342,
-   "production": 712.282,
-   "consumption": 923.139
+   "imports": 227.873547288103,
+   "exports": 26.342345446296303,
+   "production": 712.281526317049,
+   "consumption": 923.138700644383
   },
   "RUS|COCM": {
-   "imports": 66.378,
-   "exports": 40.508,
-   "production": 171.839,
-   "consumption": 213.056
+   "imports": 66.3782881995104,
+   "exports": 40.5075458407821,
+   "production": 171.839270664927,
+   "consumption": 213.056037636367
   },
   "RUS|CREM": {
-   "imports": 21.08,
-   "exports": 0.355,
-   "production": 382.225,
-   "consumption": 405.976
+   "imports": 21.079793023507,
+   "exports": 0.35531276504313203,
+   "production": 382.22522248446,
+   "consumption": 405.97621586137603
   },
   "RUS|FRMI": {
-   "imports": 175.284,
-   "exports": 166.255,
-   "production": 22625.255,
-   "consumption": 22698.769
+   "imports": 175.28383896745902,
+   "exports": 166.254945740134,
+   "production": 22625.254594687598,
+   "consumption": 22698.768993728998
   },
   "RUS|SKIM": {
-   "imports": 120.709,
-   "exports": 1.418,
-   "production": 94.556,
-   "consumption": 208.958
+   "imports": 120.709374987134,
+   "exports": 1.41787483857281,
+   "production": 94.556339734411,
+   "consumption": 208.95774531527698
   },
   "RUS|WHEY": {
-   "imports": 71.865,
-   "consumption": 66.862
+   "imports": 71.86474065756411,
+   "consumption": 66.8617800007542
   },
   "RUS|WMIO": {
-   "imports": 37.661,
-   "exports": 0.794,
-   "production": 49.961,
-   "consumption": 101.155
+   "imports": 37.6611279552053,
+   "exports": 0.794082993411289,
+   "production": 49.9609292248505,
+   "consumption": 101.15534326695801
   },
   "THA|BUTR": {
-   "imports": 13.615,
-   "exports": 1.191,
-   "production": 2.605,
-   "consumption": 14.656
+   "imports": 13.6154726843207,
+   "exports": 1.19050172632193,
+   "production": 2.60504893551695,
+   "consumption": 14.6558258161666
   },
   "THA|CASE": {
-   "imports": 0.393,
-   "consumption": 5.121
+   "imports": 0.3927415716751,
+   "consumption": 5.120836666666509
   },
   "THA|CHES": {
-   "imports": 14.803,
-   "exports": 0.454,
-   "production": 3.463,
-   "consumption": 18.595
+   "imports": 14.803309447997702,
+   "exports": 0.454063403669432,
+   "production": 3.4632947509751397,
+   "consumption": 18.5954883029398
   },
   "THA|COCM": {
-   "imports": 6.783,
-   "exports": 18.946,
-   "production": 60.232,
-   "consumption": 49.648
+   "imports": 6.783013379959121,
+   "exports": 18.9461348043437,
+   "production": 60.231850630097895,
+   "consumption": 49.648033098310606
   },
   "THA|CREM": {
-   "imports": 2.822,
-   "exports": 5.721,
-   "production": 4.158,
-   "consumption": 1.469
+   "imports": 2.82181119515739,
+   "exports": 5.7210338641544904,
+   "production": 4.157758702715509,
+   "consumption": 1.46935353343718
   },
   "THA|FRMI": {
-   "imports": 71.132,
-   "exports": 168.319,
-   "production": 961.459,
-   "consumption": 907.769
+   "imports": 71.131711170565,
+   "exports": 168.319163525307,
+   "production": 961.459411168954,
+   "consumption": 907.768989260197
   },
   "THA|SKIM": {
-   "imports": 60.936,
-   "consumption": 58.687
+   "imports": 60.9362886943439,
+   "consumption": 58.6869542889763
   },
   "THA|WHEY": {
-   "imports": 61.157,
-   "consumption": 56.571
+   "imports": 61.1567713737047,
+   "consumption": 56.5711525658894
   },
   "THA|WMIO": {
-   "imports": 47.373,
-   "consumption": 50.998
+   "imports": 47.373249922673,
+   "consumption": 50.9981334373729
   },
   "TUR|BUTR": {
-   "imports": 12.799,
-   "exports": 0.693,
-   "production": 239.2,
-   "consumption": 249.96
+   "imports": 12.7992578313501,
+   "exports": 0.693209635455279,
+   "production": 239.199558705493,
+   "consumption": 249.959727470355
   },
   "TUR|CASE": {
-   "imports": 0.536,
-   "exports": 0.275,
-   "consumption": 0.555
+   "imports": 0.535617259793942,
+   "exports": 0.275312862712286,
+   "consumption": 0.5550922169432251
   },
   "TUR|CHES": {
-   "imports": 6.878,
-   "exports": 49.696,
-   "production": 244.387,
-   "consumption": 205.541
+   "imports": 6.87819076581957,
+   "exports": 49.696355305656304,
+   "production": 244.38729261778698,
+   "consumption": 205.540546488246
   },
   "TUR|COCM": {
-   "imports": 4.978,
-   "exports": 3.93,
-   "production": 3.609,
-   "consumption": 0.215
+   "imports": 4.97799253312108,
+   "exports": 3.92998302699933,
+   "production": 3.60916423469906,
+   "consumption": 0.214709426735181
   },
   "TUR|CREM": {
-   "imports": 0.904,
-   "exports": 3.654,
-   "production": 7.821,
-   "consumption": 4.897
+   "imports": 0.9038461248822951,
+   "exports": 3.65440435733718,
+   "production": 7.820935772318641,
+   "consumption": 4.89735897885555
   },
   "TUR|FRMI": {
-   "imports": 1.545,
-   "exports": 14.5,
-   "production": 17909.516,
-   "consumption": 17898.241
+   "imports": 1.5450272843513302,
+   "exports": 14.4995323821708,
+   "production": 17909.5156912718,
+   "consumption": 17898.240813434702
   },
   "TUR|SKIM": {
-   "imports": 0.139,
-   "exports": 37.313,
-   "production": 64.942,
-   "consumption": 27.365
+   "imports": 0.13941946837800898,
+   "exports": 37.3126110709684,
+   "production": 64.94195939242981,
+   "consumption": 27.3649205682176
   },
   "TUR|WHEY": {
-   "imports": 0.355,
-   "exports": 40.394,
-   "production": 39.851,
-   "consumption": 0.681
+   "imports": 0.35452747968503,
+   "exports": 40.3942584078823,
+   "production": 39.8511529603638,
+   "consumption": 0.6807611486559021
   },
   "TUR|WMIO": {
-   "imports": 1.878,
-   "exports": 0.642,
-   "production": 0.448,
-   "consumption": 0.008
+   "imports": 1.8783096908131198,
+   "exports": 0.6424325092705699,
+   "production": 0.447515896702838,
+   "consumption": 0.00848972727165506
   },
   "UKR|BUTR": {
-   "imports": 1.653,
-   "exports": 24.437,
-   "production": 96.6,
-   "consumption": 74.74
+   "imports": 1.65286772331874,
+   "exports": 24.4370104709174,
+   "production": 96.5999052932944,
+   "consumption": 74.7396846525911
   },
   "UKR|CASE": {
-   "imports": 0.062,
-   "exports": 26.202,
-   "production": 9.937,
-   "consumption": 2.965
+   "imports": 0.0617971031314983,
+   "exports": 26.2020930083872,
+   "production": 9.93661114156162,
+   "consumption": 2.96549200314716
   },
   "UKR|CHES": {
-   "imports": 12.605,
-   "exports": 10.969,
-   "production": 189.669,
-   "consumption": 191.434
+   "imports": 12.6046401512389,
+   "exports": 10.9692342875675,
+   "production": 189.668943504951,
+   "consumption": 191.434401855282
   },
   "UKR|COCM": {
-   "imports": 1.482,
-   "exports": 16.359,
-   "production": 71.107,
-   "consumption": 62.293
+   "imports": 1.48229521425121,
+   "exports": 16.3589630613105,
+   "production": 71.1065601835584,
+   "consumption": 62.2928604037822
   },
   "UKR|CREM": {
-   "imports": 0.052,
-   "consumption": 0.17
+   "imports": 0.052386855792593105,
+   "consumption": 0.16989000000952
   },
   "UKR|FRMI": {
-   "imports": 49.985,
-   "exports": 51.121,
-   "production": 6395.09,
-   "consumption": 6394.919
+   "imports": 49.9849097172357,
+   "exports": 51.121247567820504,
+   "production": 6395.08995968622,
+   "consumption": 6394.91853083924
   },
   "UKR|SKIM": {
-   "imports": 0.542,
-   "exports": 27.52,
-   "production": 123.775,
-   "consumption": 95.582
+   "imports": 0.541558773392543,
+   "exports": 27.5202859892564,
+   "production": 123.775288790203,
+   "consumption": 95.5821010585264
   },
   "UKR|WHEY": {
-   "imports": 1.679,
-   "exports": 26.31,
-   "production": 26.781,
-   "consumption": 2.221
+   "imports": 1.67930110196165,
+   "exports": 26.3101211163648,
+   "production": 26.7807422718645,
+   "consumption": 2.2207610762373
   },
   "UKR|WMIO": {
-   "imports": 0.183,
-   "exports": 3.538,
-   "production": 10.114,
-   "consumption": 7.256
+   "imports": 0.183155209927101,
+   "exports": 3.5376122163929598,
+   "production": 10.1138478032825,
+   "consumption": 7.25575949988298
   },
   "USA|BUTR": {
-   "imports": 37.149,
-   "exports": 38.461,
-   "production": 857.561,
-   "consumption": 859.558
+   "imports": 37.148518041858395,
+   "exports": 38.4610893120917,
+   "production": 857.5611072415561,
+   "consumption": 859.558460139896
   },
   "USA|CASE": {
-   "imports": 59.158,
-   "consumption": 58.538
+   "imports": 59.1575164969377,
+   "consumption": 58.538223329954
   },
   "USA|CHES": {
-   "imports": 136.964,
-   "exports": 368.266,
-   "production": 5889.497,
-   "consumption": 5693.942
+   "imports": 136.96364434488302,
+   "exports": 368.265612448011,
+   "production": 5889.49710734903,
+   "consumption": 5693.94158280556
   },
   "USA|COCM": {
-   "imports": 31.151,
-   "exports": 55.038,
-   "production": 1085.588,
-   "consumption": 1078.14
+   "imports": 31.1509695688361,
+   "exports": 55.0379843536515,
+   "production": 1085.58779473406,
+   "consumption": 1078.13964715691
   },
   "USA|CREM": {
-   "imports": 5.172,
-   "exports": 25.526,
-   "production": 25.597,
-   "consumption": 6.971
+   "imports": 5.17227802815024,
+   "exports": 25.5262042377074,
+   "production": 25.596504103792597,
+   "consumption": 6.97100797652742
   },
   "USA|FRMI": {
-   "imports": 131.313,
-   "exports": 842.436,
-   "production": 54355.884,
-   "consumption": 53949.043
+   "imports": 131.312779385622,
+   "exports": 842.435814654376,
+   "production": 54355.8842556246,
+   "consumption": 53949.0431607297
   },
   "USA|SKIM": {
-   "imports": 0.723,
-   "exports": 608.874,
-   "production": 1093.494,
-   "consumption": 464.922
+   "imports": 0.72277046679351,
+   "exports": 608.873988002075,
+   "production": 1093.4943997294,
+   "consumption": 464.922248726427
   },
   "USA|WHEY": {
-   "imports": 21.626,
-   "exports": 460.843,
-   "production": 481.774,
-   "consumption": 47.462
+   "imports": 21.6257754692552,
+   "exports": 460.842828798895,
+   "production": 481.774416974483,
+   "consumption": 47.461749947170205
   },
   "USA|WMIO": {
-   "imports": 7.379,
-   "exports": 37.804,
-   "production": 54.465,
-   "consumption": 25.168
+   "imports": 7.37886074474204,
+   "exports": 37.8041091832738,
+   "production": 54.4648358989232,
+   "consumption": 25.168491520883197
   },
   "VNM|BUTR": {
-   "imports": 14.512,
-   "consumption": 14.274
+   "imports": 14.5115446683913,
+   "consumption": 14.273825236549799
   },
   "VNM|CASE": {
-   "imports": 0.02,
-   "consumption": 1.99
+   "imports": 0.0201864295703329,
+   "consumption": 1.9900533333333301
   },
   "VNM|CHES": {
-   "imports": 6.474,
-   "consumption": 6.97
+   "imports": 6.47430027749284,
+   "consumption": 6.969713088299209
   },
   "VNM|COCM": {
-   "imports": 10.105,
-   "exports": 9.947,
-   "production": 27.751,
-   "consumption": 29.331
+   "imports": 10.104868200975899,
+   "exports": 9.94740315794056,
+   "production": 27.750872801529102,
+   "consumption": 29.3309492885859
   },
   "VNM|CREM": {
-   "imports": 3.777,
-   "consumption": 4.076
+   "imports": 3.77682682091583,
+   "consumption": 4.07552930678815
   },
   "VNM|FRMI": {
-   "imports": 31.842,
-   "exports": 29.764,
-   "production": 478.324,
-   "consumption": 493.69
+   "imports": 31.8418398329683,
+   "exports": 29.7639710703435,
+   "production": 478.323769447864,
+   "consumption": 493.68956436944995
   },
   "VNM|SKIM": {
-   "imports": 80.865,
-   "exports": 1.102,
-   "production": 0.207,
-   "consumption": 79.108
+   "imports": 80.8653352862776,
+   "exports": 1.1016192016628399,
+   "production": 0.206718973376148,
+   "consumption": 79.1075830148109
   },
   "VNM|WHEY": {
-   "imports": 42.33,
-   "consumption": 42.191
+   "imports": 42.3304853540694,
+   "consumption": 42.1914884752449
   },
   "VNM|WMIO": {
-   "imports": 43.801,
-   "exports": 15.13,
-   "production": 59.509,
-   "consumption": 106.123
+   "imports": 43.8009569457206,
+   "exports": 15.130049358156,
+   "production": 59.5090169323481,
+   "consumption": 106.122704757637
   },
   "ZAF|BUTR": {
-   "imports": 6.612,
-   "exports": 3.009,
-   "production": 14.631,
-   "consumption": 20.935
+   "imports": 6.61185670246022,
+   "exports": 3.00901855797881,
+   "production": 14.630627602108099,
+   "consumption": 20.934759697267697
   },
   "ZAF|CASE": {
-   "imports": 1.326,
-   "consumption": 1.722
+   "imports": 1.32613894734767,
+   "consumption": 1.7218445339263502
   },
   "ZAF|CHES": {
-   "imports": 11.76,
-   "exports": 9.759,
-   "production": 62.045,
-   "consumption": 69.075
+   "imports": 11.7601663030682,
+   "exports": 9.75913362084337,
+   "production": 62.0453992527477,
+   "consumption": 69.0750440462026
   },
   "ZAF|COCM": {
-   "imports": 0.352,
-   "exports": 35.797,
-   "production": 45.059,
-   "consumption": 15.09
+   "imports": 0.351758951326742,
+   "exports": 35.796800729518,
+   "production": 45.059411555790994,
+   "consumption": 15.090410750839402
   },
   "ZAF|CREM": {
-   "imports": 0.057,
-   "exports": 2.195,
-   "production": 3.542,
-   "consumption": 1.659
+   "imports": 0.0572583211466386,
+   "exports": 2.1954482512047697,
+   "production": 3.54182477151781,
+   "consumption": 1.65891419235148
   },
   "ZAF|FRMI": {
-   "imports": 0.815,
-   "exports": 76.133,
-   "production": 2831.141,
-   "consumption": 2792.086
+   "imports": 0.8153369152641191,
+   "exports": 76.1326187102008,
+   "production": 2831.14111316083,
+   "consumption": 2792.08562188338
   },
   "ZAF|SKIM": {
-   "imports": 8.597,
-   "exports": 7.881,
-   "production": 5.169,
-   "consumption": 6.753
+   "imports": 8.59739417433564,
+   "exports": 7.88059007932725,
+   "production": 5.16895480700649,
+   "consumption": 6.753149935215649
   },
   "ZAF|WHEY": {
-   "imports": 8.612,
-   "exports": 2.387,
-   "production": 3.303,
-   "consumption": 9.111
+   "imports": 8.61162386749245,
+   "exports": 2.38716501326095,
+   "production": 3.3028947930956902,
+   "consumption": 9.11096799088374
   },
   "ZAF|WMIO": {
-   "imports": 4.217,
-   "exports": 5.921,
-   "production": 7.242,
-   "consumption": 6.892
+   "imports": 4.21716488765757,
+   "exports": 5.92067955285309,
+   "production": 7.24231211085465,
+   "consumption": 6.8918141189151605
   }
  }
 }

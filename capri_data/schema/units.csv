@@ -1,0 +1,42 @@
+code,description,capri
+U_1000ha,1000 hectares,yes
+U_1000t,1000 tons,yes
+U_1000hd,1000 heads,yes
+U_Miohd,1000000 heads,yes
+U_Miol,1000000 litres,yes
+U_1unit,1 unit = index (= activity level of OANI in database),yes
+U_MioEur2005,1E6 Euros (year 2005 prices),yes
+U_MioEur,1E6 Euros,yes
+U_kgperha,kg per hectare,yes
+U_kgperhd,kg per head,yes
+U_kgper1000hd,kg per 1000 heads,yes
+U_hdper1000hd,heads per 1000 heads,yes
+U_lperha,litre per ha,yes
+U_lperhd,litre per head,yes
+U_lper1000hd,litre per 1000 heads,yes
+U_Eur2005perha,Euros (year 2005 prices) per hectare,yes
+U_Eur2005perhd,Euros (year 2005 prices) per head,yes
+U_Eur2005per1000hd,Euros (year 2005 prices) per 1000 heads,yes
+U_kgper1000unit,kg per 1000 units (for OANI),yes
+U_lper1000unit,l per 1000 units (for OANI),yes
+U_Eur2005per1000unit,Euros (year 2005 prices) per 1000 units (for OANI),yes
+U_ratio,Ratio (e.g. kg/kg),yes
+U_EuPerTon,Euro per metric ton,yes
+U_EuPerHa,Euro per ha,yes
+U_EuPerHd,Euro per head,yes
+U_EuPer1000Hd,Euro per 1000 head,yes
+U_TonPerHa,Metric ton per ha,yes
+U_HourPerHa,Hour per ha,yes
+U_HourPerHd,Hour per hd,yes
+U_HourPer1000Hd,Hour per 1000 hd,yes
+U_percent,%,yes
+U_kgPerCapitaAndYear,kg per capita and day,yes
+U_kCalPerCapitaAndDay,kCal per capita and day,yes
+U_grPerCapitaAndDay,gr per capita and day,yes
+U_days,Days in productions system,yes
+U_NELperHdAndDay,Netto energy lactation per head and day,yes
+U_CrPrperHdAndDay,Crude protein per head and day,yes
+U_NELper1000HdAndDay,Netto energy lactation per head and day,yes
+U_CrPrper1000HdAndDay,Crude protein per head and day,yes
+U_TonPerHd,Metric ton per head,no
+U_HdPerHd,Heads per head,no

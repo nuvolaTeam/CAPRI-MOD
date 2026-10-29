@@ -120,21 +120,15 @@ CARRY_FORWARD = {
     "supply": [
         "supply_elasticities_regional.csv",
         "pmp_own_price_elasticities.csv",
-        "pmp_diagonal_terms.csv",       # reference only; Q is recomputed at runtime
-        "pmp_crossgroup_terms.csv",     # reference only
-        "input_requirements.csv",
         "variable_costs.csv",           # ideally updated; see --update-costs
         "land_availability.csv",
     ],
     "market": [
-        "armington_params.csv",
         "world_prices.csv",
         "fao_market_baseline.json",
-        "fao_demand_own_elas_eu.json",
     ],
     "policy": ["cap_payments.csv", "eu_mfn_tariffs.csv"],
-    "environment": ["nutrient_coefs.csv", "crop_nutrient_export.csv",
-                    "manure_ch4_ef_regional.csv", "climate_zones.csv"],
+    "environment": ["nutrient_coefs.csv", "crop_nutrient_export.csv", "climate_zones.csv"],
     "feed": ["feed_requirements.csv"],
 }
 

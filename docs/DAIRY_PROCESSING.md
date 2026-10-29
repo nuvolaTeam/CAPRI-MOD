@@ -4,9 +4,9 @@ Status: revised 21 October 2026 against the code (Norway's block: K56). The bloc
 market model. The development stages (October 2026: Stages 1-4, Sprint 9f) and their run results are summarised in
 "History" and recorded in CHANGELOG.md; current results are in README section 9 (Validation).
 
-Switch: `MarketModule.use_dairy_block` (True); off (`run_f2f_2030.py --no-dairy-block`, diagnostics) the dairy
-products are raw milk × CAPRI's member-state 2030 yields (output less processing per tonne of raw milk,
-`dairy_processing.csv`, `model._dairy_yield`).
+Always on (the switch `market.use_dairy_block` and the run option `--no-dairy-block` were removed on 27 October
+2026). Without the block's data the dairy products are raw milk × CAPRI's member-state 2030 yields (output less
+processing per tonne of raw milk, `dairy_processing.csv`, `model._dairy_yield`).
 
 ## CAPRI's block (`arm/market_model.gms`)
 

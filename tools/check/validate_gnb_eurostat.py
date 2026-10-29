@@ -14,6 +14,8 @@ from pathlib import Path
 
 import pandas as pd
 
+import functools as _ft
+_read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 warnings.filterwarnings("ignore")
@@ -25,7 +27,7 @@ def main(year=2017):
     from capri_mod.data.definitions import ANIMALS
     d = load_all_data(str(ROOT / "capri_data"))
     e = EnvironmentalModule(d)
-    es = pd.read_csv(ROOT / "capri_data" / "sources" / "eurostat" / "aei_pr_gnb_nitrogen.csv")
+    es = _read_csv(ROOT / "capri_data" / "sources" / "eurostat" / "aei_pr_gnb_nitrogen.csv")
     es = es[es.year == year].pivot_table(index="geo", columns="indic_ag", values="value")
     H = d["animal_numbers"]
     rows = {}

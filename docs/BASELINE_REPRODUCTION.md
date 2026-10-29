@@ -66,7 +66,7 @@ Each step is what CAPRI does; the code is in `capri_mod/projection/` and `capri_
    over CAPRI's activities; member state where there are no regional rows; the ration is lifted uniformly only where
    it would fall short of the energy or protein requirement), and the fodder balances' usable fodder per ha by
    CAPRI's FEDM / LEVL of grass, silage maize and other fodder, 2030 over 2017 (`capri_ref_fodder_2030.csv`).
-7. **Baseline calibration** (`SupplyModule.calibrate_to_base`, switch `CAPRIModel.calibrate_baseline`): CAPMOD
+7. **Baseline calibration** (`SupplyModule.calibrate_to_base`; always on in a projected year's baseline): CAPMOD
    calibrates its supply models so that the simulation year's baseline reproduces the projected levels. In the
    baseline of a projected year the regional models' linear cost terms move by Q (x − x_target) round by round until
    the largest drift stops falling; fodder crops are excepted (held by the fodder balances). The outer loop counts
