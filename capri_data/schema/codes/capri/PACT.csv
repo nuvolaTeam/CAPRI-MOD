@@ -1,0 +1,100 @@
+code,text
+APPL,Apples  pears and peaches production activity
+BARL,Barley production activity
+BULF,Male adult fattening activity
+BULH,Male adult fattening activity high final weight
+BULL,Male adult fattening activity low final weight
+CAFF,Calves female fattening activity
+CAFR,Calves female raising activity
+CAMF,Calves male fattening activity
+CAMR,Calves male raising activity
+CATC,Catch crop
+CITR,Citrus fruits production activity
+DCOH,Dairy cows  production activityhigh yield
+DCOL,Dairy cows production activity low yield
+DCOW,Dairy cows production activity
+DWHE,Durum wheat production activity
+FALL,Fallow land
+FLOW,Flowers production activity
+FallGr,from grass as biomass production
+GRAE,Gras and grazings production activity extensive
+GRAI,Gras and grazings production activity intensive
+GRAS,Gras and grazings production activity
+GSET,Set aside obligatory used as grass land
+HEIF,Heifers fattening activity
+HEIH,Heifers fattening activity high final weight
+HEIL,Heifers fattening activity low final weight
+HEIR,Heifers raising activity
+HENS,Laying hens production activity
+IHISCR,Idling of former CROP for histosol protection as element of PACT
+IHISGR,Idling of former GRAS for histosol protection as element of PACT
+ISET,Set aside obligatory idling
+MAIF,Fodder maize production activity
+MAIZ,Grain maize production activity
+NECR,New energy crops
+NONF,Non food production on set-aside
+NURS,Nurseries production activity
+OANI,Other animals activity
+OATS,Oats and summer cereal mixes production activity without triticale
+OCER,Other cereals production activity including triticale
+OCRO,Other crops production activity
+OFAR,Fodder other on arable land production activity
+OFRU,Other fruits production activity
+OIND,Other industrial crops production activity
+OLIV,Olive production activity for the oil industry
+OOIL,Other seed production activities for the oil industry
+OSET,Obligatory set-aside
+OVEG,Other vegetables production activity
+PARI,Paddy rice production activity
+PIGF,Pig fattening activity
+POTA,Potatoes production activity
+POUF,Poultry fattening activity
+PULS,Pulses production activity
+RAPE,Rape production activity
+ROOF,Fodder root crops production activity
+RYEM,Rye and meslin production activity
+SCOW,Suckler cows production activity
+SETA,Set aside total
+SHGF,Sheep and goats activity for fattening
+SHGM,Sheep and goats activity for milk production
+SOWS,Sows for piglet production
+SOYA,Soya production activity
+SUGB,Sugar beet production activity
+SUNF,Sunflower production activity
+SWHE,Soft wheat production activity
+TABO,Table olives production activity
+TAGR,Table grapes production activity
+TEXT,Flax and hemp production activity
+TOBA,Tobacco production activity
+TOMA,Tomatoes production activity
+TSET,Set aside obligatory fast growing trees
+TWIN,Wine production activity
+VSET,Set aside voluntary
+cropMiti,Crop related mitigation of ghg emissions as element of PACT
+grasMiti,Grassland related mitigation of ghg emissions as element of PACT
+mi_WinterCov,Prototype activity for treatment of premiums in for mitigation technology winter cover
+mi_ammAppHE,activity for mitigation technology low ammonia application high efficiency
+mi_ammAppLE,activity for mitigation technology low ammonia application low efficiency
+mi_buffer10to30Man,activity for mitigation technology buffer strips from 10 to 30 meters for manure
+mi_buffer10to30Min,activity for mitigation technology buffer strips from 10 to 30 meters for mineral fertilizers
+mi_buffer1to5Man,activity for mitigation technology buffer strips from 1 to 5 meters for manure
+mi_buffer1to5Min,activity for mitigation technology buffer strips from 1 to 5 meters for mineral fertilizers
+mi_buffer5to10Man,activity for mitigation technology buffer strips from 5 to 10 meters for manure
+mi_buffer5to10Min,activity for mitigation technology buffer strips from 5 to 10 meters for mineral fertilizers
+mi_bufferBel1Man,activity for mitigation technology buffer strips up to 1 meter for manure
+mi_bufferBel1Min,activity for mitigation technology buffer strips up to 1 meter for mineral fertilizers
+mi_consTill,activity for mitigation technology conservation tillage
+mi_fallowCr,activity for mitigation technology fallowing histosols on cropland
+mi_fallowGr,activity for mitigation technology fallowing histosols on grassland
+mi_ferttimeMan,activity for mitigation technology beter timing of manure application
+mi_ferttimeMin,activity for mitigation technology beter timing of mineral fertilizer application
+mi_luPerHaLimit,activity for mitigation technology limit for livestock units per ha
+mi_nManLimit,activity for mitigation technology limit to N input from manure
+mi_nMinLimit,activity for mitigation technology limit to N input from mineral fertilizers
+mi_nTotLimit,activity for mitigation technology limit to total N fertilizer input
+mi_nitrInhMan,activity for mitigation technology nitrification inhibitors on manure
+mi_nitrInhMin,activity for mitigation technology nitrification inhibitors on mineral fertilizers
+mi_noTill,activity for mitigation technology no tillage
+mi_precFarm,activity for mitigation technology precision farming
+mi_vrt,activity for mitigation technology variable rate technology
+uaarMiti,uaar related mitigation of ghg emissions as element of PACT
