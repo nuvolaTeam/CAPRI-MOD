@@ -1,4 +1,4 @@
--- The supply models' land rents, own-price supply elasticities and the mineral N price.
+-- The supply models' land rents, own-price supply elasticities, fertiliser coefficients and the mineral N price.
 -- Long files: the unit of each numeric column is in value_units, the column's name as the item.
 
 -- file: capri_data/2017/supply/land_rents_2030.csv
@@ -68,6 +68,28 @@ INSERT INTO value_units SELECT 'capri_own_price_elasticities', c, 'U_Elasticity'
 FROM (VALUES ('RYEM'), ('BARL'), ('OATS'), ('MAIZ'), ('OCER'), ('RAPE'), ('SUNF'), ('PULS'), ('POTA'), ('TEXT'), ('TOBA'),
              ('TOMA'), ('OVEG'), ('APPL'), ('OFRU'), ('TAGR'), ('TWIN'), ('YCOW'), ('YBUL'), ('YHEI'), ('YCAM'), ('YCAF'),
              ('YPIG'), ('YLAM'), ('BEEF'), ('PORK'), ('SGMT'), ('EGGS'), ('POUM'), ('SOYA'), ('CITR'), ('TABO')) t(c);
+
+-- file: capri_data/2017/supply/nutrient_coefs_regional.csv
+CREATE TABLE nutrient_coefs_regional (
+    region VARCHAR NOT NULL REFERENCES regional_units (region),
+    activity VARCHAR NOT NULL REFERENCES model_activities (code),
+    N DOUBLE NOT NULL CHECK (N >= 0),
+    P2O5 DOUBLE NOT NULL CHECK (P2O5 >= 0),
+    K2O DOUBLE NOT NULL CHECK (K2O >= 0),
+    PRIMARY KEY (region, activity)
+);
+COMMENT ON TABLE nutrient_coefs_regional IS 'CAPRI''s fertiliser coefficients NITF, PHOF, POTF of res_17<MS> DATA2 per region and model crop, level-weighted over the crop''s CAPRI activities (build_capri_base.CROP_MAP), the member state''s for a crop the region does not grow (tools/build/build_nutrient_coefs_regional.py, K100)';
+INSERT INTO value_units VALUES
+  ('nutrient_coefs_regional', 'N', 'U_kgperha', 'capri', 'CAPRI''s NITF (kg N per ha; CAPRI''s N requirement NRET)'),
+  ('nutrient_coefs_regional', 'P2O5', 'U_kgperha', 'capri', 'CAPRI''s PHOF (kg P2O5 per ha)'),
+  ('nutrient_coefs_regional', 'K2O', 'U_kgperha', 'capri', 'CAPRI''s POTF (kg K2O per ha)');
+
+-- rule: the fertiliser coefficients are the crops', and every crop with area in a region has its coefficients
+SELECT region, activity, 'not a crop' AS what FROM nutrient_coefs_regional
+WHERE activity NOT IN (SELECT code FROM model_activities WHERE kind = 'crop')
+UNION ALL
+SELECT b.region, b.activity, 'crop with area, no coefficients' FROM base_areas b
+WHERE b.value > 0 AND NOT EXISTS (SELECT 1 FROM nutrient_coefs_regional n WHERE n.region = b.region AND n.activity = b.activity);
 
 -- file: capri_data/2017/supply/mineral_n_price.csv
 CREATE TABLE mineral_n_price (

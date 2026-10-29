@@ -320,18 +320,6 @@
     "type": "dict"
    }
   },
-  "nutrient_coefs.csv": {
-   "source": "capreg DATA2 (NITF/PHOF/POTF)",
-   "vintage": "2017",
-   "units": "kg/ha N,P2O5,K2O",
-   "domain": "environment",
-   "status": "live",
-   "shape": {
-    "rows": 29,
-    "cols": 3,
-    "note": "CAPRI crop fertiliser application (NITF, PHOF, POTF); the animal rows removed 27 October 2026 (K33)"
-   }
-  },
   "livestock_output_coef.csv": {
    "source": "capreg DATA2",
    "vintage": "2017",
@@ -2845,13 +2833,22 @@
     ]
    },
    "note": "CAPRI's DEF_PRD: the products whose values fill a feed's missing items (envind/def_digestibility.gms; tools/build/build_digestibility_table.py)"
+  },
+  "nutrient_coefs_regional.csv": {
+   "source": "res_17<MS> DATA2 NITF/PHOF/POTF (tools/build/build_nutrient_coefs_regional.py)",
+   "vintage": "2017",
+   "units": "kg/ha N,P2O5,K2O",
+   "domain": "supply",
+   "status": "live",
+   "path": "2017/supply/nutrient_coefs_regional.csv",
+   "note": "CAPRI's fertiliser coefficients per region and model crop, level-weighted over the crop's CAPRI activities; replaces the national nutrient_coefs.csv (no builder, K100)"
   }
  },
  "_vintage_summary": {
   "base_year": "2017 (quantities, prices, PMP parameters - all consistent)",
   "trade": "2021 (bilateral flows, refreshed and validated)",
   "why_not_newer": "A newer base requires CAPRI to RE-ESTIMATE its PMP parameters for the new year (a CAPRI-side computation). Mixing newer prices/quantities onto 2017 PMP terms breaks calibration - the validator blocks this. Trade is separable and safely refreshed to 2021.",
-  "synthetic": "feed_requirements.csv, without builder, was removed on 29 October 2026 (KNOWN_ISSUES K99); nutrient_coefs.csv, a national table without builder, still fills OFOD, SETA and WINE's nutrient coefficients and SETA's mineral N (K100).",
+  "synthetic": "none known: feed_requirements.csv and nutrient_coefs.csv, without builders, were removed on 29 October 2026 (KNOWN_ISSUES K99, K100).",
   "upgrade_path": "See docs/DATA_LOCATION_MAP.md. A newer STAR release database (results) from capri-model.org would provide a consistent newer base.",
   "layout": "Data organised as capri_data/<base_year>/<category>/ with cross-vintage files in shared/. Market JSON parameter files (fao_market_baseline, fao_demand_own_elas_eu) live in <year>/market/."
  }

@@ -143,12 +143,10 @@ class EnvironmentalModule:
 
     def __init__(self, data: dict):
         self.data = data
-        # Nutrient application rates (kg/ha per crop, N/P2O5/K2O): CAPRI's p_FertPerHa (data["nutrients"]). A
-        # removal x yield x efficiency derivation (FertilizerModule, not CAPRI's fert/ HPD estimation) that could
-        # replace them for a re-based year was never used in a run and was removed on 23 October 2026 (PROXY_AUDIT
-        # S213, S214).
-        self.nutrient_coefs = data["nutrients"]
-        self._nutrient_source = "loaded (CAPRI p_FertPerHa)"
+        # Mineral N per ha: CAPRI's regional NMIN (data["mineral_n_regional"], _base_mineral_rate). A national
+        # table without builder (data["nutrients"], nutrient_coefs.csv) stood under it until 29 October 2026 and gave
+        # fallow and set-aside 4.8 kg N/ha where CAPRI applies none (KNOWN_ISSUES K100). A removal x yield x efficiency
+        # derivation (FertilizerModule) was removed on 23 October 2026 (PROXY_AUDIT S213, S214).
 
     def _manure_loss_shares(self, region: str) -> dict:
         """CAPRI's manure N lost in housing and storage per kg excreted, by animal ((GASANI + RUNANI) / MANN, 2030
@@ -286,9 +284,7 @@ class EnvironmentalModule:
         total_n_applied = 0.0
         for crop in CROPS:
             area = activities.get(crop, 0.0)
-            n_rate = self.nutrient_coefs.at[crop, "N"] if (
-                crop in self.nutrient_coefs.index and "N" in self.nutrient_coefs.columns
-            ) else 0.0
+            n_rate = self._base_mineral_rate(region, crop) if area > 0 else 0.0
             # fertiliser per ha follows the crop's N intensity (1 = base)
             n_rate = n_rate * float((n_intensity or {}).get(crop, 1.0))
             total_n_applied += area * n_rate / 1e3   # 1000 ha x kg/ha = t; /1e3 -> kt N
@@ -298,9 +294,9 @@ class EnvironmentalModule:
         if grass_shift:
             dl = self.grass_intensity_delta(region) or {}
             r_g = self._base_mineral_rate(region, "GRAS")
-            if r_g > 0 and "GRAS" in self.nutrient_coefs.index and "N" in self.nutrient_coefs.columns:
-                total_n_applied += (grass_shift * float(self.nutrient_coefs.at["GRAS", "N"])
-                                    * float(dl.get("mineral_rate", 0.0)) / r_g / 1e3)
+            if r_g > 0:
+                # the grassland intensity shift's change of mineral N per ha (kg) on the shifted area (1000 ha)
+                total_n_applied += grass_shift * float(dl.get("mineral_rate", 0.0)) / 1e3
         # Direct N2O from soils
         n2o_soil_n = total_n_applied * EF_SOIL_N2O_DIRECT
         ghg["N2O_SOIL"] += (n2o_soil_n * 44 / 28) * GWP_N2O
@@ -434,15 +430,6 @@ class EnvironmentalModule:
                          if t is not None and hasattr(t, "index") and region in t.index else None)
         return cache[ck]
 
-    def _ncoef_n(self) -> dict:
-        """nutrient_coefs['N'] as a dict, cached."""
-        d = self.__dict__.get("_ncoef_n_cache")
-        if d is None:
-            nc = self.nutrient_coefs
-            d = {c: nc.at[c, "N"] for c in nc.index} if "N" in getattr(nc, "columns", []) else {}
-            self._ncoef_n_cache = d
-        return d
-
     #: CAPRI crop -> model crop (several CAPRI crops pooled by level)
     _CAPRI_CROP = {"CORN": ("MAIZ",), "WINE": ("TWIN",), "GRAS": ("GRAE", "GRAI"),
                    "OFOD": ("OFAR", "ROOF"), "SETA": ("SETA", "FALL", "VSET")}
@@ -528,7 +515,8 @@ class EnvironmentalModule:
     OWN_RESIDUE_CROPS = frozenset({"GRAS", "APPL", "CITR", "TAGR", "WINE", "OLIV", "TABO"})
 
     def _base_mineral_rate(self, region, crop):
-        """Base mineral N per ha of a crop: CAPRI's regional rate, else the EU table."""
+        """Base mineral N per ha of a crop: CAPRI's regional NMIN; none where CAPRI has none (fallow, set-aside: CAPRI's
+        results carry no NMIN for FALL, VSET, SETA; K100)."""
         _regn = self._cached_row("mineral_n_regional", region)
         rate = None
         if _regn is not None and crop in _regn:
@@ -536,7 +524,7 @@ class EnvironmentalModule:
             if v == v and v > 0:
                 rate = float(v)
         if rate is None:
-            rate = float(self._ncoef_n().get(crop, 0.0) or 0.0)
+            rate = 0.0
         ov = self.__dict__.get("_grass_override")
         if ov and crop == "GRAS":
             # one of CAPRI's grassland activities: the GRAS rate in proportion to its need
@@ -718,7 +706,6 @@ class EnvironmentalModule:
         # row and cell access dominated the cost of this function)
         _ybase = self._cached_row("yields", region)
         _regn = self._cached_row("mineral_n_regional", region)
-        _ncN = self._ncoef_n()
         if hasattr(activities, "to_dict"):
             activities = activities.to_dict()
         if hasattr(yields, "to_dict"):

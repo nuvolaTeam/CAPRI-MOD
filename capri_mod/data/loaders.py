@@ -88,7 +88,7 @@ _FILE_CATEGORY = {
     "pmp_own_price_elasticities.csv": "supply",
     "producer_prices.csv": "market", "world_prices.csv": "market",
     "cap_payments.csv": "policy", "crop_premium.csv": "supply", "eu_mfn_tariffs.csv": "policy", "tariffs.csv": "policy",
-    "nutrient_coefs.csv": "environment", "crop_nutrient_export.csv": "environment",
+    "nutrient_coefs_regional.csv": "supply", "crop_nutrient_export.csv": "environment",
     "climate_zones.csv": "environment",
     # JSON parameter files
     "fao_market_baseline.json": "market",
@@ -266,20 +266,15 @@ def load_yields(data_dir: Optional[Path] = None) -> pd.DataFrame:
 
 def load_regional_nutrients(data_dir=None):
     """
-    CAPRI regional fertiliser application (DATA2 NITF/PHOF/POTF, kg/ha).
-
-    Returned MultiIndexed by (region, activity) with N / P2O5 / K2O columns.
+    CAPRI's fertiliser coefficients per region and model crop (DATA2 NITF / PHOF / POTF, kg/ha, level-weighted over
+    the crop's CAPRI activities; tools/build/build_nutrient_coefs_regional.py), indexed by (region, activity) with
+    N / P2O5 / K2O columns. Required: the national table that stood under it (nutrient_coefs.csv, no builder) was
+    removed on 29 October 2026 (KNOWN_ISSUES K100).
     """
-    import pandas as pd
-    from pathlib import Path
-    if data_dir is None:
-        return None
-    p = Path(data_dir) / "sources" / "capreg" / "capreg_nutrient_coefs.csv"
-    if not p.exists():
-        return None
-    df = read_input(p)
-    return df.pivot_table(index=["model_region", "activity"],
-                          columns="nutrient", values="value", aggfunc="last")
+    p = resolve_data_file(data_dir, "nutrient_coefs_regional.csv") if data_dir else None
+    if p is None or not p.exists():
+        raise FileNotFoundError(f"nutrient_coefs_regional.csv not found under {data_dir}")
+    return read_input(p).set_index(["region", "activity"])[["N", "P2O5", "K2O"]]
 
 
 def load_cap_premium(data_dir=None):
@@ -435,22 +430,6 @@ def load_land_availability(data_dir: Optional[Path] = None) -> pd.DataFrame:
                             f"(the synthetic generator that stood here was removed, Sprint 9s)")
 
 
-def load_nutrient_coefficients(data_dir: Optional[Path] = None) -> pd.DataFrame:
-    """
-    Nutrient use coefficients (kg N/P/K per ha for crops, per head for animals).
-
-    Connect to: Eurostat env_ac_ainah_r2, CAPRI nitrogen module
-    """
-    if data_dir and (resolve_data_file(data_dir, "nutrient_coefs.csv")).exists():
-        return read_input(resolve_data_file(data_dir, "nutrient_coefs.csv"), index_col=0)
-    raise FileNotFoundError(f"nutrient_coefs.csv not found under {data_dir}: the model runs on CAPRI's data only "
-                            f"(the synthetic generator that stood here was removed, Sprint 9s)")
-
-
-# ---------------------------------------------------------------------------
-# MARKET MODULE DATA
-# ---------------------------------------------------------------------------
-
 def load_world_prices(data_dir: Optional[Path] = None) -> pd.Series:
     """
     World reference prices (EUR/t, CIF basis) for market module.
@@ -602,7 +581,7 @@ def load_all_data(data_dir: Optional[Path] = None, validate: bool = False,
         # of mineral nitrogen where the EU average is far lower, and a single
         # EU-wide table made high-fertiliser regions look unfertilised.
         # NOTE: distinct from "nutrients_regional" below, which holds CAPRI's
-        # NITF. NITF equals NRET, a nitrogen REQUIREMENT, not an application
+        # NITF (nutrient_coefs_regional.csv). NITF equals NRET, a nitrogen REQUIREMENT, not an application
         # rate; NMIN is the mineral nitrogen actually applied.
         # Market revenue per head (CAPRI MREV), by region and animal activity.
         "livestock_output_value_coef": _load_optional_csv(data_dir, "livestock_output_value_coef.csv"),
@@ -752,7 +731,6 @@ def load_all_data(data_dir: Optional[Path] = None, validate: bool = False,
         "variable_costs":  load_variable_costs(data_dir),
         "variable_costs_regional": load_variable_costs_regional(data_dir),
         "land":            load_land_availability(data_dir),
-        "nutrients":       load_nutrient_coefficients(data_dir),
         "world_prices":    load_world_prices(data_dir),
         "cap_payments":    load_cap_payments(data_dir),
         "tariffs":         load_tariffs(data_dir),

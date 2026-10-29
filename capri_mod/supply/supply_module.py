@@ -5430,22 +5430,13 @@ class RegionalSupplyModel:
 # ---------------------------------------------------------------------------
 
 def _region_nutrients(d: dict, region: str) -> pd.DataFrame:
-    """National nutrient coefficients, overridden by CAPRI regional values."""
-    nut = d["nutrients"].copy()
-    reg = d.get("nutrients_regional")
-    if reg is None or reg.empty or region not in reg.index.get_level_values(0):
-        return nut
-    try:
-        block = reg.loc[region]
-    except KeyError:
-        return nut
-    for act in block.index:
-        if act in nut.index:
-            for col in ("N", "P2O5", "K2O"):
-                v = block.at[act, col] if col in block.columns else None
-                if v is not None and pd.notna(v) and v > 0:
-                    nut.at[act, col] = float(v)
-    return nut
+    """CAPRI's fertiliser coefficients of the region's crops (NITF, PHOF, POTF; nutrient_coefs_regional.csv), crops
+    CAPRI has nowhere in the member state left out (no fertiliser). Until 29 October 2026 a national table without
+    builder (nutrient_coefs.csv) under them, which OFOD, SETA and WINE kept in every region (KNOWN_ISSUES K100)."""
+    reg = d["nutrients_regional"]
+    if region not in reg.index.get_level_values(0):
+        return pd.DataFrame(columns=["N", "P2O5", "K2O"], dtype=float)
+    return reg.loc[region].astype(float).copy()
 
 
 def _region_prices(d: dict, region: str) -> pd.Series:

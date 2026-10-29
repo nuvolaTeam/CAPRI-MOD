@@ -24,7 +24,7 @@ PRME, NITF/PHOF/POTF, feed use), extracted for all 27 member states (`tools/buil
 | supply-utilisation sheet | `p_sua_final` | `results/fao/faodata.gdx` |
 
 Fills: `base_areas.csv`, `yields.csv`, `variable_costs.csv`, `crop_premium.csv`, the livestock coefficient files,
-`livestock_feed_coef.csv`, `capreg_nutrient_coefs.csv` (from DATA2); `world_prices.csv` and the market base balances (from
+`livestock_feed_coef.csv`, `nutrient_coefs_regional.csv` (from DATA2); `world_prices.csv` and the market base balances (from
 `p_dataMarket`).
 
 ## B. Elasticities and PMP terms (for a full re-base; otherwise keep 2017)

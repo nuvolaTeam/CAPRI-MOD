@@ -210,7 +210,9 @@
    "source": "capreg DATA2 NITF/PHOF/POTF, regional",
    "priority": "medium",
    "coverage": "14210 region-activity pairs, 79.0% by area",
-   "note": "Was national constants per activity. CAPRI soft-wheat nitrogen is 147.5 kg/ha at DE11 and 68.2 at ES61 against a single national 125.9."
+   "note": "Was national constants per activity. CAPRI soft-wheat nitrogen is 147.5 kg/ha at DE11 and 68.2 at ES61 against a single national 125.9.",
+   "status": "REMOVED (29 October 2026, KNOWN_ISSUES K100)",
+   "retired_note": "The file held national constants per crop without builder, under CAPRI's regional extract; OFOD, SETA and WINE kept them everywhere (the extract is keyed by CAPRI's activities) and the environmental accounts gave fallow 4.8 kg mineral N/ha where CAPRI has no NMIN. Replaced by 2017/supply/nutrient_coefs_regional.csv (tools/build/build_nutrient_coefs_regional.py)."
   },
   "capreg_feed_requirements.csv": {
    "nature": "REAL_CAPRI",

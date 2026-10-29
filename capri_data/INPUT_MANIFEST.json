@@ -78,15 +78,6 @@
    "coverage": "1700 cells across 9 animals",
    "note": "COWS and SHGO have no direct CAPRI counterpart and keep prior values."
   },
-  "nutrient_coefs.csv": {
-   "concept": "fertiliser application per hectare",
-   "unit": "kg/ha of N, P2O5, K2O",
-   "dimension": "region x activity x nutrient",
-   "capri_symbol": "DATA2 NITF, PHOF, POTF",
-   "status": "GDX",
-   "coverage": "79.0% by area, regional",
-   "note": "Was national constants per activity. Real variation is large: soft wheat nitrogen 147.5 kg/ha in DE11 against 68.2 in ES61, where 125.9 was used everywhere."
-  },
   "manure_nutrients": {
    "concept": "manure nutrient output",
    "unit": "kg/head",
@@ -874,6 +865,15 @@
    "gaps": [
     "needs young-animal trade between regions"
    ]
+  },
+  "nutrient_coefs_regional.csv": {
+   "concept": "fertiliser application per hectare",
+   "unit": "kg/ha of N, P2O5, K2O",
+   "dimension": "region x activity x nutrient",
+   "capri_symbol": "DATA2 NITF, PHOF, POTF",
+   "status": "GDX",
+   "coverage": "every crop with a CAPRI level, regional (the member state's values for a crop the region does not grow)",
+   "note": "tools/build/build_nutrient_coefs_regional.py: CAPRI's NITF/PHOF/POTF on the model's crops (OFOD = OFAR + ROOF, SETA = SETA + FALL, WINE = TWIN, level-weighted). Until 29 October 2026 the national nutrient_coefs.csv (no builder) under CAPRI's extract, which those three crops kept everywhere (K100)."
   }
  },
  "hardcoded_in_code": {

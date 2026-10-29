@@ -103,20 +103,6 @@
     "COWS, SHGO have no direct CAPRI counterpart"
    ]
   },
-  "nutrient_coefs": {
-   "file": "2017/environment/nutrient_coefs.csv",
-   "exists": true,
-   "live_cells": 120,
-   "nonzero_cells": 120,
-   "source_type": "CAPRI_GDX",
-   "source_ref": "capreg DATA2 NITF/PHOF/POTF",
-   "confidence": "validated",
-   "modules": [
-    "environment",
-    "supply"
-   ],
-   "known_gaps": []
-  },
   "manure_nutrients": {
    "file": "sources/capreg/capreg_manure_nutrients.csv",
    "exists": true,

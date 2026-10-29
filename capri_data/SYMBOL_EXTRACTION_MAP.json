@@ -1,22 +1,4 @@
 {
-  "nutrient_coefs.csv (fertiliser N/P/K per ha or per crop)": [
-    {
-      "symbol": "p_FertPerHa",
-      "desc": "Fertiliser use per ha for CAPRI regions"
-    },
-    {
-      "symbol": "p_NPKContFEED",
-      "desc": "Average nutrient content of aggregate (FEED set) consumed feed by country in kg nutrient (N or P2O5)/ t)"
-    },
-    {
-      "symbol": "p_minShareMinFert",
-      "desc": "Minimum share of mineral on total fertilizer input"
-    },
-    {
-      "symbol": "p_maxShareMinFert",
-      "desc": "Maximum share of mineral on total fertilizer input"
-    }
-  ],
   "base_areas/yields (regional activity levels)": [
     {
       "symbol": "p_actLevl",

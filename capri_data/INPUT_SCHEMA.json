@@ -149,21 +149,23 @@
    ]
   },
   "nutrient_coefs": {
-   "file": "2017/environment/nutrient_coefs.csv",
+   "file": "2017/supply/nutrient_coefs_regional.csv",
    "concept": "fertiliser application",
    "unit": "kg/ha",
-   "dimension": "region x activity x nutrient",
+   "dimension": "region x crop x nutrient",
    "modules": [
-    "environment",
     "supply"
    ],
    "source": {
     "source_type": "CAPRI_GDX",
-    "source_ref": "capreg DATA2 NITF/PHOF/POTF",
+    "source_ref": "res_17<MS> DATA2 NITF/PHOF/POTF, level-weighted over the model crop's CAPRI activities (tools/build/build_nutrient_coefs_regional.py)",
     "vintage": "2017",
     "confidence": "validated",
     "reproducibility": "public_code"
-   }
+   },
+   "known_gaps": [
+    "NITF is CAPRI's N requirement (NRET), not mineral N applied (NMIN, nutrients_regional.csv); the national nutrient_coefs.csv that stood under it, without builder, removed 29 October 2026 (KNOWN_ISSUES K100)"
+   ]
   },
   "manure_nutrients": {
    "file": "sources/capreg/capreg_manure_nutrients.csv",

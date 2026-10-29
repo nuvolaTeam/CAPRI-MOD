@@ -50,7 +50,8 @@ Paths relative to the CAPRI system folder. GDX files are exported to CSV with `t
 Two files once proposed here for the feed requirements and the fertiliser rates are the wrong data:
 `dat/coco/feed_agri.gdx` holds feed use, and `dat/arm/nutrient_cont_usda.gdx` (`p_nutrientCont`) holds food nutrient
 contents. The feed per head is CAPRI's DATA2 totals (livestock_feed_coef.csv; `feed_requirements.csv`, without
-builder, removed: KNOWN_ISSUES K99); the national `nutrient_coefs.csv` has no builder (K100).
+builder, removed: KNOWN_ISSUES K99); the fertiliser coefficients are CAPRI's DATA2 NITF, PHOF, POTF on the model's crops
+(`nutrient_coefs_regional.csv`; the national `nutrient_coefs.csv`, without builder, removed: K100).
 
 ## 4. Public sources (not CAPRI)
 

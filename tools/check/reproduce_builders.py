@@ -66,6 +66,7 @@ INVOCATIONS: list[tuple[str, list[str], list[Path]]] = [
     ("build_supply_elasticities_regional", [], []),
     ("build_capri_base", [str(D17)], [D17]),
     ("build_crop_economics_2017", [str(D17)], [D17]),
+    ("build_nutrient_coefs_regional", [str(D17)], [D17]),
     ("build_cap_ceilings_2030", [], [REF]),
     ("build_capri_baseline_surplus", [], []),
     ("build_cover_crops", [], [GAMS]),
