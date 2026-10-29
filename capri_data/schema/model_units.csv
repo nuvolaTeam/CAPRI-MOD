@@ -1,3 +1,4 @@
 code,description,used_by
 U_TonPerHd,Metric ton per head,"2017/supply/yields.csv, animal columns whose output is a mass (not PIGS: piglets per sow, a head count)"
 U_HdPerHd,Heads per head,"2017/supply/yields.csv, PIGS (piglets per sow)"
+U_ValueUnitPerHa,"CAPRI's value-measured crops: units of output per ha, a unit being about 1000 EUR of output at CAPRI's reference price (MPRI an index near 1000; MREV = YILD / 1000 x MPRI)","2017/supply/yields.csv, OCRO, OIND, NURS, FLOW"

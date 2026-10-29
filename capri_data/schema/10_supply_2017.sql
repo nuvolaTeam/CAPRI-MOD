@@ -54,10 +54,10 @@ INSERT INTO value_units SELECT 'yields', code, 'U_TonPerHa', 'builder', 'CAPRI''
 FROM model_activities WHERE kind = 'crop' AND code NOT IN ('GRAS', 'OCRO', 'OIND', 'NURS', 'FLOW');
 INSERT INTO value_units VALUES
   ('yields', 'GRAS', 'U_kgperha', 'builder', 'CAPRI''s YILD of GRAS unscaled, fresh matter (loaders: converted to dry matter with CAPRI''s DRMA)'),
-  ('yields', 'OCRO', NULL, 'open', 'CAPRI''s YILD / 1000 like the other crops; whether CAPRI''s YILD of this crop is kg per ha is not established'),
-  ('yields', 'OIND', NULL, 'open', 'CAPRI''s YILD / 1000 like the other crops; whether CAPRI''s YILD of this crop is kg per ha is not established (median 6, maximum 431)'),
-  ('yields', 'NURS', NULL, 'open', 'CAPRI''s YILD / 1000 like the other crops; whether CAPRI''s YILD of this crop is kg per ha is not established (median 20)'),
-  ('yields', 'FLOW', NULL, 'open', 'CAPRI''s YILD / 1000 like the other crops; whether CAPRI''s YILD of this crop is kg per ha is not established (median 138)'),
+  ('yields', 'OCRO', 'U_ValueUnitPerHa', 'builder', 'CAPRI''s YILD / 1000: a value-measured crop, CAPRI''s MPRI an index near 1000 and MREV = YILD / 1000 x MPRI as for every crop (checked in res_17NL: NL320000)'),
+  ('yields', 'OIND', 'U_ValueUnitPerHa', 'builder', 'CAPRI''s YILD / 1000: a value-measured crop, CAPRI''s MPRI an index near 1000 and MREV = YILD / 1000 x MPRI as for every crop (checked in res_17NL: NL320000)'),
+  ('yields', 'NURS', 'U_ValueUnitPerHa', 'builder', 'CAPRI''s YILD / 1000: a value-measured crop, CAPRI''s MPRI an index near 1000 and MREV = YILD / 1000 x MPRI as for every crop (checked in res_17NL: NL320000)'),
+  ('yields', 'FLOW', 'U_ValueUnitPerHa', 'builder', 'CAPRI''s YILD / 1000: a value-measured crop, CAPRI''s MPRI an index near 1000 and MREV = YILD / 1000 x MPRI as for every crop (checked in res_17NL: NL320000)'),
   ('yields', 'DCOW', 'U_TonPerHd', 'builder', 'build_animal_yields.py: t of milk per dairy cow'),
   ('yields', 'LAYS', 'U_TonPerHd', 'builder', 'build_animal_yields.py: CAPRI''s output unit / 1000 per hen (eggs)'),
   ('yields', 'PIGS', 'U_HdPerHd', 'builder', 'build_animal_yields.py: piglets per sow'),
@@ -68,8 +68,8 @@ INSERT INTO value_units VALUES
   ('yields', 'BROI', 'U_TonPerHd', 'builder', 'build_animal_yields.py: t of meat per model head'),
   ('yields', 'SHGM', 'U_TonPerHd', 'builder', 'build_animal_yields.py: t of milk per model head'),
   ('yields', 'SHGF', 'U_TonPerHd', 'builder', 'build_animal_yields.py: t of meat per model head'),
-  ('yields', 'HFRS', NULL, 'open', 'build_animal_yields.py: CAPRI''s YILD / 1000 per model head; median 4.1, not a plausible meat weight per heifer: CAPRI''s output and unit to be checked'),
-  ('yields', 'OANI', NULL, 'open', 'CAPRI''s OANI level is an index (U_1unit); the output''s unit is not established (median 303)');
+  ('yields', 'HFRS', NULL, 'open', 'build_animal_yields.py: CAPRI''s YILD / 1000 per model head, level-weighted over members whose YILD measures different outputs (HEIL, HEIH kg of meat per head; HEIR one raised heifer as 1000): no single unit; the model reads animal yields only for DCOW (its ratio to base scales milk), the animals'' output is CAPRI''s output coefficients'),
+  ('yields', 'OANI', NULL, 'open', 'value-measured like the value crops (MPRI near 1000, MREV = YILD / 1000 x MPRI: res_17DE DE110000), per unit of OANI''s level, an index (U_1unit): no catalogue unit; OANI is held at 0 in every region');
 
 -- file: capri_data/2017/supply/variable_costs.csv
 -- layout: wide

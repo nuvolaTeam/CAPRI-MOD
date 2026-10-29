@@ -40,3 +40,4 @@ U_NELper1000HdAndDay,Netto energy lactation per head and day,yes
 U_CrPrper1000HdAndDay,Crude protein per head and day,yes
 U_TonPerHd,Metric ton per head,no
 U_HdPerHd,Heads per head,no
+U_ValueUnitPerHa,"CAPRI's value-measured crops: units of output per ha, a unit being about 1000 EUR of output at CAPRI's reference price (MPRI an index near 1000; MREV = YILD / 1000 x MPRI)",no

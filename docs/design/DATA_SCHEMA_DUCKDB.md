@@ -74,10 +74,11 @@ Beyond CAPRI (for the project lead to note): range checks, and enforcement at lo
    `CAPRIunits.gms`, `CAPRIunits.gdx`, CAPRI's documentation), `builder` (stated by the builder from the CAPRI item it
    transforms, not found stated by CAPRI), `open` (not established; the unit is left empty). First declared
    (`10_supply_2017.sql`): base_areas, land_availability, animal_numbers, yields, variable_costs, producer_prices.
-   The open units found: the yields (and so prices) of OCRO, OIND, NURS, FLOW (CAPRI's YILD / 1000 like the other
-   crops, but their magnitudes, FLOW median 138 "t/ha", do not show that CAPRI's YILD of these crops is kg per ha),
-   HFRS's yield (median 4.1 t per head), OANI's yield and cost (its level is an index), and the livestock rows of the
-   EU producer prices (origin not recorded, K72). `CAPRIunits.gms` assigns units to the market results (`yild` of a
+   The open units found, and settled where the data allow (29 October 2026): the yields of OCRO, OIND, NURS, FLOW are
+   value units per ha (CAPRI measures these crops in value: MPRI an index near 1000, MREV = YILD / 1000 x MPRI; the
+   model's own unit U_ValueUnitPerHa); HFRS's yield has no single unit (its CAPRI members' YILD measure meat and raised
+   heifers; read by no model code: only DCOW's yield is read, as a ratio); OANI's yield and cost stay open (per unit of
+   an index level; OANI is held at 0); the livestock rows of the EU producer prices were removed (K72). `CAPRIunits.gms` assigns units to the market results (`yild` of a
    product t/ha, prices EUR/t), not to the supply data's per-activity items, and the old `CAPRIunits.gdx` gives the
    activities' LEVL units only (crops 1000 ha, animals 1000 heads, hens and poultry million heads, OANI an index).
 2. `MANIFEST.json` and `INPUT_SCHEMA.json`: retired once their content is in the declarations; `verify_schema.py`'s
