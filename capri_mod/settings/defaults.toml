@@ -212,6 +212,12 @@ noneu_supply_nq = true
 # market solve from the supply models' bulks at the prices they saw, with the elasticities measured on the supply models
 # (the market supply Hessian's FEEDBLK rows); false: fixed within a solve (until 29 October 2026). Same fixed point
 feed_bulk_in_market = true
+# CAPRI's non-EU feed demand (FeedNQ_ with the feed energy balance FeedBal_, audit M3): each non-EU behavioural region
+# without supply models feeds by its normalised-quadratic feed function of the Arm1 prices and its feed energy price FEDE,
+# which clears its feed energy against its animal output; FEDE also moves its market supply functions
+# (tools/build/build_feed_energy.py, build_noneu_feed_nq.py); false: p_ElasFeed constant elasticities, FEDE held (until
+# 29 October 2026)
+noneu_feed_nq = true
 # price shock of the market supply Hessian (calibrate_supply.gms)
 nq_price_shock = 0.01
 # bilateral market solve: acceleration ("anderson" or "none"), memory, chord step for trade, Newton rounds,

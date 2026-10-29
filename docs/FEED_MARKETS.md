@@ -59,7 +59,8 @@ The supply models buy feed as bulks; the market splits each member state's bulk 
   default); world prices FENI 312.77 EUR/t (FAO_agg World PMRK, base period), FPRI 252.74 EUR/t (FAO_agg has none:
   CAPRI's 2017 market, export-weighted market prices; 252.66 before Norway's exports counted as such, K56). Non-EU supply: each region's own-price
   elasticity, CAPRI's p_elasSupp of its CAPRI regions (`supply_elas_region.csv`; until 23 October 2026 one value per
-  product from `armington_params.csv`, removed on 29 October 2026, KNOWN_ISSUES K72). Non-EU feed demand: CAPRI's
+  product from `armington_params.csv`, removed on 29 October 2026, KNOWN_ISSUES K72). Non-EU feed demand (the trade
+  regions without CAPRI's FeedNQ_ regions, `market.noneu_feed_nq` off, and the dairy products fed): CAPRI's
   p_ElasFeed (`feed_demand_nonEU.json`; the generic response of `armington_params.csv`'s eta column was removed on 24
   October 2026).
 - EU output, `MaprFeed_` (`MarketModule.eu_feed_byproduct_output`, `feed_byproducts.csv`): prod0 × Σ weight × the
@@ -70,3 +71,26 @@ The supply models buy feed as bulks; the market splits each member state's bulk 
 
 REGISTERED: one EU share for MaprFeed_ (CAPRI's is per member state); the parents' food response stands for their
 human consumption plus processing; one non-EU supply elasticity per product (as for the other commodities).
+
+## Non-EU feed demand and the feed energy balance (audit M3, 29 October 2026)
+
+CAPRI (`arm/market_model.gms` l. 1018-1047): each non-EU behavioural region without supply models feeds by its
+normalised-quadratic feed function FeedNQ_ of the Arm1 prices and of its feed energy price FEDE; FEDE clears FeedBal_,
+the energy of the feed used against the energy its animal output needs (output x pv_feedConv); FEDE is also a column of
+the region's market supply functions (ProdNQ_), so dearer feed energy lowers animal output and raises feed crops'.
+
+- Data (`tools/build/build_feed_energy.py`, `build_noneu_feed_nq.py`): calorie contents p_calContent (USDA Energ_cal of
+  CAPRI's nutrient_cont_usda.gdx), the FEDE quantity and price at CAPRI's 2030 calibration (arm/market1.gms l. 402-408),
+  the feed conversion factors pv_feedConv fitted as `arm/feed_conv.gms` (m_fitFeedConv; per region, solved exactly),
+  CAPRI's p_hessNQFeed completed as on loading. Checks: CAPRI's p_ElasFeed and p_hessNQFeed imply the builder's FEDE
+  price in all 45 regions (ratio 1.00000000); the feed terms reproduce p_ElasFeed (10,443 terms, 1e-14), the supply
+  functions' FEDE terms p_elasSupp.
+- Market (`MarketModule.noneu_fede`, `noneu_feed_change`, `demand_response`, `_noneu_market_supply_nq`): per behavioural
+  region FEDE is solved in closed form at each evaluation's prices (both sides linear in FEDE); a trade region's feed of a
+  product changes by the sum of its regions' changes over CAPRI's base feed of all its members (those with supply models
+  in CAPRI, outside FeedBal_'s domain, held). The raw milk output in the balance is the dairy block's of the latest
+  evaluation (the block is solved later in the same evaluation). The dairy products fed keep the FMIL block.
+- REGISTERED: CAPRI's FeedFudge_ (non-negative feed) not ported (feed floored at 0); the share rule of the fit's
+  feasibility loop read per region (`build_feed_energy.py`); CAPRI's FEDE elasticity calibration normalises FEDE by 1,
+  its FeedNQ_ by the market's INPE: the market follows the equation.
+

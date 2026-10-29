@@ -28,6 +28,14 @@ class FeedMixin(MarketStateMixin):
     #: elasticities measured on the supply models with the market supply Hessian (calibrate_supply.gms l. 521-560).
     #: false: the bulks fixed at the supply models' within a solve (until 29 October 2026)
     feed_bulk_in_market = setting("market.feed_bulk_in_market")
+    #: CAPRI's non-EU feed demand (arm/market_model.gms FeedNQ_ and FeedBal_, l. 1018-1047; audit M3): outside the regions
+    #: with supply models each behavioural region's feed is its normalised-quadratic feed function of the Arm1 prices and
+    #: its feed energy price FEDE, which clears its feed energy balance against its animal output (the market supply
+    #: functions, whose FEDE column moves with it). false: one constant-elasticity function per trade region and
+    #: product (p_ElasFeed, feed_demand_nonEU.json) and FEDE held (until 29 October 2026)
+    noneu_feed_nq = setting("market.noneu_feed_nq")
+    #: arm/arm_sets.gms XX_ANIM_FEED: the animal products whose output needs feed energy (CAPRI's codes)
+    ANIM_FEED = ("BEEF", "PORK", "SGMT", "POUM", "EGGS", "MILK")
 
     def _feed_bulk_elas(self) -> dict:
         """{(member state, bulk): {product: elasticity}}: the supply models' bulk use per unit change of the product's
@@ -281,6 +289,122 @@ class FeedMixin(MarketStateMixin):
             for p, q in self.eu_feed_byproduct_output(reg).items():
                 if p in S.columns:
                     S.at[reg, p] = max(0.0, q)
+
+    def _noneu_feed_params(self) -> dict:
+        """CAPRI's feed energy balance of the non-EU behavioural regions without supply models (audit M3;
+        tools/build/build_feed_energy.py, build_noneu_feed_nq.py), per region: its trade region, the base feed per
+        CAPRI product (kt) with its calories and model code, the feed function's terms in the price ratios
+        ({product: {y: h_ratio}}, y a model commodity or FEDE), the base animal output (kt), the supply functions' terms
+        of the animal products ({product: {y: h_ratio}}, y a model commodity, MILK or FEDE) and the feed conversion
+        factors (kcal fed per kg); and the trade regions' total base feed per model commodity."""
+        c = getattr(self, "_nfp_cache", None)
+        if c is not None:
+            return c
+        inp = self._inp()
+        out: dict = {"rms": {}, "totals": {}}
+        for t in inp.csv("noneu_feed_energy.csv").itertuples(index=False):
+            out["rms"][t.rms] = {"feed0": {}, "kcal": {}, "xm": {}, "terms": {}, "prod0": {}, "sterms": {}, "conv": {}}
+        R = out["rms"]
+        for t in inp.csv("noneu_feed_base.csv", keep_default_na=False).itertuples(index=False):
+            d = R.get(t.rms)
+            if d is None:
+                continue
+            d["tr"] = t.trade_region
+            d["feed0"][t.capri_x] = float(t.feed_kt)
+            d["kcal"][t.capri_x] = float(t.kcal_per_kg)
+            d["xm"][t.capri_x] = t.x
+        for t in inp.csv("noneu_feed_nq.csv", keep_default_na=False).itertuples(index=False):
+            d = R.get(t.rms)
+            if d is None or not t.y:
+                continue
+            row = d["terms"].setdefault(t.capri_x, {})
+            row[t.y] = row.get(t.y, 0.0) + float(t.h_ratio)
+        for t in inp.csv("noneu_feed_conv.csv").itertuples(index=False):
+            d = R.get(t.rms)
+            if d is not None:
+                d["conv"][t.product] = float(t.feed_conv)
+                d["prod0"][t.product] = float(t.prod_kt)
+        anim = set(self.ANIM_FEED)
+        for t in inp.csv("noneu_market_supply_nq.csv", keep_default_na=False).itertuples(index=False):
+            d = R.get(t.rms)
+            if d is None or t.capri_x not in anim or not t.y:
+                continue
+            row = d["sterms"].setdefault(t.capri_x, {})
+            row[t.y] = row.get(t.y, 0.0) + float(t.h_ratio)
+        for t in inp.csv("noneu_feed_totals.csv").itertuples(index=False):
+            out["totals"][(t.trade_region, t.x)] = float(t.feed_kt)
+        self._nfp_cache = out
+        return out
+
+    def noneu_fede(self, arm_ratio: pd.DataFrame, prod_ratio: pd.DataFrame, milk_ratio: Optional[dict] = None) -> dict:
+        """CAPRI's FeedBal_ per non-EU behavioural region without supply models: the feed energy price (as a ratio to
+        its calibration value) at which the energy of the feed used equals the energy its animal output needs,
+
+            sum_x kcal_x feed_x(arm prices, FEDE)  =  sum_a feedConv_a prod_a(producer prices, raw milk, FEDE),
+
+        both linear in FEDE (FeedNQ_, ProdNQ_), so solved directly. arm_ratio, prod_ratio: the trade regions' Arm1 and
+        producer price ratios (regions x commodities); milk_ratio: {trade region: raw milk price ratio} of the dairy
+        blocks (the latest evaluation's: the dairy block is solved after this, inside the supply response).
+        {region: FEDE ratio}; 1 where the balance has no FEDE response."""
+        P = self._noneu_feed_params()
+        mr = milk_ratio or {}
+        out = {}
+        for rms, d in P["rms"].items():
+            tr = d.get("tr")
+            if tr is None or tr not in arm_ratio.index:
+                continue
+            ra, rp = arm_ratio.loc[tr], prod_ratio.loc[tr] if tr in prod_ratio.index else arm_ratio.loc[tr]
+            e0 = aF = 0.0
+            for x, q0 in d["feed0"].items():
+                k = d["kcal"].get(x, 0.0)
+                if not k:
+                    continue                                   # no calories (p_noCal): not in the balance
+                dq = 0.0
+                for y, h in d["terms"].get(x, {}).items():
+                    if y == "FEDE":
+                        aF += k * h
+                    elif y in ra.index:
+                        dq += h * (float(ra[y]) - 1.0)
+                e0 += k * (q0 + dq)
+            n0 = aN = 0.0
+            for a, cv in d["conv"].items():
+                dq = 0.0
+                for y, h in d["sterms"].get(a, {}).items():
+                    if y == "FEDE":
+                        aN += cv * h
+                    elif y == "MILK":
+                        dq += h * (float(mr.get(tr, 1.0)) - 1.0)
+                    elif y in rp.index:
+                        dq += h * (float(rp[y]) - 1.0)
+                n0 += cv * (d["prod0"].get(a, 0.0) + dq)
+            den = aF - aN
+            out[rms] = 1.0 + (n0 - e0) / den if den > 0 else 1.0
+        return out
+
+    def noneu_feed_change(self, arm_ratio: pd.DataFrame, fede: dict) -> Dict[tuple, float]:
+        """{(trade region, model commodity): relative change of its feed use} from CAPRI's FeedNQ_ of its behavioural
+        regions at the Arm1 price ratios and their FEDE ratios: sum of the regions' feed changes over the trade region's
+        total base feed (CAPRI's, its members with supply models included, whose feed is held)."""
+        P = self._noneu_feed_params()
+        dF: Dict[tuple, float] = {}
+        for rms, d in P["rms"].items():
+            tr = d.get("tr")
+            if tr is None or tr not in arm_ratio.index:
+                continue
+            ra = arm_ratio.loc[tr]
+            ph = float(fede.get(rms, 1.0))
+            for x, q0 in d["feed0"].items():
+                xm = d["xm"].get(x)
+                if not xm:
+                    continue
+                dq = 0.0
+                for y, h in d["terms"].get(x, {}).items():
+                    if y == "FEDE":
+                        dq += h * (ph - 1.0)
+                    elif y in ra.index:
+                        dq += h * (float(ra[y]) - 1.0)
+                dF[(tr, xm)] = dF.get((tr, xm), 0.0) + dq
+        return {k: v / P["totals"][k] for k, v in dF.items() if P["totals"].get(k, 0.0) > 0}
 
     def _feed_demand_params(self) -> dict:
         """(region, feed commodity) -> feed share and p_ElasFeed elasticities (non-EU)."""

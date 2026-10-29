@@ -2981,6 +2981,43 @@ def test_noneu_supply_is_capris_market_supply_function(model):
     assert float(s0.at["USA", "SWHE"]) == float(b.at["USA", "SWHE"])
 
 
+def test_noneu_feed_energy_balance_is_capris(model):
+    """Audit M3: outside the regions with supply models, CAPRI's feed demand is FeedNQ_ (p_hessNQFeed, with the feed
+    energy price FEDE) and FEDE clears FeedBal_ (feed energy = animal output x pv_feedConv, the factors fitted as
+    arm/feed_conv.gms). At the calibration prices the balance holds with FEDE at its calibration value in every region;
+    after a dearer US maize the US balance holds at the solved FEDE, US maize feed falls, and FEDE moves the US supply
+    functions."""
+    mm = model.market_module
+    cols = list(mm.commodities)
+    regs = list(mm.par.base_production.index)
+    one = pd.DataFrame(1.0, index=regs, columns=cols)
+    f0 = mm.noneu_fede(one, one, {})
+    assert len(f0) >= 40 and max(abs(v - 1.0) for v in f0.values()) < 1e-9
+    rr = one.copy()
+    rr.loc["USA", "CORN"] = 1.10
+    f1 = mm.noneu_fede(rr, rr, {})
+    d = mm._noneu_feed_params()["rms"]["USA"]
+    ph = f1["USA"]
+    feed = sum(d["kcal"][x] * (q0 + sum(h * ((ph if y == "FEDE" else float(rr.at["USA", y])) - 1.0)
+                                         for y, h in d["terms"].get(x, {}).items() if y == "FEDE" or y in cols))
+               for x, q0 in d["feed0"].items() if d["kcal"].get(x))
+    need = sum(cv * (d["prod0"][a] + sum(h * ((ph if y == "FEDE" else float(rr.at["USA", y]) if y in cols else 1.0) - 1.0)
+                                         for y, h in d["sterms"].get(a, {}).items()))
+               for a, cv in d["conv"].items())
+    assert abs(feed - need) < 1e-9 * need and abs(ph - 1.0) > 1e-6
+    ch = mm.noneu_feed_change(rr, f1)
+    assert ch[("USA", "CORN")] < 0
+    P = mm._noneu_nq_params()["USA"]
+    assert P["fede"]["USA"]["BEEF"] < 0                      # dearer feed energy: less beef (CAPRI's p_elasSupp)
+    mm.ev.fede_now = {"USA": 1.10}
+    try:
+        s = mm.supply_response(mm.world_prices_base, None, region_ratio=one)
+    finally:
+        mm.ev.fede_now = None
+    exp = float(mm.par.base_production.at["USA", "BEEF"]) + P["fede"]["USA"]["BEEF"] * 0.10
+    assert abs(float(s.at["USA", "BEEF"]) - exp) < 1e-6 * abs(exp)
+
+
 def test_supply_elasticities_reach_every_region_from_capri(data):
     """K30, K32: crops the regional CAPRI sources lack take the member state's calibrated elasticity (tobacco 0.44,
     not the hand-entered 0.213); recoded regions reach the PMP source through the region map or the national row

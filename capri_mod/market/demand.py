@@ -282,10 +282,26 @@ class DemandMixin(MarketStateMixin):
         # FEED
         fb = self._feed_bulk_params()
         fdp = self._feed_demand_params()
-        for (r, c), prm in (fdp or {}).items():                      # other regions: p_ElasFeed (M3 open)
+        # other regions: CAPRI's FeedNQ_ with the feed energy price of FeedBal_ (audit M3), each trade region's feed
+        # changing by its behavioural regions' feed changes over its CAPRI base feed; else (market.noneu_feed_nq off, or
+        # outside a bilateral evaluation) one constant-elasticity function per region and product (p_ElasFeed)
+        fnq, fnq_regs = None, set()
+        if self.noneu_feed_nq and self.ev.fede_now is not None:
+            fnq = self.noneu_feed_change(pd.DataFrame(PR, index=self.regions, columns=self.commodities), self.ev.fede_now)
+            fnq_regs = {d.get("tr") for d in self._noneu_feed_params()["rms"].values()}
+        _dairy_fed = set(self.DAIRY_TRADED.values())
+        if fnq is not None:
+            for (r, c), g in fnq.items():
+                i, j = R.get(r), Cc.get(c)
+                # the dairy products fed keep the FMIL block below (registered)
+                if i is not None and j is not None and F0[i, j] > 0 and c not in _dairy_fed:
+                    F[i, j] = F0[i, j] * max(0.0, 1.0 + g)
+        for (r, c), prm in (fdp or {}).items():
             i, j = R.get(r), Cc.get(c)
             if i is None or j is None or F0[i, j] <= 0:
                 continue
+            if r in fnq_regs and c not in _dairy_fed:
+                continue                                         # CAPRI's FeedNQ_ above (a cell without terms: base)
             ft = 1.0
             for jn, e in prm["elasticities"].items():
                 jj = Cc.get(jn)

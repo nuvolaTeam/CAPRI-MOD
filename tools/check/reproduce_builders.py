@@ -161,6 +161,7 @@ INVOCATIONS: list[tuple[str, list[str], list[Path]]] = [
     ("build_world_prices", [], [UP / "fao_agg_17_datamarket.txt", D17]),
     ("build_eu_cake_feed", [], [UP / "fao_agg_17_datamarket.txt"]),
     ("build_feed_energy", [], [UP / "data_market_1730defaulta.csv"]),
+    ("build_noneu_feed_nq", [], [UP / "data_market_1730defaulta.csv", UP / "elas_2_1730defaulta.csv"]),
     ("build_greendeal_targets", ["--gams", str(GAMS), "--gdxlib", str(WORK / "gdxlib")], [GAMS / "pol_input" / "greendeal"]),
     ("build_eu_market_blocks", ["--agg", str(GAMS / "aggregation" / "defaultA.agg")], [GAMS / "aggregation" / "defaultA.agg"]),
     ("build_organic_yield_gap", ["--xlsx", str(UP / "yield_effects_ppp.xlsx")], [UP / "yield_effects_ppp.xlsx"]),

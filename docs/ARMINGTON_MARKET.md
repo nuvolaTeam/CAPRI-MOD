@@ -80,8 +80,8 @@ Supply (`supply_response`, region_ratio given):
   completes it (symmetric; tiny terms and products without ProdNQ_ deleted; `tools/lib/_capri_nq.py`), the own and
   cross-price terms over the market products and raw milk (the region's dairy block's price); raw milk's own supply
   function in the dairy block takes its cross-price terms as a shift (`noneu_market_supply_nq.csv`,
-  `tools/build/build_noneu_market_supply_nq.py`; KNOWN_ISSUES K54-3). Held at the calibration point: the feed energy
-  price FEDE (market audit M3) and the rents of CAPRI's land inputs (TCRP, FRUN, FODFAL: CAPRI's market land use,
+  `tools/build/build_noneu_market_supply_nq.py`; KNOWN_ISSUES K54-3). The feed energy price FEDE moves with CAPRI's
+  FeedBal_ ([FEED_MARKETS.md](FEED_MARKETS.md), audit M3, since 29 October 2026). Held at the calibration point: the rents of CAPRI's land inputs (TCRP, FRUN, FODFAL: CAPRI's market land use,
   which the model does not have outside the EU; 4.4% of the terms' absolute size). `market.noneu_supply_nq = false`: one own-price constant elasticity per region and
   product, CAPRI's 2017 p_elasSupp (`supply_elas_region.csv`), the form from 20 to 29 October 2026. Crushing, the non-EU dairy blocks and the biofuel markets set their products' supply at
   the regional prices ([OILSEED_CRUSHING.md](OILSEED_CRUSHING.md), [DAIRY_PROCESSING.md](DAIRY_PROCESSING.md),
@@ -158,8 +158,8 @@ world ratio × premium, i.e. the EU market price ratio. "Premium" is only this b
 - EU market regions: one region by default (CAPRI's member states inside its trade blocks are available as
   `eu_blocks`); member states are not market regions (raw milk, fat and protein are priced per member state in the
   dairy block, young animals per EU market region).
-- Non-EU supply: CAPRI's market supply functions at its 2030 calibration point, without the feed energy price's
-  terms (M3); for the UK, Turkey and the Western Balkans CAPRI has supply models (RMSSUP) and recalibrates the
+- Non-EU supply: CAPRI's market supply functions at its 2030 calibration point, with the feed energy price of CAPRI's
+  FeedBal_ (M3) and the land rents held; for the UK, Turkey and the Western Balkans CAPRI has supply models (RMSSUP) and recalibrates the
   function to them every iteration, the model has none there, so the function stays at the calibration point.
 - EU market supply between iterations: CAPRI's market supply elasticities as given; CAPRI recalibrates its supply
   approximation to the supply models (available as `market_supply_nq`, off).

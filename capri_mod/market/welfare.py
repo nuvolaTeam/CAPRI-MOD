@@ -291,7 +291,11 @@ class WelfareMixin:
         S0 p0 (rr^(e+1) - 1) / (e + 1), for the cells whose supply is that function at the solution (crushing, the
         dairy blocks, raw milk, biofuels and residual feeds have their own blocks: their supply differs from it).
         ProfitFeed: minus the integral of the feed demand F = F0 prod_j PR_j^e_cj (p_ElasFeed), good by good in the
-        model's commodity order."""
+        model's commodity order; with CAPRI's feed functions (market.noneu_feed_nq, audit M3) the integral of the linear
+        functions as reports/welfare.gms l. 500-515 (path-independent for a symmetric Hessian): minus REF (PR - 1)
+        (F0 + dF / 2) per product, plus each behavioural region's feed energy, FEDE0 (phi - 1) (E0 + dE / 2), dE the
+        change of the energy fed (CAPRI integrates the FEDE row of its Hessian; REGISTERED: the energy fed stands for
+        it, equal to the energy needed at the solution by FeedBal_)."""
         out = {"agr": {}, "feed": {}}
         dom0 = self._dom0()
         ev_regs, cols, EVm = getattr(self, "_welf_supply_EV", (None, None, None))
@@ -325,9 +329,46 @@ class WelfareMixin:
         Rr = {x: i for i, x in enumerate(self.regions)}
         Cc = {c: j for j, c in enumerate(self.commodities)}
         fdp = self._feed_demand_params() or {}
+        covered = set()
+        if getattr(self, "noneu_feed_nq", False) and getattr(self, "noneu_supply_nq", False):
+            P_ = self._noneu_feed_params()
+            covered = {d.get("tr") for d in P_["rms"].values()}
+            PRd = pd.DataFrame(PR, index=self.regions, columns=self.commodities)
+            _wl = self.ev.dairy_world_last or {}
+            _wp = self._dairy_world_params() or {}
+            _mr = {g: 1.0 + float(v["z"][_wp[g]["iM"]]) for g, v in _wl.items() if g in _wp and "z" in v}
+            fede = self.noneu_fede(PRd, r, _mr)
+            g = self.noneu_feed_change(PRd, fede)
+            dairy_fed = set(self.DAIRY_TRADED.values())
+            en = {}
+            for t in self._inp().csv("noneu_feed_energy.csv").itertuples(index=False):
+                en[t.rms] = (float(t.fede_kcal), float(t.fede_price))
+            for reg in covered:
+                if reg in skip or reg not in Rr:
+                    continue
+                i = Rr[reg]
+                v = 0.0
+                for c, j in Cc.items():
+                    if c in dairy_fed or not (F0[i, j] > 0 and REF[i, j] > 0):
+                        continue
+                    dF = F0[i, j] * g.get((reg, c), 0.0)
+                    v -= REF[i, j] * (PR[i, j] - 1.0) * (F0[i, j] + 0.5 * dF)
+                for rms, d in P_["rms"].items():
+                    if d.get("tr") != reg or rms not in en:
+                        continue
+                    ph = float(fede.get(rms, 1.0))
+                    dE = sum(d["kcal"].get(x, 0.0) * sum(h * ((ph if y == "FEDE" else float(PRd.at[reg, y])) - 1.0)
+                                                          for y, h in d["terms"].get(x, {}).items()
+                                                          if y == "FEDE" or y in PRd.columns)
+                             for x in d["feed0"])
+                    v += en[rms][1] * (ph - 1.0) * (en[rms][0] + 0.5 * dE)
+                out["feed"][reg] = v / 1000.0
         by_reg: Dict[str, list] = {}
+        _dairy = set(self.DAIRY_TRADED.values())
         for (reg, c), prm in fdp.items():
-            by_reg.setdefault(reg, []).append((c, prm))
+            if reg in covered and c not in _dairy:
+                continue                                     # CAPRI's feed functions above; the dairy products fed
+            by_reg.setdefault(reg, []).append((c, prm))      # keep the FMIL block (as the demand)
         for reg, items in by_reg.items():
             if reg in skip or reg not in Rr:
                 continue
@@ -346,7 +387,7 @@ class WelfareMixin:
                         C *= PR[i, Cc[jn]] ** e
                 I = np.log(rc) if abs(ec + 1.0) < 1e-12 else (rc ** (ec + 1.0) - 1.0) / (ec + 1.0)
                 v -= F0[i, j] * REF[i, j] * C * I
-            out["feed"][reg] = v / 1000.0
+            out["feed"][reg] = out["feed"].get(reg, 0.0) + v / 1000.0
         return out
 
     # ------------------------------------------------------------------

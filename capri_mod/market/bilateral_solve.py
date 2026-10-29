@@ -261,6 +261,14 @@ class BilateralSolveMixin(MarketStateMixin):
             d0r = dom0.reindex(index=r.index, columns=_oc)
             cpd[_oc] = d0r * r[_oc]
         self.ev.crush_prices_now = cpd
+        if self.noneu_feed_nq and self.noneu_supply_nq:
+            # CAPRI's FeedBal_ (audit M3): each non-EU region's feed energy price at these prices, used by its feed
+            # functions (demand_response) and its market supply functions (supply_response); the dairy blocks' raw milk
+            # price of the latest evaluation (the block is solved inside supply_response)
+            _wl = self.ev.dairy_world_last or {}
+            _wp = self._dairy_world_params() or {}
+            _mr = {g: 1.0 + float(v["z"][_wp[g]["iM"]]) for g, v in _wl.items() if g in _wp and "z" in v}
+            self.ev.fede_now = self.noneu_fede(PAr, r, _mr)
         try:
             S = self.supply_response(world, exogenous_supply, region_ratio=r, crush_dom=dp)
             D = self.demand_response(dp, world)

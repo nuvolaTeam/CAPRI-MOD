@@ -566,8 +566,10 @@ class SupplyMixin(MarketStateMixin):
         {trade region: {"rows": {x: {y: h}}, "milk": {y: h}}}, h in kt per unit change of y's price ratio (CAPRI's
         p_hessNQSupp x PPRI0_y / INPE). "rows": the market products' supply, y over the market products and raw milk;
         "milk": per CAPRI region, the raw milk supply's terms in the other prices (its own term is the dairy block's).
-        Columns without a model price (feed energy FEDE, the land rents TCRP, FRUN, FODFAL) are not in the file's
-        model columns: held at their calibration value (registered)."""
+        "fede": {CAPRI region: {x: h}} and "milk_fede": {CAPRI region: h}, the terms in the region's own feed energy
+        price FEDE (CAPRI's FeedBal_, audit M3: one price per CAPRI region, so kept per region). Columns without a model
+        price (the land rents TCRP, FRUN, FODFAL) are not in the file's model columns: held at their calibration value
+        (registered)."""
         c = getattr(self, "_noneu_nq_cache", None)
         if c is not None:
             return c
@@ -577,7 +579,14 @@ class SupplyMixin(MarketStateMixin):
             y = t.y if isinstance(t.y, str) else ""
             if not y or t.trade_region not in self.regions or t.trade_region in eu_:
                 continue
-            d = out.setdefault(t.trade_region, {"rows": {}, "milk": {}})
+            d = out.setdefault(t.trade_region, {"rows": {}, "milk": {}, "fede": {}, "milk_fede": {}})
+            if y == "FEDE":
+                if t.x == "MILK":
+                    d["milk_fede"][t.rms] = d["milk_fede"].get(t.rms, 0.0) + float(t.h_ratio)
+                else:
+                    f_ = d["fede"].setdefault(t.rms, {})
+                    f_[t.x] = f_.get(t.x, 0.0) + float(t.h_ratio)
+                continue
             if t.x == "MILK":
                 if y != "MILK":
                     m_ = d["milk"].setdefault(t.rms, {})
@@ -591,10 +600,15 @@ class SupplyMixin(MarketStateMixin):
     def _noneu_milk_shift(self, reg, cols, r_) -> dict:
         """The change of the raw milk supply of each of the region's CAPRI regions from the prices of the other
         products (ProdNQ_ MILK's cross-price terms), kt; the dairy block adds the own-price term."""
-        terms = (self._noneu_nq_params().get(reg) or {}).get("milk") or {}
+        prm = self._noneu_nq_params().get(reg) or {}
+        terms = prm.get("milk") or {}
         ci = {c: j for j, c in enumerate(cols)}
-        return {rms: float(sum(h * (float(r_[ci[y]]) - 1.0) for y, h in t.items() if y in ci))
-                for rms, t in terms.items()}
+        out = {rms: float(sum(h * (float(r_[ci[y]]) - 1.0) for y, h in t.items() if y in ci))
+               for rms, t in terms.items()}
+        fede = self.ev.fede_now or {}
+        for rms, h in (prm.get("milk_fede") or {}).items():
+            out[rms] = out.get(rms, 0.0) + h * (float(fede.get(rms, 1.0)) - 1.0)     # FEDE (audit M3)
+        return out
 
     def _noneu_market_supply_nq(self, supply, cols, ratio_of, milk_ratio_of, sup_cols):
         """The non-EU market regions' supply of the market products as CAPRI's ProdNQ_ (market audit step D, K54-3):
@@ -610,6 +624,8 @@ class SupplyMixin(MarketStateMixin):
             r_ = ratio_of(reg)
             mr = float(milk_ratio_of(reg))
             skip = sup_cols.get(reg, set())
+            fd = d.get("fede") or {}
+            fede = self.ev.fede_now or {}
             rec = self._welf_noneu_nq.setdefault(reg, {})
             for x, terms in d["rows"].items():
                 if x not in ci or x in skip or x not in supply.columns:
@@ -623,6 +639,9 @@ class SupplyMixin(MarketStateMixin):
                         dq += h * (mr - 1.0)
                     elif y in ci:
                         dq += h * (float(r_[ci[y]]) - 1.0)
+                for rms, fx in fd.items():                     # each CAPRI region's feed energy price (audit M3)
+                    if x in fx:
+                        dq += fx[x] * (float(fede.get(rms, 1.0)) - 1.0)
                 supply.at[reg, x] = max(q0 + dq, 0.0)
                 rec[x] = (q0, dq)
 

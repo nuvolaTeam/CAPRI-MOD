@@ -25,6 +25,9 @@ Outputs (capri_data/2017/market):
   noneu_feed_nq.csv    trade_region, rms, x, y, capri_x, capri_y, h, p0_y, inpe, h_ratio   (x, y model codes; y FEDE,
                        or empty for a price the model does not have: held)
   noneu_feed_base.csv  trade_region, rms, capri_x, x, feed_kt, kcal_per_kg   (every product the region feeds at CAL)
+  noneu_feed_totals.csv trade_region, x, feed_kt   (CAPRI's feed at CAL of all the trade region's non-EU behavioural
+                       regions per model commodity, the members with supply models included: the base the regions'
+                       feed changes are relative to)
 
     python tools/build/build_noneu_feed_nq.py
 """
@@ -58,6 +61,20 @@ def main() -> None:
     pat = re.compile(r"^'([^']*)'\.'(FEED|ARM1P)'\.'([^']*)'\.'CAL'\s+(\S+)")
     data = {(r, it, p): num(v) for r, it, p, v in read_param(DATA, "Data_CAL", pat, lambda m: m.group(1) in keep)}
     hess = read_feed_hessian(ELAS, lambda r: r in regs)
+    # every non-EU behavioural region's feed at CAL, for the trade regions' totals (the members with supply models in
+    # CAPRI, outside FeedBal_'s domain, included: their feed is held)
+    with open(ROOT / "capri_data" / "shared" / "rms_to_rm.csv", newline="") as f:
+        rm_all = {r["rms"]: r["rm"] for r in csv.DictReader(f)}
+    from build_noneu_market_supply_nq import EU_RM
+    noneu_all = {r for r, m in rm_all.items() if m not in EU_RM}
+    fpat = re.compile(r"^'([^']*)'\.'(FEED)'\.'([^']*)'\.'CAL'\s+(\S+)")
+    tot = {}
+    for r, _, x, v in read_param(DATA, "Data_CAL", fpat, lambda m: m.group(1) in noneu_all):
+        xm = to_model.get(x, "")
+        q = num(v)
+        if xm and q > 0:
+            k = (REGION_MAP.get(rm_all[r], "ROW"), xm)
+            tot[k] = tot.get(k, 0.0) + q
     ep = re.compile(r"^'([^']*)'\.'([^']*)'\.'([^']*)'\.'CAL'\s+(\S+)")
     elas = {(r, x, y): num(v) for r, x, y, v in read_param(ELAS, "p_ElasFeed", ep, lambda m: m.group(1) in regs)}
     stored = {(r, x, y) for r, x, y, _ in read_param(ELAS, "p_hessNQFeed", ep, lambda m: m.group(1) in regs)}
@@ -84,6 +101,10 @@ def main() -> None:
         w = csv.writer(f, lineterminator="\n")
         w.writerow(["trade_region", "rms", "x", "y", "capri_x", "capri_y", "h", "p0_y", "inpe", "h_ratio"])
         w.writerows(rows)
+    with open(OUT / "noneu_feed_totals.csv", "w", newline="") as f:
+        w = csv.writer(f, lineterminator="\n")
+        w.writerow(["trade_region", "x", "feed_kt"])
+        w.writerows((tr, x, repr(q)) for (tr, x), q in sorted(tot.items()))
     with open(OUT / "noneu_feed_base.csv", "w", newline="") as f:
         w = csv.writer(f, lineterminator="\n")
         w.writerow(["trade_region", "rms", "capri_x", "x", "feed_kt", "kcal_per_kg"])
