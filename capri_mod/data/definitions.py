@@ -204,11 +204,11 @@ TRADE_REGIONS = {
     "NGA":   ["NG"],
     "ZAF":   ["ZA"],
     "ETH":   ["ET"],
-    "EGY":   ["EG"],
     "MAR":   ["MA"],
-    "DZA":   ["DZ"],
-    "SAU":   ["SA"],
-    "IRN":   ["IR"],
+    # Egypt, Algeria, Saudi Arabia and Iran were trade regions here without any data (no flows, use, supply or
+    # processing; tariff rows of zeros): CAPRI's behavioural regions EGY and ALG (its market region MED) enter ROW in
+    # every market file, and Saudi Arabia and Iran are no behavioural regions of CAPRI's (capri_data/shared/rms.csv).
+    # Removed 29 October 2026 (KNOWN_ISSUES K45)
     # Norway: CAPRI's market region NO000000 (own market region, aggregation/defaultA.agg), linked to supply
     # models (RMSSUP): its market supply is its supply models' output (KNOWN_ISSUES K56)
     "NOR":   ["NO"],

@@ -1644,7 +1644,10 @@ class CAPRIModel:
             t = pd.read_parquet(cfile)
             ms_h = {ms: g.pivot(index="x", columns="y", values="dq").fillna(0.0) for ms, g in t.groupby("ms")}
             eu, sup, blocks = self._split_hessian(ms_h)
-            self.market_supply_hessian_info = {"source": "cache", "file": str(cfile), "products": len(eu.columns)}
+            # "products" kept as before (the columns with a response here, the prices shocked when computed); both
+            # counts named in either case (29 October 2026)
+            self.market_supply_hessian_info = {"source": "cache", "file": str(cfile), "products": len(eu.columns),
+                                               "prices_shocked": len(cols_y), "columns_with_response": len(eu.columns)}
             self.__dict__.setdefault("market_supply_hessian_log", []).append(dict(self.market_supply_hessian_info))
             return {"eu": eu, "ms": ms_h, "sup": sup, "blocks": blocks}
         import time as _t
@@ -1787,6 +1790,7 @@ class CAPRIModel:
         ms_h = {ms: g.pivot(index="x", columns="y", values="dq").fillna(0.0) for ms, g in t.groupby("ms")}
         eu, sup, blocks = self._split_hessian(ms_h)
         self.market_supply_hessian_info = {"source": "computed", "file": str(cfile), "products": len(cols_y),
+                                           "prices_shocked": len(cols_y), "columns_with_response": len(eu.columns),
                                            "seconds": round(_t.time() - t0, 1), "base_resolve_max_dev_kt": dev}
         if skip:
             self.market_supply_hessian_info.update(regions_skipped=n_skipped, regions_shocked=n_solved)

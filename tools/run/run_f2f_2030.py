@@ -408,6 +408,9 @@ def main():
                     "base_iterations": b.get("metadata", {}).get("n_outer_iterations"),
                     # CAPRI's stop rule at the last iteration, baseline and scenario (capri_mod/utils/capri_stop.py)
                     "capri_stop": {lab_: (d_.get("metadata") or {}).get("capri_stop") for lab_, d_ in (("base", b), ("scen", s))},
+                    # the regional solves' jump check per iteration (supply.nlp_jump_check, K79): the regions checked
+                    # and those it switched to another start's solution (the detail per region: outer_history)
+                    "nlp_jump_check": {lab_: (d_.get("metadata") or {}).get("nlp_jump_check") for lab_, d_ in (("base", b), ("scen", s))},
                      "prices": pmod.price_summary,
                      # regions where CAPRI's form failed (K55, K57): JRC121368's relaxed N target, or IPOPT's last point
                      # kept (non-optimal, as CAPRI)

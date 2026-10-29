@@ -96,7 +96,7 @@ economy-wide feedbacks.
   `cgemrk` modules), not by embedding one. We share the boundary and the
   principle; we differ in maturity, since CAPRI has that linkage implemented and
   this model does not.
-- **NOT insulated from world markets.** The market module carries 30 trade
+- **NOT insulated from world markets.** The market module carries 26 trade
   regions with Armington substitution, so an EU policy moves world prices and
   those feed back into EU supply. Leakage is *modelled*, not excluded — the same
   channel JRC121368 flags when it notes that an EU-only Farm-to-Fork leaks a
@@ -138,7 +138,7 @@ people with access to CAPRI. Two things follow.
 
 **You do not need a CAPRI installation to run it.** The calibrated base-year data
 ships with the repository: CAPRI's 221 regional units, 46 activities, market data for 30
-trade regions (the EU27 and 29 others). `pip install -r requirements.txt` and a two-region baseline runs in a
+trade regions (the EU27 and 25 others). `pip install -r requirements.txt` and a two-region baseline runs in a
 few minutes; a full EU Farm-to-Fork 2030 run takes about 50 minutes on 2 cores
 (§1, At a glance). No GAMS licence, no proprietary solver.
 
@@ -172,7 +172,7 @@ files record how they map to this model's names.
 | Market commodities | 58 |
 | Base year | 2017 (parameterised); scenarios usually solved in 2030 |
 | Supply method | CAPRI's regional models as NLPs, PMP-calibrated (CAPRI's 2030 terms) |
-| Market method | CAPRI's bilateral Armington market: 30 trade regions (31 with CAPRI's EU blocks, optional), transport costs, tariffs, TRQs; dairy block, GL food demand, young animals, CAPRI's market supply functions; Newton + Anderson to < 1e-7 |
+| Market method | CAPRI's bilateral Armington market: 26 trade regions (27 with CAPRI's EU blocks, optional), transport costs, tariffs, TRQs; dairy block, GL food demand, young animals, CAPRI's market supply functions; Newton + Anderson to < 1e-7 |
 | Data validator | 13 pass, 0 warn, 0 fail |
 | Convergence | all 221 regional models solve (one Dutch unit, NL320000, at JRC121368's relaxed N target); under CAPRI's stop rule Farm-to-Fork 2030 converges in 12 iterations, Green Deal 2030 in 37 (reference runs r180, r181, 29 October 2026, on CAPRI's regional units) |
 | Test suite | 225 tests (gate of 29 October 2026: 220 passed, 5 skipped; 21 marked `slow`) |
@@ -604,7 +604,7 @@ model, CAP greening and the Green Deal targets. Key classes: `RegionalSupplyMode
 (one region's program), `CapriRegionalNLP` (its NLP form), `PMPCalibrator`,
 `SupplyModule` (orchestration).
 
-**Market — CAPRI's bilateral spatial market.** 30 trade regions (the EU as one region, or CAPRI's two
+**Market — CAPRI's bilateral spatial market.** 26 trade regions (the EU as one region, or CAPRI's two
 trade blocks; Norway its own region, as CAPRI's NO000000) and 58 commodities, with bilateral trade in two Armington nests, transport costs, tariffs and
 the EU's tariff-rate quotas (`market/bilateral.py`); Generalised Leontief food demand, processing, the dairy
 block, biofuel markets, feed bulks and young-animal markets. EU supply enters through CAPRI's market supply
@@ -1499,7 +1499,7 @@ for practical reasons (to be switched to CAPRI's) are listed with these two in d
 ### 10.3 EU27 as a single market region
 
 The market is CAPRI's bilateral market (two Armington nests over CAPRI's bilateral
-flows, transport costs, tariffs and quotas) with the EU27 as one of its 30 trade
+flows, transport costs, tariffs and quotas) with the EU27 as one of its 26 trade
 regions, trading bilaterally with the others; trade between member states is not
 resolved, as in CAPRI. CAPRI's own default splits the EU into two trade blocks,
 EU_WEST and EU_EAST; that is an option here (`market.eu_blocks = true`), kept off for

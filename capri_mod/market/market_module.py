@@ -54,7 +54,7 @@ class MarketModule(CalibrationMixin, BiofuelMixin, DairyMixin, FeedMixin, Demand
     """
     CAPRI's global market model for the given EU supply (arm/market_model.gms).
 
-    30 trade regions (or the EU as two blocks, eu_blocks) and 58 commodities: bilateral trade with two
+    26 trade regions (or the EU as two blocks, eu_blocks) and 58 commodities: bilateral trade with two
     Armington nests, transport costs, tariffs and the EU's tariff-rate quotas (market/bilateral.py),
     Generalised Leontief food demand, processing (ProcNQ_, oilseed crushing), the dairy block (fat and
     protein), biofuel markets and feed bulks per member state. Non-EU supply responds with own-price

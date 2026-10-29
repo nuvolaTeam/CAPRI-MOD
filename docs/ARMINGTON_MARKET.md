@@ -14,7 +14,8 @@ Code: `capri_mod/market/bilateral.py` (`BilateralCommodity`: one product's trade
 
 ## Regions and products
 
-- 30 trade regions (`definitions.ALL_TRADE_REGIONS`): EU27, 28 non-EU countries and ROW. One of them is Norway (NOR,
+- 26 trade regions (`definitions.ALL_TRADE_REGIONS`): EU27, 24 non-EU countries and ROW (Egypt, Algeria, Saudi
+  Arabia and Iran, regions without data, removed on 29 October 2026: KNOWN_ISSUES K45). One of them is Norway (NOR,
   since 21 October 2026, KNOWN_ISSUES K56): CAPRI's market region NO000000, its own market region in
   `gams/aggregation/defaultA.agg` and linked to supply models (RMSSUP); before, CAPRI's bilateral data folded it into
   ROW while its supply regions NO01-NO07 fed the EU's market supply.
