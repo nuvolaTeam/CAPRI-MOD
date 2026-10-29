@@ -40,9 +40,9 @@ Usage
 -----
     python tools/build/build_capri_base.py <dir with res_17<CC>.txt dumps>
 
-Writes base_areas, land_availability, animal_numbers, yields, variable_costs (supply), nutrients_regional and
-sources/capreg/capreg_producer_prices.csv on the units, with the columns they have; the columns other builders
-add (the sheep and goat split, the animal yields, prices of other items, OTHER_AG) are filled when those run.
+Writes base_areas, land_availability, animal_numbers and nutrients_regional (supply) on the units, each from scratch:
+every cell from CAPRI's dumps (one writer per table, 29 October 2026). Yields, costs and producer prices are written
+by build_crop_economics_2017.py.
 """
 
 from __future__ import annotations
@@ -67,6 +67,12 @@ COSTS = SUPPLY / "variable_costs.csv"
 #: their EU totals, 9.47 and 5.89 Mt, match the real ~10.8 and ~7. NITF is NOT
 #: an application rate - it equals NRET, a nitrogen requirement.
 NUTRIENTS = SUPPLY / "nutrients_regional.csv"
+#: the layouts of the tables written (columns in the committed files' order)
+AREA_COLS = ["SWHE", "DWHE", "RYEM", "BARL", "OATS", "CORN", "OCER", "PARI", "PULS", "SUGB", "POTA", "TOMA", "OVEG",
+             "APPL", "OFRU", "CITR", "TAGR", "WINE", "OLIV", "TABO", "GRAS", "TOBA", "TEXT", "MAIF", "OFOD", "SETA",
+             "RAPE", "SUNF", "SOYA", "OOIL", "OCRO", "OIND", "NURS", "FLOW"]
+LAND_COLS = ["ARABLE", "PERMANENT", "GRASSLAND", "FALLOW"]
+HERD_COLS = ["DCOW", "SCOW", "COWS", "BULL", "HEIF", "CALV", "PIGS", "PIGF", "HENS", "POUL", "SHGM", "SHGF"]
 PRICES = _ROOT / "capri_data" / "sources" / "capreg" / "capreg_producer_prices.csv"
 
 # ---------------------------------------------------------------- crop map --
@@ -172,18 +178,14 @@ def main(dump_dir: Path):
     missing = [r for r in regs if r not in capri]
     assert not missing, f"no CAPRI rows for {missing}"
 
-    def frame(path):
-        """the table on the units: as it is if it already holds exactly the units (this builder re-run, or the producer
-        prices written by extract_all_from_data2.py first), else its columns, empty (columns other builders fill stay
-        empty until they run)"""
-        t = _read_csv(path, index_col=0)
-        if sorted(map(str, t.index)) == sorted(regs):
-            return t.reindex(regs).astype(float)
-        return pd.DataFrame(index=pd.Index(regs, name=t.index.name), columns=t.columns, dtype=float)
-    areas, land, herds = frame(AREAS), frame(LAND), frame(HERDS)
-    # OTHER_AG (other agricultural land): written by no builder, of unknown origin (template-like values: 6.25, 2.97619);
-    # read only by the environmental module's HNV indicator through the land total. Dropped 27 October 2026
-    land = land.drop(columns=["OTHER_AG"], errors="ignore")
+    # the three tables from scratch on the units, in their layout (until 29 October 2026 the builder took the layout,
+    # and any cell it does not write, from the committed file: a read of its own output, so the tables could not be
+    # built from blank). The column orders are the files' as committed: the model takes its crop order from
+    # base_areas.csv (capri_pmp, the supply model), so the order is kept, not re-sorted.
+    areas = pd.DataFrame(index=pd.Index(regs, name="region"), columns=AREA_COLS, dtype=float)
+    land = pd.DataFrame(index=pd.Index(regs, name="region"), columns=LAND_COLS, dtype=float)
+    herds = pd.DataFrame(index=pd.Index(regs), columns=HERD_COLS, dtype=float)
+    # (land_availability's OTHER_AG, of unknown origin and written by no builder, was dropped 27 October 2026)
     nutrients = pd.DataFrame(index=pd.Index(regs, name=areas.index.name), columns=[c for c in CROP_MAP], dtype=float)
     spec = build_spec(capri, regs)
 

@@ -83,8 +83,10 @@ COMMODITY_MAP = {
 
 DUMP = Path("/mnt/user-data/uploads/res_0_1717cap_after_2014_cal_from_data_caldefaulta.csv")
 # RSA is a different CAPRI region from ZAF (South Africa) -> ROW.
-#: oilseed-crushing products, added for the crushing module
-EXTRA_COMMODITIES = ["RAPO", "SUNO", "SOYO", "RAPC", "SUNC", "SOYC"]
+#: the commodities beyond the 2021 matrix's columns: sheep and goat meat, and the oilseed-crushing products (added for
+#: the crushing module). Until 29 October 2026 the builder took SGMT from the columns of its own output (a read of the
+#: file it writes); the column list is now declared here, in the same order.
+EXTRA_COMMODITIES = ["SGMT", "RAPO", "SUNO", "SOYO", "RAPC", "SUNC", "SOYC"]
 RECORD = re.compile(
     r"^'([^']+)'\.'([^']+)'\.'ImportQ'\.'([A-Z0-9]+)'\.'2017'\s+([-\d.Ee+]+)")
 
@@ -116,9 +118,7 @@ def main() -> None:
 
     cur_path = args.data_dir / "sources" / "fao_2021" / "trade_flows_2021.csv"
     cur = _read_csv(cur_path, index_col=[0, 1])
-    cur17_path = args.data_dir / "shared" / "trade_flows_2017.csv"
-    cur17_cols = list(_read_csv(cur17_path, index_col=[0, 1]).columns) if cur17_path.exists() else []
-    commodities = list(dict.fromkeys(list(cur.columns) + cur17_cols + EXTRA_COMMODITIES))
+    commodities = list(dict.fromkeys(list(cur.columns) + EXTRA_COMMODITIES))
     print(f"current matrix: {cur.shape[0]} region pairs x {len(commodities)} commodities")
 
     inv_comm = {v: k for k, v in COMMODITY_MAP.items()}

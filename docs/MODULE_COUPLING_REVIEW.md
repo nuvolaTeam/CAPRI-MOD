@@ -92,10 +92,10 @@ forecast on its own market prices, and CAPRI's stop rule with Norway out from th
 state inside the market, M5, and per region in the non-EU dairy blocks, M11) and the member states' milk price step
 (CAPRI's step weights with the price forecast; K62 superseded).
 
-Data items in the market files that no module reads: the `FATS` and `OFOD_M` rows of `world_prices.csv` (both
-markets were removed: no supply, no use, invented totals; `armington_params.csv`, which also carried them, was removed
-on 29 October 2026, KNOWN_ISSUES K72). The files also carry `DWHE`
-and `SUGB` rows, which are price-only rows (durum is traded within wheat; beet has no market, as in CAPRI).
+The `FATS` and `OFOD_M` rows of `world_prices.csv` (markets removed earlier: no supply, no use, invented totals) were
+removed on 29 October 2026 when the file got its one builder (`tools/build/build_world_prices.py`). The file also
+carries `DWHE` and `SUGB` rows, which are price-only rows (durum is traded within wheat; beet has no market, as in
+CAPRI): the outer loop's price signal takes its index from the table and sets them from soft wheat and sugar.
 
 ## History
 

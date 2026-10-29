@@ -66,15 +66,10 @@ def main():
         rows.append({"region": reg, "surplus_kg_n_per_ha": v, "source": how})
     out = pd.DataFrame(rows)
     dest = ROOT / "capri_data" / "2017" / "policy" / "capri_baseline_surplus_2030.csv"
-    old = _read_csv(dest).set_index("region")["surplus_kg_n_per_ha"] if dest.exists() else None
     out.to_csv(dest, index=False)
     kinds = out["source"].str.extract(r"^(CAPRI 2030 reference, NUTS-2|CAPRI 2030 reference, national|"
                                       r"CAPRI 2030 reference, [A-Z]{2}000000|no CAPRI)")[0].value_counts()
     print(f"wrote {dest.name}: {len(out)} regions\n{kinds.to_string()}")
-    if old is not None:
-        o = out.set_index("region")["surplus_kg_n_per_ha"]
-        d = (o - old.reindex(o.index)).abs().sort_values(ascending=False)
-        print("largest changes:", ", ".join(f"{r} {old.get(r):.0f}->{o[r]:.0f}" for r in d.index[:12] if d[r] == d[r]))
     print("nine highest:", ", ".join(f"{r} {v:.0f}" for r, v in
                                      out.set_index("region")["surplus_kg_n_per_ha"].dropna().sort_values(ascending=False).head(10).items()))
 

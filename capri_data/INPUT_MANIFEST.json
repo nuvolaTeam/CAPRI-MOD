@@ -120,7 +120,7 @@
    "dimension": "commodity",
    "capri_symbol": "FAO_agg_17_defaulta p_dataMarket 'World'.'PMRK'.<product>.'BAS'",
    "status": "GDX",
-   "coverage": "39 market commodities; per-row CAPRI code in sources/world_price_provenance.json",
+   "coverage": "the 58 market commodities and DWHE, SUGB; per-row CAPRI code in sources/world_price_provenance.json (tools/build/build_world_prices.py)",
    "note": "Validated via the producer/world arbitrage ratio using verified MPRI prices. Model retained for 7 commodities where CAPRI implies a domestic price below world; EGGS corrected from CAPRI (63.4 -> 1173.8). Rows = the market module's 39 traded commodities, as armington_params.csv (October 2026: four price-only rows - SOYA_OIL and SOYM, older names duplicating SOYO and SOYC, and WMLK, CREM, dairy products outside the market set - removed as orphans; provenance kept in sources/world_price_provenance.json). Sprint 9f: + FRMI, CREM, COCM, WMIO, CASE (CAPRI's dairy products, traded)."
   },
   "eu_mfn_tariffs.csv": {

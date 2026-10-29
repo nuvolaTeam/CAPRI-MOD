@@ -33,10 +33,6 @@ if __name__ == "__main__":
             d = (q[parts].sum(axis=1) - tot[act]).abs().max()
             print(f"  {act}: products {', '.join(p.split('.')[1] for p in parts)}; max |sum - total| {d:.2e}")
     q.to_csv(D / "livestock_output_by_product_coef.csv")
-    old = _read_csv(D / "livestock_product_value_by_market_coef.csv", index_col=0)
-    new = B.build_product_values_by_market(Path(a.dump_dir))
-    same = [c for c in old.columns if c in new.columns]
-    print(f"by-market values: unchanged columns max |diff| {float((new[same] - old[same]).abs().max().max()):.2e}; "
-          f"new {sorted(set(new.columns) - set(old.columns))}")
+    new = B.build_product_values_by_market(Path(a.dump_dir))   # (from scratch; no comparison with the committed file)
     new.to_csv(D / "livestock_product_value_by_market_coef.csv")
     print("wrote livestock_output_by_product_coef.csv, livestock_product_value_by_market_coef.csv")

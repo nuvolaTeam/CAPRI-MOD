@@ -5,7 +5,7 @@ form, solved with IPOPT). The tables give one line per issue; the details follow
 was found, where it acts, whether the tagged release 9t (`capri-mod-9t.zip`) carries it, and its status. 9t.1 is 9t
 with every fix below except K5, which needs the prototype's model change.
 
-## Open (17)
+## Open (19)
 
 | # | Issue | Status |
 |---|---|---|
@@ -26,6 +26,8 @@ with every fix below except K5, which needs the prototype's model change.
 | [K83](#k83) | A one-region Farm-to-Fork run's market diverges in its second step | open |
 | [K86](#k86) | Ammonia housing and storage options without their farm-size cost curves in Denmark, Lithuania and Croatia | open |
 | [K89](#k89) | Failing regional solves take most of IPOPT's time | open |
+| [K90](#k90) | The wheat market's world price is CAPRI's soft-wheat price, not its wheat product's | open |
+| [K91](#k91) | CAPRI's trend projection (captrd_2030.json) has no extractor | open |
 
 ## Resolved (72)
 
@@ -1062,3 +1064,36 @@ rounds reproduces its own rounded file). Some may round keys or comparisons rath
   n_cascade_factors.csv, each built later in the list than its reader): the technology model's initial shares off by up to 1.6e-4
   relative, the AD option by 2.6e-11. The ammonia chain now runs in dependency order and was rebuilt (batch 2).
 
+<a id="k90"></a>
+### K90: The wheat market's world price is CAPRI's soft-wheat price, not its wheat product's (found 29 October 2026, making build_world_prices.py)
+
+The model's wheat market SWHE is CAPRI's market product WHEA (capri_data/schema/codes/model_commodities.csv, from
+build_feed_bulks.COMMODITY), but its world price in world_prices.csv is FAO_agg's 'World'.'PMRK'.'SWHE'.'BAS', 171.93
+EUR/t, as the file has held it since the earlier writer, not 'WHEA', 196.60. FAO_agg's WHEA price lies above both
+its soft and durum wheat prices (171.93, 173.00), so it is not their average; which one CAPRI's market model starts
+from for WHEA is not checked yet (arm/ data preparation).
+
+- **Effect:** the world price of the wheat market (the bilateral market's base world price, the EU price signal's
+  denominator); a change would move the base calibration of the wheat market
+- **In 9t:** not checked
+- **Status:** **open**: kept as it was (tools/build/build_world_prices.py SOURCE_CODE); to be checked against CAPRI's
+  market data preparation before any change, a decision for the project lead
+
+<a id="k91"></a>
+### K91: CAPRI's trend projection (captrd_2030.json) has no extractor (found 29 October 2026, the data pipeline)
+
+capri_data/trajectories/captrd_2030.json, the alternative baseline trajectory (`--trajectory captrd`; the default is
+CAPRI's 2030 reference, capri_ref_2030.json), holds CAPRI's CAPTRD trend factors extracted from a series slice
+(its `_provenance`: "/tmp/series_slice.csv", per-activity medians of per-region cumulative ratios, band 0.2-5) by a
+script that is not in the repository. tools/build/build_trajectory_model_keys.py adds the model's activity and region
+keys to the file in place (idempotent: rerun on its output, it writes the same file), so the file cannot be built from
+blank; it was taken out of the pipeline's builder list (tools/check/reproduce_builders.py NOT_AUDITED). Beyond the
+missing script, the step overwrites a BULL growth entry with BULF's, so whether the slice had a BULL factor of its own
+cannot be told from the file.
+
+- **Effect:** the `captrd` trajectory only (not the default runs)
+- **In 9t:** not checked
+- **Status:** **open**: an extractor from CAPTRD's results (capri_reference/captrd_results/1770, its `series` position)
+  writing the CAPRI-keyed factors to capri_data/sources, read by build_trajectory_model_keys.py into
+  captrd_2030.json, would make the file reproducible; its factors would differ from the file's where the original
+  slice differed (not known)

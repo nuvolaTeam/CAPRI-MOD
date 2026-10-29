@@ -133,20 +133,20 @@
    "note": "BPS = CAPRI's premiums per ha of UAA over all schemes; ANC, AES, ORGANIC, COUPLED are 0 and unused (the split by scheme comes from premium_scheme_shares_2030.csv)"
   },
   "world_prices.csv": {
-   "source": "CAPRI FAO_agg_17_defaulta p_dataMarket 'World'.'PMRK'.<product>.'BAS' (base-period world market price); per-commodity mapping and previous values in sources/world_price_provenance.json",
+   "source": "CAPRI FAO_agg_17_defaulta p_dataMarket 'World'.'PMRK'.<product>.'BAS' (base-period world market price); OLIV from OLIO's price and the EU's oil extraction, FPRI export-weighted from CAPRI's 2017 market; built by tools/build/build_world_prices.py, per-row CAPRI code in sources/world_price_provenance.json",
    "vintage": "2017",
    "units": "EUR/t",
    "domain": "prices",
    "status": "live",
    "shape": {
-    "rows": 62,
+    "rows": 60,
     "cols": 1,
     "columns": [
      "price"
     ]
    },
-   "note": "Replaced 2026-10: the previous values ('CAPRI SUA') differed from CAPRI's base world prices for most commodities, and the oilseed rows held CAKE prices. OOIL, OLIV, FATS, OFOD_M, WMLK kept (no unambiguous CAPRI counterpart). Sprint 9f: + FRMI, CREM, COCM, WMIO, CASE (CAPRI's dairy products, traded).",
-   "commodity_set": "exactly the market module's 39 traded commodities (definitions.MARKET_COMMODITIES) (armington_params.csv, which had the same rows, was removed on 29 October 2026: KNOWN_ISSUES K72)"
+   "note": "Replaced 2026-10: the previous values ('CAPRI SUA') differed from CAPRI's base world prices for most commodities, and the oilseed rows held CAKE prices. OOIL, OLIV, FATS, OFOD_M, WMLK kept (no unambiguous CAPRI counterpart). Sprint 9f: + FRMI, CREM, COCM, WMIO, CASE (CAPRI's dairy products, traded). 29 October 2026: one builder (tools/build/build_world_prices.py), every row from its source at full precision (at most 0.02% from the 2- and 1-decimal values held before); the placeholder rows FATS and OFOD_M removed; the provenance's previous values are in the file's git history.",
+   "commodity_set": "the market module's 58 commodities (definitions.MARKET_COMMODITIES) and DWHE, SUGB (price-only rows: the outer loop's price signal takes its index from the table)"
   },
   "trade_flows.csv": {
    "source": "FAO",

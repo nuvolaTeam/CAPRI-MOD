@@ -31,7 +31,7 @@ Files are under `capri_data/<base_year>/<category>/` (only `2017/` exists); `tra
 
 | File | Content | Source | Shape |
 |---|---|---|---|
-| `world_prices.csv` | base-year world market price (EUR/t) | CAPRI `FAO_agg_17_defaulta` p_dataMarket 'World'.'PMRK'.<product>.'BAS' (code map and previous values in `sources/world_price_provenance.json`) | 62 rows: the 58 market commodities plus `DWHE`, `SUGB` (price-only rows) and `FATS`, `OFOD_M` (rows of removed markets, not read) |
+| `world_prices.csv` | base-year world market price (EUR/t) | CAPRI `FAO_agg_17_defaulta` p_dataMarket 'World'.'PMRK'.<product>.'BAS' (CAPRI code per row in `sources/world_price_provenance.json`) | 60 rows: the 58 market commodities plus `DWHE`, `SUGB` (price-only rows); built by `tools/build/build_world_prices.py` |
 | `producer_prices.csv` | EU-wide producer price per commodity (EUR/t), the fallback where no regional price exists | CAPRI's production-weighted EU price (`tools/build/build_eu_producer_prices.py`, K34) | 42 rows |
 | `fao_market_baseline.json` | market base balances by `region|product` (read by tools/build/build_world_market_baseline.py) | CAPRI FAO_agg (2017) | dict of 454 entries |
 

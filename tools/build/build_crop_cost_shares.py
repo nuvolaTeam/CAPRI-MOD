@@ -11,8 +11,10 @@ other-input shares this file also held were dropped on 24 October 2026: the Gree
 regional changes to CAPRI's regional rows only, where CAPRI has a coefficient.
 
 Source: CAPRI 2017 results res_17<MS>.txt (LEVL, FERT, TOIN per activity).
-Output: capri_data/2017/supply/crop_cost_shares.csv (crop, fert_cost_share); the set-aside row (no input cost in
-CAPRI) is kept as it was.
+Output: capri_data/2017/supply/crop_cost_shares.csv (crop, fert_cost_share). Set-aside is computed like the other crops
+(CAPRI's SETA and FALL: where CAPRI gives them an input cost, 40 regional rows, all of it is fertiliser, so the share
+is 1). Until 29 October 2026 the builder skipped set-aside and kept the file's row as it was (a read of its own output;
+the value, 1.0, is the same).
 
     python tools/build/build_crop_cost_shares.py [--dump-dir /home/claude/work/capreg] [--out FILE]
 """
@@ -49,7 +51,7 @@ def main():
                 v[m.group(1)][(m.group(2), m.group(3))] = float(m.group(4))
     sp = importlib.util.spec_from_file_location("base", ROOT / "tools" / "build" / "build_capri_base.py")
     base = importlib.util.module_from_spec(sp); sp.loader.exec_module(base)
-    crops = {c: acts for c, acts in base.CROP_MAP.items() if c != "SETA"}
+    crops = dict(base.CROP_MAP)
     tot = defaultdict(lambda: defaultdict(float))
     for reg, d in v.items():
         for col, acts in crops.items():
@@ -59,16 +61,12 @@ def main():
                     continue
                 tot[col]["toin"] += L * T
                 tot[col]["fert"] += L * d.get((act, "FERT"), 0.0)
-    old = _read_csv(DEST, index_col=0)
     new = pd.DataFrame({c: {"fert_cost_share": t["fert"] / t["toin"]} for c, t in tot.items() if t["toin"] > 0}).T
-    if "SETA" in old.index:
-        new.loc["SETA"] = old.loc["SETA", ["fert_cost_share"]]
     new = new.sort_index()
     new.index.name = "crop"
     new[["fert_cost_share"]].to_csv(a.out)
-    cmp = old[["fert_cost_share"]].join(new, rsuffix="_new", how="outer")
     print(f"wrote {a.out}: {len(new)} crops")
-    print(cmp.to_string())
+    print(new.to_string())
 
 
 if __name__ == "__main__":

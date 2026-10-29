@@ -46,6 +46,7 @@ WORK = Path(os.environ.get("CAPRI_WORK", "/home/claude/work"))
 D17 = WORK / "capreg"                       # res_17<CC>.txt dumps of CAPREG's 2017 base (DATA2)
 GAMS = WORK / "allgms" / "gams"             # CAPRI's GAMS code
 REF = UP / "res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv"
+SETS = WORK / "capri_reference" / "sets" / "simini_21730"   # CAPRI's sets (capri_reference/README.md), not in git
 BP = "capri_data/sources/baseline_pmp"
 S = "capri_data/2017/supply"
 
@@ -53,6 +54,8 @@ S = "capri_data/2017/supply"
 INVOCATIONS: list[tuple[str, list[str], list[Path]]] = [
     ("extract_gd2030_nbalance", [], [REF]),
     ("build_regional_units", [], []),
+    ("build_code_lists", ["--sets", str(SETS)], [SETS]),
+    ("build_unit_catalogue", ["--gms", str(GAMS / "CAPRIunits.gms")], [GAMS / "CAPRIunits.gms"]),
     ("extract_all_from_data2", ["--export-dir", str(WORK / "inputs/capri_export_zip/capri_export")],
      [WORK / "inputs/capri_export_zip/capri_export"]),
     ("extract_remaining_nine", ["--export-dir", str(WORK / "inputs/capri_export_zip/capri_export")],
@@ -99,7 +102,6 @@ INVOCATIONS: list[tuple[str, list[str], list[Path]]] = [
                               "--out", f"{S}/pmp_recipe_2030.csv"], [REF]),
     ("build_intensity_q_2030", [], []),
     ("build_trajectory_capri_ref", [], [REF, D17]),
-    ("build_trajectory_model_keys", [], []),
     ("build_winter_cover_option", [], []),
     ("build_manure_n2o", [], [D17]),
     ("build_capri_level_ratio", [], [D17]),
@@ -153,7 +155,8 @@ INVOCATIONS: list[tuple[str, list[str], list[Path]]] = [
     ("build_enteric_feed_factors", [str(GAMS), str(D17)], [GAMS, D17]),
     ("build_eu_ms_balance", [], []),
     ("build_feed_bulks", [], []),
-    ("build_feed_byproducts", [], [UP / "fao_agg_17_datamarket.txt"]),
+    ("build_feed_byproducts", [], []),
+    ("build_world_prices", [], [UP / "fao_agg_17_datamarket.txt", D17]),
     ("build_feed_demand_nonEU", [], [UP / "elas_2_1730defaulta.csv", UP / "data_market_1730defaulta.csv"]),
     ("build_fert_dist_priors", [], []),
     ("build_fert_options_jul15", [], []),
@@ -203,6 +206,10 @@ NOT_AUDITED = {
     "build_patched_inputs": "superseded one-off (see REGIONAL_UNITS_BUILDERS.md 4.4)",
     "extract_capri_vcs_pair": "input is a GDX inside a zip (cap_after_2014 reference)",
     "build_captrd_sets": "reads capri_reference/sets (not committed; build_capri_sets_reference writes it)",
+    "build_trajectory_model_keys": "edits captrd_2030.json in place (idempotent); the file's CAPRI-keyed part has no "
+                                   "extractor (KNOWN_ISSUES K91)",
+    "build_animal_yields": "a module: build() is called by build_crop_economics_2017, the one writer of yields.csv",
+    "convert_inputs_to_parquet": "a conversion step (Parquet decision deferred), not a builder of data",
 }
 
 TOL_REL, TOL_ABS = 1e-12, 1e-15
