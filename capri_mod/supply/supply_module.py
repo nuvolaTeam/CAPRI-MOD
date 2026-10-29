@@ -1847,8 +1847,23 @@ class RegionalSupplyModel:
         kinds = []
         _tol = float(getattr(type(self), "nlp_tol", 1e-8))
         _tried = []
+        _km = _crn.KKT_MODE
+        _kb = self.__dict__.setdefault("_kkt_base", {}) if _km else None
+
+        def _nsolve(nlp_, xs_, lam=None, tol=None):
+            # the market supply Hessian from the KKT conditions (market.hessian_method = "kkt"): a shock's solve of a
+            # graph the base solved is the first-order step from the base's solution (CapriRegionalNLP.kkt_step);
+            # else IPOPT, counted (_kkt_ipopt) where the method asked for a step
+            if _km == "apply":
+                b_ = _kb.get(nlp_.graph_key())
+                if b_ is not None and len(b_["pval"]) == len(nlp_.pval) and len(b_["x"]) == len(nlp_.lbx):
+                    return nlp_.kkt_step(b_)
+                self._kkt_ipopt = int(getattr(self, "_kkt_ipopt", 0) or 0) + 1
+            return nlp_.solve(xs_, lam=lam, tol=tol) if tol is not None else nlp_.solve(xs_, lam=lam)
         for kind, xs, lam_ in starts:
-            res = nlp.solve(xs, lam=lam_, tol=_tol)
+            res = _nsolve(nlp, xs, lam=lam_, tol=_tol)
+            if res["status"] == "KKT_Step":
+                kind = "kkt"
             kinds.append(kind)
             _tried.append((kind, res["status"], float(res["f"]), int(res["iterations"] or 0)))
             if res["success"] or res["status"] in ("Solved_To_Acceptable_Level",):
@@ -1862,7 +1877,7 @@ class RegionalSupplyModel:
             # its objective is more than nlp_warm_check (relative) worse than the last iteration's, the region is also
             # solved from the previous point and from the standard start, and the lowest objective is kept.
             for kind, xs, lam_ in [s_ for s_ in starts if s_[0] != "warm"]:
-                r_ = nlp.solve(xs, lam=lam_, tol=_tol)
+                r_ = _nsolve(nlp, xs, lam=lam_, tol=_tol)
                 _tried.append((kind, r_["status"], float(r_["f"]), int(r_["iterations"] or 0)))
                 if (r_["success"] or r_["status"] in ("Solved_To_Acceptable_Level",)) and float(r_["f"]) < float(res["f"]):
                     res = r_
@@ -1887,7 +1902,7 @@ class RegionalSupplyModel:
                     _done = {k_[0] for k_ in _tried}
                     _f0, _n0 = float(res["f"]), len(_tried)
                     for kind, xs, lam_ in [s_ for s_ in starts if s_[0] not in _done and s_[0] != "warm"]:
-                        r_ = nlp.solve(xs, lam=lam_, tol=_tol)
+                        r_ = _nsolve(nlp, xs, lam=lam_, tol=_tol)
                         _tried.append(("jump:" + kind, r_["status"], float(r_["f"]), int(r_["iterations"] or 0)))
                         # kept only where it gains more than nlp_jump_gain (relative): a lower objective by solver
                         # noise is the same optimum, and switching to it moved the levels for nothing (K79)
@@ -1916,7 +1931,7 @@ class RegionalSupplyModel:
             def _try(sp_):
                 try:
                     nlp_ = CapriRegionalNLP(sp_)
-                    return nlp_, nlp_.solve(nlp_.start(np.asarray(x_start, float)))
+                    return nlp_, _nsolve(nlp_, nlp_.start(np.asarray(x_start, float)))
                 except Exception:
                     return None, None
             for kind_ in _todo:
@@ -1974,6 +1989,8 @@ class RegionalSupplyModel:
             self._nlp_nonoptimal = _nonopt
             _w.warn(f"{self.data.region_id}: IPOPT's last point kept ({_nonopt}, non-optimal), as CAPRI keeps a "
                     f"non-optimal solve", RuntimeWarning)
+        if _km == "record" and _nonopt is None:
+            _kb[gk] = nlp.kkt_record(res)
         _am = spec.get("amm")
         if (_nonopt is None and _am and not _am.get("fixed")
                 and "N_balance" in labels and "mineral_N" not in labels
@@ -1985,7 +2002,7 @@ class RegionalSupplyModel:
                 try:
                     spec_f = dict(spec, amm=dict(_am, fixed=True))
                     nlp_f = CapriRegionalNLP(spec_f)
-                    res_f = nlp_f.solve(np.clip(res["x"], nlp_f.lbx, nlp_f.ubx), tol=_tol)
+                    res_f = _nsolve(nlp_f, np.clip(res["x"], nlp_f.lbx, nlp_f.ubx), tol=_tol)
                     if _ok(res_f):
                         nlp, res, spec = nlp_f, res_f, spec_f
                         gk = nlp.graph_key()
@@ -1993,6 +2010,8 @@ class RegionalSupplyModel:
                         kinds.append("amm-fixed")
                 except Exception:
                     pass
+        if _km == "record" and _nonopt is None:
+            _kb[gk] = nlp.kkt_record(res)
         self._nlp_prev = (gk, res["x"], shape, (res["lam_x"], res["lam_g"]))
         self._nlp_prev_f = float(res["f"])
         # the starts tried and the last one's IPOPT iterations (diagnostics of the outer loop, model.trace_outer)

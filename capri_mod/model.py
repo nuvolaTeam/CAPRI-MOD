@@ -1609,6 +1609,13 @@ class CAPRIModel:
             return q_
         q0 = bridged(supply_results)
         skip = bool(_settings().get("market.hessian_skip_unchanged"))
+        # BEYOND CAPRI (market.hessian_method = "kkt"): the shocks' regional solutions from the KKT conditions at the
+        # base solution recorded by the base re-solve (capri_regional_nlp.KKT_MODE)
+        kkt = str(_settings().get("market.hessian_method")) == "kkt"
+        if kkt and not skip:
+            raise ValueError('market.hessian_method = "kkt" needs market.hessian_skip_unchanged = true (its base '
+                             're-solve records the base points)')
+        from capri_mod.supply import capri_regional_nlp as _crn_h
         cols_y = [c for c in sig0.index if c in q0.columns and float(q0[c].clip(lower=0).sum()) > 1e-6]
         cols_y += [c for c in self.MARKET_SUPPLY_FEED_COLS if c in sig0.index and c not in cols_y]
         cols_y += ["YANI:" + g for g in yani_goods]
@@ -1646,7 +1653,9 @@ class CAPRIModel:
                         "feedblk-rows")
                         # differences to the base re-solved from the same state, regions a shock does not reach not
                         # re-solved (27 October 2026, market.hessian_skip_unchanged; off: the key as before)
-                        + (("base-resolved-skip-unchanged", "full-solve-state") if skip else ()))
+                        + (("base-resolved-skip-unchanged", "full-solve-state") if skip else ())
+                        # 29 October 2026: the shocks' solutions from the KKT conditions (beyond CAPRI)
+                        + (("kkt-step",) if kkt else ()))
                    # at a scenario's state (market.hessian_scenario_iter): its young-animal and member-state milk
                    # prices too (a baseline's key is unchanged)
                    + (repr((sorted((getattr(sm, "yani_price_ratio", None) or {}).items()),
@@ -1725,10 +1734,16 @@ class CAPRIModel:
             _restore(_snap0)
             sm._hess_fp, sm._hess_verify = {}, {}
             sm._hess_probe = "record"
+            if kkt:
+                for mo_ in sm._models.values():
+                    mo_.__dict__.pop("_kkt_base", None)
+                    mo_.__dict__.pop("_kkt_ipopt", None)
+                _crn_h.KKT_MODE = "record"
             try:
                 res_b = sm.run(price_signals=sig0, policy_scenario=pol, regions=regs, verbose=False)
             finally:
                 sm._hess_probe = None
+                _crn_h.KKT_MODE = None
             q_ref = bridged(res_b)
             sm._hess_base_res = res_b
         try:
@@ -1768,10 +1783,13 @@ class CAPRIModel:
                 _restore(_snap0)
                 if skip:
                     sm._hess_probe, sm._hess_shock = ("verify" if verify else "compare"), y
+                if kkt:
+                    _crn_h.KKT_MODE = "apply"
                 try:
                     res = sm.run(price_signals=sig, policy_scenario=pol, regions=regs, verbose=False)
                 finally:
                     sm._hess_probe = None
+                    _crn_h.KKT_MODE = None
                 n_skipped += sum(1 for r_ in res.values() if getattr(r_, "hess_unchanged", False))
                 n_solved += len(res)
                 # the price change each country's models saw (Norway's young-animal prices are its own market's)
@@ -1784,7 +1802,13 @@ class CAPRIModel:
                             rows.append((ms, x, y, v))
         finally:
             sm._hess_probe = None
+            _crn_h.KKT_MODE = None
             sm.__dict__.pop("_hess_base_res", None)
+        n_kkt_ipopt = 0
+        if kkt:
+            for mo_ in sm._models.values():
+                n_kkt_ipopt += int(mo_.__dict__.pop("_kkt_ipopt", 0) or 0)
+                mo_.__dict__.pop("_kkt_base", None)
         # back to the base: the regional models' warm starts and states as the baseline left them
         sm.yani_price_ratio, sm.yani_price_ratio_ms, sm.yani_price_ratio_m = yr0
         sm.feed_bulk_ratio = fb0 if fb0 is not None else self.feed_bulk_price_ratios(sig0)
@@ -1812,6 +1836,9 @@ class CAPRIModel:
         self.market_supply_hessian_info = {"source": "computed", "file": str(cfile), "products": len(cols_y),
                                            "prices_shocked": len(cols_y), "columns_with_response": len(eu.columns),
                                            "seconds": round(_t.time() - t0, 1), "base_resolve_max_dev_kt": dev}
+        if kkt:
+            # the regional solves of the shocks that IPOPT made (the shock changed the problem's structure)
+            self.market_supply_hessian_info.update(method="kkt", kkt_ipopt_solves=n_kkt_ipopt)
         if skip:
             self.market_supply_hessian_info.update(regions_skipped=n_skipped, regions_shocked=n_solved)
             if verify:

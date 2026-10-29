@@ -194,6 +194,12 @@ hessian_scenario_iter = 0
 # Hessian as re-solving every region from that state, with fewer solves. false: every region re-solved, differences
 # to the baseline's own solution (until 27 October 2026; cached Hessians keep their keys)
 hessian_skip_unchanged = true
+# BEYOND CAPRI (the project lead's decision, 29 October 2026): "capri" measures the market supply Hessian as CAPRI does,
+# re-solving the supply models at each 1% price shock (calibrate_supply.gms); "kkt" takes each shock's solution as the
+# first-order step of the KKT conditions from the base solution (the implicit function theorem with the base's active
+# set: the exact derivative where CAPRI's is a 1% difference quotient; no change of the active set within the shock).
+# Needs hessian_skip_unchanged (its base re-solve records the base points)
+hessian_method = "capri"
 # CAPRI's endogenous biofuel markets (BIOF_M; star 3.0 GUI default on); a scenario may set its own
 biofuel_markets = true
 # DEPARTURE: CAPRI's default aggregation has two EU trade blocks (EU_WEST, EU_EAST; aggregation/defaultA.agg);

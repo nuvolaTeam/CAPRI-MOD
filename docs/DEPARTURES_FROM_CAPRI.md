@@ -264,6 +264,19 @@ the rule (trade-block prices, member-state production and feed, after the rule's
 sign, the last above 0.05%: their changes, the rate they shrink at and a rough estimate of the movement still to come
 (metadata capri_stop drift; a warning when the loop stopped). It decides nothing; 0 turns it off.
 
+## Beyond CAPRI: options (default CAPRI's)
+
+### `market.hessian_method = "kkt"` (29 October 2026; the project lead's decision; default `"capri"`)
+
+CAPRI measures the market supply functions' Hessian by re-solving every supply model at a 1% shock of each price
+(supply/calibrate_supply.gms), 41 minutes of a Green Deal run here. With "kkt" each shocked regional solve is the
+first-order step of the KKT conditions from the base solution (CapriRegionalNLP.kkt_step: the implicit function
+theorem with the base's active set, solved in the active rows' null space); IPOPT only where a shock changes the
+problem's structure. It is the exact derivative where CAPRI's is a 1% difference quotient: they differ where the
+active set changes within the shock (a crop leaving its bound) and in second order. Test: activity levels within 2% of
+the largest move of IPOPT's re-solves at 0.1% shocks (DE110000). To be compared on the full Hessian and a run before
+any change of the default.
+
 ## DEPARTURE (to be removed)
 
 | Setting | CAPRI star 3.0 | Default now | Why it differs (recorded at the time) | What switching needs |

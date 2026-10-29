@@ -61,6 +61,15 @@ CACHE_STATS = {"hit": 0, "miss": 0}
 #: ridge weight of the calibration's multiplier fit (CapriRegionalNLP.calibrate), relative to the scaled columns
 CAL_RIDGE = 1e-10
 
+#: the market supply Hessian from the KKT conditions (market.hessian_method = "kkt"; beyond CAPRI, which re-solves its
+#: supply models at 1% price shocks): None, "record" (the base solve: each successful solve's primal-dual point is kept
+#: on the regional model, per graph) or "apply" (a shock: a solve of a recorded graph is replaced by the first-order
+#: step of the KKT conditions from the recorded point, CapriRegionalNLP.kkt_step). Set by model._market_supply_hessian
+#: before the supply module's run; the forked workers inherit it
+KKT_MODE = None
+#: the KKT step's functions per graph (the Lagrangian's gradient's and the rows' directional derivatives in p)
+_KKT: "OrderedDict[str, tuple]" = OrderedDict()
+
 #: called as SOLVE_PROBE(fingerprint) before each IPOPT solve when set (the market supply Hessian's skip of regions a
 #: price shock does not reach: SupplyModule._solve_region, model._market_supply_hessian); None otherwise
 SOLVE_PROBE = None
@@ -1300,6 +1309,107 @@ class CapriRegionalNLP:
             inv = np.where(w > 1e-10 * wmax, 1.0 / np.where(w > 0, w, 1.0), 0.0)
             dX[Fr] = -Z @ (U @ (inv[:, None] * (U.T @ (Z.T @ DX[Fr]))))
         return dX[:n0] * np.asarray(self.sc, float)[:, None]
+
+    def kkt_record(self, res) -> dict:
+        """The point a KKT step starts from (kkt_step): the solution, its multipliers, and the problem's parameters and
+        bounds at it."""
+        return {"x": np.asarray(res["x"], float).copy(), "lam_x": np.asarray(res["lam_x"], float).copy(),
+                "lam_g": np.asarray(res["lam_g"], float).copy(), "pval": np.asarray(self.pval, float).copy(),
+                "lbx": self.lbx.copy(), "ubx": self.ubx.copy(), "lbg": self.lbg.copy(), "ubg": self.ubg.copy()}
+
+    def kkt_step(self, base: dict, tol: float = 1e-9) -> dict:
+        """The solution of this problem to first order from the recorded solution of the same graph at other parameter
+        values and bounds (base, kkt_record): the implicit function theorem on the KKT conditions with the base's
+        active set (market.hessian_method = "kkt", beyond CAPRI). With dp = p - p0 and the bounds' changes:
+
+            active variable bounds (and fixed variables): dx_B = the bound's change
+            active rows (and equalities):                 J_AF dx_F = the bound's change - dg/dp dp - J_AB dx_B
+            stationarity on the free variables:           H_FF dx_F + H_FB dx_B + J_AF' dlam_A = -d(grad_x L)/dp dp
+
+        H the Lagrangian's Hessian, J the rows' Jacobian, at the base point; the active set as in response (a bound or
+        row within 1e-6 of its bound with a multiplier above tol). Solved as response does, in the null space Z of the
+        active rows (robust where they are linearly dependent, at degenerate vertices): dx_F = x_p + Z w, x_p the
+        least-norm solution of the rows, w from the reduced Hessian Z' H_FF Z (directions without curvature take no
+        step). Then the multipliers: dlam_A by least squares from the stationarity, the active variables' bound
+        multipliers from the stationarity of their rows. Returns the solve's dict ("status" "KKT_Step", "success" True,
+        "iterations" 0). A regularised sparse KKT solve was tried first: its regularisation exceeded the smallest
+        curvature of the reduced Hessian (1e-4 against 5e-3, DE110000) and turned the response's sign."""
+        import casadi as ca
+        from scipy.linalg import null_space
+        key = self.graph_key()
+        fn = _KKT.get(key)
+        if fn is None:
+            d = self._derivatives()
+            lg = ca.SX.sym("lam_g", int(self.g.shape[0]))
+            dp = ca.SX.sym("dp", int(self.p.shape[0]))
+            grad = d["grad_f"](self.X, self.p)[1]
+            gradL = grad + ca.jtimes(self.g, self.X, lg, True)
+            fn = (d["hess_lag"],
+                  ca.Function("jac_g", [self.X, self.p], [ca.jacobian(self.g, self.X)]),
+                  ca.Function("dgradL", [self.X, self.p, lg, dp], [ca.jtimes(gradL, self.p, dp)]),
+                  ca.Function("dg", [self.X, self.p, dp], [ca.jtimes(self.g, self.p, dp)]))
+            _KKT[key] = fn
+            while len(_KKT) > 16:
+                _KKT.popitem(last=False)
+        hess, jac, dgradL, dgf = fn
+        x0, lx0, lg0, p0 = base["x"], base["lam_x"], base["lam_g"], base["pval"]
+        dpv = np.asarray(self.pval, float) - p0
+        nX, m = len(x0), len(lg0)
+        Ht = np.asarray(ca.DM(hess(x0, p0, 1.0, lg0)).full(), float)
+        H = Ht + Ht.T - np.diag(np.diag(Ht))
+        J = np.asarray(ca.DM(jac(x0, p0)).full(), float) if m else np.zeros((0, nX))
+        rL = np.asarray(ca.DM(dgradL(x0, p0, lg0, dpv)).full(), float).ravel()
+        rg = np.asarray(ca.DM(dgf(x0, p0, dpv)).full(), float).ravel() if m else np.zeros(0)
+        g0 = np.asarray(ca.DM(self.f_g.f(x0, p0)).full(), float).ravel() if m else np.zeros(0)
+
+        def near(v, bnd):
+            fin = np.isfinite(bnd)
+            return fin & (np.abs(v - bnd) <= 1e-6 * (1.0 + np.abs(np.where(fin, bnd, 0.0))))
+
+        def change(new, old):
+            with np.errstate(invalid="ignore"):
+                dd = np.asarray(new, float) - np.asarray(old, float)
+            return np.where(np.isfinite(dd), dd, 0.0)
+        lbx0, ubx0, lbg0, ubg0 = base["lbx"], base["ubx"], base["lbg"], base["ubg"]
+        fixed = lbx0 >= ubx0
+        at_lo = fixed | (near(x0, lbx0) & (np.abs(lx0) > tol))
+        at_up = ~at_lo & near(x0, ubx0) & (np.abs(lx0) > tol)
+        Bm = at_lo | at_up
+        dxB = np.where(at_lo, change(self.lbx, lbx0), np.where(at_up, change(self.ubx, ubx0), 0.0))
+        eq = lbg0 >= ubg0
+        g_lo = eq | (near(g0, lbg0) & (np.abs(lg0) > tol))
+        g_up = ~g_lo & near(g0, ubg0) & (np.abs(lg0) > tol)
+        db = np.where(g_lo, change(self.lbg, lbg0), np.where(g_up, change(self.ubg, ubg0), 0.0))
+        F, B, A = np.nonzero(~Bm)[0], np.nonzero(Bm)[0], np.nonzero(g_lo | g_up)[0]
+        dx = np.zeros(nX)
+        dx[B] = dxB[B]
+        HF = H[np.ix_(F, F)]
+        JAF = J[np.ix_(A, F)]
+        cA = db[A] - rg[A] - J[np.ix_(A, B)] @ dx[B]
+        bF = rL[F] + H[np.ix_(F, B)] @ dx[B]
+        if len(A):
+            xp = np.linalg.lstsq(JAF, cA, rcond=None)[0]
+            Z = null_space(JAF)
+        else:
+            xp, Z = np.zeros(len(F)), np.eye(len(F))
+        dF = xp.copy()
+        if Z.shape[1]:
+            Hr = Z.T @ HF @ Z
+            w, U = np.linalg.eigh(0.5 * (Hr + Hr.T))
+            wmax = float(np.max(np.abs(w))) if len(w) else 1.0
+            inv = np.where(w > 1e-10 * wmax, 1.0 / np.where(w > 0, w, 1.0), 0.0)
+            dF = xp - Z @ (U @ (inv * (U.T @ (Z.T @ (HF @ xp + bF)))))
+        dx[F] = dF
+        dlg = np.zeros(m)
+        if len(A):
+            dlg[A] = np.linalg.lstsq(JAF.T, -(HF @ dF + bF), rcond=None)[0]
+        dlx = np.zeros(nX)
+        if len(B):
+            dlx[B] = -(H[B] @ dx + rL[B] + (J[:, B].T @ dlg if m else 0.0))
+        x = x0 + dx
+        return {"x": x, "f": float(np.asarray(ca.DM(self.f_obj.f(x, self.pval)).full()).ravel()[0]),
+                "lam_g": lg0 + dlg, "lam_x": lx0 + dlx, "status": "KKT_Step", "iterations": 0, "success": True,
+                "warm": False}
 
     # ---------------- results in the regional QP's terms ----------------
     def outputs(self, res):

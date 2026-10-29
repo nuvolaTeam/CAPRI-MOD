@@ -4052,3 +4052,44 @@ def test_crop_diversification_log_floors_cover_ipopts_bound_relaxation(model, tm
             x[j] = lb[j] - 1e-8 * max(1.0, abs(lb[j]))
     g = np.asarray(N.f_g(x), float).ravel()
     assert np.isfinite(g[N.cap_rows["cropDiv"]])
+
+
+@pytest.mark.slow
+def test_kkt_step_matches_the_resolve_at_a_small_price_change(model, tmp_path, monkeypatch):
+    """market.hessian_method = "kkt" (beyond CAPRI): the regional solution at changed parameters as the first-order step
+    of the KKT conditions from the base solution (CapriRegionalNLP.kkt_step). Its activity levels follow IPOPT's
+    re-solves: a 0.1% higher return of the region's largest activity and a 0.1% dearer feed move the activities as
+    the re-solve does within 2% of the largest move (the rest: second order and auxiliary columns of flat directions,
+    which the re-solve moves by more than the shock itself, column 52 of DE110000 from 0.011 to 0.22 at -0.1%)."""
+    import pickle
+    from capri_mod.supply import capri_regional_nlp as C
+    monkeypatch.setenv("CAPRI_NLP_DUMP", str(tmp_path))
+    model.run(scenario="BASELINE", regions=["DE110000"], max_outer_iter=1)
+    d = pickle.load(open(tmp_path / "DE110000.pkl", "rb"))
+    spec = dict(d["spec"])
+    N = C.CapriRegionalNLP(spec)
+    r0 = N.solve(N.start(np.asarray(d["x_start"], float)), tol=1e-10)
+    assert r0["success"]
+    r0 = N.solve(np.asarray(r0["x"], float), lam=(r0["lam_x"], r0["lam_g"]), tol=1e-10)
+    base = N.kkt_record(r0)
+    y0 = np.asarray(N.outputs(r0)[0], float)
+    n = len(spec["acts"])
+    j = int(np.argmax(np.abs(np.asarray(spec["c"], float)[:n]) * np.abs(y0[:n])))
+    variants = []
+    for e in (1e-3, -1e-3):
+        c1 = np.asarray(spec["c"], float).copy()
+        c1[j] *= 1 + e
+        variants.append(dict(spec, c=c1))
+    if spec.get("prices"):
+        variants.append(dict(spec, prices={a: np.asarray(v, float) * 1.001 for a, v in spec["prices"].items()}))
+    for sp_ in variants:
+        N1 = C.CapriRegionalNLP(sp_)
+        assert N1.graph_key() == N.graph_key()            # the same problem up to the parameters
+        k = N1.kkt_step(base)
+        r1 = N1.solve(np.asarray(r0["x"], float), lam=(r0["lam_x"], r0["lam_g"]), tol=1e-10)
+        assert r1["success"] and k["success"]
+        yk = np.asarray(N1.outputs(k)[0], float)[:n]
+        y1 = np.asarray(N1.outputs(r1)[0], float)[:n]
+        move = float(np.max(np.abs(y1 - y0[:n])))
+        assert move > 0
+        assert float(np.max(np.abs(yk - y1))) <= 0.02 * move
