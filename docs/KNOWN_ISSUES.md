@@ -9,7 +9,7 @@ The data sourcing registry's log of checks, fixes and decisions (201 entries, mo
 [KNOWN_ISSUES_REGISTRY_LOG.md](KNOWN_ISSUES_REGISTRY_LOG.md), verbatim, with the triage of its open entries against
 the code: they became K92-K96, joined K73, K80, K91, or were closed or historical.
 
-## Open (19)
+## Open (18)
 
 | # | Issue | Status |
 |---|---|---|
@@ -27,13 +27,12 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K79](#k79) | Member-state production that keeps moving between iterations | open |
 | [K80](#k80) | The same run repeated from a warm start differs by up to 3e-5 relative in small cereal activities | open |
 | [K83](#k83) | A one-region Farm-to-Fork run's market diverges in its second step | open |
-| [K86](#k86) | Ammonia housing and storage options without their farm-size cost curves in Denmark, Lithuania and Croatia | open |
 | [K89](#k89) | Failing regional solves take most of IPOPT's time | open |
 | [K92](#k92) | Farm-to-Fork changes furthest from JRC121368, besides the milk price | open |
 | [K93](#k93) | CAPRI mitigation options not built; documents disagree on which are in | open |
 | [K97](#k97) | NaN in the crop-diversification row during Green Deal solves | open |
 
-## Resolved (78)
+## Resolved (79)
 
 | # | Issue | Status |
 |---|---|---|
@@ -106,6 +105,7 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K82](#k82) | The market supply Hessian read from its cache differed from the measured one by an ulp | fixed |
 | [K84](#k84) | The landscape floor's fit ends on its last step | fixed (capri's form) |
 | [K85](#k85) | Input costs of animals a region does not have were NaN in its net revenues | fixed |
+| [K86](#k86) | Ammonia housing and storage options without their farm-size cost curves in Denmark, Lithuania and Croatia | fixed |
 | [K87](#k87) | Builder outputs that do not follow from their builders (reproduction audit) | fixed |
 | [K88](#k88) | Builders that still round the values they write | fixed |
 | [K45](#k45) | Egypt's oilseed rows | fixed |
@@ -1042,7 +1042,7 @@ the national ones (the builder's registered fallback). Whether CAPRI has holding
 - **Effect:** the cost and curvature of the ammonia housing, storage and air-purification options in DK000000,
   LT000000, HR000000 (and CZ010000); every run with the ammonia options
 - **In 9t:** not checked
-- **Status:** **open**: fixed in the builders (branch data-fixes): the cost curves, the AD option
+- **Status:** **fixed** (27 October 2026, in dev since; Prague checked 29 October 2026): fixed in the builders (branch data-fixes): the cost curves, the AD option
   (build_ad_option.py, which had LU000000, not a unit, and missed HR000000) and the Nitrates Directive tables
   (build_nitrates_directive.py, the same list) take the regional units; the ammonia chain to be rebuilt
   (build_ammonia_cost_curves -> build_ammonia_technologies -> build_ad_option -> build_ammonia_tech_model ->
@@ -1050,7 +1050,12 @@ the national ones (the builder's registered fallback). Whether CAPRI has holding
   purification for fattening pigs 7.62, 2.61, 2.93 EUR; curvature terms no longer 0). The AD option and the Nitrates
   Directive tables come out unchanged: Croatia is absent from CAPRI's AD base data (p_VSER) and from those tables'
   sources, so CAPRI has no AD option there either. The builder now lists the units left without a curve: CZ010000 and
-  Norway's six (no ammonia options built for Norway, registered)
+  Norway's six (no ammonia options built for Norway, registered). Prague (29 October 2026): CAPRI's own holdings data
+  (dat/scen/ghgtech/holdingsLSU.gdx, as exported to p_holdLSU.csv) has one row for CZ010000 (poultry, the largest class),
+  so in CAPRI as well no heads per holding exist for its other animals (ammo_tech.gms l. 1355-1362, defined only where
+  p_holdLSU is), m_CostAmm has no shares for them and v_alpha, v_beta stay 0: the option's own farm-size terms are 0
+  and its CostParLin is the manure-storage term added on (l. 2120-2121; e.g. low-emission housing for dairy cows (DCOL) 5.36,
+  the storage term). The model's file has the same values, so this is CAPRI's result, not a gap
 
 <a id="k87"></a>
 ### K87: Builder outputs that do not follow from their builders (reproduction audit, 27 October 2026)
