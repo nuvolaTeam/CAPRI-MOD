@@ -212,6 +212,11 @@ TRADE_REGIONS = {
     # Norway: CAPRI's market region NO000000 (own market region, aggregation/defaultA.agg), linked to supply
     # models (RMSSUP): its market supply is its supply models' output (KNOWN_ISSUES K56)
     "NOR":   ["NO"],
+    # the United Kingdom (CAPRI's market region UK000000) and the Western Balkans (CAPRI's trade block WBA: Albania,
+    # Bosnia and Herzegovina, Serbia, Kosovo, North Macedonia, Montenegro), trade regions of their own as in CAPRI
+    # (batch 7; before, in ROW). CAPRI has supply models for both (RMSSUP); the model has their market supply functions
+    "GBR":   ["GB"],
+    "WBA":   ["AL", "BA", "RS", "XK", "MK", "ME"],
     "ROW":   ["ROW"],  # Rest of world
 }
 

@@ -57,6 +57,11 @@ REGION_MAP = {
     # models), the model's trade region NOR (KNOWN_ISSUES K56; before, it folded into ROW while its supply regions
     # NO01-NO07 were summed into the EU)
     "NO000000": "NOR",
+    # the United Kingdom and the Western Balkans: CAPRI's market regions UK000000 (its own) and WBA (the trade block of
+    # AL, BA, CS, KO, MK, MO: aggregation/defaultA.agg), both with supply models in CAPRI (RMSSUP); the model's trade
+    # regions GBR and WBA since batch 7 (scoping note of 27 October 2026; before, both folded into ROW)
+    "UK000000": "GBR",
+    "WBA": "WBA",
 }
 
 # Overlapping aggregates. These are supersets of the regions above and must be

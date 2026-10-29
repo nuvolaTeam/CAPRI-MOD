@@ -12,6 +12,8 @@ throughout may follow later). This builder writes:
   capri_data/schema/codes/model_activities.csv  the model's 46 activities (capri_mod/data/definitions.py CROPS,
                                               ANIMALS): code, kind, capri_codes (";"-joined CAPRI activities summed
                                               into it), mapping_source
+  capri_data/schema/codes/model_trade_regions.csv the bilateral market's trade regions (ALL_TRADE_REGIONS) and the
+                                              CAPRI market region of each (recalibrate_trade_2017.REGION_MAP)
   capri_data/schema/codes/model_commodities.csv the model's 58 market commodities (MARKET_COMMODITIES): code,
                                               capri_code, mapping_source
 
@@ -160,6 +162,24 @@ def main():
     write(OUT / "capri" / "MS_RU.csv", ("ms", "ru"), sorted((m, r) for m, r in pairs("Map_RR") if m in ms_ and r in ru_))
     write(OUT / "model_activities.csv", ("code", "kind", "capri_codes", "mapping_source"), acts)
     write(OUT / "model_commodities.csv", ("code", "capri_code", "mapping_source"), comms)
+    # the bilateral market's trade regions and the CAPRI market region each stands for (recalibrate_trade_2017.REGION_MAP;
+    # ROW: the CAPRI market regions mapped to no other); written by hand until batch 7 (KNOWN_ISSUES K101)
+    rmap = literal("tools/build/recalibrate_trade_2017.py", "REGION_MAP")
+    inv = {}
+    for capri_rm, tr in rmap.items():
+        if tr in inv:
+            problems.append(f"trade region {tr} stands for two CAPRI market regions")
+        inv[tr] = capri_rm
+    src = "tools/build/recalibrate_trade_2017.py REGION_MAP"
+    trs = []
+    for tr in D.ALL_TRADE_REGIONS:
+        if tr == "ROW":
+            trs.append((tr, "", "the CAPRI market regions not mapped to another trade region (" + src + ")"))
+        elif tr not in inv:
+            raise SystemExit(f"trade region {tr} has no CAPRI market region in REGION_MAP")
+        else:
+            trs.append((tr, inv[tr], src))
+    write(OUT / "model_trade_regions.csv", ("code", "capri_rm", "mapping_source"), trs)
     differ = [(c, cc) for c, cc, _ in comms if c != cc]
     print(f"wrote {OUT.relative_to(ROOT)}: CAPRI's sets {', '.join(f'{s} {len(d)}' for s, d in capri.items())}; "
           f"{len(acts)} model activities, {sum(a[2] != a[0] for a in acts)} not CAPRI's own code; "

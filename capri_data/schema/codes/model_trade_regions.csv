@@ -24,4 +24,6 @@ ZAF,ZAF,tools/build/recalibrate_trade_2017.py REGION_MAP
 ETH,ETH,tools/build/recalibrate_trade_2017.py REGION_MAP
 MAR,MOR,tools/build/recalibrate_trade_2017.py REGION_MAP
 NOR,NO000000,tools/build/recalibrate_trade_2017.py REGION_MAP
+GBR,UK000000,tools/build/recalibrate_trade_2017.py REGION_MAP
+WBA,WBA,tools/build/recalibrate_trade_2017.py REGION_MAP
 ROW,,the CAPRI market regions not mapped to another trade region (tools/build/recalibrate_trade_2017.py REGION_MAP)
