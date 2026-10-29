@@ -26,7 +26,8 @@ Stages (each a function, with the GAMS lines it ports):
   prep_for_estimation prep_data_for_estimation.gms l. 15-162
 The COCO nowcasts (load_coco1_data.gms, l. 715), the policy data (captrd_policy.gms) and the labour agelines follow as
 they are ported (docs/design/CAPTRD_MOD.md section 12.2).
-fill_uvad needs the UVAD of every country, so prepare() runs the country files in two passes.
+The COCO stage is in coco.py; prepare_run.py runs every stage over the country files in CAPTRD's order (fill_uvad and the
+COCO flags need every country).
 """
 from __future__ import annotations
 
@@ -78,6 +79,25 @@ class CaptrdSets:
     feed: Set[str] = field(default_factory=set)
     aact: Set[str] = field(default_factory=set)
     oyani: Set[str] = field(default_factory=set)
+    # read by coco.py (load_coco1_data.gms)
+    corfeedlosf: Set[str] = field(default_factory=set)
+    cropo: Set[str] = field(default_factory=set)
+    domm_set: Set[str] = field(default_factory=set)
+    splitacts: Set[str] = field(default_factory=set)
+    dact: Set[str] = field(default_factory=set)
+    dmpact: Set[str] = field(default_factory=set)
+    msnoeu28: Set[str] = field(default_factory=set)
+    fuel_rows: Set[str] = field(default_factory=set)
+    biofuels: Set[str] = field(default_factory=set)
+    fosfuels: Set[str] = field(default_factory=set)
+    fuels: Set[str] = field(default_factory=set)
+    biostock: Set[str] = field(default_factory=set)
+    prcd: Set[Tuple[str, str]] = field(default_factory=set)
+    feed_to_o: Set[Tuple[str, str]] = field(default_factory=set)
+    dact_to_pact: Set[Tuple[str, str]] = field(default_factory=set)
+    p_t_actagg: Set[Tuple[str, str]] = field(default_factory=set)
+    stock_to_fuel: Set[Tuple[str, str]] = field(default_factory=set)
+    stock_to_by: Set[Tuple[str, str]] = field(default_factory=set)
     mrkbale: Set[str] = field(default_factory=set)
     mrkbalee: Set[str] = field(default_factory=set)
     dompos: Set[str] = field(default_factory=set)
@@ -115,8 +135,10 @@ def read_sets(path: Path = SETS_DIR) -> CaptrdSets:
     names1 = ["urbannuts", "srnuts2", "s_colsest", "s_rowsest", "cols_load", "rows_load", "reqsc", "secom",
               "landusearto", "quotas", "bio_cols", "biorepcols", "seco_biof", "mpact", "maact", "iyani", "fix_yai",
               "rmaggsup", "ncnc", "fout", "oyani_rows", "mcact", "cact", "seco", "o", "feed", "mrkbale", "mrkbalee",
-              "dompos", "breedact", "meat", "grpr", "grpc", "aact", "oyani"]
-    names2 = ["map_rr", "pact_to_io", "pact_to_i", "rms_to_rm", "pact_to_o", "pact_to_y", "cropc_to_g", "rows_to_g"]
+              "dompos", "breedact", "meat", "grpr", "grpc", "aact", "oyani", "corfeedlosf", "cropo", "domm_set",
+              "splitacts", "dact", "dmpact", "msnoeu28", "fuel_rows", "biofuels", "fosfuels", "fuels", "biostock"]
+    names2 = ["map_rr", "pact_to_io", "pact_to_i", "rms_to_rm", "pact_to_o", "pact_to_y", "cropc_to_g", "rows_to_g",
+              "prcd", "feed_to_o", "dact_to_pact", "p_t_actagg", "stock_to_fuel", "stock_to_by"]
     return CaptrdSets(ms=one("ms"), **{n: two(n) for n in names2}, **{n: set(one(n)) for n in names1})
 
 
@@ -344,7 +366,8 @@ def read_series(path: Path, sets: CaptrdSets, years: Iterable[int], chunk: int =
 
 
 def stage_a(series: pd.DataFrame, sets: CaptrdSets, data2: Optional[pd.DataFrame] = None) -> pd.DataFrame:
-    """The stages up to the deletions, on one country's files as loaded (time series; base year, if given)."""
+    """The stages up to the deletions, on one country's files as loaded (time series; base year, if given), without
+    the COCO stage, which comes between load_basm and check_and_cor (prepare_run.py runs it)."""
     p = load_fixes(series, sets)
     if data2 is not None:
         p = load_basm(p, data2, sets)
@@ -358,33 +381,6 @@ def expost_years(uaar: pd.DataFrame, ms: Iterable[str]) -> List[int]:
     nowcasts (not yet ported) the two coincide."""
     u = uaar[uaar["region"].isin(set(ms)) & (uaar["col"] == "UAAR") & (uaar["row"] == "LEVL") & (uaar["value"] != 0)]
     return sorted({int(t) for t in u["t"] if str(t).isdigit()})
-
-
-def prepare(files: Dict[str, Path], sets: CaptrdSets, years: Iterable[int], work: Path) -> Dict[str, Path]:
-    """Every country file through the stages; returns the prepared p_data per country (work/<CC>.parquet).
-
-    Pass 1 per file: load, the fixes and the deletions (work/<CC>.a.parquet). Pass 2: UVAD from every country's UVAD,
-    then per file the regions' cleaning and LABH. The UAAR that defines the ex-post years is read before the deletions,
-    as l. 673 runs before them."""
-    work.mkdir(parents=True, exist_ok=True)
-    years = list(years)
-    uv, ua = [], []
-    for cc, f in files.items():
-        s = read_series(f, sets, years)
-        ua.append(s[(s["col"] == "UAAR") & (s["row"] == "LEVL")])
-        a = stage_a(s, sets)
-        a.to_parquet(work / f"{cc}.a.parquet", index=False)
-        uv.append(a[a["col"] == "UVAD"])
-    expost = expost_years(pd.concat(ua, ignore_index=True), sets.ms)
-    added = fill_uvad(pd.concat(uv, ignore_index=True), sets, expost)
-    out = {}
-    for cc in files:
-        a = pd.read_parquet(work / f"{cc}.a.parquet")
-        a = pd.concat([a, added[added["region"].isin(set(a["region"]))]], ignore_index=True)
-        a = labour_household(clean_regions(a, sets, expost))
-        out[cc] = work / f"{cc}.parquet"
-        a.to_parquet(out[cc], index=False)
-    return out
 
 
 # --- prep_data_for_estimation.gms -----------------------------------------------------------------------------------

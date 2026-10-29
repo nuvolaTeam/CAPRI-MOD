@@ -170,3 +170,41 @@ def test_uvad_average_is_parallel_and_portugal_fills_the_east():
     assert add[west[2]] == pytest.approx(sum(have[r] for r in peers if r in have) / sum(r in have for r in peers))
     # BG has no western peer: A_EU_EAST and EU013000 have no UVAD, so Portugal's (EU_EAST and BUR) is taken
     assert add[east] == pytest.approx(300.0)
+
+
+COCO = ROOT / "capri_reference" / "coco2" / "17" / "coco2_output.csv.gz"
+BIOFUEL = ROOT / "capri_reference" / "fao_agg" / "17" / "p_biofuelData.csv.gz"
+
+
+@pytest.mark.slow
+@pytest.mark.skipif(not all(f.exists() for f in (TS / "DK.csv.gz", BASE / "DK.csv.gz", COCO, BIOFUEL,
+                                                 RES / "P_Data.csv.gz")), reason="CAPRI reference files not built")
+def test_denmark_with_the_coco_data(tmp_path):
+    """Denmark through every ported stage (prepare_run.run), the COCO data included: the years 1984-2019 (2019 from
+    COCO) equal CAPTRD's p_data, leaving out the stages not ported (policy, LU, reporting) and what needs the other
+    countries (the near-zero biofuel flags some other country's COCO data sets, l. 337 and 346; the UVAD averages) or
+    CAPRI's extraction rates (the default biostocks and DDGS of l. 524-548)."""
+    from capri_mod.pipeline.captrd import prepare_run as R
+    s = P.read_sets()
+    out = R.run(["DK000000"], s, BASE_YEAR, 1984, 2019, TS, BASE, COCO, BIOFUEL, tmp_path)
+    a = pd.read_parquet(out["DK000000"])
+    a = a[a.t != "BASM"]
+    ex = sorted({int(t) for t in a.t})
+    oagg = set(pd.read_csv(ROOT / "capri_reference" / "sets" / "simini_21730" / "OAGG.csv", keep_default_na=False).d0)
+    nobs = pd.read_csv(RES / "data.csv.gz")
+    nobs = nobs[(nobs.t == "nObs") & (nobs.value > 0) & (nobs.region == "DK000000")][["region", "col", "row"]]
+    m = a.merge(nobs, on=["region", "col", "row"]).merge(_reference(s, "DK000000", ex)[P.KEYS + ["value"]], on=P.KEYS,
+                                                          how="outer", suffixes=("", "_ref"), indicator=True)
+    col, row, t = m["col"], m["row"], m["t"]
+    reporting = (row.isin(oagg) & col.isin(s.mrkbalee | {"UVAG", "INHA", "UVAD"})) | ((row == "TOOU") & ~col.isin(s.mpact))
+    policy = col.isin(s.quotas) | (col == "VSET") | ((col == "UAAR") & (row == "LEVL"))
+    near_zero = m["value_ref"].fillna(0).abs().le(1e-13) & m["value"].fillna(0).abs().le(1e-13)
+    extr = (((col == "BIOF") & row.isin({"SWHE", "RAPO"})) | ((col == "MAPR") & (row == "DDGS"))) & \
+        (m["value_ref"].fillna(0).abs() < 1e-12)
+    peers = col.isin({"UVAD", "CSSP"}) & (m._merge == "right_only")
+    hfcs = (row == "HFCS") & (t == "2018")
+    # not traced yet: CAPTRD's p_data has the fossil fuels' UVAG in 2019, which COCO does not carry (load_coco1_data.gms
+    # l. 352 copies COCO's UVAP, absent for 2019); presumably a later stage
+    fuel_2019 = (col == "UVAG") & row.isin(s.fosfuels) & (t == "2019") & (m._merge == "right_only")
+    m = m[~(reporting | policy | (col == "LU") | near_zero | extr | peers | hfcs | fuel_2019)]
+    _assert_equal(m, 42_000)

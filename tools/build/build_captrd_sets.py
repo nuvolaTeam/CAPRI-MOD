@@ -75,9 +75,16 @@ GLOBAL_1D = {"ms": "RMSSUP", "srnuts2": "SRNUTS2", "urbannuts": "urbanNUTS", "se
              "landusearto": "LandUseARTO", "quotas": "QUOTAS", "bio_cols": "Bio_Cols", "biorepcols": "bioRepCols",
              "seco_biof": "SECO_BIOF", "mpact": "MPACT", "maact": "MAACT", "iyani": "IYANI", "fix_yai": "FIX_YAI",
              "reqsc": "REQSC", "ncnc": "NCNC", "fout": "FOUT", "oyani_rows": "OYANI_ROWS", "mcact": "MCACT",
-             "cact": "CACT", "seco": "SECO", "o": "O", "feed": "FEED", "aact": "AACT", "oyani": "OYANI"}
+             "cact": "CACT", "seco": "SECO", "o": "O", "feed": "FEED", "aact": "AACT", "oyani": "OYANI",
+             # load_coco1_data.gms
+             "corfeedlosf": "corFeedLosf", "cropo": "CROPO", "domm_set": "DOMM", "splitacts": "SplitActs",
+             "dact": "DACT", "dmpact": "DMPACT", "msnoeu28": "MSnoEU28", "fuel_rows": "FUEL_ROWS",
+             "biofuels": "BIOFUELS", "fosfuels": "FOSFUELS", "fuels": "FUELS", "biostock": "bioStock"}
 GLOBAL_2D = {"map_rr": "Map_RR", "pact_to_io": "PACT_TO_IO", "pact_to_i": "PACT_TO_I", "rms_to_rm": "RMS_TO_RM",
-             "pact_to_o": "PACT_TO_O", "pact_to_y": "PACT_TO_Y"}
+             "pact_to_o": "PACT_TO_O", "pact_to_y": "PACT_TO_Y",
+             # load_coco1_data.gms
+             "prcd": "PRCD", "feed_to_o": "FEED_TO_O", "dact_to_pact": "DACT_TO_PACT", "p_t_actagg": "P_T_ActAgg",
+             "stock_to_fuel": "STOCK_TO_FUEL", "stock_to_by": "STOCK_TO_BY"}
 
 
 def _members(ref: Path, name: str, dim: int = 1):
