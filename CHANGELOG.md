@@ -30,6 +30,52 @@ Full provenance for every entry is in `capri_data/DATA_SOURCING_REGISTRY.json`.
 
 ---
 
+## 29 October 2026 (batch 6, one gate): CAPRI's non-EU feed energy balance (M3), the EU feed bulks in the market (M4), the inputs without builders (K99-K101), the data census (K102)
+
+**Model.**
+- **M3, CAPRI's non-EU feed demand** (arm/market_model.gms FeedNQ_ and FeedBal_, l. 1018-1047;
+  `market.noneu_feed_nq`, CAPRI's form by default): each non-EU behavioural region without supply models feeds by its
+  normalised-quadratic feed function (p_hessNQFeed completed as arm/market1.gms; the terms reproduce CAPRI's
+  p_ElasFeed to 1e-14), with its feed energy price FEDE clearing the feed energy against the energy its animal output
+  needs. The feed conversion factors are CAPRI's arm/feed_conv.gms, ported (its fit is separable by region and solved
+  exactly; the share raised in 10 of 45 regions), the calorie contents CAPRI's USDA table. FEDE also moves the regions'
+  market supply functions (their FEDE column). Before: one constant-elasticity feed function per trade region.
+- **M4, CAPRI's EU feed bulk demand inside the market** (feedBlk_, `market.feed_bulk_in_market`): the member states'
+  bulks respond to the prices within a market solve, from the supply models' bulks at the prices those models saw, with
+  the elasticities measured on the supply models (the market supply Hessian's FEEDBLK rows). Same fixed point as before,
+  another path.
+- Market step E prepared: with CAPRI's two EU trade blocks (`market.eu_blocks`, off by default) the member states' raw
+  milk and the young-animal markets clear inside the market as with one EU.
+- **K99**: feed_requirements.csv removed (no builder, contradictory records; its fallback concerned only region-animal
+  pairs without a base herd). **K100**: the national nutrient table without builder replaced by CAPRI's regional
+  coefficients on the model's crops (build_nutrient_coefs_regional.py).
+
+**Data and tools.**
+- **K101**: every input a run reads has a builder, but for the two declared tables (the member-state code map, the
+  parameter table, five rows checked against CAPRI's code): eleven files given builders, same values (several gained the
+  digits their dumps had cut); the EU supply elasticities rebuilt on the model's 27 member states and codes (the project
+  lead's decision; before CAPRI's EU28, the UK included).
+- **K102**: data files that no run and no builder reads: four orphans removed; the extractors write only what the model
+  or a builder of its inputs reads (the project lead's decision); 128 source files read by no code removed, the
+  reference material kept (JRC121368's text and results, the NUTS correspondences).
+- DuckDB declarations for the PMP terms, land rents and elasticities, the market's base inputs, the feed energy balance
+  and the Green Deal targets (59 files, 0 violations).
+- The pipeline file (tools/pipeline/builders.json) regenerated from a trace of every builder: 132 invocations, 298
+  files, all reproduced byte-identical, 0 problems.
+- CITATION.cff (the project lead's metadata, licence GPL-3.0-only, CAPRI cited).
+
+**Gate.** Test suite 230 passed, 5 skipped (three tests corrected first: the world production coverage now requires
+CAPRI's FAO_agg balance for every non-EU base production of a product the balances map, where a 90% share had been
+guessed; the M3 test's expected beef change includes the dairy block's milk price; the feed-energy builder writes its
+share without rounding). Farm-to-Fork 2030 (r188): converged in 10 iterations (r186: 12), no NaN warning; prices up
+to +0.9 points from r186 (pork +0.9, poultry +0.9, beef +0.8, cereals +0.3), quantities within 0.3; mean absolute
+deviation from JRC121368 over compare_runs' 20 indicators 4.22 (r186: 4.28). Green Deal 2030 (r189): converged under
+CAPRI's rule in 21 iterations (r187: 17), no NaN warning; prices up to +0.4 points from r187 (beef, pork, poultry +0.4,
+milk +0.2), quantities within 0.2; mean absolute deviation 8.63 (r187: 8.65). Closed with the gate: K73 (every market
+finding run), K101 (the census repeated on both gate runs' manifests: every file read has a builder but the two declared
+tables). K79 stays open: HU230000 ended with another crop mix than in r187 at a near-equal objective (the region's
+several optima).
+
 ## 29 October 2026 (batch 5, one gate): non-EU market supply as CAPRI's, 3-NOP, K79's warm start, K97, the registry migration, the run manifest
 
 **Model.**
