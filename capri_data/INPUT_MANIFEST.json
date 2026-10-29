@@ -96,15 +96,6 @@
    "coverage": "40246 records, 192 regions, 82 activities",
    "note": "New input. The hardcoded constants were wrong both ways: dairy understated 29% (85 vs 118.8), bulls overstated 49% (35 vs 23.5), laying hens absent where CAPRI has 659.5."
   },
-  "feed_requirements.csv": {
-   "concept": "energy, protein and dry matter requirement per head",
-   "unit": "MJ NEL, kg CP, kg DM, days",
-   "dimension": "region x animal x item",
-   "capri_symbol": "DATA2 ENNE, CRPR, DRMN, DRMX, DAYS",
-   "status": "GDX",
-   "coverage": "192 regions, 29 animal activities",
-   "note": "reqrel_17*.gdx p_animReqCorrFac1 holds CORRECTION FACTORS, not levels. The levels are in DATA2."
-  },
   "supply_elasticities_regional.csv": {
    "concept": "own-price supply elasticity",
    "unit": "dimensionless",
@@ -281,7 +272,7 @@
    "coverage": "6252 cells",
    "note": "Same construction as revenue and manure per head.",
    "gaps": [
-    "empty cells fall back to feed_requirements.csv"
+    "cells without a coefficient are region-animal pairs without a base herd: no feed (feed_requirements.csv, the fallback without builder, removed 29 October 2026, KNOWN_ISSUES K99)"
    ]
   },
   "capri_oilseed_products_baseline.json": {

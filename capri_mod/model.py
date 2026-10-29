@@ -2584,20 +2584,17 @@ class CAPRIModel:
         part of each cereal's demand curve, so when herds shrank the market did
         not see the feed they no longer ate (Farm-to-Fork: pigs -15%, cereal
         prices +13% against CAPRI's +8%). Feed use = sum over regions and
-        animals of heads x feed requirement (t/head, feed_requirements.csv);
+        animals of heads x feed per head (t/head, livestock_feed_coef.csv; the ration where feeding is in the supply
+        models);
         base use from each regional model's own base levels, so the base year
         cannot move. Broilers are counted per census place (4.35 birds a year).
         """
         mm = self.market_module
         try:
-            fr = self.data.get("feed_requirements")
-            if fr is None:
-                fr = self.data.get("feed_req")
-            if fr is None or not len(fr) or not supply_results:
+            if not supply_results:
                 mm.seen.feed_bulk_index = None
                 return
             from capri_mod.data.definitions import ANIMALS
-            mult = {"BROI": getattr(type(self.supply_module), "BROILER_BIRDS_PER_PLACE", 1.0)}
             # feed bulks per member state (CAPRI v_feedBlk): cereals FCER and protein-rich feed FPRO, now and base
             blk = {}
             fmil = [0.0, 0.0]                       # feed from milk products (FMIL): now, base (the EU's)
@@ -2643,15 +2640,8 @@ class CAPRIModel:
                     if q == q:                      # CAPRI total / our herd, t per head
                         bc[0] += x * q
                         bc[1] += x0 * q
-                        continue
-                    if a not in fr.index:
-                        continue
-                    k = mult.get(a, 1.0)
-                    for c in ("SWHE", "BARL", "CORN", "RYEM", "OATS", "OCER"):
-                        if c in fr.columns:
-                            q = float(fr.at[a, c]) * k
-                            bc[0] += x * q
-                            bc[1] += x0 * q
+                    # (no coefficient: no herd of the animal in the region at base in CAPRI, so no feed; the national
+                    # feed table that stood here as a fallback had no builder and was removed, KNOWN_ISSUES K99)
             # CAPRI's market splits each member state's bulks into products (feedShareEqu_,
             # MarketModule.eu_feed_use); the market gets each bulk's change against the base
             mm.seen.feed_bulk_index = {k: (v[0] / v[1] if v[1] > 0 else 1.0) for k, v in blk.items()}

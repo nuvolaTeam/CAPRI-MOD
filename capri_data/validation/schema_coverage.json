@@ -227,19 +227,6 @@
    ],
    "known_gaps": []
   },
-  "feed_requirements": {
-   "file": "2017/feed/feed_requirements.csv",
-   "exists": true,
-   "live_cells": 110,
-   "nonzero_cells": 52,
-   "source_type": "CAPRI_GDX",
-   "source_ref": "capreg DATA2 ENNE/CRPR/DRMN/DRMX/DAYS",
-   "confidence": "validated",
-   "modules": [
-    "feed"
-   ],
-   "known_gaps": []
-  },
   "crop_nutrient_export": {
    "file": "2017/environment/crop_nutrient_export.csv",
    "exists": true,

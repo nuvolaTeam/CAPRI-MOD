@@ -71,10 +71,6 @@ def list_gdx(path):
 
 # Curated map: model input file -> best CAPRI symbol(s) to fill it
 MODEL_NEEDS = {
-    "feed_requirements.csv": [
-        ("p_feedInpCoeff", "feed input coefficients (fresh matter) by activity"),
-        ("v_feedInpCoeff", "feeding per head and year in kg"),
-    ],
     "nutrient_coefs.csv": [
         ("p_FertPerHa", "fertiliser use per ha for CAPRI regions"),
         ("v_minfert", "N input from mineral fertilizers [kg/ha]"),

@@ -270,22 +270,6 @@
     "SOYA/CHES/SKIM diverge; dairy has no CAPRI processing margin to validate against"
    ]
   },
-  "feed_requirements": {
-   "file": "2017/feed/feed_requirements.csv",
-   "concept": "energy/protein/DM/days per animal",
-   "unit": "mixed",
-   "dimension": "animal x requirement",
-   "modules": [
-    "feed"
-   ],
-   "source": {
-    "source_type": "CAPRI_GDX",
-    "source_ref": "capreg DATA2 ENNE/CRPR/DRMN/DRMX/DAYS",
-    "vintage": "2017",
-    "confidence": "validated",
-    "reproducibility": "public_code"
-   }
-  },
   "crop_nutrient_export": {
    "file": "2017/environment/crop_nutrient_export.csv",
    "concept": "nutrient removal per ton yield",
@@ -554,7 +538,7 @@
     "reproducibility": "capri_gdx"
    },
    "known_gaps": [
-    "fallback to feed_requirements.csv"
+    "cells without a coefficient are region-animal pairs without a base herd: no feed (feed_requirements.csv, the fallback without builder, removed 29 October 2026, KNOWN_ISSUES K99)"
    ]
   },
   "capri_oilseed_products_baseline": {

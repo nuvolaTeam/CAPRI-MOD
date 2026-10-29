@@ -9,7 +9,7 @@ The data sourcing registry's log of checks, fixes and decisions (201 entries, mo
 [KNOWN_ISSUES_REGISTRY_LOG.md](KNOWN_ISSUES_REGISTRY_LOG.md), verbatim, with the triage of its open entries against
 the code: they became K92-K96, joined K73, K80, K91, or were closed or historical.
 
-## Open (17)
+## Open (18)
 
 | # | Issue | Status |
 |---|---|---|
@@ -30,8 +30,9 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K89](#k89) | Failing regional solves take most of IPOPT's time | open |
 | [K92](#k92) | Farm-to-Fork changes furthest from JRC121368, besides the milk price | open |
 | [K93](#k93) | CAPRI mitigation options not built; documents disagree on which are in | open |
+| [K100](#k100) | The national nutrient table (nutrient_coefs.csv) has no builder and fills three crops' coefficients | open |
 
-## Resolved (81)
+## Resolved (82)
 
 | # | Issue | Status |
 |---|---|---|
@@ -116,6 +117,7 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K72](#k72) | Inputs without a builder (armington_params.csv and the livestock producer prices removed) | fixed |
 | [K97](#k97) | NaN in the crop-diversification row during Green Deal solves | fixed |
 | [K98](#k98) | CAPRI's supply Hessian read as stored: half of the cross terms missed | fixed |
+| [K99](#k99) | A feed table without builder (feed_requirements.csv) as the fallback of the feed costs and bulks | fixed |
 
 ## Details
 
@@ -1313,3 +1315,46 @@ porting the non-EU market supply functions (K54-3), which need the full matrix.
   builders (the EU's other oils and fish, the non-EU market supply functions) use it; eu_market_supply_nq.csv rebuilt
   (817 terms; the 133 before unchanged); the non-EU builder checks the stored terms against CAPRI's p_elasSupp
   (23,647 terms, largest relative deviation 1e-14); run pending (batch-5 gate)
+
+<a id="k99"></a>
+### K99: A feed table without builder (feed_requirements.csv) as the fallback of the feed costs and bulks (found 29 October 2026, data declarations)
+
+`capri_data/2017/feed/feed_requirements.csv` (9 animals x 11 feeds, one row per animal for every region) had no
+builder; its records disagreed (DATA_SOURCING_REGISTRY "REAL_CAPRI ... fully real", MANIFEST "pigs/poultry synthetic",
+a tools/gams note "one of the fully synthetic inputs"). It was read in two places, as the fallback where an animal has
+no feed coefficient (livestock_feed_coef.csv, CAPRI's 2017 feed totals over the model's herds): the feed cost change of
+the animals without a ration in the supply models (supply_module.py), and the feed bulks passed to the market
+(model._set_feed_demand). The 24 cells without a coefficient are all region-animal pairs with no base herd (7 BROI, 9
+LAYS, 4 HFRS, 3 PIGS, 1 BULL), so the fallback acted on herds of zero; with BROILER_BIRDS_PER_PLACE (4.35, read only
+there).
+
+- **Effect:** none expected in results (zero herds); an input of unrecorded origin kept as a required file
+- **In 9t:** –
+- **Status:** **fixed** 29 October 2026 (batch 6): the file, its loader and both fallbacks removed (no coefficient: no
+  herd at base in CAPRI, so no feed); livestock_feed_coef.csv is now a required input; BROILER_BIRDS_PER_PLACE removed
+  from model_parameters.csv; tests and run pending (batch-6 gate)
+
+<a id="k100"></a>
+### K100: The national nutrient table (nutrient_coefs.csv) has no builder and fills three crops' coefficients (found 29 October 2026, data declarations)
+
+`capri_data/2017/environment/nutrient_coefs.csv` holds one N, P2O5, K2O value per crop (no region; SWHE 125.9 kg N/ha)
+and has no builder (MANIFEST's vintage summary still calls it synthetic; DATA_SOURCING_REGISTRY records it as replaced
+by the regional CAPRI values). It is the base the regional values override:
+
+1. supply models (`_region_nutrients`): CAPRI's regional NITF / PHOF / POTF (sources/capreg/capreg_nutrient_coefs.csv)
+   cover every crop with area except OFOD (14.4 Mha, all 221 regions), SETA (7.5 Mha, 208 regions) and WINE (3.0 Mha,
+   155 regions), which keep the national values: the extract is keyed by CAPRI's activities (OFAR, ROOF, FALL, TWIN),
+   not mapped to the model's. The supply result's nutrient balance and the fertiliser instruments that scale the N
+   column read them.
+2. environmental accounts (`_base_mineral_rate`, the soil N2O pre-balance loop): CAPRI's regional mineral N (NMIN,
+   nutrients_regional.csv) covers every crop but SETA, which takes the national 4.8 kg N/ha: about 38.7 kt of mineral
+   N on 8.07 Mha of fallow and set-aside in the EU. CAPRI's 2017 results have no NMIN row for FALL, VSET or SETA (they
+   have NITF, a requirement of about 4.3-4.8 kg/ha), so CAPRI spreads no mineral N there.
+
+- **Effect:** mineral N on fallow about +39 kt (of about 9.5 Mt) in the N balance and the emissions; OFOD, SETA, WINE's
+  nutrient coefficients national rather than regional in the supply models' nutrient balance
+- **In 9t:** –
+- **Status:** open. Planned: map the regional extract to the model's activities (OFOD = OFAR + ROOF, SETA = SETA +
+  FALL, WINE = TWIN, level-weighted as build_capri_base.intensive_values), take SETA's mineral N as CAPRI's (none),
+  then remove the national table and its loader
+

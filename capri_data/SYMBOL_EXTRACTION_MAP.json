@@ -1,22 +1,4 @@
 {
-  "feed_requirements.csv (feed per animal head)": [
-    {
-      "symbol": "p_feedConvBlk",
-      "desc": "Per unit of output requirement of bulk of feedstuff such as cereals"
-    },
-    {
-      "symbol": "p_feedInpCoeff",
-      "desc": "Stats and expectations for feed bulk input coefficients in terms of fresh matter by activity"
-    },
-    {
-      "symbol": "p_pmpFeedInpCoeff",
-      "desc": "PMP parameter for feed input coefficients"
-    },
-    {
-      "symbol": "p_feedInpCoeffDRMA",
-      "desc": "Various steps of assigning input coefficients in terms of dry matter"
-    }
-  ],
   "nutrient_coefs.csv (fertiliser N/P/K per ha or per crop)": [
     {
       "symbol": "p_FertPerHa",

@@ -11,7 +11,6 @@ ELAS_CAP,,8.0,-,capri,"CAPRI MIN(8, ...) in the PMP elasticity dampening",capri_
 SHARE_COEF,,0.2,-,capri,CAPRI PMP share term coefficient,capri_pmp
 TRQ_SLOPE,,200.0,-,capri,CAPRI p_trqSigmoidSlope (arm/market_model.gms trqSigmoidFunc_),bilateral
 RHO_FMIL,,0.5,-,capri,"CAPRI p_rhoFeed(RMSSUP,'FMIL') (arm/market1.gms)",market_module
-BROILER_BIRDS_PER_PLACE,,4.35,birds per place and year,capri,CAPRI 2030 reference: broilers produced per census place,supply_module
 NITR_N_EXCR,,0.27999999999999997,kg N excreted per kg nitrate,capri,CAPRI line_nitr.gms: +0.42% of DM intake at 1.5% dosage,supply_module
 FIBRE_FACTOR,DCOW,0.6,-,capri,"CAPRI feed/req_or_man_fnc.gms fibre-rich feed factor (calves, sheep and goats: mean of CAPRI's activities, REGISTERED)",ration
 FIBRE_FACTOR,BCOW,0.9,-,capri,"CAPRI feed/req_or_man_fnc.gms fibre-rich feed factor (calves, sheep and goats: mean of CAPRI's activities, REGISTERED)",ration

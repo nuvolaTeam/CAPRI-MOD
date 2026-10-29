@@ -200,7 +200,9 @@
    "vintage": "2017",
    "source": "capreg DATA2 feed cols ALL animals incl pigs/poultry (Miohd unit handled), fresh->DM via feed-science fractions",
    "best_update": "newer capreg",
-   "priority": "DONE - fully real"
+   "priority": "DONE - fully real",
+   "status": "REMOVED (29 October 2026, KNOWN_ISSUES K99)",
+   "retired_note": "No builder in the repository and contradictory records (this entry 'fully real'; MANIFEST 'pigs/poultry synthetic'). Read only as the fallback for region-animal pairs without a feed coefficient, all without a base herd; file, loader and fallbacks removed."
   },
   "nutrient_coefs.csv": {
    "nature": "REAL_CAPRI",

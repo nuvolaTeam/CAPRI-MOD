@@ -52,7 +52,6 @@ Files are under `capri_data/<base_year>/<category>/` (only `2017/` exists); `tra
 | `nutrient_coefs.csv` | N, P2O5, K2O per ha of crop (the per-head animal rows of unrecorded source removed with the legacy nitrate-limit instrument, K33) | capreg DATA2 NITF/PHOF/POTF | 29 × 3 |
 | `crop_nutrient_export.csv` | nutrient removed per t of crop (`N_kg_t`, `P_kg_t`, `K_kg_t`) | CAPRI | 35 × 3 |
 | `climate_zones.csv` | climate-zone shares per CAPRI region or member state (`region`, `zone`, `pct`; 145 codes); read by `tools/build/build_ad_option.py`, not by the model | CAPRI | 521 rows |
-| `feed_requirements.csv` | feed per head (t DM/head/yr) by animal and feed item | capreg DATA2 feed columns, fresh to dry matter | 9 animals × 11 feeds |
 
 ### Shared (`shared/`)
 
@@ -110,8 +109,8 @@ Market-only codes: `SUGR` white sugar; `MILK` raw milk; `BUTR` butter; `SKIM` sk
 `CASE` casein; `BEEF`, `PORK`, `POUL`, `SGMT` (sheep and goat meat), `EGGS`; `RAPO`, `SUNO`, `SOYO` (oils), `RAPC`,
 `SUNC`, `SOYC` (cakes); `PLMO` palm oil; `OTHO` other vegetable oils; `FFIS` freshwater fish; `SFIS` saltwater fish;
 `OAQU` other aquatic products; `COFF` coffee; `TEAS` tea; `COCO` cocoa; `BIOE` bio-ethanol; `BIOD` bio-diesel; `DDGS`
-distillers' dried grains; `FENI`, `FPRI` CAPRI's residual feeds. Feed items in `feed_requirements.csv`: `RAPC`,
-`SOYC`, `SUNC` (rapeseed, soya, sunflower cake: CAPRI's codes, as the market's; `RAPM`, `SOYM`, `SUFM` before 23 October 2026).
+distillers' dried grains; `FENI`, `FPRI` CAPRI's residual feeds; `RAPC`, `SOYC`, `SUNC` rapeseed, soya, sunflower
+cake (CAPRI's codes, as the market's).
 
 ## Further files (added in October 2026)
 

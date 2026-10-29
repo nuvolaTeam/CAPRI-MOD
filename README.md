@@ -453,7 +453,6 @@ consuming modules:
 | pmp_diagonal_terms | PMP own quadratic term | EUR/ha² | supply |
 | pmp_crossgroup_terms | PMP cross-group term | EUR/ha² | supply |
 | world_prices | world market price | EUR/t | market |
-| feed_requirements | energy/protein/DM/days per animal | mixed | feed |
 | feed_availability | feed supply by item | 1000 t DM | feed |
 | crop_nutrient_export | nutrient removal per ton yield | kg/t | environment |
 | climate_zones | IPCC climate zone shares | share | environment |

@@ -90,7 +90,6 @@ _FILE_CATEGORY = {
     "cap_payments.csv": "policy", "crop_premium.csv": "supply", "eu_mfn_tariffs.csv": "policy", "tariffs.csv": "policy",
     "nutrient_coefs.csv": "environment", "crop_nutrient_export.csv": "environment",
     "climate_zones.csv": "environment",
-    "feed_requirements.csv": "feed",
     # JSON parameter files
     "fao_market_baseline.json": "market",
 }
@@ -436,18 +435,6 @@ def load_land_availability(data_dir: Optional[Path] = None) -> pd.DataFrame:
                             f"(the synthetic generator that stood here was removed, Sprint 9s)")
 
 
-def load_feed_requirements(data_dir: Optional[Path] = None) -> pd.DataFrame:
-    """
-    Feed requirements per animal (t DM / head / year).
-
-    Connect to: CAPRI feed module parameters / INRA FEALQ tables
-    """
-    if data_dir and (resolve_data_file(data_dir, "feed_requirements.csv")).exists():
-        return read_input(resolve_data_file(data_dir, "feed_requirements.csv"), index_col=0)
-    raise FileNotFoundError(f"feed_requirements.csv not found under {data_dir}: the model runs on CAPRI's data only "
-                            f"(the synthetic generator that stood here was removed, Sprint 9s)")
-
-
 def load_nutrient_coefficients(data_dir: Optional[Path] = None) -> pd.DataFrame:
     """
     Nutrient use coefficients (kg N/P/K per ha for crops, per head for animals).
@@ -509,6 +496,14 @@ def load_tariffs(data_dir: Optional[Path] = None) -> pd.DataFrame:
 # ---------------------------------------------------------------------------
 # CONVENIENCE: LOAD ALL DATA AT ONCE
 # ---------------------------------------------------------------------------
+
+
+def _load_required_csv(data_dir, filename):
+    """Load a region-indexed CSV the model needs; a missing file is an error (the model runs on CAPRI's data only)."""
+    path = resolve_data_file(data_dir, filename) if data_dir else None
+    if path is None or not path.exists():
+        raise FileNotFoundError(f"{filename} not found under {data_dir}")
+    return read_input(path, index_col=0)
 
 
 def _load_optional_csv(data_dir, filename):
@@ -702,8 +697,9 @@ def load_all_data(data_dir: Optional[Path] = None, validate: bool = False,
         # Regional fodder balances (docs/FODDER_BALANCE.md)
         "fodder_balance": (lambda p: __import__("json").load(open(p))["regions"] if p.exists() else None)(
             Path(data_dir) / "2017" / "feed" / "fodder_balance_2017.json"),
-        # Feed per head (t): CAPRI 2017 regional FCER/FPRO/FENE totals / herds
-        "livestock_feed_coef": _load_optional_csv(
+        # Feed per head (t): CAPRI 2017 regional FCER/FPRO/FENE totals / herds; required: the animals without a
+        # ration in the supply models cost their feed with it (the national fallback table was removed, K99)
+        "livestock_feed_coef": _load_required_csv(
             data_dir, "livestock_feed_coef.csv"),
         # CAPRI's FADN-based organic yield gaps by macro-region and product
         # group (JRC Seville, SUPREMA project), used by the organic instrument.
@@ -756,7 +752,6 @@ def load_all_data(data_dir: Optional[Path] = None, validate: bool = False,
         "variable_costs":  load_variable_costs(data_dir),
         "variable_costs_regional": load_variable_costs_regional(data_dir),
         "land":            load_land_availability(data_dir),
-        "feed_req":        load_feed_requirements(data_dir),
         "nutrients":       load_nutrient_coefficients(data_dir),
         "world_prices":    load_world_prices(data_dir),
         "cap_payments":    load_cap_payments(data_dir),

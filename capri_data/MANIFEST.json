@@ -332,16 +332,6 @@
     "note": "CAPRI crop fertiliser application (NITF, PHOF, POTF); the animal rows removed 27 October 2026 (K33)"
    }
   },
-  "feed_requirements.csv": {
-   "source": "capreg DATA2 feed cols (fresh->DM)",
-   "vintage": "2017",
-   "units": "t DM/head/yr",
-   "domain": "feed",
-   "status": "live",
-   "shape": {
-    "note": "real CAPRI ruminants; pigs/poultry synthetic"
-   }
-  },
   "livestock_output_coef.csv": {
    "source": "capreg DATA2",
    "vintage": "2017",
@@ -2861,7 +2851,7 @@
   "base_year": "2017 (quantities, prices, PMP parameters - all consistent)",
   "trade": "2021 (bilateral flows, refreshed and validated)",
   "why_not_newer": "A newer base requires CAPRI to RE-ESTIMATE its PMP parameters for the new year (a CAPRI-side computation). Mixing newer prices/quantities onto 2017 PMP terms breaks calibration - the validator blocks this. Trade is separable and safely refreshed to 2021.",
-  "synthetic": "2 files (feed_requirements, nutrient_coefs) have no real source and use plausible templates. Flagged by validator and at runtime.",
+  "synthetic": "feed_requirements.csv, without builder, was removed on 29 October 2026 (KNOWN_ISSUES K99); nutrient_coefs.csv, a national table without builder, still fills OFOD, SETA and WINE's nutrient coefficients and SETA's mineral N (K100).",
   "upgrade_path": "See docs/DATA_LOCATION_MAP.md. A newer STAR release database (results) from capri-model.org would provide a consistent newer base.",
   "layout": "Data organised as capri_data/<base_year>/<category>/ with cross-vintage files in shared/. Market JSON parameter files (fao_market_baseline, fao_demand_own_elas_eu) live in <year>/market/."
  }

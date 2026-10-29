@@ -208,9 +208,6 @@ class RegionData:
     # Land constraints (1000 ha)
     land: pd.Series              # indexed by land type
 
-    # Feed requirements (t DM / head / year) indexed by (animal, feed_item)
-    feed_requirements: pd.DataFrame
-
     # Nutrient coefficients (kg/ha or kg/head)
     nutrient_coefs: pd.DataFrame
 
@@ -2211,8 +2208,6 @@ class RegionalSupplyModel:
             self._base_levels_cache = cached
         return cached[1].copy()
 
-    #: broiler birds produced per census place and year (CAPRI 2030 reference)
-    BROILER_BIRDS_PER_PLACE = param("BROILER_BIRDS_PER_PLACE")
     #: protein-rich feed is priced by the CAKE markets (crushing Stage 3): a cake
     #: price index weighted by CAPRI's EU cake feed use (2017 FAO_agg BAS), at
     #: CAPRI's base world prices. Replaces the soybean-meal PROXY (0.89 x the
@@ -2353,11 +2348,11 @@ class RegionalSupplyModel:
             # FIXED variable cost, so dearer cereals never reached livestock:
             # under Farm-to-Fork (cereals +14%) poultry changed by exactly 0.0%
             # against CAPRI's -16%. The change in cost per head is the animal's
-            # purchased cereal ration (t/head, feed_requirements.csv) times the
+            # purchased cereal ration (t/head, livestock_feed_coef.csv) times the
             # change in each cereal's price. Base costs already include feed, so
             # at base nothing changes. Protein feed (oilseed cakes, CAPRI's SOYC,
             # RAPC, SUNC) is priced through the FPRO bulk or, without it, the
-            # soya cake row of feed_requirements.csv (_protein_feed_cost_change).
+            # cake price changes (_protein_feed_cost_change).
             if act in ANIMALS and price_shock is not None and act not in (getattr(self, "feed_rations", None) or {}):
                 # With feeding inside the regional model (a ration for the animal) the feed is
                 # bought in the model at its current prices (QUADRF_ in capri_regional_nlp.py, the base
@@ -2397,20 +2392,9 @@ class RegionalSupplyModel:
                             cost += qp * sum((w_[c] / ws_) * p_[c] for c in w_) * (float(_fbr["FPRO"]) - 1.0)
                         else:
                             cost += self._protein_feed_cost_change(qp, price_shock)
-                else:
-                    fr = getattr(self.data, "feed_requirements", None)
-                    if fr is not None and len(fr) and act in fr.index:
-                        mult = self.BROILER_BIRDS_PER_PLACE if act == "BROI" else 1.0
-                        for feed in ("SWHE", "BARL", "CORN", "RYEM", "OATS", "OCER"):
-                            if feed in fr.columns:
-                                q = float(fr.at[act, feed]) * mult
-                                if q > 0:
-                                    p0 = float(self.data.producer_prices.get(feed, 0.0))
-                                    cost += q * p0 * float(price_shock.get(feed, 0.0))
-                        if "SOYC" in fr.columns:
-                            q = float(fr.at[act, "SOYC"]) * mult
-                            if q > 0:
-                                cost += self._protein_feed_cost_change(q, price_shock)
+                # (no feed coefficient: CAPRI has no herd of the animal in the region at base, so no feed and no
+                # feed cost change; the national feed table that stood here as a fallback, feed_requirements.csv, had
+                # no builder and was removed on 29 October 2026, KNOWN_ISSUES K99)
             # Crop gross margin (EUR/ha); animal gross margin (EUR/head)
             r[act] = revenue - cost + payment
             prem[act] = payment
@@ -5768,7 +5752,6 @@ class SupplyModule:
             yields=yields,
             land=d["land"].loc[region] if region in d["land"].index
                  else pd.Series(dtype=float),
-            feed_requirements=d["feed_req"],
             # CAPRI's NITF/PHOF/POTF are regional; the national constants they
             # replace lose real variation (nitrogen on soft wheat spans
             # 15-230 kg/ha across regions).
