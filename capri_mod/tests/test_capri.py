@@ -3981,3 +3981,24 @@ def test_warm_start_from_the_last_solution_as_it_is(model, tmp_path, monkeypatch
     assert np.array_equal(N.inside_regulations(x, only_outside=True), x)
     w = N.solve(N.inside_regulations(x, only_outside=True), lam=(r["lam_x"], r["lam_g"]))
     assert w["success"] and w["iterations"] <= 10 and abs(w["f"] - r["f"]) <= 1e-7 * abs(r["f"])
+
+
+def test_3nop_from_capris_digestibility_table():
+    """K93: 3-NOP (envind/line_nitr.gms) for dairy and suckler cows: CAPRI's digestibility table read as GAMS reads it
+    (a value under the header it overlaps: rye has no PAF, its 87.3 is dry matter), CH4ENT cut by CAPRI's formula in the
+    ration's fibre and fat, 0.09% of dry matter, no requirement effect, no cost saving."""
+    t = pd.read_csv(DATA_DIR / "sources" / "envind" / "capri_digestpar.csv")
+    rye = t[t.feed == "RYEM"].set_index("item")["value"]
+    assert "PAF" not in rye.index and rye["DM"] == 87.3 and rye["NDF"] == 14.1 and rye["EE"] == 1.2
+    import sys
+    sys.path.insert(0, str(DATA_DIR.parent / "tools" / "lib"))
+    import _capri_digest as G
+    # line_nitr.gms l. 125-134 at its reference ration (NDF 32.9, fat 4.2): 32.36 + 0.282 x (90 - 70.5)
+    assert abs(G.nop_ch4_rel(32.9, 4.2) + (32.36 + 0.282 * 19.5) / 100) < 1e-12
+    s = pd.read_csv(DATA_DIR / "2017" / "abatement" / "mitigation" / "supplement_effects.csv")
+    n = s[s.option == "3NOP_Tot"]
+    assert set(n.animal) == {"DCOW", "BCOW"} and len(n) > 400
+    # 25% to 57% (median 35%): the concentrate-rich rations of CAPRI's data in HR, CY, MT have the lowest fibre
+    assert n.ch4ent_rel.between(-0.60, -0.20).all() and (n.shr_of_dm == 0.0009).all()
+    assert (n[["d_ener_rel", "d_crpr_rel", "d_drmn_rel", "d_mann_rel", "dsav"]] == 0).all().all()
+    assert n.elig_share.between(0.0, 305 / 365 + 1e-12).all()

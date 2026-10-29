@@ -27,6 +27,10 @@ COMMENT ON TABLE capri_xx IS 'CAPRI XX, the market model''s products (arm/arm_se
 CREATE TABLE capri_xx1 (code VARCHAR PRIMARY KEY, text VARCHAR);
 COMMENT ON TABLE capri_xx1 IS 'CAPRI''s XX1: the market model''s products with the non-agricultural good, income, the land inputs and feed energy (arm/arm_sets.gms)';
 
+-- file: capri_data/schema/codes/capri/FEED_TO_O.csv
+CREATE TABLE capri_feed_to_o (feed VARCHAR NOT NULL, row VARCHAR NOT NULL, PRIMARY KEY (feed, row));
+COMMENT ON TABLE capri_feed_to_o IS 'CAPRI''s FEED_TO_O: the feed bulks and their products (sets.gms)';
+
 -- file: capri_data/schema/codes/capri/RALL.csv
 CREATE TABLE capri_rall (code VARCHAR PRIMARY KEY, text VARCHAR);
 COMMENT ON TABLE capri_rall IS 'CAPRI RALL, all regional units of the CAPRI system (sets.gms)';
@@ -92,3 +96,11 @@ GROUP BY capri_code HAVING count(*) > 1;
 
 -- rule: a member state of the regional units is its own unit's member state code (ends in 000000)
 SELECT region, capri_ms FROM regional_units WHERE capri_ms NOT LIKE '%000000';
+
+-- file: capri_data/schema/codes/capri/MS_RU.csv
+CREATE TABLE capri_ms_ru (
+    ms VARCHAR NOT NULL REFERENCES capri_rall (code),
+    ru VARCHAR NOT NULL REFERENCES capri_rall (code),
+    PRIMARY KEY (ms, ru)
+);
+COMMENT ON TABLE capri_ms_ru IS 'CAPRI''s member states and their regional units (MAP_RR restricted to MS x RU)';

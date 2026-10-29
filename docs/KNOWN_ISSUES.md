@@ -1180,7 +1180,7 @@ where the N target barely binds) were made on structures since replaced and are 
 <a id="k93"></a>
 ### K93: CAPRI mitigation options not built, and the documents disagree on which are in (found 29 October 2026, registry migration)
 
-Not in the regional model: 3-NOP, legume share (LegSh), tillage (ConsTill, NoTill), urea substitution (UreaSubst),
+Not in the regional model: 3-NOP (built 29 October 2026), legume share (LegSh), tillage (ConsTill, NoTill), urea substitution (UreaSubst),
 buffer strips, biodiversity options and biochar (`docs/MITIGATION_IN_SUPPLY.md`: "not built; their LEACHN_/RUNSURFN_
 terms held at CAPRI's reference"); CAPRI's constraint on total ration fat (SupplementPerc_) is not carried. These are
 recorded only inside the status texts of K50 and K51 (resolved table) and README's "Future (not scheduled)", not in
@@ -1200,7 +1200,11 @@ recorded only inside the status texts of K50 and K51 (resolved table) and README
   NRC 2001 and INRA 2002 values written in CAPRI's code, then cleaned per region in digestibility.gms) over the
   activity's base ration; cost 175 EUR per kg of active substance; no cost saving. Without an emission price its
   share stays 0 (CAPRI's calibration), so it acts in the carbon-tax runs only. Needs p_digestPar as data (a CSV built
-  from CAPRI's code) and the rations' dry matter
+  from CAPRI's code) and the rations' dry matter. **3-NOP built 29 October 2026** (tools/build/build_digestibility_table.py: CAPRI's table to
+  CSV; tools/lib/_capri_digest.py: digestibility.gms's steps; build_supplement_effects.py: 3NOP_Tot rows, CH4ENT -25%
+  to -57% (median -35%), about EUR 95 per dairy cow and year; the accounts' combination of the supplements corrected so linseed and
+  nitrate keep their overlap term with 3-NOP present); acts in the carbon-tax runs only. Remaining: LegSh, ConsTill,
+  NoTill, UreaSubst, buffer strips, biodiversity options, biochar
 
 <a id="k94"></a>
 ### K94: `capri_mod/data/reconcile_base.py` is an orphan, and README's re-basing note points at a removed concordance (found 29 October 2026, registry migration)

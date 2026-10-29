@@ -801,6 +801,16 @@
    ],
    "source": "CAPRI elas_2_1730defaulta.csv (p_hessNQSupp, p_elasSupp at CAL), data_market_1730defaulta.csv (Data_CAL PPRI, PROD), markmarket_greendeal_1730et_base_1717.txt (PPRI INPE 2030)",
    "note": "29 October 2026: the non-EU market regions' supply as CAPRI's ProdNQ_ with the cross-price terms (market step D, K54-3), replacing one own-price constant elasticity per region and product"
+  },
+  "capri_digestibility": {
+   "nature": "CAPRI_STRUCTURE",
+   "status": "IMPLEMENTED - from CAPRI code",
+   "files": [
+    "sources/envind/capri_digestpar.csv",
+    "sources/envind/capri_digest_default_prd.csv"
+   ],
+   "source": "CAPRI gams/envind/def_digestibility.gms (TABLE p_digestPar, SET DEF_PRD)",
+   "note": "29 October 2026: for 3-NOP's CH4 effect (K93); the regional steps of digestibility.gms in tools/lib/_capri_digest.py"
   }
  },
  "_moved": "29 October 2026: the log entries (checks, fixes, decisions) and the sections uploaded_star_files_assessment, capreg_extraction_outcome, _release_readiness, cattle_member_splits moved verbatim to docs/KNOWN_ISSUES.md (appendix 'the data sourcing registry's log'); code_embedded_data to docs/design/PROXY_AUDIT.md"

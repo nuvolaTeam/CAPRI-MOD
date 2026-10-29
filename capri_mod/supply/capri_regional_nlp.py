@@ -22,8 +22,8 @@ land-market columns, land and bound rows, with one label per row) and the calibr
 * CAP greening (permGras, ecoSetAside, cropDiv Shannon), the N-surplus target, the Green Deal's mineral caps and organic
   area target, the ammonia, fertiliser-technique and inhibitor options through CAPRI's N loss cascade, the emission tax.
 
-Breeding, low-N feed, linseed and nitrate (and histosol fallowing) are linear columns the supply module adds. Not
-built: legume share, tillage, urea substitution, 3-NOP, buffer strips, biodiversity options, biochar, and CAPRI's ration
+Breeding, low-N feed, linseed, nitrate and 3-NOP (and histosol fallowing) are linear columns the supply module adds.
+Not built: legume share, tillage, urea substitution, buffer strips, biodiversity options, biochar, and CAPRI's ration
 fat constraint SupplementPerc_ (KNOWN_ISSUES K93).
 
 CALIBRATION of the feed terms. The rations were calibrated (feed/ration.py) with CAPRI's fixed feed shares and dry-matter

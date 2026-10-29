@@ -7,6 +7,8 @@ throughout may follow later). This builder writes:
                                               (PACT all production activities, MPACT, MCACT, MAACT, XX the market
                                               products, XX1 the market model's products with the non-agricultural good, income,
                                               land and feed energy, RALL all regional units)
+  capri_data/schema/codes/capri/FEED_TO_O.csv  CAPRI's feed bulks and their products: feed, row
+  capri_data/schema/codes/capri/MS_RU.csv     CAPRI's member states and their regional units (MAP_RR x MS x RU)
   capri_data/schema/codes/model_activities.csv  the model's 46 activities (capri_mod/data/definitions.py CROPS,
                                               ANIMALS): code, kind, capri_codes (";"-joined CAPRI activities summed
                                               into it), mapping_source
@@ -148,6 +150,14 @@ def main():
         raise SystemExit("code lists not written:\n  " + "\n  ".join(problems))
     for s, d in capri.items():
         write(OUT / "capri" / f"{s}.csv", ("code", "text"), sorted(d.items()))
+    # two-dimensional sets: FEED_TO_O (feed bulks and their products) and MAP_RR restricted to each member state's
+    # regional units (MS x RU), as envind/digestibility.gms and line_nitr.gms use them (3-NOP, K93)
+    def pairs(name):
+        with open(Path(a.sets) / f"{name}.csv", newline="", encoding="utf-8") as fh:
+            return [(r["d0"], r["d1"]) for r in csv.DictReader(fh)]
+    ms_, ru_ = set(read_set(a.sets, "MS")), set(read_set(a.sets, "RU"))
+    write(OUT / "capri" / "FEED_TO_O.csv", ("feed", "row"), sorted(pairs("FEED_TO_O")))
+    write(OUT / "capri" / "MS_RU.csv", ("ms", "ru"), sorted((m, r) for m, r in pairs("Map_RR") if m in ms_ and r in ru_))
     write(OUT / "model_activities.csv", ("code", "kind", "capri_codes", "mapping_source"), acts)
     write(OUT / "model_commodities.csv", ("code", "capri_code", "mapping_source"), comms)
     differ = [(c, cc) for c, cc, _ in comms if c != cc]

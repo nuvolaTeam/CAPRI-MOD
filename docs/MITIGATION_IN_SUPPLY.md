@@ -24,7 +24,7 @@ columns of the regional QP).
 | Linseed (LINE), nitrate (NITR), their combination (AComLN) | envind/line_nitr.gms | in | `tools/build/build_supplement_effects.py` |
 | Winter cover (WinterCov) | envind/cover_crops.gms | a choice of the regional model with CAPRI's cost curve, the Farm-to-Fork requirement as its floor (`capri_regional_nlp.py`, catcMiti_; docs/WINTER_COVER.md); it acts in the cascade and in leaching | `cover_crops.csv`, `p_winterCoverShare0.csv` |
 | Histosol fallowing (FALLOW) | envind/no_histosols.gms | in, as a linear column (approximated) | `histosol.csv` |
-| 3-NOP, legume share (LegSh), tillage (ConsTill, NoTill), urea substitution (UreaSubst), buffer strips, biodiversity options, biochar | various | not built; their LEACHN_/RUNSURFN_ terms held at CAPRI's reference | - |
+| Legume share (LegSh), tillage (ConsTill, NoTill), urea substitution (UreaSubst), buffer strips, biodiversity options, biochar | various | not built; their LEACHN_/RUNSURFN_ terms held at CAPRI's reference | - |
 
 The active set is CAPRI's Green Deal reference (`pol_input/greendeal/refpol_endotech_all_sup.gms`, activeTech;
 `capri_data/2017/abatement/active_technologies.csv`). The copy of the JRC121368-era reference supplied with CAPRI
@@ -142,23 +142,25 @@ REGISTERED: the cost is CAPRI's at ghgTechLowNFeed = 1 (it is not linear in the 
 2017 corrections; lysine is not a model requirement. The fall of the marginal value between CAPRI's ini and max runs
 is netted from the slope as CAPRI (dsav, as for breeding; since 23 October 2026).
 
-## Linseed and nitrate (`envind/line_nitr.gms`)
+## Linseed, nitrate and 3-NOP (`envind/line_nitr.gms`)
 
 star 3.0's Green Deal technology file switches the supplements on (`ghgTechLineNitr = 1`; `ghgTechActiveFeed` = LINE,
 NITR, AComLN, 3NOP, LowNFeed). They are columns of the regional models with feeding inside, one per region, cattle
-animal and total (CAPRI's `LINE_Tot`, `Nitr_Tot`) (`tools/build/build_supplement_effects.py`,
+animal and total (CAPRI's `LINE_Tot`, `Nitr_Tot`, `3NOP_Tot`) (`tools/build/build_supplement_effects.py`,
 `abatement/mitigation/supplement_effects.csv`):
 
-| | Linseed (LINE) | Nitrate (NITR) |
-|---|---|---|
-| Animals | dairy 100% of stable time, other cattle 50% | dairy 10/12 of stable time; bulls and replacement heifers 50%; never calves or suckler cows |
-| Maximum dosage (share of dry matter) | 5% fat | 1.5% (heifers 1%) |
-| Feed effect (REQSE_) | fed: fresh matter = DRMA x 5% / (40.5% fat x 89.9% DM), supplying the OOIL row of p_nutCont (energy 5.89, crude protein 0.22, DM 0.9 per kg) | replaces crude protein: requirement - DRMA x 0.0154 x dosage x 100 per head |
-| Enteric CH4 (accounts) | -5% per point of fat (-25% at maximum) | -10% per point (-15%; heifers -10%) |
-| Cost | EUR 674/t x 89.9 / 40.5 per t fat | EUR 873/t |
+| | Linseed (LINE) | Nitrate (NITR) | 3-NOP (since 29 October 2026) |
+|---|---|---|---|
+| Animals | dairy 100% of stable time, other cattle 50% | dairy 10/12 of stable time; bulls and replacement heifers 50%; never calves or suckler cows | dairy and suckler cows, stable time x 305/365 (the member state's (1 - grazing share)) |
+| Maximum dosage (share of dry matter) | 5% fat | 1.5% (heifers 1%) | 0.09% (Bovaer10; 90 mg of active substance per kg DM) |
+| Feed effect (REQSE_) | fed: fresh matter = DRMA x 5% / (40.5% fat x 89.9% DM), supplying the OOIL row of p_nutCont (energy 5.89, crude protein 0.22, DM 0.9 per kg) | replaces crude protein: requirement - DRMA x 0.0154 x dosage x 100 per head | none |
+| Enteric CH4 (accounts) | -5% per point of fat (-25% at maximum) | -10% per point (-15%; heifers -10%) | -(32.36 + 0.282 (dose - 70.5) - 0.915 (NDF - 32.9) - 3.08 (FAT - 4.2)) %, the member state's ration NDF and fat (CAPRI's digestibility table and data, `tools/lib/_capri_digest.py`): -25% to -57%, median -35% (the most in the concentrate-rich rations of Croatia, Cyprus, Malta) |
+| Cost | EUR 674/t x 89.9 / 40.5 per t fat | EUR 873/t | EUR 17,500/t of Bovaer10 (2022 money; deflated to 2017 with 1.019), not halved: about EUR 95 per dairy cow and year |
 
-- On the same animals (AComLN) the CH4 factors multiply, the overlap as large as the shares allow.
-- Maximum shares = the level of CAPRI's maximum calibration run + 2e-6 (line_nitr.gms caps MaxShare there).
+- On the same animals (AComLN) the CH4 factors of linseed and nitrate multiply, the overlap as large as the shares
+  allow; 3-NOP adds (CAPRI's MC_GHG_Miti_Factor sums the options' shares times their QEmitt ratios).
+- Maximum shares = the level of CAPRI's maximum calibration run + 2e-6 (line_nitr.gms caps MaxShare there); 3-NOP's
+  CAPRI's formula, not capped by the maximum run (l. 340-343).
 - Cost per head = costParLin x DRMA / 1000 x dosage, in 2017 money, halved for the cost savings (line_nitr.gms
   l. 357). Calibration as line_nitr.gms: zero at base, relSubs0 0.05, relSubs1 1.2, curvature floor 0.1 per unit of
   the eligible share, the fall of the marginal value between CAPRI's ini and max runs netted (dsav, as for breeding).
@@ -168,10 +170,10 @@ animal and total (CAPRI's `LINE_Tot`, `Nitr_Tot`) (`tools/build/build_supplement
   ingredient of the EU ration (`CAPRIModel.use_nitrate`, off) was removed on 27 October 2026.
 
 REGISTERED: DRMA is CAPRI's own estimate from breeding.gms, DRMN + (|DRMX| - DRMN) / 4; CAPRI's soft constraint on
-total ration fat (SupplementPerc_, 5% of DM) needs every feed's fat (p_digestPar, not among the inputs) and is not
-carried, its effect on the maximum shares being in the max-run caps; 3-NOP is left out: its only effect is enteric CH4,
-it has no cost saving in CAPRI's calibration runs, so without an emission price its calibrated optimum is zero (with
-the emission tax this omission matters).
+total ration fat (SupplementPerc_, 5% of DM) needs every feed's fat in the ration as it changes and is not carried,
+its effect on the maximum shares being in the max-run caps. 3-NOP has no cost saving in CAPRI's calibration runs, so
+without an emission price its share stays zero; it acts under the emission tax. Its CH4 effect takes the 2017 rations
+(CAPRI's data(ru, act, feed, "Y")), summed per head over the member state's units as line_nitr.gms writes it.
 
 ## CAPRI's emission tax in the supply models
 

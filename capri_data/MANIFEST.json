@@ -1670,7 +1670,7 @@
    "domain": "abatement",
    "status": "live",
    "shape": {
-    "rows": 1925,
+    "rows": 2355,
     "cols": 19,
     "columns": [
      "animal",
@@ -1694,7 +1694,7 @@
      "dsav"
     ]
    },
-   "note": "CAPRI's feed supplements linseed (LINE_Tot) and nitrate (Nitr_Tot) per model region and cattle animal (envind/line_nitr.gms, ghgTechLineNitr a switch): requirement changes, eligible share, cost, CH4ENT change, calibration terms; tools/build/build_supplement_effects.py. dsav: CAPRI's cost-saving drop between its ini and max calibration runs, EUR per model head adopting (per unit of the parameter; tools/lib/_capri_costsavings.py), netted from the PMP slope as CAPRI (K67 F2)."
+   "note": "CAPRI's feed supplements linseed (LINE_Tot) and nitrate (Nitr_Tot) per model region and cattle animal (envind/line_nitr.gms, ghgTechLineNitr a switch): requirement changes, eligible share, cost, CH4ENT change, calibration terms; tools/build/build_supplement_effects.py. dsav: CAPRI's cost-saving drop between its ini and max calibration runs, EUR per model head adopting (per unit of the parameter; tools/lib/_capri_costsavings.py), netted from the PMP slope as CAPRI (K67 F2).; 3-NOP rows (3NOP_Tot) since 29 October 2026 (K93)"
   },
   "capri_level_ratio.csv": {
    "source": "CAPRI res_17<MS> LEVL per model herd (tools/build/build_capri_level_ratio.py)",
@@ -2820,6 +2820,41 @@
     ]
    },
    "note": "CAPRI's market supply functions (ProdNQ_) of the non-EU market regions with their cross-price terms (tools/build/build_noneu_market_supply_nq.py; K54-3, market step D); y empty: a column without a model price, held at calibration"
+  },
+  "capri_digestpar.csv": {
+   "source": "CAPRI star 3.0 code, gams/envind/def_digestibility.gms",
+   "vintage": "CAPRI star 3.0 code",
+   "units": "% of dry matter (PAF, CAT: factors)",
+   "domain": "environment",
+   "status": "live",
+   "path": "sources/envind/capri_digestpar.csv",
+   "shape": {
+    "rows": 367,
+    "cols": 3,
+    "columns": [
+     "feed",
+     "item",
+     "value"
+    ]
+   },
+   "note": "CAPRI's feed digestibility table p_digestPar(EU, DCOL, feed, item) as written in envind/def_digestibility.gms (NRC 2001, INRA 2002), read as GAMS reads it (tools/build/build_digestibility_table.py); 3-NOP's CH4 effect (K93)"
+  },
+  "capri_digest_default_prd.csv": {
+   "source": "CAPRI star 3.0 code, gams/envind/def_digestibility.gms",
+   "vintage": "CAPRI star 3.0 code",
+   "units": "-",
+   "domain": "environment",
+   "status": "live",
+   "path": "sources/envind/capri_digest_default_prd.csv",
+   "shape": {
+    "rows": 49,
+    "cols": 2,
+    "columns": [
+     "default",
+     "feed"
+    ]
+   },
+   "note": "CAPRI's DEF_PRD: the products whose values fill a feed's missing items (envind/def_digestibility.gms; tools/build/build_digestibility_table.py)"
   }
  },
  "_vintage_summary": {

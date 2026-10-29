@@ -1520,11 +1520,14 @@ class EnvironmentalModule:
                 _h = float(_lvs.get(_ga, 0.0) or 0.0)
                 if _e is None or _h <= 0 or not _gz or "ch4ent_rel" not in _e.index or not pd.notna(_e["ch4ent_rel"]):
                     continue
-                _sh.setdefault(_ga, []).append((min(1.0, max(0.0, float(_gz) / _h)), float(_e["ch4ent_rel"])))
+                _sh.setdefault(_ga, {})[_go] = (min(1.0, max(0.0, float(_gz) / _h)), float(_e["ch4ent_rel"]))
             for _ga, _l in _sh.items():
-                _f = 1.0 + sum(s_ * r_ for s_, r_ in _l)
-                if len(_l) == 2:
-                    _f += _l[0][1] * _l[1][1] * min(_l[0][0], _l[1][0])
+                _f = 1.0 + sum(s_ * r_ for s_, r_ in _l.values())
+                # linseed and nitrate on the same animals (CAPRI's AComLN): their effects multiply; 3-NOP adds
+                # (line_nitr.gms l. 107-121, 124-134; ghgMiti.gms sums the options' QEmitt changes)
+                if "LINE_Tot" in _l and "Nitr_Tot" in _l:
+                    (sL, rL), (sN, rN) = _l["LINE_Tot"], _l["Nitr_Tot"]
+                    _f += rL * rN * min(sL, sN)
                 _supp[_ga] = max(0.0, _f)
         if not hasattr(self, "_supp_ch4"):
             self._supp_ch4 = {}
