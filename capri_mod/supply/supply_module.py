@@ -69,21 +69,19 @@ _OVERFERT_WARNED = False
 def overfert_factor(region: str):
     """CAPRI's over-fertilisation factor x = v_cropNutNeedMultFact(ru, NITF, "T") for a model
     region (capri_data/2017/environment/crop_nut_need_mult_fact_2030.csv, built by
-    tools/build/build_overfert_factors.py from CAPRI's priFertDist results), or None when the data
-    is not available - then CAPRI's limits on the fertiliser technologies (Tot_MitFert_ and the
-    regional maximum shares) cannot be applied, which is warned once."""
+    tools/build/build_overfert_factors.py from CAPRI's priFertDist results). Every unit of the model has one
+    (CAPRI's limits on the fertiliser technologies, Tot_MitFert_ and the regional maximum shares, need it): a missing
+    file or region is an error (K74, 29 October 2026; before, the limits were dropped with a warning, a fallback no
+    unit of the model reached)."""
     global _OVERFERT, _OVERFERT_WARNED
     if _OVERFERT is None:
-        _OVERFERT = {}
         f = Path(__file__).resolve().parents[2] / "capri_data" / "2017" / "environment" / "crop_nut_need_mult_fact_2030.csv"
-        if f.exists():
-            for r in read_input(f).itertuples(index=False):
-                _OVERFERT[str(r.region)] = float(r.x)
+        if not f.exists():
+            raise FileNotFoundError(f"CAPRI's over-fertilisation factors missing: {f} (tools/build/build_overfert_factors.py)")
+        _OVERFERT = {str(r.region): float(r.x) for r in read_input(f).itertuples(index=False)}
     x = _OVERFERT.get(region)
-    if x is None and not _OVERFERT_WARNED:
-        warnings.warn("CAPRI over-fertilisation factors (crop_nut_need_mult_fact_2030.csv) missing: "
-                      "fertiliser technologies are not limited by over-fertilisation (CAPRI Tot_MitFert_)")
-        _OVERFERT_WARNED = True
+    if x is None:
+        raise KeyError(f"{region}: no CAPRI over-fertilisation factor in crop_nut_need_mult_fact_2030.csv")
     return x
 
 
@@ -161,18 +159,16 @@ def young_animal_table() -> dict:
 
 def active_technologies():
     """CAPRI's active mitigation technologies of the Green Deal reference (activeTech,
-    capri_data/2017/abatement/active_technologies.csv, tools/build/build_active_technologies.py), or
-    None when the file is missing (then every option with data is available, with a warning)."""
+    capri_data/2017/abatement/active_technologies.csv, tools/build/build_active_technologies.py). A missing file is an
+    error (K74, 29 October 2026; before, every option with data was made available with a warning)."""
     global _ACTIVE_TECH
     if _ACTIVE_TECH is None:
         from pathlib import Path as _P
         f = _P(__file__).resolve().parents[2] / "capri_data" / "2017" / "abatement" / "active_technologies.csv"
-        if f.exists():
-            _ACTIVE_TECH = set(read_input(f)["technology"].str.upper())
-        else:
-            import warnings as _w
-            _w.warn("active_technologies.csv missing: all mitigation options with data are available")
-            _ACTIVE_TECH = set()
+        if not f.exists():
+            raise FileNotFoundError(f"CAPRI's active mitigation technologies missing: {f} "
+                                    "(tools/build/build_active_technologies.py)")
+        _ACTIVE_TECH = set(read_input(f)["technology"].str.upper())
     return _ACTIVE_TECH or None
 
 
@@ -1236,7 +1232,7 @@ class RegionalSupplyModel:
         if type(self)._CATC_OPT is None:
             from pathlib import Path as _P
             f = _P(__file__).resolve().parents[2] / "capri_data" / "2017" / "abatement" / "mitigation" / "winter_cover_option.csv"
-            type(self)._CATC_OPT = read_input(f).set_index("region") if f.exists() else pd.DataFrame()
+            type(self)._CATC_OPT = read_input(f).set_index("region")       # a missing file is an error (K74)
         opt = type(self)._CATC_OPT
         cc = getattr(self.data, "cover_crops", None)
         wcs = getattr(self.data, "winter_cover_share", None)
@@ -1253,7 +1249,9 @@ class RegionalSupplyModel:
         row = [(j, float(wcs.at[a, "share"])) for j, a in enumerate(self.acts) if a in wcs.index and float(wcs.at[a, "share"]) > 0]
         cov0 = sum(float(base.get(self.acts[j], 0.0) or 0.0) * s for j, s in row)
         rhs = max(uaa + float(getattr(self, "_fall_floor", 0.0) or 0.0), cov0 + m0 * uaa)
-        return {"uaa": uaa, "m0": m0, "lb": 0.0, "ub": max(float(opt.at[reg, "max_share"]), m0),
+        # the upper bound CAPRI's MaxShare (supply/set_miti_bounds.gms l. 30-34; K74, 29 October 2026: was
+        # max(MaxShare, IniShare), the same in every unit, none has its initial share above the maximum)
+        return {"uaa": uaa, "m0": m0, "lb": 0.0, "ub": float(opt.at[reg, "max_share"]),
                 "k1": float(opt.at[reg, "cost_lin_eur_ha"]), "lin": float(opt.at[reg, "pmp_lin"]),
                 "sqr": float(opt.at[reg, "pmp_sqr"]), "biofix": bf, "row": row, "rhs": rhs,
                 "potential": max(0.0, uaa - cov0)}
@@ -1535,7 +1533,11 @@ class RegionalSupplyModel:
                 if row == "EXCRET" and x > 0:
                     c[(r, {"PHOF": "P", "POTF": "K", "NITF": "N"}[col])] = max(0.0, 1.0 - v.get((r, "MTRADE", col), 0.0) / x)
             type(self)._NPK_APPL = c
-        return c.get((cr, nut), c.get((cr[:2] + "000000", nut), 1.0))
+        # every unit of the model has CAPRI's regional value (K74, 29 October 2026: the national value and the 1.0
+        # without a source, the fallbacks before, were reached by none)
+        if (cr, nut) not in c:
+            raise KeyError(f"{cr}: no CAPRI 2030 manure {nut} excretion in npk_dataout_2030.csv.xz")
+        return c[(cr, nut)]
 
     def _aug_col_labels(self, n_cols):
         """One label per column of the regional problem: activities, land types, the mineral-N allocation column,
@@ -2452,15 +2454,17 @@ class RegionalSupplyModel:
         "IE": "UK_IR",
     }
 
-    #: CAPRI's crop -> yield-gap product group (same source).
+    #: CAPRI's crop -> yield-gap product group (same source, pact2yieldGap; MAIZ = CORN, GRAE/GRAI = GRAS; K74,
+    #: 29 October 2026: MAIF, OOIL and OFOD, which CAPRI does not map, removed - no organic crop used them). A group
+    #: without a value for the region takes Central Europe North's, as CAPRI (pol_input/greendeal/organic_area.gms
+    #: l. 178-180)
     YIELD_GAP_GROUP = {
         "SWHE": "wheat", "DWHE": "wheat",
         "RYEM": "cereals", "BARL": "cereals", "OATS": "cereals",
         "OCER": "cereals", "PARI": "cereals",
-        "CORN": "maize", "MAIF": "maize",
+        "CORN": "maize",
         "RAPE": "oilseeds", "SUNF": "oilseeds", "SOYA": "oilseeds",
-        "OOIL": "oilseeds",
-        "GRAS": "grass", "OFOD": "grass",
+        "GRAS": "grass",
         "TOMA": "vegetables", "POTA": "vegetables", "OVEG": "vegetables",
         "APPL": "fruits", "OFRU": "fruits", "CITR": "fruits",
         "TAGR": "nonfruit_perm", "WINE": "nonfruit_perm", "OLIV": "nonfruit_perm", "TABO": "nonfruit_perm",
@@ -2533,15 +2537,13 @@ class RegionalSupplyModel:
     PESTICIDE_YIELD_LOSS_AT_50PCT = param("PESTICIDE_YIELD_LOSS_AT_50PCT")
 
     #: The crops the pesticide yield loss reaches (the jrc121368 rule only; CAPRI star 3.0 calls conventional_io.gms
-    #: with the yield shock off).
-    PESTICIDE_AFFECTED = (
-        # CORN is grain maize in this activity set; "MAIZ" (used here before)
-        # is not an activity, so the pesticide target silently skipped it.
-        "SWHE", "DWHE", "RYEM", "BARL", "OATS", "CORN", "OCER",      # cereals
-        "RAPE", "SUNF", "SOYA", "OOIL",                              # oilseeds
-        "TOMA", "OVEG", "POTA", "SUGB", "PULS",                      # veg/other arable
-        "APPL", "OFRU", "CITR", "TAGR", "WINE", "OLIV", "TABO",      # permanent
-    )
+    #: with the yield shock off): CAPRI's pesticideCrops, every crop activity MCACT but the idled histosols
+    #: (pol_input/greendeal/conventional_io.gms l. 51-53). K74 (S11), 29 October 2026: a list of 23 crops without
+    #: source before (rice, tobacco, textiles, nurseries, flowers, other crops and industrial crops left out). The loss
+    #: acts through the yield of a crop with a producer price; the fodder crops (grass, fodder maize, other fodder,
+    #: CAPRI's shift of their output coefficients) and set-aside are not reached (REGISTERED: their yields enter the
+    #: fodder balances from CAPRI's data, not from the yields this rule moves)
+    PESTICIDE_AFFECTED = tuple(c for c in CROPS if c not in ("GRAS", "MAIF", "OFOD", "SETA"))
 
     #: Share of total input cost that is fertiliser (CAPRI FERT, EU-wide, all 27 member states' 2017 data;
     #: tools/build/build_crop_cost_shares.py): FALLBACK for the fertiliser cost per ha of a crop CAPRI does not grow
