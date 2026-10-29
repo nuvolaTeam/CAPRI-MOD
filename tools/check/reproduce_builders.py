@@ -133,6 +133,7 @@ INVOCATIONS: list[tuple[str, list[str], list[Path]]] = [
     ("build_lownfeed_effects", [], [UP / "animReq_SK.zip", D17]),
     ("build_livestock_products", [], [D17]),
     ("build_eu_producer_prices", [], []),
+    ("build_sheep_goat_inputs", [], [D17]),
     ("build_supplement_effects", [], []),
     ("build_genetics_effects", [], [D17]),
     # not region-keyed, or member-state / market / CAPRI-coded
