@@ -291,3 +291,13 @@ captrd`), S278 (trajectory plausibility check: raises an error, it does not subs
   `tillageCover.csv`, `ccEfa.csv`, `gams.zip` (CAPRI source, extracted to `/home/claude/work/allgms`).
 - **Official statistics:** `estat_apri_lrnt_en.csv` (land rents), `tgs00045_page_linear_2_0.csv`,
   `ef_lsk_bovine_*.csv.gz`, NUTS correspondence spreadsheets.
+
+## Hardcoded data recorded in the data sourcing registry (moved here 29 October 2026)
+
+The registry's section `code_embedded_data` (constants in code, not data files) moved here with its log
+(docs/KNOWN_ISSUES_REGISTRY_LOG.md). State on 29 October 2026:
+
+| Registry entry | Location named | State |
+|---|---|---|
+| biofuel conversion coefficients (REALITY_CALIBRATED: standard agronomic yields, mandate calibrated to EU output) | `biofuel/biofuel_module.py` | gone: the module no longer exists (`capri_mod/biofuel/` holds only `__init__.py`); biofuels are CAPRI's market blocks |
+| environmental proxy factors (FRAC_GASF, HNV, NH3 shares; IPCC/literature defaults) | `environmental/environmental_module.py` | FRAC_GASF no longer in the code (N losses by CAPRI's cascade, K51); the HNV farmland indicator remains a proxy: permanent grassland plus 0.5 x the area of PULS, SOYA and GRAS (hand-set weight; GRAS counted twice, as grassland and among the "legumes"); reporting only (`compute_biodiversity_indicators`), KNOWN_ISSUES K96 |

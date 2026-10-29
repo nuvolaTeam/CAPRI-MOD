@@ -89,6 +89,11 @@ Beyond CAPRI (for the project lead to note): range checks, and enforcement at lo
    checked against today's code and becomes a K item (or joins the K item it duplicates); the closed and historical
    entries are kept verbatim in an appendix of `KNOWN_ISSUES.md`, so nothing is lost and the K list stays current.
    Its `code_embedded_data` section (2 entries: constants in code) goes to the proxy audit's hardcoded-data list.
+   **Done 29 October 2026:** the 201 log entries and the sections uploaded_star_files_assessment,
+   capreg_extraction_outcome, _release_readiness and cattle_member_splits are verbatim in
+   docs/KNOWN_ISSUES_REGISTRY_LOG.md (a file of its own, linked from KNOWN_ISSUES.md, because of its size), with the
+   triage of the 71 entries not marked closed (new K92-K96; K91 corrected); code_embedded_data in
+   docs/design/PROXY_AUDIT.md; the registry keeps its 74 dataset entries.
 4. "No orphan rows": a row whose key is not in a code list (the foreign keys) and a table nothing reads (rule above).
 
 ## Order

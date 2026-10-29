@@ -162,13 +162,21 @@ def check_readme_counts(root: Path) -> list:
     _sys.path.insert(0, str(root))
     from capri_mod.data.definitions import CROPS, ANIMALS, MARKET_COMMODITIES
     import ast as _ast
-    # count tests by parsing, not importing: importing needs pytest, which a
-    # documentation check should not depend on
-    _trees = [_ast.parse(f.read_text()) for f in sorted((root / "capri_mod" / "tests").glob("test_*.py"))]
+    # the tests as pytest collects them (both test folders of pyproject's testpaths, parametrized cases each counted),
+    # the number the README states; without pytest the count is skipped. (Until 29 October 2026 the test functions of
+    # capri_mod/tests were counted by parsing, which missed the pipeline tests and the parametrized cases: 199 against
+    # pytest's 229.)
     readme = (root / "README.md").read_text()
+    import subprocess as _sp
+    try:
+        _out = _sp.run([_sys.executable, "-m", "pytest", "--collect-only", "-q", "-p", "no:cacheprovider"], cwd=root,
+                       capture_output=True, text=True, timeout=300).stdout
+        _m = re.search(r"(\d+) tests? collected", _out)
+        _n_tests = int(_m.group(1)) if _m else None
+    except Exception:
+        _n_tests = None
     actual = {
-        "tests": sum(1 for _tree in _trees for n in _tree.body if isinstance(n, _ast.FunctionDef)
-                     and n.name.startswith("test_")),
+        "tests": _n_tests,
         "market commodities": len(MARKET_COMMODITIES),
         "activities": len(CROPS) + len(ANIMALS),
         "crops": len(CROPS),
@@ -185,6 +193,8 @@ def check_readme_counts(root: Path) -> list:
     }
     problems = []
     for what, pats in patterns.items():
+        if actual[what] is None:
+            continue
         for pat in pats:
             for m in re.finditer(pat, readme):
                 if int(m.group(1)) != actual[what]:

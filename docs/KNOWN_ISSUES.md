@@ -5,7 +5,11 @@ form, solved with IPOPT). The tables give one line per issue; the details follow
 was found, where it acts, whether the tagged release 9t (`capri-mod-9t.zip`) carries it, and its status. 9t.1 is 9t
 with every fix below except K5, which needs the prototype's model change.
 
-## Open (19)
+The data sourcing registry's log of checks, fixes and decisions (201 entries, moved 29 October 2026) is in
+[KNOWN_ISSUES_REGISTRY_LOG.md](KNOWN_ISSUES_REGISTRY_LOG.md), verbatim, with the triage of its open entries against
+the code: they became K92-K96, joined K73, K80, K91, or were closed or historical.
+
+## Open (25)
 
 | # | Issue | Status |
 |---|---|---|
@@ -27,7 +31,13 @@ with every fix below except K5, which needs the prototype's model change.
 | [K86](#k86) | Ammonia housing and storage options without their farm-size cost curves in Denmark, Lithuania and Croatia | open |
 | [K89](#k89) | Failing regional solves take most of IPOPT's time | open |
 | [K90](#k90) | The wheat market's world price is CAPRI's soft-wheat price, not its wheat product's | open |
-| [K91](#k91) | CAPRI's trend projection (captrd_2030.json) has no extractor | open |
+| [K91](#k91) | CAPRI's trend projection (captrd_2030.json): no builder calls its extractor | open |
+| [K92](#k92) | Farm-to-Fork changes furthest from JRC121368, besides the milk price | open |
+| [K93](#k93) | CAPRI mitigation options not built; documents disagree on which are in | open |
+| [K94](#k94) | reconcile_base.py orphan; README's re-basing note points at a removed concordance | open |
+| [K95](#k95) | The "12/12 against PMRK" market-price validation is a solver-consistency check | open |
+| [K96](#k96) | Documents and one constant still describe removed mechanisms | open |
+| [K97](#k97) | NaN in the crop-diversification row during Green Deal solves | open |
 
 ## Resolved (72)
 
@@ -893,6 +903,22 @@ CAPRI's stop rule, recorded every iteration since r135, flags rows that move by 
   corrected it. So the end state still depends on the path where a region has two optima. Options for the project
   lead: keep, per region, the best objective found at (nearly) the same prices as a further start of the check; or
   compare HU230000's two optima first (still open)
+  29 October 2026, HU230000's two optima compared (the project lead's option (b); every solve of the region traced in a
+  repeat of r183, r184, which follows r183's path exactly): at the final prices the two optima differ by 5.1e-3 in
+  the objective; the better one feeds the cattle concentrates and grows maize grain (168 kha) and sunflower, the worse
+  one feeds no concentrates (cereals, protein feed 0) and twice the other fodder, with maize grain at 37 kha and more
+  other fodder (54 -> 135 kha), rapeseed (25 -> 102) and soft wheat (113 -> 164); the non-convexity is the per-head
+  feeding (herd x ration), CAPRI's own form. Why the run loses the better one: the warm start is built from the last
+  solution moved by `inside_regulations` (the fertiliser flows above 0.95 of their regulation maximum pulled back to
+  it: 44 values in HU230000) and started with the last solution's multipliers, an inconsistent primal-dual point; in 5
+  of the 19 traced scenario solves it stopped at the 200-iteration cap (objective -3.3e6 instead of -5.03e6), and the cold
+  restart from the same moved point (`prev`) ended at the worse optimum at iteration 17 (-5.0043e6 against -5.0300e6),
+  where every later warm start stayed. Replayed from the recorded data, the warm start from the last solution itself
+  (bounds clipped only) converged in all five (10-22 iterations), at iteration 17 to the better optimum (-5.02997e6);
+  in two of the replays it ended at a slightly worse point than the run kept (iteration 4: -4.9974e6 against the
+  standard start's -5.0202e6; iteration 8: 2e-4 relative). Proposed fix (for the project lead): the warm start from
+  the last solution as it is, as CAPRI's CONOPT restarts from its last solution, the regulated flows moved only where
+  they lie outside the support (not to 0.95 of it); `inside_regulations` kept for the cold starts
 
 <a id="k80"></a>
 ### K80: The same run repeated from a warm start differs by up to 3e-5 relative in small cereal activities (26 October 2026)
@@ -1095,8 +1121,10 @@ from for WHEA is not checked yet (arm/ data preparation).
 
 capri_data/trajectories/captrd_2030.json, the alternative baseline trajectory (`--trajectory captrd`; the default is
 CAPRI's 2030 reference, capri_ref_2030.json), holds CAPRI's CAPTRD trend factors extracted from a series slice
-(its `_provenance`: "/tmp/series_slice.csv", per-activity medians of per-region cumulative ratios, band 0.2-5) by a
-script that is not in the repository. tools/build/build_trajectory_model_keys.py adds the model's activity and region
+(its `_provenance`: "/tmp/series_slice.csv", per-activity medians of per-region cumulative ratios, band 0.2-5).
+Corrected 29 October 2026 (registry migration): the extractor is in the repository, capri_mod/projection/captrd_import.py
+`extract_trajectory` (it writes exactly the file's `_provenance` keys); missing are its input (the series slice of the
+project lead's CAPTRD p_result export, not kept) and a builder that calls it. tools/build/build_trajectory_model_keys.py adds the model's activity and region
 keys to the file in place (idempotent: rerun on its output, it writes the same file), so the file cannot be built from
 blank; it was taken out of the pipeline's builder list (tools/check/reproduce_builders.py NOT_AUDITED). Beyond the
 missing script, the step overwrites a BULL growth entry with BULF's, so whether the slice had a BULL factor of its own
@@ -1104,7 +1132,110 @@ cannot be told from the file.
 
 - **Effect:** the `captrd` trajectory only (not the default runs)
 - **In 9t:** not checked
-- **Status:** **open**: an extractor from CAPTRD's results (capri_reference/captrd_results/1770, its `series` position)
-  writing the CAPRI-keyed factors to capri_data/sources, read by build_trajectory_model_keys.py into
-  captrd_2030.json, would make the file reproducible; its factors would differ from the file's where the original
-  slice differed (not known)
+- **Status:** **open**: a builder calling `extract_trajectory` on CAPTRD's results (capri_reference/captrd_results/1770,
+  its `series` position) and writing the CAPRI-keyed factors to capri_data/sources, read by
+  build_trajectory_model_keys.py into captrd_2030.json, would make the file reproducible; its factors would differ
+  from the file's where the original slice differed (not known). captrd_import.py's docstring says per-region detail
+  is not carried while its code carries it (to correct with it)
+
+<a id="k92"></a>
+### K92: Farm-to-Fork changes furthest from JRC121368, besides the milk price (K13) (found 29 October 2026, registry migration)
+
+In the last Farm-to-Fork 2030 run whose indicators are tabulated (r145, README section 8 table; r161 in
+`FITNESS_FOR_USE.json` within about 0.5 points), against JRC121368 (Figures 5 and 7, Table 15): pork price +18.0% (CAPRI
++43) while pigs fall as in CAPRI (-13.9%, -14.5); poultry price +15.1% (+18); oilseed price +14.4% (+11); cereal price
++10.6% (+8); vegetables and permanent crops +11.7% (+15); dairy cows -3.4% (-10); poultry -11.9% (-16.5); manure N2O
+-18.2% (-3.2); ammonia -37.4% (-33); non-CO2 GHG -18.8% (-14.8). Close to CAPRI: beef animals, cereal, oilseed and
+vegetable production. The comparison is not like for like (JRC121368 ran the 2020 CAPRI, base 2012; the model is star
+3.0). The registry's earlier diagnoses (pork: EU exports absorb the supply cut at CAPRI's rho2; dairy: cows expanding
+where the N target barely binds) were made on structures since replaced and are not re-checked.
+
+- **Effect:** Farm-to-Fork meat and crop price levels, the dairy herd, poultry, manure N2O (README "Not sound for")
+- **In 9t:** –
+- **Status:** **open**: first tabulate the current reference run's indicators (r182); then per indicator: pork through
+  the EU pork trade response of the bilateral market, dairy through the regional N shadow prices against the change in
+  cows; CAPRI's own Farm-to-Fork results would be the reference (K13)
+
+<a id="k93"></a>
+### K93: CAPRI mitigation options not built, and the documents disagree on which are in (found 29 October 2026, registry migration)
+
+Not in the regional model: 3-NOP, legume share (LegSh), tillage (ConsTill, NoTill), urea substitution (UreaSubst),
+buffer strips, biodiversity options and biochar (`docs/MITIGATION_IN_SUPPLY.md`: "not built; their LEACHN_/RUNSURFN_
+terms held at CAPRI's reference"); CAPRI's constraint on total ration fat (SupplementPerc_) is not carried. These are
+recorded only inside the status texts of K50 and K51 (resolved table) and README's "Future (not scheduled)", not in
+`docs/DEPARTURES_FROM_CAPRI.md`. On linseed the documents disagree: MITIGATION_IN_SUPPLY.md says it is in
+(`build_supplement_effects.py`), README and `capri_regional_nlp.py`'s header list it as not yet in CAPRI's form.
+
+- **Effect:** runs with an emission tax (3-NOP acts on enteric CH4); leaching and runoff where tillage or buffer strips
+  would act (held at CAPRI's reference); size in the model not measured
+- **In 9t:** –
+- **Status:** **open**: build them, or register them as departures (a decision for the project lead); make the linseed
+  statements agree with the code
+
+<a id="k94"></a>
+### K94: `capri_mod/data/reconcile_base.py` is an orphan, and README's re-basing note points at a removed concordance (found 29 October 2026, registry migration)
+
+The module is imported only by its own test (`test_capri.py`, `null_check`); no builder or model path calls it.
+README's re-basing paragraph says the concordance and the reconciliation "are now in hand" and names
+`capri_data/shared/capri_regio_concordance.json`, removed on 27 October 2026 with the move to CAPRI's units. The
+registry entry `base_reconciliation` records that its own test ran on share-allocated data, so turning raw regional
+statistics into CAPRI's base was never tested.
+
+- **Effect:** none on results; the documentation claims a capability the code does not use
+- **In 9t:** –
+- **Status:** **open**: remove the module and the paragraph (re-basing is planned through the data pipeline,
+  docs/design/CAPTRD_MOD.md), or keep it as a tool with the concordance restored and its untested parts stated
+
+<a id="k95"></a>
+### K95: The "12/12 against CAPRI's PMRK" market-price validation is a solver-consistency check (found 29 October 2026, registry migration)
+
+`test_market_module_reproduces_its_own_prices` compares the market's base solution with `world_prices.csv` itself; its
+docstring says "Solver consistency, NOT price validation". The CHANGELOG validation table ("Market prices | CAPRI PMRK
+| 12/12 within 15%"), README (section 8 and the world-production paragraph) and `FITNESS_FOR_USE.json`
+(`market.prices`: validated) still present it as a validation against CAPRI. The test's comment speaks of soya
+"corrected to 102.7"; since 29 October `world_prices.csv` holds FAO_agg's 325.67 (K90 on CAPRI's market rows).
+
+- **Effect:** documentation only (an overstated validation claim)
+- **In 9t:** –
+- **Status:** **open**: reword the claims as solver consistency; report `tools/check/report_world_price_divergence.py`'s
+  current output
+
+<a id="k96"></a>
+### K96: Documents and one constant still describe removed mechanisms (found 29 October 2026, registry migration)
+
+- `capri_data/FITNESS_FOR_USE.json` (served by `capri_mod/fitness.py`, "other entries as of 2026-09-29"):
+  `abatement_capri`, `abatement` describe post-solve modules retired in Sprint 9i; `market.prices` relies on the
+  Armington premium removed on 20 October (K54) and the PMRK claim (K95); `market.eu_balance` on FAO's
+  self-sufficiency (removed); `market.PARI` calls the EU base share-allocated (PARI is in CAPRI's bilateral data);
+  `supply.gross_margin` names MREV where margins use TOOU.
+- README: Saxony and Croatia regional detail from p_REGIO splits (removed on 27 October: DED00000 and HR000000 are
+  single units); Iran's and Saudi Arabia's allocated shares (removed, K45); the feed check on IPCC Eq. 10.6 and
+  calibrated monogastric targets (not in the code: the NLP's requirements are the base ration's supply); "no physical
+  grass yield for Ireland" (CAPRI's GRAS output is taken for every unit; whether Ireland's units have their own rows or
+  the national fallback is to be checked before the caveat is dropped).
+- `docs/MITIGATION_IN_SUPPLY.md`: "columns of the regional QP" (removed 26 October); winter cover "not a choice" (the
+  NLP chooses it, K51).
+- Code: `supply_module.py` `UNVERIFIED_OUTPUT_UNITS`, read by nothing (one comment names it).
+- The environmental module's HNV farmland indicator: hand-set weight 0.5 on legumes, and grass counted twice (the
+  GRASSLAND land and GRAS among the "legumes"); reporting only (docs/design/PROXY_AUDIT.md).
+
+- **Effect:** none on results; the fitness file is the machine-readable source of caveats, so stale entries mislead
+- **In 9t:** –
+- **Status:** **open**
+
+<a id="k97"></a>
+### K97: NaN in the crop-diversification row during Green Deal solves (found 29 October 2026)
+
+Every Green Deal 2030 run logs CasADi's "nlp_g failed: NaN detected for output g, at (row 66, col 0)": 168,690 times
+in r183, 112,335 in r181, from the scenario's fourth iteration; Farm-to-Fork runs (r180, r182) log none. Row 66 is the
+crop-diversification row (Shannon index of the annual crop groups, `cropDivGreening_`) in a region with all twelve
+animals (HU230000's structure: 42 linear rows, 24 requirement rows, the permanent-grassland and ecological set-aside
+rows); it takes the log of each group's area plus 1e-6 kha. IPOPT evaluates trial points within its bound relaxation
+(1e-8 of the scaled variables), where a group sum can fall below -1e-6 kha and the log is undefined (a likely cause,
+not confirmed); IPOPT then shortens the step. HU230000's traced solves replay without it, so the regions are not yet
+identified. K69 removed the fixed-zero columns from the groups for the same symptom in the baseline.
+
+- **Effect:** solver effort in the Green Deal (step cuts); results not known to be affected
+- **In 9t:** –
+- **Status:** **open**: identify the regions (the warning per region), then a floor under the log sized to IPOPT's
+  bound relaxation, with a gate
