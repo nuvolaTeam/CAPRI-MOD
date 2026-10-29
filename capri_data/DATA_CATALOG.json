@@ -79,10 +79,6 @@
    "units": "cost share"
   },
   {
-   "file": "sources/fao_2021/fao_bilateral_trade_2021.json",
-   "note": "2021 vintage"
-  },
-  {
    "file": "2017/supply/land_rents_2030.csv",
    "vintage": "2030",
    "domain": "supply",
@@ -169,22 +165,6 @@
  ],
  "stored_not_applied": [
   {
-   "file": "sources/fao_2021/fao_market_baseline_2021.json",
-   "note": "2021 vintage"
-  },
-  {
-   "file": "sources/fao_2021/fao_2021_dictionaries.json",
-   "note": "2021 vintage"
-  },
-  {
-   "file": "sources/fao_2021/fao_trade_dictionary_2021.json",
-   "note": "2021 vintage"
-  },
-  {
-   "file": "sources/fao_2021/prices/faostat_producer_prices_eu.json",
-   "note": "2021 vintage"
-  },
-  {
    "file": "shared/trade_flows_2017.csv",
    "note": "tools input only (validate_world_prices, recalibrate_trade_2017); the model reads the bilateral files"
   }
@@ -203,138 +183,5 @@
    "note": "superseded"
   }
  ],
- "provenance": [
-  {
-   "file": "sources/fao_agg_2017/fao_bilateral_trade_2005.json"
-  },
-  {
-   "file": "sources/fao_agg_2017/fao_commodity_balances_eu.csv"
-  },
-  {
-   "file": "sources/fao_agg_2017/fao_code2region.json"
-  },
-  {
-   "file": "sources/fao_agg_2017/fao_demand_elasticities_eu.json"
-  },
-  {
-   "file": "sources/fao_agg_2017/fao_sua_eu_baseline.csv"
-  },
-  {
-   "file": "sources/fao_agg_2017/fao_sua_prices_production.json"
-  },
-  {
-   "file": "sources/fao_agg_2017/fao_trade_dictionary.json"
-  },
-  {
-   "file": "sources/fao_agg_2017/fao_demand_cross_matrix.json"
-  },
-  {
-   "file": "sources/fao_agg_2017/fao_world_production.json"
-  },
-  {
-   "file": "sources/fao_agg_2017/fao_world_supply_use.json"
-  },
-  {
-   "file": "sources/fao_agg_2017/fao_code2comm.json"
-  },
-  {
-   "file": "sources/coco/coco_demography.json"
-  },
-  {
-   "file": "sources/coco/coco_activity_levels.csv"
-  },
-  {
-   "file": "sources/coco/coco_production.csv"
-  },
-  {
-   "file": "sources/coco/coco_animal_numbers_national.csv"
-  },
-  {
-   "file": "sources/coco/coco_provenance.json"
-  },
-  {
-   "file": "sources/coco/coco_yields.csv"
-  },
-  {
-   "file": "sources/coco/coco_producer_prices.csv"
-  },
-  {
-   "file": "sources/coco/coco_dairy_splits.json"
-  },
-  {
-   "file": "sources/coco/coco_products_national.csv"
-  },
-  {
-   "file": "sources/coco/coco_product_production_national.csv"
-  },
-  {
-   "file": "sources/gams/gams_all_params.json"
-  },
-  {
-   "file": "sources/gams/gams_params.json"
-  },
-  {
-   "file": "sources/gams/dat_extracted.json"
-  },
-  {
-   "file": "sources/fao_trade/eu_import_volumes.csv"
-  },
-  {
-   "file": "sources/fao_trade/trade_flow_structure_2005.json"
-  },
-  {
-   "file": "sources/fao_trade/eu_import_kt_by_market_comm.csv"
-  },
-  {
-   "file": "sources/fao_trade/variable_costs_eu.csv"
-  },
-  {
-   "file": "sources/gams/gams_extracted/policy_params.json"
-  },
-  {
-   "file": "sources/gams/gams_extracted/capdis_params.json"
-  },
-  {
-   "file": "sources/gams/gams_extracted/all_scalars.json"
-  },
-  {
-   "file": "sources/gams/gams_extracted/trade_params.json"
-  },
-  {
-   "file": "sources/gams/gams_extracted/all_scalars.csv"
-  },
-  {
-   "file": "sources/gams/gams_extracted/all_params.csv"
-  },
-  {
-   "file": "sources/gams/gams_extracted/armington_params.json"
-  },
-  {
-   "file": "sources/gams/gams_extracted/capri_sets.json"
-  },
-  {
-   "file": "sources/gams/gams_extracted/table_bodies.json"
-  },
-  {
-   "file": "sources/gams/gams_extracted/numeric_tables.json"
-  },
-  {
-   "file": "sources/gams/gams_extracted/table_index.csv"
-  },
-  {
-   "file": "sources/gams/gams_extracted/ghg_params.json"
-  },
-  {
-   "file": "sources/gams/gams_extracted/set_index.csv"
-  },
-  {
-   "file": "sources/gams/gams_extracted/full_numeric_extract.json"
-  },
-  {
-   "file": "sources/gams/gams_extracted/supply_params.json"
-  },
-  {
-   "file": "sources/gams/gams_extracted/nutr_params.json"
-  }
- ]
+ "provenance": []
 }

@@ -284,7 +284,7 @@
    "vintage": "2017",
    "priority": "high",
    "source": "capmod res_0_1717 dataOut ImportQ, EU as importer",
-   "status": "EXTRACTED, READY FOR ARMINGTON RECALIBRATION",
+   "status": "REMOVED (29 October 2026, KNOWN_ISSUES K102: read by no code; the project lead's decision, option 2)",
    "coverage": "71 commodities x 61 origins",
    "note": "Gives the extra-EU import share directly, which is the Armington first nest: soya 90.7% extra-EU, wheat 2.4%, beef 5.2%, cheese 1.6%. This is what the 2021 trade matrix is currently used for, so it can replace it without the market module needing to handle 61x61 bilateral detail."
   },

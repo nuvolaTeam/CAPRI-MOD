@@ -1,1 +1,0 @@
-*Disaggregation based on the agreggated category from IFS and then distributed to CAPRI actvitities according to the respective activity share in the CAPRI database

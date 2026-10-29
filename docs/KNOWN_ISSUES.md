@@ -9,7 +9,7 @@ The data sourcing registry's log of checks, fixes and decisions (201 entries, mo
 [KNOWN_ISSUES_REGISTRY_LOG.md](KNOWN_ISSUES_REGISTRY_LOG.md), verbatim, with the triage of its open entries against
 the code: they became K92-K96, joined K73, K80, K91, or were closed or historical.
 
-## Open (19)
+## Open (18)
 
 | # | Issue | Status |
 |---|---|---|
@@ -31,9 +31,8 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K92](#k92) | Farm-to-Fork changes furthest from JRC121368, besides the milk price | open |
 | [K93](#k93) | CAPRI mitigation options not built; documents disagree on which are in | open |
 | [K101](#k101) | Model inputs without a builder (census of a run's reads) | open, in part fixed |
-| [K102](#k102) | Data files that no run and no builder reads (census) | open: sources/ left |
 
-## Resolved (83)
+## Resolved (84)
 
 | # | Issue | Status |
 |---|---|---|
@@ -120,6 +119,7 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K98](#k98) | CAPRI's supply Hessian read as stored: half of the cross terms missed | fixed |
 | [K99](#k99) | A feed table without builder (feed_requirements.csv) as the fallback of the feed costs and bulks | fixed |
 | [K100](#k100) | A national nutrient table without builder (nutrient_coefs.csv) filled three crops' coefficients and fallow's mineral N | fixed |
+| [K102](#k102) | Data files that no run and no builder reads (census) | fixed |
 
 ## Details
 
@@ -1424,12 +1424,16 @@ capri_data/2017 and shared/, 46 files are in neither. By kind:
 
 - **Effect:** none on results
 - **In 9t:** –
-- **Status:** open, in part fixed: four orphans removed; the extractors write only what the model or a builder of its
+- **Status:** **fixed** 29 October 2026 (batch 6): four orphans removed; the extractors write only what the model or a builder of its
   inputs reads (the project lead's decision, 29 October 2026): 13 ammonia symbols, the cost tables' scalars, three
   mitigation inputs and build_nitrates_directive with its inputs (nvz_p_nvzArea, nvz_p_slopeTypes) and outputs removed;
   p_holdLSU.csv and p_nvzShare_lu.csv given their builder (build_ammonia_tech_inputs with CAPRI's holdingsLSU and
   nvzShare_LU dumps, byte-identical). fao_market_baseline.json and the extended FAO_agg SUA (read only by a coverage
-  test of an older market base) removed, the test now on CAPRI's FAO_agg balances (world_market_baseline.json). Left:
-  the census of capri_data/sources (180 files no run or traced builder reads: raw extracts, many of them the
-  extractors' sources)
+  test of an older market base) removed, the test now on CAPRI's FAO_agg balances (world_market_baseline.json).
+  capri_data/sources: of 180 files no run or traced builder reads, 128 are named by no code at all and were removed
+  (the project lead's decision, option 2, 29 October 2026: old parameter extractions of CAPRI's GAMS code, FAO 2021 /
+  FAO_agg JSON / COCO extracts of the former market base, CAPRI data copies of parts not ported or handled otherwise:
+  Norway's MITERRA mirror, anaerobic digestion base data, cost-saving runs, soil carbon, land-use transition, water,
+  the IFS maps); kept as reference: the JRC121368 report text and published results, the NUTS correspondences; the
+  others are named by a builder or extractor (their own outputs, or read in an untraced invocation)
 
