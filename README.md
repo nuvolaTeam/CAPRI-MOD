@@ -96,7 +96,7 @@ economy-wide feedbacks.
   `cgemrk` modules), not by embedding one. We share the boundary and the
   principle; we differ in maturity, since CAPRI has that linkage implemented and
   this model does not.
-- **NOT insulated from world markets.** The market module carries 30 trade
+- **NOT insulated from world markets.** The market module carries 26 trade
   regions with Armington substitution, so an EU policy moves world prices and
   those feed back into EU supply. Leakage is *modelled*, not excluded — the same
   channel JRC121368 flags when it notes that an EU-only Farm-to-Fork leaks a
@@ -138,7 +138,7 @@ people with access to CAPRI. Two things follow.
 
 **You do not need a CAPRI installation to run it.** The calibrated base-year data
 ships with the repository: CAPRI's 221 regional units, 46 activities, market data for 30
-trade regions (the EU27 and 29 others). `pip install -r requirements.txt` and a two-region baseline runs in a
+trade regions (the EU27 and 25 others). `pip install -r requirements.txt` and a two-region baseline runs in a
 few minutes; a full EU Farm-to-Fork 2030 run takes about 50 minutes on 2 cores
 (§1, At a glance). No GAMS licence, no proprietary solver.
 
@@ -172,7 +172,7 @@ files record how they map to this model's names.
 | Market commodities | 58 |
 | Base year | 2017 (parameterised); scenarios usually solved in 2030 |
 | Supply method | CAPRI's regional models as NLPs, PMP-calibrated (CAPRI's 2030 terms) |
-| Market method | CAPRI's bilateral Armington market: 30 trade regions (31 with CAPRI's EU blocks, optional), transport costs, tariffs, TRQs; dairy block, GL food demand, young animals, CAPRI's market supply functions; Newton + Anderson to < 1e-7 |
+| Market method | CAPRI's bilateral Armington market: 26 trade regions (27 with CAPRI's EU blocks, optional), transport costs, tariffs, TRQs; dairy block, GL food demand, young animals, CAPRI's market supply functions; Newton + Anderson to < 1e-7 |
 | Data validator | 13 pass, 0 warn, 0 fail |
 | Convergence | all 221 regional models solve (one Dutch unit, NL320000, at JRC121368's relaxed N target); under CAPRI's stop rule Farm-to-Fork 2030 converges in 12 iterations, Green Deal 2030 in 37 (reference runs r180, r181, 29 October 2026, on CAPRI's regional units) |
 | Test suite | 225 tests (gate of 29 October 2026: 220 passed, 5 skipped; 21 marked `slow`) |
@@ -452,7 +452,6 @@ consuming modules:
 | pmp_diagonal_terms | PMP own quadratic term | EUR/ha² | supply |
 | pmp_crossgroup_terms | PMP cross-group term | EUR/ha² | supply |
 | world_prices | world market price | EUR/t | market |
-| armington_params | EU market supply elasticity where CAPRI's EU p_elasSupp has none (eps) | — | market |
 | feed_requirements | energy/protein/DM/days per animal | mixed | feed |
 | feed_availability | feed supply by item | 1000 t DM | feed |
 | crop_nutrient_export | nutrient removal per ton yield | kg/t | environment |
@@ -604,7 +603,7 @@ model, CAP greening and the Green Deal targets. Key classes: `RegionalSupplyMode
 (one region's program), `CapriRegionalNLP` (its NLP form), `PMPCalibrator`,
 `SupplyModule` (orchestration).
 
-**Market — CAPRI's bilateral spatial market.** 30 trade regions (the EU as one region, or CAPRI's two
+**Market — CAPRI's bilateral spatial market.** 26 trade regions (the EU as one region, or CAPRI's two
 trade blocks; Norway its own region, as CAPRI's NO000000) and 58 commodities, with bilateral trade in two Armington nests, transport costs, tariffs and
 the EU's tariff-rate quotas (`market/bilateral.py`); Generalised Leontief food demand, processing, the dairy
 block, biofuel markets, feed bulks and young-animal markets. EU supply enters through CAPRI's market supply
@@ -1499,7 +1498,7 @@ for practical reasons (to be switched to CAPRI's) are listed with these two in d
 ### 10.3 EU27 as a single market region
 
 The market is CAPRI's bilateral market (two Armington nests over CAPRI's bilateral
-flows, transport costs, tariffs and quotas) with the EU27 as one of its 30 trade
+flows, transport costs, tariffs and quotas) with the EU27 as one of its 26 trade
 regions, trading bilaterally with the others; trade between member states is not
 resolved, as in CAPRI. CAPRI's own default splits the EU into two trade blocks,
 EU_WEST and EU_EAST; that is an option here (`market.eu_blocks = true`), kept off for
@@ -1530,10 +1529,11 @@ basis).
 
 The parameters of `capri_data/shared/model_parameters.csv` each carry their source (CAPRI, IPCC, JRC121368, literature
 or legal), the feed requirements are CAPRI's (DATA2) and the world prices CAPRI's market data (p_dataMarket, World,
-PMRK). Two inputs have no builder that reproduces them from a CAPRI file (KNOWN_ISSUES K72, open): the own-price
-supply elasticity `eps` in `armington_params.csv`, used for EU market supply where CAPRI's EU p_elasSupp file has no
-value (32 of 62 products; which of them the solve still reaches now that CAPRI's market supply functions are on is to
-be checked), and the livestock rows of `producer_prices.csv`.
+PMRK). One input has no builder that reproduces it from a CAPRI file (KNOWN_ISSUES K72): the livestock rows of
+`producer_prices.csv`. The own-price supply elasticity `eps` of `armington_params.csv` (no recorded source) was
+removed with the file on 29 October 2026: the EU's supply of every product it covered is set by CAPRI's market supply
+functions, crushing, the dairy, biofuel or residual-feed blocks, or the EU produces none of it, and doubling it left a
+mini-EU run identical to the last digit.
 
 ---
 
@@ -1553,8 +1553,7 @@ principled reason and extension path.
   run the projection layer (§10.1–10.2). Compared on *production*, as CAPRI
   reports it, the magnitudes are directly comparable with its published
   scenarios; comparing *area* against its production is not.
-- **Two inputs are not yet traced to a CAPRI source** (§10.5, KNOWN_ISSUES K72): the EU market supply elasticity
-  `eps` of about 30 products and the livestock producer prices.
+- **One input is not yet traced to a CAPRI source** (§10.5, KNOWN_ISSUES K72): the livestock producer prices.
 - **Biofuel and parts of the market module are validated against external data
   or documented behaviour**, not against a CAPRI scenario run.
 - **Supply elasticities** matched CAPRI's regional `PELA` values at 0.76–1.00

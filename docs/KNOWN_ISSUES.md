@@ -5,19 +5,18 @@ form, solved with IPOPT). The tables give one line per issue; the details follow
 was found, where it acts, whether the tagged release 9t (`capri-mod-9t.zip`) carries it, and its status. 9t.1 is 9t
 with every fix below except K5, which needs the prototype's model change.
 
-## Open (18)
+## Open (17)
 
 | # | Issue | Status |
 |---|---|---|
 | [K10](#k10) | Sub-sets of regions do not converge | note |
 | [K13](#k13) | Farm-to-Fork milk price | open |
 | [K29](#k29) | NL11 and NL13 meet the tiered N target only at corner solutions (Farm-to-Fork) | open |
-| [K45](#k45) | Egypt's oilseed rows | open |
 | [K47](#k47) | The cattle chain's equilibrium is sensitive to changes outside it | open |
 | [K48](#k48) | Young-animal prices against CAPRI's own market run | open |
 | [K65](#k65) | Cattle member splits and per-sex young-animal markets do not converge yet | open |
 | [K66](#k66) | Farmland expands under the per-hectare N target more than in CAPRI | open |
-| [K72](#k72) | armington_params.csv: cells without a builder | open |
+| [K72](#k72) | Inputs without a builder (armington_params.csv removed; the livestock producer prices left) | open |
 | [K73](#k73) | Market: differences from CAPRI that no register listed | open |
 | [K74](#k74) | Supply: differences from CAPRI that no register listed | open |
 | [K77](#k77) | CAPRI's fertiliser-option curvature (S5) leaves the baseline's base shares | open |
@@ -26,9 +25,9 @@ with every fix below except K5, which needs the prototype's model change.
 | [K80](#k80) | The same run repeated from a warm start differs by up to 3e-5 relative in small cereal activities | open |
 | [K83](#k83) | A one-region Farm-to-Fork run's market diverges in its second step | open |
 | [K86](#k86) | Ammonia housing and storage options without their farm-size cost curves in Denmark, Lithuania and Croatia | open |
-| [K88](#k88) | Builders that still round the values they write | fixed |
+| [K89](#k89) | Failing regional solves take most of IPOPT's time | open |
 
-## Resolved (70)
+## Resolved (72)
 
 | # | Issue | Status |
 |---|---|---|
@@ -102,6 +101,8 @@ with every fix below except K5, which needs the prototype's model change.
 | [K84](#k84) | The landscape floor's fit ends on its last step | fixed (capri's form) |
 | [K85](#k85) | Input costs of animals a region does not have were NaN in its net revenues | fixed |
 | [K87](#k87) | Builder outputs that do not follow from their builders (reproduction audit) | fixed |
+| [K88](#k88) | Builders that still round the values they write | fixed |
+| [K45](#k45) | Egypt's oilseed rows | fixed |
 
 ## Details
 
@@ -490,7 +491,7 @@ feed_demand_nonEU.json took FAO_agg 2017 FEDM/DOMM shares and elas_2_1717, only 
 
 - **Effect:** 7.0% of world use (biofuels and raw milk aside) on that response; EU indicators within 0.3 points (r26_dec_feed)
 - **In 9t:** yes
-- **Status:** **fixed**: tools/build/build_feed_demand_nonEU.py from data_market_1730defaulta CAL (feed share = FEED / (HCON+FEED+PROC+BIOF)) and elas_2_1730 p_ElasFeed, aggregated from CAPRI's 80 behavioural regions to every trade region, every product with a CAPRI feed function (494 entries, 23 regions): 1.3% left. REGISTERED: Turkey (a CAPRI supply-model region, no p_ElasFeed), Egypt, Algeria, Iran, Saudi Arabia (not CAPRI behavioural regions, K45) keep the generic response
+- **Status:** **fixed**: tools/build/build_feed_demand_nonEU.py from data_market_1730defaulta CAL (feed share = FEED / (HCON+FEED+PROC+BIOF)) and elas_2_1730 p_ElasFeed, aggregated from CAPRI's 80 behavioural regions to every trade region, every product with a CAPRI feed function (494 entries, 23 regions): 1.3% left. REGISTERED: Turkey (a CAPRI supply-model region, no p_ElasFeed), Egypt, Algeria, Iran, Saudi Arabia (not CAPRI behavioural regions, K45) keep the generic response (corrected 29 October 2026, K45: EGY and ALG are CAPRI behavioural regions, mapped into ROW with their p_ElasFeed; the four model regions had no data and were removed)
 
 <a id="k44"></a>
 ### K44: An inert income term and invented fallbacks in the market
@@ -508,7 +509,14 @@ The market has rows for Egypt (EGY) only for SOYC, SOYO, SUNC, SUNO (1.7 Mt of s
 
 - **Effect:** possible double count of Egypt's oilseed products; not checked
 - **In 9t:** ?
-- **Status:** **open**: to check with the market-structure work
+- **Status:** **fixed** (29 October 2026). No double count: every market file maps CAPRI's behavioural region EGY (and
+  ALG, both in CAPRI's market region MED) into the model's ROW (food demand, processing, crushing, dairy, biofuels,
+  supply elasticities, welfare base); the EGY rows left in capri_oilseed_products_baseline.json are read by nothing
+  (its one reader, SupplyModule._cake_index, takes the EU27's cake feed use). Found instead: the model declared EGY,
+  DZA, SAU and IRN as trade regions (definitions.TRADE_REGIONS) without any data (no bilateral flows, no use, supply
+  or processing; tariff rows of zeros), carried through the market as empty regions; Saudi Arabia and Iran are not
+  behavioural regions of CAPRI's (capri_data/shared/rms.csv). Removed with their zero tariff rows: 26 trade regions (27
+  with CAPRI's EU blocks); the documents' counts corrected. Results unchanged (to be confirmed by the batch's runs)
 
 <a id="k46"></a>
 ### K46: The fodder balance's right-hand side moved with the rations
@@ -751,7 +759,15 @@ With every cell blanked, the builders refilled 102 of 248. The eta column (a gen
 
 - **Effect:** EU market supply (eps) where used
 - **In 9t:** –
-- **Status:** **open** (eta, sigma, rho2 removed). Next: eps goes with CAPRI's market supply functions (market_supply_nq, ProdNQ_)
+- **Status:** **open** (eta, sigma, rho2 removed 24 October 2026; eps and the file removed 29 October 2026). eps acted
+  on no result: it was read only for the EU rows of the 28 products without CAPRI's EU p_elasSupp, and every one of
+  them has its EU supply set afterwards in the same market step (PARI, SUGR, WINE, OLIV by CAPRI's market supply
+  function, the measured Hessian; oils and cakes by crushing; the dairy products by the dairy block; BIOE, BIOD, DDGS
+  by the biofuel block; FENI, FPRI by MaprFeed_) or has no EU production (PLMO, COFF, TEAS, COCO); a mini-EU run with
+  eps doubled equals the run without, to the last digit, in every regional activity and price. Those products now get
+  no own-price anticipation in the EU rows (MarketModule.supply_response); armington_params.csv, its loader and
+  build_dairy_trade_params (which wrote only eps, for the regions without a dairy block, the four empty regions of
+  K45) removed, build_feed_byproducts writes no eps. Left: the livestock rows of producer_prices.csv without a builder
 
 <a id="k73"></a>
 ### K73: Market: differences from CAPRI that no register listed (CAPRI-claim audit, 24 October 2026)
@@ -863,6 +879,9 @@ CAPRI's stop rule, recorded every iteration since r135, flags rows that move by 
   by iteration 32. Farm-to-Fork (r180): 12 iterations (r178: 13), 492 checks, none with a gain above 1e-5. Next, for
   the project lead's decision: switch (and count) only above a gain tolerance (a behaviour change: its own runs);
   compare HU230000's two optima (activities, feeding) to see what makes its warm start leave the better one
+  29 October 2026, the project lead's decision: the check switches only where the other start gains more than
+  supply.nlp_jump_gain = 1e-6 (relative; r181's gains: 938 at 1e-9 or less, one at 1.4e-7, 23 at 1.7e-5 and more), so
+  the record's "switched" counts real switches; HU230000's two optima still to compare
 
 <a id="k80"></a>
 ### K80: The same run repeated from a warm start differs by up to 3e-5 relative in small cereal activities (26 October 2026)
@@ -917,6 +936,32 @@ The per-head animal columns of variable_costs.csv held values of unknown origin 
 - **Effect:** r160 (not used); no other run
 - **In 9t:** no
 - **Status:** **fixed**: an activity without CAPRI input cost and without base level costs 0 (its level is fixed at 0); one with a base level raises an error; the regional NLP refuses a non-finite matrix or vector. r161: all regional solves optimal
+
+<a id="k89"></a>
+### K89: Failing regional solves take most of IPOPT's time (found 29 October 2026)
+
+The linear-solver benchmark (tools/check/linear_solver_bench.py: the mini-EU Farm-to-Fork run, every regional IPOPT
+solve repeated with MA27; branch hsl-option) recorded 908 solves: the 860 that both solvers finished took 63.5 s of
+IPOPT time with MUMPS, the 48 that failed with either solver took 260.9 s, 80% of the IPOPT time (45 failed with
+both: MUMPS ended 34 as Infeasible_Problem_Detected and 11 at its iteration limit; 3 failed with MA27 only).
+They are probably the tries of the fallbacks (JRC121368's relaxed N target, the mineral-cap exemptions of BG020000 and
+HR000000, K71); which solves they are is not recorded.
+
+- **Effect:** run time only
+- **In 9t:** –
+- **Status:** **open**, diagnosed (29 October 2026; the project lead's decision: the cause first;
+  tools/check/k89_trace.py, the mini-EU Farm-to-Fork run in one process: 905 solves, 345 s of IPOPT, 43 failed, 254 s).
+  210 s are one episode in NL320000 at the scenario's first iteration: its solve at the tiered N target fails (warm
+  start 3,000 iterations, cold start infeasible), then the mineral-cap exemption search (written for the Green Deal's
+  caps, supply_module._capri_nlp_solve) exempts its crop groups one at a time, twice each: 30 cold solves, all
+  infeasible or at the iteration limit; JRC121368's relaxed target (K57) then solves in 59 iterations and is kept, so
+  every later solve of NL320000 succeeds. The caps are not what makes NL320000 infeasible, the N target is. The rest:
+  the cap searches of BG020000 and HR000000 (the exemptions they need, found: PERM, ROOF; about 30 s) and a few failed
+  starts of the jump check. In a full run of 221 units the NL320000 episode is the same single event, so its share of
+  the run time is a few percent, not the mini run's 74% of IPOPT time (an estimate). Options: try JRC121368's relaxed
+  target before the cap search where a tiered N target is in force (identical results where the cap search fails, as
+  in NL320000); or a solve without the N-surplus row first to see which constraint makes the problem infeasible
+  Left as it is for now (the project lead's decision, 29 October 2026), to be taken up again later
 
 ## NLP check (tools/nlp_check), what it showed
 

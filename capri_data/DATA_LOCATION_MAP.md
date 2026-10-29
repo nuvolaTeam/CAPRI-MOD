@@ -43,7 +43,7 @@ with newer prices is what the validator's vintage check is meant to catch.
 | Model file | Symbol | Location |
 |---|---|---|
 | `bilateral_flows_<year>.csv`, `bilateral_regions_<year>.csv`, `bilateral_trq_<year>.csv` | CAPRI's market results of the year | capmod market results (`tools/build/build_bilateral_market.py`) |
-| `armington_rho.csv`, `armington_params.csv` (`sigma`, `rho2`) | `p_rhoArm1`, `p_rhoArm2` | `arm/market1.gms`, `special_ch/market1_ch.gms` |
+| `armington_rho.csv` | `p_rhoArm1`, `p_rhoArm2` | `arm/market1.gms`, `special_ch/market1_ch.gms` |
 | biofuel files | `p_bioDat` and the biofuel parameters | `baseline/trace_dataPrep.gdx`, `fao_agg`; calibration as `biofuel/def_biofuel_params.gms` (`tools/build/build_biofuel_market.py`) |
 | dairy block | `p_hessNQDairy` and the dairy data | `elas_2_1730` and market results (`tools/build/build_dairy_processing.py`) |
 

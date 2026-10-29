@@ -43,7 +43,7 @@ from CAPRI's, docs/DEPARTURES_FROM_CAPRI.md says so.
 ## Product concepts and their status
 
 The model has 46 activities (34 in the crop list, fodder and set-aside included, and 12 animal activities), 58 market
-commodities and 30 trade regions (31 with CAPRI's two EU blocks), counted from the lists `CROPS`, `ANIMALS`,
+commodities and 26 trade regions (27 with CAPRI's two EU blocks), counted from the lists `CROPS`, `ANIMALS`,
 `MARKET_COMMODITIES` and `TRADE_REGIONS` of `capri_mod/data/definitions.py`; 57 of the 58 commodities have CAPRI's
 bilateral flows in the market data (`capri_data/2017/market/bilateral_flows_2017.csv`), raw milk has none. Norway
 (NOR) is its own trade region since 21 October 2026 (KNOWN_ISSUES K56).
@@ -92,8 +92,9 @@ forecast on its own market prices, and CAPRI's stop rule with Norway out from th
 state inside the market, M5, and per region in the non-EU dairy blocks, M11) and the member states' milk price step
 (CAPRI's step weights with the price forecast; K62 superseded).
 
-Data items in the market files that no module reads: the `FATS` and `OFOD_M` rows of `world_prices.csv` and
-`armington_params.csv` (both markets were removed: no supply, no use, invented totals). The files also carry `DWHE`
+Data items in the market files that no module reads: the `FATS` and `OFOD_M` rows of `world_prices.csv` (both
+markets were removed: no supply, no use, invented totals; `armington_params.csv`, which also carried them, was removed
+on 29 October 2026, KNOWN_ISSUES K72). The files also carry `DWHE`
 and `SUGB` rows, which are price-only rows (durum is traded within wheat; beet has no market, as in CAPRI).
 
 ## History

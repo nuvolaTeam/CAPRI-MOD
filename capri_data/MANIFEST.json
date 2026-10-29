@@ -146,7 +146,7 @@
     ]
    },
    "note": "Replaced 2026-10: the previous values ('CAPRI SUA') differed from CAPRI's base world prices for most commodities, and the oilseed rows held CAKE prices. OOIL, OLIV, FATS, OFOD_M, WMLK kept (no unambiguous CAPRI counterpart). Sprint 9f: + FRMI, CREM, COCM, WMIO, CASE (CAPRI's dairy products, traded).",
-   "commodity_set": "exactly the market module's 39 traded commodities (definitions.MARKET_COMMODITIES), the same rows as armington_params.csv"
+   "commodity_set": "exactly the market module's 39 traded commodities (definitions.MARKET_COMMODITIES) (armington_params.csv, which had the same rows, was removed on 29 October 2026: KNOWN_ISSUES K72)"
   },
   "trade_flows.csv": {
    "source": "FAO",
@@ -201,21 +201,6 @@
     ]
    },
    "note": "Recalibrated from CAPRI capmod res_0_1717 (2017). The previous 841-row matrix carried a zero diagonal - no intra-EU trade at all - so every commodity showed a 100% extra-EU import share. 547 rows is fewer because CAPRI reports only realised flows, not an exhaustive grid of zeros. | REBUILT 2026-10 on CAPRI's trade partition (sources/capri_trade_regions_2017.json): no EU or rest-of-world double counting, genuine regions no longer dropped, six oilseed-product columns; EU imports match CAPRI's NONEU rows exactly. Not read by the model since the bilateral market (bilateral_flows_<year>.csv) replaced the old Armington aggregator (removed 21 October 2026, an orphan: built from this file, never used); kept as an input of tools/check/validate_world_prices.py and tools/build/recalibrate_trade_2017.py."
-  },
-  "armington_params.csv": {
-   "source": "CAPRI",
-   "vintage": "2017",
-   "units": "elasticity",
-   "domain": "market",
-   "status": "live",
-   "shape": {
-    "rows": 62,
-    "cols": 1,
-    "columns": [
-     "eps"
-    ]
-   },
-   "note": "Sprint 9f: + FRMI, CREM, COCM, WMIO, CASE (CAPRI's dairy products, traded)."
   },
   "eu_mfn_tariffs.csv": {
    "source": "CAPRI",

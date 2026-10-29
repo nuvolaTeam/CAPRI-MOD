@@ -112,18 +112,18 @@ class SupplyMixin(MarketStateMixin):
             real_supply = self._inp().json("supply_elas_eu_all.json", "sources/arm")
             self._real_supply_elas = real_supply
 
-        if "eps" not in self.armington.columns:            # no stand-in (removed 23 October 2026: 0.25)
-            raise ValueError("armington_params.csv has no eps column")
-        eps = self.armington["eps"]
 
         # Vectorised over commodities; arithmetic unchanged.
         ratio = pd.Series({
             c: float(world_prices.get(c, self.world_prices_base[c]))
                / max(float(self.world_prices_base[c]), 0.01)
             for c in self.commodities})
-        el = pd.Series({
-            c: (float(real_supply[c]) if c in real_supply else float(eps[c]))
-            for c in self.commodities})
+        # a product without CAPRI's EU p_elasSupp gets no own-price anticipation in the EU rows: its EU supply is set
+        # below by CAPRI's market supply function (the measured Hessian), crushing, the dairy block, the biofuel block
+        # or the residual feeds' MaprFeed_, or the EU produces none of it (palm oil, coffee, tea, cocoa). Until 29
+        # October 2026 the eps column of armington_params.csv stood here (values of no recorded source): doubling it
+        # left a mini-EU run identical to the last digit, so it acted on no result (KNOWN_ISSUES K72)
+        el = pd.Series({c: (float(real_supply[c]) if c in real_supply else 0.0) for c in self.commodities})
         cols = [c for c in self.commodities if c in supply.columns]
         # each non-EU region's own-price elasticity from CAPRI's market model (p_elasSupp "CAL" of its CAPRI regions,
         # production-weighted; tools/build/build_supply_elas_nonEU.py; KNOWN_ISSUES K54-3), 0 where CAPRI has none

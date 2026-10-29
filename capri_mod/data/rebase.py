@@ -124,7 +124,6 @@ CARRY_FORWARD = {
         "land_availability.csv",
     ],
     "market": [
-        "armington_params.csv",
         "world_prices.csv",
         "fao_market_baseline.json",
     ],

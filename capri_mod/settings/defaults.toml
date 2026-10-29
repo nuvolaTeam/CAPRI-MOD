@@ -134,6 +134,11 @@ nlp_warm_check = 0.01
 # start in a non-convex regional problem can end at a worse local optimum (HU330000, Green Deal 2030: 2,200 worse, the
 # region switching between two states every few iterations; r174). 0 = off
 nlp_jump_check = 0.1
+# the relative objective gain another start's solution needs to replace the warm one in the jump check (K79; the
+# project lead's decision of 29 October 2026). Without it any lower objective switched: in the Green Deal 2030 run r181
+# 938 of 961 switches gained 1e-9 or less (the same optimum to the solver's precision), the other 23 gained 1.7e-5 and
+# more; 1e-6 lies in that gap
+nlp_jump_gain = 1e-6
 nlp_acceptable_tol = 1e-6
 # IPOPT's treatment of fixed columns (lower = upper bound): "make_constraint" keeps them as variables held by an
 # equality (trial points may leave the bound), "make_parameter" removes them from the problem (CAPRI: an activity

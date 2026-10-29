@@ -51,10 +51,11 @@ The supply models buy feed as bulks; the market splits each member state's bulk 
 - FENI and FPRI markets (`tools/build/build_bilateral_market.py`, `tools/build/build_feed_byproducts.py`): CAPRI's bilateral flows,
   regional market prices and Armington elasticities (FENI 4 / 8 from `special_ch/market1_ch.gms`, FPRI 8 / 10, CAPRI's
   default); world prices FENI 312.77 EUR/t (FAO_agg World PMRK, base period), FPRI 252.74 EUR/t (FAO_agg has none:
-  CAPRI's 2017 market, export-weighted market prices; 252.66 before Norway's exports counted as such, K56). Non-EU supply: one own-price elasticity per product
-  (`armington_params.csv` eps: FENI 0.44, FPRI 0.98, CAPRI's p_elasSupp weighted by production). Non-EU feed demand:
-  CAPRI's p_ElasFeed (`feed_demand_nonEU.json`); regions without a CAPRI feed function keep the generic own-price
-  response (`armington_params.csv` eta: FENI −1.56, FPRI −2.42).
+  CAPRI's 2017 market, export-weighted market prices; 252.66 before Norway's exports counted as such, K56). Non-EU supply: each region's own-price
+  elasticity, CAPRI's p_elasSupp of its CAPRI regions (`supply_elas_region.csv`; until 23 October 2026 one value per
+  product from `armington_params.csv`, removed on 29 October 2026, KNOWN_ISSUES K72). Non-EU feed demand: CAPRI's
+  p_ElasFeed (`feed_demand_nonEU.json`; the generic response of `armington_params.csv`'s eta column was removed on 24
+  October 2026).
 - EU output, `MaprFeed_` (`MarketModule.eu_feed_byproduct_output`, `feed_byproducts.csv`): prod0 × Σ weight × the
   parent's current food response (human consumption and processing) or sugar's biofuel feedstock use relative to the
   reference; prod0 is CAPRI's 2030 EU output: FPRI 26.8 Mt from 72.7 Mt of cereals eaten or processed (wheat 73% of

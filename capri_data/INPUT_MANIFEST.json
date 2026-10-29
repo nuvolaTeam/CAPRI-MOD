@@ -123,15 +123,6 @@
    "coverage": "39 market commodities; per-row CAPRI code in sources/world_price_provenance.json",
    "note": "Validated via the producer/world arbitrage ratio using verified MPRI prices. Model retained for 7 commodities where CAPRI implies a domestic price below world; EGGS corrected from CAPRI (63.4 -> 1173.8). Rows = the market module's 39 traded commodities, as armington_params.csv (October 2026: four price-only rows - SOYA_OIL and SOYM, older names duplicating SOYO and SOYC, and WMLK, CREM, dairy products outside the market set - removed as orphans; provenance kept in sources/world_price_provenance.json). Sprint 9f: + FRMI, CREM, COCM, WMIO, CASE (CAPRI's dairy products, traded)."
   },
-  "armington_params.csv": {
-   "concept": "Armington substitution elasticities",
-   "unit": "dimensionless",
-   "dimension": "commodity",
-   "capri_symbol": "p_rhoArm1 / p_rhoArm2, literal in GAMS source",
-   "status": "GDX",
-   "coverage": "verified exact for 16 commodities; rho2 added for 21",
-   "note": "No GDX or model run needed - the values are literal assignments in market1_ch.gms, included unconditionally by arm/market1.gms:165. Sprint 9f: + FRMI, CREM, COCM, WMIO, CASE (CAPRI's dairy products, traded)."
-  },
   "eu_mfn_tariffs.csv": {
    "concept": "MFN applied tariffs",
    "unit": "EUR/t or ad valorem",

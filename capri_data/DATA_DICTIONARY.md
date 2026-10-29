@@ -5,7 +5,7 @@ revised again on 27 October 2026, after the move to CAPRI's 221 regional units. 
 or key column not counted. The folder layout is in `capri_data/README.md` and README
 section 6; per-file source, vintage and units are also in `MANIFEST.json` and `INPUT_SCHEMA.json`, and provenance in
 `DATA_SOURCING_REGISTRY.json`. MANIFEST.json is not regenerated automatically and lags the files in places (shapes of
-`world_prices.csv`, `armington_params.csv`, `fert_side_effects.csv`; sources of `base_areas.csv`, `yields.csv`).
+`world_prices.csv`, `fert_side_effects.csv`; sources of `base_areas.csv`, `yields.csv`).
 
 Files are under `capri_data/<base_year>/<category>/` (only `2017/` exists); `trade_flows.csv` resolves to
 `capri_data/shared/trade_flows_2017.csv` (`capri_mod/data/loaders.py::resolve_data_file`).
@@ -32,7 +32,6 @@ Files are under `capri_data/<base_year>/<category>/` (only `2017/` exists); `tra
 | File | Content | Source | Shape |
 |---|---|---|---|
 | `world_prices.csv` | base-year world market price (EUR/t) | CAPRI `FAO_agg_17_defaulta` p_dataMarket 'World'.'PMRK'.<product>.'BAS' (code map and previous values in `sources/world_price_provenance.json`) | 62 rows: the 58 market commodities plus `DWHE`, `SUGB` (price-only rows) and `FATS`, `OFOD_M` (rows of removed markets, not read) |
-| `armington_params.csv` | per commodity: `eps`, the own-price supply elasticity used for EU market supply where CAPRI's EU p_elasSupp file (`sources/arm/supply_elas_eu_all.json`) has no value (0 for products supplied only by their blocks) | dairy and residual feeds: tools/build/build_dairy_trade_params.py, build_feed_byproducts.py; the rest of unrecorded source (K72). The Armington elasticities are CAPRI's `p_rhoArm1`, `p_rhoArm2` in `armington_rho.csv`; the former `sigma`, `rho2` and `eta` columns were removed on 24 October 2026 (unused; no generic demand elasticity under CAPRI's Armington balance) | 62 rows, the same as `world_prices.csv` |
 | `producer_prices.csv` | EU-wide producer price per commodity (EUR/t), the fallback where no regional price exists | CAPRI's production-weighted EU price (`tools/build/build_eu_producer_prices.py`, K34) | 42 rows |
 | `fao_market_baseline.json` | market base balances by `region|product` (read by tools/build/build_world_market_baseline.py) | CAPRI FAO_agg (2017) | dict of 454 entries |
 
