@@ -18,7 +18,10 @@ from __future__ import annotations
 
 import json
 import os
+import subprocess
 import sys
+import tempfile
+import zipfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
@@ -37,18 +40,35 @@ def _tasks():
     return json.loads(PIPELINE.read_text())["tasks"]
 
 
+def _run(cmd):
+    """Run a builder; an argument "unzip:Z" stands for the files of zip Z, extracted to a temporary folder (as
+    tools/check/reproduce_builders.py runs it)."""
+    with tempfile.TemporaryDirectory(prefix="dodo_") as tmp:
+        full = []
+        for a in cmd:
+            if a.startswith("unzip:"):
+                with zipfile.ZipFile(a[6:]) as z:
+                    z.extractall(tmp)
+                    full += sorted(str(Path(tmp) / n) for n in z.namelist() if not n.endswith("/"))
+            else:
+                full.append(a)
+        return subprocess.run(full, cwd=ROOT).returncode == 0
+
+
 def task_build():
     """One task per builder invocation (tools/pipeline/builders.json)."""
     for t in _tasks():
-        ext = [_expand(x) for x in t["external"]]
+        args = [_expand(a) for a in t["args"]]
+        zips = [a[6:] for a in args if a.startswith("unzip:")]
+        ext = [_expand(x) for x in t["external"]] + zips
         missing = [x for x in ext if not Path(x).exists()]
         deps = [str(ROOT / f) for f in t["inputs"] + t["code"]] + [x for x in ext if Path(x).is_file()]
-        cmd = [sys.executable, str(ROOT / "tools" / "build" / f"{t['builder']}.py")] + [_expand(a) for a in t["args"]]
+        cmd = [sys.executable, str(ROOT / "tools" / "build" / f"{t['builder']}.py")] + args
         if missing:
             yield {"name": t["task"], "actions": [f"echo 'skipped {t['task']}: missing {missing[0]}' >&2"],
                    "file_dep": [d for d in deps if Path(d).exists()], "uptodate": [False], "verbosity": 2}
             continue
-        yield {"name": t["task"], "actions": [cmd], "file_dep": deps,
+        yield {"name": t["task"], "actions": [(_run, [cmd])], "file_dep": deps,
                "targets": [str(ROOT / f) for f in t["outputs"]], "verbosity": 1}
 
 

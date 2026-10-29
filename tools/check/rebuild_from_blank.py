@@ -38,8 +38,9 @@ def main():
     if git("status", "--porcelain", "--untracked-files=no").strip():
         sys.exit("the working tree has changes: run on a clean checkout")
     tasks = json.loads(PIPELINE.read_text())["tasks"]
+    exp = lambda x: x.replace("$UP", UP).replace("$WORK", WORK)  # noqa: E731
     runnable = [t for t in tasks
-                if all(Path(x.replace("$UP", UP).replace("$WORK", WORK)).exists() for x in t["external"])]
+                if all(Path(exp(x)).exists() for x in t["external"] + [a[6:] for a in t["args"] if a.startswith("unzip:")])]
     skipped = [t["task"] for t in tasks if t not in runnable]
     outs = sorted({f for t in runnable for f in t["outputs"]})
     for f in outs:
