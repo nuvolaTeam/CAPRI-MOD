@@ -135,6 +135,44 @@ def test_norway_market_supply_is_its_models_and_the_base_is_reproduced(data):
         mm.par.supply_hessian = None
 
 
+
+def test_norway_raw_milk_responds_inside_the_market(data):
+    """CAPRI keeps ProdNQ_ MILK of the regions with supply models in the market, re-anchored to their models' milk
+    (arm/simu_calibration_to_supply.gms l. 198-201, 423-427; market.sup_milk_in_market, step F): Norway's milk delivered
+    = its models' milk + the Hessian's MILK row x (its dairy-block milk price and the other prices against those its
+    models saw), and its products move with the milk price by the MILK column (the block's price of the previous
+    evaluation); with the switch off the milk is its models'."""
+    from capri_mod.market.market_module import MarketModule
+    mm = MarketModule(data)
+    exo = _exo_with_norway(mm)
+    mm._bilateral_calibrate(exo)
+    r1 = mm._bilateral_ratio_frame().copy()
+    r1.at["NOR", "BARL"] = 1.10
+    m_now = float(exo.at["NO", "MILK"])
+    b_now = float(exo.at["NO", "BARL"])
+    H = pd.DataFrame([[50.0, -10.0], [-20.0, 400.0]], index=["BARL", "MILK"], columns=["BARL", "MILK"])
+    mm.par.supply_hessian = {"sup": {"NOR": H}}
+    mm.seen.sup_price_seen = {"NOR": pd.Series(1.0, index=mm.commodities)}
+    mm.ev.dairy_world_last = None
+    try:
+        S1 = mm.supply_response(mm.world_prices_base, exo, region_ratio=r1, crush_dom=mm._dom0())
+        pm = float(mm.ev.dairy_world_last["NOR"]["price_ratio"]["MILK"])
+        # dearer barley: less milk delivered (cross term -20 x 0.10), so the dairies bid the milk price up
+        assert pm > 1.0
+        assert abs(float(S1.at["NOR", "MILK"]) - (m_now + 400.0 * (pm - 1.0) - 2.0)) < 1e-6 * m_now
+        assert float(S1.at["NOR", "MILK"]) < m_now
+        # the first evaluation has no block price yet: barley as before
+        assert abs(float(S1.at["NOR", "BARL"]) - (b_now + 5.0)) < 1e-6
+        # the next evaluation: barley responds to the block's milk price by the MILK column
+        S2 = mm.supply_response(mm.world_prices_base, exo, region_ratio=r1, crush_dom=mm._dom0())
+        assert abs(float(S2.at["NOR", "BARL"]) - (b_now + 5.0 - 10.0 * (pm - 1.0))) < 1e-6
+        from capri_mod.settings import override
+        with override({"market.sup_milk_in_market": False}):
+            S3 = mm.supply_response(mm.world_prices_base, exo, region_ratio=r1, crush_dom=mm._dom0())
+        assert abs(float(S3.at["NOR", "MILK"]) - m_now) < 1e-9 * m_now
+    finally:
+        mm.par.supply_hessian = None
+
 def test_norway_feed_and_dairy_follow_its_supply_models(data):
     """Norway's feed bulks (feed_bulks_no.csv, CAPRI NO000000 FEED and ARM1P) give its feed use at base, and the feed
     share of its use is CAPRI's (FEED over HCON + FEED + PROC + BIOF + INDM + LOSM); its dairy block takes its raw

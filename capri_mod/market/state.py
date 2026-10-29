@@ -38,6 +38,10 @@ class MarketEvalState:
     #: raw milk of the non-EU regions with supply models, and of the other non-EU regions, at the evaluation
     sup_milk_now: Any = None
     world_milk_now: Any = None
+    #: Norway's raw milk supply function in the market (market.sup_milk_in_market): {region: {"k", "L", "dL"}} and
+    #: the MILK row's response to the other prices (kt) of the evaluation
+    sup_milk_terms: Any = None
+    sup_milk_cross: Any = None
     #: the non-EU dairy blocks' last solutions
     dairy_world_last: Any = None
     #: the biofuel markets' state (processing quantities, prices) of the evaluation

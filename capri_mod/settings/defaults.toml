@@ -218,6 +218,12 @@ feed_bulk_in_market = true
 # (tools/build/build_feed_energy.py, build_noneu_feed_nq.py); false: p_ElasFeed constant elasticities, FEDE held (until
 # 29 October 2026)
 noneu_feed_nq = true
+# CAPRI's raw milk of the non-EU regions with supply models (Norway, RMSSUP): ProdNQ_ MILK stays in the market
+# (arm/simu_calibration_to_supply.gms l. 423-427: v_prodQuant MILK at the supply models' level, bounds 0.1 to 10 x, the
+# constant re-anchored there), so the milk delivered responds to the region's dairy-block milk price and to the other
+# prices with the market supply Hessian's MILK row, and the products to the milk price with its MILK column (step F,
+# 29 October 2026); false: Norway's milk fixed at its supply models' within a market solve (until 29 October 2026)
+sup_milk_in_market = true
 # price shock of the market supply Hessian (calibrate_supply.gms)
 nq_price_shock = 0.01
 # bilateral market solve: acceleration ("anderson" or "none"), memory, chord step for trade, Newton rounds,

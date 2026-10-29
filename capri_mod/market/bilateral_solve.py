@@ -437,7 +437,9 @@ class BilateralSolveMixin(MarketStateMixin):
             max_outer = int(_st.get("market.max_iter"))
         _sclip = tuple(_st.get("market.step_clip"))
         # BASELINE RUN (no EU base recorded yet): the market is calibrated at THIS supply, prices stay at the
-        # reference - CAPRI's reference run is a calibrated equilibrium at its reference prices. Each outer
+        # reference. A registered departure (DEPARTURES_FROM_CAPRI.md, step F): CAPRI calibrates its market and
+        # supply models to one baseline beforehand and recalibrates only the supply functions during a run; here the
+        # supply models' baseline differs from CAPRI's market baseline, so the demand is calibrated to it. Each outer
         # iteration of the baseline recalibrates, so the calibration a scenario inherits is the one at the
         # converged baseline supply. Scenario runs keep it frozen.
         if self.seen.eu_base_supply is None or self.par.demand_cal_frozen is None:

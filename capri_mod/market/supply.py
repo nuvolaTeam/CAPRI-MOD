@@ -25,6 +25,7 @@ class SupplyMixin(MarketStateMixin):
     #: the non-EU market regions' supply as CAPRI's ProdNQ_ (own and cross-price terms, p_hessNQSupp; true, CAPRI's
     #: form) or one own-price constant elasticity per product (false, until 29 October 2026)
     noneu_supply_nq = setting("market.noneu_supply_nq")
+    sup_milk_in_market = setting("market.sup_milk_in_market")
 
 
     def _region_supply_elas(self, regions, cols, el) -> np.ndarray:
@@ -72,6 +73,9 @@ class SupplyMixin(MarketStateMixin):
         """
         # the supply models' output: the EU's countries, and the non-EU market regions with supply models (Norway)
         self.ev.dairy_m5_now = None
+        # Norway's raw milk terms are set by this evaluation's market supply functions (_sup_milk_terms) or not at all
+        self.ev.sup_milk_terms = None
+        self.ev.sup_milk_cross = None
         exo_all = exogenous_supply
         exogenous_supply, exo_sup = self._split_supply(exo_all)
         self.ev.sup_active = set(exo_sup)
@@ -266,7 +270,19 @@ class SupplyMixin(MarketStateMixin):
                 Hm = Hs.reindex(index=xs, columns=cols).fillna(0.0).to_numpy(dtype=float)
                 s0 = s_exo_sup[reg].to_numpy(dtype=float)[xj]
                 dP_ = self._nq_price_change(rr[i_] - _sv_sup[reg], cols)
-                q = s0 + Hm @ dP_ + self._yani_clear(reg, Hs, xs, cols, dP_)
+                mk_ = self._sup_milk_terms(reg, Hs, cols, xs, _sv_sup[reg])
+                if mk_ is not None:
+                    # Norway's raw milk inside the market (step F; CAPRI simu_calibration_to_supply.gms l. 423-427):
+                    # the MILK row without the milk price (its own term is in the dairy block, _sup_milk_delivered),
+                    # then every row with the milk price change from the dairy block's latest price
+                    iM_ = xs.index("MILK")
+                    q_nm = s0 + Hm @ dP_ + self._yani_clear(reg, Hs, xs, cols, dP_)
+                    self.ev.sup_milk_cross[reg] = float(q_nm[iM_] - s0[iM_])
+                    dP_[cols.index("MILK")] = mk_["dL"]
+                    q = s0 + Hm @ dP_ + self._yani_clear(reg, Hs, xs, cols, dP_)
+                    q[iM_] = q_nm[iM_]
+                else:
+                    q = s0 + Hm @ dP_ + self._yani_clear(reg, Hs, xs, cols, dP_)
                 keep = s0 > 1e-6
                 vals = supply.loc[reg, cols].to_numpy(dtype=float).copy()
                 vals[np.asarray(xj)[keep]] = np.maximum(q[keep], 0.0)
@@ -341,9 +357,10 @@ class SupplyMixin(MarketStateMixin):
                 else:
                     tr = {k: float(dom.at[r, c]) / float(d0.at[r, c]) if float(d0.at[r, c]) > 0 else 1.0
                           for k, c in self.DAIRY_TRADED.items()}
-                # Norway (RMSSUP): raw milk delivered from its supply models (CAPRI market_model.gms ProdNQ_ NOTE2:
-                # milk production in RMSSUP is covered by the supply models), its block's FMIL index from its herds;
-                # the other regions: CAPRI's raw milk supply function
+                # Norway (RMSSUP): raw milk from its supply models, moved inside the market by its raw milk supply
+                # function (ProdNQ_ MILK re-anchored to the models' milk, simu_calibration_to_supply.gms l. 423-427;
+                # market.sup_milk_in_market; off: fixed at the models'), its block's FMIL index from its herds; the
+                # other regions: CAPRI's raw milk supply function
                 mr_ = None
                 m0_ = (self.par.sup_milk0 or {}).get(r)
                 if r in exo_sup and "MILK" in exo_sup[r].index and m0_:
@@ -355,7 +372,17 @@ class SupplyMixin(MarketStateMixin):
                 # CAPRI's raw milk supply function (ProdNQ_ MILK) with its cross-price terms: the shift from the
                 # other products' prices (the block holds the own-price term)
                 m_sh = self._noneu_milk_shift(r, cols, _ratio_row(r)) if (mr_ is None and self.noneu_supply_nq) else {}
-                res_r = self._dairy_solve(prm, tr, mr_, fi_, r, milk_shift=sum(m_sh.values()))
+                sm_ = self._sup_milk_delivered(r, prm, m_now, m0_) if mr_ is not None else None
+                if sm_ is not None:
+                    # Norway: the milk its supply models deliver, moved by its own milk price and the other prices
+                    # (the market supply Hessian's MILK row), against its dairies' demand inside its block
+                    prm_, shift_ = sm_
+                    res_r = self._dairy_solve(prm_, tr, None, fi_, r, milk_shift=shift_)
+                    q_ = m0_ * float(res_r["milk_supply_ratio"])
+                    supply.at[r, "MILK"] = q_
+                    self.ev.sup_milk_now[r] = q_
+                else:
+                    res_r = self._dairy_solve(prm, tr, mr_, fi_, r, milk_shift=sum(m_sh.values()))
                 res_r["milk_shift_rms"] = m_sh
                 wl[r] = res_r
                 if mr_ is None and "MILK" in supply.columns and "milk_supply_ratio" in res_r:
@@ -644,6 +671,41 @@ class SupplyMixin(MarketStateMixin):
                         dq += fx[x] * (float(fede.get(rms, 1.0)) - 1.0)
                 supply.at[reg, x] = max(q0 + dq, 0.0)
                 rec[x] = (q0, dq)
+
+    def _sup_milk_terms(self, reg, Hs, cols, xs, sv):
+        """Norway's raw milk in the market (market.sup_milk_in_market, step F): CAPRI keeps ProdNQ_ MILK of the
+        regions with supply models in the market, its constant re-anchored to the models' milk
+        (arm/simu_calibration_to_supply.gms l. 198-201, 423-427: v_prodQuant MILK not fixed, bounds 0.1 to 10 x the
+        level). Returns {"k": the Hessian's own milk term (kt per unit of price level), "L": the milk price level the
+        region's models saw, "dL": the milk price change the products respond to (the region's dairy-block price of
+        the latest evaluation against L)}, or None (switch off, no MILK row and column, no milk in the models)."""
+        if not self.sup_milk_in_market or "MILK" not in xs or "MILK" not in cols or "MILK" not in Hs.columns:
+            return None
+        k = float(Hs.at["MILK", "MILK"])
+        if not k > 0:
+            return None
+        L = float(sv[cols.index("MILK")])
+        prev = (((self.ev.dairy_world_last or {}).get(reg) or {}).get("price_ratio") or {}).get("MILK")
+        t = {"k": k, "L": L, "dL": (float(prev) - L) if prev is not None else 0.0}
+        self.ev.setdefault("sup_milk_terms", {})[reg] = t
+        self.ev.setdefault("sup_milk_cross", {})
+        return t
+
+    def _sup_milk_delivered(self, reg, prm, m_now, m0):
+        """Norway's dairy block with its raw milk supply function (_sup_milk_terms): delivered = m_now + k x (milk
+        price level - L) + the MILK row's response to the other prices (ev.sup_milk_cross); in the block's units (its
+        base delivery Q0 against the models' base m0): the slope SM = k Q0 / m0 per unit of z_M (milk price ratio - 1)
+        and the shift Q0 (m_now / m0 - 1) + Q0 / m0 (k (1 - L) + cross). Returns (block parameters with SM, shift) or
+        None."""
+        t = (self.ev.sup_milk_terms or {}).get(reg)
+        if t is None or not m0:
+            return None
+        Q0 = float(prm["Q0"][prm["iM"]])
+        cross = float((self.ev.sup_milk_cross or {}).get(reg, 0.0))
+        prm_ = dict(prm)
+        prm_["SM"] = t["k"] * Q0 / m0
+        shift = Q0 * (m_now / m0 - 1.0) + Q0 / m0 * (t["k"] * (1.0 - t["L"]) + cross)
+        return prm_, shift
 
     def _nq_price_change(self, dP, cols):
         """The price changes the market's supply functions respond to (relative to the prices the supply models saw),
