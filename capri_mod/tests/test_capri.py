@@ -4002,3 +4002,27 @@ def test_3nop_from_capris_digestibility_table():
     assert n.ch4ent_rel.between(-0.60, -0.20).all() and (n.shr_of_dm == 0.0009).all()
     assert (n[["d_ener_rel", "d_crpr_rel", "d_drmn_rel", "d_mann_rel", "dsav"]] == 0).all().all()
     assert n.elig_share.between(0.0, 305 / 365 + 1e-12).all()
+
+
+def test_crop_diversification_log_floors_cover_ipopts_bound_relaxation(model, tmp_path, monkeypatch):
+    """K97: the Shannon index row (cropDivGreening_) takes the log of each crop group's area plus a floor of 1e-6 kha
+    plus IPOPT's bound relaxation over the group's columns (1e-8 per scaled column, x 10); the same floors in the base
+    index H0. With every column at its relaxed lower bound the row stays defined (with 1e-6 alone a group of base
+    level above 100 kha reached zero: LV000000, Green Deal 2030, 3000 iterations of NaN)."""
+    import pickle
+    from capri_mod.supply import capri_regional_nlp as C
+    monkeypatch.setenv("CAPRI_NLP_DUMP", str(tmp_path))
+    model.run(scenario="BASELINE", regions=["DE110000"], max_outer_iter=1)
+    spec = dict(pickle.load(open(tmp_path / "DE110000.pkl", "rb"))["spec"])
+    cd = (spec.get("cap_rules") or {}).get("cropDiv")
+    assert cd is not None and len(cd["floors"]) == len(cd["groups"])
+    N = C.CapriRegionalNLP(spec)
+    for gp, f in zip(cd["groups"], cd["floors"]):
+        assert abs(f - (1e-6 + 1e-7 * sum(w * max(abs(float(N.xb[j])), 1.0) for j, w in gp))) < 1e-15
+    x = np.array(N.start(N.xb), float)                 # N.xb: the base levels (unscaled), start scales them
+    lb = np.asarray(N.lbx, float)
+    for gp in cd["groups"]:
+        for j, _ in gp:
+            x[j] = lb[j] - 1e-8 * max(1.0, abs(lb[j]))
+    g = np.asarray(N.f_g(x), float).ravel()
+    assert np.isfinite(g[N.cap_rows["cropDiv"]])

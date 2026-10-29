@@ -9,7 +9,7 @@ The data sourcing registry's log of checks, fixes and decisions (201 entries, mo
 [KNOWN_ISSUES_REGISTRY_LOG.md](KNOWN_ISSUES_REGISTRY_LOG.md), verbatim, with the triage of its open entries against
 the code: they became K92-K96, joined K73, K80, K91, or were closed or historical.
 
-## Open (18)
+## Open (17)
 
 | # | Issue | Status |
 |---|---|---|
@@ -30,9 +30,8 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K89](#k89) | Failing regional solves take most of IPOPT's time | open |
 | [K92](#k92) | Farm-to-Fork changes furthest from JRC121368, besides the milk price | open |
 | [K93](#k93) | CAPRI mitigation options not built; documents disagree on which are in | open |
-| [K97](#k97) | NaN in the crop-diversification row during Green Deal solves | open |
 
-## Resolved (80)
+## Resolved (81)
 
 | # | Issue | Status |
 |---|---|---|
@@ -115,6 +114,7 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K91](#k91) | CAPRI's trend projection (captrd_2030.json) had no builder | fixed |
 | [K90](#k90) | The wheat market's world price was CAPRI's soft-wheat price, not its wheat product's | fixed |
 | [K72](#k72) | Inputs without a builder (armington_params.csv and the livestock producer prices removed) | fixed |
+| [K97](#k97) | NaN in the crop-diversification row during Green Deal solves | fixed |
 | [K98](#k98) | CAPRI's supply Hessian read as stored: half of the cross terms missed | fixed |
 
 ## Details
@@ -1275,10 +1275,20 @@ rows); it takes the log of each group's area plus 1e-6 kha. IPOPT evaluates tria
 not confirmed); IPOPT then shortens the step. HU230000's traced solves replay without it, so the regions are not yet
 identified. K69 removed the fixed-zero columns from the groups for the same symptom in the baseline.
 
-- **Effect:** solver effort in the Green Deal (step cuts); results not known to be affected
+- **Effect:** solver effort in the Green Deal: the solves that hit it were the jump check's cold starts, which ran to
+  IPOPT's 3000 iterations or ended infeasible and were discarded (the warm solution kept), so the kept results were
+  not affected
 - **In 9t:** –
-- **Status:** **open**: identify the regions (the warning per region), then a floor under the log sized to IPOPT's
-  bound relaxation, with a gate
+- **Status:** **fixed** 29 October 2026. Found with tools/check/k97_nan_regions.py on the Green Deal run r185 (the
+  CasADi warnings per regional solve): LV000000, a cold start, 47,966 NaN warnings, 3000 iterations. A one-region
+  Green Deal run of LV000000 caught the failing solve: the row is the crop-diversification row (cap_rows cropDiv), and
+  at IPOPT's last point a one-column group (a column of base level about 166 kha, lower bound 0) sat at -6e-9 in the
+  scaled column, within IPOPT's bound relaxation (1e-8), i.e. -1e-6 kha: the group plus the 1e-6 floor was zero and
+  0 log 0 NaN. The floor under each group's log is now 1e-6 + 1e-7 x the sum of the group's column scales (max(|base
+  level|, 1)), the relaxation over the group's columns x 10, the same in the base index H0 (supply_module, the
+  spec's floors; capri_regional_nlp). The fixed columns as constants (as GAMS hands .fx variables to CONOPT) were
+  tried first and did not remove it. LV000000's two-iteration Green Deal run: 41,636 NaN warnings before, none after;
+  its supply-model time in the second iteration 10 s before, 3 s after; the indicators equal to 0.1 point. Test
 
 <a id="k98"></a>
 ### K98: CAPRI's supply Hessian read as stored: half of the cross terms missed (found 29 October 2026)

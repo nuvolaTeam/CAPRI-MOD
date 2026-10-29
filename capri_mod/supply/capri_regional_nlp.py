@@ -491,8 +491,13 @@ class CapriRegionalNLP:
             # prep_sim) are left out of the groups: they contribute nothing, and with IPOPT's fixed-variable treatment
             # (make_constraint) their trial values can fall below zero by more than the 1e-6 floor, where the log is
             # undefined (NaN in about 24 regions of the 2030 baseline, KNOWN_ISSUES K69)
+            # The floor under each group's log: 1e-6 kha plus IPOPT's bound relaxation over the group's columns
+            # (bound_relax_factor 1e-8 per scaled column, x 10; cd["floors"], the same in the base index H0). With 1e-6
+            # alone a column of base level 166 kha at its relaxed bound (-6e-9 scaled) took a single-column group to
+            # zero, the log to NaN, and IPOPT through 3000 iterations (LV000000, Green Deal 2030 cold start; K97)
             _fix0 = lambda j: lbx[int(j)] == 0.0 and ubx[int(j)] == 0.0
-            Xk = [lin([(j, w) for j, w in gp if not _fix0(j)]) + 1e-6 for gp in cd["groups"]]
+            fl_ = cd.get("floors") or [1e-6] * len(cd["groups"])
+            Xk = [lin([(j, w) for j, w in gp if not _fix0(j)]) + float(f_) for gp, f_ in zip(cd["groups"], fl_)]
             T = sum(Xk)
             H = 0
             for x_ in Xk:

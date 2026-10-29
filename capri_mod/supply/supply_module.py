@@ -1459,7 +1459,11 @@ class RegionalSupplyModel:
                 g = self.CROPDIV_GROUPS.get(a)
                 if g is not None:
                     grp.setdefault(g, []).append((j, 1.0))
-            X = [sum(xb[j] for j, _ in gp) + 1e-6 for gp in grp.values()]
+            # floors under the logs: CAPRI's 1e-10 is 1e-6 here, plus IPOPT's bound relaxation over the group's columns
+            # (1e-8 per column in the NLP's scaling, max(|base level|, 1); x 10), so that no trial point within the
+            # relaxed bounds takes a group to zero (K97); the same floors in the NLP's row
+            fl = [1e-6 + 1e-7 * sum(w * max(abs(float(xb[j])), 1.0) for j, w in gp) for gp in grp.values()]
+            X = [sum(xb[j] for j, _ in gp) + f_ for gp, f_ in zip(grp.values(), fl)]
             T = sum(X)
             if T > 0 and len(X) > 1:
                 H0 = -sum(x / T * np.log(x / T) for x in X)
@@ -1469,7 +1473,7 @@ class RegionalSupplyModel:
                 F = float(getattr(self, "_fall_floor", 0.0) or 0.0)
                 if F > 0:
                     H0 = min(H0, -sum((x + F) / (T + F) * np.log((x + F) / (T + F)) for x in X))
-                out["cropDiv"] = {"groups": list(grp.values()), "H0": H0 * (1 - 1e-9)}
+                out["cropDiv"] = {"groups": list(grp.values()), "H0": H0 * (1 - 1e-9), "floors": fl}
         return out or None
 
     def _npk_recalibrate_priors(self, spec, nuts, yb) -> bool:
