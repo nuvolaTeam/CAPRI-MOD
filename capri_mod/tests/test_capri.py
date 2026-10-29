@@ -2019,31 +2019,25 @@ def test_land_bounds_do_not_rewrite_the_base_year(data):
 
 
 def test_world_production_coverage(data):
-    """Every region's base production is CAPRI's: its FAO_agg base balance (world_market_baseline.json, built by
-    tools/build/build_world_market_baseline.py) covers nearly all of the market's world base production outside the EU
-    (the EU's is its supply models'). Until 29 October 2026 the test counted the cells of an older FAO extract and an
-    extended SUA (fao_market_baseline.json, fao_agg_sua_2017_extended.json), files the market no longer read (removed,
-    KNOWN_ISSUES K102); the residual feeds and the products whose base is CAPRI's market result (bilateral flows) are
-    outside the balance file by construction."""
+    """Every non-EU region's base production of a product CAPRI's FAO_agg balances map (world_market_baseline.json,
+    built by tools/build/build_world_market_baseline.py, its "_products") is CAPRI's: each such region-product with a
+    base production has its balance (the EU's is its supply models'). The products outside the mapping are listed in
+    the builder: the residual feeds and the products whose base is CAPRI's market result (bilateral flows, biofuels,
+    DDGS), and those without a matching CAPRI world balance (PARI, DWHE, OOIL, OLIV). Until 29 October 2026 the test
+    counted the cells of an older FAO extract and an extended SUA, files the market no longer read (removed, KNOWN_ISSUES
+    K102)."""
     import json
     from capri_mod.market.market_module import MarketModule
 
-    wb = json.load(open(DATA_DIR / "2017" / "market" / "world_market_baseline.json"))["balances"]
-    keys = {tuple(k.split("|")) for k, v in wb.items() if float(v.get("production", 0) or 0) > 0}
+    wbf = json.load(open(DATA_DIR / "2017" / "market" / "world_market_baseline.json"))
+    prods = set(wbf["_products"])
+    keys = {tuple(k.split("|")) for k, v in wbf["balances"].items() if float(v.get("production", 0) or 0) > 0}
     mm = MarketModule(data)
     bp = mm.par.base_production
-    total = covered = 0.0
-    for reg in bp.index:
-        for comm in bp.columns:
-            v = float(bp.at[reg, comm])
-            if v <= 0:
-                continue
-            total += v
-            if (reg, comm) in keys or reg == "EU27":
-                covered += v
-    assert total > 0
-    share = covered / total * 100.0
-    assert share > 90.0, f"only {share:.1f}% of world base production is in CAPRI's FAO_agg balances"
+    missing = [(reg, comm) for reg in bp.index if reg not in mm.EU and reg != "EU27"
+               for comm in bp.columns if comm in prods and float(bp.at[reg, comm]) > 0 and (reg, comm) not in keys]
+    assert len(prods) > 40
+    assert not missing, f"base production without CAPRI's FAO_agg balance: {missing[:10]}"
 
 
 def test_yield_responds_to_price(data):
@@ -3003,7 +2997,12 @@ def test_noneu_feed_energy_balance_is_capris(model):
         s = mm.supply_response(mm.world_prices_base, None, region_ratio=one)
     finally:
         mm.ev.fede_now = None
-    exp = float(mm.par.base_production.at["USA", "BEEF"]) + P["fede"]["USA"]["BEEF"] * 0.10
+    # beef also follows the raw milk price of the USA's dairy block, which the dearer feed energy moves through raw
+    # milk's own FEDE term (ProdNQ_ MILK)
+    wl, wp = mm.ev.dairy_world_last or {}, mm._dairy_world_params()
+    mr = 1.0 + float(wl["USA"]["z"][wp["USA"]["iM"]]) if "USA" in wl and "USA" in wp else 1.0
+    exp = (float(mm.par.base_production.at["USA", "BEEF"]) + P["fede"]["USA"]["BEEF"] * 0.10
+           + P["rows"].get("BEEF", {}).get("MILK", 0.0) * (mr - 1.0))
     assert abs(float(s.at["USA", "BEEF"]) - exp) < 1e-6 * abs(exp)
 
 
