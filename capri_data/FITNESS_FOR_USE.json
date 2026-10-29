@@ -60,7 +60,7 @@
   },
   "market.prices": {
    "status": "use_with_care",
-   "note": "Base world prices are CAPRI's FAO_agg world prices (tools/build/build_world_prices.py), except the wheat market, which takes CAPRI's soft-wheat price instead of its wheat product's (KNOWN_ISSUES K90); EU and non-EU prices come from CAPRI's bilateral Armington market, calibrated to CAPRI's market data, so the base reproduces it (r183: two baseline iterations, no row of CAPRI's stop rule above 0.05%). The base price test is a solver-consistency check, not a validation against an independent price (K95).",
+   "note": "Base world prices are CAPRI's FAO_agg world prices of its market products (tools/build/build_world_prices.py; the wheat market's is CAPRI's WHEA since 29 October 2026, KNOWN_ISSUES K90); EU and non-EU prices come from CAPRI's bilateral Armington market, calibrated to CAPRI's market data, so the base reproduces it (r183: two baseline iterations, no row of CAPRI's stop rule above 0.05%). The base price test is a solver-consistency check, not a validation against an independent price (K95).",
    "evidence": "r183 baseline; test_market_module_reproduces_its_own_prices (solver consistency)"
   },
   "market.PARI": {

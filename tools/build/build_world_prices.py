@@ -4,9 +4,8 @@ and its provenance, capri_data/sources/world_price_provenance.json. The one writ
 Rows
   every market commodity (definitions.MARKET_COMMODITIES) with a world price in CAPRI's FAO_agg market data:
       p_dataMarket 'World'.'PMRK'.<CAPRI product>.'BAS', the product being the commodity's CAPRI code
-      (capri_data/schema/codes/model_commodities.csv), except soft wheat (below)
-  SWHE  CAPRI's 'SWHE' world price (171.9), as the file has held it; CAPRI's market product for the model's wheat
-        market is WHEA, whose FAO_agg world price is 196.6 (KNOWN_ISSUES K90, open)
+      (capri_data/schema/codes/model_commodities.csv); the model's wheat market SWHE is CAPRI's market product WHEA
+      (196.6; until 29 October 2026 CAPRI's 'SWHE' price, 171.9, which no market of CAPRI's carries: KNOWN_ISSUES K90)
   DWHE, SUGB  not market commodities, kept as rows: the outer loop's price signal takes its index from this table and
         sets them from soft wheat and sugar (model.py); their values are FAO_agg's 'DWHE' and 'SUGB'
   OLIV  the model's olive market is in tonnes of olives, CAPRI trades olive oil (OLIO): OLIO's world price times the
@@ -51,7 +50,7 @@ DUMPS = Path("/home/claude/work/capreg")
 FAO_SRC = "FAO_agg_17_defaulta p_dataMarket 'World'.'PMRK'.'BAS'"
 #: the CAPRI product whose world price a row takes where it is not the commodity's CAPRI code (model_commodities.csv),
 #: and the rows that are not market commodities
-SOURCE_CODE = {"SWHE": "SWHE", "DWHE": "DWHE", "SUGB": "SUGB"}
+SOURCE_CODE = {"DWHE": "DWHE", "SUGB": "SUGB"}
 
 
 def fao_market(path: Path):

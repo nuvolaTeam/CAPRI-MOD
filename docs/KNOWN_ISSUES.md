@@ -9,7 +9,7 @@ The data sourcing registry's log of checks, fixes and decisions (201 entries, mo
 [KNOWN_ISSUES_REGISTRY_LOG.md](KNOWN_ISSUES_REGISTRY_LOG.md), verbatim, with the triage of its open entries against
 the code: they became K92-K96, joined K73, K80, K91, or were closed or historical.
 
-## Open (21)
+## Open (20)
 
 | # | Issue | Status |
 |---|---|---|
@@ -30,12 +30,11 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K83](#k83) | A one-region Farm-to-Fork run's market diverges in its second step | open |
 | [K86](#k86) | Ammonia housing and storage options without their farm-size cost curves in Denmark, Lithuania and Croatia | open |
 | [K89](#k89) | Failing regional solves take most of IPOPT's time | open |
-| [K90](#k90) | The wheat market's world price is CAPRI's soft-wheat price, not its wheat product's | open |
 | [K92](#k92) | Farm-to-Fork changes furthest from JRC121368, besides the milk price | open |
 | [K93](#k93) | CAPRI mitigation options not built; documents disagree on which are in | open |
 | [K97](#k97) | NaN in the crop-diversification row during Green Deal solves | open |
 
-## Resolved (76)
+## Resolved (77)
 
 | # | Issue | Status |
 |---|---|---|
@@ -115,6 +114,7 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K95](#k95) | The "12/12 against PMRK" market-price validation is a solver-consistency check | fixed |
 | [K96](#k96) | Documents and one constant still describe removed mechanisms | fixed |
 | [K91](#k91) | CAPRI's trend projection (captrd_2030.json) had no builder | fixed |
+| [K90](#k90) | The wheat market's world price was CAPRI's soft-wheat price, not its wheat product's | fixed |
 
 ## Details
 
@@ -1118,8 +1118,9 @@ from for WHEA is not checked yet (arm/ data preparation).
   For comparison: CAPRI's 2017 market solution (market_base_1717) has a World PMRK of WHEA of 157.7 EUR/t, but its
   World rows are far from FAO_agg's for other products too (soya 102.7 against 325.7), so it is no check
 - **In 9t:** not checked
-- **Status:** **open**: kept as it was (tools/build/build_world_prices.py SOURCE_CODE); to be checked against CAPRI's
-  market data preparation before any change, a decision for the project lead
+- **Status:** **fixed** 29 October 2026 (batch 5; the project lead's "fix everything"): the wheat market takes CAPRI's
+  WHEA world price (196.60 EUR/t), the price of the market product it is in CAPRI (no market of CAPRI's carries
+  'SWHE'); effect measured in the batch's gate runs
 
 <a id="k91"></a>
 ### K91: CAPRI's trend projection (captrd_2030.json) has no extractor (found 29 October 2026, the data pipeline)

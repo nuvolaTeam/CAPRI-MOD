@@ -1125,7 +1125,7 @@ external references.
 market data) for its 26 trade regions, `ROW` being CAPRI's other market regions summed; no region is allocated by a
 share any more (the allocation that stood for Iran and Saudi Arabia went with those trade regions, KNOWN_ISSUES K45).
 The base world prices are CAPRI's FAO_agg world prices (`tools/build/build_world_prices.py`; the wheat market's is
-CAPRI's soft-wheat price, K90). The base-price test (`test_market_module_reproduces_its_own_prices`) checks that the
+CAPRI's WHEA price, K90). The base-price test (`test_market_module_reproduces_its_own_prices`) checks that the
 market reproduces its own base prices: solver consistency, not a validation against an independent price (K95).
 
 **Filter near-zero base cells before reading percentage changes.** An activity
@@ -1220,7 +1220,7 @@ adjustment with its FADN yield gaps).
 | **Policy — nitrogen instruments** | Fixed | CAPRI's tiered N-balance target inside the regional models, met through CAPRI's fertiliser options, its intensity variants and area; the model's own applied-N ceiling and its intensity margin were retired on 27 October 2026 (K33) |
 | **Environment** | Validated | Gross nitrogen balance on CAPRI's definition (`e_SURTOTHa`), item by item against CAPRI's 2030 reference (EU, kg N/ha): removal 125 vs 119, residues 57 vs 55, fixation 10 vs 8, deposition 11 vs 11, mineral 63 vs 57, manure 54 vs 53; regional surplus correlation 0.92 over 235 regions. Phosphate balance (P2O5, docs/P_BALANCE.md): with CAPRI's own levels the formulas give its items; at the model's base data EU kg P2O5/ha excretion 27.8 vs 27.6, mineral 15.6 vs 15.6, removal 53.1 vs 53.4, surplus 14.4 vs 13.9, regional surplus correlation 0.99 |
 | **Feed** | CAPRI data | Rations chosen inside the regional models against CAPRI's requirement rows (REQSE_) at CAPRI's base rations; the requirements equal the base rations' supply by construction, no independent check |
-| **Market** | CAPRI data | The base is CAPRI's market data (bilateral flows, balances; world prices from FAO_agg, K90); the base-price test is solver consistency (K95); scenario supply shocks move prices in CAPRI's direction |
+| **Market** | CAPRI data | The base is CAPRI's market data (bilateral flows, balances; world prices from FAO_agg); the base-price test is solver consistency (K95); scenario supply shocks move prices in CAPRI's direction |
 | **Biofuel** | CAPRI structure | Feedstock CES reproduces CAPRI's 2030 BiofFeedCost exactly in every CAPRI market region; endogenous biofuel markets (`BIOF_M`) reproduce every region's 2030 biofuel output and use at reference prices |
 
 ### 8.1 Validation methods
