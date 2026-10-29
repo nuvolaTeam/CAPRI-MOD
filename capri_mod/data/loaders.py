@@ -87,8 +87,8 @@ _FILE_CATEGORY = {
     "pmp_recipe_2017_animals_members.csv": "supply",
     "pmp_own_price_elasticities.csv": "supply",
     "producer_prices.csv": "market", "world_prices.csv": "market",
-    "cap_payments.csv": "policy", "crop_premium.csv": "supply", "eu_mfn_tariffs.csv": "policy", "tariffs.csv": "policy",
-    "nutrient_coefs_regional.csv": "supply", "crop_nutrient_export.csv": "environment",
+    "cap_payments.csv": "policy", "crop_premium.csv": "supply", "tariffs.csv": "policy",
+    "nutrient_coefs_regional.csv": "supply",
     "climate_zones.csv": "environment",
     # JSON parameter files
     "fao_market_baseline.json": "market",

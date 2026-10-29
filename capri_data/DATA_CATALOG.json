@@ -43,12 +43,6 @@
    "units": "EUR/t"
   },
   {
-   "file": "eu_mfn_tariffs.csv",
-   "vintage": "2017",
-   "domain": "policy",
-   "units": "fraction"
-  },
-  {
    "file": "land_availability.csv",
    "vintage": "2017",
    "domain": "supply",
@@ -71,12 +65,6 @@
    "vintage": "2006",
    "domain": "environment",
    "units": "kg/head or factor"
-  },
-  {
-   "file": "crop_nutrient_export.csv",
-   "vintage": "2017",
-   "domain": "environment",
-   "units": "kg/t"
   },
   {
    "file": "climate_zones.csv",

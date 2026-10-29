@@ -43,13 +43,11 @@ Files are under `capri_data/<base_year>/<category>/` (only `2017/` exists); `tra
 | `cap_ceilings_2030.csv` | CAPRI's 2030 budgets by premium scheme, Mio EUR, per CAPRI member state and NUTS2 region: DPPIL1, DPPIL2, DPRD_LFA, DPRD_N2K, DPAE, DPNAT, DPTOTAL; the payments report's national envelopes (DPTOTAL) | CAPRI 2030 reference, dataOut CEILVAL (`tools/build/build_cap_ceilings_2030.py`) | 289 × 7 |
 | `premium_scheme_shares_2030.csv` | per model region and activity, the part of the premium paid under DPPIL1, DPRD_LFA, DPRD_N2K, DPAE and DPNAT (sums to 1); Pillar II budget changes and the report's split by scheme | CAPRI 2030 reference, dataOut PRME by scheme / DPTOTAL, LEVL-weighted (`tools/build/build_cap_ceilings_2030.py`) | 8,709 rows (221 regions) |
 | `tariffs.csv` | ad valorem protection per trade region and commodity | CAPRI's total protection from its 2017 bilateral flows (Sprint 9r; `tools/build/build_tariffs_2017.py`) | 30 × 52 |
-| `eu_mfn_tariffs.csv` | EU import tariffs per commodity (fraction) | CAPRI | 1 × 32 |
 
 ### Environment (`2017/environment/`) and feed (`2017/feed/`)
 
 | File | Content | Source | Shape |
 |---|---|---|---|
-| `crop_nutrient_export.csv` | nutrient removed per t of crop (`N_kg_t`, `P_kg_t`, `K_kg_t`) | CAPRI | 35 × 3 |
 | `climate_zones.csv` | climate-zone shares per CAPRI region or member state (`region`, `zone`, `pct`; 145 codes); read by `tools/build/build_ad_option.py`, not by the model | CAPRI | 521 rows |
 
 ### Shared (`shared/`)

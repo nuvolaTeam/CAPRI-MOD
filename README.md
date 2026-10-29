@@ -454,9 +454,7 @@ consuming modules:
 | pmp_crossgroup_terms | PMP cross-group term | EUR/ha² | supply |
 | world_prices | world market price | EUR/t | market |
 | feed_availability | feed supply by item | 1000 t DM | feed |
-| crop_nutrient_export | nutrient removal per ton yield | kg/t | environment |
 | climate_zones | IPCC climate zone shares | share | environment |
-| eu_mfn_tariffs | applied MFN tariff | % or EUR/t | market |
 | supply_elasticities_regional | own-price supply elasticity by region | — | supply |
 | pela_cross_price | cross-price elasticities (PELA) | — | supply |
 | livestock_output_coef | marketed product per head | kt/1000 head | supply |

@@ -272,22 +272,6 @@
     "SOYA/CHES/SKIM diverge; dairy has no CAPRI processing margin to validate against"
    ]
   },
-  "crop_nutrient_export": {
-   "file": "2017/environment/crop_nutrient_export.csv",
-   "concept": "nutrient removal per ton yield",
-   "unit": "kg/t",
-   "dimension": "crop x nutrient",
-   "modules": [
-    "environment"
-   ],
-   "source": {
-    "source_type": "CAPRI_SOURCE",
-    "source_ref": "CAPRI documentation Table 15",
-    "vintage": "CAPRI star-3.0",
-    "confidence": "validated",
-    "reproducibility": "manual"
-   }
-  },
   "climate_zones": {
    "file": "2017/environment/climate_zones.csv",
    "concept": "IPCC climate zone shares",
@@ -302,22 +286,6 @@
     "vintage": "IPCC 2006",
     "confidence": "validated",
     "reproducibility": "manual"
-   }
-  },
-  "eu_mfn_tariffs": {
-   "file": "2017/policy/eu_mfn_tariffs.csv",
-   "concept": "applied MFN tariff",
-   "unit": "percent or EUR/t",
-   "dimension": "commodity",
-   "modules": [
-    "market"
-   ],
-   "source": {
-    "source_type": "EXTERNAL",
-    "source_ref": "TARIC/WTO",
-    "vintage": "2017",
-    "confidence": "validated",
-    "reproducibility": "public_code"
    }
   },
   "livestock_output_coef": {

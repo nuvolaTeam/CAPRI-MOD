@@ -203,27 +203,6 @@
    },
    "note": "Recalibrated from CAPRI capmod res_0_1717 (2017). The previous 841-row matrix carried a zero diagonal - no intra-EU trade at all - so every commodity showed a 100% extra-EU import share. 547 rows is fewer because CAPRI reports only realised flows, not an exhaustive grid of zeros. | REBUILT 2026-10 on CAPRI's trade partition (sources/capri_trade_regions_2017.json): no EU or rest-of-world double counting, genuine regions no longer dropped, six oilseed-product columns; EU imports match CAPRI's NONEU rows exactly. Not read by the model since the bilateral market (bilateral_flows_<year>.csv) replaced the old Armington aggregator (removed 21 October 2026, an orphan: built from this file, never used); kept as an input of tools/check/validate_world_prices.py and tools/build/recalibrate_trade_2017.py."
   },
-  "eu_mfn_tariffs.csv": {
-   "source": "CAPRI",
-   "vintage": "2017",
-   "units": "fraction",
-   "domain": "policy",
-   "status": "live",
-   "shape": {
-    "rows": 1,
-    "cols": 32,
-    "columns": [
-     "SWHE",
-     "DWHE",
-     "BARL",
-     "CORN",
-     "OCER",
-     "RYEM",
-     "OATS",
-     "RAPE"
-    ]
-   }
-  },
   "land_availability.csv": {
    "source": "CAPRI/COCO",
    "vintage": "2017",
@@ -275,22 +254,6 @@
     "columns": [
      "crop",
      "own_price_elas"
-    ]
-   }
-  },
-  "crop_nutrient_export.csv": {
-   "source": "CAPRI",
-   "vintage": "2017",
-   "units": "kg/t",
-   "domain": "environment",
-   "status": "live",
-   "shape": {
-    "rows": 35,
-    "cols": 3,
-    "columns": [
-     "N_kg_t",
-     "P_kg_t",
-     "K_kg_t"
     ]
    }
   },
