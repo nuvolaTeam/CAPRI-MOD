@@ -586,8 +586,8 @@ data preparation is ported.
 |---|---|---|
 | Trend variable, grid on c | captrd.gms l. 203, 271; estimate_trends.gms l. 28, 80-82 | done (`capri_mod/pipeline/captrd/step1.py`) |
 | Time sets ExPost, ExPostT, BASYRS5, BASYRSM, EIGHTLST, BAST, YearsEst | captrd.gms l. 665-812 | next (ExPostT: 1984–2019 in the reference run, 2019 from COCO) |
-| Data load and cleaning (copy of years, area rescaling, BASM from DATA2, deletion of series not estimated) | captrd.gms l. 486-870 | next. The sets are done: `capri_data/pipeline/captrd/sets/` (S_ColsEst, S_RowsEst, GRPC, CROPC_TO_G, GRPR, ROWS_TO_G, REQST, MrkBalE, NoYieldDrop, FixYield; `tools/build/build_captrd_sets.py`). They are built from sets_captrd.gms (transcribed with line numbers) and CAPRI's global sets (`capri_reference/sets/simini_21730`, the 1,972 sets of the CAPMOD file sim_ini_21730.gdx). CAPTRD redefines MrkBalE (14 positions against CAPMOD's 8), so its own definition is used. Check: all 1,856 (col, row) pairs CAPTRD estimated in the reference run are in S_ColsEst × S_RowsEst (`test_captrd_sets.py`) |
-| Data preparation (sugar prices, aggregates, SLGW, UVAG, DOMM, TOOU, NTRD, LU density) | prep_data_for_estimation.gms l. 15-200 | next |
+| Data load and cleaning (copy of years, area rescaling, deletion of series not estimated, early years, UVAD fill, regions, LABH) | captrd.gms l. 418-517, 830-898; check_and_cor_capreg.gms | done for the years (`capri_mod/pipeline/captrd/prepare.py`, 29 October 2026); BASM from DATA2 (l. 520-580) next. The sets it reads, CAPRI's global ones copied from the reference export and CAPTRD's own transcribed, are written by `tools/build/build_captrd_sets.py` (COLS_LOAD, ROWS_LOAD, MS, NT2, urbanNUTS, rmAggSup with EU013000, MrkBaleE, DOMPOS, breedAct, MEAT, ...). GAMS assignments are parallel (the right-hand side is read before the statement; GAMS user's guide), which the area rescaling and the UVAD average follow |
+| Data preparation (sugar prices, aggregates, SLGW, UVAG, DOMM, TOOU, NTRD, LU density) | prep_data_for_estimation.gms l. 15-162 | done but LU (`prep_for_estimation`): LU.LEVL needs CAPRI's livestock units p_LUUnits (dat/policy/livestock_units.gms, not in hand). Check (`test_captrd_prepare.py`): Denmark's prepared years equal CAPTRD's p_data on all 40,000+ compared records (relative 1e-9), leaving out what the stages not yet ported write: the reporting overwrites of the same position (aggreg_and_report.gms l. 203-220), the policy data (captrd_policy.gms: quotas, set-aside), the COCO nowcasts and biofuel data (load_coco1_data.gms, from coco2_output.gdx) and LU. The UVAD that Denmark lacks (other cereals, 1990) is the average over the 11 countries of its market aggregate A_EU_WEST with data (Germany's 1990 deleted first), as in CAPTRD (slow test) |
 | nObs, nW, wAve, wVar | prep_data_for_estimation.gms l. 205-247 | done |
 | BAS, BSY, feed coefficients (nObs forced to 1) | prep_data_for_estimation.gms l. 250-320 | next |
 | WLS grid search | estimate_trends.gms | done |
@@ -652,5 +652,17 @@ data preparation is ported.
   define_eu_supports.gms l. 693, 705). Fixed on 24 October 2026 (project lead: "fix the still open"): the floor is
   (0.05 × |wAve|)², a 5% coefficient of variation; `captrd.variance_floor_squared = false` reproduces CAPRI. It has no
   effect until Steps 2-3 are ported; then it changes the weight of about a fifth of the series.
+- **The NUTS 2 column filter deletes nothing as coded** (captrd.gms l. 872-876). The statement is meant to keep only
+  the activities, land use, GROF and ARTO of the NUTS 2 regions, but its condition NOT SUM(SAMEAS(MS,NT2),1) has NT2
+  uncontrolled: the sum runs over MS and NT2 together and counts the 14 countries that are their own NUTS 2 region,
+  so the condition is false everywhere. CAPTRD's own p_data is consistent with this: its NUTS 2 regions keep, among
+  others, LOSF, UVAG, EAAG and SEDF (266,493 records), which the statement would delete. Ported as coded (`clean_regions`); a fix (the condition per NUTS 2 region,
+  as the two following statements have it) is for the project lead to decide, since it removes series from the NUTS 2
+  estimation.
+- **Reporting overwrites the p_data position.** aggreg_and_report.gms writes the product aggregates (INHA, UVAG, UVAD
+  and the market balance of the OAGG rows) and the activity aggregates' TOOU into p_result(..., "p_data") after the
+  estimation. CAPTRD's stored INHA.CERE of Denmark before 2005 therefore lacks maize (its INHA.MAIZ has no base-year
+  value, so no stored series), while the INHA.CERE CAPTRD estimated includes it. Parity tests on the p_data position
+  must leave these records out.
 - **DOMM and NTRD in CAPTRD's output** are reporting re-aggregates in every position, Step1 included. A parity test
   must use DEMD for DOMM, and cannot test NTRD's estimated Step1.

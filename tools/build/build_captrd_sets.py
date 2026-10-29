@@ -50,6 +50,35 @@ NO_YIELD_DROP_LITERAL = ["PARI", "MAIF", "ROOF", "POTA", "SUGB", "PULS", "TOBA",
                          "SOWS", "HENS", "OOIL", "GRAE", "GRAI"]                              # l. 465-467 (+ CERE, OILS)
 FIX_YIELD = ["OCRO", "OOIL", "OANI"]                                                         # l. 472
 
+# --- the data preparation (capri_mod/pipeline/captrd/prepare.py) ----------------------------------------------------
+# captrd.gms l. 418-478: the columns and rows loaded from CAPREG's time series, every DB_COLS / DB_ROWS member but these
+COLS_LOAD_MINUS_SETS = ["NBIL", "MFIND_COLS", "ARMPRICE_SET", "MARKET_BALPOS", "FEO_ITEMS_COLS", "FEOGA_COLS",
+                        "ADD_MARKET_COLS", "GHGS_ROWS", "FRM_COLS", "SET_ACT_AGG", "SLGT_COLS", "EMIS_COLS"]
+COLS_LOAD_MINUS = ["EAAS", "EAAT", "CSSP", "TARS", "TARV", "UVAI", "UVAE", "MODU", "QUTI", "QUTE", "AVAILA", "Impact",
+                   "ImpactGwp"]
+COLS_LOAD_PLUS = ["HOLD"]                                                                    # l. 444, after the removals
+ROWS_LOAD_MINUS_SETS = ["GHGS", "GHGS_DEL", "EAAGA_ROWS", "FEO_ITEMS_ROWS", "NBIL_COLS", "OAGG", "D_DUALS",
+                        "ADD_LABOUR_ROWS", "Frm_ROWS", "REPORT_ROWS", "GAS_EMIS"]
+ROWS_LOAD_MINUS = ["DIFR", "LLEV", "VCOF", "FLOOR", "PMPT", "FERT", "PRMC", "PRMT", "INTR", "ENTI", "CC_S", "FEEDS",
+                   "RESTI", "Impact", "ImpactHa", "AVAILA", "NETMAN", "NETMAN2", "WHEA"]
+# sets_captrd.gms l. 184: CAPTRD adds the EU-13 aggregate to the market aggregates of the supply regions
+RMAGGSUP_PLUS = ["EU013000"]
+# sets_captrd.gms: the extended market balance positions (MrkBaleE, l. 297-305; GAMS reads MrkBalee as the same name),
+# the domestic use positions (DOMPOS, l. 318-320), the female breeding animals (breedAct, l. 334), the meats (MEAT, l. 274)
+MRKBALEE = MRKBALE + ["EAAG", "EXPD", "DOMM", "NTRD", "NAGR", "SECG"]
+DOMPOS = ["FEDM", "SEDM", "SEDF", "INDM", "PRCM", "BIOF", "HCOM", "LOSM", "LOSF"]
+BREEDACT = ["DCOL", "DCOH", "SCOW", "SHGM", "SOWS", "HENS"]
+MEAT = ["BEEF", "POUM", "PORK", "SGMT"]
+# CAPRI's global sets the preparation reads, as instantiated (copied from the reference export): MS is sets.rmssup
+# (sets_captrd.gms l. 54-56), NT2 the alias of SRNUTS2 (l. 69)
+GLOBAL_1D = {"ms": "RMSSUP", "srnuts2": "SRNUTS2", "urbannuts": "urbanNUTS", "secom": "SECOM",
+             "landusearto": "LandUseARTO", "quotas": "QUOTAS", "bio_cols": "Bio_Cols", "biorepcols": "bioRepCols",
+             "seco_biof": "SECO_BIOF", "mpact": "MPACT", "maact": "MAACT", "iyani": "IYANI", "fix_yai": "FIX_YAI",
+             "reqsc": "REQSC", "ncnc": "NCNC", "fout": "FOUT", "oyani_rows": "OYANI_ROWS", "mcact": "MCACT",
+             "cact": "CACT", "seco": "SECO", "o": "O", "feed": "FEED"}
+GLOBAL_2D = {"map_rr": "Map_RR", "pact_to_io": "PACT_TO_IO", "pact_to_i": "PACT_TO_I", "rms_to_rm": "RMS_TO_RM",
+             "pact_to_o": "PACT_TO_O", "pact_to_y": "PACT_TO_Y"}
+
 
 def _members(ref: Path, name: str, dim: int = 1):
     f = ref / f"{name}.csv"
@@ -102,7 +131,27 @@ def main() -> None:
     _write("mrkbale", MRKBALE)
     _write("noyielddrop", sorted(set(NO_YIELD_DROP_LITERAL) | set(_members(ref, "CERE")) | set(_members(ref, "OILS"))))
     _write("fixyield", FIX_YIELD)
-    print(f"S_ColsEst {len(cols)}, S_RowsEst {len(rows)} -> {OUT}")
+
+    cl = set(_members(ref, "DB_COLS"))
+    for s in COLS_LOAD_MINUS_SETS:
+        cl -= set(_members(ref, s))
+    cl = (cl - set(COLS_LOAD_MINUS)) | set(COLS_LOAD_PLUS)
+    rl = set(_members(ref, "DB_ROWS"))
+    for s in ROWS_LOAD_MINUS_SETS:
+        rl -= set(_members(ref, s))
+    rl -= set(ROWS_LOAD_MINUS)
+    _write("cols_load", sorted(cl, key=str.upper))
+    _write("rows_load", sorted(rl, key=str.upper))
+    _write("rmaggsup", sorted(set(_members(ref, "RmAggSup")) | set(RMAGGSUP_PLUS)))
+    _write("mrkbalee", MRKBALEE)
+    _write("dompos", DOMPOS)
+    _write("breedact", BREEDACT)
+    _write("meat", MEAT)
+    for out, s in GLOBAL_1D.items():
+        _write(out, _members(ref, s))
+    for out, s in GLOBAL_2D.items():
+        _write(out, _members(ref, s, 2), 2)
+    print(f"S_ColsEst {len(cols)}, S_RowsEst {len(rows)}, COLS_LOAD {len(cl)}, ROWS_LOAD {len(rl)} -> {OUT}")
 
 
 if __name__ == "__main__":
