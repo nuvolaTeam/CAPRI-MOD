@@ -157,6 +157,8 @@ INVOCATIONS: list[tuple[str, list[str], list[Path]]] = [
     ("build_feed_bulks", [], []),
     ("build_feed_byproducts", [], []),
     ("build_world_prices", [], [UP / "fao_agg_17_datamarket.txt", D17]),
+    ("build_captrd_trajectory", ["--series", str(WORK / "capri_reference/captrd_results/1770/series.csv.gz")],
+     [WORK / "capri_reference/captrd_results/1770/series.csv.gz"]),
     ("build_feed_demand_nonEU", [], [UP / "elas_2_1730defaulta.csv", UP / "data_market_1730defaulta.csv"]),
     ("build_fert_dist_priors", [], []),
     ("build_fert_options_jul15", [], []),
@@ -206,8 +208,8 @@ NOT_AUDITED = {
     "build_patched_inputs": "superseded one-off (see REGIONAL_UNITS_BUILDERS.md 4.4)",
     "extract_capri_vcs_pair": "input is a GDX inside a zip (cap_after_2014 reference)",
     "build_captrd_sets": "reads capri_reference/sets (not committed; build_capri_sets_reference writes it)",
-    "build_trajectory_model_keys": "edits captrd_2030.json in place (idempotent); the file's CAPRI-keyed part has no "
-                                   "extractor (KNOWN_ISSUES K91)",
+    "build_trajectory_model_keys": "a module: add_model_keys is called by build_captrd_trajectory (the file's one "
+                                   "writer); its command line edits a file in place",
     "build_animal_yields": "a module: build() is called by build_crop_economics_2017, the one writer of yields.csv",
     "convert_inputs_to_parquet": "a conversion step (Parquet decision deferred), not a builder of data",
 }

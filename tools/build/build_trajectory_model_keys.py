@@ -8,6 +8,9 @@ model regions (NUTS 2021: FRB0, IE04 ...), so every name that differs fell back 
 EU median. This adds model-keyed entries next to CAPRI's (which are kept): activity aliases below, regions
 through tools/lib/_model_regions.region_to_capri() (the NUTS correspondence with its splits and merges).
 
+Since 29 October 2026 the file is built from blank by tools/build/build_captrd_trajectory.py, which calls
+add_model_keys; the command line below edits a file in place (as before) and is not part of the data pipeline.
+
     python tools/build/build_trajectory_model_keys.py [capri_data/trajectories/captrd_2030.json]
 """
 from __future__ import annotations
@@ -28,9 +31,8 @@ ALIASES = {
 }
 
 
-def main():
-    path = Path(sys.argv[1]) if len(sys.argv) > 1 else ROOT / "capri_data" / "trajectories" / "captrd_2030.json"
-    t = json.loads(path.read_text())
+def add_model_keys(t: dict) -> dict:
+    """The model's activity and region keys added to a CAPRI-keyed trajectory (in place; returns the counts)."""
     sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check")]
     import _model_regions as mr
     to_c8 = mr.region_to_capri()
@@ -69,9 +71,16 @@ def main():
     t.setdefault("_provenance", {})["model_keys"] = (
         "model activity aliases and model regions added by tools/build/build_trajectory_model_keys.py "
         "(CAPRI-keyed entries kept)")
-    path.write_text(json.dumps(t, indent=1))
-    print(f"{path.resolve().relative_to(ROOT)}: {added}; retired model keys dropped: {dropped}")
+    added["retired_dropped"] = dropped
+    return added
 
+
+def main():
+    path = Path(sys.argv[1]) if len(sys.argv) > 1 else ROOT / "capri_data" / "trajectories" / "captrd_2030.json"
+    t = json.loads(path.read_text())
+    added = add_model_keys(t)
+    path.write_text(json.dumps(t, indent=1))
+    print(f"{path.resolve().relative_to(ROOT)}: {added}")
 
 if __name__ == "__main__":
     main()

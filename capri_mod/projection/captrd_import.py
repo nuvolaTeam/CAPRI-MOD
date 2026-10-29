@@ -95,10 +95,10 @@ def extract_trajectory(
     """Extract cumulative growth factors and return a trajectory dict.
 
     Factors are aggregated across regions to a per-activity median, which is
-    robust to the outliers a per-cell ratio inevitably produces at small bases.
-    Per-region detail is deliberately not carried into the trajectory: the
-    trajectory schema drives model-wide blocks, and a median keeps the adopted
-    assumption legible and auditable rather than opaque.
+    robust to the outliers a per-cell ratio inevitably produces at small bases;
+    per-region factors are carried as well where the base value is at least 1
+    (the "regional" block, keyed by the first four characters of CAPRI's region
+    code), the median being the fallback elsewhere.
     """
     base, target = str(base_year), str(target_year)
     values: Dict[tuple, Dict[str, float]] = defaultdict(dict)

@@ -9,7 +9,7 @@ The data sourcing registry's log of checks, fixes and decisions (201 entries, mo
 [KNOWN_ISSUES_REGISTRY_LOG.md](KNOWN_ISSUES_REGISTRY_LOG.md), verbatim, with the triage of its open entries against
 the code: they became K92-K96, joined K73, K80, K91, or were closed or historical.
 
-## Open (22)
+## Open (21)
 
 | # | Issue | Status |
 |---|---|---|
@@ -31,12 +31,11 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K86](#k86) | Ammonia housing and storage options without their farm-size cost curves in Denmark, Lithuania and Croatia | open |
 | [K89](#k89) | Failing regional solves take most of IPOPT's time | open |
 | [K90](#k90) | The wheat market's world price is CAPRI's soft-wheat price, not its wheat product's | open |
-| [K91](#k91) | CAPRI's trend projection (captrd_2030.json): no builder calls its extractor | open |
 | [K92](#k92) | Farm-to-Fork changes furthest from JRC121368, besides the milk price | open |
 | [K93](#k93) | CAPRI mitigation options not built; documents disagree on which are in | open |
 | [K97](#k97) | NaN in the crop-diversification row during Green Deal solves | open |
 
-## Resolved (75)
+## Resolved (76)
 
 | # | Issue | Status |
 |---|---|---|
@@ -115,6 +114,7 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K94](#k94) | reconcile_base.py orphan; README's re-basing note points at a removed concordance | fixed |
 | [K95](#k95) | The "12/12 against PMRK" market-price validation is a solver-consistency check | fixed |
 | [K96](#k96) | Documents and one constant still describe removed mechanisms | fixed |
+| [K91](#k91) | CAPRI's trend projection (captrd_2030.json) had no builder | fixed |
 
 ## Details
 
@@ -1137,11 +1137,11 @@ cannot be told from the file.
 
 - **Effect:** the `captrd` trajectory only (not the default runs)
 - **In 9t:** not checked
-- **Status:** **open**: a builder calling `extract_trajectory` on CAPTRD's results (capri_reference/captrd_results/1770,
-  its `series` position) and writing the CAPRI-keyed factors to capri_data/sources, read by
-  build_trajectory_model_keys.py into captrd_2030.json, would make the file reproducible; its factors would differ
-  from the file's where the original slice differed (not known). captrd_import.py's docstring says per-region detail
-  is not carried while its code carries it (to correct with it)
+- **Status:** **fixed** 29 October 2026 (batch 5): tools/build/build_captrd_trajectory.py builds the file from blank
+  from CAPTRD's results of the base-2017 run (capri_reference/captrd_results/1770/series.csv.gz) with
+  `extract_trajectory` and `build_trajectory_model_keys.add_model_keys`; it reproduces the earlier file's growth
+  factors and all 442 entries keyed by the model's regions exactly (so the same source run); only CAPRI-keyed regional
+  entries differ, where the NUTS-2016 model's keys step had overwritten them. captrd_import.py's docstring corrected
 
 <a id="k92"></a>
 ### K92: Farm-to-Fork changes furthest from JRC121368, besides the milk price (K13) (found 29 October 2026, registry migration)
