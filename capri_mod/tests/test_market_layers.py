@@ -261,3 +261,32 @@ def test_eu_fish_and_other_oils_supply_as_capri_prodnq():
     t = read_csv("capri_data/2017/market/eu_market_supply_nq.csv")
     fr = t[(t.ms == "FR000000") & (t.x == "OTHO") & (t.y == "OTHO")].iloc[0]
     assert abs(fr.h * fr.ppri_y / fr.inpe - fr.h_ratio) < 1e-9 and abs(fr.inpe - 1.019 ** 13) < 1e-3
+
+
+def test_feed_bulks_respond_inside_the_market_as_capris_feedblk():
+    """Audit M4: a member state's feed bulk responds to the prices within the market solve, log-linear from the supply
+    models' bulk at the prices they saw (CAPRI's feedBlk_, its constant at the supply models' bulk), the elasticities
+    from the market supply Hessian's FEEDBLK rows over the bulk at base; at the prices the models saw nothing moves,
+    and the switch off keeps the bulks fixed within the solve."""
+    import numpy as np
+    import pandas as pd
+    from capri_mod.data.loaders import load_all_data
+    from capri_mod.market.market_module import MarketModule
+    from capri_mod.settings import override
+    m = MarketModule(load_all_data("capri_data"))
+    fb = m._feed_bulk_params()
+    (ms, b), d = next(((k, v) for k, v in fb["bulks"].items() if k[1] == "FCER"))
+    cc = ms[:2] if ms[:2] != "BL" else "BE"
+    h = pd.DataFrame({"SWHE": [-50.0], "BEEF": [20.0]}, index=["FEEDBLK:FCER"])
+    m.par.supply_hessian = {"ms": {cc: h}}
+    m.seen.feed_bulk_base = {(ms, "FCER"): 1000.0}
+    m.seen.eu_price_seen = pd.Series(1.0, index=m.commodities)
+    f = m.feed_bulk_market_factor({"SWHE": 1.1, "BEEF": 1.0})
+    assert abs(f[(ms, "FCER")] - np.exp(-0.05 * np.log(1.1))) < 1e-12
+    assert abs(m.feed_bulk_market_factor({"SWHE": 1.0, "BEEF": 1.0})[(ms, "FCER")] - 1.0) < 1e-15
+    q0 = m.eu_feed_use({"SWHE": 1.1})
+    q1 = m.eu_feed_use({"SWHE": 1.1}, bulk_factor=f)
+    c0 = next(c for c in d["comm"] if c)
+    assert q1[c0] < q0[c0]
+    with override({"market.feed_bulk_in_market": False}):
+        assert m.feed_bulk_market_factor({"SWHE": 1.1}) == {}

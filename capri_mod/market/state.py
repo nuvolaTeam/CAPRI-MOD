@@ -126,6 +126,8 @@ class MarketSeen:
     yani_state: Any = None
     #: feed bulk use of the supply models relative to base, per (member state, bulk); None: 1
     feed_bulk_index: Any = None
+    #: the supply models' feed bulks at base, kt per (member state, bulk) (the market's bulk demand, audit M4)
+    feed_bulk_base: Any = None
     #: calves' milk feed relative to base, EU (None: 1) and per non-EU region with supply models
     fmil_index: Any = None
     fmil_index_sup: Any = None

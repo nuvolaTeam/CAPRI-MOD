@@ -38,7 +38,13 @@ The supply models buy feed as bulks; the market splits each member state's bulk 
   regional solutions (feeding inside the supply models, `feed_t`) against the base ration × base herds, and passes
   the ratio (`_feed_bulk_index`) to the market; the FMIL index likewise (`_fmil_index`).
 - EU feed use of each product (`MarketModule.eu_feed_use`): q_i = q_i0 × (bulk / bulk0) × (P_B / p_i)^rho at the EU
-  Arm1 price ratios. The feed part of the EU's use of a product is CAPRI's 2030 feed share of use
+  Arm1 price ratios. The bulk responds within the market solve as CAPRI's `feedBlk_` (l. 972-995; audit M4, since 29
+  October 2026, `market.feed_bulk_in_market`): bulk = the supply models' bulk × exp(Σ_y e_y log(r_y / r_seen_y)), r
+  the region's market price ratios and r_seen those the supply models saw (CAPRI's constant re-anchored to the supply
+  models every iteration), e_y the supply models' bulk response measured with the market supply Hessian (its
+  `FEEDBLK:<bulk>` rows per country, CAPRI's `p_feedBlkElas` from `calibrate_supply.gms` l. 521-560) over the bulk at
+  base; in the products' prices, the bulk prices being functions of them (`feedBlkPrice_`); the young-animal and raw
+  milk columns left out. The feed part of the EU's use of a product is CAPRI's 2030 feed share of use
   (`feed_bulks_eu_share.csv`, including processing in the use, so the oilseeds fed whole get their feed share of total
   use, crushing included); it is applied as a correction of the row, so crushing demand already in the row is kept.
   The dairy products' feed use comes from the FMIL bulks ([DAIRY_PROCESSING.md](DAIRY_PROCESSING.md)).

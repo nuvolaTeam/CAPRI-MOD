@@ -22,6 +22,71 @@ from capri_mod.market.state import MarketStateMixin
 class FeedMixin(MarketStateMixin):
     """MarketModule methods for feed demand (the EU feed bulks per member state, the residual feeds FENI and FPRI, non-EU feed demand)."""
 
+    #: CAPRI's feed bulk demand inside the market (arm/market_model.gms feedBlk_, l. 972-995; audit M4): each member
+    #: state's bulks respond to the prices within a market solve, log-linear from the supply models' bulks at the
+    #: prices they saw (the constant re-anchored every iteration, simu_calibration_to_supply.gms l. 259-275), with the
+    #: elasticities measured on the supply models with the market supply Hessian (calibrate_supply.gms l. 521-560).
+    #: false: the bulks fixed at the supply models' within a solve (until 29 October 2026)
+    feed_bulk_in_market = setting("market.feed_bulk_in_market")
+
+    def _feed_bulk_elas(self) -> dict:
+        """{(member state, bulk): {product: elasticity}}: the supply models' bulk use per unit change of the product's
+        price ratio (the market supply Hessian's FEEDBLK rows, per country summed to the member state) over the bulk
+        at base (seen.feed_bulk_base): CAPRI's p_feedBlkElas, here in the products' prices (the bulk prices are
+        functions of them, feedBlkPrice_). The young-animal and raw milk columns left out (registered)."""
+        hs = (self.par.supply_hessian or {}).get("ms") or {}
+        B0 = self.seen.feed_bulk_base or {}
+        ck = (id(hs), id(B0))
+        c_ = getattr(self, "_fblk_elas_cache", None)
+        if c_ is not None and c_[0] == ck:
+            return c_[1]
+        from capri_mod.data.definitions import capri_ms
+        sup_of = getattr(self, "sup_region_of_country", lambda c: None)
+        dB = {}
+        for cc, h in hs.items():
+            if sup_of(cc) is not None:
+                continue
+            ms = capri_ms(str(cc))
+            for x in h.index:
+                if not str(x).startswith("FEEDBLK:"):
+                    continue
+                b = str(x)[8:]
+                d = dB.setdefault((ms, b), {})
+                for y, v in h.loc[x].items():
+                    if str(y).startswith("YANI:") or y in self.NQ_PRICE_AS_SEEN or not float(v):
+                        continue
+                    d[y] = d.get(y, 0.0) + float(v)
+        out = {k: {y: v / float(B0[k]) for y, v in d.items()} for k, d in dB.items() if float(B0.get(k, 0.0)) > 0}
+        self._fblk_elas_cache = (ck, out)
+        return out
+
+    def feed_bulk_market_factor(self, prices: Dict[str, float], region: Optional[str] = None) -> Dict[tuple, float]:
+        """{(member state, bulk): the bulk's change within the market solve}: exp(sum_y e_y log(r_y / r_seen_y)), r the
+        region's price ratios, r_seen those its supply models saw (CAPRI's feedBlk_ with its constant at the supply
+        models' bulk, audit M4); empty with market.feed_bulk_in_market off or without the measured responses."""
+        if not self.feed_bulk_in_market:
+            return {}
+        E = self._feed_bulk_elas()
+        if not E:
+            return {}
+        seen = self.seen.eu_price_seen
+        if isinstance(seen, pd.DataFrame):
+            seen = seen.loc[region] if (region is not None and region in seen.index) else None
+        out = {}
+        for (ms, b), el in E.items():
+            if region is not None and self.eu_region_of_ms(ms) != region:
+                continue
+            s = 0.0
+            for y, e in el.items():
+                r = prices.get(y)
+                if r is None:
+                    continue
+                sv = float(seen.get(y, 1.0)) if seen is not None else 1.0
+                if r > 0 and sv > 0:
+                    s += e * np.log(float(r) / sv)
+            out[(ms, b)] = float(np.exp(s))
+        return out
+
 
     def _feed_bulk_params(self) -> dict:
         """CAPRI's feed bulks of the member states (arm/market_model.gms feedBlkPrice_, feedShareEqu_;
@@ -108,11 +173,13 @@ class FeedMixin(MarketStateMixin):
         rho = d["rho"]
         return float((d["s"] * r ** (1.0 - rho)).sum()) ** (1.0 / (1.0 - rho))
 
-    def eu_feed_use(self, price_ratio: Dict[str, float], region: Optional[str] = None) -> Dict[str, float]:
+    def eu_feed_use(self, price_ratio: Dict[str, float], region: Optional[str] = None,
+                    bulk_factor: Optional[Dict[tuple, float]] = None) -> Dict[str, float]:
         """EU feed use per model commodity (kt) from the member states' bulks at the EU price ratios (CAPRI
         feedShareEqu_): q_i = q_i0 x (B / B0) x (P_B / p_i)^rho with prices relative to the reference; B / B0 from
-        the supply models (seen.feed_bulk_index, 1 before any supply result). region: only the member states of that
-        EU market region (their block's prices)."""
+        the supply models (seen.feed_bulk_index, 1 before any supply result), times the bulk's response within the
+        market solve (bulk_factor, feed_bulk_market_factor: CAPRI's feedBlk_, audit M4). region: only the member
+        states of that EU market region (their block's prices)."""
         fb = self._feed_bulk_params()
         bix = self.seen.feed_bulk_index or {}
         out = {}
@@ -122,7 +189,7 @@ class FeedMixin(MarketStateMixin):
             r = np.array([max(float(price_ratio.get(c, 1.0)), 1e-6) if c else 1.0 for c in d["comm"]])
             rho = d["rho"]
             pb = float((d["s"] * r ** (1.0 - rho)).sum()) ** (1.0 / (1.0 - rho))
-            q = d["q0"] * float(bix.get((ms, b), 1.0)) * (pb / r) ** rho
+            q = d["q0"] * float(bix.get((ms, b), 1.0)) * float((bulk_factor or {}).get((ms, b), 1.0)) * (pb / r) ** rho
             for c, x in zip(d["comm"], q):
                 if c:
                     out[c] = out.get(c, 0.0) + float(x)

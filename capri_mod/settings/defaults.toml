@@ -208,6 +208,10 @@ market_supply_nq = true
 # KNOWN_ISSUES K54-3); false: one own-price constant elasticity per region and product (CAPRI's p_elasSupp of 2017),
 # the form until 29 October 2026
 noneu_supply_nq = true
+# CAPRI's feed bulk demand inside the market (feedBlk_, audit M4): the member states' bulks respond to the prices within a
+# market solve from the supply models' bulks at the prices they saw, with the elasticities measured on the supply models
+# (the market supply Hessian's FEEDBLK rows); false: fixed within a solve (until 29 October 2026). Same fixed point
+feed_bulk_in_market = true
 # price shock of the market supply Hessian (calibrate_supply.gms)
 nq_price_shock = 0.01
 # bilateral market solve: acceleration ("anderson" or "none"), memory, chord step for trade, Newton rounds,

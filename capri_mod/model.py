@@ -1594,6 +1594,18 @@ class CAPRIModel:
                 yn = self._young_animal_net_by_country(res)
                 for g in yani_goods:
                     q_["YANI:" + g] = pd.Series({cc: v.get(g, 0.0) for cc, v in yn.items()}).reindex(q_.index).fillna(0.0)
+            # the supply models' feed bulks per country (kt; CAPRI calibrate_supply.gms l. 521-560: the bulks'
+            # response to the prices, p_feedBlkElas of the market's feedBlk_; audit M4): rows "FEEDBLK:<bulk>"
+            bk = {}
+            for r_, res_ in res.items():
+                cc_ = REGION_TO_COUNTRY.get(r_, r_)
+                for _a, bl_ in (getattr(res_, "feed_t", None) or {}).items():
+                    for b_, t_ in (bl_ or {}).items():
+                        if b_ in self.FEED_BULKS:
+                            bk[(cc_, b_)] = bk.get((cc_, b_), 0.0) + float(t_) / 1000.0
+            for b_ in self.FEED_BULKS:
+                q_["FEEDBLK:" + b_] = pd.Series({cc_: v_ for (cc_, bb_), v_ in bk.items() if bb_ == b_}
+                                                ).reindex(q_.index).fillna(0.0)
             return q_
         q0 = bridged(supply_results)
         skip = bool(_settings().get("market.hessian_skip_unchanged"))
@@ -1629,7 +1641,9 @@ class CAPRIModel:
                             # 26 October 2026 (K75): the NLP form without the lagged fodder band rows
                             ("", "True"))),     # the fodder band rows, removed 27 October 2026
                         # the measurement: every shock from the baseline's state (24 October 2026)
-                        "shocks-from-base")
+                        "shocks-from-base",
+                        # 29 October 2026 (audit M4): the feed bulks' rows recorded as well
+                        "feedblk-rows")
                         # differences to the base re-solved from the same state, regions a shock does not reach not
                         # re-solved (27 October 2026, market.hessian_skip_unchanged; off: the key as before)
                         + (("base-resolved-skip-unchanged", "full-solve-state") if skip else ()))
@@ -2641,6 +2655,9 @@ class CAPRIModel:
             # CAPRI's market splits each member state's bulks into products (feedShareEqu_,
             # MarketModule.eu_feed_use); the market gets each bulk's change against the base
             mm.seen.feed_bulk_index = {k: (v[0] / v[1] if v[1] > 0 else 1.0) for k, v in blk.items()}
+            # the bulks at base (kt): the market's bulk demand (feedBlk_, audit M4) turns the measured responses into
+            # elasticities with them
+            mm.seen.feed_bulk_base = {k: float(v[1]) for k, v in blk.items()}
             # DAIRY PRODUCTS FED (dairy Stage 3): the FMIL block follows the calves' milk feed, as CAPRI's
             # feed block FMIL (SMIP, WMIO, CASE, WHEP, BUTT, CREM, COCM, CHES, FRMI) follows the supply models
             mm.seen.fmil_index = (fmil[0] / fmil[1]) if fmil[1] > 0 else 1.0
