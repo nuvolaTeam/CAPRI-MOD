@@ -91,7 +91,6 @@ _FILE_CATEGORY = {
     "nutrient_coefs_regional.csv": "supply",
     "climate_zones.csv": "environment",
     # JSON parameter files
-    "fao_market_baseline.json": "market",
 }
 _SHARED_FILES = {"trade_flows.csv": "trade_flows_2017.csv"}
 

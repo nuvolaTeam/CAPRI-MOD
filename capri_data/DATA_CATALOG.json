@@ -73,12 +73,6 @@
    "units": "category"
   },
   {
-   "file": "fao_market_baseline.json",
-   "vintage": "2017",
-   "domain": "market",
-   "units": "1000 t"
-  },
-  {
    "file": "dairy_processing_params.json",
    "vintage": "2017",
    "domain": "market",

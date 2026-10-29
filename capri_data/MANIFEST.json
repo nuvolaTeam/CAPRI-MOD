@@ -272,17 +272,6 @@
     ]
    }
   },
-  "fao_market_baseline.json": {
-   "source": "FAO_agg SUA",
-   "vintage": "2017",
-   "units": "1000 t",
-   "domain": "market",
-   "status": "live",
-   "shape": {
-    "entries": 328,
-    "type": "dict"
-   }
-  },
   "livestock_output_coef.csv": {
    "source": "capreg DATA2",
    "vintage": "2017",

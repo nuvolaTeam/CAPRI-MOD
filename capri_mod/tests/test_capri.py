@@ -2019,26 +2019,17 @@ def test_land_bounds_do_not_rewrite_the_base_year(data):
 
 
 def test_world_production_coverage(data):
-    """Most world production must be backed by real data, not a share key.
-
-    World base production was once only 63.2% real by volume; the remainder was
-    spread across non-EU trade regions with a fixed share key and a seeded ±8%
-    noise term. Extending coverage from CAPRI's own FAO_agg SUA raised it to
-    76.6%. This test stops that regressing — and stops the extended file being
-    dropped without anyone noticing.
-    """
+    """Every region's base production is CAPRI's: its FAO_agg base balance (world_market_baseline.json, built by
+    tools/build/build_world_market_baseline.py) covers nearly all of the market's world base production outside the EU
+    (the EU's is its supply models'). Until 29 October 2026 the test counted the cells of an older FAO extract and an
+    extended SUA (fao_market_baseline.json, fao_agg_sua_2017_extended.json), files the market no longer read (removed,
+    KNOWN_ISSUES K102); the residual feeds and the products whose base is CAPRI's market result (bilateral flows) are
+    outside the balance file by construction."""
     import json
-    from pathlib import Path
     from capri_mod.market.market_module import MarketModule
 
-    base = Path(str(DATA_DIR))
-    keys = set()
-    for rel in ("2017/market/fao_market_baseline.json",
-                "sources/fao_agg_2017/fao_agg_sua_2017_extended.json"):
-        f = base / rel
-        if f.exists():
-            keys |= {tuple(k.split("|")) for k in json.load(open(f))}
-
+    wb = json.load(open(DATA_DIR / "2017" / "market" / "world_market_baseline.json"))["balances"]
+    keys = {tuple(k.split("|")) for k, v in wb.items() if float(v.get("production", 0) or 0) > 0}
     mm = MarketModule(data)
     bp = mm.par.base_production
     total = covered = 0.0
@@ -2052,9 +2043,7 @@ def test_world_production_coverage(data):
                 covered += v
     assert total > 0
     share = covered / total * 100.0
-    assert share > 70.0, (
-        f"only {share:.1f}% of world production is backed by real data "
-        "(expected >70% since the FAO_agg extension was wired in)")
+    assert share > 90.0, f"only {share:.1f}% of world base production is in CAPRI's FAO_agg balances"
 
 
 def test_yield_responds_to_price(data):

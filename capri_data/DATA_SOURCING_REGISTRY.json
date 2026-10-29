@@ -150,7 +150,8 @@
    "vintage": "2017",
    "source": "FAO_agg SUA",
    "best_update": "fao_agg_21 or FAOSTAT 2021 (needs milk-code fix)",
-   "priority": "optional"
+   "priority": "optional",
+   "status": "REMOVED (29 October 2026, KNOWN_ISSUES K102: read by no model code and no builder; the market's base is CAPRI's FAO_agg balances, world_market_baseline.json)"
   },
   "fao_processing_splits.json": {
    "status": "ARCHIVED 20 October 2026 (capri_data/archive/): read only for oil yields the code no longer used (KNOWN_ISSUES K54-7); oil and cake come from CAPRI's crushing in the market",

@@ -31,7 +31,7 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K92](#k92) | Farm-to-Fork changes furthest from JRC121368, besides the milk price | open |
 | [K93](#k93) | CAPRI mitigation options not built; documents disagree on which are in | open |
 | [K101](#k101) | Model inputs without a builder (census of a run's reads) | open, in part fixed |
-| [K102](#k102) | Data files that no run and no builder reads (census) | open, in part fixed |
+| [K102](#k102) | Data files that no run and no builder reads (census) | open: sources/ left |
 
 ## Resolved (83)
 
@@ -1428,5 +1428,8 @@ capri_data/2017 and shared/, 46 files are in neither. By kind:
   inputs reads (the project lead's decision, 29 October 2026): 13 ammonia symbols, the cost tables' scalars, three
   mitigation inputs and build_nitrates_directive with its inputs (nvz_p_nvzArea, nvz_p_slopeTypes) and outputs removed;
   p_holdLSU.csv and p_nvzShare_lu.csv given their builder (build_ammonia_tech_inputs with CAPRI's holdingsLSU and
-  nvzShare_LU dumps, byte-identical). Left: fao_market_baseline.json, with its coverage test
+  nvzShare_LU dumps, byte-identical). fao_market_baseline.json and the extended FAO_agg SUA (read only by a coverage
+  test of an older market base) removed, the test now on CAPRI's FAO_agg balances (world_market_baseline.json). Left:
+  the census of capri_data/sources (180 files no run or traced builder reads: raw extracts, many of them the
+  extractors' sources)
 
