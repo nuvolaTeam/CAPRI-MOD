@@ -1,0 +1,59 @@
+code,capri_code,mapping_source
+SWHE,WHEA,tools/build/build_feed_bulks.py COMMODITY
+BARL,BARL,tools/build/build_feed_bulks.py COMMODITY
+CORN,MAIZ,tools/build/build_feed_bulks.py COMMODITY
+RYEM,RYEM,tools/build/build_feed_bulks.py COMMODITY
+OATS,OATS,tools/build/build_feed_bulks.py COMMODITY
+OCER,OCER,tools/build/build_feed_bulks.py COMMODITY
+PARI,RICE,tools/build/build_feed_bulks.py COMMODITY
+RAPE,RAPE,tools/build/build_feed_bulks.py COMMODITY
+SUNF,SUNF,tools/build/build_feed_bulks.py COMMODITY
+SOYA,SOYA,tools/build/build_feed_bulks.py COMMODITY
+SUGR,SUGA,tools/build/build_feed_bulks.py COMMODITY
+POTA,POTA,tools/build/build_feed_bulks.py COMMODITY
+PULS,PULS,tools/build/build_feed_bulks.py COMMODITY
+TOMA,TOMA,tools/build/build_feed_bulks.py COMMODITY
+OVEG,OVEG,tools/build/build_feed_bulks.py COMMODITY
+APPL,APPL,tools/build/build_feed_bulks.py COMMODITY
+OFRU,OFRU,tools/build/build_feed_bulks.py COMMODITY
+CITR,CITR,tools/build/build_feed_bulks.py COMMODITY
+TAGR,TAGR,tools/build/build_feed_bulks.py COMMODITY
+TOBA,TOBA,CAPRI's own code (XX)
+TABO,TABO,tools/build/build_feed_bulks.py COMMODITY
+TEXT,TEXT,tools/build/build_feed_bulks.py COMMODITY
+WINE,TWIN,tools/build/build_feed_bulks.py COMMODITY
+OLIV,OLIO,tools/build/build_feed_bulks.py COMMODITY
+MILK,MILK,CAPRI's own code (XX)
+BUTR,BUTT,tools/build/build_feed_bulks.py COMMODITY
+SKIM,SMIP,tools/build/build_feed_bulks.py COMMODITY
+CHES,CHES,tools/build/build_feed_bulks.py COMMODITY
+WHEY,WHEP,tools/build/build_feed_bulks.py COMMODITY
+FRMI,FRMI,tools/build/build_feed_bulks.py COMMODITY
+CREM,CREM,tools/build/build_feed_bulks.py COMMODITY
+COCM,COCM,tools/build/build_feed_bulks.py COMMODITY
+WMIO,WMIO,tools/build/build_feed_bulks.py COMMODITY
+CASE,CASE,tools/build/build_feed_bulks.py COMMODITY
+BEEF,BEEF,tools/build/build_feed_bulks.py COMMODITY
+PORK,PORK,tools/build/build_feed_bulks.py COMMODITY
+POUL,POUM,tools/build/recalibrate_trade_2017.py COMMODITY_MAP
+SGMT,SGMT,tools/build/recalibrate_trade_2017.py COMMODITY_MAP
+EGGS,EGGS,tools/build/build_feed_bulks.py COMMODITY
+RAPO,RAPO,tools/build/build_feed_bulks.py COMMODITY
+SUNO,SUNO,tools/build/build_feed_bulks.py COMMODITY
+SOYO,SOYO,tools/build/build_feed_bulks.py COMMODITY
+RAPC,RAPC,tools/build/build_feed_bulks.py COMMODITY
+SUNC,SUNC,tools/build/build_feed_bulks.py COMMODITY
+SOYC,SOYC,tools/build/build_feed_bulks.py COMMODITY
+PLMO,PLMO,CAPRI's own code (XX)
+OTHO,OTHO,tools/build/build_feed_bulks.py COMMODITY
+FFIS,FFIS,tools/build/build_feed_bulks.py COMMODITY
+SFIS,SFIS,tools/build/build_feed_bulks.py COMMODITY
+OAQU,OAQU,tools/build/build_feed_bulks.py COMMODITY
+COFF,COFF,CAPRI's own code (XX)
+TEAS,TEAS,CAPRI's own code (XX)
+COCO,COCO,CAPRI's own code (XX)
+BIOE,BIOE,CAPRI's own code (XX)
+BIOD,BIOD,CAPRI's own code (XX)
+DDGS,DDGS,tools/build/build_feed_bulks.py COMMODITY
+FENI,FENI,tools/build/build_feed_bulks.py COMMODITY
+FPRI,FPRI,tools/build/build_feed_bulks.py COMMODITY

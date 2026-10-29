@@ -1,0 +1,45 @@
+code,text
+APPL,Apples  pears and peaches production activity
+BARL,Barley production activity
+CITR,Citrus fruits production activity
+DWHE,Durum wheat production activity
+FALL,Fallow land
+FLOW,Flowers production activity
+FallGr,from grass as biomass production
+GRAE,Gras and grazings production activity extensive
+GRAI,Gras and grazings production activity intensive
+GSET,Set aside obligatory used as grass land
+IHISCR,
+IHISGR,
+ISET,Set aside obligatory idling
+MAIF,Fodder maize production activity
+MAIZ,Grain maize production activity
+NECR,New energy crops
+NURS,Nurseries production activity
+OATS,Oats and summer cereal mixes production activity without triticale
+OCER,Other cereals production activity including triticale
+OCRO,Other crops production activity
+OFAR,Fodder other on arable land production activity
+OFRU,Other fruits production activity
+OIND,Other industrial crops production activity
+OLIV,Olive production activity for the oil industry
+OOIL,Other seed production activities for the oil industry
+OVEG,Other vegetables production activity
+PARI,Paddy rice production activity
+POTA,Potatoes production activity
+PULS,Pulses production activity
+RAPE,Rape production activity
+ROOF,Fodder root crops production activity
+RYEM,Rye and meslin production activity
+SOYA,Soya production activity
+SUGB,Sugar beet production activity
+SUNF,Sunflower production activity
+SWHE,Soft wheat production activity
+TABO,Table olives production activity
+TAGR,Table grapes production activity
+TEXT,Flax and hemp production activity
+TOBA,Tobacco production activity
+TOMA,Tomatoes production activity
+TSET,Set aside obligatory fast growing trees
+TWIN,Wine production activity
+VSET,Set aside voluntary
