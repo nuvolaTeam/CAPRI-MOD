@@ -1383,15 +1383,17 @@ into the file.
 | supply/mineral_n_price.csv | CAPRI's res_17 national UVAG of NITF | built: build_mineral_n_price.py (the file held 2 decimals) |
 | supply/pmp_own_price_elasticities.csv | CAPRI's PELA (estnlp results.gdx), latest year up to 2005 | built: build_pmp_own_price_elasticities.py, same values (1e-14); the year rule is the committed file's (116 pairs from before 2005; CAPRI's slope forecast reads 2004) |
 | market/capri_oilseed_products_baseline.json | CAPRI's FAO_agg p_dataMarket | replaced: only the EU's three cake feed uses were read (the cake index's weights): market/eu_cake_feed_bas.csv, build_eu_cake_feed.py, same values; the JSON removed |
-| supply/capri_own_price_elasticities.csv | CAPRI's p_ElasSupp 'CAL' per member state (results/arm supply_elas_*) | open: the source file is not identified among the exports here; read by the elasticity-calibrated PMP only (not the default) |
-| sources/arm/capri_supply_elas_market_1717.csv, supply_elas_eu_all.json | CAPRI's elas1717defaulta.gdx p_elasSupp (gdxdump) | open: extracts without extractor; supply_elas_eu_all.json gives the EU rows' own-price anticipation (market) |
-| sources/capreg/capreg_national_prices.csv | CAPRI's national prices (extract) | open: extract without extractor |
+| supply/capri_own_price_elasticities.csv | CAPRI's p_ElasSupp 'CAL' of its 2020 supply-model calibration per member state (supply_elas_2_1720<MS>defaulta.txt and the REMAINI_NG zip) | built: build_capri_own_price_elasticities.py, same values (columns in the files' order of appearance); read by the elasticity-calibrated PMP only |
+| sources/arm/capri_supply_elas_market_1717.csv, supply_elas_eu_all.json | CAPRI's elas1717defaulta.gdx p_elasSupp (gdxdump p_elasSupp.txt) | built: build_capri_supply_elas_market.py, both byte-identical. Open for decision: the JSON (the EU rows' own-price anticipation) is the median over CAPRI's EU28, the UK included (the model's EU is 27), keyed by CAPRI's code for OLIO, RICE, SUGA, TWIN, which the market never looks up, and carries INPE |
+| sources/capreg/capreg_national_prices.csv | CAPRI's res_17 national MPRI | built: build_capreg_national_prices.py, same values; adds MAIZ, OAR1 and the model's CORN (the 17 regions without a regional maize price grow none), drops COTT and OFIB (copies of TEXT under old codes, read by nothing) |
 | shared/model_parameters.csv | each row with its CAPRI or literature source | open: a parameter table by construction; its rows to be checked one by one |
-| shared/capri_member_state_codes.csv | CAPRI's sets.gms NUTS0 | open: a code list, to be written by build_code_lists.py |
+| shared/capri_member_state_codes.csv | CAPRI's sets.gms NUTS0 codes and the NUTS prefixes' aliases (BE, LU -> BL; IE -> IR; GR -> EL; GB -> UK) | kept as a declared code map, each row with its source: the aliases are a convention between NUTS and CAPRI, not in CAPRI's sets |
 
 - **Effect:** reproducibility (no result changes from the builders added: the values are the files'; small rounding
   gains); K100's fallow mineral N
 - **In 9t:** –
-- **Status:** open, in part fixed 29 October 2026 (batch 6): seven files built, one replaced; five left as above. The
-  census to be repeated on the gate runs' manifests (a full EU run reads files a one-region run may not)
+- **Status:** open, in part fixed 29 October 2026 (batch 6): eleven files built, one replaced, the member-state code map
+  kept as declared; left: model_parameters.csv (its rows to be checked one by one) and the decision on
+  supply_elas_eu_all.json's member states and keys. The census to be repeated on the gate runs' manifests (a full EU run
+  reads files a one-region run may not)
 
