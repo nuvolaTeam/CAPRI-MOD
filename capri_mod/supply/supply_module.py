@@ -1629,6 +1629,7 @@ class RegionalSupplyModel:
         last attempt, _nlp_accept_last, IPOPT's last point is returned and recorded in _nlp_fallback_log, the run's
         metadata["nlp_fallback"])."""
         self._n_solves = int(getattr(self, "_n_solves", 0) or 0) + 1
+        self.__dict__.pop("_nlp_n_target_cause", None)
         self._wc_solved = None; self._cover_solved = None
         self._yani_dnet = None
         from capri_mod.supply.capri_regional_nlp import CapriRegionalNLP
@@ -1920,6 +1921,26 @@ class RegionalSupplyModel:
         _order = ("duals", "caps")
         # a kept exemption that no longer suffices is extended (the next group), not dropped
         _todo = (_order[_order.index(_keep[1]) + 1:] or ("caps",)) if _keep is not None else _order
+
+        def _try(sp_):
+            try:
+                nlp_ = CapriRegionalNLP(sp_)
+                return nlp_, _nsolve(nlp_, nlp_.start(np.asarray(x_start, float)))
+            except Exception:
+                return None, None
+        if (not _ok(res) and _fp is not None and _todo and getattr(self, "_nlp_try_n_relax", False)
+                and _km != "apply"):
+            # K89: with a tiered N target in force, which constraint makes the problem infeasible: solved once without
+            # the N-surplus row (CAPRI SURTOT_REST_ / e_SURTOTHa). Feasible without it: the target is the cause, not the
+            # mineral caps, so no cap is exempted here and the caller tries JRC121368's relaxed target (where the caps
+            # still bind there, its own solve searches the exemptions). Before, the exemption search ran first: in
+            # NL320000 (Farm-to-Fork) 30 cold solves, all failing, before the relaxed target solved
+            _np0 = spec0.get("npk") or {}
+            if _np0.get("n_rows"):
+                _, res_n = _try(dict(spec0, npk=dict(_np0, n_rows=[], n_rows_rhs_add={})))
+                if res_n is not None and _ok(res_n):
+                    _todo = ()
+                    self._nlp_n_target_cause = True
         if not _ok(res) and _fp is not None and _todo:
             # the Green Deal's mineral caps (organic target, mineRedu) as CAPRI's regulations can leave a crop group's
             # need out of reach (e.g. a permanent-crop group with a high organic target, its mineral N cut by the
@@ -1928,12 +1949,6 @@ class RegionalSupplyModel:
             # first the duals widened to +-1000; then the groups exempted one at a time, those whose need is out of
             # reach first (_nlp_cap_shortfall), at fertiliser.exempt_cap_factor x baseline, with CAPRI's duals and
             # then the widened ones; recorded as nlp_relaxed ("caps:GROUP+...")
-            def _try(sp_):
-                try:
-                    nlp_ = CapriRegionalNLP(sp_)
-                    return nlp_, _nsolve(nlp_, nlp_.start(np.asarray(x_start, float)))
-                except Exception:
-                    return None, None
             for kind_ in _todo:
                 found = None
                 if kind_ == "duals":
@@ -5205,13 +5220,16 @@ class RegionalSupplyModel:
                     self._nlp_try_n_relax = False
                 if _yc is None and getattr(self, "_nlp_fb_last", False) == "n_target":
                     _st0 = getattr(self, "_nlp_failed", None) or "NLP build failed"
+                    _cause = bool(self.__dict__.pop("_nlp_n_target_cause", False))
                     y_f, ok_f, Aa_r, ba_r = self._relax_n_target(Qa, ca, Aa, ba, ya0)
                     if getattr(self, "_nlp_fallback_log", None) is None:
                         self._nlp_fallback_log = []
                     if ok_f:
                         _yc, Aa, ba = y_f, Aa_r, ba_r
                         self._nlp_fallback_log.append(f"{_st0} at the tiered N target -> CAPRI's form at "
-                                                      f"JRC121368's relaxed target (36%)")
+                                                      f"JRC121368's relaxed target (36%)"
+                                                      + (" (feasible without the target: no cap exempted first, K89)"
+                                                         if _cause else ""))
                     else:
                         self._n_target_relaxed = False
                         self._n_relax_sticky = None

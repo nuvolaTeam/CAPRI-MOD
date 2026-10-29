@@ -14,21 +14,21 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | # | Issue | Status |
 |---|---|---|
 | [K10](#k10) | Sub-sets of regions do not converge | note |
-| [K13](#k13) | Farm-to-Fork milk price | open |
-| [K29](#k29) | NL11 and NL13 meet the tiered N target only at corner solutions (Farm-to-Fork) | open |
+| [K13](#k13) | Farm-to-Fork milk price | open: waiting for CAPRI's scenario results |
+| [K29](#k29) | NL11 and NL13 meet the tiered N target only at corner solutions (Farm-to-Fork) | open: waiting for CAPRI's scenario results |
 | [K47](#k47) | The cattle chain's equilibrium is sensitive to changes outside it | open |
 | [K48](#k48) | Young-animal prices against CAPRI's own market run | open |
 | [K65](#k65) | Cattle member splits and per-sex young-animal markets do not converge yet | open |
-| [K66](#k66) | Farmland expands under the per-hectare N target more than in CAPRI | open |
+| [K66](#k66) | Farmland expands under the per-hectare N target more than in CAPRI | open: waiting for CAPRI's scenario results |
 | [K73](#k73) | Market: differences from CAPRI that no register listed | open |
 | [K74](#k74) | Supply: differences from CAPRI that no register listed | open |
 | [K77](#k77) | CAPRI's fertiliser-option curvature (S5) leaves the baseline's base shares | open |
-| [K78](#k78) | Histosol fallowing under Farm-to-Fork far above JRC121368's figure | open |
+| [K78](#k78) | Histosol fallowing under Farm-to-Fork far above JRC121368's figure | open: waiting for CAPRI's scenario results |
 | [K79](#k79) | Member-state production that keeps moving between iterations | open |
 | [K80](#k80) | The same run repeated from a warm start differs by up to 3e-5 relative in small cereal activities | open |
 | [K83](#k83) | A one-region Farm-to-Fork run's market diverges in its second step | open |
 | [K89](#k89) | Failing regional solves take most of IPOPT's time | open |
-| [K92](#k92) | Farm-to-Fork changes furthest from JRC121368, besides the milk price | open |
+| [K92](#k92) | Farm-to-Fork changes furthest from JRC121368, besides the milk price | open: waiting for CAPRI's scenario results |
 | [K93](#k93) | CAPRI mitigation options not built; documents disagree on which are in | open |
 | [K101](#k101) | Model inputs without a builder (census of a run's reads) | open, in part fixed |
 
@@ -238,7 +238,7 @@ between ~0 and ~335 EUR/kg N (two branches).
 
 - **Effect:** Farm-to-Fork milk and dairy prices; the largest single gap to JRC121368
 - **In 9t:** yes
-- **Status:** open: needs CAPRI's Farm-to-Fork dairy market results; model unchanged (no calibration to the figure). 18 October 2026: with CAPRI's GL food demand and processing functions +40.3% (r19). 22 October 2026: tools/gams/export_capmod_results.gms dumps every CAPMOD 2030 result file of a CAPRI installation (except the reference already in hand) for the project lead to run, if the Farm-to-Fork or Green Deal scenarios were run there
+- **Status:** **open, waiting for CAPRI's scenario results** (the project lead's decision, 29 October 2026: kept open with its reference). Needed: CAPRI's Farm-to-Fork 2030 market results for the dairy chain: per member state and EU the raw milk delivery and price, the fat and protein values, production, processing, food use, trade and Arm1 prices of butter, SMP, cheese, WMP, fresh milk products and whey (DATA rows PROD, PROC, HCON, IMPT, EXPT, PPRI, ARM1P of the CAPMOD result file); to be exported with tools/gams/export_capmod_results.gms (run on a CAPRI installation where the scenario was solved); the project lead's installation has none of them so far. Before: open: needs CAPRI's Farm-to-Fork dairy market results; model unchanged (no calibration to the figure). 18 October 2026: with CAPRI's GL food demand and processing functions +40.3% (r19). 22 October 2026: tools/gams/export_capmod_results.gms dumps every CAPMOD 2030 result file of a CAPRI installation (except the reference already in hand) for the project lead to run, if the Farm-to-Fork or Green Deal scenarios were run there
 
 <a id="k14"></a>
 ### K14: Clarabel declares infeasibility that is not there
@@ -382,7 +382,7 @@ Both are feasible at JRC121368's tiered target (a 69-70% cut of CAPRI's baseline
 
 - **Effect:** Farm-to-Fork: Dutch and Irish livestock and crop mix; EU aggregates little (NL11 and NL13 hold 0.2% of EU farmland, with IE05 1.6%)
 - **In 9t:** yes
-- **Status:** **open**: options (a) CAPRI's regional Farm-to-Fork results for NL11, NL13, IE05 to compare; (b) treat a region whose solution needs activities at CAPRI's bounds as infeasible and relax it (a departure: CAPRI's criterion is the solver's infeasibility)
+- **Status:** **open, waiting for CAPRI's scenario results** (the project lead's decision, 29 October 2026: kept open with its reference). Needed: CAPRI's Farm-to-Fork 2030 regional results for NL11, NL13 and IE05: activity levels, the N surplus (SURTOT) and whether CAPRI's solve there was optimal (p_INFES); to be exported with tools/gams/export_capmod_results.gms (run on a CAPRI installation where the scenario was solved); the project lead's installation has none of them so far. Before: **open**: options (a) CAPRI's regional Farm-to-Fork results for NL11, NL13, IE05 to compare; (b) treat a region whose solution needs activities at CAPRI's bounds as infeasible and relax it (a departure: CAPRI's criterion is the solver's infeasibility)
 
 <a id="k30"></a>
 ### K30: Supply elasticities of permanent crops, vegetables, tobacco, textile crops and table olives were one EU-wide value per crop, while CAPRI's per-country values were in the data unused
@@ -722,7 +722,7 @@ The Farm-to-Fork N target is per hectare of current farmland, as CAPRI's e_SURTO
 
 - **Effect:** land use, regional N surplus and herds in the regions concerned; EU UAA
 - **In 9t:** –
-- **Status:** **open**. CAPRI's regional Farm-to-Fork results do not exist on the project lead's installation (23 October 2026), so the comparison planned here cannot be made. Checked instead (r97): the expansion is broad, not from the capped or extreme regions (regions with N prices of 1-10 EUR/kg give +3.1 of the +6.0 points of the land types' farmland, regions above 100 EUR/kg 0.7); forest falls 16.7 Mha (about 10 to farmland, 7 to other land, through the cross terms of CAPRI's own 2030 land-type matrix); the land market is CAPRI's Trustee_land form with ARTIF fixed and the total-land row an inequality (both would make it expand less). Next: the share of the landscape-feature floor and of the N target, by runs without each (tools/run/run_f2f_2030.py --targets lndscpTarg=0 / surpRedu=0)
+- **Status:** **open, waiting for CAPRI's scenario results** (the project lead's decision, 29 October 2026: kept open with its reference). Needed: CAPRI's Farm-to-Fork 2030 regional results for land use: per NUTS2 unit the land types (ARAC, GRAS, FORE, OLND, the land market's p_aLU / v_landTypes levels) and the land rents; to be exported with tools/gams/export_capmod_results.gms (run on a CAPRI installation where the scenario was solved); the project lead's installation has none of them so far. Before: **open**. CAPRI's regional Farm-to-Fork results do not exist on the project lead's installation (23 October 2026), so the comparison planned here cannot be made. Checked instead (r97): the expansion is broad, not from the capped or extreme regions (regions with N prices of 1-10 EUR/kg give +3.1 of the +6.0 points of the land types' farmland, regions above 100 EUR/kg 0.7); forest falls 16.7 Mha (about 10 to farmland, 7 to other land, through the cross terms of CAPRI's own 2030 land-type matrix); the land market is CAPRI's Trustee_land form with ARTIF fixed and the total-land row an inequality (both would make it expand less). Next: the share of the landscape-feature floor and of the N target, by runs without each (tools/run/run_f2f_2030.py --targets lndscpTarg=0 / surpRedu=0)
 
 <a id="k67"></a>
 ### K67: Breeding options without CAPRI's maximum share (found 23 October 2026)
@@ -854,7 +854,7 @@ Run r129: 52.7% of the histosol area fallowed (r123: 21.7%; JRC121368 Table 17: 
   CAPRI star 3.0 run with the landscape floor (lndscpTarg > 0) to compare the share fallowed under it.
 - **Effect:** Farm-to-Fork land use, histosol N2O and CO2, set-aside premiums
 - **In 9t:** –
-- **Status:** **open** (needs CAPRI's Green Deal or Farm-to-Fork result with the floor)
+- **Status:** **open, waiting for CAPRI's scenario results** (the project lead's decision, 29 October 2026: kept open with its reference). Needed: CAPRI's Farm-to-Fork or Green Deal 2030 regional results with the landscape floor: per NUTS2 unit the histosol fallowing (the FALLOW technology's v_Miti levels) and the set-aside land; to be exported with tools/gams/export_capmod_results.gms (run on a CAPRI installation where the scenario was solved); the project lead's installation has none of them so far. Before: **open** (needs CAPRI's Green Deal or Farm-to-Fork result with the floor)
 
 <a id="k79"></a>
 ### K79: Member-state production that keeps moving between iterations (26 October 2026)
@@ -1175,7 +1175,7 @@ where the N target barely binds) were made on structures since replaced and are 
 
 - **Effect:** Farm-to-Fork meat and crop price levels, the dairy herd, poultry, manure N2O (README "Not sound for")
 - **In 9t:** –
-- **Status:** **open**. The current reference run r182 (29 October 2026; tools/check/compare_runs.py --capri) gives
+- **Status:** **open, waiting for CAPRI's scenario results** (the project lead's decision, 29 October 2026: kept open with its reference). Needed: CAPRI's Farm-to-Fork 2030 market and supply results behind the indicators: per member state and EU the prices (PPRI, ARM1P) of pork, poultry, cereals, oilseeds, vegetables and permanent crops, the herds (dairy cows, poultry), net trade of pork and poultry, and manure N2O and ammonia by source; to be exported with tools/gams/export_capmod_results.gms (run on a CAPRI installation where the scenario was solved); the project lead's installation has none of them so far. Before: **open**. The current reference run r182 (29 October 2026; tools/check/compare_runs.py --capri) gives
   the same picture: pork price +18.7% (CAPRI +43), milk +21.7% (+1.5, K13), poultry price +15.7% (+18), cereal +10.7%
   (+8), oilseed +14.4% (+11), vegetables and permanent crops +12.4% (+15); dairy cows -3.5% (-10), poultry -12.2%
   (-16.5); manure N2O -18.3% (-3.2), ammonia -37.7% (-33), GHG -18.9% (-14.8); mean absolute deviation over the 24
