@@ -304,3 +304,23 @@ if __name__ == "__main__":
     dest4 = _ROOT / "capri_data" / "2017" / "supply" / "livestock_output_value_coef.csv"
     tou.to_csv(dest4)
     print(f"wrote {dest4} — {tou.notna().sum().sum()} coefficients (1000 EUR per 1000 head)")
+    # Manure N, final product value and purchased feed per head, the same way (LEVL x item / model heads). Written by
+    # build_shg_split.py's coefficient step until 29 October 2026 (its only writer; the one-time sheep-and-goat split
+    # was retired once a rebuild without it reproduced every file): one writer per file
+    # (docs/design/DATA_PIPELINE_DOIT.md)
+    man = build(src, "MANN")
+    dest5 = _ROOT / "capri_data" / "2017" / "environment" / "livestock_manure_n_coef.csv"
+    man.to_csv(dest5)
+    print(f"wrote {dest5} — {man.notna().sum().sum()} coefficients (t N per 1000 head)")
+    fin = build(src, "FINAL_VALUE")
+    dest6 = _ROOT / "capri_data" / "2017" / "supply" / "livestock_product_value_coef.csv"
+    fin.to_csv(dest6)
+    print(f"wrote {dest6} — {fin.notna().sum().sum()} coefficients (1000 EUR per 1000 head)")
+    import pandas as _pd
+    feed = []
+    for item, suf in (("FCER", "cereals"), ("FPRO", "protein"), ("FENE", "energy")):
+        t = build(src, item) / 1000.0
+        feed.append(t.rename(columns=lambda c, s=suf: f"{c}_{s}"))
+    dest7 = _ROOT / "capri_data" / "2017" / "feed" / "livestock_feed_coef.csv"
+    _pd.concat(feed, axis=1).to_csv(dest7)
+    print(f"wrote {dest7} — purchased feed per head (FCER, FPRO, FENE)")

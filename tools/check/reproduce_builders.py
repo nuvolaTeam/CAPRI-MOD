@@ -101,7 +101,6 @@ INVOCATIONS: list[tuple[str, list[str], list[Path]]] = [
     ("build_trajectory_model_keys", [], []),
     ("build_winter_cover_option", [], []),
     ("build_manure_n2o", [], [D17]),
-    ("build_shg_split", [], [D17]),
     ("build_capri_level_ratio", [], [D17]),
     ("build_livestock_output_coef", [str(D17)], [D17]),
     ("build_livestock_premium_coef", [str(D17)], [D17]),
