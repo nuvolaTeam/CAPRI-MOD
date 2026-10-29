@@ -5,7 +5,7 @@ own time series instead of CAPTRD's prepared data. The parity reference is CAPTR
 (p_result(..., "p_data"), written by define_stats_and_supports.gms l. 138-150 after prep_data_for_estimation.gms;
 capri_reference/captrd_results/<run>/P_Data.csv.gz).
 
-p_data is held long (region, col, row, t, value), t a calendar year as text. GAMS semantics kept:
+p_data is held long (region, col, row, t, value), t a calendar year as text or BASM. GAMS semantics kept:
   - a zero is no record (an assignment of 0 deletes), and a $-condition on a value is true where the value is nonzero;
   - EPS records are not loaded (EPS is zero in arithmetic and, as treated here, in conditions; the reference files mark
     them in their eps column and the parity check leaves them out);
@@ -16,21 +16,23 @@ p_data is held long (region, col, row, t, value), t a calendar year as text. GAM
 Stages (each a function, with the GAMS lines it ports):
   load               captrd.gms l. 418-478, 504   the CAPREG series of the regions in estimation, COLS_LOAD x ROWS_LOAD
   load_fixes         captrd.gms l. 509-517        GROF of the secondary products to 0; land uses rescaled to ARTO
-  check_and_cor      check_and_cor_capreg.gms     EPS sugar quotas (not loaded); no biofuel production in Norway
+  load_basm          captrd.gms l. 528-580        CAPREG's base-year data (DATA2) as BASM
+  check_and_cor      check_and_cor_capreg.gms     EPS sugar quotas (not loaded); no biofuel in Norway; ARTIF of BASM
   delete_unestimated captrd.gms l. 833-839        series not estimated deleted
   delete_early_years captrd.gms l. 841-850        EU_EAST and Germany before 1992, BUR and WBA before 1995
   fill_uvad          captrd.gms l. 852-860        UVAD averaged over the market aggregates; Portugal's for EU_EAST/BUR
   clean_regions      captrd.gms l. 862-888        regions never estimated; the NUTS 2 rows reduced
-  labour_household   captrd.gms l. 897            LABH = LABO - LABN
-The base-year data (BASM, l. 520-580), the COCO nowcasts (load_coco1_data.gms), the policy data (captrd_policy.gms),
-the labour agelines and prep_data_for_estimation.gms follow as they are ported (docs/design/CAPTRD_MOD.md section 12.2).
+  labour_household   captrd.gms l. 897-898        LABH = LABO - LABN
+  prep_for_estimation prep_data_for_estimation.gms l. 15-162
+The COCO nowcasts (load_coco1_data.gms, l. 715), the policy data (captrd_policy.gms) and the labour agelines follow as
+they are ported (docs/design/CAPTRD_MOD.md section 12.2).
 fill_uvad needs the UVAD of every country, so prepare() runs the country files in two passes.
 """
 from __future__ import annotations
 
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Dict, Iterable, List, Set, Tuple
+from typing import Dict, Iterable, List, Optional, Set, Tuple
 
 import pandas as pd
 
@@ -74,6 +76,8 @@ class CaptrdSets:
     seco: Set[str] = field(default_factory=set)
     o: Set[str] = field(default_factory=set)
     feed: Set[str] = field(default_factory=set)
+    aact: Set[str] = field(default_factory=set)
+    oyani: Set[str] = field(default_factory=set)
     mrkbale: Set[str] = field(default_factory=set)
     mrkbalee: Set[str] = field(default_factory=set)
     dompos: Set[str] = field(default_factory=set)
@@ -111,7 +115,7 @@ def read_sets(path: Path = SETS_DIR) -> CaptrdSets:
     names1 = ["urbannuts", "srnuts2", "s_colsest", "s_rowsest", "cols_load", "rows_load", "reqsc", "secom",
               "landusearto", "quotas", "bio_cols", "biorepcols", "seco_biof", "mpact", "maact", "iyani", "fix_yai",
               "rmaggsup", "ncnc", "fout", "oyani_rows", "mcact", "cact", "seco", "o", "feed", "mrkbale", "mrkbalee",
-              "dompos", "breedact", "meat", "grpr", "grpc"]
+              "dompos", "breedact", "meat", "grpr", "grpc", "aact", "oyani"]
     names2 = ["map_rr", "pact_to_io", "pact_to_i", "rms_to_rm", "pact_to_o", "pact_to_y", "cropc_to_g", "rows_to_g"]
     return CaptrdSets(ms=one("ms"), **{n: two(n) for n in names2}, **{n: set(one(n)) for n in names1})
 
@@ -162,18 +166,67 @@ def load_fixes(p: pd.DataFrame, sets: CaptrdSets) -> pd.DataFrame:
     return _assign(p, lu)
 
 
-def check_and_cor(p: pd.DataFrame, sets: CaptrdSets) -> pd.DataFrame:
-    """check_and_cor_capreg.gms l. 27-28: the EPS sugar quotas set to 0 (EPS is not loaded: nothing left to do); l. 32-33:
-    Norway produces no biofuel (BIO_COLS and bioRepCols on SECO_BIOF to 0). The ARTIF correction of l. 36-39 concerns
-    BASM (the base-year stage)."""
+def load_basm(p: pd.DataFrame, data2: pd.DataFrame, sets: CaptrdSets) -> pd.DataFrame:
+    """captrd.gms l. 549-580: CAPREG's base-year data DATA2(., ., ., "Y") as BASM.
+
+    - every S_ColsEst (with HOLD) or REQSC column and S_RowsEst (with LABT) row of the regions in estimation, l. 552-559;
+    - the check that every region in estimation has UAAR (but the urban regions) and ARTO, l. 565-568 (here: the regions
+      of the file);
+    - GROF of the secondary products to 0; N_EXPT and SETR of the S_ColsEst; STCM of the young animals; EDAYS, and
+      DRMN and DRMX times DAYS, of the animals (AACT), l. 572-579.
+    data2: region, col, row, t (= Y), value[, eps]."""
+    d = data2[data2["region"].isin(sets.rest)]
+    if "eps" in d.columns:
+        d = d[d["eps"] == 0]
+    d = d[d["value"] != 0]
+    v = d.set_index(["region", "col", "row"])["value"]
+    cols = sets.s_colsest | {"HOLD"} | sets.reqsc
+    rows = sets.s_rowsest | {"LABT"}
+    basm = d[d["col"].isin(cols) & d["row"].isin(rows)][["region", "col", "row", "value"]]
+    regions = sorted(set(d["region"]))
+    have = set(zip(basm["region"], basm["col"], basm["row"]))
+    empty = [r for r in regions if ((r, "UAAR", "LEVL") not in have and r not in sets.urbannuts)
+             or (r, "ARTO", "LEVL") not in have]
+    if empty:
+        raise ValueError(f"missing base year data for agricultural or total area: {empty} (captrd.gms l. 565-568)")
+    basm = basm[~((basm["col"] == "GROF") & basm["row"].isin(sets.seco))]
+    extra = d[(d["col"].isin(sets.s_colsest) & d["row"].isin({"N_EXPT", "SETR"}))
+              | ((d["col"] == "STCM") & d["row"].isin(sets.oyani))
+              | (d["col"].isin(sets.aact) & (d["row"] == "EDAYS"))][["region", "col", "row", "value"]]
+    days = d[d["col"].isin(sets.aact) & (d["row"] == "DAYS")].set_index(["region", "col"])["value"]
+    dr = d[d["col"].isin(sets.aact) & d["row"].isin({"DRMN", "DRMX"})].copy()
+    dr["value"] = dr["value"] * [days.get((r, c), 0.0) for r, c in zip(dr["region"], dr["col"])]
+    out = pd.concat([basm, extra, dr[["region", "col", "row", "value"]]], ignore_index=True)
+    out = out.drop_duplicates(["region", "col", "row"], keep="last")
+    out["t"] = "BASM"
+    del v
+    p = p[p["t"] != "BASM"]
+    return pd.concat([p, out[KEYS + ["value"]][out["value"] != 0]], ignore_index=True)
+
+
+def check_and_cor(p: pd.DataFrame, sets: CaptrdSets, msincl: Optional[Iterable[str]] = None) -> pd.DataFrame:
+    """check_and_cor_capreg.gms, on the years and BASM: l. 27-28, the EPS sugar quotas set to 0 (EPS is not loaded:
+    nothing left to do); l. 32-33, Norway produces no biofuel (BIO_COLS and bioRepCols on SECO_BIOF to 0); l. 35-39,
+    ARTIF.LEVL of BASM of each country in the run (MSINCL, default every MS) is the sum over its NUTS 2 and urban
+    regions (MAP_RR; a country without NUTS 2 regions maps to itself)."""
     m = (p["region"] == "NO000000") & p["col"].isin(sets.bio_cols | sets.biorepcols) & p["row"].isin(sets.seco_biof)
-    return p[~m].reset_index(drop=True)
+    p = p[~m]
+    incl = set(sets.ms if msincl is None else msincl)
+    sub = {(a, r) for a, r in sets.map_rr if a in incl and r in sets.nt2ext}
+    art = p[(p["col"] == "ARTIF") & (p["row"] == "LEVL") & (p["t"] == "BASM")].set_index("region")["value"]
+    here = set(p["region"])
+    new = []
+    for c in sorted(incl & here):
+        new.append((c, "ARTIF", "LEVL", "BASM", float(sum(art.get(r, 0.0) for a, r in sub if a == c))))
+    if not new:
+        return p.reset_index(drop=True)
+    return _assign(p, pd.DataFrame(new, columns=KEYS + ["value"]))
 
 
 def delete_unestimated(p: pd.DataFrame, sets: CaptrdSets) -> pd.DataFrame:
     """captrd.gms l. 833-839: the years of every series outside S_ColsEst + REQSC, S_RowsEst or Rest deleted."""
     m = p["col"].isin(sets.s_colsest | sets.reqsc) & p["row"].isin(sets.s_rowsest) & p["region"].isin(sets.rest)
-    return p[m].reset_index(drop=True)
+    return p[m | _year(p["t"]).isna()].reset_index(drop=True)
 
 
 def delete_early_years(p: pd.DataFrame, sets: CaptrdSets) -> pd.DataFrame:
@@ -251,23 +304,25 @@ def clean_regions(p: pd.DataFrame, sets: CaptrdSets, expost: Iterable[int]) -> p
     ms = set(sets.ms)
     exp = {str(int(t)) for t in expost}
     rdel = {r for r in sets.nt2ext if not any((m, r) in sets.map_rr for m in ms)}
-    p = p[~(p["region"].isin(rdel) & p["t"].isin(exp))]
+    p = p[~(p["region"].isin(rdel) & (p["t"].isin(exp) | (p["t"] == "BASM")))]
+    yrs = _year(p["t"]).notna()
     if sum(1 for m in ms if m in sets.srnuts2) == 0:              # the GAMS condition, should the sets change
         keep = (p["col"].isin(sets.mpact | sets.landusearto | {"GROF", "ARTO"}) | ~p["region"].isin(sets.nt2ext)
-                | p["region"].isin(ms))
+                | p["region"].isin(ms) | ~yrs)
         p = p[keep]
-    nt2 = p["region"].isin(sets.srnuts2) & ~p["region"].isin(ms)
+    yrs = _year(p["t"]).notna()
+    nt2 = p["region"].isin(sets.srnuts2) & ~p["region"].isin(ms) & yrs
     act = p["col"].isin(sets.mpact)
     io = pd.Series([(c, r) in sets.pact_to_io for c, r in zip(p["col"], p["row"])], index=p.index, dtype=bool)
     p = p[~(nt2 & act & ~io & (p["row"] != "LEVL"))]
     takers = {i for a, i in sets.pact_to_i if i in sets.iyani and a in sets.maact and a not in sets.fix_yai}
-    nt2 = p["region"].isin(sets.srnuts2) & ~p["region"].isin(ms)
+    nt2 = p["region"].isin(sets.srnuts2) & ~p["region"].isin(ms) & _year(p["t"]).notna()
     yani = p["row"].isin(sets.iyani - takers) & (p["col"].isin(sets.maact) | (p["col"] == "GROF"))
     return p[~(nt2 & yani)].reset_index(drop=True)
 
 
 def labour_household(p: pd.DataFrame) -> pd.DataFrame:
-    """captrd.gms l. 897: p_data(Rest, "GROF", "LABH", YEARS) = LABO - LABN (every year; a zero deletes)."""
+    """captrd.gms l. 897-898: p_data(Rest, "GROF", "LABH", YEARS and BASM) = LABO - LABN (a zero deletes)."""
     lab = p[(p["col"] == "GROF") & p["row"].isin(["LABO", "LABN"])]
     old = (p["col"] == "GROF") & (p["row"] == "LABH")
     if lab.empty:
@@ -288,9 +343,11 @@ def read_series(path: Path, sets: CaptrdSets, years: Iterable[int], chunk: int =
     return pd.concat(parts, ignore_index=True) if parts else pd.DataFrame(columns=KEYS + ["value"])
 
 
-def stage_a(series: pd.DataFrame, sets: CaptrdSets) -> pd.DataFrame:
-    """The stages up to the deletions, on one country's file as loaded."""
+def stage_a(series: pd.DataFrame, sets: CaptrdSets, data2: Optional[pd.DataFrame] = None) -> pd.DataFrame:
+    """The stages up to the deletions, on one country's files as loaded (time series; base year, if given)."""
     p = load_fixes(series, sets)
+    if data2 is not None:
+        p = load_basm(p, data2, sets)
     p = check_and_cor(p, sets)
     p = delete_unestimated(p, sets)
     return delete_early_years(p, sets)

@@ -12,6 +12,11 @@ Records the stages not yet ported change, excluded by rule (docs/design/CAPTRD_M
   - the COCO nowcasts and biofuel data (load_coco1_data.gms, from coco2_output.gdx): the biofuel columns and rows,
     the fuels, and isoglucose (HFCS) in the last CAPREG year, which COCO revises;
   - LU.LEVL (prep_data_for_estimation.gms l. 160-162 needs CAPRI's p_LUUnits, dat/policy/livestock_units.gms).
+For the base year (BASM, compared with CAPTRD's BASM position, which carries p_data's BASM to every ex-ante year,
+define_stats_and_supports.gms l. 55-57), further:
+  - the animal requirements (REQST rows of the animals), which prep_requirement_estimation.gms converts;
+  - the labour rows LABF and LABP of the activities (captrd.gms l. 1265-1290 and the labour agelines);
+  - DOMM of the products with biofuel use (DOMM sums BIOF, which the COCO stage changes).
 """
 from __future__ import annotations
 
@@ -24,6 +29,7 @@ from capri_mod.pipeline.captrd import prepare as P
 
 ROOT = Path(__file__).resolve().parents[3]
 TS = ROOT / "capri_reference" / "capreg_tseries" / "17"
+BASE = ROOT / "capri_reference" / "capreg_base" / "17"
 RES = ROOT / "capri_reference" / "captrd_results" / "1770"
 BASE_YEAR = 2017                                              # the reference run's base year (settings.csv)
 
@@ -97,6 +103,36 @@ def test_denmark_prepared_data_equals_captrds():
         return ((m.col.isin({"UVAD", "CSSP", "EXPE"}) & k)
                 | ((m.col == "EXPE") & (m.row == "LEVL") & m.t.isin(lacking_t)))
     _assert_equal(_compare(_prepare_one(s, raw, ex), s, "DK000000", ex, _from_peers), 40_000)
+
+
+@pytest.mark.skipif(not ((TS / "DK.csv.gz").exists() and (BASE / "DK.csv.gz").exists()
+                         and (RES / "BASM.csv.gz").exists()), reason="CAPRI reference files not built")
+def test_denmark_base_year_equals_captrds():
+    s = P.read_sets()
+    oagg = set(pd.read_csv(ROOT / "capri_reference" / "sets" / "simini_21730" / "OAGG.csv", keep_default_na=False).d0)
+    raw = P.read_series(TS / "DK.csv.gz", s, range(1984, 2019))
+    ex = P.expost_years(raw, s.ms)
+    d2 = pd.read_csv(BASE / "DK.csv.gz", keep_default_na=False)
+    a = P.stage_a(raw, s, d2)
+    a = P.labour_household(P.clean_regions(a, s, ex))
+    a = P.prep_for_estimation(a, s, ex, [y for y in ex if abs(y - BASE_YEAR) <= 3],
+                              [y for y in ex if abs(y - BASE_YEAR) <= 1], range(1984, 2019))
+    mine = a[(a.t == "BASM") & (a.region == "DK000000")]
+    nobs = pd.read_csv(RES / "data.csv.gz")
+    nobs = nobs[(nobs.t == "nObs") & (nobs.value > 0) & (nobs.region == "DK000000")][["region", "col", "row"]]
+    ref = pd.concat(c[(c.region == "DK000000") & (c.t == "2030")] for c in
+                    pd.read_csv(RES / "BASM.csv.gz", dtype={"t": str}, chunksize=1_000_000))
+    ref = ref[(ref.eps == 0) & ref.col.isin(s.s_colsest) & ref.row.isin(s.s_rowsest)
+              & (ref.col + ref.row != "INHALEVL")]
+    keys = ["region", "col", "row"]
+    m = mine.merge(nobs, on=keys)[keys + ["value"]].merge(ref[keys + ["value"]], on=keys, how="outer",
+                                                          suffixes=("", "_ref"), indicator=True)
+    m["t"] = "BASM"
+    biof = set(ref[ref.col == "BIOF"].row)
+    later = ((m.col.isin(s.aact) & m.row.isin(set(pd.read_csv(P.SETS_DIR / "reqst.csv").d0)))
+             | (m.col.isin(s.mpact) & m.row.isin({"LABF", "LABP"}))
+             | ((m.col == "DOMM") & m.row.isin(biof)))
+    _assert_equal(m[~(_pending(m, s, oagg) | later)], 1_200)
 
 
 @pytest.mark.slow
