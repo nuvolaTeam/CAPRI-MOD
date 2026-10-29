@@ -961,6 +961,7 @@ HR000000, K71); which solves they are is not recorded.
   the run time is a few percent, not the mini run's 74% of IPOPT time (an estimate). Options: try JRC121368's relaxed
   target before the cap search where a tiered N target is in force (identical results where the cap search fails, as
   in NL320000); or a solve without the N-surplus row first to see which constraint makes the problem infeasible
+  Left as it is for now (the project lead's decision, 29 October 2026), to be taken up again later
 
 ## NLP check (tools/nlp_check), what it showed
 
