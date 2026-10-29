@@ -1163,9 +1163,13 @@ where the N target barely binds) were made on structures since replaced and are 
 
 - **Effect:** Farm-to-Fork meat and crop price levels, the dairy herd, poultry, manure N2O (README "Not sound for")
 - **In 9t:** –
-- **Status:** **open**: first tabulate the current reference run's indicators (r182); then per indicator: pork through
-  the EU pork trade response of the bilateral market, dairy through the regional N shadow prices against the change in
-  cows; CAPRI's own Farm-to-Fork results would be the reference (K13)
+- **Status:** **open**. The current reference run r182 (29 October 2026; tools/check/compare_runs.py --capri) gives
+  the same picture: pork price +18.7% (CAPRI +43), milk +21.7% (+1.5, K13), poultry price +15.7% (+18), cereal +10.7%
+  (+8), oilseed +14.4% (+11), vegetables and permanent crops +12.4% (+15); dairy cows -3.5% (-10), poultry -12.2%
+  (-16.5); manure N2O -18.3% (-3.2), ammonia -37.7% (-33), GHG -18.9% (-14.8); mean absolute deviation over the 24
+  indicators 4.44. Next, per indicator: pork through the EU pork trade response of the bilateral market, dairy
+  through the regional N shadow prices against the change in cows; CAPRI's own Farm-to-Fork results would be the
+  reference (K13)
 
 <a id="k93"></a>
 ### K93: CAPRI mitigation options not built, and the documents disagree on which are in (found 29 October 2026, registry migration)
