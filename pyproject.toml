@@ -22,7 +22,7 @@ dependencies = [
 # requirements.txt lists all of these together; the extras are for installing as a package (pip install ".[dev]")
 # the test tools: pytest, pytest-xdist for parallel test processes (python -m pytest -n 2), coverage, DuckDB for the
 # data declarations and checks (capri_data/schema, tools/check/validate_data.py)
-dev = ["pytest>=7.0", "pytest-xdist>=3.5", "coverage>=7.0", "duckdb>=2.0"]
+dev = ["pytest>=7.0", "pytest-xdist>=3.5", "coverage>=7.0", "duckdb>=2.0", "doit>=0.37"]
 # the data pipeline (capri_mod/pipeline): provider downloads (requests) and the versioned Delta store (deltalake)
 pipeline = ["requests>=2.28", "deltalake>=0.18"]
 # the reference-building tools (tools/build/*): GDX bindings of the GAMS Python API; the GDX library is built separately

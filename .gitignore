@@ -33,3 +33,6 @@ capri_data/validation/remaining_nine_extraction.json
 capri_data/validation/trade_recalibration_2017.json
 capri_data/validation/world_price_arbitrage_check.csv
 capri_data/validation/world_price_divergence.csv
+
+# doit state (dodo.py)
+.doit.db*
