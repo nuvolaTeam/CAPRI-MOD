@@ -17,8 +17,8 @@ animals: build_animal_yields.ANIMALS; market products: build_feed_bulks.COMMODIT
 recalibrate_trade_2017.COMMODITY_MAP for the products that are not feed, which must agree, and CAPRI's code where the
 model's is CAPRI's own). The builder stops if a model code has no mapping, a CAPRI code is not in CAPRI's set, or another copy of
 a mapping in the code disagrees (build_livestock_units, build_plant_protection_cost, build_supplement_effects for the
-animals; build_dairy_world_markets.COMM, build_dairy_trade_params.CODE and
-market/dairy.DAIRY_TRADED for the products), and checks that every regional unit is one of CAPRI's (RALL).
+animals; build_dairy_world_markets.COMM and market/dairy.DAIRY_TRADED for the products; build_dairy_trade_params.CODE
+until that builder was removed with armington_params.csv, 29 October 2026), and checks that every regional unit is one of CAPRI's (RALL).
 
 Source of CAPRI's sets: tools/build/build_capri_sets_reference.py's extract of sim_ini_21730.gdx (a CAPMOD restart file
 of the project lead's installation; capri_reference/README.md), given with --sets.
@@ -114,7 +114,6 @@ def main():
         elif m not in to_capri:
             to_capri[m], src_of[m] = cc, trade_src
     checks = [("tools/build/build_dairy_world_markets.py", "COMM", True),            # CAPRI -> model
-              ("tools/build/build_dairy_trade_params.py", "CODE", True),
               ("capri_mod/market/dairy.py", "DAIRY_TRADED", True)]
     for path, name, capri_first in checks:
         for k, v in literal(path, name).items():
