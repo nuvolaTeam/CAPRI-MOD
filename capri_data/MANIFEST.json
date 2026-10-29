@@ -2290,7 +2290,7 @@
    "domain": "supply",
    "status": "live",
    "shape": {
-    "rows": 38421,
+    "rows": 38634,
     "cols": 6,
     "columns": [
      "act_i",
@@ -2333,7 +2333,7 @@
    "domain": "sources",
    "status": "source",
    "shape": {
-    "rows": 30136,
+    "rows": 30379,
     "cols": 4,
     "columns": [
      "activity",
@@ -2649,7 +2649,8 @@
    "units": "EUR/ha",
    "domain": "supply",
    "status": "live (builder input)",
-   "path": "sources/capri_land_rents/"
+   "path": "sources/capri_land_rents/",
+   "vintage_exception": "CAPRI's land rents at 2017 and at its 2030 calibration point (the folder holds both); the 2030 file is used only when the model simulates the 2030 market"
   },
   "capri_member_state_codes.csv": {
    "source": "CAPRI sets.gms NUTS0 (BL = Belgium and Luxembourg, IR, EL, UK)",
