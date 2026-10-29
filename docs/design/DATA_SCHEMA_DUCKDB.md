@@ -82,7 +82,10 @@ Beyond CAPRI (for the project lead to note): range checks, and enforcement at lo
    own-price supply elasticities (PELA regional and raw, CAPRI's p_ElasSupp per member state; model unit U_Elasticity)
    and the mineral N price; three of them have no builder in the repository (pmp_own_price_elasticities,
    capri_own_price_elasticities, mineral_n_price: none is read by the default model). `20_market_2017.sql`: the
-   market supply functions (ProdNQ_). `99_rules.sql`: every numeric column of a long table has a unit in the
+   market supply functions (ProdNQ_). `21_market_inputs.sql`: world prices, the non-EU supply elasticities, the feed
+   bulks (EU, Norway, the EU's feed shares), the Armington elasticities, the processing yields; its rule on the bulks
+   checks CAPRI's market map FEED_TO_XX (FEED_TO_O plus WHEA in FCER, arm/arm_sets.gms l. 508-509), which the first
+   draft against FEED_TO_O alone found. `99_rules.sql`: every numeric column of a long table has a unit in the
    catalogue (information_schema; tables with per-item units are left to their own rules).
    The open units found, and settled where the data allow (29 October 2026): the yields of OCRO, OIND, NURS, FLOW are
    value units per ha (CAPRI measures these crops in value: MPRI an index near 1000, MREV = YILD / 1000 x MPRI; the
