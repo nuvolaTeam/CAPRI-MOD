@@ -78,7 +78,12 @@ Beyond CAPRI (for the project lead to note): range checks, and enforcement at lo
    (2017, 2030), crops and animals, and capri_level_ratio; rules: the crop terms symmetric with one level per activity,
    the territory groups' CAPRI regions in RALL and the same for a region's crops and animals, the animal terms' level
    ratio capri_level_ratio's. One open unit: the animals' x_capri holds CAPRI's level unit of each animal (1000 head,
-   poultry million head), two units in one column. `20_market_2017.sql`: the market supply functions (ProdNQ_).
+   poultry million head), two units in one column. `13_supply_rents_elas.sql`: the land rents (2017, 2030), the
+   own-price supply elasticities (PELA regional and raw, CAPRI's p_ElasSupp per member state; model unit U_Elasticity)
+   and the mineral N price; three of them have no builder in the repository (pmp_own_price_elasticities,
+   capri_own_price_elasticities, mineral_n_price: none is read by the default model). `20_market_2017.sql`: the
+   market supply functions (ProdNQ_). `99_rules.sql`: every numeric column of a long table has a unit in the
+   catalogue (information_schema; tables with per-item units are left to their own rules).
    The open units found, and settled where the data allow (29 October 2026): the yields of OCRO, OIND, NURS, FLOW are
    value units per ha (CAPRI measures these crops in value: MPRI an index near 1000, MREV = YILD / 1000 x MPRI; the
    model's own unit U_ValueUnitPerHa); HFRS's yield has no single unit (its CAPRI members' YILD measure meat and raised
