@@ -588,6 +588,8 @@ class RegionalSupplyModel:
     nlp_warm_check = setting("supply.nlp_warm_check")
     #: a solution whose levels jump by more than this between outer iterations is checked against the other starts (K79)
     nlp_jump_check = setting("supply.nlp_jump_check")
+    #: the relative objective gain another start's solution needs to replace it in that check (K79)
+    nlp_jump_gain = setting("supply.nlp_jump_gain")
 
     #: CAPRI's land market and the grassland allowance (capri_mod/settings: supply.*)
     use_land_market = setting("supply.use_land_market")
@@ -1807,7 +1809,8 @@ class RegionalSupplyModel:
                            "f_prev": getattr(self, "_nlp_prev_f", None), "keep": _keep},
                     {"tol": float(getattr(type(self), "nlp_tol", 1e-8)),
                      "warm_check": float(getattr(type(self), "nlp_warm_check", 0.01)),
-                     "jump_check": float(getattr(type(self), "nlp_jump_check", 0.0) or 0.0)}))
+                     "jump_check": float(getattr(type(self), "nlp_jump_check", 0.0) or 0.0),
+                     "jump_gain": float(getattr(type(self), "nlp_jump_gain", 0.0) or 0.0)}))
             nlp = CapriRegionalNLP(spec)
             if os.environ.get("CAPRI_NLP_DUMP"):
                 import pickle as _pk
@@ -1878,8 +1881,11 @@ class RegionalSupplyModel:
                     for kind, xs, lam_ in [s_ for s_ in starts if s_[0] not in _done and s_[0] != "warm"]:
                         r_ = nlp.solve(xs, lam=lam_, tol=_tol)
                         _tried.append(("jump:" + kind, r_["status"], float(r_["f"]), int(r_["iterations"] or 0)))
+                        # kept only where it gains more than nlp_jump_gain (relative): a lower objective by solver
+                        # noise is the same optimum, and switching to it moved the levels for nothing (K79)
+                        _gain = float(getattr(type(self), "nlp_jump_gain", 0.0) or 0.0)
                         if ((r_["success"] or r_["status"] in ("Solved_To_Acceptable_Level",))
-                                and float(r_["f"]) < float(res["f"])):
+                                and float(r_["f"]) < float(res["f"]) - _gain * max(1.0, abs(float(res["f"])))):
                             res = r_
                             kinds.append("jump:" + kind)
                     self._nlp_jump = {"move": round(_mv, 6), "f": _f0, "solved": [t_[0] for t_ in _tried[_n0:]],

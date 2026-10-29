@@ -879,6 +879,9 @@ CAPRI's stop rule, recorded every iteration since r135, flags rows that move by 
   by iteration 32. Farm-to-Fork (r180): 12 iterations (r178: 13), 492 checks, none with a gain above 1e-5. Next, for
   the project lead's decision: switch (and count) only above a gain tolerance (a behaviour change: its own runs);
   compare HU230000's two optima (activities, feeding) to see what makes its warm start leave the better one
+  29 October 2026, the project lead's decision: the check switches only where the other start gains more than
+  supply.nlp_jump_gain = 1e-6 (relative; r181's gains: 938 at 1e-9 or less, one at 1.4e-7, 23 at 1.7e-5 and more), so
+  the record's "switched" counts real switches; HU230000's two optima still to compare
 
 <a id="k80"></a>
 ### K80: The same run repeated from a warm start differs by up to 3e-5 relative in small cereal activities (26 October 2026)
