@@ -9,7 +9,7 @@ The data sourcing registry's log of checks, fixes and decisions (201 entries, mo
 [KNOWN_ISSUES_REGISTRY_LOG.md](KNOWN_ISSUES_REGISTRY_LOG.md), verbatim, with the triage of its open entries against
 the code: they became K92-K96, joined K73, K80, K91, or were closed or historical.
 
-## Open (18)
+## Open (16)
 
 | # | Issue | Status |
 |---|---|---|
@@ -20,7 +20,6 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K48](#k48) | Young-animal prices against CAPRI's own market run | open |
 | [K65](#k65) | Cattle member splits and per-sex young-animal markets do not converge yet | open |
 | [K66](#k66) | Farmland expands under the per-hectare N target more than in CAPRI | open: waiting for CAPRI's scenario results |
-| [K73](#k73) | Market: differences from CAPRI that no register listed | open |
 | [K74](#k74) | Supply: differences from CAPRI that no register listed | open |
 | [K77](#k77) | CAPRI's fertiliser-option curvature (S5) leaves the baseline's base shares | open |
 | [K78](#k78) | Histosol fallowing under Farm-to-Fork far above JRC121368's figure | open: waiting for CAPRI's scenario results |
@@ -30,12 +29,13 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K89](#k89) | Failing regional solves take most of IPOPT's time | open |
 | [K92](#k92) | Farm-to-Fork changes furthest from JRC121368, besides the milk price | open: waiting for CAPRI's scenario results |
 | [K93](#k93) | CAPRI mitigation options not built; documents disagree on which are in | open |
-| [K101](#k101) | Model inputs without a builder (census of a run's reads) | open, in part fixed |
 
-## Resolved (84)
+## Resolved (86)
 
 | # | Issue | Status |
 |---|---|---|
+| [K73](#k73) | Market: differences from CAPRI that no register listed | fixed (batch 6 gate) |
+| [K101](#k101) | Model inputs without a builder (census of a run's reads) | fixed (batch 6 gate) |
 | [K1](#k1) | Ammonia loss cascade linearised without its value | fixed |
 | [K2](#k2) | Quadratic cost of ammonia options w times too small | fixed |
 | [K3](#k3) | Silent fallback when the conic solve fails | fixed |
@@ -800,7 +800,11 @@ Ten findings M1-M10 in docs/design/ARCHITECTURE_REFACTOR.md section 5.1 (table d
 
 - **Effect:** market prices and quantities in scenarios (M1-M3, M6, M9, M10); reporting (M7)
 - **In 9t:** –
-- **Status:** **open**, in part. Fixed 24 October 2026: M1 and M8 (run r112), M2 (r113, the Armington balance), M11 raw milk cleared per region (r115, added to the audit), M6 (r117). Fixed 24 October 2026 (evening): M10 (tariff on price + transport per importer region), M7 label and base price; M5 implemented (raw milk per member state inside the market), run pending. M7's welfare report ported 27 October 2026 (docs/WELFARE.md; reporting only). M9 (dairy processing as CAPRI's ProcNQ_) fixed 28 October 2026 and accepted with the gate of batches 2 and 3 (r181). M3 ported 29 October 2026 (the project lead's decision of that day: arm/feed_conv.gms ported; CAPRI's FeedNQ_ and FeedBal_ in the market, market.noneu_feed_nq; batch 6), run pending. M4 (path only). M4 implemented 29 October 2026 (batch 6: CAPRI's feedBlk_ in the market, market.feed_bulk_in_market; the elasticities from the market supply Hessian's FEEDBLK rows), run pending **29 October 2026 (K73 review):** every finding M1-M11 fixed or registered; step F done (Norway's raw milk inside the market, market.sup_milk_in_market; the baseline demand recalibration registered); M3 and M4 run in the batch-6 gate (r188, r189); the claims table's 17 unsourced rows resolved (four already removed as dead code, the rest registered as fallbacks, guards or numerical devices with where they act). To be closed with the batch-6 Green Deal run (M3, M4) and the batch-8 gate (step F)
+- **Status:** **fixed** (29 October 2026, batch 6 gate: every finding M1-M11 fixed and run). History: Fixed 24 October 2026: M1 and M8 (run r112), M2 (r113, the Armington balance), M11 raw milk cleared per region (r115, added to the audit), M6 (r117). Fixed 24 October 2026 (evening): M10 (tariff on price + transport per importer region), M7 label and base price; M5 implemented (raw milk per member state inside the market), run pending. M7's welfare report ported 27 October 2026 (docs/WELFARE.md; reporting only). M9 (dairy processing as CAPRI's ProcNQ_) fixed 28 October 2026 and accepted with the gate of batches 2 and 3 (r181). M3 ported 29 October 2026 (the project lead's decision of that day: arm/feed_conv.gms ported; CAPRI's FeedNQ_ and FeedBal_ in the market, market.noneu_feed_nq; batch 6), run pending. M4 (path only). M4 implemented 29 October 2026 (batch 6: CAPRI's feedBlk_ in the market, market.feed_bulk_in_market; the elasticities from the market supply Hessian's FEEDBLK rows), run pending
+  Gate of batch 6 (29 October 2026): M3 and M4 run in Farm-to-Fork 2030 (r188: converged in 10 iterations; prices up to +0.9 points from r186, quantities within 0.3) and Green Deal 2030 (r189: converged under CAPRI's rule in 21 iterations; prices up to +0.4 points from r187, mean absolute deviation from JRC121368 8.63 against 8.65). Closed
+  Batch 8: step F (Norway's raw milk inside the market, market.sup_milk_in_market; the baseline demand recalibration
+  registered) and the claims table's 17 unsourced rows resolved (four removed as dead code, the rest registered as
+  fallbacks, guards or numerical devices); step F's results with the batch-8 gate runs
 
 <a id="k74"></a>
 ### K74: Supply: differences from CAPRI that no register listed (CAPRI-claim audit, 24 October 2026)
@@ -936,6 +940,12 @@ CAPRI's stop rule, recorded every iteration since r135, flags rows that move by 
   starts, the fixed start moves no value and converges in 10-22 iterations (test
   `test_warm_start_from_the_last_solution_as_it_is`); the market supply Hessian's key changes with it. Results: the
   batch's gate runs
+  Gate of batch 6 (r189, Green Deal 2030 with the warm-start fix of batch 5): converged under CAPRI's rule in 21
+  iterations (r187: 17); after the first scenario iteration the check kept another start's solution 6 times (r187: 9),
+  HU230000 once (iteration 4, the standard start). HU230000 ended at an objective 0.07% below r187's (-5.0317e6 against
+  -5.0284e6, at slightly different prices) with another crop mix: rapeseed 97 kha against 24, soft wheat 154 against
+  114, sunflower 51 against 115, maize 148 against 167. So the region still has near-equal optima and the end state
+  depends on the path; the EU indicators of the two runs are within 0.4 points. Open
 
 <a id="k80"></a>
 ### K80: The same run repeated from a warm start differs by up to 3e-5 relative in small cereal activities (26 October 2026)
@@ -1394,10 +1404,13 @@ into the file.
 - **Effect:** reproducibility (no result changes from the builders added: the values are the files'; small rounding
   gains); K100's fallow mineral N
 - **In 9t:** –
-- **Status:** open, in part fixed 29 October 2026 (batch 6): eleven files built, one replaced, the member-state code map
+- **Status:** **fixed** (29 October 2026, batch 6 gate). Batch 6: eleven files built, one replaced, the member-state code map
   and the parameter table kept as declared; the EU supply elasticities rebuilt on the model's EU27 (the project lead's
   decision). Left: the census to be repeated on the gate runs' manifests (a full EU run
   reads files a one-region run may not)
+  Census repeated on the gate runs' manifests (Farm-to-Fork r188, 162 files read; Green Deal r189, 167): every file
+  read is written by a builder of tools/pipeline/builders.json but the two declared tables (the member-state code map,
+  the parameter table) and settings/defaults.toml. Closed
 
 <a id="k102"></a>
 ### K102: Data files that no run and no builder reads (census, found 29 October 2026)

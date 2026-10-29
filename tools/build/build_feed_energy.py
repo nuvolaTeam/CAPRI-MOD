@@ -72,7 +72,10 @@ ANIM = ("BEEF", "PORK", "SGMT", "POUM", "EGGS", "MILK")
 #: arm/feed_conv.gms: expected kg of maize per kg of product, the calories it is divided by, the relative std. deviation
 EXPECTED = {"SGMT": (3.5, "BEEF", 0.6), "BEEF": (3.0, "BEEF", 0.6), "PORK": (2.5, "PORK", 0.1),
             "POUM": (2.2, "POUM", 0.1), "EGGS": (2.0, "EGGS", 0.1), "MILK": (0.8, "MILK", 0.5)}
-LO, UPF, SHARE0, STEP, MAXSOLVES = 0.001, 20.0, 0.7, 0.1, 100
+LO, UPF, MAXSOLVES = 0.001, 20.0, 100
+#: FeedCost_'s share of the producer price: 0.7, raised by 0.1 at each infeasible solve (in tenths)
+SHARE0_TENTHS, STEP_TENTHS = 7, 1
+SHARE0 = SHARE0_TENTHS / 10.0
 
 
 def calories(path: Path) -> dict:
@@ -148,17 +151,20 @@ def main() -> None:
         if feed_e <= 0 or not any(prod[k] > 0 and k in cal for k in ANIM):
             continue
         ave = sum(q * (arm.get(p, 0.0) - fsei.get(p, 0.0)) for p, q in feed.items()) / feed_e
-        share, n = SHARE0, 1
+        # the share in tenths (CAPRI adds 0.1 per solve; counted here in whole tenths so the written share is the
+        # decimal value, not an accumulated sum such as 0.7999999999999999)
+        n = 1
+        share = SHARE0
         conv, up, ok = fit_region(feed_e, prod, cal, ppri, ave, share, m_, s_)
         while not ok and n < MAXSOLVES:
-            share += STEP
             n += 1
+            share = (SHARE0_TENTHS + (n - 1) * STEP_TENTHS) / 10.0
             conv, up, ok = fit_region(feed_e, prod, cal, ppri, ave, share, m_, s_)
         if not ok:
             raise SystemExit(f"{r}: feed needs not balanced after {n} solves (CAPRI aborts here too)")
         fede_q = feed_e
         fede_p = sum(q * arm.get(p, 0.0) for p, q in feed.items()) / fede_q
-        reg_rows.append((r, rm, repr(fede_q), repr(fede_p), repr(ave), repr(round(share, 10)), n))
+        reg_rows.append((r, rm, repr(fede_q), repr(fede_p), repr(ave), repr(share), n))
         for k, c in conv.items():
             conv_rows.append((r, k, repr(prod[k]), repr(c), repr(c * cal[k]), repr(m_[k]), repr(up[k]),
                               int(abs(c - up[k]) <= 1e-12 * max(1.0, up[k]))))
