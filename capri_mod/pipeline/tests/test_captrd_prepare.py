@@ -11,10 +11,9 @@ Records the stages not yet ported change, excluded by rule (docs/design/CAPTRD_M
   - policy (captrd_policy.gms): the quotas;
   - not traced: VSET.LEVL of 1991-2005, which CAPTRD's p_data has at values with one decimal (8.2 for 1994 against
     CAPREG's 8.3599...; no CAPTRD statement found that sets it, and COCO has no VSET for these years), and therefore
-    UAAR.LEVL, which sums the crop activities;
+    UAAR.LEVL, which sums the crop activities, and LU.LEVL, livestock units per UAAR, in those years;
   - the COCO nowcasts and biofuel data (load_coco1_data.gms, from coco2_output.gdx): the biofuel columns and rows,
     the fuels, and isoglucose (HFCS) in the last CAPREG year, which COCO revises;
-  - LU.LEVL (prep_data_for_estimation.gms l. 160-162 needs CAPRI's p_LUUnits, dat/policy/livestock_units.gms).
 For the base year (BASM, compared with CAPTRD's BASM position, which carries p_data's BASM to every ex-ante year,
 define_stats_and_supports.gms l. 55-57), further:
   - the animal requirements (REQST rows of the animals), which prep_requirement_estimation.gms converts;
@@ -43,11 +42,23 @@ FUELS = {"GASL", "DISL"}                                      # the fossil fuels
 def _pending(df: pd.DataFrame, s: P.CaptrdSets, oagg: set) -> pd.Series:
     col, row = df["col"], df["row"]
     reporting = (row.isin(oagg) & col.isin(s.mrkbalee | {"UVAG", "INHA", "UVAD"})) | ((row == "TOOU") & ~col.isin(s.mpact))
-    policy = col.isin(s.quotas) | (col == "VSET") | ((col == "UAAR") & (row == "LEVL"))
+    policy = col.isin(s.quotas)
+    untraced = _vset_dependent(df)
     coco = (col.isin(BIOFUEL_COLS) | row.isin(s.seco_biof | FUELS | {"DDGS"})
             | ((df["t"] == str(BASE_YEAR + 1)) & (row == "HFCS")))
-    lu = col == "LU"
-    return reporting | policy | coco | lu
+    return reporting | policy | untraced | coco
+
+
+def _vset_dependent(df: pd.DataFrame) -> pd.Series:
+    """VSET.LEVL, and UAAR.LEVL (the crops' sum) and LU.LEVL (livestock units per UAAR) in the years where VSET.LEVL
+    differs from CAPTRD's (not traced; see the module docstring)."""
+    if "_merge" not in df.columns:
+        return df["col"] == "VSET"
+    v = df[(df["col"] == "VSET") & (df["row"] == "LEVL")]
+    bad = v[(v["_merge"] != "both") | ((v["value"] - v["value_ref"]).abs() > 1e-9 * v["value_ref"].abs())]
+    years = set(bad["t"])
+    lev = (df["row"] == "LEVL") & df["col"].isin({"UAAR", "LU"}) & df["t"].isin(years)
+    return (df["col"] == "VSET") | lev
 
 
 def _reference(s: P.CaptrdSets, region: str, ex) -> pd.DataFrame:
@@ -185,8 +196,7 @@ BIOFUEL = ROOT / "capri_reference" / "fao_agg" / "17" / "p_biofuelData.csv.gz"
 def test_denmark_with_the_coco_data(tmp_path):
     """Denmark through every ported stage (prepare_run.run), the COCO data included: the years 1984-2019 (2019 from
     COCO) equal CAPTRD's p_data, leaving out the stages not ported (policy, LU, reporting) and what needs the other
-    countries (the near-zero biofuel flags some other country's COCO data sets, l. 337 and 346; the UVAD averages) or
-    CAPRI's extraction rates (the default biostocks and DDGS of l. 524-548)."""
+    countries (the near-zero biofuel flags some other country's COCO data sets, l. 337 and 346; the UVAD averages)."""
     from capri_mod.pipeline.captrd import prepare_run as R
     s = P.read_sets()
     out = R.run(["DK000000"], s, BASE_YEAR, 1984, 2019, TS, BASE, COCO, BIOFUEL, tmp_path)
@@ -200,14 +210,12 @@ def test_denmark_with_the_coco_data(tmp_path):
                                                           how="outer", suffixes=("", "_ref"), indicator=True)
     col, row, t = m["col"], m["row"], m["t"]
     reporting = (row.isin(oagg) & col.isin(s.mrkbalee | {"UVAG", "INHA", "UVAD"})) | ((row == "TOOU") & ~col.isin(s.mpact))
-    policy = col.isin(s.quotas) | (col == "VSET") | ((col == "UAAR") & (row == "LEVL"))
+    policy = col.isin(s.quotas) | _vset_dependent(m)
     near_zero = m["value_ref"].fillna(0).abs().le(1e-13) & m["value"].fillna(0).abs().le(1e-13)
-    extr = (((col == "BIOF") & row.isin({"SWHE", "RAPO"})) | ((col == "MAPR") & (row == "DDGS"))) & \
-        (m["value_ref"].fillna(0).abs() < 1e-12)
     peers = col.isin({"UVAD", "CSSP"}) & (m._merge == "right_only")
     hfcs = (row == "HFCS") & (t == "2018")
     # not traced yet: CAPTRD's p_data has the fossil fuels' UVAG in 2019, which COCO does not carry (load_coco1_data.gms
     # l. 352 copies COCO's UVAP, absent for 2019); presumably a later stage
     fuel_2019 = (col == "UVAG") & row.isin(s.fosfuels) & (t == "2019") & (m._merge == "right_only")
-    m = m[~(reporting | policy | (col == "LU") | near_zero | extr | peers | hfcs | fuel_2019)]
+    m = m[~(reporting | policy | near_zero | peers | hfcs | fuel_2019)]
     _assert_equal(m, 42_000)

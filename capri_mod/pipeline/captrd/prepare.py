@@ -39,6 +39,18 @@ import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[3]
 SETS_DIR = ROOT / "capri_data" / "pipeline" / "captrd" / "sets"
+DAT_DIR = ROOT / "capri_data" / "pipeline" / "captrd" / "dat"
+
+
+def read_dat(path: Path = DAT_DIR) -> Dict[str, Dict]:
+    """CAPRI's data include files CAPTRD reads (tools/build/build_captrd_dat.py): luunits {act: LU per head},
+    extr_rates {(fuel, stock): t/t}, byproduct {(byproduct, stock): t/t}."""
+    lu = pd.read_csv(path / "p_luunits.csv", keep_default_na=False)
+    er = pd.read_csv(path / "p_extrrates.csv", keep_default_na=False)
+    bp = pd.read_csv(path / "p_byproduct.csv", keep_default_na=False)
+    return {"luunits": dict(zip(lu.act, lu.value)),
+            "extr_rates": {(f, s_): v for f, s_, v in zip(er.fuel, er.stock, er.value)},
+            "byproduct": {(b, s_): v for b, s_, v in zip(bp.byproduct, bp.stock, bp.value)}}
 KEYS = ["region", "col", "row", "t"]
 
 
@@ -430,14 +442,16 @@ class Wide:
 
 
 def prep_for_estimation(p: pd.DataFrame, sets: CaptrdSets, expostt: Iterable[int], basyrs5: Iterable[int],
-                        basyrsm: Iterable[int], years: Iterable[int]) -> pd.DataFrame:
+                        basyrsm: Iterable[int], years: Iterable[int], luunits: Optional[Dict[str, float]] = None
+                        ) -> pd.DataFrame:
     """captrd/prep_data_for_estimation.gms l. 22-162, the statements on the years and BASM (the statistics nObs, nW,
     wAve, wVar of l. 164-198 and the base-year values of l. 205-252 are Step 1's, step1.py). Rest is MS + NT2ext; BASM
     records are treated where present (the base-year stage adds them). Every statement is an indexed assignment
     (parallel), but for the sugar price loop of l. 34-39, which is a GAMS loop over the years (sequential).
 
-    Not ported yet: LU.LEVL, the stocking density of l. 160-162, needs CAPRI's livestock units p_LUUnits
-    (dat/policy/livestock_units.gms, not among the files we have); CAPREG's LU is left as loaded."""
+    luunits: CAPRI's livestock units p_LUUnits (dat/policy/livestock_units.gms; read_dat() when not given)."""
+    if luunits is None:
+        luunits = read_dat()["luunits"]
     w = Wide(p)
     ms = set(sets.ms)
     is_ms = w.region.isin(ms)
@@ -584,6 +598,10 @@ def prep_for_estimation(p: pd.DataFrame, sets: CaptrdSets, expostt: Iterable[int
     tot = sum((w("EXPE", r) for r in {k[1] for k in w.keys(cols={"EXPE"})} if r != "LEVL" and r not in sets.grpr),
               w.zero)
     w.put("EXPE", "LEVL", tot, where=is_ms & t_yb)
+    # l. 160-162: stocking density, livestock units per hectare of UAAR
+    ua = w("UAAR", "LEVL")
+    lus = sum((w(a, "LEVL") * float(luunits.get(a, 0.0)) for a in sorted(sets.maact)), w.zero)
+    w.put("LU", "LEVL", lus / ua.where(ua != 0, 1.0), where=t_yb & (ua != 0))
     return w.long()
 
 

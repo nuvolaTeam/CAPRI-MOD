@@ -17,9 +17,9 @@ Order, as load_coco1_data.gms, in three parts:
 Not ported: p_result_MSnoEU (l. 422-497), Aglink expert supports of the non-EU countries for Step 2 (belongs to the
 expert supports); p_data of the market aggregates (l. 553-554), which no estimated series of the regions reads.
 
-The default biostocks (l. 524-537) and DDGS (l. 545-548) need CAPRI's extraction rates P_ExtrRates and by-product
-coefficients p_ByProduct (dat/biofuel/biofuel_technology_params.gms, captrd.gms l. 340-341, not in hand): without
-them (extr=None) these three statements are skipped and reported in the returned list.
+The default biostocks (l. 524-537) and DDGS (l. 545-548) use CAPRI's extraction rates P_ExtrRates and by-product
+coefficients p_ByProduct (dat/biofuel/biofuel_technology_params.gms, captrd.gms l. 340-341; prepare.read_dat()):
+without them (extr=None) these three statements are skipped and reported in the returned list.
 
 GAMS semantics as in prepare.py: a zero is no record; assignments are parallel; EPS is not loaded.
 """

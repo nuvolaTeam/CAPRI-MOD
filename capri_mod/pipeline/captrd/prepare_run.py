@@ -32,19 +32,26 @@ REF = P.ROOT / "capri_reference"
 
 
 def _cc(ms: str) -> str:
+    """The code of the country's time-series file (capri_reference/capreg_tseries: TUR for TUR)."""
     return ms[:2] if ms.endswith("000000") else ms
+
+
+def _cc_base(ms: str) -> str:
+    """The code of the country's base-year file: CAPTRD's MS.tl:2, the first two characters (captrd.gms l. 535)."""
+    return ms[:2]
 
 
 def run(countries: Iterable[str], sets: P.CaptrdSets, base_year: int, first_year: int, last_year: int,
         tseries_dir: Path, base_dir: Path, coco_file: Path, biofuel_file: Optional[Path], work: Path,
-        extr: Optional[dict] = None) -> Dict[str, Path]:
+        dat: Optional[dict] = None) -> Dict[str, Path]:
     """The prepared p_data of each country (MS code), written to work/<CC>.parquet. A country without its CAPREG files
     stops the run (CAPTRD aborts on missing base-year data, captrd.gms l. 568)."""
     work.mkdir(parents=True, exist_ok=True)
+    dat = P.read_dat() if dat is None else dat
     ms_list = [m for m in sets.ms if m in set(countries)]
     years = list(range(first_year, last_year + 1))
     for m in ms_list:
-        for f in (tseries_dir / f"{_cc(m)}.csv.gz", base_dir / f"{_cc(m)}.csv.gz"):
+        for f in (tseries_dir / f"{_cc(m)}.csv.gz", base_dir / f"{_cc_base(m)}.csv.gz"):
             if not f.exists():
                 raise FileNotFoundError(f"{m}: {f} missing")
     # 1
@@ -52,8 +59,8 @@ def run(countries: Iterable[str], sets: P.CaptrdSets, base_year: int, first_year
     for m in ms_list:
         raw = P.read_series(tseries_dir / f"{_cc(m)}.csv.gz", sets, years)
         ua.append(raw[(raw["col"] == "UAAR") & (raw["row"] == "LEVL")])
-        p = P.load_basm(P.load_fixes(raw, sets), pd.read_csv(base_dir / f"{_cc(m)}.csv.gz", keep_default_na=False),
-                        sets)
+        p = P.load_basm(P.load_fixes(raw, sets),
+                        pd.read_csv(base_dir / f"{_cc_base(m)}.csv.gz", keep_default_na=False), sets)
         p.to_parquet(work / f"{_cc(m)}.1.parquet", index=False)
         log.info("%s: loaded, %d records", m, len(p))
     expost = P.expost_years(pd.concat(ua, ignore_index=True), sets.ms)
@@ -80,7 +87,7 @@ def run(countries: Iterable[str], sets: P.CaptrdSets, base_year: int, first_year
     uv, skipped = [], set()
     for m in ms_list:
         p = pd.read_parquet(work / f"{_cc(m)}.1.parquet")
-        p, sk = C.apply_country(p, prepared[m], usable[m], m, sets, expost, exanted, years, basyrsm, flags, bf, extr)
+        p, sk = C.apply_country(p, prepared[m], usable[m], m, sets, expost, exanted, years, basyrsm, flags, bf, dat)
         skipped |= set(sk)
         p = P.delete_early_years(P.delete_unestimated(P.check_and_cor(p, sets), sets), sets)
         p.to_parquet(work / f"{_cc(m)}.3.parquet", index=False)
@@ -95,7 +102,7 @@ def run(countries: Iterable[str], sets: P.CaptrdSets, base_year: int, first_year
         p = pd.read_parquet(work / f"{_cc(m)}.3.parquet")
         p = pd.concat([p, added[added["region"].isin(set(p["region"]))]], ignore_index=True)
         p = P.labour_household(P.clean_regions(p, sets, expost))
-        p = P.prep_for_estimation(p, sets, expostt, basyrs5, basyrsm, years)
+        p = P.prep_for_estimation(p, sets, expostt, basyrs5, basyrsm, years, dat["luunits"])
         out[m] = work / f"{_cc(m)}.parquet"
         p.to_parquet(out[m], index=False)
     return out
@@ -115,7 +122,8 @@ def main(argv: Optional[List[str]] = None) -> None:
     if args.countries:
         want = {c if len(c) > 2 else c + "000000" for c in args.countries}
     else:
-        want = {m for m in sets.ms if (ts_dir / f"{_cc(m)}.csv.gz").exists() and (base_dir / f"{_cc(m)}.csv.gz").exists()}
+        want = {m for m in sets.ms
+                if (ts_dir / f"{_cc(m)}.csv.gz").exists() and (base_dir / f"{_cc_base(m)}.csv.gz").exists()}
     run(want, sets, args.base_year, int(_settings().get("captrd.first_year")), args.last_year, ts_dir, base_dir,
         REF / "coco2" / "17" / "coco2_output.csv.gz", REF / "fao_agg" / "17" / "p_biofuelData.csv.gz", Path(args.out))
 
