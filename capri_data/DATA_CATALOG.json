@@ -43,12 +43,6 @@
    "units": "EUR/t"
   },
   {
-   "file": "armington_params.csv",
-   "vintage": "2017",
-   "domain": "market",
-   "units": "elasticity"
-  },
-  {
    "file": "eu_mfn_tariffs.csv",
    "vintage": "2017",
    "domain": "policy",

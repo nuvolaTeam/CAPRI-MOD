@@ -74,9 +74,10 @@ non-EU world is CAPRI's 2030 world.
 
 Supply (`supply_response`, region_ratio given):
 
-- Non-EU regions: base production × r_i^ε, with one own-price elasticity per product for every region: CAPRI's
-  p_elasSupp, EU median (`sources/arm/supply_elas_eu_all.json`), where it has the product, else the `eps` column of
-  `armington_params.csv`. Crushing, the non-EU dairy blocks and the biofuel markets set their products' supply at
+- Non-EU regions: base production × r_i^ε, with each region's own-price elasticity from CAPRI's p_elasSupp of its
+  CAPRI regions (`supply_elas_region.csv`, `tools/build/build_supply_elas_nonEU.py`), 0 where CAPRI has none
+  (KNOWN_ISSUES K54-3; until 23 October 2026 one EU-median or `eps` value per product, the `eps` column removed with
+  `armington_params.csv` on 29 October 2026, K72). Crushing, the non-EU dairy blocks and the biofuel markets set their products' supply at
   the regional prices ([OILSEED_CRUSHING.md](OILSEED_CRUSHING.md), [DAIRY_PROCESSING.md](DAIRY_PROCESSING.md),
   [BIOFUEL_MARKET.md](BIOFUEL_MARKET.md)).
 - EU: the supply models' output, anticipated against the price the supply models last saw:

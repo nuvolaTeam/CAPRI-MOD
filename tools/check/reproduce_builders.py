@@ -149,7 +149,6 @@ INVOCATIONS: list[tuple[str, list[str], list[Path]]] = [
     ("build_crop_cost_shares", [], [D17]),
     ("build_crushing_parameters", [], [UP / "fao_agg_17_datamarket.txt", UP / "elas_2_1717defaulta.csv"]),
     ("build_dairy_processing", [], []),
-    ("build_dairy_trade_params", [], []),
     ("build_dairy_world_blocks", [], []),
     ("build_dairy_world_markets", [], []),
     ("build_enteric_feed_factors", [str(GAMS), str(D17)], [GAMS, D17]),

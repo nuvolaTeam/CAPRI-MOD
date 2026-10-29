@@ -87,7 +87,6 @@ _FILE_CATEGORY = {
     "pmp_recipe_2017_animals_members.csv": "supply",
     "pmp_own_price_elasticities.csv": "supply",
     "producer_prices.csv": "market", "world_prices.csv": "market",
-    "armington_params.csv": "market",
     "cap_payments.csv": "policy", "crop_premium.csv": "supply", "eu_mfn_tariffs.csv": "policy", "tariffs.csv": "policy",
     "nutrient_coefs.csv": "environment", "crop_nutrient_export.csv": "environment",
     "climate_zones.csv": "environment",
@@ -478,19 +477,6 @@ def load_world_prices(data_dir: Optional[Path] = None) -> pd.Series:
                             f"(the synthetic generator that stood here was removed, Sprint 9s)")
 
 
-def load_armington_parameters(data_dir: Optional[Path] = None) -> pd.DataFrame:
-    """
-    Armington elasticities (substitution between domestic and imported goods).
-
-    Based on CAPRI calibrated parameters (Jansson 2007, Britz 2008).
-    """
-    if data_dir and (resolve_data_file(data_dir, "armington_params.csv")).exists():
-        df = read_input(resolve_data_file(data_dir, "armington_params.csv"), index_col=0)
-        return df
-    raise FileNotFoundError(f"armington_params.csv not found under {data_dir}: the model runs on CAPRI's data only "
-                            f"(the synthetic generator that stood here was removed, Sprint 9s)")
-
-
 # ---------------------------------------------------------------------------
 # CAP POLICY DATA
 # ---------------------------------------------------------------------------
@@ -773,7 +759,6 @@ def load_all_data(data_dir: Optional[Path] = None, validate: bool = False,
         "feed_req":        load_feed_requirements(data_dir),
         "nutrients":       load_nutrient_coefficients(data_dir),
         "world_prices":    load_world_prices(data_dir),
-        "armington":       load_armington_parameters(data_dir),
         "cap_payments":    load_cap_payments(data_dir),
         "tariffs":         load_tariffs(data_dir),
     }

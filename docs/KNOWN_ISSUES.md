@@ -16,7 +16,7 @@ with every fix below except K5, which needs the prototype's model change.
 | [K48](#k48) | Young-animal prices against CAPRI's own market run | open |
 | [K65](#k65) | Cattle member splits and per-sex young-animal markets do not converge yet | open |
 | [K66](#k66) | Farmland expands under the per-hectare N target more than in CAPRI | open |
-| [K72](#k72) | armington_params.csv: cells without a builder | open |
+| [K72](#k72) | Inputs without a builder (armington_params.csv removed; the livestock producer prices left) | open |
 | [K73](#k73) | Market: differences from CAPRI that no register listed | open |
 | [K74](#k74) | Supply: differences from CAPRI that no register listed | open |
 | [K77](#k77) | CAPRI's fertiliser-option curvature (S5) leaves the baseline's base shares | open |
@@ -759,7 +759,15 @@ With every cell blanked, the builders refilled 102 of 248. The eta column (a gen
 
 - **Effect:** EU market supply (eps) where used
 - **In 9t:** –
-- **Status:** **open** (eta, sigma, rho2 removed). Next: eps goes with CAPRI's market supply functions (market_supply_nq, ProdNQ_)
+- **Status:** **open** (eta, sigma, rho2 removed 24 October 2026; eps and the file removed 29 October 2026). eps acted
+  on no result: it was read only for the EU rows of the 28 products without CAPRI's EU p_elasSupp, and every one of
+  them has its EU supply set afterwards in the same market step (PARI, SUGR, WINE, OLIV by CAPRI's market supply
+  function, the measured Hessian; oils and cakes by crushing; the dairy products by the dairy block; BIOE, BIOD, DDGS
+  by the biofuel block; FENI, FPRI by MaprFeed_) or has no EU production (PLMO, COFF, TEAS, COCO); a mini-EU run with
+  eps doubled equals the run without, to the last digit, in every regional activity and price. Those products now get
+  no own-price anticipation in the EU rows (MarketModule.supply_response); armington_params.csv, its loader and
+  build_dairy_trade_params (which wrote only eps, for the regions without a dairy block, the four empty regions of
+  K45) removed, build_feed_byproducts writes no eps. Left: the livestock rows of producer_prices.csv without a builder
 
 <a id="k73"></a>
 ### K73: Market: differences from CAPRI that no register listed (CAPRI-claim audit, 24 October 2026)

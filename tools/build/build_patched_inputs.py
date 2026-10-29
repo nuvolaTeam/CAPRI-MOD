@@ -1,6 +1,6 @@
 """Rebuild the input files that several builders patch in place, running those builders in their order (K70).
 
-Three files are written by more than one builder, each owning some cells:
+Two files are written by more than one builder, each owning some cells:
 
   capri_data/2017/supply/yields.csv
       1 build_crop_economics_2017.py   crop columns (CAPRI 2017 YILD, LEVL-weighted)
@@ -9,12 +9,8 @@ Three files are written by more than one builder, each owning some cells:
       2 build_eu_producer_prices.py    crop rows (CAPRI's production-weighted EU price; reads yields.csv, and the
                                        regional prices that step 1 writes to sources/capreg/capreg_producer_prices.csv)
       livestock rows: no builder (the SHGM/SHGF rows came from build_shg_split.py's one-time split)
-  capri_data/2017/market/armington_params.csv
-      4 build_dairy_trade_params.py    eps of the nine dairy products
-      5 build_feed_byproducts.py       eps of FENI, FPRI and the other non-EU-supplied products it lists
-      the other cells: no builder (KNOWN_ISSUES K72). Since 24 October 2026 the file holds only eps (EU market
-      supply where CAPRI's EU p_elasSupp file has no value): eta (no generic demand elasticity under ArmBal1_) and
-      sigma, rho2 (the market reads CAPRI's p_rhoArm1/2 from armington_rho.csv) were removed
+  (armington_params.csv, written by build_dairy_trade_params.py and build_feed_byproducts.py until 29 October
+  2026: removed with its last column, eps, which acted on no result; KNOWN_ISSUES K72)
 
 The base files these patch (areas, herds, the rest of yields.csv) come from build_capri_base.py, which is not rerun
 here. Inputs: CAPRI's 2017 result dumps (--dump-dir, res_17*.txt) and CAPRI's market exports (--uploads:
@@ -22,7 +18,7 @@ data_market_1730defaulta.csv).
 
     python tools/build/build_patched_inputs.py [--dump-dir DIR] [--uploads DIR] [--check]
 
---check runs the chain on a copy of the repository (without capri_reference) and reports whether the three files,
+--check runs the chain on a copy of the repository (without capri_reference) and reports whether the two files,
 and the other files the steps write, come out as they are in place (CSV values within 1e-9); nothing in the repository is changed.
 """
 from __future__ import annotations
@@ -48,11 +44,8 @@ STEPS = (
     ["build_crop_economics_2017.py", "{dump}"],
     ["build_eu_producer_prices.py"],
     ["build_animal_yields.py"],
-    ["build_dairy_trade_params.py"],
-    ["build_feed_byproducts.py"],
 )
-TARGETS = ("capri_data/2017/supply/yields.csv", "capri_data/2017/market/producer_prices.csv",
-           "capri_data/2017/market/armington_params.csv")
+TARGETS = ("capri_data/2017/supply/yields.csv", "capri_data/2017/market/producer_prices.csv")
 
 
 def same(p: Path, q: Path) -> bool:

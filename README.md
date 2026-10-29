@@ -452,7 +452,6 @@ consuming modules:
 | pmp_diagonal_terms | PMP own quadratic term | EUR/ha² | supply |
 | pmp_crossgroup_terms | PMP cross-group term | EUR/ha² | supply |
 | world_prices | world market price | EUR/t | market |
-| armington_params | EU market supply elasticity where CAPRI's EU p_elasSupp has none (eps) | — | market |
 | feed_requirements | energy/protein/DM/days per animal | mixed | feed |
 | feed_availability | feed supply by item | 1000 t DM | feed |
 | crop_nutrient_export | nutrient removal per ton yield | kg/t | environment |
@@ -1530,10 +1529,11 @@ basis).
 
 The parameters of `capri_data/shared/model_parameters.csv` each carry their source (CAPRI, IPCC, JRC121368, literature
 or legal), the feed requirements are CAPRI's (DATA2) and the world prices CAPRI's market data (p_dataMarket, World,
-PMRK). Two inputs have no builder that reproduces them from a CAPRI file (KNOWN_ISSUES K72, open): the own-price
-supply elasticity `eps` in `armington_params.csv`, used for EU market supply where CAPRI's EU p_elasSupp file has no
-value (32 of 62 products; which of them the solve still reaches now that CAPRI's market supply functions are on is to
-be checked), and the livestock rows of `producer_prices.csv`.
+PMRK). One input has no builder that reproduces it from a CAPRI file (KNOWN_ISSUES K72): the livestock rows of
+`producer_prices.csv`. The own-price supply elasticity `eps` of `armington_params.csv` (no recorded source) was
+removed with the file on 29 October 2026: the EU's supply of every product it covered is set by CAPRI's market supply
+functions, crushing, the dairy, biofuel or residual-feed blocks, or the EU produces none of it, and doubling it left a
+mini-EU run identical to the last digit.
 
 ---
 
@@ -1553,8 +1553,7 @@ principled reason and extension path.
   run the projection layer (§10.1–10.2). Compared on *production*, as CAPRI
   reports it, the magnitudes are directly comparable with its published
   scenarios; comparing *area* against its production is not.
-- **Two inputs are not yet traced to a CAPRI source** (§10.5, KNOWN_ISSUES K72): the EU market supply elasticity
-  `eps` of about 30 products and the livestock producer prices.
+- **One input is not yet traced to a CAPRI source** (§10.5, KNOWN_ISSUES K72): the livestock producer prices.
 - **Biofuel and parts of the market module are validated against external data
   or documented behaviour**, not against a CAPRI scenario run.
 - **Supply elasticities** matched CAPRI's regional `PELA` values at 0.76–1.00

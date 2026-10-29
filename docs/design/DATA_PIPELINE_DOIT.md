@@ -33,7 +33,7 @@ access a read), writes, read-modify-writes, the Python files it ran and the file
 |---|---|---|
 | `build_shg_split` (a one-time migration of October 2026: SHGO split into SHGM and SHGF, then 13 builders rerun) | 22 | the base builders now take SHGM and SHGF from CAPRI directly (`build_capri_base`, `build_animal_yields`); `animal_numbers.csv` has no SHGO left. To check: a full rebuild without it reproduces the data; then retired |
 | base tables written in turn, each builder its columns | `yields.csv`, `variable_costs.csv`, `sources/capreg/capreg_producer_prices.csv`, `market/producer_prices.csv` | each builder writes its part to its own intermediate; one assembly task writes the table (same columns, order and format) |
-| `market/armington_params.csv`: rows added by `build_dairy_trade_params` and `build_feed_byproducts` | 1 | with K72 (the `eps` column: probably no effect on converged results; to test) |
+| `market/armington_params.csv`: rows added by `build_dairy_trade_params` and `build_feed_byproducts` | 1 | done (29 October 2026): the file and `build_dairy_trade_params` removed, its one column `eps` acting on no result (K72) |
 | `sources/capreg/capreg_nutrient_coefs.csv`: `extract_all_from_data2`, `extract_remaining_nine` | 1 | one extractor |
 | a builder reading its own previous output (`recalibrate_trade_2017.py`: `trade_flows_2017.csv` for its column list) | 1+ | the trace lists them (`rewrites`); each reads its inputs only |
 

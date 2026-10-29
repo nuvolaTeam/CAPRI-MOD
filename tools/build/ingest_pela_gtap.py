@@ -160,18 +160,6 @@ def main() -> None:
     arm.to_csv(args.data_dir / "sources" / "estnlp" / "gtap_armington.csv")
     print(f"\nGTAP: {len(esubd)} sectors, {len(arm)} model commodities mapped")
 
-    cur_arm_path = args.data_dir / "2017/market/armington_params.csv"
-    if cur_arm_path.exists():
-        ca = _read_csv(cur_arm_path, index_col=0)
-        common = [c for c in arm.index if c in ca.index]
-        if common and "sigma" in ca.columns:
-            d = ((ca.loc[common, "sigma"] - arm.loc[common, "esubd"]).abs()
-                 / arm.loc[common, "esubd"] * 100)
-            print(f"  model sigma vs GTAP esubd, {len(common)} commodities: "
-                  f"median deviation {d.median():.1f}%")
-            cmp_ = pd.DataFrame({"model_sigma": ca.loc[common, "sigma"],
-                                 "gtap_esubd": arm.loc[common, "esubd"]})
-            print(cmp_.head(8).round(2).to_string())
 
     print(f"\nwritten to {out}")
 

@@ -20,15 +20,12 @@ Outputs:
   capri_data/2017/market/world_prices.csv      + FENI, RYEM, OATS, TAGR, TOBA, TABO, TEXT, PLMO, OTHO (FAO_agg World PMRK BAS, as the other rows), FPRI (FAO_agg
                                                has no world price for it: CAPRI's 2017 market, export-weighted
                                                market prices of the exporting regions, bilateral_*_2017.csv)
-  capri_data/2017/market/armington_params.csv  + FENI, FPRI: eps = production-weighted own-price p_elasSupp of
-                                               the non-EU regions (capri_supply_elas_market_1717.csv, weights CAPRI's
-                                               2030 production)
   capri_data/sources/world_price_provenance.json  + FENI, FPRI
 
     python tools/build/build_feed_byproducts.py
 """
 from __future__ import annotations
-import json, re, sys
+import json, re
 from pathlib import Path
 
 import pandas as pd
@@ -46,14 +43,8 @@ PARENTS = {"FPRI": {"SWHE": ("WHEA", "SWHE", "DWHE"), "BARL": ("BARL",), "CORN":
 
 def main():
     bal = json.load(open(ROOT / "capri_data" / "validation" / "capri_eu27_market_balance_2030_ref.json"))["products"]
-    src = _read_csv(ROOT / "capri_data" / "sources" / "market" / "bilateral_dataout_2030.csv.xz", keep_default_na=False)
-    prod = src[(src["item"] == "PROD") & (src["r2"] == "")]
-    # the EU's production: the model's EU27 trade region (tools/build/build_bilateral_market.py); the EU member states
-    # are left out of the non-EU supply elasticities
+    # the EU's production: the model's EU27 trade region (tools/build/build_bilateral_market.py)
     breg = _read_csv(MKT / "bilateral_regions_2030.csv")
-    sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check")]
-    from build_feed_bulks import EU_MS
-    eu_ms = set(EU_MS) | {"EU27yr19"}
     rows = []
     for rp, par in PARENTS.items():
         p0 = float(breg.loc[(breg.commodity == rp) & (breg.region == "EU27"), "prod_kt"].sum())
@@ -97,27 +88,6 @@ def main():
     wp.to_csv(MKT / "world_prices.csv")
     json.dump(prov, open(prov_f, "w"), indent=1)
     print(f"world prices: FENI {wp.at['FENI', col]}, FPRI {fp:.2f}")
-
-    # Armington and supply elasticities
-    rho = _read_csv(MKT / "armington_rho.csv").set_index("commodity")
-    arm = _read_csv(MKT / "armington_params.csv", index_col=0)
-    el = _read_csv(ROOT / "capri_data" / "sources" / "arm" / "capri_supply_elas_market_1717.csv")
-    # FENI, FPRI, and rye and oats (separate markets as in CAPRI; before the split they were inside OCER)
-    for c in ("FENI", "FPRI", "RYEM", "OATS", "TAGR", "TOBA", "TABO", "TEXT", "PLMO", "OTHO",
-              "FFIS", "SFIS", "OAQU", "COFF", "TEAS", "COCO"):
-        own = el[(el["prod"] == c) & (el["wrt"] == c)].set_index("region")["value"]
-        pr = prod[(prod["product"] == c) & ~prod.r1.isin(eu_ms)].set_index("r1")["value"].astype(float)
-        num = den = 0.0
-        for r, e in own.items():
-            w = float(pr.get(r, 0.0))
-            if w > 0:
-                num += w * float(e)
-                den += w
-        eps = num / den if den > 0 else float(own.mean())
-        arm.loc[c, "eps"] = eps
-        print(f"{c}: eps {eps:.4f} "
-              f"(production-weighted over {len(own)} CAPRI regions)")
-    arm.to_csv(MKT / "armington_params.csv")
 
 
 if __name__ == "__main__":

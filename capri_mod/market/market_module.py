@@ -113,7 +113,6 @@ class MarketModule(CalibrationMixin, BiofuelMixin, DairyMixin, FeedMixin, Demand
             for _b in self.EU:
                 _t.loc[_b] = _t.loc["EU27"]
             self.tariffs = _t.drop(index="EU27")
-        self.armington     = data["armington"]
         self.par.demand_cal   = None  # set by the bilateral calibration at the first solve
 
         # Compute baseline consumption and production

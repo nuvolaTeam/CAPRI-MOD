@@ -270,22 +270,6 @@
     "SOYA/CHES/SKIM diverge; dairy has no CAPRI processing margin to validate against"
    ]
   },
-  "armington_params": {
-   "file": "2017/market/armington_params.csv",
-   "concept": "Armington substitution elasticities",
-   "unit": "dimensionless",
-   "dimension": "commodity",
-   "modules": [
-    "market"
-   ],
-   "source": {
-    "source_type": "CAPRI_SOURCE",
-    "source_ref": "market1_ch.gms literal (CEPII Fontagne 2019)",
-    "vintage": "CAPRI star-3.0",
-    "confidence": "validated",
-    "reproducibility": "public_code"
-   }
-  },
   "feed_requirements": {
    "file": "2017/feed/feed_requirements.csv",
    "concept": "energy/protein/DM/days per animal",

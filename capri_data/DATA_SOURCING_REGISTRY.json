@@ -111,14 +111,6 @@
    "best_update": "current MFN schedule",
    "priority": "low"
   },
-  "armington_params.csv": {
-   "nature": "REAL_CAPRI",
-   "vintage": "CAPRI star-3.0 source",
-   "source": "gams/arm/market1.gms and gams/special_ch/market1_ch.gms, literal assignments",
-   "priority": "low",
-   "status": "VERIFIED",
-   "note": "VERIFIED EXACTLY. The sigma column reproduces CAPRI's p_rhoArm1 with 0.0% deviation across all 16 directly comparable commodities, so this file was already correct. Despite the directory name, special_ch/market1_ch.gms is the authoritative source: arm/market1.gms includes it unconditionally at line 165 with the comment 'was commented as Special adjustments for Switzerland but actually assigns most CES elasticities'. Provenance is Fontagne, Guimbard and Orefice (2019), CEPII product-level trade elasticities, aggregated by FOAG to CAPRI market products. This also explains the earlier GTAP confusion: CAPRI does not use GTAP for these at all, so dat/arm/GTP57_134.gdx was never the right source. The intra-import elasticity (rhoArm2, added as column rho2 for 21 commodities) was missing entirely; it is consistently twice rhoArm1."
-  },
   "land_availability.csv": {
    "nature": "REAL_CAPRI",
    "vintage": "2017",
