@@ -5,6 +5,12 @@ REFERENCES to the code lists, CHECK ranges; units and sources as comments) and r
 rows). A `-- file: <path>` line names the CSV a CREATE TABLE loads; a `-- rule: <text>` line makes the next statement
 a rule. Files run in name order, so a file can reference the tables of the files before it.
 
+A `-- layout:` line between the file line and its CREATE TABLE says how the CSV is laid out:
+  wide      regions in rows, codes as columns (yields.csv): the table is declared long, (key, item, value), the
+            CSV's first column is the key, every other header an item; so the headers are checked against a code
+            list by the item column's REFERENCES, and the values by the value column's type and CHECK
+  unnamed   the first header is empty (a pandas index written without a name) and stands for the first declared column
+
 For each declared CSV, in an in-memory database, the check lists every violation, not only the first:
   columns   the file's header against the declared columns (names and order)
   types     values that do not convert to the declared type (CSV line numbers)
@@ -31,12 +37,15 @@ SHOW = 5          # examples shown per violation
 
 def parse(sql_text):
     """The statements of a declaration file, each with its kind ('table' with its CSV, 'rule' with its text, 'sql')."""
-    out, buf, pending_file, pending_rule = [], [], None, None
+    out, buf, pending_file, pending_rule, pending_layout = [], [], None, None, ""
     for line in sql_text.splitlines():
         s = line.strip()
         m = re.match(r"--\s*file:\s*(\S+)", s)
         if m and not buf:
             pending_file = m.group(1)
+            continue
+        if re.match(r"--\s*layout:", s) and not buf and pending_file:
+            pending_layout = s
             continue
         m = re.match(r"--\s*rule:\s*(.+)", s)
         if m and not buf:
@@ -50,16 +59,25 @@ def parse(sql_text):
             if pending_rule is not None:
                 out.append(("rule", pending_rule, stmt))
             elif re.match(r"\s*CREATE\s+TABLE", stmt, re.I) and pending_file:
-                out.append(("table", pending_file, stmt))
+                out.append(("table", pending_file, stmt + ("\n" + pending_layout if pending_layout else "")))
             else:
                 out.append(("sql", None, stmt))
-            buf, pending_file, pending_rule = [], None, None
+            buf, pending_file, pending_rule, pending_layout = [], None, None, ""
     if buf:
         raise ValueError("a statement without its closing ';'")
     return out
 
 
-def check_table(con, table, csv_path):
+def layout(stmt):
+    """The layout words of a declaration (its `-- layout:` line): a subset of {'wide', 'unnamed'}."""
+    m = re.search(r"--\s*layout:\s*(.+)", stmt)
+    words = set(re.findall(r"\w+", m.group(1))) if m else set()
+    if words - {"wide", "unnamed"}:
+        raise ValueError(f"unknown layout {sorted(words - {'wide', 'unnamed'})}")
+    return words
+
+
+def check_table(con, table, csv_path, lay=frozenset()):
     """Every violation of the table's declarations in the CSV, as (kind, message) pairs; then the load."""
     v = []
     cols = con.execute("SELECT column_name, data_type, is_nullable FROM duckdb_columns() WHERE table_name = ? "
@@ -70,19 +88,31 @@ def check_table(con, table, csv_path):
                 f"columns = {{{', '.join(repr(f'c{i}') + ': ' + repr('VARCHAR') for i in range(_ncols(csv_path)))}}}, "
                 "skip = 1)", [str(csv_path)])
     header = _header(csv_path)
-    if header != names:
+    if "unnamed" in lay and header and header[0] == "":
+        header = [names[0]] + header[1:]
+    if "wide" in lay:
+        if len(names) != 3 or header[0] != names[0] or len(header) < 2:
+            return [("columns", f"wide file: first header {header[:1]} against the key {names[:1]}, and a declared "
+                     f"(key, item, value) of 3 columns ({names})")]
+        items = ", ".join("'" + h.replace("'", "''") + "'" for h in header[1:])
+        vals = ", ".join(f"c{i}" for i in range(1, len(header)))
+        con.execute(f'CREATE OR REPLACE TEMP TABLE _raw AS SELECT _line, c0 AS "{names[0]}", unnest([{items}]) AS '
+                    f'"{names[1]}", unnest([{vals}]) AS "{names[2]}" FROM _stage')
+    elif header != names:
         return [("columns", f"header {header} against declared {names}")]
-    ren = ", ".join(f'c{i} AS "{n}"' for i, n in enumerate(names))
-    con.execute(f"CREATE OR REPLACE TEMP TABLE _raw AS SELECT _line, {ren} FROM _stage")
-    # types and not null
+    else:
+        ren = ", ".join(f'c{i} AS "{n}"' for i, n in enumerate(names))
+        con.execute(f"CREATE OR REPLACE TEMP TABLE _raw AS SELECT _line, {ren} FROM _stage")
+    # types and not null (in a wide file the item is named with the line)
+    at = f"_line || ' ' || \"{names[1]}\"" if "wide" in lay else "_line"
     for n, typ, nullable in cols:
         if typ != "VARCHAR":
-            bad = con.execute(f'SELECT _line, "{n}" FROM _raw WHERE "{n}" IS NOT NULL AND "{n}" <> \'\' '
+            bad = con.execute(f'SELECT {at}, "{n}" FROM _raw WHERE "{n}" IS NOT NULL AND "{n}" <> \'\' '
                               f'AND TRY_CAST("{n}" AS {typ}) IS NULL LIMIT {SHOW}').fetchall()
             if bad:
                 v.append(("types", f"{n} ({typ}): " + ", ".join(f"line {l}: {x!r}" for l, x in bad)))
         if not nullable:
-            bad = con.execute(f'SELECT _line FROM _raw WHERE "{n}" IS NULL OR "{n}" = \'\' LIMIT {SHOW}').fetchall()
+            bad = con.execute(f'SELECT {at} FROM _raw WHERE "{n}" IS NULL OR "{n}" = \'\' LIMIT {SHOW}').fetchall()
             if bad:
                 v.append(("not null", f"{n} empty at lines {[b[0] for b in bad]}"))
     if v:
@@ -145,7 +175,7 @@ def validate(root=ROOT, verbose=True):
                 if not path.exists():
                     found.append((arg, "file", "declared file missing"))
                     continue
-                for k, msg in check_table(con, table, path):
+                for k, msg in check_table(con, table, path, layout(stmt)):
                     found.append((arg, k, msg))
             elif kind == "rule":
                 rows = con.execute(stmt).fetchall()

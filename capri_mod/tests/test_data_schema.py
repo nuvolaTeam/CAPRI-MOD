@@ -63,3 +63,19 @@ def test_a_wrong_header_and_a_wrong_type_are_found(tmp_path):
     assert "line 3: 'x'" in found[0][2] and "[4]" in found[1][2]
     (root / "t.csv").write_text("value,key\n1,A\n")
     assert [k for _, k, _ in V.validate(root, verbose=False)] == ["columns"]
+
+
+def test_a_wide_file_is_checked_long(tmp_path):
+    """A wide file (regions in rows, codes as columns) is read as (region, item, value): a bad value is named with its
+    line and column; an unknown column header is a code no list knows, and the unit rule finds the item without unit."""
+    root = _copy(tmp_path)
+    y = "capri_data/2017/supply/yields.csv"
+    first = lambda line, new: ",".join([line.split(",")[0], new] + line.split(",")[2:])  # noqa: E731
+    _edit(root, y, lambda l: [l[0], first(l[1], "4.x")] + l[2:])
+    found = {(w, k): m for w, k, m in V.validate(root, verbose=False)}
+    assert "line 2 SWHE: '4.x'" in found[(y, "types")]
+    _edit(root, y, lambda l: [l[0].replace(",SWHE,", ",XXXX,"), first(l[1], "4.5")] + l[2:])
+    found = {(w, k): m for w, k, m in V.validate(root, verbose=False)}
+    assert "XXXX" in found[(y, "refs")] and "not in model_activities" in found[(y, "refs")]
+    rule = [m for (w, k), m in found.items() if k == "rule" and "unit declared" in w]
+    assert rule and "('yields', 'SWHE', 'unit declared for an item not in the table')" in rule[0]

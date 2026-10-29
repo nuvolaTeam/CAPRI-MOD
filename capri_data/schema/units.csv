@@ -39,3 +39,4 @@ U_CrPrperHdAndDay,Crude protein per head and day,yes
 U_NELper1000HdAndDay,Netto energy lactation per head and day,yes
 U_CrPrper1000HdAndDay,Crude protein per head and day,yes
 U_TonPerHd,Metric ton per head,no
+U_HdPerHd,Heads per head,no

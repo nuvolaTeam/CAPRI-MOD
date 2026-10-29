@@ -63,8 +63,23 @@ Beyond CAPRI (for the project lead to note): range checks, and enforcement at lo
 
 ## Points to settle while building
 
-1. Wide tables (regions in rows, activities as columns): the region key is a foreign key as declared; the column
-   headers are checked against the code list by a rule, or the validator reads the file long (region, item, value).
+1. Wide tables (regions in rows, activities as columns). **Settled 29 October 2026**: the validator reads the file
+   long. A `-- layout: wide` line declares the table as (key, item, value); the CSV's first column is the key, every
+   other header an item, so the headers are checked against the code list by the item column's `REFERENCES` and every
+   value by the value column's type and `CHECK`. `-- layout: unnamed` takes an empty first header (a pandas index
+   written without a name) as the first declared column. A long table's value column holds a different unit per item
+   (t/ha for a crop, t per head for milk), which `COMMENT ON COLUMN` cannot hold: the units are a table,
+   `value_units (tbl, item, unit, status, basis)`, filled by each declaration, with a rule that every item has its
+   unit and every unit is in the catalogue. `status` says how far the unit is established: `capri` (stated by CAPRI:
+   `CAPRIunits.gms`, `CAPRIunits.gdx`, CAPRI's documentation), `builder` (stated by the builder from the CAPRI item it
+   transforms, not found stated by CAPRI), `open` (not established; the unit is left empty). First declared
+   (`10_supply_2017.sql`): base_areas, land_availability, animal_numbers, yields, variable_costs, producer_prices.
+   The open units found: the yields (and so prices) of OCRO, OIND, NURS, FLOW (CAPRI's YILD / 1000 like the other
+   crops, but their magnitudes, FLOW median 138 "t/ha", do not show that CAPRI's YILD of these crops is kg per ha),
+   HFRS's yield (median 4.1 t per head), OANI's yield and cost (its level is an index), and the livestock rows of the
+   EU producer prices (origin not recorded, K72). `CAPRIunits.gms` assigns units to the market results (`yild` of a
+   product t/ha, prices EUR/t), not to the supply data's per-activity items, and the old `CAPRIunits.gdx` gives the
+   activities' LEVL units only (crops 1000 ha, animals 1000 heads, hens and poultry million heads, OANI an index).
 2. `MANIFEST.json` and `INPUT_SCHEMA.json`: retired once their content is in the declarations; `verify_schema.py`'s
    coverage count moves onto the declarations.
 3. `DATA_SOURCING_REGISTRY.json` (276 entries): the 37 that name a file give their provenance to the table comments.

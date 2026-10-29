@@ -52,6 +52,29 @@ CREATE TABLE regional_units (
 );
 COMMENT ON TABLE regional_units IS 'CAPRI''s regional units the model runs on (27 October 2026): unit, its member state, country';
 
+-- file: capri_data/schema/units.csv
+CREATE TABLE units (
+    code VARCHAR PRIMARY KEY,
+    description VARCHAR NOT NULL,
+    capri VARCHAR NOT NULL CHECK (capri IN ('yes', 'no'))   -- no: the model's own unit (model_units.csv)
+);
+COMMENT ON TABLE units IS 'the unit catalogue: CAPRI''s set capri_u (gams/CAPRIunits.gms) and the model''s own units (tools/build/build_unit_catalogue.py)';
+
+-- The unit of each value, per table and item (a wide table's value column holds a different unit per column: t/ha for
+-- a crop, t per head for milk). Filled by the declaration of each table (INSERT below its CREATE TABLE).
+--   status  capri    the unit is stated by CAPRI (CAPRIunits.gms, CAPRIunits.gdx or CAPRI's documentation)
+--           builder  stated by the table's builder from CAPRI's item it transforms; not found stated by CAPRI
+--           open     not established (unit empty): the value is used as it is, its unit is to be checked
+CREATE TABLE value_units (
+    tbl VARCHAR NOT NULL,
+    item VARCHAR NOT NULL,
+    unit VARCHAR,
+    status VARCHAR NOT NULL CHECK (status IN ('capri', 'builder', 'open')),
+    basis VARCHAR NOT NULL,
+    PRIMARY KEY (tbl, item),
+    CHECK ((unit IS NULL) = (status = 'open'))
+);
+
 -- rule: every CAPRI code of a model activity is a CAPRI production activity
 SELECT a.code, c.capri_code
 FROM (SELECT code, unnest(string_split(capri_codes, ';')) AS capri_code FROM model_activities) c
