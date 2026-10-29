@@ -6,7 +6,7 @@ Everything here is already in dumps held locally; no new GAMS run is required.
     LEVL                    activity levels -> base_areas, land_availability,
                             animal_numbers
     PRME                    CAP premium per activity -> cap_payments
-    NITF PHOF POTF          fertiliser application -> nutrient_coefs
+    NITF PHOF POTF          fertiliser application (counted; the file is extract_all_from_data2.py's)
     MANN MANP MANK          manure nutrients (new input; the environmental
                             module currently hardcodes N excretion)
     FEED FCER FGRA FMAI     feed use by item -> feed availability
@@ -119,11 +119,9 @@ def main() -> None:
     summary["herds"] = list(herd.shape)
     print(f"herd sizes      : {herd.shape[0]} regions x {herd.shape[1]} animals")
 
-    # 5. fertiliser application
+    # 5. fertiliser application: capreg_nutrient_coefs.csv is extract_all_from_data2.py's (the same records; one writer
+    # per file since 29 October 2026, docs/design/DATA_PIPELINE_DOIT.md); counted here for the summary only
     nu = df[df.item.isin(NUTRIENTS)].copy()
-    nu["nutrient"] = nu.item.map(NUTRIENTS)
-    nu[["model_region", "activity", "nutrient", "value"]].to_csv(
-        out / "capreg_nutrient_coefs.csv", index=False)
     summary["nutrients"] = int(len(nu))
     print(f"fertiliser      : {len(nu):,} records")
 
