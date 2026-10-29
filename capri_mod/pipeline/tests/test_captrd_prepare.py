@@ -8,7 +8,10 @@ waits for the full run.
 Records the stages not yet ported change, excluded by rule (docs/design/CAPTRD_MOD.md section 12.2):
   - reporting: aggreg_and_report.gms writes the product aggregates (OAGG rows of the market balance, UVAG, INHA, UVAD;
     l. 203-220) and the activity aggregates' TOOU into the same p_data position, after the estimation;
-  - policy (captrd_policy.gms): the quotas, the set-aside VSET and therefore UAAR in the set-aside years;
+  - policy (captrd_policy.gms): the quotas;
+  - not traced: VSET.LEVL of 1991-2005, which CAPTRD's p_data has at values with one decimal (8.2 for 1994 against
+    CAPREG's 8.3599...; no CAPTRD statement found that sets it, and COCO has no VSET for these years), and therefore
+    UAAR.LEVL, which sums the crop activities;
   - the COCO nowcasts and biofuel data (load_coco1_data.gms, from coco2_output.gdx): the biofuel columns and rows,
     the fuels, and isoglucose (HFCS) in the last CAPREG year, which COCO revises;
   - LU.LEVL (prep_data_for_estimation.gms l. 160-162 needs CAPRI's p_LUUnits, dat/policy/livestock_units.gms).
