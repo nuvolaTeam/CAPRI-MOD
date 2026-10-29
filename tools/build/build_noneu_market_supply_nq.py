@@ -15,12 +15,14 @@ build_eu_market_supply_nq.py takes it); it does not move in a simulation.
 Columns kept: the prices the model has for the region: its market products (the bilateral market's product map,
 build_bilateral_market.MODEL) and raw milk (the region's dairy block, capri_mod/market/dairy.py). Columns written with
 the model code empty and held at their calibration value by the market (registered, docs/DEPARTURES_FROM_CAPRI.md):
-the feed energy price FEDE (CAPRI's FeedBal_ of the non-EU regions, market audit M3, not built; no FEDE price in
-CAPRI's calibration data, so these terms are written with h_ratio 0) and the rents of the land inputs of CAPRI's
+the rents of the land inputs of CAPRI's
 market land use (TCRP land for temporary crops, FRUN for permanent crops, FODFAL fodder and fallow: xx1Land,
 arm/arm_sets.gms l. 140-150; the model has no land market outside the EU's supply models). The young animals carry
 only a placeholder own term (1) in CAPRI's export, no cross terms. Rows: every model market product and raw milk;
-the input rows (FEDE, the land types) and the young animals are left out.
+the input rows (FEDE, the land types) and the young animals are left out. The feed energy price FEDE (CAPRI's
+FeedBal_, market audit M3) is a column with model code FEDE and its CAPRI price at CAL from
+tools/build/build_feed_energy.py (arm/market1.gms l. 406: not in Data_CAL's export); until 29 October 2026 held, written
+with h_ratio 0.
 
 The Hessian is completed as CAPRI's market model completes it on loading (tools/lib/_capri_nq.py, arm/market1.gms
 l. 539-574): tiny cross terms deleted, products without ProdNQ_ deleted (for the regions with supply models in CAPRI,
@@ -65,6 +67,7 @@ DUMP = UP / "markmarket_greendeal_1730et_base_1717.txt"
 RMS_TO_RM = ROOT / "capri_data" / "shared" / "rms_to_rm.csv"
 UNITS = ROOT / "capri_data" / "sources" / "capri_res" / "gd2030_endotech_ini_nbalance.csv"
 OUT = ROOT / "capri_data" / "2017" / "market" / "noneu_market_supply_nq.csv"
+FEED_ENERGY = ROOT / "capri_data" / "2017" / "market" / "noneu_feed_energy.csv"
 #: CAPRI's EU market regions (trade blocks): their member states' supply is the supply models'
 EU_RM = ("A_EU_WEST", "A_EU_EAST", "EU27yr19")
 
@@ -117,20 +120,25 @@ def main():
                 if m:
                     inpe[m.group(1)] = num(m.group(2))
 
+    # the feed energy price FEDE of the regions with CAPRI's feed energy balance (FeedBal_, audit M3;
+    # tools/build/build_feed_energy.py: arm/market1.gms l. 406, not in Data_CAL's export)
+    fede = {}
+    if FEED_ENERGY.exists():
+        fede = {t.rms: float(t.fede_price) for t in read_csv(FEED_ENERGY).itertuples(index=False)}
     rows, missing = [], set()
     held = defaultdict(float)
     for r, x, y, h in terms:
         if not inpe.get(r):
             missing.add((r, "INPE 2030"))
             continue
-        p = data.get((r, "PPRI", y), 0.0)
+        p = data.get((r, "PPRI", y), 0.0) if y != "FEDE" else fede.get(r, 0.0)
         if not p:
             # a price CAPRI's calibration data does not carry for the region (FEDE: the feed energy balance's
             # shadow price; young animals priced at RM level): such a column is held, its term not usable
             held[y] += 0.0
             rows.append((REGION_MAP.get(rm_of[r], "ROW"), r, to_model[x], "", x, y, h, 0.0, inpe[r], 0.0))
             continue
-        ym = to_model.get(y, "")
+        ym = to_model.get(y, "") if y != "FEDE" else "FEDE"
         rows.append((REGION_MAP.get(rm_of[r], "ROW"), r, to_model[x], ym, x, y, h, p, inpe[r], h * p / inpe[r]))
         if not ym:
             held[y] += abs(h * p / inpe[r])

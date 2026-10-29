@@ -65,3 +65,19 @@ def read_supply_hessian(path: Path, keep_region, rmssup=()) -> dict:
         if (r, y, x) not in h:
             h[(r, y, x)] = v                                           # step 3
     return h
+
+
+def read_feed_hessian(path: Path, keep_region) -> dict:
+    """CAPRI's p_hessNQFeed at CAL for the regions keep_region accepts, completed as arm/market1.gms does: tiny cross
+    terms deleted by their p_elasFeed (l. 553), made symmetric (l. 575). The FEDE row's sign turn (l. 598) concerns a
+    row FeedNQ_ does not have (its domain is XX, FEDE is not in XX), so only the FEDE column is used."""
+    h = {k: v for k, v in _read(path, "p_hessNQFeed", keep_region).items() if v != 0.0}
+    el = _read(path, "p_ElasFeed", keep_region)
+    for (r, x, y) in list(h):
+        e = el.get((r, x, y), 0.0)
+        if x != y and e != 0.0 and abs(e) <= 1e-6:
+            del h[(r, x, y)]
+    for (r, x, y), v in list(h.items()):
+        if (r, y, x) not in h:
+            h[(r, y, x)] = v
+    return h
