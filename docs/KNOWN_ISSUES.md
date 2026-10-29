@@ -1192,7 +1192,15 @@ recorded only inside the status texts of K50 and K51 (resolved table) and README
 - **In 9t:** –
 - **Status:** **open**: registered as a departure (docs/DEPARTURES_FROM_CAPRI.md, 29 October 2026) and the linseed
   statements made to agree with the code (linseed and nitrate are in: columns of the regional model from
-  `supplement_effects.csv`); building the options remains
+  `supplement_effects.csv`); building the options remains. Scoped 29 October 2026: CAPRI's Green Deal technology
+  file (refpol_endotech_all_sup.gms, active_technologies.csv) switches on 3NOP, LegSh, ConsTill, NoTill and UreaSubst
+  among those not built. 3NOP (envind/line_nitr.gms l. 58-61, 83-86, 124-143, 217-221): dairy cows in stables for
+  305 of 365 days, 0.09% of dry matter, CH4ENT cut by 32.36 + 0.282 (dose - 70.5) - 0.915 (NDF - 32.9) - 3.08 (fat -
+  4.2) %, the ration's NDF and fat shares from CAPRI's digestibility table p_digestPar (envind/def_digestibility.gms:
+  NRC 2001 and INRA 2002 values written in CAPRI's code, then cleaned per region in digestibility.gms) over the
+  activity's base ration; cost 175 EUR per kg of active substance; no cost saving. Without an emission price its
+  share stays 0 (CAPRI's calibration), so it acts in the carbon-tax runs only. Needs p_digestPar as data (a CSV built
+  from CAPRI's code) and the rations' dry matter
 
 <a id="k94"></a>
 ### K94: `capri_mod/data/reconcile_base.py` is an orphan, and README's re-basing note points at a removed concordance (found 29 October 2026, registry migration)
