@@ -949,8 +949,18 @@ HR000000, K71); which solves they are is not recorded.
 
 - **Effect:** run time only
 - **In 9t:** –
-- **Status:** **open**, for the project lead's decision: trace the failing solves to their regions and steps, then see
-  whether a failing try can be cut short or skipped (a behaviour change: its own runs)
+- **Status:** **open**, diagnosed (29 October 2026; the project lead's decision: the cause first;
+  tools/check/k89_trace.py, the mini-EU Farm-to-Fork run in one process: 905 solves, 345 s of IPOPT, 43 failed, 254 s).
+  210 s are one episode in NL320000 at the scenario's first iteration: its solve at the tiered N target fails (warm
+  start 3,000 iterations, cold start infeasible), then the mineral-cap exemption search (written for the Green Deal's
+  caps, supply_module._capri_nlp_solve) exempts its crop groups one at a time, twice each: 30 cold solves, all
+  infeasible or at the iteration limit; JRC121368's relaxed target (K57) then solves in 59 iterations and is kept, so
+  every later solve of NL320000 succeeds. The caps are not what makes NL320000 infeasible, the N target is. The rest:
+  the cap searches of BG020000 and HR000000 (the exemptions they need, found: PERM, ROOF; about 30 s) and a few failed
+  starts of the jump check. In a full run of 221 units the NL320000 episode is the same single event, so its share of
+  the run time is a few percent, not the mini run's 74% of IPOPT time (an estimate). Options: try JRC121368's relaxed
+  target before the cap search where a tiered N target is in force (identical results where the cap search fails, as
+  in NL320000); or a solve without the N-surplus row first to see which constraint makes the problem infeasible
 
 ## NLP check (tools/nlp_check), what it showed
 
