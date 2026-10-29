@@ -107,7 +107,8 @@ def main() -> None:
             body.append("\n".join(lines[s - 1:e]))
         text = (f'"""{doc}\n\nRegionalSupplyModel\'s methods, moved unchanged from capri_mod/supply/supply_module.py (refactor '
                 f'stage 3a,\ndocs/design/ARCHITECTURE_REFACTOR.md); the module-level names they use are supply_module\'s, '
-                f'given to\nthis module once supply_module is loaded (capri_mod.supply.blocks.inject).\n"""\n\n\n'
+                f'given to\nthis module once supply_module is loaded (capri_mod.supply.blocks.inject); the annotations are '
+                f'not evaluated\n(they name supply_module\'s types).\n"""\nfrom __future__ import annotations\n\n\n'
                 f"class {cname}:\n" + "\n\n".join(body) + "\n")
         (BLOCKS / f"{blk}.py").write_text(text)
     init = ('"""The regional supply model\'s blocks (refactor stage 3a): mixins of supply_module.RegionalSupplyModel.\n\n'
