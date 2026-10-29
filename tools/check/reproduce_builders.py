@@ -417,13 +417,17 @@ def main():
                     full += sorted(str(Path(tmp) / n_) for n_ in z_.namelist() if not n_.endswith("/"))
             else:
                 full.append(a_)
-        pre = []
+        pre, env_ = [], env
         if o.trace:
+            # modules compiled from source into the temporary folder, so every module the builder imports is opened
+            # as its .py and recorded as code (with a valid __pycache__ only the cached .pyc is opened, and imported
+            # modules - tools/lib, other builders, capri_mod - were missing from the code lists until 29 October 2026)
+            env_ = {**env, "PYTHONPYCACHEPREFIX": str(Path(tmp) / "pycache")}
             # every file the builder and its child processes open or rename (strace: also Parquet and other C-level
             # readers that a Python hook does not see)
             pre = ["strace", "-f", "-qq", "-e", "trace=openat,rename,renameat,renameat2", "-o", str(Path(tmp) / "strace.log")]
         try:
-            r = subprocess.run(pre + [sys.executable, str(ROOT / "tools" / "build" / f"{name}.py"), *full], cwd=ROOT, env=env,
+            r = subprocess.run(pre + [sys.executable, str(ROOT / "tools" / "build" / f"{name}.py"), *full], cwd=ROOT, env=env_,
                                capture_output=True, text=True, timeout=o.timeout)
             if o.trace:
                 traces[cmd] = parse_strace(Path(tmp) / "strace.log", tmp)

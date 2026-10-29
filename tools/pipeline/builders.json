@@ -3799,6 +3799,31 @@
    "outputs": [
     "capri_data/trajectories/captrd_2030.json"
    ]
+  },
+  {
+   "task": "build_noneu_market_supply_nq",
+   "builder": "build_noneu_market_supply_nq",
+   "args": [],
+   "inputs": [
+    "capri_data/2017/feed/feed_cereal_mix_2030.csv",
+    "capri_data/2017/supply/crop_cost_shares.csv",
+    "capri_data/shared/capri_member_state_codes.csv",
+    "capri_data/shared/model_parameters.csv",
+    "capri_data/shared/regional_units.csv",
+    "capri_data/shared/rms_to_rm.csv",
+    "capri_data/sources/capri_res/gd2030_endotech_ini_nbalance.csv"
+   ],
+   "code": [
+    "tools/build/build_noneu_market_supply_nq.py"
+   ],
+   "external": [
+    "$UP/data_market_1730defaulta.csv",
+    "$UP/elas_2_1730defaulta.csv",
+    "$UP/markmarket_greendeal_1730et_base_1717.txt"
+   ],
+   "outputs": [
+    "capri_data/2017/market/noneu_market_supply_nq.csv"
+   ]
   }
  ]
 }
