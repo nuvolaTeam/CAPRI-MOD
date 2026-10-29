@@ -11,8 +11,12 @@ CAPRI (envind/gases.gms, supply/supply_model.gms):
                    manure N, revenue and costs);
   CO2LIM           one coefficient per ha of every crop activity, the region's UAAR CO2LIM (kg CO2/ha; gases.gms
                    (16): "kg lime emissions per ha equally distributed to crop and grassland");
-  CO2UREA          mineral N x the member state's urea share of mineral N (FracUseFert 'ureum') x 44/28; the share is
-                   recovered from CAPRI's own results: sum LEVL CO2UREA / sum LEVL NMIN / (44/28).
+  CO2UREA          mineral N x the member state's urea share of mineral N (FracUseFert 'ureum') x 44/28 (gases.gms
+                   l. 833): the share is CAPRI's FracUseFert as its simulation loads it (envind/ammo.gms l. 285-290, 535;
+                   capri_data/2017/abatement/ammonia/FracUseFert.csv, build_ammonia_tech_inputs.py). Checked on CAPRI's
+                   Green Deal 2030 result: its CO2UREA equals mineral N x this share x 44/28 in every country (KNOWN_ISSUES
+                   K93). Before 29 October 2026 the share was recovered from CAPREG's 2017 results (CO2UREA / NMIN /
+                   (44/28)), CAPREG's base-year share, which differs (CZ 0.116 against 0.016).
 Outputs:
   capri_data/2017/environment/livestock_ch4man_coef.csv, livestock_ch4ent_coef.csv  (region x animal, kg CH4/head)
   capri_data/2017/environment/crop_co2_coef.csv  (region, co2lim_kg_ha, urea_share)
@@ -34,6 +38,7 @@ _sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "che
 from _model_regions import CTRY as MS_CODE  # noqa: E402  CAPRI member-state codes (capri_member_state_codes.csv)
 sys.path.insert(0, str(ROOT)); sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check")]
 ENV = ROOT / "capri_data" / "2017" / "environment"
+FRAC_USE_FERT = ROOT / "capri_data" / "2017" / "abatement" / "ammonia" / "FracUseFert.csv"
 
 
 def main(dump: Path):
@@ -43,25 +48,20 @@ def main(dump: Path):
         t = L.build(dump, item)
         t.to_csv(ENV / name)
         print(name, t.shape, "median kg/head:", t.median().round(2).to_dict())
-    # CO2LIM per region (UAAR) and urea share per member state
+    # CO2LIM per region (UAAR); the urea share per member state is CAPRI's FracUseFert
     import re
     row = re.compile(r"'([A-Z]{2}[A-Z0-9]{6})'\.'([A-Z]+)'\.'([A-Z0-9]+)'\.'Y'\s+([^,\s]+)")
     cap: dict = defaultdict(lambda: defaultdict(dict))
     for path in sorted(dump.glob("res_17*.txt")):
         for line in open(path, errors="ignore"):
             m = row.match(line)
-            if m and m.group(3) in ("LEVL", "CO2LIM", "CO2UREA", "NMIN"):
+            if m and m.group(3) in ("LEVL", "CO2LIM"):
                 cap[m.group(1)][m.group(3)][m.group(2)] = B._num(m.group(4))
+    fuf = _read_csv(FRAC_USE_FERT)
+    share = {r[:2]: float(v) for r, f, v in zip(fuf["region"], fuf["fertiliser"], fuf["value"])
+             if str(f).lower() == "ureum" and str(r).endswith("000000")}
     areas = _read_csv(B.AREAS, index_col=0)
     spec = B.build_spec(cap, list(areas.index))
-    share = {}
-    for code, it in cap.items():
-        if not code.endswith("000000"):
-            continue
-        num = sum(it["LEVL"].get(a, 0.0) * v for a, v in it.get("CO2UREA", {}).items())
-        den = sum(it["LEVL"].get(a, 0.0) * it.get("NMIN", {}).get(a, 0.0) for a in it.get("CO2UREA", {}))
-        if den > 0:
-            share[code[:2]] = num / den / (44.0 / 28.0)
     rows = []
     for reg in areas.index:
         ms = MS_CODE.get(reg[:2], reg[:2])

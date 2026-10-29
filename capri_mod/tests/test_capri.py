@@ -2661,7 +2661,9 @@ def test_no_synthetic_inputs_reach_the_model(data):
 def test_ghg_accounts_take_capris_methane_and_co2(data):
     """Sprint 9s: manure and enteric CH4 per head are CAPRI's (CH4MAN, CH4ENT totals / census heads, regional:
     dairy manure CH4 in Germany ~2.6 times France's), CO2 from liming CAPRI's per ha of every crop (DE11 115.6
-    kg/ha) and from urea mineral N x the member state's urea share x 44/28; the GHG total is split into non-CO2
+    kg/ha) and from urea mineral N x the member state's urea share x 44/28, the share CAPRI's simulation uses
+    (FracUseFert, envind/gases.gms l. 833; CZ 0.016, where CAPREG's 2017 accounts imply 0.116; KNOWN_ISSUES K93); the
+    GHG total is split into non-CO2
     (JRC121368's figure) and CAPRI's GGWP (the emission tax's base: non-CO2 + liming)."""
     import pandas as pd
     m4 = data["livestock_ch4man_coef"]
@@ -2670,6 +2672,7 @@ def test_ghg_accounts_take_capris_methane_and_co2(data):
     assert de > 2.0 * fr
     co2 = data["crop_co2_coef"]
     assert abs(co2.at["DE110000", "co2lim_kg_ha"] - 115.616) < 0.01 and abs(co2.at["DE110000", "urea_share"] - 0.158) < 0.001
+    assert abs(co2.at["CZ010000", "urea_share"] - 0.016) < 1e-12
     h = data["animal_numbers"]
     eu = [r for r in h.index if not r.startswith("NO")]
     cols = [c for c in m4.columns if c in h.columns]

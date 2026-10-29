@@ -1235,8 +1235,9 @@ recorded only inside the status texts of K50 and K51 (resolved table) and README
   CAPREG's. The GROF.CO2UREA and CARB entries of the same result are another quantity (GROF = CARB x 44/12 in every
   country: carbon and its CO2), not the urea term. Consequence: the model's reported CO2_UREA (environmental_module,
   crop_co2_coef's urea_share) is CAPREG's base-year share, not CAPRI's 2030 simulation's (CZ 0.116 against 0.016);
-  to be switched to p_fracUseFert with the UreaSubst port (reporting only: CO2 from urea is outside CAPRI's GGWP tax
-  base)
+  switched to FracUseFert the same day (tools/build/build_ghg_coefs_2017.py; reporting only: CO2 from urea is
+  outside CAPRI's GGWP tax base; Norway stays at 0, its p_NO_FracUseFert not in hand). EU CO2 from urea changes
+  with the next runs (e.g. Romania 0.342 -> 0.050, Croatia 0.337 -> 0.050, Poland 0.249 -> 0.345)
 
 <a id="k94"></a>
 ### K94: `capri_mod/data/reconcile_base.py` is an orphan, and README's re-basing note points at a removed concordance (found 29 October 2026, registry migration)
