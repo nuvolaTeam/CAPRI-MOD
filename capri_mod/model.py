@@ -2120,14 +2120,14 @@ class CAPRIModel:
 
     def _yani_in_market_now(self) -> bool:
         """The young-animal markets are cleared inside the market (CAPRI's yaniMarket_ with the market's supply
-        functions): with CAPRI's market supply functions (market.market_supply_nq) built and one EU market (the trade
-        blocks keep the price update between solves)."""
+        functions): with CAPRI's market supply functions (market.market_supply_nq) built, for the EU market or each of
+        CAPRI's two trade blocks (their Hessians, the sum of their member states'; since 29 October 2026 the blocks as
+        the one EU market)."""
         mm = self.market_module
         hs = mm.par.supply_hessian or {}
-        h_eu = hs.get("eu")
-        return (bool(getattr(self, "market_supply_nq", False))
-                and not getattr(mm, "eu_blocks", False) and h_eu is not None and len(h_eu)
-                and any(str(x).startswith("YANI:") for x in h_eu.index))
+        hl = list((hs.get("blocks") or {}).values()) if getattr(mm, "eu_blocks", False) else [hs.get("eu")]
+        return (bool(getattr(self, "market_supply_nq", False)) and len(hl) > 0
+                and all(h is not None and len(h) and any(str(x).startswith("YANI:") for x in h.index) for h in hl))
 
     def _young_animal_state_to_market(self, supply_results, ref) -> None:
         """The supply models' young-animal state for the market's clearing (CAPRI simu_calibration_to_supply.gms

@@ -27,7 +27,7 @@ class MarketEvalState:
     #: the dairy block's solution inside the raw milk clearing (audit M5), for supply_response
     dairy_m5_now: Any = None
     #: raw milk delivered against the supply models' (kt), from the member states' milk clearing
-    milk_dq_now: Optional[float] = None
+    milk_dq_now: Optional[dict] = None          # {EU market region: kt} (M5)
     #: the EU's raw milk supply per member state at the evaluation (dairy block)
     eu_milk_supply_now: Any = None
     #: the EU dairy block's last solution
