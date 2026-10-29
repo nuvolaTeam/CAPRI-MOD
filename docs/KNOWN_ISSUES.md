@@ -9,7 +9,7 @@ The data sourcing registry's log of checks, fixes and decisions (201 entries, mo
 [KNOWN_ISSUES_REGISTRY_LOG.md](KNOWN_ISSUES_REGISTRY_LOG.md), verbatim, with the triage of its open entries against
 the code: they became K92-K96, joined K73, K80, K91, or were closed or historical.
 
-## Open (18)
+## Open (19)
 
 | # | Issue | Status |
 |---|---|---|
@@ -31,6 +31,7 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K92](#k92) | Farm-to-Fork changes furthest from JRC121368, besides the milk price | open |
 | [K93](#k93) | CAPRI mitigation options not built; documents disagree on which are in | open |
 | [K101](#k101) | Model inputs without a builder (census of a run's reads) | open, in part fixed |
+| [K102](#k102) | Data files that no run and no builder reads (census) | open, in part fixed |
 
 ## Resolved (83)
 
@@ -1396,4 +1397,34 @@ into the file.
   and the parameter table kept as declared; the EU supply elasticities rebuilt on the model's EU27 (the project lead's
   decision). Left: the census to be repeated on the gate runs' manifests (a full EU run
   reads files a one-region run may not)
+
+<a id="k102"></a>
+### K102: Data files that no run and no builder reads (census, found 29 October 2026)
+
+The run manifests of a full Farm-to-Fork run (r186) and a one-region Green Deal run (lv_gd4) list every file the
+model's main process reads; the pipeline's trace (tools/pipeline/builders.json) every file a builder reads. Under
+capri_data/2017 and shared/, 46 files are in neither. By kind:
+
+- read only under a setting that is off by default (kept): the EU trade blocks' market files (*_eu2.csv,
+  market.eu_blocks), the cattle member splits' PMP files and per-sex young animals (K65), the 2017 tariff-rate quotas
+  (the 2017 market year), the water module's irrigation, the NUTS 2024 reporting units, the 2017 trade flows;
+- written in batch 6 and not yet run (the M3 files, the regional nutrient coefficients, the EU supply elasticities and
+  cake weights): read by the batch-6 gate;
+- read by nothing and written by no builder: crop_nutrient_export.csv, eu_mfn_tariffs.csv (listed in the loaders'
+  file map only), min_share_mineral_fert.csv (K9's floor, superseded by the inner fertiliser distribution),
+  nvz_p_soilTypes.csv: **removed 29 October 2026** (batch 6), with their register entries;
+- written by an extractor and read by nothing: 17 symbols of CAPRI's ammonia data (tools/build/build_ammonia_tech_inputs.py
+  writes every symbol of CAPRI's MITERRA and holdings files: ControlStrat_TS, CorrND, FracNVZNuts2(_full),
+  FracToepHouse, FracToepStorage, FracUseFert, PercPeat, ScalarArray, costs/scalars, rCorrND, rLFManureBasis,
+  rLFManureND, reducBio, the Nitrates Directive's min shares and obligations) and three of the mitigation inputs
+  (p_ccEfa, p_tillageCover, p_winterCoverShare0; build_mitigation_inputs.py): CAPRI's data for parts not ported
+  (the Nitrates Directive's NDtech is off in CAPRI's Green Deal runs; tillage, K93) or not needed;
+- fao_market_baseline.json: read by a coverage test only (the market reads CAPRI's balances): to be settled with that
+  test.
+
+- **Effect:** none on results
+- **In 9t:** –
+- **Status:** open, in part fixed: four orphans removed; for the extractors' unread symbols the project lead's
+  decision (keep them as CAPRI's source data in CSV for the parts still to port, or have the extractors write only what
+  the model reads)
 

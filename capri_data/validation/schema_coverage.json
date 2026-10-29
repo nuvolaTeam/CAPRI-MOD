@@ -213,19 +213,6 @@
    ],
    "known_gaps": []
   },
-  "crop_nutrient_export": {
-   "file": "2017/environment/crop_nutrient_export.csv",
-   "exists": true,
-   "live_cells": 105,
-   "nonzero_cells": 105,
-   "source_type": "CAPRI_SOURCE",
-   "source_ref": "CAPRI documentation Table 15",
-   "confidence": "validated",
-   "modules": [
-    "environment"
-   ],
-   "known_gaps": []
-  },
   "climate_zones": {
    "file": "2017/environment/climate_zones.csv",
    "exists": true,
@@ -249,19 +236,6 @@
    "confidence": "validated",
    "modules": [
     "environment"
-   ],
-   "known_gaps": []
-  },
-  "eu_mfn_tariffs": {
-   "file": "2017/policy/eu_mfn_tariffs.csv",
-   "exists": true,
-   "live_cells": 32,
-   "nonzero_cells": 32,
-   "source_type": "EXTERNAL",
-   "source_ref": "TARIC/WTO",
-   "confidence": "validated",
-   "modules": [
-    "market"
    ],
    "known_gaps": []
   }

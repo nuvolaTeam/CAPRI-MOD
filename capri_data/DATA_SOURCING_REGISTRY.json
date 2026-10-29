@@ -110,7 +110,8 @@
    "vintage": "2017",
    "source": "CAPRI",
    "best_update": "current MFN schedule",
-   "priority": "low"
+   "priority": "low",
+   "status": "REMOVED (29 October 2026, KNOWN_ISSUES K102: read by no model code and no builder)"
   },
   "land_availability.csv": {
    "nature": "REAL_CAPRI",
@@ -185,7 +186,7 @@
   "crop_nutrient_export.csv": {
    "nature": "REAL_CAPRI",
    "vintage": "CAPRI star-3.0 doc Table 15",
-   "status": "RECLASSIFIED from LITERATURE",
+   "status": "REMOVED (29 October 2026, KNOWN_ISSUES K102: read by no model code and no builder)",
    "note": "CAPRI documentation Table 15 gives these as CAPRI's own nutrient export coefficients (soft wheat 20/8/6 N/P/K kg per ton). Not external literature after all."
   },
   "climate_zones.csv": {

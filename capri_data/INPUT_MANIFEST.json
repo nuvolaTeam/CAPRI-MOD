@@ -105,26 +105,11 @@
    "coverage": "the 58 market commodities and DWHE, SUGB; per-row CAPRI code in sources/world_price_provenance.json (tools/build/build_world_prices.py)",
    "note": "Validated via the producer/world arbitrage ratio using verified MPRI prices. Model retained for 7 commodities where CAPRI implies a domestic price below world; EGGS corrected from CAPRI (63.4 -> 1173.8). Rows = the market module's 39 traded commodities, as armington_params.csv (October 2026: four price-only rows - SOYA_OIL and SOYM, older names duplicating SOYO and SOYC, and WMLK, CREM, dairy products outside the market set - removed as orphans; provenance kept in sources/world_price_provenance.json). Sprint 9f: + FRMI, CREM, COCM, WMIO, CASE (CAPRI's dairy products, traded)."
   },
-  "eu_mfn_tariffs.csv": {
-   "concept": "MFN applied tariffs",
-   "unit": "EUR/t or ad valorem",
-   "dimension": "commodity",
-   "capri_symbol": "pol_input",
-   "status": "EXTERNAL",
-   "note": "Ultimately from TARIC/WTO. CAPRI carries a processed version; either is defensible if the year is declared."
-  },
   "climate_zones.csv": {
    "concept": "regional climate zone shares",
    "dimension": "region x zone",
    "status": "LITERATURE",
    "note": "IPCC zone classification, not a CAPRI output."
-  },
-  "crop_nutrient_export.csv": {
-   "concept": "nutrient removal per tonne of harvest",
-   "unit": "kg/t",
-   "dimension": "crop x nutrient",
-   "status": "GDX",
-   "note": "CAPRI doc Table 15, reclassified from LITERATURE."
   },
   "pela_cross_price": {
    "concept": "cross-price supply elasticity between crops",
