@@ -111,14 +111,6 @@ def parse_param(lines, name):
     return out
 
 
-def parse_scalar(lines, name):
-    for l in lines:
-        m = re.match(rf'^\s*Scalar\s+{name}\b[^/]*/\s*([-+0-9.eE]+)\s*/', l, re.I)
-        if m:
-            return float(m.group(1))
-    return None
-
-
 def main(src: Path):
     lines = _lines(src)
     OUT.mkdir(parents=True, exist_ok=True)
@@ -140,11 +132,7 @@ def main(src: Path):
             for rk, v in rows:
                 w.writerow(list(rk) + [repr(v)])
         report.append((name, len(rows)))
-    with open(OUT / "scalars.csv", "w", newline="", encoding="utf-8") as f:
-        w = csv.writer(f)
-        w.writerow(["name", "value", "meaning"])
-        w.writerow(["p_r", repr(parse_scalar(lines, "p_r")), "discount rate (share)"])
-    report.append(("scalars", 1))
+    # (scalars.csv, the discount rate p_r, was written here until 29 October 2026: read by no code, K102)
     return report
 
 
