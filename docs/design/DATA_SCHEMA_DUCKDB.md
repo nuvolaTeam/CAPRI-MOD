@@ -87,6 +87,9 @@ Beyond CAPRI (for the project lead to note): range checks, and enforcement at lo
    checks CAPRI's market map FEED_TO_XX (FEED_TO_O plus WHEA in FCER, arm/arm_sets.gms l. 508-509), which the first
    draft against FEED_TO_O alone found. `99_rules.sql`: every numeric column of a long table has a unit in the
    catalogue (information_schema; tables with per-item units are left to their own rules).
+   `14_policy_targets.sql`: CAPRI's Green Deal targets, the organic yield gaps, the yields' price elasticities.
+   `22_market_feed_energy.sql`: the feed energy balance of audit M3 (rule: FedeBal_ holds at the calibration point),
+   the EU's cake feed weights, the EU supply elasticities. 59 files declared (29 October 2026).
    The open units found, and settled where the data allow (29 October 2026): the yields of OCRO, OIND, NURS, FLOW are
    value units per ha (CAPRI measures these crops in value: MPRI an index near 1000, MREV = YILD / 1000 x MPRI; the
    model's own unit U_ValueUnitPerHa); HFRS's yield has no single unit (its CAPRI members' YILD measure meat and raised
