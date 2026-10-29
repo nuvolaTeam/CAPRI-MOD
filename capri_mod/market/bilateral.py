@@ -46,23 +46,27 @@ class BilateralCommodity:
     #: n x n transport cost of each flow (EUR/t, CAPRI TCost): with a0 r the base of an ad valorem tariff change
     tc: Optional[np.ndarray] = None
 
-    def calibrate(self, S0: np.ndarray, max_export_share: float = 0.98) -> None:
+    def calibrate(self, S0: np.ndarray) -> None:
         """Closure at the model's own base supply S0: CAPRI's trade flows are kept, domestic sales absorb the
-        difference between the model's production and CAPRI's (DS0 = S0 - exports); where a region would
-        export more than max_export_share of its production its exports are scaled down."""
+        difference between the model's production and CAPRI's (DS0 = S0 - exports). Where a region's CAPRI exports
+        exceed its base supply S0 they are scaled down to S0 (no domestic sales): with CAPRI's market data of the
+        market year (crushing, biofuels: K106) this happens only for the rows set by the supply models (step F,
+        DEPARTURES_FROM_CAPRI.md), not in CAPRI's own non-EU data, where exports never exceed production. Until
+        30 October 2026 exports were capped at 0.98 of S0 everywhere (PROXY_AUDIT S192), which also forced 2% domestic
+        sales on the regions that export nearly all of their production in CAPRI's data (Indonesia's coffee 99.99%)."""
         n = len(self.regions)
         X = self.X0.copy()
         off = ~np.eye(n, dtype=bool)
-        # regions whose CAPRI exports exceed the cap on the model's base supply: (region, exports / supply). Recorded
-        # so the runs show whether the 0.98 (not CAPRI's: PROXY_AUDIT S192) is ever reached
+        # regions whose CAPRI exports exceed the model's base supply by more than rounding: (region, exports /
+        # supply), recorded for the runs' metadata and warned
         self.export_cap_hits = []
         for j in range(n):
             e = float(X[off[:, j], j].sum())
-            cap = max_export_share * max(float(S0[j]), 0.0)
-            if e > cap:
-                self.export_cap_hits.append((self.regions[j], e / float(S0[j]) if float(S0[j]) > 0 else float("inf")))
-                f = cap / e if e > 0 else 0.0
-                X[off[:, j], j] *= f
+            s0 = max(float(S0[j]), 0.0)
+            if e > s0:
+                if e > s0 * (1.0 + 1e-6):
+                    self.export_cap_hits.append((self.regions[j], e / s0 if s0 > 0 else float("inf")))
+                X[off[:, j], j] *= (s0 / e) if e > 0 else 0.0
         E = np.array([X[off[:, j], j].sum() for j in range(n)])
         DS = np.maximum(S0 - E, 0.0)
         X[np.arange(n), np.arange(n)] = DS

@@ -2900,7 +2900,7 @@ def test_palm_and_other_vegetable_oils_are_markets(model):
     from capri_mod.market.market_module import MarketModule
     assert {"PLMO", "OTHO"} <= set(MARKET_COMMODITIES)
     assert MarketModule.EU_MARKET_SUPPLY == frozenset({"OTHO", "FFIS", "SFIS", "OAQU"})
-    fs = pd.read_csv(DATA_DIR / "2017" / "market" / "biofuel_feedstock.csv")
+    fs = pd.read_csv(DATA_DIR / "2017" / "market" / "biofuel_feedstock_2030.csv")
     assert (fs.loc[fs.feedstock == "PLMO", "commodity"] == "PLMO").all()
     mm = model.market_module
     cols = list(mm.commodities)

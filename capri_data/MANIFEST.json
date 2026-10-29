@@ -965,9 +965,35 @@
    },
    "note": "CAPRI's low/high-intensity fattening bulls and heifers per model region and animal (BULL, HFRS): stall shares, per-stall relative differences (manure N, beef, young animals, energy, protein, dry matter), PMP curvature of the stall shift; tools/build/build_cattle_intensity.py, Sprint 7c.; q_<x>_capri2030 / _recipe2030: the 2030 calibration's curvature (tools/build/build_intensity_q_2030.py, 22 October 2026); splits int / rep (HEIR) / male / female / sex (calves) since 22 October 2026 (column split)"
   },
-  "biofuel_feedstock.csv": {
-   "source": "CAPRI 2030 Green Deal reference market results (markmarket_greendeal_1730et_base_1717 dataOut: BIOF, PRCB, PRCBY, ARM1P, PPRI DDGS, BiofFeedCost); arm/market1.gms p_rhoBioFuel; arm/store_prices.gms glycerine",
-   "vintage": "2030 reference",
+  "biofuel_feedstock_2017.csv": {
+   "source": "CAPRI's 2017 market data (market_base_1717 dataOut, base year 2017 calibrated from data): BIOF, PRCB, PRCBY, ARM1P, PPRI DDGS, BiofFeedCost); arm/market1.gms p_rhoBioFuel; arm/store_prices.gms glycerine",
+   "vintage": "2017 market year",
+   "units": "kt; t/t; EUR/t",
+   "domain": "market",
+   "status": "live",
+   "shape": {
+    "rows": 296,
+    "cols": 12,
+    "columns": [
+     "region",
+     "biofuel",
+     "feedstock",
+     "commodity",
+     "biof_kt",
+     "prcb",
+     "prcby",
+     "byproduct",
+     "feed_price",
+     "byproduct_price",
+     "rho",
+     "numeraire"
+    ]
+   },
+   "note": "First-generation biofuel feedstocks per CAPRI market region and biofuel (all regions; column region = model trade region): 2030-reference quantity, biofuel and by-product yields, feedstock and by-product prices, numeraire, CES elasticity (tools/build/build_biofuel_market.py). Reproduces CAPRI's BiofFeedCost exactly in every region."
+  },
+  "biofuel_feedstock_2030.csv": {
+   "source": "CAPRI 2030 Green Deal reference market results (markmarket_greendeal_1730et_base_1717 dataOut): BIOF, PRCB, PRCBY, ARM1P, PPRI DDGS, BiofFeedCost); arm/market1.gms p_rhoBioFuel; arm/store_prices.gms glycerine",
+   "vintage": "2030 market year",
    "units": "kt; t/t; EUR/t",
    "domain": "market",
    "status": "live",
@@ -991,9 +1017,26 @@
    },
    "note": "First-generation biofuel feedstocks per CAPRI market region and biofuel (all regions; column region = model trade region): 2030-reference quantity, biofuel and by-product yields, feedstock and by-product prices, numeraire, CES elasticity (tools/build/build_biofuel_market.py). Reproduces CAPRI's BiofFeedCost exactly in every region."
   },
-  "biofuel_use_share.csv": {
-   "source": "CAPRI 2030 reference: biofuel feedstock use over EU use (HCOM+FEDM+INDM+BIOF+LOSM) of the market group",
-   "vintage": "2030 reference",
+  "biofuel_use_share_2017.csv": {
+   "source": "CAPRI's 2017 market data (market_base_1717 dataOut, base year 2017 calibrated from data): biofuel feedstock use over EU use (HCOM+FEDM+INDM+BIOF+LOSM) of the market group",
+   "vintage": "2017 market year",
+   "units": "kt; share",
+   "domain": "market",
+   "status": "live",
+   "shape": {
+    "rows": 13,
+    "cols": 3,
+    "columns": [
+     "biof_kt",
+     "use_kt",
+     "share"
+    ]
+   },
+   "note": "Share of the EU use of each model market commodity that goes to biofuels (tools/build/build_biofuel_market.py)."
+  },
+  "biofuel_use_share_2030.csv": {
+   "source": "CAPRI 2030 Green Deal reference market results (markmarket_greendeal_1730et_base_1717 dataOut): biofuel feedstock use over EU use (HCOM+FEDM+INDM+BIOF+LOSM) of the market group",
+   "vintage": "2030 market year",
    "units": "kt; share",
    "domain": "market",
    "status": "live",
@@ -1388,9 +1431,53 @@
    },
    "note": "olive oil per tonne of olives (member state) and milled rice per tonne of paddy (EU) (tools/build/build_processing_yields.py)"
   },
-  "biofuel_market.csv": {
-   "source": "CAPRI 2030 Green Deal reference market results (markmarket_greendeal_1730et_base_1717 dataOut: PROD, NAGR, SECG, EXOG, BIOF, PPRI, PMRK, CPRI, ARM1P, QUTS, HCOM and CPRI of GASL/DISL, feedstock BIOF/PRCB/PRCBY/ARM1P); biofuel/def_biofuel_params.gms; arm/market_model.gms p_oilEqu",
-   "vintage": "2030 reference",
+  "biofuel_market_2017.csv": {
+   "source": "CAPRI's 2017 market data (market_base_1717 dataOut, base year 2017 calibrated from data): PROD, NAGR, SECG, EXOG, BIOF, PPRI, PMRK, CPRI, ARM1P, QUTS, HCOM and CPRI of GASL/DISL, feedstock BIOF/PRCB/PRCBY/ARM1P); biofuel/def_biofuel_params.gms; arm/market_model.gms p_oilEqu",
+   "vintage": "2017 market year",
+   "units": "kt; EUR/t; share; toe/t",
+   "domain": "market",
+   "status": "live",
+   "shape": {
+    "rows": 120,
+    "cols": 30,
+    "columns": [
+     "region",
+     "biofuel",
+     "rmssup",
+     "prod_kt",
+     "x0_kt",
+     "fixed_kt",
+     "ppri",
+     "pmrk",
+     "bfc",
+     "pr0",
+     "sup_scale",
+     "sup_alfa",
+     "sup_beta",
+     "sup_slope",
+     "sup_turn",
+     "biof_kt",
+     "cpri",
+     "arm1p",
+     "fossil_cpri",
+     "hcon_kt",
+     "oil_eq",
+     "oil_eq_fossil",
+     "quts",
+     "cal_share",
+     "dem_max",
+     "dem_slope",
+     "dem_turn",
+     "proc_kt",
+     "proc_hess",
+     "inpe"
+    ]
+   },
+   "note": "CAPRI's biofuel supply (SupplyBiof_), demand (biofDemShare_, biofDem_) and non-fuel processing (ProcNQ_: proc_kt, proc_hess from p_hessNQProc, INPE price) functions per CAPRI market region, calibrated as biofuel/def_biofuel_params.gms to the 2030 reference; tools/build/build_biofuel_market.py, docs/BIOFUEL_MARKET.md."
+  },
+  "biofuel_market_2030.csv": {
+   "source": "CAPRI 2030 Green Deal reference market results (markmarket_greendeal_1730et_base_1717 dataOut): PROD, NAGR, SECG, EXOG, BIOF, PPRI, PMRK, CPRI, ARM1P, QUTS, HCOM and CPRI of GASL/DISL, feedstock BIOF/PRCB/PRCBY/ARM1P); biofuel/def_biofuel_params.gms; arm/market_model.gms p_oilEqu",
+   "vintage": "2030 market year",
    "units": "kt; EUR/t; share; toe/t",
    "domain": "market",
    "status": "live",

@@ -124,6 +124,15 @@ class MarketModule(CalibrationMixin, BiofuelMixin, DairyMixin, FeedMixin, Demand
         self.par.base_production0 = self.par.base_production.copy()
         self.par.base_consumption0 = self.par.base_consumption.copy()
 
+    #: the base year, the market year's default when the data name none
+    DEFAULT_MARKET_YEAR = 2017
+
+    def _market_year(self) -> int:
+        """The market year (data["market_year"]): the year of CAPRI's market data the market calibrates to and of
+        the yearly input files (bilateral flows, crushing, biofuels)."""
+        d = self.data if isinstance(self.data, dict) else {}
+        return int(d.get("market_year", self.DEFAULT_MARKET_YEAR) or self.DEFAULT_MARKET_YEAR)
+
     def _inp(self) -> MarketInputs:
         """The data adapter (one for the package's own data where the module was built without __init__)."""
         inp = self.__dict__.get("inputs")

@@ -1,22 +1,31 @@
-"""CAPRI's oilseed crushing per model trade region: capri_data/2017/market/crushing_parameters.csv.
+"""CAPRI's oilseed crushing per model trade region and market year: capri_data/2017/market/crushing_parameters_<YEAR>.csv.
 
-Per (trade region, seed) for rapeseed, sunflower and soybeans, from CAPRI's FAO_agg base period (FAO_agg_17_defaulta
-p_dataMarket, 'BAS'): crush = the seed's industrial use (INDM), oil and cake yields = their production (MAPR) / crush,
-and the crushing elasticity p_ElasProc(r, seed, seed, 'CAL') (elas_2_1717defaulta). CAPRI regions that the model does
-not trade separately are summed into ROW (tools/build/recalibrate_trade_2017.REGION_MAP; the 44 trading regions of
-sources/capri_trade_regions_2017.json, without the EU), their elasticity the crush-weighted mean of the members'.
+Per (trade region, seed) for rapeseed, sunflower and soybeans, from CAPRI's market data of the market year (dataOut of
+the market model's calibration point: market_base_1717 for 2017, markmarket_greendeal_1730et_base_1717 for 2030):
+crush = the seed's processing PROC, oil and cake yields = CAPRI's PRCY (summed over CAPRI regions as sum PROD / sum
+PROC), and the crushing elasticity p_ElasProc(r, seed, seed, 'CAL') (elas_2_17<YEAR>defaulta). In CAPRI's data the
+processing identity ProcO_ holds (PROD(oil, cake) = PROC(seed) x PRCY; arm/calibrate_market_data.gms l. 72-82 and
+1123-1130), so the market's crushing reproduces CAPRI's oil and cake production of the market year. CAPRI regions that
+the model does not trade separately are summed into ROW (tools/build/recalibrate_trade_2017.REGION_MAP; the 44 trading
+regions of sources/capri_trade_regions_2017.json, without the EU), their elasticity the crush-weighted mean of the
+members'.
 
-EU27: the sums over CAPRI's member states (crush, yields, crush share of domestic use DOMM) and the median of their
-p_ElasProc; they reproduce the earlier file's rounded values.
+EU27: the sums over CAPRI's member states (crush, PROD, crush share of domestic use, the use as PROD + IMPORTS - EXPORTS
+of the seed) and the median of their p_ElasProc.
+
+Until 30 October 2026 the file was one, crushing_parameters.csv, with the yields of FAO_agg's base period (p_dataMarket
+'BAS': INDM, MAPR), the raw data before CAPRI's market calibration: the oils then fell short of CAPRI's production
+(Australia's soybean oil yield 0.1776 against CAPRI's 0.1937) and the market's export cap had to absorb it (KNOWN_ISSUES
+K106).
 
 Until 23 October 2026 the file was JSON, held 20 non-EU regions, and pairs whose yields fell outside a plausibility
 band (oil + cake > 1.05 t per t, a yield outside 0.1-0.95) were left out. Those regions' oil and cake supply then fell
 back to a flat elasticity of 0.10-0.107 (armington_params.csv eps, no CAPRI source). Now every region with CAPRI
 crushing data has its row, with CAPRI's yields as they are.
 
-    python tools/build/build_crushing_parameters.py [--fao FILE] [--elas FILE]
-
-Checked on 23 October 2026: it reproduces every pair of the earlier JSON (to its 4-decimal rounding), EU27 included.
+    python tools/build/build_crushing_parameters.py --year 2017 --market market_base_1717.txt --elas elas_2_1717defaulta.csv
+    python tools/build/build_crushing_parameters.py --year 2030 --market markmarket_greendeal_1730et_base_1717.txt \
+        --elas elas_2_1730defaulta.csv
 """
 from __future__ import annotations
 
@@ -29,9 +38,7 @@ from collections import defaultdict
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-FAO = Path("/mnt/user-data/uploads/fao_agg_17_datamarket.txt")
-ELAS = Path("/mnt/user-data/uploads/elas_2_1717defaulta.csv")
-OUT = ROOT / "capri_data" / "2017" / "market" / "crushing_parameters.csv"
+OUT_DIR = ROOT / "capri_data" / "2017" / "market"
 CHAINS = {"RAPE": ("RAPO", "RAPC"), "SUNF": ("SUNO", "SUNC"), "SOYA": ("SOYO", "SOYC")}
 COLS = ["region", "seed", "crush_kt", "oil_yield", "cake_yield", "elasticity", "elasticity_source", "crush_share_of_use",
         "capri_regions"]
@@ -49,8 +56,11 @@ def region_map():
     return out
 
 
-def read_fao(path: Path, regions):
-    rx = re.compile(r"^'([^']+)'\.'(INDM|MAPR)'\.'(RAPE|SUNF|SOYA|RAPO|RAPC|SUNO|SUNC|SOYO|SOYC)'\.'BAS'\s+([-\d.Ee+]+)")
+def read_market(path: Path, year: str, regions):
+    """{CAPRI region: {(item, product): value}} of dataOut(region, '', item, product, year) for PROC, PROD, PRCY,
+    IMPORTS, EXPORTS of the seeds, oils and cakes (1000 t; PRCY t per t)."""
+    rx = re.compile(r"^'([^']+)'\.''\.'(PROC|PROD|PRCY|IMPORTS|EXPORTS)'\.'(RAPE|SUNF|SOYA|RAPO|RAPC|SUNO|SUNC|SOYO|SOYC)'\."
+                    r"'" + year + r"'\s+([-\d.Ee+]+)")
     d = defaultdict(dict)
     with open(path, errors="ignore") as f:
         for line in f:
@@ -58,7 +68,7 @@ def read_fao(path: Path, regions):
                 continue
             m = rx.match(line)
             if m and m.group(1) in regions:
-                d[m.group(1)][(m.group(2), m.group(3))] = float(m.group(4)) / 1000.0     # t -> kt
+                d[m.group(1)][(m.group(2), m.group(3))] = float(m.group(4))
     return d
 
 
@@ -77,9 +87,9 @@ def read_elas(path: Path):
     return e
 
 
-def build(fao: Path, elas: Path):
+def build(market: Path, year: str, elas: Path):
     rmap = region_map()
-    d = read_fao(fao, set(rmap))
+    d = read_market(market, year, set(rmap))
     e = read_elas(elas)
     agg = defaultdict(lambda: defaultdict(float))
     wel = defaultdict(lambda: [0.0, 0.0])
@@ -87,13 +97,13 @@ def build(fao: Path, elas: Path):
     for c, tr in rmap.items():
         v = d.get(c, {})
         for seed, (oil, cake) in CHAINS.items():
-            crush = v.get(("INDM", seed), 0.0)
+            crush = v.get(("PROC", seed), 0.0)
             if crush <= 0:
                 continue
             a = agg[(tr, seed)]
             a["crush"] += crush
-            a["oil"] += v.get(("MAPR", oil), 0.0)
-            a["cake"] += v.get(("MAPR", cake), 0.0)
+            a["oil"] += crush * v.get(("PRCY", oil), 0.0)        # CAPRI's PROD of the oil (ProcO_)
+            a["cake"] += crush * v.get(("PRCY", cake), 0.0)
             members[(tr, seed)].append(c)
             if (c, seed) in e:
                 wel[(tr, seed)][0] += crush * e[(c, seed)]
@@ -115,29 +125,25 @@ def build(fao: Path, elas: Path):
     return rows
 
 
-def eu_build(fao: Path, elas: Path):
-    """EU27 rows from CAPRI's member states (capri_member_state_codes.csv without NO and UK): crush = sum of INDM,
-    yields = sum of MAPR / crush, crush share of use = crush / sum of DOMM, elasticity = median of the member states'
-    p_ElasProc (the market's EU base crush = this share x its aligned EU seed use)."""
+def eu_build(market: Path, year: str, elas: Path):
+    """EU27 rows from CAPRI's member states (capri_member_state_codes.csv without NO and UK): crush = sum of PROC,
+    yields = sum of PROC x PRCY / crush, crush share of use = crush / sum of (PROD + IMPORTS - EXPORTS) of the seed,
+    elasticity = median of the member states' p_ElasProc (the market's EU base crush = this share x its aligned EU
+    seed use)."""
     import statistics
     with open(ROOT / "capri_data" / "shared" / "capri_member_state_codes.csv", newline="") as f:
         eu = {r["capri_ms"] for r in csv.DictReader(f) if r["nuts_prefix"] not in ("NO", "GB", "UK")}
-    rx = re.compile(r"^'([A-Z]{2}000000)'\.'(INDM|MAPR|DOMM)'\.'(RAPE|SUNF|SOYA|RAPO|RAPC|SUNO|SUNC|SOYO|SOYC)'\.'BAS'\s+([-\d.Ee+]+)")
-    d = defaultdict(dict)
-    with open(fao, errors="ignore") as f:
-        for line in f:
-            m = rx.match(line)
-            if m and m.group(1) in eu:
-                d[m.group(1)][(m.group(2), m.group(3))] = float(m.group(4)) / 1000.0
+    d = read_market(market, year, eu)
     e = read_elas(elas)
     rows = []
     for seed, (oil, cake) in CHAINS.items():
-        crush = sum(v.get(("INDM", seed), 0.0) for v in d.values())
-        dom = sum(v.get(("DOMM", seed), 0.0) for v in d.values())
+        crush = sum(v.get(("PROC", seed), 0.0) for v in d.values())
+        dom = sum(v.get(("PROD", seed), 0.0) + v.get(("IMPORTS", seed), 0.0) - v.get(("EXPORTS", seed), 0.0)
+                  for v in d.values())
         els = [e[(ms, seed)] for ms in sorted(eu) if (ms, seed) in e]
         rows.append({"region": "EU27", "seed": seed, "crush_kt": crush,
-                     "oil_yield": sum(v.get(("MAPR", oil), 0.0) for v in d.values()) / crush,
-                     "cake_yield": sum(v.get(("MAPR", cake), 0.0) for v in d.values()) / crush,
+                     "oil_yield": sum(v.get(("PROC", seed), 0.0) * v.get(("PRCY", oil), 0.0) for v in d.values()) / crush,
+                     "cake_yield": sum(v.get(("PROC", seed), 0.0) * v.get(("PRCY", cake), 0.0) for v in d.values()) / crush,
                      "elasticity": statistics.median(els), "elasticity_source": "p_ElasProc median of member states",
                      "crush_share_of_use": crush / dom, "capri_regions": "EU27 member states"})
     return rows
@@ -145,11 +151,13 @@ def eu_build(fao: Path, elas: Path):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--fao", type=Path, default=FAO)
-    ap.add_argument("--elas", type=Path, default=ELAS)
+    ap.add_argument("--year", required=True, choices=["2017", "2030"])
+    ap.add_argument("--market", type=Path, required=True)
+    ap.add_argument("--elas", type=Path, required=True)
     a = ap.parse_args()
-    rows = build(a.fao, a.elas)
-    out = eu_build(a.fao, a.elas) + rows
+    rows = build(a.market, a.year, a.elas)
+    out = eu_build(a.market, a.year, a.elas) + rows
+    OUT = OUT_DIR / f"crushing_parameters_{a.year}.csv"
     with open(OUT, "w", newline="") as f:
         w = csv.DictWriter(f, fieldnames=COLS)
         w.writeheader()

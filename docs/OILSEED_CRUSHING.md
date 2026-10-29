@@ -20,9 +20,11 @@ Market commodities: the seeds RAPE, SUNF, SOYA; the oils RAPO, SUNO, SOYO; the c
 bilaterally; [ARMINGTON_MARKET.md](ARMINGTON_MARKET.md)). Palm oil (PLMO) and other vegetable oils (OTHO) are market
 commodities too, without crushing in the model.
 
-Parameters (`crushing_parameters.csv`, `tools/build/build_crushing_parameters.py`, from CAPRI's FAO_agg base period): per
-(region, seed) the crush (the seed's industrial use), oil and cake yields (production / crush), the share of crush in
-seed use, and p_ElasProc (EU: median of the member states; rapeseed 0.456, sunflower 0.869, soybeans 0.856; ROW: the
+Parameters (`crushing_parameters_<market year>.csv`, `tools/build/build_crushing_parameters.py`, from CAPRI's market data
+of the market year: market_base_1717 for 2017, the 2030 Green Deal reference for 2030; until 30 October 2026 one file
+from FAO_agg's base period, whose raw yields left the oils below CAPRI's production, KNOWN_ISSUES K106): per (region,
+seed) the crush (CAPRI's PROC), oil and cake yields (CAPRI's PRCY, for which ProcO_ holds: PROD = PROC x PRCY), the
+share of crush in seed use, and p_ElasProc of the year's calibration (EU: median of the member states; rapeseed 0.456, sunflower 0.869, soybeans 0.856; ROW: the
 crush-weighted mean of its CAPRI regions; a pair without p_ElasProc in CAPRI has its crush fixed at base). 64 pairs, every
 trade region with CAPRI crushing data, CAPRI's yields as they are. Until 23 October 2026: JSON, 20 non-EU regions, pairs
 with yields outside a plausibility band left out, and those regions' oil and cake supply at a flat elasticity of 0.10.
@@ -63,8 +65,8 @@ the changes are formed on (docs/design/ARCHITECTURE_REFACTOR.md 5.1, M1).
 | Sunflower cake | 4,546 | 9,832 | | 36 | | 9,312 | 3,960 | 466 |
 | Soybean cake | 11,185 | 39,542 | | 159 | | 43,727 | 15,124 | 468 |
 
-FAO_agg base period (`crushing_parameters.csv`, `world_prices.csv`): EU crush rapeseed 21.0 Mt, sunflower 8.3 Mt,
-soybeans 14.7 Mt; world prices (EUR/t) rapeseed oil 737, sunflower oil 665, soybean oil 700, rapeseed cake 213,
+FAO_agg base period (the former `crushing_parameters.csv`, `world_prices.csv`): EU crush rapeseed 21.0 Mt, sunflower
+8.3 Mt, soybeans 14.7 Mt; world prices (EUR/t) rapeseed oil 737, sunflower oil 665, soybean oil 700, rapeseed cake 213,
 sunflower cake 204, soybean cake 354.
 
 ## History (October 2026)

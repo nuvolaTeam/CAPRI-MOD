@@ -31,10 +31,11 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K93](#k93) | CAPRI mitigation options not built; documents disagree on which are in | open |
 | [K105](#k105) | Numbers in the model's code to check, register or move to the settings | open |
 
-## Resolved (88)
+## Resolved (89)
 
 | # | Issue | Status |
 |---|---|---|
+| [K106](#k106) | The market's base supply of crushed and biofuel products was not CAPRI's production of the market year | fixed |
 | [K103](#k103) | Data files without a known origin or read by no code (data declarations) | fixed: removed, or given a builder |
 | [K104](#k104) | The payments report's area left fallow out of CAPRI's UAAR | fixed |
 | [K73](#k73) | Market: differences from CAPRI that no register listed | fixed (batch 6 gate) |
@@ -1545,3 +1546,32 @@ October 2026):
 - **In 9t:** yes
 - **Status:** open (the export cap: the inconsistent calibration data behind it are being fixed); four done 29-30
   October 2026
+
+### K106: The market's base supply of crushed and biofuel products was not CAPRI's production of the market year (found 29 October 2026)
+
+The market keeps CAPRI's bilateral flows of the market year and calibrates each region's domestic sales as its base
+supply S0 minus those exports; an export cap at 0.98 of S0 (PROXY_AUDIT S192, not CAPRI's) bound in 42 commodity x region
+cells at the 2017 base. In 34 of them CAPRI's own data were consistent (a region exporting 98-100% of its production,
+Indonesia's coffee 99.99%) and only the cap changed CAPRI's flows; in 8, CAPRI's exports exceeded S0. In CAPRI's market
+data all 8 are consistent: S0 did not come from them. 110 of 1,135 non-EU cells had S0 differing from CAPRI's production
+(prod_kt of bilateral_regions_<year>.csv) by more than 1e-4, all from two blocks:
+
+- crushing: crush and yields from FAO_agg's base period (p_dataMarket 'BAS', the raw data before CAPRI's market
+  calibration), where CAPRI's calibration sets PRCY = Prod / Proc (clamped outside RMSSUP) and Prod = Proc x PRCY
+  (arm/calibrate_market_data.gms l. 72-82, 1123-1130): Australia's soybean oil yield 0.1776 against CAPRI's 0.1937;
+- biofuels and DDGS: the files held only CAPRI's 2030 reference (the builder hard-coded the year), so a 2017 market ran
+  with 2030 output (Argentina's biodiesel 1,862 kt against 2,819 in 2017; New Zealand's DDGS 4.45 against 6.73), the EU
+  rows included.
+
+- **Effect:** the market's calibration at the 2017 base (oils, cakes, biofuels, DDGS; the 2017 market year's runs) and
+  at 2030 (29 crushing cells above 5%); results move
+- **In 9t:** yes
+- **Status:** **fixed** 30 October 2026: crushing_parameters_<year>.csv from CAPRI's market data of the year (PROC,
+  PRCY; p_ElasProc of the year's calibration); biofuel_feedstock/market/use_share_<year>.csv per market year
+  (build_biofuel_market.py --year; CAPRI's "RW" aggregate of the 2017 data excluded; a non-positive feedstock cost is
+  an error, no group dropped); the market reads the files of its market year (MarketModule._market_year). At the 2017
+  base the cells with a gap above 1e-4 fell from 110 to 15, all from the UK: the new files map it to GBR, the bilateral
+  market files still to ROW (the batch-7 rebuild on 32 regions). The 0.98 cap is removed: exports are scaled only where
+  they exceed S0, which CAPRI's data no longer cause outside the rows set by the supply models (step F); such hits are
+  logged in the run metadata and warned.
+

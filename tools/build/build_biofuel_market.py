@@ -37,13 +37,16 @@ with only the own term for BIOE in CAPRI's Hessian (elas_2_1730defaulta p_hessNQ
 
 DDGS output = sum over the cereal feedstocks of BIOF x PRCBY (prodQuantBiofBy_); checked against CAPRI's PROD DDGS.
 
-Source: CAPRI 2030 Green Deal reference market results (markmarket_greendeal_1730et_base_1717, dataOut), every
-CAPRI market region (RMS): BIOF (feedstock to biofuels; biofuel use), PRCB, PRCBY, ARM1P, PPRI, CPRI, PROD,
+Source, per market year: CAPRI's market data of the year (dataOut of the market model's calibration point) -
+2017: market_base_1717 (base year 2017 calibrated from data), with p_hessNQProc of elas_2_1717defaulta;
+2030: the 2030 Green Deal reference market results (markmarket_greendeal_1730et_base_1717), with elas_2_1730defaulta.
+Until 30 October 2026 only the 2030 files existed and a 2017 market ran with CAPRI's 2030 biofuel output (Argentina's
+biodiesel 1,862 kt against 2,819 in 2017; KNOWN_ISSUES K106). Every CAPRI market region (RMS): BIOF (feedstock to biofuels; biofuel use), PRCB, PRCBY, ARM1P, PPRI, CPRI, PROD,
 NAGR, SECG, EXOG, QUTS (%), BiofFeedCost, HCOM of gasoline and diesel, CPRI of gasoline and diesel.
 The dump's HCOM of the fossil fuels is the FOSSIL part; CAPRI's HCON in the calibration is total fuel use
 (fossil + biofuel in fossil equivalents): HCON = HCOM + BIOF oilEqu_b / oilEqu_f, which reproduces CAPRI's
 data_market_1730defaulta HCON (CAL) and its HCOS share. The rows used are kept as
-capri_data/sources/market/biofuel_dataout_2030.csv.xz.
+capri_data/sources/market/biofuel_dataout_<YEAR>.csv.xz.
 
 Feedstock -> model market commodity: WHEA -> SWHE, BARL -> BARL, MAIZ -> CORN, RYEM, OATS, OCER as themselves,
 SUGA -> SUGR, TWIN -> WINE, RAPO/SUNO/SOYO -> themselves; palm oil PLMO and other vegetable oils OTHO -> themselves
@@ -54,20 +57,22 @@ CAPRI market regions -> model trade regions: EU member states -> EU27 (CAPRI's t
 the regions of tools/build/recalibrate_trade_2017.REGION_MAP by name; the rest -> ROW. CAPRI's trade-only blocks
 (EU27yr19, URUPAR, WBA, MER_OTH, MED) and reporting aggregates carry no functions of their own.
 
-Outputs (capri_data/2017/market/)
-  biofuel_feedstock.csv   ms (CAPRI region), region (model), biofuel, feedstock, commodity, biof_kt, prcb,
+Outputs (capri_data/2017/market/, one set per market year <YEAR>)
+  biofuel_feedstock_<YEAR>.csv   ms (CAPRI region), region (model), biofuel, feedstock, commodity, biof_kt, prcb,
                           prcby, byproduct, feed_price, byproduct_price, rho, numeraire
-  biofuel_use_share.csv   commodity, biof_kt, use_kt, share  (EU27, CAPRI 2030 ref: use = HCOM + FEDM + INDM
-                          + BIOF + LOSM of the group)
-  biofuel_market.csv      ms, region, biofuel, rmssup, prod_kt, x0_kt, fixed_kt, ppri, pmrk, bfc, pr0,
+  biofuel_use_share_<YEAR>.csv   commodity, biof_kt, use_kt, share  (EU27: use = HCOM + FEDM + INDM + BIOF + LOSM of
+                          the group, CAPRI's EU aggregate EU27yr19 in the same dump)
+  biofuel_market_<YEAR>.csv      ms, region, biofuel, rmssup, prod_kt, x0_kt, fixed_kt, ppri, pmrk, bfc, pr0,
                           sup_scale, sup_alfa, sup_beta, sup_slope, sup_turn, biof_kt, cpri, arm1p,
                           fossil_cpri, hcon_kt, oil_eq, oil_eq_fossil, quts, cal_share, dem_max, dem_slope,
                           dem_turn
 
-    python tools/build/build_biofuel_market.py [--dump /mnt/user-data/uploads/markmarket_greendeal_1730et_base_1717.txt]
+    python tools/build/build_biofuel_market.py --year 2017 --dump market_base_1717.txt --elas elas_2_1717defaulta.csv
+    python tools/build/build_biofuel_market.py --year 2030 --dump markmarket_greendeal_1730et_base_1717.txt \
+        --elas elas_2_1730defaulta.csv
 """
 from __future__ import annotations
-import argparse, json, math, re, subprocess, sys
+import argparse, math, re, subprocess, sys
 from pathlib import Path
 
 import pandas as pd
@@ -75,7 +80,7 @@ import pandas as pd
 import functools as _ft
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
-SRC = ROOT / "capri_data" / "sources" / "market" / "biofuel_dataout_2030.csv.xz"
+SRC_DIR = ROOT / "capri_data" / "sources" / "market"
 DEST = ROOT / "capri_data" / "2017" / "market"
 FUEL = {"BIOE": ("WHEA", "BARL", "MAIZ", "RYEM", "OATS", "OCER", "SUGA", "TWIN"),
         "BIOD": ("RAPO", "SUNO", "SOYO", "PLMO", "OTHO")}
@@ -92,11 +97,14 @@ GROUPS = {"SWHE": ("SWHE",), "BARL": ("BARL",), "CORN": ("MAIZ",), "OCER": ("OCE
 GLYC_PRICE = 600.0                           # arm/store_prices.gms
 RHO = 4.0                                    # arm/market1.gms: p_rhoBioFuel(RMS,XXBioF) = 4
 ITEMS = ("BIOF", "PRCB", "PRCBY", "ARM1P", "PPRI", "PMRK", "UVAP", "CPRI", "PROD", "NAGR", "SECG", "EXOG",
-         "QUTS", "HCOM", "BiofFeedCost", "PROC")
-PRODS = set(BYPROD) | {"BIOE", "BIOD", "DDGS", "GLYC", "SUGA", "TWIN", "GASL", "DISL", "INPE"}
-HESS = ROOT / "capri_data" / "sources" / "market" / "biofuel_proc_hessian_2030.csv"
+         "QUTS", "HCOM", "BiofFeedCost", "PROC", "FEDM", "INDM", "LOSM")
+PRODS = set(BYPROD) | {"BIOE", "BIOD", "DDGS", "GLYC", "SUGA", "TWIN", "GASL", "DISL", "INPE", "SWHE"}
+
 #: CAPRI's trade-only blocks (aggregates of market regions) - no behavioural functions of their own
 TRADE_BLOCKS = {"EU27yr19", "URUPAR", "WBA", "MER_OTH", "MED"}
+#: aggregates in CAPRI's 2017 market data that recalibrate_trade_2017.AGGREGATES does not list (RW: the rest of the
+#: world, reported with world-scale biofuel output)
+MORE_AGGREGATES = {"RW"}
 EU_MS = {"BL000000", "SE000000", "DK000000", "DE000000", "EL000000", "ES000000", "FR000000", "IR000000",
          "IT000000", "NL000000", "AT000000", "PT000000", "FI000000", "CY000000", "EE000000", "LV000000",
          "LT000000", "MT000000", "PL000000", "SK000000", "BG000000", "CZ000000", "HU000000", "SI000000",
@@ -107,10 +115,10 @@ def sigmoid(x: float) -> float:
     return 1.0 / (1.0 + math.exp(-x))
 
 
-def extract(dump: Path) -> pd.DataFrame:
-    pat = re.compile(r"^'([^']+)'\.''\.'(" + "|".join(ITEMS) + r")'\.'([A-Z]+)'\.'2030'\s+([-\d.Ee+]+)")
+def extract(dump: Path, year: str) -> pd.DataFrame:
+    pat = re.compile(r"^'([^']+)'\.''\.'(" + "|".join(ITEMS) + r")'\.'([A-Z]+)'\.'" + year + r"'\s+([-\d.Ee+]+)")
     txt = subprocess.run(["grep", "-E", r"^'[^']+'\.''\.'(" + "|".join(ITEMS) + r")'\.'(" + "|".join(sorted(PRODS))
-                          + r")'\.'2030'", str(dump)], capture_output=True, text=True).stdout
+                          + r")'\.'" + year + "'", str(dump)], capture_output=True, text=True).stdout
     rows = []
     for line in txt.splitlines():
         m = pat.match(line)
@@ -121,7 +129,7 @@ def extract(dump: Path) -> pd.DataFrame:
 
 def is_rms(r: str, aggregates) -> bool:
     """A CAPRI market region with its own behavioural functions (not a NUTS2 region, aggregate or trade block)."""
-    if r in aggregates or r in TRADE_BLOCKS or r.startswith(("EU0", "EU_", "A_EU")) or r == "EU":
+    if r in aggregates or r in TRADE_BLOCKS or r in MORE_AGGREGATES or r.startswith(("EU0", "EU_", "A_EU")) or r == "EU":
         return False
     return not (len(r) == 8 and r[2:].isalnum() and not r.endswith("000000"))
 
@@ -167,15 +175,18 @@ def calibrate_demand(ms, fuel, cal_share, quts, price_rel):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--dump", type=Path,
-                    default=Path("/mnt/user-data/uploads/markmarket_greendeal_1730et_base_1717.txt"))
-    ap.add_argument("--elas", type=Path, default=Path("/mnt/user-data/uploads/elas_2_1730defaulta.csv"))
+    ap.add_argument("--year", required=True, choices=["2017", "2030"])
+    ap.add_argument("--dump", type=Path, required=True)
+    ap.add_argument("--elas", type=Path, required=True)
     a = ap.parse_args()
+    SRC = SRC_DIR / f"biofuel_dataout_{a.year}.csv.xz"
+    HESS = SRC_DIR / f"biofuel_proc_hessian_{a.year}.csv"
     sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check")]
     from recalibrate_trade_2017 import REGION_MAP, AGGREGATES
     if a.dump.exists():
-        src = extract(a.dump)
-        src = src[src.region.map(lambda r: is_rms(r, AGGREGATES))]
+        src = extract(a.dump, a.year)
+        # the market regions, and the EU aggregate EU27yr19 for the EU's use of the feedstocks (biofuel_use_share)
+        src = src[src.region.map(lambda r: is_rms(r, AGGREGATES)) | (src.region == "EU27yr19")]
         SRC.parent.mkdir(parents=True, exist_ok=True)
         src.to_csv(SRC, index=False)
         print(f"extracted {len(src)} rows -> {SRC.relative_to(ROOT)}")
@@ -221,23 +232,26 @@ def main():
                 r["numeraire"] = int(r is top)
             mu = [r["feed_price"] - r["prcby"] * r["byproduct_price"] for r in recs]
             if any(not (m > 0) for m in mu):                 # no CES without positive feedstock costs
-                continue
+                # CAPRI's data never have it (biofFeedCost_ needs it); until 30 October 2026 such a group was left
+                # out without a word: a data inconsistency to look at, not a group to drop
+                raise ValueError(f"{ms} {fuel}: a feedstock cost net of its by-product is not positive "
+                                 f"({', '.join(r['feedstock'] for r, m in zip(recs, mu) if not m > 0)})")
             frows += recs
             X = sum(r["biof_kt"] * r["prcb"] for r in recs)
             mub = sum(r["biof_kt"] * m for r, m in zip(recs, mu)) / X
             x0[(ms, fuel)] = (X, mub)
             checks.append((ms, fuel, X, mub, v.get((ms, "BiofFeedCost", fuel))))
     fs = pd.DataFrame(frows)
-    fs.to_csv(DEST / "biofuel_feedstock.csv", index=False)
+    fs.to_csv(DEST / f"biofuel_feedstock_{a.year}.csv", index=False)
 
-    bal = json.load(open(ROOT / "capri_data" / "validation" / "capri_eu27_market_balance_2030_ref.json"))["products"]
     eu = fs[fs.region == "EU27"]
     us = []
     for c, grp in GROUPS.items():
-        use = sum(float(bal.get(x, {}).get(k, 0.0)) for x in grp for k in ("HCOM", "FEDM", "INDM", "BIOF", "LOSM"))
+        # the EU's use of the group: CAPRI's EU aggregate EU27yr19 in the same dump and year
+        use = sum(v.get(("EU27yr19", k, x), 0.0) for x in grp for k in ("HCOM", "FEDM", "INDM", "BIOF", "LOSM"))
         q = float(eu.loc[eu["commodity"] == c, "biof_kt"].sum())
         us.append({"commodity": c, "biof_kt": q, "use_kt": use, "share": q / use if use > 0 else 0.0})
-    pd.DataFrame(us).to_csv(DEST / "biofuel_use_share.csv", index=False)
+    pd.DataFrame(us).to_csv(DEST / f"biofuel_use_share_{a.year}.csv", index=False)
 
     # ---- biofuel supply and demand functions
     mrows = []
@@ -275,10 +289,10 @@ def main():
                        inpe=v.get((ms, "PPRI", "INPE"), 0.0))
             mrows.append(row)
     mk = pd.DataFrame(mrows)
-    mk.to_csv(DEST / "biofuel_market.csv", index=False)
+    mk.to_csv(DEST / f"biofuel_market_{a.year}.csv", index=False)
 
-    print(f"biofuel_feedstock.csv: {len(fs)} rows, {fs.ms.nunique()} CAPRI regions")
-    print(f"biofuel_market.csv: {len(mk)} rows; supply functions {int((mk.pr0 > 0).sum())}, "
+    print(f"biofuel_feedstock_{a.year}.csv: {len(fs)} rows, {fs.ms.nunique()} CAPRI regions")
+    print(f"biofuel_market_{a.year}.csv: {len(mk)} rows; supply functions {int((mk.pr0 > 0).sum())}, "
           f"demand functions {int((mk.dem_slope != 0).sum())}")
     print("by model region (kt): production, of which first generation; use")
     print(mk.groupby(["biofuel", "region"])[["prod_kt", "x0_kt", "biof_kt"]].sum().round(0).to_string())

@@ -171,8 +171,8 @@ INSERT INTO value_units VALUES
   ('mkt_bilateral_trq_2030', 'gap_eur_t', NULL, 'open', 'bilateral_trq_2030.gap_eur_t: unit to be established'),
   ('mkt_bilateral_trq_2030', 'imports_kt', NULL, 'open', 'bilateral_trq_2030.imports_kt: unit to be established');
 
--- file: capri_data/2017/market/biofuel_feedstock.csv
-CREATE TABLE mkt_biofuel_feedstock (
+-- file: capri_data/2017/market/biofuel_feedstock_2017.csv
+CREATE TABLE mkt_biofuel_feedstock_2017 (
     ms VARCHAR NOT NULL,
     region VARCHAR NOT NULL,
     biofuel VARCHAR NOT NULL,
@@ -187,18 +187,44 @@ CREATE TABLE mkt_biofuel_feedstock (
     rho DOUBLE NOT NULL,
     numeraire BIGINT NOT NULL
 );
-COMMENT ON TABLE mkt_biofuel_feedstock IS 'CAPRI''s biofuel markets: feedstock demand, biofuel supply and biofuel demand, per CAPRI market region. (tools/build/build_biofuel_market.py)';
+COMMENT ON TABLE mkt_biofuel_feedstock_2017 IS 'Market year 2017: CAPRI''s biofuel markets: feedstock demand, biofuel supply and biofuel demand, per CAPRI market region. (tools/build/build_biofuel_market.py)';
 INSERT INTO value_units VALUES
-  ('mkt_biofuel_feedstock', 'biof_kt', NULL, 'open', 'biofuel_feedstock.biof_kt: unit to be established'),
-  ('mkt_biofuel_feedstock', 'prcb', NULL, 'open', 'biofuel_feedstock.prcb: unit to be established'),
-  ('mkt_biofuel_feedstock', 'prcby', NULL, 'open', 'biofuel_feedstock.prcby: unit to be established'),
-  ('mkt_biofuel_feedstock', 'feed_price', NULL, 'open', 'biofuel_feedstock.feed_price: unit to be established'),
-  ('mkt_biofuel_feedstock', 'byproduct_price', NULL, 'open', 'biofuel_feedstock.byproduct_price: unit to be established'),
-  ('mkt_biofuel_feedstock', 'rho', NULL, 'open', 'biofuel_feedstock.rho: unit to be established'),
-  ('mkt_biofuel_feedstock', 'numeraire', NULL, 'open', 'biofuel_feedstock.numeraire: unit to be established');
+  ('mkt_biofuel_feedstock_2017', 'biof_kt', NULL, 'open', 'biofuel_feedstock_2017.biof_kt: unit to be established'),
+  ('mkt_biofuel_feedstock_2017', 'prcb', NULL, 'open', 'biofuel_feedstock_2017.prcb: unit to be established'),
+  ('mkt_biofuel_feedstock_2017', 'prcby', NULL, 'open', 'biofuel_feedstock_2017.prcby: unit to be established'),
+  ('mkt_biofuel_feedstock_2017', 'feed_price', NULL, 'open', 'biofuel_feedstock_2017.feed_price: unit to be established'),
+  ('mkt_biofuel_feedstock_2017', 'byproduct_price', NULL, 'open', 'biofuel_feedstock_2017.byproduct_price: unit to be established'),
+  ('mkt_biofuel_feedstock_2017', 'rho', NULL, 'open', 'biofuel_feedstock_2017.rho: unit to be established'),
+  ('mkt_biofuel_feedstock_2017', 'numeraire', NULL, 'open', 'biofuel_feedstock_2017.numeraire: unit to be established');
 
--- file: capri_data/2017/market/biofuel_market.csv
-CREATE TABLE mkt_biofuel_market (
+-- file: capri_data/2017/market/biofuel_feedstock_2030.csv
+CREATE TABLE mkt_biofuel_feedstock_2030 (
+    ms VARCHAR NOT NULL,
+    region VARCHAR NOT NULL,
+    biofuel VARCHAR NOT NULL,
+    feedstock VARCHAR NOT NULL,
+    commodity VARCHAR NOT NULL,
+    biof_kt DOUBLE NOT NULL,
+    prcb DOUBLE NOT NULL,
+    prcby DOUBLE NOT NULL,
+    byproduct VARCHAR,
+    feed_price DOUBLE NOT NULL,
+    byproduct_price DOUBLE NOT NULL,
+    rho DOUBLE NOT NULL,
+    numeraire BIGINT NOT NULL
+);
+COMMENT ON TABLE mkt_biofuel_feedstock_2030 IS 'Market year 2030: CAPRI''s biofuel markets: feedstock demand, biofuel supply and biofuel demand, per CAPRI market region. (tools/build/build_biofuel_market.py)';
+INSERT INTO value_units VALUES
+  ('mkt_biofuel_feedstock_2030', 'biof_kt', NULL, 'open', 'biofuel_feedstock_2030.biof_kt: unit to be established'),
+  ('mkt_biofuel_feedstock_2030', 'prcb', NULL, 'open', 'biofuel_feedstock_2030.prcb: unit to be established'),
+  ('mkt_biofuel_feedstock_2030', 'prcby', NULL, 'open', 'biofuel_feedstock_2030.prcby: unit to be established'),
+  ('mkt_biofuel_feedstock_2030', 'feed_price', NULL, 'open', 'biofuel_feedstock_2030.feed_price: unit to be established'),
+  ('mkt_biofuel_feedstock_2030', 'byproduct_price', NULL, 'open', 'biofuel_feedstock_2030.byproduct_price: unit to be established'),
+  ('mkt_biofuel_feedstock_2030', 'rho', NULL, 'open', 'biofuel_feedstock_2030.rho: unit to be established'),
+  ('mkt_biofuel_feedstock_2030', 'numeraire', NULL, 'open', 'biofuel_feedstock_2030.numeraire: unit to be established');
+
+-- file: capri_data/2017/market/biofuel_market_2017.csv
+CREATE TABLE mkt_biofuel_market_2017 (
     ms VARCHAR NOT NULL,
     region VARCHAR NOT NULL,
     biofuel VARCHAR NOT NULL,
@@ -232,53 +258,133 @@ CREATE TABLE mkt_biofuel_market (
     inpe DOUBLE NOT NULL,
     PRIMARY KEY (ms, region, biofuel)
 );
-COMMENT ON TABLE mkt_biofuel_market IS 'CAPRI''s biofuel markets: feedstock demand, biofuel supply and biofuel demand, per CAPRI market region. (tools/build/build_biofuel_market.py)';
+COMMENT ON TABLE mkt_biofuel_market_2017 IS 'Market year 2017: CAPRI''s biofuel markets: feedstock demand, biofuel supply and biofuel demand, per CAPRI market region. (tools/build/build_biofuel_market.py)';
 INSERT INTO value_units VALUES
-  ('mkt_biofuel_market', 'rmssup', NULL, 'open', 'biofuel_market.rmssup: unit to be established'),
-  ('mkt_biofuel_market', 'prod_kt', NULL, 'open', 'biofuel_market.prod_kt: unit to be established'),
-  ('mkt_biofuel_market', 'x0_kt', NULL, 'open', 'biofuel_market.x0_kt: unit to be established'),
-  ('mkt_biofuel_market', 'fixed_kt', NULL, 'open', 'biofuel_market.fixed_kt: unit to be established'),
-  ('mkt_biofuel_market', 'ppri', NULL, 'open', 'biofuel_market.ppri: unit to be established'),
-  ('mkt_biofuel_market', 'pmrk', NULL, 'open', 'biofuel_market.pmrk: unit to be established'),
-  ('mkt_biofuel_market', 'bfc', NULL, 'open', 'biofuel_market.bfc: unit to be established'),
-  ('mkt_biofuel_market', 'pr0', NULL, 'open', 'biofuel_market.pr0: unit to be established'),
-  ('mkt_biofuel_market', 'sup_scale', NULL, 'open', 'biofuel_market.sup_scale: unit to be established'),
-  ('mkt_biofuel_market', 'sup_alfa', NULL, 'open', 'biofuel_market.sup_alfa: unit to be established'),
-  ('mkt_biofuel_market', 'sup_beta', NULL, 'open', 'biofuel_market.sup_beta: unit to be established'),
-  ('mkt_biofuel_market', 'sup_slope', NULL, 'open', 'biofuel_market.sup_slope: unit to be established'),
-  ('mkt_biofuel_market', 'sup_turn', NULL, 'open', 'biofuel_market.sup_turn: unit to be established'),
-  ('mkt_biofuel_market', 'biof_kt', NULL, 'open', 'biofuel_market.biof_kt: unit to be established'),
-  ('mkt_biofuel_market', 'cpri', NULL, 'open', 'biofuel_market.cpri: unit to be established'),
-  ('mkt_biofuel_market', 'arm1p', NULL, 'open', 'biofuel_market.arm1p: unit to be established'),
-  ('mkt_biofuel_market', 'fossil_cpri', NULL, 'open', 'biofuel_market.fossil_cpri: unit to be established'),
-  ('mkt_biofuel_market', 'hcon_kt', NULL, 'open', 'biofuel_market.hcon_kt: unit to be established'),
-  ('mkt_biofuel_market', 'oil_eq', NULL, 'open', 'biofuel_market.oil_eq: unit to be established'),
-  ('mkt_biofuel_market', 'oil_eq_fossil', NULL, 'open', 'biofuel_market.oil_eq_fossil: unit to be established'),
-  ('mkt_biofuel_market', 'quts', NULL, 'open', 'biofuel_market.quts: unit to be established'),
-  ('mkt_biofuel_market', 'cal_share', NULL, 'open', 'biofuel_market.cal_share: unit to be established'),
-  ('mkt_biofuel_market', 'dem_max', NULL, 'open', 'biofuel_market.dem_max: unit to be established'),
-  ('mkt_biofuel_market', 'dem_slope', NULL, 'open', 'biofuel_market.dem_slope: unit to be established'),
-  ('mkt_biofuel_market', 'dem_turn', NULL, 'open', 'biofuel_market.dem_turn: unit to be established'),
-  ('mkt_biofuel_market', 'proc_kt', NULL, 'open', 'biofuel_market.proc_kt: unit to be established'),
-  ('mkt_biofuel_market', 'proc_hess', NULL, 'open', 'biofuel_market.proc_hess: unit to be established'),
-  ('mkt_biofuel_market', 'inpe', NULL, 'open', 'biofuel_market.inpe: unit to be established');
+  ('mkt_biofuel_market_2017', 'rmssup', NULL, 'open', 'biofuel_market_2017.rmssup: unit to be established'),
+  ('mkt_biofuel_market_2017', 'prod_kt', NULL, 'open', 'biofuel_market_2017.prod_kt: unit to be established'),
+  ('mkt_biofuel_market_2017', 'x0_kt', NULL, 'open', 'biofuel_market_2017.x0_kt: unit to be established'),
+  ('mkt_biofuel_market_2017', 'fixed_kt', NULL, 'open', 'biofuel_market_2017.fixed_kt: unit to be established'),
+  ('mkt_biofuel_market_2017', 'ppri', NULL, 'open', 'biofuel_market_2017.ppri: unit to be established'),
+  ('mkt_biofuel_market_2017', 'pmrk', NULL, 'open', 'biofuel_market_2017.pmrk: unit to be established'),
+  ('mkt_biofuel_market_2017', 'bfc', NULL, 'open', 'biofuel_market_2017.bfc: unit to be established'),
+  ('mkt_biofuel_market_2017', 'pr0', NULL, 'open', 'biofuel_market_2017.pr0: unit to be established'),
+  ('mkt_biofuel_market_2017', 'sup_scale', NULL, 'open', 'biofuel_market_2017.sup_scale: unit to be established'),
+  ('mkt_biofuel_market_2017', 'sup_alfa', NULL, 'open', 'biofuel_market_2017.sup_alfa: unit to be established'),
+  ('mkt_biofuel_market_2017', 'sup_beta', NULL, 'open', 'biofuel_market_2017.sup_beta: unit to be established'),
+  ('mkt_biofuel_market_2017', 'sup_slope', NULL, 'open', 'biofuel_market_2017.sup_slope: unit to be established'),
+  ('mkt_biofuel_market_2017', 'sup_turn', NULL, 'open', 'biofuel_market_2017.sup_turn: unit to be established'),
+  ('mkt_biofuel_market_2017', 'biof_kt', NULL, 'open', 'biofuel_market_2017.biof_kt: unit to be established'),
+  ('mkt_biofuel_market_2017', 'cpri', NULL, 'open', 'biofuel_market_2017.cpri: unit to be established'),
+  ('mkt_biofuel_market_2017', 'arm1p', NULL, 'open', 'biofuel_market_2017.arm1p: unit to be established'),
+  ('mkt_biofuel_market_2017', 'fossil_cpri', NULL, 'open', 'biofuel_market_2017.fossil_cpri: unit to be established'),
+  ('mkt_biofuel_market_2017', 'hcon_kt', NULL, 'open', 'biofuel_market_2017.hcon_kt: unit to be established'),
+  ('mkt_biofuel_market_2017', 'oil_eq', NULL, 'open', 'biofuel_market_2017.oil_eq: unit to be established'),
+  ('mkt_biofuel_market_2017', 'oil_eq_fossil', NULL, 'open', 'biofuel_market_2017.oil_eq_fossil: unit to be established'),
+  ('mkt_biofuel_market_2017', 'quts', NULL, 'open', 'biofuel_market_2017.quts: unit to be established'),
+  ('mkt_biofuel_market_2017', 'cal_share', NULL, 'open', 'biofuel_market_2017.cal_share: unit to be established'),
+  ('mkt_biofuel_market_2017', 'dem_max', NULL, 'open', 'biofuel_market_2017.dem_max: unit to be established'),
+  ('mkt_biofuel_market_2017', 'dem_slope', NULL, 'open', 'biofuel_market_2017.dem_slope: unit to be established'),
+  ('mkt_biofuel_market_2017', 'dem_turn', NULL, 'open', 'biofuel_market_2017.dem_turn: unit to be established'),
+  ('mkt_biofuel_market_2017', 'proc_kt', NULL, 'open', 'biofuel_market_2017.proc_kt: unit to be established'),
+  ('mkt_biofuel_market_2017', 'proc_hess', NULL, 'open', 'biofuel_market_2017.proc_hess: unit to be established'),
+  ('mkt_biofuel_market_2017', 'inpe', NULL, 'open', 'biofuel_market_2017.inpe: unit to be established');
 
--- file: capri_data/2017/market/biofuel_use_share.csv
-CREATE TABLE mkt_biofuel_use_share (
+-- file: capri_data/2017/market/biofuel_market_2030.csv
+CREATE TABLE mkt_biofuel_market_2030 (
+    ms VARCHAR NOT NULL,
+    region VARCHAR NOT NULL,
+    biofuel VARCHAR NOT NULL,
+    rmssup BIGINT NOT NULL,
+    prod_kt DOUBLE NOT NULL,
+    x0_kt DOUBLE NOT NULL,
+    fixed_kt DOUBLE NOT NULL,
+    ppri DOUBLE NOT NULL,
+    pmrk DOUBLE NOT NULL,
+    bfc DOUBLE NOT NULL,
+    pr0 DOUBLE NOT NULL,
+    sup_scale DOUBLE NOT NULL,
+    sup_alfa DOUBLE NOT NULL,
+    sup_beta DOUBLE NOT NULL,
+    sup_slope DOUBLE NOT NULL,
+    sup_turn DOUBLE NOT NULL,
+    biof_kt DOUBLE NOT NULL,
+    cpri DOUBLE NOT NULL,
+    arm1p DOUBLE NOT NULL,
+    fossil_cpri DOUBLE NOT NULL,
+    hcon_kt DOUBLE NOT NULL,
+    oil_eq DOUBLE NOT NULL,
+    oil_eq_fossil DOUBLE NOT NULL,
+    quts DOUBLE NOT NULL,
+    cal_share DOUBLE NOT NULL,
+    dem_max DOUBLE NOT NULL,
+    dem_slope DOUBLE NOT NULL,
+    dem_turn DOUBLE NOT NULL,
+    proc_kt DOUBLE NOT NULL,
+    proc_hess DOUBLE NOT NULL,
+    inpe DOUBLE NOT NULL,
+    PRIMARY KEY (ms, region, biofuel)
+);
+COMMENT ON TABLE mkt_biofuel_market_2030 IS 'Market year 2030: CAPRI''s biofuel markets: feedstock demand, biofuel supply and biofuel demand, per CAPRI market region. (tools/build/build_biofuel_market.py)';
+INSERT INTO value_units VALUES
+  ('mkt_biofuel_market_2030', 'rmssup', NULL, 'open', 'biofuel_market_2030.rmssup: unit to be established'),
+  ('mkt_biofuel_market_2030', 'prod_kt', NULL, 'open', 'biofuel_market_2030.prod_kt: unit to be established'),
+  ('mkt_biofuel_market_2030', 'x0_kt', NULL, 'open', 'biofuel_market_2030.x0_kt: unit to be established'),
+  ('mkt_biofuel_market_2030', 'fixed_kt', NULL, 'open', 'biofuel_market_2030.fixed_kt: unit to be established'),
+  ('mkt_biofuel_market_2030', 'ppri', NULL, 'open', 'biofuel_market_2030.ppri: unit to be established'),
+  ('mkt_biofuel_market_2030', 'pmrk', NULL, 'open', 'biofuel_market_2030.pmrk: unit to be established'),
+  ('mkt_biofuel_market_2030', 'bfc', NULL, 'open', 'biofuel_market_2030.bfc: unit to be established'),
+  ('mkt_biofuel_market_2030', 'pr0', NULL, 'open', 'biofuel_market_2030.pr0: unit to be established'),
+  ('mkt_biofuel_market_2030', 'sup_scale', NULL, 'open', 'biofuel_market_2030.sup_scale: unit to be established'),
+  ('mkt_biofuel_market_2030', 'sup_alfa', NULL, 'open', 'biofuel_market_2030.sup_alfa: unit to be established'),
+  ('mkt_biofuel_market_2030', 'sup_beta', NULL, 'open', 'biofuel_market_2030.sup_beta: unit to be established'),
+  ('mkt_biofuel_market_2030', 'sup_slope', NULL, 'open', 'biofuel_market_2030.sup_slope: unit to be established'),
+  ('mkt_biofuel_market_2030', 'sup_turn', NULL, 'open', 'biofuel_market_2030.sup_turn: unit to be established'),
+  ('mkt_biofuel_market_2030', 'biof_kt', NULL, 'open', 'biofuel_market_2030.biof_kt: unit to be established'),
+  ('mkt_biofuel_market_2030', 'cpri', NULL, 'open', 'biofuel_market_2030.cpri: unit to be established'),
+  ('mkt_biofuel_market_2030', 'arm1p', NULL, 'open', 'biofuel_market_2030.arm1p: unit to be established'),
+  ('mkt_biofuel_market_2030', 'fossil_cpri', NULL, 'open', 'biofuel_market_2030.fossil_cpri: unit to be established'),
+  ('mkt_biofuel_market_2030', 'hcon_kt', NULL, 'open', 'biofuel_market_2030.hcon_kt: unit to be established'),
+  ('mkt_biofuel_market_2030', 'oil_eq', NULL, 'open', 'biofuel_market_2030.oil_eq: unit to be established'),
+  ('mkt_biofuel_market_2030', 'oil_eq_fossil', NULL, 'open', 'biofuel_market_2030.oil_eq_fossil: unit to be established'),
+  ('mkt_biofuel_market_2030', 'quts', NULL, 'open', 'biofuel_market_2030.quts: unit to be established'),
+  ('mkt_biofuel_market_2030', 'cal_share', NULL, 'open', 'biofuel_market_2030.cal_share: unit to be established'),
+  ('mkt_biofuel_market_2030', 'dem_max', NULL, 'open', 'biofuel_market_2030.dem_max: unit to be established'),
+  ('mkt_biofuel_market_2030', 'dem_slope', NULL, 'open', 'biofuel_market_2030.dem_slope: unit to be established'),
+  ('mkt_biofuel_market_2030', 'dem_turn', NULL, 'open', 'biofuel_market_2030.dem_turn: unit to be established'),
+  ('mkt_biofuel_market_2030', 'proc_kt', NULL, 'open', 'biofuel_market_2030.proc_kt: unit to be established'),
+  ('mkt_biofuel_market_2030', 'proc_hess', NULL, 'open', 'biofuel_market_2030.proc_hess: unit to be established'),
+  ('mkt_biofuel_market_2030', 'inpe', NULL, 'open', 'biofuel_market_2030.inpe: unit to be established');
+
+-- file: capri_data/2017/market/biofuel_use_share_2017.csv
+CREATE TABLE mkt_biofuel_use_share_2017 (
     commodity VARCHAR NOT NULL,
     biof_kt DOUBLE NOT NULL,
     use_kt DOUBLE NOT NULL,
     share DOUBLE NOT NULL,
     PRIMARY KEY (commodity)
 );
-COMMENT ON TABLE mkt_biofuel_use_share IS 'CAPRI''s biofuel markets: feedstock demand, biofuel supply and biofuel demand, per CAPRI market region. (tools/build/build_biofuel_market.py)';
+COMMENT ON TABLE mkt_biofuel_use_share_2017 IS 'Market year 2017: CAPRI''s biofuel markets: feedstock demand, biofuel supply and biofuel demand, per CAPRI market region. (tools/build/build_biofuel_market.py)';
 INSERT INTO value_units VALUES
-  ('mkt_biofuel_use_share', 'biof_kt', NULL, 'open', 'biofuel_use_share.biof_kt: unit to be established'),
-  ('mkt_biofuel_use_share', 'use_kt', NULL, 'open', 'biofuel_use_share.use_kt: unit to be established'),
-  ('mkt_biofuel_use_share', 'share', NULL, 'open', 'biofuel_use_share.share: unit to be established');
+  ('mkt_biofuel_use_share_2017', 'biof_kt', NULL, 'open', 'biofuel_use_share_2017.biof_kt: unit to be established'),
+  ('mkt_biofuel_use_share_2017', 'use_kt', NULL, 'open', 'biofuel_use_share_2017.use_kt: unit to be established'),
+  ('mkt_biofuel_use_share_2017', 'share', NULL, 'open', 'biofuel_use_share_2017.share: unit to be established');
 
--- file: capri_data/2017/market/crushing_parameters.csv
-CREATE TABLE mkt_crushing_parameters (
+-- file: capri_data/2017/market/biofuel_use_share_2030.csv
+CREATE TABLE mkt_biofuel_use_share_2030 (
+    commodity VARCHAR NOT NULL,
+    biof_kt DOUBLE NOT NULL,
+    use_kt DOUBLE NOT NULL,
+    share DOUBLE NOT NULL,
+    PRIMARY KEY (commodity)
+);
+COMMENT ON TABLE mkt_biofuel_use_share_2030 IS 'Market year 2030: CAPRI''s biofuel markets: feedstock demand, biofuel supply and biofuel demand, per CAPRI market region. (tools/build/build_biofuel_market.py)';
+INSERT INTO value_units VALUES
+  ('mkt_biofuel_use_share_2030', 'biof_kt', NULL, 'open', 'biofuel_use_share_2030.biof_kt: unit to be established'),
+  ('mkt_biofuel_use_share_2030', 'use_kt', NULL, 'open', 'biofuel_use_share_2030.use_kt: unit to be established'),
+  ('mkt_biofuel_use_share_2030', 'share', NULL, 'open', 'biofuel_use_share_2030.share: unit to be established');
+
+-- file: capri_data/2017/market/crushing_parameters_2017.csv
+CREATE TABLE mkt_crushing_parameters_2017 (
     region VARCHAR NOT NULL,
     seed VARCHAR NOT NULL,
     crush_kt DOUBLE NOT NULL,
@@ -290,13 +396,34 @@ CREATE TABLE mkt_crushing_parameters (
     capri_regions VARCHAR NOT NULL,
     PRIMARY KEY (region, seed, elasticity_source, capri_regions)
 );
-COMMENT ON TABLE mkt_crushing_parameters IS 'CAPRI''s oilseed crushing per model trade region: capri_data/2017/market/crushing_parameters.csv. (tools/build/build_crushing_parameters.py)';
+COMMENT ON TABLE mkt_crushing_parameters_2017 IS 'CAPRI''s oilseed crushing per model trade region at the 2017 market year: crush = PROC of the seed, oil and cake yields = CAPRI''s PRCY, from CAPRI''s market data of 2017 (tools/build/build_crushing_parameters.py)';
 INSERT INTO value_units VALUES
-  ('mkt_crushing_parameters', 'crush_kt', NULL, 'open', 'crushing_parameters.crush_kt: unit to be established'),
-  ('mkt_crushing_parameters', 'oil_yield', NULL, 'open', 'crushing_parameters.oil_yield: unit to be established'),
-  ('mkt_crushing_parameters', 'cake_yield', NULL, 'open', 'crushing_parameters.cake_yield: unit to be established'),
-  ('mkt_crushing_parameters', 'elasticity', NULL, 'open', 'crushing_parameters.elasticity: unit to be established'),
-  ('mkt_crushing_parameters', 'crush_share_of_use', NULL, 'open', 'crushing_parameters.crush_share_of_use: unit to be established');
+  ('mkt_crushing_parameters_2017', 'crush_kt', NULL, 'open', 'crushing_parameters_2017.crush_kt: unit to be established'),
+  ('mkt_crushing_parameters_2017', 'oil_yield', NULL, 'open', 'crushing_parameters_2017.oil_yield: unit to be established'),
+  ('mkt_crushing_parameters_2017', 'cake_yield', NULL, 'open', 'crushing_parameters_2017.cake_yield: unit to be established'),
+  ('mkt_crushing_parameters_2017', 'elasticity', NULL, 'open', 'crushing_parameters_2017.elasticity: unit to be established'),
+  ('mkt_crushing_parameters_2017', 'crush_share_of_use', NULL, 'open', 'crushing_parameters_2017.crush_share_of_use: unit to be established');
+
+-- file: capri_data/2017/market/crushing_parameters_2030.csv
+CREATE TABLE mkt_crushing_parameters_2030 (
+    region VARCHAR NOT NULL,
+    seed VARCHAR NOT NULL,
+    crush_kt DOUBLE NOT NULL,
+    oil_yield DOUBLE NOT NULL,
+    cake_yield DOUBLE NOT NULL,
+    elasticity DOUBLE NOT NULL,
+    elasticity_source VARCHAR NOT NULL,
+    crush_share_of_use DOUBLE,
+    capri_regions VARCHAR NOT NULL,
+    PRIMARY KEY (region, seed, elasticity_source, capri_regions)
+);
+COMMENT ON TABLE mkt_crushing_parameters_2030 IS 'CAPRI''s oilseed crushing per model trade region at the 2030 market year: crush = PROC of the seed, oil and cake yields = CAPRI''s PRCY, from CAPRI''s market data of 2030 (tools/build/build_crushing_parameters.py)';
+INSERT INTO value_units VALUES
+  ('mkt_crushing_parameters_2030', 'crush_kt', NULL, 'open', 'crushing_parameters_2030.crush_kt: unit to be established'),
+  ('mkt_crushing_parameters_2030', 'oil_yield', NULL, 'open', 'crushing_parameters_2030.oil_yield: unit to be established'),
+  ('mkt_crushing_parameters_2030', 'cake_yield', NULL, 'open', 'crushing_parameters_2030.cake_yield: unit to be established'),
+  ('mkt_crushing_parameters_2030', 'elasticity', NULL, 'open', 'crushing_parameters_2030.elasticity: unit to be established'),
+  ('mkt_crushing_parameters_2030', 'crush_share_of_use', NULL, 'open', 'crushing_parameters_2030.crush_share_of_use: unit to be established');
 
 -- file: capri_data/2017/market/dairy_eu_balance.csv
 CREATE TABLE mkt_dairy_eu_balance (

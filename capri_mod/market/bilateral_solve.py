@@ -33,7 +33,7 @@ class BilateralSolveMixin(MarketStateMixin):
         """Uncalibrated bilateral systems for the market year (data['market_year'], else 2017)."""
         from capri_mod.market.bilateral import BilateralCommodity
         inp = self._inp()
-        year = int(self.data.get("market_year", 2017) or 2017)
+        year = self._market_year()
         cached = getattr(self, "_bilat_raw_cache", None)
         if cached is not None and cached[0] == year:
             return cached[1]
@@ -209,7 +209,8 @@ class BilateralSolveMixin(MarketStateMixin):
         others = [r for r in R if r not in fixed]
         cal = pd.Series(1.0, index=self.commodities)
         # where the bounds [0.2, 5] (not CAPRI's: PROXY_AUDIT S185) bind: {commodity: unbounded factor}; and the
-        # bilateral systems' export-share caps (S192). Recorded for the runs' metadata and warned
+        # regions whose CAPRI exports exceed their base supply (scaled to it, BilateralCommodity.calibrate). Recorded
+        # for the runs' metadata and warned
         self.calibration_bound_hits = {"non_eu_use": {}, "export_share": {
             c: list(sc.export_cap_hits) for c, sc in sysd.items() if getattr(sc, "export_cap_hits", None)}}
         for c in pooled:
@@ -227,7 +228,7 @@ class BilateralSolveMixin(MarketStateMixin):
         if _h["non_eu_use"] or _h["export_share"]:
             import warnings as _w
             _w.warn(f"market calibration bounds reached: non-EU use factor outside [0.2, 5] for "
-                    f"{sorted(_h['non_eu_use'])}; export share above 0.98 for {sorted(_h['export_share'])}",
+                    f"{sorted(_h['non_eu_use'])}; CAPRI's exports above the base supply for {_h['export_share']}",
                     RuntimeWarning)
         for sc in sysd.values():
             if sc.trq_row is not None:

@@ -1778,6 +1778,18 @@ COMMENT ON TABLE src_biofuel_proc_hessian_2030 IS 'CAPRI''s p_hessNQProc(region,
 INSERT INTO value_units VALUES
   ('src_biofuel_proc_hessian_2030', 'value', NULL, 'open', 'biofuel_proc_hessian_2030.value: unit to be established');
 
+-- file: capri_data/sources/market/biofuel_proc_hessian_2017.csv
+CREATE TABLE src_biofuel_proc_hessian_2017 (
+    region VARCHAR NOT NULL,
+    product VARCHAR NOT NULL,
+    price_of VARCHAR NOT NULL,
+    "value" DOUBLE NOT NULL,
+    PRIMARY KEY (region, product, price_of)
+);
+COMMENT ON TABLE src_biofuel_proc_hessian_2017 IS 'CAPRI''s p_hessNQProc(region, product, price_of, ''CAL'') rows of the biofuels BIOE and BIOD, own and cross terms, per market region, from elas_2_1717defaulta (tools/build/build_biofuel_market.py).';
+INSERT INTO value_units VALUES
+  ('src_biofuel_proc_hessian_2017', 'value', NULL, 'open', 'biofuel_proc_hessian_2017.value: unit to be established');
+
 -- file: capri_data/sources/market/dairy_dataout_2030.csv
 CREATE TABLE src_dairy_dataout_2030 (
     region VARCHAR NOT NULL,

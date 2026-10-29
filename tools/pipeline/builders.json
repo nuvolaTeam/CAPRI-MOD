@@ -493,12 +493,45 @@
    ]
   },
   {
-   "task": "build_biofuel_market",
+   "task": "build_biofuel_market:2017",
    "builder": "build_biofuel_market",
-   "args": [],
-   "inputs": [
-    "capri_data/validation/capri_eu27_market_balance_2030_ref.json"
+   "args": [
+    "--year",
+    "2017",
+    "--dump",
+    "$UP/market_base_1717.txt",
+    "--elas",
+    "$UP/elas_2_1717defaulta.csv"
    ],
+   "inputs": [],
+   "code": [
+    "tools/build/build_biofuel_market.py",
+    "tools/build/recalibrate_trade_2017.py"
+   ],
+   "external": [
+    "$UP/elas_2_1717defaulta.csv",
+    "$UP/market_base_1717.txt"
+   ],
+   "outputs": [
+    "capri_data/2017/market/biofuel_feedstock_2017.csv",
+    "capri_data/2017/market/biofuel_market_2017.csv",
+    "capri_data/2017/market/biofuel_use_share_2017.csv",
+    "capri_data/sources/market/biofuel_dataout_2017.csv.xz",
+    "capri_data/sources/market/biofuel_proc_hessian_2017.csv"
+   ]
+  },
+  {
+   "task": "build_biofuel_market:2030",
+   "builder": "build_biofuel_market",
+   "args": [
+    "--year",
+    "2030",
+    "--dump",
+    "$UP/markmarket_greendeal_1730et_base_1717.txt",
+    "--elas",
+    "$UP/elas_2_1730defaulta.csv"
+   ],
+   "inputs": [],
    "code": [
     "tools/build/build_biofuel_market.py",
     "tools/build/recalibrate_trade_2017.py"
@@ -508,9 +541,9 @@
     "$UP/markmarket_greendeal_1730et_base_1717.txt"
    ],
    "outputs": [
-    "capri_data/2017/market/biofuel_feedstock.csv",
-    "capri_data/2017/market/biofuel_market.csv",
-    "capri_data/2017/market/biofuel_use_share.csv",
+    "capri_data/2017/market/biofuel_feedstock_2030.csv",
+    "capri_data/2017/market/biofuel_market_2030.csv",
+    "capri_data/2017/market/biofuel_use_share_2030.csv",
     "capri_data/sources/market/biofuel_dataout_2030.csv.xz",
     "capri_data/sources/market/biofuel_proc_hessian_2030.csv"
    ]
@@ -1101,9 +1134,16 @@
    ]
   },
   {
-   "task": "build_crushing_parameters",
+   "task": "build_crushing_parameters:2017",
    "builder": "build_crushing_parameters",
-   "args": [],
+   "args": [
+    "--year",
+    "2017",
+    "--market",
+    "$UP/market_base_1717.txt",
+    "--elas",
+    "$UP/elas_2_1717defaulta.csv"
+   ],
    "inputs": [
     "capri_data/shared/capri_member_state_codes.csv",
     "capri_data/sources/capri_trade_regions_2017.json"
@@ -1113,11 +1153,38 @@
     "tools/build/recalibrate_trade_2017.py"
    ],
    "external": [
-    "$UP/elas_2_1717defaulta.csv",
-    "$UP/fao_agg_17_datamarket.txt"
+    "$UP/market_base_1717.txt",
+    "$UP/elas_2_1717defaulta.csv"
    ],
    "outputs": [
-    "capri_data/2017/market/crushing_parameters.csv"
+    "capri_data/2017/market/crushing_parameters_2017.csv"
+   ]
+  },
+  {
+   "task": "build_crushing_parameters:2030",
+   "builder": "build_crushing_parameters",
+   "args": [
+    "--year",
+    "2030",
+    "--market",
+    "$UP/markmarket_greendeal_1730et_base_1717.txt",
+    "--elas",
+    "$UP/elas_2_1730defaulta.csv"
+   ],
+   "inputs": [
+    "capri_data/shared/capri_member_state_codes.csv",
+    "capri_data/sources/capri_trade_regions_2017.json"
+   ],
+   "code": [
+    "tools/build/build_crushing_parameters.py",
+    "tools/build/recalibrate_trade_2017.py"
+   ],
+   "external": [
+    "$UP/markmarket_greendeal_1730et_base_1717.txt",
+    "$UP/elas_2_1730defaulta.csv"
+   ],
+   "outputs": [
+    "capri_data/2017/market/crushing_parameters_2030.csv"
    ]
   },
   {

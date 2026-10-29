@@ -12243,11 +12243,11 @@
     "tests": []
    }
   },
-  "mkt_biofuel_feedstock": {
-   "file": "capri_data/2017/market/biofuel_feedstock.csv",
+  "mkt_biofuel_feedstock_2017": {
+   "file": "capri_data/2017/market/biofuel_feedstock_2017.csv",
    "declared_in": "23_market_more.sql",
    "layout": [],
-   "comment": "CAPRI's biofuel markets: feedstock demand, biofuel supply and biofuel demand, per CAPRI market region. (tools/build/build_biofuel_market.py)",
+   "comment": "Market year 2017: CAPRI's biofuel markets: feedstock demand, biofuel supply and biofuel demand, per CAPRI market region. (tools/build/build_biofuel_market.py)",
    "columns": [
     {
      "name": "ms",
@@ -12324,57 +12324,193 @@
      "item": "biof_kt",
      "unit": null,
      "status": "open",
-     "basis": "biofuel_feedstock.biof_kt: unit to be established"
+     "basis": "biofuel_feedstock_2017.biof_kt: unit to be established"
     },
     {
      "item": "byproduct_price",
      "unit": null,
      "status": "open",
-     "basis": "biofuel_feedstock.byproduct_price: unit to be established"
+     "basis": "biofuel_feedstock_2017.byproduct_price: unit to be established"
     },
     {
      "item": "feed_price",
      "unit": null,
      "status": "open",
-     "basis": "biofuel_feedstock.feed_price: unit to be established"
+     "basis": "biofuel_feedstock_2017.feed_price: unit to be established"
     },
     {
      "item": "numeraire",
      "unit": null,
      "status": "open",
-     "basis": "biofuel_feedstock.numeraire: unit to be established"
+     "basis": "biofuel_feedstock_2017.numeraire: unit to be established"
     },
     {
      "item": "prcb",
      "unit": null,
      "status": "open",
-     "basis": "biofuel_feedstock.prcb: unit to be established"
+     "basis": "biofuel_feedstock_2017.prcb: unit to be established"
     },
     {
      "item": "prcby",
      "unit": null,
      "status": "open",
-     "basis": "biofuel_feedstock.prcby: unit to be established"
+     "basis": "biofuel_feedstock_2017.prcby: unit to be established"
     },
     {
      "item": "rho",
      "unit": null,
      "status": "open",
-     "basis": "biofuel_feedstock.rho: unit to be established"
+     "basis": "biofuel_feedstock_2017.rho: unit to be established"
     }
    ],
    "provenance": {
     "nature": "capri",
     "origins": "CAPRI",
-    "builder": "build_biofuel_market",
+    "builder": "build_biofuel_market:2017",
+    "sources": "$UP/elas_2_1717defaulta.csv; $UP/market_base_1717.txt"
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/data/loaders.py",
+     "capri_mod/market/biofuel.py"
+    ],
+    "builders": [],
+    "checks": [],
+    "tests": []
+   }
+  },
+  "mkt_biofuel_feedstock_2030": {
+   "file": "capri_data/2017/market/biofuel_feedstock_2030.csv",
+   "declared_in": "23_market_more.sql",
+   "layout": [],
+   "comment": "Market year 2030: CAPRI's biofuel markets: feedstock demand, biofuel supply and biofuel demand, per CAPRI market region. (tools/build/build_biofuel_market.py)",
+   "columns": [
+    {
+     "name": "ms",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "biofuel",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "feedstock",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "commodity",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "biof_kt",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "prcb",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "prcby",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "byproduct",
+     "type": "VARCHAR",
+     "not_null": false
+    },
+    {
+     "name": "feed_price",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "byproduct_price",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "rho",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "numeraire",
+     "type": "BIGINT",
+     "not_null": true
+    }
+   ],
+   "primary_key": [],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [
+    {
+     "item": "biof_kt",
+     "unit": null,
+     "status": "open",
+     "basis": "biofuel_feedstock_2030.biof_kt: unit to be established"
+    },
+    {
+     "item": "byproduct_price",
+     "unit": null,
+     "status": "open",
+     "basis": "biofuel_feedstock_2030.byproduct_price: unit to be established"
+    },
+    {
+     "item": "feed_price",
+     "unit": null,
+     "status": "open",
+     "basis": "biofuel_feedstock_2030.feed_price: unit to be established"
+    },
+    {
+     "item": "numeraire",
+     "unit": null,
+     "status": "open",
+     "basis": "biofuel_feedstock_2030.numeraire: unit to be established"
+    },
+    {
+     "item": "prcb",
+     "unit": null,
+     "status": "open",
+     "basis": "biofuel_feedstock_2030.prcb: unit to be established"
+    },
+    {
+     "item": "prcby",
+     "unit": null,
+     "status": "open",
+     "basis": "biofuel_feedstock_2030.prcby: unit to be established"
+    },
+    {
+     "item": "rho",
+     "unit": null,
+     "status": "open",
+     "basis": "biofuel_feedstock_2030.rho: unit to be established"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_biofuel_market:2030",
     "sources": "$UP/elas_2_1730defaulta.csv; $UP/markmarket_greendeal_1730et_base_1717.txt"
    },
    "notes": [],
    "read_by": {
     "model": [
      "capri_mod/data/loaders.py",
-     "capri_mod/market/biofuel.py",
-     "capri_mod/market/inputs.py"
+     "capri_mod/market/biofuel.py"
     ],
     "builders": [],
     "checks": [],
@@ -12383,11 +12519,11 @@
     ]
    }
   },
-  "mkt_biofuel_market": {
-   "file": "capri_data/2017/market/biofuel_market.csv",
+  "mkt_biofuel_market_2017": {
+   "file": "capri_data/2017/market/biofuel_market_2017.csv",
    "declared_in": "23_market_more.sql",
    "layout": [],
-   "comment": "CAPRI's biofuel markets: feedstock demand, biofuel supply and biofuel demand, per CAPRI market region. (tools/build/build_biofuel_market.py)",
+   "comment": "Market year 2017: CAPRI's biofuel markets: feedstock demand, biofuel supply and biofuel demand, per CAPRI market region. (tools/build/build_biofuel_market.py)",
    "columns": [
     {
      "name": "ms",
@@ -12558,194 +12694,550 @@
      "item": "arm1p",
      "unit": null,
      "status": "open",
-     "basis": "biofuel_market.arm1p: unit to be established"
+     "basis": "biofuel_market_2017.arm1p: unit to be established"
     },
     {
      "item": "bfc",
      "unit": null,
      "status": "open",
-     "basis": "biofuel_market.bfc: unit to be established"
+     "basis": "biofuel_market_2017.bfc: unit to be established"
     },
     {
      "item": "biof_kt",
      "unit": null,
      "status": "open",
-     "basis": "biofuel_market.biof_kt: unit to be established"
+     "basis": "biofuel_market_2017.biof_kt: unit to be established"
     },
     {
      "item": "cal_share",
      "unit": null,
      "status": "open",
-     "basis": "biofuel_market.cal_share: unit to be established"
+     "basis": "biofuel_market_2017.cal_share: unit to be established"
     },
     {
      "item": "cpri",
      "unit": null,
      "status": "open",
-     "basis": "biofuel_market.cpri: unit to be established"
+     "basis": "biofuel_market_2017.cpri: unit to be established"
     },
     {
      "item": "dem_max",
      "unit": null,
      "status": "open",
-     "basis": "biofuel_market.dem_max: unit to be established"
+     "basis": "biofuel_market_2017.dem_max: unit to be established"
     },
     {
      "item": "dem_slope",
      "unit": null,
      "status": "open",
-     "basis": "biofuel_market.dem_slope: unit to be established"
+     "basis": "biofuel_market_2017.dem_slope: unit to be established"
     },
     {
      "item": "dem_turn",
      "unit": null,
      "status": "open",
-     "basis": "biofuel_market.dem_turn: unit to be established"
+     "basis": "biofuel_market_2017.dem_turn: unit to be established"
     },
     {
      "item": "fixed_kt",
      "unit": null,
      "status": "open",
-     "basis": "biofuel_market.fixed_kt: unit to be established"
+     "basis": "biofuel_market_2017.fixed_kt: unit to be established"
     },
     {
      "item": "fossil_cpri",
      "unit": null,
      "status": "open",
-     "basis": "biofuel_market.fossil_cpri: unit to be established"
+     "basis": "biofuel_market_2017.fossil_cpri: unit to be established"
     },
     {
      "item": "hcon_kt",
      "unit": null,
      "status": "open",
-     "basis": "biofuel_market.hcon_kt: unit to be established"
+     "basis": "biofuel_market_2017.hcon_kt: unit to be established"
     },
     {
      "item": "inpe",
      "unit": null,
      "status": "open",
-     "basis": "biofuel_market.inpe: unit to be established"
+     "basis": "biofuel_market_2017.inpe: unit to be established"
     },
     {
      "item": "oil_eq",
      "unit": null,
      "status": "open",
-     "basis": "biofuel_market.oil_eq: unit to be established"
+     "basis": "biofuel_market_2017.oil_eq: unit to be established"
     },
     {
      "item": "oil_eq_fossil",
      "unit": null,
      "status": "open",
-     "basis": "biofuel_market.oil_eq_fossil: unit to be established"
+     "basis": "biofuel_market_2017.oil_eq_fossil: unit to be established"
     },
     {
      "item": "pmrk",
      "unit": null,
      "status": "open",
-     "basis": "biofuel_market.pmrk: unit to be established"
+     "basis": "biofuel_market_2017.pmrk: unit to be established"
     },
     {
      "item": "ppri",
      "unit": null,
      "status": "open",
-     "basis": "biofuel_market.ppri: unit to be established"
+     "basis": "biofuel_market_2017.ppri: unit to be established"
     },
     {
      "item": "pr0",
      "unit": null,
      "status": "open",
-     "basis": "biofuel_market.pr0: unit to be established"
+     "basis": "biofuel_market_2017.pr0: unit to be established"
     },
     {
      "item": "proc_hess",
      "unit": null,
      "status": "open",
-     "basis": "biofuel_market.proc_hess: unit to be established"
+     "basis": "biofuel_market_2017.proc_hess: unit to be established"
     },
     {
      "item": "proc_kt",
      "unit": null,
      "status": "open",
-     "basis": "biofuel_market.proc_kt: unit to be established"
+     "basis": "biofuel_market_2017.proc_kt: unit to be established"
     },
     {
      "item": "prod_kt",
      "unit": null,
      "status": "open",
-     "basis": "biofuel_market.prod_kt: unit to be established"
+     "basis": "biofuel_market_2017.prod_kt: unit to be established"
     },
     {
      "item": "quts",
      "unit": null,
      "status": "open",
-     "basis": "biofuel_market.quts: unit to be established"
+     "basis": "biofuel_market_2017.quts: unit to be established"
     },
     {
      "item": "rmssup",
      "unit": null,
      "status": "open",
-     "basis": "biofuel_market.rmssup: unit to be established"
+     "basis": "biofuel_market_2017.rmssup: unit to be established"
     },
     {
      "item": "sup_alfa",
      "unit": null,
      "status": "open",
-     "basis": "biofuel_market.sup_alfa: unit to be established"
+     "basis": "biofuel_market_2017.sup_alfa: unit to be established"
     },
     {
      "item": "sup_beta",
      "unit": null,
      "status": "open",
-     "basis": "biofuel_market.sup_beta: unit to be established"
+     "basis": "biofuel_market_2017.sup_beta: unit to be established"
     },
     {
      "item": "sup_scale",
      "unit": null,
      "status": "open",
-     "basis": "biofuel_market.sup_scale: unit to be established"
+     "basis": "biofuel_market_2017.sup_scale: unit to be established"
     },
     {
      "item": "sup_slope",
      "unit": null,
      "status": "open",
-     "basis": "biofuel_market.sup_slope: unit to be established"
+     "basis": "biofuel_market_2017.sup_slope: unit to be established"
     },
     {
      "item": "sup_turn",
      "unit": null,
      "status": "open",
-     "basis": "biofuel_market.sup_turn: unit to be established"
+     "basis": "biofuel_market_2017.sup_turn: unit to be established"
     },
     {
      "item": "x0_kt",
      "unit": null,
      "status": "open",
-     "basis": "biofuel_market.x0_kt: unit to be established"
+     "basis": "biofuel_market_2017.x0_kt: unit to be established"
     }
    ],
    "provenance": {
     "nature": "capri",
     "origins": "CAPRI",
-    "builder": "build_biofuel_market",
-    "sources": "$UP/elas_2_1730defaulta.csv; $UP/markmarket_greendeal_1730et_base_1717.txt"
+    "builder": "build_biofuel_market:2017",
+    "sources": "$UP/elas_2_1717defaulta.csv; $UP/market_base_1717.txt"
    },
    "notes": [],
    "read_by": {
     "model": [
      "capri_mod/data/loaders.py",
-     "capri_mod/market/biofuel.py",
-     "capri_mod/market/inputs.py"
+     "capri_mod/market/biofuel.py"
     ],
     "builders": [],
     "checks": [],
     "tests": []
    }
   },
-  "mkt_biofuel_use_share": {
-   "file": "capri_data/2017/market/biofuel_use_share.csv",
+  "mkt_biofuel_market_2030": {
+   "file": "capri_data/2017/market/biofuel_market_2030.csv",
    "declared_in": "23_market_more.sql",
    "layout": [],
-   "comment": "CAPRI's biofuel markets: feedstock demand, biofuel supply and biofuel demand, per CAPRI market region. (tools/build/build_biofuel_market.py)",
+   "comment": "Market year 2030: CAPRI's biofuel markets: feedstock demand, biofuel supply and biofuel demand, per CAPRI market region. (tools/build/build_biofuel_market.py)",
+   "columns": [
+    {
+     "name": "ms",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "biofuel",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "rmssup",
+     "type": "BIGINT",
+     "not_null": true
+    },
+    {
+     "name": "prod_kt",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "x0_kt",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "fixed_kt",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "ppri",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "pmrk",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "bfc",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "pr0",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "sup_scale",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "sup_alfa",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "sup_beta",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "sup_slope",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "sup_turn",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "biof_kt",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "cpri",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "arm1p",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "fossil_cpri",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "hcon_kt",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "oil_eq",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "oil_eq_fossil",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "quts",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "cal_share",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "dem_max",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "dem_slope",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "dem_turn",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "proc_kt",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "proc_hess",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "inpe",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "ms",
+    "region",
+    "biofuel"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [
+    {
+     "item": "arm1p",
+     "unit": null,
+     "status": "open",
+     "basis": "biofuel_market_2030.arm1p: unit to be established"
+    },
+    {
+     "item": "bfc",
+     "unit": null,
+     "status": "open",
+     "basis": "biofuel_market_2030.bfc: unit to be established"
+    },
+    {
+     "item": "biof_kt",
+     "unit": null,
+     "status": "open",
+     "basis": "biofuel_market_2030.biof_kt: unit to be established"
+    },
+    {
+     "item": "cal_share",
+     "unit": null,
+     "status": "open",
+     "basis": "biofuel_market_2030.cal_share: unit to be established"
+    },
+    {
+     "item": "cpri",
+     "unit": null,
+     "status": "open",
+     "basis": "biofuel_market_2030.cpri: unit to be established"
+    },
+    {
+     "item": "dem_max",
+     "unit": null,
+     "status": "open",
+     "basis": "biofuel_market_2030.dem_max: unit to be established"
+    },
+    {
+     "item": "dem_slope",
+     "unit": null,
+     "status": "open",
+     "basis": "biofuel_market_2030.dem_slope: unit to be established"
+    },
+    {
+     "item": "dem_turn",
+     "unit": null,
+     "status": "open",
+     "basis": "biofuel_market_2030.dem_turn: unit to be established"
+    },
+    {
+     "item": "fixed_kt",
+     "unit": null,
+     "status": "open",
+     "basis": "biofuel_market_2030.fixed_kt: unit to be established"
+    },
+    {
+     "item": "fossil_cpri",
+     "unit": null,
+     "status": "open",
+     "basis": "biofuel_market_2030.fossil_cpri: unit to be established"
+    },
+    {
+     "item": "hcon_kt",
+     "unit": null,
+     "status": "open",
+     "basis": "biofuel_market_2030.hcon_kt: unit to be established"
+    },
+    {
+     "item": "inpe",
+     "unit": null,
+     "status": "open",
+     "basis": "biofuel_market_2030.inpe: unit to be established"
+    },
+    {
+     "item": "oil_eq",
+     "unit": null,
+     "status": "open",
+     "basis": "biofuel_market_2030.oil_eq: unit to be established"
+    },
+    {
+     "item": "oil_eq_fossil",
+     "unit": null,
+     "status": "open",
+     "basis": "biofuel_market_2030.oil_eq_fossil: unit to be established"
+    },
+    {
+     "item": "pmrk",
+     "unit": null,
+     "status": "open",
+     "basis": "biofuel_market_2030.pmrk: unit to be established"
+    },
+    {
+     "item": "ppri",
+     "unit": null,
+     "status": "open",
+     "basis": "biofuel_market_2030.ppri: unit to be established"
+    },
+    {
+     "item": "pr0",
+     "unit": null,
+     "status": "open",
+     "basis": "biofuel_market_2030.pr0: unit to be established"
+    },
+    {
+     "item": "proc_hess",
+     "unit": null,
+     "status": "open",
+     "basis": "biofuel_market_2030.proc_hess: unit to be established"
+    },
+    {
+     "item": "proc_kt",
+     "unit": null,
+     "status": "open",
+     "basis": "biofuel_market_2030.proc_kt: unit to be established"
+    },
+    {
+     "item": "prod_kt",
+     "unit": null,
+     "status": "open",
+     "basis": "biofuel_market_2030.prod_kt: unit to be established"
+    },
+    {
+     "item": "quts",
+     "unit": null,
+     "status": "open",
+     "basis": "biofuel_market_2030.quts: unit to be established"
+    },
+    {
+     "item": "rmssup",
+     "unit": null,
+     "status": "open",
+     "basis": "biofuel_market_2030.rmssup: unit to be established"
+    },
+    {
+     "item": "sup_alfa",
+     "unit": null,
+     "status": "open",
+     "basis": "biofuel_market_2030.sup_alfa: unit to be established"
+    },
+    {
+     "item": "sup_beta",
+     "unit": null,
+     "status": "open",
+     "basis": "biofuel_market_2030.sup_beta: unit to be established"
+    },
+    {
+     "item": "sup_scale",
+     "unit": null,
+     "status": "open",
+     "basis": "biofuel_market_2030.sup_scale: unit to be established"
+    },
+    {
+     "item": "sup_slope",
+     "unit": null,
+     "status": "open",
+     "basis": "biofuel_market_2030.sup_slope: unit to be established"
+    },
+    {
+     "item": "sup_turn",
+     "unit": null,
+     "status": "open",
+     "basis": "biofuel_market_2030.sup_turn: unit to be established"
+    },
+    {
+     "item": "x0_kt",
+     "unit": null,
+     "status": "open",
+     "basis": "biofuel_market_2030.x0_kt: unit to be established"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_biofuel_market:2030",
+    "sources": "$UP/elas_2_1730defaulta.csv; $UP/markmarket_greendeal_1730et_base_1717.txt"
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/data/loaders.py",
+     "capri_mod/market/biofuel.py"
+    ],
+    "builders": [],
+    "checks": [],
+    "tests": []
+   }
+  },
+  "mkt_biofuel_use_share_2017": {
+   "file": "capri_data/2017/market/biofuel_use_share_2017.csv",
+   "declared_in": "23_market_more.sql",
+   "layout": [],
+   "comment": "Market year 2017: CAPRI's biofuel markets: feedstock demand, biofuel supply and biofuel demand, per CAPRI market region. (tools/build/build_biofuel_market.py)",
    "columns": [
     {
      "name": "commodity",
@@ -12779,44 +13271,113 @@
      "item": "biof_kt",
      "unit": null,
      "status": "open",
-     "basis": "biofuel_use_share.biof_kt: unit to be established"
+     "basis": "biofuel_use_share_2017.biof_kt: unit to be established"
     },
     {
      "item": "share",
      "unit": null,
      "status": "open",
-     "basis": "biofuel_use_share.share: unit to be established"
+     "basis": "biofuel_use_share_2017.share: unit to be established"
     },
     {
      "item": "use_kt",
      "unit": null,
      "status": "open",
-     "basis": "biofuel_use_share.use_kt: unit to be established"
+     "basis": "biofuel_use_share_2017.use_kt: unit to be established"
     }
    ],
    "provenance": {
     "nature": "capri",
     "origins": "CAPRI",
-    "builder": "build_biofuel_market",
-    "sources": "$UP/elas_2_1730defaulta.csv; $UP/markmarket_greendeal_1730et_base_1717.txt"
+    "builder": "build_biofuel_market:2017",
+    "sources": "$UP/elas_2_1717defaulta.csv; $UP/market_base_1717.txt"
    },
    "notes": [],
    "read_by": {
     "model": [
      "capri_mod/data/loaders.py",
-     "capri_mod/market/biofuel.py",
-     "capri_mod/market/inputs.py"
+     "capri_mod/market/biofuel.py"
     ],
     "builders": [],
     "checks": [],
     "tests": []
    }
   },
-  "mkt_crushing_parameters": {
-   "file": "capri_data/2017/market/crushing_parameters.csv",
+  "mkt_biofuel_use_share_2030": {
+   "file": "capri_data/2017/market/biofuel_use_share_2030.csv",
    "declared_in": "23_market_more.sql",
    "layout": [],
-   "comment": "CAPRI's oilseed crushing per model trade region: capri_data/2017/market/crushing_parameters.csv. (tools/build/build_crushing_parameters.py)",
+   "comment": "Market year 2030: CAPRI's biofuel markets: feedstock demand, biofuel supply and biofuel demand, per CAPRI market region. (tools/build/build_biofuel_market.py)",
+   "columns": [
+    {
+     "name": "commodity",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "biof_kt",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "use_kt",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "share",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "commodity"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [
+    {
+     "item": "biof_kt",
+     "unit": null,
+     "status": "open",
+     "basis": "biofuel_use_share_2030.biof_kt: unit to be established"
+    },
+    {
+     "item": "share",
+     "unit": null,
+     "status": "open",
+     "basis": "biofuel_use_share_2030.share: unit to be established"
+    },
+    {
+     "item": "use_kt",
+     "unit": null,
+     "status": "open",
+     "basis": "biofuel_use_share_2030.use_kt: unit to be established"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_biofuel_market:2030",
+    "sources": "$UP/elas_2_1730defaulta.csv; $UP/markmarket_greendeal_1730et_base_1717.txt"
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/data/loaders.py",
+     "capri_mod/market/biofuel.py"
+    ],
+    "builders": [],
+    "checks": [],
+    "tests": []
+   }
+  },
+  "mkt_crushing_parameters_2017": {
+   "file": "capri_data/2017/market/crushing_parameters_2017.csv",
+   "declared_in": "23_market_more.sql",
+   "layout": [],
+   "comment": "CAPRI's oilseed crushing per model trade region at the 2017 market year: crush = PROC of the seed, oil and cake yields = CAPRI's PRCY, from CAPRI's market data of 2017 (tools/build/build_crushing_parameters.py)",
    "columns": [
     {
      "name": "region",
@@ -12878,43 +13439,153 @@
      "item": "cake_yield",
      "unit": null,
      "status": "open",
-     "basis": "crushing_parameters.cake_yield: unit to be established"
+     "basis": "crushing_parameters_2017.cake_yield: unit to be established"
     },
     {
      "item": "crush_kt",
      "unit": null,
      "status": "open",
-     "basis": "crushing_parameters.crush_kt: unit to be established"
+     "basis": "crushing_parameters_2017.crush_kt: unit to be established"
     },
     {
      "item": "crush_share_of_use",
      "unit": null,
      "status": "open",
-     "basis": "crushing_parameters.crush_share_of_use: unit to be established"
+     "basis": "crushing_parameters_2017.crush_share_of_use: unit to be established"
     },
     {
      "item": "elasticity",
      "unit": null,
      "status": "open",
-     "basis": "crushing_parameters.elasticity: unit to be established"
+     "basis": "crushing_parameters_2017.elasticity: unit to be established"
     },
     {
      "item": "oil_yield",
      "unit": null,
      "status": "open",
-     "basis": "crushing_parameters.oil_yield: unit to be established"
+     "basis": "crushing_parameters_2017.oil_yield: unit to be established"
     }
    ],
    "provenance": {
     "nature": "capri",
     "origins": "CAPRI",
-    "builder": "build_crushing_parameters",
-    "sources": "$UP/elas_2_1717defaulta.csv; $UP/fao_agg_17_datamarket.txt"
+    "builder": "build_crushing_parameters:2017",
+    "sources": "$UP/elas_2_1717defaulta.csv; $UP/market_base_1717.txt"
    },
    "notes": [],
    "read_by": {
     "model": [
-     "capri_mod/market/inputs.py",
+     "capri_mod/data/loaders.py",
+     "capri_mod/market/processing.py"
+    ],
+    "builders": [],
+    "checks": [],
+    "tests": []
+   }
+  },
+  "mkt_crushing_parameters_2030": {
+   "file": "capri_data/2017/market/crushing_parameters_2030.csv",
+   "declared_in": "23_market_more.sql",
+   "layout": [],
+   "comment": "CAPRI's oilseed crushing per model trade region at the 2030 market year: crush = PROC of the seed, oil and cake yields = CAPRI's PRCY, from CAPRI's market data of 2030 (tools/build/build_crushing_parameters.py)",
+   "columns": [
+    {
+     "name": "region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "seed",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "crush_kt",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "oil_yield",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "cake_yield",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "elasticity",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "elasticity_source",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "crush_share_of_use",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "capri_regions",
+     "type": "VARCHAR",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "region",
+    "seed",
+    "elasticity_source",
+    "capri_regions"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [
+    {
+     "item": "cake_yield",
+     "unit": null,
+     "status": "open",
+     "basis": "crushing_parameters_2030.cake_yield: unit to be established"
+    },
+    {
+     "item": "crush_kt",
+     "unit": null,
+     "status": "open",
+     "basis": "crushing_parameters_2030.crush_kt: unit to be established"
+    },
+    {
+     "item": "crush_share_of_use",
+     "unit": null,
+     "status": "open",
+     "basis": "crushing_parameters_2030.crush_share_of_use: unit to be established"
+    },
+    {
+     "item": "elasticity",
+     "unit": null,
+     "status": "open",
+     "basis": "crushing_parameters_2030.elasticity: unit to be established"
+    },
+    {
+     "item": "oil_yield",
+     "unit": null,
+     "status": "open",
+     "basis": "crushing_parameters_2030.oil_yield: unit to be established"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_crushing_parameters:2030",
+    "sources": "$UP/elas_2_1730defaulta.csv; $UP/markmarket_greendeal_1730et_base_1717.txt"
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/data/loaders.py",
      "capri_mod/market/processing.py"
     ],
     "builders": [],
@@ -20328,6 +20999,63 @@
     "tests": []
    }
   },
+  "src_biofuel_proc_hessian_2017": {
+   "file": "capri_data/sources/market/biofuel_proc_hessian_2017.csv",
+   "declared_in": "30_sources.sql",
+   "layout": [],
+   "comment": "CAPRI's p_hessNQProc(region, product, price_of, 'CAL') rows of the biofuels BIOE and BIOD, own and cross terms, per market region, from elas_2_1717defaulta (tools/build/build_biofuel_market.py).",
+   "columns": [
+    {
+     "name": "region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "product",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "price_of",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "value",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "region",
+    "product",
+    "price_of"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [
+    {
+     "item": "value",
+     "unit": null,
+     "status": "open",
+     "basis": "biofuel_proc_hessian_2017.value: unit to be established"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_biofuel_market:2017",
+    "sources": "$UP/elas_2_1717defaulta.csv; $UP/market_base_1717.txt"
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [],
+    "tests": []
+   }
+  },
   "src_biofuel_proc_hessian_2030": {
    "file": "capri_data/sources/market/biofuel_proc_hessian_2030.csv",
    "declared_in": "30_sources.sql",
@@ -20374,7 +21102,7 @@
    "provenance": {
     "nature": "capri",
     "origins": "CAPRI",
-    "builder": "build_biofuel_market",
+    "builder": "build_biofuel_market:2030",
     "sources": "$UP/elas_2_1730defaulta.csv; $UP/markmarket_greendeal_1730et_base_1717.txt"
    },
    "notes": [],
@@ -37442,7 +38170,6 @@
  "code_data": {
   "capri/keep": 97,
   "capri-mod/keep": 2,
-  "capri-mod/register": 1,
   "literature/keep": 11,
   "numerical/keep": 34,
   "open/keep": 8,
