@@ -1517,10 +1517,17 @@ The census of the numbers held in the model's code (capri_data/schema/03_code_da
 October 2026):
 
 - the manure-application limit (SupplyModule._manure_limit: 170 kg N/ha, or 1.001 x the base rate where higher): it
-  builds the manure_application row of the N-surplus scenarios (manure N <= limit x crop land), capri-mod's own (the
-  Nitrates Directive cap is CAPRI's NDtech, off in its Green Deal runs), and the function returned None on any error
-  (the row then silently absent). The classification first said the limit was read nowhere; it is read. Decision: to
-  be replaced by CAPRI's own mechanism (open);
+  built the manure_application row of the N-surplus scenarios (manure N <= limit x crop land), capri-mod's own, and
+  the function returned None on any error (the manure terms then silently absent). The classification first said the
+  limit was read nowhere; it was read. CAPRI's default runs have no such row: manure is tied to land by the crop
+  nutrient balance (NUTNED_, fertDistExcr_, ManureNPK_, supply_model.gms l. 870-947 and 1095-1212) with manure trade,
+  which the NLP form ports; the Nitrates Directive's cap is NDman (envind/envConstraints.gms l. 2876-2933), whose
+  switch the Green Deal policy file sets only after an $exit. **Done** ("as CAPRI", the project lead's decision): the
+  row, the limit and MANURE_LIMIT removed (the NLP form already dropped the row); _manure_per_head gives the manure
+  per head and lets an error stop the solve. Found with it: the split columns (dairy, cattle, genetics) took their
+  manure factor for NUTNED_ from the manure or N row, which exist only with an N target, so without one their manure
+  did not reach the nutrient balance; the factor now comes from the tables (dmann_rel, d_mann_rel) in every run, which
+  can move results of runs without an N target;
 - capri_mod/data/validate_data.py _check_margins capped specialty-crop costs at 2 x the median, a cap the loader had
   dropped: **removed** (the check sees the model's costs; 12 pass, 0 warn);
 - BilateralCommodity's export cap at 0.98 of the model's base supply (PROXY_AUDIT S192): a consequence of step F (the
@@ -1533,7 +1540,8 @@ October 2026):
 - CAPRIModel._run_scenario's adaptive price step for Norway (1.25, 0.5, 0.1) now reads outer_loop.relax_step_up,
   relax_step_down and relax_floor (the same values): **done**.
 
-- **Effect:** none on default results from the three done (the checks, the settings with equal values, a path the
-  default skips)
+- **Effect:** none on default results from the checks, the settings with equal values and the path the default skips;
+  the split columns' manure in runs without an N target is a correction that can move results
 - **In 9t:** yes
-- **Status:** open (the manure row, the export cap); three done 29 October 2026
+- **Status:** open (the export cap: the inconsistent calibration data behind it are being fixed); four done 29-30
+  October 2026

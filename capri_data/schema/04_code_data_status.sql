@@ -223,7 +223,6 @@ INSERT INTO code_data_status VALUES
   ('capri_mod/supply/supply_module.py', 'SupplyModule._fert_techs', 1.2, 'capri', 'keep', 'gams/envind/ghgMiti.gms l. 885-887', 'relSubs1 of the fertiliser options'),
   ('capri_mod/supply/supply_module.py', 'SupplyModule._intensity_q_at', 2017.0, 'technical', 'keep', NULL, 'market-year switch choosing the 2030 data variant'),
   ('capri_mod/supply/supply_module.py', 'SupplyModule._intensity_q_at', 2030.0, 'technical', 'keep', NULL, 'market-year switch choosing the 2030 data variant'),
-  ('capri_mod/supply/supply_module.py', 'SupplyModule._manure_limit', 1.001, 'capri-mod', 'check', NULL, 'the manure-application limit (170 kg N/ha, or 1.001 x the base rate where higher) of the manure_application row in the N-surplus scenarios: capri-mod''s row, not CAPRI''s (the Nitrates Directive cap is CAPRI''s NDtech, off in its Green Deal runs); to be replaced by CAPRI''s mechanism (the project lead''s decision, 29 October 2026)'),
   ('capri_mod/supply/supply_module.py', 'SupplyModule._pmp_terms_for', 2017.0, 'technical', 'keep', NULL, 'market-year switch choosing the 2030 data variant'),
   ('capri_mod/supply/supply_module.py', 'SupplyModule._pmp_terms_for', 2030.0, 'technical', 'keep', NULL, 'market-year switch choosing the 2030 data variant'),
   ('capri_mod/supply/supply_module.py', 'SupplyModule.run', 50.0, 'technical', 'keep', NULL, 'progress print every 50 regions'),

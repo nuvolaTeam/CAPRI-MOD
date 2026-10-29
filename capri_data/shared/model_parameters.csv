@@ -32,7 +32,6 @@ ORGANIC_BASELINE_SHARE,,0.1,share of UAA,capri,CAPRI load_organic_targets.gms: p
 PESTICIDE_YIELD_LOSS_AT_50PCT,,0.1,share,jrc121368,JRC121368 (Sanchez et al. 2019): yield loss for a 50% pesticide cut,supply_module
 JRC_CAPPED_N_REGIONS,,9.0,regions,jrc121368,JRC121368 sect. 4.3.4: nine regions with the highest baseline surplus,supply_module
 JRC_CAPPED_CUT,,0.36,share,jrc121368,JRC121368 sect. 4.3.4: their cut set at the EU average,supply_module
-MANURE_LIMIT,,170.0,kg N per ha,legal,Nitrates Directive 91/676/EEC,supply_module
 FERT_CAL_PRIOR_ACCURACY,,2.0,ratio,capri,"CAPRI fert/ferttrm_years.gms: accuracy (mode / sd) of the calibration's blanket priors of the crop-group flows (2.0 at regional level)",inner_fert_dist
 FERT_CAL_CRES_ACCURACY,,5.0,ratio,capri,"CAPRI fert/ferttrm_years.gms: accuracy of the calibration's crop-residue priors (so residues cannot act as a readily available source)",inner_fert_dist
 FERT_CAL_MIN_NEED_SHARE,,0.1,share,capri,"CAPRI fert/ferttrm_years.gms: at least 10% of a crop's nutrient need is supplied by manure and mineral fertiliser (permanent groups, after their own residues)",inner_fert_dist

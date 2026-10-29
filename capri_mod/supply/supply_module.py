@@ -641,6 +641,26 @@ class RegionalSupplyModel:
                     n = float(rec.get("produce", {}).get(a, 0.0)) - float(rec.get("use", {}).get(a, 0.0))
                     self.net_revenues[a] = float(self.net_revenues[a]) + (r_ - 1.0) * v * n
 
+    def _split_manure_factors(self, n_cols, acts):
+        """[(column, animal, manure per head of the column / the animal's)] of the animal split and option columns:
+        the dairy intensity split (dairy_intensity dmann_rel), the cattle splits (cattle_intensity[key] dmann_rel) and
+        the genetics options (genetics_effects[(animal, option)] d_mann_rel)."""
+        out = []
+        j = getattr(self, "_dairy_col", None)
+        di = getattr(self.data, "dairy_intensity", None)
+        if j is not None and int(j) < n_cols and di is not None and "DCOW" in acts:
+            out.append((int(j), "DCOW", float(di["dmann_rel"])))
+        tab = getattr(self.data, "cattle_intensity", None) or {}
+        for key, j in (getattr(self, "_cattle_cols", None) or {}).items():
+            a = key.split(":")[0]
+            if int(j) < n_cols and a in acts and key in tab:
+                out.append((int(j), a, float(tab[key]["dmann_rel"])))
+        gen = getattr(self.data, "genetics_effects", None) or {}
+        for (a, opt), j in (getattr(self, "_genet_cols", None) or {}).items():
+            if int(j) < n_cols and a in acts and (a, opt) in gen:
+                out.append((int(j), a, float(gen[(a, opt)]["d_mann_rel"])))
+        return out
+
     def _mctx(self):
         """CAPRI's crop nutrient balance terms for this solve: {"man_d": manure N per activity unit, "nmin": crops'
         base mineral N per ha, "ybase": base yields}, from the N target's row when the scenario has one, else from
@@ -648,8 +668,7 @@ class RegionalSupplyModel:
         Sprint 9k); None when neither is there."""
         srow = getattr(self, "_surplus_row", None)
         if srow is not None and len(srow) > 6:
-            mrow = srow[6]
-            man_d = mrow[0] if mrow is not None and hasattr(mrow[0], "get") else None
+            man_d = srow[6] if srow[6] is not None and hasattr(srow[6], "get") else None
             if man_d is not None:
                 return {"man_d": man_d, "nmin": srow[2], "ybase": srow[4]}
         ctx = getattr(self, "_manure_ctx", None)
@@ -903,24 +922,13 @@ class RegionalSupplyModel:
         out = {"capri_region": cr, "nutrients": {}, "land_cols": land_cols, "crop_cols": crop_cols}
         # the split columns: the grassland split moves area from CAPRI's GRAI to GRAE (z = GRAE - base GRAE, each of the
         # two half the grassland at base), so the GRAS groups' need changes by z x (need GRAE - need GRAI); the animal
-        # split and option columns change their animal's manure in the proportion their manure coefficient bears to the
-        # animal's (the manure-application row, else its N row), which reaches ManureNPK_
+        # split and option columns change their animal's manure in the proportion of their manure per head to the
+        # animal's (the tables' dmann_rel / d_mann_rel, the factor their columns carry in the N rows), which reaches
+        # ManureNPK_. Until 29 October 2026 the factor was read off the manure-application row or the N row, which
+        # exist only with an N target: without one the split columns left the manure in NUTNED_ unchanged (K105).
         colsl = self._aug_col_labels(n_cols)
         j_gz = colsl.index("grass_z") if "grass_z" in colsl else None
-        man_split = []
-        if A is not None and labels is not None:
-            ref_row = next((labels.index(l_) for l_ in ("manure_application", "N_balance") if l_ in labels), None)
-            if ref_row is not None:
-                for j, lab in enumerate(colsl):
-                    a_ = None
-                    if lab == "dairy_z":
-                        a_ = "DCOW"
-                    elif lab.startswith("cattle_z_"):
-                        a_ = lab[len("cattle_z_"):].split(":")[0]
-                    elif lab.startswith("genet_z_"):
-                        a_ = lab[len("genet_z_"):].split("_")[0]
-                    if a_ in acts and float(A[ref_row, acts.index(a_)]) != 0.0:
-                        man_split.append((j, a_, float(A[ref_row, j]) / float(A[ref_row, acts.index(a_)])))
+        man_split = self._split_manure_factors(n_cols, acts)
         for nut in NUTRIENTS:
             sq = sqn[nut]
             R = D.region(cr, nut); P = D.priors(cr, nut)
@@ -1604,7 +1612,7 @@ class RegionalSupplyModel:
         abat = self._nlp_abatement_spec(labels) if npk is not None else {}
         if npk is not None:
             # capri-mod's manure-application limit and mineral-N allocation row are not CAPRI's
-            drop += ["manure_application", "alloc_mineral_N"]
+            drop += ["alloc_mineral_N"]
         tax_ = float(getattr(self, "ghg_tax", 0.0) or 0.0)
         ghg_min = None
         if tax_ > 0 and npk is not None:
@@ -3648,7 +3656,6 @@ class RegionalSupplyModel:
                     # 50 per t N for each 1% of the region's manure N supply traded. man0 is in t N (kg N per unit x
                     # 1000 units) and the objective in EUR 1000, so CAPRI's 50 is 0.05 here (supply.manure_pool_slope)
                     slope = float(_settings().get("supply.manure_pool_slope")) / (man0 / 100.0)
-                    i_ma = labels.index("manure_application") if "manure_application" in labels else None
                     # emission tax: the mineral N bought (export) or saved (import), sub x the accounts' soil N2O
                     # factor and the indirect N2O of its runoff and leaching per t N (kt CO2-eq x EUR/t = 1000 EUR);
                     # the NLP form takes exactly this term out again (_nlp_tax_terms), mineral N being endogenous there
@@ -3661,8 +3668,6 @@ class RegionalSupplyModel:
                         Aa = np.hstack([Aa, np.zeros((Aa.shape[0], 1))])
                         if i_nb is not None:
                             Aa[i_nb, -1] = sign * (1.0 - sub)
-                        if i_ma is not None:
-                            Aa[i_ma, -1] = sign
                         if "mineral_N" in labels:
                             # mineral N: exported manure must be replaced (+sub), imported manure displaces it
                             Aa[labels.index("mineral_N"), -1] = -sign * sub
@@ -3891,7 +3896,7 @@ class RegionalSupplyModel:
             return Qa, ca, Aa, ba, start
         cz_all = getattr(self, "_cattle_cz", None) or {}
         pending = {}
-        rows_ = [labels.index(l) for l in ("N_balance", "manure_application") if l in labels]
+        rows_ = [labels.index(l) for l in ("N_balance",) if l in labels]
         for extra in ("_need_row", "_alloc_row"):
             k = getattr(self, extra, None)
             if k is not None and k < Aa.shape[0] and k not in rows_ and (extra != "_alloc_row" or getattr(self, "_alloc_cols", 0)):
@@ -4055,7 +4060,7 @@ class RegionalSupplyModel:
             return Qa, ca, Aa, ba, start
         cal = getattr(self, "_genet_cz", None) or {}
         pend = {}
-        rows_ = [labels.index(l) for l in ("N_balance", "manure_application") if l in labels]
+        rows_ = [labels.index(l) for l in ("N_balance",) if l in labels]
         for extra in ("_need_row", "_alloc_row"):
             k = getattr(self, extra, None)
             if k is not None and k < Aa.shape[0] and k not in rows_ and (extra != "_alloc_row" or getattr(self, "_alloc_cols", 0)):
@@ -4157,7 +4162,7 @@ class RegionalSupplyModel:
         jd = list(self.acts).index("DCOW")
         s0 = float(di["share_low"]); dm = float(di["dmann_rel"])
         col = np.zeros(Aa.shape[0])
-        rows_ = [labels.index(l) for l in ("N_balance", "manure_application") if l in labels]
+        rows_ = [labels.index(l) for l in ("N_balance",) if l in labels]
         for extra in ("_need_row", "_alloc_row"):
             k = getattr(self, extra, None)
             if k is not None and k < Aa.shape[0] and k not in rows_ and (extra != "_alloc_row" or getattr(self, "_alloc_cols", 0)):
@@ -4664,19 +4669,10 @@ class RegionalSupplyModel:
             A_rows.append(row_B)
             b_rows.append(float(target) * base_area)
             self._row_labels.append("N_balance")
-            # manure must be spread on land: manure N <= limit x land in use
-            mrow = srow[6] if len(srow) > 6 else None
-            if mrow is not None:
-                man, lim = mrow
-                row_M = np.zeros(n)
-                for i, a in enumerate(self.acts):
-                    if a in man:
-                        row_M[i] = float(man[a])
-                    elif a in CROPS:
-                        row_M[i] = -float(lim)
-                A_rows.append(row_M)
-                b_rows.append(0.0)
-                self._row_labels.append("manure_application")
+            # (a row "manure_application", manure N <= 170 kg N/ha x crop land, stood here until 29 October 2026:
+            # capri-mod's, not CAPRI's - CAPRI's default runs tie manure to land through the crop nutrient balance
+            # NUTNED_, fertDistExcr_ and ManureNPK_ with manure trade, which the NLP form ports, and apply the Nitrates
+            # Directive's cap only in NDman, off in its Green Deal runs; KNOWN_ISSUES K105)
 
         # CAPRI's mineral fertiliser reduction (Green Deal mineRedu; pol_input/greendeal/minfert_redu_*.gms):
         #   "20"    e_synNMax: mineral N per ha of current land <= baseline mineral N per ha x (1 - r)
@@ -5907,46 +5903,26 @@ class SupplyModule:
              + L["RunTot"] * (sv["NO3SRUN"] or 0.0))
         return (abs(v) ** self.FERT_EFF_COR) * (1.0 if v >= 0 else -1.0) if v else 0.0
 
-    #: Nitrates Directive limit on manure N, kg N per ha (91/676/EEC)
-    MANURE_LIMIT = param("MANURE_LIMIT")
-
-    def _manure_limit(self, region, model):
-        """Manure N per head and the region's manure-application limit.
-
-        Manure has to be spread on land. Without this link a region under a
-        nitrogen cap could keep its animals and abandon its fields - North
-        Brabant dropped ALL cropland, since removing a hectare removes its
-        fertiliser and uptake and so cuts the surplus. CAPRI's fertiliser
-        allocation forces each region's manure onto its crops, and the Nitrates
-        Directive caps it at 170 kg N/ha, with derogations above that. The limit
-        here is 170 kg N/ha or the region's own base level where higher, so it
-        cannot bind at base. Manure N per 1000 head is the environmental module's
-        own (organic N input for one unit of each animal).
-        """
-        try:
-            if not hasattr(self, "_env_for_surplus"):
-                from capri_mod.environmental.environmental_module import EnvironmentalModule
-                self._env_for_surplus = EnvironmentalModule(self.data)
-                self._env_for_surplus.set_manure_trade(getattr(self, "manure_trade_on", True))
-            ylds = self.data["yields"].loc[region]
-            man = {}
-            for a in model.acts:
-                if a in CROPS:
-                    continue
-                nb = self._env_for_surplus.unit_nitrogen_balance(a, ylds, region)
-                v = float(nb.get("n_organic_input", 0.0))
-                if v > 0:
-                    man[a] = v
-            if not man:
-                return None
-            base = model._base_levels()
-            land = sum(float(base.get(c, 0.0)) for c in CROPS)
-            if land <= 0:
-                return None
-            base_rate = sum(man[a] * float(base.get(a, 0.0)) for a in man) / land
-            return (man, max(self.MANURE_LIMIT, base_rate * 1.001))
-        except Exception:
-            return None
+    def _manure_per_head(self, region, model):
+        """Manure N per activity unit of the region's animals ({animal: the environmental module's organic N input
+        of one unit}), the coefficients of CAPRI's ManureNPK_ / NUTNED_ terms; None when the region has no animal with
+        manure. Until 29 October 2026 this was _manure_limit, which also returned a manure-application limit (170 kg
+        N/ha or 1.001 x the base rate) for a row of capri-mod's own, removed (KNOWN_ISSUES K105), and returned None on
+        any error, which dropped the manure terms without a word: an error now stops the solve."""
+        if not hasattr(self, "_env_for_surplus"):
+            from capri_mod.environmental.environmental_module import EnvironmentalModule
+            self._env_for_surplus = EnvironmentalModule(self.data)
+            self._env_for_surplus.set_manure_trade(getattr(self, "manure_trade_on", True))
+        ylds = self.data["yields"].loc[region]
+        man = {}
+        for a in model.acts:
+            if a in CROPS:
+                continue
+            nb = self._env_for_surplus.unit_nitrogen_balance(a, ylds, region)
+            v = float(nb.get("n_organic_input", 0.0))
+            if v > 0:
+                man[a] = v
+        return man or None
 
     #: CAPRI's baseline calibration (Sprint 9p): at most this many correction rounds per baseline run
     BASE_CAL_ROUNDS = setting("projection.base_cal_rounds")
@@ -6021,10 +5997,10 @@ class SupplyModule:
         cache = self.__dict__.setdefault("_mctx_cache", {})
         ck = (region, bool(getattr(self, "manure_trade_on", True)))
         if ck not in cache:
-            ml = self._manure_limit(region, model)
+            man = self._manure_per_head(region, model)
             bc = self._balance_coefs(region, model)
-            cache[ck] = None if (ml is None or bc is None) else \
-                {"man_d": ml[0], "nmin": bc[1], "ybase": self.data["yields"].loc[region]}
+            cache[ck] = None if (man is None or bc is None) else \
+                {"man_d": man, "nmin": bc[1], "ybase": self.data["yields"].loc[region]}
         if cache[ck] is None:
             return None
         try:
@@ -6381,7 +6357,7 @@ class SupplyModule:
                         surplus_row = (bc[0], target, bc[1], bc[2],
                                        self.data["yields"].loc[region],
                                        self._fert_techs(region),
-                                       self._manure_limit(region, model),
+                                       self._manure_per_head(region, model),
                                        sp)
                     elif bc is not None and sp is not None and sp > 0:
                         # The REQUIRED CUT comes from CAPRI's own baseline
@@ -6419,7 +6395,7 @@ class SupplyModule:
                         surplus_row = (bc[0], target, bc[1], bc[2],
                                        self.data["yields"].loc[region],
                                        self._fert_techs(region),
-                                       self._manure_limit(region, model),
+                                       self._manure_per_head(region, model),
                                        sp)
 
             # CAPRI's mineral fertiliser reduction (mineRedu), EU27 only (minfert_redu_*.gms)
