@@ -2951,6 +2951,36 @@ def test_palm_and_other_vegetable_oils_are_markets(model):
     mm.seen.eu_price_seen = None
 
 
+def test_noneu_supply_is_capris_market_supply_function(model):
+    """Market step D, K54-3: a non-EU region's supply is CAPRI's ProdNQ_ (p_hessNQSupp at the 2030 calibration point,
+    completed as arm/market1.gms: symmetric, tiny terms and products without ProdNQ_ deleted): linear in the prices
+    with the cross-price terms, raw milk's included (its cross terms move the dairy block's raw milk supply). A
+    dearer US maize raises US maize and lowers US wheat and soya (CAPRI's cross terms; the constant elasticity of
+    before moved maize only). The terms reproduce CAPRI's p_elasSupp at the calibration point (the builder's check)."""
+    import numpy as np
+    from capri_mod import settings
+    mm = model.market_module
+    cols = list(mm.commodities)
+    b = mm.par.base_production
+    rr = pd.DataFrame(1.0, index=b.index, columns=cols)
+    rr.loc["USA", "CORN"] = 1.10
+    P = mm._noneu_nq_params()["USA"]
+    # symmetric in prices: h_xy / PPRI_y = h_yx / PPRI_x, both stored after completion
+    nq = pd.read_csv(DATA_DIR / "2017" / "market" / "noneu_market_supply_nq.csv", keep_default_na=False)
+    u = nq[nq.rms == "USA"].set_index(["capri_x", "capri_y"])["h"]
+    assert abs(u[("WHEA", "MAIZ")] - u[("MAIZ", "WHEA")]) < 1e-9 * abs(u[("MAIZ", "WHEA")])
+    s = mm.supply_response(mm.world_prices_base, None, region_ratio=rr)
+    assert P["rows"]["SWHE"]["CORN"] < 0 and P["rows"]["SOYA"]["CORN"] < 0
+    for x in ("CORN", "SWHE", "SOYA"):
+        exp = float(b.at["USA", x]) + P["rows"][x]["CORN"] * 0.10
+        assert abs(float(s.at["USA", x]) - exp) < 1e-3 * abs(P["rows"][x]["CORN"] * 0.10) + 1.0, x
+    assert float(s.at["USA", "SWHE"]) < float(b.at["USA", "SWHE"])
+    assert mm._noneu_milk_shift("USA", cols, rr.loc["USA", cols].to_numpy())["USA"] != 0.0
+    with settings.override({"market.noneu_supply_nq": False}):
+        s0 = mm.supply_response(mm.world_prices_base, None, region_ratio=rr)
+    assert float(s0.at["USA", "SWHE"]) == float(b.at["USA", "SWHE"])
+
+
 def test_supply_elasticities_reach_every_region_from_capri(data):
     """K30, K32: crops the regional CAPRI sources lack take the member state's calibrated elasticity (tobacco 0.44,
     not the hand-entered 0.213); recoded regions reach the PMP source through the region map or the national row

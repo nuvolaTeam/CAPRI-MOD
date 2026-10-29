@@ -175,7 +175,7 @@ files record how they map to this model's names.
 | Market method | CAPRI's bilateral Armington market: 26 trade regions (27 with CAPRI's EU blocks, optional), transport costs, tariffs, TRQs; dairy block, GL food demand, young animals, CAPRI's market supply functions; Newton + Anderson to < 1e-7 |
 | Data validator | 13 pass, 0 warn, 0 fail |
 | Convergence | all 221 regional models solve (one Dutch unit, NL320000, at JRC121368's relaxed N target); under CAPRI's stop rule Farm-to-Fork 2030 converges in 12 iterations, Green Deal 2030 in 21 (reference runs r182, r183, 29 October 2026, on CAPRI's regional units; the Green Deal's iteration count depends on the path, K79: 37 in r181) |
-| Test suite | 229 tests (gate of 29 October 2026, batch 4 and the data batch: 224 passed, 5 skipped) |
+| Test suite | 230 tests (gate of 29 October 2026, batch 4 and the data batch: 224 passed, 5 skipped) |
 | On by default, as in CAPRI | land market and land rules, endogenous feed rations, fodder equality, ammonia technologies |
 | Optional | manure market (`use_manure_market`) |
 | 2030 Farm-to-Fork run | about 36 minutes on 2 cores (r161), plus about an hour once per new baseline for the market supply Hessian (67 min for r161's); regions solved in parallel (`CAPRI_WORKERS`), same results |
@@ -481,7 +481,8 @@ consuming modules:
 | livestock_output_by_product_coef | animal output by CAPRI final product | kt/1000 head | supply, market |
 | genetics_effects | CAPRI's cattle genomics options per region and animal | relative change, EUR/head | supply, environment |
 | p_balance_crop_coefs | CAPRI's P2O5 retention (removal) and residue output per ha of the model's crops | kg P2O5/ha | environment |
-| supply_elas_region | non-EU trade regions' own-price supply elasticities (CAPRI p_elasSupp, production-weighted) | elasticity | market |
+| noneu_market_supply_nq | CAPRI's market supply functions of the non-EU regions (ProdNQ_: p_hessNQSupp at the 2030 calibration point, own and cross-price terms) | kt per unit of price ratio | market |
+| supply_elas_region | non-EU trade regions' own-price supply elasticities (CAPRI p_elasSupp, production-weighted; only with market.noneu_supply_nq = false) | elasticity | market |
 | feed_bulks_no | Norway's feed bulks (feed use and Arm1 prices per product) for its bulk price indices | 1000 t; EUR/t | market |
 | land_rents_2030 | CAPRI's land rents by land type at its 2030 calibration point (land market balance, NLP calibration's land multipliers) | EUR/ha | supply |
 | winter_cover_option | winter cover as an option: initial and maximum share, CAPRI's cost curve | share; EUR/ha | supply |

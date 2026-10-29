@@ -250,7 +250,8 @@ class WelfareMixin:
     def _welfare_dairy(self) -> Dict[str, Dict[str, float]]:
         """ProfitDairy per model region from the last dairy solutions (the EU member states' blocks and the non-EU
         trade regions' blocks), and the non-EU farms' profit from raw milk (CAPRI's raw milk supply function, ProdNQ_
-        MILK: change = sum over the behavioural regions of (Q0 + dQ / 2) dp_MILK). {"dairy": {...}, "milk": {...}}."""
+        MILK: change = sum over the behavioural regions of (Q0 + dQ / 2) dp_MILK, dQ with the cross-price terms; the
+        other products' share of the integral is in ProfitAgr). {"dairy": {...}, "milk": {...}}."""
         out = {"dairy": {}, "milk": {}}
         dp = self._dairy_params() or {}
         last = self.ev.dairy_last or {}
@@ -271,7 +272,8 @@ class WelfareMixin:
             for rms, a in (prm.get("rms") or {}).items():
                 out["dairy"][tr] = out["dairy"].get(tr, 0.0) + self._dairy_profit(a, z) / 1000.0
                 if res.get("milk_supply_ratio") is not None and a.get("SM", 0.0) > 0:
-                    dQ = a["SM"] * z[a["iM"]]
+                    # CAPRI's raw milk supply function: its own-price change and its change from the other prices
+                    dQ = a["SM"] * z[a["iM"]] + float((res.get("milk_shift_rms") or {}).get(rms, 0.0))
                     dpm = a["pM"] * z[a["iM"]]
                     out["milk"][tr] = out["milk"].get(tr, 0.0) + (a["Q0"][a["iM"]] + 0.5 * dQ) * dpm / 1000.0
         return out
@@ -283,7 +285,9 @@ class WelfareMixin:
                           REF: np.ndarray) -> Dict[str, Dict[str, float]]:
         """ProfitAgr and ProfitFeed of the market regions without supply models (CAPRI: not RMSSUP).
 
-        ProfitAgr: the integral of the model's constant-elasticity supply S = S0 rr^e over the region's own price,
+        ProfitAgr: with CAPRI's market supply functions (market.noneu_supply_nq) the integral of the linear supply
+        over the price changes, p0 (rr - 1) (q0 + dq / 2) per product; otherwise the integral of the model's
+        constant-elasticity supply S = S0 rr^e over the region's own price,
         S0 p0 (rr^(e+1) - 1) / (e + 1), for the cells whose supply is that function at the solution (crushing, the
         dairy blocks, raw milk, biofuels and residual feeds have their own blocks: their supply differs from it).
         ProfitFeed: minus the integral of the feed demand F = F0 prod_j PR_j^e_cj (p_ElasFeed), good by good in the
@@ -297,6 +301,7 @@ class WelfareMixin:
                     or reg not in ev_regs):
                 continue
             EV = EVm[ev_regs.index(reg)]
+            nq = (getattr(self, "_welf_noneu_nq", None) or {}).get(reg) or {}
             v = 0.0
             for j, c in enumerate(cols):
                 s0 = float(self.par.base_production.at[reg, c])
@@ -304,6 +309,14 @@ class WelfareMixin:
                 rr = max(float(r.at[reg, c]), 1e-6) if c in r.columns else 1.0
                 if c == "MILK" or s0 <= 0 or not p0 > 0 or rr == 1.0:
                     continue                                  # raw milk: the dairy blocks' (or fixed, not traded)
+                if c in nq:
+                    # CAPRI's market supply function (ProdNQ_, linear in the prices): the profit change is the
+                    # integral of the supply over the price change, p0 (r - 1) (q0 + dq / 2) on the straight path
+                    # (exact for the linear function with CAPRI's symmetric Hessian)
+                    q0_, dq_ = nq[c]
+                    if abs(float(S.at[reg, c]) - max(q0_ + dq_, 0.0)) <= 1e-9 * max(1.0, q0_):
+                        v += p0 * (rr - 1.0) * (q0_ + 0.5 * dq_)
+                    continue
                 e = float(EV[j])
                 if abs(float(S.at[reg, c]) - s0 * rr ** e) > 1e-9 * max(1.0, s0):
                     continue                                  # not the elasticity function: another block's

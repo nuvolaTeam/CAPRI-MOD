@@ -178,6 +178,8 @@ INVOCATIONS: list[tuple[str, list[str], list[Path]]] = [
                                  UP / "markmarket_greendeal_1730et_base_1717.txt"]),
     ("build_eu_market_supply_nq", [], [UP / "elas_2_1730defaulta.csv", UP / "data_market_1730defaulta.csv",
                                        UP / "markmarket_greendeal_1730et_base_1717.txt"]),
+    ("build_noneu_market_supply_nq", [], [UP / "elas_2_1730defaulta.csv", UP / "data_market_1730defaulta.csv",
+                                          UP / "markmarket_greendeal_1730et_base_1717.txt"]),
     ("build_processing_seeds", [], []),
     ("build_processing_yields", [], [UP / "markmarket_greendeal_1730et_base_1717.txt"]),
     ("build_sugar_processing", [], []),

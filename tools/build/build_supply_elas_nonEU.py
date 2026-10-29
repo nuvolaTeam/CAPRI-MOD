@@ -10,8 +10,8 @@ bilateral market (tools/build/recalibrate_trade_2017.py REGION_MAP, CAPRI region
 tools/build/build_bilateral_market.py MODEL). Products CAPRI's market produces by processing (dairy products, oils and cakes,
 biofuels, DDGS) have no p_elasSupp and keep the market's previous value.
 
-REGISTERED: own-price terms only. CAPRI's non-EU supply functions also carry cross-price terms (p_elasSupp off the
-diagonal, p_hessNQSupp); the model's non-EU supply stays one-product-at-a-time.
+Used only with market.noneu_supply_nq = false (since 29 October 2026 the market takes CAPRI's own market supply
+functions with their cross-price terms, build_noneu_market_supply_nq.py). Own-price terms only.
 
 Output: capri_data/2017/market/supply_elas_region.csv
     region, commodity, elasticity, capri_regions, prod_kt

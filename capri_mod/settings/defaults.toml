@@ -203,6 +203,11 @@ eu_blocks = false
 # iteration by simu_calibration_to_supply.gms); CAPRI's setting since 24 October 2026 (K75). The Hessian is measured
 # once per baseline by price shocks on the supply models and cached on disk (.cache/market_supply_hessian)
 market_supply_nq = true
+# the non-EU market regions' supply as CAPRI's market supply functions (arm/market_model.gms ProdNQ_: p_hessNQSupp at
+# the 2030 calibration point with its cross-price terms and raw milk's, tools/build/build_noneu_market_supply_nq.py;
+# KNOWN_ISSUES K54-3); false: one own-price constant elasticity per region and product (CAPRI's p_elasSupp of 2017),
+# the form until 29 October 2026
+noneu_supply_nq = true
 # price shock of the market supply Hessian (calibrate_supply.gms)
 nq_price_shock = 0.01
 # bilateral market solve: acceleration ("anderson" or "none"), memory, chord step for trade, Newton rounds,

@@ -244,12 +244,13 @@ class DairyMixin(MarketStateMixin):
             rP -= float(part["r"] @ d)
         return dproc, rF, rP
 
-    def _dairy_solve(self, dp, traded_ratio, milk_ratio=None, fi=1.0, key="EU27"):
+    def _dairy_solve(self, dp, traded_ratio, milk_ratio=None, fi=1.0, key="EU27", milk_shift=0.0):
         """Solve one dairy block. Unknowns: fat, protein and raw milk price ratios, and the prices of the products
         that clear inside the block (DAIRY_DOMESTIC; none since Sprint 9f: all nine products are traded
         bilaterally, so their prices are given and this set is empty). Equations: fat and protein balances
         (FatsProtBal_); raw milk: dairies' demand = milk delivered (milk_ratio given: the EU) or = CAPRI's raw milk
-        supply function (milk_ratio None); for a product clearing inside the block: supply - fixed processing +
+        supply function (milk_ratio None; milk_shift, kt: its change from the other products' prices, ProdNQ_ MILK's
+        cross-price terms); for a product clearing inside the block: supply - fixed processing +
         fixed extra-regional net imports = food demand (own and cross p_ElasDem) + feed demand (FMIL index x CES
         0.5)."""
         G, n = dp["G"], len(dp["items"]) + 2
@@ -262,7 +263,7 @@ class DairyMixin(MarketStateMixin):
         mrow = G[iM].copy()
         if milk_ratio is None:
             mrow[iM] -= dp["SM"]                                       # supply moves with the milk price
-            mrhs = 0.0
+            mrhs = float(milk_shift)
         else:
             mrhs = dp["Q0"][iM] * (float(milk_ratio) - 1.0)
         A = np.vstack([dp["rowF"], dp["rowP"], mrow, G[dom]])
@@ -314,7 +315,7 @@ class DairyMixin(MarketStateMixin):
                "fmil_index": float(fi), "z": z.copy(),
                "residual": float(np.max(np.abs(Au @ u + c - rhs0 - np.concatenate([np.zeros(3), demand_change(u[3:])]))))}
         if milk_ratio is None:
-            res["milk_supply_ratio"] = 1.0 + dp["SM"] * z[iM] / dp["Q0"][iM]
+            res["milk_supply_ratio"] = 1.0 + (dp["SM"] * z[iM] + float(milk_shift)) / dp["Q0"][iM]
         return res
 
     @staticmethod

@@ -57,8 +57,8 @@ class MarketModule(CalibrationMixin, BiofuelMixin, DairyMixin, FeedMixin, Demand
     26 trade regions (or the EU as two blocks, eu_blocks) and 58 commodities: bilateral trade with two
     Armington nests, transport costs, tariffs and the EU's tariff-rate quotas (market/bilateral.py),
     Generalised Leontief food demand, processing (ProcNQ_, oilseed crushing), the dairy block (fat and
-    protein), biofuel markets and feed bulks per member state. Non-EU supply responds with own-price
-    elasticities; EU supply comes from the regional supply models (fixed within one solve), and so does the supply
+    protein), biofuel markets and feed bulks per member state. Non-EU supply is CAPRI's market supply
+    functions (ProdNQ_, own and cross-price terms); EU supply comes from the regional supply models (fixed within one solve), and so does the supply
     of Norway (NOR, CAPRI's market region NO000000 with supply models; SUP_NONEU_REGIONS, KNOWN_ISSUES K56).
 
     Solve: Newton per commodity on the bilateral system, with Anderson acceleration across the

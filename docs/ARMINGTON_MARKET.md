@@ -74,10 +74,16 @@ non-EU world is CAPRI's 2030 world.
 
 Supply (`supply_response`, region_ratio given):
 
-- Non-EU regions: base production × r_i^ε, with each region's own-price elasticity from CAPRI's p_elasSupp of its
-  CAPRI regions (`supply_elas_region.csv`, `tools/build/build_supply_elas_nonEU.py`), 0 where CAPRI has none
-  (KNOWN_ISSUES K54-3; until 23 October 2026 one EU-median or `eps` value per product, the `eps` column removed with
-  `armington_params.csv` on 29 October 2026, K72). Crushing, the non-EU dairy blocks and the biofuel markets set their products' supply at
+- Non-EU regions: CAPRI's market supply function (ProdNQ_, arm/market_model.gms l. 1529-1572; since 29 October 2026,
+  `market.noneu_supply_nq`): base production + Σ_y h_xy (r_y − 1), summed over the region's CAPRI regions, with h_xy
+  = p_hessNQSupp × PPRI0_y / INPE at CAPRI's 2030 calibration point, the Hessian completed as CAPRI's market model
+  completes it (symmetric; tiny terms and products without ProdNQ_ deleted; `tools/lib/_capri_nq.py`), the own and
+  cross-price terms over the market products and raw milk (the region's dairy block's price); raw milk's own supply
+  function in the dairy block takes its cross-price terms as a shift (`noneu_market_supply_nq.csv`,
+  `tools/build/build_noneu_market_supply_nq.py`; KNOWN_ISSUES K54-3). Held at the calibration point: the feed energy
+  price FEDE (market audit M3) and the prices of products the model does not market (TCRP, FODFAL, FRUN: 4.4% of
+  the terms' absolute size). `market.noneu_supply_nq = false`: one own-price constant elasticity per region and
+  product, CAPRI's 2017 p_elasSupp (`supply_elas_region.csv`), the form from 20 to 29 October 2026. Crushing, the non-EU dairy blocks and the biofuel markets set their products' supply at
   the regional prices ([OILSEED_CRUSHING.md](OILSEED_CRUSHING.md), [DAIRY_PROCESSING.md](DAIRY_PROCESSING.md),
   [BIOFUEL_MARKET.md](BIOFUEL_MARKET.md)).
 - EU: the supply models' output, anticipated against the price the supply models last saw:
@@ -152,8 +158,9 @@ world ratio × premium, i.e. the EU market price ratio. "Premium" is only this b
 - EU market regions: one region by default (CAPRI's member states inside its trade blocks are available as
   `eu_blocks`); member states are not market regions (raw milk, fat and protein are priced per member state in the
   dairy block, young animals per EU market region).
-- Non-EU supply: one own-price elasticity per product (CAPRI's EU median), not CAPRI's regional market supply
-  functions with cross-price terms.
+- Non-EU supply: CAPRI's market supply functions at its 2030 calibration point, without the feed energy price's
+  terms (M3); for the UK, Turkey and the Western Balkans CAPRI has supply models (RMSSUP) and recalibrates the
+  function to them every iteration, the model has none there, so the function stays at the calibration point.
 - EU market supply between iterations: CAPRI's market supply elasticities as given; CAPRI recalibrates its supply
   approximation to the supply models (available as `market_supply_nq`, off).
 - No p_arm2Commit, no global TRQs (above).

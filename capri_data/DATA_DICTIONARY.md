@@ -211,6 +211,7 @@ distillers' dried grains; `FENI`, `FPRI` CAPRI's residual feeds. Feed items in `
 | `2017/market/processing_nq_base.csv`, `processing_nq_hessian.csv` (ProcNQ_) | `tools/build/build_processing_nq.py` |
 | `2017/market/welfare_base_2030.csv` (CAPRI's welfare base values, reports/welfare.gms) | `tools/build/build_welfare_base.py` |
 | `2017/market/eu_market_supply_nq.csv` (CAPRI's ProdNQ_ terms of the EU's other vegetable oils and fish per member state) | `tools/build/build_eu_market_supply_nq.py` |
+| `2017/market/noneu_market_supply_nq.csv` (CAPRI's ProdNQ_ terms of the non-EU market regions, own and cross-price) | `tools/build/build_noneu_market_supply_nq.py` |
 | `2017/market/eu_ms_balance_2030.csv`, `shared/eu_market_blocks.csv` (EU trade blocks) | `tools/build/build_eu_ms_balance.py` |
 | `2017/environment/luc_2030.csv` (land-use change model) | `tools/build/build_luc_2030.py` |
 | `2017/environment/npk_crop_coefs_2030.csv`, `npk_region_2030.csv`, `fert_dist_priors_npk_2030.csv`, `livestock_manure_p_coef.csv`, `livestock_manure_k_coef.csv` (P and K) | `tools/build/build_npk_balance_2030.py` |

@@ -31,6 +31,8 @@ import pandas as pd
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 from capri_mod.csvio import read_csv, to_csv  # noqa: E402
+sys.path.insert(0, str(ROOT / "tools" / "lib"))
+from _capri_nq import read_supply_hessian  # noqa: E402
 
 UP = Path("/mnt/user-data/uploads")
 ELAS = UP / "elas_2_1730defaulta.csv"
@@ -49,19 +51,11 @@ def num(s: str) -> float:
 
 def main():
     ms_eu = set(read_csv(ROOT / "capri_data" / "shared" / "regional_units.csv").capri_ms)
-    pat = re.compile(r"^'([^']*)'\.'([^']*)'\.'([^']*)'\.'CAL'\s+(\S+)")
-    terms = []
-    cur = None
-    with open(ELAS, encoding="latin-1") as fh:
-        for line in fh:
-            if line.startswith("Parameter"):
-                cur = line.split("(")[0].split()[1]
-                continue
-            if cur != "p_hessNQSupp" or not line.startswith("'"):
-                continue
-            m = pat.match(line)
-            if m and m.group(1) in ms_eu and m.group(2) in PRODUCTS and num(m.group(4)) != 0.0:
-                terms.append((m.group(1), m.group(2), m.group(3), num(m.group(4))))
+    # CAPRI's Hessian completed as its market model does on loading (tools/lib/_capri_nq.py: tiny terms and products
+    # without ProdNQ_ deleted, made symmetric; until 29 October 2026 only the terms stored under these products' rows
+    # were read, and the cross terms stored under the other product's row were missed); the member states are RMSSUP
+    hess = read_supply_hessian(ELAS, lambda r: r in ms_eu, ms_eu)
+    terms = sorted((ms, x, y, h) for (ms, x, y), h in hess.items() if x in PRODUCTS)
     want = {(ms, y) for ms, _, y, _ in terms}
     pp = re.compile(r"^'([^']*)'\.'PPRI'\.'([^']*)'\.'CAL'\s+(\S+)")
     price = {}

@@ -32,7 +32,7 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K93](#k93) | CAPRI mitigation options not built; documents disagree on which are in | open |
 | [K97](#k97) | NaN in the crop-diversification row during Green Deal solves | open |
 
-## Resolved (79)
+## Resolved (80)
 
 | # | Issue | Status |
 |---|---|---|
@@ -115,6 +115,7 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K91](#k91) | CAPRI's trend projection (captrd_2030.json) had no builder | fixed |
 | [K90](#k90) | The wheat market's world price was CAPRI's soft-wheat price, not its wheat product's | fixed |
 | [K72](#k72) | Inputs without a builder (armington_params.csv and the livestock producer prices removed) | fixed |
+| [K98](#k98) | CAPRI's supply Hessian read as stored: half of the cross terms missed | fixed |
 
 ## Details
 
@@ -609,7 +610,7 @@ The NLP form calibrates each region once (the base a first-order point) and agai
 
 - **Effect:** (3)-(5): results; (1), (2), (6), (7): interface and maintenance
 - **In 9t:** –
-- **Status:** **fixed** 20 October 2026 (the user's decisions): (1) `market_max_iter` is the bilateral solve's Newton rounds (default 60, unchanged behaviour); (2) the premium structure removed (`solve()` is bilateral only; eu_armington_premium, compute_trade_flows, _calibrate_demand_to_supply, _exempt_eu_from_world_calibration, eu_gross_trade removed; eu_gross_trade_supplement.csv archived); (3) each non-EU trade region's own-price elasticity is CAPRI's p_elasSupp ('CAL', elas_2_1717) of its CAPRI regions, weighted by CAPRI's 2017 production (tools/build/build_supply_elas_nonEU.py, supply_elas_region.csv: 772 region-commodity pairs; processed products keep the product value); REGISTERED: own-price terms only (CAPRI's non-EU supply has cross-price terms, p_hessNQSupp); (4) the crushing margin with the seed at its Armington price and oil and cake at their producer prices (ProcMargO_); biofuel feedstock prices unchanged; (5) Norway's supply models get feed bulk price indices from CAPRI's Norwegian bulks (FEED, ARM1P of NO000000; feed_bulks_no.csv), at the price signal they see; Norway's feed is not in the EU's feed demand; (6) the FAO fallback removed (CAPRI's EU balance covered every commodity it had); (7) the unused oil-yield code removed, fao_processing_splits.json archived
+- **Status:** **fixed** 20 October 2026 (the user's decisions): (1) `market_max_iter` is the bilateral solve's Newton rounds (default 60, unchanged behaviour); (2) the premium structure removed (`solve()` is bilateral only; eu_armington_premium, compute_trade_flows, _calibrate_demand_to_supply, _exempt_eu_from_world_calibration, eu_gross_trade removed; eu_gross_trade_supplement.csv archived); (3) each non-EU trade region's own-price elasticity is CAPRI's p_elasSupp ('CAL', elas_2_1717) of its CAPRI regions, weighted by CAPRI's 2017 production (tools/build/build_supply_elas_nonEU.py, supply_elas_region.csv: 772 region-commodity pairs; processed products keep the product value); REGISTERED: own-price terms only (CAPRI's non-EU supply has cross-price terms, p_hessNQSupp) - replaced 29 October 2026 by CAPRI's market supply functions with the cross-price terms (market.noneu_supply_nq, build_noneu_market_supply_nq.py; K98); (4) the crushing margin with the seed at its Armington price and oil and cake at their producer prices (ProcMargO_); biofuel feedstock prices unchanged; (5) Norway's supply models get feed bulk price indices from CAPRI's Norwegian bulks (FEED, ARM1P of NO000000; feed_bulks_no.csv), at the price signal they see; Norway's feed is not in the EU's feed demand; (6) the FAO fallback removed (CAPRI's EU balance covered every commodity it had); (7) the unused oil-yield code removed, fao_processing_splits.json archived
 
 <a id="k55"></a>
 ### K55: Supply-side findings of the documentation review (20 October 2026)
@@ -1266,3 +1267,23 @@ identified. K69 removed the fixed-zero columns from the groups for the same symp
 - **In 9t:** –
 - **Status:** **open**: identify the regions (the warning per region), then a floor under the log sized to IPOPT's
   bound relaxation, with a gate
+
+<a id="k98"></a>
+### K98: CAPRI's supply Hessian read as stored: half of the cross terms missed (found 29 October 2026)
+
+CAPRI's calibration export (elas_2_1730defaulta.csv) stores each cross term of p_hessNQSupp once, under one of the two
+products (USA: MAIZ's row carries WHEA, WHEA's row does not carry MAIZ); CAPRI's market model completes the matrix on
+loading (arm/market1.gms l. 539-574: tiny terms deleted, products without ProdNQ_ deleted, missing terms from the
+transpose). tools/build/build_eu_market_supply_nq.py (the EU's other vegetable oils and fish, market step D, 28
+October 2026) read the products' stored rows only: 133 of the 817 terms CAPRI uses. The own terms were complete, so
+CAPRI's own-price elasticities were reproduced and the builder's check passed; the cross terms of other oils to the
+crops were missing (EU sum -10.7 kt per unit of price ratio against CAPRI's -116.4; fish: none of size). Found while
+porting the non-EU market supply functions (K54-3), which need the full matrix.
+
+- **Effect:** the EU's supply of other vegetable oils (about 2,490 kt per unit own term) in scenarios that move the
+  crop prices; small
+- **In 9t:** –
+- **Status:** **fixed** 29 October 2026: tools/lib/_capri_nq.py completes the Hessian as CAPRI's market1.gms; both
+  builders (the EU's other oils and fish, the non-EU market supply functions) use it; eu_market_supply_nq.csv rebuilt
+  (817 terms; the 133 before unchanged); the non-EU builder checks the stored terms against CAPRI's p_elasSupp
+  (23,647 terms, largest relative deviation 1e-14); run pending (batch-5 gate)
