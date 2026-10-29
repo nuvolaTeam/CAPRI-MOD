@@ -319,10 +319,11 @@
    "nature": "REAL_CAPRI",
    "vintage": "2017",
    "priority": "high",
-   "status": "MERGED into market module",
+   "status": "REPLACED (29 October 2026, KNOWN_ISSUES K101) by 2017/market/supply_elas_eu.csv",
    "source": "elas1717defaulta.gdx p_elasSupp, EU median own-price diagonal",
    "coverage": "19 of 32 model market commodities, incl. all livestock",
-   "note": "Wired into MarketModule.supply_response, replacing the Armington eps column which applied a blanket 0.15-0.25 to every commodity. Livestock was the worst case: BEEF/PORK/MILK/EGGS ran at 0.15-0.25 where CAPRI's calibrated values are 0.72/0.69/0.55/0.76. Behavioural effect: a +20% livestock price shock now raises EU supply ~10-15% (beef +14%) where the placeholder gave ~3%. Market still clears 12/12. Commodities not in the file keep the eps fallback."
+   "note": "Wired into MarketModule.supply_response, replacing the Armington eps column which applied a blanket 0.15-0.25 to every commodity. Livestock was the worst case: BEEF/PORK/MILK/EGGS ran at 0.15-0.25 where CAPRI's calibrated values are 0.72/0.69/0.55/0.76. Behavioural effect: a +20% livestock price shock now raises EU supply ~10-15% (beef +14%) where the placeholder gave ~3%. Market still clears 12/12. Commodities not in the file keep the eps fallback.",
+   "retired_note": "Medians over CAPRI's EU28 (UK included), 3 decimals, four products under CAPRI's codes the market never found (OLIO, RICE, SUGA, TWIN) and INPE. Now: the model's 27 member states, every market commodity with CAPRI's p_elasSupp under the model's code, full precision (the project lead's decision)."
   },
   "capri_gross_n_balance_2030": {
    "nature": "CAPRI_RESULT",

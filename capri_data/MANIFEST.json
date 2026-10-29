@@ -2843,6 +2843,15 @@
    "status": "live",
    "path": "2017/supply/nutrient_coefs_regional.csv",
    "note": "CAPRI's fertiliser coefficients per region and model crop, level-weighted over the crop's CAPRI activities; replaces the national nutrient_coefs.csv (no builder, K100)"
+  },
+  "supply_elas_eu.csv": {
+   "source": "CAPRI elas1717defaulta p_elasSupp CAL (tools/build/build_capri_supply_elas_market.py)",
+   "vintage": "2017",
+   "units": "elasticity",
+   "domain": "market",
+   "status": "live",
+   "path": "2017/market/supply_elas_eu.csv",
+   "note": "the EU rows' own-price supply elasticity: median over the model's 27 member states per market commodity"
   }
  },
  "_vintage_summary": {

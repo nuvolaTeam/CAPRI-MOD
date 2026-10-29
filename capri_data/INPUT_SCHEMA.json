@@ -203,7 +203,7 @@
    ]
   },
   "market_supply_elasticities": {
-   "file": "sources/arm/supply_elas_eu_all.json",
+   "file": "2017/market/supply_elas_eu.csv",
    "concept": "market-level own-price supply elasticity",
    "unit": "dimensionless",
    "dimension": "commodity",
@@ -212,7 +212,7 @@
    ],
    "source": {
     "source_type": "CAPRI_GDX",
-    "source_ref": "elas1717 p_elasSupp EU median",
+    "source_ref": "elas1717 p_elasSupp, median over the model's 27 member states per market commodity (tools/build/build_capri_supply_elas_market.py)",
     "vintage": "2017",
     "confidence": "validated",
     "reproducibility": "public_code"

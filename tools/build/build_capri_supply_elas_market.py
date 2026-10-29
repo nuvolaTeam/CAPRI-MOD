@@ -4,15 +4,16 @@
     capri_data/sources/arm/capri_supply_elas_market_1717.csv   region, prod, wrt, value
         every record of p_elasSupp(region, prod, wrt, 'CAL') of the gdxdump p_elasSupp.txt, in its order; read by
         capri_mod/supply/capri_pmp.py (the livestock elasticities of the elasticity-calibrated PMP)
-    capri_data/sources/arm/supply_elas_eu_all.json             {product: elasticity}
-        the median over CAPRI's EU member states of the own-price p_elasSupp per product, rounded to 3 decimals, keyed
-        by CAPRI's code but MAIZ, POUM, WHEA (the model's CORN, POUL, SWHE); read by capri_mod/market/supply.py (the EU
-        rows' own-price anticipation)
+    capri_data/2017/market/supply_elas_eu.csv                  commodity, capri_code, elasticity, member_states
+        per market commodity of the model (schema/codes/model_commodities.csv, its CAPRI code), the median over the
+        model's EU member states (CAPRI's codes of shared/capri_member_state_codes.csv but Norway and the UK: 26, BL =
+        Belgium and Luxembourg) of the own-price p_elasSupp, where at least one has it; read by
+        capri_mod/market/supply.py (the EU rows' own-price anticipation)
 
-The JSON is built as it was committed, which had no builder until 29 October 2026; three of its choices are recorded
-in K101, not changed here: the member states are CAPRI's EU28 (the UK included, the model's EU is 27), the key set has
-INPE (the price index of the non-agricultural good) and four products under CAPRI's codes the market never looks up
-(OLIO, RICE, SUGA, TWIN: the model's OLIV, PARI, SUGR, WINE, whose EU supply is set by other blocks).
+Until 29 October 2026 the EU medians were supply_elas_eu_all.json (no builder until that day): over CAPRI's EU28 (the
+UK included), rounded to 3 decimals, keyed by CAPRI's code for OLIO, RICE, SUGA, TWIN (the model's OLIV, PARI, SUGR,
+WINE never found them) and with INPE, the price index of the non-agricultural good. Replaced at the project lead's
+decision of 29 October 2026 (the model's 27 member states and the model's codes).
 
     python tools/build/build_capri_supply_elas_market.py [--src p_elasSupp.txt]
 """
@@ -20,7 +21,6 @@ from __future__ import annotations
 
 import argparse
 import csv
-import json
 import re
 import statistics
 from collections import defaultdict
@@ -30,12 +30,12 @@ ROOT = Path(__file__).resolve().parents[2]
 SRC = Path("/mnt/user-data/uploads/p_elasSupp.txt")
 OUT = ROOT / "capri_data" / "sources" / "arm"
 REC = re.compile(r"^'([^']+)'\.'([^']+)'\.'([^']+)'\.'CAL'\s+([^,\s]+)")
-#: CAPRI's EU28 member states of the 2017 calibration (sets.gms NUTS0_EU15 + NUTS0_EU10 + BG, RO, HR)
-EU28 = ("AT000000", "BG000000", "BL000000", "CY000000", "CZ000000", "DE000000", "DK000000", "EE000000", "EL000000",
-        "ES000000", "FI000000", "FR000000", "HR000000", "HU000000", "IR000000", "IT000000", "LT000000", "LV000000",
-        "MT000000", "NL000000", "PL000000", "PT000000", "RO000000", "SE000000", "SI000000", "SK000000", "UK000000")
-#: the JSON's three renamed keys (CAPRI code -> model code)
-RENAME = {"MAIZ": "CORN", "POUM": "POUL", "WHEA": "SWHE"}
+NOT_EU = ("NO000000", "UK000000")
+
+
+def eu_member_states() -> set:
+    with open(ROOT / "capri_data" / "shared" / "capri_member_state_codes.csv", newline="") as f:
+        return {r["capri_ms"] for r in csv.DictReader(f)} - set(NOT_EU)
 
 
 def main() -> None:
@@ -51,14 +51,20 @@ def main() -> None:
         w = csv.writer(f, lineterminator="\n")
         w.writerow(["region", "prod", "wrt", "value"])
         w.writerows(recs)
-    own = defaultdict(list)
+    eu = eu_member_states()
+    own = defaultdict(dict)
     for r, p, q, v in recs:
-        if p == q and r in EU28:
-            own[p].append(float(v))
-    med = {RENAME.get(p, p): round(statistics.median(own[p]), 3) for p in sorted(own)}
-    (OUT / "supply_elas_eu_all.json").write_text(json.dumps(med, indent=1))
-    print(f"capri_supply_elas_market_1717.csv: {len(recs)} records; supply_elas_eu_all.json: {len(med)} products")
-
+        if p == q and r in eu:
+            own[p][r] = float(v)
+    with open(ROOT / "capri_data" / "schema" / "codes" / "model_commodities.csv", newline="") as f:
+        comm = [(r["code"], r["capri_code"]) for r in csv.DictReader(f)]
+    rows = [(c, cc, repr(statistics.median(own[cc].values())), len(own[cc])) for c, cc in comm if own.get(cc)]
+    with open(ROOT / "capri_data" / "2017" / "market" / "supply_elas_eu.csv", "w", newline="") as f:
+        w = csv.writer(f, lineterminator="\n")
+        w.writerow(["commodity", "capri_code", "elasticity", "member_states"])
+        w.writerows(rows)
+    print(f"capri_supply_elas_market_1717.csv: {len(recs)} records; supply_elas_eu.csv: {len(rows)} commodities "
+          f"(of {len(comm)}) over {len(eu)} member states")
 
 if __name__ == "__main__":
     main()

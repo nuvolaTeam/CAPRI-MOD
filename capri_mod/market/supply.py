@@ -105,15 +105,14 @@ class SupplyMixin(MarketStateMixin):
         else:
             supply = self.par.base_production.copy()
 
-        # Own-price supply elasticities from CAPRI's calibrated market model
-        # (elas1717 p_elasSupp, EU medians). These replace the crop-oriented
-        # Armington eps column, which stood in a blanket 0.15-0.25 for every
-        # commodity -- including livestock, where CAPRI's real values are
-        # 0.55-0.76. Commodities not in the file keep the eps fallback.
+        # Own-price supply elasticities of the EU rows: CAPRI's calibrated market model (elas1717 p_elasSupp), the
+        # median over the model's 27 member states per market commodity (supply_elas_eu.csv,
+        # tools/build/build_capri_supply_elas_market.py; until 29 October 2026 over CAPRI's EU28 with four products
+        # under CAPRI's codes, which were never found: KNOWN_ISSUES K101). A missing file stops.
         real_supply = getattr(self, "_real_supply_elas", None)
         if real_supply is None:
-            # CAPRI's EU p_elasSupp (a missing file stops: no silent fallback, 23 October 2026)
-            real_supply = self._inp().json("supply_elas_eu_all.json", "sources/arm")
+            _se = self._inp().csv("supply_elas_eu.csv")
+            real_supply = {str(c): float(v) for c, v in zip(_se.commodity, _se.elasticity)}
             self._real_supply_elas = real_supply
 
 

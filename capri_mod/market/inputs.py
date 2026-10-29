@@ -51,6 +51,7 @@ BUILDERS = {
     "noneu_market_supply_nq.csv": "build_noneu_market_supply_nq.py",
     "crushing_parameters.csv": "build_crushing_parameters.py",
     "supply_elas_region.csv": "build_supply_elas_nonEU.py",
+    "supply_elas_eu.csv": "build_capri_supply_elas_market.py",
     "eu_ms_balance_2030.csv": "build_eu_ms_balance.py",
     "eu_market_blocks.csv": "(CAPRI's aggregation/defaultA.agg)",
     "rms_to_rm.csv": "build_gl_demand.py",
