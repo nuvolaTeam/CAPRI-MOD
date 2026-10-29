@@ -174,7 +174,7 @@ files record how they map to this model's names.
 | Supply method | CAPRI's regional models as NLPs, PMP-calibrated (CAPRI's 2030 terms) |
 | Market method | CAPRI's bilateral Armington market: 26 trade regions (27 with CAPRI's EU blocks, optional), transport costs, tariffs, TRQs; dairy block, GL food demand, young animals, CAPRI's market supply functions; Newton + Anderson to < 1e-7 |
 | Data validator | 13 pass, 0 warn, 0 fail |
-| Convergence | all 221 regional models solve (one Dutch unit, NL320000, at JRC121368's relaxed N target); under CAPRI's stop rule Farm-to-Fork 2030 converges in 12 iterations, Green Deal 2030 in 37 (reference runs r180, r181, 29 October 2026, on CAPRI's regional units) |
+| Convergence | all 221 regional models solve (one Dutch unit, NL320000, at JRC121368's relaxed N target); under CAPRI's stop rule Farm-to-Fork 2030 converges in 12 iterations, Green Deal 2030 in 21 (reference runs r182, r183, 29 October 2026, on CAPRI's regional units; the Green Deal's iteration count depends on the path, K79: 37 in r181) |
 | Test suite | 225 tests (gate of 29 October 2026: 220 passed, 5 skipped; 21 marked `slow`) |
 | On by default, as in CAPRI | land market and land rules, endogenous feed rations, fodder equality, ammonia technologies |
 | Optional | manure market (`use_manure_market`) |
@@ -185,9 +185,9 @@ files record how they map to this model's names.
 
 **Current state.** The model's regions are CAPRI's 221 regional units (EU27 215, Norway 6) under CAPRI's codes; results
 can be reported on the NUTS-2024 regions (`capri_mod/nuts_reporting`). Since 28 October CAPRI's stop rule decides when
-the supply-market loop ends (`outer_loop.stop_rule = "capri"`); the reference runs of 29 October are r180 (Farm-to-Fork
-2030: 12 iterations, mean deviation from JRC121368 4.29) and r181 (Green Deal 2030: 37 iterations) (CHANGELOG,
-28-29 October 2026). The first Farm-to-Fork 2030 run on the units
+the supply-market loop ends (`outer_loop.stop_rule = "capri"`); the reference runs of 29 October are r182 (Farm-to-Fork
+2030: 12 iterations, results as r180's: mean deviation from JRC121368 4.29) and r183 (Green Deal 2030: 21 iterations;
+r181: 37) (CHANGELOG, 29 October 2026). The first Farm-to-Fork 2030 run on the units
 (r161, the default settings) converges in 9 iterations (about 36 minutes on 2 cores) and deviates from CAPRI's published
 results (JRC121368) by 4.34 on average over 20 indicators (§8; r145 on the NUTS-2016 regions: 4.44); Green Deal 2030
 converges in 8 iterations (r162). Before 27 October, on the NUTS-2016 regions: r145 (Farm-to-Fork, 9 iterations) and
@@ -950,8 +950,8 @@ scenario or its baseline (the report's setting); full EU). Since 24 October 2026
 with the young-animal markets inside the market (K75), raw milk per member state inside the market (audit M5), tariffs
 on price plus transport (M10), the supply audit S5-S10 and the K75 fix (CHANGELOG). The table's run is r145 (26
 October 2026, the default settings then: converged in 9 iterations, about 27 minutes on 2 cores); the current reference
-is r180 (29 October 2026, on CAPRI's regional units under CAPRI's stop rule: 12 iterations, mean deviation 4.29;
-CHANGELOG), whose indicators are not in this table; the earlier
+is r182 (29 October 2026, on CAPRI's regional units under CAPRI's stop rule: 12 iterations, the results of r180, mean
+deviation 4.29; CHANGELOG), whose indicators are not in this table; the earlier
 column is the converged run before the changes of 24-26 October (mean deviation 4.26, about 13 minutes on 2 cores). Cereal and oilseed
 price indices are weighted by base production value; EU prices are the EU's market (producer) prices:
 
@@ -1096,10 +1096,10 @@ CAPRI rather than adding land.
 **The EU market balance is consistent.** EU production in the market is the model's
 own output, and EU use follows CAPRI's Armington balance (food, feed, processing,
 biofuels, each with CAPRI's function), so the baseline reproduces its calibration
-point (r181: two baseline iterations, no row of CAPRI's stop rule above 0.05%). The
+point (r183: two baseline iterations, no row of CAPRI's stop rule above 0.05%). The
 market anticipates the supply response through CAPRI's market supply functions
 (ProdNQ_, measured on the supply models), and the loop ends on CAPRI's stop rule:
-Farm-to-Fork 2030 in 12 iterations, Green Deal 2030 in 37 (r180, r181). (Until 20
+Farm-to-Fork 2030 in 12 iterations, Green Deal 2030 in 21 (r182, r183). (Until 20
 October 2026 EU use kept FAO's self-sufficiency and EU prices an Armington premium;
 both were removed, KNOWN_ISSUES K54.)
 

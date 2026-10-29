@@ -884,6 +884,15 @@ CAPRI's stop rule, recorded every iteration since r135, flags rows that move by 
   29 October 2026, the project lead's decision: the check switches only where the other start gains more than
   supply.nlp_jump_gain = 1e-6 (relative; r181's gains: 938 at 1e-9 or less, one at 1.4e-7, 23 at 1.7e-5 and more), so
   the record's "switched" counts real switches; HU230000's two optima still to compare
+  Gate of batch 4 (r183, Green Deal 2030 with the tolerance): converged under CAPRI's rule in 21 iterations (r181: 37);
+  13 switches in the scenario, all with real gains (HU230000 at iterations 4, 7, 9, 10). At iteration 17 HU230000's
+  solve from the previous point ended at its worse optimum (objective -5.0043e6 against -5.0301e6 at iteration 12,
+  5e-3 relative), the standard start found no better one, and the loop stopped at iteration 21 with the region there:
+  its maize 37 kha against r181's 148 (base 199), EU maize area -1.1% and the maize price +0.48 points against r181
+  (other cereals +0.24, rye +0.18, soya +0.17); the aggregated EU indicators within 0.2 points. r181 ended at the better optimum because its iteration-34 check
+  corrected it. So the end state still depends on the path where a region has two optima. Options for the project
+  lead: keep, per region, the best objective found at (nearly) the same prices as a further start of the check; or
+  compare HU230000's two optima first (still open)
 
 <a id="k80"></a>
 ### K80: The same run repeated from a warm start differs by up to 3e-5 relative in small cereal activities (26 October 2026)
