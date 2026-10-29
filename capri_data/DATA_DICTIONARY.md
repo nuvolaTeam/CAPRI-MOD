@@ -219,7 +219,6 @@ cake (CAPRI's codes, as the market's).
 | `2017/abatement/ammonia/n_cascade_factors.csv`, `n_cascade_region.csv`, `n_cascade_effects.csv` (CAPRI's N loss cascade, docs/N_CASCADE_SPEC.md) | `tools/build/build_n_cascade.py` |
 | `2017/abatement/ammonia/n_leaching_region.csv` (leaching share, LEACHN_) | `tools/build/build_n_leaching.py` |
 | `2017/abatement/ammonia/ad_option.csv` (anaerobic digestion, docs/AD_SPEC.md) | `tools/build/build_ad_option.py` |
-| `2017/abatement/ammonia/nitrates_directive_min_shares.csv`, `nitrates_directive_obligations.csv`, `nvz_*.csv` (built, not applied) | `tools/build/build_nitrates_directive.py` |
 | `2017/market/gl_demand_b.csv`, `gl_demand_goods.csv`, `gl_demand_regions.csv` (Generalised Leontief food demand) | `tools/build/build_gl_demand.py` |
 | `2017/market/processing_nq_base.csv`, `processing_nq_hessian.csv` (ProcNQ_) | `tools/build/build_processing_nq.py` |
 | `2017/market/welfare_base_2030.csv` (CAPRI's welfare base values, reports/welfare.gms) | `tools/build/build_welfare_base.py` |
@@ -242,10 +241,7 @@ runs.
 
 | File | Content | Written by |
 |---|---|---|
-| `2017/abatement/ammonia/ControlStrat_TS.csv`, `CorrND.csv`, `FracNVZNuts2.csv`, `FracNVZNuts2_full.csv`, `FracToepHouse.csv`, `FracToepStorage.csv`, `FracUseFert.csv`, `PercPeat.csv`, `ScalarArray.csv`, `rCorrND.csv`, `rLFManureBasis.csv`, `rLFManureND.csv`, `reducBio.csv` | MITERRA symbols of CAPRI's ammonia module not used by the model's ammonia options | `tools/build/build_ammonia_tech_inputs.py` (one file per GDX symbol) |
-| `2017/abatement/ammonia/nitrates_directive_min_shares.csv` | Nitrates Directive minimum option shares by region | `tools/build/build_nitrates_directive.py` |
 | `2017/abatement/ammonia/costs/scalars.csv` | scalar cost parameters of the ammonia options | `tools/build/build_ammonia_cost_tables.py` |
-| `2017/abatement/mitigation/p_ccEfa.csv`, `p_tillageCover.csv`, `p_winterCoverShare0.csv` | catch crops as ecological focus area, tillage cover, initial winter-cover shares | `tools/build/build_mitigation_inputs.py` |
 | `pipeline/captrd/sets/fixyield.csv`, `mrkbale.csv`, `reqst.csv` | empty CAPTRD sets, part of the complete set extraction | `tools/build/build_captrd_sets.py` |
 | `sources/capreg/capreg_feed_use.csv`, `capreg_herds.csv`, `capreg_land.csv` | CAPREG DATA2 feed use, herds, land | `tools/build/extract_remaining_nine.py` |
 | `sources/capreg/capreg_cost_components.csv.xz` | CAPREG DATA2 input cost components | `tools/build/extract_all_from_data2.py` |

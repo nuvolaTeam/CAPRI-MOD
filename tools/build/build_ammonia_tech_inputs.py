@@ -111,11 +111,20 @@ def parse_dump(path: Path) -> dict:
     return out
 
 
+#: the symbols the model or a builder of its inputs reads (KNOWN_ISSUES K102; the project lead's decision of 29 October
+#: 2026: the extractors write only what is read). Not written: ControlStrat_TS, CorrND, FracNVZNuts2(_full),
+#: FracToepHouse, FracToepStorage, FracUseFert, PercPeat, ScalarArray, rCorrND, rLFManureBasis, rLFManureND, reducBio
+#: (CAPRI's data of parts not ported, read by no code)
+READ = {"ControlStrategies", "reducControlStrategies", "RCEmissions", "FracEmGrazing", "p_holdLSU", "p_nvzShare_lu",
+        "NN_CorrFertFactDeviation", "bNumAniRAINS", "FracEmHouse", "FracEmStorage", "FracEmAppl", "EmFracFert",
+        "reducEmHouse", "reducEmStorage", "rLFRest", "p_factRunStor", "p_fracStorType", "p_litRevAmmoTechsAdd"}
+
+
 def write(symbols: dict) -> list:
     OUT.mkdir(parents=True, exist_ok=True)
     written = []
     for name, rows in symbols.items():
-        if not rows:
+        if not rows or name not in READ:
             continue
         nd = len(rows[0][0])
         cols = DIMS.get(name, [f"dim{i + 1}" for i in range(nd)])

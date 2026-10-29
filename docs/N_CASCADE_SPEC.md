@@ -46,7 +46,8 @@
 * Not yet in capri-mod: tillage, buffer strips, biodiversity options and biochar (their LEACHN_ terms held at CAPRI's
   reference, below), the fertiliser techniques' N2OMAN/N2OSYN terms in APPLN_ and GASTOTNETF_ (the inhibitors' gas
   effects are applied in the accounts and the solve outside the cascade), urea substitution. Nitrates Directive
-  minimum shares: built from CAPRI's nvz.gdx (tools/build/build_nitrates_directive.py), not applied (KNOWN_ISSUES K51).
+  minimum shares: not applied (KNOWN_ISSUES K51; CAPRI's NDtech is off in its Green Deal runs); the builder that built
+  them from CAPRI's nvz.gdx was removed on 29 October 2026 with its data, read by no code (K102).
 
 ## Leaching and the indirect N2O of leached and run-off N (20 October 2026)
 

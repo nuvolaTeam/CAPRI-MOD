@@ -1424,7 +1424,9 @@ capri_data/2017 and shared/, 46 files are in neither. By kind:
 
 - **Effect:** none on results
 - **In 9t:** –
-- **Status:** open, in part fixed: four orphans removed; for the extractors' unread symbols the project lead's
-  decision (keep them as CAPRI's source data in CSV for the parts still to port, or have the extractors write only what
-  the model reads)
+- **Status:** open, in part fixed: four orphans removed; the extractors write only what the model or a builder of its
+  inputs reads (the project lead's decision, 29 October 2026): 13 ammonia symbols, the cost tables' scalars, three
+  mitigation inputs and build_nitrates_directive with its inputs (nvz_p_nvzArea, nvz_p_slopeTypes) and outputs removed;
+  p_holdLSU.csv and p_nvzShare_lu.csv given their builder (build_ammonia_tech_inputs with CAPRI's holdingsLSU and
+  nvzShare_LU dumps, byte-identical). Left: fao_market_baseline.json, with its coverage test
 
