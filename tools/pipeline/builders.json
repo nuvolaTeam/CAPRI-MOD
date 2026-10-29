@@ -3774,6 +3774,31 @@
     "capri_data/shared/trade_flows_2017.csv",
     "capri_data/validation/trade_recalibration_2017.json"
    ]
+  },
+  {
+   "task": "build_captrd_trajectory",
+   "builder": "build_captrd_trajectory",
+   "args": [
+    "--series",
+    "$WORK/capri_reference/captrd_results/1770/series.csv.gz"
+   ],
+   "inputs": [
+    "capri_data/2017/feed/feed_cereal_mix_2030.csv",
+    "capri_data/2017/supply/crop_cost_shares.csv",
+    "capri_data/shared/capri_member_state_codes.csv",
+    "capri_data/shared/model_parameters.csv",
+    "capri_data/shared/regional_units.csv",
+    "capri_mod/settings/defaults.toml"
+   ],
+   "code": [
+    "tools/build/build_captrd_trajectory.py"
+   ],
+   "external": [
+    "$WORK/capri_reference/captrd_results/1770/series.csv.gz"
+   ],
+   "outputs": [
+    "capri_data/trajectories/captrd_2030.json"
+   ]
   }
  ]
 }

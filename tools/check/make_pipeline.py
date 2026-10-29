@@ -24,6 +24,7 @@ import collections
 import json
 import os
 import sys
+import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -46,8 +47,10 @@ def build(trace: dict) -> tuple[list, list]:
             a.replace("$UP/", "").replace("$WORK/", "").replace("/", ".").lstrip("-") for a in args)[:80]
         outs = sorted(set(d["writes"]) | set(d["rewrites"]))
         ins = sorted(set(d["reads"]) - set(outs))
+        # a builder's own temporary files (tempfile) are not sources
+        ext = [x for x in d["external"] if not x.startswith(tempfile.gettempdir().rstrip("/") + "/")]
         tasks.append({"task": name, "builder": builder, "args": args, "inputs": ins,
-                      "code": sorted(d["code"]), "external": sorted(placeholder(x) for x in d["external"]),
+                      "code": sorted(d["code"]), "external": sorted(placeholder(x) for x in ext),
                       "outputs": outs})
     writers = collections.defaultdict(list)
     for t in tasks:
