@@ -12,7 +12,12 @@ and fixed as its own item.
 `2017/supply` 47, `2017/market` 42, `2017/environment` 30, `validation` 13, `2017/policy` 13, `pipeline` 10, `shared` 8,
 `trajectories` 5, `2017/feed` 3.
 
-Four metadata stores, kept by hand, overlapping:
+Metadata stores, kept by hand, overlapping (the first inventory counted four; with the batch-4 removal of
+armington_params.csv, 29 October 2026, the file turned out to be named in seven: the four below and `DATA_CATALOG.json`
+(live, stored-not-applied and archived files, 44 live entries), `INPUT_MANIFEST.json` (93 inputs and the data held in
+code) and `DATA_LOCATION_MAP.md` (where each input lives in CAPRI). `FITNESS_FOR_USE.json` (the outputs' fitness,
+read by capri_mod/fitness.py), `SYMBOL_EXTRACTION_MAP.json` and `validation/schema_coverage.json` (a dated report)
+describe the data too. All of them are to be checked when their content moves into the declarations):
 
 | Store | Entries | Holds | Read by |
 |---|---|---|---|
