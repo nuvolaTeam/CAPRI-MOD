@@ -1,23 +1,51 @@
 cff-version: 1.2.0
-title: CAPRI-mod
+
 message: >-
-  If you use this software, please cite it, and cite the original CAPRI
-  model separately -- this is an independent reimplementation, not a
-  release of the CAPRI modelling system.
+  If you use CAPRI-MOD in scientific research, academic
+  publications, technical reports, or derivative software,
+  please cite CAPRI-MOD and identify the version used.
+
 type: software
-version: 0.1.0
-license: GPL-3.0-only
+
+title: >-
+  CAPRI-MOD: Python Implementation of the
+  CAPRI Agricultural Economic Model
+
+authors:
+  - family-names: Ghirimoldi
+    given-names: Gabriele
+
+repository-code: https://github.com/nuvolaTeam/CAPRI-MOD
+
+url: https://github.com/nuvolaTeam/CAPRI-MOD
+
 abstract: >-
-  An AI-assisted Python reimplementation of the economic logic of the
-  CAPRI (Common Agricultural Policy Regionalised Impact) model, covering
-  the regional PMP supply module, an Armington market module, CAP policy
-  instruments, environmental, water and farm-income indicators, and a
-  recursive-dynamic projection layer, calibrated against data extracted
-  from CAPRI star-3.0 and validated against CAPRI's own outputs and
-  published JRC scenario results.
+  CAPRI-MOD is an experimental Python implementation
+  of the Common Agricultural Policy Regionalised
+  Impact (CAPRI) modelling framework, supporting
+  transparent and reproducible agricultural economic
+  modelling and policy scenario analysis.
+
+keywords:
+  - CAPRI
+  - CAPRI-MOD
+  - agricultural economics
+  - economic modelling
+  - agricultural policy
+  - Python
+  - scenario analysis
+
+version: 0.1.0
+
+license: GPL-3.0-only
+
 references:
   - type: software
     title: CAPRI modelling system
+    authors:
+      - name: University of Bonn and partner institutions (CAPRI network)
+    url: https://www.capri-model.org
     notes: >-
       The original CAPRI model, developed at the University of Bonn and
-      partner institutions. See https://www.capri-model.org
+      partner institutions. CAPRI-MOD is an independent reimplementation,
+      not a release of the CAPRI modelling system.
