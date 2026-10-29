@@ -7,8 +7,9 @@ tomatoes 33.5, olives 49.5, tobacco 43.8, wine 95.5). They are rewritten as CAPR
 the model regions: sum(area x yield x price) / sum(area x yield), CAPRI's 2017 values. This builder is the table's one
 writer (29 October 2026), built from scratch: the crop rows above; SHGM and SHGF, CAPREG's prices weighted by the herds
 (tools/lib/_sheep_goat.py, as the retired build_shg_split.py); the rows no builder computes from
-sources/unsourced/producer_prices_no_builder.csv (set-aside's 0; ten livestock rows of unrecorded origin, KNOWN_ISSUES
-K72). Rows in the model's activity order. Grass keeps its own price basis (dry matter, build_crop_economics).
+sources/unsourced/producer_prices_no_builder.csv (set-aside's 0). The ten livestock rows of unrecorded origin that file
+held were removed on 29 October 2026 (KNOWN_ISSUES K72): no model code reads an animal's EU producer price (livestock
+revenue is CAPRI's output value per head, livestock_output_value_coef.csv). Rows in the model's activity order. Grass keeps its own price basis (dry matter, build_crop_economics).
 Other marketable and industrial crops, nurseries and flowers get no row (CAPRI carries them as values).
 
     python tools/build/build_eu_producer_prices.py

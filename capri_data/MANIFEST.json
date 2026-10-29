@@ -78,18 +78,19 @@
    "note": "Norway's PIGS, PIGF (NO01-NO07) = CAPRI's SOWS, PIGF HERD of res_17NO (no census total in CAPRI's Norwegian data), tools/build/build_norway_pigs.py, 21 October 2026"
   },
   "producer_prices.csv": {
-   "source": "CAPRI SUA",
+   "source": "CAPRI's 2017 regional prices (MPRI), production-weighted EU averages for the crops; SHGM, SHGF CAPREG's herd-weighted prices; SETA 0 (tools/build/build_eu_producer_prices.py)",
    "vintage": "2017",
    "units": "EUR/t",
    "domain": "prices",
    "status": "live",
    "shape": {
-    "rows": 42,
+    "rows": 32,
     "cols": 1,
     "columns": [
      "price"
     ]
-   }
+   },
+   "note": "29 October 2026: the ten livestock rows of unrecorded origin removed (read by no model code; KNOWN_ISSUES K72)"
   },
   "variable_costs.csv": {
    "source": "CAPRI",
@@ -976,7 +977,7 @@
    "status": "live",
    "path": "2017/environment/manure_n2o_tech.csv",
    "shape": {
-    "rows": 7309,
+    "rows": 7315,
     "cols": 4,
     "columns": [
      "animal",
@@ -2211,7 +2212,7 @@
    "domain": "supply",
    "status": "live",
    "shape": {
-    "rows": 39523,
+    "rows": 39736,
     "cols": 6,
     "columns": [
      "act_i",
@@ -2252,7 +2253,7 @@
    "domain": "sources",
    "status": "source",
    "shape": {
-    "rows": 33472,
+    "rows": 33747,
     "cols": 4,
     "columns": [
      "activity",

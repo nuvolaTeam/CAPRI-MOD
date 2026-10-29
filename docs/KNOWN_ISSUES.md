@@ -9,7 +9,7 @@ The data sourcing registry's log of checks, fixes and decisions (201 entries, mo
 [KNOWN_ISSUES_REGISTRY_LOG.md](KNOWN_ISSUES_REGISTRY_LOG.md), verbatim, with the triage of its open entries against
 the code: they became K92-K96, joined K73, K80, K91, or were closed or historical.
 
-## Open (20)
+## Open (19)
 
 | # | Issue | Status |
 |---|---|---|
@@ -20,7 +20,6 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K48](#k48) | Young-animal prices against CAPRI's own market run | open |
 | [K65](#k65) | Cattle member splits and per-sex young-animal markets do not converge yet | open |
 | [K66](#k66) | Farmland expands under the per-hectare N target more than in CAPRI | open |
-| [K72](#k72) | Inputs without a builder (armington_params.csv removed; the livestock producer prices left) | open |
 | [K73](#k73) | Market: differences from CAPRI that no register listed | open |
 | [K74](#k74) | Supply: differences from CAPRI that no register listed | open |
 | [K77](#k77) | CAPRI's fertiliser-option curvature (S5) leaves the baseline's base shares | open |
@@ -34,7 +33,7 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K93](#k93) | CAPRI mitigation options not built; documents disagree on which are in | open |
 | [K97](#k97) | NaN in the crop-diversification row during Green Deal solves | open |
 
-## Resolved (77)
+## Resolved (78)
 
 | # | Issue | Status |
 |---|---|---|
@@ -115,6 +114,7 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K96](#k96) | Documents and one constant still describe removed mechanisms | fixed |
 | [K91](#k91) | CAPRI's trend projection (captrd_2030.json) had no builder | fixed |
 | [K90](#k90) | The wheat market's world price was CAPRI's soft-wheat price, not its wheat product's | fixed |
+| [K72](#k72) | Inputs without a builder (armington_params.csv and the livestock producer prices removed) | fixed |
 
 ## Details
 
@@ -771,7 +771,12 @@ With every cell blanked, the builders refilled 102 of 248. The eta column (a gen
 
 - **Effect:** EU market supply (eps) where used
 - **In 9t:** –
-- **Status:** **open** (eta, sigma, rho2 removed 24 October 2026; eps and the file removed 29 October 2026). eps acted
+- **Status:** **fixed** 29 October 2026 (batch 5): the last inputs without a builder, the ten livestock rows of
+  `producer_prices.csv` (DCOW 869.4, BCOW 844.05, BULL 1400, HFRS 900, CALV 300, PIGS 905, PIGF 844.72, LAYS 688.2, BROI
+  748, OANI 8; origin not recorded), removed: no model code reads an animal's EU producer price (the supply models'
+  livestock revenue is CAPRI's output value per head, `livestock_output_value_coef.csv`, and replaces price x yield
+  for every animal; the other readers take crops only), to be confirmed by the batch's gate runs. Earlier steps: eta,
+  sigma, rho2 removed 24 October 2026; eps and the file removed 29 October 2026. eps acted
   on no result: it was read only for the EU rows of the 28 products without CAPRI's EU p_elasSupp, and every one of
   them has its EU supply set afterwards in the same market step (PARI, SUGR, WINE, OLIV by CAPRI's market supply
   function, the measured Hessian; oils and cakes by crushing; the dairy products by the dairy block; BIOE, BIOD, DDGS

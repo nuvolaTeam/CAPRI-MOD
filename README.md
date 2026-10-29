@@ -1378,7 +1378,7 @@ Three kinds of difference, kept apart because they call for different readings:
   trade block (10.3) and the others in docs/DEPARTURES_FROM_CAPRI.md, the register of settings whose default is not
   CAPRI's (method choices are registered in docs/KNOWN_ISSUES.md and the design notes it points to).
 
-Inputs not yet traced to a CAPRI source are in 10.5; method gaps and open differences from CAPRI's results in §11.
+The sources of the inputs are in 10.5; method gaps and open differences from CAPRI's results in §11.
 
 ### 10.1 Two modes: comparative-static and projected
 
@@ -1534,12 +1534,14 @@ reporting step, not regional detail of their own: `capri_mod/nuts_reporting.to_n
 2024 changes; extensive values split by Eurostat UAA within each connected group, intensive values weighted by a
 basis).
 
-### 10.5 Inputs not yet traced to a CAPRI source
+### 10.5 Inputs traced to a CAPRI source
 
 The parameters of `capri_data/shared/model_parameters.csv` each carry their source (CAPRI, IPCC, JRC121368, literature
 or legal), the feed requirements are CAPRI's (DATA2) and the world prices CAPRI's market data (p_dataMarket, World,
-PMRK). One input has no builder that reproduces it from a CAPRI file (KNOWN_ISSUES K72): the livestock rows of
-`producer_prices.csv`. The own-price supply elasticity `eps` of `armington_params.csv` (no recorded source) was
+PMRK). Every builder-written input is reproduced by its builder from CAPRI's files (the data pipeline's rebuild from
+blank, 29 October 2026); the last inputs without a builder, the ten livestock rows of `producer_prices.csv` of
+unrecorded origin, read by no model code, were removed on 29 October 2026 (KNOWN_ISSUES K72). The own-price supply
+elasticity `eps` of `armington_params.csv` (no recorded source) was
 removed with the file on 29 October 2026: the EU's supply of every product it covered is set by CAPRI's market supply
 functions, crushing, the dairy, biofuel or residual-feed blocks, or the EU produces none of it, and doubling it left a
 mini-EU run identical to the last digit.
@@ -1562,7 +1564,6 @@ principled reason and extension path.
   run the projection layer (§10.1–10.2). Compared on *production*, as CAPRI
   reports it, the magnitudes are directly comparable with its published
   scenarios; comparing *area* against its production is not.
-- **One input is not yet traced to a CAPRI source** (§10.5, KNOWN_ISSUES K72): the livestock producer prices.
 - **Biofuel and parts of the market module are validated against external data
   or documented behaviour**, not against a CAPRI scenario run.
 - **Supply elasticities** matched CAPRI's regional `PELA` values at 0.76–1.00

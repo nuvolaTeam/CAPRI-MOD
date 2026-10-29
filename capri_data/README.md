@@ -53,8 +53,10 @@ hold CAPRI's 2030 reference values used by the projection (their names end in `_
 Not a working path yet. The intended steps are: create `capri_data/<year>/` with the same category subfolders, place
 that year's files there under the same names, and load with `CAPRIModel(data_dir="capri_data", base_year="<year>")`.
 But several modules read `capri_data/2017/` directly, so the `base_year` argument does not switch every file; that has
-to be fixed first (README section 4 (The data layer); `capri_mod/data/rebase.py` is a starting point). PMP terms and elasticities are
-CAPRI estimation outputs and need CAPRI's estimation for the new year, not a copy.
+to be fixed first (README section 4 (The data layer)). PMP terms and elasticities are CAPRI estimation outputs and need
+CAPRI's estimation for the new year, not a copy; the planned route is the data pipeline (docs/design/CAPTRD_MOD.md: the
+COCO and CAPREG ports). (`capri_mod/data/rebase.py`, a Eurostat download into a new base folder that relied on the
+elasticity calibration removed on 28 October 2026, was removed on 29 October 2026 with `reconcile_base.py`, K94.)
 
 ## File resolution
 
