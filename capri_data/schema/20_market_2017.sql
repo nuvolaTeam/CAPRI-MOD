@@ -56,12 +56,13 @@ INSERT INTO value_units VALUES
   ('noneu_market_supply_nq', 'inpe', 'U_1unit', 'builder', 'the price index of the non-agricultural good, 1.019^13 in 2030'),
   ('noneu_market_supply_nq', 'h_ratio', 'U_1000tPerPriceRatio', 'builder', 'h x ppri_y / inpe');
 
--- rule: the market supply functions' model codes are market commodities (raw milk included), mapped from CAPRI's
+-- rule: the market supply functions' model codes are market commodities (raw milk included), mapped from CAPRI's; a
+-- column may also be FEDE, the region's feed energy price (CAPRI's FeedBal_, audit M3; its regions: 22_market_feed_energy.sql)
 SELECT DISTINCT 'noneu x' AS what, x AS code FROM noneu_market_supply_nq
 WHERE x NOT IN (SELECT code FROM model_commodities)
 UNION ALL
 SELECT DISTINCT 'noneu y', y FROM noneu_market_supply_nq
-WHERE y IS NOT NULL AND y NOT IN (SELECT code FROM model_commodities)
+WHERE y IS NOT NULL AND y NOT IN (SELECT code FROM model_commodities) AND y <> 'FEDE'
 UNION ALL
 SELECT DISTINCT 'noneu x/capri_x', x || '/' || capri_x FROM noneu_market_supply_nq n
 WHERE NOT EXISTS (SELECT 1 FROM model_commodities m WHERE m.code = n.x AND m.capri_code = n.capri_x);

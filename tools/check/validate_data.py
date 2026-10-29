@@ -18,7 +18,7 @@ For each declared CSV, in an in-memory database, the check lists every violation
   keys      duplicate PRIMARY KEY / UNIQUE values
   refs      values not in the referenced table (a code no code list knows)
   checks    rows that fail a CHECK expression
-then loads the file into the declared table, so DuckDB enforces the same declarations. The rules run after all loads.
+then loads the file into the declared table, so DuckDB enforces the same declarations. A rule runs where it stands, in file order: it can use the tables declared before it.
 The CSVs stay the stored data; the database is built for the check and not kept.
 
     python tools/check/validate_data.py                  # every declaration; exit 1 on a violation

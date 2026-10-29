@@ -1,4 +1,4 @@
--- Rules over every declaration (run after all files are loaded): the units of the long tables' numeric columns.
+-- Rules over every declaration (this file runs last, after every table is loaded): the units of the long tables' numeric columns.
 -- A long table's numeric column has one unit, declared in value_units with the column's name as the item. Tables whose
 -- units are per item rather than per column (a wide table's `value` column; producer_prices, one unit per activity
 -- in a key column) are left to their own file's rules; the validator's own work tables (names from `_`) are skipped.
