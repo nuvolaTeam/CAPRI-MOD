@@ -146,6 +146,26 @@ def units() -> list:
         return [r["region"] for r in csv.DictReader(f)]
 
 
+def intensive_values(capri, sources, item, cols):
+    """CAPRI's per-unit item (YILD, TOIN, MPRI, NMIN) of each column over the region's sources, weighted by the level of
+    the column's first CAPRI activity (CROP_MAP; an animal column is its own CAPRI code), a source without level counted
+    by its weight; only positive values. Used by build_crop_economics_2017.py for the four animal columns of the
+    costs and prices (COST_ANIMALS)."""
+    vals = {}
+    for col in cols:
+        num = den = 0.0
+        for c, w in sources:
+            a = CROP_MAP.get(col, (col,))[0]
+            lv = w * capri.get(c, {}).get("LEVL", {}).get(a, 0.0)
+            v = capri.get(c, {}).get(item, {}).get(a, 0.0)
+            if v > 0:
+                num += (lv if lv > 0 else w) * v
+                den += (lv if lv > 0 else w)
+        if den > 0:
+            vals[col] = num / den
+    return vals
+
+
 def main(dump_dir: Path):
     capri = read_capri(dump_dir)
     regs = units()
@@ -164,7 +184,6 @@ def main(dump_dir: Path):
     # OTHER_AG (other agricultural land): written by no builder, of unknown origin (template-like values: 6.25, 2.97619);
     # read only by the environmental module's HNV indicator through the land total. Dropped 27 October 2026
     land = land.drop(columns=["OTHER_AG"], errors="ignore")
-    yields, costs, prices = frame(YIELDS), frame(COSTS), frame(PRICES)
     nutrients = pd.DataFrame(index=pd.Index(regs, name=areas.index.name), columns=[c for c in CROP_MAP], dtype=float)
     spec = build_spec(capri, regs)
 
@@ -193,47 +212,12 @@ def main(dump_dir: Path):
         herds.at[reg, "PIGF"] = (max(census - sows, 0.0) if census > 0
                                  else sum(w * items(c, "HERD").get("PIGF", 0.0) for c, w in sources))
 
-        # ---- intensive values: area-weighted across sources
-        def intensive(item, capri_code_for):
-            vals = {}
-            for col in capri_code_for:
-                num = den = 0.0
-                for c, w in sources:
-                    a = CROP_MAP.get(col, (col,))[0]
-                    lv = w * items(c, "LEVL").get(a, 0.0)
-                    v = items(c, item).get(a, 0.0)
-                    if v > 0:
-                        num += (lv if lv > 0 else w) * v
-                        den += (lv if lv > 0 else w)
-                if den > 0:
-                    vals[col] = num / den
-            return vals
-
-        crop_cols = [c for c in areas.columns if c in CROP_MAP and c != "GRAS"]
-        for col, v in intensive("YILD", crop_cols).items():
-            yields.at[reg, col] = v / 1000.0
-        cost_cols = [c for c in costs.columns
-                     if (c in CROP_MAP or c in COST_ANIMALS) and c not in COST_EXCLUDE]
-        for col, v in intensive("TOIN", cost_cols).items():
-            costs.at[reg, col] = v
-        price_cols = [c for c in prices.columns if c in CROP_MAP or c in COST_ANIMALS]
-        for col, v in intensive("MPRI", price_cols).items():
-            prices.at[reg, col] = v
-        for col, v in intensive("NMIN", [c for c in areas.columns if c in CROP_MAP]).items():
+        # ---- intensive values: the N applied per ha (NMIN). Yields, costs and producer prices are written by
+        # build_crop_economics_2017.py, their one writer since 29 October 2026 (this builder's first pass over them,
+        # from each crop's first CAPRI activity, was overwritten there; the four animal columns it computed are taken
+        # from intensive_values by that builder)
+        for col, v in intensive_values(capri, sources, "NMIN", [c for c in areas.columns if c in CROP_MAP]).items():
             nutrients.at[reg, col] = v
-
-        # Grass is not traded, so CAPRI carries a DUMMY price for it - exactly
-        # 1000 EUR/t in every region - while its real valuation sits in MREV
-        # (362 EUR/ha in DE11). Copying the dummy through gave grass a net
-        # revenue of 6,125 EUR/ha and made it the largest item in the regional
-        # gross margin. The price is derived from CAPRI's own revenue instead,
-        # on the dry-matter yield the model actually uses.
-        if "GRAS" in prices.columns:
-            mrev = sum(w * items(c, "MREV").get("GRAS", 0.0) for c, w in sources)
-            raw_gras = float(yields.at[reg, "GRAS"]) if "GRAS" in yields.columns else 0.0
-            dm_yield = raw_gras / 1000.0 * 0.20 if raw_gras > 100 else raw_gras
-            if mrev > 0 and dm_yield > 0:
-                prices.at[reg, "GRAS"] = mrev / dm_yield
 
         # ---- land from the rebuilt areas
         v = areas.loc[reg]
@@ -243,9 +227,7 @@ def main(dump_dir: Path):
         land.at[reg, "FALLOW"] = fallow
         land.at[reg, "ARABLE"] = float(v.sum()) - perm - grass - fallow
 
-    for df, p in ((areas, AREAS), (land, LAND), (herds, HERDS),
-                  (yields, YIELDS), (costs, COSTS), (prices, PRICES),
-                  (nutrients, NUTRIENTS)):
+    for df, p in ((areas, AREAS), (land, LAND), (herds, HERDS), (nutrients, NUTRIENTS)):
         df.to_csv(p)
     eu = [r for r in areas.index if not r.startswith("NO")]
     print(f"rebuilt {len(spec)} regions | EU crop area {areas.loc[eu].sum().sum():,.0f} kha "

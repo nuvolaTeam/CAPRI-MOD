@@ -41,8 +41,10 @@ def main() -> None:
                 lev[(m.group(1), CAPRI_TO_MODEL[m.group(2)])] += float(m.group(3))
     # the herds as the model loads them (poultry converted to thousand head, loaders._reconcile_poultry_units)
     sys.path.insert(0, str(ROOT))
-    from capri_mod.data.loaders import load_all_data
-    herds = load_all_data(str(ROOT / "capri_data"))["animal_numbers"]
+    # only the herds' loader (the same table as load_all_data's, checked 29 October 2026): the whole data load made this
+    # builder read about 80 model inputs, its own output and the yields among them (a cycle in the data pipeline)
+    from capri_mod.data.loaders import load_regional_animal_numbers
+    herds = load_regional_animal_numbers(str(ROOT / "capri_data"))
     animals = sorted(set(CAPRI_TO_MODEL.values()) & set(herds.columns))
     sp = importlib.util.spec_from_file_location("_mr", ROOT / "tools" / "lib" / "_model_regions.py")
     mr = importlib.util.module_from_spec(sp); sp.loader.exec_module(mr)

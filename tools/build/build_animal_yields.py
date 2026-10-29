@@ -1,4 +1,5 @@
-"""CAPRI's animal yields per model head: the animal columns of capri_data/2017/supply/yields.csv.
+"""CAPRI's animal yields per model head: the animal columns of capri_data/2017/supply/yields.csv (written by
+build_crop_economics_2017.py, the table's one writer, from build() here).
 
 Per model region and animal: CAPRI's YILD level-weighted over the animal's CAPRI members (2017 results, res_17* dumps,
 item 'Y'; the region's row, else its member state's, as tools/build/build_livestock_units.py), divided by 1000 and by
@@ -84,14 +85,11 @@ def main() -> None:
             print(f"{c}: {int(m.sum())} cells, old/new ratio median {r.median():.4g} (min {r.min():.4g}, max {r.max():.4g}); "
                   f"old>0 & new missing {int(((old > 0) & ~(new > 0)).sum())}, new>0 & old 0 {int((~(old > 0) & (new > 0)).sum())}")
         return
-    # the other columns are written back as read (text), so a parse/format round trip cannot move their last digit
-    ys = _read_csv(YIELDS, index_col=0, dtype=str, keep_default_na=False)
-    for c in cols:
-        v = wide[c].reindex(ys.index).fillna(0.0) if c in wide.columns else pd.Series(0.0, index=ys.index)
-        ys[c] = [repr(float(x)) for x in v]
-    ys.to_csv(YIELDS)
+    # yields.csv is written by build_crop_economics_2017.py, its one writer since 29 October 2026, with these animal
+    # columns (build()); run on its own this builder reports what it computes
     nat = int((out.capri_region.str[2:] == "000000").sum())
-    print(f"yields.csv: animal columns {cols} rebuilt from CAPRI YILD, {len(out)} values ({nat} from the member-state row)")
+    print(f"animal yields: {cols}, {len(out)} values ({nat} from the member-state row); written into yields.csv by "
+          f"build_crop_economics_2017.py")
 
 
 if __name__ == "__main__":

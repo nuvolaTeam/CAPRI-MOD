@@ -50,10 +50,9 @@ def main():
     spec = importlib.util.spec_from_file_location("_mr", ROOT / "tools" / "lib" / "_model_regions.py")
     mr = importlib.util.module_from_spec(spec); spec.loader.exec_module(mr)
     sys.path.insert(0, str(ROOT))
-    from capri_mod.data.loaders import load_all_data
+    from capri_mod.data.loaders import load_regional_base_areas  # the tables needed (load_all_data read every model input, a dependency cycle in the data pipeline; 29 Oct 2026)
     from capri_mod.data.definitions import CROPS
-    d = load_all_data(str(ROOT / "capri_data"))
-    A = d["areas"]
+    A = load_regional_base_areas(str(ROOT / "capri_data"))
     regs = list(A.index)
     code_to_group, groups = mr.capri_groups(regs)
     out = {}

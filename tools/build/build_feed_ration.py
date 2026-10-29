@@ -94,8 +94,8 @@ def main() -> None:
                     help="gdxdump CSVs of p_pmpFeedInpCoeff (pmppar_17XX_feedpmp.csv)")
     args = ap.parse_args()
 
-    from capri_mod.data.loaders import load_all_data
-    herds = load_all_data(str(_ROOT / "capri_data"))["animal_numbers"]
+    from capri_mod.data.loaders import load_regional_animal_numbers  # the one table needed (load_all_data read every model input, a dependency cycle in the data pipeline; 29 Oct 2026)
+    herds = load_regional_animal_numbers(str(_ROOT / "capri_data"))
 
     # CAPRI regions -> model regions in groups covering the same territory (tools/lib/_model_regions.py:
     # splits, merges, renamed regions); a group's CAPRI totals are spread over its model regions by

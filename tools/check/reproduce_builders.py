@@ -115,7 +115,6 @@ INVOCATIONS: list[tuple[str, list[str], list[Path]]] = [
     ("build_dairy_intensity", [], [D17]),
     ("build_cattle_intensity", [], [D17]),
     ("build_grass_intensity", [], [D17]),
-    ("build_animal_yields", [], [D17]),
     ("build_animal_pmp_capri_2030", [], [REF]),
     ("build_animal_pmp_capri_2030", ["--splits"], [REF]),
     ("build_animal_pmp_capri_2030", ["--techn", f"{BP}/recipe_2017_quad_techn.csv", "--year", "2017",
@@ -133,7 +132,6 @@ INVOCATIONS: list[tuple[str, list[str], list[Path]]] = [
     ("build_lownfeed_effects", [], [UP / "animReq_SK.zip", D17]),
     ("build_livestock_products", [], [D17]),
     ("build_eu_producer_prices", [], []),
-    ("build_sheep_goat_inputs", [], [D17]),
     ("build_supplement_effects", [], []),
     ("build_genetics_effects", [], [D17]),
     # not region-keyed, or member-state / market / CAPRI-coded

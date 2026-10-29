@@ -105,9 +105,8 @@ def main() -> None:
     p30 = terms[terms["item"] == "PRME"].pivot_table(index="region", columns="activity", values="value")
     sys_path = str(ROOT)
     import sys; sys.path.insert(0, sys_path)
-    from capri_mod.data.loaders import load_all_data
-    d = load_all_data(str(ROOT / "capri_data"))
-    cap = d["cap_premium"]; herds = d["animal_numbers"]
+    from capri_mod.data.loaders import load_cap_premium, load_regional_animal_numbers  # the tables needed (load_all_data read every model input, a dependency cycle in the data pipeline; 29 Oct 2026)
+    cap = load_cap_premium(str(ROOT / "capri_data")); herds = load_regional_animal_numbers(str(ROOT / "capri_data"))
     mr = _load(ROOT / "tools" / "lib" / "_model_regions.py")
     loc = _load(ROOT / "tools" / "build" / "build_livestock_output_coef.py")
     c2m = loc.CAPRI_TO_MODEL

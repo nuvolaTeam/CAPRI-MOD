@@ -56,8 +56,8 @@ def main():
     to_c8 = _mr_.region_to_capri()          # correspondence + NUTS splits and merges (tools/lib/_model_regions.py)
     import sys
     sys.path.insert(0, str(ROOT))
-    from capri_mod.data.loaders import load_all_data
-    areas = load_all_data(str(ROOT / "capri_data"))["areas"]
+    from capri_mod.data.loaders import load_regional_base_areas  # the one table needed (load_all_data read every model input, a dependency cycle in the data pipeline; 29 Oct 2026)
+    areas = load_regional_base_areas(str(ROOT / "capri_data"))
     Q = {sfx: _read_csv(f)[lambda d: d["activity"].isin(["GRAE", "GRAI"])].pivot_table(
              index="model_region", columns="activity", values="value") for sfx, f in Q_SOURCES if f.exists()}
 

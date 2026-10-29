@@ -77,8 +77,8 @@ def main():
     to_c8 = mr.region_to_capri()
     import sys
     sys.path.insert(0, str(ROOT))
-    from capri_mod.data.loaders import load_all_data
-    herds = load_all_data(str(ROOT / "capri_data"))["animal_numbers"]
+    from capri_mod.data.loaders import load_regional_animal_numbers  # the one table needed (load_all_data read every model input, a dependency cycle in the data pipeline; 29 Oct 2026)
+    herds = load_regional_animal_numbers(str(ROOT / "capri_data"))
     Q = {sfx: _read_csv(f).pivot_table(index="model_region", columns="activity", values="value")
          for sfx, f in Q_SOURCES if f.exists()}
 

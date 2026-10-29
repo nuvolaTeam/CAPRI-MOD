@@ -197,10 +197,9 @@ def _final_product_value_totals(dump_dir: Path, products=FINAL_PRODUCTS):
 
 
 def build(dump_dir: Path, value_item: str = None) -> pd.DataFrame:
-    from capri_mod.data.loaders import load_all_data
+    from capri_mod.data.loaders import load_regional_animal_numbers  # the one table needed (load_all_data read every model input, a dependency cycle in the data pipeline; 29 Oct 2026)
 
-    data = load_all_data(str(_ROOT / "capri_data"))
-    herds = data["animal_numbers"]
+    herds = load_regional_animal_numbers(str(_ROOT / "capri_data"))
     model_regions = set(herds.index)
     model_acts = sorted(set(CAPRI_TO_MODEL.values()))
 

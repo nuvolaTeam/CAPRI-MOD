@@ -103,7 +103,9 @@ def main() -> None:
     pr = df[df.item == PRICE_ITEM].pivot_table(
         index="model_region", columns="activity", values="value", aggfunc="last")
     pr = pr.where(pr > 0)
-    pr.to_csv(out / "capreg_producer_prices.csv")
+    # CAPRI's regional producer prices as extracted (CAPRI's codes); the model's table capreg_producer_prices.csv is
+    # assembled from it by tools/build/build_crop_economics_2017.py (one writer per file, 29 October 2026)
+    pr.to_csv(out / "capreg_producer_prices_extract.csv")
     summary["producer_prices"] = {
         "regions": int(pr.shape[0]), "activities": int(pr.shape[1]),
         "values": int(pr.notna().sum().sum())}
