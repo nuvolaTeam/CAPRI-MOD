@@ -2565,6 +2565,8 @@ def test_model_regions_are_capris_regional_units(data):
     (Finland's FI18 once carried all of Etelae-Suomi's manure on one part of a split: 990 kg N per dairy cow)."""
     units = pd.read_csv(DATA_DIR / "shared" / "regional_units.csv")
     assert len(units) == 221 and set(data["areas"].index) == set(units.region)
+    # in the same order: the builders take the unit list from regional_units.csv (tools/lib/_model_regions.py)
+    assert list(data["areas"].index) == list(units.region)
     assert {"DK000000", "EE000000", "LT000000", "LV000000", "SI000000", "CY000000", "MT000000", "HR000000"} <= set(units.region)
     assert units.set_index("region").at["BL400000", "country"] == "LU"
     mc = data["livestock_manure_n_coef"]

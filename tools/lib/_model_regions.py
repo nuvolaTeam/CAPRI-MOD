@@ -41,10 +41,12 @@ def _all_units(regs) -> bool:
 
 
 def model_regions():
-    import sys
-    sys.path.insert(0, str(ROOT))
-    from capri_mod.data.loaders import load_all_data
-    return list(load_all_data(str(ROOT / "capri_data"))["areas"].index)
+    """The model's regional units in their order: capri_data/shared/regional_units.csv (the model's areas are indexed
+    the same, checked by tests). Until 29 October 2026 the model's whole data were loaded for this list, so every
+    builder calling it opened about 80 model inputs, its own outputs among them (docs/design/DATA_PIPELINE_DOIT.md)."""
+    import csv
+    with open(ROOT / "capri_data" / "shared" / "regional_units.csv", newline="") as fh:
+        return [r["region"] for r in csv.DictReader(fh)]
 
 
 def national_code(nuts2: str) -> str:
