@@ -51,6 +51,7 @@ S = "capri_data/2017/supply"
 
 #: (builder, arguments, external inputs that must exist). Order: REGIONAL_UNITS_BUILDERS.md section 3, then the rest.
 INVOCATIONS: list[tuple[str, list[str], list[Path]]] = [
+    ("extract_gd2030_nbalance", [], [REF]),
     ("build_regional_units", [], []),
     ("extract_all_from_data2", ["--export-dir", str(WORK / "inputs/capri_export_zip/capri_export")],
      [WORK / "inputs/capri_export_zip/capri_export"]),
@@ -165,7 +166,7 @@ INVOCATIONS: list[tuple[str, list[str], list[Path]]] = [
     ("build_mineral_redu_rules", [], []),
     ("build_mitigation_inputs", [str(UP)], [UP / "trends_1730.csv"]),
     ("build_n_deposition_substitution", [], []),
-    ("build_n_leaching", [], [REF]),
+    ("build_n_leaching", [], []),
     ("build_nitrates_directive", [], []),
     ("build_nuts2024_reporting", [], []),
     ("build_p_balance", [], []),
