@@ -1227,6 +1227,17 @@ recorded only inside the status texts of K50 and K51 (resolved table) and README
   for the emission-tax runs (and scenarios that switch them on)
 
   **UreaSubst, scoped 29 October 2026 (port started):** CAPRI's form (envind/ammo_tech.gms l. 2353-2372, 3041-3107; supply/supply_model.gms GASTOTNETF_ l. 3366-3377, GWPCO2UREA_ l. 3966-3972, GHG_Mit_Cost_ l. 4945): one share m per region of the mineral N bought, 0 <= m <= MaxShare = p_fracUseFert(MS, Ureum) (LitRev_inputs), IniShare 0; cost per t N bought costParLin = (UVAG(NITF) - 289 x 60/28 x 1.019^(BAS - 2007) x (share urea + other)) / share other, case 3 calibration (relSubs0 0.2, relSubs1 1.2, pmpParSqr = (Subs1 - Subs0) / MaxShare, pmpParLin = Subs0 - costParLin); effects: the mineral N's NH3 loss x (1 - m x (EF_NH3 urea - EF_NH3 other)) (the model's cascade n_cascade.netf already takes these arguments) and CO2UREA = N bought x (IniShare - m) x 44/28 in the tax. Data: FracUseFert.csv written again by build_ammonia_tech_inputs.py (batch 8). Found on the way: the accounts' urea share (crop_co2_coef.csv, implied by CAPRI's 2017 CO2UREA / NMIN) differs from LitRev's p_fracUseFert, which CAPRI's simulation loads (ammoLitRev on; envind/ammo.gms l. 285-290): Czechia 0.116 against 0.016, Austria 0.032 against 0.014, Germany and Spain equal; which one CAPRI's 2030 runs use for CO2UREA is to be settled from its 2030 results (the Green Deal reference reports CO2UREA under 'UreaSubst' and 'CARB', meaning not yet established) before the port
+  **Urea share settled 29 October 2026** from CAPRI's own Green Deal 2030 result (res_2_1730greendeal_refpol_endotech_all_ini,
+  dataOut): for every country listed (EU27, UK, Turkey, the Balkans; Norway has no entry) CO2UREA booked under
+  UreaSubst equals the mineral N bought (MINFER.NITF) x LitRev's p_fracUseFert(Ureum) (FracUseFert.csv) x 44/28 to
+  six digits (CZ 7.306 kt = 290.57 x 0.016 x 44/28). CAPRI's simulation therefore uses LitRev's share, as
+  envind/ammo.gms l. 285-290 loads it; the accounts' share (crop_co2_coef.csv, from CAPRI's 2017 CO2UREA / NMIN) is
+  CAPREG's. The GROF.CO2UREA and CARB entries of the same result are another quantity (GROF = CARB x 44/12 in every
+  country: carbon and its CO2), not the urea term. Consequence: the model's reported CO2_UREA (environmental_module,
+  crop_co2_coef's urea_share) is CAPREG's base-year share, not CAPRI's 2030 simulation's (CZ 0.116 against 0.016);
+  to be switched to p_fracUseFert with the UreaSubst port (reporting only: CO2 from urea is outside CAPRI's GGWP tax
+  base)
+
 <a id="k94"></a>
 ### K94: `capri_mod/data/reconcile_base.py` is an orphan, and README's re-basing note points at a removed concordance (found 29 October 2026, registry migration)
 
