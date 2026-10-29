@@ -1645,6 +1645,8 @@ class CAPRIModel:
         # converted (read to the last digit, K82, and checked equal) and are no longer read
         cfile = cdir / f"{key}.parquet"
         if cfile.exists():
+            from capri_mod import run_manifest
+            run_manifest.note_read(cfile)              # the cached Hessian the run uses (run manifest)
             t = pd.read_parquet(cfile)
             ms_h = {ms: g.pivot(index="x", columns="y", values="dq").fillna(0.0) for ms, g in t.groupby("ms")}
             eu, sup, blocks = self._split_hessian(ms_h)

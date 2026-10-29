@@ -870,7 +870,11 @@ s.save("my_run.settings.toml")                         # the effective settings
 ```
 
 - From the command line: `tools/run/run_f2f_2030.py OUT.pkl --settings my_run.toml --set market.eu_blocks=true`. The run
-  writes its effective settings next to the result (`OUT.settings.toml`, and `meta["settings"]` in the pickle).
+  writes its effective settings next to the result (`OUT.settings.toml`, and `meta["settings"]` in the pickle), and
+  its run manifest (`OUT.manifest.json`, and `meta["run_manifest"]`; `capri_mod/run_manifest.py`, since 29 October
+  2026): the git commit, branch and files changed from it, the software versions, and every input file the run's own
+  process read (CSV, JSON, Parquet, the cached market supply Hessian) with its SHA-256 and size.
+  `tools/check/compare_runs.py A.pkl B.pkl` lists the inputs that differ between two runs.
 - In the code, a setting is a `setting("section.key")` class attribute: `RegionalSupplyModel.use_land_market` reads
   `supply.use_land_market`. Assigning to it is an error, so no class or instance can hold a second value.
 - **Where the defaults differ from CAPRI's:** docs/DEPARTURES_FROM_CAPRI.md lists them: corrections of CAPRI code

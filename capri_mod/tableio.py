@@ -27,6 +27,8 @@ def read_table(path) -> pd.DataFrame:
     p = Path(path)
     if p.suffix != ".parquet":
         raise ValueError(f"{p}: model inputs written by builders are Parquet (capri_mod/tableio.py)")
+    from capri_mod import run_manifest
+    run_manifest.note_read(p)                      # pyarrow opens the file outside Python's open (run manifest)
     return pd.read_parquet(p, engine="pyarrow")
 
 
@@ -51,6 +53,8 @@ def read_input(path, **kw) -> pd.DataFrame:
     other = set(kw) - allowed
     if other:
         raise ValueError(f"{p.name}: read options {sorted(other)} have no Parquet equivalent here")
+    from capri_mod import run_manifest
+    run_manifest.note_read(p)                      # pyarrow opens the file outside Python's open (run manifest)
     df = pd.read_parquet(p, engine="pyarrow")
     if df.index.name is not None or not isinstance(df.index, pd.RangeIndex):
         df = df.reset_index()                     # a table written with its index: back to columns, as in a CSV

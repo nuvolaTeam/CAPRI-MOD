@@ -229,6 +229,14 @@ CAPRI's scenario files set a few market-loop switches of their own. Two were fou
 
 ## Beyond CAPRI: reports only (results unchanged)
 
+### The run manifest (29 October 2026; the project lead's decision)
+
+CAPRI records a run's settings (the GUI's batch file and the scenario's include files), not the state of the data it
+read. A capri-mod run writes beside its result the git commit, branch and files changed from it, the software
+versions, and every input file its own process read with its SHA-256 (`capri_mod/run_manifest.py`,
+`OUT.manifest.json`), so two results can be traced to their exact inputs. Not recorded: files only a worker process
+opens. Results unchanged.
+
 ### `outer_loop.drift_report_steps = 3` (28 October 2026; the project lead's decision)
 
 CAPRI's stop rule (price_forecast.gms l. 345-371) counts rows (products, each at its largest change over the trade
