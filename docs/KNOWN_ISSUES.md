@@ -1386,14 +1386,13 @@ into the file.
 | supply/capri_own_price_elasticities.csv | CAPRI's p_ElasSupp 'CAL' of its 2020 supply-model calibration per member state (supply_elas_2_1720<MS>defaulta.txt and the REMAINI_NG zip) | built: build_capri_own_price_elasticities.py, same values (columns in the files' order of appearance); read by the elasticity-calibrated PMP only |
 | sources/arm/capri_supply_elas_market_1717.csv, supply_elas_eu_all.json | CAPRI's elas1717defaulta.gdx p_elasSupp (gdxdump p_elasSupp.txt) | built: build_capri_supply_elas_market.py, both byte-identical. Open for decision: the JSON (the EU rows' own-price anticipation) is the median over CAPRI's EU28, the UK included (the model's EU is 27), keyed by CAPRI's code for OLIO, RICE, SUGA, TWIN, which the market never looks up, and carries INPE |
 | sources/capreg/capreg_national_prices.csv | CAPRI's res_17 national MPRI | built: build_capreg_national_prices.py, same values; adds MAIZ, OAR1 and the model's CORN (the 17 regions without a regional maize price grow none), drops COTT and OFIB (copies of TEXT under old codes, read by nothing) |
-| shared/model_parameters.csv | each row with its CAPRI or literature source | open: a parameter table by construction; its rows to be checked one by one |
+| shared/model_parameters.csv | each row with its CAPRI or literature source | kept as the declared parameter table (the scalars CAPRI sets in its code); five rows checked against CAPRI's code, all as stated: p_OverFertMarkUp 0.1 and p_fertEffCor 1.1 (envind/ghgMiti.gms), p_trqSigmoidSlope 200 (arm/market_model.gms l. 339, the simulation's; trim_trqs.gms's 50 and 10 are the calibration's), p_elasHigh 4.5 (impose_upper_bound_on_elasticity.gms), p_rhoFeed FMIL 0.5 (arm/market1.gms l. 90) |
 | shared/capri_member_state_codes.csv | CAPRI's sets.gms NUTS0 codes and the NUTS prefixes' aliases (BE, LU -> BL; IE -> IR; GR -> EL; GB -> UK) | kept as a declared code map, each row with its source: the aliases are a convention between NUTS and CAPRI, not in CAPRI's sets |
 
 - **Effect:** reproducibility (no result changes from the builders added: the values are the files'; small rounding
   gains); K100's fallow mineral N
 - **In 9t:** –
 - **Status:** open, in part fixed 29 October 2026 (batch 6): eleven files built, one replaced, the member-state code map
-  kept as declared; left: model_parameters.csv (its rows to be checked one by one) and the decision on
-  supply_elas_eu_all.json's member states and keys. The census to be repeated on the gate runs' manifests (a full EU run
+  and the parameter table kept as declared; left: the decision on supply_elas_eu_all.json's member states and keys. The census to be repeated on the gate runs' manifests (a full EU run
   reads files a one-region run may not)
 
