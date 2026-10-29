@@ -31,7 +31,7 @@ access a read), writes, read-modify-writes, the Python files it ran and the file
 
 | Pattern | Files | Plan |
 |---|---|---|
-| `build_shg_split` (a one-time migration of October 2026: SHGO split into SHGM and SHGF, then 13 builders rerun) | 22 | done (29 October 2026): a rebuild of the whole chain without it reproduced all 278 files the chain writes; retired, its coefficient step (the only writer of three per-head tables) moved into `build_livestock_output_coef`, which reproduces them |
+| `build_shg_split` (a one-time migration of October 2026: SHGO split into SHGM and SHGF, then 13 builders rerun) | 22 | done (29 October 2026): retired; its coefficient step (the only writer of three per-head tables) moved into `build_livestock_output_coef`, and its SHGM/SHGF costs and EU price rows (the only writer of those cells, found by rebuilding the tables from blank) kept as `build_sheep_goat_inputs`, unchanged |
 | base tables written in turn, each builder its columns | `yields.csv`, `variable_costs.csv`, `sources/capreg/capreg_producer_prices.csv`, `market/producer_prices.csv` | each builder writes its part to its own intermediate; one assembly task writes the table (same columns, order and format) |
 | `market/armington_params.csv`: rows added by `build_dairy_trade_params` and `build_feed_byproducts` | 1 | with K72 (the `eps` column: probably no effect on converged results; to test) |
 | `sources/capreg/capreg_nutrient_coefs.csv`: `extract_all_from_data2`, `extract_remaining_nine` | 1 | one extractor |
@@ -42,6 +42,15 @@ access a read), writes, read-modify-writes, the Python files it ran and the file
 No orphan: `build_nitrates_directive` builds CAPRI's Nitrates Directive minimum shares, applied only with CAPRI's
 `NDtech` (off in its Green Deal runs, so not applied here); `ingest_capmod_market`'s extracts are read by the world-price
 checks (`tools/check/validate_world_prices.py`, `report_world_price_divergence.py`).
+
+## How a rebuild is checked (29 October 2026)
+
+A chain run over the committed files is not enough: builders that read a table before writing it (a read-modify-write;
+`build_capri_base` keeps the cells it does not compute) leave a cell that no builder writes as it was, so the file
+still compares identical. The retirement of `build_shg_split` passed that test with 442 cost cells and two price rows
+left without a writer. The check is therefore a rebuild from blank: the tables emptied (index and columns kept), the
+builders run, every file compared byte for byte; with doit, the full rebuild runs from the sources on an empty
+`capri_data` output set.
 
 ## Steps
 
