@@ -11,6 +11,11 @@ Scripts around the model, by role. Run every tool from the repository root, e.g.
 | `gams/` | GAMS export scripts to run in a CAPRI installation; they produce the extracts the builders read. |
 | `lib/` | Modules shared by the tools: `_model_regions.py` (model ↔ CAPRI regions), `_capri_costsavings.py`, and `paths.py`. `paths.py` finds the repository root and any tool by name (`tool_file`, `load_tool`). |
 
+`pipeline/builders.json` declares, per builder invocation, the files it reads and writes (generated from a traced run
+by `check/make_pipeline.py`); `dodo.py` at the repository root runs the builders with doit in the order those
+declarations give, and `check/rebuild_from_blank.py` checks that the whole data set is reproduced from the sources
+(docs/design/DATA_PIPELINE_DOIT.md).
+
 A tool that imports another adds the folders to `sys.path`:
 
 ```

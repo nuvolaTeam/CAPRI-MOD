@@ -505,6 +505,27 @@ from capri_mod.data.validate_data import validate_data
 print(validate_data("capri_data").summary())
 ```
 
+Check the data against their declarations in DuckDB (types, keys, code lists, ranges, units; `capri_data/schema`,
+docs/design/DATA_SCHEMA_DUCKDB.md; so far the code lists, the unit catalogue and the core 2017 supply inputs):
+
+```shell
+python tools/check/validate_data.py
+```
+
+Rebuild the data with doit (`dodo.py`; docs/design/DATA_PIPELINE_DOIT.md). Each of the 117 builder invocations is a
+task with the files it reads and writes, as traced (`tools/pipeline/builders.json`): every file has one writer, no
+builder reads its own output, and doit reruns only what a changed input, a changed CAPRI source or a changed builder
+affects. CAPRI's exports are looked up under `CAPRI_UPLOADS` and `CAPRI_WORK`; a task whose source is missing is
+reported and skipped.
+
+```shell
+python -m doit list                          # the tasks
+python -m doit                               # bring the data up to date, then check them
+python tools/check/rebuild_from_blank.py     # every output deleted, rebuilt, compared with git byte for byte
+```
+
+On 29 October 2026 the rebuild from blank reproduced all 289 files byte for byte.
+
 ### 4.4 Re-basing or swapping data sources
 
 Because the schema declares each input's source and the loader resolves files

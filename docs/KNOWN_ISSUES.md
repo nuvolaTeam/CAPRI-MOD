@@ -1073,8 +1073,10 @@ EUR/t, as the file has held it since the earlier writer, not 'WHEA', 196.60. FAO
 its soft and durum wheat prices (171.93, 173.00), so it is not their average; which one CAPRI's market model starts
 from for WHEA is not checked yet (arm/ data preparation).
 
-- **Effect:** the world price of the wheat market (the bilateral market's base world price, the EU price signal's
-  denominator); a change would move the base calibration of the wheat market
+- **Effect:** the level of the wheat market's base world price (`world_prices.csv`); the outer loop's price signal is
+  its ratio to the base, so the level cancels there; where else the level enters the bilateral market is not traced.
+  For comparison: CAPRI's 2017 market solution (market_base_1717) has a World PMRK of WHEA of 157.7 EUR/t, but its
+  World rows are far from FAO_agg's for other products too (soya 102.7 against 325.7), so it is no check
 - **In 9t:** not checked
 - **Status:** **open**: kept as it was (tools/build/build_world_prices.py SOURCE_CODE); to be checked against CAPRI's
   market data preparation before any change, a decision for the project lead
