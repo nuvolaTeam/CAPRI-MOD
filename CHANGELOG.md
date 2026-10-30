@@ -64,6 +64,7 @@ and `docs/KNOWN_ISSUES.md`.
 - **capri_data/schema holds only the SQL** (and schema.json). The code lists and the unit catalogue moved to
   capri_data/codes.
 - Declared: 404 files, 0 violations.
+- SENSITIVITY_ANALYSIS.md removed (the project lead's request).
 
 **CAPTRD-MOD.**
 - **FIX-3 confirmed** by the project lead.
