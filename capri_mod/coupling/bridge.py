@@ -185,6 +185,7 @@ class BridgeBlock:
         areas = d.get("areas")
         run = set(run_regions or [])
         units = [r for r in areas.index if _is_eu(r) and r not in run] if areas is not None else []
+        self._excluded_units = list(units)          # the feed bulks' base (coupling/feed.py) reads them too
         if not units:
             return None
         yld, an, oc = d.get("yields"), d.get("animal_numbers"), d.get("livestock_output_coef")

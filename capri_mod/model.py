@@ -975,7 +975,13 @@ class CAPRIModel(HessianBlock, FeedBlock, YoungAnimalBlock, PriceStepBlock, Manu
                 _mh = getattr(self, "_milk_ms_hist", None) or {}
                 if outer_iter == 0:
                     _sig, _mw, _mg, _mh = {}, {}, {}, {}
+                # the member states with supply models in the run: in a run on a subset (K83) a member state whose
+                # units are all outside it supplies through CAPRI's market supply function, its milk price signal
+                # reaching no supply model (with every unit in the run: every member state)
+                _ms_run = {capri_ms(r_) for r_ in supply_results} if supply_results else None
                 for _ms, _v in _dl["ms_price_ratio"].items():
+                    if _ms_run is not None and _ms not in _ms_run:
+                        continue
                     _t = (float(_v["MILK"]) / _eu) * (1.0 + float(_target["MILK"])) - 1.0
                     _s0 = _sig.get(_ms, float(price_signal.get("MILK", 0.0)) - float(_w.get("MILK", 0.0)) * float(_g.get("MILK", 0.0)))
                     _gg = _t - _s0

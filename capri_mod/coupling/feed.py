@@ -143,6 +143,41 @@ class FeedBlock:
                         bc[1] += x0 * q
                     # (no coefficient: no herd of the animal in the region at base in CAPRI, so no feed; the national
                     # feed table that stood here as a fallback had no builder and was removed, KNOWN_ISSUES K99)
+            # the EU's units outside a run on a subset (K83): their feed at its base, now and base alike (CAPRI would
+            # give a country switched off its market feed function FeedNQ_, whose terms its 2030 calibration does not
+            # hold for the EU's member states: KNOWN_ISSUES K83), so a member state's index is its solved units'
+            # change over all its feed
+            _an = self.data.get("animal_numbers") if isinstance(self.data, dict) else None
+            _lfc = self.data.get("livestock_feed_coef") if isinstance(self.data, dict) else None
+            _r0x = getattr(self, "_ration_model", None)
+            for region in (getattr(self, "_excluded_units", None) or []):
+                if _an is None or region not in _an.index or region in supply_results:
+                    continue
+                ms = self.member_state_of(region)
+                for a in ANIMALS:
+                    x0 = float(_an.at[region, a]) if a in _an.columns and pd.notna(_an.at[region, a]) else 0.0
+                    if not x0 > 0:
+                        continue
+                    if _r0x is not None and (region, a) in _r0x.rations:
+                        _rb = _r0x.rations[(region, a)]
+                        xb = dict(zip(_rb.feeds, _rb.x0))
+                        for _b in self.FEED_BULKS:
+                            if _b in xb:
+                                _acc = blk.setdefault((ms, _b), [0.0, 0.0])
+                                _acc[0] += x0 * xb[_b] / 1000.0
+                                _acc[1] += x0 * xb[_b] / 1000.0
+                        if "FMIL" in xb:
+                            fmil[0] += x0 * xb["FMIL"] / 1000.0
+                            fmil[1] += x0 * xb["FMIL"] / 1000.0
+                        continue
+                    if _lfc is not None and region in _lfc.index:
+                        for _sfx, _b in (("cereals", "FCER"), ("protein", "FPRO")):
+                            c_ = f"{a}_{_sfx}"
+                            q_ = float(_lfc.at[region, c_]) if (c_ in _lfc.columns and pd.notna(_lfc.at[region, c_])) else None
+                            if q_ is not None:
+                                _acc = blk.setdefault((ms, _b), [0.0, 0.0])
+                                _acc[0] += x0 * q_
+                                _acc[1] += x0 * q_
             # CAPRI's market splits each member state's bulks into products (feedShareEqu_,
             # MarketModule.eu_feed_use); the market gets each bulk's change against the base
             mm.seen.feed_bulk_index = {k: (v[0] / v[1] if v[1] > 0 else 1.0) for k, v in blk.items()}
