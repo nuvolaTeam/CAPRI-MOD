@@ -3340,15 +3340,21 @@
     "--xlsx",
     "$UP/yield_effects_ppp.xlsx"
    ],
-   "inputs": [],
+   "inputs": [
+    "capri_data/codes/model_activities.csv"
+   ],
    "code": [
-    "tools/build/build_organic_yield_gap.py"
+    "tools/build/build_organic_yield_gap.py",
+    "tools/lib/_model_codes.py"
    ],
    "external": [
-    "$UP/yield_effects_ppp.xlsx"
+    "$UP/yield_effects_ppp.xlsx",
+    "$WORK/allgms/gams/inputs/load_organic_yieldgap.gms"
    ],
    "outputs": [
-    "capri_data/2017/policy/organic_yield_gap.csv"
+    "capri_data/2017/policy/organic_yield_gap.csv",
+    "capri_data/2017/policy/organic_yield_gap_groups.csv",
+    "capri_data/2017/policy/organic_yield_gap_regions.csv"
    ]
   },
   {

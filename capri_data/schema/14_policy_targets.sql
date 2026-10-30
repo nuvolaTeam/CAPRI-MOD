@@ -42,6 +42,20 @@ INSERT INTO value_units SELECT 'organic_yield_gap', c, 'U_percent', 'capri', 'pe
 FROM (VALUES ('cereals'), ('fruits'), ('grass'), ('maize'), ('milk'), ('nonfruit_perm'), ('oilseeds'), ('vegetables'),
              ('wheat')) t(c);
 
+-- file: capri_data/2017/policy/organic_yield_gap_regions.csv
+CREATE TABLE organic_yield_gap_regions (
+    ms VARCHAR PRIMARY KEY REFERENCES capri_rall (code),
+    peseta_region VARCHAR NOT NULL REFERENCES organic_yield_gap (peseta_region)
+);
+COMMENT ON TABLE organic_yield_gap_regions IS 'CAPRI''s member states and their PESETA macro-region of the organic yield gaps: set ms2peseta of inputs/load_organic_yieldgap.gms (tools/build/build_organic_yield_gap.py)';
+
+-- file: capri_data/2017/policy/organic_yield_gap_groups.csv
+CREATE TABLE organic_yield_gap_groups (
+    activity VARCHAR PRIMARY KEY REFERENCES model_activities (code),
+    "group" VARCHAR NOT NULL CHECK ("group" IN ('cereals', 'fruits', 'grass', 'maize', 'milk', 'nonfruit_perm', 'oilseeds', 'vegetables', 'wheat'))
+);
+COMMENT ON TABLE organic_yield_gap_groups IS 'the model''s crops and their product group of the organic yield gaps: set pact2yieldGap of inputs/load_organic_yieldgap.gms through the CAPRI supply-model codes of codes/model_activities.csv; the animals left out as CAPRI leaves them out of organicCrops (tools/build/build_organic_yield_gap.py)';
+
 -- file: capri_data/2017/supply/yield_price_elasticity.csv
 CREATE TABLE yield_price_elasticity (
     crop VARCHAR PRIMARY KEY REFERENCES model_activities (code),
