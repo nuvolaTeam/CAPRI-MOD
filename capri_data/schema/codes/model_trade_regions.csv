@@ -1,29 +1,29 @@
 code,capri_rm,mapping_source
-EU27,EU27yr19,tools/build/recalibrate_trade_2017.py REGION_MAP
-USA,USA,tools/build/recalibrate_trade_2017.py REGION_MAP
-CAN,CAN,tools/build/recalibrate_trade_2017.py REGION_MAP
-BRA,BRA,tools/build/recalibrate_trade_2017.py REGION_MAP
-ARG,ARG,tools/build/recalibrate_trade_2017.py REGION_MAP
-AUS,AUS,tools/build/recalibrate_trade_2017.py REGION_MAP
-NZL,NZL,tools/build/recalibrate_trade_2017.py REGION_MAP
-CHN,CHN,tools/build/recalibrate_trade_2017.py REGION_MAP
-IND,IND,tools/build/recalibrate_trade_2017.py REGION_MAP
-RUS,RUS,tools/build/recalibrate_trade_2017.py REGION_MAP
-UKR,UKR,tools/build/recalibrate_trade_2017.py REGION_MAP
-TUR,TUR,tools/build/recalibrate_trade_2017.py REGION_MAP
-MEX,MEX,tools/build/recalibrate_trade_2017.py REGION_MAP
-IDN,INDO,tools/build/recalibrate_trade_2017.py REGION_MAP
-JPN,JAP,tools/build/recalibrate_trade_2017.py REGION_MAP
-KOR,SKOR,tools/build/recalibrate_trade_2017.py REGION_MAP
-THA,THAI,tools/build/recalibrate_trade_2017.py REGION_MAP
-VNM,VIET,tools/build/recalibrate_trade_2017.py REGION_MAP
-PAK,PAK,tools/build/recalibrate_trade_2017.py REGION_MAP
-BGD,BGD,tools/build/recalibrate_trade_2017.py REGION_MAP
-NGA,NGA,tools/build/recalibrate_trade_2017.py REGION_MAP
-ZAF,ZAF,tools/build/recalibrate_trade_2017.py REGION_MAP
-ETH,ETH,tools/build/recalibrate_trade_2017.py REGION_MAP
-MAR,MOR,tools/build/recalibrate_trade_2017.py REGION_MAP
-NOR,NO000000,tools/build/recalibrate_trade_2017.py REGION_MAP
-GBR,UK000000,tools/build/recalibrate_trade_2017.py REGION_MAP
-WBA,WBA,tools/build/recalibrate_trade_2017.py REGION_MAP
-ROW,,the CAPRI market regions not mapped to another trade region (tools/build/recalibrate_trade_2017.py REGION_MAP)
+EU27,EU27yr19,CAPRI's EU aggregate in its market data
+USA,USA,CAPRI's market data (capmod results): region code USA
+CAN,CAN,CAPRI's market data (capmod results): region code CAN
+BRA,BRA,CAPRI's market data (capmod results): region code BRA
+ARG,ARG,CAPRI's market data (capmod results): region code ARG
+AUS,AUS,CAPRI's market data (capmod results): region code AUS
+NZL,NZL,CAPRI's market data (capmod results): region code NZL
+CHN,CHN,CAPRI's market data (capmod results): region code CHN
+IND,IND,CAPRI's market data (capmod results): region code IND
+RUS,RUS,CAPRI's market data (capmod results): region code RUS
+UKR,UKR,CAPRI's market data (capmod results): region code UKR
+TUR,TUR,CAPRI's market data (capmod results): region code TUR
+MEX,MEX,CAPRI's market data (capmod results): region code MEX
+IDN,INDO,CAPRI's market data (capmod results): region code INDO
+JPN,JAP,CAPRI's market data (capmod results): region code JAP
+KOR,SKOR,CAPRI's market data (capmod results): region code SKOR
+THA,THAI,CAPRI's market data (capmod results): region code THAI
+VNM,VIET,CAPRI's market data (capmod results): region code VIET
+PAK,PAK,CAPRI's market data (capmod results): region code PAK
+BGD,BGD,CAPRI's market data (capmod results): region code BGD
+NGA,NGA,CAPRI's market data (capmod results): region code NGA
+ZAF,ZAF,CAPRI's market data (capmod results): region code ZAF
+ETH,ETH,CAPRI's market data (capmod results): region code ETH
+MAR,MOR,CAPRI's market data (capmod results): region code MOR
+NOR,NO000000,"CAPRI's market region NO000000, its own in gams/aggregation/defaultA.agg (KNOWN_ISSUES K56)"
+GBR,UK000000,"CAPRI's market region UK000000, its own in gams/aggregation/defaultA.agg (batch 7)"
+WBA,WBA,"CAPRI's trade block WBA (AL, BA, CS, KO, MK, MO) of gams/aggregation/defaultA.agg (batch 7)"
+ROW,,every CAPRI region not listed in this table

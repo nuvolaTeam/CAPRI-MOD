@@ -193,30 +193,26 @@ EU_BLOCKS = tuple(dict.fromkeys(EU_MS_BLOCK.values()))
 
 
 def _load_trade_regions() -> tuple:
-    """The market's trade regions in their order (capri_data/shared/trade_regions.csv, a declared table: trade region,
-    CAPRI's region code, the countries). Returns (trade region -> its countries (two-letter codes), CAPRI's region code
-    -> trade region). The EU27's countries are those of the regional units whose CAPRI member state is in CAPRI's EU
-    trade blocks (EU_MS_BLOCK); ROW holds every CAPRI region the table does not list. The United Kingdom (GBR) and
-    the Western Balkans (WBA) are trade regions of their own as in CAPRI since batch 7; Norway (NOR) since K56;
-    Egypt, Algeria, Saudi Arabia and Iran, trade regions here without any data until 29 October 2026, fold into ROW
-    (KNOWN_ISSUES K45)."""
-    regions: dict = {}
-    of_capri: dict = {}
-    for r in _shared_rows("trade_regions.csv"):
-        members = regions.setdefault(r["trade_region"], [])
-        if r["country"]:
-            members.append(r["country"])
-        if r["capri_region"]:
-            if of_capri.setdefault(r["capri_region"], r["trade_region"]) != r["trade_region"]:
-                raise ValueError(f"trade_regions.csv: {r['capri_region']} in two trade regions")
-    if regions.get("EU27", [None]):
-        raise ValueError("trade_regions.csv: EU27 must be listed without countries (they come from eu_market_blocks.csv)")
-    regions["EU27"] = list(dict.fromkeys(c for _r, m, c in _UNITS if m in EU_MS_BLOCK))
-    return regions, of_capri
+    """The market's trade regions in their order and CAPRI's region code of each (capri_data/schema/codes/
+    model_trade_regions.csv, a declared code list with a source per row; ROW: every CAPRI region not listed). The
+    United Kingdom (GBR) and the Western Balkans (WBA) are trade regions of their own as in CAPRI since batch 7, Norway
+    (NOR) since K56; Egypt, Algeria, Saudi Arabia and Iran, trade regions here without any data until 29 October 2026,
+    fold into ROW (KNOWN_ISSUES K45)."""
+    import csv
+    from pathlib import Path
+    p = Path(__file__).resolve().parents[2] / "capri_data" / "schema" / "codes" / "model_trade_regions.csv"
+    with open(p, newline="") as f:
+        rows = list(csv.DictReader(f))
+    of_capri = {}
+    for r in rows:
+        if r["capri_rm"] and of_capri.setdefault(r["capri_rm"], r["code"]) != r["code"]:
+            raise ValueError(f"model_trade_regions.csv: {r['capri_rm']} in two trade regions")
+    return [r["code"] for r in rows], of_capri
 
 
-#: trade region -> its countries; CAPRI's region code (market region or trade block of its market data) -> trade region
-TRADE_REGIONS, TRADE_REGION_OF_CAPRI = _load_trade_regions()
+#: the trade regions in their order; CAPRI's region code (market region or trade block of its market data) -> trade
+#: region
+ALL_TRADE_REGIONS, TRADE_REGION_OF_CAPRI = _load_trade_regions()
 
 
 def _supply_model_regions_outside_eu() -> dict:
@@ -233,7 +229,7 @@ def _supply_model_regions_outside_eu() -> dict:
         tr = TRADE_REGION_OF_CAPRI.get(rm) if rm is not None else None
         if tr is None:
             raise ValueError(f"supply-model country {m}: no trade region for its market region {rm} "
-                             "(capri_data/shared/rms_to_rm.csv, trade_regions.csv)")
+                             "(capri_data/shared/rms_to_rm.csv, schema/codes/model_trade_regions.csv)")
         out[m] = (c, tr)
     return out
 
@@ -241,7 +237,6 @@ def _supply_model_regions_outside_eu() -> dict:
 #: CAPRI member state -> (country, trade region) of the supply-model countries outside the EU (Norway: NO, NOR)
 SUP_NONEU = _supply_model_regions_outside_eu()
 
-ALL_TRADE_REGIONS = list(TRADE_REGIONS.keys())
 
 # ---------------------------------------------------------------------------
 # LAND USE TYPES
@@ -300,3 +295,10 @@ def capri_ms(region: str) -> str:
     'IR010000' -> 'IR000000', 'BE' -> 'BL000000'."""
     p = str(region)[:2]
     return MS_CODE.get(p, p) + "000000"
+
+
+def is_eu(region: str) -> bool:
+    """Whether a model region, a CAPRI member state or a country prefix belongs to the EU: its CAPRI member state is in
+    one of CAPRI's EU trade blocks (EU_MS_BLOCK, capri_data/shared/eu_market_blocks.csv). Norway's supply regions are
+    not (they are SUP_NONEU)."""
+    return capri_ms(region) in EU_MS_BLOCK

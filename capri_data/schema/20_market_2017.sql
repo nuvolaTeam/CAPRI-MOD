@@ -4,10 +4,10 @@
 -- file: capri_data/schema/codes/model_trade_regions.csv
 CREATE TABLE model_trade_regions (
     code VARCHAR PRIMARY KEY,
-    capri_rm VARCHAR REFERENCES capri_rall (code),     -- empty: ROW, the CAPRI market regions mapped to no other
-    mapping_source VARCHAR NOT NULL
+    capri_rm VARCHAR REFERENCES capri_rall (code),     -- empty: ROW, the CAPRI regions mapped to no other
+    mapping_source VARCHAR NOT NULL                    -- the source of the row
 );
-COMMENT ON TABLE model_trade_regions IS 'the bilateral market''s trade regions (capri_mod/data/definitions.py ALL_TRADE_REGIONS) and the CAPRI market region each stands for (tools/build/recalibrate_trade_2017.py REGION_MAP)';
+COMMENT ON TABLE model_trade_regions IS 'the bilateral market''s trade regions in their order and the CAPRI region each stands for (market region or trade block of CAPRI''s market data); no builder: a declared code list, read by capri_mod/data/definitions.py (ALL_TRADE_REGIONS, TRADE_REGION_OF_CAPRI) and tools/build/recalibrate_trade_2017.py (REGION_MAP)';
 
 -- file: capri_data/shared/rms_to_rm.csv
 CREATE TABLE rms_to_rm (

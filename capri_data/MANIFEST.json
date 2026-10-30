@@ -1920,24 +1920,6 @@
    "note": "member state -> EU trade block (CAPRI's rows only since 30 October 2026; Norway is its own market region NOR)",
    "path": "shared/eu_market_blocks.csv"
   },
-  "trade_regions.csv": {
-   "source": "declared: CAPRI's region codes of its market data and gams/aggregation/defaultA.agg, a source per row",
-   "vintage": "star 3.0",
-   "units": "-",
-   "domain": "market",
-   "status": "live",
-   "shape": {
-    "rows": 33,
-    "cols": 3,
-    "columns": [
-     "capri_region",
-     "country",
-     "source"
-    ]
-   },
-   "note": "the market's trade regions in their order: CAPRI's region code and the countries (EU27's from eu_market_blocks.csv)",
-   "path": "shared/trade_regions.csv"
-  },
   "processing_nq_hessian.csv": {
    "source": "CAPRI elas_2_1730defaulta p_hessNQProc (CAL)",
    "vintage": "2030 calibration point",

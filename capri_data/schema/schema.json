@@ -16035,7 +16035,7 @@
    "file": "capri_data/schema/codes/model_trade_regions.csv",
    "declared_in": "20_market_2017.sql",
    "layout": [],
-   "comment": "the bilateral market's trade regions (capri_mod/data/definitions.py ALL_TRADE_REGIONS) and the CAPRI market region each stands for (tools/build/recalibrate_trade_2017.py REGION_MAP)",
+   "comment": "the bilateral market's trade regions in their order and the CAPRI region each stands for (market region or trade block of CAPRI's market data); no builder: a declared code list, read by capri_mod/data/definitions.py (ALL_TRADE_REGIONS, TRADE_REGION_OF_CAPRI) and tools/build/recalibrate_trade_2017.py (REGION_MAP)",
    "columns": [
     {
      "name": "code",
@@ -16071,16 +16071,38 @@
    "checks": [],
    "units": [],
    "provenance": {
-    "nature": "capri",
-    "origins": "CAPRI",
-    "builder": "build_code_lists",
-    "sources": "$UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $WORK/capri_reference/sets/simini_21730/<CC>.csv; $WORK/capri_reference/sets/simini_21730/FEED_TO_O.csv; $WORK/capri_reference/sets/simini_21730/MAACT.csv; $WORK/capri_reference/sets/simini_21730/MCACT.csv; $WORK/capri_reference/sets/simini_21730/MPACT.csv; $WORK/capri_reference/sets/simini_21730/Map_RR.csv; $WORK/capri_reference/sets/simini_21730/PACT.csv; $WORK/capri_reference/sets/simini_21730/RALL.csv; $WORK/capri_reference/sets/simini_21730/XX1.csv"
+    "nature": "declared",
+    "origins": "per row",
+    "builder": null,
+    "sources": null
    },
    "notes": [],
    "read_by": {
-    "model": [],
-    "builders": [],
-    "checks": [],
+    "model": [
+     "capri_mod/data/definitions.py"
+    ],
+    "builders": [
+     "build_bilateral_market",
+     "build_biofuel_market",
+     "build_code_lists",
+     "build_crushing_parameters",
+     "build_dairy_world_blocks",
+     "build_dairy_world_markets",
+     "build_feed_demand_nonEU",
+     "build_gl_demand",
+     "build_noneu_feed_nq",
+     "build_noneu_market_supply_nq",
+     "build_processing_nq",
+     "build_processing_seeds",
+     "build_supply_elas_nonEU",
+     "build_tariffs_2017",
+     "build_use_components",
+     "build_world_market_baseline",
+     "recalibrate_trade_2017"
+    ],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
     "tests": []
    }
   },
@@ -20971,79 +20993,6 @@
     "builders": [],
     "checks": [
      "tools/check/validate_world_prices.py"
-    ],
-    "tests": []
-   }
-  },
-  "shr_trade_regions": {
-   "file": "capri_data/shared/trade_regions.csv",
-   "declared_in": "26_shared.sql",
-   "layout": [],
-   "comment": "The market's trade regions in their order (no builder: a declared table, a source per row): trade region, CAPRI's region code in its market data (market region or trade block; ROW: none), the countries (two-letter codes; EU27: none, its countries are the member states of eu_market_blocks.csv). Read by capri_mod/data/definitions.py (TRADE_REGIONS, the non-EU supply-model regions) and tools/build/recalibrate_trade_2017.py (REGION_MAP).",
-   "columns": [
-    {
-     "name": "trade_region",
-     "type": "VARCHAR",
-     "not_null": true
-    },
-    {
-     "name": "capri_region",
-     "type": "VARCHAR",
-     "not_null": false
-    },
-    {
-     "name": "country",
-     "type": "VARCHAR",
-     "not_null": false
-    },
-    {
-     "name": "source",
-     "type": "VARCHAR",
-     "not_null": true
-    }
-   ],
-   "primary_key": [],
-   "unique": [
-    [
-     "trade_region",
-     "country"
-    ]
-   ],
-   "foreign_keys": [],
-   "checks": [],
-   "units": [],
-   "provenance": {
-    "nature": "declared",
-    "origins": "per row",
-    "builder": null,
-    "sources": null
-   },
-   "notes": [],
-   "read_by": {
-    "model": [
-     "capri_mod/data/definitions.py"
-    ],
-    "builders": [
-     "build_bilateral_market",
-     "build_biofuel_market",
-     "build_code_lists",
-     "build_crushing_parameters",
-     "build_dairy_world_blocks",
-     "build_dairy_world_markets",
-     "build_feed_demand_nonEU",
-     "build_gl_demand",
-     "build_noneu_feed_nq",
-     "build_noneu_market_supply_nq",
-     "build_processing_nq",
-     "build_processing_seeds",
-     "build_supply_elas_nonEU",
-     "build_tariffs_2017",
-     "build_use_components",
-     "build_world_market_baseline",
-     "recalibrate_trade_2017"
-    ],
-    "checks": [
-     "tools/check/make_provenance.py"
     ],
     "tests": []
    }

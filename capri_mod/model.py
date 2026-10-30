@@ -51,7 +51,7 @@ from capri_mod.utils.utils import (
 from capri_mod.scenarios.scenarios import get_scenario, list_scenarios
 from capri_mod.params import param, param_table
 from capri_mod.settings import setting, tri_state, current as _settings
-from capri_mod.data.definitions import MS_CODE, capri_ms, REGION_TO_COUNTRY
+from capri_mod.data.definitions import MS_CODE, capri_ms, REGION_TO_COUNTRY, EU_MS_BLOCK, SUP_NONEU, is_eu as _is_eu
 from capri_mod.tableio import read_input
 
 
@@ -219,7 +219,7 @@ class CAPRIModel(HessianBlock, FeedBlock, YoungAnimalBlock, PriceStepBlock, Manu
         rats = getattr(self.supply_module, "feed_rations", None) or {}
         out = {}
         for region, res in base.items():
-            if region.startswith("NO"):                      # CAPRI: EU regions only (msNoEU)
+            if not _is_eu(region):                           # CAPRI: EU regions only (msNoEU)
                 continue
             try:
                 out[region] = ghg_coefficients(self.env_module, region, res, rats.get(region))
@@ -850,7 +850,7 @@ class CAPRIModel(HessianBlock, FeedBlock, YoungAnimalBlock, PriceStepBlock, Manu
             # price as a departure from the price the others in its market see (applied with price_dev_ms next
             # iteration). The member state's market price each step: the EU target plus its block's departure
             self._special_ms_dev = {}
-            _spm = {k_: v_ for k_, v_ in self._capri_step_special().items() if k_[1] != "MILK" and k_[0] != "NO000000"}
+            _spm = {k_: v_ for k_, v_ in self._capri_step_special().items() if k_[1] != "MILK" and _is_eu(k_[0])}
             if _spm and self._capri_price_update():
                 _hs = (getattr(self, "_capri_special_hist", None) or {}) if outer_iter > 0 else {}
                 _bmap_s = (self.market_module._ms_block_map()
@@ -1033,7 +1033,7 @@ class CAPRIModel(HessianBlock, FeedBlock, YoungAnimalBlock, PriceStepBlock, Manu
                     _hist = []
                 _sr_ = supply_results or {}
                 _herd = {a_: float(sum(float(getattr(x_, "activities", pd.Series(dtype=float)).get(a_, 0.0))
-                                       for r_, x_ in _sr_.items() if r_[:2] not in ("NO",)))
+                                       for r_, x_ in _sr_.items() if _is_eu(r_)))
                          for a_ in ("DCOW", "BCOW", "BULL", "HFRS", "CALV", "PIGF", "PIGS", "BROI", "LAYS", "SHGM", "SHGF")}
                 _dlh = self.market_module.ev.dairy_last or {}
                 _hist.append({"it": outer_iter + 1,

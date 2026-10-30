@@ -65,12 +65,20 @@ code used as a classifier (`startswith("NO")` meaning "outside the EU") is not.
 ## Done
 
 On 30 October 2026 (branch region-decl):
-- The trade regions moved to capri_data/shared/trade_regions.csv, a declared table with a source per row.
-- The EU trade blocks are read from eu_market_blocks.csv, whose stale Norway row is removed.
-- The supply-model countries outside the EU are derived from the data: they are the regional units outside the EU
-  blocks (regional_units.csv), placed in their CAPRI market region (rms_to_rm.csv).
-- The literals these replace are gone: definitions.TRADE_REGIONS, MarketModule's EU_BLOCK_REGIONS and SUP_NONEU_*,
-  and recalibrate_trade_2017.REGION_MAP.
+- **Trade regions.** The code list capri_data/schema/codes/model_trade_regions.csv is now the declared master, with
+  a source per row: each trade region in order, and CAPRI's region code. build_code_lists wrote it from the
+  REGION_MAP literal until then.
+  - The model (definitions.ALL_TRADE_REGIONS, TRADE_REGION_OF_CAPRI) and the builders (REGION_MAP) read it.
+  - The country lists of definitions.TRADE_REGIONS were read by no code and are gone.
+- **EU trade blocks.** They are read from eu_market_blocks.csv, whose stale Norway row is removed.
+- **Supply-model countries outside the EU** are derived from the data: the regional units outside the EU blocks
+  (regional_units.csv), placed in their CAPRI market region (rms_to_rm.csv) (definitions.SUP_NONEU).
+- **H1 in the model.** Every Norway test and non-EU list in capri_mod now goes through definitions.is_eu, SUP_NONEU
+  or EU_MS_BLOCK. This covers model.py, coupling/bridge.py (including the sugar ratio's list), coupling/price_step.py,
+  supply_module.py, projection/prices.py, policy_module.py and io_results.py.
+  - Kept: capri_stop.py's NO000000 and captrd/prepare.py's NO000000 statement, because CAPRI's own code names
+    Norway there.
+- **Still to do in H1:** the builders' EU and non-EU lists.
 
 ## Plan (proposed; each stage a move that must reproduce the reference run, except where noted)
 

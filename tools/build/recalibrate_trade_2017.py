@@ -45,11 +45,11 @@ import pandas as pd
 import functools as _ft
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 #: CAPRI's region code (market region or trade block of its market data) -> the model's trade region, from the
-#: declared table capri_data/shared/trade_regions.csv (Norway NO000000 -> NOR, KNOWN_ISSUES K56; the United Kingdom
-#: UK000000 -> GBR and the Western Balkans' block WBA, batch 7). Regions absent there fold into ROW.
-TRADE_REGIONS_CSV = Path(__file__).resolve().parents[2] / "capri_data" / "shared" / "trade_regions.csv"
+#: declared code list capri_data/schema/codes/model_trade_regions.csv (Norway NO000000 -> NOR, KNOWN_ISSUES K56; the
+#: United Kingdom UK000000 -> GBR and the Western Balkans' block WBA, batch 7). Regions absent there fold into ROW.
+TRADE_REGIONS_CSV = Path(__file__).resolve().parents[2] / "capri_data" / "schema" / "codes" / "model_trade_regions.csv"
 REGION_MAP = {r: t for r, t in _read_csv(TRADE_REGIONS_CSV, dtype=str, keep_default_na=False)[
-    ["capri_region", "trade_region"]].itertuples(index=False) if r}
+    ["capri_rm", "code"]].itertuples(index=False) if r}
 
 #: CAPRI's mapping of behavioural regions (RMS) to market regions (RM): set RMS_TO_RM of its instantiation, written by
 #: tools/build/build_gl_demand.py. A behavioural region that is not a market region of its own (the Western Balkan

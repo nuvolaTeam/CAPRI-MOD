@@ -16,7 +16,7 @@ Output: capri_data/shared/regional_units.csv (region, capri_ms, country): countr
 key the model aggregates regions by (aggregate_supply(by_country=True), mapped to CAPRI's member state by MS_CODE):
 CAPRI's member state read back through capri_member_state_codes.csv, except BL400000, Luxembourg (sets.gms l. 6126),
 in CAPRI's member state BL with Belgium. (CAPRI's own prefixes are not used as country keys: IR, Ireland in CAPRI, is
-Iran among the market's ISO country codes, capri_mod.data.definitions.TRADE_REGIONS.)
+Iran among ISO country codes.)
 
     python tools/build/build_regional_units.py [--dump-dir /home/claude/work/capreg]
 """
