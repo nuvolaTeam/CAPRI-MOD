@@ -9,7 +9,7 @@ The data sourcing registry's log of checks, fixes and decisions (201 entries, mo
 [KNOWN_ISSUES_REGISTRY_LOG.md](KNOWN_ISSUES_REGISTRY_LOG.md), verbatim, with the triage of its open entries against
 the code: they became K92-K96, joined K73, K80, K91, or were closed or historical.
 
-## Open (17)
+## Open (15)
 
 | # | Issue | Status |
 |---|---|---|
@@ -20,7 +20,6 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K48](#k48) | Young-animal prices against CAPRI's own market run | open |
 | [K65](#k65) | Cattle member splits and per-sex young-animal markets do not converge yet | open |
 | [K66](#k66) | Farmland expands under the per-hectare N target more than in CAPRI | open: waiting for CAPRI's scenario results |
-| [K74](#k74) | Supply: differences from CAPRI that no register listed | open |
 | [K77](#k77) | CAPRI's fertiliser-option curvature (S5) leaves the baseline's base shares | open |
 | [K78](#k78) | Histosol fallowing under Farm-to-Fork far above JRC121368's figure | open: waiting for CAPRI's scenario results |
 | [K79](#k79) | Member-state production that keeps moving between iterations | open |
@@ -29,12 +28,13 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K89](#k89) | Failing regional solves take most of IPOPT's time | open |
 | [K92](#k92) | Farm-to-Fork changes furthest from JRC121368, besides the milk price | open: waiting for CAPRI's scenario results |
 | [K93](#k93) | CAPRI mitigation options not built; documents disagree on which are in | open |
-| [K105](#k105) | Numbers in the model's code to check, register or move to the settings | open |
 
-## Resolved (89)
+## Resolved (91)
 
 | # | Issue | Status |
 |---|---|---|
+| [K74](#k74) | Supply: differences from CAPRI that no register listed | fixed (batch 8 gate) |
+| [K105](#k105) | Numbers in the model's code to check, register or move to the settings | fixed (batch 8 gate) |
 | [K106](#k106) | The market's base supply of crushed and biofuel products was not CAPRI's production of the market year | fixed |
 | [K103](#k103) | Data files without a known origin or read by no code (data declarations) | fixed: removed, or given a builder |
 | [K104](#k104) | The payments report's area left fallow out of CAPRI's UAAR | fixed |
@@ -817,7 +817,7 @@ Ten findings M1-M10 in docs/design/ARCHITECTURE_REFACTOR.md section 5.1 (table d
 
 - **Effect:** livestock in every scenario (S1); Green Deal crop and fertiliser results (S2-S12)
 - **In 9t:** –
-- **Status:** **open**, in part. Fixed 24 October 2026: S1 (run r114). Implemented, not yet accepted (runs r116, r117 do not converge in 25 iterations, see K75): S3-S4 and the plant-protection / other-input part of S11 (CAPRI's regional input changes on every activity, the organic crops' fuel top-up, CAPRI's organic crop set; two CAPRI code errors corrected with parity switches, DEPARTURES_FROM_CAPRI; the other-input cost per ha was about 20% low, without its unit value). Fixed 24 October 2026 (evening; run pending): S5 (the options' cost on the N purchases, CAPRI's curvature with the saving term), S6 (need follows yield as fertned.gms, not sqrt), S7 (yield-dependent inputs, define_inputs.gms), S8 (the grassland rule's calibration dual), S9 (catch crops on the ecological set-aside row), S10 (idled histosols on the landscape floor; the diversification limit lowered under the floor). Fixed 27 October 2026 (branch supply-audit, run pending): S12 (the mineral N tax and soil N2O on CAPRI's MITERRA loss fractions). S13 (the elasticity calibration path) removed 28 October 2026; S12 and S13 accepted with batch 1 (runs r177, r178). Fixed 28 October 2026 (batch 2): S2 (CAPRI's small groups keep the mineral reduction's cap, replacing the organic one). The claims table brought up to date with S1-S13 (28 October 2026). S5's last part (28 October 2026): the inhibitor on manure's saving term added behind supply.fert_slope_with_saving, off as the mineral options' (K77 departure); its maximum share found in CAPRI (ghgMiti.gms l. 115-119). The PMP calibrator's elasticity cap and share term reach only 14 cells (set-aside below 50 m2 in Belgian and Dutch regions). Open: the pesticide yield-loss crop list (S11, jrc121368 rule only) **29 October 2026 (batch 8, K74 review):** S11 fixed: the pesticide yield loss on CAPRI's pesticideCrops (every crop activity but the idled histosols, conventional_io.gms l. 51-53) instead of an unsourced 23-crop list, the fodder crops and set-aside not reached (registered); the claims table's 19 remaining unsourced or unverifiable rows resolved: three fallbacks no unit reached removed (over-fertilisation factor, active technologies, the applied manure P/K ratio: now errors), the winter cover bound CAPRI's MaxShare (equal in every unit), the PESETA and yield-gap maps verified (CAPRI's own CEN fallback), the crop-diversity groups verified (OFOD = OFAR + ROOF one group, registered), the rest registered as guards, solver devices or reconciliations with their reasons. Run pending (batch-8 gate); to be closed with it
+- **Status:** **fixed** (closed with the batch-8 gate, 30 October 2026). History: fixed 24 October 2026: S1 (run r114). Implemented, not yet accepted (runs r116, r117 do not converge in 25 iterations, see K75): S3-S4 and the plant-protection / other-input part of S11 (CAPRI's regional input changes on every activity, the organic crops' fuel top-up, CAPRI's organic crop set; two CAPRI code errors corrected with parity switches, DEPARTURES_FROM_CAPRI; the other-input cost per ha was about 20% low, without its unit value). Fixed 24 October 2026 (evening; run pending): S5 (the options' cost on the N purchases, CAPRI's curvature with the saving term), S6 (need follows yield as fertned.gms, not sqrt), S7 (yield-dependent inputs, define_inputs.gms), S8 (the grassland rule's calibration dual), S9 (catch crops on the ecological set-aside row), S10 (idled histosols on the landscape floor; the diversification limit lowered under the floor). Fixed 27 October 2026 (branch supply-audit, run pending): S12 (the mineral N tax and soil N2O on CAPRI's MITERRA loss fractions). S13 (the elasticity calibration path) removed 28 October 2026; S12 and S13 accepted with batch 1 (runs r177, r178). Fixed 28 October 2026 (batch 2): S2 (CAPRI's small groups keep the mineral reduction's cap, replacing the organic one). The claims table brought up to date with S1-S13 (28 October 2026). S5's last part (28 October 2026): the inhibitor on manure's saving term added behind supply.fert_slope_with_saving, off as the mineral options' (K77 departure); its maximum share found in CAPRI (ghgMiti.gms l. 115-119). The PMP calibrator's elasticity cap and share term reach only 14 cells (set-aside below 50 m2 in Belgian and Dutch regions). Open: the pesticide yield-loss crop list (S11, jrc121368 rule only) **29 October 2026 (batch 8, K74 review):** S11 fixed: the pesticide yield loss on CAPRI's pesticideCrops (every crop activity but the idled histosols, conventional_io.gms l. 51-53) instead of an unsourced 23-crop list, the fodder crops and set-aside not reached (registered); the claims table's 19 remaining unsourced or unverifiable rows resolved: three fallbacks no unit reached removed (over-fertilisation factor, active technologies, the applied manure P/K ratio: now errors), the winter cover bound CAPRI's MaxShare (equal in every unit), the PESETA and yield-gap maps verified (CAPRI's own CEN fallback), the crop-diversity groups verified (OFOD = OFAR + ROOF one group, registered), the rest registered as guards, solver devices or reconciliations with their reasons. Closed with the batch-8 gate (30 October 2026: Farm-to-Fork r190 converged in 13 iterations, Green Deal r191 in 22; no non-optimal regional solve kept)
 
 <a id="k75"></a>
 ### K75: The Farm-to-Fork runs with CAPRI's Green Deal input changes (S3/S4) did not converge: a warm-started NLP stuck at a worse point (24 October 2026)
@@ -1533,7 +1533,9 @@ October 2026):
   dropped: **removed** (the check sees the model's costs; 12 pass, 0 warn);
 - BilateralCommodity's export cap at 0.98 of the model's base supply (PROXY_AUDIT S192): a consequence of step F (the
   market calibrated to the supply models' baseline, where a region's base production can fall below CAPRI's recorded
-  exports); open, explained to the project lead;
+  exports): **removed** with K106 (the market's base made CAPRI's production of the market year; exports scaled only
+  where they exceed the base supply, which no cell does after the 30 October rebuild: 0 of 1,228 cells off by more than
+  1e-4);
 - PMPCalibrator.calibrate's 0.05 cap on PELA / p_pmpQuadPact cross terms of crops without CAPRI's terms (S065):
   **removed** with the path, its two inputs' loading and sources/estnlp/pela_cross_by_region.json (no longer written);
   such crops have diagonal rows, as in CAPRI's QUADRA_; default runs unchanged (with CAPRI's terms the path was
@@ -1544,8 +1546,7 @@ October 2026):
 - **Effect:** none on default results from the checks, the settings with equal values and the path the default skips;
   the split columns' manure in runs without an N target is a correction that can move results
 - **In 9t:** yes
-- **Status:** open (the export cap: the inconsistent calibration data behind it are being fixed); four done 29-30
-  October 2026
+- **Status:** fixed (all five done 29-30 October 2026; the export cap with K106)
 
 ### K106: The market's base supply of crushed and biofuel products was not CAPRI's production of the market year (found 29 October 2026)
 

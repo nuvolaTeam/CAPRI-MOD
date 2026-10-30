@@ -32,6 +32,78 @@ and `docs/KNOWN_ISSUES.md`.
 
 ---
 
+## 30 October 2026 (batches 7 and 8, one gate): the UK and the Western Balkans as trade regions, Norway's raw milk in the market (step F), manure as CAPRI (K105), the market base at CAPRI's production of the market year (K106), the data declared in SQL, the CAPTRD-MOD data preparation, the register of departures
+
+**Model.**
+- **The UK (GBR) and the Western Balkans (WBA) as trade regions** of their own, as CAPRI's market regions UK000000 and
+  WBA (28 trade regions; before, both folded into ROW). The market data rebuilt on them; the builders that read CAPRI's
+  data per behavioural region now map a region by its market region (CAPRI's RMS_TO_RM), so the Western Balkan
+  countries AL, BA, CS, KO, MK, MO sit in WBA in every market file, not in ROW.
+- **Step F: Norway's raw milk in the market** (`market.sup_milk_in_market`, CAPRI's ProdNQ_ MILK re-anchored to the
+  supply models' milk, simu_calibration_to_supply.gms l. 423-427). M8 found already done.
+- **K105, manure as CAPRI:** the manure-application row (170 kg N/ha) removed. CAPRI's Green Deal runs set the Nitrates
+  Directive switch only after an `$exit`, so the cap is off there. The manure of the split columns now reaches NUTNED_
+  in every run. Also under K105: the 0.05 cap on PELA cross terms and its path removed; the validator's specialty-cost
+  cap removed; Norway's price step reads the settings.
+- **K106, the market's base at CAPRI's production of the market year:** crushing and biofuel parameters per market year
+  from CAPRI's calibrated market data (PROD = PROC x PRCY). The crushing is summed over CAPRI's behavioural regions:
+  the trade blocks MED, MER_OTH and URUPAR hold PROC but not PRCY, and before, ROW's soybean oil yield was 0.083 against
+  0.186. The bilateral export cap at 0.98 of the base supply was removed. Base supply against CAPRI's market data:
+  0 of 1,228 cells off by more than 1e-4.
+- **K104:** the payments report counts fallow land in CAPRI's UAAR (EU total EUR 49.1 bn, before 46.9 bn).
+- **K93:** CO2 from urea on the urea share of CAPRI's simulation (FracUseFert); UreaSubst scoped in CAPRI's form.
+- **K89:** under a tiered N target a failed solve is tested without the N row before the cap search.
+- **K73/K74 reviews:** the pesticide yield loss on CAPRI's pesticideCrops (S11); unreached fallbacks removed; the
+  winter cover bound and the yield-gap map as CAPRI.
+- **Beyond CAPRI, off by default:**
+  - the exact-KKT market supply Hessian (`market.hessian_method = "kkt"`);
+  - the Newton–Krylov market solve (`market.solver = "newton_krylov"`). The pooled MILK ratio is held as in the fixed
+    point. One market, Japan's sunflower cake (30 t, autarkic), has a flat family of equilibria that the method cannot
+    select from. The planned answer is IPOPT minimum distance (step G).
+
+**Data and tools.**
+- **Every CSV under capri_data declared** in SQL (388 files, 0 violations):
+  - provenance generated from the pipeline trace (01), with checked notes (02);
+  - the numbers in the model's code censused (03) and classified (04);
+  - schema.json generated from the declarations.
+- The JSON stores INPUT_MANIFEST, INPUT_SCHEMA and DATA_SOURCING_REGISTRY retired.
+- K103: unread or untraced files removed or given builders. The EU27 reference levels get a builder.
+- tools/pipeline/builders.json regenerated from a traced rebuild (135 tasks).
+- Refactor stage 3a: the regional supply model's methods split into block mixins, unchanged.
+- **CAPTRD-MOD** (capri_mod/pipeline/captrd), CAPTRD's data preparation ported:
+  - the load and cleaning of the ex-post years;
+  - BASM;
+  - the COCO stage over all countries;
+  - livestock units and biofuel coefficients;
+  - the labour bounds (labour_ageline.gms: DK, AT and BL equal CAPTRD's to 1e-15);
+  - the policy data.
+
+  The statistics and base-year values (prep_data_for_estimation.gms l. 205-320) are in progress. On the way, the set
+  of estimated columns was found to hold the nutrient contents for good, which CAPTRD adds only for one deletion
+  (captrd.gms l. 833-838); corrected.
+- **docs/CAPRI_DEPARTURES_REGISTER.md** (the project lead's request): one index of the CAPRI code errors fixed (FIX)
+  or kept as coded (KEPT), the departures in force (DEP) and the additions beyond CAPRI (BEYOND), each with its CAPRI
+  reference, setting and status, and the documents still to align.
+
+**Gate.**
+- **Test suite:** 246 tests, 243 passed, 3 skipped. The full run left two Norway tests failing, both out of date:
+  - the region count, now 28;
+  - Norway's market milk, which since step F is the supply models' milk plus its raw milk supply response; the test
+    now checks that relation, exactly.
+
+  The two tests were corrected and rerun on their own.
+- **Farm-to-Fork 2030 (r190):**
+  - converged in 13 iterations (r188: 10), with no non-optimal regional solve kept;
+  - prices moved from r188 by up to +2.3 points (beef +2.3, pork +1.2, poultry +0.8, oilseeds +0.7, vegetables and
+    permanent crops +0.7, cereals +0.1); quantities by at most 0.6 points;
+  - mean absolute deviation from JRC121368 over compare_runs' 20 indicators 4.05 (r188: 4.22).
+- **Green Deal 2030 (r191):**
+  - converged under CAPRI's rule in 22 iterations (r189: 21);
+  - prices moved from r189 by up to +1.2 points (beef +1.2, pork +0.5, poultry +0.4, oilseeds +0.4); quantities by at
+    most 0.2 points;
+  - mean absolute deviation 8.54 (r189: 8.63).
+- **Closed with the gate:** K74 (every supply finding run) and K105.
+
 ## 29 October 2026 (batch 6, one gate): CAPRI's non-EU feed energy balance (M3), the EU feed bulks in the market (M4), the inputs without builders (K99-K101), the data census (K102)
 
 **Model.**
