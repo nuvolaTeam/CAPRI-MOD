@@ -1003,6 +1003,19 @@ pandas' default CSV float parser returns 64% of the cached Hessian's terms one u
   region. Decision of the project lead (31 October 2026): CAPRI's rule, the units not in a run supplying the EU
   market through their member state's market supply function (their share of it, the model's departure where a
   subset cuts through a member state); the solved units supply their models' output
+  The plan (31 October 2026, read in CAPRI's code and data): a country off in CAPRI gets both ProdNQ_ and FeedNQ_
+  (arm/market_model.gms l. 1033: FeedNQ_ only for NOT RMSSUP). CAPRI's export elas_2_1730defaulta.csv has every EU
+  member state's p_hessNQSupp at CAL (DE000000: 37 products, MILK and the young animals included) but no
+  p_hessNQFeed or p_ElasFeed for them (in CAPRI's reference run every member state is RMSSUP, so their feed functions
+  are never calibrated). So: the excluded share's supply through its member state's ProdNQ_; its feed demand at its
+  base quantity (the model's departure: CAPRI would calibrate FeedNQ_ in its own run with the country off; no terms
+  invented). The excluded share of a member state per product: its units outside the run over all its units, from the
+  units' base output (0 in a full run, which therefore does not change). Steps: (1) a builder of the member states'
+  ProdNQ_ terms for all products in model codes, with CAPRI's Data_CAL production; (2) the shares; (3) the market's
+  EU supply (solved output + the excluded share's ProdNQ_), replacing the K16 fallback; (4) the base calibration and
+  crushing base; (5) raw milk per member state; (6) feed bulks; (7) young animals; (8) the outer loop's member-state
+  milk test. Checks: a full run unchanged exactly; a one-region run converging; the mini-EU run's prices nearer the
+  full run's
 
 <a id="k84"></a>
 ### K84: The landscape floor's fit ends on its last step (found 27 October 2026, test timing)
