@@ -121,8 +121,12 @@ def main():
     _S.activate(run_settings)
     # a timed line per stage and outer iteration (CAPRIModel._progress): wall clock and time since the start
     CAPRIModel.progress, CAPRIModel.progress_t0 = True, _T_START
-    m = CAPRIModel(data_dir=str(ROOT / "capri_data"), verbose=False,
-                   regions=[x for x in a.regions.split(",") if x] or None)
+    # a subset of regions (--regions) is solved on the whole data set: the EU's units outside it stay in the data and
+    # supply the market through their member states' CAPRI market supply functions (KNOWN_ISSUES K83); until 31 October
+    # 2026 the model was built on the subset's data alone, so the EU market had the whole EU's demand and the subset's
+    # supply only
+    _subset = [x for x in a.regions.split(",") if x] or None
+    m = CAPRIModel(data_dir=str(ROOT / "capri_data"), verbose=False)
     m._progress("model built (data loaded)")
     t0 = time.time()
     # CAPRI simulates from its calibrated 2030 reference (CAPMOD's reference run); the trend projection (CAPTRD) is
@@ -177,7 +181,7 @@ def main():
         _scen.endotech = effective(_et)
     _scen.endotech = effective(_scen.endotech)
     m._progress(f"projection to 2030: baseline, then {_scen.name}")
-    res = pmod.run(policy_scenario=_scen, years=[2030])
+    res = pmod.run(policy_scenario=_scen, years=[2030], **({"regions": _subset} if _subset else {}))
     m._progress("runs done; writing the results")
     b, s = res.baseline[2030], res.scenario[2030]
     _pmm = (getattr(pmod, "_last_projected_model", None) or m).market_module

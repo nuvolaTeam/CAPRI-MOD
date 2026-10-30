@@ -1016,6 +1016,19 @@ pandas' default CSV float parser returns 64% of the cached Hessian's terms one u
   crushing base; (5) raw milk per member state; (6) feed bulks; (7) young animals; (8) the outer loop's member-state
   milk test. Checks: a full run unchanged exactly; a one-region run converging; the mini-EU run's prices nearer the
   full run's
+  31 October 2026, steps 2, 3 and part of 5 built (the excluded units' base output through the bridge, their
+  member states' ProdNQ_ in the market's supply after the measured Hessian, the base calibration and the dairy
+  block's raw milk with them; the K16 refill of the whole EU's base production off where they are). DE110000 alone
+  (two outer steps): the market converges in 19 and 16 steps (before: not in 100), Germany's milk gap 0.0002, the
+  young-animal ratios 0.85-1.31, world prices within 0.3%; 63 s. tools/run/run_f2f_2030.py --regions now solves the
+  subset on the whole data set (the model was built on the subset's data alone, so the projection had no data for
+  the units outside it). Mini-EU Farm-to-Fork: converged in 5 iterations, 224 s (461 s). A correction to the plan's
+  expectation: its EU prices moved further from the full run's, not nearer (cereals -0.9% against the full run's
+  +11.2%, the mini run before +4.0%; milk +3.7 against +22.4, before +11.8): as in CAPRI, a policy applied in the
+  supply models does not reach the countries switched off, so a subset run now simulates the policy in its own
+  units only, the rest of the EU supplying through its market supply functions. A subset run is market-consistent
+  but cannot stand in for the full run's prices under an EU-wide policy (nor could it before). Remaining: the
+  excluded units' raw milk response (MILK's ProdNQ_), feed bulks, the outer loop's member-state milk test
 
 <a id="k84"></a>
 ### K84: The landscape floor's fit ends on its last step (found 27 October 2026, test timing)
