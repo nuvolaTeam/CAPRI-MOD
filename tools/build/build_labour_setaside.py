@@ -34,6 +34,7 @@ import importlib.util
 import re
 import subprocess
 from collections import defaultdict
+import sys
 from pathlib import Path
 
 import pandas as pd
@@ -44,16 +45,10 @@ ROOT = Path(__file__).resolve().parents[2]
 DUMPS = Path("/home/claude/work/capreg")
 REF = Path("/mnt/user-data/uploads/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv")
 ITEMS = ("LEVL", "LABT", "LABF", "LABP", "PRME")
-CROPS = {"SWHE": ("SWHE",), "DWHE": ("DWHE",), "RYEM": ("RYEM",), "BARL": ("BARL",), "OATS": ("OATS",),
-         "CORN": ("MAIZ",), "OCER": ("OCER",), "PARI": ("PARI",), "PULS": ("PULS",), "OCRO": ("OCRO",),
-         "OIND": ("OIND",), "NURS": ("NURS",), "FLOW": ("FLOW",), "SUGB": ("SUGB",), "POTA": ("POTA",),
-         "TOMA": ("TOMA",), "OVEG": ("OVEG",), "APPL": ("APPL",), "OFRU": ("OFRU",), "CITR": ("CITR",),
-         "TAGR": ("TAGR",), "WINE": ("TWIN",), "OLIV": ("OLIV",), "TABO": ("TABO",), "TOBA": ("TOBA",),
-         "MAIF": ("MAIF",), "RAPE": ("RAPE",), "SUNF": ("SUNF",), "SOYA": ("SOYA",), "OOIL": ("OOIL",),
-         "TEXT": ("TEXT",), "OFOD": ("OFAR", "ROOF"), "GRAS": ("GRAE", "GRAI"), "SETA": ("VSET", "FALL")}
-ANIMALS = {"DCOW": ("DCOL", "DCOH"), "BCOW": ("SCOW",), "BULL": ("BULL", "BULH"), "HFRS": ("HEIL", "HEIH", "HEIR"),
-           "CALV": ("CAMF", "CAFF", "CAMR", "CAFR"), "PIGS": ("SOWS",), "PIGF": ("PIGF",), "LAYS": ("HENS",),
-           "BROI": ("POUF",), "SHGM": ("SHGM",), "SHGF": ("SHGF",), "OANI": ("OANI",)}
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "lib"))
+import _model_codes as _MC  # noqa: E402  the model's activities and their CAPRI activities (codes/model_activities.csv)
+CROPS = dict(_MC.CROP_MAP_CAPMOD)
+ANIMALS = dict(_MC.ANIMALS)
 MEMBERS = {**CROPS, **ANIMALS}
 CAPRI_ACTS = sorted({c for v in MEMBERS.values() for c in v})
 

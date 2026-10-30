@@ -582,12 +582,14 @@
    "builder": "build_cap_ceilings_2030",
    "args": [],
    "inputs": [
+    "capri_data/codes/model_activities.csv",
     "capri_data/shared/capri_member_state_codes.csv",
     "capri_data/shared/eu_market_blocks.csv",
     "capri_data/shared/regional_units.csv"
    ],
    "code": [
     "tools/build/build_cap_ceilings_2030.py",
+    "tools/lib/_model_codes.py",
     "tools/lib/_model_regions.py"
    ],
    "external": [
@@ -691,10 +693,12 @@
     "$WORK/capreg"
    ],
    "inputs": [
+    "capri_data/codes/model_activities.csv",
     "capri_data/shared/regional_units.csv"
    ],
    "code": [
-    "tools/build/build_capri_base.py"
+    "tools/build/build_capri_base.py",
+    "tools/lib/_model_codes.py"
    ],
    "external": [
     "$WORK/capreg/res_17AT.txt",
@@ -1074,6 +1078,7 @@
     "$WORK/capri_reference/sets/simini_21730"
    ],
    "inputs": [
+    "capri_data/codes/model_activities.csv",
     "capri_data/codes/model_trade_regions.csv",
     "capri_data/shared/capri_member_state_codes.csv",
     "capri_data/shared/eu_market_blocks.csv",
@@ -1088,14 +1093,9 @@
     "capri_mod/data/loaders.py",
     "capri_mod/market/dairy.py",
     "capri_mod/tableio.py",
-    "tools/build/build_animal_yields.py",
-    "tools/build/build_capri_base.py",
     "tools/build/build_code_lists.py",
     "tools/build/build_dairy_world_markets.py",
     "tools/build/build_feed_bulks.py",
-    "tools/build/build_livestock_units.py",
-    "tools/build/build_plant_protection_cost.py",
-    "tools/build/build_supplement_effects.py",
     "tools/build/recalibrate_trade_2017.py"
    ],
    "external": [
@@ -1121,7 +1121,6 @@
     "capri_data/codes/capri/RALL.csv",
     "capri_data/codes/capri/XX.csv",
     "capri_data/codes/capri/XX1.csv",
-    "capri_data/codes/model_activities.csv",
     "capri_data/codes/model_commodities.csv"
    ]
   },
@@ -2228,6 +2227,7 @@
    "args": [],
    "inputs": [
     "capri_data/2017/supply/capri_level_ratio.csv",
+    "capri_data/codes/model_activities.csv",
     "capri_data/shared/capri_member_state_codes.csv",
     "capri_data/shared/eu_market_blocks.csv",
     "capri_data/shared/regional_units.csv",
@@ -2237,6 +2237,7 @@
    ],
    "code": [
     "tools/build/build_labour_setaside.py",
+    "tools/lib/_model_codes.py",
     "tools/lib/_model_regions.py"
    ],
    "external": [
@@ -2723,12 +2724,14 @@
    "args": [],
    "inputs": [
     "capri_data/2017/supply/capri_level_ratio.csv",
+    "capri_data/codes/model_activities.csv",
     "capri_data/shared/capri_member_state_codes.csv",
     "capri_data/shared/eu_market_blocks.csv",
     "capri_data/shared/regional_units.csv"
    ],
    "code": [
     "tools/build/build_livestock_units.py",
+    "tools/lib/_model_codes.py",
     "tools/lib/_model_regions.py"
    ],
    "external": [
@@ -2772,6 +2775,7 @@
     "capri_data/2017/abatement/ammonia/capri_mann_days_2030.csv",
     "capri_data/2017/feed/feed_ration_2017.json",
     "capri_data/2017/supply/capri_level_ratio.csv",
+    "capri_data/codes/model_activities.csv",
     "capri_data/shared/capri_member_state_codes.csv",
     "capri_data/shared/eu_market_blocks.csv",
     "capri_data/shared/regional_units.csv",
@@ -2780,6 +2784,7 @@
    "code": [
     "tools/build/build_lownfeed_effects.py",
     "tools/lib/_capri_costsavings.py",
+    "tools/lib/_model_codes.py",
     "tools/lib/_model_regions.py"
    ],
    "external": [
@@ -3386,6 +3391,7 @@
    "builder": "build_plant_protection_cost",
    "args": [],
    "inputs": [
+    "capri_data/codes/model_activities.csv",
     "capri_data/shared/capri_member_state_codes.csv",
     "capri_data/shared/eu_market_blocks.csv",
     "capri_data/shared/regional_units.csv",
@@ -3394,6 +3400,7 @@
    "code": [
     "tools/build/build_capri_base.py",
     "tools/build/build_plant_protection_cost.py",
+    "tools/lib/_model_codes.py",
     "tools/lib/_model_regions.py"
    ],
    "external": [
@@ -3492,6 +3499,7 @@
    "builder": "build_pmp_capri_2030",
    "args": [],
    "inputs": [
+    "capri_data/codes/model_activities.csv",
     "capri_data/shared/capri_member_state_codes.csv",
     "capri_data/shared/eu_market_blocks.csv",
     "capri_data/shared/regional_units.csv",
@@ -3500,6 +3508,7 @@
    ],
    "code": [
     "tools/build/build_pmp_capri_2030.py",
+    "tools/lib/_model_codes.py",
     "tools/lib/_model_regions.py"
    ],
    "external": [
@@ -3521,6 +3530,7 @@
     "capri_data/2017/supply/pmp_recipe_2017.csv"
    ],
    "inputs": [
+    "capri_data/codes/model_activities.csv",
     "capri_data/shared/capri_member_state_codes.csv",
     "capri_data/shared/eu_market_blocks.csv",
     "capri_data/shared/regional_units.csv",
@@ -3529,6 +3539,7 @@
    ],
    "code": [
     "tools/build/build_pmp_capri_2030.py",
+    "tools/lib/_model_codes.py",
     "tools/lib/_model_regions.py"
    ],
    "external": [
@@ -3576,6 +3587,7 @@
     "capri_data/2017/supply/pmp_recipe_2030.csv"
    ],
    "inputs": [
+    "capri_data/codes/model_activities.csv",
     "capri_data/shared/capri_member_state_codes.csv",
     "capri_data/shared/eu_market_blocks.csv",
     "capri_data/shared/regional_units.csv",
@@ -3584,6 +3596,7 @@
    ],
    "code": [
     "tools/build/build_pmp_capri_2030.py",
+    "tools/lib/_model_codes.py",
     "tools/lib/_model_regions.py"
    ],
    "external": [
@@ -3945,6 +3958,7 @@
     "capri_data/2017/supply/capri_level_ratio.csv",
     "capri_data/codes/capri/FEED_TO_O.csv",
     "capri_data/codes/capri/MS_RU.csv",
+    "capri_data/codes/model_activities.csv",
     "capri_data/shared/capri_member_state_codes.csv",
     "capri_data/shared/eu_market_blocks.csv",
     "capri_data/shared/regional_units.csv",
@@ -3961,6 +3975,7 @@
     "tools/build/build_supplement_effects.py",
     "tools/lib/_capri_costsavings.py",
     "tools/lib/_capri_digest.py",
+    "tools/lib/_model_codes.py",
     "tools/lib/_model_regions.py"
    ],
    "external": [

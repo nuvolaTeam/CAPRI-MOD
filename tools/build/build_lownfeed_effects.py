@@ -32,6 +32,7 @@ at ghgTechLowNFeed = 1, star 3.0's value - the cost is not linear in the paramet
 from __future__ import annotations
 import argparse, glob, importlib.util, io, json, re, zipfile
 from collections import defaultdict
+import sys
 from pathlib import Path
 
 import pandas as pd
@@ -43,9 +44,9 @@ M = ROOT / "capri_data" / "2017" / "abatement" / "mitigation"
 SRC = ROOT / "capri_data" / "sources" / "envind"
 CORR = SRC / "anim_req_corr_2017.csv"
 LEV = SRC / "res17_mann_crpr_expt.csv"
-MAP = {"DCOW": ("DCOL", "DCOH"), "BCOW": ("SCOW",), "BULL": ("BULL", "BULH"), "HFRS": ("HEIL", "HEIH", "HEIR"),
-       "CALV": ("CAMF", "CAFF", "CAMR", "CAFR"), "PIGF": ("PIGF",), "PIGS": ("SOWS",), "BROI": ("POUF",),
-       "LAYS": ("HENS",), "SHGM": ("SHGM",), "SHGF": ("SHGF",)}
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "lib"))
+import _model_codes as _MC  # noqa: E402  the model's activities and their CAPRI activities (codes/model_activities.csv)
+MAP = {a: _MC.ANIMALS[a] for a in ("DCOW", "BCOW", "BULL", "HFRS", "CALV", "PIGF", "PIGS", "BROI", "LAYS", "SHGM", "SHGF")}
 CAPRI_ACTS = sorted({x for v in MAP.values() for x in v})
 YEARS = 2030 - 2017
 

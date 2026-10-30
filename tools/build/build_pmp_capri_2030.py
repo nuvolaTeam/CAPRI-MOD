@@ -34,6 +34,7 @@ Output: capri_data/2017/supply/pmp_capri_2030.csv (region, act_i, act_j, g, x_i,
 from __future__ import annotations
 import argparse, re, subprocess, sys
 from collections import defaultdict
+import sys
 from pathlib import Path
 
 import numpy as np
@@ -52,13 +53,9 @@ CAPRI_GRP = {"SWHE": "CERE", "DWHE": "CERE", "RYEM": "CERE", "BARL": "CERE", "OA
              "PULS": "OARA", "POTA": "OARA", "SUGB": "OARA", "MAIF": "FARA", "ROOF": "FARA", "OFAR": "FARA"}
 #: model crop -> CAPRI activities with PMP terms (tools/build/build_capri_base.CROP_MAP; GRAS and SETA by their
 #: CAPRI components that carry terms: GRAS = GRAE + GRAI, SETA = VSET + FALL)
-MODEL_TO_CAPRI = {"SWHE": ("SWHE",), "DWHE": ("DWHE",), "RYEM": ("RYEM",), "BARL": ("BARL",), "OATS": ("OATS",),
-                  "CORN": ("MAIZ",), "OCER": ("OCER",), "PARI": ("PARI",), "PULS": ("PULS",), "OCRO": ("OCRO",),
-                  "OIND": ("OIND",), "NURS": ("NURS",), "FLOW": ("FLOW",), "SUGB": ("SUGB",), "POTA": ("POTA",),
-                  "TOMA": ("TOMA",), "OVEG": ("OVEG",), "APPL": ("APPL",), "OFRU": ("OFRU",), "CITR": ("CITR",),
-                  "TAGR": ("TAGR",), "WINE": ("TWIN",), "OLIV": ("OLIV",), "TABO": ("TABO",), "TOBA": ("TOBA",),
-                  "TEXT": ("TEXT",), "MAIF": ("MAIF",), "RAPE": ("RAPE",), "SUNF": ("SUNF",), "SOYA": ("SOYA",),
-                  "OOIL": ("OOIL",), "OFOD": ("OFAR", "ROOF"), "GRAS": ("GRAE", "GRAI"), "SETA": ("VSET", "FALL")}
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "lib"))
+import _model_codes as _MC  # noqa: E402  the model's activities and their CAPRI activities (codes/model_activities.csv)
+MODEL_TO_CAPRI = dict(_MC.CROP_MAP_CAPMOD)
 CAPRI_TO_MODEL = {c: m for m, cs in MODEL_TO_CAPRI.items() for c in cs}
 
 

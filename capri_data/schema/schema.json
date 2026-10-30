@@ -15917,7 +15917,7 @@
    "file": "capri_data/codes/model_activities.csv",
    "declared_in": "00_codes.sql",
    "layout": [],
-   "comment": "the model's activities (capri_mod/data/definitions.py CROPS, ANIMALS) and their CAPRI activities",
+   "comment": "the model's activities (capri_mod/data/definitions.py CROPS, ANIMALS) and their CAPRI activities: a declared code list, a source per row (tools/lib/_model_codes.py reads it for the builders)",
    "columns": [
     {
      "name": "code",
@@ -15931,6 +15931,11 @@
     },
     {
      "name": "capri_codes",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "capmod_codes",
      "type": "VARCHAR",
      "not_null": true
     },
@@ -15950,18 +15955,29 @@
    ],
    "units": [],
    "provenance": {
-    "nature": "capri",
-    "origins": "CAPRI",
-    "builder": "build_code_lists",
-    "sources": "$UP/data_market_1730defaulta.csv; $UP/elas_2_1730defaulta.csv; $UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $WORK/allgms/gams/aggregation/defaultA.agg; $WORK/capri_reference/sets/simini_21730/<CC>.csv; $WORK/capri_reference/sets/simini_21730/FEED_TO_O.csv; $WORK/capri_reference/sets/simini_21730/MAACT.csv; $WORK/capri_reference/sets/simini_21730/MCACT.csv; $WORK/capri_reference/sets/simini_21730/MPACT.csv; $WORK/capri_reference/sets/simini_21730/Map_RR.csv; $WORK/capri_reference/sets/simini_21730/PACT.csv; $WORK/capri_reference/sets/simini_21730/RALL.csv; $WORK/capri_reference/sets/simini_21730/XX1.csv"
+    "nature": "declared",
+    "origins": "per row",
+    "builder": null,
+    "sources": null
    },
    "notes": [],
    "read_by": {
     "model": [],
     "builders": [
+     "build_cap_ceilings_2030",
+     "build_capri_base",
+     "build_code_lists",
+     "build_labour_setaside",
+     "build_livestock_units",
+     "build_lownfeed_effects",
+     "build_plant_protection_cost",
+     "build_pmp_capri_2030",
+     "build_supplement_effects",
      "build_yield_price_elasticity"
     ],
-    "checks": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
     "tests": [
      "capri_mod/tests/test_data_schema.py"
     ]
@@ -35299,11 +35315,6 @@
      "not_null": false
     },
     {
-     "name": "PULS",
-     "type": "DOUBLE",
-     "not_null": true
-    },
-    {
      "name": "OCRO",
      "type": "DOUBLE",
      "not_null": false
@@ -35324,14 +35335,39 @@
      "not_null": false
     },
     {
+     "name": "POTA",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
      "name": "SUGB",
      "type": "DOUBLE",
      "not_null": false
     },
     {
-     "name": "POTA",
+     "name": "SUNF",
      "type": "DOUBLE",
      "not_null": false
+    },
+    {
+     "name": "RAPE",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "SOYA",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "OOIL",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "PULS",
+     "type": "DOUBLE",
+     "not_null": true
     },
     {
      "name": "TOMA",
@@ -35379,42 +35415,22 @@
      "not_null": false
     },
     {
-     "name": "GRAS",
-     "type": "DOUBLE",
-     "not_null": false
-    },
-    {
      "name": "TOBA",
      "type": "DOUBLE",
      "not_null": false
     },
     {
-     "name": "MAIF",
-     "type": "DOUBLE",
-     "not_null": false
-    },
-    {
-     "name": "RAPE",
-     "type": "DOUBLE",
-     "not_null": false
-    },
-    {
-     "name": "SUNF",
-     "type": "DOUBLE",
-     "not_null": false
-    },
-    {
-     "name": "SOYA",
-     "type": "DOUBLE",
-     "not_null": false
-    },
-    {
-     "name": "OOIL",
-     "type": "DOUBLE",
-     "not_null": false
-    },
-    {
      "name": "TEXT",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "GRAS",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "MAIF",
      "type": "DOUBLE",
      "not_null": false
     },
@@ -39029,7 +39045,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_yield_price_elasticity",
-    "sources": "$UP/data_market_1730defaulta.csv; $UP/elas_2_1730defaulta.csv; $UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $WORK/allgms/gams/aggregation/defaultA.agg; $WORK/allgms/gams/global/fromimpact/sets.gms; $WORK/allgms/gams/supply/yield_elas.gms; $WORK/capri_reference/sets/simini_21730/<CC>.csv; $WORK/capri_reference/sets/simini_21730/FEED_TO_O.csv; $WORK/capri_reference/sets/simini_21730/MAACT.csv; $WORK/capri_reference/sets/simini_21730/MCACT.csv; $WORK/capri_reference/sets/simini_21730/MPACT.csv; $WORK/capri_reference/sets/simini_21730/Map_RR.csv; $WORK/capri_reference/sets/simini_21730/PACT.csv; $WORK/capri_reference/sets/simini_21730/RALL.csv; $WORK/capri_reference/sets/simini_21730/XX1.csv"
+    "sources": "$WORK/allgms/gams/global/fromimpact/sets.gms; $WORK/allgms/gams/supply/yield_elas.gms"
    },
    "notes": [],
    "read_by": {
@@ -39613,6 +39629,14 @@
   {
    "file": "00_codes.sql",
    "rule": "no CAPRI activity is summed into two model activities"
+  },
+  {
+   "file": "00_codes.sql",
+   "rule": "every CAPRI supply-model code of a model activity is a CAPRI production activity"
+  },
+  {
+   "file": "00_codes.sql",
+   "rule": "no CAPRI supply-model activity is summed into two model activities"
   },
   {
    "file": "00_codes.sql",
