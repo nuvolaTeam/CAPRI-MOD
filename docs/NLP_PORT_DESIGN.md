@@ -58,10 +58,12 @@ IPOPT (MUMPS), warm start from the region's previous solution (CAPRI's CONOPT st
 start the base. Regions in parallel as now. A region whose solve fails keeps its previous solution and is reported (no
 silent fallback to another model). Run time measured early, on the base and one Farm-to-Fork iteration.
 
-## Departures from CAPRI that stay (to be registered)
+## Departures from CAPRI that stay (registered in docs/CAPRI_DEPARTURES_REGISTER.md)
 
-- Activity set: capri-mod's (46 activities plus the dairy, grassland, bull and heifer splits), not CAPRI's full list.
-- PMP and land-market matrices: capri-mod's calibration (decision 5a.5).
+- Activity set: capri-mod's (46 activities plus the dairy, grassland, bull and heifer splits), not CAPRI's full list
+  (DEP-9).
+- PMP and land-market matrices: capri-mod's calibration was decision 5a.5; superseded on 22 October 2026: the default
+  is CAPRI's own 2030 terms (`supply.pmp_source = "capri2030"`, K61); capri-mod's recipe terms remain an option.
 - LULUCF and emission totals: accounting after the solve where they do not enter decisions (no emission tax).
 
 ## Order of work

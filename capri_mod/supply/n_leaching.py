@@ -14,7 +14,7 @@ Leaching share of the soil surplus (LEACHN_):
 B2 is held at CAPRI's Green Deal 'ini' reference: L = leach_ini x B1 / B1_ini (B1_ini at CAPRI's initial shares and
 the base winter cover). REGISTERED.
 
-DEPARTURE FROM CAPRI (the user's decision, 20 October 2026): CAPRI adds agg in LEACHN_ ("+ v_ammoAppLeaAgg",
+CAPRI-ERROR-FIX (the project lead's decision, 20 October 2026; docs/CAPRI_DEPARTURES_REGISTER.md FIX-2): CAPRI adds agg in LEACHN_ ("+ v_ammoAppLeaAgg",
 supply_model.gms l. 3413) while it subtracts the same options' runoff effect in RUNSURFN_ and the fertiliser options'
 leaching effects in LEACHN_. Its literature table gives reductions (prep_data_LitRev.gms p_reducGains: positive = less
 loss; LNA_low liquid: NH3 0.51, RunSurf -0.24, Leach -0.24), copied without change of sign to no3mlea (ammo_tech.gms

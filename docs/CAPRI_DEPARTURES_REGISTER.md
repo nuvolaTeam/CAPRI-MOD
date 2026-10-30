@@ -139,20 +139,9 @@ Removed:
 
 Closures toward CAPRI recorded in KNOWN_ISSUES: K33, K37, K38, K40, K61, K62, K67, K73.
 
-## 6. Documents to align with this register (found 30 October 2026)
+## 6. Documents to align with this register
 
-- `ammapp_sign` and `ad_dairy_ch4` (FIX-1, FIX-2) are labelled "DEPARTURE FROM CAPRI" in supply/n_leaching.py,
-  N_CASCADE_SPEC.md and SETTINGS_INVENTORY.csv (S201, S222). They are CAPRI-ERROR-FIX.
-- NLP_PORT_DESIGN.md and SUPPLY_MODEL_MAP.md describe the PMP terms as capri-mod's own calibration. The default since
-  22 October is CAPRI's 2030 terms.
-- KNOWN_ISSUES K105 still counts the export cap as open; K106 removed it. market_claims.csv row 73 still says
-  "registered".
-- supply_claims.csv has stale rows: the manure-application row, the 0.05 cross-term cap, the legacy nitrate limit, and
-  the rows of the removed modules feed_conic.py and intensity.py.
-- PROXY_AUDIT.md gives the census counts as of 29 October. 04_code_data_status.sql has grown with the CAPTRD and
-  Newton–Krylov numbers.
-- SETTINGS_INVENTORY.md and .csv, and SCENARIO_SETTINGS.md, describe superseded defaults (market_supply_nq,
-  absent_activities_fixed, max_outer_iter 25, adaptive damping).
-- DEPARTURES_FROM_CAPRI.md, "Switched": add noneu_supply_nq and feed_bulk_in_market.
-- CAPTRD_MOD.md: FIX-8 (zeros as missing) is listed as fixed, and FIX-7 as decided; neither is built. It names
-  `capri_mod/projection/capsim_dyn/`, which does not exist yet.
+Aligned on 30 October 2026: the labels of FIX-1 and FIX-2 (supply/n_leaching.py, N_CASCADE_SPEC.md, the settings
+inventory), the PMP terms in NLP_PORT_DESIGN.md and SUPPLY_MODEL_MAP.md, the export cap in K105 and the claims tables'
+stale rows (marked removed), the census counts in PROXY_AUDIT.md, SCENARIO_SETTINGS.md's iteration scheme, the
+"Switched" section of DEPARTURES_FROM_CAPRI.md, CAPTRD_MOD.md's FIX-7, FIX-8 and CAPSIM-DYN path. None open.

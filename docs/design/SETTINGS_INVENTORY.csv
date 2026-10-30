@@ -96,7 +96,7 @@ S105,RegionalSupplyModel.surplus_per_current_ha,capri_mod/supply/supply_module.p
 S106,grassland row arable share 0.2,capri_mod/supply/supply_module.py:3851,numeric_constant,0.2,param_csv,,,no,unsourced; only with land_no_slack off (also ARABLE*0.20 at :4977),
 S107,manure pool schedule slope,capri_mod/supply/supply_module.py:4042,numeric_constant,0.05 per 100 units,toml:supply,supply.manure_pool_slope,,no,unsourced; classification unsure (economic vs numerical),
 S108,RegionalSupplyModel.use_grass_intensity,capri_mod/supply/supply_module.py:4196,switch,True,toml:supply,supply.use_grass_intensity,GRAE/GRAI,yes: Sprint 7a,,removed 27 Oct 2026: always on (CAPRI has no off option)
-S109,RegionalSupplyModel.absent_activities_fixed,capri_mod/supply/supply_module.py:4201,switch,False,toml:supply,supply.absent_activities_fixed,no v_actLevl without p_technFact,yes: test 22 Oct 2026,DEPARTURE FROM CAPRI,
+S109,RegionalSupplyModel.absent_activities_fixed,capri_mod/supply/supply_module.py:4201,switch,False,toml:supply,supply.absent_activities_fixed,no v_actLevl without p_technFact,yes: test 22 Oct 2026,DEPARTURE FROM CAPRI (superseded: switched to CAPRI's setting 23 Oct 2026; DEPARTURES_FROM_CAPRI.md),
 S110,RegionalSupplyModel.absent_output_cleared,capri_mod/supply/supply_module.py:4204,switch,True,toml:supply,supply.absent_output_cleared,,yes: K64,threshold 1e-4 at :6105,removed 27 Oct 2026: always on (CAPRI has no off option)
 S111,RegionalSupplyModel.use_capri_activity_bounds,capri_mod/supply/supply_module.py:4206,switch,True,toml:supply,supply.use_capri_activity_bounds,set_supply_bounds.gms [v file],yes,,removed 27 Oct 2026: always on (CAPRI has no off option)
 S112,activity bounds 10x / 0.1x / +100,capri_mod/supply/supply_module.py:5269,numeric_constant,"10, 0.1, add 100 x k",param_csv,,"set_supply_bounds.gms (0.1 x level, 1e-8 verified l.28) [v partly]",partial,the 'v + 100 x k' term not verified in CAPRI,
@@ -187,7 +187,7 @@ S197,EnvironmentalModule._CAPRI_CROP,capri_mod/environmental/environmental_modul
 S198,EnvironmentalModule.OWN_RESIDUE_CROPS,capri_mod/environmental/environmental_module.py:551,code_list,GRAS APPL CITR TAGR WINE OLIV TABO,mapping_csv,,PERM_NGRP (supply/define_ngrp_sets.gms),yes,,
 S199,N in animal products share,capri_mod/environmental/environmental_module.py:897,numeric_constant,0.25,param_csv,,,no,unsourced PROXY ('~25%'); feeds reported n_animal_products,
 S200,mineral cap room 0.998,capri_mod/environmental/environmental_module.py:985,numeric_constant,0.998,keep_code,,,partial,numerical room,
-S201,EnvironmentalModule.ad_dairy_ch4,capri_mod/environmental/environmental_module.py:1147,switch,fix,toml:environment,environment.ad_dairy_ch4,ad_data_and_cali.gms l.588,yes: user decision 20 Oct 2026,DEPARTURE FROM CAPRI as coded,
+S201,EnvironmentalModule.ad_dairy_ch4,capri_mod/environmental/environmental_module.py:1147,switch,fix,toml:environment,environment.ad_dairy_ch4,ad_data_and_cali.gms l.588,yes: user decision 20 Oct 2026,CAPRI-ERROR-FIX ('capri' reproduces CAPRI as coded; CAPRI_DEPARTURES_REGISTER.md FIX-1),
 S202,compute_indicators PERM,capri_mod/environmental/environmental_module.py:1864,code_list,WINE OLIV TABO APPL OFRU CITR TAGR NURS,mapping_csv,,,no,unsourced; near-duplicate of PERMANENT_LAND_CROPS,
 S203,inline country map (enteric),capri_mod/environmental/environmental_module.py:269,table,"BE/LU->BL, IE->IR, GR->EL",mapping_csv,,,no,unsourced; duplicate country map,
 S204,FEED_ELAS,capri_mod/feed/ration.py:37,table,"FODDI -10, FPRO -5, ...",param_csv,,supply/pmp_elas.gms,yes: CAPRI (cited),keyed rows,
@@ -208,7 +208,7 @@ S218,inner fert solve tol / max_iter,capri_mod/fert/inner_fert_dist.py:350,toler
 S219,fert/npk ENDO_MAN_AV_SLOPE,capri_mod/fert/npk.py:27,numeric_constant,"N -0.0015, P 0, K 0",param_csv,,fert/endoManAvail.gms:61-65 [v],yes,duplicate of environmental_module.py:392,
 S220,EF5,capri_mod/supply/n_leaching.py:38,numeric_constant,0.0075,param_csv,,GHGEFS (envind/create_rawdat_gascoeff_gdx.gms l.713),yes: module docstring,IPCC 2006 EF5,
 S221,WINTERCOV_NO3LEA,capri_mod/supply/n_leaching.py:39,numeric_constant,0.35,param_csv,,envind/cover_crops.gms l.402,yes,duplicated as n_cascade.WINTERCOV_NO3 (:168),
-S222,AMMAPP_SIGN,capri_mod/supply/n_leaching.py:40,switch,consistent,toml:environment,environment.ammapp_sign,RUNSURFN_ sign of AmmApp (CAPRI code: +agg),yes,DEPARTURE FROM CAPRI code ('capri' reproduces it),
+S222,AMMAPP_SIGN,capri_mod/supply/n_leaching.py:40,switch,consistent,toml:environment,environment.ammapp_sign,RUNSURFN_ sign of AmmApp (CAPRI code: +agg),yes,CAPRI-ERROR-FIX ('capri' reproduces CAPRI's code; CAPRI_DEPARTURES_REGISTER.md FIX-2),
 S223,n_cascade technology lists,capri_mod/supply/n_cascade.py:31,code_list,"HOUS/STOR/RUNH/APPL techs, GASES, NMAT",mapping_csv,,envind ammonia technologies,partial,rows :29-36; APPL also n_leaching.py:41,
 S224,n_cascade.WINTERCOV_NO3,capri_mod/supply/n_cascade.py:168,numeric_constant,0.35,param_csv,,envind/cover_crops.gms l.400-402,yes,duplicate of n_leaching.WINTERCOV_NO3LEA,
 S225,ghg_tax.MJ_PER_MCAL,capri_mod/supply/ghg_tax.py:41,numeric_constant,4.1868,keep_code,,,yes: unit conversion,physical constant,
