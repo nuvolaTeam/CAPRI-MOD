@@ -190,14 +190,6 @@ COMMENT ON TABLE src_nutrient_cont_usda_p_nutrientcont IS 'CAPRI''s p_nutrientCo
 INSERT INTO value_units VALUES
   ('src_nutrient_cont_usda_p_nutrientcont', 'value', NULL, 'open', 'per item, named in the item (Water_g, Energ_cal, Protein_g, ...)');
 
--- file: capri_data/sources/capri_trade_regions_2017.csv
-CREATE TABLE src_capri_trade_regions_2017 (
-    "key" VARCHAR NOT NULL,
-    "value" VARCHAR NOT NULL,
-    PRIMARY KEY ("key")
-);
-COMMENT ON TABLE src_capri_trade_regions_2017 IS 'The trade partition derived from CAPRI''s 2017 market (the 44 trading regions, the 5 trade-only blocks, the 18 reporting aggregates, the test and its result), the former capri_trade_regions_2017.json flattened: key the JSON path (keys and list positions joined by /), value the leaf as written; converted to CSV by tools/build/convert_sources_to_csv.py; cited by tools/build/recalibrate_trade_2017.py (AGGREGATES), read by no code.';
-
 -- file: capri_data/sources/envind/fao_landuse_2000_P.csv
 CREATE TABLE src_fao_landuse_2000_p (
     fao_code VARCHAR NOT NULL,
@@ -315,71 +307,6 @@ COMMENT ON TABLE src_miti_data_jul15_p_ghgmiti IS 'CAPRI''s p_ghgMiti(region, ac
 INSERT INTO value_units VALUES
   ('src_miti_data_jul15_p_ghgmiti', 'value', NULL, 'open', 'per info (shares, costs, QEmitt)');
 
--- file: capri_data/sources/jrc121368/published_results.csv
-CREATE TABLE src_published_results (
-    "key" VARCHAR NOT NULL,
-    "value" VARCHAR NOT NULL,
-    PRIMARY KEY ("key")
-);
-COMMENT ON TABLE src_published_results IS 'The published results of the JRC''s CAPRI-based Farm-to-Fork assessment (Barreiro-Hurle et al. 2021, JRC121368, EUR 30317 EN, doi:10.2760/98160) as recorded in the project, the former published_results.json flattened: key the JSON path (keys and list positions joined by /), value the leaf as written; converted to CSV by tools/build/convert_sources_to_csv.py; read by no code (cited in docs/KNOWN_ISSUES_REGISTRY_LOG.md).';
-
--- file: capri_data/sources/jrc121368/scenario_specification.csv
-CREATE TABLE src_scenario_specification (
-    "key" VARCHAR NOT NULL,
-    "value" VARCHAR NOT NULL,
-    PRIMARY KEY ("key")
-);
-COMMENT ON TABLE src_scenario_specification IS 'The scenario specification (CAPRI''s implementation of the four targets) of the JRC''s CAPRI-based Farm-to-Fork assessment (Barreiro-Hurle et al. 2021, JRC121368, EUR 30317 EN, doi:10.2760/98160) as recorded in the project, the former scenario_specification.json flattened: key the JSON path (keys and list positions joined by /), value the leaf as written; converted to CSV by tools/build/convert_sources_to_csv.py; read by no code (cited in docs/KNOWN_ISSUES_REGISTRY_LOG.md).';
-
--- file: capri_data/sources/nuts/nuts2010_2013.csv
-CREATE TABLE src_nuts2010_2013 (
-    number BIGINT,
-    code_2010 VARCHAR,
-    code_2013 VARCHAR,
-    country VARCHAR,
-    level1 VARCHAR,
-    level2 VARCHAR,
-    level3 VARCHAR,
-    change VARCHAR,
-    nuts_level BIGINT,
-    country_order BIGINT,
-    order_2010 BIGINT,
-    order_2013 BIGINT
-);
-COMMENT ON TABLE src_nuts2010_2013 IS 'Correspondence NUTS 2010 to NUTS 2013 (codes, labels by level, change, level and sort orders), from Eurostat''s workbook NUTS_2010_-_NUTS_2013.xls (sheet ''NUTS2010-NUTS2013''), every row with a code (and the two note rows under the table) and every named column as written; converted to CSV by tools/build/convert_sources_to_csv.py; read by no code (reference for the NUTS correspondences).';
-INSERT INTO value_units VALUES
-  ('src_nuts2010_2013', 'number', NULL, 'open', 'an order number (no unit)'),
-  ('src_nuts2010_2013', 'nuts_level', NULL, 'open', 'an order number (no unit)'),
-  ('src_nuts2010_2013', 'country_order', NULL, 'open', 'an order number (no unit)'),
-  ('src_nuts2010_2013', 'order_2010', NULL, 'open', 'an order number (no unit)'),
-  ('src_nuts2010_2013', 'order_2013', NULL, 'open', 'an order number (no unit)');
-
--- file: capri_data/sources/nuts/nuts2010_2013_changes.csv
-CREATE TABLE src_nuts2010_2013_changes (
-    "level" BIGINT NOT NULL,
-    code_2010 VARCHAR,
-    code_2013 VARCHAR,
-    label VARCHAR NOT NULL,
-    change VARCHAR NOT NULL,
-    explanation VARCHAR
-);
-COMMENT ON TABLE src_nuts2010_2013_changes IS 'The changes NUTS 2010 to NUTS 2013 by level (codes, label, change, explanation new = old), from Eurostat''s workbook NUTS_2010_-_NUTS_2013.xls (sheets ''Correspondence NUTS-1'', -2, -3), every row with a code and every named column as written (level: the sheet''s NUTS level); converted to CSV by tools/build/convert_sources_to_csv.py; read by no code (reference for the NUTS correspondences).';
-INSERT INTO value_units VALUES
-  ('src_nuts2010_2013_changes', 'level', NULL, 'open', 'nuts2010_2013_changes.level: unit to be established');
-
--- file: capri_data/sources/nuts/nuts2013_2016_changes.csv
-CREATE TABLE src_nuts2013_2016_changes (
-    "level" BIGINT NOT NULL,
-    code_2013 VARCHAR,
-    code_2016 VARCHAR,
-    label VARCHAR NOT NULL,
-    change VARCHAR NOT NULL,
-    explanation VARCHAR
-);
-COMMENT ON TABLE src_nuts2013_2016_changes IS 'The changes NUTS 2013 to NUTS 2016 by level (codes, label, change, explanation new = old), from Eurostat''s workbook NUTS2013-NUTS2016__1_.xlsx (sheets ''Correspondence NUTS-1'', -2, -3), every row with a code and every named column as written (level: the sheet''s NUTS level); converted to CSV by tools/build/convert_sources_to_csv.py; read by no code (reference for the NUTS correspondences).';
-INSERT INTO value_units VALUES
-  ('src_nuts2013_2016_changes', 'level', NULL, 'open', 'nuts2013_2016_changes.level: unit to be established');
-
 -- file: capri_data/sources/nuts/nuts2016_2021_changes.csv
 CREATE TABLE src_nuts2016_2021_changes (
     "level" BIGINT NOT NULL,
@@ -414,72 +341,6 @@ INSERT INTO value_units VALUES
   ('src_nuts2021', 'nuts_level', NULL, 'open', 'an order number (no unit)'),
   ('src_nuts2021', 'country_order', NULL, 'open', 'an order number (no unit)'),
   ('src_nuts2021', 'region_order', NULL, 'open', 'an order number (no unit)');
-
--- file: capri_data/sources/nuts/nuts2021_2024_changes.csv
-CREATE TABLE src_nuts2021_2024_changes (
-    "level" BIGINT NOT NULL,
-    country VARCHAR NOT NULL,
-    code_2021 VARCHAR,
-    code_2024 VARCHAR,
-    label VARCHAR NOT NULL,
-    change VARCHAR,
-    explanation VARCHAR
-);
-COMMENT ON TABLE src_nuts2021_2024_changes IS 'The changes NUTS 2021 to NUTS 2024 by level (country, codes, label, change, explanation), from Eurostat''s workbook NUTS2021-NUTS2024.xlsx (sheets ''Changes NUTS-1'' (no rows), -2, -3), every row with a code and every named column as written (level: the sheet''s NUTS level); converted to CSV by tools/build/convert_sources_to_csv.py; read by no code (reference for the NUTS correspondences).';
-INSERT INTO value_units VALUES
-  ('src_nuts2021_2024_changes', 'level', NULL, 'open', 'nuts2021_2024_changes.level: unit to be established');
-
--- file: capri_data/sources/nuts/nuts2024_2027.csv
-CREATE TABLE src_nuts2024_2027 (
-    number BIGINT NOT NULL,
-    country VARCHAR,
-    code_2024 VARCHAR,
-    code_2027 VARCHAR,
-    level1 VARCHAR,
-    level2 VARCHAR,
-    level3 VARCHAR,
-    change VARCHAR,
-    nuts_level BIGINT NOT NULL,
-    country_order BIGINT NOT NULL,
-    order_2024 BIGINT,
-    order_2027 BIGINT
-);
-COMMENT ON TABLE src_nuts2024_2027 IS 'Correspondence NUTS 2024 to NUTS 2027 (country, codes, labels by level, change, level and orders), from Eurostat''s workbook NUTS2024-NUTS2027.xlsx (sheet ''NUTS2024- NUTS2027''), every row with a code and every named column as written; converted to CSV by tools/build/convert_sources_to_csv.py; read by no code (reference for the NUTS correspondences).';
-INSERT INTO value_units VALUES
-  ('src_nuts2024_2027', 'number', NULL, 'open', 'an order number (no unit)'),
-  ('src_nuts2024_2027', 'nuts_level', NULL, 'open', 'an order number (no unit)'),
-  ('src_nuts2024_2027', 'country_order', NULL, 'open', 'an order number (no unit)'),
-  ('src_nuts2024_2027', 'order_2024', NULL, 'open', 'an order number (no unit)'),
-  ('src_nuts2024_2027', 'order_2027', NULL, 'open', 'an order number (no unit)');
-
--- file: capri_data/sources/nuts/nuts2024_2027_changes.csv
-CREATE TABLE src_nuts2024_2027_changes (
-    "level" BIGINT NOT NULL,
-    country VARCHAR,
-    code_2024 VARCHAR,
-    code_2027 VARCHAR,
-    change VARCHAR,
-    explanation VARCHAR
-);
-COMMENT ON TABLE src_nuts2024_2027_changes IS 'The changes NUTS 2024 to NUTS 2027 by level (country, codes, change, explanation), from Eurostat''s workbook NUTS2024-NUTS2027.xlsx (sheets ''Changes NUTS-1'', -2, -3), every row with a code and every named column as written (level: the sheet''s NUTS level); converted to CSV by tools/build/convert_sources_to_csv.py; read by no code (reference for the NUTS correspondences).';
-INSERT INTO value_units VALUES
-  ('src_nuts2024_2027_changes', 'level', NULL, 'open', 'level: unit to be established');
-
--- file: capri_data/sources/nuts/nuts2027.csv
-CREATE TABLE src_nuts2027 (
-    country VARCHAR NOT NULL,
-    code VARCHAR NOT NULL,
-    label VARCHAR NOT NULL,
-    "level" BIGINT NOT NULL,
-    country_order BIGINT NOT NULL,
-    number BIGINT NOT NULL,
-    PRIMARY KEY (code)
-);
-COMMENT ON TABLE src_nuts2027 IS 'The NUTS 2027 classification (country, code, label, level, country order, row number), from Eurostat''s workbook NUTS2024-NUTS2027.xlsx (sheet ''NUTS2027''), every row with a code and every named column as written; converted to CSV by tools/build/convert_sources_to_csv.py; read by no code (reference for the NUTS correspondences).';
-INSERT INTO value_units VALUES
-  ('src_nuts2027', 'level', NULL, 'open', 'an order number (no unit)'),
-  ('src_nuts2027', 'country_order', NULL, 'open', 'an order number (no unit)'),
-  ('src_nuts2027', 'number', NULL, 'open', 'an order number (no unit)');
 
 -- file: capri_data/sources/policy/minfert_redu_by_crop_limCres.csv
 CREATE TABLE src_minfert_redu_by_crop_limcres (

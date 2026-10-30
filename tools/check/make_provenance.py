@@ -75,10 +75,8 @@ UNTRACED = {
     "capri_data/sources/policy/minfert_redu_by_crop_p_checkSmallMine.csv": ("convert_sources_to_csv", "CAPRI"),
     "capri_data/sources/policy/minfert_redu_by_crop_limCres.csv": ("convert_sources_to_csv", "CAPRI"),
     "capri_data/sources/eu_tariff_provenance.csv": ("convert_sources_to_csv", "CAPRI"),
-    "capri_data/sources/capri_trade_regions_2017.csv": ("convert_sources_to_csv", "CAPRI"),
     "capri_data/sources/capri_star/nutrient_cont_usda_p_nutrientCont.csv": ("convert_sources_to_csv", "USDA via CAPRI"),
     "capri_data/sources/nuts/": ("convert_sources_to_csv", "Eurostat"),
-    "capri_data/sources/jrc121368/": ("convert_sources_to_csv", "JRC121368"),
 }
 #: files without a builder whose origin was established by a check (02_provenance_notes.sql gives the evidence)
 NO_BUILDER_ORIGIN = {

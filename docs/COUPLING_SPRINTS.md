@@ -994,8 +994,8 @@ With CAPRI's land rules as well, the earlier (unconverged) run gave a gap of 5.1
 the pools did not clear there (the Latvian pool's imbalance stayed at 1.0 of its supply on the full EU) — fixed in
 Sprint 8: the pool QP failed silently; with the land rules and manure trade the gap is 5.03.
 
-**Decision: no manure trade for JRC121368 (resolved from the report).** The report (now in
-`capri_data/sources/jrc121368/jrc121368_report_text.txt`) states it as a limitation of the CAPRI version used:
+**Decision: no manure trade for JRC121368 (resolved from the report).** The report (its text was kept in
+`capri_data/sources/jrc121368/jrc121368_report_text.txt` until 30 October 2026, removed as read by no code) states it as a limitation of the CAPRI version used:
 "the model assumes that all manure generated in a region has to be used within that region. There is evidence that
 livestock-intensive regions process and/or export their manure to neighbouring regions with lower nitrogen loads.
 Therefore, the GNB for these regions is overestimated and impacts on animal numbers would be lower for them were we

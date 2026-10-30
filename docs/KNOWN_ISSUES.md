@@ -1465,7 +1465,15 @@ capri_data/2017 and shared/, 46 files are in neither. By kind:
   FAO_agg JSON / COCO extracts of the former market base, CAPRI data copies of parts not ported or handled otherwise:
   Norway's MITERRA mirror, anaerobic digestion base data, cost-saving runs, soil carbon, land-use transition, water,
   the IFS maps); kept as reference: the JRC121368 report text and published results, the NUTS correspondences; the
-  others are named by a builder or extractor (their own outputs, or read in an untraced invocation)
+  others are named by a builder or extractor (their own outputs, or read in an untraced invocation).
+  **Removed 30 October 2026** at the project lead's request, read by no code: the JRC121368 report text, published
+  results and scenario specification (jrc121368/), capri_trade_regions_2017.json, the NUTS workbooks
+  NUTS_2010_-_NUTS_2013.xls, NUTS2013-NUTS2016__1_.xlsx, NUTS2021-NUTS2024.xlsx and NUTS2024-NUTS2027.xlsx (the NUTS
+  tables remain in the project lead's uploads; the CSVs taken from them that code reads, nuts2013_2016.csv,
+  nuts2021_2024.csv and nuts2024.csv, stay, written by tools/build/convert_sources_to_csv.py from git history), and the stand-alone
+  extract_variable_costs.py with its notes (capri_star/capreg_extracts/; variable_costs.csv is written by
+  build_crop_economics_2017.py). NUTS2021.xlsx is converted (nuts2016_2021.csv, read by build_nuts2024_reporting.py;
+  nuts2021.csv, nuts2016_2021_changes.csv).
 
 ### K103: Data files without a known origin or read by no code (data declarations, found 29 October 2026)
 

@@ -36,24 +36,21 @@ unchanged); the CSV declarations (capri_data/schema/34_sources_csv.sql) cite the
     policy/minfert_redu_by_crop.gms                    -> minfert_redu_by_crop_{p_checkSmallMine, limCres}.csv
   Excel
     capri_star/nutrient_cont_usda_export.xlsx          -> capri_star/nutrient_cont_usda_p_nutrientCont.csv
-    nuts/NUTS_2010_-_NUTS_2013.xls                     -> nuts/nuts2010_2013.csv, nuts2010_2013_changes.csv
-    nuts/NUTS2013-NUTS2016__1_.xlsx                    -> nuts/nuts2013_2016.csv, nuts2013_2016_changes.csv
-    nuts/NUTS2021.xlsx                                 -> nuts/nuts2021.csv, nuts2016_2021.csv,
-                                                          nuts2016_2021_changes.csv
-    nuts/NUTS2021-NUTS2024.xlsx                        -> nuts/nuts2024.csv, nuts2021_2024.csv,
-                                                          nuts2021_2024_changes.csv
-    nuts/NUTS2024-NUTS2027.xlsx                        -> nuts/nuts2027.csv, nuts2024_2027.csv,
-                                                          nuts2024_2027_changes.csv
-    Each workbook's classification and correspondence sheets and its change sheets (Changes / Correspondence NUTS-1,
-    -2, -3 in one file with a level column). Not converted: the statistical regions, typologies, transliteration,
-    version and change-overview sheets. nuts2013_2016, nuts2016_2021, nuts2021_2024 and nuts2024 existed before
-    without a writer; they are written as they were (their columns, CRLF line ends; nuts2016_2021 and nuts2021_2024
-    with the labels stripped of surrounding white space), the other NUTS files keep every named column and the text as
-    the workbook writes it.
+    nuts/NUTS2021.xlsx                                 -> nuts/nuts2021.csv (sheet 'NUTS & SR 2021'),
+                                                          nuts2016_2021.csv ('Changes detailed NUTS 2016-2021'),
+                                                          nuts2016_2021_changes.csv ('Changes NUTS-1', -2, -3)
+    nuts/NUTS2013-NUTS2016__1_.xlsx                    -> nuts/nuts2013_2016.csv
+    nuts/NUTS2021-NUTS2024.xlsx                        -> nuts/nuts2024.csv, nuts2021_2024.csv
+    nuts2013_2016, nuts2016_2021, nuts2021_2024 and nuts2024 existed before without a writer and are read
+    (build_nuts2024_reporting.py, a test); they are written as they were (their columns, CRLF line ends; nuts2016_2021
+    and nuts2021_2024 with the labels stripped of surrounding white space). nuts2021 and nuts2016_2021_changes keep
+    every named column and the text as the workbook writes it. Not converted, removed at the project lead's request
+    (30 October 2026: read by no code; they remain in git history and in the project lead's uploads): the other
+    sheets of these workbooks and the workbooks NUTS_2010_-_NUTS_2013.xls and NUTS2024-NUTS2027.xlsx.
   JSON
     eu_tariff_provenance.json                          -> eu_tariff_provenance.csv (one row per commodity)
-    capri_trade_regions_2017.json                      -> capri_trade_regions_2017.csv (key path, value)
-    jrc121368/published_results.json, scenario_specification.json -> the same names .csv (key path, value)
+  (Removed without conversion, read by no code, at the project lead's request: capri_trade_regions_2017.json and
+  jrc121368/{published_results.json, scenario_specification.json, jrc121368_report_text.txt}.)
   (world_price_provenance.json was written by tools/build/build_world_prices.py, which now writes
   world_price_provenance.csv itself.)
 
@@ -365,19 +362,10 @@ def convert_excel() -> None:
     rows = _sheets("capri_star/nutrient_cont_usda_export.xlsx")["p_nutrientCont"]
     write("capri_star/nutrient_cont_usda_p_nutrientCont.csv", ["product", "item", "value"],
           [[_cell(v) for v in r] for r in rows])
-    # NUTS 2010 -> 2013
-    sh = _sheets("nuts/NUTS_2010_-_NUTS_2013.xls")
-    write("nuts/nuts2010_2013.csv",
-          ["number", "code_2010", "code_2013", "country", "level1", "level2", "level3", "change", "nuts_level",
-           "country_order", "order_2010", "order_2013"], _named(sh["NUTS2010-NUTS2013"], 1, range(12), (1, 2)))
-    write("nuts/nuts2010_2013_changes.csv", ["level", "code_2010", "code_2013", "label", "change", "explanation"],
-          _changes(sh, [(k, f"Correspondence NUTS-{k}") for k in (1, 2, 3)], (0, 1), 5))
     # NUTS 2013 -> 2016 (nuts2013_2016.csv as committed before)
     sh = _sheets("nuts/NUTS2013-NUTS2016__1_.xlsx")
     write("nuts/nuts2013_2016.csv", ["code_2013", "code_2016", "country", "level1", "level2", "level3", "change"],
           _named(sh["NUTS2013-NUTS2016"], 1, range(1, 8), (1, 2)), crlf=True)
-    write("nuts/nuts2013_2016_changes.csv", ["level", "code_2013", "code_2016", "label", "change", "explanation"],
-          _changes(sh, [(k, f"Correspondence NUTS-{k}") for k in (1, 2, 3)], (0, 1), 5))
     # NUTS 2021 (classification) and 2016 -> 2021 (nuts2016_2021.csv as committed before)
     sh = _sheets("nuts/NUTS2021.xlsx")
     # columns J-N, without a header: the code and the labels in Latin characters (Cyrillic and Greek labels)
@@ -396,18 +384,6 @@ def convert_excel() -> None:
           crlf=True)
     write("nuts/nuts2021_2024.csv", ["country", "code_2021", "code_2024", "level1", "level2", "level3", "change"],
           _named(sh["NUTS2021- NUTS2024"], 0, range(1, 8), (2, 3), strip=True), crlf=True)
-    write("nuts/nuts2021_2024_changes.csv",
-          ["level", "country", "code_2021", "code_2024", "label", "change", "explanation"],
-          _changes(sh, [(k, f"Changes NUTS-{k}") for k in (1, 2, 3)], (1, 2), 6))
-    # NUTS 2027 (classification) and 2024 -> 2027
-    sh = _sheets("nuts/NUTS2024-NUTS2027.xlsx")
-    write("nuts/nuts2027.csv", ["country", "code", "label", "level", "country_order", "number"],
-          _named(sh["NUTS2027"], 0, range(6), (1,)))
-    write("nuts/nuts2024_2027.csv",
-          ["number", "country", "code_2024", "code_2027", "level1", "level2", "level3", "change", "nuts_level",
-           "country_order", "order_2024", "order_2027"], _named(sh["NUTS2024- NUTS2027"], 0, range(12), (2, 3)))
-    write("nuts/nuts2024_2027_changes.csv", ["level", "country", "code_2024", "code_2027", "change", "explanation"],
-          _changes(sh, [(k, f"Changes NUTS-{k}") for k in (1, 2, 3)], (1, 2), 5))
 
 
 # --- JSON ----------------------------------------------------------------------------------------------------------
@@ -421,18 +397,6 @@ def _text(v) -> str:
     return "" if v is None else "true" if v is True else "false" if v is False else str(v)
 
 
-def _flatten(obj, prefix=""):
-    """(key path, value) of every leaf of a JSON value; dict keys and list positions joined by '/'."""
-    if isinstance(obj, dict):
-        for k, v in obj.items():
-            yield from _flatten(v, f"{prefix}/{k}" if prefix else str(k))
-    elif isinstance(obj, list):
-        for i, v in enumerate(obj):
-            yield from _flatten(v, f"{prefix}/{i}" if prefix else str(i))
-    else:
-        yield prefix, _text(obj)
-
-
 def convert_json() -> None:
     d = _json("eu_tariff_provenance.json")
     rows = d["rows"]
@@ -441,9 +405,6 @@ def convert_json() -> None:
         fields += [k for k in v if k not in fields]
     write("eu_tariff_provenance.csv", ["commodity"] + fields,
           [[c] + [_text(v.get(k)) for k in fields] for c, v in rows.items()])
-    for rel in ("capri_trade_regions_2017.json", "jrc121368/published_results.json",
-                "jrc121368/scenario_specification.json"):
-        write(rel[:-5] + ".csv", ["key", "value"], list(_flatten(_json(rel))))
 
 
 def main() -> None:

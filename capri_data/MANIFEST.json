@@ -201,7 +201,7 @@
      "SOYC"
     ]
    },
-   "note": "Recalibrated from CAPRI capmod res_0_1717 (2017). The previous 841-row matrix carried a zero diagonal - no intra-EU trade at all - so every commodity showed a 100% extra-EU import share. 547 rows is fewer because CAPRI reports only realised flows, not an exhaustive grid of zeros. | REBUILT 2026-10 on CAPRI's trade partition (sources/capri_trade_regions_2017.json): no EU or rest-of-world double counting, genuine regions no longer dropped, six oilseed-product columns; EU imports match CAPRI's NONEU rows exactly. Not read by the model since the bilateral market (bilateral_flows_<year>.csv) replaced the old Armington aggregator (removed 21 October 2026, an orphan: built from this file, never used); kept as an input of tools/check/validate_world_prices.py and tools/build/recalibrate_trade_2017.py."
+   "note": "Recalibrated from CAPRI capmod res_0_1717 (2017). The previous 841-row matrix carried a zero diagonal - no intra-EU trade at all - so every commodity showed a 100% extra-EU import share. 547 rows is fewer because CAPRI reports only realised flows, not an exhaustive grid of zeros. | REBUILT 2026-10 on CAPRI's trade partition (the 44 trading regions reproduce ImportQ(World, World) for all 71 traded products, 2017): no EU or rest-of-world double counting, genuine regions no longer dropped, six oilseed-product columns; EU imports match CAPRI's NONEU rows exactly. Not read by the model since the bilateral market (bilateral_flows_<year>.csv) replaced the old Armington aggregator (removed 21 October 2026, an orphan: built from this file, never used); kept as an input of tools/check/validate_world_prices.py and tools/build/recalibrate_trade_2017.py."
   },
   "land_availability.csv": {
    "source": "CAPRI/COCO",

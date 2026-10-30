@@ -1910,7 +1910,7 @@ CREATE TABLE src_nuts2013_2016 (
     level3 VARCHAR,
     change VARCHAR
 );
-COMMENT ON TABLE src_nuts2013_2016 IS 'Correspondence NUTS 2013 to NUTS 2016 (codes, names by level, change), from Eurostat''s workbook NUTS2013-NUTS2016__1_.xlsx (sheet ''NUTS2013-NUTS2016'', the rows with a code, columns B-H, text as written, CRLF line ends as committed before), written by tools/build/convert_sources_to_csv.py; read by tools/build/build_nuts2024_reporting.py.';
+COMMENT ON TABLE src_nuts2013_2016 IS 'Correspondence NUTS 2013 to NUTS 2016 (codes, names by level, change), from Eurostat''s workbook NUTS2013-NUTS2016__1_.xlsx (removed 30 October 2026, read from git history; sheet ''NUTS2013-NUTS2016'', the rows with a code, columns B-H, text as written, CRLF line ends as committed before), written by tools/build/convert_sources_to_csv.py; read by tools/build/build_nuts2024_reporting.py.';
 
 -- file: capri_data/sources/nuts/nuts2016_2021.csv
 CREATE TABLE src_nuts2016_2021 (
@@ -1937,7 +1937,7 @@ CREATE TABLE src_nuts2021_2024 (
     level3 VARCHAR,
     change VARCHAR
 );
-COMMENT ON TABLE src_nuts2021_2024 IS 'Correspondence NUTS 2021 to NUTS 2024 (country, codes, names by level, change), from Eurostat''s workbook NUTS2021-NUTS2024.xlsx (sheet ''NUTS2021- NUTS2024'', the rows with a code, columns B-H, the text stripped of surrounding white space as committed before), written by tools/build/convert_sources_to_csv.py; read by tools/build/build_nuts2024_reporting.py.';
+COMMENT ON TABLE src_nuts2021_2024 IS 'Correspondence NUTS 2021 to NUTS 2024 (country, codes, names by level, change), from Eurostat''s workbook NUTS2021-NUTS2024.xlsx (removed 30 October 2026, read from git history; sheet ''NUTS2021- NUTS2024'', the rows with a code, columns B-H, the text stripped of surrounding white space as committed before), written by tools/build/convert_sources_to_csv.py; read by tools/build/build_nuts2024_reporting.py.';
 
 -- file: capri_data/sources/nuts/nuts2024.csv
 CREATE TABLE src_nuts2024 (
@@ -1947,7 +1947,7 @@ CREATE TABLE src_nuts2024 (
     "level" BIGINT NOT NULL,
     PRIMARY KEY (country, code, label)
 );
-COMMENT ON TABLE src_nuts2024 IS 'NUTS 2024 codes with country, label and level, from Eurostat''s workbook NUTS2021-NUTS2024.xlsx (sheet ''NUTS2024'', the rows with a code, columns A-D, as committed before), written by tools/build/convert_sources_to_csv.py; read by capri_mod/tests/test_nuts_reporting.py.';
+COMMENT ON TABLE src_nuts2024 IS 'NUTS 2024 codes with country, label and level, from Eurostat''s workbook NUTS2021-NUTS2024.xlsx (removed 30 October 2026, read from git history; sheet ''NUTS2024'', the rows with a code, columns A-D, as committed before), written by tools/build/convert_sources_to_csv.py; read by capri_mod/tests/test_nuts_reporting.py.';
 INSERT INTO value_units VALUES
   ('src_nuts2024', 'level', NULL, 'open', 'nuts2024.level: unit to be established');
 
