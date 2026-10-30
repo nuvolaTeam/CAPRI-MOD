@@ -56,3 +56,20 @@ def test_module_tables_are_read_from_the_run_inputs(tmp_path):
         assert sm.RegionalSupplyModel.FERT_COST_SHARE != {"SWHE": 0.25}
     finally:
         I.use(saved)
+
+
+def test_a_missing_supply_input_stops_the_run(tmp_path):
+    """A required input that is missing raises, naming the file (stage 3b; before, several tables fell back to none,
+    some with a warning, some silently)."""
+    import pytest
+    from capri_mod.supply import inputs as I
+    from capri_mod.supply import supply_module as sm
+    saved = I.current()
+    try:
+        I.use(I.SupplyInputs(tmp_path, "2017"))
+        with pytest.raises(FileNotFoundError, match="fert_options_jul15.csv"):
+            sm.fert_option_table()
+        with pytest.raises(FileNotFoundError, match="fert_side_effects.csv"):
+            sm.fert_side_value("DK000000", "NITR_INH", "N2O")
+    finally:
+        I.use(saved)

@@ -51,7 +51,7 @@ def load(data_dir=None):
     key = str(inp.path("", "abatement/ammonia"))
     if key not in _REG:
         out = {}
-        for r in inp.rows("n_leaching_region.csv", "abatement/ammonia", required=False) or []:
+        for r in inp.rows("n_leaching_region.csv", "abatement/ammonia"):
             out[r["region"]] = {k: (float(v) if v not in ("", None) else None) for k, v in r.items() if k != "region"}
         _REG[key] = out
     return _REG[key]

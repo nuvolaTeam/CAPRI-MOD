@@ -89,6 +89,12 @@ class SupplyInputs:
         from capri_mod.data.loaders import resolve_data_file
         return resolve_data_file(self.root, name, base_year=self.base_year)
 
+    def need(self, path: Path) -> Path:
+        """path, which must exist (a missing input stops the run, naming the file)."""
+        if path is None or not Path(path).exists():
+            raise FileNotFoundError(f"supply input {path} is missing")
+        return Path(path)
+
     def read(self, path: Path, **read_kw) -> pd.DataFrame:
         """A table at a path this object located (path, resolve)."""
         return read_input(path, **read_kw)

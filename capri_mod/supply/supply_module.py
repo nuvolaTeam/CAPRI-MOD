@@ -92,13 +92,8 @@ def fert_option_table() -> dict:
     """{model region: [row]} of CAPRI's fertiliser options (fert_options_jul15.csv)."""
     def load(inp):
         out = {}
-        tab = inp.csv("fert_options_jul15.csv", "abatement", required=False)
-        if tab is not None:
-            for r in tab.itertuples(index=False):
-                out.setdefault(r.region, []).append(r)
-        else:
-            import warnings as _w
-            _w.warn("fert_options_jul15.csv missing: no fertiliser-efficiency options")
+        for r in inp.csv("fert_options_jul15.csv", "abatement").itertuples(index=False):
+            out.setdefault(r.region, []).append(r)
         return out
     return _inputs.current().cached("fert_options", load)
 
@@ -143,8 +138,7 @@ def young_animal_table() -> dict:
     name = "young_animals_by_sex_2017.json" if by_sex else "young_animals_2017.json"
 
     def load(inp):
-        d = inp.json(name, "supply", required=False)
-        return d["regions"] if d is not None else {}
+        return inp.json(name, "supply")["regions"]
     return _inputs.current().cached(name, load)
 
 
@@ -2101,17 +2095,12 @@ class SupplyModule:
         from capri_mod.supply.capri_pmp import build_elasticity_table
         self.elasticity_provenance = pd.DataFrame()
         self.elasticity_summary: dict = {}
-        try:
-            eps_tab, prov, summary = build_elasticity_table(
-                self.inputs.root, self.regions, ALL_ACTIVITIES, self.supply_elasticities,
-                base_areas=data.get("areas"), base_year=self.inputs.base_year, inputs=self.inputs)
-            self.regional_elasticities = eps_tab
-            self.elasticity_provenance = prov
-            self.elasticity_summary = summary
-        except Exception as exc:                       # pragma: no cover
-            warnings.warn(f"CAPRI elasticity table unavailable ({exc}); "
-                          "falling back to EU-wide defaults")
-            self.regional_elasticities = pd.DataFrame()
+        eps_tab, prov, summary = build_elasticity_table(
+            self.inputs.root, self.regions, ALL_ACTIVITIES, self.supply_elasticities,
+            base_areas=data.get("areas"), base_year=self.inputs.base_year, inputs=self.inputs)
+        self.regional_elasticities = eps_tab
+        self.elasticity_provenance = prov
+        self.elasticity_summary = summary
 
         self._models: Dict[str, RegionalSupplyModel] = {}
 
@@ -2357,8 +2346,7 @@ class SupplyModule:
         l. 1016-1035, fert_slope_with_saving): the NLP form's fertilisation block holds the convex saving
         (N(m) = N0 / (1 + nmE m)), which the term offsets so that the base and the maximum share stay stationary."""
         def load(inp):
-            tab = inp.csv("fert_options_jul15.csv", "abatement", required=False)
-            tab = tab if tab is not None else pd.DataFrame()
+            tab = inp.csv("fert_options_jul15.csv", "abatement")
             to8 = IdentityMap()        # the model's regions are CAPRI's units: each its own CAPRI region
             return ({(r.region, str(r.option).upper()): r for r in tab.itertuples(index=False)}, to8)
         tab, to8 = _inputs.current().cached("fert_options_by_option", load)
@@ -3349,8 +3337,8 @@ def fert_side_value(region: str, tech: str, item: str):
     """CAPRI's literature-review side effect (p_litRevFertTechs) for a model region, or None
     (capri_data/2017/abatement/fert_side_effects.csv, tools/build/build_fert_side_effects.py)."""
     def load(inp):
-        tab = inp.csv("fert_side_effects.csv", "abatement", required=False)
-        return {(r.region, r.technology, r.item): float(r.value) for r in tab.itertuples()} if tab is not None else {}
+        tab = inp.csv("fert_side_effects.csv", "abatement")
+        return {(r.region, r.technology, r.item): float(r.value) for r in tab.itertuples()}
     return _inputs.current().cached("fert_side_effects", load).get((region, tech, item))
 
 

@@ -44,23 +44,22 @@ def load(path: Path) -> dict:
         return _CACHE[key]
     out = {}
     from capri_mod.supply.inputs import current
-    rows = current().rows_at(path, required=False)
-    if rows is not None:
-        for r in rows:
-            subs = out.setdefault(r["region"], {}).setdefault(r["animal"], {})
-            s = subs.get(r["sub"])
-            if s is None:
-                s = subs[r["sub"]] = dict(key=r["sub"], w=float(r["weight"]), stock=float(r["stock_factor"]),
-                                          mrel=float(r["mann_rel"]), g=float(r["g"]), fG=float(r["fG"]),
-                                          fH=float(r["fH"]), fS=float(r["fS"]), fA=float(r["fA"]), techs=[])
-            if r.get("lg"):
-                # anaerobic digestion: L (1 - G) and the manure CH4 ratio QE_AD / QE_NOC (build_ad_option.py)
-                s["ad"] = (float(r["lg"]), float(r["r_ch4"]))
-            s["techs"].append(dict(tech=r["technology"], group=r["group"], k1=float(r["kappa1"]),
-                                   slope=float(r["slope"]) if r["slope"] not in ("", None) else None,
-                                   th=float(r["thresh"] or 0.0), ini=float(r["ini"]), max=float(r["max"]),
-                                   rH=float(r["rH"]), rS=float(r["rS"]), rA=float(r["rA"])))
-        out = {reg: {a: list(d.values()) for a, d in an.items()} for reg, an in out.items()}
+    rows = current().rows_at(path)
+    for r in rows:
+        subs = out.setdefault(r["region"], {}).setdefault(r["animal"], {})
+        s = subs.get(r["sub"])
+        if s is None:
+            s = subs[r["sub"]] = dict(key=r["sub"], w=float(r["weight"]), stock=float(r["stock_factor"]),
+                                      mrel=float(r["mann_rel"]), g=float(r["g"]), fG=float(r["fG"]),
+                                      fH=float(r["fH"]), fS=float(r["fS"]), fA=float(r["fA"]), techs=[])
+        if r.get("lg"):
+            # anaerobic digestion: L (1 - G) and the manure CH4 ratio QE_AD / QE_NOC (build_ad_option.py)
+            s["ad"] = (float(r["lg"]), float(r["r_ch4"]))
+        s["techs"].append(dict(tech=r["technology"], group=r["group"], k1=float(r["kappa1"]),
+                               slope=float(r["slope"]) if r["slope"] not in ("", None) else None,
+                               th=float(r["thresh"] or 0.0), ini=float(r["ini"]), max=float(r["max"]),
+                               rH=float(r["rH"]), rS=float(r["rS"]), rA=float(r["rA"])))
+    out = {reg: {a: list(d.values()) for a, d in an.items()} for reg, an in out.items()}
     _CACHE[key] = out
     return out
 

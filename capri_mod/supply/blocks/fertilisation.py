@@ -735,16 +735,10 @@ class FertilisationBlock:
         c = _inputs.current().cache.setdefault("fert_alloc", {})
         if not c:
             inp = _inputs.current()
-            try:
-                fs = inp.csv("fertiliser_substitution_2030.csv", "environment").set_index("region")
-                c["av"] = fs["manure_availability"].to_dict()
-            except Exception:
-                c["av"] = {}
-            try:
-                fp = inp.csv("mineral_n_price.csv", "supply").set_index("country")
-                c["pf"] = (fp["eur_per_t_n"] / 1000.0).to_dict()
-            except Exception:
-                c["pf"] = {}
+            fs = inp.csv("fertiliser_substitution_2030.csv", "environment").set_index("region")
+            c["av"] = fs["manure_availability"].to_dict()
+            fp = inp.csv("mineral_n_price.csv", "supply").set_index("country")
+            c["pf"] = (fp["eur_per_t_n"] / 1000.0).to_dict()
         a = c["av"].get(reg)
         from capri_mod.data.definitions import country_of
         p = c["pf"].get(country_of(reg)) if reg else None
