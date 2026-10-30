@@ -32,14 +32,12 @@ condition in closed form.
 from __future__ import annotations
 
 from math import sqrt
-from pathlib import Path
 from typing import Dict, Optional, Tuple
 
 import numpy as np
 import pandas as pd
 from capri_mod.params import param, param_table
 from capri_mod.data.definitions import capri_ms
-from capri_mod.tableio import read_input
 
 SOURCES = ("MINE", "EXCR", "CRES")
 PERM_NGRP = frozenset({"GRAS", "PERM"})
@@ -112,11 +110,11 @@ class InnerFertDist:
     """Priors and solver of CAPRI's inner fertiliser distribution model for the model's regions."""
 
     def __init__(self, data_dir: Optional[str] = None):
-        root = Path(data_dir) if data_dir else Path(__file__).resolve().parents[2] / "capri_data"
-        env = root / "2017" / "environment"
-        self._root = root
-        self.priors = read_input(env / "fert_dist_priors_2030.csv")
-        self.groups = read_input(env / "fert_dist_crop_groups_2030.csv")
+        from capri_mod.data.inputs import RunInputs, current
+        inp = RunInputs(data_dir, current().base_year) if data_dir else current()
+        self._inp = inp
+        self.priors = inp.csv("fert_dist_priors_2030.csv", "environment")
+        self.groups = inp.csv("fert_dist_crop_groups_2030.csv", "environment")
         self._pri = {r: d.set_index("ngrp") for r, d in self.priors.groupby("capri_region")}
         # priors calibrated at a run's own base where CAPRI's star 3.0 posterior has no allocation there
         # (calibrate()), by CAPRI region and configuration variant (the manure-trade setting)
@@ -288,9 +286,8 @@ class InnerFertDist:
 
     def _rules(self):
         if not hasattr(self, "_exm"):
-            pol = self._root / "2017" / "policy"
-            self._exm = read_input(pol / "mineral_redu_exemptions.csv")
-            self._lim = read_input(pol / "mineral_redu_limcres.csv")
+            self._exm = self._inp.csv("mineral_redu_exemptions.csv", "policy")
+            self._lim = self._inp.csv("mineral_redu_limcres.csv", "policy")
         return self._exm, self._lim
 
     def mineral_caps(self, region: str, base: dict, reduction: float, year: Optional[int] = None) -> Dict[str, float]:

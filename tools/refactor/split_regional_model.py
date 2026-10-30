@@ -29,7 +29,7 @@ ASSIGN = {
                   ["_young_animal_coefs", "young_animal_columns", "_yani_response", "_apply_young_animal_prices",
                    "_grass_intensity_column", "_dairy_intensity_column", "_split_pending", "_split_record",
                    "_cattle_columns", "cattle_split_hessian", "_cattle_calibrate_from_duals", "_genetics_columns",
-                   "_genetics_calibrate_from_duals", "_dairy_column_only", "_dairy_calibrate_from_duals",
+                   "_genetics_calibrate_from_duals", "_split_manure_factors", "_dairy_column_only", "_dairy_calibrate_from_duals",
                    "_grass_calibrate_from_duals", "_fodder_rows", "_animal_cost_per_head", "_cake_index",
                    "_protein_feed_cost_change"]),
     "fertilisation": ("FertilisationBlock",
@@ -110,6 +110,8 @@ def main() -> None:
                 f'given to\nthis module once supply_module is loaded (capri_mod.supply.blocks.inject); the annotations are '
                 f'not evaluated\n(they name supply_module\'s types).\n"""\nfrom __future__ import annotations\n\n\n'
                 f"class {cname}:\n" + "\n\n".join(body) + "\n")
+        # a block sits one folder below supply_module.py: the repository root is one parent further from __file__
+        text = text.replace("__file__).resolve().parents[2]", "__file__).resolve().parents[3]")
         (BLOCKS / f"{blk}.py").write_text(text)
     init = ('"""The regional supply model\'s blocks (refactor stage 3a): mixins of supply_module.RegionalSupplyModel.\n\n'
             "Their methods were moved unchanged from supply_module.py and use its module-level names (numpy as np, the "
