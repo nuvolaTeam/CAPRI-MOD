@@ -37,6 +37,8 @@ from typing import Dict, Iterable, List, Optional, Set, Tuple
 
 import pandas as pd
 
+from capri_mod.csvio import read_csv
+
 ROOT = Path(__file__).resolve().parents[3]
 SETS_DIR = ROOT / "capri_data" / "pipeline" / "captrd" / "sets"
 DAT_DIR = ROOT / "capri_data" / "pipeline" / "captrd" / "dat"
@@ -45,9 +47,9 @@ DAT_DIR = ROOT / "capri_data" / "pipeline" / "captrd" / "dat"
 def read_dat(path: Path = DAT_DIR) -> Dict[str, Dict]:
     """CAPRI's data include files CAPTRD reads (tools/build/build_captrd_dat.py): luunits {act: LU per head},
     extr_rates {(fuel, stock): t/t}, byproduct {(byproduct, stock): t/t}."""
-    lu = pd.read_csv(path / "p_luunits.csv", keep_default_na=False)
-    er = pd.read_csv(path / "p_extrrates.csv", keep_default_na=False)
-    bp = pd.read_csv(path / "p_byproduct.csv", keep_default_na=False)
+    lu = read_csv(path / "p_luunits.csv", keep_default_na=False)
+    er = read_csv(path / "p_extrrates.csv", keep_default_na=False)
+    bp = read_csv(path / "p_byproduct.csv", keep_default_na=False)
     return {"luunits": dict(zip(lu.act, lu.value)),
             "extr_rates": {(f, s_): v for f, s_, v in zip(er.fuel, er.stock, er.value)},
             "byproduct": {(b, s_): v for b, s_, v in zip(bp.byproduct, bp.stock, bp.value)}}
@@ -110,6 +112,14 @@ class CaptrdSets:
     p_t_actagg: Set[Tuple[str, str]] = field(default_factory=set)
     stock_to_fuel: Set[Tuple[str, str]] = field(default_factory=set)
     stock_to_by: Set[Tuple[str, str]] = field(default_factory=set)
+    # read by labour.py (baseline/labour_ageline.gms)
+    srnuts1: Set[str] = field(default_factory=set)
+    # read by policy.py (captrd_policy.gms)
+    grcu: Set[str] = field(default_factory=set)
+    rset: Set[str] = field(default_factory=set)
+    msall: Set[str] = field(default_factory=set)
+    nosugquotaaglinkversion: Set[str] = field(default_factory=set)
+    map_rrt: Set[Tuple[str, str, str]] = field(default_factory=set)
     mrkbale: Set[str] = field(default_factory=set)
     mrkbalee: Set[str] = field(default_factory=set)
     dompos: Set[str] = field(default_factory=set)
@@ -138,20 +148,23 @@ class CaptrdSets:
 
 def read_sets(path: Path = SETS_DIR) -> CaptrdSets:
     def one(n):
-        return list(pd.read_csv(path / f"{n}.csv", keep_default_na=False).d0)
+        return list(read_csv(path / f"{n}.csv", keep_default_na=False).d0)
 
     def two(n):
-        d = pd.read_csv(path / f"{n}.csv", keep_default_na=False)
+        d = read_csv(path / f"{n}.csv", keep_default_na=False)
         return set(zip(d.d0, d.d1))
 
     names1 = ["urbannuts", "srnuts2", "s_colsest", "s_rowsest", "cols_load", "rows_load", "reqsc", "secom",
               "landusearto", "quotas", "bio_cols", "biorepcols", "seco_biof", "mpact", "maact", "iyani", "fix_yai",
               "rmaggsup", "ncnc", "fout", "oyani_rows", "mcact", "cact", "seco", "o", "feed", "mrkbale", "mrkbalee",
               "dompos", "breedact", "meat", "grpr", "grpc", "aact", "oyani", "corfeedlosf", "cropo", "domm_set",
-              "splitacts", "dact", "dmpact", "msnoeu28", "fuel_rows", "biofuels", "fosfuels", "fuels", "biostock"]
+              "splitacts", "dact", "dmpact", "msnoeu28", "fuel_rows", "biofuels", "fosfuels", "fuels", "biostock",
+              "grcu", "rset", "msall", "nosugquotaaglinkversion", "srnuts1"]
     names2 = ["map_rr", "pact_to_io", "pact_to_i", "rms_to_rm", "pact_to_o", "pact_to_y", "cropc_to_g", "rows_to_g",
               "prcd", "feed_to_o", "dact_to_pact", "p_t_actagg", "stock_to_fuel", "stock_to_by"]
-    return CaptrdSets(ms=one("ms"), **{n: two(n) for n in names2}, **{n: set(one(n)) for n in names1})
+    m3 = read_csv(path / "map_rrt.csv", keep_default_na=False, dtype=str)
+    return CaptrdSets(ms=one("ms"), map_rrt=set(zip(m3.d0, m3.d1, m3.d2)), **{n: two(n) for n in names2},
+                      **{n: set(one(n)) for n in names1})
 
 
 def _year(t: pd.Series) -> pd.Series:
@@ -373,7 +386,7 @@ def read_series(path: Path, sets: CaptrdSets, years: Iterable[int], chunk: int =
     does, read in chunks."""
     years = list(years)
     parts = [load(c, sets, years)
-             for c in pd.read_csv(path, chunksize=chunk, dtype={"t": str}, keep_default_na=False)]
+             for c in read_csv(path, chunksize=chunk, dtype={"t": str}, keep_default_na=False)]
     return pd.concat(parts, ignore_index=True) if parts else pd.DataFrame(columns=KEYS + ["value"])
 
 

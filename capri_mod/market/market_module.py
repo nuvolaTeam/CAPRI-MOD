@@ -42,6 +42,7 @@ from capri_mod.market.demand import DemandMixin
 from capri_mod.market.processing import ProcessingMixin
 from capri_mod.market.supply import SupplyMixin
 from capri_mod.market.bilateral_solve import BilateralSolveMixin
+from capri_mod.market.market_nk import NewtonKrylovMixin
 from capri_mod.market.welfare import WelfareMixin
 
 
@@ -49,7 +50,7 @@ from capri_mod.market.welfare import WelfareMixin
 # MARKET MODULE
 # ---------------------------------------------------------------------------
 
-class MarketModule(CalibrationMixin, BiofuelMixin, DairyMixin, FeedMixin, DemandMixin, ProcessingMixin, SupplyMixin, BilateralSolveMixin,
+class MarketModule(NewtonKrylovMixin, CalibrationMixin, BiofuelMixin, DairyMixin, FeedMixin, DemandMixin, ProcessingMixin, SupplyMixin, BilateralSolveMixin,
                    WelfareMixin):
     """
     CAPRI's global market model for the given EU supply (arm/market_model.gms).

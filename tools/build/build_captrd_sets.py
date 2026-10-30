@@ -40,7 +40,9 @@ S_COLS_LITERAL = ["UAAR", "ARTO", "GROF", "QUTS", "MAPR", "UVAG", "UVAD", "EAAG"
 S_COLS_SETS = ["MPACT", "LandUseARTO"]
 # CAPTRD's own MrkBalE (sets_captrd.gms l. 292-294), not the CAPMOD one of sets.gms l. 5271 (8 positions)
 MRKBALE = ["GROF", "IMPT", "EXPT", "FEDM", "SEDF", "SEDM", "INDM", "PRCM", "BIOF", "HCOM", "LOSF", "LOSM", "MAPR", "INTP"]
-# captrd.gms l. 833: S_ColsEst(REQSC) = YES after the data load (the nutrient contents; sets.gms l. 2133 REQSC = REQS_SET)
+# REQSC (the nutrient contents, sets.gms l. 2133) is not a member: captrd.gms l. 833-838 adds it only while deleting the
+# annual data of the series not estimated (S_ColsEst(REQSC) = YES, the deletion, = NO), so their annual data are kept but
+# they get no statistics (prep_data_for_estimation.gms l. 209); the port adds REQSC at that step (prepare.py)
 # S_RowsEst, l. 422-460: the global sets O, SECO, SECO_BIOF, FUEL_ROWS, MLKSECO, IYANI, FEED, then literals and GRPR;
 # minus FOUT (l. 454); plus REQST (l. 458); minus the outputs no activity produces (l. 459, PACT_TO_O)
 S_ROWS_SETS = ["O", "SECO", "SECO_BIOF", "FUEL_ROWS", "MLKSECO", "IYANI", "FEED"]
@@ -71,7 +73,7 @@ BREEDACT = ["DCOL", "DCOH", "SCOW", "SHGM", "SOWS", "HENS"]
 MEAT = ["BEEF", "POUM", "PORK", "SGMT"]
 # CAPRI's global sets the preparation reads, as instantiated (copied from the reference export): MS is sets.rmssup
 # (sets_captrd.gms l. 54-56), NT2 the alias of SRNUTS2 (l. 69)
-GLOBAL_1D = {"ms": "RMSSUP", "srnuts2": "SRNUTS2", "urbannuts": "urbanNUTS", "secom": "SECOM",
+GLOBAL_1D = {"ms": "RMSSUP", "srnuts1": "SRNUTS1", "srnuts2": "SRNUTS2", "urbannuts": "urbanNUTS", "secom": "SECOM",
              "landusearto": "LandUseARTO", "quotas": "QUOTAS", "bio_cols": "Bio_Cols", "biorepcols": "bioRepCols",
              "seco_biof": "SECO_BIOF", "mpact": "MPACT", "maact": "MAACT", "iyani": "IYANI", "fix_yai": "FIX_YAI",
              "reqsc": "REQSC", "ncnc": "NCNC", "fout": "FOUT", "oyani_rows": "OYANI_ROWS", "mcact": "MCACT",
@@ -79,12 +81,15 @@ GLOBAL_1D = {"ms": "RMSSUP", "srnuts2": "SRNUTS2", "urbannuts": "urbanNUTS", "se
              # load_coco1_data.gms
              "corfeedlosf": "corFeedLosf", "cropo": "CROPO", "domm_set": "DOMM", "splitacts": "SplitActs",
              "dact": "DACT", "dmpact": "DMPACT", "msnoeu28": "MSnoEU28", "fuel_rows": "FUEL_ROWS",
-             "biofuels": "BIOFUELS", "fosfuels": "FOSFUELS", "fuels": "FUELS", "biostock": "bioStock"}
+             "biofuels": "BIOFUELS", "fosfuels": "FOSFUELS", "fuels": "FUELS", "biostock": "bioStock",
+             # captrd_policy.gms
+             "grcu": "GRCU", "rset": "RSET", "msall": "MSALL", "nosugquotaaglinkversion": "noSugQuotaAglinkVersion"}
 GLOBAL_2D = {"map_rr": "Map_RR", "pact_to_io": "PACT_TO_IO", "pact_to_i": "PACT_TO_I", "rms_to_rm": "RMS_TO_RM",
              "pact_to_o": "PACT_TO_O", "pact_to_y": "PACT_TO_Y",
              # load_coco1_data.gms
              "prcd": "PRCD", "feed_to_o": "FEED_TO_O", "dact_to_pact": "DACT_TO_PACT", "p_t_actagg": "P_T_ActAgg",
              "stock_to_fuel": "STOCK_TO_FUEL", "stock_to_by": "STOCK_TO_BY"}
+GLOBAL_3D = {"map_rrt": "MAP_RRT"}                     # captrd_policy.gms (sugar quotas of the EU members by year)
 
 
 def _members(ref: Path, name: str, dim: int = 1):
@@ -116,7 +121,7 @@ def main() -> None:
     cols = list(S_COLS_LITERAL)
     for s in S_COLS_SETS:
         cols += _members(ref, s)
-    cols += GRPC + MRKBALE + list(_members(ref, "REQSC"))
+    cols += GRPC + MRKBALE
     cols = sorted(set(cols) - {"OSET"}, key=str.upper)
 
     rows = []
@@ -158,6 +163,8 @@ def main() -> None:
         _write(out, _members(ref, s))
     for out, s in GLOBAL_2D.items():
         _write(out, _members(ref, s, 2), 2)
+    for out, s in GLOBAL_3D.items():
+        _write(out, _members(ref, s, 3), 3)
     print(f"S_ColsEst {len(cols)}, S_RowsEst {len(rows)}, COLS_LOAD {len(cl)}, ROWS_LOAD {len(rl)} -> {OUT}")
 
 

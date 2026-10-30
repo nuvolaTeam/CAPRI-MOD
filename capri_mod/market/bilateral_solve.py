@@ -475,6 +475,9 @@ class BilateralSolveMixin(MarketStateMixin):
                 return np.maximum(sysd[c].S0 + sysd[c].D0, 1.0)
             return np.array([max(float(self.par.base_production[c].sum()), 1.0)])
 
+        if str(_st.get("market.solver")) == "newton_krylov":
+            # step G2: the same equations at once (capri_mod/market/market_nk.py)
+            return self._nk_solve(r, exogenous_supply, trade_scenario, es, ed, size, tol, max_outer, verbose)
         prev = np.inf
         damp = 1.0
         converged = False
