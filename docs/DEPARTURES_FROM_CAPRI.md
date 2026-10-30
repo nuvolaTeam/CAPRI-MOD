@@ -73,8 +73,8 @@ not a porting artefact (test `capri_mod/pipeline/tests/test_captrd_step1.py::tes
 - 1–2 observations: a is the weighted mean and b = 0;
 - 3–4 observations: a linear weighted fit.
 
-This is the default under the rule of 23 October 2026 for corrections of CAPRI code errors, pending the project
-lead's confirmation. `true` reproduces CAPRI for the parity runs.
+This is the default under the rule of 23 October 2026 for corrections of CAPRI code errors, confirmed by the project
+lead on 30 October 2026. `true` reproduces CAPRI for the parity runs.
 
 **Scope.** 93 of about 100,000 estimated series, mostly minor positions (DDGS, losses, a few NUTS2 crops). The fix
 changes their supports directly; other series can change only through the consistency equations of CAPTRD's Step 2.
@@ -96,6 +96,49 @@ in CAPRI's code; this reading keeps CAPRI's 5% and makes it a variance. `false` 
 
 **Scope.** No effect on results yet: the stored variance weights the penalty terms of CAPTRD's Steps 2-3, which are
 not ported. Decided on 24 October 2026 under the rule for CAPRI code errors ("fix the still open").
+
+### `captrd.zeros_as_missing = false` (CAPRI: `true`) — CAPTRD-MOD, Step 1 and statistics (register FIX-8)
+
+**What CAPRI does.** GAMS stores no zeros, so CAPTRD reads a zero as a missing observation: every count and sum of
+Step 1 runs over the years with a nonzero value. The converse also holds where CAPTRD sums or takes a maximum over a
+set of years, because there a missing year counts as a value of 0:
+- the base value of an activity's inputs and outputs is weighted by the activity's levels, and the sum of the levels
+  runs over every base year, including years in which the input or output has no observation
+  (`captrd/prep_data_for_estimation.gms` l. 263-264);
+- BSY, the average of the three highest distinct yields of the last eight years, takes them over every year, so a
+  missing year's 0 can be one of the three (l. 309-325).
+
+**What capri-mod does.** An absent value (NaN) is missing and a recorded zero is an observation of 0 (step1.observed).
+The weighted base value sums the levels of the years in which the series is observed; a series with no observed base
+year gets no base value, as CAPRI's plain base value has none. BSY takes the yields of the observed years only.
+`true` reproduces CAPRI. The decision is the project lead's (CAPTRD_MOD.md §8.3; 30 October 2026).
+
+**Scope.** On CAPREG's series as GAMS writes them the fix changes nothing measurable so far.
+- **No true zeros in the input.** The series hold no recorded zeros. Their only EPS records (45,132 over the 35
+  country files) are set-aside rates and sugar quotas, which CAPTRD sets from its policy data and does not fit trends
+  to.
+- **The two statistics where missing years enter.** They are the same under both settings for Denmark and Ireland
+  (30 October 2026). Other countries are to be checked with the all-country statistics run.
+- **When the fix acts.** Once the data layer passes true zeros: the raw sources mark a zero apart from a missing
+  value (CAPTRD_MOD.md §6).
+
+### `captrd.nuts2_column_filter_as_coded = false` (CAPRI as coded: `true`) — CAPTRD-MOD, data preparation (register FIX-9)
+
+**What CAPRI's code does.** captrd.gms l. 872-876 is meant to delete, for the NUTS 2 regions that are not countries,
+the years of every column other than the activities, land uses, GROF and ARTO. Its condition
+NOT SUM(SAMEAS(MS,NT2),1) leaves NT2 uncontrolled: the sum runs over the countries and the NUTS 2 regions together and
+counts the 14 countries that are their own NUTS 2 region. The condition is therefore false everywhere and the
+statement deletes nothing. The two statements that follow it (l. 878-880) control the region correctly.
+
+**What capri-mod does.** The condition is applied per region. The kept columns are those of CAPTRD's own NUTS 2
+estimation (estimate_nuts2.gms l. 33-41): the activities, the groups GRPC, the land uses, GROF, LU, UAAR, ARTO and
+LOSF. The statement's own list lacks GRPC, LU and LOSF. Deleting them would contradict the NUTS 2 estimation, which
+bounds LOSF from GROF (l. 276-285, 398) and uses its observations in the balances (equations.gms l. 503, 619-630).
+`true` reproduces CAPRI. The decision is the project lead's (30 October 2026), with LOSF kept.
+
+**Scope.** On Ireland, the fix deletes the NUTS 2 years of UVAG, EAAG, SEDF, INHA and QUTS: 69 series that CAPTRD
+otherwise prepares for estimation. The NUTS 2 estimation does not estimate these columns, so its results should not
+change. This is to be confirmed when CAPTRD's Steps 2-3 are ported.
 
 ### `supply.greendeal_inputs_keep_tech_change = true` (CAPRI as coded: `false`) — Green Deal input changes
 

@@ -410,11 +410,18 @@ The defects (details in CAPTRD_MAP.md):
 - the base-year window labelled "5 years" spanning 7: on inspection (23 October 2026) not a defect where ExPost ends
   at BAS + 1, as in the reference run (BASYRS5 = 2014-2018, five years; section 12.4). Setting
   `captrd.basyrs5_halfwidth` = 3, CAPRI's;
-- zeros treated as missing: decided; not built yet. The estimator (pipeline/captrd/step1.py) keeps CAPRI's convention
-  until the data layer separates true zeros from missing values (section 6; register FIX-8);
+- zeros treated as missing: built on 30 October 2026 (register FIX-8), setting `captrd.zeros_as_missing` (default
+  false). Step 1 and the statistics count a recorded zero as an observation and only an absent value as missing.
+  Where CAPTRD sums over base years or takes the three highest yields, a missing year no longer counts as 0. On
+  CAPREG's series as GAMS writes them the effect is nil (they hold no true zeros); the fix acts once the data layer
+  passes them (section 6);
 - series with 2-4 observations get Step1 = 0: the minimum over the trend grid counts the 29 zeroed grid points
   (estimate_trends.gms l. 158-171). Found while porting and confirmed in CAPRI's own output on 23 October 2026
-  (section 12.4). Setting `captrd.short_series_grid_as_coded` (docs/DEPARTURES_FROM_CAPRI.md).
+  (section 12.4). Setting `captrd.short_series_grid_as_coded` (docs/DEPARTURES_FROM_CAPRI.md); confirmed by the
+  project lead on 30 October 2026;
+- the NUTS 2 column filter that deletes nothing (captrd.gms l. 872-876): fixed on 30 October 2026, keeping the
+  columns of CAPTRD's own NUTS 2 estimation, LOSF among them (register FIX-9; setting
+  `captrd.nuts2_column_filter_as_coded`; section 12.4).
 
 Further defects found while porting are handled the same way and added here.
 
@@ -662,9 +669,12 @@ data preparation is ported.
   the activities, land use, GROF and ARTO of the NUTS 2 regions, but its condition NOT SUM(SAMEAS(MS,NT2),1) has NT2
   uncontrolled: the sum runs over MS and NT2 together and counts the 14 countries that are their own NUTS 2 region,
   so the condition is false everywhere. CAPTRD's own p_data is consistent with this: its NUTS 2 regions keep, among
-  others, LOSF, UVAG, EAAG and SEDF (266,493 records), which the statement would delete. Ported as coded (`clean_regions`); a fix (the condition per NUTS 2 region,
-  as the two following statements have it) is for the project lead to decide, since it removes series from the NUTS 2
-  estimation.
+  others, LOSF, UVAG, EAAG and SEDF (266,493 records), which the statement would delete. Fixed on 30 October 2026
+  (project lead; register FIX-9; `clean_regions`, setting `captrd.nuts2_column_filter_as_coded`). The fix applies
+  the condition per NUTS 2 region, as the two following statements have it. It keeps the columns of CAPTRD's NUTS 2
+  estimation (estimate_nuts2.gms l. 33-41), which include LOSF, GRPC and LU, not in the statement's own list; that
+  estimation bounds LOSF from GROF and uses its observations in the balances. On Ireland the fix deletes the NUTS 2
+  years of UVAG, EAAG, SEDF, INHA and QUTS (69 series).
 - **CAPTRD stores the quotas and set-aside rates whatever their observations.** define_stats_and_supports.gms
   l. 138-150 writes p_data into its result position only for the series with observations (nObs), but the quotas
   and SETR in every year: a parity check filtered by nObs misses them (it did on 29 October 2026, until corrected).

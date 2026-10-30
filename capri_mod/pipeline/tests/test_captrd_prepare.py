@@ -86,7 +86,7 @@ def _prepare_one(s: P.CaptrdSets, raw: pd.DataFrame, ex, uvad_added=None) -> pd.
     a = P.stage_a(raw, s)
     if uvad_added is not None:
         a = pd.concat([a, uvad_added[uvad_added.region.isin(set(a.region))]], ignore_index=True)
-    a = P.labour_household(P.clean_regions(a, s, ex))
+    a = P.labour_household(P.clean_regions(a, s, ex, as_coded=True))     # parity: CAPRI's NUTS 2 filter
     return P.prep_for_estimation(a, s, ex, [y for y in ex if abs(y - BASE_YEAR) <= 3],
                                  [y for y in ex if abs(y - BASE_YEAR) <= 1], range(1984, 2019))
 
@@ -128,7 +128,7 @@ def test_denmark_base_year_equals_captrds():
     ex = P.expost_years(raw, s.ms)
     d2 = pd.read_csv(BASE / "DK.csv.gz", keep_default_na=False)
     a = P.stage_a(raw, s, d2)
-    a = P.labour_household(P.clean_regions(a, s, ex))
+    a = P.labour_household(P.clean_regions(a, s, ex, as_coded=True))     # parity: CAPRI's NUTS 2 filter
     a = P.prep_for_estimation(a, s, ex, [y for y in ex if abs(y - BASE_YEAR) <= 3],
                               [y for y in ex if abs(y - BASE_YEAR) <= 1], range(1984, 2019))
     mine = a[(a.t == "BASM") & (a.region == "DK000000")]
@@ -232,3 +232,30 @@ def test_denmark_with_the_coco_data(tmp_path):
     ref = ref[ref.t.str.isdigit() & (ref.eps == 0) & (ref.col.isin(s.quotas) | (ref.row == "SETR") | lab(ref))]
     q = a.merge(ref[P.KEYS + ["value"]], on=P.KEYS, how="outer", suffixes=("", "_ref"), indicator=True)
     _assert_equal(q, 170)
+
+
+@pytest.mark.skipif(not (TS / "IR.csv.gz").exists(), reason="CAPRI reference files not built")
+def test_nuts2_column_filter_fixed_and_as_coded():
+    """captrd.gms l. 872-876 (register FIX-9): as coded the statement deletes nothing; fixed, the NUTS 2 regions that
+    are not countries keep in the years only the columns of CAPTRD's NUTS 2 estimation (estimate_nuts2.gms l. 33-41),
+    LOSF among them, and the countries keep all.
+    Ireland: a small file with NUTS 2 regions (Denmark is one NUTS 2 region)."""
+    s = P.read_sets()
+    raw = P.read_series(TS / "IR.csv.gz", s, range(1984, 2019))
+    ex = P.expost_years(raw, s.ms)
+    a = P.stage_a(raw, s)
+    coded = P.clean_regions(a, s, ex, as_coded=True)
+    fixed = P.clean_regions(a, s, ex, as_coded=False)
+    kept_cols = s.mpact | s.landusearto | {"GROF", "ARTO"} | s.grpc | {"LU", "UAAR", "LOSF"}
+
+    def other(df):
+        return df[df.region.isin(s.nt2ext) & ~df.region.isin(set(s.ms)) & ~df.col.isin(kept_cols)
+                  & df.t.str.fullmatch(r"\d{4}")]
+    assert len(other(coded)) > 1000                       # e.g. UVAG of the NUTS 2 regions, kept by CAPRI's code
+    assert other(fixed).empty
+    losf = fixed[(fixed.col == "LOSF") & ~fixed.region.isin(set(s.ms))]
+    assert len(losf) > 100 and len(losf) == len(coded[(coded.col == "LOSF") & ~coded.region.isin(set(s.ms))])
+    assert len(coded) - len(fixed) == len(other(coded))
+    c = coded[coded.region.isin(set(s.ms))]
+    f = fixed[fixed.region.isin(set(s.ms))]
+    assert len(c) == len(f) and set(c.itertuples(index=False)) == set(f.itertuples(index=False))

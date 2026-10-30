@@ -21,7 +21,7 @@ REF = Path(__file__).resolve().parents[3] / "capri_reference" / "capreg_tseries"
 
 def _lstsq_fit(x, w, grid):
     """Independent fit: for each c, WLS of x on (1, t^c) with weights t; the c of least wESS (first on ties)."""
-    m = x != 0
+    m = np.isfinite(x) & (x != 0)                 # observations: neither NaN nor (CAPRI) zero
     best = None
     for k, c in enumerate(grid):
         X = np.column_stack([np.ones(m.sum()), w[m] ** c])
@@ -53,8 +53,8 @@ def test_closed_form_equals_independent_wls():
         x[i] = a + b * W ** c + rng.normal(0, 8, len(YEARS))
     x[3, :10] = 0.0                       # a series starting later
     x[5, [4, 9, 20]] = 0.0                # gaps
-    pre = s1.prestats(x, W)
-    f = s1.fit(x, W, pre.nobs, grid, as_coded=True)
+    pre = s1.prestats(x, W, zeros_as_missing=True)
+    f = s1.fit(x, W, pre.nobs, grid, as_coded=True, zeros_as_missing=True)
     for i in range(len(x)):
         wess, a, b, c, k = _lstsq_fit(x[i], W, grid)
         assert f.k_opt[i] == k
@@ -65,7 +65,7 @@ def test_closed_form_equals_independent_wls():
 
 
 def test_prestats_weighted_mean_and_variance():
-    x = np.zeros(len(YEARS))
+    x = np.full(len(YEARS), np.nan)            # missing years: NaN
     x[-5:] = [10, 12, 11, 13, 14]
     pre = s1.prestats(x, W)
     w = W[-5:]
@@ -76,7 +76,7 @@ def test_prestats_weighted_mean_and_variance():
 
 
 def test_three_or_four_observations_linear_when_fixed():
-    x = np.zeros(len(YEARS))
+    x = np.full(len(YEARS), np.nan)            # missing years: NaN
     x[-3:] = [100.0, 104.0, 107.0]
     pre = s1.prestats(x, W)
     f = s1.fit(x, W, pre.nobs, as_coded=False)
@@ -86,20 +86,20 @@ def test_three_or_four_observations_linear_when_fixed():
 
 def test_three_or_four_observations_as_coded_fall_to_zero():
     """As coded, the zeroed grid points 2..30 win the minimum: a = b = c = 0 unless c = 1 fits exactly."""
-    x = np.zeros(len(YEARS))
+    x = np.full(len(YEARS), np.nan)            # missing years: NaN
     x[-3:] = [100.0, 104.0, 107.0]
     pre = s1.prestats(x, W)
     f = s1.fit(x, W, pre.nobs, as_coded=True)
     assert (f.a[0], f.b[0], f.c[0], f.k_opt[0]) == (0.0, 0.0, 0.0, 1)
     # an exact straight line: wESS at c = 1 is (numerically) zero; the first point is kept only if exactly zero
-    y = np.zeros(len(YEARS))
+    y = np.full(len(YEARS), np.nan)            # missing years: NaN
     y[-3:] = 5.0
     f2 = s1.fit(y, W, s1.prestats(y, W).nobs, as_coded=True)
     assert f2.k_opt[0] in (0, 1)
 
 
 def test_one_or_two_observations():
-    x = np.zeros(len(YEARS))
+    x = np.full(len(YEARS), np.nan)            # missing years: NaN
     x[-2:] = [10.0, 14.0]
     pre = s1.prestats(x, W)
     fixed = s1.fit(x, W, pre.nobs, as_coded=False)
@@ -107,13 +107,14 @@ def test_one_or_two_observations():
     assert fixed.a[0] == pytest.approx(m) and fixed.b[0] == 0.0 and fixed.c[0] == 0.0
     coded = s1.fit(x, W, pre.nobs, as_coded=True)
     assert coded.a[0] == 0.0                     # the zeroed second grid point wins
-    one = np.zeros(len(YEARS))
+    one = np.full(len(YEARS), np.nan)            # missing years: NaN
     one[-1] = 7.0                                # a single observation fits exactly: kept either way
-    assert s1.fit(one, W, s1.prestats(one, W).nobs, as_coded=True).a[0] == pytest.approx(7.0)
+    assert s1.fit(one, W, s1.prestats(one, W, zeros_as_missing=True).nobs, as_coded=True,
+                  zeros_as_missing=True).a[0] == pytest.approx(7.0)
 
 
 def test_error_variance_and_r2_rules():
-    x = np.zeros((2, len(YEARS)))
+    x = np.full((2, len(YEARS)), np.nan)
     x[0, -2:] = [10.0, 14.0]
     x[1] = 50.0                                   # constant: wVar = 0 -> wR2 = 1
     r = s1.run(x, YEARS, [2030], first_year=1984, as_coded=False)
@@ -122,11 +123,19 @@ def test_error_variance_and_r2_rules():
     assert r.wr2[0] == 1.0                        # nObs = 2: wVar not assigned -> 1
 
 
-def test_zero_is_missing_and_nan_is_zero():
+def test_zeros_and_missing_values():
+    """Register FIX-8: CAPRI reads a zero as missing (zeros_as_missing = true); the fix counts a recorded zero."""
     x = np.full(len(YEARS), np.nan)
     x[-6:] = [3.0, 0.0, 4.0, 5.0, 0.0, 6.0]
-    pre = s1.prestats(x, W)
-    assert pre.nobs[0] == 4
+    capri = s1.prestats(x, W, zeros_as_missing=True)
+    fixed = s1.prestats(x, W, zeros_as_missing=False)
+    assert capri.nobs[0] == 4 and fixed.nobs[0] == 6
+    assert fixed.wave[0] < capri.wave[0]                  # the two zeros enter the weighted mean
+    # without recorded zeros (NaN for the missing years) the two agree
+    y = np.where(x == 0.0, np.nan, x)
+    r_c = s1.run(y, YEARS, [2030], first_year=1984, zeros_as_missing=True)
+    r_f = s1.run(y, YEARS, [2030], first_year=1984, zeros_as_missing=False)
+    assert np.array_equal(r_c.step1, r_f.step1) and np.array_equal(r_c.wvarerr, r_f.wvarerr)
 
 
 @pytest.mark.skipif(not (REF / "AT.csv.gz").exists(), reason="CAPRI reference time series not built")
@@ -135,7 +144,7 @@ def test_runs_on_capri_capreg_series():
     d = pd.read_csv(REF / "AT.csv.gz", dtype={"t": str})
     d = d[d.t.str.fullmatch(r"\d{4}") & (d.region == "AT000000") & (d.row == "YILD")]
     wide = d.pivot_table(index="col", columns="t", values="value", aggfunc="first").reindex(
-        columns=[str(y) for y in YEARS]).fillna(0.0)
+        columns=[str(y) for y in YEARS])                    # absent: NaN, missing
     r = s1.run(wide.to_numpy(), YEARS, [2030], first_year=1984)
     ok = r.pre.nobs > 4
     assert ok.sum() > 10
@@ -169,7 +178,8 @@ def _parity_frame():
     x = x.reindex(columns=[str(y) for y in expost]).fillna(0.0)
     x = x[x.index.isin(st.index)]
     ref = st.reindex(x.index)
-    r = s1.run(x.to_numpy(), expost, [2030], nobs=ref.nObs.to_numpy(), first_year=1984, as_coded=True)
+    r = s1.run(x.to_numpy(), expost, [2030], nobs=ref.nObs.to_numpy(), first_year=1984, as_coded=True,
+               zeros_as_missing=True)
     s = pd.read_csv(RES / "step1.csv.gz", dtype={"t": str})
     s = s[s.t == "2030"]
     s1ref = s.set_index(["region", "col", "row"]).value
