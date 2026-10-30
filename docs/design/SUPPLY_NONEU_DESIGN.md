@@ -71,11 +71,19 @@ built. No proxy.
 
 - **The regional units.** regional_units.csv gets all 250 units: build_regional_units.py without its UK exclusion,
   and with Turkey's TUR. Every region-keyed builder then writes rows for them.
-- **The switch.** A setting run.regions_noneu (default false) decides which units the run solves. Off, the run solves
-  the EU27 and Norway, as now. On, all 250.
-  - The default region list comes from the area table, so the switch acts where the data are loaded.
-  - The check that off means unchanged is the exact-reproduction comparison of a run before and after the data
-    rebuild. It matters because code that sums a table over all its rows would otherwise take in the new units.
+- **The switch** (agreed with the project lead, 30 October 2026: a list per country rather than one on/off switch).
+  The setting run.supply_countries_outside_eu lists the countries outside the EU whose supply models are in the run,
+  by CAPRI code, as CAPRI's per-country switches do (%CountriesNO000000% ... %CountriesTUR%,
+  capmod/define_regional_sets.gms l. 40-77). Default ["NO000000"]: the EU27 and Norway, as now. The UK can then come
+  in before Turkey and the Western Balkans.
+  - definitions.SUP_NONEU_ALL holds every country outside the EU with regional units; definitions.sup_noneu() is the
+    run's selection, read when the run builds its modules (not at import, so a settings file decides it).
+  - The model leaves out the units of countries not selected (CAPRIModel's region list) and refuses a selected
+    country without regional data. The market's non-EU supply maps (SUP_NONEU_REGIONS, SUP_NONEU_COUNTRY,
+    SUP_NONEU_MS) are built per market module from the selection.
+  - The check that the default is unchanged is the exact-reproduction comparison of a run before and after the data
+    rebuild with the 29 units. It matters because code that sums a table over all its rows would otherwise take in
+    the new units.
 - **The market.** A non-EU market region has supply models when its units are in the run. The market then takes its
   supply from them, through the mechanism built for Norway (definitions.SUP_NONEU, since 30 October from the data).
   - WBA holds six countries, where NOR holds one. The model's one-to-one map from a non-EU market region to its
@@ -83,17 +91,29 @@ built. No proxy.
 - **The EU's own policy** stays off outside the EU, as now for Norway: the CAP, the EU's Green Deal targets, NUTS 2024
   reporting. Each country's 2030 policy is as in CAPRI's baseline, starting with CEILVAL, which CAPRI has for the UK
   units only.
-- **The order of the work:**
-  1. Turkey's code and the country tables; build_regional_units.
-  2. The ready builders on the 250 units.
-  3. The country lists of section 2.
-  4. CAPRI's rules for the missing data, read and ported.
-  5. The switch, and the exact-reproduction check with it off.
-  6. The market side: SUP_NONEU one-to-many.
-  7. The baseline of the 29 against CAPRI's 2030.
-  8. A gate with Farm-to-Fork and the Green Deal, agreed with the project lead.
+- **The order of the work** (revised 30 October 2026: the switch comes before the regional units grow, since the
+  model's region constants are read from regional_units.csv):
+  1. The builders that took the EU from the member-state code table read it from the EU trade blocks (done).
+  2. The switch (done, see above), and the supply models' "outside the EU" test by definitions.is_eu instead of the
+     units' first two letters, which are not the country code for the UK (UK, country GB) or Serbia (CS, RS) (done).
+  3. Turkey's code (TUR) and the Western Balkans in the country table; build_regional_units with all 250 units.
+  4. The ready builders on the 250 units.
+  5. The country lists of section 2.
+  6. CAPRI's rules for the missing data, read and ported.
+  7. The exact-reproduction check with the default setting.
+  8. The market side: SUP_NONEU one-to-many (WBA).
+  9. The baseline of the 29 against CAPRI's 2030.
+  10. A gate with Farm-to-Fork and the Green Deal, agreed with the project lead.
 
 ## 4. Open points
+
+- **Mitigation outside the EU in the Green Deal runs.** CAPRI's Green Deal reference
+  (pol_input/greendeal/refpol_endotech_all_sup.gms l. 49-64) sets MitiInAllRmssup on, so winter cover
+  (winterCovInAllRmssup) and histosol fallowing (fallowInAllRmssup) apply in every supply region; low-N feed,
+  breeding, linseed and nitrate stay EU-only. pol_input/cap_after_2023 sets it off. The model has winter cover off
+  outside the EU (abatement._catc_spec) and build_histosol leaves Norway out. This concerns Norway in today's Green
+  Deal runs already. Decision of the project lead (30 October 2026): aligned with CAPRI when the 29 come in, for
+  Norway too.
 
 - **The "EU-wide" price fallback** (build_eu_producer_prices) averages over all model regions. With the 29 it would
   no longer be the EU's. To decide when CAPRI's own fallback for these countries is read.
