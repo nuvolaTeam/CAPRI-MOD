@@ -993,7 +993,16 @@ pandas' default CSV float parser returns 64% of the cached Hessian's terms one u
 
 - **Effect:** one-region scenario runs (tests, regional studies); the winter-cover test took 590 s
 - **In 9t:** no
-- **Status:** **open**: the winter-cover test runs one step (~40 s); cause to find, then the market loop's handling of a steep local response
+- **Status:** **open**, cause found and fix decided (30-31 October 2026). Reproduced (DE110000, Farm-to-Fork, two
+  outer steps, 193 s): the market did not converge in either step (100 steps; largest relative residual 6.45 and
+  1.76, potatoes), its log showing why: the EU market keeps the whole EU's demand while its supply is the solved
+  units' alone (soya cake: EU production 16.8 kt against consumption 14,543 kt). For products the EU hardly trades no
+  price within the market's bounds closes that gap: not a solver fault, a market the subset cannot balance (as K10).
+  CAPRI switches whole countries off (%CountriesXX%) and keeps them in the market: a country off leaves RMSSUP
+  (capmod/create_sim_ini_gdx.gms l. 73) and is supplied by CAPRI's market supply functions (ProdNQ_), as a non-EU
+  region. Decision of the project lead (31 October 2026): CAPRI's rule, the units not in a run supplying the EU
+  market through their member state's market supply function (their share of it, the model's departure where a
+  subset cuts through a member state); the solved units supply their models' output
 
 <a id="k84"></a>
 ### K84: The landscape floor's fit ends on its last step (found 27 October 2026, test timing)
