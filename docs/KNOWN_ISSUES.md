@@ -1472,8 +1472,10 @@ capri_data/2017 and shared/, 46 files are in neither. By kind:
   tables remain in the project lead's uploads; the CSVs taken from them that code reads, nuts2013_2016.csv,
   nuts2021_2024.csv and nuts2024.csv, stay, written by tools/build/convert_sources_to_csv.py from git history), and the stand-alone
   extract_variable_costs.py with its notes (capri_star/capreg_extracts/; variable_costs.csv is written by
-  build_crop_economics_2017.py). NUTS2021.xlsx is converted (nuts2016_2021.csv, read by build_nuts2024_reporting.py;
-  nuts2021.csv, nuts2016_2021_changes.csv).
+  build_crop_economics_2017.py). NUTS2021.xlsx is converted (nuts2016_2021.csv, read by build_nuts2024_reporting.py).
+  The converter writes only what code reads: the miti_data_jul15 dump's four sets, three of the biofuel file's
+  parameters (p_secgConv, p_oilEqu, p_density) and the NUTS 2021 classification and change sheets are not written; the
+  unread second LitRevFertTech dump (sources/capri_dat/ghgtech, see K103) was removed with them.
 
 ### K103: Data files without a known origin or read by no code (data declarations, found 29 October 2026)
 
@@ -1503,7 +1505,7 @@ reads); no code names the first.
   write them); the two reference files given a builder, tools/build/build_capri_eu27_levels.py (2030: dataOut EU27yr19
   LEVL of markmarket_greendeal_1730et_base_1717, reproduced exactly; 2017: the 26 CAPREG dumps summed, equal to the
   old file's four decimals, now at full precision). sources/capri_dat/ghgtech/LitRevFertTech_p_litRevFertTechs.csv
-  (unread second dump) and further builder outputs that no code reads remain to be settled (see the census in
+  (unread second dump) removed 30 October 2026 (K102); further builder outputs that no code reads remain to be settled (see the census in
   capri_data/schema/schema.json, read_by).
 
 ### K104: The payments report's area left fallow out of CAPRI's UAAR (found 29 October 2026, data declarations)

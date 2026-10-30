@@ -22,36 +22,6 @@ COMMENT ON TABLE src_biofuel_technology_params_p_extrrates IS 'CAPRI''s p_ExtrRa
 INSERT INTO value_units VALUES
   ('src_biofuel_technology_params_p_extrrates', 'value', 'U_ratio', 'capri', 't of biofuel per t of feedstock (the file: Conversion coefficients ... (t/t))');
 
--- file: capri_data/sources/capri_dat/biofuel/biofuel_technology_params_p_density.csv
-CREATE TABLE src_biofuel_technology_params_p_density (
-    fuel VARCHAR NOT NULL,
-    "value" DOUBLE NOT NULL,
-    PRIMARY KEY (fuel)
-);
-COMMENT ON TABLE src_biofuel_technology_params_p_density IS 'CAPRI''s p_density(fuel) from dat/biofuel/biofuel_technology_params.gms l. 95-102 ("density of liquids", kg per l, RED 2009), every record as the file writes it, converted to CSV by tools/build/convert_sources_to_csv.py; no reader (converted with its file).';
-INSERT INTO value_units VALUES
-  ('src_biofuel_technology_params_p_density', 'value', NULL, 'open', 'kg per l (the file''s comment: 1l = kg); no unit code for it');
-
--- file: capri_data/sources/capri_dat/biofuel/biofuel_technology_params_p_oilEqu.csv
-CREATE TABLE src_biofuel_technology_params_p_oilequ (
-    fuel VARCHAR NOT NULL,
-    "value" DOUBLE NOT NULL,
-    PRIMARY KEY (fuel)
-);
-COMMENT ON TABLE src_biofuel_technology_params_p_oilequ IS 'CAPRI''s p_oilEqu(fuel) from dat/biofuel/biofuel_technology_params.gms l. 84-90 ("oil equivalents of different fuel types", toe per t, RED 2009), every record as the file writes it, converted to CSV by tools/build/convert_sources_to_csv.py; no reader (converted with its file).';
-INSERT INTO value_units VALUES
-  ('src_biofuel_technology_params_p_oilequ', 'value', NULL, 'open', 'toe per t (the file''s comment: 1t = toe); no unit code for it');
-
--- file: capri_data/sources/capri_dat/biofuel/biofuel_technology_params_p_secgConv.csv
-CREATE TABLE src_biofuel_technology_params_p_secgconv (
-    fuel VARCHAR NOT NULL,
-    "value" DOUBLE NOT NULL,
-    PRIMARY KEY (fuel)
-);
-COMMENT ON TABLE src_biofuel_technology_params_p_secgconv IS 'CAPRI''s p_secgConv(fuel) from dat/biofuel/biofuel_technology_params.gms l. 76-79 ("Conversion coefficients for biomass to biofuel (t/t)", second generation), every record as the file writes it, converted to CSV by tools/build/convert_sources_to_csv.py; no reader (converted with its file).';
-INSERT INTO value_units VALUES
-  ('src_biofuel_technology_params_p_secgconv', 'value', 'U_ratio', 'capri', 't of biofuel per dry t of biomass (the file''s text)');
-
 -- file: capri_data/sources/capri_dat/coco/milk_quota_dat_p_MQuotaDat.csv
 CREATE TABLE src_milk_quota_dat_p_mquotadat (
     region VARCHAR NOT NULL,
@@ -259,40 +229,6 @@ COMMENT ON TABLE src_litrevferttech_p_litrevferttechs_all IS 'CAPRI''s p_litRevF
 INSERT INTO value_units VALUES
   ('src_litrevferttech_p_litrevferttechs_all', 'value', NULL, 'open', 'relative changes of emissions (the dump states no unit)');
 
--- file: capri_data/sources/ghgtech/miti_data_jul15_allMitiTech.csv
-CREATE TABLE src_miti_data_jul15_allmititech (
-    technology VARCHAR NOT NULL,
-    text VARCHAR NOT NULL,
-    PRIMARY KEY (technology)
-);
-COMMENT ON TABLE src_miti_data_jul15_allmititech IS 'CAPRI''s set allMitiTech(technology) ("GAINS type mitigation technologies plus auxiliary technologies") with the element texts, of the project lead''s gdxdump of dat/scen/ghgtech/miti_data_jul15.gdx (the mitigation data of the Green Deal runs, miti_data_type = _jul15), every record as dumped, converted from the gdxdump text miti_data_jul15_p_ghgMiti.txt by tools/build/convert_sources_to_csv.py; no reader (converted with its dump).';
-
--- file: capri_data/sources/ghgtech/miti_data_jul15_mitiInfo.csv
-CREATE TABLE src_miti_data_jul15_mitiinfo (
-    info VARCHAR NOT NULL,
-    text VARCHAR NOT NULL,
-    PRIMARY KEY (info)
-);
-COMMENT ON TABLE src_miti_data_jul15_mitiinfo IS 'CAPRI''s set mitiInfo(info) ("Information on mitigation technologies") with the element texts (the euro sign as written, cp1252), of the project lead''s gdxdump of dat/scen/ghgtech/miti_data_jul15.gdx (the mitigation data of the Green Deal runs, miti_data_type = _jul15), every record as dumped, converted from the gdxdump text miti_data_jul15_p_ghgMiti.txt by tools/build/convert_sources_to_csv.py; no reader (converted with its dump).';
-
--- file: capri_data/sources/ghgtech/miti_data_jul15_mitiTarget.csv
-CREATE TABLE src_miti_data_jul15_mititarget (
-    target VARCHAR NOT NULL,
-    text VARCHAR NOT NULL,
-    PRIMARY KEY (target)
-);
-COMMENT ON TABLE src_miti_data_jul15_mititarget IS 'CAPRI''s set mitiTarget(target) ("mitigation targets include CH4ENT_3k from milk yield > 3kt") with the element texts, of the project lead''s gdxdump of dat/scen/ghgtech/miti_data_jul15.gdx (the mitigation data of the Green Deal runs, miti_data_type = _jul15), every record as dumped, converted from the gdxdump text miti_data_jul15_p_ghgMiti.txt by tools/build/convert_sources_to_csv.py; no reader (converted with its dump).';
-
--- file: capri_data/sources/ghgtech/miti_data_jul15_mitiTech_map.csv
-CREATE TABLE src_miti_data_jul15_mititech_map (
-    region VARCHAR NOT NULL,
-    activity VARCHAR NOT NULL,
-    technology VARCHAR NOT NULL,
-    target VARCHAR NOT NULL,
-    PRIMARY KEY (region, activity, technology, target)
-);
-COMMENT ON TABLE src_miti_data_jul15_mititech_map IS 'CAPRI''s set mitiTech_map(region, activity, technology, target) of the project lead''s gdxdump of dat/scen/ghgtech/miti_data_jul15.gdx (the mitigation data of the Green Deal runs, miti_data_type = _jul15), every record as dumped, converted from the gdxdump text miti_data_jul15_p_ghgMiti.txt by tools/build/convert_sources_to_csv.py; no reader (converted with its dump).';
-
 -- file: capri_data/sources/ghgtech/miti_data_jul15_p_ghgMiti.csv
 CREATE TABLE src_miti_data_jul15_p_ghgmiti (
     region VARCHAR NOT NULL,
@@ -306,41 +242,6 @@ CREATE TABLE src_miti_data_jul15_p_ghgmiti (
 COMMENT ON TABLE src_miti_data_jul15_p_ghgmiti IS 'CAPRI''s p_ghgMiti(region, activity, technology, target, info) ("information for CAPRI activities without specification of production system") of the project lead''s gdxdump of dat/scen/ghgtech/miti_data_jul15.gdx (the mitigation data of the Green Deal runs, miti_data_type = _jul15), every record as dumped, converted from the gdxdump text miti_data_jul15_p_ghgMiti.txt by tools/build/convert_sources_to_csv.py; read by tools/build/build_fert_options_jul15.py (cropMiti, N2OSYN).';
 INSERT INTO value_units VALUES
   ('src_miti_data_jul15_p_ghgmiti', 'value', NULL, 'open', 'per info (shares, costs, QEmitt)');
-
--- file: capri_data/sources/nuts/nuts2016_2021_changes.csv
-CREATE TABLE src_nuts2016_2021_changes (
-    "level" BIGINT NOT NULL,
-    code_2016 VARCHAR,
-    code_2021 VARCHAR,
-    label VARCHAR NOT NULL,
-    change VARCHAR NOT NULL,
-    explanation VARCHAR
-);
-COMMENT ON TABLE src_nuts2016_2021_changes IS 'The changes NUTS 2016 to NUTS 2021 by level (codes, label, change, explanation new = old), from Eurostat''s workbook NUTS2021.xlsx (sheets ''Changes NUTS-1'', -2, -3), every row with a code and every named column as written (level: the sheet''s NUTS level); converted to CSV by tools/build/convert_sources_to_csv.py; read by no code (reference for the NUTS correspondences).';
-INSERT INTO value_units VALUES
-  ('src_nuts2016_2021_changes', 'level', NULL, 'open', 'nuts2016_2021_changes.level: unit to be established');
-
--- file: capri_data/sources/nuts/nuts2021.csv
-CREATE TABLE src_nuts2021 (
-    code VARCHAR NOT NULL,
-    country VARCHAR,
-    level1 VARCHAR,
-    level2 VARCHAR,
-    level3 VARCHAR,
-    nuts_level BIGINT,
-    country_order BIGINT,
-    region_order BIGINT,
-    latin_code VARCHAR,
-    latin_country VARCHAR,
-    latin_level1 VARCHAR,
-    latin_level2 VARCHAR,
-    latin_level3 VARCHAR
-);
-COMMENT ON TABLE src_nuts2021 IS 'The NUTS 2021 classification with the statistical regions (code, country, labels by level, level, orders, and the labels in Latin characters of the unheaded columns J-N), from Eurostat''s workbook NUTS2021.xlsx (sheet ''NUTS & SR 2021''), every row with a code (and a heading row) and every named column as written; converted to CSV by tools/build/convert_sources_to_csv.py; read by no code (reference for the NUTS correspondences).';
-INSERT INTO value_units VALUES
-  ('src_nuts2021', 'nuts_level', NULL, 'open', 'an order number (no unit)'),
-  ('src_nuts2021', 'country_order', NULL, 'open', 'an order number (no unit)'),
-  ('src_nuts2021', 'region_order', NULL, 'open', 'an order number (no unit)');
 
 -- file: capri_data/sources/policy/minfert_redu_by_crop_limCres.csv
 CREATE TABLE src_minfert_redu_by_crop_limcres (

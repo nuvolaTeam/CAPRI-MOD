@@ -14,13 +14,14 @@ unchanged); the CSV declarations (capri_data/schema/34_sources_csv.sql) cite the
     envind/ipcc_wetlands_p_emifacOrganicSoil_ori.txt   -> envind/ipcc_wetlands_p_emifacOrganicSoil_ori.csv
     envind/orgsoil_share_p_orgsoilori.txt              -> envind/orgsoil_share_p_orgsoilori.csv
     ghgtech/LitRevFertTech_p_litRevFertTechs.txt       -> ghgtech/LitRevFertTech_p_litRevFertTechs_all.csv
-    ghgtech/miti_data_jul15_p_ghgMiti.txt              -> ghgtech/miti_data_jul15_{p_ghgMiti, allMitiTech,
-                                                          mitiTech_map, mitiTarget, mitiInfo}.csv
+    ghgtech/miti_data_jul15_p_ghgMiti.txt              -> ghgtech/miti_data_jul15_p_ghgMiti.csv (the dump's sets
+                                                          allMitiTech, mitiTech_map, mitiTarget, mitiInfo: read by no
+                                                          code, not written)
     water/cropwat.gms                                  -> water/cropwat_p_cropwatReq.csv
     water/irrishare.gms                                -> water/irrishare_p_irriShare.csv
   CAPRI's data include files (gams_text.parameter_records, table_records)
-    capri_dat/biofuel/biofuel_technology_params.gms    -> ..._{p_ExtrRates, p_ByProduct, p_secgConv, p_oilEqu,
-                                                          p_density}.csv
+    capri_dat/biofuel/biofuel_technology_params.gms    -> ..._{p_ExtrRates, p_ByProduct}.csv (p_secgConv, p_oilEqu,
+                                                          p_density: read by no code, not written)
     capri_dat/coco/milk_quota_dat.gms                  -> milk_quota_dat_p_MQuotaDat.csv
     capri_dat/policy/livestock_units.gms               -> livestock_units_p_LUUnits.csv
     capri_dat/policy/smal_pshar.gms                    -> smal_pshar_p_smallProdShare.csv
@@ -36,15 +37,12 @@ unchanged); the CSV declarations (capri_data/schema/34_sources_csv.sql) cite the
     policy/minfert_redu_by_crop.gms                    -> minfert_redu_by_crop_{p_checkSmallMine, limCres}.csv
   Excel
     capri_star/nutrient_cont_usda_export.xlsx          -> capri_star/nutrient_cont_usda_p_nutrientCont.csv
-    nuts/NUTS2021.xlsx                                 -> nuts/nuts2021.csv (sheet 'NUTS & SR 2021'),
-                                                          nuts2016_2021.csv ('Changes detailed NUTS 2016-2021'),
-                                                          nuts2016_2021_changes.csv ('Changes NUTS-1', -2, -3)
+    nuts/NUTS2021.xlsx                                 -> nuts/nuts2016_2021.csv ('Changes detailed NUTS 2016-2021')
     nuts/NUTS2013-NUTS2016__1_.xlsx                    -> nuts/nuts2013_2016.csv
     nuts/NUTS2021-NUTS2024.xlsx                        -> nuts/nuts2024.csv, nuts2021_2024.csv
     nuts2013_2016, nuts2016_2021, nuts2021_2024 and nuts2024 existed before without a writer and are read
     (build_nuts2024_reporting.py, a test); they are written as they were (their columns, CRLF line ends; nuts2016_2021
-    and nuts2021_2024 with the labels stripped of surrounding white space). nuts2021 and nuts2016_2021_changes keep
-    every named column and the text as the workbook writes it. Not converted, removed at the project lead's request
+    and nuts2021_2024 with the labels stripped of surrounding white space). Not converted, removed at the project lead's request
     (30 October 2026: read by no code; they remain in git history and in the project lead's uploads): the other
     sheets of these workbooks and the workbooks NUTS_2010_-_NUTS_2013.xls and NUTS2024-NUTS2027.xlsx.
   JSON
@@ -120,10 +118,8 @@ GDXDUMP = {
     "ghgtech/miti_data_jul15_p_ghgMiti.txt": {
         "p_ghgMiti": ("ghgtech/miti_data_jul15_p_ghgMiti.csv",
                       ["region", "activity", "technology", "target", "info", "value"]),
-        "allMitiTech": ("ghgtech/miti_data_jul15_allMitiTech.csv", ["technology", "text"]),
-        "mitiTech_map": ("ghgtech/miti_data_jul15_mitiTech_map.csv", ["region", "activity", "technology", "target"]),
-        "mitiTarget": ("ghgtech/miti_data_jul15_mitiTarget.csv", ["target", "text"]),
-        "mitiInfo": ("ghgtech/miti_data_jul15_mitiInfo.csv", ["info", "text"])},
+        # the dump's sets, read by no code (the project lead's rule: only what a builder or the model reads)
+        "allMitiTech": None, "mitiTech_map": None, "mitiTarget": None, "mitiInfo": None},
     "water/cropwat.gms": {
         "p_cropwatReq": ("water/cropwat_p_cropwatReq.csv", ["region", "crop", "item", "value"])},
     "water/irrishare.gms": {
@@ -137,6 +133,8 @@ def convert_gdxdumps() -> None:
         if sorted(s[1] for s in found) != sorted(symbols):
             raise ValueError(f"{rel}: symbols {[s[1] for s in found]}, expected {sorted(symbols)}")
         for kind, name, dims, _desc, recs in found:
+            if symbols[name] is None:
+                continue
             out, cols = symbols[name]
             if kind.lower() == "set" and not any(r[-1] for r in recs):
                 recs = [r[:-1] for r in recs]                     # a set without element texts: the keys only
@@ -152,11 +150,7 @@ GAMS_DATA = {
          ["fuel", "stock", "value"]),
         ("p_ByProduct", "parameter", 2, "capri_dat/biofuel/biofuel_technology_params_p_ByProduct.csv",
          ["byproduct", "stock", "value"]),
-        ("p_secgConv", "parameter", 1, "capri_dat/biofuel/biofuel_technology_params_p_secgConv.csv",
-         ["fuel", "value"]),
-        ("p_oilEqu", "parameter", 1, "capri_dat/biofuel/biofuel_technology_params_p_oilEqu.csv", ["fuel", "value"]),
-        ("p_density", "parameter", 1, "capri_dat/biofuel/biofuel_technology_params_p_density.csv",
-         ["fuel", "value"])],
+        ],
     "capri_dat/coco/milk_quota_dat.gms": [
         ("p_MQuotaDat", "table", 2, "capri_dat/coco/milk_quota_dat_p_MQuotaDat.csv",
          ["region", "info", "year", "value"])],
@@ -349,15 +343,6 @@ def _named(rows, header_row: int, cols, key_cols, strip=False):
             if any(c < len(r) and r[c] not in (None, "") for c in key_cols)]
 
 
-def _changes(sheets, names, cols, ncol):
-    """The change sheets (NUTS-1, -2, -3) as one table with a level column; the rows with a code."""
-    out = []
-    for level, name in names:
-        for r in _named(sheets[name], 0, range(ncol), cols):
-            out.append([str(level)] + r)
-    return out
-
-
 def convert_excel() -> None:
     rows = _sheets("capri_star/nutrient_cont_usda_export.xlsx")["p_nutrientCont"]
     write("capri_star/nutrient_cont_usda_p_nutrientCont.csv", ["product", "item", "value"],
@@ -368,16 +353,9 @@ def convert_excel() -> None:
           _named(sh["NUTS2013-NUTS2016"], 1, range(1, 8), (1, 2)), crlf=True)
     # NUTS 2021 (classification) and 2016 -> 2021 (nuts2016_2021.csv as committed before)
     sh = _sheets("nuts/NUTS2021.xlsx")
-    # columns J-N, without a header: the code and the labels in Latin characters (Cyrillic and Greek labels)
-    write("nuts/nuts2021.csv", ["code", "country", "level1", "level2", "level3", "nuts_level", "country_order",
-                                "region_order", "latin_code", "latin_country", "latin_level1", "latin_level2",
-                                "latin_level3"],
-          _named(sh["NUTS & SR 2021"], 0, [*range(8), *range(9, 14)], (0,)))
     write("nuts/nuts2016_2021.csv", ["code_2016", "code_2021", "country", "level1", "level2", "level3",
                                      "change_codes", "change_comments"],
           _named(sh["Changes detailed NUTS 2016-2021"], 0, range(8), (0, 1), strip=True), crlf=True)
-    write("nuts/nuts2016_2021_changes.csv", ["level", "code_2016", "code_2021", "label", "change", "explanation"],
-          _changes(sh, [(k, f"Changes NUTS-{k}") for k in (1, 2, 3)], (0, 1), 5))
     # NUTS 2024 (classification) and 2021 -> 2024 (nuts2024.csv and nuts2021_2024.csv as committed before)
     sh = _sheets("nuts/NUTS2021-NUTS2024.xlsx")
     write("nuts/nuts2024.csv", ["country", "code", "label", "level"], _named(sh["NUTS2024"], 0, range(4), (1,)),

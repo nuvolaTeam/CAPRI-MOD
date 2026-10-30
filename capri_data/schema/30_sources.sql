@@ -1369,22 +1369,6 @@ INSERT INTO value_units VALUES
   ('src_ad_basedata_p_sf', 'level', NULL, 'open', 'AD_basedata_p_sf.level: unit to be established'),
   ('src_ad_basedata_p_sf', 'marginal', NULL, 'open', 'AD_basedata_p_sf.marginal: unit to be established');
 
--- file: capri_data/sources/capri_dat/ghgtech/LitRevFertTech_p_litRevFertTechs.csv
-CREATE TABLE src_capri_dat_litrevferttech_p_litrevferttechs (
-    dim1 VARCHAR NOT NULL,
-    dim2 VARCHAR NOT NULL,
-    dim3 VARCHAR NOT NULL,
-    dim4 VARCHAR NOT NULL,
-    dim5 VARCHAR NOT NULL,
-    "level" DOUBLE NOT NULL,
-    marginal DOUBLE NOT NULL,
-    PRIMARY KEY (dim1, dim2, dim3, dim4, dim5)
-);
-COMMENT ON TABLE src_capri_dat_litrevferttech_p_litrevferttechs IS 'CAPRI''s p_litRevFertTechs (dim1-dim5: region, technology, activity, manure system, emission item; level, marginal; 88530 rows), relative emission changes of fertiliser technologies; no builder, read by no code: a fuller dump of the table in sources/ghgtech (KNOWN_ISSUES K103).';
-INSERT INTO value_units VALUES
-  ('src_capri_dat_litrevferttech_p_litrevferttechs', 'level', NULL, 'open', 'LitRevFertTech_p_litRevFertTechs.level: unit to be established'),
-  ('src_capri_dat_litrevferttech_p_litrevferttechs', 'marginal', NULL, 'open', 'LitRevFertTech_p_litRevFertTechs.marginal: unit to be established');
-
 -- file: capri_data/sources/capri_dat/ghgtech/gains_ad_p_gainsdata.csv
 CREATE TABLE src_gains_ad_p_gainsdata (
     dim1 VARCHAR NOT NULL,
