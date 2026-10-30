@@ -32,6 +32,74 @@ and `docs/KNOWN_ISSUES.md`.
 
 ---
 
+## 30 October 2026 (batch 9, one gate): the refactor's stages 3b-4c, the data sources as CSV, CAPTRD's fixes and statistics, the region tables from the data, the SQL declarations apart from the code lists
+
+**Refactor (moves, each checked by a Farm-to-Fork run equal to r190 to the last digit).**
+- **Stages 3b and 4b:** the inputs read through one data adapter (RunInputs, capri_mod/data/inputs.py): the supply
+  module's (3b), then the environment's, fertiliser's and water's (4b).
+  - Separate commits, behaviour changes: a missing supply or environment input now stops the run.
+- **Stage 4a:** the environmental module split into blocks (GHG, nitrogen, ammonia, phosphorus, biodiversity):
+  1,954 → 673 lines.
+- **Stage 4c:** model.py's coupling split into capri_mod/coupling (Hessian, feed, young animals, price step, manure,
+  bridge, reporting): 3,048 → 1,572 lines.
+- **The checks.** Stage 3 was checked by r192 and stage 4 by r193, each equal to r190 apart from metadata. Stage 4
+  also passed the full test suite: 241 passed, 9 skipped.
+
+**Data and tools.**
+- **The data sources that were not CSV are CSV** (the project lead's choice: all data files).
+  - The builders read the converted files, and each reproduces its outputs identically.
+  - The files no code read were removed and their writers stopped.
+  - The world price provenance is a checked note.
+- **histosol.csv rebuilt with every record.** The builder dropped the last one. Effect: ef_n2o_grass in 39 regions.
+- **The region tables come from the data** (the project lead: no hard-coded tables).
+  - The trade regions' code list (capri_data/codes/model_trade_regions.csv) is now the declared master, with CAPRI's
+    region code of each. The model and the builders read it.
+  - The EU trade blocks come from eu_market_blocks.csv. Its stale Norway row is removed: since K56 Norway is its own
+    market region, as in CAPRI.
+  - The countries with supply models outside the EU follow from the regional units (definitions.SUP_NONEU). The UK,
+    Turkey or the Western Balkans become supply-model market regions as soon as they get regional units.
+  - Every Norway test and non-EU list in the model goes through definitions.is_eu (stage H1 in the model).
+  - The inventory of the remaining code tables, and the plan to read them from data (H1-H4), is in
+    docs/design/HARDCODED_TABLES.md.
+- **capri_data/schema holds only the SQL** (and schema.json). The code lists and the unit catalogue moved to
+  capri_data/codes.
+- Declared: 404 files, 0 violations.
+
+**CAPTRD-MOD.**
+- **FIX-3 confirmed** by the project lead.
+- **FIX-8 built** (`captrd.zeros_as_missing`): a recorded zero is an observation and only an absent value is missing.
+  - The level-weighted BAS and BSY no longer count a missing year as 0.
+  - CAPREG's series hold no true zeros, so Denmark's and Ireland's statistics are unchanged. The fix acts once the
+    data layer passes true zeros.
+- **FIX-9 (was KEPT-2)** (`captrd.nuts2_column_filter_as_coded`): the NUTS 2 column filter applied per region.
+  - It keeps the columns of CAPTRD's own NUTS 2 estimation, LOSF among them (the project lead's choice).
+  - On Ireland it deletes the NUTS 2 years of UVAG, EAAG, SEDF, INHA and QUTS (69 series).
+- **The statistics (prep_data_for_estimation.gms l. 205-320) for all 35 countries against CAPTRD's own:**
+  - nW, WAve, wVar and BAS are equal for 99.95% of the series or more.
+  - The rest of WAve and wVar is set-aside, UAAR and LU of the EU-15 in 1989-2005. CAPRI's shipped results hold the
+    Commission's official set-aside areas (dat/policy/expost.gms), while the CAPREG time series CAPTRD read hold
+    CAPREG's calibrated ones. Traced with the project lead's files: no CAPTRD code in the installation restores the
+    official areas (docs/design/CAPTRD_MOD.md section 12.4).
+  - The differences in nObs are set by CAPTRD steps not ported yet.
+
+**Design.**
+- **Step G, the market solve with IPOPT and exact Jacobians** (docs/design/MARKET_IPOPT_DESIGN.md). The project lead's
+  decisions:
+  - the objective ½‖z − z₀‖²;
+  - each market block written once, in CasADi, as a move stage;
+  - the exact Hessian;
+  - the TRQ first.
+
+**Gate.**
+- **Farm-to-Fork 2030 (r194).**
+  - Converged in 13 iterations, like r190. The convergence path is the same at every iteration.
+  - Supply, market and prices are equal to r190.
+  - The only differences are the histosol fix's: histosol N2O and the GHG totals of 7 Portuguese regions, by at most
+    0.009%.
+  - Norway's removal from the EU_WEST stop-rule aggregate changed nothing in this run.
+- **Green Deal 2030 (r195):** [to fill]
+- **Test suite:** [to fill]
+
 ## 30 October 2026 (batches 7 and 8, one gate): the UK and the Western Balkans as trade regions, Norway's raw milk in the market (step F), manure as CAPRI (K105), the market base at CAPRI's production of the market year (K106), the data declared in SQL, the CAPTRD-MOD data preparation, the register of departures
 
 **Model.**
