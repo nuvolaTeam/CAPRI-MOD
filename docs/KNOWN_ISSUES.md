@@ -1404,7 +1404,7 @@ into the file.
 | File | Source | Status |
 |---|---|---|
 | policy/landscape_targets_ms.csv, organic_targets_ms.csv | CAPRI's pol_input/greendeal GDX (p_landscapeTargets, p_organicTargetMS, p_organicTargetUAA) | built: build_greendeal_targets.py (tools/lib/_gdx.py), same values (largest relative difference 4e-15: the files held 15 significant digits) |
-| shared/eu_market_blocks.csv | CAPRI's aggregation/defaultA.agg section 4; Norway's row capri-mod's (registered) | built: build_eu_market_blocks.py, byte-identical |
+| shared/eu_market_blocks.csv | CAPRI's aggregation/defaultA.agg section 4 (Norway's former capri-mod row removed 30 October 2026: Norway is its own market region since K56) | built: build_eu_market_blocks.py, byte-identical |
 | policy/organic_yield_gap.csv | CAPRI's dat/pesticides/yield_effects_ppp.xlsx, sheet yld_gap | built: build_organic_yield_gap.py (the file held 3 decimals; at most 0.0005 points) |
 | supply/yield_price_elasticity.csv | CAPRI's supply/yield_elas.gms with sets.gms CERE_COLS, OILS_COLS | built: build_yield_price_elasticity.py, byte-identical |
 | supply/mineral_n_price.csv | CAPRI's res_17 national UVAG of NITF | built: build_mineral_n_price.py (the file held 2 decimals) |
