@@ -202,10 +202,14 @@ def test_denmark_with_the_coco_data(tmp_path):
     years included. (Austria and Belgium, whose bounds the age lines set in some years, also checked on 30 October
     2026: equal to 1e-15.)"""
     from capri_mod.pipeline.captrd import prepare_run as R
+    from capri_mod.settings import override
     s = P.read_sets()
-    out = R.run(["DK000000"], s, BASE_YEAR, 1984, 2019, TS, BASE, COCO, BIOFUEL, tmp_path)
+    # parity: CAPRI's code as written (register FIX-8, FIX-9)
+    with override({"captrd.zeros_as_missing": True, "captrd.nuts2_column_filter_as_coded": True}):
+        out = R.run(["DK000000"], s, BASE_YEAR, 1984, 2019, TS, BASE, COCO, BIOFUEL, tmp_path)
     a = pd.read_parquet(out["DK000000"])
-    a = a[a.t != "BASM"]
+    # the calendar years (prepare_run also writes BASM and, since the statistics stage, nObs, nW, WAve, wVar, BAS, BSY)
+    a = a[a.t.astype(str).str.fullmatch(r"\d{4}")]
     ex = sorted({int(t) for t in a.t})
     oagg = set(pd.read_csv(ROOT / "capri_reference" / "sets" / "simini_21730" / "OAGG.csv", keep_default_na=False).d0)
     nobs = pd.read_csv(RES / "data.csv.gz")
@@ -221,12 +225,15 @@ def test_denmark_with_the_coco_data(tmp_path):
     # not traced yet: CAPTRD's p_data has the fossil fuels' UVAG in 2019, which COCO does not carry (load_coco1_data.gms
     # l. 352 copies COCO's UVAP, absent for 2019); presumably a later stage
     fuel_2019 = (col == "UVAG") & row.isin(s.fosfuels) & (t == "2019") & (m._merge == "right_only")
-    m = m[~(reporting | policy | near_zero | peers | hfcs | fuel_2019)]
+    # the quotas and set-aside rates: CAPTRD stores them whatever their observations (no nObs), compared below
+    stored = col.isin(s.quotas) | (row == "SETR")
+    m = m[~(reporting | policy | near_zero | peers | hfcs | fuel_2019 | stored)]
     _assert_equal(m, 42_000)
     # the quotas and set-aside rates in every year (captrd_policy.gms)
     a = pd.read_parquet(out["DK000000"])
     lab = lambda d: (d.row == "LABO") & d.col.isin(["MAXS", "MINS"])         # noqa: E731 labour_ageline.gms
-    a = a[(a.t != "BASM") & (a.region == "DK000000") & (a.col.isin(s.quotas) | (a.row == "SETR") | lab(a))]
+    a = a[a.t.astype(str).str.fullmatch(r"\d{4}") & (a.region == "DK000000")
+          & (a.col.isin(s.quotas) | (a.row == "SETR") | lab(a))]
     ref = pd.concat(c[c.region == "DK000000"] for c in
                     pd.read_csv(RES / "P_Data.csv.gz", dtype={"t": str}, chunksize=1_000_000))
     ref = ref[ref.t.str.isdigit() & (ref.eps == 0) & (ref.col.isin(s.quotas) | (ref.row == "SETR") | lab(ref))]
