@@ -139,8 +139,8 @@ def trade_trq_function(sc, act):
         the import prices of the quota's importer rows);
       - B0: the fixed part of the import prices WITHOUT the offsets (import_price_matrices(sc, ..., offsets=False));
       - g = [market residual[act] / scale ; (o_j - gap_j (sig(k_j X_j) - s0_j)) / gap_j], X_j the flows of the quota
-        rows into exporter j at these prices, sig CAPRI's sigmoid (slope TRQ_SLOPE on fill - 0.97, its argument
-        clipped at +-60 as BilateralCommodity._sig);
+        rows into exporter j at these prices, sig CAPRI's sigmoid as BilateralCommodity._sig (TRQ_SLOPE,
+        TRQ_FILL_MID, TRQ_ARG_CLIP);
       - J = the Jacobian of g in (z, o).
     The TRQ equation is trq_solve's fixed point with the flows' full response, not its local one."""
     k_ = ("trq",) + _key(sc, act)
@@ -157,10 +157,10 @@ def trade_trq_function(sc, act):
     res, qf = _system(sc, act, ca, z, A, B, Sk, Dk, rk, PAk, es, ed,
                       offsets={j: o[q] for q, j in enumerate(quota)})
     gap, kk, s0 = trq_constants(sc, quota)
-    slope = float(sc.TRQ_SLOPE)
+    slope, mid, clip = float(sc.TRQ_SLOPE), float(sc.TRQ_FILL_MID), float(sc.TRQ_ARG_CLIP)
     trq = []
     for q, j in enumerate(quota):
-        arg = ca.fmin(ca.fmax(slope * (kk[q] * qf[j] - 0.97), -60.0), 60.0)
+        arg = ca.fmin(ca.fmax(slope * (kk[q] * qf[j] - mid), -clip), clip)
         trq.append((o[q] - gap[q] * (1.0 / (1.0 + ca.exp(-arg)) - s0[q])) / gap[q])
     g = ca.vertcat(ca.vertcat(*res) / scale, *trq)
     x = ca.vertcat(z, o)

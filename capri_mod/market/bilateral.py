@@ -102,12 +102,17 @@ class BilateralCommodity:
     #: CAPRI p_trqSigmoidSlope = 200 on (imports - 0.97 quota) / quota: the tariff moves from in- to
     #: out-of-quota within about +-3% of the quota (arm/market_model.gms trqSigmoidFunc_)
     TRQ_SLOPE = param("TRQ_SLOPE")
+    #: the quota fill at the sigmoid's midpoint (CAPRI trqSigmoidFunc_, arm/market_model.gms l. 3272-3284)
+    TRQ_FILL_MID = 0.97
+    #: overflow clip of the sigmoid's argument (numerical)
+    TRQ_ARG_CLIP = 60.0
 
     def _rows(self) -> np.ndarray:
         return np.atleast_1d(np.asarray(self.trq_row, dtype=int))
 
     def _sig(self, f):
-        return 1.0 / (1.0 + np.exp(-np.clip(self.TRQ_SLOPE * (f - 0.97), -60, 60)))
+        return 1.0 / (1.0 + np.exp(-np.clip(self.TRQ_SLOPE * (f - self.TRQ_FILL_MID), -self.TRQ_ARG_CLIP,
+                                            self.TRQ_ARG_CLIP)))
 
     def trq_solve(self, X: np.ndarray, p: np.ndarray) -> None:
         """Set each quota's offset consistent with its own flow: o = gap (sig(fill(X(o))) - sig(fill0)), with the
