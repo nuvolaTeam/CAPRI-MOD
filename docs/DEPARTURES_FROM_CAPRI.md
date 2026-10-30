@@ -203,6 +203,18 @@ CAPRI's form, home-grown fodder carries no purchase price and enters through its
 feed use (capri_regional_nlp.py QUADRF_ and the fodder rows), so its value is that equality's dual, as in CAPRI. The
 setting, its ratio bounds and damping, and the outside ration solve were removed with the conic form.
 
+### `market.noneu_supply_nq = true` (29 October 2026; K54-3, step D)
+
+The non-EU market regions' supply as CAPRI's market supply functions (arm/market_model.gms ProdNQ_: p_hessNQSupp at
+the 2030 calibration point with its cross-price terms and raw milk's, tools/build/build_noneu_market_supply_nq.py);
+before, one own-price constant elasticity per region and product (CAPRI's p_elasSupp of 2017).
+
+### `market.feed_bulk_in_market = true` (29 October 2026; audit M4, batch 6)
+
+CAPRI's feed bulk demand inside the market (feedBlk_): the member states' bulks respond to the prices within a market
+solve, from the supply models' bulks at the prices they saw, with the elasticities measured on the supply models (the
+market supply Hessian's FEEDBLK rows); before, fixed within a solve. Same fixed point, another path.
+
 ### `market.noneu_feed_nq = true` (29 October 2026; audit M3, batch 6)
 
 CAPRI's non-EU feed demand FeedNQ_ with the feed energy balance FeedBal_ (arm/market_model.gms l. 1018-1048), the

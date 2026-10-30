@@ -344,6 +344,15 @@ variance_floor_squared = true
 # seven calendar years under the name "5", but the set is restricted to ExPost, which ends at BAS + 1 in the
 # reference run (CAPREG series to 2018, BAS 2017): 2014-2018, five years. Not an error in that configuration
 basyrs5_halfwidth = 3
+# The run's GUI choices (captrd.gms %BaseYear%, %lst_dgagri%, %Aglink%, %mlkQutExpiry%, the simulation years RESY), at
+# the values of the reference run results_1770.gdx (base 2017, simulation years 2018-2070), against which the port is
+# compared; the last year of the data is CAPREG's and COCO's (COCO's nowcast reaches 2019)
+base_year = 2017
+last_data_year = 2019
+simulation_years = [2018, 2020, 2025, 2030, 2035, 2040, 2045, 2050, 2060, 2070]
+lst_dgagri = 2030
+aglink = "aglink2023dgAgri"
+milk_quota_expiry = 2009
 
 [pipeline]
 # The data download layer (capri_mod/pipeline; docs/DATA_PIPELINE.md). Where the store (raw downloads, manifest, Delta

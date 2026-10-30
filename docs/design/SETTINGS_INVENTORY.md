@@ -23,6 +23,12 @@ without the Hessian), the fodder band rows (removed with the regional-units chan
 (`use_cattle_member_splits`, K65; `fert_slope_with_saving`, K77). Column `status_27oct` of the CSV marks every removed
 row; the rest of this survey is left as written on 23 October.
 
+**Update 30 October 2026.** The current state of every departure and CAPRI code-error fix is in
+docs/CAPRI_DEPARTURES_REGISTER.md. Superseded below: market_supply_nq, absent_activities_fixed and the Norway milk are
+CAPRI's settings since 23-29 October; fodder_at_shadow_price was removed on 26 October; ammapp_sign and ad_dairy_ch4
+are corrections of CAPRI code errors (CAPRI-ERROR-FIX, register FIX-1 and FIX-2), not departures (the CSV's notes of
+S201 and S222 corrected).
+
 ## Counts
 | proposed_home | rows | | module (file) | rows | toml / param / map / scen / cli / keep |
 |---|---|---|---|---|---|

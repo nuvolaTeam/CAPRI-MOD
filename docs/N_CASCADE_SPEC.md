@@ -75,7 +75,7 @@
   0.1120, NL22 0.3220, PL22 0.1986, FRH0 0.2041); capri-mod's crop N2OLEA at its baseline is 10-40% above CAPRI's in
   DE11, NL22, PL22, FRH0 and 31% below in IE04, through its N balance items (mineral N: NL22 27.4 kt against CAPRI
   16.3, PL22 37.4 against 25.5).
-* DEPARTURE FROM CAPRI - sign of the application options in LEACHN_ (the user's decision, 20 October 2026;
+* CAPRI-ERROR-FIX - sign of the application options in LEACHN_ (the project lead's decision, 20 October 2026; register FIX-2;
   `n_leaching.AMMAPP_SIGN`):
   - CAPRI's code: LEACHN_ (supply_model.gms l. 3413) ADDS v_ammoAppLeaAgg, the manure-weighted mean of the low-emission
     application options' no3mlea x share (AMMOAGG_, l. 3427). RUNSURFN_ SUBTRACTS the same options' runoff effect

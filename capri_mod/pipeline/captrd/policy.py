@@ -48,7 +48,7 @@ def _years(ys) -> List[str]:
 
 
 def milk_quotas(w: Wide, ms: Iterable[str], dat: Dict[str, pd.DataFrame], years: Iterable[int],
-                exante: Iterable[int], basyrsm: Iterable[int], lst_expost: int, expiry: int = 2009) -> None:
+                exante: Iterable[int], basyrsm: Iterable[int], lst_expost: int, expiry: int) -> None:
     """pol_input/mquota_update.gms with %1 = Years, %3 = p_data, %4 = BASM; then captrd_policy.gms l. 28 (expiry)."""
     ys = _years(years)
     exa = _years(exante)
@@ -305,10 +305,13 @@ def _region_value(w: Wide, c: str, r: str, t: str) -> pd.Series:
 
 def apply(p: pd.DataFrame, sets: CaptrdSets, ms: Iterable[str], years: Iterable[int], exante: Iterable[int],
           exantet: Iterable[int], years_cur: Iterable[int], basyrsm: Iterable[int], lst_expost: int, base_year: int,
-          aglink: str, dat: Optional[Dict[str, pd.DataFrame]] = None, expiry: int = 2009) -> pd.DataFrame:
+          aglink: str, dat: Optional[Dict[str, pd.DataFrame]] = None, expiry: Optional[int] = None) -> pd.DataFrame:
     """captrd_policy.gms on p_data (one country's file: the country and its NUTS 2 regions). years: YEARS of the run
     (to the last simulation year); the index gets every year of the run for the country."""
     dat = read_policy_dat() if dat is None else dat
+    if expiry is None:                                      # %mlkQutExpiry% of the run (settings captrd.milk_quota_expiry)
+        from capri_mod.settings import current as _settings
+        expiry = int(_settings().get("captrd.milk_quota_expiry"))
     ms = [m for m in ms if m in set(p["region"])]
     have = set(zip(p["region"], p["t"]))
     extra = [(r, str(int(y))) for r in sorted(set(p["region"])) for y in years if (r, str(int(y))) not in have]

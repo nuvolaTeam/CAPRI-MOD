@@ -403,13 +403,15 @@ Each defect gets a fix, and a parity switch reproduces CAPRI's behaviour.
 - **Reporting:** the effect of each fix is reported separately, against the parity run.
 
 The defects (details in CAPTRD_MAP.md):
-- the upper bound on artificial land, non-binding through a misplaced parenthesis (fix_est.gms:810);
+- the upper bound on artificial land, non-binding through a misplaced parenthesis (fix_est.gms:810): decided, not built
+  yet (Steps 2-3 are not ported; register FIX-7);
 - the error-variance floor comparing a level with a variance: fixed 24 October 2026 as (0.05 × |wAve|)², setting
   `captrd.variance_floor_squared` (section 12.4; docs/DEPARTURES_FROM_CAPRI.md);
 - the base-year window labelled "5 years" spanning 7: on inspection (23 October 2026) not a defect where ExPost ends
   at BAS + 1, as in the reference run (BASYRS5 = 2014-2018, five years; section 12.4). Setting
   `captrd.basyrs5_halfwidth` = 3, CAPRI's;
-- zeros treated as missing (fixed in the data layer, section 6, and in the estimator);
+- zeros treated as missing: decided; not built yet. The estimator (pipeline/captrd/step1.py) keeps CAPRI's convention
+  until the data layer separates true zeros from missing values (section 6; register FIX-8);
 - series with 2-4 observations get Step1 = 0: the minimum over the trend grid counts the 29 zeroed grid points
   (estimate_trends.gms l. 158-171). Found while porting and confirmed in CAPRI's own output on 23 October 2026
   (section 12.4). Setting `captrd.short_series_grid_as_coded` (docs/DEPARTURES_FROM_CAPRI.md).
@@ -420,7 +422,8 @@ Further defects found while porting are handled the same way and added here.
 
 ### 8.4 Recursive dynamics, CAPSIM-DYN: the largest possible set (decided scope; beyond CAPRI)
 
-The module is named **CAPSIM-DYN** (project lead, 23 October 2026). Code: `capri_mod/projection/capsim_dyn/`.
+The module is named **CAPSIM-DYN** (project lead, 23 October 2026). Code (planned, not yet created):
+`capri_mod/projection/capsim_dyn/`.
 
 
 CAPRI's per-year equilibrium is kept. Each link carries a state from year t−1 into year t, has a switch, and is
