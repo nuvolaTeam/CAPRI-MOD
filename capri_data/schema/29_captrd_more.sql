@@ -7,7 +7,7 @@ CREATE TABLE ctrd_p_byproduct (
     "value" DOUBLE NOT NULL,
     PRIMARY KEY (byproduct, stock)
 );
-COMMENT ON TABLE ctrd_p_byproduct IS 'CAPRI''s p_ByProduct(byproduct, stock): by-product (DDGS, GLYC) per ton of feedstock converted to biofuel, from dat/biofuel/biofuel_technology_params.gms (copy in capri_data/sources/capri_dat), which captrd.gms l. 340-341 includes; 14 rows (tools/build/build_captrd_dat.py).';
+COMMENT ON TABLE ctrd_p_byproduct IS 'CAPRI''s p_ByProduct(byproduct, stock): by-product (DDGS, GLYC) per ton of feedstock converted to biofuel, from dat/biofuel/biofuel_technology_params.gms (as CSV: capri_data/sources/capri_dat/biofuel/biofuel_technology_params_p_ByProduct.csv, tools/build/convert_sources_to_csv.py), which captrd.gms l. 340-341 includes; 14 rows (tools/build/build_captrd_dat.py).';
 INSERT INTO value_units VALUES
   ('ctrd_p_byproduct', 'value', NULL, 'open', 'p_byproduct.value: unit to be established');
 
@@ -18,7 +18,7 @@ CREATE TABLE ctrd_p_extrrates (
     "value" DOUBLE NOT NULL,
     PRIMARY KEY (fuel, stock)
 );
-COMMENT ON TABLE ctrd_p_extrrates IS 'CAPRI''s p_ExtrRates(fuel, stock): biofuel (BIOE, BIOD) per ton of feedstock, from dat/biofuel/biofuel_technology_params.gms (copy in capri_data/sources/capri_dat), which captrd.gms l. 340-341 includes; 17 rows (tools/build/build_captrd_dat.py).';
+COMMENT ON TABLE ctrd_p_extrrates IS 'CAPRI''s p_ExtrRates(fuel, stock): biofuel (BIOE, BIOD) per ton of feedstock, from dat/biofuel/biofuel_technology_params.gms (as CSV: capri_data/sources/capri_dat/biofuel/biofuel_technology_params_p_ExtrRates.csv, tools/build/convert_sources_to_csv.py), which captrd.gms l. 340-341 includes; 17 rows (tools/build/build_captrd_dat.py).';
 INSERT INTO value_units VALUES
   ('ctrd_p_extrrates', 'value', NULL, 'open', 'p_extrrates.value: unit to be established');
 
@@ -28,7 +28,7 @@ CREATE TABLE ctrd_p_luunits (
     "value" DOUBLE NOT NULL,
     PRIMARY KEY (act)
 );
-COMMENT ON TABLE ctrd_p_luunits IS 'CAPRI''s p_LUUnits(act): livestock units per head of an animal activity, from dat/policy/livestock_units.gms (copy in capri_data/sources/capri_dat), included at captrd.gms l. 349 and used for the stocking density LU (prep_data_for_estimation.gms l. 202-203); 18 rows (tools/build/build_captrd_dat.py).';
+COMMENT ON TABLE ctrd_p_luunits IS 'CAPRI''s p_LUUnits(act): livestock units per head of an animal activity, from dat/policy/livestock_units.gms (as CSV: capri_data/sources/capri_dat/policy/livestock_units_p_LUUnits.csv, tools/build/convert_sources_to_csv.py), included at captrd.gms l. 349 and used for the stocking density LU (prep_data_for_estimation.gms l. 202-203); 18 rows (tools/build/build_captrd_dat.py).';
 INSERT INTO value_units VALUES
   ('ctrd_p_luunits', 'value', NULL, 'open', 'p_luunits.value: unit to be established');
 

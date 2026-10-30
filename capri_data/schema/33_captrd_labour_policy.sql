@@ -20,7 +20,7 @@ CREATE TABLE ctrd_p_minlabourperact (
     "value" DOUBLE NOT NULL,
     PRIMARY KEY (act)
 );
-COMMENT ON TABLE ctrd_p_minlabourperact IS 'CAPRI''s p_minLabourPerAct(act): minimum labour per activity unit (h, 2008), transcribed from baseline/labour_ageline.gms (copy in capri_data/sources/capri_gams) by tools/build/build_captrd_dat.py';
+COMMENT ON TABLE ctrd_p_minlabourperact IS 'CAPRI''s p_minLabourPerAct(act): minimum labour per activity unit (h, 2008), from baseline/labour_ageline.gms l. 92-153 (as CSV: capri_data/sources/capri_gams/baseline/labour_ageline_p_minLabourPerAct.csv, tools/build/convert_sources_to_csv.py) by tools/build/build_captrd_dat.py';
 INSERT INTO value_units VALUES
   ('ctrd_p_minlabourperact', 'value', NULL, 'open', 'p_minlabourperact.value: unit to be established');
 
@@ -32,7 +32,7 @@ CREATE TABLE ctrd_p_mquotadat (
     "value" DOUBLE NOT NULL,
     PRIMARY KEY (region, info, "year")
 );
-COMMENT ON TABLE ctrd_p_mquotadat IS 'CAPRI''s p_MQuotaDat(MS, info, year): milk quotas, deliveries and direct sales (DG AGRI), from dat/coco/milk_quota_dat.gms (copy in capri_data/sources/capri_dat), read by captrd/captrd_policy.gms (tools/build/build_captrd_dat.py)';
+COMMENT ON TABLE ctrd_p_mquotadat IS 'CAPRI''s p_MQuotaDat(MS, info, year): milk quotas, deliveries and direct sales (DG AGRI), from dat/coco/milk_quota_dat.gms (as CSV: capri_data/sources/capri_dat/coco/milk_quota_dat_p_MQuotaDat.csv, tools/build/convert_sources_to_csv.py), read by captrd/captrd_policy.gms (tools/build/build_captrd_dat.py)';
 INSERT INTO value_units VALUES
   ('ctrd_p_mquotadat', 'value', NULL, 'open', 'p_mquotadat.value: unit to be established');
 
@@ -44,7 +44,7 @@ CREATE TABLE ctrd_p_mquotareg (
     "value" DOUBLE NOT NULL,
     PRIMARY KEY (region, info, "year")
 );
-COMMENT ON TABLE ctrd_p_mquotareg IS 'CAPRI''s PMQuotaReg(MS, QUTtot, year): total milk quotas 2004-2014 (1000 t), from pol_input/mquota_update.gms (copy in capri_data/sources/capri_gams), read by captrd/captrd_policy.gms (tools/build/build_captrd_dat.py)';
+COMMENT ON TABLE ctrd_p_mquotareg IS 'CAPRI''s PMQuotaReg(MS, QUTtot, year): total milk quotas 2004-2014 (1000 t), from pol_input/mquota_update.gms (as CSV: capri_data/sources/capri_gams/pol_input/mquota_update_PMQuotaReg.csv, tools/build/convert_sources_to_csv.py), read by captrd/captrd_policy.gms (tools/build/build_captrd_dat.py)';
 INSERT INTO value_units VALUES
   ('ctrd_p_mquotareg', 'value', 'U_1000t', 'capri', 'CAPRI''s quantity in 1000 t (builder docstring; sugar README)');
 
@@ -78,7 +78,7 @@ CREATE TABLE ctrd_p_smallprodshare (
     "value" DOUBLE NOT NULL,
     PRIMARY KEY (region, "year")
 );
-COMMENT ON TABLE ctrd_p_smallprodshare IS 'CAPRI''s p_smallProdShare(year, MS): small producers'' share outside compulsory set-aside, from dat/policy/smal_pshar.gms (copy in capri_data/sources/capri_dat), read by captrd/captrd_policy.gms (tools/build/build_captrd_dat.py)';
+COMMENT ON TABLE ctrd_p_smallprodshare IS 'CAPRI''s p_smallProdShare(year, MS): small producers'' share outside compulsory set-aside, from dat/policy/smal_pshar.gms (as CSV: capri_data/sources/capri_dat/policy/smal_pshar_p_smallProdShare.csv, tools/build/convert_sources_to_csv.py), read by captrd/captrd_policy.gms (tools/build/build_captrd_dat.py)';
 INSERT INTO value_units VALUES
   ('ctrd_p_smallprodshare', 'value', NULL, 'open', 'p_smallprodshare.value: unit to be established');
 

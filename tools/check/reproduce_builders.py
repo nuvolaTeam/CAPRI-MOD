@@ -52,6 +52,8 @@ S = "capri_data/2017/supply"
 
 #: (builder, arguments, external inputs that must exist). Order: REGIONAL_UNITS_BUILDERS.md section 3, then the rest.
 INVOCATIONS: list[tuple[str, list[str], list[Path]]] = [
+    # the CSV conversion of the sources that were not CSV (reads the originals from git history)
+    ("convert_sources_to_csv", [], []),
     ("extract_gd2030_nbalance", [], [REF]),
     ("build_regional_units", [], []),
     ("build_code_lists", ["--sets", str(SETS)], [SETS]),
@@ -186,6 +188,7 @@ INVOCATIONS: list[tuple[str, list[str], list[Path]]] = [
     ("build_capri_own_price_elasticities", ["--src", str(UP)], [UP]),
     ("build_captrd_trajectory", ["--series", str(WORK / "capri_reference/captrd_results/1770/series.csv.gz")],
      [WORK / "capri_reference/captrd_results/1770/series.csv.gz"]),
+    ("build_captrd_dat", [], [WORK / "hf_capri/dat/baseline/ageline/ageline.parquet"]),
     ("build_feed_demand_nonEU", [], [UP / "elas_2_1730defaulta.csv", UP / "data_market_1730defaulta.csv"]),
     ("build_fert_dist_priors", [], []),
     ("build_fert_options_jul15", [], []),
