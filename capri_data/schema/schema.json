@@ -471,7 +471,7 @@
    "read_by": {
     "model": [
      "capri_mod/environmental/environmental_module.py",
-     "capri_mod/supply/supply_module.py"
+     "capri_mod/supply/blocks/abatement.py"
     ],
     "builders": [
      "build_genetics_effects",
@@ -7909,7 +7909,7 @@
    "read_by": {
     "model": [
      "capri_mod/data/loaders.py",
-     "capri_mod/supply/supply_module.py"
+     "capri_mod/supply/blocks/fertilisation.py"
     ],
     "builders": [],
     "checks": [],
@@ -9974,7 +9974,7 @@
    "read_by": {
     "model": [
      "capri_mod/data/loaders.py",
-     "capri_mod/supply/supply_module.py"
+     "capri_mod/supply/blocks/livestock.py"
     ],
     "builders": [],
     "checks": [],
@@ -11886,7 +11886,7 @@
    "read_by": {
     "model": [
      "capri_mod/data/loaders.py",
-     "capri_mod/supply/supply_module.py"
+     "capri_mod/supply/blocks/fertilisation.py"
     ],
     "builders": [],
     "checks": [],
@@ -18475,7 +18475,7 @@
    "notes": [],
    "read_by": {
     "model": [
-     "capri_mod/supply/supply_module.py"
+     "capri_mod/supply/blocks/policy.py"
     ],
     "builders": [],
     "checks": [],
@@ -18544,7 +18544,7 @@
    "notes": [],
    "read_by": {
     "model": [
-     "capri_mod/supply/supply_module.py"
+     "capri_mod/supply/blocks/policy.py"
     ],
     "builders": [],
     "checks": [],
@@ -38132,7 +38132,7 @@
    "notes": [],
    "read_by": {
     "model": [
-     "capri_mod/supply/supply_module.py"
+     "capri_mod/supply/blocks/abatement.py"
     ],
     "builders": [],
     "checks": [],
@@ -38190,7 +38190,7 @@
     "model": [
      "capri_mod/data/loaders.py",
      "capri_mod/data/validate_data.py",
-     "capri_mod/supply/supply_module.py"
+     "capri_mod/supply/blocks/livestock.py"
     ],
     "builders": [],
     "checks": [
@@ -38260,7 +38260,7 @@
    "notes": [],
    "read_by": {
     "model": [
-     "capri_mod/supply/supply_module.py"
+     "capri_mod/supply/blocks/policy.py"
     ],
     "builders": [],
     "checks": [],
