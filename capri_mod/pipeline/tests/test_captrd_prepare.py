@@ -64,7 +64,7 @@ def _vset_dependent(df: pd.DataFrame) -> pd.Series:
 def _reference(s: P.CaptrdSets, region: str, ex) -> pd.DataFrame:
     ref = pd.concat(c[c.region == region] for c in
                     pd.read_csv(RES / "P_Data.csv.gz", dtype={"t": str}, chunksize=1_000_000))
-    ref = ref[ref.t.str.isdigit() & (ref.eps == 0) & ref.col.isin(s.s_colsest) & ref.row.isin(s.s_rowsest)
+    ref = ref[ref.t.str.isdigit() & (ref.eps == 0) & ref.col.isin(s.s_colsest | s.reqsc) & ref.row.isin(s.s_rowsest)
               & (ref.col + ref.row != "INHALEVL")]          # population: external forecast, nObs = 0 (l. 184-185)
     return ref[ref.t.astype(int).isin(ex)]
 

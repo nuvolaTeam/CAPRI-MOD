@@ -40,7 +40,9 @@ S_COLS_LITERAL = ["UAAR", "ARTO", "GROF", "QUTS", "MAPR", "UVAG", "UVAD", "EAAG"
 S_COLS_SETS = ["MPACT", "LandUseARTO"]
 # CAPTRD's own MrkBalE (sets_captrd.gms l. 292-294), not the CAPMOD one of sets.gms l. 5271 (8 positions)
 MRKBALE = ["GROF", "IMPT", "EXPT", "FEDM", "SEDF", "SEDM", "INDM", "PRCM", "BIOF", "HCOM", "LOSF", "LOSM", "MAPR", "INTP"]
-# captrd.gms l. 833: S_ColsEst(REQSC) = YES after the data load (the nutrient contents; sets.gms l. 2133 REQSC = REQS_SET)
+# REQSC (the nutrient contents, sets.gms l. 2133) is not a member: captrd.gms l. 833-838 adds it only while deleting the
+# annual data of the series not estimated (S_ColsEst(REQSC) = YES, the deletion, = NO), so their annual data are kept but
+# they get no statistics (prep_data_for_estimation.gms l. 209); the port adds REQSC at that step (prepare.py)
 # S_RowsEst, l. 422-460: the global sets O, SECO, SECO_BIOF, FUEL_ROWS, MLKSECO, IYANI, FEED, then literals and GRPR;
 # minus FOUT (l. 454); plus REQST (l. 458); minus the outputs no activity produces (l. 459, PACT_TO_O)
 S_ROWS_SETS = ["O", "SECO", "SECO_BIOF", "FUEL_ROWS", "MLKSECO", "IYANI", "FEED"]
@@ -119,7 +121,7 @@ def main() -> None:
     cols = list(S_COLS_LITERAL)
     for s in S_COLS_SETS:
         cols += _members(ref, s)
-    cols += GRPC + MRKBALE + list(_members(ref, "REQSC"))
+    cols += GRPC + MRKBALE
     cols = sorted(set(cols) - {"OSET"}, key=str.upper)
 
     rows = []
