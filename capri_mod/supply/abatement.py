@@ -56,7 +56,7 @@ class AbatementBlock:
         the simulation; the winterCover_ row: sum_c winter cover share_c x crop_c + m x UAAR <= UAAR + fallow floor
         (supply_model.gms l. 1979-1992), its right-hand side at least the base point's (REGISTERED: CAPRI's MaxShare
         is from CAPRI's crop levels, the row from the model's)."""
-        if self.data.region_id[:2] in SupplyModule.NON_EU_PREFIXES:
+        if not is_eu(self.data.region_id):
             return None
         opt = _inputs.current().cached(                                   # a missing file is an error (K74)
             "winter_cover_option", lambda inp: inp.csv("winter_cover_option.csv", "abatement/mitigation").set_index("region"))

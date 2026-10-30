@@ -41,7 +41,7 @@ from capri_mod.settings import setting, tri_state, current as _settings
 from capri_mod.data.definitions import (
     CROPS, ANIMALS, ALL_ACTIVITIES, FEED_ITEMS, NUTRIENTS,
 )
-from capri_mod.data.definitions import MS_CODE, capri_ms, IdentityMap, SUP_NONEU, is_eu
+from capri_mod.data.definitions import MS_CODE, capri_ms, IdentityMap, is_eu
 from capri_mod.tableio import read_input
 from capri_mod.supply import inputs as _inputs
 
@@ -2546,7 +2546,7 @@ class SupplyModule:
     def _manure_context(self, region, model):
         """{"man_d", "nmin", "ybase"} for the regional model's crop-need row, manure trade columns and ammonia options
         (CAPRI has them in every run), or None outside the EU (msNoEU)."""
-        if region[:2] in self.NON_EU_PREFIXES:
+        if not is_eu(region):
             return None
         cache = self.__dict__.setdefault("_mctx_cache", {})
         ck = (region, bool(getattr(self, "manure_trade_on", True)))
@@ -2672,8 +2672,7 @@ class SupplyModule:
         cache[key] = spec
         return spec
 
-    #: supply regions outside the EU, where EU policy instruments do not apply
-    NON_EU_PREFIXES = frozenset(c for c, _tr in SUP_NONEU.values())
+    #: the EU policy instruments, which do not apply to supply regions outside the EU (definitions.is_eu)
     EU_POLICY_KEYS = frozenset({"set_aside_requirement", "nutrient_surplus_target", "surplus_rule", "surplus_cut",
                                 "mineral_redu",
                                 "pesticide_reduction",
@@ -2882,7 +2881,7 @@ class SupplyModule:
         # (conventional_io.gms) to EU27yr19 and take landscape targets for EU regions; Norway is
         # in the model's supply regions but not in the EU
         policy_scenario = _pol_all
-        if isinstance(_pol_all, dict) and region[:2] in self.NON_EU_PREFIXES:
+        if isinstance(_pol_all, dict) and not is_eu(region):
             policy_scenario = {k: v for k, v in _pol_all.items() if k not in self.EU_POLICY_KEYS}
         try:
             model = self._get_or_build_model(region)
