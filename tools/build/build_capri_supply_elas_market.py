@@ -6,7 +6,7 @@
         capri_mod/supply/capri_pmp.py (the livestock elasticities of the elasticity-calibrated PMP)
     capri_data/2017/market/supply_elas_eu.csv                  commodity, capri_code, elasticity, member_states
         per market commodity of the model (codes/model_commodities.csv, its CAPRI code), the median over the
-        model's EU member states (CAPRI's codes of shared/capri_member_state_codes.csv but Norway and the UK: 26, BL =
+        model's EU member states (those of CAPRI's EU trade blocks, shared/eu_market_blocks.csv: 26, BL =
         Belgium and Luxembourg) of the own-price p_elasSupp, where at least one has it; read by
         capri_mod/market/supply.py (the EU rows' own-price anticipation)
 
@@ -24,18 +24,21 @@ import csv
 import re
 import statistics
 from collections import defaultdict
+import sys
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "lib"))
+from _model_regions import EU_MS  # noqa: E402  CAPRI's EU member states (shared/eu_market_blocks.csv)
 
 ROOT = Path(__file__).resolve().parents[2]
 SRC = Path("/mnt/user-data/uploads/p_elasSupp.txt")
 OUT = ROOT / "capri_data" / "sources" / "arm"
 REC = re.compile(r"^'([^']+)'\.'([^']+)'\.'([^']+)'\.'CAL'\s+([^,\s]+)")
-NOT_EU = ("NO000000", "UK000000")
 
 
 def eu_member_states() -> set:
-    with open(ROOT / "capri_data" / "shared" / "capri_member_state_codes.csv", newline="") as f:
-        return {r["capri_ms"] for r in csv.DictReader(f)} - set(NOT_EU)
+    """CAPRI's EU member states: those of its EU trade blocks (shared/eu_market_blocks.csv)."""
+    return set(EU_MS)
 
 
 def main() -> None:

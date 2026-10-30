@@ -34,7 +34,11 @@ import csv
 import importlib.util
 import re
 from collections import defaultdict
+import sys
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "lib"))
+from _model_regions import EU_MS  # noqa: E402  CAPRI's EU member states (shared/eu_market_blocks.csv)
 
 ROOT = Path(__file__).resolve().parents[2]
 OUT_DIR = ROOT / "capri_data" / "2017" / "market"
@@ -49,8 +53,7 @@ def region_map():
     30 October 2026 the blocks' crushing was missed, ROW's oils and cakes falling short of CAPRI's production)."""
     sp = importlib.util.spec_from_file_location("_rt", ROOT / "tools" / "build" / "recalibrate_trade_2017.py")
     m = importlib.util.module_from_spec(sp); sp.loader.exec_module(m)
-    with open(ROOT / "capri_data" / "shared" / "capri_member_state_codes.csv", newline="") as f:
-        eu = {r["capri_ms"] for r in csv.DictReader(f) if r["nuts_prefix"] not in ("NO", "GB", "UK")}
+    eu = set(EU_MS)
     with open(ROOT / "capri_data" / "shared" / "rms.csv", newline="") as f:
         rms = [r["rms"] for r in csv.DictReader(f)]
     return {r: m.trade_region(r) for r in rms if r not in eu}
@@ -126,13 +129,12 @@ def build(market: Path, year: str, elas: Path):
 
 
 def eu_build(market: Path, year: str, elas: Path):
-    """EU27 rows from CAPRI's member states (capri_member_state_codes.csv without NO and UK): crush = sum of PROC,
-    yields = sum of PROC x PRCY / crush, crush share of use = crush / sum of (PROD + IMPORTS - EXPORTS) of the seed,
-    elasticity = median of the member states' p_ElasProc (the market's EU base crush = this share x its aligned EU
+    """EU27 rows from CAPRI's member states (those of its EU trade blocks, shared/eu_market_blocks.csv): crush = sum
+    of PROC, yields = sum of PROC x PRCY / crush, crush share of use = crush / sum of (PROD + IMPORTS - EXPORTS) of
+    the seed, elasticity = median of the member states' p_ElasProc (the market's EU base crush = this share x its aligned EU
     seed use)."""
     import statistics
-    with open(ROOT / "capri_data" / "shared" / "capri_member_state_codes.csv", newline="") as f:
-        eu = {r["capri_ms"] for r in csv.DictReader(f) if r["nuts_prefix"] not in ("NO", "GB", "UK")}
+    eu = set(EU_MS)
     d = read_market(market, year, eu)
     e = read_elas(elas)
     rows = []

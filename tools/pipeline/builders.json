@@ -899,7 +899,7 @@
    ],
    "inputs": [
     "capri_data/codes/model_commodities.csv",
-    "capri_data/shared/capri_member_state_codes.csv"
+    "capri_data/shared/eu_market_blocks.csv"
    ],
    "code": [
     "tools/build/build_capri_supply_elas_market.py"
@@ -1205,7 +1205,7 @@
     "$UP/elas_2_1717defaulta.csv"
    ],
    "inputs": [
-    "capri_data/shared/capri_member_state_codes.csv",
+    "capri_data/shared/eu_market_blocks.csv",
     "capri_data/shared/rms.csv",
     "capri_data/shared/rms_to_rm.csv",
     "capri_data/codes/model_trade_regions.csv"
@@ -1234,7 +1234,7 @@
     "$UP/elas_2_1730defaulta.csv"
    ],
    "inputs": [
-    "capri_data/shared/capri_member_state_codes.csv",
+    "capri_data/shared/eu_market_blocks.csv",
     "capri_data/shared/rms.csv",
     "capri_data/shared/rms_to_rm.csv",
     "capri_data/codes/model_trade_regions.csv"
@@ -1451,7 +1451,7 @@
    "builder": "build_eu_cake_feed",
    "args": [],
    "inputs": [
-    "capri_data/shared/capri_member_state_codes.csv"
+    "capri_data/shared/eu_market_blocks.csv"
    ],
    "code": [
     "tools/build/build_eu_cake_feed.py"

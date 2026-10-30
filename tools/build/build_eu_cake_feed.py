@@ -5,7 +5,7 @@
 
 feed_kt = sum over CAPRI's EU member states of p_dataMarket(MS, 'FEDM', cake, 'BAS') / 1000 (tonnes to 1000 t), cakes
 RAPC, SUNC, SOYC, from CAPRI's FAO_agg market data (fao_agg_17_datamarket.txt, the export the market builders read).
-The member states: CAPRI's codes of shared/capri_member_state_codes.csv but Norway and the United Kingdom (26, BL =
+The member states: those of CAPRI's EU trade blocks, shared/eu_market_blocks.csv (26, BL =
 Belgium and Luxembourg). Until 29 October 2026 the weights were read from capri_oilseed_products_baseline.json, a file
 without builder whose other contents no code read (removed).
 
@@ -17,18 +17,21 @@ import argparse
 import csv
 import re
 from collections import defaultdict
+import sys
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "lib"))
+from _model_regions import EU_MS  # noqa: E402  CAPRI's EU member states (shared/eu_market_blocks.csv)
 
 ROOT = Path(__file__).resolve().parents[2]
 SRC = Path("/mnt/user-data/uploads/fao_agg_17_datamarket.txt")
 OUT = ROOT / "capri_data" / "2017" / "market" / "eu_cake_feed_bas.csv"
 CAKES = ("RAPC", "SUNC", "SOYC")
-NOT_EU = ("NO000000", "UK000000")
 
 
 def eu_member_states() -> list[str]:
-    with open(ROOT / "capri_data" / "shared" / "capri_member_state_codes.csv", newline="") as f:
-        return sorted({r["capri_ms"] for r in csv.DictReader(f)} - set(NOT_EU))
+    """CAPRI's EU member states: those of its EU trade blocks (shared/eu_market_blocks.csv)."""
+    return sorted(EU_MS)
 
 
 def main() -> None:
