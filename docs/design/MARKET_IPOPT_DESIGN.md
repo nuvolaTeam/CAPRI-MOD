@@ -1,6 +1,6 @@
 # Market solve with IPOPT and exact Jacobians (step G): design note
 
-Draft of 30 October 2026, for the project lead's decisions in section 7. Nothing here is built yet, except the trade
+Written on 30 October 2026; the decisions of section 7 were taken the same day. Nothing here is built yet, except the trade
 systems' CasADi expressions (`capri_mod/market/trade_ad.py`, step G1).
 
 ## 1. What CAPRI does
@@ -115,7 +115,15 @@ Each stage must pass two checks:
      and GD runs, and the outer loop converges in the same number of iterations or fewer.
    - **Default:** the IPOPT solve becomes the default only after that check, by the project lead's decision.
 
-## 7. Decisions for the project lead
+## 7. Decisions
+
+**Decided by the project lead on 30 October 2026 ("Step G: ok"), as recommended below:**
+- the objective is ½‖z − z₀‖²;
+- each block is written once, in CasADi, as a separate move stage;
+- the Hessian is exact;
+- the stages run in the order of section 6, the TRQ first.
+
+The options as they were put:
 
 1. **The objective.** ½‖z − z₀‖² (chosen) or a zero objective as CAPRI's. The two give the same solution where it
    is isolated.
