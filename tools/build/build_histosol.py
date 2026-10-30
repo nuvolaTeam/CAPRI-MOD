@@ -55,18 +55,15 @@ TAG = {"crop": "crop", "grslnd": "grass"}
 
 #: Until 30 October 2026 this builder parsed the gdxdump text with a pattern that missed each dump's last record (the
 #: line ending in "/;"): p_OrgSoilOri('NO011000', 'sof_regN2_rk'), P('299', 'TropicalDry', 'Forest_be30') and
-#: p_emifacOrganicSoil_ori('N2O', 'grslnd', 'tropical') = 5. The CSVs hold every record; the last one of each is left
-#: out here so that histosol.csv stays as it was (the CSV conversion changes no output). Reading it (False) raises
-#: ef_n2o_grass in the 39 regions with a tropical climate-zone share (CY, EL, ES, ...), n2o_t_ha_grass by at most
-#: 2.4e-8 t/ha: the project lead's decision.
-SKIP_LAST_RECORD = True
+#: p_emifacOrganicSoil_ori('N2O', 'grslnd', 'tropical') = 5; an extraction error of capri-mod, found when the dumps were
+#: converted to CSV. Every record is read now.
 
 
 def _records(name):
     """The records of a gdxdump converted to CSV (capri_data/sources/envind, tools/build/convert_sources_to_csv.py)."""
     with open(SRC / "envind" / name, newline="", encoding="utf-8") as fh:
         rows = list(csv.DictReader(fh))
-    return rows[:-1] if SKIP_LAST_RECORD else rows
+    return rows
 
 
 def _load(path):
