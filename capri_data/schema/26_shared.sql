@@ -34,6 +34,16 @@ CREATE TABLE shr_eu_market_blocks (
 );
 COMMENT ON TABLE shr_eu_market_blocks IS 'The EU''s trade blocks of CAPRI''s market (market step E, eu_blocks): member state -> block, from CAPRI''s region (tools/build/build_eu_market_blocks.py)';
 
+-- file: capri_data/shared/trade_regions.csv
+CREATE TABLE shr_trade_regions (
+    trade_region VARCHAR NOT NULL,
+    capri_region VARCHAR,
+    country VARCHAR,
+    source VARCHAR NOT NULL,
+    UNIQUE (trade_region, country)
+);
+COMMENT ON TABLE shr_trade_regions IS 'The market''s trade regions in their order (no builder: a declared table, a source per row): trade region, CAPRI''s region code in its market data (market region or trade block; ROW: none), the countries (two-letter codes; EU27: none, its countries are the member states of eu_market_blocks.csv). Read by capri_mod/data/definitions.py (TRADE_REGIONS, the non-EU supply-model regions) and tools/build/recalibrate_trade_2017.py (REGION_MAP).';
+
 -- file: capri_data/shared/model_parameters.csv
 CREATE TABLE shr_model_parameters (
     name VARCHAR NOT NULL,

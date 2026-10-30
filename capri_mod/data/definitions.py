@@ -179,46 +179,67 @@ def country_of(region: str) -> str:
 # TRADE REGIONS (market module — 77 countries aggregated to ~40 trade blocks)
 # ---------------------------------------------------------------------------
 
-TRADE_REGIONS = {
-    # the EU's member states (Norway is not one: NUTS2_REGIONS also holds Norway's supply regions)
-    "EU27":  [c for c in NUTS2_REGIONS.keys() if c not in ("NO",)],  # one block in market
-    "USA":   ["US"],
-    "CAN":   ["CA"],
-    "BRA":   ["BR"],
-    "ARG":   ["AR"],
-    "AUS":   ["AU"],
-    "NZL":   ["NZ"],
-    "CHN":   ["CN"],
-    "IND":   ["IN"],
-    "RUS":   ["RU"],
-    "UKR":   ["UA"],
-    "TUR":   ["TR"],
-    "MEX":   ["MX"],
-    "IDN":   ["ID"],
-    "JPN":   ["JP"],
-    "KOR":   ["KR"],
-    "THA":   ["TH"],
-    "VNM":   ["VN"],
-    "PAK":   ["PK"],
-    "BGD":   ["BD"],
-    "NGA":   ["NG"],
-    "ZAF":   ["ZA"],
-    "ETH":   ["ET"],
-    "MAR":   ["MA"],
-    # Egypt, Algeria, Saudi Arabia and Iran were trade regions here without any data (no flows, use, supply or
-    # processing; tariff rows of zeros): CAPRI's behavioural regions EGY and ALG (its market region MED) enter ROW in
-    # every market file, and Saudi Arabia and Iran are no behavioural regions of CAPRI's (capri_data/shared/rms.csv).
-    # Removed 29 October 2026 (KNOWN_ISSUES K45)
-    # Norway: CAPRI's market region NO000000 (own market region, aggregation/defaultA.agg), linked to supply
-    # models (RMSSUP): its market supply is its supply models' output (KNOWN_ISSUES K56)
-    "NOR":   ["NO"],
-    # the United Kingdom (CAPRI's market region UK000000) and the Western Balkans (CAPRI's trade block WBA: Albania,
-    # Bosnia and Herzegovina, Serbia, Kosovo, North Macedonia, Montenegro), trade regions of their own as in CAPRI
-    # (batch 7; before, in ROW). CAPRI has supply models for both (RMSSUP); the model has their market supply functions
-    "GBR":   ["GB"],
-    "WBA":   ["AL", "BA", "RS", "XK", "MK", "ME"],
-    "ROW":   ["ROW"],  # Rest of world
-}
+def _shared_rows(name: str) -> list:
+    import csv
+    from pathlib import Path
+    with open(Path(__file__).resolve().parents[2] / "capri_data" / "shared" / name, newline="") as f:
+        return list(csv.DictReader(f))
+
+
+#: CAPRI's EU trade blocks (capri_data/shared/eu_market_blocks.csv, from gams/aggregation/defaultA.agg): member state
+#: (CAPRI code) -> block, and the blocks in the file's order (EU_WEST, EU_EAST)
+EU_MS_BLOCK = {r["ms"]: r["block"] for r in _shared_rows("eu_market_blocks.csv")}
+EU_BLOCKS = tuple(dict.fromkeys(EU_MS_BLOCK.values()))
+
+
+def _load_trade_regions() -> tuple:
+    """The market's trade regions in their order (capri_data/shared/trade_regions.csv, a declared table: trade region,
+    CAPRI's region code, the countries). Returns (trade region -> its countries (two-letter codes), CAPRI's region code
+    -> trade region). The EU27's countries are those of the regional units whose CAPRI member state is in CAPRI's EU
+    trade blocks (EU_MS_BLOCK); ROW holds every CAPRI region the table does not list. The United Kingdom (GBR) and
+    the Western Balkans (WBA) are trade regions of their own as in CAPRI since batch 7; Norway (NOR) since K56;
+    Egypt, Algeria, Saudi Arabia and Iran, trade regions here without any data until 29 October 2026, fold into ROW
+    (KNOWN_ISSUES K45)."""
+    regions: dict = {}
+    of_capri: dict = {}
+    for r in _shared_rows("trade_regions.csv"):
+        members = regions.setdefault(r["trade_region"], [])
+        if r["country"]:
+            members.append(r["country"])
+        if r["capri_region"]:
+            if of_capri.setdefault(r["capri_region"], r["trade_region"]) != r["trade_region"]:
+                raise ValueError(f"trade_regions.csv: {r['capri_region']} in two trade regions")
+    if regions.get("EU27", [None]):
+        raise ValueError("trade_regions.csv: EU27 must be listed without countries (they come from eu_market_blocks.csv)")
+    regions["EU27"] = list(dict.fromkeys(c for _r, m, c in _UNITS if m in EU_MS_BLOCK))
+    return regions, of_capri
+
+
+#: trade region -> its countries; CAPRI's region code (market region or trade block of its market data) -> trade region
+TRADE_REGIONS, TRADE_REGION_OF_CAPRI = _load_trade_regions()
+
+
+def _supply_model_regions_outside_eu() -> dict:
+    """The countries outside the EU with supply models (CAPRI's RMSSUP outside the EU): the CAPRI member states of the
+    regional units (capri_data/shared/regional_units.csv) that are not in an EU trade block. Returns CAPRI member
+    state -> (country code of its units, its trade region: its CAPRI market region, capri_data/shared/rms_to_rm.csv,
+    in TRADE_REGION_OF_CAPRI). Like the EU's, their market supply is their supply models' output (KNOWN_ISSUES K56)."""
+    rm_of = {r["rms"]: r["rm"] for r in _shared_rows("rms_to_rm.csv")}
+    out = {}
+    for _r, m, c in _UNITS:
+        if m in EU_MS_BLOCK or m in out:
+            continue
+        rm = rm_of.get(m)
+        tr = TRADE_REGION_OF_CAPRI.get(rm) if rm is not None else None
+        if tr is None:
+            raise ValueError(f"supply-model country {m}: no trade region for its market region {rm} "
+                             "(capri_data/shared/rms_to_rm.csv, trade_regions.csv)")
+        out[m] = (c, tr)
+    return out
+
+
+#: CAPRI member state -> (country, trade region) of the supply-model countries outside the EU (Norway: NO, NOR)
+SUP_NONEU = _supply_model_regions_outside_eu()
 
 ALL_TRADE_REGIONS = list(TRADE_REGIONS.keys())
 

@@ -73,7 +73,7 @@ INSERT INTO code_data VALUES
   ('capri_mod/market/demand.py', 'DemandMixin.demand_response', 0.05, 2, '355,371', '_feed = self.dairy_feed_factor(np.maximum(_rho, 0.05))'),
   ('capri_mod/market/demand.py', 'DemandMixin.gl_food_ratio', 0.05, 1, '175', 'p = np.maximum(p, 0.05 * e["p0"])'),
   ('capri_mod/market/inputs.py', 'REPO_DATA', 2.0, 1, '23', 'REPO_DATA = Path(__file__).resolve().parents[2] / "capri_data"'),
-  ('capri_mod/market/market_module.py', 'MarketModule.DEFAULT_MARKET_YEAR', 2017.0, 1, '129', 'DEFAULT_MARKET_YEAR = 2017'),
+  ('capri_mod/market/market_module.py', 'MarketModule.DEFAULT_MARKET_YEAR', 2017.0, 1, '132', 'DEFAULT_MARKET_YEAR = 2017'),
   ('capri_mod/market/market_nk.py', 'NewtonKrylovMixin._nk_solve', 32.0, 1, '193', 'while t >= 1.0 / 32:'),
   ('capri_mod/market/supply.py', 'SupplyMixin._yani_clear', -50.0, 1, '749', 'lo, hi = st.get("bounds", (-50.0, 50.0))'),
   ('capri_mod/market/supply.py', 'SupplyMixin._yani_clear', 50.0, 1, '749', 'lo, hi = st.get("bounds", (-50.0, 50.0))'),

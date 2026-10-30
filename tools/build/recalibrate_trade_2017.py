@@ -44,25 +44,12 @@ import pandas as pd
 
 import functools as _ft
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
-# CAPRI capmod region -> model trade region. Regions absent here fold into ROW.
-REGION_MAP = {
-    "EU27yr19": "EU27",
-    "USA": "USA", "CAN": "CAN", "BRA": "BRA", "ARG": "ARG",
-    "AUS": "AUS", "NZL": "NZL", "CHN": "CHN", "IND": "IND",
-    "RUS": "RUS", "UKR": "UKR", "TUR": "TUR", "MEX": "MEX",
-    "INDO": "IDN", "JAP": "JPN", "SKOR": "KOR", "THAI": "THA",
-    "VIET": "VNM", "PAK": "PAK", "BGD": "BGD", "NGA": "NGA",
-    "ZAF": "ZAF", "ETH": "ETH", "MOR": "MAR",
-    # Norway: CAPRI's market region NO000000 (aggregation/defaultA.agg: its own market region, linked to supply
-    # models), the model's trade region NOR (KNOWN_ISSUES K56; before, it folded into ROW while its supply regions
-    # NO01-NO07 were summed into the EU)
-    "NO000000": "NOR",
-    # the United Kingdom and the Western Balkans: CAPRI's market regions UK000000 (its own) and WBA (the trade block of
-    # AL, BA, CS, KO, MK, MO: aggregation/defaultA.agg), both with supply models in CAPRI (RMSSUP); the model's trade
-    # regions GBR and WBA since batch 7 (scoping note of 27 October 2026; before, both folded into ROW)
-    "UK000000": "GBR",
-    "WBA": "WBA",
-}
+#: CAPRI's region code (market region or trade block of its market data) -> the model's trade region, from the
+#: declared table capri_data/shared/trade_regions.csv (Norway NO000000 -> NOR, KNOWN_ISSUES K56; the United Kingdom
+#: UK000000 -> GBR and the Western Balkans' block WBA, batch 7). Regions absent there fold into ROW.
+TRADE_REGIONS_CSV = Path(__file__).resolve().parents[2] / "capri_data" / "shared" / "trade_regions.csv"
+REGION_MAP = {r: t for r, t in _read_csv(TRADE_REGIONS_CSV, dtype=str, keep_default_na=False)[
+    ["capri_region", "trade_region"]].itertuples(index=False) if r}
 
 #: CAPRI's mapping of behavioural regions (RMS) to market regions (RM): set RMS_TO_RM of its instantiation, written by
 #: tools/build/build_gl_demand.py. A behavioural region that is not a market region of its own (the Western Balkan

@@ -1,0 +1,34 @@
+trade_region,capri_region,country,source
+EU27,EU27yr19,,CAPRI's EU aggregate in its market data; its countries are the member states of capri_data/shared/eu_market_blocks.csv
+USA,USA,US,CAPRI's market data (capmod results): region code USA
+CAN,CAN,CA,CAPRI's market data (capmod results): region code CAN
+BRA,BRA,BR,CAPRI's market data (capmod results): region code BRA
+ARG,ARG,AR,CAPRI's market data (capmod results): region code ARG
+AUS,AUS,AU,CAPRI's market data (capmod results): region code AUS
+NZL,NZL,NZ,CAPRI's market data (capmod results): region code NZL
+CHN,CHN,CN,CAPRI's market data (capmod results): region code CHN
+IND,IND,IN,CAPRI's market data (capmod results): region code IND
+RUS,RUS,RU,CAPRI's market data (capmod results): region code RUS
+UKR,UKR,UA,CAPRI's market data (capmod results): region code UKR
+TUR,TUR,TR,CAPRI's market data (capmod results): region code TUR
+MEX,MEX,MX,CAPRI's market data (capmod results): region code MEX
+IDN,INDO,ID,CAPRI's market data (capmod results): region code INDO
+JPN,JAP,JP,CAPRI's market data (capmod results): region code JAP
+KOR,SKOR,KR,CAPRI's market data (capmod results): region code SKOR
+THA,THAI,TH,CAPRI's market data (capmod results): region code THAI
+VNM,VIET,VN,CAPRI's market data (capmod results): region code VIET
+PAK,PAK,PK,CAPRI's market data (capmod results): region code PAK
+BGD,BGD,BD,CAPRI's market data (capmod results): region code BGD
+NGA,NGA,NG,CAPRI's market data (capmod results): region code NGA
+ZAF,ZAF,ZA,CAPRI's market data (capmod results): region code ZAF
+ETH,ETH,ET,CAPRI's market data (capmod results): region code ETH
+MAR,MOR,MA,CAPRI's market data (capmod results): region code MOR
+NOR,NO000000,NO,"CAPRI's market region NO000000, its own in gams/aggregation/defaultA.agg (KNOWN_ISSUES K56)"
+GBR,UK000000,GB,"CAPRI's market region UK000000, its own in gams/aggregation/defaultA.agg (batch 7)"
+WBA,WBA,AL,"CAPRI's trade block WBA (AL, BA, CS, KO, MK, MO) of gams/aggregation/defaultA.agg (batch 7)"
+WBA,WBA,BA,"CAPRI's trade block WBA (AL, BA, CS, KO, MK, MO) of gams/aggregation/defaultA.agg (batch 7)"
+WBA,WBA,RS,"CAPRI's trade block WBA (AL, BA, CS, KO, MK, MO) of gams/aggregation/defaultA.agg (batch 7)"
+WBA,WBA,XK,"CAPRI's trade block WBA (AL, BA, CS, KO, MK, MO) of gams/aggregation/defaultA.agg (batch 7)"
+WBA,WBA,MK,"CAPRI's trade block WBA (AL, BA, CS, KO, MK, MO) of gams/aggregation/defaultA.agg (batch 7)"
+WBA,WBA,ME,"CAPRI's trade block WBA (AL, BA, CS, KO, MK, MO) of gams/aggregation/defaultA.agg (batch 7)"
+ROW,,ROW,every CAPRI region not listed in this table
