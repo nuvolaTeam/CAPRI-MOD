@@ -33,11 +33,12 @@ def data():
 
 
 def test_norway_is_a_trade_region_of_its_own():
-    """26 trade regions: NOR is one, the EU27 block holds no Norwegian country, CAPRI's NO000000 maps to NOR."""
+    """NOR is a trade region of its own (28 since GBR and WBA joined in batch 7), the EU27 block holds no Norwegian
+    country, CAPRI's NO000000 maps to NOR."""
     from capri_mod.data.definitions import ALL_TRADE_REGIONS, TRADE_REGIONS
     sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "check")]
     from recalibrate_trade_2017 import REGION_MAP
-    assert len(ALL_TRADE_REGIONS) == 26 and "NOR" in ALL_TRADE_REGIONS
+    assert len(ALL_TRADE_REGIONS) == 28 and "NOR" in ALL_TRADE_REGIONS
     assert TRADE_REGIONS["NOR"] == ["NO"] and "NO" not in TRADE_REGIONS["EU27"]
     assert REGION_MAP["NO000000"] == "NOR"
 
