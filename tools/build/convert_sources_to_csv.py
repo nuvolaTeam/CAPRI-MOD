@@ -96,8 +96,9 @@ def write(rel: str, header, rows, crlf: bool = False) -> None:
         w.writerow(r)
         n += 1
     data = buf.getvalue().encode("utf-8")
-    if not p.exists() or p.read_bytes() != data:
-        p.write_bytes(data)
+    # written every run, identical or not: the builder trace (reproduce_builders.py --trace) sees a builder's outputs
+    # by its writes, and the pipeline (dodo.py) compares files by content (md5), not by date
+    p.write_bytes(data)
     print(f"{rel}: {n} records")
 
 
