@@ -4,6 +4,7 @@ The project lead's rule (23 October 2026): **follow CAPRI, except where CAPRI's 
 difference.** This file lists the settings whose default in `capri_mod/settings/defaults.toml` is not CAPRI star 3.0's.
 It covers settings only. Method choices registered elsewhere (KNOWN_ISSUES, MITIGATION_IN_SUPPLY, NLP_PORT_DESIGN)
 are not repeated here.
+The complete list of departures and of CAPRI code errors, settings or not, is docs/CAPRI_DEPARTURES_REGISTER.md.
 
 Two kinds of entry:
 
