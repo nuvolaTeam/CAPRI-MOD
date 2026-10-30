@@ -18,12 +18,12 @@ Symbols (supply/supply_model.gms QUADRA_ l. 5284, GRPLEVL_ l. 4892, LandMarket_ 
 Writes (CAPRI region codes, CAPRI activity codes; nothing mapped or changed here):
   capri_data/sources/baseline_pmp/pmp_quad_techn_2030.csv      region, activity, tech1, tech2, value
   capri_data/sources/baseline_pmp/pmp_quad_pact_2030.csv       region, group1, group2, value
-  capri_data/sources/baseline_pmp/pmp_cnst_2030.csv            region, activity, tech, value
   capri_data/sources/baseline_pmp/pmp_quad_landtypes_2030.csv  region, landtype1, landtype2, value
-  capri_data/sources/baseline_pmp/pmp_cnst_landtypes_2030.csv  region, landtype, value ("exogenousLandSupply" kept
-                                                                as text: CAPRI's marker of an exogenous land type)
   capri_data/sources/baseline_pmp/pmp_feed_inp_coeff_2030.csv region, activity, tech, feed, coef (CNST / SLOP), value
   capri_data/sources/baseline_pmp/estnlp_vb.csv, estnlp_vd.csv region, ..., level (VB.L, VD.L)
+The linear terms p_pmpCnst and p_pmpCnstLandTypes were written to pmp_cnst_2030.csv and pmp_cnst_landtypes_2030.csv
+until 30 October 2026; nothing read them (the model derives its linear terms from its own calibration, docs/
+PMP_CAPRI_2030.md) and they were removed, the project lead's decision (KNOWN_ISSUES K103).
 
     python tools/build/build_pmp_2030.py [--dir DIR with pmppar_21730*.txt and estnlp_results_*.txt]
 """
@@ -35,9 +35,7 @@ ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / "capri_data" / "sources" / "baseline_pmp"
 SYMBOLS = {"p_pmpQuadTechn": ("pmp_quad_techn_2030.csv", ["region", "activity", "tech1", "tech2", "value"]),
            "p_pmpQuadPact": ("pmp_quad_pact_2030.csv", ["region", "group1", "group2", "value"]),
-           "p_pmpCnst": ("pmp_cnst_2030.csv", ["region", "activity", "tech", "value"]),
            "p_pmpQuadLandTypes": ("pmp_quad_landtypes_2030.csv", ["region", "landtype1", "landtype2", "value"]),
-           "p_pmpCnstLandTypes": ("pmp_cnst_landtypes_2030.csv", ["region", "landtype", "value"]),
            "p_pmpFeedInpCoeff": ("pmp_feed_inp_coeff_2030.csv", ["region", "activity", "tech", "feed", "coef", "value"])}
 _REC = re.compile(r"^((?:'[^']*'\.)*'[^']*')(?:\.(L|M|LO|UP|SCALE))?\s+(\S+?),?\s*$")
 

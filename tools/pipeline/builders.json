@@ -3311,8 +3311,6 @@
    "outputs": [
     "capri_data/sources/baseline_pmp/estnlp_vb.csv",
     "capri_data/sources/baseline_pmp/estnlp_vd.csv",
-    "capri_data/sources/baseline_pmp/pmp_cnst_2030.csv",
-    "capri_data/sources/baseline_pmp/pmp_cnst_landtypes_2030.csv",
     "capri_data/sources/baseline_pmp/pmp_feed_inp_coeff_2030.csv",
     "capri_data/sources/baseline_pmp/pmp_quad_landtypes_2030.csv",
     "capri_data/sources/baseline_pmp/pmp_quad_pact_2030.csv",
@@ -4099,8 +4097,7 @@
     "$WORK/capreg/res_17SK.txt"
    ],
    "outputs": [
-    "capri_data/2017/market/world_prices.csv",
-    "capri_data/sources/world_price_provenance.csv"
+    "capri_data/2017/market/world_prices.csv"
    ]
   },
   {
@@ -4250,7 +4247,6 @@
     "$WORK/inputs/capri_export_zip/capri_export/DATA2_UK.txt"
    ],
    "outputs": [
-    "capri_data/sources/capreg/capreg_cost_components.csv.xz",
     "capri_data/sources/capreg/capreg_producer_prices_extract.csv",
     "capri_data/validation/data2_extraction_summary.json"
    ]
@@ -4291,25 +4287,6 @@
    "outputs": [
     "capri_data/validation/greendeal_2030/capri_marginal_terms_ini_2030.csv.xz",
     "capri_data/validation/greendeal_2030/capri_unit_values_ini_2030.csv"
-   ]
-  },
-  {
-   "task": "extract_capri_marginal_terms:gd.endomax.res_2_1730greendeal_refpol_endotech_all_maxdefaulta.csv_max",
-   "builder": "extract_capri_marginal_terms",
-   "args": [
-    "$WORK/gd/endomax/res_2_1730greendeal_refpol_endotech_all_maxdefaulta.csv",
-    "max"
-   ],
-   "inputs": [],
-   "code": [
-    "tools/build/extract_capri_marginal_terms.py"
-   ],
-   "external": [
-    "$WORK/gd/endomax/res_2_1730greendeal_refpol_endotech_all_maxdefaulta.csv"
-   ],
-   "outputs": [
-    "capri_data/validation/greendeal_2030/capri_marginal_terms_max_2030.csv.xz",
-    "capri_data/validation/greendeal_2030/capri_unit_values_max_2030.csv"
    ]
   },
   {
@@ -4382,9 +4359,6 @@
    "outputs": [
     "capri_data/sources/capreg/capreg_activity_levels.csv",
     "capri_data/sources/capreg/capreg_cap_premium.csv",
-    "capri_data/sources/capreg/capreg_feed_use.csv",
-    "capri_data/sources/capreg/capreg_herds.csv",
-    "capri_data/sources/capreg/capreg_land.csv",
     "capri_data/validation/remaining_nine_extraction.json"
    ]
   },
@@ -4403,7 +4377,6 @@
     "$UP/_symbols_base1717.txt"
    ],
    "outputs": [
-    "capri_data/sources/capmod/capmod_trade_flows_2017.csv.xz",
     "capri_data/validation/capmod_market_extraction.json"
    ]
   },
@@ -4423,12 +4396,9 @@
     "tools/lib/_model_regions.py"
    ],
    "external": [
-    "$WORK/inputs/estnlp/estnlp_PELA.txt",
-    "$WORK/inputs/estnlp/gtap_esubd.txt",
-    "$WORK/inputs/estnlp/gtap_esubm.txt"
+    "$WORK/inputs/estnlp/estnlp_PELA.txt"
    ],
    "outputs": [
-    "capri_data/sources/estnlp/gtap_armington.csv",
     "capri_data/sources/estnlp/pela_own_price.csv"
    ]
   },

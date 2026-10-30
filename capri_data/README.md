@@ -19,18 +19,16 @@ capri_data/
 │                          mitigation/ (feed, genetics, soil options), fertiliser options
 ├── shared/                region maps (region_capri_map.csv, NUTS correspondences), EU trade blocks,
 │                          model_parameters.csv, trade_flows_2017.csv
-├── trajectories/          capri_ref_2030.json (default), captrd_2030.json, null.json, TEMPLATE.json, CAPRI's 2030
+├── trajectories/          capri_ref_2030.json (default), captrd_2030.json, null.json, CAPRI's 2030
 │                          prices, premiums, rations and fodder
 ├── validation/            CAPRI reference results used by the tests and comparison tools
 ├── sources/               the extracts the builders read (CAPRI result rows, MITERRA tables, literature review);
 │                          not read by the model
-├── archive/               superseded files, not read by the model
 ├── schema/                the declarations of every CSV (DuckDB SQL: types, keys, code lists, ranges, units), each
 │                          file's provenance and checked notes, the numbers held in the model's code, and
 │                          schema.json (the same as JSON, generated)
 ├── MANIFEST.json                                           expected files and shapes
 ├── FITNESS_FOR_USE.json                                    how far each output can be trusted (capri_mod/fitness.py)
-├── DATA_CATALOG.json, SYMBOL_EXTRACTION_MAP.json           catalogue of files and CAPRI symbols
 └── *.md                                                    this file and the guides below
 ```
 

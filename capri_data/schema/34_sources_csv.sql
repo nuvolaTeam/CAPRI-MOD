@@ -1,4 +1,4 @@
--- The CSV conversion of the sources that were not CSV (the project lead's decision, 30 October 2026: input data in .csv), written by tools/build/convert_sources_to_csv.py from the originals in git history (commit 6d25163), and world_price_provenance.csv (tools/build/build_world_prices.py). Structure (types, NOT NULL, keys) from the files; units open where the source states none.
+-- The CSV conversion of the sources that were not CSV (the project lead's decision, 30 October 2026: input data in .csv), written by tools/build/convert_sources_to_csv.py from the originals in git history (commit 6d25163). Structure (types, NOT NULL, keys) from the files; units open where the source states none.
 
 -- file: capri_data/sources/capri_dat/biofuel/biofuel_technology_params_p_ByProduct.csv
 CREATE TABLE src_biofuel_technology_params_p_byproduct (
@@ -295,12 +295,3 @@ CREATE TABLE src_irrishare_p_irrishare (
 COMMENT ON TABLE src_irrishare_p_irrishare IS 'CAPRI''s p_irriShare(region, item, type, year) ("share of irrigable and irrigated area in UAAR (%)": IRRI irrigable, IRR2 irrigated once a year; Eurostat FSS), every record of the gdxdump irrishare.gms (as uploaded), converted from the gdxdump text by tools/build/convert_sources_to_csv.py; read by tools/build/build_irrigation_2017.py (IRR2 IRSH).';
 INSERT INTO value_units VALUES
   ('src_irrishare_p_irrishare', 'value', NULL, 'open', 'the dump says % but holds shares (0.0217): unit to be established');
-
--- file: capri_data/sources/world_price_provenance.csv
-CREATE TABLE src_world_price_provenance (
-    commodity VARCHAR NOT NULL,
-    capri_code VARCHAR NOT NULL,
-    source VARCHAR NOT NULL,
-    PRIMARY KEY (commodity)
-);
-COMMENT ON TABLE src_world_price_provenance IS 'The CAPRI source of each row of capri_data/2017/market/world_prices.csv: commodity, CAPRI code, source text; written by tools/build/build_world_prices.py with world_prices.csv (world_price_provenance.json until 30 October 2026); read by no code.';

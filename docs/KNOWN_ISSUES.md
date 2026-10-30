@@ -1087,8 +1087,8 @@ committed files. 117 invocations; most reproduce their files exactly. Found:
 - `2017/supply/crop_cost_shares.csv` (the supply module's fertiliser cost share where CAPRI has no regional
   coefficient): rounded to 3 decimals (up to 2.9% relative for small shares); its builder also leaves out the eight
   member states that are one regional unit each (the old test "code does not end in 000000").
-- `validation/greendeal_2030/capri_unit_values_max_2030.csv`: without the 34 TABO rows its extractor writes now (the ini
-  file has them); read by no model code.
+- `validation/greendeal_2030/capri_unit_values_max_2030.csv` (without the 34 TABO rows its extractor wrote): removed 30
+  October 2026 with the max invocation, read by no code.
 - Files written before the full-precision decision of 27 October and not rebuilt since: the market builders' outputs
   (bilateral flows, regions and quotas, biofuel, dairy, feed bulks, GL demand, processing, sugar, use components,
   EU member-state balance, fertiliser distribution priors, land-use change, CAP greening, cost savings) differ from
@@ -1465,7 +1465,9 @@ capri_data/2017 and shared/, 46 files are in neither. By kind:
   FAO_agg JSON / COCO extracts of the former market base, CAPRI data copies of parts not ported or handled otherwise:
   Norway's MITERRA mirror, anaerobic digestion base data, cost-saving runs, soil carbon, land-use transition, water,
   the IFS maps); kept as reference: the JRC121368 report text and published results, the NUTS correspondences; the
-  others are named by a builder or extractor (their own outputs, or read in an untraced invocation).
+  others are named by a builder or extractor (their own outputs, or read in an untraced invocation). capri_data/archive/,
+  DATA_CATALOG.json, SYMBOL_EXTRACTION_MAP.json and the unread extracts and reports listed under K103: removed 30
+  October 2026, the project lead's decision, read by no code.
   **Removed 30 October 2026** at the project lead's request, read by no code: the JRC121368 report text, published
   results and scenario specification (jrc121368/), capri_trade_regions_2017.json, the NUTS workbooks
   NUTS_2010_-_NUTS_2013.xls, NUTS2013-NUTS2016__1_.xlsx, NUTS2021-NUTS2024.xlsx and NUTS2024-NUTS2027.xlsx (the NUTS
@@ -1507,6 +1509,22 @@ reads); no code names the first.
   old file's four decimals, now at full precision). sources/capri_dat/ghgtech/LitRevFertTech_p_litRevFertTechs.csv
   (unread second dump) removed 30 October 2026 (K102); further builder outputs that no code reads remain to be settled (see the census in
   capri_data/schema/schema.json, read_by).
+  **Removed 30 October 2026, the project lead's decision, read by no code** (an audit of the files read neither by the
+  runs r190/r191 nor by a builder; each grepped again across code, tests, docs, schema and the pipeline trace), their
+  writers stopped: sources/baseline_pmp/pmp_cnst_2030.csv and pmp_cnst_landtypes_2030.csv (build_pmp_2030),
+  sources/baseline_pmp/simini_21730_data.csv (no writer; its reader build_pmp_recipe.calibration_point_2030, never
+  called, removed too), sources/capmod/capmod_trade_flows_2017.csv.xz (ingest_capmod_market, which now writes only its
+  uncommitted summary JSON), sources/capreg/capreg_cost_components.csv.xz (extract_all_from_data2),
+  capreg_feed_use.csv, capreg_herds.csv, capreg_land.csv (extract_remaining_nine), sources/estnlp/gtap_armington.csv
+  (ingest_pela_gtap, its GTAP part removed), validation/greendeal_2030/capri_marginal_terms_max_2030.csv.xz and
+  capri_unit_values_max_2030.csv (extract_capri_marginal_terms: the max invocation removed from the pipeline trace
+  and reproduce_builders), sources/world_price_provenance.csv (build_world_prices; its content summarised in the
+  origin note of world_prices.csv, 02_provenance_notes.sql); the metadata DATA_CATALOG.json, SYMBOL_EXTRACTION_MAP.json,
+  trajectories/TEMPLATE.json, validation/VALIDATION_SUMMARY.json, capreg_merge_report.json,
+  capreg_yield_validation.json, coco_yield_merge_report.json, livestock_merge_report.json, documentation_answers.json,
+  schema_coverage.json (tools/check/verify_schema.py --json writes it only where asked), greendeal_2030/summary.json
+  and validation_result.json; and capri_data/archive/ (seven superseded files and its README). Kept:
+  pipeline/captrd/sets/fixyield.csv (CAPTRD's FixYield, read once CAPTRD's Steps 2-3 are ported).
 
 ### K104: The payments report's area left fallow out of CAPRI's UAAR (found 29 October 2026, data declarations)
 

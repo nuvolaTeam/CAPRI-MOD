@@ -6,7 +6,6 @@
  "layout": {
   "root": "Live files loaded at runtime",
   "sources/": "Provenance extracts (coco, fao_agg_2017, gams, fao_trade)",
-  "archive/": "Superseded/backup (older vintages)",
   "sources/fao_2021/": "FAOSTAT 2021 extracts (raw; not read by the model: superseded by CAPRI's own 2017/2030 market data)"
  },
  "files": {
@@ -134,7 +133,7 @@
    "note": "BPS = CAPRI's premiums per ha of UAA over all schemes; ANC, AES, ORGANIC, COUPLED are 0 and unused (the split by scheme comes from premium_scheme_shares_2030.csv)"
   },
   "world_prices.csv": {
-   "source": "CAPRI FAO_agg_17_defaulta p_dataMarket 'World'.'PMRK'.<product>.'BAS' (base-period world market price); OLIV from OLIO's price and the EU's oil extraction, FPRI export-weighted from CAPRI's 2017 market; built by tools/build/build_world_prices.py, per-row CAPRI code in sources/world_price_provenance.csv",
+   "source": "CAPRI FAO_agg_17_defaulta p_dataMarket 'World'.'PMRK'.<product>.'BAS' (base-period world market price); OLIV from OLIO's price and the EU's oil extraction, FPRI export-weighted from CAPRI's 2017 market; built by tools/build/build_world_prices.py, the source per group of rows in capri_data/schema/02_provenance_notes.sql",
    "vintage": "2017",
    "units": "EUR/t",
    "domain": "prices",
@@ -2125,24 +2124,6 @@
    "note": "tools/build/build_pmp_2030.py (CAPRI codes, unchanged values)",
    "path": "sources/baseline_pmp/pmp_quad_pact_2030.csv"
   },
-  "pmp_cnst_2030.csv": {
-   "source": "CAPRI star 3.0 pmppar_21730<CC>defaulta.gdx (pmp_cnst_2030), exported with tools/gams/export_pmp_2030.gms",
-   "vintage": "2030",
-   "units": "CAPRI units",
-   "domain": "sources",
-   "status": "source",
-   "shape": {
-    "rows": 16734,
-    "cols": 3,
-    "columns": [
-     "activity",
-     "tech",
-     "value"
-    ]
-   },
-   "note": "tools/build/build_pmp_2030.py (CAPRI codes, unchanged values)",
-   "path": "sources/baseline_pmp/pmp_cnst_2030.csv"
-  },
   "pmp_quad_landtypes_2030.csv": {
    "source": "CAPRI star 3.0 pmppar_21730<CC>defaulta.gdx (pmp_quad_landtypes_2030), exported with tools/gams/export_pmp_2030.gms",
    "vintage": "2030",
@@ -2160,23 +2141,6 @@
    },
    "note": "tools/build/build_pmp_2030.py (CAPRI codes, unchanged values)",
    "path": "sources/baseline_pmp/pmp_quad_landtypes_2030.csv"
-  },
-  "pmp_cnst_landtypes_2030.csv": {
-   "source": "CAPRI star 3.0 pmppar_21730<CC>defaulta.gdx (pmp_cnst_landtypes_2030), exported with tools/gams/export_pmp_2030.gms",
-   "vintage": "2030",
-   "units": "CAPRI units",
-   "domain": "sources",
-   "status": "source",
-   "shape": {
-    "rows": 2053,
-    "cols": 2,
-    "columns": [
-     "landtype",
-     "value"
-    ]
-   },
-   "note": "tools/build/build_pmp_2030.py (CAPRI codes, unchanged values)",
-   "path": "sources/baseline_pmp/pmp_cnst_landtypes_2030.csv"
   },
   "estnlp_vb.csv": {
    "source": "CAPRI star 3.0 dat/estnlp/results.gdx (VB, VD levels), exported with tools/gams/export_pmp_2030.gms",

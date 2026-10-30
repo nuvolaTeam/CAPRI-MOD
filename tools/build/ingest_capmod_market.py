@@ -1,5 +1,8 @@
 """
-Ingest the bilateral trade flows from the capmod base-year result.
+Count the bilateral trade flows of the capmod base-year result (validation/capmod_market_extraction.json, not kept in
+git). Until 30 October 2026 it wrote them to sources/capmod/capmod_trade_flows_2017.csv.xz; nothing read that file
+(the model's bilateral trade comes from tools/build/build_bilateral_market.py) and it was removed, the project lead's
+decision (KNOWN_ISSUES K103).
 
 Source
 ------
@@ -80,13 +83,10 @@ def main() -> None:
     print(f"  {len(df):,} records for {YEAR}, "
           f"{df.importer.nunique()} importers, {df.commodity.nunique()} commodities")
 
-    out = args.data_dir / "sources" / "capmod"
-    out.mkdir(parents=True, exist_ok=True)
-
-    # ---- bilateral trade, excluding the World aggregate -----------------
+    # ---- bilateral trade, excluding the World aggregate: counted for the summary only (written to
+    # sources/capmod/capmod_trade_flows_2017.csv.xz until 30 October 2026; nothing read it - the model's trade comes
+    # from tools/build/build_bilateral_market.py - and the file was removed, the project lead's decision: K103)
     bil = df[(df.item == "ImportQ") & (df.exporter != WORLD)]
-    bil[["importer", "exporter", "commodity", "value"]].to_csv(
-        out / "capmod_trade_flows_2017.csv.xz", index=False)
     print(f"\nbilateral trade : {len(bil):,} flows, "
           f"{bil.importer.nunique()} importers x {bil.exporter.nunique()} exporters")
 
@@ -100,7 +100,7 @@ def main() -> None:
             "year": YEAR,
             "trade_flows": int(len(bil)),
         }, indent=1))
-    print(f"\nwritten to {out}")
+    print(f"\nwritten to {args.data_dir / 'validation' / 'capmod_market_extraction.json'}")
 
 
 if __name__ == "__main__":

@@ -222,8 +222,6 @@ INVOCATIONS: list[tuple[str, list[str], list[Path]]] = [
     ("extract_capri_costsavings", [str(WORK / "cs/costsavings_ini_21730_jul15.csv"),
                                    str(WORK / "cs/costsavings_max_21730_jul15.csv")], [WORK / "cs"]),
     ("extract_capri_marginal_terms", [str(REF), "ini"], [REF]),
-    ("extract_capri_marginal_terms", [str(WORK / "gd/endomax/res_2_1730greendeal_refpol_endotech_all_maxdefaulta.csv"),
-                                      "max"], [WORK / "gd/endomax"]),
     ("ingest_capmod_market", ["--dump", str(UP / "_symbols_base1717.txt")], [UP / "_symbols_base1717.txt"]),
     ("recalibrate_trade_2017", [], []),
 ]

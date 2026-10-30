@@ -1,6 +1,8 @@
 """The model's world market prices of 2017 (EUR/t), every row from its CAPRI source: capri_data/2017/market/world_prices.csv
-and its provenance, capri_data/sources/world_price_provenance.csv (commodity, capri_code, source; a JSON file until 30
-October 2026). The one writer of both (29 October 2026).
+(this builder its one writer since 29 October 2026). The source of each row (build() returns it with the prices) is summarised in
+capri_data/schema/02_provenance_notes.sql; until 30 October 2026 it was also written to
+capri_data/sources/world_price_provenance.csv (a JSON file before), which nothing read: removed, the project lead's
+decision (KNOWN_ISSUES K103).
 
 Rows
   every market commodity (definitions.MARKET_COMMODITIES) with a world price in CAPRI's FAO_agg market data:
@@ -42,7 +44,6 @@ from capri_mod.data import definitions as D  # noqa: E402
 
 MKT = ROOT / "capri_data" / "2017" / "market"
 OUT = MKT / "world_prices.csv"
-PROV = ROOT / "capri_data" / "sources" / "world_price_provenance.csv"
 CODES = ROOT / "capri_data" / "schema" / "codes" / "model_commodities.csv"
 UNITS = ROOT / "capri_data" / "shared" / "regional_units.csv"
 FAO = Path("/mnt/user-data/uploads/fao_agg_17_datamarket.txt")
@@ -131,15 +132,11 @@ def main():
     ap.add_argument("--fao", type=Path, default=FAO)
     ap.add_argument("--dumps", type=Path, default=DUMPS)
     a = ap.parse_args()
-    prices, prov = build(a.fao, a.dumps)
+    prices, _prov = build(a.fao, a.dumps)
     s = pd.Series(prices, name="price")
     s.index.name = "commodity"
     s.to_frame().to_csv(OUT)
-    with open(PROV, "w", newline="", encoding="utf-8") as fh:
-        w = csv.writer(fh, lineterminator="\n")
-        w.writerow(["commodity", "capri_code", "source"])
-        w.writerows([c, d["capri_code"], d["source"]] for c, d in prov.items())
-    print(f"wrote {OUT.relative_to(ROOT)}: {len(s)} rows; {PROV.relative_to(ROOT)}")
+    print(f"wrote {OUT.relative_to(ROOT)}: {len(s)} rows")
 
 
 if __name__ == "__main__":

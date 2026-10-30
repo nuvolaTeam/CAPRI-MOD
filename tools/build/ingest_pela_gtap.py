@@ -1,5 +1,5 @@
 """
-Ingest CAPRI's PELA elasticities and the GTAP Armington parameters.
+Ingest CAPRI's PELA elasticities (the GTAP Armington parameters until 30 October 2026, see below).
 
 PELA
 ----
@@ -26,11 +26,10 @@ is defensible, but it should be stated.
 
 GTAP
 ----
-`dat/arm/GTP57_134.gdx` is the raw GTAP database. esubd is the Armington
-elasticity between imports and domestic supply; esubm is the intra-import
-elasticity, conventionally twice esubd. Sectors are GTAP codes, so a concordance
-to CAPRI commodities is required and is declared explicitly below rather than
-inferred.
+Until 30 October 2026 it also wrote the GTAP Armington elasticities (esubd, esubm of dat/arm/GTP57_134.gdx) per model
+commodity through a GTAP-sector concordance to sources/estnlp/gtap_armington.csv. Nothing read that file (the
+model's Armington terms come from tools/build/build_bilateral_market.py, armington_rho.csv) and it was removed with
+that part of this tool, the project lead's decision (KNOWN_ISSUES K103).
 
 Usage
 -----
@@ -42,37 +41,14 @@ import argparse
 import re
 from pathlib import Path
 
-import numpy as np
 import pandas as pd
 
 import functools as _ft
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 PELA_REC = re.compile(
     r"^'([A-Z]{2}[A-Z0-9]{6})'\.'([A-Z0-9]+)'\.'([A-Z0-9]+)'\.'(\d{4})'\s+([-\d.Ee+]+)")
-GTAP_REC = re.compile(r"^'([a-z_]+)'\s+([-\d.Ee+]+)")
 
 PELA_YEAR = "2005"
-
-# GTAP sector -> CAPRI/model commodities. GTAP aggregates far more coarsely than
-# CAPRI, so this is one-to-many and every mapping is a judgement that belongs in
-# the open rather than inside a lookup.
-GTAP_CONCORDANCE = {
-    "wht": ["SWHE", "DWHE"],              # wheat
-    "gro": ["BARL", "CORN", "OCER", "RYEM", "OATS"],   # other grains
-    "pdr": ["PARI"],                       # paddy rice
-    "osd": ["RAPE", "SUNF", "SOYA", "OOIL"],           # oil seeds
-    "c_b": ["SUGB"],                       # cane and beet
-    "v_f": ["POTA", "TOMA", "OVEG", "APPL", "OFRU", "CITR", "TAGR"],
-    "pfb": ["TEXT"],                       # plant fibres
-    "ocr": ["PULS", "OLIV", "TOBA"],       # other crops
-    "ctl": ["BEEF"],                       # cattle
-    "oap": ["PORK", "POUM", "SGMT"],       # other animal products
-    "rmk": ["MILK"],                       # raw milk
-    "mil": ["BUTR", "CHES", "SKIM"],       # dairy products
-    "vol": ["RAPO", "SUNO", "SOYO"],       # vegetable oils
-    "sgr": ["SUGA"],                       # sugar
-}
-
 
 def parse_pela(path: Path, year: str) -> pd.DataFrame:
     rows = []
@@ -82,18 +58,6 @@ def parse_pela(path: Path, year: str) -> pd.DataFrame:
             if m and m.group(4) == year:
                 rows.append((m.group(1), m.group(2), m.group(3), float(m.group(5))))
     return pd.DataFrame(rows, columns=["region", "crop", "wrt", "value"])
-
-
-def parse_gtap(path: Path) -> dict:
-    out = {}
-    if not path.exists():
-        return out
-    with open(path, encoding="utf-8", errors="replace") as fh:
-        for line in fh:
-            m = GTAP_REC.match(line)
-            if m:
-                out[m.group(1)] = float(m.group(2))
-    return out
 
 
 def main() -> None:
@@ -132,24 +96,6 @@ def main() -> None:
     print(f"  own-price   : {own.shape[0]} regions x {own.shape[1]} crops")
     print(f"  cross-price : {len(cross):,} records "
           f"({100*(cross.value < 0).mean():.0f}% negative, i.e. substitutes)")
-
-
-    # ---- GTAP ---------------------------------------------------------
-    esubd = parse_gtap(args.dump_dir / "gtap_esubd.txt")
-    esubm = parse_gtap(args.dump_dir / "gtap_esubm.txt")
-    rows = []
-    for sector, commodities in GTAP_CONCORDANCE.items():
-        if sector not in esubd:
-            continue
-        for c in commodities:
-            rows.append({"commodity": c, "gtap_sector": sector,
-                         "esubd": esubd[sector],
-                         "esubm": esubm.get(sector, np.nan)})
-    arm = pd.DataFrame(rows).set_index("commodity")
-    arm.to_csv(args.data_dir / "sources" / "estnlp" / "gtap_armington.csv")
-    print(f"\nGTAP: {len(esubd)} sectors, {len(arm)} model commodities mapped")
-
-
     print(f"\nwritten to {out}")
 
 

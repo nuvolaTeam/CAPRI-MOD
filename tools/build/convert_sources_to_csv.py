@@ -49,8 +49,8 @@ unchanged); the CSV declarations (capri_data/schema/34_sources_csv.sql) cite the
     eu_tariff_provenance.json                          -> eu_tariff_provenance.csv (one row per commodity)
   (Removed without conversion, read by no code, at the project lead's request: capri_trade_regions_2017.json and
   jrc121368/{published_results.json, scenario_specification.json, jrc121368_report_text.txt}.)
-  (world_price_provenance.json was written by tools/build/build_world_prices.py, which now writes
-  world_price_provenance.csv itself.)
+  (world_price_provenance.json was written by tools/build/build_world_prices.py, not converted here; since 30 October
+  2026 the source of each world price is summarised in capri_data/schema/02_provenance_notes.sql.)
 
 Paths are under capri_data/sources. Running the converter again rewrites the same bytes.
 

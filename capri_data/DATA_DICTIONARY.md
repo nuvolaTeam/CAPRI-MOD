@@ -31,7 +31,7 @@ Files are under `capri_data/<base_year>/<category>/` (only `2017/` exists); `tra
 
 | File | Content | Source | Shape |
 |---|---|---|---|
-| `world_prices.csv` | base-year world market price (EUR/t) | CAPRI `FAO_agg_17_defaulta` p_dataMarket 'World'.'PMRK'.<product>.'BAS' (CAPRI code per row in `sources/world_price_provenance.csv`) | 60 rows: the 58 market commodities plus `DWHE`, `SUGB` (price-only rows); built by `tools/build/build_world_prices.py` |
+| `world_prices.csv` | base-year world market price (EUR/t) | CAPRI `FAO_agg_17_defaulta` p_dataMarket 'World'.'PMRK'.<product>.'BAS' (the source per group of rows in `schema/02_provenance_notes.sql`) | 60 rows: the 58 market commodities plus `DWHE`, `SUGB` (price-only rows); built by `tools/build/build_world_prices.py` |
 | `producer_prices.csv` | EU-wide producer price per commodity (EUR/t), the fallback where no regional price exists | CAPRI's production-weighted EU price (`tools/build/build_eu_producer_prices.py`, K34) | 42 rows |
 
 ### Policy (`2017/policy/`)
@@ -62,8 +62,8 @@ Files are under `capri_data/<base_year>/<category>/` (only `2017/` exists); `tra
 | `eu_market_blocks.csv` | member state → CAPRI's EU trade block (EU_WEST, EU_EAST) |
 | `model_parameters.csv` | every constant of the economics and accounts (value, unit, kind, source; `capri_mod/params.py`) |
 
-Archived, not read by the model (`capri_data/archive/`): `dairy_processing_params.json`, `gascoeff_params.json`,
-earlier base areas and trade flows.
+`capri_data/archive/` (superseded files: `dairy_processing_params.json`, `gascoeff_params.json`, earlier base areas and
+trade flows) was removed 30 October 2026, the project lead's decision, read by no code (git history keeps it).
 
 ---
 
@@ -234,6 +234,11 @@ cake (CAPRI's codes, as the market's).
 terms are read from `sources/capreg/pmp_quad_techn.csv`, `pmp_quad_pact.csv` and the 2030 exports) and
 `2017/environment/manure_ch4_ef_regional.csv` (the accounts use `livestock_ch4man_coef.csv`).*
 
+*Removed 30 October 2026 (the project lead's decision, read by no code; their writers no longer write them):
+`sources/capreg/capreg_feed_use.csv`, `capreg_herds.csv`, `capreg_land.csv`, `capreg_cost_components.csv.xz`,
+`sources/capmod/capmod_trade_flows_2017.csv.xz`, `sources/estnlp/gtap_armington.csv`,
+`validation/greendeal_2030/capri_marginal_terms_max_2030.csv.xz`, `capri_unit_values_max_2030.csv`.*
+
 CAPRI data that the extractors write and no model code, builder or test reads at present (inventory of 27 October 2026).
 Kept as the repository's copy of CAPRI's data, for the work that will need them; each is rewritten when its extractor
 runs.
@@ -241,10 +246,6 @@ runs.
 | File | Content | Written by |
 |---|---|---|
 | `2017/abatement/ammonia/costs/scalars.csv` | scalar cost parameters of the ammonia options | `tools/build/build_ammonia_cost_tables.py` |
-| `pipeline/captrd/sets/fixyield.csv`, `mrkbale.csv`, `reqst.csv` | empty CAPTRD sets, part of the complete set extraction | `tools/build/build_captrd_sets.py` |
-| `sources/capreg/capreg_feed_use.csv`, `capreg_herds.csv`, `capreg_land.csv` | CAPREG DATA2 feed use, herds, land | `tools/build/extract_remaining_nine.py` |
-| `sources/capreg/capreg_cost_components.csv.xz` | CAPREG DATA2 input cost components | `tools/build/extract_all_from_data2.py` |
-| `sources/capmod/capmod_trade_flows_2017.csv.xz`, `capmod_world_prices_2017.csv` | CAPRI's 2017 bilateral trade flows and world prices (capmod res_0_1717) | `tools/build/ingest_capmod_market.py` |
-| `sources/estnlp/gtap_armington.csv` | GTAP Armington elasticities mapped to the model's commodities | `tools/build/ingest_pela_gtap.py` |
-| `validation/greendeal_2030/capri_marginal_terms_max_2030.csv.xz`, `capri_unit_values_max_2030.csv` | CAPRI's maximum-mitigation Green Deal run: marginal terms and unit values | `tools/build/extract_capri_marginal_terms.py` |
+| `pipeline/captrd/sets/fixyield.csv` | CAPTRD's FixYield (OCRO, OOIL, OANI), read once CAPTRD's Steps 2-3 are ported | `tools/build/build_captrd_sets.py` |
+| `pipeline/captrd/sets/mrkbale.csv`, `reqst.csv` | empty CAPTRD sets, part of the complete set extraction | `tools/build/build_captrd_sets.py` |
 
