@@ -20055,6 +20055,7 @@
      "build_cap_ceilings_2030",
      "build_capri_base",
      "build_capri_baseline_surplus",
+     "build_capri_eu27_levels",
      "build_capri_level_ratio",
      "build_capri_supply_elas_market",
      "build_captrd_trajectory",
@@ -20282,6 +20283,7 @@
      "build_biofuel_market",
      "build_cap_ceilings_2030",
      "build_capri_baseline_surplus",
+     "build_capri_eu27_levels",
      "build_capri_level_ratio",
      "build_capri_supply_elas_market",
      "build_captrd_trajectory",
@@ -20484,6 +20486,7 @@
      "build_biofuel_market",
      "build_cap_ceilings_2030",
      "build_capri_baseline_surplus",
+     "build_capri_eu27_levels",
      "build_capri_level_ratio",
      "build_capri_supply_elas_market",
      "build_captrd_trajectory",
@@ -38087,7 +38090,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_capri_eu27_levels",
-    "sources": "$UP/markmarket_greendeal_1730et_base_1717.txt; $WORK/capreg/res_17<CC>.txt"
+    "sources": "$UP/markmarket_greendeal_1730et_base_1717.txt; $UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $WORK/allgms/gams/aggregation/defaultA.agg; $WORK/capreg/res_17<CC>.txt"
    },
    "notes": [],
    "read_by": {
@@ -38134,7 +38137,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_capri_eu27_levels",
-    "sources": "$UP/markmarket_greendeal_1730et_base_1717.txt; $WORK/capreg/res_17<CC>.txt"
+    "sources": "$UP/markmarket_greendeal_1730et_base_1717.txt; $UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $WORK/allgms/gams/aggregation/defaultA.agg; $WORK/capreg/res_17<CC>.txt"
    },
    "notes": [],
    "read_by": {

@@ -780,9 +780,14 @@
     "$UP/markmarket_greendeal_1730et_base_1717.txt",
     "$WORK/capreg"
    ],
-   "inputs": [],
+   "inputs": [
+    "capri_data/shared/capri_member_state_codes.csv",
+    "capri_data/shared/eu_market_blocks.csv",
+    "capri_data/shared/regional_units.csv"
+   ],
    "code": [
-    "tools/build/build_capri_eu27_levels.py"
+    "tools/build/build_capri_eu27_levels.py",
+    "tools/lib/_model_regions.py"
    ],
    "external": [
     "$UP/markmarket_greendeal_1730et_base_1717.txt",
