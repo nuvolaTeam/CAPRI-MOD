@@ -58,8 +58,7 @@ class NPKData:
         self.pri = {(r, n): d.set_index("ngrp") for (r, n), d in p.groupby(["capri_region", "nutrient"])}
         self.man = {}
         for nut, f in (("P", "livestock_manure_p_coef.csv"), ("K", "livestock_manure_k_coef.csv")):
-            if inp.exists(f, "environment"):
-                self.man[nut] = inp.csv(f, "environment", index_col=0)
+            self.man[nut] = inp.csv(f, "environment", index_col=0)
         gr = inp.csv("fert_dist_crop_groups_2030.csv", "environment")
         self.groups = {r: d for r, d in gr.groupby("capri_region")}
         w = gr.groupby(["model_crop", "ngrp"]).share.sum()

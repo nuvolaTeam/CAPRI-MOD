@@ -54,8 +54,8 @@ class NitrogenBlock:
         region is not separate in CAPRI), from capri_gnb_components_2030.csv, or {}."""
         g = getattr(type(self), "_GNB_TOT", None)
         if g is None:
-            g_ = _inputs.current().csv("capri_gnb_components_2030.csv", "environment", required=False)
-            g = g_.pivot_table(index="capri_region", columns="item", values="kg_n_per_ha") if g_ is not None else pd.DataFrame()
+            g = _inputs.current().csv("capri_gnb_components_2030.csv", "environment").pivot_table(
+                index="capri_region", columns="item", values="kg_n_per_ha")
             type(self)._GNB_TOT = g
         self._capri_crop_n(region)                         # builds the region map
         r8 = getattr(type(self), "_CROP_N_MAP", {}).get(region)
@@ -125,57 +125,55 @@ class NitrogenBlock:
         if cls._CROP_N is None:
             inp = _inputs.current()
             cls._CROP_N = {}
-            if inp.exists("capri_crop_n_coefs_2030.csv", "environment") and \
-                    inp.exists("capri_gnb_components_2030.csv", "environment"):
-                t = inp.csv("capri_crop_n_coefs_2030.csv", "environment")
-                tot = inp.csv("capri_gnb_components_2030.csv", "environment").pivot_table(
-                    index="capri_region", columns="item", values="kg_n_per_ha")
-                # the model's regions are CAPRI's units: each its own CAPRI region (a dict that returns the key)
-                cls._CROP_N_MAP = IdentityMap()
-                for r8, g8 in t.groupby("capri_region"):
-                    d = {row.crop: row for row in g8.itertuples(index=False)}
-                    if "GRAE" in d or "GRAI" in d:
-                        d.pop("GRAS", None)                       # aggregate of GRAE + GRAI
-                    lv = sum(float(x.levl) for x in d.values())
-                    if r8 not in tot.index or lv <= 0:
+            t = inp.csv("capri_crop_n_coefs_2030.csv", "environment")
+            tot = inp.csv("capri_gnb_components_2030.csv", "environment").pivot_table(
+                index="capri_region", columns="item", values="kg_n_per_ha")
+            # the model's regions are CAPRI's units: each its own CAPRI region (a dict that returns the key)
+            cls._CROP_N_MAP = IdentityMap()
+            for r8, g8 in t.groupby("capri_region"):
+                d = {row.crop: row for row in g8.itertuples(index=False)}
+                if "GRAE" in d or "GRAI" in d:
+                    d.pop("GRAS", None)                       # aggregate of GRAE + GRAI
+                lv = sum(float(x.levl) for x in d.values())
+                if r8 not in tot.index or lv <= 0:
+                    continue
+                # Removal key per crop: the crop's NITF in CAPRI's results is its need NET of
+                # biological fixation (NUTNED_: retention x (1 - fBNF) x over-fertilisation), while
+                # fixation is fBNF of the gross need (JRC96482, eq. 1: Nbiofix = NITF x LEVL x fBNF,
+                # fBNF 75% for soya and pulses, 5-17% for grass). Gross need = NITF + fixation per ha
+                # (pulses: 52 + 149 kg/ha in Saxony-Anhalt, removal 4x the net figure).
+                def _gross(x):
+                    fx = float(x.biofix_t) * 1000.0 / float(x.levl) if (x.biofix_t == x.biofix_t and float(x.levl) > 0) else 0.0
+                    return float(x.nitf) + fx
+                sx = sum(float(x.levl) * _gross(x) for x in d.values())
+                # NCRD = "N from crop residues and atmospheric deposition, kg/ha" (sets.gms);
+                # e_CRESID: CRESID + ATMOSD = sum levl x NCRD, so residues = NCRD - deposition
+                dep = float(tot.at[r8, "ATMOSD"]) if "ATMOSD" in tot.columns else 0.0
+                res_ha = lambda x: max(0.0, (float(x.ncrd) if x.ncrd == x.ncrd else 0.0) - dep) \
+                    if (x.ncrd == x.ncrd and float(x.ncrd) > 0) else 0.0
+                sr = sum(float(x.levl) * res_ha(x) for x in d.values())
+                uaa = lv
+                ke = float(tot.at[r8, "EXPPRD"]) * uaa / sx if sx > 0 and "EXPPRD" in tot.columns else 1.0
+                kr = float(tot.at[r8, "CRESID"]) * uaa / sr if sr > 0 and "CRESID" in tot.columns else 0.0
+                out = {}
+                from capri_mod.data.definitions import CROPS as _CR
+                for mc in _CR:
+                    src = [d[c] for c in cls._CAPRI_CROP.get(mc, (mc,)) if c in d]
+                    L = sum(float(x.levl) for x in src)
+                    if L <= 0:
                         continue
-                    # Removal key per crop: the crop's NITF in CAPRI's results is its need NET of
-                    # biological fixation (NUTNED_: retention x (1 - fBNF) x over-fertilisation), while
-                    # fixation is fBNF of the gross need (JRC96482, eq. 1: Nbiofix = NITF x LEVL x fBNF,
-                    # fBNF 75% for soya and pulses, 5-17% for grass). Gross need = NITF + fixation per ha
-                    # (pulses: 52 + 149 kg/ha in Saxony-Anhalt, removal 4x the net figure).
-                    def _gross(x):
-                        fx = float(x.biofix_t) * 1000.0 / float(x.levl) if (x.biofix_t == x.biofix_t and float(x.levl) > 0) else 0.0
-                        return float(x.nitf) + fx
-                    sx = sum(float(x.levl) * _gross(x) for x in d.values())
-                    # NCRD = "N from crop residues and atmospheric deposition, kg/ha" (sets.gms);
-                    # e_CRESID: CRESID + ATMOSD = sum levl x NCRD, so residues = NCRD - deposition
-                    dep = float(tot.at[r8, "ATMOSD"]) if "ATMOSD" in tot.columns else 0.0
-                    res_ha = lambda x: max(0.0, (float(x.ncrd) if x.ncrd == x.ncrd else 0.0) - dep) \
-                        if (x.ncrd == x.ncrd and float(x.ncrd) > 0) else 0.0
-                    sr = sum(float(x.levl) * res_ha(x) for x in d.values())
-                    uaa = lv
-                    ke = float(tot.at[r8, "EXPPRD"]) * uaa / sx if sx > 0 and "EXPPRD" in tot.columns else 1.0
-                    kr = float(tot.at[r8, "CRESID"]) * uaa / sr if sr > 0 and "CRESID" in tot.columns else 0.0
-                    out = {}
-                    from capri_mod.data.definitions import CROPS as _CR
-                    for mc in _CR:
-                        src = [d[c] for c in cls._CAPRI_CROP.get(mc, (mc,)) if c in d]
-                        L = sum(float(x.levl) for x in src)
-                        if L <= 0:
-                            continue
-                        rem = sum(float(x.levl) * _gross(x) for x in src) / L * ke
-                        res = sum(float(x.levl) * res_ha(x) for x in src) / L * kr
-                        fix = sum((float(x.biofix_t) if x.biofix_t == x.biofix_t else 0.0) for x in src) * 1000.0 / L
-                        out[mc] = (rem, res, fix)
-                    # CAPRI's two grassland activities on their own (the model's GRAS pools
-                    # them; grass_intensity_delta() needs each)
-                    for gc in ("GRAE", "GRAI"):
-                        if gc in d and float(d[gc].levl) > 0:
-                            x = d[gc]
-                            out[gc] = (_gross(x) * ke, res_ha(x) * kr,
-                                       (float(x.biofix_t) if x.biofix_t == x.biofix_t else 0.0) * 1000.0 / float(x.levl))
-                    cls._CROP_N[r8] = out
+                    rem = sum(float(x.levl) * _gross(x) for x in src) / L * ke
+                    res = sum(float(x.levl) * res_ha(x) for x in src) / L * kr
+                    fix = sum((float(x.biofix_t) if x.biofix_t == x.biofix_t else 0.0) for x in src) * 1000.0 / L
+                    out[mc] = (rem, res, fix)
+                # CAPRI's two grassland activities on their own (the model's GRAS pools
+                # them; grass_intensity_delta() needs each)
+                for gc in ("GRAE", "GRAI"):
+                    if gc in d and float(d[gc].levl) > 0:
+                        x = d[gc]
+                        out[gc] = (_gross(x) * ke, res_ha(x) * kr,
+                                   (float(x.biofix_t) if x.biofix_t == x.biofix_t else 0.0) * 1000.0 / float(x.levl))
+                cls._CROP_N[r8] = out
         to8 = getattr(cls, "_CROP_N_MAP", {})
         r8 = to8.get(region)
         if r8 is None or r8 not in cls._CROP_N:
@@ -666,8 +664,7 @@ class NitrogenBlock:
             return None
         cls = type(self)
         if cls._FERT_SIDE is None:
-            tab = _inputs.current().csv("fert_side_effects.csv", "abatement", required=False)
-            tab = tab if tab is not None else pd.DataFrame(columns=["region", "technology", "item", "value"])
+            tab = _inputs.current().csv("fert_side_effects.csv", "abatement")
             cls._FERT_SIDE = {(r.region, r.technology, r.item): float(r.value) for r in tab.itertuples()}
         tab = cls._FERT_SIDE
         lit = {i: tab.get((region, "NITR_INH", i)) for i in ("N2OSYN", "NH3SYN")}

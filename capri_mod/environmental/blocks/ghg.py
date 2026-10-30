@@ -182,16 +182,15 @@ class GHGBlock:
         cls = type(self)
         if cls._ENT_CACHE is None:
             out = {}
-            rows = _inputs.current().rows("enteric_feed_factors.csv", "environment", required=False)
-            if rows is not None:
-                for r in rows:
-                    if not r["ym"]:
-                        continue
-                    d = out.setdefault(r["animal"], {"ym": float(r["ym"]), "ge": {}})
-                    d["ge"].setdefault(r["country"], {})[r["feed"]] = float(r["ge_mcal_per_kg_dm"])
-                for d in out.values():
-                    for g in d["ge"].values():
-                        g["_mean"] = sum(g.values()) / len(g)
+            rows = _inputs.current().rows("enteric_feed_factors.csv", "environment")
+            for r in rows:
+                if not r["ym"]:
+                    continue
+                d = out.setdefault(r["animal"], {"ym": float(r["ym"]), "ge": {}})
+                d["ge"].setdefault(r["country"], {})[r["feed"]] = float(r["ge_mcal_per_kg_dm"])
+            for d in out.values():
+                for g in d["ge"].values():
+                    g["_mean"] = sum(g.values()) / len(g)
             cls._ENT_CACHE = out
         return cls._ENT_CACHE
 
@@ -200,9 +199,9 @@ class GHGBlock:
         manure_n2o_factors.csv), or None."""
         tab = self.__dict__.get("_mn2o_cache")
         if tab is None:
-            t_ = _inputs.current().csv("manure_n2o_factors.csv", "environment", required=False)
-            tab = ({(r.region, r.animal): (float(r.f_man), float(r.f_app), float(r.f_gra), float(r.f_lea))
-                    for r in t_.itertuples()} if t_ is not None else {})
+            t_ = _inputs.current().csv("manure_n2o_factors.csv", "environment")
+            tab = {(r.region, r.animal): (float(r.f_man), float(r.f_app), float(r.f_gra), float(r.f_lea))
+                   for r in t_.itertuples()}
             self._mn2o_cache = tab
         return tab.get((region, animal))
 
@@ -213,9 +212,7 @@ class GHGBlock:
         if region not in cache:
             inp = _inputs.current()
             if "_mn2o_tech_tab" not in self.__dict__:
-                t_ = inp.csv("manure_n2o_tech.csv", "environment", required=False)
-                self._mn2o_tech_tab = t_ if t_ is not None else pd.DataFrame(
-                    columns=["region", "animal", "technology", "r_hou", "r_app"])
+                self._mn2o_tech_tab = inp.csv("manure_n2o_tech.csv", "environment")
                 from capri_mod.supply import ammonia_techs as _at
                 self._amm_tm = _at.load(inp.path("ammonia_tech_model.csv", "abatement/ammonia"))
             t = self._mn2o_tech_tab[self._mn2o_tech_tab["region"] == region]

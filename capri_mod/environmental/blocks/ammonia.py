@@ -11,8 +11,7 @@ class AmmoniaBlock:
     def _nh3_factors(self) -> dict:
         d = self.__dict__.get("_nh3_fac_cache")
         if d is None:
-            d = _inputs.current().json("nh3_factors_capri.json", "environment", required=False)
-            d = d["regions"] if d is not None else {}
+            d = _inputs.current().json("nh3_factors_capri.json", "environment")["regions"]
             self._nh3_fac_cache = d
         return d
 
