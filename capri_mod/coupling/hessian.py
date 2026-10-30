@@ -6,6 +6,31 @@ module once model is loaded (capri_mod.coupling.inject); the annotations are not
 """
 from __future__ import annotations
 
+import functools as _functools
+import hashlib as _hashlib
+from pathlib import Path as _Path
+
+#: the packages whose code cannot change the supply models' price response: the market, the tests, the CAPTRD pipeline
+_NOT_SUPPLY_CODE = ("market", "tests", "pipeline")
+
+
+@_functools.lru_cache(maxsize=1)
+def supply_code_fingerprint() -> str:
+    """A hash of the code that can change the supply models' price response: every .py file of capri_mod but the
+    market's, the tests' and the CAPTRD pipeline's (path and content). Part of the cached Hessian's key since 30 October
+    2026 (the project lead's decision): before, a change of that code reached the key only through a label added by
+    hand, so a change that alters the price response without moving the base could reuse a stale Hessian. Any edit
+    of those files, a comment included, means one new measurement."""
+    root = _Path(__file__).resolve().parents[1]
+    h = _hashlib.sha1()
+    for f in sorted(root.rglob("*.py")):
+        rel = f.relative_to(root)
+        if rel.parts[0] in _NOT_SUPPLY_CODE or "__pycache__" in rel.parts:
+            continue
+        h.update(str(rel).encode())
+        h.update(f.read_bytes())
+    return h.hexdigest()[:16]
+
 
 class HessianBlock:
     def _measure_pending_hessian(self, pend) -> None:
@@ -123,6 +148,7 @@ class HessianBlock:
                             sorted((k_, sorted(v_.items())) for k_, v_ in (getattr(sm, "yani_price_ratio_ms", None) or {}).items()),
                             sorted((getattr(sm, "milk_price_dev_ms", None) or {}).items())))
                       if getattr(self, "_hessian_at_scenario", False) else ""))
+        key_src += repr(("supply-code", supply_code_fingerprint()))
         key = hashlib.sha1(key_src.encode()).hexdigest()[:16]
         cdir = _P(__file__).resolve().parents[2] / ".cache" / "market_supply_hessian"
         # Parquet (binary doubles, exact by construction). The Hessians cached as CSV before 27 October 2026 were
