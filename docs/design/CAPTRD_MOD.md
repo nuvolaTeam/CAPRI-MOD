@@ -687,15 +687,27 @@ data preparation is ported.
   | BAS | 142,615 | 99.9993% |
   | BASM | 142,850 | 98.7% (against BASM.csv.gz, 2030) |
 
-  - **The remaining WAve and wVar differences are VSET, UAAR and LU of the EU-15 countries.** Their cause is the
-    input:
+  - **The remaining WAve and wVar differences are VSET, UAAR and LU of the EU-15 countries.** They are a difference in
+    CAPRI's shipped results that the code and data in hand do not reproduce, not a porting error (traced 30 October
+    2026 with the project lead's files):
     - CAPTRD's p_data holds a different VSET LEVL in 1989-2005 (186 of 408 country-years; ratio median 1.003, up to
       1.74). From 2006 the two agree.
     - UAAR is the sum of the crop areas (prep_data_for_estimation.gms l. 86): Germany's WAve gap in UAAR (4.28)
       equals its gap in VSET. LU is livestock units over UAAR (l. 202-203).
-    - CAPTRD's value (e.g. Germany 1992: 842.8 against CAPREG's 818.37) is in none of CAPREG's records for that
-      country and year, and no CAPTRD statement assigns VSET LEVL. So the run behind results_1770 most likely read a
-      different vintage of CAPREG's set-aside series. That is not proven.
+    - **CAPTRD's values are the official set-aside areas.** They are those of dat/policy/expost.gms (Commission data,
+      VSET LEVL of the EU-15, 1989-2005; e.g. Germany 1992: 842.8, Spain 2000: 590.0). CAPREG reads that file
+      (capreg.gms l. 998) and calibrates the areas in capreg/cal_seta.gms, where VSET is free with weight 5 at
+      member-state level (l. 76, 321-325). Its time series (res_time_series_17<CC>.gdx) therefore holds the
+      calibrated areas (Germany 1992: 818.37).
+    - **CAPTRD read those time series.** trends_1770.gdx (the run of 5 November 2025, 00:30) records the CAPREG time
+      series of 4 November 2025, 16:43-16:44. Those are the files in hand: they equal capreg_tseries/17 in every record
+      both hold (Germany: 3.63 million).
+    - **No CAPTRD code brings the official areas back.** The installation's gams/captrd names VSET at the same places
+      as our copy, and none of them writes ex-post levels. Only capreg.gms includes expost.gms.
+    - **Conclusion.** The shipped results_1770 (computed by the CAPRI network and installed with CAPRI star 3.0 on 24
+      March 2026) come from a setup in which the member states' set-aside kept its official value. It cannot be seen
+      from the installation. The port follows the code and data in hand; a parity check must leave VSET, UAAR and LU
+      of 1989-2005 out.
   - **nObs.** 2.7% differ, and CAPTRD has about 60,000 counts we do not.
     - Where both have a count, CAPTRD stores 1 and we store the number of years. These are the requirement rows
       (CRPR, ENNE, FICT) and the young animals' rows.

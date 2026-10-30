@@ -433,7 +433,7 @@ always a visible, re-runnable step in `tools/`.
 
 ### 4.2 The 404 declared data files
 
-Every CSV file under `capri_data` (archive/ left out) is declared in `capri_data/schema/*.sql`: its columns and
+Every CSV file under `capri_data` is declared in `capri_data/schema/*.sql`: its columns and
 types, its key, the code lists its codes must belong to, its value ranges and the unit of each value (`value_units`:
 the unit stated by CAPRI, by the builder from the CAPRI item it transforms, or `open` where not established). The
 declarations also hold:
