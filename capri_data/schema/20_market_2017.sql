@@ -19,21 +19,35 @@ COMMENT ON TABLE rms_to_rm IS 'CAPRI''s behavioural regions (RMS) and the market
 -- file: capri_data/2017/market/eu_market_supply_nq.csv
 CREATE TABLE eu_market_supply_nq (
     ms VARCHAR NOT NULL REFERENCES capri_rall (code),
-    x VARCHAR NOT NULL CHECK (x IN ('OTHO', 'FFIS', 'SFIS', 'OAQU')),
-    y VARCHAR NOT NULL REFERENCES model_commodities (code),   -- the price's product, the model's code
-    capri_y VARCHAR NOT NULL REFERENCES capri_xx1 (code),     -- the same, CAPRI's code
+    x VARCHAR NOT NULL REFERENCES model_commodities (code),   -- the product, the model's code
+    y VARCHAR,                                                -- the price's product, the model's code; empty: held
+    capri_x VARCHAR NOT NULL REFERENCES capri_xx1 (code),
+    capri_y VARCHAR NOT NULL REFERENCES capri_xx1 (code),
     h DOUBLE NOT NULL,
-    ppri_y DOUBLE NOT NULL CHECK (ppri_y > 0),
+    ppri_y DOUBLE NOT NULL CHECK (ppri_y >= 0),
     inpe DOUBLE NOT NULL CHECK (inpe > 0),
     h_ratio DOUBLE NOT NULL,
-    PRIMARY KEY (ms, x, y)
+    PRIMARY KEY (ms, capri_x, capri_y),
+    CHECK ((ppri_y > 0) OR (h_ratio = 0 AND y IS NULL))
 );
-COMMENT ON TABLE eu_market_supply_nq IS 'CAPRI''s market supply functions of the EU products no supply model produces, per member state: p_hessNQSupp at CAL completed as arm/market1.gms (elas_2_1730defaulta.csv), Data_CAL PPRI, INPE 2030 (tools/build/build_eu_market_supply_nq.py)';
+COMMENT ON TABLE eu_market_supply_nq IS 'CAPRI''s market supply functions of the EU member states, every product (ProdNQ_): p_hessNQSupp at CAL completed as arm/market1.gms (elas_2_1730defaulta.csv), Data_CAL PPRI, INPE 2030 (tools/build/build_eu_market_supply_nq.py)';
 INSERT INTO value_units VALUES
   ('eu_market_supply_nq', 'h', 'U_1000tPerEuPerTonOverINPE', 'capri', 'CAPRI''s p_hessNQSupp (ProdNQ_, arm/market_model.gms l. 1529-1572: quantity in 1000 t, prices over INPE)'),
   ('eu_market_supply_nq', 'ppri_y', 'U_EuPerTon', 'capri', 'CAPRI''s PPRI (CAPRIunits: U_EuPerTon)'),
   ('eu_market_supply_nq', 'inpe', 'U_1unit', 'builder', 'the price index of the non-agricultural good, 1.019^13 in 2030'),
   ('eu_market_supply_nq', 'h_ratio', 'U_1000tPerPriceRatio', 'builder', 'h x ppri_y / inpe');
+
+-- file: capri_data/2017/market/eu_market_supply_base.csv
+CREATE TABLE eu_market_supply_base (
+    ms VARCHAR NOT NULL REFERENCES capri_rall (code),
+    x VARCHAR NOT NULL REFERENCES model_commodities (code),
+    capri_x VARCHAR NOT NULL REFERENCES capri_xx1 (code),
+    prod_cal DOUBLE NOT NULL CHECK (prod_cal <> 0),   -- CAPRI writes -1e-08 for a product it keeps at practically none
+    PRIMARY KEY (ms, capri_x)
+);
+COMMENT ON TABLE eu_market_supply_base IS 'the EU member states'' production at CAPRI''s calibration point, the quantity of their ProdNQ_ (Data_CAL PROD at CAL, data_market_1730defaulta.csv; tools/build/build_eu_market_supply_nq.py)';
+INSERT INTO value_units VALUES
+  ('eu_market_supply_base', 'prod_cal', 'U_1000t', 'capri', 'CAPRI''s PROD (1000 t)');
 
 -- file: capri_data/2017/market/noneu_market_supply_nq.csv
 CREATE TABLE noneu_market_supply_nq (

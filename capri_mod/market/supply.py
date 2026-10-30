@@ -14,7 +14,7 @@ from capri_mod.settings import setting, current as _settings
 from capri_mod.data.definitions import (
     MARKET_COMMODITIES, ALL_TRADE_REGIONS,
 )
-from capri_mod.data.definitions import MS_CODE
+from capri_mod.data.definitions import MS_CODE, EU_MS_BLOCK as _EU_MS
 from capri_mod.market.equilibrium import MarketEquilibrium  # noqa: F401
 from capri_mod.market.state import MarketStateMixin
 
@@ -560,8 +560,13 @@ class SupplyMixin(MarketStateMixin):
         if c is not None:
             return c
         out: dict = {}
-        for r in self._inp().csv("eu_market_supply_nq.csv").itertuples(index=False):
-            rg = (self.eu_region_of_ms(r.ms) if self.eu_blocks else "EU27") or "EU27"
+        for r in self._inp().csv("eu_market_supply_nq.csv", keep_default_na=False).itertuples(index=False):
+            # the EU's member states only: until 31 October 2026 the file held Norway too, whose terms this line put
+            # into EU27 (Norway's own function is in noneu_market_supply_nq.csv); a column without a model price (y
+            # empty) is held
+            rg = self.eu_region_of_ms(r.ms) if r.ms in _EU_MS else None
+            if rg is None or not r.y or r.x not in self.EU_MARKET_SUPPLY:
+                continue
             d = out.setdefault(rg, {})
             d[(r.x, r.y)] = d.get((r.x, r.y), 0.0) + float(r.h_ratio)
         self._eu_msnq_cache = out

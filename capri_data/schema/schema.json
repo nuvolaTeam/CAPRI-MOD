@@ -9984,11 +9984,97 @@
     "tests": []
    }
   },
+  "eu_market_supply_base": {
+   "file": "capri_data/2017/market/eu_market_supply_base.csv",
+   "declared_in": "20_market_2017.sql",
+   "layout": [],
+   "comment": "the EU member states' production at CAPRI's calibration point, the quantity of their ProdNQ_ (Data_CAL PROD at CAL, data_market_1730defaulta.csv; tools/build/build_eu_market_supply_nq.py)",
+   "columns": [
+    {
+     "name": "ms",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "x",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "capri_x",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "prod_cal",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "ms",
+    "capri_x"
+   ],
+   "unique": [],
+   "foreign_keys": [
+    {
+     "columns": [
+      "ms"
+     ],
+     "references": "capri_rall",
+     "ref_columns": [
+      "code"
+     ]
+    },
+    {
+     "columns": [
+      "x"
+     ],
+     "references": "model_commodities",
+     "ref_columns": [
+      "code"
+     ]
+    },
+    {
+     "columns": [
+      "capri_x"
+     ],
+     "references": "capri_xx1",
+     "ref_columns": [
+      "code"
+     ]
+    }
+   ],
+   "checks": [
+    "(prod_cal != 0)"
+   ],
+   "units": [
+    {
+     "item": "prod_cal",
+     "unit": "U_1000t",
+     "status": "capri",
+     "basis": "CAPRI's PROD (1000 t)"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_eu_market_supply_nq",
+    "sources": "$UP/data_market_1730defaulta.csv; $UP/elas_2_1730defaulta.csv; $UP/markmarket_greendeal_1730et_base_1717.txt; $UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $WORK/allgms/gams/aggregation/defaultA.agg; $WORK/capri_reference/sets/simini_21730/<CC>.csv; $WORK/capri_reference/sets/simini_21730/FEED_TO_O.csv; $WORK/capri_reference/sets/simini_21730/MAACT.csv; $WORK/capri_reference/sets/simini_21730/MCACT.csv; $WORK/capri_reference/sets/simini_21730/MPACT.csv; $WORK/capri_reference/sets/simini_21730/Map_RR.csv; $WORK/capri_reference/sets/simini_21730/PACT.csv; $WORK/capri_reference/sets/simini_21730/RALL.csv; $WORK/capri_reference/sets/simini_21730/XX1.csv"
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [],
+    "tests": []
+   }
+  },
   "eu_market_supply_nq": {
    "file": "capri_data/2017/market/eu_market_supply_nq.csv",
    "declared_in": "20_market_2017.sql",
    "layout": [],
-   "comment": "CAPRI's market supply functions of the EU products no supply model produces, per member state: p_hessNQSupp at CAL completed as arm/market1.gms (elas_2_1730defaulta.csv), Data_CAL PPRI, INPE 2030 (tools/build/build_eu_market_supply_nq.py)",
+   "comment": "CAPRI's market supply functions of the EU member states, every product (ProdNQ_): p_hessNQSupp at CAL completed as arm/market1.gms (elas_2_1730defaulta.csv), Data_CAL PPRI, INPE 2030 (tools/build/build_eu_market_supply_nq.py)",
    "columns": [
     {
      "name": "ms",
@@ -10002,6 +10088,11 @@
     },
     {
      "name": "y",
+     "type": "VARCHAR",
+     "not_null": false
+    },
+    {
+     "name": "capri_x",
      "type": "VARCHAR",
      "not_null": true
     },
@@ -10033,8 +10124,8 @@
    ],
    "primary_key": [
     "ms",
-    "x",
-    "y"
+    "capri_x",
+    "capri_y"
    ],
    "unique": [],
    "foreign_keys": [
@@ -10049,9 +10140,18 @@
     },
     {
      "columns": [
-      "y"
+      "x"
      ],
      "references": "model_commodities",
+     "ref_columns": [
+      "code"
+     ]
+    },
+    {
+     "columns": [
+      "capri_x"
+     ],
+     "references": "capri_xx1",
      "ref_columns": [
       "code"
      ]
@@ -10067,9 +10167,9 @@
     }
    ],
    "checks": [
-    "(x IN ('OTHO', 'FFIS', 'SFIS', 'OAQU'))",
-    "(ppri_y > 0)",
-    "(inpe > 0)"
+    "(ppri_y >= 0)",
+    "(inpe > 0)",
+    "((ppri_y > 0) OR ((h_ratio = 0) AND (y IS NULL)))"
    ],
    "units": [
     {
@@ -20294,6 +20394,7 @@
      "build_dairy_processing",
      "build_dairy_world_markets",
      "build_eu_cake_feed",
+     "build_eu_market_supply_nq",
      "build_eu_producer_prices",
      "build_feed_bulks",
      "build_feed_demand_nonEU",
@@ -20496,6 +20597,7 @@
      "build_dairy_processing",
      "build_dairy_world_markets",
      "build_eu_cake_feed",
+     "build_eu_market_supply_nq",
      "build_eu_ms_balance",
      "build_eu_producer_prices",
      "build_feed_bulks",

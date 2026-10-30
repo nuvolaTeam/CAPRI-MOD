@@ -1573,13 +1573,17 @@
    "args": [],
    "inputs": [
     "capri_data/codes/model_commodities.csv",
+    "capri_data/shared/capri_member_state_codes.csv",
+    "capri_data/shared/eu_market_blocks.csv",
     "capri_data/shared/regional_units.csv"
    ],
    "code": [
     "capri_mod/__init__.py",
     "capri_mod/csvio.py",
     "tools/build/build_eu_market_supply_nq.py",
-    "tools/lib/_capri_nq.py"
+    "tools/build/build_noneu_market_supply_nq.py",
+    "tools/lib/_capri_nq.py",
+    "tools/lib/_model_regions.py"
    ],
    "external": [
     "$UP/data_market_1730defaulta.csv",
@@ -1587,6 +1591,7 @@
     "$UP/markmarket_greendeal_1730et_base_1717.txt"
    ],
    "outputs": [
+    "capri_data/2017/market/eu_market_supply_base.csv",
     "capri_data/2017/market/eu_market_supply_nq.csv"
    ]
   },
