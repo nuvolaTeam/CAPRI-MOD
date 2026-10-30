@@ -98,8 +98,22 @@ and `docs/KNOWN_ISSUES.md`.
   - The only differences are the histosol fix's: histosol N2O and the GHG totals of 7 Portuguese regions, by at most
     0.009%.
   - Norway's removal from the EU_WEST stop-rule aggregate changed nothing in this run.
-- **Green Deal 2030 (r195):** [to fill]
-- **Test suite:** [to fill]
+- **Green Deal 2030 (r195).**
+  - Converged in 22 iterations, like r191, along the same path at every iteration.
+  - Supply, market and prices are equal to r191.
+  - The only differences are the histosol fix's, in the same 7 Portuguese regions.
+- **Builders.** The 15 builders this gate changed reproduce their 49 output files identically.
+  - extract_capri_vcs_pair cannot be rerun (its input is a GDX inside a zip). Its EU list was checked equal to the
+    table's before the change.
+- **Test suite:** 252 tests, 250 passed, 1 skipped, 1 failed.
+  - The failing test, test_denmark_with_the_coco_data, had been skipped at the earlier gates because the reference
+    files were not linked. It was out of date: it read the statistics positions as years and compared the stored
+    quotas against CAPTRD's nObs. It failed the same way on origin/dev.
+  - Corrected and rerun on its own: passed.
+- **The procedure from now on (the project lead, 30 October 2026).**
+  - The Farm-to-Fork and Green Deal runs are made once per gate, when the project lead and Claude agree it is ready.
+  - Between gates: the test suite, the reproduction of the changed builders, the declaration checks.
+  - The market supply Hessian's cache is shared by the worktrees, its key holding the supply code's fingerprint.
 
 ## 30 October 2026 (batches 7 and 8, one gate): the UK and the Western Balkans as trade regions, Norway's raw milk in the market (step F), manure as CAPRI (K105), the market base at CAPRI's production of the market year (K106), the data declared in SQL, the CAPTRD-MOD data preparation, the register of departures
 
