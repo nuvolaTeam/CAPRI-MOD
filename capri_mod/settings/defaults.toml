@@ -140,6 +140,13 @@ nlp_jump_check = 0.1
 # more; 1e-6 lies in that gap
 nlp_jump_gain = 1e-6
 nlp_acceptable_tol = 1e-6
+# IPOPT's linear solver (not a CAPRI parameter: CAPRI solves with CONOPT in GAMS). "mumps" or "spral" (both bundled
+# with CasADi; SPRAL under the BSD licence, run on OpenMP, one thread per worker process), or an HSL solver ("ma27",
+# "ma57", "ma86", "ma97"), loaded at run time from nlp_hsllib: the path of the HSL shared library, obtained under HSL's
+# own licence and kept outside the repository (it may not be redistributed). A different linear solver takes IPOPT on
+# a slightly different path, so a non-convex regional problem can end at another local optimum
+nlp_linear_solver = "mumps"
+nlp_hsllib = ""
 # IPOPT's treatment of fixed columns (lower = upper bound): "make_constraint" keeps them as variables held by an
 # equality (trial points may leave the bound), "make_parameter" removes them from the problem (CAPRI: an activity
 # without a level has no variable)

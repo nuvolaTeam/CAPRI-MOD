@@ -140,6 +140,10 @@ class HessianBlock:
                         # differences to the base re-solved from the same state, regions a shock does not reach not
                         # re-solved (27 October 2026, market.hessian_skip_unchanged; off: the key as before)
                         + (("base-resolved-skip-unchanged", "full-solve-state") if skip else ())
+                        # IPOPT's linear solver (supply.nlp_linear_solver, 29-30 October 2026): another solver can end a
+                        # non-convex region at another local optimum; MUMPS keeps the keys of before
+                        + ((("linear-solver", str(_settings().get("supply.nlp_linear_solver")).lower()),)
+                           if str(_settings().get("supply.nlp_linear_solver")).lower() != "mumps" else ())
                         # 29 October 2026: the shocks' solutions from the KKT conditions (beyond CAPRI)
                         + (("kkt-step",) if kkt else ()))
                    # at a scenario's state (market.hessian_scenario_iter): its young-animal and member-state milk
