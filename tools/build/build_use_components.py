@@ -28,8 +28,9 @@ _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to
 ROOT = Path(__file__).resolve().parents[2]
 DATA = Path("/mnt/user-data/uploads/data_market_1730defaulta.csv")
 OUT = ROOT / "capri_data" / "2017" / "market" / "use_components.csv"
-EU = {"AT", "BL", "BG", "CY", "CZ", "DE", "DK", "EE", "EL", "ES", "FI", "FR", "HR", "HU", "IR", "IT", "LT", "LV",
-      "MT", "NL", "PL", "PT", "RO", "SE", "SI", "SK"}
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "lib"))
+from _model_regions import EU_MS2 as _EU_FROM_DATA  # noqa: E402  (capri_data/shared/eu_market_blocks.csv)
+EU = set(_EU_FROM_DATA)                                  # CAPRI's EU member states, from the data
 ITEMS = ("HCON", "FEED", "PROC", "BIOF", "ARM1")
 
 

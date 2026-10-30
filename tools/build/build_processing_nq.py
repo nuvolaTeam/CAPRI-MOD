@@ -38,8 +38,9 @@ ELAS = Path("/mnt/user-data/uploads/elas_2_1730defaulta.csv")
 DATA = Path("/mnt/user-data/uploads/data_market_1730defaulta.csv")
 DUMP = Path("/mnt/user-data/uploads/markmarket_greendeal_1730et_base_1717.txt")
 OUT = ROOT / "capri_data" / "2017" / "market"
-EU = {"AT", "BL", "BG", "CY", "CZ", "DE", "DK", "EE", "EL", "ES", "FI", "FR", "HR", "HU", "IR", "IT", "LT", "LV",
-      "MT", "NL", "PL", "PT", "RO", "SE", "SI", "SK"}
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "lib"))
+from _model_regions import EU_MS2 as _EU_FROM_DATA  # noqa: E402  (capri_data/shared/eu_market_blocks.csv)
+EU = set(_EU_FROM_DATA)                                  # CAPRI's EU member states, from the data
 USES = ("HCON", "FEED", "PROC", "BIOF")
 
 

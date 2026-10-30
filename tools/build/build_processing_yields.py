@@ -16,6 +16,8 @@ Output: capri_data/2017/market/processing_yields.csv  ms, raw, product, raw_kt, 
     python tools/build/build_processing_yields.py
 """
 from __future__ import annotations
+
+import sys
 import re
 from pathlib import Path
 
@@ -27,8 +29,9 @@ ROOT = Path(__file__).resolve().parents[2]
 DUMP = Path("/mnt/user-data/uploads/markmarket_greendeal_1730et_base_1717.txt")
 KEEP = ROOT / "capri_data" / "sources" / "market" / "processing_yields_dataout_2030.csv"
 PAIRS = (("OLIV", "OLIO"), ("PARI", "RICE"))
-EU27 = {"BL", "SE", "DK", "DE", "EL", "ES", "FR", "IR", "IT", "NL", "AT", "PT", "FI", "CY", "EE", "LV", "LT", "MT",
-        "PL", "SK", "BG", "CZ", "HU", "SI", "RO", "HR"}
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "lib"))
+from _model_regions import EU_MS2 as _EU_FROM_DATA  # noqa: E402  (capri_data/shared/eu_market_blocks.csv)
+EU27 = set(_EU_FROM_DATA)                                  # CAPRI's EU member states, from the data
 
 
 def main():
