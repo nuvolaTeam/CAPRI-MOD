@@ -6,14 +6,11 @@ Per country file, in passes where a step needs every country:
   3  COCO applied, checks, deletions                          load_coco1_data.gms l. 250-561 (biofuel flags from every
                                                               country); captrd.gms l. 830-850
   4  UVAD averaged over the market aggregates                 l. 852-860 (every country's UVAD)
-  5  regions' cleaning, LABH, policy data, prep_data_for_estimation
-                                                              l. 862-906; captrd_policy.gms;
+  5  regions' cleaning, LABH, labour bounds, policy data, prep_data_for_estimation
+                                                              l. 862-906; labour_ageline.gms; captrd_policy.gms;
                                                               prep_data_for_estimation.gms l. 15-162
 The time sets are timesets.build's (captrd.gms l. 203-812): ExPost from CAPREG's UAAR, ExPostT adds ExAnteD (COCO),
 BASYRS5 and BASYRSM around the base year within ExPost, the ex-ante years from the simulation years.
-
-Not yet in this order (docs/design/CAPTRD_MOD.md section 12.2): the labour agelines (baseline/labour_ageline.gms),
-between LABH and the policy data.
 
     python -m capri_mod.pipeline.captrd.prepare_run --out DIR [--countries DK AT ...]
 """
@@ -29,6 +26,7 @@ import pandas as pd
 from capri_mod.csvio import read_csv
 
 from capri_mod.pipeline.captrd import coco as C
+from capri_mod.pipeline.captrd import labour as Lab
 from capri_mod.pipeline.captrd import policy as Pol
 from capri_mod.pipeline.captrd import prepare as P
 from capri_mod.pipeline.captrd import timesets as TS
@@ -110,11 +108,14 @@ def run(countries: Iterable[str], sets: P.CaptrdSets, base_year: int, first_year
     # 4
     added = P.fill_uvad(pd.concat(uv, ignore_index=True), sets, expostt)
     # 5
+    lab_dat = Lab.read_labour_dat()
+    lab_bounds = Lab.ageline_bounds(lab_dat["ageline"], sets, T.years, T.exante, base_year)
     out = {}
     for m in ms_list:
         p = pd.read_parquet(work / f"{_cc(m)}.3.parquet")
         p = pd.concat([p, added[added["region"].isin(set(p["region"]))]], ignore_index=True)
         p = P.labour_household(P.clean_regions(p, sets, expost))
+        p = Lab.apply(p, sets, [m], T.years, T.exante, base_year, dat=lab_dat, bounds=lab_bounds)   # l. 902
         p = Pol.apply(p, sets, [m], T.years, T.exante, T.exantet, T.years_cur, basyrsm, T.lst_expost, base_year,
                       aglink, expiry=milk_quota_expiry)
         p = P.prep_for_estimation(p, sets, expostt, basyrs5, basyrsm, T.years, dat["luunits"])

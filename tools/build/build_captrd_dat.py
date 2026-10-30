@@ -11,21 +11,27 @@ capri_data/sources/capri_dat/):
   policy/smal_pshar.gms                  p_smallProdShare(year, MS)  small producers' share outside compulsory set-aside
 and from CAPRI's code (capri_data/sources/capri_gams):
   pol_input/mquota_update.gms            PMQuotaReg(MS, QUTtot, year) total milk quotas 2004-2014 (1000 t)
+  baseline/labour_ageline.gms            p_minLabourPerAct(act)      minimum labour per activity unit (h, 2008)
 and CAPRI's sugar quota GDX input_load_sugar_quotas.gdx (capri_data/sources/capri_dat/sugar, README there):
   p_SQuotas, p_PPSQRenounce, p_PPSQCBuyBack (p_PPSQWithdraw: no records)
+and CAPRI's farm holders' age lines dat/baseline/ageline.gdx AGELINE(region, age, year) from the parquet mirror of
+CAPRI's dat folder (ageline.parquet: uni_0 region, uni_1 age, uni_2 year; the year label "ageline" kept as it is,
+CAPTRD reads only the years of its YEARS set), read by baseline/labour_ageline.gms (captrd.gms l. 902)
 CAPTRD includes livestock_units from policy/rd_static.gms or the policy sets, the biofuel parameters at captrd.gms
 l. 340-341 (%NewBiofuelModule% = ON), the quota and set-aside data in captrd/captrd_policy.gms.
 
 GAMS labels are case-insensitive: they are written in upper case ("BioE" is BIOE).
 
 Output: capri_data/pipeline/captrd/dat/{p_luunits, p_extrrates, p_byproduct, p_mquotadat, p_mquotareg,
-p_smallprodshare, p_squotas, p_ppsqrenounce, p_ppsqcbuyback}.csv
+p_smallprodshare, p_squotas, p_ppsqrenounce, p_ppsqcbuyback, p_minlabourperact, ageline}.csv
 
-    python tools/build/build_captrd_dat.py
+    python tools/build/build_captrd_dat.py [--ageline AGELINE.parquet]
 """
 from __future__ import annotations
 
+import argparse
 import csv
+import os
 import re
 from pathlib import Path
 
@@ -33,12 +39,13 @@ ROOT = Path(__file__).resolve().parents[2]
 SRC = ROOT / "capri_data" / "sources" / "capri_dat"
 GAMS = ROOT / "capri_data" / "sources" / "capri_gams"
 OUT = ROOT / "capri_data" / "pipeline" / "captrd" / "dat"
+AGELINE = Path(os.environ.get("CAPRI_WORK", "/home/claude/work")) / "hf_capri" / "dat" / "baseline" / "ageline" / "ageline.parquet"
 
 
 def parameter_list(path: Path, name: str, dim: int):
     """The records of `parameter name(...) "text" / k1.k2 value ... /;` (comment lines starting with * skipped)."""
     text = path.read_text(encoding="latin-1")
-    m = re.search(rf"parameter\s+{name}\s*\([^)]*\)[^/]*/(.*?)/\s*;", text, flags=re.I | re.S)
+    m = re.search(rf"parameter\s+{name}\s*(?:\([^)]*\))?[^/]*/(.*?)/\s*;", text, flags=re.I | re.S)
     if not m:
         raise KeyError(f"{name} not in {path}")
     out = []
@@ -106,6 +113,9 @@ def _write(name, header, rows):
 
 
 def main() -> None:
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--ageline", type=Path, default=AGELINE)
+    a = ap.parse_args()
     _write("p_luunits", ["act", "value"], parameter_list(SRC / "policy" / "livestock_units.gms", "p_LUUnits", 1))
     bio = SRC / "biofuel" / "biofuel_technology_params.gms"
     _write("p_extrrates", ["fuel", "stock", "value"], parameter_list(bio, "p_ExtrRates", 2))
@@ -123,6 +133,13 @@ def main() -> None:
         if rd[0] != hdr:
             raise ValueError(f"{f}.csv: columns {rd[0]}, expected {hdr}")
         _write(f.lower(), hdr, [(*r[:-1], float(r[-1])) for r in rd[1:]])
+    _write("p_minlabourperact", ["act", "value"],
+           parameter_list(GAMS / "baseline" / "labour_ageline.gms", "p_minLabourPerAct", 1))
+    import pandas as pd
+    ag = pd.read_parquet(a.ageline)
+    _write("ageline", ["region", "age", "year", "value"],
+           [(str(r.uni_0).upper(), str(r.uni_1).upper(), str(r.uni_2).upper(), float(r.value))
+            for r in ag.itertuples(index=False)])
 
 
 if __name__ == "__main__":

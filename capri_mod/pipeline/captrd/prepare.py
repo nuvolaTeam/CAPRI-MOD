@@ -112,6 +112,8 @@ class CaptrdSets:
     p_t_actagg: Set[Tuple[str, str]] = field(default_factory=set)
     stock_to_fuel: Set[Tuple[str, str]] = field(default_factory=set)
     stock_to_by: Set[Tuple[str, str]] = field(default_factory=set)
+    # read by labour.py (baseline/labour_ageline.gms)
+    srnuts1: Set[str] = field(default_factory=set)
     # read by policy.py (captrd_policy.gms)
     grcu: Set[str] = field(default_factory=set)
     rset: Set[str] = field(default_factory=set)
@@ -157,7 +159,7 @@ def read_sets(path: Path = SETS_DIR) -> CaptrdSets:
               "rmaggsup", "ncnc", "fout", "oyani_rows", "mcact", "cact", "seco", "o", "feed", "mrkbale", "mrkbalee",
               "dompos", "breedact", "meat", "grpr", "grpc", "aact", "oyani", "corfeedlosf", "cropo", "domm_set",
               "splitacts", "dact", "dmpact", "msnoeu28", "fuel_rows", "biofuels", "fosfuels", "fuels", "biostock",
-              "grcu", "rset", "msall", "nosugquotaaglinkversion"]
+              "grcu", "rset", "msall", "nosugquotaaglinkversion", "srnuts1"]
     names2 = ["map_rr", "pact_to_io", "pact_to_i", "rms_to_rm", "pact_to_o", "pact_to_y", "cropc_to_g", "rows_to_g",
               "prcd", "feed_to_o", "dact_to_pact", "p_t_actagg", "stock_to_fuel", "stock_to_by"]
     m3 = read_csv(path / "map_rrt.csv", keep_default_na=False, dtype=str)

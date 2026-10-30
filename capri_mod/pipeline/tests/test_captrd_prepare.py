@@ -198,7 +198,9 @@ def test_denmark_with_the_coco_data(tmp_path):
     1984-2019 (2019 from COCO) equal CAPTRD's p_data, leaving out the reporting overwrites and what needs the other
     countries (the near-zero biofuel flags some other country's COCO data sets, l. 337 and 346; the UVAD averages).
     The quotas and set-aside rates, which CAPTRD stores whatever their observations (define_stats_and_supports.gms
-    l. 149-150), are compared in every year, the ex-ante years included."""
+    l. 149-150), and the labour bounds MAXS/MINS LABO (labour_ageline.gms) are compared in every year, the ex-ante
+    years included. (Austria and Belgium, whose bounds the age lines set in some years, also checked on 30 October
+    2026: equal to 1e-15.)"""
     from capri_mod.pipeline.captrd import prepare_run as R
     s = P.read_sets()
     out = R.run(["DK000000"], s, BASE_YEAR, 1984, 2019, TS, BASE, COCO, BIOFUEL, tmp_path)
@@ -223,9 +225,10 @@ def test_denmark_with_the_coco_data(tmp_path):
     _assert_equal(m, 42_000)
     # the quotas and set-aside rates in every year (captrd_policy.gms)
     a = pd.read_parquet(out["DK000000"])
-    a = a[(a.t != "BASM") & (a.region == "DK000000") & (a.col.isin(s.quotas) | (a.row == "SETR"))]
+    lab = lambda d: (d.row == "LABO") & d.col.isin(["MAXS", "MINS"])         # noqa: E731 labour_ageline.gms
+    a = a[(a.t != "BASM") & (a.region == "DK000000") & (a.col.isin(s.quotas) | (a.row == "SETR") | lab(a))]
     ref = pd.concat(c[c.region == "DK000000"] for c in
                     pd.read_csv(RES / "P_Data.csv.gz", dtype={"t": str}, chunksize=1_000_000))
-    ref = ref[ref.t.str.isdigit() & (ref.eps == 0) & (ref.col.isin(s.quotas) | (ref.row == "SETR"))]
+    ref = ref[ref.t.str.isdigit() & (ref.eps == 0) & (ref.col.isin(s.quotas) | (ref.row == "SETR") | lab(ref))]
     q = a.merge(ref[P.KEYS + ["value"]], on=P.KEYS, how="outer", suffixes=("", "_ref"), indicator=True)
-    _assert_equal(q, 150)
+    _assert_equal(q, 170)

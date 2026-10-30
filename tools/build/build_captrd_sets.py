@@ -71,7 +71,7 @@ BREEDACT = ["DCOL", "DCOH", "SCOW", "SHGM", "SOWS", "HENS"]
 MEAT = ["BEEF", "POUM", "PORK", "SGMT"]
 # CAPRI's global sets the preparation reads, as instantiated (copied from the reference export): MS is sets.rmssup
 # (sets_captrd.gms l. 54-56), NT2 the alias of SRNUTS2 (l. 69)
-GLOBAL_1D = {"ms": "RMSSUP", "srnuts2": "SRNUTS2", "urbannuts": "urbanNUTS", "secom": "SECOM",
+GLOBAL_1D = {"ms": "RMSSUP", "srnuts1": "SRNUTS1", "srnuts2": "SRNUTS2", "urbannuts": "urbanNUTS", "secom": "SECOM",
              "landusearto": "LandUseARTO", "quotas": "QUOTAS", "bio_cols": "Bio_Cols", "biorepcols": "bioRepCols",
              "seco_biof": "SECO_BIOF", "mpact": "MPACT", "maact": "MAACT", "iyani": "IYANI", "fix_yai": "FIX_YAI",
              "reqsc": "REQSC", "ncnc": "NCNC", "fout": "FOUT", "oyani_rows": "OYANI_ROWS", "mcact": "MCACT",
