@@ -22,7 +22,7 @@ CAPRI values an input coefficient at its regional unit value: cost (EUR per ha o
                     INPO coefficient, so valued at INPO's unit value; for the parity switch)
   yd_rest_eur_ha    the yield-dependent part of the other directly yield-dependent inputs (sets.gms IY: CAOF, SEED,
                     REPM, REPB, ELEC, EGAS, EFUL, ELUB, IRRO, SERI): sum_i f_i x cost_i x G, with f_i CAPRI's
-                    p_inputDemandFactor (inputs/yieldIY.gms, vendored) and G CAPRI's yield growth 2017 -> 2030 (2030
+                    p_inputDemandFactor (inputs/yieldIY.gms, as CSV) and G CAPRI's yield growth 2017 -> 2030 (2030
                     reference YILD / 2017 YILD). capmod/define_inputs.gms sets a coefficient to
                     BAS x (1 - f + f x G) x TF_I, so the cost moves by yd x TF_I x (rho - 1) for a yield ratio rho
                     against the 2030 reference (supply/endog_yields.gms re-runs define_inputs after the price-driven
@@ -49,7 +49,7 @@ Output: capri_data/2017/supply/plant_protection_cost.csv
     python tools/build/build_plant_protection_cost.py [--dump-dir /home/claude/work/capreg] [--out FILE]
 """
 from __future__ import annotations
-import argparse, glob, importlib.util, re
+import argparse, csv, glob, importlib.util, re
 from collections import defaultdict
 from pathlib import Path
 
@@ -70,7 +70,7 @@ ANIMALS = {"DCOW": ("DCOL", "DCOH"), "BCOW": ("SCOW",), "BULL": ("BULL", "BULH")
            "BROI": ("POUF",), "SHGM": ("SHGM",), "SHGF": ("SHGF",), "OANI": ("OANI",)}
 COLS = ["region", "activity", "plap_eur_ha", "inpo_eur_ha", "fert_eur_ha", "eful_eur_ha", "eful_inpo_eur_ha",
         "yd_rest_eur_ha", "yd_plap_eur_ha", "yd_inpo_eur_ha", "yield_growth", "inpo_toin_share", "capri_region"]
-YIELD_IY = ROOT / "capri_data" / "sources" / "capri_gams" / "inputs" / "yieldIY.gms"
+YIELD_IY = ROOT / "capri_data" / "sources" / "capri_gams" / "inputs" / "yieldIY_p_inputDemandFactor.csv"
 YILD30 = ROOT / "capri_data" / "sources" / "capri_res" / "yild_2030_ref.csv.xz"
 
 
@@ -94,25 +94,11 @@ def yields_2030(dump: Path) -> dict:
 
 def input_demand_factors() -> dict:
     """CAPRI's p_inputDemandFactor(act, input), the yield-dependent part of an input coefficient
-    (inputs/yieldIY.gms; vendored): the table, and 1 for a yield-dependent input the table leaves blank
+    (inputs/yieldIY.gms, its table converted to yieldIY_p_inputDemandFactor.csv by
+    tools/build/convert_sources_to_csv.py): the table, and 1 for a yield-dependent input the table leaves blank
     (l. 103: p_inputDemandFactor(PACT,IY) $ (NOT p_inputDemandFactor(PACT,IY)) = 1)."""
-    lines = YIELD_IY.read_text(errors="replace").splitlines()
-    i0 = next(i for i, l in enumerate(lines) if l.startswith("TABLE p_inputDemandFactor"))
-    head, f = None, {}
-    for l in lines[i0 + 1:]:
-        if l.strip() == ";" or l.strip().startswith(";"):
-            break
-        if not l.strip() or l.lstrip().startswith("*"):
-            continue
-        if head is None:
-            head = [(m.start(), m.group()) for m in re.finditer(r"[A-Z]+", l)]
-            continue
-        act = l.split()[0]
-        for m in re.finditer(r"\d+\.?\d*", l[len(act):]):
-            pos = m.start() + len(act)
-            col = min(head, key=lambda h: abs(h[0] - pos))[1]      # the column header nearest the number
-            f[(act, col)] = float(m.group())
-    return f
+    with open(YIELD_IY, newline="", encoding="utf-8") as fh:
+        return {(r["activity"], r["input"]): float(r["value"]) for r in csv.DictReader(fh)}
 
 
 def _load(path):

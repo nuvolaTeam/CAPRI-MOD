@@ -91,7 +91,7 @@ AGGREGATES = {
     # CAPRI REPORTING sums, derived from the data (2026-10): the 44 trading regions
     # (39 behavioural regions + 5 trade-only blocks EU27yr19, URUPAR, WBA, MER_OTH,
     # MED) reproduce ImportQ(World, World) exactly for all 71 traded products, and
-    # every code below overshoots when added. See sources/capri_trade_regions_2017.json.
+    # every code below overshoots when added (checked for all 71 traded products in 2017).
     # The previous hand-made list dropped GENUINE regions (URUPAR, MED, AFR_LDC,
     # AFR_REST, ASOCE_LDC, ASOCE_REST, FSU, REU, MSA_ACP, WBA) and kept "EU" and
     # "AllImporters", double-counting the EU and rest of world.

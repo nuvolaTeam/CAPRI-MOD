@@ -6,7 +6,7 @@ CREATE TABLE world_prices (
     commodity VARCHAR PRIMARY KEY,                     -- a market commodity, or DWHE / SUGB (rule below)
     price DOUBLE NOT NULL CHECK (price > 0)
 );
-COMMENT ON TABLE world_prices IS 'world market prices 2017: CAPRI''s FAO_agg p_dataMarket World PMRK BAS of the commodity''s CAPRI product; OLIV from OLIO by the EU''s oil extraction; FPRI CAPRI''s export-weighted 2017 market prices; DWHE, SUGB kept for the outer loop''s price index (tools/build/build_world_prices.py, provenance sources/world_price_provenance.json)';
+COMMENT ON TABLE world_prices IS 'world market prices 2017: CAPRI''s FAO_agg p_dataMarket World PMRK BAS of the commodity''s CAPRI product; OLIV from OLIO by the EU''s oil extraction; FPRI CAPRI''s export-weighted 2017 market prices; DWHE, SUGB kept for the outer loop''s price index (tools/build/build_world_prices.py, the source per group of rows: 02_provenance_notes.sql)';
 INSERT INTO value_units VALUES
   ('world_prices', 'price', 'U_EuPerTon', 'capri', 'CAPRI''s PMRK (EUR/t); OLIV per t of olives (builder)');
 

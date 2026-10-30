@@ -17,7 +17,8 @@ armington_params.csv, 29 October 2026, the file turned out to be named in seven:
 (live, stored-not-applied and archived files, 44 live entries), `INPUT_MANIFEST.json` (93 inputs and the data held in
 code) and `DATA_LOCATION_MAP.md` (where each input lives in CAPRI). `FITNESS_FOR_USE.json` (the outputs' fitness,
 read by capri_mod/fitness.py), `SYMBOL_EXTRACTION_MAP.json` and `validation/schema_coverage.json` (a dated report)
-describe the data too. All of them are to be checked when their content moves into the declarations):
+describe the data too (`DATA_CATALOG.json`, `SYMBOL_EXTRACTION_MAP.json` and `schema_coverage.json` removed 30 October 2026,
+read by no code). All of them are to be checked when their content moves into the declarations):
 
 | Store | Entries | Holds | Read by |
 |---|---|---|---|
@@ -147,12 +148,15 @@ file has its provenance and no provenance row is left without a declared file; e
 ; a file without a builder has a checked note
 on its origin; every number in the code has its classification and no classification is left without its number.
 
-Two source files in GAMS text form, `sources/water/cropwat.csv` and `irrishare.csv`, were CSV only by name; they are
-`.gms` now (the builder's output is unchanged, byte for byte).
+Two source files in GAMS text form, `sources/water/cropwat.csv` and `irrishare.csv`, were CSV only by name; they were
+renamed `.gms` (the builder's output unchanged, byte for byte), and on 30 October 2026 converted to CSV with every
+other non-CSV source: `water/cropwat_p_cropwatReq.csv`, `water/irrishare_p_irriShare.csv` (`tools/build/convert_sources_to_csv.py`, declared
+in `34_sources_csv.sql`).
 
 The nine validation files without a builder were settled by the project lead (29 October 2026, KNOWN_ISSUES K103):
 the seven read by no code removed, with three unread source extracts (their builders no longer write them); the two
 read by the baseline check given a builder (tools/build/build_capri_eu27_levels.py, the 2030 file reproduced exactly,
 the 2017 file at full precision). `validate_data.py --db FILE` keeps the database it builds (a copy for querying,
-rebuilt from the CSVs; not in git). Still to move: `MANIFEST.json`, `DATA_CATALOG.json`, `SYMBOL_EXTRACTION_MAP.json`, `FITNESS_FOR_USE.json` and `DATA_DICTIONARY.md`
-still to move.
+rebuilt from the CSVs; not in git). Still to move: `MANIFEST.json`, `FITNESS_FOR_USE.json` and `DATA_DICTIONARY.md`
+(`DATA_CATALOG.json` and `SYMBOL_EXTRACTION_MAP.json`, read by no code, were removed 30 October 2026, the project lead's
+decision).

@@ -79,27 +79,6 @@ COMMENT ON TABLE src_intensity_q_recipe2030 IS 'Per model region (a CAPRI region
 INSERT INTO value_units VALUES
   ('src_intensity_q_recipe2030', 'value', NULL, 'open', 'intensity_q_recipe2030.value: unit to be established');
 
--- file: capri_data/sources/baseline_pmp/pmp_cnst_2030.csv
-CREATE TABLE src_pmp_cnst_2030 (
-    region VARCHAR NOT NULL,
-    activity VARCHAR NOT NULL,
-    tech VARCHAR NOT NULL,
-    "value" DOUBLE NOT NULL,
-    PRIMARY KEY (region, activity, tech)
-);
-COMMENT ON TABLE src_pmp_cnst_2030 IS 'CAPRI''s linear PMP terms p_pmpCnst(region, activity, tech) of its 2030 baseline calibration, from the project lead''s gdxdump of output/results/baseline/pmppar_21730<CC>defaulta.gdx; CAPRI codes, unchanged (tools/build/build_pmp_2030.py).';
-INSERT INTO value_units VALUES
-  ('src_pmp_cnst_2030', 'value', NULL, 'open', 'pmp_cnst_2030.value: unit to be established');
-
--- file: capri_data/sources/baseline_pmp/pmp_cnst_landtypes_2030.csv
-CREATE TABLE src_pmp_cnst_landtypes_2030 (
-    region VARCHAR NOT NULL,
-    landtype VARCHAR NOT NULL,
-    "value" VARCHAR NOT NULL,
-    PRIMARY KEY (region, landtype, "value")
-);
-COMMENT ON TABLE src_pmp_cnst_landtypes_2030 IS 'CAPRI''s linear land-supply terms p_pmpCnstLandTypes(region, landtype) of its 2030 baseline calibration, from pmppar_21730<CC>defaulta.gdx; the text exogenousLandSupply, CAPRI''s marker of an exogenous land type, is kept (tools/build/build_pmp_2030.py).';
-
 -- file: capri_data/sources/baseline_pmp/pmp_feed_inp_coeff_2030.csv
 CREATE TABLE src_pmp_feed_inp_coeff_2030 (
     region VARCHAR NOT NULL,
@@ -200,19 +179,6 @@ CREATE TABLE src_recipe_2030_quad_techn (
 COMMENT ON TABLE src_recipe_2030_quad_techn IS 'capri-mod''s own activity PMP terms for 2030 (region, activity, tech1, tech2, value; the format of p_pmpQuadTechn), computed with CAPRI''s recipe (supply/define_pmp_terms.gms, supply/pmp_terms/*) per CAPRI region (tools/build/build_pmp_recipe.py --year 2030).';
 INSERT INTO value_units VALUES
   ('src_recipe_2030_quad_techn', 'value', NULL, 'open', 'recipe_2030_quad_techn.value: unit to be established');
-
--- file: capri_data/sources/baseline_pmp/simini_21730_data.csv
-CREATE TABLE src_simini_21730_data (
-    region VARCHAR NOT NULL,
-    col VARCHAR NOT NULL,
-    row VARCHAR NOT NULL,
-    "year" VARCHAR NOT NULL,
-    "value" DOUBLE NOT NULL,
-    PRIMARY KEY (region, col, row, "year")
-);
-COMMENT ON TABLE src_simini_21730_data IS 'CAPRI''s DATA(region, col, row, year) of sim_ini_21730.gdx, the start file of the 2030 baseline simulation, at year Y and BAS (682267 rows); no builder: tools/build/build_pmp_recipe.py, its reader, describes it as extracted from that file (provided by the project lead).';
-INSERT INTO value_units VALUES
-  ('src_simini_21730_data', 'value', NULL, 'open', 'simini_21730_data.value: unit to be established');
 
 -- file: capri_data/sources/capmod/capmod_world_reference_2017.csv
 CREATE TABLE src_capmod_world_reference_2017 (
@@ -659,104 +625,6 @@ INSERT INTO value_units VALUES
   ('src_capreg_cap_premium', 'TOMA', NULL, 'open', 'capreg_cap_premium.TOMA: unit to be established'),
   ('src_capreg_cap_premium', 'TWIN', NULL, 'open', 'capreg_cap_premium.TWIN: unit to be established'),
   ('src_capreg_cap_premium', 'VSET', NULL, 'open', 'capreg_cap_premium.VSET: unit to be established');
-
--- file: capri_data/sources/capreg/capreg_feed_use.csv
-CREATE TABLE src_capreg_feed_use (
-    model_region VARCHAR NOT NULL,
-    activity VARCHAR NOT NULL,
-    "item" VARCHAR NOT NULL,
-    "value" DOUBLE NOT NULL,
-    PRIMARY KEY (model_region, activity, "item")
-);
-COMMENT ON TABLE src_capreg_feed_use IS 'CAPRI''s feed use per regional unit, activity and feed item (FEED, FCER, FGRA, FMAI, FROO, FOFA, FPRO, FCOM, FMIL, FSGM, FSTR, FOTH), from the CAPREG DATA2_<CC>.txt dumps, year column Y (tools/build/extract_remaining_nine.py).';
-INSERT INTO value_units VALUES
-  ('src_capreg_feed_use', 'value', NULL, 'open', 'capreg_feed_use.value: unit to be established');
-
--- file: capri_data/sources/capreg/capreg_herds.csv
-CREATE TABLE src_capreg_herds (
-    model_region VARCHAR NOT NULL,
-    BULF DOUBLE,
-    BULH DOUBLE,
-    BULL DOUBLE,
-    CAFF DOUBLE NOT NULL,
-    CAFR DOUBLE NOT NULL,
-    CALV DOUBLE NOT NULL,
-    CAMF DOUBLE,
-    CAMR DOUBLE NOT NULL,
-    CATA DOUBLE NOT NULL,
-    DCOH DOUBLE NOT NULL,
-    DCOL DOUBLE NOT NULL,
-    DCOW DOUBLE NOT NULL,
-    GOAT DOUBLE,
-    HEIF DOUBLE,
-    HEIH DOUBLE,
-    HEIL DOUBLE,
-    HEIR DOUBLE NOT NULL,
-    HENS DOUBLE,
-    PIGF DOUBLE NOT NULL,
-    PIGS DOUBLE,
-    POUF DOUBLE,
-    POUL DOUBLE,
-    SCOW DOUBLE NOT NULL,
-    SHEP DOUBLE,
-    SHGF DOUBLE NOT NULL,
-    SHGM DOUBLE NOT NULL,
-    SHGT DOUBLE NOT NULL,
-    SOWS DOUBLE,
-    PRIMARY KEY (model_region)
-);
-COMMENT ON TABLE src_capreg_herds IS 'CAPRI''s HERD per regional unit (rows) and animal activity (columns), from the CAPREG DATA2_<CC>.txt dumps, year column Y (tools/build/extract_remaining_nine.py).';
-INSERT INTO value_units VALUES
-  ('src_capreg_herds', 'BULF', NULL, 'open', 'capreg_herds.BULF: unit to be established'),
-  ('src_capreg_herds', 'BULH', NULL, 'open', 'capreg_herds.BULH: unit to be established'),
-  ('src_capreg_herds', 'BULL', NULL, 'open', 'capreg_herds.BULL: unit to be established'),
-  ('src_capreg_herds', 'CAFF', NULL, 'open', 'capreg_herds.CAFF: unit to be established'),
-  ('src_capreg_herds', 'CAFR', NULL, 'open', 'capreg_herds.CAFR: unit to be established'),
-  ('src_capreg_herds', 'CALV', NULL, 'open', 'capreg_herds.CALV: unit to be established'),
-  ('src_capreg_herds', 'CAMF', NULL, 'open', 'capreg_herds.CAMF: unit to be established'),
-  ('src_capreg_herds', 'CAMR', NULL, 'open', 'capreg_herds.CAMR: unit to be established'),
-  ('src_capreg_herds', 'CATA', NULL, 'open', 'capreg_herds.CATA: unit to be established'),
-  ('src_capreg_herds', 'DCOH', NULL, 'open', 'capreg_herds.DCOH: unit to be established'),
-  ('src_capreg_herds', 'DCOL', NULL, 'open', 'capreg_herds.DCOL: unit to be established'),
-  ('src_capreg_herds', 'DCOW', NULL, 'open', 'capreg_herds.DCOW: unit to be established'),
-  ('src_capreg_herds', 'GOAT', NULL, 'open', 'capreg_herds.GOAT: unit to be established'),
-  ('src_capreg_herds', 'HEIF', NULL, 'open', 'capreg_herds.HEIF: unit to be established'),
-  ('src_capreg_herds', 'HEIH', NULL, 'open', 'capreg_herds.HEIH: unit to be established'),
-  ('src_capreg_herds', 'HEIL', NULL, 'open', 'capreg_herds.HEIL: unit to be established'),
-  ('src_capreg_herds', 'HEIR', NULL, 'open', 'capreg_herds.HEIR: unit to be established'),
-  ('src_capreg_herds', 'HENS', NULL, 'open', 'capreg_herds.HENS: unit to be established'),
-  ('src_capreg_herds', 'PIGF', NULL, 'open', 'capreg_herds.PIGF: unit to be established'),
-  ('src_capreg_herds', 'PIGS', NULL, 'open', 'capreg_herds.PIGS: unit to be established'),
-  ('src_capreg_herds', 'POUF', NULL, 'open', 'capreg_herds.POUF: unit to be established'),
-  ('src_capreg_herds', 'POUL', NULL, 'open', 'capreg_herds.POUL: unit to be established'),
-  ('src_capreg_herds', 'SCOW', NULL, 'open', 'capreg_herds.SCOW: unit to be established'),
-  ('src_capreg_herds', 'SHEP', NULL, 'open', 'capreg_herds.SHEP: unit to be established'),
-  ('src_capreg_herds', 'SHGF', NULL, 'open', 'capreg_herds.SHGF: unit to be established'),
-  ('src_capreg_herds', 'SHGM', NULL, 'open', 'capreg_herds.SHGM: unit to be established'),
-  ('src_capreg_herds', 'SHGT', NULL, 'open', 'capreg_herds.SHGT: unit to be established'),
-  ('src_capreg_herds', 'SOWS', NULL, 'open', 'capreg_herds.SOWS: unit to be established');
-
--- file: capri_data/sources/capreg/capreg_land.csv
-CREATE TABLE src_capreg_land (
-    model_region VARCHAR NOT NULL,
-    ARAB DOUBLE NOT NULL,
-    FALL DOUBLE NOT NULL,
-    GRAE DOUBLE,
-    GRAI DOUBLE,
-    OLND DOUBLE NOT NULL,
-    SETA DOUBLE,
-    UAAR DOUBLE NOT NULL,
-    PRIMARY KEY (model_region)
-);
-COMMENT ON TABLE src_capreg_land IS 'CAPRI''s LEVL of the land categories UAAR, ARAB, GRAE, GRAI, SETA, FALL, OLND per regional unit, from the CAPREG DATA2_<CC>.txt dumps, year column Y (tools/build/extract_remaining_nine.py).';
-INSERT INTO value_units VALUES
-  ('src_capreg_land', 'ARAB', NULL, 'open', 'capreg_land.ARAB: unit to be established'),
-  ('src_capreg_land', 'FALL', NULL, 'open', 'capreg_land.FALL: unit to be established'),
-  ('src_capreg_land', 'GRAE', NULL, 'open', 'capreg_land.GRAE: unit to be established'),
-  ('src_capreg_land', 'GRAI', NULL, 'open', 'capreg_land.GRAI: unit to be established'),
-  ('src_capreg_land', 'OLND', NULL, 'open', 'capreg_land.OLND: unit to be established'),
-  ('src_capreg_land', 'SETA', NULL, 'open', 'capreg_land.SETA: unit to be established'),
-  ('src_capreg_land', 'UAAR', NULL, 'open', 'capreg_land.UAAR: unit to be established');
 
 -- file: capri_data/sources/capreg/capreg_national_prices.csv
 CREATE TABLE src_capreg_national_prices (
@@ -1369,22 +1237,6 @@ INSERT INTO value_units VALUES
   ('src_ad_basedata_p_sf', 'level', NULL, 'open', 'AD_basedata_p_sf.level: unit to be established'),
   ('src_ad_basedata_p_sf', 'marginal', NULL, 'open', 'AD_basedata_p_sf.marginal: unit to be established');
 
--- file: capri_data/sources/capri_dat/ghgtech/LitRevFertTech_p_litRevFertTechs.csv
-CREATE TABLE src_capri_dat_litrevferttech_p_litrevferttechs (
-    dim1 VARCHAR NOT NULL,
-    dim2 VARCHAR NOT NULL,
-    dim3 VARCHAR NOT NULL,
-    dim4 VARCHAR NOT NULL,
-    dim5 VARCHAR NOT NULL,
-    "level" DOUBLE NOT NULL,
-    marginal DOUBLE NOT NULL,
-    PRIMARY KEY (dim1, dim2, dim3, dim4, dim5)
-);
-COMMENT ON TABLE src_capri_dat_litrevferttech_p_litrevferttechs IS 'CAPRI''s p_litRevFertTechs (dim1-dim5: region, technology, activity, manure system, emission item; level, marginal; 88530 rows), relative emission changes of fertiliser technologies; no builder, read by no code: a fuller dump of the table in sources/ghgtech (KNOWN_ISSUES K103).';
-INSERT INTO value_units VALUES
-  ('src_capri_dat_litrevferttech_p_litrevferttechs', 'level', NULL, 'open', 'LitRevFertTech_p_litRevFertTechs.level: unit to be established'),
-  ('src_capri_dat_litrevferttech_p_litrevferttechs', 'marginal', NULL, 'open', 'LitRevFertTech_p_litRevFertTechs.marginal: unit to be established');
-
 -- file: capri_data/sources/capri_dat/ghgtech/gains_ad_p_gainsdata.csv
 CREATE TABLE src_gains_ad_p_gainsdata (
     dim1 VARCHAR NOT NULL,
@@ -1525,19 +1377,6 @@ CREATE TABLE src_capri_manure_trade_2030 (
 COMMENT ON TABLE src_capri_manure_trade_2030 IS 'CAPRI''s manure N excretion EXCRET and net manure trade MTRADE (kt N, positive = net export) per CAPRI region, item NITF, from res_2_1730greendeal_refpol_endotech_all_inidefaulta (tools/build/build_manure_trade_base.py).';
 INSERT INTO value_units VALUES
   ('src_capri_manure_trade_2030', 'kt_n', NULL, 'open', 'capri_manure_trade_2030.kt_n: unit to be established');
-
--- file: capri_data/sources/estnlp/gtap_armington.csv
-CREATE TABLE src_gtap_armington (
-    commodity VARCHAR NOT NULL,
-    gtap_sector VARCHAR NOT NULL,
-    esubd DOUBLE NOT NULL,
-    esubm DOUBLE NOT NULL,
-    PRIMARY KEY (commodity, gtap_sector)
-);
-COMMENT ON TABLE src_gtap_armington IS 'Per model commodity: its GTAP sector and the GTAP Armington elasticities esubd (imports vs domestic) and esubm (among imports), from CAPRI''s dat/arm/GTP57_134.gdx dumps, by a concordance declared in the builder (tools/build/ingest_pela_gtap.py).';
-INSERT INTO value_units VALUES
-  ('src_gtap_armington', 'esubd', NULL, 'open', 'gtap_armington.esubd: unit to be established'),
-  ('src_gtap_armington', 'esubm', NULL, 'open', 'gtap_armington.esubm: unit to be established');
 
 -- file: capri_data/sources/estnlp/pela_own_price.csv
 CREATE TABLE src_pela_own_price (
@@ -1709,7 +1548,7 @@ CREATE TABLE src_litrevferttech_p_litrevferttechs (
     "value" DOUBLE NOT NULL,
     PRIMARY KEY (region, technology, activity, system, "item")
 );
-COMMENT ON TABLE src_litrevferttech_p_litrevferttechs IS 'CAPRI''s p_litRevFertTechs(region, technology, activity, system, item): relative change in emissions of a fertiliser technology, the records used, from the gdxdump of dat/scen/ghgtech/LitRevFertTech.gdx (full dump in the .txt beside it); no builder; read by tools/build/build_fert_side_effects.py.';
+COMMENT ON TABLE src_litrevferttech_p_litrevferttechs IS 'CAPRI''s p_litRevFertTechs(region, technology, activity, system, item): relative change in emissions of a fertiliser technology, the records used, from the gdxdump of dat/scen/ghgtech/LitRevFertTech.gdx (the full dump beside it, LitRevFertTech_p_litRevFertTechs_all.csv); no builder; read by tools/build/build_fert_side_effects.py.';
 INSERT INTO value_units VALUES
   ('src_litrevferttech_p_litrevferttechs', 'value', NULL, 'open', 'LitRevFertTech_p_litRevFertTechs.value: unit to be established');
 
@@ -1723,7 +1562,7 @@ CREATE TABLE src_litrevferttech_p_litrevferttechs_no3 (
     "value" DOUBLE NOT NULL,
     PRIMARY KEY (region, technology, activity, system, "item")
 );
-COMMENT ON TABLE src_litrevferttech_p_litrevferttechs_no3 IS 'The nitrate leaching and runoff records (NO3...) of CAPRI''s p_litRevFertTechs(region, technology, activity, system, item), taken from the full dump LitRevFertTech_p_litRevFertTechs.txt (tools/build/build_fert_side_effects.py).';
+COMMENT ON TABLE src_litrevferttech_p_litrevferttechs_no3 IS 'The nitrate leaching and runoff records (NO3...) of CAPRI''s p_litRevFertTechs(region, technology, activity, system, item), taken from the full dump LitRevFertTech_p_litRevFertTechs_all.csv (the gdxdump text converted by tools/build/convert_sources_to_csv.py) (tools/build/build_fert_side_effects.py).';
 INSERT INTO value_units VALUES
   ('src_litrevferttech_p_litrevferttechs_no3', 'value', NULL, 'open', 'LitRevFertTech_p_litRevFertTechs_no3.value: unit to be established');
 
@@ -1910,7 +1749,7 @@ CREATE TABLE src_nuts2013_2016 (
     level3 VARCHAR,
     change VARCHAR
 );
-COMMENT ON TABLE src_nuts2013_2016 IS 'Correspondence NUTS 2013 to NUTS 2016 (codes, names by level, change); no builder, origin of the CSV not documented (NUTS2013-NUTS2016__1_.xlsx is in the same folder); read by tools/build/build_nuts2024_reporting.py.';
+COMMENT ON TABLE src_nuts2013_2016 IS 'Correspondence NUTS 2013 to NUTS 2016 (codes, names by level, change), from Eurostat''s workbook NUTS2013-NUTS2016__1_.xlsx (removed 30 October 2026, read from git history; sheet ''NUTS2013-NUTS2016'', the rows with a code, columns B-H, text as written, CRLF line ends as committed before), written by tools/build/convert_sources_to_csv.py; read by tools/build/build_nuts2024_reporting.py.';
 
 -- file: capri_data/sources/nuts/nuts2016_2021.csv
 CREATE TABLE src_nuts2016_2021 (
@@ -1923,7 +1762,7 @@ CREATE TABLE src_nuts2016_2021 (
     change_codes DOUBLE,
     change_comments VARCHAR
 );
-COMMENT ON TABLE src_nuts2016_2021 IS 'Correspondence NUTS 2016 to NUTS 2021 (codes, names by level, changes); no builder; read by tools/build/build_nuts2024_reporting.py, which calls it Eurostat''s ''Changes detailed NUTS 2016-2021''.';
+COMMENT ON TABLE src_nuts2016_2021 IS 'Correspondence NUTS 2016 to NUTS 2021 (codes, names by level, changes), from Eurostat''s workbook NUTS2021.xlsx (sheet ''Changes detailed NUTS 2016-2021'', the rows with a code, columns A-H, the text stripped of surrounding white space as committed before), written by tools/build/convert_sources_to_csv.py; read by tools/build/build_nuts2024_reporting.py.';
 INSERT INTO value_units VALUES
   ('src_nuts2016_2021', 'change_codes', NULL, 'open', 'nuts2016_2021.change_codes: unit to be established');
 
@@ -1937,7 +1776,7 @@ CREATE TABLE src_nuts2021_2024 (
     level3 VARCHAR,
     change VARCHAR
 );
-COMMENT ON TABLE src_nuts2021_2024 IS 'Correspondence NUTS 2021 to NUTS 2024 (country, codes, names by level, change); no builder; read by tools/build/build_nuts2024_reporting.py, which calls it Eurostat''s ''NUTS2021- NUTS2024''.';
+COMMENT ON TABLE src_nuts2021_2024 IS 'Correspondence NUTS 2021 to NUTS 2024 (country, codes, names by level, change), from Eurostat''s workbook NUTS2021-NUTS2024.xlsx (removed 30 October 2026, read from git history; sheet ''NUTS2021- NUTS2024'', the rows with a code, columns B-H, the text stripped of surrounding white space as committed before), written by tools/build/convert_sources_to_csv.py; read by tools/build/build_nuts2024_reporting.py.';
 
 -- file: capri_data/sources/nuts/nuts2024.csv
 CREATE TABLE src_nuts2024 (
@@ -1947,7 +1786,7 @@ CREATE TABLE src_nuts2024 (
     "level" BIGINT NOT NULL,
     PRIMARY KEY (country, code, label)
 );
-COMMENT ON TABLE src_nuts2024 IS 'NUTS 2024 codes with country, label and level; no builder and no reader found; origin not documented beyond the provenance register''s ''Eurostat''.';
+COMMENT ON TABLE src_nuts2024 IS 'NUTS 2024 codes with country, label and level, from Eurostat''s workbook NUTS2021-NUTS2024.xlsx (removed 30 October 2026, read from git history; sheet ''NUTS2024'', the rows with a code, columns A-D, as committed before), written by tools/build/convert_sources_to_csv.py; read by capri_mod/tests/test_nuts_reporting.py.';
 INSERT INTO value_units VALUES
   ('src_nuts2024', 'level', NULL, 'open', 'nuts2024.level: unit to be established');
 

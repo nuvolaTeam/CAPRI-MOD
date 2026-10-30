@@ -14,7 +14,7 @@ CREATE TABLE ctrd_fixyield (
     d0 VARCHAR NOT NULL,
     PRIMARY KEY (d0)
 );
-COMMENT ON TABLE ctrd_fixyield IS 'fixyield (no builder: a declared table)';
+COMMENT ON TABLE ctrd_fixyield IS 'CAPTRD''s own set FixYield(PACT) "Activities with fixed yield" (gams/captrd/sets_captrd.gms l. 464: OCRO, OOIL, OANI), transcribed in tools/build/build_captrd_sets.py; read by no code yet: CAPTRD fixes these activities'' ex-ante yields at their base value in the estimation (captrd/fix_est.gms l. 541), so it is kept for when CAPTRD''s Steps 2-3 are ported (the project lead''s decision, 30 October 2026).';
 
 -- file: capri_data/pipeline/captrd/sets/grpc.csv
 CREATE TABLE ctrd_grpc (

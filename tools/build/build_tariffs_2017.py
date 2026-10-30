@@ -1,7 +1,7 @@
 """Import protection per trade region and commodity from CAPRI's 2017 market results (Sprint 9r).
 
 The market's domestic price levels (MarketModule.domestic_prices: world price x (1 + tariff / 100)) take a tariff per
-trade region and commodity. Only the EU row came from CAPRI (capri_data/sources/eu_tariff_provenance.json); the other
+trade region and commodity. Only the EU row came from CAPRI (capri_data/sources/eu_tariff_provenance.csv); the other
 regions had no data file and the loader generated them at random (EU value x 0.5-0.8 plus uniform noise). The noise
 was drawn from a module-level generator, so each CAPRIModel built in a process got different tariffs, and with them
 different crushing parameters for the oilseed chains (MarketModule._biofuel_params uses the price levels).
@@ -13,8 +13,9 @@ imports from outside the region (ad valorem + specific tariffs + tariff-rate quo
 
 over CAPRI's bilateral flows in market_base_1717 (the same extract as tools/build/build_bilateral_market.py,
 capri_data/sources/market/bilateral_dataout_2017.csv.xz), CAPRI regions mapped to the model's trade regions as there.
-The EU row keeps its documented values (eu_tariff_provenance.json; the same formula on CAPRI's EU27yr19 <- NONEU
-aggregate); the check printed below recomputes it from the member states. Commodities a region does not import, or
+The EU row keeps its documented values (eu_tariff_provenance.csv, converted from eu_tariff_provenance.json by
+tools/build/convert_sources_to_csv.py; the same formula on CAPRI's EU27yr19 <- NONEU aggregate); the check printed
+below recomputes it from the member states. Commodities a region does not import, or
 without a CAPRI market (DWHE: durum is in CAPRI's wheat market; SUGB, MILK, FATS, OFOD_M, OOIL), take 0: no
 protection is measured, and the bilateral market carries CAPRI's own import prices in any case.
 
@@ -23,7 +24,7 @@ Output: capri_data/2017/policy/tariffs.csv (trade region x commodity, % ad valor
     python tools/build/build_tariffs_2017.py
 """
 from __future__ import annotations
-import json, sys
+import csv, sys
 from collections import defaultdict
 from pathlib import Path
 
@@ -35,9 +36,10 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT)); sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check")]
 OUT = ROOT / "capri_data" / "2017" / "policy" / "tariffs.csv"
 SRC = ROOT / "capri_data" / "sources" / "market" / "bilateral_dataout_2017.csv.xz"
-PROV = ROOT / "capri_data" / "sources" / "eu_tariff_provenance.json"
+PROV = ROOT / "capri_data" / "sources" / "eu_tariff_provenance.csv"
 RES0 = Path("/mnt/user-data/uploads/res_0_1717cap_after_2014_cal_from_data_caldefaulta.csv")
-#: EU rows added after the documented set, computed from RES0 with the same formula
+#: EU rows added after the documented set, computed from RES0 with the same formula (in eu_tariff_provenance.csv;
+#: computed here, not written, only if one is missing there)
 EU_ADDED = ("RYEM", "OATS", "TAGR", "TOBA", "TABO", "TEXT", "PLMO", "OTHO", "FFIS", "SFIS", "OAQU", "COFF", "TEAS", "COCO")
 
 
@@ -45,8 +47,11 @@ def main():
     from build_bilateral_market import CAPRI
     from recalibrate_trade_2017 import REGION_MAP, AGGREGATES
     from capri_mod.data.definitions import ALL_TRADE_REGIONS
-    _prov_all = json.load(open(PROV))
-    prov = _prov_all["rows"]
+    prov = {}                                           # commodity -> {field: value} (the fields it has)
+    with open(PROV, newline="", encoding="utf-8") as fh:
+        for r in csv.DictReader(fh):
+            c = r.pop("commodity")
+            prov[c] = {k: (v if k in ("capri_code", "kept") else float(v)) for k, v in r.items() if v != ""}
     # products added as markets after the documented set (rye, oats, table grapes, tobacco); their EU row from the same CAPRI extract and
     # formula as the documented rows (EU27yr19 <- NONEU, 2017: ImportP / (Fob + TCost) - 1)
     if any(c not in prov for c in EU_ADDED) and RES0.exists():
@@ -65,7 +70,6 @@ def main():
                        "specific_eur_t": d.get("TsAppl", 0.0),
                        "total_ave_pct": 100.0 * (d["ImportP"] / (d["Fob"] + d.get("TCost", 0.0)) - 1.0),
                        "eu_imports_kt": d.get("ImportQ", 0.0)}
-        json.dump(_prov_all, open(PROV, "w"), indent=1)
     cols = list(prov)                                   # the commodities of the EU row
     df = _read_csv(SRC, keep_default_na=False)
     df = df[df["item"].isin(("ImportQ", "ImportP", "Fob", "TCost"))]

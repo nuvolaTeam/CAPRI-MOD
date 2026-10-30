@@ -52,6 +52,8 @@ S = "capri_data/2017/supply"
 
 #: (builder, arguments, external inputs that must exist). Order: REGIONAL_UNITS_BUILDERS.md section 3, then the rest.
 INVOCATIONS: list[tuple[str, list[str], list[Path]]] = [
+    # the CSV conversion of the sources that were not CSV (reads the originals from git history)
+    ("convert_sources_to_csv", [], []),
     ("extract_gd2030_nbalance", [], [REF]),
     ("build_regional_units", [], []),
     ("build_code_lists", ["--sets", str(SETS)], [SETS]),
@@ -186,6 +188,7 @@ INVOCATIONS: list[tuple[str, list[str], list[Path]]] = [
     ("build_capri_own_price_elasticities", ["--src", str(UP)], [UP]),
     ("build_captrd_trajectory", ["--series", str(WORK / "capri_reference/captrd_results/1770/series.csv.gz")],
      [WORK / "capri_reference/captrd_results/1770/series.csv.gz"]),
+    ("build_captrd_dat", [], [WORK / "hf_capri/dat/baseline/ageline/ageline.parquet"]),
     ("build_feed_demand_nonEU", [], [UP / "elas_2_1730defaulta.csv", UP / "data_market_1730defaulta.csv"]),
     ("build_fert_dist_priors", [], []),
     ("build_fert_options_jul15", [], []),
@@ -219,8 +222,6 @@ INVOCATIONS: list[tuple[str, list[str], list[Path]]] = [
     ("extract_capri_costsavings", [str(WORK / "cs/costsavings_ini_21730_jul15.csv"),
                                    str(WORK / "cs/costsavings_max_21730_jul15.csv")], [WORK / "cs"]),
     ("extract_capri_marginal_terms", [str(REF), "ini"], [REF]),
-    ("extract_capri_marginal_terms", [str(WORK / "gd/endomax/res_2_1730greendeal_refpol_endotech_all_maxdefaulta.csv"),
-                                      "max"], [WORK / "gd/endomax"]),
     ("ingest_capmod_market", ["--dump", str(UP / "_symbols_base1717.txt")], [UP / "_symbols_base1717.txt"]),
     ("recalibrate_trade_2017", [], []),
 ]

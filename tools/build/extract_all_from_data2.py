@@ -116,9 +116,9 @@ def main() -> None:
     # (CAPRI's NITF/PHOF/POTF per region were written to capreg_nutrient_coefs.csv until 29 October 2026; nothing read
     # them - build_nutrient_coefs_regional reads CAPRI's dumps directly - and the file was removed: KNOWN_ISSUES K103)
 
-    # ---- cost components, EUR/ha ----------------------------------------
+    # ---- cost components, EUR/ha: compared with TOIN for the summary only (written to capreg_cost_components.csv.xz
+    # until 30 October 2026; nothing read it and the file was removed, the project lead's decision: KNOWN_ISSUES K103)
     co = df[df.item.isin(COST_ITEMS + [TOTAL_INPUT])]
-    co.to_csv(out / "capreg_cost_components.csv.xz", index=False)
     comp = co[co.item != TOTAL_INPUT].groupby(
         ["model_region", "activity"]).value.sum().rename("components")
     tot = co[co.item == TOTAL_INPUT].set_index(

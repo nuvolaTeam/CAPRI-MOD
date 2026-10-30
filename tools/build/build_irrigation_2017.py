@@ -1,11 +1,13 @@
 """Irrigated shares and net irrigation requirements per regional unit and crop, base year 2017, for the irrigation
 water-demand indicator (capri_mod/water).
 
-Sources (CAPRI's water database inputs, gams/water_database.gms, as uploaded):
-  capri_data/sources/water/irrishare.gms   p_irriShare(region, IRRI|IRR2, IRSH, year): share of irrigable (IRRI) and
-                                           irrigated (IRR2, 'irrigated once a year') area in UAAR, Eurostat FSS
-  capri_data/sources/water/cropwat.gms     p_cropwatReq(region, crop, CPET|CRAIN|CNIR|YRATIO|YFACT): CROPWAT crop
-                                           water requirements, mm
+Sources (CAPRI's water database inputs, gams/water_database.gms, as uploaded; gdxdumps converted to CSV by
+tools/build/convert_sources_to_csv.py):
+  capri_data/sources/water/irrishare_p_irriShare.csv   p_irriShare(region, IRRI|IRR2, IRSH, year): share of
+                                           irrigable (IRRI) and irrigated (IRR2, 'irrigated once a year') area in UAAR,
+                                           Eurostat FSS
+  capri_data/sources/water/cropwat_p_cropwatReq.csv   p_cropwatReq(region, crop, CPET|CRAIN|CNIR|YRATIO|YFACT):
+                                           CROPWAT crop water requirements, mm
   capri_data/sources/capreg/capreg_activity_levels.csv   CAPRI's 2017 levels (ROOF and OFAR, the model's OFOD)
 
 Method. CAPRI's water database (water_database.gms) estimates each EU region's irrigated area per crop with a
@@ -36,7 +38,6 @@ Output: capri_data/2017/environment/irrigation_2017.csv
 from __future__ import annotations
 
 import csv
-import re
 import sys
 from pathlib import Path
 
@@ -60,19 +61,18 @@ LEVEL_COL = {"MAIZ": "CORN"}
 IRSH_MIN = 0.001      # water_database.gms line 668: max(0.001, IRR2 share)
 
 
-def gams_records(path, n):
-    pat = re.compile(r"\s*" + r"\.".join([r"'([^']+)'"] * n) + r"\s+([-\d.Ee+]+)")
-    with open(path) as fh:
-        return [m.groups() for m in map(pat.match, fh) if m]
+def records(name):
+    """A gdxdump converted to CSV (tools/build/convert_sources_to_csv.py), every column as text."""
+    return pd.read_csv(SRC / name, dtype=str, keep_default_na=False)
 
 
 def main():
     units = list(read_csv(ROOT / "capri_data" / "shared" / "regional_units.csv").region)
-    sh = pd.DataFrame(gams_records(SRC / "irrishare.gms", 4), columns=["region", "item", "type", "year", "value"])
+    sh = records("irrishare_p_irriShare.csv")
     sh = sh[(sh["item"] == "IRR2") & (sh.type == "IRSH")].astype({"year": int, "value": float})
     sh = sh[sh.year <= BASE_YEAR]
     latest = sh.sort_values("year").groupby("region").last()
-    cw = pd.DataFrame(gams_records(SRC / "cropwat.gms", 3), columns=["region", "crop", "item", "value"])
+    cw = records("cropwat_p_cropwatReq.csv")
     cnir = cw[cw["item"] == "CNIR"].astype({"value": float}).pivot_table(index="region", columns="crop", values="value")
     lev = read_csv(ROOT / "capri_data" / "sources" / "capreg" / "capreg_activity_levels.csv", index_col=0)
 

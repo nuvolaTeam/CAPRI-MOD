@@ -27,7 +27,8 @@ Outputs (capri_data/2017/environment/):
                             grassland split column); main_share and straw_share, the parts of the need that follow the
                             main output's yield and the straw yield (fert/fertned.gms: need = MIN(cap, MAX(15, O_HP x
                             need per t + STRA x straw content)); 0 for crops at the floor or the cap), with CAPRI's straw
-                            content and caps read from the vendored envind/gascoeff.gms and fert/fertpar.gms
+                            content and caps from envind/gascoeff.gms and fert/fertpar.gms (their statements converted
+                            to CSV in capri_data/sources/capri_gams by tools/build/convert_sources_to_csv.py)
   npk_region_2030.csv       capri_region, nutrient, mine_eff (1 + loss / mineral), excr_avail (1 + unavailable /
                             manure), cres_avail (1 + (unavailable + loss) / (pooled + own residues)), uvag_eur_t (CAPRI's
                             unit value of NITF/PHOF/POTF), mine_kt, excr_kt, pool_kt, own_kt, need_kt, land_kha
@@ -74,23 +75,31 @@ BAL = ("EXCRET", "MTRADE", "GASANI", "RUNANI", "NETF", "UVAG")
 GMS = ROOT / "capri_data" / "sources" / "capri_gams"
 
 
+def _gms_csv(name):
+    """A statement of CAPRI's GAMS code converted to CSV (capri_data/sources/capri_gams,
+    tools/build/convert_sources_to_csv.py)."""
+    return pd.read_csv(GMS / name, dtype=str, keep_default_na=False)
+
+
 def straw_content() -> dict:
-    """CAPRI's nutrient content of straw, kg per t (envind/gascoeff.gms, p_nutContCropOutput("STRA", FNUT)); CAPREG
-    copies it to DATA(RS, FNUT, "STRA") and fert/fertned.gms prices straw at it (no residue relation for STRA)."""
-    txt = (GMS / "envind" / "gascoeff.gms").read_text(errors="replace")
-    blk = txt[txt.index("TABLE p_nutContCropOutput"):]
-    m = re.search(r"^\s*STRA\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)", blk, re.M)
-    return dict(zip(("NITF", "PHOF", "POTF"), map(float, m.groups())))
+    """CAPRI's nutrient content of straw, kg per t (envind/gascoeff.gms, p_nutContCropOutput("STRA", FNUT):
+    gascoeff_p_nutContCropOutput_STRA.csv); CAPREG copies it to DATA(RS, FNUT, "STRA") and fert/fertned.gms prices
+    straw at it (no residue relation for STRA)."""
+    t = _gms_csv("envind/gascoeff_p_nutContCropOutput_STRA.csv")
+    return {r.nutrient: float(r.value) for r in t.itertuples(index=False)}
 
 
 def need_bounds() -> tuple:
     """fert/fertned.gms's bounds on a crop's need per ha: MAX(15, ...) and MIN(MAXF x (1 + 1 $ doubleMaxf), ...) with
-    MAXF and doubleMaxf from fert/fertpar.gms (the last assignments: 200/160/140 x 2.0; GRAE, GRAI, OFAR, MAIF)."""
-    txt = (GMS / "fert" / "fertpar.gms").read_text(errors="replace")
-    mx = {k: float(v) for k, v in re.findall(r'^\s*MAXF\("(NITF|PHOF|POTF)"\)\s*=\s*([\d.]+)\s*;', txt, re.M)}
-    sc = float(re.search(r"^\s*MAXF\(FNUT\)\s*=\s*MAXF\(FNUT\)\s*\*\s*([\d.]+)\s*;", txt, re.M).group(1))
-    dbl = re.search(r"set doubleMaxf\(PACT\)[^/]*/([^/]*)/", txt).group(1)
-    return 15.0, {k: v * sc for k, v in mx.items()}, {c.strip() for c in dbl.split(",") if c.strip()}
+    MAXF and doubleMaxf from fert/fertpar.gms (the last assignments: 200/160/140 x 2.0; GRAE, GRAI, OFAR, MAIF;
+    fertpar_MAXF.csv, fertpar_doubleMaxf.csv)."""
+    mx = _gms_csv("fert/fertpar_MAXF.csv")
+    sc = {float(v) for v in mx["multiplier"]}
+    if len(sc) != 1:
+        raise ValueError(f"fertpar_MAXF.csv: one multiplier expected, {sc}")
+    sc = sc.pop()
+    dbl = set(_gms_csv("fert/fertpar_doubleMaxf.csv")["activity"])
+    return 15.0, {r.nutrient: float(r.value) * sc for r in mx.itertuples(index=False)}, dbl
 
 
 def extract(dump: Path) -> pd.DataFrame:
