@@ -40809,7 +40809,7 @@
    "file": "capri_data/2017/market/world_prices.csv",
    "declared_in": "21_market_inputs.sql",
    "layout": [],
-   "comment": "world market prices 2017: CAPRI's FAO_agg p_dataMarket World PMRK BAS of the commodity's CAPRI product; OLIV from OLIO by the EU's oil extraction; FPRI CAPRI's export-weighted 2017 market prices; DWHE, SUGB kept for the outer loop's price index (tools/build/build_world_prices.py, provenance sources/world_price_provenance.json)",
+   "comment": "world market prices 2017: CAPRI's FAO_agg p_dataMarket World PMRK BAS of the commodity's CAPRI product; OLIV from OLIO by the EU's oil extraction; FPRI CAPRI's export-weighted 2017 market prices; DWHE, SUGB kept for the outer loop's price index (tools/build/build_world_prices.py, provenance sources/world_price_provenance.csv)",
    "columns": [
     {
      "name": "commodity",
@@ -40847,7 +40847,7 @@
    "notes": [
     {
      "kind": "origin",
-     "note": "World prices (EUR/t), 60 rows, every row from CAPRI's FAO_agg p_dataMarket 'World' PMRK BAS under the commodity's CAPRI code. OLIV is derived (OLIO price x EU oil extraction) and FPRI is export-weighted from CAPRI's 2017 market. DWHE and SUGB are kept only for the outer loop's price signal. Provenance per row is in sources/world_price_provenance.json. Read by the model (loaders.load_world_prices; model.py price signal) and by the market test as its reference.",
+     "note": "World prices (EUR/t), 60 rows, every row from CAPRI's FAO_agg p_dataMarket 'World' PMRK BAS under the commodity's CAPRI code. OLIV is derived (OLIO price x EU oil extraction) and FPRI is export-weighted from CAPRI's 2017 market. DWHE and SUGB are kept only for the outer loop's price signal. Provenance per row is in sources/world_price_provenance.csv (a JSON file until 30 October 2026). Read by the model (loaders.load_world_prices; model.py price signal) and by the market test as its reference.",
      "evidence": "tools/build/build_world_prices.py:1-25; capri_mod/data/loaders.py:432-441; capri_mod/model.py:526-567; capri_mod/tests/test_capri.py:119-128; CSV: 60 rows, EGGS 1073.04, OLIV 520.70, no SHGM row",
      "checked": "2026-10-29"
     }
