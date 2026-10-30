@@ -39,9 +39,12 @@
    ],
    "code": [
     "tools/build/build_ad_option.py",
-    "tools/lib/_model_regions.py"
+    "tools/lib/_model_regions.py",
+    "tools/lib/gams_text.py"
    ],
-   "external": [],
+   "external": [
+    "$WORK/allgms/gams/envind/ad_data_and_cali.gms"
+   ],
    "outputs": [
     "capri_data/2017/abatement/ammonia/ad_option.csv"
    ]
@@ -3345,7 +3348,8 @@
    ],
    "code": [
     "tools/build/build_organic_yield_gap.py",
-    "tools/lib/_model_codes.py"
+    "tools/lib/_model_codes.py",
+    "tools/lib/gams_text.py"
    ],
    "external": [
     "$UP/yield_effects_ppp.xlsx",

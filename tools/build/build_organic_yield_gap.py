@@ -35,27 +35,12 @@ OUT_REG = OUT.with_name("organic_yield_gap_regions.csv")
 OUT_GRP = OUT.with_name("organic_yield_gap_groups.csv")
 
 
-def set_pairs(text: str, name: str) -> list[tuple[str, str]]:
-    """The (a, b) elements of a two-dimensional GAMS set written as a list a.b between slashes; comments (* in the
-    first column) left out."""
-    import re
-    m = re.search(r"(?im)^\s*set\s+" + re.escape(name) + r"\b[^/]*/(.*?)/\s*;", text, re.S)
-    if m is None:
-        raise SystemExit(f"set {name} not found")
-    out = []
-    for line in m.group(1).splitlines():
-        if not line.strip() or line.lstrip().startswith("*") or line.startswith("*"):
-            continue
-        a, b = line.split()[0].split(".")
-        out.append((a, b))
-    return out
-
-
 def maps(gms: Path) -> tuple[list, list]:
     import sys
     sys.path.insert(0, str(ROOT / "tools" / "lib"))
     import _model_codes as MC
-    text = gms.read_text(encoding="latin-1")
+    from gams_text import read_text, set_pairs
+    text = read_text(gms)
     reg = set_pairs(text, "ms2peseta")
     grp_of = dict(set_pairs(text, "pact2yieldGap"))
     groups = []

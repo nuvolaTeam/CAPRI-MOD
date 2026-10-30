@@ -140,3 +140,18 @@ def gdxdump_symbols(text: str, where: str = ""):
         out.append((kind, name, dims, desc, recs))
         i += 1
     return out
+
+def set_pairs(text: str, name: str) -> list[tuple[str, str]]:
+    """The (a, b) elements of a two-dimensional set written as a list between slashes, `set name(d1, d2) "text" /
+    a.b ... /;`: an element a.(b1, b2, ...) gives one pair per b; comment lines (* in the first column) and text after
+    an element skipped. Labels as the file writes them."""
+    m = re.search(rf"set\s+{name}\s*(?:\([^)]*\))?\s*(?:\"[^\"]*\"|'[^']*'|[^/\"']*)\s*/(.*?)/\s*;", text,
+                  flags=re.I | re.S)
+    if not m:
+        raise ValueError(f"set {name} not found")
+    body = "\n".join(l for l in m.group(1).splitlines() if not l.startswith("*"))
+    out = []
+    for a, group, b in re.findall(r"([A-Za-z0-9_]+)\s*\.\s*(?:\(([^)]*)\)|([A-Za-z0-9_]+))", body):
+        for x in ([y.strip() for y in group.split(",") if y.strip()] if group else [b]):
+            out.append((a, x))
+    return out

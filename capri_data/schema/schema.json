@@ -205,7 +205,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_ad_option",
-    "sources": "$UP/LitRevAmmoTech.csv; $UP/LitRev_input_manStor.csv; $UP/LitRev_inputs.csv; $UP/LitRev_non_changeable_parameters.csv; $UP/gd_full.zip; $UP/holdingsLSU.csv; $UP/nvzShare_LU.csv; $UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $UP/scen.zip; $WORK/allgms/gams/aggregation/defaultA.agg; $WORK/allgms/gams/envind/ammo_tech.gms"
+    "sources": "$UP/LitRevAmmoTech.csv; $UP/LitRev_input_manStor.csv; $UP/LitRev_inputs.csv; $UP/LitRev_non_changeable_parameters.csv; $UP/gd_full.zip; $UP/holdingsLSU.csv; $UP/nvzShare_LU.csv; $UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $UP/scen.zip; $WORK/allgms/gams/aggregation/defaultA.agg; $WORK/allgms/gams/envind/ad_data_and_cali.gms; $WORK/allgms/gams/envind/ammo_tech.gms"
    },
    "notes": [],
    "read_by": {
@@ -465,7 +465,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_ammonia_tech_model",
-    "sources": "$UP/LitRevAmmoTech.csv; $UP/LitRev_input_manStor.csv; $UP/LitRev_inputs.csv; $UP/LitRev_non_changeable_parameters.csv; $UP/gd_full.zip; $UP/holdingsLSU.csv; $UP/nvzShare_LU.csv; $UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $UP/scen.zip; $WORK/allgms/gams/aggregation/defaultA.agg; $WORK/allgms/gams/envind/ammo_tech.gms"
+    "sources": "$UP/LitRevAmmoTech.csv; $UP/LitRev_input_manStor.csv; $UP/LitRev_inputs.csv; $UP/LitRev_non_changeable_parameters.csv; $UP/gd_full.zip; $UP/holdingsLSU.csv; $UP/nvzShare_LU.csv; $UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $UP/scen.zip; $WORK/allgms/gams/aggregation/defaultA.agg; $WORK/allgms/gams/envind/ad_data_and_cali.gms; $WORK/allgms/gams/envind/ammo_tech.gms"
    },
    "notes": [],
    "read_by": {
@@ -9350,7 +9350,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_manure_n2o",
-    "sources": "$UP/LitRevAmmoTech.csv; $UP/LitRev_input_manStor.csv; $UP/LitRev_inputs.csv; $UP/LitRev_non_changeable_parameters.csv; $UP/gd_full.zip; $UP/holdingsLSU.csv; $UP/nvzShare_LU.csv; $UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $UP/scen.zip; $WORK/allgms/gams/aggregation/defaultA.agg; $WORK/allgms/gams/envind/ammo_tech.gms; $WORK/capreg/res_17<CC>.txt"
+    "sources": "$UP/LitRevAmmoTech.csv; $UP/LitRev_input_manStor.csv; $UP/LitRev_inputs.csv; $UP/LitRev_non_changeable_parameters.csv; $UP/gd_full.zip; $UP/holdingsLSU.csv; $UP/nvzShare_LU.csv; $UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $UP/scen.zip; $WORK/allgms/gams/aggregation/defaultA.agg; $WORK/allgms/gams/envind/ad_data_and_cali.gms; $WORK/allgms/gams/envind/ammo_tech.gms; $WORK/capreg/res_17<CC>.txt"
    },
    "notes": [],
    "read_by": {
@@ -9422,7 +9422,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_manure_n2o",
-    "sources": "$UP/LitRevAmmoTech.csv; $UP/LitRev_input_manStor.csv; $UP/LitRev_inputs.csv; $UP/LitRev_non_changeable_parameters.csv; $UP/gd_full.zip; $UP/holdingsLSU.csv; $UP/nvzShare_LU.csv; $UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $UP/scen.zip; $WORK/allgms/gams/aggregation/defaultA.agg; $WORK/allgms/gams/envind/ammo_tech.gms; $WORK/capreg/res_17<CC>.txt"
+    "sources": "$UP/LitRevAmmoTech.csv; $UP/LitRev_input_manStor.csv; $UP/LitRev_inputs.csv; $UP/LitRev_non_changeable_parameters.csv; $UP/gd_full.zip; $UP/holdingsLSU.csv; $UP/nvzShare_LU.csv; $UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $UP/scen.zip; $WORK/allgms/gams/aggregation/defaultA.agg; $WORK/allgms/gams/envind/ad_data_and_cali.gms; $WORK/allgms/gams/envind/ammo_tech.gms; $WORK/capreg/res_17<CC>.txt"
    },
    "notes": [],
    "read_by": {
@@ -11278,7 +11278,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_genetics_effects",
-    "sources": "$UP/LitRevAmmoTech.csv; $UP/LitRev_input_manStor.csv; $UP/LitRev_inputs.csv; $UP/LitRev_non_changeable_parameters.csv; $UP/data_market_1730defaulta.csv; $UP/elas_2_1730defaulta.csv; $UP/fedcof.gms; $UP/gd_full.zip; $UP/holdingsLSU.csv; $UP/nvzShare_LU.csv; $UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $UP/scen.zip; $UP/trends_1730.csv; $WORK/allgms/gams/aggregation/defaultA.agg; $WORK/allgms/gams/envind/ammo_tech.gms; $WORK/capreg/res_17<CC>.txt; $WORK/cs/costsavings_ini_21730_jul15.csv; $WORK/cs/costsavings_max_21730_jul15.csv; $WORK/feedexp/feed_export/pmppar_17<CC>_feedpmp.csv; $WORK/inputs/capri_export_zip/capri_export/quadPact_<CC>.txt; $WORK/inputs/capri_export_zip/capri_export/quadTechn_<CC>.txt; $WORK/up/pmp2030/estnlp_results_<CC>.txt; $WORK/up/pmp2030/estnlp_results_PELA.txt; $WORK/up/pmp2030/pmppar_21730<CC>defaulta.txt"
+    "sources": "$UP/LitRevAmmoTech.csv; $UP/LitRev_input_manStor.csv; $UP/LitRev_inputs.csv; $UP/LitRev_non_changeable_parameters.csv; $UP/data_market_1730defaulta.csv; $UP/elas_2_1730defaulta.csv; $UP/fedcof.gms; $UP/gd_full.zip; $UP/holdingsLSU.csv; $UP/nvzShare_LU.csv; $UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $UP/scen.zip; $UP/trends_1730.csv; $WORK/allgms/gams/aggregation/defaultA.agg; $WORK/allgms/gams/envind/ad_data_and_cali.gms; $WORK/allgms/gams/envind/ammo_tech.gms; $WORK/capreg/res_17<CC>.txt; $WORK/cs/costsavings_ini_21730_jul15.csv; $WORK/cs/costsavings_max_21730_jul15.csv; $WORK/feedexp/feed_export/pmppar_17<CC>_feedpmp.csv; $WORK/inputs/capri_export_zip/capri_export/quadPact_<CC>.txt; $WORK/inputs/capri_export_zip/capri_export/quadTechn_<CC>.txt; $WORK/up/pmp2030/estnlp_results_<CC>.txt; $WORK/up/pmp2030/estnlp_results_PELA.txt; $WORK/up/pmp2030/pmppar_21730<CC>defaulta.txt"
    },
    "notes": [],
    "read_by": {
