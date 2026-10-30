@@ -9,7 +9,7 @@ The data sourcing registry's log of checks, fixes and decisions (201 entries, mo
 [KNOWN_ISSUES_REGISTRY_LOG.md](KNOWN_ISSUES_REGISTRY_LOG.md), verbatim, with the triage of its open entries against
 the code: they became K92-K96, joined K73, K80, K91, or were closed or historical.
 
-## Open (14)
+## Open (13)
 
 | # | Issue | Status |
 |---|---|---|
@@ -23,15 +23,15 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K77](#k77) | CAPRI's fertiliser-option curvature (S5) leaves the baseline's base shares | open |
 | [K78](#k78) | Histosol fallowing under Farm-to-Fork far above JRC121368's figure | open: waiting for CAPRI's scenario results |
 | [K79](#k79) | Member-state production that keeps moving between iterations | open |
-| [K80](#k80) | The same run repeated from a warm start differs by up to 3e-5 relative in small cereal activities | open |
 | [K83](#k83) | A one-region Farm-to-Fork run's market diverges in its second step | open |
 | [K92](#k92) | Farm-to-Fork changes furthest from JRC121368, besides the milk price | open: waiting for CAPRI's scenario results |
 | [K93](#k93) | CAPRI mitigation options not built; documents disagree on which are in | open |
 
-## Resolved (92)
+## Resolved (93)
 
 | # | Issue | Status |
 |---|---|---|
+| [K80](#k80) | The same run repeated from a warm start differs by up to 3e-5 relative in small cereal activities | fixed (30 October 2026; gate pending) |
 | [K89](#k89) | Failing regional solves take most of IPOPT's time | fixed (measured 30 October 2026) |
 | [K74](#k74) | Supply: differences from CAPRI that no register listed | fixed (batch 8 gate) |
 | [K105](#k105) | Numbers in the model's code to check, register or move to the settings | fixed (batch 8 gate) |
@@ -958,7 +958,15 @@ The 8-region baseline of test_pesticide_reduction_binds_and_is_a_noop_at_zero ru
 
 - **Effect:** repeated solves and no-op checks at 1e-6; test tolerance set to 1e-4
 - **In 9t:** –
-- **Status:** **open**: next, IPOPT's tolerances against the PMP curvature of these activities
+- **Status:** **fixed** (30 October 2026, the project lead's decision; the gate's runs pending). Diagnosed with the
+  8-region German baseline run twice in one model (every regional solve's IPOPT status recorded): all 16 solves were
+  cold starts ending Solve_Succeeded (not IPOPT's acceptable stop, not the warm start), the two runs' objectives equal
+  to 3e-11 to 1e-10 in every region, the levels up to 3.1e-5 apart (DE240000 rye). The problem is the same; its optimum
+  is flat along the small, nearly substitutable crops, and IPOPT's stop at tol 1e-8 lands anywhere along it. With the
+  acceptable tolerance at 1e-8 the same 3.1e-5; at tol 1e-10, 1.1e-6, with 5% more iterations. Mini-EU Farm-to-Fork
+  run at 1e-10 against 1e-8: converged in 7 iterations both, no non-optimal solve, the same fallbacks, supply-model time
+  152 s against 154 s, EU prices within 0.05 points. outer_loop.nlp_tol_final set to 1e-10; the organic and pesticide
+  no-op tests back to 1e-5
 
 <a id="k81"></a>
 ### K81: A plain regional solve after a shocked one kept the old price shock in the split and genetics columns (found 26 October 2026)

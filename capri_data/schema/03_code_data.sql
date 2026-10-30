@@ -231,7 +231,6 @@ INSERT INTO code_data VALUES
   ('capri_mod/supply/supply_module.py', 'ABSENT_LEVEL', 1e-08, 1, '60', 'ABSENT_LEVEL = 1e-8'),
   ('capri_mod/supply/supply_module.py', 'RegionalSupplyModel.ORGANIC_LIMCRES_FACTOR', 1.2, 1, '579', 'ORGANIC_LIMCRES_FACTOR = 1.2'),
   ('capri_mod/supply/supply_module.py', 'RegionalSupplyModel.ORGANIC_SMALL_MINE_KG_HA', 10.0, 1, '577', 'ORGANIC_SMALL_MINE_KG_HA = 10.0'),
-  ('capri_mod/supply/supply_module.py', 'RegionalSupplyModel.nlp_tol', 1e-08, 1, '584', 'nlp_tol = 1e-8'),
   ('capri_mod/supply/supply_module.py', 'SupplyModule._build_region_data', 2017.0, 4, '2308,2308,2315,2315', 'if int(d.get("market_year", 2017) or 2017) == 2030'),
   ('capri_mod/supply/supply_module.py', 'SupplyModule._build_region_data', 2030.0, 1, '2308', 'if int(d.get("market_year", 2017) or 2017) == 2030'),
   ('capri_mod/supply/supply_module.py', 'SupplyModule._fert_techs', 0.2, 1, '2413', 'rs1, rs0 = (0.8, 0.0) if (smax < 1.0 and name != "NITR_INH") else (1.2, 0.2)'),

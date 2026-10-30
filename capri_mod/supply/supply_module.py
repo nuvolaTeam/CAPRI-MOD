@@ -580,8 +580,8 @@ class RegionalSupplyModel(LivestockBlock, FertilisationBlock, AbatementBlock, Po
 
 
     #: IPOPT's tolerance for the regional NLP solves: run state, set by CAPRIModel.run every outer iteration from the
-    #: setting outer_loop.nlp_tol_final
-    nlp_tol = 1e-8
+    #: setting outer_loop.nlp_tol_final (its value when the module is loaded until then)
+    nlp_tol = float(_settings().get("outer_loop.nlp_tol_final"))
 
 
     def __init__(self, region_data: RegionData, supply_elasticities: pd.Series,

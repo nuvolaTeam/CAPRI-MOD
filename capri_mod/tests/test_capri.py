@@ -1607,9 +1607,9 @@ def test_organic_area_target_binds_and_is_a_noop_at_zero(model):
         name="t", organic_area_target=0.25), regions=regions, max_outer_iter=1))
 
     # a zero target must be a true no-op, within IPOPT's tolerance between two solves of the same problem (KNOWN_ISSUES
-    # K80), the tolerance of the pesticide no-op test: 1e-5 was below it (27 October 2026, a fresh model per test: RYEM
-    # 27.40272 against 27.40242, 1.08e-5; the same from a cold start)
-    tol = 1e-4
+    # K80): at the regional tolerance 1e-10 (since 30 October 2026) two solves of the same baseline end within 1.1e-6
+    # (1e-4 here before, at 1e-8: RYEM 27.40272 against 27.40242, 1.08e-5)
+    tol = 1e-5
     for a, v in base.items():
         if v > 1.0:
             assert abs(zero.get(a, 0.0) - v) / v < tol, (
@@ -1871,10 +1871,10 @@ def test_pesticide_reduction_binds_and_is_a_noop_at_zero(model):
     cut = totals(model.run(custom_scenario=PolicyScenario(
         name="t", pesticide_reduction=0.50), regions=regions, max_outer_iter=1))
 
-    # IPOPT's own tolerance: a warm start from the previous point ended 1e-7 relative away before the K75 fix; since
-    # then the same baseline run twice differs by up to 3e-5 relative in small cereal activities (rye, oats, durum
-    # wheat: DE23 RYEM 5.43015 vs 5.43000 kha; KNOWN_ISSUES K80), and the zero shock by as much (up to 6e-5, DE11 RYEM)
-    tol = 1e-4
+    # IPOPT's own tolerance: at the regional tolerance 1e-10 (since 30 October 2026, KNOWN_ISSUES K80) the same
+    # baseline run twice ends within 1.1e-6 in the small cereals; at 1e-8 it was 3e-5 (rye, oats, durum wheat) and this
+    # test's tolerance 1e-4
+    tol = 1e-5
     for a, v in base.items():
         if v > 1.0:
             assert abs(zero.get(a, 0.0) - v) / v < tol, (

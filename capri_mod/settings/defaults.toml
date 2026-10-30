@@ -90,8 +90,12 @@ milk_ms_min_share = 0.01
 sup_gap_min_prod = 5.0
 # Norway's supply gap stops counting from this iteration (CAPRI: p_iterChg("NO000000",..) = 0 from step 15)
 norway_gap_last_iter = 15
-# IPOPT's tolerance in the regional models, throughout the outer loop
-nlp_tol_final = 1e-8
+# IPOPT's tolerance in the regional models, throughout the outer loop. 1e-10 since 30 October 2026 (KNOWN_ISSUES K80,
+# the project lead's decision; 1e-8 before): the regional optimum is flat along small, nearly substitutable crops (rye,
+# oats, durum wheat), where IPOPT stopped anywhere within 3e-5 of the solution at 1e-8 (the same baseline solved twice:
+# objectives equal to 1e-10, levels 3e-5 apart); at 1e-10 1.1e-6, with 5% more iterations and the same run time and
+# solves in the mini-EU Farm-to-Fork run
+nlp_tol_final = 1e-10
 # manure pools' price update: realised/planned response factor bounds, minimum plan, step bounds, QP settings
 manure_pool_kappa_bounds = [0.05, 1.5]
 manure_pool_min_plan = 0.002
