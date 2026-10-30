@@ -41,7 +41,7 @@ def num(s: str) -> float:
 def main() -> None:
     sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build")]
     import build_bilateral_market as BM
-    from recalibrate_trade_2017 import REGION_MAP
+    from recalibrate_trade_2017 import trade_region
     g2m = {g: m for m, gs in BM.MODEL.items() for g in gs}
     rms_set = set(_read_csv(ROOT / "capri_data" / "shared" / "rms.csv")["rms"])
     pat = re.compile(r"^'([^']*)'\.'(" + "|".join(ITEMS) + r")'\.'([A-Za-z]+)'\.'CAL'\s+(\S+)")
@@ -52,7 +52,7 @@ def main() -> None:
         m = pat.match(line)
         if m and m.group(1) in rms_set and m.group(3) in g2m:
             v[(m.group(1), g2m[m.group(3)], m.group(2))] += num(m.group(4))
-    mreg = lambda r: "EU27" if (r[:2] in EU and r.endswith("000000")) else REGION_MAP.get(r, "ROW")
+    mreg = lambda r: "EU27" if (r[:2] in EU and r.endswith("000000")) else trade_region(r)
     keys = sorted({(r, c) for (r, c, _) in v})
     rows, worst = [], 0.0
     for r, c in keys:

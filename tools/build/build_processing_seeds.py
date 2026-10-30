@@ -44,7 +44,7 @@ def num(s: str) -> float:
 
 def main() -> None:
     sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build")]
-    from recalibrate_trade_2017 import REGION_MAP
+    from recalibrate_trade_2017 import trade_region
     goods = set(CHAINS) | {x for oc in CHAINS.values() for x in oc}
     pat = re.compile(r"^'([^']*)'\.'(PROC|PROD|PRCY|PPRI|ARM1P)'\.'([A-Z]+)'\.'CAL'\s+(\S+)")
     v = {}
@@ -59,7 +59,7 @@ def main() -> None:
     # CAPRI's behavioural regions (set RMS; aggregates such as EU, MER or the trade blocks also carry data rows)
     rms_set = set(_read_csv(ROOT / "capri_data" / "shared" / "rms.csv")["rms"])
     rms_all = sorted({r for (r, it, g) in v if it == "PROC" and r in rms_set})
-    mreg = lambda r: "EU27" if (r[:2] in EU and r.endswith("000000")) else REGION_MAP.get(r, "ROW")
+    mreg = lambda r: "EU27" if (r[:2] in EU and r.endswith("000000")) else trade_region(r)
     rows = []
     for r in rms_all:
         for s, (o, c) in CHAINS.items():

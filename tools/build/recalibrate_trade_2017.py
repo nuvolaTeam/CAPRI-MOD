@@ -64,6 +64,27 @@ REGION_MAP = {
     "WBA": "WBA",
 }
 
+#: CAPRI's mapping of behavioural regions (RMS) to market regions (RM): set RMS_TO_RM of its instantiation, written by
+#: tools/build/build_gl_demand.py. A behavioural region that is not a market region of its own (the Western Balkan
+#: countries AL, BA, CS, KO, MK, MO of the block WBA) belongs to its market region's trade region.
+RMS_TO_RM_CSV = Path(__file__).resolve().parents[2] / "capri_data" / "shared" / "rms_to_rm.csv"
+
+
+@_ft.lru_cache(maxsize=1)
+def _rms_to_rm() -> dict:
+    return dict(_read_csv(RMS_TO_RM_CSV)[["rms", "rm"]].itertuples(index=False))
+
+
+def trade_region(r: str, default: str = "ROW") -> str:
+    """The model's trade region of a CAPRI region: a market region by REGION_MAP, a behavioural region by its market
+    region (RMS_TO_RM), anything else -> default. EU member states map to their A_EU_* blocks, not to EU27: callers
+    treat the EU first. A source that holds both a block and its members must use one level only (no double count)."""
+    if r in REGION_MAP:
+        return REGION_MAP[r]
+    rm = _rms_to_rm().get(r)
+    return REGION_MAP.get(rm, default) if rm is not None else default
+
+
 # Overlapping aggregates. These are supersets of the regions above and must be
 # dropped, not mapped: including them counts the same trade more than once.
 AGGREGATES = {

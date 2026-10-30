@@ -135,7 +135,8 @@ def is_rms(r: str, aggregates) -> bool:
 
 
 def model_region(r: str, region_map) -> str:
-    return "EU27" if r in EU_MS else region_map.get(r, "ROW")
+    from recalibrate_trade_2017 import trade_region          # behavioural regions by their market region (WBA)
+    return "EU27" if r in EU_MS else trade_region(r)
 
 
 def calibrate_supply(ms, fuel, X0, PR0, rmssup):

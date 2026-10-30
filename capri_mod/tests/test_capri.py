@@ -2004,7 +2004,12 @@ def test_world_production_coverage(data):
     the builder: the residual feeds and the products whose base is CAPRI's market result (bilateral flows, biofuels,
     DDGS), and those without a matching CAPRI world balance (PARI, DWHE, OOIL, OLIV). Until 29 October 2026 the test
     counted the cells of an older FAO extract and an extended SUA, files the market no longer read (removed, KNOWN_ISSUES
-    K102)."""
+    K102).
+
+    The regions with supply models in CAPRI (the United Kingdom, the Western Balkans: RMSSUP) take their production
+    from those models, so CAPRI's market data can hold a production FAO_agg's MAPR lacks (UK maize, sunflower seed and
+    textile crops, 0.4-13 kt): a base production equal to CAPRI's market data (bilateral_regions_2017.csv, PROD of
+    CAPRI's base market solution) is CAPRI's as well."""
     import json
     from capri_mod.market.market_module import MarketModule
 
@@ -2013,8 +2018,16 @@ def test_world_production_coverage(data):
     keys = {tuple(k.split("|")) for k, v in wbf["balances"].items() if float(v.get("production", 0) or 0) > 0}
     mm = MarketModule(data)
     bp = mm.par.base_production
+    import pandas as pd
+    rg = pd.read_csv(DATA_DIR / "2017" / "market" / "bilateral_regions_2017.csv")
+    mkt = {(r, c): float(q) for c, r, q in rg[["commodity", "region", "prod_kt"]].itertuples(index=False)}
+
+    def capri_market(reg, comm):
+        q = mkt.get((reg, comm), 0.0)
+        return q > 0 and abs(float(bp.at[reg, comm]) - q) <= 1e-9 * q
     missing = [(reg, comm) for reg in bp.index if reg not in mm.EU and reg != "EU27"
-               for comm in bp.columns if comm in prods and float(bp.at[reg, comm]) > 0 and (reg, comm) not in keys]
+               for comm in bp.columns if comm in prods and float(bp.at[reg, comm]) > 0 and (reg, comm) not in keys
+               and not capri_market(reg, comm)]
     assert len(prods) > 40
     assert not missing, f"base production without CAPRI's FAO_agg balance: {missing[:10]}"
 

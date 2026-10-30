@@ -6,8 +6,8 @@ crush = the seed's processing PROC, oil and cake yields = CAPRI's PRCY (summed o
 PROC), and the crushing elasticity p_ElasProc(r, seed, seed, 'CAL') (elas_2_17<YEAR>defaulta). In CAPRI's data the
 processing identity ProcO_ holds (PROD(oil, cake) = PROC(seed) x PRCY; arm/calibrate_market_data.gms l. 72-82 and
 1123-1130), so the market's crushing reproduces CAPRI's oil and cake production of the market year. CAPRI regions that
-the model does not trade separately are summed into ROW (tools/build/recalibrate_trade_2017.REGION_MAP; the 44 trading
-regions of sources/capri_trade_regions_2017.json, without the EU), their elasticity the crush-weighted mean of the
+the model does not trade separately are summed into ROW (CAPRI's behavioural regions, shared/rms.csv without the EU, by
+their market region: tools/build/recalibrate_trade_2017.trade_region), their elasticity the crush-weighted mean of the
 members'.
 
 EU27: the sums over CAPRI's member states (crush, PROD, crush share of domestic use, the use as PROD + IMPORTS - EXPORTS
@@ -32,7 +32,6 @@ from __future__ import annotations
 import argparse
 import csv
 import importlib.util
-import json
 import re
 from collections import defaultdict
 from pathlib import Path
@@ -45,15 +44,16 @@ COLS = ["region", "seed", "crush_kt", "oil_yield", "cake_yield", "elasticity", "
 
 
 def region_map():
+    """{CAPRI behavioural region (RMS, outside the EU): model trade region}. Behavioural regions, not market regions:
+    CAPRI's trade blocks (MED, MER_OTH, URUPAR, WBA) hold PROD but not PROC and PRCY, which sit at their members (until
+    30 October 2026 the blocks' crushing was missed, ROW's oils and cakes falling short of CAPRI's production)."""
     sp = importlib.util.spec_from_file_location("_rt", ROOT / "tools" / "build" / "recalibrate_trade_2017.py")
     m = importlib.util.module_from_spec(sp); sp.loader.exec_module(m)
-    trading = json.load(open(ROOT / "capri_data" / "sources" / "capri_trade_regions_2017.json"))["trading_regions"]
-    out = {}
-    for r in trading:
-        if r == "EU27yr19":
-            continue
-        out[r] = m.REGION_MAP.get(r, "ROW")
-    return out
+    with open(ROOT / "capri_data" / "shared" / "capri_member_state_codes.csv", newline="") as f:
+        eu = {r["capri_ms"] for r in csv.DictReader(f) if r["nuts_prefix"] not in ("NO", "GB", "UK")}
+    with open(ROOT / "capri_data" / "shared" / "rms.csv", newline="") as f:
+        rms = [r["rms"] for r in csv.DictReader(f)]
+    return {r: m.trade_region(r) for r in rms if r not in eu}
 
 
 def read_market(path: Path, year: str, regions):

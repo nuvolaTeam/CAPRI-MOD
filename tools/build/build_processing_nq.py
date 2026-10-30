@@ -51,7 +51,7 @@ def num(s: str) -> float:
 def main() -> None:
     sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check")]
     import build_bilateral_market as BM
-    from recalibrate_trade_2017 import REGION_MAP
+    from recalibrate_trade_2017 import trade_region
     g2m = {g: m for m, gs in BM.MODEL.items() for g in gs}
     h = []
     cur = None
@@ -87,7 +87,7 @@ def main() -> None:
     missing = sorted(r for r in regs if r not in inpe)
     if missing:
         raise SystemExit(f"no 2030 PPRI INPE in the dump for {missing}")
-    mreg = lambda r: "EU27" if (r[:2] in EU and r.endswith("000000")) else REGION_MAP.get(r, "ROW")
+    mreg = lambda r: "EU27" if (r[:2] in EU and r.endswith("000000")) else trade_region(r)
     a1 = lambda r, g: v.get((r2m.get(r, r), "ARM1P", g), float("nan"))
     rows_h = [(r, mreg(r), g2m[x], g2m[y], val, a1(r, x), a1(r, y)) for r, x, y, val in h
               if x in g2m and y in g2m and val != 0.0]

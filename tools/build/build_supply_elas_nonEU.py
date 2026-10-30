@@ -38,7 +38,7 @@ OUT = ROOT / "capri_data" / "2017" / "market" / "supply_elas_region.csv"
 
 
 def main():
-    from recalibrate_trade_2017 import REGION_MAP, AGGREGATES
+    from recalibrate_trade_2017 import AGGREGATES, trade_region as _trade_region
     from build_bilateral_market import MODEL as CAPRI_CODES          # model commodity -> CAPRI product(s)
     from build_feed_bulks import EU_MS
     from capri_mod.data.definitions import MARKET_COMMODITIES
@@ -54,7 +54,7 @@ def main():
     def trade_region(r):
         if r in eu or r in AGGREGATES:
             return None
-        return REGION_MAP.get(r, "ROW")
+        return _trade_region(r)
 
     rows = []
     for c in MARKET_COMMODITIES:

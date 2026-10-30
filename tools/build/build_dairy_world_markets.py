@@ -41,7 +41,7 @@ def main():
     ap.add_argument("--src", type=Path, default=Path("/mnt/user-data/uploads/fao_agg_17_datamarket.txt"))
     a = ap.parse_args()
     sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check")]
-    from recalibrate_trade_2017 import REGION_MAP, AGGREGATES
+    from recalibrate_trade_2017 import AGGREGATES, trade_region
     pat = re.compile(r"^'([^']+)'\.'(" + "|".join(ITEMS) + r")'\.'(" + "|".join(COMM) + r")'\.'BAS'\s+([-\d.Ee+]+)")
     if a.src.exists():
         rows = []
@@ -61,7 +61,7 @@ def main():
         reg, item, prod, t = line.split(",")
         if reg in AGGREGATES or reg.startswith(("EU0", "EU_", "A_EU")) or reg in ("EU27yr19",):
             continue
-        tr = "EU27" if reg in EU_MS else REGION_MAP.get(reg, "ROW")
+        tr = "EU27" if reg in EU_MS else trade_region(reg)
         out[f"{tr}|{COMM[prod]}"][ITEMS[item]] += float(t) / 1000.0
         seen.add(reg)
     res = {k: dict(d) for k, d in sorted(out.items())}
