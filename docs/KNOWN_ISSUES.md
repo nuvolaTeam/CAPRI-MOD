@@ -9,7 +9,7 @@ The data sourcing registry's log of checks, fixes and decisions (201 entries, mo
 [KNOWN_ISSUES_REGISTRY_LOG.md](KNOWN_ISSUES_REGISTRY_LOG.md), verbatim, with the triage of its open entries against
 the code: they became K92-K96, joined K73, K80, K91, or were closed or historical.
 
-## Open (15)
+## Open (14)
 
 | # | Issue | Status |
 |---|---|---|
@@ -25,14 +25,14 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K79](#k79) | Member-state production that keeps moving between iterations | open |
 | [K80](#k80) | The same run repeated from a warm start differs by up to 3e-5 relative in small cereal activities | open |
 | [K83](#k83) | A one-region Farm-to-Fork run's market diverges in its second step | open |
-| [K89](#k89) | Failing regional solves take most of IPOPT's time | open |
 | [K92](#k92) | Farm-to-Fork changes furthest from JRC121368, besides the milk price | open: waiting for CAPRI's scenario results |
 | [K93](#k93) | CAPRI mitigation options not built; documents disagree on which are in | open |
 
-## Resolved (91)
+## Resolved (92)
 
 | # | Issue | Status |
 |---|---|---|
+| [K89](#k89) | Failing regional solves take most of IPOPT's time | fixed (measured 30 October 2026) |
 | [K74](#k74) | Supply: differences from CAPRI that no register listed | fixed (batch 8 gate) |
 | [K105](#k105) | Numbers in the model's code to check, register or move to the settings | fixed (batch 8 gate) |
 | [K106](#k106) | The market's base supply of crushed and biofuel products was not CAPRI's production of the market year | fixed |
@@ -1017,7 +1017,7 @@ HR000000, K71); which solves they are is not recorded.
 
 - **Effect:** run time only
 - **In 9t:** –
-- **Status:** **open**, diagnosed (29 October 2026; the project lead's decision: the cause first;
+- **Status:** **fixed** (measured 30 October 2026, below); diagnosed 29 October 2026 (the project lead's decision: the cause first;
   tools/check/k89_trace.py, the mini-EU Farm-to-Fork run in one process: 905 solves, 345 s of IPOPT, 43 failed, 254 s).
   210 s are one episode in NL320000 at the scenario's first iteration: its solve at the tiered N target fails (warm
   start 3,000 iterations, cold start infeasible), then the mineral-cap exemption search (written for the Green Deal's
@@ -1030,6 +1030,15 @@ HR000000, K71); which solves they are is not recorded.
   target before the cap search where a tiered N target is in force (identical results where the cap search fails, as
   in NL320000); or a solve without the N-surplus row first to see which constraint makes the problem infeasible
   Left as it is for now (the project lead's decision, 29 October 2026), to be taken up again later
+  29 October 2026 (commit acda673): on a failed solve under a tiered N target the problem is solved once without
+  the N-surplus row; feasible there, the N target is the cause, and JRC121368's relaxed target is tried before any
+  cap exemption (its own solve still searches exemptions where caps bind). Measured 30 October 2026 with
+  tools/check/k89_trace.py on the same mini-EU Farm-to-Fork run with the code of that day (this fix and the others
+  since the diagnosis, the warm start of batch 5 among them; converged in 7 iterations): 261 regional solves, 135 s of
+  IPOPT (345 s in the diagnosis), 14 failed, 60 s (254 s); NL320000's episode 8.6 s (210 s), the part this fix
+  addresses. The rest are
+  the first mineral-cap exemption searches of BG020000 and HR000000 (43 s; their exemptions PERM and ROOF are needed
+  and kept for the scenario, K71) and one or two failed starts of FI190000 and AT330000. **Fixed.**
 
 ## NLP check (tools/nlp_check), what it showed
 
