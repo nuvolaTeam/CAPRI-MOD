@@ -1298,7 +1298,9 @@
      "build_n_leaching"
     ],
     "checks": [],
-    "tests": []
+    "tests": [
+     "capri_mod/tests/test_supply_layers.py"
+    ]
    }
   },
   "amm_n_leaching_region": {
@@ -10972,7 +10974,9 @@
     ],
     "builders": [],
     "checks": [],
-    "tests": []
+    "tests": [
+     "capri_mod/tests/test_supply_layers.py"
+    ]
    }
   },
   "fert_side_effects": {
@@ -11058,7 +11062,9 @@
     ],
     "builders": [],
     "checks": [],
-    "tests": []
+    "tests": [
+     "capri_mod/tests/test_supply_layers.py"
+    ]
    }
   },
   "genetics_effects": {
@@ -31937,7 +31943,9 @@
      "build_supply_elasticities_regional"
     ],
     "checks": [],
-    "tests": []
+    "tests": [
+     "capri_mod/tests/test_supply_layers.py"
+    ]
    }
   },
   "sup_crop_premium": {
@@ -39017,7 +39025,7 @@
   "numerical/keep": 35,
   "open/keep": 8,
   "physical/keep": 25,
-  "technical/keep": 44
+  "technical/keep": 45
  },
  "other_notes": {
   "capri_data/2017/environment/manure_pool_costs.json": [

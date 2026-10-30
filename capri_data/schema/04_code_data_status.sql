@@ -104,6 +104,7 @@ INSERT INTO code_data_status VALUES
   ('capri_mod/market/demand.py', 'DemandMixin.demand_response', 0.05, 'numerical', 'keep', NULL, 'floor of the dairy price ratio (5% of base) in the dairy feed factor'),
   ('capri_mod/market/demand.py', 'DemandMixin.gl_food_ratio', 0.05, 'numerical', 'keep', NULL, 'consumer price floor at 5% of base in the food demand system'),
   ('capri_mod/market/inputs.py', 'REPO_DATA', 2.0, 'technical', 'keep', NULL, 'parent-directory depth of the repository path'),
+  ('capri_mod/supply/inputs.py', 'REPO_DATA', 2.0, 'technical', 'keep', NULL, 'parent-directory depth of the repository path'),
   ('capri_mod/market/supply.py', 'SupplyMixin._yani_clear', -50.0, 'numerical', 'keep', NULL, 'default bounds of the young-animal price ratio when the state gives none'),
   ('capri_mod/market/supply.py', 'SupplyMixin._yani_clear', 50.0, 'numerical', 'keep', NULL, 'default bounds of the young-animal price ratio when the state gives none'),
   ('capri_mod/market/supply.py', 'SupplyMixin.supply_response', 0.2, 'numerical', 'keep', NULL, 'floor of the last-seen price ratio in the supply anticipation'),
