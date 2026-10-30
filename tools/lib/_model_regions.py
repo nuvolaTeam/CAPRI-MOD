@@ -13,7 +13,10 @@ ROOT = Path(__file__).resolve().parents[2]
 # CAPRI member-state codes (sets.gms NUTS0: BL = Belgium and Luxembourg, IR, EL, UK), the table the model uses
 # (capri_mod.data.definitions.MS_CODE)
 with open(ROOT / "capri_data" / "shared" / "capri_member_state_codes.csv", newline="") as _f:
-    CTRY = {r["nuts_prefix"]: r["capri_ms"][:2] for r in csv.DictReader(_f)}
+    MS_OF_PREFIX = {r["nuts_prefix"]: r["capri_ms"] for r in csv.DictReader(_f)}
+#: country prefix -> the two letters of CAPRI's member state (BE -> BL; TR -> TU, as in CAPREG's dump res_17TU)
+CTRY = {p: m[:2] for p, m in MS_OF_PREFIX.items()}
+_MS_SET = frozenset(MS_OF_PREFIX.values())
 
 
 with open(ROOT / "capri_data" / "shared" / "regional_units.csv", newline="") as _f:
@@ -55,7 +58,11 @@ def model_regions():
 
 
 def national_code(nuts2: str) -> str:
-    return CTRY.get(nuts2[:2], nuts2[:2]) + "000000"
+    """CAPRI member state of a unit, a member state or a country prefix (the same rule as
+    capri_mod.data.definitions.capri_ms): 'BL210000' -> 'BL000000', 'TR100000' -> 'TUR'."""
+    if nuts2 in _MS_SET:
+        return nuts2
+    return MS_OF_PREFIX.get(nuts2[:2], nuts2[:2] + "000000")
 
 
 #: model region -> CAPRI region(s), for NUTS changes the correspondence file leaves out (it keeps

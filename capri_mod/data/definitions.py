@@ -304,17 +304,25 @@ def _load_ms_codes():
     from pathlib import Path
     p = Path(__file__).resolve().parents[2] / "capri_data" / "shared" / "capri_member_state_codes.csv"
     with open(p, newline="") as f:
-        return {r["nuts_prefix"]: r["capri_ms"][:2] for r in csv.DictReader(f)}
+        return {r["nuts_prefix"]: r["capri_ms"] for r in csv.DictReader(f)}
 
 
-MS_CODE = _load_ms_codes()
+#: country prefix -> CAPRI member state, as CAPRI codes it (BE -> BL000000; TR -> TUR, Turkey's code in sets.gms)
+MS_OF_PREFIX = _load_ms_codes()
+#: country prefix -> the two letters of CAPRI's member state (BE -> BL; TR -> TU, as in CAPREG's dump res_17TU)
+MS_CODE = {p: m[:2] for p, m in MS_OF_PREFIX.items()}
+_MS_SET = frozenset(MS_OF_PREFIX.values())
 
 
 def capri_ms(region: str) -> str:
-    """CAPRI member state of a model region (CAPRI's code) or a country prefix: 'BL210000' -> 'BL000000',
-    'IR010000' -> 'IR000000', 'BE' -> 'BL000000'."""
-    p = str(region)[:2]
-    return MS_CODE.get(p, p) + "000000"
+    """CAPRI member state of a model region (CAPRI's code), a CAPRI member state or a country prefix:
+    'BL210000' -> 'BL000000', 'IR010000' -> 'IR000000', 'BE' -> 'BL000000', 'TR100000' -> 'TUR', 'TUR' -> 'TUR'.
+    A prefix not in the table is CAPRI's own (DE, UK, CS): its member state is the prefix + 000000."""
+    r = str(region)
+    if r in _MS_SET:
+        return r
+    p = r[:2]
+    return MS_OF_PREFIX.get(p, p + "000000")
 
 
 def is_eu(region: str) -> bool:
