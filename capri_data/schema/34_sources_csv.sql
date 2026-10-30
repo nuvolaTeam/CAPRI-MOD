@@ -195,7 +195,7 @@ COMMENT ON TABLE src_orgsoil_share_p_orgsoilori IS 'CAPRI''s p_OrgSoilOri(region
 INSERT INTO value_units VALUES
   ('src_orgsoil_share_p_orgsoilori', 'value', NULL, 'open', 'per item (shares and areas)');
 
--- file: capri_data/sources/eu_tariff_provenance.csv
+-- file: capri_data/sources/market/eu_tariff_provenance.csv
 CREATE TABLE src_eu_tariff_provenance (
     commodity VARCHAR NOT NULL,
     previous DOUBLE,

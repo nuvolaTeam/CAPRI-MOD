@@ -249,7 +249,7 @@ member-state set from MR.list) and `build_eu_producer_prices` (section 1.2).
 | build_use_components | `M/use_components.csv` | `SH/rms.csv` | data_market | – |
 | build_eu_ms_balance | `M/eu_ms_balance_2030.csv` | `SH/eu_market_blocks.csv` | `UP/data_market_1730defaulta.csv` | – |
 | build_supply_elas_nonEU | `M/supply_elas_region.csv` | `sources/arm/capri_supply_elas_market_1717.csv`, `SMK/bilateral_dataout_2017.csv.xz` | – | own-price only (registered) |
-| build_tariffs_2017 | `P/tariffs.csv` (until 30 October 2026 also, in place, `sources/eu_tariff_provenance.json` when an EU row was missing) | `SMK/bilateral_dataout_2017.csv.xz`, `sources/eu_tariff_provenance.csv` (`tools/build/convert_sources_to_csv.py`) | `UP/res_0_1717cap_after_2014_cal_from_data_caldefaulta.csv` (optional) | – |
+| build_tariffs_2017 | `P/tariffs.csv` (until 30 October 2026 also, in place, `sources/eu_tariff_provenance.json` when an EU row was missing) | `SMK/bilateral_dataout_2017.csv.xz`, `SMK/eu_tariff_provenance.csv` (`tools/build/convert_sources_to_csv.py`) | `UP/res_0_1717cap_after_2014_cal_from_data_caldefaulta.csv` (optional) | – |
 | ingest_capmod_market | `validation/capmod_market_extraction.json` (not in git; `sources/capmod/capmod_trade_flows_2017.csv.xz` until 30 October 2026, read by no code, removed) (capmod_world_prices_2017.csv until 29 October 2026, K103) | – | `--dump` res_0_1717 | `--data-dir` relative |
 | build_eu_outlook_2030 | `validation/eu_outlook_2020_2030.csv` | – | argv[1] DG AGRI outlook PDF (`pdftotext`) | validation only |
 

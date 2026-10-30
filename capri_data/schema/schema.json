@@ -27995,7 +27995,7 @@
    }
   },
   "src_eu_tariff_provenance": {
-   "file": "capri_data/sources/eu_tariff_provenance.csv",
+   "file": "capri_data/sources/market/eu_tariff_provenance.csv",
    "declared_in": "34_sources_csv.sql",
    "layout": [],
    "comment": "The EU row of the tariffs (tools/build/build_tariffs_2017.py) with its provenance, one row per commodity, the former eu_tariff_provenance.json (its rows; its _source: CAPRI res_0_1717cap_after_2014_cal_from_data_caldefaulta dataOut, EU27yr19 <- NONEU, 2017: total ad-valorem equivalent = ImportP/(Fob+TCost)-1), numbers as written, empty where the JSON had no field or null; converted to CSV by tools/build/convert_sources_to_csv.py; read by tools/build/build_tariffs_2017.py.",

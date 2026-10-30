@@ -46,7 +46,7 @@ unchanged); the CSV declarations (capri_data/schema/34_sources_csv.sql) cite the
     (30 October 2026: read by no code; they remain in git history and in the project lead's uploads): the other
     sheets of these workbooks and the workbooks NUTS_2010_-_NUTS_2013.xls and NUTS2024-NUTS2027.xlsx.
   JSON
-    eu_tariff_provenance.json                          -> eu_tariff_provenance.csv (one row per commodity)
+    eu_tariff_provenance.json                          -> market/eu_tariff_provenance.csv (one row per commodity)
   (Removed without conversion, read by no code, at the project lead's request: capri_trade_regions_2017.json and
   jrc121368/{published_results.json, scenario_specification.json, jrc121368_report_text.txt}.)
   (world_price_provenance.json was written by tools/build/build_world_prices.py, not converted here; since 30 October
@@ -381,7 +381,7 @@ def convert_json() -> None:
     fields = []
     for v in rows.values():
         fields += [k for k in v if k not in fields]
-    write("eu_tariff_provenance.csv", ["commodity"] + fields,
+    write("market/eu_tariff_provenance.csv", ["commodity"] + fields,
           [[c] + [_text(v.get(k)) for k in fields] for c, v in rows.items()])
 
 

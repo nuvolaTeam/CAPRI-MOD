@@ -3898,7 +3898,7 @@
     "capri_data/shared/capri_member_state_codes.csv",
     "capri_data/shared/regional_units.csv",
     "capri_data/codes/model_trade_regions.csv",
-    "capri_data/sources/eu_tariff_provenance.csv",
+    "capri_data/sources/market/eu_tariff_provenance.csv",
     "capri_data/sources/market/bilateral_dataout_2017.csv.xz"
    ],
    "code": [

@@ -1,7 +1,7 @@
 """Import protection per trade region and commodity from CAPRI's 2017 market results (Sprint 9r).
 
 The market's domestic price levels (MarketModule.domestic_prices: world price x (1 + tariff / 100)) take a tariff per
-trade region and commodity. Only the EU row came from CAPRI (capri_data/sources/eu_tariff_provenance.csv); the other
+trade region and commodity. Only the EU row came from CAPRI (capri_data/sources/market/eu_tariff_provenance.csv); the other
 regions had no data file and the loader generated them at random (EU value x 0.5-0.8 plus uniform noise). The noise
 was drawn from a module-level generator, so each CAPRIModel built in a process got different tariffs, and with them
 different crushing parameters for the oilseed chains (MarketModule._biofuel_params uses the price levels).
@@ -36,7 +36,7 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT)); sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check")]
 OUT = ROOT / "capri_data" / "2017" / "policy" / "tariffs.csv"
 SRC = ROOT / "capri_data" / "sources" / "market" / "bilateral_dataout_2017.csv.xz"
-PROV = ROOT / "capri_data" / "sources" / "eu_tariff_provenance.csv"
+PROV = ROOT / "capri_data" / "sources" / "market" / "eu_tariff_provenance.csv"
 RES0 = Path("/mnt/user-data/uploads/res_0_1717cap_after_2014_cal_from_data_caldefaulta.csv")
 #: EU rows added after the documented set, computed from RES0 with the same formula (in eu_tariff_provenance.csv;
 #: computed here, not written, only if one is missing there)

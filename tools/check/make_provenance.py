@@ -70,7 +70,7 @@ UNTRACED = {
     "capri_data/sources/ghgtech/miti_data_jul15_p_ghgMiti.csv": ("convert_sources_to_csv", "CAPRI"),
     "capri_data/sources/policy/minfert_redu_by_crop_p_checkSmallMine.csv": ("convert_sources_to_csv", "CAPRI"),
     "capri_data/sources/policy/minfert_redu_by_crop_limCres.csv": ("convert_sources_to_csv", "CAPRI"),
-    "capri_data/sources/eu_tariff_provenance.csv": ("convert_sources_to_csv", "CAPRI"),
+    "capri_data/sources/market/eu_tariff_provenance.csv": ("convert_sources_to_csv", "CAPRI"),
     "capri_data/sources/capri_star/nutrient_cont_usda_p_nutrientCont.csv": ("convert_sources_to_csv", "USDA via CAPRI"),
     "capri_data/sources/nuts/": ("convert_sources_to_csv", "Eurostat"),
 }
