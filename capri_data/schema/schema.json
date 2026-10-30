@@ -39011,13 +39011,12 @@
  ],
  "code_data": {
   "capri/keep": 116,
-  "capri/to-setting": 12,
   "capri-mod/keep": 2,
   "literature/keep": 11,
   "numerical/keep": 35,
   "open/keep": 8,
   "physical/keep": 25,
-  "technical/keep": 44
+  "technical/keep": 42
  },
  "other_notes": {
   "capri_data/2017/environment/manure_pool_costs.json": [

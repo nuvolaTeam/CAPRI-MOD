@@ -48,13 +48,20 @@ def _cc_base(ms: str) -> str:
 
 def run(countries: Iterable[str], sets: P.CaptrdSets, base_year: int, first_year: int, last_year: int,
         tseries_dir: Path, base_dir: Path, coco_file: Path, biofuel_file: Optional[Path], work: Path,
-        dat: Optional[dict] = None, resy: Iterable[int] = (2018, 2020, 2025, 2030, 2035, 2040, 2045, 2050, 2060, 2070),
-        lst_dgagri: int = 2030, aglink: str = "aglink2023dgAgri", milk_quota_expiry: int = 2009) -> Dict[str, Path]:
+        dat: Optional[dict] = None, resy: Optional[Iterable[int]] = None, lst_dgagri: Optional[int] = None,
+        aglink: Optional[str] = None, milk_quota_expiry: Optional[int] = None) -> Dict[str, Path]:
     """The prepared p_data of each country (MS code), written to work/<CC>.parquet. A country without its CAPREG files
     stops the run (CAPTRD aborts on missing base-year data, captrd.gms l. 568).
 
     last_year: the last year of the data (CAPREG's and COCO's); resy, lst_dgagri, aglink, milk_quota_expiry: the run's
-    simulation years, %lst_dgagri%, %Aglink% and %mlkQutExpiry% (defaults: the reference run results_1770's)."""
+    simulation years, %lst_dgagri%, %Aglink% and %mlkQutExpiry% (default: the settings captrd.simulation_years,
+    lst_dgagri, aglink, milk_quota_expiry, the reference run results_1770's)."""
+    from capri_mod.settings import current as _settings
+    st = _settings()
+    resy = tuple(st.get("captrd.simulation_years")) if resy is None else tuple(resy)
+    lst_dgagri = int(st.get("captrd.lst_dgagri")) if lst_dgagri is None else lst_dgagri
+    aglink = str(st.get("captrd.aglink")) if aglink is None else aglink
+    milk_quota_expiry = int(st.get("captrd.milk_quota_expiry")) if milk_quota_expiry is None else milk_quota_expiry
     work.mkdir(parents=True, exist_ok=True)
     dat = P.read_dat() if dat is None else dat
     ms_list = [m for m in sets.ms if m in set(countries)]
@@ -131,8 +138,9 @@ def main(argv: Optional[List[str]] = None) -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--out", required=True)
     ap.add_argument("--countries", nargs="*", help="MS codes or two-letter codes; default: every country with files")
-    ap.add_argument("--base-year", type=int, default=2017)
-    ap.add_argument("--last-year", type=int, default=2019, help="last year of the data (Years runs further in CAPTRD)")
+    ap.add_argument("--base-year", type=int, default=int(_settings().get("captrd.base_year")))
+    ap.add_argument("--last-year", type=int, default=int(_settings().get("captrd.last_data_year")),
+                    help="last year of the data (Years runs further in CAPTRD)")
     args = ap.parse_args(argv)
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(message)s")
     sets = P.read_sets()
