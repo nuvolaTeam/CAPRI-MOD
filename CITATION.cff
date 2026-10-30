@@ -1,51 +1,11 @@
+
 cff-version: 1.2.0
-
-message:
-  If you use CAPRI-MOD in scientific research, academic
-  publications, technical reports, or derivative software,
-  please cite CAPRI-MOD and identify the version used.
-
+message: "If you use CAPRI-MOD in scientific research, please cite this software."
 type: software
-
-title:
-  CAPRI-MOD: Python Implementation of the
-  CAPRI Agricultural Economic Model
-
+title: "CAPRI-MOD: Python Implementation of the CAPRI Agricultural Economic Model"
 authors:
   - family-names: Ghirimoldi
     given-names: Gabriele
-
-repository-code: https://github.com/nuvolaTeam/CAPRI-MOD
-
-url: https://github.com/nuvolaTeam/CAPRI-MOD
-
-abstract:
-  CAPRI-MOD is an experimental Python implementation
-  of the Common Agricultural Policy Regionalised
-  Impact (CAPRI) modelling framework, supporting
-  transparent and reproducible agricultural economic
-  modelling and policy scenario analysis.
-
-keywords:
-  - CAPRI
-  - CAPRI-MOD
-  - agricultural economics
-  - economic modelling
-  - agricultural policy
-  - Python
-  - scenario analysis
-
+repository-code: "https://github.com/nuvolaTeam/CAPRI-MOD"
 version: 0.1.0
-
 license: GPL-3.0-only
-
-references:
-  - type: software
-    title: CAPRI modelling system
-    authors:
-      - given-names: University of Bonn and partner institutions (CAPRI network)
-    url: https://www.capri-model.org
-    notes:
-      The original CAPRI model, developed at the University of Bonn and
-      partner institutions. CAPRI-MOD is an independent reimplementation,
-      not a release of the CAPRI modelling system.
