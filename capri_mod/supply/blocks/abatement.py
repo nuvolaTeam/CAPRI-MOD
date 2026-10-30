@@ -58,11 +58,8 @@ class AbatementBlock:
         is from CAPRI's crop levels, the row from the model's)."""
         if self.data.region_id[:2] in SupplyModule.NON_EU_PREFIXES:
             return None
-        if type(self)._CATC_OPT is None:
-            from pathlib import Path as _P
-            f = _P(__file__).resolve().parents[3] / "capri_data" / "2017" / "abatement" / "mitigation" / "winter_cover_option.csv"
-            type(self)._CATC_OPT = read_input(f).set_index("region")       # a missing file is an error (K74)
-        opt = type(self)._CATC_OPT
+        opt = _inputs.current().cached(                                   # a missing file is an error (K74)
+            "winter_cover_option", lambda inp: inp.csv("winter_cover_option.csv", "abatement/mitigation").set_index("region"))
         cc = getattr(self.data, "cover_crops", None)
         wcs = getattr(self.data, "winter_cover_share", None)
         reg = self.data.region_id
@@ -209,10 +206,8 @@ class AbatementBlock:
     def _manure_techs(self):
         """CAPRI's ammonia technologies for this region: {animal: [sub-activity block]}
         (capri_data/2017/abatement/ammonia/ammonia_tech_model.csv, capri_mod/supply/ammonia_techs.py)."""
-        from pathlib import Path as _P
         from capri_mod.supply import ammonia_techs as _at
-        f = _P(__file__).resolve().parents[3] / "capri_data" / "2017" / "abatement" / "ammonia" / "ammonia_tech_model.csv"
-        techs = _at.load(f).get(self.data.region_id, {})
+        techs = _at.load(_inputs.current().path("ammonia_tech_model.csv", "abatement/ammonia")).get(self.data.region_id, {})
         # Cost basis (KNOWN_ISSUES K63): CAPRI prices the options per animal place, places = v_actLevl x DAYS / 365
         # (GHG_Mit_Cost_), and stock_factor is DAYS / 365 per unit of CAPRI's activity level. The model's animal units
         # are its own heads (capri_level_ratio = model heads per CAPRI level unit: fattening pigs ~0.5, bulls ~0.4,

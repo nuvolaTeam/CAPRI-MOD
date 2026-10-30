@@ -105,18 +105,16 @@ class LivestockBlock:
     def _cake_index(cls):
         """(weights, base prices) of the protein-feed cake index: the EU's base-period feed use of each cake (CAPRI's
         FAO_agg FEDM, eu_cake_feed_bas.csv, tools/build/build_eu_cake_feed.py) and its world price."""
-        if cls._CAKE_INDEX is None:
-            from pathlib import Path
-            root = Path(__file__).resolve().parents[3] / "capri_data" / "2017" / "market"
-            fe_ = read_input(root / "eu_cake_feed_bas.csv").set_index("product")["feed_kt"]
-            wp = read_input(root / "world_prices.csv").set_index("commodity")["price"]
+        def load(inp):
+            fe_ = inp.csv("eu_cake_feed_bas.csv", "market").set_index("product")["feed_kt"]
+            wp = inp.csv("world_prices.csv", "market").set_index("commodity")["price"]
             w, p = {}, {}
             for c in ("SOYC", "RAPC", "SUNC"):
                 fe = float(fe_.get(c, 0.0))
                 if fe > 0 and c in wp.index:
                     w[c], p[c] = fe, float(wp[c])
-            cls._CAKE_INDEX = (w, p)
-        return cls._CAKE_INDEX
+            return (w, p)
+        return _inputs.current().cached("cake_index", load)
 
     def _protein_feed_cost_change(self, q, price_shock) -> float:
         """Cost change of q tonnes of protein-rich feed under the cake prices."""

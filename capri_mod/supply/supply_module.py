@@ -43,6 +43,7 @@ from capri_mod.data.definitions import (
 )
 from capri_mod.data.definitions import MS_CODE, capri_ms, IdentityMap
 from capri_mod.tableio import read_input
+from capri_mod.supply import inputs as _inputs
 
 
 # ---------------------------------------------------------------------------
@@ -61,8 +62,6 @@ ABSENT_LEVEL = 1e-8
 #: CAPRI p_OverFertMarkUp (envind/ghgMiti.gms): corrects the over-fertilisation factor
 #: for the additive need factor and manure availability
 OVERFERT_MARKUP = param("OVERFERT_MARKUP")
-_OVERFERT = None
-_OVERFERT_WARNED = False
 
 
 def overfert_factor(region: str):
@@ -72,41 +71,36 @@ def overfert_factor(region: str):
     (CAPRI's limits on the fertiliser technologies, Tot_MitFert_ and the regional maximum shares, need it): a missing
     file or region is an error (K74, 29 October 2026; before, the limits were dropped with a warning, a fallback no
     unit of the model reached)."""
-    global _OVERFERT, _OVERFERT_WARNED
-    if _OVERFERT is None:
-        f = Path(__file__).resolve().parents[2] / "capri_data" / "2017" / "environment" / "crop_nut_need_mult_fact_2030.csv"
+    def load(inp):
+        f = inp.path("crop_nut_need_mult_fact_2030.csv", "environment")
         if not f.exists():
             raise FileNotFoundError(f"CAPRI's over-fertilisation factors missing: {f} (tools/build/build_overfert_factors.py)")
-        _OVERFERT = {str(r.region): float(r.x) for r in read_input(f).itertuples(index=False)}
-    x = _OVERFERT.get(region)
+        return {str(r.region): float(r.x) for r in inp.csv(f.name, "environment").itertuples(index=False)}
+    x = _inputs.current().cached("overfert", load).get(region)
     if x is None:
         raise KeyError(f"{region}: no CAPRI over-fertilisation factor in crop_nut_need_mult_fact_2030.csv")
     return x
 
 
-_ACTIVE_TECH = None
-_YANI = None
 
 
 #: CAPRI p_fertEffCor (envind/ghgMiti.gms)
 P_FERT_EFF_COR = param("P_FERT_EFF_COR")
-_FERT_OPT = None
 
 
 def fert_option_table() -> dict:
     """{model region: [row]} of CAPRI's fertiliser options (fert_options_jul15.csv)."""
-    global _FERT_OPT
-    if _FERT_OPT is None:
-        from pathlib import Path as _P
-        f = _P(__file__).resolve().parents[2] / "capri_data" / "2017" / "abatement" / "fert_options_jul15.csv"
-        _FERT_OPT = {}
-        if f.exists():
-            for r in read_input(f).itertuples(index=False):
-                _FERT_OPT.setdefault(r.region, []).append(r)
+    def load(inp):
+        out = {}
+        tab = inp.csv("fert_options_jul15.csv", "abatement", required=False)
+        if tab is not None:
+            for r in tab.itertuples(index=False):
+                out.setdefault(r.region, []).append(r)
         else:
             import warnings as _w
             _w.warn("fert_options_jul15.csv missing: no fertiliser-efficiency options")
-    return _FERT_OPT
+        return out
+    return _inputs.current().cached("fert_options", load)
 
 
 def _spec_fingerprint(spec, **extra) -> str:
@@ -145,30 +139,26 @@ def young_animal_table() -> dict:
     """CAPRI's young-animal coefficients per model region (calves, young cattle, cows, piglets, lambs): pooled across the
     sexes (young_animals_2017.json, the default) or per sex as CAPRI's balances (young_animals_by_sex_2017.json) with
     the cattle member splits (RegionalSupplyModel.use_cattle_member_splits; tools/build/build_young_animals.py)."""
-    global _YANI
     by_sex = bool(getattr(RegionalSupplyModel, "use_cattle_member_splits", False))
-    if _YANI is None or _YANI[0] != by_sex:
-        import json as _json
-        from pathlib import Path as _P
-        name = "young_animals_by_sex_2017.json" if by_sex else "young_animals_2017.json"
-        f = _P(__file__).resolve().parents[2] / "capri_data" / "2017" / "supply" / name
-        _YANI = (by_sex, _json.load(open(f))["regions"] if f.exists() else {})
-    return _YANI[1]
+    name = "young_animals_by_sex_2017.json" if by_sex else "young_animals_2017.json"
+
+    def load(inp):
+        d = inp.json(name, "supply", required=False)
+        return d["regions"] if d is not None else {}
+    return _inputs.current().cached(name, load)
 
 
 def active_technologies():
     """CAPRI's active mitigation technologies of the Green Deal reference (activeTech,
     capri_data/2017/abatement/active_technologies.csv, tools/build/build_active_technologies.py). A missing file is an
     error (K74, 29 October 2026; before, every option with data was made available with a warning)."""
-    global _ACTIVE_TECH
-    if _ACTIVE_TECH is None:
-        from pathlib import Path as _P
-        f = _P(__file__).resolve().parents[2] / "capri_data" / "2017" / "abatement" / "active_technologies.csv"
+    def load(inp):
+        f = inp.path("active_technologies.csv", "abatement")
         if not f.exists():
             raise FileNotFoundError(f"CAPRI's active mitigation technologies missing: {f} "
                                     "(tools/build/build_active_technologies.py)")
-        _ACTIVE_TECH = set(read_input(f)["technology"].str.upper())
-    return _ACTIVE_TECH or None
+        return set(inp.csv(f.name, "abatement")["technology"].str.upper())
+    return _inputs.current().cached("active_technologies", load) or None
 
 
 def fert_efficiency_cap(region: str):
@@ -178,12 +168,23 @@ def fert_efficiency_cap(region: str):
     return None if x is None else max(x + OVERFERT_MARKUP, 1.0) - 1.0
 
 
-def _csv_dict(rel: str, col: str) -> Dict[str, float]:
-    """{key: value} of one column of a capri_data CSV (first column the key), NaN rows left out - CAPRI's tables the
-    supply model reads at import (project rule: inputs in CSV)."""
-    f = Path(__file__).resolve().parents[2] / "capri_data" / rel
-    s = read_input(f, index_col=0)[col].dropna()
-    return {str(k): float(v) for k, v in s.items()}
+def _csv_dict(name: str, where: str, col: str) -> Dict[str, float]:
+    """{key: value} of one column of an input CSV of the run (first column the key), NaN rows left out."""
+    def load(inp):
+        s = inp.csv(name, where, index_col=0)[col].dropna()
+        return {str(k): float(v) for k, v in s.items()}
+    return _inputs.current().cached(f"{where}/{name}:{col}", load)
+
+
+class _InputColumn:
+    """A class attribute holding one column of an input CSV of the run (_csv_dict), read when first used (it was read
+    at import from the fixed capri_data/2017 path until 30 October 2026)."""
+
+    def __init__(self, name: str, where: str, col: str):
+        self.name, self.where, self.col = name, where, col
+
+    def __get__(self, obj, owner=None) -> Dict[str, float]:
+        return _csv_dict(self.name, self.where, self.col)
 
 
 @dataclass
@@ -583,7 +584,6 @@ class RegionalSupplyModel(LivestockBlock, FertilisationBlock, AbatementBlock, Po
     #: IPOPT's tolerance for the regional NLP solves: run state, set by CAPRIModel.run every outer iteration from the
     #: setting outer_loop.nlp_tol_final
     nlp_tol = 1e-8
-    _CATC_OPT = None
 
 
     def __init__(self, region_data: RegionData, supply_elasticities: pd.Series,
@@ -683,12 +683,11 @@ class RegionalSupplyModel(LivestockBlock, FertilisationBlock, AbatementBlock, Po
     #: price index weighted by CAPRI's EU cake feed use (2017 FAO_agg BAS), at
     #: CAPRI's base world prices. Replaces the soybean-meal PROXY (0.89 x the
     #: soybean price). Values read from the data files on first use.
-    _CAKE_INDEX = None
 
 
     #: EU feed use per cereal, CAPRI 2030 reference (FEDM, kt): the weights of
     #: the feed-cereal price change (other cereals include rye and oats)
-    FEED_CEREAL_MIX = _csv_dict("2017/feed/feed_cereal_mix_2030.csv", "fedm_kt")
+    FEED_CEREAL_MIX = _InputColumn("feed_cereal_mix_2030.csv", "feed", "fedm_kt")
 
     def _compute_net_revenues(self, price_shock: Optional[pd.Series] = None):
         """
@@ -952,7 +951,7 @@ class RegionalSupplyModel(LivestockBlock, FertilisationBlock, AbatementBlock, Po
     #: Share of total input cost that is fertiliser (CAPRI FERT, EU-wide, all 27 member states' 2017 data;
     #: tools/build/build_crop_cost_shares.py): FALLBACK for the fertiliser cost per ha of a crop CAPRI does not grow
     #: in the region (the regional rows of plant_protection_cost.csv serve the others).
-    FERT_COST_SHARE = _csv_dict("2017/supply/crop_cost_shares.csv", "fert_cost_share")
+    FERT_COST_SHARE = _InputColumn("crop_cost_shares.csv", "supply", "fert_cost_share")
 
 
     #: kg N excreted per kg nitrate fed (CAPRI line_nitr.gms: +0.42% of DM intake at 1.5%)
@@ -962,7 +961,6 @@ class RegionalSupplyModel(LivestockBlock, FertilisationBlock, AbatementBlock, Po
     #: free land types of CAPRI's land market (artificial land held fixed)
     LAND_TYPES = ("ARAC", "GRAS", "FRUN", "FORE", "OLND")
 
-    _FERT_ALLOC_CACHE = {}
     #: CAPRI's fertiliser allocation (manure replaces mineral N). OFF by default:
     #: on its own it makes herd cuts LESS effective per head (each head cut
     #: relieves only the unavailable share of its manure), so the N target needs
@@ -2079,9 +2077,12 @@ class SupplyModule:
                 got = (got | extra) if ov.startswith("+") else extra
             self._jrc_capped_cache = got
         return got
-    def __init__(self, data: dict, supply_elasticities: Optional[pd.Series] = None):
-        """CAPRI's regional elasticity estimates, with provenance tracking."""
+    def __init__(self, data: dict, supply_elasticities: Optional[pd.Series] = None,
+                 inputs: Optional["_inputs.SupplyInputs"] = None):
+        """CAPRI's regional elasticity estimates, with provenance tracking. inputs: the run's data directory and base
+        year (capri_mod/supply/inputs.py; the repository's data and 2017 by default), made the supply code's inputs."""
         self.data = data
+        self.inputs = _inputs.use(inputs if inputs is not None else _inputs.SupplyInputs())
         self.regions = list(data["areas"].index)
 
         if supply_elasticities is None:
@@ -2101,10 +2102,9 @@ class SupplyModule:
         self.elasticity_provenance = pd.DataFrame()
         self.elasticity_summary: dict = {}
         try:
-            data_dir = data.get("_data_dir", "capri_data")
             eps_tab, prov, summary = build_elasticity_table(
-                Path(data_dir), self.regions, ALL_ACTIVITIES, self.supply_elasticities,
-                base_areas=data.get("areas"))
+                self.inputs.root, self.regions, ALL_ACTIVITIES, self.supply_elasticities,
+                base_areas=data.get("areas"), base_year=self.inputs.base_year, inputs=self.inputs)
             self.regional_elasticities = eps_tab
             self.elasticity_provenance = prov
             self.elasticity_summary = summary
@@ -2333,7 +2333,6 @@ class SupplyModule:
     #: CAPRI's exponent in othImpact.NMIN (envind/ghgMiti.gms, p_fertEffCor)
     FERT_EFF_COR = P_FERT_EFF_COR
 
-    _FERT_JUL15 = None
 
     def _fert_techs(self, region):
         """CAPRI's fertiliser-efficiency options for this region (cropMiti, target N2OSYN).
@@ -2357,16 +2356,12 @@ class SupplyModule:
         The slope of the options without farm-size curves carries CAPRI's fertiliser-saving term (ghgMiti.gms
         l. 1016-1035, fert_slope_with_saving): the NLP form's fertilisation block holds the convex saving
         (N(m) = N0 / (1 + nmE m)), which the term offsets so that the base and the maximum share stay stationary."""
-        cls = type(self)
-        if cls._FERT_JUL15 is None:
-            from pathlib import Path as _P
-            import json as _json
-            root = _P(__file__).resolve().parents[2] / "capri_data"
-            f = root / "2017" / "abatement" / "fert_options_jul15.csv"
-            tab = read_input(f) if f.exists() else pd.DataFrame()
+        def load(inp):
+            tab = inp.csv("fert_options_jul15.csv", "abatement", required=False)
+            tab = tab if tab is not None else pd.DataFrame()
             to8 = IdentityMap()        # the model's regions are CAPRI's units: each its own CAPRI region
-            cls._FERT_JUL15 = ({(r.region, str(r.option).upper()): r for r in tab.itertuples(index=False)}, to8)
-        tab, to8 = cls._FERT_JUL15
+            return ({(r.region, str(r.option).upper()): r for r in tab.itertuples(index=False)}, to8)
+        tab, to8 = _inputs.current().cached("fert_options_by_option", load)
         msc = capri_ms(region)
         r8 = to8.get(region)
         act_ = active_technologies()
@@ -3348,20 +3343,15 @@ def _merge_relief(model) -> dict:
     return out
 
 
-_FERT_SIDE_TAB = None
-_YIELD_ELAS = None
 
 
 def fert_side_value(region: str, tech: str, item: str):
     """CAPRI's literature-review side effect (p_litRevFertTechs) for a model region, or None
     (capri_data/2017/abatement/fert_side_effects.csv, tools/build/build_fert_side_effects.py)."""
-    global _FERT_SIDE_TAB
-    if _FERT_SIDE_TAB is None:
-        from pathlib import Path as _P
-        f = _P(__file__).resolve().parents[2] / "capri_data" / "2017" / "abatement" / "fert_side_effects.csv"
-        _FERT_SIDE_TAB = ({(r.region, r.technology, r.item): float(r.value) for r in read_input(f).itertuples()}
-                          if f.exists() else {})
-    return _FERT_SIDE_TAB.get((region, tech, item))
+    def load(inp):
+        tab = inp.csv("fert_side_effects.csv", "abatement", required=False)
+        return {(r.region, r.technology, r.item): float(r.value) for r in tab.itertuples()} if tab is not None else {}
+    return _inputs.current().cached("fert_side_effects", load).get((region, tech, item))
 
 
 # refactor stage 3a: the blocks' methods see this module's names (capri_mod/supply/blocks/__init__.py)

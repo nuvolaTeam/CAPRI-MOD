@@ -550,19 +550,17 @@ class FertilisationBlock:
     def _npk_applied_ratio(self, cr, nut):
         """CAPRI 2030: manure P/K applied in the region (net of net exports) per unit excreted (fertDistExcr_ /
         EXCRET), from the extract of tools/build/build_npk_balance_2030.py."""
-        c = type(self).__dict__.get("_NPK_APPL")
+        c = _inputs.current().cache.get("npk_applied_ratio")
         if c is None:
             import pandas as _pd
-            from pathlib import Path as _P
-            f = _P(__file__).resolve().parents[3] / "capri_data" / "sources" / "environment" / "npk_dataout_2030.csv.xz"
-            s = read_input(f, keep_default_na=False)
+            s = _inputs.current().csv("npk_dataout_2030.csv.xz", "sources/environment", keep_default_na=False)
             s = s[(s.item == "") & (s.row.isin(["EXCRET", "MTRADE"]))]
             v = {(t.region, t.row, t.col): float(t.value) for t in s.itertuples(index=False)}
             c = {}
             for (r, row, col), x in v.items():
                 if row == "EXCRET" and x > 0:
                     c[(r, {"PHOF": "P", "POTF": "K", "NITF": "N"}[col])] = max(0.0, 1.0 - v.get((r, "MTRADE", col), 0.0) / x)
-            type(self)._NPK_APPL = c
+            _inputs.current().cache["npk_applied_ratio"] = c
         # every unit of the model has CAPRI's regional value (K74, 29 October 2026: the national value and the 1.0
         # without a source, the fallbacks before, were reached by none)
         if (cr, nut) not in c:
@@ -734,17 +732,16 @@ class FertilisationBlock:
         if not getattr(self, "use_fert_allocation", False):
             return None, None
         reg = getattr(getattr(self, "data", None), "region_id", None)
-        c = RegionalSupplyModel._FERT_ALLOC_CACHE
+        c = _inputs.current().cache.setdefault("fert_alloc", {})
         if not c:
-            from pathlib import Path as _P
-            root = _P(__file__).resolve().parents[3] / "capri_data" / "2017"
+            inp = _inputs.current()
             try:
-                fs = read_input(root / "environment" / "fertiliser_substitution_2030.csv").set_index("region")
+                fs = inp.csv("fertiliser_substitution_2030.csv", "environment").set_index("region")
                 c["av"] = fs["manure_availability"].to_dict()
             except Exception:
                 c["av"] = {}
             try:
-                fp = read_input(root / "supply" / "mineral_n_price.csv").set_index("country")
+                fp = inp.csv("mineral_n_price.csv", "supply").set_index("country")
                 c["pf"] = (fp["eur_per_t_n"] / 1000.0).to_dict()
             except Exception:
                 c["pf"] = {}

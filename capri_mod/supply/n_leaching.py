@@ -46,16 +46,13 @@ _REG = {}
 
 def load(data_dir=None):
     """{CAPRI region: {leach_base, leach_ini, exp_imp}} (n_leaching_region.csv)."""
-    import csv
-    from pathlib import Path
-    d = Path(data_dir) if data_dir else Path(__file__).resolve().parents[2] / "capri_data"
-    key = str(d)
+    from capri_mod.supply.inputs import SupplyInputs, current
+    inp = SupplyInputs(data_dir, current().base_year) if data_dir else current()
+    key = str(inp.path("", "abatement/ammonia"))
     if key not in _REG:
         out = {}
-        f = d / "2017" / "abatement" / "ammonia" / "n_leaching_region.csv"
-        if f.exists():
-            for r in csv.DictReader(open(f)):
-                out[r["region"]] = {k: (float(v) if v not in ("", None) else None) for k, v in r.items() if k != "region"}
+        for r in inp.rows("n_leaching_region.csv", "abatement/ammonia", required=False) or []:
+            out[r["region"]] = {k: (float(v) if v not in ("", None) else None) for k, v in r.items() if k != "region"}
         _REG[key] = out
     return _REG[key]
 

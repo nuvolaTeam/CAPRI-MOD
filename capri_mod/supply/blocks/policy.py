@@ -23,15 +23,12 @@ class PolicyBlock:
         if not getattr(type(self), "cap_greening", False):
             return None
         import pandas as _pd
-        from pathlib import Path as _P
-        cache = type(self).__dict__.get("_CAPG")
-        if cache is None:
-            root = _P(__file__).resolve().parents[3] / "capri_data" / "2017" / "policy"
-            st = read_input(root / "cap_greening_2013_2020.csv")
-            fl = read_input(root / "cap_greening_fleg_ms.csv").set_index("ms")["fleg_share"].to_dict()
-            cache = ({(r.item, r.key): float(r.value) for r in st.itertuples(index=False)}, fl)
-            type(self)._CAPG = cache
-        st, fleg = cache
+
+        def load(inp):
+            st = inp.csv("cap_greening_2013_2020.csv", "policy")
+            fl = inp.csv("cap_greening_fleg_ms.csv", "policy").set_index("ms")["fleg_share"].to_dict()
+            return ({(r.item, r.key): float(r.value) for r in st.itertuples(index=False)}, fl)
+        st, fleg = _inputs.current().cached("cap_greening", load)
         acts = list(self.acts)
         xb = np.maximum(self._base_levels().reindex(acts).fillna(0.0).values.astype(float), 0.0)
         out = {}
@@ -200,11 +197,8 @@ class PolicyBlock:
     #: (capri_data/2017/supply/yield_price_elasticity.csv). It was 0.15 for every crop, a literature value.
     @staticmethod
     def yield_price_elasticity() -> Dict[str, float]:
-        global _YIELD_ELAS
-        if _YIELD_ELAS is None:
-            f = Path(__file__).resolve().parents[3] / "capri_data" / "2017" / "supply" / "yield_price_elasticity.csv"
-            _YIELD_ELAS = {r.crop: float(r.elasticity) for r in read_input(f).itertuples()}
-        return _YIELD_ELAS
+        return _inputs.current().cached("yield_price_elasticity", lambda inp: {
+            r.crop: float(r.elasticity) for r in inp.csv("yield_price_elasticity.csv", "supply").itertuples()})
 
     def apply_yield_price_response(self, price_shock: pd.Series) -> None:
         """Let yields respond to own-price changes, as CAPRI's stage one does.

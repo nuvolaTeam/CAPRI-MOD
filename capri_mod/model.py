@@ -165,7 +165,9 @@ class CAPRIModel:
         self.supply_elasticities = calibrate_supply_elasticities(self.data["areas"])
 
         # Initialise modules
-        self.supply_module = SupplyModule(self.data, self.supply_elasticities)
+        from capri_mod.supply.inputs import SupplyInputs
+        self.supply_module = SupplyModule(self.data, self.supply_elasticities,
+                                          inputs=SupplyInputs(self.data_dir, base_year))
         from capri_mod.market.inputs import MarketInputs
         self.market_module = MarketModule(self.data, inputs=MarketInputs(self.data_dir, base_year))
         self.policy_module = PolicyModule(self.data)
