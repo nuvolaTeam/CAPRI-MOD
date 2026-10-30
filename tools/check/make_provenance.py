@@ -42,7 +42,8 @@ SOURCE_ORIGIN = {
 #: CAPRI's folders under sources (every other folder): CAPRI's code, data (dat), CAPREG, COCO, CAPMOD results
 SOURCE_DEFAULT = "CAPRI"
 #: tables kept by hand, with a source per row, read as declared (KNOWN_ISSUES K101)
-DECLARED = {"capri_data/shared/capri_member_state_codes.csv", "capri_data/shared/model_parameters.csv"}
+DECLARED = {"capri_data/shared/capri_member_state_codes.csv", "capri_data/shared/model_parameters.csv",
+            "capri_data/schema/model_units.csv"}
 #: the origin of the external files the builders read: every one is CAPRI's (its exports, dumps, dat files and
 #: code), checked 29 October 2026 against the builders' docstrings
 EXTERNAL_ORIGIN = "CAPRI"
@@ -51,11 +52,6 @@ EXTERNAL_ORIGIN = "CAPRI"
 UNTRACED = {
     "capri_data/pipeline/captrd/sets/": ("build_captrd_sets", "CAPRI"),
     "capri_data/pipeline/captrd/dat/": ("build_captrd_dat", "CAPRI"),
-    "capri_data/schema/codes/": ("build_code_lists", "CAPRI"),
-    "capri_data/schema/model_units.csv": ("build_unit_catalogue", "CAPRI"),
-    "capri_data/shared/rms.csv": ("build_gl_demand", "CAPRI"),
-    "capri_data/shared/rms_to_rm.csv": ("build_gl_demand", "CAPRI"),
-    "capri_data/2017/abatement/ammonia/FracUseFert.csv": ("build_ammonia_tech_inputs", "CAPRI"),
     "capri_data/validation/eu_outlook_2020_2030.csv": ("build_eu_outlook_2030", "EC"),
     "capri_data/validation/n_cascade_capri_gd2030.csv": ("build_n_cascade_validation", "CAPRI"),
 }
