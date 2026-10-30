@@ -2,7 +2,7 @@
 
 EnvironmentalModule's methods, moved unchanged from capri_mod/environmental/environmental_module.py (refactor stage 4a,
 docs/design/ARCHITECTURE_REFACTOR.md); the module-level names they use are environmental_module's, given to this
-module once environmental_module is loaded (capri_mod.environmental.blocks.inject); the annotations are not evaluated.
+module once environmental_module is loaded (capri_mod.utils.mixins.inject_names); the annotations are not evaluated.
 """
 from __future__ import annotations
 

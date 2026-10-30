@@ -134,9 +134,12 @@ class EnvironmentalIndicators:
 # ENVIRONMENTAL MODULE
 # ---------------------------------------------------------------------------
 
-from capri_mod.environmental.blocks import (  # noqa: E402  (refactor stage 4a: the blocks)
-    GHGBlock, NitrogenBlock, AmmoniaBlock, PhosphorusBlock, BiodiversityBlock,
-)
+# refactor stage 4a: the module's methods in mixin modules of this package
+from capri_mod.environmental.ghg import GHGBlock  # noqa: E402
+from capri_mod.environmental.nitrogen import NitrogenBlock  # noqa: E402
+from capri_mod.environmental.ammonia import AmmoniaBlock  # noqa: E402
+from capri_mod.environmental.phosphorus import PhosphorusBlock  # noqa: E402
+from capri_mod.environmental.biodiversity import BiodiversityBlock  # noqa: E402
 
 
 class EnvironmentalModule(GHGBlock, NitrogenBlock, AmmoniaBlock, PhosphorusBlock, BiodiversityBlock):
@@ -669,6 +672,7 @@ class EnvironmentalModule(GHGBlock, NitrogenBlock, AmmoniaBlock, PhosphorusBlock
         return df
 
 
-# refactor stage 4a: the blocks' methods see this module's names (capri_mod/environmental/blocks/__init__.py)
-from capri_mod.environmental import blocks as _blocks  # noqa: E402
-_blocks.inject(globals())
+# refactor stage 4a: the mixin modules' methods see this module's names (capri_mod/utils/mixins.py)
+from capri_mod.utils.mixins import inject_names as _inject_names  # noqa: E402
+_inject_names(globals(), ["capri_mod.environmental." + _m for _m in ("ghg", "nitrogen", "ammonia", "phosphorus",
+                                                                     "biodiversity")])

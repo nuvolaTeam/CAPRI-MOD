@@ -59,7 +59,7 @@ code used as a classifier (`startswith("NO")` meaning "outside the EU") is not.
 
 ### Also reported by the scan, not yet checked
 
-- supply/blocks/land.py `LTall` fixes the column order expected of the land-market matrix.
+- supply/land.py `LTall` fixes the column order expected of the land-market matrix.
 - definitions.py's FEED_ITEMS, GHG_TYPES, NUTRIENTS and LAND_TYPES may be read by no code.
 
 ## Done

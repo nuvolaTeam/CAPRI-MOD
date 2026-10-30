@@ -479,9 +479,13 @@ class PMPCalibrator:
 # REGIONAL NLP MODEL
 # ---------------------------------------------------------------------------
 
-from capri_mod.supply.blocks import (  # noqa: E402  (refactor stage 3a: the blocks)
-    LivestockBlock, FertilisationBlock, AbatementBlock, PolicyBlock, LandBlock, NLPBlock,
-)
+# refactor stage 3a: the regional model's methods in mixin modules of this package
+from capri_mod.supply.livestock import LivestockBlock  # noqa: E402
+from capri_mod.supply.fertilisation import FertilisationBlock  # noqa: E402
+from capri_mod.supply.abatement import AbatementBlock  # noqa: E402
+from capri_mod.supply.policy import PolicyBlock  # noqa: E402
+from capri_mod.supply.land import LandBlock  # noqa: E402
+from capri_mod.supply.nlp import NLPBlock  # noqa: E402
 
 
 class RegionalSupplyModel(LivestockBlock, FertilisationBlock, AbatementBlock, PolicyBlock, LandBlock, NLPBlock):
@@ -3342,6 +3346,7 @@ def fert_side_value(region: str, tech: str, item: str):
     return _inputs.current().cached("fert_side_effects", load).get((region, tech, item))
 
 
-# refactor stage 3a: the blocks' methods see this module's names (capri_mod/supply/blocks/__init__.py)
-from capri_mod.supply import blocks as _blocks  # noqa: E402
-_blocks.inject(globals())
+# refactor stage 3a: the mixin modules' methods see this module's names (capri_mod/utils/mixins.py)
+from capri_mod.utils.mixins import inject_names as _inject_names  # noqa: E402
+_inject_names(globals(), ["capri_mod.supply." + _m for _m in ("livestock", "fertilisation", "abatement", "policy",
+                                                              "land", "nlp")])

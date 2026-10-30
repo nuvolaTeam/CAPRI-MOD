@@ -2,7 +2,7 @@
 
 RegionalSupplyModel's methods, moved unchanged from capri_mod/supply/supply_module.py (refactor stage 3a,
 docs/design/ARCHITECTURE_REFACTOR.md); the module-level names they use are supply_module's, given to
-this module once supply_module is loaded (capri_mod.supply.blocks.inject); the annotations are not evaluated
+this module once supply_module is loaded (capri_mod.utils.mixins.inject_names); the annotations are not evaluated
 (they name supply_module's types).
 """
 from __future__ import annotations

@@ -9,6 +9,11 @@ names, which the module gives them once it is loaded (blocks/__init__.py, inject
 
 Run once per configuration. The check of the move is a run identical to the reference
 (tools/check/compare_pickles_exact.py) and the test suite.
+
+History: on 30 October 2026 the blocks sub-packages this tool wrote (capri_mod/supply/blocks,
+capri_mod/environmental/blocks) were moved up into their packages, as the market's modules are, and their inject
+became capri_mod/utils/mixins.py (the project lead's preference). The tool is kept as the record of the split;
+it is not to be run again.
 """
 from __future__ import annotations
 
