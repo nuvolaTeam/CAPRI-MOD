@@ -172,6 +172,42 @@ class BridgeBlock:
 
         return market_supply
 
+    def _excluded_base_supply(self, run_regions):
+        """KNOWN_ISSUES K83: the base output of the EU's regional units not in a run on a subset of them, per country
+        and market commodity (kt), through the same bridge as the supply models' output; None when the run has every
+        EU unit. A unit's base gross output from the run's data as the regional model computes it at its base levels
+        (crops: area x yield; animals: herd x CAPRI's output per head, livestock_output_coef). CAPRI switches whole
+        countries off and keeps them in the market with their market supply functions (ProdNQ_; a country off leaves
+        RMSSUP, capmod/create_sim_ini_gdx.gms l. 73); a subset here can cut through a member state, so the part outside
+        the run is its units' own output (the model's departure, KNOWN_ISSUES K83)."""
+        from types import SimpleNamespace
+        d = self.data
+        areas = d.get("areas")
+        run = set(run_regions or [])
+        units = [r for r in areas.index if _is_eu(r) and r not in run] if areas is not None else []
+        if not units:
+            return None
+        yld, an, oc = d.get("yields"), d.get("animal_numbers"), d.get("livestock_output_coef")
+        res = {}
+        for r in units:
+            go = {}
+            for c in areas.columns:
+                y = float(yld.at[r, c]) if (yld is not None and c in yld.columns and pd.notna(yld.at[r, c])) else 0.0
+                go[c] = float(areas.at[r, c]) * y
+            if an is not None and oc is not None and r in oc.index:
+                for a in an.columns:
+                    if a in oc.columns and pd.notna(oc.at[r, a]):
+                        go[a] = float(an.at[r, a]) * float(oc.at[r, a])
+            res[r] = SimpleNamespace(gross_output=pd.Series(go, dtype=float))
+        agg = self.supply_module.aggregate_supply(res, by_country=True)
+        saved = getattr(self, "_ls_by_country", None)
+        try:
+            self._ls_by_country = self._livestock_products_by_country(res)
+            out = self._bridge_supply_to_market(agg)
+        finally:
+            self._ls_by_country = saved
+        return out
+
     def _dairy_yield(self, region: str, product: str) -> float:
         """A dairy product's output less processing per tonne of raw milk (cow + sheep and goat) in the
         region's member state, CAPRI 2030 reference (dairy_processing.csv; Norway: dairy_world_processing.csv, per

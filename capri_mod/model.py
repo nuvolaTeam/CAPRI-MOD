@@ -571,6 +571,10 @@ class CAPRIModel(HessianBlock, FeedBlock, YoungAnimalBlock, PriceStepBlock, Manu
                 # CAPRI's price forecast and stop rule start afresh every run (outer_loop.price_update, stop_rule)
                 self._capri_yani_hist = {}
                 self._capri_stop = None
+                # the EU's units outside a run on a subset (K83): their base output, supplied in the market through
+                # the member states' CAPRI market supply functions; None with every EU unit in the run
+                self.market_module.seen.eu_excluded_base = self._excluded_base_supply(
+                    regions or list(self.data["areas"].index))
             if self.verbose:
                 print(f"  Outer iteration {outer_iter + 1}/{max_outer_iter}")
             _RSMt.nlp_tol = _tol_tight

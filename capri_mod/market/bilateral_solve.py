@@ -159,6 +159,8 @@ class BilateralSolveMixin(MarketStateMixin):
         self._crush_cache = None
         self.par.demand_cal = pd.Series(1.0, index=self.commodities)
         exo_eu, exo_sup = self._split_supply(exogenous_supply)
+        # the EU's base supply with the base output of its units outside a run on a subset (K83)
+        exo_eu = self._with_eu_excluded(exo_eu)
         base_supply = self._align_eu_base_balance(exo_eu.sum(axis=0), exo_eu) \
             if exogenous_supply is not None else None
         self._align_sup_base(exo_sup)

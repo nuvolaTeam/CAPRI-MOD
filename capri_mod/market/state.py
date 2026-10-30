@@ -135,6 +135,10 @@ class MarketSeen:
     feed_bulk_index: Any = None
     #: the supply models' feed bulks at base, kt per (member state, bulk) (the market's bulk demand, audit M4)
     feed_bulk_base: Any = None
+    #: the EU's supply outside a run on a subset of regional units (KNOWN_ISSUES K83): the base output of the EU units
+    #: not in the run, per country (the rows of the supply models' table) and market commodity, kt; None in a run on
+    #: every unit. The market adds it to the EU's supply, moved by the member states' CAPRI market supply functions
+    eu_excluded_base: Any = None
     #: calves' milk feed relative to base, EU (None: 1) and per non-EU region with supply models
     fmil_index: Any = None
     fmil_index_sup: Any = None
