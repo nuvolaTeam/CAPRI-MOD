@@ -1,3 +1,10 @@
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/assets/capri-mod-logo-white.png">
+    <img src="docs/assets/capri-mod-logo.png" alt="CAPRI-mod logo" width="480">
+  </picture>
+</p>
+
 # CAPRI-mod
 
 **An AI-assisted, validated Python reimplementation of the economic logic of the
