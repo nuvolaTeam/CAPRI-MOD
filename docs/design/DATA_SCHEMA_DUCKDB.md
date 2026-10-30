@@ -47,9 +47,9 @@ Beyond CAPRI (for the project lead to note): range checks, and enforcement at lo
 
 ## Layout
 
-- `capri_data/schema/codes/*.csv`: code lists built from CAPRI's `sets.gms` by one builder (regional units, activities,
+- `capri_data/codes/*.csv`: code lists built from CAPRI's `sets.gms` by one builder (regional units, activities,
   data-cube rows, market products, with CAPRI's descriptions); `definitions.py` then reads them instead of holding lists.
-- `capri_data/schema/units.csv`: the unit catalogue from `CAPRIunits.gms` (code, description); a unit CAPRI does not
+- `capri_data/codes/units.csv`: the unit catalogue from `CAPRIunits.gms` (code, description); a unit CAPRI does not
   have is added with a flag saying so.
 - `capri_data/schema/<folder>/<table>.sql`: one `CREATE TABLE` per CSV with column types, `NOT NULL`, `PRIMARY KEY`,
   `REFERENCES` to the code lists, `CHECK` ranges; `COMMENT ON COLUMN` holds the unit code, `COMMENT ON TABLE` the source,

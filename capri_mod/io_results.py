@@ -38,6 +38,7 @@ from pathlib import Path
 from typing import Optional
 
 import pandas as pd
+from capri_mod.data.definitions import is_eu
 
 DEFAULT_OUTPUT_ROOT = "outputs"
 
@@ -144,8 +145,8 @@ def flatten_outputs(results: dict) -> dict:
     if env is not None and hasattr(env, "columns") and len(env):
         # EU totals of the environmental accounts (regions outside the EU, Norway's "NO..", left out) and Norway's
         # totals apart (env_NO_*)
-        eu = [r for r in env.index if not str(r).startswith("NO")]
-        no = [r for r in env.index if str(r).startswith("NO")]
+        eu = [r for r in env.index if is_eu(str(r))]
+        no = [r for r in env.index if not is_eu(str(r))]
         for c in ("ghg_total", "ghg_non_co2", "ghg_enteric", "ghg_manure_ch4", "ghg_manure_n2o", "ghg_soil_n2o",
                   "ghg_leaching_n2o", "nh3_total", "n_surplus", "n_mineral_input", "n_organic_input",
                   "p_input", "p_uptake", "p_surplus", "p_mineral_input", "p_manure_excretion", "p_manure_net_export",

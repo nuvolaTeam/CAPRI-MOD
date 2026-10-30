@@ -4,9 +4,10 @@ aggregation file (KNOWN_ISSUES K101).
     capri_data/shared/eu_market_blocks.csv   ms, block, source
 
 Rows: section 4 of gams/aggregation/defaultA.agg (one line per old region: code, name & new region & flag), the
-member states mapped to EU_WEST or EU_EAST, in the file's order. Norway is added to EU_WEST: capri-mod's routing of its
-supply models into the one-region EU market (CAPRI: its own market region NO000000; registered in
-docs/DEPARTURES_FROM_CAPRI.md), not CAPRI's. Until 29 October 2026 the file had no builder.
+member states mapped to EU_WEST or EU_EAST, in the file's order: CAPRI's rows only. Until 30 October 2026 Norway was
+added to EU_WEST, capri-mod's former routing of its supply models into the EU market; Norway has been its own market
+region NOR since KNOWN_ISSUES K56, as in CAPRI (NO000000), and the row is gone. Until 29 October 2026 the file had no
+builder.
 
     python tools/build/build_eu_market_blocks.py [--agg FILE]
 """
@@ -22,9 +23,6 @@ AGG = Path("/home/claude/work/allgms/gams/aggregation/defaultA.agg")
 OUT = ROOT / "capri_data" / "shared" / "eu_market_blocks.csv"
 BLOCKS = ("EU_WEST", "EU_EAST")
 SOURCE = "gams/aggregation/defaultA.agg"
-#: capri-mod's own row (not CAPRI's): Norway's supply models feed the EU market (registered)
-NORWAY = ("NO000000", "EU_WEST", "capri-mod: Norway has supply models and feeds the EU market, as in the one-region EU "
-                                 "(CAPRI: own market region NO000000; registered)")
 
 
 def section4(path: Path) -> list[tuple[str, str]]:
@@ -50,12 +48,11 @@ def main() -> None:
     rows = [(r, b, SOURCE) for r, b in section4(a.agg) if b in BLOCKS]
     if not rows:
         raise SystemExit(f"no member state mapped to {BLOCKS} in {a.agg}")
-    rows.append(NORWAY)
     with open(OUT, "w", newline="") as f:
         w = csv.writer(f, lineterminator="\n")
         w.writerow(["ms", "block", "source"])
         w.writerows(rows)
-    print(f"{OUT.name}: {len(rows) - 1} member states from {a.agg.name}, plus Norway (capri-mod)")
+    print(f"{OUT.name}: {len(rows)} member states from {a.agg.name}")
 
 
 if __name__ == "__main__":

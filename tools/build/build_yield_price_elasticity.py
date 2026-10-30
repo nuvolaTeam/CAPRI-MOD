@@ -6,7 +6,7 @@
 CAPRI sets p_yieldElas(MS, CERE) = 0.3, (MS, OILS) = 0.2, (MS, "POTA") = 0.2 for every member state (yield_elas.gms),
 CERE and OILS the Grandes Cultures sets of global/fromimpact/sets.gms (CERE_COLS, OILS_COLS). This builder reads the
 assignments p_yieldElas(MS, <set or "activity">) = <value> and expands the sets in their listed order; CAPRI's
-activities named as the model's crops by capri_data/schema/codes/model_activities.csv (MAIZ is CORN). Until 29 October
+activities named as the model's crops by capri_data/codes/model_activities.csv (MAIZ is CORN). Until 29 October
 2026 the file had no builder (the same values, written by hand).
 
     python tools/build/build_yield_price_elasticity.py [--gams DIR]
@@ -38,7 +38,7 @@ def main() -> None:
     sets = (a.gams / "global" / "fromimpact" / "sets.gms").read_text(errors="ignore")
     groups = {"CERE": set_members(sets, "CERE_COLS"), "OILS": set_members(sets, "OILS_COLS")}
     src = (a.gams / "supply" / "yield_elas.gms").read_text(errors="ignore")
-    with open(ROOT / "capri_data" / "schema" / "codes" / "model_activities.csv", newline="") as f:
+    with open(ROOT / "capri_data" / "codes" / "model_activities.csv", newline="") as f:
         to_model = {r["capri_codes"]: r["code"] for r in csv.DictReader(f) if r["kind"] == "crop"}
     rows = []
     for m in re.finditer(r"^\s*p_yieldElas\(\s*MS\s*,\s*(\"?)(\w+)\1\s*\)\s*=\s*([\d.Ee+-]+)\s*;", src, re.M):

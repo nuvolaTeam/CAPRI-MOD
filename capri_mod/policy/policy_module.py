@@ -32,6 +32,7 @@ import pandas as pd
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Tuple
 from enum import Enum
+from capri_mod.data.definitions import is_eu
 
 
 # ---------------------------------------------------------------------------
@@ -373,7 +374,7 @@ class PolicyModule:
         """Policy scenario summary: payments by region and scheme, member-state budgets against CAPRI's 2030 ones."""
         regional = self.get_payment_rates_by_region()
         national = self.payments.compute_national_budgets(regional)
-        eu = [r for r in regional.index if not str(r).startswith("NO")]
+        eu = [r for r in regional.index if is_eu(str(r))]
         uaa = float(regional.loc[eu, "UAA_1000ha"].sum())
         return {
             "scenario_name": self.scenario.name,

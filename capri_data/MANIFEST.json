@@ -1910,14 +1910,14 @@
    "domain": "market",
    "status": "live",
    "shape": {
-    "rows": 27,
+    "rows": 26,
     "cols": 2,
     "columns": [
      "block",
      "source"
     ]
    },
-   "note": "member state -> EU trade block; Norway's row is capri-mod's routing of its supply models (registered)",
+   "note": "member state -> EU trade block (CAPRI's rows only since 30 October 2026; Norway is its own market region NOR)",
    "path": "shared/eu_market_blocks.csv"
   },
   "processing_nq_hessian.csv": {

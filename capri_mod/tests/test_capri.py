@@ -2198,8 +2198,8 @@ def test_fitness_for_use_is_consistent_with_the_model():
     # every region named in a scope must be a real NUTS-2 region or a real
     # trade region -- the model has both, and they are different sets
     areas = pd.read_csv(root / "capri_data/2017/supply/base_areas.csv", index_col=0)
-    from capri_mod.data.definitions import TRADE_REGIONS
-    known = set(areas.index) | set(TRADE_REGIONS)
+    from capri_mod.data.definitions import ALL_TRADE_REGIONS
+    known = set(areas.index) | set(ALL_TRADE_REGIONS)
     for key, e in entries.items():
         for token in str(e.get("scope", "")).replace(",", " ").split():
             if (len(token) == 4 and token.isupper()

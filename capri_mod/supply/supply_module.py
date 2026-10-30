@@ -41,7 +41,7 @@ from capri_mod.settings import setting, tri_state, current as _settings
 from capri_mod.data.definitions import (
     CROPS, ANIMALS, ALL_ACTIVITIES, FEED_ITEMS, NUTRIENTS,
 )
-from capri_mod.data.definitions import MS_CODE, capri_ms, IdentityMap
+from capri_mod.data.definitions import MS_CODE, capri_ms, IdentityMap, SUP_NONEU, is_eu
 from capri_mod.tableio import read_input
 from capri_mod.supply import inputs as _inputs
 
@@ -2669,7 +2669,7 @@ class SupplyModule:
         return spec
 
     #: supply regions outside the EU, where EU policy instruments do not apply
-    NON_EU_PREFIXES = frozenset({"NO"})
+    NON_EU_PREFIXES = frozenset(c for c, _tr in SUP_NONEU.values())
     EU_POLICY_KEYS = frozenset({"set_aside_requirement", "nutrient_surplus_target", "surplus_rule", "surplus_cut",
                                 "mineral_redu",
                                 "pesticide_reduction",
@@ -3001,7 +3001,7 @@ class SupplyModule:
             model.feed_bulk_ratio = {b: x for (m, b), x in (getattr(self, "feed_bulk_ratio", None) or {}).items()
                                      if m == _ms}
             # CAPRI's emission tax (ghgTax): EU regions only (msNoEU excluded), CAPRIModel sets it
-            model.ghg_tax = float(getattr(self, "ghg_tax", 0.0) or 0.0) if not region.startswith("NO") else 0.0
+            model.ghg_tax = float(getattr(self, "ghg_tax", 0.0) or 0.0) if is_eu(region) else 0.0
             model.ghg_coef = (getattr(self, "ghg_coef", None) or {}).get(region)
             # the regional model needs the environmental module for the
             # balance's substitution factor (manure market, crop-need

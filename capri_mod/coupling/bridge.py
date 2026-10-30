@@ -196,7 +196,7 @@ class BridgeBlock:
             fw = resolve_data_file(base, "dairy_world_processing.csv")
             if fw.exists():
                 wp_ = read_input(fw)
-                for ms in ("NO000000",):
+                for ms in SUP_NONEU:                       # the supply-model countries outside the EU
                     g = wp_[wp_["rms"] == ms].set_index("item")
                     if "MILK" in g.index and float(g.at["MILK", "q_kt"]) > 0:
                         for k in ("BUTT", "SMIP", "CHES", "WHEP", "FRMI", "CREM", "COCM", "WMIO", "CASE"):
@@ -232,8 +232,7 @@ class BridgeBlock:
             sp = self.data.get("sugar_processing")
             tab = {}
             if sp is not None and len(sp):
-                eu = sp[~sp.index.isin(["UK000000", "AL000000", "BA000000", "CS000000", "MK000000", "ME000000",
-                                        "KO000000", "TUR", "NO000000", "CH000000"])]
+                eu = sp[sp.index.isin(list(EU_MS_BLOCK))]                # CAPRI's EU member states
                 tab = {ms: float(r["sugar_per_beet"]) for ms, r in sp.iterrows()}
                 tab["_EU"] = float(eu["sugar_mapr_kt"].sum() / eu["beet_grof_kt"].sum())
             self._sugar_rate_cache = tab

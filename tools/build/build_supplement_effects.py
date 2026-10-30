@@ -90,7 +90,7 @@ def nop_rows(mr, to_c8, L, rations):
     _sys.path.insert(0, str(ROOT / "tools" / "build"))
     import _capri_digest as G
     from build_ammonia_technologies import graz_share
-    codes = ROOT / "capri_data" / "schema" / "codes" / "capri"
+    codes = ROOT / "capri_data" / "codes" / "capri"
     f2o = [(r["feed"], r["row"]) for r in _csv.DictReader(open(codes / "FEED_TO_O.csv"))]
     ms_ru = defaultdict(list)
     for r in _csv.DictReader(open(codes / "MS_RU.csv")):

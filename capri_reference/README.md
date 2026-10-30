@@ -3,7 +3,7 @@
 These are CAPRI files from the project lead's installation, converted to CSV. They are read-only and are read only by
 the tests and the parity runs, never by the model (docs/design/CAPTRD_MOD.md section 6). One folder is a source of
 the data pipeline: `sets/simini_21730`, read by `tools/build/build_code_lists.py` (the code lists of
-`capri_data/schema/codes`, 29 October 2026). They are
+`capri_data/codes`, 29 October 2026). They are
 large, so they are left out of the zip packages. Each folder is rebuilt from the uploaded originals by the tool
 named below.
 

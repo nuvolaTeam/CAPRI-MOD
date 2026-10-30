@@ -11,7 +11,7 @@ COMMENT ON TABLE misc_fracusefert IS 'CAPRI''s FracUseFert(region, fertiliser): 
 INSERT INTO value_units VALUES
   ('misc_fracusefert', 'value', NULL, 'open', 'FracUseFert.value: unit to be established');
 
--- file: capri_data/schema/model_units.csv
+-- file: capri_data/codes/model_units.csv
 CREATE TABLE misc_model_units (
     code VARCHAR NOT NULL,
     description VARCHAR NOT NULL,

@@ -30,6 +30,7 @@ from capri_mod.data.definitions import (
     MARKET_COMMODITIES, ALL_TRADE_REGIONS,
 )
 from capri_mod.data.definitions import MS_CODE
+from capri_mod.data import definitions as _defs
 
 
 from capri_mod.market.equilibrium import MarketEquilibrium  # noqa: F401  (re-exported)
@@ -72,16 +73,18 @@ class MarketModule(NewtonKrylovMixin, CalibrationMixin, BiofuelMixin, DairyMixin
     #: each with its own market and Armington prices and bilateral trade between them, the member states inside
     #: (capri_data/shared/eu_market_blocks.csv). Read when the module is built (data["eu_market_blocks"] overrides).
     eu_blocks = setting("market.eu_blocks", run_state=True)
-    EU_BLOCK_REGIONS = ("EU_WEST", "EU_EAST")
+    #: CAPRI's EU trade blocks (capri_data/shared/eu_market_blocks.csv; definitions.EU_BLOCKS)
+    EU_BLOCK_REGIONS = _defs.EU_BLOCKS
     #: market regions outside the EU whose market supply is their supply models' output (CAPRI's RMSSUP outside the
-    #: EU: Norway, NO000000, its own market region in aggregation/defaultA.agg; KNOWN_ISSUES K56). Like the EU's,
-    #: their supply is fixed within one market solve, anticipated against the prices their models last saw, and
-    #: the base calibration takes it at the model's own levels; their models see their own market's prices.
-    SUP_NONEU_REGIONS = ("NOR",)
+    #: EU; KNOWN_ISSUES K56): the countries of the regional units outside the EU blocks, in their CAPRI market region
+    #: (definitions.SUP_NONEU: Norway, NO000000, market region NOR). Like the EU's, their supply is fixed within one
+    #: market solve, anticipated against the prices their models last saw, and the base calibration takes it at the
+    #: model's own levels; their models see their own market's prices.
+    SUP_NONEU_REGIONS = tuple(dict.fromkeys(tr for _c, tr in _defs.SUP_NONEU.values()))
     #: supply-model country (NUTS-0 of the supply models) -> its non-EU market region
-    SUP_NONEU_COUNTRY = {"NO": "NOR"}
+    SUP_NONEU_COUNTRY = {c: tr for c, tr in _defs.SUP_NONEU.values()}
     #: non-EU market region -> CAPRI code of its supply models' country (member-state keyed tables)
-    SUP_NONEU_MS = {"NOR": "NO000000"}
+    SUP_NONEU_MS = {tr: ms for ms, (_c, tr) in _defs.SUP_NONEU.items()}
 
     def __init__(self, data: dict, inputs: Optional["MarketInputs"] = None):
         self.data       = data
