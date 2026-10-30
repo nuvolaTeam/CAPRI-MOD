@@ -675,6 +675,34 @@ data preparation is ported.
   estimation (estimate_nuts2.gms l. 33-41), which include LOSF, GRPC and LU, not in the statement's own list; that
   estimation bounds LOSF from GROF and uses its observations in the balances. On Ireland the fix deletes the NUTS 2
   years of UVAG, EAAG, SEDF, INHA and QUTS (69 series).
+- **The statistics of all 35 countries against CAPTRD's own (30 October 2026; CAPRI's settings, the parity switches
+  true; prepare_run on CAPREG's series, results_1770's data.csv.gz).** Among the series CAPTRD estimates with
+  observations:
+
+  | Statistic | Series compared | Equal (rel. 1e-6) |
+  |---|---|---|
+  | nW | 102,632 | 99.994% |
+  | WAve | 102,632 | 99.954% |
+  | wVar | 99,113 | 99.953% |
+  | BAS | 142,615 | 99.9993% |
+  | BASM | 142,850 | 98.7% (against BASM.csv.gz, 2030) |
+
+  - **The remaining WAve and wVar differences are VSET, UAAR and LU of the EU-15 countries.** Their cause is the
+    input:
+    - CAPTRD's p_data holds a different VSET LEVL in 1989-2005 (186 of 408 country-years; ratio median 1.003, up to
+      1.74). From 2006 the two agree.
+    - UAAR is the sum of the crop areas (prep_data_for_estimation.gms l. 86): Germany's WAve gap in UAAR (4.28)
+      equals its gap in VSET. LU is livestock units over UAAR (l. 202-203).
+    - CAPTRD's value (e.g. Germany 1992: 842.8 against CAPREG's 818.37) is in none of CAPREG's records for that
+      country and year, and no CAPTRD statement assigns VSET LEVL. So the run behind results_1770 most likely read a
+      different vintage of CAPREG's set-aside series. That is not proven.
+  - **nObs.** 2.7% differ, and CAPTRD has about 60,000 counts we do not.
+    - Where both have a count, CAPTRD stores 1 and we store the number of years. These are the requirement rows
+      (CRPR, ENNE, FICT) and the young animals' rows.
+    - Where only CAPTRD has one, it is mostly the animals' feed rows. Those have 212 BAS values only in CAPTRD too.
+    - These are set by the later steps (define_stats_and_supports.gms l. 321, 350; fix_est.gms l. 535-538;
+      prep_requirement_estimation.gms), which are not ported yet. That is to be confirmed as they are ported.
+  - **BSY cannot be compared:** CAPTRD does not store it.
 - **CAPTRD stores the quotas and set-aside rates whatever their observations.** define_stats_and_supports.gms
   l. 138-150 writes p_data into its result position only for the series with observations (nObs), but the quotas
   and SETR in every year: a parity check filtered by nObs misses them (it did on 29 October 2026, until corrected).
