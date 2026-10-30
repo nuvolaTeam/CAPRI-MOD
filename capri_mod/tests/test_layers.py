@@ -1,5 +1,6 @@
-"""The supply package's layer rules (docs/design/ARCHITECTURE_REFACTOR.md, stage 3b): only its data adapter
-(capri_mod/supply/inputs.py) reads files, and the inputs follow the run's data directory and base year."""
+"""The layer rules of the supply, environment, fertiliser and water packages (docs/design/ARCHITECTURE_REFACTOR.md,
+stages 3b and 4b): only the run's data adapter (capri_mod/data/inputs.py; the supply package's name for it,
+capri_mod/supply/inputs.py) reads files, and the inputs follow the run's data directory and base year."""
 import io
 import tokenize
 from pathlib import Path
@@ -10,9 +11,14 @@ SUPPLY = Path(__file__).resolve().parents[1] / "supply"
 WRITES = ("CAPRI_NLP_DUMP", "_fn, \"ab\"")
 
 
+#: the packages that read their inputs through the run's data adapter (capri_mod/data/inputs.py): supply (stage 3b),
+#: environment, fertiliser distribution and water (stage 4b)
+PACKAGES = [SUPPLY] + [SUPPLY.parent / d for d in ("environmental", "fert", "water")]
+
+
 def test_only_the_data_adapter_reads_files():
     offenders = []
-    for p in sorted(SUPPLY.rglob("*.py")):
+    for p in sorted(q for d in PACKAGES for q in d.rglob("*.py")):
         if p.name == "inputs.py":
             continue
         toks = [t for t in tokenize.generate_tokens(io.StringIO(p.read_text()).readline)
@@ -22,7 +28,7 @@ def test_only_the_data_adapter_reads_files():
                     and b.string == "(") or (a.string == "json" and b.string == ".") or a.string == "__file__":
                 if any(w in a.line for w in WRITES):
                     continue
-                offenders.append(f"{p.relative_to(SUPPLY)}:{a.start[0]}: {a.line.strip()[:100]}")
+                offenders.append(f"{p.relative_to(SUPPLY.parent)}:{a.start[0]}: {a.line.strip()[:100]}")
     assert offenders == [], offenders
 
 

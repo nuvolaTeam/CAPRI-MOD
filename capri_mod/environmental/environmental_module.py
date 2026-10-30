@@ -31,6 +31,7 @@ from capri_mod.data.definitions import (
 )
 from capri_mod.data.definitions import MS_CODE, capri_ms, IdentityMap
 from capri_mod.tableio import read_input
+from capri_mod.data import inputs as _inputs
 
 
 # ---------------------------------------------------------------------------

@@ -21,9 +21,7 @@ class PhosphorusBlock:
         fertilisation block's ManureNPK_ for P, SupplyModel._npk_applied_ratio; npk_dataout_2030.csv.xz)."""
         c = getattr(type(self), "_P_APPL", None)
         if c is None:
-            from pathlib import Path as _P
-            f = _P(__file__).resolve().parents[3] / "capri_data" / "sources" / "environment" / "npk_dataout_2030.csv.xz"
-            s = read_input(f, keep_default_na=False)
+            s = _inputs.current().csv("npk_dataout_2030.csv.xz", "sources/environment", keep_default_na=False)
             s = s[(s.item == "") & (s.col == "PHOF") & (s.row.isin(["EXCRET", "MTRADE"]))]
             v = {(t.region, t.row): float(t.value) for t in s.itertuples(index=False)}
             c = {r: max(0.0, 1.0 - v.get((r, "MTRADE"), 0.0) / x) for (r, row), x in v.items() if row == "EXCRET" and x > 0}

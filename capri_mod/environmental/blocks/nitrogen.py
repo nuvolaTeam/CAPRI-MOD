@@ -54,9 +54,8 @@ class NitrogenBlock:
         region is not separate in CAPRI), from capri_gnb_components_2030.csv, or {}."""
         g = getattr(type(self), "_GNB_TOT", None)
         if g is None:
-            from pathlib import Path as _P
-            f = _P(__file__).resolve().parents[3] / "capri_data" / "2017" / "environment" / "capri_gnb_components_2030.csv"
-            g = read_input(f).pivot_table(index="capri_region", columns="item", values="kg_n_per_ha") if f.exists() else pd.DataFrame()
+            g_ = _inputs.current().csv("capri_gnb_components_2030.csv", "environment", required=False)
+            g = g_.pivot_table(index="capri_region", columns="item", values="kg_n_per_ha") if g_ is not None else pd.DataFrame()
             type(self)._GNB_TOT = g
         self._capri_crop_n(region)                         # builds the region map
         r8 = getattr(type(self), "_CROP_N_MAP", {}).get(region)
@@ -124,15 +123,13 @@ class NitrogenBlock:
         reference, each item scaled so the region's totals equal CAPRI's EXPPRD and CRESID."""
         cls = type(self)
         if cls._CROP_N is None:
-            import json as _json
-            from pathlib import Path as _P
-            root = _P(__file__).resolve().parents[3] / "capri_data"
-            f = root / "2017" / "environment" / "capri_crop_n_coefs_2030.csv"
-            g = root / "2017" / "environment" / "capri_gnb_components_2030.csv"
+            inp = _inputs.current()
             cls._CROP_N = {}
-            if f.exists() and g.exists():
-                t = read_input(f)
-                tot = read_input(g).pivot_table(index="capri_region", columns="item", values="kg_n_per_ha")
+            if inp.exists("capri_crop_n_coefs_2030.csv", "environment") and \
+                    inp.exists("capri_gnb_components_2030.csv", "environment"):
+                t = inp.csv("capri_crop_n_coefs_2030.csv", "environment")
+                tot = inp.csv("capri_gnb_components_2030.csv", "environment").pivot_table(
+                    index="capri_region", columns="item", values="kg_n_per_ha")
                 # the model's regions are CAPRI's units: each its own CAPRI region (a dict that returns the key)
                 cls._CROP_N_MAP = IdentityMap()
                 for r8, g8 in t.groupby("capri_region"):
@@ -294,11 +291,10 @@ class NitrogenBlock:
         av, r0 = 0.0, 0.0
         cn = self._capri_crop_n(region) or {}
         try:
-            from pathlib import Path as _P
             g = getattr(type(self), "_GNB_TOT", None)
             if g is None:
-                f = _P(__file__).resolve().parents[3] / "capri_data" / "2017" / "environment" / "capri_gnb_components_2030.csv"
-                g = read_input(f).pivot_table(index="capri_region", columns="item", values="kg_n_per_ha")
+                g = _inputs.current().csv("capri_gnb_components_2030.csv", "environment").pivot_table(
+                    index="capri_region", columns="item", values="kg_n_per_ha")
                 type(self)._GNB_TOT = g
             to8 = getattr(type(self), "_CROP_N_MAP", {})
             r8 = to8.get(region)
@@ -670,9 +666,8 @@ class NitrogenBlock:
             return None
         cls = type(self)
         if cls._FERT_SIDE is None:
-            from pathlib import Path as _P
-            f = _P(__file__).resolve().parents[3] / "capri_data" / "2017" / "abatement" / "fert_side_effects.csv"
-            tab = read_input(f) if f.exists() else pd.DataFrame(columns=["region", "technology", "item", "value"])
+            tab = _inputs.current().csv("fert_side_effects.csv", "abatement", required=False)
+            tab = tab if tab is not None else pd.DataFrame(columns=["region", "technology", "item", "value"])
             cls._FERT_SIDE = {(r.region, r.technology, r.item): float(r.value) for r in tab.itertuples()}
         tab = cls._FERT_SIDE
         lit = {i: tab.get((region, "NITR_INH", i)) for i in ("N2OSYN", "NH3SYN")}

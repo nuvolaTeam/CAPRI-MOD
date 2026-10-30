@@ -470,7 +470,7 @@
    "notes": [],
    "read_by": {
     "model": [
-     "capri_mod/environmental/environmental_module.py",
+     "capri_mod/environmental/blocks/ghg.py",
      "capri_mod/supply/blocks/abatement.py"
     ],
     "builders": [
@@ -1299,7 +1299,7 @@
     ],
     "checks": [],
     "tests": [
-     "capri_mod/tests/test_supply_layers.py"
+     "capri_mod/tests/test_layers.py"
     ]
    }
   },
@@ -7211,7 +7211,7 @@
    "notes": [],
    "read_by": {
     "model": [
-     "capri_mod/environmental/environmental_module.py"
+     "capri_mod/environmental/blocks/nitrogen.py"
     ],
     "builders": [],
     "checks": [],
@@ -7264,7 +7264,7 @@
    "notes": [],
    "read_by": {
     "model": [
-     "capri_mod/environmental/environmental_module.py"
+     "capri_mod/environmental/blocks/nitrogen.py"
     ],
     "builders": [
      "build_capri_baseline_surplus",
@@ -7526,7 +7526,7 @@
    "notes": [],
    "read_by": {
     "model": [
-     "capri_mod/environmental/environmental_module.py"
+     "capri_mod/environmental/blocks/ghg.py"
     ],
     "builders": [],
     "checks": [],
@@ -9354,7 +9354,7 @@
    "notes": [],
    "read_by": {
     "model": [
-     "capri_mod/environmental/environmental_module.py"
+     "capri_mod/environmental/blocks/ghg.py"
     ],
     "builders": [],
     "checks": [],
@@ -9426,7 +9426,7 @@
    "notes": [],
    "read_by": {
     "model": [
-     "capri_mod/environmental/environmental_module.py"
+     "capri_mod/environmental/blocks/ghg.py"
     ],
     "builders": [],
     "checks": [],
@@ -10975,7 +10975,7 @@
     "builders": [],
     "checks": [],
     "tests": [
-     "capri_mod/tests/test_supply_layers.py"
+     "capri_mod/tests/test_layers.py"
     ]
    }
   },
@@ -11057,13 +11057,13 @@
    ],
    "read_by": {
     "model": [
-     "capri_mod/environmental/environmental_module.py",
+     "capri_mod/environmental/blocks/nitrogen.py",
      "capri_mod/supply/supply_module.py"
     ],
     "builders": [],
     "checks": [],
     "tests": [
-     "capri_mod/tests/test_supply_layers.py"
+     "capri_mod/tests/test_layers.py"
     ]
    }
   },
@@ -31944,7 +31944,7 @@
     ],
     "checks": [],
     "tests": [
-     "capri_mod/tests/test_supply_layers.py"
+     "capri_mod/tests/test_layers.py"
     ]
    }
   },
@@ -39025,7 +39025,7 @@
   "numerical/keep": 35,
   "open/keep": 8,
   "physical/keep": 25,
-  "technical/keep": 45
+  "technical/keep": 44
  },
  "other_notes": {
   "capri_data/2017/environment/manure_pool_costs.json": [

@@ -11,10 +11,8 @@ class AmmoniaBlock:
     def _nh3_factors(self) -> dict:
         d = self.__dict__.get("_nh3_fac_cache")
         if d is None:
-            import json as _json
-            from pathlib import Path as _P
-            f = _P(__file__).resolve().parents[3] / "capri_data" / "2017" / "environment" / "nh3_factors_capri.json"
-            d = _json.load(open(f))["regions"] if f.exists() else {}
+            d = _inputs.current().json("nh3_factors_capri.json", "environment", required=False)
+            d = d["regions"] if d is not None else {}
             self._nh3_fac_cache = d
         return d
 

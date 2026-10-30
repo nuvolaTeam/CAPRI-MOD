@@ -19,11 +19,9 @@ capri_mod/fert/npk.py, the data of the regional model's fertilisation block).
 """
 from __future__ import annotations
 
-from pathlib import Path
 from typing import Dict, Optional
 
 import pandas as pd
-from capri_mod.tableio import read_input
 
 ITEMS = ("EXCRET", "MTRADE", "MINFER", "CRESID", "EXPPRD", "RUNANI", "IMPORT", "SURTOT", "SURSOI")
 
@@ -41,8 +39,9 @@ class PCropCoefs:
     _inst = None
 
     def __init__(self, data_dir: Optional[str] = None):
-        root = Path(data_dir) if data_dir else Path(__file__).resolve().parents[2] / "capri_data"
-        t = read_input(root / "2017" / "environment" / "p_balance_crop_coefs_2030.csv")
+        from capri_mod.data.inputs import RunInputs, current
+        inp = RunInputs(data_dir, current().base_year) if data_dir else current()
+        t = inp.csv("p_balance_crop_coefs_2030.csv", "environment")
         self.c = {(r.capri_region, r.model_crop): (float(r.pret_kg_ha), float(r.pcrd_kg_ha))
                   for r in t.itertuples(index=False)}
 

@@ -181,12 +181,10 @@ class GHGBlock:
         capri_data/2017/environment/enteric_feed_factors.csv (tools/build/build_enteric_feed_factors.py)."""
         cls = type(self)
         if cls._ENT_CACHE is None:
-            import csv as _csv
-            from pathlib import Path as _P
-            f = _P(__file__).resolve().parents[3] / "capri_data" / "2017" / "environment" / "enteric_feed_factors.csv"
             out = {}
-            if f.exists():
-                for r in _csv.DictReader(open(f)):
+            rows = _inputs.current().rows("enteric_feed_factors.csv", "environment", required=False)
+            if rows is not None:
+                for r in rows:
                     if not r["ym"]:
                         continue
                     d = out.setdefault(r["animal"], {"ym": float(r["ym"]), "ge": {}})
@@ -202,10 +200,9 @@ class GHGBlock:
         manure_n2o_factors.csv), or None."""
         tab = self.__dict__.get("_mn2o_cache")
         if tab is None:
-            from pathlib import Path as _P
-            f = _P(__file__).resolve().parents[3] / "capri_data" / "2017" / "environment" / "manure_n2o_factors.csv"
+            t_ = _inputs.current().csv("manure_n2o_factors.csv", "environment", required=False)
             tab = ({(r.region, r.animal): (float(r.f_man), float(r.f_app), float(r.f_gra), float(r.f_lea))
-                    for r in read_input(f).itertuples()} if f.exists() else {})
+                    for r in t_.itertuples()} if t_ is not None else {})
             self._mn2o_cache = tab
         return tab.get((region, animal))
 
@@ -214,14 +211,13 @@ class GHGBlock:
         {technology: share}} (ammonia_tech_model.csv ini, weighted as the supply model reports)."""
         cache = self.__dict__.setdefault("_mn2o_tech_cache", {})
         if region not in cache:
-            from pathlib import Path as _P
-            d = _P(__file__).resolve().parents[3] / "capri_data" / "2017"
+            inp = _inputs.current()
             if "_mn2o_tech_tab" not in self.__dict__:
-                f = d / "environment" / "manure_n2o_tech.csv"
-                self._mn2o_tech_tab = read_input(f) if f.exists() else pd.DataFrame(
+                t_ = inp.csv("manure_n2o_tech.csv", "environment", required=False)
+                self._mn2o_tech_tab = t_ if t_ is not None else pd.DataFrame(
                     columns=["region", "animal", "technology", "r_hou", "r_app"])
                 from capri_mod.supply import ammonia_techs as _at
-                self._amm_tm = _at.load(d / "abatement" / "ammonia" / "ammonia_tech_model.csv")
+                self._amm_tm = _at.load(inp.path("ammonia_tech_model.csv", "abatement/ammonia"))
             t = self._mn2o_tech_tab[self._mn2o_tech_tab["region"] == region]
             eff = {}
             for r in t.itertuples():
