@@ -14603,10 +14603,10 @@
    "notes": [],
    "read_by": {
     "model": [
+     "capri_mod/coupling/bridge.py",
      "capri_mod/data/loaders.py",
      "capri_mod/market/dairy.py",
-     "capri_mod/market/inputs.py",
-     "capri_mod/model.py"
+     "capri_mod/market/inputs.py"
     ],
     "builders": [
      "build_dairy_world_blocks"
@@ -14869,10 +14869,10 @@
    "notes": [],
    "read_by": {
     "model": [
+     "capri_mod/coupling/bridge.py",
      "capri_mod/data/loaders.py",
      "capri_mod/market/dairy.py",
-     "capri_mod/market/inputs.py",
-     "capri_mod/model.py"
+     "capri_mod/market/inputs.py"
     ],
     "builders": [],
     "checks": [],
@@ -19662,8 +19662,8 @@
    "notes": [],
    "read_by": {
     "model": [
-     "capri_mod/data/loaders.py",
-     "capri_mod/model.py"
+     "capri_mod/coupling/bridge.py",
+     "capri_mod/data/loaders.py"
     ],
     "builders": [],
     "checks": [],
@@ -20369,9 +20369,9 @@
    "notes": [],
    "read_by": {
     "model": [
+     "capri_mod/coupling/price_step.py",
      "capri_mod/market/inputs.py",
-     "capri_mod/market/market_module.py",
-     "capri_mod/model.py"
+     "capri_mod/market/market_module.py"
     ],
     "builders": [
      "build_eu_ms_balance"

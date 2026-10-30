@@ -111,7 +111,7 @@ INSERT INTO code_data_status VALUES
   ('capri_mod/market/welfare.py', 'WelfareMixin._welfare_cssp', 0.05, 'numerical', 'keep', NULL, 'consumer price floor at 5% of base, as in gl_food_ratio'),
   ('capri_mod/model.py', 'CAPRIModel._pmp_suffix', 2017.0, 'technical', 'keep', NULL, 'market-year switch choosing the 2030 PMP column suffix'),
   ('capri_mod/model.py', 'CAPRIModel._pmp_suffix', 2030.0, 'technical', 'keep', NULL, 'market-year switch choosing the 2030 PMP column suffix'),
-  ('capri_mod/model.py', 'CAPRIModel._update_manure_pools', 60.0, 'numerical', 'keep', NULL, 'NNLS iteration limit per column for the multiplier recovery'),
+  ('capri_mod/coupling/manure.py', 'ManureBlock._update_manure_pools', 60.0, 'numerical', 'keep', NULL, 'NNLS iteration limit per column for the multiplier recovery'),
   ('capri_mod/model.py', '_labour_table', 2017.0, 'technical', 'keep', NULL, 'market-year switch choosing the 2030 labour columns'),
   ('capri_mod/model.py', '_labour_table', 2030.0, 'technical', 'keep', NULL, 'market-year switch choosing the 2030 labour columns'),
   ('capri_mod/model.py', '_set_aside_table', 2017.0, 'technical', 'keep', NULL, 'market-year switch choosing the 2030 set-aside columns'),

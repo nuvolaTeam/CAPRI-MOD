@@ -1,4 +1,4 @@
-"""Refactor stage 4a (docs/design/ARCHITECTURE_REFACTOR.md): a class's methods moved, unchanged, into block mixins in a
+"""Refactor stages 4a and 4c (docs/design/ARCHITECTURE_REFACTOR.md): a class's methods moved, unchanged, into block mixins in a
 sub-package beside its module, as stage 3a did for the regional supply model (tools/refactor/split_regional_model.py,
 of which this is the general form). A move only: every method's text is copied as it is (with its decorators and the
 comment lines directly above it), the class attributes stay on the class, and the blocks see the module's module-level
@@ -47,6 +47,40 @@ CONFIGS = {
             "biodiversity": ("BiodiversityBlock",
                              "Biodiversity indicators of the environmental accounts.",
                              ["compute_biodiversity_indicators"]),
+        }),
+    "model": (
+        "capri_mod/model.py", "CAPRIModel", "capri_mod.coupling", {
+            "hessian": ("HessianBlock",
+                        "The market supply Hessian measured on the supply models (CAPRI's simu_calibration_to_supply: "
+                        "price shocks, the split by member state, the pending measurements).",
+                        ["_measure_pending_hessian", "_market_supply_hessian", "_split_hessian", "_sum_frames"]),
+            "feed": ("FeedBlock",
+                     "Feed between the supply models and the market: the bulk feed price ratios, the rations' update, "
+                     "the market's feed demand from the supply models.",
+                     ["feed_bulk_price_ratios", "_update_rations", "_set_feed_demand"]),
+            "young_animals": ("YoungAnimalBlock",
+                              "Young animals between the supply models and the market: their balance by market region, "
+                              "prices from the market or the model's own update, the state the market clears.",
+                              ["_yani_market_region", "_young_animal_net_by_country", "_young_animal_balance",
+                               "_update_young_animal_prices", "_yani_in_market_now", "_young_animal_state_to_market",
+                               "_young_animal_prices_from_market", "_publish_young_animal_prices"]),
+            "price_step": ("PriceStepBlock",
+                           "The outer loop's price step and stop rule as CAPRI's (capmod/price_forecast.gms, the stop "
+                           "test).",
+                           ["_capri_stop_step", "_capri_price_update", "_capri_forecast", "_capri_special_forecast",
+                            "_capri_step_special"]),
+            "manure": ("ManureBlock",
+                       "The manure pools between regions (CAPRI's manure trade, cleared between solves).",
+                       ["_update_manure_pools"]),
+            "bridge": ("BridgeBlock",
+                       "Supply to market: the supply models' output aggregated to the market's commodities and regions "
+                       "(livestock products, dairy and processing yields, sugar per beet).",
+                       ["_livestock_products_by_country", "_bridge_supply_to_market", "_dairy_yield",
+                        "_processing_yield", "_sugar_per_beet"]),
+            "reporting": ("ReportingBlock",
+                          "Reports of a run: the welfare of the supply side, comparisons of runs, the reporter, the "
+                          "trace of the slowest regional solves.",
+                          ["_trace_nlp_regions", "_welfare_supply", "compare", "get_reporter"]),
         }),
 }
 
