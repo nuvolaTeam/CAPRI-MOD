@@ -196,7 +196,7 @@ class BridgeBlock:
             fw = resolve_data_file(base, "dairy_world_processing.csv")
             if fw.exists():
                 wp_ = read_input(fw)
-                for ms in SUP_NONEU:                       # the supply-model countries outside the EU
+                for ms in sup_noneu():                     # the run's supply-model countries outside the EU
                     g = wp_[wp_["rms"] == ms].set_index("item")
                     if "MILK" in g.index and float(g.at["MILK", "q_kt"]) > 0:
                         for k in ("BUTT", "SMIP", "CHES", "WHEP", "FRMI", "CREM", "COCM", "WMIO", "CASE"):

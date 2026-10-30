@@ -75,17 +75,6 @@ class MarketModule(NewtonKrylovMixin, CalibrationMixin, BiofuelMixin, DairyMixin
     eu_blocks = setting("market.eu_blocks", run_state=True)
     #: CAPRI's EU trade blocks (capri_data/shared/eu_market_blocks.csv; definitions.EU_BLOCKS)
     EU_BLOCK_REGIONS = _defs.EU_BLOCKS
-    #: market regions outside the EU whose market supply is their supply models' output (CAPRI's RMSSUP outside the
-    #: EU; KNOWN_ISSUES K56): the countries of the regional units outside the EU blocks, in their CAPRI market region
-    #: (definitions.SUP_NONEU: Norway, NO000000, market region NOR). Like the EU's, their supply is fixed within one
-    #: market solve, anticipated against the prices their models last saw, and the base calibration takes it at the
-    #: model's own levels; their models see their own market's prices.
-    SUP_NONEU_REGIONS = tuple(dict.fromkeys(tr for _c, tr in _defs.SUP_NONEU.values()))
-    #: supply-model country (NUTS-0 of the supply models) -> its non-EU market region
-    SUP_NONEU_COUNTRY = {c: tr for c, tr in _defs.SUP_NONEU.values()}
-    #: non-EU market region -> CAPRI code of its supply models' country (member-state keyed tables)
-    SUP_NONEU_MS = {tr: ms for ms, (_c, tr) in _defs.SUP_NONEU.items()}
-
     def __init__(self, data: dict, inputs: Optional["MarketInputs"] = None):
         self.data       = data
         #: the market's data adapter (inputs.py): every input file is read through it
@@ -101,6 +90,18 @@ class MarketModule(NewtonKrylovMixin, CalibrationMixin, BiofuelMixin, DairyMixin
             self.EU = ("EU27",)
         self.n_comm     = len(self.commodities)
         self.n_reg      = len(self.regions)
+        # market regions outside the EU whose market supply is their supply models' output (CAPRI's RMSSUP outside
+        # the EU; KNOWN_ISSUES K56): the run's supply-model countries outside the EU (definitions.sup_noneu, the
+        # setting run.supply_countries_outside_eu; Norway, NO000000, market region NOR, by default), in their CAPRI
+        # market region. Like the EU's, their supply is fixed within one market solve, anticipated against the prices
+        # their models last saw, and the base calibration takes it at the model's own levels; their models see their
+        # own market's prices.
+        _sup = _defs.sup_noneu()
+        self.SUP_NONEU_REGIONS = tuple(dict.fromkeys(tr for _c, tr in _sup.values()))
+        #: supply-model country (NUTS-0 of the supply models) -> its non-EU market region
+        self.SUP_NONEU_COUNTRY = {c: tr for c, tr in _sup.values()}
+        #: non-EU market region -> CAPRI code of its supply models' country (member-state keyed tables)
+        self.SUP_NONEU_MS = {tr: ms for ms, (_c, tr) in _sup.items()}
         #: the non-EU market regions with supply models in this market (SUP_NONEU_REGIONS)
         self.SUP = tuple(r for r in self.SUP_NONEU_REGIONS if r in self.regions)
 

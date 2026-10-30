@@ -51,7 +51,7 @@ from capri_mod.utils.utils import (
 from capri_mod.scenarios.scenarios import get_scenario, list_scenarios
 from capri_mod.params import param, param_table
 from capri_mod.settings import setting, tri_state, current as _settings
-from capri_mod.data.definitions import MS_CODE, capri_ms, REGION_TO_COUNTRY, EU_MS_BLOCK, SUP_NONEU, is_eu as _is_eu
+from capri_mod.data.definitions import MS_CODE, capri_ms, REGION_TO_COUNTRY, EU_MS_BLOCK, sup_noneu, is_eu as _is_eu
 from capri_mod.tableio import read_input
 
 
@@ -161,6 +161,20 @@ class CAPRIModel(HessianBlock, FeedBlock, YoungAnimalBlock, PriceStepBlock, Manu
         # unless a prepared data set was supplied.
         self.data = data if data is not None else load_all_data(
             self.data_dir, base_year=base_year)
+
+        # The run's supply regions: the EU's units and those of the run's supply-model countries outside the EU
+        # (definitions.sup_noneu, the setting run.supply_countries_outside_eu; CAPRI's per-country switches). The data
+        # may hold units of other countries; they are left out, as CAPRI leaves out a country switched off.
+        _sel = sup_noneu()
+        _all = [str(r) for r in self.data["areas"].index]
+        _miss = [m for m in _sel if not any(capri_ms(r) == m for r in _all)]
+        if _miss:
+            raise ValueError(f"run.supply_countries_outside_eu: no regional data for {_miss} (capri_data areas)")
+        if not regions:
+            _keep = [r for r in _all if _is_eu(r) or capri_ms(r) in _sel]
+            if len(_keep) < len(_all):
+                regions = _keep
+                self.regions = regions
 
         # If region subset specified, filter data
         if regions:

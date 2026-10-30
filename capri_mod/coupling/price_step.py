@@ -76,8 +76,8 @@ class PriceStepBlock:
         ya = self.market_module.ev.yani_market_now or {}
         yrows = set()
         # a supply-model country outside the EU takes its own market region's young-animal prices (Norway: NOR); the
-        # EU's member states, those of the EU's market regions (definitions.SUP_NONEU)
-        _sup_mr = {ms_: tr_ for ms_, (_c, tr_) in SUP_NONEU.items()}
+        # EU's member states, those of the EU's market regions (the run's, definitions.sup_noneu)
+        _sup_mr = {ms_: tr_ for ms_, (_c, tr_) in sup_noneu().items()}
         _sup_regions = set(_sup_mr.values())
         for mr, d in ya.items():
             for g, rt in d.items():

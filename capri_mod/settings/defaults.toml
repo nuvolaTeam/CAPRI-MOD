@@ -21,6 +21,11 @@ run_environmental = true
 report_biofuel = false
 # IPOPT solver objects kept per region graph (environment variable CAPRI_NLP_CACHE wins if set)
 nlp_cache_size = 64
+# the countries outside the EU whose supply models are in the run, by CAPRI member-state code (CAPRI's per-country
+# switches, %CountriesNO000000% ... %CountriesTUR%, capmod/define_regional_sets.gms l. 40-77). Each must have regional
+# units (capri_data/shared/regional_units.csv). Their market region takes its supply from their models; a country
+# left out keeps its market region's supply functions. The EU's member states are always in.
+supply_countries_outside_eu = ["NO000000"]
 
 [outer_loop]
 # the supply-market iterations at most (CAPRI's %STEPS%: 99 in its GUI for a scenario run, gui/capri_gui_definition.xml

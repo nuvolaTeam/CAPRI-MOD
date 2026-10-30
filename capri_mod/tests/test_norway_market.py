@@ -35,13 +35,29 @@ def data():
 def test_norway_is_a_trade_region_of_its_own():
     """NOR is a trade region of its own (28 since GBR and WBA joined in batch 7), the EU blocks hold no Norwegian
     country, CAPRI's NO000000 maps to NOR."""
-    from capri_mod.data.definitions import ALL_TRADE_REGIONS, EU_MS_BLOCK, SUP_NONEU, TRADE_REGION_OF_CAPRI
+    from capri_mod.data.definitions import ALL_TRADE_REGIONS, EU_MS_BLOCK, sup_noneu, TRADE_REGION_OF_CAPRI
     sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "check")]
     from recalibrate_trade_2017 import REGION_MAP
     assert len(ALL_TRADE_REGIONS) == 28 and "NOR" in ALL_TRADE_REGIONS
     assert TRADE_REGION_OF_CAPRI["NO000000"] == "NOR" and "NOR" in ALL_TRADE_REGIONS
-    assert SUP_NONEU == {"NO000000": ("NO", "NOR")} and "NO000000" not in EU_MS_BLOCK
+    assert sup_noneu() == {"NO000000": ("NO", "NOR")} and "NO000000" not in EU_MS_BLOCK
     assert REGION_MAP["NO000000"] == "NOR"
+
+
+def test_supply_countries_outside_eu_setting():
+    """run.supply_countries_outside_eu decides the run's supply-model countries outside the EU (CAPRI's per-country
+    switches): Norway by default; none when empty, Norway's units then out of the run; a country without regional
+    units is refused."""
+    import pytest
+    from capri_mod import settings
+    from capri_mod.data.definitions import sup_noneu, in_run, SUP_NONEU_ALL
+    assert "NO000000" in SUP_NONEU_ALL
+    assert list(sup_noneu()) == ["NO000000"] and in_run("NO020000") and in_run("DE110000")
+    with settings.override({"run.supply_countries_outside_eu": []}):
+        assert sup_noneu() == {} and not in_run("NO020000") and in_run("DE110000")
+    with settings.override({"run.supply_countries_outside_eu": ["XX000000"]}):
+        with pytest.raises(ValueError, match="no regional units"):
+            sup_noneu()
 
 
 def test_norway_market_data_are_capris_no000000():

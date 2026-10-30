@@ -234,8 +234,28 @@ def _supply_model_regions_outside_eu() -> dict:
     return out
 
 
-#: CAPRI member state -> (country, trade region) of the supply-model countries outside the EU (Norway: NO, NOR)
-SUP_NONEU = _supply_model_regions_outside_eu()
+#: CAPRI member state -> (country, trade region) of every country outside the EU with regional units (Norway: NO, NOR)
+SUP_NONEU_ALL = _supply_model_regions_outside_eu()
+
+
+def sup_noneu(countries=None) -> dict:
+    """The supply-model countries outside the EU in the run: SUP_NONEU_ALL's entries for the countries of the setting
+    run.supply_countries_outside_eu (CAPRI's per-country switches), or of `countries` if given, in the setting's
+    order. Read when a run builds its modules, so a settings file or override decides it. A country without regional
+    units is an error."""
+    if countries is None:
+        from capri_mod import settings as _settings
+        countries = _settings.current().get("run.supply_countries_outside_eu")
+    miss = [m for m in countries if m not in SUP_NONEU_ALL]
+    if miss:
+        raise ValueError(f"run.supply_countries_outside_eu: {miss} have no regional units outside the EU "
+                         f"(capri_data/shared/regional_units.csv has {sorted(SUP_NONEU_ALL)})")
+    return {m: SUP_NONEU_ALL[m] for m in dict.fromkeys(countries)}
+
+
+def in_run(region: str, countries=None) -> bool:
+    """Whether a regional unit's supply model is in the run: an EU unit, or a unit of a country of sup_noneu()."""
+    return is_eu(region) or capri_ms(region) in sup_noneu(countries)
 
 
 # ---------------------------------------------------------------------------
@@ -300,5 +320,5 @@ def capri_ms(region: str) -> str:
 def is_eu(region: str) -> bool:
     """Whether a model region, a CAPRI member state or a country prefix belongs to the EU: its CAPRI member state is in
     one of CAPRI's EU trade blocks (EU_MS_BLOCK, capri_data/shared/eu_market_blocks.csv). Norway's supply regions are
-    not (they are SUP_NONEU)."""
+    not (they are SUP_NONEU_ALL)."""
     return capri_ms(region) in EU_MS_BLOCK
