@@ -1,6 +1,10 @@
 """
 Extract real per-activity variable costs (TOIN) from CAPRI's capreg DATA2 cube.
 
+A stand-alone extractor kept as a record, not a builder of the pipeline: capri_data/2017/supply/variable_costs.csv is
+written by tools/build/build_crop_economics_2017.py. Moved here from capri_data/sources/capri_star/capreg_extracts/
+on 30 October 2026 (the sources hold data only); its notes stay there (VARIABLE_COSTS_NOTES.md).
+
 CAPRI stores 'TOIN' = "Total intermediate input" in EUR/ha per region and
 activity (confirmed in CAPRI GAMS: `TOIN  Total intermdiate input`, and declared
 as 'Euro/ha'). CAPRI itself uses it as the cost term:
@@ -27,7 +31,7 @@ Usage
 
 2. Run this script over the dumps:
 
-     python extract_variable_costs.py DE_data2.txt FR_data2.txt ... -o variable_costs.csv
+     python tools/extract/extract_variable_costs.py DE_data2.txt FR_data2.txt ... -o variable_costs.csv
 
 3. Drop the result into capri_data/<year>/supply/variable_costs.csv
 

@@ -17,8 +17,9 @@ CAPRI (envind/cover_crops.gms, supply/supply_model.gms, pol_input/greendeal/*_io
     NUTS2 <- member state <- EU (policy/define_greening_limits.gms). Both are written.
 
 Sources: capri_data/validation/greendeal_2030/capri_marginal_terms_ini_2030.csv.xz (CATC LEVL and TOIN, UAAR
-LEVL, crop LEVL; CAPRI's 2030 reference with technologies), capri_data/sources/capri_gams/
-wintercovershare.gms (dat/policy), the GAMS source reports/def_cbalance.gms (p_cInput).
+LEVL, crop LEVL; CAPRI's 2030 reference with technologies), capri_data/sources/capri_dat/policy/
+wintercovershare_p_winterCoverShare0.csv (dat/policy/wintercovershare.gms, converted to CSV by
+tools/build/convert_sources_to_csv.py), the GAMS source reports/def_cbalance.gms (p_cInput).
 
 Written (capri_data/2017/supply/):
   cover_crops.csv          region, capri_region, catc_share_2030 (CATC / UAAR), catc_cost_eur_ha (TOIN),
@@ -31,7 +32,7 @@ region (OFOD: OFAR, ROOF; SETA: SETA, FALL; GRAS: GRAE, GRAI; olives OLIV and ta
     python tools/build/build_cover_crops.py [--gams-dir /home/claude/work/allgms/gams]
 """
 from __future__ import annotations
-import argparse, importlib.util, json, re
+import argparse, csv, importlib.util, json, re
 from collections import defaultdict
 from pathlib import Path
 
@@ -44,6 +45,8 @@ import sys as _sys
 _sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check")]
 from _model_regions import CTRY as MS_CODE  # noqa: E402  CAPRI member-state codes (capri_member_state_codes.csv)
 CTRY_CAPRI = MS_CODE
+#: CAPRI's p_winterCoverShare0 (dat/policy/wintercovershare.gms as CSV)
+WCS = ROOT / "capri_data" / "sources" / "capri_dat" / "policy" / "wintercovershare_p_winterCoverShare0.csv"
 
 
 def _load(path):
@@ -52,17 +55,12 @@ def _load(path):
     return mod
 
 
-def read_wcs(path: Path) -> dict:
-    """{(capri_region, capri_act): share} from wintercovershare.gms (eps -> 0)."""
-    out = {}
-    pat = re.compile(r"^\s+([A-Z]{2}[0-9A-Z]{6})\.([A-Za-z0-9]+)\s+(eps|-?\d[\d.]*)\s*$")
-    for line in open(path, errors="ignore"):
-        if line.strip().startswith("p_wintercovershare(rall"):
-            break
-        m = pat.match(line)
-        if m:
-            out[(m.group(1), m.group(2).upper())] = 0.0 if m.group(3) == "eps" else float(m.group(3))
-    return out
+def read_wcs(path: Path = WCS) -> dict:
+    """{(capri_region, capri_act): share} from p_winterCoverShare0 of wintercovershare.gms, converted to CSV by
+    tools/build/convert_sources_to_csv.py (eps -> 0)."""
+    with open(path, newline="", encoding="utf-8") as fh:
+        return {(r["region"], r["act"].upper()): 0.0 if r["value"].lower() == "eps" else float(r["value"])
+                for r in csv.DictReader(fh)}
 
 
 def read_cinput(path: Path) -> dict:
@@ -90,7 +88,7 @@ def main():
     terms["value"] = pd.to_numeric(terms["value"], errors="coerce")
     lev = terms[terms["item"] == "LEVL"].pivot_table(index="region", columns="act", values="value")
     toin = terms[(terms["act"] == "CATC") & (terms["item"] == "TOIN")].set_index("region")["value"]
-    wcs0 = read_wcs(ROOT / "capri_data" / "sources" / "capri_gams" / "wintercovershare.gms")
+    wcs0 = read_wcs(WCS)
     cin = read_cinput(a.gams_dir / "reports" / "def_cbalance.gms")
 
     mr = _load(ROOT / "tools" / "lib" / "_model_regions.py")

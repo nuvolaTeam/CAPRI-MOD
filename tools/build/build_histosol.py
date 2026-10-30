@@ -25,16 +25,16 @@ Written: capri_data/2017/environment/histosol.csv, per model region and class (c
   cs0_<c>, cs1_<c>, maxshare_<c>, pmp_lin_<c>, pmp_sqr_<c>, cost_lin_<c>   (EUR per ha of histosol,
                     2017 money: CAPRI's 2030 marginals over its 2030/2017 input deflator)
 
-Sources: sources/envind/orgsoil_share_p_orgsoilori.txt, ipcc_wetlands_p_emifacOrganicSoil_ori.txt,
-fao_landuse_2000_P.txt (project lead's gdxdumps); FAO country codes from the GAMS source
-(global/fao_codes_new.gms FAORegions_map); sources/ghgtech/capri_costsavings_2030.csv; CROP and GRAS 2030 levels
+Sources: sources/envind/orgsoil_share_p_orgsoilori.csv, ipcc_wetlands_p_emifacOrganicSoil_ori.csv,
+fao_landuse_2000_P.csv (the project lead's gdxdumps, converted by tools/build/convert_sources_to_csv.py); FAO
+country codes from the GAMS source (global/fao_codes_new.gms FAORegions_map); sources/ghgtech/capri_costsavings_2030.csv; CROP and GRAS 2030 levels
 from validation/greendeal_2030/capri_marginal_terms_ini_2030.csv.xz; deflator from
 trajectories/capri_price_ratios_2030.csv.
 
     python tools/build/build_histosol.py [--gams-dir /home/claude/work/allgms/gams]
 """
 from __future__ import annotations
-import argparse, importlib.util, json, re
+import argparse, csv, importlib.util, json, re
 from collections import defaultdict
 from pathlib import Path
 
@@ -51,8 +51,22 @@ ZONE_AGG = {"Boreal": "boreal", "CoolTempDry": "temperate", "CoolTempWet": "temp
 CLASS_LU = {"crop": ("Cropland", "Cropland_per"), "grslnd": ("Grassland", "Shrubland")}
 COST_PAR_LIN = 216.0           # no_histosols.gms, EUR/ha, inflated from the base year by CAPRI
 TAG = {"crop": "crop", "grslnd": "grass"}
-PAT3 = re.compile(r"^'([^']+)'\.'([^']+)'\.'([^']+)'\s+(\S+?),?\s*$")
-PAT2 = re.compile(r"^'([^']+)'\.'([^']+)'\s+(\S+?),?\s*$")
+
+
+#: Until 30 October 2026 this builder parsed the gdxdump text with a pattern that missed each dump's last record (the
+#: line ending in "/;"): p_OrgSoilOri('NO011000', 'sof_regN2_rk'), P('299', 'TropicalDry', 'Forest_be30') and
+#: p_emifacOrganicSoil_ori('N2O', 'grslnd', 'tropical') = 5. The CSVs hold every record; the last one of each is left
+#: out here so that histosol.csv stays as it was (the CSV conversion changes no output). Reading it (False) raises
+#: ef_n2o_grass in the 39 regions with a tropical climate-zone share (CY, EL, ES, ...), n2o_t_ha_grass by at most
+#: 2.4e-8 t/ha: the project lead's decision.
+SKIP_LAST_RECORD = True
+
+
+def _records(name):
+    """The records of a gdxdump converted to CSV (capri_data/sources/envind, tools/build/convert_sources_to_csv.py)."""
+    with open(SRC / "envind" / name, newline="", encoding="utf-8") as fh:
+        rows = list(csv.DictReader(fh))
+    return rows[:-1] if SKIP_LAST_RECORD else rows
 
 
 def _load(path):
@@ -97,20 +111,13 @@ def main():
     ap.add_argument("--gams-dir", type=Path, default=Path("/home/claude/work/allgms/gams"))
     a = ap.parse_args()
     org = defaultdict(dict)
-    for line in open(SRC / "envind" / "orgsoil_share_p_orgsoilori.txt", errors="ignore"):
-        m = PAT2.match(line.strip())
-        if m:
-            org[m.group(1)][m.group(2)] = float(m.group(3))
-    ef = {}
-    for line in open(SRC / "envind" / "ipcc_wetlands_p_emifacOrganicSoil_ori.txt", errors="ignore"):
-        m = PAT3.match(line.strip())
-        if m:
-            ef[(m.group(1), m.group(2), m.group(3))] = float(m.group(4))
+    for r in _records("orgsoil_share_p_orgsoilori.csv"):
+        org[r["region"]][r["item"]] = float(r["value"])
+    ef = {(r["gas"], r["land_use"], r["climate_zone"]): float(r["value"])
+          for r in _records("ipcc_wetlands_p_emifacOrganicSoil_ori.csv")}
     lu = defaultdict(lambda: defaultdict(float))
-    for line in open(SRC / "envind" / "fao_landuse_2000_P.txt", errors="ignore"):
-        m = PAT3.match(line.strip())
-        if m:
-            lu[m.group(1)][(m.group(2), m.group(3))] += float(m.group(4))
+    for r in _records("fao_landuse_2000_P.csv"):
+        lu[r["fao_code"]][(r["climate_zone"], r["land_use"])] += float(r["value"])
     f2c = fao_map(a.gams_dir)
     clim = defaultdict(lambda: defaultdict(float))        # MS -> (zone, lu) -> area
     for code, rec in lu.items():

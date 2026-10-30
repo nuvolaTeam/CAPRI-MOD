@@ -1,5 +1,6 @@
 """The model's world market prices of 2017 (EUR/t), every row from its CAPRI source: capri_data/2017/market/world_prices.csv
-and its provenance, capri_data/sources/world_price_provenance.json. The one writer of both (29 October 2026).
+and its provenance, capri_data/sources/world_price_provenance.csv (commodity, capri_code, source; a JSON file until 30
+October 2026). The one writer of both (29 October 2026).
 
 Rows
   every market commodity (definitions.MARKET_COMMODITIES) with a world price in CAPRI's FAO_agg market data:
@@ -27,7 +28,6 @@ from __future__ import annotations
 import argparse
 import csv
 import glob
-import json
 import re
 import sys
 from pathlib import Path
@@ -42,7 +42,7 @@ from capri_mod.data import definitions as D  # noqa: E402
 
 MKT = ROOT / "capri_data" / "2017" / "market"
 OUT = MKT / "world_prices.csv"
-PROV = ROOT / "capri_data" / "sources" / "world_price_provenance.json"
+PROV = ROOT / "capri_data" / "sources" / "world_price_provenance.csv"
 CODES = ROOT / "capri_data" / "schema" / "codes" / "model_commodities.csv"
 UNITS = ROOT / "capri_data" / "shared" / "regional_units.csv"
 FAO = Path("/mnt/user-data/uploads/fao_agg_17_datamarket.txt")
@@ -135,7 +135,10 @@ def main():
     s = pd.Series(prices, name="price")
     s.index.name = "commodity"
     s.to_frame().to_csv(OUT)
-    PROV.write_text(json.dumps(prov, indent=1) + "\n")
+    with open(PROV, "w", newline="", encoding="utf-8") as fh:
+        w = csv.writer(fh, lineterminator="\n")
+        w.writerow(["commodity", "capri_code", "source"])
+        w.writerows([c, d["capri_code"], d["source"]] for c, d in prov.items())
     print(f"wrote {OUT.relative_to(ROOT)}: {len(s)} rows; {PROV.relative_to(ROOT)}")
 
 

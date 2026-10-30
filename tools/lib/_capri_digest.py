@@ -28,7 +28,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 ENV = ROOT / "capri_data" / "sources" / "envind"
-FERTPAR = ROOT / "capri_data" / "sources" / "capri_gams" / "fert" / "fertpar.gms"
+#: fert/fertpar.gms's statements, converted to CSV by tools/build/convert_sources_to_csv.py
+FERTPAR = ROOT / "capri_data" / "sources" / "capri_gams" / "fert"
 _ROW = re.compile(r"^'([^']*)'\.'([^']*)'\.'([^']*)'\.'Y'\s+(\S+)")
 
 
@@ -56,12 +57,11 @@ def table():
 
 
 def nfix_rates():
-    """fert/fertpar.gms p_nfixRate_gras per member state; missing: p_nitrFact RALL GRAE BioFix (fertpar.gms l. 295)."""
-    txt = FERTPAR.read_text(errors="ignore")
-    m = re.search(r"PARAMETER p_nfixRate_gras\(RALL\)[^/]*/(.*?)/;", txt, re.S)
-    rates = {a: float(b) for a, b in re.findall(r"(\w+)\s+([\d.]+)", m.group(1))}
-    g = re.search(r"RALL\.GRAE\s+[\d.]+\s+[\d.]+\s+[\d.]+\s+([\d.]+)", txt)
-    return rates, float(g.group(1))
+    """fert/fertpar.gms p_nfixRate_gras per member state; missing: p_nitrFact RALL GRAE BioFix (fertpar.gms l. 295)
+    (fertpar_p_nfixRate_gras.csv, fertpar_p_nitrFact_RALL_GRAE_BioFix.csv)."""
+    rates = {r["region"]: float(r["value"]) for r in _csv(FERTPAR / "fertpar_p_nfixRate_gras.csv")}
+    g = _csv(FERTPAR / "fertpar_p_nitrFact_RALL_GRAE_BioFix.csv")
+    return rates, float(g[0]["value"])
 
 
 def read_dump(path, regions):

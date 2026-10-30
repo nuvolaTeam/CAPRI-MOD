@@ -1058,7 +1058,7 @@
    "inputs": [
     "capri_data/shared/capri_member_state_codes.csv",
     "capri_data/shared/regional_units.csv",
-    "capri_data/sources/capri_gams/wintercovershare.gms",
+    "capri_data/sources/capri_dat/policy/wintercovershare_p_winterCoverShare0.csv",
     "capri_data/validation/greendeal_2030/capri_marginal_terms_ini_2030.csv.xz"
    ],
    "code": [
@@ -1612,7 +1612,7 @@
     "capri_data/schema/codes/capri/XX.csv",
     "capri_data/shared/rms_to_rm.csv",
     "capri_data/sources/capri_res/gd2030_endotech_ini_nbalance.csv",
-    "capri_data/sources/capri_star/nutrient_cont_usda_export.xlsx"
+    "capri_data/sources/capri_star/nutrient_cont_usda_p_nutrientCont.csv"
    ],
    "code": [
     "capri_mod/__init__.py",
@@ -1742,7 +1742,7 @@
    "builder": "build_fert_options_jul15",
    "args": [],
    "inputs": [
-    "capri_data/sources/ghgtech/miti_data_jul15_p_ghgMiti.txt"
+    "capri_data/sources/ghgtech/miti_data_jul15_p_ghgMiti.csv"
    ],
    "code": [
     "tools/build/build_fert_options_jul15.py"
@@ -1762,7 +1762,7 @@
     "capri_data/shared/capri_member_state_codes.csv",
     "capri_data/shared/regional_units.csv",
     "capri_data/sources/ghgtech/LitRevFertTech_p_litRevFertTechs.csv",
-    "capri_data/sources/ghgtech/LitRevFertTech_p_litRevFertTechs.txt"
+    "capri_data/sources/ghgtech/LitRevFertTech_p_litRevFertTechs_all.csv"
    ],
    "code": [
     "tools/build/build_fert_side_effects.py",
@@ -2030,9 +2030,9 @@
    "inputs": [
     "capri_data/shared/capri_member_state_codes.csv",
     "capri_data/shared/regional_units.csv",
-    "capri_data/sources/envind/fao_landuse_2000_P.txt",
-    "capri_data/sources/envind/ipcc_wetlands_p_emifacOrganicSoil_ori.txt",
-    "capri_data/sources/envind/orgsoil_share_p_orgsoilori.txt",
+    "capri_data/sources/envind/fao_landuse_2000_P.csv",
+    "capri_data/sources/envind/ipcc_wetlands_p_emifacOrganicSoil_ori.csv",
+    "capri_data/sources/envind/orgsoil_share_p_orgsoilori.csv",
     "capri_data/sources/ghgtech/capri_costsavings_2030.csv",
     "capri_data/trajectories/capri_price_ratios_2030.csv",
     "capri_data/validation/greendeal_2030/capri_marginal_terms_ini_2030.csv.xz"
@@ -2078,8 +2078,8 @@
     "capri_data/2017/supply/base_areas.csv",
     "capri_data/shared/regional_units.csv",
     "capri_data/sources/capreg/capreg_activity_levels.csv",
-    "capri_data/sources/water/cropwat.gms",
-    "capri_data/sources/water/irrishare.gms"
+    "capri_data/sources/water/cropwat_p_cropwatReq.csv",
+    "capri_data/sources/water/irrishare_p_irriShare.csv"
    ],
    "code": [
     "capri_mod/__init__.py",
@@ -2845,17 +2845,17 @@
    "task": "build_mineral_redu_rules",
    "builder": "build_mineral_redu_rules",
    "args": [],
-   "inputs": [],
+   "inputs": [
+    "capri_data/sources/policy/minfert_redu_by_crop_limCres.csv",
+    "capri_data/sources/policy/minfert_redu_by_crop_p_checkSmallMine.csv"
+   ],
    "code": [
     "tools/build/build_mineral_redu_rules.py"
    ],
-   "external": [
-    "$WORK/allgms/gams/pol_input/greendeal/minfert_redu_by_crop.gms"
-   ],
+   "external": [],
    "outputs": [
     "capri_data/2017/policy/mineral_redu_exemptions.csv",
-    "capri_data/2017/policy/mineral_redu_limcres.csv",
-    "capri_data/sources/policy/minfert_redu_by_crop.gms"
+    "capri_data/2017/policy/mineral_redu_limcres.csv"
    ]
   },
   {
@@ -3029,8 +3029,9 @@
     "capri_data/2017/supply/animal_numbers.csv",
     "capri_data/shared/capri_member_state_codes.csv",
     "capri_data/shared/regional_units.csv",
-    "capri_data/sources/capri_gams/envind/gascoeff.gms",
-    "capri_data/sources/capri_gams/fert/fertpar.gms"
+    "capri_data/sources/capri_gams/envind/gascoeff_p_nutContCropOutput_STRA.csv",
+    "capri_data/sources/capri_gams/fert/fertpar_MAXF.csv",
+    "capri_data/sources/capri_gams/fert/fertpar_doubleMaxf.csv"
    ],
    "code": [
     "capri_mod/__init__.py",
@@ -3218,7 +3219,7 @@
    "inputs": [
     "capri_data/shared/capri_member_state_codes.csv",
     "capri_data/shared/regional_units.csv",
-    "capri_data/sources/capri_gams/inputs/yieldIY.gms"
+    "capri_data/sources/capri_gams/inputs/yieldIY_p_inputDemandFactor.csv"
    ],
    "code": [
     "tools/build/build_capri_base.py",
@@ -3756,7 +3757,8 @@
     "capri_data/schema/codes/capri/MS_RU.csv",
     "capri_data/shared/capri_member_state_codes.csv",
     "capri_data/shared/regional_units.csv",
-    "capri_data/sources/capri_gams/fert/fertpar.gms",
+    "capri_data/sources/capri_gams/fert/fertpar_p_nfixRate_gras.csv",
+    "capri_data/sources/capri_gams/fert/fertpar_p_nitrFact_RALL_GRAE_BioFix.csv",
     "capri_data/sources/envind/capri_digest_default_prd.csv",
     "capri_data/sources/envind/capri_digestpar.csv",
     "capri_data/sources/envind/res17_mann_crpr_expt.csv",
@@ -3869,7 +3871,7 @@
    "inputs": [
     "capri_data/shared/capri_member_state_codes.csv",
     "capri_data/shared/regional_units.csv",
-    "capri_data/sources/eu_tariff_provenance.json",
+    "capri_data/sources/eu_tariff_provenance.csv",
     "capri_data/sources/market/bilateral_dataout_2017.csv.xz"
    ],
    "code": [
@@ -4013,7 +4015,7 @@
     "capri_data/2017/supply/cover_crops.csv",
     "capri_data/shared/capri_member_state_codes.csv",
     "capri_data/shared/regional_units.csv",
-    "capri_data/sources/capri_gams/wintercovershare.gms",
+    "capri_data/sources/capri_dat/policy/wintercovershare_p_winterCoverShare0.csv",
     "capri_data/validation/greendeal_2030/capri_marginal_terms_ini_2030.csv.xz"
    ],
    "code": [
@@ -4098,7 +4100,7 @@
    ],
    "outputs": [
     "capri_data/2017/market/world_prices.csv",
-    "capri_data/sources/world_price_provenance.json"
+    "capri_data/sources/world_price_provenance.csv"
    ]
   },
   {
