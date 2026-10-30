@@ -140,10 +140,11 @@ def linear_solver_options() -> dict:
     if ls == "mumps":
         return {}
     if ls == "spral":
-        # SPRAL (BSD licence) is part of CasADi's IPOPT; it runs on OpenMP. IPOPT's documentation asks for
-        # OMP_CANCELLATION=TRUE and OMP_PROC_BIND=TRUE; the model runs its regional solves in CAPRI_WORKERS processes,
-        # so each solve takes one thread (OMP_NUM_THREADS=1) unless the environment says otherwise. The OpenMP runtime
-        # reads them when it starts: the run scripts set them before (tools/run), this is the fallback
+        # SPRAL (BSD licence) is part of CasADi's IPOPT. CasADi 3.8.1 builds it without OpenMP: libipopt carries
+        # SPRAL's omp_* stubs and no OpenMP runtime, so it runs on one thread (checked 30 October 2026). With an IPOPT
+        # built with OpenMP, IPOPT's documentation asks for OMP_CANCELLATION=TRUE and OMP_PROC_BIND=TRUE, and the
+        # model's CAPRI_WORKERS processes each take one thread (OMP_NUM_THREADS=1): set here unless the environment
+        # says otherwise (the OpenMP runtime reads them when it starts)
         for k_, v_ in (("OMP_CANCELLATION", "TRUE"), ("OMP_PROC_BIND", "TRUE"), ("OMP_NUM_THREADS", "1")):
             os.environ.setdefault(k_, v_)
         return {"ipopt.linear_solver": "spral"}
