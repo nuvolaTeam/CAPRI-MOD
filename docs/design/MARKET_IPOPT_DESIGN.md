@@ -153,6 +153,11 @@ The options as they were put:
 - **The market NLP will use IPOPT's linear solver setting** (supply.nlp_linear_solver, register BEYOND-11).
 - **SPRAL is bundled with CasADi but serial there:** CasADi 3.8.1 builds it without OpenMP.
 - **An IPOPT built with an OpenMP-enabled SPRAL is an option for this NLP.** It is much larger than a regional one,
-  which is where a parallel factorisation can pay off. The project lead likes it; it is to be weighed after the
-  MUMPS-SPRAL benchmark on the regional solves, and measured on the market NLP once G3 exists.
+  which is where a parallel factorisation can pay off. The project lead likes it; it is to be measured on the market
+  NLP once G3 exists.
+- **The benchmark on the regional solves (30 October 2026)** settles their case: MUMPS stays.
+  - Setup: the 885 regional solves of the mini-EU Farm-to-Fork run, each repeated with SPRAL from the same start.
+  - Where both solve (869), the objectives agree within 1e-6.
+  - Serial SPRAL takes 2.4 times MUMPS's time per solve (median) and 4.2 times in total IPOPT time.
+  - It also fails 2 solves that MUMPS solves.
 
