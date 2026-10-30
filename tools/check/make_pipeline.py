@@ -23,6 +23,7 @@ import argparse
 import collections
 import json
 import os
+import subprocess
 import sys
 import tempfile
 from pathlib import Path
@@ -31,6 +32,10 @@ ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / "tools" / "pipeline" / "builders.json"
 UP = os.environ.get("CAPRI_UPLOADS", "/mnt/user-data/uploads")
 WORK = os.environ.get("CAPRI_WORK", "/home/claude/work")
+#: the repository's git store: a builder reading the repository's history (convert_sources_to_csv, git show) reads it;
+#: those objects are the repository, not an external source
+GIT_DIR = subprocess.run(["git", "rev-parse", "--path-format=absolute", "--git-common-dir"], cwd=ROOT,
+                         capture_output=True, text=True).stdout.strip()
 
 
 def placeholder(p: str) -> str:
@@ -48,7 +53,9 @@ def build(trace: dict) -> tuple[list, list]:
         outs = sorted(set(d["writes"]) | set(d["rewrites"]))
         ins = sorted(set(d["reads"]) - set(outs))
         # a builder's own temporary files (tempfile) are not sources
-        ext = [x for x in d["external"] if not x.startswith(tempfile.gettempdir().rstrip("/") + "/")]
+        # nor is the repository's git store
+        ext = [x for x in d["external"] if not x.startswith(tempfile.gettempdir().rstrip("/") + "/")
+               and not (GIT_DIR and x.startswith(GIT_DIR.rstrip("/") + "/"))]
         tasks.append({"task": name, "builder": builder, "args": args, "inputs": ins,
                       "code": sorted(d["code"]), "external": sorted(placeholder(x) for x in ext),
                       "outputs": outs})

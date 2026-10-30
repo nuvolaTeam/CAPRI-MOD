@@ -53,26 +53,30 @@ EXTERNAL_ORIGIN = "CAPRI"
 #: builder, origins (from the builder's docstring); a retrace moves them into builders.json
 UNTRACED = {
     "capri_data/pipeline/captrd/sets/": ("build_captrd_sets", "CAPRI"),
-    "capri_data/pipeline/captrd/dat/": ("build_captrd_dat", "CAPRI"),
     "capri_data/validation/eu_outlook_2020_2030.csv": ("build_eu_outlook_2030", "EC"),
     "capri_data/validation/n_cascade_capri_gd2030.csv": ("build_n_cascade_validation", "CAPRI"),
-    # the CSV conversion of the sources that were not CSV (30 October 2026); under capri_data/sources they stay
-    # source extracts, with their converter named
-    "capri_data/sources/water/": ("convert_sources_to_csv", "CAPRI"),
-    "capri_data/sources/capri_gams/": ("convert_sources_to_csv", "CAPRI"),
-    "capri_data/sources/capri_dat/biofuel/": ("convert_sources_to_csv", "CAPRI"),
-    "capri_data/sources/capri_dat/coco/": ("convert_sources_to_csv", "CAPRI"),
-    "capri_data/sources/capri_dat/policy/": ("convert_sources_to_csv", "CAPRI"),
-    "capri_data/sources/envind/fao_landuse_2000_P.csv": ("convert_sources_to_csv", "CAPRI"),
-    "capri_data/sources/envind/ipcc_wetlands_p_emifacOrganicSoil_ori.csv": ("convert_sources_to_csv", "CAPRI"),
-    "capri_data/sources/envind/orgsoil_share_p_orgsoilori.csv": ("convert_sources_to_csv", "CAPRI"),
-    "capri_data/sources/ghgtech/LitRevFertTech_p_litRevFertTechs_all.csv": ("convert_sources_to_csv", "CAPRI"),
-    "capri_data/sources/ghgtech/miti_data_jul15_p_ghgMiti.csv": ("convert_sources_to_csv", "CAPRI"),
-    "capri_data/sources/policy/minfert_redu_by_crop_p_checkSmallMine.csv": ("convert_sources_to_csv", "CAPRI"),
-    "capri_data/sources/policy/minfert_redu_by_crop_limCres.csv": ("convert_sources_to_csv", "CAPRI"),
-    "capri_data/sources/market/eu_tariff_provenance.csv": ("convert_sources_to_csv", "CAPRI"),
-    "capri_data/sources/capri_star/nutrient_cont_usda_p_nutrientCont.csv": ("convert_sources_to_csv", "USDA via CAPRI"),
-    "capri_data/sources/nuts/": ("convert_sources_to_csv", "Eurostat"),
+}
+#: the CSV conversion of the sources that were not CSV (tools/build/convert_sources_to_csv.py, 30 October 2026),
+#: by file or folder prefix: their origin. The converter reads the originals from the repository's history, so the trace
+#: shows it no external source: its files stay source extracts, with their converter named and this origin (a builder
+#: reading one takes the origin of its folder, SOURCE_ORIGIN, as for any source file).
+CONVERTER = "convert_sources_to_csv"
+CONVERTED_ORIGIN = {
+    "capri_data/sources/water/": "CAPRI",
+    "capri_data/sources/capri_gams/": "CAPRI",
+    "capri_data/sources/capri_dat/biofuel/": "CAPRI",
+    "capri_data/sources/capri_dat/coco/": "CAPRI",
+    "capri_data/sources/capri_dat/policy/": "CAPRI",
+    "capri_data/sources/envind/fao_landuse_2000_P.csv": "CAPRI",
+    "capri_data/sources/envind/ipcc_wetlands_p_emifacOrganicSoil_ori.csv": "CAPRI",
+    "capri_data/sources/envind/orgsoil_share_p_orgsoilori.csv": "CAPRI",
+    "capri_data/sources/ghgtech/LitRevFertTech_p_litRevFertTechs_all.csv": "CAPRI",
+    "capri_data/sources/ghgtech/miti_data_jul15_p_ghgMiti.csv": "CAPRI",
+    "capri_data/sources/policy/minfert_redu_by_crop_p_checkSmallMine.csv": "CAPRI",
+    "capri_data/sources/policy/minfert_redu_by_crop_limCres.csv": "CAPRI",
+    "capri_data/sources/market/eu_tariff_provenance.csv": "CAPRI",
+    "capri_data/sources/capri_star/nutrient_cont_usda_p_nutrientCont.csv": "USDA via CAPRI",
+    "capri_data/sources/nuts/": "Eurostat",
 }
 #: files without a builder whose origin was established by a check (02_provenance_notes.sql gives the evidence)
 NO_BUILDER_ORIGIN = {
@@ -86,6 +90,11 @@ NO_BUILDER_ORIGIN = {
 def _untraced(rel):
     """UNTRACED's (builder, origin) of a file, by its path or a folder prefix."""
     return next((v for k, v in UNTRACED.items() if rel == k or (k.endswith("/") and rel.startswith(k))), None)
+
+
+def _converted(rel):
+    """CONVERTED_ORIGIN's origin of a file, by its path or a folder prefix."""
+    return next((v for k, v in CONVERTED_ORIGIN.items() if rel == k or (k.endswith("/") and rel.startswith(k))), None)
 
 
 def _collapse(paths):
@@ -113,6 +122,10 @@ def provenance(root: Path = ROOT):
         if f in seen:
             return set(), set()
         t = writer.get(f)
+        if t is not None and t["builder"] == CONVERTER:
+            # a source file, as if it had no writer: its folder's origin
+            memo[f] = ({SOURCE_ORIGIN.get(f.split("/")[2], SOURCE_DEFAULT)}, set())
+            return memo[f]
         if t is None:
             if f.startswith("capri_data/sources/"):
                 folder = f.split("/")[2]
@@ -141,6 +154,9 @@ def provenance(root: Path = ROOT):
         if "archive" in p.parts:
             continue
         t = writer.get(rel)
+        if t is not None and t["builder"] == CONVERTER:
+            rows.append((rel, "source-extract", _converted(rel) or SOURCE_DEFAULT, CONVERTER, None))
+            continue
         if rel.startswith("capri_data/sources/") and t is None:
             folder = rel.split("/")[2]
             hit = _untraced(rel)
