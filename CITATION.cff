@@ -43,7 +43,7 @@ references:
   - type: software
     title: CAPRI modelling system
     authors:
-      - name: University of Bonn and partner institutions (CAPRI network)
+      - given-names: University of Bonn and partner institutions (CAPRI network)
     url: https://www.capri-model.org
     notes:
       The original CAPRI model, developed at the University of Bonn and
