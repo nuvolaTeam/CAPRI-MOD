@@ -227,7 +227,6 @@ INSERT INTO code_data_status VALUES
   ('capri_mod/supply/policy.py', 'PolicyBlock._organic_converted', 25.0, 'capri', 'keep', 'gams/pol_input/greendeal/load_organic_targets.gms l. 175, 183', 'organic target scaling (orgTarg - 12) / (25 - 12)'),
   ('capri_mod/supply/policy.py', 'PolicyBlock._organic_target_scale', 25.0, 'capri', 'keep', 'gams/pol_input/greendeal/load_organic_targets.gms l. 175, 183', 'organic target scaling (orgTarg - 12) / (25 - 12)'),
   ('capri_mod/supply/policy.py', 'PolicyBlock.apply_pesticide_reduction', 0.99, 'numerical', 'keep', NULL, 'organic share capped at 99% so the conventional share stays positive'),
-  ('capri_mod/supply/supply_module.py', 'RegionalSupplyModel.nlp_tol', 1e-08, 'numerical', 'keep', NULL, 'IPOPT tolerance; overwritten each iteration from outer_loop.nlp_tol_final'),
   ('capri_mod/supply/fertilisation.py', 'FertilisationBlock.tiered_surplus_target', 0.25, 'literature', 'keep', 'JRC121368 tiered surplus rule (sect. 4.3.4 as cited in policy_module.py)', '25% cut on the first 50 kg N/ha'),
   ('capri_mod/supply/fertilisation.py', 'FertilisationBlock.tiered_surplus_target', 0.75, 'literature', 'keep', 'JRC121368 tiered surplus rule (sect. 4.3.4 as cited in policy_module.py)', '75% cut on 100-150 kg N/ha'),
   ('capri_mod/supply/fertilisation.py', 'FertilisationBlock.tiered_surplus_target', 50.0, 'literature', 'keep', 'JRC121368 tiered surplus rule (sect. 4.3.4 as cited in policy_module.py)', 'tier bounds 50 and 100 kg N/ha'),
