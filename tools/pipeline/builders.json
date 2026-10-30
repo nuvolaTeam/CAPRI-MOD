@@ -1572,6 +1572,7 @@
    "builder": "build_eu_market_supply_nq",
    "args": [],
    "inputs": [
+    "capri_data/codes/model_commodities.csv",
     "capri_data/shared/regional_units.csv"
    ],
    "code": [

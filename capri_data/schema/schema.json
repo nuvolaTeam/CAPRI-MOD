@@ -10006,6 +10006,11 @@
      "not_null": true
     },
     {
+     "name": "capri_y",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
      "name": "h",
      "type": "DOUBLE",
      "not_null": true
@@ -10045,6 +10050,15 @@
     {
      "columns": [
       "y"
+     ],
+     "references": "model_commodities",
+     "ref_columns": [
+      "code"
+     ]
+    },
+    {
+     "columns": [
+      "capri_y"
      ],
      "references": "capri_xx1",
      "ref_columns": [
@@ -10087,7 +10101,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_eu_market_supply_nq",
-    "sources": "$UP/data_market_1730defaulta.csv; $UP/elas_2_1730defaulta.csv; $UP/markmarket_greendeal_1730et_base_1717.txt; $UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv"
+    "sources": "$UP/data_market_1730defaulta.csv; $UP/elas_2_1730defaulta.csv; $UP/markmarket_greendeal_1730et_base_1717.txt; $UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $WORK/allgms/gams/aggregation/defaultA.agg; $WORK/capri_reference/sets/simini_21730/<CC>.csv; $WORK/capri_reference/sets/simini_21730/FEED_TO_O.csv; $WORK/capri_reference/sets/simini_21730/MAACT.csv; $WORK/capri_reference/sets/simini_21730/MCACT.csv; $WORK/capri_reference/sets/simini_21730/MPACT.csv; $WORK/capri_reference/sets/simini_21730/Map_RR.csv; $WORK/capri_reference/sets/simini_21730/PACT.csv; $WORK/capri_reference/sets/simini_21730/RALL.csv; $WORK/capri_reference/sets/simini_21730/XX1.csv"
    },
    "notes": [],
    "read_by": {
@@ -16021,6 +16035,7 @@
     "model": [],
     "builders": [
      "build_capri_supply_elas_market",
+     "build_eu_market_supply_nq",
      "build_world_prices"
     ],
     "checks": [],
@@ -39787,7 +39802,7 @@
   "capri/keep": 116,
   "capri-mod/keep": 2,
   "literature/keep": 11,
-  "numerical/keep": 34,
+  "numerical/keep": 33,
   "open/keep": 8,
   "physical/keep": 25,
   "technical/keep": 42

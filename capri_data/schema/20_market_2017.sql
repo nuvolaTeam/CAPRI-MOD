@@ -20,7 +20,8 @@ COMMENT ON TABLE rms_to_rm IS 'CAPRI''s behavioural regions (RMS) and the market
 CREATE TABLE eu_market_supply_nq (
     ms VARCHAR NOT NULL REFERENCES capri_rall (code),
     x VARCHAR NOT NULL CHECK (x IN ('OTHO', 'FFIS', 'SFIS', 'OAQU')),
-    y VARCHAR NOT NULL REFERENCES capri_xx1 (code),
+    y VARCHAR NOT NULL REFERENCES model_commodities (code),   -- the price's product, the model's code
+    capri_y VARCHAR NOT NULL REFERENCES capri_xx1 (code),     -- the same, CAPRI's code
     h DOUBLE NOT NULL,
     ppri_y DOUBLE NOT NULL CHECK (ppri_y > 0),
     inpe DOUBLE NOT NULL CHECK (inpe > 0),

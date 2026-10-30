@@ -16,7 +16,10 @@ Sources: CAPRI's NQ supply Hessian at the calibration point (elas_2_1730defaulta
 member states' producer prices there (data_market_1730defaulta.csv: Data_CAL PPRI at CAL) and the 2030 price of the
 non-agricultural good (markmarket_greendeal_1730et_base_1717.txt: PPRI INPE 2030).
 
-Output: capri_data/2017/market/eu_market_supply_nq.csv  ms, x, y, h, ppri_y, inpe, h_ratio
+Output: capri_data/2017/market/eu_market_supply_nq.csv  ms, x, y, capri_y, h, ppri_y, inpe, h_ratio: y the price's
+product in the model's code (codes/model_commodities.csv), capri_y CAPRI's. Until 31 October 2026 y was CAPRI's code,
+which the market looks up among the model's: the 143 terms on MAIZ, WHEA, SUGA, OLIO, POUM, RICE and TWIN (0.8% of
+the terms' absolute sum) were dropped.
 
     python tools/build/build_eu_market_supply_nq.py
 """
@@ -78,6 +81,8 @@ def main():
                 m = p3.match(line)
                 if m:
                     inpe[m.group(1)] = num(m.group(2))
+    com = read_csv(ROOT / "capri_data" / "codes" / "model_commodities.csv")
+    to_model = dict(zip(com.capri_code, com.code))
     rows = []
     missing = set()
     for ms, x, y, h in terms:
@@ -91,10 +96,14 @@ def main():
         if not p:
             missing.add((ms, x, y))
             continue
-        rows.append((ms, x, y, h, p, inpe_, h * p / inpe_))
+        if y not in to_model:
+            missing.add((ms, x, f"{y}: no model commodity"))
+            continue
+        rows.append((ms, x, to_model[y], y, h, p, inpe_, h * p / inpe_))
     if missing:
-        raise SystemExit(f"no CAPRI price (Data_CAL PPRI, or the 2030 PPRI INPE) for {sorted(missing)[:10]}")
-    out = pd.DataFrame(rows, columns=["ms", "x", "y", "h", "ppri_y", "inpe", "h_ratio"]).sort_values(["ms", "x", "y"])
+        raise SystemExit(f"no CAPRI price (Data_CAL PPRI, or the 2030 PPRI INPE) or model code for {sorted(missing)[:10]}")
+    out = pd.DataFrame(rows, columns=["ms", "x", "y", "capri_y", "h", "ppri_y", "inpe", "h_ratio"]).sort_values(
+        ["ms", "x", "capri_y"])
     to_csv(out, OUT, index=False)
     print(f"wrote {OUT.relative_to(ROOT)}: {len(out)} terms, {out.ms.nunique()} member states; "
           + ", ".join(f"{x} {int((out.x == x).sum())}" for x in PRODUCTS))
