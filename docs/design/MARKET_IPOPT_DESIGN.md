@@ -102,7 +102,13 @@ Each stage must pass two checks:
 - the CasADi residual equals the NumPy residual at random points (relative 1e-10);
 - the Jacobian equals finite differences.
 
-1. **G2a.** The TRQ sigmoid in trade_ad.py, so the quotas leave the outer loop.
+1. **G2a.** The TRQ sigmoid in trade_ad.py, so the quotas leave the outer loop. **Built 30 October 2026:**
+   trade_trq_function.
+   - The quota offsets are unknowns, with CAPRI's sigmoid as their equations. These are trq_solve's fixed point with
+     the flows' full response.
+   - The existing trade_function shares the same expressions (_system).
+   - capri_mod/tests/test_trade_ad.py checks the residual and the Jacobian against the numeric system.
+   - No solve uses it yet: the NLP of G3 will.
 2. **G2b.** Market supply and pooled commodities: the non-EU supply functions, and the EU's anticipated response
    with the measured Hessian.
 3. **G2c.** Human consumption, the generalised Leontief system.
