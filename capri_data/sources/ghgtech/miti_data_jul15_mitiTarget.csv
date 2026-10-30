@@ -1,0 +1,16 @@
+target,text
+N2OSYN,Emissions from Syntetic fertilizers
+N2OHIS,Emissions from Histosols
+NH3APP,NH3 emissions from manure application
+CH4ENT,Emissions from enteric fermentation produced per Mio heads
+CH4MAN,Emissions from Manure management produced per Mio heads
+CH4RIC,Emissions from Rice
+BIOFIX,Biological fixation may reduce crop fertiliser need
+CO2SEQ,winter cover
+NH3MAN,NH3 emissions from manure management
+CH4ENT_3k,Emissions from enteric fermentation produced per kt of Milk above 3000 kg Milk per cow
+CH4MAN_3k,Emissions from Manure management produced per kt of Milk above 3000 kg Milk per cow
+N2OEXCR,Emissions related to animal excretions
+anyFemCat,Emissions of CH4 and N2O from raising female cattle
+mlkYld,Higher milk yields increase efficeincy of dairy
+rumFedEff,Higher feed efficiency of non dairy ruminants

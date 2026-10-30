@@ -1,0 +1,264 @@
+level,code_2013,code_2016,label,change,explanation
+1,,FRB,CENTRE — VAL DE LOIRE,"new NUTS 1 region, identical to ex-NUTS 2 region FR24",FRB=FR24
+1,,FRC,BOURGOGNE-FRANCHE-COMTÉ,"new NUTS 1 region, merge of ex-NUTS 2 regions FR26 and FR43",FRC=FR26+FR43
+1,,FRD,NORMANDIE,"new NUTS 1 region, merge of ex-NUTS 2 regions FR23 and FR25",FRD=FR23+FR25
+1,,FRE,NORD-PAS DE CALAIS-PICARDIE,"new NUTS 1 region, merge of ex-NUTS 2 regions FR22 and FR30",FRE=FR22+FR30
+1,,FRF,ALSACE-CHAMPAGNE-ARDENNE-LORRAINE,"new NUTS 1 region, merge of ex-NUTS 2 regions FR 21, FR 41 and FR42",FRF=FR21+FR41+FR42
+1,,FRG,PAYS DE LA LOIRE,"new NUTS 1 region, identical to ex-NUTS 2 region FR51",FRG=FR51
+1,,FRH,BRETAGNE,"new NUTS 1 region, identical to ex-NUTS 2 region FR52",FRH=FR52
+1,,FRI,AQUITAINE-LIMOUSIN-POITOU-CHARENTES,"new NUTS 1 region, merge of ex-NUTS 2 regions FR53, FR61 and FR63",FRI=FR53+FR61+FR63
+1,,FRJ,LANGUEDOC-ROUSSILLON-MIDI-PYRÉNÉES,"new NUTS 1 region, merge of ex-NUTS 2 regions FR62 and FR81",FRJ=FR62+FR81
+1,FR7,FRK,AUVERGNE-RHÔNE-ALPES,relabelled and recoded,FRK=FR7
+1,,FRL,PROVENCE-ALPES-CÔTE D’AZUR,"new NUTS 1 region, identical to ex-NUTS 2 region FR82",FRL=FR82
+1,,FRM,CORSE,"new NUTS 1 region, identical to ex-NUTS 2 region FR83",FRM=FR83
+1,FRA,FRY,RUP FR — RÉGIONS ULTRAPÉRIPHÉRIQUES FRANÇAISES,relabelled and recoded,FRY=FRA
+1,FR2,,Bassin Parisien,discontinued,
+1,FR3,,Nord-Pas-de-Calais,discontinued,
+1,FR4,,Est,discontinued,
+1,FR5,,Ouest,discontinued,
+1,FR6,,Sud-Ouest,discontinued,
+1,FR7,,Centre-Est,discontinued,
+1,FR8,,Méditerranée,discontinued,
+1,PL1,,REGION CENTRALNY,discontinued,
+1,PL2,PL2,MAKROREGION POŁUDNIOWY,relabelled,PL2=PL2
+1,PL3,,REGION WSCHODNI,discontinued,
+1,PL4,PL4,MAKROREGION PÓŁNOCNO-ZACHODNI,relabelled,PL4=PL4
+1,PL5,PL5,MAKROREGION POŁUDNIOWO-ZACHODNI,relabelled,PL5=PL5
+1,PL6,PL6,MAKROREGION PÓŁNOCNY,relabelled,PL6=PL6
+1,,PL7,MAKROREGION CENTRALNY,"new region, made from ex-PL11 and PL33",PL7=PL11+PL33
+1,,PL8,MAKROREGION WSCHODNI,"new region, equals ex-PL3 minus PL33",PL8=PL3-PL33
+1,,PL9,MAKROREGION WOJEWÓDZTWO MAZOWIECKIE,"new region, equals ex-PL12",PL9=PL12
+2,IE01,,"Border, Midland and Western",discontinued,
+2,,IE04,Northern and Western,new region,
+2,IE02,,Southern and Eastern,discontinued,
+2,,IE05,Southern,"new region, made from ex-IE023, IE024 and IE025",IE05=IE023+IE024+IE025
+2,,IE06,Eastern and Midland,new region,
+2,FR24,FRB0,Centre — Val de Loire,recoded and relabelled,FRB0=FR24
+2,FR26,FRC1,Bourgogne,recoded,FRC1=FR26
+2,FR43,FRC2,Franche-Comté,recoded,FRC2=FR43
+2,FR25,FRD1,Basse-Normandie ,recoded,FRD1=FRFR25
+2,FR23,FRD2,Haute-Normandie ,recoded,FRD2=FR23
+2,FR30,FRE1,Nord-Pas de Calais,recoded,FRE1=FR30
+2,FR22,FRE2,Picardie,recoded,FRE2=FR22
+2,FR42,FRF1,Alsace,recoded,FRF1=FR42
+2,FR21,FRF2,Champagne-Ardenne,recoded,FRF2=FR21
+2,FR41,FRF3,Lorraine,recoded,FRF3=FR41
+2,FR51,FRG0,Pays de la Loire,recoded,FRG0=FR51
+2,FR52,FRH0,Bretagne,recoded,FRH0=FR52
+2,FR61,FRI1,Aquitaine,recoded,FRI1=FR61
+2,FR63,FRI2,Limousin,recoded,FRI2=FR63
+2,FR53,FRI3,Poitou-Charentes,recoded,FRI3=FR53
+2,FR81,FRJ1,Languedoc-Roussillon,recoded,FRJ1=FR81
+2,FR62,FRJ2,Midi-Pyrénées,recoded,FRJ2=FR62
+2,FR72,FRK1,Auvergne,recoded,FRK1=FR72
+2,FR71,FRK2,Rhône-Alpes,recoded,FRK2=FR71
+2,FR82,FRL0,Provence-Alpes-Côte d’Azur,recoded,FRL0=FR82
+2,FR83,FRM0,Corse,recoded,FRM0=FR83
+2,FRA1,FRY1,Guadeloupe,recoded,FRY1=FRA1
+2,FRA2,FRY2,Martinique ,recoded,FRY2=FRA2
+2,FRA3,FRY3,Guyane,recoded,FRY3=FRA3
+2,FRA4,FRY4,La Réunion ,recoded,FRY4=FRA4
+2,FRA5,FRY5,Mayotte,recoded,FRY5=FRA5
+2,LT00,,Lietuva,split into new LT01 and LT02,
+2,,LT01,Sostinės regionas,"new region, equals ex-NUTS 3 region LT00A",LT01=LT00A
+2,,LT02,Vidurio ir vakarų Lietuvos regionas ,"new region, ex-LT00 minus ex-LT00A",LT02=LT00-LT00A
+2,HU10,,Közép-Magyarország,discontinued; split into new HU11 and HU12,
+2,,HU11,Budapest,"new region, equals ex-NUTS 3 region HU101",HU11=HU101
+2,,HU12,Pest,"new region, equals ex-NUTS 3 region HU102",HU12=HU102
+2,PL11,PL71,Łódzkie,recoded,PL71=PL11
+2,PL33,PL72,Świętokrzyskie,recoded,PL72=PL33
+2,PL31,PL81,Lubelskie,recoded,PL81=PL31
+2,PL32,PL82,Podkarpackie,recoded,PL82=PL32
+2,PL34,PL84,Podlaskie,recoded,PL84=PL34
+2,PL12,,Mazowieckie,discontinued; split into new PL91 and PL92,
+2,,PL91,Warszawski stołeczny,"new region, equals ex-PL127, PL129 and PL12A minus new PL926",PL91=PL127+PL129+PL12A-newPL926
+2,,PL92,Mazowiecki regionalny,"new region, made from ex-PL128, PL12B, PL12C, PL12D, PL12E plus new PL926",PL92=PL128+PL12B+PL12C+PL12D+PL12E+new PL926
+2,UKM2,UKM7,Eastern Scotland,boundary shift; lost ex-UKM24,UKM7=UKM2-UKM24
+2,UKM3,,South Western Scotland,discontinued; split into new UKM8 and UKM9,
+2,,UKM8,West Central Scotland,"new region, made from ex-UKM31, UKM34, UKM35 and UKM36",UKM8=UKM31+UKM34+UKM35+UKM36
+2,,UKM9,Southern Scotland,"new region, made from ex-UKM24, UKM32, UKM33, UKM37 and UKM38",UKM9=UKM24+UKM32+UKM33+UKM37+UKM38
+3,DE915,,Göttingen,discontinued; merged with ex-DE919,
+3,DE919,,Osterode am Harz,discontinued; merged with ex-DE915,
+3,,DE91C,Göttingen,"new region, merge of ex-DE915 and DE919",DE91C=DE915+DE919
+3,DEB16,DEB1C,Cochem-Zell,boundary shift,
+3,DEB19,DEB1D,Rhein-Hunsrück-Kreis,boundary shift,
+3,IE011,IE041,Border,boundary shift,
+3,IE013,IE042,West,recoded,IE042=IE013
+3,IE023,IE051,Mid-West ,boundary shift,
+3,IE024,IE052,South-East ,boundary shift,
+3,IE025,IE053,South-West ,recoded,IE053=IE025
+3,IE021,IE061,Dublin,recoded,IE061=IE021
+3,IE022,IE062,Mid-East,boundary shift,
+3,IE012,IE063,Midland,recoded,IE063=IE012
+3,FR241,FRB01,Cher,recoded,FRB01=FR241
+3,FR242,FRB02,Eure-et-Loir,recoded,FRB02=FR242
+3,FR243,FRB03,Indre,recoded,FRB03=FR243
+3,FR244,FRB04,Indre-et-Loire,recoded,FRB04=FR244
+3,FR245,FRB05,Loir-et-Cher,recoded,FRB05=FR245
+3,FR246,FRB06,Loiret,recoded,FRB06=FR246
+3,FR261,FRC11,Côte-d’Or,recoded,FRC11=FR261
+3,FR262,FRC12,Nièvre,recoded,FRC12=FR262
+3,FR263,FRC13,Saône-et-Loire,recoded,FRC13=FR263
+3,FR264,FRC14,Yonne,recoded,FRC14=FR264
+3,FR431,FRC21,Doubs,recoded,FRC21=FR431
+3,FR432,FRC22,Jura,recoded,FRC22=FR432
+3,FR433,FRC23,Haute-Saône,recoded,FRC23=FR433
+3,FR434,FRC24,Territoire de Belfort,recoded,FRC24=FR434
+3,FR251,FRD11,Calvados ,recoded,FRD11=FR251
+3,FR252,FRD12,Manche ,recoded,FRD12=FR252
+3,FR253,FRD13,Orne,recoded,FRD13=FR253
+3,FR231,FRD21,Eure,recoded,FRD21=FR231
+3,FR232,FRD22,Seine-Maritime,recoded,FRD22=FR232
+3,FR301,FRE11,Nord,recoded,FRE11=FR301
+3,FR302,FRE12,Pas-de-Calais,recoded,FRE12=FR302
+3,FR221,FRE21,Aisne,recoded,FRE21=FR221
+3,FR222,FRE22,Oise,recoded,FRE22=FR222
+3,FR223,FRE23,Somme,recoded,FRE23=FR223
+3,FR421,FRF11,Bas-Rhin,recoded,FRF11=FR421
+3,FR422,FRF12,Haut-Rhin,recoded,FRF12=FR422
+3,FR211,FRF21,Ardennes,recoded,FRF21=FR211
+3,FR212,FRF22,Aube,recoded,FRF22=FR212
+3,FR213,FRF23,Marne,recoded,FRF23=FR213
+3,FR214,FRF24,Haute-Marne,recoded,FRF24=FR214
+3,FR411,FRF31,Meurthe-et-Moselle ,recoded,FRF31=FR411
+3,FR412,FRF32,Meuse ,recoded,FRF32=FR412
+3,FR413,FRF33,Moselle,recoded,FRF33=FR413
+3,FR414,FRF34,Vosges,recoded,FRF34=FR414
+3,FR511,FRG01,Loire-Atlantique,recoded,FRG01=FR511
+3,FR512,FRG02,Maine-et-Loire,recoded,FRG02=FR512
+3,FR513,FRG03,Mayenne,recoded,FRG03=FR513
+3,FR514,FRG04,Sarthe,recoded,FRG04=FR514
+3,FR515,FRG05,Vendée,recoded,FRG05=FR515
+3,FR521,FRH01,Côtes-d’Armor,recoded,FRH01=FR521
+3,FR522,FRH02,Finistère,recoded,FRH02=FR522
+3,FR523,FRH03,Ille-et-Vilaine,recoded,FRH03=FR523
+3,FR524,FRH04,Morbihan,recoded,FRH04=FR524
+3,FR611,FRI11,Dordogne,recoded,FRI11=FR611
+3,FR612,FRI12,Gironde,recoded,FRI12=FR612
+3,FR613,FRI13,Landes,recoded,FRI13=FR613
+3,FR614,FRI14,Lot-et-Garonne,recoded,FRI14=FR614
+3,FR615,FRI15,Pyrénées-Atlantiques,recoded,FRI15=FR615
+3,FR631,FRI21,Corrèze,recoded,FRI21=FR631
+3,FR632,FRI22,Creuse,recoded,FRI22=FR632
+3,FR633,FRI23,Haute-Vienne,recoded,FRI23=FR633
+3,FR531,FRI31,Charente,recoded,FRI31=FR531
+3,FR532,FRI32,Charente-Maritime,recoded,FRI32=FR532
+3,FR533,FRI33,Deux-Sèvres,recoded,FRI33=FR533
+3,FR534,FRI34,Vienne,recoded,FRI34=FR534
+3,FR811,FRJ11,Aude,recoded,FRJ11=FR811
+3,FR812,FRJ12,Gard,recoded,FRJ12=FR812
+3,FR813,FRJ13,Hérault,recoded,FRJ13=FR813
+3,FR814,FRJ14,Lozère,recoded,FRJ14=FR814
+3,FR815,FRJ15,Pyrénées-Orientales,recoded,FRJ15=FR815
+3,FR621,FRJ21,Ariège,recoded,FRJ21=FR621
+3,FR622,FRJ22,Aveyron,recoded,FRJ22=FR622
+3,FR623,FRJ23,Haute-Garonne,recoded,FRJ23=FR623
+3,FR624,FRJ24,Gers,recoded,FRJ24=FR624
+3,FR625,FRJ25,Lot,recoded,FRJ25=FR625
+3,FR626,FRJ26,Hautes-Pyrénées ,recoded,FRJ26=FR626
+3,FR627,FRJ27,Tarn,recoded,FRJ27=FR627
+3,FR628,FRJ28,Tarn-et-Garonne,recoded,FRJ28=FR628
+3,FR721,FRK11,Allier,recoded,FRK11=FR721
+3,FR722,FRK12,Cantal,recoded,FRK12=FR722
+3,FR723,FRK13,Haute-Loire,recoded,FRK13=FR723
+3,FR724,FRK14,Puy-de-Dôme,recoded,FRK14=FR724
+3,FR711,FRK21,Ain,recoded,FRK21=FR711
+3,FR712,FRK22,Ardèche,recoded,FRK22=FR712
+3,FR713,FRK23,Drôme,recoded,FRK23=FR713
+3,FR714,FRK24,Isère,recoded,FRK24=FR714
+3,FR715,FRK25,Loire,recoded,FRK25=FR715
+3,FR716,FRK26,Rhône,recoded,FRK26=FR716
+3,FR717,FRK27,Savoie,recoded,FRK27=FR717
+3,FR718,FRK28,Haute-Savoie,recoded,FRK28=FR718
+3,FR821,FRL01,Alpes-de-Haute-Provence,recoded,FRL01=FR821
+3,FR822,FRL02,Hautes-Alpes ,recoded,FRL02=FR822
+3,FR823,FRL03,Alpes-Maritimes,recoded,FRL03=FR823
+3,FR824,FRL04,Bouches-du-Rhône,recoded,FRL04=FR824
+3,FR825,FRL05,Var,recoded,FRL05=FR825
+3,FR826,FRL06,Vaucluse,recoded,FRL06=FR826
+3,FR831,FRM01,Corse-du-Sud,recoded,FRM01=FR831
+3,FR832,FRM02,Haute-Corse,recoded,FRM02=FR832
+3,FRA10,FRY10,Guadeloupe,recoded,FRY10=FRA10
+3,FRA20,FRY20,Martinique ,recoded,FRY20=FRA20
+3,FRA30,FRY30,Guyane,recoded,FRY30=FRA30
+3,FRA40,FRY40,La Réunion,recoded,FRY40=FRA40
+3,FRA50,FRY50,Mayotte ,recoded,FRY50=FRA50
+3,LT00A,LT011,Vilniaus apskritis,recoded,LT011=LT00A
+3,LT001,LT021,Alytaus apskritis,recoded,LT021=LT001
+3,LT002,LT022,Kauno apskritis,recoded,LT022=LT002
+3,LT003,LT023,Klaipėdos apskritis,recoded,LT023=LT003
+3,LT004,LT024,Marijampolės apskritis,recoded,LT024=LT004
+3,LT005,LT025,Panevėžio apskritis,recoded,LT025=LT005
+3,LT006,LT026,Šiaulių apskritis,recoded,LT026=LT006
+3,LT007,LT027,Tauragės apskritis,recoded,LT027=LT007
+3,LT008,LT028,Telšių apskritis,recoded,LT028=LT008
+3,LT009,LT029,Utenos apskritis,recoded,LT029=LT009
+3,HU101,HU110,Budapest,recoded,HU110=HU101
+3,HU102,HU120,Pest,recoded,HU120=HU102
+3,NL121,NL124,Noord-Friesland,boundary shift,
+3,NL122,NL125,Zuidwest-Friesland,boundary shift,
+3,NL123,NL126,Zuidoost-Friesland,boundary shift,
+3,NL322,NL328,Alkmaar en omgeving,boundary shift,
+3,NL326,NL329,Groot-Amsterdam,boundary shift,
+3,NL338,NL33B,Oost-Zuid-Holland,boundary shift,
+3,NL339,NL33C,Groot-Rijnmond,boundary shift,
+3,PL113,PL711,Miasto Łódź,recoded,PL711=PL113
+3,PL114,PL712,Łódzki,recoded,PL712=PL114
+3,PL115,PL713,Piotrkowski,recoded,PL713=PL115
+3,PL116,PL714,Sieradzki,recoded,PL714=PL116
+3,PL117,PL715,Skierniewicki,recoded,PL715=PL117
+3,PL331,PL721,Kielecki,recoded,PL721=PL331
+3,PL332,PL722,Sandomiersko-jędrzejowski,recoded,PL722=PL332
+3,PL311,PL811,Bialski,recoded,PL811=PL311
+3,PL312,PL812,Chełmsko-zamojski,recoded,PL812=PL312
+3,PL314,PL814,Lubelski,recoded,PL814=PL314
+3,PL315,PL815,Puławski,recoded,PL815=PL315
+3,PL323,PL821,Krośnieński,recoded,PL821=PL323
+3,PL324,PL822,Przemyski,recoded,PL822=PL324
+3,PL325,PL823,Rzeszowski,recoded,PL823=PL325
+3,PL326,PL824,Tarnobrzeski,recoded,PL824=PL326
+3,PL343,PL841,Białostocki,recoded,PL841=PL343
+3,PL344,PL842,Łomżyński,recoded,PL842=PL344
+3,PL345,PL843,Suwalski,recoded,PL843=PL345
+3,PL127,PL911,Miasto Warszawa,recoded,PL911=PL127
+3,PL129,PL912,Warszawski wschodni,boundary shift,
+3,PL12A,PL913,Warszawski zachodni,"boundary shift, lost new PL926",PL913=PL12A-new PL926
+3,PL128,PL921,Radomski,recoded,PL921=PL128
+3,PL12B,PL922,Ciechanowski,recoded,PL922=PL12B
+3,PL12C,PL923,Płocki,recoded,PL923=PL12C
+3,PL12D,PL924,Ostrołęcki,recoded,PL924=PL12D
+3,PL12E,PL925,Siedlecki,boundary shift,PL925=PL12E
+3,,PL926,Żyrardowski,new region,
+3,FI1D4,FI1D8,Kainuu,boundary shift,
+3,FI1D6,FI1D9,Pohjois-Pohjanmaa,boundary shift,
+3,UKM21,UKM71,Angus and Dundee City,recoded,UKM71=UKM21
+3,UKM22,UKM72,Clackmannanshire and Fife,recoded,UKM72=UKM22
+3,UKM23,UKM73,East Lothian and Midlothian,recoded,UKM73=UKM23
+3,UKM25,UKM75,"Edinburgh, City of",recoded,UKM75=UKM25
+3,UKM26,UKM76,Falkirk,recoded,UKM76=UKM26
+3,UKM27,UKM77,Perth & Kinross and Stirling,recoded,UKM77=UKM27
+3,UKM28,UKM78,West Lothian,recoded,UKM78=UKM28
+3,UKM31,UKM81,"East Dunbartonshire, West Dunbartonshire and Helensburgh & Lomond",recoded,UKM81=UKM31
+3,UKM34,UKM82,Glasgow City,recoded,UKM82=UKM34
+3,UKM35,UKM83,"Inverclyde, East Renfrewshire and Renfrewshire",recoded,UKM83=UKM35
+3,UKM36,UKM84,North Lanarkshire,recoded,UKM84=UKM36
+3,UKM24,UKM91,Scottish Borders,recoded,UKM91=UKM24
+3,UKM32,UKM92,Dumfries & Galloway,recoded,UKM92=UKM32
+3,UKM33,UKM93,East Ayrshire and North Ayrshire mainland,recoded,UKM93=UKM33
+3,UKM37,UKM94,South Ayrshire,recoded,UKM94=UKM37
+3,UKM38,UKM95,South Lanarkshire,recoded,UKM95=UKM38
+3,UKN01,UKN06,Belfast,boundary change,
+3,UKN02,,Outer Belfast,discontinued,
+3,UKN03,,East of Northern Ireland,discontinued,
+3,UKN04,,North of Northern Ireland,discontinued,
+3,UKN05,,West and South of Northern Ireland,discontinued,
+3,,UKN07,"Armagh City, Banbridge and Craigavon",new region,
+3,,UKN08,"Newry, Mourne and Down",new region,
+3,,UKN09,Ards and North Down ,new region,
+3,,UKN10,Derry City and Strabane,new region,
+3,,UKN11,Mid Ulster,new region,
+3,,UKN12,Causeway Coast and Glens,new region,
+3,,UKN13,Antrim and Newtownabbey,new region,
+3,,UKN14,Lisburn and Castlereagh,new region,
+3,,UKN15,Mid and East Antrim,new region,
+3,,UKN16,Fermanagh and Omagh,new region,

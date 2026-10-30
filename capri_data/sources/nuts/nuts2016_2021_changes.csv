@@ -1,0 +1,95 @@
+level,code_2016,code_2021,label,change,explanation
+1,BE3,BE3,Région wallonne,renamed,
+1,CZ0,CZ0,Česko,renamed,
+1,FRE,FRE,Hauts-de-France,name change,
+1,FRF,FRF,Grand Est,name change,
+1,FRI,FRI,Nouvelle-Aquitaine,name change,
+1,FRJ,FRJ,Occitanie,name change,
+2,ES52,ES52,Comunitat Valenciana ,name change,
+2,ES63,ES63,Ciudad de Ceuta,name change,
+2,ES64,ES64,Ciudad de Melilla,name change,
+2,HR04,,Kontinentalna Hrvatska,"discontinued; split into new HR02, HR05 and HR06",
+2,,HR05,Grad Zagreb,new,HR05 = HR041
+2,,HR06,Sjeverna Hrvatska,new,HR06 = HR046 + HR044 + HR045 + HR043 + HR042
+2,,HR02,Panonska Hrvatska,new,HR02 = HR047 + HR048 + HR049 + HR04A + HR04B + HR04C +  HR04D + HR04E 
+2,NO01,,Oslo og Akershus,discontinued,
+2,,NO08,Oslo og Viken,new,
+2,NO02,NO02,Innlandet,renamed,
+2,,NO09,Agder og Sør-Østlandet,new,
+2,NO05,NO0A,Vestlandet,recoded (boundary change),
+2,NO03,,Sør-Østlandet,discontinued,
+2,NO04,,Agder og Rogaland,discontinued,
+2,,NO0B,Jan Mayen and Svalbard,new,
+3,BE100,BE100,Arr. de Bruxelles-Capitale/Arr. Brussel-Hoofdstad,renamed,
+3,BE221,BE224,Arr. Hasselt,"boundary change, recode",
+3,BE222,BE225,Arr. Maaseik,"boundary change, recode",
+3,BE324,,Arr. Mouscron,discontinued; merged with ex-BE327,
+3,BE327,,Arr. Tournai,discontinued; merged with ex-BE324,
+3,,BE328,Arr. Tournai-Mouscron,new; merge of ex-BE327 and BE324,BE328 = ex-BE327 + ex-BE324
+3,,BE329,Arr. La Louvière,"new; made from parts of ex-BE321, BE322, BE325, BE326",
+3,BE321,BE32A,Arr. Ath,"boundary change, recode",
+3,BE322,BE32B,Arr. Charleroi,"boundary change, recode",
+3,BE325,BE32C,Arr. Soignies,"boundary change, recode",
+3,BE326,BE32D,Arr. Thuin,"boundary change, recode",
+3,EE006,EE009,Kesk-Eesti,"recode, boundary change",
+3,EE007,EE00A,Kirde-Eesti,"recode, boundary change",
+3,EL421,EL421,"Κάλυμνος, Κάρπαθος – Ηρωική Νήσος Κάσος, Κως, Ρόδος",name change,
+3,HR041,HR050,Grad Zagreb,recoded (reassignment),HR050 = HR041
+3,HR046,HR061,Međimurska županija,recoded (reassignment),HR061 = HR046
+3,HR044,HR062,Varaždinska županija,recoded (reassignment),HR062 = HR044
+3,HR045,HR063,Koprivničko-križevačka županija,recoded (reassignment),HR063 = HR045
+3,HR043,HR064,Krapinsko-zagorska županija,recoded (reassignment),HR064 = HR043
+3,HR042,HR065,Zagrebačka županija,recoded (reassignment),HR065 = HR042
+3,HR047,HR021,Bjelovarsko-bilogorska županija,recoded (reassignment),HR021 = HR047
+3,HR048,HR022,Virovitičko-podravska županija,recoded (reassignment),HR022 = HR048
+3,HR049,HR023,Požeško-slavonska županija,recoded (reassignment),HR023 = HR049
+3,HR04A,HR024,Brodsko-posavska županija,recoded (reassignment),HR024 = HR04A
+3,HR04B,HR025,Osječko-baranjska županija,recoded (reassignment),HR025 = HR04B
+3,HR04C,HR026,Vukovarsko-srijemska županija,recoded (reassignment),HR026 = HR04C
+3,HR04D,HR027,Karlovačka županija,recoded (reassignment),HR027 = HR04D
+3,HR04E,HR028,Sisačko-moslavačka županija,recoded (reassignment),HR028 = HR04E
+3,ITG25,ITG2D,Sassari,"recode, boundary change: merge of ex-ITG25 and ex-ITG29",ITG2D = ex-ITG25 + ex-ITG29
+3,ITG26,ITG2E,Nuoro,"recode, boundary change: merge of ex-ITG26 plus most parts of ex-ITG2A",
+3,ITG27,ITG2F,Cagliari,"recode, boundary change: made of smaller part of ex-ITG27",
+3,ITG28,ITG2G,Oristano,"recode, boundary change: lost small part to new ITG2H",
+3,,ITG2H,Sud Sardegna,"new region, made of most parts of ex-ITG27, small part of ex-ITG28, small part of ex-ITG2A, ex-ITG2B  and ex-ITG2C",
+3,ITG29,,Olbia-Tempio,discontinued,
+3,ITG2A,,Ogliastra,discontinued,
+3,ITG2B,,Medio Campidano,discontinued,
+3,ITG2C,,Carbonia-Iglesias,discontinued,
+3,UKK21,UKK24,"Bournemouth, Christchurch and Poole","boundary change, recode, rename",
+3,UKK22,UKK25,Dorset,"boundary change, recode, rename",
+3,UKN10,UKN0A,Derry City and Strabane,recode,UKN0A = UKN10
+3,UKN11,UKN0B,Mid Ulster,recode,UKN0B = UKN11
+3,UKN12,UKN0C,Causeway Coast and Glens,recode,UKN0C = UKN12
+3,UKN13,UKN0D,Antrim and Newtownabbey,recode,UKN0D = UKN13
+3,UKN14,UKN0E,Lisburn and Castlereagh,recode,UKN0E = UKN14
+3,UKN15,UKN0F,Mid and East Antrim,recode,UKN0F = UKN15
+3,UKN16,UKN0G,Fermanagh and Omagh,recode,UKN0G = UKN16
+3,NO011,NO081,Oslo,recoded,NO081 = NO011
+3,NO012,,Akershus,"discontinued, now part of NO082",
+3,,NO082,Viken,"new; made from ex-NO012, NO031 and NO032",NO082 = NO012+NO031+NO032
+3,NO021,,Hedmark,discontinued; now part of NO020,
+3,NO022,,Oppland,discontinued; now part of NO020,
+3,,NO020,Innlandet,new; merge of ex-NO021 and NO022,NO020 = NO021+NO022
+3,,NO091,Vestfold og Telemark,new; merge of ex-NO033 and NO034,NO091 = NO033+NO034
+3,,NO092,Agder,new; merge of ex-NO041 and NO042,NO092 = NO041+NO042
+3,NO043,NO0A1,Rogaland,recoded,NO0A1 = NO043
+3,,NO0A2,Vestland,new; merge of ex-NO051 and NO052,NO0A2 = NO051+NO052
+3,NO053,NO0A3,Møre og Romsdal,recoded,NO0A3 = NO053
+3,NO051,,Hordaland,discontinued; now part of NO0A2,
+3,NO052,,Sogn og Fjordane,discontinued; now part of NO0A2,
+3,NO031,,Østfold,discontinued; now part of NO082,
+3,NO032,,Buskerud,discontinued; now part of NO082,
+3,NO033,,Vestfold,discontinued; now part of NO091,
+3,NO034,,Telemark,discontinued; now part of NO091,
+3,NO041,,Aust-Agder,discontinued; now part of NO092,
+3,NO042,,Vest-Agder,discontinued; now part of NO092,
+3,NO061,,Sør-Trøndelag,discontinued; now part of NO060,01/01/2018
+3,NO062,,Nord-Trøndelag,discontinued; now part of NO060,01/01/2018
+3,,NO060,Trøndelag,new; merge of ex-NO061 and NO062,01/01/2018; NO060 = NO061+NO062
+3,NO072,,Troms,discontinued; now part of NO074,
+3,NO073,,Finnmark,discontinued; now part of NO074,
+3,,NO074,Troms og Finnmark,new; merge of ex-NO072 and NO073,NO074 = NO072+NO073
+3,,NO0B1,Jan Mayen,new,
+3,,NO0B2,Svalbard,new,
