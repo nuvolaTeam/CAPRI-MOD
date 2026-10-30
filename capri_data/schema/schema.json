@@ -4111,6 +4111,65 @@
     "tests": []
    }
   },
+  "ctrd_ageline": {
+   "file": "capri_data/pipeline/captrd/dat/ageline.csv",
+   "declared_in": "33_captrd_labour_policy.sql",
+   "layout": [],
+   "comment": "CAPRI's AGELINE(region, age, year): farm holders by age class in the farm structure surveys, NUTS 1 regions (dat/baseline/ageline.gdx, from the parquet mirror of CAPRI's dat folder; the year label ageline kept as it is), read by baseline/labour_ageline.gms (captrd.gms l. 902) for the labour bounds (tools/build/build_captrd_dat.py --ageline)",
+   "columns": [
+    {
+     "name": "region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "age",
+     "type": "BIGINT",
+     "not_null": true
+    },
+    {
+     "name": "year",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "value",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "region",
+    "year",
+    "age"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [
+    {
+     "item": "value",
+     "unit": null,
+     "status": "open",
+     "basis": "ageline.value: unit to be established"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_captrd_dat (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/pipeline/captrd/labour.py"
+    ],
+    "builders": [],
+    "checks": [],
+    "tests": []
+   }
+  },
   "ctrd_bio_cols": {
    "file": "capri_data/pipeline/captrd/sets/bio_cols.csv",
    "declared_in": "29_captrd_more.sql",
@@ -4888,6 +4947,39 @@
     "tests": []
    }
   },
+  "ctrd_grcu": {
+   "file": "capri_data/pipeline/captrd/sets/grcu.csv",
+   "declared_in": "33_captrd_labour_policy.sql",
+   "layout": [],
+   "comment": "CAPRI's global set GRCU (gams/sets.gms) as instantiated in sim_ini_21730 (capri_reference/sets/simini_21730), copied by tools/build/build_captrd_sets.py",
+   "columns": [
+    {
+     "name": "d0",
+     "type": "VARCHAR",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "d0"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_captrd_sets (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [],
+    "tests": []
+   }
+  },
   "ctrd_grpc": {
    "file": "capri_data/pipeline/captrd/sets/grpc.csv",
    "declared_in": "28_captrd_sets.sql",
@@ -5092,6 +5184,53 @@
     "tests": []
    }
   },
+  "ctrd_map_rrt": {
+   "file": "capri_data/pipeline/captrd/sets/map_rrt.csv",
+   "declared_in": "33_captrd_labour_policy.sql",
+   "layout": [],
+   "comment": "CAPRI's global set MAP_RRT (gams/sets.gms) as instantiated in sim_ini_21730 (capri_reference/sets/simini_21730), copied by tools/build/build_captrd_sets.py",
+   "columns": [
+    {
+     "name": "d0",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "d1",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "d2",
+     "type": "VARCHAR",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "d0",
+    "d1",
+    "d2"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_captrd_sets (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/pipeline/captrd/prepare.py"
+    ],
+    "builders": [],
+    "checks": [],
+    "tests": []
+   }
+  },
   "ctrd_mcact": {
    "file": "capri_data/pipeline/captrd/sets/mcact.csv",
    "declared_in": "29_captrd_more.sql",
@@ -5290,6 +5429,39 @@
     "tests": []
    }
   },
+  "ctrd_msall": {
+   "file": "capri_data/pipeline/captrd/sets/msall.csv",
+   "declared_in": "33_captrd_labour_policy.sql",
+   "layout": [],
+   "comment": "CAPRI's global set MSALL (gams/sets.gms) as instantiated in sim_ini_21730 (capri_reference/sets/simini_21730), copied by tools/build/build_captrd_sets.py",
+   "columns": [
+    {
+     "name": "d0",
+     "type": "VARCHAR",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "d0"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_captrd_sets (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [],
+    "tests": []
+   }
+  },
   "ctrd_msnoeu28": {
    "file": "capri_data/pipeline/captrd/sets/msnoeu28.csv",
    "declared_in": "29_captrd_more.sql",
@@ -5328,6 +5500,39 @@
    "declared_in": "29_captrd_more.sql",
    "layout": [],
    "comment": "CAPRI's NCNC, the common nutrient coefficients (declared /SET.NCNC_POS/ at gams/captrd.gms l. 621; the same in capmod.gms l. 235): one member per row in d0, 24 members (e.g. N_CAL, N_PRO, VIT_C); copied from CAPRI's instantiation in sim_ini_21730 (capri_reference/sets/simini_21730) by tools/build/build_captrd_sets.py.",
+   "columns": [
+    {
+     "name": "d0",
+     "type": "VARCHAR",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "d0"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_captrd_sets (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [],
+    "tests": []
+   }
+  },
+  "ctrd_nosugquotaaglinkversion": {
+   "file": "capri_data/pipeline/captrd/sets/nosugquotaaglinkversion.csv",
+   "declared_in": "33_captrd_labour_policy.sql",
+   "layout": [],
+   "comment": "CAPRI's global set noSugQuotaAglinkVersion (gams/sets.gms) as instantiated in sim_ini_21730 (capri_reference/sets/simini_21730), copied by tools/build/build_captrd_sets.py",
    "columns": [
     {
      "name": "d0",
@@ -5638,6 +5843,383 @@
     "model": [
      "capri_mod/pipeline/captrd/prepare.py"
     ],
+    "builders": [],
+    "checks": [],
+    "tests": []
+   }
+  },
+  "ctrd_p_minlabourperact": {
+   "file": "capri_data/pipeline/captrd/dat/p_minlabourperact.csv",
+   "declared_in": "33_captrd_labour_policy.sql",
+   "layout": [],
+   "comment": "CAPRI's p_minLabourPerAct(act): minimum labour per activity unit (h, 2008), transcribed from baseline/labour_ageline.gms (copy in capri_data/sources/capri_gams) by tools/build/build_captrd_dat.py",
+   "columns": [
+    {
+     "name": "act",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "value",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "act"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [
+    {
+     "item": "value",
+     "unit": null,
+     "status": "open",
+     "basis": "p_minlabourperact.value: unit to be established"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_captrd_dat (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/pipeline/captrd/labour.py"
+    ],
+    "builders": [],
+    "checks": [],
+    "tests": []
+   }
+  },
+  "ctrd_p_mquotadat": {
+   "file": "capri_data/pipeline/captrd/dat/p_mquotadat.csv",
+   "declared_in": "33_captrd_labour_policy.sql",
+   "layout": [],
+   "comment": "CAPRI's p_MQuotaDat(MS, info, year): milk quotas, deliveries and direct sales (DG AGRI), from dat/coco/milk_quota_dat.gms (copy in capri_data/sources/capri_dat), read by captrd/captrd_policy.gms (tools/build/build_captrd_dat.py)",
+   "columns": [
+    {
+     "name": "region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "info",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "year",
+     "type": "BIGINT",
+     "not_null": true
+    },
+    {
+     "name": "value",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "region",
+    "info",
+    "year"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [
+    {
+     "item": "value",
+     "unit": null,
+     "status": "open",
+     "basis": "p_mquotadat.value: unit to be established"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_captrd_dat (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [],
+    "tests": []
+   }
+  },
+  "ctrd_p_mquotareg": {
+   "file": "capri_data/pipeline/captrd/dat/p_mquotareg.csv",
+   "declared_in": "33_captrd_labour_policy.sql",
+   "layout": [],
+   "comment": "CAPRI's PMQuotaReg(MS, QUTtot, year): total milk quotas 2004-2014 (1000 t), from pol_input/mquota_update.gms (copy in capri_data/sources/capri_gams), read by captrd/captrd_policy.gms (tools/build/build_captrd_dat.py)",
+   "columns": [
+    {
+     "name": "region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "info",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "year",
+     "type": "BIGINT",
+     "not_null": true
+    },
+    {
+     "name": "value",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "region",
+    "info",
+    "year"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [
+    {
+     "item": "value",
+     "unit": "U_1000t",
+     "status": "capri",
+     "basis": "CAPRI's quantity in 1000 t (builder docstring; sugar README)"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_captrd_dat (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [],
+    "tests": []
+   }
+  },
+  "ctrd_p_ppsqcbuyback": {
+   "file": "capri_data/pipeline/captrd/dat/p_ppsqcbuyback.csv",
+   "declared_in": "33_captrd_labour_policy.sql",
+   "layout": [],
+   "comment": "CAPRI's p_PPSQCBuyBack(MSALL, year): sugar quota buy-back, from CAPRI's input_load_sugar_quotas.gdx (capri_data/sources/capri_dat/sugar/p_PPSQCBuyBack.csv), read by captrd/captrd_policy.gms (tools/build/build_captrd_dat.py)",
+   "columns": [
+    {
+     "name": "region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "year",
+     "type": "BIGINT",
+     "not_null": true
+    },
+    {
+     "name": "value",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "region",
+    "year"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [
+    {
+     "item": "value",
+     "unit": null,
+     "status": "open",
+     "basis": "p_ppsqcbuyback.value: unit to be established"
+    },
+    {
+     "item": "year",
+     "unit": null,
+     "status": "open",
+     "basis": "p_ppsqcbuyback.year: unit to be established"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_captrd_dat (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [],
+    "tests": []
+   }
+  },
+  "ctrd_p_ppsqrenounce": {
+   "file": "capri_data/pipeline/captrd/dat/p_ppsqrenounce.csv",
+   "declared_in": "33_captrd_labour_policy.sql",
+   "layout": [],
+   "comment": "CAPRI's p_PPSQRenounce(MSALL, year): renounced sugar quota, from CAPRI's input_load_sugar_quotas.gdx (capri_data/sources/capri_dat/sugar/p_PPSQRenounce.csv), read by captrd/captrd_policy.gms (tools/build/build_captrd_dat.py)",
+   "columns": [
+    {
+     "name": "region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "year",
+     "type": "BIGINT",
+     "not_null": true
+    },
+    {
+     "name": "value",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "region",
+    "year"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [
+    {
+     "item": "value",
+     "unit": null,
+     "status": "open",
+     "basis": "p_ppsqrenounce.value: unit to be established"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_captrd_dat (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [],
+    "tests": []
+   }
+  },
+  "ctrd_p_smallprodshare": {
+   "file": "capri_data/pipeline/captrd/dat/p_smallprodshare.csv",
+   "declared_in": "33_captrd_labour_policy.sql",
+   "layout": [],
+   "comment": "CAPRI's p_smallProdShare(year, MS): small producers' share outside compulsory set-aside, from dat/policy/smal_pshar.gms (copy in capri_data/sources/capri_dat), read by captrd/captrd_policy.gms (tools/build/build_captrd_dat.py)",
+   "columns": [
+    {
+     "name": "year",
+     "type": "BIGINT",
+     "not_null": true
+    },
+    {
+     "name": "region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "value",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "region",
+    "year"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [
+    {
+     "item": "value",
+     "unit": null,
+     "status": "open",
+     "basis": "p_smallprodshare.value: unit to be established"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_captrd_dat (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [],
+    "tests": []
+   }
+  },
+  "ctrd_p_squotas": {
+   "file": "capri_data/pipeline/captrd/dat/p_squotas.csv",
+   "declared_in": "33_captrd_labour_policy.sql",
+   "layout": [],
+   "comment": "CAPRI's p_SQuotas(MSALL, QUOTAS, year): sugar quotas (1000 t white sugar), from CAPRI's input_load_sugar_quotas.gdx (capri_data/sources/capri_dat/sugar/p_SQuotas.csv), read by captrd/captrd_policy.gms (tools/build/build_captrd_dat.py)",
+   "columns": [
+    {
+     "name": "region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "quota",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "year",
+     "type": "BIGINT",
+     "not_null": true
+    },
+    {
+     "name": "value",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "region",
+    "quota",
+    "year"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [
+    {
+     "item": "value",
+     "unit": "U_1000t",
+     "status": "capri",
+     "basis": "CAPRI's quantity in 1000 t (builder docstring; sugar README)"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_captrd_dat (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
     "builders": [],
     "checks": [],
     "tests": []
@@ -6129,6 +6711,39 @@
     ]
    }
   },
+  "ctrd_rset": {
+   "file": "capri_data/pipeline/captrd/sets/rset.csv",
+   "declared_in": "33_captrd_labour_policy.sql",
+   "layout": [],
+   "comment": "CAPRI's global set RSET (gams/sets.gms) as instantiated in sim_ini_21730 (capri_reference/sets/simini_21730), copied by tools/build/build_captrd_sets.py",
+   "columns": [
+    {
+     "name": "d0",
+     "type": "VARCHAR",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "d0"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_captrd_sets (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [],
+    "tests": []
+   }
+  },
   "ctrd_s_colsest": {
    "file": "capri_data/pipeline/captrd/sets/s_colsest.csv",
    "declared_in": "28_captrd_sets.sql",
@@ -6299,6 +6914,39 @@
    "declared_in": "29_captrd_more.sql",
    "layout": [],
    "comment": "CAPRI's global set SplitActs (disaggregated activities in the model; gams/sets.gms l. 2310): one member per row in d0, 8 members (e.g. GRAE, DCOL); copied from CAPRI's instantiation in sim_ini_21730 (capri_reference/sets/simini_21730) by tools/build/build_captrd_sets.py.",
+   "columns": [
+    {
+     "name": "d0",
+     "type": "VARCHAR",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "d0"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_captrd_sets (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [],
+    "tests": []
+   }
+  },
+  "ctrd_srnuts1": {
+   "file": "capri_data/pipeline/captrd/sets/srnuts1.csv",
+   "declared_in": "33_captrd_labour_policy.sql",
+   "layout": [],
+   "comment": "CAPRI's global set SRNUTS1 (gams/sets.gms) as instantiated in sim_ini_21730 (capri_reference/sets/simini_21730), copied by tools/build/build_captrd_sets.py",
    "columns": [
     {
      "name": "d0",
@@ -26739,6 +27387,198 @@
     "tests": []
    }
   },
+  "src_capri_dat_sugar_p_ppsqcbuyback": {
+   "file": "capri_data/sources/capri_dat/sugar/p_PPSQCBuyBack.csv",
+   "declared_in": "33_captrd_labour_policy.sql",
+   "layout": [],
+   "comment": "CAPRI's p_PPSQCBuyBack(MSALL, year) of input_load_sugar_quotas.gdx (sugar/load_quotas.gms), as the parquet mirror of CAPRI's dat folder holds it, columns renamed (README in the folder); no builder",
+   "columns": [
+    {
+     "name": "region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "year",
+     "type": "BIGINT",
+     "not_null": true
+    },
+    {
+     "name": "value",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "region",
+    "year"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [
+    {
+     "item": "value",
+     "unit": null,
+     "status": "open",
+     "basis": "p_PPSQCBuyBack.value: unit to be established"
+    },
+    {
+     "item": "year",
+     "unit": null,
+     "status": "open",
+     "basis": "p_PPSQCBuyBack.year: unit to be established"
+    }
+   ],
+   "provenance": {
+    "nature": "source-extract",
+    "origins": "CAPRI",
+    "builder": null,
+    "sources": null
+   },
+   "notes": [
+    {
+     "kind": "origin",
+     "note": "CAPRI's p_PPSQCBuyBack(MSALL, year), sugar quota buy-back, of input_load_sugar_quotas.gdx (written by CAPRI's sugar/load_quotas.gms from dat/sugar/*.gms). No builder: converted from the parquet mirror of CAPRI's dat folder on 29 October 2026 with the columns renamed (README in the folder). Read by tools/build/build_captrd_dat.py for CAPTRD-MOD's policy data.",
+     "evidence": "capri_data/sources/capri_dat/sugar/README.md; comparison with /home/claude/work/hf_capri/dat/sugar/input_load_sugar_quotas/p_PPSQCBuyBack.parquet on 30 October 2026: 13 of 13 rows, keys and values equal; tools/build/build_captrd_dat.py docstring",
+     "checked": "2026-10-30"
+    }
+   ],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
+   }
+  },
+  "src_capri_dat_sugar_p_ppsqrenounce": {
+   "file": "capri_data/sources/capri_dat/sugar/p_PPSQRenounce.csv",
+   "declared_in": "33_captrd_labour_policy.sql",
+   "layout": [],
+   "comment": "CAPRI's p_PPSQRenounce(MSALL, year) of input_load_sugar_quotas.gdx (sugar/load_quotas.gms), as the parquet mirror of CAPRI's dat folder holds it, columns renamed (README in the folder); no builder",
+   "columns": [
+    {
+     "name": "region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "year",
+     "type": "BIGINT",
+     "not_null": true
+    },
+    {
+     "name": "value",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "region",
+    "year"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [
+    {
+     "item": "value",
+     "unit": null,
+     "status": "open",
+     "basis": "p_PPSQRenounce.value: unit to be established"
+    }
+   ],
+   "provenance": {
+    "nature": "source-extract",
+    "origins": "CAPRI",
+    "builder": null,
+    "sources": null
+   },
+   "notes": [
+    {
+     "kind": "origin",
+     "note": "CAPRI's p_PPSQRenounce(MSALL, year), renounced sugar quota, of input_load_sugar_quotas.gdx (written by CAPRI's sugar/load_quotas.gms from dat/sugar/*.gms). No builder: converted from the parquet mirror of CAPRI's dat folder on 29 October 2026 with the columns renamed (README in the folder). Read by tools/build/build_captrd_dat.py for CAPTRD-MOD's policy data.",
+     "evidence": "capri_data/sources/capri_dat/sugar/README.md; comparison with /home/claude/work/hf_capri/dat/sugar/input_load_sugar_quotas/p_PPSQRenounce.parquet on 30 October 2026: 35 of 35 rows, keys and values equal; tools/build/build_captrd_dat.py docstring",
+     "checked": "2026-10-30"
+    }
+   ],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
+   }
+  },
+  "src_capri_dat_sugar_p_squotas": {
+   "file": "capri_data/sources/capri_dat/sugar/p_SQuotas.csv",
+   "declared_in": "33_captrd_labour_policy.sql",
+   "layout": [],
+   "comment": "CAPRI's p_SQuotas(MSALL, QUOTAS, year) of input_load_sugar_quotas.gdx (sugar/load_quotas.gms; 1000 t white sugar), as the parquet mirror of CAPRI's dat folder holds it, columns renamed (README in the folder); no builder",
+   "columns": [
+    {
+     "name": "region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "quota",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "year",
+     "type": "BIGINT",
+     "not_null": true
+    },
+    {
+     "name": "value",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "region",
+    "quota",
+    "year"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [
+    {
+     "item": "value",
+     "unit": "U_1000t",
+     "status": "capri",
+     "basis": "CAPRI's quantity in 1000 t (builder docstring; sugar README)"
+    }
+   ],
+   "provenance": {
+    "nature": "source-extract",
+    "origins": "CAPRI",
+    "builder": null,
+    "sources": null
+   },
+   "notes": [
+    {
+     "kind": "origin",
+     "note": "CAPRI's p_SQuotas(MSALL, QUOTAS, year), sugar quotas in 1000 t white sugar, of input_load_sugar_quotas.gdx (written by CAPRI's sugar/load_quotas.gms from dat/sugar/*.gms). No builder: converted from the parquet mirror of CAPRI's dat folder on 29 October 2026 with the columns renamed (README in the folder). Read by tools/build/build_captrd_dat.py for CAPTRD-MOD's policy data.",
+     "evidence": "capri_data/sources/capri_dat/sugar/README.md; comparison with /home/claude/work/hf_capri/dat/sugar/input_load_sugar_quotas/p_SQuotas.parquet on 30 October 2026: 582 of 582 rows, keys and values equal; tools/build/build_captrd_dat.py docstring",
+     "checked": "2026-10-30"
+    }
+   ],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
+   }
+  },
   "src_capri_digest_default_prd": {
    "file": "capri_data/sources/envind/capri_digest_default_prd.csv",
    "declared_in": "30_sources.sql",
@@ -38170,10 +39010,11 @@
   }
  ],
  "code_data": {
-  "capri/keep": 97,
+  "capri/keep": 116,
+  "capri/to-setting": 12,
   "capri-mod/keep": 2,
   "literature/keep": 11,
-  "numerical/keep": 34,
+  "numerical/keep": 35,
   "open/keep": 8,
   "physical/keep": 25,
   "technical/keep": 44
