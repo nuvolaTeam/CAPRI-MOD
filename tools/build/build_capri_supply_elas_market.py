@@ -5,7 +5,7 @@
         every record of p_elasSupp(region, prod, wrt, 'CAL') of the gdxdump p_elasSupp.txt, in its order; read by
         capri_mod/supply/capri_pmp.py (the livestock elasticities of the elasticity-calibrated PMP)
     capri_data/2017/market/supply_elas_eu.csv                  commodity, capri_code, elasticity, member_states
-        per market commodity of the model (schema/codes/model_commodities.csv, its CAPRI code), the median over the
+        per market commodity of the model (codes/model_commodities.csv, its CAPRI code), the median over the
         model's EU member states (CAPRI's codes of shared/capri_member_state_codes.csv but Norway and the UK: 26, BL =
         Belgium and Luxembourg) of the own-price p_elasSupp, where at least one has it; read by
         capri_mod/market/supply.py (the EU rows' own-price anticipation)
@@ -56,7 +56,7 @@ def main() -> None:
     for r, p, q, v in recs:
         if p == q and r in eu:
             own[p][r] = float(v)
-    with open(ROOT / "capri_data" / "schema" / "codes" / "model_commodities.csv", newline="") as f:
+    with open(ROOT / "capri_data" / "codes" / "model_commodities.csv", newline="") as f:
         comm = [(r["code"], r["capri_code"]) for r in csv.DictReader(f)]
     rows = [(c, cc, repr(statistics.median(own[cc].values())), len(own[cc])) for c, cc in comm if own.get(cc)]
     with open(ROOT / "capri_data" / "2017" / "market" / "supply_elas_eu.csv", "w", newline="") as f:

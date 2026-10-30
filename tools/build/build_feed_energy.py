@@ -124,7 +124,7 @@ def main() -> None:
     ap.add_argument("--cal", type=Path, default=CAL)
     a = ap.parse_args()
     cal_all = calories(a.cal)
-    with open(ROOT / "capri_data" / "schema" / "codes" / "capri" / "XX.csv", newline="") as f:
+    with open(ROOT / "capri_data" / "codes" / "capri" / "XX.csv", newline="") as f:
         xx = {r["code"] for r in csv.DictReader(f)}
     cal = {k: v for k, v in cal_all.items() if k in xx}
     with open(ROOT / "capri_data" / "shared" / "rms_to_rm.csv", newline="") as f:

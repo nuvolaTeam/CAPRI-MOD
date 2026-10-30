@@ -193,14 +193,14 @@ EU_BLOCKS = tuple(dict.fromkeys(EU_MS_BLOCK.values()))
 
 
 def _load_trade_regions() -> tuple:
-    """The market's trade regions in their order and CAPRI's region code of each (capri_data/schema/codes/
+    """The market's trade regions in their order and CAPRI's region code of each (capri_data/codes/
     model_trade_regions.csv, a declared code list with a source per row; ROW: every CAPRI region not listed). The
     United Kingdom (GBR) and the Western Balkans (WBA) are trade regions of their own as in CAPRI since batch 7, Norway
     (NOR) since K56; Egypt, Algeria, Saudi Arabia and Iran, trade regions here without any data until 29 October 2026,
     fold into ROW (KNOWN_ISSUES K45)."""
     import csv
     from pathlib import Path
-    p = Path(__file__).resolve().parents[2] / "capri_data" / "schema" / "codes" / "model_trade_regions.csv"
+    p = Path(__file__).resolve().parents[2] / "capri_data" / "codes" / "model_trade_regions.csv"
     with open(p, newline="") as f:
         rows = list(csv.DictReader(f))
     of_capri = {}
@@ -229,7 +229,7 @@ def _supply_model_regions_outside_eu() -> dict:
         tr = TRADE_REGION_OF_CAPRI.get(rm) if rm is not None else None
         if tr is None:
             raise ValueError(f"supply-model country {m}: no trade region for its market region {rm} "
-                             "(capri_data/shared/rms_to_rm.csv, schema/codes/model_trade_regions.csv)")
+                             "(capri_data/shared/rms_to_rm.csv, codes/model_trade_regions.csv)")
         out[m] = (c, tr)
     return out
 

@@ -3,39 +3,39 @@
 -- loads the CSV named by the "-- file:" line above it and enforces the types, keys, ranges and references declared here.
 -- Files load in name order (00_ first), so later declarations can reference these tables.
 
--- file: capri_data/schema/codes/capri/PACT.csv
+-- file: capri_data/codes/capri/PACT.csv
 CREATE TABLE capri_pact (code VARCHAR PRIMARY KEY, text VARCHAR);
 COMMENT ON TABLE capri_pact IS 'CAPRI PACT, all production activities (sets.gms; CAPMOD restart file sim_ini_21730)';
 
--- file: capri_data/schema/codes/capri/MPACT.csv
+-- file: capri_data/codes/capri/MPACT.csv
 CREATE TABLE capri_mpact (code VARCHAR PRIMARY KEY REFERENCES capri_pact (code), text VARCHAR);
 COMMENT ON TABLE capri_mpact IS 'CAPRI MPACT(PACT), production activities in the supply model';
 
--- file: capri_data/schema/codes/capri/MCACT.csv
+-- file: capri_data/codes/capri/MCACT.csv
 CREATE TABLE capri_mcact (code VARCHAR PRIMARY KEY REFERENCES capri_pact (code), text VARCHAR);
 COMMENT ON TABLE capri_mcact IS 'CAPRI MCACT(PACT), crop activities in the supply model';
 
--- file: capri_data/schema/codes/capri/MAACT.csv
+-- file: capri_data/codes/capri/MAACT.csv
 CREATE TABLE capri_maact (code VARCHAR PRIMARY KEY REFERENCES capri_pact (code), text VARCHAR);
 COMMENT ON TABLE capri_maact IS 'CAPRI MAACT(PACT), animal activities in the supply model';
 
--- file: capri_data/schema/codes/capri/XX.csv
+-- file: capri_data/codes/capri/XX.csv
 CREATE TABLE capri_xx (code VARCHAR PRIMARY KEY, text VARCHAR);
 COMMENT ON TABLE capri_xx IS 'CAPRI XX, the market model''s products (arm/arm_sets.gms)';
 
--- file: capri_data/schema/codes/capri/XX1.csv
+-- file: capri_data/codes/capri/XX1.csv
 CREATE TABLE capri_xx1 (code VARCHAR PRIMARY KEY, text VARCHAR);
 COMMENT ON TABLE capri_xx1 IS 'CAPRI''s XX1: the market model''s products with the non-agricultural good, income, the land inputs and feed energy (arm/arm_sets.gms)';
 
--- file: capri_data/schema/codes/capri/FEED_TO_O.csv
+-- file: capri_data/codes/capri/FEED_TO_O.csv
 CREATE TABLE capri_feed_to_o (feed VARCHAR NOT NULL, row VARCHAR NOT NULL, PRIMARY KEY (feed, row));
 COMMENT ON TABLE capri_feed_to_o IS 'CAPRI''s FEED_TO_O: the feed bulks and their products (sets.gms)';
 
--- file: capri_data/schema/codes/capri/RALL.csv
+-- file: capri_data/codes/capri/RALL.csv
 CREATE TABLE capri_rall (code VARCHAR PRIMARY KEY, text VARCHAR);
 COMMENT ON TABLE capri_rall IS 'CAPRI RALL, all regional units of the CAPRI system (sets.gms)';
 
--- file: capri_data/schema/codes/model_activities.csv
+-- file: capri_data/codes/model_activities.csv
 CREATE TABLE model_activities (
     code VARCHAR PRIMARY KEY,
     kind VARCHAR NOT NULL CHECK (kind IN ('crop', 'animal')),
@@ -44,7 +44,7 @@ CREATE TABLE model_activities (
 );
 COMMENT ON TABLE model_activities IS 'the model''s activities (capri_mod/data/definitions.py CROPS, ANIMALS) and their CAPRI activities';
 
--- file: capri_data/schema/codes/model_commodities.csv
+-- file: capri_data/codes/model_commodities.csv
 CREATE TABLE model_commodities (
     code VARCHAR PRIMARY KEY,
     capri_code VARCHAR NOT NULL UNIQUE REFERENCES capri_xx (code),
@@ -60,7 +60,7 @@ CREATE TABLE regional_units (
 );
 COMMENT ON TABLE regional_units IS 'CAPRI''s regional units the model runs on (27 October 2026): unit, its member state, country';
 
--- file: capri_data/schema/units.csv
+-- file: capri_data/codes/units.csv
 CREATE TABLE units (
     code VARCHAR PRIMARY KEY,
     description VARCHAR NOT NULL,
@@ -97,7 +97,7 @@ GROUP BY capri_code HAVING count(*) > 1;
 -- rule: a member state of the regional units is its own unit's member state code (ends in 000000)
 SELECT region, capri_ms FROM regional_units WHERE capri_ms NOT LIKE '%000000';
 
--- file: capri_data/schema/codes/capri/MS_RU.csv
+-- file: capri_data/codes/capri/MS_RU.csv
 CREATE TABLE capri_ms_ru (
     ms VARCHAR NOT NULL REFERENCES capri_rall (code),
     ru VARCHAR NOT NULL REFERENCES capri_rall (code),

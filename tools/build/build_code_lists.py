@@ -3,16 +3,16 @@
 The model keeps its own codes (the project lead's decision of 29 October 2026: option 1, a mapping table; CAPRI's codes
 throughout may follow later). This builder writes:
 
-  capri_data/schema/codes/capri/<SET>.csv     CAPRI's code lists as instantiated in a CAPMOD run: code, text
+  capri_data/codes/capri/<SET>.csv     CAPRI's code lists as instantiated in a CAPMOD run: code, text
                                               (PACT all production activities, MPACT, MCACT, MAACT, XX the market
                                               products, XX1 the market model's products with the non-agricultural good, income,
                                               land and feed energy, RALL all regional units)
-  capri_data/schema/codes/capri/FEED_TO_O.csv  CAPRI's feed bulks and their products: feed, row
-  capri_data/schema/codes/capri/MS_RU.csv     CAPRI's member states and their regional units (MAP_RR x MS x RU)
-  capri_data/schema/codes/model_activities.csv  the model's 46 activities (capri_mod/data/definitions.py CROPS,
+  capri_data/codes/capri/FEED_TO_O.csv  CAPRI's feed bulks and their products: feed, row
+  capri_data/codes/capri/MS_RU.csv     CAPRI's member states and their regional units (MAP_RR x MS x RU)
+  capri_data/codes/model_activities.csv  the model's 46 activities (capri_mod/data/definitions.py CROPS,
                                               ANIMALS): code, kind, capri_codes (";"-joined CAPRI activities summed
                                               into it), mapping_source
-  capri_data/schema/codes/model_commodities.csv the model's 58 market commodities (MARKET_COMMODITIES): code,
+  capri_data/codes/model_commodities.csv the model's 58 market commodities (MARKET_COMMODITIES): code,
                                               capri_code, mapping_source
 
 The trade regions' code list (codes/model_trade_regions.csv) is not written here since 30 October 2026: it is a
@@ -41,7 +41,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
-OUT = ROOT / "capri_data" / "schema" / "codes"
+OUT = ROOT / "capri_data" / "codes"
 CAPRI_SETS = ("PACT", "MPACT", "MCACT", "MAACT", "XX", "XX1", "RALL")
 
 

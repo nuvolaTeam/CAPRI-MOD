@@ -1,7 +1,7 @@
 -- The market's supply functions outside the supply models (CAPRI's ProdNQ_) and the region maps they are summed over.
 -- Long files: the unit of each numeric column is in value_units with the column's name as the item.
 
--- file: capri_data/schema/codes/model_trade_regions.csv
+-- file: capri_data/codes/model_trade_regions.csv
 CREATE TABLE model_trade_regions (
     code VARCHAR PRIMARY KEY,
     capri_rm VARCHAR REFERENCES capri_rall (code),     -- empty: ROW, the CAPRI regions mapped to no other

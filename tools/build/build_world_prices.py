@@ -7,7 +7,7 @@ decision (KNOWN_ISSUES K103).
 Rows
   every market commodity (definitions.MARKET_COMMODITIES) with a world price in CAPRI's FAO_agg market data:
       p_dataMarket 'World'.'PMRK'.<CAPRI product>.'BAS', the product being the commodity's CAPRI code
-      (capri_data/schema/codes/model_commodities.csv); the model's wheat market SWHE is CAPRI's market product WHEA
+      (capri_data/codes/model_commodities.csv); the model's wheat market SWHE is CAPRI's market product WHEA
       (196.6; until 29 October 2026 CAPRI's 'SWHE' price, 171.9, which no market of CAPRI's carries: KNOWN_ISSUES K90)
   DWHE, SUGB  not market commodities, kept as rows: the outer loop's price signal takes its index from this table and
         sets them from soft wheat and sugar (model.py); their values are FAO_agg's 'DWHE' and 'SUGB'
@@ -44,7 +44,7 @@ from capri_mod.data import definitions as D  # noqa: E402
 
 MKT = ROOT / "capri_data" / "2017" / "market"
 OUT = MKT / "world_prices.csv"
-CODES = ROOT / "capri_data" / "schema" / "codes" / "model_commodities.csv"
+CODES = ROOT / "capri_data" / "codes" / "model_commodities.csv"
 UNITS = ROOT / "capri_data" / "shared" / "regional_units.csv"
 FAO = Path("/mnt/user-data/uploads/fao_agg_17_datamarket.txt")
 DUMPS = Path("/home/claude/work/capreg")

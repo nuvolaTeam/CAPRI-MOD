@@ -24,9 +24,13 @@ capri_data/
 ├── validation/            CAPRI reference results used by the tests and comparison tools
 ├── sources/               the extracts the builders read (CAPRI result rows, MITERRA tables, literature review);
 │                          not read by the model
-├── schema/                the declarations of every CSV (DuckDB SQL: types, keys, code lists, ranges, units), each
-│                          file's provenance and checked notes, the numbers held in the model's code, and
-│                          schema.json (the same as JSON, generated)
+├── schema/                SQL only: the declarations of every CSV (DuckDB SQL: types, keys, code lists, ranges,
+│                          units), each file's provenance and checked notes, the numbers held in the model's code,
+│                          and schema.json (the same as JSON, generated)
+├── codes/                 the code lists and the unit catalogue the declarations check against: units.csv (CAPRI's
+│                          units and the model's own, model_units.csv), CAPRI's sets (capri/), the model's activities,
+│                          commodities and trade regions with their CAPRI codes (model_trade_regions.csv is also
+│                          read by the model)
 ├── MANIFEST.json                                           expected files and shapes
 ├── FITNESS_FOR_USE.json                                    how far each output can be trusted (capri_mod/fitness.py)
 └── *.md                                                    this file and the guides below

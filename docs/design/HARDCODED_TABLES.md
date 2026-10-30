@@ -17,7 +17,7 @@ were verified by reading the code; the rest is the scan's result.
 | capri_mod/ | 81 | 31 | 50 |
 | tools/build/ | 212 in 81 files (3+ codes each; includes item and column selectors) | most | the model ↔ CAPRI crosswalks |
 
-About 10 of capri_mod's tables are the master copy of a generated file: capri_data/schema/codes/model_activities.csv,
+About 10 of capri_mod's tables are the master copy of a generated file: capri_data/codes/model_activities.csv,
 model_commodities.csv and model_trade_regions.csv are written by tools/build/build_code_lists.py from the Python
 literals, not the other way round.
 
@@ -65,7 +65,7 @@ code used as a classifier (`startswith("NO")` meaning "outside the EU") is not.
 ## Done
 
 On 30 October 2026 (branch region-decl):
-- **Trade regions.** The code list capri_data/schema/codes/model_trade_regions.csv is now the declared master, with
+- **Trade regions.** The code list capri_data/codes/model_trade_regions.csv is now the declared master, with
   a source per row: each trade region in order, and CAPRI's region code. build_code_lists wrote it from the
   REGION_MAP literal until then.
   - The model (definitions.ALL_TRADE_REGIONS, TRADE_REGION_OF_CAPRI) and the builders (REGION_MAP) read it.
@@ -84,7 +84,7 @@ On 30 October 2026 (branch region-decl):
 
 1. **H1, regions.** Replace every non-EU test and every EU member-state list, in the model and in the builders, by
    `definitions.EU_MS_BLOCK` and `SUP_NONEU`, or by the same CSVs for builders. bridge.py's list goes too.
-2. **H2, crosswalks.** Make the code tables of capri_data/schema/codes the master copy:
+2. **H2, crosswalks.** Make the code tables of capri_data/codes the master copy:
    - model ↔ CAPRI activities, products, dairy and crushing chains;
    - the model and every builder read them;
    - build_code_lists then checks the tables instead of writing them from the literals.

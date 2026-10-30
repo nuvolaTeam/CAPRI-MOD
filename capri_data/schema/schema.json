@@ -3272,7 +3272,7 @@
    }
   },
   "capri_feed_to_o": {
-   "file": "capri_data/schema/codes/capri/FEED_TO_O.csv",
+   "file": "capri_data/codes/capri/FEED_TO_O.csv",
    "declared_in": "00_codes.sql",
    "layout": [],
    "comment": "CAPRI's FEED_TO_O: the feed bulks and their products (sets.gms)",
@@ -3458,7 +3458,7 @@
    }
   },
   "capri_maact": {
-   "file": "capri_data/schema/codes/capri/MAACT.csv",
+   "file": "capri_data/codes/capri/MAACT.csv",
    "declared_in": "00_codes.sql",
    "layout": [],
    "comment": "CAPRI MAACT(PACT), animal activities in the supply model",
@@ -3506,7 +3506,7 @@
    }
   },
   "capri_mcact": {
-   "file": "capri_data/schema/codes/capri/MCACT.csv",
+   "file": "capri_data/codes/capri/MCACT.csv",
    "declared_in": "00_codes.sql",
    "layout": [],
    "comment": "CAPRI MCACT(PACT), crop activities in the supply model",
@@ -3556,7 +3556,7 @@
    }
   },
   "capri_mpact": {
-   "file": "capri_data/schema/codes/capri/MPACT.csv",
+   "file": "capri_data/codes/capri/MPACT.csv",
    "declared_in": "00_codes.sql",
    "layout": [],
    "comment": "CAPRI MPACT(PACT), production activities in the supply model",
@@ -3606,7 +3606,7 @@
    }
   },
   "capri_ms_ru": {
-   "file": "capri_data/schema/codes/capri/MS_RU.csv",
+   "file": "capri_data/codes/capri/MS_RU.csv",
    "declared_in": "00_codes.sql",
    "layout": [],
    "comment": "CAPRI's member states and their regional units (MAP_RR restricted to MS x RU)",
@@ -3927,7 +3927,7 @@
    }
   },
   "capri_pact": {
-   "file": "capri_data/schema/codes/capri/PACT.csv",
+   "file": "capri_data/codes/capri/PACT.csv",
    "declared_in": "00_codes.sql",
    "layout": [],
    "comment": "CAPRI PACT, all production activities (sets.gms; CAPMOD restart file sim_ini_21730)",
@@ -3965,7 +3965,7 @@
    }
   },
   "capri_rall": {
-   "file": "capri_data/schema/codes/capri/RALL.csv",
+   "file": "capri_data/codes/capri/RALL.csv",
    "declared_in": "00_codes.sql",
    "layout": [],
    "comment": "CAPRI RALL, all regional units of the CAPRI system (sets.gms)",
@@ -4003,7 +4003,7 @@
    }
   },
   "capri_xx": {
-   "file": "capri_data/schema/codes/capri/XX.csv",
+   "file": "capri_data/codes/capri/XX.csv",
    "declared_in": "00_codes.sql",
    "layout": [],
    "comment": "CAPRI XX, the market model's products (arm/arm_sets.gms)",
@@ -4043,7 +4043,7 @@
    }
   },
   "capri_xx1": {
-   "file": "capri_data/schema/codes/capri/XX1.csv",
+   "file": "capri_data/codes/capri/XX1.csv",
    "declared_in": "00_codes.sql",
    "layout": [],
    "comment": "CAPRI's XX1: the market model's products with the non-agricultural good, income, the land inputs and feed energy (arm/arm_sets.gms)",
@@ -11954,7 +11954,7 @@
    }
   },
   "misc_model_units": {
-   "file": "capri_data/schema/model_units.csv",
+   "file": "capri_data/codes/model_units.csv",
    "declared_in": "32_misc.sql",
    "layout": [],
    "comment": "The model's own units that CAPRI's unit catalogue (CAPRIunits.gms) lacks: code, description and the tables using it; hand-kept, no builder; tools/build/build_unit_catalogue.py adds them to units.csv with capri = no.",
@@ -15916,7 +15916,7 @@
    }
   },
   "model_activities": {
-   "file": "capri_data/schema/codes/model_activities.csv",
+   "file": "capri_data/codes/model_activities.csv",
    "declared_in": "00_codes.sql",
    "layout": [],
    "comment": "the model's activities (capri_mod/data/definitions.py CROPS, ANIMALS) and their CAPRI activities",
@@ -15970,7 +15970,7 @@
    }
   },
   "model_commodities": {
-   "file": "capri_data/schema/codes/model_commodities.csv",
+   "file": "capri_data/codes/model_commodities.csv",
    "declared_in": "00_codes.sql",
    "layout": [],
    "comment": "the model's market commodities (capri_mod/data/definitions.py MARKET_COMMODITIES) and CAPRI's products",
@@ -16032,7 +16032,7 @@
    }
   },
   "model_trade_regions": {
-   "file": "capri_data/schema/codes/model_trade_regions.csv",
+   "file": "capri_data/codes/model_trade_regions.csv",
    "declared_in": "20_market_2017.sql",
    "layout": [],
    "comment": "the bilateral market's trade regions in their order and the CAPRI region each stands for (market region or trade block of CAPRI's market data); no builder: a declared code list, read by capri_mod/data/definitions.py (ALL_TRADE_REGIONS, TRADE_REGION_OF_CAPRI) and tools/build/recalibrate_trade_2017.py (REGION_MAP)",
@@ -37841,7 +37841,7 @@
    }
   },
   "units": {
-   "file": "capri_data/schema/units.csv",
+   "file": "capri_data/codes/units.csv",
    "declared_in": "00_codes.sql",
    "layout": [],
    "comment": "the unit catalogue: CAPRI's set capri_u (gams/CAPRIunits.gms) and the model's own units (tools/build/build_unit_catalogue.py)",
@@ -38804,8 +38804,8 @@
    "notes": [
     {
      "kind": "origin",
-     "note": "World prices (EUR/t), 60 rows; the source of each row (until 30 October 2026 written to sources/world_price_provenance.csv, read by nothing, removed): 58 rows are CAPRI's FAO_agg_17_defaulta p_dataMarket 'World'.'PMRK'.<CAPRI product>.'BAS' under the commodity's CAPRI code of schema/codes/model_commodities.csv, the same code for 49 of them and another for 9 (SWHE WHEA, CORN MAIZ, PARI RICE, SUGR SUGA, WINE TWIN, BUTR BUTT, SKIM SMIP, WHEY WHEP, POUL POUM); DWHE and SUGB, which are not market commodities, take FAO_agg's own DWHE and SUGB and are kept only for the outer loop's price signal. OLIV (the model's olive market is in t of olives) is OLIO's World PMRK BAS, 2447.5 EUR/t, times the EU's olive oil per t of olives for oil, 0.2127 (FAO_agg MAPR OLIO BAS of the member states, 2,348 kt, over CAPRI's olives for oil, res_17 OLIV YILD x LEVL, 11,035 kt). FPRI, without a World PMRK in FAO_agg, is the export-weighted PMRK of the exporting regions in CAPRI's 2017 market (market_base_1717, bilateral_flows_2017.csv and bilateral_regions_2017.csv). Read by the model (loaders.load_world_prices; model.py price signal) and by the market test as its reference.",
-     "evidence": "tools/build/build_world_prices.py:51-54 (FAO_SRC, SOURCE_CODE), :74-95 (olives_for_oil, fpri_price), :97-125 (build); schema/codes/model_commodities.csv (code, capri_code); the removed provenance file (git show d4b6bbe:capri_data/sources/world_price_provenance.csv: 58 rows FAO_agg PMRK BAS, OLIV and FPRI as above); capri_mod/data/loaders.py:432-441; capri_mod/model.py:526-567; capri_mod/tests/test_capri.py:119-128; CSV: 60 rows, EGGS 1073.04, OLIV 520.6950896523276, FPRI 250.83510372575935, no SHGM row",
+     "note": "World prices (EUR/t), 60 rows; the source of each row (until 30 October 2026 written to sources/world_price_provenance.csv, read by nothing, removed): 58 rows are CAPRI's FAO_agg_17_defaulta p_dataMarket 'World'.'PMRK'.<CAPRI product>.'BAS' under the commodity's CAPRI code of codes/model_commodities.csv, the same code for 49 of them and another for 9 (SWHE WHEA, CORN MAIZ, PARI RICE, SUGR SUGA, WINE TWIN, BUTR BUTT, SKIM SMIP, WHEY WHEP, POUL POUM); DWHE and SUGB, which are not market commodities, take FAO_agg's own DWHE and SUGB and are kept only for the outer loop's price signal. OLIV (the model's olive market is in t of olives) is OLIO's World PMRK BAS, 2447.5 EUR/t, times the EU's olive oil per t of olives for oil, 0.2127 (FAO_agg MAPR OLIO BAS of the member states, 2,348 kt, over CAPRI's olives for oil, res_17 OLIV YILD x LEVL, 11,035 kt). FPRI, without a World PMRK in FAO_agg, is the export-weighted PMRK of the exporting regions in CAPRI's 2017 market (market_base_1717, bilateral_flows_2017.csv and bilateral_regions_2017.csv). Read by the model (loaders.load_world_prices; model.py price signal) and by the market test as its reference.",
+     "evidence": "tools/build/build_world_prices.py:51-54 (FAO_SRC, SOURCE_CODE), :74-95 (olives_for_oil, fpri_price), :97-125 (build); codes/model_commodities.csv (code, capri_code); the removed provenance file (git show d4b6bbe:capri_data/sources/world_price_provenance.csv: 58 rows FAO_agg PMRK BAS, OLIV and FPRI as above); capri_mod/data/loaders.py:432-441; capri_mod/model.py:526-567; capri_mod/tests/test_capri.py:119-128; CSV: 60 rows, EGGS 1073.04, OLIV 520.6950896523276, FPRI 250.83510372575935, no SHGM row",
      "checked": "2026-10-30"
     }
    ],

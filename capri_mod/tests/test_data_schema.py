@@ -38,7 +38,7 @@ def _edit(root, rel, fn):
 def test_each_kind_of_violation_is_found_with_its_line(tmp_path):
     root = _copy(tmp_path)
     assert set(V.validate(root, verbose=False)) == set(V.validate(ROOT, verbose=False))   # the copy is the repository
-    acts, comms = "capri_data/schema/codes/model_activities.csv", "capri_data/schema/codes/model_commodities.csv"
+    acts, comms = "capri_data/codes/model_activities.csv", "capri_data/codes/model_commodities.csv"
     units = "capri_data/shared/regional_units.csv"
     # a duplicate key: line 2 repeated at the end
     _edit(root, acts, lambda l: l + [l[1]])
