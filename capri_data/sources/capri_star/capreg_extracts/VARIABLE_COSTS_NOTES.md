@@ -39,7 +39,7 @@ execute 'gdxdump <path>\capreg\res_17FR.gdx symb=DATA2 output=<path>\FR_data2.tx
 2. Run the extractor over all dumps at once:
 
 ```bash
-python extract_variable_costs.py DE_data2.txt FR_data2.txt IT_data2.txt ... \
+python tools/extract/extract_variable_costs.py DE_data2.txt FR_data2.txt IT_data2.txt ... \
     -o variable_costs.csv
 ```
 
@@ -60,7 +60,7 @@ The 12 uncovered activities are expected:
 
 ## Code mapping
 
-`CAPRI_TO_MODEL` in `extract_variable_costs.py` renames CAPRI codes to the model's:
+`CAPRI_TO_MODEL` in `tools/extract/extract_variable_costs.py` (in this folder until 30 October 2026) renames CAPRI codes to the model's:
 
 | CAPRI | Model | Meaning |
 |-------|-------|---------|

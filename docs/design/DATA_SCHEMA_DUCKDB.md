@@ -147,8 +147,10 @@ file has its provenance and no provenance row is left without a declared file; e
 ; a file without a builder has a checked note
 on its origin; every number in the code has its classification and no classification is left without its number.
 
-Two source files in GAMS text form, `sources/water/cropwat.csv` and `irrishare.csv`, were CSV only by name; they are
-`.gms` now (the builder's output is unchanged, byte for byte).
+Two source files in GAMS text form, `sources/water/cropwat.csv` and `irrishare.csv`, were CSV only by name; they were
+renamed `.gms` (the builder's output unchanged, byte for byte), and on 30 October 2026 converted to CSV with every
+other non-CSV source: `water/cropwat_p_cropwatReq.csv`, `water/irrishare_p_irriShare.csv` (`tools/build/convert_sources_to_csv.py`, declared
+in `34_sources_csv.sql`).
 
 The nine validation files without a builder were settled by the project lead (29 October 2026, KNOWN_ISSUES K103):
 the seven read by no code removed, with three unread source extracts (their builders no longer write them); the two

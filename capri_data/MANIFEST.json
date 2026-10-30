@@ -134,7 +134,7 @@
    "note": "BPS = CAPRI's premiums per ha of UAA over all schemes; ANC, AES, ORGANIC, COUPLED are 0 and unused (the split by scheme comes from premium_scheme_shares_2030.csv)"
   },
   "world_prices.csv": {
-   "source": "CAPRI FAO_agg_17_defaulta p_dataMarket 'World'.'PMRK'.<product>.'BAS' (base-period world market price); OLIV from OLIO's price and the EU's oil extraction, FPRI export-weighted from CAPRI's 2017 market; built by tools/build/build_world_prices.py, per-row CAPRI code in sources/world_price_provenance.json",
+   "source": "CAPRI FAO_agg_17_defaulta p_dataMarket 'World'.'PMRK'.<product>.'BAS' (base-period world market price); OLIV from OLIO's price and the EU's oil extraction, FPRI export-weighted from CAPRI's 2017 market; built by tools/build/build_world_prices.py, per-row CAPRI code in sources/world_price_provenance.csv",
    "vintage": "2017",
    "units": "EUR/t",
    "domain": "prices",
@@ -1617,7 +1617,7 @@
    "note": "Model crop -> CAPRI crop group (NGRP) with area shares per CAPRI region (OFOD = OFAR + ROOF, OLIV = OLIV + TABO, GRAS = GRAE + GRAI); tools/build/build_fert_dist_priors.py."
   },
   "mineral_redu_exemptions.csv": {
-   "source": "CAPRI pol_input/greendeal/minfert_redu_by_crop.gms (p_checkSmallMine), kept as capri_data/sources/policy/minfert_redu_by_crop.gms",
+   "source": "CAPRI pol_input/greendeal/minfert_redu_by_crop.gms (p_checkSmallMine), its statements converted to capri_data/sources/policy/minfert_redu_by_crop_p_checkSmallMine.csv and minfert_redu_by_crop_limCres.csv by tools/build/convert_sources_to_csv.py",
    "vintage": "star 3.0",
    "units": "factor x baseline; year",
    "domain": "policy",
