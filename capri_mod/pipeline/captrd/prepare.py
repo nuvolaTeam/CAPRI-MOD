@@ -335,15 +335,24 @@ def fill_uvad(uvad: pd.DataFrame, sets: CaptrdSets, expostt: Iterable[int]) -> p
     return pd.DataFrame([(r, "UVAD", rw, t, v) for (r, rw, t), v in added.items()], columns=KEYS + ["value"])
 
 
-def clean_regions(p: pd.DataFrame, sets: CaptrdSets, expost: Iterable[int]) -> pd.DataFrame:
+def clean_regions(p: pd.DataFrame, sets: CaptrdSets, expost: Iterable[int],
+                  as_coded: Optional[bool] = None) -> pd.DataFrame:
     """captrd.gms l. 862-888.
 
     - RDel: the NT2ext regions no country maps (MAP_RR(MS, .)); their ex-post years (ExPost) deleted (BASM: base-year
       stage).
     - l. 872-876 (the columns of NT2ext other than the activities, land use, GROF and ARTO): as coded, the condition
       NOT SUM(SAMEAS(MS,NT2),1) has NT2 uncontrolled, so the sum runs over both MS and NT2 and counts the countries that
-      are their own NUTS 2 region; that count is nonzero in CAPRI's sets, so the statement deletes nothing. Kept as
-      coded (CAPTRD's p_data keeps, e.g., UVAG of the NUTS 2 regions).
+      are their own NUTS 2 region; that count is nonzero in CAPRI's sets, so the statement deletes nothing (CAPTRD's
+      p_data keeps, e.g., UVAG of the NUTS 2 regions). as_coded (setting captrd.nuts2_column_filter_as_coded):
+        False - the default (CAPRI-ERROR-FIX, register FIX-9): the condition per region, as the two statements that
+                follow have it, and the kept columns those of CAPTRD's own NUTS 2 estimation (estimate_nuts2.gms
+                l. 33-41: the activities MPACT, the groups GRPC, the land uses, GROF, LU, UAAR, ARTO and LOSF). The
+                statement's own list lacks GRPC, LU and LOSF, which the NUTS 2 estimation estimates (LOSF: its bounds
+                from GROF, l. 276-285, 398; its observations in the balances, equations.gms l. 503, 619-630); deleting
+                them would contradict that code (project lead, 30 October 2026). The years of the other columns are
+                deleted for the NT2ext regions that are not countries: on Ireland, UVAG, EAAG, SEDF, INHA and QUTS;
+        True  - CAPRI's code as written (the parity switch): nothing deleted.
     - the activities of the NUTS 2 regions that are not countries keep only their inputs and outputs (PACT_TO_IO) and
       LEVL; the young-animal inputs (IYANI) of the animal activities and of GROF are deleted where no animal activity
       without fixed young-animal coefficients (FIX_YAI) takes that input.
@@ -353,9 +362,15 @@ def clean_regions(p: pd.DataFrame, sets: CaptrdSets, expost: Iterable[int]) -> p
     rdel = {r for r in sets.nt2ext if not any((m, r) in sets.map_rr for m in ms)}
     p = p[~(p["region"].isin(rdel) & (p["t"].isin(exp) | (p["t"] == "BASM")))]
     yrs = _year(p["t"]).notna()
-    if sum(1 for m in ms if m in sets.srnuts2) == 0:              # the GAMS condition, should the sets change
-        keep = (p["col"].isin(sets.mpact | sets.landusearto | {"GROF", "ARTO"}) | ~p["region"].isin(sets.nt2ext)
-                | p["region"].isin(ms) | ~yrs)
+    if as_coded is None:
+        from capri_mod.settings import current as _settings
+        as_coded = bool(_settings().get("captrd.nuts2_column_filter_as_coded"))
+    # as coded: the GAMS condition, which holds only should no country be its own NUTS 2 region; fixed: per region
+    if not as_coded or sum(1 for m in ms if m in sets.srnuts2) == 0:
+        cols = sets.mpact | sets.landusearto | {"GROF", "ARTO"}
+        if not as_coded:
+            cols = cols | sets.grpc | {"LU", "UAAR", "LOSF"}
+        keep = (p["col"].isin(cols) | ~p["region"].isin(sets.nt2ext) | p["region"].isin(ms) | ~yrs)
         p = p[keep]
     yrs = _year(p["t"]).notna()
     nt2 = p["region"].isin(sets.srnuts2) & ~p["region"].isin(ms) & yrs

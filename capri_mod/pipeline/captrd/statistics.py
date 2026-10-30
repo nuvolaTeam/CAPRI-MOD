@@ -18,6 +18,17 @@ so their statements are left out):
   BSY            max(the mean of the three highest distinct yields of the last eight ex-post years EIGHTLST, BAS) of the
                  crops' and animals' yields (PACT_TO_Y), where the activity has a level BAS (l. 309-325)
 
+Which values are observations (setting captrd.zeros_as_missing, step1.observed; CAPRI-ERROR-FIX, register FIX-8): with
+CAPRI's convention (true) a zero is missing, and an absent value counts as a zero where the GAMS code sums or takes the
+maximum over a set of years. With the fix (false, the default) an absent value is missing and a recorded zero is an
+observation; that changes, on CAPRI's own data:
+  - the level-weighted BAS of an activity's inputs and outputs (l. 263-264): the sum of the levels runs over the base
+    years in which the input or output is observed, not over every base year with a level;
+  - BSY (l. 309-325): the three highest distinct yields are taken over the observed years of EIGHTLST; CAPRI takes a
+    missing year as a yield of 0, which can enter the average of the three.
+Where the data have no recorded zeros (CAPREG's series as GAMS writes them), nObs, nW, WAve, wVar and the plain BAS
+are the same under both.
+
 Returns p_data with the positions nObs, nW, WAve, wVar, BAS, BSY added (as t values) and the feed BASM changed.
 """
 from __future__ import annotations
@@ -29,7 +40,7 @@ import pandas as pd
 
 from capri_mod.pipeline.captrd.coco import BIO_COLS_COCO, BIO_ROWS_COCO
 from capri_mod.pipeline.captrd.prepare import CaptrdSets
-from capri_mod.pipeline.captrd.step1 import prestats, trend_variable
+from capri_mod.pipeline.captrd.step1 import observed, prestats, trend_variable, zeros_missing
 
 KEYS = ["region", "col", "row"]
 
@@ -40,7 +51,8 @@ def _gmax(values: np.ndarray) -> float:
 
 
 def bsy(yields: np.ndarray, bas: float) -> float:
-    """l. 309-325 for one series: yields over EIGHTLST (zeros included, as GAMS's SMAX runs over the set)."""
+    """l. 309-325 for one series: yields over EIGHTLST (CAPRI: every year of the set, a missing one as 0, as GAMS's SMAX
+    runs over the set; with the fix the caller passes the observed years only)."""
     first = _gmax(yields)
     if not first:                                                   # l. 321: BSY $ "1"
         return 0.0
@@ -50,7 +62,9 @@ def bsy(yields: np.ndarray, bas: float) -> float:
 
 
 def statistics(p: pd.DataFrame, sets: CaptrdSets, expostt: Iterable[int], basyrs5: Iterable[int],
-               eightlst: Iterable[int], first_year: Optional[int] = None) -> pd.DataFrame:
+               eightlst: Iterable[int], first_year: Optional[int] = None,
+               zeros_as_missing: Optional[bool] = None) -> pd.DataFrame:
+    zm = zeros_missing(zeros_as_missing)
     ex = [str(int(y)) for y in expostt]
     b5 = [str(int(y)) for y in basyrs5]
     e8 = [str(int(y)) for y in eightlst]
@@ -60,11 +74,12 @@ def statistics(p: pd.DataFrame, sets: CaptrdSets, expostt: Iterable[int], basyrs
     for c in set(ex) | set(b5) | set(e8) | {"BASM"}:
         if c not in wide.columns:
             wide[c] = np.nan
+    raw = wide                                                      # NaN: absent (missing unless zm reads it as 0)
     wide = wide.fillna(0.0)
-    est = wide[wide.index.get_level_values("col").isin(sets.s_colsest)
-               & wide.index.get_level_values("row").isin(sets.s_rowsest)]
-    X = est[ex].to_numpy(float)
-    obs = X != 0.0
+    in_est = (wide.index.get_level_values("col").isin(sets.s_colsest)
+              & wide.index.get_level_values("row").isin(sets.s_rowsest))
+    est = wide[in_est]
+    _, obs = observed(raw[in_est][ex].to_numpy(float), zm)
     nobs = obs.sum(axis=1).astype(float)
     nw = (obs * w).sum(axis=1)
     cols = est.index.get_level_values("col")
@@ -73,11 +88,11 @@ def statistics(p: pd.DataFrame, sets: CaptrdSets, expostt: Iterable[int], basyrs
     zero = ~keep | ((cols == "INHA") & (rows == "LEVL")) | ((cols == "DOMM") & rows.isin(sets.oyani))  # l. 221-227
     nobs = np.where(zero, 0.0, nobs)
     nw = np.where(zero, 0.0, nw)
-    pre = prestats(X, w, nobs, nw)
+    pre = prestats(raw[in_est][ex].to_numpy(float), w, nobs, nw, zeros_as_missing=zm)
     st = pd.DataFrame({"nObs": pre.nobs, "nW": pre.nw, "WAve": pre.wave, "wVar": pre.wvar}, index=est.index)
-    # l. 254-258: BAS $ nObs = the mean of the nonzero BASYRS5 values
-    B5 = est[b5].to_numpy(float)
-    nb = (B5 != 0.0).sum(axis=1)
+    # l. 254-258: BAS $ nObs = the mean of the observed BASYRS5 values
+    B5, ob5 = observed(raw[in_est][b5].to_numpy(float), zm)
+    nb = ob5.sum(axis=1)
     st["BAS"] = np.where((st["nObs"].to_numpy() != 0) & (nb > 0), B5.sum(axis=1) / np.maximum(nb, 1), 0.0)
     # l. 263-264: an activity's inputs and outputs weighted by its levels, where its LEVL has a BAS
     levl_bas = st["BAS"].xs("LEVL", level="row", drop_level=False) if "LEVL" in set(rows) else None
@@ -92,6 +107,12 @@ def statistics(p: pd.DataFrame, sets: CaptrdSets, expostt: Iterable[int], basyrs
         if not lb:
             continue
         lv = lev.loc[(reg, a)].to_numpy(float)
+        if not zm:                                                  # the base years in which the series is observed
+            ob = observed(raw.loc[k, b5].to_numpy(float), zm)[1][0]
+            if not ob.any():                                        # none: no base value, as the plain BAS (nb = 0)
+                new_bas[k] = 0.0
+                continue
+            lv = np.where(ob, lv, 0.0)
         den = lv.sum()
         new_bas[k] = float((est.loc[k, b5].to_numpy(float) * lv).sum() / den) if den else np.nan
     for k, v in new_bas.items():
@@ -143,7 +164,8 @@ def statistics(p: pd.DataFrame, sets: CaptrdSets, expostt: Iterable[int], basyrs
     for k in st.index:
         reg, a, r = k
         if a in sets.mpact and a in sets.s_colsest and (a, r) in pty and st["BAS"].get((reg, a, "LEVL"), 0.0):
-            st.at[k, "BSY"] = bsy(wide.loc[k, e8].to_numpy(float), float(st.at[k, "BAS"]))
+            y8, o8 = observed(raw.loc[k, e8].to_numpy(float), zm)
+            st.at[k, "BSY"] = bsy(y8[0] if zm else y8[0][o8[0]], float(st.at[k, "BAS"]))
     # back to p_data: the positions, and the feed BASM
     long = st.reset_index().melt(id_vars=KEYS, var_name="t", value_name="value")
     long = long[long["value"] != 0.0]

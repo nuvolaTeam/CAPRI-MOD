@@ -344,6 +344,23 @@ variance_floor_squared = true
 # seven calendar years under the name "5", but the set is restricted to ExPost, which ends at BAS + 1 in the
 # reference run (CAPREG series to 2018, BAS 2017): 2014-2018, five years. Not an error in that configuration
 basyrs5_halfwidth = 3
+# Zeros and missing values (register FIX-8; CAPRI-ERROR-FIX). CAPRI reads a zero as a missing observation (GAMS stores
+# no zeros), and where it sums or takes a maximum over years it reads a missing year as 0: the level-weighted base value
+# of an activity's inputs and outputs divides by the levels of years in which the input is missing
+# (prep_data_for_estimation.gms l. 263-264), and the three highest yields of BSY can include a missing year's 0
+# (l. 309-325).
+# false (default): NaN or an absent record is missing, a recorded zero is an observation (step1.observed, statistics);
+# true: CAPRI's convention (the parity switch). CAPREG's series as GAMS writes them have no recorded zeros (their
+# only EPS are set-aside rates and sugar quotas, which CAPTRD sets from its policy data), so on them the switch changes
+# only the two statistics named above
+zeros_as_missing = false
+# The NUTS 2 column filter of captrd.gms l. 872-876 (register KEPT-2 -> FIX-9; CAPRI-ERROR-FIX). The statement is
+# meant to keep, for the NUTS 2 regions that are not countries, only the activities, land uses, GROF and ARTO, but
+# its condition NOT SUM(SAMEAS(MS,NT2),1) leaves NT2 uncontrolled, so it deletes nothing in CAPRI.
+# false (default): the condition per region, as in the two statements that follow it (l. 878-880), keeping the
+# columns of CAPTRD's NUTS 2 estimation (estimate_nuts2.gms l. 33-41: also the groups GRPC, LU and LOSF, which that
+# estimation uses); true: CAPRI's code as written (the parity switch)
+nuts2_column_filter_as_coded = false
 # The run's GUI choices (captrd.gms %BaseYear%, %lst_dgagri%, %Aglink%, %mlkQutExpiry%, the simulation years RESY), at
 # the values of the reference run results_1770.gdx (base 2017, simulation years 2018-2070), against which the port is
 # compared; the last year of the data is CAPREG's and COCO's (COCO's nowcast reaches 2019)
