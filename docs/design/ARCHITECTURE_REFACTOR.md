@@ -82,11 +82,12 @@ The builders (tools/build) are out of this plan: they are run by the maintainers
   and its parameters and datasets in separate files (the trajectories moved there first, branch json-csv); the
   scenario definitions now written in Python (policy/greendeal.py, scenarios/) move there.
 - Results in one format for every run, as CAPRI's dataOut: one long table (region, activity or product, item, point:
-  base, scenario or year, value) in Parquet, with the run's settings.toml and manifest.json beside it, under
-  results/<scenario>/<run_id>/ (not in git); capri_mod/io_results.py the single writer, the gate runner and
-  tools/check/compare_runs.py on it, the pickle at most a cache. Parquet needs pyarrow only, already a model
-  dependency; a Delta Lake table over all runs (append, versions, one query across runs) can be added on top with
-  the pipeline's deltalake (the pipeline extra), as the data pipeline stores its tables.
+  base, scenario or year, value), stored in Delta Lake (the project lead's choice, 31 October 2026), as the data
+  pipeline stores its tables: one results table under results/ (not in git), each run appended as its partition
+  (scenario, run_id), with the run's settings.toml and manifest.json beside it; versions, appends and one query across
+  runs come with the format (deltalake; DuckDB reads it too). deltalake moves from the pipeline extra to the model's
+  dependencies. capri_mod/io_results.py is the single writer; the gate runner and tools/check/compare_runs.py use it;
+  the pickle at most a cache.
 
 ## 4. CAPRI-claim audit
 
