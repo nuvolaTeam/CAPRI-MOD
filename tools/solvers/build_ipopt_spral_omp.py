@@ -21,6 +21,11 @@ capri_mod/supply/ipopt_library.py loads the library RTLD_LOCAL | RTLD_DEEPBIND s
 
     python tools/solvers/build_ipopt_spral_omp.py [--prefix DIR] [--jobs N]
 
+Built on the machine that runs it, against that machine's runtime libraries under their own names. Shipped to other
+machines as a binary (a wheel or a package), it would have to go through auditwheel repair in a manylinux container
+instead: libgomp and libgfortran renamed and carried with it, as CasADi's wheel does, and a glibc baseline older than
+this machine's (a build on Ubuntu 24.04 needs glibc 2.39 or newer).
+
 The default prefix is ~/capri-solvers/ipopt-spral-omp; the library is PREFIX/lib/libipopt.so.3, the value to give
 supply.nlp_ipopt_library. Needs git (the sources come from GitHub), make, cmake, meson (pip install meson), ninja, gcc,
 g++, gfortran. Each step leaves a stamp file in PREFIX/stamps and is skipped when it is there; --clean removes the
