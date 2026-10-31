@@ -79,6 +79,14 @@ goes gate by gate.
 - **Expected effect:** the N kept in manure, so the value of mineral N.
 - **Effort:** medium: they are in the NLP already; the hold is a switch.
 - **How to check:** adoption against CAPRI's reference; the gate.
+- **First check (31 October 2026):** the hold switched off in a baseline (DE94, NL22; the N incentive test forced
+  true). NL22: nothing moves. DE94: ten options leave their base shares with no policy at all (broilers' low-emission
+  storage cover 0 to 0.27, laying hens' 0 to 0.20), activities 2e-4 off the base. This is K63's saddle: the base is
+  a first-order point (the calibration holds it), but along the options' joint direction (storage cover x spreading,
+  multiplied in the loss cascade) the objective curves downward, and IPOPT leaves it; CONOPT, starting at the
+  calibrated point, stays. So S5 is not a switch: the hold can go only once the curvature is understood. Next: the
+  Hessian of the options block at the base, its negative direction, and the terms behind it against CAPRI's
+  (ammo_tech.gms: the options' quadratic cost and the cascade), to see whether CAPRI's own model has the same saddle.
 
 ### S6. The other regional NLP departures
 
