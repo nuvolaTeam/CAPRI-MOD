@@ -20,11 +20,11 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K48](#k48) | Young-animal prices against CAPRI's own market run | open |
 | [K65](#k65) | Cattle member splits and per-sex young-animal markets do not converge yet | open |
 | [K66](#k66) | Farmland expands under the per-hectare N target more than in CAPRI | open: waiting for CAPRI's scenario results |
-| [K77](#k77) | CAPRI's fertiliser-option curvature (S5) leaves the baseline's base shares | open |
+| [K77](#k77) | CAPRI's fertiliser-option curvature (S5) leaves the baseline's base shares | open: CAPRI's reference moves timing and inhibitors in about ten regions; two ways to it for the project lead's decision |
 | [K78](#k78) | Histosol fallowing under Farm-to-Fork far above JRC121368's figure | open: waiting for CAPRI's scenario results |
 | [K79](#k79) | Member-state production that keeps moving between iterations | open |
 | [K92](#k92) | Farm-to-Fork changes furthest from JRC121368, besides the milk price | open: waiting for CAPRI's scenario results |
-| [K93](#k93) | CAPRI mitigation options not built; documents disagree on which are in | open |
+| [K93](#k93) | CAPRI mitigation options not built; documents disagree on which are in | open: no-till and legume share unmeasured; UreaSubst parked; the others not needed for Farm-to-Fork and the Green Deal |
 
 ## Resolved (96)
 
@@ -851,6 +851,36 @@ With CAPRI's pmpParSqr including the fertiliser-saving term (ghgMiti.gms l. 1016
 - **Effect:** Green Deal / Farm-to-Fork adoption of the fertiliser options
 - **In 9t:** –
 - **Status:** **open**: supply.fert_slope_with_saving off by default (the curvature without the saving term, as before); the cost on the purchases kept. Run r128 with both on: nitrification inhibitors 4.5% (r123 16.3%; JRC121368 Table 17 18%), precision farming 9.6 -> 25.0%
+  **CAPRI's own 2030 reference checked, 31 October 2026** (res_2_1730greendeal_refpol_endotech_all_ini, dataOut SHARE
+  of the fertiliser options; code reading). CAPRI's reference run is a ghgTechCali = ini run
+  (pol_input/greendeal/refpol_endotech_all_ini.gms l. 29), and that setting fixes the ammonia, breeding, histosol,
+  winter-cover and tillage options at their initial shares (supply/set_miti_bounds.gms l. 60-74, 101-115, 158-201,
+  213-229, 236-253) but not the fertiliser options, which keep only their upper bound MaxShare (l. 41-42): in CAPRI's
+  reference the fertiliser options are endogenous, as in the model's baseline. Their shares there:
+  - precision farming at most 0.3% (PT200000; IT12, IT13 0.2%; every other region 0): CAPRI's base stays where the
+    model's stays with fert_slope_with_saving off, and far from the model's with it on (r128: FR10 0.44, EU 9.6%);
+  - fertiliser timing up to 85% (NL410000 0.855; RO020000 0.61, RO060000 0.58, ES130000 0.30, RO010000 0.23, RO070000
+    0.20, ES120000 0.14; Montenegro and Albania too) and nitrification inhibitors up to 34% in the EU (PT300000 0.335,
+    NL410000 0.109, IT330000 0.072, PT110000 0.062; Montenegro 0.52): CAPRI's reference leaves the initial share in a
+    handful of regions, which the model's baseline does not (0 everywhere, the gate runs' adoption tables).
+  So neither setting reproduces CAPRI's reference: with the saving term the base moves where CAPRI's does not (precision
+  farming), without it the base stays where CAPRI's moves (timing and inhibitors in about ten EU regions). Next step:
+  per option and region, CAPRI's reference share against the model's baseline with each setting, and CAPRI's own
+  first-order condition at its reference (which of its terms makes timing move in NL41 and not precision farming in
+  FR10).
+  **Why the two differ (code reading, 31 October 2026).** CAPRI calibrates an option's linear term beta so that its
+  first-order condition is zero at the initial share with the fertiliser saving valued by a notional formula, the
+  member state's NITF price times nmE on N0 / (1 + nmE m) (envind/ghgMiti.gms l. 1016-1035 and the beta derivation
+  above it); in its simulation the saving runs through its fertilisation block, so where the block's marginal value of N
+  differs from that notional value the option can move off its initial share, the likely reason for CAPRI's reference
+  moves (fertiliser timing in NL41, Romania; inhibitors in PT30; not verified on CAPRI's numbers). The model calibrates on the solved NLP's own reduced cost instead (CapriRegionalNLP
+  calibration: an option's residual at its base share goes into its linear cost, dabat("fert", option); an option at
+  zero with a positive reduced cost is left alone), which makes every base share exactly stationary: the baseline
+  cannot move where CAPRI's does. Two ways to CAPRI's reference, for the project lead's decision: (a) CAPRI's beta
+  with its notional saving (the baseline then moves as CAPRI's, by the model's own block, not CAPRI's); (b) CAPRI's
+  2030 reference shares (dataOut SHARE of the ini run) as the model's base shares, calibrated stationary there as now,
+  the same treatment as the other base data the 2030 baseline takes from that run. (b) reproduces CAPRI's reference
+  state by construction; (a) reproduces CAPRI's mechanism with the model's fertilisation block.
 
 <a id="k78"></a>
 ### K78: Histosol fallowing under Farm-to-Fork far above JRC121368's figure (25 October 2026)
@@ -1335,6 +1365,36 @@ recorded only inside the status texts of K50 and K51 (resolved table) and README
   **UreaSubst parked 31 October 2026** (the project lead's decision): not built until a scenario with an NH3 price, a
   tax on CO2UREA or a binding mineral N cap where it could move is planned; CAPRI's form and this analysis are the
   starting point
+  **The remaining options scoped, 31 October 2026** (code reading; CAPRI's 2030 reference res_2_1730greendeal_refpol_endotech_all_ini
+  and its maximum-mitigation run scen_greendeal_2030.txt). Correction first: the statement above that LegSh, UreaSubst,
+  the tillage options, buffer strips and the biodiversity options "carry no level" in CAPRI's Green Deal 2030 result,
+  and so "none of them moves CAPRI's Green Deal or Farm-to-Fork result", was read from scen_greendeal_2030.txt, which
+  is CAPRI's maximum-mitigation run (refpol_endotech_all_max, K38), not a Green Deal or Farm-to-Fork scenario; it is not
+  evidence about those scenarios, and it is not even right for that run: conservation tillage carries SHARE 1 there in
+  most regions (3,258 regional entries, median 1; ConsTill's initial shares in the 2030 reference are e.g. Denmark 0.107,
+  NoTill 0.013). What the code says instead:
+  - buffer strips, the biodiversity options and biochar are not in CAPRI's Green Deal technology lists
+    (pol_input/greendeal/refpol_endotech_all_ini.gms l. 216: ghgTechActiveCarb LegSh, WinterCov, ConsTill, NoTill;
+    biochar and rotGraz commented out; the landscape options off): nothing to port for the Farm-to-Fork and Green Deal
+    runs;
+  - conservation tillage (ConsTill): no yield effect (p_tillYldFrac 1 in every zone, envind/tillage.gms l. 454-456), a
+    cost saving (costParLin 46 - 60 - 7 = -21 EUR/ha, l. 403) calibrated away at the initial share, its soil carbon
+    (CO2SEQ) outside the GGWP tax base and its runoff effect commented out (l. 561-566): without a soil-carbon price it
+    stays at its initial share, which the 2030 reference's yields and costs already contain;
+  - no-till (NoTill): yield 0.9 of the regional mix in CAPRI's North and Center zones, 1 in the South (l. 450-453;
+    applied directly or through the T1/T2 split, %NoYieldEffect%, l. 486-535, the Green Deal file's setting not
+    checked), leaching of mineral and manure N up 24% and 38% (l. 562-563, active), N2O of mineral N up 12% (8% South,
+    l. 580-583); so its share would respond to crop prices and to the GGWP tax (both against it) from small initial
+    shares (Denmark 0.013); the effect on production and emissions is that small share's change times those factors,
+    not measured;
+  - legume share in temporary grassland (LegSh): MaxShare 1, its scenario response not measured (in the
+    maximum-mitigation run 1.9e-5 of the EU's area);
+  - urea substitution: the incentive analysis above does not depend on CAPRI's result files and stands; the sentence
+    "CAPRI's own Green Deal result shows no adoption either" in the 31 October discussion came from the same
+    maximum-mitigation run and is withdrawn.
+  Status of the remaining options: buffer strips, biodiversity options and biochar need nothing for CAPRI's Green Deal
+  and Farm-to-Fork runs; conservation tillage none without a soil-carbon price; no-till and LegSh are the two whose
+  scenario response could be non-zero, small by the code's terms, unmeasured.
 
 <a id="k94"></a>
 ### K94: `capri_mod/data/reconcile_base.py` is an orphan, and README's re-basing note points at a removed concordance (found 29 October 2026, registry migration)
