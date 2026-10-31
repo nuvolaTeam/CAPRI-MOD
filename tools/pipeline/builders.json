@@ -3795,13 +3795,12 @@
    "args": [],
    "inputs": [
     "capri_data/2017/supply/animal_numbers.csv",
-    "capri_data/2017/supply/crop_premium.csv",
+    "capri_data/2017/supply/cap_premium_activity.csv",
     "capri_data/codes/model_trade_regions.csv",
     "capri_data/shared/capri_member_state_codes.csv",
     "capri_data/shared/eu_market_blocks.csv",
     "capri_data/shared/regional_units.csv",
     "capri_data/shared/rms_to_rm.csv",
-    "capri_data/sources/capreg/capreg_cap_premium.csv",
     "capri_data/sources/capri_baseline/capri_market_prices_1730.csv",
     "capri_data/validation/greendeal_2030/capri_marginal_terms_ini_2030.csv.xz",
     "capri_data/validation/greendeal_2030/capri_unit_values_ini_2030.csv"
@@ -3816,7 +3815,8 @@
     "capri_mod/tableio.py",
     "tools/build/build_livestock_output_coef.py",
     "tools/build/build_price_trajectory_2030.py",
-    "tools/lib/_model_regions.py"
+    "tools/lib/_model_regions.py",
+    "tools/lib/paths.py"
    ],
    "external": [
     "$SOURCES/capreg/res_17AT.txt",
@@ -4866,6 +4866,37 @@
    "outputs": [
     "capri_data/shared/trade_flows_2017.csv",
     "capri_data/validation/trade_recalibration_2017.json"
+   ]
+  },
+  {
+   "task": "build_model_premium_prices",
+   "builder": "build_model_premium_prices",
+   "args": [],
+   "inputs": [
+    "capri_data/2017/supply/crop_premium.csv",
+    "capri_data/codes/model_trade_regions.csv",
+    "capri_data/shared/capri_member_state_codes.csv",
+    "capri_data/shared/eu_market_blocks.csv",
+    "capri_data/shared/regional_units.csv",
+    "capri_data/shared/rms_to_rm.csv",
+    "capri_data/sources/capreg/capreg_cap_premium.csv",
+    "capri_data/sources/capreg/capreg_national_prices.csv",
+    "capri_data/sources/capreg/capreg_producer_prices.csv"
+   ],
+   "code": [
+    "capri_mod/__init__.py",
+    "capri_mod/csvio.py",
+    "capri_mod/data/__init__.py",
+    "capri_mod/data/definitions.py",
+    "capri_mod/data/land_market_io.py",
+    "capri_mod/data/loaders.py",
+    "capri_mod/tableio.py",
+    "tools/build/build_model_premium_prices.py"
+   ],
+   "external": [],
+   "outputs": [
+    "capri_data/2017/supply/cap_premium_activity.csv",
+    "capri_data/2017/supply/producer_prices_regional.csv"
    ]
   }
  ]

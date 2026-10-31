@@ -16237,6 +16237,7 @@
      "build_livestock_premium_coef",
      "build_livestock_products",
      "build_manure_trade_base",
+     "build_model_premium_prices",
      "build_noneu_feed_nq",
      "build_noneu_market_supply_nq",
      "build_npk_balance_2030",
@@ -20324,6 +20325,7 @@
      "build_manure_losses",
      "build_manure_n2o",
      "build_manure_trade_base",
+     "build_model_premium_prices",
      "build_n_deposition_substitution",
      "build_nh3_factors",
      "build_npk_balance_2030",
@@ -20439,6 +20441,7 @@
      "build_livestock_premium_coef",
      "build_livestock_products",
      "build_manure_trade_base",
+     "build_model_premium_prices",
      "build_noneu_feed_nq",
      "build_noneu_market_supply_nq",
      "build_npk_balance_2030",
@@ -20552,6 +20555,7 @@
      "build_manure_n2o",
      "build_manure_trade_base",
      "build_mineral_n_price",
+     "build_model_premium_prices",
      "build_n_deposition_substitution",
      "build_nh3_factors",
      "build_npk_balance_2030",
@@ -20756,6 +20760,7 @@
      "build_manure_losses",
      "build_manure_n2o",
      "build_manure_trade_base",
+     "build_model_premium_prices",
      "build_n_deposition_substitution",
      "build_nh3_factors",
      "build_npk_balance_2030",
@@ -22002,9 +22007,7 @@
    },
    "notes": [],
    "read_by": {
-    "model": [
-     "capri_mod/market/bilateral_solve.py"
-    ],
+    "model": [],
     "builders": [],
     "checks": [],
     "tests": []
@@ -22057,9 +22060,7 @@
    },
    "notes": [],
    "read_by": {
-    "model": [
-     "capri_mod/market/bilateral_solve.py"
-    ],
+    "model": [],
     "builders": [],
     "checks": [],
     "tests": []
@@ -24708,12 +24709,10 @@
    },
    "notes": [],
    "read_by": {
-    "model": [
-     "capri_mod/data/loaders.py"
-    ],
+    "model": [],
     "builders": [
      "build_livestock_premium_coef",
-     "build_price_trajectory_2030"
+     "build_model_premium_prices"
     ],
     "checks": [],
     "tests": []
@@ -25561,10 +25560,10 @@
    },
    "notes": [],
    "read_by": {
-    "model": [
-     "capri_mod/data/loaders.py"
+    "model": [],
+    "builders": [
+     "build_model_premium_prices"
     ],
-    "builders": [],
     "checks": [],
     "tests": []
    }
@@ -26401,11 +26400,11 @@
    "notes": [],
    "read_by": {
     "model": [
-     "capri_mod/data/loaders.py",
      "capri_mod/data/validate_data.py"
     ],
     "builders": [
-     "build_eu_producer_prices"
+     "build_eu_producer_prices",
+     "build_model_premium_prices"
     ],
     "checks": [
      "tools/check/validate_world_prices.py"
@@ -27723,127 +27722,6 @@
     "builders": [
      "build_price_trajectory_2030"
     ],
-    "checks": [],
-    "tests": []
-   }
-  },
-  "src_capri_supply_elas_market_1717": {
-   "file": "capri_data/sources/arm/capri_supply_elas_market_1717.csv",
-   "declared_in": "30_sources.sql",
-   "layout": [],
-   "comment": "Every record of CAPRI's p_elasSupp(region, prod, wrt, 'CAL') from elas1717defaulta.gdx (gdxdump p_elasSupp.txt): the supply elasticity of prod with respect to the price of wrt, per market region (countries and trade regions), 73528 rows (tools/build/build_capri_supply_elas_market.py).",
-   "columns": [
-    {
-     "name": "region",
-     "type": "VARCHAR",
-     "not_null": true
-    },
-    {
-     "name": "prod",
-     "type": "VARCHAR",
-     "not_null": true
-    },
-    {
-     "name": "wrt",
-     "type": "VARCHAR",
-     "not_null": true
-    },
-    {
-     "name": "value",
-     "type": "DOUBLE",
-     "not_null": true
-    }
-   ],
-   "primary_key": [
-    "region",
-    "prod",
-    "wrt"
-   ],
-   "unique": [],
-   "foreign_keys": [],
-   "checks": [],
-   "units": [
-    {
-     "item": "value",
-     "unit": null,
-     "status": "open",
-     "basis": "capri_supply_elas_market_1717.value: unit to be established"
-    }
-   ],
-   "provenance": {
-    "nature": "capri",
-    "origins": "CAPRI",
-    "builder": "build_capri_supply_elas_market",
-    "sources": "$EXPORTS/data_market_1730defaulta.csv; $EXPORTS/elas_2_1730defaulta.csv; $EXPORTS/p_elasSupp.txt; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/XX1.csv; $SOURCES/gams/aggregation/defaultA.agg"
-   },
-   "notes": [
-    {
-     "kind": "origin",
-     "note": "Every record of CAPRI's p_elasSupp(region, prod, wrt, 'CAL') from elas1717defaulta (73528 rows, 80 regions of which 34 are CAPRI national codes, 45 products, 2635 own-price records). Market level: country and trade-region codes, market products. Read by the model in capri_pmp.build_elasticity_table for the livestock elasticities (each animal takes its product's member-state value) and by build_supply_elas_nonEU.py. Its EU medians go to 2017/market/supply_elas_eu.csv, read by capri_mod/market/supply.py: MILK 0.556, BEEF 0.719, PORK 0.690, EGGS 0.761, POUM 0.750, SGMT 0.816.",
-     "evidence": "tools/build/build_capri_supply_elas_market.py:1-16, :40-66; capri_mod/supply/capri_pmp.py:136-138, :250-300; tools/build/build_supply_elas_nonEU.py:6, :35; capri_mod/market/supply.py:113-118; capri_data/2017/market/supply_elas_eu.csv; CSV: 73528 rows, 80 regions, 45 prods, 2635 diagonal",
-     "checked": "2026-10-29"
-    }
-   ],
-   "read_by": {
-    "model": [
-     "capri_mod/supply/capri_pmp.py"
-    ],
-    "builders": [
-     "build_supply_elas_nonEU"
-    ],
-    "checks": [],
-    "tests": []
-   }
-  },
-  "src_capri_supply_elas_young_1720": {
-   "file": "capri_data/sources/arm/capri_supply_elas_young_1720.csv",
-   "declared_in": "30_sources.sql",
-   "layout": [],
-   "comment": "CAPRI's calibrated supply elasticities of young animals (YCAM, YCAF, YBUL, YHEI, YCOW, YPIG) per member state: p_ElasSupp(MS, item, item, 'CAL') from results/arm/supply_elas_2_1720<MS>defaulta.gdx, the 2020 calibration (tools/build/build_young_animal_elasticities.py).",
-   "columns": [
-    {
-     "name": "region",
-     "type": "VARCHAR",
-     "not_null": true
-    },
-    {
-     "name": "item",
-     "type": "VARCHAR",
-     "not_null": true
-    },
-    {
-     "name": "value",
-     "type": "DOUBLE",
-     "not_null": true
-    }
-   ],
-   "primary_key": [
-    "region",
-    "item"
-   ],
-   "unique": [],
-   "foreign_keys": [],
-   "checks": [],
-   "units": [
-    {
-     "item": "value",
-     "unit": null,
-     "status": "open",
-     "basis": "capri_supply_elas_young_1720.value: unit to be established"
-    }
-   ],
-   "provenance": {
-    "nature": "capri",
-    "origins": "CAPRI",
-    "builder": "build_young_animal_elasticities",
-    "sources": "$EXPORTS/supply_elas_2_1720DEdefaulta.txt; $EXPORTS/supply_elas_2_1720ESdefaulta.txt; $EXPORTS/supply_elas_2_1720FRdefaulta.txt; $EXPORTS/supply_elas_2_1720ITdefaulta.txt; $EXPORTS/supply_elas_2_1720PLdefaulta.txt"
-   },
-   "notes": [],
-   "read_by": {
-    "model": [
-     "capri_mod/supply/capri_pmp.py"
-    ],
-    "builders": [],
     "checks": [],
     "tests": []
    }
@@ -29721,9 +29599,7 @@
    },
    "notes": [],
    "read_by": {
-    "model": [
-     "capri_mod/data/loaders.py"
-    ],
+    "model": [],
     "builders": [
      "build_pmp_recipe"
     ],
@@ -29787,9 +29663,7 @@
    },
    "notes": [],
    "read_by": {
-    "model": [
-     "capri_mod/data/loaders.py"
-    ],
+    "model": [],
     "builders": [
      "build_pmp_recipe"
     ],
@@ -32519,6 +32393,1023 @@
     "tests": []
    }
   },
+  "sup_cap_premium_activity": {
+   "file": "capri_data/2017/supply/cap_premium_activity.csv",
+   "declared_in": "18_supply_more.sql",
+   "layout": [],
+   "comment": "CAPRI's CAP premium PRME per regional unit and activity (per ha or per head): the crop columns from crop_premium.csv (every region, model codes), the others from CAPREG's DATA2 extract sources/capreg/capreg_cap_premium.csv (tools/build/build_model_premium_prices.py; the model read the extract and joined them at run time until 31 October 2026)",
+   "columns": [
+    {
+     "name": "region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "SWHE",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "DWHE",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "RYEM",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "BARL",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "OATS",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "CORN",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "OCER",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "PARI",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "OCRO",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "OIND",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "NURS",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "FLOW",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "POTA",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "SUGB",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "SUNF",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "RAPE",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "SOYA",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "OOIL",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "PULS",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "TOMA",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "OVEG",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "APPL",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "OFRU",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "CITR",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "TAGR",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "WINE",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "OLIV",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "TABO",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "TOBA",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "TEXT",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "GRAS",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "MAIF",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "OFOD",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "SETA",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "AGGT",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "ANNC",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "ARAC",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "BEFM",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "BULF",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "BULH",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "BULL",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "CACR",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "CAFF",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "CAFR",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "CAMF",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "CAMR",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "CATA",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "CERE",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "DCOH",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "DCOL",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "DCOW",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "EAAG",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "FODD",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "FRUN",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "HEIF",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "HEIH",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "HEIL",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "HEIR",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "HENS",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "LABT",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "MODU",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "OANI",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "OAR1",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "OFAR",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "OILS",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "PERM",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "PIGF",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "PKPL",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "POUF",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "ROOF",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "RUMI",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "SCOW",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "SETF",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "SHGF",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "SHGM",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "SOWS",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "TWIN",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "VSET",
+     "type": "DOUBLE",
+     "not_null": false
+    }
+   ],
+   "primary_key": [
+    "region"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [
+    {
+     "item": "AGGT",
+     "unit": null,
+     "status": "open",
+     "basis": "cap_premium_activity.AGGT: unit to be established (per ha for crops, per head for animals)"
+    },
+    {
+     "item": "ANNC",
+     "unit": null,
+     "status": "open",
+     "basis": "cap_premium_activity.ANNC: unit to be established (per ha for crops, per head for animals)"
+    },
+    {
+     "item": "APPL",
+     "unit": null,
+     "status": "open",
+     "basis": "cap_premium_activity.APPL: unit to be established (per ha for crops, per head for animals)"
+    },
+    {
+     "item": "ARAC",
+     "unit": null,
+     "status": "open",
+     "basis": "cap_premium_activity.ARAC: unit to be established (per ha for crops, per head for animals)"
+    },
+    {
+     "item": "BARL",
+     "unit": null,
+     "status": "open",
+     "basis": "cap_premium_activity.BARL: unit to be established (per ha for crops, per head for animals)"
+    },
+    {
+     "item": "BEFM",
+     "unit": null,
+     "status": "open",
+     "basis": "cap_premium_activity.BEFM: unit to be established (per ha for crops, per head for animals)"
+    },
+    {
+     "item": "BULF",
+     "unit": null,
+     "status": "open",
+     "basis": "cap_premium_activity.BULF: unit to be established (per ha for crops, per head for animals)"
+    },
+    {
+     "item": "BULH",
+     "unit": null,
+     "status": "open",
+     "basis": "cap_premium_activity.BULH: unit to be established (per ha for crops, per head for animals)"
+    },
+    {
+     "item": "BULL",
+     "unit": null,
+     "status": "open",
+     "basis": "cap_premium_activity.BULL: unit to be established (per ha for crops, per head for animals)"
+    },
+    {
+     "item": "CACR",
+     "unit": null,
+     "status": "open",
+     "basis": "cap_premium_activity.CACR: unit to be established (per ha for crops, per head for animals)"
+    },
+    {
+     "item": "CAFF",
+     "unit": null,
+     "status": "open",
+     "basis": "cap_premium_activity.CAFF: unit to be established (per ha for crops, per head for animals)"
+    },
+    {
+     "item": "CAFR",
+     "unit": null,
+     "status": "open",
+     "basis": "cap_premium_activity.CAFR: unit to be established (per ha for crops, per head for animals)"
+    },
+    {
+     "item": "CAMF",
+     "unit": null,
+     "status": "open",
+     "basis": "cap_premium_activity.CAMF: unit to be established (per ha for crops, per head for animals)"
+    },
+    {
+     "item": "CAMR",
+     "unit": null,
+     "status": "open",
+     "basis": "cap_premium_activity.CAMR: unit to be established (per ha for crops, per head for animals)"
+    },
+    {
+     "item": "CATA",
+     "unit": null,
+     "status": "open",
+     "basis": "cap_premium_activity.CATA: unit to be established (per ha for crops, per head for animals)"
+    },
+    {
+     "item": "CERE",
+     "unit": null,
+     "status": "open",
+     "basis": "cap_premium_activity.CERE: unit to be established (per ha for crops, per head for animals)"
+    },
+    {
+     "item": "CITR",
+     "unit": null,
+     "status": "open",
+     "basis": "cap_premium_activity.CITR: unit to be established (per ha for crops, per head for animals)"
+    },
+    {
+     "item": "CORN",
+     "unit": null,
+     "status": "open",
+     "basis": "cap_premium_activity.CORN: unit to be established (per ha for crops, per head for animals)"
+    },
+    {
+     "item": "DCOH",
+     "unit": null,
+     "status": "open",
+     "basis": "cap_premium_activity.DCOH: unit to be established (per ha for crops, per head for animals)"
+    },
+    {
+     "item": "DCOL",
+     "unit": null,
+     "status": "open",
+     "basis": "cap_premium_activity.DCOL: unit to be established (per ha for crops, per head for animals)"
+    },
+    {
+     "item": "DCOW",
+     "unit": null,
+     "status": "open",
+     "basis": "cap_premium_activity.DCOW: unit to be established (per ha for crops, per head for animals)"
+    },
+    {
+     "item": "DWHE",
+     "unit": null,
+     "status": "open",
+     "basis": "cap_premium_activity.DWHE: unit to be established (per ha for crops, per head for animals)"
+    },
+    {
+     "item": "EAAG",
+     "unit": null,
+     "status": "open",
+     "basis": "cap_premium_activity.EAAG: unit to be established (per ha for crops, per head for animals)"
+    },
+    {
+     "item": "FLOW",
+     "unit": null,
+     "status": "open",
+     "basis": "cap_premium_activity.FLOW: unit to be established (per ha for crops, per head for animals)"
+    },
+    {
+     "item": "FODD",
+     "unit": null,
+     "status": "open",
+     "basis": "cap_premium_activity.FODD: unit to be established (per ha for crops, per head for animals)"
+    },
+    {
+     "item": "FRUN",
+     "unit": null,
+     "status": "open",
+     "basis": "cap_premium_activity.FRUN: unit to be established (per ha for crops, per head for animals)"
+    },
+    {
+     "item": "GRAS",
+     "unit": null,
+     "status": "open",
+     "basis": "cap_premium_activity.GRAS: unit to be established (per ha for crops, per head for animals)"
+    },
+    {
+     "item": "HEIF",
+     "unit": null,
+     "status": "open",
+     "basis": "cap_premium_activity.HEIF: unit to be established (per ha for crops, per head for animals)"
+    },
+    {
+     "item": "HEIH",
+     "unit": null,
+     "status": "open",
+     "basis": "cap_premium_activity.HEIH: unit to be established (per ha for crops, per head for animals)"
+    },
+    {
+     "item": "HEIL",
+     "unit": null,
+     "status": "open",
+     "basis": "cap_premium_activity.HEIL: unit to be established (per ha for crops, per head for animals)"
+    },
+    {
+     "item": "HEIR",
+     "unit": null,
+     "status": "open",
+     "basis": "cap_premium_activity.HEIR: unit to be established (per ha for crops, per head for animals)"
+    },
+    {
+     "item": "HENS",
+     "unit": null,
+     "status": "open",
+     "basis": "cap_premium_activity.HENS: unit to be established (per ha for crops, per head for animals)"
+    },
+    {
+     "item": "LABT",
+     "unit": null,
+     "status": "open",
+     "basis": "cap_premium_activity.LABT: unit to be established (per ha for crops, per head for animals)"
+    },
+    {
+     "item": "MAIF",
+     "unit": null,
+     "status": "open",
+     "basis": "cap_premium_activity.MAIF: unit to be established (per ha for crops, per head for animals)"
+    },
+    {
+     "item": "MODU",
+     "unit": null,
+     "status": "open",
+     "basis": "cap_premium_activity.MODU: unit to be established (per ha for crops, per head for animals)"
+    },
+    {
+     "item": "NURS",
+     "unit": null,
+     "status": "open",
+     "basis": "cap_premium_activity.NURS: unit to be established (per ha for crops, per head for animals)"
+    },
+    {
+     "item": "OANI",
+     "unit": null,
+     "status": "open",
+     "basis": "cap_premium_activity.OANI: unit to be established (per ha for crops, per head for animals)"
+    },
+    {
+     "item": "OAR1",
+     "unit": null,
+     "status": "open",
+     "basis": "cap_premium_activity.OAR1: unit to be established (per ha for crops, per head for animals)"
+    },
+    {
+     "item": "OATS",
+     "unit": null,
+     "status": "open",
+     "basis": "cap_premium_activity.OATS: unit to be established (per ha for crops, per head for animals)"
+    },
+    {
+     "item": "OCER",
+     "unit": null,
+     "status": "open",
+     "basis": "cap_premium_activity.OCER: unit to be established (per ha for crops, per head for animals)"
+    },
+    {
+     "item": "OCRO",
+     "unit": null,
+     "status": "open",
+     "basis": "cap_premium_activity.OCRO: unit to be established (per ha for crops, per head for animals)"
+    },
+    {
+     "item": "OFAR",
+     "unit": null,
+     "status": "open",
+     "basis": "cap_premium_activity.OFAR: unit to be established (per ha for crops, per head for animals)"
+    },
+    {
+     "item": "OFOD",
+     "unit": null,
+     "status": "open",
+     "basis": "cap_premium_activity.OFOD: unit to be established (per ha for crops, per head for animals)"
+    },
+    {
+     "item": "OFRU",
+     "unit": null,
+     "status": "open",
+     "basis": "cap_premium_activity.OFRU: unit to be established (per ha for crops, per head for animals)"
+    },
+    {
+     "item": "OILS",
+     "unit": null,
+     "status": "open",
+     "basis": "cap_premium_activity.OILS: unit to be established (per ha for crops, per head for animals)"
+    },
+    {
+     "item": "OIND",
+     "unit": null,
+     "status": "open",
+     "basis": "cap_premium_activity.OIND: unit to be established (per ha for crops, per head for animals)"
+    },
+    {
+     "item": "OLIV",
+     "unit": null,
+     "status": "open",
+     "basis": "cap_premium_activity.OLIV: unit to be established (per ha for crops, per head for animals)"
+    },
+    {
+     "item": "OOIL",
+     "unit": null,
+     "status": "open",
+     "basis": "cap_premium_activity.OOIL: unit to be established (per ha for crops, per head for animals)"
+    },
+    {
+     "item": "OVEG",
+     "unit": null,
+     "status": "open",
+     "basis": "cap_premium_activity.OVEG: unit to be established (per ha for crops, per head for animals)"
+    },
+    {
+     "item": "PARI",
+     "unit": null,
+     "status": "open",
+     "basis": "cap_premium_activity.PARI: unit to be established (per ha for crops, per head for animals)"
+    },
+    {
+     "item": "PERM",
+     "unit": null,
+     "status": "open",
+     "basis": "cap_premium_activity.PERM: unit to be established (per ha for crops, per head for animals)"
+    },
+    {
+     "item": "PIGF",
+     "unit": null,
+     "status": "open",
+     "basis": "cap_premium_activity.PIGF: unit to be established (per ha for crops, per head for animals)"
+    },
+    {
+     "item": "PKPL",
+     "unit": null,
+     "status": "open",
+     "basis": "cap_premium_activity.PKPL: unit to be established (per ha for crops, per head for animals)"
+    },
+    {
+     "item": "POTA",
+     "unit": null,
+     "status": "open",
+     "basis": "cap_premium_activity.POTA: unit to be established (per ha for crops, per head for animals)"
+    },
+    {
+     "item": "POUF",
+     "unit": null,
+     "status": "open",
+     "basis": "cap_premium_activity.POUF: unit to be established (per ha for crops, per head for animals)"
+    },
+    {
+     "item": "PULS",
+     "unit": null,
+     "status": "open",
+     "basis": "cap_premium_activity.PULS: unit to be established (per ha for crops, per head for animals)"
+    },
+    {
+     "item": "RAPE",
+     "unit": null,
+     "status": "open",
+     "basis": "cap_premium_activity.RAPE: unit to be established (per ha for crops, per head for animals)"
+    },
+    {
+     "item": "ROOF",
+     "unit": null,
+     "status": "open",
+     "basis": "cap_premium_activity.ROOF: unit to be established (per ha for crops, per head for animals)"
+    },
+    {
+     "item": "RUMI",
+     "unit": null,
+     "status": "open",
+     "basis": "cap_premium_activity.RUMI: unit to be established (per ha for crops, per head for animals)"
+    },
+    {
+     "item": "RYEM",
+     "unit": null,
+     "status": "open",
+     "basis": "cap_premium_activity.RYEM: unit to be established (per ha for crops, per head for animals)"
+    },
+    {
+     "item": "SCOW",
+     "unit": null,
+     "status": "open",
+     "basis": "cap_premium_activity.SCOW: unit to be established (per ha for crops, per head for animals)"
+    },
+    {
+     "item": "SETA",
+     "unit": null,
+     "status": "open",
+     "basis": "cap_premium_activity.SETA: unit to be established (per ha for crops, per head for animals)"
+    },
+    {
+     "item": "SETF",
+     "unit": null,
+     "status": "open",
+     "basis": "cap_premium_activity.SETF: unit to be established (per ha for crops, per head for animals)"
+    },
+    {
+     "item": "SHGF",
+     "unit": null,
+     "status": "open",
+     "basis": "cap_premium_activity.SHGF: unit to be established (per ha for crops, per head for animals)"
+    },
+    {
+     "item": "SHGM",
+     "unit": null,
+     "status": "open",
+     "basis": "cap_premium_activity.SHGM: unit to be established (per ha for crops, per head for animals)"
+    },
+    {
+     "item": "SOWS",
+     "unit": null,
+     "status": "open",
+     "basis": "cap_premium_activity.SOWS: unit to be established (per ha for crops, per head for animals)"
+    },
+    {
+     "item": "SOYA",
+     "unit": null,
+     "status": "open",
+     "basis": "cap_premium_activity.SOYA: unit to be established (per ha for crops, per head for animals)"
+    },
+    {
+     "item": "SUGB",
+     "unit": null,
+     "status": "open",
+     "basis": "cap_premium_activity.SUGB: unit to be established (per ha for crops, per head for animals)"
+    },
+    {
+     "item": "SUNF",
+     "unit": null,
+     "status": "open",
+     "basis": "cap_premium_activity.SUNF: unit to be established (per ha for crops, per head for animals)"
+    },
+    {
+     "item": "SWHE",
+     "unit": null,
+     "status": "open",
+     "basis": "cap_premium_activity.SWHE: unit to be established (per ha for crops, per head for animals)"
+    },
+    {
+     "item": "TABO",
+     "unit": null,
+     "status": "open",
+     "basis": "cap_premium_activity.TABO: unit to be established (per ha for crops, per head for animals)"
+    },
+    {
+     "item": "TAGR",
+     "unit": null,
+     "status": "open",
+     "basis": "cap_premium_activity.TAGR: unit to be established (per ha for crops, per head for animals)"
+    },
+    {
+     "item": "TEXT",
+     "unit": null,
+     "status": "open",
+     "basis": "cap_premium_activity.TEXT: unit to be established (per ha for crops, per head for animals)"
+    },
+    {
+     "item": "TOBA",
+     "unit": null,
+     "status": "open",
+     "basis": "cap_premium_activity.TOBA: unit to be established (per ha for crops, per head for animals)"
+    },
+    {
+     "item": "TOMA",
+     "unit": null,
+     "status": "open",
+     "basis": "cap_premium_activity.TOMA: unit to be established (per ha for crops, per head for animals)"
+    },
+    {
+     "item": "TWIN",
+     "unit": null,
+     "status": "open",
+     "basis": "cap_premium_activity.TWIN: unit to be established (per ha for crops, per head for animals)"
+    },
+    {
+     "item": "VSET",
+     "unit": null,
+     "status": "open",
+     "basis": "cap_premium_activity.VSET: unit to be established (per ha for crops, per head for animals)"
+    },
+    {
+     "item": "WINE",
+     "unit": null,
+     "status": "open",
+     "basis": "cap_premium_activity.WINE: unit to be established (per ha for crops, per head for animals)"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_model_premium_prices",
+    "sources": "$EXPORTS/data_market_1730defaulta.csv; $EXPORTS/elas_2_1730defaulta.csv; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $SOURCES/capreg/res_17<CC>.txt; $SOURCES/capri_export/DATA2_<CC>.txt; $SOURCES/gams/aggregation/defaultA.agg"
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/data/loaders.py"
+    ],
+    "builders": [
+     "build_price_trajectory_2030"
+    ],
+    "checks": [],
+    "tests": []
+   }
+  },
+  "sup_capri_supply_elas_market_1717": {
+   "file": "capri_data/2017/supply/capri_supply_elas_market_1717.csv",
+   "declared_in": "13_supply_rents_elas.sql",
+   "layout": [],
+   "comment": "Every record of CAPRI's p_elasSupp(region, prod, wrt, 'CAL') from elas1717defaulta.gdx (gdxdump p_elasSupp.txt): the supply elasticity of prod with respect to the price of wrt, per market region (countries and trade regions), 73528 rows (tools/build/build_capri_supply_elas_market.py).",
+   "columns": [
+    {
+     "name": "region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "prod",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "wrt",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "value",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "region",
+    "prod",
+    "wrt"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [
+    {
+     "item": "value",
+     "unit": null,
+     "status": "open",
+     "basis": "capri_supply_elas_market_1717.value: unit to be established"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_capri_supply_elas_market",
+    "sources": "$EXPORTS/data_market_1730defaulta.csv; $EXPORTS/elas_2_1730defaulta.csv; $EXPORTS/p_elasSupp.txt; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/XX1.csv; $SOURCES/gams/aggregation/defaultA.agg"
+   },
+   "notes": [
+    {
+     "kind": "origin",
+     "note": "Every record of CAPRI's p_elasSupp(region, prod, wrt, 'CAL') from elas1717defaulta (73528 rows, 80 regions of which 34 are CAPRI national codes, 45 products, 2635 own-price records). Market level: country and trade-region codes, market products. Read by the model in capri_pmp.build_elasticity_table for the livestock elasticities (each animal takes its product's member-state value) and by build_supply_elas_nonEU.py. Its EU medians go to 2017/market/supply_elas_eu.csv, read by capri_mod/market/supply.py: MILK 0.556, BEEF 0.719, PORK 0.690, EGGS 0.761, POUM 0.750, SGMT 0.816.",
+     "evidence": "tools/build/build_capri_supply_elas_market.py:1-16, :40-66; capri_mod/supply/capri_pmp.py:136-138, :250-300; tools/build/build_supply_elas_nonEU.py:6, :35; capri_mod/market/supply.py:113-118; capri_data/2017/market/supply_elas_eu.csv; CSV: 73528 rows, 80 regions, 45 prods, 2635 diagonal",
+     "checked": "2026-10-29"
+    }
+   ],
+   "read_by": {
+    "model": [
+     "capri_mod/supply/capri_pmp.py"
+    ],
+    "builders": [
+     "build_supply_elas_nonEU"
+    ],
+    "checks": [],
+    "tests": []
+   }
+  },
+  "sup_capri_supply_elas_young_1720": {
+   "file": "capri_data/2017/supply/capri_supply_elas_young_1720.csv",
+   "declared_in": "13_supply_rents_elas.sql",
+   "layout": [],
+   "comment": "CAPRI's calibrated supply elasticities of young animals (YCAM, YCAF, YBUL, YHEI, YCOW, YPIG) per member state: p_ElasSupp(MS, item, item, 'CAL') from results/arm/supply_elas_2_1720<MS>defaulta.gdx, the 2020 calibration (tools/build/build_young_animal_elasticities.py).",
+   "columns": [
+    {
+     "name": "region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "item",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "value",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "region",
+    "item"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [
+    {
+     "item": "value",
+     "unit": null,
+     "status": "open",
+     "basis": "capri_supply_elas_young_1720.value: unit to be established"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_young_animal_elasticities",
+    "sources": "$EXPORTS/supply_elas_2_1720DEdefaulta.txt; $EXPORTS/supply_elas_2_1720ESdefaulta.txt; $EXPORTS/supply_elas_2_1720FRdefaulta.txt; $EXPORTS/supply_elas_2_1720ITdefaulta.txt; $EXPORTS/supply_elas_2_1720PLdefaulta.txt"
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/supply/capri_pmp.py"
+    ],
+    "builders": [],
+    "checks": [],
+    "tests": []
+   }
+  },
   "sup_cattle_intensity": {
    "file": "capri_data/2017/supply/cattle_intensity.csv",
    "declared_in": "18_supply_more.sql",
@@ -33421,7 +34312,7 @@
      "capri_mod/data/loaders.py"
     ],
     "builders": [
-     "build_price_trajectory_2030"
+     "build_model_premium_prices"
     ],
     "checks": [],
     "tests": []
@@ -36061,6 +36952,845 @@
     "origins": "CAPRI",
     "builder": "build_plant_protection_cost",
     "sources": "$EXPORTS/res_2_1730greendeal_refdefaulta.zip; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $SOURCES/capreg/res_17<CC>.txt; $SOURCES/gams/aggregation/defaultA.agg"
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/data/loaders.py"
+    ],
+    "builders": [],
+    "checks": [],
+    "tests": []
+   }
+  },
+  "sup_producer_prices_regional": {
+   "file": "capri_data/2017/supply/producer_prices_regional.csv",
+   "declared_in": "18_supply_more.sql",
+   "layout": [],
+   "comment": "CAPRI's regional producer prices MPRI (EUR/t) per regional unit and activity (sources/capreg/capreg_producer_prices.csv), CAPRI's TWIN and OFAR columns for WINE and OFOD where those are empty, and a missing regional price filled with the country's national price (sources/capreg/capreg_national_prices.csv; tools/build/build_model_premium_prices.py; done by the model's loader at run time until 31 October 2026)",
+   "columns": [
+    {
+     "name": "model_region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "AGGT",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "APPL",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "ARAB",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "BARL",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "BEFM",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "BULF",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "BULH",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "BULL",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "CACR",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "CAFF",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "CAFR",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "CAMF",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "CAMR",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "CATA",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "CERE",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "CITR",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "CORN",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "DCOH",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "DCOL",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "DCOW",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "DWHE",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "FLOW",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "FODD",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "GRAE",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "GRAI",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "GRAS",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "HEIF",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "HEIH",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "HEIL",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "HEIR",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "HENS",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "MAIF",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "NURS",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "OANI",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "OAR1",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "OATS",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "OCER",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "OCRO",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "OFAR",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "OFRU",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "OILS",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "OIND",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "OLIV",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "OOIL",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "OVEG",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "PARI",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "PERM",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "PIGF",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "PKPL",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "POTA",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "POUF",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "PULS",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "RAPE",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "ROOF",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "RUMI",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "RYEM",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "SCOW",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "SHGF",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "SHGM",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "SOWS",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "SOYA",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "SUGB",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "SUNF",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "SWHE",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "TABO",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "TAGR",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "TEXT",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "TOBA",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "TOMA",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "TWIN",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "UAAR",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "WINE",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "OFOD",
+     "type": "DOUBLE",
+     "not_null": false
+    }
+   ],
+   "primary_key": [
+    "model_region"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [
+    {
+     "item": "AGGT",
+     "unit": null,
+     "status": "open",
+     "basis": "producer_prices_regional.AGGT: EUR/t as CAPRI's MPRI, to be confirmed per column"
+    },
+    {
+     "item": "APPL",
+     "unit": null,
+     "status": "open",
+     "basis": "producer_prices_regional.APPL: EUR/t as CAPRI's MPRI, to be confirmed per column"
+    },
+    {
+     "item": "ARAB",
+     "unit": null,
+     "status": "open",
+     "basis": "producer_prices_regional.ARAB: EUR/t as CAPRI's MPRI, to be confirmed per column"
+    },
+    {
+     "item": "BARL",
+     "unit": null,
+     "status": "open",
+     "basis": "producer_prices_regional.BARL: EUR/t as CAPRI's MPRI, to be confirmed per column"
+    },
+    {
+     "item": "BEFM",
+     "unit": null,
+     "status": "open",
+     "basis": "producer_prices_regional.BEFM: EUR/t as CAPRI's MPRI, to be confirmed per column"
+    },
+    {
+     "item": "BULF",
+     "unit": null,
+     "status": "open",
+     "basis": "producer_prices_regional.BULF: EUR/t as CAPRI's MPRI, to be confirmed per column"
+    },
+    {
+     "item": "BULH",
+     "unit": null,
+     "status": "open",
+     "basis": "producer_prices_regional.BULH: EUR/t as CAPRI's MPRI, to be confirmed per column"
+    },
+    {
+     "item": "BULL",
+     "unit": null,
+     "status": "open",
+     "basis": "producer_prices_regional.BULL: EUR/t as CAPRI's MPRI, to be confirmed per column"
+    },
+    {
+     "item": "CACR",
+     "unit": null,
+     "status": "open",
+     "basis": "producer_prices_regional.CACR: EUR/t as CAPRI's MPRI, to be confirmed per column"
+    },
+    {
+     "item": "CAFF",
+     "unit": null,
+     "status": "open",
+     "basis": "producer_prices_regional.CAFF: EUR/t as CAPRI's MPRI, to be confirmed per column"
+    },
+    {
+     "item": "CAFR",
+     "unit": null,
+     "status": "open",
+     "basis": "producer_prices_regional.CAFR: EUR/t as CAPRI's MPRI, to be confirmed per column"
+    },
+    {
+     "item": "CAMF",
+     "unit": null,
+     "status": "open",
+     "basis": "producer_prices_regional.CAMF: EUR/t as CAPRI's MPRI, to be confirmed per column"
+    },
+    {
+     "item": "CAMR",
+     "unit": null,
+     "status": "open",
+     "basis": "producer_prices_regional.CAMR: EUR/t as CAPRI's MPRI, to be confirmed per column"
+    },
+    {
+     "item": "CATA",
+     "unit": null,
+     "status": "open",
+     "basis": "producer_prices_regional.CATA: EUR/t as CAPRI's MPRI, to be confirmed per column"
+    },
+    {
+     "item": "CERE",
+     "unit": null,
+     "status": "open",
+     "basis": "producer_prices_regional.CERE: EUR/t as CAPRI's MPRI, to be confirmed per column"
+    },
+    {
+     "item": "CITR",
+     "unit": null,
+     "status": "open",
+     "basis": "producer_prices_regional.CITR: EUR/t as CAPRI's MPRI, to be confirmed per column"
+    },
+    {
+     "item": "CORN",
+     "unit": null,
+     "status": "open",
+     "basis": "producer_prices_regional.CORN: EUR/t as CAPRI's MPRI, to be confirmed per column"
+    },
+    {
+     "item": "DCOH",
+     "unit": null,
+     "status": "open",
+     "basis": "producer_prices_regional.DCOH: EUR/t as CAPRI's MPRI, to be confirmed per column"
+    },
+    {
+     "item": "DCOL",
+     "unit": null,
+     "status": "open",
+     "basis": "producer_prices_regional.DCOL: EUR/t as CAPRI's MPRI, to be confirmed per column"
+    },
+    {
+     "item": "DCOW",
+     "unit": null,
+     "status": "open",
+     "basis": "producer_prices_regional.DCOW: EUR/t as CAPRI's MPRI, to be confirmed per column"
+    },
+    {
+     "item": "DWHE",
+     "unit": null,
+     "status": "open",
+     "basis": "producer_prices_regional.DWHE: EUR/t as CAPRI's MPRI, to be confirmed per column"
+    },
+    {
+     "item": "FLOW",
+     "unit": null,
+     "status": "open",
+     "basis": "producer_prices_regional.FLOW: EUR/t as CAPRI's MPRI, to be confirmed per column"
+    },
+    {
+     "item": "FODD",
+     "unit": null,
+     "status": "open",
+     "basis": "producer_prices_regional.FODD: EUR/t as CAPRI's MPRI, to be confirmed per column"
+    },
+    {
+     "item": "GRAE",
+     "unit": null,
+     "status": "open",
+     "basis": "producer_prices_regional.GRAE: EUR/t as CAPRI's MPRI, to be confirmed per column"
+    },
+    {
+     "item": "GRAI",
+     "unit": null,
+     "status": "open",
+     "basis": "producer_prices_regional.GRAI: EUR/t as CAPRI's MPRI, to be confirmed per column"
+    },
+    {
+     "item": "GRAS",
+     "unit": null,
+     "status": "open",
+     "basis": "producer_prices_regional.GRAS: EUR/t as CAPRI's MPRI, to be confirmed per column"
+    },
+    {
+     "item": "HEIF",
+     "unit": null,
+     "status": "open",
+     "basis": "producer_prices_regional.HEIF: EUR/t as CAPRI's MPRI, to be confirmed per column"
+    },
+    {
+     "item": "HEIH",
+     "unit": null,
+     "status": "open",
+     "basis": "producer_prices_regional.HEIH: EUR/t as CAPRI's MPRI, to be confirmed per column"
+    },
+    {
+     "item": "HEIL",
+     "unit": null,
+     "status": "open",
+     "basis": "producer_prices_regional.HEIL: EUR/t as CAPRI's MPRI, to be confirmed per column"
+    },
+    {
+     "item": "HEIR",
+     "unit": null,
+     "status": "open",
+     "basis": "producer_prices_regional.HEIR: EUR/t as CAPRI's MPRI, to be confirmed per column"
+    },
+    {
+     "item": "HENS",
+     "unit": null,
+     "status": "open",
+     "basis": "producer_prices_regional.HENS: EUR/t as CAPRI's MPRI, to be confirmed per column"
+    },
+    {
+     "item": "MAIF",
+     "unit": null,
+     "status": "open",
+     "basis": "producer_prices_regional.MAIF: EUR/t as CAPRI's MPRI, to be confirmed per column"
+    },
+    {
+     "item": "NURS",
+     "unit": null,
+     "status": "open",
+     "basis": "producer_prices_regional.NURS: EUR/t as CAPRI's MPRI, to be confirmed per column"
+    },
+    {
+     "item": "OANI",
+     "unit": null,
+     "status": "open",
+     "basis": "producer_prices_regional.OANI: EUR/t as CAPRI's MPRI, to be confirmed per column"
+    },
+    {
+     "item": "OAR1",
+     "unit": null,
+     "status": "open",
+     "basis": "producer_prices_regional.OAR1: EUR/t as CAPRI's MPRI, to be confirmed per column"
+    },
+    {
+     "item": "OATS",
+     "unit": null,
+     "status": "open",
+     "basis": "producer_prices_regional.OATS: EUR/t as CAPRI's MPRI, to be confirmed per column"
+    },
+    {
+     "item": "OCER",
+     "unit": null,
+     "status": "open",
+     "basis": "producer_prices_regional.OCER: EUR/t as CAPRI's MPRI, to be confirmed per column"
+    },
+    {
+     "item": "OCRO",
+     "unit": null,
+     "status": "open",
+     "basis": "producer_prices_regional.OCRO: EUR/t as CAPRI's MPRI, to be confirmed per column"
+    },
+    {
+     "item": "OFAR",
+     "unit": null,
+     "status": "open",
+     "basis": "producer_prices_regional.OFAR: EUR/t as CAPRI's MPRI, to be confirmed per column"
+    },
+    {
+     "item": "OFOD",
+     "unit": null,
+     "status": "open",
+     "basis": "producer_prices_regional.OFOD: EUR/t as CAPRI's MPRI, to be confirmed per column"
+    },
+    {
+     "item": "OFRU",
+     "unit": null,
+     "status": "open",
+     "basis": "producer_prices_regional.OFRU: EUR/t as CAPRI's MPRI, to be confirmed per column"
+    },
+    {
+     "item": "OILS",
+     "unit": null,
+     "status": "open",
+     "basis": "producer_prices_regional.OILS: EUR/t as CAPRI's MPRI, to be confirmed per column"
+    },
+    {
+     "item": "OIND",
+     "unit": null,
+     "status": "open",
+     "basis": "producer_prices_regional.OIND: EUR/t as CAPRI's MPRI, to be confirmed per column"
+    },
+    {
+     "item": "OLIV",
+     "unit": null,
+     "status": "open",
+     "basis": "producer_prices_regional.OLIV: EUR/t as CAPRI's MPRI, to be confirmed per column"
+    },
+    {
+     "item": "OOIL",
+     "unit": null,
+     "status": "open",
+     "basis": "producer_prices_regional.OOIL: EUR/t as CAPRI's MPRI, to be confirmed per column"
+    },
+    {
+     "item": "OVEG",
+     "unit": null,
+     "status": "open",
+     "basis": "producer_prices_regional.OVEG: EUR/t as CAPRI's MPRI, to be confirmed per column"
+    },
+    {
+     "item": "PARI",
+     "unit": null,
+     "status": "open",
+     "basis": "producer_prices_regional.PARI: EUR/t as CAPRI's MPRI, to be confirmed per column"
+    },
+    {
+     "item": "PERM",
+     "unit": null,
+     "status": "open",
+     "basis": "producer_prices_regional.PERM: EUR/t as CAPRI's MPRI, to be confirmed per column"
+    },
+    {
+     "item": "PIGF",
+     "unit": null,
+     "status": "open",
+     "basis": "producer_prices_regional.PIGF: EUR/t as CAPRI's MPRI, to be confirmed per column"
+    },
+    {
+     "item": "PKPL",
+     "unit": null,
+     "status": "open",
+     "basis": "producer_prices_regional.PKPL: EUR/t as CAPRI's MPRI, to be confirmed per column"
+    },
+    {
+     "item": "POTA",
+     "unit": null,
+     "status": "open",
+     "basis": "producer_prices_regional.POTA: EUR/t as CAPRI's MPRI, to be confirmed per column"
+    },
+    {
+     "item": "POUF",
+     "unit": null,
+     "status": "open",
+     "basis": "producer_prices_regional.POUF: EUR/t as CAPRI's MPRI, to be confirmed per column"
+    },
+    {
+     "item": "PULS",
+     "unit": null,
+     "status": "open",
+     "basis": "producer_prices_regional.PULS: EUR/t as CAPRI's MPRI, to be confirmed per column"
+    },
+    {
+     "item": "RAPE",
+     "unit": null,
+     "status": "open",
+     "basis": "producer_prices_regional.RAPE: EUR/t as CAPRI's MPRI, to be confirmed per column"
+    },
+    {
+     "item": "ROOF",
+     "unit": null,
+     "status": "open",
+     "basis": "producer_prices_regional.ROOF: EUR/t as CAPRI's MPRI, to be confirmed per column"
+    },
+    {
+     "item": "RUMI",
+     "unit": null,
+     "status": "open",
+     "basis": "producer_prices_regional.RUMI: EUR/t as CAPRI's MPRI, to be confirmed per column"
+    },
+    {
+     "item": "RYEM",
+     "unit": null,
+     "status": "open",
+     "basis": "producer_prices_regional.RYEM: EUR/t as CAPRI's MPRI, to be confirmed per column"
+    },
+    {
+     "item": "SCOW",
+     "unit": null,
+     "status": "open",
+     "basis": "producer_prices_regional.SCOW: EUR/t as CAPRI's MPRI, to be confirmed per column"
+    },
+    {
+     "item": "SHGF",
+     "unit": null,
+     "status": "open",
+     "basis": "producer_prices_regional.SHGF: EUR/t as CAPRI's MPRI, to be confirmed per column"
+    },
+    {
+     "item": "SHGM",
+     "unit": null,
+     "status": "open",
+     "basis": "producer_prices_regional.SHGM: EUR/t as CAPRI's MPRI, to be confirmed per column"
+    },
+    {
+     "item": "SOWS",
+     "unit": null,
+     "status": "open",
+     "basis": "producer_prices_regional.SOWS: EUR/t as CAPRI's MPRI, to be confirmed per column"
+    },
+    {
+     "item": "SOYA",
+     "unit": null,
+     "status": "open",
+     "basis": "producer_prices_regional.SOYA: EUR/t as CAPRI's MPRI, to be confirmed per column"
+    },
+    {
+     "item": "SUGB",
+     "unit": null,
+     "status": "open",
+     "basis": "producer_prices_regional.SUGB: EUR/t as CAPRI's MPRI, to be confirmed per column"
+    },
+    {
+     "item": "SUNF",
+     "unit": null,
+     "status": "open",
+     "basis": "producer_prices_regional.SUNF: EUR/t as CAPRI's MPRI, to be confirmed per column"
+    },
+    {
+     "item": "SWHE",
+     "unit": null,
+     "status": "open",
+     "basis": "producer_prices_regional.SWHE: EUR/t as CAPRI's MPRI, to be confirmed per column"
+    },
+    {
+     "item": "TABO",
+     "unit": null,
+     "status": "open",
+     "basis": "producer_prices_regional.TABO: EUR/t as CAPRI's MPRI, to be confirmed per column"
+    },
+    {
+     "item": "TAGR",
+     "unit": null,
+     "status": "open",
+     "basis": "producer_prices_regional.TAGR: EUR/t as CAPRI's MPRI, to be confirmed per column"
+    },
+    {
+     "item": "TEXT",
+     "unit": null,
+     "status": "open",
+     "basis": "producer_prices_regional.TEXT: EUR/t as CAPRI's MPRI, to be confirmed per column"
+    },
+    {
+     "item": "TOBA",
+     "unit": null,
+     "status": "open",
+     "basis": "producer_prices_regional.TOBA: EUR/t as CAPRI's MPRI, to be confirmed per column"
+    },
+    {
+     "item": "TOMA",
+     "unit": null,
+     "status": "open",
+     "basis": "producer_prices_regional.TOMA: EUR/t as CAPRI's MPRI, to be confirmed per column"
+    },
+    {
+     "item": "TWIN",
+     "unit": null,
+     "status": "open",
+     "basis": "producer_prices_regional.TWIN: EUR/t as CAPRI's MPRI, to be confirmed per column"
+    },
+    {
+     "item": "UAAR",
+     "unit": null,
+     "status": "open",
+     "basis": "producer_prices_regional.UAAR: EUR/t as CAPRI's MPRI, to be confirmed per column"
+    },
+    {
+     "item": "WINE",
+     "unit": null,
+     "status": "open",
+     "basis": "producer_prices_regional.WINE: EUR/t as CAPRI's MPRI, to be confirmed per column"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_model_premium_prices",
+    "sources": "$EXPORTS/data_market_1730defaulta.csv; $EXPORTS/elas_2_1730defaulta.csv; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $SOURCES/capreg/res_17<CC>.txt; $SOURCES/capri_export/DATA2_<CC>.txt; $SOURCES/gams/aggregation/defaultA.agg"
    },
    "notes": [],
    "read_by": {

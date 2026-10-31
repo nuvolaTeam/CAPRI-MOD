@@ -2255,6 +2255,23 @@
    ],
    "catalogue_note": "Specialty-crop columns (TOMA, OVEG, and formerly COTT/OLIV/WINE) contain synthetic placeholder values, not observations. COTT and OLIV corrected to real geography. TOMA/OVEG still placeholder — replace with Eurostat apro_cpshr. (not re-checked)"
   },
+  "capri_data/2017/supply/cap_premium_activity.csv": {
+   "description": "CAPRI's CAP premium PRME per regional unit and activity (per ha or per head): the crop columns from crop_premium.csv (every region, model codes), the others from CAPREG's DATA2 extract sources/capreg/capreg_cap_premium.csv (tools/build/build_model_premium_prices.py; the model read the extract and joined them at run time until 31 October 2026)",
+   "vintage": "2017",
+   "domain": "supply",
+   "status": "live",
+   "rows": 221,
+   "columns": 79,
+   "units": "to be established (value_units: open)",
+   "read_by_model": [
+    "capri_mod/data/loaders.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_model_premium_prices"
+   },
+   "catalogue_note": "The model's CAP premium per activity: the crop premiums of every region with CAPREG's PRME for the other activities (tools/build/build_model_premium_prices.py). (not re-checked)"
+  },
   "capri_data/2017/supply/capri_level_ratio.csv": {
    "description": "the model's base herd per unit of CAPRI's 2017 LEVL of the animal's CAPRI activities, per territory group (tools/build/build_capri_level_ratio.py, K27): converts CAPRI's additive bound and the PMP herd terms to the model's heads",
    "vintage": "2017",
@@ -2292,6 +2309,35 @@
     "The model does read it: build_elasticity_table uses it as the member-state (CAPRI_COUNTRY) source for crops that neither PELA file covers. Under the default PMP terms it does not drive the crop response, because crops with a CAPRI term take that term and crops without one are held at their level. (checked 2026-10-29)"
    ],
    "catalogue_note": "REFERENCE DATA, not a model input: CAPRI's national MARKET elasticities. The supply model uses the regional PELA values in supply_elasticities_regional.csv. (not re-checked)"
+  },
+  "capri_data/2017/supply/capri_supply_elas_market_1717.csv": {
+   "description": "Every record of CAPRI's p_elasSupp(region, prod, wrt, 'CAL') from elas1717defaulta.gdx (gdxdump p_elasSupp.txt): the supply elasticity of prod with respect to the price of wrt, per market region (countries and trade regions), 73528 rows (tools/build/build_capri_supply_elas_market.py).",
+   "rows": 73528,
+   "columns": 4,
+   "units": "to be established (value_units: open)",
+   "read_by_model": [
+    "capri_mod/supply/capri_pmp.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_capri_supply_elas_market"
+   },
+   "notes": [
+    "Every record of CAPRI's p_elasSupp(region, prod, wrt, 'CAL') from elas1717defaulta (73528 rows, 80 regions of which 34 are CAPRI national codes, 45 products, 2635 own-price records). Market level: country and trade-region codes, market products. Read by the model in capri_pmp.build_elasticity_table for the livestock elasticities (each animal takes its product's member-state value) and by build_supply_elas_nonEU.py. Its EU medians go to 2017/market/supply_elas_eu.csv, read by capri_mod/market/supply.py: MILK 0.556, BEEF 0.719, PORK 0.690, EGGS 0.761, POUM 0.750, SGMT 0.816. (checked 2026-10-29)"
+   ]
+  },
+  "capri_data/2017/supply/capri_supply_elas_young_1720.csv": {
+   "description": "CAPRI's calibrated supply elasticities of young animals (YCAM, YCAF, YBUL, YHEI, YCOW, YPIG) per member state: p_ElasSupp(MS, item, item, 'CAL') from results/arm/supply_elas_2_1720<MS>defaulta.gdx, the 2020 calibration (tools/build/build_young_animal_elasticities.py).",
+   "rows": 156,
+   "columns": 3,
+   "units": "to be established (value_units: open)",
+   "read_by_model": [
+    "capri_mod/supply/capri_pmp.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_young_animal_elasticities"
+   }
   },
   "capri_data/2017/supply/cattle_intensity.csv": {
    "description": "CAPRI's two-intensity cattle fattening activities, per model region: bulls BULL/BULH and fattening (tools/build/build_cattle_intensity.py)",
@@ -2948,6 +2994,23 @@
     "builder": "build_animal_pmp_capri_2030:techn_capri_data.sources.baseline_pmp.recipe_2030_quad_techn.csv_year_2030_split"
    },
    "catalogue_note": "The animals' herd terms grouped for the cattle member splits (HEIL/HEIH/HEIR, the calves per sex: harmonic of the members' terms); tools/build/build_animal_pmp_capri_2030.py --splits. Read instead of pmp_recipe_2030_animals.csv only with the member splits on. KNOWN_ISSUES K65: off by default (RegionalSupplyModel.use_cattle_member_splits), the per-sex young-animal markets did not converge yet (not re-checked)"
+  },
+  "capri_data/2017/supply/producer_prices_regional.csv": {
+   "description": "CAPRI's regional producer prices MPRI (EUR/t) per regional unit and activity (sources/capreg/capreg_producer_prices.csv), CAPRI's TWIN and OFAR columns for WINE and OFOD where those are empty, and a missing regional price filled with the country's national price (sources/capreg/capreg_national_prices.csv; tools/build/build_model_premium_prices.py; done by the model's loader at run time until 31 October 2026)",
+   "vintage": "2017",
+   "domain": "supply",
+   "status": "live",
+   "rows": 221,
+   "columns": 74,
+   "units": "to be established (value_units: open)",
+   "read_by_model": [
+    "capri_mod/data/loaders.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_model_premium_prices"
+   },
+   "catalogue_note": "The model's regional producer prices: CAPRI's MPRI with its TWIN and OFAR columns and the national fallback (tools/build/build_model_premium_prices.py). (not re-checked)"
   },
   "capri_data/2017/supply/set_aside_split.csv": {
    "description": "CAPRI's labour accounts and its two set-aside activities, per model region (22 October 2026, the project lead's (tools/build/build_labour_setaside.py)",
@@ -4104,35 +4167,6 @@
    ],
    "catalogue_note": "Recalibrated from CAPRI capmod res_0_1717 (2017). The previous 841-row matrix carried a zero diagonal - no intra-EU trade at all - so every commodity showed a 100% extra-EU import share. 547 rows is fewer because CAPRI reports only realised flows, not an exhaustive grid of zeros. | REBUILT 2026-10 on CAPRI's trade partition (the 44 trading regions reproduce ImportQ(World, World) for all 71 traded products, 2017): no EU or rest-of-world double counting, genuine regions no longer dropped, six oilseed-product columns; EU imports match CAPRI's NONEU rows exactly. Not read by the model since the bilateral market (bilateral_flows_<year>.csv) replaced the old Armington aggregator (removed 21 October 2026, an orphan: built from this file, never used); kept as an input of tools/check/validate_world_prices.py and tools/build/recalibrate_trade_2017.py. (not re-checked)"
   },
-  "capri_data/sources/arm/capri_supply_elas_market_1717.csv": {
-   "description": "Every record of CAPRI's p_elasSupp(region, prod, wrt, 'CAL') from elas1717defaulta.gdx (gdxdump p_elasSupp.txt): the supply elasticity of prod with respect to the price of wrt, per market region (countries and trade regions), 73528 rows (tools/build/build_capri_supply_elas_market.py).",
-   "rows": 73528,
-   "columns": 4,
-   "units": "to be established (value_units: open)",
-   "read_by_model": [
-    "capri_mod/supply/capri_pmp.py"
-   ],
-   "origin": {
-    "nature": "capri",
-    "builder": "build_capri_supply_elas_market"
-   },
-   "notes": [
-    "Every record of CAPRI's p_elasSupp(region, prod, wrt, 'CAL') from elas1717defaulta (73528 rows, 80 regions of which 34 are CAPRI national codes, 45 products, 2635 own-price records). Market level: country and trade-region codes, market products. Read by the model in capri_pmp.build_elasticity_table for the livestock elasticities (each animal takes its product's member-state value) and by build_supply_elas_nonEU.py. Its EU medians go to 2017/market/supply_elas_eu.csv, read by capri_mod/market/supply.py: MILK 0.556, BEEF 0.719, PORK 0.690, EGGS 0.761, POUM 0.750, SGMT 0.816. (checked 2026-10-29)"
-   ]
-  },
-  "capri_data/sources/arm/capri_supply_elas_young_1720.csv": {
-   "description": "CAPRI's calibrated supply elasticities of young animals (YCAM, YCAF, YBUL, YHEI, YCOW, YPIG) per member state: p_ElasSupp(MS, item, item, 'CAL') from results/arm/supply_elas_2_1720<MS>defaulta.gdx, the 2020 calibration (tools/build/build_young_animal_elasticities.py).",
-   "rows": 156,
-   "columns": 3,
-   "units": "to be established (value_units: open)",
-   "read_by_model": [
-    "capri_mod/supply/capri_pmp.py"
-   ],
-   "origin": {
-    "nature": "capri",
-    "builder": "build_young_animal_elasticities"
-   }
-  },
   "capri_data/sources/baseline_pmp/estnlp_vb.csv": {
    "description": "CAPRI's econometric estimate VB.L(region, group1, group2) from dat/estnlp/results.gdx (around 2004), the crop-group terms CAPRI derives its PMP terms from; kept for the record and for checks (tools/build/build_pmp_2030.py).",
    "vintage": "2004 estimates",
@@ -4339,9 +4373,6 @@
    "rows": 221,
    "columns": 76,
    "units": "to be established (value_units: open)",
-   "read_by_model": [
-    "capri_mod/data/loaders.py"
-   ],
    "origin": {
     "nature": "capri",
     "builder": "extract_remaining_nine"
@@ -4351,36 +4382,32 @@
    "description": "CAPRI's producer price MPRI of the national row <MS>000000 per country (two-letter code) and activity, from the 2017 dumps res_17<MS>.txt, column Y, under CAPRI's code and also the model's where it differs (CORN = MAIZ) (tools/build/build_capreg_national_prices.py).",
    "vintage": "2017",
    "domain": "supply",
-   "status": "live",
+   "status": "live (builder input)",
    "rows": 27,
    "columns": 75,
    "units": "to be established (value_units: open)",
-   "read_by_model": [
-    "capri_mod/data/loaders.py"
-   ],
    "origin": {
     "nature": "capri",
     "builder": "build_capreg_national_prices"
    },
-   "catalogue_note": "National CAPRI prices, the fallback where no regional price exists. (not re-checked)"
+   "catalogue_note": "National CAPRI prices, the fallback where no regional price exists; read by tools/build/build_model_premium_prices.py (by the model's loader until 31 October 2026). (not re-checked)"
   },
   "capri_data/sources/capreg/capreg_producer_prices.csv": {
    "description": "Producer prices (EUR/t) per regional unit and activity: CAPRI's MPRI extract (capreg_producer_prices_extract.csv) with the model-coded crop columns written for all regions and the animal columns DCOW, BULL, PIGF, OANI (MPRI) from CAPRI's 2017 dumps (tools/build/build_crop_economics_2017.py).",
    "vintage": "2017",
    "domain": "supply",
-   "status": "live",
+   "status": "live (builder input)",
    "rows": 221,
    "columns": 74,
    "units": "to be established (value_units: open)",
    "read_by_model": [
-    "capri_mod/data/loaders.py",
     "capri_mod/data/validate_data.py"
    ],
    "origin": {
     "nature": "capri",
     "builder": "build_crop_economics_2017"
    },
-   "catalogue_note": "Regional CAPRI market prices (MPRI) by NUTS-2 region; read directly by the loader. (not re-checked)"
+   "catalogue_note": "Regional CAPRI market prices (MPRI) by NUTS-2 region; read by tools/build/build_model_premium_prices.py (by the model's loader until 31 October 2026). (not re-checked)"
   },
   "capri_data/sources/capreg/capreg_producer_prices_extract.csv": {
    "description": "CAPRI's regional producer price MPRI (EUR/t per the builder) per regional unit (rows) and activity (columns), from the CAPREG DATA2_<CC>.txt dumps; MAIZ renamed CORN (tools/build/extract_all_from_data2.py).",
@@ -4704,9 +4731,6 @@
    "rows": 784,
    "columns": 4,
    "units": "to be established (value_units: open)",
-   "read_by_model": [
-    "capri_mod/data/loaders.py"
-   ],
    "origin": {
     "nature": "capri",
     "builder": "build_land_rents:year_2017"
@@ -4717,9 +4741,6 @@
    "rows": 805,
    "columns": 4,
    "units": "to be established (value_units: open)",
-   "read_by_model": [
-    "capri_mod/data/loaders.py"
-   ],
    "origin": {
     "nature": "capri",
     "builder": "build_land_rents:year_2030"
@@ -4978,9 +4999,6 @@
    "rows": 9359,
    "columns": 4,
    "units": "to be established (value_units: open)",
-   "read_by_model": [
-    "capri_mod/market/bilateral_solve.py"
-   ],
    "origin": {
     "nature": "capri",
     "builder": "build_bilateral_market:"
@@ -4991,9 +5009,6 @@
    "rows": 8808,
    "columns": 4,
    "units": "to be established (value_units: open)",
-   "read_by_model": [
-    "capri_mod/market/bilateral_solve.py"
-   ],
    "origin": {
     "nature": "capri",
     "builder": "build_bilateral_market:"
