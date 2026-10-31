@@ -166,7 +166,7 @@
   },
   "capri_data/2017/abatement/ammonia/capri_mann_days_2030.csv": {
    "description": "CAPRI's 2030 levels, manure N and stable days per CAPRI region and activity (build_ammonia_herd_inputs.py) (tools/build/build_ammonia_herd_inputs.py)",
-   "kind": "reference",
+   "kind": "parameter",
    "rows": 16365,
    "columns": 4,
    "units": "to be established (value_units: open)",
@@ -582,7 +582,7 @@
   },
   "capri_data/2017/environment/capri_crop_n_coefs_2030.csv": {
    "description": "CAPRI's per-crop nitrogen coefficients per region, 2030 reference (for the gross N balance). (tools/build/build_capri_crop_n_coefs.py)",
-   "kind": "reference",
+   "kind": "parameter",
    "rows": 8568,
    "columns": 7,
    "units": "to be established (value_units: open)",
@@ -596,7 +596,7 @@
   },
   "capri_data/2017/environment/capri_gnb_components_2030.csv": {
    "description": "CAPRI's regional gross nitrogen balance components, 2030 reference (kg N per ha). (tools/build/build_capri_gnb_components.py)",
-   "kind": "reference",
+   "kind": "parameter",
    "rows": 4336,
    "columns": 3,
    "units": "to be established (value_units: open)",
@@ -724,7 +724,7 @@
   },
   "capri_data/2017/environment/fertiliser_substitution_2030.csv": {
    "description": "Atmospheric N deposition and the fertiliser substitution terms per model region, from CAPRI's 2030 reference. (tools/build/build_n_deposition_substitution.py)",
-   "kind": "reference",
+   "kind": "parameter",
    "vintage": "2030",
    "domain": "environment",
    "status": "live",
@@ -760,7 +760,7 @@
   },
   "capri_data/2017/environment/irrigation_2017.csv": {
    "description": "Irrigated shares and net irrigation requirements per regional unit and crop, base year 2017, for the irrigation (tools/build/build_irrigation_2017.py)",
-   "kind": "base",
+   "kind": "parameter",
    "vintage": "2017 (FSS survey up to 2017)",
    "domain": "environment",
    "status": "live",
@@ -866,7 +866,7 @@
   },
   "capri_data/2017/environment/luc_2030.csv": {
    "description": "CAPRI's land-use change (LUC) transition model data (supply/supply_model.gms e_landTypes_to_LUclass, (tools/build/build_luc_2030.py)",
-   "kind": "reference",
+   "kind": "parameter",
    "rows": 16200,
    "columns": 3,
    "units": "to be established (value_units: open)",
@@ -880,7 +880,7 @@
   },
   "capri_data/2017/environment/manure_housing_losses_2030.csv": {
    "description": "CAPRI's manure N lost in housing and storage, per model region and animal (fertDistExcr_ input). (tools/build/build_manure_losses.py)",
-   "kind": "reference",
+   "kind": "parameter",
    "rows": 2431,
    "columns": 4,
    "units": "to be established (value_units: open)",
@@ -938,7 +938,7 @@
   },
   "capri_data/2017/environment/manure_trade_2030.csv": {
    "description": "CAPRI's 2030 manure trade per model region (manureTradeNew; Sprint 9j). (tools/build/build_manure_trade_base.py)",
-   "kind": "reference",
+   "kind": "parameter",
    "vintage": "2030",
    "domain": "environment",
    "status": "live",
@@ -981,7 +981,7 @@
   },
   "capri_data/2017/environment/npk_crop_coefs_2030.csv": {
    "description": "CAPRI's crop nutrient balance for N, P and K (supply/supply_model.gms NUTNED_, fertDistMine_, fertDistExcr_, (tools/build/build_npk_balance_2030.py)",
-   "kind": "reference",
+   "kind": "parameter",
    "rows": 23415,
    "columns": 10,
    "units": "to be established (value_units: open)",
@@ -995,7 +995,7 @@
   },
   "capri_data/2017/environment/npk_region_2030.csv": {
    "description": "CAPRI's crop nutrient balance for N, P and K (supply/supply_model.gms NUTNED_, fertDistMine_, fertDistExcr_, (tools/build/build_npk_balance_2030.py)",
-   "kind": "reference",
+   "kind": "parameter",
    "rows": 810,
    "columns": 14,
    "units": "to be established (value_units: open)",
@@ -1009,7 +1009,7 @@
   },
   "capri_data/2017/environment/p_balance_crop_coefs_2030.csv": {
    "description": "CAPRI's gross phosphate (P2O5) balance (reports/calc_nbalance.gms, FNUT = PHOF), the coefficients the environmental (tools/build/build_p_balance.py)",
-   "kind": "reference",
+   "kind": "parameter",
    "vintage": "2030 reference",
    "domain": "environment",
    "status": "live",
@@ -1030,7 +1030,7 @@
   },
   "capri_data/2017/feed/feed_cereal_mix_2030.csv": {
    "description": "CAPRI's feed bulks in the market for the member states (arm/market_model.gms feedBlkPrice_, feedShareEqu_). (tools/build/build_feed_bulks.py)",
-   "kind": "reference",
+   "kind": "parameter",
    "rows": 6,
    "columns": 2,
    "units": "to be established (value_units: open)",
@@ -1064,7 +1064,7 @@
   },
   "capri_data/2017/feed/livestock_feed_coef.csv": {
    "description": "CAPRI's purchased feed per model head by bulk: FCER (cereals), FPRO (protein), FENE (energy), LEVL x item over the model's heads / 1000 (tools/build/build_livestock_output_coef.py)",
-   "kind": "base",
+   "kind": "parameter",
    "vintage": "2017",
    "domain": "feed",
    "status": "live",
@@ -1258,7 +1258,7 @@
   },
   "capri_data/2017/market/bilateral_trq_2017.csv": {
    "description": "CAPRI's bilateral trade data for the model's trade regions (Sprint 8m: CAPRI's full market). (tools/build/build_bilateral_market.py)",
-   "kind": "base",
+   "kind": "parameter",
    "vintage": "2017",
    "domain": "market",
    "status": "live",
@@ -1277,7 +1277,7 @@
   },
   "capri_data/2017/market/bilateral_trq_2030.csv": {
    "description": "CAPRI's bilateral trade data for the model's trade regions (Sprint 8m: CAPRI's full market). (tools/build/build_bilateral_market.py)",
-   "kind": "reference",
+   "kind": "parameter",
    "vintage": "2030 reference",
    "domain": "market",
    "status": "live",
@@ -1372,7 +1372,7 @@
   },
   "capri_data/2017/market/biofuel_use_share_2017.csv": {
    "description": "Market year 2017: CAPRI's biofuel markets: feedstock demand, biofuel supply and biofuel demand, per CAPRI market region. (tools/build/build_biofuel_market.py)",
-   "kind": "base",
+   "kind": "parameter",
    "vintage": "2017 market year",
    "domain": "market",
    "status": "live",
@@ -1391,7 +1391,7 @@
   },
   "capri_data/2017/market/biofuel_use_share_2030.csv": {
    "description": "Market year 2030: CAPRI's biofuel markets: feedstock demand, biofuel supply and biofuel demand, per CAPRI market region. (tools/build/build_biofuel_market.py)",
-   "kind": "reference",
+   "kind": "parameter",
    "vintage": "2030 market year",
    "domain": "market",
    "status": "live",
@@ -1681,7 +1681,7 @@
   },
   "capri_data/2017/market/feed_bulks_eu_share.csv": {
    "description": "the feed share of the EU's use per model commodity in the bulks, CAPRI's 2030 reference, processing included in the use (tools/build/build_feed_bulks.py)",
-   "kind": "base",
+   "kind": "parameter",
    "vintage": "2030 reference",
    "domain": "market",
    "status": "live",
@@ -2121,7 +2121,7 @@
   },
   "capri_data/2017/policy/cap_ceilings_2030.csv": {
    "description": "CAPRI's 2030 CAP budgets and the per-activity premium split by scheme (Pillar I, LFA, Natura 2000, agri-environment). (tools/build/build_cap_ceilings_2030.py)",
-   "kind": "reference",
+   "kind": "parameter",
    "vintage": "2030",
    "domain": "policy",
    "status": "live",
@@ -2139,7 +2139,7 @@
   },
   "capri_data/2017/policy/cap_greening_2013_2020.csv": {
    "description": "CAPRI's CAP 2014-2020 greening (the policy of CAPRI's 2030 reference, pol_input/cap_after_2014/ref.gms -> (tools/build/build_cap_greening.py)",
-   "kind": "base",
+   "kind": "parameter",
    "rows": 10,
    "columns": 4,
    "units": "to be established (value_units: open)",
@@ -2167,7 +2167,7 @@
   },
   "capri_data/2017/policy/cap_payments.csv": {
    "description": "Crop yields, producer prices, input costs and CAP premiums for every model region from CAPRI's 2017 results (tools/build/build_crop_economics_2017.py)",
-   "kind": "base",
+   "kind": "parameter",
    "vintage": "2017",
    "domain": "policy",
    "status": "live",
@@ -2328,7 +2328,7 @@
   },
   "capri_data/2017/policy/premium_scheme_shares_2030.csv": {
    "description": "CAPRI's 2030 CAP budgets and the per-activity premium split by scheme (Pillar I, LFA, Natura 2000, agri-environment). (tools/build/build_cap_ceilings_2030.py)",
-   "kind": "reference",
+   "kind": "parameter",
    "vintage": "2030",
    "domain": "policy",
    "status": "live",
@@ -2346,7 +2346,7 @@
   },
   "capri_data/2017/policy/tariffs.csv": {
    "description": "Import protection per trade region and commodity from CAPRI's 2017 market results (Sprint 9r). (tools/build/build_tariffs_2017.py)",
-   "kind": "base",
+   "kind": "parameter",
    "rows": 28,
    "columns": 53,
    "units": "to be established (value_units: open)",
@@ -2404,7 +2404,7 @@
   },
   "capri_data/2017/supply/cap_premium_activity.csv": {
    "description": "CAPRI's CAP premium PRME per regional unit and activity (per ha or per head): the crop columns from crop_premium.csv (every region, model codes), the others from CAPREG's DATA2 extract sources/capreg/capreg_cap_premium.csv (tools/build/build_model_premium_prices.py; the model read the extract and joined them at run time until 31 October 2026)",
-   "kind": "base",
+   "kind": "parameter",
    "vintage": "2017",
    "domain": "supply",
    "status": "live",
@@ -2422,7 +2422,7 @@
   },
   "capri_data/2017/supply/capri_level_ratio.csv": {
    "description": "the model's base herd per unit of CAPRI's 2017 LEVL of the animal's CAPRI activities, per territory group (tools/build/build_capri_level_ratio.py, K27): converts CAPRI's additive bound and the PMP herd terms to the model's heads",
-   "kind": "base",
+   "kind": "parameter",
    "vintage": "2017",
    "domain": "supply",
    "status": "live",
@@ -2493,7 +2493,7 @@
   },
   "capri_data/2017/supply/cattle_intensity.csv": {
    "description": "CAPRI's two-intensity cattle fattening activities, per model region: bulls BULL/BULH and fattening (tools/build/build_cattle_intensity.py)",
-   "kind": "base",
+   "kind": "parameter",
    "vintage": "2017",
    "domain": "supply",
    "status": "live",
@@ -2532,7 +2532,7 @@
   },
   "capri_data/2017/supply/crop_cost_shares.csv": {
    "description": "EU-wide share of fertiliser in a crop's input cost, from CAPRI's 2017 results (K31). (tools/build/build_crop_cost_shares.py)",
-   "kind": "base",
+   "kind": "parameter",
    "rows": 34,
    "columns": 2,
    "units": "to be established (value_units: open)",
@@ -2546,7 +2546,7 @@
   },
   "capri_data/2017/supply/crop_premium.csv": {
    "description": "Crop yields, producer prices, input costs and CAP premiums for every model region from CAPRI's 2017 results (tools/build/build_crop_economics_2017.py)",
-   "kind": "base",
+   "kind": "parameter",
    "rows": 221,
    "columns": 35,
    "units": "to be established (value_units: open)",
@@ -2560,7 +2560,7 @@
   },
   "capri_data/2017/supply/dairy_intensity.csv": {
    "description": "CAPRI's two dairy-cow activities, low-yield DCOL and high-yield DCOH, per model region. (tools/build/build_dairy_intensity.py)",
-   "kind": "base",
+   "kind": "parameter",
    "vintage": "2017",
    "domain": "supply",
    "status": "live",
@@ -2592,7 +2592,7 @@
   },
   "capri_data/2017/supply/grass_intensity.csv": {
    "description": "CAPRI's two grassland activities, extensive GRAE and intensive GRAI, per model region. (tools/build/build_grass_intensity.py)",
-   "kind": "base",
+   "kind": "parameter",
    "vintage": "2017",
    "domain": "supply",
    "status": "live",
@@ -2610,7 +2610,7 @@
   },
   "capri_data/2017/supply/labour_coef.csv": {
    "description": "CAPRI's labour accounts and its two set-aside activities, per model region (22 October 2026, the project lead's (tools/build/build_labour_setaside.py)",
-   "kind": "base",
+   "kind": "parameter",
    "vintage": "2017",
    "domain": "supply",
    "status": "live",
@@ -2751,7 +2751,7 @@
   },
   "capri_data/2017/supply/livestock_cost_coef.csv": {
    "description": "CAPRI's variable cost per model head (tools/build/build_livestock_output_coef.py)",
-   "kind": "base",
+   "kind": "parameter",
    "rows": 221,
    "columns": 12,
    "units": "to be established (value_units: open)",
@@ -2765,7 +2765,7 @@
   },
   "capri_data/2017/supply/livestock_output_by_product_coef.csv": {
    "description": "CAPRI's output per model head by CAPRI product (columns ACT.PRODUCT) (tools/build/build_livestock_products.py)",
-   "kind": "base",
+   "kind": "parameter",
    "vintage": "2017",
    "domain": "supply",
    "status": "live",
@@ -2783,7 +2783,7 @@
   },
   "capri_data/2017/supply/livestock_output_coef.csv": {
    "description": "CAPRI's main output per model head (tools/build/build_livestock_output_coef.py)",
-   "kind": "base",
+   "kind": "parameter",
    "vintage": "2017",
    "domain": "supply",
    "status": "live",
@@ -2801,7 +2801,7 @@
   },
   "capri_data/2017/supply/livestock_output_value_coef.csv": {
    "description": "CAPRI's output value per model head (tools/build/build_livestock_output_coef.py)",
-   "kind": "base",
+   "kind": "parameter",
    "rows": 221,
    "columns": 12,
    "units": "to be established (value_units: open)",
@@ -2816,7 +2816,7 @@
   },
   "capri_data/2017/supply/livestock_premium_coef.csv": {
    "description": "CAPRI's premiums per model head (tools/build/build_livestock_premium_coef.py)",
-   "kind": "base",
+   "kind": "parameter",
    "rows": 221,
    "columns": 12,
    "units": "to be established (value_units: open)",
@@ -2830,7 +2830,7 @@
   },
   "capri_data/2017/supply/livestock_product_value_by_market_coef.csv": {
    "description": "CAPRI's value of each final product per model head by market commodity (columns ACT.MARKET) (tools/build/build_livestock_products.py)",
-   "kind": "base",
+   "kind": "parameter",
    "rows": 221,
    "columns": 15,
    "units": "U_EuPerHd",
@@ -2844,7 +2844,7 @@
   },
   "capri_data/2017/supply/livestock_product_value_coef.csv": {
    "description": "CAPRI's final product value per model head (tools/build/build_livestock_output_coef.py)",
-   "kind": "base",
+   "kind": "parameter",
    "rows": 221,
    "columns": 12,
    "units": "to be established (value_units: open)",
@@ -2859,7 +2859,7 @@
   },
   "capri_data/2017/supply/livestock_revenue_coef.csv": {
    "description": "CAPRI's market revenue per model head (tools/build/build_livestock_output_coef.py)",
-   "kind": "base",
+   "kind": "parameter",
    "vintage": "2017",
    "domain": "supply",
    "status": "live",
@@ -2921,7 +2921,7 @@
   },
   "capri_data/2017/supply/nutrient_coefs_regional.csv": {
    "description": "CAPRI's fertiliser coefficients NITF, PHOF, POTF of res_17<MS> DATA2 per region and model crop, level-weighted over the crop's CAPRI activities (build_capri_base.CROP_MAP), the member state's for a crop the region does not grow (tools/build/build_nutrient_coefs_regional.py, K100)",
-   "kind": "base",
+   "kind": "parameter",
    "vintage": "2017",
    "domain": "supply",
    "status": "live",
@@ -2943,7 +2943,7 @@
   },
   "capri_data/2017/supply/nutrients_regional.csv": {
    "description": "Rebuild every region's base data from CAPRI. (tools/build/build_capri_base.py)",
-   "kind": "base",
+   "kind": "parameter",
    "vintage": "2017",
    "domain": "supply",
    "status": "live",
@@ -2964,7 +2964,7 @@
   },
   "capri_data/2017/supply/plant_protection_cost.csv": {
    "description": "CAPRI's input costs that the Green Deal organic and pesticide targets shock, per model region and activity (2017). (tools/build/build_plant_protection_cost.py)",
-   "kind": "base",
+   "kind": "parameter",
    "vintage": "2017",
    "domain": "supply",
    "status": "live",
@@ -3206,7 +3206,7 @@
   },
   "capri_data/2017/supply/set_aside_split.csv": {
    "description": "CAPRI's labour accounts and its two set-aside activities, per model region (22 October 2026, the project lead's (tools/build/build_labour_setaside.py)",
-   "kind": "base",
+   "kind": "parameter",
    "vintage": "2017",
    "domain": "supply",
    "status": "live",
@@ -3247,7 +3247,7 @@
   },
   "capri_data/2017/supply/variable_costs.csv": {
    "description": "input costs 2017: crops CAPRI's TOIN level-weighted per ha (build_crop_economics_2017.py); DCOW, BULL, PIGF, OANI CAPRI's TOIN per CAPRI level unit (build_capri_base.intensive_values); SHGM, SHGF tools/lib/_sheep_goat.costs",
-   "kind": "base",
+   "kind": "parameter",
    "vintage": "2017",
    "domain": "supply",
    "status": "live",
@@ -3304,7 +3304,7 @@
   },
   "capri_data/2017/supply/yields.csv": {
    "description": "yields 2017: crops CAPRI's YILD / 1000 level-weighted over the crop's CAPRI activities (build_crop_economics_2017.py), GRAS CAPRI's fresh-matter YILD unscaled, animals CAPRI's YILD / 1000 per model head (build_animal_yields.py)",
-   "kind": "base",
+   "kind": "parameter",
    "vintage": "2017",
    "domain": "supply",
    "status": "live",
@@ -3563,7 +3563,7 @@
   },
   "capri_data/pipeline/captrd/dat/p_mquotadat.csv": {
    "description": "CAPRI's p_MQuotaDat(MS, info, year): milk quotas, deliveries and direct sales (DG AGRI), from dat/coco/milk_quota_dat.gms (as CSV: capri_data/sources/capri_dat/coco/milk_quota_dat_p_MQuotaDat.csv, tools/build/convert_sources_to_csv.py), read by captrd/captrd_policy.gms (tools/build/build_captrd_dat.py)",
-   "kind": "base",
+   "kind": "parameter",
    "rows": 1794,
    "columns": 4,
    "units": "to be established (value_units: open)",
@@ -3574,7 +3574,7 @@
   },
   "capri_data/pipeline/captrd/dat/p_mquotareg.csv": {
    "description": "CAPRI's PMQuotaReg(MS, QUTtot, year): total milk quotas 2004-2014 (1000 t), from pol_input/mquota_update.gms (as CSV: capri_data/sources/capri_gams/pol_input/mquota_update_PMQuotaReg.csv, tools/build/convert_sources_to_csv.py), read by captrd/captrd_policy.gms (tools/build/build_captrd_dat.py)",
-   "kind": "base",
+   "kind": "parameter",
    "rows": 291,
    "columns": 4,
    "units": "U_1000t",
@@ -3585,7 +3585,7 @@
   },
   "capri_data/pipeline/captrd/dat/p_ppsqcbuyback.csv": {
    "description": "CAPRI's p_PPSQCBuyBack(MSALL, year): sugar quota buy-back, from CAPRI's input_load_sugar_quotas.gdx (capri_data/sources/capri_dat/sugar/p_PPSQCBuyBack.csv), read by captrd/captrd_policy.gms (tools/build/build_captrd_dat.py)",
-   "kind": "base",
+   "kind": "parameter",
    "rows": 13,
    "columns": 3,
    "units": "to be established (value_units: open)",
@@ -3596,7 +3596,7 @@
   },
   "capri_data/pipeline/captrd/dat/p_ppsqrenounce.csv": {
    "description": "CAPRI's p_PPSQRenounce(MSALL, year): renounced sugar quota, from CAPRI's input_load_sugar_quotas.gdx (capri_data/sources/capri_dat/sugar/p_PPSQRenounce.csv), read by captrd/captrd_policy.gms (tools/build/build_captrd_dat.py)",
-   "kind": "base",
+   "kind": "parameter",
    "rows": 35,
    "columns": 3,
    "units": "to be established (value_units: open)",
@@ -3607,7 +3607,7 @@
   },
   "capri_data/pipeline/captrd/dat/p_smallprodshare.csv": {
    "description": "CAPRI's p_smallProdShare(year, MS): small producers' share outside compulsory set-aside, from dat/policy/smal_pshar.gms (as CSV: capri_data/sources/capri_dat/policy/smal_pshar_p_smallProdShare.csv, tools/build/convert_sources_to_csv.py), read by captrd/captrd_policy.gms (tools/build/build_captrd_dat.py)",
-   "kind": "base",
+   "kind": "parameter",
    "rows": 488,
    "columns": 3,
    "units": "to be established (value_units: open)",
@@ -3618,7 +3618,7 @@
   },
   "capri_data/pipeline/captrd/dat/p_squotas.csv": {
    "description": "CAPRI's p_SQuotas(MSALL, QUOTAS, year): sugar quotas (1000 t white sugar), from CAPRI's input_load_sugar_quotas.gdx (capri_data/sources/capri_dat/sugar/p_SQuotas.csv), read by captrd/captrd_policy.gms (tools/build/build_captrd_dat.py)",
-   "kind": "base",
+   "kind": "parameter",
    "rows": 582,
    "columns": 4,
    "units": "U_1000t",
@@ -4687,7 +4687,7 @@
   },
   "capri_data/sources/capreg/capreg_cap_premium.csv": {
    "description": "CAPRI's premium PRME per regional unit (rows) and activity (columns), per ha or per head, from the CAPREG DATA2_<CC>.txt dumps, year column Y; MAIZ renamed CORN (tools/build/extract_remaining_nine.py).",
-   "kind": "base",
+   "kind": "parameter",
    "rows": 221,
    "columns": 76,
    "units": "to be established (value_units: open)",
@@ -4820,7 +4820,7 @@
   },
   "capri_data/sources/capri_dat/coco/milk_quota_dat_p_MQuotaDat.csv": {
    "description": "CAPRI's TABLE p_MQuotaDat(region, info, year) from dat/coco/milk_quota_dat.gms l. 17-135 (\"Milk quota data from DG Agri used in coco, captrd, capmod\": quotas for deliveries QUTdel and direct sales QUTdir, deliveries Delivs, direct sales DSTOTL, 1993-2014), every cell with a number, as written, converted to CSV by tools/build/convert_sources_to_csv.py; read (upper-cased) by tools/build/build_captrd_dat.py.",
-   "kind": "base",
+   "kind": "parameter",
    "rows": 1794,
    "columns": 4,
    "units": "to be established (value_units: open)",
@@ -4922,7 +4922,7 @@
   },
   "capri_data/sources/capri_dat/policy/smal_pshar_p_smallProdShare.csv": {
    "description": "CAPRI's TABLE p_smallProdShare(year, region) from dat/policy/smal_pshar.gms l. 27-57 (\"Share of small producers not falling under the compulsory set-aside regime\", 1993-2020), every cell with a number, as written, converted to CSV by tools/build/convert_sources_to_csv.py; read (upper-cased) by tools/build/build_captrd_dat.py.",
-   "kind": "base",
+   "kind": "parameter",
    "rows": 488,
    "columns": 3,
    "units": "U_ratio",
@@ -4943,7 +4943,7 @@
   },
   "capri_data/sources/capri_dat/sugar/p_PPSQCBuyBack.csv": {
    "description": "CAPRI's p_PPSQCBuyBack(MSALL, year) of input_load_sugar_quotas.gdx (sugar/load_quotas.gms), as the parquet mirror of CAPRI's dat folder holds it, columns renamed (README in the folder); no builder",
-   "kind": "base",
+   "kind": "parameter",
    "rows": 13,
    "columns": 3,
    "units": "to be established (value_units: open)",
@@ -4956,7 +4956,7 @@
   },
   "capri_data/sources/capri_dat/sugar/p_PPSQRenounce.csv": {
    "description": "CAPRI's p_PPSQRenounce(MSALL, year) of input_load_sugar_quotas.gdx (sugar/load_quotas.gms), as the parquet mirror of CAPRI's dat folder holds it, columns renamed (README in the folder); no builder",
-   "kind": "base",
+   "kind": "parameter",
    "rows": 35,
    "columns": 3,
    "units": "to be established (value_units: open)",
@@ -4969,7 +4969,7 @@
   },
   "capri_data/sources/capri_dat/sugar/p_SQuotas.csv": {
    "description": "CAPRI's p_SQuotas(MSALL, QUOTAS, year) of input_load_sugar_quotas.gdx (sugar/load_quotas.gms; 1000 t white sugar), as the parquet mirror of CAPRI's dat folder holds it, columns renamed (README in the folder); no builder",
-   "kind": "base",
+   "kind": "parameter",
    "rows": 582,
    "columns": 4,
    "units": "U_1000t",
@@ -5058,7 +5058,7 @@
   },
   "capri_data/sources/capri_gams/pol_input/mquota_update_PMQuotaReg.csv": {
    "description": "CAPRI's TABLE PMQuotaReg(region, QUTtot, year) from gams/pol_input/mquota_update.gms l. 35-65 (\"Total quota\", deliveries and direct sales incl. the restructuring reserve, 2004-2014, per member state), every cell with a number, as written, converted to CSV by tools/build/convert_sources_to_csv.py (the statement only; the file is CAPRI code); read (upper-cased) by tools/build/build_captrd_dat.py.",
-   "kind": "base",
+   "kind": "parameter",
    "rows": 291,
    "columns": 4,
    "units": "to be established (value_units: open)",
@@ -5152,7 +5152,7 @@
   },
   "capri_data/sources/envind/anim_req_corr_2017.csv": {
    "description": "CAPRI's requirement correction factors p_animReqCorrFac1(region, animal activity, 'T', CRPR or ENNE) from the animReq_* dumps (animReq_SK.zip), used for the low-N feeding option (tools/build/build_lownfeed_effects.py).",
-   "kind": "base",
+   "kind": "parameter",
    "vintage": "2017",
    "domain": "environment",
    "status": "source",
@@ -5365,7 +5365,7 @@
   },
   "capri_data/sources/ghgtech/capri_costsavings_2030.csv": {
    "description": "Level and marginal of CAPRI's v_Miti per EU region, activity, mitigation technology and target, in the calibration runs ini and max (costsavings_ini/max_21730_jul15.gdx dumps, 2030); options other than NOC (tools/build/extract_capri_costsavings.py).",
-   "kind": "reference",
+   "kind": "parameter",
    "vintage": "2030",
    "domain": "abatement",
    "status": "source",
@@ -5457,7 +5457,7 @@
   },
   "capri_data/sources/market/dairy_elasticities_2030.csv": {
    "description": "CAPRI's dairy parameters p_hessNQDairy, p_ElasDair and p_ElasDem (param, member state, row, col; CAL) between dairy products, from elas_2_1730defaulta (tools/build/build_dairy_processing.py).",
-   "kind": "reference",
+   "kind": "parameter",
    "vintage": "2030",
    "domain": "market",
    "status": "source",
@@ -5487,7 +5487,7 @@
   },
   "capri_data/sources/market/dairy_world_elasticities_2030.csv": {
    "description": "CAPRI's p_hessNQDairy, p_ElasDem (between dairy products) and p_hessNQSupp (MILK own term) per market region, CAL, from elas_2_1730defaulta (param, rms, row, col, value) (tools/build/build_dairy_world_blocks.py).",
-   "kind": "reference",
+   "kind": "parameter",
    "vintage": "2030",
    "domain": "market",
    "status": "source",
@@ -5528,7 +5528,7 @@
   },
   "capri_data/sources/market/feed_demand_nonEU_elas_2030.csv": {
    "description": "CAPRI's feed demand elasticities p_ElasFeed(rms, feed, price_of, 'CAL') per behavioural market region, for the products the model trades, from elas_2_1730defaulta (tools/build/build_feed_demand_nonEU.py).",
-   "kind": "reference",
+   "kind": "parameter",
    "rows": 19984,
    "columns": 4,
    "units": "to be established (value_units: open)",
@@ -5550,7 +5550,7 @@
   },
   "capri_data/sources/market/processing_yields_dataout_2030.csv": {
    "description": "CAPRI's GROF of olives and paddy (OLIV, PARI) and MAPR of olive oil and milled rice (OLIO, RICE) per member state, from markmarket_greendeal_1730et_base_1717 dataOut, 2030 (tools/build/build_processing_yields.py).",
-   "kind": "reference",
+   "kind": "parameter",
    "vintage": "2030",
    "domain": "market",
    "status": "source",
@@ -5676,7 +5676,7 @@
   },
   "capri_data/trajectories/capri_cap_premium_2030.csv": {
    "description": "CAPRI's 2030 prices and premiums for the model's 2030 baseline, in 2017 money. (tools/build/build_price_trajectory_2030.py)",
-   "kind": "reference",
+   "kind": "parameter",
    "rows": 221,
    "columns": 79,
    "units": "to be established (value_units: open)",
@@ -5690,7 +5690,7 @@
   },
   "capri_data/trajectories/capri_livestock_premium_ratio_2030.csv": {
    "description": "CAPRI's 2030 / 2017 premium ratio per model animal, real, 2017 activity levels as weights (tools/build/build_price_trajectory_2030.py)",
-   "kind": "reference",
+   "kind": "parameter",
    "rows": 221,
    "columns": 12,
    "units": "U_ratio",
