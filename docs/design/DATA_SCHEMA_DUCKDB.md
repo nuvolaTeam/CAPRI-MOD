@@ -114,6 +114,8 @@ Beyond CAPRI (for the project lead to note): range checks, and enforcement at lo
    rules: a parameter is one value, with its concept and meaning; a file of more than one value is a dataset; a
    coefficient belongs to the scenario. On that day: 41 base, 28 reference, 200 coefficients,
    39 calibrated, 1 parameters (shared/model_parameters.csv), 95 structure, 5 validation.
+   With the 22 CSV files of the JSON conversion (31 October 2026: capri_mod/data/nested_tables.py, the scenario
+   folders): 45 base, 32 reference, 210 coefficients, 39 calibrated, 1 parameters, 99 structure, 5 validation.
 3. `DATA_SOURCING_REGISTRY.json` (276 entries): the 37 that name a file give their provenance to the table comments.
    The other 239 are not data declarations but a log of the project's checks and decisions: 143 closed (fixed,
    implemented, retired), 59 with another status (validations, diagnoses, settings, "comparison pending"), 37 without

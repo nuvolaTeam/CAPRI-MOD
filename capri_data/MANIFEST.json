@@ -926,15 +926,45 @@
     "builder": "build_manure_n2o"
    }
   },
-  "capri_data/2017/environment/manure_pool_costs.json": {
+  "capri_data/2017/environment/manure_pool_centres.csv": {
+   "description": "the centre region of each country's manure pool, CAPRI's rManPool_centre (manuremarket/define_manure_market_structure.gms); with manure_pool_costs.csv, from manure_pool_costs.json until 31 October 2026 (tools/build/build_manure_pool_costs.py; capri_mod/data/nested_tables.py)",
+   "kind": "structure",
    "vintage": "CAPRI star 3.0",
    "domain": "environment",
    "status": "calibration",
-   "units": "km; EUR per t N (not re-checked)",
+   "rows": 34,
+   "columns": 2,
+   "read_by_model": [
+    "capri_mod/data/loaders.py",
+    "capri_mod/data/nested_tables.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_manure_pool_costs"
+   },
+   "catalogue_note": "The centre region of each manure pool (rManPool_centre); converted from JSON on 31 October 2026 (capri_mod/data/nested_tables.py), the same values. (not re-checked)"
+  },
+  "capri_data/2017/environment/manure_pool_costs.csv": {
+   "description": "CAPRI's manure trade cost between two pools (p_mPoolTradeCost: 1 EUR loading + 0.18 EUR/t/km x the distance of the pools' centres, nuts2_center_distance.gdx supplied by the project lead, per t of pure nutrient); one row per connected pair (tools/build/build_manure_pool_costs.py; manure_pool_costs.json until 31 October 2026)",
+   "kind": "coefficients",
+   "vintage": "CAPRI star 3.0",
+   "domain": "environment",
+   "status": "calibration",
+   "rows": 930,
+   "columns": 4,
+   "units": "to be established (value_units: open)",
+   "read_by_model": [
+    "capri_mod/coupling/manure.py",
+    "capri_mod/data/loaders.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_manure_pool_costs"
+   },
    "notes": [
     "The haul cost is fixed at CAPRI's 0.18 EUR/t/km base value. CAPRI inflates it to the simulation year by p_infl (1.019 per year), so the model's manure trade costs between pools are lower than CAPRI's at 2030. (checked 2026-10-29)"
    ],
-   "catalogue_note": "34 country pools, 930 connected pairs; used only with use_manure_market (off). (not re-checked)"
+   "catalogue_note": "34 country pools, 930 connected pairs; used only with use_manure_market (off). With manure_pool_centres.csv; converted from JSON on 31 October 2026 (capri_mod/data/nested_tables.py), the same values. (not re-checked)"
   },
   "capri_data/2017/environment/manure_trade_2030.csv": {
    "description": "CAPRI's 2030 manure trade per model region (manureTradeNew; Sprint 9j). (tools/build/build_manure_trade_base.py)",
@@ -972,12 +1002,42 @@
    },
    "catalogue_note": "Atmospheric N deposition per ha by region (CAPRI 2030 reference, EMEP-based); 157 NUTS-2, 91 national. Deposition changes slowly; 2030 used for the 2017 base. (not re-checked)"
   },
-  "capri_data/2017/environment/nh3_factors_capri.json": {
+  "capri_data/2017/environment/nh3_factors_capri.csv": {
+   "description": "CAPRI's share of each animal's excreted N lost as NH3-N (GNH3 / MANN, weighted by excreted N; res_2_1730greendeal_refdefaulta dataOut; national rows where regional are missing), per model region and animal (tools/build/build_nh3_factors.py; nh3_factors_capri.json until 31 October 2026; capri_mod/data/nested_tables.py)",
+   "kind": "coefficients",
    "vintage": "2030 reference",
    "domain": "environment",
    "status": "live",
-   "units": "kg NH3-N per kg N excreted / applied (not re-checked)",
-   "catalogue_note": "Ammonia shares of excreted N per animal (GNH3/MANN, weighted by excreted N) and of mineral N (NH3MIN/MINFER) for 244 regions (204 regional, 40 national). (not re-checked)"
+   "rows": 2431,
+   "columns": 3,
+   "units": "to be established (value_units: open)",
+   "read_by_model": [
+    "capri_mod/data/loaders.py",
+    "capri_mod/environmental/ammonia.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_nh3_factors"
+   },
+   "catalogue_note": "Ammonia shares of excreted N per animal (GNH3/MANN, weighted by excreted N); the mineral N shares (NH3MIN/MINFER) in nh3_factors_capri_regions.csv; converted from JSON on 31 October 2026 (capri_mod/data/nested_tables.py), the same values. (not re-checked)"
+  },
+  "capri_data/2017/environment/nh3_factors_capri_regions.csv": {
+   "description": "per model region: CAPRI's share of mineral N lost as NH3-N (NH3MIN / MINFER), whether the factors are the region's or its country's, and CAPRI's NH3 total (tools/build/build_nh3_factors.py; with nh3_factors_capri.csv, from nh3_factors_capri.json until 31 October 2026)",
+   "kind": "coefficients",
+   "vintage": "2030 reference",
+   "domain": "environment",
+   "status": "live",
+   "rows": 221,
+   "columns": 4,
+   "units": "to be established (value_units: open)",
+   "read_by_model": [
+    "capri_mod/data/loaders.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_nh3_factors"
+   },
+   "catalogue_note": "Ammonia share of mineral N (NH3MIN/MINFER) per region, the factors' source (regional or national) and CAPRI's NH3 total; converted from JSON on 31 October 2026 (capri_mod/data/nested_tables.py), the same values. (not re-checked)"
   },
   "capri_data/2017/environment/npk_crop_coefs_2030.csv": {
    "description": "CAPRI's crop nutrient balance for N, P and K (supply/supply_model.gms NUTNED_, fertDistMine_, fertDistExcr_, (tools/build/build_npk_balance_2030.py)",
@@ -1042,25 +1102,66 @@
     "builder": "build_feed_bulks"
    }
   },
-  "capri_data/2017/feed/feed_ration_2017.json": {
+  "capri_data/2017/feed/feed_ration_2017.csv": {
+   "description": "the EU feed rations per model region and animal from CAPRI's 2017 regional results (res_17*, dataOut; per head = CAPRI total / the model's herd): ration (kg per head and year, by feed), req (per head and year, by nutrient: ENNE energy units, CRPR kg, DMIN/DMAX kg dry matter), content (per kg fresh feed, by feed and nutrient), price (EUR/kg, by feed), capri_slope and capri_slope_2030 (CAPRI's feed-PMP slopes of pmppar_17* and of the 2030 calibration pmppar_21730, by feed); tools/build/build_feed_ration.py; feed_ration_2017.json until 31 October 2026 (capri_mod/data/nested_tables.py)",
+   "kind": "coefficients",
    "vintage": "2017",
    "domain": "feed",
    "status": "calibration",
-   "units": "kg/head/yr; per head per yr; per kg; EUR/kg (not re-checked)",
+   "rows": 127897,
+   "columns": 6,
+   "units": "to be established (value_units: open)",
+   "read_by_model": [
+    "capri_mod/data/loaders.py",
+    "capri_mod/feed/ration.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_feed_ration"
+   },
    "notes": [
     "In 986 of 2,407 region-animal records, the base ration's dry matter falls outside the file's DMIN-DMAX range (worst: HR000000 broilers 2.4x DMAX). The ration model widens the DM bounds, and lowers the energy and protein requirements, to fit the base ration (CAPRI's p_trimFeed). So the file's requirements are not what binds at calibration. (checked 2026-10-29)"
    ],
-   "catalogue_note": "EU ration data per region x animal: base ration by feed group, energy/protein/dry-matter requirements, nutrient contents, feed prices (CAPRI totals / herds; national remainder for regions without regional rows). 235 regions, 2,084 entries; energy and protein close to a median of 0.00%. Input to the EU ration choice (docs/FEED_RATION.md), not yet read by the model. | Rebuilt 2026-10 with the corrected NUTS correspondence (73 regions now regional CAPRI values). | Norway's pig cells rebuilt 21 October 2026 (tools/build/build_norway_pigs.py --rebuild) (not re-checked)"
+   "catalogue_note": "EU ration data per region x animal: base ration by feed group, energy/protein/dry-matter requirements, nutrient contents, feed prices, CAPRI's feed-PMP slopes (2017 and 2030 calibration), one value per row (block, feed, nutrient). Input to the EU ration choice (docs/FEED_RATION.md). | converted from JSON on 31 October 2026 (capri_mod/data/nested_tables.py), the same values. (not re-checked)"
   },
-  "capri_data/2017/feed/fodder_balance_2017.json": {
+  "capri_data/2017/feed/fodder_balance_2017.csv": {
+   "description": "the regional balances of the non-tradable fodder (CAPRI supply_model.gms SUPBAL_): the crop producing it, the usable fresh fodder per ha (base fodder use / base area) and its base value (CAPRI's UVAG); built from feed_ration_2017.csv, base_areas.csv and animal_numbers.csv (tools/build/build_fodder_balance.py; fodder_balance_2017.json until 31 October 2026; capri_mod/data/nested_tables.py)",
+   "kind": "coefficients",
    "vintage": "2017",
    "domain": "feed",
    "status": "live",
-   "units": "t/ha; EUR/t; t/head (not re-checked)",
+   "rows": 645,
+   "columns": 5,
+   "units": "U_TonPerHa",
+   "read_by_model": [
+    "capri_mod/data/loaders.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_fodder_balance"
+   },
    "notes": [
     "Usable fodder per ha is CAPRI's base fodder use divided by base area, and in some regions it is implausible. For fodder maize: ES620000 246, ES520000 161 and IT920000 119 t/ha, against a median of 30.5, and DE910000 at 0.01 t/ha. The supply model uses it in its fodder balance. (checked 2026-10-29)"
    ],
-   "catalogue_note": "Regional fodder balances (686 in 235 regions), exact at base; replaces the loose buy-in roughage constraint (docs/FODDER_BALANCE.md). (not re-checked)"
+   "catalogue_note": "Regional fodder balances (645 in 221 regions), exact at base (docs/FODDER_BALANCE.md); the fodder per head in fodder_balance_2017_use.csv; converted from JSON on 31 October 2026 (capri_mod/data/nested_tables.py), the same values. (not re-checked)"
+  },
+  "capri_data/2017/feed/fodder_balance_2017_use.csv": {
+   "description": "the fodder each animal eats per head in a fodder balance (fodder_balance_2017.csv), from the base ration (tools/build/build_fodder_balance.py)",
+   "kind": "coefficients",
+   "vintage": "2017",
+   "domain": "feed",
+   "status": "live",
+   "rows": 4499,
+   "columns": 4,
+   "units": "U_TonPerHd",
+   "read_by_model": [
+    "capri_mod/data/loaders.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_fodder_balance"
+   },
+   "catalogue_note": "Fodder per head per animal of each fodder balance; converted from JSON on 31 October 2026 (capri_mod/data/nested_tables.py), the same values. (not re-checked)"
   },
   "capri_data/2017/feed/livestock_feed_coef.csv": {
    "description": "CAPRI's purchased feed per model head by bulk: FCER (cereals), FPRO (protein), FENE (energy), LEVL x item over the model's heads / 1000 (tools/build/build_livestock_output_coef.py)",
@@ -1519,12 +1620,25 @@
    },
    "catalogue_note": "CAPRI's dairy block per member state: quantities, processing, fat and protein contents, prices, raw milk, fat and protein prices (tools/build/build_dairy_processing.py). EU member states only since 21 October 2026 (Norway, NO000000, is in dairy_world_processing.csv as trade region NOR: KNOWN_ISSUES K56). (not re-checked)"
   },
-  "capri_data/2017/market/dairy_world_baseline.json": {
+  "capri_data/2017/market/dairy_world_baseline.csv": {
+   "description": "CAPRI's base-period balances of the dairy products per model trade region (FAO_agg p_dataMarket, fao_agg_17_datamarket, year BAS: MAPR production, DOMM consumption, IMPT, EXPT), EU27 for reference; tools/build/build_dairy_world_markets.py; dairy_world_baseline.json until 31 October 2026 (capri_mod/data/nested_tables.py)",
+   "kind": "base",
    "vintage": "2030 reference",
    "domain": "market",
    "status": "live",
-   "units": "kt (not re-checked)",
-   "catalogue_note": "World base balances of butter, skimmed milk powder, cheese and whey powder per model trade region (dairy Stage 2; tools/build/build_dairy_world_markets.py). Sprint 9f: + FRMI, CREM, COCM, WMIO, CASE (CAPRI's dairy products, traded). (not re-checked)"
+   "rows": 890,
+   "columns": 4,
+   "units": "U_1000t",
+   "read_by_model": [
+    "capri_mod/data/loaders.py",
+    "capri_mod/market/calibration.py",
+    "capri_mod/market/inputs.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_dairy_world_markets"
+   },
+   "catalogue_note": "World base balances of the dairy products (BUTR, SKIM, CHES, WHEY, FRMI, CREM, COCM, WMIO, CASE) per model trade region (tools/build/build_dairy_world_markets.py); converted from JSON on 31 October 2026 (capri_mod/data/nested_tables.py), the same values. (not re-checked)"
   },
   "capri_data/2017/market/dairy_world_demand_elas.csv": {
    "description": "CAPRI's dairy block for the non-EU market regions (dairy Stage 4). (tools/build/build_dairy_world_blocks.py)",
@@ -1748,12 +1862,62 @@
     "builder": "build_feed_energy"
    }
   },
-  "capri_data/2017/market/feed_demand_nonEU.json": {
+  "capri_data/2017/market/feed_demand_nonEU.csv": {
+   "description": "non-EU feed demand per model trade region and product at CAPRI's 2030 calibration point: feed share = sum FEED / sum (HCON + FEED + PROC + BIOF) over the trade region's CAPRI regions (data_market_1730defaulta CAL); tools/build/build_feed_demand_nonEU.py; feed_demand_nonEU.json until 31 October 2026 (capri_mod/data/nested_tables.py)",
+   "kind": "coefficients",
    "vintage": "2030 calibration point",
    "domain": "market",
    "status": "live",
-   "units": "share; elasticity (not re-checked)",
-   "catalogue_note": "Non-EU feed demand per trade region (ROW and the grouped regions included) for every product with a CAPRI feed function that the model trades: feed share of CAPRI's use (HCON+FEED+PROC+BIOF) and feed-weighted p_ElasFeed. EU feed demand comes from the supply models in CAPRI. Built by tools/build/build_feed_demand_nonEU.py (rebuilt 19 October 2026; before: FAO_agg 2017 FEDM/DOMM and elas_2_1717, CAPRI-identical regions only). (not re-checked)"
+   "rows": 494,
+   "columns": 3,
+   "units": "to be established (value_units: open)",
+   "read_by_model": [
+    "capri_mod/data/loaders.py",
+    "capri_mod/market/feed.py",
+    "capri_mod/market/inputs.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_feed_demand_nonEU"
+   },
+   "catalogue_note": "Non-EU feed demand per trade region (ROW and the grouped regions included) for every product with a CAPRI feed function that the model trades: feed share of CAPRI's use (HCON+FEED+PROC+BIOF); elasticities in feed_demand_nonEU_elasticities.csv, CAPRI regions in feed_demand_nonEU_capri_regions.csv (tools/build/build_feed_demand_nonEU.py); converted from JSON on 31 October 2026 (capri_mod/data/nested_tables.py), the same values. (not re-checked)"
+  },
+  "capri_data/2017/market/feed_demand_nonEU_capri_regions.csv": {
+   "description": "the CAPRI regions whose feed functions make a trade region's feed demand of a product (tools/build/build_feed_demand_nonEU.py)",
+   "kind": "structure",
+   "vintage": "2030 calibration point",
+   "domain": "market",
+   "status": "live",
+   "rows": 920,
+   "columns": 3,
+   "read_by_model": [
+    "capri_mod/data/loaders.py",
+    "capri_mod/market/inputs.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_feed_demand_nonEU"
+   },
+   "catalogue_note": "The CAPRI regions of each trade region's feed function; converted from JSON on 31 October 2026 (capri_mod/data/nested_tables.py), the same values. (not re-checked)"
+  },
+  "capri_data/2017/market/feed_demand_nonEU_elasticities.csv": {
+   "description": "CAPRI's feed demand elasticities p_ElasFeed(RMS, feed, price-of, 'CAL') (elas_2_1730defaulta), feed-weighted over the CAPRI regions of a trade region (tools/build/build_feed_demand_nonEU.py)",
+   "kind": "coefficients",
+   "vintage": "2030 calibration point",
+   "domain": "market",
+   "status": "live",
+   "rows": 11224,
+   "columns": 4,
+   "units": "to be established (value_units: open)",
+   "read_by_model": [
+    "capri_mod/data/loaders.py",
+    "capri_mod/market/inputs.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_feed_demand_nonEU"
+   },
+   "catalogue_note": "Feed-weighted p_ElasFeed per trade region, product and price; converted from JSON on 31 October 2026 (capri_mod/data/nested_tables.py), the same values. (not re-checked)"
   },
   "capri_data/2017/market/gl_demand_b.csv": {
    "description": "CAPRI's food demand system (Generalised Leontief) per behavioural region, for the market model (October 2026). (tools/build/build_gl_demand.py)",
@@ -2090,12 +2254,43 @@
    },
    "catalogue_note": "CAPRI's welfare report base values per behavioural region (reports/welfare.gms conventions; tools/build/build_welfare_base.py): the welfare levels are these plus the change from the calibration point (not re-checked)"
   },
-  "capri_data/2017/market/world_market_baseline.json": {
+  "capri_data/2017/market/world_market_baseline.csv": {
+   "description": "CAPRI's base-period balances of the market products per model trade region (FAO_agg p_dataMarket, fao_agg_17_datamarket, year BAS: MAPR production, DOMM consumption, IMPT, EXPT; EU27 the sum of the member states); tools/build/build_world_market_baseline.py; world_market_baseline.json until 31 October 2026 (capri_mod/data/nested_tables.py)",
+   "kind": "base",
    "vintage": "base period (BAS)",
    "domain": "market",
    "status": "live",
-   "units": "kt (not re-checked)",
-   "catalogue_note": "Every region's base balance of 32 market commodities (tools/build/build_world_market_baseline.py); replaces invented world totals and regional shares. (not re-checked)"
+   "rows": 4709,
+   "columns": 4,
+   "units": "U_1000t",
+   "read_by_model": [
+    "capri_mod/data/loaders.py",
+    "capri_mod/market/calibration.py",
+    "capri_mod/market/inputs.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_world_market_baseline"
+   },
+   "catalogue_note": "Every region's base balance of the market commodities (tools/build/build_world_market_baseline.py); converted from JSON on 31 October 2026 (capri_mod/data/nested_tables.py), the same values. (not re-checked)"
+  },
+  "capri_data/2017/market/world_market_baseline_products.csv": {
+   "description": "the model products of world_market_baseline.csv and the CAPRI products whose FAO_agg balances each sums (tools/build/build_world_market_baseline.py MODEL; the \"_products\" of world_market_baseline.json until 31 October 2026)",
+   "kind": "structure",
+   "vintage": "base period (BAS)",
+   "domain": "market",
+   "status": "live",
+   "rows": 46,
+   "columns": 2,
+   "read_by_model": [
+    "capri_mod/data/loaders.py",
+    "capri_mod/market/inputs.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_world_market_baseline"
+   },
+   "catalogue_note": "The model products of world_market_baseline.csv and their CAPRI products; converted from JSON on 31 October 2026 (capri_mod/data/nested_tables.py), the same values. (not re-checked)"
   },
   "capri_data/2017/market/world_prices.csv": {
    "description": "world market prices 2017: CAPRI's FAO_agg p_dataMarket World PMRK BAS of the commodity's CAPRI product; OLIV from OLIO by the EU's oil extraction; FPRI CAPRI's export-weighted 2017 market prices; DWHE, SUGB kept for the outer loop's price index (tools/build/build_world_prices.py, the source per group of rows: 02_provenance_notes.sql)",
@@ -3324,25 +3519,85 @@
    ],
    "catalogue_note": "animal columns rebuilt from CAPRI's 2017 YILD on 23 October 2026 (tools/build/build_animal_yields.py; 337 of 2936 values from the member-state row); the loader's unit-cluster rescaling was removed (not re-checked)"
   },
-  "capri_data/2017/supply/young_animals_2017.json": {
+  "capri_data/2017/supply/young_animals_2017.csv": {
+   "description": "CAPRI's young-animal balances per model region (supply_model.gms INPANI_), calves and young cattle pooled across the sexes (the model's default): base net export and CAPRI's national unit value (UVAG); the coefficients in young_animals_2017_coef.csv (tools/build/build_young_animals.py; young_animals_2017.json until 31 October 2026; capri_mod/data/nested_tables.py)",
+   "kind": "base",
    "vintage": "2017",
    "domain": "supply",
    "status": "live",
-   "units": "head per head; EUR per head (not re-checked)",
+   "rows": 1098,
+   "columns": 4,
+   "units": "to be established (value_units: open)",
+   "read_by_model": [
+    "capri_mod/data/loaders.py",
+    "capri_mod/supply/supply_module.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_young_animals"
+   },
    "notes": [
     "This is the default young-animal table. It pools male and female calves and male and female young cattle into one balance each, where CAPRI clears them per sex. The pooled value per head is the unweighted mean of the two sexes' national unit values (e.g. Spain young cattle 1019.7 = (1075.0 + 964.4)/2). (checked 2026-10-29)"
    ],
-   "catalogue_note": "Young-animal balances (calves and young cattle pooled across the sexes, replacement cows, piglets, lambs) per model region; the young-animal markets of the scenario runs (CAPRIModel._update_young_animal_prices). The model's default; the per-sex file young_animals_by_sex_2017.json is read with the cattle member splits on (KNOWN_ISSUES K65). (not re-checked)"
+   "catalogue_note": "Young-animal balances (calves and young cattle pooled across the sexes, replacement cows, piglets, lambs) per model region; the young-animal markets of the scenario runs (CAPRIModel._update_young_animal_prices). The model's default; coefficients in young_animals_2017_coef.csv; the per-sex files are read with the cattle member splits on (KNOWN_ISSUES K65); converted from JSON on 31 October 2026 (capri_mod/data/nested_tables.py), the same values. (not re-checked)"
   },
-  "capri_data/2017/supply/young_animals_by_sex_2017.json": {
+  "capri_data/2017/supply/young_animals_2017_coef.csv": {
+   "description": "young animals produced or used per model head of an activity (CAPRI's YCAM..YPIG outputs, ICAM..IPIG inputs per 1000 head, LEVL weights, per model head) in the pooled balances of young_animals_2017.csv (tools/build/build_young_animals.py)",
+   "kind": "coefficients",
    "vintage": "2017",
    "domain": "supply",
    "status": "live",
-   "units": "head per head; EUR per head (not re-checked)",
-   "notes": [
-    "Read only when the cattle member splits are on, which is off by default (K65). A default run uses the pooled young_animals_2017.json instead. (checked 2026-10-29)"
+   "rows": 3289,
+   "columns": 5,
+   "units": "U_HdPerHd",
+   "read_by_model": [
+    "capri_mod/data/loaders.py"
    ],
-   "catalogue_note": "CAPRI's young-animal balances per sex (male/female calves, young bulls/heifers; INPANI_), tools/build/build_young_animals.py; read instead of young_animals_2017.json only with the cattle member splits on. KNOWN_ISSUES K65: off by default (RegionalSupplyModel.use_cattle_member_splits), the per-sex young-animal markets did not converge yet (not re-checked)"
+   "origin": {
+    "nature": "capri",
+    "builder": "build_young_animals"
+   },
+   "catalogue_note": "Young animals produced and used per model head (pooled balances); converted from JSON on 31 October 2026 (capri_mod/data/nested_tables.py), the same values. (not re-checked)"
+  },
+  "capri_data/2017/supply/young_animals_by_sex_2017.csv": {
+   "description": "CAPRI's young-animal balances per model region and sex (INPANI_), read instead of young_animals_2017.csv only with the cattle member splits on (KNOWN_ISSUES K65); the coefficients in young_animals_by_sex_2017_coef.csv (tools/build/build_young_animals.py; young_animals_by_sex_2017.json until 31 October 2026)",
+   "kind": "base",
+   "vintage": "2017",
+   "domain": "supply",
+   "status": "live",
+   "rows": 1535,
+   "columns": 4,
+   "units": "to be established (value_units: open)",
+   "read_by_model": [
+    "capri_mod/data/loaders.py",
+    "capri_mod/supply/supply_module.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_young_animals"
+   },
+   "notes": [
+    "Read only when the cattle member splits are on, which is off by default (K65). A default run uses the pooled young_animals_2017.csv instead. (checked 2026-10-29)"
+   ],
+   "catalogue_note": "CAPRI's young-animal balances per sex (INPANI_), tools/build/build_young_animals.py; read instead of young_animals_2017.csv only with the cattle member splits on (KNOWN_ISSUES K65, off by default); converted from JSON on 31 October 2026 (capri_mod/data/nested_tables.py), the same values. (not re-checked)"
+  },
+  "capri_data/2017/supply/young_animals_by_sex_2017_coef.csv": {
+   "description": "young animals produced or used per model head of an activity in the per-sex balances of young_animals_by_sex_2017.csv (tools/build/build_young_animals.py)",
+   "kind": "coefficients",
+   "vintage": "2017",
+   "domain": "supply",
+   "status": "live",
+   "rows": 4168,
+   "columns": 5,
+   "units": "U_HdPerHd",
+   "read_by_model": [
+    "capri_mod/data/loaders.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_young_animals"
+   },
+   "catalogue_note": "Young animals produced and used per model head (per-sex balances); converted from JSON on 31 October 2026 (capri_mod/data/nested_tables.py), the same values. (not re-checked)"
   },
   "capri_data/FITNESS_FOR_USE.json": {
    "vintage": "2026",
@@ -4344,6 +4599,99 @@
     "builder": "build_captrd_sets (not in the trace yet)"
    }
   },
+  "capri_data/scenarios/capri_ref_2030/growth.csv": {
+   "description": "CAPRI's 2030 reference as growth factors per block and activity: the per-activity median of the per-region ratios LEVL or YILD in res_2_1730greendeal_refpol_endotech_all_ini / CAPRI's 2017 results, with the model's activity aliases (tools/build/build_trajectory_capri_ref.py, build_trajectory_model_keys.py)",
+   "kind": "reference",
+   "vintage": "2030 reference",
+   "domain": "projection",
+   "status": "live",
+   "rows": 138,
+   "columns": 4,
+   "units": "to be established (value_units: open)",
+   "read_by_model": [
+    "capri_mod/projection/scenario_io.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_trajectory_capri_ref"
+   },
+   "catalogue_note": "CAPRI's 2030 reference: growth factors per block and activity (tools/build/build_trajectory_capri_ref.py). (not re-checked)"
+  },
+  "capri_data/scenarios/capri_ref_2030/regional.csv": {
+   "description": "CAPRI's 2030 reference as per-region growth factors (regions keyed by CAPRI's four-character codes and by the model's regions; the factor where the 2017 level is >= 1.0) (tools/build/build_trajectory_capri_ref.py, build_trajectory_model_keys.py)",
+   "kind": "reference",
+   "vintage": "2030 reference",
+   "domain": "projection",
+   "status": "live",
+   "rows": 45641,
+   "columns": 5,
+   "units": "to be established (value_units: open)",
+   "read_by_model": [
+    "capri_mod/projection/scenario_io.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_trajectory_capri_ref"
+   },
+   "catalogue_note": "CAPRI's 2030 reference: per-region growth factors (tools/build/build_trajectory_capri_ref.py). (not re-checked)"
+  },
+  "capri_data/scenarios/capri_ref_2030/settings.toml": {
+   "vintage": "2030 reference",
+   "domain": "projection",
+   "status": "live",
+   "units": "- (not re-checked)",
+   "catalogue_note": "The default 2030 scenario's settings (name, source, vintage, years, provenance); its factors in growth.csv and regional.csv (capri_mod/projection/scenario_io.py; capri_data/trajectories/capri_ref_2030.json until 31 October 2026). (not re-checked)"
+  },
+  "capri_data/scenarios/captrd_2030/growth.csv": {
+   "description": "CAPRI's trend projection (CAPTRD results_1770, p_result series) as growth factors per block and activity: per-activity medians of the per-region cumulative ratios 2030 / 2017 of YILD and LEVL, with the model's activity aliases (tools/build/build_captrd_trajectory.py)",
+   "kind": "reference",
+   "vintage": "2030 (CAPTRD)",
+   "domain": "projection",
+   "status": "live",
+   "rows": 185,
+   "columns": 4,
+   "units": "to be established (value_units: open)",
+   "read_by_model": [
+    "capri_mod/projection/scenario_io.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_trajectory"
+   },
+   "catalogue_note": "CAPTRD results_1770: growth factors per block and activity (tools/build/build_captrd_trajectory.py). (not re-checked)"
+  },
+  "capri_data/scenarios/captrd_2030/regional.csv": {
+   "description": "CAPRI's trend projection as per-region growth factors (where the base value is >= 1.0), keyed by CAPRI's four-character codes and by the model's regions (tools/build/build_captrd_trajectory.py)",
+   "kind": "reference",
+   "vintage": "2030 (CAPTRD)",
+   "domain": "projection",
+   "status": "live",
+   "rows": 67295,
+   "columns": 5,
+   "units": "to be established (value_units: open)",
+   "read_by_model": [
+    "capri_mod/projection/scenario_io.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_captrd_trajectory"
+   },
+   "catalogue_note": "CAPTRD results_1770: per-region growth factors (tools/build/build_captrd_trajectory.py). (not re-checked)"
+  },
+  "capri_data/scenarios/captrd_2030/settings.toml": {
+   "vintage": "2030 (CAPTRD)",
+   "domain": "projection",
+   "status": "live",
+   "units": "- (not re-checked)",
+   "catalogue_note": "CAPRI's trend projection as an alternative 2030 scenario (--trajectory captrd): settings; factors in growth.csv and regional.csv (capri_data/trajectories/captrd_2030.json until 31 October 2026). (not re-checked)"
+  },
+  "capri_data/scenarios/null/settings.toml": {
+   "vintage": "n/a",
+   "domain": "projection",
+   "status": "live",
+   "units": "- (not re-checked)",
+   "catalogue_note": "The identity scenario (no factors): projecting with it must reproduce the comparative-static result exactly (capri_data/trajectories/null.json until 31 October 2026). (not re-checked)"
+  },
   "capri_data/shared/capri_member_state_codes.csv": {
    "description": "capri_member_state_codes (no builder: a declared table)",
    "kind": "structure",
@@ -4410,6 +4758,22 @@
    "origin": {
     "nature": "declared"
    }
+  },
+  "capri_data/shared/nuts_version_correspondence.csv": {
+   "description": "CAPRI's 8-character region codes and their NUTS codes across coding-scheme versions, in order (a code can have several: IT110000 -> IT11 and ITC1; an empty nuts_code for a code without one), from CAPRI's gams/compile_rdp_data/build_general_set_structure.gms, with 75 NUTS-2 pairs added in October 2026 (each verified by CAPRI's total agricultural area against the model region's base area and a second variable), NO090000 -> NO03 and PL500000 -> PL81 removed as unconfirmed, and FI190000 -> FI1C removed; read by tools/lib/_model_regions.py (with its CORR_FIXES, SPLITS_MERGES). nuts_version_correspondence.json until 31 October 2026, kept by hand (capri_mod/data/nested_tables.py)",
+   "kind": "structure",
+   "vintage": "n/a",
+   "domain": "shared",
+   "status": "live (builder input)",
+   "rows": 281,
+   "columns": 2,
+   "origin": {
+    "nature": "capri"
+   },
+   "notes": [
+    "CAPRI's 8-character region codes and their NUTS codes across versions, kept by hand (no builder): 281 rows, 217 CAPRI codes, 279 pairs, two codes (NO090000, PL500000) without a NUTS code. Converted on 31 October 2026 from shared/nuts_version_correspondence.json, whose capri8_to_nuts it equals exactly (order included); that file stated its origin as CAPRI's gams/compile_rdp_data/build_general_set_structure.gms (207 pairs) with 75 NUTS-2 pairs added in October 2026 and three removed (its _note, now the table's comment). Checked today against that GAMS file: 228 of the 279 pairs are in CAPRI's set r2_nutsRd (pairs read with a simple pattern), 51 are not; the difference to the 75 stated additions was not resolved. Read by tools/lib/_model_regions.py (_nuts_correspondence: capri_groups, region_to_capri, with CORR_FIXES and SPLITS_MERGES), not by the model. (checked 2026-10-31)"
+   ],
+   "catalogue_note": "CAPRI's 8-character codes -> NUTS codes across versions (CAPRI's build_general_set_structure.gms with the October 2026 additions); read by tools/lib/_model_regions.py; kept by hand; converted from JSON on 31 October 2026 (capri_mod/data/nested_tables.py), the same values. (not re-checked)"
   },
   "capri_data/shared/regional_units.csv": {
    "description": "CAPRI's regional units the model runs on (27 October 2026): unit, its member state, country",
