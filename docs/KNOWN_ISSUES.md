@@ -25,10 +25,11 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K92](#k92) | Farm-to-Fork changes furthest from JRC121368, besides the milk price | open: waiting for CAPRI's scenario results |
 | [K93](#k93) | CAPRI mitigation options not built; documents disagree on which are in | open |
 
-## Resolved (95)
+## Resolved (96)
 
 | # | Issue | Status |
 |---|---|---|
+| [K107](#k107) | The regional model's tax on mineral N took IPCC's factors, the accounts CAPRI's MITERRA fractions | fixed (31 October 2026) |
 | [K10](#k10) | Sub-sets of regions do not converge | resolved by K83 (31 October 2026) |
 | [K83](#k83) | A one-region Farm-to-Fork run's market diverges in its second step | fixed (31 October 2026; gate pending) |
 | [K80](#k80) | The same run repeated from a warm start differs by up to 3e-5 relative in small cereal activities | fixed (30 October 2026; gate pending) |
@@ -1317,6 +1318,19 @@ recorded only inside the status texts of K50 and K51 (resolved table) and README
   switched to FracUseFert the same day (tools/build/build_ghg_coefs_2017.py; reporting only: CO2 from urea is
   outside CAPRI's GGWP tax base; Norway stays at 0, its p_NO_FracUseFert not in hand). EU CO2 from urea changes
   with the next runs (e.g. Romania 0.342 -> 0.050, Croatia 0.337 -> 0.050, Poland 0.249 -> 0.345)
+  **UreaSubst's incentives measured 31 October 2026** (before building it; scratchpad script, CAPRI's rules): CAPRI's
+  calibration (case 3, or case 4 where the mineral N price is below the urea price, Bulgaria and Czechia) leaves a
+  marginal cost at a zero share of Subs0 per t of N bought, 6.9 (Hungary) to 342 EUR (Italy), median about 58. The
+  option's gains per unit share and t of N bought: the N it saves (the mineral N's NH3 loss falls, so more of the N
+  bought reaches the crops: GASTOTNETF_ in fertDist, supply_model.gms l. 1143) worth 1.2 (Sweden) to 19 EUR (Italy) at
+  the 2017 N price, below Subs0 in every member state (closest Hungary 4.0 against 6.9, Slovakia 4.1 against 17.2);
+  CAPRI's GGWP tax gives none: with CAPRI's MITERRA fractions the N kept from volatilising raises the direct N2O (1.11%
+  of the N left) by more than it cuts the indirect N2O of the NH3 (EF4 1%), so at 100 EUR/t CO2-eq the tax adds 0.05
+  to 0.55 EUR per unit share; CO2 from urea is outside the GGWP (GWPCO2_ is CO2LIM only, GWPTOT_ l. 3980). So the
+  option stays at 0 in the model's scenarios at base prices; it would move where the N bought is worth much more than
+  its price (a binding mineral N cap: Hungary roughly from 560 EUR/t N above the price), under an NH3 price, or with a
+  tax on CO2UREA (157 EUR per unit share and t N at 100 EUR/t CO2). Building it touches the fertilisation block's
+  first-order conditions (the mineral N's efficiency becomes a function of the share)
 
 <a id="k94"></a>
 ### K94: `capri_mod/data/reconcile_base.py` is an orphan, and README's re-basing note points at a removed concordance (found 29 October 2026, registry migration)
@@ -1679,3 +1693,19 @@ data all 8 are consistent: S0 did not come from them. 110 of 1,135 non-EU cells 
   they exceed S0, which CAPRI's data no longer cause outside the rows set by the supply models (step F); such hits are
   logged in the run metadata and warned.
 
+<a id="k107"></a>
+### K107: The regional model's emission tax on mineral N took IPCC's factors while the accounts take CAPRI's MITERRA fractions (found 31 October 2026, UreaSubst scoping)
+
+CAPRI taxes the soil N2O of the mineral N bought through its loss fractions: N2OSYN = N bought x emiLoss(NETF, N2O,
+GasTot) and the mineral part of N2OAMM = N bought x (emiLoss(NETF, NH3) + emiLoss(NETF, NOx)) x EF4
+(supply/supply_model.gms l. 3708, 3793). The accounts and the manure-trade terms moved to these fractions on 27
+October 2026 (K74 S12, `_ef_mineral_n2o`), but the regional model's tax on the purchases (`AbatementBlock._nlp_tax_terms`,
+the d and v terms) kept IPCC's EF1 (1%) and 10% x EF4. In DE11 the direct part is 1.067% against 1% and the indirect
+0.039% against 0.1%; the sum differs by under 1% (1.107% against 1.1%); the nitrification inhibitor's side effects (N2OSYN, NH3SYN)
+apply to the two parts separately, so its tax value takes the split as well (not measured).
+
+- **Effect:** emission-tax runs only (the term is built only with a tax); the Farm-to-Fork and Green Deal runs have none
+- **In 9t:** –
+- **Status:** **fixed** 31 October 2026: `FertilisationBlock._mineral_n2o_parts` returns the two parts (MITERRA, IPCC's
+  factors where CAPRI's fractions are missing, as before), used by `_ef_mineral_n2o` and by the tax terms; test
+  `test_tax_on_mineral_n_takes_the_accounts_miterra_factors`

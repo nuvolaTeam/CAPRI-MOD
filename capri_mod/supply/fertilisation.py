@@ -28,14 +28,24 @@ class FertilisationBlock:
         EF4 everywhere); IPCC's factors where CAPRI's fractions are missing (Norway: no cascade built, registered)."""
         c_ = self.__dict__.get("_ef_min_n2o_cache")
         if c_ is None:
-            from capri_mod.environmental.environmental_module import (EF_SOIL_N2O_DIRECT, EF_SOIL_N2O_INDIRECT,
-                                                                      GWP_N2O)
+            from capri_mod.environmental.environmental_module import GWP_N2O
+            c_ = self.__dict__["_ef_min_n2o_cache"] = sum(self._mineral_n2o_parts()) * 44.0 / 28.0 * GWP_N2O
+        return c_
+
+    def _mineral_n2o_parts(self):
+        """(direct, indirect) soil N2O-N per unit of mineral N, the two parts of _ef_mineral_n2o: CAPRI's
+        emiLoss(NETF, N2O, GasTot) and (emiLoss(NETF, NH3) + emiLoss(NETF, NOx)) x EF4 (supply_model.gms N2OSYN and
+        N2OAMM, l. 3708 and 3793) from the region's MITERRA fractions; IPCC's EF1 and 10% x EF4 where they are
+        missing."""
+        p_ = self.__dict__.get("_min_n2o_parts_cache")
+        if p_ is None:
+            from capri_mod.environmental.environmental_module import EF_SOIL_N2O_DIRECT, EF_SOIL_N2O_INDIRECT
             from capri_mod.supply import n_cascade as _nc, n_leaching as _nl
             rs = _nl.capri_region(self.data.region_id)
             dn = _nc.mineral_n2o_n(_nc.load()[1].get(rs, {}), EF_SOIL_N2O_INDIRECT) if rs else None
-            n2o_n = sum(dn) if dn else EF_SOIL_N2O_DIRECT + 0.10 * EF_SOIL_N2O_INDIRECT
-            c_ = self.__dict__["_ef_min_n2o_cache"] = n2o_n * 44.0 / 28.0 * GWP_N2O
-        return c_
+            p_ = (float(dn[0]), float(dn[1])) if dn else (EF_SOIL_N2O_DIRECT, 0.10 * EF_SOIL_N2O_INDIRECT)
+            self._min_n2o_parts_cache = p_
+        return p_
 
     def _ef_mineral_lea(self) -> float:
         """t CO2-eq per t of mineral N bought in the indirect N2O of its runoff and leaching (CAPRI GWPN2OLEA_ a and c,

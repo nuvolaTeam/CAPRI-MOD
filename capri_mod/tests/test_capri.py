@@ -2499,6 +2499,30 @@ def test_manure_n2o_by_source_and_technology_effects():
     assert f1 > f0 and abs(h1 - h0) < 1e-12
 
 
+def test_tax_on_mineral_n_takes_the_accounts_miterra_factors():
+    """KNOWN_ISSUES K107: the regional model's emission tax on the mineral N bought takes CAPRI's N2OSYN and the
+    mineral part of N2OAMM from the region's MITERRA fractions (supply_model.gms l. 3708, 3793), the factors of the
+    accounts (_ef_mineral_n2o), not IPCC's EF1 and 10% x EF4."""
+    from types import SimpleNamespace
+    import numpy as np
+    from capri_mod.environmental.environmental_module import GWP_N2O
+    from capri_mod.supply import n_cascade as _nc
+    from capri_mod.supply.abatement import AbatementBlock
+    from capri_mod.supply.fertilisation import FertilisationBlock
+
+    class _S(FertilisationBlock, AbatementBlock):
+        pass
+    s = _S.__new__(_S)
+    s.data = SimpleNamespace(region_id="DE110000")
+    g = _nc.load()[1]["DE110000"]
+    a, x, n = g["netf_NH3"], g["netf_NOX"], g["netf_N2O"]
+    d_, v_ = (1.0 - a - x) * n, (a + x) * 0.01
+    out, _ = s._nlp_tax_terms(100.0, np.zeros(2), {})
+    k = 44.0 / 28.0 * GWP_N2O
+    assert abs(out["d"] - 100.0 * d_ * k / 1000.0) < 1e-12 and abs(out["v"] - 100.0 * v_ * k / 1000.0) < 1e-12
+    assert abs((out["d"] + out["v"]) * 1000.0 / 100.0 - s._ef_mineral_n2o()) < 1e-9
+
+
 def test_baseline_surplus_is_capri_regional(data):
     """The tiered N target starts from CAPRI's own regional surplus (old NUTS codes and NUTS
     splits included), never from the model's own pattern scaled to a national total."""
