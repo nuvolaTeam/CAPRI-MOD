@@ -854,7 +854,12 @@ def test_option_costsaving_drop_follows_capri(model):
             mx = min(1.0, float(s.at["max", "level"]) + 2e-6)
             num += mx * (float(s.at["ini", "marginal"]) - float(s.at["max", "marginal"]))
             den += mx * lev[("DE110000", x)]
-        return num / den / float(ratio.at["DE110000", an])
+        # the source in CAPRI's 2030 money, the options' files in the model's 2017 money (KNOWN_ISSUES K108)
+        return num / den / float(ratio.at["DE110000", an]) / infl
+    import importlib.util as _ilu
+    _sp = _ilu.spec_from_file_location("_money", root / "tools" / "lib" / "_money.py")
+    _m = _ilu.module_from_spec(_sp); _sp.loader.exec_module(_m)
+    infl = _m.deflator(2030)
     u = model.data["genetics_effects_unit"]["DE110000"]
     assert abs(float(u[("BULL", "genet_eff")]["dsav"]) * 0.1 - drop("GENET_EFF", ("BULL", "BULH"), "BULL")) < 1e-4 * \
         max(1.0, abs(drop("GENET_EFF", ("BULL", "BULH"), "BULL")))
