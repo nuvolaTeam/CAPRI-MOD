@@ -33,6 +33,24 @@ goes gate by gate.
 - **Expected effect:** the block's balance in permanent-crop regions.
 - **Effort:** first a diagnosis: why CAPRI's form fails there, a symptom of S1/S2 or of the data.
 - **How to check:** the regions where it fails; with the cause removed, CAPRI's form back and the base exact.
+- **Diagnosis (31 October 2026; F2F run r200's regional NLP dumps, 221 regions x N, P, K):**
+  - CAPRI's form (the multiplier on the need alone, closing the balance at the model's base) fails in 10 of 663
+    region-nutrients: BG01 and BG03 (K), BL32, NL23 and NL34 (P), RO01, RO03, RO04 and RO05 (N), RO03 (P). In each,
+    the grassland group's own residues (with deposition for N) exceed its scaled need: they cover 92-96% of the
+    group's need per ha in CAPRI's 2030 data already (RO03 N: 155.7 of 162.3 kg/ha), and the model's base gives a
+    multiplier below that share (RO03 N 0.69, the others 0.83-0.94).
+  - The cause is the base, not CAPRI's form: the crop coefficients are CAPRI's 2030 need per crop (its NUTNED_
+    left-hand side, with its own multiplier and additive term in it, which close CAPRI's 2030 balance exactly), and
+    the model's 2017 levels and supply give less supply relative to need in these regions. Not S1 or S2.
+  - CAPRI's additive term (v_cropNutNeedAddFact, 1-5 kg/ha in its 2030 export for the six member states it covers)
+    does not repair it: with the multiplier closing the balance, the term needed is 8-21 kg/ha in five cases and has
+    no solution in the other five (grass needs more per ha than the region's average).
+  - capri-mod's form changes the multiplier in every region, not only in the ten: median difference 0.008 for N
+    (largest 0.67), under 0.001 for P and K (largest 0.95 P).
+- **Options:** (a) CAPRI's form in the 653 region-nutrients where it has a solution, capri-mod's form only in the ten
+  (the departure narrowed to where it is needed); (b) as now, until a new base year brings CAPRI's own fertiliser
+  calibration (fert/ferttrm_*.gms) at the model's base, where CAPRI recalibrates the multiplier and the additive term
+  with its priors.
 
 ### S4. Manure P and K trade
 
