@@ -615,8 +615,7 @@ def load_all_data(data_dir: Optional[Path] = None, validate: bool = False,
         # capri-mod's own terms with CAPRI's recipe (tools/build/build_pmp_recipe.py; SupplyModule.pmp_source "recipe")
         "pmp_recipe": {y: _load_pmp_capri_2030(Path(data_dir) / "2017" / "supply", f"pmp_recipe_{y}") for y in (2017, 2030)},
         # Regional fodder balances (docs/FODDER_BALANCE.md)
-        "fodder_balance": (lambda p: _nested_tables.read_fodder_balances(p) if p.exists() else None)(
-            Path(data_dir) / "2017" / "feed" / "fodder_balance_2017.csv"),
+        "fodder_balance": _nested_tables.read_fodder_balances(Path(data_dir) / "2017" / "feed" / "fodder_balance_2017.csv"),
         # Feed per head (t): CAPRI 2017 regional FCER/FPRO/FENE totals / herds; required: the animals without a
         # ration in the supply models cost their feed with it (the national fallback table was removed, K99)
         "livestock_feed_coef": _load_required_csv(

@@ -71,10 +71,9 @@ class CalibrationMixin(MarketStateMixin):
         # member-state production and use)
         bal = {}
         from capri_mod.data.nested_tables import read_balances
-        for fn in ("world_market_baseline.csv", "dairy_world_baseline.csv"):
-            if inp.exists(fn):
-                for k, v in read_balances(inp.path(fn)).items():
-                    bal.setdefault(k, v)
+        for fn in ("world_market_baseline.csv", "dairy_world_baseline.csv"):      # required (a missing file stops the run)
+            for k, v in read_balances(inp.need(fn)).items():
+                bal.setdefault(k, v)
         self.par.capri_world_balance = {k: v for k, v in bal.items()}
         for c in comms:
             if c in bil:

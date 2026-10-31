@@ -227,8 +227,7 @@ class RationModel:
         the largest factor so it stays feasible, and the ration is calibrated to it."""
         root = Path(data_dir) if data_dir else Path(__file__).resolve().parents[2] / "capri_data"
         from capri_mod.data.nested_tables import read_feed_rations
-        f = root / "2017" / "feed" / "feed_ration_2017.csv"
-        raw = read_feed_rations(f) if f.exists() else {}
+        raw = read_feed_rations(root / "2017" / "feed" / "feed_ration_2017.csv")      # a missing file stops the run
         self.rations = {}
         ctx = self._contexts(root, raw)
         scale = scale or {}

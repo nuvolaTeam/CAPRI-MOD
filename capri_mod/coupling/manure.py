@@ -70,13 +70,11 @@ class ManureBlock:
                      else ((getattr(sm, "manure_pool_price_pk", None) or {}).get(prod) or {}))
         cost = getattr(self, "_pool_cost_cache", None)
         if cost is None:
-            from pathlib import Path as _P
-            from capri_mod.data import nested_tables as _nt
-            f = _P(__file__).resolve().parents[2] / "capri_data" / "2017" / "environment" / "manure_pool_costs.csv"
+            from capri_mod.data import inputs as _inputs, nested_tables as _nt
+            # CAPRI's trade costs between the pools (tools/build/build_manure_pool_costs.py); a missing file stops the run
             cost = {}
-            if f.exists():
-                for k, v in _nt.read_manure_pools(f)["pairs"].items():
-                    a, b = k.split("|"); cost[(a, b)] = v["eur_per_t_n"] / 1000.0
+            for k, v in _nt.read_manure_pools(_inputs.current().path("manure_pool_costs.csv", "environment"))["pairs"].items():
+                a, b = k.split("|"); cost[(a, b)] = v["eur_per_t_n"] / 1000.0
             self._pool_cost_cache = cost
         sched, es, sup = {}, {}, {}
         for reg, mo in getattr(sm, "_models", {}).items():

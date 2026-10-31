@@ -412,9 +412,10 @@ class FeedMixin(MarketStateMixin):
         if cached is not None:
             return cached
         out = {}
+        from capri_mod.data.nested_tables import read_feed_demand
+        params = read_feed_demand(self._inp().need("feed_demand_nonEU.csv"))   # a missing file: FileNotFoundError
         try:
-            from capri_mod.data.nested_tables import read_feed_demand
-            for key, v in read_feed_demand(self._inp().need("feed_demand_nonEU.csv")).items():
+            for key, v in params.items():
                 r, c = key.split("|")
                 if r in self.regions and r not in self.EU and r != "EU27" and c in self.commodities:
                     out[(r, c)] = {"feed_share": float(v["feed_share"]),
