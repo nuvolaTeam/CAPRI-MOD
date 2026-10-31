@@ -29,6 +29,26 @@ PERM_NGRP = frozenset({"GRAS", "PERM"})
 ENDO_MAN_AV_SLOPE = {"N": -0.0015, "P": 0.0, "K": 0.0}
 
 
+def need_multiplier(supply0: float, need0: float, own0: float, gc: float, perm_groups) -> tuple:
+    """The need multiplier of a region and nutrient, calibrated at the base so that NUTNED_ summed over the crop groups
+    closes with the base flows (CAPRI's v_cropNutNeedMultFact, fixed in simulation): (kappa, own_scaled).
+
+    CAPRI's form: the multiplier on the need alone, the permanent groups' own residues (and deposition for N) on the
+    supply side as they are, kappa x need0 = supply0 + gc x (their own residues), with supply0 = eff x MINE0 + g0 x EXCR0 + gc x CRES0.
+    It is used wherever it leaves every permanent group (perm_groups: its base (need, own residues)) a positive need
+    for its mineral and manure flows. Where it does not (the model's base supplies less than CAPRI's 2030 relative to
+    the need while the grassland's own residues cover most of its need; STRUCTURAL_GAPS_PLAN S3), the need net of
+    the own residues is scaled together, kappa x (need0 - gc x own0) = supply0, own_scaled True (REGISTERED, K50
+    departure 1; until 31 October 2026 in every region)."""
+    if need0 > 0:
+        # the own residues on the supply side are the permanent groups' (NUTNED_ rows of PERM_NGRP)
+        k = (supply0 + gc * sum(og for _, og in perm_groups)) / need0
+        if all(k * ng - gc * og > 0.0 for ng, og in perm_groups if ng > 0):
+            return k, False
+    net0 = need0 - gc * own0
+    return (supply0 / net0 if net0 > 0 else 1.0), True
+
+
 def endo_slope(g0: float, m0: float, nut: str) -> float:
     """CAPRI's slope of the endogenous availability (fert/endoManAvail.gms) with its two corrections: availability at
     most max(0.999, g0) at zero application, at least min(0.2, g0) at max(300, m0) kg/ha."""

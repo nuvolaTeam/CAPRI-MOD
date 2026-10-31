@@ -51,10 +51,10 @@ goes gate by gate.
     for N, under 0.001 for P and K (these figures from the trade-off run).
   - A first version of this diagnosis (same day) took the trade-off run's mismatch for a data fault in the regions'
     manure; it was the trade setting.
-- **Options:** (a) CAPRI's form in the 653 region-nutrients where it has a solution, capri-mod's form only in the ten
-  (the departure narrowed to where it is needed); (b) as now, until a new base year brings CAPRI's own fertiliser
-  calibration (fert/ferttrm_*.gms) at the model's base, where CAPRI recalibrates the multiplier and the additive term
-  with its priors.
+- **Decision (31 October 2026, the project lead): narrow it.** CAPRI's form wherever it leaves every permanent
+  group a positive need for its flows; capri-mod's form only where it does not (capri_mod.fert.npk.need_multiplier,
+  used by the fertilisation block and the P accounts alike). Checked at the base: RO03 (N scaled, P and K CAPRI's
+  form with manure trade; all three scaled without), RO04, NL34; the base reproduced (activities within 8e-6).
 
 ### S4. Manure P and K trade
 

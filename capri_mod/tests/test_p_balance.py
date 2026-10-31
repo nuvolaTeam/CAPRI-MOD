@@ -228,3 +228,16 @@ def test_p_accounts_from_the_nlp_solution():
             assert abs(row["p_surplus"] - (row["p_input"] - row["p_uptake"])) < 1e-6
             assert row["p_runoff"] >= 0.0
 
+
+
+def test_need_multiplier_is_capris_where_it_has_a_solution():
+    """CAPRI's v_cropNutNeedMultFact on the need alone (NUTNED_, own residues of the permanent groups on the supply
+    side) wherever every permanent group keeps a positive need for its flows; else the need net of own residues
+    scaled together (STRUCTURAL_GAPS_PLAN S3)."""
+    from capri_mod.fert.npk import need_multiplier
+    # supply 80, need 100, gc 0.9; grassland need 40 with own residues 20: CAPRI's form, k = (80 + 18) / 100
+    k, scaled = need_multiplier(80.0, 100.0, 20.0, 0.9, [(40.0, 20.0)])
+    assert not scaled and abs(k - 0.98) < 1e-12 and k * 40.0 - 0.9 * 20.0 > 0
+    # grassland's own residues nearly cover its need and the base supplies little: CAPRI's form leaves it nothing
+    k, scaled = need_multiplier(40.0, 100.0, 38.0, 0.9, [(40.0, 38.0)])
+    assert scaled and abs(k - 40.0 / (100.0 - 0.9 * 38.0)) < 1e-12

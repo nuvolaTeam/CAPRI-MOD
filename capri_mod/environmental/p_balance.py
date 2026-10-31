@@ -66,13 +66,14 @@ def nutned_mineral(D, capri_region: str, need, own, own_perm, pool, mine0, xb, x
     """Mineral P2O5 bought (t) from CAPRI's NUTNED_ for P summed over the crop groups, the equation of the regional
     model's fertilisation block (capri_regional_nlp._fert_block, data SupplyModel._npk_spec):
 
-        kappa x (sum_c need_c sq_c x_c - gc x sum_c own_perm_c x_c) = eff x MINE + g0 x E + gc x C
+        kappa x sum_c need_c sq_c x_c - gc x sum_c own_perm_c x_c = eff x MINE + g0 x E + gc x C
 
     with the arable residue pool C = sum_c pool_c x_c, the permanent groups' own residues own_perm_c (own_c x the crop's
     share in a permanent group), manure applied E, sq_c = CAPRI's need factor of the yield
     (capri_mod.fert.npk.need_yield_factor), and kappa the need factor that closes the equation at the base levels xb with CAPRI's mineral flows mine0, as the block computes it:
-    kappa x (need0 - gc x own0) = eff x M0 + g0 x E0 + gc x C0 (CAPRI's v_cropNutNeedMultFact, calibrated at the
-    base and fixed in simulation).
+    kappa x need0 - gc x own0 = eff x M0 + g0 x E0 + gc x C0 (CAPRI's v_cropNutNeedMultFact, calibrated at the
+    base and fixed in simulation), or, where that leaves a permanent group no need of its own, the need net of the own
+    residues scaled together (capri_mod.fert.npk.need_multiplier).
     Arguments are dicts by model crop (kg/ha, 1000 ha) and t; grass = (z, dn, sq) adds the grassland split column
     (z x need difference GRAE - GRAI). Used where there is no regional solution (the accounts at the base data); at the
     NLP form's solution the sum of its NUTNED_ rows is this equation exactly. None without CAPRI's data."""
@@ -84,11 +85,18 @@ def nutned_mineral(D, capri_region: str, need, own, own_perm, pool, mine0, xb, x
     gc = float(R.cres_avail) if R.cres_avail == R.cres_avail else 0.0
     dot = lambda c, lv: sum(float(c.get(k, 0.0)) * float(v) for k, v in lv.items())
     need0 = dot(need, xb)
-    net0 = need0 - gc * dot(own, xb)
-    # as the block (SupplyModel._npk_spec): kappa 1 where the base has no need net of own residues (Berlin)
-    kappa = (eff * dot(mine0, xb) + g0 * E0 + gc * dot(pool, xb)) / net0 if net0 > 0 else 1.0
+    # as the block (SupplyModel._npk_spec; capri_mod.fert.npk.need_multiplier): CAPRI's form where it leaves the
+    # permanent groups a positive need, else the need net of their own residues scaled together
+    from capri_mod.fert.npk import PERM_NGRP, need_multiplier
+    sh = D.crop_shares(capri_region)
+    perm_g = [(sum(float(need.get(c, 0.0)) * float((sh.get(c) or {}).get(g, 0.0)) * float(v) for c, v in xb.items()),
+               sum(float(own.get(c, 0.0)) * float((sh.get(c) or {}).get(g, 0.0)) * float(v) for c, v in xb.items()))
+              for g in PERM_NGRP]
+    kappa, own_scaled = need_multiplier(eff * dot(mine0, xb) + g0 * E0 + gc * dot(pool, xb), need0, dot(own, xb), gc,
+                                        perm_g)
     N = sum(float(need.get(k, 0.0)) * float(sq.get(k, 1.0)) * float(v) for k, v in x.items())
     if grass is not None:
         N += float(grass[0]) * float(grass[1]) * float(grass[2])
-    M = (kappa * (N - gc * dot(own_perm, x)) - g0 * E - gc * dot(pool, x)) / eff
+    own_x = gc * dot(own_perm, x)
+    M = ((kappa * (N - own_x) if own_scaled else kappa * N - own_x) - g0 * E - gc * dot(pool, x)) / eff
     return M                          # kg/ha x 1000 ha = t, as E

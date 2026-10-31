@@ -198,7 +198,7 @@ class FertilisationBlock:
         x kappa, kappa the region's need
         factor that closes NUTNED_ at base with the base mineral use (CAPRI's v_cropNutNeedMultFact, calibrated in
         the base and fixed in simulation; here one per region and nutrient). None outside CAPRI's EU data."""
-        from capri_mod.fert.npk import NPKData, NUTRIENTS, PERM_NGRP, endo_slope
+        from capri_mod.fert.npk import NPKData, NUTRIENTS, PERM_NGRP, endo_slope, need_multiplier
         from capri_mod.fert.inner_fert_dist import FERT_POST_ACCURACY
         env_ = getattr(self, "_env_for_surplus", None)
         if env_ is None:
@@ -282,10 +282,13 @@ class FertilisationBlock:
             if key not in kap:
                 need0 = float(need @ xb); M0 = float(mine0 @ xb); E0 = float(man @ xb)
                 C0 = float(poolc @ xb); O0 = float(own @ xb)
-                net0 = need0 - gc * O0
-                kap[key] = (eff * M0 + g0 * E0 + gc * C0) / net0 if net0 > 0 else 1.0
+                perm_g = [(sum(float(shares.get(acts[j], {}).get(g_, 0.0)) * need[j] * xb[j] for j in crop_cols),
+                           sum(float(shares.get(acts[j], {}).get(g_, 0.0)) * own[j] * xb[j] for j in crop_cols))
+                          for g_ in PERM_NGRP]
+                kap[key], kap[(key, "own_scaled")] = need_multiplier(eff * M0 + g0 * E0 + gc * C0, need0, O0, gc, perm_g)
                 kap[(key, "base")] = dict(need0=need0, M0=M0, E0=E0, C0=C0, O0=O0, land0=land0)
             k = kap[key]
+            k_own = k if kap.get((key, "own_scaled"), True) else 1.0
             base = kap[(key, "base")]
             m0E = 1000.0 * base["E0"] / base["land0"] / 1000.0 if base["land0"] > 0 else 0.0   # kg/ha (t / kha)
             groups = []
@@ -316,7 +319,7 @@ class FertilisationBlock:
                         needl.append((j_gz, sh_g * k * dn * sq.get("GRAS", 1.0)))
                 groups.append({"g": gname, "perm": perm, "acc": acc, "modes": modes, "crops": crops,
                                "need": needl,
-                               "own": [(j, sh * k * own[j]) for j, sh in crops if perm and own[j] > 0], "Aref": Aref})
+                               "own": [(j, sh * k_own * own[j]) for j, sh in crops if perm and own[j] > 0], "Aref": Aref})
             if not groups:
                 continue
             # coverage check: the groups' need and own residues at base against the region's (kappa's) totals
@@ -339,6 +342,7 @@ class FertilisationBlock:
                 "groups": groups, "E": Ecols, "C": [(j, float(poolc[j])) for j in range(n) if poolc[j] > 0],
                 "eff": eff, "g0": g0, "gc": gc, "slope": endo_slope(g0, m0E, nut), "m0E": m0E,
                 "price": float(R.uvag_eur_t) if R.uvag_eur_t == R.uvag_eur_t else 0.0, "kappa": k,
+                "own_scaled": bool(kap.get((key, "own_scaled"), True)),
                 "M0": base["M0"]}
         out["dual_bound"] = float(getattr(self, "_npk_dual_bound", 10.0) or 10.0)
         return out if out["nutrients"] else None
