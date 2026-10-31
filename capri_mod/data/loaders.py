@@ -523,7 +523,7 @@ def load_all_data(data_dir: Optional[Path] = None, validate: bool = False,
 
     base_year selects the capri_data/<base_year>/ folder in the categorised
     layout. If validate=True, run the data checks first (the declarations under
-    capri_data/schema with their rules: tools/check/validate_data.py, which needs
+    capri_data/schema with their rules: capri_mod/data/validate_data.py, which needs
     DuckDB) and print their violations.
 
     By design this **fails loudly** when no real data directory is given, rather
@@ -547,11 +547,7 @@ def load_all_data(data_dir: Optional[Path] = None, validate: bool = False,
     if validate and data_dir is not None:
         # the data checks (until 31 October 2026 a separate validator against capri_data/MANIFEST.json, merged into
         # the declarations' checks): every violation printed; a missing DuckDB is said, not hidden
-        import importlib.util as _ilu
-        _vp = Path(__file__).resolve().parents[2] / "tools" / "check" / "validate_data.py"
-        _sp = _ilu.spec_from_file_location("_validate_data", _vp)
-        _vd = _ilu.module_from_spec(_sp)
-        _sp.loader.exec_module(_vd)
+        from capri_mod.data import validate_data as _vd
         try:
             _found = _vd.validate(Path(data_dir).resolve().parent, verbose=False)
         except ImportError as _e:

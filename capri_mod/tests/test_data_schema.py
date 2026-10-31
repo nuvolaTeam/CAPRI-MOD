@@ -1,4 +1,4 @@
-"""The data declarations (capri_data/schema, tools/check/validate_data.py; docs/design/DATA_SCHEMA_DUCKDB.md): the
+"""The data declarations (capri_data/schema, capri_mod/data/validate_data.py; docs/design/DATA_SCHEMA_DUCKDB.md): the
 repository's data meet them, and every kind of violation is found, with the CSV line, in a damaged copy."""
 import shutil
 import sys
@@ -7,9 +7,8 @@ from pathlib import Path
 import pytest
 
 ROOT = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(ROOT / "tools" / "check"))
 duckdb = pytest.importorskip("duckdb")
-import validate_data as V  # noqa: E402
+from capri_mod.data import validate_data as V  # noqa: E402
 
 
 def test_the_data_meet_their_declarations():
