@@ -91,7 +91,7 @@ def test_a_wide_file_is_checked_long(tmp_path):
     assert rule and "('yields', 'SWHE', 'unit declared for an item not in the table')" in rule[0]
 
 
-@pytest.mark.parametrize("tool", ["make_provenance.py", "make_code_data.py", "make_schema_json.py"])
+@pytest.mark.parametrize("tool", ["make_provenance.py", "make_code_data.py", "make_schema_json.py", "make_manifest_json.py"])
 def test_the_generated_declarations_are_up_to_date(tool):
     """01_provenance.sql (from the pipeline's trace), 03_code_data.sql (the numbers in the model's code) and schema.json
     (the declarations as JSON) are generated: each matches what its tool writes today."""
