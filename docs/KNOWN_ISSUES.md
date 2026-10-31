@@ -9,10 +9,11 @@ The data sourcing registry's log of checks, fixes and decisions (201 entries, mo
 [KNOWN_ISSUES_REGISTRY_LOG.md](KNOWN_ISSUES_REGISTRY_LOG.md), verbatim, with the triage of its open entries against
 the code: they became K92-K96, joined K73, K80, K91, or were closed or historical.
 
-## Open (11)
+## Open (12)
 
 | # | Issue | Status |
 |---|---|---|
+| [K108](#k108) | Inputs from CAPRI's 2030 results in 2030 money in a model working in 2017 money | open: audit running (gate 11) |
 | [K13](#k13) | Farm-to-Fork milk price | open: waiting for CAPRI's scenario results |
 | [K29](#k29) | NL11 and NL13 meet the tiered N target only at corner solutions (Farm-to-Fork) | open: waiting for CAPRI's scenario results |
 | [K47](#k47) | The cattle chain's equilibrium is sensitive to changes outside it | open |
@@ -1712,3 +1713,32 @@ apply to the two parts separately, so its tax value takes the split as well (not
 - **Status:** **fixed** 31 October 2026: `FertilisationBlock._mineral_n2o_parts` returns the two parts (MITERRA, IPCC's
   factors where CAPRI's fractions are missing, as before), used by `_ef_mineral_n2o` and by the tax terms; test
   `test_tax_on_mineral_n_takes_the_accounts_miterra_factors`
+
+<a id="k108"></a>
+### K108: Inputs from CAPRI's 2030 results in 2030 money in a model that works in 2017 money (found 31 October 2026, anaerobic digestion check)
+
+The 2030 runs work in 2017 money: CAPRI's 2030 prices and premiums divided by CAPRI's general inflation 1.019^13 =
+1.2772 (tools/build/build_price_trajectory_2030.py, capri_price_ratios_2030.csv), input costs at 2017 values. CAPRI's
+own 2030 calibration and results are in its 2030 money: it inflates costs and mitigation parameters by p_infl^(2030 -
+2017) (e.g. envind/ammo_tech.gms l. 3355-3358) and its PMP terms are calibrated on its 2030 prices (the recipe matches
+CAPRI's terms only with p_infl since 2004, docs/PMP_CAPRI_2030.md). Found so far without deflation:
+
+- CAPRI's crop PMP matrix (pmp_capri_2030.csv, the default pmp_source "capri2030"; supply_module.py capri_g, Q_ij = g_ij
+  / sqrt(x_i x_j)) and the other 2030 terms of that source (animals' herd terms, intensity splits);
+- anaerobic digestion: every money term x 1.019^13 (tools/build/build_ad_option.py INFL);
+- the catch crops' cost (cover_crops.csv catc_cost_eur_ha = CATC TOIN of CAPRI's 2030 reference) and the winter-cover
+  option built on it;
+- the 2030 land rents (land_rents_2030.csv, D_AREA of CAPRI's 2030 reference);
+- possibly the 2030 CAP ceilings (cap_ceilings_2030.csv) beside premiums in 2017 money (to check).
+
+Deflated already: histosol fallowing, the feed supplements (3-NOP), premiums and prices. The ammonia technologies are
+in 2017 money (CAPRI inflates them; the model takes them before that step), consistent.
+
+- **Effect (expected, not measured):** with curvature in 2030 money against prices in 2017 money, the crops' (and
+  animals', where CAPRI's terms are used) price responses are 1/1.2772 of CAPRI's, about 22% weaker; an earlier check
+  fits it (Austria's rapeseed elasticity 9.7 against CAPRI's 12.4, K61; 12.4 / 1.2772 = 9.7). The Farm-to-Fork and
+  Green Deal results move
+- **In 9t:** ?
+- **Status:** **open**: audit of every input built from CAPRI's 2030 results under way (31 October 2026); fix after
+  gate 10 (the project lead's decision: gate 10 runs as prepared, the money-year fix is gate 11): divide the 2030-money
+  inputs by 1.019^13, the deflator the prices take
