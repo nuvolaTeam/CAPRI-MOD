@@ -1,6 +1,8 @@
 # S1 and S2: CAPRI's crop technologies and its split activities (design, 31 October 2026)
 
-Status: design for a decision; nothing implemented. Items S1 and S2 of docs/design/STRUCTURAL_GAPS_PLAN.md. CAPRI's
+Status: **decided by the project lead on 1 November 2026: S1 option (c), one mix column per crop (CAPRI's T1/T2 model in
+other coordinates); S2: GRAE/GRAI, OFAR/ROOF and VSET/FALL as activities of their own, as CAPRI** (section 5). Nothing implemented
+yet; in the agreed order after refactor stages 3-5. Items S1 and S2 of docs/design/STRUCTURAL_GAPS_PLAN.md. CAPRI's
 code: capri_sources/gams (docs/EXTERNAL_SOURCES.md); every statement cites it. Where a statement is derived rather
 than read, it says so.
 
@@ -113,3 +115,24 @@ per ha responses to the F2F and GD targets.
 
 Effort (an estimate, to be refined with the design): (a) none; (c) the largest single item of the plan after the
 refactor of the supply code (agreed order: refactor first); (b) more than (c), for the same model.
+
+## 5. Decision (1 November 2026)
+
+The project lead chose:
+- **S1: option (c).** One mix column z per crop that CAPRI gives T1 and T2 (TACT: EACT and CACT without grassland;
+  ISET and VSET with levels only): T1 = X/2 + z, T2 = X/2 - z, the bounds T1, T2 >= 0 as |z| <= X/2. CAPRI's
+  quadratic blocks and linear PMP terms per technology carried over by this change of variables, the factors of
+  section 1.1 on outputs, inputs, plant protection and nutrient need entering through z, the set-aside obligation per
+  technology, and reports with the technology levels T1 and T2 recovered from (X, z) and weighted as CAPRI's
+  (sol_simy.gms l. 160, 373-389). The same model as (b), CAPRI's two columns: the change of variables is linear, so
+  the solutions correspond one to one (derived); the total area keeps one column in the land, feed and market code.
+  A departure of form, not of model, to be registered (the variables differ from CAPRI's v_actLevl per technology).
+- **S2: the split activities explicit.** GRAE and GRAI (replacing GRAS with its grass_z column), OFAR and ROOF
+  (replacing OFOD's fixed shares; OFAR with T1/T2, the legume share's N fixation and CO2 option, its weight in the
+  ecological set-aside), VSET and FALL (replacing SETA; FALL without fertiliser, VSET in the set-aside limit), each
+  with its own PMP terms, nutrient groups and CAPRI's data.
+
+Order: after refactor stages 3-5 (the agreed order of 31 October 2026). The checks of section 4: the base reproduced
+exactly, crop supply elasticities against CAPRI's own (supply_elas files), the yield and N per ha responses at the
+F2F and GD gates. To be built first: the data (the linear PMP terms per technology from the PMP export, the factor
+table with its citations, CAPREG's 2017 levels of the split activities).

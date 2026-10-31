@@ -17,6 +17,8 @@ goes gate by gate.
 - **Expected effect:** intensity responses (yield, N per ha) to prices and N targets; the crop groups' marginal N need.
 - **Effort:** large: activities, yields and inputs per technology, fertilisation per technology, the PMP block without the collapse, reports. A design document first.
 - **How to check:** base reproduced exactly; crop supply elasticities against CAPRI's own (supply_elas files); the F2F/GD gate.
+- **Decided (1 November 2026):** option (c), one mix column per crop, CAPRI's T1/T2 model in other coordinates
+  (docs/design/S1_S2_DESIGN.md section 5); after refactor stages 3-5.
 
 ### S2. Aggregated activities
 
@@ -25,6 +27,7 @@ goes gate by gate.
 - **Expected effect:** grassland and fodder N need; set-aside premiums.
 - **Effort:** medium per activity; part of S1's design.
 - **How to check:** as S1.
+- **Decided (1 November 2026):** the three pairs as activities of their own, as CAPRI (S1_S2_DESIGN.md section 5).
 
 ### S3. The fertilisation block's scaling (kappa)
 
