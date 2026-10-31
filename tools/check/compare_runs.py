@@ -92,6 +92,16 @@ def main():
         if len(res) == 2:
             row += f" {vals[1] - vals[0]:+8.1f}"
         print(f"{k:16s} {row}")
+    # a run on a subset of regional units (run_f2f_2030.py --regions): its indicators cover two sets of units
+    # (KNOWN_ISSUES K83)
+    for i, o in enumerate(objs):
+        sub = [r for r in str(((o.get("meta") or {}).get("options") or {}).get("regions") or "").split(",") if r]
+        if sub:
+            print(f"note: run{i + 1} solved {len(sub)} regional units (--regions). Its prices and beef production are "
+                  f"the EU market's, where the EU's units outside the run supply through their member states' market "
+                  f"supply functions, untouched by policies applied in the supply models (as CAPRI's countries "
+                  f"switched off; KNOWN_ISSUES K83); its herds, crop production and environmental indicators are "
+                  f"its {len(sub)} units' only. Not comparable with a full run's or CAPRI's EU figures.")
     for i, o in enumerate(objs):
         print(f"run{i + 1}: {a.runs[i]} | {({k: v for k, v in (o.get('meta') or {}).items() if k != 'run_manifest'})}")
     # the run manifests (capri_mod/run_manifest.py; runs from 29 October 2026): what the runs were computed from

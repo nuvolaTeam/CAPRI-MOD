@@ -9,7 +9,7 @@ The data sourcing registry's log of checks, fixes and decisions (201 entries, mo
 [KNOWN_ISSUES_REGISTRY_LOG.md](KNOWN_ISSUES_REGISTRY_LOG.md), verbatim, with the triage of its open entries against
 the code: they became K92-K96, joined K73, K80, K91, or were closed or historical.
 
-## Open (13)
+## Open (12)
 
 | # | Issue | Status |
 |---|---|---|
@@ -23,14 +23,14 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K77](#k77) | CAPRI's fertiliser-option curvature (S5) leaves the baseline's base shares | open |
 | [K78](#k78) | Histosol fallowing under Farm-to-Fork far above JRC121368's figure | open: waiting for CAPRI's scenario results |
 | [K79](#k79) | Member-state production that keeps moving between iterations | open |
-| [K83](#k83) | A one-region Farm-to-Fork run's market diverges in its second step | open |
 | [K92](#k92) | Farm-to-Fork changes furthest from JRC121368, besides the milk price | open: waiting for CAPRI's scenario results |
 | [K93](#k93) | CAPRI mitigation options not built; documents disagree on which are in | open |
 
-## Resolved (93)
+## Resolved (94)
 
 | # | Issue | Status |
 |---|---|---|
+| [K83](#k83) | A one-region Farm-to-Fork run's market diverges in its second step | fixed (31 October 2026; gate pending) |
 | [K80](#k80) | The same run repeated from a warm start differs by up to 3e-5 relative in small cereal activities | fixed (30 October 2026; gate pending) |
 | [K89](#k89) | Failing regional solves take most of IPOPT's time | fixed (measured 30 October 2026) |
 | [K74](#k74) | Supply: differences from CAPRI that no register listed | fixed (batch 8 gate) |
@@ -1029,6 +1029,18 @@ pandas' default CSV float parser returns 64% of the cached Hessian's terms one u
   units only, the rest of the EU supplying through its market supply functions. A subset run is market-consistent
   but cannot stand in for the full run's prices under an EU-wide policy (nor could it before). Remaining: the
   excluded units' raw milk response (MILK's ProdNQ_), feed bulks, the outer loop's member-state milk test
+  31 October 2026, **fixed** (the gate's runs pending): the excluded units' raw milk responds as their member state's
+  ProdNQ_ of MILK inside the dairy block's clearing; their feed enters the member states' bulks at its base; the
+  member-state milk test runs over the member states with units in the run. DE110000 alone, two outer steps: the
+  market converges in 15 and 8 steps, the milk gap 0.0000, world prices within 0.03%, 68 s. Full test suite: 249
+  passed; the 3 failures were two Norway tests written for the old rule (updated) and schema.json; updating them found
+  the EU's raw milk counted twice with no EU unit in the run (fixed). tools/check/compare_runs.py notes a subset
+  run's two coverages (prices and beef production: the EU market; herds, crops, environment: the run's units). The
+  mini-EU regression run changes with it: its dev reference is to be renewed at the gate. Registered differences
+  from CAPRI: a subset can cut through a member state (the part outside: its units' own base output); the excluded
+  share's feed demand held at its base (no FeedNQ_ terms for EU member states in CAPRI's export); the member states'
+  ProdNQ_ terms are CAPRI's 2030 reference calibration's (CAPRI may recalibrate them in a run with a country off, not
+  verified)
 
 <a id="k84"></a>
 ### K84: The landscape floor's fit ends on its last step (found 27 October 2026, test timing)
