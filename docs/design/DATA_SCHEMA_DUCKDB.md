@@ -112,8 +112,8 @@ Beyond CAPRI (for the project lead to note): range checks, and enforcement at lo
    baseline or the estimates change) with the basis of the classification (by file or by rule; a first
    classification, to be reviewed); two rules keep it complete; `MANIFEST.json` shows it per file. The project lead's
    rules: a parameter is one value, with its concept and meaning; a file of more than one value is a dataset; a
-   coefficient belongs to the scenario. On that day: 41 base, 29 reference, 201 coefficients,
-   40 calibrated, 2 parameters (shared/model_parameters.csv), 96 structure, 5 validation.
+   coefficient belongs to the scenario. On that day: 41 base, 28 reference, 200 coefficients,
+   39 calibrated, 1 parameters (shared/model_parameters.csv), 95 structure, 5 validation.
 3. `DATA_SOURCING_REGISTRY.json` (276 entries): the 37 that name a file give their provenance to the table comments.
    The other 239 are not data declarations but a log of the project's checks and decisions: 143 closed (fixed,
    implemented, retired), 59 with another status (validations, diagnoses, settings, "comparison pending"), 37 without
