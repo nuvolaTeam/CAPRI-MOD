@@ -1331,6 +1331,9 @@ recorded only inside the status texts of K50 and K51 (resolved table) and README
   its price (a binding mineral N cap: Hungary roughly from 560 EUR/t N above the price), under an NH3 price, or with a
   tax on CO2UREA (157 EUR per unit share and t N at 100 EUR/t CO2). Building it touches the fertilisation block's
   first-order conditions (the mineral N's efficiency becomes a function of the share)
+  **UreaSubst parked 31 October 2026** (the project lead's decision): not built until a scenario with an NH3 price, a
+  tax on CO2UREA or a binding mineral N cap where it could move is planned; CAPRI's form and this analysis are the
+  starting point
 
 <a id="k94"></a>
 ### K94: `capri_mod/data/reconcile_base.py` is an orphan, and README's re-basing note points at a removed concordance (found 29 October 2026, registry migration)
