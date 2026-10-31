@@ -107,6 +107,11 @@ Beyond CAPRI (for the project lead to note): range checks, and enforcement at lo
    margins); its row counts were not carried over (fixed numbers that went stale with rebuilds, e.g.
    fert_side_effects.csv; a file that must cover every unit needs a rule saying so); the validator
    moved to `capri_mod/data/validate_data.py`, `tools/check/validate_data.py` keeping its command line.
+   **Kind of data, 31 October 2026:** `06_data_kind.sql` gives every declared file its kind (base, reference,
+   parameter, calibrated, structure, validation: what has to be redone when the base year, the baseline or the
+   estimates change) with the basis of the classification (by file or by rule; a first classification, to be
+   reviewed); two rules keep it complete; `MANIFEST.json` shows it per file. On that day: 85 base, 50 reference,
+   135 parameter, 39 calibrated, 95 structure, 5 validation.
 3. `DATA_SOURCING_REGISTRY.json` (276 entries): the 37 that name a file give their provenance to the table comments.
    The other 239 are not data declarations but a log of the project's checks and decisions: 143 closed (fixed,
    implemented, retired), 59 with another status (validations, diagnoses, settings, "comparison pending"), 37 without

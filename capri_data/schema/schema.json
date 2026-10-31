@@ -41481,6 +41481,30 @@
     "value"
    ]
   },
+  "data_kind": {
+   "declared_in": "06_data_kind.sql",
+   "comment": "the kind of data of every declared file (base, reference, parameter, calibrated, structure, validation) and the basis of the classification",
+   "columns": [
+    {
+     "name": "file",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "kind",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "basis",
+     "type": "VARCHAR",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "file"
+   ]
+  },
   "file_catalogue": {
    "declared_in": "05_file_catalogue.sql",
    "comment": "vintage, domain and status of the data files (from MANIFEST.json, 31 October 2026; units and notes not re-checked)",
@@ -41837,6 +41861,14 @@
   {
    "file": "99_rules.sql",
    "rule": "the base-year group shares one vintage: the supply and price files of the catalogue (but 'static' and '2006'), unless a file's row records why it carries another (MANIFEST.json's vintage check, kept since 2 October 2026)"
+  },
+  {
+   "file": "99_rules.sql",
+   "rule": "every declared file has its kind (06_data_kind.sql)"
+  },
+  {
+   "file": "99_rules.sql",
+   "rule": "no kind for a file that is not declared (the file was removed or renamed)"
   }
  ],
  "code_data": {

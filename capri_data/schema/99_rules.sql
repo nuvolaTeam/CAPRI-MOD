@@ -38,3 +38,9 @@ SELECT list(DISTINCT vintage ORDER BY vintage) AS vintages
 FROM file_catalogue
 WHERE domain IN ('supply', 'prices') AND vintage NOT IN ('static', '2006') AND vintage_exception IS NULL
 HAVING count(DISTINCT vintage) > 1;
+
+-- rule: every declared file has its kind (06_data_kind.sql)
+SELECT file FROM _declared WHERE file NOT IN (SELECT file FROM data_kind);
+
+-- rule: no kind for a file that is not declared (the file was removed or renamed)
+SELECT file FROM data_kind WHERE file NOT IN (SELECT file FROM _declared);

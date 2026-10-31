@@ -5,6 +5,7 @@ and the catalogue's other files (05_file_catalogue.sql: JSON files, a compressed
 the file holds and where it comes from, without SQL:
 
   description     the table's comment (what the file holds and its builder)
+  kind            the kind of data (06_data_kind.sql: base, reference, parameter, calibrated, structure, validation)
   vintage, domain, status, vintage_exception
                   from the files' catalogue, where the file has a row there
   rows, columns   counted in the file now (CSV: data lines and header fields; JSON and folders: left out)
@@ -52,10 +53,13 @@ def build(root: Path = ROOT) -> dict:
     cat = {r[0]: dict(zip(("vintage", "domain", "status", "units", "vintage_exception", "note"), r[1:]))
            for r in con.execute("SELECT file, vintage, domain, status, units, vintage_exception, note "
                                 "FROM file_catalogue").fetchall()}
+    kind = dict(con.execute("SELECT file, kind FROM data_kind").fetchall())
     files = {}
     for t in schema["tables"].values():
         f = t["file"]
         e = {"description": t.get("comment") or ""}
+        if f in kind:
+            e["kind"] = kind[f]
         c = cat.get(f) or {}
         e.update({k: c[k] for k in ("vintage", "domain", "status", "vintage_exception") if c.get(k)})
         p = Path(root) / f
