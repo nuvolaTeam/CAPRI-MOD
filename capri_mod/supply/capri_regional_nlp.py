@@ -136,17 +136,24 @@ def linear_solver_options() -> dict:
     HSL solver needs its library, and a missing one stops here rather than IPOPT failing in every region (IPOPT returns
     Invalid_Option, which the regional fallbacks would treat as a failed solve)."""
     from capri_mod.settings import current as _settings
+    lib_ = str(_settings().get("supply.nlp_ipopt_library") or "").strip()
+    if lib_:
+        # another IPOPT library (an IPOPT with SPRAL in OpenMP), loaded before the first IPOPT solve of the process
+        # and its OpenMP set up (capri_mod/supply/ipopt_library.py)
+        from capri_mod.supply import ipopt_library as _il
+        _il.ensure_loaded(lib_)
     ls = str(_settings().get("supply.nlp_linear_solver")).strip().lower()
     if ls == "mumps":
+        if lib_:
+            raise ValueError(f"supply.nlp_ipopt_library = {lib_!r} is an IPOPT without MUMPS "
+                             "(tools/solvers/build_ipopt_spral_omp.py): supply.nlp_linear_solver = \"spral\"")
         return {}
     if ls == "spral":
         # SPRAL (BSD licence) is part of CasADi's IPOPT. CasADi 3.8.1 builds it without OpenMP: libipopt carries
-        # SPRAL's omp_* stubs and no OpenMP runtime, so it runs on one thread (checked 30 October 2026). With an IPOPT
-        # built with OpenMP, IPOPT's documentation asks for OMP_CANCELLATION=TRUE and OMP_PROC_BIND=TRUE, and the
-        # model's CAPRI_WORKERS processes each take one thread (OMP_NUM_THREADS=1): set here unless the environment
-        # says otherwise (the OpenMP runtime reads them when it starts)
-        for k_, v_ in (("OMP_CANCELLATION", "TRUE"), ("OMP_PROC_BIND", "TRUE"), ("OMP_NUM_THREADS", "1")):
-            os.environ.setdefault(k_, v_)
+        # SPRAL's omp_* stubs and no OpenMP runtime, so it runs on one thread (checked 30 October 2026); SPRAL in
+        # OpenMP comes with supply.nlp_ipopt_library (its environment and threads: ipopt_library.py). Until
+        # 31 October 2026 this set OMP_CANCELLATION, OMP_PROC_BIND and OMP_NUM_THREADS here, which CasADi's IPOPT
+        # does not read (no OpenMP runtime)
         return {"ipopt.linear_solver": "spral"}
     if ls not in ("ma27", "ma57", "ma77", "ma86", "ma97"):
         raise ValueError(f"supply.nlp_linear_solver = {ls!r}: mumps, spral, ma27, ma57, ma77, ma86 or ma97")

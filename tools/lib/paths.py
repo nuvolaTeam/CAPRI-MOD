@@ -4,6 +4,7 @@
     tools/run     model runs
     tools/check   comparisons and diagnostics
     tools/gams    GAMS export scripts to run in a CAPRI installation
+    tools/solvers builds of solver libraries outside the repository (IPOPT with SPRAL in OpenMP)
     tools/lib     modules shared by the tools (_model_regions, _capri_costsavings, this one)
 
 ROOT is found by looking upward for pyproject.toml, so a tool keeps working if it moves between these folders.
@@ -22,7 +23,7 @@ from pathlib import Path
 
 ROOT = next(p for p in Path(__file__).resolve().parents if (p / "pyproject.toml").exists())
 TOOLS = ROOT / "tools"
-FOLDERS = ("lib", "build", "run", "check", "gams")
+FOLDERS = ("lib", "build", "run", "check", "gams", "solvers")
 
 #: CAPRI's material outside the repository (docs/EXTERNAL_SOURCES.md): capri_sources/ or $CAPRI_SOURCES
 SOURCES = Path(os.environ["CAPRI_SOURCES"]).expanduser().resolve() if os.environ.get("CAPRI_SOURCES") \
