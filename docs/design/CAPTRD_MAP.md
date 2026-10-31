@@ -1,8 +1,8 @@
 # CAPTRD (CAPRI star 3.0) — code map for the capri-mod design spec
 
-Source tree: `/home/claude/work/allgms/gams` (all paths below relative to it; `captrd/x.gms:N` = file:line).
+Source tree: `capri_sources/gams` (all paths below relative to it; `captrd/x.gms:N` = file:line).
 Entry point: `captrd.gms` (1437 lines). Farm-type disaggregation is a **separate entry point** `captrdfrm.gms` (869 lines).
-Doc cross-check: `caprijan2022.pdf` §4.3 (pp.148–166) was available (`/mnt/user-data/uploads/caprijan2022.pdf`); where doc and code differ, the code is reported and the difference flagged.
+Doc cross-check: `caprijan2022.pdf` §4.3 (pp.148–166) was available (`capri_sources/exports/caprijan2022.pdf`); where doc and code differ, the code is reported and the difference flagged.
 Conventions: `p_data(r,col,row,t)` = input/statistics cube; `p_result(r,col,row,t,respos)` = result cube; `V_EstV(r,col,row,t)` = the single estimated variable family; `exAnteY` = the one year being solved.
 
 ---------------------------------------------------------------------------------------------------

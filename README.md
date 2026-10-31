@@ -149,6 +149,12 @@ trade regions (the EU27 and 25 others). `pip install -r requirements.txt` and a 
 few minutes; a full EU Farm-to-Fork 2030 run takes about 50 minutes on 2 cores
 (§1, At a glance). No GAMS licence, no proprietary solver.
 
+**Any machine.** No file of the repository names a folder of a particular machine (a test checks it:
+`capri_mod/tests/test_portable_paths.py`); every path is relative to the repository. The runs and tests are made on
+Linux. On Windows, which has no `fork`, the regional solves run in one process, so a run is slower; Windows and macOS
+have not been tested. Rebuilding the data from CAPRI's own exports needs those exports, placed as
+docs/EXTERNAL_SOURCES.md describes; running the model does not.
+
 **You do need one to re-derive the validation.** Every comparison in §8 was made
 against CAPRI output or published CAPRI-based studies. The *results* of those
 comparisons are recorded here, and the reference extracts used are shipped where
@@ -358,8 +364,8 @@ the model) and the reference-building tools. The same sets are the dependencies 
 
 The reference-building tools (`tools/build/*`, which turn CAPRI's GDX files into the reference CSVs) read GDX files
 through the GAMS Python API (`gamsapi`) and the GDX library, which is open source (MIT) and needs no GAMS installation
-or licence. The library is built once with CMake and its folder passed as `--gdxlib` or the environment variable
-`CAPRI_GDXLIB`:
+or licence. The library is built once with CMake and placed in `capri_sources/gdxlib` (docs/EXTERNAL_SOURCES.md), or
+its folder passed as `--gdxlib` or the environment variable `CAPRI_GDXLIB`:
 
 ```shell
 git clone https://github.com/GAMS-dev/gdx.git && cd gdx    # built here from commit 9e2a8c8
@@ -488,11 +494,13 @@ docs/design/DATA_SCHEMA_DUCKDB.md; every CSV under `capri_data`; code in `capri_
 python -m capri_mod.data.validate_data          # or: python tools/check/validate_data.py
 ```
 
-Rebuild the data with doit (`dodo.py`; docs/design/DATA_PIPELINE_DOIT.md). Each of the 117 builder invocations is a
+Rebuild the data with doit (`dodo.py`; docs/design/DATA_PIPELINE_DOIT.md). Each of the 136 builder invocations is a
 task with the files it reads and writes, as traced (`tools/pipeline/builders.json`): every file has one writer, no
 builder reads its own output, and doit reruns only what a changed input, a changed CAPRI source or a changed builder
-affects. CAPRI's exports are looked up under `CAPRI_UPLOADS` and `CAPRI_WORK`; a task whose source is missing is
-reported and skipped.
+affects. CAPRI's own material that the builders read (its exports, dumps and source tree, not in git) goes in
+`capri_sources/` at the repository root, or in the folder named by the environment variable `CAPRI_SOURCES`; the files
+and the archives they come from are listed in docs/EXTERNAL_SOURCES.md. A task whose source is missing is reported and
+skipped; the model itself needs none of it.
 
 ```shell
 python -m doit list                          # the tasks

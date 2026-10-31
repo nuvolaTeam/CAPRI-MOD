@@ -48,7 +48,7 @@ costsavings show winter cover in all 29, for example. Those rules are to be read
 built. No proxy.
 
 **Issues across the builders.**
-1. **The dumps' folder.** The builders glob $WORK/capreg/res_17*.txt. The eight non-EU dumps are elsewhere, and
+1. **The dumps' folder.** The builders glob capri_sources/capreg/res_17*.txt. The eight non-EU dumps are elsewhere, and
    builders.json lists only the EU's and Norway's.
 2. **Turkey's code.** Turkey's national code is TUR, not TR000000, and its dump is res_17TU.txt. The code's
    two-letter + "000000" patterns, the `[:2] + "000000"` fallbacks and capri_member_state_codes.csv (no TR, no WB) do

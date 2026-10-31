@@ -204,11 +204,11 @@ points. Expectations, vintages and investment remain optional extensions, each f
 ## 5. Sources
 
 Local (project) sources:
-- **S1** CAPRI model documentation, Jan 2022, `/mnt/user-data/uploads/caprijan2022.pdf` (project doc
+- **S1** CAPRI model documentation, Jan 2022, `capri_sources/exports/caprijan2022.pdf` (project doc
   `caprijan2022.pdf`). Sections used: Introduction (comparative static; CAPRI-Dynaspat history), §3.4.2
   (herd flow), herd-size data section, supply model eq. 5.20-5.21, CAPTRD bounds, land supply and
   transitions (eq. 5.37).
-- **S2** CAPRI star-3.0 GAMS code, `/home/claude/work/allgms/gams/`:
+- **S2** CAPRI star-3.0 GAMS code, `capri_sources/gams`:
   - `capreg/set_global_variables.gms` l.106-108
   - `seamcap/gtaplink/shift_exog_main.gms` l.94
   - `capmod/create_sim_ini_gdx.gms` l.68-71
