@@ -41,6 +41,14 @@ goes gate by gate.
 - **Expected effect:** P and K balances in manure-trading regions; little on N.
 - **Effort:** small to medium: CAPRI's two products in the manure market.
 - **How to check:** the manure market's P and K flows against CAPRI's 2030 reference.
+- **Decision (31 October 2026, the project lead):** port CAPRI's three markets, as a general improvement of the model
+  and not for one scenario. CAPRI's 2030 reference shows why the proportional rule was not close: of 235 regions with
+  N trade, the P and K trade often has another size or another sign (DE80 exports 10.2 kt N and imports 20.9 kt P2O5;
+  FR51 exports 8.2 kt N and 32.2 kt P2O5, where the proportional rule gives 4.2).
+- **Done (31 October 2026):** MANP and MANK columns per region (supply/land.py), in the block's P and K balances
+  (supply/fertilisation.py), their own pools cleared one by one (coupling/manure.py), the P accounts from the P
+  market's trade. Base exact (Belgium: activities within 7e-6 of base, as before); under a carbon tax N trade moves
+  and P and K stay (the tax has no P or K term in CAPRI's structure). Next: the gate.
 
 ### S5. Ammonia options held without an N incentive
 

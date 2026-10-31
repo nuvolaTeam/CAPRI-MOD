@@ -1427,6 +1427,7 @@ class RegionalSupplyModel(LivestockBlock, FertilisationBlock, AbatementBlock, Po
         self._mineral_cap = mineral_cap         # CAPRI's mineral fertiliser reduction, THIS solve only
         self._mineral_row_m = {}
         self._last_manure_trade = (0.0, 0.0)
+        self._last_manure_trade_pk = {}
         self._last_mineral_n = None
         self._nbal_price = float(n_balance_price or 0.0)
         self._n_intensity = {}
@@ -1717,6 +1718,9 @@ class RegionalSupplyModel(LivestockBlock, FertilisationBlock, AbatementBlock, Po
             self._last_mineral_n = float(y[n_ + _nl]) if getattr(self, "_alloc_cols", 0) else None
             _pc = getattr(self, "_pool_cols", []) or []
             self._last_manure_trade = (float(y[_pc[0]]), float(y[_pc[1]])) if len(_pc) == 2 else (0.0, 0.0)
+            self._last_manure_trade_pk = {nut_: (float(y[c_[0]]), float(y[c_[1]]))
+                                          for nut_, c_ in (getattr(self, "_pool_cols_pk", None) or {}).items()
+                                          if len(c_) == 2 and max(c_) < len(y)}
             self._last_aug = (Qa, ca, Aa, ba, y)
             _gc = getattr(self, "_grass_col", None)
             self._last_grass_z = float(y[_gc]) if _gc is not None and _gc < len(y) else 0.0
@@ -2968,6 +2972,8 @@ class SupplyModule:
             )
             model.ration_state = (getattr(self, "ration_state", None) or {}).get(region)
             model.manure_pool_price = (getattr(self, "manure_pool_price", None) or {}).get(region[:2], 0.0)
+            model.manure_pool_price_pk = {nut_: float(((getattr(self, "manure_pool_price_pk", None) or {}).get(nut_) or {})
+                                                      .get(region[:2], 0.0)) for nut_ in ("P", "K")}
             model.yani_price_ratio = getattr(self, "yani_price_ratio", None)
             _yms = getattr(self, "yani_price_ratio_ms", None) or {}
             if _yms:
@@ -3003,6 +3009,7 @@ class SupplyModule:
             # mineral N to the environmental accounting (else the reported N balance
             # recomputes them from herds and fixed rates and misses the trade)
             result.manure_trade = tuple(getattr(model, "_last_manure_trade", (0.0, 0.0)) or (0.0, 0.0))
+            result.manure_trade_pk = dict(getattr(model, "_last_manure_trade_pk", None) or {})
             result.mineral_n_alloc = _mineral_n_for_accounts(model)
             result.fert_npk = getattr(model, "_last_npk", None)
             result.manure_availability = getattr(model, "_pool_avail", 0.0)
@@ -3055,6 +3062,7 @@ class SupplyModule:
             # adopted once the N price is positive, i.e. after the first solve).
             try:
                 result.manure_trade = tuple(getattr(model, "_last_manure_trade", (0.0, 0.0)) or (0.0, 0.0))
+                result.manure_trade_pk = dict(getattr(model, "_last_manure_trade_pk", None) or {})
                 result.mineral_n_alloc = _mineral_n_for_accounts(model)
                 result.fert_npk = getattr(model, "_last_npk", None)
                 result.manure_availability = getattr(model, "_pool_avail", 0.0)

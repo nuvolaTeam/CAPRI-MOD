@@ -590,6 +590,8 @@ class CAPRIModel(HessianBlock, FeedBlock, YoungAnimalBlock, PriceStepBlock, Manu
                 _RSM.use_fert_allocation = False      # substitution already in the balance
                 _RSM.use_manure_pool = _on
                 self.supply_module.manure_pool_price = {}     # fresh pools every run
+                self.supply_module.manure_pool_price_pk = {}  # the P and K markets' (CAPRI's MANP, MANK)
+                self._pool_pk = {}
                 if _is_base:
                     # CAPRI calibrates its supply models in the baseline it simulates with (the base a first-order
                     # point of that model): each regional model checks at its first solve that its calibration was

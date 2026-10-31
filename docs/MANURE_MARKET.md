@@ -41,8 +41,14 @@ at the base, and deviations from the base trade follow the change in manure's va
 
 - NLP form (default): traded manure changes the manure applied in the fertilisation block (ManureNPK_, then
   fertDistExcr_ and NUTNED_ per crop group), so an exporter must buy the mineral N its crops lose and an importer buys
-  less; it enters the N-surplus row in CAPRI's terms (SURTOT_REST_ with the purchases). P2O5 and K2O move with N in the
-  region's manure proportions (REGISTERED: CAPRI trades MANP and MANK as products of their own, K50 departure 4).
+  less; it enters the N-surplus row in CAPRI's terms (SURTOT_REST_ with the purchases). P2O5 and K2O have markets of
+  their own, as CAPRI's MANP and MANK (31 October 2026; until then they moved with N in the region's manure proportions,
+  K50 departure 4): per nutrient an export and an import column in the block's P or K manure balance (ManureNPK_),
+  the pool price of that nutrient, CAPRI's quadratic cost with the slope from the region's excretion of the nutrient
+  (define_manure_trade_costs.gms, by FOUT), exports at most the manure P / K applied in the region; no emission tax
+  term (none in CAPRI). The pool links and their costs per t of nutrient are the N market's (CAPRI's
+  p_mPoolTradeCost has no FOUT index). Each market is cleared on its own (simu_manure_market.gms: loop over FOUT);
+  the outer loop's pool gap is the worst of the three.
   Emission tax: the mineral N bought or saved is taxed through the purchases, and `_nlp_tax_terms` takes the conic
   form's term off the columns: tax x substitution factor x (soil N2O + leaching N2O factor), exactly what the columns
   carry since the leaching factor was added to them (checked 21 October 2026; the 20 October revision of this file

@@ -24,6 +24,9 @@ class NLPBlock:
         pc = getattr(self, "_pool_cols", None) or []
         if len(pc) == 2:
             extra[int(pc[0])] = "manure_export"; extra[int(pc[1])] = "manure_import"
+        for nut_, pk_ in (getattr(self, "_pool_cols_pk", None) or {}).items():
+            if len(pk_) == 2:
+                extra[int(pk_[0])] = f"manure_export_{nut_}"; extra[int(pk_[1])] = f"manure_import_{nut_}"
         if getattr(self, "_grass_col", None) is not None:
             extra[int(self._grass_col)] = "grass_z"
         if getattr(self, "_dairy_col", None) is not None:

@@ -328,12 +328,13 @@ class FertilisationBlock:
                 Ecols += [(j, float(man[acts.index(a_)]) * r_) for j, a_, r_ in man_split if man[acts.index(a_)] * r_ != 0.0]
             if pool and nut == "N" and len(pool) == 2:
                 Ecols += [(pool[0], -1.0), (pool[1], 1.0)]
-            elif pool and len(pool) == 2:
-                # traded manure carries P and K in the region's manure proportions (REGISTERED: CAPRI trades MANP and
-                # MANK as products of their own)
-                rN = float(eN @ xb); rX = float(man @ xb)
-                f_ = rX / rN if rN > 0 else 0.0
-                Ecols += [(pool[0], -f_), (pool[1], f_)]
+            elif nut != "N":
+                # CAPRI trades MANP and MANK as products of their own (supply_model.gms ManureNPK_, e_netMTrade by
+                # FOUT): the P or K columns of the region's own pool, 1 t P2O5 / K2O each (until 31 October 2026 the
+                # N columns carried P and K in the region's manure proportions, DEP-10)
+                pk_ = [int(j_) for j_ in ((getattr(self, "_pool_cols_pk", None) or {}).get(nut) or []) if int(j_) < n_cols]
+                if len(pk_) == 2:
+                    Ecols += [(pk_[0], -1.0), (pk_[1], 1.0)]
             out["nutrients"][nut] = {
                 "groups": groups, "E": Ecols, "C": [(j, float(poolc[j])) for j in range(n) if poolc[j] > 0],
                 "eff": eff, "g0": g0, "gc": gc, "slope": endo_slope(g0, m0E, nut), "m0E": m0E,
@@ -556,6 +557,27 @@ class FertilisationBlock:
         self._npk_prior_override = ov
         self._npk_prior_recalibrated = sorted(set(getattr(self, "_npk_prior_recalibrated", []) or []) | set(ov))
         return ok
+
+    def _pk_manure_vectors(self, nut):
+        """Manure P2O5 or K2O per unit of each column (t per 1000 head): (excreted, applied in the region), the latter
+        in the proportion CAPRI's 2030 reference applies it (net of its base net exports, _npk_applied_ratio; all of it
+        with manure trade off). None outside CAPRI's EU data."""
+        from capri_mod.fert.npk import NPKData
+        from capri_mod.fert.inner_fert_dist import InnerFertDist
+        env_ = getattr(self, "_env_for_surplus", None)
+        if env_ is None:
+            return None
+        inner = env_.__dict__.get("_inner_fert")
+        if inner is None:
+            inner = env_._inner_fert = InnerFertDist()
+        rid = self.data.region_id
+        cr = inner.capri_region(rid)
+        if cr is None:
+            return None
+        D = NPKData.get()
+        exc = np.array([D.manure_per_head(rid, nut, a) if a in ANIMALS else 0.0 for a in self.acts])
+        ratio = self._npk_applied_ratio(cr, nut) if bool(getattr(env_, "manure_trade_on", True)) else 1.0
+        return exc, exc * ratio
 
     def _npk_applied_ratio(self, cr, nut):
         """CAPRI 2030: manure P/K applied in the region (net of net exports) per unit excreted (fertDistExcr_ /

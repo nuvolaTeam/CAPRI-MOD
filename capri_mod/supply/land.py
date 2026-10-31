@@ -174,6 +174,7 @@ class LandBlock:
         alloc_k = k_extra
         self._alloc_cols = alloc_k
         self._pool_cols = []
+        self._pool_cols_pk = {}
         # ---- NATIONAL MANURE MARKET (CAPRI e_costMTrade, manuremarket/*). The
         # balance ALREADY makes manure replace mineral N linearly (availability
         # a, CAPRI fertiliser_substitution): the animals' row terms are about
@@ -253,6 +254,39 @@ class LandBlock:
                     self._pool_manure_vec = e.copy()
                     self._pool_avail = sub
                     pool_k = 2
+            # ---- CAPRI's P and K manure markets (manureTradeNew: e_netMTrade, e_costMTrade and the pools by FOUT,
+            # MANP and MANK besides MANN; manuremarket/simu_manure_market.gms clears one market per nutrient). Their
+            # columns enter the fertilisation block's P and K manure balances only (ManureNPK_), at the pool price of
+            # the nutrient and CAPRI's quadratic cost, slope EUR 50 per t for each 1% of the region's excretion of
+            # the nutrient traded (define_manure_trade_costs.gms l. 66-71, by FOUT); exports at most the manure P / K
+            # applied in the region. As the N columns, they trade around CAPRI's base trade (in the accounts), and
+            # the base calibration makes their base value optimal (CAPRI's cost constants, FINALIZE).
+            if pool_k == 2:
+                pkc, pk0, pkv = {}, {}, {}
+                for nut in ("P", "K"):
+                    vecs = self._pk_manure_vectors(nut)
+                    if vecs is None:
+                        continue
+                    exc, app = vecs
+                    grof = float(exc @ xb)
+                    if grof <= 1e-6:
+                        continue
+                    slope_k = float(_settings().get("supply.manure_pool_slope")) / (grof / 100.0)
+                    pp_k = float((getattr(self, "manure_pool_price_pk", None) or {}).get(nut, 0.0) or 0.0)
+                    cols_k = []
+                    for sign in (-1.0, +1.0):              # -1 export, +1 import
+                        Qa = np.pad(Qa, ((0, 1), (0, 1))); Qa[-1, -1] = slope_k
+                        ca = np.concatenate([ca, [pp_k if sign < 0 else -pp_k]])
+                        Aa = np.hstack([Aa, np.zeros((Aa.shape[0], 1))])
+                        cols_k.append(Aa.shape[1] - 1)
+                    capr = np.zeros(Aa.shape[1]); capr[:n] = -app; capr[cols_k[0]] = 1.0
+                    Aa = np.vstack([Aa, capr]); ba = np.concatenate([ba, [0.0]])
+                    labels.append(f"manure_export_cap_{nut}")
+                    pkc[nut], pk0[nut], pkv[nut] = cols_k, grof, app.copy()
+                    pool_k += 2
+                self._pool_cols_pk = pkc
+                self._manure_supply0_pk = pk0
+                self._pool_manure_vec_pk = pkv
         # ---- MANURE WITHIN CROP NEED (CAPRI supply_model.gms fertDistExcr_ +
         # NUTNED_, an EQUALITY with mineral N >= 0; its over-application term is
         # commented out): a region can hold only as much manure as its crops can

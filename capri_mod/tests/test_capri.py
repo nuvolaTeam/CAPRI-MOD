@@ -298,6 +298,37 @@ def test_emission_tax_in_supply_follows_capri(model):
 
 
 @pytest.mark.slow
+def test_manure_p_and_k_have_markets_of_their_own(model):
+    """CAPRI's manure trade by FOUT (supply_model.gms e_netMTrade, e_costMTrade; manuremarket/simu_manure_market.gms,
+    one market per nutrient): each EU region has P2O5 and K2O export and import columns besides N, priced at their own
+    pool price, in the block's P and K manure balances only; the base stays a first-order point; under the emission
+    tax, which prices N only, N trade moves while P and K trade do not follow it."""
+    from capri_mod.scenarios.scenarios import carbon_tax_scenario
+    regs = [r for r in model.data["areas"].index if r.startswith("BL")][:4]
+    b = model.run(scenario="BASELINE", regions=regs, max_outer_iter=3, manure_trade=True)
+    try:
+        sm = model.supply_module
+        for r in regs:
+            mo = sm._models[r]
+            pk = mo._pool_cols_pk
+            assert set(pk) == {"P", "K"} and len({*mo._pool_cols, *pk["P"], *pk["K"]}) == 6
+            Q, c, A, bb, y = mo._last_aug
+            for nut, (je, ji) in pk.items():
+                assert abs(float(c[je]) - mo.manure_pool_price_pk[nut]) < 1e-9 and abs(float(c[ji]) + float(c[je])) < 1e-9
+            x0 = mo._base_levels().reindex(mo.acts).fillna(0.0).values
+            xa = np.array([b["supply"][r].activities.get(a, 0.0) for a in mo.acts])
+            assert float(np.max(np.abs(xa - x0) / np.maximum(np.abs(x0), 1.0))) < 1e-4
+            assert all(max(map(abs, v)) < 0.1 for v in b["supply"][r].manure_trade_pk.values())      # t, at base
+        s = model.run(custom_scenario=carbon_tax_scenario(100.0), regions=regs, max_outer_iter=4, manure_trade=True)
+        n_moved = sum(abs(s["supply"][r].manure_trade[0] - s["supply"][r].manure_trade[1]) for r in regs)
+        pk_moved = sum(abs(v[0] - v[1]) for r in regs for v in s["supply"][r].manure_trade_pk.values())
+        assert n_moved > 10.0 and pk_moved < 0.1 * n_moved
+        assert set(model._pool_gaps) == {"N", "P", "K"} and max(model._pool_gaps.values()) < 0.05
+    finally:
+        model.run(scenario="BASELINE", regions=regs, max_outer_iter=2)
+
+
+@pytest.mark.slow
 def test_manure_market_and_ammonia_options_in_every_eu_solve(model):
     """Sprint 9k: CAPRI's crop nutrient balance (NUTNED_) and manure market (e_netMTrade, e_costMTrade) are in every
     run, not only under the N target: each EU solve carries the crop-need row and, with manure trade on, the pool

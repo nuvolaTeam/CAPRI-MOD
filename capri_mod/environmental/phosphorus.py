@@ -128,12 +128,12 @@ class PhosphorusBlock:
             hb = {a: max(float(H0.get(a, 0.0) or 0.0), 0.0) for a in ANIMALS}
             E0 = ratio_base * sum(hb[a] * manp[a] for a in ANIMALS)
             applied = ratio * excret
-            mt = getattr(supply_result, "manure_trade", None) if supply_result is not None else None
-            if mt and (abs(float(mt[0])) > 0 or abs(float(mt[1])) > 0):
-                # traded manure carries P in the region's base manure P/N proportion (the block's pool columns)
-                ba = dict(xb); ba.update(hb)
-                rN = float(self.compute_nitrogen_balance(ba, dict(y0), region).get("n_manure_applied", 0.0))
-                applied += (E0 / rN if rN > 0 else 0.0) * (float(mt[1]) - float(mt[0]))
+            mt = ((getattr(supply_result, "manure_trade_pk", None) or {}).get("P")
+                  if supply_result is not None else None)
+            if mt:
+                # the region's trade on CAPRI's P manure market (MANP, its own columns; until 31 October 2026 the N
+                # trade, carried in the region's manure P/N proportion)
+                applied += float(mt[1]) - float(mt[0])
             sh = D.crop_shares(cr)
             col = lambda k: {c: D.crop_coef(cr, "P", c, k) for c in CROPS}
             need, own, pool, mine0 = col("need_kg_ha"), col("own_kg_ha"), col("pool_kg_ha"), col("mine_kg_ha")
