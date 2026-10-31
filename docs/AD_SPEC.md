@@ -306,7 +306,7 @@ Inputs not in these CSVs:
 | `EMISCALC(r,a,"T","DE"/"GE"/"ASH"/"YM","Y")`, `p_animReqSubEne` (`%scrdir%\animReqSubEne.gdx`) | not in capri_data | **missing**. Needed for cattle VSER. The port has partial GE pieces (`tools/build/build_enteric_feed_factors.py`) but no DE/ASH/sub-energy requirements |
 | `EMISCALC(r,a,A,"CH4MAN","Y")` (baseline CH4MAN EF) | not found as such | **missing** for exact CH4MAN; the per-head ratio QE_AD/QE_NOC is computable |
 | `p_animProdDays`, `DATA DAYS`, `v_actLevl` | port | available |
-| `p_infl` = 1.019, BAS = 2017 | port uses 1.019^13 | available [V] |
+| `p_infl` = 1.019, BAS = 2017 | port applies 1.019^13 and divides by the model's deflator to 2030 (the same index): the terms in 2017 money (KNOWN_ISSUES K108, 31 October 2026) | available [V] |
 | NUTS1→NUTS2 map (`map_rr(srnuts1,srnuts2)`) for the per-class fallback | **[U]** check that the port has it | DE110000 → DE100000 assumed and verified via MaxShare |
 | `fallback_Balkan`, `p_farmsTotal`, `p_LUUnits`, `data levl/days` for non-EU NLP `m_fsclass` (prep l.439-495) | prep file, `dat\policy\livestock_units.gms` | needed only for MSnoEU/Turkey |
 | `ghgInvData.gdx p_shareADInv` | not present | needed only if `storgrazInv on` (default off) |

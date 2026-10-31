@@ -3,6 +3,12 @@
 Status: implemented 21 October 2026 as `SupplyModule.pmp_source = "capri2030"` (run script: `--pmp capri2030`); the
 elasticity calibration stays available (`"elasticity"`). Results: CHANGELOG, 21-22 October 2026 (night), and below.
 
+Money (KNOWN_ISSUES K108, 31 October 2026): CAPRI's 2030 terms are in its 2030 money (calibrated on its 2030 prices,
+inflated from 2004 by p_infl); the model's 2030 runs are in 2017 money (prices over CAPRI's inflation to 2030). The
+builders divide every 2030 term (crops, animals, intensity variants, land types, feed slopes) by that deflator
+(tools/lib/_money.py); until then the terms reached the model in 2030 money, so its price responses were about
+1/1.277 of CAPRI's. The elasticities in the tables below were measured before that change.
+
 ## Why
 
 Until now capri-mod calibrated its own PMP matrix (PMPCalibrator, Howitt 1995): each crop's diagonal term from a
