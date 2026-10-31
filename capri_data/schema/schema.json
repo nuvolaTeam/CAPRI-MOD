@@ -2855,7 +2855,6 @@
    "read_by": {
     "model": [
      "capri_mod/data/loaders.py",
-     "capri_mod/data/validate_data.py",
      "capri_mod/feed/ration.py"
     ],
     "builders": [
@@ -39228,7 +39227,6 @@
    "read_by": {
     "model": [
      "capri_mod/data/loaders.py",
-     "capri_mod/data/validate_data.py",
      "capri_mod/supply/livestock.py"
     ],
     "builders": [],
@@ -39754,6 +39752,50 @@
     "value"
    ]
   },
+  "file_catalogue": {
+   "declared_in": "05_file_catalogue.sql",
+   "comment": "vintage, domain and status of the data files (from MANIFEST.json, 31 October 2026; units and notes not re-checked)",
+   "columns": [
+    {
+     "name": "file",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "vintage",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "domain",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "status",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "units",
+     "type": "VARCHAR",
+     "not_null": false
+    },
+    {
+     "name": "vintage_exception",
+     "type": "VARCHAR",
+     "not_null": false
+    },
+    {
+     "name": "note",
+     "type": "VARCHAR",
+     "not_null": false
+    }
+   ],
+   "primary_key": [
+    "file"
+   ]
+  },
   "provenance": {
    "declared_in": "01_provenance.sql",
    "comment": "each data file: its nature, the origins of what its builders read, its builder, the files outside the repository its builder chain reads",
@@ -39985,6 +40027,10 @@
   },
   {
    "file": "21_market_inputs.sql",
+   "rule": "the world beef price is more than five times the wheat price (a units check, from the former MANIFEST.json validator)"
+  },
+  {
+   "file": "21_market_inputs.sql",
    "rule": "the world prices' rows are market commodities, or DWHE and SUGB (kept for the outer loop's price index)"
   },
   {
@@ -40054,6 +40100,14 @@
   {
    "file": "99_rules.sql",
    "rule": "every data file has a known origin: a traced builder, a source folder, a declared table or a checked note"
+  },
+  {
+   "file": "99_rules.sql",
+   "rule": "every CSV file of the catalogue (05_file_catalogue.sql) is a declared file: a renamed or removed file takes its catalogue row along"
+  },
+  {
+   "file": "99_rules.sql",
+   "rule": "the base-year group shares one vintage: the supply and price files of the catalogue (but 'static' and '2006'), unless a file's row records why it carries another (MANIFEST.json's vintage check, kept since 2 October 2026)"
   }
  ],
  "code_data": {
