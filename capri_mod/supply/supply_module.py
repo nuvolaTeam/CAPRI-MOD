@@ -3160,7 +3160,7 @@ class SupplyModule:
         data files read on first use are loaded once, before the fork, not in every worker."""
         nw = self.workers(len(regions))
         from capri_mod.supply import ipopt_library as _il
-        if _il.loaded():
+        if _il.active():
             # an IPOPT with OpenMP (supply.nlp_ipopt_library): one thread in a process that forks workers, the threads
             # to the workers (a process that ran OpenMP on several threads hangs its forked children: ipopt_library)
             _il.for_parent(nw, self.workers(10 ** 9))

@@ -19,9 +19,12 @@ pip and the run manifest tell it from PyPI's.
 
     python tools/solvers/build_casadi_spral_omp_wheel.py WORKDIR [--jobs N]
 
-Needs Docker (a daemon), git, and network access to github.com (git), ghcr.io, coin-or-tools.github.io (CasADi's MUMPS
+Needs a container engine (Docker, or podman: Red Hat's, used as docker; SELinux's relabelling of the bind mounts is
+added when it is enforcing), git, Python 3, and network access to github.com (git), ghcr.io, coin-or-tools.github.io (CasADi's MUMPS
 and METIS 4 sources) and gitlab.com (Eigen). The steps leave stamp files in WORKDIR/stamps and are skipped when there;
-the build takes hours on two cores and about 6 GB of disk. The wheel is written to WORKDIR/dist. Not committed; the
+the build takes hours on two cores and about 8 GB of disk (the images 7 GB more). Tested on 1 November 2026 up to the
+core build's first external projects (sources, SWIG, mockups, the start of the core); the python, graft and wheel
+steps follow binaries.yml and universal_grafter but have not run yet. The wheel is written to WORKDIR/dist. Not committed; the
 library inside it is loaded by CasADi itself, so supply.nlp_ipopt_library stays "" with it and
 supply.nlp_linear_solver = "spral" selects SPRAL (capri_mod/supply/ipopt_library.py's OpenMP rules apply: the threads
 of a process that forks its workers).
@@ -55,18 +58,35 @@ def sh(cmd, cwd=None, log=None):
         sys.exit(f"failed ({r.returncode}){': see ' + str(log) if log else ''}")
 
 
+def engine() -> str:
+    """The container engine: docker, or podman (Red Hat's; its command line is docker's)."""
+    import shutil
+    for e in ("docker", "podman"):
+        if shutil.which(e):
+            return e
+    sys.exit("no container engine: install podman (dnf install podman) or docker")
+
+
+def _selinux() -> bool:
+    try:
+        return Path("/sys/fs/selinux/enforce").read_text().strip() == "1"
+    except OSError:
+        return False
+
+
 def docker(work: Path, image: str, script: str, log: Path):
+    z = ":Z" if _selinux() else ""             # SELinux (Red Hat): the bind mounts relabelled for the container
     env = []
     for k in PASS_ENV:
         if os.environ.get(k):
             env += ["-e", f"{k}={os.environ[k]}"]
     ca = os.environ.get("SSL_CERT_FILE") or os.environ.get("CURL_CA_BUNDLE")
-    mounts = ["-v", f"{work}:/work"]
+    mounts = ["-v", f"{work}:/work{z}"]
     if ca and os.path.isfile(ca):
-        mounts += ["-v", f"{ca}:/ca.crt:ro"]
+        mounts += ["-v", f"{ca}:/ca.crt:ro{',Z' if z else ''}"]
         env += ["-e", "SSL_CERT_FILE=/ca.crt", "-e", "CURL_CA_BUNDLE=/ca.crt", "-e", "GIT_SSL_CAINFO=/ca.crt",
                 "-e", "REQUESTS_CA_BUNDLE=/ca.crt"]
-    sh(["docker", "run", "--rm", "--network", "host", *env, *mounts, "-w", "/work", image, "bash", "-ec", script],
+    sh([engine(), "run", "--rm", "--network", "host", *env, *mounts, "-w", "/work", image, "bash", "-ec", script],
        log=log)
 
 
@@ -137,7 +157,10 @@ def main() -> None:
     if not stamp(work, "graft"):
         # universal_grafter's Linux steps: RPATH $ORIGIN, a dummy wheel of the package, jgillis's auditwheel repair
         # (the runtime libraries copied in under hashed names), the result unpacked over the package
-        docker(work, BUILD_IMAGE, "cd install/casadi && (chrpath -l -k -r '$ORIGIN' * || true) && rm -f spral_ssids && "
+        # (the action runs chrpath -r '$ORIGIN' on its host; the image has patchelf: the same RPATH where one is set)
+        docker(work, BUILD_IMAGE, "cd install/casadi && for f in *; do [ -f \"$f\" ] && r=$(patchelf --print-rpath "
+               "\"$f\" 2>/dev/null) && [ -n \"$r\" ] && patchelf --force-rpath --set-rpath '$ORIGIN' \"$f\" || true; "
+               "done && rm -f spral_ssids && /opt/python/cp39-cp39/bin/pip install -q pyelftools wheel==0.31.1 && "
                "cd /work && W=$(/opt/python/cp39-cp39/bin/python universal_grafter/create_wheel_local.py 64 "
                "manylinux_2_28-x64 install/casadi) && cp universal_grafter/graft_manylinux.sh . && "
                "./graft_manylinux.sh $W 'libknitro:libhsl:libworhp:libsnopt7:libut:libmex:libmx:libeng:"

@@ -135,10 +135,59 @@ def loaded() -> Optional[str]:
     return _LOADED
 
 
+_BUILTIN = False
+
+
+def prepare_builtin() -> None:
+    """SPRAL with CasADi's own IPOPT (supply.nlp_ipopt_library = ""). PyPI's CasADi has no OpenMP there; a CasADi
+    built with it (tools/solvers/build_casadi_spral_omp_wheel.py) carries its own libgomp (renamed, next to its
+    libipopt), which reads its environment when CasADi's IPOPT plugin is loaded: OMP_CANCELLATION=TRUE and, so that a
+    process that will fork starts on one thread, OMP_NUM_THREADS=1 are set here first (unless the environment has
+    them); the threads are then set per process as with a library of its own (_attach_builtin)."""
+    global _BUILTIN
+    if _LOADED is None and not _BUILTIN:
+        os.environ.setdefault("OMP_CANCELLATION", "TRUE")
+        os.environ.setdefault("OMP_NUM_THREADS", "1")
+        _BUILTIN = True
+
+
+def _attach_builtin() -> None:
+    """Once CasADi's IPOPT is in the process: its OpenMP runtime, a libgomp mapped from libipopt's folder (none with
+    PyPI's CasADi: nothing to do)."""
+    global _GOMP, _OWN_GOMP
+    if _GOMP is not None or _LOADED is not None or not _BUILTIN:
+        return
+    ip = _ipopt_in_process()
+    if not ip:
+        return
+    folder = os.path.dirname(os.path.realpath(ip[0]))
+    gomp = [f for f in _mapped() if os.path.basename(f).startswith("libgomp")
+            and os.path.dirname(os.path.realpath(f)) == folder]
+    if not gomp:
+        return
+    _OWN_GOMP = gomp[0]
+    _GOMP = ctypes.CDLL(_OWN_GOMP)
+    if not _GOMP.omp_get_cancellation():
+        raise RuntimeError(f"CasADi's IPOPT has OpenMP ({_OWN_GOMP}) but cancellation is off (OMP_CANCELLATION="
+                           f"{os.environ.get('OMP_CANCELLATION')!r} when it was loaded): SPRAL's factorisation needs it")
+    others = other_openmp_runtimes()
+    if others:
+        warnings.warn("CasADi's IPOPT with OpenMP: other OpenMP runtimes in this process (" + ", ".join(others) +
+                      "): they keep their own threads, which supply.nlp_omp_threads does not set",
+                      RuntimeWarning, stacklevel=2)
+    _GOMP.omp_set_num_threads(_THREADS)
+
+
+def active() -> bool:
+    """A library of its own loaded, or SPRAL with CasADi's own IPOPT prepared."""
+    return _LOADED is not None or _BUILTIN
+
+
 def set_threads(n: int) -> None:
     """This process's OpenMP threads for the linear solver (one where no OpenMP runtime is loaded: nothing to do)."""
     global _THREADS
     _THREADS = max(1, int(n))
+    _attach_builtin()
     if _GOMP is not None:
         _GOMP.omp_set_num_threads(_THREADS)
 
@@ -152,6 +201,7 @@ def for_parent(workers: int, configured: int) -> None:
     later pass: `configured` is the worker setting), else supply.nlp_omp_threads. A process that has used more than
     one thread may not fork: raises (the hang it would cause is silent)."""
     global _THREADED_PARENT
+    _attach_builtin()
     if _GOMP is None:
         return
     if workers > 1:
@@ -172,6 +222,7 @@ def for_parent(workers: int, configured: int) -> None:
 
 def for_worker() -> None:
     """A forked worker process: supply.nlp_omp_threads."""
+    _attach_builtin()
     if _GOMP is None:
         return
     from capri_mod.settings import current as _settings

@@ -125,3 +125,37 @@ def test_the_openmp_ipopt_in_a_fresh_process(tmp_path):
                   {"print_time": 0, "ipopt.print_level": 0, "ipopt.tol": 1e-10})
     fm = float(S(x0=0, lbg=1, ubg=1, lbx=0)["f"])
     assert abs(fm - f0) <= 1e-8 * max(1.0, abs(fm))
+
+
+def test_spral_with_casadis_own_ipopt_in_a_fresh_process(tmp_path):
+    """SPRAL with CasADi's own IPOPT (no library of its own): the OpenMP environment is prepared before CasADi's
+    plugin loads; with PyPI's CasADi (no OpenMP in its IPOPT) no runtime is attached and the thread calls do nothing."""
+    import json
+    script = tmp_path / "builtin.py"
+    script.write_text(textwrap.dedent(r'''
+        import json, os, sys
+        sys.path.insert(0, sys.argv[1])
+        from capri_mod import settings
+        from capri_mod.supply import ipopt_library as il
+        with settings.override({"supply.nlp_linear_solver": "spral"}):
+            from capri_mod.supply.capri_regional_nlp import linear_solver_options
+            opts = linear_solver_options()
+            import casadi as ca
+            x = ca.MX.sym("x", 3)
+            S = ca.nlpsol("S", "ipopt", {"x": x, "f": ca.sumsqr(x - 1)}, {"print_time": 0, "ipopt.print_level": 0, **opts})
+            r = S(x0=0)
+            il.for_parent(2, 2)
+            casadi_gomp = [f for f in il._mapped() if os.path.basename(f).startswith("libgomp")
+                           and "casadi" in f and "libuno" not in f]
+            print("RESULT " + json.dumps({"active": il.active(), "env": os.environ.get("OMP_CANCELLATION"),
+                                          "status": S.stats()["return_status"], "gomp": il._OWN_GOMP,
+                                          "casadi_gomp": casadi_gomp}))
+    '''))
+    env = {k: v for k, v in os.environ.items() if not k.startswith("OMP_")}
+    p = subprocess.run([sys.executable, str(script), str(ROOT)], capture_output=True, text=True, timeout=300, env=env)
+    line = [ln for ln in p.stdout.splitlines() if ln.startswith("RESULT ")]
+    assert line, p.stdout + p.stderr
+    out = json.loads(line[0][7:])
+    assert out["active"] is True and out["env"] == "TRUE" and out["status"] == "Solve_Succeeded"
+    if not out["casadi_gomp"]:                       # PyPI's CasADi: no OpenMP in its IPOPT
+        assert out["gomp"] is None

@@ -151,9 +151,12 @@ def linear_solver_options() -> dict:
     if ls == "spral":
         # SPRAL (BSD licence) is part of CasADi's IPOPT. CasADi 3.8.1 builds it without OpenMP: libipopt carries
         # SPRAL's omp_* stubs and no OpenMP runtime, so it runs on one thread (checked 30 October 2026); SPRAL in
-        # OpenMP comes with supply.nlp_ipopt_library (its environment and threads: ipopt_library.py). Until
-        # 31 October 2026 this set OMP_CANCELLATION, OMP_PROC_BIND and OMP_NUM_THREADS here, which CasADi's IPOPT
-        # does not read (no OpenMP runtime)
+        # OpenMP comes with supply.nlp_ipopt_library or with a CasADi built with it (its environment and threads:
+        # ipopt_library.py). Until 31 October 2026 this set OMP_CANCELLATION, OMP_PROC_BIND and OMP_NUM_THREADS here,
+        # which PyPI's CasADi does not read (no OpenMP runtime)
+        if not lib_:
+            from capri_mod.supply import ipopt_library as _il
+            _il.prepare_builtin()
         return {"ipopt.linear_solver": "spral"}
     if ls not in ("ma27", "ma57", "ma77", "ma86", "ma97"):
         raise ValueError(f"supply.nlp_linear_solver = {ls!r}: mumps, spral, ma27, ma57, ma77, ma86 or ma97")
