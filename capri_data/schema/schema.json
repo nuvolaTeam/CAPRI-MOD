@@ -33067,11 +33067,6 @@
      "not_null": true
     },
     {
-     "name": "PULS",
-     "type": "DOUBLE",
-     "not_null": true
-    },
-    {
      "name": "OCRO",
      "type": "DOUBLE",
      "not_null": true
@@ -33092,12 +33087,37 @@
      "not_null": true
     },
     {
+     "name": "POTA",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
      "name": "SUGB",
      "type": "DOUBLE",
      "not_null": true
     },
     {
-     "name": "POTA",
+     "name": "SUNF",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "RAPE",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "SOYA",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "OOIL",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "PULS",
      "type": "DOUBLE",
      "not_null": true
     },
@@ -33147,42 +33167,22 @@
      "not_null": true
     },
     {
-     "name": "GRAS",
-     "type": "DOUBLE",
-     "not_null": true
-    },
-    {
      "name": "TOBA",
      "type": "DOUBLE",
      "not_null": true
     },
     {
-     "name": "MAIF",
-     "type": "DOUBLE",
-     "not_null": true
-    },
-    {
-     "name": "RAPE",
-     "type": "DOUBLE",
-     "not_null": true
-    },
-    {
-     "name": "SUNF",
-     "type": "DOUBLE",
-     "not_null": true
-    },
-    {
-     "name": "SOYA",
-     "type": "DOUBLE",
-     "not_null": true
-    },
-    {
-     "name": "OOIL",
-     "type": "DOUBLE",
-     "not_null": true
-    },
-    {
      "name": "TEXT",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "GRAS",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "MAIF",
      "type": "DOUBLE",
      "not_null": true
     },
