@@ -99,7 +99,7 @@ built. No proxy.
   3. Turkey's code (TUR) and the Western Balkans in the country table; build_regional_units with all 250 units.
   4. The ready builders on the 250 units.
   5. The country lists of section 2.
-  6. CAPRI's rules for the missing data, read and ported.
+  6. CAPRI's rules for the missing data, read (section 5) and ported.
   7. The exact-reproduction check with the default setting.
   8. The market side: SUP_NONEU one-to-many (WBA).
   9. The baseline of the 29 against CAPRI's 2030.
@@ -116,6 +116,33 @@ built. No proxy.
   Norway too.
 
 - **The "EU-wide" price fallback** (build_eu_producer_prices) averages over all model regions. With the 29 it would
-  no longer be the EU's. To decide when CAPRI's own fallback for these countries is read.
-- **CEILVAL for Turkey and the Western Balkans** is absent in CAPRI's 2030 results. Presumably CAPRI has no CAP-type
-  ceiling there; to confirm in its code.
+  no longer be the EU's. CAPRI's rule for Turkey's prices is read (section 5: TUR is its own market and supply
+  region, its supply models take TUR's producer prices); the Western Balkans' and the UK's to read; the project lead's
+  decision on the fallback is pending.
+- **CEILVAL for Turkey and the Western Balkans** is absent in CAPRI's 2030 results. CAPRI's code does not restrict it to
+  the EU by a set, but its sources (Regulation 1307/2013 Annex II and reference-period premiums) cover the EU28 only:
+  no CAP ceilings for Turkey and the Western Balkans (section 5; the absence of their premiums inferred).
+
+## 5. CAPRI's rules for the missing data (read 30 October 2026)
+
+Read in CAPRI's code (gams/, paths below), the key lines checked by hand. Decision of the project lead (30 October
+2026): do as CAPRI does. Each rule is ported as CAPRI's, named with its file and lines; a number CAPRI writes in its
+code goes into a CSV with that source. Where the contents of a GDX decide, it is marked inferred.
+
+| Gap | CAPRI's rule | Where |
+|---|---|---|
+| Winter cover, p_winterCoverShare0 (UK only, nationally) | p_coverMax falls back region -> NUTS 1 -> NUTS 0 -> 1 - p_winterCoverShare0("EU027000"): the UK's units take the UK's value, Turkey's and the Western Balkans' the EU27's. With winterCovInAllRmssup on (Green Deal), the option is not zeroed outside the EU. IniShare = max(p_catchCropShSAPM, p_ccEfa), EU survey and greening data: presumably 0 for TR and WB (inferred) | envind/cover_crops.gms l. 340-343, 349, 429-430 (checked) |
+| Tillage | TillInAllRmssup is commented out in the Green Deal file: tillage options zeroed outside the EU | pol_input/greendeal/refpol_endotech_all_sup.gms l. 66-67; envind/tillage.gms l. 586-587 |
+| Organic soils, p_orgsoilori (none for TR, WB) | Zero means zero for every NUTS 0 but the Western Balkans (WBA6) and TUR; for those, a missing crop share is FAO's peat share of their FAO region, else p_peatsh_def / 100 (the Balkan defaults from Croatia, per CAPRI's comment); the national value passes to the units; grassland takes the crop share. Fallowing: EU only unless fallowInAllRmssup (on in the Green Deal) | envind/prep_lulucf_carbon.gms l. 243-266 (checked l. 250-262); lulucf_carbon_decl.gms l. 704; envind/no_histosols.gms l. 25-26, 34 (checked l. 26); capmod.gms l. 944-948 |
+| Irrigation shares, p_irriShare | Used only by the water module, off by default (WaterModule off) and not turned on by the Green Deal files: not in the supply models | water_database.gms l. 245-265; capmod/set_global_variables.gms l. 178 (checked) |
+| Labour (TU, AL dumps) | Reporting only (not a constraint): missing data give no labour figures | reports/sol_simy.gms l. 475-482; supply/supply_model.gms l. 4808 |
+| PMP terms (estnlp: the UK only) | No group terms where a region has no estimated diagonal; activity slopes by the fallback 1/elas x max(abs linear term, land rent, revenue) / LEVL, with CAPRI's default elasticities (1 for MPACT, 3 for GRAS, 0.1 for permanent crops), PELA where it exists; a land-nest adjustment | supply/define_pmp_terms.gms l. 23; supply/pmp_terms/forecast_group_pmp_matrix_from_estimates.gms l. 44-46 (checked); forecast_activity_slopes.gms l. 87-100, 124-141; supply/pmp_elas.gms l. 45-46, 58-90 |
+| Ammonia farm structure (p_holdLSU, p_Heads, p_nvzShare_lu), p_minStorCapND | Not EU-only. fallback_Balkan maps CS, KO, MK, MO, BA, AL, HR, TUR and TR1..TRC to Romania, Bulgaria and Croatia (their averages); MO, KO, TUR as CS in ammo_tech's tables; p_minStorCapND falls back NUTS 1 -> NUTS 0 -> p_storTime; an estimation loop over MSnoEU and Turkey's units (not UK, NO, WBA) with farm totals written in the code (Turkey's 2.56 million farms split equally over its 12 units) | sets.gms l. 8111-8119 (checked); envind/ammo_tech.gms l. 312-315, 348-351, 547-555; envind/prep_farm_size_data_for_miti.gms l. 137-152, 205-266, 439-449 |
+| Anaerobic digestion (GAINS) | p_VSER, p_HousShar, p_SharLiq through fallback_Balkan; GAINS country map: the Western Balkans and TUR use Croatia (CROA) | envind/ad_data_and_cali.gms l. 162 (checked), 350-365 |
+| Turkey's prices | TUR is its own market region and supply region: its supply models take TUR's producer prices; UVAG moves with the price change where PPri exists, else keeps its base | aggregation/defaultA.agg l. 7, 98; arm/set_prices.gms l. 30 (checked), 43-50; supply/supply_model.gms l. 4642 |
+| CEILVAL | Not EU-restricted by a set (RSEU includes all RUNMS); CEILVAL comes from Regulation 1307/2013 Annex II (EU28 with UK000000, no TR or WB) and from reference-period premiums: no CAP ceilings for TR and WB (no PRME: inferred) | policy/policy_sets.gms l. 105, 129; scen/base_scenarios/CAP_2014_2020.gms l. 101-141, 309-343; policy/calc_mtr.gms l. 190-200 |
+
+Beyond CAPRI, not taken now (the project lead's decision, 30 October 2026: as CAPRI): measured data could replace
+some of these fallbacks: organic-soil shares from FAO's Harmonized World Soil Database v2.0, farm structure from
+Eurostat's candidate-country tables and national surveys (Serbia's 2023 census, MONSTAT's 2016 survey, TurkStat),
+GAINS' own country data.
