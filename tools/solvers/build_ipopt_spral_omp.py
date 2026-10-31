@@ -17,7 +17,7 @@ Everything is compiled by the system's gcc, g++ and gfortran, and the result nee
 libraries (libgfortran, libgomp, libquadmath, libstdc++): no runtime library of CasADi's wheel is mixed in. The static
 OpenBLAS, METIS and SPRAL are linked into libipopt with their symbols hidden (--exclude-libs), so other libraries in
 the process (CasADi's MUMPS with its METIS 4, numpy's and scipy's OpenBLAS) cannot bind to them;
-capri_mod/supply/ipopt_library.py loads the library RTLD_LOCAL | RTLD_DEEPBIND so its own calls go to its own runtimes.
+capri_mod/supply/ipopt_library.py loads the library RTLD_LOCAL (its symbols out of the global scope).
 
     python tools/solvers/build_ipopt_spral_omp.py [--prefix DIR] [--jobs N]
 

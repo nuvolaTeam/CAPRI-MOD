@@ -32,9 +32,12 @@ OpenMP inside the model's process structure (what makes a wheel's OpenMP awkward
   system's GNU libgomp.so.1 and libgfortran.so.5. Three guards:
   (1) the build hides the symbols of its static OpenBLAS, METIS 5 and SPRAL (--exclude-libs): nothing else binds to
       them (CasADi's MUMPS uses its own METIS 4 under the same METIS_ names);
-  (2) the library is loaded RTLD_LOCAL | RTLD_DEEPBIND: its own calls (GOMP_*, omp_*, gfortran, BLAS) go to its own
-      dependencies first, not to a runtime another library put in the global scope (CasADi loads HSL libraries the
-      same way, its IPOPT patch to IpLibraryLoader.cpp);
+  (2) the library is loaded RTLD_LOCAL: its symbols stay out of the process's global scope. Not RTLD_DEEPBIND (which
+      CasADi uses for HSL libraries, its IPOPT patch to IpLibraryLoader.cpp): under it the GNU OpenMP runtime loaded
+      with the library did not see the environment (omp_get_cancellation 0 with OMP_CANCELLATION=TRUE set before the
+      process started; 1 without DEEPBIND; checked 1 November 2026). Its calls to GOMP_* and omp_* are bound to
+      libgomp's versioned symbols (GOMP_4.0, OMP_4.0, ...); a runtime in the global scope (LD_PRELOAD, or a library
+      loaded RTLD_GLOBAL) could still take them, which the check of cancellation below and (3) would show;
   (3) the other OpenMP runtimes in the process are reported (other_openmp_runtimes): each has its own threads, which
       set_threads does not control, and the fork rule above holds for them too.
 """
@@ -107,7 +110,7 @@ def ensure_loaded(path: str) -> None:
                            f"({', '.join(present)}); the setting has to be in force before the first IPOPT solve")
     os.environ.setdefault("OMP_CANCELLATION", "TRUE")
     before = set(_mapped())
-    ctypes.CDLL(p, mode=ctypes.RTLD_LOCAL | getattr(os, "RTLD_DEEPBIND", 0))
+    ctypes.CDLL(p, mode=ctypes.RTLD_LOCAL)
     _LOADED = p
     # its OpenMP runtime: the GNU libgomp.so.1 mapped with it (or found already in the process under that name)
     gomp = [f for f in _mapped() if os.path.basename(f).startswith("libgomp.so")]
