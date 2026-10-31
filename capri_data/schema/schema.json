@@ -41483,7 +41483,7 @@
   },
   "data_kind": {
    "declared_in": "06_data_kind.sql",
-   "comment": "the kind of data of every declared file (base, reference, parameter, calibrated, structure, validation) and the basis of the classification",
+   "comment": "the kind of data of every declared file (base, reference, coefficients, calibrated, parameters, structure, validation) and the basis of the classification",
    "columns": [
     {
      "name": "file",
