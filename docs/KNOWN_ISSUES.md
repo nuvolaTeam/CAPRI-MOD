@@ -1008,6 +1008,18 @@ CAPRI's stop rule, recorded every iteration since r135, flags rows that move by 
   LT000000's other fodder 56.6 kha (gate 10 166.9, base 232.8): the regions with two states switch with the PMP terms'
   change (K108). The diagnostic of the two states' objectives (tools/check/k79_multistart, draft) is the next step
   (STRUCTURAL_GAPS_PLAN S12)
+  **Gate 12 (31 October 2026, r201 against r198; Farm-to-Fork only):** converged under CAPRI's rule in 23 iterations
+  (r198: 12); the EU indicators within 1 point of r198 (beef price +0.9, beef animals -0.8, the rest within 0.5; mean
+  deviation from JRC121368 over 20 indicators 4.15, r198 4.19). The extra iterations are a two-step cycle of FR820000's
+  jump check: at every even iteration from 2 to 20 the region's solve ended at objective -4.63e6 (moves 0.14-0.17 against
+  the last iteration's levels), the standard start found -6.21e6 and was kept; at the odd iterations the check did not
+  act. CAPRI's row OLIV FR000000 moved by about 102% at every iteration from 3 to 21; the cycle ended at iteration 21,
+  where CAPRI's late price-averaging weights start (capri_step_weights_late_from = 20). Which region carries the olive
+  swing is not known (per-iteration crop levels are not recorded): FR820000's olives are 0.89 kha at the end in both
+  gates, FR810000's 5.5 (r198 14.9). End states differ from r198 in FR820000 (suckler cows 2.7 thousand head, r198 19.9;
+  cereals) and LT000000 (other fodder 161.5 kha, r198 56.6; the check moved it to the standard start's lower objective
+  at iteration 1). Why the solve from the better point returns to the worse one every other iteration is not known; a
+  traced run of FR820000 and FR810000 (CAPRI_NLP_TRACE) would show it
 
 
 <a id="k80"></a>
