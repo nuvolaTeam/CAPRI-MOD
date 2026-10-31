@@ -25,6 +25,8 @@ from __future__ import annotations
 import argparse, glob, json, re, sys
 from collections import defaultdict
 from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
+from paths import SOURCES  # noqa: E402  (CAPRI's material outside the repository)
 
 
 def _read_csv(*a, **k):
@@ -71,7 +73,7 @@ def main() -> None:
 
 def build(dest_name: str) -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--dump-dir", type=Path, default=Path("/home/claude/work/capreg"))
+    ap.add_argument("--dump-dir", type=Path, default=SOURCES / "capreg")
     ap.add_argument("--old-json", default=None, help="earlier build (per CAPRI head) for Spain")
     args = ap.parse_args()
     import pandas as pd

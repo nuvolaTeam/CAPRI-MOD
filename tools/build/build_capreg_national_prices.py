@@ -12,7 +12,7 @@ Until 29 October 2026 the file had no builder: the same values, without MAIZ and
 (so CORN had no national fallback; the 17 regions without a regional maize price grow none), with two columns for
 CAPRI's TEXT under the old fibre codes COTT and OFIB, which no table reads.
 
-    python tools/build/build_capreg_national_prices.py [dump dir, default /home/claude/work/capreg]
+    python tools/build/build_capreg_national_prices.py [dump dir, default capri_sources/capreg]
 """
 from __future__ import annotations
 
@@ -21,6 +21,8 @@ import sys
 from pathlib import Path
 
 import pandas as pd
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
+from paths import SOURCES  # noqa: E402  (CAPRI's material outside the repository)
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check")]
@@ -48,4 +50,4 @@ def main(dump_dir: Path) -> None:
 
 
 if __name__ == "__main__":
-    main(Path(sys.argv[1]) if len(sys.argv) > 1 else Path("/home/claude/work/capreg"))
+    main(Path(sys.argv[1]) if len(sys.argv) > 1 else SOURCES / "capreg")

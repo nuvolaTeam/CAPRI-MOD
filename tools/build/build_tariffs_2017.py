@@ -31,13 +31,15 @@ from pathlib import Path
 import pandas as pd
 
 import functools as _ft
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
+from paths import EXPORTS  # noqa: E402  (CAPRI's material outside the repository)
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT)); sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check")]
 OUT = ROOT / "capri_data" / "2017" / "policy" / "tariffs.csv"
 SRC = ROOT / "capri_data" / "sources" / "market" / "bilateral_dataout_2017.csv.xz"
 PROV = ROOT / "capri_data" / "sources" / "market" / "eu_tariff_provenance.csv"
-RES0 = Path("/mnt/user-data/uploads/res_0_1717cap_after_2014_cal_from_data_caldefaulta.csv")
+RES0 = EXPORTS / "res_0_1717cap_after_2014_cal_from_data_caldefaulta.csv"
 #: EU rows added after the documented set, computed from RES0 with the same formula (in eu_tariff_provenance.csv;
 #: computed here, not written, only if one is missing there)
 EU_ADDED = ("RYEM", "OATS", "TAGR", "TOBA", "TABO", "TEXT", "PLMO", "OTHO", "FFIS", "SFIS", "OAQU", "COFF", "TEAS", "COCO")

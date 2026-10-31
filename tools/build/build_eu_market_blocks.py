@@ -17,9 +17,12 @@ import argparse
 import csv
 import re
 from pathlib import Path
+import sys  # noqa: E402
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
+from paths import SOURCES  # noqa: E402  (CAPRI's material outside the repository)
 
 ROOT = Path(__file__).resolve().parents[2]
-AGG = Path("/home/claude/work/allgms/gams/aggregation/defaultA.agg")
+AGG = SOURCES / "gams/aggregation/defaultA.agg"
 OUT = ROOT / "capri_data" / "shared" / "eu_market_blocks.csv"
 BLOCKS = ("EU_WEST", "EU_EAST")
 SOURCE = "gams/aggregation/defaultA.agg"

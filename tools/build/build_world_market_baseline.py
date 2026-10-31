@@ -30,12 +30,14 @@ Output: capri_data/2017/market/world_market_baseline.json {"balances": {"REGION|
 consumption, imports, exports}}} in 1000 t; EU27 = sum of member states (imports/exports include intra-EU trade,
 so only production and consumption are used for the EU).
 
-    python tools/build/build_world_market_baseline.py [--src /mnt/user-data/uploads/fao_agg_17_datamarket.txt]
+    python tools/build/build_world_market_baseline.py [--src capri_sources/exports/fao_agg_17_datamarket.txt]
 """
 from __future__ import annotations
 import argparse, json, re, sys
 from collections import defaultdict
 from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
+from paths import EXPORTS  # noqa: E402  (CAPRI's material outside the repository)
 
 ROOT = Path(__file__).resolve().parents[2]
 SRC_KEEP = ROOT / "capri_data" / "sources" / "fao_agg_2017" / "fao_agg_market_balances_bas.csv"
@@ -58,7 +60,7 @@ EU_MS = set(_EU_FROM_DATA)                                  # CAPRI's EU member 
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--src", type=Path, default=Path("/mnt/user-data/uploads/fao_agg_17_datamarket.txt"))
+    ap.add_argument("--src", type=Path, default=EXPORTS / "fao_agg_17_datamarket.txt")
     a = ap.parse_args()
     sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check")]
     from recalibrate_trade_2017 import AGGREGATES, trade_region

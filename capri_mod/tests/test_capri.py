@@ -11,6 +11,7 @@ Covers the invariants that matter for a trustworthy model:
 Run:  pytest capri_mod/tests/ -v
 """
 from pathlib import Path
+import os
 import sys
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
@@ -20,6 +21,9 @@ import pandas as pd
 import pytest
 
 ROOT = Path(__file__).resolve().parents[2]
+#: CAPRI's material outside git (tools/lib/paths.py, docs/EXTERNAL_SOURCES.md): a check that needs it is skipped
+#: where it is absent
+SOURCES = Path(os.environ.get("CAPRI_SOURCES") or ROOT / "capri_sources")
 DATA_DIR = ROOT / "capri_data"
 
 
@@ -3852,7 +3856,7 @@ def test_labour_accounts_and_set_aside_split_as_capri(data):
     lab = _labour_table(res, d17, sa)
     assert set(lab.columns) == {"LABT", "LABF", "LABP"} and abs(lab.at[reg, "LABF"] + lab.at[reg, "LABP"] - lab.at[reg, "LABT"]) < 0.02 * lab.at[reg, "LABT"]
     import re
-    dump = Path("/home/claude/work/capreg/res_17DE.txt")
+    dump = SOURCES / "capreg" / "res_17DE.txt"
     if dump.exists():
         m = re.search(r"^'DE110000'\.'GROF'\.'LABT'\.'Y'\s+([\d.Ee+-]+)", dump.read_text(errors="ignore"), re.M)
         if m:

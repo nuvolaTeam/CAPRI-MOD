@@ -7,12 +7,18 @@ From CAPRI's 2030 reference run (dataOut, res_2_1730greendeal_refdefaulta):
   * per region: NH3MIN / MINFER -> share of mineral N lost as NH3-N.
 Regions without regional rows use the national (CC000000) factors.
 
-    python tools/build/build_nh3_factors.py --rows nh3_rows.txt
+    python tools/build/build_nh3_factors.py [--zip capri_sources/exports/res_2_1730greendeal_refdefaulta.zip]
+    python tools/build/build_nh3_factors.py --rows nh3_rows.txt     (the same rows, extracted beforehand)
+
+The rows read are those of KEEP (until 31 October 2026 they came from nh3_rows.txt, extracted from the zip with grep;
+reading the zip gives the same rows: 80,303, byte-identical).
 """
 from __future__ import annotations
 import argparse, json, re, sys
 from collections import defaultdict
 from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
+from paths import EXPORTS, need  # noqa: E402  (CAPRI's material outside the repository)
 
 _ROOT = Path(__file__).resolve().parents[2]
 sys.path[:0] = [str(_ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check")]
@@ -26,15 +32,37 @@ def _read_csv(*a, **k):
     return pd.read_csv(*a, **k)
 
 
+#: the rows used: per region (NUTS code) the activities' NH3 losses, levels and excreted N, and the mineral N applied
+#: with its NH3 loss and the total
+KEEP = re.compile(r"^'[A-Z]{2}[0-9A-Z]{6}'\.''\.'(?:[A-Z0-9]+'\.'(?:GNH3|LEVL|MANN)|(?:MINFER|NH3MIN|NH3TOT)'\.'NITF)'\.'2030' ")
+
+
+def _lines(zip_path: Path, rows: Path | None):
+    """The KEEP rows: of the zip's CSV, or of an extracted rows file."""
+    if rows is not None:
+        yield from open(need(rows, "--rows"), errors="ignore")
+        return
+    import io
+    import zipfile
+    with zipfile.ZipFile(need(zip_path, "CAPRI's 2030 reference")) as z:
+        name = next(n for n in z.namelist() if n.lower().endswith(".csv"))
+        with z.open(name) as fh:
+            for line in io.TextIOWrapper(fh, encoding="latin-1", errors="ignore"):
+                if KEEP.match(line):
+                    yield line
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--rows", type=Path, default=Path("/home/claude/work/nh3/nh3_rows.txt"))
+    ap.add_argument("--zip", type=Path, default=EXPORTS / "res_2_1730greendeal_refdefaulta.zip",
+                    help="CAPRI's 2030 reference (dataOut as GAMS text, one CSV in the zip)")
+    ap.add_argument("--rows", type=Path, default=None, help="the KEEP rows extracted beforehand (instead of --zip)")
     args = ap.parse_args()
     import pandas as pd
     areas = _read_csv(_ROOT / "capri_data" / "2017" / "supply" / "base_areas.csv", index_col=0)
     pat = re.compile(r"^'([A-Z]{2}[0-9A-Z]{6})'\.''\.'([A-Z0-9]+)'\.'([A-Za-z0-9]+)'\.'2030'\s+(-?\d[\d.Ee+\-]*)")
     v = defaultdict(dict)
-    for line in open(args.rows, errors="ignore"):
+    for line in _lines(args.zip, args.rows):
         m = pat.match(line)
         if m:
             v[m.group(1)][(m.group(2), m.group(3))] = float(m.group(4))

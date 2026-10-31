@@ -17,12 +17,14 @@ import csv
 import re
 import sys
 from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
+from paths import EXPORTS  # noqa: E402  (CAPRI's material outside the repository)
 
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / "capri_data" / "sources" / "capri_res" / "gd2030_endotech_ini_nbalance.csv"
 ITEMS = ("MINFER", "GASMIN", "RUNMIN", "NH3MIN", "EXPPRD", "IMPORT", "ATMOSD", "CRESID", "BIOFIX", "EXCRET", "GASANI",
          "RUNANI", "MTRADE", "SURSOI", "LEACHI")
-DUMP = "/mnt/user-data/uploads/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv"
+DUMP = str(EXPORTS / "res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv")
 
 
 def extract(dump):

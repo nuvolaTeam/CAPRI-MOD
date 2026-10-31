@@ -46,7 +46,7 @@ Output: capri_data/2017/supply/plant_protection_cost.csv
     (region, activity, plap_eur_ha, inpo_eur_ha, fert_eur_ha, eful_eur_ha, eful_inpo_eur_ha, inpo_toin_share,
      capri_region)
 
-    python tools/build/build_plant_protection_cost.py [--dump-dir /home/claude/work/capreg] [--out FILE]
+    python tools/build/build_plant_protection_cost.py [--dump-dir capri_sources/capreg] [--out FILE]
 """
 from __future__ import annotations
 import argparse, csv, glob, importlib.util, re
@@ -57,6 +57,8 @@ from pathlib import Path
 import pandas as pd
 
 import functools as _ft
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
+from paths import EXPORTS, SOURCES  # noqa: E402  (CAPRI's material outside the repository)
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 #: CAPRI's directly yield-dependent inputs of crops present in the 2017 data (sets.gms IY = I not IS, without ICHI,
@@ -110,9 +112,9 @@ def _load(path):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--dump-dir", type=Path, default=Path("/home/claude/work/capreg"))
+    ap.add_argument("--dump-dir", type=Path, default=SOURCES / "capreg")
     ap.add_argument("--out", type=Path, default=ROOT / "capri_data" / "2017" / "supply" / "plant_protection_cost.csv")
-    ap.add_argument("--dump-2030", type=Path, default=Path("/mnt/user-data/uploads/res_2_1730greendeal_refdefaulta.zip"))
+    ap.add_argument("--dump-2030", type=Path, default=EXPORTS / "res_2_1730greendeal_refdefaulta.zip")
     a = ap.parse_args()
     y30 = yields_2030(a.dump_2030)
     v = defaultdict(dict)            # region -> {(act, item): value}

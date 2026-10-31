@@ -10,6 +10,7 @@ folded into ROW), Norway's supply regions NO01-NO07 out of the EU's market suppl
 Run:  python -m pytest -q -p no:cacheprovider capri_mod/tests/test_norway_market.py
 """
 from pathlib import Path
+import os
 import lzma
 import sys
 import types
@@ -21,6 +22,9 @@ import pandas as pd
 import pytest
 
 ROOT = Path(__file__).resolve().parents[2]
+#: CAPRI's material outside git (tools/lib/paths.py, docs/EXTERNAL_SOURCES.md): a check that needs it is skipped
+#: where it is absent
+SOURCES = Path(os.environ.get("CAPRI_SOURCES") or ROOT / "capri_sources")
 DATA_DIR = ROOT / "capri_data"
 MKT = DATA_DIR / "2017" / "market"
 NO_REGIONS = ["NO020000", "NO060000", "NO070000", "NO080000", "NO090000", "NO0A0000"]
@@ -274,7 +278,7 @@ def test_norway_has_pig_herds_and_per_head_coefficients():
     for t in (pork, mann):
         v = t.to_numpy(dtype=float)
         assert np.isfinite(v).all() and (v > 0).all()
-    dump = Path("/home/claude/work/capreg/res_17NO.txt")
+    dump = SOURCES / "capreg" / "res_17NO.txt"
     if not dump.exists():
         return
     pat = re.compile(r"^'NO000000'\.'(SOWS|PIGF)'\.'(HERD|LEVL|PORK|MANN)'\.'Y'\s+(-?\d[\d.Ee+\-]*)")

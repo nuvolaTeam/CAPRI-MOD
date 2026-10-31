@@ -24,12 +24,14 @@ import json
 import sys
 import tempfile
 from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
+from paths import REFERENCE  # noqa: E402  (CAPRI's material outside the repository)
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build")]
 OUT = ROOT / "capri_data" / "trajectories" / "captrd_2030.json"
-SERIES = Path("/home/claude/work/capri_reference/captrd_results/1770/series.csv.gz")
+SERIES = REFERENCE / "captrd_results/1770/series.csv.gz"
 
 
 def main():

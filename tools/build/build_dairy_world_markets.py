@@ -17,12 +17,14 @@ Output: capri_data/2017/market/dairy_world_baseline.json  {"REGION|COMM": {produ
 imports, exports}} for BUTR, SKIM, CHES, WHEY, FRMI, CREM, COCM, WMIO, CASE (model codes); EU27 is listed for reference only (the
 market takes the EU from the dairy block).
 
-    python tools/build/build_dairy_world_markets.py [--src /mnt/user-data/uploads/fao_agg_17_datamarket.txt]
+    python tools/build/build_dairy_world_markets.py [--src capri_sources/exports/fao_agg_17_datamarket.txt]
 """
 from __future__ import annotations
 import argparse, json, re, sys
 from collections import defaultdict
 from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
+from paths import EXPORTS  # noqa: E402  (CAPRI's material outside the repository)
 
 ROOT = Path(__file__).resolve().parents[2]
 SRC_KEEP = ROOT / "capri_data" / "sources" / "fao_agg_2017" / "fao_agg_dairy_products_bas.csv"
@@ -37,7 +39,7 @@ EU_MS = set(_EU_FROM_DATA)                                  # CAPRI's EU member 
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--src", type=Path, default=Path("/mnt/user-data/uploads/fao_agg_17_datamarket.txt"))
+    ap.add_argument("--src", type=Path, default=EXPORTS / "fao_agg_17_datamarket.txt")
     a = ap.parse_args()
     sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check")]
     from recalibrate_trade_2017 import AGGREGATES, trade_region

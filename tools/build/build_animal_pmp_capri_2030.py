@@ -42,11 +42,13 @@ from pathlib import Path
 import pandas as pd
 
 import functools as _ft
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
+from paths import EXPORTS, SOURCES  # noqa: E402  (CAPRI's material outside the repository)
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 SRC = ROOT / "capri_data" / "sources" / "baseline_pmp" / "pmp_quad_techn_2030.csv"
 OUT = ROOT / "capri_data" / "2017" / "supply" / "pmp_capri_2030_animals.csv"
-REF = Path("/mnt/user-data/uploads/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv")
+REF = EXPORTS / "res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv"
 #: model animal -> members; a tuple is an intensity pair whose split the model carries
 #: tuples: activities the model gives their own levels inside the animal (split columns), whose herd curvature is the
 #: harmonic 1 / sum(1 / q_j) of their terms (the Schur complement for a pair).
@@ -71,7 +73,7 @@ def levels_2017_dumps(acts) -> dict:
     import glob
     out = defaultdict(dict)
     rx = re.compile(r"^'([A-Z]{2}[0-9A-Z]{6})'\.'([A-Z0-9]+)'\.'LEVL'\.'Y'\s+([-\d.Ee+]+)")
-    for f in glob.glob("/home/claude/work/capreg/res_17*.txt"):
+    for f in glob.glob(str(SOURCES / "capreg/res_17*.txt")):
         for line in open(f, errors="ignore"):
             m = rx.match(line)
             if m and m.group(2) in acts and float(m.group(3)) > 0:

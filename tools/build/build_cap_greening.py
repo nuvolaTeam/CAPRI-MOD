@@ -11,7 +11,7 @@ Outputs (capri_data/2017/policy/):
   cap_greening_fleg_ms.csv    legume share of other arable fodder per member state (DATA(MS,"FLEG") = FPEG.LEVL /
                               OFAR.LEVL of the base year, define_greening_limits.gms), from the CAPREG dumps
 
-    python tools/build/build_cap_greening.py [--capreg-dir /home/claude/work/capreg]
+    python tools/build/build_cap_greening.py [--capreg-dir capri_sources/capreg]
 """
 from __future__ import annotations
 
@@ -20,6 +20,9 @@ import re
 from pathlib import Path
 
 import pandas as pd
+import sys  # noqa: E402
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
+from paths import SOURCES  # noqa: E402  (CAPRI's material outside the repository)
 
 ROOT = Path(__file__).resolve().parents[2]
 POL = ROOT / "capri_data" / "2017" / "policy"
@@ -35,7 +38,7 @@ SETTINGS = [
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--capreg-dir", type=Path, default=Path("/home/claude/work/capreg"))
+    ap.add_argument("--capreg-dir", type=Path, default=SOURCES / "capreg")
     a = ap.parse_args()
     POL.mkdir(parents=True, exist_ok=True)
     pd.DataFrame(SETTINGS, columns=["item", "key", "value"]).assign(

@@ -43,11 +43,13 @@ import numpy as np
 import pandas as pd
 
 import functools as _ft
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
+from paths import EXPORTS, SOURCES  # noqa: E402  (CAPRI's material outside the repository)
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 SRC = ROOT / "capri_data" / "sources" / "baseline_pmp"
 OUT = ROOT / "capri_data" / "2017" / "supply" / "pmp_capri_2030.csv"
-REF = Path("/mnt/user-data/uploads/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv")
+REF = EXPORTS / "res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv"
 
 #: CAPRI's EPRD_TO_GRP (gams/sets.gms l. 2918) and group order (storage of p_pmpQuadPact)
 CAPRI_GRP = {"SWHE": "CERE", "DWHE": "CERE", "RYEM": "CERE", "BARL": "CERE", "OATS": "CERE",
@@ -67,7 +69,7 @@ def levels_2017_dumps(acts) -> dict:
     import glob
     out = defaultdict(dict)
     rx = re.compile(r"^'([A-Z]{2}[0-9A-Z]{6})'\.'([A-Z0-9]+)'\.'LEVL'\.'Y'\s+([-\d.Ee+]+)")
-    for f in glob.glob("/home/claude/work/capreg/res_17*.txt"):
+    for f in glob.glob(str(SOURCES / "capreg/res_17*.txt")):
         for line in open(f, errors="ignore"):
             m = rx.match(line)
             if m and m.group(2) in acts and float(m.group(3)) > 0:

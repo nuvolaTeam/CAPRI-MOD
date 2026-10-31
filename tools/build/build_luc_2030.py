@@ -24,6 +24,9 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
+import sys  # noqa: E402
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
+from paths import EXPORTS  # noqa: E402  (CAPRI's material outside the repository)
 
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / "capri_data" / "2017" / "environment" / "luc_2030.csv"
@@ -33,7 +36,7 @@ LT = ("ARAC", "FRUN", "GRAS", "FORE", "OLND", "ARTIF", "INLW", "ARTO")
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--dump", type=Path, default=Path("/mnt/user-data/uploads/res_2_1730greendeal_refdefaulta.zip"))
+    ap.add_argument("--dump", type=Path, default=EXPORTS / "res_2_1730greendeal_refdefaulta.zip")
     a = ap.parse_args()
     trans = [i + j for i in CLS for j in CLS]
     ini = ["INI" + k for k in CLS]

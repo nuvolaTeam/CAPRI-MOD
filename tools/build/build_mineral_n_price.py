@@ -9,7 +9,7 @@ ordered by CAPRI code; where a prefix equals its CAPRI code (EL) the alias (GR) 
 the code is a row (BE and LU for BL, IE for IR). Until 29 October 2026 the file had no builder (the same values
 rounded to 2 decimals).
 
-    python tools/build/build_mineral_n_price.py [dump dir, default /home/claude/work/capreg]
+    python tools/build/build_mineral_n_price.py [dump dir, default capri_sources/capreg]
 """
 from __future__ import annotations
 
@@ -17,6 +17,8 @@ import csv
 import re
 import sys
 from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
+from paths import SOURCES  # noqa: E402  (CAPRI's material outside the repository)
 
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / "capri_data" / "2017" / "supply" / "mineral_n_price.csv"
@@ -46,4 +48,4 @@ def main(dump_dir: Path) -> None:
 
 
 if __name__ == "__main__":
-    main(Path(sys.argv[1]) if len(sys.argv) > 1 else Path("/home/claude/work/capreg"))
+    main(Path(sys.argv[1]) if len(sys.argv) > 1 else SOURCES / "capreg")

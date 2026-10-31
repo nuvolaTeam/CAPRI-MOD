@@ -24,14 +24,17 @@ import os
 import argparse
 import csv
 import gzip
+import sys
 import tempfile
 import zipfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / "capri_reference" / "capreg_tseries" / "17"
-# folder of libgdxcclib64.so (README section 3): --gdxlib or the environment variable CAPRI_GDXLIB
-DEFAULT_GDXLIB = os.environ.get("CAPRI_GDXLIB", "")
+# folder of libgdxcclib64.so (README section 3): --gdxlib, the environment variable CAPRI_GDXLIB or capri_sources/gdxlib
+sys.path.insert(0, str(ROOT / "tools" / "lib"))
+from paths import SOURCES  # noqa: E402  (CAPRI's material outside the repository)
+DEFAULT_GDXLIB = os.environ.get("CAPRI_GDXLIB") or str(SOURCES / "gdxlib")
 
 
 def _read_data(path: Path, gdxlib: str):

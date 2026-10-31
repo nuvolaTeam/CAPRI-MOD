@@ -40,6 +40,9 @@ from collections import defaultdict
 from pathlib import Path
 
 import importlib.util as _ilu
+import sys  # noqa: E402
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
+from paths import SOURCES  # noqa: E402  (CAPRI's material outside the repository)
 _sp_mr = _ilu.spec_from_file_location("_mr", Path(__file__).resolve().parents[2] / "tools" / "lib" / "_model_regions.py")
 _mr = _ilu.module_from_spec(_sp_mr); _sp_mr.loader.exec_module(_mr)
 
@@ -57,7 +60,7 @@ ADACT = {"DCOL": "DAIRY", "DCOH": "DAIRY", "BULL": "NDAIRY", "BULH": "NDAIRY", "
 GAINSACT = {"DCOL": "DL_L", "DCOH": "DL_L", "PIGF": "PL_L", "SOWS": "PL_L"}                           # map_gainsact1
 #: CAPRI's map from its member states to GAINS countries (map_gainsCount, ad_data_and_cali.gms l. 158-187; the Western
 #: Balkans and Turkey take Croatia's, CROA), read from CAPRI's code: member state -> GAINS country
-GMS = Path("/home/claude/work/allgms/gams/envind/ad_data_and_cali.gms")
+GMS = SOURCES / "gams/envind/ad_data_and_cali.gms"
 _sp_gt = _ilu.spec_from_file_location("_gt", Path(__file__).resolve().parents[2] / "tools" / "lib" / "gams_text.py")
 _gt = _ilu.module_from_spec(_sp_gt); _sp_gt.loader.exec_module(_gt)
 GAINSC = {ms: gc for gc, ms in _gt.set_pairs(_gt.read_text(GMS), "map_gainsCount")}

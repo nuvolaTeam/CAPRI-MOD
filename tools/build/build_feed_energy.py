@@ -59,12 +59,14 @@ import re
 import sys
 from collections import defaultdict
 from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
+from paths import EXPORTS  # noqa: E402  (CAPRI's material outside the repository)
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check")]
 from build_noneu_market_supply_nq import EU_RM, UNITS, num, read_param  # noqa: E402
 
-UP = Path("/mnt/user-data/uploads")
+UP = EXPORTS
 DATA = UP / "data_market_1730defaulta.csv"
 CAL = ROOT / "capri_data" / "sources" / "capri_star" / "nutrient_cont_usda_p_nutrientCont.csv"
 OUT = ROOT / "capri_data" / "2017" / "market"

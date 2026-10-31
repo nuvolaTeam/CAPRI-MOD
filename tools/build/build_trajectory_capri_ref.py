@@ -19,6 +19,8 @@ from __future__ import annotations
 import argparse, json, re, statistics, subprocess, sys
 from collections import defaultdict
 from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
+from paths import EXPORTS, SOURCES  # noqa: E402  (CAPRI's material outside the repository)
 
 
 def _read_csv(*a, **k):
@@ -29,7 +31,7 @@ def _read_csv(*a, **k):
 
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / "capri_data" / "trajectories" / "capri_ref_2030.json"
-REF = Path("/mnt/user-data/uploads/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv")
+REF = EXPORTS / "res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv"
 KEEP = ROOT / "capri_data" / "sources" / "capri_baseline" / "capri_ref_levl_yild_2030_2017.csv.xz"
 sys.path.insert(0, str(ROOT / "tools" / "lib"))
 from _model_regions import UNITS  # noqa: E402  (capri_data/shared/regional_units.csv)
@@ -60,7 +62,7 @@ def extract(ref: Path, dump_dir: Path) -> list:
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--ref", type=Path, default=REF)
-    ap.add_argument("--dump-dir", type=Path, default=Path("/home/claude/work/capreg"))
+    ap.add_argument("--dump-dir", type=Path, default=SOURCES / "capreg")
     a = ap.parse_args()
     import pandas as pd
     if a.ref.exists() and a.dump_dir.exists():

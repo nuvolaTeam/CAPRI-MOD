@@ -53,12 +53,15 @@ from pathlib import Path
 import pandas as pd
 
 import functools as _ft
+import sys  # noqa: E402
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
+from paths import EXPORTS, SOURCES  # noqa: E402  (CAPRI's material outside the repository)
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 SRC = ROOT / "capri_data" / "sources" / "baseline_pmp"
-REF = Path("/mnt/user-data/uploads/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv")
-DUMPS = Path("/home/claude/work/capreg")
-PELA = Path("/home/claude/work/up/pmp2030/estnlp_results_PELA.txt")
+REF = EXPORTS / "res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv"
+DUMPS = SOURCES / "capreg"
+PELA = SOURCES / "pmp2030/estnlp_results_PELA.txt"
 P_INFL, EST_YEAR = 1.019, 2004
 #: CAPRI's technology factors of the outputs (intens/techf.gms l. 84-85): T1 yields 20% above the mean, T2 20% below
 TECH_YIELD_FACTOR = {"T1": 0.2, "T2": -0.2}

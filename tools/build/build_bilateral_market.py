@@ -47,12 +47,14 @@ from pathlib import Path
 import pandas as pd
 
 import functools as _ft
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
+from paths import EXPORTS, SOURCES  # noqa: E402  (CAPRI's material outside the repository)
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
-SRC = {2017: Path("/mnt/user-data/uploads/market_base_1717.txt"),
-       2030: Path("/mnt/user-data/uploads/markmarket_greendeal_1730et_base_1717.txt")}
+SRC = {2017: EXPORTS / "market_base_1717.txt",
+       2030: EXPORTS / "markmarket_greendeal_1730et_base_1717.txt"}
 KEEP = ROOT / "capri_data" / "sources" / "market"
-GAMS = Path("/home/claude/work/allgms/gams")
+GAMS = SOURCES / "gams"
 MODEL = {
     "SWHE": ("WHEA",), "BARL": ("BARL",), "CORN": ("MAIZ",), "OCER": ("OCER",), "RYEM": ("RYEM",), "OATS": ("OATS",), "PARI": ("RICE",),
     "RAPE": ("RAPE",), "SUNF": ("SUNF",), "SOYA": ("SOYA",), "SUGR": ("SUGA",), "POTA": ("POTA",),

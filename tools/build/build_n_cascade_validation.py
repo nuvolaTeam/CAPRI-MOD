@@ -3,7 +3,7 @@
 (capri_mod/supply/n_cascade.py; test_n_cascade_reproduces_capri).
 
 Input: the run's result dump in GAMS text form ('REGION'.'KEY'.'COL'.'ROW'.'2030' value), path as the first argument
-(default /mnt/user-data/uploads/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv). Regions: DE110000,
+(default capri_sources/exports/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv). Regions: DE110000,
 NL220000, PL220000, DK000000 (others as further arguments).
 Output: capri_data/validation/n_cascade_capri_gd2030.csv (region, key, col, row, value) with the animal activities'
 MANN and loss rows (NH3/NOX/N2O at grazing, MAN, APP; GASANI, RUNANI), the option shares (key SHARE) and the
@@ -16,6 +16,8 @@ import csv
 import re
 import sys
 from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
+from paths import EXPORTS  # noqa: E402  (CAPRI's material outside the repository)
 
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / "capri_data" / "validation" / "n_cascade_capri_gd2030.csv"
@@ -52,6 +54,6 @@ def main(src, regions):
 
 
 if __name__ == "__main__":
-    src = sys.argv[1] if len(sys.argv) > 1 else "/mnt/user-data/uploads/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv"
+    src = sys.argv[1] if len(sys.argv) > 1 else str(EXPORTS / "res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv")
     regs = sys.argv[2:] or ["DE110000", "NL220000", "PL220000", "DK000000"]
     print(len(main(src, regs)), "rows ->", OUT)

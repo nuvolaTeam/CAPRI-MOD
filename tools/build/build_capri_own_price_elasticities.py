@@ -21,9 +21,12 @@ import zipfile
 from pathlib import Path
 
 import pandas as pd
+import sys  # noqa: E402
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
+from paths import EXPORTS  # noqa: E402  (CAPRI's material outside the repository)
 
 ROOT = Path(__file__).resolve().parents[2]
-SRC = Path("/mnt/user-data/uploads")
+SRC = EXPORTS
 OUT = ROOT / "capri_data" / "2017" / "supply" / "capri_own_price_elasticities.csv"
 NAME = re.compile(r"^supply_elas_2_1720([A-Z]{2})defaulta\.txt$")
 REC = re.compile(r"^'([A-Z]{2})000000'\.'([A-Z0-9]+)'\.'([A-Z0-9]+)'\.'CAL'\s+([^,\s]+)")

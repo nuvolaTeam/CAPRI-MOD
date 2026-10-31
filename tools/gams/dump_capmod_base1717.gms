@@ -1,4 +1,7 @@
 $TITLE CAPRI-Python -- market-side inputs from the 2017 base-year capmod result
+* CAPRI's installation folder is given on the command line (no machine's folder in this file):
+*     gams dump_capmod_base1717.gms --CAPRI=C:\path\to\capri-star3.0
+$if not set CAPRI $abort "Give CAPRI's installation folder: gams dump_capmod_base1717.gms --CAPRI=<folder>"
 $ONTEXT
 
   WHY sim_ini WAS EMPTY
@@ -37,12 +40,12 @@ $ONTEXT
 
 $OFFTEXT
 
-$call 'cmd /c if not exist "C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\capri_export" mkdir "C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\capri_export"'
+$call 'cmd /c if not exist "%CAPRI%\capri_export" mkdir "%CAPRI%\capri_export"'
 
 *--------------------------------------------------------------------------
 * SECTION 1 -- symbol listing of the base-year result. RUN THIS ALONE FIRST.
 *--------------------------------------------------------------------------
-execute 'gdxdump C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\output\results\capmod\res_0_1717cap_after_2014_cal_from_data_caldefaulta.gdx > C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\capri_export\_symbols_base1717.txt';
+execute 'gdxdump %CAPRI%\output\results\capmod\res_0_1717cap_after_2014_cal_from_data_caldefaulta.gdx > %CAPRI%\capri_export\_symbols_base1717.txt';
 
 *--------------------------------------------------------------------------
 * SECTION 2 -- DATAOUT from the base-year result.
@@ -50,7 +53,7 @@ execute 'gdxdump C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\output\resul
 * Uncomment after SECTION 1 confirms the structure. This carries world prices,
 * bilateral trade and the Armington terms, all at the 2017 base year.
 *--------------------------------------------------------------------------
-* execute 'gdxdump C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\output\results\capmod\res_0_1717cap_after_2014_cal_from_data_caldefaulta.gdx symb=DATAOUT output=C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\capri_export\base1717_DATAOUT.txt';
+* execute 'gdxdump %CAPRI%\output\results\capmod\res_0_1717cap_after_2014_cal_from_data_caldefaulta.gdx symb=DATAOUT output=%CAPRI%\capri_export\base1717_DATAOUT.txt';
 
 *--------------------------------------------------------------------------
 * SECTION 3 -- OPTIONAL: re-enable sim_ini for one run.
@@ -66,14 +69,14 @@ execute 'gdxdump C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\output\resul
 * about only arises with simultaneous scenario runs. Restore the asterisk
 * afterwards. The file then appears and these statements will work:
 *--------------------------------------------------------------------------
-* execute 'gdxdump C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\output\results\simini\sim_ini_01717defaulta.gdx symb=p_rhoArm1 output=C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\capri_export\mkt_p_rhoArm1.txt';
-* execute 'gdxdump C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\output\results\simini\sim_ini_01717defaulta.gdx symb=p_rhoArm2 output=C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\capri_export\mkt_p_rhoArm2.txt';
-* execute 'gdxdump C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\output\results\simini\sim_ini_01717defaulta.gdx symb=p_realRhoArm2 output=C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\capri_export\mkt_p_realRhoArm2.txt';
-* execute 'gdxdump C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\output\results\simini\sim_ini_01717defaulta.gdx symb=p_tradeFlows output=C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\capri_export\mkt_p_tradeFlows.txt';
-* execute 'gdxdump C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\output\results\simini\sim_ini_01717defaulta.gdx symb=p_impPrice output=C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\capri_export\mkt_p_impPrice.txt';
-* execute 'gdxdump C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\output\results\simini\sim_ini_01717defaulta.gdx symb=p_elasSupp output=C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\capri_export\mkt_p_elasSupp.txt';
+* execute 'gdxdump %CAPRI%\output\results\simini\sim_ini_01717defaulta.gdx symb=p_rhoArm1 output=%CAPRI%\capri_export\mkt_p_rhoArm1.txt';
+* execute 'gdxdump %CAPRI%\output\results\simini\sim_ini_01717defaulta.gdx symb=p_rhoArm2 output=%CAPRI%\capri_export\mkt_p_rhoArm2.txt';
+* execute 'gdxdump %CAPRI%\output\results\simini\sim_ini_01717defaulta.gdx symb=p_realRhoArm2 output=%CAPRI%\capri_export\mkt_p_realRhoArm2.txt';
+* execute 'gdxdump %CAPRI%\output\results\simini\sim_ini_01717defaulta.gdx symb=p_tradeFlows output=%CAPRI%\capri_export\mkt_p_tradeFlows.txt';
+* execute 'gdxdump %CAPRI%\output\results\simini\sim_ini_01717defaulta.gdx symb=p_impPrice output=%CAPRI%\capri_export\mkt_p_impPrice.txt';
+* execute 'gdxdump %CAPRI%\output\results\simini\sim_ini_01717defaulta.gdx symb=p_elasSupp output=%CAPRI%\capri_export\mkt_p_elasSupp.txt';
 
 *--------------------------------------------------------------------------
 * SECTION 4 -- report
 *--------------------------------------------------------------------------
-execute 'cmd /c dir /b "C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\capri_export" > "C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\capri_export\_produced_market.txt"';
+execute 'cmd /c dir /b "%CAPRI%\capri_export" > "%CAPRI%\capri_export\_produced_market.txt"';

@@ -22,7 +22,7 @@ Sources: CAPRI 2017 results res_17<MS>.txt; capri_data/sources/capreg/pmp_quad_t
 their CAPRI region through tools/lib/_model_regions.py (splits and merges), else the national row.
 Output: capri_data/2017/supply/cattle_intensity.csv (region, animal, ...)
 
-    python tools/build/build_cattle_intensity.py [--dump-dir /home/claude/work/capreg]
+    python tools/build/build_cattle_intensity.py [--dump-dir capri_sources/capreg]
 """
 from __future__ import annotations
 import argparse, glob, importlib.util, re
@@ -32,6 +32,9 @@ from pathlib import Path
 import pandas as pd
 
 import functools as _ft
+import sys  # noqa: E402
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
+from paths import SOURCES  # noqa: E402  (CAPRI's material outside the repository)
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 #: (column suffix, terms per model region): the base year's (CAPREG), CAPRI's 2030 calibration and capri-mod's
@@ -64,7 +67,7 @@ GOODS_USE = {"calves_m": ("ICAM",), "calves_f": ("ICAF",), "young_m": ("IBUL",),
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--dump-dir", type=Path, default=Path("/home/claude/work/capreg"))
+    ap.add_argument("--dump-dir", type=Path, default=SOURCES / "capreg")
     a = ap.parse_args()
     v = defaultdict(dict)
     for f in glob.glob(str(a.dump_dir / "res_17*.txt")):

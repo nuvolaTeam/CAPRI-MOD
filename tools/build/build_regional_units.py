@@ -18,7 +18,7 @@ CAPRI's member state read back through capri_member_state_codes.csv, except BL40
 in CAPRI's member state BL with Belgium. (CAPRI's own prefixes are not used as country keys: IR, Ireland in CAPRI, is
 Iran among ISO country codes.)
 
-    python tools/build/build_regional_units.py [--dump-dir /home/claude/work/capreg]
+    python tools/build/build_regional_units.py [--dump-dir capri_sources/capreg]
 """
 from __future__ import annotations
 

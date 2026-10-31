@@ -43,6 +43,9 @@ import numpy as np
 import pandas as pd
 
 import functools as _ft
+import sys  # noqa: E402
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
+from paths import EXPORTS  # noqa: E402  (CAPRI's material outside the repository)
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 #: CAPRI's region code (market region or trade block of its market data) -> the model's trade region, from the
 #: declared code list capri_data/codes/model_trade_regions.csv (Norway NO000000 -> NOR, KNOWN_ISSUES K56; the
@@ -94,7 +97,7 @@ COMMODITY_MAP = {
     "SUGR": "SUGA", "WINE": "TWIN", "WHEY": "WHEP", "SGMT": "SGMT",
 }
 
-DUMP = Path("/mnt/user-data/uploads/res_0_1717cap_after_2014_cal_from_data_caldefaulta.csv")
+DUMP = EXPORTS / "res_0_1717cap_after_2014_cal_from_data_caldefaulta.csv"
 # RSA is a different CAPRI region from ZAF (South Africa) -> ROW.
 #: the commodities beyond the 2021 matrix's columns: sheep and goat meat, and the oilseed-crushing products (added for
 #: the crushing module). Until 29 October 2026 the builder took SGMT from the columns of its own output (a read of the

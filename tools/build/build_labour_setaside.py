@@ -21,8 +21,8 @@ request).
    collapsed). Columns: share_vset, w_vset (2017: the recipe's 2017 terms, as CAPREG's file has one technology's
    term; _capri2030 / _recipe2030: the 2030 terms), the premiums PRME (EUR/ha) and labour LABT (h/ha) of each.
 
-Sources: CAPRI 2017 results /home/claude/work/capreg/res_17*.txt; CAPRI's 2030 reference
-/mnt/user-data/uploads/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; PMP terms
+Sources: CAPRI 2017 results capri_sources/capreg/res_17*.txt; CAPRI's 2030 reference
+capri_sources/exports/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; PMP terms
 capri_data/sources/capreg/pmp_quad_techn.csv and sources/baseline_pmp/intensity_q_*.csv.
 
     python tools/build/build_labour_setaside.py
@@ -40,10 +40,12 @@ from pathlib import Path
 import pandas as pd
 
 import functools as _ft
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
+from paths import EXPORTS, SOURCES  # noqa: E402  (CAPRI's material outside the repository)
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
-DUMPS = Path("/home/claude/work/capreg")
-REF = Path("/mnt/user-data/uploads/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv")
+DUMPS = SOURCES / "capreg"
+REF = EXPORTS / "res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv"
 ITEMS = ("LEVL", "LABT", "LABF", "LABP", "PRME")
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "lib"))
 import _model_codes as _MC  # noqa: E402  the model's activities and their CAPRI activities (codes/model_activities.csv)

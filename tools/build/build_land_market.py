@@ -15,6 +15,8 @@ import argparse, csv, glob, json, re, sys
 from collections import defaultdict
 from pathlib import Path
 import numpy as np
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
+from paths import EXPORTS, SOURCES  # noqa: E402  (CAPRI's material outside the repository)
 
 
 def _read_csv(*a, **k):
@@ -31,14 +33,14 @@ LT = ["ARAC", "GRAS", "FRUN", "FORE", "OLND", "ARTIF"]
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--dump-dir", type=Path, default=Path("/home/claude/work/capreg"))
-    ap.add_argument("--pmp-dir", type=Path, default=Path("/home/claude/work/landexp/land_export"))
+    ap.add_argument("--dump-dir", type=Path, default=SOURCES / "capreg")
+    ap.add_argument("--pmp-dir", type=Path, default=SOURCES / "land_export")
     ap.add_argument("--year", type=int, choices=(2017, 2030), default=2017,
                     help="2017: CAPRI's base-year calibration (res_17 LEVL, pmppar_17 exports); 2030: its 2030 baseline "
                          "calibration (LEVL of the 2030 reference, pmppar_21730 p_pmpQuadLandTypes, "
                          "capri_data/sources/baseline_pmp/pmp_quad_landtypes_2030.csv)")
     ap.add_argument("--ref", type=Path,
-                    default=Path("/mnt/user-data/uploads/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv"))
+                    default=EXPORTS / "res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv")
     args = ap.parse_args()
     import pandas as pd
     areas = _read_csv(_ROOT / "capri_data" / "2017" / "supply" / "base_areas.csv", index_col=0)

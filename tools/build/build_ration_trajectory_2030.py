@@ -27,6 +27,8 @@ from pathlib import Path
 import pandas as pd
 
 import functools as _ft
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
+from paths import EXPORTS, SOURCES  # noqa: E402  (CAPRI's material outside the repository)
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 import sys as _sys
@@ -34,7 +36,7 @@ _sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "che
 from _model_regions import CTRY as MS_CODE  # noqa: E402  CAPRI member-state codes (capri_member_state_codes.csv)
 OUT = ROOT / "capri_data" / "trajectories" / "capri_ref_ration_2030.csv"
 OUT_FODDER = ROOT / "capri_data" / "trajectories" / "capri_ref_fodder_2030.csv"
-REF = Path("/mnt/user-data/uploads/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv")
+REF = EXPORTS / "res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv"
 ITEMS = ("LEVL", "DAYS", "ENNE", "CRPR", "DRMN", "DRMX", "CH4MAN", "CH4ENT")
 
 
@@ -48,7 +50,7 @@ def _load(name):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--ref", type=Path, default=REF)
-    ap.add_argument("--dump-dir", type=Path, default=Path("/home/claude/work/capreg"))
+    ap.add_argument("--dump-dir", type=Path, default=SOURCES / "capreg")
     a = ap.parse_args()
     fr = _load("build_feed_ration")
     mr = _load("_model_regions")

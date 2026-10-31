@@ -19,9 +19,12 @@ import argparse
 import csv
 import re
 from pathlib import Path
+import sys  # noqa: E402
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
+from paths import SOURCES  # noqa: E402  (CAPRI's material outside the repository)
 
 ROOT = Path(__file__).resolve().parents[2]
-DUMPS = Path("/home/claude/work/inputs/estnlp")
+DUMPS = SOURCES / "estnlp"
 OUT = ROOT / "capri_data" / "2017" / "supply" / "pmp_own_price_elasticities.csv"
 YEAR = "2005"
 REC = re.compile(r"^'([^']+)'\.'([^']+)'\.'([^']+)'\.'(\d{4})'\s+([-\d.Ee+]+)")

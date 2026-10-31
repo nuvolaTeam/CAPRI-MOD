@@ -30,6 +30,8 @@ import subprocess
 import sys
 import tempfile
 from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
+from paths import EXPORTS, SOURCES  # noqa: E402  (CAPRI's material outside the repository)
 
 
 def _read_csv(*a, **k):
@@ -89,8 +91,8 @@ def run(root: Path, dump: str, up: str) -> bool:
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--dump-dir", default="/home/claude/work/capreg")
-    ap.add_argument("--uploads", default="/mnt/user-data/uploads")
+    ap.add_argument("--dump-dir", default=str(SOURCES / "capreg"))
+    ap.add_argument("--uploads", default=str(EXPORTS))
     ap.add_argument("--check", action="store_true")
     a = ap.parse_args()
     if not a.check:

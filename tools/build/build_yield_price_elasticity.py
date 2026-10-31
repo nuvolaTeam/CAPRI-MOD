@@ -17,9 +17,12 @@ import argparse
 import csv
 import re
 from pathlib import Path
+import sys  # noqa: E402
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
+from paths import SOURCES  # noqa: E402  (CAPRI's material outside the repository)
 
 ROOT = Path(__file__).resolve().parents[2]
-GAMS = Path("/home/claude/work/allgms/gams")
+GAMS = SOURCES / "gams"
 OUT = ROOT / "capri_data" / "2017" / "supply" / "yield_price_elasticity.csv"
 
 

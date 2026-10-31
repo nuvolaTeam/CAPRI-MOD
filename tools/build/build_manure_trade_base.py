@@ -16,7 +16,7 @@ Replaces capri_data/2017/environment/manure_trade_2030.csv, which had been writt
 `res_2_1730greendeal_refdefaulta` by CAPRI code: its Romanian and Irish regions (CAPRI's older codes) were missing,
 so 155 kt of CAPRI's net trade (Romania 125, Ireland 30) was not in the model's balances.
 
-    python tools/build/build_manure_trade_base.py [--src /mnt/user-data/uploads/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv]
+    python tools/build/build_manure_trade_base.py [--src capri_sources/exports/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv]
 """
 from __future__ import annotations
 import argparse, importlib.util, re, subprocess, sys
@@ -26,6 +26,8 @@ from pathlib import Path
 import pandas as pd
 
 import functools as _ft
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
+from paths import EXPORTS  # noqa: E402  (CAPRI's material outside the repository)
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 KEEP = ROOT / "capri_data" / "sources" / "environment" / "capri_manure_trade_2030.csv"
@@ -35,7 +37,7 @@ DEST = ROOT / "capri_data" / "2017" / "environment" / "manure_trade_2030.csv"
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--src", type=Path,
-                    default=Path("/mnt/user-data/uploads/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv"))
+                    default=EXPORTS / "res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv")
     a = ap.parse_args()
     if a.src.exists():
         txt = subprocess.run(["grep", "-E", r"^'[A-Z0-9]{8}'\.''\.'(MTRADE|EXCRET)'\.'NITF'\.'2030'", str(a.src)],

@@ -11,13 +11,14 @@ the data against their declarations (capri_data/schema, tools/check/validate_dat
     doit build:build_tariffs_2017   # one builder (and what it needs)
     doit forget; doit         # rerun everything (with the outputs emptied first: the rebuild from blank)
 
-CAPRI's exports and dumps live outside the repository: $UP (CAPRI_UPLOADS, default /mnt/user-data/uploads) and $WORK
-(CAPRI_WORK, default /home/claude/work). A builder whose external source is missing here is reported and not run.
+CAPRI's own material (exports, dumps, source tree) is not in git: tools/pipeline/builders.json names it as $EXPORTS,
+$SOURCES and $REFERENCE, which are capri_sources/exports, capri_sources and capri_reference at the repository root
+(capri_sources may be elsewhere: the environment variable CAPRI_SOURCES; tools/lib/paths.py, docs/EXTERNAL_SOURCES.md).
+A builder whose external source is missing is reported and not run.
 """
 from __future__ import annotations
 
 import json
-import os
 import subprocess
 import sys
 import tempfile
@@ -25,15 +26,18 @@ import zipfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
-UP = os.environ.get("CAPRI_UPLOADS", "/mnt/user-data/uploads")
-WORK = os.environ.get("CAPRI_WORK", "/home/claude/work")
+sys.path.insert(0, str(ROOT / "tools" / "lib"))
+from paths import EXPORTS, REFERENCE, SOURCES  # noqa: E402
 PIPELINE = ROOT / "tools" / "pipeline" / "builders.json"
 
 DOIT_CONFIG = {"check_file_uptodate": "md5", "default_tasks": ["build", "validate"], "verbosity": 1}
 
 
 def _expand(s: str) -> str:
-    return s.replace("$UP", UP).replace("$WORK", WORK)
+    for loc, tok in ((EXPORTS, "$EXPORTS"), (REFERENCE, "$REFERENCE"), (SOURCES, "$SOURCES")):
+        if s == tok or s.startswith(tok + "/"):
+            return str(loc) + s[len(tok):]
+    return s
 
 
 def _tasks():

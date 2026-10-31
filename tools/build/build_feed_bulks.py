@@ -33,7 +33,7 @@ Outputs (capri_data/2017/market/)
   capri_data/2017/feed/feed_cereal_mix_2030.csv  cereal, fedm_kt  (EU27 FCER feed per cereal with a model producer
                             price; replaces a hand-entered table that had rye and oats inside OCER)
 
-    python tools/build/build_feed_bulks.py [--dump /mnt/user-data/uploads/markmarket_greendeal_1730et_base_1717.txt]
+    python tools/build/build_feed_bulks.py [--dump capri_sources/exports/markmarket_greendeal_1730et_base_1717.txt]
 """
 from __future__ import annotations
 
@@ -44,11 +44,13 @@ from pathlib import Path
 import pandas as pd
 
 import functools as _ft
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
+from paths import EXPORTS, SOURCES  # noqa: E402  (CAPRI's material outside the repository)
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 SRC = ROOT / "capri_data" / "sources" / "market" / "feed_bulks_dataout_2030.csv"
 DEST = ROOT / "capri_data" / "2017" / "market"
-GAMS = Path("/home/claude/work/allgms/gams")
+GAMS = SOURCES / "gams"
 BULKS = {"FCER": ("WHEA", "RYEM", "BARL", "OATS", "MAIZ", "OCER", "RICE"),
          "FPRO": ("PULS", "RAPO", "SUNO", "SOYO", "OLIO", "OTHO", "RAPC", "SUNC", "SOYC", "OLIC", "OTHC", "DDGS",
                   "FPRI", "SFIS", "FFIS", "OAQU"),
@@ -124,7 +126,7 @@ def rho_feed_caps(region: str) -> dict:
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--dump", type=Path,
-                    default=Path("/mnt/user-data/uploads/markmarket_greendeal_1730et_base_1717.txt"))
+                    default=EXPORTS / "markmarket_greendeal_1730et_base_1717.txt")
     a = ap.parse_args()
     prods = sorted({p for v in BULKS.values() for p in v} | set(BULKS) | {x for g in GROUPS.values() for x in g})
     if a.dump.exists():

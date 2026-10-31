@@ -1,4 +1,7 @@
 $TITLE CAPRI-Python -- dump animal requirement relations from reqrel_17*.gdx
+* CAPRI's installation folder is given on the command line (no machine's folder in this file):
+*     gams dump_reqrel_explicit.gms --CAPRI=C:\path\to\capri-star3.0
+$if not set CAPRI $abort "Give CAPRI's installation folder: gams dump_reqrel_explicit.gms --CAPRI=<folder>"
 $ONTEXT
 
   Same explicit form as before: one execute statement per file, no loops.
@@ -26,53 +29,53 @@ $ONTEXT
 
 $OFFTEXT
 
-$call 'cmd /c if not exist "C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\capri_export" mkdir "C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\capri_export"'
+$call 'cmd /c if not exist "%CAPRI%\capri_export" mkdir "%CAPRI%\capri_export"'
 
 *--------------------------------------------------------------------------
 * SECTION 1 -- symbol listing (run this first, on its own)
 *--------------------------------------------------------------------------
-execute 'gdxdump C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\output\results\capreg\reqrel_17MT.gdx > C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\capri_export\_symbols_reqrel.txt';
+execute 'gdxdump %CAPRI%\output\results\capreg\reqrel_17MT.gdx > %CAPRI%\capri_export\_symbols_reqrel.txt';
 
 *--------------------------------------------------------------------------
 * SECTION 2 -- p_animReqCorrFac1, one statement per member state
 *--------------------------------------------------------------------------
-execute 'gdxdump C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\output\results\capreg\reqrel_17AL.gdx symb=p_animReqCorrFac1 output=C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\capri_export\animReq_AL.txt';
-execute 'gdxdump C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\output\results\capreg\reqrel_17AT.gdx symb=p_animReqCorrFac1 output=C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\capri_export\animReq_AT.txt';
-execute 'gdxdump C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\output\results\capreg\reqrel_17BA.gdx symb=p_animReqCorrFac1 output=C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\capri_export\animReq_BA.txt';
-execute 'gdxdump C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\output\results\capreg\reqrel_17BG.gdx symb=p_animReqCorrFac1 output=C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\capri_export\animReq_BG.txt';
-execute 'gdxdump C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\output\results\capreg\reqrel_17BL.gdx symb=p_animReqCorrFac1 output=C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\capri_export\animReq_BL.txt';
-execute 'gdxdump C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\output\results\capreg\reqrel_17CS.gdx symb=p_animReqCorrFac1 output=C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\capri_export\animReq_CS.txt';
-execute 'gdxdump C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\output\results\capreg\reqrel_17CY.gdx symb=p_animReqCorrFac1 output=C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\capri_export\animReq_CY.txt';
-execute 'gdxdump C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\output\results\capreg\reqrel_17CZ.gdx symb=p_animReqCorrFac1 output=C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\capri_export\animReq_CZ.txt';
-execute 'gdxdump C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\output\results\capreg\reqrel_17DE.gdx symb=p_animReqCorrFac1 output=C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\capri_export\animReq_DE.txt';
-execute 'gdxdump C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\output\results\capreg\reqrel_17DK.gdx symb=p_animReqCorrFac1 output=C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\capri_export\animReq_DK.txt';
-execute 'gdxdump C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\output\results\capreg\reqrel_17EE.gdx symb=p_animReqCorrFac1 output=C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\capri_export\animReq_EE.txt';
-execute 'gdxdump C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\output\results\capreg\reqrel_17EL.gdx symb=p_animReqCorrFac1 output=C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\capri_export\animReq_EL.txt';
-execute 'gdxdump C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\output\results\capreg\reqrel_17ES.gdx symb=p_animReqCorrFac1 output=C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\capri_export\animReq_ES.txt';
-execute 'gdxdump C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\output\results\capreg\reqrel_17FI.gdx symb=p_animReqCorrFac1 output=C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\capri_export\animReq_FI.txt';
-execute 'gdxdump C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\output\results\capreg\reqrel_17FR.gdx symb=p_animReqCorrFac1 output=C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\capri_export\animReq_FR.txt';
-execute 'gdxdump C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\output\results\capreg\reqrel_17HR.gdx symb=p_animReqCorrFac1 output=C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\capri_export\animReq_HR.txt';
-execute 'gdxdump C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\output\results\capreg\reqrel_17HU.gdx symb=p_animReqCorrFac1 output=C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\capri_export\animReq_HU.txt';
-execute 'gdxdump C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\output\results\capreg\reqrel_17IR.gdx symb=p_animReqCorrFac1 output=C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\capri_export\animReq_IR.txt';
-execute 'gdxdump C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\output\results\capreg\reqrel_17IT.gdx symb=p_animReqCorrFac1 output=C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\capri_export\animReq_IT.txt';
-execute 'gdxdump C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\output\results\capreg\reqrel_17KO.gdx symb=p_animReqCorrFac1 output=C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\capri_export\animReq_KO.txt';
-execute 'gdxdump C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\output\results\capreg\reqrel_17LT.gdx symb=p_animReqCorrFac1 output=C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\capri_export\animReq_LT.txt';
-execute 'gdxdump C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\output\results\capreg\reqrel_17LV.gdx symb=p_animReqCorrFac1 output=C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\capri_export\animReq_LV.txt';
-execute 'gdxdump C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\output\results\capreg\reqrel_17MK.gdx symb=p_animReqCorrFac1 output=C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\capri_export\animReq_MK.txt';
-execute 'gdxdump C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\output\results\capreg\reqrel_17MO.gdx symb=p_animReqCorrFac1 output=C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\capri_export\animReq_MO.txt';
-execute 'gdxdump C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\output\results\capreg\reqrel_17MT.gdx symb=p_animReqCorrFac1 output=C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\capri_export\animReq_MT.txt';
-execute 'gdxdump C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\output\results\capreg\reqrel_17NL.gdx symb=p_animReqCorrFac1 output=C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\capri_export\animReq_NL.txt';
-execute 'gdxdump C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\output\results\capreg\reqrel_17NO.gdx symb=p_animReqCorrFac1 output=C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\capri_export\animReq_NO.txt';
-execute 'gdxdump C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\output\results\capreg\reqrel_17PL.gdx symb=p_animReqCorrFac1 output=C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\capri_export\animReq_PL.txt';
-execute 'gdxdump C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\output\results\capreg\reqrel_17PT.gdx symb=p_animReqCorrFac1 output=C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\capri_export\animReq_PT.txt';
-execute 'gdxdump C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\output\results\capreg\reqrel_17RO.gdx symb=p_animReqCorrFac1 output=C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\capri_export\animReq_RO.txt';
-execute 'gdxdump C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\output\results\capreg\reqrel_17SE.gdx symb=p_animReqCorrFac1 output=C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\capri_export\animReq_SE.txt';
-execute 'gdxdump C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\output\results\capreg\reqrel_17SI.gdx symb=p_animReqCorrFac1 output=C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\capri_export\animReq_SI.txt';
-execute 'gdxdump C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\output\results\capreg\reqrel_17SK.gdx symb=p_animReqCorrFac1 output=C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\capri_export\animReq_SK.txt';
-execute 'gdxdump C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\output\results\capreg\reqrel_17TU.gdx symb=p_animReqCorrFac1 output=C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\capri_export\animReq_TU.txt';
-execute 'gdxdump C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\output\results\capreg\reqrel_17UK.gdx symb=p_animReqCorrFac1 output=C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\capri_export\animReq_UK.txt';
+execute 'gdxdump %CAPRI%\output\results\capreg\reqrel_17AL.gdx symb=p_animReqCorrFac1 output=%CAPRI%\capri_export\animReq_AL.txt';
+execute 'gdxdump %CAPRI%\output\results\capreg\reqrel_17AT.gdx symb=p_animReqCorrFac1 output=%CAPRI%\capri_export\animReq_AT.txt';
+execute 'gdxdump %CAPRI%\output\results\capreg\reqrel_17BA.gdx symb=p_animReqCorrFac1 output=%CAPRI%\capri_export\animReq_BA.txt';
+execute 'gdxdump %CAPRI%\output\results\capreg\reqrel_17BG.gdx symb=p_animReqCorrFac1 output=%CAPRI%\capri_export\animReq_BG.txt';
+execute 'gdxdump %CAPRI%\output\results\capreg\reqrel_17BL.gdx symb=p_animReqCorrFac1 output=%CAPRI%\capri_export\animReq_BL.txt';
+execute 'gdxdump %CAPRI%\output\results\capreg\reqrel_17CS.gdx symb=p_animReqCorrFac1 output=%CAPRI%\capri_export\animReq_CS.txt';
+execute 'gdxdump %CAPRI%\output\results\capreg\reqrel_17CY.gdx symb=p_animReqCorrFac1 output=%CAPRI%\capri_export\animReq_CY.txt';
+execute 'gdxdump %CAPRI%\output\results\capreg\reqrel_17CZ.gdx symb=p_animReqCorrFac1 output=%CAPRI%\capri_export\animReq_CZ.txt';
+execute 'gdxdump %CAPRI%\output\results\capreg\reqrel_17DE.gdx symb=p_animReqCorrFac1 output=%CAPRI%\capri_export\animReq_DE.txt';
+execute 'gdxdump %CAPRI%\output\results\capreg\reqrel_17DK.gdx symb=p_animReqCorrFac1 output=%CAPRI%\capri_export\animReq_DK.txt';
+execute 'gdxdump %CAPRI%\output\results\capreg\reqrel_17EE.gdx symb=p_animReqCorrFac1 output=%CAPRI%\capri_export\animReq_EE.txt';
+execute 'gdxdump %CAPRI%\output\results\capreg\reqrel_17EL.gdx symb=p_animReqCorrFac1 output=%CAPRI%\capri_export\animReq_EL.txt';
+execute 'gdxdump %CAPRI%\output\results\capreg\reqrel_17ES.gdx symb=p_animReqCorrFac1 output=%CAPRI%\capri_export\animReq_ES.txt';
+execute 'gdxdump %CAPRI%\output\results\capreg\reqrel_17FI.gdx symb=p_animReqCorrFac1 output=%CAPRI%\capri_export\animReq_FI.txt';
+execute 'gdxdump %CAPRI%\output\results\capreg\reqrel_17FR.gdx symb=p_animReqCorrFac1 output=%CAPRI%\capri_export\animReq_FR.txt';
+execute 'gdxdump %CAPRI%\output\results\capreg\reqrel_17HR.gdx symb=p_animReqCorrFac1 output=%CAPRI%\capri_export\animReq_HR.txt';
+execute 'gdxdump %CAPRI%\output\results\capreg\reqrel_17HU.gdx symb=p_animReqCorrFac1 output=%CAPRI%\capri_export\animReq_HU.txt';
+execute 'gdxdump %CAPRI%\output\results\capreg\reqrel_17IR.gdx symb=p_animReqCorrFac1 output=%CAPRI%\capri_export\animReq_IR.txt';
+execute 'gdxdump %CAPRI%\output\results\capreg\reqrel_17IT.gdx symb=p_animReqCorrFac1 output=%CAPRI%\capri_export\animReq_IT.txt';
+execute 'gdxdump %CAPRI%\output\results\capreg\reqrel_17KO.gdx symb=p_animReqCorrFac1 output=%CAPRI%\capri_export\animReq_KO.txt';
+execute 'gdxdump %CAPRI%\output\results\capreg\reqrel_17LT.gdx symb=p_animReqCorrFac1 output=%CAPRI%\capri_export\animReq_LT.txt';
+execute 'gdxdump %CAPRI%\output\results\capreg\reqrel_17LV.gdx symb=p_animReqCorrFac1 output=%CAPRI%\capri_export\animReq_LV.txt';
+execute 'gdxdump %CAPRI%\output\results\capreg\reqrel_17MK.gdx symb=p_animReqCorrFac1 output=%CAPRI%\capri_export\animReq_MK.txt';
+execute 'gdxdump %CAPRI%\output\results\capreg\reqrel_17MO.gdx symb=p_animReqCorrFac1 output=%CAPRI%\capri_export\animReq_MO.txt';
+execute 'gdxdump %CAPRI%\output\results\capreg\reqrel_17MT.gdx symb=p_animReqCorrFac1 output=%CAPRI%\capri_export\animReq_MT.txt';
+execute 'gdxdump %CAPRI%\output\results\capreg\reqrel_17NL.gdx symb=p_animReqCorrFac1 output=%CAPRI%\capri_export\animReq_NL.txt';
+execute 'gdxdump %CAPRI%\output\results\capreg\reqrel_17NO.gdx symb=p_animReqCorrFac1 output=%CAPRI%\capri_export\animReq_NO.txt';
+execute 'gdxdump %CAPRI%\output\results\capreg\reqrel_17PL.gdx symb=p_animReqCorrFac1 output=%CAPRI%\capri_export\animReq_PL.txt';
+execute 'gdxdump %CAPRI%\output\results\capreg\reqrel_17PT.gdx symb=p_animReqCorrFac1 output=%CAPRI%\capri_export\animReq_PT.txt';
+execute 'gdxdump %CAPRI%\output\results\capreg\reqrel_17RO.gdx symb=p_animReqCorrFac1 output=%CAPRI%\capri_export\animReq_RO.txt';
+execute 'gdxdump %CAPRI%\output\results\capreg\reqrel_17SE.gdx symb=p_animReqCorrFac1 output=%CAPRI%\capri_export\animReq_SE.txt';
+execute 'gdxdump %CAPRI%\output\results\capreg\reqrel_17SI.gdx symb=p_animReqCorrFac1 output=%CAPRI%\capri_export\animReq_SI.txt';
+execute 'gdxdump %CAPRI%\output\results\capreg\reqrel_17SK.gdx symb=p_animReqCorrFac1 output=%CAPRI%\capri_export\animReq_SK.txt';
+execute 'gdxdump %CAPRI%\output\results\capreg\reqrel_17TU.gdx symb=p_animReqCorrFac1 output=%CAPRI%\capri_export\animReq_TU.txt';
+execute 'gdxdump %CAPRI%\output\results\capreg\reqrel_17UK.gdx symb=p_animReqCorrFac1 output=%CAPRI%\capri_export\animReq_UK.txt';
 
 *--------------------------------------------------------------------------
 * SECTION 3 -- report
 *--------------------------------------------------------------------------
-execute 'cmd /c dir /b "C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\capri_export" > "C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\capri_export\_produced_reqrel.txt"';
+execute 'cmd /c dir /b "%CAPRI%\capri_export" > "%CAPRI%\capri_export\_produced_reqrel.txt"';

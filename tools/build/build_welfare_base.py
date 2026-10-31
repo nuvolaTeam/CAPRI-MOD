@@ -32,12 +32,14 @@ from collections import defaultdict
 from pathlib import Path
 
 import pandas as pd
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
+from paths import EXPORTS  # noqa: E402  (CAPRI's material outside the repository)
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 from capri_mod.csvio import read_csv, to_csv  # noqa: E402
 
-UP = Path("/mnt/user-data/uploads")
+UP = EXPORTS
 ELAS = UP / "elas_2_1730defaulta.csv"
 DATA = UP / "data_market_1730defaulta.csv"
 DUMP = UP / "markmarket_greendeal_1730et_base_1717.txt"

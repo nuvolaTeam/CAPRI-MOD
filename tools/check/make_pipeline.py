@@ -5,10 +5,10 @@ each opens. This script turns that record into one entry per builder invocation:
 
   task      unique task name (the builder, with its arguments where it is invoked more than once)
   builder   tools/build/<builder>.py
-  args      its arguments, CAPRI's uploads and work folders as $UP and $WORK (CAPRI_UPLOADS, CAPRI_WORK)
+  args      its arguments, CAPRI's locations as $EXPORTS, $SOURCES and $REFERENCE (tools/lib/paths.py)
   inputs    the repository files it reads (data under capri_data, settings), its own outputs left out
   code      the Python files of the repository it runs
-  external  the files outside the repository it reads (CAPRI's exports and dumps), as $UP / $WORK paths
+  external  CAPRI's files it reads (exports, dumps, source tree; docs/EXTERNAL_SOURCES.md), as such paths
   outputs   the repository files it writes
 
 and stops where the declaration could not be a pipeline: a file with two writers, or a cycle (a builder depending,
@@ -22,7 +22,6 @@ from __future__ import annotations
 import argparse
 import collections
 import json
-import os
 import subprocess
 import sys
 import tempfile
@@ -30,16 +29,12 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / "tools" / "pipeline" / "builders.json"
-UP = os.environ.get("CAPRI_UPLOADS", "/mnt/user-data/uploads")
-WORK = os.environ.get("CAPRI_WORK", "/home/claude/work")
+sys.path.insert(0, str(ROOT / "tools" / "check"))
+from reproduce_builders import placeholder  # noqa: E402  ($EXPORTS, $SOURCES, $REFERENCE)
 #: the repository's git store: a builder reading the repository's history (convert_sources_to_csv, git show) reads it;
 #: those objects are the repository, not an external source
 GIT_DIR = subprocess.run(["git", "rev-parse", "--path-format=absolute", "--git-common-dir"], cwd=ROOT,
                          capture_output=True, text=True).stdout.strip()
-
-
-def placeholder(p: str) -> str:
-    return p.replace(UP, "$UP").replace(WORK, "$WORK")
 
 
 def build(trace: dict) -> tuple[list, list]:
@@ -49,7 +44,7 @@ def build(trace: dict) -> tuple[list, list]:
         parts = key.split()
         builder, args = parts[0], parts[1:]
         name = builder if names[builder] == 1 else builder + ":" + "_".join(
-            a.replace("$UP/", "").replace("$WORK/", "").replace("/", ".").lstrip("-") for a in args)[:80]
+            a.replace("$EXPORTS/", "").replace("$SOURCES/", "").replace("$REFERENCE/", "").replace("/", ".").lstrip("-") for a in args)[:80]
         outs = sorted(set(d["writes"]) | set(d["rewrites"]))
         ins = sorted(set(d["reads"]) - set(outs))
         # a builder's own temporary files (tempfile) are not sources

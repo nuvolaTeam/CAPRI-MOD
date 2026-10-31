@@ -21,7 +21,7 @@ Written (capri_data/2017/environment/):
                           the option, weighted over the animal's sub-activities as in ammonia_tech_model.csv
                           (weight x manure N); combined options take their cover's effect
 
-    python tools/build/build_manure_n2o.py [--dump-dir /home/claude/work/capreg]
+    python tools/build/build_manure_n2o.py [--dump-dir capri_sources/capreg]
 """
 from __future__ import annotations
 import argparse, glob, importlib.util, json, re
@@ -31,6 +31,9 @@ from pathlib import Path
 import pandas as pd
 
 import functools as _ft
+import sys  # noqa: E402
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
+from paths import SOURCES  # noqa: E402  (CAPRI's material outside the repository)
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 ITEMS = ("LEVL", "MANN", "N2OMAN", "N2OAPP", "N2OGRA", "N2OLEA")
@@ -52,7 +55,7 @@ def _load(path):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--dump-dir", type=Path, default=Path("/home/claude/work/capreg"))
+    ap.add_argument("--dump-dir", type=Path, default=SOURCES / "capreg")
     a = ap.parse_args()
     c2m = _load(ROOT / "tools" / "build" / "build_livestock_output_coef.py").CAPRI_TO_MODEL
     v = defaultdict(lambda: defaultdict(dict))

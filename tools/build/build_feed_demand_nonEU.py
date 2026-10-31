@@ -38,6 +38,8 @@ from pathlib import Path
 import pandas as pd
 
 import functools as _ft
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
+from paths import EXPORTS  # noqa: E402  (CAPRI's material outside the repository)
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 KEEP_E = ROOT / "capri_data" / "sources" / "market" / "feed_demand_nonEU_elas_2030.csv"
@@ -51,8 +53,8 @@ EU = set(_EU_FROM_DATA)                                  # CAPRI's EU member sta
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--elas", type=Path, default=Path("/mnt/user-data/uploads/elas_2_1730defaulta.csv"))
-    ap.add_argument("--data", type=Path, default=Path("/mnt/user-data/uploads/data_market_1730defaulta.csv"))
+    ap.add_argument("--elas", type=Path, default=EXPORTS / "elas_2_1730defaulta.csv")
+    ap.add_argument("--data", type=Path, default=EXPORTS / "data_market_1730defaulta.csv")
     a = ap.parse_args()
     sys.path.insert(0, str(ROOT)); sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check")]
     from capri_mod.data.definitions import ALL_TRADE_REGIONS

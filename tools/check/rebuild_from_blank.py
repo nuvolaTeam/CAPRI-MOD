@@ -16,15 +16,14 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
 import subprocess
 import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 PIPELINE = ROOT / "tools" / "pipeline" / "builders.json"
-UP = os.environ.get("CAPRI_UPLOADS", "/mnt/user-data/uploads")
-WORK = os.environ.get("CAPRI_WORK", "/home/claude/work")
+sys.path.insert(0, str(ROOT / "tools" / "check"))
+from reproduce_builders import expand  # noqa: E402  ($EXPORTS, $SOURCES, $REFERENCE: tools/lib/paths.py)
 
 
 def git(*a):
@@ -38,7 +37,7 @@ def main():
     if git("status", "--porcelain", "--untracked-files=no").strip():
         sys.exit("the working tree has changes: run on a clean checkout")
     tasks = json.loads(PIPELINE.read_text())["tasks"]
-    exp = lambda x: x.replace("$UP", UP).replace("$WORK", WORK)  # noqa: E731
+    exp = expand
     runnable = [t for t in tasks
                 if all(Path(exp(x)).exists() for x in t["external"] + [a[6:] for a in t["args"] if a.startswith("unzip:")])]
     skipped = [t["task"] for t in tasks if t not in runnable]

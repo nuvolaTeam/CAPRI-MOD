@@ -16,7 +16,7 @@ Output: capri_data/2017/supply/crop_cost_shares.csv (crop, fert_cost_share). Set
 is 1). Until 29 October 2026 the builder skipped set-aside and kept the file's row as it was (a read of its own output;
 the value, 1.0, is the same).
 
-    python tools/build/build_crop_cost_shares.py [--dump-dir /home/claude/work/capreg] [--out FILE]
+    python tools/build/build_crop_cost_shares.py [--dump-dir capri_sources/capreg] [--out FILE]
 """
 from __future__ import annotations
 
@@ -30,6 +30,8 @@ import pandas as pd
 import functools as _ft
 
 import importlib.util as _ilu
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
+from paths import SOURCES  # noqa: E402  (CAPRI's material outside the repository)
 _sp_mr = _ilu.spec_from_file_location("_mr", Path(__file__).resolve().parents[2] / "tools" / "lib" / "_model_regions.py")
 _mr = _ilu.module_from_spec(_sp_mr); _sp_mr.loader.exec_module(_mr)
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
@@ -43,7 +45,7 @@ EU27 = set(_EU_FROM_DATA)                                  # CAPRI's EU member s
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--dump-dir", type=Path, default=Path("/home/claude/work/capreg"))
+    ap.add_argument("--dump-dir", type=Path, default=SOURCES / "capreg")
     ap.add_argument("--out", type=Path, default=DEST)
     a = ap.parse_args()
     v = defaultdict(dict)

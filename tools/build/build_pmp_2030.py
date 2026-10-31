@@ -30,6 +30,9 @@ PMP_CAPRI_2030.md) and they were removed, the project lead's decision (KNOWN_ISS
 from __future__ import annotations
 import argparse, csv, re
 from pathlib import Path
+import sys  # noqa: E402
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
+from paths import SOURCES  # noqa: E402  (CAPRI's material outside the repository)
 
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / "capri_data" / "sources" / "baseline_pmp"
@@ -81,7 +84,7 @@ def records(path: Path, symbol: str, field: str = None):
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--dir", type=Path, default=Path("/home/claude/work/up/pmp2030"))
+    ap.add_argument("--dir", type=Path, default=SOURCES / "pmp2030")
     a = ap.parse_args()
     OUT.mkdir(parents=True, exist_ok=True)
     files = sorted(a.dir.glob("pmppar_21730*.txt"))

@@ -14,7 +14,7 @@ where the group has no regional CAPRI rows. Activities map as in tools/build/bui
 Source: CAPRI's 2017 results res_17<MS> (LEVL); the model's herds as loaded (animal_numbers.csv, poultry in thousand head).
 Output: capri_data/2017/supply/capri_level_ratio.csv (region x animal)
 
-    python tools/build/build_capri_level_ratio.py [--dump-dir /home/claude/work/capreg]
+    python tools/build/build_capri_level_ratio.py [--dump-dir capri_sources/capreg]
 """
 from __future__ import annotations
 import argparse, glob, importlib.util, re, sys
@@ -22,13 +22,15 @@ from collections import defaultdict
 from pathlib import Path
 
 import pandas as pd
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
+from paths import SOURCES  # noqa: E402  (CAPRI's material outside the repository)
 
 ROOT = Path(__file__).resolve().parents[2]
 
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--dump-dir", type=Path, default=Path("/home/claude/work/capreg"))
+    ap.add_argument("--dump-dir", type=Path, default=SOURCES / "capreg")
     a = ap.parse_args()
     sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check")]
     from build_livestock_output_coef import CAPRI_TO_MODEL

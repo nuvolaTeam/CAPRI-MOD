@@ -14,8 +14,9 @@ For every CSV under capri_data (archive/ left out) one row of the table provenan
             Eurostat, FAO, EC, unsourced; a source file's own row may name where CAPRI took it from, as "USDA via
             CAPRI")
   builder   the builder that writes it (tools/build/<builder>.py; several invocations: the task names)
-  sources   the files outside the repository its builder chain reads ($UP: the project lead's uploads, $WORK: the work
-            folder of CAPRI's dumps), runs of numbered files collapsed (res_17<CC>.txt)
+  sources   the files of CAPRI's material its builder chain reads, outside git ($EXPORTS: CAPRI's exports as delivered,
+            $SOURCES: CAPRI's unpacked dumps and source tree, $REFERENCE: capri_reference; tools/lib/paths.py,
+            docs/EXTERNAL_SOURCES.md), runs of numbered files collapsed (res_17<CC>.txt)
 
 The trace is tools/pipeline/builders.json (tools/check/make_pipeline.py). Files written by no traced builder are
 looked up in DECLARED, SOURCE_ORIGIN, UNTRACED and NO_BUILDER_ORIGIN below; the rest are "no-builder".

@@ -5,14 +5,14 @@
    "task": "build_active_technologies",
    "builder": "build_active_technologies",
    "args": [
-    "$WORK/allgms/gams/pol_input/greendeal/refpol_endotech_all_sup.gms"
+    "$SOURCES/gams/pol_input/greendeal/refpol_endotech_all_sup.gms"
    ],
    "inputs": [],
    "code": [
     "tools/build/build_active_technologies.py"
    ],
    "external": [
-    "$WORK/allgms/gams/pol_input/greendeal/refpol_endotech_all_sup.gms"
+    "$SOURCES/gams/pol_input/greendeal/refpol_endotech_all_sup.gms"
    ],
    "outputs": [
     "capri_data/2017/abatement/active_technologies.csv"
@@ -45,7 +45,7 @@
     "tools/lib/gams_text.py"
    ],
    "external": [
-    "$WORK/allgms/gams/envind/ad_data_and_cali.gms"
+    "$SOURCES/gams/envind/ad_data_and_cali.gms"
    ],
    "outputs": [
     "capri_data/2017/abatement/ammonia/ad_option.csv"
@@ -84,14 +84,14 @@
    "task": "build_ammonia_cost_tables",
    "builder": "build_ammonia_cost_tables",
    "args": [
-    "$WORK/allgms/gams/envind/ammo_tech.gms"
+    "$SOURCES/gams/envind/ammo_tech.gms"
    ],
    "inputs": [],
    "code": [
     "tools/build/build_ammonia_cost_tables.py"
    ],
    "external": [
-    "$WORK/allgms/gams/envind/ammo_tech.gms"
+    "$SOURCES/gams/envind/ammo_tech.gms"
    ],
    "outputs": [
     "capri_data/2017/abatement/ammonia/costs/p_addDemand.csv",
@@ -110,16 +110,16 @@
    "task": "build_ammonia_herd_inputs",
    "builder": "build_ammonia_herd_inputs",
    "args": [
-    "$UP/scen.zip",
-    "$UP/gd_full.zip"
+    "$EXPORTS/scen.zip",
+    "$EXPORTS/gd_full.zip"
    ],
    "inputs": [],
    "code": [
     "tools/build/build_ammonia_herd_inputs.py"
    ],
    "external": [
-    "$UP/gd_full.zip",
-    "$UP/scen.zip"
+    "$EXPORTS/gd_full.zip",
+    "$EXPORTS/scen.zip"
    ],
    "outputs": [
     "capri_data/2017/abatement/ammonia/capri_mann_days_2030.csv",
@@ -130,24 +130,24 @@
    "task": "build_ammonia_tech_inputs",
    "builder": "build_ammonia_tech_inputs",
    "args": [
-    "$UP/LitRev_non_changeable_parameters.csv",
-    "$UP/LitRev_inputs.csv",
-    "$UP/LitRev_input_manStor.csv",
-    "$UP/LitRevAmmoTech.csv",
-    "$UP/holdingsLSU.csv",
-    "$UP/nvzShare_LU.csv"
+    "$EXPORTS/LitRev_non_changeable_parameters.csv",
+    "$EXPORTS/LitRev_inputs.csv",
+    "$EXPORTS/LitRev_input_manStor.csv",
+    "$EXPORTS/LitRevAmmoTech.csv",
+    "$EXPORTS/holdingsLSU.csv",
+    "$EXPORTS/nvzShare_LU.csv"
    ],
    "inputs": [],
    "code": [
     "tools/build/build_ammonia_tech_inputs.py"
    ],
    "external": [
-    "$UP/LitRevAmmoTech.csv",
-    "$UP/LitRev_input_manStor.csv",
-    "$UP/LitRev_inputs.csv",
-    "$UP/LitRev_non_changeable_parameters.csv",
-    "$UP/holdingsLSU.csv",
-    "$UP/nvzShare_LU.csv"
+    "$EXPORTS/LitRevAmmoTech.csv",
+    "$EXPORTS/LitRev_input_manStor.csv",
+    "$EXPORTS/LitRev_inputs.csv",
+    "$EXPORTS/LitRev_non_changeable_parameters.csv",
+    "$EXPORTS/holdingsLSU.csv",
+    "$EXPORTS/nvzShare_LU.csv"
    ],
    "outputs": [
     "capri_data/2017/abatement/ammonia/ControlStrategies.csv",
@@ -258,7 +258,7 @@
     "tools/lib/_money.py"
    ],
    "external": [
-    "$UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv"
+    "$EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv"
    ],
    "outputs": [
     "capri_data/2017/supply/pmp_capri_2030_animals.csv"
@@ -284,7 +284,7 @@
     "tools/lib/_money.py"
    ],
    "external": [
-    "$UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv"
+    "$EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv"
    ],
    "outputs": [
     "capri_data/2017/supply/pmp_capri_2030_animals_members.csv"
@@ -314,33 +314,33 @@
     "tools/lib/_money.py"
    ],
    "external": [
-    "$WORK/capreg/res_17AT.txt",
-    "$WORK/capreg/res_17BG.txt",
-    "$WORK/capreg/res_17BL.txt",
-    "$WORK/capreg/res_17CY.txt",
-    "$WORK/capreg/res_17CZ.txt",
-    "$WORK/capreg/res_17DE.txt",
-    "$WORK/capreg/res_17DK.txt",
-    "$WORK/capreg/res_17EE.txt",
-    "$WORK/capreg/res_17EL.txt",
-    "$WORK/capreg/res_17ES.txt",
-    "$WORK/capreg/res_17FI.txt",
-    "$WORK/capreg/res_17FR.txt",
-    "$WORK/capreg/res_17HR.txt",
-    "$WORK/capreg/res_17HU.txt",
-    "$WORK/capreg/res_17IR.txt",
-    "$WORK/capreg/res_17IT.txt",
-    "$WORK/capreg/res_17LT.txt",
-    "$WORK/capreg/res_17LV.txt",
-    "$WORK/capreg/res_17MT.txt",
-    "$WORK/capreg/res_17NL.txt",
-    "$WORK/capreg/res_17NO.txt",
-    "$WORK/capreg/res_17PL.txt",
-    "$WORK/capreg/res_17PT.txt",
-    "$WORK/capreg/res_17RO.txt",
-    "$WORK/capreg/res_17SE.txt",
-    "$WORK/capreg/res_17SI.txt",
-    "$WORK/capreg/res_17SK.txt"
+    "$SOURCES/capreg/res_17AT.txt",
+    "$SOURCES/capreg/res_17BG.txt",
+    "$SOURCES/capreg/res_17BL.txt",
+    "$SOURCES/capreg/res_17CY.txt",
+    "$SOURCES/capreg/res_17CZ.txt",
+    "$SOURCES/capreg/res_17DE.txt",
+    "$SOURCES/capreg/res_17DK.txt",
+    "$SOURCES/capreg/res_17EE.txt",
+    "$SOURCES/capreg/res_17EL.txt",
+    "$SOURCES/capreg/res_17ES.txt",
+    "$SOURCES/capreg/res_17FI.txt",
+    "$SOURCES/capreg/res_17FR.txt",
+    "$SOURCES/capreg/res_17HR.txt",
+    "$SOURCES/capreg/res_17HU.txt",
+    "$SOURCES/capreg/res_17IR.txt",
+    "$SOURCES/capreg/res_17IT.txt",
+    "$SOURCES/capreg/res_17LT.txt",
+    "$SOURCES/capreg/res_17LV.txt",
+    "$SOURCES/capreg/res_17MT.txt",
+    "$SOURCES/capreg/res_17NL.txt",
+    "$SOURCES/capreg/res_17NO.txt",
+    "$SOURCES/capreg/res_17PL.txt",
+    "$SOURCES/capreg/res_17PT.txt",
+    "$SOURCES/capreg/res_17RO.txt",
+    "$SOURCES/capreg/res_17SE.txt",
+    "$SOURCES/capreg/res_17SI.txt",
+    "$SOURCES/capreg/res_17SK.txt"
    ],
    "outputs": [
     "capri_data/2017/supply/pmp_recipe_2017_animals.csv"
@@ -371,33 +371,33 @@
     "tools/lib/_money.py"
    ],
    "external": [
-    "$WORK/capreg/res_17AT.txt",
-    "$WORK/capreg/res_17BG.txt",
-    "$WORK/capreg/res_17BL.txt",
-    "$WORK/capreg/res_17CY.txt",
-    "$WORK/capreg/res_17CZ.txt",
-    "$WORK/capreg/res_17DE.txt",
-    "$WORK/capreg/res_17DK.txt",
-    "$WORK/capreg/res_17EE.txt",
-    "$WORK/capreg/res_17EL.txt",
-    "$WORK/capreg/res_17ES.txt",
-    "$WORK/capreg/res_17FI.txt",
-    "$WORK/capreg/res_17FR.txt",
-    "$WORK/capreg/res_17HR.txt",
-    "$WORK/capreg/res_17HU.txt",
-    "$WORK/capreg/res_17IR.txt",
-    "$WORK/capreg/res_17IT.txt",
-    "$WORK/capreg/res_17LT.txt",
-    "$WORK/capreg/res_17LV.txt",
-    "$WORK/capreg/res_17MT.txt",
-    "$WORK/capreg/res_17NL.txt",
-    "$WORK/capreg/res_17NO.txt",
-    "$WORK/capreg/res_17PL.txt",
-    "$WORK/capreg/res_17PT.txt",
-    "$WORK/capreg/res_17RO.txt",
-    "$WORK/capreg/res_17SE.txt",
-    "$WORK/capreg/res_17SI.txt",
-    "$WORK/capreg/res_17SK.txt"
+    "$SOURCES/capreg/res_17AT.txt",
+    "$SOURCES/capreg/res_17BG.txt",
+    "$SOURCES/capreg/res_17BL.txt",
+    "$SOURCES/capreg/res_17CY.txt",
+    "$SOURCES/capreg/res_17CZ.txt",
+    "$SOURCES/capreg/res_17DE.txt",
+    "$SOURCES/capreg/res_17DK.txt",
+    "$SOURCES/capreg/res_17EE.txt",
+    "$SOURCES/capreg/res_17EL.txt",
+    "$SOURCES/capreg/res_17ES.txt",
+    "$SOURCES/capreg/res_17FI.txt",
+    "$SOURCES/capreg/res_17FR.txt",
+    "$SOURCES/capreg/res_17HR.txt",
+    "$SOURCES/capreg/res_17HU.txt",
+    "$SOURCES/capreg/res_17IR.txt",
+    "$SOURCES/capreg/res_17IT.txt",
+    "$SOURCES/capreg/res_17LT.txt",
+    "$SOURCES/capreg/res_17LV.txt",
+    "$SOURCES/capreg/res_17MT.txt",
+    "$SOURCES/capreg/res_17NL.txt",
+    "$SOURCES/capreg/res_17NO.txt",
+    "$SOURCES/capreg/res_17PL.txt",
+    "$SOURCES/capreg/res_17PT.txt",
+    "$SOURCES/capreg/res_17RO.txt",
+    "$SOURCES/capreg/res_17SE.txt",
+    "$SOURCES/capreg/res_17SI.txt",
+    "$SOURCES/capreg/res_17SK.txt"
    ],
    "outputs": [
     "capri_data/2017/supply/pmp_recipe_2017_animals_members.csv"
@@ -428,7 +428,7 @@
     "tools/lib/_money.py"
    ],
    "external": [
-    "$UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv"
+    "$EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv"
    ],
    "outputs": [
     "capri_data/2017/supply/pmp_recipe_2030_animals.csv"
@@ -460,7 +460,7 @@
     "tools/lib/_money.py"
    ],
    "external": [
-    "$UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv"
+    "$EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv"
    ],
    "outputs": [
     "capri_data/2017/supply/pmp_recipe_2030_animals_members.csv"
@@ -478,9 +478,9 @@
     "tools/build/recalibrate_trade_2017.py"
    ],
    "external": [
-    "$UP/market_base_1717.txt",
-    "$UP/markmarket_greendeal_1730et_base_1717.txt",
-    "$WORK/allgms/gams/special_ch/market1_ch.gms"
+    "$EXPORTS/market_base_1717.txt",
+    "$EXPORTS/markmarket_greendeal_1730et_base_1717.txt",
+    "$SOURCES/gams/special_ch/market1_ch.gms"
    ],
    "outputs": [
     "capri_data/2017/market/armington_rho.csv",
@@ -510,8 +510,8 @@
     "tools/build/recalibrate_trade_2017.py"
    ],
    "external": [
-    "$UP/market_base_1717.txt",
-    "$UP/markmarket_greendeal_1730et_base_1717.txt"
+    "$EXPORTS/market_base_1717.txt",
+    "$EXPORTS/markmarket_greendeal_1730et_base_1717.txt"
    ],
    "outputs": [
     "capri_data/2017/market/bilateral_flows_2017_eu2.csv",
@@ -529,9 +529,9 @@
     "--year",
     "2017",
     "--dump",
-    "$UP/market_base_1717.txt",
+    "$EXPORTS/market_base_1717.txt",
     "--elas",
-    "$UP/elas_2_1717defaulta.csv"
+    "$EXPORTS/elas_2_1717defaulta.csv"
    ],
    "inputs": [
     "capri_data/codes/model_trade_regions.csv",
@@ -546,8 +546,8 @@
     "tools/lib/_model_regions.py"
    ],
    "external": [
-    "$UP/elas_2_1717defaulta.csv",
-    "$UP/market_base_1717.txt"
+    "$EXPORTS/elas_2_1717defaulta.csv",
+    "$EXPORTS/market_base_1717.txt"
    ],
    "outputs": [
     "capri_data/2017/market/biofuel_feedstock_2017.csv",
@@ -564,9 +564,9 @@
     "--year",
     "2030",
     "--dump",
-    "$UP/markmarket_greendeal_1730et_base_1717.txt",
+    "$EXPORTS/markmarket_greendeal_1730et_base_1717.txt",
     "--elas",
-    "$UP/elas_2_1730defaulta.csv"
+    "$EXPORTS/elas_2_1730defaulta.csv"
    ],
    "inputs": [
     "capri_data/codes/model_trade_regions.csv",
@@ -581,8 +581,8 @@
     "tools/lib/_model_regions.py"
    ],
    "external": [
-    "$UP/elas_2_1730defaulta.csv",
-    "$UP/markmarket_greendeal_1730et_base_1717.txt"
+    "$EXPORTS/elas_2_1730defaulta.csv",
+    "$EXPORTS/markmarket_greendeal_1730et_base_1717.txt"
    ],
    "outputs": [
     "capri_data/2017/market/biofuel_feedstock_2030.csv",
@@ -610,7 +610,7 @@
     "tools/lib/_money.py"
    ],
    "external": [
-    "$UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv"
+    "$EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv"
    ],
    "outputs": [
     "capri_data/2017/policy/cap_ceilings_2030.csv",
@@ -626,33 +626,33 @@
     "tools/build/build_cap_greening.py"
    ],
    "external": [
-    "$WORK/capreg/res_17AT.txt",
-    "$WORK/capreg/res_17BG.txt",
-    "$WORK/capreg/res_17BL.txt",
-    "$WORK/capreg/res_17CY.txt",
-    "$WORK/capreg/res_17CZ.txt",
-    "$WORK/capreg/res_17DE.txt",
-    "$WORK/capreg/res_17DK.txt",
-    "$WORK/capreg/res_17EE.txt",
-    "$WORK/capreg/res_17EL.txt",
-    "$WORK/capreg/res_17ES.txt",
-    "$WORK/capreg/res_17FI.txt",
-    "$WORK/capreg/res_17FR.txt",
-    "$WORK/capreg/res_17HR.txt",
-    "$WORK/capreg/res_17HU.txt",
-    "$WORK/capreg/res_17IR.txt",
-    "$WORK/capreg/res_17IT.txt",
-    "$WORK/capreg/res_17LT.txt",
-    "$WORK/capreg/res_17LV.txt",
-    "$WORK/capreg/res_17MT.txt",
-    "$WORK/capreg/res_17NL.txt",
-    "$WORK/capreg/res_17NO.txt",
-    "$WORK/capreg/res_17PL.txt",
-    "$WORK/capreg/res_17PT.txt",
-    "$WORK/capreg/res_17RO.txt",
-    "$WORK/capreg/res_17SE.txt",
-    "$WORK/capreg/res_17SI.txt",
-    "$WORK/capreg/res_17SK.txt"
+    "$SOURCES/capreg/res_17AT.txt",
+    "$SOURCES/capreg/res_17BG.txt",
+    "$SOURCES/capreg/res_17BL.txt",
+    "$SOURCES/capreg/res_17CY.txt",
+    "$SOURCES/capreg/res_17CZ.txt",
+    "$SOURCES/capreg/res_17DE.txt",
+    "$SOURCES/capreg/res_17DK.txt",
+    "$SOURCES/capreg/res_17EE.txt",
+    "$SOURCES/capreg/res_17EL.txt",
+    "$SOURCES/capreg/res_17ES.txt",
+    "$SOURCES/capreg/res_17FI.txt",
+    "$SOURCES/capreg/res_17FR.txt",
+    "$SOURCES/capreg/res_17HR.txt",
+    "$SOURCES/capreg/res_17HU.txt",
+    "$SOURCES/capreg/res_17IR.txt",
+    "$SOURCES/capreg/res_17IT.txt",
+    "$SOURCES/capreg/res_17LT.txt",
+    "$SOURCES/capreg/res_17LV.txt",
+    "$SOURCES/capreg/res_17MT.txt",
+    "$SOURCES/capreg/res_17NL.txt",
+    "$SOURCES/capreg/res_17NO.txt",
+    "$SOURCES/capreg/res_17PL.txt",
+    "$SOURCES/capreg/res_17PT.txt",
+    "$SOURCES/capreg/res_17RO.txt",
+    "$SOURCES/capreg/res_17SE.txt",
+    "$SOURCES/capreg/res_17SI.txt",
+    "$SOURCES/capreg/res_17SK.txt"
    ],
    "outputs": [
     "capri_data/2017/policy/cap_greening_2013_2020.csv",
@@ -663,7 +663,7 @@
    "task": "build_capreg_national_prices",
    "builder": "build_capreg_national_prices",
    "args": [
-    "$WORK/capreg"
+    "$SOURCES/capreg"
    ],
    "inputs": [],
    "code": [
@@ -671,33 +671,33 @@
     "tools/build/build_capri_base.py"
    ],
    "external": [
-    "$WORK/capreg/res_17AT.txt",
-    "$WORK/capreg/res_17BG.txt",
-    "$WORK/capreg/res_17BL.txt",
-    "$WORK/capreg/res_17CY.txt",
-    "$WORK/capreg/res_17CZ.txt",
-    "$WORK/capreg/res_17DE.txt",
-    "$WORK/capreg/res_17DK.txt",
-    "$WORK/capreg/res_17EE.txt",
-    "$WORK/capreg/res_17EL.txt",
-    "$WORK/capreg/res_17ES.txt",
-    "$WORK/capreg/res_17FI.txt",
-    "$WORK/capreg/res_17FR.txt",
-    "$WORK/capreg/res_17HR.txt",
-    "$WORK/capreg/res_17HU.txt",
-    "$WORK/capreg/res_17IR.txt",
-    "$WORK/capreg/res_17IT.txt",
-    "$WORK/capreg/res_17LT.txt",
-    "$WORK/capreg/res_17LV.txt",
-    "$WORK/capreg/res_17MT.txt",
-    "$WORK/capreg/res_17NL.txt",
-    "$WORK/capreg/res_17NO.txt",
-    "$WORK/capreg/res_17PL.txt",
-    "$WORK/capreg/res_17PT.txt",
-    "$WORK/capreg/res_17RO.txt",
-    "$WORK/capreg/res_17SE.txt",
-    "$WORK/capreg/res_17SI.txt",
-    "$WORK/capreg/res_17SK.txt"
+    "$SOURCES/capreg/res_17AT.txt",
+    "$SOURCES/capreg/res_17BG.txt",
+    "$SOURCES/capreg/res_17BL.txt",
+    "$SOURCES/capreg/res_17CY.txt",
+    "$SOURCES/capreg/res_17CZ.txt",
+    "$SOURCES/capreg/res_17DE.txt",
+    "$SOURCES/capreg/res_17DK.txt",
+    "$SOURCES/capreg/res_17EE.txt",
+    "$SOURCES/capreg/res_17EL.txt",
+    "$SOURCES/capreg/res_17ES.txt",
+    "$SOURCES/capreg/res_17FI.txt",
+    "$SOURCES/capreg/res_17FR.txt",
+    "$SOURCES/capreg/res_17HR.txt",
+    "$SOURCES/capreg/res_17HU.txt",
+    "$SOURCES/capreg/res_17IR.txt",
+    "$SOURCES/capreg/res_17IT.txt",
+    "$SOURCES/capreg/res_17LT.txt",
+    "$SOURCES/capreg/res_17LV.txt",
+    "$SOURCES/capreg/res_17MT.txt",
+    "$SOURCES/capreg/res_17NL.txt",
+    "$SOURCES/capreg/res_17NO.txt",
+    "$SOURCES/capreg/res_17PL.txt",
+    "$SOURCES/capreg/res_17PT.txt",
+    "$SOURCES/capreg/res_17RO.txt",
+    "$SOURCES/capreg/res_17SE.txt",
+    "$SOURCES/capreg/res_17SI.txt",
+    "$SOURCES/capreg/res_17SK.txt"
    ],
    "outputs": [
     "capri_data/sources/capreg/capreg_national_prices.csv"
@@ -707,7 +707,7 @@
    "task": "build_capri_base",
    "builder": "build_capri_base",
    "args": [
-    "$WORK/capreg"
+    "$SOURCES/capreg"
    ],
    "inputs": [
     "capri_data/codes/model_activities.csv",
@@ -718,33 +718,33 @@
     "tools/lib/_model_codes.py"
    ],
    "external": [
-    "$WORK/capreg/res_17AT.txt",
-    "$WORK/capreg/res_17BG.txt",
-    "$WORK/capreg/res_17BL.txt",
-    "$WORK/capreg/res_17CY.txt",
-    "$WORK/capreg/res_17CZ.txt",
-    "$WORK/capreg/res_17DE.txt",
-    "$WORK/capreg/res_17DK.txt",
-    "$WORK/capreg/res_17EE.txt",
-    "$WORK/capreg/res_17EL.txt",
-    "$WORK/capreg/res_17ES.txt",
-    "$WORK/capreg/res_17FI.txt",
-    "$WORK/capreg/res_17FR.txt",
-    "$WORK/capreg/res_17HR.txt",
-    "$WORK/capreg/res_17HU.txt",
-    "$WORK/capreg/res_17IR.txt",
-    "$WORK/capreg/res_17IT.txt",
-    "$WORK/capreg/res_17LT.txt",
-    "$WORK/capreg/res_17LV.txt",
-    "$WORK/capreg/res_17MT.txt",
-    "$WORK/capreg/res_17NL.txt",
-    "$WORK/capreg/res_17NO.txt",
-    "$WORK/capreg/res_17PL.txt",
-    "$WORK/capreg/res_17PT.txt",
-    "$WORK/capreg/res_17RO.txt",
-    "$WORK/capreg/res_17SE.txt",
-    "$WORK/capreg/res_17SI.txt",
-    "$WORK/capreg/res_17SK.txt"
+    "$SOURCES/capreg/res_17AT.txt",
+    "$SOURCES/capreg/res_17BG.txt",
+    "$SOURCES/capreg/res_17BL.txt",
+    "$SOURCES/capreg/res_17CY.txt",
+    "$SOURCES/capreg/res_17CZ.txt",
+    "$SOURCES/capreg/res_17DE.txt",
+    "$SOURCES/capreg/res_17DK.txt",
+    "$SOURCES/capreg/res_17EE.txt",
+    "$SOURCES/capreg/res_17EL.txt",
+    "$SOURCES/capreg/res_17ES.txt",
+    "$SOURCES/capreg/res_17FI.txt",
+    "$SOURCES/capreg/res_17FR.txt",
+    "$SOURCES/capreg/res_17HR.txt",
+    "$SOURCES/capreg/res_17HU.txt",
+    "$SOURCES/capreg/res_17IR.txt",
+    "$SOURCES/capreg/res_17IT.txt",
+    "$SOURCES/capreg/res_17LT.txt",
+    "$SOURCES/capreg/res_17LV.txt",
+    "$SOURCES/capreg/res_17MT.txt",
+    "$SOURCES/capreg/res_17NL.txt",
+    "$SOURCES/capreg/res_17NO.txt",
+    "$SOURCES/capreg/res_17PL.txt",
+    "$SOURCES/capreg/res_17PT.txt",
+    "$SOURCES/capreg/res_17RO.txt",
+    "$SOURCES/capreg/res_17SE.txt",
+    "$SOURCES/capreg/res_17SI.txt",
+    "$SOURCES/capreg/res_17SK.txt"
    ],
    "outputs": [
     "capri_data/2017/supply/animal_numbers.csv",
@@ -777,14 +777,14 @@
    "task": "build_capri_crop_n_coefs",
    "builder": "build_capri_crop_n_coefs",
    "args": [
-    "$UP/res_2_1730greendeal_refdefaulta.zip"
+    "$EXPORTS/res_2_1730greendeal_refdefaulta.zip"
    ],
    "inputs": [],
    "code": [
     "tools/build/build_capri_crop_n_coefs.py"
    ],
    "external": [
-    "$UP/res_2_1730greendeal_refdefaulta.zip"
+    "$EXPORTS/res_2_1730greendeal_refdefaulta.zip"
    ],
    "outputs": [
     "capri_data/2017/environment/capri_crop_n_coefs_2030.csv"
@@ -794,8 +794,8 @@
    "task": "build_capri_eu27_levels",
    "builder": "build_capri_eu27_levels",
    "args": [
-    "$UP/markmarket_greendeal_1730et_base_1717.txt",
-    "$WORK/capreg"
+    "$EXPORTS/markmarket_greendeal_1730et_base_1717.txt",
+    "$SOURCES/capreg"
    ],
    "inputs": [
     "capri_data/shared/capri_member_state_codes.csv",
@@ -807,33 +807,33 @@
     "tools/lib/_model_regions.py"
    ],
    "external": [
-    "$UP/markmarket_greendeal_1730et_base_1717.txt",
-    "$WORK/capreg/res_17AT.txt",
-    "$WORK/capreg/res_17BG.txt",
-    "$WORK/capreg/res_17BL.txt",
-    "$WORK/capreg/res_17CY.txt",
-    "$WORK/capreg/res_17CZ.txt",
-    "$WORK/capreg/res_17DE.txt",
-    "$WORK/capreg/res_17DK.txt",
-    "$WORK/capreg/res_17EE.txt",
-    "$WORK/capreg/res_17EL.txt",
-    "$WORK/capreg/res_17ES.txt",
-    "$WORK/capreg/res_17FI.txt",
-    "$WORK/capreg/res_17FR.txt",
-    "$WORK/capreg/res_17HR.txt",
-    "$WORK/capreg/res_17HU.txt",
-    "$WORK/capreg/res_17IR.txt",
-    "$WORK/capreg/res_17IT.txt",
-    "$WORK/capreg/res_17LT.txt",
-    "$WORK/capreg/res_17LV.txt",
-    "$WORK/capreg/res_17MT.txt",
-    "$WORK/capreg/res_17NL.txt",
-    "$WORK/capreg/res_17PL.txt",
-    "$WORK/capreg/res_17PT.txt",
-    "$WORK/capreg/res_17RO.txt",
-    "$WORK/capreg/res_17SE.txt",
-    "$WORK/capreg/res_17SI.txt",
-    "$WORK/capreg/res_17SK.txt"
+    "$EXPORTS/markmarket_greendeal_1730et_base_1717.txt",
+    "$SOURCES/capreg/res_17AT.txt",
+    "$SOURCES/capreg/res_17BG.txt",
+    "$SOURCES/capreg/res_17BL.txt",
+    "$SOURCES/capreg/res_17CY.txt",
+    "$SOURCES/capreg/res_17CZ.txt",
+    "$SOURCES/capreg/res_17DE.txt",
+    "$SOURCES/capreg/res_17DK.txt",
+    "$SOURCES/capreg/res_17EE.txt",
+    "$SOURCES/capreg/res_17EL.txt",
+    "$SOURCES/capreg/res_17ES.txt",
+    "$SOURCES/capreg/res_17FI.txt",
+    "$SOURCES/capreg/res_17FR.txt",
+    "$SOURCES/capreg/res_17HR.txt",
+    "$SOURCES/capreg/res_17HU.txt",
+    "$SOURCES/capreg/res_17IR.txt",
+    "$SOURCES/capreg/res_17IT.txt",
+    "$SOURCES/capreg/res_17LT.txt",
+    "$SOURCES/capreg/res_17LV.txt",
+    "$SOURCES/capreg/res_17MT.txt",
+    "$SOURCES/capreg/res_17NL.txt",
+    "$SOURCES/capreg/res_17PL.txt",
+    "$SOURCES/capreg/res_17PT.txt",
+    "$SOURCES/capreg/res_17RO.txt",
+    "$SOURCES/capreg/res_17SE.txt",
+    "$SOURCES/capreg/res_17SI.txt",
+    "$SOURCES/capreg/res_17SK.txt"
    ],
    "outputs": [
     "capri_data/validation/capri_eu27_levels_2017_capreg.csv",
@@ -844,14 +844,14 @@
    "task": "build_capri_gnb_components",
    "builder": "build_capri_gnb_components",
    "args": [
-    "$UP/res_2_1730greendeal_refdefaulta.zip"
+    "$EXPORTS/res_2_1730greendeal_refdefaulta.zip"
    ],
    "inputs": [],
    "code": [
     "tools/build/build_capri_gnb_components.py"
    ],
    "external": [
-    "$UP/res_2_1730greendeal_refdefaulta.zip"
+    "$EXPORTS/res_2_1730greendeal_refdefaulta.zip"
    ],
    "outputs": [
     "capri_data/2017/environment/capri_gnb_components_2030.csv"
@@ -882,33 +882,33 @@
     "tools/lib/_model_regions.py"
    ],
    "external": [
-    "$WORK/capreg/res_17AT.txt",
-    "$WORK/capreg/res_17BG.txt",
-    "$WORK/capreg/res_17BL.txt",
-    "$WORK/capreg/res_17CY.txt",
-    "$WORK/capreg/res_17CZ.txt",
-    "$WORK/capreg/res_17DE.txt",
-    "$WORK/capreg/res_17DK.txt",
-    "$WORK/capreg/res_17EE.txt",
-    "$WORK/capreg/res_17EL.txt",
-    "$WORK/capreg/res_17ES.txt",
-    "$WORK/capreg/res_17FI.txt",
-    "$WORK/capreg/res_17FR.txt",
-    "$WORK/capreg/res_17HR.txt",
-    "$WORK/capreg/res_17HU.txt",
-    "$WORK/capreg/res_17IR.txt",
-    "$WORK/capreg/res_17IT.txt",
-    "$WORK/capreg/res_17LT.txt",
-    "$WORK/capreg/res_17LV.txt",
-    "$WORK/capreg/res_17MT.txt",
-    "$WORK/capreg/res_17NL.txt",
-    "$WORK/capreg/res_17NO.txt",
-    "$WORK/capreg/res_17PL.txt",
-    "$WORK/capreg/res_17PT.txt",
-    "$WORK/capreg/res_17RO.txt",
-    "$WORK/capreg/res_17SE.txt",
-    "$WORK/capreg/res_17SI.txt",
-    "$WORK/capreg/res_17SK.txt"
+    "$SOURCES/capreg/res_17AT.txt",
+    "$SOURCES/capreg/res_17BG.txt",
+    "$SOURCES/capreg/res_17BL.txt",
+    "$SOURCES/capreg/res_17CY.txt",
+    "$SOURCES/capreg/res_17CZ.txt",
+    "$SOURCES/capreg/res_17DE.txt",
+    "$SOURCES/capreg/res_17DK.txt",
+    "$SOURCES/capreg/res_17EE.txt",
+    "$SOURCES/capreg/res_17EL.txt",
+    "$SOURCES/capreg/res_17ES.txt",
+    "$SOURCES/capreg/res_17FI.txt",
+    "$SOURCES/capreg/res_17FR.txt",
+    "$SOURCES/capreg/res_17HR.txt",
+    "$SOURCES/capreg/res_17HU.txt",
+    "$SOURCES/capreg/res_17IR.txt",
+    "$SOURCES/capreg/res_17IT.txt",
+    "$SOURCES/capreg/res_17LT.txt",
+    "$SOURCES/capreg/res_17LV.txt",
+    "$SOURCES/capreg/res_17MT.txt",
+    "$SOURCES/capreg/res_17NL.txt",
+    "$SOURCES/capreg/res_17NO.txt",
+    "$SOURCES/capreg/res_17PL.txt",
+    "$SOURCES/capreg/res_17PT.txt",
+    "$SOURCES/capreg/res_17RO.txt",
+    "$SOURCES/capreg/res_17SE.txt",
+    "$SOURCES/capreg/res_17SI.txt",
+    "$SOURCES/capreg/res_17SK.txt"
    ],
    "outputs": [
     "capri_data/2017/supply/capri_level_ratio.csv"
@@ -919,19 +919,19 @@
    "builder": "build_capri_own_price_elasticities",
    "args": [
     "--src",
-    "$UP"
+    "$EXPORTS"
    ],
    "inputs": [],
    "code": [
     "tools/build/build_capri_own_price_elasticities.py"
    ],
    "external": [
-    "$UP/supply_elas_2_1720DEdefaulta.txt",
-    "$UP/supply_elas_2_1720ESdefaulta.txt",
-    "$UP/supply_elas_2_1720FRdefaulta.txt",
-    "$UP/supply_elas_2_1720ITdefaulta.txt",
-    "$UP/supply_elas_2_1720PLdefaulta.txt",
-    "$UP/supply_elas_2_1720REMAINI_NGdefaulta.zip"
+    "$EXPORTS/supply_elas_2_1720DEdefaulta.txt",
+    "$EXPORTS/supply_elas_2_1720ESdefaulta.txt",
+    "$EXPORTS/supply_elas_2_1720FRdefaulta.txt",
+    "$EXPORTS/supply_elas_2_1720ITdefaulta.txt",
+    "$EXPORTS/supply_elas_2_1720PLdefaulta.txt",
+    "$EXPORTS/supply_elas_2_1720REMAINI_NGdefaulta.zip"
    ],
    "outputs": [
     "capri_data/2017/supply/capri_own_price_elasticities.csv"
@@ -942,7 +942,7 @@
    "builder": "build_capri_supply_elas_market",
    "args": [
     "--src",
-    "$UP/p_elasSupp.txt"
+    "$EXPORTS/p_elasSupp.txt"
    ],
    "inputs": [
     "capri_data/codes/model_commodities.csv",
@@ -955,7 +955,7 @@
     "tools/lib/_model_regions.py"
    ],
    "external": [
-    "$UP/p_elasSupp.txt"
+    "$EXPORTS/p_elasSupp.txt"
    ],
    "outputs": [
     "capri_data/2017/market/supply_elas_eu.csv",
@@ -982,7 +982,7 @@
     "tools/build/build_captrd_dat.py"
    ],
    "external": [
-    "$WORK/hf_capri/dat/baseline/ageline/ageline.parquet"
+    "$SOURCES/dat/baseline/ageline/ageline.parquet"
    ],
    "outputs": [
     "capri_data/pipeline/captrd/dat/ageline.csv",
@@ -1003,7 +1003,7 @@
    "builder": "build_captrd_trajectory",
    "args": [
     "--series",
-    "$WORK/capri_reference/captrd_results/1770/series.csv.gz"
+    "$REFERENCE/captrd_results/1770/series.csv.gz"
    ],
    "inputs": [
     "capri_data/shared/capri_member_state_codes.csv",
@@ -1027,7 +1027,7 @@
     "tools/lib/_model_regions.py"
    ],
    "external": [
-    "$WORK/capri_reference/captrd_results/1770/series.csv.gz"
+    "$REFERENCE/captrd_results/1770/series.csv.gz"
    ],
    "outputs": [
     "capri_data/trajectories/captrd_2030.json"
@@ -1060,33 +1060,33 @@
     "tools/lib/_model_regions.py"
    ],
    "external": [
-    "$WORK/capreg/res_17AT.txt",
-    "$WORK/capreg/res_17BG.txt",
-    "$WORK/capreg/res_17BL.txt",
-    "$WORK/capreg/res_17CY.txt",
-    "$WORK/capreg/res_17CZ.txt",
-    "$WORK/capreg/res_17DE.txt",
-    "$WORK/capreg/res_17DK.txt",
-    "$WORK/capreg/res_17EE.txt",
-    "$WORK/capreg/res_17EL.txt",
-    "$WORK/capreg/res_17ES.txt",
-    "$WORK/capreg/res_17FI.txt",
-    "$WORK/capreg/res_17FR.txt",
-    "$WORK/capreg/res_17HR.txt",
-    "$WORK/capreg/res_17HU.txt",
-    "$WORK/capreg/res_17IR.txt",
-    "$WORK/capreg/res_17IT.txt",
-    "$WORK/capreg/res_17LT.txt",
-    "$WORK/capreg/res_17LV.txt",
-    "$WORK/capreg/res_17MT.txt",
-    "$WORK/capreg/res_17NL.txt",
-    "$WORK/capreg/res_17NO.txt",
-    "$WORK/capreg/res_17PL.txt",
-    "$WORK/capreg/res_17PT.txt",
-    "$WORK/capreg/res_17RO.txt",
-    "$WORK/capreg/res_17SE.txt",
-    "$WORK/capreg/res_17SI.txt",
-    "$WORK/capreg/res_17SK.txt"
+    "$SOURCES/capreg/res_17AT.txt",
+    "$SOURCES/capreg/res_17BG.txt",
+    "$SOURCES/capreg/res_17BL.txt",
+    "$SOURCES/capreg/res_17CY.txt",
+    "$SOURCES/capreg/res_17CZ.txt",
+    "$SOURCES/capreg/res_17DE.txt",
+    "$SOURCES/capreg/res_17DK.txt",
+    "$SOURCES/capreg/res_17EE.txt",
+    "$SOURCES/capreg/res_17EL.txt",
+    "$SOURCES/capreg/res_17ES.txt",
+    "$SOURCES/capreg/res_17FI.txt",
+    "$SOURCES/capreg/res_17FR.txt",
+    "$SOURCES/capreg/res_17HR.txt",
+    "$SOURCES/capreg/res_17HU.txt",
+    "$SOURCES/capreg/res_17IR.txt",
+    "$SOURCES/capreg/res_17IT.txt",
+    "$SOURCES/capreg/res_17LT.txt",
+    "$SOURCES/capreg/res_17LV.txt",
+    "$SOURCES/capreg/res_17MT.txt",
+    "$SOURCES/capreg/res_17NL.txt",
+    "$SOURCES/capreg/res_17NO.txt",
+    "$SOURCES/capreg/res_17PL.txt",
+    "$SOURCES/capreg/res_17PT.txt",
+    "$SOURCES/capreg/res_17RO.txt",
+    "$SOURCES/capreg/res_17SE.txt",
+    "$SOURCES/capreg/res_17SI.txt",
+    "$SOURCES/capreg/res_17SK.txt"
    ],
    "outputs": [
     "capri_data/2017/supply/cattle_intensity.csv"
@@ -1097,7 +1097,7 @@
    "builder": "build_code_lists",
    "args": [
     "--sets",
-    "$WORK/capri_reference/sets/simini_21730"
+    "$REFERENCE/sets/simini_21730"
    ],
    "inputs": [
     "capri_data/codes/model_activities.csv",
@@ -1121,17 +1121,17 @@
     "tools/build/recalibrate_trade_2017.py"
    ],
    "external": [
-    "$WORK/capri_reference/sets/simini_21730/FEED_TO_O.csv",
-    "$WORK/capri_reference/sets/simini_21730/MAACT.csv",
-    "$WORK/capri_reference/sets/simini_21730/MCACT.csv",
-    "$WORK/capri_reference/sets/simini_21730/MPACT.csv",
-    "$WORK/capri_reference/sets/simini_21730/MS.csv",
-    "$WORK/capri_reference/sets/simini_21730/Map_RR.csv",
-    "$WORK/capri_reference/sets/simini_21730/PACT.csv",
-    "$WORK/capri_reference/sets/simini_21730/RALL.csv",
-    "$WORK/capri_reference/sets/simini_21730/RU.csv",
-    "$WORK/capri_reference/sets/simini_21730/XX.csv",
-    "$WORK/capri_reference/sets/simini_21730/XX1.csv"
+    "$REFERENCE/sets/simini_21730/FEED_TO_O.csv",
+    "$REFERENCE/sets/simini_21730/MAACT.csv",
+    "$REFERENCE/sets/simini_21730/MCACT.csv",
+    "$REFERENCE/sets/simini_21730/MPACT.csv",
+    "$REFERENCE/sets/simini_21730/MS.csv",
+    "$REFERENCE/sets/simini_21730/Map_RR.csv",
+    "$REFERENCE/sets/simini_21730/PACT.csv",
+    "$REFERENCE/sets/simini_21730/RALL.csv",
+    "$REFERENCE/sets/simini_21730/RU.csv",
+    "$REFERENCE/sets/simini_21730/XX.csv",
+    "$REFERENCE/sets/simini_21730/XX1.csv"
    ],
    "outputs": [
     "capri_data/codes/capri/FEED_TO_O.csv",
@@ -1167,7 +1167,7 @@
     "tools/lib/_money.py"
    ],
    "external": [
-    "$WORK/allgms/gams/reports/def_cbalance.gms"
+    "$SOURCES/gams/reports/def_cbalance.gms"
    ],
    "outputs": [
     "capri_data/2017/supply/cover_crops.csv",
@@ -1189,33 +1189,33 @@
     "tools/lib/_model_regions.py"
    ],
    "external": [
-    "$WORK/capreg/res_17AT.txt",
-    "$WORK/capreg/res_17BG.txt",
-    "$WORK/capreg/res_17BL.txt",
-    "$WORK/capreg/res_17CY.txt",
-    "$WORK/capreg/res_17CZ.txt",
-    "$WORK/capreg/res_17DE.txt",
-    "$WORK/capreg/res_17DK.txt",
-    "$WORK/capreg/res_17EE.txt",
-    "$WORK/capreg/res_17EL.txt",
-    "$WORK/capreg/res_17ES.txt",
-    "$WORK/capreg/res_17FI.txt",
-    "$WORK/capreg/res_17FR.txt",
-    "$WORK/capreg/res_17HR.txt",
-    "$WORK/capreg/res_17HU.txt",
-    "$WORK/capreg/res_17IR.txt",
-    "$WORK/capreg/res_17IT.txt",
-    "$WORK/capreg/res_17LT.txt",
-    "$WORK/capreg/res_17LV.txt",
-    "$WORK/capreg/res_17MT.txt",
-    "$WORK/capreg/res_17NL.txt",
-    "$WORK/capreg/res_17NO.txt",
-    "$WORK/capreg/res_17PL.txt",
-    "$WORK/capreg/res_17PT.txt",
-    "$WORK/capreg/res_17RO.txt",
-    "$WORK/capreg/res_17SE.txt",
-    "$WORK/capreg/res_17SI.txt",
-    "$WORK/capreg/res_17SK.txt"
+    "$SOURCES/capreg/res_17AT.txt",
+    "$SOURCES/capreg/res_17BG.txt",
+    "$SOURCES/capreg/res_17BL.txt",
+    "$SOURCES/capreg/res_17CY.txt",
+    "$SOURCES/capreg/res_17CZ.txt",
+    "$SOURCES/capreg/res_17DE.txt",
+    "$SOURCES/capreg/res_17DK.txt",
+    "$SOURCES/capreg/res_17EE.txt",
+    "$SOURCES/capreg/res_17EL.txt",
+    "$SOURCES/capreg/res_17ES.txt",
+    "$SOURCES/capreg/res_17FI.txt",
+    "$SOURCES/capreg/res_17FR.txt",
+    "$SOURCES/capreg/res_17HR.txt",
+    "$SOURCES/capreg/res_17HU.txt",
+    "$SOURCES/capreg/res_17IR.txt",
+    "$SOURCES/capreg/res_17IT.txt",
+    "$SOURCES/capreg/res_17LT.txt",
+    "$SOURCES/capreg/res_17LV.txt",
+    "$SOURCES/capreg/res_17MT.txt",
+    "$SOURCES/capreg/res_17NL.txt",
+    "$SOURCES/capreg/res_17NO.txt",
+    "$SOURCES/capreg/res_17PL.txt",
+    "$SOURCES/capreg/res_17PT.txt",
+    "$SOURCES/capreg/res_17RO.txt",
+    "$SOURCES/capreg/res_17SE.txt",
+    "$SOURCES/capreg/res_17SI.txt",
+    "$SOURCES/capreg/res_17SK.txt"
    ],
    "outputs": [
     "capri_data/2017/supply/crop_cost_shares.csv"
@@ -1225,7 +1225,7 @@
    "task": "build_crop_economics_2017",
    "builder": "build_crop_economics_2017",
    "args": [
-    "$WORK/capreg"
+    "$SOURCES/capreg"
    ],
    "inputs": [
     "capri_data/2017/supply/base_areas.csv",
@@ -1251,33 +1251,33 @@
     "tools/lib/_sheep_goat.py"
    ],
    "external": [
-    "$WORK/capreg/res_17AT.txt",
-    "$WORK/capreg/res_17BG.txt",
-    "$WORK/capreg/res_17BL.txt",
-    "$WORK/capreg/res_17CY.txt",
-    "$WORK/capreg/res_17CZ.txt",
-    "$WORK/capreg/res_17DE.txt",
-    "$WORK/capreg/res_17DK.txt",
-    "$WORK/capreg/res_17EE.txt",
-    "$WORK/capreg/res_17EL.txt",
-    "$WORK/capreg/res_17ES.txt",
-    "$WORK/capreg/res_17FI.txt",
-    "$WORK/capreg/res_17FR.txt",
-    "$WORK/capreg/res_17HR.txt",
-    "$WORK/capreg/res_17HU.txt",
-    "$WORK/capreg/res_17IR.txt",
-    "$WORK/capreg/res_17IT.txt",
-    "$WORK/capreg/res_17LT.txt",
-    "$WORK/capreg/res_17LV.txt",
-    "$WORK/capreg/res_17MT.txt",
-    "$WORK/capreg/res_17NL.txt",
-    "$WORK/capreg/res_17NO.txt",
-    "$WORK/capreg/res_17PL.txt",
-    "$WORK/capreg/res_17PT.txt",
-    "$WORK/capreg/res_17RO.txt",
-    "$WORK/capreg/res_17SE.txt",
-    "$WORK/capreg/res_17SI.txt",
-    "$WORK/capreg/res_17SK.txt"
+    "$SOURCES/capreg/res_17AT.txt",
+    "$SOURCES/capreg/res_17BG.txt",
+    "$SOURCES/capreg/res_17BL.txt",
+    "$SOURCES/capreg/res_17CY.txt",
+    "$SOURCES/capreg/res_17CZ.txt",
+    "$SOURCES/capreg/res_17DE.txt",
+    "$SOURCES/capreg/res_17DK.txt",
+    "$SOURCES/capreg/res_17EE.txt",
+    "$SOURCES/capreg/res_17EL.txt",
+    "$SOURCES/capreg/res_17ES.txt",
+    "$SOURCES/capreg/res_17FI.txt",
+    "$SOURCES/capreg/res_17FR.txt",
+    "$SOURCES/capreg/res_17HR.txt",
+    "$SOURCES/capreg/res_17HU.txt",
+    "$SOURCES/capreg/res_17IR.txt",
+    "$SOURCES/capreg/res_17IT.txt",
+    "$SOURCES/capreg/res_17LT.txt",
+    "$SOURCES/capreg/res_17LV.txt",
+    "$SOURCES/capreg/res_17MT.txt",
+    "$SOURCES/capreg/res_17NL.txt",
+    "$SOURCES/capreg/res_17NO.txt",
+    "$SOURCES/capreg/res_17PL.txt",
+    "$SOURCES/capreg/res_17PT.txt",
+    "$SOURCES/capreg/res_17RO.txt",
+    "$SOURCES/capreg/res_17SE.txt",
+    "$SOURCES/capreg/res_17SI.txt",
+    "$SOURCES/capreg/res_17SK.txt"
    ],
    "outputs": [
     "capri_data/2017/policy/cap_payments.csv",
@@ -1295,9 +1295,9 @@
     "--year",
     "2017",
     "--market",
-    "$UP/market_base_1717.txt",
+    "$EXPORTS/market_base_1717.txt",
     "--elas",
-    "$UP/elas_2_1717defaulta.csv"
+    "$EXPORTS/elas_2_1717defaulta.csv"
    ],
    "inputs": [
     "capri_data/codes/model_trade_regions.csv",
@@ -1313,8 +1313,8 @@
     "tools/lib/_model_regions.py"
    ],
    "external": [
-    "$UP/elas_2_1717defaulta.csv",
-    "$UP/market_base_1717.txt"
+    "$EXPORTS/elas_2_1717defaulta.csv",
+    "$EXPORTS/market_base_1717.txt"
    ],
    "outputs": [
     "capri_data/2017/market/crushing_parameters_2017.csv"
@@ -1327,9 +1327,9 @@
     "--year",
     "2030",
     "--market",
-    "$UP/markmarket_greendeal_1730et_base_1717.txt",
+    "$EXPORTS/markmarket_greendeal_1730et_base_1717.txt",
     "--elas",
-    "$UP/elas_2_1730defaulta.csv"
+    "$EXPORTS/elas_2_1730defaulta.csv"
    ],
    "inputs": [
     "capri_data/codes/model_trade_regions.csv",
@@ -1345,8 +1345,8 @@
     "tools/lib/_model_regions.py"
    ],
    "external": [
-    "$UP/elas_2_1730defaulta.csv",
-    "$UP/markmarket_greendeal_1730et_base_1717.txt"
+    "$EXPORTS/elas_2_1730defaulta.csv",
+    "$EXPORTS/markmarket_greendeal_1730et_base_1717.txt"
    ],
    "outputs": [
     "capri_data/2017/market/crushing_parameters_2030.csv"
@@ -1379,33 +1379,33 @@
     "tools/lib/_model_regions.py"
    ],
    "external": [
-    "$WORK/capreg/res_17AT.txt",
-    "$WORK/capreg/res_17BG.txt",
-    "$WORK/capreg/res_17BL.txt",
-    "$WORK/capreg/res_17CY.txt",
-    "$WORK/capreg/res_17CZ.txt",
-    "$WORK/capreg/res_17DE.txt",
-    "$WORK/capreg/res_17DK.txt",
-    "$WORK/capreg/res_17EE.txt",
-    "$WORK/capreg/res_17EL.txt",
-    "$WORK/capreg/res_17ES.txt",
-    "$WORK/capreg/res_17FI.txt",
-    "$WORK/capreg/res_17FR.txt",
-    "$WORK/capreg/res_17HR.txt",
-    "$WORK/capreg/res_17HU.txt",
-    "$WORK/capreg/res_17IR.txt",
-    "$WORK/capreg/res_17IT.txt",
-    "$WORK/capreg/res_17LT.txt",
-    "$WORK/capreg/res_17LV.txt",
-    "$WORK/capreg/res_17MT.txt",
-    "$WORK/capreg/res_17NL.txt",
-    "$WORK/capreg/res_17NO.txt",
-    "$WORK/capreg/res_17PL.txt",
-    "$WORK/capreg/res_17PT.txt",
-    "$WORK/capreg/res_17RO.txt",
-    "$WORK/capreg/res_17SE.txt",
-    "$WORK/capreg/res_17SI.txt",
-    "$WORK/capreg/res_17SK.txt"
+    "$SOURCES/capreg/res_17AT.txt",
+    "$SOURCES/capreg/res_17BG.txt",
+    "$SOURCES/capreg/res_17BL.txt",
+    "$SOURCES/capreg/res_17CY.txt",
+    "$SOURCES/capreg/res_17CZ.txt",
+    "$SOURCES/capreg/res_17DE.txt",
+    "$SOURCES/capreg/res_17DK.txt",
+    "$SOURCES/capreg/res_17EE.txt",
+    "$SOURCES/capreg/res_17EL.txt",
+    "$SOURCES/capreg/res_17ES.txt",
+    "$SOURCES/capreg/res_17FI.txt",
+    "$SOURCES/capreg/res_17FR.txt",
+    "$SOURCES/capreg/res_17HR.txt",
+    "$SOURCES/capreg/res_17HU.txt",
+    "$SOURCES/capreg/res_17IR.txt",
+    "$SOURCES/capreg/res_17IT.txt",
+    "$SOURCES/capreg/res_17LT.txt",
+    "$SOURCES/capreg/res_17LV.txt",
+    "$SOURCES/capreg/res_17MT.txt",
+    "$SOURCES/capreg/res_17NL.txt",
+    "$SOURCES/capreg/res_17NO.txt",
+    "$SOURCES/capreg/res_17PL.txt",
+    "$SOURCES/capreg/res_17PT.txt",
+    "$SOURCES/capreg/res_17RO.txt",
+    "$SOURCES/capreg/res_17SE.txt",
+    "$SOURCES/capreg/res_17SI.txt",
+    "$SOURCES/capreg/res_17SK.txt"
    ],
    "outputs": [
     "capri_data/2017/supply/dairy_intensity.csv"
@@ -1425,8 +1425,8 @@
     "tools/lib/_model_regions.py"
    ],
    "external": [
-    "$UP/elas_2_1730defaulta.csv",
-    "$UP/markmarket_greendeal_1730et_base_1717.txt"
+    "$EXPORTS/elas_2_1730defaulta.csv",
+    "$EXPORTS/markmarket_greendeal_1730et_base_1717.txt"
    ],
    "outputs": [
     "capri_data/2017/market/dairy_eu_balance.csv",
@@ -1451,8 +1451,8 @@
     "tools/build/recalibrate_trade_2017.py"
    ],
    "external": [
-    "$UP/elas_2_1730defaulta.csv",
-    "$UP/markmarket_greendeal_1730et_base_1717.txt"
+    "$EXPORTS/elas_2_1730defaulta.csv",
+    "$EXPORTS/markmarket_greendeal_1730et_base_1717.txt"
    ],
    "outputs": [
     "capri_data/2017/market/dairy_world_demand_elas.csv",
@@ -1479,7 +1479,7 @@
     "tools/lib/_model_regions.py"
    ],
    "external": [
-    "$UP/fao_agg_17_datamarket.txt"
+    "$EXPORTS/fao_agg_17_datamarket.txt"
    ],
    "outputs": [
     "capri_data/2017/market/dairy_world_baseline.json",
@@ -1490,7 +1490,7 @@
    "task": "build_digestibility_table",
    "builder": "build_digestibility_table",
    "args": [
-    "$WORK/allgms/gams"
+    "$SOURCES/gams"
    ],
    "inputs": [],
    "code": [
@@ -1499,7 +1499,7 @@
     "tools/build/build_digestibility_table.py"
    ],
    "external": [
-    "$WORK/allgms/gams/envind/def_digestibility.gms"
+    "$SOURCES/gams/envind/def_digestibility.gms"
    ],
    "outputs": [
     "capri_data/sources/envind/capri_digest_default_prd.csv",
@@ -1510,8 +1510,8 @@
    "task": "build_enteric_feed_factors",
    "builder": "build_enteric_feed_factors",
    "args": [
-    "$WORK/allgms/gams",
-    "$WORK/capreg"
+    "$SOURCES/gams",
+    "$SOURCES/capreg"
    ],
    "inputs": [
     "capri_data/2017/abatement/ammonia/RCEmissions.csv"
@@ -1520,35 +1520,35 @@
     "tools/build/build_enteric_feed_factors.py"
    ],
    "external": [
-    "$WORK/allgms/gams/envind/create_rawdat_gascoeff_gdx.gms",
-    "$WORK/allgms/gams/envind/def_digestibility.gms",
-    "$WORK/capreg/res_17AT.txt",
-    "$WORK/capreg/res_17BG.txt",
-    "$WORK/capreg/res_17BL.txt",
-    "$WORK/capreg/res_17CY.txt",
-    "$WORK/capreg/res_17CZ.txt",
-    "$WORK/capreg/res_17DE.txt",
-    "$WORK/capreg/res_17DK.txt",
-    "$WORK/capreg/res_17EE.txt",
-    "$WORK/capreg/res_17EL.txt",
-    "$WORK/capreg/res_17ES.txt",
-    "$WORK/capreg/res_17FI.txt",
-    "$WORK/capreg/res_17FR.txt",
-    "$WORK/capreg/res_17HR.txt",
-    "$WORK/capreg/res_17HU.txt",
-    "$WORK/capreg/res_17IR.txt",
-    "$WORK/capreg/res_17IT.txt",
-    "$WORK/capreg/res_17LT.txt",
-    "$WORK/capreg/res_17LV.txt",
-    "$WORK/capreg/res_17MT.txt",
-    "$WORK/capreg/res_17NL.txt",
-    "$WORK/capreg/res_17NO.txt",
-    "$WORK/capreg/res_17PL.txt",
-    "$WORK/capreg/res_17PT.txt",
-    "$WORK/capreg/res_17RO.txt",
-    "$WORK/capreg/res_17SE.txt",
-    "$WORK/capreg/res_17SI.txt",
-    "$WORK/capreg/res_17SK.txt"
+    "$SOURCES/gams/envind/create_rawdat_gascoeff_gdx.gms",
+    "$SOURCES/gams/envind/def_digestibility.gms",
+    "$SOURCES/capreg/res_17AT.txt",
+    "$SOURCES/capreg/res_17BG.txt",
+    "$SOURCES/capreg/res_17BL.txt",
+    "$SOURCES/capreg/res_17CY.txt",
+    "$SOURCES/capreg/res_17CZ.txt",
+    "$SOURCES/capreg/res_17DE.txt",
+    "$SOURCES/capreg/res_17DK.txt",
+    "$SOURCES/capreg/res_17EE.txt",
+    "$SOURCES/capreg/res_17EL.txt",
+    "$SOURCES/capreg/res_17ES.txt",
+    "$SOURCES/capreg/res_17FI.txt",
+    "$SOURCES/capreg/res_17FR.txt",
+    "$SOURCES/capreg/res_17HR.txt",
+    "$SOURCES/capreg/res_17HU.txt",
+    "$SOURCES/capreg/res_17IR.txt",
+    "$SOURCES/capreg/res_17IT.txt",
+    "$SOURCES/capreg/res_17LT.txt",
+    "$SOURCES/capreg/res_17LV.txt",
+    "$SOURCES/capreg/res_17MT.txt",
+    "$SOURCES/capreg/res_17NL.txt",
+    "$SOURCES/capreg/res_17NO.txt",
+    "$SOURCES/capreg/res_17PL.txt",
+    "$SOURCES/capreg/res_17PT.txt",
+    "$SOURCES/capreg/res_17RO.txt",
+    "$SOURCES/capreg/res_17SE.txt",
+    "$SOURCES/capreg/res_17SI.txt",
+    "$SOURCES/capreg/res_17SK.txt"
    ],
    "outputs": [
     "capri_data/2017/environment/enteric_feed_factors.csv"
@@ -1568,7 +1568,7 @@
     "tools/lib/_model_regions.py"
    ],
    "external": [
-    "$UP/fao_agg_17_datamarket.txt"
+    "$EXPORTS/fao_agg_17_datamarket.txt"
    ],
    "outputs": [
     "capri_data/2017/market/eu_cake_feed_bas.csv"
@@ -1579,14 +1579,14 @@
    "builder": "build_eu_market_blocks",
    "args": [
     "--agg",
-    "$WORK/allgms/gams/aggregation/defaultA.agg"
+    "$SOURCES/gams/aggregation/defaultA.agg"
    ],
    "inputs": [],
    "code": [
     "tools/build/build_eu_market_blocks.py"
    ],
    "external": [
-    "$WORK/allgms/gams/aggregation/defaultA.agg"
+    "$SOURCES/gams/aggregation/defaultA.agg"
    ],
    "outputs": [
     "capri_data/shared/eu_market_blocks.csv"
@@ -1611,9 +1611,9 @@
     "tools/lib/_model_regions.py"
    ],
    "external": [
-    "$UP/data_market_1730defaulta.csv",
-    "$UP/elas_2_1730defaulta.csv",
-    "$UP/markmarket_greendeal_1730et_base_1717.txt"
+    "$EXPORTS/data_market_1730defaulta.csv",
+    "$EXPORTS/elas_2_1730defaulta.csv",
+    "$EXPORTS/markmarket_greendeal_1730et_base_1717.txt"
    ],
    "outputs": [
     "capri_data/2017/market/eu_market_supply_base.csv",
@@ -1632,7 +1632,7 @@
     "tools/build/build_eu_ms_balance.py"
    ],
    "external": [
-    "$UP/data_market_1730defaulta.csv"
+    "$EXPORTS/data_market_1730defaulta.csv"
    ],
    "outputs": [
     "capri_data/2017/market/eu_ms_balance_2030.csv"
@@ -1684,8 +1684,8 @@
     "tools/lib/_model_regions.py"
    ],
    "external": [
-    "$UP/markmarket_greendeal_1730et_base_1717.txt",
-    "$WORK/allgms/gams/arm/market1.gms"
+    "$EXPORTS/markmarket_greendeal_1730et_base_1717.txt",
+    "$SOURCES/gams/arm/market1.gms"
    ],
    "outputs": [
     "capri_data/2017/feed/feed_cereal_mix_2030.csv",
@@ -1736,8 +1736,8 @@
     "tools/lib/_model_regions.py"
    ],
    "external": [
-    "$UP/data_market_1730defaulta.csv",
-    "$UP/elas_2_1730defaulta.csv"
+    "$EXPORTS/data_market_1730defaulta.csv",
+    "$EXPORTS/elas_2_1730defaulta.csv"
    ],
    "outputs": [
     "capri_data/2017/market/feed_demand_nonEU.json",
@@ -1763,7 +1763,7 @@
     "tools/lib/_capri_nq.py"
    ],
    "external": [
-    "$UP/data_market_1730defaulta.csv"
+    "$EXPORTS/data_market_1730defaulta.csv"
    ],
    "outputs": [
     "capri_data/2017/market/feed_cal_content.csv",
@@ -1798,68 +1798,68 @@
     "tools/lib/_money.py"
    ],
    "external": [
-    "$WORK/capreg/res_17AT.txt",
-    "$WORK/capreg/res_17BG.txt",
-    "$WORK/capreg/res_17BL.txt",
-    "$WORK/capreg/res_17CY.txt",
-    "$WORK/capreg/res_17CZ.txt",
-    "$WORK/capreg/res_17DE.txt",
-    "$WORK/capreg/res_17DK.txt",
-    "$WORK/capreg/res_17EE.txt",
-    "$WORK/capreg/res_17EL.txt",
-    "$WORK/capreg/res_17ES.txt",
-    "$WORK/capreg/res_17FI.txt",
-    "$WORK/capreg/res_17FR.txt",
-    "$WORK/capreg/res_17HR.txt",
-    "$WORK/capreg/res_17HU.txt",
-    "$WORK/capreg/res_17IR.txt",
-    "$WORK/capreg/res_17IT.txt",
-    "$WORK/capreg/res_17LT.txt",
-    "$WORK/capreg/res_17LV.txt",
-    "$WORK/capreg/res_17MT.txt",
-    "$WORK/capreg/res_17NL.txt",
-    "$WORK/capreg/res_17NO.txt",
-    "$WORK/capreg/res_17PL.txt",
-    "$WORK/capreg/res_17PT.txt",
-    "$WORK/capreg/res_17RO.txt",
-    "$WORK/capreg/res_17SE.txt",
-    "$WORK/capreg/res_17SI.txt",
-    "$WORK/capreg/res_17SK.txt",
-    "$WORK/feedexp/feed_export/pmppar_17AL_feedpmp.csv",
-    "$WORK/feedexp/feed_export/pmppar_17AT_feedpmp.csv",
-    "$WORK/feedexp/feed_export/pmppar_17BA_feedpmp.csv",
-    "$WORK/feedexp/feed_export/pmppar_17BG_feedpmp.csv",
-    "$WORK/feedexp/feed_export/pmppar_17BL_feedpmp.csv",
-    "$WORK/feedexp/feed_export/pmppar_17CS_feedpmp.csv",
-    "$WORK/feedexp/feed_export/pmppar_17CY_feedpmp.csv",
-    "$WORK/feedexp/feed_export/pmppar_17CZ_feedpmp.csv",
-    "$WORK/feedexp/feed_export/pmppar_17DE_feedpmp.csv",
-    "$WORK/feedexp/feed_export/pmppar_17DK_feedpmp.csv",
-    "$WORK/feedexp/feed_export/pmppar_17EE_feedpmp.csv",
-    "$WORK/feedexp/feed_export/pmppar_17EL_feedpmp.csv",
-    "$WORK/feedexp/feed_export/pmppar_17ES_feedpmp.csv",
-    "$WORK/feedexp/feed_export/pmppar_17FI_feedpmp.csv",
-    "$WORK/feedexp/feed_export/pmppar_17FR_feedpmp.csv",
-    "$WORK/feedexp/feed_export/pmppar_17HR_feedpmp.csv",
-    "$WORK/feedexp/feed_export/pmppar_17HU_feedpmp.csv",
-    "$WORK/feedexp/feed_export/pmppar_17IR_feedpmp.csv",
-    "$WORK/feedexp/feed_export/pmppar_17IT_feedpmp.csv",
-    "$WORK/feedexp/feed_export/pmppar_17KO_feedpmp.csv",
-    "$WORK/feedexp/feed_export/pmppar_17LT_feedpmp.csv",
-    "$WORK/feedexp/feed_export/pmppar_17LV_feedpmp.csv",
-    "$WORK/feedexp/feed_export/pmppar_17MK_feedpmp.csv",
-    "$WORK/feedexp/feed_export/pmppar_17MO_feedpmp.csv",
-    "$WORK/feedexp/feed_export/pmppar_17MT_feedpmp.csv",
-    "$WORK/feedexp/feed_export/pmppar_17NL_feedpmp.csv",
-    "$WORK/feedexp/feed_export/pmppar_17NO_feedpmp.csv",
-    "$WORK/feedexp/feed_export/pmppar_17PL_feedpmp.csv",
-    "$WORK/feedexp/feed_export/pmppar_17PT_feedpmp.csv",
-    "$WORK/feedexp/feed_export/pmppar_17RO_feedpmp.csv",
-    "$WORK/feedexp/feed_export/pmppar_17SE_feedpmp.csv",
-    "$WORK/feedexp/feed_export/pmppar_17SI_feedpmp.csv",
-    "$WORK/feedexp/feed_export/pmppar_17SK_feedpmp.csv",
-    "$WORK/feedexp/feed_export/pmppar_17TU_feedpmp.csv",
-    "$WORK/feedexp/feed_export/pmppar_17UK_feedpmp.csv"
+    "$SOURCES/capreg/res_17AT.txt",
+    "$SOURCES/capreg/res_17BG.txt",
+    "$SOURCES/capreg/res_17BL.txt",
+    "$SOURCES/capreg/res_17CY.txt",
+    "$SOURCES/capreg/res_17CZ.txt",
+    "$SOURCES/capreg/res_17DE.txt",
+    "$SOURCES/capreg/res_17DK.txt",
+    "$SOURCES/capreg/res_17EE.txt",
+    "$SOURCES/capreg/res_17EL.txt",
+    "$SOURCES/capreg/res_17ES.txt",
+    "$SOURCES/capreg/res_17FI.txt",
+    "$SOURCES/capreg/res_17FR.txt",
+    "$SOURCES/capreg/res_17HR.txt",
+    "$SOURCES/capreg/res_17HU.txt",
+    "$SOURCES/capreg/res_17IR.txt",
+    "$SOURCES/capreg/res_17IT.txt",
+    "$SOURCES/capreg/res_17LT.txt",
+    "$SOURCES/capreg/res_17LV.txt",
+    "$SOURCES/capreg/res_17MT.txt",
+    "$SOURCES/capreg/res_17NL.txt",
+    "$SOURCES/capreg/res_17NO.txt",
+    "$SOURCES/capreg/res_17PL.txt",
+    "$SOURCES/capreg/res_17PT.txt",
+    "$SOURCES/capreg/res_17RO.txt",
+    "$SOURCES/capreg/res_17SE.txt",
+    "$SOURCES/capreg/res_17SI.txt",
+    "$SOURCES/capreg/res_17SK.txt",
+    "$SOURCES/feed_export/pmppar_17AL_feedpmp.csv",
+    "$SOURCES/feed_export/pmppar_17AT_feedpmp.csv",
+    "$SOURCES/feed_export/pmppar_17BA_feedpmp.csv",
+    "$SOURCES/feed_export/pmppar_17BG_feedpmp.csv",
+    "$SOURCES/feed_export/pmppar_17BL_feedpmp.csv",
+    "$SOURCES/feed_export/pmppar_17CS_feedpmp.csv",
+    "$SOURCES/feed_export/pmppar_17CY_feedpmp.csv",
+    "$SOURCES/feed_export/pmppar_17CZ_feedpmp.csv",
+    "$SOURCES/feed_export/pmppar_17DE_feedpmp.csv",
+    "$SOURCES/feed_export/pmppar_17DK_feedpmp.csv",
+    "$SOURCES/feed_export/pmppar_17EE_feedpmp.csv",
+    "$SOURCES/feed_export/pmppar_17EL_feedpmp.csv",
+    "$SOURCES/feed_export/pmppar_17ES_feedpmp.csv",
+    "$SOURCES/feed_export/pmppar_17FI_feedpmp.csv",
+    "$SOURCES/feed_export/pmppar_17FR_feedpmp.csv",
+    "$SOURCES/feed_export/pmppar_17HR_feedpmp.csv",
+    "$SOURCES/feed_export/pmppar_17HU_feedpmp.csv",
+    "$SOURCES/feed_export/pmppar_17IR_feedpmp.csv",
+    "$SOURCES/feed_export/pmppar_17IT_feedpmp.csv",
+    "$SOURCES/feed_export/pmppar_17KO_feedpmp.csv",
+    "$SOURCES/feed_export/pmppar_17LT_feedpmp.csv",
+    "$SOURCES/feed_export/pmppar_17LV_feedpmp.csv",
+    "$SOURCES/feed_export/pmppar_17MK_feedpmp.csv",
+    "$SOURCES/feed_export/pmppar_17MO_feedpmp.csv",
+    "$SOURCES/feed_export/pmppar_17MT_feedpmp.csv",
+    "$SOURCES/feed_export/pmppar_17NL_feedpmp.csv",
+    "$SOURCES/feed_export/pmppar_17NO_feedpmp.csv",
+    "$SOURCES/feed_export/pmppar_17PL_feedpmp.csv",
+    "$SOURCES/feed_export/pmppar_17PT_feedpmp.csv",
+    "$SOURCES/feed_export/pmppar_17RO_feedpmp.csv",
+    "$SOURCES/feed_export/pmppar_17SE_feedpmp.csv",
+    "$SOURCES/feed_export/pmppar_17SI_feedpmp.csv",
+    "$SOURCES/feed_export/pmppar_17SK_feedpmp.csv",
+    "$SOURCES/feed_export/pmppar_17TU_feedpmp.csv",
+    "$SOURCES/feed_export/pmppar_17UK_feedpmp.csv"
    ],
    "outputs": [
     "capri_data/2017/feed/feed_ration_2017.json"
@@ -1874,8 +1874,8 @@
     "tools/build/build_fert_dist_priors.py"
    ],
    "external": [
-    "$UP/priFertDist_1730defaulta.zip",
-    "$UP/res_2_1730greendeal_refdefaulta.zip"
+    "$EXPORTS/priFertDist_1730defaulta.zip",
+    "$EXPORTS/res_2_1730greendeal_refdefaulta.zip"
    ],
    "outputs": [
     "capri_data/2017/environment/fert_dist_crop_groups_2030.csv",
@@ -1977,33 +1977,33 @@
     "tools/lib/_money.py"
    ],
    "external": [
-    "$WORK/capreg/res_17AT.txt",
-    "$WORK/capreg/res_17BG.txt",
-    "$WORK/capreg/res_17BL.txt",
-    "$WORK/capreg/res_17CY.txt",
-    "$WORK/capreg/res_17CZ.txt",
-    "$WORK/capreg/res_17DE.txt",
-    "$WORK/capreg/res_17DK.txt",
-    "$WORK/capreg/res_17EE.txt",
-    "$WORK/capreg/res_17EL.txt",
-    "$WORK/capreg/res_17ES.txt",
-    "$WORK/capreg/res_17FI.txt",
-    "$WORK/capreg/res_17FR.txt",
-    "$WORK/capreg/res_17HR.txt",
-    "$WORK/capreg/res_17HU.txt",
-    "$WORK/capreg/res_17IR.txt",
-    "$WORK/capreg/res_17IT.txt",
-    "$WORK/capreg/res_17LT.txt",
-    "$WORK/capreg/res_17LV.txt",
-    "$WORK/capreg/res_17MT.txt",
-    "$WORK/capreg/res_17NL.txt",
-    "$WORK/capreg/res_17NO.txt",
-    "$WORK/capreg/res_17PL.txt",
-    "$WORK/capreg/res_17PT.txt",
-    "$WORK/capreg/res_17RO.txt",
-    "$WORK/capreg/res_17SE.txt",
-    "$WORK/capreg/res_17SI.txt",
-    "$WORK/capreg/res_17SK.txt"
+    "$SOURCES/capreg/res_17AT.txt",
+    "$SOURCES/capreg/res_17BG.txt",
+    "$SOURCES/capreg/res_17BL.txt",
+    "$SOURCES/capreg/res_17CY.txt",
+    "$SOURCES/capreg/res_17CZ.txt",
+    "$SOURCES/capreg/res_17DE.txt",
+    "$SOURCES/capreg/res_17DK.txt",
+    "$SOURCES/capreg/res_17EE.txt",
+    "$SOURCES/capreg/res_17EL.txt",
+    "$SOURCES/capreg/res_17ES.txt",
+    "$SOURCES/capreg/res_17FI.txt",
+    "$SOURCES/capreg/res_17FR.txt",
+    "$SOURCES/capreg/res_17HR.txt",
+    "$SOURCES/capreg/res_17HU.txt",
+    "$SOURCES/capreg/res_17IR.txt",
+    "$SOURCES/capreg/res_17IT.txt",
+    "$SOURCES/capreg/res_17LT.txt",
+    "$SOURCES/capreg/res_17LV.txt",
+    "$SOURCES/capreg/res_17MT.txt",
+    "$SOURCES/capreg/res_17NL.txt",
+    "$SOURCES/capreg/res_17NO.txt",
+    "$SOURCES/capreg/res_17PL.txt",
+    "$SOURCES/capreg/res_17PT.txt",
+    "$SOURCES/capreg/res_17RO.txt",
+    "$SOURCES/capreg/res_17SE.txt",
+    "$SOURCES/capreg/res_17SI.txt",
+    "$SOURCES/capreg/res_17SK.txt"
    ],
    "outputs": [
     "capri_data/2017/abatement/mitigation/genetics_effects.csv"
@@ -2013,7 +2013,7 @@
    "task": "build_ghg_coefs_2017",
    "builder": "build_ghg_coefs_2017",
    "args": [
-    "$WORK/capreg"
+    "$SOURCES/capreg"
    ],
    "inputs": [
     "capri_data/2017/abatement/ammonia/FracUseFert.csv",
@@ -2039,33 +2039,33 @@
     "tools/lib/_model_regions.py"
    ],
    "external": [
-    "$WORK/capreg/res_17AT.txt",
-    "$WORK/capreg/res_17BG.txt",
-    "$WORK/capreg/res_17BL.txt",
-    "$WORK/capreg/res_17CY.txt",
-    "$WORK/capreg/res_17CZ.txt",
-    "$WORK/capreg/res_17DE.txt",
-    "$WORK/capreg/res_17DK.txt",
-    "$WORK/capreg/res_17EE.txt",
-    "$WORK/capreg/res_17EL.txt",
-    "$WORK/capreg/res_17ES.txt",
-    "$WORK/capreg/res_17FI.txt",
-    "$WORK/capreg/res_17FR.txt",
-    "$WORK/capreg/res_17HR.txt",
-    "$WORK/capreg/res_17HU.txt",
-    "$WORK/capreg/res_17IR.txt",
-    "$WORK/capreg/res_17IT.txt",
-    "$WORK/capreg/res_17LT.txt",
-    "$WORK/capreg/res_17LV.txt",
-    "$WORK/capreg/res_17MT.txt",
-    "$WORK/capreg/res_17NL.txt",
-    "$WORK/capreg/res_17NO.txt",
-    "$WORK/capreg/res_17PL.txt",
-    "$WORK/capreg/res_17PT.txt",
-    "$WORK/capreg/res_17RO.txt",
-    "$WORK/capreg/res_17SE.txt",
-    "$WORK/capreg/res_17SI.txt",
-    "$WORK/capreg/res_17SK.txt"
+    "$SOURCES/capreg/res_17AT.txt",
+    "$SOURCES/capreg/res_17BG.txt",
+    "$SOURCES/capreg/res_17BL.txt",
+    "$SOURCES/capreg/res_17CY.txt",
+    "$SOURCES/capreg/res_17CZ.txt",
+    "$SOURCES/capreg/res_17DE.txt",
+    "$SOURCES/capreg/res_17DK.txt",
+    "$SOURCES/capreg/res_17EE.txt",
+    "$SOURCES/capreg/res_17EL.txt",
+    "$SOURCES/capreg/res_17ES.txt",
+    "$SOURCES/capreg/res_17FI.txt",
+    "$SOURCES/capreg/res_17FR.txt",
+    "$SOURCES/capreg/res_17HR.txt",
+    "$SOURCES/capreg/res_17HU.txt",
+    "$SOURCES/capreg/res_17IR.txt",
+    "$SOURCES/capreg/res_17IT.txt",
+    "$SOURCES/capreg/res_17LT.txt",
+    "$SOURCES/capreg/res_17LV.txt",
+    "$SOURCES/capreg/res_17MT.txt",
+    "$SOURCES/capreg/res_17NL.txt",
+    "$SOURCES/capreg/res_17NO.txt",
+    "$SOURCES/capreg/res_17PL.txt",
+    "$SOURCES/capreg/res_17PT.txt",
+    "$SOURCES/capreg/res_17RO.txt",
+    "$SOURCES/capreg/res_17SE.txt",
+    "$SOURCES/capreg/res_17SI.txt",
+    "$SOURCES/capreg/res_17SK.txt"
    ],
    "outputs": [
     "capri_data/2017/environment/crop_co2_coef.csv",
@@ -2092,8 +2092,8 @@
     "tools/lib/_model_regions.py"
    ],
    "external": [
-    "$UP/data_market_1730defaulta.csv",
-    "$UP/elas_2_1730defaulta.csv"
+    "$EXPORTS/data_market_1730defaulta.csv",
+    "$EXPORTS/elas_2_1730defaulta.csv"
    ],
    "outputs": [
     "capri_data/2017/market/gl_demand_b.csv",
@@ -2130,33 +2130,33 @@
     "tools/lib/_model_regions.py"
    ],
    "external": [
-    "$WORK/capreg/res_17AT.txt",
-    "$WORK/capreg/res_17BG.txt",
-    "$WORK/capreg/res_17BL.txt",
-    "$WORK/capreg/res_17CY.txt",
-    "$WORK/capreg/res_17CZ.txt",
-    "$WORK/capreg/res_17DE.txt",
-    "$WORK/capreg/res_17DK.txt",
-    "$WORK/capreg/res_17EE.txt",
-    "$WORK/capreg/res_17EL.txt",
-    "$WORK/capreg/res_17ES.txt",
-    "$WORK/capreg/res_17FI.txt",
-    "$WORK/capreg/res_17FR.txt",
-    "$WORK/capreg/res_17HR.txt",
-    "$WORK/capreg/res_17HU.txt",
-    "$WORK/capreg/res_17IR.txt",
-    "$WORK/capreg/res_17IT.txt",
-    "$WORK/capreg/res_17LT.txt",
-    "$WORK/capreg/res_17LV.txt",
-    "$WORK/capreg/res_17MT.txt",
-    "$WORK/capreg/res_17NL.txt",
-    "$WORK/capreg/res_17NO.txt",
-    "$WORK/capreg/res_17PL.txt",
-    "$WORK/capreg/res_17PT.txt",
-    "$WORK/capreg/res_17RO.txt",
-    "$WORK/capreg/res_17SE.txt",
-    "$WORK/capreg/res_17SI.txt",
-    "$WORK/capreg/res_17SK.txt"
+    "$SOURCES/capreg/res_17AT.txt",
+    "$SOURCES/capreg/res_17BG.txt",
+    "$SOURCES/capreg/res_17BL.txt",
+    "$SOURCES/capreg/res_17CY.txt",
+    "$SOURCES/capreg/res_17CZ.txt",
+    "$SOURCES/capreg/res_17DE.txt",
+    "$SOURCES/capreg/res_17DK.txt",
+    "$SOURCES/capreg/res_17EE.txt",
+    "$SOURCES/capreg/res_17EL.txt",
+    "$SOURCES/capreg/res_17ES.txt",
+    "$SOURCES/capreg/res_17FI.txt",
+    "$SOURCES/capreg/res_17FR.txt",
+    "$SOURCES/capreg/res_17HR.txt",
+    "$SOURCES/capreg/res_17HU.txt",
+    "$SOURCES/capreg/res_17IR.txt",
+    "$SOURCES/capreg/res_17IT.txt",
+    "$SOURCES/capreg/res_17LT.txt",
+    "$SOURCES/capreg/res_17LV.txt",
+    "$SOURCES/capreg/res_17MT.txt",
+    "$SOURCES/capreg/res_17NL.txt",
+    "$SOURCES/capreg/res_17NO.txt",
+    "$SOURCES/capreg/res_17PL.txt",
+    "$SOURCES/capreg/res_17PT.txt",
+    "$SOURCES/capreg/res_17RO.txt",
+    "$SOURCES/capreg/res_17SE.txt",
+    "$SOURCES/capreg/res_17SI.txt",
+    "$SOURCES/capreg/res_17SK.txt"
    ],
    "outputs": [
     "capri_data/2017/supply/grass_intensity.csv"
@@ -2167,9 +2167,9 @@
    "builder": "build_greendeal_targets",
    "args": [
     "--gams",
-    "$WORK/allgms/gams",
+    "$SOURCES/gams",
     "--gdxlib",
-    "$WORK/gdxlib"
+    "$SOURCES/gdxlib"
    ],
    "inputs": [],
    "code": [
@@ -2177,10 +2177,10 @@
     "tools/lib/_gdx.py"
    ],
    "external": [
-    "$WORK/allgms/gams/pol_input/greendeal/landscape_targets.gdx",
-    "$WORK/allgms/gams/pol_input/greendeal/organic_targets.gdx",
-    "$WORK/allgms/gams/pol_input/greendeal/organic_targets_uaa.gdx",
-    "$WORK/gdxlib/libgdxcclib64.so"
+    "$SOURCES/gams/pol_input/greendeal/landscape_targets.gdx",
+    "$SOURCES/gams/pol_input/greendeal/organic_targets.gdx",
+    "$SOURCES/gams/pol_input/greendeal/organic_targets_uaa.gdx",
+    "$SOURCES/gdxlib/libgdxcclib64.so"
    ],
    "outputs": [
     "capri_data/2017/policy/landscape_targets_ms.csv",
@@ -2207,7 +2207,7 @@
     "tools/lib/_model_regions.py"
    ],
    "external": [
-    "$WORK/allgms/gams/global/fao_codes_new.gms"
+    "$SOURCES/gams/global/fao_codes_new.gms"
    ],
    "outputs": [
     "capri_data/2017/environment/histosol.csv"
@@ -2281,34 +2281,34 @@
     "tools/lib/_money.py"
    ],
    "external": [
-    "$UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv",
-    "$WORK/capreg/res_17AT.txt",
-    "$WORK/capreg/res_17BG.txt",
-    "$WORK/capreg/res_17BL.txt",
-    "$WORK/capreg/res_17CY.txt",
-    "$WORK/capreg/res_17CZ.txt",
-    "$WORK/capreg/res_17DE.txt",
-    "$WORK/capreg/res_17DK.txt",
-    "$WORK/capreg/res_17EE.txt",
-    "$WORK/capreg/res_17EL.txt",
-    "$WORK/capreg/res_17ES.txt",
-    "$WORK/capreg/res_17FI.txt",
-    "$WORK/capreg/res_17FR.txt",
-    "$WORK/capreg/res_17HR.txt",
-    "$WORK/capreg/res_17HU.txt",
-    "$WORK/capreg/res_17IR.txt",
-    "$WORK/capreg/res_17IT.txt",
-    "$WORK/capreg/res_17LT.txt",
-    "$WORK/capreg/res_17LV.txt",
-    "$WORK/capreg/res_17MT.txt",
-    "$WORK/capreg/res_17NL.txt",
-    "$WORK/capreg/res_17NO.txt",
-    "$WORK/capreg/res_17PL.txt",
-    "$WORK/capreg/res_17PT.txt",
-    "$WORK/capreg/res_17RO.txt",
-    "$WORK/capreg/res_17SE.txt",
-    "$WORK/capreg/res_17SI.txt",
-    "$WORK/capreg/res_17SK.txt"
+    "$EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv",
+    "$SOURCES/capreg/res_17AT.txt",
+    "$SOURCES/capreg/res_17BG.txt",
+    "$SOURCES/capreg/res_17BL.txt",
+    "$SOURCES/capreg/res_17CY.txt",
+    "$SOURCES/capreg/res_17CZ.txt",
+    "$SOURCES/capreg/res_17DE.txt",
+    "$SOURCES/capreg/res_17DK.txt",
+    "$SOURCES/capreg/res_17EE.txt",
+    "$SOURCES/capreg/res_17EL.txt",
+    "$SOURCES/capreg/res_17ES.txt",
+    "$SOURCES/capreg/res_17FI.txt",
+    "$SOURCES/capreg/res_17FR.txt",
+    "$SOURCES/capreg/res_17HR.txt",
+    "$SOURCES/capreg/res_17HU.txt",
+    "$SOURCES/capreg/res_17IR.txt",
+    "$SOURCES/capreg/res_17IT.txt",
+    "$SOURCES/capreg/res_17LT.txt",
+    "$SOURCES/capreg/res_17LV.txt",
+    "$SOURCES/capreg/res_17MT.txt",
+    "$SOURCES/capreg/res_17NL.txt",
+    "$SOURCES/capreg/res_17NO.txt",
+    "$SOURCES/capreg/res_17PL.txt",
+    "$SOURCES/capreg/res_17PT.txt",
+    "$SOURCES/capreg/res_17RO.txt",
+    "$SOURCES/capreg/res_17SE.txt",
+    "$SOURCES/capreg/res_17SI.txt",
+    "$SOURCES/capreg/res_17SK.txt"
    ],
    "outputs": [
     "capri_data/2017/supply/labour_coef.csv",
@@ -2342,68 +2342,68 @@
     "tools/lib/_money.py"
    ],
    "external": [
-    "$WORK/capreg/res_17AT.txt",
-    "$WORK/capreg/res_17BG.txt",
-    "$WORK/capreg/res_17BL.txt",
-    "$WORK/capreg/res_17CY.txt",
-    "$WORK/capreg/res_17CZ.txt",
-    "$WORK/capreg/res_17DE.txt",
-    "$WORK/capreg/res_17DK.txt",
-    "$WORK/capreg/res_17EE.txt",
-    "$WORK/capreg/res_17EL.txt",
-    "$WORK/capreg/res_17ES.txt",
-    "$WORK/capreg/res_17FI.txt",
-    "$WORK/capreg/res_17FR.txt",
-    "$WORK/capreg/res_17HR.txt",
-    "$WORK/capreg/res_17HU.txt",
-    "$WORK/capreg/res_17IR.txt",
-    "$WORK/capreg/res_17IT.txt",
-    "$WORK/capreg/res_17LT.txt",
-    "$WORK/capreg/res_17LV.txt",
-    "$WORK/capreg/res_17MT.txt",
-    "$WORK/capreg/res_17NL.txt",
-    "$WORK/capreg/res_17NO.txt",
-    "$WORK/capreg/res_17PL.txt",
-    "$WORK/capreg/res_17PT.txt",
-    "$WORK/capreg/res_17RO.txt",
-    "$WORK/capreg/res_17SE.txt",
-    "$WORK/capreg/res_17SI.txt",
-    "$WORK/capreg/res_17SK.txt",
-    "$WORK/landexp/land_export/pmppar_17AL_p_pmpQuadLandTypes.csv",
-    "$WORK/landexp/land_export/pmppar_17AT_p_pmpQuadLandTypes.csv",
-    "$WORK/landexp/land_export/pmppar_17BA_p_pmpQuadLandTypes.csv",
-    "$WORK/landexp/land_export/pmppar_17BG_p_pmpQuadLandTypes.csv",
-    "$WORK/landexp/land_export/pmppar_17BL_p_pmpQuadLandTypes.csv",
-    "$WORK/landexp/land_export/pmppar_17CS_p_pmpQuadLandTypes.csv",
-    "$WORK/landexp/land_export/pmppar_17CY_p_pmpQuadLandTypes.csv",
-    "$WORK/landexp/land_export/pmppar_17CZ_p_pmpQuadLandTypes.csv",
-    "$WORK/landexp/land_export/pmppar_17DE_p_pmpQuadLandTypes.csv",
-    "$WORK/landexp/land_export/pmppar_17DK_p_pmpQuadLandTypes.csv",
-    "$WORK/landexp/land_export/pmppar_17EE_p_pmpQuadLandTypes.csv",
-    "$WORK/landexp/land_export/pmppar_17EL_p_pmpQuadLandTypes.csv",
-    "$WORK/landexp/land_export/pmppar_17ES_p_pmpQuadLandTypes.csv",
-    "$WORK/landexp/land_export/pmppar_17FI_p_pmpQuadLandTypes.csv",
-    "$WORK/landexp/land_export/pmppar_17FR_p_pmpQuadLandTypes.csv",
-    "$WORK/landexp/land_export/pmppar_17HR_p_pmpQuadLandTypes.csv",
-    "$WORK/landexp/land_export/pmppar_17HU_p_pmpQuadLandTypes.csv",
-    "$WORK/landexp/land_export/pmppar_17IR_p_pmpQuadLandTypes.csv",
-    "$WORK/landexp/land_export/pmppar_17IT_p_pmpQuadLandTypes.csv",
-    "$WORK/landexp/land_export/pmppar_17KO_p_pmpQuadLandTypes.csv",
-    "$WORK/landexp/land_export/pmppar_17LT_p_pmpQuadLandTypes.csv",
-    "$WORK/landexp/land_export/pmppar_17LV_p_pmpQuadLandTypes.csv",
-    "$WORK/landexp/land_export/pmppar_17MK_p_pmpQuadLandTypes.csv",
-    "$WORK/landexp/land_export/pmppar_17MO_p_pmpQuadLandTypes.csv",
-    "$WORK/landexp/land_export/pmppar_17MT_p_pmpQuadLandTypes.csv",
-    "$WORK/landexp/land_export/pmppar_17NL_p_pmpQuadLandTypes.csv",
-    "$WORK/landexp/land_export/pmppar_17NO_p_pmpQuadLandTypes.csv",
-    "$WORK/landexp/land_export/pmppar_17PL_p_pmpQuadLandTypes.csv",
-    "$WORK/landexp/land_export/pmppar_17PT_p_pmpQuadLandTypes.csv",
-    "$WORK/landexp/land_export/pmppar_17RO_p_pmpQuadLandTypes.csv",
-    "$WORK/landexp/land_export/pmppar_17SE_p_pmpQuadLandTypes.csv",
-    "$WORK/landexp/land_export/pmppar_17SI_p_pmpQuadLandTypes.csv",
-    "$WORK/landexp/land_export/pmppar_17SK_p_pmpQuadLandTypes.csv",
-    "$WORK/landexp/land_export/pmppar_17TU_p_pmpQuadLandTypes.csv",
-    "$WORK/landexp/land_export/pmppar_17UK_p_pmpQuadLandTypes.csv"
+    "$SOURCES/capreg/res_17AT.txt",
+    "$SOURCES/capreg/res_17BG.txt",
+    "$SOURCES/capreg/res_17BL.txt",
+    "$SOURCES/capreg/res_17CY.txt",
+    "$SOURCES/capreg/res_17CZ.txt",
+    "$SOURCES/capreg/res_17DE.txt",
+    "$SOURCES/capreg/res_17DK.txt",
+    "$SOURCES/capreg/res_17EE.txt",
+    "$SOURCES/capreg/res_17EL.txt",
+    "$SOURCES/capreg/res_17ES.txt",
+    "$SOURCES/capreg/res_17FI.txt",
+    "$SOURCES/capreg/res_17FR.txt",
+    "$SOURCES/capreg/res_17HR.txt",
+    "$SOURCES/capreg/res_17HU.txt",
+    "$SOURCES/capreg/res_17IR.txt",
+    "$SOURCES/capreg/res_17IT.txt",
+    "$SOURCES/capreg/res_17LT.txt",
+    "$SOURCES/capreg/res_17LV.txt",
+    "$SOURCES/capreg/res_17MT.txt",
+    "$SOURCES/capreg/res_17NL.txt",
+    "$SOURCES/capreg/res_17NO.txt",
+    "$SOURCES/capreg/res_17PL.txt",
+    "$SOURCES/capreg/res_17PT.txt",
+    "$SOURCES/capreg/res_17RO.txt",
+    "$SOURCES/capreg/res_17SE.txt",
+    "$SOURCES/capreg/res_17SI.txt",
+    "$SOURCES/capreg/res_17SK.txt",
+    "$SOURCES/land_export/pmppar_17AL_p_pmpQuadLandTypes.csv",
+    "$SOURCES/land_export/pmppar_17AT_p_pmpQuadLandTypes.csv",
+    "$SOURCES/land_export/pmppar_17BA_p_pmpQuadLandTypes.csv",
+    "$SOURCES/land_export/pmppar_17BG_p_pmpQuadLandTypes.csv",
+    "$SOURCES/land_export/pmppar_17BL_p_pmpQuadLandTypes.csv",
+    "$SOURCES/land_export/pmppar_17CS_p_pmpQuadLandTypes.csv",
+    "$SOURCES/land_export/pmppar_17CY_p_pmpQuadLandTypes.csv",
+    "$SOURCES/land_export/pmppar_17CZ_p_pmpQuadLandTypes.csv",
+    "$SOURCES/land_export/pmppar_17DE_p_pmpQuadLandTypes.csv",
+    "$SOURCES/land_export/pmppar_17DK_p_pmpQuadLandTypes.csv",
+    "$SOURCES/land_export/pmppar_17EE_p_pmpQuadLandTypes.csv",
+    "$SOURCES/land_export/pmppar_17EL_p_pmpQuadLandTypes.csv",
+    "$SOURCES/land_export/pmppar_17ES_p_pmpQuadLandTypes.csv",
+    "$SOURCES/land_export/pmppar_17FI_p_pmpQuadLandTypes.csv",
+    "$SOURCES/land_export/pmppar_17FR_p_pmpQuadLandTypes.csv",
+    "$SOURCES/land_export/pmppar_17HR_p_pmpQuadLandTypes.csv",
+    "$SOURCES/land_export/pmppar_17HU_p_pmpQuadLandTypes.csv",
+    "$SOURCES/land_export/pmppar_17IR_p_pmpQuadLandTypes.csv",
+    "$SOURCES/land_export/pmppar_17IT_p_pmpQuadLandTypes.csv",
+    "$SOURCES/land_export/pmppar_17KO_p_pmpQuadLandTypes.csv",
+    "$SOURCES/land_export/pmppar_17LT_p_pmpQuadLandTypes.csv",
+    "$SOURCES/land_export/pmppar_17LV_p_pmpQuadLandTypes.csv",
+    "$SOURCES/land_export/pmppar_17MK_p_pmpQuadLandTypes.csv",
+    "$SOURCES/land_export/pmppar_17MO_p_pmpQuadLandTypes.csv",
+    "$SOURCES/land_export/pmppar_17MT_p_pmpQuadLandTypes.csv",
+    "$SOURCES/land_export/pmppar_17NL_p_pmpQuadLandTypes.csv",
+    "$SOURCES/land_export/pmppar_17NO_p_pmpQuadLandTypes.csv",
+    "$SOURCES/land_export/pmppar_17PL_p_pmpQuadLandTypes.csv",
+    "$SOURCES/land_export/pmppar_17PT_p_pmpQuadLandTypes.csv",
+    "$SOURCES/land_export/pmppar_17RO_p_pmpQuadLandTypes.csv",
+    "$SOURCES/land_export/pmppar_17SE_p_pmpQuadLandTypes.csv",
+    "$SOURCES/land_export/pmppar_17SI_p_pmpQuadLandTypes.csv",
+    "$SOURCES/land_export/pmppar_17SK_p_pmpQuadLandTypes.csv",
+    "$SOURCES/land_export/pmppar_17TU_p_pmpQuadLandTypes.csv",
+    "$SOURCES/land_export/pmppar_17UK_p_pmpQuadLandTypes.csv"
    ],
    "outputs": [
     "capri_data/2017/supply/land_market_2017.csv",
@@ -2439,7 +2439,7 @@
     "tools/lib/_money.py"
    ],
    "external": [
-    "$UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv"
+    "$EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv"
    ],
    "outputs": [
     "capri_data/2017/supply/land_market_2030.csv",
@@ -2464,33 +2464,33 @@
     "tools/lib/_money.py"
    ],
    "external": [
-    "$WORK/capreg/res_17AT.txt",
-    "$WORK/capreg/res_17BG.txt",
-    "$WORK/capreg/res_17BL.txt",
-    "$WORK/capreg/res_17CY.txt",
-    "$WORK/capreg/res_17CZ.txt",
-    "$WORK/capreg/res_17DE.txt",
-    "$WORK/capreg/res_17DK.txt",
-    "$WORK/capreg/res_17EE.txt",
-    "$WORK/capreg/res_17EL.txt",
-    "$WORK/capreg/res_17ES.txt",
-    "$WORK/capreg/res_17FI.txt",
-    "$WORK/capreg/res_17FR.txt",
-    "$WORK/capreg/res_17HR.txt",
-    "$WORK/capreg/res_17HU.txt",
-    "$WORK/capreg/res_17IR.txt",
-    "$WORK/capreg/res_17IT.txt",
-    "$WORK/capreg/res_17LT.txt",
-    "$WORK/capreg/res_17LV.txt",
-    "$WORK/capreg/res_17MT.txt",
-    "$WORK/capreg/res_17NL.txt",
-    "$WORK/capreg/res_17NO.txt",
-    "$WORK/capreg/res_17PL.txt",
-    "$WORK/capreg/res_17PT.txt",
-    "$WORK/capreg/res_17RO.txt",
-    "$WORK/capreg/res_17SE.txt",
-    "$WORK/capreg/res_17SI.txt",
-    "$WORK/capreg/res_17SK.txt"
+    "$SOURCES/capreg/res_17AT.txt",
+    "$SOURCES/capreg/res_17BG.txt",
+    "$SOURCES/capreg/res_17BL.txt",
+    "$SOURCES/capreg/res_17CY.txt",
+    "$SOURCES/capreg/res_17CZ.txt",
+    "$SOURCES/capreg/res_17DE.txt",
+    "$SOURCES/capreg/res_17DK.txt",
+    "$SOURCES/capreg/res_17EE.txt",
+    "$SOURCES/capreg/res_17EL.txt",
+    "$SOURCES/capreg/res_17ES.txt",
+    "$SOURCES/capreg/res_17FI.txt",
+    "$SOURCES/capreg/res_17FR.txt",
+    "$SOURCES/capreg/res_17HR.txt",
+    "$SOURCES/capreg/res_17HU.txt",
+    "$SOURCES/capreg/res_17IR.txt",
+    "$SOURCES/capreg/res_17IT.txt",
+    "$SOURCES/capreg/res_17LT.txt",
+    "$SOURCES/capreg/res_17LV.txt",
+    "$SOURCES/capreg/res_17MT.txt",
+    "$SOURCES/capreg/res_17NL.txt",
+    "$SOURCES/capreg/res_17NO.txt",
+    "$SOURCES/capreg/res_17PL.txt",
+    "$SOURCES/capreg/res_17PT.txt",
+    "$SOURCES/capreg/res_17RO.txt",
+    "$SOURCES/capreg/res_17SE.txt",
+    "$SOURCES/capreg/res_17SI.txt",
+    "$SOURCES/capreg/res_17SK.txt"
    ],
    "outputs": [
     "capri_data/2017/supply/land_rents_2017.csv",
@@ -2516,7 +2516,7 @@
     "tools/lib/_money.py"
    ],
    "external": [
-    "$UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv"
+    "$EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv"
    ],
    "outputs": [
     "capri_data/2017/supply/land_rents_2030.csv",
@@ -2548,33 +2548,33 @@
     "tools/lib/_model_regions.py"
    ],
    "external": [
-    "$WORK/capreg/res_17AT.txt",
-    "$WORK/capreg/res_17BG.txt",
-    "$WORK/capreg/res_17BL.txt",
-    "$WORK/capreg/res_17CY.txt",
-    "$WORK/capreg/res_17CZ.txt",
-    "$WORK/capreg/res_17DE.txt",
-    "$WORK/capreg/res_17DK.txt",
-    "$WORK/capreg/res_17EE.txt",
-    "$WORK/capreg/res_17EL.txt",
-    "$WORK/capreg/res_17ES.txt",
-    "$WORK/capreg/res_17FI.txt",
-    "$WORK/capreg/res_17FR.txt",
-    "$WORK/capreg/res_17HR.txt",
-    "$WORK/capreg/res_17HU.txt",
-    "$WORK/capreg/res_17IR.txt",
-    "$WORK/capreg/res_17IT.txt",
-    "$WORK/capreg/res_17LT.txt",
-    "$WORK/capreg/res_17LV.txt",
-    "$WORK/capreg/res_17MT.txt",
-    "$WORK/capreg/res_17NL.txt",
-    "$WORK/capreg/res_17NO.txt",
-    "$WORK/capreg/res_17PL.txt",
-    "$WORK/capreg/res_17PT.txt",
-    "$WORK/capreg/res_17RO.txt",
-    "$WORK/capreg/res_17SE.txt",
-    "$WORK/capreg/res_17SI.txt",
-    "$WORK/capreg/res_17SK.txt"
+    "$SOURCES/capreg/res_17AT.txt",
+    "$SOURCES/capreg/res_17BG.txt",
+    "$SOURCES/capreg/res_17BL.txt",
+    "$SOURCES/capreg/res_17CY.txt",
+    "$SOURCES/capreg/res_17CZ.txt",
+    "$SOURCES/capreg/res_17DE.txt",
+    "$SOURCES/capreg/res_17DK.txt",
+    "$SOURCES/capreg/res_17EE.txt",
+    "$SOURCES/capreg/res_17EL.txt",
+    "$SOURCES/capreg/res_17ES.txt",
+    "$SOURCES/capreg/res_17FI.txt",
+    "$SOURCES/capreg/res_17FR.txt",
+    "$SOURCES/capreg/res_17HR.txt",
+    "$SOURCES/capreg/res_17HU.txt",
+    "$SOURCES/capreg/res_17IR.txt",
+    "$SOURCES/capreg/res_17IT.txt",
+    "$SOURCES/capreg/res_17LT.txt",
+    "$SOURCES/capreg/res_17LV.txt",
+    "$SOURCES/capreg/res_17MT.txt",
+    "$SOURCES/capreg/res_17NL.txt",
+    "$SOURCES/capreg/res_17NO.txt",
+    "$SOURCES/capreg/res_17PL.txt",
+    "$SOURCES/capreg/res_17PT.txt",
+    "$SOURCES/capreg/res_17RO.txt",
+    "$SOURCES/capreg/res_17SE.txt",
+    "$SOURCES/capreg/res_17SI.txt",
+    "$SOURCES/capreg/res_17SK.txt"
    ],
    "outputs": [
     "capri_data/2017/environment/livestock_n_export_coef.csv"
@@ -2584,7 +2584,7 @@
    "task": "build_livestock_output_coef",
    "builder": "build_livestock_output_coef",
    "args": [
-    "$WORK/capreg"
+    "$SOURCES/capreg"
    ],
    "inputs": [
     "capri_data/2017/supply/animal_numbers.csv",
@@ -2606,33 +2606,33 @@
     "tools/lib/_model_regions.py"
    ],
    "external": [
-    "$WORK/capreg/res_17AT.txt",
-    "$WORK/capreg/res_17BG.txt",
-    "$WORK/capreg/res_17BL.txt",
-    "$WORK/capreg/res_17CY.txt",
-    "$WORK/capreg/res_17CZ.txt",
-    "$WORK/capreg/res_17DE.txt",
-    "$WORK/capreg/res_17DK.txt",
-    "$WORK/capreg/res_17EE.txt",
-    "$WORK/capreg/res_17EL.txt",
-    "$WORK/capreg/res_17ES.txt",
-    "$WORK/capreg/res_17FI.txt",
-    "$WORK/capreg/res_17FR.txt",
-    "$WORK/capreg/res_17HR.txt",
-    "$WORK/capreg/res_17HU.txt",
-    "$WORK/capreg/res_17IR.txt",
-    "$WORK/capreg/res_17IT.txt",
-    "$WORK/capreg/res_17LT.txt",
-    "$WORK/capreg/res_17LV.txt",
-    "$WORK/capreg/res_17MT.txt",
-    "$WORK/capreg/res_17NL.txt",
-    "$WORK/capreg/res_17NO.txt",
-    "$WORK/capreg/res_17PL.txt",
-    "$WORK/capreg/res_17PT.txt",
-    "$WORK/capreg/res_17RO.txt",
-    "$WORK/capreg/res_17SE.txt",
-    "$WORK/capreg/res_17SI.txt",
-    "$WORK/capreg/res_17SK.txt"
+    "$SOURCES/capreg/res_17AT.txt",
+    "$SOURCES/capreg/res_17BG.txt",
+    "$SOURCES/capreg/res_17BL.txt",
+    "$SOURCES/capreg/res_17CY.txt",
+    "$SOURCES/capreg/res_17CZ.txt",
+    "$SOURCES/capreg/res_17DE.txt",
+    "$SOURCES/capreg/res_17DK.txt",
+    "$SOURCES/capreg/res_17EE.txt",
+    "$SOURCES/capreg/res_17EL.txt",
+    "$SOURCES/capreg/res_17ES.txt",
+    "$SOURCES/capreg/res_17FI.txt",
+    "$SOURCES/capreg/res_17FR.txt",
+    "$SOURCES/capreg/res_17HR.txt",
+    "$SOURCES/capreg/res_17HU.txt",
+    "$SOURCES/capreg/res_17IR.txt",
+    "$SOURCES/capreg/res_17IT.txt",
+    "$SOURCES/capreg/res_17LT.txt",
+    "$SOURCES/capreg/res_17LV.txt",
+    "$SOURCES/capreg/res_17MT.txt",
+    "$SOURCES/capreg/res_17NL.txt",
+    "$SOURCES/capreg/res_17NO.txt",
+    "$SOURCES/capreg/res_17PL.txt",
+    "$SOURCES/capreg/res_17PT.txt",
+    "$SOURCES/capreg/res_17RO.txt",
+    "$SOURCES/capreg/res_17SE.txt",
+    "$SOURCES/capreg/res_17SI.txt",
+    "$SOURCES/capreg/res_17SK.txt"
    ],
    "outputs": [
     "capri_data/2017/environment/livestock_manure_n_coef.csv",
@@ -2648,7 +2648,7 @@
    "task": "build_livestock_premium_coef",
    "builder": "build_livestock_premium_coef",
    "args": [
-    "$WORK/capreg"
+    "$SOURCES/capreg"
    ],
    "inputs": [
     "capri_data/2017/supply/animal_numbers.csv",
@@ -2673,33 +2673,33 @@
     "tools/lib/_model_regions.py"
    ],
    "external": [
-    "$WORK/capreg/res_17AT.txt",
-    "$WORK/capreg/res_17BG.txt",
-    "$WORK/capreg/res_17BL.txt",
-    "$WORK/capreg/res_17CY.txt",
-    "$WORK/capreg/res_17CZ.txt",
-    "$WORK/capreg/res_17DE.txt",
-    "$WORK/capreg/res_17DK.txt",
-    "$WORK/capreg/res_17EE.txt",
-    "$WORK/capreg/res_17EL.txt",
-    "$WORK/capreg/res_17ES.txt",
-    "$WORK/capreg/res_17FI.txt",
-    "$WORK/capreg/res_17FR.txt",
-    "$WORK/capreg/res_17HR.txt",
-    "$WORK/capreg/res_17HU.txt",
-    "$WORK/capreg/res_17IR.txt",
-    "$WORK/capreg/res_17IT.txt",
-    "$WORK/capreg/res_17LT.txt",
-    "$WORK/capreg/res_17LV.txt",
-    "$WORK/capreg/res_17MT.txt",
-    "$WORK/capreg/res_17NL.txt",
-    "$WORK/capreg/res_17NO.txt",
-    "$WORK/capreg/res_17PL.txt",
-    "$WORK/capreg/res_17PT.txt",
-    "$WORK/capreg/res_17RO.txt",
-    "$WORK/capreg/res_17SE.txt",
-    "$WORK/capreg/res_17SI.txt",
-    "$WORK/capreg/res_17SK.txt"
+    "$SOURCES/capreg/res_17AT.txt",
+    "$SOURCES/capreg/res_17BG.txt",
+    "$SOURCES/capreg/res_17BL.txt",
+    "$SOURCES/capreg/res_17CY.txt",
+    "$SOURCES/capreg/res_17CZ.txt",
+    "$SOURCES/capreg/res_17DE.txt",
+    "$SOURCES/capreg/res_17DK.txt",
+    "$SOURCES/capreg/res_17EE.txt",
+    "$SOURCES/capreg/res_17EL.txt",
+    "$SOURCES/capreg/res_17ES.txt",
+    "$SOURCES/capreg/res_17FI.txt",
+    "$SOURCES/capreg/res_17FR.txt",
+    "$SOURCES/capreg/res_17HR.txt",
+    "$SOURCES/capreg/res_17HU.txt",
+    "$SOURCES/capreg/res_17IR.txt",
+    "$SOURCES/capreg/res_17IT.txt",
+    "$SOURCES/capreg/res_17LT.txt",
+    "$SOURCES/capreg/res_17LV.txt",
+    "$SOURCES/capreg/res_17MT.txt",
+    "$SOURCES/capreg/res_17NL.txt",
+    "$SOURCES/capreg/res_17NO.txt",
+    "$SOURCES/capreg/res_17PL.txt",
+    "$SOURCES/capreg/res_17PT.txt",
+    "$SOURCES/capreg/res_17RO.txt",
+    "$SOURCES/capreg/res_17SE.txt",
+    "$SOURCES/capreg/res_17SI.txt",
+    "$SOURCES/capreg/res_17SK.txt"
    ],
    "outputs": [
     "capri_data/2017/supply/livestock_premium_coef.csv"
@@ -2731,33 +2731,33 @@
     "tools/lib/_model_regions.py"
    ],
    "external": [
-    "$WORK/capreg/res_17AT.txt",
-    "$WORK/capreg/res_17BG.txt",
-    "$WORK/capreg/res_17BL.txt",
-    "$WORK/capreg/res_17CY.txt",
-    "$WORK/capreg/res_17CZ.txt",
-    "$WORK/capreg/res_17DE.txt",
-    "$WORK/capreg/res_17DK.txt",
-    "$WORK/capreg/res_17EE.txt",
-    "$WORK/capreg/res_17EL.txt",
-    "$WORK/capreg/res_17ES.txt",
-    "$WORK/capreg/res_17FI.txt",
-    "$WORK/capreg/res_17FR.txt",
-    "$WORK/capreg/res_17HR.txt",
-    "$WORK/capreg/res_17HU.txt",
-    "$WORK/capreg/res_17IR.txt",
-    "$WORK/capreg/res_17IT.txt",
-    "$WORK/capreg/res_17LT.txt",
-    "$WORK/capreg/res_17LV.txt",
-    "$WORK/capreg/res_17MT.txt",
-    "$WORK/capreg/res_17NL.txt",
-    "$WORK/capreg/res_17NO.txt",
-    "$WORK/capreg/res_17PL.txt",
-    "$WORK/capreg/res_17PT.txt",
-    "$WORK/capreg/res_17RO.txt",
-    "$WORK/capreg/res_17SE.txt",
-    "$WORK/capreg/res_17SI.txt",
-    "$WORK/capreg/res_17SK.txt"
+    "$SOURCES/capreg/res_17AT.txt",
+    "$SOURCES/capreg/res_17BG.txt",
+    "$SOURCES/capreg/res_17BL.txt",
+    "$SOURCES/capreg/res_17CY.txt",
+    "$SOURCES/capreg/res_17CZ.txt",
+    "$SOURCES/capreg/res_17DE.txt",
+    "$SOURCES/capreg/res_17DK.txt",
+    "$SOURCES/capreg/res_17EE.txt",
+    "$SOURCES/capreg/res_17EL.txt",
+    "$SOURCES/capreg/res_17ES.txt",
+    "$SOURCES/capreg/res_17FI.txt",
+    "$SOURCES/capreg/res_17FR.txt",
+    "$SOURCES/capreg/res_17HR.txt",
+    "$SOURCES/capreg/res_17HU.txt",
+    "$SOURCES/capreg/res_17IR.txt",
+    "$SOURCES/capreg/res_17IT.txt",
+    "$SOURCES/capreg/res_17LT.txt",
+    "$SOURCES/capreg/res_17LV.txt",
+    "$SOURCES/capreg/res_17MT.txt",
+    "$SOURCES/capreg/res_17NL.txt",
+    "$SOURCES/capreg/res_17NO.txt",
+    "$SOURCES/capreg/res_17PL.txt",
+    "$SOURCES/capreg/res_17PT.txt",
+    "$SOURCES/capreg/res_17RO.txt",
+    "$SOURCES/capreg/res_17SE.txt",
+    "$SOURCES/capreg/res_17SI.txt",
+    "$SOURCES/capreg/res_17SK.txt"
    ],
    "outputs": [
     "capri_data/2017/supply/livestock_output_by_product_coef.csv",
@@ -2781,33 +2781,33 @@
     "tools/lib/_model_regions.py"
    ],
    "external": [
-    "$WORK/capreg/res_17AT.txt",
-    "$WORK/capreg/res_17BG.txt",
-    "$WORK/capreg/res_17BL.txt",
-    "$WORK/capreg/res_17CY.txt",
-    "$WORK/capreg/res_17CZ.txt",
-    "$WORK/capreg/res_17DE.txt",
-    "$WORK/capreg/res_17DK.txt",
-    "$WORK/capreg/res_17EE.txt",
-    "$WORK/capreg/res_17EL.txt",
-    "$WORK/capreg/res_17ES.txt",
-    "$WORK/capreg/res_17FI.txt",
-    "$WORK/capreg/res_17FR.txt",
-    "$WORK/capreg/res_17HR.txt",
-    "$WORK/capreg/res_17HU.txt",
-    "$WORK/capreg/res_17IR.txt",
-    "$WORK/capreg/res_17IT.txt",
-    "$WORK/capreg/res_17LT.txt",
-    "$WORK/capreg/res_17LV.txt",
-    "$WORK/capreg/res_17MT.txt",
-    "$WORK/capreg/res_17NL.txt",
-    "$WORK/capreg/res_17NO.txt",
-    "$WORK/capreg/res_17PL.txt",
-    "$WORK/capreg/res_17PT.txt",
-    "$WORK/capreg/res_17RO.txt",
-    "$WORK/capreg/res_17SE.txt",
-    "$WORK/capreg/res_17SI.txt",
-    "$WORK/capreg/res_17SK.txt"
+    "$SOURCES/capreg/res_17AT.txt",
+    "$SOURCES/capreg/res_17BG.txt",
+    "$SOURCES/capreg/res_17BL.txt",
+    "$SOURCES/capreg/res_17CY.txt",
+    "$SOURCES/capreg/res_17CZ.txt",
+    "$SOURCES/capreg/res_17DE.txt",
+    "$SOURCES/capreg/res_17DK.txt",
+    "$SOURCES/capreg/res_17EE.txt",
+    "$SOURCES/capreg/res_17EL.txt",
+    "$SOURCES/capreg/res_17ES.txt",
+    "$SOURCES/capreg/res_17FI.txt",
+    "$SOURCES/capreg/res_17FR.txt",
+    "$SOURCES/capreg/res_17HR.txt",
+    "$SOURCES/capreg/res_17HU.txt",
+    "$SOURCES/capreg/res_17IR.txt",
+    "$SOURCES/capreg/res_17IT.txt",
+    "$SOURCES/capreg/res_17LT.txt",
+    "$SOURCES/capreg/res_17LV.txt",
+    "$SOURCES/capreg/res_17MT.txt",
+    "$SOURCES/capreg/res_17NL.txt",
+    "$SOURCES/capreg/res_17NO.txt",
+    "$SOURCES/capreg/res_17PL.txt",
+    "$SOURCES/capreg/res_17PT.txt",
+    "$SOURCES/capreg/res_17RO.txt",
+    "$SOURCES/capreg/res_17SE.txt",
+    "$SOURCES/capreg/res_17SI.txt",
+    "$SOURCES/capreg/res_17SK.txt"
    ],
    "outputs": [
     "capri_data/2017/supply/livestock_units.csv"
@@ -2836,34 +2836,34 @@
     "tools/lib/_money.py"
    ],
    "external": [
-    "$UP/animReq_SK.zip",
-    "$WORK/capreg/res_17AT.txt",
-    "$WORK/capreg/res_17BG.txt",
-    "$WORK/capreg/res_17BL.txt",
-    "$WORK/capreg/res_17CY.txt",
-    "$WORK/capreg/res_17CZ.txt",
-    "$WORK/capreg/res_17DE.txt",
-    "$WORK/capreg/res_17DK.txt",
-    "$WORK/capreg/res_17EE.txt",
-    "$WORK/capreg/res_17EL.txt",
-    "$WORK/capreg/res_17ES.txt",
-    "$WORK/capreg/res_17FI.txt",
-    "$WORK/capreg/res_17FR.txt",
-    "$WORK/capreg/res_17HR.txt",
-    "$WORK/capreg/res_17HU.txt",
-    "$WORK/capreg/res_17IR.txt",
-    "$WORK/capreg/res_17IT.txt",
-    "$WORK/capreg/res_17LT.txt",
-    "$WORK/capreg/res_17LV.txt",
-    "$WORK/capreg/res_17MT.txt",
-    "$WORK/capreg/res_17NL.txt",
-    "$WORK/capreg/res_17NO.txt",
-    "$WORK/capreg/res_17PL.txt",
-    "$WORK/capreg/res_17PT.txt",
-    "$WORK/capreg/res_17RO.txt",
-    "$WORK/capreg/res_17SE.txt",
-    "$WORK/capreg/res_17SI.txt",
-    "$WORK/capreg/res_17SK.txt"
+    "$EXPORTS/animReq_SK.zip",
+    "$SOURCES/capreg/res_17AT.txt",
+    "$SOURCES/capreg/res_17BG.txt",
+    "$SOURCES/capreg/res_17BL.txt",
+    "$SOURCES/capreg/res_17CY.txt",
+    "$SOURCES/capreg/res_17CZ.txt",
+    "$SOURCES/capreg/res_17DE.txt",
+    "$SOURCES/capreg/res_17DK.txt",
+    "$SOURCES/capreg/res_17EE.txt",
+    "$SOURCES/capreg/res_17EL.txt",
+    "$SOURCES/capreg/res_17ES.txt",
+    "$SOURCES/capreg/res_17FI.txt",
+    "$SOURCES/capreg/res_17FR.txt",
+    "$SOURCES/capreg/res_17HR.txt",
+    "$SOURCES/capreg/res_17HU.txt",
+    "$SOURCES/capreg/res_17IR.txt",
+    "$SOURCES/capreg/res_17IT.txt",
+    "$SOURCES/capreg/res_17LT.txt",
+    "$SOURCES/capreg/res_17LV.txt",
+    "$SOURCES/capreg/res_17MT.txt",
+    "$SOURCES/capreg/res_17NL.txt",
+    "$SOURCES/capreg/res_17NO.txt",
+    "$SOURCES/capreg/res_17PL.txt",
+    "$SOURCES/capreg/res_17PT.txt",
+    "$SOURCES/capreg/res_17RO.txt",
+    "$SOURCES/capreg/res_17SE.txt",
+    "$SOURCES/capreg/res_17SI.txt",
+    "$SOURCES/capreg/res_17SK.txt"
    ],
    "outputs": [
     "capri_data/2017/abatement/mitigation/lownfeed_effects.csv",
@@ -2880,7 +2880,7 @@
     "tools/build/build_luc_2030.py"
    ],
    "external": [
-    "$UP/res_2_1730greendeal_refdefaulta.zip"
+    "$EXPORTS/res_2_1730greendeal_refdefaulta.zip"
    ],
    "outputs": [
     "capri_data/2017/environment/luc_2030.csv"
@@ -2901,7 +2901,7 @@
     "tools/lib/_model_regions.py"
    ],
    "external": [
-    "$UP/res_2_1730greendeal_refdefaulta.zip"
+    "$EXPORTS/res_2_1730greendeal_refdefaulta.zip"
    ],
    "outputs": [
     "capri_data/2017/environment/manure_housing_losses_2030.csv"
@@ -2925,33 +2925,33 @@
     "tools/lib/_model_regions.py"
    ],
    "external": [
-    "$WORK/capreg/res_17AT.txt",
-    "$WORK/capreg/res_17BG.txt",
-    "$WORK/capreg/res_17BL.txt",
-    "$WORK/capreg/res_17CY.txt",
-    "$WORK/capreg/res_17CZ.txt",
-    "$WORK/capreg/res_17DE.txt",
-    "$WORK/capreg/res_17DK.txt",
-    "$WORK/capreg/res_17EE.txt",
-    "$WORK/capreg/res_17EL.txt",
-    "$WORK/capreg/res_17ES.txt",
-    "$WORK/capreg/res_17FI.txt",
-    "$WORK/capreg/res_17FR.txt",
-    "$WORK/capreg/res_17HR.txt",
-    "$WORK/capreg/res_17HU.txt",
-    "$WORK/capreg/res_17IR.txt",
-    "$WORK/capreg/res_17IT.txt",
-    "$WORK/capreg/res_17LT.txt",
-    "$WORK/capreg/res_17LV.txt",
-    "$WORK/capreg/res_17MT.txt",
-    "$WORK/capreg/res_17NL.txt",
-    "$WORK/capreg/res_17NO.txt",
-    "$WORK/capreg/res_17PL.txt",
-    "$WORK/capreg/res_17PT.txt",
-    "$WORK/capreg/res_17RO.txt",
-    "$WORK/capreg/res_17SE.txt",
-    "$WORK/capreg/res_17SI.txt",
-    "$WORK/capreg/res_17SK.txt"
+    "$SOURCES/capreg/res_17AT.txt",
+    "$SOURCES/capreg/res_17BG.txt",
+    "$SOURCES/capreg/res_17BL.txt",
+    "$SOURCES/capreg/res_17CY.txt",
+    "$SOURCES/capreg/res_17CZ.txt",
+    "$SOURCES/capreg/res_17DE.txt",
+    "$SOURCES/capreg/res_17DK.txt",
+    "$SOURCES/capreg/res_17EE.txt",
+    "$SOURCES/capreg/res_17EL.txt",
+    "$SOURCES/capreg/res_17ES.txt",
+    "$SOURCES/capreg/res_17FI.txt",
+    "$SOURCES/capreg/res_17FR.txt",
+    "$SOURCES/capreg/res_17HR.txt",
+    "$SOURCES/capreg/res_17HU.txt",
+    "$SOURCES/capreg/res_17IR.txt",
+    "$SOURCES/capreg/res_17IT.txt",
+    "$SOURCES/capreg/res_17LT.txt",
+    "$SOURCES/capreg/res_17LV.txt",
+    "$SOURCES/capreg/res_17MT.txt",
+    "$SOURCES/capreg/res_17NL.txt",
+    "$SOURCES/capreg/res_17NO.txt",
+    "$SOURCES/capreg/res_17PL.txt",
+    "$SOURCES/capreg/res_17PT.txt",
+    "$SOURCES/capreg/res_17RO.txt",
+    "$SOURCES/capreg/res_17SE.txt",
+    "$SOURCES/capreg/res_17SI.txt",
+    "$SOURCES/capreg/res_17SK.txt"
    ],
    "outputs": [
     "capri_data/2017/environment/manure_n2o_factors.csv",
@@ -2963,15 +2963,15 @@
    "builder": "build_manure_pool_costs",
    "args": [
     "--dist",
-    "$UP/nuts2_center_distance.csv"
+    "$EXPORTS/nuts2_center_distance.csv"
    ],
    "inputs": [],
    "code": [
     "tools/build/build_manure_pool_costs.py"
    ],
    "external": [
-    "$UP/nuts2_center_distance.csv",
-    "$WORK/allgms/gams/manuremarket/define_manure_market_structure.gms"
+    "$EXPORTS/nuts2_center_distance.csv",
+    "$SOURCES/gams/manuremarket/define_manure_market_structure.gms"
    ],
    "outputs": [
     "capri_data/2017/environment/manure_pool_costs.json"
@@ -3001,7 +3001,7 @@
     "tools/lib/_model_regions.py"
    ],
    "external": [
-    "$UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv"
+    "$EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv"
    ],
    "outputs": [
     "capri_data/2017/environment/manure_trade_2030.csv",
@@ -3012,7 +3012,7 @@
    "task": "build_mineral_n_price",
    "builder": "build_mineral_n_price",
    "args": [
-    "$WORK/capreg"
+    "$SOURCES/capreg"
    ],
    "inputs": [
     "capri_data/shared/capri_member_state_codes.csv"
@@ -3021,33 +3021,33 @@
     "tools/build/build_mineral_n_price.py"
    ],
    "external": [
-    "$WORK/capreg/res_17AT.txt",
-    "$WORK/capreg/res_17BG.txt",
-    "$WORK/capreg/res_17BL.txt",
-    "$WORK/capreg/res_17CY.txt",
-    "$WORK/capreg/res_17CZ.txt",
-    "$WORK/capreg/res_17DE.txt",
-    "$WORK/capreg/res_17DK.txt",
-    "$WORK/capreg/res_17EE.txt",
-    "$WORK/capreg/res_17EL.txt",
-    "$WORK/capreg/res_17ES.txt",
-    "$WORK/capreg/res_17FI.txt",
-    "$WORK/capreg/res_17FR.txt",
-    "$WORK/capreg/res_17HR.txt",
-    "$WORK/capreg/res_17HU.txt",
-    "$WORK/capreg/res_17IR.txt",
-    "$WORK/capreg/res_17IT.txt",
-    "$WORK/capreg/res_17LT.txt",
-    "$WORK/capreg/res_17LV.txt",
-    "$WORK/capreg/res_17MT.txt",
-    "$WORK/capreg/res_17NL.txt",
-    "$WORK/capreg/res_17NO.txt",
-    "$WORK/capreg/res_17PL.txt",
-    "$WORK/capreg/res_17PT.txt",
-    "$WORK/capreg/res_17RO.txt",
-    "$WORK/capreg/res_17SE.txt",
-    "$WORK/capreg/res_17SI.txt",
-    "$WORK/capreg/res_17SK.txt"
+    "$SOURCES/capreg/res_17AT.txt",
+    "$SOURCES/capreg/res_17BG.txt",
+    "$SOURCES/capreg/res_17BL.txt",
+    "$SOURCES/capreg/res_17CY.txt",
+    "$SOURCES/capreg/res_17CZ.txt",
+    "$SOURCES/capreg/res_17DE.txt",
+    "$SOURCES/capreg/res_17DK.txt",
+    "$SOURCES/capreg/res_17EE.txt",
+    "$SOURCES/capreg/res_17EL.txt",
+    "$SOURCES/capreg/res_17ES.txt",
+    "$SOURCES/capreg/res_17FI.txt",
+    "$SOURCES/capreg/res_17FR.txt",
+    "$SOURCES/capreg/res_17HR.txt",
+    "$SOURCES/capreg/res_17HU.txt",
+    "$SOURCES/capreg/res_17IR.txt",
+    "$SOURCES/capreg/res_17IT.txt",
+    "$SOURCES/capreg/res_17LT.txt",
+    "$SOURCES/capreg/res_17LV.txt",
+    "$SOURCES/capreg/res_17MT.txt",
+    "$SOURCES/capreg/res_17NL.txt",
+    "$SOURCES/capreg/res_17NO.txt",
+    "$SOURCES/capreg/res_17PL.txt",
+    "$SOURCES/capreg/res_17PT.txt",
+    "$SOURCES/capreg/res_17RO.txt",
+    "$SOURCES/capreg/res_17SE.txt",
+    "$SOURCES/capreg/res_17SI.txt",
+    "$SOURCES/capreg/res_17SK.txt"
    ],
    "outputs": [
     "capri_data/2017/supply/mineral_n_price.csv"
@@ -3074,7 +3074,7 @@
    "task": "build_mitigation_inputs",
    "builder": "build_mitigation_inputs",
    "args": [
-    "$UP"
+    "$EXPORTS"
    ],
    "inputs": [],
    "code": [
@@ -3083,8 +3083,8 @@
     "tools/lib/paths.py"
    ],
    "external": [
-    "$UP/fedcof.gms",
-    "$UP/trends_1730.csv"
+    "$EXPORTS/fedcof.gms",
+    "$EXPORTS/trends_1730.csv"
    ],
    "outputs": [
     "capri_data/2017/abatement/mitigation/p_nutCont.csv",
@@ -3174,7 +3174,7 @@
     "tools/lib/_model_regions.py"
    ],
    "external": [
-    "$WORK/nh3/nh3_rows.txt"
+    "$EXPORTS/res_2_1730greendeal_refdefaulta.zip"
    ],
    "outputs": [
     "capri_data/2017/environment/nh3_factors_capri.json"
@@ -3200,8 +3200,8 @@
     "tools/lib/_capri_nq.py"
    ],
    "external": [
-    "$UP/data_market_1730defaulta.csv",
-    "$UP/elas_2_1730defaulta.csv"
+    "$EXPORTS/data_market_1730defaulta.csv",
+    "$EXPORTS/elas_2_1730defaulta.csv"
    ],
    "outputs": [
     "capri_data/2017/market/noneu_feed_base.csv",
@@ -3228,9 +3228,9 @@
     "tools/lib/_capri_nq.py"
    ],
    "external": [
-    "$UP/data_market_1730defaulta.csv",
-    "$UP/elas_2_1730defaulta.csv",
-    "$UP/markmarket_greendeal_1730et_base_1717.txt"
+    "$EXPORTS/data_market_1730defaulta.csv",
+    "$EXPORTS/elas_2_1730defaulta.csv",
+    "$EXPORTS/markmarket_greendeal_1730et_base_1717.txt"
    ],
    "outputs": [
     "capri_data/2017/market/noneu_market_supply_nq.csv"
@@ -3268,34 +3268,34 @@
     "tools/lib/_money.py"
    ],
    "external": [
-    "$UP/res_2_1730greendeal_refdefaulta.zip",
-    "$WORK/capreg/res_17AT.txt",
-    "$WORK/capreg/res_17BG.txt",
-    "$WORK/capreg/res_17BL.txt",
-    "$WORK/capreg/res_17CY.txt",
-    "$WORK/capreg/res_17CZ.txt",
-    "$WORK/capreg/res_17DE.txt",
-    "$WORK/capreg/res_17DK.txt",
-    "$WORK/capreg/res_17EE.txt",
-    "$WORK/capreg/res_17EL.txt",
-    "$WORK/capreg/res_17ES.txt",
-    "$WORK/capreg/res_17FI.txt",
-    "$WORK/capreg/res_17FR.txt",
-    "$WORK/capreg/res_17HR.txt",
-    "$WORK/capreg/res_17HU.txt",
-    "$WORK/capreg/res_17IR.txt",
-    "$WORK/capreg/res_17IT.txt",
-    "$WORK/capreg/res_17LT.txt",
-    "$WORK/capreg/res_17LV.txt",
-    "$WORK/capreg/res_17MT.txt",
-    "$WORK/capreg/res_17NL.txt",
-    "$WORK/capreg/res_17NO.txt",
-    "$WORK/capreg/res_17PL.txt",
-    "$WORK/capreg/res_17PT.txt",
-    "$WORK/capreg/res_17RO.txt",
-    "$WORK/capreg/res_17SE.txt",
-    "$WORK/capreg/res_17SI.txt",
-    "$WORK/capreg/res_17SK.txt"
+    "$EXPORTS/res_2_1730greendeal_refdefaulta.zip",
+    "$SOURCES/capreg/res_17AT.txt",
+    "$SOURCES/capreg/res_17BG.txt",
+    "$SOURCES/capreg/res_17BL.txt",
+    "$SOURCES/capreg/res_17CY.txt",
+    "$SOURCES/capreg/res_17CZ.txt",
+    "$SOURCES/capreg/res_17DE.txt",
+    "$SOURCES/capreg/res_17DK.txt",
+    "$SOURCES/capreg/res_17EE.txt",
+    "$SOURCES/capreg/res_17EL.txt",
+    "$SOURCES/capreg/res_17ES.txt",
+    "$SOURCES/capreg/res_17FI.txt",
+    "$SOURCES/capreg/res_17FR.txt",
+    "$SOURCES/capreg/res_17HR.txt",
+    "$SOURCES/capreg/res_17HU.txt",
+    "$SOURCES/capreg/res_17IR.txt",
+    "$SOURCES/capreg/res_17IT.txt",
+    "$SOURCES/capreg/res_17LT.txt",
+    "$SOURCES/capreg/res_17LV.txt",
+    "$SOURCES/capreg/res_17MT.txt",
+    "$SOURCES/capreg/res_17NL.txt",
+    "$SOURCES/capreg/res_17NO.txt",
+    "$SOURCES/capreg/res_17PL.txt",
+    "$SOURCES/capreg/res_17PT.txt",
+    "$SOURCES/capreg/res_17RO.txt",
+    "$SOURCES/capreg/res_17SE.txt",
+    "$SOURCES/capreg/res_17SI.txt",
+    "$SOURCES/capreg/res_17SK.txt"
    ],
    "outputs": [
     "capri_data/2017/environment/fert_dist_priors_npk_2030.csv",
@@ -3310,7 +3310,7 @@
    "task": "build_nutrient_coefs_regional",
    "builder": "build_nutrient_coefs_regional",
    "args": [
-    "$WORK/capreg"
+    "$SOURCES/capreg"
    ],
    "inputs": [
     "capri_data/shared/capri_member_state_codes.csv",
@@ -3323,33 +3323,33 @@
     "tools/lib/_model_regions.py"
    ],
    "external": [
-    "$WORK/capreg/res_17AT.txt",
-    "$WORK/capreg/res_17BG.txt",
-    "$WORK/capreg/res_17BL.txt",
-    "$WORK/capreg/res_17CY.txt",
-    "$WORK/capreg/res_17CZ.txt",
-    "$WORK/capreg/res_17DE.txt",
-    "$WORK/capreg/res_17DK.txt",
-    "$WORK/capreg/res_17EE.txt",
-    "$WORK/capreg/res_17EL.txt",
-    "$WORK/capreg/res_17ES.txt",
-    "$WORK/capreg/res_17FI.txt",
-    "$WORK/capreg/res_17FR.txt",
-    "$WORK/capreg/res_17HR.txt",
-    "$WORK/capreg/res_17HU.txt",
-    "$WORK/capreg/res_17IR.txt",
-    "$WORK/capreg/res_17IT.txt",
-    "$WORK/capreg/res_17LT.txt",
-    "$WORK/capreg/res_17LV.txt",
-    "$WORK/capreg/res_17MT.txt",
-    "$WORK/capreg/res_17NL.txt",
-    "$WORK/capreg/res_17NO.txt",
-    "$WORK/capreg/res_17PL.txt",
-    "$WORK/capreg/res_17PT.txt",
-    "$WORK/capreg/res_17RO.txt",
-    "$WORK/capreg/res_17SE.txt",
-    "$WORK/capreg/res_17SI.txt",
-    "$WORK/capreg/res_17SK.txt"
+    "$SOURCES/capreg/res_17AT.txt",
+    "$SOURCES/capreg/res_17BG.txt",
+    "$SOURCES/capreg/res_17BL.txt",
+    "$SOURCES/capreg/res_17CY.txt",
+    "$SOURCES/capreg/res_17CZ.txt",
+    "$SOURCES/capreg/res_17DE.txt",
+    "$SOURCES/capreg/res_17DK.txt",
+    "$SOURCES/capreg/res_17EE.txt",
+    "$SOURCES/capreg/res_17EL.txt",
+    "$SOURCES/capreg/res_17ES.txt",
+    "$SOURCES/capreg/res_17FI.txt",
+    "$SOURCES/capreg/res_17FR.txt",
+    "$SOURCES/capreg/res_17HR.txt",
+    "$SOURCES/capreg/res_17HU.txt",
+    "$SOURCES/capreg/res_17IR.txt",
+    "$SOURCES/capreg/res_17IT.txt",
+    "$SOURCES/capreg/res_17LT.txt",
+    "$SOURCES/capreg/res_17LV.txt",
+    "$SOURCES/capreg/res_17MT.txt",
+    "$SOURCES/capreg/res_17NL.txt",
+    "$SOURCES/capreg/res_17NO.txt",
+    "$SOURCES/capreg/res_17PL.txt",
+    "$SOURCES/capreg/res_17PT.txt",
+    "$SOURCES/capreg/res_17RO.txt",
+    "$SOURCES/capreg/res_17SE.txt",
+    "$SOURCES/capreg/res_17SI.txt",
+    "$SOURCES/capreg/res_17SK.txt"
    ],
    "outputs": [
     "capri_data/2017/supply/nutrient_coefs_regional.csv"
@@ -3383,7 +3383,7 @@
    "builder": "build_organic_yield_gap",
    "args": [
     "--xlsx",
-    "$UP/yield_effects_ppp.xlsx"
+    "$EXPORTS/yield_effects_ppp.xlsx"
    ],
    "inputs": [
     "capri_data/codes/model_activities.csv"
@@ -3394,8 +3394,8 @@
     "tools/lib/gams_text.py"
    ],
    "external": [
-    "$UP/yield_effects_ppp.xlsx",
-    "$WORK/allgms/gams/inputs/load_organic_yieldgap.gms"
+    "$EXPORTS/yield_effects_ppp.xlsx",
+    "$SOURCES/gams/inputs/load_organic_yieldgap.gms"
    ],
    "outputs": [
     "capri_data/2017/policy/organic_yield_gap.csv",
@@ -3407,7 +3407,7 @@
    "task": "build_overfert_factors",
    "builder": "build_overfert_factors",
    "args": [
-    "$WORK/inputs/fert/multfact_1730.txt"
+    "$SOURCES/fert/multfact_1730.txt"
    ],
    "inputs": [
     "capri_data/shared/capri_member_state_codes.csv",
@@ -3419,7 +3419,7 @@
     "tools/lib/_model_regions.py"
    ],
    "external": [
-    "$WORK/inputs/fert/multfact_1730.txt"
+    "$SOURCES/fert/multfact_1730.txt"
    ],
    "outputs": [
     "capri_data/2017/environment/crop_nut_need_mult_fact_2030.csv"
@@ -3434,8 +3434,8 @@
     "tools/build/build_p_balance.py"
    ],
    "external": [
-    "$UP/res_2_1730greendeal_refdefaulta.zip",
-    "$UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv"
+    "$EXPORTS/res_2_1730greendeal_refdefaulta.zip",
+    "$EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv"
    ],
    "outputs": [
     "capri_data/2017/environment/p_balance_crop_coefs_2030.csv",
@@ -3461,34 +3461,34 @@
     "tools/lib/_model_regions.py"
    ],
    "external": [
-    "$UP/res_2_1730greendeal_refdefaulta.zip",
-    "$WORK/capreg/res_17AT.txt",
-    "$WORK/capreg/res_17BG.txt",
-    "$WORK/capreg/res_17BL.txt",
-    "$WORK/capreg/res_17CY.txt",
-    "$WORK/capreg/res_17CZ.txt",
-    "$WORK/capreg/res_17DE.txt",
-    "$WORK/capreg/res_17DK.txt",
-    "$WORK/capreg/res_17EE.txt",
-    "$WORK/capreg/res_17EL.txt",
-    "$WORK/capreg/res_17ES.txt",
-    "$WORK/capreg/res_17FI.txt",
-    "$WORK/capreg/res_17FR.txt",
-    "$WORK/capreg/res_17HR.txt",
-    "$WORK/capreg/res_17HU.txt",
-    "$WORK/capreg/res_17IR.txt",
-    "$WORK/capreg/res_17IT.txt",
-    "$WORK/capreg/res_17LT.txt",
-    "$WORK/capreg/res_17LV.txt",
-    "$WORK/capreg/res_17MT.txt",
-    "$WORK/capreg/res_17NL.txt",
-    "$WORK/capreg/res_17NO.txt",
-    "$WORK/capreg/res_17PL.txt",
-    "$WORK/capreg/res_17PT.txt",
-    "$WORK/capreg/res_17RO.txt",
-    "$WORK/capreg/res_17SE.txt",
-    "$WORK/capreg/res_17SI.txt",
-    "$WORK/capreg/res_17SK.txt"
+    "$EXPORTS/res_2_1730greendeal_refdefaulta.zip",
+    "$SOURCES/capreg/res_17AT.txt",
+    "$SOURCES/capreg/res_17BG.txt",
+    "$SOURCES/capreg/res_17BL.txt",
+    "$SOURCES/capreg/res_17CY.txt",
+    "$SOURCES/capreg/res_17CZ.txt",
+    "$SOURCES/capreg/res_17DE.txt",
+    "$SOURCES/capreg/res_17DK.txt",
+    "$SOURCES/capreg/res_17EE.txt",
+    "$SOURCES/capreg/res_17EL.txt",
+    "$SOURCES/capreg/res_17ES.txt",
+    "$SOURCES/capreg/res_17FI.txt",
+    "$SOURCES/capreg/res_17FR.txt",
+    "$SOURCES/capreg/res_17HR.txt",
+    "$SOURCES/capreg/res_17HU.txt",
+    "$SOURCES/capreg/res_17IR.txt",
+    "$SOURCES/capreg/res_17IT.txt",
+    "$SOURCES/capreg/res_17LT.txt",
+    "$SOURCES/capreg/res_17LV.txt",
+    "$SOURCES/capreg/res_17MT.txt",
+    "$SOURCES/capreg/res_17NL.txt",
+    "$SOURCES/capreg/res_17NO.txt",
+    "$SOURCES/capreg/res_17PL.txt",
+    "$SOURCES/capreg/res_17PT.txt",
+    "$SOURCES/capreg/res_17RO.txt",
+    "$SOURCES/capreg/res_17SE.txt",
+    "$SOURCES/capreg/res_17SI.txt",
+    "$SOURCES/capreg/res_17SK.txt"
    ],
    "outputs": [
     "capri_data/2017/supply/plant_protection_cost.csv",
@@ -3504,43 +3504,43 @@
     "tools/build/build_pmp_2030.py"
    ],
    "external": [
-    "$WORK/up/pmp2030/estnlp_results_VB.txt",
-    "$WORK/up/pmp2030/estnlp_results_VD.txt",
-    "$WORK/up/pmp2030/pmppar_21730ALdefaulta.txt",
-    "$WORK/up/pmp2030/pmppar_21730ATdefaulta.txt",
-    "$WORK/up/pmp2030/pmppar_21730BAdefaulta.txt",
-    "$WORK/up/pmp2030/pmppar_21730BGdefaulta.txt",
-    "$WORK/up/pmp2030/pmppar_21730BLdefaulta.txt",
-    "$WORK/up/pmp2030/pmppar_21730CSdefaulta.txt",
-    "$WORK/up/pmp2030/pmppar_21730CYdefaulta.txt",
-    "$WORK/up/pmp2030/pmppar_21730CZdefaulta.txt",
-    "$WORK/up/pmp2030/pmppar_21730DEdefaulta.txt",
-    "$WORK/up/pmp2030/pmppar_21730DKdefaulta.txt",
-    "$WORK/up/pmp2030/pmppar_21730EEdefaulta.txt",
-    "$WORK/up/pmp2030/pmppar_21730ELdefaulta.txt",
-    "$WORK/up/pmp2030/pmppar_21730ESdefaulta.txt",
-    "$WORK/up/pmp2030/pmppar_21730FIdefaulta.txt",
-    "$WORK/up/pmp2030/pmppar_21730FRdefaulta.txt",
-    "$WORK/up/pmp2030/pmppar_21730HRdefaulta.txt",
-    "$WORK/up/pmp2030/pmppar_21730HUdefaulta.txt",
-    "$WORK/up/pmp2030/pmppar_21730IRdefaulta.txt",
-    "$WORK/up/pmp2030/pmppar_21730ITdefaulta.txt",
-    "$WORK/up/pmp2030/pmppar_21730KOdefaulta.txt",
-    "$WORK/up/pmp2030/pmppar_21730LTdefaulta.txt",
-    "$WORK/up/pmp2030/pmppar_21730LVdefaulta.txt",
-    "$WORK/up/pmp2030/pmppar_21730MKdefaulta.txt",
-    "$WORK/up/pmp2030/pmppar_21730MOdefaulta.txt",
-    "$WORK/up/pmp2030/pmppar_21730MTdefaulta.txt",
-    "$WORK/up/pmp2030/pmppar_21730NLdefaulta.txt",
-    "$WORK/up/pmp2030/pmppar_21730NOdefaulta.txt",
-    "$WORK/up/pmp2030/pmppar_21730PLdefaulta.txt",
-    "$WORK/up/pmp2030/pmppar_21730PTdefaulta.txt",
-    "$WORK/up/pmp2030/pmppar_21730ROdefaulta.txt",
-    "$WORK/up/pmp2030/pmppar_21730SEdefaulta.txt",
-    "$WORK/up/pmp2030/pmppar_21730SIdefaulta.txt",
-    "$WORK/up/pmp2030/pmppar_21730SKdefaulta.txt",
-    "$WORK/up/pmp2030/pmppar_21730TUdefaulta.txt",
-    "$WORK/up/pmp2030/pmppar_21730UKdefaulta.txt"
+    "$SOURCES/pmp2030/estnlp_results_VB.txt",
+    "$SOURCES/pmp2030/estnlp_results_VD.txt",
+    "$SOURCES/pmp2030/pmppar_21730ALdefaulta.txt",
+    "$SOURCES/pmp2030/pmppar_21730ATdefaulta.txt",
+    "$SOURCES/pmp2030/pmppar_21730BAdefaulta.txt",
+    "$SOURCES/pmp2030/pmppar_21730BGdefaulta.txt",
+    "$SOURCES/pmp2030/pmppar_21730BLdefaulta.txt",
+    "$SOURCES/pmp2030/pmppar_21730CSdefaulta.txt",
+    "$SOURCES/pmp2030/pmppar_21730CYdefaulta.txt",
+    "$SOURCES/pmp2030/pmppar_21730CZdefaulta.txt",
+    "$SOURCES/pmp2030/pmppar_21730DEdefaulta.txt",
+    "$SOURCES/pmp2030/pmppar_21730DKdefaulta.txt",
+    "$SOURCES/pmp2030/pmppar_21730EEdefaulta.txt",
+    "$SOURCES/pmp2030/pmppar_21730ELdefaulta.txt",
+    "$SOURCES/pmp2030/pmppar_21730ESdefaulta.txt",
+    "$SOURCES/pmp2030/pmppar_21730FIdefaulta.txt",
+    "$SOURCES/pmp2030/pmppar_21730FRdefaulta.txt",
+    "$SOURCES/pmp2030/pmppar_21730HRdefaulta.txt",
+    "$SOURCES/pmp2030/pmppar_21730HUdefaulta.txt",
+    "$SOURCES/pmp2030/pmppar_21730IRdefaulta.txt",
+    "$SOURCES/pmp2030/pmppar_21730ITdefaulta.txt",
+    "$SOURCES/pmp2030/pmppar_21730KOdefaulta.txt",
+    "$SOURCES/pmp2030/pmppar_21730LTdefaulta.txt",
+    "$SOURCES/pmp2030/pmppar_21730LVdefaulta.txt",
+    "$SOURCES/pmp2030/pmppar_21730MKdefaulta.txt",
+    "$SOURCES/pmp2030/pmppar_21730MOdefaulta.txt",
+    "$SOURCES/pmp2030/pmppar_21730MTdefaulta.txt",
+    "$SOURCES/pmp2030/pmppar_21730NLdefaulta.txt",
+    "$SOURCES/pmp2030/pmppar_21730NOdefaulta.txt",
+    "$SOURCES/pmp2030/pmppar_21730PLdefaulta.txt",
+    "$SOURCES/pmp2030/pmppar_21730PTdefaulta.txt",
+    "$SOURCES/pmp2030/pmppar_21730ROdefaulta.txt",
+    "$SOURCES/pmp2030/pmppar_21730SEdefaulta.txt",
+    "$SOURCES/pmp2030/pmppar_21730SIdefaulta.txt",
+    "$SOURCES/pmp2030/pmppar_21730SKdefaulta.txt",
+    "$SOURCES/pmp2030/pmppar_21730TUdefaulta.txt",
+    "$SOURCES/pmp2030/pmppar_21730UKdefaulta.txt"
    ],
    "outputs": [
     "capri_data/sources/baseline_pmp/estnlp_vb.csv",
@@ -3571,7 +3571,7 @@
     "tools/lib/_money.py"
    ],
    "external": [
-    "$UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv"
+    "$EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv"
    ],
    "outputs": [
     "capri_data/2017/supply/pmp_capri_2030.csv"
@@ -3603,33 +3603,33 @@
     "tools/lib/_money.py"
    ],
    "external": [
-    "$WORK/capreg/res_17AT.txt",
-    "$WORK/capreg/res_17BG.txt",
-    "$WORK/capreg/res_17BL.txt",
-    "$WORK/capreg/res_17CY.txt",
-    "$WORK/capreg/res_17CZ.txt",
-    "$WORK/capreg/res_17DE.txt",
-    "$WORK/capreg/res_17DK.txt",
-    "$WORK/capreg/res_17EE.txt",
-    "$WORK/capreg/res_17EL.txt",
-    "$WORK/capreg/res_17ES.txt",
-    "$WORK/capreg/res_17FI.txt",
-    "$WORK/capreg/res_17FR.txt",
-    "$WORK/capreg/res_17HR.txt",
-    "$WORK/capreg/res_17HU.txt",
-    "$WORK/capreg/res_17IR.txt",
-    "$WORK/capreg/res_17IT.txt",
-    "$WORK/capreg/res_17LT.txt",
-    "$WORK/capreg/res_17LV.txt",
-    "$WORK/capreg/res_17MT.txt",
-    "$WORK/capreg/res_17NL.txt",
-    "$WORK/capreg/res_17NO.txt",
-    "$WORK/capreg/res_17PL.txt",
-    "$WORK/capreg/res_17PT.txt",
-    "$WORK/capreg/res_17RO.txt",
-    "$WORK/capreg/res_17SE.txt",
-    "$WORK/capreg/res_17SI.txt",
-    "$WORK/capreg/res_17SK.txt"
+    "$SOURCES/capreg/res_17AT.txt",
+    "$SOURCES/capreg/res_17BG.txt",
+    "$SOURCES/capreg/res_17BL.txt",
+    "$SOURCES/capreg/res_17CY.txt",
+    "$SOURCES/capreg/res_17CZ.txt",
+    "$SOURCES/capreg/res_17DE.txt",
+    "$SOURCES/capreg/res_17DK.txt",
+    "$SOURCES/capreg/res_17EE.txt",
+    "$SOURCES/capreg/res_17EL.txt",
+    "$SOURCES/capreg/res_17ES.txt",
+    "$SOURCES/capreg/res_17FI.txt",
+    "$SOURCES/capreg/res_17FR.txt",
+    "$SOURCES/capreg/res_17HR.txt",
+    "$SOURCES/capreg/res_17HU.txt",
+    "$SOURCES/capreg/res_17IR.txt",
+    "$SOURCES/capreg/res_17IT.txt",
+    "$SOURCES/capreg/res_17LT.txt",
+    "$SOURCES/capreg/res_17LV.txt",
+    "$SOURCES/capreg/res_17MT.txt",
+    "$SOURCES/capreg/res_17NL.txt",
+    "$SOURCES/capreg/res_17NO.txt",
+    "$SOURCES/capreg/res_17PL.txt",
+    "$SOURCES/capreg/res_17PT.txt",
+    "$SOURCES/capreg/res_17RO.txt",
+    "$SOURCES/capreg/res_17SE.txt",
+    "$SOURCES/capreg/res_17SI.txt",
+    "$SOURCES/capreg/res_17SK.txt"
    ],
    "outputs": [
     "capri_data/2017/supply/pmp_recipe_2017.csv"
@@ -3662,7 +3662,7 @@
     "tools/lib/_money.py"
    ],
    "external": [
-    "$UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv"
+    "$EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv"
    ],
    "outputs": [
     "capri_data/2017/supply/pmp_recipe_2030.csv"
@@ -3673,14 +3673,14 @@
    "builder": "build_pmp_own_price_elasticities",
    "args": [
     "--dump-dir",
-    "$WORK/inputs/estnlp"
+    "$SOURCES/estnlp"
    ],
    "inputs": [],
    "code": [
     "tools/build/build_pmp_own_price_elasticities.py"
    ],
    "external": [
-    "$WORK/inputs/estnlp/estnlp_PELA.txt"
+    "$SOURCES/estnlp/estnlp_PELA.txt"
    ],
    "outputs": [
     "capri_data/2017/supply/pmp_own_price_elasticities.csv"
@@ -3703,34 +3703,34 @@
     "tools/build/build_pmp_recipe.py"
    ],
    "external": [
-    "$WORK/capreg/res_17AT.txt",
-    "$WORK/capreg/res_17BG.txt",
-    "$WORK/capreg/res_17BL.txt",
-    "$WORK/capreg/res_17CY.txt",
-    "$WORK/capreg/res_17CZ.txt",
-    "$WORK/capreg/res_17DE.txt",
-    "$WORK/capreg/res_17DK.txt",
-    "$WORK/capreg/res_17EE.txt",
-    "$WORK/capreg/res_17EL.txt",
-    "$WORK/capreg/res_17ES.txt",
-    "$WORK/capreg/res_17FI.txt",
-    "$WORK/capreg/res_17FR.txt",
-    "$WORK/capreg/res_17HR.txt",
-    "$WORK/capreg/res_17HU.txt",
-    "$WORK/capreg/res_17IR.txt",
-    "$WORK/capreg/res_17IT.txt",
-    "$WORK/capreg/res_17LT.txt",
-    "$WORK/capreg/res_17LV.txt",
-    "$WORK/capreg/res_17MT.txt",
-    "$WORK/capreg/res_17NL.txt",
-    "$WORK/capreg/res_17NO.txt",
-    "$WORK/capreg/res_17PL.txt",
-    "$WORK/capreg/res_17PT.txt",
-    "$WORK/capreg/res_17RO.txt",
-    "$WORK/capreg/res_17SE.txt",
-    "$WORK/capreg/res_17SI.txt",
-    "$WORK/capreg/res_17SK.txt",
-    "$WORK/up/pmp2030/estnlp_results_PELA.txt"
+    "$SOURCES/capreg/res_17AT.txt",
+    "$SOURCES/capreg/res_17BG.txt",
+    "$SOURCES/capreg/res_17BL.txt",
+    "$SOURCES/capreg/res_17CY.txt",
+    "$SOURCES/capreg/res_17CZ.txt",
+    "$SOURCES/capreg/res_17DE.txt",
+    "$SOURCES/capreg/res_17DK.txt",
+    "$SOURCES/capreg/res_17EE.txt",
+    "$SOURCES/capreg/res_17EL.txt",
+    "$SOURCES/capreg/res_17ES.txt",
+    "$SOURCES/capreg/res_17FI.txt",
+    "$SOURCES/capreg/res_17FR.txt",
+    "$SOURCES/capreg/res_17HR.txt",
+    "$SOURCES/capreg/res_17HU.txt",
+    "$SOURCES/capreg/res_17IR.txt",
+    "$SOURCES/capreg/res_17IT.txt",
+    "$SOURCES/capreg/res_17LT.txt",
+    "$SOURCES/capreg/res_17LV.txt",
+    "$SOURCES/capreg/res_17MT.txt",
+    "$SOURCES/capreg/res_17NL.txt",
+    "$SOURCES/capreg/res_17NO.txt",
+    "$SOURCES/capreg/res_17PL.txt",
+    "$SOURCES/capreg/res_17PT.txt",
+    "$SOURCES/capreg/res_17RO.txt",
+    "$SOURCES/capreg/res_17SE.txt",
+    "$SOURCES/capreg/res_17SI.txt",
+    "$SOURCES/capreg/res_17SK.txt",
+    "$SOURCES/pmp2030/estnlp_results_PELA.txt"
    ],
    "outputs": [
     "capri_data/sources/baseline_pmp/recipe_2017_quad_pact.csv",
@@ -3754,35 +3754,35 @@
     "tools/build/build_pmp_recipe.py"
    ],
    "external": [
-    "$UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv",
-    "$WORK/capreg/res_17AT.txt",
-    "$WORK/capreg/res_17BG.txt",
-    "$WORK/capreg/res_17BL.txt",
-    "$WORK/capreg/res_17CY.txt",
-    "$WORK/capreg/res_17CZ.txt",
-    "$WORK/capreg/res_17DE.txt",
-    "$WORK/capreg/res_17DK.txt",
-    "$WORK/capreg/res_17EE.txt",
-    "$WORK/capreg/res_17EL.txt",
-    "$WORK/capreg/res_17ES.txt",
-    "$WORK/capreg/res_17FI.txt",
-    "$WORK/capreg/res_17FR.txt",
-    "$WORK/capreg/res_17HR.txt",
-    "$WORK/capreg/res_17HU.txt",
-    "$WORK/capreg/res_17IR.txt",
-    "$WORK/capreg/res_17IT.txt",
-    "$WORK/capreg/res_17LT.txt",
-    "$WORK/capreg/res_17LV.txt",
-    "$WORK/capreg/res_17MT.txt",
-    "$WORK/capreg/res_17NL.txt",
-    "$WORK/capreg/res_17NO.txt",
-    "$WORK/capreg/res_17PL.txt",
-    "$WORK/capreg/res_17PT.txt",
-    "$WORK/capreg/res_17RO.txt",
-    "$WORK/capreg/res_17SE.txt",
-    "$WORK/capreg/res_17SI.txt",
-    "$WORK/capreg/res_17SK.txt",
-    "$WORK/up/pmp2030/estnlp_results_PELA.txt"
+    "$EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv",
+    "$SOURCES/capreg/res_17AT.txt",
+    "$SOURCES/capreg/res_17BG.txt",
+    "$SOURCES/capreg/res_17BL.txt",
+    "$SOURCES/capreg/res_17CY.txt",
+    "$SOURCES/capreg/res_17CZ.txt",
+    "$SOURCES/capreg/res_17DE.txt",
+    "$SOURCES/capreg/res_17DK.txt",
+    "$SOURCES/capreg/res_17EE.txt",
+    "$SOURCES/capreg/res_17EL.txt",
+    "$SOURCES/capreg/res_17ES.txt",
+    "$SOURCES/capreg/res_17FI.txt",
+    "$SOURCES/capreg/res_17FR.txt",
+    "$SOURCES/capreg/res_17HR.txt",
+    "$SOURCES/capreg/res_17HU.txt",
+    "$SOURCES/capreg/res_17IR.txt",
+    "$SOURCES/capreg/res_17IT.txt",
+    "$SOURCES/capreg/res_17LT.txt",
+    "$SOURCES/capreg/res_17LV.txt",
+    "$SOURCES/capreg/res_17MT.txt",
+    "$SOURCES/capreg/res_17NL.txt",
+    "$SOURCES/capreg/res_17NO.txt",
+    "$SOURCES/capreg/res_17PL.txt",
+    "$SOURCES/capreg/res_17PT.txt",
+    "$SOURCES/capreg/res_17RO.txt",
+    "$SOURCES/capreg/res_17SE.txt",
+    "$SOURCES/capreg/res_17SI.txt",
+    "$SOURCES/capreg/res_17SK.txt",
+    "$SOURCES/pmp2030/estnlp_results_PELA.txt"
    ],
    "outputs": [
     "capri_data/sources/baseline_pmp/recipe_2030_quad_pact.csv",
@@ -3819,33 +3819,33 @@
     "tools/lib/_model_regions.py"
    ],
    "external": [
-    "$WORK/capreg/res_17AT.txt",
-    "$WORK/capreg/res_17BG.txt",
-    "$WORK/capreg/res_17BL.txt",
-    "$WORK/capreg/res_17CY.txt",
-    "$WORK/capreg/res_17CZ.txt",
-    "$WORK/capreg/res_17DE.txt",
-    "$WORK/capreg/res_17DK.txt",
-    "$WORK/capreg/res_17EE.txt",
-    "$WORK/capreg/res_17EL.txt",
-    "$WORK/capreg/res_17ES.txt",
-    "$WORK/capreg/res_17FI.txt",
-    "$WORK/capreg/res_17FR.txt",
-    "$WORK/capreg/res_17HR.txt",
-    "$WORK/capreg/res_17HU.txt",
-    "$WORK/capreg/res_17IR.txt",
-    "$WORK/capreg/res_17IT.txt",
-    "$WORK/capreg/res_17LT.txt",
-    "$WORK/capreg/res_17LV.txt",
-    "$WORK/capreg/res_17MT.txt",
-    "$WORK/capreg/res_17NL.txt",
-    "$WORK/capreg/res_17NO.txt",
-    "$WORK/capreg/res_17PL.txt",
-    "$WORK/capreg/res_17PT.txt",
-    "$WORK/capreg/res_17RO.txt",
-    "$WORK/capreg/res_17SE.txt",
-    "$WORK/capreg/res_17SI.txt",
-    "$WORK/capreg/res_17SK.txt"
+    "$SOURCES/capreg/res_17AT.txt",
+    "$SOURCES/capreg/res_17BG.txt",
+    "$SOURCES/capreg/res_17BL.txt",
+    "$SOURCES/capreg/res_17CY.txt",
+    "$SOURCES/capreg/res_17CZ.txt",
+    "$SOURCES/capreg/res_17DE.txt",
+    "$SOURCES/capreg/res_17DK.txt",
+    "$SOURCES/capreg/res_17EE.txt",
+    "$SOURCES/capreg/res_17EL.txt",
+    "$SOURCES/capreg/res_17ES.txt",
+    "$SOURCES/capreg/res_17FI.txt",
+    "$SOURCES/capreg/res_17FR.txt",
+    "$SOURCES/capreg/res_17HR.txt",
+    "$SOURCES/capreg/res_17HU.txt",
+    "$SOURCES/capreg/res_17IR.txt",
+    "$SOURCES/capreg/res_17IT.txt",
+    "$SOURCES/capreg/res_17LT.txt",
+    "$SOURCES/capreg/res_17LV.txt",
+    "$SOURCES/capreg/res_17MT.txt",
+    "$SOURCES/capreg/res_17NL.txt",
+    "$SOURCES/capreg/res_17NO.txt",
+    "$SOURCES/capreg/res_17PL.txt",
+    "$SOURCES/capreg/res_17PT.txt",
+    "$SOURCES/capreg/res_17RO.txt",
+    "$SOURCES/capreg/res_17SE.txt",
+    "$SOURCES/capreg/res_17SI.txt",
+    "$SOURCES/capreg/res_17SK.txt"
    ],
    "outputs": [
     "capri_data/trajectories/capri_cap_premium_2030.csv",
@@ -3871,9 +3871,9 @@
     "tools/lib/_model_regions.py"
    ],
    "external": [
-    "$UP/data_market_1730defaulta.csv",
-    "$UP/elas_2_1730defaulta.csv",
-    "$UP/markmarket_greendeal_1730et_base_1717.txt"
+    "$EXPORTS/data_market_1730defaulta.csv",
+    "$EXPORTS/elas_2_1730defaulta.csv",
+    "$EXPORTS/markmarket_greendeal_1730et_base_1717.txt"
    ],
    "outputs": [
     "capri_data/2017/market/processing_nq_base.csv",
@@ -3898,7 +3898,7 @@
     "tools/lib/_model_regions.py"
    ],
    "external": [
-    "$UP/data_market_1730defaulta.csv"
+    "$EXPORTS/data_market_1730defaulta.csv"
    ],
    "outputs": [
     "capri_data/2017/market/processing_seeds.csv"
@@ -3918,7 +3918,7 @@
     "tools/lib/_model_regions.py"
    ],
    "external": [
-    "$UP/markmarket_greendeal_1730et_base_1717.txt"
+    "$EXPORTS/markmarket_greendeal_1730et_base_1717.txt"
    ],
    "outputs": [
     "capri_data/2017/market/processing_yields.csv",
@@ -3942,34 +3942,34 @@
     "tools/lib/paths.py"
    ],
    "external": [
-    "$UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv",
-    "$WORK/capreg/res_17AT.txt",
-    "$WORK/capreg/res_17BG.txt",
-    "$WORK/capreg/res_17BL.txt",
-    "$WORK/capreg/res_17CY.txt",
-    "$WORK/capreg/res_17CZ.txt",
-    "$WORK/capreg/res_17DE.txt",
-    "$WORK/capreg/res_17DK.txt",
-    "$WORK/capreg/res_17EE.txt",
-    "$WORK/capreg/res_17EL.txt",
-    "$WORK/capreg/res_17ES.txt",
-    "$WORK/capreg/res_17FI.txt",
-    "$WORK/capreg/res_17FR.txt",
-    "$WORK/capreg/res_17HR.txt",
-    "$WORK/capreg/res_17HU.txt",
-    "$WORK/capreg/res_17IR.txt",
-    "$WORK/capreg/res_17IT.txt",
-    "$WORK/capreg/res_17LT.txt",
-    "$WORK/capreg/res_17LV.txt",
-    "$WORK/capreg/res_17MT.txt",
-    "$WORK/capreg/res_17NL.txt",
-    "$WORK/capreg/res_17NO.txt",
-    "$WORK/capreg/res_17PL.txt",
-    "$WORK/capreg/res_17PT.txt",
-    "$WORK/capreg/res_17RO.txt",
-    "$WORK/capreg/res_17SE.txt",
-    "$WORK/capreg/res_17SI.txt",
-    "$WORK/capreg/res_17SK.txt"
+    "$EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv",
+    "$SOURCES/capreg/res_17AT.txt",
+    "$SOURCES/capreg/res_17BG.txt",
+    "$SOURCES/capreg/res_17BL.txt",
+    "$SOURCES/capreg/res_17CY.txt",
+    "$SOURCES/capreg/res_17CZ.txt",
+    "$SOURCES/capreg/res_17DE.txt",
+    "$SOURCES/capreg/res_17DK.txt",
+    "$SOURCES/capreg/res_17EE.txt",
+    "$SOURCES/capreg/res_17EL.txt",
+    "$SOURCES/capreg/res_17ES.txt",
+    "$SOURCES/capreg/res_17FI.txt",
+    "$SOURCES/capreg/res_17FR.txt",
+    "$SOURCES/capreg/res_17HR.txt",
+    "$SOURCES/capreg/res_17HU.txt",
+    "$SOURCES/capreg/res_17IR.txt",
+    "$SOURCES/capreg/res_17IT.txt",
+    "$SOURCES/capreg/res_17LT.txt",
+    "$SOURCES/capreg/res_17LV.txt",
+    "$SOURCES/capreg/res_17MT.txt",
+    "$SOURCES/capreg/res_17NL.txt",
+    "$SOURCES/capreg/res_17NO.txt",
+    "$SOURCES/capreg/res_17PL.txt",
+    "$SOURCES/capreg/res_17PT.txt",
+    "$SOURCES/capreg/res_17RO.txt",
+    "$SOURCES/capreg/res_17SE.txt",
+    "$SOURCES/capreg/res_17SI.txt",
+    "$SOURCES/capreg/res_17SK.txt"
    ],
    "outputs": [
     "capri_data/trajectories/capri_ref_fodder_2030.csv",
@@ -4001,7 +4001,7 @@
     "tools/build/build_sugar_processing.py"
    ],
    "external": [
-    "$UP/markmarket_greendeal_1730et_base_1717.txt"
+    "$EXPORTS/markmarket_greendeal_1730et_base_1717.txt"
    ],
    "outputs": [
     "capri_data/2017/market/sugar_processing.csv",
@@ -4043,32 +4043,32 @@
     "tools/lib/_money.py"
    ],
    "external": [
-    "$WORK/capreg/res_17AT.txt",
-    "$WORK/capreg/res_17BG.txt",
-    "$WORK/capreg/res_17BL.txt",
-    "$WORK/capreg/res_17CY.txt",
-    "$WORK/capreg/res_17CZ.txt",
-    "$WORK/capreg/res_17DE.txt",
-    "$WORK/capreg/res_17DK.txt",
-    "$WORK/capreg/res_17EE.txt",
-    "$WORK/capreg/res_17EL.txt",
-    "$WORK/capreg/res_17ES.txt",
-    "$WORK/capreg/res_17FI.txt",
-    "$WORK/capreg/res_17FR.txt",
-    "$WORK/capreg/res_17HR.txt",
-    "$WORK/capreg/res_17HU.txt",
-    "$WORK/capreg/res_17IR.txt",
-    "$WORK/capreg/res_17IT.txt",
-    "$WORK/capreg/res_17LT.txt",
-    "$WORK/capreg/res_17LV.txt",
-    "$WORK/capreg/res_17MT.txt",
-    "$WORK/capreg/res_17NL.txt",
-    "$WORK/capreg/res_17PL.txt",
-    "$WORK/capreg/res_17PT.txt",
-    "$WORK/capreg/res_17RO.txt",
-    "$WORK/capreg/res_17SE.txt",
-    "$WORK/capreg/res_17SI.txt",
-    "$WORK/capreg/res_17SK.txt"
+    "$SOURCES/capreg/res_17AT.txt",
+    "$SOURCES/capreg/res_17BG.txt",
+    "$SOURCES/capreg/res_17BL.txt",
+    "$SOURCES/capreg/res_17CY.txt",
+    "$SOURCES/capreg/res_17CZ.txt",
+    "$SOURCES/capreg/res_17DE.txt",
+    "$SOURCES/capreg/res_17DK.txt",
+    "$SOURCES/capreg/res_17EE.txt",
+    "$SOURCES/capreg/res_17EL.txt",
+    "$SOURCES/capreg/res_17ES.txt",
+    "$SOURCES/capreg/res_17FI.txt",
+    "$SOURCES/capreg/res_17FR.txt",
+    "$SOURCES/capreg/res_17HR.txt",
+    "$SOURCES/capreg/res_17HU.txt",
+    "$SOURCES/capreg/res_17IR.txt",
+    "$SOURCES/capreg/res_17IT.txt",
+    "$SOURCES/capreg/res_17LT.txt",
+    "$SOURCES/capreg/res_17LV.txt",
+    "$SOURCES/capreg/res_17MT.txt",
+    "$SOURCES/capreg/res_17NL.txt",
+    "$SOURCES/capreg/res_17PL.txt",
+    "$SOURCES/capreg/res_17PT.txt",
+    "$SOURCES/capreg/res_17RO.txt",
+    "$SOURCES/capreg/res_17SE.txt",
+    "$SOURCES/capreg/res_17SI.txt",
+    "$SOURCES/capreg/res_17SK.txt"
    ],
    "outputs": [
     "capri_data/2017/abatement/mitigation/supplement_effects.csv"
@@ -4200,34 +4200,34 @@
     "tools/lib/_model_regions.py"
    ],
    "external": [
-    "$UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv",
-    "$WORK/capreg/res_17AT.txt",
-    "$WORK/capreg/res_17BG.txt",
-    "$WORK/capreg/res_17BL.txt",
-    "$WORK/capreg/res_17CY.txt",
-    "$WORK/capreg/res_17CZ.txt",
-    "$WORK/capreg/res_17DE.txt",
-    "$WORK/capreg/res_17DK.txt",
-    "$WORK/capreg/res_17EE.txt",
-    "$WORK/capreg/res_17EL.txt",
-    "$WORK/capreg/res_17ES.txt",
-    "$WORK/capreg/res_17FI.txt",
-    "$WORK/capreg/res_17FR.txt",
-    "$WORK/capreg/res_17HR.txt",
-    "$WORK/capreg/res_17HU.txt",
-    "$WORK/capreg/res_17IR.txt",
-    "$WORK/capreg/res_17IT.txt",
-    "$WORK/capreg/res_17LT.txt",
-    "$WORK/capreg/res_17LV.txt",
-    "$WORK/capreg/res_17MT.txt",
-    "$WORK/capreg/res_17NL.txt",
-    "$WORK/capreg/res_17NO.txt",
-    "$WORK/capreg/res_17PL.txt",
-    "$WORK/capreg/res_17PT.txt",
-    "$WORK/capreg/res_17RO.txt",
-    "$WORK/capreg/res_17SE.txt",
-    "$WORK/capreg/res_17SI.txt",
-    "$WORK/capreg/res_17SK.txt"
+    "$EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv",
+    "$SOURCES/capreg/res_17AT.txt",
+    "$SOURCES/capreg/res_17BG.txt",
+    "$SOURCES/capreg/res_17BL.txt",
+    "$SOURCES/capreg/res_17CY.txt",
+    "$SOURCES/capreg/res_17CZ.txt",
+    "$SOURCES/capreg/res_17DE.txt",
+    "$SOURCES/capreg/res_17DK.txt",
+    "$SOURCES/capreg/res_17EE.txt",
+    "$SOURCES/capreg/res_17EL.txt",
+    "$SOURCES/capreg/res_17ES.txt",
+    "$SOURCES/capreg/res_17FI.txt",
+    "$SOURCES/capreg/res_17FR.txt",
+    "$SOURCES/capreg/res_17HR.txt",
+    "$SOURCES/capreg/res_17HU.txt",
+    "$SOURCES/capreg/res_17IR.txt",
+    "$SOURCES/capreg/res_17IT.txt",
+    "$SOURCES/capreg/res_17LT.txt",
+    "$SOURCES/capreg/res_17LV.txt",
+    "$SOURCES/capreg/res_17MT.txt",
+    "$SOURCES/capreg/res_17NL.txt",
+    "$SOURCES/capreg/res_17NO.txt",
+    "$SOURCES/capreg/res_17PL.txt",
+    "$SOURCES/capreg/res_17PT.txt",
+    "$SOURCES/capreg/res_17RO.txt",
+    "$SOURCES/capreg/res_17SE.txt",
+    "$SOURCES/capreg/res_17SI.txt",
+    "$SOURCES/capreg/res_17SK.txt"
    ],
    "outputs": [
     "capri_data/sources/capri_baseline/capri_ref_levl_yild_2030_2017.csv.xz",
@@ -4239,7 +4239,7 @@
    "builder": "build_unit_catalogue",
    "args": [
     "--gms",
-    "$WORK/allgms/gams/CAPRIunits.gms"
+    "$SOURCES/gams/CAPRIunits.gms"
    ],
    "inputs": [
     "capri_data/codes/model_units.csv"
@@ -4248,7 +4248,7 @@
     "tools/build/build_unit_catalogue.py"
    ],
    "external": [
-    "$WORK/allgms/gams/CAPRIunits.gms"
+    "$SOURCES/gams/CAPRIunits.gms"
    ],
    "outputs": [
     "capri_data/codes/units.csv"
@@ -4273,7 +4273,7 @@
     "tools/lib/_model_regions.py"
    ],
    "external": [
-    "$UP/data_market_1730defaulta.csv"
+    "$EXPORTS/data_market_1730defaulta.csv"
    ],
    "outputs": [
     "capri_data/2017/market/use_components.csv"
@@ -4294,9 +4294,9 @@
     "tools/build/build_welfare_base.py"
    ],
    "external": [
-    "$UP/data_market_1730defaulta.csv",
-    "$UP/elas_2_1730defaulta.csv",
-    "$UP/markmarket_greendeal_1730et_base_1717.txt"
+    "$EXPORTS/data_market_1730defaulta.csv",
+    "$EXPORTS/elas_2_1730defaulta.csv",
+    "$EXPORTS/markmarket_greendeal_1730et_base_1717.txt"
    ],
    "outputs": [
     "capri_data/2017/market/welfare_base_2030.csv"
@@ -4342,7 +4342,7 @@
     "tools/lib/_model_regions.py"
    ],
    "external": [
-    "$UP/fao_agg_17_datamarket.txt"
+    "$EXPORTS/fao_agg_17_datamarket.txt"
    ],
    "outputs": [
     "capri_data/2017/market/world_market_baseline.json",
@@ -4373,34 +4373,34 @@
     "tools/build/build_world_prices.py"
    ],
    "external": [
-    "$UP/fao_agg_17_datamarket.txt",
-    "$WORK/capreg/res_17AT.txt",
-    "$WORK/capreg/res_17BG.txt",
-    "$WORK/capreg/res_17BL.txt",
-    "$WORK/capreg/res_17CY.txt",
-    "$WORK/capreg/res_17CZ.txt",
-    "$WORK/capreg/res_17DE.txt",
-    "$WORK/capreg/res_17DK.txt",
-    "$WORK/capreg/res_17EE.txt",
-    "$WORK/capreg/res_17EL.txt",
-    "$WORK/capreg/res_17ES.txt",
-    "$WORK/capreg/res_17FI.txt",
-    "$WORK/capreg/res_17FR.txt",
-    "$WORK/capreg/res_17HR.txt",
-    "$WORK/capreg/res_17HU.txt",
-    "$WORK/capreg/res_17IR.txt",
-    "$WORK/capreg/res_17IT.txt",
-    "$WORK/capreg/res_17LT.txt",
-    "$WORK/capreg/res_17LV.txt",
-    "$WORK/capreg/res_17MT.txt",
-    "$WORK/capreg/res_17NL.txt",
-    "$WORK/capreg/res_17NO.txt",
-    "$WORK/capreg/res_17PL.txt",
-    "$WORK/capreg/res_17PT.txt",
-    "$WORK/capreg/res_17RO.txt",
-    "$WORK/capreg/res_17SE.txt",
-    "$WORK/capreg/res_17SI.txt",
-    "$WORK/capreg/res_17SK.txt"
+    "$EXPORTS/fao_agg_17_datamarket.txt",
+    "$SOURCES/capreg/res_17AT.txt",
+    "$SOURCES/capreg/res_17BG.txt",
+    "$SOURCES/capreg/res_17BL.txt",
+    "$SOURCES/capreg/res_17CY.txt",
+    "$SOURCES/capreg/res_17CZ.txt",
+    "$SOURCES/capreg/res_17DE.txt",
+    "$SOURCES/capreg/res_17DK.txt",
+    "$SOURCES/capreg/res_17EE.txt",
+    "$SOURCES/capreg/res_17EL.txt",
+    "$SOURCES/capreg/res_17ES.txt",
+    "$SOURCES/capreg/res_17FI.txt",
+    "$SOURCES/capreg/res_17FR.txt",
+    "$SOURCES/capreg/res_17HR.txt",
+    "$SOURCES/capreg/res_17HU.txt",
+    "$SOURCES/capreg/res_17IR.txt",
+    "$SOURCES/capreg/res_17IT.txt",
+    "$SOURCES/capreg/res_17LT.txt",
+    "$SOURCES/capreg/res_17LV.txt",
+    "$SOURCES/capreg/res_17MT.txt",
+    "$SOURCES/capreg/res_17NL.txt",
+    "$SOURCES/capreg/res_17NO.txt",
+    "$SOURCES/capreg/res_17PL.txt",
+    "$SOURCES/capreg/res_17PT.txt",
+    "$SOURCES/capreg/res_17RO.txt",
+    "$SOURCES/capreg/res_17SE.txt",
+    "$SOURCES/capreg/res_17SI.txt",
+    "$SOURCES/capreg/res_17SK.txt"
    ],
    "outputs": [
     "capri_data/2017/market/world_prices.csv"
@@ -4411,7 +4411,7 @@
    "builder": "build_yield_price_elasticity",
    "args": [
     "--gams",
-    "$WORK/allgms/gams"
+    "$SOURCES/gams"
    ],
    "inputs": [
     "capri_data/codes/model_activities.csv"
@@ -4420,8 +4420,8 @@
     "tools/build/build_yield_price_elasticity.py"
    ],
    "external": [
-    "$WORK/allgms/gams/global/fromimpact/sets.gms",
-    "$WORK/allgms/gams/supply/yield_elas.gms"
+    "$SOURCES/gams/global/fromimpact/sets.gms",
+    "$SOURCES/gams/supply/yield_elas.gms"
    ],
    "outputs": [
     "capri_data/2017/supply/yield_price_elasticity.csv"
@@ -4431,23 +4431,23 @@
    "task": "build_young_animal_elasticities",
    "builder": "build_young_animal_elasticities",
    "args": [
-    "$UP/supply_elas_2_1720DEdefaulta.txt",
-    "$UP/supply_elas_2_1720ESdefaulta.txt",
-    "$UP/supply_elas_2_1720FRdefaulta.txt",
-    "$UP/supply_elas_2_1720ITdefaulta.txt",
-    "$UP/supply_elas_2_1720PLdefaulta.txt",
-    "unzip:$UP/supply_elas_2_1720REMAINI_NGdefaulta.zip"
+    "$EXPORTS/supply_elas_2_1720DEdefaulta.txt",
+    "$EXPORTS/supply_elas_2_1720ESdefaulta.txt",
+    "$EXPORTS/supply_elas_2_1720FRdefaulta.txt",
+    "$EXPORTS/supply_elas_2_1720ITdefaulta.txt",
+    "$EXPORTS/supply_elas_2_1720PLdefaulta.txt",
+    "unzip:$EXPORTS/supply_elas_2_1720REMAINI_NGdefaulta.zip"
    ],
    "inputs": [],
    "code": [
     "tools/build/build_young_animal_elasticities.py"
    ],
    "external": [
-    "$UP/supply_elas_2_1720DEdefaulta.txt",
-    "$UP/supply_elas_2_1720ESdefaulta.txt",
-    "$UP/supply_elas_2_1720FRdefaulta.txt",
-    "$UP/supply_elas_2_1720ITdefaulta.txt",
-    "$UP/supply_elas_2_1720PLdefaulta.txt"
+    "$EXPORTS/supply_elas_2_1720DEdefaulta.txt",
+    "$EXPORTS/supply_elas_2_1720ESdefaulta.txt",
+    "$EXPORTS/supply_elas_2_1720FRdefaulta.txt",
+    "$EXPORTS/supply_elas_2_1720ITdefaulta.txt",
+    "$EXPORTS/supply_elas_2_1720PLdefaulta.txt"
    ],
    "outputs": [
     "capri_data/sources/arm/capri_supply_elas_young_1720.csv"
@@ -4468,33 +4468,33 @@
     "tools/lib/_model_regions.py"
    ],
    "external": [
-    "$WORK/capreg/res_17AT.txt",
-    "$WORK/capreg/res_17BG.txt",
-    "$WORK/capreg/res_17BL.txt",
-    "$WORK/capreg/res_17CY.txt",
-    "$WORK/capreg/res_17CZ.txt",
-    "$WORK/capreg/res_17DE.txt",
-    "$WORK/capreg/res_17DK.txt",
-    "$WORK/capreg/res_17EE.txt",
-    "$WORK/capreg/res_17EL.txt",
-    "$WORK/capreg/res_17ES.txt",
-    "$WORK/capreg/res_17FI.txt",
-    "$WORK/capreg/res_17FR.txt",
-    "$WORK/capreg/res_17HR.txt",
-    "$WORK/capreg/res_17HU.txt",
-    "$WORK/capreg/res_17IR.txt",
-    "$WORK/capreg/res_17IT.txt",
-    "$WORK/capreg/res_17LT.txt",
-    "$WORK/capreg/res_17LV.txt",
-    "$WORK/capreg/res_17MT.txt",
-    "$WORK/capreg/res_17NL.txt",
-    "$WORK/capreg/res_17NO.txt",
-    "$WORK/capreg/res_17PL.txt",
-    "$WORK/capreg/res_17PT.txt",
-    "$WORK/capreg/res_17RO.txt",
-    "$WORK/capreg/res_17SE.txt",
-    "$WORK/capreg/res_17SI.txt",
-    "$WORK/capreg/res_17SK.txt"
+    "$SOURCES/capreg/res_17AT.txt",
+    "$SOURCES/capreg/res_17BG.txt",
+    "$SOURCES/capreg/res_17BL.txt",
+    "$SOURCES/capreg/res_17CY.txt",
+    "$SOURCES/capreg/res_17CZ.txt",
+    "$SOURCES/capreg/res_17DE.txt",
+    "$SOURCES/capreg/res_17DK.txt",
+    "$SOURCES/capreg/res_17EE.txt",
+    "$SOURCES/capreg/res_17EL.txt",
+    "$SOURCES/capreg/res_17ES.txt",
+    "$SOURCES/capreg/res_17FI.txt",
+    "$SOURCES/capreg/res_17FR.txt",
+    "$SOURCES/capreg/res_17HR.txt",
+    "$SOURCES/capreg/res_17HU.txt",
+    "$SOURCES/capreg/res_17IR.txt",
+    "$SOURCES/capreg/res_17IT.txt",
+    "$SOURCES/capreg/res_17LT.txt",
+    "$SOURCES/capreg/res_17LV.txt",
+    "$SOURCES/capreg/res_17MT.txt",
+    "$SOURCES/capreg/res_17NL.txt",
+    "$SOURCES/capreg/res_17NO.txt",
+    "$SOURCES/capreg/res_17PL.txt",
+    "$SOURCES/capreg/res_17PT.txt",
+    "$SOURCES/capreg/res_17RO.txt",
+    "$SOURCES/capreg/res_17SE.txt",
+    "$SOURCES/capreg/res_17SI.txt",
+    "$SOURCES/capreg/res_17SK.txt"
    ],
    "outputs": [
     "capri_data/2017/supply/young_animals_2017.json",
@@ -4550,7 +4550,7 @@
    "builder": "extract_all_from_data2",
    "args": [
     "--export-dir",
-    "$WORK/inputs/capri_export_zip/capri_export"
+    "$SOURCES/capri_export"
    ],
    "inputs": [
     "capri_data/shared/capri_member_state_codes.csv",
@@ -4562,41 +4562,41 @@
     "tools/lib/_model_regions.py"
    ],
    "external": [
-    "$WORK/inputs/capri_export_zip/capri_export/DATA2_AL.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/DATA2_AT.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/DATA2_BA.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/DATA2_BG.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/DATA2_BL.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/DATA2_CS.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/DATA2_CY.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/DATA2_CZ.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/DATA2_DE.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/DATA2_DK.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/DATA2_EE.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/DATA2_EL.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/DATA2_ES.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/DATA2_FI.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/DATA2_FR.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/DATA2_HR.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/DATA2_HU.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/DATA2_IR.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/DATA2_IT.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/DATA2_KO.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/DATA2_LT.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/DATA2_LV.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/DATA2_MK.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/DATA2_MO.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/DATA2_MT.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/DATA2_NL.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/DATA2_NO.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/DATA2_PL.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/DATA2_PT.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/DATA2_RO.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/DATA2_SE.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/DATA2_SI.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/DATA2_SK.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/DATA2_TU.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/DATA2_UK.txt"
+    "$SOURCES/capri_export/DATA2_AL.txt",
+    "$SOURCES/capri_export/DATA2_AT.txt",
+    "$SOURCES/capri_export/DATA2_BA.txt",
+    "$SOURCES/capri_export/DATA2_BG.txt",
+    "$SOURCES/capri_export/DATA2_BL.txt",
+    "$SOURCES/capri_export/DATA2_CS.txt",
+    "$SOURCES/capri_export/DATA2_CY.txt",
+    "$SOURCES/capri_export/DATA2_CZ.txt",
+    "$SOURCES/capri_export/DATA2_DE.txt",
+    "$SOURCES/capri_export/DATA2_DK.txt",
+    "$SOURCES/capri_export/DATA2_EE.txt",
+    "$SOURCES/capri_export/DATA2_EL.txt",
+    "$SOURCES/capri_export/DATA2_ES.txt",
+    "$SOURCES/capri_export/DATA2_FI.txt",
+    "$SOURCES/capri_export/DATA2_FR.txt",
+    "$SOURCES/capri_export/DATA2_HR.txt",
+    "$SOURCES/capri_export/DATA2_HU.txt",
+    "$SOURCES/capri_export/DATA2_IR.txt",
+    "$SOURCES/capri_export/DATA2_IT.txt",
+    "$SOURCES/capri_export/DATA2_KO.txt",
+    "$SOURCES/capri_export/DATA2_LT.txt",
+    "$SOURCES/capri_export/DATA2_LV.txt",
+    "$SOURCES/capri_export/DATA2_MK.txt",
+    "$SOURCES/capri_export/DATA2_MO.txt",
+    "$SOURCES/capri_export/DATA2_MT.txt",
+    "$SOURCES/capri_export/DATA2_NL.txt",
+    "$SOURCES/capri_export/DATA2_NO.txt",
+    "$SOURCES/capri_export/DATA2_PL.txt",
+    "$SOURCES/capri_export/DATA2_PT.txt",
+    "$SOURCES/capri_export/DATA2_RO.txt",
+    "$SOURCES/capri_export/DATA2_SE.txt",
+    "$SOURCES/capri_export/DATA2_SI.txt",
+    "$SOURCES/capri_export/DATA2_SK.txt",
+    "$SOURCES/capri_export/DATA2_TU.txt",
+    "$SOURCES/capri_export/DATA2_UK.txt"
    ],
    "outputs": [
     "capri_data/sources/capreg/capreg_producer_prices_extract.csv",
@@ -4607,16 +4607,16 @@
    "task": "extract_capri_costsavings",
    "builder": "extract_capri_costsavings",
    "args": [
-    "$WORK/cs/costsavings_ini_21730_jul15.csv",
-    "$WORK/cs/costsavings_max_21730_jul15.csv"
+    "$SOURCES/costsavings/costsavings_ini_21730_jul15.csv",
+    "$SOURCES/costsavings/costsavings_max_21730_jul15.csv"
    ],
    "inputs": [],
    "code": [
     "tools/build/extract_capri_costsavings.py"
    ],
    "external": [
-    "$WORK/cs/costsavings_ini_21730_jul15.csv",
-    "$WORK/cs/costsavings_max_21730_jul15.csv"
+    "$SOURCES/costsavings/costsavings_ini_21730_jul15.csv",
+    "$SOURCES/costsavings/costsavings_max_21730_jul15.csv"
    ],
    "outputs": [
     "capri_data/sources/ghgtech/capri_costsavings_2030.csv"
@@ -4626,7 +4626,7 @@
    "task": "extract_capri_marginal_terms",
    "builder": "extract_capri_marginal_terms",
    "args": [
-    "$UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv",
+    "$EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv",
     "ini"
    ],
    "inputs": [],
@@ -4634,7 +4634,7 @@
     "tools/build/extract_capri_marginal_terms.py"
    ],
    "external": [
-    "$UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv"
+    "$EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv"
    ],
    "outputs": [
     "capri_data/validation/greendeal_2030/capri_marginal_terms_ini_2030.csv.xz",
@@ -4650,7 +4650,7 @@
     "tools/build/extract_gd2030_nbalance.py"
    ],
    "external": [
-    "$UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv"
+    "$EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv"
    ],
    "outputs": [
     "capri_data/sources/capri_res/gd2030_endotech_ini_nbalance.csv"
@@ -4661,7 +4661,7 @@
    "builder": "extract_remaining_nine",
    "args": [
     "--export-dir",
-    "$WORK/inputs/capri_export_zip/capri_export"
+    "$SOURCES/capri_export"
    ],
    "inputs": [
     "capri_data/shared/capri_member_state_codes.csv",
@@ -4673,41 +4673,41 @@
     "tools/lib/_model_regions.py"
    ],
    "external": [
-    "$WORK/inputs/capri_export_zip/capri_export/DATA2_AL.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/DATA2_AT.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/DATA2_BA.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/DATA2_BG.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/DATA2_BL.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/DATA2_CS.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/DATA2_CY.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/DATA2_CZ.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/DATA2_DE.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/DATA2_DK.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/DATA2_EE.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/DATA2_EL.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/DATA2_ES.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/DATA2_FI.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/DATA2_FR.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/DATA2_HR.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/DATA2_HU.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/DATA2_IR.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/DATA2_IT.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/DATA2_KO.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/DATA2_LT.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/DATA2_LV.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/DATA2_MK.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/DATA2_MO.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/DATA2_MT.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/DATA2_NL.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/DATA2_NO.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/DATA2_PL.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/DATA2_PT.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/DATA2_RO.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/DATA2_SE.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/DATA2_SI.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/DATA2_SK.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/DATA2_TU.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/DATA2_UK.txt"
+    "$SOURCES/capri_export/DATA2_AL.txt",
+    "$SOURCES/capri_export/DATA2_AT.txt",
+    "$SOURCES/capri_export/DATA2_BA.txt",
+    "$SOURCES/capri_export/DATA2_BG.txt",
+    "$SOURCES/capri_export/DATA2_BL.txt",
+    "$SOURCES/capri_export/DATA2_CS.txt",
+    "$SOURCES/capri_export/DATA2_CY.txt",
+    "$SOURCES/capri_export/DATA2_CZ.txt",
+    "$SOURCES/capri_export/DATA2_DE.txt",
+    "$SOURCES/capri_export/DATA2_DK.txt",
+    "$SOURCES/capri_export/DATA2_EE.txt",
+    "$SOURCES/capri_export/DATA2_EL.txt",
+    "$SOURCES/capri_export/DATA2_ES.txt",
+    "$SOURCES/capri_export/DATA2_FI.txt",
+    "$SOURCES/capri_export/DATA2_FR.txt",
+    "$SOURCES/capri_export/DATA2_HR.txt",
+    "$SOURCES/capri_export/DATA2_HU.txt",
+    "$SOURCES/capri_export/DATA2_IR.txt",
+    "$SOURCES/capri_export/DATA2_IT.txt",
+    "$SOURCES/capri_export/DATA2_KO.txt",
+    "$SOURCES/capri_export/DATA2_LT.txt",
+    "$SOURCES/capri_export/DATA2_LV.txt",
+    "$SOURCES/capri_export/DATA2_MK.txt",
+    "$SOURCES/capri_export/DATA2_MO.txt",
+    "$SOURCES/capri_export/DATA2_MT.txt",
+    "$SOURCES/capri_export/DATA2_NL.txt",
+    "$SOURCES/capri_export/DATA2_NO.txt",
+    "$SOURCES/capri_export/DATA2_PL.txt",
+    "$SOURCES/capri_export/DATA2_PT.txt",
+    "$SOURCES/capri_export/DATA2_RO.txt",
+    "$SOURCES/capri_export/DATA2_SE.txt",
+    "$SOURCES/capri_export/DATA2_SI.txt",
+    "$SOURCES/capri_export/DATA2_SK.txt",
+    "$SOURCES/capri_export/DATA2_TU.txt",
+    "$SOURCES/capri_export/DATA2_UK.txt"
    ],
    "outputs": [
     "capri_data/sources/capreg/capreg_activity_levels.csv",
@@ -4720,14 +4720,14 @@
    "builder": "ingest_capmod_market",
    "args": [
     "--dump",
-    "$UP/_symbols_base1717.txt"
+    "$EXPORTS/_symbols_base1717.txt"
    ],
    "inputs": [],
    "code": [
     "tools/build/ingest_capmod_market.py"
    ],
    "external": [
-    "$UP/_symbols_base1717.txt"
+    "$EXPORTS/_symbols_base1717.txt"
    ],
    "outputs": [
     "capri_data/validation/capmod_market_extraction.json"
@@ -4738,7 +4738,7 @@
    "builder": "ingest_pela_gtap",
    "args": [
     "--dump-dir",
-    "$WORK/inputs/estnlp"
+    "$SOURCES/estnlp"
    ],
    "inputs": [
     "capri_data/shared/capri_member_state_codes.csv",
@@ -4750,7 +4750,7 @@
     "tools/lib/_model_regions.py"
    ],
    "external": [
-    "$WORK/inputs/estnlp/estnlp_PELA.txt"
+    "$SOURCES/estnlp/estnlp_PELA.txt"
    ],
    "outputs": [
     "capri_data/sources/estnlp/pela_own_price.csv"
@@ -4761,7 +4761,7 @@
    "builder": "ingest_pmp_terms",
    "args": [
     "--export-dir",
-    "$WORK/inputs/capri_export_zip/capri_export"
+    "$SOURCES/capri_export"
    ],
    "inputs": [
     "capri_data/shared/capri_member_state_codes.csv",
@@ -4773,76 +4773,76 @@
     "tools/lib/_model_regions.py"
    ],
    "external": [
-    "$WORK/inputs/capri_export_zip/capri_export/quadPact_AL.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/quadPact_AT.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/quadPact_BA.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/quadPact_BG.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/quadPact_BL.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/quadPact_CS.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/quadPact_CY.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/quadPact_CZ.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/quadPact_DE.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/quadPact_DK.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/quadPact_EE.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/quadPact_EL.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/quadPact_ES.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/quadPact_FI.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/quadPact_FR.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/quadPact_HR.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/quadPact_HU.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/quadPact_IR.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/quadPact_IT.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/quadPact_KO.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/quadPact_LT.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/quadPact_LV.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/quadPact_MK.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/quadPact_MO.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/quadPact_MT.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/quadPact_NL.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/quadPact_NO.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/quadPact_PL.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/quadPact_PT.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/quadPact_RO.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/quadPact_SE.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/quadPact_SI.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/quadPact_SK.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/quadPact_TU.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/quadPact_UK.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/quadTechn_AL.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/quadTechn_AT.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/quadTechn_BA.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/quadTechn_BG.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/quadTechn_BL.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/quadTechn_CS.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/quadTechn_CY.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/quadTechn_CZ.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/quadTechn_DE.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/quadTechn_DK.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/quadTechn_EE.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/quadTechn_EL.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/quadTechn_ES.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/quadTechn_FI.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/quadTechn_FR.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/quadTechn_HR.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/quadTechn_HU.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/quadTechn_IR.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/quadTechn_IT.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/quadTechn_KO.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/quadTechn_LT.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/quadTechn_LV.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/quadTechn_MK.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/quadTechn_MO.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/quadTechn_MT.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/quadTechn_NL.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/quadTechn_NO.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/quadTechn_PL.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/quadTechn_PT.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/quadTechn_RO.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/quadTechn_SE.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/quadTechn_SI.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/quadTechn_SK.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/quadTechn_TU.txt",
-    "$WORK/inputs/capri_export_zip/capri_export/quadTechn_UK.txt"
+    "$SOURCES/capri_export/quadPact_AL.txt",
+    "$SOURCES/capri_export/quadPact_AT.txt",
+    "$SOURCES/capri_export/quadPact_BA.txt",
+    "$SOURCES/capri_export/quadPact_BG.txt",
+    "$SOURCES/capri_export/quadPact_BL.txt",
+    "$SOURCES/capri_export/quadPact_CS.txt",
+    "$SOURCES/capri_export/quadPact_CY.txt",
+    "$SOURCES/capri_export/quadPact_CZ.txt",
+    "$SOURCES/capri_export/quadPact_DE.txt",
+    "$SOURCES/capri_export/quadPact_DK.txt",
+    "$SOURCES/capri_export/quadPact_EE.txt",
+    "$SOURCES/capri_export/quadPact_EL.txt",
+    "$SOURCES/capri_export/quadPact_ES.txt",
+    "$SOURCES/capri_export/quadPact_FI.txt",
+    "$SOURCES/capri_export/quadPact_FR.txt",
+    "$SOURCES/capri_export/quadPact_HR.txt",
+    "$SOURCES/capri_export/quadPact_HU.txt",
+    "$SOURCES/capri_export/quadPact_IR.txt",
+    "$SOURCES/capri_export/quadPact_IT.txt",
+    "$SOURCES/capri_export/quadPact_KO.txt",
+    "$SOURCES/capri_export/quadPact_LT.txt",
+    "$SOURCES/capri_export/quadPact_LV.txt",
+    "$SOURCES/capri_export/quadPact_MK.txt",
+    "$SOURCES/capri_export/quadPact_MO.txt",
+    "$SOURCES/capri_export/quadPact_MT.txt",
+    "$SOURCES/capri_export/quadPact_NL.txt",
+    "$SOURCES/capri_export/quadPact_NO.txt",
+    "$SOURCES/capri_export/quadPact_PL.txt",
+    "$SOURCES/capri_export/quadPact_PT.txt",
+    "$SOURCES/capri_export/quadPact_RO.txt",
+    "$SOURCES/capri_export/quadPact_SE.txt",
+    "$SOURCES/capri_export/quadPact_SI.txt",
+    "$SOURCES/capri_export/quadPact_SK.txt",
+    "$SOURCES/capri_export/quadPact_TU.txt",
+    "$SOURCES/capri_export/quadPact_UK.txt",
+    "$SOURCES/capri_export/quadTechn_AL.txt",
+    "$SOURCES/capri_export/quadTechn_AT.txt",
+    "$SOURCES/capri_export/quadTechn_BA.txt",
+    "$SOURCES/capri_export/quadTechn_BG.txt",
+    "$SOURCES/capri_export/quadTechn_BL.txt",
+    "$SOURCES/capri_export/quadTechn_CS.txt",
+    "$SOURCES/capri_export/quadTechn_CY.txt",
+    "$SOURCES/capri_export/quadTechn_CZ.txt",
+    "$SOURCES/capri_export/quadTechn_DE.txt",
+    "$SOURCES/capri_export/quadTechn_DK.txt",
+    "$SOURCES/capri_export/quadTechn_EE.txt",
+    "$SOURCES/capri_export/quadTechn_EL.txt",
+    "$SOURCES/capri_export/quadTechn_ES.txt",
+    "$SOURCES/capri_export/quadTechn_FI.txt",
+    "$SOURCES/capri_export/quadTechn_FR.txt",
+    "$SOURCES/capri_export/quadTechn_HR.txt",
+    "$SOURCES/capri_export/quadTechn_HU.txt",
+    "$SOURCES/capri_export/quadTechn_IR.txt",
+    "$SOURCES/capri_export/quadTechn_IT.txt",
+    "$SOURCES/capri_export/quadTechn_KO.txt",
+    "$SOURCES/capri_export/quadTechn_LT.txt",
+    "$SOURCES/capri_export/quadTechn_LV.txt",
+    "$SOURCES/capri_export/quadTechn_MK.txt",
+    "$SOURCES/capri_export/quadTechn_MO.txt",
+    "$SOURCES/capri_export/quadTechn_MT.txt",
+    "$SOURCES/capri_export/quadTechn_NL.txt",
+    "$SOURCES/capri_export/quadTechn_NO.txt",
+    "$SOURCES/capri_export/quadTechn_PL.txt",
+    "$SOURCES/capri_export/quadTechn_PT.txt",
+    "$SOURCES/capri_export/quadTechn_RO.txt",
+    "$SOURCES/capri_export/quadTechn_SE.txt",
+    "$SOURCES/capri_export/quadTechn_SI.txt",
+    "$SOURCES/capri_export/quadTechn_SK.txt",
+    "$SOURCES/capri_export/quadTechn_TU.txt",
+    "$SOURCES/capri_export/quadTechn_UK.txt"
    ],
    "outputs": [
     "capri_data/sources/capreg/pmp_quad_pact.csv",
@@ -4861,7 +4861,7 @@
     "tools/build/recalibrate_trade_2017.py"
    ],
    "external": [
-    "$UP/res_0_1717cap_after_2014_cal_from_data_caldefaulta.csv"
+    "$EXPORTS/res_0_1717cap_after_2014_cal_from_data_caldefaulta.csv"
    ],
    "outputs": [
     "capri_data/shared/trade_flows_2017.csv",

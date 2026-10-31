@@ -21,12 +21,14 @@ import sys
 from pathlib import Path
 
 import pandas as pd
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
+from paths import SOURCES  # noqa: E402  (CAPRI's material outside the repository)
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check")]
 from _gdx import read_symbol  # noqa: E402
 
-GAMS = Path("/home/claude/work/allgms/gams")
+GAMS = SOURCES / "gams"
 OUT = ROOT / "capri_data" / "2017" / "policy"
 #: CAPRI's land types of p_organicTargetMS and the file's columns
 ORGANIC_COLS = {"ARA": "arable_pp", "J0000": "grassland_pp", "PECR": "permanent_pp"}

@@ -37,6 +37,8 @@ from pathlib import Path
 import pandas as pd
 
 import functools as _ft
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
+from paths import EXPORTS, SOURCES  # noqa: E402  (CAPRI's material outside the repository)
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
@@ -46,8 +48,8 @@ MKT = ROOT / "capri_data" / "2017" / "market"
 OUT = MKT / "world_prices.csv"
 CODES = ROOT / "capri_data" / "codes" / "model_commodities.csv"
 UNITS = ROOT / "capri_data" / "shared" / "regional_units.csv"
-FAO = Path("/mnt/user-data/uploads/fao_agg_17_datamarket.txt")
-DUMPS = Path("/home/claude/work/capreg")
+FAO = EXPORTS / "fao_agg_17_datamarket.txt"
+DUMPS = SOURCES / "capreg"
 FAO_SRC = "FAO_agg_17_defaulta p_dataMarket 'World'.'PMRK'.'BAS'"
 #: the CAPRI product whose world price a row takes where it is not the commodity's CAPRI code (model_commodities.csv),
 #: and the rows that are not market commodities

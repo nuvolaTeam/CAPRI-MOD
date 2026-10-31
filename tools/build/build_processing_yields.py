@@ -24,9 +24,11 @@ from pathlib import Path
 import pandas as pd
 
 import functools as _ft
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
+from paths import EXPORTS  # noqa: E402  (CAPRI's material outside the repository)
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
-DUMP = Path("/mnt/user-data/uploads/markmarket_greendeal_1730et_base_1717.txt")
+DUMP = EXPORTS / "markmarket_greendeal_1730et_base_1717.txt"
 KEEP = ROOT / "capri_data" / "sources" / "market" / "processing_yields_dataout_2030.csv"
 PAIRS = (("OLIV", "OLIO"), ("PARI", "RICE"))
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "lib"))

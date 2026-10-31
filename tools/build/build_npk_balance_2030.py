@@ -53,6 +53,8 @@ import numpy as np
 import pandas as pd
 
 import functools as _ft
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
+from paths import EXPORTS, SOURCES  # noqa: E402  (CAPRI's material outside the repository)
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 ENV = ROOT / "capri_data" / "2017" / "environment"
@@ -127,8 +129,8 @@ def main():
     import _money
     money = _money.deflator(2030)
     ap = argparse.ArgumentParser()
-    ap.add_argument("--dump", type=Path, default=Path("/mnt/user-data/uploads/res_2_1730greendeal_refdefaulta.zip"))
-    ap.add_argument("--capreg-dir", type=Path, default=Path("/home/claude/work/capreg"))
+    ap.add_argument("--dump", type=Path, default=EXPORTS / "res_2_1730greendeal_refdefaulta.zip")
+    ap.add_argument("--capreg-dir", type=Path, default=SOURCES / "capreg")
     ap.add_argument("--out-dir", type=Path, default=ENV, help="where to write the outputs (default: the data folder)")
     a = ap.parse_args()
     out = a.out_dir

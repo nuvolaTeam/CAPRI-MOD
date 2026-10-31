@@ -27,7 +27,7 @@ Written (capri_data/trajectories/):
   capri_livestock_premium_ratio_2030.csv  model region x model animal: 2030/2017 premium ratio (real,
                                        2017 CAPRI activity levels as weights)
 
-    python tools/build/build_price_trajectory_2030.py [--dump-dir /home/claude/work/capreg]
+    python tools/build/build_price_trajectory_2030.py [--dump-dir capri_sources/capreg]
 """
 from __future__ import annotations
 import argparse, glob, importlib.util, json, re, statistics
@@ -37,6 +37,9 @@ from pathlib import Path
 import pandas as pd
 
 import functools as _ft
+import sys  # noqa: E402
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
+from paths import SOURCES  # noqa: E402  (CAPRI's material outside the repository)
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 CAKES = ("SOYC", "RAPC", "SUNC")
@@ -52,7 +55,7 @@ def _load(path):
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--dump-dir", type=Path, default=Path("/home/claude/work/capreg"))
+    ap.add_argument("--dump-dir", type=Path, default=SOURCES / "capreg")
     args = ap.parse_args()
     val = ROOT / "capri_data" / "validation" / "greendeal_2030"
     out = ROOT / "capri_data" / "trajectories"

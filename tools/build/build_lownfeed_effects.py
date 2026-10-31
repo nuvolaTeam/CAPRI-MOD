@@ -26,8 +26,8 @@ Output: capri_data/2017/abatement/mitigation/lownfeed_effects.csv, the schema of
 lowNFeed, tech_param ghgTechLowNFeed; d_crpr_rel and d_mann_rel per unit of the parameter; cost_per_unit = the cost
 at ghgTechLowNFeed = 1, star 3.0's value - the cost is not linear in the parameter: REGISTERED)
 
-    python tools/build/build_lownfeed_effects.py [--anim-req /mnt/user-data/uploads/animReq_SK.zip]
-                                           [--dump-dir /home/claude/work/capreg]
+    python tools/build/build_lownfeed_effects.py [--anim-req capri_sources/exports/animReq_SK.zip]
+                                           [--dump-dir capri_sources/capreg]
 """
 from __future__ import annotations
 import argparse, glob, importlib.util, io, json, re, zipfile
@@ -38,6 +38,8 @@ from pathlib import Path
 import pandas as pd
 
 import functools as _ft
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
+from paths import EXPORTS, SOURCES  # noqa: E402  (CAPRI's material outside the repository)
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 M = ROOT / "capri_data" / "2017" / "abatement" / "mitigation"
@@ -81,8 +83,8 @@ def extract(zpath: Path, dump_dir: Path):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--anim-req", type=Path, default=Path("/mnt/user-data/uploads/animReq_SK.zip"))
-    ap.add_argument("--dump-dir", type=Path, default=Path("/home/claude/work/capreg"))
+    ap.add_argument("--anim-req", type=Path, default=EXPORTS / "animReq_SK.zip")
+    ap.add_argument("--dump-dir", type=Path, default=SOURCES / "capreg")
     a = ap.parse_args()
     extract(a.anim_req, a.dump_dir)
     spec = importlib.util.spec_from_file_location("_mr", ROOT / "tools" / "lib" / "_model_regions.py")

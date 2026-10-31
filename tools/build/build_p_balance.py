@@ -46,13 +46,16 @@ import re
 import subprocess
 from collections import defaultdict
 from pathlib import Path
+import sys  # noqa: E402
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
+from paths import EXPORTS  # noqa: E402  (CAPRI's material outside the repository)
 
 ROOT = Path(__file__).resolve().parents[2]
 SRC_DIR = ROOT / "capri_data" / "sources" / "capri_res"
 SRC_REF = SRC_DIR / "gd2030_ref_pbalance.csv"
 SRC_INI = SRC_DIR / "gd2030_endotech_ini_pbalance.csv"
 OUT = ROOT / "capri_data" / "2017" / "environment" / "p_balance_crop_coefs_2030.csv"
-UP = Path("/mnt/user-data/uploads")
+UP = EXPORTS
 
 ITEMS = ("EXCRET", "MTRADE", "MINFER", "NETF", "CRESID", "EXPPRD", "RUNANI", "IMPORT", "SURTOT", "SURSOI")
 #: CAPRI's elementary crop activities (sets.gms MCACT), as tools/build/build_npk_balance_2030.py

@@ -20,8 +20,10 @@ should be dropped into REFERENCE below to turn CHECK verdicts into quantitative
 PASS/FAIL against CAPRI itself.
 """
 import sys, warnings
+from pathlib import Path
 warnings.filterwarnings("ignore")
-sys.path.insert(0, "/home/claude")
+ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT))
 import pandas as pd
 import numpy as np
 from capri_mod.model import CAPRIModel
@@ -132,7 +134,7 @@ def test_market_shock(model, regions):
 
 
 if __name__ == "__main__":
-    model = CAPRIModel(data_dir="/home/claude/capri_data", verbose=False)
+    model = CAPRIModel(data_dir=str(ROOT / "capri_data"), verbose=False)
     test_regions = list(model.data["areas"].index[:5])
 
     r1 = test_supply_elasticities(model, test_regions[:2])

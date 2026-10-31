@@ -22,6 +22,8 @@ import json
 import re
 import sys
 from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
+from paths import SOURCES  # noqa: E402  (CAPRI's material outside the repository)
 
 _ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(_ROOT))
@@ -89,8 +91,8 @@ def _attach_slopes(out, reg8, anim, var, slope_src, key):
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--dump-dir", type=Path, default=Path("/home/claude/work/capreg"))
-    ap.add_argument("--pmp-dir", type=Path, default=Path("/home/claude/work/feedexp/feed_export"),
+    ap.add_argument("--dump-dir", type=Path, default=SOURCES / "capreg")
+    ap.add_argument("--pmp-dir", type=Path, default=SOURCES / "feed_export",
                     help="gdxdump CSVs of p_pmpFeedInpCoeff (pmppar_17XX_feedpmp.csv)")
     args = ap.parse_args()
 

@@ -12,7 +12,7 @@ CAPRI's is visible.
 
 Output: capri_data/codes/units.csv  code, description, capri (yes|no)
 
-    python tools/build/build_unit_catalogue.py [--gms /home/claude/work/allgms/gams/CAPRIunits.gms]
+    python tools/build/build_unit_catalogue.py [--gms capri_sources/gams/CAPRIunits.gms]
 """
 from __future__ import annotations
 
@@ -20,6 +20,9 @@ import argparse
 import csv
 import re
 from pathlib import Path
+import sys  # noqa: E402
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
+from paths import SOURCES  # noqa: E402  (CAPRI's material outside the repository)
 
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / "capri_data" / "codes" / "units.csv"
@@ -48,7 +51,7 @@ def capri_units(gms: Path) -> list[tuple[str, str]]:
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--gms", type=Path, default=Path("/home/claude/work/allgms/gams/CAPRIunits.gms"))
+    ap.add_argument("--gms", type=Path, default=SOURCES / "gams/CAPRIunits.gms")
     a = ap.parse_args()
     cu = capri_units(a.gms)
     have = {c.lower() for c, _ in cu}

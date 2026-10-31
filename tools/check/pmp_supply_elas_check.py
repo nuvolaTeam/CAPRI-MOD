@@ -14,6 +14,8 @@ The CAPRI values are for 2020, not 2030: a guide to magnitudes, not a target to 
 from __future__ import annotations
 import argparse, contextlib, io, re, sys, warnings
 from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
+from paths import EXPORTS, SOURCES  # noqa: E402  (CAPRI's material outside the repository)
 
 warnings.filterwarnings("ignore")
 ROOT = Path(__file__).resolve().parents[2]
@@ -29,7 +31,7 @@ CAPRI_CODE = {"CORN": "MAIZ", "WINE": "TWIN"}
 def capri_elas(ms: str, products) -> pd.Series:
     cc = MS_CODE.get(ms, ms)
     cands = [Path(d) / f"supply_elas_2_1720{cc}defaulta.txt" for d in
-             ("/mnt/user-data/uploads", "/home/claude/work/up/supelas")]      # the second: the REMAINING zip unpacked
+             (str(EXPORTS), str(SOURCES / "supelas"))]      # the second: the REMAINING zip unpacked
     f = next((c for c in cands if c.exists()), cands[0])
     out = {}
     if not f.exists():

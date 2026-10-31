@@ -31,7 +31,7 @@ country codes from the GAMS source (global/fao_codes_new.gms FAORegions_map); so
 from validation/greendeal_2030/capri_marginal_terms_ini_2030.csv.xz; deflator from
 trajectories/capri_price_ratios_2030.csv.
 
-    python tools/build/build_histosol.py [--gams-dir /home/claude/work/allgms/gams]
+    python tools/build/build_histosol.py [--gams-dir capri_sources/gams]
 """
 from __future__ import annotations
 import argparse, csv, importlib.util, json, re
@@ -42,6 +42,9 @@ import numpy as np
 import pandas as pd
 
 import functools as _ft
+import sys  # noqa: E402
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
+from paths import SOURCES  # noqa: E402  (CAPRI's material outside the repository)
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 SRC = ROOT / "capri_data" / "sources"
@@ -105,7 +108,7 @@ def relsubs_pmp(cs0, cs1, cpl, ini, mx):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--gams-dir", type=Path, default=Path("/home/claude/work/allgms/gams"))
+    ap.add_argument("--gams-dir", type=Path, default=SOURCES / "gams")
     a = ap.parse_args()
     org = defaultdict(dict)
     for r in _records("orgsoil_share_p_orgsoilori.csv"):

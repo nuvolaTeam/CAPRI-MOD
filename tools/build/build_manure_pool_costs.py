@@ -13,14 +13,17 @@ the simulation year; kept at 0.18 here (REGISTERED).
 from __future__ import annotations
 import argparse, csv, json, re
 from pathlib import Path
+import sys  # noqa: E402
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
+from paths import EXPORTS, SOURCES  # noqa: E402  (CAPRI's material outside the repository)
 
 _ROOT = Path(__file__).resolve().parents[2]
-GMS = Path("/home/claude/work/allgms/gams/manuremarket/define_manure_market_structure.gms")
+GMS = SOURCES / "gams/manuremarket/define_manure_market_structure.gms"
 
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--dist", type=Path, default=Path("/home/claude/work/nuts2_center_distance.csv"))
+    ap.add_argument("--dist", type=Path, default=EXPORTS / "nuts2_center_distance.csv")
     args = ap.parse_args()
     txt = GMS.read_text(errors="ignore").replace("\r", "")
     blk = txt[txt.index("set rManPool_centre(rall,rall)"):]
