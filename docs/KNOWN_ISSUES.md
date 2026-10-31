@@ -9,11 +9,10 @@ The data sourcing registry's log of checks, fixes and decisions (201 entries, mo
 [KNOWN_ISSUES_REGISTRY_LOG.md](KNOWN_ISSUES_REGISTRY_LOG.md), verbatim, with the triage of its open entries against
 the code: they became K92-K96, joined K73, K80, K91, or were closed or historical.
 
-## Open (11)
+## Open (10)
 
 | # | Issue | Status |
 |---|---|---|
-| [K108](#k108) | Inputs from CAPRI's 2030 results in 2030 money in a model working in 2017 money | fixed on money-year; gate 11 pending |
 | [K13](#k13) | Farm-to-Fork milk price | open: waiting for CAPRI's scenario results |
 | [K29](#k29) | NL11 and NL13 meet the tiered N target only at corner solutions (Farm-to-Fork) | open: waiting for CAPRI's scenario results |
 | [K47](#k47) | The cattle chain's equilibrium is sensitive to changes outside it | open |
@@ -25,10 +24,11 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K92](#k92) | Farm-to-Fork changes furthest from JRC121368, besides the milk price | open: waiting for CAPRI's scenario results |
 | [K93](#k93) | CAPRI mitigation options not built; documents disagree on which are in | open: no-till and legume share unmeasured; UreaSubst parked; the others not needed for Farm-to-Fork and the Green Deal |
 
-## Resolved (97)
+## Resolved (98)
 
 | # | Issue | Status |
 |---|---|---|
+| [K108](#k108) | Inputs from CAPRI's 2030 results in 2030 money in a model working in 2017 money | fixed (gate 11, 31 October 2026) |
 | [K77](#k77) | CAPRI's fertiliser-option curvature (S5) leaves the baseline's base shares | decided (31 October 2026): the model's calibration kept, a deliberate departure (DEP-30) |
 | [K107](#k107) | The regional model's tax on mineral N took IPCC's factors, the accounts CAPRI's MITERRA fractions | fixed (31 October 2026) |
 | [K10](#k10) | Sub-sets of regions do not converge | resolved by K83 (31 October 2026) |
@@ -1003,6 +1003,11 @@ CAPRI's stop rule, recorded every iteration since r135, flags rows that move by 
   BG020000 oats 1.5 -> 23.1, other cereals 19.0 -> 52.9, sunflower 24.9 -> 46.9 (a region with mineral caps relaxed).
   Which state has the lower objective at the final prices is not measured (both runs' solves are optimal and the jump
   check did not act on FR820000 or BG020000)
+  **Gate 11 (31 October 2026, r198 against r196):** FR820000 back in the gate-8/9 state (wine 15.0 kha, olives 0.9),
+  LT000000's other fodder 56.6 kha (gate 10 166.9, base 232.8): the regions with two states switch with the PMP terms'
+  change (K108). The diagnostic of the two states' objectives (tools/check/k79_multistart, draft) is the next step
+  (STRUCTURAL_GAPS_PLAN S12)
+
 
 <a id="k80"></a>
 ### K80: The same run repeated from a warm start differs by up to 3e-5 relative in small cereal activities (26 October 2026)
@@ -1840,3 +1845,10 @@ in 2017 money (CAPRI inflates them; the model takes them before that step), cons
   little). Not changed: genet_eff's feed cost from the 2017 ration prices where CAPRI takes the simulation year's
   (a price-year question); the market's welfare base (to settle). The full Farm-to-Fork and Green Deal runs wait for the
   project lead's go (gate 11)
+  **Gate 11, 31 October 2026** (r198 Farm-to-Fork, r199 Green Deal 2030 against gate 10's r196, r197): baselines equal
+  (largest regional difference 0.006); supply responds more to prices, so the scenarios' price rises are smaller and the
+  herds fall less: Farm-to-Fork milk +20.0% (+22.4), pork +19.5 (+20.9), poultry +16.3 (+17.4), cereals +10.7 (+11.2),
+  pigs -12.8% (-13.5), ammonia -36.7 (-37.7), manure N2O -17.2 (-18.1), production totals within 0.1 points; Green
+  Deal milk +8.0 (+8.9), cereals +5.7 (+6.4), ammonia -29.7 (-31.0), the rest within 0.3 points. Both converged (12 and
+  20 iterations); the scenario iterations take about 1.5 times as long (a first Green Deal run stopped at its
+  iteration 6, restarted with the Hessian from the cache)
