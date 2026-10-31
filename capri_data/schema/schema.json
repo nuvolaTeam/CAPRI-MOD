@@ -10064,7 +10064,9 @@
    },
    "notes": [],
    "read_by": {
-    "model": [],
+    "model": [
+     "capri_mod/market/supply.py"
+    ],
     "builders": [],
     "checks": [],
     "tests": []

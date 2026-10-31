@@ -318,10 +318,13 @@ class SupplyMixin(MarketStateMixin):
                 Sr = ({r: float(v) for r, v in self.eu_rows(exogenous_supply[["MILK"]])["MILK"].items()} if self.eu_blocks
                       else {"EU27": float(exogenous_supply["MILK"].sum())})
             else:
-                Sr = {r: float(self.par.base_production.at[r, "MILK"]) for r in self.EU}
-            # the EU's units outside a run on a subset (K83): their raw milk at its base (CAPRI's ProdNQ_ of MILK for
-            # them: KNOWN_ISSUES K83 step 5)
+                Sr = None
+            # the EU's units outside a run on a subset (K83): their raw milk at its base, moved by their member
+            # states' ProdNQ_ of MILK in the dairy block (_excluded_milk_resp); with no EU unit in the run, theirs alone
             _xr_m = self._eu_excluded_rows()
+            if Sr is None:
+                Sr = ({r: 0.0 for r in self.EU} if (_xr_m is not None and "MILK" in _xr_m.columns)
+                      else {r: float(self.par.base_production.at[r, "MILK"]) for r in self.EU})
             if _xr_m is not None and "MILK" in _xr_m.columns:
                 Sr = {r_: float(v_) + (float(_xr_m.at[r_, "MILK"]) if r_ in _xr_m.index else 0.0)
                       for r_, v_ in Sr.items()}

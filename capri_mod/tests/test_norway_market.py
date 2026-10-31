@@ -294,7 +294,9 @@ def test_norway_has_pig_herds_and_per_head_coefficients():
 def test_norway_run_on_its_own_supply_models():
     """A baseline with Norway's supply regions: the EU's market supply holds none of Norway's output, Norway's market
     supply is its models' (pork too, since Norway's regions have pigs, K56), the base is reproduced at the reference
-    prices and Norway's supply models see Norway's prices."""
+    prices and Norway's supply models see Norway's prices. With no EU unit in the run, the EU's supply is its units'
+    base output through their member states' market supply functions (K83, since 31 October 2026; before, the market's
+    own base table), at the reference prices that base output itself."""
     from capri_mod.model import CAPRIModel
     m = CAPRIModel(data_dir=str(DATA_DIR), verbose=False)
     with pytest.warns(RuntimeWarning):
@@ -305,9 +307,9 @@ def test_norway_run_on_its_own_supply_models():
     assert float(ex.at["NO", "PORK"]) > 0
     for c in ("BARL", "OATS", "BEEF", "MILK", "SGMT", "PORK"):
         assert abs(float(P.at["NOR", c]) - float(ex.at["NO", c])) < 1e-6 * max(1.0, float(ex.at["NO", c])), c
-        # no EU supply-model region in the run: the EU keeps CAPRI's base, Norway's output is not in it
-        assert abs(float(P.at["EU27", c]) - float(mm.par.base_production0.at["EU27", c])) < 1e-6 * max(
-            1.0, float(P.at["EU27", c])), c
+        # no EU unit in the run: the EU's supply is its units' base output (K83), Norway's output not in it
+        xr = mm._eu_excluded_rows()
+        assert abs(float(P.at["EU27", c]) - float(xr.at["EU27", c])) < 1e-6 * max(1.0, float(P.at["EU27", c])), c
     assert float(mm._bilat_err) < 1e-6
     assert float((mm.sup_price_ratio - 1.0).abs().max().max()) < 1e-9
 
@@ -340,7 +342,10 @@ def test_norway_prices_follow_its_own_market_in_a_scenario():
     P = float(mm.ev.dairy_world_last["NOR"]["price_ratio"]["MILK"])
     resp = (t["k"] * (P - t["L"]) + float((mm.ev.sup_milk_cross or {}).get("NOR", 0.0))) if t else 0.0
     assert abs(float(ex.at["NO", "MILK"]) + resp - float(s["market"].production.at["NOR", "MILK"])) < 1e-6
-    # EU raw milk: the EU supply models' output plus the member states' response to their milk prices in the dairy
-    # block (audit M5, MarketModule.ev.milk_dq_now), with no Norwegian milk in it
-    eu_milk = float(ex.drop(index="NO")["MILK"].sum()) + float(sum((mm.ev.milk_dq_now or {}).values()))
+    # EU raw milk: the EU supply models' output and the base raw milk of the EU's units outside the run (K83), plus
+    # the member states' response to their milk prices in the dairy block (audit M5, MarketModule.ev.milk_dq_now),
+    # with no Norwegian milk in it
+    xr = mm._eu_excluded_rows()
+    eu_milk = (float(ex.drop(index="NO")["MILK"].sum()) + float(xr.at["EU27", "MILK"])
+               + float(sum((mm.ev.milk_dq_now or {}).values())))
     assert abs(float(s["market"].production.at["EU27", "MILK"]) - eu_milk) < 1e-6
