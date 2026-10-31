@@ -254,8 +254,9 @@ def margins(root):
         areas = read_input(resolve_data_file(D, "base_areas.csv"), index_col=0)
         pr = read_input(resolve_data_file(D, "producer_prices.csv"), index_col=0)
         price = pr[pr.columns[0]]
-        rp_path = D / "sources" / "capreg" / "capreg_producer_prices.csv"
-        reg_price = read_input(rp_path, index_col=0) if rp_path.exists() else pd.DataFrame()
+        # the regional prices as the model reads them (2017/supply/producer_prices_regional.csv: CAPRI's MPRI with its
+        # TWIN and OFAR columns and the national fallback; until 31 October 2026 the CAPREG extract without them)
+        reg_price = read_input(resolve_data_file(D, "producer_prices_regional.csv"), index_col=0)
         cap = read_input(resolve_data_file(D, "cap_payments.csv"), index_col=0)
     except Exception as e:                               # a partial copy without the supply files
         return [], f"not checked ({str(e)[:60]})"

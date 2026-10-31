@@ -26399,9 +26399,7 @@
    },
    "notes": [],
    "read_by": {
-    "model": [
-     "capri_mod/data/validate_data.py"
-    ],
+    "model": [],
     "builders": [
      "build_eu_producer_prices",
      "build_model_premium_prices"
@@ -37795,7 +37793,8 @@
    "notes": [],
    "read_by": {
     "model": [
-     "capri_mod/data/loaders.py"
+     "capri_mod/data/loaders.py",
+     "capri_mod/data/validate_data.py"
     ],
     "builders": [],
     "checks": [],

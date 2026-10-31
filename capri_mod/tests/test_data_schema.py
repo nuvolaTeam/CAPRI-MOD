@@ -98,3 +98,22 @@ def test_the_generated_declarations_are_up_to_date(tool):
     import subprocess
     r = subprocess.run([sys.executable, str(ROOT / "tools" / "check" / tool), "--check"], capture_output=True, text=True)
     assert r.returncode == 0, r.stdout[-2000:] + r.stderr[-2000:]
+
+
+def test_the_model_reads_no_file_under_sources():
+    """capri_data/sources is the builders' layer (CAPRI's extracts): the model reads its inputs from the base year's
+    folders, shared, codes, trajectories and the pipeline only (31 October 2026: the CAP premium and the regional
+    prices built as inputs, CAPRI's supply elasticities moved; schema.json's reader scan)."""
+    import json
+    t = json.loads((ROOT / "capri_data" / "schema" / "schema.json").read_text())["tables"]
+    read = sorted(v["file"] for v in t.values() if v["file"].startswith("capri_data/sources/") and v["read_by"]["model"])
+    assert not read, read
+
+
+def test_a_missing_premium_or_price_input_stops_the_run(tmp_path):
+    """The model's CAP premium and regional prices are inputs: without them the run stops, naming the file (until
+    31 October 2026 it went on without the premiums and with the EU-wide prices)."""
+    from capri_mod.data import loaders as L
+    for fn in (L.load_cap_premium, L.load_regional_producer_prices):
+        with pytest.raises(FileNotFoundError):
+            fn(str(tmp_path))

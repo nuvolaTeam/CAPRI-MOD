@@ -285,7 +285,8 @@ def load_cap_premium(data_dir=None):
         return None
     p = resolve_data_file(data_dir, "cap_premium_activity.csv")
     if p is None or not Path(p).exists():
-        return None
+        # a missing input stops the run, naming it (until 31 October 2026 the run went on without the premiums)
+        raise FileNotFoundError(f"input {p} is missing (tools/build/build_model_premium_prices.py writes it)")
     return read_input(p, index_col=0)
 
 
@@ -304,7 +305,8 @@ def load_regional_producer_prices(data_dir=None):
         return pd.DataFrame()
     p = resolve_data_file(data_dir, "producer_prices_regional.csv")
     if p is None or not Path(p).exists():
-        return pd.DataFrame()
+        # a missing input stops the run, naming it (until 31 October 2026 the run went on with the EU-wide prices)
+        raise FileNotFoundError(f"input {p} is missing (tools/build/build_model_premium_prices.py writes it)")
     return read_input(p, index_col=0)
 
 

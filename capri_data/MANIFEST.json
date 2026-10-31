@@ -3004,7 +3004,8 @@
    "columns": 74,
    "units": "to be established (value_units: open)",
    "read_by_model": [
-    "capri_mod/data/loaders.py"
+    "capri_mod/data/loaders.py",
+    "capri_mod/data/validate_data.py"
    ],
    "origin": {
     "nature": "capri",
@@ -4400,9 +4401,6 @@
    "rows": 221,
    "columns": 74,
    "units": "to be established (value_units: open)",
-   "read_by_model": [
-    "capri_mod/data/validate_data.py"
-   ],
    "origin": {
     "nature": "capri",
     "builder": "build_crop_economics_2017"
