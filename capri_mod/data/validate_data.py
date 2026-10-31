@@ -259,16 +259,23 @@ def margins(root):
         cap = read_input(resolve_data_file(D, "cap_payments.csv"), index_col=0)
     except Exception as e:                               # a partial copy without the supply files
         return [], f"not checked ({str(e)[:60]})"
+    # a cell that is not a number is a type violation of its declaration, reported there: here it is skipped
+    num = lambda f: f.apply(pd.to_numeric, errors="coerce")  # noqa: E731
+    y, c, areas, cap = num(y), num(c), num(areas), num(cap)
+    price = pd.to_numeric(price, errors="coerce")
+    reg_price = num(reg_price) if not reg_price.empty else reg_price
     cap_ha = cap.sum(axis=1) if cap.shape[1] > 1 else cap[cap.columns[0]]
     crops = [k for k in areas.columns if k in y.columns and k in c.columns and k in price.index and k not in NON_MARKET]
     supported, marginal, artifacts, checked = 0, [], [], 0
     for reg in areas.index:
-        sub = float(cap_ha[reg]) if reg in cap_ha.index else 0.0
+        sub = float(cap_ha[reg]) if reg in cap_ha.index and pd.notna(cap_ha[reg]) else 0.0
         for crop in crops:
             grown = areas.at[reg, crop]
             if pd.isna(grown) or grown <= 1.0:
                 continue
             p_ = price[crop]
+            if pd.isna(p_):
+                continue
             if (not reg_price.empty and reg in reg_price.index and crop in reg_price.columns
                     and pd.notna(reg_price.at[reg, crop]) and reg_price.at[reg, crop] > 0):
                 p_ = float(reg_price.at[reg, crop])
