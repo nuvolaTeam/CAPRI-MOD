@@ -87,6 +87,13 @@ goes gate by gate.
   calibrated point, stays. So S5 is not a switch: the hold can go only once the curvature is understood. Next: the
   Hessian of the options block at the base, its negative direction, and the terms behind it against CAPRI's
   (ammo_tech.gms: the options' quadratic cost and the cascade), to see whether CAPRI's own model has the same saddle.
+- **The curvature (31 October 2026, DE94 at its base, the Hessian of the Lagrangian on the 157 options):** three
+  negative directions: broilers' storage covers with their application techniques together (-802), laying hens'
+  (-81), bulls' low-emission storage cover (-3.9). Two options curve downward on their own (broilers' and laying
+  hens' low-emission cover, -11.5 and -4.0): their cost term (slope 12.4 x stock 0.0007 per head for broilers' high
+  cover) is small against the value of the N they keep. The next question is whether those cost terms are CAPRI's:
+  the poultry options' cost basis was wrong once already (K63, a factor 1000). To check: CAPRI's cost per place of
+  these options for DE94 (ammo_tech.gms, its quadratic term) against the model's slope x stock.
 
 ### S6. The other regional NLP departures
 
