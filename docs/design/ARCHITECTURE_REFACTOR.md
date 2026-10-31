@@ -60,6 +60,23 @@ adapter layer is the interface they need.
 | 4 | Environment and `model.py` (the coupling loop) | 4a done (EnvironmentalModule's methods into block mixins, 273586b), 4b done (the run's data adapter, capri_mod/data/inputs.py, 4e5313c), 4c done (CAPRIModel's coupling methods into capri_mod/coupling mixins, 9ecb4d8); parameters and state objects not done |
 | 5 | Scenario and reporting layers | not started |
 
+**Order and scope of what is left (agreed with the project lead, 31 October 2026).** After the next F2F/GD gate,
+before S1/S2 (docs/design/S1_S2_DESIGN.md), so the technologies are written into the refactored supply code:
+1. Supply's parameters and state objects (stage 3, second half), block by block, each step reproducing the mini-EU
+   Farm-to-Fork run exactly (to 1e-12, as stage 2b).
+2. Environment's and the coupling's parameters and state objects (stage 4, second half).
+3. Stage 5, the scenario and reporting layers.
+
+Within steps 1 and 2, the model's parameters become data (the project lead's rule: no hard-coded constants or
+parameters unless needed):
+- the numbers of the model's code that are CAPRI's constants (status capri in 04_code_data_status.sql, 116 on
+  31 October 2026), and the literature and physical ones, move to a declared parameters file with their citation,
+  read through the data adapters into the parameter objects;
+- the numerical and technical numbers (solver tolerances, iteration limits, display limits) move to the settings
+  (capri_mod/settings/defaults.toml);
+- the code tables (HARDCODED_TABLES.md H2-H4) become declared CSVs or CAPRI's own sets.
+The builders (tools/build) are out of this plan: they are run by the maintainers only, to reproduce the inputs.
+
 ## 4. CAPRI-claim audit
 
 Each claim that the code follows CAPRI is classified against the GAMS source:
