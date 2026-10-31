@@ -4795,13 +4795,17 @@
   },
   "capri_data/sources/envind/anim_req_corr_2017.csv": {
    "description": "CAPRI's requirement correction factors p_animReqCorrFac1(region, animal activity, 'T', CRPR or ENNE) from the animReq_* dumps (animReq_SK.zip), used for the low-N feeding option (tools/build/build_lownfeed_effects.py).",
+   "vintage": "2017",
+   "domain": "environment",
+   "status": "source",
    "rows": 11220,
    "columns": 4,
    "units": "to be established (value_units: open)",
    "origin": {
     "nature": "capri",
     "builder": "build_lownfeed_effects"
-   }
+   },
+   "catalogue_note": "extract of CAPRI's raw file written and read back by tools/build/build_lownfeed_effects.py, kept so its input can be rebuilt without the raw file (docs/EXTERNAL_SOURCES.md) (not re-checked)"
   },
   "capri_data/sources/envind/capri_digest_default_prd.csv": {
    "description": "CAPRI's set DEF_PRD: per row, a feed and the default product whose values fill the feed's missing digestibility items, from envind/def_digestibility.gms (tools/build/build_digestibility_table.py).",
@@ -4872,13 +4876,17 @@
   },
   "capri_data/sources/environment/capri_manure_trade_2030.csv": {
    "description": "CAPRI's manure N excretion EXCRET and net manure trade MTRADE (kt N, positive = net export) per CAPRI region, item NITF, from res_2_1730greendeal_refpol_endotech_all_inidefaulta (tools/build/build_manure_trade_base.py).",
+   "vintage": "2030",
+   "domain": "environment",
+   "status": "source",
    "rows": 521,
    "columns": 3,
    "units": "to be established (value_units: open)",
    "origin": {
     "nature": "capri",
     "builder": "build_manure_trade_base"
-   }
+   },
+   "catalogue_note": "extract of CAPRI's raw file written and read back by tools/build/build_manure_trade_base.py, kept so its input can be rebuilt without the raw file (docs/EXTERNAL_SOURCES.md) (not re-checked)"
   },
   "capri_data/sources/estnlp/pela_own_price.csv": {
    "description": "CAPRI's estimated own-price supply elasticities PELA(region, crop, crop, '2005') from dat/estnlp/results.gdx, per regional unit (rows) and crop (columns); MAIZ renamed CORN (tools/build/ingest_pela_gtap.py).",
@@ -4922,23 +4930,31 @@
   },
   "capri_data/sources/fao_agg_2017/fao_agg_dairy_products_bas.csv": {
    "description": "CAPRI's FAO_agg base-period balances (p_dataMarket, year BAS: MAPR, DOMM, IMPT, EXPT; tonnes) of the dairy products per CAPRI region, from fao_agg_17_datamarket.txt (tools/build/build_dairy_world_markets.py).",
+   "vintage": "2017",
+   "domain": "market",
+   "status": "source",
    "rows": 2566,
    "columns": 4,
    "units": "to be established (value_units: open)",
    "origin": {
     "nature": "capri",
     "builder": "build_dairy_world_markets"
-   }
+   },
+   "catalogue_note": "extract of CAPRI's raw file written and read back by tools/build/build_dairy_world_markets.py, kept so its input can be rebuilt without the raw file (docs/EXTERNAL_SOURCES.md) (not re-checked)"
   },
   "capri_data/sources/fao_agg_2017/fao_agg_market_balances_bas.csv": {
    "description": "CAPRI's FAO_agg base-period balances (p_dataMarket, year BAS: MAPR, DOMM, IMPT, EXPT; tonnes) of the market products per CAPRI region, from fao_agg_17_datamarket.txt (tools/build/build_world_market_baseline.py).",
+   "vintage": "2017",
+   "domain": "market",
+   "status": "source",
    "rows": 13399,
    "columns": 4,
    "units": "to be established (value_units: open)",
    "origin": {
     "nature": "capri",
     "builder": "build_world_market_baseline"
-   }
+   },
+   "catalogue_note": "extract of CAPRI's raw file written and read back by tools/build/build_world_market_baseline.py, kept so its input can be rebuilt without the raw file (docs/EXTERNAL_SOURCES.md) (not re-checked)"
   },
   "capri_data/sources/ghgtech/LitRevFertTech_p_litRevFertTechs.csv": {
    "description": "CAPRI's p_litRevFertTechs(region, technology, activity, system, item): relative change in emissions of a fertiliser technology, the records used, from the gdxdump of dat/scen/ghgtech/LitRevFertTech.gdx (the full dump beside it, LitRevFertTech_p_litRevFertTechs_all.csv); no builder; read by tools/build/build_fert_side_effects.py.",
@@ -4961,13 +4977,17 @@
   },
   "capri_data/sources/ghgtech/LitRevFertTech_p_litRevFertTechs_no3.csv": {
    "description": "The nitrate leaching and runoff records (NO3...) of CAPRI's p_litRevFertTechs(region, technology, activity, system, item), taken from the full dump LitRevFertTech_p_litRevFertTechs_all.csv (the gdxdump text converted by tools/build/convert_sources_to_csv.py) (tools/build/build_fert_side_effects.py).",
+   "vintage": "CAPRI star 3.0 data",
+   "domain": "abatement",
+   "status": "source",
    "rows": 18216,
    "columns": 6,
    "units": "to be established (value_units: open)",
    "origin": {
     "nature": "capri",
     "builder": "build_fert_side_effects"
-   }
+   },
+   "catalogue_note": "extract of CAPRI's raw file written and read back by tools/build/build_fert_side_effects.py, kept so its input can be rebuilt without the raw file (docs/EXTERNAL_SOURCES.md) (not re-checked)"
   },
   "capri_data/sources/ghgtech/capri_costsavings_2030.csv": {
    "description": "Level and marginal of CAPRI's v_Miti per EU region, activity, mitigation technology and target, in the calibration runs ini and max (costsavings_ini/max_21730_jul15.gdx dumps, 2030); options other than NOC (tools/build/extract_capri_costsavings.py).",
@@ -5014,63 +5034,87 @@
   },
   "capri_data/sources/market/biofuel_proc_hessian_2017.csv": {
    "description": "CAPRI's p_hessNQProc(region, product, price_of, 'CAL') rows of the biofuels BIOE and BIOD, own and cross terms, per market region, from elas_2_1717defaulta (tools/build/build_biofuel_market.py).",
+   "vintage": "2017",
+   "domain": "market",
+   "status": "source",
    "rows": 44,
    "columns": 4,
    "units": "to be established (value_units: open)",
    "origin": {
     "nature": "capri",
     "builder": "build_biofuel_market:year_2017_dump_market_base_1717.txt_elas_elas_2_1717defaulta.csv"
-   }
+   },
+   "catalogue_note": "extract of CAPRI's raw file written and read back by tools/build/build_biofuel_market.py, kept so its input can be rebuilt without the raw file (docs/EXTERNAL_SOURCES.md) (not re-checked)"
   },
   "capri_data/sources/market/biofuel_proc_hessian_2030.csv": {
    "description": "CAPRI's p_hessNQProc(region, product, price_of, 'CAL') rows of the biofuels BIOE and BIOD, own and cross terms, per market region, from elas_2_1730defaulta (tools/build/build_biofuel_market.py).",
+   "vintage": "2030",
+   "domain": "market",
+   "status": "source",
    "rows": 44,
    "columns": 4,
    "units": "to be established (value_units: open)",
    "origin": {
     "nature": "capri",
     "builder": "build_biofuel_market:year_2030_dump_markmarket_greendeal_1730et_base_1717.txt_elas_elas_2_1730default"
-   }
+   },
+   "catalogue_note": "extract of CAPRI's raw file written and read back by tools/build/build_biofuel_market.py, kept so its input can be rebuilt without the raw file (docs/EXTERNAL_SOURCES.md) (not re-checked)"
   },
   "capri_data/sources/market/dairy_dataout_2030.csv": {
    "description": "CAPRI's dairy market items (PROD, PROC, GROF, HCOM, PPRI, FATS, PROT, ...) per member state and 'EU' and dairy product, from markmarket_greendeal_1730et_base_1717 dataOut, 2030 (tools/build/build_dairy_processing.py).",
+   "vintage": "2030",
+   "domain": "market",
+   "status": "source",
    "rows": 3016,
    "columns": 4,
    "units": "to be established (value_units: open)",
    "origin": {
     "nature": "capri",
     "builder": "build_dairy_processing"
-   }
+   },
+   "catalogue_note": "extract of CAPRI's raw file written and read back by tools/build/build_dairy_processing.py, kept so its input can be rebuilt without the raw file (docs/EXTERNAL_SOURCES.md) (not re-checked)"
   },
   "capri_data/sources/market/dairy_elasticities_2030.csv": {
    "description": "CAPRI's dairy parameters p_hessNQDairy, p_ElasDair and p_ElasDem (param, member state, row, col; CAL) between dairy products, from elas_2_1730defaulta (tools/build/build_dairy_processing.py).",
+   "vintage": "2030",
+   "domain": "market",
+   "status": "source",
    "rows": 7126,
    "columns": 5,
    "units": "to be established (value_units: open)",
    "origin": {
     "nature": "capri",
     "builder": "build_dairy_processing"
-   }
+   },
+   "catalogue_note": "extract of CAPRI's raw file written and read back by tools/build/build_dairy_processing.py, kept so its input can be rebuilt without the raw file (docs/EXTERNAL_SOURCES.md) (not re-checked)"
   },
   "capri_data/sources/market/dairy_world_dataout_2030.csv": {
    "description": "CAPRI's dairy market items (PROD, PROC, FATS, PROT, PPRI, HCON, FEED, Imports_noIntra, Exports_noIntra) per market region and dairy product, from markmarket_greendeal_1730et_base_1717 dataOut, 2030 (tools/build/build_dairy_world_blocks.py).",
+   "vintage": "2030",
+   "domain": "market",
+   "status": "source",
    "rows": 6432,
    "columns": 4,
    "units": "to be established (value_units: open)",
    "origin": {
     "nature": "capri",
     "builder": "build_dairy_world_blocks"
-   }
+   },
+   "catalogue_note": "extract of CAPRI's raw file written and read back by tools/build/build_dairy_world_blocks.py, kept so its input can be rebuilt without the raw file (docs/EXTERNAL_SOURCES.md) (not re-checked)"
   },
   "capri_data/sources/market/dairy_world_elasticities_2030.csv": {
    "description": "CAPRI's p_hessNQDairy, p_ElasDem (between dairy products) and p_hessNQSupp (MILK own term) per market region, CAL, from elas_2_1730defaulta (param, rms, row, col, value) (tools/build/build_dairy_world_blocks.py).",
+   "vintage": "2030",
+   "domain": "market",
+   "status": "source",
    "rows": 8413,
    "columns": 5,
    "units": "to be established (value_units: open)",
    "origin": {
     "nature": "capri",
     "builder": "build_dairy_world_blocks"
-   }
+   },
+   "catalogue_note": "extract of CAPRI's raw file written and read back by tools/build/build_dairy_world_blocks.py, kept so its input can be rebuilt without the raw file (docs/EXTERNAL_SOURCES.md) (not re-checked)"
   },
   "capri_data/sources/market/eu_tariff_provenance.csv": {
    "description": "The EU row of the tariffs (tools/build/build_tariffs_2017.py) with its provenance, one row per commodity, the former eu_tariff_provenance.json (its rows; its _source: CAPRI res_0_1717cap_after_2014_cal_from_data_caldefaulta dataOut, EU27yr19 <- NONEU, 2017: total ad-valorem equivalent = ImportP/(Fob+TCost)-1), numbers as written, empty where the JSON had no field or null; converted to CSV by tools/build/convert_sources_to_csv.py; read by tools/build/build_tariffs_2017.py.",
@@ -5084,13 +5128,17 @@
   },
   "capri_data/sources/market/feed_bulks_dataout_2030.csv": {
    "description": "CAPRI's FEED per EU member state and product, ARM1P of the EU trade block EU27yr19 and Norway, and Norway's use items, from markmarket_greendeal_1730et_base_1717 dataOut, 2030 (tools/build/build_feed_bulks.py).",
+   "vintage": "2030",
+   "domain": "market",
+   "status": "source",
    "rows": 2355,
    "columns": 4,
    "units": "to be established (value_units: open)",
    "origin": {
     "nature": "capri",
     "builder": "build_feed_bulks"
-   }
+   },
+   "catalogue_note": "extract of CAPRI's raw file written and read back by tools/build/build_feed_bulks.py, kept so its input can be rebuilt without the raw file (docs/EXTERNAL_SOURCES.md) (not re-checked)"
   },
   "capri_data/sources/market/feed_demand_nonEU_elas_2030.csv": {
    "description": "CAPRI's feed demand elasticities p_ElasFeed(rms, feed, price_of, 'CAL') per behavioural market region, for the products the model trades, from elas_2_1730defaulta (tools/build/build_feed_demand_nonEU.py).",
@@ -5114,23 +5162,31 @@
   },
   "capri_data/sources/market/processing_yields_dataout_2030.csv": {
    "description": "CAPRI's GROF of olives and paddy (OLIV, PARI) and MAPR of olive oil and milled rice (OLIO, RICE) per member state, from markmarket_greendeal_1730et_base_1717 dataOut, 2030 (tools/build/build_processing_yields.py).",
+   "vintage": "2030",
+   "domain": "market",
+   "status": "source",
    "rows": 76,
    "columns": 4,
    "units": "to be established (value_units: open)",
    "origin": {
     "nature": "capri",
     "builder": "build_processing_yields"
-   }
+   },
+   "catalogue_note": "extract of CAPRI's raw file written and read back by tools/build/build_processing_yields.py, kept so its input can be rebuilt without the raw file (docs/EXTERNAL_SOURCES.md) (not re-checked)"
   },
   "capri_data/sources/market/sugar_processing_dataout_2030.csv": {
    "description": "CAPRI's sugar beet GROF and PRCM and white sugar MAPR and PRCY per member state, from markmarket_greendeal_1730et_base_1717 dataOut, 2030 (tools/build/build_sugar_processing.py).",
+   "vintage": "2030",
+   "domain": "market",
+   "status": "source",
    "rows": 92,
    "columns": 4,
    "units": "to be established (value_units: open)",
    "origin": {
     "nature": "capri",
     "builder": "build_sugar_processing"
-   }
+   },
+   "catalogue_note": "extract of CAPRI's raw file written and read back by tools/build/build_sugar_processing.py, kept so its input can be rebuilt without the raw file (docs/EXTERNAL_SOURCES.md) (not re-checked)"
   },
   "capri_data/sources/nuts/nuts2013_2016.csv": {
    "description": "Correspondence NUTS 2013 to NUTS 2016 (codes, names by level, change), from Eurostat's workbook NUTS2013-NUTS2016__1_.xlsx (removed 30 October 2026, read from git history; sheet 'NUTS2013-NUTS2016', the rows with a code, columns B-H, text as written, CRLF line ends as committed before), written by tools/build/convert_sources_to_csv.py; read by tools/build/build_nuts2024_reporting.py.",
