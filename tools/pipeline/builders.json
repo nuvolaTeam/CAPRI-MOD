@@ -959,7 +959,7 @@
    ],
    "outputs": [
     "capri_data/2017/market/supply_elas_eu.csv",
-    "capri_data/sources/arm/capri_supply_elas_market_1717.csv"
+    "capri_data/2017/supply/capri_supply_elas_market_1717.csv"
    ]
   },
   {
@@ -4084,7 +4084,7 @@
     "capri_data/shared/eu_market_blocks.csv",
     "capri_data/shared/regional_units.csv",
     "capri_data/shared/rms_to_rm.csv",
-    "capri_data/sources/arm/capri_supply_elas_market_1717.csv",
+    "capri_data/2017/supply/capri_supply_elas_market_1717.csv",
     "capri_data/sources/market/bilateral_dataout_2017.csv.xz"
    ],
    "code": [
@@ -4450,7 +4450,7 @@
     "$EXPORTS/supply_elas_2_1720PLdefaulta.txt"
    ],
    "outputs": [
-    "capri_data/sources/arm/capri_supply_elas_young_1720.csv"
+    "capri_data/2017/supply/capri_supply_elas_young_1720.csv"
    ]
   },
   {

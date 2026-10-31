@@ -113,3 +113,26 @@ WHERE NOT EXISTS (SELECT 1 FROM regional_units r WHERE r.country = m.country);
 -- rule: every model region has its land rents in both years
 SELECT r.region FROM regional_units r
 WHERE r.region NOT IN (SELECT region FROM land_rents_2030) OR r.region NOT IN (SELECT region FROM land_rents_2017);
+
+-- file: capri_data/2017/supply/capri_supply_elas_market_1717.csv
+CREATE TABLE sup_capri_supply_elas_market_1717 (
+    region VARCHAR NOT NULL,
+    prod VARCHAR NOT NULL,
+    wrt VARCHAR NOT NULL,
+    "value" DOUBLE NOT NULL,
+    PRIMARY KEY (region, prod, wrt)
+);
+COMMENT ON TABLE sup_capri_supply_elas_market_1717 IS 'Every record of CAPRI''s p_elasSupp(region, prod, wrt, ''CAL'') from elas1717defaulta.gdx (gdxdump p_elasSupp.txt): the supply elasticity of prod with respect to the price of wrt, per market region (countries and trade regions), 73528 rows (tools/build/build_capri_supply_elas_market.py).';
+INSERT INTO value_units VALUES
+  ('sup_capri_supply_elas_market_1717', 'value', NULL, 'open', 'capri_supply_elas_market_1717.value: unit to be established');
+
+-- file: capri_data/2017/supply/capri_supply_elas_young_1720.csv
+CREATE TABLE sup_capri_supply_elas_young_1720 (
+    region VARCHAR NOT NULL,
+    "item" VARCHAR NOT NULL,
+    "value" DOUBLE NOT NULL,
+    PRIMARY KEY (region, "item")
+);
+COMMENT ON TABLE sup_capri_supply_elas_young_1720 IS 'CAPRI''s calibrated supply elasticities of young animals (YCAM, YCAF, YBUL, YHEI, YCOW, YPIG) per member state: p_ElasSupp(MS, item, item, ''CAL'') from results/arm/supply_elas_2_1720<MS>defaulta.gdx, the 2020 calibration (tools/build/build_young_animal_elasticities.py).';
+INSERT INTO value_units VALUES
+  ('sup_capri_supply_elas_young_1720', 'value', NULL, 'open', 'capri_supply_elas_young_1720.value: unit to be established');

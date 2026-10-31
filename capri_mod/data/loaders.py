@@ -23,7 +23,6 @@ from capri_mod.data.definitions import (
     MARKET_COMMODITIES, ALL_TRADE_REGIONS, NUTRIENTS,
     REGION_TO_COUNTRY, NUTS2_REGIONS, FEED_ITEMS,
 )
-from capri_mod.data.definitions import MS_CODE
 from capri_mod.data import land_market_io as _land_market_io
 from capri_mod.tableio import read_input
 
@@ -45,6 +44,7 @@ from capri_mod.tableio import read_input
 # ---------------------------------------------------------------------------
 _FILE_CATEGORY = {
     "base_areas.csv": "supply", "yields.csv": "supply", "animal_numbers.csv": "supply",
+    "cap_premium_activity.csv": "supply", "producer_prices_regional.csv": "supply",
     "livestock_output_coef.csv": "supply", "nutrients_regional.csv": "supply",
     "livestock_revenue_coef.csv": "supply", "livestock_product_value_coef.csv": "supply", "livestock_product_value_by_market_coef.csv": "supply", "livestock_output_by_product_coef.csv": "supply", "grass_intensity.csv": "supply", "dairy_intensity.csv": "supply", "cattle_intensity.csv": "supply", "genetics_effects.csv": "abatement/mitigation", "lownfeed_effects.csv": "abatement/mitigation", "supplement_effects.csv": "abatement/mitigation", "feed_byproducts.csv": "market", "sugar_processing.csv": "market", "processing_yields.csv": "market", "bilateral_flows_2017.csv": "market", "bilateral_flows_2030.csv": "market", "bilateral_regions_2017.csv": "market", "bilateral_regions_2030.csv": "market", "bilateral_trq_2017.csv": "market", "bilateral_trq_2030.csv": "market", "armington_rho.csv": "market", "world_market_baseline.json": "market", "histosol.csv": "environment", "plant_protection_cost.csv": "supply", "cover_crops.csv": "supply", "winter_cover_share.csv": "supply", "livestock_cost_coef.csv": "supply", "livestock_output_value_coef.csv": "supply", "livestock_premium_coef.csv": "supply", "capri_level_ratio.csv": "supply", "livestock_units.csv": "supply", "land_rents_2017.csv": "supply", "land_rents_2030.csv": "supply", "labour_coef.csv": "supply", "set_aside_split.csv": "supply",
     "livestock_feed_coef.csv": "feed",
@@ -277,96 +277,34 @@ def load_regional_nutrients(data_dir=None):
 
 
 def load_cap_premium(data_dir=None):
-    """CAPRI per-activity CAP premium (DATA2 PRME, EUR/ha or EUR/head)."""
-    import pandas as pd
+    """CAPRI per-activity CAP premium (DATA2 PRME, EUR/ha or EUR/head; the crop columns the model-coded crop premiums of
+    every region): 2017/supply/cap_premium_activity.csv (tools/build/build_model_premium_prices.py; until 31 October
+    2026 joined here at run time from the CAPREG extract in capri_data/sources)."""
     from pathlib import Path
     if data_dir is None:
         return None
-    p = Path(data_dir) / "sources" / "capreg" / "capreg_cap_premium.csv"
-    if not p.exists():
+    p = resolve_data_file(data_dir, "cap_premium_activity.csv")
+    if p is None or not Path(p).exists():
         return None
-    base = read_input(p, index_col=0)
-    # crops: every region, model codes (tools/build/build_crop_economics_2017.py). The capreg file covers 192 regions in
-    # CAPRI's codes, so 56 regions, and fodder, set-aside, wine and fibre everywhere, used to fall back to the
-    # random cap_payments.csv
-    c = resolve_data_file(data_dir, "crop_premium.csv")
-    if c is not None and Path(c).exists():
-        crop = read_input(c, index_col=0)
-        base = crop.join(base[[k for k in base.columns if k not in crop.columns]], how="left")
-    return base
+    return read_input(p, index_col=0)
 
 
 def load_regional_producer_prices(data_dir=None):
-    """
-    CAPRI regional producer prices (DATA2 item MPRI, EUR/t), if extracted.
+    """CAPRI regional producer prices (DATA2 item MPRI, EUR/t): 2017/supply/producer_prices_regional.csv
+    (tools/build/build_model_premium_prices.py: CAPRI's TWIN and OFAR columns for WINE and OFOD, a missing regional
+    price filled with the country's national price; until 31 October 2026 done here at run time from the CAPREG
+    extracts in capri_data/sources).
 
-    The national series that preceded this was materially wrong for specialty
-    crops -- other vegetables at 30.8 EUR/t against CAPRI's 495.9, tobacco at
-    43.8 against 2574.7 -- which is what drove the long-standing validator
-    warning about implausible losses on specialty crops.
-    """
+    The national series that preceded CAPRI's regional prices was materially wrong for specialty crops (other
+    vegetables at 30.8 EUR/t against CAPRI's 495.9, tobacco at 43.8 against 2574.7), which drove the long-standing
+    validator warning about implausible losses on specialty crops."""
     import pandas as pd
     from pathlib import Path
     if data_dir is None:
         return pd.DataFrame()
-    p = Path(data_dir) / "sources" / "capreg" / "capreg_producer_prices.csv"
-    if not p.exists():
+    p = resolve_data_file(data_dir, "producer_prices_regional.csv")
+    if p is None or not Path(p).exists():
         return pd.DataFrame()
-    prices = read_input(p, index_col=0)
-
-    # The file carries CAPRI's activity codes for five crops the model names
-    # differently, so those columns were never read and the crops silently fell
-    # back to the EU-wide price. The same silent-drop family as MAIZ/CORN and
-    # the grassland codes.
-    #
-    # Wine was the damaging case. CAPRI prices it at a median of 1,362 EUR/t
-    # (Spain's main wine region at 403); the EU fallback was 95.5, which left
-    # wine on a NEGATIVE gross margin in the largest wine regions - Spain -712,
-    # Aquitaine -1,413 EUR/ha - where real EU wine margins are strongly
-    # positive. An activity sitting at a negative margin responds erratically
-    # to any cost shock, which is why wine area fell 11.3% under Farm-to-Fork
-    # while olives, correctly priced, stayed flat at -0.1% exactly as CAPRI
-    # reports.
-    CAPRI_PRICE_ALIASES = {
-        "TWIN": ["WINE"],      # table wine
-        "OFAR": ["OFOD"],      # fodder on arable land
-    }
-    for src, targets in CAPRI_PRICE_ALIASES.items():
-        if src not in prices.columns:
-            continue
-        for tgt in targets:
-            if tgt not in prices.columns or prices[tgt].isna().all():
-                prices[tgt] = prices[src]
-
-    # Where CAPRI has no REGIONAL price, fall back to its NATIONAL one before the
-    # EU-wide figure. A missing regional price used to drop straight to the EU
-    # average; for wine that meant 95.5 EUR/t in eleven vine-growing regions -
-    # 338 kha, including Sicily's 127 kha - where CAPRI's own national prices are
-    # 1,362 (Italy), 1,923 (Croatia) and 1,858 (Slovenia). A national price is
-    # the same country's own market, so it is a far closer stand-in than the EU.
-    nat = _national_capri_prices(data_dir)
-    if nat is not None:
-        country_alias = MS_CODE
-        for col in prices.columns:
-            if col not in nat.columns:
-                continue
-            missing = prices[col].isna()
-            if not missing.any():
-                continue
-            for reg in prices.index[missing]:
-                cc = country_alias.get(str(reg)[:2], str(reg)[:2])
-                if cc in nat.index and pd.notna(nat.at[cc, col]) and nat.at[cc, col] > 0:
-                    prices.at[reg, col] = float(nat.at[cc, col])
-    return prices
-
-
-def _national_capri_prices(data_dir):
-    """CAPRI's national market prices (MPRI) by country, if the file is held."""
-    import pandas as pd
-    from pathlib import Path
-    p = Path(data_dir) / "sources" / "capreg" / "capreg_national_prices.csv"
-    if not p.exists():
-        return None
     return read_input(p, index_col=0)
 
 

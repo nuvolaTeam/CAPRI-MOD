@@ -219,7 +219,7 @@ no Python file (only mentioned in `README.md`, `DATA_DICTIONARY.md`, `DATA_SOURC
 | extract_capri_marginal_terms | `GD/capri_marginal_terms_<tag>_2030.csv.xz`, `GD/capri_unit_values_<tag>_2030.csv` (read by 5 builders although in `validation/`; tag ini; the max invocation and its two files removed 30 October 2026, read by no code) | – | positional `<dump.csv> <tag>` | `<dump> <tag>` | CAPRI | – |
 | extract_capri_vcs_pair | `validation/coupled_support_2030/capri_vcs_effect.csv.xz` | – | REF.gdx (GDX API), NOVCS dump | `<ref.gdx> <novcs> [--lib-dir D]` | CAPRI | – |
 | gdx_dump_symbol | any `OUT.csv` | – | a GDX file, `libgdxcclib64.so` | `<gdx> <symbol> <out.csv>` or `--list` | – | generic tool |
-| build_young_animal_elasticities | `sources/arm/capri_supply_elas_young_1720.csv` | – | argv: supply_elas_2_1720<MS> dumps | `<dumps …>` | member states | 2020 values (registered) |
+| build_young_animal_elasticities | `2017/supply/capri_supply_elas_young_1720.csv` | – | argv: supply_elas_2_1720<MS> dumps | `<dumps …>` | member states | 2020 values (registered) |
 
 ### 1.8 Market builders (CAPRI market regions, trade regions or member states; no model-region keys)
 
@@ -239,7 +239,7 @@ member-state set from MR.list) and `build_eu_producer_prices` (section 1.2).
 | build_world_market_baseline | `M/world_market_baseline.json`; `sources/fao_agg_2017/fao_agg_market_balances_bas.csv` | – | `--src` `UP/fao_agg_17_datamarket.txt` | – |
 | build_feed_bulks | `M/feed_bulks_eu.csv`, `feed_bulks_no.csv`, `feed_bulks_eu_share.csv`, `F/feed_cereal_mix_2030.csv`; `SMK/feed_bulks_dataout_2030.csv` | `validation/capri_eu27_market_balance_2030_ref.json` | `--dump` MKTD, `capri_sources/gams/arm/market1.gms` | – |
 | build_world_prices | `M/world_prices.csv`, `sources/world_price_provenance.csv` (from scratch, 29 October 2026; JSON until 30 October 2026) | `codes/model_commodities.csv`, `shared/regional_units.csv`, `M/bilateral_flows_2017.csv`, `M/bilateral_regions_2017.csv` | `UP/fao_agg_17_datamarket.txt`, `WORK/capreg` res_17 | – |
-| build_feed_byproducts | `M/feed_byproducts.csv` (until 29 October 2026 also in place `M/world_prices.csv`, `M/armington_params.csv`, `sources/world_price_provenance.json`) | `SMK/bilateral_dataout_2030.csv.xz`, `M/bilateral_regions_2030.csv`, `M/bilateral_flows_2017.csv`, `M/bilateral_regions_2017.csv`, `M/armington_rho.csv`, `sources/arm/capri_supply_elas_market_1717.csv`, the EU27 balance JSON | `UP/fao_agg_17_datamarket.txt` | – |
+| build_feed_byproducts | `M/feed_byproducts.csv` (until 29 October 2026 also in place `M/world_prices.csv`, `M/armington_params.csv`, `sources/world_price_provenance.json`) | `SMK/bilateral_dataout_2030.csv.xz`, `M/bilateral_regions_2030.csv`, `M/bilateral_flows_2017.csv`, `M/bilateral_regions_2017.csv`, `M/armington_rho.csv`, `2017/supply/capri_supply_elas_market_1717.csv`, the EU27 balance JSON | `UP/fao_agg_17_datamarket.txt` | – |
 | build_feed_demand_nonEU | `M/feed_demand_nonEU.json`; `SMK/feed_demand_nonEU_{elas,use}_2030.csv` | `M/processing_nq_base.csv` | `--elas`, `--data` uploads | – |
 | build_gl_demand | `M/gl_demand_goods.csv`, `gl_demand_b.csv`, `gl_demand_regions.csv`; `SH/rms_to_rm.csv`, `SH/rms.csv` (copied from `capri_reference/sets/simini_21730/` when present) | – | `UP/elas_2_1730defaulta.csv`, `UP/data_market_1730defaulta.csv` | – |
 | build_processing_nq | `M/processing_nq_hessian.csv`, `processing_nq_base.csv` | `SH/rms_to_rm.csv` | elas, data_market, MKTD (hard-coded) | – |
@@ -248,7 +248,7 @@ member-state set from MR.list) and `build_eu_producer_prices` (section 1.2).
 | build_sugar_processing | `M/sugar_processing.csv`; `SMK/sugar_processing_dataout_2030.csv` | – | MKTD | – |
 | build_use_components | `M/use_components.csv` | `SH/rms.csv` | data_market | – |
 | build_eu_ms_balance | `M/eu_ms_balance_2030.csv` | `SH/eu_market_blocks.csv` | `UP/data_market_1730defaulta.csv` | – |
-| build_supply_elas_nonEU | `M/supply_elas_region.csv` | `sources/arm/capri_supply_elas_market_1717.csv`, `SMK/bilateral_dataout_2017.csv.xz` | – | own-price only (registered) |
+| build_supply_elas_nonEU | `M/supply_elas_region.csv` | `2017/supply/capri_supply_elas_market_1717.csv`, `SMK/bilateral_dataout_2017.csv.xz` | – | own-price only (registered) |
 | build_tariffs_2017 | `P/tariffs.csv` (until 30 October 2026 also, in place, `sources/eu_tariff_provenance.json` when an EU row was missing) | `SMK/bilateral_dataout_2017.csv.xz`, `SMK/eu_tariff_provenance.csv` (`tools/build/convert_sources_to_csv.py`) | `UP/res_0_1717cap_after_2014_cal_from_data_caldefaulta.csv` (optional) | – |
 | ingest_capmod_market | `validation/capmod_market_extraction.json` (not in git; `sources/capmod/capmod_trade_flows_2017.csv.xz` until 30 October 2026, read by no code, removed) (capmod_world_prices_2017.csv until 29 October 2026, K103) | – | `--dump` res_0_1717 | `--data-dir` relative |
 | build_eu_outlook_2030 | `validation/eu_outlook_2020_2030.csv` | – | argv[1] DG AGRI outlook PDF (`pdftotext`) | validation only |

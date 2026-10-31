@@ -132,11 +132,11 @@ COUNTRY_ELAS_ALIASES = {"MAIZ": "CORN", "TWIN": "WINE"}
 # CAPRI's sources carry OFAR only): without the alias the 14 Mha of other fodder stayed on the literature default
 # 0.12 against CAPRI's median 1.05 (K32).
 ACTIVITY_ALIASES = {"MAIZ": "CORN", "OFAR": "OFOD"}
-LIVESTOCK_ELAS_FILE = "sources/arm/capri_supply_elas_market_1717.csv"
+LIVESTOCK_ELAS_FILE = "capri_supply_elas_market_1717.csv"   # in the base year's supply inputs
 LIVESTOCK_PRODUCT = {"DCOW": "MILK", "BCOW": "BEEF", "BULL": "BEEF", "HFRS": "BEEF", "CALV": "BEEF",
                      "PIGS": "PORK", "PIGF": "PORK", "LAYS": "EGGS", "BROI": "POUM", "SHGM": "MILK", "SHGF": "SGMT"}
 LIVESTOCK_MS = MS_CODE
-YOUNG_ELAS_FILE = "sources/arm/capri_supply_elas_young_1720.csv"
+YOUNG_ELAS_FILE = "capri_supply_elas_young_1720.csv"       # in the base year's supply inputs
 #: young animals produced by each cattle activity (CAPRI YCAM/YCAF, YBUL/YHEI, YCOW)
 LIVESTOCK_YOUNG = {"DCOW": ("YCAM", "YCAF"), "BCOW": ("YCAM", "YCAF"), "CALV": ("YBUL", "YHEI"), "HFRS": ("YCOW",),
                    "PIGS": ("YPIG",)}   # sows: piglets
@@ -245,14 +245,14 @@ def build_elasticity_table(
 
     # --- livestock: CAPRI's calibrated supply elasticities of the animal products ---
     # (results/arm/elas_2_1717*: p_elasSupp(MS, product, product, "CAL"), the elasticities
-    # CAPRI's supply models are calibrated to reproduce; sources/arm/
+    # CAPRI's supply models are calibrated to reproduce; capri_data/2017/supply/
     # capri_supply_elas_market_1717.csv). Each animal activity takes its product's
     # own-price value for its member state: dairy cows - milk; suckler cows, bulls, heifers,
     # calves - beef; pigs - pork; hens - eggs; broilers - poultry meat; sheep and goats for
     # fattening (SHGF) - sheep and goat meat; for milk (SHGM) - raw milk (CAPRI's MILK market holds cow
     # and sheep-goat milk; p_elasSupp has no separate SGMI). Replaces the literature priors (0.10-0.25; CAPRI 0.47-0.82).
     n_lsk = 0
-    lsk_path = inp.need(inp.path(LIVESTOCK_ELAS_FILE, "root"))
+    lsk_path = inp.need(inp.path(LIVESTOCK_ELAS_FILE, "supply"))
     ldf = inp.read(lsk_path)
     ldf = ldf[(ldf["prod"] == ldf["wrt"]) & ldf["prod"].isin(set(LIVESTOCK_PRODUCT.values()))]
     ms_val = {(r, p_): float(v) for r, p_, v in zip(ldf.region, ldf["prod"], ldf.value)}
@@ -261,7 +261,7 @@ def build_elasticity_table(
     # elasticities as well. Each activity's elasticity is the value-weighted mean of its
     # final product's and its young animals' (suckler cows: 89% calves in Duesseldorf).
     yel = {}
-    ypath = inp.need(inp.path(YOUNG_ELAS_FILE, "root"))
+    ypath = inp.need(inp.path(YOUNG_ELAS_FILE, "supply"))
     for r_, i_, v_ in inp.read(ypath).itertuples(index=False):
         yel[(r_, i_)] = float(v_)
     mrev = inp.csv("livestock_revenue_coef.csv", "supply", index_col=0)

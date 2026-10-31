@@ -43,7 +43,7 @@ their markets open (K37).
 ## Livestock supply elasticities
 
 Each animal activity's PMP calibration takes CAPRI's own calibrated supply elasticity of its product for its member
-state (`capri_data/sources/arm/capri_supply_elas_market_1717.csv`, `elas_2_1717` p_elasSupp, level CAL): dairy cows
+state (`capri_data/2017/supply/capri_supply_elas_market_1717.csv`, `elas_2_1717` p_elasSupp, level CAL): dairy cows
 milk; suckler cows, bulls, heifers and calves beef; pigs pork; laying hens eggs; broilers poultry meat; fattening sheep
 and goats sheep and goat meat; sheep and goats for milk raw milk (CAPRI's MILK market holds cow and sheep-goat milk).
 Medians over the 34 regions of the file: milk 0.59, beef 0.72, pork 0.70, eggs 0.76, poultry meat 0.76, sheep and goat
@@ -54,7 +54,7 @@ PMP curvature used market revenue (MREV) before. For suckler cows (DE11: MREV 68
 change in their margin act about nine times too strongly. The curvature now uses TOOU; a commodity price moves the
 market part (MREV) only, young animals moving with their own prices; and the elasticity of each cattle activity and
 of sows is the value-weighted mean of its product's and its young animals' (CAPRI's calibrated values,
-`sources/arm/capri_supply_elas_young_1720.csv`, `tools/build/build_young_animal_elasticities.py`; the 2017 file has dummies
+`2017/supply/capri_supply_elas_young_1720.csv`, `tools/build/build_young_animal_elasticities.py`; the 2017 file has dummies
 of 1 for young animals).
 
 REGISTERED: the product elasticity is used as each activity's own-price elasticity; CAPRI calibrates its PMP terms so

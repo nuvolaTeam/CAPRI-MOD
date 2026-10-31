@@ -1,28 +1,5 @@
 -- The extracts under capri_data/sources (CAPRI's files and outside sources the builders read), 29 October 2026. Structure (types, NOT NULL, keys) from the files; each table's origin in provenance (01_provenance.sql); units open where no builder or CAPRI file states them.
 
--- file: capri_data/sources/arm/capri_supply_elas_market_1717.csv
-CREATE TABLE src_capri_supply_elas_market_1717 (
-    region VARCHAR NOT NULL,
-    prod VARCHAR NOT NULL,
-    wrt VARCHAR NOT NULL,
-    "value" DOUBLE NOT NULL,
-    PRIMARY KEY (region, prod, wrt)
-);
-COMMENT ON TABLE src_capri_supply_elas_market_1717 IS 'Every record of CAPRI''s p_elasSupp(region, prod, wrt, ''CAL'') from elas1717defaulta.gdx (gdxdump p_elasSupp.txt): the supply elasticity of prod with respect to the price of wrt, per market region (countries and trade regions), 73528 rows (tools/build/build_capri_supply_elas_market.py).';
-INSERT INTO value_units VALUES
-  ('src_capri_supply_elas_market_1717', 'value', NULL, 'open', 'capri_supply_elas_market_1717.value: unit to be established');
-
--- file: capri_data/sources/arm/capri_supply_elas_young_1720.csv
-CREATE TABLE src_capri_supply_elas_young_1720 (
-    region VARCHAR NOT NULL,
-    "item" VARCHAR NOT NULL,
-    "value" DOUBLE NOT NULL,
-    PRIMARY KEY (region, "item")
-);
-COMMENT ON TABLE src_capri_supply_elas_young_1720 IS 'CAPRI''s calibrated supply elasticities of young animals (YCAM, YCAF, YBUL, YHEI, YCOW, YPIG) per member state: p_ElasSupp(MS, item, item, ''CAL'') from results/arm/supply_elas_2_1720<MS>defaulta.gdx, the 2020 calibration (tools/build/build_young_animal_elasticities.py).';
-INSERT INTO value_units VALUES
-  ('src_capri_supply_elas_young_1720', 'value', NULL, 'open', 'capri_supply_elas_young_1720.value: unit to be established');
-
 -- file: capri_data/sources/baseline_pmp/estnlp_vb.csv
 CREATE TABLE src_estnlp_vb (
     region VARCHAR NOT NULL,
