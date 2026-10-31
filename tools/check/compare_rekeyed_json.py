@@ -2,6 +2,9 @@
 equal the value under its CAPRI unit, number by number (relative tolerance --tol).
 
     python tools/check/compare_rekeyed_json.py capri_data/2017/environment/nh3_factors_capri.json [--key regions]
+
+The model's JSON inputs were converted to CSV on 31 October 2026 (capri_mod/data/nested_tables.py): this compares the
+versions of a JSON file in the repository's history (git show).
 """
 import argparse
 import csv

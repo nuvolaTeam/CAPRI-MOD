@@ -7,15 +7,19 @@ Per region and non-tradable fodder (grass, fodder maize, other fodder):
                 coefficient embeds CAPRI's loss share and yield)
   value_eur_t   the fodder's base value = CAPRI unit value (UVAG), the dual the
                 balance carries at base
-  use_t_head    fodder per head per animal (t), from feed_ration_2017.json
+  use_t_head    fodder per head per animal (t), from feed_ration_2017.csv
 
 Base fodder use = sum(heads x use_t_head), so use = u x area holds exactly at base.
 
     python tools/build/build_fodder_balance.py
+
+Writes capri_data/2017/feed/fodder_balance_2017.csv (region, fodder, crop, u_t_per_ha, value_eur_t) and
+fodder_balance_2017_use.csv (region, fodder, animal, use_t_head), capri_mod/data/nested_tables.py (JSON until
+31 October 2026).
 """
 from __future__ import annotations
 
-import json
+import sys
 from pathlib import Path
 
 import pandas as pd
@@ -23,12 +27,14 @@ import pandas as pd
 import functools as _ft
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 _ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(_ROOT))
+from capri_mod.data.nested_tables import read_feed_rations, write_fodder_balances  # noqa: E402
 FODDER = {"FGRA": "GRAS", "FMAI": "MAIF", "FOFA": "OFOD"}
 
 
 def main() -> None:
     data = _ROOT / "capri_data" / "2017"
-    rations = json.loads((data / "feed" / "feed_ration_2017.json").read_text())["regions"]
+    rations = read_feed_rations(data / "feed" / "feed_ration_2017.csv")
     areas = _read_csv(data / "supply" / "base_areas.csv", index_col=0)
     herds = _read_csv(data / "supply" / "animal_numbers.csv", index_col=0)
     # The raw file uses CAPRI-style names (SCOW, HEIF, SHGO); the model and the rations
@@ -55,12 +61,10 @@ def main() -> None:
             out.setdefault(reg, {})[feed] = {"crop": crop, "u_t_per_ha": u, "value_eur_t": value,
                                              "use_t_head": per_head}
             worst = max(worst, abs(sum(float(herds.at[reg, a]) * t for a, t in per_head.items()) - u * area))
-    dest = data / "feed" / "fodder_balance_2017.json"
-    dest.write_text(json.dumps({
-        "_source": "Built from feed_ration_2017.json (CAPRI 2017 rations x herds), base_areas.csv and CAPRI unit values (UVAG); "
-                   "CAPRI supply_model.gms SUPBAL_ for non-tradable fodder",
-        "_units": "u t fresh fodder per ha; value EUR per t; use t per head",
-        "regions": out}, indent=1))
+    # source: feed_ration_2017.csv (CAPRI 2017 rations x herds), base_areas.csv and CAPRI unit values (UVAG); CAPRI
+    # supply_model.gms SUPBAL_ for non-tradable fodder. Units: u t fresh fodder per ha; value EUR per t; use t per head
+    dest = data / "feed" / "fodder_balance_2017.csv"
+    write_fodder_balances(dest, out)
     n = sum(len(v) for v in out.values())
     print(f"wrote {dest}: {len(out)} regions, {n} region x fodder balances; max base residual {worst:.2e} kt")
 

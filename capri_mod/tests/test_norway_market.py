@@ -89,7 +89,8 @@ def test_norway_market_data_are_capris_no000000():
     assert "NO000000" not in set(pd.read_csv(MKT / "dairy_processing.csv").ms)
     wp = pd.read_csv(MKT / "dairy_world_processing.csv")
     assert set(wp.loc[wp.rms == "NO000000", "trade_region"]) == {"NOR"}
-    fd = json.load(open(MKT / "feed_demand_nonEU.json"))["parameters"]
+    from capri_mod.data.nested_tables import read_feed_demand
+    fd = read_feed_demand(MKT / "feed_demand_nonEU.csv")
     assert not any(k.startswith("NOR|") for k in fd)
     se = pd.read_csv(MKT / "supply_elas_region.csv")
     assert (se.region == "NOR").any()

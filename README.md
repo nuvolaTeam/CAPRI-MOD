@@ -1415,11 +1415,13 @@ equilibrium. Given a policy scenario, each year is solved **twice**, baseline an
 scenario, so the policy increment stays separable from baseline drift at every
 step rather than being entangled in a single 2030 number.
 
-Three trajectories ship: `capri_ref_2030.json` (default in `tools/run/run_f2f_2030.py`) — CAPRI star 3.0's own 2030
-reference (CAPMOD's reference run over CAPRI's 2017 results: levels, yields and land types per region;
-`tools/build/build_trajectory_capri_ref.py`), the point CAPRI's own scenarios start from; `captrd_2030.json` — CAPRI's
-captrd trend results, the input of CAPRI's baseline calibration; and `null.json` (no drift). A trajectory of one's own
-follows the same JSON format (`TEMPLATE.json`, removed 30 October 2026 as read by no code, is in git history).
+Three trajectories ship, each a scenario folder under `capri_data/scenarios/` (`settings.toml` with the name, source,
+vintage, years and provenance; `growth.csv` and `regional.csv` with the factors; `capri_mod/projection/scenario_io.py`;
+JSON files in `capri_data/trajectories/` until 31 October 2026): `capri_ref_2030` (default in
+`tools/run/run_f2f_2030.py`) — CAPRI star 3.0's own 2030 reference (CAPMOD's reference run over CAPRI's 2017 results:
+levels, yields and land types per region; `tools/build/build_trajectory_capri_ref.py`), the point CAPRI's own
+scenarios start from; `captrd_2030` — CAPRI's captrd trend results, the input of CAPRI's baseline calibration; and
+`null` (no drift, settings only). A trajectory of one's own is a folder of the same form.
 
 **Baseline calibration (Sprint 9p).** As CAPMOD calibrates its supply models to the simulation year's baseline, the
 baseline of a projected year shifts each region's linear cost terms by Q (x − target) until the region reproduces its
@@ -1432,7 +1434,7 @@ requirements and usable fodder per ha (Sprint 9q) the calibrated baseline reprod
 ```python
 from capri_mod.projection import ProjectionModule, BaselineTrajectory
 
-traj  = BaselineTrajectory.from_file("capri_data/trajectories/capri_ref_2030.json")
+traj  = BaselineTrajectory.from_file("capri_data/scenarios/capri_ref_2030")
 proj  = ProjectionModule(model, traj)
 
 result = proj.run(regions=regions)                      # baseline path

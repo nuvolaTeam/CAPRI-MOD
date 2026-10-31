@@ -9435,6 +9435,141 @@
     ]
    }
   },
+  "env_manure_pool_centres": {
+   "file": "capri_data/2017/environment/manure_pool_centres.csv",
+   "declared_in": "17_environment.sql",
+   "layout": [],
+   "comment": "the centre region of each country's manure pool, CAPRI's rManPool_centre (manuremarket/define_manure_market_structure.gms); with manure_pool_costs.csv, from manure_pool_costs.json until 31 October 2026 (tools/build/build_manure_pool_costs.py; capri_mod/data/nested_tables.py)",
+   "columns": [
+    {
+     "name": "pool",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "region",
+     "type": "VARCHAR",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "pool"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_manure_pool_costs",
+    "sources": "$EXPORTS/data_market_1730defaulta.csv; $EXPORTS/elas_2_1730defaulta.csv; $EXPORTS/nuts2_center_distance.csv; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $SOURCES/gams/aggregation/defaultA.agg; $SOURCES/gams/manuremarket/define_manure_market_structure.gms"
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/data/loaders.py",
+     "capri_mod/data/nested_tables.py"
+    ],
+    "builders": [],
+    "checks": [],
+    "tests": []
+   }
+  },
+  "env_manure_pool_costs": {
+   "file": "capri_data/2017/environment/manure_pool_costs.csv",
+   "declared_in": "17_environment.sql",
+   "layout": [],
+   "comment": "CAPRI's manure trade cost between two pools (p_mPoolTradeCost: 1 EUR loading + 0.18 EUR/t/km x the distance of the pools' centres, nuts2_center_distance.gdx supplied by the project lead, per t of pure nutrient); one row per connected pair (tools/build/build_manure_pool_costs.py; manure_pool_costs.json until 31 October 2026)",
+   "columns": [
+    {
+     "name": "from",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "to",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "km",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "eur_per_t_n",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "from",
+    "to"
+   ],
+   "unique": [],
+   "foreign_keys": [
+    {
+     "columns": [
+      "from"
+     ],
+     "references": "env_manure_pool_centres",
+     "ref_columns": [
+      "pool"
+     ]
+    },
+    {
+     "columns": [
+      "to"
+     ],
+     "references": "env_manure_pool_centres",
+     "ref_columns": [
+      "pool"
+     ]
+    }
+   ],
+   "checks": [
+    "(km > 0)",
+    "(eur_per_t_n > 0)"
+   ],
+   "units": [
+    {
+     "item": "eur_per_t_n",
+     "unit": null,
+     "status": "open",
+     "basis": "manure_pool_costs.eur_per_t_n: EUR per t N (the builder; no unit code in the catalogue)"
+    },
+    {
+     "item": "km",
+     "unit": null,
+     "status": "open",
+     "basis": "manure_pool_costs.km: km between the pools' centres (the builder; no unit code in the catalogue)"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_manure_pool_costs",
+    "sources": "$EXPORTS/data_market_1730defaulta.csv; $EXPORTS/elas_2_1730defaulta.csv; $EXPORTS/nuts2_center_distance.csv; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $SOURCES/gams/aggregation/defaultA.agg; $SOURCES/gams/manuremarket/define_manure_market_structure.gms"
+   },
+   "notes": [
+    {
+     "kind": "gap",
+     "note": "The haul cost is fixed at CAPRI's 0.18 EUR/t/km base value. CAPRI inflates it to the simulation year by p_infl (1.019 per year), so the model's manure trade costs between pools are lower than CAPRI's at 2030.",
+     "evidence": "tools/build/build_manure_pool_costs.py:4-9; allgms/gams/manuremarket/define_manure_market_structure.gms:281-282; allgms/gams/captrd.gms:327",
+     "checked": "2026-10-29"
+    }
+   ],
+   "read_by": {
+    "model": [
+     "capri_mod/coupling/manure.py",
+     "capri_mod/data/loaders.py"
+    ],
+    "builders": [],
+    "checks": [],
+    "tests": []
+   }
+  },
   "env_manure_trade_2030": {
    "file": "capri_data/2017/environment/manure_trade_2030.csv",
    "declared_in": "17_environment.sql",
@@ -9541,6 +9676,154 @@
     "origins": "CAPRI",
     "builder": "build_n_deposition_substitution",
     "sources": "$EXPORTS/res_2_1730greendeal_refdefaulta.zip; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $SOURCES/gams/aggregation/defaultA.agg"
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/data/loaders.py"
+    ],
+    "builders": [],
+    "checks": [],
+    "tests": []
+   }
+  },
+  "env_nh3_factors_capri": {
+   "file": "capri_data/2017/environment/nh3_factors_capri.csv",
+   "declared_in": "17_environment.sql",
+   "layout": [],
+   "comment": "CAPRI's share of each animal's excreted N lost as NH3-N (GNH3 / MANN, weighted by excreted N; res_2_1730greendeal_refdefaulta dataOut; national rows where regional are missing), per model region and animal (tools/build/build_nh3_factors.py; nh3_factors_capri.json until 31 October 2026; capri_mod/data/nested_tables.py)",
+   "columns": [
+    {
+     "name": "region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "animal",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "manure_share",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "region",
+    "animal"
+   ],
+   "unique": [],
+   "foreign_keys": [
+    {
+     "columns": [
+      "region"
+     ],
+     "references": "regional_units",
+     "ref_columns": [
+      "region"
+     ]
+    },
+    {
+     "columns": [
+      "animal"
+     ],
+     "references": "model_activities",
+     "ref_columns": [
+      "code"
+     ]
+    }
+   ],
+   "checks": [],
+   "units": [
+    {
+     "item": "manure_share",
+     "unit": null,
+     "status": "open",
+     "basis": "nh3_factors_capri.manure_share: kg NH3-N per kg N excreted (the builder)"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_nh3_factors",
+    "sources": "$EXPORTS/data_market_1730defaulta.csv; $EXPORTS/elas_2_1730defaulta.csv; $EXPORTS/res_2_1730greendeal_refdefaulta.zip; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $SOURCES/capreg/res_17<CC>.txt; $SOURCES/gams/aggregation/defaultA.agg"
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/data/loaders.py",
+     "capri_mod/environmental/ammonia.py"
+    ],
+    "builders": [],
+    "checks": [],
+    "tests": []
+   }
+  },
+  "env_nh3_factors_capri_regions": {
+   "file": "capri_data/2017/environment/nh3_factors_capri_regions.csv",
+   "declared_in": "17_environment.sql",
+   "layout": [],
+   "comment": "per model region: CAPRI's share of mineral N lost as NH3-N (NH3MIN / MINFER), whether the factors are the region's or its country's, and CAPRI's NH3 total (tools/build/build_nh3_factors.py; with nh3_factors_capri.csv, from nh3_factors_capri.json until 31 October 2026)",
+   "columns": [
+    {
+     "name": "region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "mineral_share",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "source",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "capri_nh3_total_ktN",
+     "type": "DOUBLE",
+     "not_null": false
+    }
+   ],
+   "primary_key": [
+    "region"
+   ],
+   "unique": [],
+   "foreign_keys": [
+    {
+     "columns": [
+      "region"
+     ],
+     "references": "regional_units",
+     "ref_columns": [
+      "region"
+     ]
+    }
+   ],
+   "checks": [
+    "(\"source\" IN ('regional', 'national'))"
+   ],
+   "units": [
+    {
+     "item": "capri_nh3_total_ktN",
+     "unit": null,
+     "status": "open",
+     "basis": "nh3_factors_capri_regions.capri_nh3_total_ktN: kt N by its name (the builder: CAPRI's NH3TOT, NITF)"
+    },
+    {
+     "item": "mineral_share",
+     "unit": null,
+     "status": "open",
+     "basis": "nh3_factors_capri_regions.mineral_share: kg NH3-N per kg N applied as mineral fertiliser (the builder)"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_nh3_factors",
+    "sources": "$EXPORTS/data_market_1730defaulta.csv; $EXPORTS/elas_2_1730defaulta.csv; $EXPORTS/res_2_1730greendeal_refdefaulta.zip; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $SOURCES/capreg/res_17<CC>.txt; $SOURCES/gams/aggregation/defaultA.agg"
    },
    "notes": [],
    "read_by": {
@@ -10654,6 +10937,296 @@
    "read_by": {
     "model": [
      "capri_mod/supply/supply_module.py"
+    ],
+    "builders": [],
+    "checks": [],
+    "tests": []
+   }
+  },
+  "feed_feed_ration_2017": {
+   "file": "capri_data/2017/feed/feed_ration_2017.csv",
+   "declared_in": "25_feed.sql",
+   "layout": [],
+   "comment": "the EU feed rations per model region and animal from CAPRI's 2017 regional results (res_17*, dataOut; per head = CAPRI total / the model's herd): ration (kg per head and year, by feed), req (per head and year, by nutrient: ENNE energy units, CRPR kg, DMIN/DMAX kg dry matter), content (per kg fresh feed, by feed and nutrient), price (EUR/kg, by feed), capri_slope and capri_slope_2030 (CAPRI's feed-PMP slopes of pmppar_17* and of the 2030 calibration pmppar_21730, by feed); tools/build/build_feed_ration.py; feed_ration_2017.json until 31 October 2026 (capri_mod/data/nested_tables.py)",
+   "columns": [
+    {
+     "name": "region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "animal",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "block",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "feed",
+     "type": "VARCHAR",
+     "not_null": false
+    },
+    {
+     "name": "nutrient",
+     "type": "VARCHAR",
+     "not_null": false
+    },
+    {
+     "name": "value",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [],
+   "unique": [
+    [
+     "region",
+     "animal",
+     "block",
+     "feed",
+     "nutrient"
+    ]
+   ],
+   "foreign_keys": [
+    {
+     "columns": [
+      "region"
+     ],
+     "references": "regional_units",
+     "ref_columns": [
+      "region"
+     ]
+    },
+    {
+     "columns": [
+      "animal"
+     ],
+     "references": "model_activities",
+     "ref_columns": [
+      "code"
+     ]
+    }
+   ],
+   "checks": [
+    "(block IN ('ration', 'req', 'content', 'price', 'capri_slope', 'capri_slope_2030'))",
+    "((block = 'req') = (feed IS NULL))",
+    "((block IN ('req', 'content')) = (nutrient IS NOT NULL))"
+   ],
+   "units": [
+    {
+     "item": "value",
+     "unit": null,
+     "status": "open",
+     "basis": "feed_ration_2017.value: the unit of its block (the comment)"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_feed_ration",
+    "sources": "$EXPORTS/data_market_1730defaulta.csv; $EXPORTS/elas_2_1730defaulta.csv; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $SOURCES/capreg/res_17<CC>.txt; $SOURCES/capri_export/DATA2_<CC>.txt; $SOURCES/feed_export/pmppar_17<CC>_feedpmp.csv; $SOURCES/gams/aggregation/defaultA.agg; $SOURCES/pmp2030/estnlp_results_<CC>.txt; $SOURCES/pmp2030/pmppar_21730<CC>defaulta.txt"
+   },
+   "notes": [
+    {
+     "kind": "gap",
+     "note": "In 986 of 2,407 region-animal records, the base ration's dry matter falls outside the file's DMIN-DMAX range (worst: HR000000 broilers 2.4x DMAX). The ration model widens the DM bounds, and lowers the energy and protein requirements, to fit the base ration (CAPRI's p_trimFeed). So the file's requirements are not what binds at calibration.",
+     "evidence": "capri_mod/feed/ration.py:14-15, :159-163; dry matter = sum(ration x DRMA) vs req DMIN/DMAX in feed_ration_2017.csv (computed today)",
+     "checked": "2026-10-29"
+    }
+   ],
+   "read_by": {
+    "model": [
+     "capri_mod/data/loaders.py",
+     "capri_mod/feed/ration.py"
+    ],
+    "builders": [
+     "build_fodder_balance",
+     "build_genetics_effects",
+     "build_lownfeed_effects",
+     "build_supplement_effects"
+    ],
+    "checks": [],
+    "tests": [
+     "capri_mod/tests/test_capri.py"
+    ]
+   }
+  },
+  "feed_fodder_balance_2017": {
+   "file": "capri_data/2017/feed/fodder_balance_2017.csv",
+   "declared_in": "25_feed.sql",
+   "layout": [],
+   "comment": "the regional balances of the non-tradable fodder (CAPRI supply_model.gms SUPBAL_): the crop producing it, the usable fresh fodder per ha (base fodder use / base area) and its base value (CAPRI's UVAG); built from feed_ration_2017.csv, base_areas.csv and animal_numbers.csv (tools/build/build_fodder_balance.py; fodder_balance_2017.json until 31 October 2026; capri_mod/data/nested_tables.py)",
+   "columns": [
+    {
+     "name": "region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "fodder",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "crop",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "u_t_per_ha",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "value_eur_t",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "region",
+    "fodder"
+   ],
+   "unique": [],
+   "foreign_keys": [
+    {
+     "columns": [
+      "region"
+     ],
+     "references": "regional_units",
+     "ref_columns": [
+      "region"
+     ]
+    },
+    {
+     "columns": [
+      "crop"
+     ],
+     "references": "model_activities",
+     "ref_columns": [
+      "code"
+     ]
+    }
+   ],
+   "checks": [
+    "(fodder IN ('FGRA', 'FMAI', 'FOFA'))"
+   ],
+   "units": [
+    {
+     "item": "u_t_per_ha",
+     "unit": "U_TonPerHa",
+     "status": "builder",
+     "basis": "fodder_balance_2017.u_t_per_ha: t fresh fodder per ha (the builder)"
+    },
+    {
+     "item": "value_eur_t",
+     "unit": null,
+     "status": "open",
+     "basis": "fodder_balance_2017.value_eur_t: EUR per t (the builder; no unit code in the catalogue)"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_fodder_balance",
+    "sources": "$EXPORTS/data_market_1730defaulta.csv; $EXPORTS/elas_2_1730defaulta.csv; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $SOURCES/capreg/res_17<CC>.txt; $SOURCES/capri_export/DATA2_<CC>.txt; $SOURCES/feed_export/pmppar_17<CC>_feedpmp.csv; $SOURCES/gams/aggregation/defaultA.agg; $SOURCES/pmp2030/estnlp_results_<CC>.txt; $SOURCES/pmp2030/pmppar_21730<CC>defaulta.txt"
+   },
+   "notes": [
+    {
+     "kind": "gap",
+     "note": "Usable fodder per ha is CAPRI's base fodder use divided by base area, and in some regions it is implausible. For fodder maize: ES620000 246, ES520000 161 and IT920000 119 t/ha, against a median of 30.5, and DE910000 at 0.01 t/ha. The supply model uses it in its fodder balance.",
+     "evidence": "tools/build/build_fodder_balance.py:4-6, :52; capri_mod/supply/supply_module.py:4397, :4640; values in fodder_balance_2017.csv (computed today); docs/FODDER_BALANCE.md:57-60 (older list of outlier regions)",
+     "checked": "2026-10-29"
+    }
+   ],
+   "read_by": {
+    "model": [
+     "capri_mod/data/loaders.py"
+    ],
+    "builders": [],
+    "checks": [],
+    "tests": [
+     "capri_mod/tests/test_run_manifest.py"
+    ]
+   }
+  },
+  "feed_fodder_balance_2017_use": {
+   "file": "capri_data/2017/feed/fodder_balance_2017_use.csv",
+   "declared_in": "25_feed.sql",
+   "layout": [],
+   "comment": "the fodder each animal eats per head in a fodder balance (fodder_balance_2017.csv), from the base ration (tools/build/build_fodder_balance.py)",
+   "columns": [
+    {
+     "name": "region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "fodder",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "animal",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "use_t_head",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "region",
+    "fodder",
+    "animal"
+   ],
+   "unique": [],
+   "foreign_keys": [
+    {
+     "columns": [
+      "region"
+     ],
+     "references": "regional_units",
+     "ref_columns": [
+      "region"
+     ]
+    },
+    {
+     "columns": [
+      "animal"
+     ],
+     "references": "model_activities",
+     "ref_columns": [
+      "code"
+     ]
+    }
+   ],
+   "checks": [
+    "(fodder IN ('FGRA', 'FMAI', 'FOFA'))"
+   ],
+   "units": [
+    {
+     "item": "use_t_head",
+     "unit": "U_TonPerHd",
+     "status": "builder",
+     "basis": "fodder_balance_2017_use.use_t_head: t per head (the builder)"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_fodder_balance",
+    "sources": "$EXPORTS/data_market_1730defaulta.csv; $EXPORTS/elas_2_1730defaulta.csv; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $SOURCES/capreg/res_17<CC>.txt; $SOURCES/capri_export/DATA2_<CC>.txt; $SOURCES/feed_export/pmppar_17<CC>_feedpmp.csv; $SOURCES/gams/aggregation/defaultA.agg; $SOURCES/pmp2030/estnlp_results_<CC>.txt; $SOURCES/pmp2030/pmppar_21730<CC>defaulta.txt"
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/data/loaders.py"
     ],
     "builders": [],
     "checks": [],
@@ -14732,6 +15305,69 @@
     ]
    }
   },
+  "mkt_dairy_world_baseline": {
+   "file": "capri_data/2017/market/dairy_world_baseline.csv",
+   "declared_in": "23_market_more.sql",
+   "layout": [],
+   "comment": "CAPRI's base-period balances of the dairy products per model trade region (FAO_agg p_dataMarket, fao_agg_17_datamarket, year BAS: MAPR production, DOMM consumption, IMPT, EXPT), EU27 for reference; tools/build/build_dairy_world_markets.py; dairy_world_baseline.json until 31 October 2026 (capri_mod/data/nested_tables.py)",
+   "columns": [
+    {
+     "name": "region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "commodity",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "item",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "value",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "region",
+    "commodity",
+    "item"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [
+    "(item IN ('production', 'consumption', 'imports', 'exports'))"
+   ],
+   "units": [
+    {
+     "item": "value",
+     "unit": "U_1000t",
+     "status": "builder",
+     "basis": "dairy_world_baseline.value: CAPRI's tonnes / 1000 (the builder)"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_dairy_world_markets",
+    "sources": "$EXPORTS/data_market_1730defaulta.csv; $EXPORTS/elas_2_1730defaulta.csv; $EXPORTS/fao_agg_17_datamarket.txt; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $SOURCES/gams/aggregation/defaultA.agg"
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/data/loaders.py",
+     "capri_mod/market/calibration.py",
+     "capri_mod/market/inputs.py"
+    ],
+    "builders": [],
+    "checks": [],
+    "tests": []
+   }
+  },
   "mkt_dairy_world_demand_elas": {
    "file": "capri_data/2017/market/dairy_world_demand_elas.csv",
    "declared_in": "23_market_more.sql",
@@ -15176,6 +15812,174 @@
     "model": [
      "capri_mod/data/loaders.py",
      "capri_mod/market/feed.py",
+     "capri_mod/market/inputs.py"
+    ],
+    "builders": [],
+    "checks": [],
+    "tests": []
+   }
+  },
+  "mkt_feed_demand_noneu": {
+   "file": "capri_data/2017/market/feed_demand_nonEU.csv",
+   "declared_in": "23_market_more.sql",
+   "layout": [],
+   "comment": "non-EU feed demand per model trade region and product at CAPRI's 2030 calibration point: feed share = sum FEED / sum (HCON + FEED + PROC + BIOF) over the trade region's CAPRI regions (data_market_1730defaulta CAL); tools/build/build_feed_demand_nonEU.py; feed_demand_nonEU.json until 31 October 2026 (capri_mod/data/nested_tables.py)",
+   "columns": [
+    {
+     "name": "region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "commodity",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "feed_share",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "region",
+    "commodity"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [
+    "((feed_share > 0) AND (feed_share <= 1))"
+   ],
+   "units": [
+    {
+     "item": "feed_share",
+     "unit": null,
+     "status": "open",
+     "basis": "feed_demand_nonEU.feed_share: a share (the builder)"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_feed_demand_nonEU",
+    "sources": "$EXPORTS/data_market_1730defaulta.csv; $EXPORTS/elas_2_1730defaulta.csv; $EXPORTS/markmarket_greendeal_1730et_base_1717.txt; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $SOURCES/gams/aggregation/defaultA.agg"
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/data/loaders.py",
+     "capri_mod/market/feed.py",
+     "capri_mod/market/inputs.py"
+    ],
+    "builders": [],
+    "checks": [],
+    "tests": [
+     "capri_mod/tests/test_capri.py",
+     "capri_mod/tests/test_norway_market.py"
+    ]
+   }
+  },
+  "mkt_feed_demand_noneu_capri_regions": {
+   "file": "capri_data/2017/market/feed_demand_nonEU_capri_regions.csv",
+   "declared_in": "23_market_more.sql",
+   "layout": [],
+   "comment": "the CAPRI regions whose feed functions make a trade region's feed demand of a product (tools/build/build_feed_demand_nonEU.py)",
+   "columns": [
+    {
+     "name": "region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "commodity",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "capri_region",
+     "type": "VARCHAR",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "region",
+    "commodity",
+    "capri_region"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_feed_demand_nonEU",
+    "sources": "$EXPORTS/data_market_1730defaulta.csv; $EXPORTS/elas_2_1730defaulta.csv; $EXPORTS/markmarket_greendeal_1730et_base_1717.txt; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $SOURCES/gams/aggregation/defaultA.agg"
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/data/loaders.py",
+     "capri_mod/market/inputs.py"
+    ],
+    "builders": [],
+    "checks": [],
+    "tests": []
+   }
+  },
+  "mkt_feed_demand_noneu_elasticities": {
+   "file": "capri_data/2017/market/feed_demand_nonEU_elasticities.csv",
+   "declared_in": "23_market_more.sql",
+   "layout": [],
+   "comment": "CAPRI's feed demand elasticities p_ElasFeed(RMS, feed, price-of, 'CAL') (elas_2_1730defaulta), feed-weighted over the CAPRI regions of a trade region (tools/build/build_feed_demand_nonEU.py)",
+   "columns": [
+    {
+     "name": "region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "commodity",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "price_of",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "elasticity",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "region",
+    "commodity",
+    "price_of"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [
+    {
+     "item": "elasticity",
+     "unit": null,
+     "status": "open",
+     "basis": "feed_demand_nonEU_elasticities.elasticity: an elasticity (the builder)"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_feed_demand_nonEU",
+    "sources": "$EXPORTS/data_market_1730defaulta.csv; $EXPORTS/elas_2_1730defaulta.csv; $EXPORTS/markmarket_greendeal_1730et_base_1717.txt; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $SOURCES/gams/aggregation/defaultA.agg"
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/data/loaders.py",
      "capri_mod/market/inputs.py"
     ],
     "builders": [],
@@ -16028,6 +16832,123 @@
     "tests": []
    }
   },
+  "mkt_world_market_baseline": {
+   "file": "capri_data/2017/market/world_market_baseline.csv",
+   "declared_in": "23_market_more.sql",
+   "layout": [],
+   "comment": "CAPRI's base-period balances of the market products per model trade region (FAO_agg p_dataMarket, fao_agg_17_datamarket, year BAS: MAPR production, DOMM consumption, IMPT, EXPT; EU27 the sum of the member states); tools/build/build_world_market_baseline.py; world_market_baseline.json until 31 October 2026 (capri_mod/data/nested_tables.py)",
+   "columns": [
+    {
+     "name": "region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "commodity",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "item",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "value",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "region",
+    "commodity",
+    "item"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [
+    "(item IN ('production', 'consumption', 'imports', 'exports'))"
+   ],
+   "units": [
+    {
+     "item": "value",
+     "unit": "U_1000t",
+     "status": "builder",
+     "basis": "world_market_baseline.value: CAPRI's tonnes / 1000 (the builder)"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_world_market_baseline",
+    "sources": "$EXPORTS/data_market_1730defaulta.csv; $EXPORTS/elas_2_1730defaulta.csv; $EXPORTS/fao_agg_17_datamarket.txt; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $SOURCES/gams/aggregation/defaultA.agg"
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/data/loaders.py",
+     "capri_mod/market/calibration.py",
+     "capri_mod/market/inputs.py"
+    ],
+    "builders": [],
+    "checks": [],
+    "tests": [
+     "capri_mod/tests/test_capri.py"
+    ]
+   }
+  },
+  "mkt_world_market_baseline_products": {
+   "file": "capri_data/2017/market/world_market_baseline_products.csv",
+   "declared_in": "23_market_more.sql",
+   "layout": [],
+   "comment": "the model products of world_market_baseline.csv and the CAPRI products whose FAO_agg balances each sums (tools/build/build_world_market_baseline.py MODEL; the \"_products\" of world_market_baseline.json until 31 October 2026)",
+   "columns": [
+    {
+     "name": "product",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "capri_product",
+     "type": "VARCHAR",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "product",
+    "capri_product"
+   ],
+   "unique": [],
+   "foreign_keys": [
+    {
+     "columns": [
+      "capri_product"
+     ],
+     "references": "capri_xx",
+     "ref_columns": [
+      "code"
+     ]
+    }
+   ],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_world_market_baseline",
+    "sources": "$EXPORTS/data_market_1730defaulta.csv; $EXPORTS/elas_2_1730defaulta.csv; $EXPORTS/fao_agg_17_datamarket.txt; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $SOURCES/gams/aggregation/defaultA.agg"
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/data/loaders.py",
+     "capri_mod/market/inputs.py"
+    ],
+    "builders": [],
+    "checks": [],
+    "tests": []
+   }
+  },
   "model_activities": {
    "file": "capri_data/codes/model_activities.csv",
    "declared_in": "00_codes.sql",
@@ -16228,6 +17149,7 @@
      "build_feed_demand_nonEU",
      "build_feed_ration",
      "build_fodder_balance",
+     "build_genetics_effects",
      "build_ghg_coefs_2017",
      "build_gl_demand",
      "build_grass_intensity",
@@ -16236,14 +17158,18 @@
      "build_livestock_output_coef",
      "build_livestock_premium_coef",
      "build_livestock_products",
+     "build_lownfeed_effects",
+     "build_manure_pool_costs",
      "build_manure_trade_base",
      "build_model_premium_prices",
+     "build_nh3_factors",
      "build_noneu_feed_nq",
      "build_noneu_market_supply_nq",
      "build_npk_balance_2030",
      "build_price_trajectory_2030",
      "build_processing_nq",
      "build_processing_seeds",
+     "build_supplement_effects",
      "build_supply_elas_nonEU",
      "build_supply_elasticities_regional",
      "build_tariffs_2017",
@@ -16251,6 +17177,7 @@
      "build_use_components",
      "build_world_market_baseline",
      "build_world_prices",
+     "build_young_animals",
      "recalibrate_trade_2017"
     ],
     "checks": [
@@ -20324,6 +21251,7 @@
      "build_lownfeed_effects",
      "build_manure_losses",
      "build_manure_n2o",
+     "build_manure_pool_costs",
      "build_manure_trade_base",
      "build_model_premium_prices",
      "build_n_deposition_substitution",
@@ -20433,6 +21361,7 @@
      "build_feed_energy",
      "build_feed_ration",
      "build_fodder_balance",
+     "build_genetics_effects",
      "build_ghg_coefs_2017",
      "build_grass_intensity",
      "build_land_market",
@@ -20440,14 +21369,18 @@
      "build_livestock_output_coef",
      "build_livestock_premium_coef",
      "build_livestock_products",
+     "build_lownfeed_effects",
+     "build_manure_pool_costs",
      "build_manure_trade_base",
      "build_model_premium_prices",
+     "build_nh3_factors",
      "build_noneu_feed_nq",
      "build_noneu_market_supply_nq",
      "build_npk_balance_2030",
      "build_price_trajectory_2030",
      "build_processing_nq",
      "build_processing_seeds",
+     "build_supplement_effects",
      "build_supply_elas_nonEU",
      "build_supply_elasticities_regional",
      "build_tariffs_2017",
@@ -20455,13 +21388,298 @@
      "build_use_components",
      "build_welfare_base",
      "build_world_market_baseline",
-     "build_world_prices"
+     "build_world_prices",
+     "build_young_animals"
     ],
     "checks": [],
     "tests": [
      "capri_mod/tests/test_market_layers.py",
      "capri_mod/tests/test_run_manifest.py"
     ]
+   }
+  },
+  "scn_capri_ref_2030_growth": {
+   "file": "capri_data/scenarios/capri_ref_2030/growth.csv",
+   "declared_in": "35_scenarios.sql",
+   "layout": [],
+   "comment": "CAPRI's 2030 reference as growth factors per block and activity: the per-activity median of the per-region ratios LEVL or YILD in res_2_1730greendeal_refpol_endotech_all_ini / CAPRI's 2017 results, with the model's activity aliases (tools/build/build_trajectory_capri_ref.py, build_trajectory_model_keys.py)",
+   "columns": [
+    {
+     "name": "block",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "item",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "year",
+     "type": "INTEGER",
+     "not_null": true
+    },
+    {
+     "name": "factor",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "block",
+    "item",
+    "year"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [
+    "(block IN ('yields', 'demand', 'world_prices', 'herds', 'land'))",
+    "(factor > 0)"
+   ],
+   "units": [
+    {
+     "item": "factor",
+     "unit": null,
+     "status": "open",
+     "basis": "growth.factor: a ratio to the base year (the builder)"
+    },
+    {
+     "item": "year",
+     "unit": null,
+     "status": "open",
+     "basis": "the target year (a calendar year, not a quantity)"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_trajectory_capri_ref",
+    "sources": "$EXPORTS/data_market_1730defaulta.csv; $EXPORTS/elas_2_1730defaulta.csv; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $SOURCES/capreg/res_17<CC>.txt; $SOURCES/gams/aggregation/defaultA.agg"
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/projection/scenario_io.py"
+    ],
+    "builders": [],
+    "checks": [],
+    "tests": []
+   }
+  },
+  "scn_capri_ref_2030_regional": {
+   "file": "capri_data/scenarios/capri_ref_2030/regional.csv",
+   "declared_in": "35_scenarios.sql",
+   "layout": [],
+   "comment": "CAPRI's 2030 reference as per-region growth factors (regions keyed by CAPRI's four-character codes and by the model's regions; the factor where the 2017 level is >= 1.0) (tools/build/build_trajectory_capri_ref.py, build_trajectory_model_keys.py)",
+   "columns": [
+    {
+     "name": "block",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "item",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "year",
+     "type": "INTEGER",
+     "not_null": true
+    },
+    {
+     "name": "factor",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "block",
+    "region",
+    "item",
+    "year"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [
+    "(block IN ('yields', 'demand', 'world_prices', 'herds', 'land'))",
+    "(factor > 0)"
+   ],
+   "units": [
+    {
+     "item": "factor",
+     "unit": null,
+     "status": "open",
+     "basis": "regional.factor: a ratio to the base year (the builder)"
+    },
+    {
+     "item": "year",
+     "unit": null,
+     "status": "open",
+     "basis": "the target year (a calendar year, not a quantity)"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_trajectory_capri_ref",
+    "sources": "$EXPORTS/data_market_1730defaulta.csv; $EXPORTS/elas_2_1730defaulta.csv; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $SOURCES/capreg/res_17<CC>.txt; $SOURCES/gams/aggregation/defaultA.agg"
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/projection/scenario_io.py"
+    ],
+    "builders": [],
+    "checks": [],
+    "tests": []
+   }
+  },
+  "scn_captrd_2030_growth": {
+   "file": "capri_data/scenarios/captrd_2030/growth.csv",
+   "declared_in": "35_scenarios.sql",
+   "layout": [],
+   "comment": "CAPRI's trend projection (CAPTRD results_1770, p_result series) as growth factors per block and activity: per-activity medians of the per-region cumulative ratios 2030 / 2017 of YILD and LEVL, with the model's activity aliases (tools/build/build_captrd_trajectory.py)",
+   "columns": [
+    {
+     "name": "block",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "item",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "year",
+     "type": "INTEGER",
+     "not_null": true
+    },
+    {
+     "name": "factor",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "block",
+    "item",
+    "year"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [
+    "(block IN ('yields', 'demand', 'world_prices', 'herds', 'land'))",
+    "(factor > 0)"
+   ],
+   "units": [
+    {
+     "item": "factor",
+     "unit": null,
+     "status": "open",
+     "basis": "growth.factor: a ratio to the base year (the builder)"
+    },
+    {
+     "item": "year",
+     "unit": null,
+     "status": "open",
+     "basis": "the target year (a calendar year, not a quantity)"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_captrd_trajectory",
+    "sources": "$EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/captrd_results/1770/series.csv.gz; $SOURCES/gams/aggregation/defaultA.agg"
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/projection/scenario_io.py"
+    ],
+    "builders": [],
+    "checks": [],
+    "tests": []
+   }
+  },
+  "scn_captrd_2030_regional": {
+   "file": "capri_data/scenarios/captrd_2030/regional.csv",
+   "declared_in": "35_scenarios.sql",
+   "layout": [],
+   "comment": "CAPRI's trend projection as per-region growth factors (where the base value is >= 1.0), keyed by CAPRI's four-character codes and by the model's regions (tools/build/build_captrd_trajectory.py)",
+   "columns": [
+    {
+     "name": "block",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "item",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "year",
+     "type": "INTEGER",
+     "not_null": true
+    },
+    {
+     "name": "factor",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "block",
+    "region",
+    "item",
+    "year"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [
+    "(block IN ('yields', 'demand', 'world_prices', 'herds', 'land'))",
+    "(factor > 0)"
+   ],
+   "units": [
+    {
+     "item": "factor",
+     "unit": null,
+     "status": "open",
+     "basis": "regional.factor: a ratio to the base year (the builder)"
+    },
+    {
+     "item": "year",
+     "unit": null,
+     "status": "open",
+     "basis": "the target year (a calendar year, not a quantity)"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_captrd_trajectory",
+    "sources": "$EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/captrd_results/1770/series.csv.gz; $SOURCES/gams/aggregation/defaultA.agg"
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/projection/scenario_io.py"
+    ],
+    "builders": [],
+    "checks": [],
+    "tests": []
    }
   },
   "shr_capri_member_state_codes": {
@@ -20553,6 +21771,7 @@
      "build_lownfeed_effects",
      "build_manure_losses",
      "build_manure_n2o",
+     "build_manure_pool_costs",
      "build_manure_trade_base",
      "build_mineral_n_price",
      "build_model_premium_prices",
@@ -20759,6 +21978,7 @@
      "build_lownfeed_effects",
      "build_manure_losses",
      "build_manure_n2o",
+     "build_manure_pool_costs",
      "build_manure_trade_base",
      "build_model_premium_prices",
      "build_n_deposition_substitution",
@@ -20860,7 +22080,60 @@
     ],
     "builders": [
      "build_captrd_trajectory",
-     "build_supply_elasticities_regional"
+     "build_supply_elasticities_regional",
+     "build_trajectory_capri_ref"
+    ],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
+   }
+  },
+  "shr_nuts_version_correspondence": {
+   "file": "capri_data/shared/nuts_version_correspondence.csv",
+   "declared_in": "26_shared.sql",
+   "layout": [],
+   "comment": "CAPRI's 8-character region codes and their NUTS codes across coding-scheme versions, in order (a code can have several: IT110000 -> IT11 and ITC1; an empty nuts_code for a code without one), from CAPRI's gams/compile_rdp_data/build_general_set_structure.gms, with 75 NUTS-2 pairs added in October 2026 (each verified by CAPRI's total agricultural area against the model region's base area and a second variable), NO090000 -> NO03 and PL500000 -> PL81 removed as unconfirmed, and FI190000 -> FI1C removed; read by tools/lib/_model_regions.py (with its CORR_FIXES, SPLITS_MERGES). nuts_version_correspondence.json until 31 October 2026, kept by hand (capri_mod/data/nested_tables.py)",
+   "columns": [
+    {
+     "name": "capri_code",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "nuts_code",
+     "type": "VARCHAR",
+     "not_null": false
+    }
+   ],
+   "primary_key": [],
+   "unique": [
+    [
+     "capri_code",
+     "nuts_code"
+    ]
+   ],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": null,
+    "sources": null
+   },
+   "notes": [
+    {
+     "kind": "origin",
+     "note": "CAPRI's 8-character region codes and their NUTS codes across versions, kept by hand (no builder): 281 rows, 217 CAPRI codes, 279 pairs, two codes (NO090000, PL500000) without a NUTS code. Converted on 31 October 2026 from shared/nuts_version_correspondence.json, whose capri8_to_nuts it equals exactly (order included); that file stated its origin as CAPRI's gams/compile_rdp_data/build_general_set_structure.gms (207 pairs) with 75 NUTS-2 pairs added in October 2026 and three removed (its _note, now the table's comment). Checked today against that GAMS file: 228 of the 279 pairs are in CAPRI's set r2_nutsRd (pairs read with a simple pattern), 51 are not; the difference to the 75 stated additions was not resolved. Read by tools/lib/_model_regions.py (_nuts_correspondence: capri_groups, region_to_capri, with CORR_FIXES and SPLITS_MERGES), not by the model.",
+     "evidence": "capri_mod/data/nested_tables.py (read_nuts_correspondence); tools/lib/_model_regions.py (_nuts_correspondence); git show 60f714f:capri_data/shared/nuts_version_correspondence.json (_source, _note); capri_sources/gams/compile_rdp_data/build_general_set_structure.gms:442 (SET r2_nutsRd)",
+     "checked": "2026-10-31"
+    }
+   ],
+   "read_by": {
+    "model": [],
+    "builders": [
+     "build_nuts2024_reporting"
     ],
     "checks": [
      "tools/check/make_provenance.py"
@@ -38051,6 +39324,352 @@
     "tests": []
    }
   },
+  "sup_young_animals_2017": {
+   "file": "capri_data/2017/supply/young_animals_2017.csv",
+   "declared_in": "18_supply_more.sql",
+   "layout": [],
+   "comment": "CAPRI's young-animal balances per model region (supply_model.gms INPANI_), calves and young cattle pooled across the sexes (the model's default): base net export and CAPRI's national unit value (UVAG); the coefficients in young_animals_2017_coef.csv (tools/build/build_young_animals.py; young_animals_2017.json until 31 October 2026; capri_mod/data/nested_tables.py)",
+   "columns": [
+    {
+     "name": "region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "category",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "base_net_export",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "value_eur_head",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "region",
+    "category"
+   ],
+   "unique": [],
+   "foreign_keys": [
+    {
+     "columns": [
+      "region"
+     ],
+     "references": "regional_units",
+     "ref_columns": [
+      "region"
+     ]
+    }
+   ],
+   "checks": [
+    "(category IN ('calves', 'young', 'cows', 'piglets', 'lambs'))"
+   ],
+   "units": [
+    {
+     "item": "base_net_export",
+     "unit": null,
+     "status": "open",
+     "basis": "young_animals_2017.base_net_export: 1000 head (the builder; no unit code in the catalogue)"
+    },
+    {
+     "item": "value_eur_head",
+     "unit": null,
+     "status": "open",
+     "basis": "young_animals_2017.value_eur_head: EUR per head (the builder; no unit code in the catalogue)"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_young_animals",
+    "sources": "$EXPORTS/data_market_1730defaulta.csv; $EXPORTS/elas_2_1730defaulta.csv; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $SOURCES/capreg/res_17<CC>.txt; $SOURCES/gams/aggregation/defaultA.agg"
+   },
+   "notes": [
+    {
+     "kind": "gap",
+     "note": "This is the default young-animal table. It pools male and female calves and male and female young cattle into one balance each, where CAPRI clears them per sex. The pooled value per head is the unweighted mean of the two sexes' national unit values (e.g. Spain young cattle 1019.7 = (1075.0 + 964.4)/2).",
+     "evidence": "tools/build/build_young_animals.py:40-46, :58-61, :151; capri_mod/supply/supply_module.py:145-157; capri_mod/settings/defaults.toml:113-115; res_17ES.txt UVAG YBUL/YHEI",
+     "checked": "2026-10-29"
+    }
+   ],
+   "read_by": {
+    "model": [
+     "capri_mod/data/loaders.py",
+     "capri_mod/supply/supply_module.py"
+    ],
+    "builders": [],
+    "checks": [],
+    "tests": [
+     "capri_mod/tests/test_capri.py"
+    ]
+   }
+  },
+  "sup_young_animals_2017_coef": {
+   "file": "capri_data/2017/supply/young_animals_2017_coef.csv",
+   "declared_in": "18_supply_more.sql",
+   "layout": [],
+   "comment": "young animals produced or used per model head of an activity (CAPRI's YCAM..YPIG outputs, ICAM..IPIG inputs per 1000 head, LEVL weights, per model head) in the pooled balances of young_animals_2017.csv (tools/build/build_young_animals.py)",
+   "columns": [
+    {
+     "name": "region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "category",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "side",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "activity",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "coefficient",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "region",
+    "category",
+    "side",
+    "activity"
+   ],
+   "unique": [],
+   "foreign_keys": [
+    {
+     "columns": [
+      "region"
+     ],
+     "references": "regional_units",
+     "ref_columns": [
+      "region"
+     ]
+    },
+    {
+     "columns": [
+      "activity"
+     ],
+     "references": "model_activities",
+     "ref_columns": [
+      "code"
+     ]
+    }
+   ],
+   "checks": [
+    "(category IN ('calves', 'young', 'cows', 'piglets', 'lambs'))",
+    "(side IN ('produce', 'use'))"
+   ],
+   "units": [
+    {
+     "item": "coefficient",
+     "unit": "U_HdPerHd",
+     "status": "builder",
+     "basis": "young_animals_2017_coef.coefficient: head per head (the builder)"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_young_animals",
+    "sources": "$EXPORTS/data_market_1730defaulta.csv; $EXPORTS/elas_2_1730defaulta.csv; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $SOURCES/capreg/res_17<CC>.txt; $SOURCES/gams/aggregation/defaultA.agg"
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/data/loaders.py"
+    ],
+    "builders": [],
+    "checks": [],
+    "tests": []
+   }
+  },
+  "sup_young_animals_by_sex_2017": {
+   "file": "capri_data/2017/supply/young_animals_by_sex_2017.csv",
+   "declared_in": "18_supply_more.sql",
+   "layout": [],
+   "comment": "CAPRI's young-animal balances per model region and sex (INPANI_), read instead of young_animals_2017.csv only with the cattle member splits on (KNOWN_ISSUES K65); the coefficients in young_animals_by_sex_2017_coef.csv (tools/build/build_young_animals.py; young_animals_by_sex_2017.json until 31 October 2026)",
+   "columns": [
+    {
+     "name": "region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "category",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "base_net_export",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "value_eur_head",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "region",
+    "category"
+   ],
+   "unique": [],
+   "foreign_keys": [
+    {
+     "columns": [
+      "region"
+     ],
+     "references": "regional_units",
+     "ref_columns": [
+      "region"
+     ]
+    }
+   ],
+   "checks": [
+    "(category IN ('calves_m', 'calves_f', 'young_m', 'young_f', 'cows', 'piglets', 'lambs'))"
+   ],
+   "units": [
+    {
+     "item": "base_net_export",
+     "unit": null,
+     "status": "open",
+     "basis": "young_animals_by_sex_2017.base_net_export: 1000 head (the builder; no unit code in the catalogue)"
+    },
+    {
+     "item": "value_eur_head",
+     "unit": null,
+     "status": "open",
+     "basis": "young_animals_by_sex_2017.value_eur_head: EUR per head (the builder; no unit code in the catalogue)"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_young_animals",
+    "sources": "$EXPORTS/data_market_1730defaulta.csv; $EXPORTS/elas_2_1730defaulta.csv; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $SOURCES/capreg/res_17<CC>.txt; $SOURCES/gams/aggregation/defaultA.agg"
+   },
+   "notes": [
+    {
+     "kind": "gap",
+     "note": "Read only when the cattle member splits are on, which is off by default (K65). A default run uses the pooled young_animals_2017.csv instead.",
+     "evidence": "capri_mod/supply/supply_module.py:145-157; capri_mod/settings/defaults.toml:113-115",
+     "checked": "2026-10-29"
+    }
+   ],
+   "read_by": {
+    "model": [
+     "capri_mod/data/loaders.py",
+     "capri_mod/supply/supply_module.py"
+    ],
+    "builders": [],
+    "checks": [],
+    "tests": [
+     "capri_mod/tests/test_capri.py"
+    ]
+   }
+  },
+  "sup_young_animals_by_sex_2017_coef": {
+   "file": "capri_data/2017/supply/young_animals_by_sex_2017_coef.csv",
+   "declared_in": "18_supply_more.sql",
+   "layout": [],
+   "comment": "young animals produced or used per model head of an activity in the per-sex balances of young_animals_by_sex_2017.csv (tools/build/build_young_animals.py)",
+   "columns": [
+    {
+     "name": "region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "category",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "side",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "activity",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "coefficient",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "region",
+    "category",
+    "side",
+    "activity"
+   ],
+   "unique": [],
+   "foreign_keys": [
+    {
+     "columns": [
+      "region"
+     ],
+     "references": "regional_units",
+     "ref_columns": [
+      "region"
+     ]
+    },
+    {
+     "columns": [
+      "activity"
+     ],
+     "references": "model_activities",
+     "ref_columns": [
+      "code"
+     ]
+    }
+   ],
+   "checks": [
+    "(category IN ('calves_m', 'calves_f', 'young_m', 'young_f', 'cows', 'piglets', 'lambs'))",
+    "(side IN ('produce', 'use'))"
+   ],
+   "units": [
+    {
+     "item": "coefficient",
+     "unit": "U_HdPerHd",
+     "status": "builder",
+     "basis": "young_animals_by_sex_2017_coef.coefficient: head per head (the builder)"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_young_animals",
+    "sources": "$EXPORTS/data_market_1730defaulta.csv; $EXPORTS/elas_2_1730defaulta.csv; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $SOURCES/capreg/res_17<CC>.txt; $SOURCES/gams/aggregation/defaultA.agg"
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/data/loaders.py"
+    ],
+    "builders": [],
+    "checks": [],
+    "tests": []
+   }
+  },
   "supplement_effects": {
    "file": "capri_data/2017/abatement/mitigation/supplement_effects.csv",
    "declared_in": "15_abatement.sql",
@@ -41880,46 +43499,5 @@
   "physical/keep": 25,
   "technical/keep": 44
  },
- "other_notes": {
-  "capri_data/2017/environment/manure_pool_costs.json": [
-   {
-    "kind": "gap",
-    "note": "The haul cost is fixed at CAPRI's 0.18 EUR/t/km base value. CAPRI inflates it to the simulation year by p_infl (1.019 per year), so the model's manure trade costs between pools are lower than CAPRI's at 2030.",
-    "evidence": "tools/build/build_manure_pool_costs.py:4-9; allgms/gams/manuremarket/define_manure_market_structure.gms:281-282; allgms/gams/captrd.gms:327",
-    "checked": "2026-10-29"
-   }
-  ],
-  "capri_data/2017/feed/feed_ration_2017.json": [
-   {
-    "kind": "gap",
-    "note": "In 986 of 2,407 region-animal records, the base ration's dry matter falls outside the file's DMIN-DMAX range (worst: HR000000 broilers 2.4x DMAX). The ration model widens the DM bounds, and lowers the energy and protein requirements, to fit the base ration (CAPRI's p_trimFeed). So the file's requirements are not what binds at calibration.",
-    "evidence": "capri_mod/feed/ration.py:14-15, :159-163; dry matter = sum(ration x DRMA) vs req DMIN/DMAX in feed_ration_2017.json (computed today)",
-    "checked": "2026-10-29"
-   }
-  ],
-  "capri_data/2017/feed/fodder_balance_2017.json": [
-   {
-    "kind": "gap",
-    "note": "Usable fodder per ha is CAPRI's base fodder use divided by base area, and in some regions it is implausible. For fodder maize: ES620000 246, ES520000 161 and IT920000 119 t/ha, against a median of 30.5, and DE910000 at 0.01 t/ha. The supply model uses it in its fodder balance.",
-    "evidence": "tools/build/build_fodder_balance.py:4-6, :52; capri_mod/supply/supply_module.py:4397, :4640; values in fodder_balance_2017.json (computed today); docs/FODDER_BALANCE.md:57-60 (older list of outlier regions)",
-    "checked": "2026-10-29"
-   }
-  ],
-  "capri_data/2017/supply/young_animals_2017.json": [
-   {
-    "kind": "gap",
-    "note": "This is the default young-animal table. It pools male and female calves and male and female young cattle into one balance each, where CAPRI clears them per sex. The pooled value per head is the unweighted mean of the two sexes' national unit values (e.g. Spain young cattle 1019.7 = (1075.0 + 964.4)/2).",
-    "evidence": "tools/build/build_young_animals.py:40-46, :58-61, :151; capri_mod/supply/supply_module.py:145-157; capri_mod/settings/defaults.toml:113-115; res_17ES.txt UVAG YBUL/YHEI",
-    "checked": "2026-10-29"
-   }
-  ],
-  "capri_data/2017/supply/young_animals_by_sex_2017.json": [
-   {
-    "kind": "gap",
-    "note": "Read only when the cattle member splits are on, which is off by default (K65). A default run uses the pooled young_animals_2017.json instead.",
-    "evidence": "capri_mod/supply/supply_module.py:145-157; capri_mod/settings/defaults.toml:113-115",
-    "checked": "2026-10-29"
-   }
-  ]
- }
+ "other_notes": {}
 }

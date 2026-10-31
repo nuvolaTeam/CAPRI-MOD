@@ -20,9 +20,13 @@ build) are scaled with CAPRI's 2030 activity levels (capri_mann_days_2030.csv)
 (REGISTERED). Base value per head = CAPRI unit value (UVAG) of the young animal, national.
 
     python tools/build/build_young_animals.py [--dump-dir DIR]
+
+Writes capri_data/2017/supply/young_animals_2017.csv and young_animals_by_sex_2017.csv (region, category,
+base_net_export, value_eur_head), each with <name>_coef.csv (region, category, side, activity, coefficient),
+capri_mod/data/nested_tables.py (JSON files until 31 October 2026).
 """
 from __future__ import annotations
-import argparse, glob, json, re, sys
+import argparse, glob, re, sys
 from collections import defaultdict
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
@@ -36,14 +40,16 @@ def _read_csv(*a, **k):
     return pd.read_csv(*a, **k)
 
 _ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(_ROOT))
+from capri_mod.data.nested_tables import read_young_animals, write_young_animals  # noqa: E402
 MAP = {"DCOW": "DCOW", "SCOW": "BCOW", "BULF": "BULL", "HEIF": "HFRS", "HEIR": "HFRS",
        "CAMF": "CALV", "CAFF": "CALV", "CAMR": "CALV", "CAFR": "CALV",
        "SOWS": "PIGS", "PIGF": "PIGF", "SHGM": "SHGM", "SHGF": "SHGF"}
 #: two groupings, two files:
-#: - BAL_BY_SEX (young_animals_by_sex_2017.json), CAPRI's balances (INPANI_ per young animal): male and female calves
+#: - BAL_BY_SEX (young_animals_by_sex_2017.csv), CAPRI's balances (INPANI_ per young animal): male and female calves
 #:   (YCAM / ICAM, YCAF / ICAF), young bulls and young heifers (YBUL / IBUL, YHEI / IHEI); read with the model's cattle
 #:   member splits (RegionalSupplyModel.use_cattle_member_splits);
-#: - BAL_POOLED (young_animals_2017.json, the model's default): calves and young cattle pooled across the sexes (the
+#: - BAL_POOLED (young_animals_2017.csv, the model's default): calves and young cattle pooled across the sexes (the
 #:   per-sex markets did not converge yet, KNOWN_ISSUES K65)
 BAL_BY_SEX = {"calves_m": ({"YCAM"}, {"ICAM"}, ("YCAM",)),
        "calves_f": ({"YCAF"}, {"ICAF"}, ("YCAF",)),
@@ -61,7 +67,7 @@ BAL_POOLED = {"calves": ({"YCAM", "YCAF"}, {"ICAM", "ICAF"}, ("YCAM", "YCAF")),
               "young": ({"YBUL", "YHEI"}, {"IBUL", "IHEI"}, ("YBUL", "YHEI")),
               **{k: v for k, v in BAL_BY_SEX.items() if k not in ("calves_m", "calves_f", "young_m", "young_f")}}
 BAL = BAL_POOLED
-VARIANTS = (("young_animals_2017.json", BAL_POOLED), ("young_animals_by_sex_2017.json", BAL_BY_SEX))
+VARIANTS = (("young_animals_2017.csv", BAL_POOLED), ("young_animals_by_sex_2017.csv", BAL_BY_SEX))
 
 
 def main() -> None:
@@ -74,7 +80,7 @@ def main() -> None:
 def build(dest_name: str) -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--dump-dir", type=Path, default=SOURCES / "capreg")
-    ap.add_argument("--old-json", default=None, help="earlier build (per CAPRI head) for Spain")
+    ap.add_argument("--old", default=None, help="earlier build (per CAPRI head) for Spain: its young_animals_2017.csv")
     args = ap.parse_args()
     import pandas as pd
     herds = _read_csv(_ROOT / "capri_data" / "2017" / "supply" / "animal_numbers.csv", index_col=0)
@@ -128,7 +134,7 @@ def build(dest_name: str) -> None:
 
     # Spain (no res_17 dump): earlier per-CAPRI-head coefficients x CAPRI 2030 levels / model heads
     old_es = {}
-    _old = Path(args.old_json) if args.old_json else None
+    _old = Path(args.old) if args.old else None
     if _old and _old.exists():
         md = _read_csv(_ROOT / "capri_data" / "2017" / "abatement" / "ammonia" / "capri_mann_days_2030.csv")
         L30 = defaultdict(float)
@@ -137,7 +143,7 @@ def build(dest_name: str) -> None:
         for r in md[md["item"] == "LEVL"].itertuples():
             if r.activity in SUB:
                 L30[(r.region, SUB[r.activity])] += float(r.value)     # the model's regions are CAPRI's units
-        for reg, rec in json.loads(_old.read_text())["regions"].items():
+        for reg, rec in read_young_animals(_old).items():
             if not reg.startswith("ES") or reg not in herds.index:
                 continue
             out = {}
@@ -184,10 +190,11 @@ def build(dest_name: str) -> None:
         for b, x in r.items():
             if not x["value_eur_head"]:
                 x["value_eur_head"] = med[b]
+    # source: CAPRI 2017 regional results (res_17*): YCAM/YCAF/YBUL/YHEI/YCOW/YPIG outputs and ICAM/ICAF/IBUL/IHEI/ICOW/
+    # IPIG inputs per 1000 head, LEVL weights; national UVAG; supply_model.gms INPANI_. Units: head per head; 1000 head
+    # (base_net_export); EUR per head (value)
     dest = _ROOT / "capri_data" / "2017" / "supply" / dest_name
-    dest.write_text(json.dumps({"_source": "CAPRI 2017 regional results (res_17*): YCAM/YCAF/YBUL/YHEI/YCOW/YPIG outputs and ICAM/ICAF/IBUL/IHEI/ICOW/IPIG "
-                                "inputs per 1000 head, LEVL weights; national UVAG; supply_model.gms INPANI_",
-                                "_units": "head per head; 1000 head (base_net_export); EUR per head (value)", "regions": res}, indent=1))
+    write_young_animals(dest, res)
     print(f"wrote {dest}: {len(res)} regions ({nat_used} from national rows)")
 
 

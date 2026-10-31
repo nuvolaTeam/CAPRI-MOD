@@ -83,6 +83,9 @@ CONVERTED_ORIGIN = {
 #: files without a builder whose origin was established by a check (02_provenance_notes.sql gives the evidence)
 NO_BUILDER_ORIGIN = {
     "capri_data/2017/environment/climate_zones.csv": "CAPRI",
+    # CAPRI's NUTS version correspondence (build_general_set_structure.gms) with the pairs added and removed by hand in
+    # October 2026 (the table's comment, 26_shared.sql); a JSON file until 31 October 2026
+    "capri_data/shared/nuts_version_correspondence.csv": "CAPRI",
     "capri_data/sources/capri_dat/sugar/p_SQuotas.csv": "CAPRI",
     "capri_data/sources/capri_dat/sugar/p_PPSQRenounce.csv": "CAPRI",
     "capri_data/sources/capri_dat/sugar/p_PPSQCBuyBack.csv": "CAPRI",

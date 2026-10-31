@@ -13,14 +13,14 @@ DOMM domestic use, IMPT, EXPT) for every CAPRI behavioural region, maps them to 
 ROW; EU member states, the UK and other European countries outside EU27 are skipped / fold into ROW as
 there), and converts tonnes to kt.
 
-Output: capri_data/2017/market/dairy_world_baseline.json  {"REGION|COMM": {production, consumption,
-imports, exports}} for BUTR, SKIM, CHES, WHEY, FRMI, CREM, COCM, WMIO, CASE (model codes); EU27 is listed for reference only (the
+Output: capri_data/2017/market/dairy_world_baseline.csv (region, commodity, item, value; item production,
+consumption, imports or exports; capri_mod/data/nested_tables.py, a JSON file until 31 October 2026) for BUTR, SKIM, CHES, WHEY, FRMI, CREM, COCM, WMIO, CASE (model codes); EU27 is listed for reference only (the
 market takes the EU from the dairy block).
 
     python tools/build/build_dairy_world_markets.py [--src capri_sources/exports/fao_agg_17_datamarket.txt]
 """
 from __future__ import annotations
-import argparse, json, re, sys
+import argparse, re, sys
 from collections import defaultdict
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
@@ -66,10 +66,11 @@ def main():
         out[f"{tr}|{COMM[prod]}"][ITEMS[item]] += float(t) / 1000.0
         seen.add(reg)
     res = {k: dict(d) for k, d in sorted(out.items())}
-    dest = ROOT / "capri_data" / "2017" / "market" / "dairy_world_baseline.json"
-    json.dump({"_source": "CAPRI FAO_agg p_dataMarket (fao_agg_17_datamarket), year BAS, items MAPR DOMM IMPT EXPT; "
-                          "tools/build/build_dairy_world_markets.py", "_unit": "1000 t", "balances": res},
-              open(dest, "w"), indent=1)
+    # source: CAPRI FAO_agg p_dataMarket (fao_agg_17_datamarket), year BAS, items MAPR DOMM IMPT EXPT; unit 1000 t
+    sys.path.insert(0, str(ROOT))
+    from capri_mod.data.nested_tables import write_balances
+    dest = ROOT / "capri_data" / "2017" / "market" / "dairy_world_baseline.csv"
+    write_balances(dest, res)
     for c in COMM.values():
         w = sum(v.get("production", 0.0) for k, v in res.items() if k.endswith("|" + c))
         eu = res.get(f"EU27|{c}", {}).get("production", 0.0)

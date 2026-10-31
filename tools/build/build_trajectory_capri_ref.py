@@ -1,22 +1,24 @@
-"""CAPRI's own 2030 reference as the projection's trajectory (Sprint 9p).
+"""CAPRI's own 2030 reference as the projection's trajectory (Sprint 9p): the scenario folder
+capri_data/scenarios/capri_ref_2030 (settings.toml, growth.csv, regional.csv; capri_mod/projection/scenario_io.py;
+capri_data/trajectories/capri_ref_2030.json until 31 October 2026).
 
 CAPRI simulates every scenario from its calibrated baseline: CAPMOD's reference run for the simulation year (star 3.0:
 `res_2_1730greendeal_refpol_endotech_all_ini`, the 2030 Green Deal reference with endogenous technologies at their
 calibrated shares). The model projected its 2030 baseline with CAPRI's trend projection (CAPTRD `series`,
-captrd_2030.json), which is the INPUT to that calibration, not its result: against the reference the projected data
+capri_data/scenarios/captrd_2030), which is the INPUT to that calibration, not its result: against the reference the projected data
 had cereals 3-4% high, other fruit +21%, pulses +9% (tools/check/compare_baseline_capri.py), before the model solved anything.
 
 This writes the same trajectory structure from the reference itself: per CAPRI region and activity the factor
     LEVL or YILD in the 2030 reference / LEVL or YILD in CAPRI's 2017 results (res_17<MS>.txt)
-for the `herds` block (activity levels, crops included, as in captrd_2030.json) and the `yields` block; regions keyed
+for the `herds` block (activity levels, crops included, as in captrd_2030) and the `yields` block; regions keyed
 by the first four characters of CAPRI's code (national entries XX00), as CAPTRD's; EU growth per activity = median of
 the regional factors (fallback); factors kept in [0.2, 5]; regional factors only where the 2017 value is >= 1.0 (the
-rules of captrd_2030.json). Model activity and region keys are added by tools/build/build_trajectory_model_keys.py.
+rules of captrd_2030). Model activity and region keys are added by tools/build/build_trajectory_model_keys.py.
 
     python tools/build/build_trajectory_capri_ref.py [--ref CSV] [--dump-dir DIR]
 """
 from __future__ import annotations
-import argparse, json, re, statistics, subprocess, sys
+import argparse, re, statistics, subprocess, sys
 from collections import defaultdict
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
@@ -31,7 +33,7 @@ def _read_csv(*a, **k):
     return pd.read_csv(*a, **k)
 
 ROOT = Path(__file__).resolve().parents[2]
-OUT = ROOT / "capri_data" / "trajectories" / "capri_ref_2030.json"
+OUT = ROOT / "capri_data" / "scenarios" / "capri_ref_2030"
 REF = EXPORTS / "res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv"
 KEEP = ROOT / "capri_data" / "sources" / "capri_baseline" / "capri_ref_levl_yild_2030_2017.csv.xz"
 sys.path.insert(0, str(ROOT / "tools" / "lib"))
@@ -158,7 +160,9 @@ def main():
                            "aggregation": "per-activity median of per-region ratios (EU fallback)",
                            "factor_band": list(BAND), "min_cells_per_activity": 3,
                            "regional_detail": "per-region factors where the 2017 level is >= 1.0 (yields > 0)"}}
-    OUT.write_text(json.dumps(out, separators=(",", ":")))
+    sys.path.insert(0, str(ROOT))
+    from capri_mod.projection import scenario_io
+    scenario_io.write(OUT, out)
     print(f"wrote {OUT.relative_to(ROOT)}: {sum(len(r) for r in regional['herds'].values())} level and "
           f"{sum(len(r) for r in regional['yields'].values())} yield factors")
     subprocess.run([sys.executable, str(ROOT / "tools" / "build" / "build_trajectory_model_keys.py"), str(OUT)], check=True)

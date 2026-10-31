@@ -24,6 +24,7 @@ from capri_mod.data.definitions import (
     REGION_TO_COUNTRY, NUTS2_REGIONS, FEED_ITEMS,
 )
 from capri_mod.data import land_market_io as _land_market_io
+from capri_mod.data import nested_tables as _nested_tables
 from capri_mod.tableio import read_input
 
 
@@ -46,20 +47,23 @@ _FILE_CATEGORY = {
     "base_areas.csv": "supply", "yields.csv": "supply", "animal_numbers.csv": "supply",
     "cap_premium_activity.csv": "supply", "producer_prices_regional.csv": "supply",
     "livestock_output_coef.csv": "supply", "nutrients_regional.csv": "supply",
-    "livestock_revenue_coef.csv": "supply", "livestock_product_value_coef.csv": "supply", "livestock_product_value_by_market_coef.csv": "supply", "livestock_output_by_product_coef.csv": "supply", "grass_intensity.csv": "supply", "dairy_intensity.csv": "supply", "cattle_intensity.csv": "supply", "genetics_effects.csv": "abatement/mitigation", "lownfeed_effects.csv": "abatement/mitigation", "supplement_effects.csv": "abatement/mitigation", "feed_byproducts.csv": "market", "sugar_processing.csv": "market", "processing_yields.csv": "market", "bilateral_flows_2017.csv": "market", "bilateral_flows_2030.csv": "market", "bilateral_regions_2017.csv": "market", "bilateral_regions_2030.csv": "market", "bilateral_trq_2017.csv": "market", "bilateral_trq_2030.csv": "market", "armington_rho.csv": "market", "world_market_baseline.json": "market", "histosol.csv": "environment", "plant_protection_cost.csv": "supply", "cover_crops.csv": "supply", "winter_cover_share.csv": "supply", "livestock_cost_coef.csv": "supply", "livestock_output_value_coef.csv": "supply", "livestock_premium_coef.csv": "supply", "capri_level_ratio.csv": "supply", "livestock_units.csv": "supply", "land_rents_2017.csv": "supply", "land_rents_2030.csv": "supply", "labour_coef.csv": "supply", "set_aside_split.csv": "supply",
+    "livestock_revenue_coef.csv": "supply", "livestock_product_value_coef.csv": "supply", "livestock_product_value_by_market_coef.csv": "supply", "livestock_output_by_product_coef.csv": "supply", "grass_intensity.csv": "supply", "dairy_intensity.csv": "supply", "cattle_intensity.csv": "supply", "genetics_effects.csv": "abatement/mitigation", "lownfeed_effects.csv": "abatement/mitigation", "supplement_effects.csv": "abatement/mitigation", "feed_byproducts.csv": "market", "sugar_processing.csv": "market", "processing_yields.csv": "market", "bilateral_flows_2017.csv": "market", "bilateral_flows_2030.csv": "market", "bilateral_regions_2017.csv": "market", "bilateral_regions_2030.csv": "market", "bilateral_trq_2017.csv": "market", "bilateral_trq_2030.csv": "market", "armington_rho.csv": "market", "world_market_baseline.csv": "market", "world_market_baseline_products.csv": "market", "histosol.csv": "environment", "plant_protection_cost.csv": "supply", "cover_crops.csv": "supply", "winter_cover_share.csv": "supply", "livestock_cost_coef.csv": "supply", "livestock_output_value_coef.csv": "supply", "livestock_premium_coef.csv": "supply", "capri_level_ratio.csv": "supply", "livestock_units.csv": "supply", "land_rents_2017.csv": "supply", "land_rents_2030.csv": "supply", "labour_coef.csv": "supply", "set_aside_split.csv": "supply",
     "livestock_feed_coef.csv": "feed",
     "eu_cake_feed_bas.csv": "market",
     "biofuel_feedstock_2017.csv": "market", "biofuel_use_share_2017.csv": "market", "biofuel_market_2017.csv": "market", "biofuel_feedstock_2030.csv": "market", "biofuel_use_share_2030.csv": "market", "biofuel_market_2030.csv": "market", "crushing_parameters_2017.csv": "market", "crushing_parameters_2030.csv": "market", "feed_bulks_eu.csv": "market", "feed_bulks_eu_share.csv": "market", "dairy_processing.csv": "market",
-    "dairy_hessian.csv": "market", "dairy_eu_balance.csv": "market", "dairy_eu_demand_elas.csv": "market", "dairy_world_processing.csv": "market", "dairy_world_hessian.csv": "market", "dairy_world_demand_elas.csv": "market", "dairy_world_baseline.json": "market",
-    "feed_demand_nonEU.json": "market",
-    "feed_ration_2017.json": "feed",
-    "fodder_balance_2017.json": "feed",
-    "young_animals_2017.json": "supply",   # read by supply_module.young_animal_table
+    "dairy_hessian.csv": "market", "dairy_eu_balance.csv": "market", "dairy_eu_demand_elas.csv": "market", "dairy_world_processing.csv": "market", "dairy_world_hessian.csv": "market", "dairy_world_demand_elas.csv": "market", "dairy_world_baseline.csv": "market",
+    "feed_demand_nonEU.csv": "market", "feed_demand_nonEU_elasticities.csv": "market",
+    "feed_demand_nonEU_capri_regions.csv": "market",
+    "feed_ration_2017.csv": "feed",
+    "fodder_balance_2017.csv": "feed", "fodder_balance_2017_use.csv": "feed",
+    # read by supply_module.young_animal_table (capri_mod/data/nested_tables.py)
+    "young_animals_2017.csv": "supply", "young_animals_2017_coef.csv": "supply",
+    "young_animals_by_sex_2017.csv": "supply", "young_animals_by_sex_2017_coef.csv": "supply",
     "mineral_n_price.csv": "supply",       # located for validation; not loaded yet
-    "manure_pool_costs.json": "environment",
+    "manure_pool_costs.csv": "environment", "manure_pool_centres.csv": "environment",
     "land_market_2017.csv": "supply", "land_market_2030.csv": "supply",
     "land_market_2017_regions.csv": "supply", "land_market_2030_regions.csv": "supply",
-    "nh3_factors_capri.json": "environment",
+    "nh3_factors_capri.csv": "environment", "nh3_factors_capri_regions.csv": "environment",
     "landscape_targets_ms.csv": "policy",
     "cap_ceilings_2030.csv": "policy", "premium_scheme_shares_2030.csv": "policy",
     "capri_baseline_surplus_2030.csv": "policy",
@@ -90,7 +94,6 @@ _FILE_CATEGORY = {
     "cap_payments.csv": "policy", "crop_premium.csv": "supply", "tariffs.csv": "policy",
     "nutrient_coefs_regional.csv": "supply",
     "climate_zones.csv": "environment",
-    # JSON parameter files
 }
 _SHARED_FILES = {"trade_flows.csv": "trade_flows_2017.csv"}
 
@@ -612,8 +615,7 @@ def load_all_data(data_dir: Optional[Path] = None, validate: bool = False,
         # capri-mod's own terms with CAPRI's recipe (tools/build/build_pmp_recipe.py; SupplyModule.pmp_source "recipe")
         "pmp_recipe": {y: _load_pmp_capri_2030(Path(data_dir) / "2017" / "supply", f"pmp_recipe_{y}") for y in (2017, 2030)},
         # Regional fodder balances (docs/FODDER_BALANCE.md)
-        "fodder_balance": (lambda p: __import__("json").load(open(p))["regions"] if p.exists() else None)(
-            Path(data_dir) / "2017" / "feed" / "fodder_balance_2017.json"),
+        "fodder_balance": _nested_tables.read_fodder_balances(Path(data_dir) / "2017" / "feed" / "fodder_balance_2017.csv"),
         # Feed per head (t): CAPRI 2017 regional FCER/FPRO/FENE totals / herds; required: the animals without a
         # ration in the supply models cost their feed with it (the national fallback table was removed, K99)
         "livestock_feed_coef": _load_required_csv(

@@ -142,7 +142,7 @@
     <text x="1324" y="590" class="t">• region_capri_map, NUTS</text>
     <text x="1336" y="608" class="t">correspondences</text>
     <text x="1324" y="626" class="t">• model_parameters.csv</text>
-    <text x="1324" y="644" class="t">• capri_ref_2030.json,</text>
+    <text x="1324" y="644" class="t">• scenarios/capri_ref_2030,</text>
     <text x="1336" y="662" class="t">captrd, null; 2030 prices</text>
     <text x="1324" y="680" class="t">• validation/: CAPRI refs</text>
   </g>

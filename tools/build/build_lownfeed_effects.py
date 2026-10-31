@@ -30,7 +30,7 @@ at ghgTechLowNFeed = 1, star 3.0's value - the cost is not linear in the paramet
                                            [--dump-dir capri_sources/capreg]
 """
 from __future__ import annotations
-import argparse, glob, importlib.util, io, json, re, zipfile
+import argparse, glob, importlib.util, io, re, zipfile
 from collections import defaultdict
 import sys
 from pathlib import Path
@@ -97,7 +97,9 @@ def main():
     cs = _read_csv(ROOT / "capri_data" / "sources" / "ghgtech" / "capri_costsavings_2030.csv")
     cs = cs[cs.technology.str.lower() == "lownfeed"]
     MX = {(r.region, r.activity): float(r.level) for r in cs[cs.run == "max"].itertuples() if pd.notna(r.level)}
-    rations = json.load(open(ROOT / "capri_data" / "2017" / "feed" / "feed_ration_2017.json"))["regions"]
+    sys.path.insert(0, str(ROOT))
+    from capri_mod.data.nested_tables import read_feed_rations
+    rations = read_feed_rations(ROOT / "capri_data" / "2017" / "feed" / "feed_ration_2017.csv")
     eu = {r for r in {k[0] for k in C} if r[:2] not in ("AL", "BA", "CS", "KO", "MK", "MO", "TU", "UK", "NO")}
 
     def get(d, keys):

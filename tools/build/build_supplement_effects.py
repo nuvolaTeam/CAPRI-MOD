@@ -42,7 +42,7 @@ CH4 per head adopting, and shr_of_dm.
     python tools/build/build_supplement_effects.py
 """
 from __future__ import annotations
-import importlib.util, json
+import importlib.util
 from collections import defaultdict
 import sys
 from pathlib import Path
@@ -159,7 +159,9 @@ def main():
     nut = _read_csv(M / "p_nutCont.csv")
     ooil = {r.nutrient: float(r.value) for r in nut[nut.feed == "OOIL"].itertuples()}
     tot_fat = RAPE_EE / 100.0 * RAPE_DM / 100.0
-    rations = json.load(open(ROOT / "capri_data" / "2017" / "feed" / "feed_ration_2017.json"))["regions"]
+    sys.path.insert(0, str(ROOT))
+    from capri_mod.data.nested_tables import read_feed_rations
+    rations = read_feed_rations(ROOT / "capri_data" / "2017" / "feed" / "feed_ration_2017.csv")
 
     rows, nskip = [], 0
     for reg in mr.model_regions():

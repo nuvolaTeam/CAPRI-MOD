@@ -448,7 +448,7 @@ input_manStor.csv), all GAMS text format. I found no Norway mirror files.
   * **Caution:** the EU-level NH3APP NITF (5.89) and NH3GRA NITF (1.54) are implausibly small compared with the
     per-activity rows. Do not use those two aggregate rows without checking them.
 * Derived ratio files from CAPRI 2030 results, `capri_data/2017/environment/`:
-  * nh3_factors_capri.json (GNH3/MANN and NH3MIN/MINFER)
+  * nh3_factors_capri.csv (GNH3/MANN and NH3MIN/MINFER)
   * manure_housing_losses_2030.csv
   * manure_n2o_factors.csv (from res_17)
   * capri_gnb_components_2030.csv
@@ -472,7 +472,7 @@ input_manStor.csv), all GAMS text format. I found no Norway mirror files.
 * **NETF gaseous loss and runoff**, refdefaulta DE110000:
   * NH3MIN/MINFER = 0.03632973. This equals 0.157998·0.15 + 0.842002·0.015 (NN_CorrFertFactDeviation 2020). FracUseFert.csv
     would give 0.036330.
-  * FR10 in nh3_factors_capri.json = 0.047733154, matching NN (FracUseFert would give 0.046444).
+  * FR10 in nh3_factors_capri.csv = 0.047733154, matching NN (FracUseFert would give 0.046444).
   * GASMIN/MINFER = 0.05000384 = NH3 + NOx + 0.011111·(1−NH3−NOx).
   * RUNMIN/MINFER = (1−0.05000384)·LFsurface(DE110000)/100 = 0.03466217.
 * **Leaching**, refdefaulta: LEACHI/SURSOI = 0.114217 (DE110000), 0.087275 (AT110000) and 0.132151 (FR100000). These are

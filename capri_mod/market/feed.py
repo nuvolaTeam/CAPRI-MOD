@@ -32,7 +32,7 @@ class FeedMixin(MarketStateMixin):
     #: with supply models each behavioural region's feed is its normalised-quadratic feed function of the Arm1 prices and
     #: its feed energy price FEDE, which clears its feed energy balance against its animal output (the market supply
     #: functions, whose FEDE column moves with it). false: one constant-elasticity function per trade region and
-    #: product (p_ElasFeed, feed_demand_nonEU.json) and FEDE held (until 29 October 2026)
+    #: product (p_ElasFeed, feed_demand_nonEU*.csv) and FEDE held (until 29 October 2026)
     noneu_feed_nq = setting("market.noneu_feed_nq")
     #: arm/arm_sets.gms XX_ANIM_FEED: the animal products whose output needs feed energy (CAPRI's codes)
     ANIM_FEED = ("BEEF", "PORK", "SGMT", "POUM", "EGGS", "MILK")
@@ -412,8 +412,10 @@ class FeedMixin(MarketStateMixin):
         if cached is not None:
             return cached
         out = {}
+        from capri_mod.data.nested_tables import read_feed_demand
+        params = read_feed_demand(self._inp().need("feed_demand_nonEU.csv"))   # a missing file: FileNotFoundError
         try:
-            for key, v in self._inp().json("feed_demand_nonEU.json")["parameters"].items():
+            for key, v in params.items():
                 r, c = key.split("|")
                 if r in self.regions and r not in self.EU and r != "EU27" and c in self.commodities:
                     out[(r, c)] = {"feed_share": float(v["feed_share"]),

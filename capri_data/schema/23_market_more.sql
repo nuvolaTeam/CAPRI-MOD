@@ -740,3 +740,67 @@ CREATE TABLE mkt_welfare_base_2030 (
 COMMENT ON TABLE mkt_welfare_base_2030 IS 'CAPRI''s welfare report levels at the calibration point (reports/welfare.gms): the base terms CAPRI adds to each (tools/build/build_welfare_base.py)';
 INSERT INTO value_units VALUES
   ('mkt_welfare_base_2030', 'value', NULL, 'open', 'welfare_base_2030.value: unit to be established');
+
+-- file: capri_data/2017/market/dairy_world_baseline.csv
+CREATE TABLE mkt_dairy_world_baseline (
+    region VARCHAR NOT NULL,
+    commodity VARCHAR NOT NULL,
+    "item" VARCHAR NOT NULL CHECK ("item" IN ('production', 'consumption', 'imports', 'exports')),
+    "value" DOUBLE NOT NULL,
+    PRIMARY KEY (region, commodity, "item")
+);
+COMMENT ON TABLE mkt_dairy_world_baseline IS 'CAPRI''s base-period balances of the dairy products per model trade region (FAO_agg p_dataMarket, fao_agg_17_datamarket, year BAS: MAPR production, DOMM consumption, IMPT, EXPT), EU27 for reference; tools/build/build_dairy_world_markets.py; dairy_world_baseline.json until 31 October 2026 (capri_mod/data/nested_tables.py)';
+INSERT INTO value_units VALUES
+  ('mkt_dairy_world_baseline', 'value', 'U_1000t', 'builder', 'dairy_world_baseline.value: CAPRI''s tonnes / 1000 (the builder)');
+
+-- file: capri_data/2017/market/world_market_baseline.csv
+CREATE TABLE mkt_world_market_baseline (
+    region VARCHAR NOT NULL,
+    commodity VARCHAR NOT NULL,
+    "item" VARCHAR NOT NULL CHECK ("item" IN ('production', 'consumption', 'imports', 'exports')),
+    "value" DOUBLE NOT NULL,
+    PRIMARY KEY (region, commodity, "item")
+);
+COMMENT ON TABLE mkt_world_market_baseline IS 'CAPRI''s base-period balances of the market products per model trade region (FAO_agg p_dataMarket, fao_agg_17_datamarket, year BAS: MAPR production, DOMM consumption, IMPT, EXPT; EU27 the sum of the member states); tools/build/build_world_market_baseline.py; world_market_baseline.json until 31 October 2026 (capri_mod/data/nested_tables.py)';
+INSERT INTO value_units VALUES
+  ('mkt_world_market_baseline', 'value', 'U_1000t', 'builder', 'world_market_baseline.value: CAPRI''s tonnes / 1000 (the builder)');
+
+-- file: capri_data/2017/market/world_market_baseline_products.csv
+CREATE TABLE mkt_world_market_baseline_products (
+    product VARCHAR NOT NULL,
+    capri_product VARCHAR NOT NULL REFERENCES capri_xx (code),
+    PRIMARY KEY (product, capri_product)
+);
+COMMENT ON TABLE mkt_world_market_baseline_products IS 'the model products of world_market_baseline.csv and the CAPRI products whose FAO_agg balances each sums (tools/build/build_world_market_baseline.py MODEL; the "_products" of world_market_baseline.json until 31 October 2026)';
+
+-- file: capri_data/2017/market/feed_demand_nonEU.csv
+CREATE TABLE mkt_feed_demand_noneu (
+    region VARCHAR NOT NULL,
+    commodity VARCHAR NOT NULL,
+    feed_share DOUBLE NOT NULL CHECK (feed_share > 0 AND feed_share <= 1),
+    PRIMARY KEY (region, commodity)
+);
+COMMENT ON TABLE mkt_feed_demand_noneu IS 'non-EU feed demand per model trade region and product at CAPRI''s 2030 calibration point: feed share = sum FEED / sum (HCON + FEED + PROC + BIOF) over the trade region''s CAPRI regions (data_market_1730defaulta CAL); tools/build/build_feed_demand_nonEU.py; feed_demand_nonEU.json until 31 October 2026 (capri_mod/data/nested_tables.py)';
+INSERT INTO value_units VALUES
+  ('mkt_feed_demand_noneu', 'feed_share', NULL, 'open', 'feed_demand_nonEU.feed_share: a share (the builder)');
+
+-- file: capri_data/2017/market/feed_demand_nonEU_elasticities.csv
+CREATE TABLE mkt_feed_demand_noneu_elasticities (
+    region VARCHAR NOT NULL,
+    commodity VARCHAR NOT NULL,
+    price_of VARCHAR NOT NULL,
+    elasticity DOUBLE NOT NULL,
+    PRIMARY KEY (region, commodity, price_of)
+);
+COMMENT ON TABLE mkt_feed_demand_noneu_elasticities IS 'CAPRI''s feed demand elasticities p_ElasFeed(RMS, feed, price-of, ''CAL'') (elas_2_1730defaulta), feed-weighted over the CAPRI regions of a trade region (tools/build/build_feed_demand_nonEU.py)';
+INSERT INTO value_units VALUES
+  ('mkt_feed_demand_noneu_elasticities', 'elasticity', NULL, 'open', 'feed_demand_nonEU_elasticities.elasticity: an elasticity (the builder)');
+
+-- file: capri_data/2017/market/feed_demand_nonEU_capri_regions.csv
+CREATE TABLE mkt_feed_demand_noneu_capri_regions (
+    region VARCHAR NOT NULL,
+    commodity VARCHAR NOT NULL,
+    capri_region VARCHAR NOT NULL,
+    PRIMARY KEY (region, commodity, capri_region)
+);
+COMMENT ON TABLE mkt_feed_demand_noneu_capri_regions IS 'the CAPRI regions whose feed functions make a trade region''s feed demand of a product (tools/build/build_feed_demand_nonEU.py)';

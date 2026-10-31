@@ -162,7 +162,7 @@ class ProjectionModule:
             L = data["land"]
             for col in L.columns:
                 if traj.regional.get("land"):
-                    # per region where the trajectory has it (CAPRI's 2030 reference: capri_ref_2030.json)
+                    # per region where the trajectory has it (CAPRI's 2030 reference: capri_data/scenarios/capri_ref_2030)
                     for reg in L.index:
                         f = traj.factor("land", col, year, region=reg)
                         if f != 1.0:

@@ -116,7 +116,7 @@ def main():
     fac = premium_factors(list(m.data["areas"].index))
     scen = PolicyScenario(name="WITHOUT_VCS", description="CAPRI cap_after_2014 without voluntary coupled support",
                           premium_factor_regional=fac)
-    traj = BaselineTrajectory.from_file(str(ROOT / "capri_data" / "trajectories" / "captrd_2030.json"))
+    traj = BaselineTrajectory.from_file(str(ROOT / "capri_data" / "scenarios" / "captrd_2030"))
     pmod = ProjectionModule(m, traj, capri_prices_dir=str(ROOT / "capri_data" / "trajectories"))
     res = pmod.run(policy_scenario=scen, years=[2030])
     b, s = res.baseline[2030], res.scenario[2030]

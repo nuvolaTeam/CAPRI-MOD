@@ -61,7 +61,7 @@ The supply models buy feed as bulks; the market splits each member state's bulk 
   elasticity, CAPRI's p_elasSupp of its CAPRI regions (`supply_elas_region.csv`; until 23 October 2026 one value per
   product from `armington_params.csv`, removed on 29 October 2026, KNOWN_ISSUES K72). Non-EU feed demand (the trade
   regions without CAPRI's FeedNQ_ regions, `market.noneu_feed_nq` off, and the dairy products fed): CAPRI's
-  p_ElasFeed (`feed_demand_nonEU.json`; the generic response of `armington_params.csv`'s eta column was removed on 24
+  p_ElasFeed (`feed_demand_nonEU.csv`; the generic response of `armington_params.csv`'s eta column was removed on 24
   October 2026).
 - EU output, `MaprFeed_` (`MarketModule.eu_feed_byproduct_output`, `feed_byproducts.csv`): prod0 × Σ weight × the
   parent's current food response (human consumption and processing) or sugar's biofuel feedstock use relative to the

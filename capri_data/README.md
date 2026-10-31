@@ -19,8 +19,9 @@ capri_data/
 │                          mitigation/ (feed, genetics, soil options), fertiliser options
 ├── shared/                region maps (region_capri_map.csv, NUTS correspondences), EU trade blocks,
 │                          model_parameters.csv, trade_flows_2017.csv
-├── trajectories/          capri_ref_2030.json (default), captrd_2030.json, null.json, CAPRI's 2030
-│                          prices, premiums, rations and fodder
+├── scenarios/             one folder per scenario: settings.toml (its settings) and its factors as CSV
+│                          (capri_ref_2030, the default; captrd_2030; null, settings only)
+├── trajectories/          CAPRI's 2030 prices, premiums, rations and fodder
 ├── validation/            CAPRI reference results used by the tests and comparison tools
 ├── sources/               the extracts the builders read (CAPRI result rows, MITERRA tables, literature review);
 │                          not read by the model

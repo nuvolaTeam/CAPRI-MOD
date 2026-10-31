@@ -26,14 +26,15 @@ bases are CAPRI's market results (bilateral flows; the EU's production MaprFeed_
 Not covered (no CAPRI world balance under a matching product): DWHE, PARI (CAPRI's world market is milled RICE,
 the model's is paddy), OOIL, OLIV (CAPRI trades olive oil OLIO). These keep the market's previous base.
 
-Output: capri_data/2017/market/world_market_baseline.json {"balances": {"REGION|COMM": {production,
-consumption, imports, exports}}} in 1000 t; EU27 = sum of member states (imports/exports include intra-EU trade,
+Output: capri_data/2017/market/world_market_baseline.csv (region, commodity, item, value; item production,
+consumption, imports or exports) in 1000 t, and world_market_baseline_products.csv (product, capri_product: MODEL)
+(capri_mod/data/nested_tables.py; a JSON file until 31 October 2026); EU27 = sum of member states (imports/exports include intra-EU trade,
 so only production and consumption are used for the EU).
 
     python tools/build/build_world_market_baseline.py [--src capri_sources/exports/fao_agg_17_datamarket.txt]
 """
 from __future__ import annotations
-import argparse, json, re, sys
+import argparse, re, sys
 from collections import defaultdict
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
@@ -82,11 +83,11 @@ def main():
         out[f"{tr}|{CAPRI[prod]}"][ITEMS[item]] += float(t) / 1000.0
         seen.add(reg)
     res = {k: dict(d) for k, d in sorted(out.items())}
-    dest = ROOT / "capri_data" / "2017" / "market" / "world_market_baseline.json"
-    json.dump({"_source": "CAPRI FAO_agg p_dataMarket (fao_agg_17_datamarket), year BAS, items MAPR DOMM IMPT EXPT; "
-                          "tools/build/build_world_market_baseline.py",
-               "_unit": "1000 t", "_products": {m: list(cs) for m, cs in MODEL.items()}, "balances": res},
-              open(dest, "w"), indent=1)
+    # source: CAPRI FAO_agg p_dataMarket (fao_agg_17_datamarket), year BAS, items MAPR DOMM IMPT EXPT; unit 1000 t
+    sys.path.insert(0, str(ROOT))
+    from capri_mod.data.nested_tables import write_balances
+    dest = ROOT / "capri_data" / "2017" / "market" / "world_market_baseline.csv"
+    write_balances(dest, res, {m: list(cs) for m, cs in MODEL.items()})
     for m in MODEL:
         w = sum(v.get("production", 0.0) for k, v in res.items() if k.endswith("|" + m))
         eu = res.get(f"EU27|{m}", {}).get("production", 0.0)

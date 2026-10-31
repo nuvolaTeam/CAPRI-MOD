@@ -30,8 +30,8 @@ class CalibrationMixin(MarketStateMixin):
         - CAPRI's bilateral market of the market year (bilateral_flows/regions_<year>[_eu2].csv, the data of the
           bilateral market itself): production = the region's market production (PROD), use = domestic sales +
           imports;
-        - products without bilateral trade (raw milk): CAPRI's FAO_agg world balance (world_market_baseline.json;
-          dairy_world_baseline.json for the dairy products);
+        - products without bilateral trade (raw milk): CAPRI's FAO_agg world balance (world_market_baseline.csv;
+          dairy_world_baseline.csv for the dairy products; capri_mod/data/nested_tables.py);
         - none of either: zero.
 
         The EU's rows are then set from the supply models (_align_eu_base_balance) and the bilateral market
@@ -70,10 +70,10 @@ class CalibrationMixin(MarketStateMixin):
         # products without bilateral trade: CAPRI's FAO_agg balances (one EU region: EU27; blocks: split by CAPRI's
         # member-state production and use)
         bal = {}
-        for fn in ("world_market_baseline.json", "dairy_world_baseline.json"):
-            if inp.exists(fn):
-                for k, v in inp.json(fn)["balances"].items():
-                    bal.setdefault(k, v)
+        from capri_mod.data.nested_tables import read_balances
+        for fn in ("world_market_baseline.csv", "dairy_world_baseline.csv"):      # required (a missing file stops the run)
+            for k, v in read_balances(inp.need(fn)).items():
+                bal.setdefault(k, v)
         self.par.capri_world_balance = {k: v for k, v in bal.items()}
         for c in comms:
             if c in bil:

@@ -441,3 +441,46 @@ CREATE TABLE env_livestock_n_export_coef (
 );
 COMMENT ON TABLE env_livestock_n_export_coef IS 'CAPRI''s N exported in animal products CRPR_EXPT per model head (fert/calc_nexport.gms; tools/build/build_livestock_n_export_coef.py)';
 INSERT INTO value_units SELECT 'env_livestock_n_export_coef', code, 'U_kgperhd', 'builder', 'kg N per head' FROM model_activities WHERE kind = 'animal';
+
+-- file: capri_data/2017/environment/manure_pool_centres.csv
+CREATE TABLE env_manure_pool_centres (
+    pool VARCHAR PRIMARY KEY,
+    region VARCHAR NOT NULL
+);
+COMMENT ON TABLE env_manure_pool_centres IS 'the centre region of each country''s manure pool, CAPRI''s rManPool_centre (manuremarket/define_manure_market_structure.gms); with manure_pool_costs.csv, from manure_pool_costs.json until 31 October 2026 (tools/build/build_manure_pool_costs.py; capri_mod/data/nested_tables.py)';
+
+-- file: capri_data/2017/environment/manure_pool_costs.csv
+CREATE TABLE env_manure_pool_costs (
+    "from" VARCHAR NOT NULL REFERENCES env_manure_pool_centres (pool),
+    "to" VARCHAR NOT NULL REFERENCES env_manure_pool_centres (pool),
+    km DOUBLE NOT NULL CHECK (km > 0),
+    eur_per_t_n DOUBLE NOT NULL CHECK (eur_per_t_n > 0),
+    PRIMARY KEY ("from", "to")
+);
+COMMENT ON TABLE env_manure_pool_costs IS 'CAPRI''s manure trade cost between two pools (p_mPoolTradeCost: 1 EUR loading + 0.18 EUR/t/km x the distance of the pools'' centres, nuts2_center_distance.gdx supplied by the project lead, per t of pure nutrient); one row per connected pair (tools/build/build_manure_pool_costs.py; manure_pool_costs.json until 31 October 2026)';
+INSERT INTO value_units VALUES
+  ('env_manure_pool_costs', 'km', NULL, 'open', 'manure_pool_costs.km: km between the pools'' centres (the builder; no unit code in the catalogue)'),
+  ('env_manure_pool_costs', 'eur_per_t_n', NULL, 'open', 'manure_pool_costs.eur_per_t_n: EUR per t N (the builder; no unit code in the catalogue)');
+
+-- file: capri_data/2017/environment/nh3_factors_capri.csv
+CREATE TABLE env_nh3_factors_capri (
+    region VARCHAR NOT NULL REFERENCES regional_units (region),
+    animal VARCHAR NOT NULL REFERENCES model_activities (code),
+    manure_share DOUBLE NOT NULL,
+    PRIMARY KEY (region, animal)
+);
+COMMENT ON TABLE env_nh3_factors_capri IS 'CAPRI''s share of each animal''s excreted N lost as NH3-N (GNH3 / MANN, weighted by excreted N; res_2_1730greendeal_refdefaulta dataOut; national rows where regional are missing), per model region and animal (tools/build/build_nh3_factors.py; nh3_factors_capri.json until 31 October 2026; capri_mod/data/nested_tables.py)';
+INSERT INTO value_units VALUES
+  ('env_nh3_factors_capri', 'manure_share', NULL, 'open', 'nh3_factors_capri.manure_share: kg NH3-N per kg N excreted (the builder)');
+
+-- file: capri_data/2017/environment/nh3_factors_capri_regions.csv
+CREATE TABLE env_nh3_factors_capri_regions (
+    region VARCHAR PRIMARY KEY REFERENCES regional_units (region),
+    mineral_share DOUBLE,
+    source VARCHAR NOT NULL CHECK (source IN ('regional', 'national')),
+    "capri_nh3_total_ktN" DOUBLE
+);
+COMMENT ON TABLE env_nh3_factors_capri_regions IS 'per model region: CAPRI''s share of mineral N lost as NH3-N (NH3MIN / MINFER), whether the factors are the region''s or its country''s, and CAPRI''s NH3 total (tools/build/build_nh3_factors.py; with nh3_factors_capri.csv, from nh3_factors_capri.json until 31 October 2026)';
+INSERT INTO value_units VALUES
+  ('env_nh3_factors_capri_regions', 'mineral_share', NULL, 'open', 'nh3_factors_capri_regions.mineral_share: kg NH3-N per kg N applied as mineral fertiliser (the builder)'),
+  ('env_nh3_factors_capri_regions', 'capri_nh3_total_ktN', NULL, 'open', 'nh3_factors_capri_regions.capri_nh3_total_ktN: kt N by its name (the builder: CAPRI''s NH3TOT, NITF)');

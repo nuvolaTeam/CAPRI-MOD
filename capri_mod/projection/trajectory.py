@@ -8,7 +8,9 @@ a range of plausible trajectories.
 
 Schema
 ------
-A trajectory is a JSON document::
+A trajectory is a scenario folder, capri_data/scenarios/<name>/ (capri_mod/projection/scenario_io.py: settings.toml
+with the fields below but the growth, growth.csv and regional.csv with the factors; until 31 October 2026 a JSON file
+in capri_data/trajectories). Read, it is the document::
 
     {
       "name":        "eu_outlook_2024",
@@ -39,7 +41,6 @@ test, and it needs no forecast data at all.
 
 from __future__ import annotations
 
-import json
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Dict, List, Optional
@@ -81,8 +82,13 @@ class BaselineTrajectory:
     # ---------------------------------------------------------------- loading
     @classmethod
     def from_file(cls, path: Path) -> "BaselineTrajectory":
-        data = json.loads(Path(path).read_text())
-        return cls.from_dict(data)
+        """A trajectory from its scenario folder (or the folder's settings.toml)."""
+        from capri_mod.projection import scenario_io
+        p = Path(path)
+        if p.is_file() and p.name != scenario_io.SETTINGS:
+            raise TrajectoryError(f"{p}: a trajectory is a scenario folder (capri_data/scenarios/<name>/, "
+                                  "capri_mod/projection/scenario_io.py), not a file")
+        return cls.from_dict(scenario_io.read(p))
 
     @classmethod
     def from_dict(cls, data: dict) -> "BaselineTrajectory":

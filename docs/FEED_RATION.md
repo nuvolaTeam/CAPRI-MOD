@@ -7,7 +7,7 @@ inside the regional supply models. Rations are always on (the `use_ration` switc
 ## How CAPRI does it
 
 Outside the EU, feed demand is a market function with feed-price elasticities (`p_ElasFeed`); in capri-mod
-`feed_demand_nonEU.json` (`tools/build/build_feed_demand_nonEU.py`, CAPRI's 2030 calibration, K43).
+`feed_demand_nonEU.csv` (`tools/build/build_feed_demand_nonEU.py`, CAPRI's 2030 calibration, K43).
 
 In the EU there is no feed-demand elasticity: the ration is chosen inside each regional supply model
 (`supply/supply_model.gms`). For every region and animal activity the feed input coefficients `v_feedInpCoeff(feed)`
@@ -24,7 +24,7 @@ regional model that act on the requirement rows (`docs/MITIGATION_IN_SUPPLY.md`)
 
 ## Data (CAPRI 2017 regional results, `res_17*`)
 
-Built by `tools/build/build_feed_ration.py` (`capri_data/2017/feed/feed_ration_2017.json`): per region and CAPRI animal
+Built by `tools/build/build_feed_ration.py` (`capri_data/2017/feed/feed_ration_2017.csv`): per region and CAPRI animal
 activity, the base ration per head per year (kg of fresh feed by feed group: grass `FGRA`, fodder maize `FMAI`, other
 fodder `FOFA`, roots `FROO`, straw `FSTR`, cereals `FCER`, protein-rich `FPRO`, energy-rich `FENE`, milk feeds `FMIL`,
 other `FOTH`, ...), the requirements per head per day (energy `ENNE`, crude protein `CRPR`, dry matter `DRMN`/`DRMX`)

@@ -132,13 +132,15 @@ def _spec_fingerprint(spec, **extra) -> str:
 
 def young_animal_table() -> dict:
     """CAPRI's young-animal coefficients per model region (calves, young cattle, cows, piglets, lambs): pooled across the
-    sexes (young_animals_2017.json, the default) or per sex as CAPRI's balances (young_animals_by_sex_2017.json) with
-    the cattle member splits (RegionalSupplyModel.use_cattle_member_splits; tools/build/build_young_animals.py)."""
+    sexes (young_animals_2017.csv, the default) or per sex as CAPRI's balances (young_animals_by_sex_2017.csv) with
+    the cattle member splits (RegionalSupplyModel.use_cattle_member_splits; tools/build/build_young_animals.py;
+    capri_mod/data/nested_tables.py)."""
     by_sex = bool(getattr(RegionalSupplyModel, "use_cattle_member_splits", False))
-    name = "young_animals_by_sex_2017.json" if by_sex else "young_animals_2017.json"
+    name = "young_animals_by_sex_2017.csv" if by_sex else "young_animals_2017.csv"
 
     def load(inp):
-        return inp.json(name, "supply")["regions"]
+        from capri_mod.data.nested_tables import read_young_animals
+        return read_young_animals(inp.path(name, "supply"))
     return _inputs.current().cached(name, load)
 
 
@@ -1189,7 +1191,7 @@ class RegionalSupplyModel(LivestockBlock, FertilisationBlock, AbatementBlock, Po
         # balance; one without it stops the run.)
         if not fodder_rows and any(float(self._base_levels().get(a_, 0.0)) > 1e-8 for a_ in ANIMALS
                                    if a_ in acts_idx and a_ not in FIXED_ACTIVITIES):
-            raise ValueError(f"{self.data.region_id}: herds without CAPRI's fodder balance (fodder_balance_2017.json)")
+            raise ValueError(f"{self.data.region_id}: herds without CAPRI's fodder balance (fodder_balance_2017.csv)")
 
         # Gross nitrogen balance (JRC121368's binding GNB restriction): surplus per
         # ha of farmland <= the tiered target, i.e.
