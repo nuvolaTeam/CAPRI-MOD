@@ -94,6 +94,20 @@ goes gate by gate.
   cover) is small against the value of the N they keep. The next question is whether those cost terms are CAPRI's:
   the poultry options' cost basis was wrong once already (K63, a factor 1000). To check: CAPRI's cost per place of
   these options for DE94 (ammo_tech.gms, its quadratic term) against the model's slope x stock.
+- **CAPRI's structure (ammo_tech.gms, read 31 October 2026):** for the manure-management ammonia options CAPRI sets
+  the unobserved quadratic term to zero (l. 3121, pmpParSqr = 0) and calibrates only the linear term from the
+  first-order condition at the initial shares (l. 3126-3133); the only curvature is the observed cost slope
+  (costParSqr = 2 x v_beta, from its farm-size cost curves, l. 1972-1980), which capri-mod's slope reproduces
+  (tools/build/build_ammonia_tech_model.py). The N kept enters CAPRI's cascade multiplicatively as in capri-mod. So
+  the saddle is very probably CAPRI's own: its base is a first-order point that is not a minimum along the poultry
+  options, and CAPRI stays there because CONOPT starts at the calibrated point; with a shock it moves wherever its
+  path leads. Not yet checked: CAPRI's costParSqr values for DE94 against the model's slope (a GAMS run or CAPRI's
+  p_ghgMiti for the region would show it).
+- **Options:** (a) keep the hold (DEP-15): deterministic; departs from CAPRI only in runs without an N incentive;
+  (b) free the options as CAPRI, accepting that a solver leaves a saddle by its own path (IPOPT left it at the base
+  itself, so the baseline would not be reproduced); (c) beyond CAPRI: a calibrated quadratic term for the options
+  where the base is a saddle, the smallest that makes it a local minimum (CAPRI does calibrate such terms for its
+  other options: pmpParSqr in RedFert, tillage, cover crops), then free them.
 
 ### S6. The other regional NLP departures
 
