@@ -108,6 +108,7 @@ goes gate by gate.
   itself, so the baseline would not be reproduced); (c) beyond CAPRI: a calibrated quadratic term for the options
   where the base is a saddle, the smallest that makes it a local minimum (CAPRI does calibrate such terms for its
   other options: pmpParSqr in RedFert, tillage, cover crops), then free them.
+- **Decision (31 October 2026, the project lead): (a), keep the hold (DEP-15).** S5 closed.
 
 ### S6. The other regional NLP departures
 
