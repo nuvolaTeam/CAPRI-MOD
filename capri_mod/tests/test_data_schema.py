@@ -26,6 +26,16 @@ def _copy(tmp_path):
             if kind == "table":
                 (root / arg).parent.mkdir(parents=True, exist_ok=True)
                 shutil.copy(ROOT / arg, root / arg)
+    # the catalogue's files that are not CSV (05_file_catalogue.sql: JSON files, a compressed CSV, a folder)
+    con = duckdb.connect()
+    con.execute((ROOT / "capri_data" / "schema" / "05_file_catalogue.sql").read_text())
+    for (f,) in con.execute("SELECT file FROM file_catalogue WHERE file NOT LIKE '%.csv'").fetchall():
+        src, dst = ROOT / f, root / f
+        dst.parent.mkdir(parents=True, exist_ok=True)
+        if src.is_dir():
+            shutil.copytree(src, dst, dirs_exist_ok=True)
+        else:
+            shutil.copy(src, dst)
     return root
 
 

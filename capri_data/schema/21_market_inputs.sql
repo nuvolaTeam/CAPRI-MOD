@@ -10,6 +10,11 @@ COMMENT ON TABLE world_prices IS 'world market prices 2017: CAPRI''s FAO_agg p_d
 INSERT INTO value_units VALUES
   ('world_prices', 'price', 'U_EuPerTon', 'capri', 'CAPRI''s PMRK (EUR/t); OLIV per t of olives (builder)');
 
+-- rule: the world beef price is more than five times the wheat price (a units check, from the former MANIFEST.json validator)
+SELECT b.price AS beef, w.price AS wheat
+FROM world_prices b, world_prices w
+WHERE b.commodity = 'BEEF' AND w.commodity = 'SWHE' AND NOT b.price > 5 * w.price;
+
 -- file: capri_data/2017/market/supply_elas_region.csv
 CREATE TABLE supply_elas_region (
     region VARCHAR NOT NULL REFERENCES model_trade_regions (code),

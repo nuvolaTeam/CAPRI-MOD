@@ -19,7 +19,9 @@ For each declared CSV, in an in-memory database, the check lists every violation
   refs      values not in the referenced table (a code no code list knows)
   checks    rows that fail a CHECK expression
 then loads the file into the declared table, so DuckDB enforces the same declarations. A CSV under capri_data
-(archive/ left out) without a declaration is a violation too. The rules can use the temporary table
+(archive/ left out) without a declaration is a violation too, and so are a missing file of the catalogue
+(05_file_catalogue.sql, the files that are not CSV) and a staple crop with an implausible gross margin (margins();
+both from the former MANIFEST.json validator, merged here on 31 October 2026). The rules can use the temporary table
 _declared (file, tbl): the files declared so far and their tables. A rule runs where it stands, in file order: it can use the tables declared before it.
 The CSVs stay the stored data; the database is built for the check and not kept, unless --db names a file to keep
 it in (a copy for querying, rebuilt from the CSVs each time; a table whose file breaks a declaration stays empty).
@@ -204,12 +206,89 @@ def validate(root=ROOT, verbose=True, con=None, declarations_only=False):
     all_csv = sorted(str(p.relative_to(root)) for p in (root / "capri_data").rglob("*.csv") if "archive" not in p.parts)
     found += [(f, "undeclared", "a CSV file under capri_data without a declaration") for f in all_csv
               if f not in set(declared)]
+    found += catalogue_files(con, root)
+    margin_found, margin_note = margins(root)
+    found += margin_found
     if verbose:
+        print(f"input margins: {margin_note}")
         print(f"{len(declared)} files declared of {len(all_csv)} CSV files under capri_data; "
               f"{len(found)} violations")
         for where, k, msg in found:
             print(f"  {where} [{k}] {msg}")
     return found
+
+
+def catalogue_files(con, root):
+    """The catalogue's files that are not CSV (JSON files, compressed CSVs, folders; 05_file_catalogue.sql): each must
+    exist (the CSV files are checked as declarations, rule in 99_rules.sql)."""
+    try:
+        rows = con.execute("SELECT file FROM file_catalogue WHERE file NOT LIKE '%.csv' ORDER BY file").fetchall()
+    except Exception:                                    # no catalogue declared (a partial copy)
+        return []
+    return [(f, "catalogue", "catalogued file missing") for (f,) in rows if not (Path(root) / f).exists()]
+
+
+#: the margin check (from the former MANIFEST.json validator, capri_mod/data/validate_data.py until 31 October 2026):
+#: fodder and other non-marketed activities are left out; a staple crop whose gross margin with its CAP payments falls
+#: below ARTIFACT_LOSS EUR/ha is a violation (a data error, as the sugar-price bug once was); specialty crops are
+#: reported below their looser threshold, not counted as violations
+NON_MARKET = {"GRAS", "MAIF", "OFOD", "SETA"}
+STAPLES = {"SWHE", "DWHE", "BARL", "CORN", "RYEM", "OATS", "RAPE", "SUNF", "SOYA", "POTA", "SUGB", "PULS"}
+SPECIALTY = {"OVEG", "TOMA", "APPL", "OFRU", "CITR", "OLIV", "PULS", "TAGR", "TWIN", "TABO", "WINE"}
+ARTIFACT_LOSS, ARTIFACT_LOSS_SPECIALTY = -1000.0, -8000.0
+
+
+def margins(root):
+    """Gross margins of the grown crops at the base (price x yield - cost + CAP payment per ha), as the supply module
+    reads them: (violations, note). A negative market margin made good by the CAP payment is normal; a small loss
+    after it may be real; a staple crop below ARTIFACT_LOSS is a violation."""
+    import pandas as pd
+    sys.path.insert(0, str(Path(root)))
+    from capri_mod.data.loaders import resolve_data_file
+    from capri_mod.tableio import read_input
+    D = Path(root) / "capri_data"
+    try:
+        y = read_input(resolve_data_file(D, "yields.csv"), index_col=0)
+        c = read_input(resolve_data_file(D, "variable_costs.csv"), index_col=0)
+        areas = read_input(resolve_data_file(D, "base_areas.csv"), index_col=0)
+        pr = read_input(resolve_data_file(D, "producer_prices.csv"), index_col=0)
+        price = pr[pr.columns[0]]
+        rp_path = D / "sources" / "capreg" / "capreg_producer_prices.csv"
+        reg_price = read_input(rp_path, index_col=0) if rp_path.exists() else pd.DataFrame()
+        cap = read_input(resolve_data_file(D, "cap_payments.csv"), index_col=0)
+    except Exception as e:                               # a partial copy without the supply files
+        return [], f"not checked ({str(e)[:60]})"
+    cap_ha = cap.sum(axis=1) if cap.shape[1] > 1 else cap[cap.columns[0]]
+    crops = [k for k in areas.columns if k in y.columns and k in c.columns and k in price.index and k not in NON_MARKET]
+    supported, marginal, artifacts, checked = 0, [], [], 0
+    for reg in areas.index:
+        sub = float(cap_ha[reg]) if reg in cap_ha.index else 0.0
+        for crop in crops:
+            grown = areas.at[reg, crop]
+            if pd.isna(grown) or grown <= 1.0:
+                continue
+            p_ = price[crop]
+            if (not reg_price.empty and reg in reg_price.index and crop in reg_price.columns
+                    and pd.notna(reg_price.at[reg, crop]) and reg_price.at[reg, crop] > 0):
+                p_ = float(reg_price.at[reg, crop])
+            yld = y.at[reg, crop] if reg in y.index else None
+            cost = c.at[reg, crop] if reg in c.index else None
+            if yld is None or cost is None or pd.isna(yld) or pd.isna(cost):
+                continue
+            checked += 1
+            m_ = float(yld) * float(p_) - float(cost)
+            if m_ + sub >= 0:
+                supported += m_ < 0
+                continue
+            lim = ARTIFACT_LOSS_SPECIALTY if crop in SPECIALTY else ARTIFACT_LOSS
+            (artifacts if m_ + sub < lim else marginal).append((reg, crop, m_ + sub))
+    staple = [a_ for a_ in artifacts if a_[1] in STAPLES]
+    note = (f"{checked} grown region-crops; {supported} negative at market prices and made good by the CAP payment, "
+            f"{len(marginal)} at a small loss after it, {len(artifacts) - len(staple)} specialty crops below "
+            f"{ARTIFACT_LOSS_SPECIALTY:.0f} EUR/ha, {len(staple)} staple crops below {ARTIFACT_LOSS:.0f} EUR/ha")
+    found = [(f"{r}/{k}", "margin", f"staple crop's gross margin after CAP {m:+.0f} EUR/ha") for r, k, m in
+             sorted(staple, key=lambda t: t[2])]
+    return found, note
 
 
 def main():
