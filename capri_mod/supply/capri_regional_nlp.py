@@ -130,6 +130,32 @@ def problem_fingerprint(spec, kw, opts) -> str:
     return h.hexdigest()
 
 
+def linear_solver_options() -> dict:
+    """IPOPT's linear solver options from supply.nlp_linear_solver / supply.nlp_hsllib, for every IPOPT solve of the
+    model. MUMPS (the default) adds no option, so its solver objects and cache keys are those of before the setting; an
+    HSL solver needs its library, and a missing one stops here rather than IPOPT failing in every region (IPOPT returns
+    Invalid_Option, which the regional fallbacks would treat as a failed solve)."""
+    from capri_mod.settings import current as _settings
+    ls = str(_settings().get("supply.nlp_linear_solver")).strip().lower()
+    if ls == "mumps":
+        return {}
+    if ls == "spral":
+        # SPRAL (BSD licence) is part of CasADi's IPOPT. CasADi 3.8.1 builds it without OpenMP: libipopt carries
+        # SPRAL's omp_* stubs and no OpenMP runtime, so it runs on one thread (checked 30 October 2026). With an IPOPT
+        # built with OpenMP, IPOPT's documentation asks for OMP_CANCELLATION=TRUE and OMP_PROC_BIND=TRUE, and the
+        # model's CAPRI_WORKERS processes each take one thread (OMP_NUM_THREADS=1): set here unless the environment
+        # says otherwise (the OpenMP runtime reads them when it starts)
+        for k_, v_ in (("OMP_CANCELLATION", "TRUE"), ("OMP_PROC_BIND", "TRUE"), ("OMP_NUM_THREADS", "1")):
+            os.environ.setdefault(k_, v_)
+        return {"ipopt.linear_solver": "spral"}
+    if ls not in ("ma27", "ma57", "ma77", "ma86", "ma97"):
+        raise ValueError(f"supply.nlp_linear_solver = {ls!r}: mumps, spral, ma27, ma57, ma77, ma86 or ma97")
+    lib = str(_settings().get("supply.nlp_hsllib")).strip()
+    if not lib or not os.path.isfile(lib):
+        raise FileNotFoundError(f"supply.nlp_linear_solver = {ls!r} needs the HSL library: supply.nlp_hsllib = {lib!r}")
+    return {"ipopt.linear_solver": ls, "ipopt.hsllib": lib}
+
+
 def _cache_max():
     """Solver objects kept: CAPRI_NLP_CACHE if set (a property of the machine's memory), else run.nlp_cache_size."""
     from capri_mod.settings import current as _settings
@@ -1099,7 +1125,8 @@ class CapriRegionalNLP:
             Xs = ca.vertcat(ca.DM(x[:o]), xf, ca.DM(x[o1:]))
             gf = ca.Function("gf", [self.X, self.p], [self.g[r0:r1]])(Xs, ca.DM(self.pval))
             S = ca.nlpsol("C", "ipopt", {"x": xf, "f": 0, "g": gf},
-                          {"ipopt.print_level": 0, "print_time": 0, "ipopt.tol": 1e-10, "ipopt.max_iter": 3000})
+                          {"ipopt.print_level": 0, "print_time": 0, "ipopt.tol": 1e-10, "ipopt.max_iter": 3000,
+                           **linear_solver_options()})
             r = S(x0=x[o:o1], lbx=self.lbx[o:o1], ubx=self.ubx[o:o1], lbg=self.lbg[r0:r1], ubg=self.ubg[r0:r1])
             if not S.stats()["success"]:
                 failed[nut] = S.stats()["return_status"]
@@ -1226,7 +1253,7 @@ class CapriRegionalNLP:
                 "ipopt.fixed_variable_treatment": str(_st.get("supply.nlp_fixed_variable_treatment")),
                 # a guard: a regional solve normally takes well under a second; one that stalls is cut and the caller's
                 # next start (or fallback) follows
-                "ipopt.max_cpu_time": float(_st.get("supply.nlp_max_cpu_time"))}
+                "ipopt.max_cpu_time": float(_st.get("supply.nlp_max_cpu_time")), **linear_solver_options()}
         warm = lam is not None and len(lam[0]) == len(self.lbx) and len(lam[1]) == len(self.lbg)
         if warm:
             # a warm start normally takes 14-23 iterations (docs/NLP_PORT_DESIGN.md "Speed"); one from a point whose

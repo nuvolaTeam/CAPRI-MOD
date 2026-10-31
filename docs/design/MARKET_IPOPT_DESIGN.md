@@ -147,3 +147,23 @@ The options as they were put:
 - The feed energy price uses the dairy blocks' raw milk price of the *previous* evaluation (`_bilateral_eval`,
   l. 265-272). In CAPRI both are equations of the same system. This lag only affects the path, not the equilibrium,
   if the loop converges; the NLP removes it.
+
+## 9. Linear solver (30 October 2026)
+
+- **The market NLP will use IPOPT's linear solver setting** (supply.nlp_linear_solver, register BEYOND-11).
+- **SPRAL is bundled with CasADi but serial there:** CasADi 3.8.1 builds it without OpenMP.
+- **An IPOPT built with an OpenMP-enabled SPRAL is an option for this NLP.** It is much larger than a regional one,
+  which is where a parallel factorisation can pay off. The project lead likes it; it is to be measured on the market
+  NLP once G3 exists.
+- **The benchmark on the regional solves (30 October 2026)** settles their case: MUMPS stays.
+  - Setup: the 885 regional solves of the mini-EU Farm-to-Fork run, each repeated with SPRAL from the same start.
+  - Where both solve (869), the objectives agree within 1e-6.
+  - Serial SPRAL takes 2.4 times MUMPS's time per solve (median) and 4.2 times in total IPOPT time.
+  - It also fails 2 solves that MUMPS solves.
+- **Building an OpenMP SPRAL here (planned for step G, the project lead's choice of 30 October 2026).** The sandbox
+  has what the build needs: gfortran, OpenMP, BLAS/LAPACK, cmake and ninja; meson and METIS 5 are to be added.
+  - The plan: METIS 5, then SPRAL with OpenMP, then IPOPT 3.14.19 (CasADi 3.8.1's) with SPRAL and MUMPS, then
+    CasADi pointed at that library. A build script goes under tools/; the binaries stay out of the repository.
+  - The speed-up can only be measured on a machine with more cores than workers.
+  - The shortcut for the comparison: HSL MA86/MA97 (OpenMP) load into CasADi's IPOPT at run time, under HSL's
+    licence.
