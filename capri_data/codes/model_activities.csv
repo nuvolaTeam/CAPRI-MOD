@@ -1,47 +1,47 @@
-code,kind,capri_codes,mapping_source
-SWHE,crop,SWHE,tools/build/build_capri_base.py CROP_MAP
-DWHE,crop,DWHE,tools/build/build_capri_base.py CROP_MAP
-RYEM,crop,RYEM,tools/build/build_capri_base.py CROP_MAP
-BARL,crop,BARL,tools/build/build_capri_base.py CROP_MAP
-OATS,crop,OATS,tools/build/build_capri_base.py CROP_MAP
-CORN,crop,MAIZ,tools/build/build_capri_base.py CROP_MAP
-OCER,crop,OCER,tools/build/build_capri_base.py CROP_MAP
-PARI,crop,PARI,tools/build/build_capri_base.py CROP_MAP
-OCRO,crop,OCRO,tools/build/build_capri_base.py CROP_MAP
-OIND,crop,OIND,tools/build/build_capri_base.py CROP_MAP
-NURS,crop,NURS,tools/build/build_capri_base.py CROP_MAP
-FLOW,crop,FLOW,tools/build/build_capri_base.py CROP_MAP
-POTA,crop,POTA,tools/build/build_capri_base.py CROP_MAP
-SUGB,crop,SUGB,tools/build/build_capri_base.py CROP_MAP
-SUNF,crop,SUNF,tools/build/build_capri_base.py CROP_MAP
-RAPE,crop,RAPE,tools/build/build_capri_base.py CROP_MAP
-SOYA,crop,SOYA,tools/build/build_capri_base.py CROP_MAP
-OOIL,crop,OOIL,tools/build/build_capri_base.py CROP_MAP
-PULS,crop,PULS,tools/build/build_capri_base.py CROP_MAP
-TOMA,crop,TOMA,tools/build/build_capri_base.py CROP_MAP
-OVEG,crop,OVEG,tools/build/build_capri_base.py CROP_MAP
-APPL,crop,APPL,tools/build/build_capri_base.py CROP_MAP
-OFRU,crop,OFRU,tools/build/build_capri_base.py CROP_MAP
-CITR,crop,CITR,tools/build/build_capri_base.py CROP_MAP
-TAGR,crop,TAGR,tools/build/build_capri_base.py CROP_MAP
-WINE,crop,TWIN,tools/build/build_capri_base.py CROP_MAP
-OLIV,crop,OLIV,tools/build/build_capri_base.py CROP_MAP
-TABO,crop,TABO,tools/build/build_capri_base.py CROP_MAP
-TOBA,crop,TOBA,tools/build/build_capri_base.py CROP_MAP
-TEXT,crop,TEXT,tools/build/build_capri_base.py CROP_MAP
-GRAS,crop,GRAS,tools/build/build_capri_base.py CROP_MAP
-MAIF,crop,MAIF,tools/build/build_capri_base.py CROP_MAP
-OFOD,crop,OFAR;ROOF,tools/build/build_capri_base.py CROP_MAP
-SETA,crop,SETA;FALL,tools/build/build_capri_base.py CROP_MAP
-DCOW,animal,DCOL;DCOH,tools/build/build_animal_yields.py ANIMALS
-BCOW,animal,SCOW,tools/build/build_animal_yields.py ANIMALS
-BULL,animal,BULL;BULH,tools/build/build_animal_yields.py ANIMALS
-HFRS,animal,HEIL;HEIH;HEIR,tools/build/build_animal_yields.py ANIMALS
-CALV,animal,CAMF;CAFF;CAMR;CAFR,tools/build/build_animal_yields.py ANIMALS
-SHGM,animal,SHGM,tools/build/build_animal_yields.py ANIMALS
-SHGF,animal,SHGF,tools/build/build_animal_yields.py ANIMALS
-PIGS,animal,SOWS,tools/build/build_animal_yields.py ANIMALS
-PIGF,animal,PIGF,tools/build/build_animal_yields.py ANIMALS
-LAYS,animal,HENS,tools/build/build_animal_yields.py ANIMALS
-BROI,animal,POUF,tools/build/build_animal_yields.py ANIMALS
-OANI,animal,OANI,tools/build/build_animal_yields.py ANIMALS
+code,kind,capri_codes,capmod_codes,mapping_source
+SWHE,crop,SWHE,SWHE,CAPRI's own activity (PACT)
+DWHE,crop,DWHE,DWHE,CAPRI's own activity (PACT)
+RYEM,crop,RYEM,RYEM,CAPRI's own activity (PACT)
+BARL,crop,BARL,BARL,CAPRI's own activity (PACT)
+OATS,crop,OATS,OATS,CAPRI's own activity (PACT)
+CORN,crop,MAIZ,MAIZ,CAPRI's activity MAIZ (Grain maize production activity) under the model's own code
+OCER,crop,OCER,OCER,CAPRI's own activity (PACT)
+PARI,crop,PARI,PARI,CAPRI's own activity (PACT)
+OCRO,crop,OCRO,OCRO,CAPRI's own activity (PACT)
+OIND,crop,OIND,OIND,CAPRI's own activity (PACT)
+NURS,crop,NURS,NURS,CAPRI's own activity (PACT)
+FLOW,crop,FLOW,FLOW,CAPRI's own activity (PACT)
+POTA,crop,POTA,POTA,CAPRI's own activity (PACT)
+SUGB,crop,SUGB,SUGB,CAPRI's own activity (PACT)
+SUNF,crop,SUNF,SUNF,CAPRI's own activity (PACT)
+RAPE,crop,RAPE,RAPE,CAPRI's own activity (PACT)
+SOYA,crop,SOYA,SOYA,CAPRI's own activity (PACT)
+OOIL,crop,OOIL,OOIL,CAPRI's own activity (PACT)
+PULS,crop,PULS,PULS,CAPRI's own activity (PACT)
+TOMA,crop,TOMA,TOMA,CAPRI's own activity (PACT)
+OVEG,crop,OVEG,OVEG,CAPRI's own activity (PACT)
+APPL,crop,APPL,APPL,CAPRI's own activity (PACT)
+OFRU,crop,OFRU,OFRU,CAPRI's own activity (PACT)
+CITR,crop,CITR,CITR,CAPRI's own activity (PACT)
+TAGR,crop,TAGR,TAGR,CAPRI's own activity (PACT)
+WINE,crop,TWIN,TWIN,CAPRI's activity TWIN (Wine production activity) under the model's own code
+OLIV,crop,OLIV,OLIV,CAPRI's own activity (PACT)
+TABO,crop,TABO,TABO,CAPRI's own activity (PACT)
+TOBA,crop,TOBA,TOBA,CAPRI's own activity (PACT)
+TEXT,crop,TEXT,TEXT,CAPRI's own activity (PACT)
+GRAS,crop,GRAS,GRAE;GRAI,"CAPRI's own activity (PACT); in CAPRI's supply model (CAPMOD) the activities with PMP terms: GRAE (Gras and grazings production activity extensive), GRAI (Gras and grazings production activity intensive)"
+MAIF,crop,MAIF,MAIF,CAPRI's own activity (PACT)
+OFOD,crop,OFAR;ROOF,OFAR;ROOF,"CAPRI's PACT activities summed: OFAR (Fodder other on arable land production activity), ROOF (Fodder root crops production activity)"
+SETA,crop,SETA;FALL,VSET;FALL,"CAPRI's PACT activities summed: SETA (Set aside total), FALL (Fallow land); in CAPRI's supply model (CAPMOD) the activities with PMP terms: VSET (Set aside voluntary), FALL (Fallow land)"
+DCOW,animal,DCOL;DCOH,DCOL;DCOH,"CAPRI's PACT activities summed: DCOL (Dairy cows production activity low yield), DCOH (Dairy cows  production activityhigh yield)"
+BCOW,animal,SCOW,SCOW,CAPRI's activity SCOW (Suckler cows production activity) under the model's own code
+BULL,animal,BULL;BULH,BULL;BULH,"CAPRI's PACT activities summed: BULL (Male adult fattening activity low final weight), BULH (Male adult fattening activity high final weight)"
+HFRS,animal,HEIL;HEIH;HEIR,HEIL;HEIH;HEIR,"CAPRI's PACT activities summed: HEIL (Heifers fattening activity low final weight), HEIH (Heifers fattening activity high final weight), HEIR (Heifers raising activity)"
+CALV,animal,CAMF;CAFF;CAMR;CAFR,CAMF;CAFF;CAMR;CAFR,"CAPRI's PACT activities summed: CAMF (Calves male fattening activity), CAFF (Calves female fattening activity), CAMR (Calves male raising activity), CAFR (Calves female raising activity)"
+SHGM,animal,SHGM,SHGM,CAPRI's own activity (PACT)
+SHGF,animal,SHGF,SHGF,CAPRI's own activity (PACT)
+PIGS,animal,SOWS,SOWS,CAPRI's activity SOWS (Sows for piglet production) under the model's own code
+PIGF,animal,PIGF,PIGF,CAPRI's own activity (PACT)
+LAYS,animal,HENS,HENS,CAPRI's activity HENS (Laying hens production activity) under the model's own code
+BROI,animal,POUF,POUF,CAPRI's activity POUF (Poultry fattening activity) under the model's own code
+OANI,animal,OANI,OANI,CAPRI's own activity (PACT)

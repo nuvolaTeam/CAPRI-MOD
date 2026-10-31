@@ -44,6 +44,7 @@ CH4 per head adopting, and shr_of_dm.
 from __future__ import annotations
 import importlib.util, json
 from collections import defaultdict
+import sys
 from pathlib import Path
 
 import pandas as pd
@@ -55,8 +56,9 @@ M = ROOT / "capri_data" / "2017" / "abatement" / "mitigation"
 LEV = ROOT / "capri_data" / "sources" / "envind" / "res17_mann_crpr_expt.csv"
 #: CAPRI's 2017 regional results (CAPREG text dumps res_17<MS>.txt): the rations and feed data 3-NOP's effect needs
 DUMPS = Path("/home/claude/work/capreg")
-MAP = {"DCOW": ("DCOL", "DCOH"), "BCOW": ("SCOW",), "BULL": ("BULL", "BULH"), "HFRS": ("HEIL", "HEIH", "HEIR"),
-       "CALV": ("CAMF", "CAFF", "CAMR", "CAFR")}
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "lib"))
+import _model_codes as _MC  # noqa: E402  the model's activities and their CAPRI activities (codes/model_activities.csv)
+MAP = {a: _MC.ANIMALS[a] for a in ("DCOW", "BCOW", "BULL", "HFRS", "CALV")}
 #: line_nitr.gms: ShrOfDM, CH4ENT change per unit of ShrOfDM (x100 points), halved costParLin (EUR per t)
 OPT = {"LINE_Tot": dict(shr=0.05, ch4=-0.05 * 100, cost=0.5 * 674 * 89.9 / 40.5),
        "Nitr_Tot": dict(shr=0.015, ch4=-0.1 * 100, cost=0.5 * 873.0)}
@@ -66,7 +68,7 @@ RAPE_EE, RAPE_DM = 40.5, 89.9
 
 
 #: 3-NOP (line_nitr.gms l. 58-61): the dairy cows (DACT_TO_PACT DCOW: DCOL, DCOH) and the suckler cows (SCOW)
-NOP_MAP = {"DCOW": ("DCOL", "DCOH"), "BCOW": ("SCOW",)}
+NOP_MAP = {a: _MC.ANIMALS[a] for a in ("DCOW", "BCOW")}
 #: 0.09% of dry matter as Bovaer10 (l. 86); 17,500 EUR per t of Bovaer10 in 2022 money, deflated to 2017 with CAPRI's
 #: general inflation 1.019 (l. 217-221; the model in 2017 money as the other supplements), not halved (l. 357)
 NOP_SHR, NOP_COST, NOP_DAYS = 0.0009, 17500.0 / 1.019 ** (2022 - 2017), 305.0 / 365.0

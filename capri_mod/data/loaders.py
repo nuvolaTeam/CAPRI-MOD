@@ -77,7 +77,7 @@ _FILE_CATEGORY = {
     # reference data: not loaded by the model, but registered so the
     # validator can resolve and shape-check it like any other input
     "capri_own_price_elasticities.csv": "supply",
-    "organic_yield_gap.csv": "policy",
+    "organic_yield_gap.csv": "policy", "organic_yield_gap_regions.csv": "policy", "organic_yield_gap_groups.csv": "policy",
     "variable_costs.csv": "supply",
     "land_availability.csv": "supply", "supply_elasticities_regional.csv": "supply",
     "pmp_capri_2030.csv": "supply", "pmp_capri_2030_animals.csv": "supply",
@@ -683,6 +683,11 @@ def load_all_data(data_dir: Optional[Path] = None, validate: bool = False,
         # group (JRC Seville, SUPREMA project), used by the organic instrument.
         "organic_yield_gap": _load_optional_csv(
             data_dir, "organic_yield_gap.csv"),
+        # CAPRI's maps to the yield gaps' macro-regions and product groups (inputs/load_organic_yieldgap.gms)
+        "organic_yield_gap_regions": (lambda df: None if df is None else df["peseta_region"].astype(str).to_dict())(
+            _load_optional_csv(data_dir, "organic_yield_gap_regions.csv")),
+        "organic_yield_gap_groups": (lambda df: None if df is None else df["group"].astype(str).to_dict())(
+            _load_optional_csv(data_dir, "organic_yield_gap_groups.csv")),
         # CAPRI's low- and high-intensity dairy yields (DCOL / DCOH), the
         # bounds of the livestock intensity margin.
         # CAPRI's Green Deal targets by member state, from

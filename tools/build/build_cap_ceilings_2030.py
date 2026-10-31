@@ -30,6 +30,7 @@ import argparse
 import importlib.util
 import re
 from collections import defaultdict
+import sys
 from pathlib import Path
 
 import pandas as pd
@@ -41,16 +42,10 @@ OUT_SHARE = ROOT / "capri_data" / "2017" / "policy" / "premium_scheme_shares_203
 SCHEMES = ("DPPIL1", "DPPIL2", "DPRD_LFA", "DPRD_N2K", "DPAE", "DPNAT", "DPTOTAL")
 SHARES = ("DPPIL1", "DPRD_LFA", "DPRD_N2K", "DPAE", "DPNAT")
 # model activity -> CAPRI activities (crops: tools/build/build_capri_base.CROP_MAP; animals: tools/build/build_livestock_units.ANIMALS)
-CROPS = {"SWHE": ("SWHE",), "DWHE": ("DWHE",), "RYEM": ("RYEM",), "BARL": ("BARL",), "OATS": ("OATS",),
-         "CORN": ("MAIZ",), "OCER": ("OCER",), "PARI": ("PARI",), "PULS": ("PULS",), "OCRO": ("OCRO",),
-         "OIND": ("OIND",), "NURS": ("NURS",), "FLOW": ("FLOW",), "SUGB": ("SUGB",), "POTA": ("POTA",),
-         "TOMA": ("TOMA",), "OVEG": ("OVEG",), "APPL": ("APPL",), "OFRU": ("OFRU",), "CITR": ("CITR",),
-         "TAGR": ("TAGR",), "WINE": ("TWIN",), "OLIV": ("OLIV",), "TABO": ("TABO",), "GRAS": ("GRAS",),
-         "TOBA": ("TOBA",), "MAIF": ("MAIF",), "RAPE": ("RAPE",), "SUNF": ("SUNF",), "SOYA": ("SOYA",),
-         "OOIL": ("OOIL",), "TEXT": ("TEXT",), "OFOD": ("OFAR", "ROOF"), "SETA": ("SETA", "FALL")}
-ANIMALS = {"DCOW": ("DCOL", "DCOH"), "BCOW": ("SCOW",), "BULL": ("BULL", "BULH"), "HFRS": ("HEIL", "HEIH", "HEIR"),
-           "CALV": ("CAMF", "CAFF", "CAMR", "CAFR"), "PIGS": ("SOWS",), "PIGF": ("PIGF",), "LAYS": ("HENS",),
-           "BROI": ("POUF",), "SHGM": ("SHGM",), "SHGF": ("SHGF",), "OANI": ("OANI",)}
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "lib"))
+import _model_codes as _MC  # noqa: E402  the model's activities and their CAPRI activities (codes/model_activities.csv)
+CROPS = dict(_MC.CROP_MAP)
+ANIMALS = dict(_MC.ANIMALS)
 MEMBERS = {**CROPS, **ANIMALS}
 CAPRI_ACTS = {c for v in MEMBERS.values() for c in v}
 

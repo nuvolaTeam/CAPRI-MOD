@@ -205,7 +205,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_ad_option",
-    "sources": "$UP/LitRevAmmoTech.csv; $UP/LitRev_input_manStor.csv; $UP/LitRev_inputs.csv; $UP/LitRev_non_changeable_parameters.csv; $UP/gd_full.zip; $UP/holdingsLSU.csv; $UP/nvzShare_LU.csv; $UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $UP/scen.zip; $WORK/allgms/gams/aggregation/defaultA.agg; $WORK/allgms/gams/envind/ammo_tech.gms"
+    "sources": "$UP/LitRevAmmoTech.csv; $UP/LitRev_input_manStor.csv; $UP/LitRev_inputs.csv; $UP/LitRev_non_changeable_parameters.csv; $UP/gd_full.zip; $UP/holdingsLSU.csv; $UP/nvzShare_LU.csv; $UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $UP/scen.zip; $WORK/allgms/gams/aggregation/defaultA.agg; $WORK/allgms/gams/envind/ad_data_and_cali.gms; $WORK/allgms/gams/envind/ammo_tech.gms"
    },
    "notes": [],
    "read_by": {
@@ -465,7 +465,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_ammonia_tech_model",
-    "sources": "$UP/LitRevAmmoTech.csv; $UP/LitRev_input_manStor.csv; $UP/LitRev_inputs.csv; $UP/LitRev_non_changeable_parameters.csv; $UP/gd_full.zip; $UP/holdingsLSU.csv; $UP/nvzShare_LU.csv; $UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $UP/scen.zip; $WORK/allgms/gams/aggregation/defaultA.agg; $WORK/allgms/gams/envind/ammo_tech.gms"
+    "sources": "$UP/LitRevAmmoTech.csv; $UP/LitRev_input_manStor.csv; $UP/LitRev_inputs.csv; $UP/LitRev_non_changeable_parameters.csv; $UP/gd_full.zip; $UP/holdingsLSU.csv; $UP/nvzShare_LU.csv; $UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $UP/scen.zip; $WORK/allgms/gams/aggregation/defaultA.agg; $WORK/allgms/gams/envind/ad_data_and_cali.gms; $WORK/allgms/gams/envind/ammo_tech.gms"
    },
    "notes": [],
    "read_by": {
@@ -9350,7 +9350,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_manure_n2o",
-    "sources": "$UP/LitRevAmmoTech.csv; $UP/LitRev_input_manStor.csv; $UP/LitRev_inputs.csv; $UP/LitRev_non_changeable_parameters.csv; $UP/gd_full.zip; $UP/holdingsLSU.csv; $UP/nvzShare_LU.csv; $UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $UP/scen.zip; $WORK/allgms/gams/aggregation/defaultA.agg; $WORK/allgms/gams/envind/ammo_tech.gms; $WORK/capreg/res_17<CC>.txt"
+    "sources": "$UP/LitRevAmmoTech.csv; $UP/LitRev_input_manStor.csv; $UP/LitRev_inputs.csv; $UP/LitRev_non_changeable_parameters.csv; $UP/gd_full.zip; $UP/holdingsLSU.csv; $UP/nvzShare_LU.csv; $UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $UP/scen.zip; $WORK/allgms/gams/aggregation/defaultA.agg; $WORK/allgms/gams/envind/ad_data_and_cali.gms; $WORK/allgms/gams/envind/ammo_tech.gms; $WORK/capreg/res_17<CC>.txt"
    },
    "notes": [],
    "read_by": {
@@ -9422,7 +9422,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_manure_n2o",
-    "sources": "$UP/LitRevAmmoTech.csv; $UP/LitRev_input_manStor.csv; $UP/LitRev_inputs.csv; $UP/LitRev_non_changeable_parameters.csv; $UP/gd_full.zip; $UP/holdingsLSU.csv; $UP/nvzShare_LU.csv; $UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $UP/scen.zip; $WORK/allgms/gams/aggregation/defaultA.agg; $WORK/allgms/gams/envind/ammo_tech.gms; $WORK/capreg/res_17<CC>.txt"
+    "sources": "$UP/LitRevAmmoTech.csv; $UP/LitRev_input_manStor.csv; $UP/LitRev_inputs.csv; $UP/LitRev_non_changeable_parameters.csv; $UP/gd_full.zip; $UP/holdingsLSU.csv; $UP/nvzShare_LU.csv; $UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $UP/scen.zip; $WORK/allgms/gams/aggregation/defaultA.agg; $WORK/allgms/gams/envind/ad_data_and_cali.gms; $WORK/allgms/gams/envind/ammo_tech.gms; $WORK/capreg/res_17<CC>.txt"
    },
    "notes": [],
    "read_by": {
@@ -11394,7 +11394,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_genetics_effects",
-    "sources": "$UP/LitRevAmmoTech.csv; $UP/LitRev_input_manStor.csv; $UP/LitRev_inputs.csv; $UP/LitRev_non_changeable_parameters.csv; $UP/data_market_1730defaulta.csv; $UP/elas_2_1730defaulta.csv; $UP/fedcof.gms; $UP/gd_full.zip; $UP/holdingsLSU.csv; $UP/nvzShare_LU.csv; $UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $UP/scen.zip; $UP/trends_1730.csv; $WORK/allgms/gams/aggregation/defaultA.agg; $WORK/allgms/gams/envind/ammo_tech.gms; $WORK/capreg/res_17<CC>.txt; $WORK/cs/costsavings_ini_21730_jul15.csv; $WORK/cs/costsavings_max_21730_jul15.csv; $WORK/feedexp/feed_export/pmppar_17<CC>_feedpmp.csv; $WORK/inputs/capri_export_zip/capri_export/quadPact_<CC>.txt; $WORK/inputs/capri_export_zip/capri_export/quadTechn_<CC>.txt; $WORK/up/pmp2030/estnlp_results_<CC>.txt; $WORK/up/pmp2030/estnlp_results_PELA.txt; $WORK/up/pmp2030/pmppar_21730<CC>defaulta.txt"
+    "sources": "$UP/LitRevAmmoTech.csv; $UP/LitRev_input_manStor.csv; $UP/LitRev_inputs.csv; $UP/LitRev_non_changeable_parameters.csv; $UP/data_market_1730defaulta.csv; $UP/elas_2_1730defaulta.csv; $UP/fedcof.gms; $UP/gd_full.zip; $UP/holdingsLSU.csv; $UP/nvzShare_LU.csv; $UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $UP/scen.zip; $UP/trends_1730.csv; $WORK/allgms/gams/aggregation/defaultA.agg; $WORK/allgms/gams/envind/ad_data_and_cali.gms; $WORK/allgms/gams/envind/ammo_tech.gms; $WORK/capreg/res_17<CC>.txt; $WORK/cs/costsavings_ini_21730_jul15.csv; $WORK/cs/costsavings_max_21730_jul15.csv; $WORK/feedexp/feed_export/pmppar_17<CC>_feedpmp.csv; $WORK/inputs/capri_export_zip/capri_export/quadPact_<CC>.txt; $WORK/inputs/capri_export_zip/capri_export/quadTechn_<CC>.txt; $WORK/up/pmp2030/estnlp_results_<CC>.txt; $WORK/up/pmp2030/estnlp_results_PELA.txt; $WORK/up/pmp2030/pmppar_21730<CC>defaulta.txt"
    },
    "notes": [],
    "read_by": {
@@ -16033,7 +16033,7 @@
    "file": "capri_data/codes/model_activities.csv",
    "declared_in": "00_codes.sql",
    "layout": [],
-   "comment": "the model's activities (capri_mod/data/definitions.py CROPS, ANIMALS) and their CAPRI activities",
+   "comment": "the model's activities (capri_mod/data/definitions.py CROPS, ANIMALS) and their CAPRI activities: a declared code list, a source per row (tools/lib/_model_codes.py reads it for the builders)",
    "columns": [
     {
      "name": "code",
@@ -16047,6 +16047,11 @@
     },
     {
      "name": "capri_codes",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "capmod_codes",
      "type": "VARCHAR",
      "not_null": true
     },
@@ -16066,18 +16071,30 @@
    ],
    "units": [],
    "provenance": {
-    "nature": "capri",
-    "origins": "CAPRI",
-    "builder": "build_code_lists",
-    "sources": "$UP/data_market_1730defaulta.csv; $UP/elas_2_1730defaulta.csv; $UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $WORK/allgms/gams/aggregation/defaultA.agg; $WORK/capri_reference/sets/simini_21730/<CC>.csv; $WORK/capri_reference/sets/simini_21730/FEED_TO_O.csv; $WORK/capri_reference/sets/simini_21730/MAACT.csv; $WORK/capri_reference/sets/simini_21730/MCACT.csv; $WORK/capri_reference/sets/simini_21730/MPACT.csv; $WORK/capri_reference/sets/simini_21730/Map_RR.csv; $WORK/capri_reference/sets/simini_21730/PACT.csv; $WORK/capri_reference/sets/simini_21730/RALL.csv; $WORK/capri_reference/sets/simini_21730/XX1.csv"
+    "nature": "declared",
+    "origins": "per row",
+    "builder": null,
+    "sources": null
    },
    "notes": [],
    "read_by": {
     "model": [],
     "builders": [
+     "build_cap_ceilings_2030",
+     "build_capri_base",
+     "build_code_lists",
+     "build_labour_setaside",
+     "build_livestock_units",
+     "build_lownfeed_effects",
+     "build_organic_yield_gap",
+     "build_plant_protection_cost",
+     "build_pmp_capri_2030",
+     "build_supplement_effects",
      "build_yield_price_elasticity"
     ],
-    "checks": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
     "tests": [
      "capri_mod/tests/test_data_schema.py"
     ]
@@ -17287,7 +17304,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_organic_yield_gap",
-    "sources": "$UP/yield_effects_ppp.xlsx"
+    "sources": "$UP/yield_effects_ppp.xlsx; $WORK/allgms/gams/inputs/load_organic_yieldgap.gms"
    },
    "notes": [
     {
@@ -17297,6 +17314,117 @@
      "checked": "2026-10-29"
     }
    ],
+   "read_by": {
+    "model": [
+     "capri_mod/data/loaders.py"
+    ],
+    "builders": [],
+    "checks": [],
+    "tests": []
+   }
+  },
+  "organic_yield_gap_groups": {
+   "file": "capri_data/2017/policy/organic_yield_gap_groups.csv",
+   "declared_in": "14_policy_targets.sql",
+   "layout": [],
+   "comment": "the model's crops and their product group of the organic yield gaps: set pact2yieldGap of inputs/load_organic_yieldgap.gms through the CAPRI supply-model codes of codes/model_activities.csv; the animals left out as CAPRI leaves them out of organicCrops (tools/build/build_organic_yield_gap.py)",
+   "columns": [
+    {
+     "name": "activity",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "group",
+     "type": "VARCHAR",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "activity"
+   ],
+   "unique": [],
+   "foreign_keys": [
+    {
+     "columns": [
+      "activity"
+     ],
+     "references": "model_activities",
+     "ref_columns": [
+      "code"
+     ]
+    }
+   ],
+   "checks": [
+    "(\"group\" IN ('cereals', 'fruits', 'grass', 'maize', 'milk', 'nonfruit_perm', 'oilseeds', 'vegetables', 'wheat'))"
+   ],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_organic_yield_gap",
+    "sources": "$UP/yield_effects_ppp.xlsx; $WORK/allgms/gams/inputs/load_organic_yieldgap.gms"
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/data/loaders.py"
+    ],
+    "builders": [],
+    "checks": [],
+    "tests": []
+   }
+  },
+  "organic_yield_gap_regions": {
+   "file": "capri_data/2017/policy/organic_yield_gap_regions.csv",
+   "declared_in": "14_policy_targets.sql",
+   "layout": [],
+   "comment": "CAPRI's member states and their PESETA macro-region of the organic yield gaps: set ms2peseta of inputs/load_organic_yieldgap.gms (tools/build/build_organic_yield_gap.py)",
+   "columns": [
+    {
+     "name": "ms",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "peseta_region",
+     "type": "VARCHAR",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "ms"
+   ],
+   "unique": [],
+   "foreign_keys": [
+    {
+     "columns": [
+      "ms"
+     ],
+     "references": "capri_rall",
+     "ref_columns": [
+      "code"
+     ]
+    },
+    {
+     "columns": [
+      "peseta_region"
+     ],
+     "references": "organic_yield_gap",
+     "ref_columns": [
+      "peseta_region"
+     ]
+    }
+   ],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_organic_yield_gap",
+    "sources": "$UP/yield_effects_ppp.xlsx; $WORK/allgms/gams/inputs/load_organic_yieldgap.gms"
+   },
+   "notes": [],
    "read_by": {
     "model": [
      "capri_mod/data/loaders.py"
@@ -20156,6 +20284,7 @@
      "build_cap_ceilings_2030",
      "build_capri_base",
      "build_capri_baseline_surplus",
+     "build_capri_eu27_levels",
      "build_capri_level_ratio",
      "build_capri_supply_elas_market",
      "build_captrd_trajectory",
@@ -20383,6 +20512,7 @@
      "build_biofuel_market",
      "build_cap_ceilings_2030",
      "build_capri_baseline_surplus",
+     "build_capri_eu27_levels",
      "build_capri_level_ratio",
      "build_capri_supply_elas_market",
      "build_captrd_trajectory",
@@ -20586,6 +20716,7 @@
      "build_biofuel_market",
      "build_cap_ceilings_2030",
      "build_capri_baseline_surplus",
+     "build_capri_eu27_levels",
      "build_capri_level_ratio",
      "build_capri_supply_elas_market",
      "build_captrd_trajectory",
@@ -35418,11 +35549,6 @@
      "not_null": false
     },
     {
-     "name": "PULS",
-     "type": "DOUBLE",
-     "not_null": true
-    },
-    {
      "name": "OCRO",
      "type": "DOUBLE",
      "not_null": false
@@ -35443,14 +35569,39 @@
      "not_null": false
     },
     {
+     "name": "POTA",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
      "name": "SUGB",
      "type": "DOUBLE",
      "not_null": false
     },
     {
-     "name": "POTA",
+     "name": "SUNF",
      "type": "DOUBLE",
      "not_null": false
+    },
+    {
+     "name": "RAPE",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "SOYA",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "OOIL",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "PULS",
+     "type": "DOUBLE",
+     "not_null": true
     },
     {
      "name": "TOMA",
@@ -35498,42 +35649,22 @@
      "not_null": false
     },
     {
-     "name": "GRAS",
-     "type": "DOUBLE",
-     "not_null": false
-    },
-    {
      "name": "TOBA",
      "type": "DOUBLE",
      "not_null": false
     },
     {
-     "name": "MAIF",
-     "type": "DOUBLE",
-     "not_null": false
-    },
-    {
-     "name": "RAPE",
-     "type": "DOUBLE",
-     "not_null": false
-    },
-    {
-     "name": "SUNF",
-     "type": "DOUBLE",
-     "not_null": false
-    },
-    {
-     "name": "SOYA",
-     "type": "DOUBLE",
-     "not_null": false
-    },
-    {
-     "name": "OOIL",
-     "type": "DOUBLE",
-     "not_null": false
-    },
-    {
      "name": "TEXT",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "GRAS",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "MAIF",
      "type": "DOUBLE",
      "not_null": false
     },
@@ -38190,7 +38321,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_capri_eu27_levels",
-    "sources": "$UP/markmarket_greendeal_1730et_base_1717.txt; $WORK/capreg/res_17<CC>.txt"
+    "sources": "$UP/markmarket_greendeal_1730et_base_1717.txt; $UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $WORK/allgms/gams/aggregation/defaultA.agg; $WORK/capreg/res_17<CC>.txt"
    },
    "notes": [],
    "read_by": {
@@ -38237,7 +38368,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_capri_eu27_levels",
-    "sources": "$UP/markmarket_greendeal_1730et_base_1717.txt; $WORK/capreg/res_17<CC>.txt"
+    "sources": "$UP/markmarket_greendeal_1730et_base_1717.txt; $UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $WORK/allgms/gams/aggregation/defaultA.agg; $WORK/capreg/res_17<CC>.txt"
    },
    "notes": [],
    "read_by": {
@@ -39148,7 +39279,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_yield_price_elasticity",
-    "sources": "$UP/data_market_1730defaulta.csv; $UP/elas_2_1730defaulta.csv; $UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $WORK/allgms/gams/aggregation/defaultA.agg; $WORK/allgms/gams/global/fromimpact/sets.gms; $WORK/allgms/gams/supply/yield_elas.gms; $WORK/capri_reference/sets/simini_21730/<CC>.csv; $WORK/capri_reference/sets/simini_21730/FEED_TO_O.csv; $WORK/capri_reference/sets/simini_21730/MAACT.csv; $WORK/capri_reference/sets/simini_21730/MCACT.csv; $WORK/capri_reference/sets/simini_21730/MPACT.csv; $WORK/capri_reference/sets/simini_21730/Map_RR.csv; $WORK/capri_reference/sets/simini_21730/PACT.csv; $WORK/capri_reference/sets/simini_21730/RALL.csv; $WORK/capri_reference/sets/simini_21730/XX1.csv"
+    "sources": "$WORK/allgms/gams/global/fromimpact/sets.gms; $WORK/allgms/gams/supply/yield_elas.gms"
    },
    "notes": [],
    "read_by": {
@@ -39732,6 +39863,14 @@
   {
    "file": "00_codes.sql",
    "rule": "no CAPRI activity is summed into two model activities"
+  },
+  {
+   "file": "00_codes.sql",
+   "rule": "every CAPRI supply-model code of a model activity is a CAPRI production activity"
+  },
+  {
+   "file": "00_codes.sql",
+   "rule": "no CAPRI supply-model activity is summed into two model activities"
   },
   {
    "file": "00_codes.sql",

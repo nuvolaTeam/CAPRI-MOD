@@ -22,6 +22,7 @@ from __future__ import annotations
 
 import argparse
 import re
+import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -30,8 +31,10 @@ OUT = ROOT / "capri_data" / "validation"
 ACTS_2017 = ["BULF", "HEIF", "HEIR", "PIGF", "POUF", "SOWS", "HENS"]
 #: the policy accounts dataOut holds under LEVL for the EU aggregate: not activity levels
 POLICY_ACCOUNT = re.compile(r"^(bud.*|PSE_.*|BlueBox|GreenBox|DeMinimis)$")
-EU27 = ["AT", "BL", "BG", "CY", "CZ", "DE", "DK", "EE", "EL", "ES", "FI", "FR", "HR", "HU", "IR", "IT", "LT", "LV",
-        "MT", "NL", "PL", "PT", "RO", "SE", "SI", "SK"]    # CAPREG's dump codes: 26 files, BL = Belgium-Luxembourg
+sys.path.insert(0, str(ROOT / "tools" / "lib"))
+from _model_regions import EU_MS2  # noqa: E402  (capri_data/shared/eu_market_blocks.csv)
+#: CAPRI's EU member states as CAPREG's dump codes (res_17<CC>.txt): 26 files, BL = Belgium-Luxembourg
+EU27 = sorted(EU_MS2)
 
 
 def levels_2030(listing: Path):

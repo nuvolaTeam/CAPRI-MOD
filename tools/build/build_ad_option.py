@@ -55,10 +55,12 @@ ADACT = {"DCOL": "DAIRY", "DCOH": "DAIRY", "BULL": "NDAIRY", "BULH": "NDAIRY", "
          "HEIR": "NDAIRY", "SCOW": "NDAIRY", "CAMR": "NDAIRY", "CAFR": "NDAIRY", "CAMF": "NDAIRY", "CAFF": "NDAIRY",
          "PIGF": "SWIN", "SOWS": "SWIN"}                                                              # map_animals
 GAINSACT = {"DCOL": "DL_L", "DCOH": "DL_L", "PIGF": "PL_L", "SOWS": "PL_L"}                           # map_gainsact1
-GAINSC = {"AT": "AUST", "BL": "BELG", "BG": "BULG", "HR": "CROA", "CY": "CYPR", "CZ": "CZRE", "DK": "DENM",
-          "EE": "ESTO", "FI": "FINL", "FR": "FRAN", "DE": "GERM", "EL": "GREE", "HU": "HUNG", "IR": "IREL",
-          "IT": "ITAL", "LV": "LATV", "LT": "LITH", "MT": "MALT", "NL": "NETH", "PL": "POLA", "PT": "PORT",
-          "RO": "ROMA", "SK": "SKRE", "SI": "SLOV", "ES": "SPAI", "SE": "SWED", "UK": "UNKI", "NO": "NORW"}
+#: CAPRI's map from its member states to GAINS countries (map_gainsCount, ad_data_and_cali.gms l. 158-187; the Western
+#: Balkans and Turkey take Croatia's, CROA), read from CAPRI's code: member state -> GAINS country
+GMS = Path("/home/claude/work/allgms/gams/envind/ad_data_and_cali.gms")
+_sp_gt = _ilu.spec_from_file_location("_gt", Path(__file__).resolve().parents[2] / "tools" / "lib" / "gams_text.py")
+_gt = _ilu.module_from_spec(_sp_gt); _sp_gt.loader.exec_module(_gt)
+GAINSC = {ms: gc for gc, ms in _gt.set_pairs(_gt.read_text(GMS), "map_gainsCount")}
 # p_MCF (l. 324-345): nocrustcover, solid, pasture by climate cell
 MCF = {10: (0.17, 0.02, 0.01), 11: (0.19, 0.02, 0.01), 12: (0.20, 0.02, 0.01), 13: (0.22, 0.02, 0.01),
        14: (0.25, 0.02, 0.01), 15: (0.27, 0.04, 0.015), 16: (0.29, 0.04, 0.015), 17: (0.32, 0.04, 0.015),
@@ -190,7 +192,7 @@ def build():
         m0 = mitishar0.get((rs, ad), mitishar0.get((_n1(rs), ad), mitishar0.get((ms, ad), 0.0)))
         hs = housshar.get((ms, ad), 1.0 if ad == "SWIN" else 0.0)
         ini_v = m0 * sharliq.get((ms, ad), 0.0) * hs / lg if m0 else 0.0
-        gc = GAINSC.get(rs[:2])
+        gc = GAINSC.get(_mr.national_code(rs))
         ga = GAINSACT.get(act, "OL_L")
         elec = gains.get((gc, ga, "eprice_ind")) or PR_ELEC
         heat = 0.5 * gains.get((gc, ga, "eprice_agr"), 0.0) or PR_HEAT

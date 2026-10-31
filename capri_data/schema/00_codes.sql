@@ -40,9 +40,10 @@ CREATE TABLE model_activities (
     code VARCHAR PRIMARY KEY,
     kind VARCHAR NOT NULL CHECK (kind IN ('crop', 'animal')),
     capri_codes VARCHAR NOT NULL,          -- ';'-joined CAPRI PACT codes summed into the model's activity (rule below)
+    capmod_codes VARCHAR NOT NULL,         -- the same with CAPRI's supply-model activities carrying PMP terms (GRAS: GRAE;GRAI)
     mapping_source VARCHAR NOT NULL
 );
-COMMENT ON TABLE model_activities IS 'the model''s activities (capri_mod/data/definitions.py CROPS, ANIMALS) and their CAPRI activities';
+COMMENT ON TABLE model_activities IS 'the model''s activities (capri_mod/data/definitions.py CROPS, ANIMALS) and their CAPRI activities: a declared code list, a source per row (tools/lib/_model_codes.py reads it for the builders)';
 
 -- file: capri_data/codes/model_commodities.csv
 CREATE TABLE model_commodities (
@@ -92,6 +93,16 @@ WHERE c.capri_code NOT IN (SELECT code FROM capri_pact);
 -- rule: no CAPRI activity is summed into two model activities
 SELECT capri_code, list(code) AS model_codes
 FROM (SELECT code, unnest(string_split(capri_codes, ';')) AS capri_code FROM model_activities)
+GROUP BY capri_code HAVING count(*) > 1;
+
+-- rule: every CAPRI supply-model code of a model activity is a CAPRI production activity
+SELECT code, capri_code
+FROM (SELECT code, unnest(string_split(capmod_codes, ';')) AS capri_code FROM model_activities)
+WHERE capri_code NOT IN (SELECT code FROM capri_pact);
+
+-- rule: no CAPRI supply-model activity is summed into two model activities
+SELECT capri_code, list(code) AS model_codes
+FROM (SELECT code, unnest(string_split(capmod_codes, ';')) AS capri_code FROM model_activities)
 GROUP BY capri_code HAVING count(*) > 1;
 
 -- rule: a member state of the regional units is its own unit's member state code (ends in 000000)

@@ -264,10 +264,12 @@ class PolicyBlock:
         return v_
 
     def _organic_yield_gap_uncached(self, activity: str, table) -> float:
-        group = self.YIELD_GAP_GROUP.get(activity)
+        # CAPRI's maps (inputs/load_organic_yieldgap.gms): the crop's product group (pact2yieldGap) and the member
+        # state's PESETA macro-region (ms2peseta)
+        group = (getattr(self.data, "organic_yield_gap_groups", None) or {}).get(activity)
         reg_id = getattr(self.data, "region_id", "") or getattr(self, "region", "")
-        from capri_mod.data.definitions import country_of
-        region = self.PESETA_REGION.get(country_of(reg_id))
+        from capri_mod.data.definitions import capri_ms
+        region = (getattr(self.data, "organic_yield_gap_regions", None) or {}).get(capri_ms(reg_id))
         if table is None or not group or region is None:
             return 0.0
         for reg_ in (region, "CEN"):

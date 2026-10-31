@@ -51,6 +51,7 @@ Output: capri_data/2017/supply/plant_protection_cost.csv
 from __future__ import annotations
 import argparse, csv, glob, importlib.util, re
 from collections import defaultdict
+import sys
 from pathlib import Path
 
 import pandas as pd
@@ -65,9 +66,9 @@ ROW = re.compile(r"^'([A-Z]{2}[0-9A-Z]{6})'\.'([A-Za-z0-9_]+)'\.'(PLAP|INPO|FERT
                  r"REPB|ELEC|EGAS|ELUB|IRRO|SERI)'\.'Y'\s+"
                  r"(-?\d[\d.]*(?:[Ee][+\-]?\d+)?)")
 #: model animal -> CAPRI activities (as tools/build/build_animal_yields.py)
-ANIMALS = {"DCOW": ("DCOL", "DCOH"), "BCOW": ("SCOW",), "BULL": ("BULL", "BULH"), "HFRS": ("HEIL", "HEIH", "HEIR"),
-           "CALV": ("CAMF", "CAFF", "CAMR", "CAFR"), "PIGS": ("SOWS",), "PIGF": ("PIGF",), "LAYS": ("HENS",),
-           "BROI": ("POUF",), "SHGM": ("SHGM",), "SHGF": ("SHGF",), "OANI": ("OANI",)}
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "lib"))
+import _model_codes as _MC  # noqa: E402  the model's activities and their CAPRI activities (codes/model_activities.csv)
+ANIMALS = dict(_MC.ANIMALS)
 COLS = ["region", "activity", "plap_eur_ha", "inpo_eur_ha", "fert_eur_ha", "eful_eur_ha", "eful_inpo_eur_ha",
         "yd_rest_eur_ha", "yd_plap_eur_ha", "yd_inpo_eur_ha", "yield_growth", "inpo_toin_share", "capri_region"]
 YIELD_IY = ROOT / "capri_data" / "sources" / "capri_gams" / "inputs" / "yieldIY_p_inputDemandFactor.csv"

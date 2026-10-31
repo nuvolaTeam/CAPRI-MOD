@@ -258,6 +258,10 @@ class RegionData:
 
     #: CAPRI's organic yield gaps by macro-region and product group.
     organic_yield_gap: Optional[pd.DataFrame] = None
+    #: CAPRI's maps to them (inputs/load_organic_yieldgap.gms): member state -> PESETA macro-region (ms2peseta) and
+    #: model crop -> product group (pact2yieldGap), organic_yield_gap_regions.csv / _groups.csv
+    organic_yield_gap_regions: Optional[dict] = None
+    organic_yield_gap_groups: Optional[dict] = None
 
     #: CAPRI's Green Deal targets for this region's member state: extra
     #: landscape land (points of UAA) and organic conversion (points of arable,
@@ -849,35 +853,6 @@ class RegionalSupplyModel(LivestockBlock, FertilisationBlock, AbatementBlock, Po
     # Constraint matrix
     # ------------------------------------------------------------------
 
-
-    #: CAPRI's country -> PESETA macro-region mapping for organic yield gaps
-    #: (gams/inputs/load_organic_yieldgap.gms).
-    PESETA_REGION = {
-        "BE": "CEN", "LU": "CEN", "DE": "CEN", "NL": "CEN", "PL": "CEN",
-        "AT": "CES", "CZ": "CES", "FR": "CES", "HU": "CES", "RO": "CES",
-        "SK": "CES",
-        "DK": "NE", "EE": "NE", "FI": "NE", "LT": "NE", "LV": "NE",
-        "SE": "NE", "NO": "NE",
-        "BG": "SE", "CY": "SE", "ES": "SE", "EL": "SE", "HR": "SE",
-        "IT": "SE", "MT": "SE", "PT": "SE", "SI": "SE",
-        "IE": "UK_IR",
-    }
-
-    #: CAPRI's crop -> yield-gap product group (same source, pact2yieldGap; MAIZ = CORN, GRAE/GRAI = GRAS; K74,
-    #: 29 October 2026: MAIF, OOIL and OFOD, which CAPRI does not map, removed - no organic crop used them). A group
-    #: without a value for the region takes Central Europe North's, as CAPRI (pol_input/greendeal/organic_area.gms
-    #: l. 178-180)
-    YIELD_GAP_GROUP = {
-        "SWHE": "wheat", "DWHE": "wheat",
-        "RYEM": "cereals", "BARL": "cereals", "OATS": "cereals",
-        "OCER": "cereals", "PARI": "cereals",
-        "CORN": "maize",
-        "RAPE": "oilseeds", "SUNF": "oilseeds", "SOYA": "oilseeds",
-        "GRAS": "grass",
-        "TOMA": "vegetables", "POTA": "vegetables", "OVEG": "vegetables",
-        "APPL": "fruits", "OFRU": "fruits", "CITR": "fruits",
-        "TAGR": "nonfruit_perm", "WINE": "nonfruit_perm", "OLIV": "nonfruit_perm", "TABO": "nonfruit_perm",
-    }
 
     #: CAPRI's organicCrops (pol_input/greendeal/load_organic_targets.gms l. 201-233; CERE_COLS and OILS_COLS from
     #: global/fromimpact/sets.gms), in model codes (MAIZ = CORN, TWIN = WINE): the crops whose own organic target
@@ -2254,6 +2229,8 @@ class SupplyModule:
                 if d.get("livestock_output_coef") is not None
                 and region in d["livestock_output_coef"].index else None),
             organic_yield_gap=d.get("organic_yield_gap"),
+            organic_yield_gap_regions=d.get("organic_yield_gap_regions"),
+            organic_yield_gap_groups=d.get("organic_yield_gap_groups"),
             landscape_target_pp=_ms_value(d.get("landscape_targets_ms"), region,
                                           "landscape_pp"),
             organic_targets_pp=_ms_row(d.get("organic_targets_ms"), region),
