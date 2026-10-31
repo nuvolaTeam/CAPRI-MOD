@@ -1731,6 +1731,28 @@ CAPRI's terms only with p_infl since 2004, docs/PMP_CAPRI_2030.md). Found so far
 - the 2030 land rents (land_rents_2030.csv, D_AREA of CAPRI's 2030 reference);
 - possibly the 2030 CAP ceilings (cap_ceilings_2030.csv) beside premiums in 2017 money (to check).
 
+**Audit of the builders, 31 October 2026** (read-only; defaults pmp_source "capri2030", pmp_capri_parts crops, animals,
+feed, land). In 2030 money and used by the 2030 runs, ranked by expected effect on the responses:
+1. crop PMP matrix (build_pmp_capri_2030.py, supply_module.py capri_g);
+2. animals' herd terms (build_animal_pmp_capri_2030.py; loaders put them into capri_g);
+3. fertiliser prices of the fertilisation block (npk_region_2030.csv uvag_eur_t, CAPRI's 2030 UVAG: Austria's N
+   1,110.5 EUR/t against 869.5 in 2017, ratio 1.2772; read by the NLP objective and the fertiliser options' NITF
+   price), while the fertiliser allocation reads mineral_n_price.csv in 2017 money;
+4. land market: the land types' quadratic terms (land_market_2030.csv, p_pmpQuadLandTypes) and the 2030 land rents
+   (land_rents_2030.csv), also in the greening dual;
+5. intensity splits' 2030 terms (q_*_capri2030 of the dairy, cattle and grass intensity files);
+6. feed PMP slopes (feed_ration capri_slope_2030);
+7. catch crops' cost and the winter-cover option's curve (CATC TOIN 2030);
+8. anaerobic digestion (inflated on purpose, unlike the other ammonia options of the same file);
+9. CAPRI's cost savings (capri_costsavings_2030.csv, dsav) in the genetics, low-N feed and supplement options, and
+   genetic improvement's cost per unit (2030 UVAG of COMI).
+Report-only: CAP budget ceilings (budget use) and the set-aside premiums of the labour table. In 2017 money (fine):
+prices and premiums, histosols, 3-NOP cost, the ammonia options other than AD, the fertiliser options (miti_data_jul15
+before CAPRI's inflation; their saving slope takes the 2030 NITF price, item 3), feed ration prices, young animals,
+plant protection, mineral_n_price. Unsettled: welfare_base (market data of 2030 with INPE 1.2772; cancels in run
+differences). The deflator for all items is 1.019^13 (CAPRI's 2030 terms carry p_infl since 2004, the model's prices
+13 years from 2017).
+
 Deflated already: histosol fallowing, the feed supplements (3-NOP), premiums and prices. The ammonia technologies are
 in 2017 money (CAPRI inflates them; the model takes them before that step), consistent.
 
