@@ -1,0 +1,14 @@
+name = "captrd_baseline"
+source = "CAPRI captrd trend results (p_result, series), reconciled against AGLINK/EU Outlook supports"
+vintage = "CAPTRD results_1770 (base 2017), the project lead's CAPRI installation"
+base_year = 2017
+target_years = [2030]
+
+[provenance]
+extracted_from = "capri_reference/captrd_results/1770/series.csv.gz (results_1770.gdx p_result, series; tools/build/build_captrd_trajectory.py)"
+datatype_read = "series (final reconciled trend in projection years; BASM is a constant base-mean, not the projection)"
+aggregation = "per-activity median of per-region cumulative ratios"
+factor_band = [0.2, 5.0]
+min_cells_per_activity = 3
+regional_detail = "per-region factors carried where the base value is >= 1.0; the per-activity median is the fallback elsewhere"
+model_keys = "model activity aliases and model regions added by tools/build/build_trajectory_model_keys.py (CAPRI-keyed entries kept)"

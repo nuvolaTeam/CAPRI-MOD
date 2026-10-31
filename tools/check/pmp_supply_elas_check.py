@@ -50,7 +50,7 @@ def model_elas(pmp: str, ms: str, products, shock: float) -> pd.Series:
     from capri_mod import settings as _S
     _S.activate(_S.current().replace({"supply.pmp_source": pmp}))
     m = CAPRIModel(data_dir=str(ROOT / "capri_data"), verbose=False)
-    traj = BaselineTrajectory.from_file(str(ROOT / "capri_data" / "trajectories" / "capri_ref_2030.json"))
+    traj = BaselineTrajectory.from_file(str(ROOT / "capri_data" / "scenarios" / "capri_ref_2030"))
     pmod = ProjectionModule(m, traj, capri_prices_dir=str(ROOT / "capri_data" / "trajectories"))
     data, _ = pmod.project_data(2030)
     pm = pmod._model_for(data)

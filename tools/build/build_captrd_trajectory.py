@@ -1,5 +1,7 @@
-"""CAPRI's trend projection as the model's alternative 2030 trajectory: capri_data/trajectories/captrd_2030.json
-(`--trajectory captrd`; the default is CAPRI's 2030 reference, capri_ref_2030.json). The file's one writer, from blank.
+"""CAPRI's trend projection as the model's alternative 2030 trajectory: the scenario folder capri_data/scenarios/captrd_2030
+(settings.toml, growth.csv, regional.csv; capri_mod/projection/scenario_io.py; capri_data/trajectories/captrd_2030.json
+until 31 October 2026) (`--trajectory captrd`; the default is CAPRI's 2030 reference, capri_data/scenarios/capri_ref_2030).
+The folder's one writer, from blank.
 
 Source: CAPTRD's results of the base-2017 run (results_1770.gdx, p_result, datatype "series": the final reconciled trend
 in projection years), as converted to capri_reference/captrd_results/1770/series.csv.gz
@@ -20,7 +22,6 @@ from __future__ import annotations
 import argparse
 import csv
 import gzip
-import json
 import sys
 import tempfile
 from pathlib import Path
@@ -30,7 +31,7 @@ from paths import REFERENCE  # noqa: E402  (CAPRI's material outside the reposit
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build")]
-OUT = ROOT / "capri_data" / "trajectories" / "captrd_2030.json"
+OUT = ROOT / "capri_data" / "scenarios" / "captrd_2030"
 SERIES = REFERENCE / "captrd_results/1770/series.csv.gz"
 
 
@@ -55,7 +56,8 @@ def main():
     traj["_provenance"]["extracted_from"] = ("capri_reference/captrd_results/1770/series.csv.gz (results_1770.gdx "
                                              "p_result, series; tools/build/build_captrd_trajectory.py)")
     added = K.add_model_keys(traj)
-    OUT.write_text(json.dumps(traj, indent=1))
+    from capri_mod.projection import scenario_io
+    scenario_io.write(OUT, traj)
     print(f"{OUT.relative_to(ROOT)}: {n} series records; {added}")
 
 

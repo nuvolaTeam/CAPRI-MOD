@@ -131,9 +131,9 @@ no Python file (only mentioned in `README.md`, `DATA_DICTIONARY.md`, `DATA_SOURC
 | **build_livestock_n_export_coef** | `E/livestock_n_export_coef.csv` | herds | `--dump-dir` D17 | `[--dump-dir D]` | as build_livestock_output_coef (CRPR_EXPT) | – |
 | **build_ghg_coefs_2017** | `E/livestock_ch4man_coef.csv`, `E/livestock_ch4ent_coef.csv` (via `build()`), `E/crop_co2_coef.csv` | herds, `S/base_areas.csv`, Eurostat cattle files (through BCB.spec), `SH/capri_member_state_codes.csv` | argv[1] D17 dir | `[dump dir]` | CH4: MR.groups; CO2LIM: **BCB.spec**, UAAR-weighted, else national | urea share recovered from CAPRI's results |
 | **build_capri_level_ratio** | `S/capri_level_ratio.csv` | herds via `load_all_data` (poultry converted) | `--dump-dir` D17 | `[--dump-dir D]`; imports `CAPRI_TO_MODEL` | MR.groups (H/L of the group on every part), else national | – |
-| **build_young_animals** | `S/young_animals_2017.json`, `S/young_animals_by_sex_2017.json` | `S/animal_numbers.csv`, `SH/nuts_version_correspondence.json`; with `--old-json` `AM/capri_mann_days_2030.csv` | `--dump-dir` D17, `--old-json` (earlier build, for Spain) | `[--dump-dir D] [--old-json F]` | MR.groups (group flows / group heads), national rows over the country's heads | Spain path (docstring: no res_17ES dump; `res_17ES.txt` is present now); UVAG fallback = median of other countries (registered) |
-| **build_feed_ration** | `F/feed_ration_2017.json` | herds; `BP/pmp_feed_inp_coeff_2030.csv` (optional); correspondence loaded, unused | `--dump-dir` D17, `--pmp-dir` `capri_sources/feed_export` (`pmppar_17*_feedpmp.csv`) | `[--dump-dir D] [--pmp-dir D]` | MR.groups spread by model herds; national remainder with `PREFIX` BL→(BE, LU), IR→IE | HEIL/HEIH mean slope for HEIF; 2030 slopes on 2017 weights (both registered) |
-| **build_fodder_balance** | `F/fodder_balance_2017.json` | `F/feed_ration_2017.json`, `S/base_areas.csv`, `S/animal_numbers.csv` (+ `HERD_ALIASES`) | – | no args | none (regions of the inputs) | value = max of the ration prices; inventory wrongly lists it as a builder of animal_numbers and base_areas |
+| **build_young_animals** | `S/young_animals_2017.csv`, `S/young_animals_by_sex_2017.csv` | `S/animal_numbers.csv`, `SH/nuts_version_correspondence.csv`; with `--old-json` `AM/capri_mann_days_2030.csv` | `--dump-dir` D17, `--old-json` (earlier build, for Spain) | `[--dump-dir D] [--old-json F]` | MR.groups (group flows / group heads), national rows over the country's heads | Spain path (docstring: no res_17ES dump; `res_17ES.txt` is present now); UVAG fallback = median of other countries (registered) |
+| **build_feed_ration** | `F/feed_ration_2017.csv` | herds; `BP/pmp_feed_inp_coeff_2030.csv` (optional); correspondence loaded, unused | `--dump-dir` D17, `--pmp-dir` `capri_sources/feed_export` (`pmppar_17*_feedpmp.csv`) | `[--dump-dir D] [--pmp-dir D]` | MR.groups spread by model herds; national remainder with `PREFIX` BL→(BE, LU), IR→IE | HEIL/HEIH mean slope for HEIF; 2030 slopes on 2017 weights (both registered) |
+| **build_fodder_balance** | `F/fodder_balance_2017.csv` | `F/feed_ration_2017.csv`, `S/base_areas.csv`, `S/animal_numbers.csv` (+ `HERD_ALIASES`) | – | no args | none (regions of the inputs) | value = max of the ration prices; inventory wrongly lists it as a builder of animal_numbers and base_areas |
 | **build_ration_trajectory_2030** | `T/capri_ref_ration_2030.csv`, `T/capri_ref_fodder_2030.csv` | `S/animal_numbers.csv` (index), `SH/capri_member_state_codes.csv` | `--ref` REF (grep), `--dump-dir` D17 | `[--ref F] [--dump-dir D]`; loads build_feed_ration | MR.groups, else member state | factors clipped to [0, 5] / [0.2, 5] |
 
 ### 1.4 Supply: intensity splits, PMP terms, land, labour, input costs, elasticities, cover crops
@@ -203,8 +203,8 @@ no Python file (only mentioned in `README.md`, `DATA_DICTIONARY.md`, `DATA_SOURC
 | build_cap_greening | `P/cap_greening_2013_2020.csv`, `P/cap_greening_fleg_ms.csv` | – | `--capreg-dir` D17 (national rows) | `[--capreg-dir D]` | member states | settings transcribed from the GAMS file |
 | build_mineral_redu_rules | `P/mineral_redu_exemptions.csv`, `P/mineral_redu_limcres.csv` | `sources/policy/minfert_redu_by_crop_p_checkSmallMine.csv`, `minfert_redu_by_crop_limCres.csv` (CAPRI's pol_input file parsed by `tools/build/convert_sources_to_csv.py`; until 30 October 2026 this builder copied the file into sources/policy and parsed it) | – | no args | CAPRI | – |
 | **build_price_trajectory_2030** | `T/capri_price_ratios_2030.csv` (member states), `T/capri_cap_premium_2030.csv` (index of `load_all_data` cap_premium = `SC/capreg_cap_premium.csv` + `S/crop_premium.csv`), `T/capri_livestock_premium_ratio_2030.csv` (herds index) | `GD/capri_unit_values_ini_2030.csv`, `GD/capri_marginal_terms_ini_2030.csv.xz`, `sources/capri_baseline/capri_market_prices_1730.csv`, `load_all_data`; correspondence loaded, unused | `--dump-dir` D17 | `[--dump-dir D]` | MR.r2c, else national | `COLMAP` CORN→MAIZ |
-| **build_trajectory_capri_ref** (calls build_trajectory_model_keys) | `T/capri_ref_2030.json`; `sources/capri_baseline/capri_ref_levl_yild_2030_2017.csv.xz` (when `--ref` exists) | that source | `--ref` REF (grep), `--dump-dir` D17 | `[--ref F] [--dump-dir D]`; sub-process `build_trajectory_model_keys.py <out>` (`check=True`) | CAPRI codes, 4-character keys; `EU27` list includes NO | factors in [0.2, 5]; EU median fallback |
-| **build_trajectory_model_keys** | in place: the trajectory JSON (argv[1], default `T/captrd_2030.json`) | that JSON, MR.list | – | `[json path]` | MR.r2c (first 4 characters), else national; `ALIASES` activity map | retired names dropped; `captrd_2030.json` itself has no builder in `tools/build` |
+| **build_trajectory_capri_ref** (calls build_trajectory_model_keys) | `scenarios/capri_ref_2030/`; `sources/capri_baseline/capri_ref_levl_yild_2030_2017.csv.xz` (when `--ref` exists) | that source | `--ref` REF (grep), `--dump-dir` D17 | `[--ref F] [--dump-dir D]`; sub-process `build_trajectory_model_keys.py <out>` (`check=True`) | CAPRI codes, 4-character keys; `EU27` list includes NO | factors in [0.2, 5]; EU median fallback |
+| **build_trajectory_model_keys** | in place: the scenario folder (argv[1], default `capri_data/scenarios/captrd_2030`) | that folder, MR.list | – | `[folder]` | MR.r2c (first 4 characters), else national; `ALIASES` activity map | retired names dropped; `captrd_2030` is written from blank by build_captrd_trajectory, which calls it |
 
 ### 1.7 Extractions of CAPRI exports (CAPRI codes, or older model-keyed tables through the crosswalk)
 
@@ -366,7 +366,7 @@ in section 0 are set aside.
 | 1 | (only while the crosswalk-based tables are kept) build_nuts_crosswalk `--nuts-dir … --capri-gams …` → extract_remaining_nine `--export-dir …`, ingest_pmp_terms `--export-dir …`, ingest_pela_gtap `--dump-dir …`; then build_supply_elasticities_regional. Do **not** run extract_all_from_data2 after step 2 | seed (region list) |
 | 2 | build_capri_base `<D17 dir>` | seed |
 | 3 | build_crop_economics_2017 `<D17 dir>` | 2 |
-| 4 | build_region_map; build_cap_ceilings_2030; build_capri_baseline_surplus; build_cover_crops; build_fert_side_effects; build_land_market `--year 2017` and `--year 2030`; build_land_rents `--year 2017` and `--year 2030`; build_manure_losses; build_manure_trade_base; build_nh3_factors; build_overfert_factors `<dumps>`; build_plant_protection_cost; build_ammonia_tech_model; build_pmp_capri_2030 (default, and the two recipe variants, section 2 rows 60, 63); build_intensity_q_2030 (after step 1); build_trajectory_capri_ref (runs build_trajectory_model_keys on `capri_ref_2030.json`) and build_trajectory_model_keys (for `captrd_2030.json`) | 2 (region list in base_areas.csv); cover_crops → winter_cover_option below |
+| 4 | build_region_map; build_cap_ceilings_2030; build_capri_baseline_surplus; build_cover_crops; build_fert_side_effects; build_land_market `--year 2017` and `--year 2030`; build_land_rents `--year 2017` and `--year 2030`; build_manure_losses; build_manure_trade_base; build_nh3_factors; build_overfert_factors `<dumps>`; build_plant_protection_cost; build_ammonia_tech_model; build_pmp_capri_2030 (default, and the two recipe variants, section 2 rows 60, 63); build_intensity_q_2030 (after step 1); build_trajectory_capri_ref (runs build_trajectory_model_keys on `scenarios/capri_ref_2030`) and build_trajectory_model_keys (for `scenarios/captrd_2030`) | 2 (region list in base_areas.csv); cover_crops → winter_cover_option below |
 | 5 | build_winter_cover_option; build_manure_n2o | build_cover_crops; build_ammonia_tech_model |
 | 6 | herds: build_shg_split's `split_herds` and `per_head_tables` (see the note below), then build_norway_pigs (without `--rebuild`; needs build_ssb_pigs' file) | 2, 3 |
 | 7 | build_capri_level_ratio `--dump-dir …` | 6 (final herds) |
@@ -430,8 +430,8 @@ Notes on the order:
 6. `S/variable_costs.csv` columns `BCOW, HFRS, CALV, PIGS, LAYS, BROI`: values with 2 decimals in all 248 rows, written
    by no script found. Not checked whether the model reads them (livestock costs per head come from
    `livestock_cost_coef.csv`).
-7. `SH/nuts_version_correspondence.json`, `E/climate_zones.csv`, `AM/nvz_p_nvzArea.csv`, `AM/nvz_p_slopeTypes.csv`,
-   `SC/pmp_quad_landtypes_2017.csv`, `T/captrd_2030.json` (CAPRI's keys), `sources/capri_baseline/*.csv`: inputs read by
+7. `SH/nuts_version_correspondence.csv`, `E/climate_zones.csv`, `AM/nvz_p_nvzArea.csv`, `AM/nvz_p_slopeTypes.csv`,
+   `SC/pmp_quad_landtypes_2017.csv`, `scenarios/captrd_2030/` (CAPRI's keys), `sources/capri_baseline/*.csv`: inputs read by
    builders and written by none in `tools/build` (supplied or exported files).
 
 ### 4.3 Invocations not recorded
@@ -468,7 +468,7 @@ Notes on the order:
     `pela_cross_price.csv`, `gtap_armington.csv`, `SC/capreg_levels, capreg_yields, capreg_land, capreg_herds,
     capreg_activity_levels, capreg_manure_nutrients, capreg_feed_use.csv` (of these, `capreg_activity_levels` is read by
     build_livestock_premium_coef and `capreg_herds`/`capreg_yields` by derive_elasticities_from_pmp),
-    `T/captrd_2030.json` (read by tests and `tools/run`),
+    `scenarios/captrd_2030/` (read by tests and `tools/run`),
     `SH/capri_regio_concordance.json` (read by nothing).
 
 ### 4.5 Other uncertainties
@@ -525,7 +525,7 @@ builder reads `file`, last written by `A`. `build_shg_split[herds]` = its `split
 | 4 | build_overfert_factors | build_capri_base: 2017/supply/base_areas.csv |
 | 4 | build_plant_protection_cost | build_capri_base: 2017/supply/base_areas.csv |
 | 4 | build_region_map | build_capri_base: 2017/supply/base_areas.csv |
-| 4 | build_trajectory_model_keys | build_capri_base: 2017/supply/base_areas.csv; build_trajectory_capri_ref: trajectories/capri_ref_2030.json (same file, written before) |
+| 4 | build_trajectory_model_keys | build_capri_base: 2017/supply/base_areas.csv; build_trajectory_capri_ref: scenarios/capri_ref_2030 (same file, written before) |
 | 5 | build_ammonia_tech_model | build_capri_base: 2017/supply/base_areas.csv |
 | 5 | build_shg_split[herds] | build_capri_base: 2017/supply/animal_numbers.csv (same file, written before); build_crop_economics_2017: 2017/supply/variable_costs.csv (same file, written before), 2017/supply/yields.csv (same file, written before), sources/capreg/capreg_producer_prices.csv |
 | 5 | build_winter_cover_option | build_cover_crops: 2017/supply/cover_crops.csv |
@@ -548,7 +548,7 @@ builder reads `file`, last written by `A`. `build_shg_split[herds]` = its `split
 | 7 | build_young_animals | build_capri_base: 2017/supply/base_areas.csv; build_norway_pigs: 2017/supply/animal_numbers.csv |
 | 8 | build_animal_pmp_capri_2030 | build_capri_base: 2017/supply/base_areas.csv; build_capri_level_ratio: 2017/supply/capri_level_ratio.csv |
 | 8 | build_animal_yields | build_capri_base: 2017/supply/base_areas.csv; build_capri_level_ratio: 2017/supply/capri_level_ratio.csv; build_shg_split[herds]: 2017/supply/yields.csv (same file, written before) |
-| 8 | build_fodder_balance | build_capri_base: 2017/supply/base_areas.csv; build_feed_ration: 2017/feed/feed_ration_2017.json; build_norway_pigs: 2017/supply/animal_numbers.csv |
+| 8 | build_fodder_balance | build_capri_base: 2017/supply/base_areas.csv; build_feed_ration: 2017/feed/feed_ration_2017.csv; build_norway_pigs: 2017/supply/animal_numbers.csv |
 | 8 | build_histosol | build_capri_base: 2017/supply/base_areas.csv; build_price_trajectory_2030: trajectories/capri_price_ratios_2030.csv |
 | 8 | build_labour_setaside | build_capri_base: 2017/supply/base_areas.csv; build_capri_level_ratio: 2017/supply/capri_level_ratio.csv; build_intensity_q_2030: sources/baseline_pmp/intensity_q_capri2030.csv, sources/baseline_pmp/intensity_q_recipe2017.csv, sources/baseline_pmp/intensity_q_recipe2030.csv |
 | 8 | build_livestock_units | build_capri_base: 2017/supply/base_areas.csv; build_capri_level_ratio: 2017/supply/capri_level_ratio.csv |

@@ -77,7 +77,7 @@ def main():
                          "CAPRI baseline surpluses per ha (comma list; '+' prefix adds to the nine)")
     ap.add_argument("--trajectory", default="capri_ref",
                     help="2030 baseline trajectory: capri_ref (CAPRI's 2030 reference, default), captrd (CAPRI's trend "
-                         "projection) or a file name in capri_data/trajectories")
+                         "projection) or a scenario folder name in capri_data/scenarios")
     ap.add_argument("--settings", action="append", default=[],
                     help="a TOML settings file (capri_mod/settings/defaults.toml's keys); repeatable, later files win")
     ap.add_argument("--set", action="append", default=[],
@@ -131,8 +131,8 @@ def main():
     t0 = time.time()
     # CAPRI simulates from its calibrated 2030 reference (CAPMOD's reference run); the trend projection (CAPTRD) is
     # that calibration's input and stays available (--trajectory captrd)
-    _tf = {"capri_ref": "capri_ref_2030.json", "captrd": "captrd_2030.json"}.get(a.trajectory, a.trajectory)
-    traj = BaselineTrajectory.from_file(str(ROOT / "capri_data" / "trajectories" / _tf))
+    _tf = {"capri_ref": "capri_ref_2030", "captrd": "captrd_2030"}.get(a.trajectory, a.trajectory)
+    traj = BaselineTrajectory.from_file(str(ROOT / "capri_data" / "scenarios" / _tf))
     kw = {k: (v if k == "mineRedu" else int(v)) for k, v in (x.split("=") for x in a.targets.split(",") if x)}
     _pdir = None if a.base_prices else str(ROOT / "capri_data" / "trajectories")
     pmod = ProjectionModule(m, traj, capri_prices_dir=_pdir)

@@ -827,7 +827,7 @@ def test_projection_livestock_output_follows_yield(model):
     the cows' requirements follow breeding.gms's functions; the trajectory is read by the model's own names."""
     from capri_mod.projection import ProjectionModule, BaselineTrajectory
     import os
-    traj_path = os.path.join(str(DATA_DIR), "trajectories", "captrd_2030.json")
+    traj_path = os.path.join(str(DATA_DIR), "scenarios", "captrd_2030")
     traj = BaselineTrajectory.from_file(traj_path)
     assert traj.factor("yields", "CORN", 2030) == traj.factor("yields", "MAIZ", 2030)
     pm = ProjectionModule(model, traj)
@@ -1365,7 +1365,7 @@ def test_captrd_trajectory_is_usable_and_plausible():
     import os
     from capri_mod.projection import BaselineTrajectory
 
-    path = os.path.join(str(DATA_DIR), "trajectories", "captrd_2030.json")
+    path = os.path.join(str(DATA_DIR), "scenarios", "captrd_2030")
     if not os.path.exists(path):
         return  # trajectory not shipped in this build
 
@@ -1674,7 +1674,7 @@ def test_projection_matches_capri_2030_reference(model):
     from capri_mod.projection import ProjectionModule, BaselineTrajectory
 
     ref_path = os.path.join(str(DATA_DIR), "validation", "capri_eu27_levels_2030_ref.csv")
-    traj_path = os.path.join(str(DATA_DIR), "trajectories", "captrd_2030.json")
+    traj_path = os.path.join(str(DATA_DIR), "scenarios", "captrd_2030")
     if not (os.path.exists(ref_path) and os.path.exists(traj_path)):
         return
 
@@ -1704,16 +1704,17 @@ def test_projection_matches_capri_2030_reference(model):
 @pytest.mark.slow
 def test_projection_starts_from_capri_reference_and_calibrates(model):
     """Sprint 9p: the 2030 baseline is projected with CAPRI's own 2030 reference (CAPMOD's reference run over CAPRI's
-    2017 results, levels, yields and land types per region: capri_ref_2030.json), not its trend projection, and the
+    2017 results, levels, yields and land types per region: capri_data/scenarios/capri_ref_2030), not its trend projection, and the
     baseline is calibrated as CAPRI calibrates its supply models: the linear cost terms move until each region's
     solution is its projected levels (fodder crops excepted: the fodder balances hold them). The purchased feed bulks
     in the rations take CAPRI's 2030 bulk prices (feedBlkPrice_ CES of the products' 2030 prices)."""
     import os, json
     import pandas as pd
     from capri_mod.projection import ProjectionModule, BaselineTrajectory
-    tp = os.path.join(str(DATA_DIR), "trajectories", "capri_ref_2030.json")
+    from capri_mod.projection import scenario_io
+    tp = os.path.join(str(DATA_DIR), "scenarios", "capri_ref_2030")
     src = os.path.join(str(DATA_DIR), "sources", "capri_baseline", "capri_ref_levl_yild_2030_2017.csv.xz")
-    t = json.load(open(tp))
+    t = scenario_io.read(tp)
     raw = pd.read_csv(src)
     v = {(r.capri_region, r.activity, r.item, str(r.year)): r.value for r in raw.itertuples()}
     f = v[("DE110000", "SWHE", "LEVL", "2030")] / v[("DE110000", "SWHE", "LEVL", "2017")]
@@ -2816,7 +2817,8 @@ def test_projection_trajectory_moves_every_livestock_yield(data):
     import json
     from pathlib import Path
     from capri_mod.projection.projection_module import ProjectionModule
-    t = json.loads((Path(__file__).resolve().parents[2] / "capri_data" / "trajectories" / "capri_ref_2030.json").read_text())
+    from capri_mod.projection import scenario_io
+    t = scenario_io.read(Path(__file__).resolve().parents[2] / "capri_data" / "scenarios" / "capri_ref_2030")
     reg, gro = t["regional"]["yields"], t["growth"]["yields"]
     herds = data["animal_numbers"]
     for a in ProjectionModule.LIVESTOCK_YIELD:
@@ -3635,7 +3637,7 @@ def test_capri_land_rents_at_the_2030_calibration_point(model):
     them; the baseline reproduces the 2030 base."""
     from capri_mod.projection import ProjectionModule, BaselineTrajectory
     root = _repo_root()
-    traj = BaselineTrajectory.from_file(str(root / "capri_data" / "trajectories" / "capri_ref_2030.json"))
+    traj = BaselineTrajectory.from_file(str(root / "capri_data" / "scenarios" / "capri_ref_2030"))
     pmod = ProjectionModule(model, traj, capri_prices_dir=str(root / "capri_data" / "trajectories"))
     res = pmod.run(years=[2030], regions=["IR010000"], max_outer_iter=2)
     pm = getattr(pmod, "_last_projected_model", None) or model
@@ -3822,7 +3824,7 @@ def test_ammonia_options_stay_at_their_base_shares_in_the_2030_baseline():
     from capri_mod.projection import ProjectionModule, BaselineTrajectory
     from capri_mod.supply import ammonia_techs as _at
     m = CAPRIModel(data_dir=str(DATA_DIR), verbose=False)
-    traj = BaselineTrajectory.from_file(str(DATA_DIR / "trajectories" / "capri_ref_2030.json"))
+    traj = BaselineTrajectory.from_file(str(DATA_DIR / "scenarios" / "capri_ref_2030"))
     pmod = ProjectionModule(m, traj, capri_prices_dir=str(DATA_DIR / "trajectories"))
     d30, _ = pmod.project_data(2030)
     pm = pmod._model_for(d30)

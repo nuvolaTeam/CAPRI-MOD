@@ -138,6 +138,28 @@ cake (CAPRI's codes, as the market's).
 
 
 
+### Scenarios (`scenarios/<name>/`)
+
+One folder per projection scenario (capri_mod/projection/scenario_io.py; until 31 October 2026 one JSON file each in
+`trajectories/`): the scenario's settings and its reference data in separate files.
+
+| File | Content | Built by |
+|---|---|---|
+| `scenarios/<name>/settings.toml` | name, source, vintage, base_year, target_years, notes, [provenance] | the builders below; `null` by hand |
+| `scenarios/<name>/growth.csv` | block, item, year, factor: cumulative growth factor relative to the base year per block (yields, herds, land) and activity or land type | `tools/build/build_trajectory_capri_ref.py` (`capri_ref_2030`), `tools/build/build_captrd_trajectory.py` (`captrd_2030`), both with `build_trajectory_model_keys.py` |
+| `scenarios/<name>/regional.csv` | block, region, item, year, factor: the per-region factors (CAPRI's four-character region keys and the model's regions) | same |
+
+The `null` scenario has settings only (no factors: the identity of the projection).
+
+### Nested inputs as long tables (converted from JSON on 31 October 2026)
+
+Read and written by capri_mod/data/nested_tables.py, which gives the readers the structure they used before. Companion
+files: `manure_pool_centres.csv`; `nh3_factors_capri_regions.csv`; `fodder_balance_2017_use.csv`;
+`world_market_baseline_products.csv`; `feed_demand_nonEU_elasticities.csv`, `feed_demand_nonEU_capri_regions.csv`;
+`young_animals_2017_coef.csv`, `young_animals_by_sex_2017_coef.csv`. `feed_ration_2017.csv` holds one value per row
+(region, animal, block, feed, nutrient, value: the feed empty in the requirements, the nutrient empty in the ration,
+prices and slopes).
+
 ### CAPRI 2030 prices (`trajectories/`)
 
 | File | Content | Built by |

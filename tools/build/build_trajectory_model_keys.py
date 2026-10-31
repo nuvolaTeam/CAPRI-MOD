@@ -1,4 +1,4 @@
-"""Key CAPRI's trend projection (captrd_2030.json) by the model's own activity and region names.
+"""Key CAPRI's trend projection (capri_data/scenarios/captrd_2030) by the model's own activity and region names.
 
 The trajectory carries CAPRI's codes: activities as CAPRI names them (MAIZ, TWIN, SCOW, BULF, SOWS, HENS, POUF,
 SHGT, OFAR ...) and regions as the first four characters of CAPRI's region code (DE11, FR24, BL00 ...). The
@@ -11,10 +11,11 @@ through tools/lib/_model_regions.region_to_capri() (the NUTS correspondence with
 Since 29 October 2026 the file is built from blank by tools/build/build_captrd_trajectory.py, which calls
 add_model_keys; the command line below edits a file in place (as before) and is not part of the data pipeline.
 
-    python tools/build/build_trajectory_model_keys.py [capri_data/trajectories/captrd_2030.json]
+    python tools/build/build_trajectory_model_keys.py [capri_data/scenarios/captrd_2030]
+(a scenario folder, capri_mod/projection/scenario_io.py; a JSON file until 31 October 2026)
 """
 from __future__ import annotations
-import json, sys
+import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -76,10 +77,12 @@ def add_model_keys(t: dict) -> dict:
 
 
 def main():
-    path = Path(sys.argv[1]) if len(sys.argv) > 1 else ROOT / "capri_data" / "trajectories" / "captrd_2030.json"
-    t = json.loads(path.read_text())
+    path = Path(sys.argv[1]) if len(sys.argv) > 1 else ROOT / "capri_data" / "scenarios" / "captrd_2030"
+    sys.path.insert(0, str(ROOT))
+    from capri_mod.projection import scenario_io
+    t = scenario_io.read(path)
     added = add_model_keys(t)
-    path.write_text(json.dumps(t, indent=1))
+    scenario_io.write(path, t)
     print(f"{path.resolve().relative_to(ROOT)}: {added}")
 
 if __name__ == "__main__":
