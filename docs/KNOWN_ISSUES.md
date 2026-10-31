@@ -955,6 +955,14 @@ CAPRI's stop rule, recorded every iteration since r135, flags rows that move by 
   114, sunflower 51 against 115, maize 148 against 167. So the region still has near-equal optima and the end state
   depends on the path; the EU indicators of the two runs are within 0.4 points. Open
 
+  **Gate 10 (31 October 2026, r196 Farm-to-Fork, r197 Green Deal against gate 9's r194, r195):** EU indicators within
+  0.2 points; a few regions at another local optimum of their non-convex regional problem, the path changed by K80's
+  tolerance (1e-10): Farm-to-Fork FR820000 wine 16.5 -> 50.7 kha (base 52.4; gate 8 and 9 had the 16.5 state), olives
+  0.9 -> 16.7 (base 8.9), FR810000 olives 14.9 -> 5.4 (the jump check acted on FR810000 at iteration 2); Green Deal
+  BG020000 oats 1.5 -> 23.1, other cereals 19.0 -> 52.9, sunflower 24.9 -> 46.9 (a region with mineral caps relaxed).
+  Which state has the lower objective at the final prices is not measured (both runs' solves are optimal and the jump
+  check did not act on FR820000 or BG020000)
+
 <a id="k80"></a>
 ### K80: The same run repeated from a warm start differs by up to 3e-5 relative in small cereal activities (26 October 2026)
 
