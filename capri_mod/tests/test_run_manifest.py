@@ -1,6 +1,5 @@
 """The run manifest (capri_mod/run_manifest.py): the inputs a run reads, with their SHA-256, and the code's state."""
 import hashlib
-import json
 
 import pandas as pd
 
@@ -13,14 +12,14 @@ def test_the_manifest_records_the_inputs_read_with_their_hash(tmp_path):
     f = root / "capri_data" / "shared" / "rms_to_rm.csv"
     run_manifest.start()
     read_csv(f)
-    json.loads((root / "capri_data" / "2017" / "feed" / "feed_ration_2017.json").read_text())   # Path.read_text: Python's open too
+    (root / "capri_data" / "2017" / "feed" / "fodder_balance_2017.csv").read_text()   # Path.read_text: Python's open too
     out = tmp_path / "x.csv"
     pd.DataFrame({"a": [1]}).to_csv(out)                                   # a write is not an input
     m = run_manifest.finish()
     rel = "capri_data/shared/rms_to_rm.csv"
     assert rel in m["inputs"]
     assert m["inputs"][rel]["sha256"] == hashlib.sha256(f.read_bytes()).hexdigest()
-    assert "capri_data/2017/feed/feed_ration_2017.json" in m["inputs"]
+    assert "capri_data/2017/feed/fodder_balance_2017.csv" in m["inputs"]
     assert str(out) not in m["external_inputs"]
     assert len(m["git"]["commit"]) == 40 and m["software"]["pandas"] == pd.__version__
     # recording stops at finish

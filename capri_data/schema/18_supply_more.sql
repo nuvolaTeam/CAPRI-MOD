@@ -896,3 +896,55 @@ INSERT INTO value_units VALUES
   ('sup_producer_prices_regional', 'UAAR', NULL, 'open', 'producer_prices_regional.UAAR: EUR/t as CAPRI''s MPRI, to be confirmed per column'),
   ('sup_producer_prices_regional', 'WINE', NULL, 'open', 'producer_prices_regional.WINE: EUR/t as CAPRI''s MPRI, to be confirmed per column'),
   ('sup_producer_prices_regional', 'OFOD', NULL, 'open', 'producer_prices_regional.OFOD: EUR/t as CAPRI''s MPRI, to be confirmed per column');
+
+-- file: capri_data/2017/supply/young_animals_2017.csv
+CREATE TABLE sup_young_animals_2017 (
+    region VARCHAR NOT NULL REFERENCES regional_units (region),
+    category VARCHAR NOT NULL CHECK (category IN ('calves', 'young', 'cows', 'piglets', 'lambs')),
+    base_net_export DOUBLE NOT NULL,
+    value_eur_head DOUBLE NOT NULL,
+    PRIMARY KEY (region, category)
+);
+COMMENT ON TABLE sup_young_animals_2017 IS 'CAPRI''s young-animal balances per model region (supply_model.gms INPANI_), calves and young cattle pooled across the sexes (the model''s default): base net export and CAPRI''s national unit value (UVAG); the coefficients in young_animals_2017_coef.csv (tools/build/build_young_animals.py; young_animals_2017.json until 31 October 2026; capri_mod/data/nested_tables.py)';
+INSERT INTO value_units VALUES
+  ('sup_young_animals_2017', 'base_net_export', NULL, 'open', 'young_animals_2017.base_net_export: 1000 head (the builder; no unit code in the catalogue)'),
+  ('sup_young_animals_2017', 'value_eur_head', NULL, 'open', 'young_animals_2017.value_eur_head: EUR per head (the builder; no unit code in the catalogue)');
+
+-- file: capri_data/2017/supply/young_animals_2017_coef.csv
+CREATE TABLE sup_young_animals_2017_coef (
+    region VARCHAR NOT NULL REFERENCES regional_units (region),
+    category VARCHAR NOT NULL CHECK (category IN ('calves', 'young', 'cows', 'piglets', 'lambs')),
+    side VARCHAR NOT NULL CHECK (side IN ('produce', 'use')),
+    activity VARCHAR NOT NULL REFERENCES model_activities (code),
+    coefficient DOUBLE NOT NULL,
+    PRIMARY KEY (region, category, side, activity)
+);
+COMMENT ON TABLE sup_young_animals_2017_coef IS 'young animals produced or used per model head of an activity (CAPRI''s YCAM..YPIG outputs, ICAM..IPIG inputs per 1000 head, LEVL weights, per model head) in the pooled balances of young_animals_2017.csv (tools/build/build_young_animals.py)';
+INSERT INTO value_units VALUES
+  ('sup_young_animals_2017_coef', 'coefficient', 'U_HdPerHd', 'builder', 'young_animals_2017_coef.coefficient: head per head (the builder)');
+
+-- file: capri_data/2017/supply/young_animals_by_sex_2017.csv
+CREATE TABLE sup_young_animals_by_sex_2017 (
+    region VARCHAR NOT NULL REFERENCES regional_units (region),
+    category VARCHAR NOT NULL CHECK (category IN ('calves_m', 'calves_f', 'young_m', 'young_f', 'cows', 'piglets', 'lambs')),
+    base_net_export DOUBLE NOT NULL,
+    value_eur_head DOUBLE NOT NULL,
+    PRIMARY KEY (region, category)
+);
+COMMENT ON TABLE sup_young_animals_by_sex_2017 IS 'CAPRI''s young-animal balances per model region and sex (INPANI_), read instead of young_animals_2017.csv only with the cattle member splits on (KNOWN_ISSUES K65); the coefficients in young_animals_by_sex_2017_coef.csv (tools/build/build_young_animals.py; young_animals_by_sex_2017.json until 31 October 2026)';
+INSERT INTO value_units VALUES
+  ('sup_young_animals_by_sex_2017', 'base_net_export', NULL, 'open', 'young_animals_by_sex_2017.base_net_export: 1000 head (the builder; no unit code in the catalogue)'),
+  ('sup_young_animals_by_sex_2017', 'value_eur_head', NULL, 'open', 'young_animals_by_sex_2017.value_eur_head: EUR per head (the builder; no unit code in the catalogue)');
+
+-- file: capri_data/2017/supply/young_animals_by_sex_2017_coef.csv
+CREATE TABLE sup_young_animals_by_sex_2017_coef (
+    region VARCHAR NOT NULL REFERENCES regional_units (region),
+    category VARCHAR NOT NULL CHECK (category IN ('calves_m', 'calves_f', 'young_m', 'young_f', 'cows', 'piglets', 'lambs')),
+    side VARCHAR NOT NULL CHECK (side IN ('produce', 'use')),
+    activity VARCHAR NOT NULL REFERENCES model_activities (code),
+    coefficient DOUBLE NOT NULL,
+    PRIMARY KEY (region, category, side, activity)
+);
+COMMENT ON TABLE sup_young_animals_by_sex_2017_coef IS 'young animals produced or used per model head of an activity in the per-sex balances of young_animals_by_sex_2017.csv (tools/build/build_young_animals.py)';
+INSERT INTO value_units VALUES
+  ('sup_young_animals_by_sex_2017_coef', 'coefficient', 'U_HdPerHd', 'builder', 'young_animals_by_sex_2017_coef.coefficient: head per head (the builder)');

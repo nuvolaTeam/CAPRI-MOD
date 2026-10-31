@@ -25,13 +25,14 @@ supply-model regions (United Kingdom, the Western Balkans, Turkey) have no p_Ela
 supply models, which capri-mod does not have for them: in ROW their feed counts in the feed share and follows the
 elasticities of ROW's other regions; Turkey, a trade region of its own, keeps the generic own-price response.
 
-Output: capri_data/2017/market/feed_demand_nonEU.json {"_source", "parameters": {"REGION|COMM": {feed_share,
-elasticities}}}; source extracts capri_data/sources/market/feed_demand_nonEU_{elas,use}_2030.csv.
+Output: capri_data/2017/market/feed_demand_nonEU.csv (region, commodity, feed_share),
+feed_demand_nonEU_elasticities.csv (region, commodity, price_of, elasticity) and feed_demand_nonEU_capri_regions.csv
+(region, commodity, capri_region) (capri_mod/data/nested_tables.py; a JSON file until 31 October 2026); source extracts capri_data/sources/market/feed_demand_nonEU_{elas,use}_2030.csv.
 
     python tools/build/build_feed_demand_nonEU.py
 """
 from __future__ import annotations
-import argparse, json, re, sys
+import argparse, re, sys
 from collections import defaultdict
 from pathlib import Path
 
@@ -44,7 +45,7 @@ _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to
 ROOT = Path(__file__).resolve().parents[2]
 KEEP_E = ROOT / "capri_data" / "sources" / "market" / "feed_demand_nonEU_elas_2030.csv"
 KEEP_U = ROOT / "capri_data" / "sources" / "market" / "feed_demand_nonEU_use_2030.csv"
-DEST = ROOT / "capri_data" / "2017" / "market" / "feed_demand_nonEU.json"
+DEST = ROOT / "capri_data" / "2017" / "market" / "feed_demand_nonEU.csv"
 USES = ("HCON", "FEED", "PROC", "BIOF")
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "lib"))
 from _model_regions import EU_MS2 as _EU_FROM_DATA  # noqa: E402  (capri_data/shared/eu_market_blocks.csv)
@@ -150,12 +151,14 @@ def main():
         params[f"{R}|{c}"] = {"feed_share": f / u,
                               "elasticities": {c2: v / fe for c2, v in wel[(R, c)].items()},
                               "capri_regions": sorted(members[(R, c)])}
-    src = ("CAPRI 2030 calibration: feed share = sum FEED / sum (HCON + FEED + PROC + BIOF) over the trade region's "
-           "CAPRI regions (data_market_1730defaulta CAL); elasticities = p_ElasFeed(RMS, feed, price-of, 'CAL') from "
-           "elas_2_1730defaulta, feed-weighted over the CAPRI regions of an aggregate, every product with a CAPRI feed "
-           "function that the model trades (CAPRI -> model products: tools/build/build_bilateral_market.py MODEL). Non-EU regions only: EU feed comes from the supply models' feed "
-           "bulks (tools/build/build_feed_bulks.py). tools/build/build_feed_demand_nonEU.py")
-    json.dump({"_source": src, "parameters": params}, open(DEST, "w"), indent=1)
+    # source: CAPRI 2030 calibration: feed share = sum FEED / sum (HCON + FEED + PROC + BIOF) over the trade region's
+    # CAPRI regions (data_market_1730defaulta CAL); elasticities = p_ElasFeed(RMS, feed, price-of, 'CAL') from
+    # elas_2_1730defaulta, feed-weighted over the CAPRI regions of an aggregate, every product with a CAPRI feed function
+    # that the model trades (CAPRI -> model products: tools/build/build_bilateral_market.py MODEL). Non-EU regions only:
+    # EU feed comes from the supply models' feed bulks (tools/build/build_feed_bulks.py)
+    sys.path.insert(0, str(ROOT))
+    from capri_mod.data.nested_tables import write_feed_demand
+    write_feed_demand(DEST, params)
     regs = sorted({k.split("|")[0] for k in params})
     print(f"wrote {DEST.relative_to(ROOT)}: {len(params)} entries, {len(regs)} regions {regs}")
     miss = sorted(trade - set(regs))

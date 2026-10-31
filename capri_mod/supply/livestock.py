@@ -11,7 +11,7 @@ from __future__ import annotations
 class LivestockBlock:
     def _young_animal_coefs(self) -> dict:
         """{good: {"produce": {act: per head}, "use": {act: per head}, "value_eur_head": v}} for this
-        region (capri_data/2017/supply/young_animals_2017.json, tools/build/build_young_animals.py)."""
+        region (capri_data/2017/supply/young_animals_2017.csv, tools/build/build_young_animals.py)."""
         rec = young_animal_table().get(self.data.region_id, {})
         fac = getattr(self.data, "young_value_factor", None) or {}
         if not fac:

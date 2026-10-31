@@ -113,7 +113,7 @@ Other entries of the same period (registry names in brackets; details in the reg
 - **EU price reporting**: reported EU prices omitted the Armington premium farmers respond to; `domestic_prices` now
   carries the producer price (`wedge_prices` keeps the old value).
 - **Ammonia**: a housing-only factor plus a "soils = 10% of livestock" proxy replaced by CAPRI's factors per region
-  and animal (`nh3_factors_capri.json`, from the 2030 reference run); ammonia now follows CAPRI's N loss cascade
+  and animal (`nh3_factors_capri.csv`, from the 2030 reference run); ammonia now follows CAPRI's N loss cascade
   (docs/N_CASCADE_SPEC.md).
 - **Land-market units**: CAPRI's land-market terms are per hectare, the model's land in 1000 ha (factor 1,000).
 - **Environmental module in the regional models**: the regional models had no access to it, so two calculations

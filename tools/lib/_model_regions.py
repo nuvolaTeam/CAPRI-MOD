@@ -79,9 +79,19 @@ SPLITS_MERGES = {
     "HU11": ("HU100000",), "HU12": ("HU100000",),
     "IE04": ("IR010000",), "IE05": ("IR020000",), "IE06": ("IR010000", "IR020000"),
 }
-#: wrong entries in nuts_version_correspondence.json: FI19 (Laensi-Suomi) is unchanged since 2006;
+#: wrong entries in nuts_version_correspondence.csv: FI19 (Laensi-Suomi) is unchanged since 2006;
 #: FI1C comes from FI18, not FI19
 CORR_FIXES = {"FI190000": ["FI19"], "FI180000": ["FI18"]}
+
+
+def _nuts_correspondence():
+    """CAPRI's NUTS version correspondence {capri code: [NUTS codes]} (capri_data/shared/nuts_version_correspondence.csv,
+    read by capri_mod/data/nested_tables.py, loaded from its file: this module runs without the package on the path)."""
+    import importlib.util
+    sp = importlib.util.spec_from_file_location("_nested_tables", ROOT / "capri_mod" / "data" / "nested_tables.py")
+    nt = importlib.util.module_from_spec(sp)
+    sp.loader.exec_module(nt)
+    return nt.read_nuts_correspondence(ROOT / "capri_data" / "shared" / "nuts_version_correspondence.csv")
 
 
 def capri_groups(model_regions=None):
@@ -97,8 +107,7 @@ def capri_groups(model_regions=None):
     if _all_units(regs):                       # CAPRI's units: each region is its own group
         out = {i: ({r}, {r}) for i, r in enumerate(sorted(regs))}
         return {r: i for i, (cs, _) in out.items() for r in cs}, out
-    import json
-    corr = json.loads((ROOT / "capri_data" / "shared" / "nuts_version_correspondence.json").read_text())["capri8_to_nuts"]
+    corr = _nuts_correspondence()
     corr = {**corr, **CORR_FIXES}
     edges = []
     for c8, lst in corr.items():
@@ -143,8 +152,7 @@ def region_to_capri():
     identity."""
     if _all_units(model_regions_list()):
         return {r: r for r in model_regions_list()}
-    import json
-    corr = json.loads((ROOT / "capri_data" / "shared" / "nuts_version_correspondence.json").read_text())["capri8_to_nuts"]
+    corr = _nuts_correspondence()
     corr = {**corr, **CORR_FIXES}
     out = {}
     for c8, lst in corr.items():

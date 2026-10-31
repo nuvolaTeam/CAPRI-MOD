@@ -141,3 +141,11 @@ INSERT INTO value_units VALUES
   ('shr_trade_flows_2017', 'RAPC', NULL, 'open', 'trade_flows_2017.RAPC: unit to be established'),
   ('shr_trade_flows_2017', 'SUNC', NULL, 'open', 'trade_flows_2017.SUNC: unit to be established'),
   ('shr_trade_flows_2017', 'SOYC', NULL, 'open', 'trade_flows_2017.SOYC: unit to be established');
+
+-- file: capri_data/shared/nuts_version_correspondence.csv
+CREATE TABLE shr_nuts_version_correspondence (
+    capri_code VARCHAR NOT NULL,
+    nuts_code VARCHAR,
+    UNIQUE (capri_code, nuts_code)
+);
+COMMENT ON TABLE shr_nuts_version_correspondence IS 'CAPRI''s 8-character region codes and their NUTS codes across coding-scheme versions, in order (a code can have several: IT110000 -> IT11 and ITC1; an empty nuts_code for a code without one), from CAPRI''s gams/compile_rdp_data/build_general_set_structure.gms, with 75 NUTS-2 pairs added in October 2026 (each verified by CAPRI''s total agricultural area against the model region''s base area and a second variable), NO090000 -> NO03 and PL500000 -> PL81 removed as unconfirmed, and FI190000 -> FI1C removed; read by tools/lib/_model_regions.py (with its CORR_FIXES, SPLITS_MERGES). nuts_version_correspondence.json until 31 October 2026, kept by hand (capri_mod/data/nested_tables.py)';

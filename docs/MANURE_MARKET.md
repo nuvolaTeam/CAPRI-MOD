@@ -59,7 +59,7 @@ at the base, and deviations from the base trade follow the change in manure's va
   N bought or saved is priced on the columns.
 
 Pools (`CAPRIModel._update_manure_pools`): CAPRI's 34 country pools and 930 links
-(`capri_data/2017/environment/manure_pool_costs.json`, `tools/build/build_manure_pool_costs.py`). Each outer iteration:
+(`capri_data/2017/environment/manure_pool_costs.csv`, `tools/build/build_manure_pool_costs.py`). Each outer iteration:
 
 1. each region's exact piecewise-linear schedule from the reduced costs of its trade columns at its solution (NLP form:
    IPOPT's bound multipliers, because the fertilisation block is not in the stored rows; conic form: the conic solve's

@@ -43,7 +43,12 @@ BUILDERS = {
     "feed_bulks_eu.csv": "build_feed_bulks.py",
     "feed_bulks_eu_share.csv": "build_feed_bulks.py",
     "feed_byproducts.csv": "build_feed_byproducts.py",
-    "feed_demand_nonEU.json": "build_feed_demand_nonEU.py",
+    "feed_demand_nonEU.csv": "build_feed_demand_nonEU.py",
+    "feed_demand_nonEU_elasticities.csv": "build_feed_demand_nonEU.py",
+    "feed_demand_nonEU_capri_regions.csv": "build_feed_demand_nonEU.py",
+    "world_market_baseline.csv": "build_world_market_baseline.py",
+    "world_market_baseline_products.csv": "build_world_market_baseline.py",
+    "dairy_world_baseline.csv": "build_dairy_world_markets.py",
     "processing_nq_hessian.csv": "build_processing_nq.py",
     "processing_nq_base.csv": "build_processing_nq.py",
     "welfare_base_2030.csv": "build_welfare_base.py",
@@ -84,6 +89,12 @@ class MarketInputs:
             b = next((v for k, v in BUILDERS.items() if k == name or (("{" in k) and name.startswith(k.split("{")[0]))),
                      None)
             raise FileNotFoundError(f"market input {p} is missing" + (f" (written by tools/build/{b})" if b else ""))
+
+    def need(self, name: str, where: str = "market") -> Path:
+        """The path of a required input; a missing file raises FileNotFoundError naming it and its builder."""
+        p = self.path(name, where)
+        self._require(p, name)
+        return p
 
     # -- readers -------------------------------------------------------------------------------------------------
     def csv(self, name: str, where: str = "market", required: bool = True, **read_kw) -> Optional[pd.DataFrame]:

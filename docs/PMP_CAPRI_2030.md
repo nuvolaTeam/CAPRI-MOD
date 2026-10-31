@@ -73,7 +73,7 @@ Under the same switch, at the 2030 market year:
   2030 market year with pmp_source capri2030 / recipe (animals: DCOL/DCOH, BULL/BULH, HEIL/HEIH with "animals" in
   pmp_capri_parts; grassland GRAE/GRAI with "crops"). Medians 2030 over 2017: dairy 1.8, bulls 1.4, heifers 1.3,
   intensive grassland 1.2, extensive 0.9.
-- **Feed PMP slopes** (`tools/build/build_feed_ration.py`: `capri_slope_2030` beside `capri_slope` in feed_ration_2017.json):
+- **Feed PMP slopes** (`tools/build/build_feed_ration.py`: `capri_slope_2030` beside `capri_slope` in feed_ration_2017.csv):
   CAPRI's 2030 p_pmpFeedInpCoeff SLOP, aggregated as the 2017 ones (2017 weights, registered); the ration model takes
   them (`RationModel(slope_key="capri_slope_2030")`).
 - **Land market** (`tools/build/build_land_market.py --year 2030` -> `land_market_2030.csv`): CAPRI's 2030 land-type

@@ -63,8 +63,6 @@ class ManureBlock:
         (min_p sum_k Phi_k(p_k) s.t. p_k - p_l <= c_kl) was solved with SLSQP before and
         failed on the schedules' kinks.
         """
-        import json as _json
-        from pathlib import Path as _P
         from scipy.optimize import nnls as _nnls, minimize as _min
         sm = self.supply_module
         # the market's prices by country: the N market's in manure_pool_price, P and K in manure_pool_price_pk
@@ -72,10 +70,12 @@ class ManureBlock:
                      else ((getattr(sm, "manure_pool_price_pk", None) or {}).get(prod) or {}))
         cost = getattr(self, "_pool_cost_cache", None)
         if cost is None:
-            f = _P(__file__).resolve().parents[2] / "capri_data" / "2017" / "environment" / "manure_pool_costs.json"
+            from pathlib import Path as _P
+            from capri_mod.data import nested_tables as _nt
+            f = _P(__file__).resolve().parents[2] / "capri_data" / "2017" / "environment" / "manure_pool_costs.csv"
             cost = {}
             if f.exists():
-                for k, v in _json.load(open(f))["pairs"].items():
+                for k, v in _nt.read_manure_pools(f)["pairs"].items():
                     a, b = k.split("|"); cost[(a, b)] = v["eur_per_t_n"] / 1000.0
             self._pool_cost_cache = cost
         sched, es, sup = {}, {}, {}

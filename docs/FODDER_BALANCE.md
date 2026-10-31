@@ -17,12 +17,12 @@ their region and fodder crops to the herds.
 
 ## capri-mod
 
-Data: `tools/build/build_fodder_balance.py` -> `capri_data/2017/feed/fodder_balance_2017.json`, per region and fodder
+Data: `tools/build/build_fodder_balance.py` -> `capri_data/2017/feed/fodder_balance_2017.csv`, per region and fodder
 (grass FGRA on GRAS, fodder maize FMAI on MAIF, other fodder FOFA on OFOD):
 
 - `u_t_per_ha`: usable fresh fodder per ha = CAPRI's base fodder use (herds x rations, t fresh) / base fodder area, so
   CAPRI's loss share and yield are embedded and use = u x area holds at base;
-- `use_t_head`: fodder per head per animal, from the rations (`feed_ration_2017.json`);
+- `use_t_head`: fodder per head per animal, from the rations (`feed_ration_2017.csv`);
 - `value_eur_t`: CAPRI's unit value of the fodder (UVAG), the value the balance carries at base.
 
 The model holds grass yields in dry matter; rations are fresh. The balance uses CAPRI's fresh quantities throughout,

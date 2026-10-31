@@ -11,7 +11,8 @@ class AmmoniaBlock:
     def _nh3_factors(self) -> dict:
         d = self.__dict__.get("_nh3_fac_cache")
         if d is None:
-            d = _inputs.current().json("nh3_factors_capri.json", "environment")["regions"]
+            from capri_mod.data.nested_tables import read_nh3_factors
+            d = read_nh3_factors(_inputs.current().path("nh3_factors_capri.csv", "environment"))
             self._nh3_fac_cache = d
         return d
 

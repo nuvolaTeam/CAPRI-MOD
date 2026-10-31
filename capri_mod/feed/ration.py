@@ -27,7 +27,6 @@ there; here they are held at their base quantity.
 """
 from __future__ import annotations
 
-import json
 from pathlib import Path
 
 import numpy as np
@@ -219,7 +218,7 @@ class Ration:
 
 
 class RationModel:
-    """All EU region-animal rations, from feed_ration_2017.json."""
+    """All EU region-animal rations, from feed_ration_2017.csv (capri_mod/data/nested_tables.py)."""
 
     def __init__(self, data_dir: str | Path = None, scale: dict = None, price_scale: dict = None,
                  factor: dict = None, slope_key: str = "capri_slope"):
@@ -227,8 +226,9 @@ class RationModel:
         (capri_mod/projection: output per head follows the projected yield); the base ration is scaled by
         the largest factor so it stays feasible, and the ration is calibrated to it."""
         root = Path(data_dir) if data_dir else Path(__file__).resolve().parents[2] / "capri_data"
-        f = root / "2017" / "feed" / "feed_ration_2017.json"
-        raw = json.load(open(f))["regions"] if f.exists() else {}
+        from capri_mod.data.nested_tables import read_feed_rations
+        f = root / "2017" / "feed" / "feed_ration_2017.csv"
+        raw = read_feed_rations(f) if f.exists() else {}
         self.rations = {}
         ctx = self._contexts(root, raw)
         scale = scale or {}

@@ -2032,8 +2032,8 @@ def test_land_bounds_do_not_rewrite_the_base_year(data):
 
 
 def test_world_production_coverage(data):
-    """Every non-EU region's base production of a product CAPRI's FAO_agg balances map (world_market_baseline.json,
-    built by tools/build/build_world_market_baseline.py, its "_products") is CAPRI's: each such region-product with a
+    """Every non-EU region's base production of a product CAPRI's FAO_agg balances map (world_market_baseline.csv,
+    built by tools/build/build_world_market_baseline.py, its world_market_baseline_products.csv) is CAPRI's: each such region-product with a
     base production has its balance (the EU's is its supply models'). The products outside the mapping are listed in
     the builder: the residual feeds and the products whose base is CAPRI's market result (bilateral flows, biofuels,
     DDGS), and those without a matching CAPRI world balance (PARI, DWHE, OOIL, OLIV). Until 29 October 2026 the test
@@ -2047,9 +2047,10 @@ def test_world_production_coverage(data):
     import json
     from capri_mod.market.market_module import MarketModule
 
-    wbf = json.load(open(DATA_DIR / "2017" / "market" / "world_market_baseline.json"))
-    prods = set(wbf["_products"])
-    keys = {tuple(k.split("|")) for k, v in wbf["balances"].items() if float(v.get("production", 0) or 0) > 0}
+    from capri_mod.data.nested_tables import read_balance_products, read_balances
+    wbf = DATA_DIR / "2017" / "market" / "world_market_baseline.csv"
+    prods = set(read_balance_products(wbf))
+    keys = {tuple(k.split("|")) for k, v in read_balances(wbf).items() if float(v.get("production", 0) or 0) > 0}
     mm = MarketModule(data)
     bp = mm.par.base_production
     import pandas as pd
@@ -3104,7 +3105,8 @@ def test_lamb_balance_links_sheep_activities():
     """CAPRI's lambs (sets.gms YLAM.ILAM): milk sheep and goats (SHGM) produce them, fattening (SHGF) and SHGM's
     replacement use them; the young-animal balances carry them and EU production and use agree at base."""
     import json
-    ya = json.load(open(DATA_DIR / "2017" / "supply" / "young_animals_2017.json"))["regions"]
+    from capri_mod.data.nested_tables import read_young_animals
+    ya = read_young_animals(DATA_DIR / "2017" / "supply" / "young_animals_2017.csv")
     herds = pd.read_csv(DATA_DIR / "2017" / "supply" / "animal_numbers.csv", index_col=0)
     P = U = 0.0
     for r, rec in ya.items():
@@ -3256,7 +3258,8 @@ def test_processing_inpe_and_nonEU_feed_are_capris_2030():
     r = hh[(hh.rms == "USA") & (hh.x == "SOYA") & (hh.y == "SOYA")].iloc[0]
     inpe_usa = float(pb[pb.rms == "USA"]["inpe"].iloc[0])
     assert abs(pq["H"]["USA"][("SOYA", "SOYA")] - float(r.h) / inpe_usa) < 1e-9 * float(r.h)
-    fd = json.load(open(MK / "feed_demand_nonEU.json"))["parameters"]
+    from capri_mod.data.nested_tables import read_feed_demand
+    fd = read_feed_demand(MK / "feed_demand_nonEU.csv")
     assert "ROW|SOYC" in fd and "KOR|SOYC" in fd and "EU27|SWHE" not in fd
     us = pd.read_csv(DATA_DIR / "sources" / "market" / "feed_demand_nonEU_use_2030.csv")
     u = us[(us.rms == "USA") & (us["product"] == "MAIZ")].set_index("item")["value"]
@@ -3732,7 +3735,8 @@ def test_feed_ration_carries_capri_2030_feed_slopes():
     ration model takes them when asked (slope_key)."""
     from capri_mod.feed.ration import RationModel
     import json
-    raw = json.load(open(DATA_DIR / "2017" / "feed" / "feed_ration_2017.json"))["regions"]
+    from capri_mod.data.nested_tables import read_feed_rations
+    raw = read_feed_rations(DATA_DIR / "2017" / "feed" / "feed_ration_2017.csv")
     n = sum(1 for acts in raw.values() for rec in acts.values() if rec.get("capri_slope_2030"))
     assert n > 2000
     s17 = RationModel(str(DATA_DIR)).rations
@@ -3844,9 +3848,10 @@ def test_cattle_activities_and_young_animals_per_sex_as_capri():
     did not converge yet): the default file keeps the pooled balances, the per-sex file sits beside it and adds up
     to them."""
     import json
-    ya = json.load(open(DATA_DIR / "2017" / "supply" / "young_animals_by_sex_2017.json"))["regions"]["DE110000"]
+    from capri_mod.data.nested_tables import read_young_animals
+    ya = read_young_animals(DATA_DIR / "2017" / "supply" / "young_animals_by_sex_2017.csv")["DE110000"]
     assert {"calves_m", "calves_f", "young_m", "young_f", "cows"} <= set(ya) and "calves" not in ya
-    yp = json.load(open(DATA_DIR / "2017" / "supply" / "young_animals_2017.json"))["regions"]["DE110000"]
+    yp = read_young_animals(DATA_DIR / "2017" / "supply" / "young_animals_2017.csv")["DE110000"]
     assert {"calves", "young", "cows"} <= set(yp) and "calves_m" not in yp
     assert abs(ya["calves_m"]["produce"]["DCOW"] + ya["calves_f"]["produce"]["DCOW"] - yp["calves"]["produce"]["DCOW"]) < 1e-9
     from capri_mod.supply.supply_module import RegionalSupplyModel, young_animal_table
