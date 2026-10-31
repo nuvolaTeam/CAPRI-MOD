@@ -13,7 +13,7 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 
 | # | Issue | Status |
 |---|---|---|
-| [K108](#k108) | Inputs from CAPRI's 2030 results in 2030 money in a model working in 2017 money | open: audit running (gate 11) |
+| [K108](#k108) | Inputs from CAPRI's 2030 results in 2030 money in a model working in 2017 money | fixed on money-year; gate 11 pending |
 | [K13](#k13) | Farm-to-Fork milk price | open: waiting for CAPRI's scenario results |
 | [K29](#k29) | NL11 and NL13 meet the tiered N target only at corner solutions (Farm-to-Fork) | open: waiting for CAPRI's scenario results |
 | [K47](#k47) | The cattle chain's equilibrium is sensitive to changes outside it | open |
@@ -1761,6 +1761,13 @@ in 2017 money (CAPRI inflates them; the model takes them before that step), cons
   fits it (Austria's rapeseed elasticity 9.7 against CAPRI's 12.4, K61; 12.4 / 1.2772 = 9.7). The Farm-to-Fork and
   Green Deal results move
 - **In 9t:** ?
-- **Status:** **open**: audit of every input built from CAPRI's 2030 results under way (31 October 2026); fix after
-  gate 10 (the project lead's decision: gate 10 runs as prepared, the money-year fix is gate 11): divide the 2030-money
-  inputs by 1.019^13, the deflator the prices take
+- **Status:** **fixed, gate 11 pending** (31 October 2026, branch money-year): tools/lib/_money.deflator(year) (the
+  deflator of capri_price_ratios_<year>.csv, one value, 1.019^13 to 4e-16) divides every item of the audit's list in its
+  builder (genetics: also CAPRI's floors of 20 and 2 EUR, in its simulation year's money; anaerobic digestion: CAPRI's
+  inflation taken back out; the per-CAPRI-region land rents stay in CAPRI's money, the recipe's input); data rebuilt in
+  the pipeline's order, every changed term exactly 1/1.277216 of before; tests 253 passed. Mini-EU Farm-to-Fork (20
+  units) against the gate-10 reference: oilseed production -22.4% (-20.6), cereals -16.9 (-16.0), veg+perm -16.1
+  (-15.5), ammonia -38.7 (-39.6), manure N2O -21.8 (-23.0), prices within 0.2 points (a subset run: its EU prices move
+  little). Not changed: genet_eff's feed cost from the 2017 ration prices where CAPRI takes the simulation year's
+  (a price-year question); the market's welfare base (to settle). The full Farm-to-Fork and Green Deal runs wait for the
+  project lead's go (gate 11)
