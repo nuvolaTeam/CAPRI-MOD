@@ -19,13 +19,13 @@ from __future__ import annotations
 
 import argparse
 import re
-import subprocess
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
 import sys  # noqa: E402
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
+from _grep import grep  # noqa: E402  (grep -E in Python: any system)
 from paths import EXPORTS  # noqa: E402  (CAPRI's material outside the repository)
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -42,8 +42,7 @@ def main():
     ini = ["INI" + k for k in CLS]
     rows_ = "|".join(list(LT) + list(CLS.values()) + trans + ini)
     pat = rf"^'[A-Z0-9]+'\.''\.'({rows_})'\.'LEVL'\.'2030'"
-    p1 = subprocess.Popen(["unzip", "-p", str(a.dump)], stdout=subprocess.PIPE)
-    out = subprocess.run(["grep", "-E", pat], stdin=p1.stdout, capture_output=True, text=True).stdout
+    out = grep(pat, str(a.dump))
     rx = re.compile(r"^'([A-Z0-9]+)'\.''\.'([A-Za-z]+)'\.'LEVL'\.'2030'\s+([-\d.Ee+]+)")
     v = {}
     for line in out.splitlines():

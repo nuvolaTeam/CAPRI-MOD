@@ -72,7 +72,7 @@ Outputs (capri_data/2017/market/, one set per market year <YEAR>)
         --elas elas_2_1730defaulta.csv
 """
 from __future__ import annotations
-import argparse, math, re, subprocess, sys
+import argparse, math, re, sys
 from pathlib import Path
 
 import pandas as pd
@@ -107,6 +107,7 @@ TRADE_BLOCKS = {"EU27yr19", "URUPAR", "WBA", "MER_OTH", "MED"}
 MORE_AGGREGATES = {"RW"}
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "lib"))
 from _model_regions import EU_MS as _EU_FROM_DATA  # noqa: E402  (capri_data/shared/eu_market_blocks.csv)
+from _grep import grep  # noqa: E402  (grep -E in Python: any system)
 EU_MS = set(_EU_FROM_DATA)                                  # CAPRI's EU member states, from the data
 
 
@@ -116,8 +117,8 @@ def sigmoid(x: float) -> float:
 
 def extract(dump: Path, year: str) -> pd.DataFrame:
     pat = re.compile(r"^'([^']+)'\.''\.'(" + "|".join(ITEMS) + r")'\.'([A-Z]+)'\.'" + year + r"'\s+([-\d.Ee+]+)")
-    txt = subprocess.run(["grep", "-E", r"^'[^']+'\.''\.'(" + "|".join(ITEMS) + r")'\.'(" + "|".join(sorted(PRODS))
-                          + r")'\.'" + year + "'", str(dump)], capture_output=True, text=True).stdout
+    txt = grep(r"^'[^']+'\.''\.'(" + "|".join(ITEMS) + r")'\.'(" + "|".join(sorted(PRODS))
+                          + r")'\.'" + year + "'", str(dump))
     rows = []
     for line in txt.splitlines():
         m = pat.match(line)

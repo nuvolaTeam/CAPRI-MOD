@@ -38,6 +38,7 @@ import pandas as pd
 import functools as _ft
 import sys  # noqa: E402
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
+from _grep import grep  # noqa: E402  (grep -E in Python: any system)
 from paths import EXPORTS  # noqa: E402  (CAPRI's material outside the repository)
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
@@ -100,13 +101,11 @@ CROPS = tuple(sorted(set(GROUP) | {"OIND", "NURS", "TEXT", "TOBA", "FALL", "NECR
 
 
 def extract(dump: Path) -> pd.DataFrame:
-    import subprocess
     pat = (r"^'[A-Z0-9]+'\.'(fertDist_mine|fertDist_excr|fertDist_cres)'\.'(" + "|".join(CROPS) + r")'\.'NITF'\.'2030'"
            r"|^'[A-Z0-9]+'\.''\.'(" + "|".join(CROPS) + r")'\.'LEVL'\.'2030'"
            r"|^'[A-Z0-9]+'\.'(nutNed_mine_loss_gasRunTot_perha|fertDist_mine_perha|nutNed_excr_unavailable_perha|"
            r"fertDist_excr_perha)'\.'AGGT'\.'NITF'\.'2030'")
-    p1 = subprocess.Popen(["unzip", "-p", str(dump)], stdout=subprocess.PIPE)
-    out = subprocess.run(["grep", "-E", pat], stdin=p1.stdout, capture_output=True, text=True).stdout
+    out = grep(pat, str(dump))
     rx = re.compile(r"^'([A-Z0-9]+)'\.'([^']*)'\.'([A-Z]+)'\.'([A-Z]+)'\.'2030'\s+([-\d.Ee+]+)")
     rows = []
     for line in out.splitlines():

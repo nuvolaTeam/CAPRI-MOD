@@ -16,6 +16,7 @@ from collections import defaultdict
 from pathlib import Path
 import numpy as np
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
+from _grep import grep  # noqa: E402  (grep -E in Python: any system)
 from paths import EXPORTS, SOURCES  # noqa: E402  (CAPRI's material outside the repository)
 
 
@@ -58,9 +59,8 @@ def main() -> None:
         return next(iter(regs_g)) if len(regs_g) == 1 else None
     # land-type levels (CAPRI code, land type, 1000 ha) of the calibration point
     if args.year == 2030:
-        import subprocess as _sp2
         _pat = r"^'[A-Z]{2}[0-9A-Z]{6}'\.''\.'(ARAC|GRAS|FRUN|FORE|OLND|ARTIF)'\.'LEVL'\.'2030'"
-        _txt = _sp2.run(["grep", "-E", _pat, str(args.ref)], capture_output=True, text=True).stdout
+        _txt = grep(_pat, str(args.ref))
         _rx = re.compile(r"^'([A-Z]{2}[0-9A-Z]{6})'\.''\.'(ARAC|GRAS|FRUN|FORE|OLND|ARTIF)'\.'LEVL'\.'2030'\s+(-?\d[\d.Ee+\-]*)")
         LEVROWS = [(m.group(1), m.group(2), float(m.group(3))) for m in map(_rx.match, _txt.splitlines()) if m]
     else:

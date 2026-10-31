@@ -36,6 +36,11 @@ def _join_thousands(vals, n):
 
 
 def main(pdf):
+    import shutil
+    if not shutil.which("pdftotext"):
+        # the table layout this parser reads is pdftotext's (-layout); a Python PDF library lays the text out otherwise,
+        # and the outlook's PDF is not at hand to check one against it (docs/EXTERNAL_SOURCES.md)
+        sys.exit("pdftotext (poppler-utils, a program outside Python) is needed: the parser reads its -layout text")
     txt = subprocess.run(["pdftotext", "-layout", pdf, "-"], capture_output=True, text=True, check=True).stdout
     lines = txt.splitlines()
     tab, rows = None, []

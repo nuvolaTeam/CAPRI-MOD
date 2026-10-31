@@ -46,7 +46,7 @@ recipe_<Y>_quad_pact.csv
     python tools/build/build_pmp_recipe.py --year 2030|2017
 """
 from __future__ import annotations
-import argparse, glob, math, re, subprocess
+import argparse, glob, math, re
 from collections import defaultdict
 from pathlib import Path
 
@@ -55,6 +55,7 @@ import pandas as pd
 import functools as _ft
 import sys  # noqa: E402
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
+from _grep import grep  # noqa: E402  (grep -E in Python: any system)
 from paths import EXPORTS, SOURCES  # noqa: E402  (CAPRI's material outside the repository)
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
@@ -159,7 +160,7 @@ def levels_ref(year: int) -> dict:
     """CAPRI's 2030 reference results (dataOut, '{year}'): every item of the regions' activity and land rows and the
     member states' unit values (UVAG, UVAP), keyed (column, row)."""
     pat = rf"^'[A-Z]{{2}}[0-9A-Z]{{6}}'\.''\.'[A-Z0-9_]+'\.'[A-Z0-9_]+'\.'{year}'"
-    txt = subprocess.run(["grep", "-E", pat, str(REF)], capture_output=True, text=True).stdout
+    txt = grep(pat, str(REF))
     rx = re.compile(rf"^'([A-Z]{{2}}[0-9A-Z]{{6}})'\.''\.'([A-Z0-9_]+)'\.'([A-Z0-9_]+)'\.'{year}'\s+(\S+?),?\s*$")
     out = defaultdict(dict)
     for line in txt.splitlines():

@@ -19,7 +19,7 @@ so 155 kt of CAPRI's net trade (Romania 125, Ireland 30) was not in the model's 
     python tools/build/build_manure_trade_base.py [--src capri_sources/exports/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv]
 """
 from __future__ import annotations
-import argparse, importlib.util, re, subprocess, sys
+import argparse, importlib.util, re, sys
 from collections import defaultdict
 from pathlib import Path
 
@@ -27,6 +27,7 @@ import pandas as pd
 
 import functools as _ft
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
+from _grep import grep  # noqa: E402  (grep -E in Python: any system)
 from paths import EXPORTS  # noqa: E402  (CAPRI's material outside the repository)
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
@@ -40,8 +41,7 @@ def main():
                     default=EXPORTS / "res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv")
     a = ap.parse_args()
     if a.src.exists():
-        txt = subprocess.run(["grep", "-E", r"^'[A-Z0-9]{8}'\.''\.'(MTRADE|EXCRET)'\.'NITF'\.'2030'", str(a.src)],
-                             capture_output=True, text=True).stdout
+        txt = grep(r"^'[A-Z0-9]{8}'\.''\.'(MTRADE|EXCRET)'\.'NITF'\.'2030'", str(a.src))
         pat = re.compile(r"^'([A-Z0-9]{8})'\.''\.'(MTRADE|EXCRET)'\.'NITF'\.'2030'\s+([-\d.Ee+]+)")
         rows = [m.groups() for m in map(pat.match, txt.splitlines()) if m]
         KEEP.parent.mkdir(parents=True, exist_ok=True)

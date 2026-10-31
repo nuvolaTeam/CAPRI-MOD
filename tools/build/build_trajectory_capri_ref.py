@@ -20,6 +20,7 @@ import argparse, json, re, statistics, subprocess, sys
 from collections import defaultdict
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
+from _grep import grep  # noqa: E402  (grep -E in Python: any system)
 from paths import EXPORTS, SOURCES  # noqa: E402  (CAPRI's material outside the repository)
 
 
@@ -44,8 +45,7 @@ BAND = (0.2, 5.0)
 def extract(ref: Path, dump_dir: Path) -> list:
     rows = []
     p30 = re.compile(r"^'([A-Z]{2}[0-9A-Z]{6})'\.''\.'([A-Z0-9]+)'\.'(LEVL|YILD)'\.'2030'\s+([-\d.Ee+]+)")
-    txt = subprocess.run(["grep", "-E", r"^'[A-Z]{2}[0-9A-Z]{6}'\.''\.'[A-Z0-9]+'\.'(LEVL|YILD)'\.'2030'", str(ref)],
-                         capture_output=True, text=True).stdout
+    txt = grep(r"^'[A-Z]{2}[0-9A-Z]{6}'\.''\.'[A-Z0-9]+'\.'(LEVL|YILD)'\.'2030'", str(ref))
     for line in txt.splitlines():
         m = p30.match(line)
         if m and m.group(1)[:2] in SUPPLY_PREFIXES:

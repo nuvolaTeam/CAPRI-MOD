@@ -38,13 +38,14 @@ Outputs (capri_data/2017/market/)
 from __future__ import annotations
 
 import sys
-import argparse, json, re, subprocess
+import argparse, json, re
 from pathlib import Path
 
 import pandas as pd
 
 import functools as _ft
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
+from _grep import grep  # noqa: E402  (grep -E in Python: any system)
 from paths import EXPORTS, SOURCES  # noqa: E402  (CAPRI's material outside the repository)
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
@@ -130,8 +131,8 @@ def main():
     a = ap.parse_args()
     prods = sorted({p for v in BULKS.values() for p in v} | set(BULKS) | {x for g in GROUPS.values() for x in g})
     if a.dump.exists():
-        txt = subprocess.run(["grep", "-E", r"^'[^']+'\.''\.'(FEED|ARM1P|" + "|".join(USE_ITEMS) + r")'\.'("
-                              + "|".join(prods) + r")'\.'2030'", str(a.dump)], capture_output=True, text=True).stdout
+        txt = grep(r"^'[^']+'\.''\.'(FEED|ARM1P|" + "|".join(USE_ITEMS) + r")'\.'("
+                              + "|".join(prods) + r")'\.'2030'", str(a.dump))
         pat = re.compile(r"^'([^']+)'\.''\.'(FEED|ARM1P|" + "|".join(USE_ITEMS) + r")'\.'([A-Z]+)'\.'2030'\s+([-\d.Ee+]+)")
         rows = [m.groups() for m in map(pat.match, txt.splitlines()) if m]
         # Norway's balance items (its use per product, for the feed share of its use) are kept for Norway only

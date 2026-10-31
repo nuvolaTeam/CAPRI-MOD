@@ -35,7 +35,7 @@ res_2_1730greendeal_refpol_endotech_all_inidefaulta. Output: capri_data/2017/sup
     python tools/build/build_animal_pmp_capri_2030.py [--ref FILE]
 """
 from __future__ import annotations
-import argparse, re, subprocess, sys
+import argparse, re, sys
 from collections import defaultdict
 from pathlib import Path
 
@@ -43,6 +43,7 @@ import pandas as pd
 
 import functools as _ft
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
+from _grep import grep  # noqa: E402  (grep -E in Python: any system)
 from paths import EXPORTS, SOURCES  # noqa: E402  (CAPRI's material outside the repository)
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
@@ -82,7 +83,7 @@ def levels_2017_dumps(acts) -> dict:
 
 def ref_levels(ref: Path) -> dict:
     pat = rf"^'[A-Z]{{2}}[0-9A-Z]{{6}}'\.''\.'({'|'.join(ACTS)})'\.'LEVL'\.'2030'"
-    txt = subprocess.run(["grep", "-E", pat, str(ref)], capture_output=True, text=True).stdout
+    txt = grep(pat, str(ref))
     rx = re.compile(r"^'([A-Z]{2}[0-9A-Z]{6})'\.''\.'([A-Z]+)'\.'LEVL'\.'2030'\s+([-\d.Ee+]+)")
     out = defaultdict(dict)
     for line in txt.splitlines():

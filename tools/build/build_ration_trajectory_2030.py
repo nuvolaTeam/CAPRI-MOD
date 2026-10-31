@@ -21,13 +21,14 @@ and CAPRI's 2017 results (res_17<MS>.txt). Output: capri_data/trajectories/capri
     python tools/build/build_ration_trajectory_2030.py [--ref CSV] [--dump-dir DIR]
 """
 from __future__ import annotations
-import argparse, collections, importlib.util, re, subprocess, sys
+import argparse, collections, importlib.util, re, sys
 from pathlib import Path
 
 import pandas as pd
 
 import functools as _ft
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
+from _grep import grep  # noqa: E402  (grep -E in Python: any system)
 from paths import EXPORTS, SOURCES  # noqa: E402  (CAPRI's material outside the repository)
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
@@ -58,8 +59,7 @@ def main():
     want = set(FEEDS) | set(ITEMS)
     data = {"2017": collections.defaultdict(dict), "2030": collections.defaultdict(dict)}
     acts_alt = "|".join(C2M)
-    txt = subprocess.run(["grep", "-E", rf"^'[A-Z]{{2}}[0-9A-Z]{{6}}'\.''\.'({acts_alt})'\.'[A-Z0-9]+'\.'2030'", str(a.ref)],
-                         capture_output=True, text=True).stdout
+    txt = grep(rf"^'[A-Z]{{2}}[0-9A-Z]{{6}}'\.''\.'({acts_alt})'\.'[A-Z0-9]+'\.'2030'", str(a.ref))
     p30 = re.compile(r"^'([A-Z]{2}[0-9A-Z]{6})'\.''\.'([A-Z0-9]+)'\.'([A-Z0-9]+)'\.'2030'\s+(-?[\d.Ee+\-]+|[Ee][Pp][Ss])")
     for line in txt.splitlines():
         m = p30.match(line)
@@ -131,15 +131,13 @@ def main():
     fcrop = {"GRAS": "GRAS", "MAIF": "MAIF", "OFOD": "OFAR"}
     fdat = {"2017": {}, "2030": {}}
     pf30 = re.compile(r"^'([A-Z]{2}[0-9A-Z]{6})'\.''\.'(FEDM|LEVL)'\.'(GRAS|MAIF|OFAR)'\.'2030'\s+(-?[\d.Ee+\-]+)")
-    txt = subprocess.run(["grep", "-E", r"^'[A-Z]{2}[0-9A-Z]{6}'\.''\.'(FEDM|LEVL)'\.'(GRAS|MAIF|OFAR)'\.'2030'", str(a.ref)],
-                         capture_output=True, text=True).stdout
+    txt = grep(r"^'[A-Z]{2}[0-9A-Z]{6}'\.''\.'(FEDM|LEVL)'\.'(GRAS|MAIF|OFAR)'\.'2030'", str(a.ref))
     for line in txt.splitlines():
         m = pf30.match(line)
         if m:
             fdat["2030"][(m.group(1), m.group(3), m.group(2))] = float(m.group(4))
     pl30 = re.compile(r"^'([A-Z]{2}[0-9A-Z]{6})'\.''\.'(GRAS|MAIF|OFAR)'\.'LEVL'\.'2030'\s+(-?[\d.Ee+\-]+)")
-    txt = subprocess.run(["grep", "-E", r"^'[A-Z]{2}[0-9A-Z]{6}'\.''\.'(GRAS|MAIF|OFAR)'\.'LEVL'\.'2030'", str(a.ref)],
-                         capture_output=True, text=True).stdout
+    txt = grep(r"^'[A-Z]{2}[0-9A-Z]{6}'\.''\.'(GRAS|MAIF|OFAR)'\.'LEVL'\.'2030'", str(a.ref))
     for line in txt.splitlines():
         m = pl30.match(line)
         if m:

@@ -40,7 +40,7 @@ Outputs (capri_data/2017/market/):
     python tools/build/build_bilateral_market.py --eu-blocks   (CAPRI's two EU trade blocks: *_eu2.csv)
 """
 from __future__ import annotations
-import re, subprocess, sys
+import re, sys
 from collections import defaultdict
 from pathlib import Path
 
@@ -48,6 +48,7 @@ import pandas as pd
 
 import functools as _ft
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
+from _grep import grep  # noqa: E402  (grep -E in Python: any system)
 from paths import EXPORTS, SOURCES  # noqa: E402  (CAPRI's material outside the repository)
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
@@ -105,8 +106,7 @@ def extract(year, eu_blocks=False):
         pat = re.compile(r"^'([^']*)'\.'([^']*)'\.'(" + "|".join(PAIR_ITEMS + REG_ITEMS) + r")'\.'(" + prods
                          + r")'\.'" + str(year) + r"'\s+([-\d.Ee+]+)")
         # grep first: the 2030 dump is 390 MB
-        txt = subprocess.run(["grep", "-E", r"'(" + "|".join(PAIR_ITEMS + REG_ITEMS) + r")'\.'(" + prods + r")'\.'" + str(year) + "'",
-                              str(src)], capture_output=True, text=True).stdout
+        txt = grep(r"'(" + "|".join(PAIR_ITEMS + REG_ITEMS) + r")'\.'(" + prods + r")'\.'" + str(year) + "'", str(src))
         rows = [m.groups() for m in map(pat.match, txt.splitlines()) if m]
         # keep only what is used: pairs that carry a flow, regions' own items; no reporting aggregates
         from recalibrate_trade_2017 import AGGREGATES as _AG
@@ -209,8 +209,7 @@ def build_trq(year, REGION_MAP, AGGREGATES):
     items = ("TrqNT", "TAMFN", "TSMFN", "TaAppl", "TsAppl", "Fob", "TCost", "ImportQ")
     if src.exists():
         prods = "|".join(CAPRI)
-        txt = subprocess.run(["grep", "-E", r"^'EU'\.'[^']*'\.'(" + "|".join(items) + r")'\.'(" + prods + r")'\.'" + str(year) + "'",
-                             str(src)], capture_output=True, text=True).stdout
+        txt = grep(r"^'EU'\.'[^']*'\.'(" + "|".join(items) + r")'\.'(" + prods + r")'\.'" + str(year) + "'", str(src))
         pat = re.compile(r"^'EU'\.'([^']*)'\.'([A-Za-z]+)'\.'([A-Z]+)'\.'\d+'\s+([-\d.Ee+]+)")
         rows = [m.groups() for m in map(pat.match, txt.splitlines()) if m]
         pd.DataFrame(rows, columns=["exporter", "item", "product", "value"]).to_csv(keep, index=False)

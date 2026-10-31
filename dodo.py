@@ -59,6 +59,12 @@ def _run(cmd):
         return subprocess.run(full, cwd=ROOT).returncode == 0
 
 
+def _skipped(task, missing):
+    """A task whose CAPRI source is missing: reported, not run (a Python action, so it works on any system)."""
+    print(f"skipped {task}: missing {missing}", file=sys.stderr)
+    return True
+
+
 def task_build():
     """One task per builder invocation (tools/pipeline/builders.json)."""
     for t in _tasks():
@@ -69,7 +75,7 @@ def task_build():
         deps = [str(ROOT / f) for f in t["inputs"] + t["code"]] + [x for x in ext if Path(x).is_file()]
         cmd = [sys.executable, str(ROOT / "tools" / "build" / f"{t['builder']}.py")] + args
         if missing:
-            yield {"name": t["task"], "actions": [f"echo 'skipped {t['task']}: missing {missing[0]}' >&2"],
+            yield {"name": t["task"], "actions": [(_skipped, [t["task"], missing[0]])],
                    "file_dep": [d for d in deps if Path(d).exists()], "uptodate": [False], "verbosity": 2}
             continue
         yield {"name": t["task"], "actions": [(_run, [cmd])], "file_dep": deps,

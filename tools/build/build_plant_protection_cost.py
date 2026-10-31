@@ -58,6 +58,7 @@ import pandas as pd
 
 import functools as _ft
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
+from _grep import grep  # noqa: E402  (grep -E in Python: any system)
 from paths import EXPORTS, SOURCES  # noqa: E402  (CAPRI's material outside the repository)
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
@@ -81,10 +82,7 @@ def yields_2030(dump: Path) -> dict:
     """CAPRI's 2030 reference yields per CAPRI region and activity (kg/ha, YILD of res_2_1730greendeal_refdefaulta),
     extracted from the dump when given, else read from the extract (capri_data/sources/capri_res/yild_2030_ref.csv.xz)."""
     if dump is not None and dump.exists():
-        import subprocess
-        p1 = subprocess.Popen(["unzip", "-p", str(dump)], stdout=subprocess.PIPE)
-        out = subprocess.run(["grep", "-E", r"^'[A-Z0-9]{8}'\.''\.'[A-Z]+'\.'YILD'\.'2030'"], stdin=p1.stdout,
-                             capture_output=True, text=True).stdout
+        out = grep(r"^'[A-Z0-9]{8}'\.''\.'[A-Z]+'\.'YILD'\.'2030'", str(dump))
         rx = re.compile(r"^'([A-Z0-9]{8})'\.''\.'([A-Z]+)'\.'YILD'\.'2030'\s+([-\d.Ee+]+)")
         rows = [m.groups() for m in map(rx.match, out.splitlines()) if m]
         df = pd.DataFrame(rows, columns=["capri_region", "activity", "yild_kg_ha"]).astype({"yild_kg_ha": float})

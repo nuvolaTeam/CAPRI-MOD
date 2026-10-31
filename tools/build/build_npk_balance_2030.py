@@ -45,7 +45,6 @@ from __future__ import annotations
 
 import argparse
 import re
-import subprocess
 import sys
 from pathlib import Path
 
@@ -54,6 +53,7 @@ import pandas as pd
 
 import functools as _ft
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
+from _grep import grep  # noqa: E402  (grep -E in Python: any system)
 from paths import EXPORTS, SOURCES  # noqa: E402  (CAPRI's material outside the repository)
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
@@ -112,8 +112,7 @@ def extract(dump: Path) -> pd.DataFrame:
            rf"|^'[A-Z0-9]+'\.''\.'({'|'.join(ELEM)})'\.'(LEVL|{nu}|NCRD|PCRD|KCRD|STRA)'\.'2030'"
            rf"|^'[A-Z0-9]+'\.''\.'({'|'.join(BAL)})'\.'({nu})'\.'2030'"
            rf"|^'[A-Z0-9]+'\.''\.'UAAR'\.'LEVL'\.'2030'")
-    p1 = subprocess.Popen(["unzip", "-p", str(dump)], stdout=subprocess.PIPE)
-    out = subprocess.run(["grep", "-E", pat], stdin=p1.stdout, capture_output=True, text=True).stdout
+    out = grep(pat, str(dump))
     rx = re.compile(r"^'([A-Z0-9]+)'\.'([^']*)'\.'([A-Za-z]+)'\.'([A-Z]+)'\.'2030'\s+([-\d.Ee+]+)")
     rows = []
     for line in out.splitlines():

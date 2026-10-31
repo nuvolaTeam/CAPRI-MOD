@@ -148,6 +148,14 @@ above. The `dump_*.gms` scripts take CAPRI's folder on the command line, as in
 **The GDX library** (`gdxlib/` above) is needed by the two builders that read .gdx files. It is open source and needs
 no GAMS.
 
+**pdftotext** (poppler-utils, available for Linux, macOS and Windows) is needed only by
+`tools/build/build_eu_outlook_2030.py`, which parses the layout text of DG AGRI's outlook PDF into a validation file
+(not part of the pipeline). It stops with a message when pdftotext is missing. A Python PDF library lays the text out
+differently, and the PDF is not at hand to check a replacement against it, so the program stays.
+
+**grep and unzip are no longer used.** The builders read CAPRI's listings and zip archives with Python's standard
+library (`tools/lib/_grep.py`, since 31 October 2026); the text is the same as the tools gave.
+
 **strace** (Linux) is needed only by `tools/check/reproduce_builders.py --trace`, which records the files each builder
 opens to regenerate the pipeline's declaration (`tools/check/make_pipeline.py`). Without `--trace` the comparison runs
 anywhere, and the tool stops with a message when strace is missing.
