@@ -124,6 +124,11 @@ Each stage must pass two checks:
    - The model's floors (consumer price at least 5% of its calibration value, demand at least 0 in the sums) are
      fmax terms: kinks for G3, to be registered or removed there.
    - Time: 5.2 ms per gl_food_ratio call against 3.4 ms in NumPy (the SX function expanded; the MX graph took 7.6).
+   - Mini-EU check (1 November 2026; G2c and G2e together, against the same run at 955470d): not bit-identical, as
+     expected from the rounding above. 1,369 values differ at all, 86 by more than 1e-12 relative, 11 by more than
+     1e-10, 5 by more than 1e-8: the largest are near-zero ammonia option shares in IR010000 (1.08e-7 against
+     1.08e-7, 2e-5 relative) and a regional dual (DK000000, 2e-10 relative), i.e. the regional solver's tolerance;
+     the same iterations (6), the same relaxed caps, the EU indicators equal to their printed digits.
 4. **G2d.** Feed, with the feed energy price lifted as an unknown (FeedBal_).
 5. **G2e.** Processing and crushing. **Built 31 October 2026** (with G2c, same decision):
    capri_mod/market/processing_ad.py.
