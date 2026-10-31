@@ -1020,6 +1020,11 @@ CAPRI's stop rule, recorded every iteration since r135, flags rows that move by 
   cereals) and LT000000 (other fodder 161.5 kha, r198 56.6; the check moved it to the standard start's lower objective
   at iteration 1). Why the solve from the better point returns to the worse one every other iteration is not known; a
   traced run of FR820000 and FR810000 (CAPRI_NLP_TRACE) would show it
+  31 October 2026, the project lead's decision: the next gate's Farm-to-Fork run is traced (diagnostics only, the
+  results unchanged): CAPRI_NLP_DUMP=DIR CAPRI_NLP_TRACE=FR820000,FR810000 (every solve of the two regions: the
+  previous point, the starts tried, the point kept) and diagnostics.record_regional_levels = true (every region's levels
+  per iteration, tools/check/k79_trace.py, to find the region behind CAPRI's olive row); the K79 remedy is decided on
+  what it shows
 
 
 <a id="k80"></a>
