@@ -9,7 +9,7 @@ The data sourcing registry's log of checks, fixes and decisions (201 entries, mo
 [KNOWN_ISSUES_REGISTRY_LOG.md](KNOWN_ISSUES_REGISTRY_LOG.md), verbatim, with the triage of its open entries against
 the code: they became K92-K96, joined K73, K80, K91, or were closed or historical.
 
-## Open (12)
+## Open (11)
 
 | # | Issue | Status |
 |---|---|---|
@@ -20,16 +20,16 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K48](#k48) | Young-animal prices against CAPRI's own market run | open |
 | [K65](#k65) | Cattle member splits and per-sex young-animal markets do not converge yet | open |
 | [K66](#k66) | Farmland expands under the per-hectare N target more than in CAPRI | open: waiting for CAPRI's scenario results |
-| [K77](#k77) | CAPRI's fertiliser-option curvature (S5) leaves the baseline's base shares | open: CAPRI's reference moves timing and inhibitors in about ten regions; two ways to it for the project lead's decision |
 | [K78](#k78) | Histosol fallowing under Farm-to-Fork far above JRC121368's figure | open: waiting for CAPRI's scenario results |
 | [K79](#k79) | Member-state production that keeps moving between iterations | open |
 | [K92](#k92) | Farm-to-Fork changes furthest from JRC121368, besides the milk price | open: waiting for CAPRI's scenario results |
 | [K93](#k93) | CAPRI mitigation options not built; documents disagree on which are in | open: no-till and legume share unmeasured; UreaSubst parked; the others not needed for Farm-to-Fork and the Green Deal |
 
-## Resolved (96)
+## Resolved (97)
 
 | # | Issue | Status |
 |---|---|---|
+| [K77](#k77) | CAPRI's fertiliser-option curvature (S5) leaves the baseline's base shares | decided (31 October 2026): the model's calibration kept, a deliberate departure (DEP-30) |
 | [K107](#k107) | The regional model's tax on mineral N took IPCC's factors, the accounts CAPRI's MITERRA fractions | fixed (31 October 2026) |
 | [K10](#k10) | Sub-sets of regions do not converge | resolved by K83 (31 October 2026) |
 | [K83](#k83) | A one-region Farm-to-Fork run's market diverges in its second step | fixed (31 October 2026; gate pending) |
@@ -881,6 +881,15 @@ With CAPRI's pmpParSqr including the fertiliser-saving term (ghgMiti.gms l. 1016
   2030 reference shares (dataOut SHARE of the ini run) as the model's base shares, calibrated stationary there as now,
   the same treatment as the other base data the 2030 baseline takes from that run. (b) reproduces CAPRI's reference
   state by construction; (a) reproduces CAPRI's mechanism with the model's fertilisation block.
+  **Decision of the project lead, 31 October 2026:** the model's calibration is kept and registered as a deliberate
+  departure up to CAPRI (CAPRI_DEPARTURES_REGISTER DEP-30). It meets the condition CAPRI's derivation states
+  (envind/ghgMiti.gms l. 731: each initial share optimal) exactly, with the model's own value of N, where CAPRI's
+  notional saving misses it in some regions; neither (a) CAPRI's notional formula, which carries that miss into the
+  model's own regions, nor (b) CAPRI's reference shares as the base, which would tie the baseline to CAPRI's reference
+  run. The saving term in the curvature stays off (DEP-2). The structural differences that move the regional value of N
+  (activities and technologies, the fertilisation block's scaling, manure P and K trade, the open departures) are to be
+  assessed and reduced for their own sake (plan to follow)
+
 
 <a id="k78"></a>
 ### K78: Histosol fallowing under Farm-to-Fork far above JRC121368's figure (25 October 2026)

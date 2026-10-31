@@ -59,7 +59,7 @@ CAPTRD_MOD.md §12.4).
 | ID | What | CAPRI | Setting (default; CAPRI) | Status | Details |
 |---|---|---|---|---|---|
 | DEP-1 | Outer-loop iteration cap of 60. | GUI STEPS 99 (gui/capri_gui_definition.xml l. 2891-2897, verified) | `outer_loop.max_outer_iter = 60`; 99 | the project lead's choice, 28 Oct 2026 | DEPARTURES_FROM_CAPRI.md |
-| DEP-2 | Fertiliser-option curvature without the saving term. | envind/ghgMiti.gms l. 1016-1050 | `supply.fert_slope_with_saving = false`; `true` | K77 open | DEPARTURES_FROM_CAPRI.md; KNOWN_ISSUES K77 |
+| DEP-2 | Fertiliser-option curvature without the saving term. | envind/ghgMiti.gms l. 1016-1050 | `supply.fert_slope_with_saving = false`; `true` | kept with DEP-30 (K77, decision 31 Oct 2026) | DEPARTURES_FROM_CAPRI.md; KNOWN_ISSUES K77 |
 | DEP-3 | One EU27 trade block instead of CAPRI's EU_WEST and EU_EAST. | aggregation/defaultA.agg | `market.eu_blocks = false`; `true` | option since 18 Oct 2026 | DEPARTURES_FROM_CAPRI.md |
 | DEP-4 | Cattle member splits off: young animals pooled across sexes. | INPANI_ per sex; HEIR and calf activities | `supply.use_cattle_member_splits = false`; `true` | K65 open | DEPARTURES_FROM_CAPRI.md; KNOWN_ISSUES K65 |
 
@@ -92,6 +92,8 @@ CAPTRD_MOD.md §12.4).
 | DEP-27 | Stop rule: CAPRI's rule, plus the model's inner balances must settle (N-balance price, manure pools, young-animal balance, base calibration). | CAPRI's convergence test | utils/capri_stop.py | in force | DEPARTURES_FROM_CAPRI.md |
 | DEP-28 | Where negative milk prices are not allowed (outside the Green Deal group), the member-state raw milk price is held at 1e-7 of base. CAPRI lowers a positive bound tenfold each time it binds. It never bound in runs r163 and r166. | arm/market_model.gms (dairy) | market/dairy.py | in force | DEPARTURES_FROM_CAPRI.md |
 | DEP-29 | Norway's dairy products take the dairy block's milk price of the previous evaluation; the two are equal at a converged market solve. | arm/market_model.gms | market (`market.sup_milk_in_market`) | in force (solution path only) | DEPARTURES_FROM_CAPRI.md |
+
+| DEP-30 | Fertiliser options (precision farming, timing, inhibitors, variable rate): the linear cost term is calibrated with the regional model's own marginal value of the N they save, so each option's observed initial share is exactly its optimum at the base. CAPRI values the saving with a notional formula (the national NITF price x nmE on N0 / (1 + nmE m)); where its model's actual value of N differs, its options leave the initial share in its own reference run (fertiliser timing NL410000 0.855, RO020000 0.61; inhibitors PT300000 0.335; initial shares 0). capri-mod meets the condition CAPRI's derivation states ("relsubsi is hypothetically chosen such that mi is optimal for i=0 or i=1") exactly; the project lead's decision of 31 October 2026, a deliberate departure up to CAPRI. Effect: in about ten EU regions CAPRI's 2030 reference has fertiliser timing or inhibitors where the model's baseline has none. | envind/ghgMiti.gms l. 725-745 (the FOC, the stated condition l. 731, beta = nmin_impact x p_fert - costParLin (1 - relsubs0) l. 745; verified), 1016-1035; res_2_1730greendeal_refpol_endotech_all_ini SHARE | supply/capri_regional_nlp.py (calibration: dabat("fert", option)) | in force (decision 31 Oct 2026) | KNOWN_ISSUES K77 |
 
 Two more differences apply only with non-default settings:
 - With `market.eu_blocks = true`, the young-animal markets are updated between market solves instead of inside them.
