@@ -129,7 +129,7 @@ def build_ipopt(src: Path, prefix: Path, jobs: int, log: Path):
         lib = prefix / "lib"
         rt = "-lgfortran -lquadmath -lgomp -lm"
         run([i / "configure", f"--prefix={prefix}", "--disable-java", "--disable-sipopt", "--without-asl",
-             "--without-mumps", "--without-hsl", "--without-pardiso", "--without-wsmp",
+             "--without-mumps", "--without-hsl",
              f"--with-lapack-lflags=-L{lib} -lopenblas {rt}",
              f"--with-spral-cflags=-I{prefix / 'include'}",
              f"--with-spral-lflags=-L{lib} -lspral -lmetis -lopenblas {rt} -lstdc++",
