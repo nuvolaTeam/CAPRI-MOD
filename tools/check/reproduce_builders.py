@@ -70,6 +70,8 @@ INVOCATIONS: list[tuple[str, list[str], list[Path]]] = [
     ("build_supply_elasticities_regional", [], []),
     ("build_capri_base", [str(D17)], [D17]),
     ("build_crop_economics_2017", [str(D17)], [D17]),
+    ("build_capreg_national_prices", [str(D17)], [D17]),
+    ("build_model_premium_prices", [], []),            # after the crop premiums and the national prices
     ("build_nutrient_coefs_regional", [str(D17)], [D17]),
     ("build_cap_ceilings_2030", [], [REF]),
     ("build_capri_baseline_surplus", [], []),
@@ -186,7 +188,6 @@ INVOCATIONS: list[tuple[str, list[str], list[Path]]] = [
     ("build_mineral_n_price", [str(D17)], [D17]),
     ("build_pmp_own_price_elasticities", ["--dump-dir", str(SOURCES / "estnlp")], [SOURCES / "estnlp"]),
     ("build_capri_supply_elas_market", ["--src", str(EXPORTS / "p_elasSupp.txt")], [EXPORTS / "p_elasSupp.txt"]),
-    ("build_capreg_national_prices", [str(D17)], [D17]),
     ("build_capri_own_price_elasticities", ["--src", str(EXPORTS)], [EXPORTS]),
     ("build_captrd_trajectory", ["--series", str(REFERENCE / "captrd_results/1770/series.csv.gz")],
      [REFERENCE / "captrd_results/1770/series.csv.gz"]),
@@ -356,6 +357,8 @@ _SKIP = ("/usr/", "/proc/", "/sys/", "/dev/", "/etc/", "/lib", "/opt/", "/root/"
 def placeholder(p: str) -> str:
     """A path with CAPRI's locations as $EXPORTS, $REFERENCE and $SOURCES (tools/lib/paths.py), so the pipeline's
     declaration holds no machine's paths."""
+    if p.startswith("unzip:"):
+        return "unzip:" + placeholder(p[6:])
     for loc, tok in ((EXPORTS, "$EXPORTS"), (REFERENCE, "$REFERENCE"), (SOURCES, "$SOURCES")):
         if p == str(loc) or p.startswith(str(loc) + os.sep):
             return tok + p[len(str(loc)):].replace(os.sep, "/")
@@ -364,6 +367,8 @@ def placeholder(p: str) -> str:
 
 def expand(p: str) -> str:
     """The inverse of placeholder."""
+    if p.startswith("unzip:"):
+        return "unzip:" + expand(p[6:])
     for loc, tok in ((EXPORTS, "$EXPORTS"), (REFERENCE, "$REFERENCE"), (SOURCES, "$SOURCES")):
         if p == tok or p.startswith(tok + "/"):
             return str(loc) + p[len(tok):]
