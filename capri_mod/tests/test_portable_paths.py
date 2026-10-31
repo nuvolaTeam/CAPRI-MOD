@@ -37,3 +37,26 @@ def test_no_file_names_a_machine_folder():
             if MACHINE.search(line) and (f, line.strip()) not in ALLOWED:
                 found.append(f"{f}:{i}: {line.strip()[:120]}")
     assert not found, f"{len(found)} lines name a folder of one machine:\n" + "\n".join(found[:40])
+
+
+#: programs outside Python that a delivered .py file may run: git (the repository's own), strace (the builder trace,
+#: Linux, checked before use) and pdftotext (one validation builder, checked before use); docs/EXTERNAL_SOURCES.md
+PROGRAMS_ALLOWED = {"git", "strace", "pdftotext"}
+_RUN = re.compile(r"""(?:subprocess\.\w+|_sp\w*\.\w+)\(\s*\[\s*["']([\w.-]+)["']""")
+
+
+def test_no_file_runs_a_unix_tool():
+    """No .py file runs a shell or a Unix tool (grep, unzip, awk, ...): they do not exist on every system; Python's
+    standard library does the same (tools/lib/_grep.py)."""
+    found = []
+    for f in _files():
+        if not f.endswith(".py"):
+            continue
+        text = (ROOT / f).read_text(encoding="utf-8", errors="replace")
+        for m in _RUN.finditer(text):
+            if m.group(1) not in PROGRAMS_ALLOWED:
+                found.append(f"{f}: runs {m.group(1)}")
+        if "shell=True" in text or "os.system(" in text:
+            if f != "capri_mod/tests/test_portable_paths.py":
+                found.append(f"{f}: runs a shell")
+    assert not found, "\n".join(found)
