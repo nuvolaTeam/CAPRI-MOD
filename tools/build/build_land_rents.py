@@ -23,7 +23,9 @@ member state's (national) rent (REGISTERED, as elsewhere in the model).
 
     python tools/build/build_land_rents.py [--year 2030|2017] [--ref FILE]
 Writes capri_data/2017/supply/land_rents_2030.csv (or land_rents_2017.csv from CAPRI's 2017 results, res_17<MS> dumps:
-D_AREA 'Y'; 23 October 2026) with region, capri_source, rent_arac, rent_frun, rent_gras (EUR/ha).
+D_AREA 'Y'; 23 October 2026) with region, capri_source, rent_arac, rent_frun, rent_gras (EUR/ha, in the model's 2017
+money: the 2030 rents over CAPRI's inflation to 2030, KNOWN_ISSUES K108), and per CAPRI region
+sources/capri_land_rents/land_rents_capri_<year>.csv in CAPRI's money of the year (the recipe's input).
 """
 from __future__ import annotations
 import argparse, csv, importlib.util, re, subprocess, sys
@@ -166,6 +168,12 @@ def main() -> None:
             have[t] = d[t][0]
         if miss:
             src[r] = (src.get(r, "") + ("; " if r in src else "") + f"{nat} ({','.join(miss)})").strip()
+    # the model's file in its 2017 money: CAPRI's rents of the year over its inflation to that year (tools/lib/_money;
+    # KNOWN_ISSUES K108, 31 October 2026: before, CAPRI's 2030 money); the per-CAPRI-region file above stays in CAPRI's
+    # money, the recipe's input (build_pmp_recipe.py computes CAPRI's terms in CAPRI's money)
+    sys.path.insert(0, str(ROOT / "tools" / "lib"))
+    import _money
+    money = _money.deflator(a.year)
     with open(out, "w", newline="") as fh:
         w = csv.writer(fh)
         w.writerow(["region", "capri_source", "rent_arac", "rent_frun", "rent_gras"])
@@ -174,7 +182,7 @@ def main() -> None:
             d = rows[r]
             if not d:
                 continue
-            w.writerow([r, src.get(r, "")] + [("" if t not in d else repr(float(d[t]))) for t in TYPES])
+            w.writerow([r, src.get(r, "")] + [("" if t not in d else repr(float(d[t]) / money)) for t in TYPES])
             n += 1
     print(f"wrote {out} ({n} regions)")
 

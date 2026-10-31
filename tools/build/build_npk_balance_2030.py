@@ -31,7 +31,8 @@ Outputs (capri_data/2017/environment/):
                             to CSV in capri_data/sources/capri_gams by tools/build/convert_sources_to_csv.py)
   npk_region_2030.csv       capri_region, nutrient, mine_eff (1 + loss / mineral), excr_avail (1 + unavailable /
                             manure), cres_avail (1 + (unavailable + loss) / (pooled + own residues)), uvag_eur_t (CAPRI's
-                            unit value of NITF/PHOF/POTF), mine_kt, excr_kt, pool_kt, own_kt, need_kt, land_kha
+                            2030 unit value of NITF/PHOF/POTF over its inflation to 2030: the model's 2017 money,
+                            KNOWN_ISSUES K108), mine_kt, excr_kt, pool_kt, own_kt, need_kt, land_kha
   fert_dist_priors_npk_2030.csv  as fert_dist_priors_2030.csv with a nutrient column (N, P, K): CAPRI's posterior
                             mode per ha of each crop group and source, accuracy 1 (tools/build/build_fert_dist_priors.py)
   livestock_manure_p_coef.csv, livestock_manure_k_coef.csv   manure P2O5 and K2O per model head (kg), CAPRI's 2017
@@ -122,6 +123,9 @@ def extract(dump: Path) -> pd.DataFrame:
 
 
 def main():
+    sys.path.insert(0, str(ROOT / "tools" / "lib"))
+    import _money
+    money = _money.deflator(2030)
     ap = argparse.ArgumentParser()
     ap.add_argument("--dump", type=Path, default=Path("/mnt/user-data/uploads/res_2_1730greendeal_refdefaulta.zip"))
     ap.add_argument("--capreg-dir", type=Path, default=Path("/home/claude/work/capreg"))
@@ -196,7 +200,7 @@ def main():
             sraw = sum(pool_raw.values())
             kpool = cres / sraw if sraw > 0 else 0.0
             rrow.append(dict(capri_region=r, level="nuts0" if r in nuts0 else "ru", nutrient=nut, mine_eff=meff,
-                             excr_avail=eav, cres_avail=cav, uvag_eur_t=v.get((r, "", "UVAG", col), float("nan")),
+                             excr_avail=eav, cres_avail=cav, uvag_eur_t=v.get((r, "", "UVAG", col), float("nan")) / money,
                              mine_kt=mine, excr_kt=excr, pool_kt=cres, own_kt=own, need_kt=tot["nutNed_lhs"],
                              land_kha=land, pool_scale=kpool))
             # model crops

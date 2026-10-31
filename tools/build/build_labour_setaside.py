@@ -91,6 +91,10 @@ def main() -> None:
     to_c8 = mr.region_to_capri()
     ratio = _read_csv(ROOT / "capri_data" / "2017" / "supply" / "capri_level_ratio.csv", index_col=0)
     data = {"": read_2017(), "_2030": read_2030()}
+    # money terms of the 2030 reference in the model's 2017 money (CAPRI's 2030 PRME over its inflation to 2030;
+    # tools/lib/_money, KNOWN_ISSUES K108, 31 October 2026)
+    import _money
+    money = {"": 1.0, "_2030": _money.deflator(2030)}
     rows, srows = [], []
     for reg in regions:
         src = {}
@@ -133,7 +137,7 @@ def main() -> None:
                 continue
             rec["share_vset" + vt] = dv / (dv + df)
             for a, k in (("VSET", "vset"), ("FALL", "fall")):
-                rec[f"prem_{k}{vt}"] = d[c].get((a, "PRME"), 0.0)
+                rec[f"prem_{k}{vt}"] = d[c].get((a, "PRME"), 0.0) / money[vt]
                 rec[f"labt_{k}{vt}"] = d[c].get((a, "LABT"), 0.0)
         if len(rec) > 1:
             srows.append(rec)

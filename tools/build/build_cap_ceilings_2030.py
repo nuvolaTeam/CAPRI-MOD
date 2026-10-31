@@ -10,7 +10,7 @@ model's 2030 calibration uses):
   - dataOut(R, '', activity, 'LEVL', '2030'): activity levels, to weight CAPRI activities into model activities.
 
 Outputs
-  capri_data/2017/policy/cap_ceilings_2030.csv     CAPRI region x scheme budget (Mio EUR): DPPIL1, DPPIL2, DPRD_LFA,
+  capri_data/2017/policy/cap_ceilings_2030.csv     CAPRI region x scheme budget (Mio EUR of 2017, K108): DPPIL1, DPPIL2, DPRD_LFA,
                                                     DPRD_N2K, DPAE, DPNAT (national payments: complementary
                                                     national direct payments, Norway's schemes), DPTOTAL (Eps -> 0)
   capri_data/2017/policy/premium_scheme_shares_2030.csv
@@ -86,6 +86,11 @@ def main() -> None:
     # member states and their NUTS regions (not the EU aggregates EU, EU27yr19, EU_EAST, A_EU_WEST, ...)
     eu = sorted(r for r in ceil if re.fullmatch(r"[A-Z]{2}[0-9A-Z]{6}", r) and not r.startswith("EU"))
     c = pd.DataFrame({r: {s: ceil[r].get(s, 0.0) for s in SCHEMES} for r in eu}).T[list(SCHEMES)]
+    # the budgets in the model's 2017 money, as its premiums: CAPRI's 2030 budgets over its inflation to 2030
+    # (tools/lib/_money; KNOWN_ISSUES K108, 31 October 2026: before, CAPRI's 2030 money); the shares are ratios
+    sys.path.insert(0, str(ROOT / "tools" / "lib"))
+    import _money
+    c = c / _money.deflator(2030)
     c.index.name = "capri_region"
     c.to_csv(OUT_CEIL)
 

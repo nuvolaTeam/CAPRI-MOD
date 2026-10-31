@@ -179,6 +179,13 @@ def main() -> None:
         if r in parent: split_n += 1
         else: nat_n += 1
     print(f"split parents: {sorted(set(parent.values()))} -> {sorted(parent)}; filled {split_n} split parts, {nat_n} from national matrices")
+    # the matrices in the model's 2017 money: CAPRI's terms of the year's calibration over its inflation to that year
+    # (tools/lib/_money.deflator; KNOWN_ISSUES K108, 31 October 2026: the 2030 file was in CAPRI's 2030 money)
+    import _money
+    money = _money.deflator(args.year)
+    for v_ in out.values():
+        v_["quad"] = (np.asarray(v_["quad"], float) / money).tolist()
+        v_["min_eigenvalue"] = float(v_["min_eigenvalue"]) / money
     sys.path.insert(0, str(_ROOT))
     from capri_mod.data import land_market_io as io
     dest = _ROOT / "capri_data" / "2017" / "supply" / f"land_market_{args.year}"

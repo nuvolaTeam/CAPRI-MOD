@@ -23,8 +23,8 @@ Items (ad_data_and_cali.gms lines):
   IniShare = MitiShar0 SharLiq HousShar / (L (1 - G)) (l. 440-454, 603-613), 0 where MitiShar0 is 0
   revenue = ECH4 (0.4 0.3 P_heat + 0.36 (1 - 0.12) P_elec), GAINS prices of the country's L farms (l. 642-661)
   QE_AD / QE_NOC from the climate cells' MCF (l. 676-737; member-state level as the supply model uses it)
-  L (1 - G) scaling, CAPRI's calibration (relSubs cases l. 816-925, Version B l. 1105-1160), inflation 1.019^13
-  (l. 1175-1177)
+  L (1 - G) scaling, CAPRI's calibration (relSubs cases l. 816-925, Version B l. 1105-1160), CAPRI's inflation 1.019^13
+  (l. 1175-1177) taken back out: the model works in 2017 money (KNOWN_ISSUES K108)
 
 VSER: pigs CAPRI's table (AD_basedata p_VSER), as CAPRI's own fallback gives them; cattle CAPRI computes from the
 feed, energy and requirement data of the run (l. 49-116), not in hand: the table value is used and recorded as
@@ -70,7 +70,12 @@ MCF = {10: (0.17, 0.02, 0.01), 11: (0.19, 0.02, 0.01), 12: (0.20, 0.02, 0.01), 1
 P_R, P_T, ALPHA, BETA, COP, ENGH = 0.035, 15, -1009.332, 10381.16, 0.05, 7000.0
 PRE_CO2, PRE_CH4, MCF_DIG, LEAK, DENS, ECONT, ECONV = 0.02, 0.25, 0.85, 0.03, 0.6557, 55.0, 277.8
 EF_HEAT, EH_SOLD, EF_ELEC, EL_USED, PR_ELEC, PR_HEAT = 0.4, 0.3, 0.36, 0.12, 0.10, 0.03
-INFL = 1.019 ** 13                                      # p_infl ** (2030 - 2017)
+# CAPRI inflates the option's money terms from the base year to 2030 (p_infl ** (2030 - 2017), l. 1175-1177); the
+# model works in 2017 money and divides the 2030 terms by the same index (tools/lib/_money.deflator; KNOWN_ISSUES
+# K108, 31 October 2026: before, the terms stayed in CAPRI's 2030 money): the net factor is 1 to rounding
+_sp_my = _ilu.spec_from_file_location("_money", Path(__file__).resolve().parents[2] / "tools" / "lib" / "_money.py")
+_money = _ilu.module_from_spec(_sp_my); _sp_my.loader.exec_module(_money)
+INFL = 1.019 ** 13 / _money.deflator(2030)
 SENS = 1.0                                              # %sensFac% (refpol_endotech_all_sup.gms l. 243)
 
 

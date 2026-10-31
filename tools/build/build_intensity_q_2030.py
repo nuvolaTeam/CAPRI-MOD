@@ -15,7 +15,9 @@ Term: the activity's curvature on its level, its technology block collapsed (c =
 single-technology activity, as the animals and grassland; the set-aside and fodder crops have two).
 Model regions: CAPRI's regional units, each its own CAPRI region's terms.
 
-Output: capri_data/sources/baseline_pmp/intensity_q_<tag>.csv (model_region, activity, value)
+Output: capri_data/sources/baseline_pmp/intensity_q_<tag>.csv (model_region, activity, value); value in the model's
+2017 money: the terms of a 2030 calibration over CAPRI's inflation to 2030 (tools/lib/_money.deflator; KNOWN_ISSUES
+K108, 31 October 2026: before, CAPRI's 2030 money)
 
     python tools/build/build_intensity_q_2030.py
 """
@@ -47,7 +49,8 @@ def crosswalk() -> dict:
     return {u: u for u in UNITS}
 
 
-def build(path: Path, rev: dict) -> pd.DataFrame:
+def build(path: Path, rev: dict, money: float = 1.0) -> pd.DataFrame:
+    """money: CAPRI's money of the terms' calibration year per unit of the model's (2017) money."""
     import numpy as np
     t = _read_csv(path)
     t = t[t.activity.isin(ACTS)]
@@ -69,7 +72,7 @@ def build(path: Path, rev: dict) -> pd.DataFrame:
         except np.linalg.LinAlgError:
             continue
         if v > 0:
-            rows.append((r, a, 1.0 / v))
+            rows.append((r, a, 1.0 / v / money))
     t = pd.DataFrame(rows, columns=["region", "activity", "value"])
     t = t.assign(model_region=t.region.map(rev)).dropna(subset=["model_region"])
     t = t.drop_duplicates(["model_region", "activity"], keep="last")
@@ -82,7 +85,10 @@ def main() -> None:
         if not path.exists():
             print(f"{tag}: {path.name} missing, skipped")
             continue
-        d = build(path, rev)
+        import sys as _sys
+        _sys.path.insert(0, str(ROOT / "tools" / "lib"))
+        import _money
+        d = build(path, rev, _money.deflator(int(tag[-4:])))
         out = SRC / f"intensity_q_{tag}.csv"
         d.to_csv(out, index=False)
         print(f"wrote {out.name}: {len(d)} rows, {d.model_region.nunique()} model regions, "

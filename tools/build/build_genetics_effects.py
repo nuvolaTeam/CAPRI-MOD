@@ -99,6 +99,12 @@ def main():
     R = {(r.region, r.animal_mitt, r.item): r.value for r in rce.itertuples()}
     uv = _read_csv(ROOT / "capri_data" / "sources" / "capri_baseline" / "capri_uvag_store_1730.csv")
     UV = {(r.region, r.product): float(r.uvag_2030) for r in uv.itertuples()}
+    # CAPRI's costs of the options are in its money of the simulation year (the 2030 UVAG of COMI, the floors of 20 and 2
+    # EUR per place, breeding.gms l. 287-289, 335-341); the model's in 2017 money: over CAPRI's inflation to 2030
+    # (tools/lib/_money; KNOWN_ISSUES K108, 31 October 2026: before, 2030 money). Not changed here: genet_eff's feed cost
+    # from the 2017 ration prices where CAPRI takes the simulation year's unit values (a price-year question, K108)
+    import _money
+    money = _money.deflator(2030)
     mann = _read_csv(ROOT / "capri_data" / "2017" / "environment" / "livestock_manure_n_coef.csv", index_col=0)
     prod = _read_csv(ROOT / "capri_data" / "2017" / "supply" / "livestock_output_by_product_coef.csv", index_col=0)
     ci = _read_csv(ROOT / "capri_data" / "2017" / "supply" / "cattle_intensity.csv")
@@ -174,7 +180,8 @@ def main():
                              d_drmn_rel=DRMN_KG * g / (DRMN_KG * y + DRMN_FIX),
                              d_drmx_rel=DRMN_KG * g / (DRMN_KG * y + DRMN_FIX),
                              d_mann_rel=N_KG_MILK * g / mn,
-                             cost_floor=per_head(20.0, reg, "DCOW") or 20.0, cost_per_unit=0.1 * g * uvc / 1000.0,
+                             cost_floor=per_head(20.0 / money, reg, "DCOW") or 20.0 / money,
+                             cost_per_unit=0.1 * g * uvc / 1000.0 / money,
                              relsubs0=0.01, relsubs1=1.2,
                              max_share=GENET_CAP))
         # genet_eff
@@ -202,7 +209,7 @@ def main():
             rows.append(dict(region=reg, animal=an, option="genet_eff", tech_param="ghgTechFEff", elig_share=el,
                              d_milk_rel=0.0, d_ener_rel=-1.0, d_crpr_rel=-0.5, d_drmn_rel=0.0, d_drmx_rel=0.0,
                              d_mann_rel=-0.5 * (mN + expt) / mN,
-                             cost_floor=per_head(2.0, reg, an) or 2.0, cost_per_unit=0.05 * fc, relsubs0=0.10,
+                             cost_floor=per_head(2.0 / money, reg, an) or 2.0 / money, cost_per_unit=0.05 * fc, relsubs0=0.10,
                              relsubs1=1.2, max_share=msh))
     out = pd.DataFrame(rows)
     # CAPRI's cost-saving drop between its ini and max calibration runs (breeding.gms l. 447-458), per model head

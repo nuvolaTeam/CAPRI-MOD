@@ -3361,6 +3361,10 @@ def test_ad_option_reproduces_capri():
             R[(r["region"], r["key"])][(r["col"], r["row"])] = float(r["value"])
     with open(root / "2017" / "abatement" / "ammonia" / "ad_option.csv") as fh:
         ad = {(r["region"], r["activity"]): r for r in csv.DictReader(fh)}
+    import importlib.util as _ilu
+    _sp = _ilu.spec_from_file_location("_money", root.parent / "tools" / "lib" / "_money.py")
+    _m = _ilu.module_from_spec(_sp); _sp.loader.exec_module(_m)
+    infl = _m.deflator(2030)
     n = 0
     for reg in ("DE110000", "NL220000", "PL220000", "DK000000"):
         for act in ("DCOL", "BULL", "PIGF", "SOWS"):
@@ -3373,7 +3377,8 @@ def test_ad_option_reproduces_capri():
                 v = s / lg
                 days = R[(reg, "")].get((act, "DAYS"), 365.0)
                 cost = (1e-10 * v + 0.5 * float(a["costParSqr"]) * v * v) * days / 365.0
-                assert abs(cost / R[(reg, "cost")][(act, "AD_AnCh")] - 1.0) < 1e-5, (reg, act)
+                # the file in the model's 2017 money, CAPRI's run in its 2030 money (KNOWN_ISSUES K108)
+                assert abs(cost * infl / R[(reg, "cost")][(act, "AD_AnCh")] - 1.0) < 1e-5, (reg, act)
             n += 1
     assert n == 16
 

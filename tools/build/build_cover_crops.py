@@ -22,7 +22,8 @@ wintercovershare_p_winterCoverShare0.csv (dat/policy/wintercovershare.gms, conve
 tools/build/convert_sources_to_csv.py), the GAMS source reports/def_cbalance.gms (p_cInput).
 
 Written (capri_data/2017/supply/):
-  cover_crops.csv          region, capri_region, catc_share_2030 (CATC / UAAR), catc_cost_eur_ha (TOIN),
+  cover_crops.csv          region, capri_region, catc_share_2030 (CATC / UAAR), catc_cost_eur_ha (TOIN over CAPRI's
+                           inflation to 2030: the model's 2017 money, K108),
                            biofix_t_n_ha
   winter_cover_share.csv   region, crop, share (filled), share0 (as given; 0 where not given)
 
@@ -87,7 +88,14 @@ def main():
                         header=None, names=["region", "act", "item", "value"], dtype=str)
     terms["value"] = pd.to_numeric(terms["value"], errors="coerce")
     lev = terms[terms["item"] == "LEVL"].pivot_table(index="region", columns="act", values="value")
-    toin = terms[(terms["act"] == "CATC") & (terms["item"] == "TOIN")].set_index("region")["value"]
+    # CATC's input cost in the model's 2017 money: CAPRI's 2030 TOIN over its inflation to 2030 (tools/lib/_money;
+    # KNOWN_ISSUES K108, 31 October 2026: before, CAPRI's 2030 money); the winter-cover option's cost curve
+    # (build_winter_cover_option.py) scales with it
+    import sys as _sys
+    _sys.path.insert(0, str(ROOT / "tools" / "lib"))
+    import _money
+    toin = terms[(terms["act"] == "CATC") & (terms["item"] == "TOIN")].set_index("region")["value"] \
+        / _money.deflator(2030)
     wcs0 = read_wcs(WCS)
     cin = read_cinput(a.gams_dir / "reports" / "def_cbalance.gms")
 
