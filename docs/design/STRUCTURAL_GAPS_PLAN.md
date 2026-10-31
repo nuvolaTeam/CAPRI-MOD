@@ -106,7 +106,7 @@ goes gate by gate.
 - **Effort:** in development (Step G, linear solvers); K79's diagnostic first.
 - **How to check:** the K79 diagnostic (tools/check/k79_multistart, draft): the objectives of the two states.
 
-## 2. Proposed order
+## 2. Order (agreed with the project lead, 31 October 2026)
 
 1. **S3 diagnosis and S12's K79 check.** Both are cheap and tell where the larger items matter: S3 may point at S1/S2;
    the K79 check tells whether the regions that switch state have one better optimum.
