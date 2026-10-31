@@ -9,11 +9,10 @@ The data sourcing registry's log of checks, fixes and decisions (201 entries, mo
 [KNOWN_ISSUES_REGISTRY_LOG.md](KNOWN_ISSUES_REGISTRY_LOG.md), verbatim, with the triage of its open entries against
 the code: they became K92-K96, joined K73, K80, K91, or were closed or historical.
 
-## Open (12)
+## Open (11)
 
 | # | Issue | Status |
 |---|---|---|
-| [K10](#k10) | Sub-sets of regions do not converge | note |
 | [K13](#k13) | Farm-to-Fork milk price | open: waiting for CAPRI's scenario results |
 | [K29](#k29) | NL11 and NL13 meet the tiered N target only at corner solutions (Farm-to-Fork) | open: waiting for CAPRI's scenario results |
 | [K47](#k47) | The cattle chain's equilibrium is sensitive to changes outside it | open |
@@ -26,10 +25,11 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K92](#k92) | Farm-to-Fork changes furthest from JRC121368, besides the milk price | open: waiting for CAPRI's scenario results |
 | [K93](#k93) | CAPRI mitigation options not built; documents disagree on which are in | open |
 
-## Resolved (94)
+## Resolved (95)
 
 | # | Issue | Status |
 |---|---|---|
+| [K10](#k10) | Sub-sets of regions do not converge | resolved by K83 (31 October 2026) |
 | [K83](#k83) | A one-region Farm-to-Fork run's market diverges in its second step | fixed (31 October 2026; gate pending) |
 | [K80](#k80) | The same run repeated from a warm start differs by up to 3e-5 relative in small cereal activities | fixed (30 October 2026; gate pending) |
 | [K89](#k89) | Failing regional solves take most of IPOPT's time | fixed (measured 30 October 2026) |
@@ -215,7 +215,11 @@ between ~0 and ~335 EUR/kg N (two branches).
 
 - **Effect:** diagnostic runs only
 - **In 9t:** yes
-- **Status:** note: compare region sets only on full-EU runs
+- **Status:** **resolved by K83** (31 October 2026): a run on a subset now has the EU's other units in its market,
+  supplied through their member states' market supply functions, so its markets clear: DE110000 alone converges
+  (market in 15 and 8 steps, young-animal imbalance 0.0013), the mini-EU Farm-to-Fork run in 5 iterations. A subset run
+  still simulates the policy in its own units only (as CAPRI with countries switched off), so its EU figures are not
+  a full run's; tools/check/compare_runs.py says so for a subset run (K83)
 
 <a id="k11"></a>
 ### K11: Three Romanian regions fell back under the emission tax
