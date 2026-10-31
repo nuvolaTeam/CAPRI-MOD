@@ -77,6 +77,17 @@ parameters unless needed):
 - the code tables (HARDCODED_TABLES.md H2-H4) become declared CSVs or CAPRI's own sets.
 The builders (tools/build) are out of this plan: they are run by the maintainers only, to reproduce the inputs.
 
+**Stage 5's scope (agreed with the project lead, 31 October 2026).**
+- Scenarios as data: each scenario and the reference in capri_data/scenarios/<name>/, its settings (settings.toml)
+  and its parameters and datasets in separate files (the trajectories moved there first, branch json-csv); the
+  scenario definitions now written in Python (policy/greendeal.py, scenarios/) move there.
+- Results in one format for every run, as CAPRI's dataOut: one long table (region, activity or product, item, point:
+  base, scenario or year, value) in Parquet, with the run's settings.toml and manifest.json beside it, under
+  results/<scenario>/<run_id>/ (not in git); capri_mod/io_results.py the single writer, the gate runner and
+  tools/check/compare_runs.py on it, the pickle at most a cache. Parquet needs pyarrow only, already a model
+  dependency; a Delta Lake table over all runs (append, versions, one query across runs) can be added on top with
+  the pipeline's deltalake (the pipeline extra), as the data pipeline stores its tables.
+
 ## 4. CAPRI-claim audit
 
 Each claim that the code follows CAPRI is classified against the GAMS source:
