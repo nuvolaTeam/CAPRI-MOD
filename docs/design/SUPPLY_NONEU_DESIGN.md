@@ -117,8 +117,9 @@ built. No proxy.
 
 - **The "EU-wide" price fallback** (build_eu_producer_prices) averages over all model regions. With the 29 it would
   no longer be the EU's. CAPRI's rule for Turkey's prices is read (section 5: TUR is its own market and supply
-  region, its supply models take TUR's producer prices); the Western Balkans' and the UK's to read; the project lead's
-  decision on the fallback is pending.
+  region, its supply models take TUR's producer prices); the Western Balkans' and the UK's to read. **Decided (the
+  project lead, 31 October 2026), as CAPRI:** the fallback of the EU's regions is averaged over the EU's member states
+  only (eu_market_blocks.csv), and a unit outside the EU falls back to its own country's price.
 - **CEILVAL for Turkey and the Western Balkans** is absent in CAPRI's 2030 results. CAPRI's code does not restrict it to
   the EU by a set, but its sources (Regulation 1307/2013 Annex II and reference-period premiums) cover the EU28 only:
   no CAP ceilings for Turkey and the Western Balkans (section 5; the absence of their premiums inferred).
