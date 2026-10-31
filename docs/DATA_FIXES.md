@@ -6,9 +6,9 @@ superseded by rebuilding the data from CAPRI's 2017 results (Sprint 9s; docs/SYN
 item. Provenance of each data file: `capri_data/schema/01_provenance.sql` and `02_provenance_notes.sql`; the record
 of each fix: `docs/KNOWN_ISSUES_REGISTRY_LOG.md`; effect on results: CHANGELOG.md.
 
-Current data checks (20 October 2026): `python -m capri_mod.data.validate_data capri_data` gives 12 pass, 1 warning
-(a stale row count in MANIFEST.json for `fert_side_effects.csv`), 0 fail; `python tools/check/verify_schema.py`;
-`python tools/check/check_regression.py`.
+Current data checks: `python -m capri_mod.data.validate_data` (the declarations; 0 violations at each gate; until
+31 October 2026 the MANIFEST.json validator, which gave 12 pass, 1 warning, 0 fail on 20 October 2026);
+`python tools/check/verify_schema.py`; `python tools/check/check_regression.py`.
 
 ## Activity-code corruption (OANI)
 
@@ -121,6 +121,6 @@ Other entries of the same period (registry names in brackets; details in the reg
 
 ## Open from this record
 
-- **Trade-flow vintage**: `capri_data/shared/trade_flows_2017.csv` (read as `trade_flows.csv`) is, per MANIFEST.json,
+- **Trade-flow vintage**: `capri_data/shared/trade_flows_2017.csv` (read as `trade_flows.csv`) is, per the files' catalogue (from MANIFEST.json),
   recalibrated from CAPRI's 2017 market results, while the registry entry `trade_flows.csv` still says FAO 2021. The
   bilateral market itself reads CAPRI's `bilateral_flows_<year>.csv`. The registry entry should be brought in line.

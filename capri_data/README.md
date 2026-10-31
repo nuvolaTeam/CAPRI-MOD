@@ -31,7 +31,6 @@ capri_data/
 │                          units and the model's own, model_units.csv), CAPRI's sets (capri/), the model's activities,
 │                          commodities and trade regions with their CAPRI codes (model_trade_regions.csv is also
 │                          read by the model)
-├── MANIFEST.json                                           expected files and shapes
 ├── FITNESS_FOR_USE.json                                    how far each output can be trusted (capri_mod/fitness.py)
 └── *.md                                                    this file and the guides below
 ```
@@ -70,6 +69,7 @@ in a flat `capri_data/<file>` fallback.
 
 ## Checks
 
-`python -m capri_mod.data.validate_data capri_data` (files, shapes against MANIFEST.json, vintages, sanity,
-provenance; 20 October 2026: 12 pass, 1 warning, a stale MANIFEST row count for `fert_side_effects.csv`),
-`python tools/check/verify_schema.py`, `python tools/check/check_regression.py`.
+`python -m capri_mod.data.validate_data` (the declarations of `schema/`: every CSV's columns, types, keys, code lists,
+ranges and units, the rules, provenance, the files' catalogue with their vintages, and the crops' gross margins at the
+base; it replaced the MANIFEST.json validator on 31 October 2026), `python tools/check/verify_schema.py`,
+`python tools/check/check_regression.py`.

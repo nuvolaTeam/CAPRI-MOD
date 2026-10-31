@@ -391,11 +391,11 @@ one process).
 Then, in Python — validate the data layer and run a minimal base scenario:
 
 ```python
-from capri_mod.data.validate_data import validate_data
+from capri_mod.data.validate_data import validate
 from capri_mod.model import CAPRIModel
 
-# validate the data layer
-print(validate_data("capri_data").summary())
+# check the data against their declarations (DuckDB, the dev extra): a list of violations, empty when all hold
+assert validate(".", verbose=True) == []
 
 # a minimal base run
 model = CAPRIModel(data_dir="capri_data")
@@ -428,9 +428,9 @@ capri_data/
 │                              fao_agg_2017, estnlp, nuts, gams (CSV)
 ├── trajectories/              projection paths (captrd 2030)
 ├── validation/                REGRESSION_ANCHORS.json, VALIDATION.md
-├── schema/                    the declarations of every CSV (DuckDB SQL), their provenance, the numbers in
-│                              the code, and schema.json (the same, as JSON, generated)
-└── MANIFEST.json              expected row and column counts of the live files
+└── schema/                    the declarations of every CSV (DuckDB SQL), their provenance, the files'
+                               catalogue (vintages), the numbers in the code, and schema.json (the same, as
+                               JSON, generated)
 ```
 
 Each folder under the base year feeds the module named on its right. Anything in
@@ -480,19 +480,12 @@ Count the non-zero cells of the files the model reads by origin (from the declar
 python tools/check/verify_schema.py
 ```
 
-Run the full data validator (margins, coverage, consistency) in Python:
-
-```python
-from capri_mod.data.validate_data import validate_data
-
-print(validate_data("capri_data").summary())
-```
-
-Check the data against their declarations in DuckDB (types, keys, code lists, ranges, units, provenance;
-`capri_data/schema`, docs/design/DATA_SCHEMA_DUCKDB.md; every CSV under `capri_data`):
+Check the data against their declarations in DuckDB (types, keys, code lists, ranges, units, provenance, the
+files' catalogue with their vintages, and the crops' gross margins at the base; `capri_data/schema`,
+docs/design/DATA_SCHEMA_DUCKDB.md; every CSV under `capri_data`; code in `capri_mod/data/validate_data.py`):
 
 ```shell
-python tools/check/validate_data.py
+python -m capri_mod.data.validate_data          # or: python tools/check/validate_data.py
 ```
 
 Rebuild the data with doit (`dodo.py`; docs/design/DATA_PIPELINE_DOIT.md). Each of the 117 builder invocations is a
@@ -1293,8 +1286,8 @@ and review), and statistical or machine-learning methods that learn from its inp
 ### 9.3 AI readiness: what is in place
 
 - **Inputs a machine can check.** Every input is a CSV file declared in DuckDB SQL under `capri_data/schema` (types,
-  keys, code lists, ranges, units, provenance; as JSON in `schema.json`), with its expected shape in `MANIFEST.json`
-  (§12). The data pipeline
+  keys, code lists, ranges, units, provenance; as JSON in `schema.json`), and the files' vintages are in the
+  declared catalogue `05_file_catalogue.sql` (§12). The data pipeline
   (`capri_mod/pipeline`) keeps every download as a version in Delta tables, each row tagged with the download it came
   from, and keeps a missing observation apart from a true zero.
 - **One settings file.** Every switch, tolerance and algorithm choice is in `capri_mod/settings/defaults.toml`, read
@@ -1644,11 +1637,10 @@ principled reason and extension path.
 - `capri_data/schema/` — the declarations of every data file (DuckDB SQL) with their provenance and checked notes,
   the numbers held in the code, and `schema.json` (the same as JSON, generated). The hand-kept `INPUT_SCHEMA.json`,
   `INPUT_MANIFEST.json` and `DATA_SOURCING_REGISTRY.json` were retired on 29 October 2026 (their checked content is in
-  the declarations; the registry's log is in `docs/KNOWN_ISSUES_REGISTRY_LOG.md`).
+  the declarations; the registry's log is in `docs/KNOWN_ISSUES_REGISTRY_LOG.md`), and `MANIFEST.json` with its
+  validator on 31 October 2026 (its catalogue is `05_file_catalogue.sql`, its checks rules of the declarations).
 - `capri_data/validation/` — validation artifacts: the Green Deal comparison
   (`greendeal_2030/`) and the world-price divergence report (`tools/check/report_world_price_divergence.py`).
-- `capri_data/MANIFEST.json` — expected row and column counts for every live
-  file, so a missing or truncated input is caught rather than absorbed.
 - `tools/check/verify_schema.py`, `tools/run/run_tests.py` — coverage and test gates.
 - `tools/check/check_regression.py` — the regression anchors; `--update` rewrites them
   with a recorded reason.
