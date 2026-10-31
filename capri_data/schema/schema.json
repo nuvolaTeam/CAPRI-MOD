@@ -205,7 +205,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_ad_option",
-    "sources": "$UP/LitRevAmmoTech.csv; $UP/LitRev_input_manStor.csv; $UP/LitRev_inputs.csv; $UP/LitRev_non_changeable_parameters.csv; $UP/gd_full.zip; $UP/holdingsLSU.csv; $UP/nvzShare_LU.csv; $UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $UP/scen.zip; $WORK/allgms/gams/aggregation/defaultA.agg; $WORK/allgms/gams/envind/ad_data_and_cali.gms; $WORK/allgms/gams/envind/ammo_tech.gms"
+    "sources": "$UP/LitRevAmmoTech.csv; $UP/LitRev_input_manStor.csv; $UP/LitRev_inputs.csv; $UP/LitRev_non_changeable_parameters.csv; $UP/data_market_1730defaulta.csv; $UP/elas_2_1730defaulta.csv; $UP/gd_full.zip; $UP/holdingsLSU.csv; $UP/nvzShare_LU.csv; $UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $UP/scen.zip; $WORK/allgms/gams/aggregation/defaultA.agg; $WORK/allgms/gams/envind/ad_data_and_cali.gms; $WORK/allgms/gams/envind/ammo_tech.gms; $WORK/capreg/res_17<CC>.txt; $WORK/inputs/capri_export_zip/capri_export/DATA2_<CC>.txt"
    },
    "notes": [],
    "read_by": {
@@ -465,7 +465,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_ammonia_tech_model",
-    "sources": "$UP/LitRevAmmoTech.csv; $UP/LitRev_input_manStor.csv; $UP/LitRev_inputs.csv; $UP/LitRev_non_changeable_parameters.csv; $UP/gd_full.zip; $UP/holdingsLSU.csv; $UP/nvzShare_LU.csv; $UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $UP/scen.zip; $WORK/allgms/gams/aggregation/defaultA.agg; $WORK/allgms/gams/envind/ad_data_and_cali.gms; $WORK/allgms/gams/envind/ammo_tech.gms"
+    "sources": "$UP/LitRevAmmoTech.csv; $UP/LitRev_input_manStor.csv; $UP/LitRev_inputs.csv; $UP/LitRev_non_changeable_parameters.csv; $UP/data_market_1730defaulta.csv; $UP/elas_2_1730defaulta.csv; $UP/gd_full.zip; $UP/holdingsLSU.csv; $UP/nvzShare_LU.csv; $UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $UP/scen.zip; $WORK/allgms/gams/aggregation/defaultA.agg; $WORK/allgms/gams/envind/ad_data_and_cali.gms; $WORK/allgms/gams/envind/ammo_tech.gms; $WORK/capreg/res_17<CC>.txt; $WORK/inputs/capri_export_zip/capri_export/DATA2_<CC>.txt"
    },
    "notes": [],
    "read_by": {
@@ -7842,7 +7842,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_npk_balance_2030",
-    "sources": "$UP/data_market_1730defaulta.csv; $UP/elas_2_1730defaulta.csv; $UP/priFertDist_1730defaulta.zip; $UP/res_2_1730greendeal_refdefaulta.zip; $UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $WORK/allgms/gams/aggregation/defaultA.agg; $WORK/capreg/res_17<CC>.txt"
+    "sources": "$UP/data_market_1730defaulta.csv; $UP/elas_2_1730defaulta.csv; $UP/priFertDist_1730defaulta.zip; $UP/res_2_1730greendeal_refdefaulta.zip; $UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $WORK/allgms/gams/aggregation/defaultA.agg; $WORK/capreg/res_17<CC>.txt; $WORK/inputs/capri_export_zip/capri_export/DATA2_<CC>.txt"
    },
    "notes": [],
    "read_by": {
@@ -8714,7 +8714,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_npk_balance_2030",
-    "sources": "$UP/data_market_1730defaulta.csv; $UP/elas_2_1730defaulta.csv; $UP/priFertDist_1730defaulta.zip; $UP/res_2_1730greendeal_refdefaulta.zip; $UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $WORK/allgms/gams/aggregation/defaultA.agg; $WORK/capreg/res_17<CC>.txt"
+    "sources": "$UP/data_market_1730defaulta.csv; $UP/elas_2_1730defaulta.csv; $UP/priFertDist_1730defaulta.zip; $UP/res_2_1730greendeal_refdefaulta.zip; $UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $WORK/allgms/gams/aggregation/defaultA.agg; $WORK/capreg/res_17<CC>.txt; $WORK/inputs/capri_export_zip/capri_export/DATA2_<CC>.txt"
    },
    "notes": [],
    "read_by": {
@@ -9004,7 +9004,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_npk_balance_2030",
-    "sources": "$UP/data_market_1730defaulta.csv; $UP/elas_2_1730defaulta.csv; $UP/priFertDist_1730defaulta.zip; $UP/res_2_1730greendeal_refdefaulta.zip; $UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $WORK/allgms/gams/aggregation/defaultA.agg; $WORK/capreg/res_17<CC>.txt"
+    "sources": "$UP/data_market_1730defaulta.csv; $UP/elas_2_1730defaulta.csv; $UP/priFertDist_1730defaulta.zip; $UP/res_2_1730greendeal_refdefaulta.zip; $UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $WORK/allgms/gams/aggregation/defaultA.agg; $WORK/capreg/res_17<CC>.txt; $WORK/inputs/capri_export_zip/capri_export/DATA2_<CC>.txt"
    },
    "notes": [],
    "read_by": {
@@ -9350,7 +9350,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_manure_n2o",
-    "sources": "$UP/LitRevAmmoTech.csv; $UP/LitRev_input_manStor.csv; $UP/LitRev_inputs.csv; $UP/LitRev_non_changeable_parameters.csv; $UP/gd_full.zip; $UP/holdingsLSU.csv; $UP/nvzShare_LU.csv; $UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $UP/scen.zip; $WORK/allgms/gams/aggregation/defaultA.agg; $WORK/allgms/gams/envind/ad_data_and_cali.gms; $WORK/allgms/gams/envind/ammo_tech.gms; $WORK/capreg/res_17<CC>.txt"
+    "sources": "$UP/LitRevAmmoTech.csv; $UP/LitRev_input_manStor.csv; $UP/LitRev_inputs.csv; $UP/LitRev_non_changeable_parameters.csv; $UP/data_market_1730defaulta.csv; $UP/elas_2_1730defaulta.csv; $UP/gd_full.zip; $UP/holdingsLSU.csv; $UP/nvzShare_LU.csv; $UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $UP/scen.zip; $WORK/allgms/gams/aggregation/defaultA.agg; $WORK/allgms/gams/envind/ad_data_and_cali.gms; $WORK/allgms/gams/envind/ammo_tech.gms; $WORK/capreg/res_17<CC>.txt; $WORK/inputs/capri_export_zip/capri_export/DATA2_<CC>.txt"
    },
    "notes": [],
    "read_by": {
@@ -9422,7 +9422,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_manure_n2o",
-    "sources": "$UP/LitRevAmmoTech.csv; $UP/LitRev_input_manStor.csv; $UP/LitRev_inputs.csv; $UP/LitRev_non_changeable_parameters.csv; $UP/gd_full.zip; $UP/holdingsLSU.csv; $UP/nvzShare_LU.csv; $UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $UP/scen.zip; $WORK/allgms/gams/aggregation/defaultA.agg; $WORK/allgms/gams/envind/ad_data_and_cali.gms; $WORK/allgms/gams/envind/ammo_tech.gms; $WORK/capreg/res_17<CC>.txt"
+    "sources": "$UP/LitRevAmmoTech.csv; $UP/LitRev_input_manStor.csv; $UP/LitRev_inputs.csv; $UP/LitRev_non_changeable_parameters.csv; $UP/data_market_1730defaulta.csv; $UP/elas_2_1730defaulta.csv; $UP/gd_full.zip; $UP/holdingsLSU.csv; $UP/nvzShare_LU.csv; $UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $UP/scen.zip; $WORK/allgms/gams/aggregation/defaultA.agg; $WORK/allgms/gams/envind/ad_data_and_cali.gms; $WORK/allgms/gams/envind/ammo_tech.gms; $WORK/capreg/res_17<CC>.txt; $WORK/inputs/capri_export_zip/capri_export/DATA2_<CC>.txt"
    },
    "notes": [],
    "read_by": {
@@ -9666,7 +9666,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_npk_balance_2030",
-    "sources": "$UP/data_market_1730defaulta.csv; $UP/elas_2_1730defaulta.csv; $UP/priFertDist_1730defaulta.zip; $UP/res_2_1730greendeal_refdefaulta.zip; $UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $WORK/allgms/gams/aggregation/defaultA.agg; $WORK/capreg/res_17<CC>.txt"
+    "sources": "$UP/data_market_1730defaulta.csv; $UP/elas_2_1730defaulta.csv; $UP/priFertDist_1730defaulta.zip; $UP/res_2_1730greendeal_refdefaulta.zip; $UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $WORK/allgms/gams/aggregation/defaultA.agg; $WORK/capreg/res_17<CC>.txt; $WORK/inputs/capri_export_zip/capri_export/DATA2_<CC>.txt"
    },
    "notes": [],
    "read_by": {
@@ -9837,7 +9837,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_npk_balance_2030",
-    "sources": "$UP/data_market_1730defaulta.csv; $UP/elas_2_1730defaulta.csv; $UP/priFertDist_1730defaulta.zip; $UP/res_2_1730greendeal_refdefaulta.zip; $UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $WORK/allgms/gams/aggregation/defaultA.agg; $WORK/capreg/res_17<CC>.txt"
+    "sources": "$UP/data_market_1730defaulta.csv; $UP/elas_2_1730defaulta.csv; $UP/priFertDist_1730defaulta.zip; $UP/res_2_1730greendeal_refdefaulta.zip; $UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $WORK/allgms/gams/aggregation/defaultA.agg; $WORK/capreg/res_17<CC>.txt; $WORK/inputs/capri_export_zip/capri_export/DATA2_<CC>.txt"
    },
    "notes": [],
    "read_by": {
@@ -11394,7 +11394,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_genetics_effects",
-    "sources": "$UP/LitRevAmmoTech.csv; $UP/LitRev_input_manStor.csv; $UP/LitRev_inputs.csv; $UP/LitRev_non_changeable_parameters.csv; $UP/data_market_1730defaulta.csv; $UP/elas_2_1730defaulta.csv; $UP/fedcof.gms; $UP/gd_full.zip; $UP/holdingsLSU.csv; $UP/nvzShare_LU.csv; $UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $UP/scen.zip; $UP/trends_1730.csv; $WORK/allgms/gams/aggregation/defaultA.agg; $WORK/allgms/gams/envind/ad_data_and_cali.gms; $WORK/allgms/gams/envind/ammo_tech.gms; $WORK/capreg/res_17<CC>.txt; $WORK/cs/costsavings_ini_21730_jul15.csv; $WORK/cs/costsavings_max_21730_jul15.csv; $WORK/feedexp/feed_export/pmppar_17<CC>_feedpmp.csv; $WORK/inputs/capri_export_zip/capri_export/quadPact_<CC>.txt; $WORK/inputs/capri_export_zip/capri_export/quadTechn_<CC>.txt; $WORK/up/pmp2030/estnlp_results_<CC>.txt; $WORK/up/pmp2030/estnlp_results_PELA.txt; $WORK/up/pmp2030/pmppar_21730<CC>defaulta.txt"
+    "sources": "$UP/LitRevAmmoTech.csv; $UP/LitRev_input_manStor.csv; $UP/LitRev_inputs.csv; $UP/LitRev_non_changeable_parameters.csv; $UP/data_market_1730defaulta.csv; $UP/elas_2_1730defaulta.csv; $UP/fedcof.gms; $UP/gd_full.zip; $UP/holdingsLSU.csv; $UP/nvzShare_LU.csv; $UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $UP/scen.zip; $UP/trends_1730.csv; $WORK/allgms/gams/aggregation/defaultA.agg; $WORK/allgms/gams/envind/ad_data_and_cali.gms; $WORK/allgms/gams/envind/ammo_tech.gms; $WORK/capreg/res_17<CC>.txt; $WORK/cs/costsavings_ini_21730_jul15.csv; $WORK/cs/costsavings_max_21730_jul15.csv; $WORK/feedexp/feed_export/pmppar_17<CC>_feedpmp.csv; $WORK/inputs/capri_export_zip/capri_export/DATA2_<CC>.txt; $WORK/inputs/capri_export_zip/capri_export/quadPact_<CC>.txt; $WORK/inputs/capri_export_zip/capri_export/quadTechn_<CC>.txt; $WORK/up/pmp2030/estnlp_results_<CC>.txt; $WORK/up/pmp2030/estnlp_results_PELA.txt; $WORK/up/pmp2030/pmppar_21730<CC>defaulta.txt"
    },
    "notes": [],
    "read_by": {
@@ -11663,7 +11663,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_land_rents:year_2030",
-    "sources": "$UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $WORK/allgms/gams/aggregation/defaultA.agg"
+    "sources": "$UP/data_market_1730defaulta.csv; $UP/elas_2_1730defaulta.csv; $UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $WORK/allgms/gams/aggregation/defaultA.agg; $WORK/capreg/res_17<CC>.txt; $WORK/inputs/capri_export_zip/capri_export/DATA2_<CC>.txt"
    },
    "notes": [],
    "read_by": {
@@ -11940,7 +11940,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_lownfeed_effects",
-    "sources": "$UP/animReq_SK.zip; $UP/data_market_1730defaulta.csv; $UP/elas_2_1730defaulta.csv; $UP/gd_full.zip; $UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $UP/scen.zip; $WORK/allgms/gams/aggregation/defaultA.agg; $WORK/capreg/res_17<CC>.txt; $WORK/cs/costsavings_ini_21730_jul15.csv; $WORK/cs/costsavings_max_21730_jul15.csv; $WORK/feedexp/feed_export/pmppar_17<CC>_feedpmp.csv; $WORK/up/pmp2030/estnlp_results_<CC>.txt; $WORK/up/pmp2030/pmppar_21730<CC>defaulta.txt"
+    "sources": "$UP/animReq_SK.zip; $UP/data_market_1730defaulta.csv; $UP/elas_2_1730defaulta.csv; $UP/gd_full.zip; $UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $UP/scen.zip; $WORK/allgms/gams/aggregation/defaultA.agg; $WORK/capreg/res_17<CC>.txt; $WORK/cs/costsavings_ini_21730_jul15.csv; $WORK/cs/costsavings_max_21730_jul15.csv; $WORK/feedexp/feed_export/pmppar_17<CC>_feedpmp.csv; $WORK/inputs/capri_export_zip/capri_export/DATA2_<CC>.txt; $WORK/up/pmp2030/estnlp_results_<CC>.txt; $WORK/up/pmp2030/pmppar_21730<CC>defaulta.txt"
    },
    "notes": [],
    "read_by": {
@@ -16083,6 +16083,7 @@
      "build_cap_ceilings_2030",
      "build_capri_base",
      "build_code_lists",
+     "build_cover_crops",
      "build_labour_setaside",
      "build_livestock_units",
      "build_lownfeed_effects",
@@ -17595,7 +17596,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_pmp_capri_2030:",
-    "sources": "$UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $WORK/allgms/gams/aggregation/defaultA.agg; $WORK/up/pmp2030/estnlp_results_<CC>.txt; $WORK/up/pmp2030/pmppar_21730<CC>defaulta.txt"
+    "sources": "$UP/data_market_1730defaulta.csv; $UP/elas_2_1730defaulta.csv; $UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $WORK/allgms/gams/aggregation/defaultA.agg; $WORK/capreg/res_17<CC>.txt; $WORK/inputs/capri_export_zip/capri_export/DATA2_<CC>.txt; $WORK/up/pmp2030/estnlp_results_<CC>.txt; $WORK/up/pmp2030/pmppar_21730<CC>defaulta.txt"
    },
    "notes": [
     {
@@ -17717,7 +17718,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_animal_pmp_capri_2030:",
-    "sources": "$UP/data_market_1730defaulta.csv; $UP/elas_2_1730defaulta.csv; $UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $WORK/allgms/gams/aggregation/defaultA.agg; $WORK/capreg/res_17<CC>.txt; $WORK/up/pmp2030/estnlp_results_<CC>.txt; $WORK/up/pmp2030/pmppar_21730<CC>defaulta.txt"
+    "sources": "$UP/data_market_1730defaulta.csv; $UP/elas_2_1730defaulta.csv; $UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $WORK/allgms/gams/aggregation/defaultA.agg; $WORK/capreg/res_17<CC>.txt; $WORK/inputs/capri_export_zip/capri_export/DATA2_<CC>.txt; $WORK/up/pmp2030/estnlp_results_<CC>.txt; $WORK/up/pmp2030/pmppar_21730<CC>defaulta.txt"
    },
    "notes": [
     {
@@ -17827,7 +17828,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_animal_pmp_capri_2030:splits",
-    "sources": "$UP/data_market_1730defaulta.csv; $UP/elas_2_1730defaulta.csv; $UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $WORK/allgms/gams/aggregation/defaultA.agg; $WORK/capreg/res_17<CC>.txt; $WORK/up/pmp2030/estnlp_results_<CC>.txt; $WORK/up/pmp2030/pmppar_21730<CC>defaulta.txt"
+    "sources": "$UP/data_market_1730defaulta.csv; $UP/elas_2_1730defaulta.csv; $UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $WORK/allgms/gams/aggregation/defaultA.agg; $WORK/capreg/res_17<CC>.txt; $WORK/inputs/capri_export_zip/capri_export/DATA2_<CC>.txt; $WORK/up/pmp2030/estnlp_results_<CC>.txt; $WORK/up/pmp2030/pmppar_21730<CC>defaulta.txt"
    },
    "notes": [
     {
@@ -18371,7 +18372,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_pmp_capri_2030:techn_capri_data.sources.baseline_pmp.recipe_2030_quad_techn.csv_year_2030_out_c",
-    "sources": "$UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $WORK/allgms/gams/aggregation/defaultA.agg; $WORK/capreg/res_17<CC>.txt; $WORK/up/pmp2030/estnlp_results_<CC>.txt; $WORK/up/pmp2030/estnlp_results_PELA.txt; $WORK/up/pmp2030/pmppar_21730<CC>defaulta.txt"
+    "sources": "$UP/data_market_1730defaulta.csv; $UP/elas_2_1730defaulta.csv; $UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $WORK/allgms/gams/aggregation/defaultA.agg; $WORK/capreg/res_17<CC>.txt; $WORK/inputs/capri_export_zip/capri_export/DATA2_<CC>.txt; $WORK/up/pmp2030/estnlp_results_<CC>.txt; $WORK/up/pmp2030/estnlp_results_PELA.txt; $WORK/up/pmp2030/pmppar_21730<CC>defaulta.txt"
    },
    "notes": [
     {
@@ -18483,7 +18484,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_animal_pmp_capri_2030:techn_capri_data.sources.baseline_pmp.recipe_2030_quad_techn.csv_year_2030_out_c",
-    "sources": "$UP/data_market_1730defaulta.csv; $UP/elas_2_1730defaulta.csv; $UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $WORK/allgms/gams/aggregation/defaultA.agg; $WORK/capreg/res_17<CC>.txt; $WORK/up/pmp2030/estnlp_results_<CC>.txt; $WORK/up/pmp2030/estnlp_results_PELA.txt; $WORK/up/pmp2030/pmppar_21730<CC>defaulta.txt"
+    "sources": "$UP/data_market_1730defaulta.csv; $UP/elas_2_1730defaulta.csv; $UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $WORK/allgms/gams/aggregation/defaultA.agg; $WORK/capreg/res_17<CC>.txt; $WORK/inputs/capri_export_zip/capri_export/DATA2_<CC>.txt; $WORK/up/pmp2030/estnlp_results_<CC>.txt; $WORK/up/pmp2030/estnlp_results_PELA.txt; $WORK/up/pmp2030/pmppar_21730<CC>defaulta.txt"
    },
    "notes": [],
    "read_by": {
@@ -18588,7 +18589,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_animal_pmp_capri_2030:techn_capri_data.sources.baseline_pmp.recipe_2030_quad_techn.csv_year_2030_split",
-    "sources": "$UP/data_market_1730defaulta.csv; $UP/elas_2_1730defaulta.csv; $UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $WORK/allgms/gams/aggregation/defaultA.agg; $WORK/capreg/res_17<CC>.txt; $WORK/up/pmp2030/estnlp_results_<CC>.txt; $WORK/up/pmp2030/estnlp_results_PELA.txt; $WORK/up/pmp2030/pmppar_21730<CC>defaulta.txt"
+    "sources": "$UP/data_market_1730defaulta.csv; $UP/elas_2_1730defaulta.csv; $UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $WORK/allgms/gams/aggregation/defaultA.agg; $WORK/capreg/res_17<CC>.txt; $WORK/inputs/capri_export_zip/capri_export/DATA2_<CC>.txt; $WORK/up/pmp2030/estnlp_results_<CC>.txt; $WORK/up/pmp2030/estnlp_results_PELA.txt; $WORK/up/pmp2030/pmppar_21730<CC>defaulta.txt"
    },
    "notes": [],
    "read_by": {
@@ -18703,7 +18704,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_cap_ceilings_2030",
-    "sources": "$UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $WORK/allgms/gams/aggregation/defaultA.agg"
+    "sources": "$UP/data_market_1730defaulta.csv; $UP/elas_2_1730defaulta.csv; $UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $WORK/allgms/gams/aggregation/defaultA.agg; $WORK/capreg/res_17<CC>.txt; $WORK/inputs/capri_export_zip/capri_export/DATA2_<CC>.txt"
    },
    "notes": [],
    "read_by": {
@@ -19228,7 +19229,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_cap_ceilings_2030",
-    "sources": "$UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $WORK/allgms/gams/aggregation/defaultA.agg"
+    "sources": "$UP/data_market_1730defaulta.csv; $UP/elas_2_1730defaulta.csv; $UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $WORK/allgms/gams/aggregation/defaultA.agg; $WORK/capreg/res_17<CC>.txt; $WORK/inputs/capri_export_zip/capri_export/DATA2_<CC>.txt"
    },
    "notes": [],
    "read_by": {
@@ -21941,7 +21942,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_lownfeed_effects",
-    "sources": "$UP/animReq_SK.zip; $UP/data_market_1730defaulta.csv; $UP/elas_2_1730defaulta.csv; $UP/gd_full.zip; $UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $UP/scen.zip; $WORK/allgms/gams/aggregation/defaultA.agg; $WORK/capreg/res_17<CC>.txt; $WORK/cs/costsavings_ini_21730_jul15.csv; $WORK/cs/costsavings_max_21730_jul15.csv; $WORK/feedexp/feed_export/pmppar_17<CC>_feedpmp.csv; $WORK/up/pmp2030/estnlp_results_<CC>.txt; $WORK/up/pmp2030/pmppar_21730<CC>defaulta.txt"
+    "sources": "$UP/animReq_SK.zip; $UP/data_market_1730defaulta.csv; $UP/elas_2_1730defaulta.csv; $UP/gd_full.zip; $UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $UP/scen.zip; $WORK/allgms/gams/aggregation/defaultA.agg; $WORK/capreg/res_17<CC>.txt; $WORK/cs/costsavings_ini_21730_jul15.csv; $WORK/cs/costsavings_max_21730_jul15.csv; $WORK/feedexp/feed_export/pmppar_17<CC>_feedpmp.csv; $WORK/inputs/capri_export_zip/capri_export/DATA2_<CC>.txt; $WORK/up/pmp2030/estnlp_results_<CC>.txt; $WORK/up/pmp2030/pmppar_21730<CC>defaulta.txt"
    },
    "notes": [],
    "read_by": {
@@ -29368,7 +29369,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_intensity_q_2030",
-    "sources": "$UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $WORK/allgms/gams/aggregation/defaultA.agg; $WORK/capreg/res_17<CC>.txt; $WORK/up/pmp2030/estnlp_results_<CC>.txt; $WORK/up/pmp2030/estnlp_results_PELA.txt; $WORK/up/pmp2030/pmppar_21730<CC>defaulta.txt"
+    "sources": "$UP/data_market_1730defaulta.csv; $UP/elas_2_1730defaulta.csv; $UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $WORK/allgms/gams/aggregation/defaultA.agg; $WORK/capreg/res_17<CC>.txt; $WORK/inputs/capri_export_zip/capri_export/DATA2_<CC>.txt; $WORK/up/pmp2030/estnlp_results_<CC>.txt; $WORK/up/pmp2030/estnlp_results_PELA.txt; $WORK/up/pmp2030/pmppar_21730<CC>defaulta.txt"
    },
    "notes": [],
    "read_by": {
@@ -29424,7 +29425,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_intensity_q_2030",
-    "sources": "$UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $WORK/allgms/gams/aggregation/defaultA.agg; $WORK/capreg/res_17<CC>.txt; $WORK/up/pmp2030/estnlp_results_<CC>.txt; $WORK/up/pmp2030/estnlp_results_PELA.txt; $WORK/up/pmp2030/pmppar_21730<CC>defaulta.txt"
+    "sources": "$UP/data_market_1730defaulta.csv; $UP/elas_2_1730defaulta.csv; $UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $WORK/allgms/gams/aggregation/defaultA.agg; $WORK/capreg/res_17<CC>.txt; $WORK/inputs/capri_export_zip/capri_export/DATA2_<CC>.txt; $WORK/up/pmp2030/estnlp_results_<CC>.txt; $WORK/up/pmp2030/estnlp_results_PELA.txt; $WORK/up/pmp2030/pmppar_21730<CC>defaulta.txt"
    },
    "notes": [],
    "read_by": {
@@ -29477,7 +29478,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_intensity_q_2030",
-    "sources": "$UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $WORK/allgms/gams/aggregation/defaultA.agg; $WORK/capreg/res_17<CC>.txt; $WORK/up/pmp2030/estnlp_results_<CC>.txt; $WORK/up/pmp2030/estnlp_results_PELA.txt; $WORK/up/pmp2030/pmppar_21730<CC>defaulta.txt"
+    "sources": "$UP/data_market_1730defaulta.csv; $UP/elas_2_1730defaulta.csv; $UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $WORK/allgms/gams/aggregation/defaultA.agg; $WORK/capreg/res_17<CC>.txt; $WORK/inputs/capri_export_zip/capri_export/DATA2_<CC>.txt; $WORK/up/pmp2030/estnlp_results_<CC>.txt; $WORK/up/pmp2030/estnlp_results_PELA.txt; $WORK/up/pmp2030/pmppar_21730<CC>defaulta.txt"
    },
    "notes": [],
    "read_by": {
@@ -29783,7 +29784,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_land_rents:year_2030",
-    "sources": "$UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $WORK/allgms/gams/aggregation/defaultA.agg"
+    "sources": "$UP/data_market_1730defaulta.csv; $UP/elas_2_1730defaulta.csv; $UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $WORK/allgms/gams/aggregation/defaultA.agg; $WORK/capreg/res_17<CC>.txt; $WORK/inputs/capri_export_zip/capri_export/DATA2_<CC>.txt"
    },
    "notes": [],
    "read_by": {
@@ -31704,7 +31705,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_pmp_recipe:year_2030",
-    "sources": "$UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $WORK/allgms/gams/aggregation/defaultA.agg; $WORK/capreg/res_17<CC>.txt; $WORK/up/pmp2030/estnlp_results_<CC>.txt; $WORK/up/pmp2030/estnlp_results_PELA.txt; $WORK/up/pmp2030/pmppar_21730<CC>defaulta.txt"
+    "sources": "$UP/data_market_1730defaulta.csv; $UP/elas_2_1730defaulta.csv; $UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $WORK/allgms/gams/aggregation/defaultA.agg; $WORK/capreg/res_17<CC>.txt; $WORK/inputs/capri_export_zip/capri_export/DATA2_<CC>.txt; $WORK/up/pmp2030/estnlp_results_<CC>.txt; $WORK/up/pmp2030/estnlp_results_PELA.txt; $WORK/up/pmp2030/pmppar_21730<CC>defaulta.txt"
    },
    "notes": [],
    "read_by": {
@@ -31771,7 +31772,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_pmp_recipe:year_2030",
-    "sources": "$UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $WORK/allgms/gams/aggregation/defaultA.agg; $WORK/capreg/res_17<CC>.txt; $WORK/up/pmp2030/estnlp_results_<CC>.txt; $WORK/up/pmp2030/estnlp_results_PELA.txt; $WORK/up/pmp2030/pmppar_21730<CC>defaulta.txt"
+    "sources": "$UP/data_market_1730defaulta.csv; $UP/elas_2_1730defaulta.csv; $UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $WORK/allgms/gams/aggregation/defaultA.agg; $WORK/capreg/res_17<CC>.txt; $WORK/inputs/capri_export_zip/capri_export/DATA2_<CC>.txt; $WORK/up/pmp2030/estnlp_results_<CC>.txt; $WORK/up/pmp2030/estnlp_results_PELA.txt; $WORK/up/pmp2030/pmppar_21730<CC>defaulta.txt"
    },
    "notes": [],
    "read_by": {
@@ -31896,7 +31897,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_lownfeed_effects",
-    "sources": "$UP/animReq_SK.zip; $UP/data_market_1730defaulta.csv; $UP/elas_2_1730defaulta.csv; $UP/gd_full.zip; $UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $UP/scen.zip; $WORK/allgms/gams/aggregation/defaultA.agg; $WORK/capreg/res_17<CC>.txt; $WORK/cs/costsavings_ini_21730_jul15.csv; $WORK/cs/costsavings_max_21730_jul15.csv; $WORK/feedexp/feed_export/pmppar_17<CC>_feedpmp.csv; $WORK/up/pmp2030/estnlp_results_<CC>.txt; $WORK/up/pmp2030/pmppar_21730<CC>defaulta.txt"
+    "sources": "$UP/animReq_SK.zip; $UP/data_market_1730defaulta.csv; $UP/elas_2_1730defaulta.csv; $UP/gd_full.zip; $UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $UP/scen.zip; $WORK/allgms/gams/aggregation/defaultA.agg; $WORK/capreg/res_17<CC>.txt; $WORK/cs/costsavings_ini_21730_jul15.csv; $WORK/cs/costsavings_max_21730_jul15.csv; $WORK/feedexp/feed_export/pmppar_17<CC>_feedpmp.csv; $WORK/inputs/capri_export_zip/capri_export/DATA2_<CC>.txt; $WORK/up/pmp2030/estnlp_results_<CC>.txt; $WORK/up/pmp2030/pmppar_21730<CC>defaulta.txt"
    },
    "notes": [],
    "read_by": {
@@ -32866,7 +32867,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_cattle_intensity",
-    "sources": "$UP/data_market_1730defaulta.csv; $UP/elas_2_1730defaulta.csv; $UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $WORK/allgms/gams/aggregation/defaultA.agg; $WORK/capreg/res_17<CC>.txt; $WORK/inputs/capri_export_zip/capri_export/quadPact_<CC>.txt; $WORK/inputs/capri_export_zip/capri_export/quadTechn_<CC>.txt; $WORK/up/pmp2030/estnlp_results_<CC>.txt; $WORK/up/pmp2030/estnlp_results_PELA.txt; $WORK/up/pmp2030/pmppar_21730<CC>defaulta.txt"
+    "sources": "$UP/data_market_1730defaulta.csv; $UP/elas_2_1730defaulta.csv; $UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $WORK/allgms/gams/aggregation/defaultA.agg; $WORK/capreg/res_17<CC>.txt; $WORK/inputs/capri_export_zip/capri_export/DATA2_<CC>.txt; $WORK/inputs/capri_export_zip/capri_export/quadPact_<CC>.txt; $WORK/inputs/capri_export_zip/capri_export/quadTechn_<CC>.txt; $WORK/up/pmp2030/estnlp_results_<CC>.txt; $WORK/up/pmp2030/estnlp_results_PELA.txt; $WORK/up/pmp2030/pmppar_21730<CC>defaulta.txt"
    },
    "notes": [],
    "read_by": {
@@ -32945,7 +32946,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_cover_crops",
-    "sources": "$UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $WORK/allgms/gams/aggregation/defaultA.agg; $WORK/allgms/gams/reports/def_cbalance.gms"
+    "sources": "$UP/data_market_1730defaulta.csv; $UP/elas_2_1730defaulta.csv; $UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $WORK/allgms/gams/aggregation/defaultA.agg; $WORK/allgms/gams/reports/def_cbalance.gms; $WORK/capreg/res_17<CC>.txt; $WORK/inputs/capri_export_zip/capri_export/DATA2_<CC>.txt"
    },
    "notes": [
     {
@@ -33640,7 +33641,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_dairy_intensity",
-    "sources": "$UP/data_market_1730defaulta.csv; $UP/elas_2_1730defaulta.csv; $UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $WORK/allgms/gams/aggregation/defaultA.agg; $WORK/capreg/res_17<CC>.txt; $WORK/inputs/capri_export_zip/capri_export/quadPact_<CC>.txt; $WORK/inputs/capri_export_zip/capri_export/quadTechn_<CC>.txt; $WORK/up/pmp2030/estnlp_results_<CC>.txt; $WORK/up/pmp2030/estnlp_results_PELA.txt; $WORK/up/pmp2030/pmppar_21730<CC>defaulta.txt"
+    "sources": "$UP/data_market_1730defaulta.csv; $UP/elas_2_1730defaulta.csv; $UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $WORK/allgms/gams/aggregation/defaultA.agg; $WORK/capreg/res_17<CC>.txt; $WORK/inputs/capri_export_zip/capri_export/DATA2_<CC>.txt; $WORK/inputs/capri_export_zip/capri_export/quadPact_<CC>.txt; $WORK/inputs/capri_export_zip/capri_export/quadTechn_<CC>.txt; $WORK/up/pmp2030/estnlp_results_<CC>.txt; $WORK/up/pmp2030/estnlp_results_PELA.txt; $WORK/up/pmp2030/pmppar_21730<CC>defaulta.txt"
    },
    "notes": [],
    "read_by": {
@@ -33868,7 +33869,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_grass_intensity",
-    "sources": "$UP/data_market_1730defaulta.csv; $UP/elas_2_1730defaulta.csv; $UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $WORK/allgms/gams/aggregation/defaultA.agg; $WORK/capreg/res_17<CC>.txt; $WORK/inputs/capri_export_zip/capri_export/quadPact_<CC>.txt; $WORK/inputs/capri_export_zip/capri_export/quadTechn_<CC>.txt; $WORK/up/pmp2030/estnlp_results_<CC>.txt; $WORK/up/pmp2030/estnlp_results_PELA.txt; $WORK/up/pmp2030/pmppar_21730<CC>defaulta.txt"
+    "sources": "$UP/data_market_1730defaulta.csv; $UP/elas_2_1730defaulta.csv; $UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $WORK/allgms/gams/aggregation/defaultA.agg; $WORK/capreg/res_17<CC>.txt; $WORK/inputs/capri_export_zip/capri_export/DATA2_<CC>.txt; $WORK/inputs/capri_export_zip/capri_export/quadPact_<CC>.txt; $WORK/inputs/capri_export_zip/capri_export/quadTechn_<CC>.txt; $WORK/up/pmp2030/estnlp_results_<CC>.txt; $WORK/up/pmp2030/estnlp_results_PELA.txt; $WORK/up/pmp2030/pmppar_21730<CC>defaulta.txt"
    },
    "notes": [],
    "read_by": {
@@ -33988,7 +33989,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_labour_setaside",
-    "sources": "$UP/data_market_1730defaulta.csv; $UP/elas_2_1730defaulta.csv; $UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $WORK/allgms/gams/aggregation/defaultA.agg; $WORK/capreg/res_17<CC>.txt; $WORK/up/pmp2030/estnlp_results_<CC>.txt; $WORK/up/pmp2030/estnlp_results_PELA.txt; $WORK/up/pmp2030/pmppar_21730<CC>defaulta.txt"
+    "sources": "$UP/data_market_1730defaulta.csv; $UP/elas_2_1730defaulta.csv; $UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $WORK/allgms/gams/aggregation/defaultA.agg; $WORK/capreg/res_17<CC>.txt; $WORK/inputs/capri_export_zip/capri_export/DATA2_<CC>.txt; $WORK/up/pmp2030/estnlp_results_<CC>.txt; $WORK/up/pmp2030/estnlp_results_PELA.txt; $WORK/up/pmp2030/pmppar_21730<CC>defaulta.txt"
    },
    "notes": [],
    "read_by": {
@@ -34170,7 +34171,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_land_market:year_2030",
-    "sources": "$UP/data_market_1730defaulta.csv; $UP/elas_2_1730defaulta.csv; $UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $WORK/allgms/gams/aggregation/defaultA.agg; $WORK/capreg/res_17<CC>.txt; $WORK/up/pmp2030/estnlp_results_<CC>.txt; $WORK/up/pmp2030/pmppar_21730<CC>defaulta.txt"
+    "sources": "$UP/data_market_1730defaulta.csv; $UP/elas_2_1730defaulta.csv; $UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $WORK/allgms/gams/aggregation/defaultA.agg; $WORK/capreg/res_17<CC>.txt; $WORK/inputs/capri_export_zip/capri_export/DATA2_<CC>.txt; $WORK/up/pmp2030/estnlp_results_<CC>.txt; $WORK/up/pmp2030/pmppar_21730<CC>defaulta.txt"
    },
    "notes": [],
    "read_by": {
@@ -34234,7 +34235,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_land_market:year_2030",
-    "sources": "$UP/data_market_1730defaulta.csv; $UP/elas_2_1730defaulta.csv; $UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $WORK/allgms/gams/aggregation/defaultA.agg; $WORK/capreg/res_17<CC>.txt; $WORK/up/pmp2030/estnlp_results_<CC>.txt; $WORK/up/pmp2030/pmppar_21730<CC>defaulta.txt"
+    "sources": "$UP/data_market_1730defaulta.csv; $UP/elas_2_1730defaulta.csv; $UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $WORK/allgms/gams/aggregation/defaultA.agg; $WORK/capreg/res_17<CC>.txt; $WORK/inputs/capri_export_zip/capri_export/DATA2_<CC>.txt; $WORK/up/pmp2030/estnlp_results_<CC>.txt; $WORK/up/pmp2030/pmppar_21730<CC>defaulta.txt"
    },
    "notes": [],
    "read_by": {
@@ -36239,7 +36240,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_labour_setaside",
-    "sources": "$UP/data_market_1730defaulta.csv; $UP/elas_2_1730defaulta.csv; $UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $WORK/allgms/gams/aggregation/defaultA.agg; $WORK/capreg/res_17<CC>.txt; $WORK/up/pmp2030/estnlp_results_<CC>.txt; $WORK/up/pmp2030/estnlp_results_PELA.txt; $WORK/up/pmp2030/pmppar_21730<CC>defaulta.txt"
+    "sources": "$UP/data_market_1730defaulta.csv; $UP/elas_2_1730defaulta.csv; $UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $WORK/allgms/gams/aggregation/defaultA.agg; $WORK/capreg/res_17<CC>.txt; $WORK/inputs/capri_export_zip/capri_export/DATA2_<CC>.txt; $WORK/up/pmp2030/estnlp_results_<CC>.txt; $WORK/up/pmp2030/estnlp_results_PELA.txt; $WORK/up/pmp2030/pmppar_21730<CC>defaulta.txt"
    },
    "notes": [],
    "read_by": {
@@ -36303,7 +36304,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_cover_crops",
-    "sources": "$UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $WORK/allgms/gams/aggregation/defaultA.agg; $WORK/allgms/gams/reports/def_cbalance.gms"
+    "sources": "$UP/data_market_1730defaulta.csv; $UP/elas_2_1730defaulta.csv; $UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $WORK/allgms/gams/aggregation/defaultA.agg; $WORK/allgms/gams/reports/def_cbalance.gms; $WORK/capreg/res_17<CC>.txt; $WORK/inputs/capri_export_zip/capri_export/DATA2_<CC>.txt"
    },
    "notes": [
     {
@@ -36570,7 +36571,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_supplement_effects",
-    "sources": "$UP/LitRevAmmoTech.csv; $UP/LitRev_input_manStor.csv; $UP/LitRev_inputs.csv; $UP/LitRev_non_changeable_parameters.csv; $UP/animReq_SK.zip; $UP/data_market_1730defaulta.csv; $UP/elas_2_1730defaulta.csv; $UP/fedcof.gms; $UP/gd_full.zip; $UP/holdingsLSU.csv; $UP/nvzShare_LU.csv; $UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $UP/scen.zip; $UP/trends_1730.csv; $WORK/allgms/gams/aggregation/defaultA.agg; $WORK/allgms/gams/envind/def_digestibility.gms; $WORK/capreg/res_17<CC>.txt; $WORK/capri_reference/sets/simini_21730/<CC>.csv; $WORK/capri_reference/sets/simini_21730/FEED_TO_O.csv; $WORK/capri_reference/sets/simini_21730/MAACT.csv; $WORK/capri_reference/sets/simini_21730/MCACT.csv; $WORK/capri_reference/sets/simini_21730/MPACT.csv; $WORK/capri_reference/sets/simini_21730/Map_RR.csv; $WORK/capri_reference/sets/simini_21730/PACT.csv; $WORK/capri_reference/sets/simini_21730/RALL.csv; $WORK/capri_reference/sets/simini_21730/XX1.csv; $WORK/cs/costsavings_ini_21730_jul15.csv; $WORK/cs/costsavings_max_21730_jul15.csv; $WORK/feedexp/feed_export/pmppar_17<CC>_feedpmp.csv; $WORK/up/pmp2030/estnlp_results_<CC>.txt; $WORK/up/pmp2030/pmppar_21730<CC>defaulta.txt"
+    "sources": "$UP/LitRevAmmoTech.csv; $UP/LitRev_input_manStor.csv; $UP/LitRev_inputs.csv; $UP/LitRev_non_changeable_parameters.csv; $UP/animReq_SK.zip; $UP/data_market_1730defaulta.csv; $UP/elas_2_1730defaulta.csv; $UP/fedcof.gms; $UP/gd_full.zip; $UP/holdingsLSU.csv; $UP/nvzShare_LU.csv; $UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $UP/scen.zip; $UP/trends_1730.csv; $WORK/allgms/gams/aggregation/defaultA.agg; $WORK/allgms/gams/envind/def_digestibility.gms; $WORK/capreg/res_17<CC>.txt; $WORK/capri_reference/sets/simini_21730/<CC>.csv; $WORK/capri_reference/sets/simini_21730/FEED_TO_O.csv; $WORK/capri_reference/sets/simini_21730/MAACT.csv; $WORK/capri_reference/sets/simini_21730/MCACT.csv; $WORK/capri_reference/sets/simini_21730/MPACT.csv; $WORK/capri_reference/sets/simini_21730/Map_RR.csv; $WORK/capri_reference/sets/simini_21730/PACT.csv; $WORK/capri_reference/sets/simini_21730/RALL.csv; $WORK/capri_reference/sets/simini_21730/XX1.csv; $WORK/cs/costsavings_ini_21730_jul15.csv; $WORK/cs/costsavings_max_21730_jul15.csv; $WORK/feedexp/feed_export/pmppar_17<CC>_feedpmp.csv; $WORK/inputs/capri_export_zip/capri_export/DATA2_<CC>.txt; $WORK/up/pmp2030/estnlp_results_<CC>.txt; $WORK/up/pmp2030/pmppar_21730<CC>defaulta.txt"
    },
    "notes": [],
    "read_by": {
@@ -38045,7 +38046,21 @@
      "capri_mod/projection/prices.py"
     ],
     "builders": [
-     "build_histosol"
+     "build_ad_option",
+     "build_animal_pmp_capri_2030",
+     "build_cap_ceilings_2030",
+     "build_cover_crops",
+     "build_feed_ration",
+     "build_genetics_effects",
+     "build_histosol",
+     "build_intensity_q_2030",
+     "build_labour_setaside",
+     "build_land_market",
+     "build_land_rents",
+     "build_lownfeed_effects",
+     "build_npk_balance_2030",
+     "build_pmp_capri_2030",
+     "build_supplement_effects"
     ],
     "checks": [],
     "tests": []
@@ -39151,7 +39166,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_winter_cover_option",
-    "sources": "$UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $WORK/allgms/gams/aggregation/defaultA.agg; $WORK/allgms/gams/reports/def_cbalance.gms"
+    "sources": "$UP/data_market_1730defaulta.csv; $UP/elas_2_1730defaulta.csv; $UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $WORK/allgms/gams/aggregation/defaultA.agg; $WORK/allgms/gams/reports/def_cbalance.gms; $WORK/capreg/res_17<CC>.txt; $WORK/inputs/capri_export_zip/capri_export/DATA2_<CC>.txt"
    },
    "notes": [],
    "read_by": {

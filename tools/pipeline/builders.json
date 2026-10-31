@@ -35,11 +35,13 @@
     "capri_data/sources/capri_dat/ghgtech/AD_basedata_p_SharLiq.csv",
     "capri_data/sources/capri_dat/ghgtech/AD_basedata_p_VSER.csv",
     "capri_data/sources/capri_dat/ghgtech/AD_basedata_p_sf.csv",
-    "capri_data/sources/capri_dat/ghgtech/gains_ad_p_gainsdata.csv"
+    "capri_data/sources/capri_dat/ghgtech/gains_ad_p_gainsdata.csv",
+    "capri_data/trajectories/capri_price_ratios_2030.csv"
    ],
    "code": [
     "tools/build/build_ad_option.py",
     "tools/lib/_model_regions.py",
+    "tools/lib/_money.py",
     "tools/lib/gams_text.py"
    ],
    "external": [
@@ -247,11 +249,13 @@
     "capri_data/shared/capri_member_state_codes.csv",
     "capri_data/shared/eu_market_blocks.csv",
     "capri_data/shared/regional_units.csv",
-    "capri_data/sources/baseline_pmp/pmp_quad_techn_2030.csv"
+    "capri_data/sources/baseline_pmp/pmp_quad_techn_2030.csv",
+    "capri_data/trajectories/capri_price_ratios_2030.csv"
    ],
    "code": [
     "tools/build/build_animal_pmp_capri_2030.py",
-    "tools/lib/_model_regions.py"
+    "tools/lib/_model_regions.py",
+    "tools/lib/_money.py"
    ],
    "external": [
     "$UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv"
@@ -271,11 +275,13 @@
     "capri_data/shared/capri_member_state_codes.csv",
     "capri_data/shared/eu_market_blocks.csv",
     "capri_data/shared/regional_units.csv",
-    "capri_data/sources/baseline_pmp/pmp_quad_techn_2030.csv"
+    "capri_data/sources/baseline_pmp/pmp_quad_techn_2030.csv",
+    "capri_data/trajectories/capri_price_ratios_2030.csv"
    ],
    "code": [
     "tools/build/build_animal_pmp_capri_2030.py",
-    "tools/lib/_model_regions.py"
+    "tools/lib/_model_regions.py",
+    "tools/lib/_money.py"
    ],
    "external": [
     "$UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv"
@@ -304,7 +310,8 @@
    ],
    "code": [
     "tools/build/build_animal_pmp_capri_2030.py",
-    "tools/lib/_model_regions.py"
+    "tools/lib/_model_regions.py",
+    "tools/lib/_money.py"
    ],
    "external": [
     "$WORK/capreg/res_17AT.txt",
@@ -360,7 +367,8 @@
    ],
    "code": [
     "tools/build/build_animal_pmp_capri_2030.py",
-    "tools/lib/_model_regions.py"
+    "tools/lib/_model_regions.py",
+    "tools/lib/_money.py"
    ],
    "external": [
     "$WORK/capreg/res_17AT.txt",
@@ -411,11 +419,13 @@
     "capri_data/shared/capri_member_state_codes.csv",
     "capri_data/shared/eu_market_blocks.csv",
     "capri_data/shared/regional_units.csv",
-    "capri_data/sources/baseline_pmp/recipe_2030_quad_techn.csv"
+    "capri_data/sources/baseline_pmp/recipe_2030_quad_techn.csv",
+    "capri_data/trajectories/capri_price_ratios_2030.csv"
    ],
    "code": [
     "tools/build/build_animal_pmp_capri_2030.py",
-    "tools/lib/_model_regions.py"
+    "tools/lib/_model_regions.py",
+    "tools/lib/_money.py"
    ],
    "external": [
     "$UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv"
@@ -441,11 +451,13 @@
     "capri_data/shared/capri_member_state_codes.csv",
     "capri_data/shared/eu_market_blocks.csv",
     "capri_data/shared/regional_units.csv",
-    "capri_data/sources/baseline_pmp/recipe_2030_quad_techn.csv"
+    "capri_data/sources/baseline_pmp/recipe_2030_quad_techn.csv",
+    "capri_data/trajectories/capri_price_ratios_2030.csv"
    ],
    "code": [
     "tools/build/build_animal_pmp_capri_2030.py",
-    "tools/lib/_model_regions.py"
+    "tools/lib/_model_regions.py",
+    "tools/lib/_money.py"
    ],
    "external": [
     "$UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv"
@@ -588,12 +600,14 @@
     "capri_data/codes/model_activities.csv",
     "capri_data/shared/capri_member_state_codes.csv",
     "capri_data/shared/eu_market_blocks.csv",
-    "capri_data/shared/regional_units.csv"
+    "capri_data/shared/regional_units.csv",
+    "capri_data/trajectories/capri_price_ratios_2030.csv"
    ],
    "code": [
     "tools/build/build_cap_ceilings_2030.py",
     "tools/lib/_model_codes.py",
-    "tools/lib/_model_regions.py"
+    "tools/lib/_model_regions.py",
+    "tools/lib/_money.py"
    ],
    "external": [
     "$UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv"
@@ -1137,16 +1151,20 @@
    "builder": "build_cover_crops",
    "args": [],
    "inputs": [
+    "capri_data/codes/model_activities.csv",
     "capri_data/shared/capri_member_state_codes.csv",
     "capri_data/shared/eu_market_blocks.csv",
     "capri_data/shared/regional_units.csv",
     "capri_data/sources/capri_dat/policy/wintercovershare_p_winterCoverShare0.csv",
+    "capri_data/trajectories/capri_price_ratios_2030.csv",
     "capri_data/validation/greendeal_2030/capri_marginal_terms_ini_2030.csv.xz"
    ],
    "code": [
     "tools/build/build_capri_base.py",
     "tools/build/build_cover_crops.py",
-    "tools/lib/_model_regions.py"
+    "tools/lib/_model_codes.py",
+    "tools/lib/_model_regions.py",
+    "tools/lib/_money.py"
    ],
    "external": [
     "$WORK/allgms/gams/reports/def_cbalance.gms"
@@ -1764,7 +1782,8 @@
     "capri_data/shared/eu_market_blocks.csv",
     "capri_data/shared/regional_units.csv",
     "capri_data/shared/rms_to_rm.csv",
-    "capri_data/sources/baseline_pmp/pmp_feed_inp_coeff_2030.csv"
+    "capri_data/sources/baseline_pmp/pmp_feed_inp_coeff_2030.csv",
+    "capri_data/trajectories/capri_price_ratios_2030.csv"
    ],
    "code": [
     "capri_mod/__init__.py",
@@ -1775,7 +1794,8 @@
     "capri_mod/data/loaders.py",
     "capri_mod/tableio.py",
     "tools/build/build_feed_ration.py",
-    "tools/lib/_model_regions.py"
+    "tools/lib/_model_regions.py",
+    "tools/lib/_money.py"
    ],
    "external": [
     "$WORK/capreg/res_17AT.txt",
@@ -1947,12 +1967,14 @@
     "capri_data/shared/eu_market_blocks.csv",
     "capri_data/shared/regional_units.csv",
     "capri_data/sources/capri_baseline/capri_uvag_store_1730.csv",
-    "capri_data/sources/ghgtech/capri_costsavings_2030.csv"
+    "capri_data/sources/ghgtech/capri_costsavings_2030.csv",
+    "capri_data/trajectories/capri_price_ratios_2030.csv"
    ],
    "code": [
     "tools/build/build_genetics_effects.py",
     "tools/lib/_capri_costsavings.py",
-    "tools/lib/_model_regions.py"
+    "tools/lib/_model_regions.py",
+    "tools/lib/_money.py"
    ],
    "external": [
     "$WORK/capreg/res_17AT.txt",
@@ -2201,11 +2223,13 @@
     "capri_data/shared/regional_units.csv",
     "capri_data/sources/baseline_pmp/pmp_quad_techn_2030.csv",
     "capri_data/sources/baseline_pmp/recipe_2017_quad_techn.csv",
-    "capri_data/sources/baseline_pmp/recipe_2030_quad_techn.csv"
+    "capri_data/sources/baseline_pmp/recipe_2030_quad_techn.csv",
+    "capri_data/trajectories/capri_price_ratios_2030.csv"
    ],
    "code": [
     "tools/build/build_intensity_q_2030.py",
-    "tools/lib/_model_regions.py"
+    "tools/lib/_model_regions.py",
+    "tools/lib/_money.py"
    ],
    "external": [],
    "outputs": [
@@ -2247,12 +2271,14 @@
     "capri_data/shared/regional_units.csv",
     "capri_data/sources/baseline_pmp/intensity_q_capri2030.csv",
     "capri_data/sources/baseline_pmp/intensity_q_recipe2017.csv",
-    "capri_data/sources/baseline_pmp/intensity_q_recipe2030.csv"
+    "capri_data/sources/baseline_pmp/intensity_q_recipe2030.csv",
+    "capri_data/trajectories/capri_price_ratios_2030.csv"
    ],
    "code": [
     "tools/build/build_labour_setaside.py",
     "tools/lib/_model_codes.py",
-    "tools/lib/_model_regions.py"
+    "tools/lib/_model_regions.py",
+    "tools/lib/_money.py"
    ],
    "external": [
     "$UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv",
@@ -2312,7 +2338,8 @@
     "capri_mod/data/loaders.py",
     "capri_mod/tableio.py",
     "tools/build/build_land_market.py",
-    "tools/lib/_model_regions.py"
+    "tools/lib/_model_regions.py",
+    "tools/lib/_money.py"
    ],
    "external": [
     "$WORK/capreg/res_17AT.txt",
@@ -2397,7 +2424,8 @@
     "capri_data/shared/eu_market_blocks.csv",
     "capri_data/shared/regional_units.csv",
     "capri_data/shared/rms_to_rm.csv",
-    "capri_data/sources/baseline_pmp/pmp_quad_landtypes_2030.csv"
+    "capri_data/sources/baseline_pmp/pmp_quad_landtypes_2030.csv",
+    "capri_data/trajectories/capri_price_ratios_2030.csv"
    ],
    "code": [
     "capri_mod/__init__.py",
@@ -2407,7 +2435,8 @@
     "capri_mod/data/loaders.py",
     "capri_mod/tableio.py",
     "tools/build/build_land_market.py",
-    "tools/lib/_model_regions.py"
+    "tools/lib/_model_regions.py",
+    "tools/lib/_money.py"
    ],
    "external": [
     "$UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv"
@@ -2431,7 +2460,8 @@
    ],
    "code": [
     "tools/build/build_land_rents.py",
-    "tools/lib/_model_regions.py"
+    "tools/lib/_model_regions.py",
+    "tools/lib/_money.py"
    ],
    "external": [
     "$WORK/capreg/res_17AT.txt",
@@ -2477,11 +2507,13 @@
    "inputs": [
     "capri_data/shared/capri_member_state_codes.csv",
     "capri_data/shared/eu_market_blocks.csv",
-    "capri_data/shared/regional_units.csv"
+    "capri_data/shared/regional_units.csv",
+    "capri_data/trajectories/capri_price_ratios_2030.csv"
    ],
    "code": [
     "tools/build/build_land_rents.py",
-    "tools/lib/_model_regions.py"
+    "tools/lib/_model_regions.py",
+    "tools/lib/_money.py"
    ],
    "external": [
     "$UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv"
@@ -2793,13 +2825,15 @@
     "capri_data/shared/capri_member_state_codes.csv",
     "capri_data/shared/eu_market_blocks.csv",
     "capri_data/shared/regional_units.csv",
-    "capri_data/sources/ghgtech/capri_costsavings_2030.csv"
+    "capri_data/sources/ghgtech/capri_costsavings_2030.csv",
+    "capri_data/trajectories/capri_price_ratios_2030.csv"
    ],
    "code": [
     "tools/build/build_lownfeed_effects.py",
     "tools/lib/_capri_costsavings.py",
     "tools/lib/_model_codes.py",
-    "tools/lib/_model_regions.py"
+    "tools/lib/_model_regions.py",
+    "tools/lib/_money.py"
    ],
    "external": [
     "$UP/animReq_SK.zip",
@@ -3216,7 +3250,8 @@
     "capri_data/shared/rms_to_rm.csv",
     "capri_data/sources/capri_gams/envind/gascoeff_p_nutContCropOutput_STRA.csv",
     "capri_data/sources/capri_gams/fert/fertpar_MAXF.csv",
-    "capri_data/sources/capri_gams/fert/fertpar_doubleMaxf.csv"
+    "capri_data/sources/capri_gams/fert/fertpar_doubleMaxf.csv",
+    "capri_data/trajectories/capri_price_ratios_2030.csv"
    ],
    "code": [
     "capri_mod/__init__.py",
@@ -3229,7 +3264,8 @@
     "tools/build/build_fert_dist_priors.py",
     "tools/build/build_livestock_output_coef.py",
     "tools/build/build_npk_balance_2030.py",
-    "tools/lib/_model_regions.py"
+    "tools/lib/_model_regions.py",
+    "tools/lib/_money.py"
    ],
    "external": [
     "$UP/res_2_1730greendeal_refdefaulta.zip",
@@ -3525,12 +3561,14 @@
     "capri_data/shared/eu_market_blocks.csv",
     "capri_data/shared/regional_units.csv",
     "capri_data/sources/baseline_pmp/pmp_quad_pact_2030.csv",
-    "capri_data/sources/baseline_pmp/pmp_quad_techn_2030.csv"
+    "capri_data/sources/baseline_pmp/pmp_quad_techn_2030.csv",
+    "capri_data/trajectories/capri_price_ratios_2030.csv"
    ],
    "code": [
     "tools/build/build_pmp_capri_2030.py",
     "tools/lib/_model_codes.py",
-    "tools/lib/_model_regions.py"
+    "tools/lib/_model_regions.py",
+    "tools/lib/_money.py"
    ],
    "external": [
     "$UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv"
@@ -3561,7 +3599,8 @@
    "code": [
     "tools/build/build_pmp_capri_2030.py",
     "tools/lib/_model_codes.py",
-    "tools/lib/_model_regions.py"
+    "tools/lib/_model_regions.py",
+    "tools/lib/_money.py"
    ],
    "external": [
     "$WORK/capreg/res_17AT.txt",
@@ -3613,12 +3652,14 @@
     "capri_data/shared/eu_market_blocks.csv",
     "capri_data/shared/regional_units.csv",
     "capri_data/sources/baseline_pmp/recipe_2030_quad_pact.csv",
-    "capri_data/sources/baseline_pmp/recipe_2030_quad_techn.csv"
+    "capri_data/sources/baseline_pmp/recipe_2030_quad_techn.csv",
+    "capri_data/trajectories/capri_price_ratios_2030.csv"
    ],
    "code": [
     "tools/build/build_pmp_capri_2030.py",
     "tools/lib/_model_codes.py",
-    "tools/lib/_model_regions.py"
+    "tools/lib/_model_regions.py",
+    "tools/lib/_money.py"
    ],
    "external": [
     "$UP/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv"
@@ -3988,7 +4029,8 @@
     "capri_data/sources/envind/capri_digest_default_prd.csv",
     "capri_data/sources/envind/capri_digestpar.csv",
     "capri_data/sources/envind/res17_mann_crpr_expt.csv",
-    "capri_data/sources/ghgtech/capri_costsavings_2030.csv"
+    "capri_data/sources/ghgtech/capri_costsavings_2030.csv",
+    "capri_data/trajectories/capri_price_ratios_2030.csv"
    ],
    "code": [
     "tools/build/build_ammonia_cost_curves.py",
@@ -3997,7 +4039,8 @@
     "tools/lib/_capri_costsavings.py",
     "tools/lib/_capri_digest.py",
     "tools/lib/_model_codes.py",
-    "tools/lib/_model_regions.py"
+    "tools/lib/_model_regions.py",
+    "tools/lib/_money.py"
    ],
    "external": [
     "$WORK/capreg/res_17AT.txt",
