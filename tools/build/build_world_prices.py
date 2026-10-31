@@ -45,7 +45,6 @@ from capri_mod.data import definitions as D  # noqa: E402
 MKT = ROOT / "capri_data" / "2017" / "market"
 OUT = MKT / "world_prices.csv"
 CODES = ROOT / "capri_data" / "codes" / "model_commodities.csv"
-UNITS = ROOT / "capri_data" / "shared" / "regional_units.csv"
 FAO = Path("/mnt/user-data/uploads/fao_agg_17_datamarket.txt")
 DUMPS = Path("/home/claude/work/capreg")
 FAO_SRC = "FAO_agg_17_defaulta p_dataMarket 'World'.'PMRK'.'BAS'"
@@ -98,8 +97,12 @@ def build(fao: Path = FAO, dumps: Path = DUMPS):
     world, olio = fao_market(fao)
     with open(CODES, newline="", encoding="utf-8") as fh:
         capri_code = {r["code"]: r["capri_code"] for r in csv.DictReader(fh)}
-    with open(UNITS, newline="", encoding="utf-8") as fh:
-        ms = sorted({r["capri_ms"] for r in csv.DictReader(fh) if r["country"] != "NO"})
+    # the EU's member states (shared/eu_market_blocks.csv through tools/lib/_model_regions.EU_MS; SUPPLY_NONEU_DESIGN
+    # section 2, issue 4: until 31 October 2026 the member states of regional_units.csv but Norway, which would take in
+    # the UK's, Turkey's and the Western Balkans' units)
+    sys.path.insert(0, str(ROOT / "tools" / "lib"))
+    from _model_regions import EU_MS
+    ms = sorted(EU_MS)
     prices, prov, missing = {}, {}, []
     for c in list(D.MARKET_COMMODITIES) + ["DWHE", "SUGB"]:
         if c == "OLIV":
