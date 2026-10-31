@@ -68,17 +68,11 @@ def test_data_loads(data):
     assert len(data["world_prices"]) > 0
 
 
-def test_data_validator_runs():
-    from capri_mod.data.validate_data import validate_data
-    rep = validate_data(str(DATA_DIR))
-    assert rep.n_fail == 0, f"validator reported failures: {rep.summary()}"
-
-
 def test_validator_has_vintage_check():
-    from capri_mod.data.validate_data import validate_data
-    rep = validate_data(str(DATA_DIR))
-    names = [c[0] for c in rep.checks]
-    assert any("vintage" in n for n in names)
+    """The base-year vintage check of the former MANIFEST.json validator is a rule of the declarations (99_rules.sql,
+    over 05_file_catalogue.sql); the declarations' own test runs every rule (test_data_schema.py)."""
+    rules = (DATA_DIR / "schema" / "99_rules.sql").read_text()
+    assert "-- rule: the base-year group shares one vintage" in rules
 
 
 def test_no_negative_base_quantities(data):

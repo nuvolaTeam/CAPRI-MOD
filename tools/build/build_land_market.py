@@ -192,7 +192,7 @@ def main() -> None:
     src_txt = ("CAPRI res_17 LEVL of land types; pmppar_17XX p_pmpQuadLandTypes" if args.year == 2017 else
                "CAPRI 2030 reference LEVL of land types (res_2_1730greendeal_refpol_endotech_all_inidefaulta); "
                "pmppar_21730XX p_pmpQuadLandTypes of the 2030 baseline calibration (tools/build/build_pmp_2030.py)")
-    io.write(dest, out, LT)        # CSV (capri_mod/data/land_market_io.py); source: src_txt, recorded in MANIFEST.json
+    io.write(dest, out, LT)        # CSV (capri_mod/data/land_market_io.py); its source printed below (src_txt)
     print(f"wrote {dest}.csv ({src_txt}): {len(out)} regions | without CAPRI quad: {len(nodata)} | not positive definite: {len(notpd)} {notpd[:5]}")
 
 

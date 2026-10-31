@@ -522,9 +522,9 @@ def load_all_data(data_dir: Optional[Path] = None, validate: bool = False,
     """Load all baseline datasets, returning a nested dict.
 
     base_year selects the capri_data/<base_year>/ folder in the categorised
-    layout. If validate=True, run the data validator against the manifest first
-    and print a short report — a cheap guard against vintage-mixing, missing
-    files, and shape drift.
+    layout. If validate=True, run the data checks first (the declarations under
+    capri_data/schema with their rules: tools/check/validate_data.py, which needs
+    DuckDB) and print their violations.
 
     By design this **fails loudly** when no real data directory is given, rather
     than silently generating synthetic data. A policy tool must run on real,
@@ -545,18 +545,21 @@ def load_all_data(data_dir: Optional[Path] = None, validate: bool = False,
     DEFAULT_BASE_YEAR = base_year
     print("Loading CAPRI baseline data...")
     if validate and data_dir is not None:
+        # the data checks (until 31 October 2026 a separate validator against capri_data/MANIFEST.json, merged into
+        # the declarations' checks): every violation printed; a missing DuckDB is said, not hidden
+        import importlib.util as _ilu
+        _vp = Path(__file__).resolve().parents[2] / "tools" / "check" / "validate_data.py"
+        _sp = _ilu.spec_from_file_location("_validate_data", _vp)
+        _vd = _ilu.module_from_spec(_sp)
+        _sp.loader.exec_module(_vd)
         try:
-            from capri_mod.data.validate_data import validate_data as _vd
-            rep = _vd(str(data_dir))
-            if rep.n_fail or rep.n_warn:
-                print(f"  [data check] {rep.summary()}")
-                for name, status, detail in rep.checks:
-                    if status != "PASS":
-                        print(f"    {status}: {name} — {detail}")
-            else:
-                print(f"  [data check] {rep.summary()}")
-        except Exception as _e:
-            print(f"  [data check] skipped: {_e}")
+            _found = _vd.validate(Path(data_dir).resolve().parent, verbose=False)
+        except ImportError as _e:
+            print(f"  [data check] not run: {_e} (DuckDB is in the dev extra)")
+        else:
+            print(f"  [data check] {len(_found)} violations")
+            for _w, _k, _m in _found:
+                print(f"    {_w} [{_k}] {_m}")
     data = {
         "areas":           load_regional_base_areas(data_dir),
         # CAPRI's labour per activity unit (LABT, LABF, LABP; hours per ha or model head; 2017 and _2030) and its two
