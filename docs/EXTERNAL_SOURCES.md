@@ -158,8 +158,8 @@ not been tested.
 
 ## Until 31 October 2026
 
-Until 31 October 2026 the builders' defaults named the folders of the machine they were developed on
-(`/mnt/user-data/uploads`, `/home/claude/work/...`), and `dodo.py` read them from `CAPRI_UPLOADS` and `CAPRI_WORK`. The
+Until 31 October 2026 the builders' defaults named two folders of the machine they were developed on (its uploads
+folder and its work folder), and `dodo.py` read them from `CAPRI_UPLOADS` and `CAPRI_WORK`. The
 GAMS scripts named the project lead's CAPRI folder. Two other things changed at the same time:
 - The folders were renamed, e.g. `allgms/gams` became `gams` and `feedexp/feed_export` became `feed_export`.
 - `build_nh3_factors` reads the 2030 reference zip itself. Before, it read `nh3_rows.txt`, rows grepped from it

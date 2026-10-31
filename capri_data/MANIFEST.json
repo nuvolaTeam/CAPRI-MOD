@@ -3992,7 +3992,7 @@
    "vintage": "n/a",
    "domain": "shared",
    "status": "live",
-   "rows": 30,
+   "rows": 37,
    "columns": 3,
    "read_by_model": [
     "capri_mod/data/definitions.py"
