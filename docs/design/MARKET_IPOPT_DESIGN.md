@@ -41,6 +41,10 @@ systems' CasADi expressions (`capri_mod/market/trade_ad.py`, step G1).
 
 ## 3. Proposed formulation
 
+**G3 on standby (the project lead, 1 November 2026) pending the independent review of step G,
+docs/design/G_REVIEW_2026-11-01.md: the bound policy, the objective, the acceptance tests and the inventory's
+corrections are to be decided before G3 is built.**
+
 **Changed by the project lead on 1 November 2026: G3 in CAPRI's own form (section 3.1).** The text below is the
 reduced form first proposed; 3.1 replaces it for G3.
 
