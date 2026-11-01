@@ -26,7 +26,7 @@ the build takes hours on two cores and about 8 GB of disk (the images 7 GB more)
 core build's first external projects (sources, SWIG, mockups, the start of the core); the python, graft and wheel
 steps follow binaries.yml and universal_grafter but have not run yet. The wheel is written to WORKDIR/dist. Not committed; the
 library inside it is loaded by CasADi itself, so supply.nlp_ipopt_library stays "" with it and
-supply.nlp_linear_solver = "spral" selects SPRAL (capri_mod/supply/ipopt_library.py's OpenMP rules apply: the threads
+supply.nlp_linear_solver = "spral" selects SPRAL (capri_mod/utils/ipopt_library.py's OpenMP rules apply: the threads
 of a process that forks its workers).
 """
 from __future__ import annotations

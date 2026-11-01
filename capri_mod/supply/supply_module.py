@@ -3161,7 +3161,7 @@ class SupplyModule:
         model and state, which replace this process's copies. The first region is solved here first, so the
         data files read on first use are loaded once, before the fork, not in every worker."""
         nw = self.workers(len(regions))
-        from capri_mod.supply import ipopt_library as _il
+        from capri_mod.utils import ipopt_library as _il
         if _il.active():
             # an IPOPT with OpenMP (supply.nlp_ipopt_library): one thread in a process that forks workers, the threads
             # to the workers (a process that ran OpenMP on several threads hangs its forked children: ipopt_library)
@@ -3277,7 +3277,7 @@ def _par_solve_region(region):
     returns the result, the regional model (without the shared environmental module), the region's land and
     nitrogen-price state and the cache entries it added."""
     sm, pol, ps, verbose = _PAR_CTX
-    from capri_mod.supply import ipopt_library as _il
+    from capri_mod.utils import ipopt_library as _il
     _il.for_worker()                                     # supply.nlp_omp_threads (nothing without an OpenMP IPOPT)
     before = {n: set(sm.__dict__.get(n) or ()) for n in sm._PAR_CACHES}
     out = sm._solve_region(region, pol, ps, verbose)

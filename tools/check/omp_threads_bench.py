@@ -38,7 +38,7 @@ def _callback_seconds(st):
 def run(out, library, threads):
     from capri_mod import settings as S
     from capri_mod.supply import capri_regional_nlp as C
-    from capri_mod.supply import ipopt_library as IL
+    from capri_mod.utils import ipopt_library as IL
     sys.path.insert(0, str(ROOT / "tools" / "run"))
     import run_f2f_2030
     from run_mini_eu import UNITS

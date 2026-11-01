@@ -139,8 +139,8 @@ def linear_solver_options() -> dict:
     lib_ = str(_settings().get("supply.nlp_ipopt_library") or "").strip()
     if lib_:
         # another IPOPT library (an IPOPT with SPRAL in OpenMP), loaded before the first IPOPT solve of the process
-        # and its OpenMP set up (capri_mod/supply/ipopt_library.py)
-        from capri_mod.supply import ipopt_library as _il
+        # and its OpenMP set up (capri_mod/utils/ipopt_library.py)
+        from capri_mod.utils import ipopt_library as _il
         _il.ensure_loaded(lib_)
     ls = str(_settings().get("supply.nlp_linear_solver")).strip().lower()
     if ls == "mumps":
@@ -155,7 +155,7 @@ def linear_solver_options() -> dict:
         # ipopt_library.py). Until 31 October 2026 this set OMP_CANCELLATION, OMP_PROC_BIND and OMP_NUM_THREADS here,
         # which PyPI's CasADi does not read (no OpenMP runtime)
         if not lib_:
-            from capri_mod.supply import ipopt_library as _il
+            from capri_mod.utils import ipopt_library as _il
             _il.prepare_builtin()
         return {"ipopt.linear_solver": "spral"}
     if ls not in ("ma27", "ma57", "ma77", "ma86", "ma97"):

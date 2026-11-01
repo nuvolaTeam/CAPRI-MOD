@@ -1,4 +1,4 @@
-"""supply.nlp_ipopt_library and supply.nlp_omp_threads (capri_mod/supply/ipopt_library.py; register BEYOND-11).
+"""supply.nlp_ipopt_library and supply.nlp_omp_threads (capri_mod/utils/ipopt_library.py; register BEYOND-11).
 
 Without a built library: the setting's checks and the detection of other OpenMP runtimes. With one (the environment
 variable CAPRI_TEST_IPOPT_LIBRARY names an IPOPT with SPRAL in OpenMP, tools/solvers/build_ipopt_spral_omp.py): in a
@@ -14,7 +14,7 @@ from pathlib import Path
 import pytest
 
 from capri_mod import settings
-from capri_mod.supply import ipopt_library as il
+from capri_mod.utils import ipopt_library as il
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -54,7 +54,7 @@ CHILD = textwrap.dedent(r"""
     sys.path.insert(0, sys.argv[2])
     lib = sys.argv[1]
     from capri_mod import settings
-    from capri_mod.supply import ipopt_library as il
+    from capri_mod.utils import ipopt_library as il
     out = {}
     with settings.override({"supply.nlp_ipopt_library": lib, "supply.nlp_linear_solver": "spral",
                             "supply.nlp_omp_threads": 2}):
@@ -136,7 +136,7 @@ def test_spral_with_casadis_own_ipopt_in_a_fresh_process(tmp_path):
         import json, os, sys
         sys.path.insert(0, sys.argv[1])
         from capri_mod import settings
-        from capri_mod.supply import ipopt_library as il
+        from capri_mod.utils import ipopt_library as il
         with settings.override({"supply.nlp_linear_solver": "spral"}):
             from capri_mod.supply.capri_regional_nlp import linear_solver_options
             opts = linear_solver_options()

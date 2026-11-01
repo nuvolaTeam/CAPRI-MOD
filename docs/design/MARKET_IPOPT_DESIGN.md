@@ -198,7 +198,7 @@ The options as they were put:
   symbols hidden; built by tools/solvers/build_ipopt_spral_omp.py outside the repository, with the system's compilers and
   runtime libraries (libgomp.so.1, libgfortran.so.5). No MUMPS in it (CasADi's own IPOPT keeps it).
 - **How the model uses it.** supply.nlp_ipopt_library names the library, supply.nlp_linear_solver = "spral" selects
-  SPRAL, supply.nlp_omp_threads the threads per process (capri_mod/supply/ipopt_library.py). Defaults: CasADi's IPOPT and
+  SPRAL, supply.nlp_omp_threads the threads per process (capri_mod/utils/ipopt_library.py). Defaults: CasADi's IPOPT and
   MUMPS, results unchanged. The run manifest records the library (path, SHA-256) and the main process's threads.
 - **OpenMP in the model's processes (measured here).**
   - The supply model forks its workers. A process that has run an OpenMP region on two threads hangs its forked

@@ -159,7 +159,7 @@ nlp_hsllib = ""
 # another IPOPT library under CasADi's IPOPT interface, in place of CasADi's own: "" (CasADi's) or the path of a
 # libipopt.so.3 (absolute, or relative to the repository root), e.g. IPOPT with SPRAL in OpenMP built by
 # tools/solvers/build_ipopt_spral_omp.py, outside the repository (nlp_linear_solver = "spral" with it). Loaded before the
-# first IPOPT solve of the run (capri_mod/supply/ipopt_library.py: OpenMP's environment, other OpenMP runtimes, forks).
+# first IPOPT solve of the run (capri_mod/utils/ipopt_library.py: OpenMP's environment, other OpenMP runtimes, forks).
 # Not CAPRI's (register BEYOND-11)
 nlp_ipopt_library = ""
 # OpenMP threads of the linear solver per process with that library: each worker process takes this many; the process

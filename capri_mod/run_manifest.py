@@ -101,7 +101,7 @@ def _versions() -> dict:
         mod = sys.modules.get(m)
         if mod is not None:
             out[m] = getattr(mod, "__version__", "")
-    il = sys.modules.get("capri_mod.supply.ipopt_library")
+    il = sys.modules.get("capri_mod.utils.ipopt_library")
     if il is not None and il.loaded():
         # another IPOPT library in place of CasADi's (supply.nlp_ipopt_library): the file, and the OpenMP threads of
         # the main process (the workers': supply.nlp_omp_threads)
