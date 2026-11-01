@@ -31,7 +31,7 @@ market results (markmarket_greendeal_1730et_base_1717.txt, dataOut), against eac
 | Flexible cereal levies | MinBordP > 0 (l. 3236, 3258) | the EU blocks' cereals, 30 entries (e.g. 153.1 EUR/t) | **yes** (where the levy's variable is free) |
 | Entry prices of fruit and vegetables | TriggerP > 0 (l. 3176, 3204) | the EU and the UK, 8 entries in CAL (16 in 2030) | **yes** |
 | Global (erga omnes) TRQs | p_trqGlobl TrqNT > 0 (l. 3142, 3399, 3475) | quotas against 'World' for the EU (18 products, e.g. maize 2,778 kt, wheat 2,851 kt) and for China, Japan, the USA, Canada, Russia, India, Switzerland, Norway, Taiwan, New Zealand and the aggregates | **yes** |
-| Bilateral TRQs outside the EU | trqSigmoidFunc_ per importer | TrqNT of 2030 for about 20 importers besides the EU blocks | **yes** |
+| Bilateral TRQs outside the EU | trqSigmoidFunc_ per importer | p_trqBilat at 'CAL' in sim_ini_21730 (the state the simulation starts from): five importers besides the EU, MED, MOR, NO000000, RUS and TUR (corrected 1 November 2026: the earlier "about 20" counted dataOut's 2030 TrqNT rows, which include reporting aggregates such as World, HI_INC, NONEU_EU and the global quotas' rows; MARKET_REGIONS_INVENTORY.md) | **yes** |
 | Market land and yields | Yield_, LandSupplyMNL_ where land levels and yields exist (l. 1737, 1795) | 45 behavioural regions with yields, land levels and ARTO | **yes** |
 
 So, of the "not ported" blocks, the intervention and subsidised-export rules are inactive in the 2030 runs, while
