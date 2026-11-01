@@ -41,6 +41,32 @@ systems' CasADi expressions (`capri_mod/market/trade_ad.py`, step G1).
 
 ## 3. Proposed formulation
 
+**Changed by the project lead on 1 November 2026: G3 in CAPRI's own form (section 3.1).** The text below is the
+reduced form first proposed; 3.1 replaces it for G3.
+
+### 3.1 CAPRI's form: every quantity a variable (the project lead's choice, 1 November 2026)
+
+- **What it is.** As m_globMarket: a square system in which each endogenous quantity is a variable with its own
+  defining equation (CAPRI documentation, 2022 PDF section 5.4: "the same number of endogenous variables as
+  equations"; about 70,000 of each there). Per commodity: the bilateral flows, both Armington aggregates and their
+  price indices, the import, producer and consumer prices, and per behavioural region supply, human consumption,
+  feed, processing and biofuel use, with the market clearing; the TRQ, dairy, feed-energy, young-animal and raw-milk
+  equations as they are in CAPRI's model.
+- **Against the reduced form** (the first proposal, below): the same equilibrium (substituting a defining equation
+  into the others changes no solution), but the problem is larger and sparser, each equation simple and close to
+  CAPRI's GAMS line for line, every quantity can carry CAPRI's bounds and is reported as solved. The reduced form has
+  about 1,281 price unknowns with dense rows (flows folded into the clearing); this form has tens of thousands of
+  unknowns with a few entries per row.
+- **What carries over.** The blocks built so far (G2a trade with the TRQs, G2c human consumption, G2e processing) are
+  CasADi expressions of their arguments; in CAPRI's form each becomes the right-hand side of its variable's defining
+  equation (q - f(prices) = 0), so they are reused, not rewritten. The objective (½‖z − z₀‖² over the prices) and the
+  supply side outside the NLP (market supply functions and the measured Hessian) stay as decided.
+- **Linear solver.** A large sparse KKT system: MUMPS and SPRAL in OpenMP (section 9.1) to be compared on it.
+- **Next.** The variable and equation list per block against m_globMarket (arm/market_model.gms), with CAPRI's bounds,
+  before G3 is assembled; the remaining blocks (G2b, G2d, G2f, G2g) written as defining equations from the start.
+
+### 3.0 The reduced form (first proposal, 30 October 2026)
+
 - **Unknowns.** x = (z, w):
   - z: the price ratios above;
   - w: the unknowns that the market blocks now solve inside the response, lifted into the NLP (section 4, the "inner
