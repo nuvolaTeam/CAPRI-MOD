@@ -32,6 +32,7 @@ import pandas as pd
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Tuple
 from enum import Enum
+from capri_mod.data.definitions import is_eu
 
 
 # ---------------------------------------------------------------------------
@@ -216,7 +217,10 @@ class DirectPaymentsEngine:
         for region in cap_data.index:
             if region not in land_data.index:              # no stand-in (removed 23 October 2026: 100 kha)
                 raise ValueError(f"{region}: no land in land_availability.csv")
-            uaa = float(land_data.loc[region, ["ARABLE", "PERMANENT", "GRASSLAND"]].sum())
+            # BPS is CAPRI's premiums per ha of UAAR, and CAPRI's UAAR holds fallow (SETA, FALL): the same area here
+            # (KNOWN_ISSUES K104; until 29 October 2026 fallow was left out)
+            uaa = float(land_data.loc[region, [c for c in ("ARABLE", "PERMANENT", "GRASSLAND", "FALLOW")
+                                               if c in land_data.columns]].sum())
             total0 = float(cap_data.at[region, "BPS"]) * uaa          # EUR/ha x 1000 ha = EUR 1000
             shr = self._scheme_shares()
             ceil = shr.loc[region] if region in shr.index and shr.loc[region].notna().all() else None
@@ -370,7 +374,7 @@ class PolicyModule:
         """Policy scenario summary: payments by region and scheme, member-state budgets against CAPRI's 2030 ones."""
         regional = self.get_payment_rates_by_region()
         national = self.payments.compute_national_budgets(regional)
-        eu = [r for r in regional.index if not str(r).startswith("NO")]
+        eu = [r for r in regional.index if is_eu(str(r))]
         uaa = float(regional.loc[eu, "UAA_1000ha"].sum())
         return {
             "scenario_name": self.scenario.name,

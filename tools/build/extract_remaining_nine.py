@@ -4,13 +4,12 @@ Extract the nine remaining model inputs from the capreg DATA2 dumps.
 Everything here is already in dumps held locally; no new GAMS run is required.
 
     LEVL                    activity levels -> base_areas, land_availability,
-                            animal_numbers
-    PRME                    CAP premium per activity -> cap_payments
-    NITF PHOF POTF          fertiliser application (counted; the file is extract_all_from_data2.py's)
-    MANN MANP MANK          manure nutrients (new input; the environmental
-                            module currently hardcodes N excretion)
-    FEED FCER FGRA FMAI     feed use by item -> feed availability
-    FROO FOFA FPRO FCOM
+                            animal_numbers (capreg_activity_levels.csv); land categories and herd sizes (counted
+                            only: capreg_land.csv, capreg_herds.csv until 30 October 2026, read by nothing)
+    PRME                    CAP premium per activity -> cap_payments (capreg_cap_premium.csv)
+    NITF PHOF POTF          fertiliser application (counted only)
+    FEED FCER FGRA FMAI     feed use by item (counted only: capreg_feed_use.csv until 30 October 2026, read by
+    FROO FOFA FPRO FCOM     nothing)
     FMIL FSGM FSTR FOTH
 
 On cap payments
@@ -42,14 +41,13 @@ LEVEL = "LEVL"
 PREMIUM = "PRME"
 HERD = "HERD"
 NUTRIENTS = {"NITF": "N", "PHOF": "P2O5", "POTF": "K2O"}
-MANURE = {"MANN": "N", "MANP": "P2O5", "MANK": "K2O"}
 FEED_ITEMS = ["FEED", "FCER", "FGRA", "FMAI", "FROO", "FOFA",
               "FPRO", "FCOM", "FMIL", "FSGM", "FSTR", "FOTH"]
 
 # Aggregate land categories, carried in DATA2 as pseudo-activities.
 LAND_CATEGORIES = ["UAAR", "ARAB", "GRAE", "GRAI", "SETA", "FALL", "OLND"]
 
-WANTED = ({LEVEL, PREMIUM, HERD} | set(NUTRIENTS) | set(MANURE) | set(FEED_ITEMS))
+WANTED = ({LEVEL, PREMIUM, HERD} | set(NUTRIENTS) | set(FEED_ITEMS))
 
 
 def parse(path: Path) -> pd.DataFrame:
@@ -100,10 +98,10 @@ def main() -> None:
     summary["activity_levels"] = list(levl.shape)
     print(f"activity levels : {levl.shape[0]} regions x {levl.shape[1]} activities")
 
-    # 2. land categories
+    # 2. land categories: counted for the summary only (written to capreg_land.csv until 30 October 2026; nothing read
+    # it and the file was removed, the project lead's decision: KNOWN_ISSUES K103)
     land = df[(df.item == LEVEL) & (df.activity.isin(LAND_CATEGORIES))].pivot_table(
         index="model_region", columns="activity", values="value", aggfunc="last")
-    land.to_csv(out / "capreg_land.csv")
     summary["land"] = list(land.shape)
     print(f"land categories : {land.shape[0]} regions x {list(land.columns)}")
 
@@ -113,30 +111,24 @@ def main() -> None:
     summary["cap_premium"] = list(prme.shape)
     print(f"CAP premiums    : {prme.shape[0]} regions x {prme.shape[1]} activities")
 
-    # 4. herd sizes
+    # 4. herd sizes: counted for the summary only (capreg_herds.csv until 30 October 2026, read by nothing, removed:
+    # KNOWN_ISSUES K103)
     herd = wide(HERD)
-    herd.to_csv(out / "capreg_herds.csv")
     summary["herds"] = list(herd.shape)
     print(f"herd sizes      : {herd.shape[0]} regions x {herd.shape[1]} animals")
 
-    # 5. fertiliser application: capreg_nutrient_coefs.csv is extract_all_from_data2.py's (the same records; one writer
-    # per file since 29 October 2026, docs/design/DATA_PIPELINE_DOIT.md); counted here for the summary only
+    # 5. fertiliser application: counted for the summary only (CAPRI's NITF/PHOF/POTF extract, capreg_nutrient_coefs.csv,
+    # was removed 29 October 2026, unread: KNOWN_ISSUES K103)
     nu = df[df.item.isin(NUTRIENTS)].copy()
     summary["nutrients"] = int(len(nu))
     print(f"fertiliser      : {len(nu):,} records")
 
-    # 6. manure nutrients
-    ma = df[df.item.isin(MANURE)].copy()
-    ma["nutrient"] = ma.item.map(MANURE)
-    ma[["model_region", "activity", "nutrient", "value"]].to_csv(
-        out / "capreg_manure_nutrients.csv", index=False)
-    summary["manure"] = int(len(ma))
-    print(f"manure          : {len(ma):,} records")
+    # 6. manure nutrients: written to capreg_manure_nutrients.csv until 29 October 2026; nothing read them (the model's
+    # manure N comes from the environmental module's CAPRI coefficients) and the file was removed (KNOWN_ISSUES K103)
 
-    # 7. feed use
+    # 7. feed use: counted for the summary only (capreg_feed_use.csv until 30 October 2026, read by nothing, removed:
+    # KNOWN_ISSUES K103)
     fe = df[df.item.isin(FEED_ITEMS)]
-    fe[["model_region", "activity", "item", "value"]].to_csv(
-        out / "capreg_feed_use.csv", index=False)
     summary["feed"] = int(len(fe))
     print(f"feed use        : {len(fe):,} records")
 

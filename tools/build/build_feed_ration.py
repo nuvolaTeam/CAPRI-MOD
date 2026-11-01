@@ -222,12 +222,17 @@ def main() -> None:
     # the same slopes of CAPRI's 2030 baseline calibration (pmppar_21730, tools/build/build_pmp_2030.py), aggregated with the
     # same 2017 weights (REGISTERED: CAPRI's 2030 rations per activity are not in the export); used at the 2030 market
     # year with SupplyModule.pmp_source "capri2030" (KNOWN_ISSUES K61)
+    # in the model's 2017 money: CAPRI's 2030 slopes over its inflation to 2030 (tools/lib/_money; KNOWN_ISSUES K108,
+    # 31 October 2026: before, CAPRI's 2030 money)
+    sys.path.insert(0, str(_ROOT / "tools" / "lib"))
+    import _money
+    _m30 = _money.deflator(2030)
     slope_src_2030 = collections.defaultdict(dict)
     _f30 = _ROOT / "capri_data" / "sources" / "baseline_pmp" / "pmp_feed_inp_coeff_2030.csv"
     if _f30.exists():
         for row in csv.DictReader(open(_f30)):
             if row["coef"] == "SLOP" and row["tech"] == "T":
-                slope_src_2030[(row["region"], row["activity"])][row["feed"]] = -float(row["value"])
+                slope_src_2030[(row["region"], row["activity"])][row["feed"]] = -float(row["value"]) / _m30
     for _key, _src in (("capri_slope", slope_src), ("capri_slope_2030", slope_src_2030)):
         if _src:
             n_sl = _attach_slopes(out, reg8, anim, var, _src, _key)
@@ -238,7 +243,8 @@ def main() -> None:
         "_source": "CAPRI 2017 regional results (res_17*, dataOut): rations, requirements per day x DAYS, "
                    "nutrient contents and unit values; per head = CAPRI total / this model's herd. capri_slope: CAPRI's "
                    "feed-PMP slopes (pmppar_17* p_pmpFeedInpCoeff SLOP, sign-converted to a cost slope), aggregated to "
-                   "the model animal; capri_slope_2030: the same from CAPRI's 2030 baseline calibration (pmppar_21730)",
+                   "the model animal; capri_slope_2030: the same from CAPRI's 2030 baseline calibration (pmppar_21730), over CAPRI's inflation "
+                   "to 2030 (the model's 2017 money)",
         "_units": "ration kg/head/yr; req per head per yr (ENNE energy units, CRPR kg, DMIN/DMAX kg dry matter); "
                   "content per kg fresh feed; price EUR/kg",
         "regions": out}, indent=1))

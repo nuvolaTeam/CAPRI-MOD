@@ -282,10 +282,26 @@ class DemandMixin(MarketStateMixin):
         # FEED
         fb = self._feed_bulk_params()
         fdp = self._feed_demand_params()
-        for (r, c), prm in (fdp or {}).items():                      # other regions: p_ElasFeed (M3 open)
+        # other regions: CAPRI's FeedNQ_ with the feed energy price of FeedBal_ (audit M3), each trade region's feed
+        # changing by its behavioural regions' feed changes over its CAPRI base feed; else (market.noneu_feed_nq off, or
+        # outside a bilateral evaluation) one constant-elasticity function per region and product (p_ElasFeed)
+        fnq, fnq_regs = None, set()
+        if self.noneu_feed_nq and self.ev.fede_now is not None:
+            fnq = self.noneu_feed_change(pd.DataFrame(PR, index=self.regions, columns=self.commodities), self.ev.fede_now)
+            fnq_regs = {d.get("tr") for d in self._noneu_feed_params()["rms"].values()}
+        _dairy_fed = set(self.DAIRY_TRADED.values())
+        if fnq is not None:
+            for (r, c), g in fnq.items():
+                i, j = R.get(r), Cc.get(c)
+                # the dairy products fed keep the FMIL block below (registered)
+                if i is not None and j is not None and F0[i, j] > 0 and c not in _dairy_fed:
+                    F[i, j] = F0[i, j] * max(0.0, 1.0 + g)
+        for (r, c), prm in (fdp or {}).items():
             i, j = R.get(r), Cc.get(c)
             if i is None or j is None or F0[i, j] <= 0:
                 continue
+            if r in fnq_regs and c not in _dairy_fed:
+                continue                                         # CAPRI's FeedNQ_ above (a cell without terms: base)
             ft = 1.0
             for jn, e in prm["elasticities"].items():
                 jj = Cc.get(jn)
@@ -298,8 +314,14 @@ class DemandMixin(MarketStateMixin):
             if ie is None or not fb:
                 continue
             f0r = fb["feed0_reg"].get(_reg, {})
+            # the bulks' response to the region's market prices within the solve (CAPRI's feedBlk_, audit M4; the
+            # prices the supply models' price signal is in: the bilateral market's ratios of this evaluation)
+            _bl = self.ev.bilat_ratio_now
+            _pr = ({c: float(_bl.at[_reg, c]) for c in _bl.columns} if (_bl is not None and _reg in _bl.index)
+                   else {c: float(PR[ie, j_]) for c, j_ in Cc.items()})
+            bf_ = self.feed_bulk_market_factor(_pr, region=_reg if self.eu_blocks else None)
             feed = self.eu_feed_use({c: float(PR[ie, Cc[c]]) for c in fb["feed0"] if c in Cc},
-                                    region=_reg if self.eu_blocks else None)
+                                    region=_reg if self.eu_blocks else None, bulk_factor=bf_)
             self.ev.eu_feed_now_reg[_reg] = feed
             for c, q in feed.items():
                 j = Cc.get(c)

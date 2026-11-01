@@ -75,7 +75,7 @@ def main():
     if dump.exists() and elas.exists():
         extract(dump, elas)
     sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check")]
-    from recalibrate_trade_2017 import REGION_MAP
+    from recalibrate_trade_2017 import trade_region
     eu_block = set(_read_csv(ROOT / "capri_data" / "2017" / "market" / "dairy_processing.csv")["ms"])
     src = _read_csv(SRC_M)
     v = {(r.region, r.item, r.product): float(r.value) for r in src.itertuples()}
@@ -85,7 +85,7 @@ def main():
                      and v.get((r, "PPRI", "INPE")))
     rows, hrows, erows = [], [], []
     for r in rms_all:
-        tr = REGION_MAP.get(r, "ROW")
+        tr = trade_region(r)
         inpe = v[(r, "PPRI", "INPE")]
         rows += [{"trade_region": tr, "rms": r, "item": x, "price": v.get((r, "PPRI", x), 0.0)} for x in ("INPE", "FATS", "PROT")]
         hs = el[(el.param == "p_hessNQSupp") & (el.rms == r)]

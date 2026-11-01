@@ -38,8 +38,9 @@ ELAS = Path("/mnt/user-data/uploads/elas_2_1730defaulta.csv")
 DATA = Path("/mnt/user-data/uploads/data_market_1730defaulta.csv")
 DUMP = Path("/mnt/user-data/uploads/markmarket_greendeal_1730et_base_1717.txt")
 OUT = ROOT / "capri_data" / "2017" / "market"
-EU = {"AT", "BL", "BG", "CY", "CZ", "DE", "DK", "EE", "EL", "ES", "FI", "FR", "HR", "HU", "IR", "IT", "LT", "LV",
-      "MT", "NL", "PL", "PT", "RO", "SE", "SI", "SK"}
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "lib"))
+from _model_regions import EU_MS2 as _EU_FROM_DATA  # noqa: E402  (capri_data/shared/eu_market_blocks.csv)
+EU = set(_EU_FROM_DATA)                                  # CAPRI's EU member states, from the data
 USES = ("HCON", "FEED", "PROC", "BIOF")
 
 
@@ -51,7 +52,7 @@ def num(s: str) -> float:
 def main() -> None:
     sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check")]
     import build_bilateral_market as BM
-    from recalibrate_trade_2017 import REGION_MAP
+    from recalibrate_trade_2017 import trade_region
     g2m = {g: m for m, gs in BM.MODEL.items() for g in gs}
     h = []
     cur = None
@@ -87,7 +88,7 @@ def main() -> None:
     missing = sorted(r for r in regs if r not in inpe)
     if missing:
         raise SystemExit(f"no 2030 PPRI INPE in the dump for {missing}")
-    mreg = lambda r: "EU27" if (r[:2] in EU and r.endswith("000000")) else REGION_MAP.get(r, "ROW")
+    mreg = lambda r: "EU27" if (r[:2] in EU and r.endswith("000000")) else trade_region(r)
     a1 = lambda r, g: v.get((r2m.get(r, r), "ARM1P", g), float("nan"))
     rows_h = [(r, mreg(r), g2m[x], g2m[y], val, a1(r, x), a1(r, y)) for r, x, y, val in h
               if x in g2m and y in g2m and val != 0.0]

@@ -33,7 +33,7 @@ class BilateralSolveMixin(MarketStateMixin):
         """Uncalibrated bilateral systems for the market year (data['market_year'], else 2017)."""
         from capri_mod.market.bilateral import BilateralCommodity
         inp = self._inp()
-        year = int(self.data.get("market_year", 2017) or 2017)
+        year = self._market_year()
         cached = getattr(self, "_bilat_raw_cache", None)
         if cached is not None and cached[0] == year:
             return cached[1]
@@ -159,6 +159,8 @@ class BilateralSolveMixin(MarketStateMixin):
         self._crush_cache = None
         self.par.demand_cal = pd.Series(1.0, index=self.commodities)
         exo_eu, exo_sup = self._split_supply(exogenous_supply)
+        # the EU's base supply with the base output of its units outside a run on a subset (K83)
+        exo_eu = self._with_eu_excluded(exo_eu)
         base_supply = self._align_eu_base_balance(exo_eu.sum(axis=0), exo_eu) \
             if exogenous_supply is not None else None
         self._align_sup_base(exo_sup)
@@ -209,7 +211,8 @@ class BilateralSolveMixin(MarketStateMixin):
         others = [r for r in R if r not in fixed]
         cal = pd.Series(1.0, index=self.commodities)
         # where the bounds [0.2, 5] (not CAPRI's: PROXY_AUDIT S185) bind: {commodity: unbounded factor}; and the
-        # bilateral systems' export-share caps (S192). Recorded for the runs' metadata and warned
+        # regions whose CAPRI exports exceed their base supply (scaled to it, BilateralCommodity.calibrate). Recorded
+        # for the runs' metadata and warned
         self.calibration_bound_hits = {"non_eu_use": {}, "export_share": {
             c: list(sc.export_cap_hits) for c, sc in sysd.items() if getattr(sc, "export_cap_hits", None)}}
         for c in pooled:
@@ -227,7 +230,7 @@ class BilateralSolveMixin(MarketStateMixin):
         if _h["non_eu_use"] or _h["export_share"]:
             import warnings as _w
             _w.warn(f"market calibration bounds reached: non-EU use factor outside [0.2, 5] for "
-                    f"{sorted(_h['non_eu_use'])}; export share above 0.98 for {sorted(_h['export_share'])}",
+                    f"{sorted(_h['non_eu_use'])}; CAPRI's exports above the base supply for {_h['export_share']}",
                     RuntimeWarning)
         for sc in sysd.values():
             if sc.trq_row is not None:
@@ -261,6 +264,14 @@ class BilateralSolveMixin(MarketStateMixin):
             d0r = dom0.reindex(index=r.index, columns=_oc)
             cpd[_oc] = d0r * r[_oc]
         self.ev.crush_prices_now = cpd
+        if self.noneu_feed_nq and self.noneu_supply_nq:
+            # CAPRI's FeedBal_ (audit M3): each non-EU region's feed energy price at these prices, used by its feed
+            # functions (demand_response) and its market supply functions (supply_response); the dairy blocks' raw milk
+            # price of the latest evaluation (the block is solved inside supply_response)
+            _wl = self.ev.dairy_world_last or {}
+            _wp = self._dairy_world_params() or {}
+            _mr = {g: 1.0 + float(v["z"][_wp[g]["iM"]]) for g, v in _wl.items() if g in _wp and "z" in v}
+            self.ev.fede_now = self.noneu_fede(PAr, r, _mr)
         try:
             S = self.supply_response(world, exogenous_supply, region_ratio=r, crush_dom=dp)
             D = self.demand_response(dp, world)
@@ -429,7 +440,9 @@ class BilateralSolveMixin(MarketStateMixin):
             max_outer = int(_st.get("market.max_iter"))
         _sclip = tuple(_st.get("market.step_clip"))
         # BASELINE RUN (no EU base recorded yet): the market is calibrated at THIS supply, prices stay at the
-        # reference - CAPRI's reference run is a calibrated equilibrium at its reference prices. Each outer
+        # reference. A registered departure (DEPARTURES_FROM_CAPRI.md, step F): CAPRI calibrates its market and
+        # supply models to one baseline beforehand and recalibrates only the supply functions during a run; here the
+        # supply models' baseline differs from CAPRI's market baseline, so the demand is calibrated to it. Each outer
         # iteration of the baseline recalibrates, so the calibration a scenario inherits is the one at the
         # converged baseline supply. Scenario runs keep it frozen.
         if self.seen.eu_base_supply is None or self.par.demand_cal_frozen is None:
@@ -464,6 +477,9 @@ class BilateralSolveMixin(MarketStateMixin):
                 return np.maximum(sysd[c].S0 + sysd[c].D0, 1.0)
             return np.array([max(float(self.par.base_production[c].sum()), 1.0)])
 
+        if str(_st.get("market.solver")) == "newton_krylov":
+            # step G2: the same equations at once (capri_mod/market/market_nk.py)
+            return self._nk_solve(r, exogenous_supply, trade_scenario, es, ed, size, tol, max_outer, verbose)
         prev = np.inf
         damp = 1.0
         converged = False

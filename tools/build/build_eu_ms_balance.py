@@ -33,8 +33,7 @@ def main() -> None:
     import build_bilateral_market as BM
     g2m = {g: m for m, gs in BM.MODEL.items() for g in gs}
     bm = _read_csv(ROOT / "capri_data" / "shared" / "eu_market_blocks.csv")
-    # CAPRI's member states only (Norway's row in the map is capri-mod's supply routing, not a CAPRI block member)
-    blocks = bm[~bm["source"].astype(str).str.startswith("capri-mod")].set_index("ms")["block"].to_dict()
+    blocks = bm.set_index("ms")["block"].to_dict()                      # CAPRI's member states of the two blocks
     pat = re.compile(r"^'([A-Z]{2}000000)'\.'(" + "|".join(ITEMS) + r")'\.'([A-Za-z]+)'\.'CAL'\s+([-\d.Ee+]+)")
     v = defaultdict(lambda: defaultdict(float))
     for line in open(DATA, encoding="latin-1"):

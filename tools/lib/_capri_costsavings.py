@@ -23,7 +23,9 @@ tables aggregate them), divided by capri_level_ratio (model heads per CAPRI leve
 M0, M1: v_Miti.m of CAPRI's ini and max runs (capri_data/sources/ghgtech/capri_costsavings_2030.csv, from the project
 lead's costsavings_ini/max_21730_jul15.gdx); MaxShare_m: the max run's level (+2e-6, as CAPRI's adjustment);
 LEVL_m: CAPRI's 2030 levels (abatement/ammonia/capri_mann_days_2030.csv). The member records are the region's row,
-else its member state's.
+else its member state's. dsav in the model's 2017 money: CAPRI's 2030 marginals over its inflation to 2030
+(tools/lib/_money.deflator; KNOWN_ISSUES K108, 31 October 2026: before, CAPRI's 2030 money beside the options' costs in
+2017 money).
 """
 from __future__ import annotations
 
@@ -59,6 +61,9 @@ def costsaving_drop(members: dict, technology: str) -> dict:
     ratio = _read_csv(ROOT / "capri_data" / "2017" / "supply" / "capri_level_ratio.csv", index_col=0)
     mr = _model_regions()
     to_c8 = mr.region_to_capri()
+    _sp = importlib.util.spec_from_file_location("_money", ROOT / "tools" / "lib" / "_money.py")
+    _m = importlib.util.module_from_spec(_sp); _sp.loader.exec_module(_m)
+    money = _m.deflator(2030)
     out = {}
     for reg in mr.model_regions():
         c8, ms = to_c8.get(reg), mr.national_code(reg)
@@ -78,5 +83,5 @@ def costsaving_drop(members: dict, technology: str) -> dict:
                         den += mx * lv
                     break
             if den > 0:
-                out[(reg, an)] = num / den / float(ratio.at[reg, an])
+                out[(reg, an)] = num / den / float(ratio.at[reg, an]) / money
     return out

@@ -2233,6 +2233,272 @@
    "production": 15995.08993701584,
    "consumption": 12820.285474951022
   },
+  "GBR|APPL": {
+   "imports": 438.16867019054604,
+   "exports": 31.6611465804211,
+   "production": 507.33333333333303,
+   "consumption": 890.333333333333
+  },
+  "GBR|BARL": {
+   "imports": 240.77296774297199,
+   "exports": 1571.02266598126,
+   "production": 6778.0,
+   "consumption": 5534.66666666667
+  },
+  "GBR|BEEF": {
+   "imports": 358.410690762666,
+   "exports": 126.386754825377,
+   "production": 913.88677913551,
+   "consumption": 1187.14463711693
+  },
+  "GBR|BUTR": {
+   "imports": 58.8216621175753,
+   "exports": 40.0611170014913,
+   "production": 154.94411039876502,
+   "consumption": 173.516061019922
+  },
+  "GBR|CHES": {
+   "imports": 429.400275157216,
+   "exports": 146.91017227313,
+   "production": 454.60095271891,
+   "consumption": 768.307687475572
+  },
+  "GBR|CITR": {
+   "imports": 1780.72881788379,
+   "exports": 175.56587605231,
+   "production": 1.0,
+   "consumption": 1573.16091954023
+  },
+  "GBR|COCO": {
+   "imports": 101.456537857111,
+   "exports": 1.40000105,
+   "consumption": 103.66666666666701
+  },
+  "GBR|COFF": {
+   "imports": 318.15,
+   "exports": 88.9000010499999,
+   "consumption": 182.666666666667
+  },
+  "GBR|CORN": {
+   "imports": 2368.66209495044,
+   "exports": 203.34504573567799,
+   "consumption": 1970.80464896277
+  },
+  "GBR|EGGS": {
+   "imports": 124.909367136652,
+   "exports": 26.5674611973801,
+   "production": 764.1887644863481,
+   "consumption": 840.496562561383
+  },
+  "GBR|FFIS": {
+   "imports": 173.372776283697,
+   "exports": 145.139325307844,
+   "production": 184.04914669566102,
+   "consumption": 212.277621348716
+  },
+  "GBR|MILK": {
+   "imports": 92.3541720237105,
+   "exports": 715.727108616005,
+   "production": 15079.781550722999,
+   "consumption": 14472.7097523995
+  },
+  "GBR|OAQU": {
+   "imports": 285.263684743231,
+   "exports": 159.312830649884,
+   "production": 169.737447096458,
+   "consumption": 296.255155449268
+  },
+  "GBR|OATS": {
+   "imports": 45.1201759699004,
+   "exports": 182.453759823094,
+   "production": 847.0,
+   "consumption": 720.333333333333
+  },
+  "GBR|OCER": {
+   "imports": 878.0442796549629,
+   "exports": 97.4996702617164,
+   "production": 98.0,
+   "consumption": 111.673195229127
+  },
+  "GBR|OFRU": {
+   "imports": 3053.35687251953,
+   "exports": 182.307718204007,
+   "production": 210.266773766236,
+   "consumption": 2755.79717809487
+  },
+  "GBR|OTHO": {
+   "imports": 264.327777993994,
+   "exports": 44.789047266396004,
+   "production": 80.64027371620361,
+   "consumption": 288.727106105323
+  },
+  "GBR|OVEG": {
+   "imports": 4177.81103765341,
+   "exports": 402.29583149987803,
+   "production": 2494.50655043822,
+   "consumption": 4907.680969832991
+  },
+  "GBR|PLMO": {
+   "imports": 410.228987880107,
+   "exports": 33.3969449366939,
+   "production": 1.47843629094221,
+   "consumption": 395.556603497324
+  },
+  "GBR|PORK": {
+   "imports": 749.043847489908,
+   "exports": 171.701713376033,
+   "production": 916.2533439631501,
+   "consumption": 1619.1419966338901
+  },
+  "GBR|POTA": {
+   "imports": 1536.4103503004599,
+   "exports": 409.712339333537,
+   "production": 5557.66666666667,
+   "consumption": 6151.33333333333
+  },
+  "GBR|POUL": {
+   "imports": 662.857844987642,
+   "exports": 247.083798067695,
+   "production": 1861.1161742936201,
+   "consumption": 2304.18697303212
+  },
+  "GBR|PULS": {
+   "imports": 215.205321639104,
+   "exports": 271.93994778664495,
+   "production": 1036.56868101891,
+   "consumption": 949.051695557328
+  },
+  "GBR|RAPC": {
+   "imports": 173.426825375047,
+   "exports": 227.56484957087,
+   "production": 993.4836464857341,
+   "consumption": 903.435544813991
+  },
+  "GBR|RAPE": {
+   "imports": 181.66994732177199,
+   "exports": 202.458228523746,
+   "production": 1984.81417767805,
+   "consumption": 1934.52522230533
+  },
+  "GBR|RAPO": {
+   "imports": 86.02194766494951,
+   "exports": 81.7921537259053,
+   "production": 754.515780900021,
+   "consumption": 696.808796579108
+  },
+  "GBR|RYEM": {
+   "imports": 6.78877033626617,
+   "exports": 0.519759446172927,
+   "production": 65.160744500846,
+   "consumption": 68.1692047377327
+  },
+  "GBR|SFIS": {
+   "imports": 1098.32014840422,
+   "exports": 685.385191316659,
+   "production": 567.245556776745,
+   "consumption": 988.9902363945321
+  },
+  "GBR|SGMT": {
+   "imports": 65.1668044546867,
+   "exports": 85.55728661282859,
+   "production": 292.866933689364,
+   "consumption": 288.79350244770797
+  },
+  "GBR|SKIM": {
+   "imports": 3.30839883347025,
+   "exports": 54.4050779354962,
+   "production": 131.26069057184802,
+   "consumption": 112.32383283358
+  },
+  "GBR|SOYA": {
+   "imports": 759.225329382335,
+   "exports": 25.1800227580008,
+   "consumption": 781.8246404807901
+  },
+  "GBR|SOYC": {
+   "imports": 4207.63344250894,
+   "exports": 177.877752806938,
+   "production": 532.836073886273,
+   "consumption": 4493.79118405356
+  },
+  "GBR|SOYO": {
+   "imports": 182.862627397276,
+   "exports": 16.4932946233227,
+   "production": 130.485806214114,
+   "consumption": 272.696585058015
+  },
+  "GBR|SUGR": {
+   "imports": 1552.91798841388,
+   "exports": 362.97830251231704,
+   "production": 1044.2,
+   "consumption": 1966.34666666667
+  },
+  "GBR|SUNC": {
+   "imports": 1046.8850203980398,
+   "exports": 15.8677059153963,
+   "production": 1.4817314786407,
+   "consumption": 994.491507453375
+  },
+  "GBR|SUNF": {
+   "imports": 36.8153542246423,
+   "exports": 1.13980618256918,
+   "consumption": 33.3333333333333
+  },
+  "GBR|SUNO": {
+   "imports": 64.1516814131391,
+   "exports": 5.4757002392389404,
+   "production": 0.9444049166492869,
+   "consumption": 284.42931503422
+  },
+  "GBR|SWHE": {
+   "imports": 2861.77685769137,
+   "exports": 1595.22516363564,
+   "production": 14258.475990068198,
+   "consumption": 15889.498881363601
+  },
+  "GBR|TABO": {
+   "imports": 28.584764445258102,
+   "exports": 1.05000105,
+   "consumption": 41.6666666666667
+  },
+  "GBR|TAGR": {
+   "imports": 267.906190053507,
+   "exports": 10.0303723342316,
+   "consumption": 375.16120576671
+  },
+  "GBR|TEAS": {
+   "imports": 125.291330534192,
+   "exports": 20.993696908242697,
+   "consumption": 108.276705276705
+  },
+  "GBR|TEXT": {
+   "imports": 0.872960086405986,
+   "exports": 1.08378778290657,
+   "consumption": 0.824739450711823
+  },
+  "GBR|TOBA": {
+   "imports": 43.0988000371996,
+   "exports": 12.2560021579758,
+   "consumption": 24.9480896768641
+  },
+  "GBR|TOMA": {
+   "imports": 949.540257699899,
+   "exports": 12.333966750575,
+   "production": 83.3214222222222,
+   "consumption": 939.4963555555549
+  },
+  "GBR|WHEY": {
+   "imports": 51.5428349738138,
+   "exports": 41.2007118676515,
+   "production": 79.2187992461905,
+   "consumption": 88.4784218894046
+  },
+  "GBR|WINE": {
+   "imports": 1418.70945703139,
+   "exports": 93.4918059010199,
+   "production": 1.25695678588949,
+   "consumption": 1377.29788354948
+  },
   "IDN|APPL": {
    "imports": 167.106580284167,
    "consumption": 161.73752083731898
@@ -4756,280 +5022,280 @@
    "consumption": 27.1979882035509
   },
   "ROW|APPL": {
-   "imports": 3766.6313986396226,
-   "exports": 2567.803627272016,
-   "production": 12265.758640981756,
-   "consumption": 12315.295406378178
+   "imports": 3167.083921491472,
+   "exports": 2228.8691883308343,
+   "production": 10655.417546154522,
+   "consumption": 10687.34691543265
   },
   "ROW|BARL": {
-   "imports": 18827.361595210463,
-   "exports": 3787.042843450342,
-   "production": 22698.79994625666,
-   "consumption": 36576.26198438085
+   "imports": 18498.3695404187,
+   "exports": 2098.6566359199787,
+   "production": 14968.935488731957,
+   "consumption": 30131.22570091942
   },
   "ROW|BEEF": {
-   "imports": 2774.4075073017966,
-   "exports": 1311.9947319834246,
-   "production": 15075.335182989227,
-   "consumption": 15951.284245217465
+   "imports": 2371.810866762246,
+   "exports": 1157.3051996543227,
+   "production": 13963.202225401088,
+   "consumption": 14546.132377114123
   },
   "ROW|BUTR": {
-   "imports": 423.0343542578299,
-   "exports": 154.87190384655221,
-   "production": 1186.73761317944,
-   "consumption": 1442.9761016623736
+   "imports": 357.021170575264,
+   "exports": 111.81200048979491,
+   "production": 1008.9860154422946,
+   "consumption": 1242.2923671624576
   },
   "ROW|CHES": {
-   "imports": 1237.8520198719089,
-   "exports": 592.3621093184355,
-   "production": 3855.8079265992665,
-   "consumption": 4596.802362760626
+   "imports": 779.1379776302401,
+   "exports": 426.6103116939732,
+   "production": 3227.9473880550695,
+   "consumption": 3649.617948343039
   },
   "ROW|CITR": {
-   "imports": 6237.4989670692885,
-   "exports": 4253.041230809276,
-   "production": 25290.32535350818,
-   "consumption": 27326.592056850142
+   "imports": 4162.083029910556,
+   "consumption": 25416.569613968808,
+   "exports": 4054.887622114639,
+   "production": 25230.504251507307
   },
   "ROW|COCO": {
-   "imports": 504.63584015501976,
-   "exports": 3331.037985345565,
-   "consumption": 1225.060049562029,
+   "consumption": 1111.7210201853181,
+   "imports": 385.9420044676484,
+   "exports": 3324.127659641936,
    "production": 3853.8231022191467
   },
   "ROW|COFF": {
-   "imports": 2066.322234153491,
-   "exports": 2666.820976039324,
-   "consumption": 2308.1354365606903,
+   "consumption": 2017.127342986802,
+   "imports": 1627.9909504553095,
+   "exports": 2566.6850549657356,
    "production": 3373.1402293911656
   },
   "ROW|CORN": {
-   "imports": 68678.94171210803,
-   "exports": 6423.094676929709,
-   "consumption": 158266.49630020195,
-   "production": 104763.19515748839
+   "imports": 65755.63946461093,
+   "production": 90925.63350022152,
+   "consumption": 145719.54320334858,
+   "exports": 4620.7039158080115
   },
   "ROW|EGGS": {
-   "imports": 913.3328770514092,
-   "exports": 257.0459533961974,
-   "production": 11406.49763071924,
-   "consumption": 11917.817537942808
+   "imports": 773.6661945635555,
+   "exports": 224.19826218826955,
+   "production": 10372.301762929344,
+   "consumption": 10804.425518907525
   },
   "ROW|FFIS": {
-   "imports": 1205.2893727682288,
-   "exports": 1450.309396862522,
-   "production": 10231.516479049276,
-   "consumption": 9997.450563242588
+   "consumption": 9742.907383094253,
+   "imports": 1009.3183695991968,
+   "exports": 1298.889677477692,
+   "production": 10021.52091954136
   },
   "ROW|MILK": {
-   "imports": 863.4483299604585,
-   "exports": 1226.5056791189,
-   "production": 127899.05595375467,
-   "consumption": 127598.1073967347
+   "production": 107370.38227509333,
+   "consumption": 107658.2119526437,
+   "imports": 643.2240077380985,
+   "exports": 412.07604033504504
   },
   "ROW|OAQU": {
-   "imports": 1146.0829681081627,
-   "exports": 2231.3726403559212,
-   "production": 3431.068942907205,
-   "consumption": 2451.1094217847353
+   "consumption": 2141.2302625936427,
+   "imports": 842.9445962202177,
+   "exports": 2064.0854291031715,
+   "production": 3257.60854628114
   },
   "ROW|OATS": {
-   "imports": 555.8746894265587,
-   "exports": 404.0295394702036,
-   "production": 2614.0351920604603,
-   "consumption": 2808.478664458618
+   "imports": 492.92825324489286,
+   "production": 1549.0592992351221,
+   "consumption": 1850.8077745140945,
+   "exports": 219.11194761742271
   },
   "ROW|OCER": {
-   "imports": 5889.6648016855725,
-   "exports": 4166.4487518982705,
-   "production": 35335.542869745375,
-   "consumption": 35700.180588636955
+   "imports": 4581.092260514136,
+   "exports": 4059.8321052301208,
+   "production": 34899.76947986978,
+   "consumption": 35245.101152222254
   },
   "ROW|OFRU": {
-   "imports": 12514.195846511291,
-   "exports": 31796.28140630775,
-   "production": 163445.17746850997,
-   "consumption": 139049.13307722152
+   "imports": 9118.886469144423,
+   "exports": 30847.88663879219,
+   "production": 160886.4337078385,
+   "consumption": 134289.22091956568
   },
   "ROW|OTHO": {
-   "imports": 3065.0228254794492,
-   "exports": 2952.1428131688986,
-   "production": 8660.421205816441,
-   "consumption": 8498.18752276092
+   "consumption": 8081.30009566972,
+   "imports": 2724.6443473249456,
+   "exports": 2862.9664869313697,
+   "production": 8478.126500781404
   },
   "ROW|OVEG": {
-   "imports": 12247.538051435276,
-   "exports": 6002.508919654586,
-   "production": 138511.0074394835,
-   "consumption": 142371.43155145098
+   "imports": 7867.659220952803,
+   "exports": 5332.7132870974865,
+   "production": 131769.27091675694,
+   "consumption": 133586.70730452237
   },
   "ROW|PLMO": {
-   "imports": 10244.477313698,
-   "exports": 17318.571299662002,
-   "production": 27809.67850957282,
-   "consumption": 19576.28874105815
+   "imports": 9757.871635897067,
+   "consumption": 19117.01150482393,
+   "exports": 17275.79962949252,
+   "production": 27808.200073281874
   },
   "ROW|PORK": {
-   "imports": 2105.3423582343344,
-   "exports": 438.64162721858247,
-   "production": 9733.658743078515,
-   "consumption": 11351.402645601496
+   "imports": 1280.0253023649097,
+   "exports": 256.09990084591817,
+   "production": 8162.572295705393,
+   "consumption": 8995.687715273436
   },
   "ROW|POTA": {
-   "imports": 5505.434942900357,
-   "exports": 2358.1306628698903,
-   "production": 67036.84144051341,
-   "consumption": 71695.0599789595
+   "imports": 3830.5094721085698,
+   "exports": 1927.5069699889486,
+   "production": 59439.29648580671,
+   "consumption": 63427.641962076974
   },
   "ROW|POUL": {
-   "imports": 7028.625561892687,
-   "exports": 695.4821096388417,
-   "production": 23496.484333030578,
-   "consumption": 28632.890598607773
+   "imports": 6264.585572443376,
+   "exports": 438.6136579591705,
+   "production": 21382.746820193996,
+   "consumption": 25999.77544690122
   },
   "ROW|PULS": {
-   "imports": 4703.96429916148,
-   "exports": 3157.013643515517,
-   "production": 24058.675466660905,
-   "consumption": 24294.854206710286
+   "imports": 4443.285236233332,
+   "exports": 2878.7293636684967,
+   "production": 22828.920125058416,
+   "consumption": 23116.049998374518
   },
   "ROW|RAPC": {
-   "imports": 660.0105084428092,
-   "exports": 782.0833315503625,
-   "production": 2503.1154568909083,
-   "consumption": 2392.400080321948
+   "imports": 481.43052768557584,
+   "production": 1475.3885592054523,
+   "consumption": 1464.521774526945,
+   "exports": 537.3034696222252
   },
   "ROW|RAPE": {
-   "imports": 1271.5674106288316,
-   "exports": 586.0973268138009,
-   "production": 4020.7226631781436,
-   "consumption": 4693.137087798724
+   "imports": 1078.4385803709176,
+   "exports": 276.68046289646406,
+   "production": 1837.930012996677,
+   "consumption": 2725.0452205769952
   },
   "ROW|RAPO": {
-   "imports": 513.1020319165119,
-   "exports": 584.1178792498675,
-   "production": 1796.3575650440462,
-   "consumption": 1455.7488698109837
+   "imports": 422.3703775472579,
+   "exports": 484.498392232113,
+   "production": 1016.8958861098204,
+   "consumption": 750.7978141607379
   },
   "ROW|RYEM": {
-   "imports": 110.81012387665614,
-   "exports": 175.37370063748406,
-   "production": 924.6128291577662,
-   "consumption": 985.900164881168
+   "imports": 96.15517426283668,
+   "production": 809.5953979754439,
+   "consumption": 865.2813193372461,
+   "exports": 172.53139348611828
   },
   "ROW|SFIS": {
-   "imports": 6975.582550233704,
-   "exports": 12102.152499343456,
-   "production": 22343.424225782746,
-   "consumption": 19670.544142470953
+   "consumption": 18547.256767473835,
+   "imports": 5734.203177385183,
+   "exports": 11399.461885208382,
+   "production": 21767.819532472506
   },
   "ROW|SGMT": {
-   "imports": 395.6359036605353,
-   "exports": 143.62500949270637,
-   "production": 5115.982699890679,
-   "consumption": 5261.548719230974
+   "imports": 328.81737141914425,
+   "production": 4721.255190751108,
+   "consumption": 4883.726903344583,
+   "exports": 49.23254643436284
   },
   "ROW|SKIM": {
-   "imports": 943.0536470406822,
-   "exports": 245.14850095340373,
-   "production": 485.08721575526914,
-   "consumption": 1197.4397079827713
+   "imports": 932.6112646510982,
+   "exports": 189.819717958339,
+   "production": 343.99979361548105,
+   "consumption": 1069.0943636760917
   },
   "ROW|SOYA": {
-   "imports": 13437.999948232997,
-   "exports": 8864.421030837759,
-   "consumption": 24197.97880116677,
-   "production": 19707.236464933914
+   "imports": 12580.20522821231,
+   "exports": 8730.154229089527,
+   "production": 18564.569414024125,
+   "consumption": 22322.662825227646
   },
   "ROW|SOYC": {
-   "imports": 36918.62346732925,
-   "exports": 5926.545087274961,
-   "production": 15296.799309172593,
-   "consumption": 51590.425046821234
+   "imports": 32395.409899228373,
+   "exports": 5646.100958700568,
+   "production": 14146.43530084594,
+   "consumption": 46277.17435673286
   },
   "ROW|SOYO": {
-   "imports": 4509.312132342157,
-   "exports": 1671.5289570735968,
-   "production": 3670.6344736284195,
-   "consumption": 6328.559553288976
+   "imports": 4314.468447046577,
+   "exports": 1595.6799490057842,
+   "production": 3414.960837280895,
+   "consumption": 6041.871816568535
   },
   "ROW|SUGR": {
-   "imports": 25903.072909817874,
-   "exports": 9054.89178055382,
-   "production": 27285.7682042112,
-   "consumption": 41288.94261007696
+   "imports": 23957.430172777425,
+   "exports": 8564.634790859845,
+   "production": 25252.54876579495,
+   "consumption": 38573.53491607515
   },
   "ROW|SUNC": {
-   "imports": 3076.7827069268424,
-   "exports": 727.33723026504,
-   "production": 1858.0381077790591,
-   "consumption": 5264.952758130941
+   "imports": 1960.5905273126477,
+   "production": 1396.9652086789654,
+   "consumption": 3881.9312433866353,
+   "exports": 559.9283758009923
   },
   "ROW|SUNF": {
-   "imports": 791.2828823639494,
-   "exports": 793.7088203442435,
-   "consumption": 4579.267383001673,
-   "production": 5100.410181267237
+   "imports": 613.0119577526165,
+   "production": 3829.636487602303,
+   "consumption": 3513.838112156984,
+   "exports": 564.7197274063277
   },
   "ROW|SUNO": {
-   "imports": 3627.066902723652,
-   "exports": 604.5215385761264,
-   "production": 1666.4041640157773,
-   "consumption": 4307.888456462611
+   "imports": 3368.0517083132813,
+   "exports": 326.7986938513069,
+   "production": 1133.4785176888015,
+   "consumption": 3721.2931882023795
   },
   "ROW|SWHE": {
-   "imports": 96343.76062593728,
-   "exports": 17255.53596687163,
-   "production": 93755.54447493776,
-   "consumption": 167096.14746621574
+   "imports": 92388.16933388144,
+   "exports": 14708.851856130825,
+   "production": 73283.43822390227,
+   "consumption": 146569.93541883555
   },
   "ROW|TABO": {
-   "imports": 168.48303299956092,
-   "exports": 159.0946995197478,
-   "consumption": 1812.5878625887083,
-   "production": 2119.2987190594936
+   "imports": 126.13728696615033,
+   "exports": 154.55142411739092,
+   "consumption": 1730.7129678762478,
+   "production": 2083.8681663599446
   },
   "ROW|TAGR": {
-   "imports": 1474.1131616602229,
-   "exports": 2608.558907939941,
-   "consumption": 9429.762570430106,
-   "production": 10929.178857924018
+   "imports": 1154.0809004372297,
+   "exports": 2586.5075403638934,
+   "consumption": 8474.504795983748,
+   "production": 10350.870499838993
   },
   "ROW|TEAS": {
-   "imports": 970.6908340539094,
-   "exports": 955.7849765008011,
-   "consumption": 1490.9914749744985,
+   "consumption": 1381.7147696977934,
+   "imports": 843.483854972584,
+   "exports": 933.8756614231409,
    "production": 1435.955851313225
   },
   "ROW|TEXT": {
-   "imports": 706.4858962137135,
-   "exports": 1465.4137718095578,
-   "consumption": 2421.462098658683,
-   "production": 3363.6614360481663
+   "imports": 699.5190709507045,
+   "exports": 1463.82191550648,
+   "consumption": 2414.74031054278,
+   "production": 3363.3008821033227
   },
   "ROW|TOBA": {
-   "imports": 757.4810012052585,
-   "exports": 709.8444135533506,
-   "consumption": 1293.0350946839542,
-   "production": 1172.8444842911563
+   "consumption": 1227.6090628499207,
+   "imports": 624.175108487168,
+   "exports": 597.3120623507994,
+   "production": 1124.9656120361872
   },
   "ROW|TOMA": {
-   "imports": 5184.808875601498,
-   "exports": 1609.8347038538272,
-   "production": 34174.83316448513,
-   "consumption": 36211.77898656807
+   "imports": 4153.846165021728,
+   "production": 33280.07892640145,
+   "consumption": 34459.42049264799,
+   "exports": 1494.8588154475076
   },
   "ROW|WHEY": {
-   "imports": 345.3604616664312,
-   "exports": 179.94331385948178,
-   "production": 229.9907202801278,
-   "consumption": 366.32480749457363
+   "imports": 282.7038201294962,
+   "exports": 138.18887181853006,
+   "production": 150.7719210339373,
+   "consumption": 267.43442338562096
   },
   "ROW|WINE": {
-   "imports": 2229.1881122643704,
-   "exports": 1303.5131707214714,
-   "production": 2041.4000190464446,
-   "consumption": 3005.050097986249
+   "imports": 790.2778351323113,
+   "exports": 1143.1541006949274,
+   "production": 1851.8866986419982,
+   "consumption": 1496.693733011368
   },
   "RUS|APPL": {
    "imports": 937.889434913778,
@@ -6577,6 +6843,277 @@
    "exports": 0.646598362916741,
    "production": 9.553324257884901,
    "consumption": 10.478103017051
+  },
+  "WBA|APPL": {
+   "imports": 161.37880695760452,
+   "exports": 307.2732923607605,
+   "production": 1103.0077614939007,
+   "consumption": 737.615157612196
+  },
+  "WBA|BARL": {
+   "imports": 88.21908704879448,
+   "exports": 117.36354154910316,
+   "production": 951.864457524704,
+   "consumption": 910.3696167947639
+  },
+  "WBA|BEEF": {
+   "imports": 44.18594977688482,
+   "exports": 28.302777503724958,
+   "production": 198.24617845262773,
+   "consumption": 218.00723098641134
+  },
+  "WBA|BUTR": {
+   "imports": 7.1915215649905235,
+   "exports": 2.9987863552659673,
+   "production": 22.80748733838013,
+   "consumption": 27.16767347999418
+  },
+  "WBA|CHES": {
+   "imports": 29.313767084452973,
+   "exports": 18.841625351332393,
+   "production": 173.2595858252878,
+   "consumption": 178.87672694201422
+  },
+  "WBA|CITR": {
+   "imports": 294.6871192749413,
+   "exports": 22.587732642329136,
+   "production": 58.82110200087519,
+   "consumption": 336.861523341107
+  },
+  "WBA|COCO": {
+   "imports": 17.23729783026034,
+   "exports": 5.51032465362905,
+   "consumption": 9.672362710043727
+  },
+  "WBA|COFF": {
+   "imports": 120.18128369818153,
+   "exports": 11.235920023588323,
+   "consumption": 108.3414269072224
+  },
+  "WBA|CORN": {
+   "imports": 554.6401525466591,
+   "exports": 1599.0457153860186,
+   "production": 13837.561657266862,
+   "consumption": 10576.148447890566
+  },
+  "WBA|EGGS": {
+   "imports": 14.757315351201719,
+   "exports": 6.280230010547759,
+   "production": 270.0071033035454,
+   "consumption": 272.8954564739018
+  },
+  "WBA|FFIS": {
+   "imports": 22.598226885335286,
+   "exports": 6.2803940769862265,
+   "production": 25.946412812252298,
+   "consumption": 42.26555879961914
+  },
+  "WBA|MILK": {
+   "imports": 127.87015019864941,
+   "exports": 98.70253016784957,
+   "production": 5448.892127938343,
+   "consumption": 5467.185691691484
+  },
+  "WBA|OAQU": {
+   "imports": 17.87468714471486,
+   "exports": 7.974380602865926,
+   "consumption": 13.624003741824671,
+   "production": 3.722949529606626
+  },
+  "WBA|OATS": {
+   "imports": 17.826260211765252,
+   "exports": 2.4638320296868805,
+   "production": 217.97589282533806,
+   "consumption": 237.33755661119068
+  },
+  "WBA|OCER": {
+   "imports": 430.5282615164754,
+   "exports": 9.11697640643325,
+   "production": 337.773389875603,
+   "consumption": 343.4062411855648
+  },
+  "WBA|OFRU": {
+   "imports": 341.95250484733367,
+   "exports": 766.0870493115559,
+   "production": 2348.476986905231,
+   "consumption": 2004.114979560981
+  },
+  "WBA|OTHO": {
+   "imports": 76.05070016050978,
+   "exports": 44.38727897113249,
+   "production": 101.65443131883106,
+   "consumption": 128.16032098587885
+  },
+  "WBA|OVEG": {
+   "imports": 202.06779282906385,
+   "exports": 267.499801057221,
+   "production": 4247.229972288332,
+   "consumption": 3877.043277095615
+  },
+  "WBA|PLMO": {
+   "imports": 76.37668992082345,
+   "exports": 9.374725232789201,
+   "consumption": 63.72063273689659
+  },
+  "WBA|PORK": {
+   "imports": 76.27320837951689,
+   "exports": 10.840012996631184,
+   "production": 654.8331034099749,
+   "consumption": 736.5729336941752
+  },
+  "WBA|POTA": {
+   "imports": 138.51512049132748,
+   "exports": 20.91135354740478,
+   "production": 2039.8782880400336,
+   "consumption": 2116.084683549208
+  },
+  "WBA|POUL": {
+   "imports": 101.18214446166876,
+   "exports": 9.784653611976154,
+   "production": 252.6213385429608,
+   "consumption": 328.9281786744379
+  },
+  "WBA|PULS": {
+   "imports": 45.47374128904414,
+   "exports": 6.344332060375191,
+   "production": 193.18666058357712,
+   "consumption": 229.75251277844438
+  },
+  "WBA|RAPC": {
+   "imports": 5.153155382186366,
+   "exports": 17.215012357267213,
+   "production": 34.24325119972103,
+   "consumption": 24.44276098101176
+  },
+  "WBA|RAPE": {
+   "imports": 11.458882936142027,
+   "exports": 106.958635393591,
+   "production": 197.9784725034162,
+   "consumption": 33.56664491639964
+  },
+  "WBA|RAPO": {
+   "imports": 4.709706704304508,
+   "exports": 17.827333291849122,
+   "production": 24.945898034204895,
+   "consumption": 8.14225907113792
+  },
+  "WBA|RYEM": {
+   "imports": 7.8661792775532895,
+   "exports": 2.32254770519287,
+   "production": 49.856686681476255,
+   "consumption": 52.449640806189194
+  },
+  "WBA|SFIS": {
+   "imports": 143.05922444430158,
+   "exports": 17.305422818415035,
+   "consumption": 134.2971386025873,
+   "production": 8.359136533500953
+  },
+  "WBA|SGMT": {
+   "imports": 1.651727786704309,
+   "exports": 8.835176445514922,
+   "production": 101.86057545020637,
+   "consumption": 89.02831343868252
+  },
+  "WBA|SKIM": {
+   "imports": 7.133983556113716,
+   "exports": 0.9237050595685141,
+   "production": 9.826731567940099,
+   "consumption": 16.02151147309988
+  },
+  "WBA|SOYA": {
+   "imports": 98.56939063835173,
+   "exports": 109.08677899023014,
+   "production": 1142.6670509097883,
+   "consumption": 1093.4913354583318
+  },
+  "WBA|SOYC": {
+   "imports": 315.58012559193605,
+   "exports": 102.56637576745483,
+   "production": 617.5279344403782,
+   "consumption": 819.4595060348169
+  },
+  "WBA|SOYO": {
+   "imports": 11.981057898304632,
+   "exports": 59.355713444490185,
+   "production": 125.18783013341108,
+   "consumption": 13.99115166242576
+  },
+  "WBA|SUGR": {
+   "imports": 392.7247486265685,
+   "exports": 127.27868718165776,
+   "production": 989.019438416249,
+   "consumption": 749.0610273351366
+  },
+  "WBA|SUNC": {
+   "imports": 69.30715921615545,
+   "exports": 151.54114854865165,
+   "production": 459.59116762145305,
+   "consumption": 388.5300072909323
+  },
+  "WBA|SUNF": {
+   "imports": 141.45557038669062,
+   "exports": 227.8492867553467,
+   "production": 1270.7736936649349,
+   "consumption": 1032.095937511355
+  },
+  "WBA|SUNO": {
+   "imports": 194.863512997232,
+   "exports": 272.2471444855807,
+   "production": 531.9812414103264,
+   "consumption": 302.1659532260121
+  },
+  "WBA|SWHE": {
+   "imports": 1093.8144343644817,
+   "exports": 951.4589471051635,
+   "production": 6213.630260967286,
+   "consumption": 4636.7131660166315
+  },
+  "WBA|TABO": {
+   "imports": 13.76098158815244,
+   "exports": 3.4932743523569023,
+   "consumption": 40.208228045793696,
+   "production": 35.43055269954927
+  },
+  "WBA|TAGR": {
+   "imports": 52.12607116948625,
+   "exports": 12.020995241815921,
+   "production": 578.3083580850249,
+   "consumption": 580.0965686796491
+  },
+  "WBA|TEAS": {
+   "imports": 1.9156485471333669,
+   "exports": 0.9156181694176092,
+   "consumption": 1.0
+  },
+  "WBA|TEXT": {
+   "imports": 6.093865176603077,
+   "exports": 0.5080685201710295,
+   "consumption": 5.8970486651909955,
+   "production": 0.36055394484355296
+  },
+  "WBA|TOBA": {
+   "imports": 90.2070926808909,
+   "exports": 100.27634904457548,
+   "production": 47.878872254969146,
+   "consumption": 40.477942157169544
+  },
+  "WBA|TOMA": {
+   "imports": 81.42245287987052,
+   "exports": 102.64192165574481,
+   "production": 811.4328158614562,
+   "consumption": 812.8621383645268
+  },
+  "WBA|WHEY": {
+   "imports": 11.113806563121143,
+   "exports": 0.5537301733002615,
+   "consumption": 10.411962219548114
+  },
+  "WBA|WINE": {
+   "imports": 20.200820100668565,
+   "exports": 66.86726412552424,
+   "production": 188.2563636185571,
+   "consumption": 131.0584814254011
   },
   "ZAF|APPL": {
    "imports": 63.4046862039896,

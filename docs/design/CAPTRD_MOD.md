@@ -403,16 +403,25 @@ Each defect gets a fix, and a parity switch reproduces CAPRI's behaviour.
 - **Reporting:** the effect of each fix is reported separately, against the parity run.
 
 The defects (details in CAPTRD_MAP.md):
-- the upper bound on artificial land, non-binding through a misplaced parenthesis (fix_est.gms:810);
+- the upper bound on artificial land, non-binding through a misplaced parenthesis (fix_est.gms:810): decided, not built
+  yet (Steps 2-3 are not ported; register FIX-7);
 - the error-variance floor comparing a level with a variance: fixed 24 October 2026 as (0.05 × |wAve|)², setting
   `captrd.variance_floor_squared` (section 12.4; docs/DEPARTURES_FROM_CAPRI.md);
 - the base-year window labelled "5 years" spanning 7: on inspection (23 October 2026) not a defect where ExPost ends
   at BAS + 1, as in the reference run (BASYRS5 = 2014-2018, five years; section 12.4). Setting
   `captrd.basyrs5_halfwidth` = 3, CAPRI's;
-- zeros treated as missing (fixed in the data layer, section 6, and in the estimator);
+- zeros treated as missing: built on 30 October 2026 (register FIX-8), setting `captrd.zeros_as_missing` (default
+  false). Step 1 and the statistics count a recorded zero as an observation and only an absent value as missing.
+  Where CAPTRD sums over base years or takes the three highest yields, a missing year no longer counts as 0. On
+  CAPREG's series as GAMS writes them the effect is nil (they hold no true zeros); the fix acts once the data layer
+  passes them (section 6);
 - series with 2-4 observations get Step1 = 0: the minimum over the trend grid counts the 29 zeroed grid points
   (estimate_trends.gms l. 158-171). Found while porting and confirmed in CAPRI's own output on 23 October 2026
-  (section 12.4). Setting `captrd.short_series_grid_as_coded` (docs/DEPARTURES_FROM_CAPRI.md).
+  (section 12.4). Setting `captrd.short_series_grid_as_coded` (docs/DEPARTURES_FROM_CAPRI.md); confirmed by the
+  project lead on 30 October 2026;
+- the NUTS 2 column filter that deletes nothing (captrd.gms l. 872-876): fixed on 30 October 2026, keeping the
+  columns of CAPTRD's own NUTS 2 estimation, LOSF among them (register FIX-9; setting
+  `captrd.nuts2_column_filter_as_coded`; section 12.4).
 
 Further defects found while porting are handled the same way and added here.
 
@@ -420,7 +429,8 @@ Further defects found while porting are handled the same way and added here.
 
 ### 8.4 Recursive dynamics, CAPSIM-DYN: the largest possible set (decided scope; beyond CAPRI)
 
-The module is named **CAPSIM-DYN** (project lead, 23 October 2026). Code: `capri_mod/projection/capsim_dyn/`.
+The module is named **CAPSIM-DYN** (project lead, 23 October 2026). Code (planned, not yet created):
+`capri_mod/projection/capsim_dyn/`.
 
 
 CAPRI's per-year equilibrium is kept. Each link carries a state from year t−1 into year t, has a switch, and is
@@ -568,8 +578,8 @@ CAPTRD's inputs are listed in CAPTRD_MAP.md section 2. Their state on 23 October
 | # | Input | In hand | Where / next |
 |---|---|---|---|
 | 1 | CAPREG time series `res_time_series_17<MS>.gdx` | yes. The 35 files of the project lead's `Capreg_tseries` folder: symbol `DATA` (1984–2018 plus BAS, BASM, CUR, MEAN, TRD, Y), country, NUTS2 and some EU aggregates | `capri_reference/capreg_tseries/17/<CC>.csv.gz` (35.3 million records), `tools/build/build_capreg_tseries_reference.py` |
-| 2 | CAPREG base year `res_17<MS>.gdx` (DATA2 → BASM) | text dumps for 27 member states (`/home/claude/work/capreg`) | to be converted to CSV |
-| 3 | COCO `coco2_output.gdx` (COCO1 nowcasts, ExAnteD years) | `coco2.csv` (upload, 454 MB) | to be checked against the symbol CAPTRD reads |
+| 2 | CAPREG base year `res_17<MS>.gdx` (DATA2 → BASM) | all 35 countries: text dumps for 27 (`res_17zip.zip` and single files), GDX files for UK, TUR, AL, MK, CS, MO, BA, KO (29 October 2026) | `capri_reference/capreg_base/17/<CC>.csv.gz` (2,628,522 records), `tools/build/build_capreg_base_reference.py` |
+| 3 | COCO `coco2_output.gdx` (COCO1 nowcasts, ExAnteD years) | `coco2.csv` (upload coco2.zip, a listing of DATA2) | `capri_reference/coco2/17/coco2_output.csv.gz` (7,892,151 records), `tools/build/build_coco2_reference.py`; with fao_agg's `p_biofuelData` (`capri_reference/fao_agg/17`, `tools/build/build_fao_agg_reference.py`) |
 | 4 | Aglink (DG AGRI outlook) of the run | no. `baseline.zip` holds older vintages (up to aglink2017OECD) | needed for Steps 2–3, not Step 1; vintage to be read from the results file META |
 | 5–11 | population, nutrient contents, long-run info, age line, Agri_Prod, recent milk yields | only the age line (`baseline.zip`, parquet) | needed for the Step-2 expert supports |
 | — | CAPTRD's own results `results_1770.gdx` (p_result, all positions) | yes (upload of 23 October 2026: base 2017, simulation years 2018–2070) | `capri_reference/captrd_results/1770/<respos>.csv.gz`, `tools/build/build_captrd_results_reference.py` |
@@ -586,8 +596,11 @@ data preparation is ported.
 |---|---|---|
 | Trend variable, grid on c | captrd.gms l. 203, 271; estimate_trends.gms l. 28, 80-82 | done (`capri_mod/pipeline/captrd/step1.py`) |
 | Time sets ExPost, ExPostT, BASYRS5, BASYRSM, EIGHTLST, BAST, YearsEst | captrd.gms l. 665-812 | next (ExPostT: 1984–2019 in the reference run, 2019 from COCO) |
-| Data load and cleaning (copy of years, area rescaling, BASM from DATA2, deletion of series not estimated) | captrd.gms l. 486-870 | next. The sets are done: `capri_data/pipeline/captrd/sets/` (S_ColsEst, S_RowsEst, GRPC, CROPC_TO_G, GRPR, ROWS_TO_G, REQST, MrkBalE, NoYieldDrop, FixYield; `tools/build/build_captrd_sets.py`). They are built from sets_captrd.gms (transcribed with line numbers) and CAPRI's global sets (`capri_reference/sets/simini_21730`, the 1,972 sets of the CAPMOD file sim_ini_21730.gdx). CAPTRD redefines MrkBalE (14 positions against CAPMOD's 8), so its own definition is used. Check: all 1,856 (col, row) pairs CAPTRD estimated in the reference run are in S_ColsEst × S_RowsEst (`test_captrd_sets.py`) |
-| Data preparation (sugar prices, aggregates, SLGW, UVAG, DOMM, TOOU, NTRD, LU density) | prep_data_for_estimation.gms l. 15-200 | next |
+| Data load and cleaning (copy of years, area rescaling, deletion of series not estimated, early years, UVAD fill, regions, LABH) | captrd.gms l. 418-517, 830-898; check_and_cor_capreg.gms | done (`capri_mod/pipeline/captrd/prepare.py`, 29 October 2026), with BASM from DATA2 (l. 528-580) and the ARTIF correction of check_and_cor_capreg.gms. The sets it reads, CAPRI's global ones copied from the reference export and CAPTRD's own transcribed, are written by `tools/build/build_captrd_sets.py` (COLS_LOAD, ROWS_LOAD, MS, NT2, urbanNUTS, rmAggSup with EU013000, MrkBaleE, DOMPOS, breedAct, MEAT, ...). GAMS assignments are parallel (the right-hand side is read before the statement; GAMS user's guide), which the area rescaling and the UVAD average follow |
+| Data preparation (sugar prices, aggregates, SLGW, UVAG, DOMM, TOOU, NTRD, LU density) | prep_data_for_estimation.gms l. 15-162 | done (`prep_for_estimation`); LU.LEVL with CAPRI's livestock units p_LUUnits (dat/policy/livestock_units.gms, uploaded 29 October 2026; `capri_data/pipeline/captrd/dat`, `tools/build/build_captrd_dat.py`). Check (`test_captrd_prepare.py`): Denmark's prepared years equal CAPTRD's p_data on all 40,000+ compared records (relative 1e-9), leaving out what the stages not yet ported write: the reporting overwrites of the same position (aggreg_and_report.gms l. 203-220), the COCO nowcasts and biofuel data (load_coco1_data.gms, from coco2_output.gdx) ; not traced: Denmark's VSET.LEVL of 1991-2005, which CAPTRD's p_data has at one-decimal values (8.2 for 1994 against CAPREG's 8.3599), with UAAR as its sum and LU per UAAR (LU equals CAPTRD's in every other year). The UVAD that Denmark lacks (other cereals, 1990) is the average over the 11 countries of its market aggregate A_EU_WEST with data (Germany's 1990 deleted first), as in CAPTRD (slow test). Denmark's BASM equals CAPTRD's BASM position on all 1,200+ compared records, leaving out further the animal requirements (prep_requirement_estimation.gms), the activities' LABF and LABP (labour stage) and DOMM of the products with biofuel use |
+| COCO data: the years after CAPREG's series (ExAnteD), biofuels, near-zero flags | load_coco1_data.gms (captrd.gms l. 715) | done (`capri_mod/pipeline/captrd/coco.py`; all stages in CAPTRD's order: `prepare_run.py`), 29 October 2026, with CAPRI's P_ExtrRates and p_ByProduct for the default biostocks and DDGS (dat/biofuel/biofuel_technology_params.gms, uploaded 29 October 2026). Not ported: the Aglink expert supports of the non-EU countries (p_result_MSnoEU, l. 422-497) belong to the expert supports. Check (slow test): Denmark's years 1984-2019 equal CAPTRD's p_data on 42,000+ records, leaving out the stages not ported, the near-zero flags another country's COCO data sets and the UVAD averages; not traced: the fossil fuels' UVAG of 2019, which CAPTRD's p_data has and COCO does not |
+| Policy data: milk and sugar quotas, set-aside rates | captrd_policy.gms with pol_input/mquota_update.gms, sugar/load_quotas.gms, policy/reformsugarquotas.gms (captrd.gms l. 906) | done (`capri_mod/pipeline/captrd/policy.py`, 29 October 2026). Data: CAPRI's milk_quota_dat.gms and smal_pshar.gms (uploaded 29 October 2026), the PMQuotaReg table of mquota_update.gms, the sugar quotas of input_load_sugar_quotas.gdx from the parquet mirror of CAPRI's dat folder (p_PPSQWithdraw has no records there, taken as empty); `tools/build/build_captrd_dat.py`. Check (slow test): Denmark's quotas equal CAPTRD's p_data in every year, the ex-ante years included (the milk quotas end with %mlkQutExpiry% 2009 and the sugar quotas from 2017 under aglink2023dgAgri). |
+| Labour bounds: the farm holders' age lines and the activities' minimum labour | baseline/labour_ageline.gms (captrd.gms l. 902, between LABH and the policy data) | done (`capri_mod/pipeline/captrd/labour.py`, 30 October 2026): MINS/MAXS LABO per ex-ante year, the age-line bounds across CAPTRD's MS set (every country, whatever a run prepares). Data: AGELINE of dat/baseline/ageline.gdx from the parquet mirror of CAPRI's dat folder, p_minLabourPerAct transcribed from labour_ageline.gms (capri_data/sources/capri_gams/baseline), the set SRNUTS1 (`tools/build/build_captrd_dat.py`, `build_captrd_sets.py`). Check: Denmark (slow test; the activities' minimum labour binds), Austria and Belgium (the age lines bind in some years) equal CAPTRD's p_data to 1e-15 in every ex-ante year |
 | nObs, nW, wAve, wVar | prep_data_for_estimation.gms l. 205-247 | done |
 | BAS, BSY, feed coefficients (nObs forced to 1) | prep_data_for_estimation.gms l. 250-320 | next |
 | WLS grid search | estimate_trends.gms | done |
@@ -652,5 +665,63 @@ data preparation is ported.
   define_eu_supports.gms l. 693, 705). Fixed on 24 October 2026 (project lead: "fix the still open"): the floor is
   (0.05 × |wAve|)², a 5% coefficient of variation; `captrd.variance_floor_squared = false` reproduces CAPRI. It has no
   effect until Steps 2-3 are ported; then it changes the weight of about a fifth of the series.
+- **The NUTS 2 column filter deletes nothing as coded** (captrd.gms l. 872-876). The statement is meant to keep only
+  the activities, land use, GROF and ARTO of the NUTS 2 regions, but its condition NOT SUM(SAMEAS(MS,NT2),1) has NT2
+  uncontrolled: the sum runs over MS and NT2 together and counts the 14 countries that are their own NUTS 2 region,
+  so the condition is false everywhere. CAPTRD's own p_data is consistent with this: its NUTS 2 regions keep, among
+  others, LOSF, UVAG, EAAG and SEDF (266,493 records), which the statement would delete. Fixed on 30 October 2026
+  (project lead; register FIX-9; `clean_regions`, setting `captrd.nuts2_column_filter_as_coded`). The fix applies
+  the condition per NUTS 2 region, as the two following statements have it. It keeps the columns of CAPTRD's NUTS 2
+  estimation (estimate_nuts2.gms l. 33-41), which include LOSF, GRPC and LU, not in the statement's own list; that
+  estimation bounds LOSF from GROF and uses its observations in the balances. On Ireland the fix deletes the NUTS 2
+  years of UVAG, EAAG, SEDF, INHA and QUTS (69 series).
+- **The statistics of all 35 countries against CAPTRD's own (30 October 2026; CAPRI's settings, the parity switches
+  true; prepare_run on CAPREG's series, results_1770's data.csv.gz).** Among the series CAPTRD estimates with
+  observations:
+
+  | Statistic | Series compared | Equal (rel. 1e-6) |
+  |---|---|---|
+  | nW | 102,632 | 99.994% |
+  | WAve | 102,632 | 99.954% |
+  | wVar | 99,113 | 99.953% |
+  | BAS | 142,615 | 99.9993% |
+  | BASM | 142,850 | 98.7% (against BASM.csv.gz, 2030) |
+
+  - **The remaining WAve and wVar differences are VSET, UAAR and LU of the EU-15 countries.** They are a difference in
+    CAPRI's shipped results that the code and data in hand do not reproduce, not a porting error (traced 30 October
+    2026 with the project lead's files):
+    - CAPTRD's p_data holds a different VSET LEVL in 1989-2005 (186 of 408 country-years; ratio median 1.003, up to
+      1.74). From 2006 the two agree.
+    - UAAR is the sum of the crop areas (prep_data_for_estimation.gms l. 86): Germany's WAve gap in UAAR (4.28)
+      equals its gap in VSET. LU is livestock units over UAAR (l. 202-203).
+    - **CAPTRD's values are the official set-aside areas.** They are those of dat/policy/expost.gms (Commission data,
+      VSET LEVL of the EU-15, 1989-2005; e.g. Germany 1992: 842.8, Spain 2000: 590.0). CAPREG reads that file
+      (capreg.gms l. 998) and calibrates the areas in capreg/cal_seta.gms, where VSET is free with weight 5 at
+      member-state level (l. 76, 321-325). Its time series (res_time_series_17<CC>.gdx) therefore holds the
+      calibrated areas (Germany 1992: 818.37).
+    - **CAPTRD read those time series.** trends_1770.gdx (the run of 5 November 2025, 00:30) records the CAPREG time
+      series of 4 November 2025, 16:43-16:44. Those are the files in hand: they equal capreg_tseries/17 in every record
+      both hold (Germany: 3.63 million).
+    - **No CAPTRD code brings the official areas back.** The installation's gams/captrd names VSET at the same places
+      as our copy, and none of them writes ex-post levels. Only capreg.gms includes expost.gms.
+    - **Conclusion.** The shipped results_1770 (computed by the CAPRI network and installed with CAPRI star 3.0 on 24
+      March 2026) come from a setup in which the member states' set-aside kept its official value. It cannot be seen
+      from the installation. The port follows the code and data in hand; a parity check must leave VSET, UAAR and LU
+      of 1989-2005 out.
+  - **nObs.** 2.7% differ, and CAPTRD has about 60,000 counts we do not.
+    - Where both have a count, CAPTRD stores 1 and we store the number of years. These are the requirement rows
+      (CRPR, ENNE, FICT) and the young animals' rows.
+    - Where only CAPTRD has one, it is mostly the animals' feed rows. Those have 212 BAS values only in CAPTRD too.
+    - These are set by the later steps (define_stats_and_supports.gms l. 321, 350; fix_est.gms l. 535-538;
+      prep_requirement_estimation.gms), which are not ported yet. That is to be confirmed as they are ported.
+  - **BSY cannot be compared:** CAPTRD does not store it.
+- **CAPTRD stores the quotas and set-aside rates whatever their observations.** define_stats_and_supports.gms
+  l. 138-150 writes p_data into its result position only for the series with observations (nObs), but the quotas
+  and SETR in every year: a parity check filtered by nObs misses them (it did on 29 October 2026, until corrected).
+- **Reporting overwrites the p_data position.** aggreg_and_report.gms writes the product aggregates (INHA, UVAG, UVAD
+  and the market balance of the OAGG rows) and the activity aggregates' TOOU into p_result(..., "p_data") after the
+  estimation. CAPTRD's stored INHA.CERE of Denmark before 2005 therefore lacks maize (its INHA.MAIZ has no base-year
+  value, so no stored series), while the INHA.CERE CAPTRD estimated includes it. Parity tests on the p_data position
+  must leave these records out.
 - **DOMM and NTRD in CAPTRD's output** are reporting re-aggregates in every position, Step1 included. A parity test
   must use DEMD for DOMM, and cannot test NTRD's estimated Step1.

@@ -31,9 +31,8 @@ Files are under `capri_data/<base_year>/<category>/` (only `2017/` exists); `tra
 
 | File | Content | Source | Shape |
 |---|---|---|---|
-| `world_prices.csv` | base-year world market price (EUR/t) | CAPRI `FAO_agg_17_defaulta` p_dataMarket 'World'.'PMRK'.<product>.'BAS' (CAPRI code per row in `sources/world_price_provenance.json`) | 60 rows: the 58 market commodities plus `DWHE`, `SUGB` (price-only rows); built by `tools/build/build_world_prices.py` |
+| `world_prices.csv` | base-year world market price (EUR/t) | CAPRI `FAO_agg_17_defaulta` p_dataMarket 'World'.'PMRK'.<product>.'BAS' (the source per group of rows in `schema/02_provenance_notes.sql`) | 60 rows: the 58 market commodities plus `DWHE`, `SUGB` (price-only rows); built by `tools/build/build_world_prices.py` |
 | `producer_prices.csv` | EU-wide producer price per commodity (EUR/t), the fallback where no regional price exists | CAPRI's production-weighted EU price (`tools/build/build_eu_producer_prices.py`, K34) | 42 rows |
-| `fao_market_baseline.json` | market base balances by `region|product` (read by tools/build/build_world_market_baseline.py) | CAPRI FAO_agg (2017) | dict of 454 entries |
 
 ### Policy (`2017/policy/`)
 
@@ -43,16 +42,12 @@ Files are under `capri_data/<base_year>/<category>/` (only `2017/` exists); `tra
 | `cap_ceilings_2030.csv` | CAPRI's 2030 budgets by premium scheme, Mio EUR, per CAPRI member state and NUTS2 region: DPPIL1, DPPIL2, DPRD_LFA, DPRD_N2K, DPAE, DPNAT, DPTOTAL; the payments report's national envelopes (DPTOTAL) | CAPRI 2030 reference, dataOut CEILVAL (`tools/build/build_cap_ceilings_2030.py`) | 289 × 7 |
 | `premium_scheme_shares_2030.csv` | per model region and activity, the part of the premium paid under DPPIL1, DPRD_LFA, DPRD_N2K, DPAE and DPNAT (sums to 1); Pillar II budget changes and the report's split by scheme | CAPRI 2030 reference, dataOut PRME by scheme / DPTOTAL, LEVL-weighted (`tools/build/build_cap_ceilings_2030.py`) | 8,709 rows (221 regions) |
 | `tariffs.csv` | ad valorem protection per trade region and commodity | CAPRI's total protection from its 2017 bilateral flows (Sprint 9r; `tools/build/build_tariffs_2017.py`) | 30 × 52 |
-| `eu_mfn_tariffs.csv` | EU import tariffs per commodity (fraction) | CAPRI | 1 × 32 |
 
 ### Environment (`2017/environment/`) and feed (`2017/feed/`)
 
 | File | Content | Source | Shape |
 |---|---|---|---|
-| `nutrient_coefs.csv` | N, P2O5, K2O per ha of crop (the per-head animal rows of unrecorded source removed with the legacy nitrate-limit instrument, K33) | capreg DATA2 NITF/PHOF/POTF | 29 × 3 |
-| `crop_nutrient_export.csv` | nutrient removed per t of crop (`N_kg_t`, `P_kg_t`, `K_kg_t`) | CAPRI | 35 × 3 |
 | `climate_zones.csv` | climate-zone shares per CAPRI region or member state (`region`, `zone`, `pct`; 145 codes); read by `tools/build/build_ad_option.py`, not by the model | CAPRI | 521 rows |
-| `feed_requirements.csv` | feed per head (t DM/head/yr) by animal and feed item | capreg DATA2 feed columns, fresh to dry matter | 9 animals × 11 feeds |
 
 ### Shared (`shared/`)
 
@@ -67,8 +62,8 @@ Files are under `capri_data/<base_year>/<category>/` (only `2017/` exists); `tra
 | `eu_market_blocks.csv` | member state → CAPRI's EU trade block (EU_WEST, EU_EAST) |
 | `model_parameters.csv` | every constant of the economics and accounts (value, unit, kind, source; `capri_mod/params.py`) |
 
-Archived, not read by the model (`capri_data/archive/`): `dairy_processing_params.json`, `gascoeff_params.json`,
-earlier base areas and trade flows.
+`capri_data/archive/` (superseded files: `dairy_processing_params.json`, `gascoeff_params.json`, earlier base areas and
+trade flows) was removed 30 October 2026, the project lead's decision, read by no code (git history keeps it).
 
 ---
 
@@ -110,8 +105,8 @@ Market-only codes: `SUGR` white sugar; `MILK` raw milk; `BUTR` butter; `SKIM` sk
 `CASE` casein; `BEEF`, `PORK`, `POUL`, `SGMT` (sheep and goat meat), `EGGS`; `RAPO`, `SUNO`, `SOYO` (oils), `RAPC`,
 `SUNC`, `SOYC` (cakes); `PLMO` palm oil; `OTHO` other vegetable oils; `FFIS` freshwater fish; `SFIS` saltwater fish;
 `OAQU` other aquatic products; `COFF` coffee; `TEAS` tea; `COCO` cocoa; `BIOE` bio-ethanol; `BIOD` bio-diesel; `DDGS`
-distillers' dried grains; `FENI`, `FPRI` CAPRI's residual feeds. Feed items in `feed_requirements.csv`: `RAPC`,
-`SOYC`, `SUNC` (rapeseed, soya, sunflower cake: CAPRI's codes, as the market's; `RAPM`, `SOYM`, `SUFM` before 23 October 2026).
+distillers' dried grains; `FENI`, `FPRI` CAPRI's residual feeds; `RAPC`, `SOYC`, `SUNC` rapeseed, soya, sunflower
+cake (CAPRI's codes, as the market's).
 
 ## Further files (added in October 2026)
 
@@ -131,7 +126,7 @@ distillers' dried grains; `FENI`, `FPRI` CAPRI's residual feeds. Feed items in `
 | `2017/abatement/ammonia/ammonia_technologies.csv`, `ammonia_technology_effects.parquet` | CAPRI's ammonia-option entries of the technology table (costs, initial and maximum shares, applicability, remaining NH3) and their side effects on other gases, per region and animal activity; shares match CAPRI's endotech runs | `tools/build/build_ammonia_technologies.py`; an intermediate read by `tools/build/build_ammonia_tech_model.py`, not by the model |
 | `2017/abatement/ammonia/ammonia_tech_model.csv` | CAPRI's ammonia options per model region, animal and CAPRI sub-activity: weight, stock factor, manure-N weight, group (NH3MAN/NH3APP), cost, CAPRI-calibrated slope and early-adopter threshold, initial and maximum shares, NH3 cuts at housing/storage/application, grazing share and MITERRA loss fractions | `tools/build/build_ammonia_tech_model.py`; `capri_mod/supply/ammonia_techs.py` |
 | `sources/arm/capri_supply_elas_young_1720.csv` | CAPRI's calibrated supply elasticities of young animals per member state (YCAM, YCAF, YBUL, YHEI, YCOW; 2020 calibration) | `tools/build/build_young_animal_elasticities.py`; weights cattle elasticities in `capri_pmp.build_elasticity_table` |
-| `2017/abatement/fert_options_jul15.csv` | CAPRI's fertiliser-efficiency options from miti_data_jul15 (national; regional VRT_SRUC): costs, PMP terms, relative subsidies, shares, QEmitt and no-control QEmitt | `tools/build/build_fert_options_jul15.py` from `sources/ghgtech/miti_data_jul15_p_ghgMiti.txt`; `RegionalSupplyModel._fert_techs` |
+| `2017/abatement/fert_options_jul15.csv` | CAPRI's fertiliser-efficiency options from miti_data_jul15 (national; regional VRT_SRUC): costs, PMP terms, relative subsidies, shares, QEmitt and no-control QEmitt | `tools/build/build_fert_options_jul15.py` from `sources/ghgtech/miti_data_jul15_p_ghgMiti.csv` (the gdxdump converted by `tools/build/convert_sources_to_csv.py`); `RegionalSupplyModel._fert_techs` |
 | `2017/environment/capri_crop_n_coefs_2030.csv` | CAPRI 2030 reference per region and crop: level, yield, NITF export coefficient, NCRD (residues + deposition, kg/ha), biological fixation (1000 t) | `tools/build/build_capri_crop_n_coefs.py`; `EnvironmentalModule._capri_crop_n` (gross N balance) |
 | `2017/environment/capri_gnb_components_2030.csv` | CAPRI 2030 gross N balance items per region (kg N/ha): EXPPRD, CRESID, ATMOSD, BIOFIX, MINFER, EXCRET, MTRADE, SURTOT, residue unavailability and losses | `tools/build/build_capri_gnb_components.py`; scaling of per-crop coefficients, residue availability |
 | `sources/eurostat/aei_pr_gnb_nitrogen.csv` | Eurostat gross nutrient balance, nitrogen, member states 1985–2023 (inputs, outputs, balance; tonnes and kg/ha) | validation only: `tools/check/validate_gnb_eurostat.py` |
@@ -168,6 +163,16 @@ distillers' dried grains; `FENI`, `FPRI` CAPRI's residual feeds. Feed items in `
 | `2017/policy/mineral_redu_limcres.csv` | CAPRI's relaxations of the limCres regulation by year | `tools/build/build_mineral_redu_rules.py` |
 | `2017/market/feed_bulks_eu.csv` | CAPRI's feed bulks per member state (FCER cereals, FPRO protein-rich feed incl. DDGS and FPRI, FENE energy-rich, FOTH other, FMIL milk products): products, model commodity, 2030 feed use (kt), EU Arm1 price (EUR/t), CES elasticity p_rhoFeed (feedBlkPrice_, feedShareEqu_) | `tools/build/build_feed_bulks.py` |
 | `2017/market/feed_byproducts.csv` | CAPRI's residual feeds FENI, FPRI (MaprFeed_): EU 2030 output (kt) and parent commodities' weights (food/processing or biofuel use) | `tools/build/build_feed_byproducts.py` |
+| `2017/market/eu_cake_feed_bas.csv` | The EU's base-period feed use of the oilseed cakes RAPC, SUNC, SOYC (kt; CAPRI's FAO_agg FEDM BAS summed over the member states): the weights of the supply models' protein-feed cake index | `tools/build/build_eu_cake_feed.py` |
+| `2017/market/feed_cal_content.csv` | CAPRI's calorie content per market product (p_calContent: USDA Energ_cal, kcal per kg, of nutrient_cont_usda.gdx) | `tools/build/build_feed_energy.py` (M3) |
+| `2017/market/noneu_feed_energy.csv` | The non-EU behavioural regions without supply models: feed energy at CAPRI's 2030 calibration (FEDE quantity, sum of feed x calories; its price, feed value per calorie, arm/market1.gms l. 402-408), the average feed cost and the fitted feed-cost share of arm/feed_conv.gms | `tools/build/build_feed_energy.py` (M3) |
+| `2017/market/noneu_feed_nq.csv` | CAPRI's feed functions FeedNQ_ of the non-EU behavioural regions without supply models: p_hessNQFeed at CAL completed as arm/market1.gms, in the ratio form h x p0 / INPE (p0 the market region's ARM1P, FEDE the region's feed energy price) | `tools/build/build_noneu_feed_nq.py` (M3) |
+| `2017/market/noneu_feed_base.csv` | The same regions' feed per CAPRI product at CAL (kt) with its calories | `tools/build/build_noneu_feed_nq.py` (M3) |
+| `2017/market/noneu_feed_totals.csv` | CAPRI's feed at CAL of every non-EU behavioural region of a trade region per model commodity (kt): the base of the trade region's feed changes | `tools/build/build_noneu_feed_nq.py` (M3) |
+| `2017/market/noneu_feed_conv.csv` | CAPRI's feed conversion factors pv_feedConv per region and animal product, fitted as arm/feed_conv.gms (m_fitFeedConv) at the 2030 calibration data: conv (kg maize energy equivalent), feed_conv = conv x calories (the value FeedBal_ uses) | `tools/build/build_feed_energy.py` (M3) |
+| `2017/market/feed_bulks_no.csv` | Norway's feed bulks (K56): CAPRI's 2030 FEED (kt) and ARM1P (EUR/t) of NO000000 per bulk product, p_rhoFeed, and its use HCOM + FEDM + INDM + BIOF + LOSM + PRCM (kt) | `tools/build/build_feed_bulks.py` |
+| `2017/market/supply_elas_eu.csv` | The EU rows' own-price supply elasticity per market commodity: CAPRI's p_elasSupp (elas1717, CAL), median over the model's 27 member states (member_states: how many have it), under the model's code with CAPRI's (capri_code) | `tools/build/build_capri_supply_elas_market.py` |
+| `2017/market/supply_elas_region.csv` | CAPRI's own-price market supply elasticities p_elasSupp per non-EU trade region and commodity, production-weighted (prod_kt) over its CAPRI regions; with market.noneu_supply_nq (default) used for Norway's products without a supply model and the setting's off state | `tools/build/build_supply_elas_nonEU.py` |
 | `2017/market/feed_bulks_eu_share.csv` | Feed share of EU use per model commodity in the bulks (CAPRI 2030 reference) | `tools/build/build_feed_bulks.py` |
 | `2017/market/dairy_processing.csv` | CAPRI's dairy block per member state: product and raw milk quantities, processing, fat and protein contents (%), prices, CSEI, INPE, fat and protein prices | `tools/build/build_dairy_processing.py` |
 | `2017/market/dairy_hessian.csv` | Hessian of CAPRI's dairy NQ function per member state (symmetric, MILK row reversed) | `tools/build/build_dairy_processing.py` (elas_2_1730 p_hessNQDairy) |
@@ -184,10 +189,17 @@ distillers' dried grains; `FENI`, `FPRI` CAPRI's residual feeds. Feed items in `
 | `2017/market/dairy_world_processing.csv` | CAPRI's dairy block for the non-EU market regions: products, raw milk, contents, prices, food and feed use, extra-regional trade; MILKSUP = raw milk supply slope | `tools/build/build_dairy_world_blocks.py` |
 | `2017/market/dairy_world_hessian.csv` | Dairy NQ Hessians of the non-EU market regions | `tools/build/build_dairy_world_blocks.py` |
 | `2017/market/dairy_world_demand_elas.csv` | Food demand elasticities among the nine dairy products, non-EU regions | `tools/build/build_dairy_world_blocks.py` |
+| `2017/supply/pmp_capri_2030.csv` | CAPRI's 2030 crop PMP terms (p_pmpQuadTechn, p_pmpQuadPact of the 2030 baseline calibration) as the Hessian on the model's activities per territory group: g_ij = H_ij sqrt(X_i X_j) (EUR/ha), X the group's CAPRI levels (1000 ha); both triangles stored; at run time Q_ij = g_ij / sqrt(x_i x_j) | `tools/build/build_pmp_capri_2030.py` (K61) |
+| `2017/supply/pmp_capri_2030_animals.csv`, `pmp_capri_2030_animals_members.csv` | CAPRI's 2030 animal PMP terms as herd curvature per model animal, g = h X / r (EUR per model head), x_capri CAPRI's level (1000 head; poultry million), level_ratio = capri_level_ratio; `_members`: the heifers' and calves' split members (read only with use_cattle_member_splits, K65) | `tools/build/build_animal_pmp_capri_2030.py` (`--splits`) |
+| `2017/supply/pmp_recipe_<year>.csv`, `pmp_recipe_<year>_animals.csv`, `pmp_recipe_<year>_animals_members.csv` | capri-mod's own PMP terms with CAPRI's recipe (supply/define_pmp_terms.gms) at the 2017 and 2030 calibration points, same layout and units as the CAPRI terms (SupplyModule.pmp_source "recipe") | `tools/build/build_pmp_recipe.py` |
+| `2017/supply/capri_level_ratio.csv` | The model's base herd (1000 head) per unit of CAPRI's 2017 LEVL of the animal's CAPRI activities, region x animal; CAPRI's additive bound and the animal PMP terms in the model's heads | `tools/build/build_capri_level_ratio.py` (K27) |
 | `2017/supply/livestock_units.csv` | CAPRI's livestock units per model head (LEVW / LEVL over the animal's CAPRI members, 2017, / capri_level_ratio), region x animal; weights of the reported adoption shares | `tools/build/build_livestock_units.py` |
 | `2017/abatement/mitigation/genetics_effects.csv` | CAPRI's cattle genomics per region and animal (genet_yld, genet_eff): eligible share, relative changes of milk, energy, protein, dry matter and manure N per adopting head PER UNIT of the technology parameter (tech_param), cost floor (CAPRI's per-place floor per model head) and per-unit cost, relSubs0/1, max_share (CAPRI's MaxShare with fixGenet_eff_to_iniValues on), dsav (CAPRI's cost-saving drop between its calibration runs, per unit of the parameter); scaled at run time by the scenario's settings | `tools/build/build_genetics_effects.py` (breeding.gms) |
 | `shared/capri_member_state_codes.csv` | NUTS country prefix -> CAPRI member state (BE, LU -> BL000000; IE -> IR000000; GR -> EL000000; GB -> UK000000; others the same code); `capri_mod.data.definitions.MS_CODE` and `capri_ms()`, `tools/lib/_model_regions.CTRY` | CAPRI `sets.gms` NUTS0 |
 | `2017/environment/livestock_n_export_coef.csv` | CAPRI's N exported in animal products per model head (CRPR_EXPT x LEVL over the animal's CAPRI members / model herd, per region group), kg N; the report item n_animal_products | `tools/build/build_livestock_n_export_coef.py` (res_17; fert/calc_nexport.gms) |
+| `2017/supply/nutrient_coefs_regional.csv` | CAPRI's fertiliser coefficients per region and model crop: NITF (N), PHOF (P2O5), POTF (K2O), kg/ha, level-weighted over the crop's CAPRI activities, the member state's values for a crop the region does not grow; the supply models' nutrient balance (NITF is CAPRI's N requirement; mineral N applied is nutrients_regional.csv, NMIN) | `tools/build/build_nutrient_coefs_regional.py` (K100) |
+| `2017/supply/land_rents_2030.csv` | CAPRI's land rents at the 2030 reference (D_AREA of ARAC, FRUN, GRAS; CAPRI's rule of cal_land_nests.gms l. 204-226 where D_AREA is not positive), EUR/ha; the supply models' land market and the recipe PMP's rents | `tools/build/build_land_rents.py` |
+| `2017/supply/capri_own_price_elasticities.csv` | CAPRI's calibrated own-price supply elasticities p_ElasSupp ('CAL') per member state (two-letter CAPRI codes) and product; the elasticity-calibrated PMP's CAPRI_COUNTRY source (not the default PMP) | no builder in the repository (results/arm supply_elas_*) |
 | `2017/supply/land_rents_2017.csv` | CAPRI's land rents at 2017 (D_AREA of ARAC, FRUN, GRAS; CAPRI's rule of cal_land_nests.gms l. 204-226 where D_AREA is not positive), EUR/ha; the land market at the 2017 market year | `tools/build/build_land_rents.py --year 2017` |
 | `2017/environment/histosol.csv` | CAPRI's histosols per model region: organic-soil share of cropland and grassland, climate-weighted IPCC 2013 N2O factor, N2O/CO2/CH4 per ha of the class, and the fallowing option's calibration (costsaving0/1, MaxShare, PMP terms) | `tools/build/build_histosol.py` |
 | `2017/environment/manure_n2o_factors.csv` | CAPRI's manure N2O by stage per region and animal: t N2O-N per t manure N for housing/storage (f_man), application (f_app), grazing (f_gra), leaching (f_lea) | `tools/build/build_manure_n2o.py` (res_17) |
@@ -206,11 +218,11 @@ distillers' dried grains; `FENI`, `FPRI` CAPRI's residual feeds. Feed items in `
 | `2017/abatement/ammonia/n_cascade_factors.csv`, `n_cascade_region.csv`, `n_cascade_effects.csv` (CAPRI's N loss cascade, docs/N_CASCADE_SPEC.md) | `tools/build/build_n_cascade.py` |
 | `2017/abatement/ammonia/n_leaching_region.csv` (leaching share, LEACHN_) | `tools/build/build_n_leaching.py` |
 | `2017/abatement/ammonia/ad_option.csv` (anaerobic digestion, docs/AD_SPEC.md) | `tools/build/build_ad_option.py` |
-| `2017/abatement/ammonia/nitrates_directive_min_shares.csv`, `nitrates_directive_obligations.csv`, `nvz_*.csv` (built, not applied) | `tools/build/build_nitrates_directive.py` |
 | `2017/market/gl_demand_b.csv`, `gl_demand_goods.csv`, `gl_demand_regions.csv` (Generalised Leontief food demand) | `tools/build/build_gl_demand.py` |
 | `2017/market/processing_nq_base.csv`, `processing_nq_hessian.csv` (ProcNQ_) | `tools/build/build_processing_nq.py` |
 | `2017/market/welfare_base_2030.csv` (CAPRI's welfare base values, reports/welfare.gms) | `tools/build/build_welfare_base.py` |
 | `2017/market/eu_market_supply_nq.csv` (CAPRI's ProdNQ_ terms of the EU's other vegetable oils and fish per member state) | `tools/build/build_eu_market_supply_nq.py` |
+| `2017/market/noneu_market_supply_nq.csv` (CAPRI's ProdNQ_ terms of the non-EU market regions, own and cross-price) | `tools/build/build_noneu_market_supply_nq.py` |
 | `2017/market/eu_ms_balance_2030.csv`, `shared/eu_market_blocks.csv` (EU trade blocks) | `tools/build/build_eu_ms_balance.py` |
 | `2017/environment/luc_2030.csv` (land-use change model) | `tools/build/build_luc_2030.py` |
 | `2017/environment/npk_crop_coefs_2030.csv`, `npk_region_2030.csv`, `fert_dist_priors_npk_2030.csv`, `livestock_manure_p_coef.csv`, `livestock_manure_k_coef.csv` (P and K) | `tools/build/build_npk_balance_2030.py` |
@@ -222,20 +234,18 @@ distillers' dried grains; `FENI`, `FPRI` CAPRI's residual feeds. Feed items in `
 terms are read from `sources/capreg/pmp_quad_techn.csv`, `pmp_quad_pact.csv` and the 2030 exports) and
 `2017/environment/manure_ch4_ef_regional.csv` (the accounts use `livestock_ch4man_coef.csv`).*
 
+*Removed 30 October 2026 (the project lead's decision, read by no code; their writers no longer write them):
+`sources/capreg/capreg_feed_use.csv`, `capreg_herds.csv`, `capreg_land.csv`, `capreg_cost_components.csv.xz`,
+`sources/capmod/capmod_trade_flows_2017.csv.xz`, `sources/estnlp/gtap_armington.csv`,
+`validation/greendeal_2030/capri_marginal_terms_max_2030.csv.xz`, `capri_unit_values_max_2030.csv`.*
+
 CAPRI data that the extractors write and no model code, builder or test reads at present (inventory of 27 October 2026).
 Kept as the repository's copy of CAPRI's data, for the work that will need them; each is rewritten when its extractor
 runs.
 
 | File | Content | Written by |
 |---|---|---|
-| `2017/abatement/ammonia/ControlStrat_TS.csv`, `CorrND.csv`, `FracNVZNuts2.csv`, `FracNVZNuts2_full.csv`, `FracToepHouse.csv`, `FracToepStorage.csv`, `FracUseFert.csv`, `PercPeat.csv`, `ScalarArray.csv`, `rCorrND.csv`, `rLFManureBasis.csv`, `rLFManureND.csv`, `reducBio.csv` | MITERRA symbols of CAPRI's ammonia module not used by the model's ammonia options | `tools/build/build_ammonia_tech_inputs.py` (one file per GDX symbol) |
-| `2017/abatement/ammonia/nitrates_directive_min_shares.csv` | Nitrates Directive minimum option shares by region | `tools/build/build_nitrates_directive.py` |
 | `2017/abatement/ammonia/costs/scalars.csv` | scalar cost parameters of the ammonia options | `tools/build/build_ammonia_cost_tables.py` |
-| `2017/abatement/mitigation/p_ccEfa.csv`, `p_tillageCover.csv`, `p_winterCoverShare0.csv` | catch crops as ecological focus area, tillage cover, initial winter-cover shares | `tools/build/build_mitigation_inputs.py` |
-| `pipeline/captrd/sets/fixyield.csv`, `mrkbale.csv`, `reqst.csv` | empty CAPTRD sets, part of the complete set extraction | `tools/build/build_captrd_sets.py` |
-| `sources/capreg/capreg_feed_use.csv`, `capreg_herds.csv`, `capreg_land.csv` | CAPREG DATA2 feed use, herds, land | `tools/build/extract_remaining_nine.py` |
-| `sources/capreg/capreg_cost_components.csv.xz` | CAPREG DATA2 input cost components | `tools/build/extract_all_from_data2.py` |
-| `sources/capmod/capmod_trade_flows_2017.csv.xz`, `capmod_world_prices_2017.csv` | CAPRI's 2017 bilateral trade flows and world prices (capmod res_0_1717) | `tools/build/ingest_capmod_market.py` |
-| `sources/estnlp/gtap_armington.csv` | GTAP Armington elasticities mapped to the model's commodities | `tools/build/ingest_pela_gtap.py` |
-| `validation/greendeal_2030/capri_marginal_terms_max_2030.csv.xz`, `capri_unit_values_max_2030.csv` | CAPRI's maximum-mitigation Green Deal run: marginal terms and unit values | `tools/build/extract_capri_marginal_terms.py` |
+| `pipeline/captrd/sets/fixyield.csv` | CAPTRD's FixYield (OCRO, OOIL, OANI), read once CAPTRD's Steps 2-3 are ported | `tools/build/build_captrd_sets.py` |
+| `pipeline/captrd/sets/mrkbale.csv`, `reqst.csv` | empty CAPTRD sets, part of the complete set extraction | `tools/build/build_captrd_sets.py` |
 

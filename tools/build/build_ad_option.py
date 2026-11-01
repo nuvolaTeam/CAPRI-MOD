@@ -23,8 +23,8 @@ Items (ad_data_and_cali.gms lines):
   IniShare = MitiShar0 SharLiq HousShar / (L (1 - G)) (l. 440-454, 603-613), 0 where MitiShar0 is 0
   revenue = ECH4 (0.4 0.3 P_heat + 0.36 (1 - 0.12) P_elec), GAINS prices of the country's L farms (l. 642-661)
   QE_AD / QE_NOC from the climate cells' MCF (l. 676-737; member-state level as the supply model uses it)
-  L (1 - G) scaling, CAPRI's calibration (relSubs cases l. 816-925, Version B l. 1105-1160), inflation 1.019^13
-  (l. 1175-1177)
+  L (1 - G) scaling, CAPRI's calibration (relSubs cases l. 816-925, Version B l. 1105-1160), CAPRI's inflation 1.019^13
+  (l. 1175-1177) taken back out: the model works in 2017 money (KNOWN_ISSUES K108)
 
 VSER: pigs CAPRI's table (AD_basedata p_VSER), as CAPRI's own fallback gives them; cattle CAPRI computes from the
 feed, energy and requirement data of the run (l. 49-116), not in hand: the table value is used and recorded as
@@ -55,10 +55,12 @@ ADACT = {"DCOL": "DAIRY", "DCOH": "DAIRY", "BULL": "NDAIRY", "BULH": "NDAIRY", "
          "HEIR": "NDAIRY", "SCOW": "NDAIRY", "CAMR": "NDAIRY", "CAFR": "NDAIRY", "CAMF": "NDAIRY", "CAFF": "NDAIRY",
          "PIGF": "SWIN", "SOWS": "SWIN"}                                                              # map_animals
 GAINSACT = {"DCOL": "DL_L", "DCOH": "DL_L", "PIGF": "PL_L", "SOWS": "PL_L"}                           # map_gainsact1
-GAINSC = {"AT": "AUST", "BL": "BELG", "BG": "BULG", "HR": "CROA", "CY": "CYPR", "CZ": "CZRE", "DK": "DENM",
-          "EE": "ESTO", "FI": "FINL", "FR": "FRAN", "DE": "GERM", "EL": "GREE", "HU": "HUNG", "IR": "IREL",
-          "IT": "ITAL", "LV": "LATV", "LT": "LITH", "MT": "MALT", "NL": "NETH", "PL": "POLA", "PT": "PORT",
-          "RO": "ROMA", "SK": "SKRE", "SI": "SLOV", "ES": "SPAI", "SE": "SWED", "UK": "UNKI", "NO": "NORW"}
+#: CAPRI's map from its member states to GAINS countries (map_gainsCount, ad_data_and_cali.gms l. 158-187; the Western
+#: Balkans and Turkey take Croatia's, CROA), read from CAPRI's code: member state -> GAINS country
+GMS = Path("/home/claude/work/allgms/gams/envind/ad_data_and_cali.gms")
+_sp_gt = _ilu.spec_from_file_location("_gt", Path(__file__).resolve().parents[2] / "tools" / "lib" / "gams_text.py")
+_gt = _ilu.module_from_spec(_sp_gt); _sp_gt.loader.exec_module(_gt)
+GAINSC = {ms: gc for gc, ms in _gt.set_pairs(_gt.read_text(GMS), "map_gainsCount")}
 # p_MCF (l. 324-345): nocrustcover, solid, pasture by climate cell
 MCF = {10: (0.17, 0.02, 0.01), 11: (0.19, 0.02, 0.01), 12: (0.20, 0.02, 0.01), 13: (0.22, 0.02, 0.01),
        14: (0.25, 0.02, 0.01), 15: (0.27, 0.04, 0.015), 16: (0.29, 0.04, 0.015), 17: (0.32, 0.04, 0.015),
@@ -68,7 +70,12 @@ MCF = {10: (0.17, 0.02, 0.01), 11: (0.19, 0.02, 0.01), 12: (0.20, 0.02, 0.01), 1
 P_R, P_T, ALPHA, BETA, COP, ENGH = 0.035, 15, -1009.332, 10381.16, 0.05, 7000.0
 PRE_CO2, PRE_CH4, MCF_DIG, LEAK, DENS, ECONT, ECONV = 0.02, 0.25, 0.85, 0.03, 0.6557, 55.0, 277.8
 EF_HEAT, EH_SOLD, EF_ELEC, EL_USED, PR_ELEC, PR_HEAT = 0.4, 0.3, 0.36, 0.12, 0.10, 0.03
-INFL = 1.019 ** 13                                      # p_infl ** (2030 - 2017)
+# CAPRI inflates the option's money terms from the base year to 2030 (p_infl ** (2030 - 2017), l. 1175-1177); the
+# model works in 2017 money and divides the 2030 terms by the same index (tools/lib/_money.deflator; KNOWN_ISSUES
+# K108, 31 October 2026: before, the terms stayed in CAPRI's 2030 money): the net factor is 1 to rounding
+_sp_my = _ilu.spec_from_file_location("_money", Path(__file__).resolve().parents[2] / "tools" / "lib" / "_money.py")
+_money = _ilu.module_from_spec(_sp_my); _sp_my.loader.exec_module(_money)
+INFL = 1.019 ** 13 / _money.deflator(2030)
 SENS = 1.0                                              # %sensFac% (refpol_endotech_all_sup.gms l. 243)
 
 
@@ -190,7 +197,7 @@ def build():
         m0 = mitishar0.get((rs, ad), mitishar0.get((_n1(rs), ad), mitishar0.get((ms, ad), 0.0)))
         hs = housshar.get((ms, ad), 1.0 if ad == "SWIN" else 0.0)
         ini_v = m0 * sharliq.get((ms, ad), 0.0) * hs / lg if m0 else 0.0
-        gc = GAINSC.get(rs[:2])
+        gc = GAINSC.get(_mr.national_code(rs))
         ga = GAINSACT.get(act, "OL_L")
         elec = gains.get((gc, ga, "eprice_ind")) or PR_ELEC
         heat = 0.5 * gains.get((gc, ga, "eprice_agr"), 0.0) or PR_HEAT

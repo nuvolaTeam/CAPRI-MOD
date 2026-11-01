@@ -41,7 +41,6 @@ import numpy as np
 import pandas as pd
 from capri_mod.params import param, param_table
 from capri_mod.data.definitions import MS_CODE
-from capri_mod.tableio import read_input
 
 # --- 1. dampening ----------------------------------------------------------
 
@@ -150,6 +149,7 @@ def build_elasticity_table(
     defaults: pd.Series,
     base_areas: Optional[pd.DataFrame] = None,
     base_year: str = "2017",
+    inputs=None,
 ) -> Tuple[pd.DataFrame, pd.DataFrame, dict]:
     """
     Return (elasticities, provenance, summary).
@@ -164,7 +164,8 @@ def build_elasticity_table(
 
     Both CAPRI sources are per region x activity, keyed by CAPRI's 8-character region codes, the model's own.
     """
-    data_dir = Path(data_dir)
+    from capri_mod.supply.inputs import SupplyInputs
+    inp = inputs if inputs is not None else SupplyInputs(data_dir, base_year)
     apply_dampening = True        # CAPRI's dampening (impose_upper_bound_on_elasticity.gms)
     # (The runtime guard against activities anchored on a constant placeholder base, detect_synthetic_base_activities,
     # blocked none since the synthetic data was replaced and was removed from here on 23 October 2026; the function
@@ -176,51 +177,48 @@ def build_elasticity_table(
     prov = pd.DataFrame("NO_CAPRI_VALUE", index=regions, columns=activities)
 
     # --- lower-precedence source first, so the better one overwrites it ---
-    from capri_mod.data.loaders import resolve_data_file
-    pmp_path = resolve_data_file(data_dir, PMP_ELAS_FILE, base_year=base_year)
+    pmp_path = inp.need(inp.resolve(PMP_ELAS_FILE))
     n_pmp = 0
-    if pmp_path.exists():
-        # model region -> CAPRI region: the model's regions are CAPRI's regional units (27 October 2026); a region whose
-        # CAPRI row is missing takes its member state's national row
-        to8 = {r: r for r in regions}
-        df = read_input(pmp_path)
-        df["activity"] = df["crop"].replace(ACTIVITY_ALIASES)
-        df = df[df.activity.isin(set(activities))]
-        vals = df["own_price_elas"].values
-        if apply_dampening:
-            vals = dampen_elasticity(vals)
-        val = {(c8, a): float(v) for c8, a, v in zip(df.region, df.activity, vals) if np.isfinite(v) and v > 0}
-        for r in regions:
-            own = to8.get(r)
-            nat = LIVESTOCK_MS.get(str(r)[:2], str(r)[:2]) + "000000"
-            for a in set(df.activity):
-                if a not in eps.columns:
-                    continue
-                v = val.get((own, a)) if own else None
-                if v is None:
-                    v = val.get((nat, a))
-                if v is not None:
-                    eps.at[r, a] = v
-                    prov.at[r, a] = "PMP_CAPRI"
-                    n_pmp += 1
+    # model region -> CAPRI region: the model's regions are CAPRI's regional units (27 October 2026); a region whose
+    # CAPRI row is missing takes its member state's national row
+    to8 = {r: r for r in regions}
+    df = inp.read(pmp_path)
+    df["activity"] = df["crop"].replace(ACTIVITY_ALIASES)
+    df = df[df.activity.isin(set(activities))]
+    vals = df["own_price_elas"].values
+    if apply_dampening:
+        vals = dampen_elasticity(vals)
+    val = {(c8, a): float(v) for c8, a, v in zip(df.region, df.activity, vals) if np.isfinite(v) and v > 0}
+    for r in regions:
+        own = to8.get(r)
+        nat = LIVESTOCK_MS.get(str(r)[:2], str(r)[:2]) + "000000"
+        for a in set(df.activity):
+            if a not in eps.columns:
+                continue
+            v = val.get((own, a)) if own else None
+            if v is None:
+                v = val.get((nat, a))
+            if v is not None:
+                eps.at[r, a] = v
+                prov.at[r, a] = "PMP_CAPRI"
+                n_pmp += 1
 
     # --- higher-precedence source ---
-    reg_path = resolve_data_file(data_dir, REGIONAL_FILE, base_year=base_year)
+    reg_path = inp.need(inp.resolve(REGIONAL_FILE))
     n_reg = 0
-    if reg_path.exists():
-        rdf = read_input(reg_path, index_col=0)
-        rdf = rdf.rename(columns=ACTIVITY_ALIASES)
-        common_r = [r for r in rdf.index if r in set(regions)]
-        common_a = [c for c in rdf.columns if c in set(activities)]
-        for r in common_r:
-            for a in common_a:
-                v = rdf.at[r, a]
-                if pd.notna(v) and v > 0:
-                    # This source is already bounded at 4.5 upstream; dampening
-                    # it again would be double-counting.
-                    eps.at[r, a] = float(v)
-                    prov.at[r, a] = "REGIONAL_CAPRI"
-                    n_reg += 1
+    rdf = inp.read(reg_path, index_col=0)
+    rdf = rdf.rename(columns=ACTIVITY_ALIASES)
+    common_r = [r for r in rdf.index if r in set(regions)]
+    common_a = [c for c in rdf.columns if c in set(activities)]
+    for r in common_r:
+        for a in common_a:
+            v = rdf.at[r, a]
+            if pd.notna(v) and v > 0:
+                # This source is already bounded at 4.5 upstream; dampening
+                # it again would be double-counting.
+                eps.at[r, a] = float(v)
+                prov.at[r, a] = "REGIONAL_CAPRI"
+                n_reg += 1
 
     # --- crops neither regional source has: the member state's calibrated own-price supply elasticity (K30) ---
     # CAPRI's p_ElasSupp ("CAL", results/arm supply_elas_*; capri_own_price_elasticities.csv, 26 country groups).
@@ -230,25 +228,20 @@ def build_elasticity_table(
     # region for an arable crop the default stays (registered in docs/KNOWN_ISSUES.md K30). Dampened as the PMP
     # source (values at or below the threshold pass unchanged); a crop the member state does not have keeps the default.
     n_cty = 0
-    try:
-        from capri_mod.data.loaders import resolve_data_file as _rdf
-        cty_path = _rdf(data_dir, COUNTRY_ELAS_FILE, base_year=base_year)
-    except Exception:
-        cty_path = None
-    if cty_path is not None and Path(cty_path).exists():
-        cdf = read_input(cty_path, index_col=0).rename(columns=COUNTRY_ELAS_ALIASES)
-        covered = {a for a in prov.columns if prov[a].isin(["PMP_CAPRI", "REGIONAL_CAPRI"]).any()}
-        cols_ = [c for c in cdf.columns if c in set(activities) and c not in covered]
-        for r in regions:
-            cc = LIVESTOCK_MS.get(str(r)[:2], str(r)[:2])
-            if cc not in cdf.index:
-                continue
-            for a in cols_:
-                v = cdf.at[cc, a]
-                if pd.notna(v) and v > 0:
-                    eps.at[r, a] = float(dampen_elasticity([float(v)])[0]) if apply_dampening else float(v)
-                    prov.at[r, a] = "CAPRI_COUNTRY"
-                    n_cty += 1
+    cty_path = inp.need(inp.resolve(COUNTRY_ELAS_FILE))
+    cdf = inp.read(cty_path, index_col=0).rename(columns=COUNTRY_ELAS_ALIASES)
+    covered = {a for a in prov.columns if prov[a].isin(["PMP_CAPRI", "REGIONAL_CAPRI"]).any()}
+    cols_ = [c for c in cdf.columns if c in set(activities) and c not in covered]
+    for r in regions:
+        cc = LIVESTOCK_MS.get(str(r)[:2], str(r)[:2])
+        if cc not in cdf.index:
+            continue
+        for a in cols_:
+            v = cdf.at[cc, a]
+            if pd.notna(v) and v > 0:
+                eps.at[r, a] = float(dampen_elasticity([float(v)])[0]) if apply_dampening else float(v)
+                prov.at[r, a] = "CAPRI_COUNTRY"
+                n_cty += 1
 
     # --- livestock: CAPRI's calibrated supply elasticities of the animal products ---
     # (results/arm/elas_2_1717*: p_elasSupp(MS, product, product, "CAL"), the elasticities
@@ -259,54 +252,45 @@ def build_elasticity_table(
     # fattening (SHGF) - sheep and goat meat; for milk (SHGM) - raw milk (CAPRI's MILK market holds cow
     # and sheep-goat milk; p_elasSupp has no separate SGMI). Replaces the literature priors (0.10-0.25; CAPRI 0.47-0.82).
     n_lsk = 0
-    lsk_path = data_dir / LIVESTOCK_ELAS_FILE
-    if lsk_path.exists():
-        ldf = read_input(lsk_path)
-        ldf = ldf[(ldf["prod"] == ldf["wrt"]) & ldf["prod"].isin(set(LIVESTOCK_PRODUCT.values()))]
-        ms_val = {(r, p_): float(v) for r, p_, v in zip(ldf.region, ldf["prod"], ldf.value)}
-        # Young animals (calves, young cattle, cows) are part of the cattle activities' output
-        # (CAPRI's TOOU minus its market revenue MREV); CAPRI calibrates to their supply
-        # elasticities as well. Each activity's elasticity is the value-weighted mean of its
-        # final product's and its young animals' (suckler cows: 89% calves in Duesseldorf).
-        yel = {}
-        ypath = data_dir / YOUNG_ELAS_FILE
-        if ypath.exists():
-            for r_, i_, v_ in read_input(ypath).itertuples(index=False):
-                yel[(r_, i_)] = float(v_)
-        sup = data_dir / base_year / "supply"
-        try:
-            mrev = read_input(sup / "livestock_revenue_coef.csv", index_col=0)
-            toou = read_input(sup / "livestock_output_value_coef.csv", index_col=0)
-            # the product share is the value of final products (no young animals) in total output:
-            # CAPRI's MREV is young-animal sales for sows, raised calves and replacement heifers
-            try:
-                _pv = read_input(sup / "livestock_product_value_coef.csv", index_col=0)
-                for _a in _pv.columns:
-                    if _a in mrev.columns:
-                        mrev[_a] = _pv[_a].reindex(mrev.index)
-            except Exception:
-                pass
-        except Exception:
-            mrev = toou = None
-        for r in regions:
-            ms = LIVESTOCK_MS.get(str(r)[:2], str(r)[:2]) + "000000"
-            for a, prod_ in LIVESTOCK_PRODUCT.items():
-                if a not in eps.columns:
-                    continue
-                v = ms_val.get((ms, prod_))
-                if v is None or not np.isfinite(v) or v <= 0:
-                    continue
-                young = [yel.get((ms, i_)) for i_ in LIVESTOCK_YOUNG.get(a, ())]
-                young = [y_ for y_ in young if y_ is not None and y_ > 0]
-                if young and mrev is not None and r in mrev.index and r in toou.index \
-                        and a in mrev.columns and a in toou.columns:
-                    m_, t_ = float(mrev.at[r, a]), float(toou.at[r, a])
-                    if np.isfinite(m_) and np.isfinite(t_) and t_ > 0 and 0 <= m_ <= t_:
-                        sy = 1.0 - m_ / t_
-                        v = (1.0 - sy) * v + sy * float(np.mean(young))
-                eps.at[r, a] = v
-                prov.at[r, a] = "CAPRI_CAL_PRODUCT"
-                n_lsk += 1
+    lsk_path = inp.need(inp.path(LIVESTOCK_ELAS_FILE, "root"))
+    ldf = inp.read(lsk_path)
+    ldf = ldf[(ldf["prod"] == ldf["wrt"]) & ldf["prod"].isin(set(LIVESTOCK_PRODUCT.values()))]
+    ms_val = {(r, p_): float(v) for r, p_, v in zip(ldf.region, ldf["prod"], ldf.value)}
+    # Young animals (calves, young cattle, cows) are part of the cattle activities' output
+    # (CAPRI's TOOU minus its market revenue MREV); CAPRI calibrates to their supply
+    # elasticities as well. Each activity's elasticity is the value-weighted mean of its
+    # final product's and its young animals' (suckler cows: 89% calves in Duesseldorf).
+    yel = {}
+    ypath = inp.need(inp.path(YOUNG_ELAS_FILE, "root"))
+    for r_, i_, v_ in inp.read(ypath).itertuples(index=False):
+        yel[(r_, i_)] = float(v_)
+    mrev = inp.csv("livestock_revenue_coef.csv", "supply", index_col=0)
+    toou = inp.csv("livestock_output_value_coef.csv", "supply", index_col=0)
+    # the product share is the value of final products (no young animals) in total output:
+    # CAPRI's MREV is young-animal sales for sows, raised calves and replacement heifers
+    _pv = inp.csv("livestock_product_value_coef.csv", "supply", index_col=0)
+    for _a in _pv.columns:
+        if _a in mrev.columns:
+            mrev[_a] = _pv[_a].reindex(mrev.index)
+    for r in regions:
+        ms = LIVESTOCK_MS.get(str(r)[:2], str(r)[:2]) + "000000"
+        for a, prod_ in LIVESTOCK_PRODUCT.items():
+            if a not in eps.columns:
+                continue
+            v = ms_val.get((ms, prod_))
+            if v is None or not np.isfinite(v) or v <= 0:
+                continue
+            young = [yel.get((ms, i_)) for i_ in LIVESTOCK_YOUNG.get(a, ())]
+            young = [y_ for y_ in young if y_ is not None and y_ > 0]
+            if young and mrev is not None and r in mrev.index and r in toou.index \
+                    and a in mrev.columns and a in toou.columns:
+                m_, t_ = float(mrev.at[r, a]), float(toou.at[r, a])
+                if np.isfinite(m_) and np.isfinite(t_) and t_ > 0 and 0 <= m_ <= t_:
+                    sy = 1.0 - m_ / t_
+                    v = (1.0 - sy) * v + sy * float(np.mean(young))
+            eps.at[r, a] = v
+            prov.at[r, a] = "CAPRI_CAL_PRODUCT"
+            n_lsk += 1
 
     total = eps.size
     counts = prov.stack().value_counts().to_dict()

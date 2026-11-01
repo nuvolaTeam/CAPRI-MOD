@@ -27,7 +27,7 @@ from pathlib import Path
 from typing import Dict
 
 import pandas as pd
-from capri_mod.data.definitions import MS_CODE
+from capri_mod.data.definitions import MS_CODE, is_eu
 from capri_mod.tableio import read_input
 
 #: crop products whose CAPRI price is applied (model price-table code -> CAPRI product)
@@ -57,7 +57,7 @@ def _ms(region: str) -> str:
 def load_price_tables(traj_dir: Path):
     pr = read_input(traj_dir / "capri_price_ratios_2030.csv")
     ratio = {(r.ms, r.product): float(r.real_ratio) for r in pr.itertuples()}
-    eu = pr[pr["ms"] != "NO"].groupby("product")["real_ratio"].median().to_dict()
+    eu = pr[pr["ms"].map(is_eu)].groupby("product")["real_ratio"].median().to_dict()
     cap = read_input(traj_dir / "capri_cap_premium_2030.csv", index_col=0)
     lsk = read_input(traj_dir / "capri_livestock_premium_ratio_2030.csv", index_col=0)
     return ratio, eu, cap, lsk

@@ -4,9 +4,6 @@
                                                options benchmark against DK, FI, PT, SE;
                                                envind/breeding.gms l. 101). Only these
                                                records are kept (552 of 252,000).
-  tillageCover.gdx (dat\\envind, gdxdump)    -> p_tillageCover (cover_crops.gms, tillage.gms)
-  ccEfa.gdx (dat\\envind, gdxdump)           -> p_ccEfa (cover_crops.gms)
-  wintercovershare.gms (dat\\policy)         -> p_winterCoverShare0 (initial winter-cover shares)
   fedcof.gms (dat\\feed)                     -> p_nutCont (nutrient contents of feedstuffs;
                                                line_nitr.gms uses the OOIL row)
 
@@ -44,23 +41,8 @@ def main(up: Path):
             if m:
                 rows.append([m.group(1), m.group(2), float(m.group(3))])
     rep["trends_milk_yield_1730"] = write("trends_milk_yield_1730", ["region", "activity", "milk_yield_kg"], rows)
-    # 2) tillageCover, ccEfa (GAMS text dumps)
-    tin = _mod("build_ammonia_tech_inputs")
-    for fn, sym, cols in (("tillageCover.csv", "p_tillageCover", ["region", "crop"]), ("ccEfa.csv", "p_ccEfa", ["region"])):
-        d = tin.parse_dump(up / fn)[sym]
-        rep[sym] = write(sym, cols + ["value"], [list(k) + [v] for k, v in d])
-    # 3) winter-cover shares (unquoted dotted keys; eps = 0)
-    rows, on = [], False
-    for line in open(up / "wintercovershare.gms", encoding="latin-1"):
-        if re.match(r"^\s*PARAMETER\s+p_winterCoverShare0", line, re.I):
-            on = True; continue
-        if on:
-            if line.strip().startswith("/"):
-                break
-            m = re.match(r"^\s*([\w]+)\.([\w]+)\s+([-+0-9.eE]+|eps)\b", line, re.I)
-            if m:
-                rows.append([m.group(1), m.group(2), 0.0 if m.group(3).lower() == "eps" else float(m.group(3))])
-    rep["p_winterCoverShare0"] = write("p_winterCoverShare0", ["region", "crop", "value"], rows)
+    # (tillageCover, ccEfa and the winter-cover shares p_winterCoverShare0 were written here until 29 October 2026: read
+    # by no code, the project lead's decision that the extractors write only what is read, KNOWN_ISSUES K102)
     # 4) nutrient contents of feedstuffs (positional table)
     ct = _mod("build_ammonia_cost_tables")
     lines = [l.rstrip("\r\n") for l in open(up / "fedcof.gms", encoding="latin-1")]

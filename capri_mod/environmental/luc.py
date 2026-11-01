@@ -21,12 +21,10 @@ the objective nor any other equation of the regional model, so its solution give
 """
 from __future__ import annotations
 
-from pathlib import Path
 from typing import Dict, Optional
 
 import numpy as np
 import pandas as pd
-from capri_mod.tableio import read_input
 
 CLS = {"CRP": "CROP", "FOR": "FORE", "ART": "ARTIF", "GRS": "GRSLND", "WET": "WETLND", "RES": "RESLND"}
 
@@ -35,8 +33,9 @@ class LUCModel:
     _inst = None
 
     def __init__(self, data_dir: Optional[str] = None):
-        root = Path(data_dir) if data_dir else Path(__file__).resolve().parents[2] / "capri_data"
-        t = read_input(root / "2017" / "environment" / "luc_2030.csv")
+        from capri_mod.data.inputs import RunInputs, current
+        inp = RunInputs(data_dir, current().base_year) if data_dir else current()
+        t = inp.csv("luc_2030.csv", "environment")
         self.v = {r: dict(zip(d.item, d.value)) for r, d in t.groupby("capri_region")}
 
     @classmethod
@@ -93,11 +92,12 @@ class LUCModel:
         g = ca.mtimes(ca.DM(A * m[None, :]), z) / ca.DM(np.maximum(1.0, np.abs(b)))
         rhs = b / np.maximum(1.0, np.abs(b))
         from capri_mod.settings import current as _settings
+        from capri_mod.supply.capri_regional_nlp import linear_solver_options as _linear_solver_options
         S = ca.nlpsol("L", "ipopt", {"x": z, "f": obj, "g": g},
                       {"ipopt.print_level": 0, "print_time": 0,
                        "ipopt.tol": float(_settings().get("environment.luc_ipopt_tol")),
                        "ipopt.max_iter": int(_settings().get("environment.luc_max_iter")),
-                       "ipopt.bound_relax_factor": 0.0})
+                       "ipopt.bound_relax_factor": 0.0, **_linear_solver_options()})
         sol = S(x0=np.ones(len(m)), lbx=1e-8 / np.maximum(m, 1e-12), ubx=np.inf, lbg=rhs, ubg=rhs)
         zz = np.asarray(sol["x"]).ravel()
         res = type("R", (), {"success": S.stats()["success"], "x": zz})()

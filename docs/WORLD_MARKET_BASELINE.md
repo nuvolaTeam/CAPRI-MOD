@@ -24,9 +24,9 @@ Base production and use per market region are set in `MarketModule._calibrate_ba
 behavioural region, mapped to the model's trade regions (concordance of `tools/build/recalibrate_trade_2017.py`), under the
 model's codes (SWHE ← WHEA, CORN ← MAIZ, SUGR ← SUGA, POUL ← POUM, WINE ← TWIN, the rest by name; rye, oats and other
 cereals separate as in CAPRI). Its EU row also gives the EU's self-sufficiency (use / production) applied to the
-model's EU production in `_align_eu_base_balance` (where FAO_agg has no EU row, the older FAO extract
-`fao_market_baseline.json` is still read, `_fao_eu_rows`) before the bilateral closure replaces the use of the
-traded products.
+model's EU production in `_align_eu_base_balance` (`_fao_eu_rows`; the older FAO extract `fao_market_baseline.json`
+was its fallback until 20 October 2026, K54-6, and was removed on 29 October 2026, K102) before the bilateral closure
+replaces the use of the traded products.
 
 ## Sugar beet, sugar and the dairy products
 

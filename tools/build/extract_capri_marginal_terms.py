@@ -10,9 +10,11 @@ cost terms (shadow values) that sum to zero at an interior optimum (D_PROV = the
   D_OBJC   fixed accounting costs (p_linObjeCont)           D_PREM  premiums
   D_PMPL   PMP terms -(p_pmpCnst + quadratic at levels)     D_PMPF  feed PMP terms
   D_AREA   land shadow price                                D_CRPR/D_ENNE requirement duals (not in D_PROV)
-Written: capri_data/validation/greendeal_2030/capri_marginal_terms_<tag>_2030.csv.xz (region, activity, item, value;
-         the max file is kept to LEVL, MANN, MREV, D_O, D_FEED, D_NUTNED, D_PMPL, D_PMPF, D_PROV for size)
+Written: capri_data/validation/greendeal_2030/capri_marginal_terms_<tag>_2030.csv.xz (region, activity, item, value)
          capri_data/validation/greendeal_2030/capri_unit_values_<tag>_2030.csv (member state, product, UVAG 2030)
+The pipeline runs it with the tag ini (res_2_1730greendeal_refpol_endotech_all_inidefaulta). Until 30 October 2026 it
+also ran on the endotech max run (tag max, its terms kept to a few items); nothing read those two files and they were
+removed with that invocation, the project lead's decision (KNOWN_ISSUES K103).
 
     python tools/build/extract_capri_marginal_terms.py <dump.csv> <tag>
 """
@@ -29,8 +31,6 @@ UV_PRODUCTS = {"PORK", "BEEF", "COMI", "POUM", "EGGS", "SGMT", "SGMI", "SWHE", "
                "OCRO", "OIND", "NURS", "FLOW", "OOIL", "TABO",
                # inputs (CAPRI moves them with its general price index)
                "EFUL", "ELEC", "EGAS", "ELUB", "SEED", "PLAP", "REPM", "REPB", "INPO", "IPHA"}
-#: the max file keeps only these items (size)
-MAX_ITEMS = {"LEVL", "MANN", "MREV", "D_O", "D_FEED", "D_NUTNED", "D_PMPL", "D_PMPF", "D_PROV"}
 #: region . [qualifier .] activity . item . 2030 ; only the per-unit rows (empty qualifier), not CUR (a near-duplicate),
 #: 'total', 'perUAA', 'perAWU' variants
 RX = re.compile(r"^'([^']*)'\.(?:'([^']*)'\.)?'([^']*)'\.'([^']*)'\.'2030'\s+(\S+?),?\s*$")
@@ -50,7 +50,7 @@ def main(src: str, tag: str) -> None:
             val = float(v)
         except ValueError:
             continue
-        if (it.startswith("D_") or it in ITEMS) and (tag != "max" or it in MAX_ITEMS):
+        if it.startswith("D_") or it in ITEMS:
             terms.append((reg, a, it, val))
         elif a == "UVAG" and reg.endswith("000000") and it in UV_PRODUCTS:
             uv.append((reg, it, val))

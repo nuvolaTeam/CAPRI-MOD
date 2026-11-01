@@ -108,8 +108,10 @@ class ProcessingMixin(MarketStateMixin):
     def _crush_params(self) -> dict:
         """(region, seed) -> base crush, yields, elasticity and base margin terms.
 
-        CAPRI data (crushing_parameters.csv, tools/build/build_crushing_parameters.py): crush = the seed's industrial use,
-        yields = oil and cake production / crush, elasticity = p_ElasProc. Every
+        CAPRI data of the market year (crushing_parameters_<year>.csv, tools/build/build_crushing_parameters.py, from
+        CAPRI's market data of that year): crush = the seed's processing PROC, yields = CAPRI's PRCY, elasticity =
+        p_ElasProc; with CAPRI's cake production as the crush (the bilateral market's override) the oils' base output
+        is CAPRI's (ProcO_; until 30 October 2026 the yields were FAO_agg's base-period ones, K106). Every
         pair takes CAPRI's own yields, as CAPRI's market does: a band that dropped
         five pairs whose yields look implausible (UKR, PAK, ZAF rapeseed, PAK
         soybeans: oil + cake 1.2-1.7 t per t of seed crushed; JPN sunflower) was
@@ -134,7 +136,8 @@ class ProcessingMixin(MarketStateMixin):
             return cached
         self._crush_cache_key = _key
         out = {}
-        _t = self._inp().csv("crushing_parameters.csv", keep_default_na=False)
+        _yr = self._market_year()
+        _t = self._inp().csv(f"crushing_parameters_{_yr}.csv", keep_default_na=False)
         raw = {f"{x['region']}|{x['seed']}": {k: (float(x[k]) if x[k] != "" else None)
                                               for k in ("crush_kt", "oil_yield", "cake_yield", "elasticity",
                                                         "crush_share_of_use")}

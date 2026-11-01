@@ -58,14 +58,13 @@ RECORD = re.compile(
     r"^'([A-Z]{2}[A-Z0-9]{6})'\.'([A-Z0-9_]+)'\.'([A-Za-z0-9_]+)'\.'Y'\s+([-\d.Ee+]+)")
 
 PRICE_ITEM = "MPRI"
-NUTRIENT_ITEMS = {"NITF": "N", "PHOF": "P2O5", "POTF": "K2O"}
 # EUR/ha cost components. PLAP is excluded: it duplicates PESTOTAL, a quantity
 # index, not a cost.
 COST_ITEMS = ["FERT", "SEED", "REPM", "REPB", "ELEC", "EGAS",
               "EFUL", "ELUB", "INPO", "IRRO", "CAOF"]
 TOTAL_INPUT = "TOIN"
 
-WANTED = ({PRICE_ITEM, TOTAL_INPUT} | set(NUTRIENT_ITEMS) | set(COST_ITEMS))
+WANTED = ({PRICE_ITEM, TOTAL_INPUT} | set(COST_ITEMS))
 
 
 def parse(path: Path, keep: set) -> pd.DataFrame:
@@ -114,21 +113,12 @@ def main() -> None:
         "values": int(pr.notna().sum().sum())}
     print(f"\nproducer prices : {pr.shape[0]} regions x {pr.shape[1]} activities")
 
-    # ---- nutrient application, kg/ha, regional ---------------------------
-    nu = df[df.item.isin(NUTRIENT_ITEMS)].copy()
-    nu["nutrient"] = nu.item.map(NUTRIENT_ITEMS)
-    nu = nu[["model_region", "activity", "nutrient", "value"]]
-    nu.to_csv(out / "capreg_nutrient_coefs.csv", index=False)
-    summary["nutrient_coefs"] = {
-        "records": int(len(nu)),
-        "regions": int(nu.model_region.nunique()),
-        "activities": int(nu.activity.nunique())}
-    print(f"nutrient coefs  : {len(nu):,} records, "
-          f"{nu.model_region.nunique()} regions, {nu.activity.nunique()} activities")
+    # (CAPRI's NITF/PHOF/POTF per region were written to capreg_nutrient_coefs.csv until 29 October 2026; nothing read
+    # them - build_nutrient_coefs_regional reads CAPRI's dumps directly - and the file was removed: KNOWN_ISSUES K103)
 
-    # ---- cost components, EUR/ha ----------------------------------------
+    # ---- cost components, EUR/ha: compared with TOIN for the summary only (written to capreg_cost_components.csv.xz
+    # until 30 October 2026; nothing read it and the file was removed, the project lead's decision: KNOWN_ISSUES K103)
     co = df[df.item.isin(COST_ITEMS + [TOTAL_INPUT])]
-    co.to_csv(out / "capreg_cost_components.csv.xz", index=False)
     comp = co[co.item != TOTAL_INPUT].groupby(
         ["model_region", "activity"]).value.sum().rename("components")
     tot = co[co.item == TOTAL_INPUT].set_index(

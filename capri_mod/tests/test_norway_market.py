@@ -33,13 +33,31 @@ def data():
 
 
 def test_norway_is_a_trade_region_of_its_own():
-    """26 trade regions: NOR is one, the EU27 block holds no Norwegian country, CAPRI's NO000000 maps to NOR."""
-    from capri_mod.data.definitions import ALL_TRADE_REGIONS, TRADE_REGIONS
+    """NOR is a trade region of its own (28 since GBR and WBA joined in batch 7), the EU blocks hold no Norwegian
+    country, CAPRI's NO000000 maps to NOR."""
+    from capri_mod.data.definitions import ALL_TRADE_REGIONS, EU_MS_BLOCK, sup_noneu, TRADE_REGION_OF_CAPRI
     sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "check")]
     from recalibrate_trade_2017 import REGION_MAP
-    assert len(ALL_TRADE_REGIONS) == 26 and "NOR" in ALL_TRADE_REGIONS
-    assert TRADE_REGIONS["NOR"] == ["NO"] and "NO" not in TRADE_REGIONS["EU27"]
+    assert len(ALL_TRADE_REGIONS) == 28 and "NOR" in ALL_TRADE_REGIONS
+    assert TRADE_REGION_OF_CAPRI["NO000000"] == "NOR" and "NOR" in ALL_TRADE_REGIONS
+    assert sup_noneu() == {"NO000000": ("NO", "NOR")} and "NO000000" not in EU_MS_BLOCK
     assert REGION_MAP["NO000000"] == "NOR"
+
+
+def test_supply_countries_outside_eu_setting():
+    """run.supply_countries_outside_eu decides the run's supply-model countries outside the EU (CAPRI's per-country
+    switches): Norway by default; none when empty, Norway's units then out of the run; a country without regional
+    units is refused."""
+    import pytest
+    from capri_mod import settings
+    from capri_mod.data.definitions import sup_noneu, in_run, SUP_NONEU_ALL
+    assert "NO000000" in SUP_NONEU_ALL
+    assert list(sup_noneu()) == ["NO000000"] and in_run("NO020000") and in_run("DE110000")
+    with settings.override({"run.supply_countries_outside_eu": []}):
+        assert sup_noneu() == {} and not in_run("NO020000") and in_run("DE110000")
+    with settings.override({"run.supply_countries_outside_eu": ["XX000000"]}):
+        with pytest.raises(ValueError, match="no regional units"):
+            sup_noneu()
 
 
 def test_norway_market_data_are_capris_no000000():
@@ -134,6 +152,44 @@ def test_norway_market_supply_is_its_models_and_the_base_is_reproduced(data):
     finally:
         mm.par.supply_hessian = None
 
+
+
+def test_norway_raw_milk_responds_inside_the_market(data):
+    """CAPRI keeps ProdNQ_ MILK of the regions with supply models in the market, re-anchored to their models' milk
+    (arm/simu_calibration_to_supply.gms l. 198-201, 423-427; market.sup_milk_in_market, step F): Norway's milk delivered
+    = its models' milk + the Hessian's MILK row x (its dairy-block milk price and the other prices against those its
+    models saw), and its products move with the milk price by the MILK column (the block's price of the previous
+    evaluation); with the switch off the milk is its models'."""
+    from capri_mod.market.market_module import MarketModule
+    mm = MarketModule(data)
+    exo = _exo_with_norway(mm)
+    mm._bilateral_calibrate(exo)
+    r1 = mm._bilateral_ratio_frame().copy()
+    r1.at["NOR", "BARL"] = 1.10
+    m_now = float(exo.at["NO", "MILK"])
+    b_now = float(exo.at["NO", "BARL"])
+    H = pd.DataFrame([[50.0, -10.0], [-20.0, 400.0]], index=["BARL", "MILK"], columns=["BARL", "MILK"])
+    mm.par.supply_hessian = {"sup": {"NOR": H}}
+    mm.seen.sup_price_seen = {"NOR": pd.Series(1.0, index=mm.commodities)}
+    mm.ev.dairy_world_last = None
+    try:
+        S1 = mm.supply_response(mm.world_prices_base, exo, region_ratio=r1, crush_dom=mm._dom0())
+        pm = float(mm.ev.dairy_world_last["NOR"]["price_ratio"]["MILK"])
+        # dearer barley: less milk delivered (cross term -20 x 0.10), so the dairies bid the milk price up
+        assert pm > 1.0
+        assert abs(float(S1.at["NOR", "MILK"]) - (m_now + 400.0 * (pm - 1.0) - 2.0)) < 1e-6 * m_now
+        assert float(S1.at["NOR", "MILK"]) < m_now
+        # the first evaluation has no block price yet: barley as before
+        assert abs(float(S1.at["NOR", "BARL"]) - (b_now + 5.0)) < 1e-6
+        # the next evaluation: barley responds to the block's milk price by the MILK column
+        S2 = mm.supply_response(mm.world_prices_base, exo, region_ratio=r1, crush_dom=mm._dom0())
+        assert abs(float(S2.at["NOR", "BARL"]) - (b_now + 5.0 - 10.0 * (pm - 1.0))) < 1e-6
+        from capri_mod.settings import override
+        with override({"market.sup_milk_in_market": False}):
+            S3 = mm.supply_response(mm.world_prices_base, exo, region_ratio=r1, crush_dom=mm._dom0())
+        assert abs(float(S3.at["NOR", "MILK"]) - m_now) < 1e-9 * m_now
+    finally:
+        mm.par.supply_hessian = None
 
 def test_norway_feed_and_dairy_follow_its_supply_models(data):
     """Norway's feed bulks (feed_bulks_no.csv, CAPRI NO000000 FEED and ARM1P) give its feed use at base, and the feed
@@ -238,7 +294,9 @@ def test_norway_has_pig_herds_and_per_head_coefficients():
 def test_norway_run_on_its_own_supply_models():
     """A baseline with Norway's supply regions: the EU's market supply holds none of Norway's output, Norway's market
     supply is its models' (pork too, since Norway's regions have pigs, K56), the base is reproduced at the reference
-    prices and Norway's supply models see Norway's prices."""
+    prices and Norway's supply models see Norway's prices. With no EU unit in the run, the EU's supply is its units'
+    base output through their member states' market supply functions (K83, since 31 October 2026; before, the market's
+    own base table), at the reference prices that base output itself."""
     from capri_mod.model import CAPRIModel
     m = CAPRIModel(data_dir=str(DATA_DIR), verbose=False)
     with pytest.warns(RuntimeWarning):
@@ -249,9 +307,9 @@ def test_norway_run_on_its_own_supply_models():
     assert float(ex.at["NO", "PORK"]) > 0
     for c in ("BARL", "OATS", "BEEF", "MILK", "SGMT", "PORK"):
         assert abs(float(P.at["NOR", c]) - float(ex.at["NO", c])) < 1e-6 * max(1.0, float(ex.at["NO", c])), c
-        # no EU supply-model region in the run: the EU keeps CAPRI's base, Norway's output is not in it
-        assert abs(float(P.at["EU27", c]) - float(mm.par.base_production0.at["EU27", c])) < 1e-6 * max(
-            1.0, float(P.at["EU27", c])), c
+        # no EU unit in the run: the EU's supply is its units' base output (K83), Norway's output not in it
+        xr = mm._eu_excluded_rows()
+        assert abs(float(P.at["EU27", c]) - float(xr.at["EU27", c])) < 1e-6 * max(1.0, float(P.at["EU27", c])), c
     assert float(mm._bilat_err) < 1e-6
     assert float((mm.sup_price_ratio - 1.0).abs().max().max()) < 1e-9
 
@@ -276,8 +334,18 @@ def test_norway_prices_follow_its_own_market_in_a_scenario():
     d = (rs / rb - 1.0)
     assert float((d.loc["NOR"] - d.loc["EU27"]).abs().max()) > 1e-3
     ex = m._bridge_supply_to_market(m.supply_module.aggregate_supply(s["supply"], by_country=True))
-    assert "NO" in ex.index and abs(float(ex.at["NO", "MILK"]) - float(s["market"].production.at["NOR", "MILK"])) < 1e-6
-    # EU raw milk: the EU supply models' output plus the member states' response to their milk prices in the dairy
-    # block (audit M5, MarketModule.ev.milk_dq_now), with no Norwegian milk in it
-    eu_milk = float(ex.drop(index="NO")["MILK"].sum()) + float(mm.ev.milk_dq_now or 0.0)
+    # Norway's raw milk in the market (market.sup_milk_in_market, step F; simu_calibration_to_supply.gms l. 423-427):
+    # its supply models' milk moved by its raw milk supply function, k x (its dairy block's milk price level - the
+    # level the models saw) + the MILK row's response to the other prices; equal to the models' milk at convergence
+    assert "NO" in ex.index
+    t = (mm.ev.sup_milk_terms or {}).get("NOR")
+    P = float(mm.ev.dairy_world_last["NOR"]["price_ratio"]["MILK"])
+    resp = (t["k"] * (P - t["L"]) + float((mm.ev.sup_milk_cross or {}).get("NOR", 0.0))) if t else 0.0
+    assert abs(float(ex.at["NO", "MILK"]) + resp - float(s["market"].production.at["NOR", "MILK"])) < 1e-6
+    # EU raw milk: the EU supply models' output and the base raw milk of the EU's units outside the run (K83), plus
+    # the member states' response to their milk prices in the dairy block (audit M5, MarketModule.ev.milk_dq_now),
+    # with no Norwegian milk in it
+    xr = mm._eu_excluded_rows()
+    eu_milk = (float(ex.drop(index="NO")["MILK"].sum()) + float(xr.at["EU27", "MILK"])
+               + float(sum((mm.ev.milk_dq_now or {}).values())))
     assert abs(float(s["market"].production.at["EU27", "MILK"]) - eu_milk) < 1e-6

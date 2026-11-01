@@ -31,8 +31,11 @@ ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / "capri_data" / "trajectories" / "capri_ref_2030.json"
 REF = Path("/mnt/user-data/uploads/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv")
 KEEP = ROOT / "capri_data" / "sources" / "capri_baseline" / "capri_ref_levl_yild_2030_2017.csv.xz"
-EU27 = {"AT", "BL", "BG", "CY", "CZ", "DE", "DK", "EE", "EL", "ES", "FI", "FR", "HR", "HU", "IR", "IT", "LT", "LV",
-        "MT", "NL", "PL", "PT", "RO", "SE", "SI", "SK", "NO"}
+sys.path.insert(0, str(ROOT / "tools" / "lib"))
+from _model_regions import UNITS  # noqa: E402  (capri_data/shared/regional_units.csv)
+#: the first two letters of the model's regional units (CAPRI's codes: BL, IR, EL, NO ...): the countries whose 2030
+#: reference rows are kept. A set named EU27 until 30 October 2026, which held Norway (HARDCODED_TABLES.md)
+SUPPLY_PREFIXES = frozenset(u[:2] for u in UNITS)
 BAND = (0.2, 5.0)
 
 
@@ -43,13 +46,13 @@ def extract(ref: Path, dump_dir: Path) -> list:
                          capture_output=True, text=True).stdout
     for line in txt.splitlines():
         m = p30.match(line)
-        if m and m.group(1)[:2] in EU27:
+        if m and m.group(1)[:2] in SUPPLY_PREFIXES:
             rows.append((m.group(1), m.group(2), m.group(3), "2030", float(m.group(4))))
     p17 = re.compile(r"^'([A-Z]{2}[0-9A-Z]{6})'\.'([A-Z0-9]+)'\.'(LEVL|YILD)'\.'Y'\s+([-\d.Ee+]+)")
     for f in sorted(dump_dir.glob("res_17*.txt")):
         for line in open(f, errors="ignore"):
             m = p17.match(line)
-            if m and m.group(1)[:2] in EU27:
+            if m and m.group(1)[:2] in SUPPLY_PREFIXES:
                 rows.append((m.group(1), m.group(2), m.group(3), "2017", float(m.group(4))))
     return rows
 

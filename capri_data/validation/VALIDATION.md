@@ -27,8 +27,8 @@ show; their numbers are historical.
 | Supply elasticities | `elasticity_comparison.csv`, `capri_pela_own_elasticities.csv` | major cereals within about 10% of CAPRI's PELA | a measurement from before CAPRI's elasticities were wired into the PMP calibration for every region (KNOWN_ISSUES K30, K32) and before the NLP form; out of date. Its pulse entry had the wrong sign; measured from solved levels the sign is positive, pinned by `test_no_negative_own_price_elasticities`. Current checks: `test_supply_elasticities_reach_every_region_from_capri`, `test_permanent_crop_elasticities_match_capri` |
 | Price structure | `price_structure_vs_capri_scenario.csv`, `test_price_structure_vs_capri` | the model reproduces CAPRI's relative prices "very faithfully" (rank correlation 0.998) | the ratios to wheat of the input base world prices (2017) against CAPRI's 2030 producer prices (UVAG of the Green Deal reference) for 8-9 products; the test asserts a Pearson correlation above 0.95, which the large beef and pork ratios dominate. It is a check of input data, not of model results. The model's 2030 relative prices deviate from CAPRI's by 26.7% (median, r48; README 11.2) |
 
-`VALIDATION_SUMMARY.json` in this folder records the same early checks and carries the same overstatement on price
-structure.
+`VALIDATION_SUMMARY.json`, which recorded the same early checks with the same overstatement on price structure, was
+removed 30 October 2026 (the project lead's decision, read by no code; in git history).
 
 ## Shock magnitudes
 

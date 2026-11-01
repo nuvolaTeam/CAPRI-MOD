@@ -46,7 +46,8 @@
 * Not yet in capri-mod: tillage, buffer strips, biodiversity options and biochar (their LEACHN_ terms held at CAPRI's
   reference, below), the fertiliser techniques' N2OMAN/N2OSYN terms in APPLN_ and GASTOTNETF_ (the inhibitors' gas
   effects are applied in the accounts and the solve outside the cascade), urea substitution. Nitrates Directive
-  minimum shares: built from CAPRI's nvz.gdx (tools/build/build_nitrates_directive.py), not applied (KNOWN_ISSUES K51).
+  minimum shares: not applied (KNOWN_ISSUES K51; CAPRI's NDtech is off in its Green Deal runs); the builder that built
+  them from CAPRI's nvz.gdx was removed on 29 October 2026 with its data, read by no code (K102).
 
 ## Leaching and the indirect N2O of leached and run-off N (20 October 2026)
 
@@ -74,7 +75,7 @@
   0.1120, NL22 0.3220, PL22 0.1986, FRH0 0.2041); capri-mod's crop N2OLEA at its baseline is 10-40% above CAPRI's in
   DE11, NL22, PL22, FRH0 and 31% below in IE04, through its N balance items (mineral N: NL22 27.4 kt against CAPRI
   16.3, PL22 37.4 against 25.5).
-* DEPARTURE FROM CAPRI - sign of the application options in LEACHN_ (the user's decision, 20 October 2026;
+* CAPRI-ERROR-FIX - sign of the application options in LEACHN_ (the project lead's decision, 20 October 2026; register FIX-2;
   `n_leaching.AMMAPP_SIGN`):
   - CAPRI's code: LEACHN_ (supply_model.gms l. 3413) ADDS v_ammoAppLeaAgg, the manure-weighted mean of the low-emission
     application options' no3mlea x share (AMMOAGG_, l. 3427). RUNSURFN_ SUBTRACTS the same options' runoff effect

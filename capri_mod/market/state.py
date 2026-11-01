@@ -22,12 +22,15 @@ class MarketEvalState:
     bilat_ratio_now: Any = None
     #: crushing prices of the evaluation (supply and demand of the crushing block); None outside an evaluation
     crush_prices_now: Any = None
+    #: the non-EU behavioural regions' feed energy price ratios of the evaluation (CAPRI's FeedBal_, audit M3:
+    #: {CAPRI region: FEDE / FEDE at calibration}); None outside an evaluation or with market.noneu_feed_nq off
+    fede_now: Any = None
     #: the non-EU market regions whose supply is the supply models' in this solve
     sup_active: Any = None
     #: the dairy block's solution inside the raw milk clearing (audit M5), for supply_response
     dairy_m5_now: Any = None
     #: raw milk delivered against the supply models' (kt), from the member states' milk clearing
-    milk_dq_now: Optional[float] = None
+    milk_dq_now: Optional[dict] = None          # {EU market region: kt} (M5)
     #: the EU's raw milk supply per member state at the evaluation (dairy block)
     eu_milk_supply_now: Any = None
     #: the EU dairy block's last solution
@@ -35,6 +38,10 @@ class MarketEvalState:
     #: raw milk of the non-EU regions with supply models, and of the other non-EU regions, at the evaluation
     sup_milk_now: Any = None
     world_milk_now: Any = None
+    #: Norway's raw milk supply function in the market (market.sup_milk_in_market): {region: {"k", "L", "dL"}} and
+    #: the MILK row's response to the other prices (kt) of the evaluation
+    sup_milk_terms: Any = None
+    sup_milk_cross: Any = None
     #: the non-EU dairy blocks' last solutions
     dairy_world_last: Any = None
     #: the biofuel markets' state (processing quantities, prices) of the evaluation
@@ -126,6 +133,12 @@ class MarketSeen:
     yani_state: Any = None
     #: feed bulk use of the supply models relative to base, per (member state, bulk); None: 1
     feed_bulk_index: Any = None
+    #: the supply models' feed bulks at base, kt per (member state, bulk) (the market's bulk demand, audit M4)
+    feed_bulk_base: Any = None
+    #: the EU's supply outside a run on a subset of regional units (KNOWN_ISSUES K83): the base output of the EU units
+    #: not in the run, per country (the rows of the supply models' table) and market commodity, kt; None in a run on
+    #: every unit. The market adds it to the EU's supply, moved by the member states' CAPRI market supply functions
+    eu_excluded_base: Any = None
     #: calves' milk feed relative to base, EU (None: 1) and per non-EU region with supply models
     fmil_index: Any = None
     fmil_index_sup: Any = None

@@ -44,8 +44,9 @@ KEEP_E = ROOT / "capri_data" / "sources" / "market" / "feed_demand_nonEU_elas_20
 KEEP_U = ROOT / "capri_data" / "sources" / "market" / "feed_demand_nonEU_use_2030.csv"
 DEST = ROOT / "capri_data" / "2017" / "market" / "feed_demand_nonEU.json"
 USES = ("HCON", "FEED", "PROC", "BIOF")
-EU = {"AT", "BL", "BG", "CY", "CZ", "DE", "DK", "EE", "EL", "ES", "FI", "FR", "HR", "HU", "IR", "IT", "LT", "LV",
-      "MT", "NL", "PL", "PT", "RO", "SE", "SI", "SK"}
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "lib"))
+from _model_regions import EU_MS2 as _EU_FROM_DATA  # noqa: E402  (capri_data/shared/eu_market_blocks.csv)
+EU = set(_EU_FROM_DATA)                                  # CAPRI's EU member states, from the data
 
 
 def main():
@@ -55,7 +56,7 @@ def main():
     a = ap.parse_args()
     sys.path.insert(0, str(ROOT)); sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check")]
     from capri_mod.data.definitions import ALL_TRADE_REGIONS
-    from recalibrate_trade_2017 import REGION_MAP
+    from recalibrate_trade_2017 import trade_region
     import build_bilateral_market as BM
     # every CAPRI market product the model trades (tools/build/build_bilateral_market.py MODEL: model -> CAPRI products)
     g2m = {g: m for m, gs in BM.MODEL.items() for g in gs}
@@ -92,7 +93,7 @@ def main():
     beh = set(_read_csv(ROOT / "capri_data" / "2017" / "market" / "processing_nq_base.csv").rms)
     rms_set = set(el.rms)
     is_eu = lambda r: r[:2] in EU and r.endswith("000000")
-    mreg = lambda r: REGION_MAP.get(r, "ROW")
+    mreg = trade_region
     # CAPRI products -> model commodities (several CAPRI products of one commodity: quantities add up, the price
     # columns of one commodity's products add up - one price - and the rows are weighted by their feed below)
     E = defaultdict(lambda: defaultdict(float))

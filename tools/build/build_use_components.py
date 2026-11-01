@@ -28,8 +28,9 @@ _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to
 ROOT = Path(__file__).resolve().parents[2]
 DATA = Path("/mnt/user-data/uploads/data_market_1730defaulta.csv")
 OUT = ROOT / "capri_data" / "2017" / "market" / "use_components.csv"
-EU = {"AT", "BL", "BG", "CY", "CZ", "DE", "DK", "EE", "EL", "ES", "FI", "FR", "HR", "HU", "IR", "IT", "LT", "LV",
-      "MT", "NL", "PL", "PT", "RO", "SE", "SI", "SK"}
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "lib"))
+from _model_regions import EU_MS2 as _EU_FROM_DATA  # noqa: E402  (capri_data/shared/eu_market_blocks.csv)
+EU = set(_EU_FROM_DATA)                                  # CAPRI's EU member states, from the data
 ITEMS = ("HCON", "FEED", "PROC", "BIOF", "ARM1")
 
 
@@ -41,7 +42,7 @@ def num(s: str) -> float:
 def main() -> None:
     sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build")]
     import build_bilateral_market as BM
-    from recalibrate_trade_2017 import REGION_MAP
+    from recalibrate_trade_2017 import trade_region
     g2m = {g: m for m, gs in BM.MODEL.items() for g in gs}
     rms_set = set(_read_csv(ROOT / "capri_data" / "shared" / "rms.csv")["rms"])
     pat = re.compile(r"^'([^']*)'\.'(" + "|".join(ITEMS) + r")'\.'([A-Za-z]+)'\.'CAL'\s+(\S+)")
@@ -52,7 +53,7 @@ def main() -> None:
         m = pat.match(line)
         if m and m.group(1) in rms_set and m.group(3) in g2m:
             v[(m.group(1), g2m[m.group(3)], m.group(2))] += num(m.group(4))
-    mreg = lambda r: "EU27" if (r[:2] in EU and r.endswith("000000")) else REGION_MAP.get(r, "ROW")
+    mreg = lambda r: "EU27" if (r[:2] in EU and r.endswith("000000")) else trade_region(r)
     keys = sorted({(r, c) for (r, c, _) in v})
     rows, worst = [], 0.0
     for r, c in keys:

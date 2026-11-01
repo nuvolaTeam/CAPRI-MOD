@@ -42,14 +42,14 @@ term, was removed on 27 October 2026.)
 - Diagonal: Q_ii = p_i / (eps_i x0_i shareTerm_i), with p the gross revenue per unit (a price shock moves gross
   revenue, so this makes the realised own-price response match eps), eps clipped to [1e-4, 8], x0 at least 0.001;
   then clamped to [1e-7, 1e4] x the median positive Q_ii (capri-mod's guard against near-zero bases).
-- Off-diagonals, CAPRI's structure (supply_model.gms QUADRA_ with GRPLEVL_, `PMPCalibrator.CROSS_TERMS = "capri"`,
-  since 21 October 2026): only between two crops that both belong to CAPRI's crop groups (EPRD_TO_GRP above; the
-  model's OFOD is CAPRI's OFAR in FARA). Per such pair: CAPRI's PELA activity-level cross-price elasticity where one
-  exists (`sources/estnlp/pela_cross_by_region.json`), else CAPRI's group term p_pmpQuadPact for the pair's groups
-  (`sources/capreg/pmp_quad_pact.csv`), each as sign x min(|value|, 0.05) x sqrt(Q_ii Q_jj) (the group term divided by
-  1000 first); else none. Then each row's off-diagonal sum is scaled down to at most half its diagonal. The caps are
-  capri-mod's. Before 21 October every other pair, permanent crops, vegetables, grass and animals included, carried a
-  uniform term 0.05 / (n - 1) x sqrt(Q_ii Q_jj) (`CROSS_TERMS = "previous"`); `"none"` keeps the diagonal only.
+- Off-diagonals: since 29 October 2026 (KNOWN_ISSUES K105) only CAPRI's own, with its PMP terms (pmp_source capri2030
+  or recipe: QUADRA_ with GRPLEVL_, only between crops of CAPRI's crop groups); a crop without CAPRI terms in the region
+  has a diagonal row, as in CAPRI's QUADRA_. `CROSS_TERMS = "none"` drops CAPRI's off-diagonals too (diagonal only).
+  Until then, crops without CAPRI terms (and every crop when `pmp_capri_parts` left out "crops") could take a PELA
+  activity-level cross-price elasticity (`sources/estnlp/pela_cross_by_region.json`) or CAPRI's group term
+  p_pmpQuadPact (`sources/capreg/pmp_quad_pact.csv`), each as sign x min(|value|, 0.05) x sqrt(Q_ii Q_jj): capri-mod's
+  caps (PROXY_AUDIT S065), then each row's off-diagonal sum scaled down to at most half its diagonal; removed with the
+  JSON file (CAPRI's terms, set after, were never scaled); and "none" did not act on CAPRI's terms.
 - What the structure changes (tools/check/pmp_cross_term_check.py, CAPRI's decomposition experiment, 2008 documentation
   sect. 7.3): the six regions DE11, FRH0, ITC4, PL41, ES41, IE04 at +20% on the cereal prices, regional models alone:
   every group's response within 0.06 points across the three structures (cereals +8.90 / +8.88 / +8.88%, oilseeds

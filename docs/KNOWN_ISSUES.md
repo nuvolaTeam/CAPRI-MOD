@@ -5,34 +5,43 @@ form, solved with IPOPT). The tables give one line per issue; the details follow
 was found, where it acts, whether the tagged release 9t (`capri-mod-9t.zip`) carries it, and its status. 9t.1 is 9t
 with every fix below except K5, which needs the prototype's model change.
 
-## Open (19)
+The data sourcing registry's log of checks, fixes and decisions (201 entries, moved 29 October 2026) is in
+[KNOWN_ISSUES_REGISTRY_LOG.md](KNOWN_ISSUES_REGISTRY_LOG.md), verbatim, with the triage of its open entries against
+the code: they became K92-K96, joined K73, K80, K91, or were closed or historical.
+
+## Open (10)
 
 | # | Issue | Status |
 |---|---|---|
-| [K10](#k10) | Sub-sets of regions do not converge | note |
-| [K13](#k13) | Farm-to-Fork milk price | open |
-| [K29](#k29) | NL11 and NL13 meet the tiered N target only at corner solutions (Farm-to-Fork) | open |
+| [K13](#k13) | Farm-to-Fork milk price | open: waiting for CAPRI's scenario results |
+| [K29](#k29) | NL11 and NL13 meet the tiered N target only at corner solutions (Farm-to-Fork) | open: waiting for CAPRI's scenario results |
 | [K47](#k47) | The cattle chain's equilibrium is sensitive to changes outside it | open |
 | [K48](#k48) | Young-animal prices against CAPRI's own market run | open |
 | [K65](#k65) | Cattle member splits and per-sex young-animal markets do not converge yet | open |
-| [K66](#k66) | Farmland expands under the per-hectare N target more than in CAPRI | open |
-| [K72](#k72) | Inputs without a builder (armington_params.csv removed; the livestock producer prices left) | open |
-| [K73](#k73) | Market: differences from CAPRI that no register listed | open |
-| [K74](#k74) | Supply: differences from CAPRI that no register listed | open |
-| [K77](#k77) | CAPRI's fertiliser-option curvature (S5) leaves the baseline's base shares | open |
-| [K78](#k78) | Histosol fallowing under Farm-to-Fork far above JRC121368's figure | open |
+| [K66](#k66) | Farmland expands under the per-hectare N target more than in CAPRI | open: waiting for CAPRI's scenario results |
+| [K78](#k78) | Histosol fallowing under Farm-to-Fork far above JRC121368's figure | open: waiting for CAPRI's scenario results |
 | [K79](#k79) | Member-state production that keeps moving between iterations | open |
-| [K80](#k80) | The same run repeated from a warm start differs by up to 3e-5 relative in small cereal activities | open |
-| [K83](#k83) | A one-region Farm-to-Fork run's market diverges in its second step | open |
-| [K86](#k86) | Ammonia housing and storage options without their farm-size cost curves in Denmark, Lithuania and Croatia | open |
-| [K89](#k89) | Failing regional solves take most of IPOPT's time | open |
-| [K90](#k90) | The wheat market's world price is CAPRI's soft-wheat price, not its wheat product's | open |
-| [K91](#k91) | CAPRI's trend projection (captrd_2030.json) has no extractor | open |
+| [K92](#k92) | Farm-to-Fork changes furthest from JRC121368, besides the milk price | open: waiting for CAPRI's scenario results |
+| [K93](#k93) | CAPRI mitigation options not built; documents disagree on which are in | open: no-till and legume share unmeasured; UreaSubst parked; the others not needed for Farm-to-Fork and the Green Deal |
 
-## Resolved (72)
+## Resolved (98)
 
 | # | Issue | Status |
 |---|---|---|
+| [K108](#k108) | Inputs from CAPRI's 2030 results in 2030 money in a model working in 2017 money | fixed (gate 11, 31 October 2026) |
+| [K77](#k77) | CAPRI's fertiliser-option curvature (S5) leaves the baseline's base shares | decided (31 October 2026): the model's calibration kept, a deliberate departure (DEP-30) |
+| [K107](#k107) | The regional model's tax on mineral N took IPCC's factors, the accounts CAPRI's MITERRA fractions | fixed (31 October 2026) |
+| [K10](#k10) | Sub-sets of regions do not converge | resolved by K83 (31 October 2026) |
+| [K83](#k83) | A one-region Farm-to-Fork run's market diverges in its second step | fixed (31 October 2026; gate pending) |
+| [K80](#k80) | The same run repeated from a warm start differs by up to 3e-5 relative in small cereal activities | fixed (30 October 2026; gate pending) |
+| [K89](#k89) | Failing regional solves take most of IPOPT's time | fixed (measured 30 October 2026) |
+| [K74](#k74) | Supply: differences from CAPRI that no register listed | fixed (batch 8 gate) |
+| [K105](#k105) | Numbers in the model's code to check, register or move to the settings | fixed (batch 8 gate) |
+| [K106](#k106) | The market's base supply of crushed and biofuel products was not CAPRI's production of the market year | fixed |
+| [K103](#k103) | Data files without a known origin or read by no code (data declarations) | fixed: removed, or given a builder |
+| [K104](#k104) | The payments report's area left fallow out of CAPRI's UAAR | fixed |
+| [K73](#k73) | Market: differences from CAPRI that no register listed | fixed (batch 6 gate) |
+| [K101](#k101) | Model inputs without a builder (census of a run's reads) | fixed (batch 6 gate) |
 | [K1](#k1) | Ammonia loss cascade linearised without its value | fixed |
 | [K2](#k2) | Quadratic cost of ammonia options w times too small | fixed |
 | [K3](#k3) | Silent fallback when the conic solve fails | fixed |
@@ -102,9 +111,21 @@ with every fix below except K5, which needs the prototype's model change.
 | [K82](#k82) | The market supply Hessian read from its cache differed from the measured one by an ulp | fixed |
 | [K84](#k84) | The landscape floor's fit ends on its last step | fixed (capri's form) |
 | [K85](#k85) | Input costs of animals a region does not have were NaN in its net revenues | fixed |
+| [K86](#k86) | Ammonia housing and storage options without their farm-size cost curves in Denmark, Lithuania and Croatia | fixed |
 | [K87](#k87) | Builder outputs that do not follow from their builders (reproduction audit) | fixed |
 | [K88](#k88) | Builders that still round the values they write | fixed |
 | [K45](#k45) | Egypt's oilseed rows | fixed |
+| [K94](#k94) | reconcile_base.py orphan; README's re-basing note points at a removed concordance | fixed |
+| [K95](#k95) | The "12/12 against PMRK" market-price validation is a solver-consistency check | fixed |
+| [K96](#k96) | Documents and one constant still describe removed mechanisms | fixed |
+| [K91](#k91) | CAPRI's trend projection (captrd_2030.json) had no builder | fixed |
+| [K90](#k90) | The wheat market's world price was CAPRI's soft-wheat price, not its wheat product's | fixed |
+| [K72](#k72) | Inputs without a builder (armington_params.csv and the livestock producer prices removed) | fixed |
+| [K97](#k97) | NaN in the crop-diversification row during Green Deal solves | fixed |
+| [K98](#k98) | CAPRI's supply Hessian read as stored: half of the cross terms missed | fixed |
+| [K99](#k99) | A feed table without builder (feed_requirements.csv) as the fallback of the feed costs and bulks | fixed |
+| [K100](#k100) | A national nutrient table without builder (nutrient_coefs.csv) filled three crops' coefficients and fallow's mineral N | fixed |
+| [K102](#k102) | Data files that no run and no builder reads (census) | fixed |
 
 ## Details
 
@@ -196,7 +217,11 @@ between ~0 and ~335 EUR/kg N (two branches).
 
 - **Effect:** diagnostic runs only
 - **In 9t:** yes
-- **Status:** note: compare region sets only on full-EU runs
+- **Status:** **resolved by K83** (31 October 2026): a run on a subset now has the EU's other units in its market,
+  supplied through their member states' market supply functions, so its markets clear: DE110000 alone converges
+  (market in 15 and 8 steps, young-animal imbalance 0.0013), the mini-EU Farm-to-Fork run in 5 iterations. A subset run
+  still simulates the policy in its own units only (as CAPRI with countries switched off), so its EU figures are not
+  a full run's; tools/check/compare_runs.py says so for a subset run (K83)
 
 <a id="k11"></a>
 ### K11: Three Romanian regions fell back under the emission tax
@@ -223,7 +248,7 @@ between ~0 and ~335 EUR/kg N (two branches).
 
 - **Effect:** Farm-to-Fork milk and dairy prices; the largest single gap to JRC121368
 - **In 9t:** yes
-- **Status:** open: needs CAPRI's Farm-to-Fork dairy market results; model unchanged (no calibration to the figure). 18 October 2026: with CAPRI's GL food demand and processing functions +40.3% (r19). 22 October 2026: tools/gams/export_capmod_results.gms dumps every CAPMOD 2030 result file of a CAPRI installation (except the reference already in hand) for the project lead to run, if the Farm-to-Fork or Green Deal scenarios were run there
+- **Status:** **open, waiting for CAPRI's scenario results** (the project lead's decision, 29 October 2026: kept open with its reference). Needed: CAPRI's Farm-to-Fork 2030 market results for the dairy chain: per member state and EU the raw milk delivery and price, the fat and protein values, production, processing, food use, trade and Arm1 prices of butter, SMP, cheese, WMP, fresh milk products and whey (DATA rows PROD, PROC, HCON, IMPT, EXPT, PPRI, ARM1P of the CAPMOD result file); to be exported with tools/gams/export_capmod_results.gms (run on a CAPRI installation where the scenario was solved); the project lead's installation has none of them so far. Before: open: needs CAPRI's Farm-to-Fork dairy market results; model unchanged (no calibration to the figure). 18 October 2026: with CAPRI's GL food demand and processing functions +40.3% (r19). 22 October 2026: tools/gams/export_capmod_results.gms dumps every CAPMOD 2030 result file of a CAPRI installation (except the reference already in hand) for the project lead to run, if the Farm-to-Fork or Green Deal scenarios were run there
 
 <a id="k14"></a>
 ### K14: Clarabel declares infeasibility that is not there
@@ -367,7 +392,7 @@ Both are feasible at JRC121368's tiered target (a 69-70% cut of CAPRI's baseline
 
 - **Effect:** Farm-to-Fork: Dutch and Irish livestock and crop mix; EU aggregates little (NL11 and NL13 hold 0.2% of EU farmland, with IE05 1.6%)
 - **In 9t:** yes
-- **Status:** **open**: options (a) CAPRI's regional Farm-to-Fork results for NL11, NL13, IE05 to compare; (b) treat a region whose solution needs activities at CAPRI's bounds as infeasible and relax it (a departure: CAPRI's criterion is the solver's infeasibility)
+- **Status:** **open, waiting for CAPRI's scenario results** (the project lead's decision, 29 October 2026: kept open with its reference). Needed: CAPRI's Farm-to-Fork 2030 regional results for NL11, NL13 and IE05: activity levels, the N surplus (SURTOT) and whether CAPRI's solve there was optimal (p_INFES); to be exported with tools/gams/export_capmod_results.gms (run on a CAPRI installation where the scenario was solved); the project lead's installation has none of them so far. Before: **open**: options (a) CAPRI's regional Farm-to-Fork results for NL11, NL13, IE05 to compare; (b) treat a region whose solution needs activities at CAPRI's bounds as infeasible and relax it (a departure: CAPRI's criterion is the solver's infeasibility)
 
 <a id="k30"></a>
 ### K30: Supply elasticities of permanent crops, vegetables, tobacco, textile crops and table olives were one EU-wide value per crop, while CAPRI's per-country values were in the data unused
@@ -599,7 +624,7 @@ The NLP form calibrates each region once (the base a first-order point) and agai
 
 - **Effect:** (3)-(5): results; (1), (2), (6), (7): interface and maintenance
 - **In 9t:** –
-- **Status:** **fixed** 20 October 2026 (the user's decisions): (1) `market_max_iter` is the bilateral solve's Newton rounds (default 60, unchanged behaviour); (2) the premium structure removed (`solve()` is bilateral only; eu_armington_premium, compute_trade_flows, _calibrate_demand_to_supply, _exempt_eu_from_world_calibration, eu_gross_trade removed; eu_gross_trade_supplement.csv archived); (3) each non-EU trade region's own-price elasticity is CAPRI's p_elasSupp ('CAL', elas_2_1717) of its CAPRI regions, weighted by CAPRI's 2017 production (tools/build/build_supply_elas_nonEU.py, supply_elas_region.csv: 772 region-commodity pairs; processed products keep the product value); REGISTERED: own-price terms only (CAPRI's non-EU supply has cross-price terms, p_hessNQSupp); (4) the crushing margin with the seed at its Armington price and oil and cake at their producer prices (ProcMargO_); biofuel feedstock prices unchanged; (5) Norway's supply models get feed bulk price indices from CAPRI's Norwegian bulks (FEED, ARM1P of NO000000; feed_bulks_no.csv), at the price signal they see; Norway's feed is not in the EU's feed demand; (6) the FAO fallback removed (CAPRI's EU balance covered every commodity it had); (7) the unused oil-yield code removed, fao_processing_splits.json archived
+- **Status:** **fixed** 20 October 2026 (the user's decisions): (1) `market_max_iter` is the bilateral solve's Newton rounds (default 60, unchanged behaviour); (2) the premium structure removed (`solve()` is bilateral only; eu_armington_premium, compute_trade_flows, _calibrate_demand_to_supply, _exempt_eu_from_world_calibration, eu_gross_trade removed; eu_gross_trade_supplement.csv archived); (3) each non-EU trade region's own-price elasticity is CAPRI's p_elasSupp ('CAL', elas_2_1717) of its CAPRI regions, weighted by CAPRI's 2017 production (tools/build/build_supply_elas_nonEU.py, supply_elas_region.csv: 772 region-commodity pairs; processed products keep the product value); REGISTERED: own-price terms only (CAPRI's non-EU supply has cross-price terms, p_hessNQSupp) - replaced 29 October 2026 by CAPRI's market supply functions with the cross-price terms (market.noneu_supply_nq, build_noneu_market_supply_nq.py; K98); (4) the crushing margin with the seed at its Armington price and oil and cake at their producer prices (ProcMargO_); biofuel feedstock prices unchanged; (5) Norway's supply models get feed bulk price indices from CAPRI's Norwegian bulks (FEED, ARM1P of NO000000; feed_bulks_no.csv), at the price signal they see; Norway's feed is not in the EU's feed demand; (6) the FAO fallback removed (CAPRI's EU balance covered every commodity it had); (7) the unused oil-yield code removed, fao_processing_splits.json archived
 
 <a id="k55"></a>
 ### K55: Supply-side findings of the documentation review (20 October 2026)
@@ -707,7 +732,7 @@ The Farm-to-Fork N target is per hectare of current farmland, as CAPRI's e_SURTO
 
 - **Effect:** land use, regional N surplus and herds in the regions concerned; EU UAA
 - **In 9t:** –
-- **Status:** **open**. CAPRI's regional Farm-to-Fork results do not exist on the project lead's installation (23 October 2026), so the comparison planned here cannot be made. Checked instead (r97): the expansion is broad, not from the capped or extreme regions (regions with N prices of 1-10 EUR/kg give +3.1 of the +6.0 points of the land types' farmland, regions above 100 EUR/kg 0.7); forest falls 16.7 Mha (about 10 to farmland, 7 to other land, through the cross terms of CAPRI's own 2030 land-type matrix); the land market is CAPRI's Trustee_land form with ARTIF fixed and the total-land row an inequality (both would make it expand less). Next: the share of the landscape-feature floor and of the N target, by runs without each (tools/run/run_f2f_2030.py --targets lndscpTarg=0 / surpRedu=0)
+- **Status:** **open, waiting for CAPRI's scenario results** (the project lead's decision, 29 October 2026: kept open with its reference). Needed: CAPRI's Farm-to-Fork 2030 regional results for land use: per NUTS2 unit the land types (ARAC, GRAS, FORE, OLND, the land market's p_aLU / v_landTypes levels) and the land rents; to be exported with tools/gams/export_capmod_results.gms (run on a CAPRI installation where the scenario was solved); the project lead's installation has none of them so far. Before: **open**. CAPRI's regional Farm-to-Fork results do not exist on the project lead's installation (23 October 2026), so the comparison planned here cannot be made. Checked instead (r97): the expansion is broad, not from the capped or extreme regions (regions with N prices of 1-10 EUR/kg give +3.1 of the +6.0 points of the land types' farmland, regions above 100 EUR/kg 0.7); forest falls 16.7 Mha (about 10 to farmland, 7 to other land, through the cross terms of CAPRI's own 2030 land-type matrix); the land market is CAPRI's Trustee_land form with ARTIF fixed and the total-land row an inequality (both would make it expand less). Next: the share of the landscape-feature floor and of the N target, by runs without each (tools/run/run_f2f_2030.py --targets lndscpTarg=0 / surpRedu=0)
 
 <a id="k67"></a>
 ### K67: Breeding options without CAPRI's maximum share (found 23 October 2026)
@@ -761,7 +786,14 @@ With every cell blanked, the builders refilled 102 of 248. The eta column (a gen
 
 - **Effect:** EU market supply (eps) where used
 - **In 9t:** –
-- **Status:** **open** (eta, sigma, rho2 removed 24 October 2026; eps and the file removed 29 October 2026). eps acted
+- **Status:** **fixed** 29 October 2026 (batch 5): the last inputs without a builder, the ten livestock rows of
+  `producer_prices.csv` (DCOW 869.4, BCOW 844.05, BULL 1400, HFRS 900, CALV 300, PIGS 905, PIGF 844.72, LAYS 688.2, BROI
+  748, OANI 8; origin not recorded), removed: no model code reads an animal's EU producer price (the supply models'
+  livestock revenue is CAPRI's output value per head, `livestock_output_value_coef.csv`, and replaces price x yield
+  for every animal; the other readers take crops only), to be confirmed by the batch's gate runs. ("The last inputs without a
+  builder" held for the cells of armington_params.csv and producer_prices.csv only: a census of every file a run reads,
+  K101, found 17 more.) Earlier steps: eta,
+  sigma, rho2 removed 24 October 2026; eps and the file removed 29 October 2026. eps acted
   on no result: it was read only for the EU rows of the 28 products without CAPRI's EU p_elasSupp, and every one of
   them has its EU supply set afterwards in the same market step (PARI, SUGR, WINE, OLIV by CAPRI's market supply
   function, the measured Hessian; oils and cakes by crushing; the dairy products by the dairy block; BIOE, BIOD, DDGS
@@ -778,7 +810,11 @@ Ten findings M1-M10 in docs/design/ARCHITECTURE_REFACTOR.md section 5.1 (table d
 
 - **Effect:** market prices and quantities in scenarios (M1-M3, M6, M9, M10); reporting (M7)
 - **In 9t:** –
-- **Status:** **open**, in part. Fixed 24 October 2026: M1 and M8 (run r112), M2 (r113, the Armington balance), M11 raw milk cleared per region (r115, added to the audit), M6 (r117). Fixed 24 October 2026 (evening): M10 (tariff on price + transport per importer region), M7 label and base price; M5 implemented (raw milk per member state inside the market), run pending. M7's welfare report ported 27 October 2026 (docs/WELFARE.md; reporting only). Open: M3 (decided 25 October 2026: ported at the refactor's market feed block step, after the frozen reference), M4, M9
+- **Status:** **fixed** (29 October 2026, batch 6 gate: every finding M1-M11 fixed and run). History: Fixed 24 October 2026: M1 and M8 (run r112), M2 (r113, the Armington balance), M11 raw milk cleared per region (r115, added to the audit), M6 (r117). Fixed 24 October 2026 (evening): M10 (tariff on price + transport per importer region), M7 label and base price; M5 implemented (raw milk per member state inside the market), run pending. M7's welfare report ported 27 October 2026 (docs/WELFARE.md; reporting only). M9 (dairy processing as CAPRI's ProcNQ_) fixed 28 October 2026 and accepted with the gate of batches 2 and 3 (r181). M3 ported 29 October 2026 (the project lead's decision of that day: arm/feed_conv.gms ported; CAPRI's FeedNQ_ and FeedBal_ in the market, market.noneu_feed_nq; batch 6), run pending. M4 (path only). M4 implemented 29 October 2026 (batch 6: CAPRI's feedBlk_ in the market, market.feed_bulk_in_market; the elasticities from the market supply Hessian's FEEDBLK rows), run pending
+  Gate of batch 6 (29 October 2026): M3 and M4 run in Farm-to-Fork 2030 (r188: converged in 10 iterations; prices up to +0.9 points from r186, quantities within 0.3) and Green Deal 2030 (r189: converged under CAPRI's rule in 21 iterations; prices up to +0.4 points from r187, mean absolute deviation from JRC121368 8.63 against 8.65). Closed
+  Batch 8: step F (Norway's raw milk inside the market, market.sup_milk_in_market; the baseline demand recalibration
+  registered) and the claims table's 17 unsourced rows resolved (four removed as dead code, the rest registered as
+  fallbacks, guards or numerical devices); step F's results with the batch-8 gate runs
 
 <a id="k74"></a>
 ### K74: Supply: differences from CAPRI that no register listed (CAPRI-claim audit, 24 October 2026)
@@ -787,7 +823,7 @@ Ten findings M1-M10 in docs/design/ARCHITECTURE_REFACTOR.md section 5.1 (table d
 
 - **Effect:** livestock in every scenario (S1); Green Deal crop and fertiliser results (S2-S12)
 - **In 9t:** –
-- **Status:** **open**, in part. Fixed 24 October 2026: S1 (run r114). Implemented, not yet accepted (runs r116, r117 do not converge in 25 iterations, see K75): S3-S4 and the plant-protection / other-input part of S11 (CAPRI's regional input changes on every activity, the organic crops' fuel top-up, CAPRI's organic crop set; two CAPRI code errors corrected with parity switches, DEPARTURES_FROM_CAPRI; the other-input cost per ha was about 20% low, without its unit value). Fixed 24 October 2026 (evening; run pending): S5 (the options' cost on the N purchases, CAPRI's curvature with the saving term), S6 (need follows yield as fertned.gms, not sqrt), S7 (yield-dependent inputs, define_inputs.gms), S8 (the grassland rule's calibration dual), S9 (catch crops on the ecological set-aside row), S10 (idled histosols on the landscape floor; the diversification limit lowered under the floor). Fixed 27 October 2026 (branch supply-audit, run pending): S12 (the mineral N tax and soil N2O on CAPRI's MITERRA loss fractions). S13 (the elasticity calibration path) removed 28 October 2026; S12 and S13 accepted with batch 1 (runs r177, r178). Fixed 28 October 2026 (batch 2): S2 (CAPRI's small groups keep the mineral reduction's cap, replacing the organic one). The claims table brought up to date with S1-S13 (28 October 2026). S5's last part (28 October 2026): the inhibitor on manure's saving term added behind supply.fert_slope_with_saving, off as the mineral options' (K77 departure); its maximum share found in CAPRI (ghgMiti.gms l. 115-119). The PMP calibrator's elasticity cap and share term reach only 14 cells (set-aside below 50 m2 in Belgian and Dutch regions). Open: the pesticide yield-loss crop list (S11, jrc121368 rule only)
+- **Status:** **fixed** (closed with the batch-8 gate, 30 October 2026). History: fixed 24 October 2026: S1 (run r114). Implemented, not yet accepted (runs r116, r117 do not converge in 25 iterations, see K75): S3-S4 and the plant-protection / other-input part of S11 (CAPRI's regional input changes on every activity, the organic crops' fuel top-up, CAPRI's organic crop set; two CAPRI code errors corrected with parity switches, DEPARTURES_FROM_CAPRI; the other-input cost per ha was about 20% low, without its unit value). Fixed 24 October 2026 (evening; run pending): S5 (the options' cost on the N purchases, CAPRI's curvature with the saving term), S6 (need follows yield as fertned.gms, not sqrt), S7 (yield-dependent inputs, define_inputs.gms), S8 (the grassland rule's calibration dual), S9 (catch crops on the ecological set-aside row), S10 (idled histosols on the landscape floor; the diversification limit lowered under the floor). Fixed 27 October 2026 (branch supply-audit, run pending): S12 (the mineral N tax and soil N2O on CAPRI's MITERRA loss fractions). S13 (the elasticity calibration path) removed 28 October 2026; S12 and S13 accepted with batch 1 (runs r177, r178). Fixed 28 October 2026 (batch 2): S2 (CAPRI's small groups keep the mineral reduction's cap, replacing the organic one). The claims table brought up to date with S1-S13 (28 October 2026). S5's last part (28 October 2026): the inhibitor on manure's saving term added behind supply.fert_slope_with_saving, off as the mineral options' (K77 departure); its maximum share found in CAPRI (ghgMiti.gms l. 115-119). The PMP calibrator's elasticity cap and share term reach only 14 cells (set-aside below 50 m2 in Belgian and Dutch regions). Open: the pesticide yield-loss crop list (S11, jrc121368 rule only) **29 October 2026 (batch 8, K74 review):** S11 fixed: the pesticide yield loss on CAPRI's pesticideCrops (every crop activity but the idled histosols, conventional_io.gms l. 51-53) instead of an unsourced 23-crop list, the fodder crops and set-aside not reached (registered); the claims table's 19 remaining unsourced or unverifiable rows resolved: three fallbacks no unit reached removed (over-fertilisation factor, active technologies, the applied manure P/K ratio: now errors), the winter cover bound CAPRI's MaxShare (equal in every unit), the PESETA and yield-gap maps verified (CAPRI's own CEN fallback), the crop-diversity groups verified (OFOD = OFAR + ROOF one group, registered), the rest registered as guards, solver devices or reconciliations with their reasons. Closed with the batch-8 gate (30 October 2026: Farm-to-Fork r190 converged in 13 iterations, Green Deal r191 in 22; no non-optimal regional solve kept)
 
 <a id="k75"></a>
 ### K75: The Farm-to-Fork runs with CAPRI's Green Deal input changes (S3/S4) did not converge: a warm-started NLP stuck at a worse point (24 October 2026)
@@ -815,6 +851,45 @@ With CAPRI's pmpParSqr including the fertiliser-saving term (ghgMiti.gms l. 1016
 - **Effect:** Green Deal / Farm-to-Fork adoption of the fertiliser options
 - **In 9t:** –
 - **Status:** **open**: supply.fert_slope_with_saving off by default (the curvature without the saving term, as before); the cost on the purchases kept. Run r128 with both on: nitrification inhibitors 4.5% (r123 16.3%; JRC121368 Table 17 18%), precision farming 9.6 -> 25.0%
+  **CAPRI's own 2030 reference checked, 31 October 2026** (res_2_1730greendeal_refpol_endotech_all_ini, dataOut SHARE
+  of the fertiliser options; code reading). CAPRI's reference run is a ghgTechCali = ini run
+  (pol_input/greendeal/refpol_endotech_all_ini.gms l. 29), and that setting fixes the ammonia, breeding, histosol,
+  winter-cover and tillage options at their initial shares (supply/set_miti_bounds.gms l. 60-74, 101-115, 158-201,
+  213-229, 236-253) but not the fertiliser options, which keep only their upper bound MaxShare (l. 41-42): in CAPRI's
+  reference the fertiliser options are endogenous, as in the model's baseline. Their shares there:
+  - precision farming at most 0.3% (PT200000; IT12, IT13 0.2%; every other region 0): CAPRI's base stays where the
+    model's stays with fert_slope_with_saving off, and far from the model's with it on (r128: FR10 0.44, EU 9.6%);
+  - fertiliser timing up to 85% (NL410000 0.855; RO020000 0.61, RO060000 0.58, ES130000 0.30, RO010000 0.23, RO070000
+    0.20, ES120000 0.14; Montenegro and Albania too) and nitrification inhibitors up to 34% in the EU (PT300000 0.335,
+    NL410000 0.109, IT330000 0.072, PT110000 0.062; Montenegro 0.52): CAPRI's reference leaves the initial share in a
+    handful of regions, which the model's baseline does not (0 everywhere, the gate runs' adoption tables).
+  So neither setting reproduces CAPRI's reference: with the saving term the base moves where CAPRI's does not (precision
+  farming), without it the base stays where CAPRI's moves (timing and inhibitors in about ten EU regions). Next step:
+  per option and region, CAPRI's reference share against the model's baseline with each setting, and CAPRI's own
+  first-order condition at its reference (which of its terms makes timing move in NL41 and not precision farming in
+  FR10).
+  **Why the two differ (code reading, 31 October 2026).** CAPRI calibrates an option's linear term beta so that its
+  first-order condition is zero at the initial share with the fertiliser saving valued by a notional formula, the
+  member state's NITF price times nmE on N0 / (1 + nmE m) (envind/ghgMiti.gms l. 1016-1035 and the beta derivation
+  above it); in its simulation the saving runs through its fertilisation block, so where the block's marginal value of N
+  differs from that notional value the option can move off its initial share, the likely reason for CAPRI's reference
+  moves (fertiliser timing in NL41, Romania; inhibitors in PT30; not verified on CAPRI's numbers). The model calibrates on the solved NLP's own reduced cost instead (CapriRegionalNLP
+  calibration: an option's residual at its base share goes into its linear cost, dabat("fert", option); an option at
+  zero with a positive reduced cost is left alone), which makes every base share exactly stationary: the baseline
+  cannot move where CAPRI's does. Two ways to CAPRI's reference, for the project lead's decision: (a) CAPRI's beta
+  with its notional saving (the baseline then moves as CAPRI's, by the model's own block, not CAPRI's); (b) CAPRI's
+  2030 reference shares (dataOut SHARE of the ini run) as the model's base shares, calibrated stationary there as now,
+  the same treatment as the other base data the 2030 baseline takes from that run. (b) reproduces CAPRI's reference
+  state by construction; (a) reproduces CAPRI's mechanism with the model's fertilisation block.
+  **Decision of the project lead, 31 October 2026:** the model's calibration is kept and registered as a deliberate
+  departure up to CAPRI (CAPRI_DEPARTURES_REGISTER DEP-30). It meets the condition CAPRI's derivation states
+  (envind/ghgMiti.gms l. 731: each initial share optimal) exactly, with the model's own value of N, where CAPRI's
+  notional saving misses it in some regions; neither (a) CAPRI's notional formula, which carries that miss into the
+  model's own regions, nor (b) CAPRI's reference shares as the base, which would tie the baseline to CAPRI's reference
+  run. The saving term in the curvature stays off (DEP-2). The structural differences that move the regional value of N
+  (activities and technologies, the fertilisation block's scaling, manure P and K trade, the open departures) are to be
+  assessed and reduced for their own sake (plan to follow)
+
 
 <a id="k78"></a>
 ### K78: Histosol fallowing under Farm-to-Fork far above JRC121368's figure (25 October 2026)
@@ -832,7 +907,7 @@ Run r129: 52.7% of the histosol area fallowed (r123: 21.7%; JRC121368 Table 17: 
   CAPRI star 3.0 run with the landscape floor (lndscpTarg > 0) to compare the share fallowed under it.
 - **Effect:** Farm-to-Fork land use, histosol N2O and CO2, set-aside premiums
 - **In 9t:** –
-- **Status:** **open** (needs CAPRI's Green Deal or Farm-to-Fork result with the floor)
+- **Status:** **open, waiting for CAPRI's scenario results** (the project lead's decision, 29 October 2026: kept open with its reference). Needed: CAPRI's Farm-to-Fork or Green Deal 2030 regional results with the landscape floor: per NUTS2 unit the histosol fallowing (the FALLOW technology's v_Miti levels) and the set-aside land; to be exported with tools/gams/export_capmod_results.gms (run on a CAPRI installation where the scenario was solved); the project lead's installation has none of them so far. Before: **open** (needs CAPRI's Green Deal or Farm-to-Fork result with the floor)
 
 <a id="k79"></a>
 ### K79: Member-state production that keeps moving between iterations (26 October 2026)
@@ -893,6 +968,46 @@ CAPRI's stop rule, recorded every iteration since r135, flags rows that move by 
   corrected it. So the end state still depends on the path where a region has two optima. Options for the project
   lead: keep, per region, the best objective found at (nearly) the same prices as a further start of the check; or
   compare HU230000's two optima first (still open)
+  29 October 2026, HU230000's two optima compared (the project lead's option (b); every solve of the region traced in a
+  repeat of r183, r184, which follows r183's path exactly): at the final prices the two optima differ by 5.1e-3 in
+  the objective; the better one feeds the cattle concentrates and grows maize grain (168 kha) and sunflower, the worse
+  one feeds no concentrates (cereals, protein feed 0) and twice the other fodder, with maize grain at 37 kha and more
+  other fodder (54 -> 135 kha), rapeseed (25 -> 102) and soft wheat (113 -> 164); the non-convexity is the per-head
+  feeding (herd x ration), CAPRI's own form. Why the run loses the better one: the warm start is built from the last
+  solution moved by `inside_regulations` (the fertiliser flows above 0.95 of their regulation maximum pulled back to
+  it: 44 values in HU230000) and started with the last solution's multipliers, an inconsistent primal-dual point; in 5
+  of the 19 traced scenario solves it stopped at the 200-iteration cap (objective -3.3e6 instead of -5.03e6), and the cold
+  restart from the same moved point (`prev`) ended at the worse optimum at iteration 17 (-5.0043e6 against -5.0300e6),
+  where every later warm start stayed. Replayed from the recorded data, the warm start from the last solution itself
+  (bounds clipped only) converged in all five (10-22 iterations), at iteration 17 to the better optimum (-5.02997e6);
+  in two of the replays it ended at a slightly worse point than the run kept (iteration 4: -4.9974e6 against the
+  standard start's -5.0202e6; iteration 8: 2e-4 relative). Proposed fix (for the project lead): the warm start from
+  the last solution as it is, as CAPRI's CONOPT restarts from its last solution, the regulated flows moved only where
+  they lie outside the support (not to 0.95 of it); `inside_regulations` kept for the cold starts
+  29 October 2026, the project lead's decision: fix implemented (batch 5): the warm start from the last solution as it
+  is (`inside_regulations(..., only_outside=True)`), the cold starts unchanged; replayed on HU230000's five failed warm
+  starts, the fixed start moves no value and converges in 10-22 iterations (test
+  `test_warm_start_from_the_last_solution_as_it_is`); the market supply Hessian's key changes with it. Results: the
+  batch's gate runs
+  Gate of batch 6 (r189, Green Deal 2030 with the warm-start fix of batch 5): converged under CAPRI's rule in 21
+  iterations (r187: 17); after the first scenario iteration the check kept another start's solution 6 times (r187: 9),
+  HU230000 once (iteration 4, the standard start). HU230000 ended at an objective 0.07% below r187's (-5.0317e6 against
+  -5.0284e6, at slightly different prices) with another crop mix: rapeseed 97 kha against 24, soft wheat 154 against
+  114, sunflower 51 against 115, maize 148 against 167. So the region still has near-equal optima and the end state
+  depends on the path; the EU indicators of the two runs are within 0.4 points. Open
+
+  **Gate 10 (31 October 2026, r196 Farm-to-Fork, r197 Green Deal against gate 9's r194, r195):** EU indicators within
+  0.2 points; a few regions at another local optimum of their non-convex regional problem, the path changed by K80's
+  tolerance (1e-10): Farm-to-Fork FR820000 wine 16.5 -> 50.7 kha (base 52.4; gate 8 and 9 had the 16.5 state), olives
+  0.9 -> 16.7 (base 8.9), FR810000 olives 14.9 -> 5.4 (the jump check acted on FR810000 at iteration 2); Green Deal
+  BG020000 oats 1.5 -> 23.1, other cereals 19.0 -> 52.9, sunflower 24.9 -> 46.9 (a region with mineral caps relaxed).
+  Which state has the lower objective at the final prices is not measured (both runs' solves are optimal and the jump
+  check did not act on FR820000 or BG020000)
+  **Gate 11 (31 October 2026, r198 against r196):** FR820000 back in the gate-8/9 state (wine 15.0 kha, olives 0.9),
+  LT000000's other fodder 56.6 kha (gate 10 166.9, base 232.8): the regions with two states switch with the PMP terms'
+  change (K108). The diagnostic of the two states' objectives (tools/check/k79_multistart, draft) is the next step
+  (STRUCTURAL_GAPS_PLAN S12)
+
 
 <a id="k80"></a>
 ### K80: The same run repeated from a warm start differs by up to 3e-5 relative in small cereal activities (26 October 2026)
@@ -901,7 +1016,15 @@ The 8-region baseline of test_pesticide_reduction_binds_and_is_a_noop_at_zero ru
 
 - **Effect:** repeated solves and no-op checks at 1e-6; test tolerance set to 1e-4
 - **In 9t:** –
-- **Status:** **open**: next, IPOPT's tolerances against the PMP curvature of these activities
+- **Status:** **fixed** (30 October 2026, the project lead's decision; the gate's runs pending). Diagnosed with the
+  8-region German baseline run twice in one model (every regional solve's IPOPT status recorded): all 16 solves were
+  cold starts ending Solve_Succeeded (not IPOPT's acceptable stop, not the warm start), the two runs' objectives equal
+  to 3e-11 to 1e-10 in every region, the levels up to 3.1e-5 apart (DE240000 rye). The problem is the same; its optimum
+  is flat along the small, nearly substitutable crops, and IPOPT's stop at tol 1e-8 lands anywhere along it. With the
+  acceptable tolerance at 1e-8 the same 3.1e-5; at tol 1e-10, 1.1e-6, with 5% more iterations. Mini-EU Farm-to-Fork
+  run at 1e-10 against 1e-8: converged in 7 iterations both, no non-optimal solve, the same fallbacks, supply-model time
+  152 s against 154 s, EU prices within 0.05 points. outer_loop.nlp_tol_final set to 1e-10; the organic and pesticide
+  no-op tests back to 1e-5
 
 <a id="k81"></a>
 ### K81: A plain regional solve after a shocked one kept the old price shock in the split and genetics columns (found 26 October 2026)
@@ -928,7 +1051,54 @@ pandas' default CSV float parser returns 64% of the cached Hessian's terms one u
 
 - **Effect:** one-region scenario runs (tests, regional studies); the winter-cover test took 590 s
 - **In 9t:** no
-- **Status:** **open**: the winter-cover test runs one step (~40 s); cause to find, then the market loop's handling of a steep local response
+- **Status:** **open**, cause found and fix decided (30-31 October 2026). Reproduced (DE110000, Farm-to-Fork, two
+  outer steps, 193 s): the market did not converge in either step (100 steps; largest relative residual 6.45 and
+  1.76, potatoes), its log showing why: the EU market keeps the whole EU's demand while its supply is the solved
+  units' alone (soya cake: EU production 16.8 kt against consumption 14,543 kt). For products the EU hardly trades no
+  price within the market's bounds closes that gap: not a solver fault, a market the subset cannot balance (as K10).
+  CAPRI switches whole countries off (%CountriesXX%) and keeps them in the market: a country off leaves RMSSUP
+  (capmod/create_sim_ini_gdx.gms l. 73) and is supplied by CAPRI's market supply functions (ProdNQ_), as a non-EU
+  region. Decision of the project lead (31 October 2026): CAPRI's rule, the units not in a run supplying the EU
+  market through their member state's market supply function (their share of it, the model's departure where a
+  subset cuts through a member state); the solved units supply their models' output
+  The plan (31 October 2026, read in CAPRI's code and data): a country off in CAPRI gets both ProdNQ_ and FeedNQ_
+  (arm/market_model.gms l. 1033: FeedNQ_ only for NOT RMSSUP). CAPRI's export elas_2_1730defaulta.csv has every EU
+  member state's p_hessNQSupp at CAL (DE000000: 37 products, MILK and the young animals included) but no
+  p_hessNQFeed or p_ElasFeed for them (in CAPRI's reference run every member state is RMSSUP, so their feed functions
+  are never calibrated). So: the excluded share's supply through its member state's ProdNQ_; its feed demand at its
+  base quantity (the model's departure: CAPRI would calibrate FeedNQ_ in its own run with the country off; no terms
+  invented). The excluded share of a member state per product: its units outside the run over all its units, from the
+  units' base output (0 in a full run, which therefore does not change). Steps: (1) a builder of the member states'
+  ProdNQ_ terms for all products in model codes, with CAPRI's Data_CAL production; (2) the shares; (3) the market's
+  EU supply (solved output + the excluded share's ProdNQ_), replacing the K16 fallback; (4) the base calibration and
+  crushing base; (5) raw milk per member state; (6) feed bulks; (7) young animals; (8) the outer loop's member-state
+  milk test. Checks: a full run unchanged exactly; a one-region run converging; the mini-EU run's prices nearer the
+  full run's
+  31 October 2026, steps 2, 3 and part of 5 built (the excluded units' base output through the bridge, their
+  member states' ProdNQ_ in the market's supply after the measured Hessian, the base calibration and the dairy
+  block's raw milk with them; the K16 refill of the whole EU's base production off where they are). DE110000 alone
+  (two outer steps): the market converges in 19 and 16 steps (before: not in 100), Germany's milk gap 0.0002, the
+  young-animal ratios 0.85-1.31, world prices within 0.3%; 63 s. tools/run/run_f2f_2030.py --regions now solves the
+  subset on the whole data set (the model was built on the subset's data alone, so the projection had no data for
+  the units outside it). Mini-EU Farm-to-Fork: converged in 5 iterations, 224 s (461 s). A correction to the plan's
+  expectation: its EU prices moved further from the full run's, not nearer (cereals -0.9% against the full run's
+  +11.2%, the mini run before +4.0%; milk +3.7 against +22.4, before +11.8): as in CAPRI, a policy applied in the
+  supply models does not reach the countries switched off, so a subset run now simulates the policy in its own
+  units only, the rest of the EU supplying through its market supply functions. A subset run is market-consistent
+  but cannot stand in for the full run's prices under an EU-wide policy (nor could it before). Remaining: the
+  excluded units' raw milk response (MILK's ProdNQ_), feed bulks, the outer loop's member-state milk test
+  31 October 2026, **fixed** (the gate's runs pending): the excluded units' raw milk responds as their member state's
+  ProdNQ_ of MILK inside the dairy block's clearing; their feed enters the member states' bulks at its base; the
+  member-state milk test runs over the member states with units in the run. DE110000 alone, two outer steps: the
+  market converges in 15 and 8 steps, the milk gap 0.0000, world prices within 0.03%, 68 s. Full test suite: 249
+  passed; the 3 failures were two Norway tests written for the old rule (updated) and schema.json; updating them found
+  the EU's raw milk counted twice with no EU unit in the run (fixed). tools/check/compare_runs.py notes a subset
+  run's two coverages (prices and beef production: the EU market; herds, crops, environment: the run's units). The
+  mini-EU regression run changes with it: its dev reference is to be renewed at the gate. Registered differences
+  from CAPRI: a subset can cut through a member state (the part outside: its units' own base output); the excluded
+  share's feed demand held at its base (no FeedNQ_ terms for EU member states in CAPRI's export); the member states'
+  ProdNQ_ terms are CAPRI's 2030 reference calibration's (CAPRI may recalibrate them in a run with a country off, not
+  verified)
 
 <a id="k84"></a>
 ### K84: The landscape floor's fit ends on its last step (found 27 October 2026, test timing)
@@ -960,7 +1130,7 @@ HR000000, K71); which solves they are is not recorded.
 
 - **Effect:** run time only
 - **In 9t:** –
-- **Status:** **open**, diagnosed (29 October 2026; the project lead's decision: the cause first;
+- **Status:** **fixed** (measured 30 October 2026, below); diagnosed 29 October 2026 (the project lead's decision: the cause first;
   tools/check/k89_trace.py, the mini-EU Farm-to-Fork run in one process: 905 solves, 345 s of IPOPT, 43 failed, 254 s).
   210 s are one episode in NL320000 at the scenario's first iteration: its solve at the tiered N target fails (warm
   start 3,000 iterations, cold start infeasible), then the mineral-cap exemption search (written for the Green Deal's
@@ -973,6 +1143,15 @@ HR000000, K71); which solves they are is not recorded.
   target before the cap search where a tiered N target is in force (identical results where the cap search fails, as
   in NL320000); or a solve without the N-surplus row first to see which constraint makes the problem infeasible
   Left as it is for now (the project lead's decision, 29 October 2026), to be taken up again later
+  29 October 2026 (commit acda673): on a failed solve under a tiered N target the problem is solved once without
+  the N-surplus row; feasible there, the N target is the cause, and JRC121368's relaxed target is tried before any
+  cap exemption (its own solve still searches exemptions where caps bind). Measured 30 October 2026 with
+  tools/check/k89_trace.py on the same mini-EU Farm-to-Fork run with the code of that day (this fix and the others
+  since the diagnosis, the warm start of batch 5 among them; converged in 7 iterations): 261 regional solves, 135 s of
+  IPOPT (345 s in the diagnosis), 14 failed, 60 s (254 s); NL320000's episode 8.6 s (210 s), the part this fix
+  addresses. The rest are
+  the first mineral-cap exemption searches of BG020000 and HR000000 (43 s; their exemptions PERM and ROOF are needed
+  and kept for the scenario, K71) and one or two failed starts of FI190000 and AT330000. **Fixed.**
 
 ## NLP check (tools/nlp_check), what it showed
 
@@ -1006,7 +1185,7 @@ the national ones (the builder's registered fallback). Whether CAPRI has holding
 - **Effect:** the cost and curvature of the ammonia housing, storage and air-purification options in DK000000,
   LT000000, HR000000 (and CZ010000); every run with the ammonia options
 - **In 9t:** not checked
-- **Status:** **open**: fixed in the builders (branch data-fixes): the cost curves, the AD option
+- **Status:** **fixed** (27 October 2026, in dev since; Prague checked 29 October 2026): fixed in the builders (branch data-fixes): the cost curves, the AD option
   (build_ad_option.py, which had LU000000, not a unit, and missed HR000000) and the Nitrates Directive tables
   (build_nitrates_directive.py, the same list) take the regional units; the ammonia chain to be rebuilt
   (build_ammonia_cost_curves -> build_ammonia_technologies -> build_ad_option -> build_ammonia_tech_model ->
@@ -1014,7 +1193,12 @@ the national ones (the builder's registered fallback). Whether CAPRI has holding
   purification for fattening pigs 7.62, 2.61, 2.93 EUR; curvature terms no longer 0). The AD option and the Nitrates
   Directive tables come out unchanged: Croatia is absent from CAPRI's AD base data (p_VSER) and from those tables'
   sources, so CAPRI has no AD option there either. The builder now lists the units left without a curve: CZ010000 and
-  Norway's six (no ammonia options built for Norway, registered)
+  Norway's six (no ammonia options built for Norway, registered). Prague (29 October 2026): CAPRI's own holdings data
+  (dat/scen/ghgtech/holdingsLSU.gdx, as exported to p_holdLSU.csv) has one row for CZ010000 (poultry, the largest class),
+  so in CAPRI as well no heads per holding exist for its other animals (ammo_tech.gms l. 1355-1362, defined only where
+  p_holdLSU is), m_CostAmm has no shares for them and v_alpha, v_beta stay 0: the option's own farm-size terms are 0
+  and its CostParLin is the manure-storage term added on (l. 2120-2121; e.g. low-emission housing for dairy cows (DCOL) 5.36,
+  the storage term). The model's file has the same values, so this is CAPRI's result, not a gap
 
 <a id="k87"></a>
 ### K87: Builder outputs that do not follow from their builders (reproduction audit, 27 October 2026)
@@ -1025,15 +1209,14 @@ committed files. 117 invocations; most reproduce their files exactly. Found:
 - `2017/supply/crop_cost_shares.csv` (the supply module's fertiliser cost share where CAPRI has no regional
   coefficient): rounded to 3 decimals (up to 2.9% relative for small shares); its builder also leaves out the eight
   member states that are one regional unit each (the old test "code does not end in 000000").
-- `validation/greendeal_2030/capri_unit_values_max_2030.csv`: without the 34 TABO rows its extractor writes now (the ini
-  file has them); read by no model code.
+- `validation/greendeal_2030/capri_unit_values_max_2030.csv` (without the 34 TABO rows its extractor wrote): removed 30
+  October 2026 with the max invocation, read by no code.
 - Files written before the full-precision decision of 27 October and not rebuilt since: the market builders' outputs
   (bilateral flows, regions and quotas, biofuel, dairy, feed bulks, GL demand, processing, sugar, use components,
   EU member-state balance, fertiliser distribution priors, land-use change, CAP greening, cost savings) differ from
   their builders' output by 3e-10 to 5e-8 relative, five of them by up to 5e-6 (feed and biofuel use shares, dairy
   demand elasticities, feed by-product weights): the committed files' rounding.
-- `ingest_pela_gtap.py` writes `sources/estnlp/pela_cross_price.csv`, which is not committed (read by no model code;
-  `pela_cross_by_region.json` carries the cross-price terms); `recalibrate_trade_2017.py` writes a backup copy
+- `recalibrate_trade_2017.py` writes a backup copy
   (`trade_flows_2021.csv.superseded_by_2017`) wherever it is absent, so in every clean checkout.
 - Files several builders write in turn (`yields.csv`, `variable_costs.csv`, `capreg_producer_prices.csv`): a builder
   alone differs from the committed file where a later one overwrites its columns; to be checked as a chain
@@ -1076,7 +1259,7 @@ rounds reproduces its own rounded file). Some may round keys or comparisons rath
 <a id="k90"></a>
 ### K90: The wheat market's world price is CAPRI's soft-wheat price, not its wheat product's (found 29 October 2026, making build_world_prices.py)
 
-The model's wheat market SWHE is CAPRI's market product WHEA (capri_data/schema/codes/model_commodities.csv, from
+The model's wheat market SWHE is CAPRI's market product WHEA (capri_data/codes/model_commodities.csv, from
 build_feed_bulks.COMMODITY), but its world price in world_prices.csv is FAO_agg's 'World'.'PMRK'.'SWHE'.'BAS', 171.93
 EUR/t, as the file has held it since the earlier writer, not 'WHEA', 196.60. FAO_agg's WHEA price lies above both
 its soft and durum wheat prices (171.93, 173.00), so it is not their average; which one CAPRI's market model starts
@@ -1087,16 +1270,19 @@ from for WHEA is not checked yet (arm/ data preparation).
   For comparison: CAPRI's 2017 market solution (market_base_1717) has a World PMRK of WHEA of 157.7 EUR/t, but its
   World rows are far from FAO_agg's for other products too (soya 102.7 against 325.7), so it is no check
 - **In 9t:** not checked
-- **Status:** **open**: kept as it was (tools/build/build_world_prices.py SOURCE_CODE); to be checked against CAPRI's
-  market data preparation before any change, a decision for the project lead
+- **Status:** **fixed** 29 October 2026 (batch 5; the project lead's "fix everything"): the wheat market takes CAPRI's
+  WHEA world price (196.60 EUR/t), the price of the market product it is in CAPRI (no market of CAPRI's carries
+  'SWHE'); effect measured in the batch's gate runs
 
 <a id="k91"></a>
 ### K91: CAPRI's trend projection (captrd_2030.json) has no extractor (found 29 October 2026, the data pipeline)
 
 capri_data/trajectories/captrd_2030.json, the alternative baseline trajectory (`--trajectory captrd`; the default is
 CAPRI's 2030 reference, capri_ref_2030.json), holds CAPRI's CAPTRD trend factors extracted from a series slice
-(its `_provenance`: "/tmp/series_slice.csv", per-activity medians of per-region cumulative ratios, band 0.2-5) by a
-script that is not in the repository. tools/build/build_trajectory_model_keys.py adds the model's activity and region
+(its `_provenance`: "/tmp/series_slice.csv", per-activity medians of per-region cumulative ratios, band 0.2-5).
+Corrected 29 October 2026 (registry migration): the extractor is in the repository, capri_mod/projection/captrd_import.py
+`extract_trajectory` (it writes exactly the file's `_provenance` keys); missing are its input (the series slice of the
+project lead's CAPTRD p_result export, not kept) and a builder that calls it. tools/build/build_trajectory_model_keys.py adds the model's activity and region
 keys to the file in place (idempotent: rerun on its output, it writes the same file), so the file cannot be built from
 blank; it was taken out of the pipeline's builder list (tools/check/reproduce_builders.py NOT_AUDITED). Beyond the
 missing script, the step overwrites a BULL growth entry with BULF's, so whether the slice had a BULL factor of its own
@@ -1104,7 +1290,565 @@ cannot be told from the file.
 
 - **Effect:** the `captrd` trajectory only (not the default runs)
 - **In 9t:** not checked
-- **Status:** **open**: an extractor from CAPTRD's results (capri_reference/captrd_results/1770, its `series` position)
-  writing the CAPRI-keyed factors to capri_data/sources, read by build_trajectory_model_keys.py into
-  captrd_2030.json, would make the file reproducible; its factors would differ from the file's where the original
-  slice differed (not known)
+- **Status:** **fixed** 29 October 2026 (batch 5): tools/build/build_captrd_trajectory.py builds the file from blank
+  from CAPTRD's results of the base-2017 run (capri_reference/captrd_results/1770/series.csv.gz) with
+  `extract_trajectory` and `build_trajectory_model_keys.add_model_keys`; it reproduces the earlier file's growth
+  factors and all 442 entries keyed by the model's regions exactly (so the same source run); only CAPRI-keyed regional
+  entries differ, where the NUTS-2016 model's keys step had overwritten them. captrd_import.py's docstring corrected
+
+<a id="k92"></a>
+### K92: Farm-to-Fork changes furthest from JRC121368, besides the milk price (K13) (found 29 October 2026, registry migration)
+
+In the last Farm-to-Fork 2030 run whose indicators are tabulated (r145, README section 8 table; r161 in
+`FITNESS_FOR_USE.json` within about 0.5 points), against JRC121368 (Figures 5 and 7, Table 15): pork price +18.0% (CAPRI
++43) while pigs fall as in CAPRI (-13.9%, -14.5); poultry price +15.1% (+18); oilseed price +14.4% (+11); cereal price
++10.6% (+8); vegetables and permanent crops +11.7% (+15); dairy cows -3.4% (-10); poultry -11.9% (-16.5); manure N2O
+-18.2% (-3.2); ammonia -37.4% (-33); non-CO2 GHG -18.8% (-14.8). Close to CAPRI: beef animals, cereal, oilseed and
+vegetable production. The comparison is not like for like (JRC121368 ran the 2020 CAPRI, base 2012; the model is star
+3.0). The registry's earlier diagnoses (pork: EU exports absorb the supply cut at CAPRI's rho2; dairy: cows expanding
+where the N target barely binds) were made on structures since replaced and are not re-checked.
+
+- **Effect:** Farm-to-Fork meat and crop price levels, the dairy herd, poultry, manure N2O (README "Not sound for")
+- **In 9t:** –
+- **Status:** **open, waiting for CAPRI's scenario results** (the project lead's decision, 29 October 2026: kept open with its reference). Needed: CAPRI's Farm-to-Fork 2030 market and supply results behind the indicators: per member state and EU the prices (PPRI, ARM1P) of pork, poultry, cereals, oilseeds, vegetables and permanent crops, the herds (dairy cows, poultry), net trade of pork and poultry, and manure N2O and ammonia by source; to be exported with tools/gams/export_capmod_results.gms (run on a CAPRI installation where the scenario was solved); the project lead's installation has none of them so far. Before: **open**. The current reference run r182 (29 October 2026; tools/check/compare_runs.py --capri) gives
+  the same picture: pork price +18.7% (CAPRI +43), milk +21.7% (+1.5, K13), poultry price +15.7% (+18), cereal +10.7%
+  (+8), oilseed +14.4% (+11), vegetables and permanent crops +12.4% (+15); dairy cows -3.5% (-10), poultry -12.2%
+  (-16.5); manure N2O -18.3% (-3.2), ammonia -37.7% (-33), GHG -18.9% (-14.8); mean absolute deviation over the 24
+  indicators 4.44. Next, per indicator: pork through the EU pork trade response of the bilateral market, dairy
+  through the regional N shadow prices against the change in cows; CAPRI's own Farm-to-Fork results would be the
+  reference (K13)
+
+<a id="k93"></a>
+### K93: CAPRI mitigation options not built, and the documents disagree on which are in (found 29 October 2026, registry migration)
+
+Not in the regional model: 3-NOP (built 29 October 2026), legume share (LegSh), tillage (ConsTill, NoTill), urea substitution (UreaSubst),
+buffer strips, biodiversity options and biochar (`docs/MITIGATION_IN_SUPPLY.md`: "not built; their LEACHN_/RUNSURFN_
+terms held at CAPRI's reference"); CAPRI's constraint on total ration fat (SupplementPerc_) is not carried. These are
+recorded only inside the status texts of K50 and K51 (resolved table) and README's "Future (not scheduled)", not in
+`docs/DEPARTURES_FROM_CAPRI.md`. On linseed the documents disagree: MITIGATION_IN_SUPPLY.md says it is in
+(`build_supplement_effects.py`), README and `capri_regional_nlp.py`'s header list it as not yet in CAPRI's form.
+
+- **Effect:** runs with an emission tax (3-NOP acts on enteric CH4); leaching and runoff where tillage or buffer strips
+  would act (held at CAPRI's reference); size in the model not measured
+- **In 9t:** –
+- **Status:** **open**: registered as a departure (docs/DEPARTURES_FROM_CAPRI.md, 29 October 2026) and the linseed
+  statements made to agree with the code (linseed and nitrate are in: columns of the regional model from
+  `supplement_effects.csv`); building the options remains. Scoped 29 October 2026: CAPRI's Green Deal technology
+  file (refpol_endotech_all_sup.gms, active_technologies.csv) switches on 3NOP, LegSh, ConsTill, NoTill and UreaSubst
+  among those not built. 3NOP (envind/line_nitr.gms l. 58-61, 83-86, 124-143, 217-221): dairy cows in stables for
+  305 of 365 days, 0.09% of dry matter, CH4ENT cut by 32.36 + 0.282 (dose - 70.5) - 0.915 (NDF - 32.9) - 3.08 (fat -
+  4.2) %, the ration's NDF and fat shares from CAPRI's digestibility table p_digestPar (envind/def_digestibility.gms:
+  NRC 2001 and INRA 2002 values written in CAPRI's code, then cleaned per region in digestibility.gms) over the
+  activity's base ration; cost 175 EUR per kg of active substance; no cost saving. Without an emission price its
+  share stays 0 (CAPRI's calibration), so it acts in the carbon-tax runs only. Needs p_digestPar as data (a CSV built
+  from CAPRI's code) and the rations' dry matter. **3-NOP built 29 October 2026** (tools/build/build_digestibility_table.py: CAPRI's table to
+  CSV; tools/lib/_capri_digest.py: digestibility.gms's steps; build_supplement_effects.py: 3NOP_Tot rows, CH4ENT -25%
+  to -57% (median -35%), about EUR 95 per dairy cow and year; the accounts' combination of the supplements corrected so linseed and
+  nitrate keep their overlap term with 3-NOP present); acts in the carbon-tax runs only. Remaining: LegSh, ConsTill,
+  NoTill, UreaSubst, buffer strips, biodiversity options, biochar. **Where the rest would act** (checked 29 October 2026 in CAPRI's own Green Deal 2030 result,
+  scen_greendeal_2030.txt): LegSh is adopted on 0.002% of the EU's other fodder (NL12 1.8%, every other region 0), 3-NOP
+  at its 1e-6 floor, and UreaSubst, the tillage options, buffer strips and the biodiversity options carry no level at
+  all (not active in that run); so none of them moves CAPRI's Green Deal or Farm-to-Fork result, and their port matters
+  for the emission-tax runs (and scenarios that switch them on)
+
+  **UreaSubst, scoped 29 October 2026 (port started):** CAPRI's form (envind/ammo_tech.gms l. 2353-2372, 3041-3107; supply/supply_model.gms GASTOTNETF_ l. 3366-3377, GWPCO2UREA_ l. 3966-3972, GHG_Mit_Cost_ l. 4945): one share m per region of the mineral N bought, 0 <= m <= MaxShare = p_fracUseFert(MS, Ureum) (LitRev_inputs), IniShare 0; cost per t N bought costParLin = (UVAG(NITF) - 289 x 60/28 x 1.019^(BAS - 2007) x (share urea + other)) / share other, case 3 calibration (relSubs0 0.2, relSubs1 1.2, pmpParSqr = (Subs1 - Subs0) / MaxShare, pmpParLin = Subs0 - costParLin); effects: the mineral N's NH3 loss x (1 - m x (EF_NH3 urea - EF_NH3 other)) (the model's cascade n_cascade.netf already takes these arguments) and CO2UREA = N bought x (IniShare - m) x 44/28 in the tax. Data: FracUseFert.csv written again by build_ammonia_tech_inputs.py (batch 8). Found on the way: the accounts' urea share (crop_co2_coef.csv, implied by CAPRI's 2017 CO2UREA / NMIN) differs from LitRev's p_fracUseFert, which CAPRI's simulation loads (ammoLitRev on; envind/ammo.gms l. 285-290): Czechia 0.116 against 0.016, Austria 0.032 against 0.014, Germany and Spain equal; which one CAPRI's 2030 runs use for CO2UREA is to be settled from its 2030 results (the Green Deal reference reports CO2UREA under 'UreaSubst' and 'CARB', meaning not yet established) before the port
+  **Urea share settled 29 October 2026** from CAPRI's own Green Deal 2030 result (res_2_1730greendeal_refpol_endotech_all_ini,
+  dataOut): for every country listed (EU27, UK, Turkey, the Balkans; Norway has no entry) CO2UREA booked under
+  UreaSubst equals the mineral N bought (MINFER.NITF) x LitRev's p_fracUseFert(Ureum) (FracUseFert.csv) x 44/28 to
+  six digits (CZ 7.306 kt = 290.57 x 0.016 x 44/28). CAPRI's simulation therefore uses LitRev's share, as
+  envind/ammo.gms l. 285-290 loads it; the accounts' share (crop_co2_coef.csv, from CAPRI's 2017 CO2UREA / NMIN) is
+  CAPREG's. The GROF.CO2UREA and CARB entries of the same result are another quantity (GROF = CARB x 44/12 in every
+  country: carbon and its CO2), not the urea term. Consequence: the model's reported CO2_UREA (environmental_module,
+  crop_co2_coef's urea_share) is CAPREG's base-year share, not CAPRI's 2030 simulation's (CZ 0.116 against 0.016);
+  switched to FracUseFert the same day (tools/build/build_ghg_coefs_2017.py; reporting only: CO2 from urea is
+  outside CAPRI's GGWP tax base; Norway stays at 0, its p_NO_FracUseFert not in hand). EU CO2 from urea changes
+  with the next runs (e.g. Romania 0.342 -> 0.050, Croatia 0.337 -> 0.050, Poland 0.249 -> 0.345)
+  **UreaSubst's incentives measured 31 October 2026** (before building it; scratchpad script, CAPRI's rules): CAPRI's
+  calibration (case 3, or case 4 where the mineral N price is below the urea price, Bulgaria and Czechia) leaves a
+  marginal cost at a zero share of Subs0 per t of N bought, 6.9 (Hungary) to 342 EUR (Italy), median about 58. The
+  option's gains per unit share and t of N bought: the N it saves (the mineral N's NH3 loss falls, so more of the N
+  bought reaches the crops: GASTOTNETF_ in fertDist, supply_model.gms l. 1143) worth 1.2 (Sweden) to 19 EUR (Italy) at
+  the 2017 N price, below Subs0 in every member state (closest Hungary 4.0 against 6.9, Slovakia 4.1 against 17.2);
+  CAPRI's GGWP tax gives none: with CAPRI's MITERRA fractions the N kept from volatilising raises the direct N2O (1.11%
+  of the N left) by more than it cuts the indirect N2O of the NH3 (EF4 1%), so at 100 EUR/t CO2-eq the tax adds 0.05
+  to 0.55 EUR per unit share; CO2 from urea is outside the GGWP (GWPCO2_ is CO2LIM only, GWPTOT_ l. 3980). So the
+  option stays at 0 in the model's scenarios at base prices; it would move where the N bought is worth much more than
+  its price (a binding mineral N cap: Hungary roughly from 560 EUR/t N above the price), under an NH3 price, or with a
+  tax on CO2UREA (157 EUR per unit share and t N at 100 EUR/t CO2). Building it touches the fertilisation block's
+  first-order conditions (the mineral N's efficiency becomes a function of the share)
+  **UreaSubst parked 31 October 2026** (the project lead's decision): not built until a scenario with an NH3 price, a
+  tax on CO2UREA or a binding mineral N cap where it could move is planned; CAPRI's form and this analysis are the
+  starting point
+  **The remaining options scoped, 31 October 2026** (code reading; CAPRI's 2030 reference res_2_1730greendeal_refpol_endotech_all_ini
+  and its maximum-mitigation run scen_greendeal_2030.txt). Correction first: the statement above that LegSh, UreaSubst,
+  the tillage options, buffer strips and the biodiversity options "carry no level" in CAPRI's Green Deal 2030 result,
+  and so "none of them moves CAPRI's Green Deal or Farm-to-Fork result", was read from scen_greendeal_2030.txt, which
+  is CAPRI's maximum-mitigation run (refpol_endotech_all_max, K38), not a Green Deal or Farm-to-Fork scenario; it is not
+  evidence about those scenarios, and it is not even right for that run: conservation tillage carries SHARE 1 there in
+  most regions (3,258 regional entries, median 1; ConsTill's initial shares in the 2030 reference are e.g. Denmark 0.107,
+  NoTill 0.013). What the code says instead:
+  - buffer strips, the biodiversity options and biochar are not in CAPRI's Green Deal technology lists
+    (pol_input/greendeal/refpol_endotech_all_ini.gms l. 216: ghgTechActiveCarb LegSh, WinterCov, ConsTill, NoTill;
+    biochar and rotGraz commented out; the landscape options off): nothing to port for the Farm-to-Fork and Green Deal
+    runs;
+  - conservation tillage (ConsTill): no yield effect (p_tillYldFrac 1 in every zone, envind/tillage.gms l. 454-456), a
+    cost saving (costParLin 46 - 60 - 7 = -21 EUR/ha, l. 403) calibrated away at the initial share, its soil carbon
+    (CO2SEQ) outside the GGWP tax base and its runoff effect commented out (l. 561-566): without a soil-carbon price it
+    stays at its initial share, which the 2030 reference's yields and costs already contain;
+  - no-till (NoTill): yield 0.9 of the regional mix in CAPRI's North and Center zones, 1 in the South (l. 450-453;
+    applied directly or through the T1/T2 split, %NoYieldEffect%, l. 486-535, the Green Deal file's setting not
+    checked), leaching of mineral and manure N up 24% and 38% (l. 562-563, active), N2O of mineral N up 12% (8% South,
+    l. 580-583); so its share would respond to crop prices and to the GGWP tax (both against it) from small initial
+    shares (Denmark 0.013); the effect on production and emissions is that small share's change times those factors,
+    not measured;
+  - legume share in temporary grassland (LegSh): MaxShare 1, its scenario response not measured (in the
+    maximum-mitigation run 1.9e-5 of the EU's area);
+  - urea substitution: the incentive analysis above does not depend on CAPRI's result files and stands; the sentence
+    "CAPRI's own Green Deal result shows no adoption either" in the 31 October discussion came from the same
+    maximum-mitigation run and is withdrawn.
+  Status of the remaining options: buffer strips, biodiversity options and biochar need nothing for CAPRI's Green Deal
+  and Farm-to-Fork runs; conservation tillage none without a soil-carbon price; no-till and LegSh are the two whose
+  scenario response could be non-zero, small by the code's terms, unmeasured.
+
+<a id="k94"></a>
+### K94: `capri_mod/data/reconcile_base.py` is an orphan, and README's re-basing note points at a removed concordance (found 29 October 2026, registry migration)
+
+The module is imported only by its own test (`test_capri.py`, `null_check`); no builder or model path calls it.
+README's re-basing paragraph says the concordance and the reconciliation "are now in hand" and names
+`capri_data/shared/capri_regio_concordance.json`, removed on 27 October 2026 with the move to CAPRI's units. The
+registry entry `base_reconciliation` records that its own test ran on share-allocated data, so turning raw regional
+statistics into CAPRI's base was never tested.
+
+- **Effect:** none on results; the documentation claims a capability the code does not use
+- **In 9t:** –
+- **Status:** **fixed** 29 October 2026 (batch 5): the module and its test removed (git history keeps them); README
+  says re-basing is not available yet and is planned through the data pipeline (docs/design/CAPTRD_MOD.md)
+
+<a id="k95"></a>
+### K95: The "12/12 against CAPRI's PMRK" market-price validation is a solver-consistency check (found 29 October 2026, registry migration)
+
+`test_market_module_reproduces_its_own_prices` compares the market's base solution with `world_prices.csv` itself; its
+docstring says "Solver consistency, NOT price validation". The CHANGELOG validation table ("Market prices | CAPRI PMRK
+| 12/12 within 15%"), README (section 8 and the world-production paragraph) and `FITNESS_FOR_USE.json`
+(`market.prices`: validated) still present it as a validation against CAPRI. The test's comment speaks of soya
+"corrected to 102.7"; since 29 October `world_prices.csv` holds FAO_agg's 325.67 (K90 on CAPRI's market rows).
+
+- **Effect:** documentation only (an overstated validation claim)
+- **In 9t:** –
+- **Status:** **fixed** 29 October 2026 (batch 5): the claims reworded as solver consistency (CHANGELOG validation table,
+  README sections 7 and 8, FITNESS `market.prices`), the test's comment corrected
+
+<a id="k96"></a>
+### K96: Documents and one constant still describe removed mechanisms (found 29 October 2026, registry migration)
+
+- `capri_data/FITNESS_FOR_USE.json` (served by `capri_mod/fitness.py`, "other entries as of 2026-09-29"):
+  `abatement_capri`, `abatement` describe post-solve modules retired in Sprint 9i; `market.prices` relies on the
+  Armington premium removed on 20 October (K54) and the PMRK claim (K95); `market.eu_balance` on FAO's
+  self-sufficiency (removed); `market.PARI` calls the EU base share-allocated (PARI is in CAPRI's bilateral data);
+  `supply.gross_margin` names MREV where margins use TOOU.
+- README: Saxony and Croatia regional detail from p_REGIO splits (removed on 27 October: DED00000 and HR000000 are
+  single units); Iran's and Saudi Arabia's allocated shares (removed, K45); the feed check on IPCC Eq. 10.6 and
+  calibrated monogastric targets (not in the code: the NLP's requirements are the base ration's supply); "no physical
+  grass yield for Ireland" (CAPRI's GRAS output is taken for every unit; whether Ireland's units have their own rows or
+  the national fallback is to be checked before the caveat is dropped).
+- `docs/MITIGATION_IN_SUPPLY.md`: "columns of the regional QP" (removed 26 October); winter cover "not a choice" (the
+  NLP chooses it, K51).
+- Code: `supply_module.py` `UNVERIFIED_OUTPUT_UNITS`, read by nothing (one comment names it).
+- The environmental module's HNV farmland indicator: hand-set weight 0.5 on legumes, and grass counted twice (the
+  GRASSLAND land and GRAS among the "legumes"); reporting only (docs/design/PROXY_AUDIT.md).
+
+- **Effect:** none on results; the fitness file is the machine-readable source of caveats, so stale entries mislead
+- **In 9t:** –
+- **Status:** **fixed** 29 October 2026 (batch 5): FITNESS entries brought up to date (the three abatement entries
+  replaced by `mitigation` and `mitigation.at_carbon_price` with r182's adoption against JRC121368; market prices, EU
+  balance, rice and gross margin rewritten; the Irish entry removed: Ireland's units carry their own CAPRI grass output,
+  37.7 and 46.9 t fresh matter per ha, res_17IR GRAS.GRAS, while CAPRI's YILD item of grass equals MREV there); the
+  README passages corrected (regional detail, world production, feed, the Irish item of "Not sound for");
+  MITIGATION_IN_SUPPLY.md corrected (no QP; winter cover a choice); the dead constant removed; the HNV proxy removed
+  (no CAPRI source; reporting only)
+
+<a id="k97"></a>
+### K97: NaN in the crop-diversification row during Green Deal solves (found 29 October 2026)
+
+Every Green Deal 2030 run logs CasADi's "nlp_g failed: NaN detected for output g, at (row 66, col 0)": 168,690 times
+in r183, 112,335 in r181, from the scenario's fourth iteration; Farm-to-Fork runs (r180, r182) log none. Row 66 is the
+crop-diversification row (Shannon index of the annual crop groups, `cropDivGreening_`) in a region with all twelve
+animals (HU230000's structure: 42 linear rows, 24 requirement rows, the permanent-grassland and ecological set-aside
+rows); it takes the log of each group's area plus 1e-6 kha. IPOPT evaluates trial points within its bound relaxation
+(1e-8 of the scaled variables), where a group sum can fall below -1e-6 kha and the log is undefined (a likely cause,
+not confirmed); IPOPT then shortens the step. HU230000's traced solves replay without it, so the regions are not yet
+identified. K69 removed the fixed-zero columns from the groups for the same symptom in the baseline.
+
+- **Effect:** solver effort in the Green Deal: the solves that hit it were the jump check's cold starts, which ran to
+  IPOPT's 3000 iterations or ended infeasible and were discarded (the warm solution kept), so the kept results were
+  not affected
+- **In 9t:** –
+- **Status:** **fixed** 29 October 2026. Found with tools/check/k97_nan_regions.py on the Green Deal run r185 (the
+  CasADi warnings per regional solve): LV000000, a cold start, 47,966 NaN warnings, 3000 iterations. A one-region
+  Green Deal run of LV000000 caught the failing solve: the row is the crop-diversification row (cap_rows cropDiv), and
+  at IPOPT's last point a one-column group (a column of base level about 166 kha, lower bound 0) sat at -6e-9 in the
+  scaled column, within IPOPT's bound relaxation (1e-8), i.e. -1e-6 kha: the group plus the 1e-6 floor was zero and
+  0 log 0 NaN. The floor under each group's log is now 1e-6 + 1e-7 x the sum of the group's column scales (max(|base
+  level|, 1)), the relaxation over the group's columns x 10, the same in the base index H0 (supply_module, the
+  spec's floors; capri_regional_nlp). The fixed columns as constants (as GAMS hands .fx variables to CONOPT) were
+  tried first and did not remove it. LV000000's two-iteration Green Deal run: 41,636 NaN warnings before, none after;
+  its supply-model time in the second iteration 10 s before, 3 s after; the indicators equal to 0.1 point. Test
+
+<a id="k98"></a>
+### K98: CAPRI's supply Hessian read as stored: half of the cross terms missed (found 29 October 2026)
+
+CAPRI's calibration export (elas_2_1730defaulta.csv) stores each cross term of p_hessNQSupp once, under one of the two
+products (USA: MAIZ's row carries WHEA, WHEA's row does not carry MAIZ); CAPRI's market model completes the matrix on
+loading (arm/market1.gms l. 539-574: tiny terms deleted, products without ProdNQ_ deleted, missing terms from the
+transpose). tools/build/build_eu_market_supply_nq.py (the EU's other vegetable oils and fish, market step D, 28
+October 2026) read the products' stored rows only: 133 of the 817 terms CAPRI uses. The own terms were complete, so
+CAPRI's own-price elasticities were reproduced and the builder's check passed; the cross terms of other oils to the
+crops were missing (EU sum -10.7 kt per unit of price ratio against CAPRI's -116.4; fish: none of size). Found while
+porting the non-EU market supply functions (K54-3), which need the full matrix.
+
+- **Effect:** the EU's supply of other vegetable oils (about 2,490 kt per unit own term) in scenarios that move the
+  crop prices; small
+- **In 9t:** –
+- **Status:** **fixed** 29 October 2026: tools/lib/_capri_nq.py completes the Hessian as CAPRI's market1.gms; both
+  builders (the EU's other oils and fish, the non-EU market supply functions) use it; eu_market_supply_nq.csv rebuilt
+  (817 terms; the 133 before unchanged); the non-EU builder checks the stored terms against CAPRI's p_elasSupp
+  (23,647 terms, largest relative deviation 1e-14); run pending (batch-5 gate)
+
+<a id="k99"></a>
+### K99: A feed table without builder (feed_requirements.csv) as the fallback of the feed costs and bulks (found 29 October 2026, data declarations)
+
+`capri_data/2017/feed/feed_requirements.csv` (9 animals x 11 feeds, one row per animal for every region) had no
+builder; its records disagreed (DATA_SOURCING_REGISTRY "REAL_CAPRI ... fully real", MANIFEST "pigs/poultry synthetic",
+a tools/gams note "one of the fully synthetic inputs"). It was read in two places, as the fallback where an animal has
+no feed coefficient (livestock_feed_coef.csv, CAPRI's 2017 feed totals over the model's herds): the feed cost change of
+the animals without a ration in the supply models (supply_module.py), and the feed bulks passed to the market
+(model._set_feed_demand). The 24 cells without a coefficient are all region-animal pairs with no base herd (7 BROI, 9
+LAYS, 4 HFRS, 3 PIGS, 1 BULL), so the fallback acted on herds of zero; with BROILER_BIRDS_PER_PLACE (4.35, read only
+there).
+
+- **Effect:** none expected in results (zero herds); an input of unrecorded origin kept as a required file
+- **In 9t:** –
+- **Status:** **fixed** 29 October 2026 (batch 6): the file, its loader and both fallbacks removed (no coefficient: no
+  herd at base in CAPRI, so no feed); livestock_feed_coef.csv is now a required input; BROILER_BIRDS_PER_PLACE removed
+  from model_parameters.csv; tests and run pending (batch-6 gate)
+
+<a id="k100"></a>
+### K100: A national nutrient table without builder (nutrient_coefs.csv) filled three crops' coefficients and fallow's mineral N (found 29 October 2026, data declarations)
+
+`capri_data/2017/environment/nutrient_coefs.csv` holds one N, P2O5, K2O value per crop (no region; SWHE 125.9 kg N/ha)
+and has no builder (MANIFEST's vintage summary still calls it synthetic; DATA_SOURCING_REGISTRY records it as replaced
+by the regional CAPRI values). It is the base the regional values override:
+
+1. supply models (`_region_nutrients`): CAPRI's regional NITF / PHOF / POTF (sources/capreg/capreg_nutrient_coefs.csv)
+   cover every crop with area except OFOD (14.4 Mha, all 221 regions), SETA (7.5 Mha, 208 regions) and WINE (3.0 Mha,
+   155 regions), which keep the national values: the extract is keyed by CAPRI's activities (OFAR, ROOF, FALL, TWIN),
+   not mapped to the model's. The supply result's nutrient balance and the fertiliser instruments that scale the N
+   column read them.
+2. environmental accounts (`_base_mineral_rate`, the soil N2O pre-balance loop): CAPRI's regional mineral N (NMIN,
+   nutrients_regional.csv) covers every crop but SETA, which takes the national 4.8 kg N/ha: about 38.7 kt of mineral
+   N on 8.07 Mha of fallow and set-aside in the EU. CAPRI's 2017 results have no NMIN row for FALL, VSET or SETA (they
+   have NITF, a requirement of about 4.3-4.8 kg/ha), so CAPRI spreads no mineral N there.
+
+- **Effect:** mineral N on fallow about +39 kt (of about 9.5 Mt) in the N balance and the emissions; OFOD, SETA, WINE's
+  nutrient coefficients national rather than regional in the supply models' nutrient balance
+- **In 9t:** –
+- **Status:** **fixed** 29 October 2026 (batch 6): tools/build/build_nutrient_coefs_regional.py writes CAPRI's NITF,
+  PHOF, POTF on the model's crops (2017/supply/nutrient_coefs_regional.csv: level-weighted over the crop's CAPRI
+  activities, the member state's for a crop the region does not grow; 6,517 rows), read by the supply models in place
+  of the national table under the extract; the cells that change are exactly the three crops' (area-weighted N: OFOD
+  70 -> 158, SETA 4.8 -> 0.47, WINE 70 -> 25 kg/ha; reported in the supply result's nutrient balance, which no result
+  table reads). The environmental accounts take no mineral N where CAPRI has no NMIN (fallow, set-aside): EU mineral N
+  about -39 kt. nutrient_coefs.csv and its loader removed. Tests and run pending (batch-6 gate)
+
+<a id="k101"></a>
+### K101: Model inputs without a builder (census of a run's reads, found 29 October 2026)
+
+K72 closed the inputs without a builder it had found. A census of every file a Green Deal run reads (the run manifest
+of a one-region run, lv_gd4, 164 files) against the outputs of the pipeline's builders (tools/pipeline/builders.json)
+found 17 read files that no builder writes (settings/defaults.toml aside). Two were of unrecorded origin and are removed
+(K99 feed_requirements.csv, K100 nutrient_coefs.csv); the others had a recorded CAPRI source but no code that turns it
+into the file.
+
+| File | Source | Status |
+|---|---|---|
+| policy/landscape_targets_ms.csv, organic_targets_ms.csv | CAPRI's pol_input/greendeal GDX (p_landscapeTargets, p_organicTargetMS, p_organicTargetUAA) | built: build_greendeal_targets.py (tools/lib/_gdx.py), same values (largest relative difference 4e-15: the files held 15 significant digits) |
+| shared/eu_market_blocks.csv | CAPRI's aggregation/defaultA.agg section 4 (Norway's former capri-mod row removed 30 October 2026: Norway is its own market region since K56) | built: build_eu_market_blocks.py, byte-identical |
+| policy/organic_yield_gap.csv | CAPRI's dat/pesticides/yield_effects_ppp.xlsx, sheet yld_gap | built: build_organic_yield_gap.py (the file held 3 decimals; at most 0.0005 points) |
+| supply/yield_price_elasticity.csv | CAPRI's supply/yield_elas.gms with sets.gms CERE_COLS, OILS_COLS | built: build_yield_price_elasticity.py, byte-identical |
+| supply/mineral_n_price.csv | CAPRI's res_17 national UVAG of NITF | built: build_mineral_n_price.py (the file held 2 decimals) |
+| supply/pmp_own_price_elasticities.csv | CAPRI's PELA (estnlp results.gdx), latest year up to 2005 | built: build_pmp_own_price_elasticities.py, same values (1e-14); the year rule is the committed file's (116 pairs from before 2005; CAPRI's slope forecast reads 2004) |
+| market/capri_oilseed_products_baseline.json | CAPRI's FAO_agg p_dataMarket | replaced: only the EU's three cake feed uses were read (the cake index's weights): market/eu_cake_feed_bas.csv, build_eu_cake_feed.py, same values; the JSON removed |
+| supply/capri_own_price_elasticities.csv | CAPRI's p_ElasSupp 'CAL' of its 2020 supply-model calibration per member state (supply_elas_2_1720<MS>defaulta.txt and the REMAINI_NG zip) | built: build_capri_own_price_elasticities.py, same values (columns in the files' order of appearance); read by the elasticity-calibrated PMP only |
+| sources/arm/capri_supply_elas_market_1717.csv, supply_elas_eu_all.json | CAPRI's elas1717defaulta.gdx p_elasSupp (gdxdump p_elasSupp.txt) | built: build_capri_supply_elas_market.py, both byte-identical as committed; then, at the project lead's decision (29 October 2026), the JSON replaced by 2017/market/supply_elas_eu.csv: the median over the model's 27 member states (was CAPRI's EU28, the UK included), every market commodity under the model's code (OLIV, PARI, SUGR, WINE now found; INPE dropped), full precision. Changes the EU rows' own-price anticipation: run pending (batch-6 gate) |
+| sources/capreg/capreg_national_prices.csv | CAPRI's res_17 national MPRI | built: build_capreg_national_prices.py, same values; adds MAIZ, OAR1 and the model's CORN (the 17 regions without a regional maize price grow none), drops COTT and OFIB (copies of TEXT under old codes, read by nothing) |
+| shared/model_parameters.csv | each row with its CAPRI or literature source | kept as the declared parameter table (the scalars CAPRI sets in its code); five rows checked against CAPRI's code, all as stated: p_OverFertMarkUp 0.1 and p_fertEffCor 1.1 (envind/ghgMiti.gms), p_trqSigmoidSlope 200 (arm/market_model.gms l. 339, the simulation's; trim_trqs.gms's 50 and 10 are the calibration's), p_elasHigh 4.5 (impose_upper_bound_on_elasticity.gms), p_rhoFeed FMIL 0.5 (arm/market1.gms l. 90) |
+| shared/capri_member_state_codes.csv | CAPRI's sets.gms NUTS0 codes and the NUTS prefixes' aliases (BE, LU -> BL; IE -> IR; GR -> EL; GB -> UK) | kept as a declared code map, each row with its source: the aliases are a convention between NUTS and CAPRI, not in CAPRI's sets |
+
+- **Effect:** reproducibility (no result changes from the builders added: the values are the files'; small rounding
+  gains); K100's fallow mineral N
+- **In 9t:** –
+- **Status:** **fixed** (29 October 2026, batch 6 gate). Batch 6: eleven files built, one replaced, the member-state code map
+  and the parameter table kept as declared; the EU supply elasticities rebuilt on the model's EU27 (the project lead's
+  decision). Left: the census to be repeated on the gate runs' manifests (a full EU run
+  reads files a one-region run may not)
+  Census repeated on the gate runs' manifests (Farm-to-Fork r188, 162 files read; Green Deal r189, 167): every file
+  read is written by a builder of tools/pipeline/builders.json but the two declared tables (the member-state code map,
+  the parameter table) and settings/defaults.toml. Closed
+
+<a id="k102"></a>
+### K102: Data files that no run and no builder reads (census, found 29 October 2026)
+
+The run manifests of a full Farm-to-Fork run (r186) and a one-region Green Deal run (lv_gd4) list every file the
+model's main process reads; the pipeline's trace (tools/pipeline/builders.json) every file a builder reads. Under
+capri_data/2017 and shared/, 46 files are in neither. By kind:
+
+- read only under a setting that is off by default (kept): the EU trade blocks' market files (*_eu2.csv,
+  market.eu_blocks), the cattle member splits' PMP files and per-sex young animals (K65), the 2017 tariff-rate quotas
+  (the 2017 market year), the water module's irrigation, the NUTS 2024 reporting units, the 2017 trade flows;
+- written in batch 6 and not yet run (the M3 files, the regional nutrient coefficients, the EU supply elasticities and
+  cake weights): read by the batch-6 gate;
+- read by nothing and written by no builder: crop_nutrient_export.csv, eu_mfn_tariffs.csv (listed in the loaders'
+  file map only), min_share_mineral_fert.csv (K9's floor, superseded by the inner fertiliser distribution),
+  nvz_p_soilTypes.csv: **removed 29 October 2026** (batch 6), with their register entries;
+- written by an extractor and read by nothing: 17 symbols of CAPRI's ammonia data (tools/build/build_ammonia_tech_inputs.py
+  writes every symbol of CAPRI's MITERRA and holdings files: ControlStrat_TS, CorrND, FracNVZNuts2(_full),
+  FracToepHouse, FracToepStorage, FracUseFert, PercPeat, ScalarArray, costs/scalars, rCorrND, rLFManureBasis,
+  rLFManureND, reducBio, the Nitrates Directive's min shares and obligations) and three of the mitigation inputs
+  (p_ccEfa, p_tillageCover, p_winterCoverShare0; build_mitigation_inputs.py): CAPRI's data for parts not ported
+  (the Nitrates Directive's NDtech is off in CAPRI's Green Deal runs; tillage, K93) or not needed;
+- fao_market_baseline.json: read by a coverage test only (the market reads CAPRI's balances): to be settled with that
+  test.
+
+- **Effect:** none on results
+- **In 9t:** –
+- **Status:** **fixed** 29 October 2026 (batch 6): four orphans removed; the extractors write only what the model or a builder of its
+  inputs reads (the project lead's decision, 29 October 2026): 13 ammonia symbols, the cost tables' scalars, three
+  mitigation inputs and build_nitrates_directive with its inputs (nvz_p_nvzArea, nvz_p_slopeTypes) and outputs removed;
+  p_holdLSU.csv and p_nvzShare_lu.csv given their builder (build_ammonia_tech_inputs with CAPRI's holdingsLSU and
+  nvzShare_LU dumps, byte-identical). fao_market_baseline.json and the extended FAO_agg SUA (read only by a coverage
+  test of an older market base) removed, the test now on CAPRI's FAO_agg balances (world_market_baseline.json).
+  capri_data/sources: of 180 files no run or traced builder reads, 128 are named by no code at all and were removed
+  (the project lead's decision, option 2, 29 October 2026: old parameter extractions of CAPRI's GAMS code, FAO 2021 /
+  FAO_agg JSON / COCO extracts of the former market base, CAPRI data copies of parts not ported or handled otherwise:
+  Norway's MITERRA mirror, anaerobic digestion base data, cost-saving runs, soil carbon, land-use transition, water,
+  the IFS maps); kept as reference: the JRC121368 report text and published results, the NUTS correspondences; the
+  others are named by a builder or extractor (their own outputs, or read in an untraced invocation). capri_data/archive/,
+  DATA_CATALOG.json, SYMBOL_EXTRACTION_MAP.json and the unread extracts and reports listed under K103: removed 30
+  October 2026, the project lead's decision, read by no code.
+  **Removed 30 October 2026** at the project lead's request, read by no code: the JRC121368 report text, published
+  results and scenario specification (jrc121368/), capri_trade_regions_2017.json, the NUTS workbooks
+  NUTS_2010_-_NUTS_2013.xls, NUTS2013-NUTS2016__1_.xlsx, NUTS2021-NUTS2024.xlsx and NUTS2024-NUTS2027.xlsx (the NUTS
+  tables remain in the project lead's uploads; the CSVs taken from them that code reads, nuts2013_2016.csv,
+  nuts2021_2024.csv and nuts2024.csv, stay, written by tools/build/convert_sources_to_csv.py from git history), and the stand-alone
+  extract_variable_costs.py with its notes (capri_star/capreg_extracts/; variable_costs.csv is written by
+  build_crop_economics_2017.py). NUTS2021.xlsx is converted (nuts2016_2021.csv, read by build_nuts2024_reporting.py).
+  The converter writes only what code reads: the miti_data_jul15 dump's four sets, three of the biofuel file's
+  parameters (p_secgConv, p_oilEqu, p_density) and the NUTS 2021 classification and change sheets are not written; the
+  unread second LitRevFertTech dump (sources/capri_dat/ghgtech, see K103) was removed with them.
+
+### K103: Data files without a known origin or read by no code (data declarations, found 29 October 2026)
+
+With every CSV declared and given its provenance (capri_data/schema/01_provenance.sql) the rule "every data file has
+a known origin" finds nine files under capri_data/validation that no builder writes and no source folder or checked
+note explains:
+
+- read by no code (the static scan of schema.json and a grep): baseline_reproduction_2030.csv,
+  capri_mitigation_shares_2030.csv, capri_pela_own_elasticities.csv, capri_ref_2030_levels.csv,
+  elasticity_comparison.csv, greendeal_2030/capri_greendeal_effect.csv, price_structure_vs_capri_scenario.csv (this
+  one is not a well-formed CSV: comment lines after the data; the validator reports it);
+- read by checks and a test: capri_eu27_levels_2017_capreg.csv (tools/check/compare_baseline_capri.py),
+  capri_eu27_levels_2030_ref.csv (the same, tools/check/compare_outlook_2030.py and test_capri.py); both arrived in
+  the repository's first commit, without builder.
+
+The check of the registry's notes (02_provenance_notes.sql) found three source extracts read by no code:
+sources/capreg/capreg_nutrient_coefs.csv (build_nutrient_coefs_regional reads CAPRI's dumps directly),
+capreg_manure_nutrients.csv and sources/capmod/capmod_world_prices_2017.csv (the world-price checks read
+capmod_world_reference_2017.csv). sources/capri_dat/ghgtech/LitRevFertTech_p_litRevFertTechs.csv is a second, fuller
+dump of the table that sources/ghgtech/LitRevFertTech_p_litRevFertTechs.csv holds (the one build_fert_side_effects
+reads); no code names the first.
+
+- **Effect:** none on results
+- **In 9t:** –
+- **Status:** **fixed** 29 October 2026 (the project lead's decision): the seven unread validation files and the
+  three unread extracts removed (extract_all_from_data2, extract_remaining_nine and ingest_capmod_market no longer
+  write them); the two reference files given a builder, tools/build/build_capri_eu27_levels.py (2030: dataOut EU27yr19
+  LEVL of markmarket_greendeal_1730et_base_1717, reproduced exactly; 2017: the 26 CAPREG dumps summed, equal to the
+  old file's four decimals, now at full precision). sources/capri_dat/ghgtech/LitRevFertTech_p_litRevFertTechs.csv
+  (unread second dump) removed 30 October 2026 (K102); further builder outputs that no code reads remain to be settled (see the census in
+  capri_data/schema/schema.json, read_by).
+  **Removed 30 October 2026, the project lead's decision, read by no code** (an audit of the files read neither by the
+  runs r190/r191 nor by a builder; each grepped again across code, tests, docs, schema and the pipeline trace), their
+  writers stopped: sources/baseline_pmp/pmp_cnst_2030.csv and pmp_cnst_landtypes_2030.csv (build_pmp_2030),
+  sources/baseline_pmp/simini_21730_data.csv (no writer; its reader build_pmp_recipe.calibration_point_2030, never
+  called, removed too), sources/capmod/capmod_trade_flows_2017.csv.xz (ingest_capmod_market, which now writes only its
+  uncommitted summary JSON), sources/capreg/capreg_cost_components.csv.xz (extract_all_from_data2),
+  capreg_feed_use.csv, capreg_herds.csv, capreg_land.csv (extract_remaining_nine), sources/estnlp/gtap_armington.csv
+  (ingest_pela_gtap, its GTAP part removed), validation/greendeal_2030/capri_marginal_terms_max_2030.csv.xz and
+  capri_unit_values_max_2030.csv (extract_capri_marginal_terms: the max invocation removed from the pipeline trace
+  and reproduce_builders), sources/world_price_provenance.csv (build_world_prices; its content summarised in the
+  origin note of world_prices.csv, 02_provenance_notes.sql); the metadata DATA_CATALOG.json, SYMBOL_EXTRACTION_MAP.json,
+  trajectories/TEMPLATE.json, validation/VALIDATION_SUMMARY.json, capreg_merge_report.json,
+  capreg_yield_validation.json, coco_yield_merge_report.json, livestock_merge_report.json, documentation_answers.json,
+  schema_coverage.json (tools/check/verify_schema.py --json writes it only where asked), greendeal_2030/summary.json
+  and validation_result.json; and capri_data/archive/ (seven superseded files and its README). Kept:
+  pipeline/captrd/sets/fixyield.csv (CAPTRD's FixYield, read once CAPTRD's Steps 2-3 are ported).
+
+### K104: The payments report's area left fallow out of CAPRI's UAAR (found 29 October 2026, data declarations)
+
+cap_payments.csv's BPS is CAPRI's premiums per ha of UAAR (UAAR PRME; tools/build/build_crop_economics_2017.py), and
+CAPRI's UAAR holds the fallow land (SETA, FALL; base_areas' SETA column). The DirectPaymentsEngine
+(capri_mod/policy/policy_module.py, compute_payments_by_region) multiplied it by arable + permanent + grassland only,
+without FALLOW: AT110000 175.9 kha against CAPRI's 190.3. The EU total of the baseline payments was 46.9 bn EUR
+(regression anchor 54.0 +- 6), 49.1 bn EUR with fallow.
+
+- **Effect:** the policy report's payment totals only (the crop premiums in the margins come from crop_premium.csv
+  and livestock_premium_coef.csv)
+- **In 9t:** yes
+- **Status:** **fixed** 29 October 2026: the area is the four land columns, CAPRI's UAAR
+
+### K105: Numbers in the model's code to check, register or move to the settings (found 29 October 2026)
+
+The census of the numbers held in the model's code (capri_data/schema/03_code_data.sql, classified in
+04_code_data_status.sql; docs/design/PROXY_AUDIT.md) left five with an action; the project lead's decisions (29
+October 2026):
+
+- the manure-application limit (SupplyModule._manure_limit: 170 kg N/ha, or 1.001 x the base rate where higher): it
+  built the manure_application row of the N-surplus scenarios (manure N <= limit x crop land), capri-mod's own, and
+  the function returned None on any error (the manure terms then silently absent). The classification first said the
+  limit was read nowhere; it was read. CAPRI's default runs have no such row: manure is tied to land by the crop
+  nutrient balance (NUTNED_, fertDistExcr_, ManureNPK_, supply_model.gms l. 870-947 and 1095-1212) with manure trade,
+  which the NLP form ports; the Nitrates Directive's cap is NDman (envind/envConstraints.gms l. 2876-2933), whose
+  switch the Green Deal policy file sets only after an $exit. **Done** ("as CAPRI", the project lead's decision): the
+  row, the limit and MANURE_LIMIT removed (the NLP form already dropped the row); _manure_per_head gives the manure
+  per head and lets an error stop the solve. Found with it: the split columns (dairy, cattle, genetics) took their
+  manure factor for NUTNED_ from the manure or N row, which exist only with an N target, so without one their manure
+  did not reach the nutrient balance; the factor now comes from the tables (dmann_rel, d_mann_rel) in every run, which
+  can move results of runs without an N target;
+- capri_mod/data/validate_data.py _check_margins capped specialty-crop costs at 2 x the median, a cap the loader had
+  dropped: **removed** (the check sees the model's costs; 12 pass, 0 warn);
+- BilateralCommodity's export cap at 0.98 of the model's base supply (PROXY_AUDIT S192): a consequence of step F (the
+  market calibrated to the supply models' baseline, where a region's base production can fall below CAPRI's recorded
+  exports): **removed** with K106 (the market's base made CAPRI's production of the market year; exports scaled only
+  where they exceed the base supply, which no cell does after the 30 October rebuild: 0 of 1,228 cells off by more than
+  1e-4);
+- PMPCalibrator.calibrate's 0.05 cap on PELA / p_pmpQuadPact cross terms of crops without CAPRI's terms (S065):
+  **removed** with the path, its two inputs' loading and sources/estnlp/pela_cross_by_region.json (no longer written);
+  such crops have diagonal rows, as in CAPRI's QUADRA_; default runs unchanged (with CAPRI's terms the path was
+  skipped). Found with it: supply.pmp_cross_terms = "none" did not act on CAPRI's terms (the default ones); it does now;
+- CAPRIModel._run_scenario's adaptive price step for Norway (1.25, 0.5, 0.1) now reads outer_loop.relax_step_up,
+  relax_step_down and relax_floor (the same values): **done**.
+
+- **Effect:** none on default results from the checks, the settings with equal values and the path the default skips;
+  the split columns' manure in runs without an N target is a correction that can move results
+- **In 9t:** yes
+- **Status:** fixed (all five done 29-30 October 2026; the export cap with K106)
+
+### K106: The market's base supply of crushed and biofuel products was not CAPRI's production of the market year (found 29 October 2026)
+
+The market keeps CAPRI's bilateral flows of the market year and calibrates each region's domestic sales as its base
+supply S0 minus those exports; an export cap at 0.98 of S0 (PROXY_AUDIT S192, not CAPRI's) bound in 42 commodity x region
+cells at the 2017 base. In 34 of them CAPRI's own data were consistent (a region exporting 98-100% of its production,
+Indonesia's coffee 99.99%) and only the cap changed CAPRI's flows; in 8, CAPRI's exports exceeded S0. In CAPRI's market
+data all 8 are consistent: S0 did not come from them. 110 of 1,135 non-EU cells had S0 differing from CAPRI's production
+(prod_kt of bilateral_regions_<year>.csv) by more than 1e-4, all from two blocks:
+
+- crushing: crush and yields from FAO_agg's base period (p_dataMarket 'BAS', the raw data before CAPRI's market
+  calibration), where CAPRI's calibration sets PRCY = Prod / Proc (clamped outside RMSSUP) and Prod = Proc x PRCY
+  (arm/calibrate_market_data.gms l. 72-82, 1123-1130): Australia's soybean oil yield 0.1776 against CAPRI's 0.1937;
+- biofuels and DDGS: the files held only CAPRI's 2030 reference (the builder hard-coded the year), so a 2017 market ran
+  with 2030 output (Argentina's biodiesel 1,862 kt against 2,819 in 2017; New Zealand's DDGS 4.45 against 6.73), the EU
+  rows included.
+
+- **Effect:** the market's calibration at the 2017 base (oils, cakes, biofuels, DDGS; the 2017 market year's runs) and
+  at 2030 (29 crushing cells above 5%); results move
+- **In 9t:** yes
+- **Status:** **fixed** 30 October 2026: crushing_parameters_<year>.csv from CAPRI's market data of the year (PROC,
+  PRCY; p_ElasProc of the year's calibration); biofuel_feedstock/market/use_share_<year>.csv per market year
+  (build_biofuel_market.py --year; CAPRI's "RW" aggregate of the 2017 data excluded; a non-positive feedstock cost is
+  an error, no group dropped); the market reads the files of its market year (MarketModule._market_year). At the 2017
+  base the cells with a gap above 1e-4 fell from 110 to 15, all from the UK: the new files map it to GBR, the bilateral
+  market files still to ROW (the batch-7 rebuild on 32 regions). The 0.98 cap is removed: exports are scaled only where
+  they exceed S0, which CAPRI's data no longer cause outside the rows set by the supply models (step F); such hits are
+  logged in the run metadata and warned.
+
+<a id="k107"></a>
+### K107: The regional model's emission tax on mineral N took IPCC's factors while the accounts take CAPRI's MITERRA fractions (found 31 October 2026, UreaSubst scoping)
+
+CAPRI taxes the soil N2O of the mineral N bought through its loss fractions: N2OSYN = N bought x emiLoss(NETF, N2O,
+GasTot) and the mineral part of N2OAMM = N bought x (emiLoss(NETF, NH3) + emiLoss(NETF, NOx)) x EF4
+(supply/supply_model.gms l. 3708, 3793). The accounts and the manure-trade terms moved to these fractions on 27
+October 2026 (K74 S12, `_ef_mineral_n2o`), but the regional model's tax on the purchases (`AbatementBlock._nlp_tax_terms`,
+the d and v terms) kept IPCC's EF1 (1%) and 10% x EF4. In DE11 the direct part is 1.067% against 1% and the indirect
+0.039% against 0.1%; the sum differs by under 1% (1.107% against 1.1%); the nitrification inhibitor's side effects (N2OSYN, NH3SYN)
+apply to the two parts separately, so its tax value takes the split as well (not measured).
+
+- **Effect:** emission-tax runs only (the term is built only with a tax); the Farm-to-Fork and Green Deal runs have none
+- **In 9t:** –
+- **Status:** **fixed** 31 October 2026: `FertilisationBlock._mineral_n2o_parts` returns the two parts (MITERRA, IPCC's
+  factors where CAPRI's fractions are missing, as before), used by `_ef_mineral_n2o` and by the tax terms; test
+  `test_tax_on_mineral_n_takes_the_accounts_miterra_factors`
+
+<a id="k108"></a>
+### K108: Inputs from CAPRI's 2030 results in 2030 money in a model that works in 2017 money (found 31 October 2026, anaerobic digestion check)
+
+The 2030 runs work in 2017 money: CAPRI's 2030 prices and premiums divided by CAPRI's general inflation 1.019^13 =
+1.2772 (tools/build/build_price_trajectory_2030.py, capri_price_ratios_2030.csv), input costs at 2017 values. CAPRI's
+own 2030 calibration and results are in its 2030 money: it inflates costs and mitigation parameters by p_infl^(2030 -
+2017) (e.g. envind/ammo_tech.gms l. 3355-3358) and its PMP terms are calibrated on its 2030 prices (the recipe matches
+CAPRI's terms only with p_infl since 2004, docs/PMP_CAPRI_2030.md). Found so far without deflation:
+
+- CAPRI's crop PMP matrix (pmp_capri_2030.csv, the default pmp_source "capri2030"; supply_module.py capri_g, Q_ij = g_ij
+  / sqrt(x_i x_j)) and the other 2030 terms of that source (animals' herd terms, intensity splits);
+- anaerobic digestion: every money term x 1.019^13 (tools/build/build_ad_option.py INFL);
+- the catch crops' cost (cover_crops.csv catc_cost_eur_ha = CATC TOIN of CAPRI's 2030 reference) and the winter-cover
+  option built on it;
+- the 2030 land rents (land_rents_2030.csv, D_AREA of CAPRI's 2030 reference);
+- possibly the 2030 CAP ceilings (cap_ceilings_2030.csv) beside premiums in 2017 money (to check).
+
+**Audit of the builders, 31 October 2026** (read-only; defaults pmp_source "capri2030", pmp_capri_parts crops, animals,
+feed, land). In 2030 money and used by the 2030 runs, ranked by expected effect on the responses:
+1. crop PMP matrix (build_pmp_capri_2030.py, supply_module.py capri_g);
+2. animals' herd terms (build_animal_pmp_capri_2030.py; loaders put them into capri_g);
+3. fertiliser prices of the fertilisation block (npk_region_2030.csv uvag_eur_t, CAPRI's 2030 UVAG: Austria's N
+   1,110.5 EUR/t against 869.5 in 2017, ratio 1.2772; read by the NLP objective and the fertiliser options' NITF
+   price), while the fertiliser allocation reads mineral_n_price.csv in 2017 money;
+4. land market: the land types' quadratic terms (land_market_2030.csv, p_pmpQuadLandTypes) and the 2030 land rents
+   (land_rents_2030.csv), also in the greening dual;
+5. intensity splits' 2030 terms (q_*_capri2030 of the dairy, cattle and grass intensity files);
+6. feed PMP slopes (feed_ration capri_slope_2030);
+7. catch crops' cost and the winter-cover option's curve (CATC TOIN 2030);
+8. anaerobic digestion (inflated on purpose, unlike the other ammonia options of the same file);
+9. CAPRI's cost savings (capri_costsavings_2030.csv, dsav) in the genetics, low-N feed and supplement options, and
+   genetic improvement's cost per unit (2030 UVAG of COMI).
+Report-only: CAP budget ceilings (budget use) and the set-aside premiums of the labour table. In 2017 money (fine):
+prices and premiums, histosols, 3-NOP cost, the ammonia options other than AD, the fertiliser options (miti_data_jul15
+before CAPRI's inflation; their saving slope takes the 2030 NITF price, item 3), feed ration prices, young animals,
+plant protection, mineral_n_price. Unsettled: welfare_base (market data of 2030 with INPE 1.2772; cancels in run
+differences). The deflator for all items is 1.019^13 (CAPRI's 2030 terms carry p_infl since 2004, the model's prices
+13 years from 2017).
+
+Deflated already: histosol fallowing, the feed supplements (3-NOP), premiums and prices. The ammonia technologies are
+in 2017 money (CAPRI inflates them; the model takes them before that step), consistent.
+
+- **Effect (expected, not measured):** with curvature in 2030 money against prices in 2017 money, the crops' (and
+  animals', where CAPRI's terms are used) price responses are 1/1.2772 of CAPRI's, about 22% weaker; an earlier check
+  fits it (Austria's rapeseed elasticity 9.7 against CAPRI's 12.4, K61; 12.4 / 1.2772 = 9.7). The Farm-to-Fork and
+  Green Deal results move
+- **In 9t:** ?
+- **Status:** **fixed, gate 11 pending** (31 October 2026, branch money-year): tools/lib/_money.deflator(year) (the
+  deflator of capri_price_ratios_<year>.csv, one value, 1.019^13 to 4e-16) divides every item of the audit's list in its
+  builder (genetics: also CAPRI's floors of 20 and 2 EUR, in its simulation year's money; anaerobic digestion: CAPRI's
+  inflation taken back out; the per-CAPRI-region land rents stay in CAPRI's money, the recipe's input); data rebuilt in
+  the pipeline's order, every changed term exactly 1/1.277216 of before; tests 253 passed. Mini-EU Farm-to-Fork (20
+  units) against the gate-10 reference: oilseed production -22.4% (-20.6), cereals -16.9 (-16.0), veg+perm -16.1
+  (-15.5), ammonia -38.7 (-39.6), manure N2O -21.8 (-23.0), prices within 0.2 points (a subset run: its EU prices move
+  little). Not changed: genet_eff's feed cost from the 2017 ration prices where CAPRI takes the simulation year's
+  (a price-year question); the market's welfare base (to settle). The full Farm-to-Fork and Green Deal runs wait for the
+  project lead's go (gate 11)
+  **Gate 11, 31 October 2026** (r198 Farm-to-Fork, r199 Green Deal 2030 against gate 10's r196, r197): baselines equal
+  (largest regional difference 0.006); supply responds more to prices, so the scenarios' price rises are smaller and the
+  herds fall less: Farm-to-Fork milk +20.0% (+22.4), pork +19.5 (+20.9), poultry +16.3 (+17.4), cereals +10.7 (+11.2),
+  pigs -12.8% (-13.5), ammonia -36.7 (-37.7), manure N2O -17.2 (-18.1), production totals within 0.1 points; Green
+  Deal milk +8.0 (+8.9), cereals +5.7 (+6.4), ammonia -29.7 (-31.0), the rest within 0.3 points. Both converged (12 and
+  20 iterations); the scenario iterations take about 1.5 times as long (a first Green Deal run stopped at its
+  iteration 6, restarted with the Hessian from the cache)

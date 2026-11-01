@@ -52,6 +52,8 @@ S = "capri_data/2017/supply"
 
 #: (builder, arguments, external inputs that must exist). Order: REGIONAL_UNITS_BUILDERS.md section 3, then the rest.
 INVOCATIONS: list[tuple[str, list[str], list[Path]]] = [
+    # the CSV conversion of the sources that were not CSV (reads the originals from git history)
+    ("convert_sources_to_csv", [], []),
     ("extract_gd2030_nbalance", [], [REF]),
     ("build_regional_units", [], []),
     ("build_code_lists", ["--sets", str(SETS)], [SETS]),
@@ -66,6 +68,7 @@ INVOCATIONS: list[tuple[str, list[str], list[Path]]] = [
     ("build_supply_elasticities_regional", [], []),
     ("build_capri_base", [str(D17)], [D17]),
     ("build_crop_economics_2017", [str(D17)], [D17]),
+    ("build_nutrient_coefs_regional", [str(D17)], [D17]),
     ("build_cap_ceilings_2030", [], [REF]),
     ("build_capri_baseline_surplus", [], []),
     ("build_cover_crops", [], [GAMS]),
@@ -84,7 +87,8 @@ INVOCATIONS: list[tuple[str, list[str], list[Path]]] = [
     ("build_ammonia_cost_tables", [str(GAMS / "envind/ammo_tech.gms")], [GAMS / "envind/ammo_tech.gms"]),
     ("build_ammonia_herd_inputs", [str(UP / "scen.zip"), str(UP / "gd_full.zip")], [UP / "scen.zip", UP / "gd_full.zip"]),
     ("build_ammonia_tech_inputs", [str(UP / n) for n in ("LitRev_non_changeable_parameters.csv", "LitRev_inputs.csv",
-                                                         "LitRev_input_manStor.csv", "LitRevAmmoTech.csv")],
+                                                         "LitRev_input_manStor.csv", "LitRevAmmoTech.csv",
+                                                         "holdingsLSU.csv", "nvzShare_LU.csv")],
      [UP / "LitRev_inputs.csv"]),
     ("build_ammonia_cost_curves", [], []),
     ("build_ammonia_technologies", [], []),
@@ -134,21 +138,34 @@ INVOCATIONS: list[tuple[str, list[str], list[Path]]] = [
     ("build_lownfeed_effects", [], [UP / "animReq_SK.zip", D17]),
     ("build_livestock_products", [], [D17]),
     ("build_eu_producer_prices", [], []),
-    ("build_supplement_effects", [], []),
+    ("build_digestibility_table", [str(GAMS)], [GAMS / "envind" / "def_digestibility.gms"]),
+    ("build_supplement_effects", [], [WORK / "capreg"]),
     ("build_genetics_effects", [], [D17]),
     # not region-keyed, or member-state / market / CAPRI-coded
     ("build_active_technologies", [str(GAMS / "pol_input/greendeal/refpol_endotech_all_sup.gms")],
      [GAMS / "pol_input/greendeal/refpol_endotech_all_sup.gms"]),
     ("build_bilateral_market", [], [UP / "market_base_1717.txt"]),
     ("build_bilateral_market", ["--eu-blocks"], [UP / "market_base_1717.txt"]),
-    ("build_biofuel_market", [], []),
+    ("build_biofuel_market", ["--year", "2017", "--dump", str(UP / "market_base_1717.txt"),
+                              "--elas", str(UP / "elas_2_1717defaulta.csv")],
+     [UP / "market_base_1717.txt", UP / "elas_2_1717defaulta.csv"]),
+    ("build_biofuel_market", ["--year", "2030", "--dump", str(UP / "markmarket_greendeal_1730et_base_1717.txt"),
+                              "--elas", str(UP / "elas_2_1730defaulta.csv")],
+     [UP / "markmarket_greendeal_1730et_base_1717.txt", UP / "elas_2_1730defaulta.csv"]),
     ("build_cap_greening", [], [D17]),
+    ("build_capri_eu27_levels", [str(UP / "markmarket_greendeal_1730et_base_1717.txt"), str(WORK / "capreg")],
+     [UP / "markmarket_greendeal_1730et_base_1717.txt", WORK / "capreg"]),
     ("build_capri_crop_n_coefs", [str(UP / "res_2_1730greendeal_refdefaulta.zip")],
      [UP / "res_2_1730greendeal_refdefaulta.zip"]),
     ("build_capri_gnb_components", [str(UP / "res_2_1730greendeal_refdefaulta.zip")],
      [UP / "res_2_1730greendeal_refdefaulta.zip"]),
     ("build_crop_cost_shares", [], [D17]),
-    ("build_crushing_parameters", [], [UP / "fao_agg_17_datamarket.txt", UP / "elas_2_1717defaulta.csv"]),
+    ("build_crushing_parameters", ["--year", "2017", "--market", str(UP / "market_base_1717.txt"),
+                                   "--elas", str(UP / "elas_2_1717defaulta.csv")],
+     [UP / "market_base_1717.txt", UP / "elas_2_1717defaulta.csv"]),
+    ("build_crushing_parameters", ["--year", "2030", "--market", str(UP / "markmarket_greendeal_1730et_base_1717.txt"),
+                                   "--elas", str(UP / "elas_2_1730defaulta.csv")],
+     [UP / "markmarket_greendeal_1730et_base_1717.txt", UP / "elas_2_1730defaulta.csv"]),
     ("build_dairy_processing", [], []),
     ("build_dairy_world_blocks", [], []),
     ("build_dairy_world_markets", [], []),
@@ -157,6 +174,21 @@ INVOCATIONS: list[tuple[str, list[str], list[Path]]] = [
     ("build_feed_bulks", [], []),
     ("build_feed_byproducts", [], []),
     ("build_world_prices", [], [UP / "fao_agg_17_datamarket.txt", D17]),
+    ("build_eu_cake_feed", [], [UP / "fao_agg_17_datamarket.txt"]),
+    ("build_feed_energy", [], [UP / "data_market_1730defaulta.csv"]),
+    ("build_noneu_feed_nq", [], [UP / "data_market_1730defaulta.csv", UP / "elas_2_1730defaulta.csv"]),
+    ("build_greendeal_targets", ["--gams", str(GAMS), "--gdxlib", str(WORK / "gdxlib")], [GAMS / "pol_input" / "greendeal"]),
+    ("build_eu_market_blocks", ["--agg", str(GAMS / "aggregation" / "defaultA.agg")], [GAMS / "aggregation" / "defaultA.agg"]),
+    ("build_organic_yield_gap", ["--xlsx", str(UP / "yield_effects_ppp.xlsx")], [UP / "yield_effects_ppp.xlsx"]),
+    ("build_yield_price_elasticity", ["--gams", str(GAMS)], [GAMS / "supply" / "yield_elas.gms", GAMS / "global" / "fromimpact" / "sets.gms"]),
+    ("build_mineral_n_price", [str(D17)], [D17]),
+    ("build_pmp_own_price_elasticities", ["--dump-dir", str(WORK / "inputs" / "estnlp")], [WORK / "inputs" / "estnlp"]),
+    ("build_capri_supply_elas_market", ["--src", str(UP / "p_elasSupp.txt")], [UP / "p_elasSupp.txt"]),
+    ("build_capreg_national_prices", [str(D17)], [D17]),
+    ("build_capri_own_price_elasticities", ["--src", str(UP)], [UP]),
+    ("build_captrd_trajectory", ["--series", str(WORK / "capri_reference/captrd_results/1770/series.csv.gz")],
+     [WORK / "capri_reference/captrd_results/1770/series.csv.gz"]),
+    ("build_captrd_dat", [], [WORK / "hf_capri/dat/baseline/ageline/ageline.parquet"]),
     ("build_feed_demand_nonEU", [], [UP / "elas_2_1730defaulta.csv", UP / "data_market_1730defaulta.csv"]),
     ("build_fert_dist_priors", [], []),
     ("build_fert_options_jul15", [], []),
@@ -168,7 +200,6 @@ INVOCATIONS: list[tuple[str, list[str], list[Path]]] = [
     ("build_mitigation_inputs", [str(UP)], [UP / "trends_1730.csv"]),
     ("build_n_deposition_substitution", [], []),
     ("build_n_leaching", [], []),
-    ("build_nitrates_directive", [], []),
     ("build_nuts2024_reporting", [], []),
     ("build_p_balance", [], []),
     ("build_processing_nq", [], [UP / "elas_2_1730defaulta.csv", UP / "markmarket_greendeal_1730et_base_1717.txt"]),
@@ -176,6 +207,8 @@ INVOCATIONS: list[tuple[str, list[str], list[Path]]] = [
                                  UP / "markmarket_greendeal_1730et_base_1717.txt"]),
     ("build_eu_market_supply_nq", [], [UP / "elas_2_1730defaulta.csv", UP / "data_market_1730defaulta.csv",
                                        UP / "markmarket_greendeal_1730et_base_1717.txt"]),
+    ("build_noneu_market_supply_nq", [], [UP / "elas_2_1730defaulta.csv", UP / "data_market_1730defaulta.csv",
+                                          UP / "markmarket_greendeal_1730et_base_1717.txt"]),
     ("build_processing_seeds", [], []),
     ("build_processing_yields", [], [UP / "markmarket_greendeal_1730et_base_1717.txt"]),
     ("build_sugar_processing", [], []),
@@ -189,8 +222,6 @@ INVOCATIONS: list[tuple[str, list[str], list[Path]]] = [
     ("extract_capri_costsavings", [str(WORK / "cs/costsavings_ini_21730_jul15.csv"),
                                    str(WORK / "cs/costsavings_max_21730_jul15.csv")], [WORK / "cs"]),
     ("extract_capri_marginal_terms", [str(REF), "ini"], [REF]),
-    ("extract_capri_marginal_terms", [str(WORK / "gd/endomax/res_2_1730greendeal_refpol_endotech_all_maxdefaulta.csv"),
-                                      "max"], [WORK / "gd/endomax"]),
     ("ingest_capmod_market", ["--dump", str(UP / "_symbols_base1717.txt")], [UP / "_symbols_base1717.txt"]),
     ("recalibrate_trade_2017", [], []),
 ]
@@ -206,8 +237,8 @@ NOT_AUDITED = {
     "build_patched_inputs": "superseded one-off (see REGIONAL_UNITS_BUILDERS.md 4.4)",
     "extract_capri_vcs_pair": "input is a GDX inside a zip (cap_after_2014 reference)",
     "build_captrd_sets": "reads capri_reference/sets (not committed; build_capri_sets_reference writes it)",
-    "build_trajectory_model_keys": "edits captrd_2030.json in place (idempotent); the file's CAPRI-keyed part has no "
-                                   "extractor (KNOWN_ISSUES K91)",
+    "build_trajectory_model_keys": "a module: add_model_keys is called by build_captrd_trajectory (the file's one "
+                                   "writer); its command line edits a file in place",
     "build_animal_yields": "a module: build() is called by build_crop_economics_2017, the one writer of yields.csv",
     "convert_inputs_to_parquet": "a conversion step (Parquet decision deferred), not a builder of data",
 }
@@ -413,13 +444,17 @@ def main():
                     full += sorted(str(Path(tmp) / n_) for n_ in z_.namelist() if not n_.endswith("/"))
             else:
                 full.append(a_)
-        pre = []
+        pre, env_ = [], env
         if o.trace:
+            # modules compiled from source into the temporary folder, so every module the builder imports is opened
+            # as its .py and recorded as code (with a valid __pycache__ only the cached .pyc is opened, and imported
+            # modules - tools/lib, other builders, capri_mod - were missing from the code lists until 29 October 2026)
+            env_ = {**env, "PYTHONPYCACHEPREFIX": str(Path(tmp) / "pycache")}
             # every file the builder and its child processes open or rename (strace: also Parquet and other C-level
             # readers that a Python hook does not see)
             pre = ["strace", "-f", "-qq", "-e", "trace=openat,rename,renameat,renameat2", "-o", str(Path(tmp) / "strace.log")]
         try:
-            r = subprocess.run(pre + [sys.executable, str(ROOT / "tools" / "build" / f"{name}.py"), *full], cwd=ROOT, env=env,
+            r = subprocess.run(pre + [sys.executable, str(ROOT / "tools" / "build" / f"{name}.py"), *full], cwd=ROOT, env=env_,
                                capture_output=True, text=True, timeout=o.timeout)
             if o.trace:
                 traces[cmd] = parse_strace(Path(tmp) / "strace.log", tmp)

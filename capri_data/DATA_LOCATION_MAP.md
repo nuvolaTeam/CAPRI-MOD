@@ -24,7 +24,7 @@ PRME, NITF/PHOF/POTF, feed use), extracted for all 27 member states (`tools/buil
 | supply-utilisation sheet | `p_sua_final` | `results/fao/faodata.gdx` |
 
 Fills: `base_areas.csv`, `yields.csv`, `variable_costs.csv`, `crop_premium.csv`, the livestock coefficient files,
-`feed_requirements.csv`, `nutrient_coefs.csv` (from DATA2); `world_prices.csv` and the market base balances (from
+`livestock_feed_coef.csv`, `nutrient_coefs_regional.csv` (from DATA2); `world_prices.csv` and the market base balances (from
 `p_dataMarket`).
 
 ## B. Elasticities and PMP terms (for a full re-base; otherwise keep 2017)
@@ -56,8 +56,8 @@ with newer prices is what the validator's vintage check is meant to catch.
 | manure and enteric CH4, CO2 coefficients | CH4MAN, CH4ENT, CO2LIM, urea shares | capreg / envind results (`tools/build/build_ghg_coefs_2017.py`) |
 | mitigation options | `p_ghgMiti`, `p_litRevFertTechs`, ammonia technology tables | `dat/scen/ghgtech`, `dat/miterra`, `envind/*.gms` (`tools/build_*` named in `DATA_DICTIONARY.md`) |
 
-`gascoeff_params.json` (`p_gasEmis`, `envind/gascoeff.gms`) and `dairy_processing_params.json` are archived and not
-read by the model (`archive/README.md`).
+`gascoeff_params.json` (`p_gasEmis`, `envind/gascoeff.gms`) and `dairy_processing_params.json` were archived, read by
+no code, and removed with `capri_data/archive/` on 30 October 2026 (the project lead's decision; in git history).
 
 ## Confirming a symbol before exporting
 

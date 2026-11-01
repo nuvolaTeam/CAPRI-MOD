@@ -14,7 +14,7 @@ Leaching share of the soil surplus (LEACHN_):
 B2 is held at CAPRI's Green Deal 'ini' reference: L = leach_ini x B1 / B1_ini (B1_ini at CAPRI's initial shares and
 the base winter cover). REGISTERED.
 
-DEPARTURE FROM CAPRI (the user's decision, 20 October 2026): CAPRI adds agg in LEACHN_ ("+ v_ammoAppLeaAgg",
+CAPRI-ERROR-FIX (the project lead's decision, 20 October 2026; docs/CAPRI_DEPARTURES_REGISTER.md FIX-2): CAPRI adds agg in LEACHN_ ("+ v_ammoAppLeaAgg",
 supply_model.gms l. 3413) while it subtracts the same options' runoff effect in RUNSURFN_ and the fertiliser options'
 leaching effects in LEACHN_. Its literature table gives reductions (prep_data_LitRev.gms p_reducGains: positive = less
 loss; LNA_low liquid: NH3 0.51, RunSurf -0.24, Leach -0.24), copied without change of sign to no3mlea (ammo_tech.gms
@@ -46,16 +46,13 @@ _REG = {}
 
 def load(data_dir=None):
     """{CAPRI region: {leach_base, leach_ini, exp_imp}} (n_leaching_region.csv)."""
-    import csv
-    from pathlib import Path
-    d = Path(data_dir) if data_dir else Path(__file__).resolve().parents[2] / "capri_data"
-    key = str(d)
+    from capri_mod.supply.inputs import SupplyInputs, current
+    inp = SupplyInputs(data_dir, current().base_year) if data_dir else current()
+    key = str(inp.path("", "abatement/ammonia"))
     if key not in _REG:
         out = {}
-        f = d / "2017" / "abatement" / "ammonia" / "n_leaching_region.csv"
-        if f.exists():
-            for r in csv.DictReader(open(f)):
-                out[r["region"]] = {k: (float(v) if v not in ("", None) else None) for k, v in r.items() if k != "region"}
+        for r in inp.rows("n_leaching_region.csv", "abatement/ammonia"):
+            out[r["region"]] = {k: (float(v) if v not in ("", None) else None) for k, v in r.items() if k != "region"}
         _REG[key] = out
     return _REG[key]
 

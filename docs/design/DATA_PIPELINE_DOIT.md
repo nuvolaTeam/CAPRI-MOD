@@ -40,9 +40,7 @@ access a read), writes, read-modify-writes, the Python files it ran and the file
 
 ## Builders not read by the model
 
-No orphan: `build_nitrates_directive` builds CAPRI's Nitrates Directive minimum shares, applied only with CAPRI's
-`NDtech` (off in its Green Deal runs, so not applied here); `ingest_capmod_market`'s extracts are read by the world-price
-checks (`tools/check/validate_world_prices.py`, `report_world_price_divergence.py`).
+No orphan: `ingest_capmod_market`'s extracts are read by the world-price checks (`tools/check/validate_world_prices.py`, `report_world_price_divergence.py`).
 
 ## How a rebuild is checked (29 October 2026)
 
@@ -69,3 +67,12 @@ builders run, every file compared byte for byte; with doit, the full rebuild run
 Kept: `reproduce_builders.py` (each builder alone on the committed inputs, the census) and its trace mode, from which
 `builders.json` is regenerated when a builder's reads or writes change (`make_pipeline.py TRACE --check` first).
 Out of the pipeline: `build_trajectory_model_keys` (K91) and the tools listed in `reproduce_builders.NOT_AUDITED`.
+
+Removed 29 October 2026 (the project lead's decision: the extractors write only what the model, or a builder of its
+inputs, reads; KNOWN_ISSUES K102): `build_nitrates_directive` and its inputs and outputs (CAPRI's Nitrates Directive
+minimum shares, applied only with CAPRI's NDtech, off in its Green Deal runs: read by no code), the 13 symbols of
+`build_ammonia_tech_inputs` no code reads, `build_ammonia_cost_tables`' scalars.csv, `build_mitigation_inputs`'
+p_tillageCover, p_ccEfa and p_winterCoverShare0. `build_ammonia_tech_inputs` now also gets CAPRI's holdingsLSU and
+nvzShare_LU dumps, whose p_holdLSU.csv and p_nvzShare_lu.csv the builders read and no traced invocation wrote (their
+output is the committed files, byte for byte).
+

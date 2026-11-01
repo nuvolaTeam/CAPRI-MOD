@@ -1,4 +1,4 @@
-"""MarketModule: supply outside the supply models (non-EU own-price supply response).
+"""MarketModule: supply outside the supply models (the non-EU market supply functions).
 
 Part of capri_mod.market.market_module.MarketModule (a mixin); moved out of market_module.py on 24 October 2026
 without changing the code. CAPRI references are in the methods' docstrings."""
@@ -14,13 +14,18 @@ from capri_mod.settings import setting, current as _settings
 from capri_mod.data.definitions import (
     MARKET_COMMODITIES, ALL_TRADE_REGIONS,
 )
-from capri_mod.data.definitions import MS_CODE
+from capri_mod.data.definitions import MS_CODE, EU_MS_BLOCK as _EU_MS, capri_ms
 from capri_mod.market.equilibrium import MarketEquilibrium  # noqa: F401
 from capri_mod.market.state import MarketStateMixin
 
 
 class SupplyMixin(MarketStateMixin):
-    """MarketModule methods for supply outside the supply models (non-EU own-price supply response)."""
+    """MarketModule methods for supply outside the supply models (non-EU market supply functions)."""
+
+    #: the non-EU market regions' supply as CAPRI's ProdNQ_ (own and cross-price terms, p_hessNQSupp; true, CAPRI's
+    #: form) or one own-price constant elasticity per product (false, until 29 October 2026)
+    noneu_supply_nq = setting("market.noneu_supply_nq")
+    sup_milk_in_market = setting("market.sup_milk_in_market")
 
 
     def _region_supply_elas(self, regions, cols, el) -> np.ndarray:
@@ -68,6 +73,9 @@ class SupplyMixin(MarketStateMixin):
         """
         # the supply models' output: the EU's countries, and the non-EU market regions with supply models (Norway)
         self.ev.dairy_m5_now = None
+        # Norway's raw milk terms are set by this evaluation's market supply functions (_sup_milk_terms) or not at all
+        self.ev.sup_milk_terms = None
+        self.ev.sup_milk_cross = None
         exo_all = exogenous_supply
         exogenous_supply, exo_sup = self._split_supply(exo_all)
         self.ev.sup_active = set(exo_sup)
@@ -88,6 +96,7 @@ class SupplyMixin(MarketStateMixin):
                     if comm in supply.columns and float(v) > 1e-6:
                         supply.at[reg, comm] = float(v)
                         sup_cols.setdefault(reg, set()).add(comm)
+            _xr = self._eu_excluded_rows()
             for comm in exogenous_supply.columns:
                 if comm not in supply.columns:
                     continue
@@ -95,21 +104,24 @@ class SupplyMixin(MarketStateMixin):
                     eu_val = float(_ex.at[reg, comm]) if reg in _ex.index else 0.0
                     # 1e-6 (1 kg): solver noise in regions that do not grow the product is not supply. In a run on a
                     # subset of regions (tests) a product none of them grows came back as 1e-15 and replaced the EU's
-                    # base supply, and the EU price ran to 1e7 (K16)
-                    if eu_val > 1e-6 and reg in supply.index:
+                    # base supply, and the EU price ran to 1e7 (K16). With the units outside the run supplied by
+                    # their member states' market supply functions (K83, added below) the solved units' output is
+                    # their part, whatever its size, wherever the EU's units produce the product
+                    x_val = (float(_xr.at[reg, comm]) if (_xr is not None and reg in _xr.index
+                                                          and comm in _xr.columns) else 0.0)
+                    if reg in supply.index and (eu_val > 1e-6 or (_xr is not None and eu_val + x_val > 1e-6)):
                         supply.at[reg, comm] = eu_val
         else:
             supply = self.par.base_production.copy()
 
-        # Own-price supply elasticities from CAPRI's calibrated market model
-        # (elas1717 p_elasSupp, EU medians). These replace the crop-oriented
-        # Armington eps column, which stood in a blanket 0.15-0.25 for every
-        # commodity -- including livestock, where CAPRI's real values are
-        # 0.55-0.76. Commodities not in the file keep the eps fallback.
+        # Own-price supply elasticities of the EU rows: CAPRI's calibrated market model (elas1717 p_elasSupp), the
+        # median over the model's 27 member states per market commodity (supply_elas_eu.csv,
+        # tools/build/build_capri_supply_elas_market.py; until 29 October 2026 over CAPRI's EU28 with four products
+        # under CAPRI's codes, which were never found: KNOWN_ISSUES K101). A missing file stops.
         real_supply = getattr(self, "_real_supply_elas", None)
         if real_supply is None:
-            # CAPRI's EU p_elasSupp (a missing file stops: no silent fallback, 23 October 2026)
-            real_supply = self._inp().json("supply_elas_eu_all.json", "sources/arm")
+            _se = self._inp().csv("supply_elas_eu.csv")
+            real_supply = {str(c): float(v) for c, v in zip(_se.commodity, _se.elasticity)}
             self._real_supply_elas = real_supply
 
 
@@ -130,11 +142,34 @@ class SupplyMixin(MarketStateMixin):
         # (_region_supply_elas); the per-product value above only for the EU rows (their supply comes from the supply
         # models)
         EV = self._region_supply_elas(list(supply.index), cols, el)
+        if self.noneu_supply_nq:
+            # CAPRI's market supply functions outside the EU (ProdNQ_ with its cross-price terms,
+            # _noneu_market_supply_nq, applied below): no own-price elasticity on the non-EU rows; a product without
+            # a ProdNQ_ row in CAPRI's Hessian keeps its base, as in CAPRI. Norway's supply-model products keep
+            # their anticipation (replaced by its measured Hessian below)
+            EV = EV.copy()
+            eu_ = set(self.EU)
+            for i_, r_ in enumerate(supply.index):
+                if r_ in eu_:
+                    continue
+                sc_ = sup_cols.get(r_, set())
+                for j_, c_ in enumerate(cols):
+                    if c_ not in sc_:
+                        EV[i_, j_] = 0.0
         self._welf_supply_EV = (list(supply.index), cols, EV)        # the welfare report (market/welfare.py)
+        self._welf_noneu_nq = {}
+
+        def _ratio_row(reg_):
+            # the region's price ratios over cols (the bilateral market's own ratios, else the world ratios)
+            if region_ratio is None or reg_ not in region_ratio.index:
+                return ratio.reindex(cols).to_numpy(dtype=float)
+            v_ = region_ratio.loc[reg_].reindex(cols).to_numpy(dtype=float)
+            return np.maximum(np.where(np.isnan(v_), 1.0, v_), 1e-6)
         if region_ratio is None:
             fac = ratio.reindex(cols).to_numpy(dtype=float)[None, :] ** EV
             supply[cols] = np.maximum(supply[cols].to_numpy(dtype=float) * fac, 0.0)
             self._eu_market_supply_nq(supply, cols, lambda reg_: ratio.reindex(cols).to_numpy(dtype=float))
+            self._add_eu_excluded(supply, cols, lambda reg_: ratio.reindex(cols).to_numpy(dtype=float))
         else:
             # in arrays (pandas arithmetic here was a sizeable share of each market evaluation; same values)
             rr = region_ratio.reindex(index=supply.index, columns=cols).to_numpy(dtype=float)
@@ -193,6 +228,9 @@ class SupplyMixin(MarketStateMixin):
             _hcache = getattr(self, "_hess_cache", None)
             if not isinstance(_hcache, dict):
                 _hcache = {}
+            # per EU market region (EU27, or each trade block): its Hessian's rows, the supply models' output and the
+            # price change against what they saw
+            items_ = {}
             for reg_, H in _hreg.items():
                 if H is None or s_exo_eu is None or not len(H) or reg_ not in s_exo_eu or reg_ not in _sv_eu:
                     continue
@@ -209,16 +247,22 @@ class SupplyMixin(MarketStateMixin):
                 if xs:
                     s0 = s_exo_eu[reg_].to_numpy(dtype=float)[xj]
                     dP_ = self._nq_price_change(rr[ie_] - _sv_eu[reg_], cols)
-                    mt = self._milk_terms(cols, xs, H) if (reg_ == "EU27" and not self.eu_blocks) else None
-                    if mt is None:
-                        q = s0 + Hm @ dP_ + self._yani_clear(reg_, H, xs, cols, dP_)
-                    else:
-                        q = s0 + Hm @ dP_ + self._milk_and_yani_clear(reg_, H, xs, cols, dP_, mt, world_prices,
-                                                                      exogenous_supply)
-                    keep = s0 > 1e-6
-                    vals = supply.loc[reg_, cols].to_numpy(dtype=float).copy()
-                    vals[np.asarray(xj)[keep]] = np.maximum(q[keep], 0.0)
-                    supply.loc[reg_, cols] = vals
+                    items_[reg_] = (H, xs, xj, Hm, s0, dP_, self._milk_terms(cols, xs, H, reg_))
+            # the member states' raw milk inside the market (audit M5) with the young-animal markets, cleared together:
+            # once over all EU market regions (the dairy block is one solve over the member states, each at its own
+            # region's prices; CAPRI's trade blocks as its one EU, 29 October 2026)
+            if items_ and all(it_[6] is not None for it_ in items_.values()):
+                extra_ = self._milk_and_yani_clear_all(
+                    {reg_: (it_[0], it_[1], it_[5], it_[6]) for reg_, it_ in items_.items()}, cols, world_prices,
+                    exogenous_supply, ratio_of=lambda reg_: rr[list(supply.index).index(reg_)])
+            else:
+                extra_ = {reg_: self._yani_clear(reg_, it_[0], it_[1], cols, it_[5]) for reg_, it_ in items_.items()}
+            for reg_, (H, xs, xj, Hm, s0, dP_, mt) in items_.items():
+                q = s0 + Hm @ dP_ + extra_[reg_]
+                keep = s0 > 1e-6
+                vals = supply.loc[reg_, cols].to_numpy(dtype=float).copy()
+                vals[np.asarray(xj)[keep]] = np.maximum(q[keep], 0.0)
+                supply.loc[reg_, cols] = vals
             self._hess_cache = _hcache
             # the same market supply function for Norway's supply models (its own Hessian, measured on its models)
             for reg, Hs in ((self.par.supply_hessian or {}).get("sup") or {}).items():
@@ -232,11 +276,25 @@ class SupplyMixin(MarketStateMixin):
                 Hm = Hs.reindex(index=xs, columns=cols).fillna(0.0).to_numpy(dtype=float)
                 s0 = s_exo_sup[reg].to_numpy(dtype=float)[xj]
                 dP_ = self._nq_price_change(rr[i_] - _sv_sup[reg], cols)
-                q = s0 + Hm @ dP_ + self._yani_clear(reg, Hs, xs, cols, dP_)
+                mk_ = self._sup_milk_terms(reg, Hs, cols, xs, _sv_sup[reg])
+                if mk_ is not None:
+                    # Norway's raw milk inside the market (step F; CAPRI simu_calibration_to_supply.gms l. 423-427):
+                    # the MILK row without the milk price (its own term is in the dairy block, _sup_milk_delivered),
+                    # then every row with the milk price change from the dairy block's latest price
+                    iM_ = xs.index("MILK")
+                    q_nm = s0 + Hm @ dP_ + self._yani_clear(reg, Hs, xs, cols, dP_)
+                    self.ev.sup_milk_cross[reg] = float(q_nm[iM_] - s0[iM_])
+                    dP_[cols.index("MILK")] = mk_["dL"]
+                    q = s0 + Hm @ dP_ + self._yani_clear(reg, Hs, xs, cols, dP_)
+                    q[iM_] = q_nm[iM_]
+                else:
+                    q = s0 + Hm @ dP_ + self._yani_clear(reg, Hs, xs, cols, dP_)
                 keep = s0 > 1e-6
                 vals = supply.loc[reg, cols].to_numpy(dtype=float).copy()
                 vals[np.asarray(xj)[keep]] = np.maximum(q[keep], 0.0)
                 supply.loc[reg, cols] = vals
+            # the EU's units outside a run on a subset (K83): their member states' market supply functions
+            self._add_eu_excluded(supply, cols, lambda reg_: rr[list(supply.index).index(reg_)])
         # CRUSHING: oil and cake supply = crush x the CET yields (CAPRI ProcO_, procYield_; _crush_state)
         cp = self._crush_params()
         if cp:
@@ -260,20 +318,30 @@ class SupplyMixin(MarketStateMixin):
                 Sr = ({r: float(v) for r, v in self.eu_rows(exogenous_supply[["MILK"]])["MILK"].items()} if self.eu_blocks
                       else {"EU27": float(exogenous_supply["MILK"].sum())})
             else:
-                Sr = {r: float(self.par.base_production.at[r, "MILK"]) for r in self.EU}
+                Sr = None
+            # the EU's units outside a run on a subset (K83): their raw milk at its base, moved by their member
+            # states' ProdNQ_ of MILK in the dairy block (_excluded_milk_resp); with no EU unit in the run, theirs alone
+            _xr_m = self._eu_excluded_rows()
+            if Sr is None:
+                Sr = ({r: 0.0 for r in self.EU} if (_xr_m is not None and "MILK" in _xr_m.columns)
+                      else {r: float(self.par.base_production.at[r, "MILK"]) for r in self.EU})
+            if _xr_m is not None and "MILK" in _xr_m.columns:
+                Sr = {r_: float(v_) + (float(_xr_m.at[r_, "MILK"]) if r_ in _xr_m.index else 0.0)
+                      for r_, v_ in Sr.items()}
             S = sum(Sr.values())
             S0 = float(self.par.dairy_S0 or S)
             _m0 = self.par.dairy_S0_ms or {}
-            _m = self._milk_by_ms(exogenous_supply)
+            _m = self._milk_by_ms(self._with_eu_excluded(exogenous_supply))
             _mr = ({ms: (_m[ms] / q0 if (q0 > 0 and ms in _m) else 1.0) for ms, q0 in _m0.items()} if (_m0 and _m)
                    else (S / S0 if S0 > 0 else 1.0))
             _m5 = self.ev.dairy_m5_now
             if _m5 is not None:
                 # the block solved with the member states' raw milk responding to their prices (audit M5,
-                # _milk_and_yani_clear): raw milk delivered as it responded
+                # _milk_and_yani_clear_all): raw milk delivered as it responded
                 res = _m5
                 self.ev.dairy_m5_now = None
-                Sr = {"EU27": float(Sr["EU27"]) + float(self.ev.milk_dq_now or 0.0)}
+                _dq = self.ev.milk_dq_now or {}
+                Sr = {r_: float(Sr[r_]) + float(_dq.get(r_, 0.0)) for r_ in Sr}
             else:
                 res = self.dairy_block(self._dairy_eu_prices(world_prices), _mr)
             if res is not None:
@@ -306,9 +374,10 @@ class SupplyMixin(MarketStateMixin):
                 else:
                     tr = {k: float(dom.at[r, c]) / float(d0.at[r, c]) if float(d0.at[r, c]) > 0 else 1.0
                           for k, c in self.DAIRY_TRADED.items()}
-                # Norway (RMSSUP): raw milk delivered from its supply models (CAPRI market_model.gms ProdNQ_ NOTE2:
-                # milk production in RMSSUP is covered by the supply models), its block's FMIL index from its herds;
-                # the other regions: CAPRI's raw milk supply function
+                # Norway (RMSSUP): raw milk from its supply models, moved inside the market by its raw milk supply
+                # function (ProdNQ_ MILK re-anchored to the models' milk, simu_calibration_to_supply.gms l. 423-427;
+                # market.sup_milk_in_market; off: fixed at the models'), its block's FMIL index from its herds; the
+                # other regions: CAPRI's raw milk supply function
                 mr_ = None
                 m0_ = (self.par.sup_milk0 or {}).get(r)
                 if r in exo_sup and "MILK" in exo_sup[r].index and m0_:
@@ -317,7 +386,21 @@ class SupplyMixin(MarketStateMixin):
                     supply.at[r, "MILK"] = m_now
                     self.ev.sup_milk_now[r] = m_now
                 fi_ = float((self.seen.fmil_index_sup or {}).get(r, 1.0)) if mr_ is not None else 1.0
-                res_r = self._dairy_solve(prm, tr, mr_, fi_, r)
+                # CAPRI's raw milk supply function (ProdNQ_ MILK) with its cross-price terms: the shift from the
+                # other products' prices (the block holds the own-price term)
+                m_sh = self._noneu_milk_shift(r, cols, _ratio_row(r)) if (mr_ is None and self.noneu_supply_nq) else {}
+                sm_ = self._sup_milk_delivered(r, prm, m_now, m0_) if mr_ is not None else None
+                if sm_ is not None:
+                    # Norway: the milk its supply models deliver, moved by its own milk price and the other prices
+                    # (the market supply Hessian's MILK row), against its dairies' demand inside its block
+                    prm_, shift_ = sm_
+                    res_r = self._dairy_solve(prm_, tr, None, fi_, r, milk_shift=shift_)
+                    q_ = m0_ * float(res_r["milk_supply_ratio"])
+                    supply.at[r, "MILK"] = q_
+                    self.ev.sup_milk_now[r] = q_
+                else:
+                    res_r = self._dairy_solve(prm, tr, mr_, fi_, r, milk_shift=sum(m_sh.values()))
+                res_r["milk_shift_rms"] = m_sh
                 wl[r] = res_r
                 if mr_ is None and "MILK" in supply.columns and "milk_supply_ratio" in res_r:
                     # raw milk is not traded (CAPRI): the region's milk supply function (ProdNQ_ MILK) against its
@@ -331,6 +414,17 @@ class SupplyMixin(MarketStateMixin):
                     if c in supply.columns and q0 > 1e-9:
                         supply.at[r, c] = max(0.0, float(self.par.base_production.at[r, c]) * q / q0)
             self.ev.dairy_world_last = wl
+        if self.noneu_supply_nq:
+            # the non-EU regions' market supply functions, at the regions' prices and their dairies' raw milk price
+            _wl = self.ev.dairy_world_last or {}
+            _wp = self._dairy_world_params() or {}
+
+            def _milk_ratio(reg_):
+                res_ = _wl.get(reg_)
+                if not res_ or reg_ not in _wp:
+                    return 1.0
+                return 1.0 + float(res_["z"][_wp[reg_]["iM"]])
+            self._noneu_market_supply_nq(supply, cols, _ratio_row, _milk_ratio, sup_cols)
         if "MILK" in supply.columns:
             # raw milk in a region without supply models or a dairy block: no market of its own in CAPRI's data,
             # kept at its base (no world raw-milk market, audit M11)
@@ -372,9 +466,10 @@ class SupplyMixin(MarketStateMixin):
     #: demand (DairyNQ_) in the dairy block, and its milk price moves the other products' and the young animals'
     #: supply (the Hessian's MILK column per member state; the member states' milk prices their models saw: seen.milk_seen_ms)
 
-    def _milk_terms(self, cols, xs, H):
+    def _milk_terms(self, cols, xs, H, reg="EU27"):
         """The member states' raw milk terms of the market supply Hessian (supply_hessian["ms"], per country summed
-        to CAPRI's member state of the dairy block): {"ms": [...], "h": own response (kt per unit of price level),
+        to CAPRI's member state of the dairy block), for the member states of the EU market region reg (EU27, or one
+        of CAPRI's trade blocks): {"ms": [...], "h": own response (kt per unit of price level),
         "row": member state x cols (MILK's response to the products' prices), "rowY": member state x young-animal
         goods, "col": xs x member state (the products' response to the member state's milk price), "colY": young
         goods x member state, "goods": young-animal goods}; None without data."""
@@ -383,10 +478,11 @@ class SupplyMixin(MarketStateMixin):
         hs = (self.par.supply_hessian or {}).get("ms") or {}
         if not hs:
             return None
-        st = (self.seen.yani_state or {}).get("EU27") or {}
+        st = (self.seen.yani_state or {}).get(reg) or {}
         goods = [g for g in (st.get("goods") or []) if ("YANI:" + g) in H.index and ("YANI:" + g) in H.columns]
-        ck = (id(hs), tuple(cols), tuple(xs), tuple(goods))
-        c_ = getattr(self, "_milk_terms_cache", None)
+        ck = (id(hs), tuple(cols), tuple(xs), tuple(goods), reg)
+        cache_ = self.__dict__.setdefault("_milk_terms_cache_reg", {})
+        c_ = cache_.get(reg)
         if c_ is not None and c_[0] == ck:
             return c_[1]
         sup_of = getattr(self, "sup_region_of_country", lambda c: None)
@@ -396,7 +492,8 @@ class SupplyMixin(MarketStateMixin):
                 continue
             ms = self._DAIRY_MS.get(str(cc)[:2], str(cc)[:2]) + "000000"
             agg[ms] = h if ms not in agg else agg[ms].add(h, fill_value=0.0)
-        mss = sorted(m for m in agg if m in self._dairy_params().get("ms", {}))
+        mss = sorted(m for m in agg if m in self._dairy_params().get("ms", {})
+                     and (not self.eu_blocks or (self.eu_region_of_ms(m) or self.EU[0]) == reg))
         if not mss:
             return None
         yi = ["YANI:" + g for g in goods]
@@ -412,51 +509,197 @@ class SupplyMixin(MarketStateMixin):
         # dairy block's delivered milk, supply_response)
         out["col"][[i for i, x in enumerate(xs) if x == "MILK"], :] = 0.0
         out["row"][:, [j for j, c in enumerate(cols) if c == "MILK"]] = 0.0
-        self._milk_terms_cache = (ck, out)
+        cache_[reg] = (ck, out)
         return out
 
-    def _milk_and_yani_clear(self, reg, H, xs, cols, dP, mt, world_prices, exogenous_supply):
-        """The EU's young-animal markets (_yani_clear) and the member states' raw milk (dairy_block with the milk
-        response) cleared together at the current product prices: the milk prices move the young animals' supply and
-        the young-animal prices the milk supply (CAPRI's ProdNQ_ with p_hessNQSupp, solved jointly in its market
-        model); a few rounds of the two linear clearings. Returns the products' supply change from both (rows xs)
-        and keeps the dairy block's solution for supply_response (ev.dairy_m5_now)."""
-        mss = mt["ms"]
-        Ls = np.array([float(self.seen.milk_seen_ms.get(m, 1.0)) for m in mss])
+    def _excluded_milk_resp(self, cols, ratio_of, m0) -> dict:
+        """K83: the raw milk of the EU's units outside a run on a subset, per member state, as CAPRI's ProdNQ_ of MILK
+        moves it (eu_market_supply_nq.csv): delivered = x (1 + (sum_{y != MILK} h_My (y's ratio - 1) + h_MM (L - 1)) /
+        CAPRI's MILK production at the calibration point), x the units' base raw milk, L the member state's raw milk
+        price ratio; as the dairy block's form (constant at the price level Ls, slope per unit of L - Ls) relative to
+        the member state's base delivered milk m0: {ms: (constant at L = 1, slope)}. Empty where the run has every
+        unit."""
+        xb = self.seen.eu_excluded_base
+        if xb is None or "MILK" not in xb.columns:
+            return {}
+        terms, q0 = self._eu_ms_supply_nq()
+        ci = {c: j for j, c in enumerate(cols)}
+        xm: dict = {}
+        for cc, v in xb["MILK"].items():
+            ms = capri_ms(cc)
+            xm[ms] = xm.get(ms, 0.0) + float(v)
+        out = {}
+        for ms, x in xm.items():
+            base = float(m0.get(ms, 0.0))
+            pc = float(q0.get(ms, {}).get("MILK", 0.0))
+            if not (x > 0 and base > 0):
+                continue
+            if not pc > 0:
+                out[ms] = (x / base, 0.0)
+                continue
+            reg = self.eu_region_of_ms(ms) if self.eu_blocks else "EU27"
+            r_ = ratio_of(reg) if (ratio_of is not None and reg is not None) else None
+            t_ms = terms.get(ms, {})
+            cross = (sum(h * (float(r_[ci[y]]) - 1.0) for (x_, y), h in t_ms.items()
+                         if x_ == "MILK" and y != "MILK" and y in ci) if r_ is not None else 0.0)
+            hmm = float(t_ms.get(("MILK", "MILK"), 0.0))
+            out[ms] = (x / base * (1.0 + cross / pc), x * hmm / (pc * base))
+        return out
+
+    def _milk_and_yani_clear_all(self, regs, cols, world_prices, exogenous_supply, ratio_of=None):
+        """The young-animal markets (_yani_clear) and the member states' raw milk (dairy_block with the milk response)
+        cleared together at the current product prices, over every EU market region at once (EU27, or CAPRI's two
+        trade blocks): the milk prices move the young animals' supply and the young-animal prices the milk supply
+        (CAPRI's ProdNQ_ with p_hessNQSupp, solved jointly in its market model); a few rounds of the two linear
+        clearings, the dairy block solved once per round over all member states, each at its own region's prices.
+        regs {region: (H, xs, dP, mt)}. Returns {region: the products' supply change from both (rows xs)} and keeps
+        the dairy block's solution for supply_response (ev.dairy_m5_now; ev.milk_dq_now per region)."""
         _m0 = self.par.dairy_S0_ms or {}
-        _m = self._milk_by_ms(exogenous_supply)
-        q0 = np.array([float(_m0.get(m, 0.0)) for m in mss])
-        mr0 = np.array([(_m.get(m, 0.0) / q0[i]) if q0[i] > 0 else 1.0 for i, m in enumerate(mss)])
-        # every member state's delivered milk as the dairy section sets it; the responding ones below
+        # with the base raw milk of the EU's units outside a run on a subset (K83), as the base dairy_S0_ms has it
+        _m = self._milk_by_ms(self._with_eu_excluded(exogenous_supply))
+        _xb_ = self.seen.eu_excluded_base
+        _xbm = self._milk_by_ms(_xb_) if _xb_ is not None else {}
+        xr_milk = self._excluded_milk_resp(cols, ratio_of, _m0)
         mr_all = {m_: (_m[m_] / q_ if (q_ > 0 and m_ in _m) else 1.0) for m_, q_ in _m0.items()}
         tr = self._dairy_eu_prices(world_prices)
-        st = (self.seen.yani_state or {}).get(reg) or {}
-        r_seen = np.array([float(st.get("seen", {}).get(g, 1.0)) for g in mt["goods"]])
-        dL = np.zeros(len(mss))
-        dY = np.zeros(len(mt["goods"]))
+        S = {}
+        for reg, (H, xs, dP, mt) in regs.items():
+            mss = mt["ms"]
+            q0 = np.array([float(_m0.get(m, 0.0)) for m in mss])
+            st = (self.seen.yani_state or {}).get(reg) or {}
+            S[reg] = dict(mss=mss, q0=q0,
+                          Ls=np.array([float(self.seen.milk_seen_ms.get(m, 1.0)) for m in mss]),
+                          mr0=np.array([(_m.get(m, 0.0) / q0[i]) if q0[i] > 0 else 1.0 for i, m in enumerate(mss)]),
+                          r_seen=np.array([float(st.get("seen", {}).get(g, 1.0)) for g in mt["goods"]]),
+                          dL=np.zeros(len(mss)), dY=np.zeros(len(mt["goods"])), yq=0.0)
         res = None
         for _ in range(4):
-            ey = mt["colY"] @ dL if len(mt["goods"]) else 0.0
-            yq = self._yani_clear(reg, H, xs, cols, dP, extra_y=ey)
-            if len(mt["goods"]):
-                rn = (self.ev.yani_market_now or {}).get(reg) or {}
-                dY = np.array([float(rn.get(g, r_seen[k])) for k, g in enumerate(mt["goods"])]) - r_seen
-            a = mt["row"] @ np.asarray(dP, float) + (mt["rowY"] @ dY if len(mt["goods"]) else 0.0)
-            resp = {m: (mr0[i] + (a[i] / q0[i] if q0[i] > 0 else 0.0), (mt["h"][i] / q0[i] if q0[i] > 0 else 0.0), Ls[i])
-                    for i, m in enumerate(mss)}
+            resp = {}
+            for reg, (H, xs, dP, mt) in regs.items():
+                s_ = S[reg]
+                ey = mt["colY"] @ s_["dL"] if len(mt["goods"]) else 0.0
+                s_["yq"] = self._yani_clear(reg, H, xs, cols, dP, extra_y=ey)
+                if len(mt["goods"]):
+                    rn = (self.ev.yani_market_now or {}).get(reg) or {}
+                    s_["dY"] = np.array([float(rn.get(g, s_["r_seen"][k])) for k, g in enumerate(mt["goods"])]) \
+                        - s_["r_seen"]
+                a = mt["row"] @ np.asarray(dP, float) + (mt["rowY"] @ s_["dY"] if len(mt["goods"]) else 0.0)
+                for i, m in enumerate(s_["mss"]):
+                    q0i = s_["q0"][i]
+                    resp[m] = (s_["mr0"][i] + (a[i] / q0i if q0i > 0 else 0.0), (mt["h"][i] / q0i if q0i > 0 else 0.0),
+                               s_["Ls"][i])
+            # the raw milk of the EU's units outside a run on a subset (K83): CAPRI's ProdNQ_ of MILK of their member
+            # state, in the block's form (delivered at the seen price Ls, slope); their base share, in mr0 and mr_all,
+            # replaced by it
+            for m, (c1, k1) in xr_milk.items():
+                xs_ = _xbm.get(m, 0.0) / float(_m0[m]) if float(_m0.get(m, 0.0)) > 0 else 0.0
+                if m in resp:
+                    mb, kk, Ls_ = resp[m]
+                    resp[m] = (mb - xs_ + c1 + k1 * (Ls_ - 1.0), kk + k1, Ls_)
+                else:
+                    resp[m] = (c1, k1, 1.0)
             res = self.dairy_block(tr, {**mr_all, **{m: v[0] for m, v in resp.items()}}, milk_resp=resp)
             if res is None:
-                return yq
-            dL_new = np.array([float(res["ms_price_ratio"][m]["MILK"]) - Ls[i] for i, m in enumerate(mss)])
-            done = float(np.max(np.abs(dL_new - dL))) < 1e-10
-            dL = dL_new
+                return {reg: S[reg]["yq"] for reg in regs}
+            done = True
+            for reg in regs:
+                s_ = S[reg]
+                dL_new = np.array([float(res["ms_price_ratio"][m]["MILK"]) - s_["Ls"][i]
+                                   for i, m in enumerate(s_["mss"])])
+                done = done and float(np.max(np.abs(dL_new - s_["dL"]))) < 1e-10 if len(dL_new) else done
+                s_["dL"] = dL_new
             if done:
                 break
         self.ev.dairy_m5_now = res
-        # raw milk delivered against the supply models' (kt): the milk row of the market carries it
-        self.ev.milk_dq_now = float(sum((float(res["ms_price_ratio"][m]["milk_delivered"]) - mr0[i]) * q0[i]
-                                      for i, m in enumerate(mss)))
-        return yq + mt["col"] @ dL
+        # raw milk delivered against the supply models' (kt) per EU market region: the milk row of the market carries it
+        self.ev.milk_dq_now = {reg: float(sum((float(res["ms_price_ratio"][m]["milk_delivered"]) - S[reg]["mr0"][i])
+                                              * S[reg]["q0"][i] for i, m in enumerate(S[reg]["mss"])))
+                               for reg in regs}
+        # the member states with only units outside the run (K83): their raw milk's change from its base
+        _inS = {m for reg in regs for m in S[reg]["mss"]}
+        for m in xr_milk:
+            if m in _inS:
+                continue
+            rg_ = self.eu_region_of_ms(m) if self.eu_blocks else "EU27"
+            if rg_ in self.ev.milk_dq_now:
+                self.ev.milk_dq_now[rg_] += (float(res["ms_price_ratio"][m]["milk_delivered"])
+                                             - float(mr_all.get(m, 1.0))) * float(_m0.get(m, 0.0))
+        return {reg: S[reg]["yq"] + regs[reg][3]["col"] @ S[reg]["dL"] for reg in regs}
+
+    def _with_eu_excluded(self, exogenous_supply):
+        """The supply models' rows per country with the base output of the EU's units outside the run added (K83);
+        the rows themselves where the run has every unit."""
+        xb = self.seen.eu_excluded_base
+        if xb is None or exogenous_supply is None:
+            return exogenous_supply
+        return exogenous_supply.add(xb.reindex(columns=exogenous_supply.columns).fillna(0.0), fill_value=0.0)
+
+    def _eu_excluded_rows(self):
+        """The base output of the EU's units outside the run per EU market region (EU27, or each trade block) and
+        market commodity (K83); None where the run has every unit."""
+        xb = self.seen.eu_excluded_base
+        if xb is None:
+            return None
+        return (self.eu_rows(xb) if self.eu_blocks else pd.DataFrame([xb.sum(axis=0)], index=["EU27"]))
+
+    def _eu_ms_supply_nq(self):
+        """CAPRI's market supply functions of the EU member states, every product (ProdNQ_,
+        tools/build/build_eu_market_supply_nq.py): ({ms: {(x, y): kt per unit of y's price ratio}}, {ms: {x: CAPRI's
+        production at the calibration point}})."""
+        c = getattr(self, "_eu_ms_nq_cache", None)
+        if c is not None:
+            return c
+        terms: dict = {}
+        for r in self._inp().csv("eu_market_supply_nq.csv", keep_default_na=False).itertuples(index=False):
+            if r.ms in _EU_MS and r.y:
+                d = terms.setdefault(r.ms, {})
+                d[(r.x, r.y)] = d.get((r.x, r.y), 0.0) + float(r.h_ratio)
+        q0: dict = {}
+        for r in self._inp().csv("eu_market_supply_base.csv").itertuples(index=False):
+            if r.ms in _EU_MS:
+                q0.setdefault(r.ms, {})[r.x] = q0.get(r.ms, {}).get(r.x, 0.0) + float(r.prod_cal)
+        self._eu_ms_nq_cache = (terms, q0)
+        return self._eu_ms_nq_cache
+
+    #: products whose EU supply the market's own blocks set (raw milk and the dairy products: the dairy block; oils and
+    #: cakes: crushing) or that CAPRI's member-state functions already supply for the whole EU (EU_MARKET_SUPPLY): not
+    #: in the excluded units' term (K83)
+    def _excluded_skip(self) -> frozenset:
+        sk = set(self.EU_MARKET_SUPPLY) | {"MILK"} | set(self.DAIRY_TRADED.values())
+        for o, c in self.CRUSH_CHAINS.values():
+            sk |= {o, c}
+        return frozenset(sk)
+
+    def _add_eu_excluded(self, supply, cols, ratio_of) -> None:
+        """KNOWN_ISSUES K83: the EU's supply from its units outside a run on a subset, added to each EU market region:
+        per member state and product, those units' base output moved as CAPRI's ProdNQ_ of the member state moves it,
+        q = base x (1 + sum_y h_xy (y's price ratio - 1) / CAPRI's production at the calibration point). CAPRI keeps a
+        country switched off in the market with its ProdNQ_ (it leaves RMSSUP, capmod/create_sim_ini_gdx.gms l. 73);
+        the price ratio is the member state's EU market region's against base. Nothing where the run has every unit."""
+        xb = self.seen.eu_excluded_base
+        if xb is None:
+            return
+        terms, q0 = self._eu_ms_supply_nq()
+        ci = {c: j for j, c in enumerate(cols)}
+        skip = self._excluded_skip()
+        add: dict = {}
+        for cc, row in xb.iterrows():
+            ms = capri_ms(cc)
+            reg = (self.eu_region_of_ms(ms) if self.eu_blocks else "EU27")
+            if reg is None or reg not in supply.index:
+                continue
+            r_ = ratio_of(reg)
+            t_ms, q_ms = terms.get(ms, {}), q0.get(ms, {})
+            for x, b in row.items():
+                b = float(b)
+                if not b > 0 or x not in ci or x in skip:
+                    continue
+                qc = float(q_ms.get(x, 0.0))
+                rel = (sum(h * (float(r_[ci[y]]) - 1.0) for (x_, y), h in t_ms.items() if x_ == x and y in ci) / qc
+                       if qc > 0 else 0.0)
+                add[(reg, x)] = add.get((reg, x), 0.0) + max(b * (1.0 + rel), 0.0)
+        for (reg, x), v in add.items():
+            supply.at[reg, x] = float(supply.at[reg, x]) + v
 
     def _eu_market_supply_nq_params(self) -> dict:
         """CAPRI's market supply functions of the EU products no supply model produces (EU_MARKET_SUPPLY: other
@@ -466,8 +709,13 @@ class SupplyMixin(MarketStateMixin):
         if c is not None:
             return c
         out: dict = {}
-        for r in self._inp().csv("eu_market_supply_nq.csv").itertuples(index=False):
-            rg = (self.eu_region_of_ms(r.ms) if self.eu_blocks else "EU27") or "EU27"
+        for r in self._inp().csv("eu_market_supply_nq.csv", keep_default_na=False).itertuples(index=False):
+            # the EU's member states only: until 31 October 2026 the file held Norway too, whose terms this line put
+            # into EU27 (Norway's own function is in noneu_market_supply_nq.csv); a column without a model price (y
+            # empty) is held
+            rg = self.eu_region_of_ms(r.ms) if r.ms in _EU_MS else None
+            if rg is None or not r.y or r.x not in self.EU_MARKET_SUPPLY:
+                continue
             d = out.setdefault(rg, {})
             d[(r.x, r.y)] = d.get((r.x, r.y), 0.0) + float(r.h_ratio)
         self._eu_msnq_cache = out
@@ -492,6 +740,126 @@ class SupplyMixin(MarketStateMixin):
                     continue
                 dq = sum(h * (float(r_[ci[y]]) - 1.0) for (x_, y), h in terms.items() if x_ == x and y in ci)
                 supply.at[rg, x] = max(q0 + dq, 0.0)
+
+    def _noneu_nq_params(self) -> dict:
+        """CAPRI's market supply functions of the non-EU market regions (arm/market_model.gms ProdNQ_; KNOWN_ISSUES
+        K54-3; tools/build/build_noneu_market_supply_nq.py), summed over each trade region's CAPRI regions:
+        {trade region: {"rows": {x: {y: h}}, "milk": {y: h}}}, h in kt per unit change of y's price ratio (CAPRI's
+        p_hessNQSupp x PPRI0_y / INPE). "rows": the market products' supply, y over the market products and raw milk;
+        "milk": per CAPRI region, the raw milk supply's terms in the other prices (its own term is the dairy block's).
+        "fede": {CAPRI region: {x: h}} and "milk_fede": {CAPRI region: h}, the terms in the region's own feed energy
+        price FEDE (CAPRI's FeedBal_, audit M3: one price per CAPRI region, so kept per region). Columns without a model
+        price (the land rents TCRP, FRUN, FODFAL) are not in the file's model columns: held at their calibration value
+        (registered)."""
+        c = getattr(self, "_noneu_nq_cache", None)
+        if c is not None:
+            return c
+        out: dict = {}
+        eu_ = set(self.EU)
+        for t in self._inp().csv("noneu_market_supply_nq.csv").itertuples(index=False):
+            y = t.y if isinstance(t.y, str) else ""
+            if not y or t.trade_region not in self.regions or t.trade_region in eu_:
+                continue
+            d = out.setdefault(t.trade_region, {"rows": {}, "milk": {}, "fede": {}, "milk_fede": {}})
+            if y == "FEDE":
+                if t.x == "MILK":
+                    d["milk_fede"][t.rms] = d["milk_fede"].get(t.rms, 0.0) + float(t.h_ratio)
+                else:
+                    f_ = d["fede"].setdefault(t.rms, {})
+                    f_[t.x] = f_.get(t.x, 0.0) + float(t.h_ratio)
+                continue
+            if t.x == "MILK":
+                if y != "MILK":
+                    m_ = d["milk"].setdefault(t.rms, {})
+                    m_[y] = m_.get(y, 0.0) + float(t.h_ratio)
+            else:
+                r_ = d["rows"].setdefault(t.x, {})
+                r_[y] = r_.get(y, 0.0) + float(t.h_ratio)
+        self._noneu_nq_cache = out
+        return out
+
+    def _noneu_milk_shift(self, reg, cols, r_) -> dict:
+        """The change of the raw milk supply of each of the region's CAPRI regions from the prices of the other
+        products (ProdNQ_ MILK's cross-price terms), kt; the dairy block adds the own-price term."""
+        prm = self._noneu_nq_params().get(reg) or {}
+        terms = prm.get("milk") or {}
+        ci = {c: j for j, c in enumerate(cols)}
+        out = {rms: float(sum(h * (float(r_[ci[y]]) - 1.0) for y, h in t.items() if y in ci))
+               for rms, t in terms.items()}
+        fede = self.ev.fede_now or {}
+        for rms, h in (prm.get("milk_fede") or {}).items():
+            out[rms] = out.get(rms, 0.0) + h * (float(fede.get(rms, 1.0)) - 1.0)     # FEDE (audit M3)
+        return out
+
+    def _noneu_market_supply_nq(self, supply, cols, ratio_of, milk_ratio_of, sup_cols):
+        """The non-EU market regions' supply of the market products as CAPRI's ProdNQ_ (market audit step D, K54-3):
+        base supply + sum_y h_xy x (y's price ratio - 1), y over the products' prices and the region's raw milk price
+        (its dairy block's). The constant is CAPRI's calibration point, the market's base (no supply model to
+        recalibrate to). Norway's supply-model products are its supply models' (left as they are). Replaces the
+        own-price constant-elasticity function of each product (market.noneu_supply_nq = false)."""
+        P = self._noneu_nq_params()
+        ci = {c: j for j, c in enumerate(cols)}
+        for reg, d in P.items():
+            if reg not in supply.index:
+                continue
+            r_ = ratio_of(reg)
+            mr = float(milk_ratio_of(reg))
+            skip = sup_cols.get(reg, set())
+            fd = d.get("fede") or {}
+            fede = self.ev.fede_now or {}
+            rec = self._welf_noneu_nq.setdefault(reg, {})
+            for x, terms in d["rows"].items():
+                if x not in ci or x in skip or x not in supply.columns:
+                    continue
+                q0 = float(self.par.base_production.at[reg, x]) if x in self.par.base_production.columns else 0.0
+                if q0 <= 0:
+                    continue
+                dq = 0.0
+                for y, h in terms.items():
+                    if y == "MILK":
+                        dq += h * (mr - 1.0)
+                    elif y in ci:
+                        dq += h * (float(r_[ci[y]]) - 1.0)
+                for rms, fx in fd.items():                     # each CAPRI region's feed energy price (audit M3)
+                    if x in fx:
+                        dq += fx[x] * (float(fede.get(rms, 1.0)) - 1.0)
+                supply.at[reg, x] = max(q0 + dq, 0.0)
+                rec[x] = (q0, dq)
+
+    def _sup_milk_terms(self, reg, Hs, cols, xs, sv):
+        """Norway's raw milk in the market (market.sup_milk_in_market, step F): CAPRI keeps ProdNQ_ MILK of the
+        regions with supply models in the market, its constant re-anchored to the models' milk
+        (arm/simu_calibration_to_supply.gms l. 198-201, 423-427: v_prodQuant MILK not fixed, bounds 0.1 to 10 x the
+        level). Returns {"k": the Hessian's own milk term (kt per unit of price level), "L": the milk price level the
+        region's models saw, "dL": the milk price change the products respond to (the region's dairy-block price of
+        the latest evaluation against L)}, or None (switch off, no MILK row and column, no milk in the models)."""
+        if not self.sup_milk_in_market or "MILK" not in xs or "MILK" not in cols or "MILK" not in Hs.columns:
+            return None
+        k = float(Hs.at["MILK", "MILK"])
+        if not k > 0:
+            return None
+        L = float(sv[cols.index("MILK")])
+        prev = (((self.ev.dairy_world_last or {}).get(reg) or {}).get("price_ratio") or {}).get("MILK")
+        t = {"k": k, "L": L, "dL": (float(prev) - L) if prev is not None else 0.0}
+        self.ev.setdefault("sup_milk_terms", {})[reg] = t
+        self.ev.setdefault("sup_milk_cross", {})
+        return t
+
+    def _sup_milk_delivered(self, reg, prm, m_now, m0):
+        """Norway's dairy block with its raw milk supply function (_sup_milk_terms): delivered = m_now + k x (milk
+        price level - L) + the MILK row's response to the other prices (ev.sup_milk_cross); in the block's units (its
+        base delivery Q0 against the models' base m0): the slope SM = k Q0 / m0 per unit of z_M (milk price ratio - 1)
+        and the shift Q0 (m_now / m0 - 1) + Q0 / m0 (k (1 - L) + cross). Returns (block parameters with SM, shift) or
+        None."""
+        t = (self.ev.sup_milk_terms or {}).get(reg)
+        if t is None or not m0:
+            return None
+        Q0 = float(prm["Q0"][prm["iM"]])
+        cross = float((self.ev.sup_milk_cross or {}).get(reg, 0.0))
+        prm_ = dict(prm)
+        prm_["SM"] = t["k"] * Q0 / m0
+        shift = Q0 * (m_now / m0 - 1.0) + Q0 / m0 * (t["k"] * (1.0 - t["L"]) + cross)
+        return prm_, shift
 
     def _nq_price_change(self, dP, cols):
         """The price changes the market's supply functions respond to (relative to the prices the supply models saw),
@@ -529,7 +897,7 @@ class SupplyMixin(MarketStateMixin):
         n_now = np.array([float(st["net"].get(g, 0.0)) for g in goods])
         ref = np.array([float(st["ref"].get(g, 0.0)) for g in goods])
         r_seen = np.array([float(st["seen"].get(g, 1.0)) for g in goods])
-        # extra_y: the young animals' supply change from the member states' milk prices (_milk_and_yani_clear)
+        # extra_y: the young animals' supply change from the member states' milk prices (_milk_and_yani_clear_all)
         rhs = ref - n_now - H_YP @ np.asarray(dP, float) - extra_y
         dr = np.linalg.lstsq(H_YY, rhs, rcond=None)[0]
         lo, hi = st.get("bounds", (-50.0, 50.0))

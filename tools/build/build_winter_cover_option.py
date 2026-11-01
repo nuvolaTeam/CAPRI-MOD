@@ -54,7 +54,7 @@ def main():
                         header=None, names=["region", "act", "item", "value"], dtype=str)
     terms["value"] = pd.to_numeric(terms["value"], errors="coerce")
     lev = terms[terms["item"] == "LEVL"].pivot_table(index="region", columns="act", values="value")
-    wcs0 = cc.read_wcs(ROOT / "capri_data" / "sources" / "capri_gams" / "wintercovershare.gms")
+    wcs0 = cc.read_wcs(cc.WCS)
     base = _load(ROOT / "tools" / "build" / "build_capri_base.py")
     crop_map = dict(base.CROP_MAP)
     crop_map["GRAS"] = ("GRAE", "GRAI")

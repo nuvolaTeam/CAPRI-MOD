@@ -22,8 +22,9 @@ land-market columns, land and bound rows, with one label per row) and the calibr
 * CAP greening (permGras, ecoSetAside, cropDiv Shannon), the N-surplus target, the Green Deal's mineral caps and organic
   area target, the ammonia, fertiliser-technique and inhibitor options through CAPRI's N loss cascade, the emission tax.
 
-Not yet in CAPRI's form (taken from the regional QP or absent): legume share, tillage, urea substitution, 3-NOP,
-linseed, SupplementPerc_ (KNOWN_ISSUES K50).
+Breeding, low-N feed, linseed, nitrate and 3-NOP (and histosol fallowing) are linear columns the supply module adds.
+Not built: legume share, tillage, urea substitution, buffer strips, biodiversity options, biochar, and CAPRI's ration
+fat constraint SupplementPerc_ (KNOWN_ISSUES K93).
 
 CALIBRATION of the feed terms. The rations were calibrated (feed/ration.py) with CAPRI's fixed feed shares and dry-matter
 limits; CAPRI's simulation model has only REQSE_. As CAPRI's PMP calibration does, the linear terms are set so that the
@@ -59,6 +60,15 @@ CACHE_STATS = {"hit": 0, "miss": 0}
 
 #: ridge weight of the calibration's multiplier fit (CapriRegionalNLP.calibrate), relative to the scaled columns
 CAL_RIDGE = 1e-10
+
+#: the market supply Hessian from the KKT conditions (market.hessian_method = "kkt"; beyond CAPRI, which re-solves its
+#: supply models at 1% price shocks): None, "record" (the base solve: each successful solve's primal-dual point is kept
+#: on the regional model, per graph) or "apply" (a shock: a solve of a recorded graph is replaced by the first-order
+#: step of the KKT conditions from the recorded point, CapriRegionalNLP.kkt_step). Set by model._market_supply_hessian
+#: before the supply module's run; the forked workers inherit it
+KKT_MODE = None
+#: the KKT step's functions per graph (the Lagrangian's gradient's and the rows' directional derivatives in p)
+_KKT: "OrderedDict[str, tuple]" = OrderedDict()
 
 #: called as SOLVE_PROBE(fingerprint) before each IPOPT solve when set (the market supply Hessian's skip of regions a
 #: price shock does not reach: SupplyModule._solve_region, model._market_supply_hessian); None otherwise
@@ -118,6 +128,32 @@ def problem_fingerprint(spec, kw, opts) -> str:
     _feed_hash(h, kw)
     _feed_hash(h, opts)
     return h.hexdigest()
+
+
+def linear_solver_options() -> dict:
+    """IPOPT's linear solver options from supply.nlp_linear_solver / supply.nlp_hsllib, for every IPOPT solve of the
+    model. MUMPS (the default) adds no option, so its solver objects and cache keys are those of before the setting; an
+    HSL solver needs its library, and a missing one stops here rather than IPOPT failing in every region (IPOPT returns
+    Invalid_Option, which the regional fallbacks would treat as a failed solve)."""
+    from capri_mod.settings import current as _settings
+    ls = str(_settings().get("supply.nlp_linear_solver")).strip().lower()
+    if ls == "mumps":
+        return {}
+    if ls == "spral":
+        # SPRAL (BSD licence) is part of CasADi's IPOPT. CasADi 3.8.1 builds it without OpenMP: libipopt carries
+        # SPRAL's omp_* stubs and no OpenMP runtime, so it runs on one thread (checked 30 October 2026). With an IPOPT
+        # built with OpenMP, IPOPT's documentation asks for OMP_CANCELLATION=TRUE and OMP_PROC_BIND=TRUE, and the
+        # model's CAPRI_WORKERS processes each take one thread (OMP_NUM_THREADS=1): set here unless the environment
+        # says otherwise (the OpenMP runtime reads them when it starts)
+        for k_, v_ in (("OMP_CANCELLATION", "TRUE"), ("OMP_PROC_BIND", "TRUE"), ("OMP_NUM_THREADS", "1")):
+            os.environ.setdefault(k_, v_)
+        return {"ipopt.linear_solver": "spral"}
+    if ls not in ("ma27", "ma57", "ma77", "ma86", "ma97"):
+        raise ValueError(f"supply.nlp_linear_solver = {ls!r}: mumps, spral, ma27, ma57, ma77, ma86 or ma97")
+    lib = str(_settings().get("supply.nlp_hsllib")).strip()
+    if not lib or not os.path.isfile(lib):
+        raise FileNotFoundError(f"supply.nlp_linear_solver = {ls!r} needs the HSL library: supply.nlp_hsllib = {lib!r}")
+    return {"ipopt.linear_solver": ls, "ipopt.hsllib": lib}
 
 
 def _cache_max():
@@ -490,8 +526,13 @@ class CapriRegionalNLP:
             # prep_sim) are left out of the groups: they contribute nothing, and with IPOPT's fixed-variable treatment
             # (make_constraint) their trial values can fall below zero by more than the 1e-6 floor, where the log is
             # undefined (NaN in about 24 regions of the 2030 baseline, KNOWN_ISSUES K69)
+            # The floor under each group's log: 1e-6 kha plus IPOPT's bound relaxation over the group's columns
+            # (bound_relax_factor 1e-8 per scaled column, x 10; cd["floors"], the same in the base index H0). With 1e-6
+            # alone a column of base level 166 kha at its relaxed bound (-6e-9 scaled) took a single-column group to
+            # zero, the log to NaN, and IPOPT through 3000 iterations (LV000000, Green Deal 2030 cold start; K97)
             _fix0 = lambda j: lbx[int(j)] == 0.0 and ubx[int(j)] == 0.0
-            Xk = [lin([(j, w) for j, w in gp if not _fix0(j)]) + 1e-6 for gp in cd["groups"]]
+            fl_ = cd.get("floors") or [1e-6] * len(cd["groups"])
+            Xk = [lin([(j, w) for j, w in gp if not _fix0(j)]) + float(f_) for gp, f_ in zip(cd["groups"], fl_)]
             T = sum(Xk)
             H = 0
             for x_ in Xk:
@@ -1084,7 +1125,8 @@ class CapriRegionalNLP:
             Xs = ca.vertcat(ca.DM(x[:o]), xf, ca.DM(x[o1:]))
             gf = ca.Function("gf", [self.X, self.p], [self.g[r0:r1]])(Xs, ca.DM(self.pval))
             S = ca.nlpsol("C", "ipopt", {"x": xf, "f": 0, "g": gf},
-                          {"ipopt.print_level": 0, "print_time": 0, "ipopt.tol": 1e-10, "ipopt.max_iter": 3000})
+                          {"ipopt.print_level": 0, "print_time": 0, "ipopt.tol": 1e-10, "ipopt.max_iter": 3000,
+                           **linear_solver_options()})
             r = S(x0=x[o:o1], lbx=self.lbx[o:o1], ubx=self.ubx[o:o1], lbg=self.lbg[r0:r1], ubg=self.ubg[r0:r1])
             if not S.stats()["success"]:
                 failed[nut] = S.stats()["return_status"]
@@ -1116,10 +1158,12 @@ class CapriRegionalNLP:
             x = self.inside_regulations(np.clip(x, self.lbx, self.ubx))
         return np.clip(x, self.lbx, self.ubx)
 
-    def inside_regulations(self, x, margin=0.95):
+    def inside_regulations(self, x, margin=0.95, only_outside=False):
         """x with every regulated flow (CAPRI's beta-density regulations) moved inside its support: at most margin x
         its maximum at x's own column levels. A start outside the support (the prior mode above a Green Deal cap)
-        leaves IPOPT on the wrong side of the density's pole."""
+        leaves IPOPT on the wrong side of the density's pole. With only_outside, a flow is moved (to margin x its
+        maximum) only where it lies outside the support; the warm start from the last solution (K79): a solution's
+        flows near their maximum stay where they are, so the point fits the last solution's multipliers."""
         x = np.asarray(x, float).copy()
         y = x[:self.n0] * self.sc
         for nut, fb in (self.fert or {}).items():
@@ -1129,7 +1173,7 @@ class CapriRegionalNLP:
                     continue
                 Y = sum(v * y[j] for j, v in cols)
                 k = fb["off"] + i
-                if Y > 0 and x[k] * m > margin * Y:
+                if Y > 0 and x[k] * m > (Y if only_outside else margin * Y):
                     x[k] = max(margin * Y / m, self.lbx[k])
         return np.clip(x, self.lbx, self.ubx)
 
@@ -1209,7 +1253,7 @@ class CapriRegionalNLP:
                 "ipopt.fixed_variable_treatment": str(_st.get("supply.nlp_fixed_variable_treatment")),
                 # a guard: a regional solve normally takes well under a second; one that stalls is cut and the caller's
                 # next start (or fallback) follows
-                "ipopt.max_cpu_time": float(_st.get("supply.nlp_max_cpu_time"))}
+                "ipopt.max_cpu_time": float(_st.get("supply.nlp_max_cpu_time")), **linear_solver_options()}
         warm = lam is not None and len(lam[0]) == len(self.lbx) and len(lam[1]) == len(self.lbg)
         if warm:
             # a warm start normally takes 14-23 iterations (docs/NLP_PORT_DESIGN.md "Speed"); one from a point whose
@@ -1292,6 +1336,107 @@ class CapriRegionalNLP:
             inv = np.where(w > 1e-10 * wmax, 1.0 / np.where(w > 0, w, 1.0), 0.0)
             dX[Fr] = -Z @ (U @ (inv[:, None] * (U.T @ (Z.T @ DX[Fr]))))
         return dX[:n0] * np.asarray(self.sc, float)[:, None]
+
+    def kkt_record(self, res) -> dict:
+        """The point a KKT step starts from (kkt_step): the solution, its multipliers, and the problem's parameters and
+        bounds at it."""
+        return {"x": np.asarray(res["x"], float).copy(), "lam_x": np.asarray(res["lam_x"], float).copy(),
+                "lam_g": np.asarray(res["lam_g"], float).copy(), "pval": np.asarray(self.pval, float).copy(),
+                "lbx": self.lbx.copy(), "ubx": self.ubx.copy(), "lbg": self.lbg.copy(), "ubg": self.ubg.copy()}
+
+    def kkt_step(self, base: dict, tol: float = 1e-9) -> dict:
+        """The solution of this problem to first order from the recorded solution of the same graph at other parameter
+        values and bounds (base, kkt_record): the implicit function theorem on the KKT conditions with the base's
+        active set (market.hessian_method = "kkt", beyond CAPRI). With dp = p - p0 and the bounds' changes:
+
+            active variable bounds (and fixed variables): dx_B = the bound's change
+            active rows (and equalities):                 J_AF dx_F = the bound's change - dg/dp dp - J_AB dx_B
+            stationarity on the free variables:           H_FF dx_F + H_FB dx_B + J_AF' dlam_A = -d(grad_x L)/dp dp
+
+        H the Lagrangian's Hessian, J the rows' Jacobian, at the base point; the active set as in response (a bound or
+        row within 1e-6 of its bound with a multiplier above tol). Solved as response does, in the null space Z of the
+        active rows (robust where they are linearly dependent, at degenerate vertices): dx_F = x_p + Z w, x_p the
+        least-norm solution of the rows, w from the reduced Hessian Z' H_FF Z (directions without curvature take no
+        step). Then the multipliers: dlam_A by least squares from the stationarity, the active variables' bound
+        multipliers from the stationarity of their rows. Returns the solve's dict ("status" "KKT_Step", "success" True,
+        "iterations" 0). A regularised sparse KKT solve was tried first: its regularisation exceeded the smallest
+        curvature of the reduced Hessian (1e-4 against 5e-3, DE110000) and turned the response's sign."""
+        import casadi as ca
+        from scipy.linalg import null_space
+        key = self.graph_key()
+        fn = _KKT.get(key)
+        if fn is None:
+            d = self._derivatives()
+            lg = ca.SX.sym("lam_g", int(self.g.shape[0]))
+            dp = ca.SX.sym("dp", int(self.p.shape[0]))
+            grad = d["grad_f"](self.X, self.p)[1]
+            gradL = grad + ca.jtimes(self.g, self.X, lg, True)
+            fn = (d["hess_lag"],
+                  ca.Function("jac_g", [self.X, self.p], [ca.jacobian(self.g, self.X)]),
+                  ca.Function("dgradL", [self.X, self.p, lg, dp], [ca.jtimes(gradL, self.p, dp)]),
+                  ca.Function("dg", [self.X, self.p, dp], [ca.jtimes(self.g, self.p, dp)]))
+            _KKT[key] = fn
+            while len(_KKT) > 16:
+                _KKT.popitem(last=False)
+        hess, jac, dgradL, dgf = fn
+        x0, lx0, lg0, p0 = base["x"], base["lam_x"], base["lam_g"], base["pval"]
+        dpv = np.asarray(self.pval, float) - p0
+        nX, m = len(x0), len(lg0)
+        Ht = np.asarray(ca.DM(hess(x0, p0, 1.0, lg0)).full(), float)
+        H = Ht + Ht.T - np.diag(np.diag(Ht))
+        J = np.asarray(ca.DM(jac(x0, p0)).full(), float) if m else np.zeros((0, nX))
+        rL = np.asarray(ca.DM(dgradL(x0, p0, lg0, dpv)).full(), float).ravel()
+        rg = np.asarray(ca.DM(dgf(x0, p0, dpv)).full(), float).ravel() if m else np.zeros(0)
+        g0 = np.asarray(ca.DM(self.f_g.f(x0, p0)).full(), float).ravel() if m else np.zeros(0)
+
+        def near(v, bnd):
+            fin = np.isfinite(bnd)
+            return fin & (np.abs(v - bnd) <= 1e-6 * (1.0 + np.abs(np.where(fin, bnd, 0.0))))
+
+        def change(new, old):
+            with np.errstate(invalid="ignore"):
+                dd = np.asarray(new, float) - np.asarray(old, float)
+            return np.where(np.isfinite(dd), dd, 0.0)
+        lbx0, ubx0, lbg0, ubg0 = base["lbx"], base["ubx"], base["lbg"], base["ubg"]
+        fixed = lbx0 >= ubx0
+        at_lo = fixed | (near(x0, lbx0) & (np.abs(lx0) > tol))
+        at_up = ~at_lo & near(x0, ubx0) & (np.abs(lx0) > tol)
+        Bm = at_lo | at_up
+        dxB = np.where(at_lo, change(self.lbx, lbx0), np.where(at_up, change(self.ubx, ubx0), 0.0))
+        eq = lbg0 >= ubg0
+        g_lo = eq | (near(g0, lbg0) & (np.abs(lg0) > tol))
+        g_up = ~g_lo & near(g0, ubg0) & (np.abs(lg0) > tol)
+        db = np.where(g_lo, change(self.lbg, lbg0), np.where(g_up, change(self.ubg, ubg0), 0.0))
+        F, B, A = np.nonzero(~Bm)[0], np.nonzero(Bm)[0], np.nonzero(g_lo | g_up)[0]
+        dx = np.zeros(nX)
+        dx[B] = dxB[B]
+        HF = H[np.ix_(F, F)]
+        JAF = J[np.ix_(A, F)]
+        cA = db[A] - rg[A] - J[np.ix_(A, B)] @ dx[B]
+        bF = rL[F] + H[np.ix_(F, B)] @ dx[B]
+        if len(A):
+            xp = np.linalg.lstsq(JAF, cA, rcond=None)[0]
+            Z = null_space(JAF)
+        else:
+            xp, Z = np.zeros(len(F)), np.eye(len(F))
+        dF = xp.copy()
+        if Z.shape[1]:
+            Hr = Z.T @ HF @ Z
+            w, U = np.linalg.eigh(0.5 * (Hr + Hr.T))
+            wmax = float(np.max(np.abs(w))) if len(w) else 1.0
+            inv = np.where(w > 1e-10 * wmax, 1.0 / np.where(w > 0, w, 1.0), 0.0)
+            dF = xp - Z @ (U @ (inv * (U.T @ (Z.T @ (HF @ xp + bF)))))
+        dx[F] = dF
+        dlg = np.zeros(m)
+        if len(A):
+            dlg[A] = np.linalg.lstsq(JAF.T, -(HF @ dF + bF), rcond=None)[0]
+        dlx = np.zeros(nX)
+        if len(B):
+            dlx[B] = -(H[B] @ dx + rL[B] + (J[:, B].T @ dlg if m else 0.0))
+        x = x0 + dx
+        return {"x": x, "f": float(np.asarray(ca.DM(self.f_obj.f(x, self.pval)).full()).ravel()[0]),
+                "lam_g": lg0 + dlg, "lam_x": lx0 + dlx, "status": "KKT_Step", "iterations": 0, "success": True,
+                "warm": False}
 
     # ---------------- results in the regional QP's terms ----------------
     def outputs(self, res):

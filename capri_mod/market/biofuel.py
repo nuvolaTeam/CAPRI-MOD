@@ -39,9 +39,9 @@ class BiofuelMixin(MarketStateMixin):
         """First-generation biofuel feedstock demand, CAPRI's market equations (biofFeedCost_, biofFeedCostAgg_,
         Biof_, prodBiof_, prodQuantBiofBy_), per CAPRI market region.
 
-        From capri_data/2017/market/biofuel_feedstock.csv (tools/build/build_biofuel_market.py): per CAPRI region and
+        From capri_data/2017/market/biofuel_feedstock_<market year>.csv (tools/build/build_biofuel_market.py): per CAPRI region and
         biofuel, the feedstocks' 2030-reference quantities q0, PRCB, PRCBY, by-product, prices and the numeraire;
-        and biofuel_use_share.csv: EU biofuel use as a share of the EU use of each model commodity.
+        and biofuel_use_share_<market year>.csv: EU biofuel use as a share of the EU use of each model commodity.
         Returns {"groups": [...], "share": {commodity: EU share}, "q0": {commodity: EU kt},
         "q0_reg": {(region, commodity): kt}, "ddgs0": {region: kt}} ({} when the files are absent).
         """
@@ -50,10 +50,11 @@ class BiofuelMixin(MarketStateMixin):
             return cached
         out = {}
         try:
-            f = self._inp().csv("biofuel_feedstock.csv", keep_default_na=False)
+            _yr = self._market_year()       # the market year's files (K106)
+            f = self._inp().csv(f"biofuel_feedstock_{_yr}.csv", keep_default_na=False)
             if "region" not in f.columns:
                 f["region"] = "EU27"
-            sh = self._inp().csv("biofuel_use_share.csv")
+            sh = self._inp().csv(f"biofuel_use_share_{_yr}.csv")
             groups = []
             for (ms, fuel), g in f.groupby(["ms", "biofuel"], sort=True):
                 reg = str(g["region"].iloc[0])
@@ -118,7 +119,8 @@ class BiofuelMixin(MarketStateMixin):
             return cached
         out = {}
         try:
-            m = self._inp().csv("biofuel_market.csv")
+            _yr = self._market_year()
+            m = self._inp().csv(f"biofuel_market_{_yr}.csv")
             for col in ("proc_kt", "proc_hess", "inpe"):
                 if col not in m.columns:
                     m[col] = 0.0

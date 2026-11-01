@@ -26,8 +26,9 @@ it is recorded, not used - REGISTERED). Fertiliser timing on manure (FERTTIME) i
 model has no such option.
 
 Source: capri_data/sources/ghgtech/LitRevFertTech_p_litRevFertTechs.csv (the records used, from the
-gdxdump of the installation's LitRevFertTech.gdx; the full dump is the .txt beside it; the NO3 records are read from
-the full dump into LitRevFertTech_p_litRevFertTechs_no3.csv). Model regions take their CAPRI region, else the national entry,
+gdxdump of the installation's LitRevFertTech.gdx; the full dump is LitRevFertTech_p_litRevFertTechs_all.csv beside
+it, converted from the gdxdump text by tools/build/convert_sources_to_csv.py; the NO3 records are read from the full
+dump into LitRevFertTech_p_litRevFertTechs_no3.csv). Model regions take their CAPRI region, else the national entry,
 else (multi-region countries whose model region has no CAPRI counterpart: city states, recent NUTS
 splits, Norway) the median over the country's CAPRI regions (REGISTERED; the values vary little
 within a country).
@@ -52,16 +53,13 @@ SRC = ROOT / "capri_data" / "sources" / "ghgtech"
 
 
 def no3_records():
-    """The NO3 records of NITR_INH from the full dump -> LitRevFertTech_p_litRevFertTechs_no3.csv (region,
-    technology, activity, system, item, value)."""
-    import re
+    """The NO3 records of NITR_INH from the full dump (LitRevFertTech_p_litRevFertTechs_all.csv, the gdxdump converted
+    by tools/build/convert_sources_to_csv.py) -> LitRevFertTech_p_litRevFertTechs_no3.csv (region, technology,
+    activity, system, item, value)."""
     out = SRC / "LitRevFertTech_p_litRevFertTechs_no3.csv"
-    txt = SRC / "LitRevFertTech_p_litRevFertTechs.txt"
-    if txt.exists():
-        pat = re.compile(r"'([^']+)'\.'(NITR_INH)'\.'([^']+)'\.'([^']+)'\.'(NO3[A-Z]+)'\s+([-0-9.eE+]+)")
-        rows = [m.groups() for m in map(pat.match, open(txt)) if m]
-        pd.DataFrame(rows, columns=["region", "technology", "activity", "system", "item", "value"]).astype(
-            {"value": float}).to_csv(out, index=False)
+    full = pd.read_csv(SRC / "LitRevFertTech_p_litRevFertTechs_all.csv", dtype=str, keep_default_na=False)
+    full = full[(full["technology"] == "NITR_INH") & full["item"].str.fullmatch(r"NO3[A-Z]+")]
+    full.astype({"value": float}).to_csv(out, index=False)
     return _read_csv(out)
 
 

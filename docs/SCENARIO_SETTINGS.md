@@ -75,7 +75,7 @@ implemented (an error if not 0): dietShift, othPol. The JRC121368 surplus rule a
 | Stock changes (`stockChg`) | nost | none |
 | Allow minimum shares of anorganic fertilizers (`useMinimumAnorganicShares`) | false; NUTMIN_ is in the regional model only with the inner fertiliser model off | as star 3.0: NUTMIN_ off, the inner model being always on (K40; the switches of the conic form were removed on 26 October 2026) |
 | Water module, crop inputs in market | false | false (capri-mod's water module is standalone, not part of `run()`) |
-| Iterations (`STEPS`) / lower weights after (`LOWSTEPS`) | 99 / 20 | `max_outer_iter` 25 (raised to 60 with manure trade), adaptive damping per commodity (README 7.4) |
+| Iterations (`STEPS`) / lower weights after (`LOWSTEPS`) | 99 / 20 | `outer_loop.max_outer_iter` 60 (the project lead's choice of 28 October 2026, register DEP-1), CAPRI's price forecast (`outer_loop.price_update = "capri"`, its step weights from iteration `capri_step_weights_late_from` 20) |
 
 Outside the GUI table: CAPRI solves its regional supply models as NLPs with CONOPT; capri-mod solves the same form
 with IPOPT (a conic reformulation with Clarabel was an option until 26 October 2026).

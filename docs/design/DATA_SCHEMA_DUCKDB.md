@@ -17,7 +17,8 @@ armington_params.csv, 29 October 2026, the file turned out to be named in seven:
 (live, stored-not-applied and archived files, 44 live entries), `INPUT_MANIFEST.json` (93 inputs and the data held in
 code) and `DATA_LOCATION_MAP.md` (where each input lives in CAPRI). `FITNESS_FOR_USE.json` (the outputs' fitness,
 read by capri_mod/fitness.py), `SYMBOL_EXTRACTION_MAP.json` and `validation/schema_coverage.json` (a dated report)
-describe the data too. All of them are to be checked when their content moves into the declarations):
+describe the data too (`DATA_CATALOG.json`, `SYMBOL_EXTRACTION_MAP.json` and `schema_coverage.json` removed 30 October 2026,
+read by no code). All of them are to be checked when their content moves into the declarations):
 
 | Store | Entries | Holds | Read by |
 |---|---|---|---|
@@ -46,9 +47,9 @@ Beyond CAPRI (for the project lead to note): range checks, and enforcement at lo
 
 ## Layout
 
-- `capri_data/schema/codes/*.csv`: code lists built from CAPRI's `sets.gms` by one builder (regional units, activities,
+- `capri_data/codes/*.csv`: code lists built from CAPRI's `sets.gms` by one builder (regional units, activities,
   data-cube rows, market products, with CAPRI's descriptions); `definitions.py` then reads them instead of holding lists.
-- `capri_data/schema/units.csv`: the unit catalogue from `CAPRIunits.gms` (code, description); a unit CAPRI does not
+- `capri_data/codes/units.csv`: the unit catalogue from `CAPRIunits.gms` (code, description); a unit CAPRI does not
   have is added with a flag saying so.
 - `capri_data/schema/<folder>/<table>.sql`: one `CREATE TABLE` per CSV with column types, `NOT NULL`, `PRIMARY KEY`,
   `REFERENCES` to the code lists, `CHECK` ranges; `COMMENT ON COLUMN` holds the unit code, `COMMENT ON TABLE` the source,
@@ -74,14 +75,32 @@ Beyond CAPRI (for the project lead to note): range checks, and enforcement at lo
    `CAPRIunits.gms`, `CAPRIunits.gdx`, CAPRI's documentation), `builder` (stated by the builder from the CAPRI item it
    transforms, not found stated by CAPRI), `open` (not established; the unit is left empty). First declared
    (`10_supply_2017.sql`): base_areas, land_availability, animal_numbers, yields, variable_costs, producer_prices.
-   The open units found: the yields (and so prices) of OCRO, OIND, NURS, FLOW (CAPRI's YILD / 1000 like the other
-   crops, but their magnitudes, FLOW median 138 "t/ha", do not show that CAPRI's YILD of these crops is kg per ha),
-   HFRS's yield (median 4.1 t per head), OANI's yield and cost (its level is an index), and the livestock rows of the
-   EU producer prices (origin not recorded, K72). `CAPRIunits.gms` assigns units to the market results (`yild` of a
+   Then `12_supply_pmp.sql` (29 October 2026): the PMP terms, CAPRI's 2030 and capri-mod's own with CAPRI's recipe
+   (2017, 2030), crops and animals, and capri_level_ratio; rules: the crop terms symmetric with one level per activity,
+   the territory groups' CAPRI regions in RALL and the same for a region's crops and animals, the animal terms' level
+   ratio capri_level_ratio's. One open unit: the animals' x_capri holds CAPRI's level unit of each animal (1000 head,
+   poultry million head), two units in one column. `13_supply_rents_elas.sql`: the land rents (2017, 2030), the
+   own-price supply elasticities (PELA regional and raw, CAPRI's p_ElasSupp per member state; model unit U_Elasticity)
+   and the mineral N price; three of them have no builder in the repository (pmp_own_price_elasticities,
+   capri_own_price_elasticities, mineral_n_price: none is read by the default model). `20_market_2017.sql`: the
+   market supply functions (ProdNQ_). `21_market_inputs.sql`: world prices, the non-EU supply elasticities, the feed
+   bulks (EU, Norway, the EU's feed shares), the Armington elasticities, the processing yields; its rule on the bulks
+   checks CAPRI's market map FEED_TO_XX (FEED_TO_O plus WHEA in FCER, arm/arm_sets.gms l. 508-509), which the first
+   draft against FEED_TO_O alone found. `99_rules.sql`: every numeric column of a long table has a unit in the
+   catalogue (information_schema; tables with per-item units are left to their own rules).
+   `14_policy_targets.sql`: CAPRI's Green Deal targets, the organic yield gaps, the yields' price elasticities.
+   `22_market_feed_energy.sql`: the feed energy balance of audit M3 (rule: FedeBal_ holds at the calibration point),
+   the EU's cake feed weights, the EU supply elasticities. 59 files declared (29 October 2026).
+   The open units found, and settled where the data allow (29 October 2026): the yields of OCRO, OIND, NURS, FLOW are
+   value units per ha (CAPRI measures these crops in value: MPRI an index near 1000, MREV = YILD / 1000 x MPRI; the
+   model's own unit U_ValueUnitPerHa); HFRS's yield has no single unit (its CAPRI members' YILD measure meat and raised
+   heifers; without effect on results: the animals' output is CAPRI's output coefficients, and of their yields only DCOW's is used, as a ratio); OANI's yield and cost stay open (per unit of
+   an index level; OANI is held at 0); the livestock rows of the EU producer prices were removed (K72). `CAPRIunits.gms` assigns units to the market results (`yild` of a
    product t/ha, prices EUR/t), not to the supply data's per-activity items, and the old `CAPRIunits.gdx` gives the
    activities' LEVL units only (crops 1000 ha, animals 1000 heads, hens and poultry million heads, OANI an index).
 2. `MANIFEST.json` and `INPUT_SCHEMA.json`: retired once their content is in the declarations; `verify_schema.py`'s
-   coverage count moves onto the declarations.
+   coverage count moves onto the declarations. **INPUT_SCHEMA.json done 29 October 2026** (see "Provenance, the numbers
+   in the code and the JSON catalogue" below); MANIFEST.json still to do.
 3. `DATA_SOURCING_REGISTRY.json` (276 entries): the 37 that name a file give their provenance to the table comments.
    The other 239 are not data declarations but a log of the project's checks and decisions: 143 closed (fixed,
    implemented, retired), 59 with another status (validations, diagnoses, settings, "comparison pending"), 37 without
@@ -89,6 +108,14 @@ Beyond CAPRI (for the project lead to note): range checks, and enforcement at lo
    checked against today's code and becomes a K item (or joins the K item it duplicates); the closed and historical
    entries are kept verbatim in an appendix of `KNOWN_ISSUES.md`, so nothing is lost and the K list stays current.
    Its `code_embedded_data` section (2 entries: constants in code) goes to the proxy audit's hardcoded-data list.
+   **Done 29 October 2026:** the 201 log entries and the sections uploaded_star_files_assessment,
+   capreg_extraction_outcome, _release_readiness and cattle_member_splits are verbatim in
+   docs/KNOWN_ISSUES_REGISTRY_LOG.md (a file of its own, linked from KNOWN_ISSUES.md, because of its size), with the
+   triage of the 71 entries not marked closed (new K92-K96; K91 corrected); code_embedded_data in
+   docs/design/PROXY_AUDIT.md; the registry keeps its 74 dataset entries. **Retired 29 October 2026**: of its dataset
+   entries, the 18 that name a live file were checked against the code and the data; what still holds is in
+   `02_provenance_notes.sql`, the rest (most of it: coverage counts, synthetic columns and fixes of earlier states)
+   was dropped. The entries' text stays in git history.
 4. "No orphan rows": a row whose key is not in a code list (the foreign keys) and a table nothing reads (rule above).
 
 ## Order
@@ -99,3 +126,37 @@ Beyond CAPRI (for the project lead to note): range checks, and enforcement at lo
 4. The extracts under `sources/`, each declared with its CAPRI symbol.
 
 Each step: declarations, check, violations listed; the data unchanged.
+
+## Provenance, the numbers in the code and the JSON catalogue (29 October 2026, the project lead's request)
+
+The hand-kept JSON stores `DATA_SOURCING_REGISTRY.json` (per-dataset provenance), `INPUT_MANIFEST.json` (the declared
+inputs and the data held in code) and `INPUT_SCHEMA.json` (54 inputs with modules and known gaps) are replaced by
+tables of the declarations, two generated and two kept by hand:
+
+| File | Table | Kept | Content |
+|---|---|---|---|
+| `01_provenance.sql` | `provenance (file, nature, origins, builder, sources)` | generated: `tools/check/make_provenance.py` | every CSV's nature (capri, capri-publication, external, mixed, source-extract, declared, no-builder), from the pipeline's trace: the origins of the leaves its builder chain reads (CAPRI, JRC121368, Eurostat, FAO, EC, unsourced) and the files outside the repository it reads. Builders added after the last retrace (the CAPTRD sets and data, the code lists, ...) are listed in the script with their origin until a retrace takes them in. |
+| `02_provenance_notes.sql` | `provenance_notes (file, kind, n, note, evidence, checked)` | by hand | statements on a file's origin (kind `origin`) or a limitation a user should know (kind `gap`), each checked against the code and the data, with file:line evidence and the date |
+| `03_code_data.sql` | `code_data (file, scope, value, n, lines, excerpt)` | generated: `tools/check/make_code_data.py` | the numbers in the model's code that may be data: every number of a module- or class-level assignment but 0, 1, -1; every other number but small integers, 0.5, powers of ten, tolerances below 1e-5 and numbers in messages |
+| `04_code_data_status.sql` | `code_data_status (file, scope, value, status, action, source, note)` | by hand | where each number comes from (capri with the gms line, capri-data, literature, physical, numerical, capri-mod, technical, open) and what to do (keep, to-data, to-setting, register, check) |
+
+`schema.json` is generated from all the declarations (`tools/check/make_schema_json.py`): per table its file,
+columns, keys, references, checks, units, provenance, notes and the code that names the file (the builders from the
+trace; the model, checks and tests from a static scan of string literals, which misses names assembled otherwise).
+A test fails when a generated file is out of date. Rules: every CSV under `capri_data` is declared; every declared
+file has its provenance and no provenance row is left without a declared file; every data file has a known origin
+; a file without a builder has a checked note
+on its origin; every number in the code has its classification and no classification is left without its number.
+
+Two source files in GAMS text form, `sources/water/cropwat.csv` and `irrishare.csv`, were CSV only by name; they were
+renamed `.gms` (the builder's output unchanged, byte for byte), and on 30 October 2026 converted to CSV with every
+other non-CSV source: `water/cropwat_p_cropwatReq.csv`, `water/irrishare_p_irriShare.csv` (`tools/build/convert_sources_to_csv.py`, declared
+in `34_sources_csv.sql`).
+
+The nine validation files without a builder were settled by the project lead (29 October 2026, KNOWN_ISSUES K103):
+the seven read by no code removed, with three unread source extracts (their builders no longer write them); the two
+read by the baseline check given a builder (tools/build/build_capri_eu27_levels.py, the 2030 file reproduced exactly,
+the 2017 file at full precision). `validate_data.py --db FILE` keeps the database it builds (a copy for querying,
+rebuilt from the CSVs; not in git). Still to move: `MANIFEST.json`, `FITNESS_FOR_USE.json` and `DATA_DICTIONARY.md`
+(`DATA_CATALOG.json` and `SYMBOL_EXTRACTION_MAP.json`, read by no code, were removed 30 October 2026, the project lead's
+decision).

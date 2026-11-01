@@ -45,7 +45,7 @@ class CalibrationMixin(MarketStateMixin):
         self.par.base_consumption = pd.DataFrame(0.0, index=regions, columns=comms)
         self.par.base_net_exports_eu = {}
         inp = self._inp()
-        year = int(self.data.get("market_year", 2017) or 2017) if isinstance(self.data, dict) else 2017
+        year = self._market_year()
         sfx = "_eu2" if self.eu_blocks else ""
         ff, fr = f"bilateral_flows_{year}{sfx}.csv", f"bilateral_regions_{year}{sfx}.csv"
         if not inp.exists(ff):

@@ -19,7 +19,8 @@ Herd curvature in CAPRI's level units, per CAPRI region:
 Territories with several CAPRI regions (tools/lib/_model_regions.capri_groups, Norway as tools/build/build_capri_base): the herd
 responses add up, h = 1 / sum_c (1 / h_c) on the summed levels X.
 Written as g = h X / r (X the territory's CAPRI 2030 level of the animal's activities, r = capri_level_ratio, the model's
-heads per CAPRI level unit); at runtime Q = g / x with the model region's base herd x, as for the crops
+heads per CAPRI level unit), in the model's 2017 money (over tools/lib/_money.deflator of the year, KNOWN_ISSUES K108,
+31 October 2026; before, CAPRI's 2030 money); at runtime Q = g / x with the model region's base herd x, as for the crops
 (PMPCalibrator: Q_ij = g_ij / sqrt(x_i x_j)). For a region holding the share w of its territory, x = w r X and
 Q = h / (w r^2): the elasticity of CAPRI's territory, with the model's revenue per head (CAPRI's per level unit / r).
 (The first version wrote g = h X^2, which made the herds 100-25000 times too steep: corrected the same night.)
@@ -131,6 +132,9 @@ def main() -> None:
     a = ap.parse_args()
     sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check")]
     import _model_regions as mr
+    import _money
+    # CAPRI's terms of the year's calibration are in its money of that year; the model's in 2017 money (K108)
+    money = _money.deflator(a.year)
     t = _read_csv(a.techn or SRC)
     t = t[(t.tech1 == "T") & (t.tech2 == "T") & t.activity.isin(ACTS)]
     Q = defaultdict(dict)
@@ -176,7 +180,7 @@ def main() -> None:
                 if not (rr == rr and rr > 0):
                     missing[animal].append(r)
                     continue
-                rows.append((r, animal, h * X / rr, X, rr, " ".join(used)))
+                rows.append((r, animal, h * X / rr / money, X, rr, " ".join(used)))
     df = pd.DataFrame(rows, columns=["region", "animal", "g", "x_capri", "level_ratio", "capri_regions"])
     df.to_csv(OUT, index=False)
     print(f"{OUT.name}: {len(df)} region x animal entries, {df.region.nunique()} regions; "

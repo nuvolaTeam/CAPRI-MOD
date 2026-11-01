@@ -122,7 +122,9 @@ region's previous solution, as CAPRI's CONOPT restarts from the last solution).
 The registered departures of the NLP form are listed in KNOWN_ISSUES K50 (14 items) and K51; the user's two decisions
 against CAPRI's code are in README section 10.2c. In terms of this map, the ones that change the equations rather than
 their data:
-1. PMP and land-market matrices: capri-mod's calibration, not CAPRI's p_pmpQuad* values (decision 5a.5).
+1. PMP and land-market matrices: capri-mod's calibration, not CAPRI's p_pmpQuad* values (decision 5a.5). Superseded on
+   22 October 2026: CAPRI's own 2030 terms are the default (`supply.pmp_source = "capri2030"`, K61; the recipe terms an
+   option). The current list: docs/CAPRI_DEPARTURES_REGISTER.md.
 2. SUPBAL_/INPANI_: no balances for sales and young animals in the regional problem (values per unit).
 3. One need multiplier per region and nutrient in NUTNED_.
 4. LUC solved after the regional model.
@@ -140,7 +142,8 @@ Questions raised by the map, and the decisions:
    reference).
 4. LUC transition model, ecological set-aside and crop diversification: in the first version. Done in the NLP form
    (`tools/build/build_luc_2030.py`, `tools/build/build_cap_greening.py`).
-5. PMP and land-market matrices: capri-mod's own calibration for now. As decided.
+5. PMP and land-market matrices: capri-mod's own calibration for now. As decided (superseded 22 October 2026: CAPRI's
+   own 2030 terms by default, K61).
 
 The data the map listed as needed (P and K needs and excretion, LUC transition matrix, greening limits, the Green Deal
 abatement block's inputs) were supplied from the CAPRI installation; each builder in `tools/` names its source.

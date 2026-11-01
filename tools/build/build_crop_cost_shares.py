@@ -19,6 +19,8 @@ the value, 1.0, is the same).
     python tools/build/build_crop_cost_shares.py [--dump-dir /home/claude/work/capreg] [--out FILE]
 """
 from __future__ import annotations
+
+import sys
 import argparse, glob, importlib.util, re
 from collections import defaultdict
 from pathlib import Path
@@ -34,8 +36,9 @@ _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to
 ROOT = Path(__file__).resolve().parents[2]
 DEST = ROOT / "capri_data" / "2017" / "supply" / "crop_cost_shares.csv"
 ROW = re.compile(r"^'([A-Z]{2}[0-9A-Z]{6})'\.'([A-Za-z0-9_]+)'\.'(FERT|TOIN|LEVL)'\.'Y'\s+(-?\d[\d.]*(?:[Ee][+\-]?\d+)?)")
-EU27 = {"AT", "BL", "BG", "CY", "CZ", "DE", "DK", "EE", "EL", "ES", "FI", "FR", "HR", "HU", "IR", "IT", "LT", "LV",
-        "MT", "NL", "PL", "PT", "RO", "SE", "SI", "SK"}
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "lib"))
+from _model_regions import EU_MS2 as _EU_FROM_DATA  # noqa: E402  (capri_data/shared/eu_market_blocks.csv)
+EU27 = set(_EU_FROM_DATA)                                  # CAPRI's EU member states, from the data
 
 
 def main():

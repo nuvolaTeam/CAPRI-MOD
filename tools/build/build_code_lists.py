@@ -3,21 +3,25 @@
 The model keeps its own codes (the project lead's decision of 29 October 2026: option 1, a mapping table; CAPRI's codes
 throughout may follow later). This builder writes:
 
-  capri_data/schema/codes/capri/<SET>.csv     CAPRI's code lists as instantiated in a CAPMOD run: code, text
+  capri_data/codes/capri/<SET>.csv     CAPRI's code lists as instantiated in a CAPMOD run: code, text
                                               (PACT all production activities, MPACT, MCACT, MAACT, XX the market
-                                              products, RALL all regional units)
-  capri_data/schema/codes/model_activities.csv  the model's 46 activities (capri_mod/data/definitions.py CROPS,
-                                              ANIMALS): code, kind, capri_codes (";"-joined CAPRI activities summed
-                                              into it), mapping_source
-  capri_data/schema/codes/model_commodities.csv the model's 58 market commodities (MARKET_COMMODITIES): code,
+                                              products, XX1 the market model's products with the non-agricultural good, income,
+                                              land and feed energy, RALL all regional units)
+  capri_data/codes/capri/FEED_TO_O.csv  CAPRI's feed bulks and their products: feed, row
+  capri_data/codes/capri/MS_RU.csv     CAPRI's member states and their regional units (MAP_RR x MS x RU)
+  capri_data/codes/model_commodities.csv the model's 58 market commodities (MARKET_COMMODITIES): code,
                                               capri_code, mapping_source
 
-The mappings are the ones the builders already use, taken from one definition each (crops: build_capri_base.CROP_MAP;
-animals: build_animal_yields.ANIMALS; market products: build_feed_bulks.COMMODITY with
+The trade regions' code list (codes/model_trade_regions.csv) and the activities' (codes/model_activities.csv: the
+model's activities, their CAPRI activities and those of CAPRI's supply model, a source per row) are not written here
+since 30 October 2026: they are declared tables, read by the model and the builders (tools/lib/_model_codes.py). The
+activities' list is checked here: the model's crops and animals (definitions.CROPS, ANIMALS) in its order, every CAPRI
+code in CAPRI's PACT.
+
+The products' mapping is the one the builders already use, taken from one definition (build_feed_bulks.COMMODITY with
 recalibrate_trade_2017.COMMODITY_MAP for the products that are not feed, which must agree, and CAPRI's code where the
-model's is CAPRI's own). The builder stops if a model code has no mapping, a CAPRI code is not in CAPRI's set, or another copy of
-a mapping in the code disagrees (build_livestock_units, build_plant_protection_cost, build_supplement_effects for the
-animals; build_dairy_world_markets.COMM and market/dairy.DAIRY_TRADED for the products; build_dairy_trade_params.CODE
+model's is CAPRI's own). The builder stops if a model code has no mapping, a CAPRI code is not in CAPRI's set, or another
+copy of a mapping in the code disagrees (build_dairy_world_markets.COMM and market/dairy.DAIRY_TRADED; build_dairy_trade_params.CODE
 until that builder was removed with armington_params.csv, 29 October 2026), and checks that every regional unit is one of CAPRI's (RALL).
 
 Source of CAPRI's sets: tools/build/build_capri_sets_reference.py's extract of sim_ini_21730.gdx (a CAPMOD restart file
@@ -35,8 +39,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
-OUT = ROOT / "capri_data" / "schema" / "codes"
-CAPRI_SETS = ("PACT", "MPACT", "MCACT", "MAACT", "XX", "RALL")
+OUT = ROOT / "capri_data" / "codes"
+CAPRI_SETS = ("PACT", "MPACT", "MCACT", "MAACT", "XX", "XX1", "RALL")
 
 
 def literal(path, name):
@@ -72,30 +76,19 @@ def main():
     capri = {s: read_set(a.sets, s) for s in CAPRI_SETS}
     problems = []
 
-    # activities
-    crop_src, anim_src = "tools/build/build_capri_base.py CROP_MAP", "tools/build/build_animal_yields.py ANIMALS"
-    crop_map = literal("tools/build/build_capri_base.py", "CROP_MAP")
-    anim_map = literal("tools/build/build_animal_yields.py", "ANIMALS")
-    for path, name in (("tools/build/build_livestock_units.py", "ANIMALS"),
-                       ("tools/build/build_plant_protection_cost.py", "ANIMALS"),
-                       ("tools/build/build_supplement_effects.py", "MAP")):
-        other = literal(path, name)
-        for k, v in other.items():
-            if tuple(anim_map.get(k, ())) != tuple(v):
-                problems.append(f"{path} {name}[{k}] = {v}, {anim_src} {anim_map.get(k)}")
-    acts = []
-    for kind, codes, mp, src in (("crop", D.CROPS, crop_map, crop_src), ("animal", D.ANIMALS, anim_map, anim_src)):
-        for c in codes:
-            if c not in mp:
-                problems.append(f"{kind} {c}: no CAPRI activity in {src}")
-                continue
-            for cc in mp[c]:
+    # activities: the declared code list (codes/model_activities.csv, since 30 October 2026 the master, read by the
+    # builders through tools/lib/_model_codes.py) checked against the model's activities and CAPRI's PACT
+    with open(OUT / "model_activities.csv", newline="", encoding="utf-8") as fh:
+        acts = list(csv.DictReader(fh))
+    by_kind = {k: [r["code"] for r in acts if r["kind"] == k] for k in ("crop", "animal")}
+    for kind, codes in (("crop", D.CROPS), ("animal", D.ANIMALS)):
+        if list(codes) != by_kind[kind]:
+            problems.append(f"model_activities.csv: its {kind}s {by_kind[kind]} are not definitions' {list(codes)}")
+    for r in acts:
+        for col in ("capri_codes", "capmod_codes"):
+            for cc in r[col].split(";"):
                 if cc not in capri["PACT"]:
-                    problems.append(f"{kind} {c}: {cc} is not in CAPRI's PACT")
-            acts.append((c, kind, ";".join(mp[c]), src))
-    extra = sorted(set(crop_map) - set(D.CROPS)) + sorted(set(anim_map) - set(D.ANIMALS))
-    if extra:
-        problems.append(f"mapped but not a model activity: {extra}")
+                    problems.append(f"model_activities.csv {r['code']}: {col} {cc} is not in CAPRI's PACT")
 
     # market commodities: build_feed_bulks.COMMODITY is CAPRI -> model
     prod_src = "tools/build/build_feed_bulks.py COMMODITY"
@@ -147,11 +140,19 @@ def main():
         raise SystemExit("code lists not written:\n  " + "\n  ".join(problems))
     for s, d in capri.items():
         write(OUT / "capri" / f"{s}.csv", ("code", "text"), sorted(d.items()))
-    write(OUT / "model_activities.csv", ("code", "kind", "capri_codes", "mapping_source"), acts)
+    # two-dimensional sets: FEED_TO_O (feed bulks and their products) and MAP_RR restricted to each member state's
+    # regional units (MS x RU), as envind/digestibility.gms and line_nitr.gms use them (3-NOP, K93)
+    def pairs(name):
+        with open(Path(a.sets) / f"{name}.csv", newline="", encoding="utf-8") as fh:
+            return [(r["d0"], r["d1"]) for r in csv.DictReader(fh)]
+    ms_, ru_ = set(read_set(a.sets, "MS")), set(read_set(a.sets, "RU"))
+    write(OUT / "capri" / "FEED_TO_O.csv", ("feed", "row"), sorted(pairs("FEED_TO_O")))
+    write(OUT / "capri" / "MS_RU.csv", ("ms", "ru"), sorted((m, r) for m, r in pairs("Map_RR") if m in ms_ and r in ru_))
     write(OUT / "model_commodities.csv", ("code", "capri_code", "mapping_source"), comms)
     differ = [(c, cc) for c, cc, _ in comms if c != cc]
     print(f"wrote {OUT.relative_to(ROOT)}: CAPRI's sets {', '.join(f'{s} {len(d)}' for s, d in capri.items())}; "
-          f"{len(acts)} model activities, {sum(a[2] != a[0] for a in acts)} not CAPRI's own code; "
+          f"{len(acts)} model activities checked (codes/model_activities.csv, declared), "
+          f"{sum(r['capri_codes'] != r['code'] for r in acts)} not CAPRI's own code; "
           f"{len(comms)} commodities, {len(differ)} not CAPRI's own code ({', '.join(f'{c}={cc}' for c, cc in differ)}); "
           f"{len(units)} regional units, all in RALL")
 

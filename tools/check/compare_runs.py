@@ -92,8 +92,35 @@ def main():
         if len(res) == 2:
             row += f" {vals[1] - vals[0]:+8.1f}"
         print(f"{k:16s} {row}")
+    # a run on a subset of regional units (run_f2f_2030.py --regions): its indicators cover two sets of units
+    # (KNOWN_ISSUES K83)
     for i, o in enumerate(objs):
-        print(f"run{i + 1}: {a.runs[i]} | {o.get('meta')}")
+        sub = [r for r in str(((o.get("meta") or {}).get("options") or {}).get("regions") or "").split(",") if r]
+        if sub:
+            print(f"note: run{i + 1} solved {len(sub)} regional units (--regions). Its prices and beef production are "
+                  f"the EU market's, where the EU's units outside the run supply through their member states' market "
+                  f"supply functions, untouched by policies applied in the supply models (as CAPRI's countries "
+                  f"switched off; KNOWN_ISSUES K83); its herds, crop production and environmental indicators are "
+                  f"its {len(sub)} units' only. Not comparable with a full run's or CAPRI's EU figures.")
+    for i, o in enumerate(objs):
+        print(f"run{i + 1}: {a.runs[i]} | {({k: v for k, v in (o.get('meta') or {}).items() if k != 'run_manifest'})}")
+    # the run manifests (capri_mod/run_manifest.py; runs from 29 October 2026): what the runs were computed from
+    mans = [(o.get("meta") or {}).get("run_manifest") for o in objs]
+    for i, m_ in enumerate(mans):
+        if m_:
+            g_ = m_.get("git", {})
+            print(f"run{i + 1} manifest: commit {g_.get('commit', '')[:10]} ({g_.get('branch')}), "
+                  f"{len(g_.get('changed_files') or [])} files changed from it, {len(m_.get('inputs') or {})} inputs read")
+    if len(mans) == 2 and all(mans):
+        import sys as _sys
+        from pathlib import Path as _P
+        _sys.path.insert(0, str(_P(__file__).resolve().parents[2]))
+        from capri_mod.run_manifest import compare as _cmp
+        d_ = _cmp(*mans)
+        print(f"manifests: inputs differing {len(d_['inputs_differ'])}, only run1 {len(d_['inputs_only_first'])}, "
+              f"only run2 {len(d_['inputs_only_second'])}; software differing {d_['software'] or 'none'}")
+        for f_ in d_["inputs_differ"][:20]:
+            print(f"  differs: {f_}")
     def _lu_cell(o, opt):
         """Adoption of an animal option, % of the eligible herd in livestock units, baseline -> scenario (runs with
         'adoption_lu'); with a CAPRI MaxShare cap below 100% its ceiling in brackets. None for older runs."""

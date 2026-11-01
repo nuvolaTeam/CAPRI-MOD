@@ -54,10 +54,10 @@ INSERT INTO value_units SELECT 'yields', code, 'U_TonPerHa', 'builder', 'CAPRI''
 FROM model_activities WHERE kind = 'crop' AND code NOT IN ('GRAS', 'OCRO', 'OIND', 'NURS', 'FLOW');
 INSERT INTO value_units VALUES
   ('yields', 'GRAS', 'U_kgperha', 'builder', 'CAPRI''s YILD of GRAS unscaled, fresh matter (loaders: converted to dry matter with CAPRI''s DRMA)'),
-  ('yields', 'OCRO', NULL, 'open', 'CAPRI''s YILD / 1000 like the other crops; whether CAPRI''s YILD of this crop is kg per ha is not established'),
-  ('yields', 'OIND', NULL, 'open', 'CAPRI''s YILD / 1000 like the other crops; whether CAPRI''s YILD of this crop is kg per ha is not established (median 6, maximum 431)'),
-  ('yields', 'NURS', NULL, 'open', 'CAPRI''s YILD / 1000 like the other crops; whether CAPRI''s YILD of this crop is kg per ha is not established (median 20)'),
-  ('yields', 'FLOW', NULL, 'open', 'CAPRI''s YILD / 1000 like the other crops; whether CAPRI''s YILD of this crop is kg per ha is not established (median 138)'),
+  ('yields', 'OCRO', 'U_ValueUnitPerHa', 'builder', 'CAPRI''s YILD / 1000: a value-measured crop, CAPRI''s MPRI an index near 1000 and MREV = YILD / 1000 x MPRI as for every crop (checked in res_17NL: NL320000)'),
+  ('yields', 'OIND', 'U_ValueUnitPerHa', 'builder', 'CAPRI''s YILD / 1000: a value-measured crop, CAPRI''s MPRI an index near 1000 and MREV = YILD / 1000 x MPRI as for every crop (checked in res_17NL: NL320000)'),
+  ('yields', 'NURS', 'U_ValueUnitPerHa', 'builder', 'CAPRI''s YILD / 1000: a value-measured crop, CAPRI''s MPRI an index near 1000 and MREV = YILD / 1000 x MPRI as for every crop (checked in res_17NL: NL320000)'),
+  ('yields', 'FLOW', 'U_ValueUnitPerHa', 'builder', 'CAPRI''s YILD / 1000: a value-measured crop, CAPRI''s MPRI an index near 1000 and MREV = YILD / 1000 x MPRI as for every crop (checked in res_17NL: NL320000)'),
   ('yields', 'DCOW', 'U_TonPerHd', 'builder', 'build_animal_yields.py: t of milk per dairy cow'),
   ('yields', 'LAYS', 'U_TonPerHd', 'builder', 'build_animal_yields.py: CAPRI''s output unit / 1000 per hen (eggs)'),
   ('yields', 'PIGS', 'U_HdPerHd', 'builder', 'build_animal_yields.py: piglets per sow'),
@@ -68,8 +68,8 @@ INSERT INTO value_units VALUES
   ('yields', 'BROI', 'U_TonPerHd', 'builder', 'build_animal_yields.py: t of meat per model head'),
   ('yields', 'SHGM', 'U_TonPerHd', 'builder', 'build_animal_yields.py: t of milk per model head'),
   ('yields', 'SHGF', 'U_TonPerHd', 'builder', 'build_animal_yields.py: t of meat per model head'),
-  ('yields', 'HFRS', NULL, 'open', 'build_animal_yields.py: CAPRI''s YILD / 1000 per model head; median 4.1, not a plausible meat weight per heifer: CAPRI''s output and unit to be checked'),
-  ('yields', 'OANI', NULL, 'open', 'CAPRI''s OANI level is an index (U_1unit); the output''s unit is not established (median 303)');
+  ('yields', 'HFRS', NULL, 'open', 'build_animal_yields.py: CAPRI''s YILD / 1000 per model head, level-weighted over members whose YILD measures different outputs (HEIL, HEIH kg of meat per head; HEIR one raised heifer as 1000): no single unit; the model reads animal yields only for DCOW (its ratio to base scales milk), the animals'' output is CAPRI''s output coefficients'),
+  ('yields', 'OANI', NULL, 'open', 'value-measured like the value crops (MPRI near 1000, MREV = YILD / 1000 x MPRI: res_17DE DE110000), per unit of OANI''s level, an index (U_1unit): no catalogue unit; OANI is held at 0 in every region');
 
 -- file: capri_data/2017/supply/variable_costs.csv
 -- layout: wide
@@ -95,15 +95,17 @@ CREATE TABLE producer_prices (
     activity VARCHAR PRIMARY KEY REFERENCES model_activities (code),
     price DOUBLE NOT NULL CHECK (price >= 0)
 );
-COMMENT ON TABLE producer_prices IS 'EU producer prices 2017 (build_eu_producer_prices.py): crops from CAPRI''s regional prices; SHGM, SHGF from tools/lib/_sheep_goat.eu_prices; SETA and the other animals from sources/unsourced/producer_prices_no_builder.csv (KNOWN_ISSUES K72)';
+COMMENT ON TABLE producer_prices IS 'EU producer prices 2017 (build_eu_producer_prices.py): crops from CAPRI''s regional prices; SHGM, SHGF from tools/lib/_sheep_goat.eu_prices; SETA''s 0 from sources/unsourced/producer_prices_no_builder.csv';
 INSERT INTO value_units SELECT 'producer_prices', code, 'U_EuPerTon', 'builder', 'revenue over production of CAPRI''s YILD x MPRI (build_crop_economics_2017.py: EUR/t)'
 FROM model_activities WHERE kind = 'crop' AND code NOT IN ('GRAS', 'SETA', 'OCRO', 'OIND', 'NURS', 'FLOW');
 INSERT INTO value_units VALUES
   ('producer_prices', 'GRAS', 'U_EuPerTon', 'builder', 'CAPRI''s MREV over the dry-matter yield (build_crop_economics_2017.py): EUR per t of dry matter'),
   ('producer_prices', 'SETA', 'U_EuPerTon', 'builder', '0 by convention (producer_prices_no_builder.csv)');
 -- (OCRO, OIND, NURS, FLOW have no EU producer price row)
-INSERT INTO value_units SELECT 'producer_prices', code, NULL, 'open', 'animal price: origin not recorded (producer_prices_no_builder.csv, K72) or CAPREG''s herd-weighted regional prices (SHGM, SHGF); the product and unit are to be checked'
-FROM model_activities WHERE kind = 'animal';
+INSERT INTO value_units VALUES
+  ('producer_prices', 'SHGM', NULL, 'open', 'CAPREG''s regional prices of the activity weighted by the herds (tools/lib/_sheep_goat.py); the product and unit are to be checked'),
+  ('producer_prices', 'SHGF', NULL, 'open', 'CAPREG''s regional prices of the activity weighted by the herds (tools/lib/_sheep_goat.py); the product and unit are to be checked');
+-- (the other animals' rows, of unrecorded origin and read by no model code, were removed on 29 October 2026, K72)
 
 -- rule: every item of a table has its unit declared, and every declared unit's item is in its table
 SELECT t.tbl, t.item, 'no unit declared' AS what FROM (

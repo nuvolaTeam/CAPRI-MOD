@@ -38,10 +38,8 @@ from typing import Dict, Optional
 import numpy as np
 import pandas as pd
 
-from capri_mod.tableio import read_input
 
 MM_HA_TO_M3 = 10.0   # 1 mm depth over 1 ha = 10 m3
-_DEFAULT = Path(__file__).resolve().parents[2] / "capri_data" / "2017" / "environment" / "irrigation_2017.csv"
 
 
 @dataclass
@@ -59,12 +57,14 @@ class WaterDemandModule:
     """Irrigation water requirement by region and crop.
 
     data: the model data dict (base areas, data["areas"], 1000 ha).
-    irrigation_path: the irrigation table; default capri_data/2017/environment/irrigation_2017.csv.
+    irrigation_path: the irrigation table; default the run's environment/irrigation_2017.csv (capri_mod/data/inputs.py).
     """
 
     def __init__(self, data: dict, irrigation_path: Optional[Path] = None):
         self.data = data
-        self.table = read_input(irrigation_path or _DEFAULT)
+        from capri_mod.data.inputs import current
+        inp = current()
+        self.table = inp.read(Path(irrigation_path)) if irrigation_path else inp.csv("irrigation_2017.csv", "environment")
 
     def _areas(self, supply_results: Optional[Dict]) -> pd.DataFrame:
         base = self.data["areas"]

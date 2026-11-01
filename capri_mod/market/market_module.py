@@ -30,6 +30,7 @@ from capri_mod.data.definitions import (
     MARKET_COMMODITIES, ALL_TRADE_REGIONS,
 )
 from capri_mod.data.definitions import MS_CODE
+from capri_mod.data import definitions as _defs
 
 
 from capri_mod.market.equilibrium import MarketEquilibrium  # noqa: F401  (re-exported)
@@ -42,6 +43,7 @@ from capri_mod.market.demand import DemandMixin
 from capri_mod.market.processing import ProcessingMixin
 from capri_mod.market.supply import SupplyMixin
 from capri_mod.market.bilateral_solve import BilateralSolveMixin
+from capri_mod.market.market_nk import NewtonKrylovMixin
 from capri_mod.market.welfare import WelfareMixin
 
 
@@ -49,7 +51,7 @@ from capri_mod.market.welfare import WelfareMixin
 # MARKET MODULE
 # ---------------------------------------------------------------------------
 
-class MarketModule(CalibrationMixin, BiofuelMixin, DairyMixin, FeedMixin, DemandMixin, ProcessingMixin, SupplyMixin, BilateralSolveMixin,
+class MarketModule(NewtonKrylovMixin, CalibrationMixin, BiofuelMixin, DairyMixin, FeedMixin, DemandMixin, ProcessingMixin, SupplyMixin, BilateralSolveMixin,
                    WelfareMixin):
     """
     CAPRI's global market model for the given EU supply (arm/market_model.gms).
@@ -57,8 +59,8 @@ class MarketModule(CalibrationMixin, BiofuelMixin, DairyMixin, FeedMixin, Demand
     26 trade regions (or the EU as two blocks, eu_blocks) and 58 commodities: bilateral trade with two
     Armington nests, transport costs, tariffs and the EU's tariff-rate quotas (market/bilateral.py),
     Generalised Leontief food demand, processing (ProcNQ_, oilseed crushing), the dairy block (fat and
-    protein), biofuel markets and feed bulks per member state. Non-EU supply responds with own-price
-    elasticities; EU supply comes from the regional supply models (fixed within one solve), and so does the supply
+    protein), biofuel markets and feed bulks per member state. Non-EU supply is CAPRI's market supply
+    functions (ProdNQ_, own and cross-price terms); EU supply comes from the regional supply models (fixed within one solve), and so does the supply
     of Norway (NOR, CAPRI's market region NO000000 with supply models; SUP_NONEU_REGIONS, KNOWN_ISSUES K56).
 
     Solve: Newton per commodity on the bilateral system, with Anderson acceleration across the
@@ -71,17 +73,8 @@ class MarketModule(CalibrationMixin, BiofuelMixin, DairyMixin, FeedMixin, Demand
     #: each with its own market and Armington prices and bilateral trade between them, the member states inside
     #: (capri_data/shared/eu_market_blocks.csv). Read when the module is built (data["eu_market_blocks"] overrides).
     eu_blocks = setting("market.eu_blocks", run_state=True)
-    EU_BLOCK_REGIONS = ("EU_WEST", "EU_EAST")
-    #: market regions outside the EU whose market supply is their supply models' output (CAPRI's RMSSUP outside the
-    #: EU: Norway, NO000000, its own market region in aggregation/defaultA.agg; KNOWN_ISSUES K56). Like the EU's,
-    #: their supply is fixed within one market solve, anticipated against the prices their models last saw, and
-    #: the base calibration takes it at the model's own levels; their models see their own market's prices.
-    SUP_NONEU_REGIONS = ("NOR",)
-    #: supply-model country (NUTS-0 of the supply models) -> its non-EU market region
-    SUP_NONEU_COUNTRY = {"NO": "NOR"}
-    #: non-EU market region -> CAPRI code of its supply models' country (member-state keyed tables)
-    SUP_NONEU_MS = {"NOR": "NO000000"}
-
+    #: CAPRI's EU trade blocks (capri_data/shared/eu_market_blocks.csv; definitions.EU_BLOCKS)
+    EU_BLOCK_REGIONS = _defs.EU_BLOCKS
     def __init__(self, data: dict, inputs: Optional["MarketInputs"] = None):
         self.data       = data
         #: the market's data adapter (inputs.py): every input file is read through it
@@ -97,6 +90,18 @@ class MarketModule(CalibrationMixin, BiofuelMixin, DairyMixin, FeedMixin, Demand
             self.EU = ("EU27",)
         self.n_comm     = len(self.commodities)
         self.n_reg      = len(self.regions)
+        # market regions outside the EU whose market supply is their supply models' output (CAPRI's RMSSUP outside
+        # the EU; KNOWN_ISSUES K56): the run's supply-model countries outside the EU (definitions.sup_noneu, the
+        # setting run.supply_countries_outside_eu; Norway, NO000000, market region NOR, by default), in their CAPRI
+        # market region. Like the EU's, their supply is fixed within one market solve, anticipated against the prices
+        # their models last saw, and the base calibration takes it at the model's own levels; their models see their
+        # own market's prices.
+        _sup = _defs.sup_noneu()
+        self.SUP_NONEU_REGIONS = tuple(dict.fromkeys(tr for _c, tr in _sup.values()))
+        #: supply-model country (NUTS-0 of the supply models) -> its non-EU market region
+        self.SUP_NONEU_COUNTRY = {c: tr for c, tr in _sup.values()}
+        #: non-EU market region -> CAPRI code of its supply models' country (member-state keyed tables)
+        self.SUP_NONEU_MS = {tr: ms for ms, (_c, tr) in _sup.items()}
         #: the non-EU market regions with supply models in this market (SUP_NONEU_REGIONS)
         self.SUP = tuple(r for r in self.SUP_NONEU_REGIONS if r in self.regions)
 
@@ -123,6 +128,15 @@ class MarketModule(CalibrationMixin, BiofuelMixin, DairyMixin, FeedMixin, Demand
         # whatever an earlier run left there persisted into later runs.
         self.par.base_production0 = self.par.base_production.copy()
         self.par.base_consumption0 = self.par.base_consumption.copy()
+
+    #: the base year, the market year's default when the data name none
+    DEFAULT_MARKET_YEAR = 2017
+
+    def _market_year(self) -> int:
+        """The market year (data["market_year"]): the year of CAPRI's market data the market calibrates to and of
+        the yearly input files (bilateral flows, crushing, biofuels)."""
+        d = self.data if isinstance(self.data, dict) else {}
+        return int(d.get("market_year", self.DEFAULT_MARKET_YEAR) or self.DEFAULT_MARKET_YEAR)
 
     def _inp(self) -> MarketInputs:
         """The data adapter (one for the package's own data where the module was built without __init__)."""

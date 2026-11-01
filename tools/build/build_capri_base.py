@@ -79,27 +79,9 @@ PRICES = _ROOT / "capri_data" / "sources" / "capreg" / "capreg_producer_prices.c
 #: model column -> CAPRI activities summed into it. Textile crops are CAPRI's one activity TEXT (cotton in the
 #: three EU countries that grow it, Greece's TEXT being 325 kha, flax and hemp elsewhere); until October 2026 the
 #: model split it by country into cotton (COTT) and other fibre (OFIB), tools/build_text_merge.py.
-CROP_MAP = {
-    "SWHE": ("SWHE",), "DWHE": ("DWHE",), "RYEM": ("RYEM",), "BARL": ("BARL",),
-    "OATS": ("OATS",), "CORN": ("MAIZ",), "OCER": ("OCER",),
-    # paddy rice: 427 kha EU, concentrated in Italy, Spain, Portugal and Greece
-    "PARI": ("PARI",), "PULS": ("PULS",),
-    # minor activities CAPRI records separately: other marketable crops,
-    # other industrial crops, nursery plants and flowers (1,721 kha EU)
-    "OCRO": ("OCRO",), "OIND": ("OIND",), "NURS": ("NURS",), "FLOW": ("FLOW",),
-    "SUGB": ("SUGB",), "POTA": ("POTA",), "TOMA": ("TOMA",), "OVEG": ("OVEG",),
-    "APPL": ("APPL",), "OFRU": ("OFRU",), "CITR": ("CITR",), "TAGR": ("TAGR",),
-    "WINE": ("TWIN",),
-    # olives for oil and table olives, CAPRI's two activities (separate since October 2026,
-    # tools/build_tabo_split.py; together 5,010 kha against a real EU olive area of about 5.0 Mha)
-    "OLIV": ("OLIV",), "TABO": ("TABO",), "GRAS": ("GRAS",), "TOBA": ("TOBA",),
-    "MAIF": ("MAIF",), "RAPE": ("RAPE",), "SUNF": ("SUNF",), "SOYA": ("SOYA",),
-    "OOIL": ("OOIL",), "TEXT": ("TEXT",),
-    # "other fodder crops" = fodder on arable land plus fodder roots
-    "OFOD": ("OFAR", "ROOF"),
-    # the model has one non-productive column; CAPRI separates set-aside from fallow
-    "SETA": ("SETA", "FALL"),
-}
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "lib"))
+import _model_codes as _MC  # noqa: E402  the model's activities and their CAPRI activities (codes/model_activities.csv)
+CROP_MAP = dict(_MC.CROP_MAP)
 
 #: animal_numbers column -> CAPRI HERD item
 HERD_MAP = {"DCOW": "DCOW", "SCOW": "SCOW", "BULL": "BULL", "HEIF": "HEIF",

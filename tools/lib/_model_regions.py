@@ -18,6 +18,11 @@ with open(ROOT / "capri_data" / "shared" / "capri_member_state_codes.csv", newli
 
 with open(ROOT / "capri_data" / "shared" / "regional_units.csv", newline="") as _f:
     UNITS = [r["region"] for r in csv.DictReader(_f)]
+# CAPRI's EU member states: those of its EU trade blocks (capri_data/shared/eu_market_blocks.csv, from
+# gams/aggregation/defaultA.agg), as eight-character codes (BL000000) and as their two-letter prefixes (BL)
+with open(ROOT / "capri_data" / "shared" / "eu_market_blocks.csv", newline="") as _f:
+    EU_MS = frozenset(r["ms"] for r in csv.DictReader(_f))
+EU_MS2 = frozenset(m[:2] for m in EU_MS)
 UNIT_SET = frozenset(UNITS)
 
 

@@ -3,7 +3,8 @@
 Baseline and scenario for 2030 through the projection module, with the model's default
 settings unless options say otherwise. Saves a pickle read by tools/check/compare_runs.py:
 EU27 domestic price changes, activity and output totals (base, scenario), the
-environmental tables (base, scenario) and convergence metadata.
+environmental tables (base, scenario) and convergence metadata; beside it OUT.settings.toml (the effective settings)
+and OUT.manifest.json (the run manifest: commit, software, every input read with its SHA-256; capri_mod/run_manifest.py).
 
 Usage: python tools/run/run_f2f_2030.py OUT.pkl [--scenario f2f|greendeal|greendeal2030|carbontax]
                                             [--targets lndscpTarg=0,orgTarg=0,pestRedu=0,surpRedu=0]
@@ -20,6 +21,7 @@ if _os.environ.get("PYTHONHASHSEED") != "0":
     _os.environ["PYTHONHASHSEED"] = "0"
     _os.execv(_sys.executable, [_sys.executable] + _sys.argv)
 import argparse
+import json
 import pickle
 import sys
 import time
@@ -92,6 +94,10 @@ def main():
     warnings.filterwarnings("always", message="bilateral market did not converge")
     warnings.filterwarnings("always", message="CAPRI's crop-group fertiliser allocation")
     sys.path.insert(0, str(ROOT))
+    # the run manifest (capri_mod/run_manifest.py): the code, software and every input file the run reads, with its
+    # SHA-256; recording starts before the data are read
+    from capri_mod import run_manifest
+    run_manifest.start()
     from capri_mod.model import CAPRIModel
     from capri_mod.projection import ProjectionModule, BaselineTrajectory
     from capri_mod.policy.greendeal import greendeal_scenario
@@ -115,8 +121,12 @@ def main():
     _S.activate(run_settings)
     # a timed line per stage and outer iteration (CAPRIModel._progress): wall clock and time since the start
     CAPRIModel.progress, CAPRIModel.progress_t0 = True, _T_START
-    m = CAPRIModel(data_dir=str(ROOT / "capri_data"), verbose=False,
-                   regions=[x for x in a.regions.split(",") if x] or None)
+    # a subset of regions (--regions) is solved on the whole data set: the EU's units outside it stay in the data and
+    # supply the market through their member states' CAPRI market supply functions (KNOWN_ISSUES K83); until 31 October
+    # 2026 the model was built on the subset's data alone, so the EU market had the whole EU's demand and the subset's
+    # supply only
+    _subset = [x for x in a.regions.split(",") if x] or None
+    m = CAPRIModel(data_dir=str(ROOT / "capri_data"), verbose=False)
     m._progress("model built (data loaded)")
     t0 = time.time()
     # CAPRI simulates from its calibrated 2030 reference (CAPMOD's reference run); the trend projection (CAPTRD) is
@@ -171,7 +181,7 @@ def main():
         _scen.endotech = effective(_et)
     _scen.endotech = effective(_scen.endotech)
     m._progress(f"projection to 2030: baseline, then {_scen.name}")
-    res = pmod.run(policy_scenario=_scen, years=[2030])
+    res = pmod.run(policy_scenario=_scen, years=[2030], **({"regions": _subset} if _subset else {}))
     m._progress("runs done; writing the results")
     b, s = res.baseline[2030], res.scenario[2030]
     _pmm = (getattr(pmod, "_last_projected_model", None) or m).market_module
@@ -451,8 +461,11 @@ def main():
                            "surplus_row": getattr(md_, "_surplus_row", None),
                            "balance_coefs": _pm.supply_module._balance_coefs(r_, md_)})
         pickle.dump(_d, open(a.out.replace(".pkl", "_dump.pkl"), "wb"))
+    out["meta"]["run_manifest"] = run_manifest.finish()
     pickle.dump(out, open(a.out, "wb"))
     run_settings.save(str(a.out).rsplit(".", 1)[0] + ".settings.toml")
+    with open(str(a.out).rsplit(".", 1)[0] + ".manifest.json", "w") as fh_:
+        json.dump(out["meta"]["run_manifest"], fh_, indent=1)
     _no = out["meta"]["nlp_nonoptimal"]
     print(f"saved {a.out} | converged {out['meta']['conv']} in {out['meta']['it']} iterations, {out['meta']['seconds']} s"
           f" | non-optimal regional solves kept: baseline {len(_no['baseline'])}, scenario {len(_no['scenario'])}"

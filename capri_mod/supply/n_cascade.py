@@ -170,22 +170,17 @@ _DATA = {}
 def load(data_dir=None):
     """The cascade's data (tools/build/build_n_cascade.py): (factors {(region, act): {factor: v}}, regional
     {region: {factor: v}}, effects {(region, act): {(tech, item): v}}), CAPRI regions (8 characters)."""
-    import csv
-    from pathlib import Path
-    d = Path(data_dir) if data_dir else Path(__file__).resolve().parents[2] / "capri_data"
-    d = d / "2017" / "abatement" / "ammonia"
-    key = str(d)
+    from capri_mod.supply.inputs import SupplyInputs, current
+    inp = SupplyInputs(data_dir, current().base_year) if data_dir else current()
+    key = str(inp.path("", "abatement/ammonia"))
     if key not in _DATA:
         F, G, E = {}, {}, {}
-        with open(d / "n_cascade_factors.csv") as fh:
-            for r in csv.DictReader(fh):
-                F.setdefault((r["region"], r["activity"]), {})[r["factor"]] = float(r["value"])
-        with open(d / "n_cascade_region.csv") as fh:
-            for r in csv.DictReader(fh):
-                G.setdefault(r["region"], {})[r["factor"]] = float(r["value"])
-        with open(d / "n_cascade_effects.csv") as fh:
-            for r in csv.DictReader(fh):
-                E.setdefault((r["region"], r["activity"]), {})[(r["technology"], r["item"])] = float(r["value"])
+        for r in inp.rows("n_cascade_factors.csv", "abatement/ammonia"):
+            F.setdefault((r["region"], r["activity"]), {})[r["factor"]] = float(r["value"])
+        for r in inp.rows("n_cascade_region.csv", "abatement/ammonia"):
+            G.setdefault(r["region"], {})[r["factor"]] = float(r["value"])
+        for r in inp.rows("n_cascade_effects.csv", "abatement/ammonia"):
+            E.setdefault((r["region"], r["activity"]), {})[(r["technology"], r["item"])] = float(r["value"])
         _DATA[key] = (F, G, E)
     return _DATA[key]
 

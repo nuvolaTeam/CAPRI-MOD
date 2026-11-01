@@ -63,6 +63,25 @@ GAS_OF = {"NH3HOU": "NH3", "NH3STO": "NH3", "NH3APP": "NH3", "NOXHOU": "NOX", "N
           "N2OHOU": "N2O", "N2OSTO": "N2O", "N2OAPP": "N2O", "N2HOU": "N2", "N2STO": "N2", "N2APP": "N2", "CH4MAN": "CH4"}
 
 
+_RCE = None
+
+
+def graz_share(ctry, act, RCE=None):
+    """CAPRI's grazing share p_NEMIDAT(MS, act, "N", "TypeShare", "GRAZ") (envind/ammo.gms l. 604-613, STORGRAZINV
+    off): (1 - HD / 365) (1 - Et / 100) of the activity's solid MITERRA type (RCEmissions)."""
+    global _RCE
+    if RCE is None:
+        if _RCE is None:
+            rce = _read_csv(D / "RCEmissions.csv")
+            _RCE = {(r.region, r.animal_mitt, r.item): r.value for r in rce.itertuples()}
+        RCE = _RCE
+    sd = MITT[act][1]
+    hd, et = RCE.get((ctry, sd, "HD")), RCE.get((ctry, sd, "Et"))
+    if hd is None:
+        return 0.0
+    return max(0.0, (1 - hd / 365.0) * (1 - (et or 0.0) / 100.0))
+
+
 def build():
     INV, ADD, FOP, PRICE, STOR, MIN, KGN, nvz, HEADS, HOLD, MD = cc.load()
     curves = pd.read_parquet(D / "ammonia_cost_curves.parquet")
@@ -95,11 +114,7 @@ def build():
         return L / (L + S) if (L + S) > 0 else 0.0
 
     def grazing(ctry, act):
-        sd = MITT[act][1]
-        hd, et = RCE.get((ctry, sd, "HD")), RCE.get((ctry, sd, "Et"))
-        if hd is None:
-            return 0.0
-        return max(0.0, (1 - hd / 365.0) * (1 - (et or 0.0) / 100.0))
+        return graz_share(ctry, act, RCE)
 
     def h500_cost(rs, act, sysm, tech):
         """investment (annualised) + operating cost at the largest class, no size term."""

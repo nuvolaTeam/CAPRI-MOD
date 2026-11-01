@@ -170,25 +170,6 @@ def levels_ref(year: int) -> dict:
     return out
 
 
-SIMINI = SRC / "simini_21730_data.csv"
-
-
-def calibration_point_2030(ydat: dict, bas: dict) -> None:
-    """CAPRI's own 2030 calibration point, in place: DATA(..., "Y") of sim_ini_21730.gdx (the simulation start file of
-    the 2030 baseline, provided by the project lead 23 October 2026; its p_pmpQuadTechn equals the exported 2030 terms
-    in all 28,169 entries), extracted to simini_21730_data.csv. Every activity item and the member states' unit values
-    (UVAG, UVAP) replace the results' values; the land rows (ARAB, ARAC, FRUN, their D_AREA), which the file does not
-    carry at "Y", stay those of CAPRI's 2030 results. The activities' L_BAS: DATA(..., "LEVL", "BAS") of the file."""
-    if not SIMINI.exists():
-        raise FileNotFoundError(f"{SIMINI} is missing (CAPRI's 2030 calibration point, sim_ini_21730.gdx)")
-    t = _read_csv(SIMINI)
-    for r in t.itertuples(index=False):
-        if r.year == "Y":
-            ydat.setdefault(r.region, {})[(r.col, r.row)] = float(r.value)
-        elif r.year == "BAS" and r.row == "LEVL":
-            bas.setdefault(r.region, {})[(r.col, "LEVL")] = float(r.value)
-
-
 def pela_2004() -> dict:
     out = {}
     rx = re.compile(r"^'([A-Z0-9]{8})'\.'([A-Z]+)'\.'\2'\.'2004'\s+([-\d.Ee+]+)")
@@ -418,9 +399,10 @@ def main() -> None:
     pela = pela_2004()
     bas = levels_2017()
     ydat = levels_ref(Y) if Y == 2030 else bas
-    # (CAPRI's 2030 calibration point from sim_ini_21730.gdx, calibration_point_2030, is not used: its DATA(..., "Y")
-    # prices are not those of the 2030 calibration - barley 101 EUR/t against 166 in the results; terms built on them
-    # matched CAPRI's in 31.6% of pairs, on the results' prices in the figures of PMP_CAPRI_2030.md)
+    # (CAPRI's 2030 calibration point from sim_ini_21730.gdx is not used: its DATA(..., "Y") prices are not those of the
+    # 2030 calibration - barley 101 EUR/t against 166 in the results; terms built on them matched CAPRI's in 31.6% of
+    # pairs, on the results' prices in the figures of PMP_CAPRI_2030.md. Its reader and its extract
+    # simini_21730_data.csv were removed 30 October 2026, the project lead's decision, KNOWN_ISSUES K103)
     regions = sorted(c for c in ydat if not c.endswith("0000") or c.endswith("000000") is False)
     regions = sorted(c for c in set(ydat) if c[4:] == "0000" or c.endswith("000000"))
     lq = land_quad(Y)

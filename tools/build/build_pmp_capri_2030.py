@@ -27,13 +27,16 @@ BULL/BULH and CAPRI's feed PMP terms, a separate step).
 Sources: capri_data/sources/baseline_pmp/pmp_quad_techn_2030.csv, pmp_quad_pact_2030.csv (tools/build/build_pmp_2030.py,
 exported from the project lead's CAPRI 2030 baseline calibration); CAPRI 2030 levels LEVL from the 2030 reference
 the model's trajectory is built from (res_2_1730greendeal_refpol_endotech_all_inidefaulta).
-Output: capri_data/2017/supply/pmp_capri_2030.csv (region, act_i, act_j, g, x_i, x_j, capri_regions)
+Output: capri_data/2017/supply/pmp_capri_2030.csv (region, act_i, act_j, g, x_i, x_j, capri_regions); g in the
+model's 2017 money: CAPRI's 2030 terms over CAPRI's inflation to 2030 (tools/lib/_money.deflator, the deflator the
+2030 prices take; KNOWN_ISSUES K108, 31 October 2026: before, in CAPRI's 2030 money)
 
     python tools/build/build_pmp_capri_2030.py [--ref FILE]
 """
 from __future__ import annotations
 import argparse, re, subprocess, sys
 from collections import defaultdict
+import sys
 from pathlib import Path
 
 import numpy as np
@@ -52,13 +55,9 @@ CAPRI_GRP = {"SWHE": "CERE", "DWHE": "CERE", "RYEM": "CERE", "BARL": "CERE", "OA
              "PULS": "OARA", "POTA": "OARA", "SUGB": "OARA", "MAIF": "FARA", "ROOF": "FARA", "OFAR": "FARA"}
 #: model crop -> CAPRI activities with PMP terms (tools/build/build_capri_base.CROP_MAP; GRAS and SETA by their
 #: CAPRI components that carry terms: GRAS = GRAE + GRAI, SETA = VSET + FALL)
-MODEL_TO_CAPRI = {"SWHE": ("SWHE",), "DWHE": ("DWHE",), "RYEM": ("RYEM",), "BARL": ("BARL",), "OATS": ("OATS",),
-                  "CORN": ("MAIZ",), "OCER": ("OCER",), "PARI": ("PARI",), "PULS": ("PULS",), "OCRO": ("OCRO",),
-                  "OIND": ("OIND",), "NURS": ("NURS",), "FLOW": ("FLOW",), "SUGB": ("SUGB",), "POTA": ("POTA",),
-                  "TOMA": ("TOMA",), "OVEG": ("OVEG",), "APPL": ("APPL",), "OFRU": ("OFRU",), "CITR": ("CITR",),
-                  "TAGR": ("TAGR",), "WINE": ("TWIN",), "OLIV": ("OLIV",), "TABO": ("TABO",), "TOBA": ("TOBA",),
-                  "TEXT": ("TEXT",), "MAIF": ("MAIF",), "RAPE": ("RAPE",), "SUNF": ("SUNF",), "SOYA": ("SOYA",),
-                  "OOIL": ("OOIL",), "OFOD": ("OFAR", "ROOF"), "GRAS": ("GRAE", "GRAI"), "SETA": ("VSET", "FALL")}
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "lib"))
+import _model_codes as _MC  # noqa: E402  the model's activities and their CAPRI activities (codes/model_activities.csv)
+MODEL_TO_CAPRI = dict(_MC.CROP_MAP_CAPMOD)
 CAPRI_TO_MODEL = {c: m for m, cs in MODEL_TO_CAPRI.items() for c in cs}
 
 
@@ -132,6 +131,9 @@ def main() -> None:
     a = ap.parse_args()
     sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check")]
     import _model_regions as mr
+    import _money
+    # CAPRI's terms of the year's calibration are in its money of that year; the model's in 2017 money (K108)
+    money = _money.deflator(a.year)
     ap_t = a.techn or SRC / "pmp_quad_techn_2030.csv"
     techn = _read_csv(ap_t)
     pact = _read_csv(Path(str(ap_t).replace("_quad_techn", "_quad_pact")))
@@ -183,7 +185,8 @@ def main() -> None:
                 for jj, j in enumerate(keep):
                     if abs(Hm[ii, jj]) < 1e-12:
                         continue
-                    rows.append((r, macts[i], macts[j], Hm[ii, jj] * np.sqrt(X[i] * X[j]), X[i], X[j], " ".join(cs)))
+                    rows.append((r, macts[i], macts[j], Hm[ii, jj] * np.sqrt(X[i] * X[j]) / money, X[i], X[j],
+                                 " ".join(cs)))
     df = pd.DataFrame(rows, columns=["region", "act_i", "act_j", "g", "x_i", "x_j", "capri_regions"])
     OUT.parent.mkdir(parents=True, exist_ok=True)
     df.to_csv(OUT, index=False)

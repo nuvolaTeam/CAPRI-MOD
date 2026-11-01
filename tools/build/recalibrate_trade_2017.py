@@ -44,20 +44,33 @@ import pandas as pd
 
 import functools as _ft
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
-# CAPRI capmod region -> model trade region. Regions absent here fold into ROW.
-REGION_MAP = {
-    "EU27yr19": "EU27",
-    "USA": "USA", "CAN": "CAN", "BRA": "BRA", "ARG": "ARG",
-    "AUS": "AUS", "NZL": "NZL", "CHN": "CHN", "IND": "IND",
-    "RUS": "RUS", "UKR": "UKR", "TUR": "TUR", "MEX": "MEX",
-    "INDO": "IDN", "JAP": "JPN", "SKOR": "KOR", "THAI": "THA",
-    "VIET": "VNM", "PAK": "PAK", "BGD": "BGD", "NGA": "NGA",
-    "ZAF": "ZAF", "ETH": "ETH", "MOR": "MAR",
-    # Norway: CAPRI's market region NO000000 (aggregation/defaultA.agg: its own market region, linked to supply
-    # models), the model's trade region NOR (KNOWN_ISSUES K56; before, it folded into ROW while its supply regions
-    # NO01-NO07 were summed into the EU)
-    "NO000000": "NOR",
-}
+#: CAPRI's region code (market region or trade block of its market data) -> the model's trade region, from the
+#: declared code list capri_data/codes/model_trade_regions.csv (Norway NO000000 -> NOR, KNOWN_ISSUES K56; the
+#: United Kingdom UK000000 -> GBR and the Western Balkans' block WBA, batch 7). Regions absent there fold into ROW.
+TRADE_REGIONS_CSV = Path(__file__).resolve().parents[2] / "capri_data" / "codes" / "model_trade_regions.csv"
+REGION_MAP = {r: t for r, t in _read_csv(TRADE_REGIONS_CSV, dtype=str, keep_default_na=False)[
+    ["capri_rm", "code"]].itertuples(index=False) if r}
+
+#: CAPRI's mapping of behavioural regions (RMS) to market regions (RM): set RMS_TO_RM of its instantiation, written by
+#: tools/build/build_gl_demand.py. A behavioural region that is not a market region of its own (the Western Balkan
+#: countries AL, BA, CS, KO, MK, MO of the block WBA) belongs to its market region's trade region.
+RMS_TO_RM_CSV = Path(__file__).resolve().parents[2] / "capri_data" / "shared" / "rms_to_rm.csv"
+
+
+@_ft.lru_cache(maxsize=1)
+def _rms_to_rm() -> dict:
+    return dict(_read_csv(RMS_TO_RM_CSV)[["rms", "rm"]].itertuples(index=False))
+
+
+def trade_region(r: str, default: str = "ROW") -> str:
+    """The model's trade region of a CAPRI region: a market region by REGION_MAP, a behavioural region by its market
+    region (RMS_TO_RM), anything else -> default. EU member states map to their A_EU_* blocks, not to EU27: callers
+    treat the EU first. A source that holds both a block and its members must use one level only (no double count)."""
+    if r in REGION_MAP:
+        return REGION_MAP[r]
+    rm = _rms_to_rm().get(r)
+    return REGION_MAP.get(rm, default) if rm is not None else default
+
 
 # Overlapping aggregates. These are supersets of the regions above and must be
 # dropped, not mapped: including them counts the same trade more than once.
@@ -65,7 +78,7 @@ AGGREGATES = {
     # CAPRI REPORTING sums, derived from the data (2026-10): the 44 trading regions
     # (39 behavioural regions + 5 trade-only blocks EU27yr19, URUPAR, WBA, MER_OTH,
     # MED) reproduce ImportQ(World, World) exactly for all 71 traded products, and
-    # every code below overshoots when added. See sources/capri_trade_regions_2017.json.
+    # every code below overshoots when added (checked for all 71 traded products in 2017).
     # The previous hand-made list dropped GENUINE regions (URUPAR, MED, AFR_LDC,
     # AFR_REST, ASOCE_LDC, ASOCE_REST, FSU, REU, MSA_ACP, WBA) and kept "EU" and
     # "AllImporters", double-counting the EU and rest of world.

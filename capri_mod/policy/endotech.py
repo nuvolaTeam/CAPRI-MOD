@@ -23,7 +23,7 @@ Settings (refpol_endotech_all_sup.gms):
                the star 3.0 Green Deal and the ecampa (JRC121368-era) reference files leave it at its default, so 1
                in both (23 October 2026). JRC121368 Table 17's genomics shares (15% of dairy cows, 9% of other
                ruminants) are above that cap: they came from an earlier CAPRI version.
-  ghgTechLineNitr  the feed supplements linseed and nitrate (envind/line_nitr.gms LINE_Tot, Nitr_Tot): a switch
+  ghgTechLineNitr  the feed supplements linseed, nitrate and 3-NOP (envind/line_nitr.gms LINE_Tot, Nitr_Tot, 3NOP_Tot): a switch
                (capmod.gms includes line_nitr.gms unless it is 0); default 1, also in the JRC121368-era references
                (pol_input/ecampa/refpol_endotech_set14_ini.gms) (Sprint 9g).
 """

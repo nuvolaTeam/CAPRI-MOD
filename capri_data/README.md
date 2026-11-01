@@ -19,16 +19,20 @@ capri_data/
 │                          mitigation/ (feed, genetics, soil options), fertiliser options
 ├── shared/                region maps (region_capri_map.csv, NUTS correspondences), EU trade blocks,
 │                          model_parameters.csv, trade_flows_2017.csv
-├── trajectories/          capri_ref_2030.json (default), captrd_2030.json, null.json, TEMPLATE.json, CAPRI's 2030
+├── trajectories/          capri_ref_2030.json (default), captrd_2030.json, null.json, CAPRI's 2030
 │                          prices, premiums, rations and fodder
 ├── validation/            CAPRI reference results used by the tests and comparison tools
 ├── sources/               the extracts the builders read (CAPRI result rows, MITERRA tables, literature review);
 │                          not read by the model
-├── archive/               superseded files, not read by the model
-├── MANIFEST.json, INPUT_SCHEMA.json, INPUT_MANIFEST.json   expected files, shapes, declared inputs
-├── DATA_SOURCING_REGISTRY.json                             provenance of each dataset and the fixes made
+├── schema/                SQL only: the declarations of every CSV (DuckDB SQL: types, keys, code lists, ranges,
+│                          units), each file's provenance and checked notes, the numbers held in the model's code,
+│                          and schema.json (the same as JSON, generated)
+├── codes/                 the code lists and the unit catalogue the declarations check against: units.csv (CAPRI's
+│                          units and the model's own, model_units.csv), CAPRI's sets (capri/), the model's activities,
+│                          commodities and trade regions with their CAPRI codes (model_trade_regions.csv is also
+│                          read by the model)
+├── MANIFEST.json                                           expected files and shapes
 ├── FITNESS_FOR_USE.json                                    how far each output can be trusted (capri_mod/fitness.py)
-├── DATA_CATALOG.json, SYMBOL_EXTRACTION_MAP.json           catalogue of files and CAPRI symbols
 └── *.md                                                    this file and the guides below
 ```
 
@@ -53,8 +57,10 @@ hold CAPRI's 2030 reference values used by the projection (their names end in `_
 Not a working path yet. The intended steps are: create `capri_data/<year>/` with the same category subfolders, place
 that year's files there under the same names, and load with `CAPRIModel(data_dir="capri_data", base_year="<year>")`.
 But several modules read `capri_data/2017/` directly, so the `base_year` argument does not switch every file; that has
-to be fixed first (README section 4 (The data layer); `capri_mod/data/rebase.py` is a starting point). PMP terms and elasticities are
-CAPRI estimation outputs and need CAPRI's estimation for the new year, not a copy.
+to be fixed first (README section 4 (The data layer)). PMP terms and elasticities are CAPRI estimation outputs and need
+CAPRI's estimation for the new year, not a copy; the planned route is the data pipeline (docs/design/CAPTRD_MOD.md: the
+COCO and CAPREG ports). (`capri_mod/data/rebase.py`, a Eurostat download into a new base folder that relied on the
+elasticity calibration removed on 28 October 2026, was removed on 29 October 2026 with `reconcile_base.py`, K94.)
 
 ## File resolution
 

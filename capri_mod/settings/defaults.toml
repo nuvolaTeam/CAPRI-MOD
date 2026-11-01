@@ -21,6 +21,11 @@ run_environmental = true
 report_biofuel = false
 # IPOPT solver objects kept per region graph (environment variable CAPRI_NLP_CACHE wins if set)
 nlp_cache_size = 64
+# the countries outside the EU whose supply models are in the run, by CAPRI member-state code (CAPRI's per-country
+# switches, %CountriesNO000000% ... %CountriesTUR%, capmod/define_regional_sets.gms l. 40-77). Each must have regional
+# units (capri_data/shared/regional_units.csv). Their market region takes its supply from their models; a country
+# left out keeps its market region's supply functions. The EU's member states are always in.
+supply_countries_outside_eu = ["NO000000"]
 
 [outer_loop]
 # the supply-market iterations at most (CAPRI's %STEPS%: 99 in its GUI for a scenario run, gui/capri_gui_definition.xml
@@ -85,8 +90,12 @@ milk_ms_min_share = 0.01
 sup_gap_min_prod = 5.0
 # Norway's supply gap stops counting from this iteration (CAPRI: p_iterChg("NO000000",..) = 0 from step 15)
 norway_gap_last_iter = 15
-# IPOPT's tolerance in the regional models, throughout the outer loop
-nlp_tol_final = 1e-8
+# IPOPT's tolerance in the regional models, throughout the outer loop. 1e-10 since 30 October 2026 (KNOWN_ISSUES K80,
+# the project lead's decision; 1e-8 before): the regional optimum is flat along small, nearly substitutable crops (rye,
+# oats, durum wheat), where IPOPT stopped anywhere within 3e-5 of the solution at 1e-8 (the same baseline solved twice:
+# objectives equal to 1e-10, levels 3e-5 apart); at 1e-10 1.1e-6, with 5% more iterations and the same run time and
+# solves in the mini-EU Farm-to-Fork run
+nlp_tol_final = 1e-10
 # manure pools' price update: realised/planned response factor bounds, minimum plan, step bounds, QP settings
 manure_pool_kappa_bounds = [0.05, 1.5]
 manure_pool_min_plan = 0.002
@@ -140,6 +149,13 @@ nlp_jump_check = 0.1
 # more; 1e-6 lies in that gap
 nlp_jump_gain = 1e-6
 nlp_acceptable_tol = 1e-6
+# IPOPT's linear solver (not a CAPRI parameter: CAPRI solves with CONOPT in GAMS). "mumps" or "spral" (both bundled
+# with CasADi; SPRAL under the BSD licence, built by CasADi 3.8.1 without OpenMP, so one thread), or an HSL solver ("ma27",
+# "ma57", "ma86", "ma97"), loaded at run time from nlp_hsllib: the path of the HSL shared library, obtained under HSL's
+# own licence and kept outside the repository (it may not be redistributed). A different linear solver takes IPOPT on
+# a slightly different path, so a non-convex regional problem can end at another local optimum
+nlp_linear_solver = "mumps"
+nlp_hsllib = ""
 # IPOPT's treatment of fixed columns (lower = upper bound): "make_constraint" keeps them as variables held by an
 # equality (trial points may leave the bound), "make_parameter" removes them from the problem (CAPRI: an activity
 # without a level has no variable)
@@ -194,6 +210,12 @@ hessian_scenario_iter = 0
 # Hessian as re-solving every region from that state, with fewer solves. false: every region re-solved, differences
 # to the baseline's own solution (until 27 October 2026; cached Hessians keep their keys)
 hessian_skip_unchanged = true
+# BEYOND CAPRI (the project lead's decision, 29 October 2026): "capri" measures the market supply Hessian as CAPRI does,
+# re-solving the supply models at each 1% price shock (calibrate_supply.gms); "kkt" takes each shock's solution as the
+# first-order step of the KKT conditions from the base solution (the implicit function theorem with the base's active
+# set: the exact derivative where CAPRI's is a 1% difference quotient; no change of the active set within the shock).
+# Needs hessian_skip_unchanged (its base re-solve records the base points)
+hessian_method = "capri"
 # CAPRI's endogenous biofuel markets (BIOF_M; star 3.0 GUI default on); a scenario may set its own
 biofuel_markets = true
 # DEPARTURE: CAPRI's default aggregation has two EU trade blocks (EU_WEST, EU_EAST; aggregation/defaultA.agg);
@@ -203,6 +225,27 @@ eu_blocks = false
 # iteration by simu_calibration_to_supply.gms); CAPRI's setting since 24 October 2026 (K75). The Hessian is measured
 # once per baseline by price shocks on the supply models and cached on disk (.cache/market_supply_hessian)
 market_supply_nq = true
+# the non-EU market regions' supply as CAPRI's market supply functions (arm/market_model.gms ProdNQ_: p_hessNQSupp at
+# the 2030 calibration point with its cross-price terms and raw milk's, tools/build/build_noneu_market_supply_nq.py;
+# KNOWN_ISSUES K54-3); false: one own-price constant elasticity per region and product (CAPRI's p_elasSupp of 2017),
+# the form until 29 October 2026
+noneu_supply_nq = true
+# CAPRI's feed bulk demand inside the market (feedBlk_, audit M4): the member states' bulks respond to the prices within a
+# market solve from the supply models' bulks at the prices they saw, with the elasticities measured on the supply models
+# (the market supply Hessian's FEEDBLK rows); false: fixed within a solve (until 29 October 2026). Same fixed point
+feed_bulk_in_market = true
+# CAPRI's non-EU feed demand (FeedNQ_ with the feed energy balance FeedBal_, audit M3): each non-EU behavioural region
+# without supply models feeds by its normalised-quadratic feed function of the Arm1 prices and its feed energy price FEDE,
+# which clears its feed energy against its animal output; FEDE also moves its market supply functions
+# (tools/build/build_feed_energy.py, build_noneu_feed_nq.py); false: p_ElasFeed constant elasticities, FEDE held (until
+# 29 October 2026)
+noneu_feed_nq = true
+# CAPRI's raw milk of the non-EU regions with supply models (Norway, RMSSUP): ProdNQ_ MILK stays in the market
+# (arm/simu_calibration_to_supply.gms l. 423-427: v_prodQuant MILK at the supply models' level, bounds 0.1 to 10 x, the
+# constant re-anchored there), so the milk delivered responds to the region's dairy-block milk price and to the other
+# prices with the market supply Hessian's MILK row, and the products to the milk price with its MILK column (step F,
+# 29 October 2026); false: Norway's milk fixed at its supply models' within a market solve (until 29 October 2026)
+sup_milk_in_market = true
 # price shock of the market supply Hessian (calibrate_supply.gms)
 nq_price_shock = 0.01
 # bilateral market solve: acceleration ("anderson" or "none"), memory, chord step for trade, Newton rounds,
@@ -213,6 +256,15 @@ trade_chord = true
 # the trade systems' Newton with the exact Jacobian from CasADi (market programme step G1, capri_mod/market/trade_ad.py)
 # instead of finite differences; same equations and root
 exact_jacobian = false
+# the market solve (market programme step G2, docs/design/ARCHITECTURE_REFACTOR.md section 6): "fixed_point", the
+# successive linearisation above (each commodity's trade system exact, the links across commodities and blocks between
+# steps), or "newton_krylov", the same equations at once (capri_mod/market/market_nk.py: Newton on all prices, GMRES
+# with finite-difference directional derivatives, the fixed point's Jacobian as preconditioner); the same stopping rule.
+# The project lead's choice of 29 October 2026; the default until its full-run comparison
+solver = "fixed_point"
+# Newton-Krylov: step of the directional differences in log prices; Krylov vectors per Newton step
+nk_fd_step = 1e-6
+nk_max_krylov = 30
 max_iter = 100
 tol = 1e-7
 damping_increase_threshold = 0.999
@@ -308,6 +360,32 @@ variance_floor_squared = true
 # seven calendar years under the name "5", but the set is restricted to ExPost, which ends at BAS + 1 in the
 # reference run (CAPREG series to 2018, BAS 2017): 2014-2018, five years. Not an error in that configuration
 basyrs5_halfwidth = 3
+# Zeros and missing values (register FIX-8; CAPRI-ERROR-FIX). CAPRI reads a zero as a missing observation (GAMS stores
+# no zeros), and where it sums or takes a maximum over years it reads a missing year as 0: the level-weighted base value
+# of an activity's inputs and outputs divides by the levels of years in which the input is missing
+# (prep_data_for_estimation.gms l. 263-264), and the three highest yields of BSY can include a missing year's 0
+# (l. 309-325).
+# false (default): NaN or an absent record is missing, a recorded zero is an observation (step1.observed, statistics);
+# true: CAPRI's convention (the parity switch). CAPREG's series as GAMS writes them have no recorded zeros (their
+# only EPS are set-aside rates and sugar quotas, which CAPTRD sets from its policy data), so on them the switch changes
+# only the two statistics named above
+zeros_as_missing = false
+# The NUTS 2 column filter of captrd.gms l. 872-876 (register KEPT-2 -> FIX-9; CAPRI-ERROR-FIX). The statement is
+# meant to keep, for the NUTS 2 regions that are not countries, only the activities, land uses, GROF and ARTO, but
+# its condition NOT SUM(SAMEAS(MS,NT2),1) leaves NT2 uncontrolled, so it deletes nothing in CAPRI.
+# false (default): the condition per region, as in the two statements that follow it (l. 878-880), keeping the
+# columns of CAPTRD's NUTS 2 estimation (estimate_nuts2.gms l. 33-41: also the groups GRPC, LU and LOSF, which that
+# estimation uses); true: CAPRI's code as written (the parity switch)
+nuts2_column_filter_as_coded = false
+# The run's GUI choices (captrd.gms %BaseYear%, %lst_dgagri%, %Aglink%, %mlkQutExpiry%, the simulation years RESY), at
+# the values of the reference run results_1770.gdx (base 2017, simulation years 2018-2070), against which the port is
+# compared; the last year of the data is CAPREG's and COCO's (COCO's nowcast reaches 2019)
+base_year = 2017
+last_data_year = 2019
+simulation_years = [2018, 2020, 2025, 2030, 2035, 2040, 2045, 2050, 2060, 2070]
+lst_dgagri = 2030
+aglink = "aglink2023dgAgri"
+milk_quota_expiry = 2009
 
 [pipeline]
 # The data download layer (capri_mod/pipeline; docs/DATA_PIPELINE.md). Where the store (raw downloads, manifest, Delta

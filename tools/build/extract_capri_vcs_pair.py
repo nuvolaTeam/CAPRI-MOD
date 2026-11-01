@@ -20,6 +20,8 @@ Output: capri_data/validation/coupled_support_2030/capri_vcs_effect.csv.xz
     python tools/build/extract_capri_vcs_pair.py REF.gdx NOVCS.csv [--lib-dir DIR]  (default: $CAPRI_GDXLIB)
 """
 from __future__ import annotations
+
+import sys
 import os
 import argparse, re
 from pathlib import Path
@@ -30,8 +32,9 @@ ROOT = Path(__file__).resolve().parents[2]
 SUP_ITEMS = {"LEVL", "PRME", "PROD", "YILD"}
 MKT_ITEMS = {"UVAP", "UVAG", "MAPR", "HCON", "IMPT", "EXPT"}
 REG = re.compile(r"^(EU27yr19|[A-Z]{2}[0-9A-Z]{6})$")
-EU_MS = {"AT", "BL", "BG", "CY", "CZ", "DE", "DK", "EE", "EL", "ES", "FI", "FR", "HR", "HU", "IR", "IT",
-         "LT", "LV", "MT", "NL", "PL", "PT", "RO", "SE", "SI", "SK"}
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "lib"))
+from _model_regions import EU_MS2 as _EU_FROM_DATA  # noqa: E402  (capri_data/shared/eu_market_blocks.csv)
+EU_MS = set(_EU_FROM_DATA)                                  # CAPRI's EU member states, from the data
 
 
 def _keep(r, q, a, i):

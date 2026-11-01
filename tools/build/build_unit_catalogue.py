@@ -1,4 +1,4 @@
-"""The unit catalogue of the data declarations (capri_data/schema/units.csv): CAPRI's units, and the model's own.
+"""The unit catalogue of the data declarations (capri_data/codes/units.csv): CAPRI's units, and the model's own.
 
 CAPRI declares its units in gams/CAPRIunits.gms (Witzke and Britz, 2009): the set capri_u, one acronym per unit with
 its description ("U_TonPerHa" "Metric ton per ha"), used to give each COLS x ROWS cell of CAPRI's tables a unit
@@ -7,10 +7,10 @@ units, prices of 2000), so the list is read from the .gms. The per-cell table ne
 declarations (capri_data/schema/*.sql) give each column its unit from this catalogue.
 
 The model's tables use some units CAPRI does not list (CAPRI's catalogue has t/ha but not t per head); they are kept in
-capri_data/schema/model_units.csv and added with capri = no, so a declaration can only name a unit that is in the catalogue and every unit not
+capri_data/codes/model_units.csv and added with capri = no, so a declaration can only name a unit that is in the catalogue and every unit not
 CAPRI's is visible.
 
-Output: capri_data/schema/units.csv  code, description, capri (yes|no)
+Output: capri_data/codes/units.csv  code, description, capri (yes|no)
 
     python tools/build/build_unit_catalogue.py [--gms /home/claude/work/allgms/gams/CAPRIunits.gms]
 """
@@ -22,11 +22,11 @@ import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-OUT = ROOT / "capri_data" / "schema" / "units.csv"
+OUT = ROOT / "capri_data" / "codes" / "units.csv"
 
 #: the model's own units, those of its tables that CAPRI's catalogue does not have (hand-kept, one row per unit with
 #: the tables that use it): code, description, used_by
-MODEL_UNITS = ROOT / "capri_data" / "schema" / "model_units.csv"
+MODEL_UNITS = ROOT / "capri_data" / "codes" / "model_units.csv"
 
 
 def capri_units(gms: Path) -> list[tuple[str, str]]:

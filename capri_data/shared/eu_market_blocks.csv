@@ -25,4 +25,3 @@ SK000000,EU_EAST,gams/aggregation/defaultA.agg
 HR000000,EU_EAST,gams/aggregation/defaultA.agg
 BG000000,EU_EAST,gams/aggregation/defaultA.agg
 RO000000,EU_EAST,gams/aggregation/defaultA.agg
-NO000000,EU_WEST,"capri-mod: Norway has supply models and feeds the EU market, as in the one-region EU (CAPRI: own market region NO000000; registered)"

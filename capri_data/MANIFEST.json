@@ -6,7 +6,6 @@
  "layout": {
   "root": "Live files loaded at runtime",
   "sources/": "Provenance extracts (coco, fao_agg_2017, gams, fao_trade)",
-  "archive/": "Superseded/backup (older vintages)",
   "sources/fao_2021/": "FAOSTAT 2021 extracts (raw; not read by the model: superseded by CAPRI's own 2017/2030 market data)"
  },
  "files": {
@@ -78,18 +77,19 @@
    "note": "Norway's PIGS, PIGF (NO01-NO07) = CAPRI's SOWS, PIGF HERD of res_17NO (no census total in CAPRI's Norwegian data), tools/build/build_norway_pigs.py, 21 October 2026"
   },
   "producer_prices.csv": {
-   "source": "CAPRI SUA",
+   "source": "CAPRI's 2017 regional prices (MPRI), production-weighted EU averages for the crops; SHGM, SHGF CAPREG's herd-weighted prices; SETA 0 (tools/build/build_eu_producer_prices.py)",
    "vintage": "2017",
    "units": "EUR/t",
    "domain": "prices",
    "status": "live",
    "shape": {
-    "rows": 42,
+    "rows": 32,
     "cols": 1,
     "columns": [
      "price"
     ]
-   }
+   },
+   "note": "29 October 2026: the ten livestock rows of unrecorded origin removed (read by no model code; KNOWN_ISSUES K72)"
   },
   "variable_costs.csv": {
    "source": "CAPRI",
@@ -133,7 +133,7 @@
    "note": "BPS = CAPRI's premiums per ha of UAA over all schemes; ANC, AES, ORGANIC, COUPLED are 0 and unused (the split by scheme comes from premium_scheme_shares_2030.csv)"
   },
   "world_prices.csv": {
-   "source": "CAPRI FAO_agg_17_defaulta p_dataMarket 'World'.'PMRK'.<product>.'BAS' (base-period world market price); OLIV from OLIO's price and the EU's oil extraction, FPRI export-weighted from CAPRI's 2017 market; built by tools/build/build_world_prices.py, per-row CAPRI code in sources/world_price_provenance.json",
+   "source": "CAPRI FAO_agg_17_defaulta p_dataMarket 'World'.'PMRK'.<product>.'BAS' (base-period world market price); OLIV from OLIO's price and the EU's oil extraction, FPRI export-weighted from CAPRI's 2017 market; built by tools/build/build_world_prices.py, the source per group of rows in capri_data/schema/02_provenance_notes.sql",
    "vintage": "2017",
    "units": "EUR/t",
    "domain": "prices",
@@ -200,28 +200,7 @@
      "SOYC"
     ]
    },
-   "note": "Recalibrated from CAPRI capmod res_0_1717 (2017). The previous 841-row matrix carried a zero diagonal - no intra-EU trade at all - so every commodity showed a 100% extra-EU import share. 547 rows is fewer because CAPRI reports only realised flows, not an exhaustive grid of zeros. | REBUILT 2026-10 on CAPRI's trade partition (sources/capri_trade_regions_2017.json): no EU or rest-of-world double counting, genuine regions no longer dropped, six oilseed-product columns; EU imports match CAPRI's NONEU rows exactly. Not read by the model since the bilateral market (bilateral_flows_<year>.csv) replaced the old Armington aggregator (removed 21 October 2026, an orphan: built from this file, never used); kept as an input of tools/check/validate_world_prices.py and tools/build/recalibrate_trade_2017.py."
-  },
-  "eu_mfn_tariffs.csv": {
-   "source": "CAPRI",
-   "vintage": "2017",
-   "units": "fraction",
-   "domain": "policy",
-   "status": "live",
-   "shape": {
-    "rows": 1,
-    "cols": 32,
-    "columns": [
-     "SWHE",
-     "DWHE",
-     "BARL",
-     "CORN",
-     "OCER",
-     "RYEM",
-     "OATS",
-     "RAPE"
-    ]
-   }
+   "note": "Recalibrated from CAPRI capmod res_0_1717 (2017). The previous 841-row matrix carried a zero diagonal - no intra-EU trade at all - so every commodity showed a 100% extra-EU import share. 547 rows is fewer because CAPRI reports only realised flows, not an exhaustive grid of zeros. | REBUILT 2026-10 on CAPRI's trade partition (the 44 trading regions reproduce ImportQ(World, World) for all 71 traded products, 2017): no EU or rest-of-world double counting, genuine regions no longer dropped, six oilseed-product columns; EU imports match CAPRI's NONEU rows exactly. Not read by the model since the bilateral market (bilateral_flows_<year>.csv) replaced the old Armington aggregator (removed 21 October 2026, an orphan: built from this file, never used); kept as an input of tools/check/validate_world_prices.py and tools/build/recalibrate_trade_2017.py."
   },
   "land_availability.csv": {
    "source": "CAPRI/COCO",
@@ -277,22 +256,6 @@
     ]
    }
   },
-  "crop_nutrient_export.csv": {
-   "source": "CAPRI",
-   "vintage": "2017",
-   "units": "kg/t",
-   "domain": "environment",
-   "status": "live",
-   "shape": {
-    "rows": 35,
-    "cols": 3,
-    "columns": [
-     "N_kg_t",
-     "P_kg_t",
-     "K_kg_t"
-    ]
-   }
-  },
   "climate_zones.csv": {
    "source": "CAPRI",
    "vintage": "static",
@@ -306,39 +269,6 @@
      "zone",
      "pct"
     ]
-   }
-  },
-  "fao_market_baseline.json": {
-   "source": "FAO_agg SUA",
-   "vintage": "2017",
-   "units": "1000 t",
-   "domain": "market",
-   "status": "live",
-   "shape": {
-    "entries": 328,
-    "type": "dict"
-   }
-  },
-  "nutrient_coefs.csv": {
-   "source": "capreg DATA2 (NITF/PHOF/POTF)",
-   "vintage": "2017",
-   "units": "kg/ha N,P2O5,K2O",
-   "domain": "environment",
-   "status": "live",
-   "shape": {
-    "rows": 29,
-    "cols": 3,
-    "note": "CAPRI crop fertiliser application (NITF, PHOF, POTF); the animal rows removed 27 October 2026 (K33)"
-   }
-  },
-  "feed_requirements.csv": {
-   "source": "capreg DATA2 feed cols (fresh->DM)",
-   "vintage": "2017",
-   "units": "t DM/head/yr",
-   "domain": "feed",
-   "status": "live",
-   "shape": {
-    "note": "real CAPRI ruminants; pigs/poultry synthetic"
    }
   },
   "livestock_output_coef.csv": {
@@ -664,13 +594,14 @@
    },
    "note": "Feed per head (t): cereals, protein-rich and energy-rich feed - CAPRI 2017 regional totals (FCER/FPRO/FENE x LEVL) divided by this model's herd | Rebuilt 2026-10 with the corrected NUTS correspondence (73 regions now regional CAPRI values). | Norway's pig cells rebuilt 21 October 2026 (tools/build/build_norway_pigs.py --rebuild)"
   },
-  "capri_oilseed_products_baseline.json": {
-   "source": "CAPRI FAO_agg_17_defaulta p_dataMarket (year BAS), supplied by the project lead; EU = sum of member states",
+  "eu_cake_feed_bas.csv": {
+   "source": "CAPRI FAO_agg_17 p_dataMarket FEDM BAS (tools/build/build_eu_cake_feed.py)",
    "vintage": "2017",
-   "units": "kt; EUR/t",
-   "domain": "market",
-   "status": "calibration",
-   "note": "Base balances of oils, cakes and seeds for the 21 trade regions, EU crushing quantities and yields - Stage 1 of oilseed crushing (docs/OILSEED_CRUSHING.md)."
+   "units": "1000 t",
+   "domain": "supply",
+   "status": "live",
+   "path": "2017/market/eu_cake_feed_bas.csv",
+   "note": "the EU's base-period feed use of RAPC, SUNC, SOYC: the weights of the protein-feed cake index"
   },
   "feed_demand_nonEU.json": {
    "source": "CAPRI data_market_1730defaulta CAL (HCON, FEED, PROC, BIOF) and elas_2_1730defaulta p_ElasFeed (supplied by the project lead), aggregated from CAPRI's 80 behavioural regions to the trade regions",
@@ -976,7 +907,7 @@
    "status": "live",
    "path": "2017/environment/manure_n2o_tech.csv",
    "shape": {
-    "rows": 7309,
+    "rows": 7315,
     "cols": 4,
     "columns": [
      "animal",
@@ -1033,9 +964,35 @@
    },
    "note": "CAPRI's low/high-intensity fattening bulls and heifers per model region and animal (BULL, HFRS): stall shares, per-stall relative differences (manure N, beef, young animals, energy, protein, dry matter), PMP curvature of the stall shift; tools/build/build_cattle_intensity.py, Sprint 7c.; q_<x>_capri2030 / _recipe2030: the 2030 calibration's curvature (tools/build/build_intensity_q_2030.py, 22 October 2026); splits int / rep (HEIR) / male / female / sex (calves) since 22 October 2026 (column split)"
   },
-  "biofuel_feedstock.csv": {
-   "source": "CAPRI 2030 Green Deal reference market results (markmarket_greendeal_1730et_base_1717 dataOut: BIOF, PRCB, PRCBY, ARM1P, PPRI DDGS, BiofFeedCost); arm/market1.gms p_rhoBioFuel; arm/store_prices.gms glycerine",
-   "vintage": "2030 reference",
+  "biofuel_feedstock_2017.csv": {
+   "source": "CAPRI's 2017 market data (market_base_1717 dataOut, base year 2017 calibrated from data): BIOF, PRCB, PRCBY, ARM1P, PPRI DDGS, BiofFeedCost); arm/market1.gms p_rhoBioFuel; arm/store_prices.gms glycerine",
+   "vintage": "2017 market year",
+   "units": "kt; t/t; EUR/t",
+   "domain": "market",
+   "status": "live",
+   "shape": {
+    "rows": 296,
+    "cols": 12,
+    "columns": [
+     "region",
+     "biofuel",
+     "feedstock",
+     "commodity",
+     "biof_kt",
+     "prcb",
+     "prcby",
+     "byproduct",
+     "feed_price",
+     "byproduct_price",
+     "rho",
+     "numeraire"
+    ]
+   },
+   "note": "First-generation biofuel feedstocks per CAPRI market region and biofuel (all regions; column region = model trade region): 2030-reference quantity, biofuel and by-product yields, feedstock and by-product prices, numeraire, CES elasticity (tools/build/build_biofuel_market.py). Reproduces CAPRI's BiofFeedCost exactly in every region."
+  },
+  "biofuel_feedstock_2030.csv": {
+   "source": "CAPRI 2030 Green Deal reference market results (markmarket_greendeal_1730et_base_1717 dataOut): BIOF, PRCB, PRCBY, ARM1P, PPRI DDGS, BiofFeedCost); arm/market1.gms p_rhoBioFuel; arm/store_prices.gms glycerine",
+   "vintage": "2030 market year",
    "units": "kt; t/t; EUR/t",
    "domain": "market",
    "status": "live",
@@ -1059,9 +1016,26 @@
    },
    "note": "First-generation biofuel feedstocks per CAPRI market region and biofuel (all regions; column region = model trade region): 2030-reference quantity, biofuel and by-product yields, feedstock and by-product prices, numeraire, CES elasticity (tools/build/build_biofuel_market.py). Reproduces CAPRI's BiofFeedCost exactly in every region."
   },
-  "biofuel_use_share.csv": {
-   "source": "CAPRI 2030 reference: biofuel feedstock use over EU use (HCOM+FEDM+INDM+BIOF+LOSM) of the market group",
-   "vintage": "2030 reference",
+  "biofuel_use_share_2017.csv": {
+   "source": "CAPRI's 2017 market data (market_base_1717 dataOut, base year 2017 calibrated from data): biofuel feedstock use over EU use (HCOM+FEDM+INDM+BIOF+LOSM) of the market group",
+   "vintage": "2017 market year",
+   "units": "kt; share",
+   "domain": "market",
+   "status": "live",
+   "shape": {
+    "rows": 13,
+    "cols": 3,
+    "columns": [
+     "biof_kt",
+     "use_kt",
+     "share"
+    ]
+   },
+   "note": "Share of the EU use of each model market commodity that goes to biofuels (tools/build/build_biofuel_market.py)."
+  },
+  "biofuel_use_share_2030.csv": {
+   "source": "CAPRI 2030 Green Deal reference market results (markmarket_greendeal_1730et_base_1717 dataOut): biofuel feedstock use over EU use (HCOM+FEDM+INDM+BIOF+LOSM) of the market group",
+   "vintage": "2030 market year",
    "units": "kt; share",
    "domain": "market",
    "status": "live",
@@ -1456,9 +1430,53 @@
    },
    "note": "olive oil per tonne of olives (member state) and milled rice per tonne of paddy (EU) (tools/build/build_processing_yields.py)"
   },
-  "biofuel_market.csv": {
-   "source": "CAPRI 2030 Green Deal reference market results (markmarket_greendeal_1730et_base_1717 dataOut: PROD, NAGR, SECG, EXOG, BIOF, PPRI, PMRK, CPRI, ARM1P, QUTS, HCOM and CPRI of GASL/DISL, feedstock BIOF/PRCB/PRCBY/ARM1P); biofuel/def_biofuel_params.gms; arm/market_model.gms p_oilEqu",
-   "vintage": "2030 reference",
+  "biofuel_market_2017.csv": {
+   "source": "CAPRI's 2017 market data (market_base_1717 dataOut, base year 2017 calibrated from data): PROD, NAGR, SECG, EXOG, BIOF, PPRI, PMRK, CPRI, ARM1P, QUTS, HCOM and CPRI of GASL/DISL, feedstock BIOF/PRCB/PRCBY/ARM1P); biofuel/def_biofuel_params.gms; arm/market_model.gms p_oilEqu",
+   "vintage": "2017 market year",
+   "units": "kt; EUR/t; share; toe/t",
+   "domain": "market",
+   "status": "live",
+   "shape": {
+    "rows": 120,
+    "cols": 30,
+    "columns": [
+     "region",
+     "biofuel",
+     "rmssup",
+     "prod_kt",
+     "x0_kt",
+     "fixed_kt",
+     "ppri",
+     "pmrk",
+     "bfc",
+     "pr0",
+     "sup_scale",
+     "sup_alfa",
+     "sup_beta",
+     "sup_slope",
+     "sup_turn",
+     "biof_kt",
+     "cpri",
+     "arm1p",
+     "fossil_cpri",
+     "hcon_kt",
+     "oil_eq",
+     "oil_eq_fossil",
+     "quts",
+     "cal_share",
+     "dem_max",
+     "dem_slope",
+     "dem_turn",
+     "proc_kt",
+     "proc_hess",
+     "inpe"
+    ]
+   },
+   "note": "CAPRI's biofuel supply (SupplyBiof_), demand (biofDemShare_, biofDem_) and non-fuel processing (ProcNQ_: proc_kt, proc_hess from p_hessNQProc, INPE price) functions per CAPRI market region, calibrated as biofuel/def_biofuel_params.gms to the 2030 reference; tools/build/build_biofuel_market.py, docs/BIOFUEL_MARKET.md."
+  },
+  "biofuel_market_2030.csv": {
+   "source": "CAPRI 2030 Green Deal reference market results (markmarket_greendeal_1730et_base_1717 dataOut): PROD, NAGR, SECG, EXOG, BIOF, PPRI, PMRK, CPRI, ARM1P, QUTS, HCOM and CPRI of GASL/DISL, feedstock BIOF/PRCB/PRCBY/ARM1P); biofuel/def_biofuel_params.gms; arm/market_model.gms p_oilEqu",
+   "vintage": "2030 market year",
    "units": "kt; EUR/t; share; toe/t",
    "domain": "market",
    "status": "live",
@@ -1598,7 +1616,7 @@
    "note": "Model crop -> CAPRI crop group (NGRP) with area shares per CAPRI region (OFOD = OFAR + ROOF, OLIV = OLIV + TABO, GRAS = GRAE + GRAI); tools/build/build_fert_dist_priors.py."
   },
   "mineral_redu_exemptions.csv": {
-   "source": "CAPRI pol_input/greendeal/minfert_redu_by_crop.gms (p_checkSmallMine), kept as capri_data/sources/policy/minfert_redu_by_crop.gms",
+   "source": "CAPRI pol_input/greendeal/minfert_redu_by_crop.gms (p_checkSmallMine), its statements converted to capri_data/sources/policy/minfert_redu_by_crop_p_checkSmallMine.csv and minfert_redu_by_crop_limCres.csv by tools/build/convert_sources_to_csv.py",
    "vintage": "star 3.0",
    "units": "factor x baseline; year",
    "domain": "policy",
@@ -1669,7 +1687,7 @@
    "domain": "abatement",
    "status": "live",
    "shape": {
-    "rows": 1925,
+    "rows": 2355,
     "cols": 19,
     "columns": [
      "animal",
@@ -1693,7 +1711,7 @@
      "dsav"
     ]
    },
-   "note": "CAPRI's feed supplements linseed (LINE_Tot) and nitrate (Nitr_Tot) per model region and cattle animal (envind/line_nitr.gms, ghgTechLineNitr a switch): requirement changes, eligible share, cost, CH4ENT change, calibration terms; tools/build/build_supplement_effects.py. dsav: CAPRI's cost-saving drop between its ini and max calibration runs, EUR per model head adopting (per unit of the parameter; tools/lib/_capri_costsavings.py), netted from the PMP slope as CAPRI (K67 F2)."
+   "note": "CAPRI's feed supplements linseed (LINE_Tot) and nitrate (Nitr_Tot) per model region and cattle animal (envind/line_nitr.gms, ghgTechLineNitr a switch): requirement changes, eligible share, cost, CH4ENT change, calibration terms; tools/build/build_supplement_effects.py. dsav: CAPRI's cost-saving drop between its ini and max calibration runs, EUR per model head adopting (per unit of the parameter; tools/lib/_capri_costsavings.py), netted from the PMP slope as CAPRI (K67 F2).; 3-NOP rows (3NOP_Tot) since 29 October 2026 (K93)"
   },
   "capri_level_ratio.csv": {
    "source": "CAPRI res_17<MS> LEVL per model herd (tools/build/build_capri_level_ratio.py)",
@@ -1892,14 +1910,14 @@
    "domain": "market",
    "status": "live",
    "shape": {
-    "rows": 27,
+    "rows": 26,
     "cols": 2,
     "columns": [
      "block",
      "source"
     ]
    },
-   "note": "member state -> EU trade block; Norway's row is capri-mod's routing of its supply models (registered)",
+   "note": "member state -> EU trade block (CAPRI's rows only since 30 October 2026; Norway is its own market region NOR)",
    "path": "shared/eu_market_blocks.csv"
   },
   "processing_nq_hessian.csv": {
@@ -2106,24 +2124,6 @@
    "note": "tools/build/build_pmp_2030.py (CAPRI codes, unchanged values)",
    "path": "sources/baseline_pmp/pmp_quad_pact_2030.csv"
   },
-  "pmp_cnst_2030.csv": {
-   "source": "CAPRI star 3.0 pmppar_21730<CC>defaulta.gdx (pmp_cnst_2030), exported with tools/gams/export_pmp_2030.gms",
-   "vintage": "2030",
-   "units": "CAPRI units",
-   "domain": "sources",
-   "status": "source",
-   "shape": {
-    "rows": 16734,
-    "cols": 3,
-    "columns": [
-     "activity",
-     "tech",
-     "value"
-    ]
-   },
-   "note": "tools/build/build_pmp_2030.py (CAPRI codes, unchanged values)",
-   "path": "sources/baseline_pmp/pmp_cnst_2030.csv"
-  },
   "pmp_quad_landtypes_2030.csv": {
    "source": "CAPRI star 3.0 pmppar_21730<CC>defaulta.gdx (pmp_quad_landtypes_2030), exported with tools/gams/export_pmp_2030.gms",
    "vintage": "2030",
@@ -2141,23 +2141,6 @@
    },
    "note": "tools/build/build_pmp_2030.py (CAPRI codes, unchanged values)",
    "path": "sources/baseline_pmp/pmp_quad_landtypes_2030.csv"
-  },
-  "pmp_cnst_landtypes_2030.csv": {
-   "source": "CAPRI star 3.0 pmppar_21730<CC>defaulta.gdx (pmp_cnst_landtypes_2030), exported with tools/gams/export_pmp_2030.gms",
-   "vintage": "2030",
-   "units": "CAPRI units",
-   "domain": "sources",
-   "status": "source",
-   "shape": {
-    "rows": 2053,
-    "cols": 2,
-    "columns": [
-     "landtype",
-     "value"
-    ]
-   },
-   "note": "tools/build/build_pmp_2030.py (CAPRI codes, unchanged values)",
-   "path": "sources/baseline_pmp/pmp_cnst_landtypes_2030.csv"
   },
   "estnlp_vb.csv": {
    "source": "CAPRI star 3.0 dat/estnlp/results.gdx (VB, VD levels), exported with tools/gams/export_pmp_2030.gms",
@@ -2211,7 +2194,7 @@
    "domain": "supply",
    "status": "live",
    "shape": {
-    "rows": 39523,
+    "rows": 39736,
     "cols": 6,
     "columns": [
      "act_i",
@@ -2252,7 +2235,7 @@
    "domain": "sources",
    "status": "source",
    "shape": {
-    "rows": 33472,
+    "rows": 33747,
     "cols": 4,
     "columns": [
      "activity",
@@ -2289,7 +2272,7 @@
    "domain": "supply",
    "status": "live",
    "shape": {
-    "rows": 38421,
+    "rows": 38634,
     "cols": 6,
     "columns": [
      "act_i",
@@ -2332,7 +2315,7 @@
    "domain": "sources",
    "status": "source",
    "shape": {
-    "rows": 30136,
+    "rows": 30379,
     "cols": 4,
     "columns": [
      "activity",
@@ -2648,7 +2631,8 @@
    "units": "EUR/ha",
    "domain": "supply",
    "status": "live (builder input)",
-   "path": "sources/capri_land_rents/"
+   "path": "sources/capri_land_rents/",
+   "vintage_exception": "CAPRI's land rents at 2017 and at its 2030 calibration point (the folder holds both); the 2030 file is used only when the model simulates the 2030 market"
   },
   "capri_member_state_codes.csv": {
    "source": "CAPRI sets.gms NUTS0 (BL = Belgium and Luxembourg, IR, EL, UK)",
@@ -2780,7 +2764,7 @@
    "status": "live",
    "path": "2017/market/eu_market_supply_nq.csv",
    "shape": {
-    "rows": 133,
+    "rows": 817,
     "cols": 7,
     "columns": [
      "ms",
@@ -2792,14 +2776,92 @@
      "h_ratio"
     ]
    },
-   "note": "CAPRI's market supply functions (ProdNQ_) of the EU products no supply model produces (tools/build/build_eu_market_supply_nq.py); they reproduce CAPRI's p_elasSupp at the calibration point"
+   "note": "CAPRI's market supply functions (ProdNQ_) of the EU products no supply model produces (tools/build/build_eu_market_supply_nq.py); they reproduce CAPRI's p_elasSupp at the calibration point; the Hessian completed as CAPRI's market model completes it on loading (tools/lib/_capri_nq.py: symmetric; 29 October 2026, K98)"
+  },
+  "noneu_market_supply_nq.csv": {
+   "source": "CAPRI elas_2_1730defaulta p_hessNQSupp (CAL) of every non-EU market region, completed as arm/market1.gms; data_market_1730defaulta Data_CAL PPRI (CAL); PPRI INPE 2030 of the markmarket_greendeal_1730et_base_1717 dump; rms_to_rm.csv",
+   "vintage": "2030 calibration point",
+   "units": "kt per unit change of the price ratio (h_ratio); h in kt per EUR/t over INPE",
+   "domain": "market",
+   "status": "live",
+   "path": "2017/market/noneu_market_supply_nq.csv",
+   "shape": {
+    "rows": 47577,
+    "cols": 10,
+    "columns": [
+     "trade_region",
+     "rms",
+     "x",
+     "y",
+     "capri_x",
+     "capri_y",
+     "h",
+     "ppri_y",
+     "inpe",
+     "h_ratio"
+    ]
+   },
+   "note": "CAPRI's market supply functions (ProdNQ_) of the non-EU market regions with their cross-price terms (tools/build/build_noneu_market_supply_nq.py; K54-3, market step D); y empty: a column without a model price, held at calibration"
+  },
+  "capri_digestpar.csv": {
+   "source": "CAPRI star 3.0 code, gams/envind/def_digestibility.gms",
+   "vintage": "CAPRI star 3.0 code",
+   "units": "% of dry matter (PAF, CAT: factors)",
+   "domain": "environment",
+   "status": "live",
+   "path": "sources/envind/capri_digestpar.csv",
+   "shape": {
+    "rows": 367,
+    "cols": 3,
+    "columns": [
+     "feed",
+     "item",
+     "value"
+    ]
+   },
+   "note": "CAPRI's feed digestibility table p_digestPar(EU, DCOL, feed, item) as written in envind/def_digestibility.gms (NRC 2001, INRA 2002), read as GAMS reads it (tools/build/build_digestibility_table.py); 3-NOP's CH4 effect (K93)"
+  },
+  "capri_digest_default_prd.csv": {
+   "source": "CAPRI star 3.0 code, gams/envind/def_digestibility.gms",
+   "vintage": "CAPRI star 3.0 code",
+   "units": "-",
+   "domain": "environment",
+   "status": "live",
+   "path": "sources/envind/capri_digest_default_prd.csv",
+   "shape": {
+    "rows": 49,
+    "cols": 2,
+    "columns": [
+     "default",
+     "feed"
+    ]
+   },
+   "note": "CAPRI's DEF_PRD: the products whose values fill a feed's missing items (envind/def_digestibility.gms; tools/build/build_digestibility_table.py)"
+  },
+  "nutrient_coefs_regional.csv": {
+   "source": "res_17<MS> DATA2 NITF/PHOF/POTF (tools/build/build_nutrient_coefs_regional.py)",
+   "vintage": "2017",
+   "units": "kg/ha N,P2O5,K2O",
+   "domain": "supply",
+   "status": "live",
+   "path": "2017/supply/nutrient_coefs_regional.csv",
+   "note": "CAPRI's fertiliser coefficients per region and model crop, level-weighted over the crop's CAPRI activities; replaces the national nutrient_coefs.csv (no builder, K100)"
+  },
+  "supply_elas_eu.csv": {
+   "source": "CAPRI elas1717defaulta p_elasSupp CAL (tools/build/build_capri_supply_elas_market.py)",
+   "vintage": "2017",
+   "units": "elasticity",
+   "domain": "market",
+   "status": "live",
+   "path": "2017/market/supply_elas_eu.csv",
+   "note": "the EU rows' own-price supply elasticity: median over the model's 27 member states per market commodity"
   }
  },
  "_vintage_summary": {
   "base_year": "2017 (quantities, prices, PMP parameters - all consistent)",
   "trade": "2021 (bilateral flows, refreshed and validated)",
   "why_not_newer": "A newer base requires CAPRI to RE-ESTIMATE its PMP parameters for the new year (a CAPRI-side computation). Mixing newer prices/quantities onto 2017 PMP terms breaks calibration - the validator blocks this. Trade is separable and safely refreshed to 2021.",
-  "synthetic": "2 files (feed_requirements, nutrient_coefs) have no real source and use plausible templates. Flagged by validator and at runtime.",
+  "synthetic": "none known: feed_requirements.csv and nutrient_coefs.csv, without builders, were removed on 29 October 2026 (KNOWN_ISSUES K99, K100).",
   "upgrade_path": "See docs/DATA_LOCATION_MAP.md. A newer STAR release database (results) from capri-model.org would provide a consistent newer base.",
   "layout": "Data organised as capri_data/<base_year>/<category>/ with cross-vintage files in shared/. Market JSON parameter files (fao_market_baseline, fao_demand_own_elas_eu) live in <year>/market/."
  }

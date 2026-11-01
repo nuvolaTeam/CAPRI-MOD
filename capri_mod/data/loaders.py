@@ -48,8 +48,8 @@ _FILE_CATEGORY = {
     "livestock_output_coef.csv": "supply", "nutrients_regional.csv": "supply",
     "livestock_revenue_coef.csv": "supply", "livestock_product_value_coef.csv": "supply", "livestock_product_value_by_market_coef.csv": "supply", "livestock_output_by_product_coef.csv": "supply", "grass_intensity.csv": "supply", "dairy_intensity.csv": "supply", "cattle_intensity.csv": "supply", "genetics_effects.csv": "abatement/mitigation", "lownfeed_effects.csv": "abatement/mitigation", "supplement_effects.csv": "abatement/mitigation", "feed_byproducts.csv": "market", "sugar_processing.csv": "market", "processing_yields.csv": "market", "bilateral_flows_2017.csv": "market", "bilateral_flows_2030.csv": "market", "bilateral_regions_2017.csv": "market", "bilateral_regions_2030.csv": "market", "bilateral_trq_2017.csv": "market", "bilateral_trq_2030.csv": "market", "armington_rho.csv": "market", "world_market_baseline.json": "market", "histosol.csv": "environment", "plant_protection_cost.csv": "supply", "cover_crops.csv": "supply", "winter_cover_share.csv": "supply", "livestock_cost_coef.csv": "supply", "livestock_output_value_coef.csv": "supply", "livestock_premium_coef.csv": "supply", "capri_level_ratio.csv": "supply", "livestock_units.csv": "supply", "land_rents_2017.csv": "supply", "land_rents_2030.csv": "supply", "labour_coef.csv": "supply", "set_aside_split.csv": "supply",
     "livestock_feed_coef.csv": "feed",
-    "capri_oilseed_products_baseline.json": "market",
-    "biofuel_feedstock.csv": "market", "biofuel_use_share.csv": "market", "biofuel_market.csv": "market", "feed_bulks_eu.csv": "market", "feed_bulks_eu_share.csv": "market", "dairy_processing.csv": "market",
+    "eu_cake_feed_bas.csv": "market",
+    "biofuel_feedstock_2017.csv": "market", "biofuel_use_share_2017.csv": "market", "biofuel_market_2017.csv": "market", "biofuel_feedstock_2030.csv": "market", "biofuel_use_share_2030.csv": "market", "biofuel_market_2030.csv": "market", "crushing_parameters_2017.csv": "market", "crushing_parameters_2030.csv": "market", "feed_bulks_eu.csv": "market", "feed_bulks_eu_share.csv": "market", "dairy_processing.csv": "market",
     "dairy_hessian.csv": "market", "dairy_eu_balance.csv": "market", "dairy_eu_demand_elas.csv": "market", "dairy_world_processing.csv": "market", "dairy_world_hessian.csv": "market", "dairy_world_demand_elas.csv": "market", "dairy_world_baseline.json": "market",
     "feed_demand_nonEU.json": "market",
     "feed_ration_2017.json": "feed",
@@ -77,7 +77,7 @@ _FILE_CATEGORY = {
     # reference data: not loaded by the model, but registered so the
     # validator can resolve and shape-check it like any other input
     "capri_own_price_elasticities.csv": "supply",
-    "organic_yield_gap.csv": "policy",
+    "organic_yield_gap.csv": "policy", "organic_yield_gap_regions.csv": "policy", "organic_yield_gap_groups.csv": "policy",
     "variable_costs.csv": "supply",
     "land_availability.csv": "supply", "supply_elasticities_regional.csv": "supply",
     "pmp_capri_2030.csv": "supply", "pmp_capri_2030_animals.csv": "supply",
@@ -87,12 +87,10 @@ _FILE_CATEGORY = {
     "pmp_recipe_2017_animals_members.csv": "supply",
     "pmp_own_price_elasticities.csv": "supply",
     "producer_prices.csv": "market", "world_prices.csv": "market",
-    "cap_payments.csv": "policy", "crop_premium.csv": "supply", "eu_mfn_tariffs.csv": "policy", "tariffs.csv": "policy",
-    "nutrient_coefs.csv": "environment", "crop_nutrient_export.csv": "environment",
+    "cap_payments.csv": "policy", "crop_premium.csv": "supply", "tariffs.csv": "policy",
+    "nutrient_coefs_regional.csv": "supply",
     "climate_zones.csv": "environment",
-    "feed_requirements.csv": "feed",
     # JSON parameter files
-    "fao_market_baseline.json": "market",
 }
 _SHARED_FILES = {"trade_flows.csv": "trade_flows_2017.csv"}
 
@@ -267,20 +265,15 @@ def load_yields(data_dir: Optional[Path] = None) -> pd.DataFrame:
 
 def load_regional_nutrients(data_dir=None):
     """
-    CAPRI regional fertiliser application (DATA2 NITF/PHOF/POTF, kg/ha).
-
-    Returned MultiIndexed by (region, activity) with N / P2O5 / K2O columns.
+    CAPRI's fertiliser coefficients per region and model crop (DATA2 NITF / PHOF / POTF, kg/ha, level-weighted over
+    the crop's CAPRI activities; tools/build/build_nutrient_coefs_regional.py), indexed by (region, activity) with
+    N / P2O5 / K2O columns. Required: the national table that stood under it (nutrient_coefs.csv, no builder) was
+    removed on 29 October 2026 (KNOWN_ISSUES K100).
     """
-    import pandas as pd
-    from pathlib import Path
-    if data_dir is None:
-        return None
-    p = Path(data_dir) / "sources" / "capreg" / "capreg_nutrient_coefs.csv"
-    if not p.exists():
-        return None
-    df = read_input(p)
-    return df.pivot_table(index=["model_region", "activity"],
-                          columns="nutrient", values="value", aggfunc="last")
+    p = resolve_data_file(data_dir, "nutrient_coefs_regional.csv") if data_dir else None
+    if p is None or not p.exists():
+        raise FileNotFoundError(f"nutrient_coefs_regional.csv not found under {data_dir}")
+    return read_input(p).set_index(["region", "activity"])[["N", "P2O5", "K2O"]]
 
 
 def load_cap_premium(data_dir=None):
@@ -436,34 +429,6 @@ def load_land_availability(data_dir: Optional[Path] = None) -> pd.DataFrame:
                             f"(the synthetic generator that stood here was removed, Sprint 9s)")
 
 
-def load_feed_requirements(data_dir: Optional[Path] = None) -> pd.DataFrame:
-    """
-    Feed requirements per animal (t DM / head / year).
-
-    Connect to: CAPRI feed module parameters / INRA FEALQ tables
-    """
-    if data_dir and (resolve_data_file(data_dir, "feed_requirements.csv")).exists():
-        return read_input(resolve_data_file(data_dir, "feed_requirements.csv"), index_col=0)
-    raise FileNotFoundError(f"feed_requirements.csv not found under {data_dir}: the model runs on CAPRI's data only "
-                            f"(the synthetic generator that stood here was removed, Sprint 9s)")
-
-
-def load_nutrient_coefficients(data_dir: Optional[Path] = None) -> pd.DataFrame:
-    """
-    Nutrient use coefficients (kg N/P/K per ha for crops, per head for animals).
-
-    Connect to: Eurostat env_ac_ainah_r2, CAPRI nitrogen module
-    """
-    if data_dir and (resolve_data_file(data_dir, "nutrient_coefs.csv")).exists():
-        return read_input(resolve_data_file(data_dir, "nutrient_coefs.csv"), index_col=0)
-    raise FileNotFoundError(f"nutrient_coefs.csv not found under {data_dir}: the model runs on CAPRI's data only "
-                            f"(the synthetic generator that stood here was removed, Sprint 9s)")
-
-
-# ---------------------------------------------------------------------------
-# MARKET MODULE DATA
-# ---------------------------------------------------------------------------
-
 def load_world_prices(data_dir: Optional[Path] = None) -> pd.Series:
     """
     World reference prices (EUR/t, CIF basis) for market module.
@@ -509,6 +474,14 @@ def load_tariffs(data_dir: Optional[Path] = None) -> pd.DataFrame:
 # ---------------------------------------------------------------------------
 # CONVENIENCE: LOAD ALL DATA AT ONCE
 # ---------------------------------------------------------------------------
+
+
+def _load_required_csv(data_dir, filename):
+    """Load a region-indexed CSV the model needs; a missing file is an error (the model runs on CAPRI's data only)."""
+    path = resolve_data_file(data_dir, filename) if data_dir else None
+    if path is None or not path.exists():
+        raise FileNotFoundError(f"{filename} not found under {data_dir}")
+    return read_input(path, index_col=0)
 
 
 def _load_optional_csv(data_dir, filename):
@@ -607,7 +580,7 @@ def load_all_data(data_dir: Optional[Path] = None, validate: bool = False,
         # of mineral nitrogen where the EU average is far lower, and a single
         # EU-wide table made high-fertiliser regions look unfertilised.
         # NOTE: distinct from "nutrients_regional" below, which holds CAPRI's
-        # NITF. NITF equals NRET, a nitrogen REQUIREMENT, not an application
+        # NITF (nutrient_coefs_regional.csv). NITF equals NRET, a nitrogen REQUIREMENT, not an application
         # rate; NMIN is the mineral nitrogen actually applied.
         # Market revenue per head (CAPRI MREV), by region and animal activity.
         "livestock_output_value_coef": _load_optional_csv(data_dir, "livestock_output_value_coef.csv"),
@@ -702,13 +675,19 @@ def load_all_data(data_dir: Optional[Path] = None, validate: bool = False,
         # Regional fodder balances (docs/FODDER_BALANCE.md)
         "fodder_balance": (lambda p: __import__("json").load(open(p))["regions"] if p.exists() else None)(
             Path(data_dir) / "2017" / "feed" / "fodder_balance_2017.json"),
-        # Feed per head (t): CAPRI 2017 regional FCER/FPRO/FENE totals / herds
-        "livestock_feed_coef": _load_optional_csv(
+        # Feed per head (t): CAPRI 2017 regional FCER/FPRO/FENE totals / herds; required: the animals without a
+        # ration in the supply models cost their feed with it (the national fallback table was removed, K99)
+        "livestock_feed_coef": _load_required_csv(
             data_dir, "livestock_feed_coef.csv"),
         # CAPRI's FADN-based organic yield gaps by macro-region and product
         # group (JRC Seville, SUPREMA project), used by the organic instrument.
         "organic_yield_gap": _load_optional_csv(
             data_dir, "organic_yield_gap.csv"),
+        # CAPRI's maps to the yield gaps' macro-regions and product groups (inputs/load_organic_yieldgap.gms)
+        "organic_yield_gap_regions": (lambda df: None if df is None else df["peseta_region"].astype(str).to_dict())(
+            _load_optional_csv(data_dir, "organic_yield_gap_regions.csv")),
+        "organic_yield_gap_groups": (lambda df: None if df is None else df["group"].astype(str).to_dict())(
+            _load_optional_csv(data_dir, "organic_yield_gap_groups.csv")),
         # CAPRI's low- and high-intensity dairy yields (DCOL / DCOH), the
         # bounds of the livestock intensity margin.
         # CAPRI's Green Deal targets by member state, from
@@ -756,8 +735,6 @@ def load_all_data(data_dir: Optional[Path] = None, validate: bool = False,
         "variable_costs":  load_variable_costs(data_dir),
         "variable_costs_regional": load_variable_costs_regional(data_dir),
         "land":            load_land_availability(data_dir),
-        "feed_req":        load_feed_requirements(data_dir),
-        "nutrients":       load_nutrient_coefficients(data_dir),
         "world_prices":    load_world_prices(data_dir),
         "cap_payments":    load_cap_payments(data_dir),
         "tariffs":         load_tariffs(data_dir),

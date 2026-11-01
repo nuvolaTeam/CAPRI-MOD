@@ -1,7 +1,0 @@
-{
- "YILD_units": "kg/ha for crops and per-head output for animals (soft wheat 7853.84 kg/ha confirmed in doc Table). Animal YILD is output per head, NOT per 1000 head.",
- "SOWS": "CAPRI doc: 'output of piglets per sow ... derived ex post'. SOWS yield IS piglets per sow per year. The 24031 value was reading a mis-scaled cell; the coefficient is a head count per sow.",
- "HENS_LAYS": "doc: 'production of eggs relies on usable production divided by herd size of hens. Replacement rate 80% for laying hens. Poultry fattening activity level = total poultry heads minus slaughtered hens.' HENS yield = eggs per hen; POUF = meat per fattening cycle.",
- "GRAS": "RESOLVED. Grass yield is DRY MATTER kg/ha (doc: 'typical grass yields in dry matter'). GRAS 410.9 was the WRONG code - it is a separate coefficient. Real DM yields are GRAE (extensive) and GRAI (intensive); area-weighted they give ~17-20 t/ha DM, matching COCO2's 17770. Corrected in yields.csv for 187 regions.",
- "nutrient_export": "BONUS: doc Table 15 gives the nutrient export coefficients (N/P/K kg per ton yield) I had marked as external literature - they are documented CAPRI values (soft wheat 20/8/6 etc). crop_nutrient_export.csv can be reclassified from LITERATURE to REAL_CAPRI."
-}
