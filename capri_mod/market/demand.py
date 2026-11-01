@@ -17,6 +17,8 @@ from capri_mod.data.definitions import (
 from capri_mod.data.definitions import MS_CODE
 from capri_mod.market.equilibrium import MarketEquilibrium  # noqa: F401
 from capri_mod.market.state import MarketStateMixin
+from capri_mod.market.demand_ad import gl_eval, gl_block_function
+from capri_mod.market.processing_ad import proc_nq_function
 
 
 class DemandMixin(MarketStateMixin):
@@ -96,12 +98,9 @@ class DemandMixin(MarketStateMixin):
 
     @staticmethod
     def _gl_eval(e: dict, p: np.ndarray, ir: float) -> np.ndarray:
-        """CAPRI's GL demand of one region (1000 t): x_i = [G_i/G (Y - F) + d_i] INHA / 1000."""
-        sq = np.sqrt(p)
-        G = float(sq @ e["B"] @ sq)
-        Gi = (e["B"] @ sq) / sq
-        F = float(e["d"] @ p)
-        return (Gi / G * (e["Y"] * ir - F) + e["d"]) * e["inha"] / 1000.0
+        """CAPRI's GL demand of one region (1000 t): x_i = [G_i/G (Y - F) + d_i] INHA / 1000; the block in CasADi
+        (capri_mod/market/demand_ad.py, step G2c; NumPy here until 31 October 2026)."""
+        return gl_eval(e, p, ir)
 
     #: CAPRI's re-calibration of the GL commitments to given quantities and prices (arm/recalibrate_commitments.gms,
     #: trim_gl_commits.gms): the commitments d are moved as little as possible (least squares) so that the system
@@ -164,17 +163,18 @@ class DemandMixin(MarketStateMixin):
                 self._gl_refit(D0c)
                 self._gl_refit_key = D0c.copy()
         Rr = {r: i for i, r in enumerate(self.regions)}
+        # every behavioural region's demand at once, from the block's CasADi function (step G2c, demand_ad.py; until
+        # 31 October 2026 a NumPy loop over the regions with the same equations, floors and order of the sums)
+        blk = getattr(self, "_gl_block", None)
+        if blk is None or blk[0] is not prm["groups"] or blk[1] != PR.shape:
+            fn, cells, _ = gl_block_function(prm["groups"], list(self.regions), PR.shape[1])
+            blk = self._gl_block = (prm["groups"], PR.shape, fn, cells)
+        _, _, fn, cells = blk
+        dcat = np.concatenate([e["d"] for mr in prm["groups"] for e in prm["groups"][mr]])
+        h = np.asarray(fn(np.asarray(PR, float), float(ir), dcat)[0]).ravel()
         num = np.zeros_like(PR, dtype=float)
-        for mr, ents in prm["groups"].items():
-            i = Rr[mr]
-            for e in ents:
-                col = e["col"]
-                p = e["p0"].copy()
-                m = col >= 0
-                p[m] = p[m] + (PR[i, col[m]] - 1.0) * e["arm1p"][m]
-                p = np.maximum(p, 0.05 * e["p0"])
-                x = self._gl_eval(e, p, ir)
-                np.add.at(num[i], col[m], np.maximum(x[m], 0.0))
+        for (i, j), v in zip(cells, h):
+            num[i, j] = v
         GLR = np.ones_like(num)
         HS = np.zeros_like(num)
         for (mr, j), v0 in prm["x0"].items():
@@ -393,19 +393,21 @@ class DemandMixin(MarketStateMixin):
                 P[i, j] = max(0.0, P0[i, j] + (q - cp[(r, sd)]["q0"]))
         pq = self._proc_nq_params()
         if pq:
-            for (reg, c), _shp in pq["share"].items():
-                i, j = R.get(reg), Cc.get(c)
-                if i is None or j is None or c in self.CRUSH_CHAINS or c in self._PROC_NQ_SKIP or P0[i, j] <= 0:
-                    continue
-                Hra = pq["Ha"].get(reg, {})
-                dq = 0.0
-                for (x, y), hv in Hra.items():
-                    if x != c:
-                        continue
-                    jy = Cc.get(y)
-                    if jy is not None and y not in self.CRUSH_CHAINS and REFv[i, jy] > 0:
-                        dq -= hv * (DPv[i, jy] / REFv[i, jy] - 1.0)
-                P[i, j] = self._proc_fudge(P0[i, j] + dq, P0[i, j])
+            # ProcNQ_ and ProcFudge_ from the block's CasADi function (step G2e, processing_ad.py; until 31 October
+            # 2026 the same loop here, dq -= hv x (DP / REF - 1) over the Hessian's terms, then _proc_fudge); REF > 0
+            # by construction above, so the ratio is PR
+            blk = getattr(self, "_procnq_block", None)
+            if blk is None or blk[0] is not pq or blk[1] != PR.shape:
+                fn, cells = proc_nq_function(pq, list(self.regions), list(self.commodities),
+                                             set(self.CRUSH_CHAINS) | set(self._PROC_NQ_SKIP), set(self.CRUSH_CHAINS))
+                blk = self._procnq_block = (pq, PR.shape, fn, cells)
+            _, _, fn, cells = blk
+            if cells:
+                p0c = np.array([P0[i, j] for i, j in cells], dtype=float)
+                pc = np.asarray(fn(PR, p0c)).ravel()
+                for (i, j), v0, v in zip(cells, p0c, pc):
+                    if v0 > 0:
+                        P[i, j] = float(v)
 
         # BIOFUEL PROCESSING (feedstocks)
         bp = self._biofuel_params()

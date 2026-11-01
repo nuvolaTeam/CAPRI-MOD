@@ -111,9 +111,32 @@ Each stage must pass two checks:
    - No solve uses it yet: the NLP of G3 will.
 2. **G2b.** Market supply and pooled commodities: the non-EU supply functions, and the EU's anticipated response
    with the measured Hessian.
-3. **G2c.** Human consumption, the generalised Leontief system.
+3. **G2c.** Human consumption, the generalised Leontief system. **Built 31 October 2026** (taken before G2b by the
+   project lead's decision of that day: G2b's market supply rests on the coupling code that refactor stage 4 is to
+   restructure; G2c and G2e are market code no refactor stage touches):
+   capri_mod/market/demand_ad.py.
+   - Written once: DemandMixin._gl_eval and gl_food_ratio evaluate the CasADi function (gl_entry_function per
+     behavioural region; gl_block_function for all of them, PR to the human consumption per cell), the NumPy code
+     removed (section 7's one implementation).
+   - capri_mod/tests/test_demand_ad.py: equal to the former NumPy equations at random points (worst relative
+     difference 1.5e-15: CasADi's matrix-vector products sum in another order; half the values bit-identical) and
+     the Jacobian equal to finite differences.
+   - The model's floors (consumer price at least 5% of its calibration value, demand at least 0 in the sums) are
+     fmax terms: kinks for G3, to be registered or removed there.
+   - Time: 5.2 ms per gl_food_ratio call against 3.4 ms in NumPy (the SX function expanded; the MX graph took 7.6).
+   - Mini-EU check (1 November 2026; G2c and G2e together, against the same run at 955470d): not bit-identical, as
+     expected from the rounding above. 1,369 values differ at all, 86 by more than 1e-12 relative, 11 by more than
+     1e-10, 5 by more than 1e-8: the largest are near-zero ammonia option shares in IR010000 (1.08e-7 against
+     1.08e-7, 2e-5 relative) and a regional dual (DK000000, 2e-10 relative), i.e. the regional solver's tolerance;
+     the same iterations (6), the same relaxed caps, the EU indicators equal to their printed digits.
 4. **G2d.** Feed, with the feed energy price lifted as an unknown (FeedBal_).
-5. **G2e.** Processing and crushing.
+5. **G2e.** Processing and crushing. **Built 31 October 2026** (with G2c, same decision):
+   capri_mod/market/processing_ad.py.
+   - Written once: ProcessingMixin._crush_state (ProcMargO_, ProcNQ_, ProcFudge_, ProcO_, procYield_: crush_function)
+     and demand_response's ProcNQ_ of the other products (proc_nq_function) evaluate the CasADi functions; the Python
+     loops removed. ProcFudge_'s log(1 + exp) is written as NumPy's logaddexp evaluates it.
+   - capri_mod/tests/test_processing_ad.py: equal to the former Python code at random prices (welfare detail
+     included) and the Jacobians equal to finite differences.
 6. **G2f.** Dairy blocks, lifted.
 7. **G2g.** Biofuels; young animals and raw milk, lifted.
 8. **G3.** IPOPT on the assembled NLP.
