@@ -156,6 +156,17 @@ nlp_acceptable_tol = 1e-6
 # a slightly different path, so a non-convex regional problem can end at another local optimum
 nlp_linear_solver = "mumps"
 nlp_hsllib = ""
+# another IPOPT library under CasADi's IPOPT interface, in place of CasADi's own: "" (CasADi's) or the path of a
+# libipopt.so.3 (absolute, or relative to the repository root), e.g. IPOPT with SPRAL in OpenMP built by
+# tools/solvers/build_ipopt_spral_omp.py, outside the repository (nlp_linear_solver = "spral" with it). Loaded before the
+# first IPOPT solve of the run (capri_mod/supply/ipopt_library.py: OpenMP's environment, other OpenMP runtimes, forks).
+# Not CAPRI's (register BEYOND-11)
+nlp_ipopt_library = ""
+# OpenMP threads of the linear solver per process with that library: each worker process takes this many; the process
+# that starts the run takes them only when it runs without workers (run.n_workers = 1 or CAPRI_WORKERS=1), one
+# otherwise (a process that ran OpenMP on several threads hangs the workers it forks). Workers x threads should not
+# exceed the machine's cores
+nlp_omp_threads = 1
 # IPOPT's treatment of fixed columns (lower = upper bound): "make_constraint" keeps them as variables held by an
 # equality (trial points may leave the bound), "make_parameter" removes them from the problem (CAPRI: an activity
 # without a level has no variable)

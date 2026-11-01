@@ -190,3 +190,43 @@ The options as they were put:
   - The speed-up can only be measured on a machine with more cores than workers.
   - The shortcut for the comparison: HSL MA86/MA97 (OpenMP) load into CasADi's IPOPT at run time, under HSL's
     licence.
+
+### 9.1 IPOPT with SPRAL in OpenMP, built (31 October - 1 November 2026)
+
+- **What is built.** IPOPT 3.14.19.mod (CasADi 3.8.1's own source, github.com/jgillis/Ipopt-1) with SPRAL v2025.09.18 in
+  OpenMP, METIS 5.2.1 and OpenBLAS 0.3.30 (USE_OPENMP, every x86-64 kernel), static inside libipopt.so.3 with their
+  symbols hidden; built by tools/solvers/build_ipopt_spral_omp.py outside the repository, with the system's compilers and
+  runtime libraries (libgomp.so.1, libgfortran.so.5). No MUMPS in it (CasADi's own IPOPT keeps it).
+- **How the model uses it.** supply.nlp_ipopt_library names the library, supply.nlp_linear_solver = "spral" selects
+  SPRAL, supply.nlp_omp_threads the threads per process (capri_mod/supply/ipopt_library.py). Defaults: CasADi's IPOPT and
+  MUMPS, results unchanged. The run manifest records the library (path, SHA-256) and the main process's threads.
+- **OpenMP in the model's processes (measured here).**
+  - The supply model forks its workers. A process that has run an OpenMP region on two threads hangs its forked
+    children at their first region (GNU libgomp; with one thread they run). So a process that forks solves on one
+    thread and the threads go to the workers; a process that has run two threads refuses to fork (an error, not a hang).
+  - SPRAL needs OMP_CANCELLATION=TRUE (its flag -53 otherwise), set before the library is loaded and checked after.
+  - The library is loaded RTLD_LOCAL. Not RTLD_DEEPBIND: under it the libgomp loaded with the library did not see the
+    environment (omp_get_cancellation 0 with OMP_CANCELLATION=TRUE set before the process started; 1 without).
+  - Other OpenMP runtimes in the process are reported; the model's process has none today (numpy, scipy, pandas, pyarrow,
+    CasADi with its IPOPT; CasADi's own libgomp-870cb1d0 is loaded only by its Uno plugin).
+- **Checked** (capri_mod/tests/test_ipopt_library.py with CAPRI_TEST_IPOPT_LIBRARY): in a fresh process the library
+  replaces CasADi's, SPRAL solves on two threads with MUMPS's optimum (1e-8), a forked worker solves on two threads after
+  a one-thread parent, a two-thread parent refuses to fork.
+- **Measured on the regional solves (1 November 2026,** tools/check/omp_threads_bench.py, the mini-EU Farm-to-Fork run
+  in one process, every regional solve repeated on 2 threads from the same start): 853 solves of 239-521 columns and
+  155-453 rows; IPOPT time 408.1 s on one thread, 437.6 s on two (median 1.06 per solve), the same iterations
+  (41,838 against 41,842) and solves (840 of 853), objectives equal to 5e-14. The run on SPRAL converged in 6
+  iterations like the MUMPS run, its EU indicators equal to 0.1 point. Two threads are slower here: the systems are
+  under 1,000 x 1,000, too small to share. On a machine with more cores the regions' worker processes use them
+  (221 independent solves per pass), which scales better than threads inside a small solve.
+- **The project lead's decision (1 November 2026):** MUMPS stays for the regional solves; IPOPT with SPRAL in OpenMP is
+  kept for G3's market NLP (a few thousand unknowns with dense trade, demand and supply blocks, solved once per
+  iteration with no worker beside it), where it is to be measured against MUMPS.
+- **A CasADi wheel with it** (the project lead's choice, 1 November 2026, for Red Hat 9.8, glibc 2.34):
+  tools/solvers/build_casadi_spral_omp_wheel.py repeats CasADi 3.8.1's release build (binaries.yml, manylinux_2_28,
+  Python 3.11 limited API, every plugin of PyPI's wheel, the runtime libraries grafted under hashed names) with one
+  patch, tools/solvers/casadi_3.8.1_spral_openmp.patch (SPRAL without --disable-openmp, -lgomp). Started on 1 November
+  2026 and paused at the project lead's request (three of about 35 external projects built; the build folder kept).
+  With that wheel CasADi's own IPOPT is the OpenMP one, so supply.nlp_ipopt_library stays "".
+- **Distribution.** The library built by build_ipopt_spral_omp.py is for the machine it is built on (glibc 2.39 here);
+  for other machines the wheel route above (manylinux_2_28) is the one.
