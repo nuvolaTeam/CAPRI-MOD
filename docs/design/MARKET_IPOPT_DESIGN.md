@@ -64,6 +64,10 @@ reduced form first proposed; 3.1 replaces it for G3.
 - **Linear solver.** A large sparse KKT system: MUMPS and SPRAL in OpenMP (section 9.1) to be compared on it.
 - **Next.** The variable and equation list per block against m_globMarket (arm/market_model.gms), with CAPRI's bounds,
   before G3 is assembled; the remaining blocks (G2b, G2d, G2f, G2g) written as defining equations from the start.
+  First inventory done 1 November 2026: docs/design/G3_MARKET_INVENTORY.md (123 equations of m_globMarket with their
+  status in capri-mod; not ported and on in CAPRI's default runs: the market's land and yield block, the land-use-change
+  estimation, and the intervention, subsidised-export, flexible-levy and entry-price rules where CAPRI's data have them).
+  CAPRI's bounds per variable are the next part of it.
 
 ### 3.0 The reduced form (first proposal, 30 October 2026)
 
