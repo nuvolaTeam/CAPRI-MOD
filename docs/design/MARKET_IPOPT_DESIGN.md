@@ -189,9 +189,16 @@ The options as they were put:
 - **Checked** (capri_mod/tests/test_ipopt_library.py with CAPRI_TEST_IPOPT_LIBRARY): in a fresh process the library
   replaces CasADi's, SPRAL solves on two threads with MUMPS's optimum (1e-8), a forked worker solves on two threads after
   a one-thread parent, a two-thread parent refuses to fork.
-- **Not yet measured:** the speed. tools/check/omp_threads_bench.py repeats every regional solve of the mini-EU run on
-  1 and 2 threads; on this machine's two cores, with no core free beside the worker, it can show at most a small gain.
-  The measurement that matters is G3's market NLP on a machine with more cores than workers.
+- **Measured on the regional solves (1 November 2026,** tools/check/omp_threads_bench.py, the mini-EU Farm-to-Fork run
+  in one process, every regional solve repeated on 2 threads from the same start): 853 solves of 239-521 columns and
+  155-453 rows; IPOPT time 408.1 s on one thread, 437.6 s on two (median 1.06 per solve), the same iterations
+  (41,838 against 41,842) and solves (840 of 853), objectives equal to 5e-14. The run on SPRAL converged in 6
+  iterations like the MUMPS run, its EU indicators equal to 0.1 point. Two threads are slower here: the systems are
+  under 1,000 x 1,000, too small to share. On a machine with more cores the regions' worker processes use them
+  (221 independent solves per pass), which scales better than threads inside a small solve.
+- **The project lead's decision (1 November 2026):** MUMPS stays for the regional solves; IPOPT with SPRAL in OpenMP is
+  kept for G3's market NLP (a few thousand unknowns with dense trade, demand and supply blocks, solved once per
+  iteration with no worker beside it), where it is to be measured against MUMPS.
 - **A CasADi wheel with it** (the project lead's choice, 1 November 2026, for Red Hat 9.8, glibc 2.34):
   tools/solvers/build_casadi_spral_omp_wheel.py repeats CasADi 3.8.1's release build (binaries.yml, manylinux_2_28,
   Python 3.11 limited API, every plugin of PyPI's wheel, the runtime libraries grafted under hashed names) with one
