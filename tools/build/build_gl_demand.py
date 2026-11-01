@@ -120,7 +120,11 @@ def main() -> None:
         goods = list(d[r])
         if not goods:
             continue
-        mr = "EU27" if r[:2] in EU and r.endswith("000000") else rmap.get(r, "ROW")
+        # a behavioural region that is not a market region of its own (the Western Balkan countries of WBA) by its
+        # market region, RMS_TO_RM (before: ROW, as REGION_MAP alone holds market regions). r2m is read here, not
+        # through recalibrate_trade_2017.trade_region, which reads rms_to_rm.csv, an output of this builder
+        mr = ("EU27" if r[:2] in EU and r.endswith("000000")
+              else rmap.get(r) or rmap.get(r2m.get(r, ""), "ROW"))
         inha = v.get((r, "INHA", "LEVL"), 0.0)
         Y = v.get((r, "INCE", "LEVL"), 0.0) / inha if inha > 0 else 0.0
         idx = {g: i for i, g in enumerate(goods)}
