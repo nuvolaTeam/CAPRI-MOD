@@ -6,8 +6,10 @@ systems' CasADi expressions (`capri_mod/market/trade_ad.py`, step G1).
 ## 1. What CAPRI does
 
 - **One simultaneous system.** CAPRI solves its market model as a single system: `SOLVE m_globMarket USING DNLP
-  Minimizing v_dummy` (arm/simu_market.gms l. 107; the same statement in simu_prestep.gms l. 366 and
-  treat_enormous_infes.gms l. 26).
+  Minimizing v_dummy` (arm/simu_market.gms l. 107; the same statement in simu_prestep.gms l. 366; the one in
+  treat_enormous_infes.gms l. 26 is inside $ontext ... $offtext, not executed: corrected 1 November 2026).
+  Where the solve is infeasible CAPRI widens bounds and solves again, at most twice more (simu_market.gms l. 95-145),
+  and in the last iteration accepts a sum of infeasibilities up to 0.1 (l. 289-300).
 - **The objective is a dummy.** The model is square, so CONOPT is used as an equation solver started from the
   previous solution. The DNLP class is there because of non-smooth terms (e.g. min/max in the tariff and stock rules).
 - **The equations** (arm/market_model.gms l. 600-720, declarations) cover:
@@ -21,8 +23,10 @@ systems' CasADi expressions (`capri_mod/market/trade_ad.py`, step G1).
   - intervention stocks: buyingToIntervStock_, releaseFromIntervStock_, intervStockLevel_ and the rest of that group;
   - subsidised exports;
   - biofuels: Biof_, ProdBiof_, BiofPriceRel_, BiofFeedCost_, biofDem_ and the rest of that group;
-  - the Armington system: ArmFit1_, ArmFit2_, ArmBal1_, importShares_, domSalesShares_, arm2QuantShares_;
-  - the balances: SupBalM_, mrkBal_, wldMarket_, nTrd_.
+  - the Armington system: ArmBal1_, importShares_, domSalesShares_, arm2QuantShares_ (ArmFit1_ and ArmFit2_ are
+    marked "not used in simulation model", l. 2685-2700; listed here until 1 November 2026 by mistake);
+  - the balances: SupBalM_, expQuant_. mrkBal_, wldMarket_ and nTrd_ belong to the net-trade model m_netTrade
+    (l. 4218-4239), not to m_globMarket (listed here until 1 November 2026 by mistake; the independent review, Q4).
 
 ## 2. What capri-mod does now
 
@@ -40,6 +44,10 @@ systems' CasADi expressions (`capri_mod/market/trade_ad.py`, step G1).
   finite differences and the successive linearisation are gone.
 
 ## 3. Proposed formulation
+
+**G3 on standby (the project lead, 1 November 2026) pending the independent review of step G,
+docs/design/G_REVIEW_2026-11-01.md: the bound policy, the objective, the acceptance tests and the inventory's
+corrections are to be decided before G3 is built.**
 
 **Changed by the project lead on 1 November 2026: G3 in CAPRI's own form (section 3.1).** The text below is the
 reduced form first proposed; 3.1 replaces it for G3.
@@ -64,6 +72,10 @@ reduced form first proposed; 3.1 replaces it for G3.
 - **Linear solver.** A large sparse KKT system: MUMPS and SPRAL in OpenMP (section 9.1) to be compared on it.
 - **Next.** The variable and equation list per block against m_globMarket (arm/market_model.gms), with CAPRI's bounds,
   before G3 is assembled; the remaining blocks (G2b, G2d, G2f, G2g) written as defining equations from the start.
+  First inventory done 1 November 2026: docs/design/G3_MARKET_INVENTORY.md (123 equations of m_globMarket with their
+  status in capri-mod; not ported and on in CAPRI's default runs: the market's land and yield block, the land-use-change
+  estimation, and the intervention, subsidised-export, flexible-levy and entry-price rules where CAPRI's data have them).
+  CAPRI's bounds per variable are the next part of it.
 
 ### 3.0 The reduced form (first proposal, 30 October 2026)
 
@@ -89,15 +101,21 @@ reduced form first proposed; 3.1 replaces it for G3.
     Hessian measured on them. They are not re-solved inside the market NLP.
 - **Non-smooth terms.** The step clip, the TRQ offsets now solved as an outer fixed point (`trq_solve`) and any
   max/min in the blocks become smooth constraints. Where CAPRI has a sigmoid (trqSigmoidFunc_), we take CAPRI's.
-  Where it has none, the departure is registered.
+  Where it has none, the departure is registered. The max/min terms of the market code (the independent review, Q3
+  and Q6.7; DEP-38, DEP-39): demand_ad.py (consumer price at least 0.05 p0, demand at least 0 in the sums);
+  trade_ad.py l. 52 (import price at least 1e-9) and l. 163 (the TRQ sigmoid's argument clipped); demand.py l. 298,
+  393, 482 (feed factor, processing, use at least 0); supply.py l. 742, 826 (market supply max(q0 + dq, 0); the
+  review cites l. 741, 825) and the further floors of supply.py l. 167-415 (price ratios at least 1e-6 or 0.2, supply at
+  least 0; found when checking the review's lines). Their treatment in G3 follows the bound policy still to be decided
+  (review Q2).
 
 ## 4. Inventory of the market blocks (30 October 2026)
 
 | Block | capri-mod (capri_mod/market/) | CAPRI equations | CasADi | Inner solves to lift |
 |---|---|---|---|---|
-| Bilateral trade, Armington nests | bilateral.py (`import_prices`, `prices`, `flows`, `residual`), bilateral_solve.py | impPrice_, ArmFit1_, ArmFit2_, ArmBal1_, importShares_, SupBalM_ | **yes**, trade_ad.py (supply and use as local log-linear terms; TRQ offsets as parameters) | the TRQ offsets (`trq_solve`, an outer fixed point) |
+| Bilateral trade, Armington nests | bilateral.py (`import_prices`, `prices`, `flows`, `residual`), bilateral_solve.py | impPrice_, ArmBal1_, importShares_, domSalesShares_, arm2QuantShares_, SupBalM_ | **yes**, trade_ad.py (supply and use as local log-linear terms; TRQ offsets as parameters) | the TRQ offsets (`trq_solve`, an outer fixed point) |
 | Tariff-rate quotas | bilateral.py `trq_solve`, `_sig` | trqSigmoidFunc_, TRQImports_, tarSpec_, tarAdval_ | no | the fill, as above |
-| Pooled commodities | bilateral_solve.py (world balance) | wldMarket_, nTrd_ | trivial | none |
+| Pooled commodities | bilateral_solve.py (world balance) | none in m_globMarket (wldMarket_, nTrd_ are m_netTrade's; a departure, DEP-31) | trivial | none |
 | Market supply (EU from the supply models; non-EU supply functions) | supply.py `supply_response`, `_eu_market_supply_nq`, `_noneu_market_supply_nq`, `_region_supply_elas` | the supply part of SupBalM_; the land block | no | none in the EU part; the milk and young-animal clearing (`_milk_and_yani_clear_all`, `_yani_clear`) |
 | Young animals, raw milk | supply.py `_milk_terms`, `_sup_milk_terms`, `_yani_clear` | yaniMarket_, rmsYaniMarket_ | no | the clearing loop |
 | Dairy blocks | dairy.py `_dairy_solve` (Newton, l. 247-320), `_dairy_solve_ms*`, `dairy_block` | DairyNQ_ | no | the dairy Newton |
