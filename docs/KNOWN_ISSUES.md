@@ -1055,7 +1055,9 @@ CAPRI's stop rule, recorded every iteration since r135, flags rows that move by 
   with it): CAPRI solves the regional model once, from the calibrated point. The options stay held at their base shares where
   there is no policy incentive on N at all (K63). To check at the next gate: FR820000's end state, and the ammonia
   options' adoption in the regions where the N-surplus row is slack (K63's saddle along the options' joint direction
-  could let IPOPT move them off their base shares there)
+  could let IPOPT move them off their base shares there). In r202's final state 213 regions had an N-surplus row
+  (none a mineral cap) and it was slack (|dual| <= 1e-9) in four: FR100000, FR240000, FR810000, FR820000, the only
+  regions where the re-solve could act at the end of that run; in the Green Deal's r203, two (BG020000, RO020000)
 
 
 <a id="k80"></a>
