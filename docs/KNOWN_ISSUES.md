@@ -1025,6 +1025,31 @@ CAPRI's stop rule, recorded every iteration since r135, flags rows that move by 
   previous point, the starts tried, the point kept) and diagnostics.record_regional_levels = true (every region's levels
   per iteration, tools/check/k79_trace.py, to find the region behind CAPRI's olive row); the K79 remedy is decided on
   what it shows
+  **Gate 13 (1 November 2026, r202 Farm-to-Fork traced, against r201):** converged under CAPRI's rule in 28 iterations
+  (r201: 23); EU indicators equal to r201 to 0.1 point (mean deviation from JRC121368 over 20 indicators 4.15 in both).
+  The trace (CAPRI_NLP_TRACE=FR820000,FR810000; 66 solves per region) answers gate 12's question. In the scenario
+  FR820000 alternates between two points of its regional problem (levels as a ratio to base):
+  A: olives 0.10, wine 0.29, table grapes 0.13, paddy rice 0.82; objective about -4.63e6 (IPOPT: Solved_To_Acceptable
+  from a warm start);
+  B: olives 2.79, wine 0.915, table grapes 0.94, paddy rice 0.79; objective about -6.21e6 (Solve_Succeeded from the
+  standard start), i.e. the better point of the same problem by about 1.58e6.
+  At every odd scenario solve the warm start from A stays at A, the jump check's standard start finds B and B is kept. At
+  every even solve the warm start from B stays at B (-6.206e6, Solve_Succeeded), and then the ammonia-fixed re-solve
+  (capri_mod/supply/nlp.py, the "amm-fixed" block: the ammonia options fixed at base shares when the N-balance row is
+  slack, started from the solution clipped to its bounds, kept whenever IPOPT reports success, with no comparison of
+  objectives) walks from B back to A. The cycle ends at solve 63 (iteration 26), where the ammonia-fixed re-solve after
+  the standard start also lands on A; from there the warm start stays at A and the jump check does not act, so the run
+  stops with FR820000 at A, the worse point (olives 0.9 kha, wine 15.4 kha; base 8.9 and 52.4). Gates 8, 9, 11, 12
+  ended near the same state (wine 15.0-16.5 kha, olives 0.9); gate 10's (wine 50.7, olives 16.7) was near B. FR810000 has no such switch: it moves by small
+  alternating steps (paddy rice 1.4553 / 1.4554, wine 0.9984 / 0.9990) following FR820000.
+  Not yet measured: the ammonia-fixed problem's own objective at B (with the options at base shares), i.e. whether B is
+  feasible and better in the fixed problem too, or whether fixing the options really moves the optimum to A.
+  Green Deal (r203 against gate 10's r197; gates 11 and 12 had no Green Deal run): converged under CAPRI's rule in 21
+  iterations (r197: 17), no non-optimal solve kept; EU indicators within 1.6 points (ammonia -29.4% against -31.0%,
+  milk price +7.5 against +8.9, manure N2O -10.8 against -12.1, beef price +11.2 against +12.4, the rest within 1
+  point). Farm-to-Fork moved the same way over the same gates (r202 against r196: milk price -2.3 points, pork -1.3,
+  poultry -1.1), in line with gate 11's K108 fix (smaller price rises), not checked further. The N-surplus row was
+  slack at the end in two regions (BG020000, RO020000; r197: three)
 
 
 <a id="k80"></a>
