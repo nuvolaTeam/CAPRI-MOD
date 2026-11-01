@@ -1,7 +1,7 @@
 # Refactor stage 3, second half: the supply's parameters and state objects (plan)
 
 Plan only, for the project lead's review; nothing in the repository was changed. Written 1-2 November 2026 on branch
-k79-amm-resolve at HEAD cfbf746 (worktree /home/claude/work/wt_k79). Line numbers are those of that HEAD and will move.
+k79-amm-resolve at HEAD cfbf746. Line numbers are those of that HEAD and will move.
 Naming: ARCHITECTURE_REFACTOR's table has stages 3a and 3b done (the mixins, the data adapter); this second half is called 3c below.
 
 Sources read: docs/design/ARCHITECTURE_REFACTOR.md (sections 1-3), docs/design/MARKET_STATE_INVENTORY.md,
