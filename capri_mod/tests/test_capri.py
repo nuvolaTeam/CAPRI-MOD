@@ -2639,9 +2639,10 @@ def test_parallel_regional_solves_match_sequential():
         os.environ.pop("CAPRI_WORKERS")
         if old is not None:
             os.environ["CAPRI_WORKERS"] = old
-    # two regions, a livestock and a crop region (four took 112 s; the identity concerns the worker processes, not the
-    # number of regions)
-    regs = ["NL220000", "IT200000"]
+    # three regions, a livestock, a crop and a small mixed region: the first region is always solved in this process
+    # (SupplyModule.workers: at most n_regions - 1 workers), so with two regions the second run had one worker and
+    # never forked (found 2 November 2026, docs/design/STAGE3B_PLAN.md); with three it forks two workers
+    regs = ["NL220000", "IT200000", "MT000000"]
     out = []
     from capri_mod.supply import capri_regional_nlp as C
     for nw in (1, 2):
@@ -2651,6 +2652,7 @@ def test_parallel_regional_solves_match_sequential():
         C._SOLVERS.clear()
         m = CAPRIModel(data_dir=str(DATA_DIR), verbose=False)
         m.supply_module.n_workers = nw
+        assert m.supply_module.workers(len(regs)) == nw     # the second run forks
         s = m.run(custom_scenario=farm_to_fork_scenario(), regions=regs, max_outer_iter=2)
         out.append(({r: dict(v.activities) for r, v in s["supply"].items()},
                     {r: dict(v.shadow_prices) for r, v in s["supply"].items()},
