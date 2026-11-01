@@ -1050,6 +1050,12 @@ CAPRI's stop rule, recorded every iteration since r135, flags rows that move by 
   point). Farm-to-Fork moved the same way over the same gates (r202 against r196: milk price -2.3 points, pork -1.3,
   poultry -1.1), in line with gate 11's K108 fix (smaller price rises), not checked further. The N-surplus row was
   slack at the end in two regions (BG020000, RO020000; r197: three)
+  1 November 2026, the project lead's decision: option (c), CAPRI's way. The re-solve with the ammonia options at
+  their base shares where the N-surplus row is slack is removed (no switch kept: gate 13's r202 is the reference run
+  with it): CAPRI solves the regional model once, from the calibrated point. The options stay held at their base shares where
+  there is no policy incentive on N at all (K63). To check at the next gate: FR820000's end state, and the ammonia
+  options' adoption in the regions where the N-surplus row is slack (K63's saddle along the options' joint direction
+  could let IPOPT move them off their base shares there)
 
 
 <a id="k80"></a>

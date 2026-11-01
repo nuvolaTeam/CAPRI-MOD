@@ -457,7 +457,7 @@ class NLPBlock:
                                 found = (nlp_, res_, sp_, (_fp, "caps", trial, wide_))
                 if found:
                     nlp, res, sp_, k_ = found[0], found[1], found[2], found[3]
-                    npk, spec = sp_["npk"], sp_         # later re-solves (amm-fixed) keep the relaxation
+                    npk, spec = sp_["npk"], sp_
                     gk = nlp.graph_key()
                     shape = (nlp.n0, tuple(k[:2] for k in nlp.feeds), len(nlp.lbx))
                     self._nlp_relax_keep = k_
@@ -479,27 +479,6 @@ class NLPBlock:
             self._nlp_nonoptimal = _nonopt
             _w.warn(f"{self.data.region_id}: IPOPT's last point kept ({_nonopt}, non-optimal), as CAPRI keeps a "
                     f"non-optimal solve", RuntimeWarning)
-        if _km == "record" and _nonopt is None:
-            _kb[gk] = nlp.kkt_record(res)
-        _am = spec.get("amm")
-        if (_nonopt is None and _am and not _am.get("fixed")
-                and "N_balance" in labels and "mineral_N" not in labels
-                and not float(getattr(self, "ghg_tax", 0.0) or 0.0) > 0):
-            # the N-surplus row slack (dual ~0): the options at their base shares (CONOPT stays at
-            # the calibrated shares unless moving pays through the policy row)
-            _zA = nlp.outputs(res)[2]
-            if float(_zA[labels.index("N_balance")]) <= 1e-9:
-                try:
-                    spec_f = dict(spec, amm=dict(_am, fixed=True))
-                    nlp_f = CapriRegionalNLP(spec_f)
-                    res_f = _nsolve(nlp_f, np.clip(res["x"], nlp_f.lbx, nlp_f.ubx), tol=_tol)
-                    if _ok(res_f):
-                        nlp, res, spec = nlp_f, res_f, spec_f
-                        gk = nlp.graph_key()
-                        shape = (nlp.n0, tuple(k[:2] for k in nlp.feeds), len(nlp.lbx))
-                        kinds.append("amm-fixed")
-                except Exception:
-                    pass
         if _km == "record" and _nonopt is None:
             _kb[gk] = nlp.kkt_record(res)
         self._nlp_prev = (gk, res["x"], shape, (res["lam_x"], res["lam_g"]))
