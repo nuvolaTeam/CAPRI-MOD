@@ -408,9 +408,11 @@ The project lead agreed with the recommendations given with this inventory ("tak
    dataOut text exports are kept for cross-checks (question 4). The two sim_ini files have the same sets and
    parameters. The non-EU bilateral TRQs therefore follow sim_ini at "CAL" (question 7); G3_MARKET_INVENTORY.md's
    "about 20 importers" is to be reconciled with it.
-5. **Errors found by the survey**: the EU's quotas against MER dropped by build_bilateral_market.py and the Western
-   Balkans' food demand placed in ROW by build_gl_demand.py are fixed as errors, each in its own commit, separate from
-   the move (questions 8 and 9).
+5. **Errors found by the survey**: the Western Balkans' food demand placed in ROW by build_gl_demand.py is fixed as an
+   error in its own commit, separate from the move (question 9; done 1 November 2026 on branch k79-amm-resolve). The
+   EU's quotas against MER cannot be represented exactly before the move (one quota over ARG, BRA and URUPAR, the last
+   inside ROW; capri-mod's quotas are per exporting region): registered as DEP-41 and fixed by the move, where quotas
+   sit on RMTP (question 8; the project lead's decision of 1 November 2026, preferred to a split rule).
 6. **Tariffs**: CAPRI's own DATA(RM, "TARV", XX, "CAL") replaces capri-mod's derived tariffs.csv, after a documented
    comparison of the two (question 11).
 7. **Young-animal markets with two EU blocks**: fixed inside the solve in the stage that makes the two EU regions
