@@ -164,6 +164,22 @@ anywhere, and the tool stops with a message when strace is missing.
 one process, which is slower but gives the same results. The runs and tests are made on Linux; Windows and macOS have
 not been tested.
 
+## CAPRI's online documentation (read, not part of the inputs)
+
+These pages explain CAPRI; no model input is built from them.
+- CAPRI's documentation: https://bw-pages.thuenen.de/capri/capri/ (pointed to by the project lead, 1 November 2026).
+- The CAPRI course of 2026 (Thünen Institute): https://bw-pages.thuenen.de/capri/course/ (pointed to by the project
+  lead, 1 November 2026). Slides, exercises and GAMS files per session, under `course/pdf/DayN/`. For capri-mod:
+  - the supply module and its calibration (days 5 and 6; `Day6/6_1_PMP_t.pdf`, `Day6/Ex. 1/PMP_test.gms`);
+  - the market module (days 8 to 10). `Day8/intro to market session/8_2_Market_Model_Intro_2026.pdf` sets out the
+    four regional levels RMSSUP, RMS, RM and RMTP (e.g. IR000000 in A_EU_WEST, policy block EU), the two Armington
+    stages, the behavioural blocks (ProdNQ_, ProcO_, DairyNQ_, the GL demand, FeedNQ_, ProcNQ_) and the link to the
+    supply models (price expectations, market supply functions calibrated each step). It does not cover TRQ
+    functions, levies, entry prices, biofuels or the solver;
+  - `Day8/intro to market session/results files/DatabaseofCAPRI.gdx`, a GDX of CAPRI's database for the exercises
+    (not downloaded, not checked).
+- CAPRI's wiki: https://www.capri-model.org/dokuwiki_help/doku.php
+
 ## Until 31 October 2026
 
 Until 31 October 2026 the builders' defaults named two folders of the machine they were developed on (its uploads
