@@ -42,6 +42,9 @@ def test_no_file_names_a_machine_folder():
 #: programs outside Python that a delivered .py file may run: git (the repository's own), strace (the builder trace,
 #: Linux, checked before use) and pdftotext (one validation builder, checked before use); docs/EXTERNAL_SOURCES.md
 PROGRAMS_ALLOWED = {"git", "strace", "pdftotext"}
+#: the builds of native solver libraries (tools/solvers, Linux only by their own statement) run the toolchain they
+#: build with: binutils' ar and nm, glibc's ldd, next to gcc, make, cmake and meson
+PROGRAMS_ALLOWED_IN = {"tools/solvers/": {"ar", "nm", "ldd"}}
 _RUN = re.compile(r"""(?:subprocess\.\w+|_sp\w*\.\w+)\(\s*\[\s*["']([\w.-]+)["']""")
 
 
@@ -54,7 +57,8 @@ def test_no_file_runs_a_unix_tool():
             continue
         text = (ROOT / f).read_text(encoding="utf-8", errors="replace")
         for m in _RUN.finditer(text):
-            if m.group(1) not in PROGRAMS_ALLOWED:
+            if m.group(1) not in PROGRAMS_ALLOWED and not any(
+                    f.startswith(d) and m.group(1) in progs for d, progs in PROGRAMS_ALLOWED_IN.items()):
                 found.append(f"{f}: runs {m.group(1)}")
         if "shell=True" in text or "os.system(" in text:
             if f != "capri_mod/tests/test_portable_paths.py":
