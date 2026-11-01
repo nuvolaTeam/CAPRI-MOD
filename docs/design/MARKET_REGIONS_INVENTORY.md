@@ -393,3 +393,27 @@ region codes (io_results keys, r150/r151 comparisons) breaking if codes change a
 
 Facts that came from memory rather than the files: none were needed beyond the project rules (CSV inputs, follow
 CAPRI, gate per batch).
+
+## 7. Decisions (1 November 2026, the project lead)
+
+The project lead agreed with the recommendations given with this inventory ("take CAPRI"):
+
+1. **Codes**: CAPRI's RM and RMTP codes become the market's identifiers (question 1), after `is_eu`/`capri_ms` are
+   guarded so that a market code never passes through them (BEL, BGD, SKOR).
+2. **EU reporting row**: "EU27" is kept in the reports as the sum of A_EU_WEST and A_EU_EAST, so comparisons with
+   earlier runs and with JRC121368 still work (question 2).
+3. **Order**: the move comes after refactor stage 3's second half (supply's parameter and state objects) and before
+   G3 and the ports of CAPRI's TRQs, flexible levies, entry prices and the market's land and yield block (question 3).
+4. **Source**: the 2030 market is built from sim_ini (CAPRI's calibrated 2030 state), extracted to CSV sources; the
+   dataOut text exports are kept for cross-checks (question 4). The two sim_ini files have the same sets and
+   parameters. The non-EU bilateral TRQs therefore follow sim_ini at "CAL" (question 7); G3_MARKET_INVENTORY.md's
+   "about 20 importers" is to be reconciled with it.
+5. **Errors found by the survey**: the EU's quotas against MER dropped by build_bilateral_market.py and the Western
+   Balkans' food demand placed in ROW by build_gl_demand.py are fixed as errors, each in its own commit, separate from
+   the move (questions 8 and 9).
+6. **Tariffs**: CAPRI's own DATA(RM, "TARV", XX, "CAL") replaces capri-mod's derived tariffs.csv, after a documented
+   comparison of the two (question 11).
+7. **Young-animal markets with two EU blocks**: fixed inside the solve in the stage that makes the two EU regions
+   permanent, not registered as a departure (question 6).
+
+Still open: the 2017 market year on RM (question 5) and the DEP-40 row (question 10).
