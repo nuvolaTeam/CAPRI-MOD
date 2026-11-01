@@ -17,6 +17,27 @@ Status: **ported** the same equation; **ported, other form** the same relation w
 - **The Armington commitments** (p_arm2Commit, the augmented CES) remain a registered departure; with them would come tradeFlowFudge_ and the Hicks-neutral shift.
 
 
+## What CAPRI's 2030 data activate (checked 1 November 2026)
+
+The policy and land equations act only where their data are nonzero. Checked in CAPRI's 2030 market data
+(data_market_1730defaulta.csv, the calibrated 'CAL' values the simulation's 'CUR' starts from) and in the 2030
+market results (markmarket_greendeal_1730et_base_1717.txt, dataOut), against each equation's $-condition:
+
+| Block | Condition (market_model.gms) | 2030 data | Active |
+|---|---|---|---|
+| Intervention buying, probability under the safety net | PADM > 0 and INTM > 0 (l. 3492, 3507) | PADM for the EU blocks' cereals (45 entries), INTM none in CAL (2 in BAS) | **no** |
+| Intervention stocks, releases, stock change | PADM > 0 and STKS > 0 (l. 3605, 3617) | STKS none in CAL (2 in BAS) | **no** |
+| Subsidised exports | FEOE_max > 0 and PADM > 0 (l. 3724) | FEOE_max none | **no** |
+| Flexible cereal levies | MinBordP > 0 (l. 3236, 3258) | the EU blocks' cereals, 30 entries (e.g. 153.1 EUR/t) | **yes** (where the levy's variable is free) |
+| Entry prices of fruit and vegetables | TriggerP > 0 (l. 3176, 3204) | the EU and the UK, 8 entries in CAL (16 in 2030) | **yes** |
+| Global (erga omnes) TRQs | p_trqGlobl TrqNT > 0 (l. 3142, 3399, 3475) | quotas against 'World' for the EU (18 products, e.g. maize 2,778 kt, wheat 2,851 kt) and for China, Japan, the USA, Canada, Russia, India, Switzerland, Norway, Taiwan, New Zealand and the aggregates | **yes** |
+| Bilateral TRQs outside the EU | trqSigmoidFunc_ per importer | TrqNT of 2030 for about 20 importers besides the EU blocks | **yes** |
+| Market land and yields | Yield_, LandSupplyMNL_ where land levels and yields exist (l. 1737, 1795) | 45 behavioural regions with yields, land levels and ARTO | **yes** |
+
+So, of the "not ported" blocks, the intervention and subsidised-export rules are inactive in the 2030 runs, while
+the global and non-EU TRQs, the flexible cereal levies, the entry prices and the market's land and yield block act in
+CAPRI's 2030 market and are to be ported (DEP-33, DEP-34 are active departures).
+
 ## Human consumption (GL)
 
 | Equation | Domain | Line | Status | capri-mod | Note |
