@@ -278,3 +278,23 @@ Open questions for the project lead
    floor), CARBON_TAX_100 (no file), run_policy_comparison.py's F2F proxy, WITHOUT_VCS (store its computed factors as
    premium_factors.csv or keep computing them), GREENDEAL_2040_TARGETS (unused), and whether CLI overrides of a
    scenario stay allowed.
+
+## Decisions (the project lead, 3 November 2026)
+
+1. **Base and scenario storage**: CAPRI's way. The reference run is stored once, as its own partition; a scenario's
+   rows point to it by run id. A run whose reference has the fingerprint (settings, data, code) of a stored one is
+   checked identical to it and points to it; a different fingerprint stores a new reference partition.
+2. **References**: one folder per CAPRI reference (Farm-to-Fork as JRC121368 ran it, the Green Deal group, the carbon
+   tax), each scenario naming its own; starting with those whose data are in hand (the Green Deal's capri_ref_2030).
+   Whether the carbon tax's reference (CAPRI's mtr_rd.gms policy file) can be built is to be checked; until then that
+   scenario is marked as running on another reference.
+3. **The long table**: both codes, CAPRI's (LEVL, PROD, ...) and the model's, from the crosswalk tables; the EU totals
+   the model computes are stored, not recomputed by the readers.
+4. **Green Deal data**: in each scenario's folder.
+5. **Uncertain definitions**: the 10% set-aside as CAPRI's rule, 10% of the grandes cultures area (GRCU), a behaviour
+   change in its own commit and run; the EUR 100 carbon tax removed, CAPRI's carbtax50_endotech_set12.gms with its
+   reference to replace it once its data are confirmed; the ad hoc Farm-to-Fork of run_policy_comparison.py removed (the
+   script uses the scenario folder); WITHOUT_VCS as a rule in its folder (the premium types set to zero, as CAPRI's
+   scenario file), its factors computed at run time; GREENDEAL_2040_TARGETS removed; command-line flags still allowed
+   but no longer renaming the scenario, each override recorded in the run's metadata and settings file and part of the
+   run id.
