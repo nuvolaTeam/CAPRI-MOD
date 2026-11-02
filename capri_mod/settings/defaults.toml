@@ -21,6 +21,8 @@ run_environmental = true
 report_biofuel = false
 # IPOPT solver objects kept per region graph (environment variable CAPRI_NLP_CACHE wins if set)
 nlp_cache_size = 64
+# the regional NLP's derivative functions kept (sensitivity and KKT factorisations, each; refactor stage 3, N5)
+nlp_derivative_cache_size = 16
 # the countries outside the EU whose supply models are in the run, by CAPRI member-state code (CAPRI's per-country
 # switches, %CountriesNO000000% ... %CountriesTUR%, capmod/define_regional_sets.gms l. 40-77). Each must have regional
 # units (capri_data/shared/regional_units.csv). Their market region takes its supply from their models; a country
@@ -133,6 +135,16 @@ jrc_capped_override = ""
 # solve tolerance is outer_loop.nlp_tol_final / nlp_tol_early)
 nlp_max_iter = 3000
 nlp_warm_max_iter = 200
+# numerical (refactor stage 3, N5): the ridge weight of the NLP calibration's multiplier fit, relative to the scaled
+# columns (also in the market supply Hessian's cache key); the fit's iteration limit (scipy lsq_linear)
+nlp_cal_ridge = 1e-10
+nlp_cal_lsq_max_iter = 5000
+# numerical (N5): the IPOPT start moved inside the fertiliser regulations' support, to this share of each bound
+nlp_start_regulation_margin = 0.95
+# numerical (N5): an activity at or below this level counts as absent (CAPRI: no p_technFact)
+absent_level = 1e-8
+# numerical (N5): the organic share capped so the conventional share stays positive
+organic_share_cap = 0.99
 # numerical safeguard (not a CAPRI parameter): a warm-started solution whose objective is more than this share worse
 # than the last iteration's is checked against the solves from the previous point and the standard start, keeping the
 # lowest objective; the warm start can end at a worse stationary point of the non-convex per-head feeding (K75)
@@ -201,6 +213,9 @@ fert_slope_with_saving = false
 # the inner model's duals widened to +-1000 where CAPRI's +-10 admit no allocation (REGISTERED, CAPRI's own
 # workaround is a slack)
 npk_dual_bound_wide = 1000.0
+# numerical (refactor stage 3, N5): regulated flows kept strictly inside the beta density's support, at this share of
+# its upper end (CAPRI: an open support)
+support_margin = 0.999
 # a crop group whose mineral cap leaves its N need out of reach (NLP infeasible) is exempted as CAPRI exempts groups
 # (minfert_redu_by_crop.gms, p_checkSmallMine): its cap at this multiple of its baseline mineral N per ha (CAPRI: 1.0
 # for its small groups, "no backsliding"; 1.1-1.2 for its listed region x group pairs)
@@ -340,6 +355,8 @@ trace_outer = false
 record_regional_levels = false
 # regions slower than this (s) are reported
 slow_region_seconds = 60.0
+# the regional solves' progress printed every this many regions (verbose runs)
+progress_every_regions = 50
 
 [captrd]
 # CAPTRD-MOD (capri_mod/pipeline/captrd): CAPRI's baseline trend projection (docs/design/CAPTRD_MOD.md).

@@ -1103,8 +1103,19 @@ def test_synthetic_base_activities_excluded_from_elasticity_wiring():
     The guard itself stays: it is what stops a future placeholder being wired
     up by accident.
     """
+    import numpy as np
     import pandas as pd
-    from capri_mod.supply.capri_pmp import detect_synthetic_base_activities
+
+    def detect_synthetic_base_activities(base_areas, min_regions=30):
+        """Activities whose base level is a constant placeholder across at least min_regions regions (a real
+        elasticity around a fake base level gives a real-looking but meaningless response: PMP curvature scales as
+        1/(eps x0)). Moved here from capri_pmp.py, where only this test used it (refactor stage 3, N5)."""
+        out = set()
+        for col in base_areas.columns:
+            v = base_areas[col].replace(0, np.nan).dropna()
+            if len(v) >= min_regions and float(v.std()) < 1e-9:
+                out.add(col)
+        return out
 
     root = _repo_root()
     areas = pd.read_csv(root / "capri_data/2017/supply/base_areas.csv", index_col=0)
@@ -3544,7 +3555,7 @@ def test_n_leaching_follows_capri():
         c = nl.crop_n(M, x["RUNMIN"] / M, (x["GASMIN"] + x["RUNMIN"]) / M, n2o_netf,
                       [(x["EXCRET"], (x["RUNANI"] - runh) / x["EXCRET"], (x["GASANI"] + x["RUNANI"]) / x["EXCRET"])],
                       x.get("MTRADE", 0.0), x["ATMOSD"] + x["CRESID"], x["BIOFIX"], L, x["EXPPRD"] / x["IMPORT"])
-        model = sum(c.values()) * nl.EF5 * 44 / 28
+        model = sum(c.values()) * __import__("capri_mod.params", fromlist=["param"]).param("EF5_LEACHING_N2O") * 44 / 28
         capri = x["UAAR_N2OLEA"] * x["UAAR_LEVL"] / 1000.0
         assert abs(model / capri - 1.0) < 0.06, (reg, model, capri)
     assert abs(nl.fert_effect(0.5, 0.1) - (1 - 0.5 * 1.1)) < 1e-12

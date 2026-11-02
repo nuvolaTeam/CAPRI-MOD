@@ -111,8 +111,8 @@ class HessianBlock:
                         # the regional models' calibration (K58): a Hessian measured before the ridge fit is stale
                         "nlp",               # the supply form, when there were two (keeps the cached Hessians' keys)
                         str(getattr(self.supply_module, "pmp_source", "capri2030")),
-                        tuple(getattr(self.supply_module, "pmp_capri_parts", ())), __import__(
-                            "capri_mod.supply.capri_regional_nlp", fromlist=["CAL_RIDGE"]).CAL_RIDGE,
+                        tuple(getattr(self.supply_module, "pmp_capri_parts", ())),
+                        float(_settings().get("supply.nlp_cal_ridge")),
                         tuple(yani_goods),
                         # 28 October 2026 (audit S13): activities of a calibrated part without a positive own PMP term
                         # are held at their level; their price response changes, their base level does not, so the

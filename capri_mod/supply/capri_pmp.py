@@ -85,33 +85,6 @@ EPRD_TO_GRP: Dict[str, str] = {
 ARABLE_ACTIVITIES = set(EPRD_TO_GRP) | {"SETA", "OFOD", "TEXT", "TOBA"}
 
 
-# --- 4a. synthetic-anchor guard --------------------------------------------
-
-def detect_synthetic_base_activities(base_areas: pd.DataFrame,
-                                     min_regions: int = 30) -> set:
-    """
-    Activities whose base level is a constant placeholder across all regions.
-
-    A real elasticity calibrated around a fake base level produces a real-looking
-    but meaningless response: PMP curvature scales as 1/(eps * x0), so a small
-    invented x0 combined with a large genuine eps makes the activity explode under
-    any shock. In this dataset COTT, OFIB, OFOD and SETA are flat constants
-    (1.0, 2.0, 3.0, 5.0 kha in every region), and OFOD carries a real CAPRI
-    elasticity of 4.27 against a default of 0.12 — a 35x jump on a fictional
-    anchor, which drove a +128% acreage response in the shock test.
-
-    Note that the lognormal fingerprint detector cannot see these: it looks for
-    a coefficient of variation near 0.10, and these columns have a CV of exactly
-    zero.
-    """
-    synthetic = set()
-    for col in base_areas.columns:
-        v = base_areas[col].replace(0, np.nan).dropna()
-        if len(v) >= min_regions and float(v.std()) < 1e-9:
-            synthetic.add(col)
-    return synthetic
-
-
 # --- 4b. provenance-tracked elasticity table --------------------------------
 
 #: Elasticity source files, resolved through the loaders' base-year-aware
@@ -163,9 +136,9 @@ def build_elasticity_table(
     from capri_mod.supply.inputs import SupplyInputs
     inp = inputs if inputs is not None else SupplyInputs(data_dir, base_year)
     apply_dampening = True        # CAPRI's dampening (impose_upper_bound_on_elasticity.gms)
-    # (The runtime guard against activities anchored on a constant placeholder base, detect_synthetic_base_activities,
-    # blocked none since the synthetic data was replaced and was removed from here on 23 October 2026; the function
-    # stays as a data check, test_capri.py.)
+    # (The runtime guard against activities anchored on a constant placeholder base blocked none since the synthetic
+    # data was replaced and was removed from here on 23 October 2026; the check lives in its test,
+    # test_capri.py test_synthetic_base_activities_excluded_from_elasticity_wiring: refactor stage 3, N5.)
     # no literature defaults (23 October 2026): a cell without a CAPRI value stays NaN, provenance NO_CAPRI_VALUE
     eps = pd.DataFrame(
         np.tile(defaults.reindex(activities).values.astype(float), (len(regions), 1)),

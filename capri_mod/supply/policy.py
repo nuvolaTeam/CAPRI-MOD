@@ -37,7 +37,7 @@ class PolicyBlock:
             # only where grassland has a level: below the threshold of the activity bounds (an activity without a
             # level, held at zero, _build_constraints) CAPRI has no grassland variable and no rule; with a base of
             # 3.5e-11 kha (EL63, 2030) the rule asked for grass the bounds forbid and the NLP was infeasible (K69)
-            if xb[j] > ABSENT_LEVEL:
+            if xb[j] > float(_settings().get("supply.absent_level")):
                 out["permGras"] = {"row": [(j, -1.0)], "rhs": -xb[j] * (1 - 1e-9), "scale": xb[j]}
                 # the rule's dual at the calibration point, CAPRI's assumption (supply/prep_cal.gms l. 118-131):
                 # p_dualGreening = -|rent of arable land - rent of grassland|, charged to GRAE and GRAI in the
@@ -174,7 +174,7 @@ class PolicyBlock:
                 continue
             o = (self._organic_converted(a, organic_share, _targets, _org_default)
                  if organic_share else 0.0)
-            o = min(max(o, 0.0), 0.99)
+            o = min(max(o, 0.0), float(_settings().get("supply.organic_share_cap")))
             conv = 1.0 - o
             # The yield loss must reach BOTH the objective and the reported
             # yields. It used to change net revenue only, so it steered what

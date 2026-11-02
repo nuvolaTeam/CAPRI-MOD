@@ -58,7 +58,7 @@ FIXED_ACTIVITIES = ("OOIL", "OIND", "NURS", "FLOW", "OCRO", "OANI")
 #: an activity whose level at the calibration point is at most this (1000 ha / 1000 head) has no level: CAPRI has no
 #: variable for it (v_actLevl exists where p_technFact(..,"LEVL",..) is set); the bounds hold it at zero
 #: (setting supply.absent_activities_fixed) and the rules that refer to it (CAP greening) leave it out
-ABSENT_LEVEL = 1e-8
+# (the level: the setting supply.absent_level)
 
 # CAPRI's p_OverFertMarkUp and p_fertEffCor (envind/ghgMiti.gms) and the supply's other parameters are read where they
 # are used, through the run's inputs (param(): <data_dir>/shared/model_parameters.csv; refactor stage 3, N1)
@@ -1380,7 +1380,7 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
                     or (a not in CROPS and a not in ANIMALS)):
                 continue
             v = float(_x0f.get(a, 0.0))
-            if not v > ABSENT_LEVEL:
+            if not v > float(_settings().get("supply.absent_level")):
                 # CAPRI has no variable for an activity without a level at the calibration point (v_actLevl exists
                 # only where p_technFact(..,"LEVL",..) is set, i.e. where the data have a level): held at zero
                 # (K64: Norway's regions produced 6e-6 kt of tobacco from the solver's interior, which no trade
@@ -2767,7 +2767,7 @@ class SupplyModule(ModuleStateMixin):
         n_regions = len(target_regions)
         for i, (region, result, failed, lu_r, kind) in enumerate(
                 self._solve_regions(target_regions, _pol_all, price_signals, verbose)):
-            if verbose and i % 50 == 0:
+            if verbose and i % int(_settings().get("diagnostics.progress_every_regions")) == 0:
                 print(f"  Supply module: solved region {i+1}/{n_regions}...")
             n_failed += failed
             if result is None:
