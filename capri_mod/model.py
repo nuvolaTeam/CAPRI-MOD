@@ -1338,7 +1338,7 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
             "feed": feed_df,
             "biofuel": biofuel_result,
             # CAPRI's inner fertiliser distribution model: N to each crop group per region (kg N/ha by source)
-            "fert_dist": (getattr(self.env_module, "last_fert_dist", None) if env_df is not None else None),
+            "fert_dist": (getattr(self.env_module.res, "last_fert_dist", None) if env_df is not None else None),
             "abatement": abatement_result,
             # CAPRI's land-use change transitions per region (1000 ha per year for changes; capri_mod/environmental/luc.py)
             "luc": _luc_table(supply_results),

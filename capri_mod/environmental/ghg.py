@@ -5,13 +5,14 @@ docs/design/ARCHITECTURE_REFACTOR.md); the module-level names they use are envir
 module once environmental_module is loaded (capri_mod.utils.mixins.inject_names); the annotations are not evaluated.
 """
 from __future__ import annotations
+from capri_mod import statekit as _est   # the state objects' helpers (refactor stage 4)
 
 
 class GHGBlock:
     def _manure_loss_shares(self, region: str) -> dict:
         """CAPRI's manure N lost in housing and storage per kg excreted, by animal ((GASANI + RUNANI) / MANN, 2030
         reference; capri_data/2017/environment/manure_housing_losses_2030.csv). Raises where the data is missing."""
-        c = self.__dict__.setdefault("_mloss_cache", {})
+        c = _est.setdefault(self.par, "mloss_cache", {})
         if region not in c:
             t = self.data.get("manure_housing_losses") if hasattr(self, "data") else None
             if t is None:
@@ -24,7 +25,7 @@ class GHGBlock:
         return c[region]
 
     def _n_excretion(self, region: str, animal: str) -> float:
-        cache = self.__dict__.setdefault("_nexc_cache", {})
+        cache = _est.setdefault(self.par, "nexc_cache", {})
         k = (region, animal)
         if k not in cache:
             cache[k] = self._n_excretion_uncached(region, animal)
@@ -101,19 +102,19 @@ class GHGBlock:
         ghg = {g: 0.0 for g in GHG_TYPES}
 
         # 1. Enteric fermentation (CH4); nitrate in the ration: -10% per point of DM
-        _ns = getattr(self, "_nitrate_share_now", None) or {}
+        _ns = getattr(self.ev, "nitrate_share_now", None) or {}
         for animal in ANIMALS:
             heads = activities.get(animal, 0.0) * 1000  # convert 1000→heads
-            _sf = float(((getattr(self, "_supp_ch4", None) or {}).get(region) or {}).get(animal, 1.0))
+            _sf = float(((getattr(self.ev, "supp_ch4", None) or {}).get(region) or {}).get(animal, 1.0))
             ef    = self._ch4_per_head("ent", region, animal) * max(0.0, 1.0 - 10.0 * float(_ns.get(animal, 0.0))) * _sf
             ch4   = heads * ef / 1e6   # kt CH4
             # CATTLE FROM THE FEED MIX (CAPRI GWPCH4ENT_, envind/gases.gms): sum over feeds of
             # DM (t) x 1000 x GE (Mcal/kg DM) x 4.1868 x Ym / 55.65, in kt (/1e6)
-            _fd = (getattr(self, "_feed_dm_now", None) or {}).get(animal)
+            _fd = (getattr(self.ev, "feed_dm_now", None) or {}).get(animal)
             _fac = self._enteric_factors().get(animal) if _fd else None
             if _fd and _fac:
-                _ctry = MS_CODE.get(str(getattr(self, "_region_now", ""))[:2],
-                                                                        str(getattr(self, "_region_now", ""))[:2]) + "000000"
+                _ctry = MS_CODE.get(str(getattr(self.ev, "region_now", ""))[:2],
+                                                                        str(getattr(self.ev, "region_now", ""))[:2]) + "000000"
                 _ge = _fac["ge"].get(_ctry) or _fac["ge"].get("EU")
                 if _ge:
                     _kg = sum(float(dm_t) * 1000.0 * float(_ge.get(f, _ge.get("_mean", 0.0))) for f, dm_t in _fd.items())
@@ -197,30 +198,30 @@ class GHGBlock:
     def _manure_n2o_factor(self, region, animal):
         """(f_man, f_app, f_gra, f_lea), t N2O-N per t of manure N (capri_data/2017/environment/
         manure_n2o_factors.csv), or None."""
-        tab = self.__dict__.get("_mn2o_cache")
+        tab = getattr(self.par, "mn2o_cache", None)
         if tab is None:
             t_ = _inputs.current().csv("manure_n2o_factors.csv", "environment")
             tab = {(r.region, r.animal): (float(r.f_man), float(r.f_app), float(r.f_gra), float(r.f_lea))
                    for r in t_.itertuples()}
-            self._mn2o_cache = tab
+            self.par.mn2o_cache = tab
         return tab.get((region, animal))
 
     def _manure_n2o_tech(self, region):
         """{animal: {technology: (r_hou, r_app)}} (manure_n2o_tech.csv) and base shares {animal:
         {technology: share}} (ammonia_tech_model.csv ini, weighted as the supply model reports)."""
-        cache = self.__dict__.setdefault("_mn2o_tech_cache", {})
+        cache = _est.setdefault(self.par, "mn2o_tech_cache", {})
         if region not in cache:
             inp = _inputs.current()
-            if "_mn2o_tech_tab" not in self.__dict__:
-                self._mn2o_tech_tab = inp.csv("manure_n2o_tech.csv", "environment")
+            if not hasattr(self.par, "mn2o_tech_tab"):
+                self.par.mn2o_tech_tab = inp.csv("manure_n2o_tech.csv", "environment")
                 from capri_mod.supply import ammonia_techs as _at
-                self._amm_tm = _at.load(inp.path("ammonia_tech_model.csv", "abatement/ammonia"))
-            t = self._mn2o_tech_tab[self._mn2o_tech_tab["region"] == region]
+                self.par.amm_tm = _at.load(inp.path("ammonia_tech_model.csv", "abatement/ammonia"))
+            t = self.par.mn2o_tech_tab[self.par.mn2o_tech_tab["region"] == region]
             eff = {}
             for r in t.itertuples():
                 eff.setdefault(r.animal, {})[r.technology] = (float(r.r_hou), float(r.r_app))
             s0 = {}
-            for a, subs in (self._amm_tm.get(region) or {}).items():
+            for a, subs in (self.par.amm_tm.get(region) or {}).items():
                 for sb in subs:
                     for tt in sb["techs"]:
                         s0.setdefault(a, {})[tt["tech"]] = s0.get(a, {}).get(tt["tech"], 0.0) + sb["w"] * tt["ini"]
@@ -232,7 +233,7 @@ class GHGBlock:
         shares sh against the base shares s0, over the animal's CAPRI sub-activities weighted by
         their manure N (ammonia_tech_model.csv; capri_mod/supply/ammonia_techs.stage_n)."""
         from capri_mod.supply import ammonia_techs as _at
-        subs = (getattr(self, "_amm_tm", None) or {}).get(region, {}).get(animal) or []
+        subs = (getattr(self.par, "amm_tm", None) or {}).get(region, {}).get(animal) or []
         if not subs:
             return 1.0, 1.0
         full1 = {t: sh.get(t, s0.get(t, 0.0)) for t in set(s0) | set(sh)}
@@ -247,7 +248,7 @@ class GHGBlock:
     def _ad_ch4_factor(self, region, animal, ms, s0):
         """Manure CH4 at the AD share against the base share (ratio), over the animal's sub-activities weighted by
         their manure N; None without AD for the animal."""
-        subs = [sb for sb in ((getattr(self, "_amm_tm", None) or {}).get(region, {}).get(animal) or []) if sb.get("ad")]
+        subs = [sb for sb in ((getattr(self.par, "amm_tm", None) or {}).get(region, {}).get(animal) or []) if sb.get("ad")]
         if not subs:
             return None
         s1 = float(ms.get((animal, "AD_AnCh"), s0.get("AD_AnCh", 0.0)) or 0.0)
@@ -266,7 +267,7 @@ class GHGBlock:
         s0 through CAPRI's full cascade (ammonia_techs.n2o), the animal's sub-activities weighted by their manure N;
         None where a sub-activity has no cascade data."""
         from capri_mod.supply import ammonia_techs as _at
-        subs = (getattr(self, "_amm_tm", None) or {}).get(region, {}).get(animal) or []
+        subs = (getattr(self.par, "amm_tm", None) or {}).get(region, {}).get(animal) or []
         if not subs or any(_at.cascade_data(sb) is None for sb in subs):
             return None
         full1 = {t: sh.get(t, s0.get(t, 0.0)) for t in set(s0) | set(sh)}

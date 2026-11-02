@@ -204,9 +204,9 @@ class FertilisationBlock:
         if env_ is None:
             return None
         from capri_mod.fert.inner_fert_dist import InnerFertDist
-        inner = env_.__dict__.get("_inner_fert")
+        inner = getattr(env_.par, "inner_fert", None)
         if inner is None:
-            inner = env_._inner_fert = InnerFertDist()
+            inner = env_.par.inner_fert = InnerFertDist()
         rid = self.data.region_id
         cr = inner.capri_region(rid)
         if cr is None:
@@ -271,7 +271,7 @@ class FertilisationBlock:
                 # proportion CAPRI's 2030 reference applies it (net of the base net exports, ManureNPK_)
                 man = np.array([D.manure_per_head(rid, nut, a) if a in ANIMALS else 0.0 for a in acts])
                 # with manure trade off nothing leaves the region: all manure P / K applied, as for N
-                if bool(getattr(getattr(self.seen, "env_for_surplus", None), "manure_trade_on", True)):
+                if bool(getattr(getattr(getattr(self.seen, "env_for_surplus", None), "seen", None), "manure_trade_on", True)):
                     man = man * self._npk_applied_ratio(cr, nut)
             # kappa: NUTNED_ summed over the groups at base (all flows interior), the need net of the permanent
             # crops' own residues scaled together (REGISTERED: CAPRI's multiplier is on the need alone; with the model's
@@ -437,7 +437,7 @@ class FertilisationBlock:
         if mc.get("kind") == "crp":
             from capri_mod.fert.inner_fert_dist import beta_regulation
             env_ = getattr(self.seen, "env_for_surplus", None)
-            inner = env_.__dict__.get("_inner_fert") if env_ is not None else None
+            inner = getattr(env_.par, "inner_fert", None) if env_ is not None else None
             if inner is None:
                 return
             caps = inner.mineral_caps(self.data.region_id, base, r)
@@ -566,16 +566,16 @@ class FertilisationBlock:
         env_ = getattr(self.seen, "env_for_surplus", None)
         if env_ is None:
             return None
-        inner = env_.__dict__.get("_inner_fert")
+        inner = getattr(env_.par, "inner_fert", None)
         if inner is None:
-            inner = env_._inner_fert = InnerFertDist()
+            inner = env_.par.inner_fert = InnerFertDist()
         rid = self.data.region_id
         cr = inner.capri_region(rid)
         if cr is None:
             return None
         D = NPKData.get()
         exc = np.array([D.manure_per_head(rid, nut, a) if a in ANIMALS else 0.0 for a in self.acts])
-        ratio = self._npk_applied_ratio(cr, nut) if bool(getattr(env_, "manure_trade_on", True)) else 1.0
+        ratio = self._npk_applied_ratio(cr, nut) if bool(getattr(env_.seen, "manure_trade_on", True)) else 1.0
         return exc, exc * ratio
 
     def _npk_applied_ratio(self, cr, nut):

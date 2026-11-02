@@ -213,7 +213,7 @@ class EnvironmentalModule(EnvStateMixin, GHGBlock, NitrogenBlock, AmmoniaBlock, 
         acts   = supply_result.activities
         region = supply_result.region_id
         # nitrate shares of this region's rations, BEFORE the GHG calculation uses them
-        self._nitrate_share_now = dict(getattr(supply_result, "nitrate_share", None) or {})
+        self.ev.nitrate_share_now = dict(getattr(supply_result, "nitrate_share", None) or {})
         # CAPRI's feed supplements (envind/line_nitr.gms; Sprint 9g): enteric CH4 per head of the adopting share
         # x (1 + ch4ent_rel) - linseed -25%, nitrate -15%; both on the same animals (AComLN) multiply, the
         # overlap taken as large as the shares allow (CAPRI's maximum run puts all its linseed on nitrate
@@ -237,12 +237,12 @@ class EnvironmentalModule(EnvStateMixin, GHGBlock, NitrogenBlock, AmmoniaBlock, 
                     (sL, rL), (sN, rN) = _l["LINE_Tot"], _l["Nitr_Tot"]
                     _f += rL * rN * min(sL, sN)
                 _supp[_ga] = max(0.0, _f)
-        if not hasattr(self, "_supp_ch4"):
-            self._supp_ch4 = {}
-        self._supp_ch4[region] = _supp
+        if not hasattr(self.ev, "supp_ch4"):
+            self.ev.supp_ch4 = {}
+        self.ev.supp_ch4[region] = _supp
         # feed dry matter per animal (feeding inside the supply model), and the region
-        self._feed_dm_now = dict(getattr(supply_result, "feed_dm", None) or {})
-        self._region_now = region
+        self.ev.feed_dm_now = dict(getattr(supply_result, "feed_dm", None) or {})
+        self.ev.region_now = region
 
         yields = self.data["yields"].loc[region] if region in self.data["yields"].index \
                  else pd.Series(dtype=float)
@@ -341,10 +341,10 @@ class EnvironmentalModule(EnvStateMixin, GHGBlock, NitrogenBlock, AmmoniaBlock, 
             if "N2O_MAN" in ghg:
                 ghg["N2O_MAN"] += float(_g_k.get("N2O_MAN", 0.0)) - float(ghg["N2O_MAN"])
         _rel = getattr(supply_result, "animal_n_relief", None) or {}
-        self._nh3_saved_last = 0.0                  # per region: never carried over
-        self._n_kept_last = 0.0
-        self._nitrate_share_now = dict(getattr(supply_result, "nitrate_share", None) or {})
-        self._nitrate_nh3_extra = 0.0
+        self.ev.nh3_saved_last = 0.0                  # per region: never carried over
+        self.ev.n_kept_last = 0.0
+        self.ev.nitrate_share_now = dict(getattr(supply_result, "nitrate_share", None) or {})
+        self.ev.nitrate_nh3_extra = 0.0
         _nx = getattr(supply_result, "nitrate_n_extra", None) or {}
         if _nx:
             # nitrate N excreted: manure like any other (organic +, mineral - sub, surplus + (1 - sub))
@@ -357,7 +357,7 @@ class EnvironmentalModule(EnvStateMixin, GHGBlock, NitrogenBlock, AmmoniaBlock, 
             nb["n_mineral_input"] = float(nb["n_mineral_input"]) - _sb * _dx
             nb["n_surplus"] = float(nb["n_surplus"]) + (1.0 - _sb) * _dx
             _fs = (self._nh3_factors().get(region) or {}).get("manure_share", {}) if region else {}
-            self._nitrate_nh3_extra = sum(float(v) * float(_lv2.get(a, 0.0)) * float(_fs.get(a, 0.0)) for a, v in _nx.items())
+            self.ev.nitrate_nh3_extra = sum(float(v) * float(_lv2.get(a, 0.0)) * float(_fs.get(a, 0.0)) for a, v in _nx.items())
         if _rel:
             _lv = getattr(supply_result, "activities", None)
             if _lv is None:
@@ -365,12 +365,12 @@ class EnvironmentalModule(EnvStateMixin, GHGBlock, NitrogenBlock, AmmoniaBlock, 
             _d = sum(float(v) * float(_lv.get(a, 0.0)) for a, v in _rel.items())
             nb["n_mineral_input"] = float(nb["n_mineral_input"]) - _d
             nb["n_surplus"] = float(nb["n_surplus"]) - _d
-            self._nh3_saved_last = sum(float(v) * float(_lv.get(a, 0.0))
+            self.ev.nh3_saved_last = sum(float(v) * float(_lv.get(a, 0.0))
                                        for a, v in (getattr(supply_result, "animal_nh3_saved", None) or {}).items())
             # N kept in the manure: every loss CAPRI's cascade has (GasRunTot), the NH3 above being part of it
             _kp = getattr(supply_result, "animal_n_kept", None)
-            self._n_kept_last = (sum(float(v) * float(_lv.get(a, 0.0)) for a, v in _kp.items()) if _kp
-                                 else self._nh3_saved_last)
+            self.ev.n_kept_last = (sum(float(v) * float(_lv.get(a, 0.0)) for a, v in _kp.items()) if _kp
+                                 else self.ev.nh3_saved_last)
         if _ma is not None:
             _d = float(_ma) - float(nb["n_mineral_input"])
             nb["n_mineral_input"] = float(_ma)
@@ -398,7 +398,7 @@ class EnvironmentalModule(EnvStateMixin, GHGBlock, NitrogenBlock, AmmoniaBlock, 
                 # model at the model's own totals, or the coupled NLP where it had no solution there
                 _mc = getattr(supply_result, "mineral_cap", None) or {}
                 _gc = _mc.get("group_caps") or {}
-                self._fert_dist_now = [
+                self.ev.fert_dist_now = [
                     dict(region=region, capri_region=_fdm.get("capri_region"), ngrp=g, area_kha=float(A),
                          mine_kg_ha=float(_fdm["flows"].get((g, "MINE"), 0.0)) / A if A > 0 else 0.0,
                          excr_kg_ha=float(_fdm["flows"].get((g, "EXCR"), 0.0)) / A if A > 0 else 0.0,
@@ -407,7 +407,7 @@ class EnvironmentalModule(EnvStateMixin, GHGBlock, NitrogenBlock, AmmoniaBlock, 
                          cap_scale=1.0, converged=True)
                     for g, A in _fdm["area"].items()]
             else:
-                self._fert_dist_now = self.fert_distribution(region, acts, yields, nb, _nb_raw,
+                self.ev.fert_dist_now = self.fert_distribution(region, acts, yields, nb, _nb_raw,
                                                              getattr(supply_result, "mineral_cap", None),
                                                              getattr(supply_result, "fert_dist_mode_crops", None),
                                                              getattr(supply_result, "fert_dist_priors", None),
@@ -415,7 +415,7 @@ class EnvironmentalModule(EnvStateMixin, GHGBlock, NitrogenBlock, AmmoniaBlock, 
         except Exception as _exc:
             import warnings as _w
             _w.warn(f"inner fertiliser distribution failed for {region}: {_exc!r}")
-            self._fert_dist_now = None
+            self.ev.fert_dist_now = None
         # soil N2O from MINERAL fertiliser (CAPRI N2OSYN; JRC121368's "N2O mineral fertiliser"): the
         # balance's own mineral N (after substitution, yield effects, technologies, catch crops) x
         # (direct + volatilised share x indirect factor). It used to be crops' N coefficients (16.6 Mt N
@@ -556,7 +556,7 @@ class EnvironmentalModule(EnvStateMixin, GHGBlock, NitrogenBlock, AmmoniaBlock, 
                 nh3["nh3_livestock"] = float(nh3["nh3_livestock"]) + _d
                 nh3["nh3_total"] = float(nh3["nh3_total"]) + _d
         # CAPRI's ammonia technologies: N kept from volatilising (t N) -> kt NH3
-        _sv = float(getattr(self, "_nh3_saved_last", 0.0) or 0.0) - float(getattr(self, "_nitrate_nh3_extra", 0.0) or 0.0)
+        _sv = float(getattr(self.ev, "nh3_saved_last", 0.0) or 0.0) - float(getattr(self.ev, "nitrate_nh3_extra", 0.0) or 0.0)
         if _sv != 0:
             _d = _sv / 1000.0 * 17.0 / 14.0
             nh3 = dict(nh3)
@@ -655,10 +655,10 @@ class EnvironmentalModule(EnvStateMixin, GHGBlock, NitrogenBlock, AmmoniaBlock, 
             if verbose and i % 50 == 0:
                 print(f"  Environmental module: region {i+1}/{len(supply_results)}")
             try:
-                self._fert_dist_now = None
+                self.ev.fert_dist_now = None
                 ind = self.compute_indicators(result)
                 rows.append(ind.to_series())
-                fd.extend(self._fert_dist_now or [])
+                fd.extend(self.ev.fert_dist_now or [])
             except Exception as _e:
                 import warnings as _w
                 _w.warn(f"environmental indicators failed for {region}: {_e!r} - region left out of the table")
@@ -666,7 +666,7 @@ class EnvironmentalModule(EnvStateMixin, GHGBlock, NitrogenBlock, AmmoniaBlock, 
                     print(f"    Warning: {region} environmental calc failed: {_e}")
 
         # CAPRI's inner fertiliser distribution per region and crop group (CAPRIModel.run: results["fert_dist"])
-        self.last_fert_dist = pd.DataFrame(fd)
+        self.res.last_fert_dist = pd.DataFrame(fd)
         if not rows:
             return pd.DataFrame()
 

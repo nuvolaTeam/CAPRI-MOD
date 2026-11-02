@@ -3268,7 +3268,7 @@ def _luc_of(model, land_types):
         from capri_mod.environmental.luc import LUCModel
         from capri_mod.fert.inner_fert_dist import InnerFertDist
         env_ = getattr(model.seen, "env_for_surplus", None)
-        inner = env_.__dict__.get("_inner_fert") if env_ is not None else None
+        inner = getattr(env_.par, "inner_fert", None) if env_ is not None else None
         if inner is None:
             inner = InnerFertDist()
         cr = model.data.region_id              # the model's regions are CAPRI's units

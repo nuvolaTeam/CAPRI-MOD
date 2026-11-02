@@ -55,8 +55,8 @@ class PolicyBlock:
             env_ = getattr(self.seen, "env_for_surplus", None)
             try:
                 from capri_mod.fert.npk import NPKData
-                cr = env_._inner_fert.capri_region(self.data.region_id) if env_ is not None and \
-                    env_.__dict__.get("_inner_fert") is not None else None
+                cr = env_.par.inner_fert.capri_region(self.data.region_id) if env_ is not None and \
+                    getattr(env_.par, "inner_fert", None) is not None else None
                 if cr is not None:
                     ofar = float(NPKData.get().crop_shares(cr).get("OFOD", {}).get("OFAR", 1.0))
             except Exception:

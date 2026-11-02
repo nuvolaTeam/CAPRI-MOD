@@ -15,6 +15,8 @@ from capri_mod.environmental.environmental_module import EnvironmentalModule
 from capri_mod.model import CAPRIModel
 
 ROOT = Path(__file__).resolve().parents[2]
+#: moved names another class still uses for its own field: SupplyModule's own inner fertiliser model (supply_module.py)
+SHARED_NAMES = {"_inner_fert"}
 STATE_FILES = {ROOT / "capri_mod" / "environmental" / "state.py", ROOT / "capri_mod" / "coupling" / "state.py"}
 
 
@@ -66,7 +68,7 @@ def test_no_moved_name_is_used_as_a_string():
     # a public name other objects share is not searched: "endotech" is also the scenario's field and the run's keyword
     # (the model's write-only copy was removed, E1); the runtime guard covers the model's
     names = {k for k, v in (*E.MOVED_ENV.items(), *C.MOVED_MODEL.items())
-             if v.rpartition(".")[2] != k and k.startswith("_")}
+             if v.rpartition(".")[2] != k and k.startswith("_")} - SHARED_NAMES
     found = []
     for base in (ROOT / "capri_mod", ROOT / "tools"):
         for f in base.rglob("*.py"):

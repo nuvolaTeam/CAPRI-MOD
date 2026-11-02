@@ -3500,7 +3500,7 @@ def test_ad_ch4_factor_and_dairy_switch():
     d = Path(__file__).resolve().parents[2] / "capri_data" / "2017" / "abatement" / "ammonia" / "ammonia_tech_model.csv"
     tm = _at.load(d)
     env = EnvironmentalModule.__new__(EnvironmentalModule)
-    env._amm_tm = tm
+    env.par.amm_tm = tm
     subs = [sb for sb in tm["DE110000"]["PIGF"] if sb.get("ad")]
     assert subs
     lg, r = subs[0]["ad"]
