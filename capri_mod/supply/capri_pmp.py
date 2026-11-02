@@ -117,7 +117,7 @@ def build_elasticity_table(
     activities,
     defaults: pd.Series,
     base_areas: Optional[pd.DataFrame] = None,
-    base_year: str = "2017",
+    base_year: Optional[str] = None,
     inputs=None,
 ) -> Tuple[pd.DataFrame, pd.DataFrame, dict]:
     """

@@ -130,11 +130,13 @@ def _spec_fingerprint(spec, **extra) -> str:
 
 def young_animal_table() -> dict:
     """CAPRI's young-animal coefficients per model region (calves, young cattle, cows, piglets, lambs): pooled across the
-    sexes (young_animals_2017.csv, the default) or per sex as CAPRI's balances (young_animals_by_sex_2017.csv) with
+    sexes (young_animals_<base year>.csv, the default) or per sex as CAPRI's balances (young_animals_by_sex_<base
+    year>.csv) with
     the cattle member splits (RegionalSupplyModel.use_cattle_member_splits; tools/build/build_young_animals.py;
     capri_mod/data/nested_tables.py)."""
     by_sex = bool(getattr(RegionalSupplyModel, "use_cattle_member_splits", False))
-    name = "young_animals_by_sex_2017.csv" if by_sex else "young_animals_2017.csv"
+    by = _inputs.base_year()                                          # the base year's tables (K52f)
+    name = f"young_animals_by_sex_{by}.csv" if by_sex else f"young_animals_{by}.csv"
 
     def load(inp):
         from capri_mod.data.nested_tables import read_young_animals
@@ -1194,7 +1196,7 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
         # balance; one without it stops the run.)
         if not fodder_rows and any(float(self._base_levels().get(a_, 0.0)) > 1e-8 for a_ in ANIMALS
                                    if a_ in acts_idx and a_ not in FIXED_ACTIVITIES):
-            raise ValueError(f"{self.data.region_id}: herds without CAPRI's fodder balance (fodder_balance_2017.csv)")
+            raise ValueError(f"{self.data.region_id}: herds without CAPRI's fodder balance (fodder_balance_<base year>.csv)")
 
         # Gross nitrogen balance (JRC121368's binding GNB restriction): surplus per
         # ha of farmland <= the tiered target, i.e.
@@ -2114,13 +2116,13 @@ class SupplyModule(ModuleStateMixin):
         if src not in ("capri2030", "recipe"):
             raise ValueError(f"supply.pmp_source {src!r}: 'capri2030' or 'recipe' (the elasticity calibration was "
                              "removed on 28 October 2026, audit S13)")
-        yr = int(d.get("market_year", 2017) or 2017)
+        yr = _inputs.market_year(d)
         if src == "capri2030" and yr == 2030:
             return self._pmp_capri_parts_of((d.get("pmp_capri_2030") or {}).get(region))
         # CAPRI's own terms exist only for its 2030 calibration (pmppar_21730); at 2017 "capri2030" takes CAPRI's
         # recipe at CAPRI's 2017 point, as "recipe" does (23 October 2026: before, the elasticity calibration, which
         # needed literature elasticities where CAPRI has none - no proxies)
-        if src == "recipe" or (src == "capri2030" and yr == 2017):
+        if src == "recipe" or (src == "capri2030" and yr == int(_inputs.base_year())):
             return self._pmp_capri_parts_of(((d.get("pmp_recipe") or {}).get(yr) or {}).get(region))
         return None
 
@@ -2132,7 +2134,7 @@ class SupplyModule(ModuleStateMixin):
         if row is None:
             return row
         src = str(getattr(self, "pmp_source", "capri2030"))
-        yr = int(d.get("market_year", 2017) or 2017)
+        yr = _inputs.market_year(d)
         sfx = {"capri2030": "_capri2030", "recipe": "_recipe2030"}.get(src) if yr == 2030 else None
         if sfx and part not in tuple(getattr(self, "pmp_capri_parts", ())):
             sfx = None
@@ -2278,14 +2280,14 @@ class SupplyModule(ModuleStateMixin):
             fodder_balance=(d.get("fodder_balance") or {}).get(region),
             # CAPRI's land market of its 2030 baseline calibration with CAPRI's 2030 PMP terms (K61), else the 2017 one
             land_market=((d.get("land_market_2030") or {}).get(region)
-                         if int(d.get("market_year", 2017) or 2017) == 2030
+                         if _inputs.market_year(d) == 2030
                          and str(getattr(self, "pmp_source", "capri2030")) in ("capri2030", "recipe")
                          and "land" in tuple(getattr(self, "pmp_capri_parts", ()))
                          and (d.get("land_market_2030") or {}).get(region)
                          else (d.get("land_market") or {}).get(region)),
             # CAPRI's land rents at the market year's calibration point (tools/build/build_land_rents.py: 2030 reference,
             # 2017 results)
-            land_rents=(((d.get("land_rents") or {}).get(int(d.get("market_year", 2017) or 2017)) or {}).get(region)),
+            land_rents=(((d.get("land_rents") or {}).get(_inputs.market_year(d)) or {}).get(region)),
             # CAPRI's PMP terms of its 2030 baseline calibration (K61): at the 2030 market year, with pmp_source "capri2030"
             pmp_capri=self._pmp_terms_for(d, region),
             uncalibrated=self._uncalibrated(d, region),

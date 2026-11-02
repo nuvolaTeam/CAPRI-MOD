@@ -3641,7 +3641,9 @@ def test_interface_audit_fixes():
     from capri_mod.model import CAPRIModel
     from capri_mod.projection.trajectory import BaselineTrajectory, TrajectoryError
     from capri_mod.scenarios.scenarios import list_scenarios
-    with pytest.raises(ValueError):
+    # K52f (2 November 2026): another base year is a parameter of the run; without its data folder it stops naming
+    # the years that have one (capri_mod/tests/test_base_year.py)
+    with pytest.raises(FileNotFoundError, match="base year 2020: no data folder"):
         CAPRIModel(data_dir=str(DATA_DIR), base_year="2020", verbose=False)
     with pytest.raises(TrajectoryError):
         BaselineTrajectory.from_dict({"name": "x", "source": "s", "vintage": "v", "base_year": 2017,

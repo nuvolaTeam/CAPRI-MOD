@@ -47,22 +47,22 @@ _FILE_CATEGORY = {
     "base_areas.csv": "supply", "yields.csv": "supply", "animal_numbers.csv": "supply",
     "cap_premium_activity.csv": "supply", "producer_prices_regional.csv": "supply",
     "livestock_output_coef.csv": "supply", "nutrients_regional.csv": "supply",
-    "livestock_revenue_coef.csv": "supply", "livestock_product_value_coef.csv": "supply", "livestock_product_value_by_market_coef.csv": "supply", "livestock_output_by_product_coef.csv": "supply", "grass_intensity.csv": "supply", "dairy_intensity.csv": "supply", "cattle_intensity.csv": "supply", "genetics_effects.csv": "abatement/mitigation", "lownfeed_effects.csv": "abatement/mitigation", "supplement_effects.csv": "abatement/mitigation", "feed_byproducts.csv": "market", "sugar_processing.csv": "market", "processing_yields.csv": "market", "bilateral_flows_2017.csv": "market", "bilateral_flows_2030.csv": "market", "bilateral_regions_2017.csv": "market", "bilateral_regions_2030.csv": "market", "bilateral_trq_2017.csv": "market", "bilateral_trq_2030.csv": "market", "armington_rho.csv": "market", "world_market_baseline.csv": "market", "world_market_baseline_products.csv": "market", "histosol.csv": "environment", "plant_protection_cost.csv": "supply", "cover_crops.csv": "supply", "winter_cover_share.csv": "supply", "livestock_cost_coef.csv": "supply", "livestock_output_value_coef.csv": "supply", "livestock_premium_coef.csv": "supply", "capri_level_ratio.csv": "supply", "livestock_units.csv": "supply", "land_rents_2017.csv": "supply", "land_rents_2030.csv": "supply", "labour_coef.csv": "supply", "set_aside_split.csv": "supply",
+    "livestock_revenue_coef.csv": "supply", "livestock_product_value_coef.csv": "supply", "livestock_product_value_by_market_coef.csv": "supply", "livestock_output_by_product_coef.csv": "supply", "grass_intensity.csv": "supply", "dairy_intensity.csv": "supply", "cattle_intensity.csv": "supply", "genetics_effects.csv": "abatement/mitigation", "lownfeed_effects.csv": "abatement/mitigation", "supplement_effects.csv": "abatement/mitigation", "feed_byproducts.csv": "market", "sugar_processing.csv": "market", "processing_yields.csv": "market", "bilateral_flows_{BY}.csv": "market", "bilateral_flows_2030.csv": "market", "bilateral_regions_{BY}.csv": "market", "bilateral_regions_2030.csv": "market", "bilateral_trq_{BY}.csv": "market", "bilateral_trq_2030.csv": "market", "armington_rho.csv": "market", "world_market_baseline.csv": "market", "world_market_baseline_products.csv": "market", "histosol.csv": "environment", "plant_protection_cost.csv": "supply", "cover_crops.csv": "supply", "winter_cover_share.csv": "supply", "livestock_cost_coef.csv": "supply", "livestock_output_value_coef.csv": "supply", "livestock_premium_coef.csv": "supply", "capri_level_ratio.csv": "supply", "livestock_units.csv": "supply", "land_rents_{BY}.csv": "supply", "land_rents_2030.csv": "supply", "labour_coef.csv": "supply", "set_aside_split.csv": "supply",
     "livestock_feed_coef.csv": "feed",
     "eu_cake_feed_bas.csv": "market",
-    "biofuel_feedstock_2017.csv": "market", "biofuel_use_share_2017.csv": "market", "biofuel_market_2017.csv": "market", "biofuel_feedstock_2030.csv": "market", "biofuel_use_share_2030.csv": "market", "biofuel_market_2030.csv": "market", "crushing_parameters_2017.csv": "market", "crushing_parameters_2030.csv": "market", "feed_bulks_eu.csv": "market", "feed_bulks_eu_share.csv": "market", "dairy_processing.csv": "market",
+    "biofuel_feedstock_{BY}.csv": "market", "biofuel_use_share_{BY}.csv": "market", "biofuel_market_{BY}.csv": "market", "biofuel_feedstock_2030.csv": "market", "biofuel_use_share_2030.csv": "market", "biofuel_market_2030.csv": "market", "crushing_parameters_{BY}.csv": "market", "crushing_parameters_2030.csv": "market", "feed_bulks_eu.csv": "market", "feed_bulks_eu_share.csv": "market", "dairy_processing.csv": "market",
     "dairy_hessian.csv": "market", "dairy_eu_balance.csv": "market", "dairy_eu_demand_elas.csv": "market", "dairy_world_processing.csv": "market", "dairy_world_hessian.csv": "market", "dairy_world_demand_elas.csv": "market", "dairy_world_baseline.csv": "market",
     "feed_demand_nonEU.csv": "market", "feed_demand_nonEU_elasticities.csv": "market",
     "feed_demand_nonEU_capri_regions.csv": "market",
-    "feed_ration_2017.csv": "feed",
-    "fodder_balance_2017.csv": "feed", "fodder_balance_2017_use.csv": "feed",
+    "feed_ration_{BY}.csv": "feed",
+    "fodder_balance_{BY}.csv": "feed", "fodder_balance_{BY}_use.csv": "feed",
     # read by supply_module.young_animal_table (capri_mod/data/nested_tables.py)
-    "young_animals_2017.csv": "supply", "young_animals_2017_coef.csv": "supply",
-    "young_animals_by_sex_2017.csv": "supply", "young_animals_by_sex_2017_coef.csv": "supply",
+    "young_animals_{BY}.csv": "supply", "young_animals_{BY}_coef.csv": "supply",
+    "young_animals_by_sex_{BY}.csv": "supply", "young_animals_by_sex_{BY}_coef.csv": "supply",
     "mineral_n_price.csv": "supply",       # located for validation; not loaded yet
     "manure_pool_costs.csv": "environment", "manure_pool_centres.csv": "environment",
-    "land_market_2017.csv": "supply", "land_market_2030.csv": "supply",
-    "land_market_2017_regions.csv": "supply", "land_market_2030_regions.csv": "supply",
+    "land_market_{BY}.csv": "supply", "land_market_2030.csv": "supply",
+    "land_market_{BY}_regions.csv": "supply", "land_market_2030_regions.csv": "supply",
     "nh3_factors_capri.csv": "environment", "nh3_factors_capri_regions.csv": "environment",
     "landscape_targets_ms.csv": "policy",
     "cap_ceilings_2030.csv": "policy", "premium_scheme_shares_2030.csv": "policy",
@@ -86,21 +86,27 @@ _FILE_CATEGORY = {
     "land_availability.csv": "supply", "supply_elasticities_regional.csv": "supply",
     "pmp_capri_2030.csv": "supply", "pmp_capri_2030_animals.csv": "supply",
     "pmp_recipe_2030.csv": "supply", "pmp_recipe_2030_animals.csv": "supply",
-    "pmp_recipe_2017.csv": "supply", "pmp_recipe_2017_animals.csv": "supply",
+    "pmp_recipe_{BY}.csv": "supply", "pmp_recipe_{BY}_animals.csv": "supply",
     "pmp_capri_2030_animals_members.csv": "supply", "pmp_recipe_2030_animals_members.csv": "supply",
-    "pmp_recipe_2017_animals_members.csv": "supply",
+    "pmp_recipe_{BY}_animals_members.csv": "supply",
     "pmp_own_price_elasticities.csv": "supply",
     "producer_prices.csv": "market", "world_prices.csv": "market",
     "cap_payments.csv": "policy", "crop_premium.csv": "supply", "tariffs.csv": "policy",
     "nutrient_coefs_regional.csv": "supply",
     "climate_zones.csv": "environment",
 }
-_SHARED_FILES = {"trade_flows.csv": "trade_flows_2017.csv"}
+_SHARED_FILES = {"trade_flows.csv": "trade_flows_{BY}.csv"}       # {BY}: the base year (K52f)
 
-DEFAULT_BASE_YEAR = "2017"
+#: the base year of the load in progress (load_all_data sets it); None: the settings' run.base_year (K52f)
+DEFAULT_BASE_YEAR = None
 
 
-def resolve_data_file(data_dir, filename, base_year=DEFAULT_BASE_YEAR):
+def _category(filename, base_year):
+    """The file's folder: the map's entry for the name, or for the name with the base year written {BY}."""
+    return _FILE_CATEGORY.get(filename) or _FILE_CATEGORY.get(filename.replace(f"_{base_year}", "_{BY}"))
+
+
+def resolve_data_file(data_dir, filename, base_year=None):
     """Return the Path to a data file.
 
     Order tried: <data_dir>/shared/<file> for cross-vintage files, then
@@ -111,15 +117,19 @@ def resolve_data_file(data_dir, filename, base_year=DEFAULT_BASE_YEAR):
     if data_dir is None:
         return None
     data_dir = Path(data_dir)
+    if base_year is None:
+        from capri_mod.data.inputs import default_base_year
+        base_year = DEFAULT_BASE_YEAR or default_base_year()
+    base_year = str(base_year)
 
     if filename in _SHARED_FILES:
-        shared = data_dir / "shared" / _SHARED_FILES[filename]
+        shared = data_dir / "shared" / _SHARED_FILES[filename].replace("{BY}", base_year)
         if shared.exists():
             return shared
         flat = data_dir / filename
         return flat if flat.exists() else shared
 
-    cat = _FILE_CATEGORY.get(filename)
+    cat = _category(filename, base_year)
     if cat:
         categorised = data_dir / base_year / cat / filename
         if categorised.exists():
@@ -218,12 +228,16 @@ def _reconcile_poultry_units(herds: pd.DataFrame) -> pd.DataFrame:
     return out
 
 
-def _grass_dm_share():
-    f = Path(__file__).resolve().parents[2] / "capri_data" / "2017" / "supply" / "grass_dm_content.csv"
+def _grass_dm_share(data_dir=None):
+    """CAPRI's dry-matter content of grass, from the data directory and base year of the load (K52f: a fixed
+    capri_data/2017 path next to the package before)."""
+    from capri_mod.data import inputs as _inputs
+    f = (Path(data_dir) / (DEFAULT_BASE_YEAR or _inputs.default_base_year()) / "supply" / "grass_dm_content.csv"
+         if data_dir else _inputs.current().path("grass_dm_content.csv", "supply"))
     return read_input(f, index_col=0)["drma"]
 
 
-def _reconcile_grass_yield_units(yields: pd.DataFrame) -> pd.DataFrame:
+def _reconcile_grass_yield_units(yields: pd.DataFrame, data_dir=None) -> pd.DataFrame:
     """Put GRAS on the same dry-matter tonnage basis as every other crop.
 
     CAPRI reports grass yield as FRESH MATTER in kg/ha (~36,000) while every
@@ -249,7 +263,7 @@ def _reconcile_grass_yield_units(yields: pd.DataFrame) -> pd.DataFrame:
     # the conversion idempotent if applied twice
     mask = out["GRAS"] > 100.0
     if mask.any():
-        dm = _grass_dm_share()
+        dm = _grass_dm_share(data_dir)
         out.loc[mask, "GRAS"] = (out.loc[mask, "GRAS"] / 1000.0
                                  * dm.reindex(out.index[mask]).fillna(float(dm.median())).values)
     return out
@@ -261,7 +275,7 @@ def load_yields(data_dir: Optional[Path] = None) -> pd.DataFrame:
     if data_dir and (resolve_data_file(data_dir, "yields.csv")).exists():
         raw = read_input(resolve_data_file(data_dir, "yields.csv"), index_col=0)
         # animal columns: CAPRI's YILD per model head / 1000 (tools/build/build_animal_yields.py)
-        return _reconcile_grass_yield_units(raw)
+        return _reconcile_grass_yield_units(raw, data_dir)
     raise FileNotFoundError(f"yields.csv not found under {data_dir}: the model runs on CAPRI's data only "
                             f"(the synthetic generator that stood here was removed, Sprint 9s)")
 
@@ -461,7 +475,7 @@ def _load_pmp_capri_2030(d: Path, stem: str = "pmp_capri_2030"):
 
 
 def load_all_data(data_dir: Optional[Path] = None, validate: bool = False,
-                  base_year: str = DEFAULT_BASE_YEAR) -> dict:
+                  base_year: Optional[str] = None) -> dict:
     """Load all baseline datasets, returning a nested dict.
 
     base_year selects the capri_data/<base_year>/ folder in the categorised
@@ -484,8 +498,12 @@ def load_all_data(data_dir: Optional[Path] = None, validate: bool = False,
         )
     # Point the resolver at the requested base year for this load.
     global DEFAULT_BASE_YEAR
+    if base_year is None:
+        from capri_mod.data.inputs import default_base_year
+        base_year = default_base_year()
+    by = str(base_year)                     # the base year's folder and file names (KNOWN_ISSUES K52f)
     _prev_year = DEFAULT_BASE_YEAR
-    DEFAULT_BASE_YEAR = base_year
+    DEFAULT_BASE_YEAR = by
     print("Loading CAPRI baseline data...")
     if validate and data_dir is not None:
         # the data checks (until 31 October 2026 a separate validator against capri_data/MANIFEST.json, merged into
@@ -598,24 +616,24 @@ def load_all_data(data_dir: Optional[Path] = None, validate: bool = False,
         "livestock_revenue_coef": _load_optional_csv(
             data_dir, "livestock_revenue_coef.csv"),
         # CAPRI land market (docs/LAND_USE_FLEXIBILITY.md)
-        "land_market": _land_market_io.read(Path(data_dir) / "2017" / "supply" / "land_market_2017"),
+        "land_market": _land_market_io.read(Path(data_dir) / by / "supply" / f"land_market_{by}"),
         # CAPRI's land market at its 2030 baseline calibration (tools/build/build_land_market.py --year 2030: 2030 land-type levels
         # and p_pmpQuadLandTypes of pmppar_21730); used with SupplyModule.pmp_source "capri2030" at the 2030 market year
-        "land_market_2030": _land_market_io.read(Path(data_dir) / "2017" / "supply" / "land_market_2030"),
+        "land_market_2030": _land_market_io.read(Path(data_dir) / by / "supply" / "land_market_2030"),
         # CAPRI's land rents at its calibration points, 2030 and 2017 (tools/build/build_land_rents.py --year;
         # docs/LAND_RENT_CALIBRATION_PLAN.md): {year: {region: {land type: EUR/ha}}}
         "land_rents": {y: (lambda p: {r: {t: float(v) for t, v in (("ARAC", row["rent_arac"]), ("FRUN", row["rent_frun"]),
                                                                    ("GRAS", row["rent_gras"])) if v == v}
                                       for r, row in read_input(p, index_col=0).iterrows()} if p.exists() else None)(
-            Path(data_dir) / "2017" / "supply" / f"land_rents_{y}.csv") for y in (2017, 2030)},
+            Path(data_dir) / by / "supply" / f"land_rents_{y}.csv") for y in (int(by), 2030)},
         # CAPRI's PMP matrix of the crops at its 2030 baseline calibration, per model region (tools/build/build_pmp_capri_2030.py,
         # KNOWN_ISSUES K61): {region: {(act_i, act_j): g}}, g in EUR/ha per 100% change of the levels
         # and of the animals' herds (tools/build/build_animal_pmp_capri_2030.py, pmp_capri_2030_animals.csv: diagonal only)
-        "pmp_capri_2030": _load_pmp_capri_2030(Path(data_dir) / "2017" / "supply"),
+        "pmp_capri_2030": _load_pmp_capri_2030(Path(data_dir) / by / "supply"),
         # capri-mod's own terms with CAPRI's recipe (tools/build/build_pmp_recipe.py; SupplyModule.pmp_source "recipe")
-        "pmp_recipe": {y: _load_pmp_capri_2030(Path(data_dir) / "2017" / "supply", f"pmp_recipe_{y}") for y in (2017, 2030)},
+        "pmp_recipe": {y: _load_pmp_capri_2030(Path(data_dir) / by / "supply", f"pmp_recipe_{y}") for y in (int(by), 2030)},
         # Regional fodder balances (docs/FODDER_BALANCE.md)
-        "fodder_balance": _nested_tables.read_fodder_balances(Path(data_dir) / "2017" / "feed" / "fodder_balance_2017.csv"),
+        "fodder_balance": _nested_tables.read_fodder_balances(Path(data_dir) / by / "feed" / f"fodder_balance_{by}.csv"),
         # Feed per head (t): CAPRI 2017 regional FCER/FPRO/FENE totals / herds; required: the animals without a
         # ration in the supply models cost their feed with it (the national fallback table was removed, K99)
         "livestock_feed_coef": _load_required_csv(
@@ -664,7 +682,7 @@ def load_all_data(data_dir: Optional[Path] = None, validate: bool = False,
         # dairy cow's energy requirement (envind/breeding.gms l. 188-191)
         "dairy_grazing_days": (lambda p: (lambda t: t[t.animal_mitt == "DAICOW_L"].pivot(
             index="region", columns="item", values="value"))(read_input(p)) if p is not None and p.exists() else None)(
-            Path(data_dir) / "2017" / "abatement" / "ammonia" / "RCEmissions.csv" if data_dir else None),
+            Path(data_dir) / by / "abatement" / "ammonia" / "RCEmissions.csv" if data_dir else None),
         # CAPRI's 2030 CAP budgets per premium scheme (CEILVAL, Mio EUR, CAPRI regions) and the split of each model
         # activity's premium over the schemes (PRME by scheme / DPTOTAL); tools/build/build_cap_ceilings_2030.py
         "cap_ceilings_2030": _load_optional_csv(data_dir, "cap_ceilings_2030.csv"),

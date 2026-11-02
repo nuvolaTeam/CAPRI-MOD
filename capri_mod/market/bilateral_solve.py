@@ -30,7 +30,7 @@ class BilateralSolveMixin(MarketStateMixin):
     MARKET_AA_MEMORY = setting("market.aa_memory")
 
     def _bilateral_raw(self):
-        """Uncalibrated bilateral systems for the market year (data['market_year'], else 2017)."""
+        """Uncalibrated bilateral systems for the market year (data['market_year'], else the base year)."""
         from capri_mod.market.bilateral import BilateralCommodity
         inp = self._inp()
         year = self._market_year()
@@ -39,7 +39,7 @@ class BilateralSolveMixin(MarketStateMixin):
             return cached[1]
         sfx = "_eu2" if self.eu_blocks else ""          # CAPRI's two EU trade blocks (build_bilateral_market --eu-blocks)
         if not inp.exists(f"bilateral_flows_{year}{sfx}.csv"):
-            year = 2017
+            year = int(inp.base_year)
         if not inp.exists(f"bilateral_flows_{year}{sfx}.csv"):
             self._bilat_raw_cache = (year, {})
             return {}

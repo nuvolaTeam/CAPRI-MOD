@@ -464,7 +464,7 @@ class ProjectionModule:
         """A fresh model built on a projected data set (see _solve for why)."""
         cls = type(self.model)
         pm = cls(data=data, data_dir=getattr(self.model, "data_dir", None),
-                 verbose=False, base_year=getattr(self.model, "base_year", "2017"))
+                 verbose=False, base_year=getattr(self.model, "base_year", None))
         self._last_projected_model = pm      # kept for diagnostics (e.g. manure-pool trace)
         return pm
 
@@ -486,7 +486,7 @@ class ProjectionModule:
             data=data,
             data_dir=getattr(self.model, "data_dir", None),
             verbose=False,
-            base_year=getattr(self.model, "base_year", "2017"),
+            base_year=getattr(self.model, "base_year", None),
         )
         self._last_projected_model = projected_model     # kept for diagnostics and tests, as in _model_for
         return projected_model.run(scenario=scenario, **kwargs)

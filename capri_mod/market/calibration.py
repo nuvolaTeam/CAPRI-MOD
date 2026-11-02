@@ -49,7 +49,8 @@ class CalibrationMixin(MarketStateMixin):
         sfx = "_eu2" if self.eu_blocks else ""
         ff, fr = f"bilateral_flows_{year}{sfx}.csv", f"bilateral_regions_{year}{sfx}.csv"
         if not inp.exists(ff):
-            ff, fr = f"bilateral_flows_2017{sfx}.csv", f"bilateral_regions_2017{sfx}.csv"
+            by = inp.base_year                  # the base year's market where the market year has none (K52f)
+            ff, fr = f"bilateral_flows_{by}{sfx}.csv", f"bilateral_regions_{by}{sfx}.csv"
         bil = set()
         if inp.exists(ff) and inp.exists(fr):
             fl = inp.csv(ff)
