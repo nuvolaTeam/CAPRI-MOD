@@ -47,7 +47,6 @@ class FeedBlock:
         bix = self.feed_bulk_price_ratios(price_signal)
         self.supply_module.seen.feed_bulk_ratio = bix
         state = {}
-        newprev = {}
         _last = getattr(self, "_last_supply_results", None) or {}
         # FEEDING INSIDE THE SUPPLY MODELS (CAPRI: v_feedInpCoeff is chosen only there, together with herds and
         # fodder): no ration is chosen outside them. The ration state is the feed per head of each region's last
@@ -62,7 +61,6 @@ class FeedBlock:
                 x = np.array([float(_ft.get(f_, 0.0)) / _h for f_ in r.feeds])
             else:
                 x = np.array(r.x0, dtype=float)
-            newprev[(reg, act)] = x
             state.setdefault(reg, {})[act] = {"x": dict(zip(r.feeds, x)), "dcost": 0.0,
                                               "nitr_kg": 0.0, "nitr_share": 0.0}
         self.supply_module.seen.ration_state = state
@@ -76,7 +74,6 @@ class FeedBlock:
         self.supply_module.seen.feed_rations = self._feed_rations_stable
         self.supply_module.seen.feed_prices = _fp
         self._ration_state = state
-        self._ration_prev = newprev
 
     def _set_feed_demand(self, supply_results) -> None:
         """Pass EU feed use (current and base) to the market.

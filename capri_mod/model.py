@@ -65,7 +65,10 @@ from capri_mod.coupling import (  # noqa: E402  (refactor stage 4a: the blocks)
 )
 
 
-class CAPRIModel(HessianBlock, FeedBlock, YoungAnimalBlock, PriceStepBlock, ManureBlock, BridgeBlock, ReportingBlock):
+from capri_mod.coupling.state import ModelStateMixin  # par, sv, ev, seen, res (refactor stage 4)
+
+class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, PriceStepBlock, ManureBlock, BridgeBlock,
+                 ReportingBlock):
     """
     CAPRI-mod: Common Agricultural Policy Regionalised Impact Model.
 
@@ -221,7 +224,6 @@ class CAPRIModel(HessianBlock, FeedBlock, YoungAnimalBlock, PriceStepBlock, Manu
         tab = scale_genetics(self.data.get("genetics_effects_unit"), settings)
         self.data["genetics_effects"] = tab
         self.supply_module.set_genetics_effects(tab, k)
-        self.endotech = dict(settings)
         self._endotech_key = k
 
     def _ghg_coefficients(self, key) -> dict:
@@ -543,7 +545,6 @@ class CAPRIModel(HessianBlock, FeedBlock, YoungAnimalBlock, PriceStepBlock, Manu
         self.supply_module.seen.yani_price_ratio_ms = None
         self.supply_module.seen.yani_price_ratio_m = None
         self._yani_imbalance = 0.0
-        self._yani_trace = []
         self._yani_w, self._yani_gprev = {}, {}
         self.market_module.seen.yani_state = None
         _yani_ref = (getattr(self, "_yani_ref", {}) or {}).get(_key)
@@ -606,7 +607,6 @@ class CAPRIModel(HessianBlock, FeedBlock, YoungAnimalBlock, PriceStepBlock, Manu
                         _m.seen.nlp_cal_check = True
                 self._pool_state = None
                 self._pool_accel = None
-                self._pool_trace = []
                 self._pool_imbalance = 0.0
             self._update_rations(price_signal if outer_iter > 0 else None)
             # CAPRI's raw milk price per member state (dairy block per RMS): the regional models get their member

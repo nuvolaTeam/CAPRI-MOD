@@ -143,7 +143,9 @@ from capri_mod.environmental.phosphorus import PhosphorusBlock  # noqa: E402
 from capri_mod.environmental.biodiversity import BiodiversityBlock  # noqa: E402
 
 
-class EnvironmentalModule(GHGBlock, NitrogenBlock, AmmoniaBlock, PhosphorusBlock, BiodiversityBlock):
+from capri_mod.environmental.state import EnvStateMixin  # par, ev, seen, res (refactor stage 4)
+
+class EnvironmentalModule(EnvStateMixin, GHGBlock, NitrogenBlock, AmmoniaBlock, PhosphorusBlock, BiodiversityBlock):
     """
     Computes environmental indicators from supply module outputs.
 
@@ -526,7 +528,6 @@ class EnvironmentalModule(GHGBlock, NitrogenBlock, AmmoniaBlock, PhosphorusBlock
         _lea = self.leaching(region, acts, nb, supply_result)
         if _lea is not None:
             ghg["N2O_LEA"] = _lea["n2o_n"] / 1000.0 * 44.0 / 28.0 * GWP_N2O       # t N2O-N -> kt CO2-eq
-            self._leaching_last = _lea
         # total after every adjustment of soil N2O (it was summed before the mineral-input
         # rescaling above, so GHG total missed the substitution and yield effects on soil N2O)
         ghg_total = sum(ghg.values())

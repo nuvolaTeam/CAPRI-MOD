@@ -280,7 +280,6 @@ class YoungAnimalBlock:
                                             round(float(net.get((mr, g), 0.0) - ref[(mr, g)]), 2),
                                             round(float(prod.get((mr, g), 0.0)), 2))
                              for (mr, g) in ref}
-        self._yani_trace.append({"ratio": dict(ratio), "imbalance": self._yani_imbalance, "markets": self._yani_detail})
         if self.verbose or getattr(self, "trace_outer", False):
             print("    [Young animals] imbalance %.4f | (ratio, net - ref, production) %s" % (
                 self._yani_imbalance, self._yani_detail), flush=True)

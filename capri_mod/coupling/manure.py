@@ -8,8 +8,8 @@ from __future__ import annotations
 
 
 #: the clearing's state kept per market between outer iterations (the N market's in the model's own attributes)
-_POOL_STATE = ("_pool_state", "_pool_accel", "_pool_trace", "_pool_imbalance", "_pool_worst_key", "_pool_flows",
-               "_pool_solver", "_pool_solver_status", "_pool_eu_unaccounted")
+_POOL_STATE = ("_pool_state", "_pool_accel", "_pool_imbalance", "_pool_worst_key", "_pool_solver_status",
+               "_pool_eu_unaccounted")
 
 
 class ManureBlock:
@@ -26,7 +26,7 @@ class ManureBlock:
         for nut in ("P", "K"):
             if not any((getattr(mo.ev, "pool_cols_pk", None) or {}).get(nut) for mo in getattr(sm, "_models", {}).values()):
                 continue
-            st = held.setdefault(nut, {"_pool_trace": [], "_pool_imbalance": 0.0})
+            st = held.setdefault(nut, {"_pool_imbalance": 0.0})
             n_state = {k: self.__dict__.get(k) for k in _POOL_STATE}
             for k in _POOL_STATE:
                 setattr(self, k, st.get(k))
@@ -203,7 +203,6 @@ class ManureBlock:
             ok = True
         if _info.get("y") is not None:
             _info["y"] = np.asarray(_info["y"], float) * _sc
-        self._pool_solver = _info
         self._pool_solver_status = str(_info.get("status", "?"))
         pnew = {}
         if ok:
@@ -222,7 +221,6 @@ class ManureBlock:
             ship = {k: 0.0 for k in keys}
             for t, (a, b_, cc) in enumerate(arcs):
                 ship[a] += sol[2 * nr + t]; ship[b_] -= sol[2 * nr + t]
-            self._pool_flows = {(a, b_): float(sol[2 * nr + t]) for t, (a, b_, cc) in enumerate(arcs) if sol[2 * nr + t] > 1e-3}
             self._pool_state = {"_plan": ship, "_kappa": kappa, "_es": dict(es)}
         else:
             pnew = {k: float(pools.get(k, 0.0)) for k in keys}
@@ -270,4 +268,3 @@ class ManureBlock:
         eu_unacc = abs(sum(es.values())) / max(sum(sup.values()), 1e-9)
         self._pool_eu_unaccounted = float(eu_unacc)
         self._pool_imbalance = float(max(worst, eu_unacc))
-        self._pool_trace = getattr(self, "_pool_trace", []) + [(float(worst), float(eu_unacc))]
