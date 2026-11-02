@@ -750,17 +750,15 @@ class FertilisationBlock:
 
     def _fert_params_raw(self):
         """(manure availability, mineral N price kEUR/t) without the allocation switch."""
-        flag = getattr(self, "use_fert_allocation", False)
-        try:
-            self.use_fert_allocation = True
-            return self._fert_alloc_params()
-        finally:
-            self.use_fert_allocation = flag
+        return self._fert_alloc_params(always=True)
 
-    def _fert_alloc_params(self):
+    def _fert_alloc_params(self, always=False):
         """(manure availability, mineral N price kEUR/t N) for this region, from
-        CAPRI's reference allocation and its 2017 national UVAG of NITF."""
-        if not getattr(self, "use_fert_allocation", False):
+        CAPRI's reference allocation and its 2017 national UVAG of NITF; (None, None) where the switch
+        use_fert_allocation is off, unless always. (2 November 2026, docs/design/STAGE3_BEHAVIOUR_CHANGES.md 3: the
+        switch was set on the instance around the call and set back as an instance attribute, which then hid any
+        later change of the class setting.)"""
+        if not (always or getattr(self, "use_fert_allocation", False)):
             return None, None
         reg = getattr(getattr(self, "data", None), "region_id", None)
         c = _inputs.current().cache.setdefault("fert_alloc", {})
