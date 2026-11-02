@@ -40,7 +40,7 @@ from capri_mod.params import param, param_table
 from capri_mod.units import M_N2O, M_N2O_N
 from capri_mod.settings import setting, tri_state, current as _settings
 from capri_mod.data.definitions import (
-    CROPS, ANIMALS, ALL_ACTIVITIES, FEED_ITEMS, NUTRIENTS,
+    CROPS, ANIMALS, ALL_ACTIVITIES, FEED_ITEMS, NUTRIENTS, ACTIVITY_CLASSES, CROPS_ON_LAND, LAND_MARKET_TYPES,
 )
 from capri_mod.data.definitions import MS_CODE, capri_ms, IdentityMap, is_eu
 from capri_mod.tableio import read_input
@@ -54,7 +54,7 @@ from capri_mod.supply import inputs as _inputs
 #: CAPRI's fixed production activities, held at their data level (supply/prep_sim.gms l. 250: v_actLevl.FX for FACT;
 #: sets.gms l. 2317 FACT = MFCACT + OANI, l. 131 MFCACT = OOIL, OIND, FallGr, NURS, FLOW, OCRO, NECR). NURS, FLOW and
 #: OCRO were endogenous here until 23 October 2026 (found by the proxy audit: they had no CAPRI elasticity)
-FIXED_ACTIVITIES = ("OOIL", "OIND", "NURS", "FLOW", "OCRO", "OANI")
+FIXED_ACTIVITIES = tuple(a for a, r in ACTIVITY_CLASSES.items() if r["fixed"] == "1")   # model_activity_classes.csv (N6)
 #: an activity whose level at the calibration point is at most this (1000 ha / 1000 head) has no level: CAPRI has no
 #: variable for it (v_actLevl exists where p_technFact(..,"LEVL",..) is set); the bounds hold it at zero
 #: (setting supply.absent_activities_fixed) and the rules that refer to it (CAP greening) leave it out
@@ -584,10 +584,7 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
     cap_greening = setting("supply.cap_greening")
     #: annual crops (sets.gms annualCrops) of the model and their crop-diversification groups (cropDivGrps: each
     #: annual crop alone, MAIS = grain and silage maize, OSET = set-aside and fallow)
-    CROPDIV_GROUPS = {"SWHE": "SWHE", "DWHE": "DWHE", "RYEM": "RYEM", "BARL": "BARL", "OATS": "OATS", "OCER": "OCER",
-                      "PARI": "PARI", "RAPE": "RAPE", "SUNF": "SUNF", "SOYA": "SOYA", "OOIL": "OOIL", "OIND": "OIND",
-                      "FLOW": "FLOW", "PULS": "PULS", "POTA": "POTA", "SUGB": "SUGB", "TEXT": "TEXT", "TOBA": "TOBA",
-                      "TOMA": "TOMA", "OVEG": "OVEG", "OFOD": "OFOD", "CORN": "MAIS", "MAIF": "MAIS", "SETA": "OSET"}
+    CROPDIV_GROUPS = {a: r["cropdiv_group"] for a, r in ACTIVITY_CLASSES.items() if r["cropdiv_group"]}   # N6
 
 
     # CAPRI organic_minfert_redu.gms: the small-mineral-N threshold of 0.01 t/ha and the limCres maximum of 1.2 x the
@@ -912,7 +909,7 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
 
     #: Crops occupying PERMANENT land - the same set the land data is built
     #: with in tools/build/build_capri_base.py. Everything else except grass is arable.
-    PERMANENT_LAND_CROPS = ("WINE", "OLIV", "TABO", "APPL", "OFRU", "CITR", "TAGR")
+    PERMANENT_LAND_CROPS = CROPS_ON_LAND["FRUN"]         # capri_data/codes/model_activity_classes.csv (N6)
 
 
     #: CAPRI's assumed average yield loss for a 50% pesticide reduction
@@ -942,7 +939,7 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
 
 
     #: free land types of CAPRI's land market (artificial land held fixed)
-    LAND_TYPES = ("ARAC", "GRAS", "FRUN", "FORE", "OLND")
+    LAND_TYPES = tuple(LAND_MARKET_TYPES)                # capri_data/codes/model_land_types.csv (N6)
 
     #: CAPRI's fertiliser allocation (manure replaces mineral N). OFF by default:
     #: on its own it makes herd cuts LESS effective per head (each head cut
@@ -2456,7 +2453,8 @@ class SupplyModule(ModuleStateMixin):
     #: CAPRI's baseline calibration (Sprint 9p): at most this many correction rounds per baseline run
     BASE_CAL_ROUNDS = setting("projection.base_cal_rounds")
     #: CAPRI sets.gms l. 5606, FODF / OFAR, GRAS, ROOF, MAIF / (the model's OFOD = CAPRI's OFAR plus ROOF)
-    FODDER_ACTS = ("GRAS", "MAIF", "OFOD", "ROOF")
+    FODDER_ACTS = tuple(a for a, r in ACTIVITY_CLASSES.items() if r["fodder"] == "1")   # model_activity_classes.csv (N6;
+    # CAPRI's FODCRP through the crosswalk: GRAS, MAIF, OFOD; the ROOF listed here before is not a model activity)
 
     def calibrate_to_base(self, results: dict, reset: bool = False) -> float:
         """CAPRI's calibration of the supply models to the baseline (CAPMOD calibrates its PMP terms so that the

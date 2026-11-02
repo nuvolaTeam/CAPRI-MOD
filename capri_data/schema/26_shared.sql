@@ -149,3 +149,9 @@ CREATE TABLE shr_nuts_version_correspondence (
     UNIQUE (capri_code, nuts_code)
 );
 COMMENT ON TABLE shr_nuts_version_correspondence IS 'CAPRI''s 8-character region codes and their NUTS codes across coding-scheme versions, in order (a code can have several: IT110000 -> IT11 and ITC1; an empty nuts_code for a code without one), from CAPRI''s gams/compile_rdp_data/build_general_set_structure.gms, with 75 NUTS-2 pairs added in October 2026 (each verified by CAPRI''s total agricultural area against the model region''s base area and a second variable), NO090000 -> NO03 and PL500000 -> PL81 removed as unconfirmed, and FI190000 -> FI1C removed; read by tools/lib/_model_regions.py (with its CORR_FIXES, SPLITS_MERGES). nuts_version_correspondence.json until 31 October 2026, kept by hand (capri_mod/data/nested_tables.py)';
+
+-- the flags of the code tables declared in 00_codes.sql (value_units exists from here)
+INSERT INTO value_units VALUES
+  ('model_activity_classes', 'fodder', NULL, 'open', 'a flag (1: a fodder crop)'),
+  ('model_activity_classes', 'fixed', NULL, 'open', 'a flag (1: held at its base level)'),
+  ('model_land_types', 'in_land_market', NULL, 'open', 'a flag (1: a column of the land market)');

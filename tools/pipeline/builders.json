@@ -1105,6 +1105,8 @@
    ],
    "inputs": [
     "capri_data/codes/model_activities.csv",
+    "capri_data/codes/model_activity_classes.csv",
+    "capri_data/codes/model_land_types.csv",
     "capri_data/codes/model_trade_regions.csv",
     "capri_data/shared/capri_member_state_codes.csv",
     "capri_data/shared/eu_market_blocks.csv",
@@ -1126,6 +1128,7 @@
    ],
    "external": [
     "$REFERENCE/sets/simini_21730/FEED_TO_O.csv",
+    "$REFERENCE/sets/simini_21730/FODCRP.csv",
     "$REFERENCE/sets/simini_21730/MAACT.csv",
     "$REFERENCE/sets/simini_21730/MCACT.csv",
     "$REFERENCE/sets/simini_21730/MPACT.csv",
@@ -1135,10 +1138,14 @@
     "$REFERENCE/sets/simini_21730/RALL.csv",
     "$REFERENCE/sets/simini_21730/RU.csv",
     "$REFERENCE/sets/simini_21730/XX.csv",
-    "$REFERENCE/sets/simini_21730/XX1.csv"
+    "$REFERENCE/sets/simini_21730/XX1.csv",
+    "$REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv",
+    "$REFERENCE/sets/simini_21730/landTypesMrk.csv",
+    "$REFERENCE/sets/simini_21730/landTypes_to_pact.csv"
    ],
    "outputs": [
     "capri_data/codes/capri/FEED_TO_O.csv",
+    "capri_data/codes/capri/FODCRP.csv",
     "capri_data/codes/capri/MAACT.csv",
     "capri_data/codes/capri/MCACT.csv",
     "capri_data/codes/capri/MPACT.csv",
@@ -1147,6 +1154,9 @@
     "capri_data/codes/capri/RALL.csv",
     "capri_data/codes/capri/XX.csv",
     "capri_data/codes/capri/XX1.csv",
+    "capri_data/codes/capri/cropDivGrps_mCact.csv",
+    "capri_data/codes/capri/landTypesMrk.csv",
+    "capri_data/codes/capri/landTypes_to_pact.csv",
     "capri_data/codes/model_commodities.csv"
    ]
   },

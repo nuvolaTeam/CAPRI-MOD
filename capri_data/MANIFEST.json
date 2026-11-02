@@ -3582,6 +3582,16 @@
     "builder": "build_code_lists"
    }
   },
+  "capri_data/codes/capri/FODCRP.csv": {
+   "description": "CAPRI FODCRP: the fodder crops (sets.gms)",
+   "kind": "structure",
+   "rows": 5,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists"
+   }
+  },
   "capri_data/codes/capri/MAACT.csv": {
    "description": "CAPRI MAACT(PACT), animal activities in the supply model",
    "kind": "structure",
@@ -3662,11 +3672,54 @@
     "builder": "build_code_lists"
    }
   },
+  "capri_data/codes/capri/cropDivGrps_mCact.csv": {
+   "description": "CAPRI cropDivGrps_mCact: the crop-diversification group of each annual crop (sets.gms)",
+   "kind": "structure",
+   "rows": 29,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists"
+   }
+  },
+  "capri_data/codes/capri/landTypesMrk.csv": {
+   "description": "CAPRI landTypesMrk: the land types of the land market (sets.gms)",
+   "kind": "structure",
+   "rows": 6,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists"
+   }
+  },
+  "capri_data/codes/capri/landTypes_to_pact.csv": {
+   "description": "CAPRI landTypes_to_pact: the land type of each production activity (sets.gms)",
+   "kind": "structure",
+   "rows": 117,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists"
+   }
+  },
   "capri_data/codes/model_activities.csv": {
    "description": "the model's activities (capri_mod/data/definitions.py CROPS, ANIMALS) and their CAPRI activities: a declared code list, a source per row (tools/lib/_model_codes.py reads it for the builders)",
    "kind": "structure",
    "rows": 46,
    "columns": 5,
+   "origin": {
+    "nature": "declared"
+   }
+  },
+  "capri_data/codes/model_activity_classes.csv": {
+   "description": "the model's activity classes (refactor stage 3, N6): land type, crop-diversification group, fodder and fixed flags; a declared table, checked against CAPRI's sets by build_code_lists (a row that differs names its departure)",
+   "kind": "structure",
+   "rows": 46,
+   "columns": 6,
+   "units": "to be established (value_units: open)",
+   "read_by_model": [
+    "capri_mod/data/definitions.py"
+   ],
    "origin": {
     "nature": "declared"
    }
@@ -3679,6 +3732,19 @@
    "origin": {
     "nature": "capri",
     "builder": "build_code_lists"
+   }
+  },
+  "capri_data/codes/model_land_types.csv": {
+   "description": "the land types of the model's land market, in its column order (refactor stage 3, N6)",
+   "kind": "structure",
+   "rows": 6,
+   "columns": 3,
+   "units": "to be established (value_units: open)",
+   "read_by_model": [
+    "capri_mod/data/definitions.py"
+   ],
+   "origin": {
+    "nature": "declared"
    }
   },
   "capri_data/codes/model_trade_regions.csv": {

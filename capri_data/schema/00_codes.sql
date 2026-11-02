@@ -45,6 +45,41 @@ CREATE TABLE model_activities (
 );
 COMMENT ON TABLE model_activities IS 'the model''s activities (capri_mod/data/definitions.py CROPS, ANIMALS) and their CAPRI activities: a declared code list, a source per row (tools/lib/_model_codes.py reads it for the builders)';
 
+-- file: capri_data/codes/capri/landTypesMrk.csv
+CREATE TABLE capri_landtypesmrk (code VARCHAR PRIMARY KEY, text VARCHAR);
+COMMENT ON TABLE capri_landtypesmrk IS 'CAPRI landTypesMrk: the land types of the land market (sets.gms)';
+
+-- file: capri_data/codes/capri/FODCRP.csv
+CREATE TABLE capri_fodcrp (code VARCHAR PRIMARY KEY, text VARCHAR);
+COMMENT ON TABLE capri_fodcrp IS 'CAPRI FODCRP: the fodder crops (sets.gms)';
+
+-- file: capri_data/codes/capri/landTypes_to_pact.csv
+CREATE TABLE capri_landtypes_to_pact (land_type VARCHAR NOT NULL, pact VARCHAR NOT NULL, PRIMARY KEY (land_type, pact));
+COMMENT ON TABLE capri_landtypes_to_pact IS 'CAPRI landTypes_to_pact: the land type of each production activity (sets.gms)';
+
+-- file: capri_data/codes/capri/cropDivGrps_mCact.csv
+CREATE TABLE capri_cropdivgrps_mcact ("group" VARCHAR NOT NULL, mcact VARCHAR NOT NULL, PRIMARY KEY ("group", mcact));
+COMMENT ON TABLE capri_cropdivgrps_mcact IS 'CAPRI cropDivGrps_mCact: the crop-diversification group of each annual crop (sets.gms)';
+
+-- file: capri_data/codes/model_activity_classes.csv
+CREATE TABLE model_activity_classes (
+    code VARCHAR PRIMARY KEY REFERENCES model_activities (code),
+    land_type VARCHAR,                     -- ARAC, GRAS or FRUN for a crop, empty for an animal
+    cropdiv_group VARCHAR,                 -- the crop-diversification group of an annual crop
+    fodder INTEGER NOT NULL CHECK (fodder IN (0, 1)),
+    fixed INTEGER NOT NULL CHECK (fixed IN (0, 1)),
+    source VARCHAR NOT NULL
+);
+COMMENT ON TABLE model_activity_classes IS 'the model''s activity classes (refactor stage 3, N6): land type, crop-diversification group, fodder and fixed flags; a declared table, checked against CAPRI''s sets by build_code_lists (a row that differs names its departure)';
+
+-- file: capri_data/codes/model_land_types.csv
+CREATE TABLE model_land_types (
+    code VARCHAR PRIMARY KEY REFERENCES capri_landtypesmrk (code),
+    in_land_market INTEGER NOT NULL CHECK (in_land_market IN (0, 1)),
+    source VARCHAR NOT NULL
+);
+COMMENT ON TABLE model_land_types IS 'the land types of the model''s land market, in its column order (refactor stage 3, N6)';
+
 -- file: capri_data/codes/model_commodities.csv
 CREATE TABLE model_commodities (
     code VARCHAR PRIMARY KEY,

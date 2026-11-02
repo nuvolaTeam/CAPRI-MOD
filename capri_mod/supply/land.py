@@ -36,7 +36,7 @@ class LandBlock:
         if not lm or "quad" not in lm:
             return None
         labels = list(getattr(self.ev, "row_labels", []))
-        LTall = ["ARAC", "GRAS", "FRUN", "FORE", "OLND", "ARTIF"]
+        LTall = list(lm["types"])          # the land types of the data, in the order of its quad (N6)
         keep = [LTall.index(t) for t in self.LAND_TYPES]
         Qf = np.array(lm["quad"], dtype=float)[np.ix_(keep, keep)]
         # UNITS: CAPRI's land-market terms are per HECTARE, the model's land

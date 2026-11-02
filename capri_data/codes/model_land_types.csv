@@ -1,0 +1,7 @@
+code,in_land_market,source
+ARAC,1,CAPRI's set landTypesMrk (arable land)
+GRAS,1,CAPRI's set landTypesMrk (grassland)
+FRUN,1,CAPRI's set landTypesMrk (permanent crops)
+FORE,1,CAPRI's set landTypesMrk (forest)
+OLND,1,CAPRI's set landTypesMrk (other land)
+ARTIF,0,"CAPRI's set landTypesMrk (artificial land): read with the land market's data, not a column of the model's land market (land.py; CAPRI's land market has it)"

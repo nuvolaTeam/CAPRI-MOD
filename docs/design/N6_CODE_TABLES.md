@@ -45,3 +45,9 @@ the project lead's decision.
 
 Both are behaviour changes. Moving the tables as they are (with the two findings registered) keeps the runs identical;
 correcting them follows as separate commits after the project lead's decision.
+
+## Decisions (2 November 2026, the project lead)
+
+- Step 1: the tables move as they are (runs identical), the two findings registered: DEP-42 (OFOD one
+  crop-diversification group, kept until S1/S2 splits OFOD) and DEP-43 (NURS on arable land).
+- Step 2: NURS goes to permanent-crop land as in CAPRI (its own commit and run, the land data's builder with it).
