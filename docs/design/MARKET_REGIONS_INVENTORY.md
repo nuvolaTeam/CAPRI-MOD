@@ -6,13 +6,14 @@ mapped to them by RMS_TO_RM. Once that is done, CAPRI's TRQs (global and bilater
 entry prices and the market's land and yield block can be ported as CAPRI writes them. **Nothing has been changed.**
 Model for this note: docs/design/REGIONAL_UNITS_INVENTORY.md (the supply side's move to CAPRI's 221 units, 27 October).
 
-Worktree read: /home/claude/work/wt_mf (branch manifest-sql, HEAD 9be8c8c). DEP-31 to DEP-40 are on branch step-g
-(/home/claude/work/wt_g, HEAD c953471) and not yet merged into manifest-sql; they are cited from there.
+Branch read: manifest-sql, HEAD 9be8c8c. DEP-31 to DEP-40 are on branch step-g
+(HEAD c953471) and not yet merged into manifest-sql; they are cited from there.
 
 **Labels.** [V] = verified for this note (file read, GDX symbol read, or data compared with a small script);
 [I] = inferred (read from code or documents but not run or not checked in data). File:line refers to manifest-sql.
 
-Sources of CAPRI's sets and data: `/mnt/user-data/uploads/sim_ini_21730_1.gdx` (read with gams.core.gdx through
+Sources of CAPRI's sets and data: `sim_ini_21730_1.gdx` (uploaded by the project lead, 1 November 2026; CAPRI's
+calibrated 2030 market state) (read with gams.core.gdx through
 tools/lib/_gdx.py). The sets RM, RMTP, RMS, RMS_TO_RM, RM_TO_RMTP, RMS_TO_RMTP, RMSSUP in that file are identical to the
 CSV export already in capri_reference/sets/simini_21730/ (made from sim_ini_21730.gdx; the two GDX files differ in
 size by one byte, the sets are the same) [V], and capri_data/shared/rms_to_rm.csv equals sim_ini's RMS_TO_RM [V].
@@ -418,4 +419,4 @@ The project lead agreed with the recommendations given with this inventory ("tak
 7. **Young-animal markets with two EU blocks**: fixed inside the solve in the stage that makes the two EU regions
    permanent, not registered as a departure (question 6).
 
-Still open: the 2017 market year on RM (question 5) and the DEP-40 row (question 10).
+2 November 2026, the project lead: the 2017 market year is rebuilt on RM too (question 5), from market_base_1717 (its extract with the two EU regions exists); the DEP-40 row is kept, with the note that CAPRI's 2030 data have one Armington elasticity per product in every RM, so it has no effect at this baseline (question 10). Order of the work (the project lead, 2 November 2026): refactor stage 3 (supply's parameter and state objects), then this move, then the 29 supply units outside the EU (SUPPLY_NONEU_DESIGN.md).

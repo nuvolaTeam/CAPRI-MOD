@@ -163,6 +163,11 @@ def linear_solver_options() -> dict:
     lib = str(_settings().get("supply.nlp_hsllib")).strip()
     if not lib or not os.path.isfile(lib):
         raise FileNotFoundError(f"supply.nlp_linear_solver = {ls!r} needs the HSL library: supply.nlp_hsllib = {lib!r}")
+    # CoinHSL is compiled with OpenMP (MA86, MA97, and the BLAS it may carry): its OpenMP runtime starts when IPOPT
+    # first loads the library and reads OMP_NUM_THREADS then. The regional solves fork worker processes, and GNU
+    # OpenMP hangs a forked child of a process that has run on several threads (capri_mod/utils/ipopt_library.py), so
+    # one thread unless the user set the variable (2 November 2026, with MA27 the project lead's solver for his runs)
+    os.environ.setdefault("OMP_NUM_THREADS", "1")
     return {"ipopt.linear_solver": ls, "ipopt.hsllib": lib}
 
 
