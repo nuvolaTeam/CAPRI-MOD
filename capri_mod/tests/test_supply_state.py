@@ -76,7 +76,12 @@ def _string_uses(names):
 def test_no_moved_name_is_used_as_a_string():
     """Refactor stage 3: after a move no code reaches the old name through a string (getattr(obj, "_x"),
     obj.__dict__["_x"], a tuple of names), which the runtime guard cannot catch."""
-    names = set(S.MOVED_REGIONAL) | set(S.MOVED_MODULE)
+    # a public input moved under its own name (feed_rations -> seen.feed_rations, S9) is not searched: its new field
+    # and the supply module's own attribute of that name are read by the same string; the runtime guard covers it
+    # and the supply module's own _env_for_surplus (the one it shares with the regional models) keeps its name until
+    # its own move (S10a)
+    names = {k for k, v in (*S.MOVED_REGIONAL.items(), *S.MOVED_MODULE.items()) if v.rpartition(".")[2] != k}
+    names -= {"_env_for_surplus"} - set(S.MOVED_MODULE)
     found = _string_uses(names) if names else []
     assert not found, "\n".join(found)
 
@@ -87,7 +92,7 @@ def test_the_emission_tax_is_taken_back_once_on_the_same_net_revenues():
     there once; on a rebuilt object nothing is taken back."""
     import pandas as pd
     m = RegionalSupplyModel.__new__(RegionalSupplyModel)
-    m.ghg_tax, m.ghg_coef = 2.0, {"act": {"SWHE": 1.5, "DCOW": 3.0}}
+    m.seen.ghg_tax, m.seen.ghg_coef = 2.0, {"act": {"SWHE": 1.5, "DCOW": 3.0}}
     m.net_revenues = pd.Series({"SWHE": 100.0, "DCOW": 50.0})
     m._apply_ghg_tax()
     m._apply_ghg_tax()

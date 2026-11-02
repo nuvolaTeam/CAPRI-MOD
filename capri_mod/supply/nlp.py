@@ -108,7 +108,7 @@ class NLPBlock:
         self.sv.wc_solved = None; self.res.cover_solved = None
         self.res.yani_dnet = None
         from capri_mod.supply.capri_regional_nlp import CapriRegionalNLP
-        rats = getattr(self, "feed_rations", None) or {}
+        rats = getattr(self.seen, "feed_rations", None) or {}
         self.res.fd_model = None
         lab_row = list(getattr(self.ev, "row_labels", []) or [])
         labels = list(getattr(self.ev, "aug_labels", None) or [])
@@ -140,12 +140,12 @@ class NLPBlock:
         if npk is not None:
             # capri-mod's manure-application limit and mineral-N allocation row are not CAPRI's
             drop += ["alloc_mineral_N"]
-        tax_ = float(getattr(self, "ghg_tax", 0.0) or 0.0)
+        tax_ = float(getattr(self.seen, "ghg_tax", 0.0) or 0.0)
         ghg_min = None
         if tax_ > 0 and npk is not None:
             ghg_min, c = self._nlp_tax_terms(tax_, c, abat)
         spec = dict(Q=Q, c=c, A=A, b=b, labels=labels, acts=list(self.acts), rations=rats, fodder=fod, x_base=xb,
-                    prices=getattr(self, "feed_prices", None), req_extra=_rx, feed_ghg=self._ghg_feed_cost(),
+                    prices=getattr(self.seen, "feed_prices", None), req_extra=_rx, feed_ghg=self._ghg_feed_cost(),
                     npk=npk, drop_labels=drop, cap_rules=self._cap_rules_spec(), ghg_min=ghg_min,
                     land_rent_rows=dict(getattr(self.ev, "land_rent_rows", None) or {}), **abat)
         if npk is not None and getattr(self.ev, "alloc_cols", 0):
@@ -173,7 +173,7 @@ class NLPBlock:
             spec_sim = spec
             spec = dict(spec_sim, drop_labels=list(drop) + pol_rows)
             _fp = None
-            if self.__dict__.pop("_nlp_cal_check", False) or cal is None:
+            if _st.pop(self.seen, "nlp_cal_check", False) or cal is None:
                 _fp = _spec_fingerprint(spec, yb_n=np.asarray(x_start, float), xb=xb[:n])
                 if cal is not None and cal.get("fp") != _fp:
                     cal = None              # made on another calibration problem (a baseline checks it, see run)
@@ -501,7 +501,7 @@ class NLPBlock:
         _ye = getattr(type(self), "yani_exact_response", None)
         if _ye is None:
             _ye = bool(getattr(type(self), "use_cattle_member_splits", False))
-        if _ye and getattr(self, "yani_price_ratio", None):
+        if _ye and getattr(self.seen, "yani_price_ratio", None):
             try:
                 self.res.yani_dnet = self._yani_response(nlp, res, list(cols))
             except Exception as _exc:                       # the caller falls back to the PMP terms' response

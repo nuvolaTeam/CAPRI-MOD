@@ -52,7 +52,7 @@ class PolicyBlock:
             ms = self.data.region_id[:2]
             ms = MS_CODE.get(ms, ms)
             ofar = 1.0
-            env_ = getattr(self, "_env_for_surplus", None)
+            env_ = getattr(self.seen, "env_for_surplus", None)
             try:
                 from capri_mod.fert.npk import NPKData
                 cr = env_._inner_fert.capri_region(self.data.region_id) if env_ is not None and \

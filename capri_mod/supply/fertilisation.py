@@ -19,7 +19,7 @@ class FertilisationBlock:
             man_d = srow[6] if srow[6] is not None and hasattr(srow[6], "get") else None
             if man_d is not None:
                 return {"man_d": man_d, "nmin": srow[2], "ybase": srow[4]}
-        ctx = getattr(self, "_manure_ctx", None)
+        ctx = getattr(self.seen, "manure_ctx", None)
         return ctx if ctx and ctx.get("man_d") is not None else None
 
     def _ef_mineral_n2o(self) -> float:
@@ -124,7 +124,7 @@ class FertilisationBlock:
         linearised at no adoption."""
         from capri_mod.environmental.environmental_module import (EF_SOIL_N2O_DIRECT, EF_SOIL_N2O_INDIRECT,
                                                                   GWP_N2O)
-        tax = float(getattr(self, "ghg_tax", 0.0) or 0.0)
+        tax = float(getattr(self.seen, "ghg_tax", 0.0) or 0.0)
         k = 44.0 / 28.0 * GWP_N2O
         ef_d, ef_v = EF_SOIL_N2O_DIRECT * k, 0.10 * EF_SOIL_N2O_INDIRECT * k
         h = []
@@ -153,8 +153,8 @@ class FertilisationBlock:
         # sub-activity unit), the manure N2O change through the loss cascade (the accounts' finite difference,
         # ghg_tax.ghg_coefficients "mtech", per head) less the indirect N2O of the NH3 kept and the soil N2O of the
         # mineral N it displaces (sub x N kept); kt CO2-eq per unit -> x tax = 1000 EUR, the objective's unit
-        tax = float(getattr(self, "ghg_tax", 0.0) or 0.0)
-        mtc = ((getattr(self, "ghg_coef", None) or {}).get("mtech") or {}) if tax > 0 else {}
+        tax = float(getattr(self.seen, "ghg_tax", 0.0) or 0.0)
+        mtc = ((getattr(self.seen, "ghg_coef", None) or {}).get("mtech") or {}) if tax > 0 else {}
         ef_n, ef_m = (self._ef_nh3_n2o(), self._ef_mineral_n2o()) if tax > 0 else (0.0, 0.0)
         out = []
         for a, subs in techs.items():
@@ -200,7 +200,7 @@ class FertilisationBlock:
         the base and fixed in simulation; here one per region and nutrient). None outside CAPRI's EU data."""
         from capri_mod.fert.npk import NPKData, NUTRIENTS, PERM_NGRP, endo_slope, need_multiplier
         from capri_mod.fert.inner_fert_dist import FERT_POST_ACCURACY
-        env_ = getattr(self, "_env_for_surplus", None)
+        env_ = getattr(self.seen, "env_for_surplus", None)
         if env_ is None:
             return None
         from capri_mod.fert.inner_fert_dist import InnerFertDist
@@ -271,7 +271,7 @@ class FertilisationBlock:
                 # proportion CAPRI's 2030 reference applies it (net of the base net exports, ManureNPK_)
                 man = np.array([D.manure_per_head(rid, nut, a) if a in ANIMALS else 0.0 for a in acts])
                 # with manure trade off nothing leaves the region: all manure P / K applied, as for N
-                if bool(getattr(getattr(self, "_env_for_surplus", None), "manure_trade_on", True)):
+                if bool(getattr(getattr(self.seen, "env_for_surplus", None), "manure_trade_on", True)):
                     man = man * self._npk_applied_ratio(cr, nut)
             # kappa: NUTNED_ summed over the groups at base (all flows interior), the need net of the permanent
             # crops' own residues scaled together (REGISTERED: CAPRI's multiplier is on the need alone; with the model's
@@ -436,7 +436,7 @@ class FertilisationBlock:
         r = float(mc.get("reduction", 0.0) or 0.0)
         if mc.get("kind") == "crp":
             from capri_mod.fert.inner_fert_dist import beta_regulation
-            env_ = getattr(self, "_env_for_surplus", None)
+            env_ = getattr(self.seen, "env_for_surplus", None)
             inner = env_.__dict__.get("_inner_fert") if env_ is not None else None
             if inner is None:
                 return
@@ -470,7 +470,7 @@ class FertilisationBlock:
         environmental accounts' own unit balances (n_mineral_input) as the row is built from them: activities their
         unit balance's, manure exports and imports -/+ the substitution factor, the grassland split its delta, the
         dairy, cattle and option columns their animal's in proportion to their manure coefficient."""
-        env_ = getattr(self, "_env_for_surplus", None)
+        env_ = getattr(self.seen, "env_for_surplus", None)
         i_nb = labels.index("N_balance")
         mp = np.zeros(A.shape[1])
         if env_ is None:
@@ -563,7 +563,7 @@ class FertilisationBlock:
         with manure trade off). None outside CAPRI's EU data."""
         from capri_mod.fert.npk import NPKData
         from capri_mod.fert.inner_fert_dist import InnerFertDist
-        env_ = getattr(self, "_env_for_surplus", None)
+        env_ = getattr(self.seen, "env_for_surplus", None)
         if env_ is None:
             return None
         inner = env_.__dict__.get("_inner_fert")
@@ -605,7 +605,7 @@ class FertilisationBlock:
         base those cancel over the region. (Until Sprint 9e the technologies scaled the whole unit coefficient,
         which saved on the manure-covered need as well: ~40% more mineral N saved in the rows than in the accounts,
         Upper Bavaria wheat 108 against 77 kg N/ha.)"""
-        env_ = getattr(self, "_env_for_surplus", None)
+        env_ = getattr(self.seen, "env_for_surplus", None)
         if env_ is None:
             return 0.0
         try:
@@ -628,7 +628,7 @@ class FertilisationBlock:
     def _nitrate_extra(self) -> dict:
         """Extra N excretion from nitrate in the ration, t N per activity unit
         (1000 heads): 0.28 kg N per kg nitrate per head."""
-        rs = getattr(self, "ration_state", None) or {}
+        rs = getattr(self.seen, "ration_state", None) or {}
         return {a: self.NITR_N_EXCR * float(v.get("nitr_kg", 0.0))
                 for a, v in rs.items() if isinstance(v, dict) and float(v.get("nitr_kg", 0.0)) > 0}
 
@@ -637,7 +637,7 @@ class FertilisationBlock:
         ex = self._nitrate_extra().get(a, 0.0)
         if ex <= 0:
             return 0.0
-        env_ = getattr(self, "_env_for_surplus", None)
+        env_ = getattr(self.seen, "env_for_surplus", None)
         try:
             sub = float(env_._substitution(self.data.region_id)[0]) if env_ is not None else 0.0
         except Exception:

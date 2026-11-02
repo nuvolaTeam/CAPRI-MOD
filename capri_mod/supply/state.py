@@ -147,8 +147,23 @@ class RegionalEvalState(_Slots):
 
 
 class RegionalSeen(_Slots):
-    """What the supply module and the coupling set on a regional model before its solve."""
-    __slots__ = ()
+    """What the supply module and the coupling set on a regional model before its solve (S9; read with a getattr
+    default where it may be unset, as the attributes were: yani_price_ratio and manure_ctx had class defaults None)."""
+    __slots__ = (
+        "ration_state",       # the feed block's ration state of the region
+        "manure_pool_price",  # the manure pool's N price of the member state
+        "manure_pool_price_pk",  # its P and K prices
+        "yani_price_ratio",   # the young-animal price ratios {good: price / base price}
+        "feed_rations",       # the rations by animal
+        "feed_prices",        # the feed prices
+        "feed_bulk_ratio",    # the bulk feeds' price ratios
+        "ghg_tax",            # the emission tax (EUR per t CO2-eq; 0 outside the EU)
+        "ghg_coef",           # the emission coefficients of the region
+        "env_for_surplus",    # the supply module's shared EnvironmentalModule (removed before pickling, re-attached)
+        "manure_ctx",         # CAPRI's crop nutrient balance terms (Sprint 9k; None outside the EU)
+        "fert_techs_all",     # CAPRI's fertiliser options (NLP form)
+        "nlp_cal_check",      # set by CAPRIModel at a baseline: check the NLP calibration at the next solve
+    )
 
 
 class RegionalResults(_Slots):
@@ -360,6 +375,20 @@ MOVED_REGIONAL: dict = {
     "_last_manure_trade_pk": "res.last_manure_trade_pk",
     "_last_mineral_n": "res.last_mineral_n",
     "_last_plain": "res.last_plain",
+    # S9: the regional models' inputs
+    "ration_state": "seen.ration_state",
+    "manure_pool_price": "seen.manure_pool_price",
+    "manure_pool_price_pk": "seen.manure_pool_price_pk",
+    "yani_price_ratio": "seen.yani_price_ratio",
+    "feed_rations": "seen.feed_rations",
+    "feed_prices": "seen.feed_prices",
+    "feed_bulk_ratio": "seen.feed_bulk_ratio",
+    "ghg_tax": "seen.ghg_tax",
+    "ghg_coef": "seen.ghg_coef",
+    "_env_for_surplus": "seen.env_for_surplus",
+    "_manure_ctx": "seen.manure_ctx",
+    "_fert_techs_all": "seen.fert_techs_all",
+    "_nlp_cal_check": "seen.nlp_cal_check",
 }
 #: the supply module's former attribute names
 MOVED_MODULE: dict = {

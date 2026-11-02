@@ -12,14 +12,14 @@ class AbatementBlock:
     def _techs_inside(self) -> bool:
         """CAPRI's ammonia technologies are decision variables of the regional model (technologies on, rations
         available)."""
-        return bool(getattr(self, "feed_rations", None) or {})
+        return bool(getattr(self.seen, "feed_rations", None) or {})
 
     def _amm_context(self):
         """(technology blocks per animal, manure N per unit, CAPRI NH3 share, substitution) or None."""
         techs = self._manure_techs()
         _mc = self._mctx()
         man_d = _mc["man_d"] if _mc else None
-        env_ = getattr(self, "_env_for_surplus", None)
+        env_ = getattr(self.seen, "env_for_surplus", None)
         if not techs or man_d is None or env_ is None:
             return None
         try:
@@ -47,7 +47,7 @@ class AbatementBlock:
 
     def _amm_incentive(self, labels) -> bool:
         return ("N_balance" in labels or "mineral_N" in labels
-                or float(getattr(self, "ghg_tax", 0.0) or 0.0) > 0)
+                or float(getattr(self.seen, "ghg_tax", 0.0) or 0.0) > 0)
 
     def _catc_spec(self):
         """The winter cover option of this region for the NLP form ({"uaa", "m0", "lb", "ub", "k1", "lin", "sqr",
@@ -99,7 +99,7 @@ class AbatementBlock:
             sc = {a: self._amm_scale(ss, float(man_d.get(a, 0.0) or 0.0), float(nh3.get(a, 0.0) or 0.0))
                   for a, ss in subs.items() if a in self.acts}
             out["amm"] = {"techs": techs, "subs": subs, "sc": sc, "wc": self._winter_cover_shares()}
-        _tl = getattr(self, "_fert_techs_all", None) or []
+        _tl = getattr(self.seen, "fert_techs_all", None) or []
         if _tl:
             ft = [(nm_, nmin_, a_, b_, smx_) for (nm_, nmin_, a_, b_, s0_, smx_) in _tl]
             mr = self._crop_mineral_now()
@@ -331,7 +331,7 @@ class AbatementBlock:
         self.ev.manure_ni_relief, self.ev.manure_ni_nh3 = {}, {}
         if self._ni_inside():
             return                       # decided inside the regional model
-        tax = float(getattr(self, "ghg_tax", 0.0) or 0.0)
+        tax = float(getattr(self.seen, "ghg_tax", 0.0) or 0.0)
         lam = float(lam or 0.0)
         if lam <= 0 and tax <= 0:
             return
@@ -365,7 +365,7 @@ class AbatementBlock:
         """The parameters of CAPRI's inhibitor on manure for this region (see _apply_manure_inhibitor), or None:
         sub, nman, smax, S0, slope (EUR per t of manure N), app_nh3 (t NH3-N per activity unit at full adoption),
         v_tax (EUR per t of manure N treated), man_d (t manure N per activity unit)."""
-        tax = float(getattr(self, "ghg_tax", 0.0) or 0.0)
+        tax = float(getattr(self.seen, "ghg_tax", 0.0) or 0.0)
         # national entry (fert_options_jul15.csv is keyed by CAPRI codes)
         _ms = capri_ms(self.data.region_id)
         ni = next((t for t in fert_option_table().get(_ms, []) if str(t.option).upper() == "NITR_INH"), None)
@@ -445,7 +445,7 @@ class AbatementBlock:
         application NH3 (NH3APP). Weighted over the region's animals by their base manure N (REGISTERED: weights and the
         ammonia cascade multiplier on application N2O held at base)."""
         from capri_mod.environmental.environmental_module import EF_SOIL_N2O_INDIRECT, GWP_N2O
-        env_ = getattr(self, "_env_for_surplus", None)
+        env_ = getattr(self.seen, "env_for_surplus", None)
         k = 44.0 / 28.0 * GWP_N2O
         v = sub * nman * self._ef_mineral_n2o()
         lit2 = fert_side_value(self.data.region_id, "NITR_INH_MAN", "N2OAPP")
@@ -475,8 +475,8 @@ class AbatementBlock:
     # column's emission per unit at the baseline; set by CAPRIModel (ghg_tax, ghg_coef) for EU regions
     # ------------------------------------------------------------------------------------------
     def _ghg_cost(self, kind, key=None) -> float:
-        tax = float(getattr(self, "ghg_tax", 0.0) or 0.0)
-        co = getattr(self, "ghg_coef", None)
+        tax = float(getattr(self.seen, "ghg_tax", 0.0) or 0.0)
+        co = getattr(self.seen, "ghg_coef", None)
         if tax <= 0 or not co:
             return 0.0
         v = co.get(kind)
@@ -493,8 +493,8 @@ class AbatementBlock:
                 self.net_revenues[a] = float(self.net_revenues[a]) + d
         self.ev.ghg_applied = {}
         self.ev.ghg_nr_obj = self.net_revenues
-        tax = float(getattr(self, "ghg_tax", 0.0) or 0.0)
-        co = getattr(self, "ghg_coef", None)
+        tax = float(getattr(self.seen, "ghg_tax", 0.0) or 0.0)
+        co = getattr(self.seen, "ghg_coef", None)
         if tax <= 0 or not co:
             return
         for a, e in (co.get("act") or {}).items():
@@ -505,8 +505,8 @@ class AbatementBlock:
 
     def _ghg_feed_cost(self):
         """Flexible feeds: tax x emission per t fed, in the regional objective's EUR/kg units ({(animal, feed)})."""
-        tax = float(getattr(self, "ghg_tax", 0.0) or 0.0)
-        co = getattr(self, "ghg_coef", None)
+        tax = float(getattr(self.seen, "ghg_tax", 0.0) or 0.0)
+        co = getattr(self.seen, "ghg_coef", None)
         if tax <= 0 or not co or not co.get("feed"):
             return None
         return {k: tax * float(e) / 1000.0 for k, e in co["feed"].items()}

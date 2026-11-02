@@ -314,7 +314,7 @@ def test_manure_p_and_k_have_markets_of_their_own(model):
             assert set(pk) == {"P", "K"} and len({*mo.ev.pool_cols, *pk["P"], *pk["K"]}) == 6
             Q, c, A, bb, y = mo.res.last_aug
             for nut, (je, ji) in pk.items():
-                assert abs(float(c[je]) - mo.manure_pool_price_pk[nut]) < 1e-9 and abs(float(c[ji]) + float(c[je])) < 1e-9
+                assert abs(float(c[je]) - mo.seen.manure_pool_price_pk[nut]) < 1e-9 and abs(float(c[ji]) + float(c[je])) < 1e-9
             x0 = mo._base_levels().reindex(mo.acts).fillna(0.0).values
             xa = np.array([b["supply"][r].activities.get(a, 0.0) for a in mo.acts])
             assert float(np.max(np.abs(xa - x0) / np.maximum(np.abs(x0), 1.0))) < 1e-4
@@ -345,9 +345,9 @@ def test_manure_market_and_ammonia_options_in_every_eu_solve(model):
         if model.use_manure_market:
             je, ji = mo.ev.pool_cols
             Q, c, A, bb, y = mo.res.last_aug
-            assert abs(float(c[je]) - float(mo.manure_pool_price)) < 1e-9 and abs(float(c[ji]) + float(c[je])) < 1e-9
+            assert abs(float(c[je]) - float(mo.seen.manure_pool_price)) < 1e-9 and abs(float(c[ji]) + float(c[je])) < 1e-9
         if "NO080000" in regs:
-            assert model.supply_module._models["NO080000"]._manure_ctx is None
+            assert model.supply_module._models["NO080000"].seen.manure_ctx is None
         sh0 = dict(b["supply"]["BL210000"].manure_tech_shares)
         s = model.run(custom_scenario=carbon_tax_scenario(100.0), regions=regs, max_outer_iter=2)
         co = list(model._ghg_coef_cache.values())[-1]["BL210000"]
@@ -2658,7 +2658,7 @@ def test_parallel_regional_solves_match_sequential():
         out.append(({r: dict(v.activities) for r, v in s["supply"].items()},
                     {r: dict(v.shadow_prices) for r, v in s["supply"].items()},
                     dict(m.supply_module._nbal_state)))
-        assert all(m.supply_module._models[r]._env_for_surplus is m.supply_module._env_for_surplus for r in regs)
+        assert all(m.supply_module._models[r].seen.env_for_surplus is m.supply_module._env_for_surplus for r in regs)
         # the solves' _nlp* fields, also those the workers brought back, are the declared ones (NLP_STATE, S0b)
         _decl = set(type(m.supply_module._models[regs[0]]).NLP_STATE)
         for r in regs:

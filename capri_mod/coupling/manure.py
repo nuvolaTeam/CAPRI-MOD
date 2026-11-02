@@ -111,8 +111,8 @@ class ManureBlock:
             sl = float(Q[je, je])
             # the pool price the region was solved at (its export column's cost also carries the emission tax,
             # which belongs to the threshold, not to the price)
-            pnow = float(getattr(mo, "manure_pool_price", 0.0) or 0.0) if prod == "N" else \
-                float((getattr(mo, "manure_pool_price_pk", None) or {}).get(prod, 0.0) or 0.0)
+            pnow = float(getattr(mo.seen, "manure_pool_price", 0.0) or 0.0) if prod == "N" else \
+                float((getattr(mo.seen, "manure_pool_price_pk", None) or {}).get(prod, 0.0) or 0.0)
             rce = max(0.0, float(c[je] + Q[je] @ y + A[:, je] @ lam))
             rci = max(0.0, float(c[ji] + Q[ji] @ y + A[:, ji] @ lam))
             rc_ = getattr(mo.res, "nlp_rc", None)

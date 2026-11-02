@@ -521,12 +521,12 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
                    "res.last_cattle_z", "res.last_dairy_z", "ev.last_duals", "res.last_feed_dm", "res.last_feed_t",
                    "res.last_genet_z", "res.last_grass_z", "res.last_hist_fallow", "res.last_npk", "ev.last_req_duals",
                    "ev.manure_ni_nh3", "ev.manure_ni_relief", "res.manure_tech_shares", "ev.price_shock_now",
-                   "sv.wc_solved", "feed_rations")
+                   "sv.wc_solved", "seen.feed_rations")
     #: the regional NLP's fields (warm starts, calibration, fallbacks and their diagnostics): what the market supply
     #: Hessian restored by the prefix "_nlp" until 2 November 2026 (refactor stage 3, S0b: the same set, declared). An
     #: entry is an attribute name or, for a field moved into the state objects, its path ("sv.nlp_prev"; S2, S3; both
     #: lists). Every instance attribute named _nlp* must be listed here (test_nlp_state_lists_every_nlp_attribute)
-    NLP_STATE = ("ev.nlp_accept_last", "par.nlp_base_alloc", "par.nlp_cal", "_nlp_cal_check", "par.nlp_cal_store",
+    NLP_STATE = ("ev.nlp_accept_last", "par.nlp_base_alloc", "par.nlp_cal", "seen.nlp_cal_check", "par.nlp_cal_store",
                  "sv.nlp_cols", "ev.nlp_failed", "res.nlp_fallback_log", "ev.nlp_fb_last", "res.nlp_jump",
                  "ev.nlp_mine_small", "ev.nlp_n_target_cause", "ev.nlp_nip", "res.nlp_nonoptimal", "res.nlp_ok",
                  "res.nlp_path", "sv.nlp_prev", "sv.nlp_prev_f", "res.nlp_rc", "sv.nlp_relax_keep", "res.nlp_relaxed",
@@ -566,9 +566,6 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
                 return sum(v * float(price_shock.get(m, price_shock.get(act, 0.0) if m == own else 0.0))
                            for m, v in parts.items())
         return mrev * float(price_shock.get(act, 0.0))
-
-    #: young-animal price ratios {good: price / base price}, set by the supply module per run
-    yani_price_ratio = None
 
 
     #: compute each region's response to the young-animal prices from its solved NLP (K65): None (default) with the
@@ -813,7 +810,7 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
             # at base nothing changes. Protein feed (oilseed cakes, CAPRI's SOYC,
             # RAPC, SUNC) is priced through the FPRO bulk or, without it, the
             # cake price changes (_protein_feed_cost_change).
-            if act in ANIMALS and price_shock is not None and act not in (getattr(self, "feed_rations", None) or {}):
+            if act in ANIMALS and price_shock is not None and act not in (getattr(self.seen, "feed_rations", None) or {}):
                 # With feeding inside the regional model (a ration for the animal) the feed is
                 # bought in the model at its current prices (QUADRF_ in capri_regional_nlp.py, the base
                 # ration's cost taken out of the linear term), as CAPRI costs feed once (supply_model.gms QUADRF_); the
@@ -836,7 +833,7 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
                 qp = float(fc.get(f"{act}_protein", float("nan"))) if fc is not None else float("nan")
                 if qc == qc:
                     wsum = sum(self.FEED_CEREAL_MIX.values())
-                    _fbr = getattr(self, "feed_bulk_ratio", None) or {}
+                    _fbr = getattr(self.seen, "feed_bulk_ratio", None) or {}
                     if "FCER" in _fbr:
                         lvl = sum((w / wsum) * float(self.data.producer_prices.get(feed, 0.0))
                                   for feed, w in self.FEED_CEREAL_MIX.items())
@@ -958,9 +955,6 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
     #: national manure market through the allocation (stage 2); requires
     #: use_fert_allocation
     use_manure_pool = False
-    #: CAPRI's crop nutrient balance terms for every EU solve (Sprint 9k): manure N per unit, crops' base
-    #: mineral N per ha, base yields - set by SupplyModule before each solve (None outside the EU)
-    _manure_ctx = None
 
 
     # CAPRI's two grassland activities (extensive GRAE, intensive GRAI) represented by the area
@@ -1219,7 +1213,7 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
             ycur = self.data.yields
             row_B = np.zeros(n)
             self.ev.mineral_row = {}
-            _env_now = getattr(self, "_env_for_surplus", None)
+            _env_now = getattr(self.seen, "env_for_surplus", None)
             for i, a in enumerate(self.acts):
                 sa = float(coefs.get(a, 0.0))
                 if not self._techs_inside():
@@ -1311,7 +1305,7 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
         # activity's mineral N from the environmental module's own balance (linear in activity levels, at this
         # solve's yields and fertiliser factors, as the N_balance row), kappa_a = sum_g share_ag x cap_g (kg/ha).
         mcap = getattr(self.ev, "mineral_cap", None)
-        _env_m = getattr(self, "_env_for_surplus", None)
+        _env_m = getattr(self.seen, "env_for_surplus", None)
         if mcap is not None and _env_m is not None:
             mint = getattr(self.ev, "n_intensity", {}) or {}
             ycur = self.data.yields
@@ -2971,25 +2965,25 @@ class SupplyModule(ModuleStateMixin):
                 surplus_row=surplus_row,
                 mineral_cap=mcap,
             )
-            model.ration_state = (getattr(self, "ration_state", None) or {}).get(region)
-            model.manure_pool_price = (getattr(self, "manure_pool_price", None) or {}).get(region[:2], 0.0)
-            model.manure_pool_price_pk = {nut_: float(((getattr(self, "manure_pool_price_pk", None) or {}).get(nut_) or {})
+            model.seen.ration_state = (getattr(self, "ration_state", None) or {}).get(region)
+            model.seen.manure_pool_price = (getattr(self, "manure_pool_price", None) or {}).get(region[:2], 0.0)
+            model.seen.manure_pool_price_pk = {nut_: float(((getattr(self, "manure_pool_price_pk", None) or {}).get(nut_) or {})
                                                       .get(region[:2], 0.0)) for nut_ in ("P", "K")}
-            model.yani_price_ratio = getattr(self, "yani_price_ratio", None)
+            model.seen.yani_price_ratio = getattr(self, "yani_price_ratio", None)
             _yms = getattr(self, "yani_price_ratio_ms", None) or {}
             if _yms:
                 # young-animal prices of the member state's market (CAPRI yaniMarket_ per trade block)
                 _msy = capri_ms(region)
-                model.yani_price_ratio = _yms.get(_msy, model.yani_price_ratio)
-            model.feed_rations = (getattr(self, "feed_rations", None) or {}).get(region)
-            model.feed_prices = (getattr(self, "feed_prices", None) or {}).get(region)
+                model.seen.yani_price_ratio = _yms.get(_msy, model.seen.yani_price_ratio)
+            model.seen.feed_rations = (getattr(self, "feed_rations", None) or {}).get(region)
+            model.seen.feed_prices = (getattr(self, "feed_prices", None) or {}).get(region)
             # CAPRI's feed bulk prices of the region's member state (feedBlkPrice_, CAPRIModel)
             _ms = capri_ms(region)
-            model.feed_bulk_ratio = {b: x for (m, b), x in (getattr(self, "feed_bulk_ratio", None) or {}).items()
+            model.seen.feed_bulk_ratio = {b: x for (m, b), x in (getattr(self, "feed_bulk_ratio", None) or {}).items()
                                      if m == _ms}
             # CAPRI's emission tax (ghgTax): EU regions only (msNoEU excluded), CAPRIModel sets it
-            model.ghg_tax = float(getattr(self, "ghg_tax", 0.0) or 0.0) if is_eu(region) else 0.0
-            model.ghg_coef = (getattr(self, "ghg_coef", None) or {}).get(region)
+            model.seen.ghg_tax = float(getattr(self, "ghg_tax", 0.0) or 0.0) if is_eu(region) else 0.0
+            model.seen.ghg_coef = (getattr(self, "ghg_coef", None) or {}).get(region)
             # the regional model needs the environmental module for the
             # balance's substitution factor (manure market, crop-need
             # limit); it lived only on the supply module, so the
@@ -2998,13 +2992,13 @@ class SupplyModule(ModuleStateMixin):
                 from capri_mod.environmental.environmental_module import EnvironmentalModule
                 self._env_for_surplus = EnvironmentalModule(self.data)
                 self._env_for_surplus.set_manure_trade(getattr(self, "manure_trade_on", True))
-            model._env_for_surplus = self._env_for_surplus
+            model.seen.env_for_surplus = self._env_for_surplus
             # CAPRI's crop nutrient balance and manure market in every EU solve (Sprint 9k)
-            model._manure_ctx = self._manure_context(region, model)
+            model.seen.manure_ctx = self._manure_context(region, model)
             try:
-                model._fert_techs_all = self._fert_techs(region)      # CAPRI's fertiliser options (NLP form)
+                model.seen.fert_techs_all = self._fert_techs(region)      # CAPRI's fertiliser options (NLP form)
             except Exception:
-                model._fert_techs_all = []
+                model.seen.fert_techs_all = []
             result = model.solve(n_balance_price=nb_used, **solve_kw)
             # manure market: hand the region's endogenous manure trade and allocated
             # mineral N to the environmental accounting (else the reported N balance
@@ -3108,12 +3102,12 @@ class SupplyModule(ModuleStateMixin):
                     except Exception:
                         result.fert_nmin = {}
                 result.nitrate_share = {a: float(v.get("nitr_share", 0.0))
-                                        for a, v in (getattr(model, "ration_state", None) or {}).items()
+                                        for a, v in (getattr(model.seen, "ration_state", None) or {}).items()
                                         if isinstance(v, dict) and float(v.get("nitr_share", 0.0)) > 0}
                 # regions without substitution data (Berlin: almost no farmland) return
                 # None - never let that drop the region
                 try:
-                    _sb = model._env_for_surplus._substitution(region) if getattr(model, "_env_for_surplus", None) is not None else None
+                    _sb = model.seen.env_for_surplus._substitution(region) if getattr(model.seen, "env_for_surplus", None) is not None else None
                     result.n_substitution = float(_sb[0]) if _sb else 0.0
                 except Exception:
                     result.n_substitution = 0.0
@@ -3194,7 +3188,7 @@ class SupplyModule(ModuleStateMixin):
                 for out, model, state, caches in pool.map(_par_solve_region, rest, chunksize=1):
                     region = out[0]
                     if model is not None:
-                        model._env_for_surplus = self._env_for_surplus
+                        model.seen.env_for_surplus = self._env_for_surplus
                         self._models[region] = model
                     for name in self._PAR_STATE:
                         d = self.__dict__.setdefault(name, {})
@@ -3282,7 +3276,7 @@ def _par_solve_region(region):
     out = sm._solve_region(region, pol, ps, verbose)
     model = sm._models.get(region)
     if model is not None:
-        model.__dict__.pop("_env_for_surplus", None)     # this process's copy, re-attached in the parent
+        _st.pop(model.seen, "env_for_surplus", None)     # this process's copy, re-attached in the parent
     state = {n: sm.__dict__[n][region] for n in sm._PAR_STATE if region in (sm.__dict__.get(n) or {})}
     caches = {n: {k: v for k, v in (sm.__dict__.get(n) or {}).items() if k not in before[n]} for n in sm._PAR_CACHES}
     return out, model, state, caches
@@ -3294,7 +3288,7 @@ def _luc_of(model, land_types):
     try:
         from capri_mod.environmental.luc import LUCModel
         from capri_mod.fert.inner_fert_dist import InnerFertDist
-        env_ = getattr(model, "_env_for_surplus", None)
+        env_ = getattr(model.seen, "env_for_surplus", None)
         inner = env_.__dict__.get("_inner_fert") if env_ is not None else None
         if inner is None:
             inner = InnerFertDist()

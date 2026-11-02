@@ -210,7 +210,7 @@ class LandBlock:
                 # more of it - traded manure then counts in full and carries no
                 # fertiliser cost or saving (West Flanders, Antwerp)
                 sub = 0.0
-                env_ = getattr(self, "_env_for_surplus", None)
+                env_ = getattr(self.seen, "env_for_surplus", None)
                 if env_ is not None:
                     try:
                         sub = float(env_._substitution(self.data.region_id)[0])
@@ -225,7 +225,7 @@ class LandBlock:
                                 f"{self.data.region_id} ({_exc!r}); using availability")
                         sub = float(a_av)
                 if man0 > 1e-6:
-                    pp = float(getattr(self, "manure_pool_price", 0.0) or 0.0)
+                    pp = float(getattr(self.seen, "manure_pool_price", 0.0) or 0.0)
                     # CAPRI supply/define_manure_trade_costs.gms l. 66-71: p_manureBuyCostSlope = 50 / (GROF / 100), EUR
                     # 50 per t N for each 1% of the region's manure N supply traded. man0 is in t N (kg N per unit x
                     # 1000 units) and the objective in EUR 1000, so CAPRI's 50 is 0.05 here (supply.manure_pool_slope)
@@ -233,7 +233,7 @@ class LandBlock:
                     # emission tax: the mineral N bought (export) or saved (import), sub x the accounts' soil N2O
                     # factor and the indirect N2O of its runoff and leaching per t N (kt CO2-eq x EUR/t = 1000 EUR);
                     # the NLP form takes exactly this term out again (_nlp_tax_terms), mineral N being endogenous there
-                    g_ = float(getattr(self, "ghg_tax", 0.0) or 0.0) * sub \
+                    g_ = float(getattr(self.seen, "ghg_tax", 0.0) or 0.0) * sub \
                         * (self._ef_mineral_n2o() + self._ef_mineral_lea()) / 1000.0
                     pcols = []
                     for sign in (-1.0, +1.0):                  # -1 export, +1 import
@@ -272,7 +272,7 @@ class LandBlock:
                     if grof <= 1e-6:
                         continue
                     slope_k = float(_settings().get("supply.manure_pool_slope")) / (grof / 100.0)
-                    pp_k = float((getattr(self, "manure_pool_price_pk", None) or {}).get(nut, 0.0) or 0.0)
+                    pp_k = float((getattr(self.seen, "manure_pool_price_pk", None) or {}).get(nut, 0.0) or 0.0)
                     cols_k = []
                     for sign in (-1.0, +1.0):              # -1 export, +1 import
                         Qa = np.pad(Qa, ((0, 1), (0, 1))); Qa[-1, -1] = slope_k
@@ -300,7 +300,7 @@ class LandBlock:
         _mc = self._mctx()
         if _mc is not None:
             nmin, ybase, man_d = _mc.get("nmin"), _mc.get("ybase"), _mc.get("man_d")
-            env_ = getattr(self, "_env_for_surplus", None)
+            env_ = getattr(self.seen, "env_for_surplus", None)
             if nmin and man_d is not None and env_ is not None:
                 try:
                     sub_n = float(env_._substitution(self.data.region_id)[0])

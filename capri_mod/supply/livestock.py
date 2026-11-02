@@ -68,7 +68,7 @@ class LivestockBlock:
         return {"goods": goods, "dnet": n.T @ dy}
 
     def _apply_young_animal_prices(self):
-        ratio = getattr(self, "yani_price_ratio", None) or {}
+        ratio = getattr(self.seen, "yani_price_ratio", None) or {}
         if not ratio:
             return
         for g, rec in self._young_animal_coefs().items():
@@ -150,7 +150,7 @@ class LivestockBlock:
         if "GRAS" not in self.acts or alloc_k:
             return Qa, ca, Aa, ba, start
         gi = getattr(self.data, "grass_intensity", None)
-        env_ = getattr(self, "_env_for_surplus", None)
+        env_ = getattr(self.seen, "env_for_surplus", None)
         if gi is None or env_ is None or not hasattr(gi, "get") or not (gi.get("q_ext", 0) > 0):
             return Qa, ca, Aa, ba, start
         dl = env_.grass_intensity_delta(self.data.region_id)
@@ -235,7 +235,7 @@ class LivestockBlock:
                 rows_.append(k)
         ps = getattr(self.ev, "price_shock_now", None)
         pv = getattr(self.data, "livestock_product_value_by_market_coef", None)
-        yr = getattr(self, "yani_price_ratio", None) or {}
+        yr = getattr(self.seen, "yani_price_ratio", None) or {}
         ycoef = self._young_animal_coefs() if yr else {}
         members = type(self).CATTLE_SPLIT_MEMBERS
         member_splits = getattr(type(self), "use_cattle_member_splits", True)
@@ -244,7 +244,7 @@ class LivestockBlock:
             a = key.split(":")[0]
             if a not in self.acts or key not in members or (":" in key and not member_splits):
                 continue
-            r = (getattr(self, "feed_rations", None) or {}).get(a)
+            r = (getattr(self.seen, "feed_rations", None) or {}).get(a)
             if r is None or not (float(di.get("q_z", 0) or 0) > 0):
                 continue
             j = list(self.acts).index(a)
@@ -403,7 +403,7 @@ class LivestockBlock:
         for (a, opt), e in _gm[1].items():
             if a not in self.acts:
                 continue
-            r = (getattr(self, "feed_rations", None) or {}).get(a)
+            r = (getattr(self.seen, "feed_rations", None) or {}).get(a)
             L0 = float(base.get(a, 0.0) or 0.0)
             c = float(e.get("cost_eur_head", 0.0) or 0.0)
             if r is None or L0 <= 1e-6 or c <= 0 or not (float(e.get("elig_share", 0.0) or 0.0) > 0):
@@ -483,7 +483,7 @@ class LivestockBlock:
         if "DCOW" not in self.acts:
             return Qa, ca, Aa, ba, start
         di = getattr(self.data, "dairy_intensity", None)
-        r = (getattr(self, "feed_rations", None) or {}).get("DCOW")
+        r = (getattr(self.seen, "feed_rations", None) or {}).get("DCOW")
         if di is None or r is None or not hasattr(di, "get") or not (float(di.get("q_low", 0) or 0) > 0):
             return Qa, ca, Aa, ba, start
         jd = list(self.acts).index("DCOW")
@@ -564,8 +564,8 @@ class LivestockBlock:
                 continue
             row = np.zeros(len(self.acts))
             row_b = np.zeros(len(self.acts))
-            _rs = getattr(self, "ration_state", None) or {}
-            _fr = getattr(self, "feed_rations", None) or {}
+            _rs = getattr(self.seen, "ration_state", None) or {}
+            _fr = getattr(self.seen, "feed_rations", None) or {}
             for a, t in rec.get("use_t_head", {}).items():
                 if a in acts_idx:
                     xr = (_rs.get(a) or {}).get("x", {})

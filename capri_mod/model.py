@@ -599,7 +599,7 @@ class CAPRIModel(HessianBlock, FeedBlock, YoungAnimalBlock, PriceStepBlock, Manu
                     # calibration left by a supply module run on its own, without the model's rations and manure
                     # pools, was reused by DE11's mineral cap test)
                     for _m in self.supply_module._models.values():
-                        _m._nlp_cal_check = True
+                        _m.seen.nlp_cal_check = True
                 self._pool_state = None
                 self._pool_accel = None
                 self._pool_trace = []
