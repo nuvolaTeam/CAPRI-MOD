@@ -66,3 +66,33 @@ def test_a_scenario_takes_its_references_settings_unless_it_gives_its_own(tmp_pa
     d = D.load("s", root=tmp_path)
     assert d.manure_trade is False and d.endotech.as_dict() == {"ghgTechMYld": 0.2, "ghgTechFEff": 0.3}
     assert D.trajectory_of(d, root=tmp_path) == "null"
+
+
+def test_a_user_scenario_is_created_checked_and_built(tmp_path):
+    """python -m capri_mod.scenarios new / check: a scenario in the user's own folder, on a reference of the
+    repository's, with a table; a wrong Green Deal value and a code the model does not have stop the check."""
+    from capri_mod.scenarios.__main__ import main
+    from capri_mod import settings as S
+    d = str(tmp_path)
+    old = S.current()
+    assert main(["new", "my_tax", "--reference", "ref_star3", "--dir", d]) == 0
+    assert S.current() is old, "--dir must not outlive the command"
+    f = tmp_path / "my_tax" / "settings.toml"
+    f.write_text(f.read_text().replace("# carbon_tax = 0.0 ", "carbon_tax = 80.0 "))
+    (tmp_path / "my_tax" / "tariff_changes.csv").write_text("region,commodity,change_pct\nUSA,BARL,-10\n")
+    try:
+        S.activate(S.load([], overrides={"run.scenarios_dir": d}))
+        assert main(["check", "my_tax", "--dir", d]) == 0
+        sc = D.to_policy_scenario(D.load("my_tax"))
+        assert sc.carbon_tax == 80.0 and sc.tariff_changes == {"USA": {"BARL": -10.0}} and sc.manure_trade is None
+        (tmp_path / "my_tax" / "tariff_changes.csv").write_text("region,commodity,change_pct\nUSA,NOPE,-10\n")
+        with pytest.raises(ValueError, match="NOPE"):
+            D.to_policy_scenario(D.load("my_tax"))
+        assert main(["new", "my_gd", "--reference", "ref_star3", "--group", "greendeal_group", "--dir", d]) == 0
+        g = tmp_path / "my_gd" / "settings.toml"
+        g.write_text(g.read_text().replace("orgTarg = 0 ", "orgTarg = 12 "))
+        with pytest.raises(ValueError, match="orgTarg=12"):
+            D.to_policy_scenario(D.load("my_gd"))
+        assert main(["check", "my_gd", "--dir", d]) == 1
+    finally:
+        S.activate(old)

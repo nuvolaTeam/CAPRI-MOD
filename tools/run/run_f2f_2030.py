@@ -80,6 +80,9 @@ def main():
     ap.add_argument("--trajectory", default="capri_ref",
                     help="2030 baseline trajectory: capri_ref (CAPRI's 2030 reference, default), captrd (CAPRI's trend "
                          "projection) or a scenario folder name in capri_data/scenarios")
+    ap.add_argument("--scenarios-dir", default="",
+                    help="a folder of your own scenarios (python -m capri_mod.scenarios new/check), looked in before "
+                         "capri_data/scenarios (the setting run.scenarios_dir)")
     ap.add_argument("--settings", action="append", default=[],
                     help="a TOML settings file (capri_mod/settings/defaults.toml's keys); repeatable, later files win")
     ap.add_argument("--set", action="append", default=[],
@@ -108,6 +111,7 @@ def main():
     ov = {}
     flag_map = [  # (flag on, setting, value); every other setting: --set or --settings
         (bool(a.capped_regions), "supply.jrc_capped_override", a.capped_regions),
+        (bool(a.scenarios_dir), "run.scenarios_dir", a.scenarios_dir),
     ]
     for on, k, v in flag_map:
         if on:

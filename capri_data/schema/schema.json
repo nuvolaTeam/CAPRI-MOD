@@ -21816,7 +21816,8 @@
    "notes": [],
    "read_by": {
     "model": [
-     "capri_mod/data/definitions.py"
+     "capri_mod/data/definitions.py",
+     "capri_mod/scenarios/definition.py"
     ],
     "builders": [
      "build_ad_option",

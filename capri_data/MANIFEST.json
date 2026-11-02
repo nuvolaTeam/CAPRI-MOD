@@ -4878,7 +4878,8 @@
    "rows": 221,
    "columns": 3,
    "read_by_model": [
-    "capri_mod/data/definitions.py"
+    "capri_mod/data/definitions.py",
+    "capri_mod/scenarios/definition.py"
    ],
    "origin": {
     "nature": "capri",
