@@ -200,7 +200,7 @@ class HessianBlock:
             _c = _cp.deepcopy if skip else _cp.copy
             mods = {r_: {k_: _c(_st.get_path(mo_, k_)) for k_ in _state_paths(mo_) if _st.has_path(mo_, k_)}
                     for r_, mo_ in sm._models.items()}
-            return mods, {n_: _cp.deepcopy(sm.__dict__.get(n_)) for n_ in getattr(sm, "_PAR_STATE", ())}
+            return mods, {n_: _cp.deepcopy(_st.get_path_or(sm, n_)) for n_ in getattr(sm, "_PAR_STATE", ())}
 
         def _restore(snap):
             mods, par = snap
@@ -215,9 +215,9 @@ class HessianBlock:
                     _st.set_path(mo_, k_, (_cp.deepcopy if skip else _cp.copy)(v_))
             for n_, v_ in par.items():
                 if v_ is None:
-                    sm.__dict__.pop(n_, None)
+                    _st.del_path(sm, n_)
                 else:
-                    sm.__dict__[n_] = _cp.deepcopy(v_)
+                    _st.set_path(sm, n_, _cp.deepcopy(v_))
         _snap0 = _snapshot()
         yr0 = (getattr(sm, "yani_price_ratio", None), getattr(sm, "yani_price_ratio_ms", None),
                getattr(sm, "yani_price_ratio_m", None))
@@ -232,7 +232,7 @@ class HessianBlock:
             # up to 0.04 kt in r161, entered every column)
             sm.feed_bulk_ratio = fb0 if fb0 is not None else self.feed_bulk_price_ratios(sig0)
             _restore(_snap0)
-            sm._hess_fp, sm._hess_verify = {}, {}
+            sm.res.hess_fp, sm.res.hess_verify = {}, {}
             sm._hess_probe = "record"
             if kkt:
                 for mo_ in sm._models.values():
@@ -319,10 +319,10 @@ class HessianBlock:
             res = sm.run(price_signals=sig0, policy_scenario=pol, regions=regs, verbose=False)
             dev = float((bridged(res) - q0).abs().max().max())
         _restore(_snap0)
-        bad = sorted(k_ for k_, v_ in (getattr(sm, "_hess_verify", None) or {}).items() if not v_)
-        n_ver = len(getattr(sm, "_hess_verify", None) or {})
-        sm.__dict__.pop("_hess_fp", None)
-        sm.__dict__.pop("_hess_verify", None)
+        bad = sorted(k_ for k_, v_ in (getattr(sm.res, "hess_verify", None) or {}).items() if not v_)
+        n_ver = len(getattr(sm.res, "hess_verify", None) or {})
+        _st.pop(sm.res, "hess_fp", None)
+        _st.pop(sm.res, "hess_verify", None)
         self._ls_by_country = self._livestock_products_by_country(supply_results)
         t = pd.DataFrame(rows, columns=["ms", "x", "y", "dq"])
         cdir.mkdir(parents=True, exist_ok=True)

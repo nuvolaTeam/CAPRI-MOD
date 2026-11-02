@@ -216,12 +216,28 @@ class RegionalResults(_Slots):
 
 class ModuleParameters(_Slots):
     """The supply module's parameters, built once per base."""
-    __slots__ = ()
+    __slots__ = (
+        # S10a; the per-region caches returned by the workers (_PAR_CACHES) are merged into the parent's
+        "balance_cache",      # the N-balance coefficients by region
+        "env_for_surplus",    # the EnvironmentalModule shared with the regional models (seen.env_for_surplus)
+        "jrc_capped_cache",   # JRC121368's capped regions (popped by CAPRIModel every outer iteration)
+        "mcap_cache",         # the mineral caps by region
+        "mctx_cache",         # CAPRI's crop nutrient balance terms by region
+        "genetics_key",       # the settings key of the genomics calibration
+    )
 
 
 class ModuleSolveState(_Slots):
     """The supply module's state carried between regional passes."""
-    __slots__ = ()
+    __slots__ = (
+        # S10a; the N-balance price state is per region and returned by the workers (_PAR_STATE)
+        "base_cal_prev",      # the base calibration's previous round
+        "base_cal_round",     # its rounds across the baseline's iterations
+        "base_cal_stalled",   # the regions where it stalled
+        "nbal_bracket",       # the N-balance price bracket by region
+        "nbal_prev",          # the previous N-balance prices by region
+        "nbal_state",         # the N-balance price by region
+    )
 
 
 class ModuleSeen(_Slots):
@@ -231,7 +247,14 @@ class ModuleSeen(_Slots):
 
 class ModuleResults(_Slots):
     """The supply module's last pass: results and diagnostics."""
-    __slots__ = ()
+    __slots__ = (
+        # S10a
+        "hess_fp",            # the Hessian's skip probe: the regions' first-solve digests (set and popped by it)
+        "hess_verify",        # idem, verify mode
+        "max_nbal_region",    # the region of the largest N-balance price update
+        "max_nbal_update",    # the largest N-balance price update of the pass
+        "worker_failures",    # the regions a worker failed on
+    )
 
 
 _REMOVED = "removed (refactor stage 3 S1, 2 November 2026: written, never read)"
@@ -393,6 +416,24 @@ MOVED_REGIONAL: dict = {
 #: the supply module's former attribute names
 MOVED_MODULE: dict = {
     "_base_cal_drift": _REMOVED,
+    # S10a: the supply module's parameters, carried state and results
+    "_balance_cache": "par.balance_cache",
+    "_env_for_surplus": "par.env_for_surplus",
+    "_jrc_capped_cache": "par.jrc_capped_cache",
+    "_mcap_cache": "par.mcap_cache",
+    "_mctx_cache": "par.mctx_cache",
+    "genetics_key": "par.genetics_key",
+    "_base_cal_prev": "sv.base_cal_prev",
+    "_base_cal_round": "sv.base_cal_round",
+    "_base_cal_stalled": "sv.base_cal_stalled",
+    "_nbal_bracket": "sv.nbal_bracket",
+    "_nbal_prev": "sv.nbal_prev",
+    "_nbal_state": "sv.nbal_state",
+    "_hess_fp": "res.hess_fp",
+    "_hess_verify": "res.hess_verify",
+    "max_nbal_region": "res.max_nbal_region",
+    "max_nbal_update": "res.max_nbal_update",
+    "worker_failures": "res.worker_failures",
 }
 
 
@@ -426,6 +467,19 @@ def pop(obj, name, default=None):
 def _split(path):
     kind, dot, name = path.partition(".")
     return (kind, name) if dot else (None, path)
+
+
+def get_path_or(model, path, default=None):
+    """The entry's value, or default where the model does not hold it (dict.get for an entry of a state list)."""
+    return get_path(model, path) if has_path(model, path) else default
+
+
+def setdefault_path(model, path, default):
+    """dict.setdefault for an entry of a state list: its value if held (None included), else default, set."""
+    if has_path(model, path):
+        return get_path(model, path)
+    set_path(model, path, default)
+    return default
 
 
 def has_path(model, path):

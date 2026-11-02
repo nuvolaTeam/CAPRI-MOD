@@ -2657,8 +2657,8 @@ def test_parallel_regional_solves_match_sequential():
         s = m.run(custom_scenario=farm_to_fork_scenario(), regions=regs, max_outer_iter=2)
         out.append(({r: dict(v.activities) for r, v in s["supply"].items()},
                     {r: dict(v.shadow_prices) for r, v in s["supply"].items()},
-                    dict(m.supply_module._nbal_state)))
-        assert all(m.supply_module._models[r].seen.env_for_surplus is m.supply_module._env_for_surplus for r in regs)
+                    dict(m.supply_module.sv.nbal_state)))
+        assert all(m.supply_module._models[r].seen.env_for_surplus is m.supply_module.par.env_for_surplus for r in regs)
         # the solves' _nlp* fields, also those the workers brought back, are the declared ones (NLP_STATE, S0b)
         _decl = set(type(m.supply_module._models[regs[0]]).NLP_STATE)
         for r in regs:
@@ -3561,13 +3561,13 @@ def test_nlp_form_takes_jrc121368_relaxation_where_the_tiered_n_target_fails(mod
     recorded, and kept for the scenario."""
     from capri_mod.policy.greendeal import farm_to_fork_scenario
     from capri_mod import settings as S
-    model.supply_module._jrc_capped_cache = None
+    model.supply_module.par.jrc_capped_cache = None
     try:
         with S.override({"supply.jrc_capped_override": "NL41,BE25,NL21,BE21,NL22,NL31,BE23,NL42,MT00"}):
             model.run(scenario="BASELINE", regions=["NL320000"], max_outer_iter=2)
             r = model.run(custom_scenario=farm_to_fork_scenario(), regions=["NL320000"], max_outer_iter=2)
     finally:
-        model.supply_module._jrc_capped_cache = None
+        model.supply_module.par.jrc_capped_cache = None
     fb = r["metadata"]["nlp_fallback"].get("NL320000") or []
     assert len(fb) == 1 and "relaxed target" in fb[0], fb       # once, then kept (sticky)
     mo = model.supply_module._models["NL320000"]

@@ -42,6 +42,7 @@ import time
 
 from capri_mod.data.loaders import load_all_data
 from capri_mod.supply.supply_module import SupplyModule
+from capri_mod.supply import state as _sst   # the supply's state objects (refactor stage 3)
 from capri_mod.market.market_module import MarketModule
 from capri_mod.policy.policy_module import PolicyModule, PolicyScenario
 from capri_mod.environmental.environmental_module import EnvironmentalModule
@@ -326,8 +327,8 @@ class CAPRIModel(HessianBlock, FeedBlock, YoungAnimalBlock, PriceStepBlock, Manu
         # the base manure trade between regions (CAPRI's 2030 reference) counts only where the run trades manure
         self.env_module.set_manure_trade(bool(_mt))
         self.supply_module.manure_trade_on = bool(_mt)
-        if getattr(self.supply_module, "_env_for_surplus", None) is not None:
-            self.supply_module._env_for_surplus.set_manure_trade(bool(_mt))
+        if getattr(self.supply_module.par, "env_for_surplus", None) is not None:
+            self.supply_module.par.env_for_surplus.set_manure_trade(bool(_mt))
         try:
             return self._run_scenario(pol_scenario, scenario, world_price_shock, custom_scenario, max_outer_iter,
                                       outer_tolerance, market_max_iter, run_environmental, run_biofuel,
@@ -583,7 +584,7 @@ class CAPRIModel(HessianBlock, FeedBlock, YoungAnimalBlock, PriceStepBlock, Manu
             # --- Step 1: Supply module ---
             if self.verbose:
                 print("    [Supply] Solving regional models...")
-            self.supply_module.__dict__.pop("_jrc_capped_cache", None)
+            _sst.pop(self.supply_module.par, "jrc_capped_cache", None)
             if outer_iter == 0:
                 from capri_mod.supply.supply_module import RegionalSupplyModel as _RSM
                 _on = bool(getattr(self, "use_manure_market", False))
@@ -1105,10 +1106,10 @@ class CAPRIModel(HessianBlock, FeedBlock, YoungAnimalBlock, PriceStepBlock, Manu
                         _d = (_pr - _prev.reindex(_pr.index).fillna(1.0)).abs().sort_values(ascending=False).head(3)
                         _top = ' | premium swing: ' + ', '.join(f'{k} {float(_pr[k]):.3f} ({v:+.3f})' for k, v in _d.items())
                     self._trace_prev_prem = _pr.copy() if _pr is not None else None
-                    _lu = float(getattr(self.supply_module, 'max_nbal_update', 0.0) or 0.0)
+                    _lu = float(getattr(self.supply_module.res, 'max_nbal_update', 0.0) or 0.0)
                     _yv = float(getattr(self, '_yani_imbalance', 0.0) or 0.0)
                     _gp = (_target.reindex(price_signal.index).fillna(0.0) - price_signal).abs()
-                    _lr = getattr(self.supply_module, 'max_nbal_region', None) if _lu > 1e-3 else None
+                    _lr = getattr(self.supply_module.res, 'max_nbal_region', None) if _lu > 1e-3 else None
                     print(f'  [outer {outer_iter + 1}] world max {_dv.abs().idxmax()} {float(_dv.abs().max()):.4f} | N price update {_lu:.5f}'
                           f'{" (%s, %s)" % _lr if _lr else ""} | milk MS gap {_ms_gap:.4f}'
                           f'{" %s s %.3f t %.3f w %.2f q %.3f" % getattr(self, "_milk_ms_worst") if _ms_gap > 0.005 and getattr(self, "_milk_ms_worst", None) else ""}'
@@ -1162,7 +1163,7 @@ class CAPRIModel(HessianBlock, FeedBlock, YoungAnimalBlock, PriceStepBlock, Manu
                           if outer_iter + 1 < self.SUP_GAP_LAST_ITER else 0.0)
             _gap = max(_gap, _ms_gap, float(getattr(self, "_eu_dev_gap", 0.0) or 0.0), _sup_gap_t)
             # each region's nitrogen-balance price settles with prices: do not stop while it moves
-            _nbal = float(getattr(self.supply_module, "max_nbal_update", 0.0) or 0.0)
+            _nbal = float(getattr(self.supply_module.res, "max_nbal_update", 0.0) or 0.0)
             _pool = float(getattr(self, "_pool_imbalance", 0.0) or 0.0)
             _pool_tol = float(self.manure_pool_tolerance)
             _yani = float(getattr(self, "_yani_imbalance", 0.0) or 0.0)

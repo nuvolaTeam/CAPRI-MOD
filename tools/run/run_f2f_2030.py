@@ -461,7 +461,7 @@ def main():
                                  "res.fert_tech_shares", "ev.n_intensity", "ev.cover", "ev.fall_floor", "res.last_grass_z",
                                  "ev.last_duals")}
             _d[r_].update({"acts": list(md_.acts), "Q": md_.Q, "f": md_.f, "net_revenues": md_.net_revenues.copy(),
-                           "base": md_._base_levels(), "nb_price": getattr(_pm.supply_module, "_nbal_state", {}).get(r_),
+                           "base": md_._base_levels(), "nb_price": getattr(_pm.supply_module.sv, "nbal_state", {}).get(r_),
                            "surplus_row": getattr(md_.ev, "surplus_row", None),
                            "balance_coefs": _pm.supply_module._balance_coefs(r_, md_)})
         pickle.dump(_d, open(a.out.replace(".pkl", "_dump.pkl"), "wb"))
