@@ -32,6 +32,20 @@ and `docs/KNOWN_ISSUES.md`.
 
 ---
 
+## 2 November 2026 (night): refactor stage 4, second half (batches 1-6, first part)
+
+- The environment's and the coupling's state in declared objects (capri_mod/environmental/state.py: par, ev, seen,
+  res; capri_mod/coupling/state.py: par, sv, ev, seen, res), the old names raising through MOVED_ENV / MOVED_MODEL;
+  the state kit shared in capri_mod/statekit.py. Seven write-only fields removed. The manure pools' state swapped by
+  paths. docs/design/ENV_COUPLING_STATE_INVENTORY.md has the inventory, the moves and what is left.
+- Numbers: NH3/N and urea N/CO2 in units.py; parameters ENDO_MAN_AV_SLOPE_N, ENDO_MAN_AV_CEILING, ENDO_MAN_AV_FLOOR,
+  ENDO_MAN_AV_FLOOR_KG (fert/endoManAvail.gms l. 61-81), NITRATE_CH4_REDUCTION (envind/line_nitr.gms l. 100-102),
+  FRAC_GASF (IPCC 2006); nine numerical settings (Hessian thresholds and progress, the manure pools' recovery, the
+  mineral caps' room). One definition of the manure availability slope (fert/npk.endo_slope).
+- Tables: "price follows" (beet, durum wheat, Norway's raw milk) as capri_data/codes/model_price_follows.csv; CAPRI's
+  FEED_TRD exported and read by the price step; the nutrient sources defined once.
+- Every batch's mini-EU run identical to the previous one at 1e-12. Not yet in a full Farm-to-Fork / Green Deal run.
+
 ## 2 November 2026 (evening): refactor stage 3, N6 second part; the sim_ini extract
 
 - The supply's remaining code tables as data (docs/design/N6_CODE_TABLES.md, second part): model_activity_classes.csv
