@@ -14,7 +14,7 @@ class FertilisationBlock:
         base mineral N per ha, "ybase": base yields}, from the N target's row when the scenario has one, else from
         the context SupplyModule sets for every EU solve (CAPRI's NUTNED_ and manure market are in every run,
         Sprint 9k); None when neither is there."""
-        srow = getattr(self, "_surplus_row", None)
+        srow = getattr(self.ev, "surplus_row", None)
         if srow is not None and len(srow) > 6:
             man_d = srow[6] if srow[6] is not None and hasattr(srow[6], "get") else None
             if man_d is not None:
@@ -79,14 +79,14 @@ class FertilisationBlock:
         (capri_mod.fert.npk.need_yield_factor: the main-output part linear in the yield, the straw part with the
         scenario's yields before the price response)."""
         from capri_mod.fert.npk import need_yield_factor
-        pf = float((getattr(self, "_yield_price_factor", None) or {}).get(a, 1.0))
+        pf = float((getattr(self.ev, "yield_price_factor", None) or {}).get(a, 1.0))
         ys = float(yc) / pf if pf > 0 else None
         return need_yield_factor(self.data.region_id, a, float(y0), float(yc), ys, nut)
 
     def _yields_scen_now(self):
         """The crops' current yields without this solve's price response (the scenario's shifted yields), for the
         environmental accounts' need factors; None without a price response."""
-        pf = getattr(self, "_yield_price_factor", None) or {}
+        pf = getattr(self.ev, "yield_price_factor", None) or {}
         if not pf or not hasattr(self.data.yields, "get"):
             return None
         return {a: float(self.data.yields.get(a)) / f for a, f in pf.items()
@@ -94,7 +94,7 @@ class FertilisationBlock:
 
     def _crop_mineral_now(self) -> dict:
         """Crops' mineral N per ha at this solve (kg N/ha): base rate x fertiliser intensity x CAPRI's need factor
-        of the yield (`_need_yf`), the same terms the N row uses (`_mineral_row`), for the fertiliser options without
+        of the yield (`_need_yf`), the same terms the N row uses (`ev.mineral_row`), for the fertiliser options without
         an N row."""
         ctx = self._mctx() or {}
         ybase = ctx.get("ybase")
@@ -372,7 +372,7 @@ class FertilisationBlock:
         nutrient at 1.2 x the baseline per ha (mode at the baseline, accuracy 10). The group's conversion is its crops'
         (capri-mod's organic targets per member state and crop class, the shares the I/O changes use), weighted by base
         area. Returns {nutrient: {(group, source): (max kg/ha, beta1, beta2)}} or {} without an organic target."""
-        conv = getattr(self, "_organic_conv", None) or {}
+        conv = getattr(self.ev, "organic_conv", None) or {}
         base = getattr(self.par, "nlp_base_alloc", None)
         if not conv or base is None:
             return {}
@@ -423,12 +423,12 @@ class FertilisationBlock:
         return out
 
     def _npk_mineral_cap(self, npk):
-        """The Green Deal's mineral N reduction (self._mineral_cap) on the fertilisation block: "crp" - CAPRI's "f2f"
+        """The Green Deal's mineral N reduction (self.ev.mineral_cap) on the fertilisation block: "crp" - CAPRI's "f2f"
         regulation on each capped group's mineral flow (max per ha = the base allocation per ha x (1 - r), CAPRI's
         exemptions; beta density mode 0.75 x max, accuracy 0.25) and "limCres" on residues; "uaa" - purchases <=
         base mineral N per ha of land x (1 - r) x current land. The base allocation is this model's own (the
         fertilisation block at the calibration point), as CAPRI takes its baseline's."""
-        mc = getattr(self, "_mineral_cap", None) or {}
+        mc = getattr(self.ev, "mineral_cap", None) or {}
         d = (npk.get("nutrients") or {}).get("N")
         base = getattr(self.par, "nlp_base_alloc", None)
         if not mc or d is None or base is None:
@@ -679,8 +679,8 @@ class FertilisationBlock:
         self.res.fert_tech_shares = {}
         self._apply_manure_techs(lam)
         self._apply_manure_inhibitor(lam)
-        srow = getattr(self, "_surplus_row", None)
-        _mc = getattr(self, "_mineral_cap", None) or {}
+        srow = getattr(self.ev, "surplus_row", None)
+        _mc = getattr(self.ev, "mineral_cap", None) or {}
         techs = srow[5] if (srow is not None and len(srow) > 5) else (_mc.get("techs") or [])
         if not lam or lam <= 0 or not techs:
             return None
@@ -786,8 +786,8 @@ class FertilisationBlock:
         manure market). The target per hectare becomes the region's base surplus x (1 - 36%); with
         the target per current hectare (e_SURTOTHa) its land terms move with it. Records
         balance_shortfall (kg N/ha relaxed) and n_target_relaxed. Returns (y, ok, Aa, ba)."""
-        labels = list(getattr(self, "_row_labels", []))
-        srow = getattr(self, "_surplus_row", None)
+        labels = list(getattr(self.ev, "row_labels", []))
+        srow = getattr(self.ev, "surplus_row", None)
         if "N_balance" not in labels or srow is None or len(srow) < 8 or srow[7] is None:
             return None, False, Aa, ba
         T = float(srow[1]); T2 = float(srow[7]) * (1.0 - SupplyModule.JRC_CAPPED_CUT)
@@ -816,7 +816,7 @@ class FertilisationBlock:
     def _n_relax_key(self):
         """The scenario's N target for this region (tiered target, base surplus): identifies the setting the
         JRC121368 relaxation belongs to; None without an N target."""
-        srow = getattr(self, "_surplus_row", None)
+        srow = getattr(self.ev, "surplus_row", None)
         if srow is None or len(srow) < 8 or srow[7] is None:
             return None
         return (round(float(srow[1]), 9), round(float(srow[7]), 9))

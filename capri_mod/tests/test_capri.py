@@ -312,7 +312,7 @@ def test_manure_p_and_k_have_markets_of_their_own(model):
             mo = sm._models[r]
             pk = mo.ev.pool_cols_pk
             assert set(pk) == {"P", "K"} and len({*mo.ev.pool_cols, *pk["P"], *pk["K"]}) == 6
-            Q, c, A, bb, y = mo._last_aug
+            Q, c, A, bb, y = mo.res.last_aug
             for nut, (je, ji) in pk.items():
                 assert abs(float(c[je]) - mo.manure_pool_price_pk[nut]) < 1e-9 and abs(float(c[ji]) + float(c[je])) < 1e-9
             x0 = mo._base_levels().reindex(mo.acts).fillna(0.0).values
@@ -344,7 +344,7 @@ def test_manure_market_and_ammonia_options_in_every_eu_solve(model):
         assert mo._mctx() is not None and mo.ev.need_row is not None
         if model.use_manure_market:
             je, ji = mo.ev.pool_cols
-            Q, c, A, bb, y = mo._last_aug
+            Q, c, A, bb, y = mo.res.last_aug
             assert abs(float(c[je]) - float(mo.manure_pool_price)) < 1e-9 and abs(float(c[ji]) + float(c[je])) < 1e-9
         if "NO080000" in regs:
             assert model.supply_module._models["NO080000"]._manure_ctx is None
@@ -2466,14 +2466,14 @@ def test_cover_crop_requirement_and_winter_cover_row(data):
     assert abs(cv["req"] - expect) < 1e-6 * max(1.0, expect)
     assert cv["delta"] > 0
     A, b, _, _ = model._build_constraints()
-    assert "winter_cover" in model._row_labels
-    i = model._row_labels.index("winter_cover")
+    assert "winter_cover" in model.ev.row_labels
+    i = model.ev.row_labels.index("winter_cover")
     assert abs(b[i] - (cv["uaa"] - cv["req"])) < 1e-6 * cv["uaa"] + 1e-6
     # with a landscape floor, CAPRI adds FALL.FLOOR to the catch-crop area (winterCover_)
     A, b, _, _ = model._build_constraints(set_aside_requirement=0.10)
-    i = model._row_labels.index("winter_cover")
-    floor = -b[model._row_labels.index("landscape_floor")]
-    assert floor > 0 and abs(model._fall_floor - floor) < 1e-9
+    i = model.ev.row_labels.index("winter_cover")
+    floor = -b[model.ev.row_labels.index("landscape_floor")]
+    assert floor > 0 and abs(model.ev.fall_floor - floor) < 1e-9
     assert abs(b[i] - (cv["uaa"] - cv["req"] + floor)) < 1e-6 * cv["uaa"] + 1e-6
     model.ev.cover = None
 
@@ -2897,7 +2897,7 @@ def test_jrc_relaxed_n_target_is_kept(model, monkeypatch):
         s = model.run(custom_scenario=farm_to_fork_scenario(), regions=regs, max_outer_iter=3)
         r = s["supply"]["NL120000"]
         mo = model.supply_module._models["NL120000"]
-        assert "N_balance" in list(mo._row_labels) and r.converged
+        assert "N_balance" in list(mo.ev.row_labels) and r.converged
         assert getattr(mo.ev, "nlp_fb_last", True) is False                       # the last solve in CAPRI's form
         fb = s["metadata"]["nlp_fallback"].get("NL120000") or []
         assert all("relaxed target" in e for e in fb) and len(fb) <= 1, fb
@@ -3121,7 +3121,7 @@ def test_capri_activity_bounds(data):
     sm.run(price_signals=None, regions=["NL120000"])
     m = sm._models["NL120000"]
     A, b, _, _ = m._build_constraints()
-    lab = list(m._row_labels)
+    lab = list(m.ev.row_labels)
     x0 = m._base_levels()
     for a in ("DCOW", "SHGF", "SWHE", "GRAS"):
         v = float(x0.get(a, 0.0))
@@ -3650,7 +3650,7 @@ def test_land_rows_are_equalities_and_histosol_fallow_keeps_its_land(model):
     model.run(scenario="BASELINE", regions=["IR010000"], max_outer_iter=1)
     mo = model.supply_module._models["IR010000"]
     lab = list(mo.ev.aug_labels)
-    _Q, _c, A, b, _y = mo._last_aug           # the augmented problem the land-market solve used
+    _Q, _c, A, b, _y = mo.res.last_aug           # the augmented problem the land-market solve used
     for row in ("arable_land", "permanent_land", "grassland"):
         if row in lab and row + "_lo" in lab:
             i, j = lab.index(row), lab.index(row + "_lo")
@@ -3998,9 +3998,9 @@ def test_input_costs_follow_yields_as_capri(monkeypatch):
     g = mo._input_row(crop, "yield_growth")
     assert rest and pl and ip and 0.5 < g < 1.5
     y0 = mo.data.yields.copy()
-    mo._yields_solve0 = y0
+    mo.ev.yields_solve0 = y0
     nr0 = mo.net_revenues.copy()
-    mo._greendeal_inputs = {}
+    mo.ev.greendeal_inputs = {}
     mo._apply_yield_input_costs()                                   # at the reference yields: no change
     assert (mo.net_revenues == nr0).all()
     y1 = y0.copy(); y1[crop] = y0[crop] * 0.9
@@ -4009,11 +4009,11 @@ def test_input_costs_follow_yields_as_capri(monkeypatch):
     assert abs((nr0[crop] - mo.net_revenues[crop]) - (rest + pl + ip) * tf * (-0.1)) < 1e-6
     # with the Green Deal's PLAP -50% and INPO +30%: those parts at (1 + change) x TF_I
     mo.net_revenues = nr0.copy()
-    mo._greendeal_inputs = {"pc_plap": -0.5, "pc_inpo": 0.3, "keep_tf": True}
+    mo.ev.greendeal_inputs = {"pc_plap": -0.5, "pc_inpo": 0.3, "keep_tf": True}
     mo._apply_yield_input_costs()
     want = (rest * tf + pl * 0.5 * tf + ip * 1.3 * tf) * (-0.1)
     assert abs((nr0[crop] - mo.net_revenues[crop]) - want) < 1e-6
-    mo.data.yields, mo._yields_solve0, mo._greendeal_inputs = y0, None, {}
+    mo.data.yields, mo.ev.yields_solve0, mo.ev.greendeal_inputs = y0, None, {}
 
 
 def _dying_in_fr10(region):
@@ -4057,7 +4057,7 @@ def test_nlp_form_has_capri_fodder_equality_without_lagged_band():
     from capri_mod.model import CAPRIModel
     m = CAPRIModel(data_dir="capri_data", verbose=False)
     m.run(scenario="BASELINE", regions=["FR250000"], max_outer_iter=1)
-    labels = m.supply_module._models["FR250000"]._row_labels
+    labels = m.supply_module._models["FR250000"].ev.row_labels
     assert any(l.startswith("fodder_") for l in labels)
     assert not any(l.endswith("_band") for l in labels)
 

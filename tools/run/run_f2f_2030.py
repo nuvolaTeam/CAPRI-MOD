@@ -457,11 +457,12 @@ def main():
             # dump's keys are the field names without the object and the leading underscore
             _d[r_] = {k_.rpartition(".")[2].lstrip("_"):
                       getattr(getattr(md_, k_.rpartition(".")[0]) if "." in k_ else md_, k_.rpartition(".")[2], None)
-                      for k_ in ("_last_aug", "_last_plain", "_row_labels", "ev.land_types_used", "res.fert_tech_shares",
-                                 "ev.n_intensity", "ev.cover", "_fall_floor", "_last_grass_z", "ev.last_duals")}
+                      for k_ in ("res.last_aug", "res.last_plain", "ev.row_labels", "ev.land_types_used",
+                                 "res.fert_tech_shares", "ev.n_intensity", "ev.cover", "ev.fall_floor", "res.last_grass_z",
+                                 "ev.last_duals")}
             _d[r_].update({"acts": list(md_.acts), "Q": md_.Q, "f": md_.f, "net_revenues": md_.net_revenues.copy(),
                            "base": md_._base_levels(), "nb_price": getattr(_pm.supply_module, "_nbal_state", {}).get(r_),
-                           "surplus_row": getattr(md_, "_surplus_row", None),
+                           "surplus_row": getattr(md_.ev, "surplus_row", None),
                            "balance_coefs": _pm.supply_module._balance_coefs(r_, md_)})
         pickle.dump(_d, open(a.out.replace(".pkl", "_dump.pkl"), "wb"))
     out["meta"]["run_manifest"] = run_manifest.finish()

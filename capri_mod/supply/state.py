@@ -63,6 +63,11 @@ class RegionalParameters(_Slots):
         # abatement (S7): the histosol fallowing's terms, calibrated from the duals
         "hist_cal",           # the terms by histosol class
         "hist_pending",       # the classes whose terms wait for the duals
+        # core and policy (S8)
+        "base_cal_shift",     # the linear terms' shift from SupplyModule.calibrate_to_base
+        "base_levels_cache",  # the base levels (a memo keyed on the base data's identity)
+        "input_cost_memo",    # the input costs (a memo)
+        "oyg_memo",           # the organic yield gaps (a memo)
     )
 
 
@@ -126,6 +131,18 @@ class RegionalEvalState(_Slots):
         "manure_ni_nh3",      # NH3 of the manure inhibitors, by activity
         "manure_ni_relief",   # the manure N the inhibitors keep, by activity
         "nlp_nip",            # the manure inhibitors' parameters
+        # core and policy (S8): the solve's arguments, the problem's rows, the scenario's per-solve terms
+        "fall_floor",         # the landscape (fallow) floor
+        "mineral_cap",        # the mineral fertiliser caps of this solve
+        "mineral_row",        # the mineral-N row's terms
+        "nbal_price",         # the N-balance price of this solve
+        "price_shock_now",    # the price shock of this solve (the Hessian's)
+        "row_labels",         # one label per row of the problem
+        "surplus_row",        # the N-surplus row of this solve
+        "yields_solve0",      # the yields at the start of the solve (restored at its end)
+        "greendeal_inputs",   # the Green Deal's input reductions of this solve
+        "organic_conv",       # the organic conversion shares by crop
+        "yield_price_factor", # the yields' price factors
     )
 
 
@@ -170,6 +187,15 @@ class RegionalResults(_Slots):
         "animal_n_kept",      # the manure N kept by the ammonia options, by animal
         "animal_nh3_saved",   # the NH3 they save, by animal
         "manure_tech_shares", # the manure technologies' shares
+        # core (S8)
+        "land_solution",      # the land types' levels
+        "last_aug",           # the augmented problem the land-market solve used (Q, c, A, b, y)
+        "last_grass_z",       # the grass split's level
+        "last_hist_fallow",   # the histosol fallowing by class
+        "last_manure_trade",  # the manure trade (N)
+        "last_manure_trade_pk",  # idem for P and K
+        "last_mineral_n",     # the mineral N bought
+        "last_plain",         # the plain problem (no land market), as last_aug
     )
 
 
@@ -310,6 +336,30 @@ MOVED_REGIONAL: dict = {
     "_animal_n_kept": "res.animal_n_kept",
     "_animal_nh3_saved": "res.animal_nh3_saved",
     "_manure_tech_shares": "res.manure_tech_shares",
+    # S8: core and policy (net_revenues, premiums, f, Q and balance_shortfall stay on the model, plan Q8)
+    "_base_cal_shift": "par.base_cal_shift",
+    "_base_levels_cache": "par.base_levels_cache",
+    "_input_cost_memo": "par.input_cost_memo",
+    "_oyg_memo": "par.oyg_memo",
+    "_fall_floor": "ev.fall_floor",
+    "_mineral_cap": "ev.mineral_cap",
+    "_mineral_row": "ev.mineral_row",
+    "_nbal_price": "ev.nbal_price",
+    "_price_shock_now": "ev.price_shock_now",
+    "_row_labels": "ev.row_labels",
+    "_surplus_row": "ev.surplus_row",
+    "_yields_solve0": "ev.yields_solve0",
+    "_greendeal_inputs": "ev.greendeal_inputs",
+    "_organic_conv": "ev.organic_conv",
+    "_yield_price_factor": "ev.yield_price_factor",
+    "_land_solution": "res.land_solution",
+    "_last_aug": "res.last_aug",
+    "_last_grass_z": "res.last_grass_z",
+    "_last_hist_fallow": "res.last_hist_fallow",
+    "_last_manure_trade": "res.last_manure_trade",
+    "_last_manure_trade_pk": "res.last_manure_trade_pk",
+    "_last_mineral_n": "res.last_mineral_n",
+    "_last_plain": "res.last_plain",
 }
 #: the supply module's former attribute names
 MOVED_MODULE: dict = {

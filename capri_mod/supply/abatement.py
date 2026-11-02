@@ -74,7 +74,7 @@ class AbatementBlock:
         m0 = float(opt.at[reg, "ini_share"])
         row = [(j, float(wcs.at[a, "share"])) for j, a in enumerate(self.acts) if a in wcs.index and float(wcs.at[a, "share"]) > 0]
         cov0 = sum(float(base.get(self.acts[j], 0.0) or 0.0) * s for j, s in row)
-        rhs = max(uaa + float(getattr(self, "_fall_floor", 0.0) or 0.0), cov0 + m0 * uaa)
+        rhs = max(uaa + float(getattr(self.ev, "fall_floor", 0.0) or 0.0), cov0 + m0 * uaa)
         # the upper bound CAPRI's MaxShare (supply/set_miti_bounds.gms l. 30-34; K74, 29 October 2026: was
         # max(MaxShare, IniShare), the same in every unit, none has its initial share above the maximum)
         return {"uaa": uaa, "m0": m0, "lb": 0.0, "ub": float(opt.at[reg, "max_share"]),

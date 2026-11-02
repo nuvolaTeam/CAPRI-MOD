@@ -84,7 +84,7 @@ class ManureBlock:
             else:
                 pc = (getattr(mo.ev, "pool_cols_pk", None) or {}).get(prod) or []
                 s0 = float((getattr(mo.res, "manure_supply0_pk", None) or {}).get(prod, 0.0) or 0.0)
-            aug = getattr(mo, "_last_aug", None)
+            aug = getattr(mo.res, "last_aug", None)
             if len(pc) != 2 or aug is None or s0 <= 0:
                 continue
             Q, c, A, b, y = aug

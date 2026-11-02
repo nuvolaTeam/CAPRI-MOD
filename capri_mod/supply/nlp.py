@@ -110,7 +110,7 @@ class NLPBlock:
         from capri_mod.supply.capri_regional_nlp import CapriRegionalNLP
         rats = getattr(self, "feed_rations", None) or {}
         self.res.fd_model = None
-        lab_row = list(getattr(self, "_row_labels", []) or [])
+        lab_row = list(getattr(self.ev, "row_labels", []) or [])
         labels = list(getattr(self.ev, "aug_labels", None) or [])
         if len(labels) != A.shape[0]:
             labels = lab_row if len(lab_row) == A.shape[0] else None
@@ -130,7 +130,7 @@ class NLPBlock:
             # CAPRI's fertilisation replaces the regional crop-need row (an approximation of NUTNED_) and
             # the fertiliser cost per ha: mineral N, P and K are bought at CAPRI's unit value (v_netPutQuant(FNUT))
             drop = ["crop_need"]
-            oc_ = getattr(self, "_organic_conv", None) or {}
+            oc_ = getattr(self.ev, "organic_conv", None) or {}
             for j, a in enumerate(self.acts):
                 if a in CROPS:
                     # (on converted land the organic I/O change already took the fertiliser cost out: only the
@@ -600,7 +600,7 @@ class NLPBlock:
         feeding, nutrient, land-use-change and fertiliser bounds, never the floor) and carries on with the solver's last
         point. CAPRI's Green Deal runs have the land market on, which lets grassland become arable land; without it a
         floor sized on total farmland may not fit on the arable land (K84)."""
-        if "landscape_floor" not in list(getattr(self, "_row_labels", []) or []):
+        if "landscape_floor" not in list(getattr(self.ev, "row_labels", []) or []):
             return
         if getattr(self.res, "nlp_fallback_log", None) is None:
             self.res.nlp_fallback_log = []

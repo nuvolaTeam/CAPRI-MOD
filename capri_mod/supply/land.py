@@ -35,7 +35,7 @@ class LandBlock:
         lm = getattr(self.data, "land_market", None)
         if not lm or "quad" not in lm:
             return None
-        labels = list(getattr(self, "_row_labels", []))
+        labels = list(getattr(self.ev, "row_labels", []))
         LTall = ["ARAC", "GRAS", "FRUN", "FORE", "OLND", "ARTIF"]
         keep = [LTall.index(t) for t in self.LAND_TYPES]
         Qf = np.array(lm["quad"], dtype=float)[np.ix_(keep, keep)]
@@ -125,7 +125,7 @@ class LandBlock:
         k_extra = 0
         self.ev.cover_dbf_nb = 0.0
         if "N_balance" in labels:
-            srow = getattr(self, "_surplus_row", None)
+            srow = getattr(self.ev, "surplus_row", None)
             nmin = srow[2] if srow is not None and len(srow) > 3 else None
             upt = srow[3] if srow is not None and len(srow) > 3 else None
             ybase = srow[4] if srow is not None and len(srow) > 4 else None

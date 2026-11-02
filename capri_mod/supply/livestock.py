@@ -233,7 +233,7 @@ class LivestockBlock:
             k = getattr(self.ev, extra, None)
             if k is not None and k < Aa.shape[0] and k not in rows_ and (extra != "alloc_row" or getattr(self.ev, "alloc_cols", 0)):
                 rows_.append(k)
-        ps = getattr(self, "_price_shock_now", None)
+        ps = getattr(self.ev, "price_shock_now", None)
         pv = getattr(self.data, "livestock_product_value_by_market_coef", None)
         yr = getattr(self, "yani_price_ratio", None) or {}
         ycoef = self._young_animal_coefs() if yr else {}
@@ -392,7 +392,7 @@ class LivestockBlock:
             k = getattr(self.ev, extra, None)
             if k is not None and k < Aa.shape[0] and k not in rows_ and (extra != "alloc_row" or getattr(self.ev, "alloc_cols", 0)):
                 rows_.append(k)
-        ps = getattr(self, "_price_shock_now", None)
+        ps = getattr(self.ev, "price_shock_now", None)
         pv = getattr(self.data, "livestock_product_value_by_market_coef", None)
         base = self._base_levels()
         # the options' rows as plain dicts, once per table (Series lookups here were a visible share of each solve)
@@ -512,7 +512,7 @@ class LivestockBlock:
         labels.extend(["dairy_z_lo", "dairy_z_hi"])
         Qa = np.pad(Qa, ((0, 1), (0, 1))); Qa[-1, -1] = float(di["q_low"]) + float(di["q_high"])
         # milk revenue of the change under the current milk price (EUR per head = 1000 EUR per 1000 heads)
-        ps = getattr(self, "_price_shock_now", None)
+        ps = getattr(self.ev, "price_shock_now", None)
         pv = getattr(self.data, "livestock_product_value_by_market_coef", None)
         dmilk = 0.0
         if ps is not None and pv is not None and hasattr(pv, "get"):

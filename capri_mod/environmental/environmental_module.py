@@ -119,8 +119,8 @@ class EnvironmentalIndicators:
     permanent_crops: float = 0.0
     grassland: float = 0.0
     #: area under organic farming added by the scenario's organic area target (1000 ha): each crop's area x its
-    #: converted share (SupplyModel._organic_conv, organic_area.gms). CAPRI's targets are percentage points above the
-    #: baseline's organic area, which neither CAPRI's data nor capri-mod's hold, so it is 0 without a target
+    #: converted share (the regional model's ev.organic_conv, organic_area.gms). CAPRI's targets are percentage points
+    #: above the baseline's organic area, which neither CAPRI's data nor capri-mod's hold, so it is 0 without a target
     organic_area: float = 0.0
 
     # Biodiversity proxy
