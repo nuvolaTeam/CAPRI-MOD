@@ -24,6 +24,7 @@ from dataclasses import dataclass, field
 from typing import Dict, Optional
 
 from capri_mod.params import param, param_table
+from capri_mod.data.definitions import CROPS_ON_LAND as _CROPS_ON_LAND   # N6
 from capri_mod.settings import setting
 from capri_mod.fert.npk import need_yield_factor
 from capri_mod.data.definitions import (
@@ -581,7 +582,7 @@ class EnvironmentalModule(GHGBlock, NitrogenBlock, AmmoniaBlock, PhosphorusBlock
         _oc = getattr(supply_result, "organic_conv", None) or {}
         organic = sum(float(acts.get(c, 0.0) or 0.0) * (1.0 - float(v)) for c, v in _oc.items() if c in CROPS)
 
-        PERM = ("WINE", "OLIV", "TABO", "APPL", "OFRU", "CITR", "TAGR", "NURS")
+        PERM = _CROPS_ON_LAND["FRUN"]      # the crops on permanent-crop land (model_activity_classes.csv, N6)
         perm   = sum(acts.get(c, 0.0) for c in PERM)
         grass  = acts.get("GRAS", 0.0)
         arable = sum(acts.get(c, 0.0) for c in CROPS if c not in PERM + ("GRAS",))

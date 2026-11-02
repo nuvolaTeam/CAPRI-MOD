@@ -711,6 +711,7 @@
    ],
    "inputs": [
     "capri_data/codes/model_activities.csv",
+    "capri_data/codes/model_activity_classes.csv",
     "capri_data/shared/regional_units.csv"
    ],
    "code": [

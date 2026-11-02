@@ -9,7 +9,7 @@ OCER,ARAC,OCER,0,0,land_type: CAPRI's set landTypes_to_pact (ARAC); cropdiv_grou
 PARI,ARAC,PARI,0,0,land_type: CAPRI's set landTypes_to_pact (ARAC); cropdiv_group: CAPRI's set cropDivGrps_mCact (PARI)
 OCRO,ARAC,,0,1,"land_type: CAPRI's set landTypes_to_pact (ARAC); cropdiv_group: none (not an annual crop of CAPRI's set annualCrops); fixed: the model's (activities held at their base level, KNOWN_ISSUES K69)"
 OIND,ARAC,OIND,0,1,"land_type: CAPRI's set landTypes_to_pact (ARAC); cropdiv_group: CAPRI's set cropDivGrps_mCact (OIND); fixed: the model's (activities held at their base level, KNOWN_ISSUES K69)"
-NURS,ARAC,,0,1,"land_type ARAC: the model's (CAPRI: FRUN, set landTypes_to_pact; DEP-43); cropdiv_group: none (not an annual crop of CAPRI's set annualCrops); fixed: the model's (activities held at their base level, KNOWN_ISSUES K69)"
+NURS,FRUN,,0,1,"land_type: CAPRI's set landTypes_to_pact (FRUN; DEP-43 fixed, 2 November 2026); cropdiv_group: none (not an annual crop of CAPRI's set annualCrops); fixed: the model's (activities held at their base level, KNOWN_ISSUES K69)"
 FLOW,ARAC,FLOW,0,1,"land_type: CAPRI's set landTypes_to_pact (ARAC); cropdiv_group: CAPRI's set cropDivGrps_mCact (FLOW); fixed: the model's (activities held at their base level, KNOWN_ISSUES K69)"
 POTA,ARAC,POTA,0,0,land_type: CAPRI's set landTypes_to_pact (ARAC); cropdiv_group: CAPRI's set cropDivGrps_mCact (POTA)
 SUGB,ARAC,SUGB,0,0,land_type: CAPRI's set landTypes_to_pact (ARAC); cropdiv_group: CAPRI's set cropDivGrps_mCact (SUGB)
