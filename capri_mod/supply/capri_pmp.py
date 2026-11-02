@@ -44,32 +44,28 @@ from capri_mod.data.definitions import MS_CODE
 
 # --- 1. dampening ----------------------------------------------------------
 
-ELAS_HIGH = param("ELAS_HIGH")      # p_elasHigh
-ELAS_CAP = param("ELAS_CAP")        # MIN(8, ...)
-
-
 def dampen_elasticity(eps):
-    """CAPRI's heuristic upper bound. Values at or below ELAS_HIGH pass through."""
+    """CAPRI's heuristic upper bound. Values at or below p_elasHigh (the parameter ELAS_HIGH) pass through; the
+    bound is MIN(8, ...) (ELAS_CAP). Both read through the run's inputs (refactor stage 3, N1)."""
+    elas_high, elas_cap = param("ELAS_HIGH"), param("ELAS_CAP")
     e = np.asarray(eps, dtype=float)
-    damped = np.minimum(ELAS_CAP, np.sqrt(np.maximum(e, 0.0))
-                        + ELAS_HIGH - np.sqrt(ELAS_HIGH))
-    return np.where(e > ELAS_HIGH, damped, e)
+    damped = np.minimum(elas_cap, np.sqrt(np.maximum(e, 0.0))
+                        + elas_high - np.sqrt(elas_high))
+    return np.where(e > elas_high, damped, e)
 
 
 # --- 2. share term ---------------------------------------------------------
-
-SHARE_COEF = param("SHARE_COEF")
-
 
 def share_term(activity_levels: pd.Series, arable_total: float,
                crop_activities: set) -> pd.Series:
     """1 - 0.2*sqrt(share of arable) for crops, 1.0 otherwise."""
     out = pd.Series(1.0, index=activity_levels.index, dtype=float)
+    share_coef = param("SHARE_COEF")
     if arable_total and arable_total > 0:
         for a in activity_levels.index:
             if a in crop_activities:
                 share = max(float(activity_levels.get(a, 0.0)), 0.0) / arable_total
-                out[a] = max(1.0 - SHARE_COEF * np.sqrt(min(share, 1.0)), 0.1)
+                out[a] = max(1.0 - share_coef * np.sqrt(min(share, 1.0)), 0.1)
     return out
 
 
@@ -87,33 +83,6 @@ EPRD_TO_GRP: Dict[str, str] = {
 # Activities on arable land, used for the share term denominator. Permanent
 # crops, grassland and livestock are excluded.
 ARABLE_ACTIVITIES = set(EPRD_TO_GRP) | {"SETA", "OFOD", "TEXT", "TOBA"}
-
-
-# --- 4a. synthetic-anchor guard --------------------------------------------
-
-def detect_synthetic_base_activities(base_areas: pd.DataFrame,
-                                     min_regions: int = 30) -> set:
-    """
-    Activities whose base level is a constant placeholder across all regions.
-
-    A real elasticity calibrated around a fake base level produces a real-looking
-    but meaningless response: PMP curvature scales as 1/(eps * x0), so a small
-    invented x0 combined with a large genuine eps makes the activity explode under
-    any shock. In this dataset COTT, OFIB, OFOD and SETA are flat constants
-    (1.0, 2.0, 3.0, 5.0 kha in every region), and OFOD carries a real CAPRI
-    elasticity of 4.27 against a default of 0.12 — a 35x jump on a fictional
-    anchor, which drove a +128% acreage response in the shock test.
-
-    Note that the lognormal fingerprint detector cannot see these: it looks for
-    a coefficient of variation near 0.10, and these columns have a CV of exactly
-    zero.
-    """
-    synthetic = set()
-    for col in base_areas.columns:
-        v = base_areas[col].replace(0, np.nan).dropna()
-        if len(v) >= min_regions and float(v.std()) < 1e-9:
-            synthetic.add(col)
-    return synthetic
 
 
 # --- 4b. provenance-tracked elasticity table --------------------------------
@@ -167,9 +136,9 @@ def build_elasticity_table(
     from capri_mod.supply.inputs import SupplyInputs
     inp = inputs if inputs is not None else SupplyInputs(data_dir, base_year)
     apply_dampening = True        # CAPRI's dampening (impose_upper_bound_on_elasticity.gms)
-    # (The runtime guard against activities anchored on a constant placeholder base, detect_synthetic_base_activities,
-    # blocked none since the synthetic data was replaced and was removed from here on 23 October 2026; the function
-    # stays as a data check, test_capri.py.)
+    # (The runtime guard against activities anchored on a constant placeholder base blocked none since the synthetic
+    # data was replaced and was removed from here on 23 October 2026; the check lives in its test,
+    # test_capri.py test_synthetic_base_activities_excluded_from_elasticity_wiring: refactor stage 3, N5.)
     # no literature defaults (23 October 2026): a cell without a CAPRI value stays NaN, provenance NO_CAPRI_VALUE
     eps = pd.DataFrame(
         np.tile(defaults.reindex(activities).values.astype(float), (len(regions), 1)),

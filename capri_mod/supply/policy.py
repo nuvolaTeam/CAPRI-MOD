@@ -37,7 +37,7 @@ class PolicyBlock:
             # only where grassland has a level: below the threshold of the activity bounds (an activity without a
             # level, held at zero, _build_constraints) CAPRI has no grassland variable and no rule; with a base of
             # 3.5e-11 kha (EL63, 2030) the rule asked for grass the bounds forbid and the NLP was infeasible (K69)
-            if xb[j] > ABSENT_LEVEL:
+            if xb[j] > float(_settings().get("supply.absent_level")):
                 out["permGras"] = {"row": [(j, -1.0)], "rhs": -xb[j] * (1 - 1e-9), "scale": xb[j]}
                 # the rule's dual at the calibration point, CAPRI's assumption (supply/prep_cal.gms l. 118-131):
                 # p_dualGreening = -|rent of arable land - rent of grassland|, charged to GRAE and GRAI in the
@@ -52,7 +52,7 @@ class PolicyBlock:
             ms = self.data.region_id[:2]
             ms = MS_CODE.get(ms, ms)
             ofar = 1.0
-            env_ = getattr(self, "_env_for_surplus", None)
+            env_ = getattr(self.seen, "env_for_surplus", None)
             try:
                 from capri_mod.fert.npk import NPKData
                 cr = env_._inner_fert.capri_region(self.data.region_id) if env_ is not None and \
@@ -94,7 +94,7 @@ class PolicyBlock:
                 # with the Biodiversity Strategy's fallow floor F, CAPRI lowers the limit to avoid infeasibility
                 # (pol_input/greendeal/landscape.gms l. 75-90, as coded there: F added to every group and to the
                 # annual area): H0 = min(H0, - sum_g (X_g + F)/(T + F) log((X_g + F)/(T + F)))
-                F = float(getattr(self, "_fall_floor", 0.0) or 0.0)
+                F = float(getattr(self.ev, "fall_floor", 0.0) or 0.0)
                 if F > 0:
                     H0 = min(H0, -sum((x + F) / (T + F) * np.log((x + F) / (T + F)) for x in X))
                 out["cropDiv"] = {"groups": list(grp.values()), "H0": H0 * (1 - 1e-9), "floors": fl}
@@ -107,7 +107,7 @@ class PolicyBlock:
         applies them uniformly to the member state's regions. (A per-country table of 2018-2019
         Eurostat shares used here before CAPRI's targets were loaded was no longer reached for any
         EU region and has been removed.)"""
-        return self.ORGANIC_BASELINE_SHARE
+        return param("ORGANIC_BASELINE_SHARE")
 
     def _input_cost(self, a: str, item: str, share_table: dict) -> float:
         """EUR/ha of input `item` (used for 'fert') for crop a: CAPRI's regional cost
@@ -117,11 +117,11 @@ class PolicyBlock:
         col = item + "_eur_ha"
         if t is not None:
             # the region's table as a plain dict, built once per table (scalar pandas lookups were ~10% of a run)
-            memo = self.__dict__.get("_input_cost_memo")
+            memo = getattr(self.par, "input_cost_memo", None)
             if memo is None or memo[0] is not t:
                 memo = (t, {(r, c_): float(v) for r, row in t.to_dict("index").items() for c_, v in row.items()
                             if isinstance(v, (int, float)) and v == v})
-                self._input_cost_memo = memo
+                self.par.input_cost_memo = memo
             v = memo[1].get((a, col))
             if v is not None:
                 return v
@@ -145,7 +145,7 @@ class PolicyBlock:
         if reduction <= 0:
             return
         # yield_loss False: CAPRI star 3.0's Green Deal group (pesticides.gms: the yield shock 'off')
-        loss = self.PESTICIDE_YIELD_LOSS_AT_50PCT * (reduction / 0.50) if yield_loss else 0.0
+        loss = param("PESTICIDE_YIELD_LOSS_AT_50PCT") * (reduction / 0.50) if yield_loss else 0.0
         # (a cap of the loss at 0.90 was removed 23 October 2026: unsourced and never reached - the loss is at most
         # 0.20, at a 100% cut)
 
@@ -174,7 +174,7 @@ class PolicyBlock:
                 continue
             o = (self._organic_converted(a, organic_share, _targets, _org_default)
                  if organic_share else 0.0)
-            o = min(max(o, 0.0), 0.99)
+            o = min(max(o, 0.0), float(_settings().get("supply.organic_share_cap")))
             conv = 1.0 - o
             # The yield loss must reach BOTH the objective and the reported
             # yields. It used to change net revenue only, so it steered what
@@ -246,7 +246,7 @@ class PolicyBlock:
             nr[a] = float(nr.get(a, 0.0)) + p * y0 * (factor - 1.0)
         self.data.yields = new_ylds
         self.net_revenues = nr
-        self._yield_price_factor = pf
+        self.ev.yield_price_factor = pf
 
     def _organic_yield_gap(self, activity: str) -> float:
         """Organic yield gap for one activity in this region, as a fraction: CAPRI's estimate for the region's PESETA
@@ -254,10 +254,10 @@ class PolicyBlock:
         (organic_area.gms l. 176-181; e.g. maize in NE and UK_IR). Before 24 October 2026 a flat 20% from the
         literature (ORGANIC_YIELD_GAP) took CEN's place."""
         table = getattr(self.data, "organic_yield_gap", None)
-        _m = self.__dict__.get("_oyg_memo")                  # per table: the lookup ran ~170k times per run
+        _m = getattr(self.par, "oyg_memo", None)                  # per table: the lookup ran ~170k times per run
         if _m is None or _m[0] is not table:
             _m = (table, {})
-            self._oyg_memo = _m
+            self.par.oyg_memo = _m
         if activity in _m[1]:
             return _m[1][activity]
         _m[1][activity] = v_ = self._organic_yield_gap_uncached(activity, table)
@@ -282,7 +282,8 @@ class PolicyBlock:
     def _organic_target_scale(share: float) -> float:
         """CAPRI's scaling of its targets to the requested ambition, (orgTarg - 12) / (25 - 12)
         (load_organic_targets.gms l. 175, 183; orgTarg in %): exactly 1 at the 25% target."""
-        return max(0.0, (100.0 * float(share) - 12.0) / (25.0 - 12.0))
+        o, t = param("ORGANIC_OUTLOOK_PCT"), param("ORGANIC_TARGET_REF_PCT")
+        return max(0.0, (100.0 * float(share) - o) / (t - o))
 
     def _organic_region_target(self, share: float) -> float:
         """p_organicAreaTarget(ru): the member state's UAA target (organic_targets_uaa.gdx) scaled to the ambition.
@@ -324,7 +325,7 @@ class PolicyBlock:
         (capmod/define_inputs.gms l. 66)."""
         base = int(str(_settings().get("run.base_year")))
         sim = int(getattr(self.data, "sim_year", None) or base)
-        return 1.0 - 0.005 * (sim - base)
+        return 1.0 - param("INPUT_SAVING_PROGRESS") * (sim - base)
 
     def _apply_greendeal_input_changes(self, organic_share: float, pesticide_reduction: float) -> None:
         """CAPRI's plant-protection (PLAP) and other-input (INPO) changes of the Green Deal organic and pesticide
@@ -363,7 +364,7 @@ class PolicyBlock:
 
         topup_col = "eful_eur_ha" if getattr(type(self), "organic_topup_at_fuel_cost", True) else "eful_inpo_eur_ha"
         nr = self.net_revenues.copy()
-        self._greendeal_inputs = {"o_R": o_R, "pc_plap": pc_plap, "pc_inpo": pc_inpo, "tf": tf, "keep_tf": keep_tf}
+        self.ev.greendeal_inputs = {"o_R": o_R, "pc_plap": pc_plap, "pc_inpo": pc_inpo, "tf": tf, "keep_tf": keep_tf}
         for a in self.acts:
             d = 0.0
             if a in ANIMALS:
@@ -397,11 +398,11 @@ class PolicyBlock:
         and INPO, _apply_greendeal_input_changes). Fertiliser is not in IY: it follows the crops' need
         (need_yield_factor). REGISTERED: the model's costs are CAPRI's 2017 coefficients (no yield-growth or TF_I term
         in the baseline cost); the change above is CAPRI's derivative at its 2030 reference."""
-        y0s, yc = getattr(self, "_yields_solve0", None), self.data.yields
+        y0s, yc = getattr(self.ev, "yields_solve0", None), self.data.yields
         if y0s is None or not hasattr(yc, "get") or not hasattr(y0s, "get"):
             return
         tf = self._greendeal_tech_progress()
-        gi = getattr(self, "_greendeal_inputs", None) or {}
+        gi = getattr(self.ev, "greendeal_inputs", None) or {}
         keep = bool(gi.get("keep_tf", True))
         tf_of = lambda pc: tf if not pc else (1.0 + pc) * (tf if keep else 1.0)
         tf_p, tf_i = tf_of(float(gi.get("pc_plap", 0.0) or 0.0)), tf_of(float(gi.get("pc_inpo", 0.0) or 0.0))
@@ -417,7 +418,7 @@ class PolicyBlock:
             if k:
                 g = self._input_row(a, "yield_growth") or 1.0
                 # CAPRI's bounds on the yield growth: G x rho within 0.5-1.5
-                d = (min(1.5, max(0.5, g * y / y0)) - g) / g if g > 0 else (y / y0 - 1.0)
+                d = (min(param("YIELD_GROWTH_MAX"), max(param("YIELD_GROWTH_MIN"), g * y / y0)) - g) / g if g > 0 else (y / y0 - 1.0)
                 if nr is None:
                     nr = self.net_revenues.copy()
                 nr[a] = float(nr.get(a, 0.0)) - k * d
@@ -456,7 +457,7 @@ class PolicyBlock:
             return default
         # CAPRI scales its targets to the requested ambition as (orgTarg - 12) / (25 - 12)
         # (load_organic_targets.gms; orgTarg in %), exactly 1 at the 25% target
-        scale = max(0.0, (100.0 * float(share) - 12.0) / (25.0 - 12.0))
+        scale = self._organic_target_scale(share)
         return max(0.0, min(1.0, float(val) / 100.0 * scale))
 
     def apply_organic_area_target(self, share: float) -> None:
@@ -519,11 +520,11 @@ class PolicyBlock:
             # still spread full mineral N. The mineral-N factor travels the
             # same path as the fertiliser technologies (multiplied with them).
             if converted > 0:
-                self._n_intensity = getattr(self, "_n_intensity", {}) or {}
-                self._n_intensity[a] = self._n_intensity.get(a, 1.0) * max(0.0, 1.0 - converted)
+                self.ev.n_intensity = getattr(self.ev, "n_intensity", {}) or {}
+                self.ev.n_intensity[a] = self.ev.n_intensity.get(a, 1.0) * max(0.0, 1.0 - converted)
                 # the conventional share alone, for CAPRI's minimum mineral share (NUTMIN_: 0 on organic land)
-                self._organic_conv = getattr(self, "_organic_conv", {}) or {}
-                self._organic_conv[a] = self._organic_conv.get(a, 1.0) * max(0.0, 1.0 - converted)
+                self.ev.organic_conv = getattr(self.ev, "organic_conv", {}) or {}
+                self.ev.organic_conv[a] = self.ev.organic_conv.get(a, 1.0) * max(0.0, 1.0 - converted)
                 nc_ = self.data.nutrient_coefs
                 if a in nc_.index and "N" in nc_.columns:
                     nc_ = nc_.copy()

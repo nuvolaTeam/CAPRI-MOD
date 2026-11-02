@@ -32,6 +32,33 @@ and `docs/KNOWN_ISSUES.md`.
 
 ---
 
+## 2 November 2026: refactor stage 3, the supply's parameters and state objects (batches 1-4)
+
+- capri_mod/supply/state.py: each regional model and the supply module hold what they keep between calls in declared
+  slot objects, `par`, `sv`, `ev`, `seen`, `res` (docs/design/STAGE3B_PLAN.md, the project lead's decisions of
+  2 November 2026; the fields in docs/design/SUPPLY_STATE_INVENTORY.md). A former attribute name raises RuntimeError
+  (MOVED); a test scans the code for the private ones used as strings.
+- The market supply Hessian saves and restores the regional models' fields by declared lists (NLP_STATE, SOLVE_STATE;
+  the prefix "_nlp" before), as names or paths; the workers' per-region state and caches (_PAR_STATE, _PAR_CACHES) as
+  paths. The sets and the copies are those before the moves.
+- Removed: twelve attributes written and never read (eleven on the regional models, one on the supply module), two
+  reads that always took their default, and the dairy output's scaling by `_dairy_yield_base` (its writer went in
+  3a264a2). The class defaults of `yani_price_ratio` and `_manure_ctx` went with their moves (every read has the
+  default None).
+- The run script's CAPRI_DUMP_REGIONS dump reads the fields by name or path; its keys lose the leading underscore.
+- Checks: each batch's mini-EU Farm-to-Fork run identical to the previous one at 1e-12 (only the run metadata differ);
+  the test suite after every step. Batch 1 was gated with the K79 change (gate 14, KNOWN_ISSUES K79); batches 2-4
+  with full runs (gate 15: Farm-to-Fork and Green Deal identical to gate 14's, largest difference 0).
+- The numbers as data (N1, N2, N4, N5): the model's parameters through the run's inputs
+  (`<data_dir>/shared/model_parameters.csv`), the supply's parameters read where used; the supply's 22 CAPRI constants
+  as sixteen parameters with their GAMS citations (the organic target scaling written once); the physical constants
+  named in `capri_mod/units.py`; the numerical and technical numbers in `defaults.toml`. Not done yet: N3 (stage 5)
+  and N6 (the code tables).
+- The three changes left out of the moves (docs/design/STAGE3_BEHAVIOUR_CHANGES.md, the project lead's decision):
+  `sv.n_relax_sticky` restored by the Hessian, `ev.ghg_nr_obj` out of its restore list, `use_fert_allocation` passed as
+  an argument instead of an instance copy; no effect on the default runs.
+- `CITATION.cff`: the project lead's text.
+
 ## 30 October 2026 (batch 9, one gate): the refactor's stages 3b-4c, the data sources as CSV, CAPTRD's fixes and statistics, the region tables from the data, the SQL declarations apart from the code lists
 
 **Refactor (moves, each checked by a Farm-to-Fork run equal to r190 to the last digit).**

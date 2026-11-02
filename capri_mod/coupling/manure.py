@@ -24,7 +24,7 @@ class ManureBlock:
         worst_key = {"N": getattr(self, "_pool_worst_key", "")}
         held = self.__dict__.setdefault("_pool_pk", {})
         for nut in ("P", "K"):
-            if not any((getattr(mo, "_pool_cols_pk", None) or {}).get(nut) for mo in getattr(sm, "_models", {}).values()):
+            if not any((getattr(mo.ev, "pool_cols_pk", None) or {}).get(nut) for mo in getattr(sm, "_models", {}).values()):
                 continue
             st = held.setdefault(nut, {"_pool_trace": [], "_pool_imbalance": 0.0})
             n_state = {k: self.__dict__.get(k) for k in _POOL_STATE}
@@ -66,8 +66,8 @@ class ManureBlock:
         from scipy.optimize import nnls as _nnls, minimize as _min
         sm = self.supply_module
         # the market's prices by country: the N market's in manure_pool_price, P and K in manure_pool_price_pk
-        pools = dict((getattr(sm, "manure_pool_price", None) or {}) if prod == "N"
-                     else ((getattr(sm, "manure_pool_price_pk", None) or {}).get(prod) or {}))
+        pools = dict((getattr(sm.seen, "manure_pool_price", None) or {}) if prod == "N"
+                     else ((getattr(sm.seen, "manure_pool_price_pk", None) or {}).get(prod) or {}))
         cost = getattr(self, "_pool_cost_cache", None)
         if cost is None:
             from capri_mod.data import inputs as _inputs, nested_tables as _nt
@@ -79,12 +79,12 @@ class ManureBlock:
         sched, es, sup = {}, {}, {}
         for reg, mo in getattr(sm, "_models", {}).items():
             if prod == "N":
-                pc = getattr(mo, "_pool_cols", []) or []
-                s0 = float(getattr(mo, "_manure_supply0", 0.0) or 0.0)
+                pc = getattr(mo.ev, "pool_cols", []) or []
+                s0 = float(getattr(mo.res, "manure_supply0", 0.0) or 0.0)
             else:
-                pc = (getattr(mo, "_pool_cols_pk", None) or {}).get(prod) or []
-                s0 = float((getattr(mo, "_manure_supply0_pk", None) or {}).get(prod, 0.0) or 0.0)
-            aug = getattr(mo, "_last_aug", None)
+                pc = (getattr(mo.ev, "pool_cols_pk", None) or {}).get(prod) or []
+                s0 = float((getattr(mo.res, "manure_supply0_pk", None) or {}).get(prod, 0.0) or 0.0)
+            aug = getattr(mo.res, "last_aug", None)
             if len(pc) != 2 or aug is None or s0 <= 0:
                 continue
             Q, c, A, b, y = aug
@@ -93,7 +93,7 @@ class ManureBlock:
             # row duals: the regional NLP's own multipliers (its feed block is not in the stored
             # problem, so duals recovered from the stored problem's KKT conditions were wrong and the
             # pools stopped clearing); else recovered by NNLS from the active rows of the stored problem
-            zc = getattr(mo, "_last_duals", None)
+            zc = getattr(mo.ev, "last_duals", None)
             if zc is not None and len(zc) == A.shape[0]:
                 lam = np.maximum(np.asarray(zc, float), 0.0)
             else:
@@ -111,11 +111,11 @@ class ManureBlock:
             sl = float(Q[je, je])
             # the pool price the region was solved at (its export column's cost also carries the emission tax,
             # which belongs to the threshold, not to the price)
-            pnow = float(getattr(mo, "manure_pool_price", 0.0) or 0.0) if prod == "N" else \
-                float((getattr(mo, "manure_pool_price_pk", None) or {}).get(prod, 0.0) or 0.0)
+            pnow = float(getattr(mo.seen, "manure_pool_price", 0.0) or 0.0) if prod == "N" else \
+                float((getattr(mo.seen, "manure_pool_price_pk", None) or {}).get(prod, 0.0) or 0.0)
             rce = max(0.0, float(c[je] + Q[je] @ y + A[:, je] @ lam))
             rci = max(0.0, float(c[ji] + Q[ji] @ y + A[:, ji] @ lam))
-            rc_ = getattr(mo, "_nlp_rc", None)
+            rc_ = getattr(mo.res, "nlp_rc", None)
             if rc_ is not None and max(je, ji) < len(rc_):
                 # the NLP form: IPOPT's own reduced costs (the fertilisation block is not in the stored A rows)
                 rce, rci = max(0.0, float(rc_[je])), max(0.0, float(rc_[ji]))
@@ -132,8 +132,8 @@ class ManureBlock:
             # export cap = manure produced at the current solution (a first draft
             # read the LAST row as the cap, but the land rows follow it, so the
             # cap came from the grassland row and exports vanished)
-            ev = getattr(mo, "_pool_manure_vec", None) if prod == "N" else \
-                (getattr(mo, "_pool_manure_vec_pk", None) or {}).get(prod)
+            ev = getattr(mo.res, "pool_manure_vec", None) if prod == "N" else \
+                (getattr(mo.res, "pool_manure_vec_pk", None) or {}).get(prod)
             emax = float(ev @ y[:len(ev)]) if ev is not None else 0.0
             k = self.POOL_OF_PREFIX.get(reg[:2], reg[:2])
             sched.setdefault(k, []).append((th_e, th_i, sl, max(emax, 0.0)))
@@ -261,9 +261,9 @@ class ManureBlock:
             if k in pnew:
                 out[reg[:2]] = pnew[k]
         if prod == "N":
-            sm.manure_pool_price = out
+            sm.seen.manure_pool_price = out
         else:
-            sm.__dict__.setdefault("manure_pool_price_pk", {})[prod] = out
+            _sst.setdefault(sm.seen, "manure_pool_price_pk", {})[prod] = out
         # EU-WIDE conservation: realised net exports into all pools should sum
         # to zero; on the full EU it lagged the per-pool measure (200 kt N
         # unaccounted at iteration 6 while every pool was within ~6%)

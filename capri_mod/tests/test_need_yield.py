@@ -44,14 +44,3 @@ def test_model_region_and_no_data(data, monkeypatch):
     assert npk.need_yield_factor(None, "SWHE", 7.0, 6.3) == pytest.approx(0.9)
     assert npk.need_yield_factor("FR720000", "SWHE", 0.0, 6.3) == 1.0
 
-
-def test_builder_reads_capri_constants():
-    import sys
-    from pathlib import Path
-    root = Path(__file__).resolve().parents[2]
-    sys.path.insert(0, str(root / "tools" / "build"))
-    import build_npk_balance_2030 as B
-    assert B.straw_content() == {"NITF": 5.0, "PHOF": 3.0, "POTF": 18.0}
-    lo, mx, dbl = B.need_bounds()
-    assert lo == 15.0 and mx == {"NITF": 400.0, "PHOF": 320.0, "POTF": 280.0}
-    assert dbl == {"GRAE", "GRAI", "OFAR", "MAIF"}

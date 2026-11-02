@@ -15,27 +15,27 @@ class NLPBlock:
         lab = list(self.acts)
         n = len(lab)
         extra = {}
-        lt = list(getattr(self, "_land_types_used", None) or [])
+        lt = list(getattr(self.ev, "land_types_used", None) or [])
         if lt and n + len(lt) <= n_cols:
             for k_, t in enumerate(lt):
                 extra[n + k_] = "land_" + t
-            if getattr(self, "_alloc_cols", 0):
+            if getattr(self.ev, "alloc_cols", 0):
                 extra[n + len(lt)] = "alloc_mineral_N"
-        pc = getattr(self, "_pool_cols", None) or []
+        pc = getattr(self.ev, "pool_cols", None) or []
         if len(pc) == 2:
             extra[int(pc[0])] = "manure_export"; extra[int(pc[1])] = "manure_import"
-        for nut_, pk_ in (getattr(self, "_pool_cols_pk", None) or {}).items():
+        for nut_, pk_ in (getattr(self.ev, "pool_cols_pk", None) or {}).items():
             if len(pk_) == 2:
                 extra[int(pk_[0])] = f"manure_export_{nut_}"; extra[int(pk_[1])] = f"manure_import_{nut_}"
-        if getattr(self, "_grass_col", None) is not None:
-            extra[int(self._grass_col)] = "grass_z"
-        if getattr(self, "_dairy_col", None) is not None:
-            extra[int(self._dairy_col)] = "dairy_z"
-        for a_, j_ in (getattr(self, "_cattle_cols", None) or {}).items():
+        if getattr(self.ev, "grass_col", None) is not None:
+            extra[int(self.ev.grass_col)] = "grass_z"
+        if getattr(self.ev, "dairy_col", None) is not None:
+            extra[int(self.ev.dairy_col)] = "dairy_z"
+        for a_, j_ in (getattr(self.ev, "cattle_cols", None) or {}).items():
             extra[int(j_)] = f"cattle_z_{a_}"
-        for (a_, o_), j_ in (getattr(self, "_genet_cols", None) or {}).items():
+        for (a_, o_), j_ in (getattr(self.ev, "genet_cols", None) or {}).items():
             extra[int(j_)] = f"genet_z_{a_}_{o_}"
-        for c_, j_ in (getattr(self, "_hist_cols", None) or {}).items():
+        for c_, j_ in (getattr(self.ev, "hist_cols", None) or {}).items():
             extra[int(j_)] = f"hist_{c_}"
         out = lab + [extra.get(j, f"col{j}") for j in range(n, n_cols)]
         return out
@@ -60,7 +60,7 @@ class NLPBlock:
         if kind == "duals" or wide:
             sp_["npk"]["dual_bound"] = float(_settings().get("fertiliser.npk_dual_bound_wide"))
         if kind == "caps":
-            base_ = (getattr(self, "_nlp_base_alloc", None) or {}).get("per_ha") or {}
+            base_ = (getattr(self.par, "nlp_base_alloc", None) or {}).get("per_ha") or {}
             f_ = float(_settings().get("fertiliser.exempt_cap_factor"))
             rg_ = sp_["npk"]["nutrients"]["N"].get("regs") or {}
             for k_ in list(rg_):
@@ -101,17 +101,17 @@ class NLPBlock:
         """The regional problem in CAPRI's form (capri_regional_nlp.CapriRegionalNLP), solved with IPOPT from the
         region's previous solution (CAPRI's CONOPT starts from the last solution; then without the duals, then cold from
         the caller's start). Returns the columns' solution, or None on failure (the caller's relaxations follow; on its
-        last attempt, _nlp_accept_last, IPOPT's last point is returned and recorded in _nlp_fallback_log, the run's
+        last attempt, ev.nlp_accept_last, IPOPT's last point is returned and recorded in res.nlp_fallback_log, the run's
         metadata["nlp_fallback"])."""
-        self._n_solves = int(getattr(self, "_n_solves", 0) or 0) + 1
-        self.__dict__.pop("_nlp_n_target_cause", None)
-        self._wc_solved = None; self._cover_solved = None
-        self._yani_dnet = None
+        self.res.n_solves = int(getattr(self.res, "n_solves", 0) or 0) + 1
+        _st.pop(self.ev, "nlp_n_target_cause", None)
+        self.sv.wc_solved = None; self.res.cover_solved = None
+        self.res.yani_dnet = None
         from capri_mod.supply.capri_regional_nlp import CapriRegionalNLP
-        rats = getattr(self, "feed_rations", None) or {}
-        self._fd_model = None
-        lab_row = list(getattr(self, "_row_labels", []) or [])
-        labels = list(getattr(self, "_aug_labels", None) or [])
+        rats = getattr(self.seen, "feed_rations", None) or {}
+        self.res.fd_model = None
+        lab_row = list(getattr(self.ev, "row_labels", []) or [])
+        labels = list(getattr(self.ev, "aug_labels", None) or [])
         if len(labels) != A.shape[0]:
             labels = lab_row if len(lab_row) == A.shape[0] else None
         if labels is None:
@@ -121,7 +121,7 @@ class NLPBlock:
         n = len(self.acts)
         xb = np.maximum(np.asarray(x_start, float), 0.0).copy()
         xb[:n] = np.maximum(self._base_levels().reindex(list(self.acts)).fillna(0.0).values, 0.0)
-        _rx = getattr(self, "_dairy_req_extra", None)
+        _rx = getattr(self.ev, "dairy_req_extra", None)
         _rx = _rx if (_rx and max(c_ for a_ in _rx for c_, _ in _rx[a_]) < Q.shape[0]) else None
         c = np.asarray(c, float).copy()
         npk = self._npk_spec(Q.shape[0], x_start, A, labels)
@@ -130,7 +130,7 @@ class NLPBlock:
             # CAPRI's fertilisation replaces the regional crop-need row (an approximation of NUTNED_) and
             # the fertiliser cost per ha: mineral N, P and K are bought at CAPRI's unit value (v_netPutQuant(FNUT))
             drop = ["crop_need"]
-            oc_ = getattr(self, "_organic_conv", None) or {}
+            oc_ = getattr(self.ev, "organic_conv", None) or {}
             for j, a in enumerate(self.acts):
                 if a in CROPS:
                     # (on converted land the organic I/O change already took the fertiliser cost out: only the
@@ -140,23 +140,23 @@ class NLPBlock:
         if npk is not None:
             # capri-mod's manure-application limit and mineral-N allocation row are not CAPRI's
             drop += ["alloc_mineral_N"]
-        tax_ = float(getattr(self, "ghg_tax", 0.0) or 0.0)
+        tax_ = float(getattr(self.seen, "ghg_tax", 0.0) or 0.0)
         ghg_min = None
         if tax_ > 0 and npk is not None:
             ghg_min, c = self._nlp_tax_terms(tax_, c, abat)
         spec = dict(Q=Q, c=c, A=A, b=b, labels=labels, acts=list(self.acts), rations=rats, fodder=fod, x_base=xb,
-                    prices=getattr(self, "feed_prices", None), req_extra=_rx, feed_ghg=self._ghg_feed_cost(),
+                    prices=getattr(self.seen, "feed_prices", None), req_extra=_rx, feed_ghg=self._ghg_feed_cost(),
                     npk=npk, drop_labels=drop, cap_rules=self._cap_rules_spec(), ghg_min=ghg_min,
-                    land_rent_rows=dict(getattr(self, "_land_rent_rows", None) or {}), **abat)
-        if npk is not None and getattr(self, "_alloc_cols", 0):
-            spec["fix_cols"] = {n + len(getattr(self, "_land_types_used", [])): 0.0}
-        self._last_feed_dm = None
-        self._last_feed_t = None
-        self._nlp_ok = False
+                    land_rent_rows=dict(getattr(self.ev, "land_rent_rows", None) or {}), **abat)
+        if npk is not None and getattr(self.ev, "alloc_cols", 0):
+            spec["fix_cols"] = {n + len(getattr(self.ev, "land_types_used", [])): 0.0}
+        self.res.last_feed_dm = None
+        self.res.last_feed_t = None
+        self.res.nlp_ok = False
         # CAPRI's calibration: the base is a first-order point of the model it is simulated with. Once per region, at
         # the first solve (the baseline's base point and prices); the linear terms are kept by column and feed
         cols = self._aug_col_labels(Q.shape[0])
-        cal = getattr(self, "_nlp_cal", None)
+        cal = getattr(self.par, "nlp_cal", None)
         _late = ("grass_z", "dairy_z", "cattle_z_", "genet_z_", "hist_")
         if cal is not None and cal.get("cols") is not None and \
                 any(l_.startswith(_late) for l_ in set(cols) - set(cal["cols"])):
@@ -173,7 +173,7 @@ class NLPBlock:
             spec_sim = spec
             spec = dict(spec_sim, drop_labels=list(drop) + pol_rows)
             _fp = None
-            if self.__dict__.pop("_nlp_cal_check", False) or cal is None:
+            if _st.pop(self.seen, "nlp_cal_check", False) or cal is None:
                 _fp = _spec_fingerprint(spec, yb_n=np.asarray(x_start, float), xb=xb[:n])
                 if cal is not None and cal.get("fp") != _fp:
                     cal = None              # made on another calibration problem (a baseline checks it, see run)
@@ -196,7 +196,7 @@ class NLPBlock:
                     # dual values to reasonable range"); groups with tiny areas can need more at the model's base
                     # (CAPRI's own workaround there is a slack on the partial derivative, v_fertDistPartialSlack).
                     # Widened for this region (REGISTERED, recorded as npk_dual_bound)
-                    self._npk_dual_bound = float(_settings().get("fertiliser.npk_dual_bound_wide"))
+                    self.par.npk_dual_bound = float(_settings().get("fertiliser.npk_dual_bound_wide"))
                     npk = self._npk_spec(Q.shape[0], x_start, A, labels)
                     spec["npk"] = npk
                     nlp0 = CapriRegionalNLP(spec)
@@ -213,8 +213,8 @@ class NLPBlock:
                     import warnings as _w
                     _w.warn(f"NLP calibration failed for {self.data.region_id}: {out.get('why')}", RuntimeWarning)
                 cal["fp"] = _fp
-                self._nlp_cal = cal
-                self._nlp_base_alloc = cal.get("base_alloc")
+                self.par.nlp_cal = cal
+                self.par.nlp_base_alloc = cal.get("base_alloc")
             # the simulation's spec: the policy rows back, in CAPRI's terms where the NLP form writes them
             spec = dict(spec_sim, npk=spec.get("npk"))
             npk = spec["npk"]
@@ -226,7 +226,7 @@ class NLPBlock:
             if spec.get("catc"):
                 # the Farm-to-Fork catch-crop requirement (e_minCoverCrops) as the option's lower bound; the option
                 # carries the winterCover_ row itself
-                _cv = getattr(self, "_cover", None)
+                _cv = getattr(self.ev, "cover", None)
                 if _cv and float(_cv.get("uaa", 0.0) or 0.0) > 0:
                     _lb = float(_cv["req"]) / float(spec["catc"]["uaa"])
                     spec["catc"] = dict(spec["catc"], lb=_lb, ub=max(float(spec["catc"]["ub"]), _lb))
@@ -239,7 +239,7 @@ class NLPBlock:
                 # (organic_minfert_redu.gms), set before the mineral fertiliser reduction, which keeps the more
                 # stringent of the two (minfert_redu_by_crop.gms: min(); its limCres replaces the organic one)
                 org_regs = self._npk_organic_cap(npk)
-                self._nlp_mine_small = set()
+                self.ev.nlp_mine_small = set()
                 if "mineral_N" in labels:
                     # CAPRI's mineral fertiliser reduction in its own terms: the inner model's regulations by crop
                     # group (minfert_redu_by_crop.gms) or e_synNMax (minfert_redu_uaa.gms); the summed row goes
@@ -250,7 +250,7 @@ class NLPBlock:
                     if d_ is None:
                         continue
                     d_["regs"] = self._merge_organic_regs(d_.get("regs") or {}, rg,
-                                                          self._nlp_mine_small if nut_ == "N" else set())
+                                                          self.ev.nlp_mine_small if nut_ == "N" else set())
                 if "N_balance" in labels:
                     # the N-surplus target with the mineral N of the fertilisation block (CAPRI SURTOT_REST_ /
                     # e_SURTOTHa): the row's linear mineral parts out, the purchases in
@@ -258,7 +258,7 @@ class NLPBlock:
                     if spec.get("catc"):
                         # the requirement's catch-crop N was put on the row as a constant; the
                         # NLP form's catch-crop share carries it (catc_n), so the constant is taken back out
-                        npk["n_rows_rhs_add"] = {"N_balance": float(getattr(self, "_cover_dbf_nb", 0.0) or 0.0)}
+                        npk["n_rows_rhs_add"] = {"N_balance": float(getattr(self.ev, "cover_dbf_nb", 0.0) or 0.0)}
                     spec["drop_labels"] = list(spec["drop_labels"]) + ["N_balance"]
             if cal is not None:
                 spec["dq"] = np.array([cal["dq"].get(l_, 0.0) for l_ in cols])
@@ -268,7 +268,7 @@ class NLPBlock:
             # exemptions are set once, before its solves, not by iteration); without this the region switched between
             # the relaxed and the strict problem from one outer iteration to the next
             _fp = self._nlp_mine_fingerprint(npk)
-            _keep = getattr(self, "_nlp_relax_keep", None)
+            _keep = getattr(self.sv, "nlp_relax_keep", None)
             if _fp is not None and _keep is not None and _keep[0] == _fp:
                 spec0 = spec
                 spec = self._nlp_relax_spec(spec, _keep[1], *(_keep[2:4] if len(_keep) > 2 else ()))
@@ -282,8 +282,8 @@ class NLPBlock:
                 # start and the warm-start state decide this solve and those after it (IPOPT and the build are
                 # deterministic), so a region whose digest is the base's is not built or solved again
                 _crn.SOLVE_PROBE(_crn.problem_fingerprint(
-                    spec, {"x_start": np.asarray(x_start, float), "prev": getattr(self, "_nlp_prev", None),
-                           "f_prev": getattr(self, "_nlp_prev_f", None), "keep": _keep},
+                    spec, {"x_start": np.asarray(x_start, float), "prev": getattr(self.sv, "nlp_prev", None),
+                           "f_prev": getattr(self.sv, "nlp_prev_f", None), "keep": _keep},
                     {"tol": float(getattr(type(self), "nlp_tol", 1e-8)),
                      "warm_check": float(getattr(type(self), "nlp_warm_check", 0.01)),
                      "jump_check": float(getattr(type(self), "nlp_jump_check", 0.0) or 0.0),
@@ -302,7 +302,7 @@ class NLPBlock:
             return None
         # warm start: the previous solution where the problem has the same columns, else the caller's start with the
         # base ration
-        prev = getattr(self, "_nlp_prev", None)
+        prev = getattr(self.sv, "nlp_prev", None)
         gk = nlp.graph_key()
         shape = (nlp.n0, tuple(k[:2] for k in nlp.feeds), len(nlp.lbx))
         starts = []
@@ -324,17 +324,17 @@ class NLPBlock:
         _tol = float(getattr(type(self), "nlp_tol", 1e-8))
         _tried = []
         _km = _crn.KKT_MODE
-        _kb = self.__dict__.setdefault("_kkt_base", {}) if _km else None
+        _kb = _st.setdefault(self.sv, "kkt_base", {}) if _km else None
 
         def _nsolve(nlp_, xs_, lam=None, tol=None):
             # the market supply Hessian from the KKT conditions (market.hessian_method = "kkt"): a shock's solve of a
             # graph the base solved is the first-order step from the base's solution (CapriRegionalNLP.kkt_step);
-            # else IPOPT, counted (_kkt_ipopt) where the method asked for a step
+            # else IPOPT, counted (res.kkt_ipopt) where the method asked for a step
             if _km == "apply":
                 b_ = _kb.get(nlp_.graph_key())
                 if b_ is not None and len(b_["pval"]) == len(nlp_.pval) and len(b_["x"]) == len(nlp_.lbx):
                     return nlp_.kkt_step(b_)
-                self._kkt_ipopt = int(getattr(self, "_kkt_ipopt", 0) or 0) + 1
+                self.res.kkt_ipopt = int(getattr(self.res, "kkt_ipopt", 0) or 0) + 1
             return nlp_.solve(xs_, lam=lam, tol=tol) if tol is not None else nlp_.solve(xs_, lam=lam)
         for kind, xs, lam_ in starts:
             res = _nsolve(nlp, xs, lam=lam_, tol=_tol)
@@ -344,7 +344,7 @@ class NLPBlock:
             _tried.append((kind, res["status"], float(res["f"]), int(res["iterations"] or 0)))
             if res["success"] or res["status"] in ("Solved_To_Acceptable_Level",):
                 break
-        _f_prev = getattr(self, "_nlp_prev_f", None)
+        _f_prev = getattr(self.sv, "nlp_prev_f", None)
         if (kinds and kinds[-1] == "warm" and _f_prev is not None
                 and float(res["f"]) > _f_prev + float(getattr(type(self), "nlp_warm_check", 0.01)) * abs(_f_prev)):
             # a warm start (IPOPT from the previous primal-dual point, small barrier) can end at a worse stationary
@@ -361,11 +361,11 @@ class NLPBlock:
         _jt = float(getattr(type(self), "nlp_jump_check", 0.0) or 0.0)
         # the jump check of this solve, None where it did not act: the largest move, the starts it solved and the one
         # kept (model metadata nlp_jump_check, the outer history's "jump_check")
-        self._nlp_jump = None
-        _y0 = getattr(self, "_nlp_y", None)
+        self.res.nlp_jump = None
+        _y0 = getattr(self.sv, "nlp_y", None)
         if (_jt > 0 and _y0 is not None and res is not None and res.get("x") is not None
                 and (res["success"] or res["status"] in ("Solved_To_Acceptable_Level",))
-                and list(getattr(self, "_nlp_cols", None) or []) == list(cols)):
+                and list(getattr(self.sv, "nlp_cols", None) or []) == list(cols)):
             # K79: a jump of the activity levels between outer iterations (a non-convex regional problem whose warm
             # start, or the cold restart after a failed warm start, ended at another local optimum): the region is
             # also solved from the starts not yet tried and the lowest objective is kept
@@ -387,12 +387,12 @@ class NLPBlock:
                                 and float(r_["f"]) < float(res["f"]) - _gain * max(1.0, abs(float(res["f"])))):
                             res = r_
                             kinds.append("jump:" + kind)
-                    self._nlp_jump = {"move": round(_mv, 6), "f": _f0, "solved": [t_[0] for t_ in _tried[_n0:]],
+                    self.res.nlp_jump = {"move": round(_mv, 6), "f": _f0, "solved": [t_[0] for t_ in _tried[_n0:]],
                                       "kept": kinds[-1], "f_kept": float(res["f"])}
         _ok = lambda r_: r_["success"] or r_["status"] in ("Solved_To_Acceptable_Level",)
         _lab = lambda k_: ((k_[1] if k_[1] == "duals" else "caps:" + "+".join(k_[2]) + (",duals" if k_[3] else ""))
                            if k_ is not None else None)
-        self._nlp_relaxed = _lab(_keep)
+        self.res.nlp_relaxed = _lab(_keep)
         _order = ("duals", "caps")
         # a kept exemption that no longer suffices is extended (the next group), not dropped
         _todo = (_order[_order.index(_keep[1]) + 1:] or ("caps",)) if _keep is not None else _order
@@ -403,7 +403,7 @@ class NLPBlock:
                 return nlp_, _nsolve(nlp_, nlp_.start(np.asarray(x_start, float)))
             except Exception:
                 return None, None
-        if (not _ok(res) and _fp is not None and _todo and getattr(self, "_nlp_try_n_relax", False)
+        if (not _ok(res) and _fp is not None and _todo and getattr(self.ev, "nlp_try_n_relax", False)
                 and _km != "apply"):
             # K89: with a tiered N target in force, which constraint makes the problem infeasible: solved once without
             # the N-surplus row (CAPRI SURTOT_REST_ / e_SURTOTHa). Feasible without it: the target is the cause, not the
@@ -415,7 +415,7 @@ class NLPBlock:
                 _, res_n = _try(dict(spec0, npk=dict(_np0, n_rows=[], n_rows_rhs_add={})))
                 if res_n is not None and _ok(res_n):
                     _todo = ()
-                    self._nlp_n_target_cause = True
+                    self.ev.nlp_n_target_cause = True
         if not _ok(res) and _fp is not None and _todo:
             # the Green Deal's mineral caps (organic target, mineRedu) as CAPRI's regulations can leave a crop group's
             # need out of reach (e.g. a permanent-crop group with a high organic target, its mineral N cut by the
@@ -460,30 +460,30 @@ class NLPBlock:
                     npk, spec = sp_["npk"], sp_
                     gk = nlp.graph_key()
                     shape = (nlp.n0, tuple(k[:2] for k in nlp.feeds), len(nlp.lbx))
-                    self._nlp_relax_keep = k_
-                    self._nlp_relaxed = _lab(k_)
-                    kinds.append(self._nlp_relaxed)
+                    self.sv.nlp_relax_keep = k_
+                    self.res.nlp_relaxed = _lab(k_)
+                    kinds.append(self.res.nlp_relaxed)
                     break
         _nonopt = None
         if not _ok(res):
             import warnings as _w
             _w.warn(f"NLP solve {res['status']} for {self.data.region_id} after {res['iterations']} iterations",
                     RuntimeWarning)
-            self._nlp_failed = "nlp:" + str(res["status"])
-            if not getattr(self, "_nlp_accept_last", False) or res.get("x") is None:
+            self.ev.nlp_failed = "nlp:" + str(res["status"])
+            if not getattr(self.ev, "nlp_accept_last", False) or res.get("x") is None:
                 return None
             # the caller's last attempt: CAPRI carries on with a non-optimal solve and records it (supply/simu_supply.gms,
             # p_INFES); IPOPT's last point is kept, recorded in the run's metadata (nlp_fallback) and warned about
             _nonopt = str(res["status"])
-            self._nlp_nonoptimal = _nonopt
+            self.res.nlp_nonoptimal = _nonopt
             _w.warn(f"{self.data.region_id}: IPOPT's last point kept ({_nonopt}, non-optimal), as CAPRI keeps a "
                     f"non-optimal solve", RuntimeWarning)
         if _km == "record" and _nonopt is None:
             _kb[gk] = nlp.kkt_record(res)
-        self._nlp_prev = (gk, res["x"], shape, (res["lam_x"], res["lam_g"]))
-        self._nlp_prev_f = float(res["f"])
+        self.sv.nlp_prev = (gk, res["x"], shape, (res["lam_x"], res["lam_g"]))
+        self.sv.nlp_prev_f = float(res["f"])
         # the starts tried and the last one's IPOPT iterations (diagnostics of the outer loop, model.trace_outer)
-        self._nlp_path = ("/".join(kinds), int(res["iterations"]))
+        self.res.nlp_path = ("/".join(kinds), int(res["iterations"]))
         if os.environ.get("CAPRI_NLP_DUMP") and self.data.region_id in os.environ.get("CAPRI_NLP_TRACE", "").split(","):
             # diagnostics only: every solve of the traced regions, with the previous point, the starts tried and the
             # point kept (CAPRI_NLP_TRACE=FRH0,...; KNOWN_ISSUES K75)
@@ -494,57 +494,57 @@ class NLPBlock:
             with open(_fn, "ab") as _fh:
                 _pk.dump(_rec, _fh)
         y, F, zA, info = nlp.outputs(res)
-        self._nlp_y = np.asarray(y, float).ravel().copy()
-        self._nlp_cols = list(cols)
+        self.sv.nlp_y = np.asarray(y, float).ravel().copy()
+        self.sv.nlp_cols = list(cols)
         # the young-animal markets' price update: this solution's response to the young-animal prices (K65)
-        self._yani_dnet = None
+        self.res.yani_dnet = None
         _ye = getattr(type(self), "yani_exact_response", None)
         if _ye is None:
             _ye = bool(getattr(type(self), "use_cattle_member_splits", False))
-        if _ye and getattr(self, "yani_price_ratio", None):
+        if _ye and getattr(self.seen, "yani_price_ratio", None):
             try:
-                self._yani_dnet = self._yani_response(nlp, res, list(cols))
+                self.res.yani_dnet = self._yani_response(nlp, res, list(cols))
             except Exception as _exc:                       # the caller falls back to the PMP terms' response
                 if os.environ.get("CAPRI_TRACE_YANI"):
                     print("YANI response failed", self.data.region_id, repr(_exc), flush=True)
-                self._yani_dnet = None
-        self._last_npk = nlp.fert_outputs(res["x"]) if nlp.fert else None
+                self.res.yani_dnet = None
+        self.res.last_npk = nlp.fert_outputs(res["x"]) if nlp.fert else None
         ab = nlp.abatement_outputs(res["x"]) if getattr(nlp, "abat", None) else {}
         if "catc" in ab:
             # the winter cover share chosen, for the cascade's accounts and the supply result (cover_crops)
             _c = spec["catc"]
-            self._wc_solved = float(ab["catc"])
-            self._cover_solved = {"req": self._wc_solved * _c["uaa"], "uaa": _c["uaa"], "base": _c["m0"] * _c["uaa"],
-                                  "delta": (self._wc_solved - _c["m0"]) * _c["uaa"], "biofix": _c["biofix"],
-                                  "share": self._wc_solved, "lb_share": float(_c.get("lb", 0.0)),
+            self.sv.wc_solved = float(ab["catc"])
+            self.res.cover_solved = {"req": self.sv.wc_solved * _c["uaa"], "uaa": _c["uaa"], "base": _c["m0"] * _c["uaa"],
+                                  "delta": (self.sv.wc_solved - _c["m0"]) * _c["uaa"], "biofix": _c["biofix"],
+                                  "share": self.sv.wc_solved, "lb_share": float(_c.get("lb", 0.0)),
                                   "max_share": float(_c["ub"]), "endogenous": True,
                                   "potential": float(_c.get("potential", 0.0))}
-        if self._last_npk:
-            for nut, o_ in self._last_npk.items():
+        if self.res.last_npk:
+            for nut, o_ in self.res.last_npk.items():
                 gs = {g_["g"]: g_ for g_ in npk["nutrients"][nut]["groups"]}
                 yv = np.asarray(nlp.f_y(res["x"])).ravel()
                 o_["area"] = {g: float(sum(sh * yv[j] for j, sh in gs[g]["crops"])) for g in gs}
-            if "N" in self._last_npk:
+            if "N" in self.res.last_npk:
                 # the allocation the regional model solved, for the accounts' report (fert_dist)
-                self._fd_model = {"capri_region": npk["capri_region"], "flows": self._last_npk["N"]["flows"],
-                                  "area": self._last_npk["N"]["area"], "converged": True}
-        self._last_duals = zA
+                self.res.fd_model = {"capri_region": npk["capri_region"], "flows": self.res.last_npk["N"]["flows"],
+                                  "area": self.res.last_npk["N"]["area"], "converged": True}
+        self.ev.last_duals = zA
         # the columns' reduced costs at the NLP solution (IPOPT's bound multipliers, per unit of the column): the
         # manure pools read the trade columns' from here, as their duals through the A rows miss the fertilisation
         # block (manure applied reaches NUTNED_ and the purchases)
-        self._nlp_rc = -np.asarray(res["lam_x"][:nlp.n0], float) / np.asarray(nlp.sc, float)
-        self._nlp_ok = _nonopt is None
+        self.res.nlp_rc = -np.asarray(res["lam_x"][:nlp.n0], float) / np.asarray(nlp.sc, float)
+        self.res.nlp_ok = _nonopt is None
         if _nonopt is None:
-            self._nlp_failed = None
+            self.ev.nlp_failed = None
         else:
-            if getattr(self, "_nlp_fallback_log", None) is None:
-                self._nlp_fallback_log = []
-            self._nlp_fallback_log.append(f"nlp:{_nonopt} -> IPOPT's last point kept (non-optimal, as CAPRI)")
-        self._nlp_status = str(info.get("status"))
-        self._last_req_duals = info.get("req_duals") or {}
-        self._manure_ni_relief, self._manure_ni_nh3 = {}, {}
-        self._fert_inside_factor = {}
-        self._fert_tech_shares = {}
+            if getattr(self.res, "nlp_fallback_log", None) is None:
+                self.res.nlp_fallback_log = []
+            self.res.nlp_fallback_log.append(f"nlp:{_nonopt} -> IPOPT's last point kept (non-optimal, as CAPRI)")
+        self.res.nlp_status = str(info.get("status"))
+        self.ev.last_req_duals = info.get("req_duals") or {}
+        self.ev.manure_ni_relief, self.ev.manure_ni_nh3 = {}, {}
+        self.res.fert_inside_factor = {}
+        self.res.fert_tech_shares = {}
         if self._techs_inside():
             # the options' shares for the accounts (relief and NH3 saved per head from CAPRI's cascade)
             sh = {}
@@ -552,18 +552,18 @@ class NLPBlock:
                 sh.setdefault((a_, key_), {})[tech_] = float(v_)
             self._amm_record(sh)
         if ab.get("fert"):
-            self._fert_tech_shares = {k_: float(v_) for k_, v_ in ab["fert"].items()}
-        if ab.get("mni") is not None and getattr(self, "_nlp_nip", None):
-            _sh = float(ab["mni"]); _nip = self._nlp_nip
+            self.res.fert_tech_shares = {k_: float(v_) for k_, v_ in ab["fert"].items()}
+        if ab.get("mni") is not None and getattr(self.ev, "nlp_nip", None):
+            _sh = float(ab["mni"]); _nip = self.ev.nlp_nip
             if _sh > 1e-9:
                 for a_, m_ in _nip["man_d"].items():
                     m_ = float(m_ or 0.0)
                     if m_ > 0 and a_ in self.acts:
-                        self._manure_ni_relief[a_] = _nip["sub"] * _nip["nman"] * _sh * m_
+                        self.ev.manure_ni_relief[a_] = _nip["sub"] * _nip["nman"] * _sh * m_
                         if a_ in _nip["app_nh3"]:
-                            self._manure_ni_nh3[a_] = _sh * _nip["app_nh3"][a_]
-                self._fert_tech_shares = dict(getattr(self, "_fert_tech_shares", None) or {})
-                self._fert_tech_shares["NITR_INH_MAN"] = _sh
+                            self.ev.manure_ni_nh3[a_] = _sh * _nip["app_nh3"][a_]
+                self.res.fert_tech_shares = dict(getattr(self.res, "fert_tech_shares", None) or {})
+                self.res.fert_tech_shares["NITR_INH_MAN"] = _sh
         acts_ = list(self.acts); dm = {}; ft = {}
         for a, r in rats.items():
             if a not in acts_:
@@ -574,24 +574,24 @@ class NLPBlock:
                 if amt is not None and amt > 0:
                     dm.setdefault(a, {})[f] = float(amt) * float(r.dm[j])
                     ft.setdefault(a, {})[f] = float(amt)
-        self._last_feed_dm = dm
-        self._last_feed_t = ft
+        self.res.last_feed_dm = dm
+        self.res.last_feed_t = ft
         return y
 
     def _nlp_solve(self, Q, c, A, b, x_start):
-        """Solve the regional problem in CAPRI's form (_capri_nlp_solve, IPOPT), or None. With _nlp_try_n_relax set by
-        the caller, a failure is marked "n_target" (_nlp_fb_last), and the caller retries at JRC121368's relaxed N
-        target; with _nlp_accept_last set (the caller's last attempt), IPOPT's last point is kept, as CAPRI carries on
+        """Solve the regional problem in CAPRI's form (_capri_nlp_solve, IPOPT), or None. With ev.nlp_try_n_relax set by
+        the caller, a failure is marked "n_target" (ev.nlp_fb_last), and the caller retries at JRC121368's relaxed N
+        target; with ev.nlp_accept_last set (the caller's last attempt), IPOPT's last point is kept, as CAPRI carries on
         with a non-optimal solve (supply/simu_supply.gms, widen_bounds.gms; p_INFES)."""
-        self._last_npk = None
-        self._nlp_rc = None
-        self._last_feed_dm = None                  # never carry a previous solve's feed
-        self._last_feed_t = None
-        self._nlp_ok = False
-        self._nlp_fb_last = False
+        self.res.last_npk = None
+        self.res.nlp_rc = None
+        self.res.last_feed_dm = None                  # never carry a previous solve's feed
+        self.res.last_feed_t = None
+        self.res.nlp_ok = False
+        self.ev.nlp_fb_last = False
         y = self._capri_nlp_solve(Q, c, A, b, x_start)
-        if y is None and getattr(self, "_nlp_try_n_relax", False):
-            self._nlp_fb_last = "n_target"
+        if y is None and getattr(self.ev, "nlp_try_n_relax", False):
+            self.ev.nlp_fb_last = "n_target"
         return y
 
     def _note_floor_failure(self):
@@ -600,26 +600,26 @@ class NLPBlock:
         feeding, nutrient, land-use-change and fertiliser bounds, never the floor) and carries on with the solver's last
         point. CAPRI's Green Deal runs have the land market on, which lets grassland become arable land; without it a
         floor sized on total farmland may not fit on the arable land (K84)."""
-        if "landscape_floor" not in list(getattr(self, "_row_labels", []) or []):
+        if "landscape_floor" not in list(getattr(self.ev, "row_labels", []) or []):
             return
-        if getattr(self, "_nlp_fallback_log", None) is None:
-            self._nlp_fallback_log = []
+        if getattr(self.res, "nlp_fallback_log", None) is None:
+            self.res.nlp_fallback_log = []
         msg = ("no solution with the landscape floor " + ("(land market on)" if getattr(self, "use_land_market", False)
                else "(land market off: CAPRI's Green Deal runs have it on)") + "; the solver's last point kept, as CAPRI")
-        if msg not in self._nlp_fallback_log:
-            self._nlp_fallback_log.append(msg)
+        if msg not in self.res.nlp_fallback_log:
+            self.res.nlp_fallback_log.append(msg)
 
     def _nlp_last_point(self, Q, c, A, b, x_start):
         """The caller's last attempt: CAPRI's form solved again with IPOPT's last point kept where it fails, as CAPRI
         carries on with a non-optimal solve (supply/simu_supply.gms, widen_bounds.gms; p_INFES), recorded in the run's
         metadata (nlp_fallback). Only where the NLP cannot be built at all is there nothing to keep: the run stops, as
         CAPRI aborts on an execution error."""
-        self._nlp_accept_last = True
+        self.ev.nlp_accept_last = True
         try:
             y = self._nlp_solve(Q, c, A, b, x_start)
         finally:
-            self._nlp_accept_last = False
+            self.ev.nlp_accept_last = False
         if y is None:
             raise RuntimeError(f"{self.data.region_id}: the regional model in CAPRI's form could not be built or solved "
-                               f"({getattr(self, '_nlp_failed', None) or 'NLP build failed'})")
+                               f"({getattr(self.ev, 'nlp_failed', None) or 'NLP build failed'})")
         return y

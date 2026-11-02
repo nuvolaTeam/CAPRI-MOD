@@ -68,7 +68,7 @@ class LivestockBlock:
         return {"goods": goods, "dnet": n.T @ dy}
 
     def _apply_young_animal_prices(self):
-        ratio = getattr(self, "yani_price_ratio", None) or {}
+        ratio = getattr(self.seen, "yani_price_ratio", None) or {}
         if not ratio:
             return
         for g, rec in self._young_animal_coefs().items():
@@ -86,17 +86,17 @@ class LivestockBlock:
         the dairy intensity split (dairy_intensity dmann_rel), the cattle splits (cattle_intensity[key] dmann_rel) and
         the genetics options (genetics_effects[(animal, option)] d_mann_rel)."""
         out = []
-        j = getattr(self, "_dairy_col", None)
+        j = getattr(self.ev, "dairy_col", None)
         di = getattr(self.data, "dairy_intensity", None)
         if j is not None and int(j) < n_cols and di is not None and "DCOW" in acts:
             out.append((int(j), "DCOW", float(di["dmann_rel"])))
         tab = getattr(self.data, "cattle_intensity", None) or {}
-        for key, j in (getattr(self, "_cattle_cols", None) or {}).items():
+        for key, j in (getattr(self.ev, "cattle_cols", None) or {}).items():
             a = key.split(":")[0]
             if int(j) < n_cols and a in acts and key in tab:
                 out.append((int(j), a, float(tab[key]["dmann_rel"])))
         gen = getattr(self.data, "genetics_effects", None) or {}
-        for (a, opt), j in (getattr(self, "_genet_cols", None) or {}).items():
+        for (a, opt), j in (getattr(self.ev, "genet_cols", None) or {}).items():
             if int(j) < n_cols and a in acts and (a, opt) in gen:
                 out.append((int(j), a, float(gen[(a, opt)]["d_mann_rel"])))
         return out
@@ -146,11 +146,11 @@ class LivestockBlock:
           - PMP: (q_ext + q_int) z^2 / 2 (CAPRI's p_pmpQuadTechn of GRAE and GRAI), linear term
             from the base duals of the rows z enters, so z = 0 is optimal at base (as CAPRI's
             PMP calibration makes the base split optimal)."""
-        self._grass_col = None
+        self.ev.grass_col = None
         if "GRAS" not in self.acts or alloc_k:
             return Qa, ca, Aa, ba, start
         gi = getattr(self.data, "grass_intensity", None)
-        env_ = getattr(self, "_env_for_surplus", None)
+        env_ = getattr(self.seen, "env_for_surplus", None)
         if gi is None or env_ is None or not hasattr(gi, "get") or not (gi.get("q_ext", 0) > 0):
             return Qa, ca, Aa, ba, start
         dl = env_.grass_intensity_delta(self.data.region_id)
@@ -165,7 +165,7 @@ class LivestockBlock:
             if lab.startswith("fodder_") and i < Aa.shape[0] and Aa[i, jg] != 0.0:
                 # GRAS's own coefficient is -u (row) or +u (band); production change u x dy per ha
                 col[i] = Aa[i, jg] * dy
-        nr = getattr(self, "_need_row", None)
+        nr = getattr(self.ev, "need_row", None)
         if nr is not None and nr < Aa.shape[0]:
             # the change in the unit balance's mineral N, the quantity every crop carries on this row and the accounts
             # apply (K19: it was the plain fertiliser rate, -3.65 against -39.9 t per 1000 ha in AT32; the model then
@@ -176,12 +176,12 @@ class LivestockBlock:
         # calibration makes the base split of GRAE and GRAI optimal): c_z = - sum_i mu_i A_iz with
         # mu the duals of the rows z enters, from the region's first (baseline) solve, which is
         # made WITHOUT the column. Later solves carry the column with the stored term.
-        cz = getattr(self, "_grass_cz", None)
+        cz = getattr(self.par, "grass_cz", None)
         if cz is None:
-            self._grass_pending_col = col
-            self._grass_col = None
+            self.par.grass_pending_col = col
+            self.ev.grass_col = None
             return Qa, ca, Aa, ba, start
-        self._grass_pending_col = None
+        self.par.grass_pending_col = None
         Aa = np.hstack([Aa, col[:, None]])
         lo = np.zeros(Aa.shape[1]); lo[-1] = -1.0; lo[jg] = -s0
         hi = np.zeros(Aa.shape[1]); hi[-1] = 1.0; hi[jg] = -(1.0 - s0)
@@ -191,7 +191,7 @@ class LivestockBlock:
         Qa = np.pad(Qa, ((0, 1), (0, 1))); Qa[-1, -1] = qz
         ca = np.concatenate([ca, [cz + self._ghg_cost('grass')]])
         start = np.concatenate([start, [0.0]])
-        self._grass_col = Aa.shape[1] - 1
+        self.ev.grass_col = Aa.shape[1] - 1
         return Qa, ca, Aa, ba, start
 
     def _dairy_intensity_column(self, Qa, ca, Aa, ba, start, labels, n):
@@ -202,15 +202,15 @@ class LivestockBlock:
         return self._genetics_columns(Qa, ca, Aa, ba, start, labels, n)
 
     def _split_pending(self) -> bool:
-        return (getattr(self, "_dairy_pending", None) is not None or bool(getattr(self, "_cattle_pending", None))
-                or bool(getattr(self, "_genet_pending", None)))
+        return (getattr(self.par, "dairy_pending", None) is not None or bool(getattr(self.par, "cattle_pending", None))
+                or bool(getattr(self.par, "genet_pending", None)))
 
     def _split_record(self, y) -> None:
         """z of the dairy, bull and heifer splits from a solution vector."""
-        _dc = getattr(self, "_dairy_col", None)
-        self._last_dairy_z = float(y[_dc]) if _dc is not None and _dc < len(y) else 0.0
-        self._last_cattle_z = {a: float(y[c]) for a, c in (getattr(self, "_cattle_cols", None) or {}).items() if c < len(y)}
-        self._last_genet_z = {k: max(0.0, float(y[c])) for k, c in (getattr(self, "_genet_cols", None) or {}).items() if c < len(y)}
+        _dc = getattr(self.ev, "dairy_col", None)
+        self.res.last_dairy_z = float(y[_dc]) if _dc is not None and _dc < len(y) else 0.0
+        self.res.last_cattle_z = {a: float(y[c]) for a, c in (getattr(self.ev, "cattle_cols", None) or {}).items() if c < len(y)}
+        self.res.last_genet_z = {k: max(0.0, float(y[c])) for k, c in (getattr(self.ev, "genet_cols", None) or {}).items() if c < len(y)}
 
     def _cattle_columns(self, Qa, ca, Aa, ba, start, labels, n):
         """One column z per split of a cattle animal into CAPRI's activities (1000 stalls moved from one CAPRI
@@ -222,20 +222,20 @@ class LivestockBlock:
         cross term); linear term from the base duals, plus the CHANGES under the scenario: beef revenue (beef per
         stall, a - b), the young animals bought (calves, young cattle) and sold (young cattle from raising calves,
         replacement cows from HEIR) at the young-animal price changes."""
-        self._cattle_cols = {}
+        self.ev.cattle_cols = {}
         tab = getattr(self.data, "cattle_intensity", None)
         if not tab:
             return Qa, ca, Aa, ba, start
-        cz_all = getattr(self, "_cattle_cz", None) or {}
+        cz_all = getattr(self.par, "cattle_cz", None) or {}
         pending = {}
         rows_ = [labels.index(l) for l in ("N_balance",) if l in labels]
-        for extra in ("_need_row", "_alloc_row"):
-            k = getattr(self, extra, None)
-            if k is not None and k < Aa.shape[0] and k not in rows_ and (extra != "_alloc_row" or getattr(self, "_alloc_cols", 0)):
+        for extra in ("need_row", "alloc_row"):
+            k = getattr(self.ev, extra, None)
+            if k is not None and k < Aa.shape[0] and k not in rows_ and (extra != "alloc_row" or getattr(self.ev, "alloc_cols", 0)):
                 rows_.append(k)
-        ps = getattr(self, "_price_shock_now", None)
+        ps = getattr(self.ev, "price_shock_now", None)
         pv = getattr(self.data, "livestock_product_value_by_market_coef", None)
-        yr = getattr(self, "yani_price_ratio", None) or {}
+        yr = getattr(self.seen, "yani_price_ratio", None) or {}
         ycoef = self._young_animal_coefs() if yr else {}
         members = type(self).CATTLE_SPLIT_MEMBERS
         member_splits = getattr(type(self), "use_cattle_member_splits", True)
@@ -244,7 +244,7 @@ class LivestockBlock:
             a = key.split(":")[0]
             if a not in self.acts or key not in members or (":" in key and not member_splits):
                 continue
-            r = (getattr(self, "feed_rations", None) or {}).get(a)
+            r = (getattr(self.seen, "feed_rations", None) or {}).get(a)
             if r is None or not (float(di.get("q_z", 0) or 0) > 0):
                 continue
             j = list(self.acts).index(a)
@@ -291,10 +291,10 @@ class LivestockBlock:
                     dv += float(dp) * p_ * chg
             ca = np.concatenate([ca, [cz_all[key] - dv + self._ghg_cost('cattle', key)]])
             start = np.concatenate([start, [0.0]])
-            self._cattle_cols[key] = Aa.shape[1] - 1
-            rx = dict(getattr(self, "_dairy_req_extra", None) or {})
+            self.ev.cattle_cols[key] = Aa.shape[1] - 1
+            rx = dict(getattr(self.ev, "dairy_req_extra", None) or {})
             rx[a] = list(rx.get(a, [])) + [(Aa.shape[1] - 1, req)]
-            self._dairy_req_extra = rx
+            self.ev.dairy_req_extra = rx
         # per animal: CAPRI's activities x_m = s_m X + sum_k E_mk z_k (E_mk = +1 if split k moves stalls into m,
         # -1 out of m); bounds x_m >= 0, one row per activity; PMP block in z: E' diag(q_m) E (q_m: the activity's term
         # per model stall, q_b for the activity giving up stalls, q_z - q_b for the one gaining them)
@@ -320,7 +320,7 @@ class LivestockBlock:
                         e2 = 1.0 if m == members[key2][0] else (-1.0 if m == members[key2][1] else 0.0)
                         v_ += e1 * e2 * q_
                     Qa[c1, c2] = v_
-        self._cattle_pending = pending or None
+        self.par.cattle_pending = pending or None
         return Qa, ca, Aa, ba, start
 
     @classmethod
@@ -351,11 +351,11 @@ class LivestockBlock:
         return keys, H
 
     def _cattle_calibrate_from_duals(self, duals):
-        pend = getattr(self, "_cattle_pending", None)
+        pend = getattr(self.par, "cattle_pending", None)
         if not pend:
             return
-        rd = getattr(self, "_last_req_duals", None) or {}
-        cz = dict(getattr(self, "_cattle_cz", None) or {})
+        rd = getattr(self.ev, "last_req_duals", None) or {}
+        cz = dict(getattr(self.par, "cattle_cz", None) or {})
         if duals is not None and rd:
             sgn = {"DMAX": -1.0}
             for key, (col, req) in pend.items():
@@ -363,8 +363,8 @@ class LivestockBlock:
                 if len(duals) >= len(col):
                     cz[key] = -(float(np.asarray(duals[:len(col)], float) @ col)
                                 + sum(float(rd.get((a, lab), 0.0)) * sgn.get(lab, 1.0) * v for lab, v in req.items()))
-        self._cattle_cz = cz
-        self._cattle_pending = None
+        self.par.cattle_cz = cz
+        self.par.cattle_pending = None
 
     def _genetics_columns(self, Qa, ca, Aa, ba, start, labels, n):
         """One column g per region, animal and option (1000 heads adopting), CAPRI's breeding options and its
@@ -381,29 +381,29 @@ class LivestockBlock:
             gamma / eligible heads at base per head adopting; the cost-saving drop is CAPRI's, from its ini and max
             calibration runs (column dsav);
           - milk revenue of the extra milk under the current milk price change (genet_yld)."""
-        self._genet_cols = {}
+        self.ev.genet_cols = {}
         tab = getattr(self.data, "genetics_effects", None)
         if not tab:
             return Qa, ca, Aa, ba, start
-        cal = getattr(self, "_genet_cz", None) or {}
+        cal = getattr(self.par, "genet_cz", None) or {}
         pend = {}
         rows_ = [labels.index(l) for l in ("N_balance",) if l in labels]
-        for extra in ("_need_row", "_alloc_row"):
-            k = getattr(self, extra, None)
-            if k is not None and k < Aa.shape[0] and k not in rows_ and (extra != "_alloc_row" or getattr(self, "_alloc_cols", 0)):
+        for extra in ("need_row", "alloc_row"):
+            k = getattr(self.ev, extra, None)
+            if k is not None and k < Aa.shape[0] and k not in rows_ and (extra != "alloc_row" or getattr(self.ev, "alloc_cols", 0)):
                 rows_.append(k)
-        ps = getattr(self, "_price_shock_now", None)
+        ps = getattr(self.ev, "price_shock_now", None)
         pv = getattr(self.data, "livestock_product_value_by_market_coef", None)
         base = self._base_levels()
         # the options' rows as plain dicts, once per table (Series lookups here were a visible share of each solve)
-        _gm = self.__dict__.get("_genet_rows_memo")
+        _gm = getattr(self.par, "genet_rows_memo", None)
         if _gm is None or _gm[0] is not tab:
             _gm = (tab, {k: (v.to_dict() if hasattr(v, "to_dict") else dict(v)) for k, v in tab.items()})
-            self._genet_rows_memo = _gm
+            self.par.genet_rows_memo = _gm
         for (a, opt), e in _gm[1].items():
             if a not in self.acts:
                 continue
-            r = (getattr(self, "feed_rations", None) or {}).get(a)
+            r = (getattr(self.seen, "feed_rations", None) or {}).get(a)
             L0 = float(base.get(a, 0.0) or 0.0)
             c = float(e.get("cost_eur_head", 0.0) or 0.0)
             if r is None or L0 <= 1e-6 or c <= 0 or not (float(e.get("elig_share", 0.0) or 0.0) > 0):
@@ -426,7 +426,8 @@ class LivestockBlock:
             # per head adopting: / (eligible heads at base). costsaving0 - costsaving1: the drop of the option's
             # marginal value between CAPRI's ini and max calibration runs (dsav, EUR per model head;
             # tools/lib/_capri_costsavings.py), taken out of the planned slope as CAPRI does (K67 F2)
-            gf = float(e["gamma_floor"]) if ("gamma_floor" in e and pd.notna(e["gamma_floor"])) else 0.2
+            gf = (float(e["gamma_floor"]) if ("gamma_floor" in e and pd.notna(e["gamma_floor"]))
+                  else param("GENET_GAMMA_FLOOR"))      # breeding.gms l. 452
             ds_ = float(e.get("dsav", 0.0) or 0.0)
             gamma = max(gf * c, c * (r1 - r0) - (ds_ if np.isfinite(ds_) else 0.0))
             el_ = max(float(e["elig_share"]), 1e-6)
@@ -444,28 +445,28 @@ class LivestockBlock:
                     dv = dmr * float(mv) * float(ps.get("MILK", ps.get(a, 0.0)) or 0.0)
             ca = np.concatenate([ca, [cal[(a, opt)] + r0 * c - dv + self._ghg_cost('genet', (a, opt))]])
             start = np.concatenate([start, [0.0]])
-            self._genet_cols[(a, opt)] = Aa.shape[1] - 1
-            rx = dict(getattr(self, "_dairy_req_extra", None) or {})
+            self.ev.genet_cols[(a, opt)] = Aa.shape[1] - 1
+            rx = dict(getattr(self.ev, "dairy_req_extra", None) or {})
             rx[a] = list(rx.get(a, [])) + [(Aa.shape[1] - 1, req)]
-            self._dairy_req_extra = rx
-        self._genet_pending = pend or None
+            self.ev.dairy_req_extra = rx
+        self.par.genet_pending = pend or None
         return Qa, ca, Aa, ba, start
 
     def _genetics_calibrate_from_duals(self, duals):
         """c_g = - (sum_i mu_i A_ig + the animal's requirement duals x the requirement changes) at base."""
-        pend = getattr(self, "_genet_pending", None)
+        pend = getattr(self.par, "genet_pending", None)
         if not pend:
             return
-        rd = getattr(self, "_last_req_duals", None) or {}
-        cz = dict(getattr(self, "_genet_cz", None) or {})
+        rd = getattr(self.ev, "last_req_duals", None) or {}
+        cz = dict(getattr(self.par, "genet_cz", None) or {})
         if duals is not None and rd:
             sgn = {"DMAX": -1.0}
             for (a, opt), (col, req) in pend.items():
                 if len(duals) >= len(col):
                     cz[(a, opt)] = -(float(np.asarray(duals[:len(col)], float) @ col)
                                      + sum(float(rd.get((a, lab), 0.0)) * sgn.get(lab, 1.0) * v for lab, v in req.items()))
-        self._genet_cz = cz
-        self._genet_pending = None
+        self.par.genet_cz = cz
+        self.par.genet_pending = None
 
     def _dairy_column_only(self, Qa, ca, Aa, ba, start, labels, n):
         """Append CAPRI's dairy split as one column z (1000 heads moved from DCOH to DCOL; DCOL =
@@ -478,21 +479,21 @@ class LivestockBlock:
           - linear term from the base duals (z = 0 optimal at base), plus the milk revenue change
             under the current milk price (milk per head (COMI_DCOL - COMI_DCOH) / COMI_DCOW).
         Calves, cull-cow beef and replacements are the same for both activities (CAPRI res_17)."""
-        self._dairy_col = None
-        self._dairy_req_extra = None
+        self.ev.dairy_col = None
+        self.ev.dairy_req_extra = None
         if "DCOW" not in self.acts:
             return Qa, ca, Aa, ba, start
         di = getattr(self.data, "dairy_intensity", None)
-        r = (getattr(self, "feed_rations", None) or {}).get("DCOW")
+        r = (getattr(self.seen, "feed_rations", None) or {}).get("DCOW")
         if di is None or r is None or not hasattr(di, "get") or not (float(di.get("q_low", 0) or 0) > 0):
             return Qa, ca, Aa, ba, start
         jd = list(self.acts).index("DCOW")
         s0 = float(di["share_low"]); dm = float(di["dmann_rel"])
         col = np.zeros(Aa.shape[0])
         rows_ = [labels.index(l) for l in ("N_balance",) if l in labels]
-        for extra in ("_need_row", "_alloc_row"):
-            k = getattr(self, extra, None)
-            if k is not None and k < Aa.shape[0] and k not in rows_ and (extra != "_alloc_row" or getattr(self, "_alloc_cols", 0)):
+        for extra in ("need_row", "alloc_row"):
+            k = getattr(self.ev, extra, None)
+            if k is not None and k < Aa.shape[0] and k not in rows_ and (extra != "alloc_row" or getattr(self.ev, "alloc_cols", 0)):
                 rows_.append(k)
         for i in rows_:
             col[i] = float(Aa[i, jd]) * dm
@@ -500,11 +501,11 @@ class LivestockBlock:
                "DMIN": float(r.DMIN) * float(di["ddrmn_rel"])}
         if np.isfinite(float(r.DMAX)):
             req["DMAX"] = float(r.DMAX) * float(di["ddrmx_rel"])
-        cz = getattr(self, "_dairy_cz", None)
+        cz = getattr(self.par, "dairy_cz", None)
         if cz is None:
-            self._dairy_pending = (col, req)
+            self.par.dairy_pending = (col, req)
             return Qa, ca, Aa, ba, start
-        self._dairy_pending = None
+        self.par.dairy_pending = None
         Aa = np.hstack([Aa, col[:, None]])
         lo = np.zeros(Aa.shape[1]); lo[-1] = -1.0; lo[jd] = -s0
         hi = np.zeros(Aa.shape[1]); hi[-1] = 1.0; hi[jd] = -(1.0 - s0)
@@ -512,7 +513,7 @@ class LivestockBlock:
         labels.extend(["dairy_z_lo", "dairy_z_hi"])
         Qa = np.pad(Qa, ((0, 1), (0, 1))); Qa[-1, -1] = float(di["q_low"]) + float(di["q_high"])
         # milk revenue of the change under the current milk price (EUR per head = 1000 EUR per 1000 heads)
-        ps = getattr(self, "_price_shock_now", None)
+        ps = getattr(self.ev, "price_shock_now", None)
         pv = getattr(self.data, "livestock_product_value_by_market_coef", None)
         dmilk = 0.0
         if ps is not None and pv is not None and hasattr(pv, "get"):
@@ -521,8 +522,8 @@ class LivestockBlock:
                 dmilk = float(di["dcomi_rel"]) * float(mv) * float(ps.get("MILK", ps.get("DCOW", 0.0)) or 0.0)
         ca = np.concatenate([ca, [cz - dmilk + self._ghg_cost('dairy')]])
         start = np.concatenate([start, [0.0]])
-        self._dairy_col = Aa.shape[1] - 1
-        self._dairy_req_extra = {"DCOW": [(self._dairy_col, req)]}
+        self.ev.dairy_col = Aa.shape[1] - 1
+        self.ev.dairy_req_extra = {"DCOW": [(self.ev.dairy_col, req)]}
         return Qa, ca, Aa, ba, start
 
     def _dairy_calibrate_from_duals(self, duals):
@@ -530,25 +531,25 @@ class LivestockBlock:
         cows' requirement rows of their dual x the requirement change)."""
         self._cattle_calibrate_from_duals(duals)
         self._genetics_calibrate_from_duals(duals)
-        pend = getattr(self, "_dairy_pending", None)
+        pend = getattr(self.par, "dairy_pending", None)
         if pend is None:
             return
         col, req = pend
-        rd = getattr(self, "_last_req_duals", None) or {}
+        rd = getattr(self.ev, "last_req_duals", None) or {}
         if duals is not None and len(duals) >= len(col) and rd:
             sgn = {"DMAX": -1.0}
-            self._dairy_cz = -(float(np.asarray(duals[:len(col)], float) @ col)
+            self.par.dairy_cz = -(float(np.asarray(duals[:len(col)], float) @ col)
                                + sum(float(rd.get(("DCOW", lab), 0.0)) * sgn.get(lab, 1.0) * v for lab, v in req.items()))
-        self._dairy_pending = None
+        self.par.dairy_pending = None
 
     def _grass_calibrate_from_duals(self, duals):
         """After the first (baseline) solve without the column: c_z = - sum_i mu_i A_iz."""
-        col = getattr(self, "_grass_pending_col", None)
+        col = getattr(self.par, "grass_pending_col", None)
         if col is None:
             return
         if duals is not None and len(duals) >= len(col):
-            self._grass_cz = -float(np.asarray(duals[:len(col)], float) @ col)
-        self._grass_pending_col = None
+            self.par.grass_cz = -float(np.asarray(duals[:len(col)], float) @ col)
+        self.par.grass_pending_col = None
 
     def _fodder_rows(self):
         """CAPRI-consistent fodder balance rows (non-tradable fodder, SUPBAL_):
@@ -564,8 +565,8 @@ class LivestockBlock:
                 continue
             row = np.zeros(len(self.acts))
             row_b = np.zeros(len(self.acts))
-            _rs = getattr(self, "ration_state", None) or {}
-            _fr = getattr(self, "feed_rations", None) or {}
+            _rs = getattr(self.seen, "ration_state", None) or {}
+            _fr = getattr(self.seen, "feed_rations", None) or {}
             for a, t in rec.get("use_t_head", {}).items():
                 if a in acts_idx:
                     xr = (_rs.get(a) or {}).get("x", {})

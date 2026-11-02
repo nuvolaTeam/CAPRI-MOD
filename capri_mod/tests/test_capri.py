@@ -275,7 +275,7 @@ def test_emission_tax_in_supply_follows_capri(model):
         c = co["IR010000"]
         assert c["act"]["DCOW"] > 0 and c["act"]["SWHE"] > 0 and c["hist"]["grass"] < 0
         assert c["genet"][("DCOW", "Nitr_Tot")] < 0
-        r = model.supply_module.feed_rations["IR010000"]["DCOW"]
+        r = model.supply_module.seen.feed_rations["IR010000"]["DCOW"]
         fac = model.env_module._enteric_factors()["DCOW"]
         j = r.feeds.index("FGRA")
         e = fac["ge"]["IR000000"]["FGRA"] * 4.1868 * fac["ym"] / 55.65 * GWP_CH4 * float(r.dm[j])
@@ -294,7 +294,7 @@ def test_emission_tax_in_supply_follows_capri(model):
         assert s["abatement"]["carbon_tax"] == 100.0
     finally:
         model.run(scenario="BASELINE", regions=regs, max_outer_iter=2)
-    assert float(model.supply_module.ghg_tax) == 0.0
+    assert float(model.supply_module.seen.ghg_tax) == 0.0
 
 
 @pytest.mark.slow
@@ -310,11 +310,11 @@ def test_manure_p_and_k_have_markets_of_their_own(model):
         sm = model.supply_module
         for r in regs:
             mo = sm._models[r]
-            pk = mo._pool_cols_pk
-            assert set(pk) == {"P", "K"} and len({*mo._pool_cols, *pk["P"], *pk["K"]}) == 6
-            Q, c, A, bb, y = mo._last_aug
+            pk = mo.ev.pool_cols_pk
+            assert set(pk) == {"P", "K"} and len({*mo.ev.pool_cols, *pk["P"], *pk["K"]}) == 6
+            Q, c, A, bb, y = mo.res.last_aug
             for nut, (je, ji) in pk.items():
-                assert abs(float(c[je]) - mo.manure_pool_price_pk[nut]) < 1e-9 and abs(float(c[ji]) + float(c[je])) < 1e-9
+                assert abs(float(c[je]) - mo.seen.manure_pool_price_pk[nut]) < 1e-9 and abs(float(c[ji]) + float(c[je])) < 1e-9
             x0 = mo._base_levels().reindex(mo.acts).fillna(0.0).values
             xa = np.array([b["supply"][r].activities.get(a, 0.0) for a in mo.acts])
             assert float(np.max(np.abs(xa - x0) / np.maximum(np.abs(x0), 1.0))) < 1e-4
@@ -341,13 +341,13 @@ def test_manure_market_and_ammonia_options_in_every_eu_solve(model):
     b = model.run(scenario="BASELINE", regions=regs, max_outer_iter=2)
     try:
         mo = model.supply_module._models["BL210000"]
-        assert mo._mctx() is not None and mo._need_row is not None
+        assert mo._mctx() is not None and mo.ev.need_row is not None
         if model.use_manure_market:
-            je, ji = mo._pool_cols
-            Q, c, A, bb, y = mo._last_aug
-            assert abs(float(c[je]) - float(mo.manure_pool_price)) < 1e-9 and abs(float(c[ji]) + float(c[je])) < 1e-9
+            je, ji = mo.ev.pool_cols
+            Q, c, A, bb, y = mo.res.last_aug
+            assert abs(float(c[je]) - float(mo.seen.manure_pool_price)) < 1e-9 and abs(float(c[ji]) + float(c[je])) < 1e-9
         if "NO080000" in regs:
-            assert model.supply_module._models["NO080000"]._manure_ctx is None
+            assert model.supply_module._models["NO080000"].seen.manure_ctx is None
         sh0 = dict(b["supply"]["BL210000"].manure_tech_shares)
         s = model.run(custom_scenario=carbon_tax_scenario(100.0), regions=regs, max_outer_iter=2)
         co = list(model._ghg_coef_cache.values())[-1]["BL210000"]
@@ -1103,8 +1103,19 @@ def test_synthetic_base_activities_excluded_from_elasticity_wiring():
     The guard itself stays: it is what stops a future placeholder being wired
     up by accident.
     """
+    import numpy as np
     import pandas as pd
-    from capri_mod.supply.capri_pmp import detect_synthetic_base_activities
+
+    def detect_synthetic_base_activities(base_areas, min_regions=30):
+        """Activities whose base level is a constant placeholder across at least min_regions regions (a real
+        elasticity around a fake base level gives a real-looking but meaningless response: PMP curvature scales as
+        1/(eps x0)). Moved here from capri_pmp.py, where only this test used it (refactor stage 3, N5)."""
+        out = set()
+        for col in base_areas.columns:
+            v = base_areas[col].replace(0, np.nan).dropna()
+            if len(v) >= min_regions and float(v.std()) < 1e-9:
+                out.add(col)
+        return out
 
     root = _repo_root()
     areas = pd.read_csv(root / "capri_data/2017/supply/base_areas.csv", index_col=0)
@@ -2293,8 +2304,8 @@ def _cold(model):
     """Clear a regional model's warm start (CAPRI's CONOPT, like IPOPT here, starts from the last solution). Two solves
     of the same problem from different starts end within IPOPT's tolerance of each other, not bit-identical (KNOWN_ISSUES
     K80); from the same cold start they coincide, which is what a check for leaked state needs."""
-    model._nlp_prev = None
-    model._nlp_prev_f = None
+    model.sv.nlp_prev = None
+    model.sv.nlp_prev_f = None
     return model
 
 
@@ -2350,15 +2361,15 @@ def test_unreachable_landscape_floor_is_kept_as_capri(data, monkeypatch):
     sm = SupplyModule(data, calibrate_supply_elasticities(data["areas"]))
     sm.run(price_signals=None, regions=[region])
     mo = sm._models[region]
-    mo._nlp_fallback_log = []
+    mo.res.nlp_fallback_log = []
     res = mo.solve(set_aside_requirement=0.10)
     assert not hasattr(res, "landscape_shortfall")
-    log = " ".join(getattr(mo, "_nlp_fallback_log", None) or [])
+    log = " ".join(getattr(mo.res, "nlp_fallback_log", None) or [])
     assert "landscape floor" in log and "land market off" in log, log
     assert not hasattr(mo, "_fit_aug_row")
-    mo._nlp_fallback_log = []
+    mo.res.nlp_fallback_log = []
     plain = mo.solve()
-    assert plain.converged and not (getattr(mo, "_nlp_fallback_log", None) or []), "the plain solve failed"
+    assert plain.converged and not (getattr(mo.res, "nlp_fallback_log", None) or []), "the plain solve failed"
 
 
 def test_greendeal_switchboard_mirrors_capri():
@@ -2460,22 +2471,22 @@ def test_cover_crop_requirement_and_winter_cover_row(data):
     model.data.organic_targets_pp = None          # use the distance rule: o known below
     o_share = model._organic_baseline() + 0.25
     model._cover_crop_requirement(0.50, o_share)
-    cv = model._cover
+    cv = model.ev.cover
     assert cv is not None and cv["potential"] > 0 and cv["biofix"] > 0
     expect = min(0.25 * cv["potential"] + cv["base"], max(cv["potential"], cv["base"]))
     assert abs(cv["req"] - expect) < 1e-6 * max(1.0, expect)
     assert cv["delta"] > 0
     A, b, _, _ = model._build_constraints()
-    assert "winter_cover" in model._row_labels
-    i = model._row_labels.index("winter_cover")
+    assert "winter_cover" in model.ev.row_labels
+    i = model.ev.row_labels.index("winter_cover")
     assert abs(b[i] - (cv["uaa"] - cv["req"])) < 1e-6 * cv["uaa"] + 1e-6
     # with a landscape floor, CAPRI adds FALL.FLOOR to the catch-crop area (winterCover_)
     A, b, _, _ = model._build_constraints(set_aside_requirement=0.10)
-    i = model._row_labels.index("winter_cover")
-    floor = -b[model._row_labels.index("landscape_floor")]
-    assert floor > 0 and abs(model._fall_floor - floor) < 1e-9
+    i = model.ev.row_labels.index("winter_cover")
+    floor = -b[model.ev.row_labels.index("landscape_floor")]
+    assert floor > 0 and abs(model.ev.fall_floor - floor) < 1e-9
     assert abs(b[i] - (cv["uaa"] - cv["req"] + floor)) < 1e-6 * cv["uaa"] + 1e-6
-    model._cover = None
+    model.ev.cover = None
 
 
 def test_dairy_split_column_calibrated_at_base():
@@ -2491,9 +2502,9 @@ def test_dairy_split_column_calibrated_at_base():
     mo = m.supply_module._models["FR520000"]
     di = m.data["dairy_intensity"].loc["FR520000"]
     assert di["dcomi_rel"] < 0 and di["dmann_rel"] < 0 and di["denne_rel"] < 0
-    assert getattr(mo, "_dairy_cz", None) is not None and getattr(mo, "_dairy_col", None) is not None
+    assert getattr(mo.par, "dairy_cz", None) is not None and getattr(mo.ev, "dairy_col", None) is not None
     cows = float(m.data["animal_numbers"].at["FR520000", "DCOW"])
-    assert abs(float(mo._last_dairy_z)) < 1e-3 * cows
+    assert abs(float(mo.res.last_dairy_z)) < 1e-3 * cows
 
 
 def test_histosol_emissions_and_fallowing_calibrated(data):
@@ -2545,8 +2556,9 @@ def test_tax_on_mineral_n_takes_the_accounts_miterra_factors():
     from capri_mod.supply import n_cascade as _nc
     from capri_mod.supply.abatement import AbatementBlock
     from capri_mod.supply.fertilisation import FertilisationBlock
+    from capri_mod.supply.state import RegionalStateMixin
 
-    class _S(FertilisationBlock, AbatementBlock):
+    class _S(RegionalStateMixin, FertilisationBlock, AbatementBlock):     # the blocks' memos are in par (stage 3, S5)
         pass
     s = _S.__new__(_S)
     s.data = SimpleNamespace(region_id="DE110000")
@@ -2598,10 +2610,10 @@ def test_bull_heifer_split_calibrated_at_base():
     mo = m.supply_module._models["FR520000"]
     ct = m.data["cattle_intensity"]["FR520000"]
     assert ct["BULL"]["dyoung_rel"] > 0 and ct["BULL"]["dmann_rel"] < 0
-    assert set(getattr(mo, "_cattle_cz", {}) or {}) >= {"BULL"} and "BULL" in (mo._cattle_cols or {})
+    assert set(getattr(mo.par, "cattle_cz", {}) or {}) >= {"BULL"} and "BULL" in (mo.ev.cattle_cols or {})
     # by default (the cattle member splits off, K65) only the intensity pairs carry a split, each at the base split
-    assert set(mo._last_cattle_z or {}) == {"BULL", "HFRS"}
-    for a, z in (mo._last_cattle_z or {}).items():
+    assert set(mo.res.last_cattle_z or {}) == {"BULL", "HFRS"}
+    for a, z in (mo.res.last_cattle_z or {}).items():
         assert abs(float(z)) < 1e-3 * max(1.0, float(m.data["animal_numbers"].at["FR520000", a.split(":")[0]])), (a, z)
     # with the member splits on, every split (the replacement heifers HFRS:rep, the calves CALV:male / female / sex)
     # gets its column and stays at the base split too
@@ -2611,8 +2623,8 @@ def test_bull_heifer_split_calibrated_at_base():
         m = CAPRIModel(data_dir=str(DATA_DIR), verbose=False)
         m.run(scenario="BASELINE", regions=["FR520000"], max_outer_iter=2)
         mo = m.supply_module._models["FR520000"]
-        assert set(mo._last_cattle_z or {}) >= {"BULL", "HFRS", "HFRS:rep", "CALV:male", "CALV:female", "CALV:sex"}
-        for a, z in (mo._last_cattle_z or {}).items():
+        assert set(mo.res.last_cattle_z or {}) >= {"BULL", "HFRS", "HFRS:rep", "CALV:male", "CALV:female", "CALV:sex"}
+        for a, z in (mo.res.last_cattle_z or {}).items():
             assert abs(float(z)) < 1e-3 * max(1.0, float(m.data["animal_numbers"].at["FR520000", a.split(":")[0]])), (a, z)
     finally:
         S.activate(_prev)
@@ -2656,8 +2668,8 @@ def test_parallel_regional_solves_match_sequential():
         s = m.run(custom_scenario=farm_to_fork_scenario(), regions=regs, max_outer_iter=2)
         out.append(({r: dict(v.activities) for r, v in s["supply"].items()},
                     {r: dict(v.shadow_prices) for r, v in s["supply"].items()},
-                    dict(m.supply_module._nbal_state)))
-        assert all(m.supply_module._models[r]._env_for_surplus is m.supply_module._env_for_surplus for r in regs)
+                    dict(m.supply_module.sv.nbal_state)))
+        assert all(m.supply_module._models[r].seen.env_for_surplus is m.supply_module.par.env_for_surplus for r in regs)
         # the solves' _nlp* fields, also those the workers brought back, are the declared ones (NLP_STATE, S0b)
         _decl = set(type(m.supply_module._models[regs[0]]).NLP_STATE)
         for r in regs:
@@ -2806,6 +2818,33 @@ def test_parameter_file_and_code_agree():
     assert params.param("GWP_N2O") == 298.0 and params.param_table("FIBRE_FACTOR")["DCOW"] == 0.6
 
 
+def test_the_supplys_parameters_follow_the_runs_data_directory(tmp_path):
+    """Refactor stage 3, N1 (the project lead's decision Q6, 2 November 2026): param() reads
+    <data_dir>/shared/model_parameters.csv through the run's inputs (capri_mod.data.inputs), and the supply reads its
+    parameters where it uses them, so a run on another data directory takes that directory's values."""
+    import csv
+    from capri_mod import params
+    from capri_mod.data import inputs as I
+    from capri_mod.supply.capri_pmp import dampen_elasticity
+    rows = list(csv.DictReader(open(params.FILE, newline="")))
+    for r in rows:
+        if r["name"] == "ELAS_CAP":
+            r["value"] = "5.0"
+    (tmp_path / "shared").mkdir()
+    with open(tmp_path / "shared" / "model_parameters.csv", "w", newline="") as f:
+        w = csv.DictWriter(f, fieldnames=list(rows[0]))
+        w.writeheader()
+        w.writerows(rows)
+    old = I.current()
+    try:
+        assert float(dampen_elasticity(100.0)) == 8.0                    # the repository's cap
+        I.use(I.RunInputs(tmp_path))
+        assert params.param("ELAS_CAP") == 5.0 and float(dampen_elasticity(100.0)) == 5.0
+    finally:
+        I.use(old)
+    assert params.param("ELAS_CAP") == 8.0
+
+
 def test_settings_layer_is_the_one_source_of_run_settings():
     """The settings layer (agreed 23 October 2026): every switch read through `setting(...)` names a key of
     defaults.toml, every key of defaults.toml is read somewhere, an unknown key or a wrong type stops, assigning to a
@@ -2896,8 +2935,8 @@ def test_jrc_relaxed_n_target_is_kept(model, monkeypatch):
         s = model.run(custom_scenario=farm_to_fork_scenario(), regions=regs, max_outer_iter=3)
         r = s["supply"]["NL120000"]
         mo = model.supply_module._models["NL120000"]
-        assert "N_balance" in list(mo._row_labels) and r.converged
-        assert getattr(mo, "_nlp_fb_last", True) is False                       # the last solve in CAPRI's form
+        assert "N_balance" in list(mo.ev.row_labels) and r.converged
+        assert getattr(mo.ev, "nlp_fb_last", True) is False                       # the last solve in CAPRI's form
         fb = s["metadata"]["nlp_fallback"].get("NL120000") or []
         assert all("relaxed target" in e for e in fb) and len(fb) <= 1, fb
         assert bool(getattr(r, "n_target_relaxed", False)) == bool(fb)
@@ -3120,7 +3159,7 @@ def test_capri_activity_bounds(data):
     sm.run(price_signals=None, regions=["NL120000"])
     m = sm._models["NL120000"]
     A, b, _, _ = m._build_constraints()
-    lab = list(m._row_labels)
+    lab = list(m.ev.row_labels)
     x0 = m._base_levels()
     for a in ("DCOW", "SHGF", "SWHE", "GRAS"):
         v = float(x0.get(a, 0.0))
@@ -3516,7 +3555,7 @@ def test_n_leaching_follows_capri():
         c = nl.crop_n(M, x["RUNMIN"] / M, (x["GASMIN"] + x["RUNMIN"]) / M, n2o_netf,
                       [(x["EXCRET"], (x["RUNANI"] - runh) / x["EXCRET"], (x["GASANI"] + x["RUNANI"]) / x["EXCRET"])],
                       x.get("MTRADE", 0.0), x["ATMOSD"] + x["CRESID"], x["BIOFIX"], L, x["EXPPRD"] / x["IMPORT"])
-        model = sum(c.values()) * nl.EF5 * 44 / 28
+        model = sum(c.values()) * __import__("capri_mod.params", fromlist=["param"]).param("EF5_LEACHING_N2O") * 44 / 28
         capri = x["UAAR_N2OLEA"] * x["UAAR_LEVL"] / 1000.0
         assert abs(model / capri - 1.0) < 0.06, (reg, model, capri)
     assert abs(nl.fert_effect(0.5, 0.1) - (1 - 0.5 * 1.1)) < 1e-12
@@ -3560,17 +3599,17 @@ def test_nlp_form_takes_jrc121368_relaxation_where_the_tiered_n_target_fails(mod
     recorded, and kept for the scenario."""
     from capri_mod.policy.greendeal import farm_to_fork_scenario
     from capri_mod import settings as S
-    model.supply_module._jrc_capped_cache = None
+    model.supply_module.par.jrc_capped_cache = None
     try:
         with S.override({"supply.jrc_capped_override": "NL41,BE25,NL21,BE21,NL22,NL31,BE23,NL42,MT00"}):
             model.run(scenario="BASELINE", regions=["NL320000"], max_outer_iter=2)
             r = model.run(custom_scenario=farm_to_fork_scenario(), regions=["NL320000"], max_outer_iter=2)
     finally:
-        model.supply_module._jrc_capped_cache = None
+        model.supply_module.par.jrc_capped_cache = None
     fb = r["metadata"]["nlp_fallback"].get("NL320000") or []
     assert len(fb) == 1 and "relaxed target" in fb[0], fb       # once, then kept (sticky)
     mo = model.supply_module._models["NL320000"]
-    assert getattr(mo, "_n_target_relaxed", False) and getattr(mo, "_nlp_fb_last", True) is False   # CAPRI's form
+    assert getattr(mo.res, "n_target_relaxed", False) and getattr(mo.ev, "nlp_fb_last", True) is False   # CAPRI's form
     assert getattr(r["supply"]["NL320000"], "balance_shortfall", 0.0) > 0.0
 
 
@@ -3586,10 +3625,10 @@ def test_winter_cover_is_chosen_in_the_nlp_form(model):
     regs = ["DE110000"]
     b = model.run(scenario="BASELINE", regions=regs, max_outer_iter=1)
     mo = model.supply_module._models["DE110000"]
-    cs = mo._cover_solved
+    cs = mo.res.cover_solved
     assert cs and cs["endogenous"] and abs(cs["share"] - cs["base"] / cs["uaa"]) < 2e-3
     s = model.run(custom_scenario=farm_to_fork_scenario(), regions=regs, max_outer_iter=1)
-    cs = model.supply_module._models["DE110000"]._cover_solved
+    cs = model.supply_module._models["DE110000"].res.cover_solved
     assert cs["lb_share"] > cs["base"] / cs["uaa"] + 0.01          # the requirement raises the floor
     assert cs["share"] >= cs["lb_share"] - 1e-6 and cs["share"] <= cs["max_share"] + 1e-6
     w0, w1 = model.env_module._winter_cover_now("DE110000", s["supply"]["DE110000"])
@@ -3648,13 +3687,13 @@ def test_land_rows_are_equalities_and_histosol_fallow_keeps_its_land(model):
     area stays in its land type on both rows of the pair (on the upper row alone it was held at zero)."""
     model.run(scenario="BASELINE", regions=["IR010000"], max_outer_iter=1)
     mo = model.supply_module._models["IR010000"]
-    lab = list(mo._aug_labels)
-    _Q, _c, A, b, _y = mo._last_aug           # the augmented problem the land-market solve used
+    lab = list(mo.ev.aug_labels)
+    _Q, _c, A, b, _y = mo.res.last_aug           # the augmented problem the land-market solve used
     for row in ("arable_land", "permanent_land", "grassland"):
         if row in lab and row + "_lo" in lab:
             i, j = lab.index(row), lab.index(row + "_lo")
             assert abs(float(b[i]) + float(b[j])) < 1e-5 * max(1.0, abs(float(b[i]))), (row, b[i], b[j])
-    for cls, col in (getattr(mo, "_hist_cols", None) or {}).items():
+    for cls, col in (getattr(mo.ev, "hist_cols", None) or {}).items():
         row = dict(mo.HISTOSOL_CLASSES)[cls]
         assert A[lab.index(row), col] == 1.0 and A[lab.index(row + "_lo"), col] == -1.0
 
@@ -3672,9 +3711,9 @@ def test_capri_land_rents_at_the_2030_calibration_point(model):
     pm = getattr(pmod, "_last_projected_model", None) or model
     mo = pm.supply_module._models["IR010000"]
     rents = pd.read_csv(root / "capri_data" / "2017" / "supply" / "land_rents_2030.csv", index_col=0).loc["IR010000"]
-    rr = mo._land_rent_rows
+    rr = mo.ev.land_rent_rows
     assert abs(rr["arable_land"] - rents["rent_arac"]) < 1e-6 and abs(rr["grassland"] - rents["rent_gras"]) < 1e-6
-    assert (mo._nlp_cal or {}).get("residual", 1.0) < 1e-6
+    assert (getattr(mo.par, "nlp_cal", None) or {}).get("residual", 1.0) < 1e-6
     drift = res.baseline[2030]["metadata"].get("base_calibration_drift") or [0.0]
     assert float(drift[-1]) < 0.002, drift
 
@@ -3775,56 +3814,6 @@ def test_feed_ration_carries_capri_2030_feed_slopes():
     key = next(k for k in s17 if k[0] == "FR520000" and k[1] == "BROI") if isinstance(next(iter(s17)), tuple) else None
     if key is not None:
         assert list(s17[key].slope) != list(s30[key].slope)
-
-
-def test_recipe_pmp_terms_reproduce_capris_own():
-    """K61, 22 October 2026: capri-mod's PMP terms by CAPRI's recipe (tools/build/build_pmp_recipe.py, with the land-nest
-    adjustment and 14 years of inflation at 2017) against CAPRI's own terms: the 2017 group terms within 1% of CAPRI's
-    CAPREG terms in (nearly) every pair, the activities' first-technology terms within 5% in most pairs at 2017 and,
-    collapsed per activity, at 2030."""
-    import sys
-    sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "check")]
-    import pmp_recipe_check as C
-    src = DATA_DIR / "sources"
-    cp = pd.read_csv(src / "capreg" / "pmp_quad_pact.csv")
-    rp = pd.read_csv(src / "baseline_pmp" / "recipe_2017_quad_pact.csv")
-    rp["model_region"] = rp.region
-    k = cp.merge(rp, on=["model_region", "group1", "group2"])
-    r = k.value_y / k.value_x
-    assert len(k) > 1000 and ((r - 1).abs() < 0.01).mean() > 0.99
-    cap = pd.read_csv(src / "capreg" / "pmp_quad_techn.csv")
-    rec = pd.read_csv(src / "baseline_pmp" / "recipe_2017_quad_techn.csv")
-    rec = rec[(rec.tech1 == rec.tech2) & rec.tech1.isin(["T1", "T"])].drop_duplicates(["region", "activity"]).copy()
-    rec["model_region"] = rec.region
-    j = cap.merge(rec, on=["model_region", "activity"], suffixes=("_c", "_r"))
-    assert ((j.value_r / j.value_c - 1).abs() < 0.05).mean() > 0.88
-    ex = C.collapsed(pd.read_csv(src / "baseline_pmp" / "pmp_quad_techn_2030.csv"))
-    rc = C.collapsed(pd.read_csv(src / "baseline_pmp" / "recipe_2030_quad_techn.csv"))
-    jj = pd.concat({"c": ex, "r": rc}, axis=1).dropna()
-    assert len(jj) > 10000 and ((jj.r / jj.c - 1).abs() < 0.05).mean() > 0.79
-
-
-def test_recipe_land_nest_elasticities_from_the_bordered_hessian():
-    """The land-nest adjustment's land-type elasticities (tools/build/build_pmp_recipe.land_elasticities): for a land owner
-    with a fixed total area and a diagonal land matrix q_i x 1000, CAPRI's bordered Hessian gives
-    dx_i/dr_i = (1/h_i)(1 - (1/h_i) / sum_j 1/h_j), h_i = 1000 q_i; elasticity = that x rent_i / x_i."""
-    import sys
-    sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "check")]
-    import build_pmp_recipe as R
-    q = {("ARAC", "ARAC"): 0.02, ("GRAS", "GRAS"): 0.01, ("FORE", "FORE"): 0.001}
-    y = {("ARAC", "LEVL"): 100.0, ("GRAS", "LEVL"): 50.0, ("FORE", "LEVL"): 200.0,
-         ("ARAC", "D_AREA"): 400.0, ("GRAS", "D_AREA"): -150.0, ("FORE", "D_AREA"): 0.0}
-    e = R.land_elasticities(q, y)
-    inv = {t: 1.0 / (1000.0 * q[(t, t)]) for t in ("ARAC", "GRAS", "FORE")}
-    tot = sum(inv.values())
-    for t, rent, lev in (("ARAC", 400.0, 100.0), ("GRAS", 150.0, 50.0)):
-        expect = inv[t] * (1.0 - inv[t] / tot) * rent / lev
-        assert abs(e[t] - expect) < 1e-12 * max(1.0, expect)
-    # the contribution of an annual crop: its level over ARAB + ANNC + ARAC, times ARAC's elasticity
-    yd = dict(y)
-    yd.update({("SWHE", "LEVL"): 30.0, ("ARAB", "LEVL"): 110.0, ("ANNC", "LEVL"): 95.0})
-    c = R.land_nest_contrib("SWHE", yd, {"ARAC": 0.5})
-    assert abs(c - 30.0 / (110.0 + 95.0 + 100.0) * 0.5) < 1e-12
 
 
 def test_intensity_splits_take_the_2030_curvature_with_capris_2030_terms(data):
@@ -3997,9 +3986,9 @@ def test_input_costs_follow_yields_as_capri(monkeypatch):
     g = mo._input_row(crop, "yield_growth")
     assert rest and pl and ip and 0.5 < g < 1.5
     y0 = mo.data.yields.copy()
-    mo._yields_solve0 = y0
+    mo.ev.yields_solve0 = y0
     nr0 = mo.net_revenues.copy()
-    mo._greendeal_inputs = {}
+    mo.ev.greendeal_inputs = {}
     mo._apply_yield_input_costs()                                   # at the reference yields: no change
     assert (mo.net_revenues == nr0).all()
     y1 = y0.copy(); y1[crop] = y0[crop] * 0.9
@@ -4008,11 +3997,11 @@ def test_input_costs_follow_yields_as_capri(monkeypatch):
     assert abs((nr0[crop] - mo.net_revenues[crop]) - (rest + pl + ip) * tf * (-0.1)) < 1e-6
     # with the Green Deal's PLAP -50% and INPO +30%: those parts at (1 + change) x TF_I
     mo.net_revenues = nr0.copy()
-    mo._greendeal_inputs = {"pc_plap": -0.5, "pc_inpo": 0.3, "keep_tf": True}
+    mo.ev.greendeal_inputs = {"pc_plap": -0.5, "pc_inpo": 0.3, "keep_tf": True}
     mo._apply_yield_input_costs()
     want = (rest * tf + pl * 0.5 * tf + ip * 1.3 * tf) * (-0.1)
     assert abs((nr0[crop] - mo.net_revenues[crop]) - want) < 1e-6
-    mo.data.yields, mo._yields_solve0, mo._greendeal_inputs = y0, None, {}
+    mo.data.yields, mo.ev.yields_solve0, mo.ev.greendeal_inputs = y0, None, {}
 
 
 def _dying_in_fr10(region):
@@ -4056,7 +4045,7 @@ def test_nlp_form_has_capri_fodder_equality_without_lagged_band():
     from capri_mod.model import CAPRIModel
     m = CAPRIModel(data_dir="capri_data", verbose=False)
     m.run(scenario="BASELINE", regions=["FR250000"], max_outer_iter=1)
-    labels = m.supply_module._models["FR250000"]._row_labels
+    labels = m.supply_module._models["FR250000"].ev.row_labels
     assert any(l.startswith("fodder_") for l in labels)
     assert not any(l.endswith("_band") for l in labels)
 

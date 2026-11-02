@@ -709,8 +709,8 @@ class NitrogenBlock:
                 if not initial:
                     s_ = {t_: sh.get(t_, v_) for t_, v_ in s_.items()}
                 f, rsurf, eff = _at.cascade_data(sb)
-                m = 1.0 - _nc.WINTERCOV_NO3 * wc - fert_mrun
-                L = _nc.losses(f, rsurf, s_, eff, m_runsurf=(m, 1.0), m_appl_run=1.0 - _nc.WINTERCOV_NO3 * wc)
+                m = 1.0 - param("WINTERCOV_NO3_REDUCTION") * wc - fert_mrun
+                L = _nc.losses(f, rsurf, s_, eff, m_runsurf=(m, 1.0), m_appl_run=1.0 - param("WINTERCOV_NO3_REDUCTION") * wc)
                 W += w
                 RS += w * L[("N", "RunSurf")]
                 GR += w * L[("N", "GasRunTot")]
@@ -757,7 +757,7 @@ class NitrogenBlock:
         e_mrun = _eff("NITR_INH_MAN", "NO3MRUN", nmin.get("NITR_INH_MAN", 0.0))
         # mineral N: CAPRI's NETF losses (GASTOTNETF_, RUNTOTNETF_ with winter cover and the inhibitor's NO3SRUN)
         M = float(nb.get("n_mineral_input", 0.0) or 0.0)
-        nf = _nc.netf(g, float(g.get("run_surf", 0.0)), m_run=1.0 - _nc.WINTERCOV_NO3 * wc1 - s_ni * e_srun)
+        nf = _nc.netf(g, float(g.get("run_surf", 0.0)), m_run=1.0 - param("WINTERCOV_NO3_REDUCTION") * wc1 - s_ni * e_srun)
         ms = getattr(supply_result, "manure_tech_shares", None) or {}
         an1 = self._leach_animals(region, acts, ms, wc1, fert_mrun=s_nim * e_mrun)
         an0 = self._leach_animals(region, acts, ms, wc0, initial=True)
@@ -782,4 +782,4 @@ class NitrogenBlock:
                           float(nb.get("n_fixation", 0.0) or 0.0), L, e)
         tot = sum(comp.values())
         return {"share": L, "b1": b_now, "b1_ini": b_ini, "components": comp, "n_runoff_leached": tot,
-                "n2o_n": tot * _nl.EF5}
+                "n2o_n": tot * param("EF5_LEACHING_N2O")}

@@ -35,8 +35,10 @@ part of the manure N2O factors (f_lea).
 """
 from __future__ import annotations
 
-EF5 = 0.0075
-WINTERCOV_NO3LEA = 0.35          # envind/cover_crops.gms l. 402
+from capri_mod.params import param
+
+# EF5 and winter cover's reduction of the leaching factor (envind/cover_crops.gms l. 402) are the parameters
+# EF5_LEACHING_N2O and WINTERCOV_NO3_REDUCTION (refactor stage 3, N2: one parameter with n_cascade's runoff effect)
 # the sign of the application losses: the setting environment.ammapp_sign, "consistent" (- agg, as RUNSURFN_; default)
 # or "capri" (CAPRI's code: + agg)
 APPL = ("AmmAppLE", "AmmAppHE")
@@ -72,7 +74,7 @@ def b1(wc=0.0, agg=0.0, nmin_sh=0.0, nman_sh=0.0, fert_min=0.0, fert_man=0.0):
     manure); agg: v_ammoAppLeaAgg."""
     from capri_mod.settings import current as _settings
     sign = 1.0 if _settings().get("environment.ammapp_sign") == "capri" else -1.0
-    return 1.0 - WINTERCOV_NO3LEA * wc - nmin_sh * fert_min - nman_sh * fert_man + sign * agg
+    return 1.0 - param("WINTERCOV_NO3_REDUCTION") * wc - nmin_sh * fert_min - nman_sh * fert_man + sign * agg
 
 
 def share(rs, b1_now, b1_ini, data_dir=None):

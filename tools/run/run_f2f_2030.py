@@ -400,7 +400,7 @@ def main():
                               # (0, the N balance's shortfall): the first item was the landscape floor's, which is
                               # no longer relaxed (K84, 27 October 2026); kept so earlier runs compare
                               "shortfall": (0.0, float(getattr(v, "balance_shortfall", 0.0) or 0.0)),
-                              "manure_pool_price": float((getattr((getattr(pmod, "_last_projected_model", None) or m).supply_module, "manure_pool_price", None) or {}).get(reg[:2], 0.0) or 0.0)}
+                              "manure_pool_price": float((getattr((getattr(pmod, "_last_projected_model", None) or m).supply_module.seen, "manure_pool_price", None) or {}).get(reg[:2], 0.0) or 0.0)}
                         for reg, v in s["supply"].items()},
            # baseline manure trade per region (t N exported, imported), for the check against CAPRI's MTRADE
            "manure_trade_base": {reg: tuple(float(t_) for t_ in (getattr(v, "manure_trade", None) or (0.0, 0.0)))
@@ -453,12 +453,16 @@ def main():
             md_ = _pm.supply_module._models.get(r_)
             if md_ is None:
                 continue
-            _d[r_] = {k_: getattr(md_, k_, None) for k_ in ("_last_aug", "_last_plain", "_row_labels", "_last_duals",
-                                                            "_land_types_used", "_fert_tech_shares", "_n_intensity",
-                                                            "_cover", "_fall_floor", "_last_grass_z")}
+            # the model's fields by attribute name or by their path in its state objects (refactor stage 3); the
+            # dump's keys are the field names without the object and the leading underscore
+            _d[r_] = {k_.rpartition(".")[2].lstrip("_"):
+                      getattr(getattr(md_, k_.rpartition(".")[0]) if "." in k_ else md_, k_.rpartition(".")[2], None)
+                      for k_ in ("res.last_aug", "res.last_plain", "ev.row_labels", "ev.land_types_used",
+                                 "res.fert_tech_shares", "ev.n_intensity", "ev.cover", "ev.fall_floor", "res.last_grass_z",
+                                 "ev.last_duals")}
             _d[r_].update({"acts": list(md_.acts), "Q": md_.Q, "f": md_.f, "net_revenues": md_.net_revenues.copy(),
-                           "base": md_._base_levels(), "nb_price": getattr(_pm.supply_module, "_nbal_state", {}).get(r_),
-                           "surplus_row": getattr(md_, "_surplus_row", None),
+                           "base": md_._base_levels(), "nb_price": getattr(_pm.supply_module.sv, "nbal_state", {}).get(r_),
+                           "surplus_row": getattr(md_.ev, "surplus_row", None),
                            "balance_coefs": _pm.supply_module._balance_coefs(r_, md_)})
         pickle.dump(_d, open(a.out.replace(".pkl", "_dump.pkl"), "wb"))
     out["meta"]["run_manifest"] = run_manifest.finish()

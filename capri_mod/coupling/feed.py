@@ -45,7 +45,7 @@ class FeedBlock:
         # FEED BULK PRICES per member state (CAPRI feedBlkPrice_): the CES price index of the member state's
         # cereals (FCER) and protein-rich feed (FPRO, with cakes, DDGS, pulses, oils, milling by-products)
         bix = self.feed_bulk_price_ratios(price_signal)
-        self.supply_module.feed_bulk_ratio = bix
+        self.supply_module.seen.feed_bulk_ratio = bix
         state = {}
         newprev = {}
         _last = getattr(self, "_last_supply_results", None) or {}
@@ -65,7 +65,7 @@ class FeedBlock:
             newprev[(reg, act)] = x
             state.setdefault(reg, {})[act] = {"x": dict(zip(r.feeds, x)), "dcost": 0.0,
                                               "nitr_kg": 0.0, "nitr_share": 0.0}
-        self.supply_module.ration_state = state
+        self.supply_module.seen.ration_state = state
         # rations and CURRENT feed prices for feeding inside the supply model
         # the per-region rations dicts are built ONCE per ration model and reused, so the
         # feed-in-supply block cache (keyed on the dict's identity) hits; only prices change
@@ -73,8 +73,8 @@ class FeedBlock:
             self._feed_rations_stable = rations_by_region(rm)
             self._feed_rations_for = rm
         _fp = feed_prices_by_region(rm, bix)
-        self.supply_module.feed_rations = self._feed_rations_stable
-        self.supply_module.feed_prices = _fp
+        self.supply_module.seen.feed_rations = self._feed_rations_stable
+        self.supply_module.seen.feed_prices = _fp
         self._ration_state = state
         self._ration_prev = newprev
 

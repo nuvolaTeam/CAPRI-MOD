@@ -22076,6 +22076,7 @@
    "notes": [],
    "read_by": {
     "model": [
+     "capri_mod/data/inputs.py",
      "capri_mod/params.py"
     ],
     "builders": [
@@ -22086,7 +22087,9 @@
     "checks": [
      "tools/check/make_provenance.py"
     ],
-    "tests": []
+    "tests": [
+     "capri_mod/tests/test_capri.py"
+    ]
    }
   },
   "shr_nuts_version_correspondence": {
@@ -32354,9 +32357,7 @@
     "checks": [
      "tools/check/pmp_recipe_check.py"
     ],
-    "tests": [
-     "capri_mod/tests/test_capri.py"
-    ]
+    "tests": []
    }
   },
   "src_pmp_quad_pact_2030": {
@@ -32481,9 +32482,7 @@
     "checks": [
      "tools/check/pmp_recipe_check.py"
     ],
-    "tests": [
-     "capri_mod/tests/test_capri.py"
-    ]
+    "tests": []
    }
   },
   "src_pmp_quad_techn_2030": {
@@ -32552,9 +32551,7 @@
     "checks": [
      "tools/check/pmp_recipe_check.py"
     ],
-    "tests": [
-     "capri_mod/tests/test_capri.py"
-    ]
+    "tests": []
    }
   },
   "src_processing_yields_dataout_2030": {
@@ -32725,9 +32722,7 @@
     "checks": [
      "tools/check/pmp_recipe_check.py"
     ],
-    "tests": [
-     "capri_mod/tests/test_capri.py"
-    ]
+    "tests": []
    }
   },
   "src_recipe_2017_quad_techn": {
@@ -32797,9 +32792,7 @@
      "tools/check/pmp_recipe_check.py",
      "tools/check/reproduce_builders.py"
     ],
-    "tests": [
-     "capri_mod/tests/test_capri.py"
-    ]
+    "tests": []
    }
   },
   "src_recipe_2030_quad_pact": {
@@ -32930,9 +32923,7 @@
      "tools/check/pmp_recipe_check.py",
      "tools/check/reproduce_builders.py"
     ],
-    "tests": [
-     "capri_mod/tests/test_capri.py"
-    ]
+    "tests": []
    }
   },
   "src_ref2030_welfare": {
@@ -43491,13 +43482,13 @@
   }
  ],
  "code_data": {
-  "capri/keep": 116,
+  "capri/keep": 94,
   "capri-mod/keep": 2,
   "literature/keep": 11,
-  "numerical/keep": 33,
+  "numerical/keep": 25,
   "open/keep": 8,
-  "physical/keep": 25,
-  "technical/keep": 44
+  "physical/keep": 15,
+  "technical/keep": 41
  },
  "other_notes": {}
 }

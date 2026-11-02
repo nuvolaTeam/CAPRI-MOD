@@ -14,22 +14,22 @@ class FertilisationBlock:
         base mineral N per ha, "ybase": base yields}, from the N target's row when the scenario has one, else from
         the context SupplyModule sets for every EU solve (CAPRI's NUTNED_ and manure market are in every run,
         Sprint 9k); None when neither is there."""
-        srow = getattr(self, "_surplus_row", None)
+        srow = getattr(self.ev, "surplus_row", None)
         if srow is not None and len(srow) > 6:
             man_d = srow[6] if srow[6] is not None and hasattr(srow[6], "get") else None
             if man_d is not None:
                 return {"man_d": man_d, "nmin": srow[2], "ybase": srow[4]}
-        ctx = getattr(self, "_manure_ctx", None)
+        ctx = getattr(self.seen, "manure_ctx", None)
         return ctx if ctx and ctx.get("man_d") is not None else None
 
     def _ef_mineral_n2o(self) -> float:
         """t CO2-eq per t of mineral N in the accounts' soil N2O: CAPRI's N2OSYN + the mineral part of N2OAMM, from the
         region's MITERRA loss fractions (n_cascade.mineral_n2o_n; K74 S12, 27 October 2026: before, IPCC's EF1 + 10% x
         EF4 everywhere); IPCC's factors where CAPRI's fractions are missing (Norway: no cascade built, registered)."""
-        c_ = self.__dict__.get("_ef_min_n2o_cache")
+        c_ = getattr(self.par, "ef_min_n2o_cache", None)
         if c_ is None:
             from capri_mod.environmental.environmental_module import GWP_N2O
-            c_ = self.__dict__["_ef_min_n2o_cache"] = sum(self._mineral_n2o_parts()) * 44.0 / 28.0 * GWP_N2O
+            c_ = self.par.ef_min_n2o_cache = sum(self._mineral_n2o_parts()) * M_N2O / M_N2O_N * GWP_N2O
         return c_
 
     def _mineral_n2o_parts(self):
@@ -37,14 +37,14 @@ class FertilisationBlock:
         emiLoss(NETF, N2O, GasTot) and (emiLoss(NETF, NH3) + emiLoss(NETF, NOx)) x EF4 (supply_model.gms N2OSYN and
         N2OAMM, l. 3708 and 3793) from the region's MITERRA fractions; IPCC's EF1 and 10% x EF4 where they are
         missing."""
-        p_ = self.__dict__.get("_min_n2o_parts_cache")
+        p_ = getattr(self.par, "min_n2o_parts_cache", None)
         if p_ is None:
             from capri_mod.environmental.environmental_module import EF_SOIL_N2O_DIRECT, EF_SOIL_N2O_INDIRECT
             from capri_mod.supply import n_cascade as _nc, n_leaching as _nl
             rs = _nl.capri_region(self.data.region_id)
             dn = _nc.mineral_n2o_n(_nc.load()[1].get(rs, {}), EF_SOIL_N2O_INDIRECT) if rs else None
             p_ = (float(dn[0]), float(dn[1])) if dn else (EF_SOIL_N2O_DIRECT, 0.10 * EF_SOIL_N2O_INDIRECT)
-            self._min_n2o_parts_cache = p_
+            self.par.min_n2o_parts_cache = p_
         return p_
 
     def _ef_mineral_lea(self) -> float:
@@ -52,7 +52,7 @@ class FertilisationBlock:
         capri_mod/supply/n_leaching.py): (RunTot_NETF + (1 - GasRunTot_NETF - EXPPRD/IMPORT) x L) x EF5 x 44/28, at the
         leaching share of CAPRI's Green Deal reference (REGISTERED: the options' effect on the share is in the accounts,
         not in this coefficient); 0 without CAPRI's data."""
-        c_ = self.__dict__.get("_ef_lea_cache")
+        c_ = getattr(self.par, "ef_lea_cache", None)
         if c_ is None:
             from capri_mod.supply import n_cascade as _nc, n_leaching as _nl
             from capri_mod.environmental.environmental_module import GWP_N2O
@@ -64,29 +64,29 @@ class FertilisationBlock:
                 L = d.get("leach_ini") if d.get("leach_ini") is not None else (d.get("leach_base") or 0.0)
                 nf = _nc.netf(g, float(g.get("run_surf", 0.0)))
                 c_ = max(0.0, nf["RunTot"] + (1.0 - nf["GasRunTot"] - float(d["exp_imp"])) * float(L)) \
-                    * _nl.EF5 * 44.0 / 28.0 * GWP_N2O
-            self._ef_lea_cache = c_
+                    * param("EF5_LEACHING_N2O") * M_N2O / M_N2O_N * GWP_N2O
+            self.par.ef_lea_cache = c_
         return c_
 
     @staticmethod
     def _ef_nh3_n2o() -> float:
         """t CO2-eq per t of NH3-N volatilised from manure (the accounts' N2O_IND, CAPRI N2OAMM)."""
         from capri_mod.environmental.environmental_module import EF_SOIL_N2O_INDIRECT, GWP_N2O
-        return EF_SOIL_N2O_INDIRECT * 44.0 / 28.0 * GWP_N2O
+        return EF_SOIL_N2O_INDIRECT * M_N2O / M_N2O_N * GWP_N2O
 
     def _need_yf(self, a, y0, yc, nut: str = "N") -> float:
         """The crop's nutrient need per ha at yield yc relative to its base yield y0, CAPRI's rule
         (capri_mod.fert.npk.need_yield_factor: the main-output part linear in the yield, the straw part with the
         scenario's yields before the price response)."""
         from capri_mod.fert.npk import need_yield_factor
-        pf = float((getattr(self, "_yield_price_factor", None) or {}).get(a, 1.0))
+        pf = float((getattr(self.ev, "yield_price_factor", None) or {}).get(a, 1.0))
         ys = float(yc) / pf if pf > 0 else None
         return need_yield_factor(self.data.region_id, a, float(y0), float(yc), ys, nut)
 
     def _yields_scen_now(self):
         """The crops' current yields without this solve's price response (the scenario's shifted yields), for the
         environmental accounts' need factors; None without a price response."""
-        pf = getattr(self, "_yield_price_factor", None) or {}
+        pf = getattr(self.ev, "yield_price_factor", None) or {}
         if not pf or not hasattr(self.data.yields, "get"):
             return None
         return {a: float(self.data.yields.get(a)) / f for a, f in pf.items()
@@ -94,11 +94,11 @@ class FertilisationBlock:
 
     def _crop_mineral_now(self) -> dict:
         """Crops' mineral N per ha at this solve (kg N/ha): base rate x fertiliser intensity x CAPRI's need factor
-        of the yield (`_need_yf`), the same terms the N row uses (`_mineral_row`), for the fertiliser options without
+        of the yield (`_need_yf`), the same terms the N row uses (`ev.mineral_row`), for the fertiliser options without
         an N row."""
         ctx = self._mctx() or {}
         ybase = ctx.get("ybase")
-        mint = getattr(self, "_n_intensity", {}) or {}
+        mint = getattr(self.ev, "n_intensity", {}) or {}
         ycur = self.data.yields
         out = {}
         for a, v in (ctx.get("nmin") or {}).items():
@@ -124,8 +124,8 @@ class FertilisationBlock:
         linearised at no adoption."""
         from capri_mod.environmental.environmental_module import (EF_SOIL_N2O_DIRECT, EF_SOIL_N2O_INDIRECT,
                                                                   GWP_N2O)
-        tax = float(getattr(self, "ghg_tax", 0.0) or 0.0)
-        k = 44.0 / 28.0 * GWP_N2O
+        tax = float(getattr(self.seen, "ghg_tax", 0.0) or 0.0)
+        k = M_N2O / M_N2O_N * GWP_N2O
         ef_d, ef_v = EF_SOIL_N2O_DIRECT * k, 0.10 * EF_SOIL_N2O_INDIRECT * k
         h = []
         for (nm_, nmin_, a_, b_, smx_) in ft:
@@ -148,13 +148,13 @@ class FertilisationBlock:
             return []
         techs, man_d, nh3, sub = ctx
         wc0, wc1 = self._winter_cover_shares()
-        last = getattr(self, "_amm_last", None) or {}
+        last = getattr(self.sv, "amm_last", None) or {}
         # CAPRI's emission tax on the options (ghgTax; its v_CO2EquEmis follows v_Miti): per unit of M (share x
         # sub-activity unit), the manure N2O change through the loss cascade (the accounts' finite difference,
         # ghg_tax.ghg_coefficients "mtech", per head) less the indirect N2O of the NH3 kept and the soil N2O of the
         # mineral N it displaces (sub x N kept); kt CO2-eq per unit -> x tax = 1000 EUR, the objective's unit
-        tax = float(getattr(self, "ghg_tax", 0.0) or 0.0)
-        mtc = ((getattr(self, "ghg_coef", None) or {}).get("mtech") or {}) if tax > 0 else {}
+        tax = float(getattr(self.seen, "ghg_tax", 0.0) or 0.0)
+        mtc = ((getattr(self.seen, "ghg_coef", None) or {}).get("mtech") or {}) if tax > 0 else {}
         ef_n, ef_m = (self._ef_nh3_n2o(), self._ef_mineral_n2o()) if tax > 0 else (0.0, 0.0)
         out = []
         for a, subs in techs.items():
@@ -200,7 +200,7 @@ class FertilisationBlock:
         the base and fixed in simulation; here one per region and nutrient). None outside CAPRI's EU data."""
         from capri_mod.fert.npk import NPKData, NUTRIENTS, PERM_NGRP, endo_slope, need_multiplier
         from capri_mod.fert.inner_fert_dist import FERT_POST_ACCURACY
-        env_ = getattr(self, "_env_for_surplus", None)
+        env_ = getattr(self.seen, "env_for_surplus", None)
         if env_ is None:
             return None
         from capri_mod.fert.inner_fert_dist import InnerFertDist
@@ -225,19 +225,19 @@ class FertilisationBlock:
         shares = D.crop_shares(cr)
         # manure N applied per unit of each column: the environmental accounts' own (excreted less housing and storage
         # losses, net of the base trade shares, imports per ha of crops), as the inner model reads it
-        mint = dict(getattr(self, "_n_intensity", {}) or {})
+        mint = dict(getattr(self.ev, "n_intensity", {}) or {})
         unitsN = {a: env_.unit_nitrogen_balance(a, ycur, rid, {k_: v_ for k_, v_ in mint.items() if k_ in (a, "__credit__")},
                                            yields_scen=self._yields_scen_now())
                   for a in acts}
         eN = np.array([float(unitsN[a].get("n_manure_applied", 0.0)) for a in acts])
-        pool = [int(p_) for p_ in (getattr(self, "_pool_cols", None) or []) if int(p_) < n_cols]
-        lt = list(getattr(self, "_land_types_used", None) or [])
+        pool = [int(p_) for p_ in (getattr(self.ev, "pool_cols", None) or []) if int(p_) < n_cols]
+        lt = list(getattr(self.ev, "land_types_used", None) or [])
         land_cols = [n + lt.index(t) for t in ("ARAC", "GRAS", "FRUN") if t in lt and n + lt.index(t) < n_cols] \
             if len(lt) and n + len(lt) <= n_cols else []
         crop_cols = [j for j, a in enumerate(acts) if a in CROPS]
         land0 = float(sum(xb[j] for j in crop_cols)) if not land_cols else \
             float(sum(np.asarray(x_start, float)[j] for j in land_cols))
-        kap = self.__dict__.setdefault("_npk_kappa", {})
+        kap = _st.setdefault(self.par, "npk_kappa", {})
         out = {"capri_region": cr, "nutrients": {}, "land_cols": land_cols, "crop_cols": crop_cols}
         # the split columns: the grassland split moves area from CAPRI's GRAI to GRAE (z = GRAE - base GRAE, each of the
         # two half the grassland at base), so the GRAS groups' need changes by z x (need GRAE - need GRAI); the animal
@@ -271,7 +271,7 @@ class FertilisationBlock:
                 # proportion CAPRI's 2030 reference applies it (net of the base net exports, ManureNPK_)
                 man = np.array([D.manure_per_head(rid, nut, a) if a in ANIMALS else 0.0 for a in acts])
                 # with manure trade off nothing leaves the region: all manure P / K applied, as for N
-                if bool(getattr(getattr(self, "_env_for_surplus", None), "manure_trade_on", True)):
+                if bool(getattr(getattr(self.seen, "env_for_surplus", None), "manure_trade_on", True)):
                     man = man * self._npk_applied_ratio(cr, nut)
             # kappa: NUTNED_ summed over the groups at base (all flows interior), the need net of the permanent
             # crops' own residues scaled together (REGISTERED: CAPRI's multiplier is on the need alone; with the model's
@@ -301,7 +301,7 @@ class FertilisationBlock:
                 perm = gname in PERM_NGRP
                 modes = {}
                 acc = {}
-                ov = (getattr(self, "_npk_prior_override", None) or {}).get(nut)
+                ov = (getattr(self.par, "npk_prior_override", None) or {}).get(nut)
                 for s_, colname in (("MINE", "mine_kg_ha"), ("EXCR", "excr_kg_ha"), ("CRES", "cres_kg_ha")):
                     v_ = float(row[colname]) if row[colname] == row[colname] else 0.0
                     if ov is not None:
@@ -331,7 +331,7 @@ class FertilisationBlock:
                 # CAPRI trades MANP and MANK as products of their own (supply_model.gms ManureNPK_, e_netMTrade by
                 # FOUT): the P or K columns of the region's own pool, 1 t P2O5 / K2O each (until 31 October 2026 the
                 # N columns carried P and K in the region's manure proportions, DEP-10)
-                pk_ = [int(j_) for j_ in ((getattr(self, "_pool_cols_pk", None) or {}).get(nut) or []) if int(j_) < n_cols]
+                pk_ = [int(j_) for j_ in ((getattr(self.ev, "pool_cols_pk", None) or {}).get(nut) or []) if int(j_) < n_cols]
                 if len(pk_) == 2:
                     Ecols += [(pk_[0], -1.0), (pk_[1], 1.0)]
             out["nutrients"][nut] = {
@@ -340,7 +340,7 @@ class FertilisationBlock:
                 "price": float(R.uvag_eur_t) if R.uvag_eur_t == R.uvag_eur_t else 0.0, "kappa": k,
                 "own_scaled": bool(kap.get((key, "own_scaled"), True)),
                 "M0": base["M0"]}
-        out["dual_bound"] = float(getattr(self, "_npk_dual_bound", 10.0) or 10.0)
+        out["dual_bound"] = float(getattr(self.par, "npk_dual_bound", 10.0) or 10.0)
         return out if out["nutrients"] else None
 
     @staticmethod
@@ -372,14 +372,14 @@ class FertilisationBlock:
         nutrient at 1.2 x the baseline per ha (mode at the baseline, accuracy 10). The group's conversion is its crops'
         (capri-mod's organic targets per member state and crop class, the shares the I/O changes use), weighted by base
         area. Returns {nutrient: {(group, source): (max kg/ha, beta1, beta2)}} or {} without an organic target."""
-        conv = getattr(self, "_organic_conv", None) or {}
-        base = getattr(self, "_nlp_base_alloc", None)
+        conv = getattr(self.ev, "organic_conv", None) or {}
+        base = getattr(self.par, "nlp_base_alloc", None)
         if not conv or base is None:
             return {}
         from capri_mod.fert.inner_fert_dist import beta_regulation
         acts = list(self.acts)
         xb = np.maximum(self._base_levels().reindex(acts).fillna(0.0).values.astype(float), 0.0)
-        b1, b2 = beta_regulation(0.25, 0.75)
+        b1, b2 = beta_regulation(param("FERT_REGU_ACCURACY"), param("FERT_REGU_MODE_SHARE"))
         out = {}
         dN = (npk.get("nutrients") or {}).get("N")
         if dN is not None:
@@ -392,10 +392,10 @@ class FertilisationBlock:
                 w = sum(sh * xb[j] for j, sh in g_["crops"])
                 share_conv = 1.0 - (sum(sh * xb[j] * float(conv.get(acts[j], 1.0)) for j, sh in g_["crops"]) / w
                                     if w > 0 else 1.0)
-                mx = v if v < self.ORGANIC_SMALL_MINE_KG_HA else v * (1.0 - max(share_conv, 0.0))
+                mx = v if v < param("ORGANIC_SMALL_MINE_KG_HA") else v * (1.0 - max(share_conv, 0.0))
                 regs[(g, "MINE")] = (mx, b1, b2)
             out["N"] = regs
-        f = self.ORGANIC_LIMCRES_FACTOR
+        f = param("ORGANIC_LIMCRES_FACTOR")
         for nut, per in (base.get("per_ha_nut") or {}).items():
             if nut not in (npk.get("nutrients") or {}):
                 continue
@@ -423,28 +423,28 @@ class FertilisationBlock:
         return out
 
     def _npk_mineral_cap(self, npk):
-        """The Green Deal's mineral N reduction (self._mineral_cap) on the fertilisation block: "crp" - CAPRI's "f2f"
+        """The Green Deal's mineral N reduction (self.ev.mineral_cap) on the fertilisation block: "crp" - CAPRI's "f2f"
         regulation on each capped group's mineral flow (max per ha = the base allocation per ha x (1 - r), CAPRI's
         exemptions; beta density mode 0.75 x max, accuracy 0.25) and "limCres" on residues; "uaa" - purchases <=
         base mineral N per ha of land x (1 - r) x current land. The base allocation is this model's own (the
         fertilisation block at the calibration point), as CAPRI takes its baseline's."""
-        mc = getattr(self, "_mineral_cap", None) or {}
+        mc = getattr(self.ev, "mineral_cap", None) or {}
         d = (npk.get("nutrients") or {}).get("N")
-        base = getattr(self, "_nlp_base_alloc", None)
+        base = getattr(self.par, "nlp_base_alloc", None)
         if not mc or d is None or base is None:
             return
         r = float(mc.get("reduction", 0.0) or 0.0)
         if mc.get("kind") == "crp":
             from capri_mod.fert.inner_fert_dist import beta_regulation
-            env_ = getattr(self, "_env_for_surplus", None)
+            env_ = getattr(self.seen, "env_for_surplus", None)
             inner = env_.__dict__.get("_inner_fert") if env_ is not None else None
             if inner is None:
                 return
             caps = inner.mineral_caps(self.data.region_id, base, r)
             # CAPRI's small groups (p_checkSmallMine): their cap replaces the organic target's (S2)
-            self._nlp_mine_small = inner.small_mine_groups(self.data.region_id, base)
+            self.ev.nlp_mine_small = inner.small_mine_groups(self.data.region_id, base)
             lim = inner.limcres_caps(self.data.region_id, base)
-            b1, b2 = beta_regulation(0.25, 0.75)
+            b1, b2 = beta_regulation(param("FERT_REGU_ACCURACY"), param("FERT_REGU_MODE_SHARE"))
             regs = {(g, "MINE"): (float(v), b1, b2) for g, v in caps.items() if v > 0}
             for g, (mx, racc, msh) in lim.items():
                 c1 = float(msh) * float(racc) + 1.0
@@ -470,14 +470,14 @@ class FertilisationBlock:
         environmental accounts' own unit balances (n_mineral_input) as the row is built from them: activities their
         unit balance's, manure exports and imports -/+ the substitution factor, the grassland split its delta, the
         dairy, cattle and option columns their animal's in proportion to their manure coefficient."""
-        env_ = getattr(self, "_env_for_surplus", None)
+        env_ = getattr(self.seen, "env_for_surplus", None)
         i_nb = labels.index("N_balance")
         mp = np.zeros(A.shape[1])
         if env_ is None:
             return mp
         rid = self.data.region_id
         ycur = self.data.yields
-        mint = dict(getattr(self, "_n_intensity", {}) or {})
+        mint = dict(getattr(self.ev, "n_intensity", {}) or {})
         acts = list(self.acts)
         unit = {}
         for j, a in enumerate(acts):
@@ -485,14 +485,14 @@ class FertilisationBlock:
             unit[a] = float(env_.unit_nitrogen_balance(a, ycur, rid, mi, yields_scen=self._yields_scen_now())
                             .get("n_mineral_input", 0.0))
             mp[j] = unit[a]
-        pc = getattr(self, "_pool_cols", None) or []
+        pc = getattr(self.ev, "pool_cols", None) or []
         if len(pc) == 2:
-            sub = float(getattr(self, "_pool_avail", 0.0) or 0.0)
+            sub = float(getattr(self.ev, "pool_avail", 0.0) or 0.0)
             if pc[0] < A.shape[1]:
                 mp[pc[0]] = sub                 # export: the row has -(1 - sub): -1 organic, +sub mineral
             if pc[1] < A.shape[1]:
                 mp[pc[1]] = -sub
-        gc = getattr(self, "_grass_col", None)
+        gc = getattr(self.ev, "grass_col", None)
         if gc is not None and gc < A.shape[1]:
             d = env_.grass_intensity_delta(rid) or {}
             mp[gc] = float(d.get("n_mineral_input", 0.0))
@@ -546,15 +546,15 @@ class FertilisationBlock:
         tmp = CapriRegionalNLP(sp)
         x, failed = tmp.fert_at(tmp.start(yb))
         ok = True
-        ov = dict(getattr(self, "_npk_prior_override", None) or {})
+        ov = dict(getattr(self.par, "npk_prior_override", None) or {})
         out = tmp.fert_outputs(x)
         for nut in nuts:
             if nut in failed:
                 ok = False
                 continue
             ov[nut] = dict(out[nut]["flows"])
-        self._npk_prior_override = ov
-        self._npk_prior_recalibrated = sorted(set(getattr(self, "_npk_prior_recalibrated", []) or []) | set(ov))
+        self.par.npk_prior_override = ov
+        self.par.npk_prior_recalibrated = sorted(set(getattr(self.par, "npk_prior_recalibrated", []) or []) | set(ov))
         return ok
 
     def _pk_manure_vectors(self, nut):
@@ -563,7 +563,7 @@ class FertilisationBlock:
         with manure trade off). None outside CAPRI's EU data."""
         from capri_mod.fert.npk import NPKData
         from capri_mod.fert.inner_fert_dist import InnerFertDist
-        env_ = getattr(self, "_env_for_surplus", None)
+        env_ = getattr(self.seen, "env_for_surplus", None)
         if env_ is None:
             return None
         inner = env_.__dict__.get("_inner_fert")
@@ -605,7 +605,7 @@ class FertilisationBlock:
         base those cancel over the region. (Until Sprint 9e the technologies scaled the whole unit coefficient,
         which saved on the manure-covered need as well: ~40% more mineral N saved in the rows than in the accounts,
         Upper Bavaria wheat 108 against 77 kg N/ha.)"""
-        env_ = getattr(self, "_env_for_surplus", None)
+        env_ = getattr(self.seen, "env_for_surplus", None)
         if env_ is None:
             return 0.0
         try:
@@ -628,8 +628,8 @@ class FertilisationBlock:
     def _nitrate_extra(self) -> dict:
         """Extra N excretion from nitrate in the ration, t N per activity unit
         (1000 heads): 0.28 kg N per kg nitrate per head."""
-        rs = getattr(self, "ration_state", None) or {}
-        return {a: self.NITR_N_EXCR * float(v.get("nitr_kg", 0.0))
+        rs = getattr(self.seen, "ration_state", None) or {}
+        return {a: param("NITR_N_EXCR") * float(v.get("nitr_kg", 0.0))
                 for a, v in rs.items() if isinstance(v, dict) and float(v.get("nitr_kg", 0.0)) > 0}
 
     def _nitrate_row_term(self, a) -> float:
@@ -637,7 +637,7 @@ class FertilisationBlock:
         ex = self._nitrate_extra().get(a, 0.0)
         if ex <= 0:
             return 0.0
-        env_ = getattr(self, "_env_for_surplus", None)
+        env_ = getattr(self.seen, "env_for_surplus", None)
         try:
             sub = float(env_._substitution(self.data.region_id)[0]) if env_ is not None else 0.0
         except Exception:
@@ -669,18 +669,18 @@ class FertilisationBlock:
         little.)
         """
         # keep factors already set this solve (organic land: no mineral N)
-        self._n_intensity = getattr(self, "_n_intensity", {}) or {}
+        self.ev.n_intensity = getattr(self.ev, "n_intensity", {}) or {}
         if self._techs_inside():
             # decided inside the regional model: keep its results (a reset here, after
             # the last solve, erased the reported shares; the inhibitor on manure is inside too,
             # _apply_manure_inhibitor returns at once)
             self._apply_manure_inhibitor(lam)
             return None
-        self._fert_tech_shares = {}
+        self.res.fert_tech_shares = {}
         self._apply_manure_techs(lam)
         self._apply_manure_inhibitor(lam)
-        srow = getattr(self, "_surplus_row", None)
-        _mc = getattr(self, "_mineral_cap", None) or {}
+        srow = getattr(self.ev, "surplus_row", None)
+        _mc = getattr(self.ev, "mineral_cap", None) or {}
         techs = srow[5] if (srow is not None and len(srow) > 5) else (_mc.get("techs") or [])
         if not lam or lam <= 0 or not techs:
             return None
@@ -737,30 +737,28 @@ class FertilisationBlock:
         for c in crops:
             if c in nc.index and "N" in nc.columns:
                 nc.at[c, "N"] = float(nc.at[c, "N"]) * f
-            self._n_intensity[c] = self._n_intensity.get(c, 1.0) * f
+            self.ev.n_intensity[c] = self.ev.n_intensity.get(c, 1.0) * f
             if c in self.net_revenues.index:
                 need_t_ha = self._crop_mineral_rate(c) * (1.0 + e0) / 1000.0
                 self.net_revenues[c] = float(self.net_revenues[c]) - c_t * need_t_ha
         # the same factor on the manure and residue credits (environmental module, "__credit__")
-        self._n_intensity["__credit__"] = self._n_intensity.get("__credit__", 1.0) * f
+        self.ev.n_intensity["__credit__"] = self.ev.n_intensity.get("__credit__", 1.0) * f
         shares = {k: (v,) for k, v in sh.items()}
         self.data.nutrient_coefs = nc
-        self._fert_tech_shares.update({k: v[0] for k, v in shares.items()})
-        return self._n_intensity
+        self.res.fert_tech_shares.update({k: v[0] for k, v in shares.items()})
+        return self.ev.n_intensity
 
     def _fert_params_raw(self):
         """(manure availability, mineral N price kEUR/t) without the allocation switch."""
-        flag = getattr(self, "use_fert_allocation", False)
-        try:
-            self.use_fert_allocation = True
-            return self._fert_alloc_params()
-        finally:
-            self.use_fert_allocation = flag
+        return self._fert_alloc_params(always=True)
 
-    def _fert_alloc_params(self):
+    def _fert_alloc_params(self, always=False):
         """(manure availability, mineral N price kEUR/t N) for this region, from
-        CAPRI's reference allocation and its 2017 national UVAG of NITF."""
-        if not getattr(self, "use_fert_allocation", False):
+        CAPRI's reference allocation and its 2017 national UVAG of NITF; (None, None) where the switch
+        use_fert_allocation is off, unless always. (2 November 2026, docs/design/STAGE3_BEHAVIOUR_CHANGES.md 3: the
+        switch was set on the instance around the call and set back as an instance attribute, which then hid any
+        later change of the class setting.)"""
+        if not (always or getattr(self, "use_fert_allocation", False)):
             return None, None
         reg = getattr(getattr(self, "data", None), "region_id", None)
         c = _inputs.current().cache.setdefault("fert_alloc", {})
@@ -780,23 +778,23 @@ class FertilisationBlock:
         """JRC121368 (sect. 4.3.4, p. 23): regions where the tiered nitrogen target "generated
         infeasibilities in the model" had their reduction "set at the EU average (36%)". The
         report names no regions and the model takes the nine highest baseline surpluses up front
-        (SupplyModule.JRC_CAPPED_N_REGIONS); this applies the same rule to any OTHER region whose
+        (the parameter JRC_CAPPED_N_REGIONS); this applies the same rule to any OTHER region whose
         target proves infeasible in the land-market problem - in the model these are Dutch regions
         that IMPORT manure in CAPRI's 2030 reference (52-123 kg N/ha, held fixed without the
         manure market). The target per hectare becomes the region's base surplus x (1 - 36%); with
         the target per current hectare (e_SURTOTHa) its land terms move with it. Records
         balance_shortfall (kg N/ha relaxed) and n_target_relaxed. Returns (y, ok, Aa, ba)."""
-        labels = list(getattr(self, "_row_labels", []))
-        srow = getattr(self, "_surplus_row", None)
+        labels = list(getattr(self.ev, "row_labels", []))
+        srow = getattr(self.ev, "surplus_row", None)
         if "N_balance" not in labels or srow is None or len(srow) < 8 or srow[7] is None:
             return None, False, Aa, ba
-        T = float(srow[1]); T2 = float(srow[7]) * (1.0 - SupplyModule.JRC_CAPPED_CUT)
+        T = float(srow[1]); T2 = float(srow[7]) * (1.0 - param("JRC_CAPPED_CUT"))
         if not T2 > T + 1e-9:
             return None, False, Aa, ba
         k = labels.index("N_balance")
         A2, b2 = Aa.copy(), ba.copy()
         base_area = float(sum(v for a_, v in self._base_levels().items() if a_ in CROPS))
-        nl = getattr(self, "_nrow_land", None)
+        nl = getattr(self.ev, "nrow_land", None)
         if nl:
             cols, L0sum, tgt = nl
             for c_ in cols:
@@ -804,19 +802,19 @@ class FertilisationBlock:
             b2[k] += (T2 - T) * (base_area - L0sum)
         else:
             b2[k] += (T2 - T) * base_area
-        self._last_duals = None
+        self.ev.last_duals = None
         y = self._nlp_solve(Qa, ca, A2, b2, ya0)
         if y is None:
             return None, False, Aa, ba
         self.balance_shortfall = T2 - T
-        self._n_target_relaxed = True
-        self._n_relax_sticky = self._n_relax_key()
+        self.res.n_target_relaxed = True
+        self.sv.n_relax_sticky = self._n_relax_key()
         return y, True, A2, b2
 
     def _n_relax_key(self):
         """The scenario's N target for this region (tiered target, base surplus): identifies the setting the
         JRC121368 relaxation belongs to; None without an N target."""
-        srow = getattr(self, "_surplus_row", None)
+        srow = getattr(self.ev, "surplus_row", None)
         if srow is None or len(srow) < 8 or srow[7] is None:
             return None
         return (round(float(srow[1]), 9), round(float(srow[7]), 9))

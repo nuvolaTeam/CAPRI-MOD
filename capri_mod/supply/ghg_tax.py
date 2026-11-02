@@ -39,8 +39,7 @@ from capri_mod.params import param, param_table
 from capri_mod.data.definitions import capri_ms
 
 #: MJ per Mcal, MJ per kg CH4 (IPCC 2006 Eq. 10.21, as gases.gms and the accounts)
-MJ_PER_MCAL = 4.1868                       # unit conversion
-MJ_PER_KG_CH4 = param("MJ_PER_KG_CH4")
+from capri_mod.units import MJ_PER_MCAL    # unit conversion (MJ per kg CH4: the parameter MJ_PER_KG_CH4)
 
 
 def _ghg_total(env, res) -> float:
@@ -60,7 +59,7 @@ def _enteric_per_t_dm(env, region: str, animal: str) -> Optional[Dict[str, float
     ge = fac["ge"].get(ctry) or fac["ge"].get("EU")
     if not ge:
         return None
-    k = MJ_PER_MCAL * float(fac["ym"]) / MJ_PER_KG_CH4 * GWP_CH4
+    k = MJ_PER_MCAL * float(fac["ym"]) / param("MJ_PER_KG_CH4") * GWP_CH4
     return {f: float(v) * k for f, v in ge.items()}
 
 

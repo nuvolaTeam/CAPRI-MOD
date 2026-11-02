@@ -4749,10 +4749,11 @@
   "capri_data/shared/model_parameters.csv": {
    "description": "model_parameters (no builder: a declared table)",
    "kind": "parameters",
-   "rows": 38,
+   "rows": 54,
    "columns": 7,
    "units": "to be established (value_units: open)",
    "read_by_model": [
+    "capri_mod/data/inputs.py",
     "capri_mod/params.py"
    ],
    "origin": {

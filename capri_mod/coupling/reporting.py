@@ -16,11 +16,11 @@ class ReportingBlock:
         prev = getattr(self, "_trace_nlp_prev", None) or {}
         cur, rows, paths = {}, [], {}
         for r_, m_ in (self.supply_module._models or {}).items():
-            y_ = getattr(m_, "_nlp_y", None)
+            y_ = getattr(m_.sv, "nlp_y", None)
             if y_ is None:
                 continue
             cur[r_] = y_
-            p_ = getattr(m_, "_nlp_path", None) or ("?", 0)
+            p_ = getattr(m_.res, "nlp_path", None) or ("?", 0)
             paths[p_[0]] = paths.get(p_[0], 0) + 1
             y0 = prev.get(r_)
             if y0 is not None and len(y0) == len(y_):
@@ -36,7 +36,7 @@ class ReportingBlock:
         if not cur:
             return
         rows.sort(reverse=True)
-        cols = lambda r_, j_: (list(getattr(self.supply_module._models[r_], "_nlp_cols", None) or [])[j_:j_ + 1] or [j_])[0]
+        cols = lambda r_, j_: (list(getattr(self.supply_module._models[r_].sv, "nlp_cols", None) or [])[j_:j_ + 1] or [j_])[0]
         print(f"    [nlp] {_dt:.0f} s | paths " + ", ".join(f"{k} {v}" for k, v in sorted(paths.items()))
               + (" | moved " + "; ".join(f"{r_} {cols(r_, j_)} {d:.3f} ({p_[0]}, {p_[1]} it)" for d, r_, j_, p_ in rows[:top])
                  if rows else ""), flush=True)

@@ -34,6 +34,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from capri_mod.params import param
+
 _CACHE = {}
 
 
@@ -169,7 +171,7 @@ def cascade(sub, sh: dict, wc=0.0):
         return None
     from capri_mod.supply import n_cascade as _nc
     f, rsurf, eff = d
-    m = 1.0 - _nc.WINTERCOV_NO3 * wc
+    m = 1.0 - param("WINTERCOV_NO3_REDUCTION") * wc
     return _nc.losses(f, rsurf, sh, eff, m_runsurf=(m, 1.0), m_appl_run=m)
 
 
