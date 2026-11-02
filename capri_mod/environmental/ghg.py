@@ -260,7 +260,7 @@ class GHGBlock:
             w = float(sb["w"]) * float(sb.get("mrel", 1.0) or 1.0)
             lg, r = sb["ad"]
             act = sb["key"].partition("|")[2]
-            k = 0.0 if (self.ad_dairy_ch4 == "capri" and act in ("DCOL", "DCOH")) else (1.0 - r) / lg
+            k = 0.0 if (self.ad_dairy_ch4 == "capri" and act in CAPMOD_MEMBERS["DCOW"]) else (1.0 - r) / lg
             F1 += w * (1.0 - s1 * k); F0 += w * (1.0 - b0 * k); W += w
         return F1 / F0 if F0 > 0 else 1.0
 

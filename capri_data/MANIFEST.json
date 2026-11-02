@@ -3572,6 +3572,19 @@
    "units": "n/a (not re-checked)",
    "catalogue_note": "How far each model OUTPUT can be trusted; queried by capri_mod/fitness.py. (not re-checked)"
   },
+  "capri_data/codes/capri/CACT_TO_NGRP.csv": {
+   "description": "CAPRI CACT_TO_NGRP: the nutrient group of each crop activity (supply/define_ngrp_sets.gms)",
+   "kind": "structure",
+   "rows": 45,
+   "columns": 2,
+   "read_by_model": [
+    "capri_mod/data/definitions.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists"
+   }
+  },
   "capri_data/codes/capri/FEED_TO_O.csv": {
    "description": "CAPRI's FEED_TO_O: the feed bulks and their products (sets.gms)",
    "kind": "structure",
@@ -3646,6 +3659,16 @@
    "description": "CAPRI PACT, all production activities (sets.gms; CAPMOD restart file sim_ini_21730)",
    "kind": "structure",
    "rows": 99,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists"
+   }
+  },
+  "capri_data/codes/capri/PERM_NGRP.csv": {
+   "description": "CAPRI PERM_NGRP: the permanent crop groups of the fertiliser distribution (supply/define_ngrp_sets.gms)",
+   "kind": "structure",
+   "rows": 2,
    "columns": 2,
    "origin": {
     "nature": "capri",

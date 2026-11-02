@@ -28,6 +28,7 @@ from capri_mod.data.definitions import CROPS_ON_LAND as _CROPS_ON_LAND   # N6
 from capri_mod.settings import setting
 from capri_mod.settings import current as _settings
 from capri_mod.units import M_N2O, M_N2O_N, M_NH3, M_NH3_N, M_CO2, M_UREA_N
+from capri_mod.data.definitions import CAPRI_MEMBERS, CAPMOD_MEMBERS, CAPRI_CACT_TO_NGRP, CAPRI_PERM_NGRP
 from capri_mod.fert.npk import need_yield_factor
 from capri_mod.data.definitions import (
     CROPS, ANIMALS, ALL_ACTIVITIES, NUTRIENTS, GHG_TYPES,
@@ -165,9 +166,9 @@ class EnvironmentalModule(EnvStateMixin, GHGBlock, NitrogenBlock, AmmoniaBlock, 
 
 
 
-    #: CAPRI crop -> model crop (several CAPRI crops pooled by level)
-    _CAPRI_CROP = {"CORN": ("MAIZ",), "WINE": ("TWIN",), "GRAS": ("GRAE", "GRAI"),
-                   "OFOD": ("OFAR", "ROOF"), "SETA": ("SETA", "FALL", "VSET")}
+    #: model crop -> its CAPRI crops (pooled by level): the crosswalk's data and supply-model members
+    #: (codes/model_activities.csv; GRAS's own row is dropped from the data wherever GRAE or GRAI is there)
+    _CAPRI_CROP = CAPRI_MEMBERS
     _CROP_N = None
 
 
@@ -177,7 +178,8 @@ class EnvironmentalModule(EnvStateMixin, GHGBlock, NitrogenBlock, AmmoniaBlock, 
     #: crops whose own residues cover their own need, CAPRI's permanent crop groups (supply/define_ngrp_sets.gms
     #: PERM_NGRP: GRAS, and PERM = OLIV, TABO, TAGR, TWIN, CITR, APPL); every other crop draws on the arable residue
     #: pool (fertDistCres_). Other fruit (VEGE in CAPRI) and nurseries (OAFC) were here until Sprint 9e.
-    OWN_RESIDUE_CROPS = frozenset({"GRAS", "APPL", "CITR", "TAGR", "WINE", "OLIV", "TABO"})
+    OWN_RESIDUE_CROPS = frozenset(c for c in CROPS if any(CAPRI_CACT_TO_NGRP.get(m) in CAPRI_PERM_NGRP
+                                                          for m in CAPRI_MEMBERS[c]))   # CACT_TO_NGRP, PERM_NGRP
 
 
     _ENT_CACHE = None
