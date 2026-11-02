@@ -322,10 +322,6 @@ class FertilisationBlock:
                                "own": [(j, sh * k_own * own[j]) for j, sh in crops if perm and own[j] > 0], "Aref": Aref})
             if not groups:
                 continue
-            # coverage check: the groups' need and own residues at base against the region's (kappa's) totals
-            cov_need = sum(sum(v * xb[j] / sq.get(acts[j], 1.0) for j, v in g_["need"] if j < n) for g_ in groups)
-            cov_own = sum(sum(v * xb[j] for j, v in g_["own"]) for g_ in groups)
-            self.__dict__.setdefault("_npk_cov", {})[nut] = (cov_need, k * base["need0"], cov_own, base["O0"])
             Ecols = [(j, float(man[j])) for j in range(n) if man[j] != 0.0]
             if nut == "N":
                 Ecols += [(j, float(man[acts.index(a_)]) * r_) for j, a_, r_ in man_split if man[acts.index(a_)] * r_ != 0.0]
@@ -454,7 +450,6 @@ class FertilisationBlock:
                 c1 = float(msh) * float(racc) + 1.0
                 regs[(g, "CRES")] = (float(mx), c1, float(racc) + 2.0 - c1)
             d["regs"] = regs
-            self._nlp_group_caps = caps
             # limCres for every nutrient (minfert_redu_by_crop.gms sets it over FNUT)
             for nut_, per_ in (base.get("per_ha_nut") or {}).items():
                 d_ = (npk.get("nutrients") or {}).get(nut_)

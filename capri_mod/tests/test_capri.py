@@ -2639,9 +2639,10 @@ def test_parallel_regional_solves_match_sequential():
         os.environ.pop("CAPRI_WORKERS")
         if old is not None:
             os.environ["CAPRI_WORKERS"] = old
-    # two regions, a livestock and a crop region (four took 112 s; the identity concerns the worker processes, not the
-    # number of regions)
-    regs = ["NL220000", "IT200000"]
+    # three regions, a livestock, a crop and a small mixed region: the first region is always solved in this process
+    # (SupplyModule.workers: at most n_regions - 1 workers), so with two regions the second run had one worker and
+    # never forked (found 2 November 2026, docs/design/STAGE3B_PLAN.md); with three it forks two workers
+    regs = ["NL220000", "IT200000", "MT000000"]
     out = []
     from capri_mod.supply import capri_regional_nlp as C
     for nw in (1, 2):
@@ -2651,12 +2652,40 @@ def test_parallel_regional_solves_match_sequential():
         C._SOLVERS.clear()
         m = CAPRIModel(data_dir=str(DATA_DIR), verbose=False)
         m.supply_module.n_workers = nw
+        assert m.supply_module.workers(len(regs)) == nw     # the second run forks
         s = m.run(custom_scenario=farm_to_fork_scenario(), regions=regs, max_outer_iter=2)
         out.append(({r: dict(v.activities) for r, v in s["supply"].items()},
                     {r: dict(v.shadow_prices) for r, v in s["supply"].items()},
                     dict(m.supply_module._nbal_state)))
         assert all(m.supply_module._models[r]._env_for_surplus is m.supply_module._env_for_surplus for r in regs)
+        # the solves' _nlp* fields, also those the workers brought back, are the declared ones (NLP_STATE, S0b)
+        _decl = set(type(m.supply_module._models[regs[0]]).NLP_STATE)
+        for r in regs:
+            assert {k for k in m.supply_module._models[r].__dict__ if k.startswith("_nlp")} <= _decl, r
     assert out[0] == out[1]
+
+
+def test_nlp_state_lists_every_nlp_attribute():
+    """Refactor stage 3, S0b (2 November 2026): the market supply Hessian saves and restores the regional models'
+    _nlp* fields by the declared list RegionalSupplyModel.NLP_STATE (by the prefix "_nlp" before). Every _nlp* instance
+    attribute the code writes (self._nlp_x = ..., obj._nlp_x = ..., __dict__ / setattr with the name) is in it, so the
+    restore keeps the set the prefix gave."""
+    import re
+    from pathlib import Path
+    from capri_mod.supply.supply_module import RegionalSupplyModel
+    root = Path(__file__).resolve().parents[1]
+    pat = re.compile(r"\._(nlp[A-Za-z0-9_]*)\s*=(?!=)|[\"'](_nlp[A-Za-z0-9_]*)[\"']")
+    written = set()
+    for f in root.rglob("*.py"):
+        if "tests" in f.parts or f.name == "state.py":     # state.py lists the removed names (MOVED)
+            continue
+        for m_ in pat.finditer(f.read_text()):
+            written.add("_" + m_.group(1) if m_.group(1) else m_.group(2))
+    methods = {k for k in dir(RegionalSupplyModel)
+               if k.startswith("_nlp") and callable(getattr(RegionalSupplyModel, k))}
+    prefix = {"_nlp", "_nlp_"}                            # the prefix itself, named in comments
+    missing = sorted(written - methods - set(RegionalSupplyModel.NLP_STATE) - prefix)
+    assert not missing, missing
 
 
 def test_no_synthetic_inputs_reach_the_model(data):
@@ -3620,7 +3649,7 @@ def test_land_rows_are_equalities_and_histosol_fallow_keeps_its_land(model):
     model.run(scenario="BASELINE", regions=["IR010000"], max_outer_iter=1)
     mo = model.supply_module._models["IR010000"]
     lab = list(mo._aug_labels)
-    A, b = mo._last_aug_A, mo._last_aug_b
+    _Q, _c, A, b, _y = mo._last_aug           # the augmented problem the land-market solve used
     for row in ("arable_land", "permanent_land", "grassland"):
         if row in lab and row + "_lo" in lab:
             i, j = lab.index(row), lab.index(row + "_lo")

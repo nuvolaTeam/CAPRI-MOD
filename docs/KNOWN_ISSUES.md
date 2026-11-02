@@ -1050,6 +1050,40 @@ CAPRI's stop rule, recorded every iteration since r135, flags rows that move by 
   point). Farm-to-Fork moved the same way over the same gates (r202 against r196: milk price -2.3 points, pork -1.3,
   poultry -1.1), in line with gate 11's K108 fix (smaller price rises), not checked further. The N-surplus row was
   slack at the end in two regions (BG020000, RO020000; r197: three)
+  1 November 2026, the project lead's decision: option (c), CAPRI's way. The re-solve with the ammonia options at
+  their base shares where the N-surplus row is slack is removed (no switch kept: gate 13's r202 is the reference run
+  with it): CAPRI solves the regional model once, from the calibrated point. The options stay held at their base shares where
+  there is no policy incentive on N at all (K63). To check at the next gate: FR820000's end state, and the ammonia
+  options' adoption in the regions where the N-surplus row is slack (K63's saddle along the options' joint direction
+  could let IPOPT move them off their base shares there). In r202's final state 213 regions had an N-surplus row
+  (none a mineral cap) and it was slack (|dual| <= 1e-9) in four: FR100000, FR240000, FR810000, FR820000, the only
+  regions where the re-solve could act at the end of that run; in the Green Deal's r203, two (BG020000, RO020000)
+  **Gate 14 (2 November 2026; stage 3's first batch with the K79 branch: the ammonia-fixed re-solve removed, the
+  Western Balkans' food demand in WBA):** Farm-to-Fork r204 (regional levels recorded, against gate 13's r202):
+  converged under CAPRI's rule in 12 iterations (r202: 28), no non-optimal solve kept; EU indicators within 0.4 points
+  of r202 (largest: fertiliser N2O -39.7% against -40.0, N surplus -32.2 against -32.5, beef price +23.7 against
+  +24.0; mean deviation from JRC121368 over 20 indicators 4.18 against 4.15), adoption rates within 0.4 points (catch
+  crops 40.9% against 41.3). Regional activities moved by more than 10% of base (and more than 1 kha or thousand head)
+  in FR810000 and FR820000 only. FR820000 ends near gate 13's point B, the better local optimum: olives 24.7 kha, wine
+  47.9, table grapes 1.2, paddy rice 7.4 (base 8.9, 52.4, 1.3, 9.3; r202 0.9, 16.0, 0.2, 9.0), its suckler cows and
+  calves near base (20.0 and 104.3 thousand; r202 2.7 and 85.4). FR810000 moves with it: olives 30.2 kha (base 5.3,
+  r202 5.5), wine 129.2 (145.9, 145.8), suckler cows 94.9 thousand (87.9, 56.2). Not checked against CAPRI's own
+  regional results (none at hand): olives at 2.8 and 5.7 times base in eight years are large for a permanent crop.
+  The N-surplus row is slack at the end in five regions (FR100000, FR240000, FR810000, FR820000 as in r202, and
+  RO020000, where it bound in r202). The ammonia options move off their base shares in four of them (not FR100000): up
+  in FR240000, FR820000 and RO020000 (broilers' and layers' covered storage and low-emission spreading, shares from
+  about 0 to 0.1-0.55), down in FR810000 (pigs' and broilers' low-emission spreading to 0). Whether these moves are the
+  options' value through the mineral N they save or K63's saddle along the options' joint direction is not determined
+  (it needs the regional objective along that direction); the EU adoption rates of the ammonia options move by 0.1
+  point at most.
+  Green Deal r205 (against r203): baselines equal (largest regional difference 0); converged under CAPRI's rule in 18
+  iterations (r203: 21), no non-optimal solve kept; EU indicators within 0.1 point of r203; N-surplus row slack at the
+  end in BG020000 and RO020000 as in r203, their ammonia options as in r203 (no share moved by more than 0.05);
+  FR820000 as in r203 (olives 8.6 kha, wine 52.1). One region ends at a different point: HU230000 (one of the regions
+  with relaxed mineral caps, ROOF and duals, in both runs), rapeseed 24.6 kha against 97.6 (base 64.2), sunflower 115.1
+  against 52.8 (78.6), barley 82.2 against 51.9 (35.4), soft wheat 108.6 against 145.5 (164.8); Hungary's rapeseed 250
+  kha against 317 (base 344), the EU's within 0.1%. Which of the two points is the better one in HU230000's problem is
+  not known (no trace); RO050000 and BG010000 move by less (other fodder, oats, soya and other cereals, 1.6-8.4 kha)
 
 
 <a id="k80"></a>

@@ -267,7 +267,7 @@ class PolicyBlock:
         # CAPRI's maps (inputs/load_organic_yieldgap.gms): the crop's product group (pact2yieldGap) and the member
         # state's PESETA macro-region (ms2peseta)
         group = (getattr(self.data, "organic_yield_gap_groups", None) or {}).get(activity)
-        reg_id = getattr(self.data, "region_id", "") or getattr(self, "region", "")
+        reg_id = getattr(self.data, "region_id", "")
         from capri_mod.data.definitions import capri_ms
         region = (getattr(self.data, "organic_yield_gap_regions", None) or {}).get(capri_ms(reg_id))
         if table is None or not group or region is None:

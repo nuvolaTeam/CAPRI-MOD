@@ -487,6 +487,7 @@ class PMPCalibrator:
 
 # refactor stage 3a: the regional model's methods in mixin modules of this package
 from capri_mod.supply.livestock import LivestockBlock  # noqa: E402
+from capri_mod.supply.state import ModuleStateMixin, RegionalStateMixin  # noqa: E402
 from capri_mod.supply.fertilisation import FertilisationBlock  # noqa: E402
 from capri_mod.supply.abatement import AbatementBlock  # noqa: E402
 from capri_mod.supply.policy import PolicyBlock  # noqa: E402
@@ -494,7 +495,8 @@ from capri_mod.supply.land import LandBlock  # noqa: E402
 from capri_mod.supply.nlp import NLPBlock  # noqa: E402
 
 
-class RegionalSupplyModel(LivestockBlock, FertilisationBlock, AbatementBlock, PolicyBlock, LandBlock, NLPBlock):
+class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock, AbatementBlock, PolicyBlock,
+                          LandBlock, NLPBlock):
     """
     Single NUTS-2 regional agricultural programming model.
 
@@ -511,14 +513,22 @@ class RegionalSupplyModel(LivestockBlock, FertilisationBlock, AbatementBlock, Po
     #: the state a solve leaves for the next one (linearisation points, warm starts, splits, rations, last solutions),
     #: besides the warm-start fields named _nlp*: what the market supply Hessian saves and restores so that every price
     #: shock starts from the baseline's state (model._market_supply_hessian). Found by comparing the model's attributes
-    #: before and after a solve (27 October 2026); bookkeeping (_n_solves, _nlp_times) and the shared environmental
+    #: before and after a solve (27 October 2026); bookkeeping (_n_solves) and the shared environmental
     #: module are not state
     SOLVE_STATE = ("_amm_cost", "_amm_last", "_animal_n_kept", "_animal_n_relief", "_animal_nh3_saved", "_cover_solved",
-                   "_fd_model", "_ghg_nr_obj", "_land_solution", "_last_aug", "_last_aug_A", "_last_aug_b",
-                   "_last_cattle_z", "_last_dairy_z", "_last_duals", "_last_feed", "_last_feed_dm", "_last_feed_t",
-                   "_last_genet_z", "_last_grass_z", "_last_hist_fallow", "_last_land", "_last_npk", "_last_req_duals",
-                   "_manure_ni_nh3", "_manure_ni_relief", "_manure_ni_share", "_manure_tech_shares", "_npk_cov",
+                   "_fd_model", "_ghg_nr_obj", "_land_solution", "_last_aug",
+                   "_last_cattle_z", "_last_dairy_z", "_last_duals", "_last_feed_dm", "_last_feed_t",
+                   "_last_genet_z", "_last_grass_z", "_last_hist_fallow", "_last_npk", "_last_req_duals",
+                   "_manure_ni_nh3", "_manure_ni_relief", "_manure_tech_shares",
                    "_price_shock_now", "_wc_solved", "feed_rations")
+    #: the regional NLP's fields (warm starts, calibration, fallbacks and their diagnostics), all named _nlp*: what the
+    #: market supply Hessian restored by the prefix "_nlp" until 2 November 2026 (refactor stage 3, S0b: the same set,
+    #: declared). Every instance attribute named _nlp* must be listed here (test_nlp_state_lists_every_nlp_attribute)
+    NLP_STATE = ("_nlp_accept_last", "_nlp_base_alloc", "_nlp_cal", "_nlp_cal_check",
+                 "_nlp_cal_store", "_nlp_cols", "_nlp_failed", "_nlp_fallback_log", "_nlp_fb_last",
+                 "_nlp_jump", "_nlp_mine_small", "_nlp_n_target_cause", "_nlp_nip", "_nlp_nonoptimal", "_nlp_ok",
+                 "_nlp_path", "_nlp_prev", "_nlp_prev_f", "_nlp_rc", "_nlp_relax_keep", "_nlp_relaxed", "_nlp_status",
+                 "_nlp_tol_trace", "_nlp_try_n_relax", "_nlp_y")
 
 
     #: livestock costs from CAPRI's regional total inputs / model heads
@@ -1330,8 +1340,6 @@ class RegionalSupplyModel(LivestockBlock, FertilisationBlock, AbatementBlock, Po
             A_rows.append(row_m)
             b_rows.append(float(self._cover_n_increment()))
             self._row_labels.append("mineral_N")
-            # crops' mineral part, for CAPRI's fertiliser technologies inside the regional model
-            self._mineral_row_m = mrow_parts
 
         # CAPRI winterCover_: the catch crops need land not already under winter cover,
         #   sum_c crop_c x winter cover share_c <= UAAR - CATC + FALL.FLOOR  (UAAR: the region's data, fixed)
@@ -1427,7 +1435,6 @@ class RegionalSupplyModel(LivestockBlock, FertilisationBlock, AbatementBlock, Po
         self.balance_shortfall = 0.0
         self._surplus_row = surplus_row         # held for THIS solve only
         self._mineral_cap = mineral_cap         # CAPRI's mineral fertiliser reduction, THIS solve only
-        self._mineral_row_m = {}
         self._last_manure_trade = (0.0, 0.0)
         self._last_manure_trade_pk = {}
         self._last_mineral_n = None
@@ -1652,7 +1659,7 @@ class RegionalSupplyModel(LivestockBlock, FertilisationBlock, AbatementBlock, Po
         # CAPRI's emission tax on the activities (ghgTax; zero unless the scenario sets one)
         self._apply_ghg_tax()
 
-        self._manure_ni_relief, self._manure_ni_nh3, self._manure_ni_share = {}, {}, 0.0
+        self._manure_ni_relief, self._manure_ni_nh3 = {}, {}
         if getattr(self, "_nbal_price", 0.0):
             self._apply_balance_price(self._nbal_price)
         else:
@@ -1716,7 +1723,6 @@ class RegionalSupplyModel(LivestockBlock, FertilisationBlock, AbatementBlock, Po
             y = _yc
             n_ = len(x0); x_qp = y[:n_]
             _nl = len(getattr(self, "_land_types_used", []))
-            self._last_land = dict(zip(getattr(self, "_land_types_used", []), y[n_:n_ + _nl]))
             self._last_mineral_n = float(y[n_ + _nl]) if getattr(self, "_alloc_cols", 0) else None
             _pc = getattr(self, "_pool_cols", []) or []
             self._last_manure_trade = (float(y[_pc[0]]), float(y[_pc[1]])) if len(_pc) == 2 else (0.0, 0.0)
@@ -2009,7 +2015,7 @@ def _ms_value(table, region, column):
     return 0.0
 
 
-class SupplyModule:
+class SupplyModule(ModuleStateMixin):
     """
     Manages and runs all regional supply models in parallel.
 
@@ -2520,7 +2526,6 @@ class SupplyModule:
                 + np.asarray(mo.Q, float) @ d
         self._base_cal_round = rnd + 1
         self._base_cal_prev, self._base_cal_stalled = prev_r, stalled
-        self._base_cal_drift = worst
         return worst
 
     # CAPRI's crop nutrient balance (NUTNED_, fertDistExcr_) and manure market in every EU solve, not only under
