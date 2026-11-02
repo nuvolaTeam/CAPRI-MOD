@@ -17,18 +17,15 @@ commodities**. Every input is traceable to a source, and each module's output
 has been compared with CAPRI's own data or scenario results; §8 says which
 outputs hold up and which do not.
 
-**Scope.** The project tests whether a large policy model, CAPRI in this case,
-can be reimplemented in a form that is transparent, reusable, reproducible,
-interoperable and AI-ready (§9). In practice, each equation cites the CAPRI code
+In practice, each equation cites the CAPRI code
 it follows and each departure is registered, the code is open Python on CSV inputs
 with their provenance and CAPRI's own codes, and every run's settings, result
 quality and decisions are recorded in machine-readable form.
 
-It is a feasibility test, not a replacement for CAPRI: §8 and §11 say how far
-it has got.
-
-It is an independent implementation of CAPRI's *methods and calibration data*,
-not a copy of its code.
+The project tests whether a large policy model, CAPRI in this case,
+can be reimplemented in a form that is transparent, reusable, reproducible,
+interoperable and AI-ready (§9). It is a feasibility test and independent implementation of CAPRI's *methods and calibration data*,
+not a copy of its code. §8 and §11 say how far it has got.
 
 ---
 
@@ -187,7 +184,6 @@ files record how they map to this model's names.
 | Supply method | CAPRI's regional models as NLPs, PMP-calibrated (CAPRI's 2030 terms) |
 | Market method | CAPRI's bilateral Armington market: 26 trade regions (27 with CAPRI's EU blocks, optional), transport costs, tariffs, TRQs; dairy block, GL food demand, young animals, CAPRI's market supply functions; Newton + Anderson to < 1e-7 |
 | Data validator | 13 pass, 0 warn, 0 fail |
-| Convergence | all 221 regional models solve (one Dutch unit, NL320000, at JRC121368's relaxed N target); under CAPRI's stop rule Farm-to-Fork 2030 converges in 10 iterations, Green Deal 2030 in 21 (reference runs r188, r189, 29 October 2026, batch 6, on CAPRI's regional units; the Green Deal's iteration count depends on the path, K79: 17 in r187, 37 in r181) |
 | Test suite | 252 tests (gate of 30 October 2026, batch 9: 250 passed, 1 skipped; test_denmark_with_the_coco_data, skipped at the earlier gates, corrected after the full run and rerun on its own) |
 | On by default, as in CAPRI | land market and land rules, endogenous feed rations, fodder equality, ammonia technologies |
 | Optional | manure market (`use_manure_market`) |
