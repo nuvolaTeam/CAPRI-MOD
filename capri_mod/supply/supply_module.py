@@ -1844,16 +1844,8 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
                 continue
             _c = (float(_coef.get(_a)) if _coef is not None
                   and _a in _coef.index and pd.notna(_coef.get(_a)) else None)
-            # The output coefficient is per head at BASE intensity. Where the
-            # livestock intensity margin has moved the yield — dairy extensifying
-            # under a nutrient ceiling — the reported product must move with it,
-            # or the extensification would steer the solve while leaving output
-            # unchanged, which is the failure the crop yield shocks had.
-            if _c is not None and _a == "DCOW":
-                _y0 = getattr(self, "_dairy_yield_base", None)
-                _y1 = float(self.data.yields.get("DCOW", 0.0))
-                if _y0 and _y1 > 0 and _y0 > 0:
-                    _c *= _y1 / _y0
+            # The output coefficient is per head at base intensity; the dairy split below moves milk with the
+            # low-yield cows (a scaling by a dairy yield base, never set since 3a264a2, removed in refactor stage 3)
             # no output coefficient: unknown (NaN) where the activity has a level, none where it has none (other
             # animals, OANI, held at 0 in every region, read NaN until 27 October 2026)
             _lv = float(activities.get(_a, 0.0))
