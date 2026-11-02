@@ -487,6 +487,7 @@ class PMPCalibrator:
 
 # refactor stage 3a: the regional model's methods in mixin modules of this package
 from capri_mod.supply.livestock import LivestockBlock  # noqa: E402
+from capri_mod.supply.state import ModuleStateMixin, RegionalStateMixin  # noqa: E402
 from capri_mod.supply.fertilisation import FertilisationBlock  # noqa: E402
 from capri_mod.supply.abatement import AbatementBlock  # noqa: E402
 from capri_mod.supply.policy import PolicyBlock  # noqa: E402
@@ -494,7 +495,8 @@ from capri_mod.supply.land import LandBlock  # noqa: E402
 from capri_mod.supply.nlp import NLPBlock  # noqa: E402
 
 
-class RegionalSupplyModel(LivestockBlock, FertilisationBlock, AbatementBlock, PolicyBlock, LandBlock, NLPBlock):
+class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock, AbatementBlock, PolicyBlock,
+                          LandBlock, NLPBlock):
     """
     Single NUTS-2 regional agricultural programming model.
 
@@ -2017,7 +2019,7 @@ def _ms_value(table, region, column):
     return 0.0
 
 
-class SupplyModule:
+class SupplyModule(ModuleStateMixin):
     """
     Manages and runs all regional supply models in parallel.
 
