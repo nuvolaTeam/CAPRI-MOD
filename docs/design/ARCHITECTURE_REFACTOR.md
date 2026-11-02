@@ -79,6 +79,8 @@ The builders (tools/build) are out of this plan: they are run by the maintainers
 
 **Stage 3's gates (the project lead, 2 November 2026).** The first batch is gated together with the K79 branch's behaviour changes (the ammonia-fixed re-solve removed, the Western Balkans' food demand in WBA): the moves are checked exactly against the mini-EU run first, so the gate's differences from gate 13 are those two changes'. After stage 3 come the market's move to CAPRI's market regions (MARKET_REGIONS_INVENTORY.md) and then the 29 supply units outside the EU (SUPPLY_NONEU_DESIGN.md).
 
+**Gate 15 (2 November 2026, the project lead's choice: full runs before the push).** Stage 3's state moves, batches 2-4 (S2-S11, 11d7304): Farm-to-Fork r206 and Green Deal r207 identical to gate 14's r204 and r205 in every regional activity level of the baseline and the scenario, the prices, production, environmental accounts and welfare (largest difference 0); 12 and 18 iterations, as gate 14. The market supply Hessian was measured again (the code fingerprint changed) and gave the same results.
+
 **Stage 5's scope (agreed with the project lead, 31 October 2026).**
 - Scenarios as data: each scenario and the reference in capri_data/scenarios/<name>/, its settings (settings.toml)
   and its parameters and datasets in separate files (the trajectories moved there first, branch json-csv); the

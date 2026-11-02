@@ -47,9 +47,17 @@ and `docs/KNOWN_ISSUES.md`.
   default None).
 - The run script's CAPRI_DUMP_REGIONS dump reads the fields by name or path; its keys lose the leading underscore.
 - Checks: each batch's mini-EU Farm-to-Fork run identical to the previous one at 1e-12 (only the run metadata differ);
-  the test suite after every step. Batch 1 was gated with the K79 change (gate 14, KNOWN_ISSUES K79).
-- Not changed (their own runs, plan Q11): `n_relax_sticky` and `ghg_applied` not restored by the Hessian, the instance
-  copy of `use_fert_allocation`. Not done yet: the numbers and code tables as data (N1-N6).
+  the test suite after every step. Batch 1 was gated with the K79 change (gate 14, KNOWN_ISSUES K79); batches 2-4
+  with full runs (gate 15: Farm-to-Fork and Green Deal identical to gate 14's, largest difference 0).
+- The numbers as data (N1, N2, N4, N5): the model's parameters through the run's inputs
+  (`<data_dir>/shared/model_parameters.csv`), the supply's parameters read where used; the supply's 22 CAPRI constants
+  as sixteen parameters with their GAMS citations (the organic target scaling written once); the physical constants
+  named in `capri_mod/units.py`; the numerical and technical numbers in `defaults.toml`. Not done yet: N3 (stage 5)
+  and N6 (the code tables).
+- The three changes left out of the moves (docs/design/STAGE3_BEHAVIOUR_CHANGES.md, the project lead's decision):
+  `sv.n_relax_sticky` restored by the Hessian, `ev.ghg_nr_obj` out of its restore list, `use_fert_allocation` passed as
+  an argument instead of an instance copy; no effect on the default runs.
+- `CITATION.cff`: the project lead's text.
 
 ## 30 October 2026 (batch 9, one gate): the refactor's stages 3b-4c, the data sources as CSV, CAPTRD's fixes and statistics, the region tables from the data, the SQL declarations apart from the code lists
 
