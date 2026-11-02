@@ -17,18 +17,15 @@ commodities**. Every input is traceable to a source, and each module's output
 has been compared with CAPRI's own data or scenario results; §8 says which
 outputs hold up and which do not.
 
-**Scope.** The project tests whether a large policy model, CAPRI in this case,
-can be reimplemented in a form that is transparent, reusable, reproducible,
-interoperable and AI-ready (§9). In practice, each equation cites the CAPRI code
+In practice, each equation cites the CAPRI code
 it follows and each departure is registered, the code is open Python on CSV inputs
 with their provenance and CAPRI's own codes, and every run's settings, result
 quality and decisions are recorded in machine-readable form.
 
-It is a feasibility test, not a replacement for CAPRI: §8 and §11 say how far
-it has got.
-
-It is an independent implementation of CAPRI's *methods and calibration data*,
-not a copy of its code.
+The project tests whether a large policy model, CAPRI in this case,
+can be reimplemented in a form that is transparent, reusable, reproducible,
+interoperable and AI-ready (§9). It is a feasibility test and independent implementation of CAPRI's *methods and calibration data*,
+not a copy of its code. §8 and §11 say how far it has got.
 
 ---
 
