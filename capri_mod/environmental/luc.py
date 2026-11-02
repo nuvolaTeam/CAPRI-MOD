@@ -26,6 +26,8 @@ from typing import Dict, Optional
 import numpy as np
 import pandas as pd
 
+from capri_mod.data.definitions import LAND_MARKET_TYPES   # the land market's free land types (N6)
+
 CLS = {"CRP": "CROP", "FOR": "FORE", "ART": "ARTIF", "GRS": "GRSLND", "WET": "WETLND", "RES": "RESLND"}
 
 
@@ -53,7 +55,7 @@ class LUCModel:
         from scipy.optimize import minimize
         f = float(v.get("step", 1.0))
         final = {c: float(v.get(c, 0.0)) for c in CLS.values()}
-        dl = {k: float(d_land.get(k, 0.0) or 0.0) for k in ("ARAC", "FRUN", "GRAS", "FORE", "OLND")}
+        dl = {k: float(d_land.get(k, 0.0) or 0.0) for k in LAND_MARKET_TYPES}   # codes/model_land_types.csv
         final["CROP"] += dl["ARAC"] + dl["FRUN"]
         final["GRSLND"] += dl["GRAS"] + float(v["shG"]) * dl["OLND"]
         final["WETLND"] += float(v["shW"]) * dl["OLND"]
