@@ -6,6 +6,8 @@ module once model is loaded (capri_mod.coupling.inject); the annotations are not
 """
 from __future__ import annotations
 
+from capri_mod.data.definitions import CROPS, MARKET_COMMODITIES, COMMODITY_CAPRI_CODE, CAPRI_MEMBERS
+
 
 class BridgeBlock:
     def _livestock_products_by_country(self, supply_results):
@@ -58,16 +60,11 @@ class BridgeBlock:
                                       index=supply_agg.index,
                                       columns=MARKET_COMMODITIES)
 
-        # Direct mappings (activity → market commodity)
-        direct_maps = {
-            "BARL": "BARL",
-            "CORN": "CORN", "OCER": "OCER", "RYEM": "RYEM", "OATS": "OATS", "RAPE": "RAPE",
-            "SUNF": "SUNF", "SOYA": "SOYA",
-            "POTA": "POTA", "PULS": "PULS",
-            "TOMA": "TOMA", "OVEG": "OVEG", "APPL": "APPL",
-            "OFRU": "OFRU", "CITR": "CITR", "TAGR": "TAGR", "TOBA": "TOBA", "TABO": "TABO", "TEXT": "TEXT", "WINE": "WINE",
-            # (wheat, olives and paddy rice are bridged below, as CAPRI's wheat, olive oil and milled rice)
-        }
+        # Direct mappings (activity -> market commodity): the crops whose CAPRI activity is the market product's CAPRI
+        # code (codes/model_activities.csv, model_commodities.csv: CORN = MAIZ, WINE = TWIN, ...). Wheat, olives and
+        # paddy rice are not (CAPRI's WHEA, OLIO, RICE): they are bridged below, as CAPRI's wheat, olive oil and milled rice
+        direct_maps = {c: c for c in CROPS
+                       if c in MARKET_COMMODITIES and COMMODITY_CAPRI_CODE.get(c) in CAPRI_MEMBERS[c]}
         # LIVESTOCK (milk is handled by the dairy block below). The meat markets
         # meat, milk and egg supply never moved with the herds: under
         # Farm-to-Fork pig supply fell ~10% while the pork price changed by
@@ -151,8 +148,7 @@ class BridgeBlock:
             # processing, per tonne of raw milk produced: dairy_processing.csv), replacing FAO EU-average
             # ratios (cheese 0.0456 against CAPRI's 0.068). With the dairy block on, the market replaces
             # these by the block's output.
-            for mc, ck in (("BUTR", "BUTT"), ("SKIM", "SMIP"), ("CHES", "CHES"), ("WHEY", "WHEP"), ("FRMI", "FRMI"),
-                           ("CREM", "CREM"), ("COCM", "COCM"), ("WMIO", "WMIO"), ("CASE", "CASE")):
+            for ck, mc in self.market_module.DAIRY_TRADED.items():     # CAPRI's dairy product -> the model's
                 if mc in market_supply.columns:
                     market_supply[mc] = milk * pd.Series(
                         {r: self._dairy_yield(r, ck) for r in market_supply.index}).reindex(market_supply.index)
@@ -224,7 +220,7 @@ class BridgeBlock:
             dp = dp.assign(net=net)
             raw = dp[dp["item"].isin(["COMI", "SGMI"])].groupby("ms")["q_kt"].sum()
             tab = {}
-            for k in ("BUTT", "SMIP", "CHES", "WHEP", "FRMI", "CREM", "COCM", "WMIO", "CASE"):
+            for k in self.market_module.DAIRY_TRADED:
                 q = dp[dp["item"] == k].set_index("ms")["net"]
                 tab.update({(ms, k): float(q.get(ms, 0.0)) / float(raw[ms]) for ms in raw.index if raw[ms] > 0})
                 tab[("_EU", k)] = float(q.sum()) / float(raw.sum())
@@ -236,7 +232,7 @@ class BridgeBlock:
                 for ms in sup_noneu():                     # the run's supply-model countries outside the EU
                     g = wp_[wp_["rms"] == ms].set_index("item")
                     if "MILK" in g.index and float(g.at["MILK", "q_kt"]) > 0:
-                        for k in ("BUTT", "SMIP", "CHES", "WHEP", "FRMI", "CREM", "COCM", "WMIO", "CASE"):
+                        for k in self.market_module.DAIRY_TRADED:
                             if k in g.index:
                                 tab[(ms, k)] = float(g.at[k, "q_kt"] - (g.at[k, "proc_kt"] if pd.notna(g.at[k, "proc_kt"])
                                                                        else 0.0)) / float(g.at["MILK", "q_kt"])
