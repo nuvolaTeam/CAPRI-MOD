@@ -1,0 +1,16 @@
+# Farm-to-Fork as JRC121368 ran it: the Green Deal group's four targets with the report's own rules (the tiered
+# surplus rule with the nine-region 36% cap, sect. 4.3.4; the 10% yield loss at a 50% pesticide cut)
+[scenario]
+name = "farm_to_fork_jrc121368"
+kind = "scenario"
+description = "Farm-to-Fork as JRC121368: landscape 10%, organic 25%, pesticides -50%, nutrient surplus -50% (tiered, 36% cap), no manure trade, milk-yield genomics 0.2"
+capri_files = ["pol_input/greendeal/greendeal_scenarios.gms"]
+reference = "ref_jrc121368"
+
+[scenario.greendeal]
+lndscpTarg = 10
+orgTarg = 25
+pestRedu = 50
+surpRedu = 50
+surplus_rule = "jrc121368"
+pesticide_rule = "jrc121368"

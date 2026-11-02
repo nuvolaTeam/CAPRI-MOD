@@ -1,0 +1,16 @@
+# CAPRI's own 2030 step of its Green Deal production series (P. Witzke's batch, section "f2f"; result
+# res_2_1730greendeal_lnds8_org18_pest20_mine13crp_surp30_diet00_oth00defaultA), with star 3.0's rules and manure
+# trade on, as that batch
+[scenario]
+name = "greendeal_lnds8_org18_pest20_mine13crp_surp30_diet00_oth00"
+kind = "scenario"
+capri_files = ["pol_input/greendeal/greendeal_scenarios.gms"]
+reference = "ref_star3"
+manure_trade = true
+
+[scenario.greendeal]
+lndscpTarg = 8
+orgTarg = 18
+pestRedu = 20
+mineRedu = "13crp"
+surpRedu = 30

@@ -158,6 +158,7 @@ INSERT INTO code_data_status VALUES
   ('capri_mod/run_manifest.py', '_git', 60.0, 'technical', 'keep', NULL, 'git subprocess timeout (s)'),
   ('capri_mod/run_manifest.py', '_sha256', 20.0, 'technical', 'keep', NULL, 'read buffer 1 << 20 bytes'),
   ('capri_mod/scenarios/scenarios.py', '<module>', 50.0, 'capri', 'keep', 'gams/pol_input/ecampa/carbtax50_endotech_set12.gms l. 214', 'CAPRI''s 50 EUR/t CO2-eq emission tax scenario'),
+  ('capri_mod/scenarios/definition.py', 'ROOT', 2.0, 'technical', 'keep', NULL, 'the repository root: two folders above this module (parents[2])'),
   ('capri_mod/units.py', 'MJ_PER_MCAL', 4.1868, 'physical', 'keep', NULL, 'MJ per Mcal (International Table calorie)'),
   ('capri_mod/units.py', 'M_N2O', 44.0, 'physical', 'keep', NULL, 'molar mass of N2O (44/28 converts N2O-N to N2O)'),
   ('capri_mod/units.py', 'M_N2O_N', 28.0, 'physical', 'keep', NULL, 'nitrogen in a mole of N2O, 2 x 14'),

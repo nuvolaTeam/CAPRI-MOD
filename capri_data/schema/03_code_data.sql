@@ -157,6 +157,7 @@ INSERT INTO code_data VALUES
   ('capri_mod/projection/reconcile.py', '_EPS', 1e-09, 1, '56', '_EPS = 1e-9'),
   ('capri_mod/run_manifest.py', '_git', 60.0, 1, '85', 'return subprocess.run(["git", *a], cwd=ROOT, capture_output=True, text=True, timeout=60).stdout.strip()'),
   ('capri_mod/run_manifest.py', '_sha256', 20.0, 1, '93', 'for b in iter(lambda: fh.read(1 << 20), b""):'),
+  ('capri_mod/scenarios/definition.py', 'ROOT', 2.0, 1, '26', 'ROOT = Path(__file__).resolve().parents[2] / "capri_data" / "scenarios"'),
   ('capri_mod/scenarios/scenarios.py', '<module>', 50.0, 1, '104', '"CARBON_TAX_50":    lambda: carbon_tax_scenario(50.0),'),
   ('capri_mod/supply/fertilisation.py', 'FertilisationBlock.tiered_surplus_target', 0.25, 1, '623', 'for lo, hi, cut in ((0.0, 50.0, 0.25), (50.0, 100.0, 0.50),'),
   ('capri_mod/supply/fertilisation.py', 'FertilisationBlock.tiered_surplus_target', 0.75, 1, '624', '(100.0, 150.0, 0.75), (150.0, 1e9, 1.0)):'),
