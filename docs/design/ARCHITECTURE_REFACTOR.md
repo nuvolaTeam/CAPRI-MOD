@@ -77,6 +77,8 @@ parameters unless needed):
 - the code tables (HARDCODED_TABLES.md H2-H4) become declared CSVs or CAPRI's own sets.
 The builders (tools/build) are out of this plan: they are run by the maintainers only, to reproduce the inputs.
 
+**Stage 3's gates (the project lead, 2 November 2026).** The first batch is gated together with the K79 branch's behaviour changes (the ammonia-fixed re-solve removed, the Western Balkans' food demand in WBA): the moves are checked exactly against the mini-EU run first, so the gate's differences from gate 13 are those two changes'. After stage 3 come the market's move to CAPRI's market regions (MARKET_REGIONS_INVENTORY.md) and then the 29 supply units outside the EU (SUPPLY_NONEU_DESIGN.md).
+
 **Stage 5's scope (agreed with the project lead, 31 October 2026).**
 - Scenarios as data: each scenario and the reference in capri_data/scenarios/<name>/, its settings (settings.toml)
   and its parameters and datasets in separate files (the trajectories moved there first, branch json-csv); the

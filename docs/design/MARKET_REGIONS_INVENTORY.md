@@ -419,4 +419,4 @@ The project lead agreed with the recommendations given with this inventory ("tak
 7. **Young-animal markets with two EU blocks**: fixed inside the solve in the stage that makes the two EU regions
    permanent, not registered as a departure (question 6).
 
-Still open: the 2017 market year on RM (question 5) and the DEP-40 row (question 10).
+2 November 2026, the project lead: the 2017 market year is rebuilt on RM too (question 5), from market_base_1717 (its extract with the two EU regions exists); the DEP-40 row is kept, with the note that CAPRI's 2030 data have one Armington elasticity per product in every RM, so it has no effect at this baseline (question 10). Order of the work (the project lead, 2 November 2026): refactor stage 3 (supply's parameter and state objects), then this move, then the 29 supply units outside the EU (SUPPLY_NONEU_DESIGN.md).
