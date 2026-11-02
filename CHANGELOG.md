@@ -32,6 +32,19 @@ and `docs/KNOWN_ISSUES.md`.
 
 ---
 
+## 2 November 2026 (evening): refactor stage 3, N6 second part; the sim_ini extract
+
+- The supply's remaining code tables as data (docs/design/N6_CODE_TABLES.md, second part): model_activity_classes.csv
+  gains the organic target group and yield gap, the pesticide yield loss, the animals' price source, the PMP share
+  term's arable set and the young-animal outputs; model_cattle_splits.csv; capri_pmp's code aliases from
+  model_activities.csv. build_code_lists checks them against CAPRI's MCACT, EPRD_TO_GRP, AACT_TO_XX, OYANI, MAACT and
+  SplitActs, and the N cascade's technology lists (kept in the equations, as CAPRI writes them) against MitiTechAmm.
+  Removed: ORGANIC_CROPS (read by no code) and _MS_ALIAS (it reached no region). Finding recorded: sheep and goat milk
+  (SHGM) earns the cow milk price in the model, CAPRI's AACT_TO_XX gives SGMT.
+- Mini-EU run identical to the previous one at 1e-12 (only the run metadata differ).
+- tools/build/build_simini_reference.py: CAPRI's calibrated 2030 market state from sim_ini as CSV (37 symbols), for the
+  market's move onto CAPRI's regions; the two sim_ini uploads are identical on all 37.
+
 ## 2 November 2026: refactor stage 3, N6 first part; nurseries on permanent-crop land (DEP-43)
 
 - The supply's land and crop classes as data: `capri_data/codes/model_activity_classes.csv` (fixed activities, the

@@ -68,9 +68,24 @@ CREATE TABLE model_activity_classes (
     cropdiv_group VARCHAR,                 -- the crop-diversification group of an annual crop
     fodder INTEGER NOT NULL CHECK (fodder IN (0, 1)),
     fixed INTEGER NOT NULL CHECK (fixed IN (0, 1)),
+    organic_target VARCHAR CHECK (organic_target IN ('arable_pp', 'permanent_pp', 'uaa_pp')),   -- empty: not an organic crop
+    organic_yield_gap INTEGER NOT NULL CHECK (organic_yield_gap IN (0, 1)),
+    pesticide INTEGER NOT NULL CHECK (pesticide IN (0, 1)),
+    price_source VARCHAR,                  -- the market whose price an animal earns (a model_commodities code)
+    share_term_arable INTEGER NOT NULL CHECK (share_term_arable IN (0, 1)),
+    young_outputs VARCHAR,                 -- the young animals in the activity's outputs (CAPRI OYANI), ';'-separated
     source VARCHAR NOT NULL
 );
-COMMENT ON TABLE model_activity_classes IS 'the model''s activity classes (refactor stage 3, N6): land type, crop-diversification group, fodder and fixed flags; a declared table, checked against CAPRI''s sets by build_code_lists (a row that differs names its departure)';
+COMMENT ON TABLE model_activity_classes IS 'the model''s activity classes (refactor stage 3, N6): land type, crop-diversification group, fodder and fixed flags, the organic target group and yield gap, the pesticide yield loss, the price source, the PMP share term''s arable set and the young-animal outputs; a declared table, checked against CAPRI''s sets by build_code_lists (a row that differs names its departure)';
+
+-- file: capri_data/codes/model_cattle_splits.csv
+CREATE TABLE model_cattle_splits (
+    split VARCHAR PRIMARY KEY,             -- the model's animal and split (BULL, HFRS:rep, CALV:male, ...)
+    gains VARCHAR NOT NULL REFERENCES capri_maact (code),
+    gives VARCHAR NOT NULL REFERENCES capri_maact (code),
+    source VARCHAR NOT NULL
+);
+COMMENT ON TABLE model_cattle_splits IS 'CAPRI''s cattle activities inside the model''s animals (refactor stage 3, N6): per split the CAPRI activity that gains the stalls and the one that gives them up; a declared table, checked against CAPRI''s MAACT and SplitActs by build_code_lists';
 
 -- file: capri_data/codes/model_land_types.csv
 CREATE TABLE model_land_types (
@@ -150,3 +165,7 @@ CREATE TABLE capri_ms_ru (
     PRIMARY KEY (ms, ru)
 );
 COMMENT ON TABLE capri_ms_ru IS 'CAPRI''s member states and their regional units (MAP_RR restricted to MS x RU)';
+
+-- rule: an animal's price source is a market commodity of the model
+SELECT code, price_source FROM model_activity_classes
+WHERE price_source IS NOT NULL AND price_source NOT IN (SELECT code FROM model_commodities);

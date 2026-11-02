@@ -52,3 +52,29 @@ correcting them follows as separate commits after the project lead's decision.
   crop-diversification group, kept until S1/S2 splits OFOD) and DEP-43 (NURS on arable land).
 - Step 2: NURS goes to permanent-crop land as in CAPRI (its own commit and run, the land data's builder with it).
   Done 2 November 2026: the mini-EU run's differences are in the register (DEP-43); test suite 279 passed, 2 skipped.
+
+## Second part (2 November 2026, evening)
+
+The project lead's decisions: the ammonia technology lists stay in the equations (CAPRI writes them inside HOUSN_,
+STORN_, RUNHOUSN_ and APPLN_, supply_model.gms l. 3200 ff.); capri_pmp.py is kept and its tables move like the others
+(its removal was asked on a wrong premise of mine: the model builds its elasticity table in every run,
+SupplyModule.__init__, and the calibrator imports its share term; whether those elasticities still reach the results
+under pmp_source capri2030 is to be measured, not assumed).
+
+| table | now | checked against |
+|---|---|---|
+| ORGANIC_CROP_TARGET, ORGANIC_YIELD_GAP_CROPS | model_activity_classes.csv organic_target, organic_yield_gap (rows cite load_organic_targets.gms, load_organic_yieldgap.gms) | none: the organic module's sets are not in the sim_ini sets |
+| ORGANIC_CROPS | removed: read by no code, the keys of ORGANIC_CROP_TARGET | — |
+| PESTICIDE_AFFECTED | classes pesticide | MCACT (the fodder crops and set-aside 0, the model's, K74) |
+| ACTIVITY_PRICE_SOURCE, capri_pmp.LIVESTOCK_PRODUCT | classes price_source (the CAPRI code through model_commodities.csv) | AACT_TO_XX: equal but SHGM (CAPRI SGMT, the model MILK: sheep and goat milk priced at the cow milk market, the model's) |
+| capri_pmp.EPRD_TO_GRP, ARABLE_ACTIVITIES | classes share_term_arable (EPRD_TO_GRP's crops plus SETA, TEXT, TOBA, the model's); a tuple in CROPS order instead of a set | EPRD_TO_GRP |
+| capri_pmp.LIVESTOCK_YOUNG | classes young_outputs | OYANI |
+| capri_pmp.ACTIVITY_ALIASES, COUNTRY_ELAS_ALIASES | model_activities.csv capri_codes (CAPRI code -> model code); a source with two CAPRI codes of one activity stops | — |
+| CATTLE_SPLIT_MEMBERS | model_cattle_splits.csv | MAACT; SplitActs for BULL/BULH, HEIL/HEIH (the other four splits are the model's, K65) |
+| HISTOSOL_CLASSES | kept in the code: the model's own constraint row names and data column suffixes | — |
+| _MS_ALIAS | removed: it reached no region (country_of gives EL; UK mapped to itself) | — |
+| n_cascade HOUS/STOR/RUNH/APPL_TECHS, n_leaching APPL | kept in the equations | MitiTechAmm (build_code_lists) |
+
+Still in the code: tools/build/build_cattle_intensity.py's SPLITS (a builder's richer copy of the cattle splits, with the
+members and young inputs per animal).
+

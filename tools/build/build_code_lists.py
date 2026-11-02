@@ -164,6 +164,50 @@ def main():
                             f"CAPRI {sorted(grps)}")
         if bool(int(r["fodder"])) != bool(set(cc) & fodcrp) and not declared:
             problems.append(f"model_activity_classes.csv {r['code']}: fodder {r['fodder']}, CAPRI FODCRP {sorted(set(cc) & fodcrp)}")
+    # the further classes (N6, second part): a value that differs from CAPRI's set must say "<column>...: the model's"
+    # in its source (or name its departure)
+    mcact, oyani = set(read_set(a.sets, "MCACT")), set(read_set(a.sets, "OYANI"))
+    eprd = {c for c, _ in pairs("EPRD_TO_GRP")}
+    xx_of = {}
+    for c, x in pairs("AACT_TO_XX"):
+        xx_of.setdefault(c, set()).add(x)
+    with open(OUT / "model_commodities.csv", newline="", encoding="utf-8") as fh:
+        comm_capri = {r["code"]: r["capri_code"] for r in csv.DictReader(fh)}
+    for r in classes:
+        cc, src = capri_of.get(r["code"], []), r["source"]
+        own = lambda col: f"{col} {r[col]}: the model's" in src or f"{col}: the model's" in src or "DEP-" in src
+        if r["code"] in D.CROPS:
+            if bool(int(r["pesticide"])) != bool(set(cc) & mcact) and not own("pesticide"):
+                problems.append(f"model_activity_classes.csv {r['code']}: pesticide {r['pesticide']}, CAPRI MCACT "
+                                f"{sorted(set(cc) & mcact)}")
+            if bool(int(r["share_term_arable"])) != bool(set(cc) & eprd) and not own("share_term_arable"):
+                problems.append(f"model_activity_classes.csv {r['code']}: share_term_arable {r['share_term_arable']}, "
+                                f"CAPRI EPRD_TO_GRP {sorted(set(cc) & eprd)}")
+        if r["price_source"]:
+            px = comm_capri.get(r["price_source"])
+            capri_x = set().union(*(xx_of.get(c, set()) for c in cc)) if cc else set()
+            if px is None:
+                problems.append(f"model_activity_classes.csv {r['code']}: price_source {r['price_source']} is not a commodity")
+            elif px not in capri_x and not own("price_source"):
+                problems.append(f"model_activity_classes.csv {r['code']}: price_source {r['price_source']} ({px}), CAPRI "
+                                f"AACT_TO_XX {sorted(capri_x)}")
+        problems += [f"model_activity_classes.csv {r['code']}: young output {y} is not in CAPRI's OYANI"
+                     for y in filter(None, r["young_outputs"].split(";")) if y not in oyani]
+    # the ammonia technologies the N cascade's equations name (HOUSN_, STORN_, RUNHOUSN_, APPLN_: CAPRI writes the
+    # lists in the equations, supply_model.gms l. 3200 ff., and so does the model): each one of CAPRI's MitiTechAmm
+    amm = set(read_set(a.sets, "MitiTechAmm"))
+    for path, name in (("capri_mod/supply/n_cascade.py", "HOUS_TECHS"), ("capri_mod/supply/n_cascade.py", "STOR_TECHS"),
+                       ("capri_mod/supply/n_cascade.py", "RUNH_TECHS"), ("capri_mod/supply/n_cascade.py", "APPL_TECHS"),
+                       ("capri_mod/supply/n_leaching.py", "APPL")):
+        problems += [f"{path} {name}: {t} is not in CAPRI's MitiTechAmm" for t in literal(path, name) if t not in amm]
+    split_acts = set(read_set(a.sets, "SplitActs"))
+    with open(OUT / "model_cattle_splits.csv", newline="", encoding="utf-8") as fh:
+        for r in csv.DictReader(fh):
+            for col in ("gains", "gives"):
+                if r[col] not in capri["MAACT"]:
+                    problems.append(f"model_cattle_splits.csv {r['split']}: {r[col]} is not in CAPRI's MAACT")
+            if not {r["gains"], r["gives"]} <= split_acts and "the model's" not in r["source"]:
+                problems.append(f"model_cattle_splits.csv {r['split']}: not in CAPRI's SplitActs and not declared the model's")
     lt_mrk = set(read_set(a.sets, "landTypesMrk"))
     with open(OUT / "model_land_types.csv", newline="", encoding="utf-8") as fh:
         for r in csv.DictReader(fh):

@@ -48,6 +48,7 @@ SOURCE_DEFAULT = "CAPRI"
 DECLARED = {"capri_data/shared/capri_member_state_codes.csv", "capri_data/shared/model_parameters.csv",
             "capri_data/codes/model_units.csv", "capri_data/codes/model_trade_regions.csv",
             "capri_data/codes/model_activity_classes.csv", "capri_data/codes/model_land_types.csv",
+            "capri_data/codes/model_cattle_splits.csv",
             "capri_data/codes/model_activities.csv"}
 #: the origin of the external files the builders read: every one is CAPRI's (its exports, dumps, dat files and
 #: code), checked 29 October 2026 against the builders' docstrings
