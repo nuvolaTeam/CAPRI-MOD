@@ -105,6 +105,7 @@ CAPTRD_MOD.md §12.4).
 | DEP-39 | Hard floors (max/min) in the market code: market supply max(q0 + dq, 0), feed and processing at least 0, use clipped at 0, import price at least 1e-9, price ratios at least 1e-6. | lower bounds and, after widen_bounds, the fudge equations | market/supply.py, demand.py, trade_ad.py (MARKET_IPOPT_DESIGN.md, non-smooth terms) | in force; review 1 Nov 2026 | G_REVIEW Q3, Q6.7 |
 | DEP-40 | One Armington elasticity per commodity (both nests). No effect at the 2030 baseline: CAPRI's sim_ini has the same p_rhoArm1 and p_rhoArm2 in all 45 market regions, and armington_rho.csv matches them (MARKET_REGIONS_INVENTORY.md); kept so that a scenario with regional values would show. | p_rhoArm1, p_rhoArm2 per market region and commodity | market/bilateral.py (s1, s2) | in force; kept 2 Nov 2026 (the project lead) | G_REVIEW Q6.7 |
 | DEP-41 | The EU's bilateral quotas against the policy block MER (ARG + BRA + URUPAR) left out: beef 61.1, sheep and goat meat 33.5, poultry 519.0, sugar 334.1 kt (2030); the builder skips MER as a reporting aggregate. Not binding at the 2030 base (imports 45%, 11%, 5%, 61% of the quotas). | p_trqBilat('EU','MER',...) on RMTP, one quota over MER's members (trqSigmoidFunc_) | tools/build/build_bilateral_market.py build_trq (AGGREGATES holds MER) | in force; registered 1 Nov 2026 (the project lead's decision): removed by the move to CAPRI's market regions, where quotas sit on RMTP | MARKET_REGIONS_INVENTORY.md |
+| DEP-42 | Other fodder (OFOD) is one crop-diversification group. | cropDivGrps_mCact: OFAR (other fodder on arable land) and ROOF (fodder root crops) are groups of their own in cropDivGreening_ | the model's OFOD is OFAR + ROOF, one activity and one group (capri_data/codes/model_activity_classes.csv) | kept until S1/S2 splits OFOD (the project lead's decision, 2 November 2026) | where both are grown the model's largest group can be larger than CAPRI's; not measured |
 
 Two more differences apply only with non-default settings:
 - With `market.eu_blocks = true`, the young-animal markets are updated between market solves instead of inside them.
@@ -140,6 +141,14 @@ ones known to be stale.
 
 The settings switched to CAPRI's form are described in DEPARTURES_FROM_CAPRI.md, "Switched to CAPRI's setting". Also
 switched to CAPRI's form:
+- DEP-43, nurseries (NURS) on permanent-crop land (FRUN) as CAPRI's landTypes_to_pact, in the supply model's land
+  balances and the base land data (land_availability.csv: 181.2 kha from arable to permanent land over 213 regions);
+  one list of the crops on permanent land for the supply model, the environmental accounts and the base builder
+  (capri_data/codes/model_activity_classes.csv; 2 November 2026, the project lead's decision); mini-EU run against N6's
+  first part (both converged in 6 iterations, the same two relaxed mineral caps): EU arable crops +0.1 to +0.3% in the
+  baseline and the scenario (potatoes most, +0.25% and +0.30%), arable crop area +14.8 kha in the baseline, nurseries'
+  output +0.61% in the scenario, prices up to +0.49% (barley), the largest regional change NL22's set-aside in the
+  baseline (0.488 to 0.456 kha); the mechanism of the arable crops' gain not traced;
 - `market.noneu_supply_nq` and `market.feed_bulk_in_market` (29 October 2026);
 - `market.hessian_scenario_iter` 8 → 0 (25–26 October; K75).
 

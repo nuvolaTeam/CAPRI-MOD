@@ -3818,6 +3818,56 @@ def test_feed_ration_carries_capri_2030_feed_slopes():
         assert list(s17[key].slope) != list(s30[key].slope)
 
 
+def test_recipe_pmp_terms_reproduce_capris_own():
+    """K61, 22 October 2026: capri-mod's PMP terms by CAPRI's recipe (tools/build/build_pmp_recipe.py, with the land-nest
+    adjustment and 14 years of inflation at 2017) against CAPRI's own terms: the 2017 group terms within 1% of CAPRI's
+    CAPREG terms in (nearly) every pair, the activities' first-technology terms within 5% in most pairs at 2017 and,
+    collapsed per activity, at 2030."""
+    import sys
+    sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "check")]
+    import pmp_recipe_check as C
+    src = DATA_DIR / "sources"
+    cp = pd.read_csv(src / "capreg" / "pmp_quad_pact.csv")
+    rp = pd.read_csv(src / "baseline_pmp" / "recipe_2017_quad_pact.csv")
+    rp["model_region"] = rp.region
+    k = cp.merge(rp, on=["model_region", "group1", "group2"])
+    r = k.value_y / k.value_x
+    assert len(k) > 1000 and ((r - 1).abs() < 0.01).mean() > 0.99
+    cap = pd.read_csv(src / "capreg" / "pmp_quad_techn.csv")
+    rec = pd.read_csv(src / "baseline_pmp" / "recipe_2017_quad_techn.csv")
+    rec = rec[(rec.tech1 == rec.tech2) & rec.tech1.isin(["T1", "T"])].drop_duplicates(["region", "activity"]).copy()
+    rec["model_region"] = rec.region
+    j = cap.merge(rec, on=["model_region", "activity"], suffixes=("_c", "_r"))
+    assert ((j.value_r / j.value_c - 1).abs() < 0.05).mean() > 0.88
+    ex = C.collapsed(pd.read_csv(src / "baseline_pmp" / "pmp_quad_techn_2030.csv"))
+    rc = C.collapsed(pd.read_csv(src / "baseline_pmp" / "recipe_2030_quad_techn.csv"))
+    jj = pd.concat({"c": ex, "r": rc}, axis=1).dropna()
+    assert len(jj) > 10000 and ((jj.r / jj.c - 1).abs() < 0.05).mean() > 0.79
+
+
+def test_recipe_land_nest_elasticities_from_the_bordered_hessian():
+    """The land-nest adjustment's land-type elasticities (tools/build/build_pmp_recipe.land_elasticities): for a land owner
+    with a fixed total area and a diagonal land matrix q_i x 1000, CAPRI's bordered Hessian gives
+    dx_i/dr_i = (1/h_i)(1 - (1/h_i) / sum_j 1/h_j), h_i = 1000 q_i; elasticity = that x rent_i / x_i."""
+    import sys
+    sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "check")]
+    import build_pmp_recipe as R
+    q = {("ARAC", "ARAC"): 0.02, ("GRAS", "GRAS"): 0.01, ("FORE", "FORE"): 0.001}
+    y = {("ARAC", "LEVL"): 100.0, ("GRAS", "LEVL"): 50.0, ("FORE", "LEVL"): 200.0,
+         ("ARAC", "D_AREA"): 400.0, ("GRAS", "D_AREA"): -150.0, ("FORE", "D_AREA"): 0.0}
+    e = R.land_elasticities(q, y)
+    inv = {t: 1.0 / (1000.0 * q[(t, t)]) for t in ("ARAC", "GRAS", "FORE")}
+    tot = sum(inv.values())
+    for t, rent, lev in (("ARAC", 400.0, 100.0), ("GRAS", 150.0, 50.0)):
+        expect = inv[t] * (1.0 - inv[t] / tot) * rent / lev
+        assert abs(e[t] - expect) < 1e-12 * max(1.0, expect)
+    # the contribution of an annual crop: its level over ARAB + ANNC + ARAC, times ARAC's elasticity
+    yd = dict(y)
+    yd.update({("SWHE", "LEVL"): 30.0, ("ARAB", "LEVL"): 110.0, ("ANNC", "LEVL"): 95.0})
+    c = R.land_nest_contrib("SWHE", yd, {"ARAC": 0.5})
+    assert abs(c - 30.0 / (110.0 + 95.0 + 100.0) * 0.5) < 1e-12
+
+
 def test_intensity_splits_take_the_2030_curvature_with_capris_2030_terms(data):
     """K61: at the 2030 market year with CAPRI's 2030 terms (pmp_source capri2030), the dairy, cattle and grassland
     splits take CAPRI's 2030 p_pmpQuadTechn of their two variants (q_<x>_capri2030); at 2017 the base year's."""

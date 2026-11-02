@@ -262,13 +262,25 @@ def in_run(region: str, countries=None) -> bool:
 # LAND USE TYPES
 # ---------------------------------------------------------------------------
 
-LAND_TYPES = [
-    "ARABLE",       # Arable land (UAA)
-    "PERMANENT",    # Permanent crops (orchards, vineyards, olives)
-    "GRASSLAND",    # Permanent grassland
-    "FALLOW",       # Fallow land (includes set-aside)
-    "OTHER_AG",     # Other agricultural land
-]
+def _load_activity_classes():
+    """The model's activity classes (capri_data/codes/model_activity_classes.csv, declared; refactor stage 3, N6): per
+    activity its land type, crop-diversification group, fodder and fixed flags, a source per row; checked against
+    CAPRI's sets by tools/build/build_code_lists.py (a row that differs names its departure). And the land types of the
+    land market (model_land_types.csv, CAPRI's landTypesMrk). The list LAND_TYPES that stood here (ARABLE, PERMANENT,
+    ...) was read by no code and is gone."""
+    import csv
+    from pathlib import Path
+    d = Path(__file__).resolve().parents[2] / "capri_data" / "codes"
+    with open(d / "model_activity_classes.csv", newline="") as f:
+        classes = {r["code"]: r for r in csv.DictReader(f)}
+    with open(d / "model_land_types.csv", newline="") as f:
+        land = [r["code"] for r in csv.DictReader(f) if r["in_land_market"] == "1"]
+    return classes, land
+
+
+ACTIVITY_CLASSES, LAND_MARKET_TYPES = _load_activity_classes()
+#: crops on permanent-crop land (FRUN), arable (ARAC) and grassland (GRAS), in the order of CROPS
+CROPS_ON_LAND = {lt: tuple(a for a in CROPS if ACTIVITY_CLASSES[a]["land_type"] == lt) for lt in ("ARAC", "GRAS", "FRUN")}
 
 # ---------------------------------------------------------------------------
 # NUTRIENT / ENVIRONMENTAL SETS

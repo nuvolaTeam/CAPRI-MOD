@@ -76,6 +76,10 @@ def main():
     capri = {s: read_set(a.sets, s) for s in CAPRI_SETS}
     problems = []
 
+    def pairs(name):
+        with open(Path(a.sets) / f"{name}.csv", newline="", encoding="utf-8") as fh:
+            return [(r["d0"], r["d1"]) for r in csv.DictReader(fh)]
+
     # activities: the declared code list (codes/model_activities.csv, since 30 October 2026 the master, read by the
     # builders through tools/lib/_model_codes.py) checked against the model's activities and CAPRI's PACT
     with open(OUT / "model_activities.csv", newline="", encoding="utf-8") as fh:
@@ -136,17 +140,50 @@ def main():
     if miss:
         problems.append(f"regional units not in CAPRI's RALL: {miss}")
 
+    # the model's activity classes (codes/model_activity_classes.csv, declared; N6) against CAPRI's sets, through the
+    # activities' CAPRI codes: a row that differs must say so (its source names the departure, DEP-...)
+    lt_of = {}
+    for lt, pa in pairs("landTypes_to_pact"):
+        lt_of.setdefault(pa, set()).add(lt)
+    grp_of = {}
+    for g, ca in pairs("cropDivGrps_mCact"):
+        grp_of.setdefault(ca, set()).add(g)
+    fodcrp = set(read_set(a.sets, "FODCRP"))
+    capri_of = {r["code"]: r["capri_codes"].split(";") for r in acts}
+    with open(OUT / "model_activity_classes.csv", newline="", encoding="utf-8") as fh:
+        classes = list(csv.DictReader(fh))
+    for r in classes:
+        cc = capri_of.get(r["code"], [])
+        declared = "DEP-" in r["source"]
+        lts = set().union(*(lt_of.get(c, set()) for c in cc)) if cc else set()
+        if r["land_type"] and lts and r["land_type"] not in lts and not declared:
+            problems.append(f"model_activity_classes.csv {r['code']}: land type {r['land_type']}, CAPRI {sorted(lts)}")
+        grps = set().union(*(grp_of.get(c, set()) for c in cc)) if cc else set()
+        if (r["cropdiv_group"] or grps) and {r["cropdiv_group"]} != grps and not declared:
+            problems.append(f"model_activity_classes.csv {r['code']}: crop-diversification group {r['cropdiv_group']!r}, "
+                            f"CAPRI {sorted(grps)}")
+        if bool(int(r["fodder"])) != bool(set(cc) & fodcrp) and not declared:
+            problems.append(f"model_activity_classes.csv {r['code']}: fodder {r['fodder']}, CAPRI FODCRP {sorted(set(cc) & fodcrp)}")
+    lt_mrk = set(read_set(a.sets, "landTypesMrk"))
+    with open(OUT / "model_land_types.csv", newline="", encoding="utf-8") as fh:
+        for r in csv.DictReader(fh):
+            if r["code"] not in lt_mrk:
+                problems.append(f"model_land_types.csv: {r['code']} is not in CAPRI's landTypesMrk")
+
     if problems:
         raise SystemExit("code lists not written:\n  " + "\n  ".join(problems))
     for s, d in capri.items():
         write(OUT / "capri" / f"{s}.csv", ("code", "text"), sorted(d.items()))
     # two-dimensional sets: FEED_TO_O (feed bulks and their products) and MAP_RR restricted to each member state's
     # regional units (MS x RU), as envind/digestibility.gms and line_nitr.gms use them (3-NOP, K93)
-    def pairs(name):
-        with open(Path(a.sets) / f"{name}.csv", newline="", encoding="utf-8") as fh:
-            return [(r["d0"], r["d1"]) for r in csv.DictReader(fh)]
     ms_, ru_ = set(read_set(a.sets, "MS")), set(read_set(a.sets, "RU"))
     write(OUT / "capri" / "FEED_TO_O.csv", ("feed", "row"), sorted(pairs("FEED_TO_O")))
+    # the sets the model's activity classes are checked against (refactor stage 3, N6): land types of the land market
+    # and of each activity, crop-diversification groups, fodder crops
+    write(OUT / "capri" / "landTypesMrk.csv", ("code", "text"), sorted(read_set(a.sets, "landTypesMrk").items()))
+    write(OUT / "capri" / "FODCRP.csv", ("code", "text"), sorted(read_set(a.sets, "FODCRP").items()))
+    write(OUT / "capri" / "landTypes_to_pact.csv", ("land_type", "pact"), sorted(pairs("landTypes_to_pact")))
+    write(OUT / "capri" / "cropDivGrps_mCact.csv", ("group", "mcact"), sorted(pairs("cropDivGrps_mCact")))
     write(OUT / "capri" / "MS_RU.csv", ("ms", "ru"), sorted((m, r) for m, r in pairs("Map_RR") if m in ms_ and r in ru_))
     write(OUT / "model_commodities.csv", ("code", "capri_code", "mapping_source"), comms)
     differ = [(c, cc) for c, cc, _ in comms if c != cc]

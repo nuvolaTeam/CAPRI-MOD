@@ -25,3 +25,10 @@ CROP_MAP = _map("crop", "capri_codes")
 ANIMALS = _map("animal", "capri_codes")
 CROP_MAP_CAPMOD = _map("crop", "capmod_codes")
 ANIMALS_CAPMOD = _map("animal", "capmod_codes")
+
+def permanent_crops() -> tuple:
+    """The model's crops on permanent-crop land (FRUN), as the supply model's land balances (model_activity_classes.csv,
+    checked against CAPRI's landTypes_to_pact by build_code_lists; refactor stage 3, N6). Read when asked, so only the
+    builders that use it read the file."""
+    with open(ROOT / "capri_data" / "codes" / "model_activity_classes.csv", newline="") as f:
+        return tuple(r["code"] for r in csv.DictReader(f) if r["land_type"] == "FRUN")

@@ -25,8 +25,7 @@ ALLOWED = {
 
 def _files():
     out = subprocess.run(["git", "ls-files"], cwd=ROOT, capture_output=True, text=True, check=True).stdout.split()
-    # the builders (tools/build) are out of the checks (the project lead, 2 November 2026)
-    return [f for f in out if f.endswith(SUFFIXES) and (ROOT / f).is_file() and not f.startswith("tools/build/")]
+    return [f for f in out if f.endswith(SUFFIXES) and (ROOT / f).is_file()]
 
 
 def test_no_file_names_a_machine_folder():

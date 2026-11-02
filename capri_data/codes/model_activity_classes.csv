@@ -1,0 +1,47 @@
+code,land_type,cropdiv_group,fodder,fixed,source
+SWHE,ARAC,SWHE,0,0,land_type: CAPRI's set landTypes_to_pact (ARAC); cropdiv_group: CAPRI's set cropDivGrps_mCact (SWHE)
+DWHE,ARAC,DWHE,0,0,land_type: CAPRI's set landTypes_to_pact (ARAC); cropdiv_group: CAPRI's set cropDivGrps_mCact (DWHE)
+RYEM,ARAC,RYEM,0,0,land_type: CAPRI's set landTypes_to_pact (ARAC); cropdiv_group: CAPRI's set cropDivGrps_mCact (RYEM)
+BARL,ARAC,BARL,0,0,land_type: CAPRI's set landTypes_to_pact (ARAC); cropdiv_group: CAPRI's set cropDivGrps_mCact (BARL)
+OATS,ARAC,OATS,0,0,land_type: CAPRI's set landTypes_to_pact (ARAC); cropdiv_group: CAPRI's set cropDivGrps_mCact (OATS)
+CORN,ARAC,MAIS,0,0,land_type: CAPRI's set landTypes_to_pact (ARAC); cropdiv_group: CAPRI's set cropDivGrps_mCact (MAIS)
+OCER,ARAC,OCER,0,0,land_type: CAPRI's set landTypes_to_pact (ARAC); cropdiv_group: CAPRI's set cropDivGrps_mCact (OCER)
+PARI,ARAC,PARI,0,0,land_type: CAPRI's set landTypes_to_pact (ARAC); cropdiv_group: CAPRI's set cropDivGrps_mCact (PARI)
+OCRO,ARAC,,0,1,"land_type: CAPRI's set landTypes_to_pact (ARAC); cropdiv_group: none (not an annual crop of CAPRI's set annualCrops); fixed: the model's (activities held at their base level, KNOWN_ISSUES K69)"
+OIND,ARAC,OIND,0,1,"land_type: CAPRI's set landTypes_to_pact (ARAC); cropdiv_group: CAPRI's set cropDivGrps_mCact (OIND); fixed: the model's (activities held at their base level, KNOWN_ISSUES K69)"
+NURS,FRUN,,0,1,"land_type: CAPRI's set landTypes_to_pact (FRUN; DEP-43 fixed, 2 November 2026); cropdiv_group: none (not an annual crop of CAPRI's set annualCrops); fixed: the model's (activities held at their base level, KNOWN_ISSUES K69)"
+FLOW,ARAC,FLOW,0,1,"land_type: CAPRI's set landTypes_to_pact (ARAC); cropdiv_group: CAPRI's set cropDivGrps_mCact (FLOW); fixed: the model's (activities held at their base level, KNOWN_ISSUES K69)"
+POTA,ARAC,POTA,0,0,land_type: CAPRI's set landTypes_to_pact (ARAC); cropdiv_group: CAPRI's set cropDivGrps_mCact (POTA)
+SUGB,ARAC,SUGB,0,0,land_type: CAPRI's set landTypes_to_pact (ARAC); cropdiv_group: CAPRI's set cropDivGrps_mCact (SUGB)
+SUNF,ARAC,SUNF,0,0,land_type: CAPRI's set landTypes_to_pact (ARAC); cropdiv_group: CAPRI's set cropDivGrps_mCact (SUNF)
+RAPE,ARAC,RAPE,0,0,land_type: CAPRI's set landTypes_to_pact (ARAC); cropdiv_group: CAPRI's set cropDivGrps_mCact (RAPE)
+SOYA,ARAC,SOYA,0,0,land_type: CAPRI's set landTypes_to_pact (ARAC); cropdiv_group: CAPRI's set cropDivGrps_mCact (SOYA)
+OOIL,ARAC,OOIL,0,1,"land_type: CAPRI's set landTypes_to_pact (ARAC); cropdiv_group: CAPRI's set cropDivGrps_mCact (OOIL); fixed: the model's (activities held at their base level, KNOWN_ISSUES K69)"
+PULS,ARAC,PULS,0,0,land_type: CAPRI's set landTypes_to_pact (ARAC); cropdiv_group: CAPRI's set cropDivGrps_mCact (PULS)
+TOMA,ARAC,TOMA,0,0,land_type: CAPRI's set landTypes_to_pact (ARAC); cropdiv_group: CAPRI's set cropDivGrps_mCact (TOMA)
+OVEG,ARAC,OVEG,0,0,land_type: CAPRI's set landTypes_to_pact (ARAC); cropdiv_group: CAPRI's set cropDivGrps_mCact (OVEG)
+APPL,FRUN,,0,0,land_type: CAPRI's set landTypes_to_pact (FRUN); cropdiv_group: none (not an annual crop of CAPRI's set annualCrops)
+OFRU,FRUN,,0,0,land_type: CAPRI's set landTypes_to_pact (FRUN); cropdiv_group: none (not an annual crop of CAPRI's set annualCrops)
+CITR,FRUN,,0,0,land_type: CAPRI's set landTypes_to_pact (FRUN); cropdiv_group: none (not an annual crop of CAPRI's set annualCrops)
+TAGR,FRUN,,0,0,land_type: CAPRI's set landTypes_to_pact (FRUN); cropdiv_group: none (not an annual crop of CAPRI's set annualCrops)
+WINE,FRUN,,0,0,land_type: CAPRI's set landTypes_to_pact (FRUN); cropdiv_group: none (not an annual crop of CAPRI's set annualCrops)
+OLIV,FRUN,,0,0,land_type: CAPRI's set landTypes_to_pact (FRUN); cropdiv_group: none (not an annual crop of CAPRI's set annualCrops)
+TABO,FRUN,,0,0,land_type: CAPRI's set landTypes_to_pact (FRUN); cropdiv_group: none (not an annual crop of CAPRI's set annualCrops)
+TOBA,ARAC,TOBA,0,0,land_type: CAPRI's set landTypes_to_pact (ARAC); cropdiv_group: CAPRI's set cropDivGrps_mCact (TOBA)
+TEXT,ARAC,TEXT,0,0,land_type: CAPRI's set landTypes_to_pact (ARAC); cropdiv_group: CAPRI's set cropDivGrps_mCact (TEXT)
+GRAS,GRAS,,1,0,land_type: CAPRI's set landTypes_to_pact (GRAS); cropdiv_group: none (not an annual crop of CAPRI's set annualCrops); fodder: CAPRI's set FODCRP
+MAIF,ARAC,MAIS,1,0,land_type: CAPRI's set landTypes_to_pact (ARAC); cropdiv_group: CAPRI's set cropDivGrps_mCact (MAIS); fodder: CAPRI's set FODCRP
+OFOD,ARAC,OFOD,1,0,"land_type: CAPRI's set landTypes_to_pact (ARAC); cropdiv_group OFOD: the model's (CAPRI: OFAR and ROOF two groups, set cropDivGrps_mCact; DEP-42 until S1/S2); fodder: CAPRI's set FODCRP"
+SETA,ARAC,OSET,0,0,land_type: CAPRI's set landTypes_to_pact (ARAC); cropdiv_group: CAPRI's set cropDivGrps_mCact (OSET)
+DCOW,,,0,0,animal
+BCOW,,,0,0,animal
+BULL,,,0,0,animal
+HFRS,,,0,0,animal
+CALV,,,0,0,animal
+SHGM,,,0,0,animal
+SHGF,,,0,0,animal
+PIGS,,,0,0,animal
+PIGF,,,0,0,animal
+LAYS,,,0,0,animal
+BROI,,,0,0,animal
+OANI,,,0,1,"fixed: the model's (activities held at their base level, KNOWN_ISSUES K69)"
