@@ -27,13 +27,13 @@ class NLPBlock:
         for nut_, pk_ in (getattr(self, "_pool_cols_pk", None) or {}).items():
             if len(pk_) == 2:
                 extra[int(pk_[0])] = f"manure_export_{nut_}"; extra[int(pk_[1])] = f"manure_import_{nut_}"
-        if getattr(self, "_grass_col", None) is not None:
-            extra[int(self._grass_col)] = "grass_z"
-        if getattr(self, "_dairy_col", None) is not None:
-            extra[int(self._dairy_col)] = "dairy_z"
-        for a_, j_ in (getattr(self, "_cattle_cols", None) or {}).items():
+        if getattr(self.ev, "grass_col", None) is not None:
+            extra[int(self.ev.grass_col)] = "grass_z"
+        if getattr(self.ev, "dairy_col", None) is not None:
+            extra[int(self.ev.dairy_col)] = "dairy_z"
+        for a_, j_ in (getattr(self.ev, "cattle_cols", None) or {}).items():
             extra[int(j_)] = f"cattle_z_{a_}"
-        for (a_, o_), j_ in (getattr(self, "_genet_cols", None) or {}).items():
+        for (a_, o_), j_ in (getattr(self.ev, "genet_cols", None) or {}).items():
             extra[int(j_)] = f"genet_z_{a_}_{o_}"
         for c_, j_ in (getattr(self, "_hist_cols", None) or {}).items():
             extra[int(j_)] = f"hist_{c_}"
@@ -121,7 +121,7 @@ class NLPBlock:
         n = len(self.acts)
         xb = np.maximum(np.asarray(x_start, float), 0.0).copy()
         xb[:n] = np.maximum(self._base_levels().reindex(list(self.acts)).fillna(0.0).values, 0.0)
-        _rx = getattr(self, "_dairy_req_extra", None)
+        _rx = getattr(self.ev, "dairy_req_extra", None)
         _rx = _rx if (_rx and max(c_ for a_ in _rx for c_, _ in _rx[a_]) < Q.shape[0]) else None
         c = np.asarray(c, float).copy()
         npk = self._npk_spec(Q.shape[0], x_start, A, labels)

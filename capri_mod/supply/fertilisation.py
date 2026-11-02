@@ -492,7 +492,7 @@ class FertilisationBlock:
                 mp[pc[0]] = sub                 # export: the row has -(1 - sub): -1 organic, +sub mineral
             if pc[1] < A.shape[1]:
                 mp[pc[1]] = -sub
-        gc = getattr(self, "_grass_col", None)
+        gc = getattr(self.ev, "grass_col", None)
         if gc is not None and gc < A.shape[1]:
             d = env_.grass_intensity_delta(rid) or {}
             mp[gc] = float(d.get("n_mineral_input", 0.0))

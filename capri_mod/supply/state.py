@@ -40,6 +40,19 @@ class RegionalParameters(_Slots):
         "nlp_base_alloc",     # the fertiliser allocation at the calibration point (nlp_cal's base_alloc)
         "nlp_cal_store",      # the calibrations by settings key, so a switch of settings and back keeps both
         "npk_dual_bound",     # the fertiliser distribution's dual bound where it was widened for the region
+        # livestock (S4): the split columns' linear terms, calibrated from the duals of the first solves, and the
+        # calibrations still pending
+        "cattle_cz",          # the cattle splits' terms by split
+        "cattle_pending",     # the cattle splits whose terms wait for the duals
+        "dairy_cz",           # the low-yield dairy split's term
+        "dairy_pending",      # the dairy split's column and requirement waiting for the duals
+        "genet_cz",           # the genetics options' terms, for the current genetics settings
+        "genet_cz_store",     # genet_cz by genetics settings key
+        "genet_key",          # the genetics settings key genet_cz belongs to
+        "genet_pending",      # the genetics options whose terms wait for the duals
+        "genet_rows_memo",    # the genetics options' rows (a memo)
+        "grass_cz",           # the grass split's term
+        "grass_pending_col",  # the grass split's column waiting for the duals
     )
 
 
@@ -66,6 +79,12 @@ class RegionalEvalState(_Slots):
         "nlp_fb_last",        # how the last fallback ended (False, or "n_target")
         "nlp_n_target_cause", # the tiered N target was the cause of a failure
         "nlp_try_n_relax",    # set around a call: the N-target relaxation may be tried
+        # livestock (S4): the split columns of this solve's problem
+        "cattle_cols",        # the cattle splits' columns
+        "dairy_col",          # the low-yield dairy split's column
+        "dairy_req_extra",    # the splits' extra requirement entries by animal
+        "genet_cols",         # the genetics options' columns
+        "grass_col",          # the grass split's column
     )
 
 
@@ -94,6 +113,10 @@ class RegionalResults(_Slots):
         "nlp_relaxed",        # the mineral-cap exemption applied
         "nlp_status",         # IPOPT's status
         "yani_dnet",          # the solution's response to the young-animal prices (K65)
+        # livestock (S4): the split columns' levels in the last solution
+        "last_cattle_z",
+        "last_dairy_z",
+        "last_genet_z",
     )
 
 
@@ -169,6 +192,26 @@ MOVED_REGIONAL: dict = {
     "_nlp_relaxed": "res.nlp_relaxed",
     "_nlp_status": "res.nlp_status",
     "_yani_dnet": "res.yani_dnet",
+    # S4: livestock and feed
+    "_cattle_cz": "par.cattle_cz",
+    "_cattle_pending": "par.cattle_pending",
+    "_dairy_cz": "par.dairy_cz",
+    "_dairy_pending": "par.dairy_pending",
+    "_genet_cz": "par.genet_cz",
+    "_genet_cz_store": "par.genet_cz_store",
+    "_genet_key": "par.genet_key",
+    "_genet_pending": "par.genet_pending",
+    "_genet_rows_memo": "par.genet_rows_memo",
+    "_grass_cz": "par.grass_cz",
+    "_grass_pending_col": "par.grass_pending_col",
+    "_cattle_cols": "ev.cattle_cols",
+    "_dairy_col": "ev.dairy_col",
+    "_dairy_req_extra": "ev.dairy_req_extra",
+    "_genet_cols": "ev.genet_cols",
+    "_grass_col": "ev.grass_col",
+    "_last_cattle_z": "res.last_cattle_z",
+    "_last_dairy_z": "res.last_dairy_z",
+    "_last_genet_z": "res.last_genet_z",
 }
 #: the supply module's former attribute names
 MOVED_MODULE: dict = {

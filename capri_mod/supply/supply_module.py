@@ -517,8 +517,8 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
     #: before and after a solve (27 October 2026); bookkeeping (res.n_solves) and the shared environmental
     #: module are not state
     SOLVE_STATE = ("_amm_cost", "_amm_last", "_animal_n_kept", "_animal_n_relief", "_animal_nh3_saved",
-                   "res.cover_solved", "res.fd_model", "_ghg_nr_obj", "_land_solution", "_last_aug", "_last_cattle_z",
-                   "_last_dairy_z", "ev.last_duals", "res.last_feed_dm", "res.last_feed_t", "_last_genet_z",
+                   "res.cover_solved", "res.fd_model", "_ghg_nr_obj", "_land_solution", "_last_aug", "res.last_cattle_z",
+                   "res.last_dairy_z", "ev.last_duals", "res.last_feed_dm", "res.last_feed_t", "res.last_genet_z",
                    "_last_grass_z", "_last_hist_fallow", "res.last_npk", "ev.last_req_duals", "_manure_ni_nh3",
                    "_manure_ni_relief", "_manure_tech_shares", "_price_shock_now", "sv.wc_solved", "feed_rations")
     #: the regional NLP's fields (warm starts, calibration, fallbacks and their diagnostics): what the market supply
@@ -1444,7 +1444,7 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
         self._organic_conv = {}
         self._land_solution = None              # set by this solve when the land market is used
         self._n_target_relaxed = False
-        self._last_cattle_z = {}
+        self.res.last_cattle_z = {}
         self.ev.nlp_failed = None
         self.res.nlp_status = None
         self.res.nlp_nonoptimal = None             # IPOPT's last point kept on the last attempt (as CAPRI), THIS solve only
@@ -1731,10 +1731,10 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
                                           for nut_, c_ in (getattr(self, "_pool_cols_pk", None) or {}).items()
                                           if len(c_) == 2 and max(c_) < len(y)}
             self._last_aug = (Qa, ca, Aa, ba, y)
-            _gc = getattr(self, "_grass_col", None)
+            _gc = getattr(self.ev, "grass_col", None)
             self._last_grass_z = float(y[_gc]) if _gc is not None and _gc < len(y) else 0.0
             self._split_record(y)
-            if getattr(self, "_grass_pending_col", None) is not None:
+            if getattr(self.par, "grass_pending_col", None) is not None:
                 self._grass_calibrate_from_duals(getattr(self.ev, "last_duals", None))
             if self._split_pending():
                 self._dairy_calibrate_from_duals(getattr(self.ev, "last_duals", None))
@@ -1750,9 +1750,9 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
         else:
             self.ev.last_duals = None
             self._last_grass_z = 0.0
-            self._last_dairy_z = 0.0
-            self._last_cattle_z = {}
-            self._last_genet_z = {}
+            self.res.last_dairy_z = 0.0
+            self.res.last_cattle_z = {}
+            self.res.last_genet_z = {}
             # CAPRI's grassland and dairy splits on the plain path too (regions without
             # land-market data: Ireland, Berlin, Hamburg, ...)
             _n0 = len(x0)
@@ -1766,19 +1766,19 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
             self._aug_labels = _lab
             self._last_hist_fallow = {}
             _yc = None
-            _cols = (getattr(self, "_grass_col", None) is not None or getattr(self, "_dairy_col", None) is not None
-                     or getattr(self, "_cattle_cols", None) or getattr(self, "_hist_cols", None))
+            _cols = (getattr(self.ev, "grass_col", None) is not None or getattr(self.ev, "dairy_col", None) is not None
+                     or getattr(self.ev, "cattle_cols", None) or getattr(self, "_hist_cols", None))
             if _cols:
                 _yg = self._nlp_solve(Qg, cg, Ag, bg, sg)
                 if _yg is None:
                     # as on the land-market path: the floor kept, the solver's last point (K84)
                     self._note_floor_failure()
                     _yg = self._nlp_last_point(Qg, cg, Ag, bg, sg)
-                if getattr(self, "_grass_col", None) is not None:
-                    self._last_grass_z = float(_yg[self._grass_col])
+                if getattr(self.ev, "grass_col", None) is not None:
+                    self._last_grass_z = float(_yg[self.ev.grass_col])
                 self._split_record(_yg)
                 _yc = _yg[:_n0]
-                if getattr(self, "_grass_pending_col", None) is not None:
+                if getattr(self.par, "grass_pending_col", None) is not None:
                     self._grass_calibrate_from_duals(getattr(self.ev, "last_duals", None))
                 if self._split_pending():
                     self._dairy_calibrate_from_duals(getattr(self.ev, "last_duals", None))
@@ -1786,12 +1786,12 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
                 if getattr(self, "_hist_pending", None):
                     self._histosol_calibrate_from_duals(getattr(self.ev, "last_duals", None))
             else:
-                self._dairy_req_extra = None
+                self.ev.dairy_req_extra = None
                 _yc = self._nlp_solve(self.Q, c_lin, A_ub, b_ub, x0)
                 if _yc is None:
                     self._note_floor_failure()
                     _yc = self._nlp_last_point(self.Q, c_lin, A_ub, b_ub, x0)
-                if getattr(self, "_grass_pending_col", None) is not None:
+                if getattr(self.par, "grass_pending_col", None) is not None:
                     self._grass_calibrate_from_duals(getattr(self.ev, "last_duals", None))
                 if self._split_pending():
                     self._dairy_calibrate_from_duals(getattr(self.ev, "last_duals", None))
@@ -1862,20 +1862,20 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
             # (COMI_DCOL - COMI_DCOH) / COMI_DCOW per head (cull-cow beef, ~1% of the tonnage, is
             # the same for both and is scaled with it: REGISTERED)
             if _c is not None and _a == "DCOW":
-                _dz = float(getattr(self, "_last_dairy_z", 0.0) or 0.0)
+                _dz = float(getattr(self.res, "last_dairy_z", 0.0) or 0.0)
                 _di = getattr(self.data, "dairy_intensity", None)
                 if _dz and _di is not None:
                     gross_output[_a] += _dz * _c * float(_di["dcomi_rel"])
             # the cattle splits (bulls and heifers, Sprint 7c; replacement heifers and calves): beef per stall,
             # a - b, over the animal's average, for every split of the animal
-            for _k, _cz_ in (getattr(self, "_last_cattle_z", None) or {}).items():
+            for _k, _cz_ in (getattr(self.res, "last_cattle_z", None) or {}).items():
                 if _k.split(":")[0] != _a:
                     continue
                 _ct_ = (getattr(self.data, "cattle_intensity", None) or {}).get(_k)
                 if _c is not None and _cz_ and _ct_ is not None:
                     gross_output[_a] += float(_cz_) * _c * float(_ct_["dbeef_rel"])
             # cattle genomics (breeding.gms genet_yld): g cows adopting give d_milk_rel more milk each
-            for (_ga, _go), _gz in (getattr(self, "_last_genet_z", None) or {}).items():
+            for (_ga, _go), _gz in (getattr(self.res, "last_genet_z", None) or {}).items():
                 _ge = (getattr(self.data, "genetics_effects", None) or {}).get((_ga, _go))
                 if _ga == _a and _c is not None and _gz and _ge is not None and float(_ge.get("d_milk_rel", 0.0) or 0.0):
                     gross_output[_a] += float(_gz) * _c * float(_ge["d_milk_rel"])
@@ -2103,12 +2103,12 @@ class SupplyModule(ModuleStateMixin):
         self.data["genetics_effects"] = table
         self.genetics_key = settings_key
         for region, m in self._models.items():
-            store = m.__dict__.setdefault("_genet_cz_store", {})
-            old = m.__dict__.get("_genet_key")
+            store = _st.setdefault(m.par, "genet_cz_store", {})
+            old = getattr(m.par, "genet_key", None)
             if old == settings_key:
                 continue
             if old is not None:
-                store[old] = getattr(m, "_genet_cz", None)
+                store[old] = getattr(m.par, "genet_cz", None)
                 # the NLP form's calibration (CAPRI's: the base a first-order point of the model it is simulated with)
                 # belongs to the settings too: the genomics columns differ with them. Kept per settings and restored,
                 # so a baseline after a run at other settings uses its own calibration, not the other one (found
@@ -2118,10 +2118,10 @@ class SupplyModule(ModuleStateMixin):
                 cal_store[old] = (getattr(m.par, "nlp_cal", None), getattr(m.par, "nlp_base_alloc", None))
                 m.par.nlp_cal, m.par.nlp_base_alloc = cal_store.get(settings_key, (None, None))
             m.data.genetics_effects = (table or {}).get(region)
-            m._genet_cz = store.get(settings_key)
-            m._genet_pending = None
-            m._last_genet_z = {}
-            m._genet_key = settings_key
+            m.par.genet_cz = store.get(settings_key)
+            m.par.genet_pending = None
+            m.res.last_genet_z = {}
+            m.par.genet_key = settings_key
 
     def _pmp_terms_for(self, d, region):
         """The region's PMP terms in the model's form for pmp_source and the market year: "capri2030" CAPRI's exported
@@ -2199,7 +2199,7 @@ class SupplyModule(ModuleStateMixin):
                 row = self.regional_elasticities.loc[region]
                 eps = row.reindex(ALL_ACTIVITIES).fillna(eps)
             self._models[region] = RegionalSupplyModel(rd, eps, use_share_term=True)
-            self._models[region]._genet_key = getattr(self, "genetics_key", None)
+            self._models[region].par.genet_key = getattr(self, "genetics_key", None)
         return self._models[region]
 
     def _build_region_data(self, region: str) -> RegionData:
@@ -3028,10 +3028,10 @@ class SupplyModule(ModuleStateMixin):
             result.animal_n_kept = dict(getattr(model, "_animal_n_kept", None) or {})
             result.manure_tech_shares = dict(getattr(model, "_manure_tech_shares", None) or {})
             result.grass_ext_shift = float(getattr(model, "_last_grass_z", 0.0) or 0.0)
-            result.dairy_low_shift = float(getattr(model, "_last_dairy_z", 0.0) or 0.0)
-            result.cattle_shift = dict(getattr(model, "_last_cattle_z", None) or {})
+            result.dairy_low_shift = float(getattr(model.res, "last_dairy_z", 0.0) or 0.0)
+            result.cattle_shift = dict(getattr(model.res, "last_cattle_z", None) or {})
             result.yani_dnet = getattr(model.res, "yani_dnet", None)
-            result.genetics_shift = dict(getattr(model, "_last_genet_z", None) or {})
+            result.genetics_shift = dict(getattr(model.res, "last_genet_z", None) or {})
             result.histosol_fallow = dict(getattr(model, "_last_hist_fallow", None) or {})
             _ls = getattr(model, "_land_solution", None) or {}
             result.land_types = {t_: float(_ls[t_]) for t_ in getattr(model, "_land_types_used", []) if t_ in _ls}
@@ -3081,10 +3081,10 @@ class SupplyModule(ModuleStateMixin):
                 result.animal_n_kept = dict(getattr(model, "_animal_n_kept", None) or {})
                 result.manure_tech_shares = dict(getattr(model, "_manure_tech_shares", None) or {})
                 result.grass_ext_shift = float(getattr(model, "_last_grass_z", 0.0) or 0.0)
-                result.dairy_low_shift = float(getattr(model, "_last_dairy_z", 0.0) or 0.0)
-                result.cattle_shift = dict(getattr(model, "_last_cattle_z", None) or {})
+                result.dairy_low_shift = float(getattr(model.res, "last_dairy_z", 0.0) or 0.0)
+                result.cattle_shift = dict(getattr(model.res, "last_cattle_z", None) or {})
                 result.yani_dnet = getattr(model.res, "yani_dnet", None)
-                result.genetics_shift = dict(getattr(model, "_last_genet_z", None) or {})
+                result.genetics_shift = dict(getattr(model.res, "last_genet_z", None) or {})
                 result.histosol_fallow = dict(getattr(model, "_last_hist_fallow", None) or {})
                 _ls = getattr(model, "_land_solution", None) or {}
                 result.land_types = {t_: float(_ls[t_]) for t_ in getattr(model, "_land_types_used", []) if t_ in _ls}

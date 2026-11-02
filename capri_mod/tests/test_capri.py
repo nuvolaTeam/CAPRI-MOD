@@ -2491,9 +2491,9 @@ def test_dairy_split_column_calibrated_at_base():
     mo = m.supply_module._models["FR520000"]
     di = m.data["dairy_intensity"].loc["FR520000"]
     assert di["dcomi_rel"] < 0 and di["dmann_rel"] < 0 and di["denne_rel"] < 0
-    assert getattr(mo, "_dairy_cz", None) is not None and getattr(mo, "_dairy_col", None) is not None
+    assert getattr(mo.par, "dairy_cz", None) is not None and getattr(mo.ev, "dairy_col", None) is not None
     cows = float(m.data["animal_numbers"].at["FR520000", "DCOW"])
-    assert abs(float(mo._last_dairy_z)) < 1e-3 * cows
+    assert abs(float(mo.res.last_dairy_z)) < 1e-3 * cows
 
 
 def test_histosol_emissions_and_fallowing_calibrated(data):
@@ -2598,10 +2598,10 @@ def test_bull_heifer_split_calibrated_at_base():
     mo = m.supply_module._models["FR520000"]
     ct = m.data["cattle_intensity"]["FR520000"]
     assert ct["BULL"]["dyoung_rel"] > 0 and ct["BULL"]["dmann_rel"] < 0
-    assert set(getattr(mo, "_cattle_cz", {}) or {}) >= {"BULL"} and "BULL" in (mo._cattle_cols or {})
+    assert set(getattr(mo.par, "cattle_cz", {}) or {}) >= {"BULL"} and "BULL" in (mo.ev.cattle_cols or {})
     # by default (the cattle member splits off, K65) only the intensity pairs carry a split, each at the base split
-    assert set(mo._last_cattle_z or {}) == {"BULL", "HFRS"}
-    for a, z in (mo._last_cattle_z or {}).items():
+    assert set(mo.res.last_cattle_z or {}) == {"BULL", "HFRS"}
+    for a, z in (mo.res.last_cattle_z or {}).items():
         assert abs(float(z)) < 1e-3 * max(1.0, float(m.data["animal_numbers"].at["FR520000", a.split(":")[0]])), (a, z)
     # with the member splits on, every split (the replacement heifers HFRS:rep, the calves CALV:male / female / sex)
     # gets its column and stays at the base split too
@@ -2611,8 +2611,8 @@ def test_bull_heifer_split_calibrated_at_base():
         m = CAPRIModel(data_dir=str(DATA_DIR), verbose=False)
         m.run(scenario="BASELINE", regions=["FR520000"], max_outer_iter=2)
         mo = m.supply_module._models["FR520000"]
-        assert set(mo._last_cattle_z or {}) >= {"BULL", "HFRS", "HFRS:rep", "CALV:male", "CALV:female", "CALV:sex"}
-        for a, z in (mo._last_cattle_z or {}).items():
+        assert set(mo.res.last_cattle_z or {}) >= {"BULL", "HFRS", "HFRS:rep", "CALV:male", "CALV:female", "CALV:sex"}
+        for a, z in (mo.res.last_cattle_z or {}).items():
             assert abs(float(z)) < 1e-3 * max(1.0, float(m.data["animal_numbers"].at["FR520000", a.split(":")[0]])), (a, z)
     finally:
         S.activate(_prev)
