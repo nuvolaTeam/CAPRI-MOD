@@ -6,7 +6,7 @@ mapped to them by RMS_TO_RM. Once that is done, CAPRI's TRQs (global and bilater
 entry prices and the market's land and yield block can be ported as CAPRI writes them. **Nothing has been changed.**
 Model for this note: docs/design/REGIONAL_UNITS_INVENTORY.md (the supply side's move to CAPRI's 221 units, 27 October).
 
-Branch read: manifest-sql, HEAD 9be8c8c. DEP-31 to DEP-40 are on branch step-g
+Branch read: manifest-sql, HEAD 9be8c8c. DEP-31 to DEP-40 were then on branch step-g (merged into manifest-sql since)
 (HEAD c953471) and not yet merged into manifest-sql; they are cited from there.
 
 **Labels.** [V] = verified for this note (file read, GDX symbol read, or data compared with a small script);

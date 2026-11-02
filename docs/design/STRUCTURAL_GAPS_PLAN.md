@@ -12,7 +12,7 @@ goes gate by gate.
 
 ### S1. One activity per crop
 
-- **CAPRI:** two technologies per crop (T1 high yield, T2 low yield; capmod.gms l. 246), each with its own yield, inputs and PMP terms.
+- **CAPRI:** two technologies per crop (T1 high yield, T2 low yield; capmod.gms l. 247-249), each with its own yield, inputs and PMP terms.
 - **capri-mod now:** one activity; CAPRI's T1/T2 PMP block collapsed exactly per crop (build_pmp_capri_2030.py); DEP-9.
 - **Expected effect:** intensity responses (yield, N per ha) to prices and N targets; the crop groups' marginal N need.
 - **Effort:** large: activities, yields and inputs per technology, fertilisation per technology, the PMP block without the collapse, reports. A design document first.
