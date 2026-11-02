@@ -35,7 +35,7 @@ class NLPBlock:
             extra[int(j_)] = f"cattle_z_{a_}"
         for (a_, o_), j_ in (getattr(self.ev, "genet_cols", None) or {}).items():
             extra[int(j_)] = f"genet_z_{a_}_{o_}"
-        for c_, j_ in (getattr(self, "_hist_cols", None) or {}).items():
+        for c_, j_ in (getattr(self.ev, "hist_cols", None) or {}).items():
             extra[int(j_)] = f"hist_{c_}"
         out = lab + [extra.get(j, f"col{j}") for j in range(n, n_cols)]
         return out
@@ -226,7 +226,7 @@ class NLPBlock:
             if spec.get("catc"):
                 # the Farm-to-Fork catch-crop requirement (e_minCoverCrops) as the option's lower bound; the option
                 # carries the winterCover_ row itself
-                _cv = getattr(self, "_cover", None)
+                _cv = getattr(self.ev, "cover", None)
                 if _cv and float(_cv.get("uaa", 0.0) or 0.0) > 0:
                     _lb = float(_cv["req"]) / float(spec["catc"]["uaa"])
                     spec["catc"] = dict(spec["catc"], lb=_lb, ub=max(float(spec["catc"]["ub"]), _lb))
@@ -542,7 +542,7 @@ class NLPBlock:
             self.res.nlp_fallback_log.append(f"nlp:{_nonopt} -> IPOPT's last point kept (non-optimal, as CAPRI)")
         self.res.nlp_status = str(info.get("status"))
         self.ev.last_req_duals = info.get("req_duals") or {}
-        self._manure_ni_relief, self._manure_ni_nh3 = {}, {}
+        self.ev.manure_ni_relief, self.ev.manure_ni_nh3 = {}, {}
         self.res.fert_inside_factor = {}
         self.res.fert_tech_shares = {}
         if self._techs_inside():
@@ -553,15 +553,15 @@ class NLPBlock:
             self._amm_record(sh)
         if ab.get("fert"):
             self.res.fert_tech_shares = {k_: float(v_) for k_, v_ in ab["fert"].items()}
-        if ab.get("mni") is not None and getattr(self, "_nlp_nip", None):
-            _sh = float(ab["mni"]); _nip = self._nlp_nip
+        if ab.get("mni") is not None and getattr(self.ev, "nlp_nip", None):
+            _sh = float(ab["mni"]); _nip = self.ev.nlp_nip
             if _sh > 1e-9:
                 for a_, m_ in _nip["man_d"].items():
                     m_ = float(m_ or 0.0)
                     if m_ > 0 and a_ in self.acts:
-                        self._manure_ni_relief[a_] = _nip["sub"] * _nip["nman"] * _sh * m_
+                        self.ev.manure_ni_relief[a_] = _nip["sub"] * _nip["nman"] * _sh * m_
                         if a_ in _nip["app_nh3"]:
-                            self._manure_ni_nh3[a_] = _sh * _nip["app_nh3"][a_]
+                            self.ev.manure_ni_nh3[a_] = _sh * _nip["app_nh3"][a_]
                 self.res.fert_tech_shares = dict(getattr(self.res, "fert_tech_shares", None) or {})
                 self.res.fert_tech_shares["NITR_INH_MAN"] = _sh
         acts_ = list(self.acts); dm = {}; ft = {}

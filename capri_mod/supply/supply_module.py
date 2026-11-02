@@ -516,18 +516,19 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
     #: shock starts from the baseline's state (model._market_supply_hessian). Found by comparing the model's attributes
     #: before and after a solve (27 October 2026); bookkeeping (res.n_solves) and the shared environmental
     #: module are not state
-    SOLVE_STATE = ("_amm_cost", "_amm_last", "_animal_n_kept", "_animal_n_relief", "_animal_nh3_saved",
-                   "res.cover_solved", "res.fd_model", "_ghg_nr_obj", "_land_solution", "_last_aug", "res.last_cattle_z",
-                   "res.last_dairy_z", "ev.last_duals", "res.last_feed_dm", "res.last_feed_t", "res.last_genet_z",
-                   "_last_grass_z", "_last_hist_fallow", "res.last_npk", "ev.last_req_duals", "_manure_ni_nh3",
-                   "_manure_ni_relief", "_manure_tech_shares", "_price_shock_now", "sv.wc_solved", "feed_rations")
+    SOLVE_STATE = ("ev.amm_cost", "sv.amm_last", "res.animal_n_kept", "ev.animal_n_relief", "res.animal_nh3_saved",
+                   "res.cover_solved", "res.fd_model", "ev.ghg_nr_obj", "_land_solution", "_last_aug",
+                   "res.last_cattle_z", "res.last_dairy_z", "ev.last_duals", "res.last_feed_dm", "res.last_feed_t",
+                   "res.last_genet_z", "_last_grass_z", "_last_hist_fallow", "res.last_npk", "ev.last_req_duals",
+                   "ev.manure_ni_nh3", "ev.manure_ni_relief", "res.manure_tech_shares", "_price_shock_now",
+                   "sv.wc_solved", "feed_rations")
     #: the regional NLP's fields (warm starts, calibration, fallbacks and their diagnostics): what the market supply
     #: Hessian restored by the prefix "_nlp" until 2 November 2026 (refactor stage 3, S0b: the same set, declared). An
     #: entry is an attribute name or, for a field moved into the state objects, its path ("sv.nlp_prev"; S2, S3; both
     #: lists). Every instance attribute named _nlp* must be listed here (test_nlp_state_lists_every_nlp_attribute)
     NLP_STATE = ("ev.nlp_accept_last", "par.nlp_base_alloc", "par.nlp_cal", "_nlp_cal_check", "par.nlp_cal_store",
                  "sv.nlp_cols", "ev.nlp_failed", "res.nlp_fallback_log", "ev.nlp_fb_last", "res.nlp_jump",
-                 "ev.nlp_mine_small", "ev.nlp_n_target_cause", "_nlp_nip", "res.nlp_nonoptimal", "res.nlp_ok",
+                 "ev.nlp_mine_small", "ev.nlp_n_target_cause", "ev.nlp_nip", "res.nlp_nonoptimal", "res.nlp_ok",
                  "res.nlp_path", "sv.nlp_prev", "sv.nlp_prev_f", "res.nlp_rc", "sv.nlp_relax_keep", "res.nlp_relaxed",
                  "res.nlp_status", "_nlp_tol_trace", "ev.nlp_try_n_relax", "sv.nlp_y")
 
@@ -1222,8 +1223,8 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
             for i, a in enumerate(self.acts):
                 sa = float(coefs.get(a, 0.0))
                 if not self._techs_inside():
-                    sa -= float((getattr(self, "_animal_n_relief", None) or {}).get(a, 0.0))   # manure technologies
-                sa -= float((getattr(self, "_manure_ni_relief", None) or {}).get(a, 0.0))      # inhibitors on manure
+                    sa -= float((getattr(self.ev, "animal_n_relief", None) or {}).get(a, 0.0))   # manure technologies
+                sa -= float((getattr(self.ev, "manure_ni_relief", None) or {}).get(a, 0.0))      # inhibitors on manure
                 sa += self._nitrate_row_term(a)                                             # nitrate N excretion
                 _exact = None
                 _fcr = float(mint.get("__credit__", 1.0))
@@ -1350,7 +1351,7 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
         # most of the arable land (Tyrol, Bolzano: floor 22 kha on 14 kha of arable land) the floor and
         # the catch-crop minimum could not both hold: the land-market solve failed and the fallback
         # emptied the region's grassland and herds.
-        _cv = getattr(self, "_cover", None)
+        _cv = getattr(self.ev, "cover", None)
         wcs_ = getattr(self.data, "winter_cover_share", None)
         if _cv and _cv.get("delta", 0.0) > 0 and wcs_ is not None:
             row_W = np.array([float(wcs_.at[a, "share"]) if a in wcs_.index else 0.0 for a in self.acts])
@@ -1541,7 +1542,7 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
         policy_shock: Optional[Dict] = None,
         set_aside_requirement: float = 0.0,
     ) -> SupplyResult:
-        self._cover = None              # catch-crop requirement: set by the pesticide/organic targets
+        self.ev.cover = None              # catch-crop requirement: set by the pesticide/organic targets
         # Recompute net revenues under shocks
         if price_shock is not None or policy_shock is not None:
             if policy_shock:
@@ -1660,7 +1661,7 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
         # CAPRI's emission tax on the activities (ghgTax; zero unless the scenario sets one)
         self._apply_ghg_tax()
 
-        self._manure_ni_relief, self._manure_ni_nh3 = {}, {}
+        self.ev.manure_ni_relief, self.ev.manure_ni_nh3 = {}, {}
         if getattr(self, "_nbal_price", 0.0):
             self._apply_balance_price(self._nbal_price)
         else:
@@ -1738,8 +1739,8 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
                 self._grass_calibrate_from_duals(getattr(self.ev, "last_duals", None))
             if self._split_pending():
                 self._dairy_calibrate_from_duals(getattr(self.ev, "last_duals", None))
-            self._last_hist_fallow = {c_: float(y[j_]) for c_, j_ in (getattr(self, "_hist_cols", None) or {}).items() if j_ < len(y)}
-            if getattr(self, "_hist_pending", None):
+            self._last_hist_fallow = {c_: float(y[j_]) for c_, j_ in (getattr(self.ev, "hist_cols", None) or {}).items() if j_ < len(y)}
+            if getattr(self.par, "hist_pending", None):
                 self._histosol_calibrate_from_duals(getattr(self.ev, "last_duals", None))
             # land rows' limits at the solved land areas, so the shadow
             # prices computed below see the right slack
@@ -1767,7 +1768,7 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
             self._last_hist_fallow = {}
             _yc = None
             _cols = (getattr(self.ev, "grass_col", None) is not None or getattr(self.ev, "dairy_col", None) is not None
-                     or getattr(self.ev, "cattle_cols", None) or getattr(self, "_hist_cols", None))
+                     or getattr(self.ev, "cattle_cols", None) or getattr(self.ev, "hist_cols", None))
             if _cols:
                 _yg = self._nlp_solve(Qg, cg, Ag, bg, sg)
                 if _yg is None:
@@ -1782,8 +1783,8 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
                     self._grass_calibrate_from_duals(getattr(self.ev, "last_duals", None))
                 if self._split_pending():
                     self._dairy_calibrate_from_duals(getattr(self.ev, "last_duals", None))
-                self._last_hist_fallow = {c_: float(_yg[j_]) for c_, j_ in (getattr(self, "_hist_cols", None) or {}).items()}
-                if getattr(self, "_hist_pending", None):
+                self._last_hist_fallow = {c_: float(_yg[j_]) for c_, j_ in (getattr(self.ev, "hist_cols", None) or {}).items()}
+                if getattr(self.par, "hist_pending", None):
                     self._histosol_calibrate_from_duals(getattr(self.ev, "last_duals", None))
             else:
                 self.ev.dairy_req_extra = None
@@ -1795,7 +1796,7 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
                     self._grass_calibrate_from_duals(getattr(self.ev, "last_duals", None))
                 if self._split_pending():
                     self._dairy_calibrate_from_duals(getattr(self.ev, "last_duals", None))
-                if getattr(self, "_hist_pending", None):
+                if getattr(self.par, "hist_pending", None):
                     self._histosol_calibrate_from_duals(getattr(self.ev, "last_duals", None))
             x_qp = _yc
             # record the plain problem as the land-market path records its own (_last_aug)
@@ -3014,11 +3015,11 @@ class SupplyModule(ModuleStateMixin):
             result.fert_npk = getattr(model.res, "last_npk", None)
             result.manure_availability = getattr(model.ev, "pool_avail", 0.0)
             result.animal_n_relief = _merge_relief(model)
-            result.manure_ni_nh3 = dict(getattr(model, "_manure_ni_nh3", None) or {})
-            result.cover_crops = dict(getattr(model.res, "cover_solved", None) or getattr(model, "_cover", None) or {})
-            result.animal_nh3_saved = dict(getattr(model, "_animal_nh3_saved", None) or {})
-            result.animal_n_kept = dict(getattr(model, "_animal_n_kept", None) or {})
-            result.manure_tech_shares = dict(getattr(model, "_manure_tech_shares", None) or {})
+            result.manure_ni_nh3 = dict(getattr(model.ev, "manure_ni_nh3", None) or {})
+            result.cover_crops = dict(getattr(model.res, "cover_solved", None) or getattr(model.ev, "cover", None) or {})
+            result.animal_nh3_saved = dict(getattr(model.res, "animal_nh3_saved", None) or {})
+            result.animal_n_kept = dict(getattr(model.res, "animal_n_kept", None) or {})
+            result.manure_tech_shares = dict(getattr(model.res, "manure_tech_shares", None) or {})
             result.grass_ext_shift = float(getattr(model, "_last_grass_z", 0.0) or 0.0)
             result.dairy_low_shift = float(getattr(model.res, "last_dairy_z", 0.0) or 0.0)
             result.cattle_shift = dict(getattr(model.res, "last_cattle_z", None) or {})
@@ -3067,11 +3068,11 @@ class SupplyModule(ModuleStateMixin):
                 result.fert_npk = getattr(model.res, "last_npk", None)
                 result.manure_availability = getattr(model.ev, "pool_avail", 0.0)
                 result.animal_n_relief = _merge_relief(model)
-                result.manure_ni_nh3 = dict(getattr(model, "_manure_ni_nh3", None) or {})
-                result.cover_crops = dict(getattr(model.res, "cover_solved", None) or getattr(model, "_cover", None) or {})
-                result.animal_nh3_saved = dict(getattr(model, "_animal_nh3_saved", None) or {})
-                result.animal_n_kept = dict(getattr(model, "_animal_n_kept", None) or {})
-                result.manure_tech_shares = dict(getattr(model, "_manure_tech_shares", None) or {})
+                result.manure_ni_nh3 = dict(getattr(model.ev, "manure_ni_nh3", None) or {})
+                result.cover_crops = dict(getattr(model.res, "cover_solved", None) or getattr(model.ev, "cover", None) or {})
+                result.animal_nh3_saved = dict(getattr(model.res, "animal_nh3_saved", None) or {})
+                result.animal_n_kept = dict(getattr(model.res, "animal_n_kept", None) or {})
+                result.manure_tech_shares = dict(getattr(model.res, "manure_tech_shares", None) or {})
                 result.grass_ext_shift = float(getattr(model, "_last_grass_z", 0.0) or 0.0)
                 result.dairy_low_shift = float(getattr(model.res, "last_dairy_z", 0.0) or 0.0)
                 result.cattle_shift = dict(getattr(model.res, "last_cattle_z", None) or {})
@@ -3320,8 +3321,8 @@ def _mineral_n_for_accounts(model):
 
 def _merge_relief(model) -> dict:
     """N relief per activity unit for the accounts: ammonia technologies + inhibitors on manure."""
-    out = dict(getattr(model, "_animal_n_relief", None) or {})
-    for a, v in (getattr(model, "_manure_ni_relief", None) or {}).items():
+    out = dict(getattr(model.ev, "animal_n_relief", None) or {})
+    for a, v in (getattr(model.ev, "manure_ni_relief", None) or {}).items():
         out[a] = out.get(a, 0.0) + float(v)
     return out
 

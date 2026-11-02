@@ -79,3 +79,20 @@ def test_no_moved_name_is_used_as_a_string():
     names = set(S.MOVED_REGIONAL) | set(S.MOVED_MODULE)
     found = _string_uses(names) if names else []
     assert not found, "\n".join(found)
+
+
+def test_the_emission_tax_is_taken_back_once_on_the_same_net_revenues():
+    """Refactor stage 3, S7 (plan section 4.2): _apply_ghg_tax's undo record (ev.ghg_applied) acts only on the net
+    revenues object it was added to (ev.ghg_nr_obj, an identity check): applied twice on the same object the tax is
+    there once; on a rebuilt object nothing is taken back."""
+    import pandas as pd
+    m = RegionalSupplyModel.__new__(RegionalSupplyModel)
+    m.ghg_tax, m.ghg_coef = 2.0, {"act": {"SWHE": 1.5, "DCOW": 3.0}}
+    m.net_revenues = pd.Series({"SWHE": 100.0, "DCOW": 50.0})
+    m._apply_ghg_tax()
+    m._apply_ghg_tax()
+    assert m.net_revenues.to_dict() == {"SWHE": 97.0, "DCOW": 44.0}
+    assert m.ev.ghg_nr_obj is m.net_revenues and m.ev.ghg_applied == {"SWHE": 3.0, "DCOW": 6.0}
+    m.net_revenues = pd.Series({"SWHE": 100.0, "DCOW": 50.0})     # rebuilt: a new object, nothing to take back
+    m._apply_ghg_tax()
+    assert m.net_revenues.to_dict() == {"SWHE": 97.0, "DCOW": 44.0}

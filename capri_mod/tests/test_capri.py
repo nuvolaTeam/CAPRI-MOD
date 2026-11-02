@@ -2460,7 +2460,7 @@ def test_cover_crop_requirement_and_winter_cover_row(data):
     model.data.organic_targets_pp = None          # use the distance rule: o known below
     o_share = model._organic_baseline() + 0.25
     model._cover_crop_requirement(0.50, o_share)
-    cv = model._cover
+    cv = model.ev.cover
     assert cv is not None and cv["potential"] > 0 and cv["biofix"] > 0
     expect = min(0.25 * cv["potential"] + cv["base"], max(cv["potential"], cv["base"]))
     assert abs(cv["req"] - expect) < 1e-6 * max(1.0, expect)
@@ -2475,7 +2475,7 @@ def test_cover_crop_requirement_and_winter_cover_row(data):
     floor = -b[model._row_labels.index("landscape_floor")]
     assert floor > 0 and abs(model._fall_floor - floor) < 1e-9
     assert abs(b[i] - (cv["uaa"] - cv["req"] + floor)) < 1e-6 * cv["uaa"] + 1e-6
-    model._cover = None
+    model.ev.cover = None
 
 
 def test_dairy_split_column_calibrated_at_base():
@@ -3655,7 +3655,7 @@ def test_land_rows_are_equalities_and_histosol_fallow_keeps_its_land(model):
         if row in lab and row + "_lo" in lab:
             i, j = lab.index(row), lab.index(row + "_lo")
             assert abs(float(b[i]) + float(b[j])) < 1e-5 * max(1.0, abs(float(b[i]))), (row, b[i], b[j])
-    for cls, col in (getattr(mo, "_hist_cols", None) or {}).items():
+    for cls, col in (getattr(mo.ev, "hist_cols", None) or {}).items():
         row = dict(mo.HISTOSOL_CLASSES)[cls]
         assert A[lab.index(row), col] == 1.0 and A[lab.index(row + "_lo"), col] == -1.0
 

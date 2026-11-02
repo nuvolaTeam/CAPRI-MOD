@@ -148,7 +148,7 @@ class FertilisationBlock:
             return []
         techs, man_d, nh3, sub = ctx
         wc0, wc1 = self._winter_cover_shares()
-        last = getattr(self, "_amm_last", None) or {}
+        last = getattr(self.sv, "amm_last", None) or {}
         # CAPRI's emission tax on the options (ghgTax; its v_CO2EquEmis follows v_Miti): per unit of M (share x
         # sub-activity unit), the manure N2O change through the loss cascade (the accounts' finite difference,
         # ghg_tax.ghg_coefficients "mtech", per head) less the indirect N2O of the NH3 kept and the soil N2O of the

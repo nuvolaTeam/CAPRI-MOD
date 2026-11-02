@@ -60,6 +60,9 @@ class RegionalParameters(_Slots):
         "npk_kappa",          # the fertiliser distribution's kappa by nutrient (a memo)
         "npk_prior_override", # CAPRI's priors where the calibration recalibrated them
         "npk_prior_recalibrated",  # the nutrients whose priors were recalibrated
+        # abatement (S7): the histosol fallowing's terms, calibrated from the duals
+        "hist_cal",           # the terms by histosol class
+        "hist_pending",       # the classes whose terms wait for the duals
     )
 
 
@@ -75,6 +78,8 @@ class RegionalSolveState(_Slots):
         "wc_solved",          # the winter cover share chosen by the last solve (None where not endogenous)
         # fertilisation (S5)
         "n_relax_sticky",     # the N-target relaxation kept from one solve to the next (not restored by the Hessian)
+        # abatement (S7)
+        "amm_last",           # the ammonia options' linearisation point, from the previous solve
     )
 
 
@@ -110,6 +115,17 @@ class RegionalEvalState(_Slots):
         "pool_avail",         # the manure available to the pool
         "pool_cols",          # the manure pool's export and import columns (N)
         "pool_cols_pk",       # idem for P and K
+        # abatement (S7): the ammonia and inhibitor accounts of the solve, the catch-crop requirement, histosols, the
+        # emission tax's undo record
+        "amm_cost",           # the ammonia options' cost by animal
+        "animal_n_relief",    # the manure N the ammonia options keep, by animal (the N row's relief)
+        "cover",              # the catch-crop requirement and increment (1000 ha)
+        "ghg_applied",        # the emission tax added to the net revenues, by activity (its undo record)
+        "ghg_nr_obj",         # the net revenues object the tax was added to (an identity check, never a copy)
+        "hist_cols",          # the histosol fallowing's columns
+        "manure_ni_nh3",      # NH3 of the manure inhibitors, by activity
+        "manure_ni_relief",   # the manure N the inhibitors keep, by activity
+        "nlp_nip",            # the manure inhibitors' parameters
     )
 
 
@@ -150,6 +166,10 @@ class RegionalResults(_Slots):
         "manure_supply0_pk",  # idem for P and K
         "pool_manure_vec",    # the manure N by column
         "pool_manure_vec_pk", # idem for P and K
+        # abatement (S7)
+        "animal_n_kept",      # the manure N kept by the ammonia options, by animal
+        "animal_nh3_saved",   # the NH3 they save, by animal
+        "manure_tech_shares", # the manure technologies' shares
     )
 
 
@@ -274,6 +294,22 @@ MOVED_REGIONAL: dict = {
     "_manure_supply0_pk": "res.manure_supply0_pk",
     "_pool_manure_vec": "res.pool_manure_vec",
     "_pool_manure_vec_pk": "res.pool_manure_vec_pk",
+    # S7: abatement
+    "_hist_cal": "par.hist_cal",
+    "_hist_pending": "par.hist_pending",
+    "_amm_last": "sv.amm_last",
+    "_amm_cost": "ev.amm_cost",
+    "_animal_n_relief": "ev.animal_n_relief",
+    "_cover": "ev.cover",
+    "_ghg_applied": "ev.ghg_applied",
+    "_ghg_nr_obj": "ev.ghg_nr_obj",
+    "_hist_cols": "ev.hist_cols",
+    "_manure_ni_nh3": "ev.manure_ni_nh3",
+    "_manure_ni_relief": "ev.manure_ni_relief",
+    "_nlp_nip": "ev.nlp_nip",
+    "_animal_n_kept": "res.animal_n_kept",
+    "_animal_nh3_saved": "res.animal_nh3_saved",
+    "_manure_tech_shares": "res.manure_tech_shares",
 }
 #: the supply module's former attribute names
 MOVED_MODULE: dict = {
