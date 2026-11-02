@@ -328,7 +328,7 @@ class AbatementBlock:
         of manure N: N-balance price x a x NMAN (the mineral N it replaces). Its share is separate
         from the mineral-fertiliser options (TotMitFertMan_), outside Tot_MitFert_.
         REGISTERED: the crop-need floor on mineral N keeps a x manure without the gain."""
-        self._manure_ni_relief, self._manure_ni_nh3, self._manure_ni_share = {}, {}, 0.0
+        self._manure_ni_relief, self._manure_ni_nh3 = {}, {}
         if self._ni_inside():
             return                       # decided inside the regional model
         tax = float(getattr(self, "ghg_tax", 0.0) or 0.0)
@@ -356,7 +356,6 @@ class AbatementBlock:
                 self.net_revenues[a] = float(self.net_revenues[a]) - (c_t - v_tax * sh) * mN / 1000.0
             if a in app_nh3:
                 self._manure_ni_nh3[a] = sh * app_nh3[a]      # t NH3-N per activity unit
-        self._manure_ni_share = sh
 
     def _ni_inside(self) -> bool:
         """Inhibitors on manure as a decision of the regional model (no N-price search)."""

@@ -78,10 +78,26 @@ class ModuleResults(_Slots):
     __slots__ = ()
 
 
+_REMOVED = "removed (refactor stage 3 S1, 2 November 2026: written, never read)"
 #: the regional models' former attribute names, with where each now lives ("sv.nlp_prev", or "removed (...)")
-MOVED_REGIONAL: dict = {}
+MOVED_REGIONAL: dict = {
+    "_last_land": _REMOVED,
+    "_last_aug_A": _REMOVED,
+    "_last_aug_b": _REMOVED,
+    "_mineral_row_m": _REMOVED,
+    "_fert_inside_weight": _REMOVED,
+    "_nlp_abatement": _REMOVED,
+    "_npk_cov": _REMOVED,
+    "_nlp_group_caps": _REMOVED,
+    "_manure_ni_share": _REMOVED,
+    "_last_feed": _REMOVED,
+    "_nlp_times": _REMOVED,
+    "_last_aug_cols": "removed (refactor stage 3 S1, 2 November 2026: read with a default, never written)",
+}
 #: the supply module's former attribute names
-MOVED_MODULE: dict = {}
+MOVED_MODULE: dict = {
+    "_base_cal_drift": _REMOVED,
+}
 
 
 class _StateMixin:

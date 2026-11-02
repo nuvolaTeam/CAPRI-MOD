@@ -2677,7 +2677,7 @@ def test_nlp_state_lists_every_nlp_attribute():
     pat = re.compile(r"\._(nlp[A-Za-z0-9_]*)\s*=(?!=)|[\"'](_nlp[A-Za-z0-9_]*)[\"']")
     written = set()
     for f in root.rglob("*.py"):
-        if "tests" in f.parts:
+        if "tests" in f.parts or f.name == "state.py":     # state.py lists the removed names (MOVED)
             continue
         for m_ in pat.finditer(f.read_text()):
             written.add("_" + m_.group(1) if m_.group(1) else m_.group(2))
@@ -3649,7 +3649,7 @@ def test_land_rows_are_equalities_and_histosol_fallow_keeps_its_land(model):
     model.run(scenario="BASELINE", regions=["IR010000"], max_outer_iter=1)
     mo = model.supply_module._models["IR010000"]
     lab = list(mo._aug_labels)
-    A, b = mo._last_aug_A, mo._last_aug_b
+    _Q, _c, A, b, _y = mo._last_aug           # the augmented problem the land-market solve used
     for row in ("arable_land", "permanent_land", "grassland"):
         if row in lab and row + "_lo" in lab:
             i, j = lab.index(row), lab.index(row + "_lo")

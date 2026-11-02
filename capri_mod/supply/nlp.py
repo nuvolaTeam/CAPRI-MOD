@@ -16,7 +16,7 @@ class NLPBlock:
         n = len(lab)
         extra = {}
         lt = list(getattr(self, "_land_types_used", None) or [])
-        if lt and n + len(lt) <= n_cols and getattr(self, "_last_aug_cols", None) != "plain":
+        if lt and n + len(lt) <= n_cols:
             for k_, t in enumerate(lt):
                 extra[n + k_] = "land_" + t
             if getattr(self, "_alloc_cols", 0):
@@ -464,7 +464,6 @@ class NLPBlock:
                     self._nlp_relaxed = _lab(k_)
                     kinds.append(self._nlp_relaxed)
                     break
-        self._nlp_times = (getattr(nlp, "build_s", 0.0), getattr(nlp, "solve_s", 0.0))
         _nonopt = None
         if not _ok(res):
             import warnings as _w
@@ -511,7 +510,6 @@ class NLPBlock:
                 self._yani_dnet = None
         self._last_npk = nlp.fert_outputs(res["x"]) if nlp.fert else None
         ab = nlp.abatement_outputs(res["x"]) if getattr(nlp, "abat", None) else {}
-        self._nlp_abatement = ab
         if "catc" in ab:
             # the winter cover share chosen, for the cascade's accounts and the supply result (cover_crops)
             _c = spec["catc"]
@@ -530,7 +528,6 @@ class NLPBlock:
                 # the allocation the regional model solved, for the accounts' report (fert_dist)
                 self._fd_model = {"capri_region": npk["capri_region"], "flows": self._last_npk["N"]["flows"],
                                   "area": self._last_npk["N"]["area"], "converged": True}
-        self._last_feed = F
         self._last_duals = zA
         # the columns' reduced costs at the NLP solution (IPOPT's bound multipliers, per unit of the column): the
         # manure pools read the trade columns' from here, as their duals through the A rows miss the fertilisation
@@ -545,9 +542,8 @@ class NLPBlock:
             self._nlp_fallback_log.append(f"nlp:{_nonopt} -> IPOPT's last point kept (non-optimal, as CAPRI)")
         self._nlp_status = str(info.get("status"))
         self._last_req_duals = info.get("req_duals") or {}
-        self._manure_ni_relief, self._manure_ni_nh3, self._manure_ni_share = {}, {}, 0.0
+        self._manure_ni_relief, self._manure_ni_nh3 = {}, {}
         self._fert_inside_factor = {}
-        self._fert_inside_weight = {}
         self._fert_tech_shares = {}
         if self._techs_inside():
             # the options' shares for the accounts (relief and NH3 saved per head from CAPRI's cascade)
@@ -566,7 +562,6 @@ class NLPBlock:
                         self._manure_ni_relief[a_] = _nip["sub"] * _nip["nman"] * _sh * m_
                         if a_ in _nip["app_nh3"]:
                             self._manure_ni_nh3[a_] = _sh * _nip["app_nh3"][a_]
-                self._manure_ni_share = _sh
                 self._fert_tech_shares = dict(getattr(self, "_fert_tech_shares", None) or {})
                 self._fert_tech_shares["NITR_INH_MAN"] = _sh
         acts_ = list(self.acts); dm = {}; ft = {}

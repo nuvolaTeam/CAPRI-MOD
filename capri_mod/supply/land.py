@@ -381,5 +381,4 @@ class LandBlock:
         Qa, ca, Aa, ba, start = self._dairy_intensity_column(Qa, ca, Aa, ba, start, labels, n)
         Qa, ca, Aa, ba, start = self._histosol_columns(Qa, ca, Aa, ba, start, labels, n)
         self._aug_labels = labels              # one label per row of the augmented problem (the NLP form reads them)
-        self._last_aug_A, self._last_aug_b = Aa, ba
         return Qa, ca, Aa, ba, start, rows

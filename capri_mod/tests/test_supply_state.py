@@ -55,13 +55,13 @@ def test_models_with_state_objects_pickle_and_copy():
 
 
 def _string_uses(names):
-    """Where a moved name is used as a string in capri_mod or tools: in getattr/setattr/hasattr/delattr calls, in
-    subscripts and .get/.pop/.setdefault on a __dict__, and in tuples of names (SOLVE_STATE and the like). The runtime
-    guard does not see these."""
+    """Where a moved name appears as a string constant in capri_mod or tools (outside the tests and state.py): the
+    form of getattr/setattr/hasattr names, __dict__ keys and tuples of names (SOLVE_STATE and the like), which the
+    runtime guard does not see. Any string equal to the name counts."""
     found = []
     for base in (ROOT / "capri_mod", ROOT / "tools"):
         for f in base.rglob("*.py"):
-            if "tests" in f.parts:
+            if "tests" in f.parts or f == ROOT / "capri_mod" / "supply" / "state.py":    # where MOVED is declared
                 continue
             try:
                 tree = ast.parse(f.read_text())

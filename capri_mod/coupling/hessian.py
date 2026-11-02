@@ -190,7 +190,7 @@ class HessianBlock:
             nlp_ = k_ in getattr(type(mo_), "NLP_STATE", ())
             if not skip:                                   # the measurement as before (cached Hessians keep their keys)
                 return nlp_
-            return (nlp_ and k_ != "_nlp_times") or k_ in getattr(type(mo_), "SOLVE_STATE", ())
+            return nlp_ or k_ in getattr(type(mo_), "SOLVE_STATE", ())
 
         def _snapshot():
             _c = _cp.deepcopy if skip else _cp.copy
