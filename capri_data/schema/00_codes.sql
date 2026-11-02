@@ -87,6 +87,15 @@ CREATE TABLE model_cattle_splits (
 );
 COMMENT ON TABLE model_cattle_splits IS 'CAPRI''s cattle activities inside the model''s animals (refactor stage 3, N6): per split the CAPRI activity that gains the stalls and the one that gives them up; a declared table, checked against CAPRI''s MAACT and SplitActs by build_code_lists';
 
+-- file: capri_data/codes/model_price_follows.csv
+CREATE TABLE model_price_follows (
+    activity VARCHAR PRIMARY KEY REFERENCES model_activities (code),
+    commodity VARCHAR NOT NULL,            -- the market commodity whose price the activity's follows
+    eu_market INTEGER NOT NULL CHECK (eu_market IN (0, 1)),   -- 1: in the EU's markets' price step too
+    source VARCHAR NOT NULL
+);
+COMMENT ON TABLE model_price_follows IS 'the activities whose price follows a market commodity''s (refactor stage 4: beet follows sugar, durum wheat the wheat market, Norway''s raw milk the MILK market); a declared table';
+
 -- file: capri_data/codes/model_land_types.csv
 CREATE TABLE model_land_types (
     code VARCHAR PRIMARY KEY REFERENCES capri_landtypesmrk (code),
@@ -157,6 +166,10 @@ GROUP BY capri_code HAVING count(*) > 1;
 
 -- rule: a member state of the regional units is its own unit's member state code (ends in 000000)
 SELECT region, capri_ms FROM regional_units WHERE capri_ms NOT LIKE '%000000';
+
+-- file: capri_data/codes/capri/FEED_TRD.csv
+CREATE TABLE capri_feed_trd (code VARCHAR PRIMARY KEY, text VARCHAR);
+COMMENT ON TABLE capri_feed_trd IS 'CAPRI FEED_TRD: the traded feed bulks, in CAPRI''s set order (global/fromimpact/sets.gms)';
 
 -- file: capri_data/codes/capri/MS_RU.csv
 CREATE TABLE capri_ms_ru (

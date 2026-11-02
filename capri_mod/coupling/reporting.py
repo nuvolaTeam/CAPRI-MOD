@@ -13,7 +13,7 @@ class ReportingBlock:
         iteration (max over the columns of |dy| / max(|y|, 1% of the region's largest column)), with the starts IPOPT
         used (warm / prev / start, then a relaxation) and its iterations, and the counts of each path."""
         import numpy as _np
-        prev = getattr(self, "_trace_nlp_prev", None) or {}
+        prev = getattr(self.sv, "trace_nlp_prev", None) or {}
         cur, rows, paths = {}, [], {}
         for r_, m_ in (self.supply_module._models or {}).items():
             y_ = getattr(m_.sv, "nlp_y", None)
@@ -28,11 +28,11 @@ class ReportingBlock:
                 d_ = _np.abs(y_ - y0) / _np.maximum(_np.abs(y0), max(0.01 * float(_np.max(_np.abs(y0))), 1e-6))
                 j_ = int(_np.argmax(d_))
                 rows.append((float(d_[j_]), r_, j_, p_))
-        self._trace_nlp_prev = cur
+        self.sv.trace_nlp_prev = cur
         import time as _t
         _now = _t.time()
-        _dt = _now - getattr(self, "_trace_nlp_t", _now)
-        self._trace_nlp_t = _now
+        _dt = _now - getattr(self.sv, "trace_nlp_t", _now)
+        self.sv.trace_nlp_t = _now
         if not cur:
             return
         rows.sort(reverse=True)

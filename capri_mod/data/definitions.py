@@ -310,6 +310,35 @@ def _load_cattle_splits():
 
 
 CATTLE_SPLITS = _load_cattle_splits()
+
+
+def _load_price_follows():
+    """The activities whose price follows a market commodity (capri_data/codes/model_price_follows.csv, declared;
+    refactor stage 4): (activity, commodity) in the table's order, those of the EU's markets first-class
+    (eu_market 1: beet follows sugar, durum wheat the wheat market) and all of them (Norway's step adds raw milk)."""
+    import csv
+    from pathlib import Path
+    with open(Path(__file__).resolve().parents[2] / "capri_data" / "codes" / "model_price_follows.csv", newline="") as f:
+        rows = list(csv.DictReader(f))
+    return (tuple((r["activity"], r["commodity"]) for r in rows if r["eu_market"] == "1"),
+            tuple((r["activity"], r["commodity"]) for r in rows))
+
+
+#: (activity, commodity): the price that follows a market's, in the EU's markets and in all (with Norway's raw milk)
+PRICE_FOLLOWS_EU, PRICE_FOLLOWS_ALL = _load_price_follows()
+
+
+def _load_capri_set(name):
+    """One of CAPRI's sets as written by tools/build/build_code_lists.py (capri_data/codes/capri/<name>.csv), its
+    codes in the file's order."""
+    import csv
+    from pathlib import Path
+    with open(Path(__file__).resolve().parents[2] / "capri_data" / "codes" / "capri" / f"{name}.csv", newline="") as f:
+        return tuple(r["code"] for r in csv.DictReader(f))
+
+
+#: CAPRI's traded feed bulks (FEED_TRD), in CAPRI's order
+CAPRI_FEED_TRD = _load_capri_set("FEED_TRD")
 #: crops on permanent-crop land (FRUN), arable (ARAC) and grassland (GRAS), in the order of CROPS
 CROPS_ON_LAND = {lt: tuple(a for a in CROPS if ACTIVITY_CLASSES[a]["land_type"] == lt) for lt in ("ARAC", "GRAS", "FRUN")}
 

@@ -155,6 +155,7 @@ INSERT INTO value_units VALUES
   ('model_activity_classes', 'fodder', NULL, 'open', 'a flag (1: a fodder crop)'),
   ('model_activity_classes', 'fixed', NULL, 'open', 'a flag (1: held at its base level)'),
   ('model_activity_classes', 'organic_yield_gap', NULL, 'open', 'a flag (1: the organic yield gap applies)'),
+  ('model_price_follows', 'eu_market', NULL, 'open', 'a flag (1: in the EU markets'' price step)'),
   ('model_activity_classes', 'pesticide', NULL, 'open', 'a flag (1: the pesticide yield loss reaches the crop)'),
   ('model_activity_classes', 'share_term_arable', NULL, 'open', 'a flag (1: in the PMP share term''s arable denominator)'),
   ('model_land_types', 'in_land_market', NULL, 'open', 'a flag (1: a column of the land market)');

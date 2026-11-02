@@ -411,9 +411,9 @@ def main():
                     "seconds": round(time.time() - t0), "options": vars(a),
                     # the effective settings of the run (also written next to the pickle as <out>.settings.toml)
                     "settings": run_settings.to_dict(), "settings_changed": run_settings.diff(),
-                    "market_supply_hessian": getattr(getattr(pmod, "_last_projected_model", None) or m,
+                    "market_supply_hessian": getattr((getattr(pmod, "_last_projected_model", None) or m).res,
                                                      "market_supply_hessian_info", None),
-                    "market_supply_hessian_log": getattr(getattr(pmod, "_last_projected_model", None) or m,
+                    "market_supply_hessian_log": getattr((getattr(pmod, "_last_projected_model", None) or m).res,
                                                          "market_supply_hessian_log", None),
                     "base_iterations": b.get("metadata", {}).get("n_outer_iterations"),
                     # CAPRI's stop rule at the last iteration, baseline and scenario (capri_mod/utils/capri_stop.py)

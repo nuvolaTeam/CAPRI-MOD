@@ -226,7 +226,7 @@ def test_norway_young_animals_hessian_and_bulk_prices_are_its_own(data):
     from capri_mod.model import CAPRIModel
     from capri_mod.market.market_module import MarketModule
     mm = MarketModule(data)
-    fake = types.SimpleNamespace(market_module=mm, _sum_frames=CAPRIModel._sum_frames)
+    fake = types.SimpleNamespace(market_module=mm, _sum_frames=CAPRIModel._sum_frames, sv=types.SimpleNamespace())
     assert CAPRIModel._yani_market_region(fake, "NO090000") == "NOR"
     assert CAPRIModel._yani_market_region(fake, "DE110000") == "EU27"
     h = lambda v: pd.DataFrame([[v]], index=["BARL"], columns=["BARL"])
@@ -243,7 +243,7 @@ def test_norway_young_animals_hessian_and_bulk_prices_are_its_own(data):
         assert {b: float(H.at["BARL", "BARL"]) for b, H in blocks.items()} == exp
     finally:
         del mm.eu_blocks
-    fake._sup_dev = {"NOR": pd.Series({"BARL": 0.2})}
+    fake.sv.sup_dev = {"NOR": pd.Series({"BARL": 0.2})}
     sig = pd.Series(0.0, index=mm.commodities)
     out = CAPRIModel.feed_bulk_price_ratios(fake, sig)
     assert out[("NO000000", "FCER")] > 1.0

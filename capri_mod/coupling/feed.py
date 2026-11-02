@@ -15,14 +15,14 @@ class FeedBlock:
         sig = price_signal if price_signal is not None else {}
         ratio = {c: 1.0 + float(sig.get(c, 0.0)) for c in mm.commodities} if hasattr(sig, "get") else {}
         # EU trade blocks: the member state's block prices (EU signal + the block's departure)
-        _dev = (getattr(self, "_eu_dev", None) or {}) if (getattr(mm, "eu_blocks", False) and price_signal is not None) else {}
+        _dev = (getattr(self.sv, "eu_dev", None) or {}) if (getattr(mm, "eu_blocks", False) and price_signal is not None) else {}
         rr = {rg: {c: v + float(d.get(c, 0.0)) for c, v in ratio.items()} for rg, d in _dev.items()}
         _fb = mm._feed_bulk_params()
         out = {k: mm.feed_bulk_price_ratio(k[0], k[1], rr.get(mm.eu_region_of_ms(k[0]), ratio))
                for k in (_fb.get("bulks") or {})}
         # Norway's supply models: its own bulks at its own market's prices (the EU signal plus Norway's departure;
         # K56)
-        _sd = (getattr(self, "_sup_dev", None) or {}) if price_signal is not None else {}
+        _sd = (getattr(self.sv, "sup_dev", None) or {}) if price_signal is not None else {}
         _ms_reg = {v: k for k, v in (getattr(mm, "SUP_NONEU_MS", {}) or {}).items()}
         for k in (_fb.get("bulks_sup") or {}):
             d_ = _sd.get(_ms_reg.get(k[0]))
@@ -36,19 +36,18 @@ class FeedBlock:
         index. Cereals and protein-rich feed: the member state's CAPRI bulk price indices (feedBlkPrice_); home-grown
         fodder through its balance; feeds without a market at base value."""
         from capri_mod.feed.ration import ration_model_for, rations_by_region, feed_prices_by_region
-        rm = getattr(self, "_ration_model", None)
+        rm = getattr(self.par, "ration_model", None)
         if rm is None:
             rm = ration_model_for(self.data, self.data_dir if hasattr(self, "data_dir") else None,
                                   getattr(self.supply_module, "pmp_source", "capri2030"),
                                   getattr(self.supply_module, "pmp_capri_parts", ()))
-            self._ration_model = rm
+            self.par.ration_model = rm
         # FEED BULK PRICES per member state (CAPRI feedBlkPrice_): the CES price index of the member state's
         # cereals (FCER) and protein-rich feed (FPRO, with cakes, DDGS, pulses, oils, milling by-products)
         bix = self.feed_bulk_price_ratios(price_signal)
         self.supply_module.seen.feed_bulk_ratio = bix
         state = {}
-        newprev = {}
-        _last = getattr(self, "_last_supply_results", None) or {}
+        _last = getattr(self.seen, "last_supply_results", None) or {}
         # FEEDING INSIDE THE SUPPLY MODELS (CAPRI: v_feedInpCoeff is chosen only there, together with herds and
         # fodder): no ration is chosen outside them. The ration state is the feed per head of each region's last
         # regional solution (base ration before the first), kept for what reads it: the market's feed index where a
@@ -62,21 +61,19 @@ class FeedBlock:
                 x = np.array([float(_ft.get(f_, 0.0)) / _h for f_ in r.feeds])
             else:
                 x = np.array(r.x0, dtype=float)
-            newprev[(reg, act)] = x
             state.setdefault(reg, {})[act] = {"x": dict(zip(r.feeds, x)), "dcost": 0.0,
                                               "nitr_kg": 0.0, "nitr_share": 0.0}
         self.supply_module.seen.ration_state = state
         # rations and CURRENT feed prices for feeding inside the supply model
         # the per-region rations dicts are built ONCE per ration model and reused, so the
         # feed-in-supply block cache (keyed on the dict's identity) hits; only prices change
-        if getattr(self, "_feed_rations_for", None) is not rm:
-            self._feed_rations_stable = rations_by_region(rm)
-            self._feed_rations_for = rm
+        if getattr(self.par, "feed_rations_for", None) is not rm:
+            self.par.feed_rations_stable = rations_by_region(rm)
+            self.par.feed_rations_for = rm
         _fp = feed_prices_by_region(rm, bix)
-        self.supply_module.seen.feed_rations = self._feed_rations_stable
+        self.supply_module.seen.feed_rations = self.par.feed_rations_stable
         self.supply_module.seen.feed_prices = _fp
-        self._ration_state = state
-        self._ration_prev = newprev
+        self.ev.ration_state = state
 
     def _set_feed_demand(self, supply_results) -> None:
         """Pass EU feed use (current and base) to the market.
@@ -117,8 +114,8 @@ class FeedBlock:
                     qp = float(fc.get(f"{a}_protein", float("nan"))) if fc is not None else float("nan")
                     # with the EU ration wired in: current cereals and protein
                     # feed per head from the ration; base from the base ration
-                    _rr = ((getattr(self, "_ration_state", None) or {}).get(region) or {}).get(a)
-                    _r0 = getattr(self, "_ration_model", None)
+                    _rr = ((getattr(self.ev, "ration_state", None) or {}).get(region) or {}).get(a)
+                    _r0 = getattr(self.par, "ration_model", None)
                     if _rr and _r0 is not None and (region, a) in _r0.rations:
                         _rb = _r0.rations[(region, a)]
                         xb = dict(zip(_rb.feeds, _rb.x0))
@@ -149,8 +146,8 @@ class FeedBlock:
             # change over all its feed
             _an = self.data.get("animal_numbers") if isinstance(self.data, dict) else None
             _lfc = self.data.get("livestock_feed_coef") if isinstance(self.data, dict) else None
-            _r0x = getattr(self, "_ration_model", None)
-            for region in (getattr(self, "_excluded_units", None) or []):
+            _r0x = getattr(self.par, "ration_model", None)
+            for region in (getattr(self.par, "excluded_units", None) or []):
                 if _an is None or region not in _an.index or region in supply_results:
                     continue
                 ms = self.member_state_of(region)

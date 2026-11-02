@@ -4,6 +4,21 @@ Inventory drafted 2 November 2026 (evening) by a read-only pass over the code at
 of docs/design/SUPPLY_STATE_INVENTORY.md; the moves follow STAGE3B_PLAN.md's pattern (slot objects par, sv, ev, seen,
 res; the old names raise through MOVED). Nothing was run for it.
 
+## Status (2 November 2026, night)
+
+Done, each batch's mini-EU Farm-to-Fork run identical to the previous one at 1e-12 (only the run's metadata differ):
+B1 (E0, E1: the state objects, the guard, the seven write-only fields removed; the state kit shared in
+capri_mod/statekit.py), B2 (E2, E3: the environment's par, ev, seen, res), B3 (E4, E5: the coupling's par and sv),
+B4 (E6, E7: the manure pools as paths, the coupling's seen, ev, res; the run script still records the Hessian),
+B5 (E8: units, six parameters with their citations, nine settings; the environment's copy of the manure availability
+slope replaced by fert/npk.endo_slope), B6 first part (T14 "price follows" as capri_data/codes/model_price_follows.csv
+at its seven sites; CAPRI's FEED_TRD read by the price step; the nutrient sources defined once).
+
+Left in the code, for B6's second part: T1-T3, T5-T7, T9-T13, T15-T17 and luc.py / p_balance.py's lists; T8's
+model.FEED_BULKS (CAPRI's FEED_TRD in another order: FOTH before FMIL; reading the set would change the order of the
+feed index's sums, so it waits for a run that shows whether the results stay identical); C10's two trace display
+thresholds (printing only).
+
 ## Decisions taken by precedent (2 November 2026; to be confirmed by the project lead if he objects)
 
 The open questions of section 7.2 are answered as stage 3 answered the same questions, unless marked for the project

@@ -5,15 +5,18 @@ docs/design/ARCHITECTURE_REFACTOR.md); the module-level names they use are envir
 module once environmental_module is loaded (capri_mod.utils.mixins.inject_names); the annotations are not evaluated.
 """
 from __future__ import annotations
+from capri_mod import statekit as _est   # the state objects' helpers (refactor stage 4)
+from capri_mod.fert.npk import endo_slope as _endo_slope
+from capri_mod.fert.inner_fert_dist import SOURCES as _FERT_SOURCES   # CAPRI's nutrient sources, one definition
 
 
 class NitrogenBlock:
     def set_manure_trade(self, on: bool) -> None:
         """CAPRI's manure trade on or off for the run (CAPRIModel; the base trade shares count only when on)."""
         on = bool(on)
-        if getattr(self, "manure_trade_on", True) != on:
-            self.__dict__.pop("_sub_cache", None)
-        self.manure_trade_on = on
+        if getattr(self.seen, "manure_trade_on", True) != on:
+            _est.discard(self.par, "sub_cache")
+        self.seen.manure_trade_on = on
 
     def _substitution(self, region):
         """(marginal availability/efficiency, manure-covered need per ha of crops at base).
@@ -24,7 +27,7 @@ class NitrogenBlock:
         plus imports) times availability/efficiency, spread per ha of base
         cropland: the part of the crops' need that manure covered at base.
         """
-        cache = self.__dict__.setdefault("_sub_cache", {})
+        cache = _est.setdefault(self.par, "sub_cache", {})
         if region in cache:
             return cache[region]
         out = None
@@ -36,7 +39,7 @@ class NitrogenBlock:
                 man0 = 0.0
                 if H is not None and region in H.index:
                     man0 = sum(float(H.at[region, a]) * self._n_excretion(region, a) for a in H.columns if a in ANIMALS)
-                mt = self.data.get("manure_trade") if getattr(self, "manure_trade_on", True) else None
+                mt = self.data.get("manure_trade") if getattr(self.seen, "manure_trade_on", True) else None
                 if mt is not None and region in mt.index:
                     man0 *= max(0.0, 1.0 - float(mt.at[region, "export_share"]))
                     imp_ha = float(mt.at[region, "import_kg_n_per_ha"])
@@ -100,17 +103,12 @@ class NitrogenBlock:
             return None
         if m0 is None or m0 <= 0:
             return g0 / eff
-        b = self.ENDO_MAN_AV_SLOPE
-        if g0 - m0 * b > max(0.999, g0):
-            b = (g0 - max(0.999, g0)) / m0
-        top = max(300.0, m0) - m0
-        if top > 0 and g0 + top * b < min(0.2, g0):
-            b = (min(0.2, g0) - g0) / top
+        b = _endo_slope(g0, m0, "N")        # CAPRI's slope and its two corrections, one definition (fert/npk.py)
         return max(g0 + b * m0, 0.0) / eff
 
     def _cached_row(self, key: str, region: str):
         """One region's row of a data table as a plain dict, cached (or None)."""
-        cache = self.__dict__.setdefault("_row_cache", {})
+        cache = _est.setdefault(self.par, "row_cache", {})
         ck = (key, region)
         if ck not in cache:
             t = self.data.get(key) if hasattr(self, "data") else None
@@ -180,7 +178,7 @@ class NitrogenBlock:
             nc = capri_ms(region)
             r8 = nc
         res = cls._CROP_N.get(r8)
-        ov = self.__dict__.get("_grass_override")
+        ov = getattr(self.ev, "grass_override", None)
         if ov and res and ov in res:
             res = dict(res); res["GRAS"] = res[ov]
         return res
@@ -196,15 +194,15 @@ class NitrogenBlock:
                 rate = float(v)
         if rate is None:
             rate = 0.0
-        ov = self.__dict__.get("_grass_override")
+        ov = getattr(self.ev, "grass_override", None)
         if ov and crop == "GRAS":
             # one of CAPRI's grassland activities: the GRAS rate in proportion to its need
             # (removal net of fixation) over the pooled GRAS need
-            self.__dict__["_grass_override"] = None
+            self.ev.grass_override = None
             try:
                 cn = self._capri_crop_n(region) or {}
             finally:
-                self.__dict__["_grass_override"] = ov
+                self.ev.grass_override = ov
             if ov in cn and "GRAS" in cn:
                 w_ov = max(cn[ov][0] - cn[ov][2], 0.0)
                 w_g = max(cn["GRAS"][0] - cn["GRAS"][2], 0.0)
@@ -218,7 +216,7 @@ class NitrogenBlock:
         with its own CAPRI removal, residues and fixation and its share of the GRAS mineral rate by
         need, at base yield; manure and residue credits keep the base distribution by need.
         Used for the supply model's extensification column and for the accounts, so the two agree."""
-        cache = self.__dict__.setdefault("_grass_delta_cache", {})
+        cache = _est.setdefault(self.par, "grass_delta_cache", {})
         key = (region, tuple(sorted((n_intensity or {}).items())))
         if key in cache:
             return cache[key]
@@ -231,19 +229,19 @@ class NitrogenBlock:
         out = {}
         try:
             for gc in ("GRAE", "GRAI"):
-                self.__dict__["_grass_override"] = gc
+                self.ev.grass_override = gc
                 out[gc] = self.compute_nitrogen_balance({"GRAS": 1.0}, y0, region, n_intensity)
         finally:
-            self.__dict__["_grass_override"] = None
+            self.ev.grass_override = None
         d = {k: float(out["GRAE"].get(k, 0.0)) - float(out["GRAI"].get(k, 0.0))
              for k in out["GRAE"] if isinstance(out["GRAE"].get(k), (int, float))}
         rates = []
         for gc in ("GRAE", "GRAI"):
-            self.__dict__["_grass_override"] = gc
+            self.ev.grass_override = gc
             try:
                 rates.append(self._base_mineral_rate(region, "GRAS"))
             finally:
-                self.__dict__["_grass_override"] = None
+                self.ev.grass_override = None
         d["mineral_rate"] = rates[0] - rates[1]
         cache[key] = d
         return d
@@ -264,7 +262,7 @@ class NitrogenBlock:
         CAPRI spreads available manure and residue N over crops BY NEED (NUTNED_,
         fertDistExcr_); the base mineral rate is the model's crop-need weight, so a hectare
         of fallow (no need, no fertiliser) receives no manure or residue credit."""
-        cache = self.__dict__.setdefault("_need_base_cache", {})
+        cache = _est.setdefault(self.par, "need_base_cache", {})
         if region in cache:
             return cache[region]
         M0 = A0 = Ma = 0.0
@@ -283,7 +281,7 @@ class NitrogenBlock:
 
     def _residue_availability(self, region):
         """(availability of residue N to crops, base ARABLE residue N per unit of arable crop need)."""
-        cache = self.__dict__.setdefault("_res_av_cache", {})
+        cache = _est.setdefault(self.par, "res_av_cache", {})
         if region in cache:
             return cache[region]
         av, r0 = 0.0, 0.0
@@ -325,8 +323,8 @@ class NitrogenBlock:
         ys = yields_scen.get(activity) if hasattr(yields_scen, "get") else None
         mi = n_intensity or {}
         key = (region, activity, None if y is None else float(y), None if ys is None else float(ys),
-               mi.get(activity), mi.get("__credit__"), bool(getattr(self, "manure_trade_on", True)))
-        memo = self.__dict__.setdefault("_unit_nb_memo", {})
+               mi.get(activity), mi.get("__credit__"), bool(getattr(self.seen, "manure_trade_on", True)))
+        memo = _est.setdefault(self.par, "unit_nb_memo", {})
         r = memo.get(key)
         if r is None:
             r = self.compute_nitrogen_balance({activity: 1.0}, yields, region, n_intensity, yields_scen=yields_scen)
@@ -442,7 +440,7 @@ class NitrogenBlock:
         # (tools/build/build_manure_trade_base.py: 1.2 Mt N traded between regions).
         # only where the run trades manure (CAPRI's manureTradeNew; a scenario setting held for its baseline: without
         # it, as JRC121368's CAPRI, every region keeps all its manure, Sprint 9j)
-        _mt = self.data.get("manure_trade") if (hasattr(self, "data") and getattr(self, "manure_trade_on", True)) else None
+        _mt = self.data.get("manure_trade") if (hasattr(self, "data") and getattr(self.seen, "manure_trade_on", True)) else None
         _exp_sh, _imp_ha = 0.0, 0.0
         if _mt is not None and region in getattr(_mt, "index", []):
             _exp_sh = float(_mt.at[region, "export_share"])
@@ -591,10 +589,10 @@ class NitrogenBlock:
         capacity and the caps were scaled to report an allocation), converged. mode_crops: the crop areas CAPRI's
         prior modes are fixed at (the supply model's starting point; None: the current areas)."""
         from capri_mod.fert.inner_fert_dist import InnerFertDist
-        inner = self.__dict__.get("_inner_fert")
+        inner = getattr(self.par, "inner_fert", None)
         if inner is None:
-            inner = self._inner_fert = InnerFertDist()
-        inner.set_variant(bool(getattr(self, "manure_trade_on", True)))
+            inner = self.par.inner_fert = InnerFertDist()
+        inner.set_variant(bool(getattr(self.seen, "manure_trade_on", True)))
         if cal_priors is not None and cal_priors[0][1] == inner.variant:
             inner._pri_cal[cal_priors[0]] = cal_priors[1]       # the regional model's calibrated priors
         if inner.capri_region(region) is None:
@@ -615,7 +613,7 @@ class NitrogenBlock:
             - float(nb_raw.get("n_organic_input", 0.0))
         # the N the ammonia options keep in housing, storage and spreading stays in the manure (CAPRI: lower GASANI,
         # higher v_ManureNPK) - set per region by the accounts above
-        E += float(getattr(self, "_n_kept_last", getattr(self, "_nh3_saved_last", 0.0)) or 0.0)
+        E += float(getattr(self.ev, "n_kept_last", getattr(self.ev, "nh3_saved_last", 0.0)) or 0.0)
         C = float(nb_raw.get("n_residue_pool", 0.0))
         av = float(self._residue_availability(region)[0] or 0.0)
         caps, gcaps = None, {}
@@ -635,7 +633,7 @@ class NitrogenBlock:
             capa = sum(v * ar_.get(g, 0.0) for (g, s_), v in caps.items() if s_ == "MINE" and not isinstance(v, tuple))
             free = [g for g in ar_ if (g, "MINE") not in caps]
             if capa > 0 and not free:
-                cap_scale = max(1.0, M / (0.998 * capa))
+                cap_scale = max(1.0, M / (float(_settings().get("fertiliser.cap_room")) * capa))
                 caps2 = {k: (v * cap_scale if (k[1] == "MINE" and not isinstance(v, tuple)) else v) for k, v in caps.items()}
                 out = inner.allocate(region, crops, M, E, C, av, crop_factor=fac, caps=caps2, mode_crop_areas=mode_crops)
         if out is None and caps:
@@ -647,7 +645,7 @@ class NitrogenBlock:
             return None
         rows = []
         for g, A in out["area"].items():
-            ph = {s_: float(out["per_ha"].get((g, s_), 0.0)) for s_ in ("MINE", "EXCR", "CRES")}
+            ph = {s_: float(out["per_ha"].get((g, s_), 0.0)) for s_ in _FERT_SOURCES}
             rows.append(dict(region=region, capri_region=out["capri_region"], ngrp=g, area_kha=float(A),
                              mine_kg_ha=ph["MINE"], excr_kg_ha=ph["EXCR"], cres_kg_ha=ph["CRES"],
                              mine_cap_kg_ha=float(gcaps.get(g, float("nan"))) if gcaps else float("nan"),
@@ -694,7 +692,7 @@ class NitrogenBlock:
         from capri_mod.supply import ammonia_techs as _at, n_cascade as _nc
         from capri_mod.supply.n_leaching import APPL
         out = []
-        tm = (getattr(self, "_amm_tm", None) or {}).get(region, {})
+        tm = (getattr(self.par, "amm_tm", None) or {}).get(region, {})
         for a_ in ANIMALS:
             x_ = float(acts.get(a_, 0.0) or 0.0)
             subs = tm.get(a_) or []
@@ -722,12 +720,12 @@ class NitrogenBlock:
     def _mineral_n2o_n(self, region):
         """(direct, indirect) N2O-N per unit of mineral N: CAPRI's from the region's MITERRA fractions
         (n_cascade.mineral_n2o_n), else IPCC's EF1 and 10% x EF4."""
-        c_ = self.__dict__.setdefault("_min_n2o_cache", {})
+        c_ = _est.setdefault(self.par, "min_n2o_cache", {})
         if region not in c_:
             from capri_mod.supply import n_cascade as _nc, n_leaching as _nl
             rs = _nl.capri_region(region)
             dn = _nc.mineral_n2o_n(_nc.load()[1].get(rs, {}), EF_SOIL_N2O_INDIRECT) if rs else None
-            c_[region] = dn if dn else (EF_SOIL_N2O_DIRECT, 0.10 * EF_SOIL_N2O_INDIRECT)
+            c_[region] = dn if dn else (EF_SOIL_N2O_DIRECT, param("FRAC_GASF") * EF_SOIL_N2O_INDIRECT)
         return c_[region]
 
     def leaching(self, region, acts, nb, supply_result=None):

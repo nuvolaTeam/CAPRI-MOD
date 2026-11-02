@@ -46,7 +46,7 @@ def run(mode: str, regions, shock: float) -> pd.DataFrame:
         b = m.run(scenario="BASELINE", regions=regions, max_outer_iter=1)
         # the regional models alone at the shocked prices (no market feedback), with the baseline's policy settings
         sig = pd.Series({c: shock for c in SHOCKED})
-        s = m.supply_module.run(price_signals=sig, policy_scenario=getattr(m, "_last_spol", None), regions=regions)
+        s = m.supply_module.run(price_signals=sig, policy_scenario=getattr(m.seen, "last_spol", None), regions=regions)
     rows = {}
     for g, acts in GROUPS.items():
         a0 = sum(float(b["supply"][r].activities.get(a, 0.0)) for r in regions for a in acts)

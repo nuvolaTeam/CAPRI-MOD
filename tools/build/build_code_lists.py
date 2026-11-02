@@ -200,6 +200,13 @@ def main():
                        ("capri_mod/supply/n_cascade.py", "RUNH_TECHS"), ("capri_mod/supply/n_cascade.py", "APPL_TECHS"),
                        ("capri_mod/supply/n_leaching.py", "APPL")):
         problems += [f"{path} {name}: {t} is not in CAPRI's MitiTechAmm" for t in literal(path, name) if t not in amm]
+    # the prices that follow a market's (codes/model_price_follows.csv, declared; refactor stage 4)
+    with open(OUT / "model_price_follows.csv", newline="", encoding="utf-8") as fh:
+        for r in csv.DictReader(fh):
+            if r["activity"] not in capri_of:
+                problems.append(f"model_price_follows.csv: {r['activity']} is not a model activity")
+            if r["commodity"] not in comm_capri:
+                problems.append(f"model_price_follows.csv: {r['commodity']} is not a model commodity")
     split_acts = set(read_set(a.sets, "SplitActs"))
     with open(OUT / "model_cattle_splits.csv", newline="", encoding="utf-8") as fh:
         for r in csv.DictReader(fh):
@@ -226,6 +233,8 @@ def main():
     # and of each activity, crop-diversification groups, fodder crops
     write(OUT / "capri" / "landTypesMrk.csv", ("code", "text"), sorted(read_set(a.sets, "landTypesMrk").items()))
     write(OUT / "capri" / "FODCRP.csv", ("code", "text"), sorted(read_set(a.sets, "FODCRP").items()))
+    # CAPRI's traded feed bulks (global/fromimpact/sets.gms FEED_TRD), in CAPRI's set order (refactor stage 4)
+    write(OUT / "capri" / "FEED_TRD.csv", ("code", "text"), list(read_set(a.sets, "FEED_TRD").items()))
     write(OUT / "capri" / "landTypes_to_pact.csv", ("land_type", "pact"), sorted(pairs("landTypes_to_pact")))
     write(OUT / "capri" / "cropDivGrps_mCact.csv", ("group", "mcact"), sorted(pairs("cropDivGrps_mCact")))
     write(OUT / "capri" / "MS_RU.csv", ("ms", "ru"), sorted((m, r) for m, r in pairs("Map_RR") if m in ms_ and r in ru_))
