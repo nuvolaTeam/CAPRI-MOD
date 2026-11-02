@@ -14,10 +14,20 @@ B5 (E8: units, six parameters with their citations, nine settings; the environme
 slope replaced by fert/npk.endo_slope), B6 first part (T14 "price follows" as capri_data/codes/model_price_follows.csv
 at its seven sites; CAPRI's FEED_TRD read by the price step; the nutrient sources defined once).
 
-Left in the code, for B6's second part: T1-T3, T5-T7, T9-T13, T15-T17 and luc.py / p_balance.py's lists; T8's
-model.FEED_BULKS (CAPRI's FEED_TRD in another order: FOTH before FMIL; reading the set would change the order of the
-feed index's sums, so it waits for a run that shows whether the results stay identical); C10's two trace display
-thresholds (printing only).
+B6 second part (3 November 2026, night): T1 (_CAPRI_CROP from the crosswalk's data and supply-model members), T2
+(OWN_RESIDUE_CROPS from CAPRI's CACT_TO_NGRP and PERM_NGRP, exported; PERM_NGRP read in fert/npk.py and
+inner_fert_dist.py too), T3 and T5 (the grassland and dairy splits from the crosswalk), T8 (model.FEED_BULKS from
+CAPRI's FEED_TRD, its own commit and run), T12 (the bridge's direct map derived: the crops whose CAPRI activity is the
+market product's CAPRI code), T13 in the bridge (the dairy pairs from the market's DAIRY_TRADED), luc.py's land types
+from model_land_types.csv.
+
+Left in the code, with the reason: T6 (item names of data files, the files' own keys); T7 and T17 (the model's own
+row and class names, as HISTOSOL_CLASSES); T9 (the market supply's feed columns: their CAPRI source not determined);
+T10 and T11 (the livestock products' market and the animals of each meat market: a declared table to write; SHGM
+counts in SGMT's supply although its price source is MILK, so the inverse of the price source is not this map);
+T15, T16 (one pair, diagnostics lists); luc.py CLS and p_balance.py ITEMS (CAPRI's LUC classes and P balance rows,
+sets to check); the market's DAIRY_TRADED and DAIRY_PRODUCTS (market code; CAPRI's DAIRY_DEF has another order); C10's
+two trace display thresholds (printing only).
 
 ## Decisions taken by precedent (2 November 2026; to be confirmed by the project lead if he objects)
 
