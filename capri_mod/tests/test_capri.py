@@ -310,8 +310,8 @@ def test_manure_p_and_k_have_markets_of_their_own(model):
         sm = model.supply_module
         for r in regs:
             mo = sm._models[r]
-            pk = mo._pool_cols_pk
-            assert set(pk) == {"P", "K"} and len({*mo._pool_cols, *pk["P"], *pk["K"]}) == 6
+            pk = mo.ev.pool_cols_pk
+            assert set(pk) == {"P", "K"} and len({*mo.ev.pool_cols, *pk["P"], *pk["K"]}) == 6
             Q, c, A, bb, y = mo._last_aug
             for nut, (je, ji) in pk.items():
                 assert abs(float(c[je]) - mo.manure_pool_price_pk[nut]) < 1e-9 and abs(float(c[ji]) + float(c[je])) < 1e-9
@@ -341,9 +341,9 @@ def test_manure_market_and_ammonia_options_in_every_eu_solve(model):
     b = model.run(scenario="BASELINE", regions=regs, max_outer_iter=2)
     try:
         mo = model.supply_module._models["BL210000"]
-        assert mo._mctx() is not None and mo._need_row is not None
+        assert mo._mctx() is not None and mo.ev.need_row is not None
         if model.use_manure_market:
-            je, ji = mo._pool_cols
+            je, ji = mo.ev.pool_cols
             Q, c, A, bb, y = mo._last_aug
             assert abs(float(c[je]) - float(mo.manure_pool_price)) < 1e-9 and abs(float(c[ji]) + float(c[je])) < 1e-9
         if "NO080000" in regs:
@@ -3649,7 +3649,7 @@ def test_land_rows_are_equalities_and_histosol_fallow_keeps_its_land(model):
     area stays in its land type on both rows of the pair (on the upper row alone it was held at zero)."""
     model.run(scenario="BASELINE", regions=["IR010000"], max_outer_iter=1)
     mo = model.supply_module._models["IR010000"]
-    lab = list(mo._aug_labels)
+    lab = list(mo.ev.aug_labels)
     _Q, _c, A, b, _y = mo._last_aug           # the augmented problem the land-market solve used
     for row in ("arable_land", "permanent_land", "grassland"):
         if row in lab and row + "_lo" in lab:
@@ -3673,7 +3673,7 @@ def test_capri_land_rents_at_the_2030_calibration_point(model):
     pm = getattr(pmod, "_last_projected_model", None) or model
     mo = pm.supply_module._models["IR010000"]
     rents = pd.read_csv(root / "capri_data" / "2017" / "supply" / "land_rents_2030.csv", index_col=0).loc["IR010000"]
-    rr = mo._land_rent_rows
+    rr = mo.ev.land_rent_rows
     assert abs(rr["arable_land"] - rents["rent_arac"]) < 1e-6 and abs(rr["grassland"] - rents["rent_gras"]) < 1e-6
     assert (getattr(mo.par, "nlp_cal", None) or {}).get("residual", 1.0) < 1e-6
     drift = res.baseline[2030]["metadata"].get("base_calibration_drift") or [0.0]

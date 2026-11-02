@@ -24,7 +24,7 @@ class ManureBlock:
         worst_key = {"N": getattr(self, "_pool_worst_key", "")}
         held = self.__dict__.setdefault("_pool_pk", {})
         for nut in ("P", "K"):
-            if not any((getattr(mo, "_pool_cols_pk", None) or {}).get(nut) for mo in getattr(sm, "_models", {}).values()):
+            if not any((getattr(mo.ev, "pool_cols_pk", None) or {}).get(nut) for mo in getattr(sm, "_models", {}).values()):
                 continue
             st = held.setdefault(nut, {"_pool_trace": [], "_pool_imbalance": 0.0})
             n_state = {k: self.__dict__.get(k) for k in _POOL_STATE}
@@ -79,11 +79,11 @@ class ManureBlock:
         sched, es, sup = {}, {}, {}
         for reg, mo in getattr(sm, "_models", {}).items():
             if prod == "N":
-                pc = getattr(mo, "_pool_cols", []) or []
-                s0 = float(getattr(mo, "_manure_supply0", 0.0) or 0.0)
+                pc = getattr(mo.ev, "pool_cols", []) or []
+                s0 = float(getattr(mo.res, "manure_supply0", 0.0) or 0.0)
             else:
-                pc = (getattr(mo, "_pool_cols_pk", None) or {}).get(prod) or []
-                s0 = float((getattr(mo, "_manure_supply0_pk", None) or {}).get(prod, 0.0) or 0.0)
+                pc = (getattr(mo.ev, "pool_cols_pk", None) or {}).get(prod) or []
+                s0 = float((getattr(mo.res, "manure_supply0_pk", None) or {}).get(prod, 0.0) or 0.0)
             aug = getattr(mo, "_last_aug", None)
             if len(pc) != 2 or aug is None or s0 <= 0:
                 continue
@@ -132,8 +132,8 @@ class ManureBlock:
             # export cap = manure produced at the current solution (a first draft
             # read the LAST row as the cap, but the land rows follow it, so the
             # cap came from the grassland row and exports vanished)
-            ev = getattr(mo, "_pool_manure_vec", None) if prod == "N" else \
-                (getattr(mo, "_pool_manure_vec_pk", None) or {}).get(prod)
+            ev = getattr(mo.res, "pool_manure_vec", None) if prod == "N" else \
+                (getattr(mo.res, "pool_manure_vec_pk", None) or {}).get(prod)
             emax = float(ev @ y[:len(ev)]) if ev is not None else 0.0
             k = self.POOL_OF_PREFIX.get(reg[:2], reg[:2])
             sched.setdefault(k, []).append((th_e, th_i, sl, max(emax, 0.0)))

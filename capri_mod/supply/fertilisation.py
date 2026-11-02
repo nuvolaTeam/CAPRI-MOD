@@ -230,8 +230,8 @@ class FertilisationBlock:
                                            yields_scen=self._yields_scen_now())
                   for a in acts}
         eN = np.array([float(unitsN[a].get("n_manure_applied", 0.0)) for a in acts])
-        pool = [int(p_) for p_ in (getattr(self, "_pool_cols", None) or []) if int(p_) < n_cols]
-        lt = list(getattr(self, "_land_types_used", None) or [])
+        pool = [int(p_) for p_ in (getattr(self.ev, "pool_cols", None) or []) if int(p_) < n_cols]
+        lt = list(getattr(self.ev, "land_types_used", None) or [])
         land_cols = [n + lt.index(t) for t in ("ARAC", "GRAS", "FRUN") if t in lt and n + lt.index(t) < n_cols] \
             if len(lt) and n + len(lt) <= n_cols else []
         crop_cols = [j for j, a in enumerate(acts) if a in CROPS]
@@ -331,7 +331,7 @@ class FertilisationBlock:
                 # CAPRI trades MANP and MANK as products of their own (supply_model.gms ManureNPK_, e_netMTrade by
                 # FOUT): the P or K columns of the region's own pool, 1 t P2O5 / K2O each (until 31 October 2026 the
                 # N columns carried P and K in the region's manure proportions, DEP-10)
-                pk_ = [int(j_) for j_ in ((getattr(self, "_pool_cols_pk", None) or {}).get(nut) or []) if int(j_) < n_cols]
+                pk_ = [int(j_) for j_ in ((getattr(self.ev, "pool_cols_pk", None) or {}).get(nut) or []) if int(j_) < n_cols]
                 if len(pk_) == 2:
                     Ecols += [(pk_[0], -1.0), (pk_[1], 1.0)]
             out["nutrients"][nut] = {
@@ -485,9 +485,9 @@ class FertilisationBlock:
             unit[a] = float(env_.unit_nitrogen_balance(a, ycur, rid, mi, yields_scen=self._yields_scen_now())
                             .get("n_mineral_input", 0.0))
             mp[j] = unit[a]
-        pc = getattr(self, "_pool_cols", None) or []
+        pc = getattr(self.ev, "pool_cols", None) or []
         if len(pc) == 2:
-            sub = float(getattr(self, "_pool_avail", 0.0) or 0.0)
+            sub = float(getattr(self.ev, "pool_avail", 0.0) or 0.0)
             if pc[0] < A.shape[1]:
                 mp[pc[0]] = sub                 # export: the row has -(1 - sub): -1 organic, +sub mineral
             if pc[1] < A.shape[1]:
@@ -796,7 +796,7 @@ class FertilisationBlock:
         k = labels.index("N_balance")
         A2, b2 = Aa.copy(), ba.copy()
         base_area = float(sum(v for a_, v in self._base_levels().items() if a_ in CROPS))
-        nl = getattr(self, "_nrow_land", None)
+        nl = getattr(self.ev, "nrow_land", None)
         if nl:
             cols, L0sum, tgt = nl
             for c_ in cols:

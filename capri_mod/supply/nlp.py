@@ -15,16 +15,16 @@ class NLPBlock:
         lab = list(self.acts)
         n = len(lab)
         extra = {}
-        lt = list(getattr(self, "_land_types_used", None) or [])
+        lt = list(getattr(self.ev, "land_types_used", None) or [])
         if lt and n + len(lt) <= n_cols:
             for k_, t in enumerate(lt):
                 extra[n + k_] = "land_" + t
-            if getattr(self, "_alloc_cols", 0):
+            if getattr(self.ev, "alloc_cols", 0):
                 extra[n + len(lt)] = "alloc_mineral_N"
-        pc = getattr(self, "_pool_cols", None) or []
+        pc = getattr(self.ev, "pool_cols", None) or []
         if len(pc) == 2:
             extra[int(pc[0])] = "manure_export"; extra[int(pc[1])] = "manure_import"
-        for nut_, pk_ in (getattr(self, "_pool_cols_pk", None) or {}).items():
+        for nut_, pk_ in (getattr(self.ev, "pool_cols_pk", None) or {}).items():
             if len(pk_) == 2:
                 extra[int(pk_[0])] = f"manure_export_{nut_}"; extra[int(pk_[1])] = f"manure_import_{nut_}"
         if getattr(self.ev, "grass_col", None) is not None:
@@ -111,7 +111,7 @@ class NLPBlock:
         rats = getattr(self, "feed_rations", None) or {}
         self.res.fd_model = None
         lab_row = list(getattr(self, "_row_labels", []) or [])
-        labels = list(getattr(self, "_aug_labels", None) or [])
+        labels = list(getattr(self.ev, "aug_labels", None) or [])
         if len(labels) != A.shape[0]:
             labels = lab_row if len(lab_row) == A.shape[0] else None
         if labels is None:
@@ -147,9 +147,9 @@ class NLPBlock:
         spec = dict(Q=Q, c=c, A=A, b=b, labels=labels, acts=list(self.acts), rations=rats, fodder=fod, x_base=xb,
                     prices=getattr(self, "feed_prices", None), req_extra=_rx, feed_ghg=self._ghg_feed_cost(),
                     npk=npk, drop_labels=drop, cap_rules=self._cap_rules_spec(), ghg_min=ghg_min,
-                    land_rent_rows=dict(getattr(self, "_land_rent_rows", None) or {}), **abat)
-        if npk is not None and getattr(self, "_alloc_cols", 0):
-            spec["fix_cols"] = {n + len(getattr(self, "_land_types_used", [])): 0.0}
+                    land_rent_rows=dict(getattr(self.ev, "land_rent_rows", None) or {}), **abat)
+        if npk is not None and getattr(self.ev, "alloc_cols", 0):
+            spec["fix_cols"] = {n + len(getattr(self.ev, "land_types_used", [])): 0.0}
         self.res.last_feed_dm = None
         self.res.last_feed_t = None
         self.res.nlp_ok = False
@@ -258,7 +258,7 @@ class NLPBlock:
                     if spec.get("catc"):
                         # the requirement's catch-crop N was put on the row as a constant; the
                         # NLP form's catch-crop share carries it (catc_n), so the constant is taken back out
-                        npk["n_rows_rhs_add"] = {"N_balance": float(getattr(self, "_cover_dbf_nb", 0.0) or 0.0)}
+                        npk["n_rows_rhs_add"] = {"N_balance": float(getattr(self.ev, "cover_dbf_nb", 0.0) or 0.0)}
                     spec["drop_labels"] = list(spec["drop_labels"]) + ["N_balance"]
             if cal is not None:
                 spec["dq"] = np.array([cal["dq"].get(l_, 0.0) for l_ in cols])

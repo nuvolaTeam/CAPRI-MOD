@@ -30,8 +30,8 @@ class LandBlock:
         the current rows at base; total land <= base total; grassland >= (1 -
         allowance) x base (CAPRI Green Deal default allowance 0%). Returns None
         where the region has no land-market data."""
-        self._need_row = None
-        self._nrow_land = None
+        self.ev.need_row = None
+        self.ev.nrow_land = None
         lm = getattr(self.data, "land_market", None)
         if not lm or "quad" not in lm:
             return None
@@ -80,11 +80,11 @@ class LandBlock:
         if _rents is None:
             raise ValueError(f"{self.data.region_id}: no CAPRI land rents for the land market (land_rents_<year>.csv)")
         _rlab = {"arable_land": "ARAC", "permanent_land": "FRUN", "grassland": "GRAS"}
-        self._land_rent_rows = {}
+        self.ev.land_rent_rows = {}
         for lab, coeffs in rowmap.items():
             t_ = _rlab.get(lab)
             m_ = float(_rents.get(t_, 0.0)) if _rents.get(t_, 0.0) == _rents.get(t_, 0.0) else 0.0
-            self._land_rent_rows[lab] = m_
+            self.ev.land_rent_rows[lab] = m_
             for j, cf in coeffs:
                 ca[n + j] += m_ * cf
             # the activities' side of the same calibration (CAPRI's FOC at the calibration point, prep_cal.gms /
@@ -110,7 +110,7 @@ class LandBlock:
                     Aa[i_nb_, n + li[t]] -= tgt_
                 ba[i_nb_] -= tgt_ * float(sum(L0[li[t]] for t in lt_))
                 # for a relaxed target (_relax_n_target): the land columns and base land
-                self._nrow_land = ([n + li[t] for t in lt_], float(sum(L0[li[t]] for t in lt_)), tgt_)
+                self.ev.nrow_land = ([n + li[t] for t in lt_], float(sum(L0[li[t]] for t in lt_)), tgt_)
         # ---- FERTILISER ALLOCATION (CAPRI supply_model.gms NUTNED_): manure
         # REPLACES mineral fertiliser. Mineral N becomes a variable M >= crop need
         # - availability x manure applied (>= 0). Crops' CURRENT mineral N is
@@ -123,7 +123,7 @@ class LandBlock:
         # on M at CAPRI's price (UVAG NITF) with the per-ha charge added back;
         # constants shift by the allocation row's base dual (= that price).
         k_extra = 0
-        self._cover_dbf_nb = 0.0
+        self.ev.cover_dbf_nb = 0.0
         if "N_balance" in labels:
             srow = getattr(self, "_surplus_row", None)
             nmin = srow[2] if srow is not None and len(srow) > 3 else None
@@ -161,20 +161,20 @@ class LandBlock:
                     labels.append("alloc_mineral_N")
                     ca = np.concatenate([ca, [pf]])
                     ca[:n] = ca[:n] - pf * (nmc + u) + pf * a_av * e
-                    self._alloc_m0 = float(nmc @ np.maximum(x0, 0.0))
-                    self._alloc_row = Aa.shape[0] - 1
+                    self.ev.alloc_m0 = float(nmc @ np.maximum(x0, 0.0))
+                    self.ev.alloc_row = Aa.shape[0] - 1
                     k_extra = 1
                     # CAPRI's catch crops (NUTNED_ l. 1076, e_BIOFIX): their N is an input of the
                     # balance and supplies crop need, so mineral N may fall by as much
                     dbf = self._cover_n_increment()
                     if dbf > 0:
                         ba[i_nb] -= dbf
-                        ba[self._alloc_row] += dbf
-                        self._cover_dbf_nb = dbf          # (the NLP form's chosen catch crops replace it)
+                        ba[self.ev.alloc_row] += dbf
+                        self.ev.cover_dbf_nb = dbf          # (the NLP form's chosen catch crops replace it)
         alloc_k = k_extra
-        self._alloc_cols = alloc_k
-        self._pool_cols = []
-        self._pool_cols_pk = {}
+        self.ev.alloc_cols = alloc_k
+        self.ev.pool_cols = []
+        self.ev.pool_cols_pk = {}
         # ---- NATIONAL MANURE MARKET (CAPRI e_costMTrade, manuremarket/*). The
         # balance ALREADY makes manure replace mineral N linearly (availability
         # a, CAPRI fertiliser_substitution): the animals' row terms are about
@@ -249,10 +249,10 @@ class LandBlock:
                     capr = np.zeros(Aa.shape[1]); capr[:n] = -e; capr[pcols[0]] = 1.0
                     Aa = np.vstack([Aa, capr]); ba = np.concatenate([ba, [0.0]])
                     labels.append("manure_export_cap")
-                    self._pool_cols = pcols
-                    self._manure_supply0 = man0
-                    self._pool_manure_vec = e.copy()
-                    self._pool_avail = sub
+                    self.ev.pool_cols = pcols
+                    self.res.manure_supply0 = man0
+                    self.res.pool_manure_vec = e.copy()
+                    self.ev.pool_avail = sub
                     pool_k = 2
             # ---- CAPRI's P and K manure markets (manureTradeNew: e_netMTrade, e_costMTrade and the pools by FOUT,
             # MANP and MANK besides MANN; manuremarket/simu_manure_market.gms clears one market per nutrient). Their
@@ -284,9 +284,9 @@ class LandBlock:
                     labels.append(f"manure_export_cap_{nut}")
                     pkc[nut], pk0[nut], pkv[nut] = cols_k, grof, app.copy()
                     pool_k += 2
-                self._pool_cols_pk = pkc
-                self._manure_supply0_pk = pk0
-                self._pool_manure_vec_pk = pkv
+                self.ev.pool_cols_pk = pkc
+                self.res.manure_supply0_pk = pk0
+                self.res.pool_manure_vec_pk = pkv
         # ---- MANURE WITHIN CROP NEED (CAPRI supply_model.gms fertDistExcr_ +
         # NUTNED_, an EQUALITY with mineral N >= 0; its over-application term is
         # commented out): a region can hold only as much manure as its crops can
@@ -326,14 +326,14 @@ class LandBlock:
                     _nx = self._nitrate_extra()
                     man_now = man + np.array([float(_nx.get(a, 0.0)) for a in self.acts])
                     cap = np.zeros(Aa.shape[1]); cap[:n] = -need + sub_n * man_now
-                    pc_ = getattr(self, "_pool_cols", []) or []
+                    pc_ = getattr(self.ev, "pool_cols", []) or []
                     if len(pc_) == 2:
                         cap[pc_[0]] = -sub_n; cap[pc_[1]] = +sub_n
                     xb_ = np.maximum(self._base_levels().reindex(self.acts).fillna(0.0).values, 0.0)
                     v0 = float(cap[:n] @ xb_)
                     Aa = np.vstack([Aa, cap]); ba = np.concatenate([ba, [max(0.0, v0) + 1e-9 * max(1.0, float(need @ xb_))
                                                                          - self._cover_n_increment()]])
-                    self._need_row = Aa.shape[0] - 1
+                    self.ev.need_row = Aa.shape[0] - 1
                     labels.append("crop_need")
         k_extra = alloc_k + pool_k
         tot = np.zeros(n + k + k_extra); tot[n:n + k] = 1.0
@@ -374,11 +374,11 @@ class LandBlock:
         if extra_r:
             Aa = np.vstack([Aa] + extra_r); ba = np.concatenate([ba, extra_b])
             labels.extend([labels[i] + "_lo" for i, _c, _k in rows])
-        self._land_types_used = list(self.LAND_TYPES)
-        start = np.concatenate([x0, L0] + ([np.array([getattr(self, "_alloc_m0", 0.0)])] if alloc_k else [])
+        self.ev.land_types_used = list(self.LAND_TYPES)
+        start = np.concatenate([x0, L0] + ([np.array([getattr(self.ev, "alloc_m0", 0.0)])] if alloc_k else [])
                                + ([np.zeros(pool_k)] if pool_k else []))
         Qa, ca, Aa, ba, start = self._grass_intensity_column(Qa, ca, Aa, ba, start, labels, n, alloc_k)
         Qa, ca, Aa, ba, start = self._dairy_intensity_column(Qa, ca, Aa, ba, start, labels, n)
         Qa, ca, Aa, ba, start = self._histosol_columns(Qa, ca, Aa, ba, start, labels, n)
-        self._aug_labels = labels              # one label per row of the augmented problem (the NLP form reads them)
+        self.ev.aug_labels = labels              # one label per row of the augmented problem (the NLP form reads them)
         return Qa, ca, Aa, ba, start, rows

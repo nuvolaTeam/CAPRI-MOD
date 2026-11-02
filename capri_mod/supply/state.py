@@ -97,6 +97,19 @@ class RegionalEvalState(_Slots):
         # fertilisation (S5)
         "n_intensity",        # the mineral N intensity factors of the solve, by crop and the manure credit
         "nlp_mine_small",     # the fertiliser groups too small for the mineral-N row
+        # land (S6): the land market's layout in the augmented problem and the manure pools
+        "alloc_cols",         # the mineral-N allocation columns (0 or 1)
+        "alloc_m0",           # the allocation's start
+        "alloc_row",          # the allocation's row
+        "aug_labels",         # one label per row of the augmented problem
+        "cover_dbf_nb",       # the catch crops' N-balance term on the allocation row
+        "land_rent_rows",     # the land rent rows by label
+        "land_types_used",    # the land types of the problem
+        "need_row",           # the feed need row
+        "nrow_land",          # the land rows of the N row (columns, base land, target)
+        "pool_avail",         # the manure available to the pool
+        "pool_cols",          # the manure pool's export and import columns (N)
+        "pool_cols_pk",       # idem for P and K
     )
 
 
@@ -132,6 +145,11 @@ class RegionalResults(_Slots):
         # fertilisation (S5)
         "fert_tech_shares",   # the fertiliser technologies' shares
         "n_target_relaxed",   # the solve ended at JRC121368's relaxed N target
+        # land (S6): the manure pools, read by the manure market (coupling/manure.py)
+        "manure_supply0",     # the region's manure N supply at the start
+        "manure_supply0_pk",  # idem for P and K
+        "pool_manure_vec",    # the manure N by column
+        "pool_manure_vec_pk", # idem for P and K
     )
 
 
@@ -239,6 +257,23 @@ MOVED_REGIONAL: dict = {
     "_nlp_mine_small": "ev.nlp_mine_small",
     "_fert_tech_shares": "res.fert_tech_shares",
     "_n_target_relaxed": "res.n_target_relaxed",
+    # S6: land
+    "_alloc_cols": "ev.alloc_cols",
+    "_alloc_m0": "ev.alloc_m0",
+    "_alloc_row": "ev.alloc_row",
+    "_aug_labels": "ev.aug_labels",
+    "_cover_dbf_nb": "ev.cover_dbf_nb",
+    "_land_rent_rows": "ev.land_rent_rows",
+    "_land_types_used": "ev.land_types_used",
+    "_need_row": "ev.need_row",
+    "_nrow_land": "ev.nrow_land",
+    "_pool_avail": "ev.pool_avail",
+    "_pool_cols": "ev.pool_cols",
+    "_pool_cols_pk": "ev.pool_cols_pk",
+    "_manure_supply0": "res.manure_supply0",
+    "_manure_supply0_pk": "res.manure_supply0_pk",
+    "_pool_manure_vec": "res.pool_manure_vec",
+    "_pool_manure_vec_pk": "res.pool_manure_vec_pk",
 }
 #: the supply module's former attribute names
 MOVED_MODULE: dict = {

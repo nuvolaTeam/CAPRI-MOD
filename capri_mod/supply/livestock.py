@@ -165,7 +165,7 @@ class LivestockBlock:
             if lab.startswith("fodder_") and i < Aa.shape[0] and Aa[i, jg] != 0.0:
                 # GRAS's own coefficient is -u (row) or +u (band); production change u x dy per ha
                 col[i] = Aa[i, jg] * dy
-        nr = getattr(self, "_need_row", None)
+        nr = getattr(self.ev, "need_row", None)
         if nr is not None and nr < Aa.shape[0]:
             # the change in the unit balance's mineral N, the quantity every crop carries on this row and the accounts
             # apply (K19: it was the plain fertiliser rate, -3.65 against -39.9 t per 1000 ha in AT32; the model then
@@ -229,9 +229,9 @@ class LivestockBlock:
         cz_all = getattr(self.par, "cattle_cz", None) or {}
         pending = {}
         rows_ = [labels.index(l) for l in ("N_balance",) if l in labels]
-        for extra in ("_need_row", "_alloc_row"):
-            k = getattr(self, extra, None)
-            if k is not None and k < Aa.shape[0] and k not in rows_ and (extra != "_alloc_row" or getattr(self, "_alloc_cols", 0)):
+        for extra in ("need_row", "alloc_row"):
+            k = getattr(self.ev, extra, None)
+            if k is not None and k < Aa.shape[0] and k not in rows_ and (extra != "alloc_row" or getattr(self.ev, "alloc_cols", 0)):
                 rows_.append(k)
         ps = getattr(self, "_price_shock_now", None)
         pv = getattr(self.data, "livestock_product_value_by_market_coef", None)
@@ -388,9 +388,9 @@ class LivestockBlock:
         cal = getattr(self.par, "genet_cz", None) or {}
         pend = {}
         rows_ = [labels.index(l) for l in ("N_balance",) if l in labels]
-        for extra in ("_need_row", "_alloc_row"):
-            k = getattr(self, extra, None)
-            if k is not None and k < Aa.shape[0] and k not in rows_ and (extra != "_alloc_row" or getattr(self, "_alloc_cols", 0)):
+        for extra in ("need_row", "alloc_row"):
+            k = getattr(self.ev, extra, None)
+            if k is not None and k < Aa.shape[0] and k not in rows_ and (extra != "alloc_row" or getattr(self.ev, "alloc_cols", 0)):
                 rows_.append(k)
         ps = getattr(self, "_price_shock_now", None)
         pv = getattr(self.data, "livestock_product_value_by_market_coef", None)
@@ -490,9 +490,9 @@ class LivestockBlock:
         s0 = float(di["share_low"]); dm = float(di["dmann_rel"])
         col = np.zeros(Aa.shape[0])
         rows_ = [labels.index(l) for l in ("N_balance",) if l in labels]
-        for extra in ("_need_row", "_alloc_row"):
-            k = getattr(self, extra, None)
-            if k is not None and k < Aa.shape[0] and k not in rows_ and (extra != "_alloc_row" or getattr(self, "_alloc_cols", 0)):
+        for extra in ("need_row", "alloc_row"):
+            k = getattr(self.ev, extra, None)
+            if k is not None and k < Aa.shape[0] and k not in rows_ and (extra != "alloc_row" or getattr(self.ev, "alloc_cols", 0)):
                 rows_.append(k)
         for i in rows_:
             col[i] = float(Aa[i, jd]) * dm

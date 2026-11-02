@@ -1723,12 +1723,12 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
                 _yc = self._nlp_last_point(Qa, ca, Aa, ba, ya0)
             y = _yc
             n_ = len(x0); x_qp = y[:n_]
-            _nl = len(getattr(self, "_land_types_used", []))
-            self._last_mineral_n = float(y[n_ + _nl]) if getattr(self, "_alloc_cols", 0) else None
-            _pc = getattr(self, "_pool_cols", []) or []
+            _nl = len(getattr(self.ev, "land_types_used", []))
+            self._last_mineral_n = float(y[n_ + _nl]) if getattr(self.ev, "alloc_cols", 0) else None
+            _pc = getattr(self.ev, "pool_cols", []) or []
             self._last_manure_trade = (float(y[_pc[0]]), float(y[_pc[1]])) if len(_pc) == 2 else (0.0, 0.0)
             self._last_manure_trade_pk = {nut_: (float(y[c_[0]]), float(y[c_[1]]))
-                                          for nut_, c_ in (getattr(self, "_pool_cols_pk", None) or {}).items()
+                                          for nut_, c_ in (getattr(self.ev, "pool_cols_pk", None) or {}).items()
                                           if len(c_) == 2 and max(c_) < len(y)}
             self._last_aug = (Qa, ca, Aa, ba, y)
             _gc = getattr(self.ev, "grass_col", None)
@@ -1746,7 +1746,7 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
             b_ub = b_ub.copy()
             for i, coeffs, const in rows:
                 b_ub[i] = const + sum(cf * float(y[n_ + k]) for k, cf in coeffs)
-            self._land_solution = dict(zip(self._land_types_used, y[n_:].tolist()))
+            self._land_solution = dict(zip(self.ev.land_types_used, y[n_:].tolist()))
         else:
             self.ev.last_duals = None
             self._last_grass_z = 0.0
@@ -1756,14 +1756,14 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
             # CAPRI's grassland and dairy splits on the plain path too (regions without
             # land-market data: Ireland, Berlin, Hamburg, ...)
             _n0 = len(x0)
-            self._need_row = None
-            self._alloc_cols = 0
+            self.ev.need_row = None
+            self.ev.alloc_cols = 0
             _lab = list(getattr(self, "_row_labels", []))
             Qg, cg, Ag, bg, sg = self._grass_intensity_column(
                 self.Q, c_lin, A_ub, b_ub, np.asarray(x0, float), _lab, _n0, 0)
             Qg, cg, Ag, bg, sg = self._dairy_intensity_column(Qg, cg, Ag, bg, sg, _lab, _n0)
             Qg, cg, Ag, bg, sg = self._histosol_columns(Qg, cg, Ag, bg, sg, _lab, _n0)
-            self._aug_labels = _lab
+            self.ev.aug_labels = _lab
             self._last_hist_fallow = {}
             _yc = None
             _cols = (getattr(self.ev, "grass_col", None) is not None or getattr(self.ev, "dairy_col", None) is not None
@@ -3012,7 +3012,7 @@ class SupplyModule(ModuleStateMixin):
             result.manure_trade_pk = dict(getattr(model, "_last_manure_trade_pk", None) or {})
             result.mineral_n_alloc = _mineral_n_for_accounts(model)
             result.fert_npk = getattr(model.res, "last_npk", None)
-            result.manure_availability = getattr(model, "_pool_avail", 0.0)
+            result.manure_availability = getattr(model.ev, "pool_avail", 0.0)
             result.animal_n_relief = _merge_relief(model)
             result.manure_ni_nh3 = dict(getattr(model, "_manure_ni_nh3", None) or {})
             result.cover_crops = dict(getattr(model.res, "cover_solved", None) or getattr(model, "_cover", None) or {})
@@ -3026,7 +3026,7 @@ class SupplyModule(ModuleStateMixin):
             result.genetics_shift = dict(getattr(model.res, "last_genet_z", None) or {})
             result.histosol_fallow = dict(getattr(model, "_last_hist_fallow", None) or {})
             _ls = getattr(model, "_land_solution", None) or {}
-            result.land_types = {t_: float(_ls[t_]) for t_ in getattr(model, "_land_types_used", []) if t_ in _ls}
+            result.land_types = {t_: float(_ls[t_]) for t_ in getattr(model.ev, "land_types_used", []) if t_ in _ls}
             result.luc = _luc_of(model, result.land_types)
             result.n_target_relaxed = bool(getattr(model.res, "n_target_relaxed", False))
             if surplus_row and model._ni_inside() and getattr(model.res, "nlp_ok", False):
@@ -3065,7 +3065,7 @@ class SupplyModule(ModuleStateMixin):
                 result.manure_trade_pk = dict(getattr(model, "_last_manure_trade_pk", None) or {})
                 result.mineral_n_alloc = _mineral_n_for_accounts(model)
                 result.fert_npk = getattr(model.res, "last_npk", None)
-                result.manure_availability = getattr(model, "_pool_avail", 0.0)
+                result.manure_availability = getattr(model.ev, "pool_avail", 0.0)
                 result.animal_n_relief = _merge_relief(model)
                 result.manure_ni_nh3 = dict(getattr(model, "_manure_ni_nh3", None) or {})
                 result.cover_crops = dict(getattr(model.res, "cover_solved", None) or getattr(model, "_cover", None) or {})
@@ -3079,7 +3079,7 @@ class SupplyModule(ModuleStateMixin):
                 result.genetics_shift = dict(getattr(model.res, "last_genet_z", None) or {})
                 result.histosol_fallow = dict(getattr(model, "_last_hist_fallow", None) or {})
                 _ls = getattr(model, "_land_solution", None) or {}
-                result.land_types = {t_: float(_ls[t_]) for t_ in getattr(model, "_land_types_used", []) if t_ in _ls}
+                result.land_types = {t_: float(_ls[t_]) for t_ in getattr(model.ev, "land_types_used", []) if t_ in _ls}
                 result.luc = _luc_of(model, result.land_types)
                 result.n_target_relaxed = bool(getattr(model.res, "n_target_relaxed", False))
                 result.nitrate_n_extra = model._nitrate_extra()

@@ -144,9 +144,9 @@ class AbatementBlock:
         if l2 is not None and l3 is not None:
             out["nitr"] = (float(l2), float(l3))
         c = np.asarray(c, float).copy()
-        pc = getattr(self, "_pool_cols", None) or []
+        pc = getattr(self.ev, "pool_cols", None) or []
         if len(pc) == 2:
-            g_ = tax * float(getattr(self, "_pool_avail", 0.0) or 0.0) * (self._ef_mineral_n2o() + self._ef_mineral_lea()) \
+            g_ = tax * float(getattr(self.ev, "pool_avail", 0.0) or 0.0) * (self._ef_mineral_n2o() + self._ef_mineral_lea()) \
                 / 1000.0
             if pc[0] < len(c):
                 c[pc[0]] -= g_                       # export: paid the mineral N it was taken to buy
