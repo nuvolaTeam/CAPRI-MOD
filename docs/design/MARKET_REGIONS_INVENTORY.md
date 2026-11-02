@@ -428,3 +428,10 @@ market year is rebuilt on RM in stage 1; CAPRI's TARV tariffs replace tariffs.cs
 comparison); the young-animal timing is fixed in stage 2 in the current market solve (G2g later writes the same markets
 as G3's equations); the Farm-to-Fork and Green Deal gates after stages 1-4 and after stages 5-7
 (docs/design/MODEL_CONTENT_PLAN.md).
+
+Preparation done 2 November 2026 (branch market-rm, not yet merged): CAPRI's region lists are written by
+build_code_lists from sim_ini's sets as capri_data/codes/capri/RM.csv (45), RMTP.csv (42), RM_TO_RMTP.csv and
+RMEU_to_RM.csv, in CAPRI's set order, next to CAPRI's other sets, instead of the names shared/market_regions.csv,
+policy_blocks.csv and rm_to_rmtp.csv of §5 stage 1; the builder checks them against RALL and shared/rms_to_rm.csv
+against CAPRI's RMS_TO_RM. No model code reads them yet. The 37 sim_ini symbols the move and the ports need are
+extracted to capri_reference/simini/simini_21730 (tools/build/build_simini_reference.py).

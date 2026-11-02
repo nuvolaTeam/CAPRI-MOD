@@ -9,6 +9,10 @@ throughout may follow later). This builder writes:
                                               land and feed energy, RALL all regional units)
   capri_data/codes/capri/FEED_TO_O.csv  CAPRI's feed bulks and their products: feed, row
   capri_data/codes/capri/MS_RU.csv     CAPRI's member states and their regional units (MAP_RR x MS x RU)
+  capri_data/codes/capri/RM.csv, RMTP.csv, RM_TO_RMTP.csv, RMEU_to_RM.csv
+                                       CAPRI's market regions, trade-policy blocks, the block of each market region
+                                              and the EU's two market blocks, in CAPRI's set order (the market's move
+                                              onto CAPRI's regions, MARKET_REGIONS_INVENTORY.md stage 1)
   capri_data/codes/model_commodities.csv the model's 58 market commodities (MARKET_COMMODITIES): code,
                                               capri_code, mapping_source
 
@@ -170,6 +174,25 @@ def main():
             if r["code"] not in lt_mrk:
                 problems.append(f"model_land_types.csv: {r['code']} is not in CAPRI's landTypesMrk")
 
+    # CAPRI's market regions (the market's move onto CAPRI's regions, stage 1: MARKET_REGIONS_INVENTORY.md section 5):
+    # RM (45 market regions), RMTP (42 trade-policy blocks), RM_TO_RMTP, RMEU_to_RM (the EU's two market blocks), in
+    # CAPRI's set order; checked against RALL and against the behavioural regions' map shared/rms_to_rm.csv
+    rm, rmtp = read_set(a.sets, "RM"), read_set(a.sets, "RMTP")
+    rm_to_rmtp, rmeu_to_rm = pairs("RM_TO_RMTP"), pairs("RMEU_to_RM")
+    for name, codes in (("RM", rm), ("RMTP", rmtp)):
+        problems += [f"CAPRI's {name}: {c} is not in RALL" for c in codes if c not in capri["RALL"]]
+    blocks_of = {}
+    for r, t in rm_to_rmtp:
+        blocks_of.setdefault(r, []).append(t)
+        if t not in rmtp:
+            problems.append(f"CAPRI's RM_TO_RMTP: {t} is not in RMTP")
+    problems += [f"CAPRI's RM_TO_RMTP: {r} has {len(blocks_of.get(r, []))} trade-policy blocks, not one"
+                 for r in rm if len(blocks_of.get(r, [])) != 1]
+    problems += [f"CAPRI's RMEU_to_RM: {r} is not in RM" for _, r in rmeu_to_rm if r not in rm]
+    with open(ROOT / "capri_data" / "shared" / "rms_to_rm.csv", newline="", encoding="utf-8") as fh:
+        rms_rm = {(r["rms"], r["rm"]) for r in csv.DictReader(fh)}
+    if rms_rm != set(pairs("RMS_TO_RM")):
+        problems.append(f"shared/rms_to_rm.csv is not CAPRI's RMS_TO_RM: {sorted(rms_rm ^ set(pairs('RMS_TO_RM')))[:6]}")
     if problems:
         raise SystemExit("code lists not written:\n  " + "\n  ".join(problems))
     for s, d in capri.items():
@@ -185,6 +208,10 @@ def main():
     write(OUT / "capri" / "landTypes_to_pact.csv", ("land_type", "pact"), sorted(pairs("landTypes_to_pact")))
     write(OUT / "capri" / "cropDivGrps_mCact.csv", ("group", "mcact"), sorted(pairs("cropDivGrps_mCact")))
     write(OUT / "capri" / "MS_RU.csv", ("ms", "ru"), sorted((m, r) for m, r in pairs("Map_RR") if m in ms_ and r in ru_))
+    write(OUT / "capri" / "RM.csv", ("code", "text"), list(rm.items()))
+    write(OUT / "capri" / "RMTP.csv", ("code", "text"), list(rmtp.items()))
+    write(OUT / "capri" / "RM_TO_RMTP.csv", ("rm", "rmtp"), rm_to_rmtp)
+    write(OUT / "capri" / "RMEU_to_RM.csv", ("rmeu", "rm"), rmeu_to_rm)
     write(OUT / "model_commodities.csv", ("code", "capri_code", "mapping_source"), comms)
     differ = [(c, cc) for c, cc, _ in comms if c != cc]
     print(f"wrote {OUT.relative_to(ROOT)}: CAPRI's sets {', '.join(f'{s} {len(d)}' for s, d in capri.items())}; "

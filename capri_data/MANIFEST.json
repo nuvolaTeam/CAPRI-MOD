@@ -3652,6 +3652,46 @@
     "builder": "build_code_lists"
    }
   },
+  "capri_data/codes/capri/RM.csv": {
+   "description": "CAPRI RM: the market regions of the global market model, in CAPRI's set order (sets.gms; the market's move onto CAPRI's regions, MARKET_REGIONS_INVENTORY.md stage 1)",
+   "kind": "structure",
+   "rows": 45,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists"
+   }
+  },
+  "capri_data/codes/capri/RMEU_to_RM.csv": {
+   "description": "CAPRI RMEU_to_RM: the EU's market blocks and their market regions (sets.gms)",
+   "kind": "structure",
+   "rows": 2,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists"
+   }
+  },
+  "capri_data/codes/capri/RMTP.csv": {
+   "description": "CAPRI RMTP: the trade-policy blocks of the market model (tariffs and TRQs), in CAPRI's set order (sets.gms)",
+   "kind": "structure",
+   "rows": 42,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists"
+   }
+  },
+  "capri_data/codes/capri/RM_TO_RMTP.csv": {
+   "description": "CAPRI RM_TO_RMTP: the trade-policy block of each market region (sets.gms)",
+   "kind": "structure",
+   "rows": 45,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists"
+   }
+  },
   "capri_data/codes/capri/XX.csv": {
    "description": "CAPRI XX, the market model's products (arm/arm_sets.gms)",
    "kind": "structure",
