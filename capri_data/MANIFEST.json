@@ -4799,7 +4799,7 @@
   "capri_data/shared/model_parameters.csv": {
    "description": "model_parameters (no builder: a declared table)",
    "kind": "parameters",
-   "rows": 54,
+   "rows": 60,
    "columns": 7,
    "units": "to be established (value_units: open)",
    "read_by_model": [

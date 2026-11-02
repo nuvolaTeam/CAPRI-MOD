@@ -247,7 +247,7 @@ class YoungAnimalBlock:
                 if self._capri_price_update():
                     # CAPRI's price forecast on the young-animal prices the market cleared
                     yh = _cst.setdefault(self.sv, "capri_yani_hist", {})
-                    yh[(mr, g)] = ((yh.get((mr, g)) or []) + [float(r_t)])[-4:]
+                    yh[(mr, g)] = ((yh.get((mr, g)) or []) + [float(r_t)])[-self._capri_hist_len():]
                     cur[g] = float(self._capri_forecast(yh[(mr, g)], int(getattr(self.ev, "outer_iter_now", 0))))
                 else:
                     cur[g] = r0 + w * gap

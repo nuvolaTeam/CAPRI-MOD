@@ -26,6 +26,8 @@ from typing import Dict, Optional
 from capri_mod.params import param, param_table
 from capri_mod.data.definitions import CROPS_ON_LAND as _CROPS_ON_LAND   # N6
 from capri_mod.settings import setting
+from capri_mod.settings import current as _settings
+from capri_mod.units import M_N2O, M_N2O_N, M_NH3, M_NH3_N, M_CO2, M_UREA_N
 from capri_mod.fert.npk import need_yield_factor
 from capri_mod.data.definitions import (
     CROPS, ANIMALS, ALL_ACTIVITIES, NUTRIENTS, GHG_TYPES,
@@ -161,8 +163,6 @@ class EnvironmentalModule(EnvStateMixin, GHGBlock, NitrogenBlock, AmmoniaBlock, 
         # derivation (FertilizerModule) was removed on 23 October 2026 (PROXY_AUDIT S213, S214).
 
 
-    #: CAPRI's slope of manure availability on manure applied per ha (fert/endoManAvail.gms)
-    ENDO_MAN_AV_SLOPE = -0.0015
 
 
     #: CAPRI crop -> model crop (several CAPRI crops pooled by level)
@@ -427,12 +427,12 @@ class EnvironmentalModule(EnvStateMixin, GHGBlock, NitrogenBlock, AmmoniaBlock, 
         _dn = self._mineral_n2o_n(region)
         if "N2O_SOIL" in ghg:
             ghg["N2O_SOIL"] = (max(0.0, float(nb.get("n_mineral_input", 0.0))) / 1000.0
-                               * (_dn[0] + _dn[1]) * 44.0 / 28.0 * GWP_N2O)
+                               * (_dn[0] + _dn[1]) * M_N2O / M_N2O_N * GWP_N2O)
         ghg["N2O_CRO"] = (max(0.0, float(nb.get("n_crop_residues", 0.0) or 0.0)) / 1000.0
-                          * EF_SOIL_N2O_DIRECT * 44.0 / 28.0 * GWP_N2O)
+                          * EF_SOIL_N2O_DIRECT * M_N2O / M_N2O_N * GWP_N2O)
         # CO2 from urea on the same mineral N (CAPRI gases.gms (17): NMIN x urea share x 44/28)
         ghg["CO2_UREA"] = (max(0.0, float(nb.get("n_mineral_input", 0.0))) / 1000.0
-                           * self._co2_coefs(region)[1] * 44.0 / 28.0)
+                           * self._co2_coefs(region)[1] * M_CO2 / M_UREA_N)
 
         # CAPRI's N2O from drained organic soils (gases.gms N2OHIS, agriculture): per ha of the land-use
         # class, its organic-soil share x the climate-weighted IPCC 2013 factor (tools/build/build_histosol.py),
@@ -447,11 +447,11 @@ class EnvironmentalModule(EnvStateMixin, GHGBlock, NitrogenBlock, AmmoniaBlock, 
             for _c in ("crop", "grass"):
                 _f = float(_fa.get(_c, 0.0) or 0.0)
                 if _f > 0:
-                    _n2o_t -= _f * float(_h.get(f"ef_n2o_{_c}", 0.0) or 0.0) * 0.001 * 44.0 / 28.0
+                    _n2o_t -= _f * float(_h.get(f"ef_n2o_{_c}", 0.0) or 0.0) * 0.001 * M_N2O / M_N2O_N
             ghg["N2O_HIS"] = max(0.0, _n2o_t) * GWP_N2O      # 1000 ha x t N2O/ha = kt N2O -> kt CO2-eq
         # crop-residue N2O of the added catch crops (CAPRI gases.gms N2OCRO: BioFix x area x EF1)
         if _cn != 0:
-            ghg["N2O_CRO"] = ghg.get("N2O_CRO", 0.0) + _cn / 1e3 * EF_SOIL_N2O_DIRECT * 44.0 / 28.0 * GWP_N2O   # t N -> kt
+            ghg["N2O_CRO"] = ghg.get("N2O_CRO", 0.0) + _cn / 1e3 * EF_SOIL_N2O_DIRECT * M_N2O / M_N2O_N * GWP_N2O   # t N -> kt
         # CAPRI's technology effects on manure N2O (v_emiLoss in gases.gms; manure_n2o_tech.csv):
         # per animal, housing/storage N2O x (1 - sum_t s_t r_hou_t) / (1 - sum_t s0_t r_hou_t) and
         # application N2O likewise with r_app (low-emission spreading raises it), at the regional
@@ -498,8 +498,8 @@ class EnvironmentalModule(EnvStateMixin, GHGBlock, NitrogenBlock, AmmoniaBlock, 
                 fa *= ca_
                 kt_n = self._n_excretion(region, a_) * x_ * 1000.0 / 1e6
                 _dm += kt_n * (_mf[0] * (fh - 1.0) + _mf[1] * (fa - 1.0))
-            ghg["N2O_MAN"] = ghg.get("N2O_MAN", 0.0) + _dm * 44.0 / 28.0 * GWP_N2O
-            _n2o_tech = _dm * 44.0 / 28.0 * GWP_N2O
+            ghg["N2O_MAN"] = ghg.get("N2O_MAN", 0.0) + _dm * M_N2O / M_N2O_N * GWP_N2O
+            _n2o_tech = _dm * M_N2O / M_N2O_N * GWP_N2O
             # CAPRI's anaerobic digestion on manure CH4 (supply_model.gms GWPCH4MAN_, MC_GHG_Miti_Factor): per sub-activity
             # 1 - v (1 - QE_AD / QE_NOC), v = s / (L (1 - G)), at the shares s against the base shares
             _dch4 = 0.0
@@ -527,7 +527,7 @@ class EnvironmentalModule(EnvStateMixin, GHGBlock, NitrogenBlock, AmmoniaBlock, 
         # crops (gases.gms N2OLEA; capri_mod/supply/n_leaching.py)
         _lea = self.leaching(region, acts, nb, supply_result)
         if _lea is not None:
-            ghg["N2O_LEA"] = _lea["n2o_n"] / 1000.0 * 44.0 / 28.0 * GWP_N2O       # t N2O-N -> kt CO2-eq
+            ghg["N2O_LEA"] = _lea["n2o_n"] / 1000.0 * M_N2O / M_N2O_N * GWP_N2O       # t N2O-N -> kt CO2-eq
         # total after every adjustment of soil N2O (it was summed before the mineral-input
         # rescaling above, so GHG total missed the substitution and yield effects on soil N2O)
         ghg_total = sum(ghg.values())
@@ -550,7 +550,7 @@ class EnvironmentalModule(EnvStateMixin, GHGBlock, NitrogenBlock, AmmoniaBlock, 
             _lv3 = getattr(supply_result, "activities", None)
             if _lv3 is None:
                 _lv3 = {}
-            _d = sum(float(v) * float(_lv3.get(a, 0.0)) for a, v in _ni.items()) / 1000.0 * 17.0 / 14.0
+            _d = sum(float(v) * float(_lv3.get(a, 0.0)) for a, v in _ni.items()) / 1000.0 * M_NH3 / M_NH3_N
             if _d:
                 nh3 = dict(nh3)
                 nh3["nh3_livestock"] = float(nh3["nh3_livestock"]) + _d
@@ -558,14 +558,14 @@ class EnvironmentalModule(EnvStateMixin, GHGBlock, NitrogenBlock, AmmoniaBlock, 
         # CAPRI's ammonia technologies: N kept from volatilising (t N) -> kt NH3
         _sv = float(getattr(self.ev, "nh3_saved_last", 0.0) or 0.0) - float(getattr(self.ev, "nitrate_nh3_extra", 0.0) or 0.0)
         if _sv != 0:
-            _d = _sv / 1000.0 * 17.0 / 14.0
+            _d = _sv / 1000.0 * M_NH3 / M_NH3_N
             nh3 = dict(nh3)
             nh3["nh3_livestock"] = max(0.0, float(nh3["nh3_livestock"]) - _d)
             nh3["nh3_total"] = max(0.0, float(nh3["nh3_total"]) - _d)
         # indirect N2O from volatilised manure NH3 (CAPRI N2OAMM: NH3-N x EF4), after every NH3
         # adjustment; the GHG total is summed again with it
         if nh3.get("nh3_livestock"):
-            ghg["N2O_IND"] = float(nh3["nh3_livestock"]) * 14.0 / 17.0 * EF_SOIL_N2O_INDIRECT * 44.0 / 28.0 * GWP_N2O
+            ghg["N2O_IND"] = float(nh3["nh3_livestock"]) * M_NH3_N / M_NH3 * EF_SOIL_N2O_INDIRECT * M_N2O / M_N2O_N * GWP_N2O
             ghg_total = sum(ghg.values())
 
         # Land use, CAPRI's aggregates (sets.gms landUse_TO_landUseAgg): arable crops ARAC (paddy, fallow and set-aside,
@@ -652,7 +652,7 @@ class EnvironmentalModule(EnvStateMixin, GHGBlock, NitrogenBlock, AmmoniaBlock, 
         rows = []
         fd = []
         for i, (region, result) in enumerate(supply_results.items()):
-            if verbose and i % 50 == 0:
+            if verbose and i % int(_settings().get("diagnostics.progress_every_regions")) == 0:
                 print(f"  Environmental module: region {i+1}/{len(supply_results)}")
             try:
                 self.ev.fert_dist_now = None

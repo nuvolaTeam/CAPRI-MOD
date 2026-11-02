@@ -6,6 +6,7 @@ module once environmental_module is loaded (capri_mod.utils.mixins.inject_names)
 """
 from __future__ import annotations
 from capri_mod import statekit as _est   # the state objects' helpers (refactor stage 4)
+from capri_mod.fert.npk import endo_slope as _endo_slope
 
 
 class NitrogenBlock:
@@ -101,12 +102,7 @@ class NitrogenBlock:
             return None
         if m0 is None or m0 <= 0:
             return g0 / eff
-        b = self.ENDO_MAN_AV_SLOPE
-        if g0 - m0 * b > max(0.999, g0):
-            b = (g0 - max(0.999, g0)) / m0
-        top = max(300.0, m0) - m0
-        if top > 0 and g0 + top * b < min(0.2, g0):
-            b = (min(0.2, g0) - g0) / top
+        b = _endo_slope(g0, m0, "N")        # CAPRI's slope and its two corrections, one definition (fert/npk.py)
         return max(g0 + b * m0, 0.0) / eff
 
     def _cached_row(self, key: str, region: str):
@@ -636,7 +632,7 @@ class NitrogenBlock:
             capa = sum(v * ar_.get(g, 0.0) for (g, s_), v in caps.items() if s_ == "MINE" and not isinstance(v, tuple))
             free = [g for g in ar_ if (g, "MINE") not in caps]
             if capa > 0 and not free:
-                cap_scale = max(1.0, M / (0.998 * capa))
+                cap_scale = max(1.0, M / (float(_settings().get("fertiliser.cap_room")) * capa))
                 caps2 = {k: (v * cap_scale if (k[1] == "MINE" and not isinstance(v, tuple)) else v) for k, v in caps.items()}
                 out = inner.allocate(region, crops, M, E, C, av, crop_factor=fac, caps=caps2, mode_crop_areas=mode_crops)
         if out is None and caps:
@@ -728,7 +724,7 @@ class NitrogenBlock:
             from capri_mod.supply import n_cascade as _nc, n_leaching as _nl
             rs = _nl.capri_region(region)
             dn = _nc.mineral_n2o_n(_nc.load()[1].get(rs, {}), EF_SOIL_N2O_INDIRECT) if rs else None
-            c_[region] = dn if dn else (EF_SOIL_N2O_DIRECT, 0.10 * EF_SOIL_N2O_INDIRECT)
+            c_[region] = dn if dn else (EF_SOIL_N2O_DIRECT, param("FRAC_GASF") * EF_SOIL_N2O_INDIRECT)
         return c_[region]
 
     def leaching(self, region, acts, nb, supply_result=None):

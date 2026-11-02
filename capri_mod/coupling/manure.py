@@ -10,7 +10,8 @@ from __future__ import annotations
 from capri_mod import statekit as _cst   # the state objects' helpers (refactor stage 4)
 #: the clearing's state kept per market between outer iterations, as paths in the model's state objects (the N
 #: market's in the model's own sv and res; the P and K markets' copies in sv.pool_pk, swapped in for their clearing)
-_POOL_STATE = ("sv.pool_state", "sv.pool_accel", "res.pool_imbalance", "res.pool_worst_key", "res.pool_solver_status",
+_POOL_IMBALANCE, _POOL_WORST_KEY = "res.pool_imbalance", "res.pool_worst_key"
+_POOL_STATE = ("sv.pool_state", "sv.pool_accel", _POOL_IMBALANCE, _POOL_WORST_KEY, "res.pool_solver_status",
                "res.pool_eu_unaccounted")
 
 
@@ -28,7 +29,7 @@ class ManureBlock:
         for nut in ("P", "K"):
             if not any((getattr(mo.ev, "pool_cols_pk", None) or {}).get(nut) for mo in getattr(sm, "_models", {}).values()):
                 continue
-            st = held.setdefault(nut, {"res.pool_imbalance": 0.0})
+            st = held.setdefault(nut, {_POOL_IMBALANCE: 0.0})
             n_state = {k: _cst.get_path_or(self, k) for k in _POOL_STATE}
             for k in _POOL_STATE:
                 _cst.set_path(self, k, st.get(k))
@@ -39,8 +40,8 @@ class ManureBlock:
                     st[k] = _cst.get_path_or(self, k)
                 for k, v in n_state.items():
                     _cst.set_path(self, k, v)
-            gaps[nut] = float(st.get("res.pool_imbalance") or 0.0)
-            worst_key[nut] = st.get("res.pool_worst_key") or ""
+            gaps[nut] = float(st.get(_POOL_IMBALANCE) or 0.0)
+            worst_key[nut] = st.get(_POOL_WORST_KEY) or ""
         self.res.pool_gaps = gaps
         w = max(gaps, key=gaps.get)
         self.res.pool_imbalance = gaps[w]
@@ -79,6 +80,7 @@ class ManureBlock:
                 a, b = k.split("|"); cost[(a, b)] = v["eur_per_t_n"] / 1000.0
             self.par.pool_cost_cache = cost
         sched, es, sup = {}, {}, {}
+        _st_m = _settings()                 # the multiplier recovery's tolerances and iterations (settings)
         for reg, mo in getattr(sm, "_models", {}).items():
             if prod == "N":
                 pc = getattr(mo.ev, "pool_cols", []) or []
@@ -99,13 +101,13 @@ class ManureBlock:
             if zc is not None and len(zc) == A.shape[0]:
                 lam = np.maximum(np.asarray(zc, float), 0.0)
             else:
-                act = [r for r in range(A.shape[0]) if A[r] @ y >= b[r] - 1e-6 * max(1.0, abs(float(b[r])))]
-                bnd = [q for q in range(len(y)) if y[q] <= 1e-9]
+                act = [r for r in range(A.shape[0]) if A[r] @ y >= b[r] - _st_m.get("outer_loop.manure_pool_active_tol") * max(1.0, abs(float(b[r])))]
+                bnd = [q for q in range(len(y)) if y[q] <= _st_m.get("outer_loop.manure_pool_bound_tol")]
                 M = np.hstack([A[act].T if act else np.zeros((len(y), 0)), -np.eye(len(y))[:, bnd]])
                 gvec = -(Q @ y + c)
                 if M.shape[1]:
                     sc = np.maximum(np.abs(M).max(axis=0), 1e-12)
-                    mu, _r = _nnls(M / sc, gvec, maxiter=60 * M.shape[1]); mu = mu / sc
+                    mu, _r = _nnls(M / sc, gvec, maxiter=int(_st_m.get("outer_loop.manure_pool_nnls_iter")) * M.shape[1]); mu = mu / sc
                     lam = np.zeros(A.shape[0]); lam[act] = mu[:len(act)]
                 else:
                     lam = np.zeros(A.shape[0])
@@ -128,7 +130,7 @@ class ManureBlock:
             # trade and price.
             k_ = self.POOL_OF_PREFIX.get(reg[:2], reg[:2])
             kap = float(((getattr(self.sv, "pool_state", None) or {}).get("_kappa") or {}).get(k_, 1.0))
-            sl = sl / max(kap, 1e-3)
+            sl = sl / max(kap, float(_settings().get("outer_loop.manure_pool_kappa_floor")))
             th_e = pnow + sl * float(y[je]) - rce
             th_i = pnow - sl * float(y[ji]) + rci
             # export cap = manure produced at the current solution (a first draft
@@ -176,7 +178,7 @@ class ManureBlock:
             Qp[q, q] = sl; cp_[q] = -te                   # exporters' benefit (negated)
             Qp[nr + q, nr + q] = sl; cp_[nr + q] = ti     # importers' cost
         for t, (a, b_, cc) in enumerate(arcs):
-            Qp[2 * nr + t, 2 * nr + t] = 1e-3 * min_sl; cp_[2 * nr + t] = cc   # scaled ridge
+            Qp[2 * nr + t, 2 * nr + t] = float(_settings().get("outer_loop.manure_pool_arc_ridge")) * min_sl; cp_[2 * nr + t] = cc   # scaled ridge
         rows, rhs, eqs, eqb = [], [], [], []
         for q, (k, te, ti, sl, em) in enumerate(reg_list):
             r_ = np.zeros(nv); r_[q] = 1.0; rows.append(r_); rhs.append(max(em, 0.0))    # e <= manure produced

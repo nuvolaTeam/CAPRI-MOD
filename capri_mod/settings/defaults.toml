@@ -105,6 +105,15 @@ manure_pool_omega_up = 1.25
 manure_pool_omega_down = 0.5
 manure_pool_omega_min = 0.25
 manure_pool_qp_tol = 1e-8
+# numerical (refactor stage 4): the multiplier recovery of a region's stored problem (NNLS on its active rows): a row
+# is active within this relative tolerance, a column at its bound below this level, at most this many iterations per
+# column; the pools' trade cost slopes are divided by kappa, at least this floor; the arcs' ridge as a share of the
+# smallest slope
+manure_pool_active_tol = 1e-6
+manure_pool_bound_tol = 1e-9
+manure_pool_nnls_iter = 60
+manure_pool_kappa_floor = 1e-3
+manure_pool_arc_ridge = 1e-3
 
 [supply]
 # PMP terms: "capri2030" (CAPRI's exported 2030 terms at 2030; CAPRI's recipe at its 2017 point at 2017) or "recipe"
@@ -216,6 +225,8 @@ npk_dual_bound_wide = 1000.0
 # numerical (refactor stage 3, N5): regulated flows kept strictly inside the beta density's support, at this share of
 # its upper end (CAPRI: an open support)
 support_margin = 0.999
+# numerical (refactor stage 4): the mineral caps scaled so the distribution keeps this share of them (0.2% room)
+cap_room = 0.998
 # a crop group whose mineral cap leaves its N need out of reach (NLP infeasible) is exempted as CAPRI exempts groups
 # (minfert_redu_by_crop.gms, p_checkSmallMine): its cap at this multiple of its baseline mineral N per ha (CAPRI: 1.0
 # for its small groups, "no backsliding"; 1.1-1.2 for its listed region x group pairs)
@@ -242,6 +253,10 @@ hessian_skip_unchanged = true
 # set: the exact derivative where CAPRI's is a 1% difference quotient; no change of the active set within the shock).
 # Needs hessian_skip_unchanged (its base re-solve records the base points)
 hessian_method = "capri"
+# numerical (refactor stage 4): a product is shocked only if its base supply exceeds this (kt); Hessian entries below
+# this size are dropped
+hessian_min_supply_kt = 1e-6
+hessian_entry_floor = 1e-9
 # CAPRI's endogenous biofuel markets (BIOF_M; star 3.0 GUI default on); a scenario may set its own
 biofuel_markets = true
 # DEPARTURE: CAPRI's default aggregation has two EU trade blocks (EU_WEST, EU_EAST; aggregation/defaultA.agg);
@@ -357,6 +372,8 @@ record_regional_levels = false
 slow_region_seconds = 60.0
 # the regional solves' progress printed every this many regions (verbose runs)
 progress_every_regions = 50
+# the market supply Hessian's progress printed every this many price shocks
+hessian_progress_every = 5
 
 [captrd]
 # CAPTRD-MOD (capri_mod/pipeline/captrd): CAPRI's baseline trend projection (docs/design/CAPTRD_MOD.md).

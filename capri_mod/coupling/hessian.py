@@ -103,7 +103,7 @@ class HessianBlock:
             raise ValueError('market.hessian_method = "kkt" needs market.hessian_skip_unchanged = true (its base '
                              're-solve records the base points)')
         from capri_mod.supply import capri_regional_nlp as _crn_h
-        cols_y = [c for c in sig0.index if c in q0.columns and float(q0[c].clip(lower=0).sum()) > 1e-6]
+        cols_y = [c for c in sig0.index if c in q0.columns and float(q0[c].clip(lower=0).sum()) > float(_settings().get("market.hessian_min_supply_kt"))]
         cols_y += [c for c in self.MARKET_SUPPLY_FEED_COLS if c in sig0.index and c not in cols_y]
         cols_y += ["YANI:" + g for g in yani_goods]
         key_src = (repr((sorted(regs), [round(float(v), 3) for v in q0.sum(axis=0).values], list(q0.columns),
@@ -249,8 +249,9 @@ class HessianBlock:
             sm.seen.hess_base_res = res_b
         try:
             _t_h0 = time.time()
+            _h_floor = float(_settings().get("market.hessian_entry_floor"))   # Hessian entries below it are dropped
             for _k_y, y in enumerate(cols_y):
-                if _k_y and _k_y % 5 == 0:
+                if _k_y and _k_y % int(_settings().get("diagnostics.hessian_progress_every")) == 0:
                     self._progress(f"  market supply Hessian: {_k_y}/{len(cols_y)} price shocks, "
                                    f"{time.time() - _t_h0:.0f} s; {n_skipped} of {n_solved} regional solves skipped")
                 sig = sig0.copy()
@@ -299,7 +300,7 @@ class HessianBlock:
                 for ms in dq.index:
                     for x in dq.columns:
                         v = float(dq.at[ms, x])
-                        if abs(v) > 1e-9:
+                        if abs(v) > _h_floor:
                             rows.append((ms, x, y, v))
         finally:
             sm.seen.hess_probe = None

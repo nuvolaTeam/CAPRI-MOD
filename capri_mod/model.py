@@ -833,7 +833,7 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
             if self._capri_price_update():
                 # CAPRI's price forecast on the market's prices of the last steps (outer_loop.price_update)
                 _th = (getattr(self.sv, "capri_target_hist", None) or []) if outer_iter > 0 else []
-                _th = (_th + [_target.reindex(price_signal.index).fillna(0.0)])[-4:]
+                _th = (_th + [_target.reindex(price_signal.index).fillna(0.0)])[-self._capri_hist_len():]
                 self.sv.capri_target_hist = _th
                 _ps_new = self._capri_forecast(_th, outer_iter)
                 _w = pd.Series(1.0, index=price_signal.index)          # the step the blocks and Norway take below
@@ -864,7 +864,7 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
                     _d0 = pd.Series(0.0, index=price_signal.index) if _d0 is None else _d0.reindex(price_signal.index).fillna(0.0)
                     if self._capri_price_update():
                         _bh = (getattr(self.sv, "capri_blockdev_hist", None) or {}) if outer_iter > 0 else {}
-                        _bh[_rg] = ((_bh.get(_rg) or []) + [_dt])[-4:]
+                        _bh[_rg] = ((_bh.get(_rg) or []) + [_dt])[-self._capri_hist_len():]
                         self.sv.capri_blockdev_hist = _bh
                         _newdev[_rg] = self._capri_forecast(_bh[_rg], outer_iter)
                     else:
@@ -946,7 +946,7 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
                     if self._capri_price_update():
                         # CAPRI's price forecast on Norway's market prices (where it has none: the EU signal)
                         _nh = (getattr(self.sv, "capri_sup_hist", None) or {}) if outer_iter > 0 else {}
-                        _nh[_rg] = ((_nh.get(_rg) or []) + [_tn.where(_has, price_signal)])[-4:]
+                        _nh[_rg] = ((_nh.get(_rg) or []) + [_tn.where(_has, price_signal)])[-self._capri_hist_len():]
                         self.sv.capri_sup_hist = _nh
                         _s1 = self._capri_forecast(_nh[_rg], outer_iter).where(_has, price_signal)
                         # CAPRI's slower smoothing for problem products (outer_loop.capri_step_special, NO000000)
@@ -1016,7 +1016,7 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
                         # on every reversal (KNOWN_ISSUES K62). Since the K75 fix CAPRI's forecast is the default
                         # for every price (outer_loop.price_update "capri")
                         _h = (_mh.get(_ms) or []) + [_t]
-                        _mh[_ms] = _h[-4:]
+                        _mh[_ms] = _h[-self._capri_hist_len():]
                         _st_ = _settings()
                         _wts = tuple(_st_.get("outer_loop.capri_step_weights")
                                      if outer_iter + 1 < int(_st_.get("outer_loop.capri_step_weights_late_from"))

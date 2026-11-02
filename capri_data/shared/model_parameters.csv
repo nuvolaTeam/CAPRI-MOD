@@ -3,7 +3,7 @@ EF_SOIL_N2O_DIRECT,,0.01,kg N2O-N per kg N,ipcc,"IPCC 2006 EF1 as CAPRI envind/g
 EF_SOIL_N2O_INDIRECT,,0.01,kg N2O-N per kg NH3-N,ipcc,IPCC 2006 EF4 as CAPRI envind/gases.gms N2OAMM (on the MITERRA NH3 + NOx losses; a 10% volatilised share only where they are missing),environmental_module
 GWP_CH4,,25.0,kg CO2-eq per kg,ipcc,"AR4, UNFCCC reporting; CAPRI p_globWarmPot","environmental_module, ghg_tax"
 GWP_N2O,,298.0,kg CO2-eq per kg,ipcc,"AR4, UNFCCC reporting; CAPRI p_globWarmPot",environmental_module
-MJ_PER_KG_CH4,,55.65,MJ per kg CH4,ipcc,"IPCC 2006 Eq. 10.21, as CAPRI envind/gases.gms CH4ENT",ghg_tax
+MJ_PER_KG_CH4,,55.65,MJ per kg CH4,ipcc,"IPCC 2006 Eq. 10.21, as CAPRI envind/gases.gms CH4ENT",ghg_tax; ghg
 OVERFERT_MARKUP,,0.1,-,capri,CAPRI p_OverFertMarkUp (envind/ghgMiti.gms),supply_module
 P_FERT_EFF_COR,,1.1,-,capri,"CAPRI p_fertEffCor, exponent of othImpact NMIN (envind/ghgMiti.gms)",supply_module
 ELAS_HIGH,,4.5,-,capri,CAPRI p_elasHigh (PMP elasticity dampening),capri_pmp
@@ -53,3 +53,9 @@ YIELD_GROWTH_MIN,,0.5,ratio,capri,"CAPRI capmod/define_inputs.gms l. 102: p_yiel
 YIELD_GROWTH_MAX,,1.5,ratio,capri,"CAPRI capmod/define_inputs.gms l. 102: p_yieldGrowth bounded to [0.5, 1.5] in the input cost adjustment",policy
 ORGANIC_SMALL_MINE_KG_HA,,10.0,kg N per ha,capri,CAPRI pol_input/greendeal/organic_minfert_redu.gms l. 51: groups below 0.01 t/ha mineral N at baseline keep the baseline as maximum,fertilisation
 ORGANIC_LIMCRES_FACTOR,,1.2,-,capri,CAPRI pol_input/greendeal/organic_minfert_redu.gms l. 115-116: limCres maximum = 1.2 x the baseline's residues per ha,fertilisation
+ENDO_MAN_AV_SLOPE_N,,-0.0015,per kg N per ha,capri,"CAPRI fert/endoManAvail.gms l. 61: slopeManAv of NITF, the slope of manure N availability on manure N applied per ha (0 for P and K, l. 62-65)",npk
+ENDO_MAN_AV_CEILING,,0.999,share,capri,"CAPRI fert/endoManAvail.gms l. 72-73: the availability at zero application is at most max(0.999, base availability)",npk
+ENDO_MAN_AV_FLOOR,,0.2,share,capri,"CAPRI fert/endoManAvail.gms l. 79-81: the availability is at least min(0.2, base availability) at the application rate ENDO_MAN_AV_FLOOR_KG",npk
+ENDO_MAN_AV_FLOOR_KG,,300.0,kg N per ha,capri,"CAPRI fert/endoManAvail.gms l. 79-81: the application rate (max(300, base rate)) at which the availability floor holds",npk
+NITRATE_CH4_REDUCTION,,10.0,share of enteric CH4 per unit of nitrate share of dry matter,capri,"CAPRI envind/line_nitr.gms l. 100-102: QEmitt(Nitr) = QEmitt(NOC) x (1 - 0.1 x ShrOfDM x 100), so enteric CH4 falls by 10 x the nitrate share of dry matter",ghg
+FRAC_GASF,,0.1,kg NH3-N + NOx-N per kg mineral N,ipcc,"IPCC 2006 Vol. 4 ch. 11 Table 11.3 FracGASF: the volatilised share of synthetic N, used only where CAPRI's MITERRA losses are missing (CAPRI envind/gases.gms N2OSYN takes the MITERRA losses)",ghg; nitrogen

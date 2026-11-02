@@ -5,7 +5,9 @@ docs/design/ARCHITECTURE_REFACTOR.md); the module-level names they use are envir
 module once environmental_module is loaded (capri_mod.utils.mixins.inject_names); the annotations are not evaluated.
 """
 from __future__ import annotations
-from capri_mod import statekit as _est   # the state objects' helpers (refactor stage 4)
+from capri_mod import statekit as _est
+from capri_mod.params import param
+from capri_mod.units import M_N2O, M_N2O_N, M_CO2, M_UREA_N, MJ_PER_MCAL   # the state objects' helpers (refactor stage 4)
 
 
 class GHGBlock:
@@ -106,7 +108,7 @@ class GHGBlock:
         for animal in ANIMALS:
             heads = activities.get(animal, 0.0) * 1000  # convert 1000→heads
             _sf = float(((getattr(self.ev, "supp_ch4", None) or {}).get(region) or {}).get(animal, 1.0))
-            ef    = self._ch4_per_head("ent", region, animal) * max(0.0, 1.0 - 10.0 * float(_ns.get(animal, 0.0))) * _sf
+            ef    = self._ch4_per_head("ent", region, animal) * max(0.0, 1.0 - param("NITRATE_CH4_REDUCTION") * float(_ns.get(animal, 0.0))) * _sf
             ch4   = heads * ef / 1e6   # kt CH4
             # CATTLE FROM THE FEED MIX (CAPRI GWPCH4ENT_, envind/gases.gms): sum over feeds of
             # DM (t) x 1000 x GE (Mcal/kg DM) x 4.1868 x Ym / 55.65, in kt (/1e6)
@@ -118,7 +120,7 @@ class GHGBlock:
                 _ge = _fac["ge"].get(_ctry) or _fac["ge"].get("EU")
                 if _ge:
                     _kg = sum(float(dm_t) * 1000.0 * float(_ge.get(f, _ge.get("_mean", 0.0))) for f, dm_t in _fd.items())
-                    ch4 = _kg * 4.1868 * _fac["ym"] / 55.65 / 1e6 * max(0.0, 1.0 - 10.0 * float(_ns.get(animal, 0.0))) * _sf
+                    ch4 = _kg * MJ_PER_MCAL * _fac["ym"] / param("MJ_PER_KG_CH4") / 1e6 * max(0.0, 1.0 - param("NITRATE_CH4_REDUCTION") * float(_ns.get(animal, 0.0))) * _sf
             ghg["CH4_ENT"] += ch4 * GWP_CH4   # kt CO2-eq
 
         # 2. Manure management (CH4 + N2O)
@@ -137,7 +139,7 @@ class GHGBlock:
             # for the region and animal: none (no herd; tests check every herd has them).
             _mf = self._manure_n2o_factor(region, animal)
             n2o_n = n_excr * (sum(_mf) if _mf is not None else 0.0)    # kt N2O-N
-            n2o   = n2o_n * 44 / 28            # kt N2O
+            n2o   = n2o_n * M_N2O / M_N2O_N    # kt N2O
             ghg["N2O_MAN"] += n2o * GWP_N2O
 
         # 3. Agricultural soils (N2O)
@@ -160,11 +162,11 @@ class GHGBlock:
                 total_n_applied += grass_shift * float(dl.get("mineral_rate", 0.0)) / 1e3
         # Direct N2O from soils
         n2o_soil_n = total_n_applied * EF_SOIL_N2O_DIRECT
-        ghg["N2O_SOIL"] += (n2o_soil_n * 44 / 28) * GWP_N2O
+        ghg["N2O_SOIL"] += (n2o_soil_n * M_N2O / M_N2O_N) * GWP_N2O
 
         # Indirect N2O (volatilisation path)
-        n2o_indirect_n = total_n_applied * 0.10 * EF_SOIL_N2O_INDIRECT
-        ghg["N2O_SOIL"] += (n2o_indirect_n * 44 / 28) * GWP_N2O
+        n2o_indirect_n = total_n_applied * param("FRAC_GASF") * EF_SOIL_N2O_INDIRECT
+        ghg["N2O_SOIL"] += (n2o_indirect_n * M_N2O / M_N2O_N) * GWP_N2O
 
         # 4. Liming (CO2): CAPRI's coefficient per ha of every crop activity, grassland and fallow included
         # (gases.gms (16): the region's UAAR CO2LIM, kg CO2/ha; tools/build/build_ghg_coefs_2017.py)
@@ -173,7 +175,7 @@ class GHGBlock:
 
         # 5. Urea (CO2): mineral N x the member state's urea share x 44/28 (gases.gms (17)); compute_indicators
         # applies it to the balance's mineral N, as soil N2O
-        ghg["CO2_UREA"] = total_n_applied * urea_share * 44.0 / 28.0
+        ghg["CO2_UREA"] = total_n_applied * urea_share * M_CO2 / M_UREA_N
 
         return ghg
 
