@@ -32652,7 +32652,9 @@
     "checks": [
      "tools/check/pmp_recipe_check.py"
     ],
-    "tests": []
+    "tests": [
+     "capri_mod/tests/test_capri.py"
+    ]
    }
   },
   "src_pmp_quad_pact_2030": {
@@ -32777,7 +32779,9 @@
     "checks": [
      "tools/check/pmp_recipe_check.py"
     ],
-    "tests": []
+    "tests": [
+     "capri_mod/tests/test_capri.py"
+    ]
    }
   },
   "src_pmp_quad_techn_2030": {
@@ -32846,7 +32850,9 @@
     "checks": [
      "tools/check/pmp_recipe_check.py"
     ],
-    "tests": []
+    "tests": [
+     "capri_mod/tests/test_capri.py"
+    ]
    }
   },
   "src_processing_yields_dataout_2030": {
@@ -33017,7 +33023,9 @@
     "checks": [
      "tools/check/pmp_recipe_check.py"
     ],
-    "tests": []
+    "tests": [
+     "capri_mod/tests/test_capri.py"
+    ]
    }
   },
   "src_recipe_2017_quad_techn": {
@@ -33087,7 +33095,9 @@
      "tools/check/pmp_recipe_check.py",
      "tools/check/reproduce_builders.py"
     ],
-    "tests": []
+    "tests": [
+     "capri_mod/tests/test_capri.py"
+    ]
    }
   },
   "src_recipe_2030_quad_pact": {
@@ -33218,7 +33228,9 @@
      "tools/check/pmp_recipe_check.py",
      "tools/check/reproduce_builders.py"
     ],
-    "tests": []
+    "tests": [
+     "capri_mod/tests/test_capri.py"
+    ]
    }
   },
   "src_ref2030_welfare": {
