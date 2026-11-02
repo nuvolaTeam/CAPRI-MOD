@@ -32,6 +32,22 @@ and `docs/KNOWN_ISSUES.md`.
 
 ---
 
+## 2 November 2026: refactor stage 3, N6 first part; nurseries on permanent-crop land (DEP-43)
+
+- The supply's land and crop classes as data: `capri_data/codes/model_activity_classes.csv` (fixed activities, the
+  crops on each land type, the fodder flag, the crop-diversification group) and `model_land_types.csv`, checked by
+  build_code_lists against CAPRI's sets (landTypesMrk, FODCRP, landTypes_to_pact, cropDivGrps_mCact) through the
+  model_activities crosswalk (docs/design/N6_CODE_TABLES.md). The land market's land types read from its data.
+  Mini-EU run identical to the previous one at 1e-12.
+- DEP-42 registered: OFOD (OFAR + ROOF) one crop-diversification group, kept until S1/S2 splits OFOD.
+- DEP-43 fixed (a behaviour change, the project lead's decision): nurseries on permanent-crop land as CAPRI's
+  landTypes_to_pact, in the supply model, the environmental accounts and the base builder (land_availability.csv:
+  181.2 kha from arable to permanent land). Mini-EU differences in the register (DEP-43).
+- The builders' tests back in the suite (revert of 07db727, the project lead's decision).
+- docs/design/MODEL_CONTENT_PLAN.md: the model-content work after the refactor in one plan; the revised order in
+  ARCHITECTURE_REFACTOR §3.
+- Checks: test suite 279 passed, 2 skipped. Not yet in a full Farm-to-Fork / Green Deal run (those follow stage 5).
+
 ## 2 November 2026: refactor stage 3, the supply's parameters and state objects (batches 1-4)
 
 - capri_mod/supply/state.py: each regional model and the supply module hold what they keep between calls in declared
