@@ -782,4 +782,4 @@ class NitrogenBlock:
                           float(nb.get("n_fixation", 0.0) or 0.0), L, e)
         tot = sum(comp.values())
         return {"share": L, "b1": b_now, "b1_ini": b_ini, "components": comp, "n_runoff_leached": tot,
-                "n2o_n": tot * _nl.EF5}
+                "n2o_n": tot * param("EF5_LEACHING_N2O")}

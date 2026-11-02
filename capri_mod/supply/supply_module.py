@@ -585,10 +585,8 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
                       "TOMA": "TOMA", "OVEG": "OVEG", "OFOD": "OFOD", "CORN": "MAIS", "MAIF": "MAIS", "SETA": "OSET"}
 
 
-    #: CAPRI organic_minfert_redu.gms: groups below 0.01 t/ha of mineral N at baseline keep the baseline as maximum
-    ORGANIC_SMALL_MINE_KG_HA = 10.0
-    #: CAPRI organic_minfert_redu.gms: limCres maximum = 1.2 x the baseline's residues per ha (all nutrients)
-    ORGANIC_LIMCRES_FACTOR = 1.2
+    # CAPRI organic_minfert_redu.gms: the small-mineral-N threshold of 0.01 t/ha and the limCres maximum of 1.2 x the
+    # baseline's residues are the parameters ORGANIC_SMALL_MINE_KG_HA and ORGANIC_LIMCRES_FACTOR (refactor stage 3, N2)
 
 
     #: IPOPT's tolerance for the regional NLP solves: run state, set by CAPRIModel.run every outer iteration from the
@@ -2349,7 +2347,7 @@ class SupplyModule(ModuleStateMixin):
             k1 = float(rr.costParLin) if rr.costParLin == rr.costParLin else 0.0
             q = float(rr.QEmitt) if rr.QEmitt == rr.QEmitt else None
             if name == "NITR_INH":
-                q = 0.9 * q0                                       # ghgMiti.gms l. 110
+                q = param("NITR_INH_EMISSION_FACTOR") * q0         # ghgMiti.gms l. 110
             if not k1 > 0 or q is None or not (0 < q < q0):
                 continue
             nmin = (q0 / q - 1.0) ** param("P_FERT_EFF_COR")
@@ -2381,7 +2379,8 @@ class SupplyModule(ModuleStateMixin):
                     continue
                 out.append((name, nmin, rs0 * k1, slope, s0, smax))
             else:
-                rs1, rs0 = (0.8, 0.0) if (smax < 1.0 and name != "NITR_INH") else (1.2, 0.2)
+                rs1, rs0 = ((param("MITI_RELSUBS1_ADOPTED"), 0.0) if (smax < 1.0 and name != "NITR_INH")
+                            else (param("MITI_RELSUBS1"), param("MITI_RELSUBS0")))
                 slope = k1 * (rs1 - rs0) / (smax - s0)
                 if getattr(type(self), "fert_slope_with_saving", True):
                     # CAPRI's pmpParSqr (envind/ghgMiti.gms l. 1016-1035, the 'alternative approach'): the FOC is zero

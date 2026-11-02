@@ -54,7 +54,7 @@ class PhosphorusBlock:
                     s_ = {t_: sh.get(t_, v_) for t_, v_ in s_.items()}
                 f, rsurf, eff = cd
                 L = _nc.losses(f, rsurf, s_, eff, m_runsurf=(1.0 - _nc.WINTERCOV_NO3 * wc - fert_mrun, 1.0),
-                               m_appl_run=1.0 - _nc.WINTERCOV_NO3 * wc)
+                               m_appl_run=1.0 - param("WINTERCOV_NO3_REDUCTION") * wc)
                 # CAPRI bounds every loss share to [0, 1] (supply/set_supply_bounds.gms l. 240-243, v_emiLoss.lo/up), so
                 # options cannot drive the runoff below zero; the cascade evaluated at the solution's shares can
                 R += w * (min(max(float(L[("N", "RunHous")]), 0.0), 1.0) + min(max(float(L[("N", "RunSurf")]), 0.0), 1.0))

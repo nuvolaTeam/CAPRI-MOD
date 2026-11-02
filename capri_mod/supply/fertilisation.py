@@ -64,7 +64,7 @@ class FertilisationBlock:
                 L = d.get("leach_ini") if d.get("leach_ini") is not None else (d.get("leach_base") or 0.0)
                 nf = _nc.netf(g, float(g.get("run_surf", 0.0)))
                 c_ = max(0.0, nf["RunTot"] + (1.0 - nf["GasRunTot"] - float(d["exp_imp"])) * float(L)) \
-                    * _nl.EF5 * 44.0 / 28.0 * GWP_N2O
+                    * param("EF5_LEACHING_N2O") * 44.0 / 28.0 * GWP_N2O
             self.par.ef_lea_cache = c_
         return c_
 
@@ -379,7 +379,7 @@ class FertilisationBlock:
         from capri_mod.fert.inner_fert_dist import beta_regulation
         acts = list(self.acts)
         xb = np.maximum(self._base_levels().reindex(acts).fillna(0.0).values.astype(float), 0.0)
-        b1, b2 = beta_regulation(0.25, 0.75)
+        b1, b2 = beta_regulation(param("FERT_REGU_ACCURACY"), param("FERT_REGU_MODE_SHARE"))
         out = {}
         dN = (npk.get("nutrients") or {}).get("N")
         if dN is not None:
@@ -392,10 +392,10 @@ class FertilisationBlock:
                 w = sum(sh * xb[j] for j, sh in g_["crops"])
                 share_conv = 1.0 - (sum(sh * xb[j] * float(conv.get(acts[j], 1.0)) for j, sh in g_["crops"]) / w
                                     if w > 0 else 1.0)
-                mx = v if v < self.ORGANIC_SMALL_MINE_KG_HA else v * (1.0 - max(share_conv, 0.0))
+                mx = v if v < param("ORGANIC_SMALL_MINE_KG_HA") else v * (1.0 - max(share_conv, 0.0))
                 regs[(g, "MINE")] = (mx, b1, b2)
             out["N"] = regs
-        f = self.ORGANIC_LIMCRES_FACTOR
+        f = param("ORGANIC_LIMCRES_FACTOR")
         for nut, per in (base.get("per_ha_nut") or {}).items():
             if nut not in (npk.get("nutrients") or {}):
                 continue
@@ -444,7 +444,7 @@ class FertilisationBlock:
             # CAPRI's small groups (p_checkSmallMine): their cap replaces the organic target's (S2)
             self.ev.nlp_mine_small = inner.small_mine_groups(self.data.region_id, base)
             lim = inner.limcres_caps(self.data.region_id, base)
-            b1, b2 = beta_regulation(0.25, 0.75)
+            b1, b2 = beta_regulation(param("FERT_REGU_ACCURACY"), param("FERT_REGU_MODE_SHARE"))
             regs = {(g, "MINE"): (float(v), b1, b2) for g, v in caps.items() if v > 0}
             for g, (mx, racc, msh) in lim.items():
                 c1 = float(msh) * float(racc) + 1.0

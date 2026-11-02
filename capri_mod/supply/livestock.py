@@ -426,7 +426,8 @@ class LivestockBlock:
             # per head adopting: / (eligible heads at base). costsaving0 - costsaving1: the drop of the option's
             # marginal value between CAPRI's ini and max calibration runs (dsav, EUR per model head;
             # tools/lib/_capri_costsavings.py), taken out of the planned slope as CAPRI does (K67 F2)
-            gf = float(e["gamma_floor"]) if ("gamma_floor" in e and pd.notna(e["gamma_floor"])) else 0.2
+            gf = (float(e["gamma_floor"]) if ("gamma_floor" in e and pd.notna(e["gamma_floor"]))
+                  else param("GENET_GAMMA_FLOOR"))      # breeding.gms l. 452
             ds_ = float(e.get("dsav", 0.0) or 0.0)
             gamma = max(gf * c, c * (r1 - r0) - (ds_ if np.isfinite(ds_) else 0.0))
             el_ = max(float(e["elig_share"]), 1e-6)

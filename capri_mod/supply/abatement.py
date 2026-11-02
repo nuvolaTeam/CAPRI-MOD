@@ -195,7 +195,7 @@ class AbatementBlock:
         o = 0.0
         if organic_share:
             v = targets.get("uaa_pp") if (targets is not None and hasattr(targets, "get")) else None
-            o = (float(v) / 100.0 * max(0.0, (100.0 * float(organic_share) - 12.0) / 13.0) if v is not None and not pd.isna(v)
+            o = (float(v) / 100.0 * self._organic_target_scale(float(organic_share)) if v is not None and not pd.isna(v)
                  else max(0.0, float(organic_share) - self._organic_baseline()))
         f = 0.5 * o + 0.5 * max(0.0, reduction - o)
         c0 = float(cc.get("catc_share_2030", 0.0) or 0.0) * uaa
@@ -379,7 +379,7 @@ class AbatementBlock:
         if sub <= 0:
             return
         q0, k1 = float(ni.QEmitt_noc), float(ni.costParLin)
-        q = 0.9 * q0            # ghgMiti.gms l. 110: QEmitt(NITR_INH) = 0.9 x QEmitt(NOC), also for N2OMAN
+        q = param("NITR_INH_EMISSION_FACTOR") * q0    # ghgMiti.gms l. 110: 0.9 x QEmitt(NOC), also for N2OMAN
         if not (q > 0 and q0 > q and k1 > 0):
             return
         nman = (q0 / q - 1.0) ** param("P_FERT_EFF_COR")
@@ -402,7 +402,8 @@ class AbatementBlock:
         smax = 1.0 - graz / tot if tot > 0 else 0.0
         if smax <= 0:
             return
-        S0, slope = 0.2 * k1, k1 * (1.2 - 0.2) / smax
+        r0, r1 = param("MITI_RELSUBS0"), param("MITI_RELSUBS1")              # ghgMiti.gms l. 885-887, 904-906
+        S0, slope = r0 * k1, k1 * (r1 - r0) / smax
         if SupplyModule.fert_slope_with_saving:
             # CAPRI's pmpParSqr of the inhibitor on manure (envind/ghgMiti.gms l. 1036-1050), as the mineral options'
             # (_fert_techs, the same switch): + nmE x p_manureShadVal x ((1 + nmE m1)^-2 - (1 + nmE m0)^-2) / (m1 - m0),

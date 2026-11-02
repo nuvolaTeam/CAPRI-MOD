@@ -282,7 +282,8 @@ class PolicyBlock:
     def _organic_target_scale(share: float) -> float:
         """CAPRI's scaling of its targets to the requested ambition, (orgTarg - 12) / (25 - 12)
         (load_organic_targets.gms l. 175, 183; orgTarg in %): exactly 1 at the 25% target."""
-        return max(0.0, (100.0 * float(share) - 12.0) / (25.0 - 12.0))
+        o, t = param("ORGANIC_OUTLOOK_PCT"), param("ORGANIC_TARGET_REF_PCT")
+        return max(0.0, (100.0 * float(share) - o) / (t - o))
 
     def _organic_region_target(self, share: float) -> float:
         """p_organicAreaTarget(ru): the member state's UAA target (organic_targets_uaa.gdx) scaled to the ambition.
@@ -324,7 +325,7 @@ class PolicyBlock:
         (capmod/define_inputs.gms l. 66)."""
         base = int(str(_settings().get("run.base_year")))
         sim = int(getattr(self.data, "sim_year", None) or base)
-        return 1.0 - 0.005 * (sim - base)
+        return 1.0 - param("INPUT_SAVING_PROGRESS") * (sim - base)
 
     def _apply_greendeal_input_changes(self, organic_share: float, pesticide_reduction: float) -> None:
         """CAPRI's plant-protection (PLAP) and other-input (INPO) changes of the Green Deal organic and pesticide
@@ -417,7 +418,7 @@ class PolicyBlock:
             if k:
                 g = self._input_row(a, "yield_growth") or 1.0
                 # CAPRI's bounds on the yield growth: G x rho within 0.5-1.5
-                d = (min(1.5, max(0.5, g * y / y0)) - g) / g if g > 0 else (y / y0 - 1.0)
+                d = (min(param("YIELD_GROWTH_MAX"), max(param("YIELD_GROWTH_MIN"), g * y / y0)) - g) / g if g > 0 else (y / y0 - 1.0)
                 if nr is None:
                     nr = self.net_revenues.copy()
                 nr[a] = float(nr.get(a, 0.0)) - k * d
@@ -456,7 +457,7 @@ class PolicyBlock:
             return default
         # CAPRI scales its targets to the requested ambition as (orgTarg - 12) / (25 - 12)
         # (load_organic_targets.gms; orgTarg in %), exactly 1 at the 25% target
-        scale = max(0.0, (100.0 * float(share) - 12.0) / (25.0 - 12.0))
+        scale = self._organic_target_scale(share)
         return max(0.0, min(1.0, float(val) / 100.0 * scale))
 
     def apply_organic_area_target(self, share: float) -> None:

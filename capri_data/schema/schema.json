@@ -22076,6 +22076,7 @@
    "notes": [],
    "read_by": {
     "model": [
+     "capri_mod/data/inputs.py",
      "capri_mod/params.py"
     ],
     "builders": [
@@ -22086,7 +22087,9 @@
     "checks": [
      "tools/check/make_provenance.py"
     ],
-    "tests": []
+    "tests": [
+     "capri_mod/tests/test_capri.py"
+    ]
    }
   },
   "shr_nuts_version_correspondence": {
@@ -43491,7 +43494,7 @@
   }
  ],
  "code_data": {
-  "capri/keep": 116,
+  "capri/keep": 94,
   "capri-mod/keep": 2,
   "literature/keep": 11,
   "numerical/keep": 33,

@@ -26,6 +26,8 @@ CAPRI's own code is kept where it reads oddly (REGISTERED, docs/N_CASCADE_SPEC.m
 """
 from __future__ import annotations
 
+from capri_mod.params import param
+
 GASES = ("NH3", "NOX", "N2O")
 NMAT = ("N2O", "NH3", "NOX", "N2")
 HOUS_TECHS = ("LowEmHous", "AirPur", "AirPurCovLow", "AirPurCovLowC", "AirPurCovHigh", "ManAcid")
@@ -185,8 +187,8 @@ def load(data_dir=None):
     return _DATA[key]
 
 
-#: winter cover's effect on runoff and leaching (envind/cover_crops.gms l. 400-402, endoLeach on)
-WINTERCOV_NO3 = 0.35
+# winter cover's effect on runoff and leaching (envind/cover_crops.gms l. 400-402, endoLeach on): the parameter
+# WINTERCOV_NO3_REDUCTION (refactor stage 3, N2)
 
 
 def activity_losses(region, act, shares, winter_cover=0.0, data_dir=None):
@@ -196,6 +198,6 @@ def activity_losses(region, act, shares, winter_cover=0.0, data_dir=None):
     capri-mod)."""
     F, G, E = load(data_dir)
     f = F[(region, act)]
-    wc = 1.0 - WINTERCOV_NO3 * winter_cover
+    wc = 1.0 - param("WINTERCOV_NO3_REDUCTION") * winter_cover
     return losses(f, G.get(region, {}).get("run_surf", 0.0), shares, E.get((region, act), {}),
                   m_runsurf=(wc, 1.0), m_appl_run=wc)
