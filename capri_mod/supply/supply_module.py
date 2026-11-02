@@ -34,7 +34,7 @@ import warnings
 from pathlib import Path
 
 from capri_mod.supply.capri_pmp import (
-    ELAS_CAP, share_term, ARABLE_ACTIVITIES,
+    share_term, ARABLE_ACTIVITIES,
 )
 from capri_mod.params import param, param_table
 from capri_mod.settings import setting, tri_state, current as _settings
@@ -59,9 +59,8 @@ FIXED_ACTIVITIES = ("OOIL", "OIND", "NURS", "FLOW", "OCRO", "OANI")
 #: (setting supply.absent_activities_fixed) and the rules that refer to it (CAP greening) leave it out
 ABSENT_LEVEL = 1e-8
 
-#: CAPRI p_OverFertMarkUp (envind/ghgMiti.gms): corrects the over-fertilisation factor
-#: for the additive need factor and manure availability
-OVERFERT_MARKUP = param("OVERFERT_MARKUP")
+# CAPRI's p_OverFertMarkUp and p_fertEffCor (envind/ghgMiti.gms) and the supply's other parameters are read where they
+# are used, through the run's inputs (param(): <data_dir>/shared/model_parameters.csv; refactor stage 3, N1)
 
 
 def overfert_factor(region: str):
@@ -84,8 +83,6 @@ def overfert_factor(region: str):
 
 
 
-#: CAPRI p_fertEffCor (envind/ghgMiti.gms)
-P_FERT_EFF_COR = param("P_FERT_EFF_COR")
 
 
 def fert_option_table() -> dict:
@@ -161,7 +158,7 @@ def fert_efficiency_cap(region: str):
     """Largest total efficiency gain E = sum share x NMIN CAPRI allows (Tot_MitFert_):
     1 + E <= max(x + 0.1, 1). None when x is unknown."""
     x = overfert_factor(region)
-    return None if x is None else max(x + OVERFERT_MARKUP, 1.0) - 1.0
+    return None if x is None else max(x + param("OVERFERT_MARKUP"), 1.0) - 1.0
 
 
 def _csv_dict(name: str, where: str, col: str) -> Dict[str, float]:
@@ -387,7 +384,7 @@ class PMPCalibrator:
         # min(eps, ELAS_HIGH/dampen) = 2.25 here, which truncated legitimate values
         # in (2.25, 4.5] that CAPRI leaves untouched. Re-applying dampening here
         # would double-count it, so this is an assertion rather than a transform.
-        eps_capped = np.clip(eps, 1e-4, ELAS_CAP)
+        eps_capped = np.clip(eps, 1e-4, param("ELAS_CAP"))
         # Guard the curvature denominator against zero/near-zero base acreage
         # (a near-zero base makes the FOC response an unbounded percentage).
         x0_guard = np.maximum(x0, 0.001)
@@ -908,8 +905,7 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
     #: CAPRI breaks the 15 points down by member state and crop group from Eurostat
     #: organic areas (organic_targets.gdx, organic_targets_UAA.gdx); that breakdown is
     #: loaded (organic_targets_ms.csv) and used for every EU region. This EU figure
-    #: is only the fallback for a region without it.
-    ORGANIC_BASELINE_SHARE = param("ORGANIC_BASELINE_SHARE")
+    #: is only the fallback for a region without it (the parameter ORGANIC_BASELINE_SHARE, read where used).
 
     #: Crops occupying PERMANENT land - the same set the land data is built
     #: with in tools/build/build_capri_base.py. Everything else except grass is arable.
@@ -920,8 +916,8 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
     #: (JRC121368, from Sanchez et al. 2019: 18.6% of EU production potentially
     #: affected by 20 pests, worst case 50% loss on that share). CAPRI has NO
     #: dose-response function for plant protection -- unlike fertiliser -- so
-    #: this is an explicit assumption in CAPRI too, not a derived quantity.
-    PESTICIDE_YIELD_LOSS_AT_50PCT = param("PESTICIDE_YIELD_LOSS_AT_50PCT")
+    #: this is an explicit assumption in CAPRI too, not a derived quantity (the parameter
+    #: PESTICIDE_YIELD_LOSS_AT_50PCT, read where used).
 
     #: The crops the pesticide yield loss reaches (the jrc121368 rule only; CAPRI star 3.0 calls conventional_io.gms
     #: with the yield shock off): CAPRI's pesticideCrops, every crop activity MCACT but the idled histosols
@@ -938,8 +934,8 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
     FERT_COST_SHARE = _InputColumn("crop_cost_shares.csv", "supply", "fert_cost_share")
 
 
-    #: kg N excreted per kg nitrate fed (CAPRI line_nitr.gms: +0.42% of DM intake at 1.5%)
-    NITR_N_EXCR = param("NITR_N_EXCR")
+    # kg N excreted per kg nitrate fed (CAPRI line_nitr.gms: +0.42% of DM intake at 1.5%): the parameter NITR_N_EXCR,
+    # read where used
 
 
     #: free land types of CAPRI's land market (artificial land held fixed)
@@ -2029,9 +2025,8 @@ class SupplyModule(ModuleStateMixin):
 
     #: JRC121368 sect. 4.3.4: the nine regions with the highest baseline gross
     #: nitrogen balance (high animal numbers) had their reduction target set to
-    #: the EU average cut, 36%, because the tiered target was infeasible there.
-    JRC_CAPPED_N_REGIONS = int(param("JRC_CAPPED_N_REGIONS"))
-    JRC_CAPPED_CUT = param("JRC_CAPPED_CUT")
+    #: the EU average cut, 36%, because the tiered target was infeasible there (the parameters JRC_CAPPED_N_REGIONS,
+    #: JRC_CAPPED_CUT, read where used).
 
     def _jrc_capped_regions(self, cs) -> set:
         """The nine regions with the highest CAPRI baseline N surplus per ha."""
@@ -2039,7 +2034,7 @@ class SupplyModule(ModuleStateMixin):
         if got is None:
             try:
                 col = cs["surplus_kg_n_per_ha"].dropna()
-                got = set(col.sort_values(ascending=False).index[: self.JRC_CAPPED_N_REGIONS])
+                got = set(col.sort_values(ascending=False).index[: int(param("JRC_CAPPED_N_REGIONS"))])
             except Exception:
                 got = set()
             # sensitivity only (tools/run/run_f2f_2030.py --capped-regions): the report does not
@@ -2300,8 +2295,7 @@ class SupplyModule(ModuleStateMixin):
         )
 
 
-    #: CAPRI's exponent in othImpact.NMIN (envind/ghgMiti.gms, p_fertEffCor)
-    FERT_EFF_COR = P_FERT_EFF_COR
+    # CAPRI's exponent in othImpact.NMIN (envind/ghgMiti.gms, p_fertEffCor): the parameter P_FERT_EFF_COR
 
 
     def _fert_techs(self, region):
@@ -2335,7 +2329,7 @@ class SupplyModule(ModuleStateMixin):
         r8 = to8.get(region)
         act_ = active_technologies()
         x = overfert_factor(region)
-        xm = (x + OVERFERT_MARKUP) if x is not None else None
+        xm = (x + param("OVERFERT_MARKUP")) if x is not None else None
         def q_of(opt, reg=None):
             rr = tab.get((reg, opt)) if reg else None
             rr = rr if rr is not None else tab.get((msc, opt))
@@ -2358,7 +2352,7 @@ class SupplyModule(ModuleStateMixin):
                 q = 0.9 * q0                                       # ghgMiti.gms l. 110
             if not k1 > 0 or q is None or not (0 < q < q0):
                 continue
-            nmin = (q0 / q - 1.0) ** self.FERT_EFF_COR
+            nmin = (q0 / q - 1.0) ** param("P_FERT_EFF_COR")
             s0 = float(rr.IniShare) if rr.IniShare == rr.IniShare else 0.0
             smax = float(rr.MaxShare) if rr.MaxShare == rr.MaxShare else 0.0
             if smax <= 0 and sd:
@@ -2367,8 +2361,8 @@ class SupplyModule(ModuleStateMixin):
             if name == "NITR_INH" and xm is not None:             # restMitFert: NI cannot go below need
                 if xm <= 1.0:
                     nmin = 0.0
-                elif xm < nmin ** (1.0 / self.FERT_EFF_COR) + 1.0:
-                    nmin = (xm - 1.0) ** self.FERT_EFF_COR
+                elif xm < nmin ** (1.0 / param("P_FERT_EFF_COR")) + 1.0:
+                    nmin = (xm - 1.0) ** param("P_FERT_EFF_COR")
             if name != "NITR_INH" and xm is not None and xm > 1.0 and qp is not None:
                 e_need = q0 / xm
                 if e_need > qp:
@@ -2380,7 +2374,7 @@ class SupplyModule(ModuleStateMixin):
                 slope = float(rr.costParSqr if rr.costParSqr == rr.costParSqr else 0.0) \
                     + float(rr.pmpParSqr if rr.pmpParSqr == rr.pmpParSqr else 0.0)
                 rs0 = float(rr.relSubs0) if rr.relSubs0 == rr.relSubs0 else 0.0
-                nmin_pf = (q0 / qp - 1.0) ** self.FERT_EFF_COR if qp else 0.0
+                nmin_pf = (q0 / qp - 1.0) ** param("P_FERT_EFF_COR") if qp else 0.0
                 if xm is not None and xm - 1.0 <= nmin_pf and smax < 1.0:
                     rs0 = 0.0
                 if slope <= 0:
@@ -2432,7 +2426,7 @@ class SupplyModule(ModuleStateMixin):
         L = _nc.netf(g, float(g.get("run_surf", 0.0)))
         v = (L["NH3"] * (sv["NH3SYN"] or 0.0) + L["NOX"] * (sv["NOXSYN"] or 0.0) + L["N2O"] * (sv["N2OSYN"] or 0.0)
              + L["RunTot"] * (sv["NO3SRUN"] or 0.0))
-        return (abs(v) ** self.FERT_EFF_COR) * (1.0 if v >= 0 else -1.0) if v else 0.0
+        return (abs(v) ** param("P_FERT_EFF_COR")) * (1.0 if v >= 0 else -1.0) if v else 0.0
 
     def _manure_per_head(self, region, model):
         """Manure N per activity unit of the region's animals ({animal: the environmental module's organic N input
@@ -2920,7 +2914,7 @@ class SupplyModule(ModuleStateMixin):
                                 # extreme N shadow prices, pig overshoot, high manure
                                 # prices and importers trading crops for manure fees.
                                 if region in self._jrc_capped_regions(cs):
-                                    target = sp * (1.0 - self.JRC_CAPPED_CUT)
+                                    target = sp * (1.0 - param("JRC_CAPPED_CUT"))
                         surplus_row = (bc[0], target, bc[1], bc[2],
                                        self.data["yields"].loc[region],
                                        self._fert_techs(region),

@@ -100,6 +100,21 @@ class RunInputs:
         """A table at a path this object located (path, resolve)."""
         return read_input(path, **read_kw)
 
+    def parameters(self) -> dict:
+        """The model's parameters, {(name, key): value}, from <data_dir>/shared/model_parameters.csv (capri_mod.params;
+        refactor stage 3, N1: read through the run's inputs, not from a path next to the package)."""
+        def _load(s):
+            import csv
+            tab = {}
+            with open(s.need(s.path("model_parameters.csv", "shared")), newline="") as f:
+                for r in csv.DictReader(f):
+                    k = (r["name"], r.get("key") or "")
+                    if k in tab:
+                        raise ValueError(f"model_parameters.csv: duplicate {k}")
+                    tab[k] = float(r["value"])
+            return tab
+        return self.cached("model_parameters", _load)
+
     def cached(self, key: str, load: Callable[["RunInputs"], Any]) -> Any:
         """load(self), computed once per inputs object."""
         if key not in self.cache:

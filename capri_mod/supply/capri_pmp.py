@@ -44,32 +44,28 @@ from capri_mod.data.definitions import MS_CODE
 
 # --- 1. dampening ----------------------------------------------------------
 
-ELAS_HIGH = param("ELAS_HIGH")      # p_elasHigh
-ELAS_CAP = param("ELAS_CAP")        # MIN(8, ...)
-
-
 def dampen_elasticity(eps):
-    """CAPRI's heuristic upper bound. Values at or below ELAS_HIGH pass through."""
+    """CAPRI's heuristic upper bound. Values at or below p_elasHigh (the parameter ELAS_HIGH) pass through; the
+    bound is MIN(8, ...) (ELAS_CAP). Both read through the run's inputs (refactor stage 3, N1)."""
+    elas_high, elas_cap = param("ELAS_HIGH"), param("ELAS_CAP")
     e = np.asarray(eps, dtype=float)
-    damped = np.minimum(ELAS_CAP, np.sqrt(np.maximum(e, 0.0))
-                        + ELAS_HIGH - np.sqrt(ELAS_HIGH))
-    return np.where(e > ELAS_HIGH, damped, e)
+    damped = np.minimum(elas_cap, np.sqrt(np.maximum(e, 0.0))
+                        + elas_high - np.sqrt(elas_high))
+    return np.where(e > elas_high, damped, e)
 
 
 # --- 2. share term ---------------------------------------------------------
-
-SHARE_COEF = param("SHARE_COEF")
-
 
 def share_term(activity_levels: pd.Series, arable_total: float,
                crop_activities: set) -> pd.Series:
     """1 - 0.2*sqrt(share of arable) for crops, 1.0 otherwise."""
     out = pd.Series(1.0, index=activity_levels.index, dtype=float)
+    share_coef = param("SHARE_COEF")
     if arable_total and arable_total > 0:
         for a in activity_levels.index:
             if a in crop_activities:
                 share = max(float(activity_levels.get(a, 0.0)), 0.0) / arable_total
-                out[a] = max(1.0 - SHARE_COEF * np.sqrt(min(share, 1.0)), 0.1)
+                out[a] = max(1.0 - share_coef * np.sqrt(min(share, 1.0)), 0.1)
     return out
 
 

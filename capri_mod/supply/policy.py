@@ -107,7 +107,7 @@ class PolicyBlock:
         applies them uniformly to the member state's regions. (A per-country table of 2018-2019
         Eurostat shares used here before CAPRI's targets were loaded was no longer reached for any
         EU region and has been removed.)"""
-        return self.ORGANIC_BASELINE_SHARE
+        return param("ORGANIC_BASELINE_SHARE")
 
     def _input_cost(self, a: str, item: str, share_table: dict) -> float:
         """EUR/ha of input `item` (used for 'fert') for crop a: CAPRI's regional cost
@@ -145,7 +145,7 @@ class PolicyBlock:
         if reduction <= 0:
             return
         # yield_loss False: CAPRI star 3.0's Green Deal group (pesticides.gms: the yield shock 'off')
-        loss = self.PESTICIDE_YIELD_LOSS_AT_50PCT * (reduction / 0.50) if yield_loss else 0.0
+        loss = param("PESTICIDE_YIELD_LOSS_AT_50PCT") * (reduction / 0.50) if yield_loss else 0.0
         # (a cap of the loss at 0.90 was removed 23 October 2026: unsourced and never reached - the loss is at most
         # 0.20, at a 100% cut)
 

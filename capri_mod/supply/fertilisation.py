@@ -629,7 +629,7 @@ class FertilisationBlock:
         """Extra N excretion from nitrate in the ration, t N per activity unit
         (1000 heads): 0.28 kg N per kg nitrate per head."""
         rs = getattr(self.seen, "ration_state", None) or {}
-        return {a: self.NITR_N_EXCR * float(v.get("nitr_kg", 0.0))
+        return {a: param("NITR_N_EXCR") * float(v.get("nitr_kg", 0.0))
                 for a, v in rs.items() if isinstance(v, dict) and float(v.get("nitr_kg", 0.0)) > 0}
 
     def _nitrate_row_term(self, a) -> float:
@@ -780,7 +780,7 @@ class FertilisationBlock:
         """JRC121368 (sect. 4.3.4, p. 23): regions where the tiered nitrogen target "generated
         infeasibilities in the model" had their reduction "set at the EU average (36%)". The
         report names no regions and the model takes the nine highest baseline surpluses up front
-        (SupplyModule.JRC_CAPPED_N_REGIONS); this applies the same rule to any OTHER region whose
+        (the parameter JRC_CAPPED_N_REGIONS); this applies the same rule to any OTHER region whose
         target proves infeasible in the land-market problem - in the model these are Dutch regions
         that IMPORT manure in CAPRI's 2030 reference (52-123 kg N/ha, held fixed without the
         manure market). The target per hectare becomes the region's base surplus x (1 - 36%); with
@@ -790,7 +790,7 @@ class FertilisationBlock:
         srow = getattr(self.ev, "surplus_row", None)
         if "N_balance" not in labels or srow is None or len(srow) < 8 or srow[7] is None:
             return None, False, Aa, ba
-        T = float(srow[1]); T2 = float(srow[7]) * (1.0 - SupplyModule.JRC_CAPPED_CUT)
+        T = float(srow[1]); T2 = float(srow[7]) * (1.0 - param("JRC_CAPPED_CUT"))
         if not T2 > T + 1e-9:
             return None, False, Aa, ba
         k = labels.index("N_balance")

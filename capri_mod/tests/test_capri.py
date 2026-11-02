@@ -2807,6 +2807,33 @@ def test_parameter_file_and_code_agree():
     assert params.param("GWP_N2O") == 298.0 and params.param_table("FIBRE_FACTOR")["DCOW"] == 0.6
 
 
+def test_the_supplys_parameters_follow_the_runs_data_directory(tmp_path):
+    """Refactor stage 3, N1 (the project lead's decision Q6, 2 November 2026): param() reads
+    <data_dir>/shared/model_parameters.csv through the run's inputs (capri_mod.data.inputs), and the supply reads its
+    parameters where it uses them, so a run on another data directory takes that directory's values."""
+    import csv
+    from capri_mod import params
+    from capri_mod.data import inputs as I
+    from capri_mod.supply.capri_pmp import dampen_elasticity
+    rows = list(csv.DictReader(open(params.FILE, newline="")))
+    for r in rows:
+        if r["name"] == "ELAS_CAP":
+            r["value"] = "5.0"
+    (tmp_path / "shared").mkdir()
+    with open(tmp_path / "shared" / "model_parameters.csv", "w", newline="") as f:
+        w = csv.DictWriter(f, fieldnames=list(rows[0]))
+        w.writeheader()
+        w.writerows(rows)
+    old = I.current()
+    try:
+        assert float(dampen_elasticity(100.0)) == 8.0                    # the repository's cap
+        I.use(I.RunInputs(tmp_path))
+        assert params.param("ELAS_CAP") == 5.0 and float(dampen_elasticity(100.0)) == 5.0
+    finally:
+        I.use(old)
+    assert params.param("ELAS_CAP") == 8.0
+
+
 def test_settings_layer_is_the_one_source_of_run_settings():
     """The settings layer (agreed 23 October 2026): every switch read through `setting(...)` names a key of
     defaults.toml, every key of defaults.toml is read somewhere, an unknown key or a wrong type stops, assigning to a

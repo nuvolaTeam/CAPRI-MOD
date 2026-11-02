@@ -382,14 +382,14 @@ class AbatementBlock:
         q = 0.9 * q0            # ghgMiti.gms l. 110: QEmitt(NITR_INH) = 0.9 x QEmitt(NOC), also for N2OMAN
         if not (q > 0 and q0 > q and k1 > 0):
             return
-        nman = (q0 / q - 1.0) ** P_FERT_EFF_COR
+        nman = (q0 / q - 1.0) ** param("P_FERT_EFF_COR")
         x = overfert_factor(self.data.region_id)
         if x is not None:
-            cap = x + OVERFERT_MARKUP
+            cap = x + param("OVERFERT_MARKUP")
             if cap <= sub:
                 return
-            if cap < (nman ** (1.0 / P_FERT_EFF_COR) + 1.0) * sub:
-                nman = (cap / sub - 1.0) ** P_FERT_EFF_COR
+            if cap < (nman ** (1.0 / param("P_FERT_EFF_COR")) + 1.0) * sub:
+                nman = (cap / sub - 1.0) ** param("P_FERT_EFF_COR")
         # maximum share: manure N not dropped on pasture (grazing shares of the ammonia data)
         base = self._base_levels()
         tot = graz = 0.0
