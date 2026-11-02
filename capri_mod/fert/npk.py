@@ -23,7 +23,7 @@ from capri_mod.data.definitions import capri_ms
 from capri_mod.params import param
 
 NUTRIENTS = ("N", "P", "K")
-SOURCES = ("MINE", "EXCR", "CRES")
+from capri_mod.fert.inner_fert_dist import SOURCES   # noqa: E402  CAPRI's nutrient sources, one definition (stage 4)
 PERM_NGRP = frozenset({"GRAS", "PERM"})
 
 

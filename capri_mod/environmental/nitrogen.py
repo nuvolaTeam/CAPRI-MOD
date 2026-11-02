@@ -7,6 +7,7 @@ module once environmental_module is loaded (capri_mod.utils.mixins.inject_names)
 from __future__ import annotations
 from capri_mod import statekit as _est   # the state objects' helpers (refactor stage 4)
 from capri_mod.fert.npk import endo_slope as _endo_slope
+from capri_mod.fert.inner_fert_dist import SOURCES as _FERT_SOURCES   # CAPRI's nutrient sources, one definition
 
 
 class NitrogenBlock:
@@ -644,7 +645,7 @@ class NitrogenBlock:
             return None
         rows = []
         for g, A in out["area"].items():
-            ph = {s_: float(out["per_ha"].get((g, s_), 0.0)) for s_ in ("MINE", "EXCR", "CRES")}
+            ph = {s_: float(out["per_ha"].get((g, s_), 0.0)) for s_ in _FERT_SOURCES}
             rows.append(dict(region=region, capri_region=out["capri_region"], ngrp=g, area_kha=float(A),
                              mine_kg_ha=ph["MINE"], excr_kg_ha=ph["EXCR"], cres_kg_ha=ph["CRES"],
                              mine_cap_kg_ha=float(gcaps.get(g, float("nan"))) if gcaps else float("nan"),

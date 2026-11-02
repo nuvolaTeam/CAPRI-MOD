@@ -42,7 +42,7 @@ class PriceStepBlock:
                 if float(v) > 0:
                     d[str(c)] = d.get(str(c), 0.0) + float(v)
         # feed use per member state (kt): the traded feed bulks
-        traded = ("FCER", "FPRO", "FENE", "FMIL", "FOTH")
+        traded = CAPRI_FEED_TRD            # CAPRI's FEED_TRD (capri_data/codes/capri/FEED_TRD.csv), in its order
         feed = {}
         for r_, res in supply_results.items():
             ft = getattr(res, "feed_t", None) or {}

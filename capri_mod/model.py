@@ -54,6 +54,7 @@ from capri_mod.scenarios.scenarios import get_scenario, list_scenarios
 from capri_mod.params import param, param_table
 from capri_mod.settings import setting, tri_state, current as _settings
 from capri_mod.data.definitions import MS_CODE, capri_ms, REGION_TO_COUNTRY, EU_MS_BLOCK, sup_noneu, is_eu as _is_eu
+from capri_mod.data.definitions import PRICE_FOLLOWS_EU, PRICE_FOLLOWS_ALL, CAPRI_FEED_TRD   # refactor stage 4
 from capri_mod.tableio import read_input
 
 
@@ -803,11 +804,10 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
             _target = (new_prices / base_prices.clip(lower=1.0)) * _prem - 1.0
             # CAPRI arm/set_prices.gms: the sugar beet price follows the sugar price
             # (UVAG(SUGB) x v_prodPrice(SUGA) / PPRI(SUGA)); beet has no market of its own
-            if "SUGR" in _target.index:
-                _target["SUGB"] = float(_target["SUGR"])
-            # durum wheat is part of CAPRI's wheat market (WHEA)
-            if "SWHE" in _target.index:
-                _target["DWHE"] = float(_target["SWHE"])
+            # durum wheat is part of CAPRI's wheat market (WHEA); capri_data/codes/model_price_follows.csv
+            for _a_f, _c_f in PRICE_FOLLOWS_EU:
+                if _c_f in _target.index:
+                    _target[_a_f] = float(_target[_c_f])
             # Damped update. With the Armington premium the EU price responds
             # to EU supply, so supply and price feed back on each other; taking
             # the new signal in full made the outer loop oscillate (a cobweb:
@@ -851,10 +851,9 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
                 _newdev = {}
                 for _rg in _mmk.EU:
                     _tr = _wr * _mmk.eu_premium_reg.loc[_rg].reindex(new_prices.index).fillna(1.0) - 1.0
-                    if "SUGR" in _tr.index:
-                        _tr["SUGB"] = float(_tr["SUGR"])
-                    if "SWHE" in _tr.index:
-                        _tr["DWHE"] = float(_tr["SWHE"])
+                    for _a_f, _c_f in PRICE_FOLLOWS_EU:
+                        if _c_f in _tr.index:
+                            _tr[_a_f] = float(_tr[_c_f])
                     _dt = (_tr - _target).reindex(price_signal.index).fillna(0.0)
                     for _c in ("MILK", "DCOW"):                 # raw milk: priced per member state (dairy blocks)
                         if _c in _dt.index:
@@ -894,7 +893,7 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
                     _d_s = float(self._capri_special_forecast(_hs[(_ms_s, _p_s)], _srt)) - _seen
                     _dd = self.sv.special_ms_dev.setdefault(_ms_s, {})
                     _dd[_p_s] = _d_s
-                    for _a_s, _c_s in (("SUGB", "SUGR"), ("DWHE", "SWHE")):   # beet follows sugar, durum wheat
+                    for _a_s, _c_s in PRICE_FOLLOWS_EU:   # beet follows sugar, durum wheat
                         if _p_s == _c_s and _a_s in price_signal.index:
                             _dd[_a_s] = _d_s
                 self.sv.capri_special_hist = _hs
@@ -915,12 +914,9 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
                     _wn_all = {}; self.sv.sup_gprev = {}
                 for _rg in _spr.index:
                     _tn = (_spr.loc[_rg].astype(float) - 1.0).reindex(price_signal.index)
-                    if "SUGR" in _tn.index and "SUGB" in _tn.index:
-                        _tn["SUGB"] = float(_tn["SUGR"])
-                    if "SWHE" in _tn.index and "DWHE" in _tn.index:
-                        _tn["DWHE"] = float(_tn["SWHE"])
-                    if "MILK" in _tn.index and "DCOW" in _tn.index:
-                        _tn["DCOW"] = float(_tn["MILK"])
+                    for _a_f, _c_f in PRICE_FOLLOWS_ALL:
+                        if _c_f in _tn.index and _a_f in _tn.index:
+                            _tn[_a_f] = float(_tn[_c_f])
                     _d0 = _sd0.get(_rg)
                     _d0 = pd.Series(0.0, index=price_signal.index) if _d0 is None else _d0.reindex(price_signal.index).fillna(0.0)
                     _s0 = _ps_old + _d0                          # the price level Norway's models saw
@@ -964,7 +960,7 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
                     _bp = _mmk.par.base_production.loc[_rg] if _rg in _mmk.par.base_production.index else None
                     _own = [c_ for c_ in _step.index if _bp is not None and c_ in _bp.index
                             and float(_bp[c_]) > self.SUP_GAP_MIN_PROD]
-                    _own += [a_ for a_, c_ in (("SUGB", "SUGR"), ("DWHE", "SWHE"), ("DCOW", "MILK")) if c_ in _own]
+                    _own += [a_ for a_, c_ in PRICE_FOLLOWS_ALL if c_ in _own]
                     _gs = _step.reindex(_own).abs() if _own else _step.abs()
                     if len(_gs) and float(_gs.max()) > self.res.sup_dev_gap:
                         self.res.sup_dev_gap = float(_gs.max()); self.res.sup_dev_worst = (_rg, str(_gs.idxmax()))
@@ -1128,7 +1124,7 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
                     # the commodity holding the largest signal gap: EU supply, world ratio, EU premium and the
                     # market's EU balance (diagnostics only)
                     _gc = str(_gp.idxmax())
-                    _mc = {"SUGB": "SUGR", "DWHE": "SWHE"}.get(_gc, _gc)
+                    _mc = dict(PRICE_FOLLOWS_EU).get(_gc, _gc)
                     _bal = ""
                     if market_eq is not None and _mc in market_eq.production.columns:
                         _eu_ = [r for r in self.market_module.EU if r in market_eq.production.index]

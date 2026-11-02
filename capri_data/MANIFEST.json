@@ -3582,6 +3582,16 @@
     "builder": "build_code_lists"
    }
   },
+  "capri_data/codes/capri/FEED_TRD.csv": {
+   "description": "CAPRI FEED_TRD: the traded feed bulks, in CAPRI's set order (global/fromimpact/sets.gms)",
+   "kind": "structure",
+   "rows": 5,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists"
+   }
+  },
   "capri_data/codes/capri/FODCRP.csv": {
    "description": "CAPRI FODCRP: the fodder crops (sets.gms)",
    "kind": "structure",
@@ -3757,6 +3767,19 @@
    "kind": "structure",
    "rows": 6,
    "columns": 3,
+   "units": "to be established (value_units: open)",
+   "read_by_model": [
+    "capri_mod/data/definitions.py"
+   ],
+   "origin": {
+    "nature": "declared"
+   }
+  },
+  "capri_data/codes/model_price_follows.csv": {
+   "description": "the activities whose price follows a market commodity's (refactor stage 4: beet follows sugar, durum wheat the wheat market, Norway's raw milk the MILK market); a declared table",
+   "kind": "structure",
+   "rows": 3,
+   "columns": 4,
    "units": "to be established (value_units: open)",
    "read_by_model": [
     "capri_mod/data/definitions.py"

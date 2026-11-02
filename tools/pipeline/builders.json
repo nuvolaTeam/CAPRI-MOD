@@ -1109,6 +1109,7 @@
     "capri_data/codes/model_activity_classes.csv",
     "capri_data/codes/model_cattle_splits.csv",
     "capri_data/codes/model_land_types.csv",
+    "capri_data/codes/model_price_follows.csv",
     "capri_data/codes/model_trade_regions.csv",
     "capri_data/shared/capri_member_state_codes.csv",
     "capri_data/shared/eu_market_blocks.csv",
@@ -1134,6 +1135,7 @@
     "$REFERENCE/sets/simini_21730/AACT_TO_XX.csv",
     "$REFERENCE/sets/simini_21730/EPRD_TO_GRP.csv",
     "$REFERENCE/sets/simini_21730/FEED_TO_O.csv",
+    "$REFERENCE/sets/simini_21730/FEED_TRD.csv",
     "$REFERENCE/sets/simini_21730/FODCRP.csv",
     "$REFERENCE/sets/simini_21730/MAACT.csv",
     "$REFERENCE/sets/simini_21730/MCACT.csv",
@@ -1154,6 +1156,7 @@
    ],
    "outputs": [
     "capri_data/codes/capri/FEED_TO_O.csv",
+    "capri_data/codes/capri/FEED_TRD.csv",
     "capri_data/codes/capri/FODCRP.csv",
     "capri_data/codes/capri/MAACT.csv",
     "capri_data/codes/capri/MCACT.csv",
