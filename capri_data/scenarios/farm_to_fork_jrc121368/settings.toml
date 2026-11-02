@@ -5,6 +5,7 @@ name = "farm_to_fork_jrc121368"
 kind = "scenario"
 description = "Farm-to-Fork as JRC121368: landscape 10%, organic 25%, pesticides -50%, nutrient surplus -50% (tiered, 36% cap), no manure trade, milk-yield genomics 0.2"
 capri_files = ["pol_input/greendeal/greendeal_scenarios.gms"]
+group = "greendeal_group"
 reference = "ref_jrc121368"
 
 [scenario.greendeal]

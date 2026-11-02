@@ -76,6 +76,8 @@ class ScenarioDef(_Strict):
     reference: Optional[str] = None
     #: where the scenario runs on another reference than CAPRI's, the reason (shown with every run)
     reference_note: str = ""
+    #: a scenario: the group whose data it reads (capri_data/scenarios/<group>/, a [group] folder), if any
+    group: Optional[str] = None
     manure_trade: Optional[bool] = None
     biofuel_markets: Optional[bool] = None
     endotech: Endotech = Field(default_factory=Endotech)
@@ -94,6 +96,8 @@ class ScenarioDef(_Strict):
                 raise ValueError(f"{self.name}: a scenario names its reference")
             if self.trajectory:
                 raise ValueError(f"{self.name}: a scenario's trajectory is its reference's")
+            if self.greendeal is not None and self.group != "greendeal_group":
+                raise ValueError(f"{self.name}: a Green Deal scenario reads the group greendeal_group")
         return self
 
 
@@ -121,6 +125,10 @@ def load(name: str, root: Optional[Path] = None) -> ScenarioDef:
     ref = _read(d.reference, root)
     if ref.kind != "reference":
         raise ValueError(f"{name}: its reference {d.reference!r} is a scenario")
+    if d.group is not None:
+        with open(root / d.group / "settings.toml", "rb") as fh:
+            if tomllib.load(fh).get("group", {}).get("name") != d.group:
+                raise ValueError(f"{name}: its group {d.group!r} is not a group folder")
     upd = {}
     for k in ("manure_trade", "biofuel_markets"):
         if getattr(d, k) is None and getattr(ref, k) is not None:

@@ -771,7 +771,7 @@
    ],
    "external": [],
    "outputs": [
-    "capri_data/2017/policy/capri_baseline_surplus_2030.csv"
+    "capri_data/scenarios/capri_ref_2030/capri_baseline_surplus_2030.csv"
    ]
   },
   {
@@ -2240,8 +2240,8 @@
     "$SOURCES/gdxlib/libgdxcclib64.so"
    ],
    "outputs": [
-    "capri_data/2017/policy/landscape_targets_ms.csv",
-    "capri_data/2017/policy/organic_targets_ms.csv"
+    "capri_data/scenarios/greendeal_group/landscape_targets_ms.csv",
+    "capri_data/scenarios/greendeal_group/organic_targets_ms.csv"
    ]
   },
   {
@@ -3148,8 +3148,8 @@
    ],
    "external": [],
    "outputs": [
-    "capri_data/2017/policy/mineral_redu_exemptions.csv",
-    "capri_data/2017/policy/mineral_redu_limcres.csv"
+    "capri_data/scenarios/greendeal_group/mineral_redu_exemptions.csv",
+    "capri_data/scenarios/greendeal_group/mineral_redu_limcres.csv"
    ]
   },
   {

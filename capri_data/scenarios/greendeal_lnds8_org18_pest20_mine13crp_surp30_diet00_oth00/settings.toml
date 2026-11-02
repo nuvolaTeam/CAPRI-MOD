@@ -5,6 +5,7 @@
 name = "greendeal_lnds8_org18_pest20_mine13crp_surp30_diet00_oth00"
 kind = "scenario"
 capri_files = ["pol_input/greendeal/greendeal_scenarios.gms"]
+group = "greendeal_group"
 reference = "ref_star3"
 manure_trade = true
 

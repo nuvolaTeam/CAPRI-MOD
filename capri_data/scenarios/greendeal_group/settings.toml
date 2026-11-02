@@ -1,0 +1,9 @@
+# CAPRI's Green Deal scenario group: the data every scenario of the group reads, held once (the project lead's
+# decision, 3 November 2026), as CAPRI's pol_input/greendeal files are included by every scenario of the group
+# (greendeal_scenarios.gms). Its files: the landscape and organic targets per member state
+# (tools/build/build_greendeal_targets.py) and the mineral fertiliser reduction's exemptions and limits
+# (tools/build/build_mineral_redu_rules.py)
+[group]
+name = "greendeal_group"
+description = "CAPRI's Green Deal scenario group data"
+capri_files = ["pol_input/greendeal/greendeal_scenarios.gms", "pol_input/greendeal/load_organic_targets.gms", "pol_input/greendeal/landscape.gms", "pol_input/greendeal/minfert_redu_by_crop.gms"]

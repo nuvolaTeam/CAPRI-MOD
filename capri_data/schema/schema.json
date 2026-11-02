@@ -12517,7 +12517,7 @@
    }
   },
   "landscape_targets_ms": {
-   "file": "capri_data/2017/policy/landscape_targets_ms.csv",
+   "file": "capri_data/scenarios/greendeal_group/landscape_targets_ms.csv",
    "declared_in": "14_policy_targets.sql",
    "layout": [],
    "comment": "CAPRI's p_landscapeTargets: share of UAA in non-productive landscape elements to reach (gams/pol_input/greendeal/landscape_targets.gdx; tools/build/build_greendeal_targets.py)",
@@ -18636,7 +18636,7 @@
    }
   },
   "organic_targets_ms": {
-   "file": "capri_data/2017/policy/organic_targets_ms.csv",
+   "file": "capri_data/scenarios/greendeal_group/organic_targets_ms.csv",
    "declared_in": "14_policy_targets.sql",
    "layout": [],
    "comment": "CAPRI's organic targets per member state: p_organicTargetMS (ARA, J0000, PECR) and p_organicTargetUAA (gams/pol_input/greendeal/organic_targets*.gdx; tools/build/build_greendeal_targets.py)",
@@ -20487,7 +20487,7 @@
    }
   },
   "pol_capri_baseline_surplus_2030": {
-   "file": "capri_data/2017/policy/capri_baseline_surplus_2030.csv",
+   "file": "capri_data/scenarios/capri_ref_2030/capri_baseline_surplus_2030.csv",
    "declared_in": "24_policy_more.sql",
    "layout": [],
    "comment": "CAPRI's own baseline gross N surplus per ha (2030 reference), per model region: the starting point (tools/build/build_capri_baseline_surplus.py)",
@@ -20540,7 +20540,7 @@
    }
   },
   "pol_mineral_redu_exemptions": {
-   "file": "capri_data/2017/policy/mineral_redu_exemptions.csv",
+   "file": "capri_data/scenarios/greendeal_group/mineral_redu_exemptions.csv",
    "declared_in": "24_policy_more.sql",
    "layout": [],
    "comment": "CAPRI's exemptions in the crop-specific mineral fertiliser reduction (pol_input/greendeal/minfert_redu_by_crop.gms). (tools/build/build_mineral_redu_rules.py)",
@@ -20617,7 +20617,7 @@
    }
   },
   "pol_mineral_redu_limcres": {
-   "file": "capri_data/2017/policy/mineral_redu_limcres.csv",
+   "file": "capri_data/scenarios/greendeal_group/mineral_redu_limcres.csv",
    "declared_in": "24_policy_more.sql",
    "layout": [],
    "comment": "CAPRI's exemptions in the crop-specific mineral fertiliser reduction (pol_input/greendeal/minfert_redu_by_crop.gms). (tools/build/build_mineral_redu_rules.py)",

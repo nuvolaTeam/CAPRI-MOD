@@ -2371,98 +2371,6 @@
    ],
    "catalogue_note": "BPS = CAPRI's premiums per ha of UAA over all schemes; ANC, AES, ORGANIC, COUPLED are 0 and unused (the split by scheme comes from premium_scheme_shares_2030.csv) (not re-checked)"
   },
-  "capri_data/2017/policy/capri_baseline_surplus_2030.csv": {
-   "description": "CAPRI's own baseline gross N surplus per ha (2030 reference), per model region: the starting point (tools/build/build_capri_baseline_surplus.py)",
-   "kind": "reference",
-   "vintage": "2030",
-   "domain": "policy",
-   "status": "live",
-   "rows": 221,
-   "columns": 3,
-   "units": "to be established (value_units: open)",
-   "read_by_model": [
-    "capri_mod/data/loaders.py"
-   ],
-   "origin": {
-    "nature": "capri",
-    "builder": "build_capri_baseline_surplus"
-   },
-   "catalogue_note": "CAPRI's own baseline gross N surplus per ha (2030 reference), input to the tiered nitrogen target; built by tools/build/build_capri_baseline_surplus.py from capri_gnb_components_2030.csv (SURTOT): 221 regions from their CAPRI NUTS-2 region(s) incl. old NUTS codes and NUTS splits/merges, 17 from member states CAPRI holds as one region, 10 city or non-modelled regions from the national value (REGISTERED). Replaces the 2026-10 file, where 82 regions carried their own surplus pattern scaled to the national value. (not re-checked)"
-  },
-  "capri_data/2017/policy/landscape_targets_ms.csv": {
-   "description": "CAPRI's p_landscapeTargets: share of UAA in non-productive landscape elements to reach (gams/pol_input/greendeal/landscape_targets.gdx; tools/build/build_greendeal_targets.py)",
-   "kind": "coefficients",
-   "vintage": "2021",
-   "domain": "policy",
-   "status": "live",
-   "rows": 27,
-   "columns": 2,
-   "units": "U_percent",
-   "read_by_model": [
-    "capri_mod/data/loaders.py"
-   ],
-   "origin": {
-    "nature": "capri",
-    "builder": "build_greendeal_targets"
-   },
-   "catalogue_note": "CAPRI Green Deal targets by member state. (not re-checked)"
-  },
-  "capri_data/2017/policy/mineral_redu_exemptions.csv": {
-   "description": "CAPRI's exemptions in the crop-specific mineral fertiliser reduction (pol_input/greendeal/minfert_redu_by_crop.gms). (tools/build/build_mineral_redu_rules.py)",
-   "kind": "coefficients",
-   "vintage": "star 3.0",
-   "domain": "policy",
-   "status": "live",
-   "rows": 81,
-   "columns": 5,
-   "units": "to be established (value_units: open)",
-   "read_by_model": [
-    "capri_mod/data/loaders.py",
-    "capri_mod/fert/inner_fert_dist.py"
-   ],
-   "origin": {
-    "nature": "capri",
-    "builder": "build_mineral_redu_rules"
-   },
-   "catalogue_note": "CAPRI's listed exemptions from the crop-specific mineral fertiliser reduction: (region, group) capped at factor x baseline from simulation year > after_year, some only with othPol high; tools/build/build_mineral_redu_rules.py. (not re-checked)"
-  },
-  "capri_data/2017/policy/mineral_redu_limcres.csv": {
-   "description": "CAPRI's exemptions in the crop-specific mineral fertiliser reduction (pol_input/greendeal/minfert_redu_by_crop.gms). (tools/build/build_mineral_redu_rules.py)",
-   "kind": "coefficients",
-   "vintage": "star 3.0",
-   "domain": "policy",
-   "status": "live",
-   "rows": 75,
-   "columns": 4,
-   "units": "to be established (value_units: open)",
-   "read_by_model": [
-    "capri_mod/data/loaders.py",
-    "capri_mod/fert/inner_fert_dist.py"
-   ],
-   "origin": {
-    "nature": "capri",
-    "builder": "build_mineral_redu_rules"
-   },
-   "catalogue_note": "CAPRI's relaxations of the limCres regulation (crop residues to a group at most (1.3 + add) x baseline per ha) by simulation year; tools/build/build_mineral_redu_rules.py. (not re-checked)"
-  },
-  "capri_data/2017/policy/organic_targets_ms.csv": {
-   "description": "CAPRI's organic targets per member state: p_organicTargetMS (ARA, J0000, PECR) and p_organicTargetUAA (gams/pol_input/greendeal/organic_targets*.gdx; tools/build/build_greendeal_targets.py)",
-   "kind": "coefficients",
-   "vintage": "2021",
-   "domain": "policy",
-   "status": "live",
-   "rows": 27,
-   "columns": 5,
-   "units": "U_percent",
-   "read_by_model": [
-    "capri_mod/data/loaders.py"
-   ],
-   "origin": {
-    "nature": "capri",
-    "builder": "build_greendeal_targets"
-   },
-   "catalogue_note": "CAPRI Green Deal targets by member state. (not re-checked)"
-  },
   "capri_data/2017/policy/organic_yield_gap.csv": {
    "description": "organic-to-conventional yield gaps per PESETA macro-region and product group, FADN estimates by the JRC (SUPREMA), CAPRI's dat/pesticides/yield_effects_ppp.xlsx sheet yld_gap (tools/build/build_organic_yield_gap.py)",
    "kind": "coefficients",
@@ -4695,6 +4603,24 @@
     "builder": "build_captrd_sets (not in the trace yet)"
    }
   },
+  "capri_data/scenarios/capri_ref_2030/capri_baseline_surplus_2030.csv": {
+   "description": "CAPRI's own baseline gross N surplus per ha (2030 reference), per model region: the starting point (tools/build/build_capri_baseline_surplus.py)",
+   "kind": "reference",
+   "vintage": "2030",
+   "domain": "policy",
+   "status": "live",
+   "rows": 221,
+   "columns": 3,
+   "units": "to be established (value_units: open)",
+   "read_by_model": [
+    "capri_mod/data/loaders.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_capri_baseline_surplus"
+   },
+   "catalogue_note": "CAPRI's own baseline gross N surplus per ha (2030 reference), input to the tiered nitrogen target; built by tools/build/build_capri_baseline_surplus.py from capri_gnb_components_2030.csv (SURTOT): 221 regions from their CAPRI NUTS-2 region(s) incl. old NUTS codes and NUTS splits/merges, 17 from member states CAPRI holds as one region, 10 city or non-modelled regions from the national value (REGISTERED). Replaces the 2026-10 file, where 82 regions carried their own surplus pattern scaled to the national value. (not re-checked)"
+  },
   "capri_data/scenarios/capri_ref_2030/growth.csv": {
    "description": "CAPRI's 2030 reference as growth factors per block and activity: the per-activity median of the per-region ratios LEVL or YILD in res_2_1730greendeal_refpol_endotech_all_ini / CAPRI's 2017 results, with the model's activity aliases (tools/build/build_trajectory_capri_ref.py, build_trajectory_model_keys.py)",
    "kind": "reference",
@@ -4780,6 +4706,80 @@
    "status": "live",
    "units": "- (not re-checked)",
    "catalogue_note": "CAPRI's trend projection as an alternative 2030 scenario (--trajectory captrd): settings; factors in growth.csv and regional.csv (capri_data/trajectories/captrd_2030.json until 31 October 2026). (not re-checked)"
+  },
+  "capri_data/scenarios/greendeal_group/landscape_targets_ms.csv": {
+   "description": "CAPRI's p_landscapeTargets: share of UAA in non-productive landscape elements to reach (gams/pol_input/greendeal/landscape_targets.gdx; tools/build/build_greendeal_targets.py)",
+   "kind": "coefficients",
+   "vintage": "2021",
+   "domain": "policy",
+   "status": "live",
+   "rows": 27,
+   "columns": 2,
+   "units": "U_percent",
+   "read_by_model": [
+    "capri_mod/data/loaders.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_greendeal_targets"
+   },
+   "catalogue_note": "CAPRI Green Deal targets by member state. (not re-checked)"
+  },
+  "capri_data/scenarios/greendeal_group/mineral_redu_exemptions.csv": {
+   "description": "CAPRI's exemptions in the crop-specific mineral fertiliser reduction (pol_input/greendeal/minfert_redu_by_crop.gms). (tools/build/build_mineral_redu_rules.py)",
+   "kind": "coefficients",
+   "vintage": "star 3.0",
+   "domain": "policy",
+   "status": "live",
+   "rows": 81,
+   "columns": 5,
+   "units": "to be established (value_units: open)",
+   "read_by_model": [
+    "capri_mod/data/loaders.py",
+    "capri_mod/fert/inner_fert_dist.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_mineral_redu_rules"
+   },
+   "catalogue_note": "CAPRI's listed exemptions from the crop-specific mineral fertiliser reduction: (region, group) capped at factor x baseline from simulation year > after_year, some only with othPol high; tools/build/build_mineral_redu_rules.py. (not re-checked)"
+  },
+  "capri_data/scenarios/greendeal_group/mineral_redu_limcres.csv": {
+   "description": "CAPRI's exemptions in the crop-specific mineral fertiliser reduction (pol_input/greendeal/minfert_redu_by_crop.gms). (tools/build/build_mineral_redu_rules.py)",
+   "kind": "coefficients",
+   "vintage": "star 3.0",
+   "domain": "policy",
+   "status": "live",
+   "rows": 75,
+   "columns": 4,
+   "units": "to be established (value_units: open)",
+   "read_by_model": [
+    "capri_mod/data/loaders.py",
+    "capri_mod/fert/inner_fert_dist.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_mineral_redu_rules"
+   },
+   "catalogue_note": "CAPRI's relaxations of the limCres regulation (crop residues to a group at most (1.3 + add) x baseline per ha) by simulation year; tools/build/build_mineral_redu_rules.py. (not re-checked)"
+  },
+  "capri_data/scenarios/greendeal_group/organic_targets_ms.csv": {
+   "description": "CAPRI's organic targets per member state: p_organicTargetMS (ARA, J0000, PECR) and p_organicTargetUAA (gams/pol_input/greendeal/organic_targets*.gdx; tools/build/build_greendeal_targets.py)",
+   "kind": "coefficients",
+   "vintage": "2021",
+   "domain": "policy",
+   "status": "live",
+   "rows": 27,
+   "columns": 5,
+   "units": "U_percent",
+   "read_by_model": [
+    "capri_mod/data/loaders.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_greendeal_targets"
+   },
+   "catalogue_note": "CAPRI Green Deal targets by member state. (not re-checked)"
   },
   "capri_data/scenarios/null/settings.toml": {
    "vintage": "n/a",
