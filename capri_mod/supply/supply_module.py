@@ -514,9 +514,10 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
     #: shock starts from the baseline's state (model._market_supply_hessian). Found by comparing the model's attributes
     #: before and after a solve (27 October 2026); bookkeeping (res.n_solves) and the shared environmental
     #: module are not state. 2 November 2026 (docs/design/STAGE3_BEHAVIOUR_CHANGES.md, the project lead's decision):
-    #: sv.n_relax_sticky added (the JRC121368 relaxation kept for the same N target)
+    #: sv.n_relax_sticky added (the JRC121368 relaxation kept for the same N target), ev.ghg_nr_obj taken out (an
+    #: identity reference: its deep copy could never match, and the tax's undo never acts across solves)
     SOLVE_STATE = ("ev.amm_cost", "sv.amm_last", "res.animal_n_kept", "ev.animal_n_relief", "res.animal_nh3_saved",
-                   "res.cover_solved", "res.fd_model", "ev.ghg_nr_obj", "res.land_solution", "res.last_aug", "res.last_cattle_z",
+                   "res.cover_solved", "res.fd_model", "res.land_solution", "res.last_aug", "res.last_cattle_z",
                    "res.last_dairy_z", "ev.last_duals", "res.last_feed_dm", "res.last_feed_t", "res.last_genet_z",
                    "res.last_grass_z", "res.last_hist_fallow", "res.last_npk", "ev.last_req_duals",
                    "ev.manure_ni_nh3", "ev.manure_ni_relief", "res.manure_tech_shares", "ev.price_shock_now",
