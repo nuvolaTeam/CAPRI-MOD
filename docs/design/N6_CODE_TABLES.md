@@ -61,6 +61,14 @@ STORN_, RUNHOUSN_ and APPLN_, supply_model.gms l. 3200 ff.); capri_pmp.py is kep
 SupplyModule.__init__, and the calibrator imports its share term; whether those elasticities still reach the results
 under pmp_source capri2030 is to be measured, not assumed).
 
+Measured 2 November 2026 (evening): a mini-EU Farm-to-Fork run with every elasticity of build_elasticity_table
+doubled (a probe edit in the run tree, not committed) against the N6 run: the EU activity levels move by at most
+1.5e-7 relative (BCOW, baseline), prices by at most 2.1e-6 (barley), the regional duals by at most 1.1e-4
+(DK's SHGM lower bound), the environmental tables by 1.1e-5; the genomics' baseline adoption (0.00015, near zero)
+by 13% of itself. So under pmp_source capri2030 the elasticity path reaches the results only through the activities
+CAPRI's 2030 terms do not cover, and barely: not inert, but far below the gates' tolerances. Whether to remove it
+(a behaviour change at that size, with its three input files and builders) is the project lead's decision.
+
 | table | now | checked against |
 |---|---|---|
 | ORGANIC_CROP_TARGET, ORGANIC_YIELD_GAP_CROPS | model_activity_classes.csv organic_target, organic_yield_gap (rows cite load_organic_targets.gms, load_organic_yieldgap.gms) | none: the organic module's sets are not in the sim_ini sets |
