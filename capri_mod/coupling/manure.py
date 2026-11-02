@@ -68,14 +68,14 @@ class ManureBlock:
         # the market's prices by country: the N market's in manure_pool_price, P and K in manure_pool_price_pk
         pools = dict((getattr(sm.seen, "manure_pool_price", None) or {}) if prod == "N"
                      else ((getattr(sm.seen, "manure_pool_price_pk", None) or {}).get(prod) or {}))
-        cost = getattr(self, "_pool_cost_cache", None)
+        cost = getattr(self.par, "pool_cost_cache", None)
         if cost is None:
             from capri_mod.data import inputs as _inputs, nested_tables as _nt
             # CAPRI's trade costs between the pools (tools/build/build_manure_pool_costs.py); a missing file stops the run
             cost = {}
             for k, v in _nt.read_manure_pools(_inputs.current().path("manure_pool_costs.csv", "environment"))["pairs"].items():
                 a, b = k.split("|"); cost[(a, b)] = v["eur_per_t_n"] / 1000.0
-            self._pool_cost_cache = cost
+            self.par.pool_cost_cache = cost
         sched, es, sup = {}, {}, {}
         for reg, mo in getattr(sm, "_models", {}).items():
             if prod == "N":

@@ -44,13 +44,13 @@ class HessianBlock:
             _t_h = time.time()
             self.market_module.par.supply_hessian = self._market_supply_hessian(pend["price_signal"], pend["supply_results"],
                                                                             pend["regions"])
-            self._hessian_key = pend["key"]
+            self.par.hessian_key = pend["key"]
             self._progress(f"market supply Hessian of the baseline: {time.time() - _t_h:.0f} s")
         except Exception as _exc:
             warnings.warn(f"market supply Hessian not built ({_exc!r}); the market keeps its own-price "
                           "anticipation", RuntimeWarning, stacklevel=2)
             self.market_module.par.supply_hessian = None
-            self._hessian_key = pend["key"]
+            self.par.hessian_key = pend["key"]
             # recorded, so a run without CAPRI's market supply function shows it in its metadata (r131)
             self.market_supply_hessian_info = {"source": "failed", "error": repr(_exc)}
 
@@ -107,7 +107,7 @@ class HessianBlock:
         cols_y += ["YANI:" + g for g in yani_goods]
         key_src = (repr((sorted(regs), [round(float(v), 3) for v in q0.sum(axis=0).values], list(q0.columns),
                         [round(float(v), 6) for v in sig0.values], self.MARKET_SUPPLY_SHOCK,
-                        bool(getattr(self, "use_manure_market", False)), str(getattr(self, "_endotech_key", "")),
+                        bool(getattr(self, "use_manure_market", False)), str(getattr(self.par, "endotech_key", "")),
                         # the regional models' calibration (K58): a Hessian measured before the ridge fit is stale
                         "nlp",               # the supply form, when there were two (keeps the cached Hessians' keys)
                         str(getattr(self.supply_module, "pmp_source", "capri2030")),

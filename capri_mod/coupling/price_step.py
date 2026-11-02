@@ -28,11 +28,11 @@ class PriceStepBlock:
         from capri_mod.utils.capri_stop import CapriStopRule
         if not supply_results:
             return None
-        if getattr(self, "_capri_stop", None) is None:
+        if getattr(self.sv, "capri_stop", None) is None:
             blocks = read_input(Path(getattr(self, "data_dir", None) or Path(__file__).resolve().parents[2] / "capri_data") / "shared" / "eu_market_blocks.csv")
             aggs = {b: list(g["ms"]) for b, g in blocks.groupby("block")}
-            self._capri_stop = CapriStopRule(aggs, yani_rows=(), no_abs_price_rows=())
-        rule = self._capri_stop
+            self.sv.capri_stop = CapriStopRule(aggs, yani_rows=(), no_abs_price_rows=())
+        rule = self.sv.capri_stop
         # production per member state (kt)
         q = self._bridge_supply_to_market(self.supply_module.aggregate_supply(supply_results, by_country=True)).fillna(0.0)
         prod = {}

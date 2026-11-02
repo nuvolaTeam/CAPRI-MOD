@@ -92,14 +92,14 @@ def test_model_records_capri_verdict_and_can_stop_on_it():
     assert cs is not None and cs["step"] >= 1
     hist = m._outer_history
     assert all(h["conv"]["capri"] is not None for h in hist)
-    last = m._capri_stop.steps[-1]
+    last = m.sv.capri_stop.steps[-1]
     # every item kind is formed: prices at the trade block, production and feed per member state
     assert last["aggp"].get("EU_WEST", {}).get("MILK", 0) > 0 and last["aggp"]["EU_WEST"].get("BEEF", 0) > 0
     assert last["prod"]["DE000000"].get("MILK", 0) > 0 and last["feed"]["FR000000"].get("FCER", 0) > 0
     if r["metadata"]["outer_converged"]:
         assert not cs["go_on"]
     # the drift report (not CAPRI's) is recorded with the verdict, as the stop rule computes it
-    assert cs["drift"] == m._capri_stop.drift(3)
+    assert cs["drift"] == m.sv.capri_stop.drift(3)
     # the jump check's record (K79): one entry per iteration where it acted, its regions a subset of those solved
     jc = r["metadata"]["nlp_jump_check"]
     assert isinstance(jc, list)

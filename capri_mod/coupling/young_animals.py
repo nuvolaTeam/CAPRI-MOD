@@ -7,6 +7,7 @@ module once model is loaded (capri_mod.coupling.inject); the annotations are not
 from __future__ import annotations
 
 
+from capri_mod import statekit as _cst   # the state objects' helpers (refactor stage 4)
 class YoungAnimalBlock:
     def _yani_market_region(self, reg: str) -> str:
         """The young-animal market of a supply region: CAPRI clears young animals per market region (yaniMarket_ per
@@ -229,8 +230,8 @@ class YoungAnimalBlock:
         if not now:
             return
         ratio_m = {k: dict(v) for k, v in (getattr(self.supply_module.seen, "yani_price_ratio_m", None) or {}).items()}
-        w_ = getattr(self, "_yani_w", None) or {}
-        gp_ = getattr(self, "_yani_gprev", None) or {}
+        w_ = getattr(self.sv, "yani_w", None) or {}
+        gp_ = getattr(self.sv, "yani_gprev", None) or {}
         _st = _settings()
         for mr, d in now.items():
             cur = ratio_m.setdefault(mr, {})
@@ -244,12 +245,12 @@ class YoungAnimalBlock:
                 w_[(mr, g)], gp_[(mr, g)] = w, gap
                 if self._capri_price_update():
                     # CAPRI's price forecast on the young-animal prices the market cleared
-                    yh = self.__dict__.setdefault("_capri_yani_hist", {})
+                    yh = _cst.setdefault(self.sv, "capri_yani_hist", {})
                     yh[(mr, g)] = ((yh.get((mr, g)) or []) + [float(r_t)])[-4:]
                     cur[g] = float(self._capri_forecast(yh[(mr, g)], int(getattr(self, "_outer_iter_now", 0))))
                 else:
                     cur[g] = r0 + w * gap
-        self._yani_w, self._yani_gprev = w_, gp_
+        self.sv.yani_w, self.sv.yani_gprev = w_, gp_
         net, prod = getattr(self, "_yani_np", ({}, {}))
         self._publish_young_animal_prices(ratio_m, ref, net, prod, sorted({mr for (mr, _g) in ref}))
 

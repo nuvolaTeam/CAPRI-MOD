@@ -185,7 +185,7 @@ class BridgeBlock:
         areas = d.get("areas")
         run = set(run_regions or [])
         units = [r for r in areas.index if _is_eu(r) and r not in run] if areas is not None else []
-        self._excluded_units = list(units)          # the feed bulks' base (coupling/feed.py) reads them too
+        self.par.excluded_units = list(units)          # the feed bulks' base (coupling/feed.py) reads them too
         if not units:
             return None
         yld, an, oc = d.get("yields"), d.get("animal_numbers"), d.get("livestock_output_coef")
@@ -213,7 +213,7 @@ class BridgeBlock:
         """A dairy product's output less processing per tonne of raw milk (cow + sheep and goat) in the
         region's member state, CAPRI 2030 reference (dairy_processing.csv; Norway: dairy_world_processing.csv, per
         tonne of raw milk delivered); EU ratio where CAPRI has no dairy data for the member state."""
-        tab = getattr(self, "_dairy_yield_cache", None)
+        tab = getattr(self.par, "dairy_yield_cache", None)
         if tab is None:
             from pathlib import Path
             from capri_mod.data.loaders import resolve_data_file
@@ -240,14 +240,14 @@ class BridgeBlock:
                             if k in g.index:
                                 tab[(ms, k)] = float(g.at[k, "q_kt"] - (g.at[k, "proc_kt"] if pd.notna(g.at[k, "proc_kt"])
                                                                        else 0.0)) / float(g.at["MILK", "q_kt"])
-            self._dairy_yield_cache = tab
+            self.par.dairy_yield_cache = tab
         ms = self._CAPRI_MS.get(str(region)[:2], str(region)[:2]) + "000000"
         return tab.get((ms, product), tab[("_EU", product)])
 
     def _processing_yield(self, region: str, raw: str) -> float:
         """CAPRI's olive oil per tonne of olives (member state) and milled rice per tonne of paddy (EU),
         2030 reference (processing_yields.csv)."""
-        tab = getattr(self, "_proc_yield_cache", None)
+        tab = getattr(self.par, "proc_yield_cache", None)
         if tab is None:
             from pathlib import Path
             from capri_mod.data.loaders import resolve_data_file
@@ -255,7 +255,7 @@ class BridgeBlock:
             f = resolve_data_file(base, "processing_yields.csv")
             py = read_input(f)
             tab = {(r["ms"], r["raw"]): float(r["yield"]) for _, r in py.iterrows()}
-            self._proc_yield_cache = tab
+            self.par.proc_yield_cache = tab
         if raw == "PARI":
             return tab[("_EU", "PARI")]
         ms = self._CAPRI_MS.get(str(region)[:2], str(region)[:2]) + "000000"
@@ -264,7 +264,7 @@ class BridgeBlock:
     def _sugar_per_beet(self, region: str) -> float:
         """White sugar per tonne of sugar beet harvested in the region's member state (CAPRI 2030 reference:
         MAPR(SUGA) / GROF(SUGB)); member states without beet in CAPRI take the EU ratio."""
-        tab = getattr(self, "_sugar_rate_cache", None)
+        tab = getattr(self.par, "sugar_rate_cache", None)
         if tab is None:
             sp = self.data.get("sugar_processing")
             tab = {}
@@ -272,7 +272,7 @@ class BridgeBlock:
                 eu = sp[sp.index.isin(list(EU_MS_BLOCK))]                # CAPRI's EU member states
                 tab = {ms: float(r["sugar_per_beet"]) for ms, r in sp.iterrows()}
                 tab["_EU"] = float(eu["sugar_mapr_kt"].sum() / eu["beet_grof_kt"].sum())
-            self._sugar_rate_cache = tab
+            self.par.sugar_rate_cache = tab
         ms = self._CAPRI_MS.get(str(region)[:2], str(region)[:2]) + "000000"
         if ms in tab:
             return tab[ms]

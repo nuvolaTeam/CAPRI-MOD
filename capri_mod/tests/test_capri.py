@@ -270,7 +270,7 @@ def test_emission_tax_in_supply_follows_capri(model):
     b = model.run(scenario="BASELINE", regions=regs, max_outer_iter=2)
     try:
         s = model.run(custom_scenario=sc, regions=regs, max_outer_iter=2)
-        co = list(model._ghg_coef_cache.values())[-1]
+        co = list(model.par.ghg_coef_cache.values())[-1]
         assert "IR010000" in co and not any(r.startswith("NO") for r in co)
         c = co["IR010000"]
         assert c["act"]["DCOW"] > 0 and c["act"]["SWHE"] > 0 and c["hist"]["grass"] < 0
@@ -350,7 +350,7 @@ def test_manure_market_and_ammonia_options_in_every_eu_solve(model):
             assert model.supply_module._models["NO080000"].seen.manure_ctx is None
         sh0 = dict(b["supply"]["BL210000"].manure_tech_shares)
         s = model.run(custom_scenario=carbon_tax_scenario(100.0), regions=regs, max_outer_iter=2)
-        co = list(model._ghg_coef_cache.values())[-1]["BL210000"]
+        co = list(model.par.ghg_coef_cache.values())[-1]["BL210000"]
         assert co["mtech"] and any(v != 0 for v in co["mtech"].values())
         tl = mo._tech_list()
         assert tl and all("ghg" in t for t in tl) and any(t["ghg"] < 0 for t in tl)
@@ -726,8 +726,8 @@ def test_endotech_settings_hold_for_baseline_and_scenario(model):
         model.run(custom_scenario=sc, max_outer_iter=2, regions=regions)
         k = key(effective({"ghgTechMYld": 0.2}))
         # manure trade and endogenous biofuel markets: star 3.0 defaults on
-        assert (tuple(regions), k, True, True) in model._eu_base_cache
-        assert model._endotech_key == k
+        assert (tuple(regions), k, True, True) in model.par.eu_base_cache
+        assert model.par.endotech_key == k
         assert any(o == "genet_yld" for (a, o) in model.data["genetics_effects"]["IR010000"])
     finally:
         model.run(scenario="BASELINE", max_outer_iter=2, regions=regions)
@@ -3345,7 +3345,7 @@ def test_rations_are_chosen_only_inside_the_supply_models(model):
     from capri_mod.model import CAPRIModel
     model.run(scenario="BASELINE", regions=["IR010000"], max_outer_iter=1)
     a = "DCOW"
-    r0 = model._ration_model.rations[("IR010000", a)]
+    r0 = model.par.ration_model.rations[("IR010000", a)]
     assert np.allclose([model._ration_state["IR010000"][a]["x"][f] for f in r0.feeds], r0.x0)   # before a solve: base
     model._update_rations({})                       # the next iteration's update: from the last regional solve
     rs = model._ration_state["IR010000"]
@@ -3677,9 +3677,9 @@ def test_shocked_baseline_does_not_replace_the_cached_baseline(model):
     """KNOWN_ISSUES K52c: a world-price shock under scenario="BASELINE" is a scenario against the unshocked baseline."""
     regs = ["DE110000"]
     model.run(scenario="BASELINE", regions=regs, max_outer_iter=1)
-    before = {k: id(v) for k, v in model._eu_base_cache.items()}
+    before = {k: id(v) for k, v in model.par.eu_base_cache.items()}
     model.run(scenario="BASELINE", regions=regs, max_outer_iter=1, world_price_shock={"SWHE": 0.2})
-    after = {k: id(v) for k, v in model._eu_base_cache.items()}
+    after = {k: id(v) for k, v in model.par.eu_base_cache.items()}
     assert before == after
 
 
