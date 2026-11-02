@@ -420,3 +420,11 @@ The project lead agreed with the recommendations given with this inventory ("tak
    permanent, not registered as a departure (question 6).
 
 2 November 2026, the project lead: the 2017 market year is rebuilt on RM too (question 5), from market_base_1717 (its extract with the two EU regions exists); the DEP-40 row is kept, with the note that CAPRI's 2030 data have one Armington elasticity per product in every RM, so it has no effect at this baseline (question 10). Order of the work (the project lead, 2 November 2026): refactor stage 3 (supply's parameter and state objects), then this move, then the 29 supply units outside the EU (SUPPLY_NONEU_DESIGN.md).
+
+2 November 2026 (evening), the project lead: the order is revised. The refactor is finished first (stage 3 N6, stage 4's
+second half, stage 5), then the full scenario runs, then this move; meanwhile the move's data preparation that touches
+no model code goes ahead (the sim_ini parameter extract to CSV and stage 1's region files). Stages fixed: the 2017
+market year is rebuilt on RM in stage 1; CAPRI's TARV tariffs replace tariffs.csv in stage 2 (after the documented
+comparison); the young-animal timing is fixed in stage 2 in the current market solve (G2g later writes the same markets
+as G3's equations); the Farm-to-Fork and Green Deal gates after stages 1-4 and after stages 5-7
+(docs/design/MODEL_CONTENT_PLAN.md).

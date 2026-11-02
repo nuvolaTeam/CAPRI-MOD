@@ -11,6 +11,12 @@ policy blocks). (4) The ports onto those regions. (5) The 29 non-EU supply units
 crop-diversification group) is kept until S1/S2 splits OFOD (decision of 2 November 2026). The notes do not place S1/S2,
 step G's G2 stages or the structural gaps in this sequence, except as stated in each section.
 
+**Decisions of 2 November 2026 (evening), the project lead.** The order above is kept; meanwhile the market move's data
+preparation that touches no model code goes ahead (the sim_ini parameter extract to CSV, stage 1's region files). The
+2017 market year is rebuilt on RM in stage 1; CAPRI's TARV tariffs replace tariffs.csv in stage 2; the young-animal
+timing is fixed in stage 2 in the current market solve, and G2g later writes the same markets as G3's equations; the
+Farm-to-Fork / Green Deal gates come after stages 1-4 and after stages 5-7. Items 1-3 of section 14 are decided.
+
 This order is later than the notes': ARCHITECTURE_REFACTOR.md §3 ("Stage 3's gates") and MARKET_REGIONS_INVENTORY.md §7
 put the market move right after refactor stage 3. The project lead's decision of 2 November 2026 (refactor through
 stage 5, then the full scenario runs) comes after them; AR §3 is updated with this plan.
@@ -557,11 +563,9 @@ of S1) (SGP S11).
 
 ## 14. Open decisions across all items
 
-1. Market move: the stage at which CAPRI's TARV tariffs replace tariffs.csv (after the documented comparison) and at
-   which the 2017 market year is rebuilt on RM (not stated in MRI).
-2. Market move: whether stage 2's young-animal fix is done in the current fixed-point solve or as G2g's lift (not
-   stated).
-3. Market move and ports: the F2F/GD gate batches (MRI §5 suggests after stages 1-4 and 5-7).
+1. Decided 2 November 2026: the TARV switch in stage 2, the 2017 rebuild in stage 1.
+2. Decided 2 November 2026: stage 2's young-animal fix in the current solve; G2g later.
+3. Decided 2 November 2026: the F2F/GD gates after stages 1-4 and after stages 5-7.
 4. Ports: written in the current market code, or directly as G3's defining equations (not stated).
 5. Ports: the market's land-use-change estimation (luc_market), on in CAPRI with REPORTS_ENV (G3I findings), is not in
    this list; whether it is to be ported (not stated).
