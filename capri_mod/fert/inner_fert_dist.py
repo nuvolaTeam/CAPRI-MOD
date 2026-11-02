@@ -40,7 +40,7 @@ from capri_mod.params import param, param_table
 from capri_mod.data.definitions import capri_ms
 
 SOURCES = ("MINE", "EXCR", "CRES")
-PERM_NGRP = frozenset({"GRAS", "PERM"})
+from capri_mod.data.definitions import CAPRI_PERM_NGRP as PERM_NGRP   # noqa: E402  CAPRI's set (stage 4)
 
 
 def gamma_params(mode: float, accuracy: float) -> Tuple[float, float]:

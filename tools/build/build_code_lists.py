@@ -233,6 +233,9 @@ def main():
     # and of each activity, crop-diversification groups, fodder crops
     write(OUT / "capri" / "landTypesMrk.csv", ("code", "text"), sorted(read_set(a.sets, "landTypesMrk").items()))
     write(OUT / "capri" / "FODCRP.csv", ("code", "text"), sorted(read_set(a.sets, "FODCRP").items()))
+    # CAPRI's permanent crop groups and the crop -> nutrient group map (fertiliser distribution; refactor stage 4)
+    write(OUT / "capri" / "PERM_NGRP.csv", ("code", "text"), list(read_set(a.sets, "PERM_NGRP").items()))
+    write(OUT / "capri" / "CACT_TO_NGRP.csv", ("cact", "ngrp"), pairs("CACT_TO_NGRP"))
     # CAPRI's traded feed bulks (global/fromimpact/sets.gms FEED_TRD), in CAPRI's set order (refactor stage 4)
     write(OUT / "capri" / "FEED_TRD.csv", ("code", "text"), list(read_set(a.sets, "FEED_TRD").items()))
     write(OUT / "capri" / "landTypes_to_pact.csv", ("land_type", "pact"), sorted(pairs("landTypes_to_pact")))

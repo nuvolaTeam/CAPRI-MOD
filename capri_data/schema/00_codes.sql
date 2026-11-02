@@ -167,6 +167,14 @@ GROUP BY capri_code HAVING count(*) > 1;
 -- rule: a member state of the regional units is its own unit's member state code (ends in 000000)
 SELECT region, capri_ms FROM regional_units WHERE capri_ms NOT LIKE '%000000';
 
+-- file: capri_data/codes/capri/PERM_NGRP.csv
+CREATE TABLE capri_perm_ngrp (code VARCHAR PRIMARY KEY, text VARCHAR);
+COMMENT ON TABLE capri_perm_ngrp IS 'CAPRI PERM_NGRP: the permanent crop groups of the fertiliser distribution (supply/define_ngrp_sets.gms)';
+
+-- file: capri_data/codes/capri/CACT_TO_NGRP.csv
+CREATE TABLE capri_cact_to_ngrp (cact VARCHAR PRIMARY KEY, ngrp VARCHAR NOT NULL);
+COMMENT ON TABLE capri_cact_to_ngrp IS 'CAPRI CACT_TO_NGRP: the nutrient group of each crop activity (supply/define_ngrp_sets.gms)';
+
 -- file: capri_data/codes/capri/FEED_TRD.csv
 CREATE TABLE capri_feed_trd (code VARCHAR PRIMARY KEY, text VARCHAR);
 COMMENT ON TABLE capri_feed_trd IS 'CAPRI FEED_TRD: the traded feed bulks, in CAPRI''s set order (global/fromimpact/sets.gms)';

@@ -1473,8 +1473,9 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
     YANI_RATIO_BOUNDS = setting("young_animals.ratio_bounds", tuple)
 
 
-    #: CAPRI's tradable feed bulks (global/fromimpact/sets.gms FEED_TRD), priced by the market (feedBlkPrice_)
-    FEED_BULKS = ("FCER", "FPRO", "FENE", "FOTH", "FMIL")
+    #: CAPRI's tradable feed bulks (global/fromimpact/sets.gms FEED_TRD), priced by the market (feedBlkPrice_), in
+    #: CAPRI's order (capri_data/codes/capri/FEED_TRD.csv; refactor stage 4: FMIL stood before FOTH)
+    FEED_BULKS = CAPRI_FEED_TRD
 
     #: CAPRI final product -> market commodity (tools/build/build_livestock_products.py)
     LIVESTOCK_PRODUCT_MARKET = {"COMI": "MILK", "SGMI": "MILK", "BEEF": "BEEF", "PORK": "PORK",

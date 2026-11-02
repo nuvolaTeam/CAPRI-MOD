@@ -166,7 +166,7 @@ class NitrogenBlock:
                     out[mc] = (rem, res, fix)
                 # CAPRI's two grassland activities on their own (the model's GRAS pools
                 # them; grass_intensity_delta() needs each)
-                for gc in ("GRAE", "GRAI"):
+                for gc in CAPMOD_MEMBERS["GRAS"]:
                     if gc in d and float(d[gc].levl) > 0:
                         x = d[gc]
                         out[gc] = (_gross(x) * ke, res_ha(x) * kr,
@@ -228,7 +228,7 @@ class NitrogenBlock:
         y0 = self._cached_row("yields", region) or {}
         out = {}
         try:
-            for gc in ("GRAE", "GRAI"):
+            for gc in CAPMOD_MEMBERS["GRAS"]:
                 self.ev.grass_override = gc
                 out[gc] = self.compute_nitrogen_balance({"GRAS": 1.0}, y0, region, n_intensity)
         finally:
@@ -236,7 +236,7 @@ class NitrogenBlock:
         d = {k: float(out["GRAE"].get(k, 0.0)) - float(out["GRAI"].get(k, 0.0))
              for k in out["GRAE"] if isinstance(out["GRAE"].get(k), (int, float))}
         rates = []
-        for gc in ("GRAE", "GRAI"):
+        for gc in CAPMOD_MEMBERS["GRAS"]:
             self.ev.grass_override = gc
             try:
                 rates.append(self._base_mineral_rate(region, "GRAS"))
