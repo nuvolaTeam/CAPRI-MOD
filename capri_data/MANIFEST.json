@@ -3707,16 +3707,31 @@
    "kind": "structure",
    "rows": 46,
    "columns": 5,
+   "read_by_model": [
+    "capri_mod/data/definitions.py"
+   ],
    "origin": {
     "nature": "declared"
    }
   },
   "capri_data/codes/model_activity_classes.csv": {
-   "description": "the model's activity classes (refactor stage 3, N6): land type, crop-diversification group, fodder and fixed flags; a declared table, checked against CAPRI's sets by build_code_lists (a row that differs names its departure)",
+   "description": "the model's activity classes (refactor stage 3, N6): land type, crop-diversification group, fodder and fixed flags, the organic target group and yield gap, the pesticide yield loss, the price source, the PMP share term's arable set and the young-animal outputs; a declared table, checked against CAPRI's sets by build_code_lists (a row that differs names its departure)",
    "kind": "structure",
    "rows": 46,
-   "columns": 6,
+   "columns": 12,
    "units": "to be established (value_units: open)",
+   "read_by_model": [
+    "capri_mod/data/definitions.py"
+   ],
+   "origin": {
+    "nature": "declared"
+   }
+  },
+  "capri_data/codes/model_cattle_splits.csv": {
+   "description": "CAPRI's cattle activities inside the model's animals (refactor stage 3, N6): per split the CAPRI activity that gains the stalls and the one that gives them up; a declared table, checked against CAPRI's MAACT and SplitActs by build_code_lists",
+   "kind": "structure",
+   "rows": 6,
+   "columns": 4,
    "read_by_model": [
     "capri_mod/data/definitions.py"
    ],
@@ -3729,6 +3744,9 @@
    "kind": "structure",
    "rows": 58,
    "columns": 3,
+   "read_by_model": [
+    "capri_mod/data/definitions.py"
+   ],
    "origin": {
     "nature": "capri",
     "builder": "build_code_lists"

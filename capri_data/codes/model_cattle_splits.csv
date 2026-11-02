@@ -1,0 +1,7 @@
+split,gains,gives,source
+BULL,BULL,BULH,"CAPRI's fattening bulls, low and high intensity (BULL, BULH: set SplitActs, sets.gms); tools/build/build_cattle_intensity.py SPLITS (Sprint 7c)"
+HFRS,HEIL,HEIH,"CAPRI's fattening heifers, low and high intensity (HEIL, HEIH: set SplitActs, sets.gms); tools/build/build_cattle_intensity.py SPLITS (Sprint 7c)"
+HFRS:rep,HEIR,HEIH,"the model's: CAPRI's replacement heifers (HEIR, MAACT) against the high-intensity fattening heifers, for their own levels (supply.use_cattle_member_splits, KNOWN_ISSUES K65); not in CAPRI's SplitActs"
+CALV:male,CAMF,CAMR,"the model's: CAPRI's male calves fattened and raised (CAMF, CAMR, MAACT), for their own levels (supply.use_cattle_member_splits, K65); not in CAPRI's SplitActs"
+CALV:female,CAFF,CAFR,"the model's: CAPRI's female calves fattened and raised (CAFF, CAFR, MAACT), for their own levels (supply.use_cattle_member_splits, K65); not in CAPRI's SplitActs"
+CALV:sex,CAMR,CAFR,"the model's: CAPRI's raised male against raised female calves (CAMR, CAFR, MAACT), for the young-animal markets per sex (supply.use_cattle_member_splits, K65); not in CAPRI's SplitActs"

@@ -279,6 +279,37 @@ def _load_activity_classes():
 
 
 ACTIVITY_CLASSES, LAND_MARKET_TYPES = _load_activity_classes()
+
+
+def _load_crosswalks():
+    """The model's codes and CAPRI's (capri_data/codes/model_activities.csv capri_codes, model_commodities.csv
+    capri_code; declared, checked against CAPRI's sets by tools/build/build_code_lists.py): CAPRI's activity code ->
+    the model's where they differ (MAIZ -> CORN, OFAR and ROOF -> OFOD, ...), and each market commodity's CAPRI code."""
+    import csv
+    from pathlib import Path
+    d = Path(__file__).resolve().parents[2] / "capri_data" / "codes"
+    with open(d / "model_activities.csv", newline="") as f:
+        acts = {c: r["code"] for r in csv.DictReader(f) for c in r["capri_codes"].split(";") if c != r["code"]}
+    with open(d / "model_commodities.csv", newline="") as f:
+        comms = {r["code"]: r["capri_code"] for r in csv.DictReader(f)}
+    return acts, comms
+
+
+#: CAPRI activity code -> the model's, where they differ; model market commodity -> CAPRI's code
+CAPRI_TO_MODEL_ACTIVITY, COMMODITY_CAPRI_CODE = _load_crosswalks()
+
+
+
+def _load_cattle_splits():
+    """CAPRI's cattle activities inside the model's animals (capri_data/codes/model_cattle_splits.csv, declared; N6):
+    split -> (the CAPRI activity that gains the stalls z, the one that gives them up), in the table's order."""
+    import csv
+    from pathlib import Path
+    with open(Path(__file__).resolve().parents[2] / "capri_data" / "codes" / "model_cattle_splits.csv", newline="") as f:
+        return {r["split"]: (r["gains"], r["gives"]) for r in csv.DictReader(f)}
+
+
+CATTLE_SPLITS = _load_cattle_splits()
 #: crops on permanent-crop land (FRUN), arable (ARAC) and grassland (GRAS), in the order of CROPS
 CROPS_ON_LAND = {lt: tuple(a for a in CROPS if ACTIVITY_CLASSES[a]["land_type"] == lt) for lt in ("ARAC", "GRAS", "FRUN")}
 

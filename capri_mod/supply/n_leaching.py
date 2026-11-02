@@ -41,7 +41,7 @@ from capri_mod.params import param
 # EF5_LEACHING_N2O and WINTERCOV_NO3_REDUCTION (refactor stage 3, N2: one parameter with n_cascade's runoff effect)
 # the sign of the application losses: the setting environment.ammapp_sign, "consistent" (- agg, as RUNSURFN_; default)
 # or "capri" (CAPRI's code: + agg)
-APPL = ("AmmAppLE", "AmmAppHE")
+APPL = ("AmmAppLE", "AmmAppHE")   # APPLN_'s terms, as n_cascade.APPL_TECHS (checked against MitiTechAmm, N6)
 
 _REG = {}
 

@@ -3299,7 +3299,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_code_lists",
-    "sources": "$EXPORTS/data_market_1730defaulta.csv; $EXPORTS/elas_2_1730defaulta.csv; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $SOURCES/gams/aggregation/defaultA.agg"
+    "sources": "$EXPORTS/data_market_1730defaulta.csv; $EXPORTS/elas_2_1730defaulta.csv; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/AACT_TO_XX.csv; $REFERENCE/sets/simini_21730/EPRD_TO_GRP.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/MitiTechAmm.csv; $REFERENCE/sets/simini_21730/OYANI.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/SplitActs.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $SOURCES/gams/aggregation/defaultA.agg"
    },
    "notes": [],
    "read_by": {
@@ -3338,7 +3338,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_code_lists",
-    "sources": "$EXPORTS/data_market_1730defaulta.csv; $EXPORTS/elas_2_1730defaulta.csv; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $SOURCES/gams/aggregation/defaultA.agg"
+    "sources": "$EXPORTS/data_market_1730defaulta.csv; $EXPORTS/elas_2_1730defaulta.csv; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/AACT_TO_XX.csv; $REFERENCE/sets/simini_21730/EPRD_TO_GRP.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/MitiTechAmm.csv; $REFERENCE/sets/simini_21730/OYANI.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/SplitActs.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $SOURCES/gams/aggregation/defaultA.agg"
    },
    "notes": [],
    "read_by": {
@@ -3378,7 +3378,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_code_lists",
-    "sources": "$EXPORTS/data_market_1730defaulta.csv; $EXPORTS/elas_2_1730defaulta.csv; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $SOURCES/gams/aggregation/defaultA.agg"
+    "sources": "$EXPORTS/data_market_1730defaulta.csv; $EXPORTS/elas_2_1730defaulta.csv; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/AACT_TO_XX.csv; $REFERENCE/sets/simini_21730/EPRD_TO_GRP.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/MitiTechAmm.csv; $REFERENCE/sets/simini_21730/OYANI.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/SplitActs.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $SOURCES/gams/aggregation/defaultA.agg"
    },
    "notes": [],
    "read_by": {
@@ -3417,7 +3417,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_code_lists",
-    "sources": "$EXPORTS/data_market_1730defaulta.csv; $EXPORTS/elas_2_1730defaulta.csv; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $SOURCES/gams/aggregation/defaultA.agg"
+    "sources": "$EXPORTS/data_market_1730defaulta.csv; $EXPORTS/elas_2_1730defaulta.csv; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/AACT_TO_XX.csv; $REFERENCE/sets/simini_21730/EPRD_TO_GRP.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/MitiTechAmm.csv; $REFERENCE/sets/simini_21730/OYANI.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/SplitActs.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $SOURCES/gams/aggregation/defaultA.agg"
    },
    "notes": [],
    "read_by": {
@@ -3455,7 +3455,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_code_lists",
-    "sources": "$EXPORTS/data_market_1730defaulta.csv; $EXPORTS/elas_2_1730defaulta.csv; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $SOURCES/gams/aggregation/defaultA.agg"
+    "sources": "$EXPORTS/data_market_1730defaulta.csv; $EXPORTS/elas_2_1730defaulta.csv; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/AACT_TO_XX.csv; $REFERENCE/sets/simini_21730/EPRD_TO_GRP.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/MitiTechAmm.csv; $REFERENCE/sets/simini_21730/OYANI.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/SplitActs.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $SOURCES/gams/aggregation/defaultA.agg"
    },
    "notes": [],
    "read_by": {
@@ -3648,7 +3648,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_code_lists",
-    "sources": "$EXPORTS/data_market_1730defaulta.csv; $EXPORTS/elas_2_1730defaulta.csv; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $SOURCES/gams/aggregation/defaultA.agg"
+    "sources": "$EXPORTS/data_market_1730defaulta.csv; $EXPORTS/elas_2_1730defaulta.csv; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/AACT_TO_XX.csv; $REFERENCE/sets/simini_21730/EPRD_TO_GRP.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/MitiTechAmm.csv; $REFERENCE/sets/simini_21730/OYANI.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/SplitActs.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $SOURCES/gams/aggregation/defaultA.agg"
    },
    "notes": [],
    "read_by": {
@@ -3696,7 +3696,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_code_lists",
-    "sources": "$EXPORTS/data_market_1730defaulta.csv; $EXPORTS/elas_2_1730defaulta.csv; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $SOURCES/gams/aggregation/defaultA.agg"
+    "sources": "$EXPORTS/data_market_1730defaulta.csv; $EXPORTS/elas_2_1730defaulta.csv; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/AACT_TO_XX.csv; $REFERENCE/sets/simini_21730/EPRD_TO_GRP.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/MitiTechAmm.csv; $REFERENCE/sets/simini_21730/OYANI.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/SplitActs.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $SOURCES/gams/aggregation/defaultA.agg"
    },
    "notes": [],
    "read_by": {
@@ -3746,7 +3746,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_code_lists",
-    "sources": "$EXPORTS/data_market_1730defaulta.csv; $EXPORTS/elas_2_1730defaulta.csv; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $SOURCES/gams/aggregation/defaultA.agg"
+    "sources": "$EXPORTS/data_market_1730defaulta.csv; $EXPORTS/elas_2_1730defaulta.csv; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/AACT_TO_XX.csv; $REFERENCE/sets/simini_21730/EPRD_TO_GRP.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/MitiTechAmm.csv; $REFERENCE/sets/simini_21730/OYANI.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/SplitActs.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $SOURCES/gams/aggregation/defaultA.agg"
    },
    "notes": [],
    "read_by": {
@@ -3806,7 +3806,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_code_lists",
-    "sources": "$EXPORTS/data_market_1730defaulta.csv; $EXPORTS/elas_2_1730defaulta.csv; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $SOURCES/gams/aggregation/defaultA.agg"
+    "sources": "$EXPORTS/data_market_1730defaulta.csv; $EXPORTS/elas_2_1730defaulta.csv; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/AACT_TO_XX.csv; $REFERENCE/sets/simini_21730/EPRD_TO_GRP.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/MitiTechAmm.csv; $REFERENCE/sets/simini_21730/OYANI.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/SplitActs.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $SOURCES/gams/aggregation/defaultA.agg"
    },
    "notes": [],
    "read_by": {
@@ -4107,7 +4107,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_code_lists",
-    "sources": "$EXPORTS/data_market_1730defaulta.csv; $EXPORTS/elas_2_1730defaulta.csv; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $SOURCES/gams/aggregation/defaultA.agg"
+    "sources": "$EXPORTS/data_market_1730defaulta.csv; $EXPORTS/elas_2_1730defaulta.csv; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/AACT_TO_XX.csv; $REFERENCE/sets/simini_21730/EPRD_TO_GRP.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/MitiTechAmm.csv; $REFERENCE/sets/simini_21730/OYANI.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/SplitActs.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $SOURCES/gams/aggregation/defaultA.agg"
    },
    "notes": [],
    "read_by": {
@@ -4145,7 +4145,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_code_lists",
-    "sources": "$EXPORTS/data_market_1730defaulta.csv; $EXPORTS/elas_2_1730defaulta.csv; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $SOURCES/gams/aggregation/defaultA.agg"
+    "sources": "$EXPORTS/data_market_1730defaulta.csv; $EXPORTS/elas_2_1730defaulta.csv; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/AACT_TO_XX.csv; $REFERENCE/sets/simini_21730/EPRD_TO_GRP.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/MitiTechAmm.csv; $REFERENCE/sets/simini_21730/OYANI.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/SplitActs.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $SOURCES/gams/aggregation/defaultA.agg"
    },
    "notes": [],
    "read_by": {
@@ -4183,7 +4183,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_code_lists",
-    "sources": "$EXPORTS/data_market_1730defaulta.csv; $EXPORTS/elas_2_1730defaulta.csv; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $SOURCES/gams/aggregation/defaultA.agg"
+    "sources": "$EXPORTS/data_market_1730defaulta.csv; $EXPORTS/elas_2_1730defaulta.csv; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/AACT_TO_XX.csv; $REFERENCE/sets/simini_21730/EPRD_TO_GRP.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/MitiTechAmm.csv; $REFERENCE/sets/simini_21730/OYANI.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/SplitActs.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $SOURCES/gams/aggregation/defaultA.agg"
    },
    "notes": [],
    "read_by": {
@@ -4223,7 +4223,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_code_lists",
-    "sources": "$EXPORTS/data_market_1730defaulta.csv; $EXPORTS/elas_2_1730defaulta.csv; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $SOURCES/gams/aggregation/defaultA.agg"
+    "sources": "$EXPORTS/data_market_1730defaulta.csv; $EXPORTS/elas_2_1730defaulta.csv; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/AACT_TO_XX.csv; $REFERENCE/sets/simini_21730/EPRD_TO_GRP.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/MitiTechAmm.csv; $REFERENCE/sets/simini_21730/OYANI.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/SplitActs.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $SOURCES/gams/aggregation/defaultA.agg"
    },
    "notes": [],
    "read_by": {
@@ -10496,7 +10496,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_eu_market_supply_nq",
-    "sources": "$EXPORTS/data_market_1730defaulta.csv; $EXPORTS/elas_2_1730defaulta.csv; $EXPORTS/markmarket_greendeal_1730et_base_1717.txt; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $SOURCES/gams/aggregation/defaultA.agg"
+    "sources": "$EXPORTS/data_market_1730defaulta.csv; $EXPORTS/elas_2_1730defaulta.csv; $EXPORTS/markmarket_greendeal_1730et_base_1717.txt; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/AACT_TO_XX.csv; $REFERENCE/sets/simini_21730/EPRD_TO_GRP.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/MitiTechAmm.csv; $REFERENCE/sets/simini_21730/OYANI.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/SplitActs.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $SOURCES/gams/aggregation/defaultA.agg"
    },
    "notes": [],
    "read_by": {
@@ -10639,7 +10639,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_eu_market_supply_nq",
-    "sources": "$EXPORTS/data_market_1730defaulta.csv; $EXPORTS/elas_2_1730defaulta.csv; $EXPORTS/markmarket_greendeal_1730et_base_1717.txt; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $SOURCES/gams/aggregation/defaultA.agg"
+    "sources": "$EXPORTS/data_market_1730defaulta.csv; $EXPORTS/elas_2_1730defaulta.csv; $EXPORTS/markmarket_greendeal_1730et_base_1717.txt; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/AACT_TO_XX.csv; $REFERENCE/sets/simini_21730/EPRD_TO_GRP.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/MitiTechAmm.csv; $REFERENCE/sets/simini_21730/OYANI.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/SplitActs.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $SOURCES/gams/aggregation/defaultA.agg"
    },
    "notes": [],
    "read_by": {
@@ -11038,7 +11038,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_feed_energy",
-    "sources": "$EXPORTS/data_market_1730defaulta.csv; $EXPORTS/elas_2_1730defaulta.csv; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $SOURCES/gams/aggregation/defaultA.agg"
+    "sources": "$EXPORTS/data_market_1730defaulta.csv; $EXPORTS/elas_2_1730defaulta.csv; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/AACT_TO_XX.csv; $REFERENCE/sets/simini_21730/EPRD_TO_GRP.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/MitiTechAmm.csv; $REFERENCE/sets/simini_21730/OYANI.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/SplitActs.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $SOURCES/gams/aggregation/defaultA.agg"
    },
    "notes": [],
    "read_by": {
@@ -17143,7 +17143,9 @@
    },
    "notes": [],
    "read_by": {
-    "model": [],
+    "model": [
+     "capri_mod/data/definitions.py"
+    ],
     "builders": [
      "build_cap_ceilings_2030",
      "build_capri_base",
@@ -17170,7 +17172,7 @@
    "file": "capri_data/codes/model_activity_classes.csv",
    "declared_in": "00_codes.sql",
    "layout": [],
-   "comment": "the model's activity classes (refactor stage 3, N6): land type, crop-diversification group, fodder and fixed flags; a declared table, checked against CAPRI's sets by build_code_lists (a row that differs names its departure)",
+   "comment": "the model's activity classes (refactor stage 3, N6): land type, crop-diversification group, fodder and fixed flags, the organic target group and yield gap, the pesticide yield loss, the price source, the PMP share term's arable set and the young-animal outputs; a declared table, checked against CAPRI's sets by build_code_lists (a row that differs names its departure)",
    "columns": [
     {
      "name": "code",
@@ -17198,6 +17200,36 @@
      "not_null": true
     },
     {
+     "name": "organic_target",
+     "type": "VARCHAR",
+     "not_null": false
+    },
+    {
+     "name": "organic_yield_gap",
+     "type": "INTEGER",
+     "not_null": true
+    },
+    {
+     "name": "pesticide",
+     "type": "INTEGER",
+     "not_null": true
+    },
+    {
+     "name": "price_source",
+     "type": "VARCHAR",
+     "not_null": false
+    },
+    {
+     "name": "share_term_arable",
+     "type": "INTEGER",
+     "not_null": true
+    },
+    {
+     "name": "young_outputs",
+     "type": "VARCHAR",
+     "not_null": false
+    },
+    {
      "name": "source",
      "type": "VARCHAR",
      "not_null": true
@@ -17220,7 +17252,11 @@
    ],
    "checks": [
     "(fodder IN (0, 1))",
-    "(fixed IN (0, 1))"
+    "(fixed IN (0, 1))",
+    "(organic_target IN ('arable_pp', 'permanent_pp', 'uaa_pp'))",
+    "(organic_yield_gap IN (0, 1))",
+    "(pesticide IN (0, 1))",
+    "(share_term_arable IN (0, 1))"
    ],
    "units": [
     {
@@ -17234,6 +17270,24 @@
      "unit": null,
      "status": "open",
      "basis": "a flag (1: a fodder crop)"
+    },
+    {
+     "item": "organic_yield_gap",
+     "unit": null,
+     "status": "open",
+     "basis": "a flag (1: the organic yield gap applies)"
+    },
+    {
+     "item": "pesticide",
+     "unit": null,
+     "status": "open",
+     "basis": "a flag (1: the pesticide yield loss reaches the crop)"
+    },
+    {
+     "item": "share_term_arable",
+     "unit": null,
+     "status": "open",
+     "basis": "a flag (1: in the PMP share term's arable denominator)"
     }
    ],
    "provenance": {
@@ -17249,6 +17303,79 @@
     ],
     "builders": [
      "build_capri_base",
+     "build_code_lists"
+    ],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
+   }
+  },
+  "model_cattle_splits": {
+   "file": "capri_data/codes/model_cattle_splits.csv",
+   "declared_in": "00_codes.sql",
+   "layout": [],
+   "comment": "CAPRI's cattle activities inside the model's animals (refactor stage 3, N6): per split the CAPRI activity that gains the stalls and the one that gives them up; a declared table, checked against CAPRI's MAACT and SplitActs by build_code_lists",
+   "columns": [
+    {
+     "name": "split",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "gains",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "gives",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "source",
+     "type": "VARCHAR",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "split"
+   ],
+   "unique": [],
+   "foreign_keys": [
+    {
+     "columns": [
+      "gains"
+     ],
+     "references": "capri_maact",
+     "ref_columns": [
+      "code"
+     ]
+    },
+    {
+     "columns": [
+      "gives"
+     ],
+     "references": "capri_maact",
+     "ref_columns": [
+      "code"
+     ]
+    }
+   ],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "declared",
+    "origins": "per row",
+    "builder": null,
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/data/definitions.py"
+    ],
+    "builders": [
      "build_code_lists"
     ],
     "checks": [
@@ -17304,11 +17431,13 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_code_lists",
-    "sources": "$EXPORTS/data_market_1730defaulta.csv; $EXPORTS/elas_2_1730defaulta.csv; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $SOURCES/gams/aggregation/defaultA.agg"
+    "sources": "$EXPORTS/data_market_1730defaulta.csv; $EXPORTS/elas_2_1730defaulta.csv; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/AACT_TO_XX.csv; $REFERENCE/sets/simini_21730/EPRD_TO_GRP.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/MitiTechAmm.csv; $REFERENCE/sets/simini_21730/OYANI.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/SplitActs.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $SOURCES/gams/aggregation/defaultA.agg"
    },
    "notes": [],
    "read_by": {
-    "model": [],
+    "model": [
+     "capri_mod/data/definitions.py"
+    ],
     "builders": [
      "build_capri_supply_elas_market",
      "build_eu_market_supply_nq",
@@ -17583,7 +17712,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_noneu_feed_nq",
-    "sources": "$EXPORTS/data_market_1730defaulta.csv; $EXPORTS/elas_2_1730defaulta.csv; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $SOURCES/gams/aggregation/defaultA.agg"
+    "sources": "$EXPORTS/data_market_1730defaulta.csv; $EXPORTS/elas_2_1730defaulta.csv; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/AACT_TO_XX.csv; $REFERENCE/sets/simini_21730/EPRD_TO_GRP.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/MitiTechAmm.csv; $REFERENCE/sets/simini_21730/OYANI.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/SplitActs.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $SOURCES/gams/aggregation/defaultA.agg"
    },
    "notes": [],
    "read_by": {
@@ -17709,7 +17838,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_feed_energy",
-    "sources": "$EXPORTS/data_market_1730defaulta.csv; $EXPORTS/elas_2_1730defaulta.csv; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $SOURCES/gams/aggregation/defaultA.agg"
+    "sources": "$EXPORTS/data_market_1730defaulta.csv; $EXPORTS/elas_2_1730defaulta.csv; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/AACT_TO_XX.csv; $REFERENCE/sets/simini_21730/EPRD_TO_GRP.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/MitiTechAmm.csv; $REFERENCE/sets/simini_21730/OYANI.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/SplitActs.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $SOURCES/gams/aggregation/defaultA.agg"
    },
    "notes": [],
    "read_by": {
@@ -17830,7 +17959,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_feed_energy",
-    "sources": "$EXPORTS/data_market_1730defaulta.csv; $EXPORTS/elas_2_1730defaulta.csv; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $SOURCES/gams/aggregation/defaultA.agg"
+    "sources": "$EXPORTS/data_market_1730defaulta.csv; $EXPORTS/elas_2_1730defaulta.csv; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/AACT_TO_XX.csv; $REFERENCE/sets/simini_21730/EPRD_TO_GRP.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/MitiTechAmm.csv; $REFERENCE/sets/simini_21730/OYANI.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/SplitActs.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $SOURCES/gams/aggregation/defaultA.agg"
    },
    "notes": [],
    "read_by": {
@@ -17973,7 +18102,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_noneu_feed_nq",
-    "sources": "$EXPORTS/data_market_1730defaulta.csv; $EXPORTS/elas_2_1730defaulta.csv; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $SOURCES/gams/aggregation/defaultA.agg"
+    "sources": "$EXPORTS/data_market_1730defaulta.csv; $EXPORTS/elas_2_1730defaulta.csv; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/AACT_TO_XX.csv; $REFERENCE/sets/simini_21730/EPRD_TO_GRP.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/MitiTechAmm.csv; $REFERENCE/sets/simini_21730/OYANI.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/SplitActs.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $SOURCES/gams/aggregation/defaultA.agg"
    },
    "notes": [],
    "read_by": {
@@ -18047,7 +18176,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_noneu_feed_nq",
-    "sources": "$EXPORTS/data_market_1730defaulta.csv; $EXPORTS/elas_2_1730defaulta.csv; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $SOURCES/gams/aggregation/defaultA.agg"
+    "sources": "$EXPORTS/data_market_1730defaulta.csv; $EXPORTS/elas_2_1730defaulta.csv; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/AACT_TO_XX.csv; $REFERENCE/sets/simini_21730/EPRD_TO_GRP.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/MitiTechAmm.csv; $REFERENCE/sets/simini_21730/OYANI.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/SplitActs.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $SOURCES/gams/aggregation/defaultA.agg"
    },
    "notes": [],
    "read_by": {
@@ -18195,7 +18324,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_noneu_market_supply_nq",
-    "sources": "$EXPORTS/data_market_1730defaulta.csv; $EXPORTS/elas_2_1730defaulta.csv; $EXPORTS/markmarket_greendeal_1730et_base_1717.txt; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $SOURCES/gams/aggregation/defaultA.agg"
+    "sources": "$EXPORTS/data_market_1730defaulta.csv; $EXPORTS/elas_2_1730defaulta.csv; $EXPORTS/markmarket_greendeal_1730et_base_1717.txt; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/AACT_TO_XX.csv; $REFERENCE/sets/simini_21730/EPRD_TO_GRP.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/MitiTechAmm.csv; $REFERENCE/sets/simini_21730/OYANI.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/SplitActs.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $SOURCES/gams/aggregation/defaultA.agg"
    },
    "notes": [],
    "read_by": {
@@ -34906,7 +35035,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_capri_supply_elas_market",
-    "sources": "$EXPORTS/data_market_1730defaulta.csv; $EXPORTS/elas_2_1730defaulta.csv; $EXPORTS/p_elasSupp.txt; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $SOURCES/gams/aggregation/defaultA.agg"
+    "sources": "$EXPORTS/data_market_1730defaulta.csv; $EXPORTS/elas_2_1730defaulta.csv; $EXPORTS/p_elasSupp.txt; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/AACT_TO_XX.csv; $REFERENCE/sets/simini_21730/EPRD_TO_GRP.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/MitiTechAmm.csv; $REFERENCE/sets/simini_21730/OYANI.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/SplitActs.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $SOURCES/gams/aggregation/defaultA.agg"
    },
    "notes": [
     {
@@ -40207,7 +40336,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_supplement_effects",
-    "sources": "$EXPORTS/LitRevAmmoTech.csv; $EXPORTS/LitRev_input_manStor.csv; $EXPORTS/LitRev_inputs.csv; $EXPORTS/LitRev_non_changeable_parameters.csv; $EXPORTS/animReq_SK.zip; $EXPORTS/data_market_1730defaulta.csv; $EXPORTS/elas_2_1730defaulta.csv; $EXPORTS/fedcof.gms; $EXPORTS/gd_full.zip; $EXPORTS/holdingsLSU.csv; $EXPORTS/nvzShare_LU.csv; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $EXPORTS/scen.zip; $EXPORTS/trends_1730.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $SOURCES/capreg/res_17<CC>.txt; $SOURCES/capri_export/DATA2_<CC>.txt; $SOURCES/costsavings/costsavings_ini_21730_jul15.csv; $SOURCES/costsavings/costsavings_max_21730_jul15.csv; $SOURCES/feed_export/pmppar_17<CC>_feedpmp.csv; $SOURCES/gams/aggregation/defaultA.agg; $SOURCES/gams/envind/def_digestibility.gms; $SOURCES/pmp2030/estnlp_results_<CC>.txt; $SOURCES/pmp2030/pmppar_21730<CC>defaulta.txt"
+    "sources": "$EXPORTS/LitRevAmmoTech.csv; $EXPORTS/LitRev_input_manStor.csv; $EXPORTS/LitRev_inputs.csv; $EXPORTS/LitRev_non_changeable_parameters.csv; $EXPORTS/animReq_SK.zip; $EXPORTS/data_market_1730defaulta.csv; $EXPORTS/elas_2_1730defaulta.csv; $EXPORTS/fedcof.gms; $EXPORTS/gd_full.zip; $EXPORTS/holdingsLSU.csv; $EXPORTS/nvzShare_LU.csv; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $EXPORTS/scen.zip; $EXPORTS/trends_1730.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/AACT_TO_XX.csv; $REFERENCE/sets/simini_21730/EPRD_TO_GRP.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/MitiTechAmm.csv; $REFERENCE/sets/simini_21730/OYANI.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/SplitActs.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $SOURCES/capreg/res_17<CC>.txt; $SOURCES/capri_export/DATA2_<CC>.txt; $SOURCES/costsavings/costsavings_ini_21730_jul15.csv; $SOURCES/costsavings/costsavings_max_21730_jul15.csv; $SOURCES/feed_export/pmppar_17<CC>_feedpmp.csv; $SOURCES/gams/aggregation/defaultA.agg; $SOURCES/gams/envind/def_digestibility.gms; $SOURCES/pmp2030/estnlp_results_<CC>.txt; $SOURCES/pmp2030/pmppar_21730<CC>defaulta.txt"
    },
    "notes": [],
    "read_by": {
@@ -40294,7 +40423,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_capri_supply_elas_market",
-    "sources": "$EXPORTS/data_market_1730defaulta.csv; $EXPORTS/elas_2_1730defaulta.csv; $EXPORTS/p_elasSupp.txt; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $SOURCES/gams/aggregation/defaultA.agg"
+    "sources": "$EXPORTS/data_market_1730defaulta.csv; $EXPORTS/elas_2_1730defaulta.csv; $EXPORTS/p_elasSupp.txt; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/AACT_TO_XX.csv; $REFERENCE/sets/simini_21730/EPRD_TO_GRP.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/MitiTechAmm.csv; $REFERENCE/sets/simini_21730/OYANI.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/SplitActs.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $SOURCES/gams/aggregation/defaultA.agg"
    },
    "notes": [
     {
@@ -40393,7 +40522,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_supply_elas_nonEU",
-    "sources": "$EXPORTS/data_market_1730defaulta.csv; $EXPORTS/elas_2_1730defaulta.csv; $EXPORTS/market_base_1717.txt; $EXPORTS/markmarket_greendeal_1730et_base_1717.txt; $EXPORTS/p_elasSupp.txt; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $SOURCES/gams/aggregation/defaultA.agg; $SOURCES/gams/special_ch/market1_ch.gms"
+    "sources": "$EXPORTS/data_market_1730defaulta.csv; $EXPORTS/elas_2_1730defaulta.csv; $EXPORTS/market_base_1717.txt; $EXPORTS/markmarket_greendeal_1730et_base_1717.txt; $EXPORTS/p_elasSupp.txt; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/AACT_TO_XX.csv; $REFERENCE/sets/simini_21730/EPRD_TO_GRP.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/MitiTechAmm.csv; $REFERENCE/sets/simini_21730/OYANI.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/SplitActs.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $SOURCES/gams/aggregation/defaultA.agg; $SOURCES/gams/special_ch/market1_ch.gms"
    },
    "notes": [],
    "read_by": {
@@ -42851,7 +42980,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_world_prices",
-    "sources": "$EXPORTS/data_market_1730defaulta.csv; $EXPORTS/elas_2_1730defaulta.csv; $EXPORTS/fao_agg_17_datamarket.txt; $EXPORTS/market_base_1717.txt; $EXPORTS/markmarket_greendeal_1730et_base_1717.txt; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $SOURCES/capreg/res_17<CC>.txt; $SOURCES/gams/aggregation/defaultA.agg; $SOURCES/gams/special_ch/market1_ch.gms"
+    "sources": "$EXPORTS/data_market_1730defaulta.csv; $EXPORTS/elas_2_1730defaulta.csv; $EXPORTS/fao_agg_17_datamarket.txt; $EXPORTS/market_base_1717.txt; $EXPORTS/markmarket_greendeal_1730et_base_1717.txt; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/AACT_TO_XX.csv; $REFERENCE/sets/simini_21730/EPRD_TO_GRP.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/MitiTechAmm.csv; $REFERENCE/sets/simini_21730/OYANI.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/SplitActs.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $SOURCES/capreg/res_17<CC>.txt; $SOURCES/gams/aggregation/defaultA.agg; $SOURCES/gams/special_ch/market1_ch.gms"
    },
    "notes": [
     {
@@ -43593,6 +43722,10 @@
   {
    "file": "00_codes.sql",
    "rule": "a member state of the regional units is its own unit's member state code (ends in 000000)"
+  },
+  {
+   "file": "00_codes.sql",
+   "rule": "an animal's price source is a market commodity of the model"
   },
   {
    "file": "02_provenance_notes.sql",

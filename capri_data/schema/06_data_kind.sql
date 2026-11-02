@@ -250,6 +250,7 @@ INSERT INTO data_kind VALUES
   ('capri_data/codes/capri/landTypesMrk.csv', 'structure', 'by rule: codes, sets, correspondences'),
   ('capri_data/codes/capri/landTypes_to_pact.csv', 'structure', 'by rule: codes, sets, correspondences'),
   ('capri_data/codes/model_activity_classes.csv', 'structure', 'by rule: codes, sets, correspondences'),
+  ('capri_data/codes/model_cattle_splits.csv', 'structure', 'by rule: codes, sets, correspondences'),
   ('capri_data/codes/model_land_types.csv', 'structure', 'by rule: codes, sets, correspondences'),
   ('capri_data/codes/model_activities.csv', 'structure', 'by rule: codes, sets, correspondences'),
   ('capri_data/codes/model_commodities.csv', 'structure', 'by rule: codes, sets, correspondences'),

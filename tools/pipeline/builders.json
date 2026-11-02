@@ -1107,6 +1107,7 @@
    "inputs": [
     "capri_data/codes/model_activities.csv",
     "capri_data/codes/model_activity_classes.csv",
+    "capri_data/codes/model_cattle_splits.csv",
     "capri_data/codes/model_land_types.csv",
     "capri_data/codes/model_trade_regions.csv",
     "capri_data/shared/capri_member_state_codes.csv",
@@ -1121,6 +1122,8 @@
     "capri_mod/data/land_market_io.py",
     "capri_mod/data/loaders.py",
     "capri_mod/market/dairy.py",
+    "capri_mod/supply/n_cascade.py",
+    "capri_mod/supply/n_leaching.py",
     "capri_mod/tableio.py",
     "tools/build/build_code_lists.py",
     "tools/build/build_dairy_world_markets.py",
@@ -1128,6 +1131,8 @@
     "tools/build/recalibrate_trade_2017.py"
    ],
    "external": [
+    "$REFERENCE/sets/simini_21730/AACT_TO_XX.csv",
+    "$REFERENCE/sets/simini_21730/EPRD_TO_GRP.csv",
     "$REFERENCE/sets/simini_21730/FEED_TO_O.csv",
     "$REFERENCE/sets/simini_21730/FODCRP.csv",
     "$REFERENCE/sets/simini_21730/MAACT.csv",
@@ -1135,9 +1140,12 @@
     "$REFERENCE/sets/simini_21730/MPACT.csv",
     "$REFERENCE/sets/simini_21730/MS.csv",
     "$REFERENCE/sets/simini_21730/Map_RR.csv",
+    "$REFERENCE/sets/simini_21730/MitiTechAmm.csv",
+    "$REFERENCE/sets/simini_21730/OYANI.csv",
     "$REFERENCE/sets/simini_21730/PACT.csv",
     "$REFERENCE/sets/simini_21730/RALL.csv",
     "$REFERENCE/sets/simini_21730/RU.csv",
+    "$REFERENCE/sets/simini_21730/SplitActs.csv",
     "$REFERENCE/sets/simini_21730/XX.csv",
     "$REFERENCE/sets/simini_21730/XX1.csv",
     "$REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv",
