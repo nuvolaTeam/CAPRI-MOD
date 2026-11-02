@@ -115,10 +115,12 @@ three minutes — see [§8](#8-validation).
 ### The base year is a parameter, not a fixed assumption
 
 Inputs are organised under `capri_data/<base_year>/` and selected via
-`load_all_data(base_year=...)`. The only populated base year is **2017**, and several modules read
-`capri_data/2017` directly, so `CAPRIModel(base_year=...)` refuses any other year (KNOWN_ISSUES K52f).
-Re-basing to a newer year requires extracting that year's CAPRI data into a new `capri_data/<year>/` folder
-and making those modules follow `base_year`.
+`load_all_data(base_year=...)`. The only populated base year is **2017**. The base year is a parameter of the run
+(`CAPRIModel(base_year=...)` or the setting `run.base_year`): every reader takes its folder and file names from it,
+and a base year without a data folder stops with an error naming the years that have one (KNOWN_ISSUES K52f). The
+builders (`tools/build`) still write 2017.
+Re-basing to a newer year requires extracting that year's CAPRI data into a new `capri_data/<year>/` folder,
+with the base year in the file names as in the 2017 folder.
 
 **2017 is CAPRI's own vintage, not a lag on our side.** The CAPRI star-3.0
 installation this model was built from is itself 2017-based: its `capreg`
