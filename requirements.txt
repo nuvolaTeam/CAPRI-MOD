@@ -11,6 +11,11 @@ casadi>=3.6
 clarabel>=0.7
 # Apache Arrow (Apache-2.0): Parquet for the model's caches (the market supply Hessians), exact by construction
 pyarrow>=14
+# Delta tables (Apache-2.0), written through Arrow: the runs' results table (capri_mod/io_results.py, refactor stage 5)
+# and the data pipeline's versioned store
+deltalake>=0.18
+# pydantic (MIT): the scenario definitions and the run's metadata, checked before a run (refactor stage 5)
+pydantic>=2.0
 
 # --- tests (tools/run/run_tests.py also runs them without pytest, through its own stand-in) ---
 pytest>=7.0
@@ -27,8 +32,7 @@ doit>=0.37
 # --- data pipeline (capri_mod/pipeline; about 300 MB installed, not needed to run the model) ---
 # provider downloads (Eurostat, FAOSTAT); capri_mod/data/rebase.py falls back to urllib without it
 requests>=2.28
-# the versioned store: Delta tables (Apache-2.0) written through Arrow
-deltalake>=0.18
+# the versioned store: Delta tables, through the model's deltalake (above)
 
 # --- reference-building tools (tools/build/*: CAPRI's GDX files -> the reference CSVs; not needed to run the model) ---
 # GAMS Python API (MIT), used only for its GDX bindings; no GAMS installation or licence is needed, but the GDX

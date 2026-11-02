@@ -355,9 +355,10 @@ pip install -r requirements.txt        # the model, tests, data pipeline and ref
 python tools/run/run_tests.py
 ```
 
-`requirements.txt` holds every package in sections: the model, the tests (pytest, pytest-xdist for
-`python -m pytest -n 2`, coverage), the data pipeline (requests, deltalake, pyarrow: about 300 MB, not needed to run
-the model) and the reference-building tools. The same sets are the dependencies and the `dev`, `pipeline` and
+`requirements.txt` holds every package in sections: the model (with deltalake for the runs' results table and
+pydantic for the scenario definitions, since refactor stage 5), the tests (pytest, pytest-xdist for
+`python -m pytest -n 2`, coverage), the data pipeline (requests; not needed to run the model) and the
+reference-building tools. The same sets are the dependencies and the `dev`, `pipeline` and
 `tools` extras of `pyproject.toml`.
 
 The reference-building tools (`tools/build/*`, which turn CAPRI's GDX files into the reference CSVs) read GDX files

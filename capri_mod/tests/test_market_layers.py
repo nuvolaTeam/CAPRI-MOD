@@ -33,10 +33,14 @@ def test_missing_input_names_its_builder(tmp_path):
 
 
 def test_model_does_not_read_delta_tables():
-    """Data formats (ARCHITECTURE_REFACTOR.md): the model reads CSV; Delta Lake is the pipeline's internal format."""
+    """Data formats (ARCHITECTURE_REFACTOR.md): the model reads CSV; Delta Lake is the pipeline's internal format and,
+    since refactor stage 5, the format of the runs' results, written by capri_mod/io_results.py alone (its single
+    writer). No other model code imports deltalake."""
     pkg = MARKET.parent
+    writer = pkg / "io_results.py"
     offenders = [str(p.relative_to(pkg)) for p in pkg.rglob("*.py")
                  if "pipeline" not in p.relative_to(pkg).parts and "tests" not in p.relative_to(pkg).parts
+                 and p != writer
                  and ("import deltalake" in p.read_text() or "from deltalake" in p.read_text())]
     assert offenders == [], offenders
 
