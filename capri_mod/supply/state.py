@@ -53,6 +53,13 @@ class RegionalParameters(_Slots):
         "genet_rows_memo",    # the genetics options' rows (a memo)
         "grass_cz",           # the grass split's term
         "grass_pending_col",  # the grass split's column waiting for the duals
+        # fertilisation (S5): memos of the base and CAPRI's priors recalibrated at the first solve
+        "ef_lea_cache",       # the leaching emission factor (a memo)
+        "ef_min_n2o_cache",   # mineral fertiliser's N2O per kg N, CO2 equivalent (a memo)
+        "min_n2o_parts_cache",  # its parts (a memo)
+        "npk_kappa",          # the fertiliser distribution's kappa by nutrient (a memo)
+        "npk_prior_override", # CAPRI's priors where the calibration recalibrated them
+        "npk_prior_recalibrated",  # the nutrients whose priors were recalibrated
     )
 
 
@@ -66,6 +73,8 @@ class RegionalSolveState(_Slots):
         "nlp_relax_keep",     # the mineral-cap exemption kept from the first solve of a problem (its fingerprint)
         "kkt_base",           # the base solve's KKT records by graph key (the Hessian's KKT mode)
         "wc_solved",          # the winter cover share chosen by the last solve (None where not endogenous)
+        # fertilisation (S5)
+        "n_relax_sticky",     # the N-target relaxation kept from one solve to the next (not restored by the Hessian)
     )
 
 
@@ -85,6 +94,9 @@ class RegionalEvalState(_Slots):
         "dairy_req_extra",    # the splits' extra requirement entries by animal
         "genet_cols",         # the genetics options' columns
         "grass_col",          # the grass split's column
+        # fertilisation (S5)
+        "n_intensity",        # the mineral N intensity factors of the solve, by crop and the manure credit
+        "nlp_mine_small",     # the fertiliser groups too small for the mineral-N row
     )
 
 
@@ -117,6 +129,9 @@ class RegionalResults(_Slots):
         "last_cattle_z",
         "last_dairy_z",
         "last_genet_z",
+        # fertilisation (S5)
+        "fert_tech_shares",   # the fertiliser technologies' shares
+        "n_target_relaxed",   # the solve ended at JRC121368's relaxed N target
     )
 
 
@@ -212,6 +227,18 @@ MOVED_REGIONAL: dict = {
     "_last_cattle_z": "res.last_cattle_z",
     "_last_dairy_z": "res.last_dairy_z",
     "_last_genet_z": "res.last_genet_z",
+    # S5: fertilisation
+    "_ef_lea_cache": "par.ef_lea_cache",
+    "_ef_min_n2o_cache": "par.ef_min_n2o_cache",
+    "_min_n2o_parts_cache": "par.min_n2o_parts_cache",
+    "_npk_kappa": "par.npk_kappa",
+    "_npk_prior_override": "par.npk_prior_override",
+    "_npk_prior_recalibrated": "par.npk_prior_recalibrated",
+    "_n_relax_sticky": "sv.n_relax_sticky",
+    "_n_intensity": "ev.n_intensity",
+    "_nlp_mine_small": "ev.nlp_mine_small",
+    "_fert_tech_shares": "res.fert_tech_shares",
+    "_n_target_relaxed": "res.n_target_relaxed",
 }
 #: the supply module's former attribute names
 MOVED_MODULE: dict = {

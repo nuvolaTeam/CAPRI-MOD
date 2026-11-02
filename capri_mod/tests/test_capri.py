@@ -2545,8 +2545,9 @@ def test_tax_on_mineral_n_takes_the_accounts_miterra_factors():
     from capri_mod.supply import n_cascade as _nc
     from capri_mod.supply.abatement import AbatementBlock
     from capri_mod.supply.fertilisation import FertilisationBlock
+    from capri_mod.supply.state import RegionalStateMixin
 
-    class _S(FertilisationBlock, AbatementBlock):
+    class _S(RegionalStateMixin, FertilisationBlock, AbatementBlock):     # the blocks' memos are in par (stage 3, S5)
         pass
     s = _S.__new__(_S)
     s.data = SimpleNamespace(region_id="DE110000")
@@ -3570,7 +3571,7 @@ def test_nlp_form_takes_jrc121368_relaxation_where_the_tiered_n_target_fails(mod
     fb = r["metadata"]["nlp_fallback"].get("NL320000") or []
     assert len(fb) == 1 and "relaxed target" in fb[0], fb       # once, then kept (sticky)
     mo = model.supply_module._models["NL320000"]
-    assert getattr(mo, "_n_target_relaxed", False) and getattr(mo.ev, "nlp_fb_last", True) is False   # CAPRI's form
+    assert getattr(mo.res, "n_target_relaxed", False) and getattr(mo.ev, "nlp_fb_last", True) is False   # CAPRI's form
     assert getattr(r["supply"]["NL320000"], "balance_shortfall", 0.0) > 0.0
 
 

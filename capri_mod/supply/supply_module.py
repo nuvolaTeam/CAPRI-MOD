@@ -527,7 +527,7 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
     #: lists). Every instance attribute named _nlp* must be listed here (test_nlp_state_lists_every_nlp_attribute)
     NLP_STATE = ("ev.nlp_accept_last", "par.nlp_base_alloc", "par.nlp_cal", "_nlp_cal_check", "par.nlp_cal_store",
                  "sv.nlp_cols", "ev.nlp_failed", "res.nlp_fallback_log", "ev.nlp_fb_last", "res.nlp_jump",
-                 "_nlp_mine_small", "ev.nlp_n_target_cause", "_nlp_nip", "res.nlp_nonoptimal", "res.nlp_ok",
+                 "ev.nlp_mine_small", "ev.nlp_n_target_cause", "_nlp_nip", "res.nlp_nonoptimal", "res.nlp_ok",
                  "res.nlp_path", "sv.nlp_prev", "sv.nlp_prev_f", "res.nlp_rc", "sv.nlp_relax_keep", "res.nlp_relaxed",
                  "res.nlp_status", "_nlp_tol_trace", "ev.nlp_try_n_relax", "sv.nlp_y")
 
@@ -1214,7 +1214,7 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
             nmin = srow[2] if len(srow) > 2 else {}
             upt = srow[3] if len(srow) > 3 else {}
             ybase = srow[4] if len(srow) > 4 else None
-            mint = getattr(self, "_n_intensity", {}) or {}
+            mint = getattr(self.ev, "n_intensity", {}) or {}
             ycur = self.data.yields
             row_B = np.zeros(n)
             self._mineral_row = {}
@@ -1312,7 +1312,7 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
         mcap = getattr(self, "_mineral_cap", None)
         _env_m = getattr(self, "_env_for_surplus", None)
         if mcap is not None and _env_m is not None:
-            mint = getattr(self, "_n_intensity", {}) or {}
+            mint = getattr(self.ev, "n_intensity", {}) or {}
             ycur = self.data.yields
             _fcr = float(mint.get("__credit__", 1.0))
             nmin_m = mcap.get("nmin") or {}
@@ -1440,10 +1440,10 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
         self._last_manure_trade_pk = {}
         self._last_mineral_n = None
         self._nbal_price = float(n_balance_price or 0.0)
-        self._n_intensity = {}
+        self.ev.n_intensity = {}
         self._organic_conv = {}
         self._land_solution = None              # set by this solve when the land market is used
-        self._n_target_relaxed = False
+        self.res.n_target_relaxed = False
         self.res.last_cattle_z = {}
         self.ev.nlp_failed = None
         self.res.nlp_status = None
@@ -1458,11 +1458,11 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
             self._surplus_row = None
             self._mineral_cap = None
             self._nbal_price = 0.0
-        res.n_intensity = dict(getattr(self, "_n_intensity", {}) or {})
+        res.n_intensity = dict(getattr(self.ev, "n_intensity", {}) or {})
         res.yield_price_factor = dict(getattr(self, "_yield_price_factor", {}) or {})
         self._yield_price_factor = {}
         res.organic_conv = dict(getattr(self, "_organic_conv", {}) or {})   # conventional share per crop (accounts: organic area)
-        res.fert_tech_shares = dict(getattr(self, "_fert_tech_shares", {}) or {})   # before the reset below
+        res.fert_tech_shares = dict(getattr(self.res, "fert_tech_shares", {}) or {})   # before the reset below
         # IPOPT's last point kept on the last attempt (non-optimal, as CAPRI; _nlp_last_point): IPOPT's status, else None
         res.nlp_nonoptimal = getattr(self.res, "nlp_nonoptimal", None)
         # CAPRI's crop-group allocation as the regional model solved it (inner model at its totals, or the coupled NLP)
@@ -1472,8 +1472,8 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
             res.fert_dist_mode_crops = {a: float(_bl.get(a, 0.0)) for a in CROPS if float(_bl.get(a, 0.0)) > 0}
         except Exception:
             res.fert_dist_mode_crops = None
-        self._n_intensity = {}
-        self._fert_tech_shares = {}
+        self.ev.n_intensity = {}
+        self.res.fert_tech_shares = {}
         res.balance_shortfall = float(getattr(self, "balance_shortfall", 0.0))
         self.balance_shortfall = 0.0
         return res
@@ -1688,7 +1688,7 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
             # the region starts from it instead of failing the tiered target again at every iteration
             _yc = None
             _rk = self._n_relax_key()
-            if _rk is not None and getattr(self, "_n_relax_sticky", None) == _rk:
+            if _rk is not None and getattr(self.sv, "n_relax_sticky", None) == _rk:
                 y_f, ok_f, Aa_r, ba_r = self._relax_n_target(Qa, ca, Aa, ba, ya0)
                 if ok_f and getattr(self.ev, "nlp_failed", None) is None:
                     _yc, Aa, ba = y_f, Aa_r, ba_r
@@ -1713,8 +1713,8 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
                                                       + (" (feasible without the target: no cap exempted first, K89)"
                                                          if _cause else ""))
                     else:
-                        self._n_target_relaxed = False
-                        self._n_relax_sticky = None
+                        self.res.n_target_relaxed = False
+                        self.sv.n_relax_sticky = None
                         self.balance_shortfall = 0.0
             if _yc is None:
                 # CAPRI keeps the landscape floor (e_setaLandscape) and every other row as they are and carries on with
@@ -3028,7 +3028,7 @@ class SupplyModule(ModuleStateMixin):
             _ls = getattr(model, "_land_solution", None) or {}
             result.land_types = {t_: float(_ls[t_]) for t_ in getattr(model, "_land_types_used", []) if t_ in _ls}
             result.luc = _luc_of(model, result.land_types)
-            result.n_target_relaxed = bool(getattr(model, "_n_target_relaxed", False))
+            result.n_target_relaxed = bool(getattr(model.res, "n_target_relaxed", False))
             if surplus_row and model._ni_inside() and getattr(model.res, "nlp_ok", False):
                 # capri-mod-proto: nothing in the regional model depends on the N price any more
                 # (fertiliser and ammonia technologies and the inhibitor on manure are all decided
@@ -3081,7 +3081,7 @@ class SupplyModule(ModuleStateMixin):
                 _ls = getattr(model, "_land_solution", None) or {}
                 result.land_types = {t_: float(_ls[t_]) for t_ in getattr(model, "_land_types_used", []) if t_ in _ls}
                 result.luc = _luc_of(model, result.land_types)
-                result.n_target_relaxed = bool(getattr(model, "_n_target_relaxed", False))
+                result.n_target_relaxed = bool(getattr(model.res, "n_target_relaxed", False))
                 result.nitrate_n_extra = model._nitrate_extra()
                 # CAPRI's mineral fertiliser reduction: the regulations of the inner fertiliser model (reporting)
                 result.mineral_cap = ({k: mcap[k] for k in ("kind", "reduction", "base_mineral", "group_caps",
@@ -3099,7 +3099,7 @@ class SupplyModule(ModuleStateMixin):
                         _ni[_c] = float(_ni.get(_c, 1.0)) * float(_f)
                     result.n_intensity = _ni
                 if not getattr(result, "fert_tech_shares", None):
-                    result.fert_tech_shares = dict(getattr(model, "_fert_tech_shares", None) or {})
+                    result.fert_tech_shares = dict(getattr(model.res, "fert_tech_shares", None) or {})
                 # the options' N saving (CAPRI othImpact NMIN), for their emission side effects
                 if result.fert_tech_shares:
                     try:

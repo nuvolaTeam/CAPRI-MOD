@@ -519,8 +519,8 @@ class PolicyBlock:
             # still spread full mineral N. The mineral-N factor travels the
             # same path as the fertiliser technologies (multiplied with them).
             if converted > 0:
-                self._n_intensity = getattr(self, "_n_intensity", {}) or {}
-                self._n_intensity[a] = self._n_intensity.get(a, 1.0) * max(0.0, 1.0 - converted)
+                self.ev.n_intensity = getattr(self.ev, "n_intensity", {}) or {}
+                self.ev.n_intensity[a] = self.ev.n_intensity.get(a, 1.0) * max(0.0, 1.0 - converted)
                 # the conventional share alone, for CAPRI's minimum mineral share (NUTMIN_: 0 on organic land)
                 self._organic_conv = getattr(self, "_organic_conv", {}) or {}
                 self._organic_conv[a] = self._organic_conv.get(a, 1.0) * max(0.0, 1.0 - converted)

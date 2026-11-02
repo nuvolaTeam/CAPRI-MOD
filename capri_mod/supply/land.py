@@ -133,7 +133,7 @@ class LandBlock:
             a_av, pf = self._fert_alloc_params()
             if nmin and upt and bser is not None and a_av and pf:
                 i_nb = labels.index("N_balance")
-                mint = getattr(self, "_n_intensity", {}) or {}
+                mint = getattr(self.ev, "n_intensity", {}) or {}
                 ycur = self.data.yields
                 xb = np.maximum(self._base_levels().reindex(self.acts).fillna(0.0).values, 0.0)
                 nm0 = np.array([float(nmin.get(a, 0.0)) if a in CROPS else 0.0 for a in self.acts])
@@ -309,7 +309,7 @@ class LandBlock:
                     _w.warn(f"crop-need limit skipped for {self.data.region_id}: {_exc!r}")
                     sub_n = None
                 if sub_n:
-                    mint = getattr(self, "_n_intensity", {}) or {}
+                    mint = getattr(self.ev, "n_intensity", {}) or {}
                     ycur = self.data.yields
                     need = np.zeros(n)
                     for j, a in enumerate(self.acts):

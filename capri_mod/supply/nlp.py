@@ -239,7 +239,7 @@ class NLPBlock:
                 # (organic_minfert_redu.gms), set before the mineral fertiliser reduction, which keeps the more
                 # stringent of the two (minfert_redu_by_crop.gms: min(); its limCres replaces the organic one)
                 org_regs = self._npk_organic_cap(npk)
-                self._nlp_mine_small = set()
+                self.ev.nlp_mine_small = set()
                 if "mineral_N" in labels:
                     # CAPRI's mineral fertiliser reduction in its own terms: the inner model's regulations by crop
                     # group (minfert_redu_by_crop.gms) or e_synNMax (minfert_redu_uaa.gms); the summed row goes
@@ -250,7 +250,7 @@ class NLPBlock:
                     if d_ is None:
                         continue
                     d_["regs"] = self._merge_organic_regs(d_.get("regs") or {}, rg,
-                                                          self._nlp_mine_small if nut_ == "N" else set())
+                                                          self.ev.nlp_mine_small if nut_ == "N" else set())
                 if "N_balance" in labels:
                     # the N-surplus target with the mineral N of the fertilisation block (CAPRI SURTOT_REST_ /
                     # e_SURTOTHa): the row's linear mineral parts out, the purchases in
@@ -544,7 +544,7 @@ class NLPBlock:
         self.ev.last_req_duals = info.get("req_duals") or {}
         self._manure_ni_relief, self._manure_ni_nh3 = {}, {}
         self.res.fert_inside_factor = {}
-        self._fert_tech_shares = {}
+        self.res.fert_tech_shares = {}
         if self._techs_inside():
             # the options' shares for the accounts (relief and NH3 saved per head from CAPRI's cascade)
             sh = {}
@@ -552,7 +552,7 @@ class NLPBlock:
                 sh.setdefault((a_, key_), {})[tech_] = float(v_)
             self._amm_record(sh)
         if ab.get("fert"):
-            self._fert_tech_shares = {k_: float(v_) for k_, v_ in ab["fert"].items()}
+            self.res.fert_tech_shares = {k_: float(v_) for k_, v_ in ab["fert"].items()}
         if ab.get("mni") is not None and getattr(self, "_nlp_nip", None):
             _sh = float(ab["mni"]); _nip = self._nlp_nip
             if _sh > 1e-9:
@@ -562,8 +562,8 @@ class NLPBlock:
                         self._manure_ni_relief[a_] = _nip["sub"] * _nip["nman"] * _sh * m_
                         if a_ in _nip["app_nh3"]:
                             self._manure_ni_nh3[a_] = _sh * _nip["app_nh3"][a_]
-                self._fert_tech_shares = dict(getattr(self, "_fert_tech_shares", None) or {})
-                self._fert_tech_shares["NITR_INH_MAN"] = _sh
+                self.res.fert_tech_shares = dict(getattr(self.res, "fert_tech_shares", None) or {})
+                self.res.fert_tech_shares["NITR_INH_MAN"] = _sh
         acts_ = list(self.acts); dm = {}; ft = {}
         for a, r in rats.items():
             if a not in acts_:

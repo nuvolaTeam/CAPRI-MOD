@@ -453,10 +453,12 @@ def main():
             md_ = _pm.supply_module._models.get(r_)
             if md_ is None:
                 continue
-            _d[r_] = {k_: getattr(md_, k_, None) for k_ in ("_last_aug", "_last_plain", "_row_labels",
-                                                            "_land_types_used", "_fert_tech_shares", "_n_intensity",
-                                                            "_cover", "_fall_floor", "_last_grass_z")}
-            _d[r_]["last_duals"] = getattr(md_.ev, "last_duals", None)      # "_last_duals" until refactor stage 3, S3
+            # the model's fields by attribute name or by their path in its state objects (refactor stage 3); the
+            # dump's keys are the field names without the object and the leading underscore
+            _d[r_] = {k_.rpartition(".")[2].lstrip("_"):
+                      getattr(getattr(md_, k_.rpartition(".")[0]) if "." in k_ else md_, k_.rpartition(".")[2], None)
+                      for k_ in ("_last_aug", "_last_plain", "_row_labels", "_land_types_used", "res.fert_tech_shares",
+                                 "ev.n_intensity", "_cover", "_fall_floor", "_last_grass_z", "ev.last_duals")}
             _d[r_].update({"acts": list(md_.acts), "Q": md_.Q, "f": md_.f, "net_revenues": md_.net_revenues.copy(),
                            "base": md_._base_levels(), "nb_price": getattr(_pm.supply_module, "_nbal_state", {}).get(r_),
                            "surplus_row": getattr(md_, "_surplus_row", None),
