@@ -8,6 +8,7 @@ from __future__ import annotations
 
 
 from capri_mod import statekit as _cst   # the state objects' helpers (refactor stage 4)
+from capri_mod import statekit as _cst   # the state objects' helpers (refactor stage 4)
 class YoungAnimalBlock:
     def _yani_market_region(self, reg: str) -> str:
         """The young-animal market of a supply region: CAPRI clears young animals per market region (yaniMarket_ per
@@ -183,7 +184,7 @@ class YoungAnimalBlock:
                 step = float(np.clip(self.YANI_RELAXATION * d[gi[g]], -lim, lim))
                 ratio[g] = float(np.clip(ratio.get(g, 1.0) + step, lo, hi))
             ratio_m[mr] = ratio
-        self._yani_imbalance = worst
+        self.res.yani_imbalance = worst
         self._publish_young_animal_prices(ratio_m, ref, net, prod, markets)
 
     def _yani_in_market_now(self) -> bool:
@@ -218,8 +219,8 @@ class YoungAnimalBlock:
                       "ref": {g: float(ref[(mr, g)]) for g in goods},
                       "seen": {g: float((ratio_m.get(mr) or {}).get(g, 1.0)) for g in goods},
                       "bounds": tuple(self.YANI_RATIO_BOUNDS)}
-        self._yani_imbalance = worst
-        self._yani_np = (net, prod)
+        self.res.yani_imbalance = worst
+        self.ev.yani_np = (net, prod)
         self.market_module.seen.yani_state = st
         self.market_module.ev.yani_market_now = {}
 
@@ -247,11 +248,11 @@ class YoungAnimalBlock:
                     # CAPRI's price forecast on the young-animal prices the market cleared
                     yh = _cst.setdefault(self.sv, "capri_yani_hist", {})
                     yh[(mr, g)] = ((yh.get((mr, g)) or []) + [float(r_t)])[-4:]
-                    cur[g] = float(self._capri_forecast(yh[(mr, g)], int(getattr(self, "_outer_iter_now", 0))))
+                    cur[g] = float(self._capri_forecast(yh[(mr, g)], int(getattr(self.ev, "outer_iter_now", 0))))
                 else:
                     cur[g] = r0 + w * gap
         self.sv.yani_w, self.sv.yani_gprev = w_, gp_
-        net, prod = getattr(self, "_yani_np", ({}, {}))
+        net, prod = getattr(self.ev, "yani_np", ({}, {}))
         self._publish_young_animal_prices(ratio_m, ref, net, prod, sorted({mr for (mr, _g) in ref}))
 
     def _publish_young_animal_prices(self, ratio_m, ref, net, prod, markets) -> None:
@@ -277,10 +278,10 @@ class YoungAnimalBlock:
             ws = sum(x for x, _ in w)
             ratio[g] = sum(x * r_ for x, r_ in w) / ws if ws > 0 else float(np.mean([r_ for _, r_ in w]))
         sm.seen.yani_price_ratio = ratio
-        self._yani_detail = {f"{mr}|{g}": (round(float(ratio_m.get(mr, {}).get(g, 1.0)), 4),
+        self.res.yani_detail = {f"{mr}|{g}": (round(float(ratio_m.get(mr, {}).get(g, 1.0)), 4),
                                             round(float(net.get((mr, g), 0.0) - ref[(mr, g)]), 2),
                                             round(float(prod.get((mr, g), 0.0)), 2))
                              for (mr, g) in ref}
         if self.verbose or getattr(self, "trace_outer", False):
             print("    [Young animals] imbalance %.4f | (ratio, net - ref, production) %s" % (
-                self._yani_imbalance, self._yani_detail), flush=True)
+                self.res.yani_imbalance, self.res.yani_detail), flush=True)

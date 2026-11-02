@@ -90,7 +90,7 @@ def test_model_records_capri_verdict_and_can_stop_on_it():
         r = m.run(scenario="BASELINE", regions=["DE110000", "FR100000"], max_outer_iter=6)
     cs = r["metadata"]["capri_stop"]
     assert cs is not None and cs["step"] >= 1
-    hist = m._outer_history
+    hist = m.res.outer_history
     assert all(h["conv"]["capri"] is not None for h in hist)
     last = m.sv.capri_stop.steps[-1]
     # every item kind is formed: prices at the trade block, production and feed per member state

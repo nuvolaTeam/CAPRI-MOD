@@ -12,7 +12,7 @@ CREATE TABLE code_data (
 );
 COMMENT ON TABLE code_data IS 'the numbers in the model code that may be data (tools/check/make_code_data.py)';
 INSERT INTO code_data VALUES
-  ('capri_mod/coupling/manure.py', 'ManureBlock._clear_pool', 60.0, 1, '106', 'mu, _r = _nnls(M / sc, gvec, maxiter=60 * M.shape[1]); mu = mu / sc'),
+  ('capri_mod/coupling/manure.py', 'ManureBlock._clear_pool', 60.0, 1, '108', 'mu, _r = _nnls(M / sc, gvec, maxiter=60 * M.shape[1]); mu = mu / sc'),
   ('capri_mod/data/find_symbol.py', '<module>', 15.0, 1, '31', 'def search(keyword, limit=15):'),
   ('capri_mod/data/inputs.py', 'REPO_DATA', 2.0, 1, '26', 'REPO_DATA = Path(__file__).resolve().parents[2] / "capri_data"'),
   ('capri_mod/data/loaders.py', 'load_all_data', 2030.0, 2, '628,634', 'Path(data_dir) / by / "supply" / f"land_rents_{y}.csv") for y in (int(by), 2030)},'),
@@ -76,9 +76,9 @@ INSERT INTO code_data VALUES
   ('capri_mod/market/supply.py', 'SupplyMixin._yani_clear', 50.0, 1, '903', 'lo, hi = st.get("bounds", (-50.0, 50.0))'),
   ('capri_mod/market/supply.py', 'SupplyMixin.supply_response', 0.2, 2, '192,211', 'sv = (np.maximum(np.nan_to_num(seen.reindex(cols).to_numpy(dtype=float), nan=1.0), 0.2)'),
   ('capri_mod/market/welfare.py', 'WelfareMixin._welfare_cssp', 0.05, 1, '95', 'p = np.maximum(p, 0.05 * e["p0"])'),
-  ('capri_mod/model.py', 'CAPRIModel._pmp_suffix', 2030.0, 1, '1505', 'if _mkt_year(self.data) != 2030:'),
-  ('capri_mod/model.py', '_labour_table', 2030.0, 1, '1573', 'vt = "_2030" if yr == 2030 else ""'),
-  ('capri_mod/model.py', '_set_aside_table', 2030.0, 1, '1540', 'vt = "_2030" if yr == 2030 else ""'),
+  ('capri_mod/model.py', 'CAPRIModel._pmp_suffix', 2030.0, 1, '1506', 'if _mkt_year(self.data) != 2030:'),
+  ('capri_mod/model.py', '_labour_table', 2030.0, 1, '1574', 'vt = "_2030" if yr == 2030 else ""'),
+  ('capri_mod/model.py', '_set_aside_table', 2030.0, 1, '1541', 'vt = "_2030" if yr == 2030 else ""'),
   ('capri_mod/pipeline/captrd/coco.py', 'DEFAULTS_FROM', 2000.0, 1, '43', 'DEFAULTS_FROM = 2000                                                                   # l. 503-548: 2000 on, and BASM'),
   ('capri_mod/pipeline/captrd/coco.py', 'EXPOST_BIO_FROM', 2002.0, 1, '42', 'EXPOST_BIO_FROM = 2002                                                                 # l. 326: years after 2002'),
   ('capri_mod/pipeline/captrd/coco.py', 'prepare_country', 365.0, 1, '131', 'd.put(a, "HERD", lv * dy / 365.0, where=is_y & (h == 0) & (dy != 0) & (lv != 0))'),

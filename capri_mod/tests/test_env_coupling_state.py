@@ -16,7 +16,9 @@ from capri_mod.model import CAPRIModel
 
 ROOT = Path(__file__).resolve().parents[2]
 #: moved names another class still uses for its own field: SupplyModule's own inner fertiliser model (supply_module.py)
-SHARED_NAMES = {"_inner_fert"}
+#: and the regional models' NLP_STATE entry "_nlp_tol_trace" (a name the regional models never hold, so the Hessian's
+#: restore never finds it; CAPRIModel's own field moved to res.nlp_tol_trace)
+SHARED_NAMES = {"_inner_fert", "_nlp_tol_trace"}
 STATE_FILES = {ROOT / "capri_mod" / "environmental" / "state.py", ROOT / "capri_mod" / "coupling" / "state.py"}
 
 

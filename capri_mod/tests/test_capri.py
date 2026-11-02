@@ -323,7 +323,7 @@ def test_manure_p_and_k_have_markets_of_their_own(model):
         n_moved = sum(abs(s["supply"][r].manure_trade[0] - s["supply"][r].manure_trade[1]) for r in regs)
         pk_moved = sum(abs(v[0] - v[1]) for r in regs for v in s["supply"][r].manure_trade_pk.values())
         assert n_moved > 10.0 and pk_moved < 0.1 * n_moved
-        assert set(model._pool_gaps) == {"N", "P", "K"} and max(model._pool_gaps.values()) < 0.05
+        assert set(model.res.pool_gaps) == {"N", "P", "K"} and max(model.res.pool_gaps.values()) < 0.05
     finally:
         model.run(scenario="BASELINE", regions=regs, max_outer_iter=2)
 
@@ -3346,10 +3346,10 @@ def test_rations_are_chosen_only_inside_the_supply_models(model):
     model.run(scenario="BASELINE", regions=["IR010000"], max_outer_iter=1)
     a = "DCOW"
     r0 = model.par.ration_model.rations[("IR010000", a)]
-    assert np.allclose([model._ration_state["IR010000"][a]["x"][f] for f in r0.feeds], r0.x0)   # before a solve: base
+    assert np.allclose([model.ev.ration_state["IR010000"][a]["x"][f] for f in r0.feeds], r0.x0)   # before a solve: base
     model._update_rations({})                       # the next iteration's update: from the last regional solve
-    rs = model._ration_state["IR010000"]
-    res = model._last_supply_results["IR010000"]
+    rs = model.ev.ration_state["IR010000"]
+    res = model.seen.last_supply_results["IR010000"]
     h = float(res.activities[a])
     ft = res.feed_t[a]
     for f, x in rs[a]["x"].items():

@@ -9,6 +9,7 @@ from __future__ import annotations
 import functools as _functools
 import hashlib as _hashlib
 from pathlib import Path as _Path
+from capri_mod import statekit as _cst   # the state objects' helpers (refactor stage 4)
 
 #: the packages whose code cannot change the supply models' price response: the market, the tests, the CAPTRD pipeline
 _NOT_SUPPLY_CODE = ("market", "tests", "pipeline")
@@ -52,7 +53,7 @@ class HessianBlock:
             self.market_module.par.supply_hessian = None
             self.par.hessian_key = pend["key"]
             # recorded, so a run without CAPRI's market supply function shows it in its metadata (r131)
-            self.market_supply_hessian_info = {"source": "failed", "error": repr(_exc)}
+            self.res.market_supply_hessian_info = {"source": "failed", "error": repr(_exc)}
 
     def _market_supply_hessian(self, price_signal, supply_results, regions):
         """CAPRI's calibration of the market's supply functions to the supply models (supply/calibrate_supply.gms:
@@ -65,7 +66,7 @@ class HessianBlock:
         from pathlib import Path as _P
         regs = regions or list(self.data["areas"].index)
         sm = self.supply_module
-        pol = dict(getattr(self, "_last_spol", {}) or {})
+        pol = dict(getattr(self.seen, "last_spol", {}) or {})
         sig0 = price_signal.copy()
 
         # young animals (CAPRI xxOmYani in p_hessNQSupp, calibrate_supply.gms l. 437-458): their net balance per country
@@ -74,7 +75,7 @@ class HessianBlock:
         yani_goods = sorted({g for rec in _yat().values() for g in rec})
 
         def bridged(res):
-            self._ls_by_country = self._livestock_products_by_country(res)
+            self.ev.ls_by_country = self._livestock_products_by_country(res)
             q_ = self._bridge_supply_to_market(sm.aggregate_supply(res, by_country=True)).fillna(0.0)
             if yani_goods:
                 yn = self._young_animal_net_by_country(res)
@@ -151,7 +152,7 @@ class HessianBlock:
                    + (repr((sorted((getattr(sm.seen, "yani_price_ratio", None) or {}).items()),
                             sorted((k_, sorted(v_.items())) for k_, v_ in (getattr(sm.seen, "yani_price_ratio_ms", None) or {}).items()),
                             sorted((getattr(sm.seen, "milk_price_dev_ms", None) or {}).items())))
-                      if getattr(self, "_hessian_at_scenario", False) else ""))
+                      if getattr(self.ev, "hessian_at_scenario", False) else ""))
         key_src += repr(("supply-code", supply_code_fingerprint()))
         key = hashlib.sha1(key_src.encode()).hexdigest()[:16]
         cdir = _P(__file__).resolve().parents[2] / ".cache" / "market_supply_hessian"
@@ -166,9 +167,9 @@ class HessianBlock:
             eu, sup, blocks = self._split_hessian(ms_h)
             # "products" kept as before (the columns with a response here, the prices shocked when computed); both
             # counts named in either case (29 October 2026)
-            self.market_supply_hessian_info = {"source": "cache", "file": str(cfile), "products": len(eu.columns),
+            self.res.market_supply_hessian_info = {"source": "cache", "file": str(cfile), "products": len(eu.columns),
                                                "prices_shocked": len(cols_y), "columns_with_response": len(eu.columns)}
-            self.__dict__.setdefault("market_supply_hessian_log", []).append(dict(self.market_supply_hessian_info))
+            _cst.setdefault(self.res, "market_supply_hessian_log", []).append(dict(self.res.market_supply_hessian_info))
             return {"eu": eu, "ms": ms_h, "sup": sup, "blocks": blocks}
         import time as _t
         import copy as _cp
@@ -323,7 +324,7 @@ class HessianBlock:
         n_ver = len(getattr(sm.res, "hess_verify", None) or {})
         _st.pop(sm.res, "hess_fp", None)
         _st.pop(sm.res, "hess_verify", None)
-        self._ls_by_country = self._livestock_products_by_country(supply_results)
+        self.ev.ls_by_country = self._livestock_products_by_country(supply_results)
         t = pd.DataFrame(rows, columns=["ms", "x", "y", "dq"])
         cdir.mkdir(parents=True, exist_ok=True)
         # written whole, then renamed: another process (parallel test workers, two runs) reads a complete file or none
@@ -333,22 +334,22 @@ class HessianBlock:
         _os.replace(_tmp, cfile)
         ms_h = {ms: g.pivot(index="x", columns="y", values="dq").fillna(0.0) for ms, g in t.groupby("ms")}
         eu, sup, blocks = self._split_hessian(ms_h)
-        self.market_supply_hessian_info = {"source": "computed", "file": str(cfile), "products": len(cols_y),
+        self.res.market_supply_hessian_info = {"source": "computed", "file": str(cfile), "products": len(cols_y),
                                            "prices_shocked": len(cols_y), "columns_with_response": len(eu.columns),
                                            "seconds": round(_t.time() - t0, 1), "base_resolve_max_dev_kt": dev}
         if kkt:
             # the regional solves of the shocks that IPOPT made (the shock changed the problem's structure)
-            self.market_supply_hessian_info.update(method="kkt", kkt_ipopt_solves=n_kkt_ipopt)
+            self.res.market_supply_hessian_info.update(method="kkt", kkt_ipopt_solves=n_kkt_ipopt)
         if skip:
-            self.market_supply_hessian_info.update(regions_skipped=n_skipped, regions_shocked=n_solved)
+            self.res.market_supply_hessian_info.update(regions_skipped=n_skipped, regions_shocked=n_solved)
             if verify:
                 # CAPRI_HESSIAN_SKIP_VERIFY=1: the regions that would have been skipped were solved; their results must
                 # equal the base re-solve's (else the fingerprint misses an input of the regional solve)
-                self.market_supply_hessian_info.update(verified=n_ver, verify_mismatch=bad[:20])
+                self.res.market_supply_hessian_info.update(verified=n_ver, verify_mismatch=bad[:20])
                 if bad:
                     warnings.warn(f"market supply Hessian: {len(bad)} region solves with the base's inputs gave "
                                   f"another result, e.g. {bad[:5]}", RuntimeWarning)
-        self.__dict__.setdefault("market_supply_hessian_log", []).append(dict(self.market_supply_hessian_info))
+        _cst.setdefault(self.res, "market_supply_hessian_log", []).append(dict(self.res.market_supply_hessian_info))
         return {"eu": eu, "ms": ms_h, "sup": sup, "blocks": blocks}
 
     def _split_hessian(self, ms_h):

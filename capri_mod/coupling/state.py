@@ -73,22 +73,58 @@ class ModelSolveState(_Slots):
         "trace_go_prev",      # the trace's last gross output
         "trace_nlp_prev",     # the trace's last NLP levels
         "trace_nlp_t",        # the trace's last time
+        # the manure pools (E6)
+        "pool_state",         # the N manure market's plan, kappa and net exports
+        "pool_accel",         # the manure market's damping
+        "pool_pk",            # the P and K markets' copies of the pool state, by path (coupling/manure.py _POOL_STATE)
     )
 
 
 class ModelEvalState(_Slots):
     """One outer iteration's working values."""
-    __slots__ = ()
+    __slots__ = (
+        "outer_iter_now",     # the outer iteration
+        "ls_by_country",      # livestock products by country (the bridge's input; the Hessian overwrites it)
+        "blockdev_target_now", # the trade blocks' target departures of the iteration
+        "hessian_at_scenario", # set around a scenario's Hessian measurement (in its cache key)
+        "yani_np",            # the young animals' (net, production) of the iteration
+        "ration_state",       # the ration state of the iteration
+    )
 
 
 class ModelSeen(_Slots):
     """What the coupling recorded from the modules' last solve."""
-    __slots__ = ()
+    __slots__ = (
+        "last_spol",          # the policy of the last supply call (the Hessian re-solves with it)
+        "last_supply_results", # the last supply results (the next iteration's ration state)
+    )
 
 
 class ModelResults(_Slots):
     """Results and diagnostics of the run."""
-    __slots__ = ()
+    __slots__ = (
+        "calib_drift",        # the base calibration's drift
+        "calib_trace",        # its trace (the metadata's base_calibration_drift)
+        "capri_stop_verdict", # CAPRI's stop rule's verdict
+        "capri_drift",        # its drift
+        "eu_dev_gap",         # the trade blocks' departure gap
+        "sup_dev_gap",        # Norway's departure gap
+        "sup_dev_worst",      # its worst product
+        "sup_dev_gap_all",    # its gaps by product
+        "milk_ms_worst",      # the member states' worst milk gap
+        "milk_ms_small_gap",  # their small gaps (metadata)
+        "nlp_tol_trace",      # the regional solves' tolerance by iteration
+        "outer_history",      # the outer iterations' record
+        "yani_imbalance",     # the young-animal markets' imbalance
+        "yani_detail",        # their detail by market
+        "pool_imbalance",     # the manure markets' worst imbalance
+        "pool_worst_key",     # its region and market
+        "pool_gaps",          # the gaps by nutrient market
+        "pool_solver_status", # the last pool clearing's solver status
+        "pool_eu_unaccounted", # the EU manure not accounted for
+        "market_supply_hessian_info", # the market supply Hessian's record (source, file, time)
+        "market_supply_hessian_log", # its records of the run
+    )
 
 
 _REMOVED = "removed (refactor stage 4 E1, 2 November 2026: written, never read)"
@@ -141,6 +177,39 @@ MOVED_MODEL: dict = {
     "_trace_go_prev": "sv.trace_go_prev",
     "_trace_nlp_prev": "sv.trace_nlp_prev",
     "_trace_nlp_t": "sv.trace_nlp_t",
+    # E6 (the manure pools), E7 (seen, ev, res)
+    "_pool_state": "sv.pool_state",
+    "_pool_accel": "sv.pool_accel",
+    "_pool_pk": "sv.pool_pk",
+    "_last_spol": "seen.last_spol",
+    "_last_supply_results": "seen.last_supply_results",
+    "_outer_iter_now": "ev.outer_iter_now",
+    "_ls_by_country": "ev.ls_by_country",
+    "_blockdev_target_now": "ev.blockdev_target_now",
+    "_hessian_at_scenario": "ev.hessian_at_scenario",
+    "_yani_np": "ev.yani_np",
+    "_ration_state": "ev.ration_state",
+    "_calib_drift": "res.calib_drift",
+    "_calib_trace": "res.calib_trace",
+    "_capri_stop_verdict": "res.capri_stop_verdict",
+    "_capri_drift": "res.capri_drift",
+    "_eu_dev_gap": "res.eu_dev_gap",
+    "_sup_dev_gap": "res.sup_dev_gap",
+    "_sup_dev_worst": "res.sup_dev_worst",
+    "_sup_dev_gap_all": "res.sup_dev_gap_all",
+    "_milk_ms_worst": "res.milk_ms_worst",
+    "_milk_ms_small_gap": "res.milk_ms_small_gap",
+    "_nlp_tol_trace": "res.nlp_tol_trace",
+    "_outer_history": "res.outer_history",
+    "_yani_imbalance": "res.yani_imbalance",
+    "_yani_detail": "res.yani_detail",
+    "_pool_imbalance": "res.pool_imbalance",
+    "_pool_worst_key": "res.pool_worst_key",
+    "_pool_gaps": "res.pool_gaps",
+    "_pool_solver_status": "res.pool_solver_status",
+    "_pool_eu_unaccounted": "res.pool_eu_unaccounted",
+    "market_supply_hessian_info": "res.market_supply_hessian_info",
+    "market_supply_hessian_log": "res.market_supply_hessian_log",
 }
 
 

@@ -86,7 +86,7 @@ class BridgeBlock:
             "SGMT": ("SHGM", "SHGF"),
         }
         # (Oil and cake supply now comes from crushing inside the market.)
-        _lsc = getattr(self, "_ls_by_country", None)
+        _lsc = getattr(self.ev, "ls_by_country", None)
         for mcomm, acts in livestock_maps.items():
             present = [a for a in acts if a in supply_agg.columns]
             if _lsc is not None and mcomm in _lsc.columns and mcomm in market_supply.columns:
@@ -201,12 +201,12 @@ class BridgeBlock:
                         go[a] = float(an.at[r, a]) * float(oc.at[r, a])
             res[r] = SimpleNamespace(gross_output=pd.Series(go, dtype=float))
         agg = self.supply_module.aggregate_supply(res, by_country=True)
-        saved = getattr(self, "_ls_by_country", None)
+        saved = getattr(self.ev, "ls_by_country", None)
         try:
-            self._ls_by_country = self._livestock_products_by_country(res)
+            self.ev.ls_by_country = self._livestock_products_by_country(res)
             out = self._bridge_supply_to_market(agg)
         finally:
-            self._ls_by_country = saved
+            self.ev.ls_by_country = saved
         return out
 
     def _dairy_yield(self, region: str, product: str) -> float:

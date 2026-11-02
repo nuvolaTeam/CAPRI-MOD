@@ -67,6 +67,7 @@ from capri_mod.coupling import (  # noqa: E402  (refactor stage 4a: the blocks)
 
 from capri_mod.coupling.state import ModelStateMixin  # par, sv, ev, seen, res (refactor stage 4)
 from capri_mod import statekit as _cst   # the state objects' helpers (refactor stage 4)
+from capri_mod import statekit as _cst   # the state objects' helpers (refactor stage 4)
 
 
 class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, PriceStepBlock, ManureBlock, BridgeBlock,
@@ -546,7 +547,7 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
         self.supply_module.seen.yani_price_ratio = None
         self.supply_module.seen.yani_price_ratio_ms = None
         self.supply_module.seen.yani_price_ratio_m = None
-        self._yani_imbalance = 0.0
+        self.res.yani_imbalance = 0.0
         self.sv.yani_w, self.sv.yani_gprev = {}, {}
         self.market_module.seen.yani_state = None
         _yani_ref = (getattr(self.par, "yani_ref", {}) or {}).get(_key)
@@ -568,11 +569,11 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
         # IPOPT's tolerance in the regional models (outer_loop.nlp_tol_final)
         from capri_mod.supply.supply_module import RegionalSupplyModel as _RSMt
         _tol_tight = float(self.nlp_tol_final)
-        self._nlp_tol_trace = []
+        self.res.nlp_tol_trace = []
         _lab = "baseline" if _is_base else str(getattr(pol_scenario, "name", scenario))
         self._progress(f"{_lab}: start (at most {max_outer_iter} iterations)")
         for outer_iter in range(max_outer_iter):
-            self._outer_iter_now = outer_iter
+            self.ev.outer_iter_now = outer_iter
             _t_it0 = time.time()
             if outer_iter == 0:
                 # CAPRI's price forecast and stop rule start afresh every run (outer_loop.price_update, stop_rule)
@@ -585,7 +586,7 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
             if self.verbose:
                 print(f"  Outer iteration {outer_iter + 1}/{max_outer_iter}")
             _RSMt.nlp_tol = _tol_tight
-            self._nlp_tol_trace.append(_RSMt.nlp_tol)
+            self.res.nlp_tol_trace.append(_RSMt.nlp_tol)
 
             # --- Step 1: Supply module ---
             if self.verbose:
@@ -598,7 +599,7 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
                 _RSM.use_manure_pool = _on
                 self.supply_module.seen.manure_pool_price = {}     # fresh pools every run
                 self.supply_module.seen.manure_pool_price_pk = {}  # the P and K markets' (CAPRI's MANP, MANK)
-                self._pool_pk = {}
+                self.sv.pool_pk = {}
                 if _is_base:
                     # CAPRI calibrates its supply models in the baseline it simulates with (the base a first-order
                     # point of that model): each regional model checks at its first solve that its calibration was
@@ -607,9 +608,9 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
                     # pools, was reused by DE11's mineral cap test)
                     for _m in self.supply_module._models.values():
                         _m.seen.nlp_cal_check = True
-                self._pool_state = None
-                self._pool_accel = None
-                self._pool_imbalance = 0.0
+                self.sv.pool_state = None
+                self.sv.pool_accel = None
+                self.res.pool_imbalance = 0.0
             self._update_rations(price_signal if outer_iter > 0 else None)
             # CAPRI's raw milk price per member state (dairy block per RMS): the regional models get their member
             # state's milk price signal (relaxed like every price signal, below) as a departure from the EU's
@@ -701,19 +702,19 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
                 regions=regions or list(self.data["areas"].index),
                 verbose=self.verbose,
             )
-            self._last_spol = _spol
-            self._last_supply_results = supply_results   # fodder shadow prices for the rations
+            self.seen.last_spol = _spol
+            self.seen.last_supply_results = supply_results   # fodder shadow prices for the rations
             _t_sup = time.time()
             # CAPRI's baseline calibration (CAPMOD calibrates its supply models so that the simulation year's baseline
             # reproduces the projected levels): in the baseline of a projected year, the regional models' linear terms
             # are corrected until their solution is the projection's levels (Sprint 9p); the scenario then starts
             # from that calibrated baseline, as CAPRI's do
-            self._calib_drift = 0.0
+            self.res.calib_drift = 0.0
             if (_is_base and isinstance(self.data, dict) and self.data.get("market_year")
                     and self.data.get("calibrate_baseline", True)):
-                self._calib_drift = self.supply_module.calibrate_to_base(supply_results, reset=(outer_iter == 0))
-                self._calib_trace = getattr(self, "_calib_trace", []) if outer_iter else []
-                self._calib_trace.append(round(float(self._calib_drift), 5))
+                self.res.calib_drift = self.supply_module.calibrate_to_base(supply_results, reset=(outer_iter == 0))
+                self.res.calib_trace = getattr(self.res, "calib_trace", []) if outer_iter else []
+                self.res.calib_trace.append(round(float(self.res.calib_drift), 5))
             # the market supply Hessian measured again at the scenario's state (market.hessian_scenario_iter; the
             # user's choice 2(b), 25 October 2026, K75): the baseline's responses can differ from the scenario's (the
             # calf market of the Farm-to-Fork runs responded with 0-10% of the baseline's own response). CAPRI
@@ -722,18 +723,18 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
             if (not _is_base and _hk > 0 and outer_iter + 1 == _hk and bool(getattr(self, "market_supply_nq", True))
                     and self.market_module.par.supply_hessian):
                 try:
-                    self._hessian_at_scenario = True
+                    self.ev.hessian_at_scenario = True
                     self.market_module.par.supply_hessian = self._market_supply_hessian(price_signal, supply_results,
                                                                                     regions)
-                    self.market_supply_hessian_info = dict(self.market_supply_hessian_info, at_iteration=outer_iter + 1)
-                    self.market_supply_hessian_log[-1] = dict(self.market_supply_hessian_info)
+                    self.res.market_supply_hessian_info = dict(self.res.market_supply_hessian_info, at_iteration=outer_iter + 1)
+                    self.res.market_supply_hessian_log[-1] = dict(self.res.market_supply_hessian_info)
                 except Exception as _exc:
                     warnings.warn(f"scenario market supply Hessian not measured ({_exc!r}); the baseline's kept",
                                   RuntimeWarning, stacklevel=2)
-                    self.market_supply_hessian_info = dict(self.market_supply_hessian_info or {},
+                    self.res.market_supply_hessian_info = dict(self.res.market_supply_hessian_info or {},
                                                            scenario_error=repr(_exc), at_iteration=outer_iter + 1)
                 finally:
-                    self._hessian_at_scenario = False
+                    self.ev.hessian_at_scenario = False
             _yani_mkt = _yani_on and self._yani_in_market_now()
             if _yani_on and not _yani_mkt:
                 self._update_young_animal_prices(supply_results, _yani_ref)
@@ -750,7 +751,7 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
             )
 
             # Map to market commodities (simplified bridge); livestock by CAPRI final product
-            self._ls_by_country = self._livestock_products_by_country(supply_results)
+            self.ev.ls_by_country = self._livestock_products_by_country(supply_results)
             eu_supply_market = self._bridge_supply_to_market(eu_supply_agg)
 
             # --- Step 2: Market module ---
@@ -842,7 +843,7 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
             else:
                 price_signal = price_signal + _w * _g
             # EU trade blocks: each block's target departure from the EU target, relaxed with the same step
-            self._eu_dev_gap = 0.0
+            self.res.eu_dev_gap = 0.0
             _mmk = self.market_module
             if getattr(_mmk, "eu_blocks", False) and getattr(_mmk, "eu_premium_reg", None) is not None:
                 _wr = new_prices / base_prices.clip(lower=1.0)
@@ -858,7 +859,7 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
                     for _c in ("MILK", "DCOW"):                 # raw milk: priced per member state (dairy blocks)
                         if _c in _dt.index:
                             _dt[_c] = 0.0
-                    self.__dict__.setdefault("_blockdev_target_now", {})[_rg] = _dt
+                    _cst.setdefault(self.ev, "blockdev_target_now", {})[_rg] = _dt
                     _d0 = _dev0.get(_rg)
                     _d0 = pd.Series(0.0, index=price_signal.index) if _d0 is None else _d0.reindex(price_signal.index).fillna(0.0)
                     if self._capri_price_update():
@@ -868,7 +869,7 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
                         _newdev[_rg] = self._capri_forecast(_bh[_rg], outer_iter)
                     else:
                         _newdev[_rg] = _d0 + _w * (_dt - _d0)
-                    self._eu_dev_gap = max(self._eu_dev_gap, float((_dt - _d0).abs().max()))
+                    self.res.eu_dev_gap = max(self.res.eu_dev_gap, float((_dt - _d0).abs().max()))
                 self.sv.eu_dev = _newdev
             # CAPRI's slower smoothing for problem products of a member state (outer_loop.capri_step_special;
             # define_stepWeights.gms, price_forecast.gms l. 384-386): CAPRI smooths the price it passes to that member
@@ -881,7 +882,7 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
                 _hs = (getattr(self.sv, "capri_special_hist", None) or {}) if outer_iter > 0 else {}
                 _bmap_s = (self.market_module._ms_block_map()
                            if getattr(self.market_module, "eu_blocks", False) else {})
-                _bdt = getattr(self, "_blockdev_target_now", None) or {}
+                _bdt = getattr(self.ev, "blockdev_target_now", None) or {}
                 _edv = getattr(self.sv, "eu_dev", None) or {}
                 for (_ms_s, _p_s), _srt in _spm.items():
                     if _p_s not in price_signal.index:
@@ -903,7 +904,7 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
             # form) dragged Norway's prices along with every move of the EU signal: on a subset run the EU's other-cereal
             # and oat targets crept up 0.003 per iteration, and Norway's cereals lagged 1-2% behind their own,
             # nearly flat, prices for ten iterations. The level is passed on as a departure from the new EU signal.
-            self._sup_dev_gap = 0.0
+            self.res.sup_dev_gap = 0.0
             _spr = getattr(_mmk, "sup_price_ratio", None)
             if _spr is not None and len(_spr):
                 _sd0 = getattr(self.sv, "sup_dev", None) or {}
@@ -965,10 +966,10 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
                             and float(_bp[c_]) > self.SUP_GAP_MIN_PROD]
                     _own += [a_ for a_, c_ in (("SUGB", "SUGR"), ("DWHE", "SWHE"), ("DCOW", "MILK")) if c_ in _own]
                     _gs = _step.reindex(_own).abs() if _own else _step.abs()
-                    if len(_gs) and float(_gs.max()) > self._sup_dev_gap:
-                        self._sup_dev_gap = float(_gs.max()); self._sup_dev_worst = (_rg, str(_gs.idxmax()))
+                    if len(_gs) and float(_gs.max()) > self.res.sup_dev_gap:
+                        self.res.sup_dev_gap = float(_gs.max()); self.res.sup_dev_worst = (_rg, str(_gs.idxmax()))
                     _ga = _step.abs()
-                    self._sup_dev_gap_all = (float(_ga.max()), str(_ga.idxmax())) if len(_ga) else (0.0, "")
+                    self.res.sup_dev_gap_all = (float(_ga.max()), str(_ga.idxmax())) if len(_ga) else (0.0, "")
                 self.sv.sup_w = _wn_all
                 self.sv.sup_dev = _nsd
             # member-state raw milk prices (dairy block per RMS): target = the member state's milk price relative to
@@ -1043,14 +1044,14 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
                     _tot = float(self.market_module._dairy_params()["Q0"][self.market_module._dairy_params()["iM"]])
                     _mms = float(_settings().get("outer_loop.milk_ms_min_share"))
                     if abs(_gg) > _ms_gap and _sh >= _mms * _tot:
-                        self._milk_ms_worst = (_ms, _s0, _t, _ww, float(_v["milk_delivered"]))
+                        self.res.milk_ms_worst = (_ms, _s0, _t, _ww, float(_v["milk_delivered"]))
                     if _sh >= _mms * _tot:
                         _ms_gap = max(_ms_gap, abs(_gg))
                     else:
                         _ms_small_gap = max(_ms_small_gap, abs(_gg))
                 self.sv.milk_ms_signal, self.sv.milk_ms_w, self.sv.milk_ms_gprev = _sig, _mw, _mg
                 self.sv.milk_ms_hist = _mh
-            self._milk_ms_small_gap = _ms_small_gap
+            self.res.milk_ms_small_gap = _ms_small_gap
 
             # Aggregate quantities for convergence
             agg_qty = eu_supply_market.sum() if eu_supply_market is not None \
@@ -1060,7 +1061,7 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
             try:
                 # diagnostics: the outer loop's state per iteration (signals, targets, young-animal prices, member
                 # states' milk, EU herds), kept in the results as outer_history (KNOWN_ISSUES K75)
-                _hist = getattr(self, "_outer_history", None)
+                _hist = getattr(self.res, "outer_history", None)
                 if outer_iter == 0 or _hist is None:
                     _hist = []
                 _sr_ = supply_results or {}
@@ -1072,7 +1073,7 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
                               "signal": price_signal.astype(float).to_dict(),
                               "target": _target.astype(float).to_dict(),
                               "yani_ratio": {k_: dict(v_) for k_, v_ in (getattr(self.supply_module.seen, "yani_price_ratio_m", None) or {}).items()},
-                              "yani_imbalance": float(getattr(self, "_yani_imbalance", 0.0) or 0.0),
+                              "yani_imbalance": float(getattr(self.res, "yani_imbalance", 0.0) or 0.0),
                               "milk_ms_signal": dict(getattr(self.sv, "milk_ms_signal", None) or {}),
                               "yani_state": __import__("copy").deepcopy(self.market_module.seen.yani_state),
                               "yani_market": __import__("copy").deepcopy(self.market_module.ev.yani_market_now),
@@ -1098,7 +1099,7 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
                         r_: {"path": getattr(m_.res, "nlp_path", None), "f": getattr(m_.sv, "nlp_prev_f", None),
                              "relaxed": getattr(m_.res, "nlp_relaxed", None)}
                         for r_, m_ in (getattr(self.supply_module, "_models", None) or {}).items()}
-                self._outer_history = _hist
+                self.res.outer_history = _hist
             except Exception as _e:
                 warnings.warn(f"outer history not recorded: {_e!r}")
             if self.verbose or _settings().get("diagnostics.trace_outer"):
@@ -1112,15 +1113,15 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
                         _top = ' | premium swing: ' + ', '.join(f'{k} {float(_pr[k]):.3f} ({v:+.3f})' for k, v in _d.items())
                     self.sv.trace_prev_prem = _pr.copy() if _pr is not None else None
                     _lu = float(getattr(self.supply_module.res, 'max_nbal_update', 0.0) or 0.0)
-                    _yv = float(getattr(self, '_yani_imbalance', 0.0) or 0.0)
+                    _yv = float(getattr(self.res, 'yani_imbalance', 0.0) or 0.0)
                     _gp = (_target.reindex(price_signal.index).fillna(0.0) - price_signal).abs()
                     _lr = getattr(self.supply_module.res, 'max_nbal_region', None) if _lu > 1e-3 else None
                     print(f'  [outer {outer_iter + 1}] world max {_dv.abs().idxmax()} {float(_dv.abs().max()):.4f} | N price update {_lu:.5f}'
                           f'{" (%s, %s)" % _lr if _lr else ""} | milk MS gap {_ms_gap:.4f}'
-                          f'{" %s s %.3f t %.3f w %.2f q %.3f" % getattr(self, "_milk_ms_worst") if _ms_gap > 0.005 and getattr(self, "_milk_ms_worst", None) else ""}'
+                          f'{" %s s %.3f t %.3f w %.2f q %.3f" % getattr(self.res, "milk_ms_worst") if _ms_gap > 0.005 and getattr(self.res, "milk_ms_worst", None) else ""}'
                           f' | gap {_gp.idxmax()} {float(_gp.max()):.4f} | yani {_yv:.4f}'
-                          f' | NOR gap {float(getattr(self, "_sup_dev_gap", 0.0) or 0.0):.4f} {getattr(self, "_sup_dev_worst", ("", ""))[1]} (all {getattr(self, "_sup_dev_gap_all", (0.0, ""))[0]:.4f} {getattr(self, "_sup_dev_gap_all", (0.0, ""))[1]})'
-                          f'{" | pool %.4f %s eu %.4f" % (float(getattr(self, "_pool_imbalance", 0.0) or 0.0), getattr(self, "_pool_worst_key", "") + ("" if str(getattr(self, "_pool_solver_status", "Solved")).endswith("Solved") else " [" + str(getattr(self, "_pool_solver_status", "")) + "]"), float(getattr(self, "_pool_eu_unaccounted", 0.0) or 0.0)) if getattr(self, "use_manure_market", False) else ""}{" | base cal %.4f" % float(getattr(self, "_calib_drift", 0.0) or 0.0) if getattr(self, "_calib_drift", 0.0) else ""}{_top}', flush=True)
+                          f' | NOR gap {float(getattr(self.res, "sup_dev_gap", 0.0) or 0.0):.4f} {getattr(self.res, "sup_dev_worst", ("", ""))[1]} (all {getattr(self.res, "sup_dev_gap_all", (0.0, ""))[0]:.4f} {getattr(self.res, "sup_dev_gap_all", (0.0, ""))[1]})'
+                          f'{" | pool %.4f %s eu %.4f" % (float(getattr(self.res, "pool_imbalance", 0.0) or 0.0), getattr(self.res, "pool_worst_key", "") + ("" if str(getattr(self.res, "pool_solver_status", "Solved")).endswith("Solved") else " [" + str(getattr(self.res, "pool_solver_status", "")) + "]"), float(getattr(self.res, "pool_eu_unaccounted", 0.0) or 0.0)) if getattr(self, "use_manure_market", False) else ""}{" | base cal %.4f" % float(getattr(self.res, "calib_drift", 0.0) or 0.0) if getattr(self.res, "calib_drift", 0.0) else ""}{_top}', flush=True)
                 except Exception:
                     pass
                 try:
@@ -1137,7 +1138,7 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
                                 f" | BIOE EU cons {float(market_eq.consumption.loc[_eu_, 'BIOE'].sum()) if 'BIOE' in market_eq.consumption.columns else float('nan'):.1f}"
                                 f" | excess {float(market_eq.excess_demand.get(_mc, float('nan'))):.3g} conv {market_eq.converged}")
                     # the regions whose gross output of the gap's activity changed most since the last iteration
-                    _sr = getattr(self, "_last_supply_results", None) or {}
+                    _sr = getattr(self.seen, "last_supply_results", None) or {}
                     _go = {r_: float(getattr(x_, "gross_output", pd.Series(dtype=float)).get(_gc, 0.0)) for r_, x_ in _sr.items()}
                     _lv = {r_: float(x_.activities.get(_gc, 0.0)) for r_, x_ in _sr.items()}
                     _gprev = getattr(self.sv, "trace_go_prev", None) or {}
@@ -1164,26 +1165,26 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
             _gap = float((_target.reindex(price_signal.index).fillna(0.0)
                           - price_signal).abs().max())
             # Norway out of the test from CAPRI's 15th iteration on (SUP_GAP_LAST_ITER)
-            _sup_gap_t = (float(getattr(self, "_sup_dev_gap", 0.0) or 0.0)
+            _sup_gap_t = (float(getattr(self.res, "sup_dev_gap", 0.0) or 0.0)
                           if outer_iter + 1 < self.SUP_GAP_LAST_ITER else 0.0)
-            _gap = max(_gap, _ms_gap, float(getattr(self, "_eu_dev_gap", 0.0) or 0.0), _sup_gap_t)
+            _gap = max(_gap, _ms_gap, float(getattr(self.res, "eu_dev_gap", 0.0) or 0.0), _sup_gap_t)
             # each region's nitrogen-balance price settles with prices: do not stop while it moves
             _nbal = float(getattr(self.supply_module.res, "max_nbal_update", 0.0) or 0.0)
-            _pool = float(getattr(self, "_pool_imbalance", 0.0) or 0.0)
+            _pool = float(getattr(self.res, "pool_imbalance", 0.0) or 0.0)
             _pool_tol = float(self.manure_pool_tolerance)
-            _yani = float(getattr(self, "_yani_imbalance", 0.0) or 0.0)
-            _cal = float(getattr(self, "_calib_drift", 0.0) or 0.0)
+            _yani = float(getattr(self.res, "yani_imbalance", 0.0) or 0.0)
+            _cal = float(getattr(self.res, "calib_drift", 0.0) or 0.0)
             # CAPRI's stop rule, every iteration (recorded; it decides with outer_loop.stop_rule = "capri")
             try:
                 _cv = self._capri_stop_step(supply_results, market_eq)
             except Exception as _exc:
                 warnings.warn(f"CAPRI's stop rule not evaluated ({_exc!r})", RuntimeWarning, stacklevel=2)
                 _cv = None
-            self._capri_stop_verdict = _cv
+            self.res.capri_stop_verdict = _cv
             try:
                 # the convergence tests of this iteration, for the outer history (K75)
-                if getattr(self, "_outer_history", None):
-                    self._outer_history[-1]["conv"] = {
+                if getattr(self.res, "outer_history", None):
+                    self.res.outer_history[-1]["conv"] = {
                         "tracker": bool(tracker.check_convergence()), "last_change": float(tracker.last_change()),
                         "gap": _gap, "ms_gap": float(_ms_gap), "nbal": _nbal, "pool": _pool, "yani": _yani, "cal": _cal,
                         "capri": ({k_: _cv[k_] for k_ in ("max", "cur", "count", "go_on", "top")} if _cv else None)}
@@ -1235,18 +1236,18 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
                 print(f"  ⚠ Outer loop did not fully converge in {max_outer_iter} iterations")
         # Not CAPRI's (a report, the project lead's decision): items still moving one way when the loop ended
         # (outer_loop.drift_report_steps; CapriStopRule.drift)
-        self._capri_drift = []
+        self.res.capri_drift = []
         _nd = int(_settings().get("outer_loop.drift_report_steps") or 0)
         if _nd > 0 and getattr(self.sv, "capri_stop", None) is not None:
-            self._capri_drift = self.sv.capri_stop.drift(_nd)
-            if self._capri_drift:
+            self.res.capri_drift = self.sv.capri_stop.drift(_nd)
+            if self.res.capri_drift:
                 _top = "; ".join(f"{e['row']} {e['where']} ({e['kind']}) {e['changes'][-1]:+.3f}%"
                                  + (f", about {e['to_come']:.2f}% to come" if e["to_come"] is not None else ", not shrinking")
-                                 for e in self._capri_drift[:5])
-                self._progress(f"{_lab}: {len(self._capri_drift)} item(s) still moving one way for {_nd} iterations "
+                                 for e in self.res.capri_drift[:5])
+                self._progress(f"{_lab}: {len(self.res.capri_drift)} item(s) still moving one way for {_nd} iterations "
                                f"at the end: {_top}")
                 if outer_converged:
-                    warnings.warn(f"{_lab}: the loop stopped with {len(self._capri_drift)} item(s) still moving one way "
+                    warnings.warn(f"{_lab}: the loop stopped with {len(self.res.capri_drift)} item(s) still moving one way "
                                   f"for {_nd} iterations ({_top}); CAPRI's rule allows it (two rows or fewer above "
                                   "0.05%), their results are not at their equilibrium yet: metadata capri_stop drift",
                                   RuntimeWarning, stacklevel=2)
@@ -1352,7 +1353,7 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
             "fert_npk": _npk_table(supply_results),
             "policy_summary": policy_summary,
             "convergence": tracker.summary(),
-            "outer_history": list(getattr(self, "_outer_history", None) or []),
+            "outer_history": list(getattr(self.res, "outer_history", None) or []),
             "metadata": {
                 "n_regions": len(supply_results) if supply_results else 0,
                 "n_outer_iterations": outer_iter + 1,
@@ -1364,22 +1365,22 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
                 # the scenario, CAPRI's negProdPriceAllowed): the price ratio the dairy block would have given
                 "milk_price_floor": dict(getattr(self.market_module, "_milk_floor_hits", None) or {}),
                 # CAPRI's stop rule at the last iteration (outer_loop.stop_rule; capri_mod/utils/capri_stop.py)
-                "capri_stop": ({**{k_: v_ for k_, v_ in (getattr(self, "_capri_stop_verdict", None) or {}).items() if k_ != "rows"},
-                                "drift": list(getattr(self, "_capri_drift", None) or [])}
-                               if getattr(self, "_capri_stop_verdict", None) else None),
+                "capri_stop": ({**{k_: v_ for k_, v_ in (getattr(self.res, "capri_stop_verdict", None) or {}).items() if k_ != "rows"},
+                                "drift": list(getattr(self.res, "capri_drift", None) or [])}
+                               if getattr(self.res, "capri_stop_verdict", None) else None),
                 # Norway's last price gap (its own products > 5 kt; out of the convergence test from iteration 15,
                 # as CAPRI's) and the product, reported as it is
-                "nor_price_gap": (float(getattr(self, "_sup_dev_gap", 0.0) or 0.0),
-                                  str((getattr(self, "_sup_dev_worst", None) or ("", ""))[1])),
-                "nlp_tol_by_iteration": list(getattr(self, "_nlp_tol_trace", []) or []),
+                "nor_price_gap": (float(getattr(self.res, "sup_dev_gap", 0.0) or 0.0),
+                                  str((getattr(self.res, "sup_dev_worst", None) or ("", ""))[1])),
+                "nlp_tol_by_iteration": list(getattr(self.res, "nlp_tol_trace", []) or []),
                 # market calibration bounds that bound at this run's calibration (PROXY_AUDIT S185, S192)
                 "market_calibration_bound_hits": dict(getattr(self.market_module, "calibration_bound_hits", None) or {}),
                 "elapsed_seconds": round(t_elapsed, 1),
                 # the baseline's drift from its calibration point by outer iteration (CAPRI's baseline reproduction)
-                "base_calibration_drift": list(getattr(self, "_calib_trace", []) or []),
+                "base_calibration_drift": list(getattr(self.res, "calib_trace", []) or []),
                 "young_animal_prices": dict(self.supply_module.seen.yani_price_ratio or {}),
-                "young_animal_imbalance": float(getattr(self, "_yani_imbalance", 0.0) or 0.0),
-                "young_animal_markets": dict(getattr(self, "_yani_detail", None) or {}),
+                "young_animal_imbalance": float(getattr(self.res, "yani_imbalance", 0.0) or 0.0),
+                "young_animal_markets": dict(getattr(self.res, "yani_detail", None) or {}),
                 "pmp_source": str(getattr(self.supply_module, "pmp_source", "capri2030")),
                 "pmp_capri_parts": list(getattr(self.supply_module, "pmp_capri_parts", ())),
                 # regions whose NLP solve took a fallback in this run (JRC121368's relaxed N target, IPOPT's last
@@ -1389,14 +1390,14 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
                 "nlp_jump_check": [{"it": e_.get("it"), "checked": sorted(e_["jump_check"]),
                                     "switched": sorted(r_ for r_, v_ in e_["jump_check"].items()
                                                        if str(v_.get("kept", "")).startswith("jump:"))}
-                                   for e_ in (getattr(self, "_outer_history", None) or []) if e_.get("jump_check")],
+                                   for e_ in (getattr(self.res, "outer_history", None) or []) if e_.get("jump_check")],
                 "nlp_fallback": {r_: list(m_.res.nlp_fallback_log) for r_, m_ in self.supply_module._models.items()
                                  if getattr(m_.res, "nlp_fallback_log", None)},
                 # regions whose NLP form needed the Green Deal's mineral caps relaxed (supply_module._capri_nlp_solve)
                 "nlp_relaxed": {r_: m_.res.nlp_relaxed for r_, m_ in self.supply_module._models.items()
                                 if getattr(m_.res, "nlp_relaxed", None)},
                 # member states below 1% of EU milk whose milk price has not settled (gap of the price signal)
-                "milk_small_ms_gap": float(getattr(self, "_milk_ms_small_gap", 0.0) or 0.0),
+                "milk_small_ms_gap": float(getattr(self.res, "milk_ms_small_gap", 0.0) or 0.0),
             },
         }
 

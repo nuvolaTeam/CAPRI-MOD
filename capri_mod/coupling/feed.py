@@ -47,7 +47,7 @@ class FeedBlock:
         bix = self.feed_bulk_price_ratios(price_signal)
         self.supply_module.seen.feed_bulk_ratio = bix
         state = {}
-        _last = getattr(self, "_last_supply_results", None) or {}
+        _last = getattr(self.seen, "last_supply_results", None) or {}
         # FEEDING INSIDE THE SUPPLY MODELS (CAPRI: v_feedInpCoeff is chosen only there, together with herds and
         # fodder): no ration is chosen outside them. The ration state is the feed per head of each region's last
         # regional solution (base ration before the first), kept for what reads it: the market's feed index where a
@@ -73,7 +73,7 @@ class FeedBlock:
         _fp = feed_prices_by_region(rm, bix)
         self.supply_module.seen.feed_rations = self.par.feed_rations_stable
         self.supply_module.seen.feed_prices = _fp
-        self._ration_state = state
+        self.ev.ration_state = state
 
     def _set_feed_demand(self, supply_results) -> None:
         """Pass EU feed use (current and base) to the market.
@@ -114,7 +114,7 @@ class FeedBlock:
                     qp = float(fc.get(f"{a}_protein", float("nan"))) if fc is not None else float("nan")
                     # with the EU ration wired in: current cereals and protein
                     # feed per head from the ration; base from the base ration
-                    _rr = ((getattr(self, "_ration_state", None) or {}).get(region) or {}).get(a)
+                    _rr = ((getattr(self.ev, "ration_state", None) or {}).get(region) or {}).get(a)
                     _r0 = getattr(self.par, "ration_model", None)
                     if _rr and _r0 is not None and (region, a) in _r0.rations:
                         _rb = _r0.rations[(region, a)]
