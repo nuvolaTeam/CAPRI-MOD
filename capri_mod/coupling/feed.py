@@ -121,7 +121,7 @@ class FeedBlock:
                         xb = dict(zip(_rb.feeds, _rb.x0))
                         # feeding inside the supply model: the region's own feed totals (t)
                         _ft = (getattr(res, "feed_t", None) or {}).get(a)
-                        # every tradable bulk of CAPRI (FEED_TRD: FCER, FPRO, FENE, FOTH, FMIL; Sprint 9h adds the
+                        # every tradable bulk of CAPRI (FEED_TRD: FCER, FPRO, FENE, FMIL, FOTH; Sprint 9h adds the
                         # last three per member state)
                         for _b in self.FEED_BULKS:
                             if _b in xb:
