@@ -400,7 +400,7 @@ def main():
                               # (0, the N balance's shortfall): the first item was the landscape floor's, which is
                               # no longer relaxed (K84, 27 October 2026); kept so earlier runs compare
                               "shortfall": (0.0, float(getattr(v, "balance_shortfall", 0.0) or 0.0)),
-                              "manure_pool_price": float((getattr((getattr(pmod, "_last_projected_model", None) or m).supply_module, "manure_pool_price", None) or {}).get(reg[:2], 0.0) or 0.0)}
+                              "manure_pool_price": float((getattr((getattr(pmod, "_last_projected_model", None) or m).supply_module.seen, "manure_pool_price", None) or {}).get(reg[:2], 0.0) or 0.0)}
                         for reg, v in s["supply"].items()},
            # baseline manure trade per region (t N exported, imported), for the check against CAPRI's MTRADE
            "manure_trade_base": {reg: tuple(float(t_) for t_ in (getattr(v, "manure_trade", None) or (0.0, 0.0)))
