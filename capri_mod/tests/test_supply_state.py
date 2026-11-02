@@ -63,8 +63,6 @@ def _string_uses(names):
         for f in base.rglob("*.py"):
             if "tests" in f.parts or f == ROOT / "capri_mod" / "supply" / "state.py":    # where MOVED is declared
                 continue
-            if f.parent == ROOT / "tools" / "build":      # the builders are out of the checks (2 November 2026)
-                continue
             try:
                 tree = ast.parse(f.read_text())
             except SyntaxError:
