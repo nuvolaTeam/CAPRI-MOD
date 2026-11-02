@@ -92,6 +92,11 @@ The builders (tools/build) are out of this plan: they are run by the maintainers
   runs come with the format (deltalake; DuckDB reads it too). deltalake moves from the pipeline extra to the model's
   dependencies. capri_mod/io_results.py is the single writer; the gate runner and tools/check/compare_runs.py use it;
   the pickle at most a cache.
+- pydantic (the project lead's decision, 2 November 2026) for the scenario definitions (one typed model per scenario
+  in capri_data/scenarios/<name>/, checked before a run starts) and the run's metadata (the run manifest, the market
+  supply Hessian's record, the metadata stored beside the results table); a declared dependency from then. Not for
+  the settings layer (it checks types and keys already), the state objects (slots on the solves' hot path) or the
+  data tables (the DuckDB schema and its rules). A choice about the Python layer, with no CAPRI counterpart.
 
 ## 4. CAPRI-claim audit
 
