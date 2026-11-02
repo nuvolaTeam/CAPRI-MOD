@@ -148,9 +148,9 @@ class HessianBlock:
                         + (("kkt-step",) if kkt else ()))
                    # at a scenario's state (market.hessian_scenario_iter): its young-animal and member-state milk
                    # prices too (a baseline's key is unchanged)
-                   + (repr((sorted((getattr(sm, "yani_price_ratio", None) or {}).items()),
-                            sorted((k_, sorted(v_.items())) for k_, v_ in (getattr(sm, "yani_price_ratio_ms", None) or {}).items()),
-                            sorted((getattr(sm, "milk_price_dev_ms", None) or {}).items())))
+                   + (repr((sorted((getattr(sm.seen, "yani_price_ratio", None) or {}).items()),
+                            sorted((k_, sorted(v_.items())) for k_, v_ in (getattr(sm.seen, "yani_price_ratio_ms", None) or {}).items()),
+                            sorted((getattr(sm.seen, "milk_price_dev_ms", None) or {}).items())))
                       if getattr(self, "_hessian_at_scenario", False) else ""))
         key_src += repr(("supply-code", supply_code_fingerprint()))
         key = hashlib.sha1(key_src.encode()).hexdigest()[:16]
@@ -173,7 +173,7 @@ class HessianBlock:
         import time as _t
         import copy as _cp
         t0 = _t.time()
-        fb0 = getattr(sm, "feed_bulk_ratio", None)
+        fb0 = getattr(sm.seen, "feed_bulk_ratio", None)
         rows = []
         # every shock starts from the baseline's solution, and the models leave as they came: the regional NLPs' warm
         # starts and path state (_nlp_*) and the N-price loop's state are restored before each shock and after the
@@ -219,8 +219,8 @@ class HessianBlock:
                 else:
                     _st.set_path(sm, n_, _cp.deepcopy(v_))
         _snap0 = _snapshot()
-        yr0 = (getattr(sm, "yani_price_ratio", None), getattr(sm, "yani_price_ratio_ms", None),
-               getattr(sm, "yani_price_ratio_m", None))
+        yr0 = (getattr(sm.seen, "yani_price_ratio", None), getattr(sm.seen, "yani_price_ratio_ms", None),
+               getattr(sm.seen, "yani_price_ratio_m", None))
         q_ref, n_skipped, n_solved = q0, 0, 0
         verify = skip and __import__("os").environ.get("CAPRI_HESSIAN_SKIP_VERIFY", "") == "1"
         if skip:
@@ -230,10 +230,10 @@ class HessianBlock:
             # differences are taken to this re-solved base: the shocks start from the same state, so a region a shock
             # does not reach contributes exactly 0 (before, the re-solve's departure from the baseline's own solution,
             # up to 0.04 kt in r161, entered every column)
-            sm.feed_bulk_ratio = fb0 if fb0 is not None else self.feed_bulk_price_ratios(sig0)
+            sm.seen.feed_bulk_ratio = fb0 if fb0 is not None else self.feed_bulk_price_ratios(sig0)
             _restore(_snap0)
             sm.res.hess_fp, sm.res.hess_verify = {}, {}
-            sm._hess_probe = "record"
+            sm.seen.hess_probe = "record"
             if kkt:
                 for mo_ in sm._models.values():
                     _st.discard(mo_.sv, "kkt_base")
@@ -242,10 +242,10 @@ class HessianBlock:
             try:
                 res_b = sm.run(price_signals=sig0, policy_scenario=pol, regions=regs, verbose=False)
             finally:
-                sm._hess_probe = None
+                sm.seen.hess_probe = None
                 _crn_h.KKT_MODE = None
             q_ref = bridged(res_b)
-            sm._hess_base_res = res_b
+            sm.seen.hess_base_res = res_b
         try:
             _t_h0 = time.time()
             for _k_y, y in enumerate(cols_y):
@@ -262,14 +262,14 @@ class HessianBlock:
                     eu0 = {g: 1.0 for g in yani_goods}
                     eu0.update({g: float(v) for g, v in (yr0[0] or {}).items()})
                     dr = self.MARKET_SUPPLY_SHOCK * eu0.get(g_, 1.0)
-                    sm.yani_price_ratio = {**eu0, g_: eu0.get(g_, 1.0) + dr}
+                    sm.seen.yani_price_ratio = {**eu0, g_: eu0.get(g_, 1.0) + dr}
                     if yr0[1]:
-                        sm.yani_price_ratio_ms = {ms_: {**dict(d_), g_: float(dict(d_).get(g_, 1.0)) * (1.0 + self.MARKET_SUPPLY_SHOCK)}
+                        sm.seen.yani_price_ratio_ms = {ms_: {**dict(d_), g_: float(dict(d_).get(g_, 1.0)) * (1.0 + self.MARKET_SUPPLY_SHOCK)}
                                                   for ms_, d_ in yr0[1].items()}
                         dr_ms = {ms_: self.MARKET_SUPPLY_SHOCK * float(dict(d_).get(g_, 1.0)) for ms_, d_ in yr0[1].items()}
                     else:
-                        sm.yani_price_ratio_ms, dr_ms = None, {}
-                    sm.yani_price_ratio_m = yr0[2]
+                        sm.seen.yani_price_ratio_ms, dr_ms = None, {}
+                    sm.seen.yani_price_ratio_m = yr0[2]
                 else:
                     dr = self.MARKET_SUPPLY_SHOCK * (1.0 + float(sig0.get(y, 0.0)))
                     sig[y] = float(sig0.get(y, 0.0)) + dr
@@ -277,18 +277,18 @@ class HessianBlock:
                         sig["SUGB"] = sig["SUGR"]
                     if y == "SWHE" and "DWHE" in sig.index:
                         sig["DWHE"] = sig["SWHE"]
-                    sm.yani_price_ratio, sm.yani_price_ratio_ms, sm.yani_price_ratio_m = yr0
+                    sm.seen.yani_price_ratio, sm.seen.yani_price_ratio_ms, sm.seen.yani_price_ratio_m = yr0
                     dr_ms = {}
-                sm.feed_bulk_ratio = self.feed_bulk_price_ratios(sig)
+                sm.seen.feed_bulk_ratio = self.feed_bulk_price_ratios(sig)
                 _restore(_snap0)
                 if skip:
-                    sm._hess_probe, sm._hess_shock = ("verify" if verify else "compare"), y
+                    sm.seen.hess_probe, sm.seen.hess_shock = ("verify" if verify else "compare"), y
                 if kkt:
                     _crn_h.KKT_MODE = "apply"
                 try:
                     res = sm.run(price_signals=sig, policy_scenario=pol, regions=regs, verbose=False)
                 finally:
-                    sm._hess_probe = None
+                    sm.seen.hess_probe = None
                     _crn_h.KKT_MODE = None
                 n_skipped += sum(1 for r_ in res.values() if getattr(r_, "hess_unchanged", False))
                 n_solved += len(res)
@@ -301,17 +301,17 @@ class HessianBlock:
                         if abs(v) > 1e-9:
                             rows.append((ms, x, y, v))
         finally:
-            sm._hess_probe = None
+            sm.seen.hess_probe = None
             _crn_h.KKT_MODE = None
-            sm.__dict__.pop("_hess_base_res", None)
+            _st.pop(sm.seen, "hess_base_res", None)
         n_kkt_ipopt = 0
         if kkt:
             for mo_ in sm._models.values():
                 n_kkt_ipopt += int(_st.pop(mo_.res, "kkt_ipopt", 0) or 0)
                 _st.discard(mo_.sv, "kkt_base")
         # back to the base: the regional models' warm starts and states as the baseline left them
-        sm.yani_price_ratio, sm.yani_price_ratio_ms, sm.yani_price_ratio_m = yr0
-        sm.feed_bulk_ratio = fb0 if fb0 is not None else self.feed_bulk_price_ratios(sig0)
+        sm.seen.yani_price_ratio, sm.seen.yani_price_ratio_ms, sm.seen.yani_price_ratio_m = yr0
+        sm.seen.feed_bulk_ratio = fb0 if fb0 is not None else self.feed_bulk_price_ratios(sig0)
         _restore(_snap0)
         if skip:
             dev = float((q_ref - q0).abs().max().max())          # the base re-solved first

@@ -66,8 +66,8 @@ class ManureBlock:
         from scipy.optimize import nnls as _nnls, minimize as _min
         sm = self.supply_module
         # the market's prices by country: the N market's in manure_pool_price, P and K in manure_pool_price_pk
-        pools = dict((getattr(sm, "manure_pool_price", None) or {}) if prod == "N"
-                     else ((getattr(sm, "manure_pool_price_pk", None) or {}).get(prod) or {}))
+        pools = dict((getattr(sm.seen, "manure_pool_price", None) or {}) if prod == "N"
+                     else ((getattr(sm.seen, "manure_pool_price_pk", None) or {}).get(prod) or {}))
         cost = getattr(self, "_pool_cost_cache", None)
         if cost is None:
             from capri_mod.data import inputs as _inputs, nested_tables as _nt
@@ -261,9 +261,9 @@ class ManureBlock:
             if k in pnew:
                 out[reg[:2]] = pnew[k]
         if prod == "N":
-            sm.manure_pool_price = out
+            sm.seen.manure_pool_price = out
         else:
-            sm.__dict__.setdefault("manure_pool_price_pk", {})[prod] = out
+            _sst.setdefault(sm.seen, "manure_pool_price_pk", {})[prod] = out
         # EU-WIDE conservation: realised net exports into all pools should sum
         # to zero; on the full EU it lagged the per-pool measure (200 kt N
         # unaccounted at iteration 6 while every pool was within ~6%)

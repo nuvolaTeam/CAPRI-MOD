@@ -2443,7 +2443,7 @@ class SupplyModule(ModuleStateMixin):
         if not hasattr(self.par, "env_for_surplus"):
             from capri_mod.environmental.environmental_module import EnvironmentalModule
             self.par.env_for_surplus = EnvironmentalModule(self.data)
-            self.par.env_for_surplus.set_manure_trade(getattr(self, "manure_trade_on", True))
+            self.par.env_for_surplus.set_manure_trade(getattr(self.seen, "manure_trade_on", True))
         ylds = self.data["yields"].loc[region]
         man = {}
         for a in model.acts:
@@ -2525,7 +2525,7 @@ class SupplyModule(ModuleStateMixin):
         if not is_eu(region):
             return None
         cache = _st.setdefault(self.par, "mctx_cache", {})
-        ck = (region, bool(getattr(self, "manure_trade_on", True)))
+        ck = (region, bool(getattr(self.seen, "manure_trade_on", True)))
         if ck not in cache:
             man = self._manure_per_head(region, model)
             bc = self._balance_coefs(region, model)
@@ -2534,7 +2534,7 @@ class SupplyModule(ModuleStateMixin):
         if cache[ck] is None:
             return None
         try:
-            _ft = self._fert_techs(region) if float(getattr(self, "ghg_tax", 0.0) or 0.0) > 0 else []   # emission tax
+            _ft = self._fert_techs(region) if float(getattr(self.seen, "ghg_tax", 0.0) or 0.0) > 0 else []   # emission tax
         except Exception:
             _ft = []
         return {**cache[ck], "techs": _ft}
@@ -2552,9 +2552,9 @@ class SupplyModule(ModuleStateMixin):
             from capri_mod.environmental.environmental_module import EnvironmentalModule
             if not hasattr(self.par, "env_for_surplus"):
                 self.par.env_for_surplus = EnvironmentalModule(self.data)
-                self.par.env_for_surplus.set_manure_trade(getattr(self, "manure_trade_on", True))
+                self.par.env_for_surplus.set_manure_trade(getattr(self.seen, "manure_trade_on", True))
             cache = getattr(self.par, "balance_cache", {})
-            ck = (region, bool(getattr(self, "manure_trade_on", True)))    # the base trade counts only with trade on
+            ck = (region, bool(getattr(self.seen, "manure_trade_on", True)))    # the base trade counts only with trade on
             if ck in cache:
                 return cache[ck]
             ylds = self.data["yields"].loc[region]
@@ -2577,7 +2577,7 @@ class SupplyModule(ModuleStateMixin):
             from capri_mod.environmental.environmental_module import EnvironmentalModule
             if not hasattr(self.par, "env_for_surplus"):
                 self.par.env_for_surplus = EnvironmentalModule(self.data)
-                self.par.env_for_surplus.set_manure_trade(getattr(self, "manure_trade_on", True))
+                self.par.env_for_surplus.set_manure_trade(getattr(self.seen, "manure_trade_on", True))
             acts = model._base_levels()
             ylds = self.data["yields"].loc[region]
             nb = self.par.env_for_surplus.compute_nitrogen_balance(acts, ylds, region)
@@ -2609,7 +2609,7 @@ class SupplyModule(ModuleStateMixin):
             from capri_mod.environmental.environmental_module import EnvironmentalModule
             if getattr(self.par, "env_for_surplus", None) is None:
                 self.par.env_for_surplus = EnvironmentalModule(self.data)
-                self.par.env_for_surplus.set_manure_trade(getattr(self, "manure_trade_on", True))
+                self.par.env_for_surplus.set_manure_trade(getattr(self.seen, "manure_trade_on", True))
             env = self.par.env_for_surplus
             base = model._base_levels()
             ylds = self.data["yields"].loc[region]
@@ -2626,7 +2626,7 @@ class SupplyModule(ModuleStateMixin):
                 inner = self.__dict__.get("_inner_fert")
                 if inner is None:
                     inner = self._inner_fert = InnerFertDist()
-                inner.set_variant(bool(getattr(self, "manure_trade_on", True)))
+                inner.set_variant(bool(getattr(self.seen, "manure_trade_on", True)))
                 av = float(env._residue_availability(region)[0] or 0.0)
                 alloc = inner.allocate(region, crops, M_b, float(nb.get("n_manure_applied", 0.0)),
                                        float(nb.get("n_residue_pool", 0.0)), av)
@@ -2735,8 +2735,8 @@ class SupplyModule(ModuleStateMixin):
         from capri_mod.feed.ration import ration_model_for, rations_by_region, feed_prices_by_region
         rm = ration_model_for(self.data, None, getattr(self, "pmp_source", "capri2030"),
                               getattr(self, "pmp_capri_parts", ()))
-        self.feed_rations = rations_by_region(rm)
-        self.feed_prices = feed_prices_by_region(rm, None)
+        self.seen.feed_rations = rations_by_region(rm)
+        self.seen.feed_prices = feed_prices_by_region(rm, None)
 
     def run(
         self,
@@ -2756,7 +2756,7 @@ class SupplyModule(ModuleStateMixin):
         verbose : print progress
         """
         price_signals = self._activity_signals(price_signals)
-        if getattr(self, "feed_rations", None) is None:
+        if getattr(self.seen, "feed_rations", None) is None:
             self._base_rations()
         target_regions = regions or self.regions
         results = {}
@@ -2800,7 +2800,7 @@ class SupplyModule(ModuleStateMixin):
         the digest of the base solve; "compare" stops the region before that solve where the digest is the base's (the
         price shock does not reach the region: its solves would repeat the base's exactly, IPOPT being deterministic)
         and returns the base result; "verify" solves anyway and records where the result differs from the base's."""
-        mode = getattr(self, "_hess_probe", None)
+        mode = getattr(self.seen, "hess_probe", None)
         if mode is None:
             return self._solve_region_timed(region, _pol_all, price_signals, verbose)
         from capri_mod.supply import capri_regional_nlp as _crn
@@ -2819,17 +2819,17 @@ class SupplyModule(ModuleStateMixin):
             out = self._solve_region_timed(region, _pol_all, price_signals, verbose)
         except _InputsUnchanged:
             import copy as _cp
-            base = _cp.copy(self._hess_base_res[region])
+            base = _cp.copy(self.seen.hess_base_res[region])
             base.hess_unchanged = True
             return region, base, 0, 0.0, "unchanged"
         finally:
             _crn.SOLVE_PROBE = None
         if mode == "verify" and first["fp"] is not None \
                 and first["fp"] == (getattr(self.res, "hess_fp", None) or {}).get(region) and out[1] is not None:
-            b, r = self._hess_base_res[region], out[1]
+            b, r = self.seen.hess_base_res[region], out[1]
             same = all(pd.Series(getattr(r, k_)).equals(pd.Series(getattr(b, k_)))
                        for k_ in ("activities", "gross_output") if hasattr(b, k_))
-            _st.setdefault(self.res, "hess_verify", {})[(getattr(self, "_hess_shock", ""), region)] = same
+            _st.setdefault(self.res, "hess_verify", {})[(getattr(self.seen, "hess_shock", ""), region)] = same
         return out
 
     def _solve_region_timed(self, region, _pol_all, price_signals, verbose=False):
@@ -2942,14 +2942,14 @@ class SupplyModule(ModuleStateMixin):
             _ps_r = price_signals
             # CAPRI's EU trade blocks: the member state's block price as a departure from the EU signal
             # (CAPRIModel, MarketModule.eu_blocks); activity-keyed entries follow their products
-            _bdev = (getattr(self, "price_dev_ms", None) or {})
+            _bdev = (getattr(self.seen, "price_dev_ms", None) or {})
             if _bdev and price_signals is not None:
                 _msb = capri_ms(region)
                 _dvs = _bdev.get(_msb)
                 if _dvs is not None:
                     _dvs = self._activity_signals(_dvs)
                     _ps_r = price_signals.add(_dvs.reindex(price_signals.index).fillna(0.0))
-            _mdev = getattr(self, "milk_price_dev_ms", None) or {}
+            _mdev = getattr(self.seen, "milk_price_dev_ms", None) or {}
             if _mdev and price_signals is not None and "MILK" in price_signals.index:
                 _msr = capri_ms(region)
                 _dv = float(_mdev.get(_msr, 0.0))
@@ -2965,25 +2965,25 @@ class SupplyModule(ModuleStateMixin):
                 surplus_row=surplus_row,
                 mineral_cap=mcap,
             )
-            model.seen.ration_state = (getattr(self, "ration_state", None) or {}).get(region)
-            model.seen.manure_pool_price = (getattr(self, "manure_pool_price", None) or {}).get(region[:2], 0.0)
-            model.seen.manure_pool_price_pk = {nut_: float(((getattr(self, "manure_pool_price_pk", None) or {}).get(nut_) or {})
+            model.seen.ration_state = (getattr(self.seen, "ration_state", None) or {}).get(region)
+            model.seen.manure_pool_price = (getattr(self.seen, "manure_pool_price", None) or {}).get(region[:2], 0.0)
+            model.seen.manure_pool_price_pk = {nut_: float(((getattr(self.seen, "manure_pool_price_pk", None) or {}).get(nut_) or {})
                                                       .get(region[:2], 0.0)) for nut_ in ("P", "K")}
-            model.seen.yani_price_ratio = getattr(self, "yani_price_ratio", None)
-            _yms = getattr(self, "yani_price_ratio_ms", None) or {}
+            model.seen.yani_price_ratio = getattr(self.seen, "yani_price_ratio", None)
+            _yms = getattr(self.seen, "yani_price_ratio_ms", None) or {}
             if _yms:
                 # young-animal prices of the member state's market (CAPRI yaniMarket_ per trade block)
                 _msy = capri_ms(region)
                 model.seen.yani_price_ratio = _yms.get(_msy, model.seen.yani_price_ratio)
-            model.seen.feed_rations = (getattr(self, "feed_rations", None) or {}).get(region)
-            model.seen.feed_prices = (getattr(self, "feed_prices", None) or {}).get(region)
+            model.seen.feed_rations = (getattr(self.seen, "feed_rations", None) or {}).get(region)
+            model.seen.feed_prices = (getattr(self.seen, "feed_prices", None) or {}).get(region)
             # CAPRI's feed bulk prices of the region's member state (feedBlkPrice_, CAPRIModel)
             _ms = capri_ms(region)
-            model.seen.feed_bulk_ratio = {b: x for (m, b), x in (getattr(self, "feed_bulk_ratio", None) or {}).items()
+            model.seen.feed_bulk_ratio = {b: x for (m, b), x in (getattr(self.seen, "feed_bulk_ratio", None) or {}).items()
                                      if m == _ms}
             # CAPRI's emission tax (ghgTax): EU regions only (msNoEU excluded), CAPRIModel sets it
-            model.seen.ghg_tax = float(getattr(self, "ghg_tax", 0.0) or 0.0) if is_eu(region) else 0.0
-            model.seen.ghg_coef = (getattr(self, "ghg_coef", None) or {}).get(region)
+            model.seen.ghg_tax = float(getattr(self.seen, "ghg_tax", 0.0) or 0.0) if is_eu(region) else 0.0
+            model.seen.ghg_coef = (getattr(self.seen, "ghg_coef", None) or {}).get(region)
             # the regional model needs the environmental module for the
             # balance's substitution factor (manure market, crop-need
             # limit); it lived only on the supply module, so the
@@ -2991,7 +2991,7 @@ class SupplyModule(ModuleStateMixin):
             if getattr(self.par, "env_for_surplus", None) is None:
                 from capri_mod.environmental.environmental_module import EnvironmentalModule
                 self.par.env_for_surplus = EnvironmentalModule(self.data)
-                self.par.env_for_surplus.set_manure_trade(getattr(self, "manure_trade_on", True))
+                self.par.env_for_surplus.set_manure_trade(getattr(self.seen, "manure_trade_on", True))
             model.seen.env_for_surplus = self.par.env_for_surplus
             # CAPRI's crop nutrient balance and manure market in every EU solve (Sprint 9k)
             model.seen.manure_ctx = self._manure_context(region, model)
@@ -3167,7 +3167,7 @@ class SupplyModule(ModuleStateMixin):
         if getattr(self.par, "env_for_surplus", None) is None:       # shared by all regional models
             from capri_mod.environmental.environmental_module import EnvironmentalModule
             self.par.env_for_surplus = EnvironmentalModule(self.data)
-            self.par.env_for_surplus.set_manure_trade(getattr(self, "manure_trade_on", True))
+            self.par.env_for_surplus.set_manure_trade(getattr(self.seen, "manure_trade_on", True))
         cs = self.data.get("capri_baseline_surplus")
         if cs is not None:
             self._jrc_capped_regions(cs)

@@ -334,7 +334,7 @@ def test_norway_prices_follow_its_own_market_in_a_scenario():
         b = m.run(scenario="BASELINE", regions=regs, max_outer_iter=2)
         s = m.run(custom_scenario=farm_to_fork_scenario(), regions=regs, max_outer_iter=2)
     mm = m.market_module
-    assert "NO000000" in (m.supply_module.price_dev_ms or {})
+    assert "NO000000" in (m.supply_module.seen.price_dev_ms or {})
     rb, rs = b["market"].domestic_prices, s["market"].domestic_prices
     d = (rs / rb - 1.0)
     assert float((d.loc["NOR"] - d.loc["EU27"]).abs().max()) > 1e-3

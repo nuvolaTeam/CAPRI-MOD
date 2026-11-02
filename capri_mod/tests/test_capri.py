@@ -275,7 +275,7 @@ def test_emission_tax_in_supply_follows_capri(model):
         c = co["IR010000"]
         assert c["act"]["DCOW"] > 0 and c["act"]["SWHE"] > 0 and c["hist"]["grass"] < 0
         assert c["genet"][("DCOW", "Nitr_Tot")] < 0
-        r = model.supply_module.feed_rations["IR010000"]["DCOW"]
+        r = model.supply_module.seen.feed_rations["IR010000"]["DCOW"]
         fac = model.env_module._enteric_factors()["DCOW"]
         j = r.feeds.index("FGRA")
         e = fac["ge"]["IR000000"]["FGRA"] * 4.1868 * fac["ym"] / 55.65 * GWP_CH4 * float(r.dm[j])
@@ -294,7 +294,7 @@ def test_emission_tax_in_supply_follows_capri(model):
         assert s["abatement"]["carbon_tax"] == 100.0
     finally:
         model.run(scenario="BASELINE", regions=regs, max_outer_iter=2)
-    assert float(model.supply_module.ghg_tax) == 0.0
+    assert float(model.supply_module.seen.ghg_tax) == 0.0
 
 
 @pytest.mark.slow

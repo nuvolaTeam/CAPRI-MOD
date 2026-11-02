@@ -241,8 +241,27 @@ class ModuleSolveState(_Slots):
 
 
 class ModuleSeen(_Slots):
-    """What the model (CAPRIModel) sets on the supply module."""
-    __slots__ = ()
+    """What the model (CAPRIModel) and the coupling set on the supply module (S10b), passed on to each regional
+    model's seen before its solve."""
+    __slots__ = (
+        "feed_prices",        # the feed prices by region (also set by the supply module's base rations)
+        "feed_rations",       # the rations by region (idem)
+        "feed_bulk_ratio",    # the bulk feeds' price ratios {(member state, bulk): ratio}
+        "ghg_tax",            # the emission tax (EUR per t CO2-eq)
+        "ghg_coef",           # the emission coefficients by region
+        "manure_pool_price",  # the manure pools' N prices by member state
+        "manure_pool_price_pk",  # their P and K prices
+        "manure_trade_on",    # manure trade between regions (read with the default True)
+        "yani_price_ratio",   # the young-animal price ratios, EU
+        "yani_price_ratio_ms",  # idem by member state
+        "yani_price_ratio_m",   # idem by market region (the coupling's own storage)
+        "milk_price_dev_ms",  # the member states' milk price deviations
+        "price_dev_ms",       # the member states' price deviations
+        "ration_state",       # the feed block's ration state by region
+        "hess_probe",         # the Hessian's skip probe mode ("record", "compare", "verify" or None)
+        "hess_shock",         # the shock being measured
+        "hess_base_res",      # the base re-solve's results by region
+    )
 
 
 class ModuleResults(_Slots):
@@ -434,6 +453,24 @@ MOVED_MODULE: dict = {
     "max_nbal_region": "res.max_nbal_region",
     "max_nbal_update": "res.max_nbal_update",
     "worker_failures": "res.worker_failures",
+    # S10b: what CAPRIModel and the coupling set on the supply module
+    "feed_prices": "seen.feed_prices",
+    "feed_rations": "seen.feed_rations",
+    "feed_bulk_ratio": "seen.feed_bulk_ratio",
+    "ghg_tax": "seen.ghg_tax",
+    "ghg_coef": "seen.ghg_coef",
+    "manure_pool_price": "seen.manure_pool_price",
+    "manure_pool_price_pk": "seen.manure_pool_price_pk",
+    "manure_trade_on": "seen.manure_trade_on",
+    "yani_price_ratio": "seen.yani_price_ratio",
+    "yani_price_ratio_ms": "seen.yani_price_ratio_ms",
+    "yani_price_ratio_m": "seen.yani_price_ratio_m",
+    "milk_price_dev_ms": "seen.milk_price_dev_ms",
+    "price_dev_ms": "seen.price_dev_ms",
+    "ration_state": "seen.ration_state",
+    "_hess_probe": "seen.hess_probe",
+    "_hess_shock": "seen.hess_shock",
+    "_hess_base_res": "seen.hess_base_res",
 }
 
 
