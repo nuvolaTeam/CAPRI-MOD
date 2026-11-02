@@ -82,7 +82,7 @@ class RegionalSolveState(_Slots):
         "kkt_base",           # the base solve's KKT records by graph key (the Hessian's KKT mode)
         "wc_solved",          # the winter cover share chosen by the last solve (None where not endogenous)
         # fertilisation (S5)
-        "n_relax_sticky",     # the N-target relaxation kept from one solve to the next (not restored by the Hessian)
+        "n_relax_sticky",     # the N-target relaxation kept from one solve to the next (in SOLVE_STATE)
         # abatement (S7)
         "amm_last",           # the ammonia options' linearisation point, from the previous solve
     )

@@ -513,13 +513,14 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
     #: besides the warm-start fields named _nlp*: what the market supply Hessian saves and restores so that every price
     #: shock starts from the baseline's state (model._market_supply_hessian). Found by comparing the model's attributes
     #: before and after a solve (27 October 2026); bookkeeping (res.n_solves) and the shared environmental
-    #: module are not state
+    #: module are not state. 2 November 2026 (docs/design/STAGE3_BEHAVIOUR_CHANGES.md, the project lead's decision):
+    #: sv.n_relax_sticky added (the JRC121368 relaxation kept for the same N target)
     SOLVE_STATE = ("ev.amm_cost", "sv.amm_last", "res.animal_n_kept", "ev.animal_n_relief", "res.animal_nh3_saved",
-                   "res.cover_solved", "res.fd_model", "ev.ghg_nr_obj", "res.land_solution", "res.last_aug",
-                   "res.last_cattle_z", "res.last_dairy_z", "ev.last_duals", "res.last_feed_dm", "res.last_feed_t",
-                   "res.last_genet_z", "res.last_grass_z", "res.last_hist_fallow", "res.last_npk", "ev.last_req_duals",
+                   "res.cover_solved", "res.fd_model", "ev.ghg_nr_obj", "res.land_solution", "res.last_aug", "res.last_cattle_z",
+                   "res.last_dairy_z", "ev.last_duals", "res.last_feed_dm", "res.last_feed_t", "res.last_genet_z",
+                   "res.last_grass_z", "res.last_hist_fallow", "res.last_npk", "ev.last_req_duals",
                    "ev.manure_ni_nh3", "ev.manure_ni_relief", "res.manure_tech_shares", "ev.price_shock_now",
-                   "sv.wc_solved", "seen.feed_rations")
+                   "sv.wc_solved", "seen.feed_rations", "sv.n_relax_sticky")
     #: the regional NLP's fields (warm starts, calibration, fallbacks and their diagnostics): what the market supply
     #: Hessian restored by the prefix "_nlp" until 2 November 2026 (refactor stage 3, S0b: the same set, declared). An
     #: entry is an attribute name or, for a field moved into the state objects, its path ("sv.nlp_prev"; S2, S3; both
