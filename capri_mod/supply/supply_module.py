@@ -514,22 +514,22 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
     #: the state a solve leaves for the next one (linearisation points, warm starts, splits, rations, last solutions),
     #: besides the warm-start fields named _nlp*: what the market supply Hessian saves and restores so that every price
     #: shock starts from the baseline's state (model._market_supply_hessian). Found by comparing the model's attributes
-    #: before and after a solve (27 October 2026); bookkeeping (_n_solves) and the shared environmental
+    #: before and after a solve (27 October 2026); bookkeeping (res.n_solves) and the shared environmental
     #: module are not state
-    SOLVE_STATE = ("_amm_cost", "_amm_last", "_animal_n_kept", "_animal_n_relief", "_animal_nh3_saved", "_cover_solved",
-                   "_fd_model", "_ghg_nr_obj", "_land_solution", "_last_aug",
-                   "_last_cattle_z", "_last_dairy_z", "_last_duals", "_last_feed_dm", "_last_feed_t",
-                   "_last_genet_z", "_last_grass_z", "_last_hist_fallow", "_last_npk", "_last_req_duals",
-                   "_manure_ni_nh3", "_manure_ni_relief", "_manure_tech_shares",
-                   "_price_shock_now", "sv.wc_solved", "feed_rations")
-    #: the regional NLP's fields (warm starts, calibration, fallbacks and their diagnostics), all named _nlp*: what the
-    #: market supply Hessian restored by the prefix "_nlp" until 2 November 2026 (refactor stage 3, S0b: the same set,
-    #: declared). Every instance attribute named _nlp* must be listed here (test_nlp_state_lists_every_nlp_attribute)
-    NLP_STATE = ("_nlp_accept_last", "par.nlp_base_alloc", "par.nlp_cal", "_nlp_cal_check",
-                 "par.nlp_cal_store", "sv.nlp_cols", "_nlp_failed", "_nlp_fallback_log", "_nlp_fb_last",
-                 "_nlp_jump", "_nlp_mine_small", "_nlp_n_target_cause", "_nlp_nip", "_nlp_nonoptimal", "_nlp_ok",
-                 "_nlp_path", "sv.nlp_prev", "sv.nlp_prev_f", "_nlp_rc", "sv.nlp_relax_keep", "_nlp_relaxed",
-                 "_nlp_status", "_nlp_tol_trace", "_nlp_try_n_relax", "sv.nlp_y")
+    SOLVE_STATE = ("_amm_cost", "_amm_last", "_animal_n_kept", "_animal_n_relief", "_animal_nh3_saved",
+                   "res.cover_solved", "res.fd_model", "_ghg_nr_obj", "_land_solution", "_last_aug", "_last_cattle_z",
+                   "_last_dairy_z", "ev.last_duals", "res.last_feed_dm", "res.last_feed_t", "_last_genet_z",
+                   "_last_grass_z", "_last_hist_fallow", "res.last_npk", "ev.last_req_duals", "_manure_ni_nh3",
+                   "_manure_ni_relief", "_manure_tech_shares", "_price_shock_now", "sv.wc_solved", "feed_rations")
+    #: the regional NLP's fields (warm starts, calibration, fallbacks and their diagnostics): what the market supply
+    #: Hessian restored by the prefix "_nlp" until 2 November 2026 (refactor stage 3, S0b: the same set, declared). An
+    #: entry is an attribute name or, for a field moved into the state objects, its path ("sv.nlp_prev"; S2, S3; both
+    #: lists). Every instance attribute named _nlp* must be listed here (test_nlp_state_lists_every_nlp_attribute)
+    NLP_STATE = ("ev.nlp_accept_last", "par.nlp_base_alloc", "par.nlp_cal", "_nlp_cal_check", "par.nlp_cal_store",
+                 "sv.nlp_cols", "ev.nlp_failed", "res.nlp_fallback_log", "ev.nlp_fb_last", "res.nlp_jump",
+                 "_nlp_mine_small", "ev.nlp_n_target_cause", "_nlp_nip", "res.nlp_nonoptimal", "res.nlp_ok",
+                 "res.nlp_path", "sv.nlp_prev", "sv.nlp_prev_f", "res.nlp_rc", "sv.nlp_relax_keep", "res.nlp_relaxed",
+                 "res.nlp_status", "_nlp_tol_trace", "ev.nlp_try_n_relax", "sv.nlp_y")
 
 
     #: livestock costs from CAPRI's regional total inputs / model heads
@@ -1445,9 +1445,9 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
         self._land_solution = None              # set by this solve when the land market is used
         self._n_target_relaxed = False
         self._last_cattle_z = {}
-        self._nlp_failed = None
-        self._nlp_status = None
-        self._nlp_nonoptimal = None             # IPOPT's last point kept on the last attempt (as CAPRI), THIS solve only
+        self.ev.nlp_failed = None
+        self.res.nlp_status = None
+        self.res.nlp_nonoptimal = None             # IPOPT's last point kept on the last attempt (as CAPRI), THIS solve only
         # the price shock the split and genetics columns value their products at: set by THIS solve's net revenues
         # (_compute_net_revenues, called only with a shock); a plain solve after a shocked one kept the old shock there
         self._price_shock_now = None
@@ -1464,9 +1464,9 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
         res.organic_conv = dict(getattr(self, "_organic_conv", {}) or {})   # conventional share per crop (accounts: organic area)
         res.fert_tech_shares = dict(getattr(self, "_fert_tech_shares", {}) or {})   # before the reset below
         # IPOPT's last point kept on the last attempt (non-optimal, as CAPRI; _nlp_last_point): IPOPT's status, else None
-        res.nlp_nonoptimal = getattr(self, "_nlp_nonoptimal", None)
+        res.nlp_nonoptimal = getattr(self.res, "nlp_nonoptimal", None)
         # CAPRI's crop-group allocation as the regional model solved it (inner model at its totals, or the coupled NLP)
-        res.fert_dist_model = getattr(self, "_fd_model", None)
+        res.fert_dist_model = getattr(self.res, "fd_model", None)
         try:
             _bl = self._base_levels()
             res.fert_dist_mode_crops = {a: float(_bl.get(a, 0.0)) for a in CROPS if float(_bl.get(a, 0.0)) > 0}
@@ -1682,7 +1682,7 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
         if aug is not None:
             # CAPRI LAND MARKET: land-type areas as variables (see _land_augment)
             Qa, ca, Aa, ba, ya0, rows = aug
-            self._last_duals = None
+            self.ev.last_duals = None
             # JRC121368 sect. 4.3.4: where the tiered N target is infeasible the region's cut is the EU average
             # (36%) - a setting of the scenario for that region, so once found in this scenario (same target)
             # the region starts from it instead of failing the tiered target again at every iteration
@@ -1690,25 +1690,25 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
             _rk = self._n_relax_key()
             if _rk is not None and getattr(self, "_n_relax_sticky", None) == _rk:
                 y_f, ok_f, Aa_r, ba_r = self._relax_n_target(Qa, ca, Aa, ba, ya0)
-                if ok_f and getattr(self, "_nlp_failed", None) is None:
+                if ok_f and getattr(self.ev, "nlp_failed", None) is None:
                     _yc, Aa, ba = y_f, Aa_r, ba_r
             if _yc is None:
                 # where CAPRI's form fails at the tiered N target, JRC121368's rule for regions whose target
                 # "generated infeasibilities in the model" (the EU-average cut, 36%) is tried
-                self._nlp_try_n_relax = _rk is not None
+                self.ev.nlp_try_n_relax = _rk is not None
                 try:
                     _yc = self._nlp_solve(Qa, ca, Aa, ba, ya0)
                 finally:
-                    self._nlp_try_n_relax = False
-                if _yc is None and getattr(self, "_nlp_fb_last", False) == "n_target":
-                    _st0 = getattr(self, "_nlp_failed", None) or "NLP build failed"
-                    _cause = bool(self.__dict__.pop("_nlp_n_target_cause", False))
+                    self.ev.nlp_try_n_relax = False
+                if _yc is None and getattr(self.ev, "nlp_fb_last", False) == "n_target":
+                    _st0 = getattr(self.ev, "nlp_failed", None) or "NLP build failed"
+                    _cause = bool(_st.pop(self.ev, "nlp_n_target_cause", False))
                     y_f, ok_f, Aa_r, ba_r = self._relax_n_target(Qa, ca, Aa, ba, ya0)
-                    if getattr(self, "_nlp_fallback_log", None) is None:
-                        self._nlp_fallback_log = []
+                    if getattr(self.res, "nlp_fallback_log", None) is None:
+                        self.res.nlp_fallback_log = []
                     if ok_f:
                         _yc, Aa, ba = y_f, Aa_r, ba_r
-                        self._nlp_fallback_log.append(f"{_st0} at the tiered N target -> CAPRI's form at "
+                        self.res.nlp_fallback_log.append(f"{_st0} at the tiered N target -> CAPRI's form at "
                                                       f"JRC121368's relaxed target (36%)"
                                                       + (" (feasible without the target: no cap exempted first, K89)"
                                                          if _cause else ""))
@@ -1735,12 +1735,12 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
             self._last_grass_z = float(y[_gc]) if _gc is not None and _gc < len(y) else 0.0
             self._split_record(y)
             if getattr(self, "_grass_pending_col", None) is not None:
-                self._grass_calibrate_from_duals(getattr(self, "_last_duals", None))
+                self._grass_calibrate_from_duals(getattr(self.ev, "last_duals", None))
             if self._split_pending():
-                self._dairy_calibrate_from_duals(getattr(self, "_last_duals", None))
+                self._dairy_calibrate_from_duals(getattr(self.ev, "last_duals", None))
             self._last_hist_fallow = {c_: float(y[j_]) for c_, j_ in (getattr(self, "_hist_cols", None) or {}).items() if j_ < len(y)}
             if getattr(self, "_hist_pending", None):
-                self._histosol_calibrate_from_duals(getattr(self, "_last_duals", None))
+                self._histosol_calibrate_from_duals(getattr(self.ev, "last_duals", None))
             # land rows' limits at the solved land areas, so the shadow
             # prices computed below see the right slack
             b_ub = b_ub.copy()
@@ -1748,7 +1748,7 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
                 b_ub[i] = const + sum(cf * float(y[n_ + k]) for k, cf in coeffs)
             self._land_solution = dict(zip(self._land_types_used, y[n_:].tolist()))
         else:
-            self._last_duals = None
+            self.ev.last_duals = None
             self._last_grass_z = 0.0
             self._last_dairy_z = 0.0
             self._last_cattle_z = {}
@@ -1779,12 +1779,12 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
                 self._split_record(_yg)
                 _yc = _yg[:_n0]
                 if getattr(self, "_grass_pending_col", None) is not None:
-                    self._grass_calibrate_from_duals(getattr(self, "_last_duals", None))
+                    self._grass_calibrate_from_duals(getattr(self.ev, "last_duals", None))
                 if self._split_pending():
-                    self._dairy_calibrate_from_duals(getattr(self, "_last_duals", None))
+                    self._dairy_calibrate_from_duals(getattr(self.ev, "last_duals", None))
                 self._last_hist_fallow = {c_: float(_yg[j_]) for c_, j_ in (getattr(self, "_hist_cols", None) or {}).items()}
                 if getattr(self, "_hist_pending", None):
-                    self._histosol_calibrate_from_duals(getattr(self, "_last_duals", None))
+                    self._histosol_calibrate_from_duals(getattr(self.ev, "last_duals", None))
             else:
                 self._dairy_req_extra = None
                 _yc = self._nlp_solve(self.Q, c_lin, A_ub, b_ub, x0)
@@ -1792,18 +1792,18 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
                     self._note_floor_failure()
                     _yc = self._nlp_last_point(self.Q, c_lin, A_ub, b_ub, x0)
                 if getattr(self, "_grass_pending_col", None) is not None:
-                    self._grass_calibrate_from_duals(getattr(self, "_last_duals", None))
+                    self._grass_calibrate_from_duals(getattr(self.ev, "last_duals", None))
                 if self._split_pending():
-                    self._dairy_calibrate_from_duals(getattr(self, "_last_duals", None))
+                    self._dairy_calibrate_from_duals(getattr(self.ev, "last_duals", None))
                 if getattr(self, "_hist_pending", None):
-                    self._histosol_calibrate_from_duals(getattr(self, "_last_duals", None))
+                    self._histosol_calibrate_from_duals(getattr(self.ev, "last_duals", None))
             x_qp = _yc
             # record the plain problem as the land-market path records its own (_last_aug)
             self._last_plain = (self.Q, c_lin.copy(), A_ub.copy(), b_ub.copy(), x_qp.copy())
 
         x_opt = np.maximum(x_qp, 0.0)
-        solver_converged = getattr(self, "_nlp_nonoptimal", None) is None
-        solver_message = f"NLP (CAPRI's form, IPOPT): {getattr(self, '_nlp_status', None)}"
+        solver_converged = getattr(self.res, "nlp_nonoptimal", None) is None
+        solver_message = f"NLP (CAPRI's form, IPOPT): {getattr(self.res, 'nlp_status', None)}"
 
         # (The post-solve "safety rail" that clamped each activity's move to max(0.5, min(6, 4 x max(eps, 0.3) x
         # shock)) of its base was removed 23 October 2026: CAPRI has no such clamp, and its numbers had no source.)
@@ -1915,7 +1915,7 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
             mu = np.zeros(len(b_ub))
         # the NLP's own multipliers ARE the shadow prices - re-detecting binding rows from an interior-point solution
         # is unreliable (inner N-price loops then ran long)
-        _zc = getattr(self, "_last_duals", None)
+        _zc = getattr(self.ev, "last_duals", None)
         if _zc is not None:
             mu = np.zeros(len(b_ub)); k_ = min(len(b_ub), len(_zc))
             mu[:k_] = np.maximum(np.asarray(_zc[:k_], float), 0.0)
@@ -2849,15 +2849,15 @@ class SupplyModule(ModuleStateMixin):
         import time as _t
         t0 = _t.time()
         mdl = (getattr(self, "_models", None) or {}).get(region)
-        n0 = int(getattr(mdl, "_n_solves", 0) or 0) if mdl is not None else 0
+        n0 = int(getattr(mdl.res, "n_solves", 0) or 0) if mdl is not None else 0
         out = self._solve_region_impl(region, _pol_all, price_signals, verbose)
         dt = _t.time() - t0
         if dt > self.SLOW_REGION_SECONDS:
             mdl = (getattr(self, "_models", None) or {}).get(region)
-            n1 = int(getattr(mdl, "_n_solves", 0) or 0) if mdl is not None else 0
+            n1 = int(getattr(mdl.res, "n_solves", 0) or 0) if mdl is not None else 0
             import warnings as _w
             _w.warn(f"slow regional solve {region}: {dt:.0f} s, {n1 - n0} solves of the regional model "
-                    f"(NLP relaxed: {getattr(mdl, '_nlp_relaxed', None)})", RuntimeWarning)
+                    f"(NLP relaxed: {getattr(mdl.res, 'nlp_relaxed', None)})", RuntimeWarning)
         return out
 
     def _solve_region_impl(self, region, _pol_all, price_signals, verbose=False):
@@ -3019,25 +3019,25 @@ class SupplyModule(ModuleStateMixin):
             result.manure_trade = tuple(getattr(model, "_last_manure_trade", (0.0, 0.0)) or (0.0, 0.0))
             result.manure_trade_pk = dict(getattr(model, "_last_manure_trade_pk", None) or {})
             result.mineral_n_alloc = _mineral_n_for_accounts(model)
-            result.fert_npk = getattr(model, "_last_npk", None)
+            result.fert_npk = getattr(model.res, "last_npk", None)
             result.manure_availability = getattr(model, "_pool_avail", 0.0)
             result.animal_n_relief = _merge_relief(model)
             result.manure_ni_nh3 = dict(getattr(model, "_manure_ni_nh3", None) or {})
-            result.cover_crops = dict(getattr(model, "_cover_solved", None) or getattr(model, "_cover", None) or {})
+            result.cover_crops = dict(getattr(model.res, "cover_solved", None) or getattr(model, "_cover", None) or {})
             result.animal_nh3_saved = dict(getattr(model, "_animal_nh3_saved", None) or {})
             result.animal_n_kept = dict(getattr(model, "_animal_n_kept", None) or {})
             result.manure_tech_shares = dict(getattr(model, "_manure_tech_shares", None) or {})
             result.grass_ext_shift = float(getattr(model, "_last_grass_z", 0.0) or 0.0)
             result.dairy_low_shift = float(getattr(model, "_last_dairy_z", 0.0) or 0.0)
             result.cattle_shift = dict(getattr(model, "_last_cattle_z", None) or {})
-            result.yani_dnet = getattr(model, "_yani_dnet", None)
+            result.yani_dnet = getattr(model.res, "yani_dnet", None)
             result.genetics_shift = dict(getattr(model, "_last_genet_z", None) or {})
             result.histosol_fallow = dict(getattr(model, "_last_hist_fallow", None) or {})
             _ls = getattr(model, "_land_solution", None) or {}
             result.land_types = {t_: float(_ls[t_]) for t_ in getattr(model, "_land_types_used", []) if t_ in _ls}
             result.luc = _luc_of(model, result.land_types)
             result.n_target_relaxed = bool(getattr(model, "_n_target_relaxed", False))
-            if surplus_row and model._ni_inside() and getattr(model, "_nlp_ok", False):
+            if surplus_row and model._ni_inside() and getattr(model.res, "nlp_ok", False):
                 # capri-mod-proto: nothing in the regional model depends on the N price any more
                 # (fertiliser and ammonia technologies and the inhibitor on manure are all decided
                 # inside the regional model), so the target is a plain constraint, as in CAPRI's NLP:
@@ -3072,18 +3072,18 @@ class SupplyModule(ModuleStateMixin):
                 result.manure_trade = tuple(getattr(model, "_last_manure_trade", (0.0, 0.0)) or (0.0, 0.0))
                 result.manure_trade_pk = dict(getattr(model, "_last_manure_trade_pk", None) or {})
                 result.mineral_n_alloc = _mineral_n_for_accounts(model)
-                result.fert_npk = getattr(model, "_last_npk", None)
+                result.fert_npk = getattr(model.res, "last_npk", None)
                 result.manure_availability = getattr(model, "_pool_avail", 0.0)
                 result.animal_n_relief = _merge_relief(model)
                 result.manure_ni_nh3 = dict(getattr(model, "_manure_ni_nh3", None) or {})
-                result.cover_crops = dict(getattr(model, "_cover_solved", None) or getattr(model, "_cover", None) or {})
+                result.cover_crops = dict(getattr(model.res, "cover_solved", None) or getattr(model, "_cover", None) or {})
                 result.animal_nh3_saved = dict(getattr(model, "_animal_nh3_saved", None) or {})
                 result.animal_n_kept = dict(getattr(model, "_animal_n_kept", None) or {})
                 result.manure_tech_shares = dict(getattr(model, "_manure_tech_shares", None) or {})
                 result.grass_ext_shift = float(getattr(model, "_last_grass_z", 0.0) or 0.0)
                 result.dairy_low_shift = float(getattr(model, "_last_dairy_z", 0.0) or 0.0)
                 result.cattle_shift = dict(getattr(model, "_last_cattle_z", None) or {})
-                result.yani_dnet = getattr(model, "_yani_dnet", None)
+                result.yani_dnet = getattr(model.res, "yani_dnet", None)
                 result.genetics_shift = dict(getattr(model, "_last_genet_z", None) or {})
                 result.histosol_fallow = dict(getattr(model, "_last_hist_fallow", None) or {})
                 _ls = getattr(model, "_land_solution", None) or {}
@@ -3094,14 +3094,14 @@ class SupplyModule(ModuleStateMixin):
                 # CAPRI's mineral fertiliser reduction: the regulations of the inner fertiliser model (reporting)
                 result.mineral_cap = ({k: mcap[k] for k in ("kind", "reduction", "base_mineral", "group_caps",
                                                             "limcres")} if mcap else None)
-                result.feed_dm = (dict(getattr(model, "_last_feed_dm", None) or {})
-                                  if getattr(model, "_last_duals", None) is not None else None)
-                result.feed_t = (dict(getattr(model, "_last_feed_t", None) or {})
-                                 if getattr(model, "_last_duals", None) is not None else None)
+                result.feed_dm = (dict(getattr(model.res, "last_feed_dm", None) or {})
+                                  if getattr(model.ev, "last_duals", None) is not None else None)
+                result.feed_t = (dict(getattr(model.res, "last_feed_t", None) or {})
+                                 if getattr(model.ev, "last_duals", None) is not None else None)
                 # fertiliser technologies inside: each crop's reported intensity includes its
                 # inside factor m_c / (n_c area_c) (reporting only; the N row never sees it)
-                _ff = getattr(model, "_fert_inside_factor", None) or {}
-                if _ff and getattr(model, "_last_duals", None) is not None:
+                _ff = getattr(model.res, "fert_inside_factor", None) or {}
+                if _ff and getattr(model.ev, "last_duals", None) is not None:
                     _ni = dict(getattr(result, "n_intensity", None) or {})
                     for _c, _f in _ff.items():
                         _ni[_c] = float(_ni.get(_c, 1.0)) * float(_f)
@@ -3320,7 +3320,7 @@ def _luc_of(model, land_types):
 def _mineral_n_for_accounts(model):
     """Mineral N of the region's solution for the environmental accounts: the purchases of the NLP form's
     fertilisation block (CAPRI's v_netPutQuant(NITF)), else the mineral-N allocation column (or None)."""
-    npk = getattr(model, "_last_npk", None) or {}
+    npk = getattr(model.res, "last_npk", None) or {}
     if "N" in npk:
         return float(npk["N"]["purchase"])
     return getattr(model, "_last_mineral_n", None)

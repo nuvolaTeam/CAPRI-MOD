@@ -20,7 +20,7 @@ class ReportingBlock:
             if y_ is None:
                 continue
             cur[r_] = y_
-            p_ = getattr(m_, "_nlp_path", None) or ("?", 0)
+            p_ = getattr(m_.res, "nlp_path", None) or ("?", 0)
             paths[p_[0]] = paths.get(p_[0], 0) + 1
             y0 = prev.get(r_)
             if y0 is not None and len(y0) == len(y_):

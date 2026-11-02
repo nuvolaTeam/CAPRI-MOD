@@ -58,7 +58,15 @@ class RegionalSolveState(_Slots):
 
 class RegionalEvalState(_Slots):
     """A regional model's working values within one solve."""
-    __slots__ = ()
+    __slots__ = (
+        "last_duals",         # the NLP's duals of the solve's rows (feed, land, ...), read by the calibrations after it
+        "last_req_duals",     # the requirement rows' duals, read by the split calibrations after the NLP
+        "nlp_accept_last",    # set around the last attempt: IPOPT's last point is kept (as CAPRI)
+        "nlp_failed",         # why the NLP form failed in this solve (None where it did not)
+        "nlp_fb_last",        # how the last fallback ended (False, or "n_target")
+        "nlp_n_target_cause", # the tiered N target was the cause of a failure
+        "nlp_try_n_relax",    # set around a call: the N-target relaxation may be tried
+    )
 
 
 class RegionalSeen(_Slots):
@@ -68,7 +76,25 @@ class RegionalSeen(_Slots):
 
 class RegionalResults(_Slots):
     """A regional model's last solve: results and diagnostics."""
-    __slots__ = ()
+    __slots__ = (
+        "cover_solved",       # the winter cover chosen in the NLP form (the supply result's cover_crops)
+        "fd_model",           # the fertiliser distribution's flows and areas (the supply result's fert_dist_model)
+        "fert_inside_factor", # the fertiliser accounts' factors inside the NLP
+        "kkt_ipopt",          # IPOPT solves in the Hessian's KKT mode (a counter)
+        "last_feed_dm",       # the feed used, dry matter
+        "last_feed_t",        # the feed used, tonnes
+        "last_npk",           # the fertiliser outputs by nutrient
+        "n_solves",           # solves of the region (a counter)
+        "nlp_fallback_log",   # the NLP form's fallbacks of the run (metadata nlp_fallback)
+        "nlp_jump",           # the jump check's record (outer history's jump_check)
+        "nlp_nonoptimal",     # IPOPT's status where its last point was kept (non-optimal, as CAPRI)
+        "nlp_ok",             # the last solve was CAPRI's form, accepted
+        "nlp_path",           # the starts tried and the last one's IPOPT iterations
+        "nlp_rc",             # the activities' reduced costs
+        "nlp_relaxed",        # the mineral-cap exemption applied
+        "nlp_status",         # IPOPT's status
+        "yani_dnet",          # the solution's response to the young-animal prices (K65)
+    )
 
 
 class ModuleParameters(_Slots):
@@ -118,6 +144,31 @@ MOVED_REGIONAL: dict = {
     "_nlp_base_alloc": "par.nlp_base_alloc",
     "_nlp_cal_store": "par.nlp_cal_store",
     "_npk_dual_bound": "par.npk_dual_bound",
+    # S3: the NLP block's working state and results
+    "_last_duals": "ev.last_duals",
+    "_last_req_duals": "ev.last_req_duals",
+    "_nlp_accept_last": "ev.nlp_accept_last",
+    "_nlp_failed": "ev.nlp_failed",
+    "_nlp_fb_last": "ev.nlp_fb_last",
+    "_nlp_n_target_cause": "ev.nlp_n_target_cause",
+    "_nlp_try_n_relax": "ev.nlp_try_n_relax",
+    "_cover_solved": "res.cover_solved",
+    "_fd_model": "res.fd_model",
+    "_fert_inside_factor": "res.fert_inside_factor",
+    "_kkt_ipopt": "res.kkt_ipopt",
+    "_last_feed_dm": "res.last_feed_dm",
+    "_last_feed_t": "res.last_feed_t",
+    "_last_npk": "res.last_npk",
+    "_n_solves": "res.n_solves",
+    "_nlp_fallback_log": "res.nlp_fallback_log",
+    "_nlp_jump": "res.nlp_jump",
+    "_nlp_nonoptimal": "res.nlp_nonoptimal",
+    "_nlp_ok": "res.nlp_ok",
+    "_nlp_path": "res.nlp_path",
+    "_nlp_rc": "res.nlp_rc",
+    "_nlp_relaxed": "res.nlp_relaxed",
+    "_nlp_status": "res.nlp_status",
+    "_yani_dnet": "res.yani_dnet",
 }
 #: the supply module's former attribute names
 MOVED_MODULE: dict = {
@@ -140,6 +191,16 @@ def discard(obj, name):
         delattr(obj, name)
     except AttributeError:
         pass
+
+
+def pop(obj, name, default=None):
+    """dict.pop(name, default) for a field of a state object: its value, unset, or default if it was not set."""
+    try:
+        v = getattr(obj, name)
+    except AttributeError:
+        return default
+    delattr(obj, name)
+    return v
 
 
 def _split(path):

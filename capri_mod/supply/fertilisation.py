@@ -804,7 +804,7 @@ class FertilisationBlock:
             b2[k] += (T2 - T) * (base_area - L0sum)
         else:
             b2[k] += (T2 - T) * base_area
-        self._last_duals = None
+        self.ev.last_duals = None
         y = self._nlp_solve(Qa, ca, A2, b2, ya0)
         if y is None:
             return None, False, Aa, ba

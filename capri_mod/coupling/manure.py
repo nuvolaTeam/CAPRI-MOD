@@ -93,7 +93,7 @@ class ManureBlock:
             # row duals: the regional NLP's own multipliers (its feed block is not in the stored
             # problem, so duals recovered from the stored problem's KKT conditions were wrong and the
             # pools stopped clearing); else recovered by NNLS from the active rows of the stored problem
-            zc = getattr(mo, "_last_duals", None)
+            zc = getattr(mo.ev, "last_duals", None)
             if zc is not None and len(zc) == A.shape[0]:
                 lam = np.maximum(np.asarray(zc, float), 0.0)
             else:
@@ -115,7 +115,7 @@ class ManureBlock:
                 float((getattr(mo, "manure_pool_price_pk", None) or {}).get(prod, 0.0) or 0.0)
             rce = max(0.0, float(c[je] + Q[je] @ y + A[:, je] @ lam))
             rci = max(0.0, float(c[ji] + Q[ji] @ y + A[:, ji] @ lam))
-            rc_ = getattr(mo, "_nlp_rc", None)
+            rc_ = getattr(mo.res, "nlp_rc", None)
             if rc_ is not None and max(je, ji) < len(rc_):
                 # the NLP form: IPOPT's own reduced costs (the fertilisation block is not in the stored A rows)
                 rce, rci = max(0.0, float(rc_[je])), max(0.0, float(rc_[ji]))

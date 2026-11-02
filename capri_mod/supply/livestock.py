@@ -354,7 +354,7 @@ class LivestockBlock:
         pend = getattr(self, "_cattle_pending", None)
         if not pend:
             return
-        rd = getattr(self, "_last_req_duals", None) or {}
+        rd = getattr(self.ev, "last_req_duals", None) or {}
         cz = dict(getattr(self, "_cattle_cz", None) or {})
         if duals is not None and rd:
             sgn = {"DMAX": -1.0}
@@ -456,7 +456,7 @@ class LivestockBlock:
         pend = getattr(self, "_genet_pending", None)
         if not pend:
             return
-        rd = getattr(self, "_last_req_duals", None) or {}
+        rd = getattr(self.ev, "last_req_duals", None) or {}
         cz = dict(getattr(self, "_genet_cz", None) or {})
         if duals is not None and rd:
             sgn = {"DMAX": -1.0}
@@ -534,7 +534,7 @@ class LivestockBlock:
         if pend is None:
             return
         col, req = pend
-        rd = getattr(self, "_last_req_duals", None) or {}
+        rd = getattr(self.ev, "last_req_duals", None) or {}
         if duals is not None and len(duals) >= len(col) and rd:
             sgn = {"DMAX": -1.0}
             self._dairy_cz = -(float(np.asarray(duals[:len(col)], float) @ col)

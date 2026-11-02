@@ -237,7 +237,7 @@ class HessianBlock:
             if kkt:
                 for mo_ in sm._models.values():
                     _st.discard(mo_.sv, "kkt_base")
-                    mo_.__dict__.pop("_kkt_ipopt", None)
+                    _st.pop(mo_.res, "kkt_ipopt", None)
                 _crn_h.KKT_MODE = "record"
             try:
                 res_b = sm.run(price_signals=sig0, policy_scenario=pol, regions=regs, verbose=False)
@@ -307,7 +307,7 @@ class HessianBlock:
         n_kkt_ipopt = 0
         if kkt:
             for mo_ in sm._models.values():
-                n_kkt_ipopt += int(mo_.__dict__.pop("_kkt_ipopt", 0) or 0)
+                n_kkt_ipopt += int(_st.pop(mo_.res, "kkt_ipopt", 0) or 0)
                 _st.discard(mo_.sv, "kkt_base")
         # back to the base: the regional models' warm starts and states as the baseline left them
         sm.yani_price_ratio, sm.yani_price_ratio_ms, sm.yani_price_ratio_m = yr0

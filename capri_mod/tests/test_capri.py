@@ -2350,15 +2350,15 @@ def test_unreachable_landscape_floor_is_kept_as_capri(data, monkeypatch):
     sm = SupplyModule(data, calibrate_supply_elasticities(data["areas"]))
     sm.run(price_signals=None, regions=[region])
     mo = sm._models[region]
-    mo._nlp_fallback_log = []
+    mo.res.nlp_fallback_log = []
     res = mo.solve(set_aside_requirement=0.10)
     assert not hasattr(res, "landscape_shortfall")
-    log = " ".join(getattr(mo, "_nlp_fallback_log", None) or [])
+    log = " ".join(getattr(mo.res, "nlp_fallback_log", None) or [])
     assert "landscape floor" in log and "land market off" in log, log
     assert not hasattr(mo, "_fit_aug_row")
-    mo._nlp_fallback_log = []
+    mo.res.nlp_fallback_log = []
     plain = mo.solve()
-    assert plain.converged and not (getattr(mo, "_nlp_fallback_log", None) or []), "the plain solve failed"
+    assert plain.converged and not (getattr(mo.res, "nlp_fallback_log", None) or []), "the plain solve failed"
 
 
 def test_greendeal_switchboard_mirrors_capri():
@@ -2897,7 +2897,7 @@ def test_jrc_relaxed_n_target_is_kept(model, monkeypatch):
         r = s["supply"]["NL120000"]
         mo = model.supply_module._models["NL120000"]
         assert "N_balance" in list(mo._row_labels) and r.converged
-        assert getattr(mo, "_nlp_fb_last", True) is False                       # the last solve in CAPRI's form
+        assert getattr(mo.ev, "nlp_fb_last", True) is False                       # the last solve in CAPRI's form
         fb = s["metadata"]["nlp_fallback"].get("NL120000") or []
         assert all("relaxed target" in e for e in fb) and len(fb) <= 1, fb
         assert bool(getattr(r, "n_target_relaxed", False)) == bool(fb)
@@ -3570,7 +3570,7 @@ def test_nlp_form_takes_jrc121368_relaxation_where_the_tiered_n_target_fails(mod
     fb = r["metadata"]["nlp_fallback"].get("NL320000") or []
     assert len(fb) == 1 and "relaxed target" in fb[0], fb       # once, then kept (sticky)
     mo = model.supply_module._models["NL320000"]
-    assert getattr(mo, "_n_target_relaxed", False) and getattr(mo, "_nlp_fb_last", True) is False   # CAPRI's form
+    assert getattr(mo, "_n_target_relaxed", False) and getattr(mo.ev, "nlp_fb_last", True) is False   # CAPRI's form
     assert getattr(r["supply"]["NL320000"], "balance_shortfall", 0.0) > 0.0
 
 
@@ -3586,10 +3586,10 @@ def test_winter_cover_is_chosen_in_the_nlp_form(model):
     regs = ["DE110000"]
     b = model.run(scenario="BASELINE", regions=regs, max_outer_iter=1)
     mo = model.supply_module._models["DE110000"]
-    cs = mo._cover_solved
+    cs = mo.res.cover_solved
     assert cs and cs["endogenous"] and abs(cs["share"] - cs["base"] / cs["uaa"]) < 2e-3
     s = model.run(custom_scenario=farm_to_fork_scenario(), regions=regs, max_outer_iter=1)
-    cs = model.supply_module._models["DE110000"]._cover_solved
+    cs = model.supply_module._models["DE110000"].res.cover_solved
     assert cs["lb_share"] > cs["base"] / cs["uaa"] + 0.01          # the requirement raises the floor
     assert cs["share"] >= cs["lb_share"] - 1e-6 and cs["share"] <= cs["max_share"] + 1e-6
     w0, w1 = model.env_module._winter_cover_now("DE110000", s["supply"]["DE110000"])

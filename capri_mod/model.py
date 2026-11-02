@@ -386,7 +386,7 @@ class CAPRIModel(HessianBlock, FeedBlock, YoungAnimalBlock, PriceStepBlock, Manu
         # first if none is cached. In a baseline run the premium stays off,
         # so the baseline is exactly what it was.
         for _m in (getattr(self.supply_module, "_models", None) or {}).values():
-            _m._nlp_fallback_log = []          # the NLP form's fallbacks of this run (metadata["nlp_fallback"])
+            _m.res.nlp_fallback_log = []          # the NLP form's fallbacks of this run (metadata["nlp_fallback"])
         _key = (tuple(sorted(regions or list(self.data["areas"].index))), _et_key(_endotech), bool(_mt), bool(_bm))
         # A world-price shock makes the run a scenario against the unshocked baseline, also
         # under scenario="BASELINE" (it used to replace the cached baseline; KNOWN_ISSUES K52c).
@@ -435,7 +435,7 @@ class CAPRIModel(HessianBlock, FeedBlock, YoungAnimalBlock, PriceStepBlock, Manu
                     self._measure_pending_hessian(_pend)
                 self.policy_module.apply_scenario(pol_scenario)
                 for _m in (getattr(self.supply_module, "_models", None) or {}).values():
-                    _m._nlp_fallback_log = []  # the baseline's fallbacks are in the baseline's own metadata
+                    _m.res.nlp_fallback_log = []  # the baseline's fallbacks are in the baseline's own metadata
             self.market_module.set_eu_base(*_cache[_key][:2])
             # reuse the calibration of the baseline for the same region set
             if len(_cache[_key]) > 2:
@@ -1077,9 +1077,9 @@ class CAPRIModel(HessianBlock, FeedBlock, YoungAnimalBlock, PriceStepBlock, Manu
                                                 for r_, x_ in _sr_.items()}})
                 # the regions whose jump check acted at this iteration (supply.nlp_jump_check, K79): the largest move, the
                 # starts solved, the one kept and the objectives
-                _hist[-1]["jump_check"] = {r_: dict(m_._nlp_jump) for r_, m_ in
+                _hist[-1]["jump_check"] = {r_: dict(m_.res.nlp_jump) for r_, m_ in
                                            (getattr(self.supply_module, "_models", None) or {}).items()
-                                           if getattr(m_, "_nlp_jump", None)}
+                                           if getattr(m_.res, "nlp_jump", None)}
                 if _settings().get("diagnostics.record_regional_levels"):
                     # every region's activity levels at this iteration, unrounded (K79: the rows CAPRI's stop rule
                     # flags, traced to regions and activities)
@@ -1089,8 +1089,8 @@ class CAPRIModel(HessianBlock, FeedBlock, YoungAnimalBlock, PriceStepBlock, Manu
                     # each region's solve: the starts tried / IPOPT's iterations of the last, its objective, its
                     # relaxation (K79: a region jumping between two states)
                     _hist[-1]["nlp_regional"] = {
-                        r_: {"path": getattr(m_, "_nlp_path", None), "f": getattr(m_.sv, "nlp_prev_f", None),
-                             "relaxed": getattr(m_, "_nlp_relaxed", None)}
+                        r_: {"path": getattr(m_.res, "nlp_path", None), "f": getattr(m_.sv, "nlp_prev_f", None),
+                             "relaxed": getattr(m_.res, "nlp_relaxed", None)}
                         for r_, m_ in (getattr(self.supply_module, "_models", None) or {}).items()}
                 self._outer_history = _hist
             except Exception as _e:
@@ -1384,11 +1384,11 @@ class CAPRIModel(HessianBlock, FeedBlock, YoungAnimalBlock, PriceStepBlock, Manu
                                     "switched": sorted(r_ for r_, v_ in e_["jump_check"].items()
                                                        if str(v_.get("kept", "")).startswith("jump:"))}
                                    for e_ in (getattr(self, "_outer_history", None) or []) if e_.get("jump_check")],
-                "nlp_fallback": {r_: list(m_._nlp_fallback_log) for r_, m_ in self.supply_module._models.items()
-                                 if getattr(m_, "_nlp_fallback_log", None)},
+                "nlp_fallback": {r_: list(m_.res.nlp_fallback_log) for r_, m_ in self.supply_module._models.items()
+                                 if getattr(m_.res, "nlp_fallback_log", None)},
                 # regions whose NLP form needed the Green Deal's mineral caps relaxed (supply_module._capri_nlp_solve)
-                "nlp_relaxed": {r_: m_._nlp_relaxed for r_, m_ in self.supply_module._models.items()
-                                if getattr(m_, "_nlp_relaxed", None)},
+                "nlp_relaxed": {r_: m_.res.nlp_relaxed for r_, m_ in self.supply_module._models.items()
+                                if getattr(m_.res, "nlp_relaxed", None)},
                 # member states below 1% of EU milk whose milk price has not settled (gap of the price signal)
                 "milk_small_ms_gap": float(getattr(self, "_milk_ms_small_gap", 0.0) or 0.0),
             },
