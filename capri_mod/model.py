@@ -43,6 +43,7 @@ import time
 from capri_mod.data.loaders import load_all_data
 from capri_mod.supply.supply_module import SupplyModule
 from capri_mod.supply import state as _sst   # the supply's state objects (refactor stage 3)
+from capri_mod.data.inputs import market_year as _mkt_year   # the market year, else the base year (K52f)
 from capri_mod.market.market_module import MarketModule
 from capri_mod.policy.policy_module import PolicyModule, PolicyScenario
 from capri_mod.environmental.environmental_module import EnvironmentalModule
@@ -143,13 +144,15 @@ class CAPRIModel(HessianBlock, FeedBlock, YoungAnimalBlock, PriceStepBlock, Manu
             it — swapping the dict on an existing model would leave the modules
             calibrated on the base year and silently return base-year results.
         """
-        # Only the 2017 base exists, and several modules read capri_data/2017 directly (KNOWN_ISSUES K52f):
-        # another year would mix vintages silently, so it is refused.
+        # The base year is a parameter of the run (KNOWN_ISSUES K52f, 2 November 2026): every reader takes it from
+        # the run's inputs. A base year without a data folder stops here, naming the years that have one (2030 runs
+        # go through the projection layer, ProjectionModule, on the base year's data).
         if base_year is None:
             base_year = str(_settings().get("run.base_year"))
-        if str(base_year) != "2017":
-            raise ValueError(f"base_year {base_year!r}: only the 2017 base exists (capri_data/2017); "
-                             "2030 runs go through the projection layer (ProjectionModule)")
+        base_year = str(base_year)
+        if data is None:
+            from capri_mod.data.inputs import check_base_year as _check_by
+            _check_by(data_dir, base_year)
         self.verbose   = bool(_settings().get("diagnostics.verbose")) if verbose is None else bool(verbose)
         self.data_dir  = Path(data_dir) if data_dir else None
         self.regions   = regions
@@ -1497,7 +1500,7 @@ class CAPRIModel(HessianBlock, FeedBlock, YoungAnimalBlock, PriceStepBlock, Manu
         (CAPRI's or the recipe's, as SupplyModule.pmp_source; CAPRI's for the elasticity calibration), else the base
         year's."""
         from capri_mod.supply.supply_module import SupplyModule
-        if int(self.data.get("market_year", 2017) or 2017) != 2030:
+        if _mkt_year(self.data) != 2030:
             return ""
         return "_recipe2030" if str(getattr(SupplyModule, "pmp_source", "")) == "recipe" else "_capri2030"
 
@@ -1531,7 +1534,7 @@ def _set_aside_table(supply_results, data, wsfx=""):
     sa, ar = data.get("set_aside_split"), data.get("areas")
     if sa is None or ar is None or "SETA" not in getattr(ar, "columns", []):
         return None
-    yr = int(data.get("market_year", 2017) or 2017)
+    yr = _mkt_year(data)
     vt = "_2030" if yr == 2030 else ""
     rows = {}
     for r, res in (supply_results or {}).items():
@@ -1564,7 +1567,7 @@ def _labour_table(supply_results, data, set_aside=None):
     lc = data.get("labour_coef")
     if lc is None:
         return None
-    yr = int(data.get("market_year", 2017) or 2017)
+    yr = _mkt_year(data)
     vt = "_2030" if yr == 2030 else ""
     if not isinstance(lc.index, pd.MultiIndex):
         lc = lc.reset_index().set_index(["region", "activity"]) if "activity" in lc.columns else lc

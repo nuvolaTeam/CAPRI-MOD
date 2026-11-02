@@ -66,9 +66,10 @@ BUILDERS = {
 class MarketInputs:
     """Paths and readers of the market's inputs for one data directory and base year."""
 
-    def __init__(self, data_dir: Optional[Path] = None, base_year: str = "2017"):
+    def __init__(self, data_dir: Optional[Path] = None, base_year: Optional[str] = None):
+        from capri_mod.data.inputs import default_base_year
         self.root = Path(data_dir) if data_dir else REPO_DATA
-        self.base_year = str(base_year)
+        self.base_year = str(base_year) if base_year is not None else default_base_year()
 
     # -- locations -----------------------------------------------------------------------------------------------
     def path(self, name: str, where: str = "market") -> Path:

@@ -11039,7 +11039,6 @@
    ],
    "read_by": {
     "model": [
-     "capri_mod/data/loaders.py",
      "capri_mod/feed/ration.py"
     ],
     "builders": [
@@ -11225,9 +11224,7 @@
    },
    "notes": [],
    "read_by": {
-    "model": [
-     "capri_mod/data/loaders.py"
-    ],
+    "model": [],
     "builders": [],
     "checks": [],
     "tests": []
@@ -12795,7 +12792,6 @@
    "notes": [],
    "read_by": {
     "model": [
-     "capri_mod/data/loaders.py",
      "capri_mod/market/bilateral_solve.py",
      "capri_mod/market/calibration.py"
     ],
@@ -12804,6 +12800,7 @@
     ],
     "checks": [],
     "tests": [
+     "capri_mod/tests/test_base_year.py",
      "capri_mod/tests/test_norway_market.py"
     ]
    }
@@ -13219,7 +13216,6 @@
    "notes": [],
    "read_by": {
     "model": [
-     "capri_mod/data/loaders.py",
      "capri_mod/market/bilateral_solve.py",
      "capri_mod/market/calibration.py"
     ],
@@ -13500,7 +13496,6 @@
    "notes": [],
    "read_by": {
     "model": [
-     "capri_mod/data/loaders.py",
      "capri_mod/market/bilateral_solve.py"
     ],
     "builders": [],
@@ -13713,7 +13708,6 @@
    "notes": [],
    "read_by": {
     "model": [
-     "capri_mod/data/loaders.py",
      "capri_mod/market/biofuel.py"
     ],
     "builders": [],
@@ -14209,7 +14203,6 @@
    "notes": [],
    "read_by": {
     "model": [
-     "capri_mod/data/loaders.py",
      "capri_mod/market/biofuel.py"
     ],
     "builders": [],
@@ -14636,7 +14629,6 @@
    "notes": [],
    "read_by": {
     "model": [
-     "capri_mod/data/loaders.py",
      "capri_mod/market/biofuel.py"
     ],
     "builders": [],
@@ -14816,7 +14808,6 @@
    "notes": [],
    "read_by": {
     "model": [
-     "capri_mod/data/loaders.py",
      "capri_mod/market/processing.py"
     ],
     "builders": [],
@@ -18973,9 +18964,7 @@
     }
    ],
    "read_by": {
-    "model": [
-     "capri_mod/data/loaders.py"
-    ],
+    "model": [],
     "builders": [],
     "checks": [
      "tools/check/reproduce_builders.py"
@@ -19078,9 +19067,7 @@
    },
    "notes": [],
    "read_by": {
-    "model": [
-     "capri_mod/data/loaders.py"
-    ],
+    "model": [],
     "builders": [],
     "checks": [
      "tools/check/reproduce_builders.py"
@@ -19183,9 +19170,7 @@
    },
    "notes": [],
    "read_by": {
-    "model": [
-     "capri_mod/data/loaders.py"
-    ],
+    "model": [],
     "builders": [],
     "checks": [
      "tools/check/reproduce_builders.py"
@@ -22651,9 +22636,7 @@
     }
    ],
    "read_by": {
-    "model": [
-     "capri_mod/data/loaders.py"
-    ],
+    "model": [],
     "builders": [],
     "checks": [
      "tools/check/validate_world_prices.py"
@@ -36204,9 +36187,7 @@
    },
    "notes": [],
    "read_by": {
-    "model": [
-     "capri_mod/data/loaders.py"
-    ],
+    "model": [],
     "builders": [],
     "checks": [],
     "tests": []
@@ -36268,9 +36249,7 @@
    },
    "notes": [],
    "read_by": {
-    "model": [
-     "capri_mod/data/loaders.py"
-    ],
+    "model": [],
     "builders": [],
     "checks": [],
     "tests": []
@@ -39391,7 +39370,6 @@
    ],
    "read_by": {
     "model": [
-     "capri_mod/data/loaders.py",
      "capri_mod/supply/supply_module.py"
     ],
     "builders": [],
@@ -39480,9 +39458,7 @@
    },
    "notes": [],
    "read_by": {
-    "model": [
-     "capri_mod/data/loaders.py"
-    ],
+    "model": [],
     "builders": [],
     "checks": [],
     "tests": []
@@ -39564,7 +39540,6 @@
    ],
    "read_by": {
     "model": [
-     "capri_mod/data/loaders.py",
      "capri_mod/supply/supply_module.py"
     ],
     "builders": [],
@@ -39653,9 +39628,7 @@
    },
    "notes": [],
    "read_by": {
-    "model": [
-     "capri_mod/data/loaders.py"
-    ],
+    "model": [],
     "builders": [],
     "checks": [],
     "tests": []
@@ -43488,7 +43461,7 @@
   "numerical/keep": 25,
   "open/keep": 8,
   "physical/keep": 15,
-  "technical/keep": 41
+  "technical/keep": 29
  },
  "other_notes": {}
 }

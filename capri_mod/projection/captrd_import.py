@@ -84,7 +84,7 @@ def _iter_rows(path: Path, years: Iterable[str], datatype: str = "series"):
 
 def extract_trajectory(
     captrd_csv: Path,
-    base_year: int = 2017,
+    base_year: Optional[int] = None,
     target_year: int = 2030,
     name: str = "captrd_baseline",
     source: str = "CAPRI captrd trend results (p_result, series), "
@@ -100,6 +100,9 @@ def extract_trajectory(
     (the "regional" block, keyed by the first four characters of CAPRI's region
     code), the median being the fallback elsewhere.
     """
+    if base_year is None:                           # the run's base year (K52f)
+        from capri_mod.data.inputs import default_base_year
+        base_year = int(default_base_year())
     base, target = str(base_year), str(target_year)
     values: Dict[tuple, Dict[str, float]] = defaultdict(dict)
 

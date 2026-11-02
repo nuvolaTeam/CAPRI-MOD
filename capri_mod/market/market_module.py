@@ -129,14 +129,12 @@ class MarketModule(NewtonKrylovMixin, CalibrationMixin, BiofuelMixin, DairyMixin
         self.par.base_production0 = self.par.base_production.copy()
         self.par.base_consumption0 = self.par.base_consumption.copy()
 
-    #: the base year, the market year's default when the data name none
-    DEFAULT_MARKET_YEAR = 2017
-
     def _market_year(self) -> int:
         """The market year (data["market_year"]): the year of CAPRI's market data the market calibrates to and of
-        the yearly input files (bilateral flows, crushing, biofuels)."""
+        the yearly input files (bilateral flows, crushing, biofuels); the base year of the market's inputs where the
+        data name none (K52f: 2017 written here before)."""
         d = self.data if isinstance(self.data, dict) else {}
-        return int(d.get("market_year", self.DEFAULT_MARKET_YEAR) or self.DEFAULT_MARKET_YEAR)
+        return int(d.get("market_year") or self._inp().base_year)
 
     def _inp(self) -> MarketInputs:
         """The data adapter (one for the package's own data where the module was built without __init__)."""
@@ -318,6 +316,6 @@ class MarketModule(NewtonKrylovMixin, CalibrationMixin, BiofuelMixin, DairyMixin
         """
         self._trade_scenario_now = trade_scenario
         if self.market_structure != "bilateral" or not self._bilateral_raw():
-            raise ValueError("the market needs CAPRI's bilateral data (capri_data/2017/market/bilateral_flows_*.csv)")
+            raise ValueError(f"the market needs CAPRI's bilateral data ({self._inp().path('bilateral_flows_*.csv')})")
         return self._solve_bilateral_equilibrium(exogenous_supply, trade_scenario, verbose=verbose,
                                                  max_outer=int(max_iter) if max_iter else int(_settings().get("market.max_iter")))

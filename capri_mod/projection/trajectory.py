@@ -116,13 +116,16 @@ class BaselineTrajectory:
         return traj
 
     @classmethod
-    def null(cls, base_year: int = 2017,
+    def null(cls, base_year: Optional[int] = None,
              target_years: Optional[List[int]] = None) -> "BaselineTrajectory":
         """A no-change trajectory. Projecting with it must reproduce the base.
 
         This is the identity used to test the projection machinery itself,
         independent of any forecast assumption.
         """
+        if base_year is None:                       # the run's base year (K52f)
+            from capri_mod.data.inputs import default_base_year
+            base_year = int(default_base_year())
         return cls(
             name="null", source="none (identity trajectory for testing)",
             vintage="n/a", base_year=base_year,

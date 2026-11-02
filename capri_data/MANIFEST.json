@@ -1112,7 +1112,6 @@
    "columns": 6,
    "units": "to be established (value_units: open)",
    "read_by_model": [
-    "capri_mod/data/loaders.py",
     "capri_mod/feed/ration.py"
    ],
    "origin": {
@@ -1154,9 +1153,6 @@
    "rows": 4499,
    "columns": 4,
    "units": "U_TonPerHd",
-   "read_by_model": [
-    "capri_mod/data/loaders.py"
-   ],
    "origin": {
     "nature": "capri",
     "builder": "build_fodder_balance"
@@ -1211,7 +1207,6 @@
    "columns": 9,
    "units": "to be established (value_units: open)",
    "read_by_model": [
-    "capri_mod/data/loaders.py",
     "capri_mod/market/bilateral_solve.py",
     "capri_mod/market/calibration.py"
    ],
@@ -1289,7 +1284,6 @@
    "columns": 4,
    "units": "to be established (value_units: open)",
    "read_by_model": [
-    "capri_mod/data/loaders.py",
     "capri_mod/market/bilateral_solve.py",
     "capri_mod/market/calibration.py"
    ],
@@ -1367,7 +1361,6 @@
    "columns": 5,
    "units": "to be established (value_units: open)",
    "read_by_model": [
-    "capri_mod/data/loaders.py",
     "capri_mod/market/bilateral_solve.py"
    ],
    "origin": {
@@ -1405,7 +1398,6 @@
    "columns": 13,
    "units": "to be established (value_units: open)",
    "read_by_model": [
-    "capri_mod/data/loaders.py",
     "capri_mod/market/biofuel.py"
    ],
    "origin": {
@@ -1443,7 +1435,6 @@
    "columns": 31,
    "units": "to be established (value_units: open)",
    "read_by_model": [
-    "capri_mod/data/loaders.py",
     "capri_mod/market/biofuel.py"
    ],
    "origin": {
@@ -1481,7 +1472,6 @@
    "columns": 4,
    "units": "to be established (value_units: open)",
    "read_by_model": [
-    "capri_mod/data/loaders.py",
     "capri_mod/market/biofuel.py"
    ],
    "origin": {
@@ -1516,7 +1506,6 @@
    "columns": 9,
    "units": "to be established (value_units: open)",
    "read_by_model": [
-    "capri_mod/data/loaders.py",
     "capri_mod/market/processing.py"
    ],
    "origin": {
@@ -2851,9 +2840,6 @@
    "rows": 9282,
    "columns": 4,
    "units": "to be established (value_units: open)",
-   "read_by_model": [
-    "capri_mod/data/loaders.py"
-   ],
    "origin": {
     "nature": "capri",
     "builder": "build_land_market:year_2017"
@@ -2866,9 +2852,6 @@
    "rows": 221,
    "columns": 4,
    "units": "to be established (value_units: open)",
-   "read_by_model": [
-    "capri_mod/data/loaders.py"
-   ],
    "origin": {
     "nature": "capri",
     "builder": "build_land_market:year_2017"
@@ -3272,9 +3255,6 @@
    "rows": 39736,
    "columns": 7,
    "units": "U_1000ha, U_EuPerHa",
-   "read_by_model": [
-    "capri_mod/data/loaders.py"
-   ],
    "origin": {
     "nature": "capri",
     "builder": "build_pmp_capri_2030:techn_capri_data.sources.baseline_pmp.recipe_2017_quad_techn.csv_year_2017_out_c"
@@ -3293,9 +3273,6 @@
    "rows": 2407,
    "columns": 6,
    "units": "U_EuPerHd, U_ratio",
-   "read_by_model": [
-    "capri_mod/data/loaders.py"
-   ],
    "origin": {
     "nature": "capri",
     "builder": "build_animal_pmp_capri_2030:techn_capri_data.sources.baseline_pmp.recipe_2017_quad_techn.csv_year_2017_out_c"
@@ -3311,9 +3288,6 @@
    "rows": 2407,
    "columns": 6,
    "units": "U_EuPerHd, U_ratio",
-   "read_by_model": [
-    "capri_mod/data/loaders.py"
-   ],
    "origin": {
     "nature": "capri",
     "builder": "build_animal_pmp_capri_2030:techn_capri_data.sources.baseline_pmp.recipe_2017_quad_techn.csv_year_2017_split"
@@ -3529,7 +3503,6 @@
    "columns": 4,
    "units": "to be established (value_units: open)",
    "read_by_model": [
-    "capri_mod/data/loaders.py",
     "capri_mod/supply/supply_module.py"
    ],
    "origin": {
@@ -3550,9 +3523,6 @@
    "rows": 3289,
    "columns": 5,
    "units": "U_HdPerHd",
-   "read_by_model": [
-    "capri_mod/data/loaders.py"
-   ],
    "origin": {
     "nature": "capri",
     "builder": "build_young_animals"
@@ -3569,7 +3539,6 @@
    "columns": 4,
    "units": "to be established (value_units: open)",
    "read_by_model": [
-    "capri_mod/data/loaders.py",
     "capri_mod/supply/supply_module.py"
    ],
    "origin": {
@@ -3590,9 +3559,6 @@
    "rows": 4168,
    "columns": 5,
    "units": "U_HdPerHd",
-   "read_by_model": [
-    "capri_mod/data/loaders.py"
-   ],
    "origin": {
     "nature": "capri",
     "builder": "build_young_animals"
@@ -4822,9 +4788,6 @@
    "rows": 692,
    "columns": 41,
    "units": "to be established (value_units: open)",
-   "read_by_model": [
-    "capri_mod/data/loaders.py"
-   ],
    "origin": {
     "nature": "mixed",
     "builder": "recalibrate_trade_2017"

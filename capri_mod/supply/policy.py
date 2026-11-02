@@ -323,7 +323,7 @@ class PolicyBlock:
     def _greendeal_tech_progress(self) -> float:
         """CAPRI's input-saving progress of the simulation year, TF_I = 1 - 0.005 x (Y - BAS)
         (capmod/define_inputs.gms l. 66)."""
-        base = int(str(_settings().get("run.base_year")))
+        base = int(_inputs.base_year())                          # the run's base year (K52f)
         sim = int(getattr(self.data, "sim_year", None) or base)
         return 1.0 - param("INPUT_SAVING_PROGRESS") * (sim - base)
 

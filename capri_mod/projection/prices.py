@@ -230,9 +230,11 @@ _BULK_PRODUCT = {"WHEA": "SWHE", "RICE": "PARI"}
 
 def ration_bulk_price_index(ratio_fn) -> Dict:
     """{(member state, bulk): CAPRI's 2030/2017 real price index of the feed bulk} (feedBlkPrice_ CES, rho of the
-    bulk) from capri_data/2017/market/feed_bulks_eu.csv and CAPRI's product price ratios."""
+    bulk) from the run's <base year>/market/feed_bulks_eu.csv and CAPRI's product price ratios (K52f: a fixed
+    capri_data/2017 path next to the package before)."""
     import numpy as np
-    f = Path(__file__).resolve().parents[2] / "capri_data" / "2017" / "market" / "feed_bulks_eu.csv"
+    from capri_mod.data.inputs import current as _current
+    f = _current().path("feed_bulks_eu.csv", "market")
     if not f.exists():
         return {}
     t = read_input(f, keep_default_na=False)
