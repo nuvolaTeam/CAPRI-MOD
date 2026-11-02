@@ -340,7 +340,7 @@ class FertilisationBlock:
                 "price": float(R.uvag_eur_t) if R.uvag_eur_t == R.uvag_eur_t else 0.0, "kappa": k,
                 "own_scaled": bool(kap.get((key, "own_scaled"), True)),
                 "M0": base["M0"]}
-        out["dual_bound"] = float(getattr(self, "_npk_dual_bound", 10.0) or 10.0)
+        out["dual_bound"] = float(getattr(self.par, "npk_dual_bound", 10.0) or 10.0)
         return out if out["nutrients"] else None
 
     @staticmethod
@@ -373,7 +373,7 @@ class FertilisationBlock:
         (capri-mod's organic targets per member state and crop class, the shares the I/O changes use), weighted by base
         area. Returns {nutrient: {(group, source): (max kg/ha, beta1, beta2)}} or {} without an organic target."""
         conv = getattr(self, "_organic_conv", None) or {}
-        base = getattr(self, "_nlp_base_alloc", None)
+        base = getattr(self.par, "nlp_base_alloc", None)
         if not conv or base is None:
             return {}
         from capri_mod.fert.inner_fert_dist import beta_regulation
@@ -430,7 +430,7 @@ class FertilisationBlock:
         fertilisation block at the calibration point), as CAPRI takes its baseline's."""
         mc = getattr(self, "_mineral_cap", None) or {}
         d = (npk.get("nutrients") or {}).get("N")
-        base = getattr(self, "_nlp_base_alloc", None)
+        base = getattr(self.par, "nlp_base_alloc", None)
         if not mc or d is None or base is None:
             return
         r = float(mc.get("reduction", 0.0) or 0.0)

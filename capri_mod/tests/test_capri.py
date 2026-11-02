@@ -2293,8 +2293,8 @@ def _cold(model):
     """Clear a regional model's warm start (CAPRI's CONOPT, like IPOPT here, starts from the last solution). Two solves
     of the same problem from different starts end within IPOPT's tolerance of each other, not bit-identical (KNOWN_ISSUES
     K80); from the same cold start they coincide, which is what a check for leaked state needs."""
-    model._nlp_prev = None
-    model._nlp_prev_f = None
+    model.sv.nlp_prev = None
+    model.sv.nlp_prev_f = None
     return model
 
 
@@ -3674,7 +3674,7 @@ def test_capri_land_rents_at_the_2030_calibration_point(model):
     rents = pd.read_csv(root / "capri_data" / "2017" / "supply" / "land_rents_2030.csv", index_col=0).loc["IR010000"]
     rr = mo._land_rent_rows
     assert abs(rr["arable_land"] - rents["rent_arac"]) < 1e-6 and abs(rr["grassland"] - rents["rent_gras"]) < 1e-6
-    assert (mo._nlp_cal or {}).get("residual", 1.0) < 1e-6
+    assert (getattr(mo.par, "nlp_cal", None) or {}).get("residual", 1.0) < 1e-6
     drift = res.baseline[2030]["metadata"].get("base_calibration_drift") or [0.0]
     assert float(drift[-1]) < 0.002, drift
 

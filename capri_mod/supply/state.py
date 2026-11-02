@@ -12,8 +12,8 @@ They are slot classes, not dataclasses with None defaults (the project lead's de
 a field that was never set is absent, as an attribute that was never set is today, so the code's
 ``getattr(obj, name, default)`` reads keep their behaviour when they move (``getattr(obj.sv, name, default)``).
 
-This step (S0c) adds the objects empty and the guard; the fields move into them block by block in the following
-commits, each a pure move checked against the mini-EU run. A moved name is listed in MOVED_REGIONAL / MOVED_MODULE:
+S0c added the objects empty and the guard; the fields move into them block by block (S2 onward), each commit a pure
+move checked against the mini-EU run. A moved name is listed in MOVED_REGIONAL / MOVED_MODULE:
 reading or writing it on the model raises RuntimeError (not AttributeError, so a getattr default cannot hide it), as
 the market's MOVED (capri_mod/market/state.py). Reads and writes through ``__dict__`` and names held in strings are
 not seen by the guard; capri_mod/tests/test_supply_state.py scans the code for them.
@@ -35,12 +35,25 @@ class _Slots:
 
 class RegionalParameters(_Slots):
     """A regional model's parameters, built once per base."""
-    __slots__ = ()
+    __slots__ = (
+        "nlp_cal",            # the NLP's calibration (CAPRI's PMP terms in the NLP form) for the current settings
+        "nlp_base_alloc",     # the fertiliser allocation at the calibration point (nlp_cal's base_alloc)
+        "nlp_cal_store",      # the calibrations by settings key, so a switch of settings and back keeps both
+        "npk_dual_bound",     # the fertiliser distribution's dual bound where it was widened for the region
+    )
 
 
 class RegionalSolveState(_Slots):
     """A regional model's state carried from one solve to the next."""
-    __slots__ = ()
+    __slots__ = (
+        "nlp_prev",           # the last solution (graph key, x, shape, multipliers): the next solve's warm start
+        "nlp_prev_f",         # its objective: the warm check's reference
+        "nlp_y",              # its activity levels: the jump check's reference
+        "nlp_cols",           # the columns of nlp_y
+        "nlp_relax_keep",     # the mineral-cap exemption kept from the first solve of a problem (its fingerprint)
+        "kkt_base",           # the base solve's KKT records by graph key (the Hessian's KKT mode)
+        "wc_solved",          # the winter cover share chosen by the last solve (None where not endogenous)
+    )
 
 
 class RegionalEvalState(_Slots):
@@ -93,11 +106,80 @@ MOVED_REGIONAL: dict = {
     "_last_feed": _REMOVED,
     "_nlp_times": _REMOVED,
     "_last_aug_cols": "removed (refactor stage 3 S1, 2 November 2026: read with a default, never written)",
+    # S2: the NLP block's carried state and calibration
+    "_nlp_prev": "sv.nlp_prev",
+    "_nlp_prev_f": "sv.nlp_prev_f",
+    "_nlp_y": "sv.nlp_y",
+    "_nlp_cols": "sv.nlp_cols",
+    "_nlp_relax_keep": "sv.nlp_relax_keep",
+    "_kkt_base": "sv.kkt_base",
+    "_wc_solved": "sv.wc_solved",
+    "_nlp_cal": "par.nlp_cal",
+    "_nlp_base_alloc": "par.nlp_base_alloc",
+    "_nlp_cal_store": "par.nlp_cal_store",
+    "_npk_dual_bound": "par.npk_dual_bound",
 }
 #: the supply module's former attribute names
 MOVED_MODULE: dict = {
     "_base_cal_drift": _REMOVED,
 }
+
+
+def setdefault(obj, name, default):
+    """dict.setdefault for a field of a state object: the field's value if set (None included), else default, set."""
+    try:
+        return getattr(obj, name)
+    except AttributeError:
+        setattr(obj, name, default)
+        return default
+
+
+def discard(obj, name):
+    """Unset a field of a state object if it is set (dict.pop(name, None) for a field)."""
+    try:
+        delattr(obj, name)
+    except AttributeError:
+        pass
+
+
+def _split(path):
+    kind, dot, name = path.partition(".")
+    return (kind, name) if dot else (None, path)
+
+
+def has_path(model, path):
+    """Whether the model holds the entry of a state list (RegionalSupplyModel.NLP_STATE, SOLVE_STATE): an attribute
+    name (in the instance's __dict__ only, as the Hessian's restore always took them) or "kind.field" (a field set in
+    the model's state object; an object not yet created holds nothing)."""
+    kind, name = _split(path)
+    if kind is None:
+        return name in model.__dict__
+    obj = model.__dict__.get("_" + kind)
+    return obj is not None and hasattr(obj, name)
+
+
+def get_path(model, path):
+    kind, name = _split(path)
+    return model.__dict__[name] if kind is None else getattr(model.__dict__["_" + kind], name)
+
+
+def set_path(model, path, value):
+    kind, name = _split(path)
+    if kind is None:
+        model.__dict__[name] = value
+    else:
+        setattr(getattr(model, kind), name, value)
+
+
+def del_path(model, path):
+    """Remove the entry if the model holds it."""
+    kind, name = _split(path)
+    if kind is None:
+        model.__dict__.pop(name, None)
+    else:
+        obj = model.__dict__.get("_" + kind)
+        if obj is not None:
+            discard(obj, name)
 
 
 class _StateMixin:

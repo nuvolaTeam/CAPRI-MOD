@@ -237,8 +237,8 @@ class AbatementBlock:
         if cc is not None and hasattr(cc, "get"):
             v = cc.get("catc_share_2030")
             w0 = float(v) if v is not None and not pd.isna(v) else 0.0
-        if getattr(self, "_wc_solved", None) is not None:
-            return w0, float(self._wc_solved)                     # chosen in the NLP form
+        if getattr(self.sv, "wc_solved", None) is not None:
+            return w0, float(self.sv.wc_solved)                     # chosen in the NLP form
         cv = getattr(self, "_cover", None)
         w1 = float(cv["req"]) / float(cv["uaa"]) if cv and float(cv.get("uaa", 0.0) or 0.0) > 0 else w0
         return w0, w1

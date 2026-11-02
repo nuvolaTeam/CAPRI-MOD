@@ -186,15 +186,19 @@ class HessianBlock:
         # left (the ammonia options' point differed at 1e-36, rations and splits possibly more)
         # the _nlp* fields by their declared list (RegionalSupplyModel.NLP_STATE; the prefix "_nlp" until 2 November
         # 2026, the same set)
-        def _state_key(mo_, k_):
-            nlp_ = k_ in getattr(type(mo_), "NLP_STATE", ())
+        # (refactor stage 3, S2: an entry is an attribute name or the path of a field in the model's state objects,
+        # "sv.nlp_prev"; each field is copied on its own, as before, never a whole object)
+        from capri_mod.supply import state as _st
+
+        def _state_paths(mo_):
+            nlp_ = tuple(getattr(type(mo_), "NLP_STATE", ()))
             if not skip:                                   # the measurement as before (cached Hessians keep their keys)
                 return nlp_
-            return nlp_ or k_ in getattr(type(mo_), "SOLVE_STATE", ())
+            return nlp_ + tuple(getattr(type(mo_), "SOLVE_STATE", ()))
 
         def _snapshot():
             _c = _cp.deepcopy if skip else _cp.copy
-            mods = {r_: {k_: _c(v_) for k_, v_ in mo_.__dict__.items() if _state_key(mo_, k_)}
+            mods = {r_: {k_: _c(_st.get_path(mo_, k_)) for k_ in _state_paths(mo_) if _st.has_path(mo_, k_)}
                     for r_, mo_ in sm._models.items()}
             return mods, {n_: _cp.deepcopy(sm.__dict__.get(n_)) for n_ in getattr(sm, "_PAR_STATE", ())}
 
@@ -204,9 +208,11 @@ class HessianBlock:
                 mo_ = sm._models.get(r_)
                 if mo_ is None:
                     continue
-                for k_ in [k_ for k_ in mo_.__dict__ if _state_key(mo_, k_) and k_ not in d_]:
-                    del mo_.__dict__[k_]
-                mo_.__dict__.update({k_: (_cp.deepcopy if skip else _cp.copy)(v_) for k_, v_ in d_.items()})
+                for k_ in _state_paths(mo_):
+                    if k_ not in d_:
+                        _st.del_path(mo_, k_)
+                for k_, v_ in d_.items():
+                    _st.set_path(mo_, k_, (_cp.deepcopy if skip else _cp.copy)(v_))
             for n_, v_ in par.items():
                 if v_ is None:
                     sm.__dict__.pop(n_, None)
@@ -230,7 +236,7 @@ class HessianBlock:
             sm._hess_probe = "record"
             if kkt:
                 for mo_ in sm._models.values():
-                    mo_.__dict__.pop("_kkt_base", None)
+                    _st.discard(mo_.sv, "kkt_base")
                     mo_.__dict__.pop("_kkt_ipopt", None)
                 _crn_h.KKT_MODE = "record"
             try:
@@ -302,7 +308,7 @@ class HessianBlock:
         if kkt:
             for mo_ in sm._models.values():
                 n_kkt_ipopt += int(mo_.__dict__.pop("_kkt_ipopt", 0) or 0)
-                mo_.__dict__.pop("_kkt_base", None)
+                _st.discard(mo_.sv, "kkt_base")
         # back to the base: the regional models' warm starts and states as the baseline left them
         sm.yani_price_ratio, sm.yani_price_ratio_ms, sm.yani_price_ratio_m = yr0
         sm.feed_bulk_ratio = fb0 if fb0 is not None else self.feed_bulk_price_ratios(sig0)

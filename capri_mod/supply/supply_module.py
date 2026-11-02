@@ -488,6 +488,7 @@ class PMPCalibrator:
 # refactor stage 3a: the regional model's methods in mixin modules of this package
 from capri_mod.supply.livestock import LivestockBlock  # noqa: E402
 from capri_mod.supply.state import ModuleStateMixin, RegionalStateMixin  # noqa: E402
+from capri_mod.supply import state as _st  # noqa: E402
 from capri_mod.supply.fertilisation import FertilisationBlock  # noqa: E402
 from capri_mod.supply.abatement import AbatementBlock  # noqa: E402
 from capri_mod.supply.policy import PolicyBlock  # noqa: E402
@@ -520,15 +521,15 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
                    "_last_cattle_z", "_last_dairy_z", "_last_duals", "_last_feed_dm", "_last_feed_t",
                    "_last_genet_z", "_last_grass_z", "_last_hist_fallow", "_last_npk", "_last_req_duals",
                    "_manure_ni_nh3", "_manure_ni_relief", "_manure_tech_shares",
-                   "_price_shock_now", "_wc_solved", "feed_rations")
+                   "_price_shock_now", "sv.wc_solved", "feed_rations")
     #: the regional NLP's fields (warm starts, calibration, fallbacks and their diagnostics), all named _nlp*: what the
     #: market supply Hessian restored by the prefix "_nlp" until 2 November 2026 (refactor stage 3, S0b: the same set,
     #: declared). Every instance attribute named _nlp* must be listed here (test_nlp_state_lists_every_nlp_attribute)
-    NLP_STATE = ("_nlp_accept_last", "_nlp_base_alloc", "_nlp_cal", "_nlp_cal_check",
-                 "_nlp_cal_store", "_nlp_cols", "_nlp_failed", "_nlp_fallback_log", "_nlp_fb_last",
+    NLP_STATE = ("_nlp_accept_last", "par.nlp_base_alloc", "par.nlp_cal", "_nlp_cal_check",
+                 "par.nlp_cal_store", "sv.nlp_cols", "_nlp_failed", "_nlp_fallback_log", "_nlp_fb_last",
                  "_nlp_jump", "_nlp_mine_small", "_nlp_n_target_cause", "_nlp_nip", "_nlp_nonoptimal", "_nlp_ok",
-                 "_nlp_path", "_nlp_prev", "_nlp_prev_f", "_nlp_rc", "_nlp_relax_keep", "_nlp_relaxed", "_nlp_status",
-                 "_nlp_tol_trace", "_nlp_try_n_relax", "_nlp_y")
+                 "_nlp_path", "sv.nlp_prev", "sv.nlp_prev_f", "_nlp_rc", "sv.nlp_relax_keep", "_nlp_relaxed",
+                 "_nlp_status", "_nlp_tol_trace", "_nlp_try_n_relax", "sv.nlp_y")
 
 
     #: livestock costs from CAPRI's regional total inputs / model heads
@@ -2113,9 +2114,9 @@ class SupplyModule(ModuleStateMixin):
                 # so a baseline after a run at other settings uses its own calibration, not the other one (found
                 # 20 October 2026: after an ghgTechMYld 0.2 run, IE04's default baseline adopted genet_eff for the
                 # whole herd)
-                cal_store = m.__dict__.setdefault("_nlp_cal_store", {})
-                cal_store[old] = (m.__dict__.get("_nlp_cal"), m.__dict__.get("_nlp_base_alloc"))
-                m._nlp_cal, m._nlp_base_alloc = cal_store.get(settings_key, (None, None))
+                cal_store = _st.setdefault(m.par, "nlp_cal_store", {})
+                cal_store[old] = (getattr(m.par, "nlp_cal", None), getattr(m.par, "nlp_base_alloc", None))
+                m.par.nlp_cal, m.par.nlp_base_alloc = cal_store.get(settings_key, (None, None))
             m.data.genetics_effects = (table or {}).get(region)
             m._genet_cz = store.get(settings_key)
             m._genet_pending = None

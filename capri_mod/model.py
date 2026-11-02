@@ -1089,7 +1089,7 @@ class CAPRIModel(HessianBlock, FeedBlock, YoungAnimalBlock, PriceStepBlock, Manu
                     # each region's solve: the starts tried / IPOPT's iterations of the last, its objective, its
                     # relaxation (K79: a region jumping between two states)
                     _hist[-1]["nlp_regional"] = {
-                        r_: {"path": getattr(m_, "_nlp_path", None), "f": getattr(m_, "_nlp_prev_f", None),
+                        r_: {"path": getattr(m_, "_nlp_path", None), "f": getattr(m_.sv, "nlp_prev_f", None),
                              "relaxed": getattr(m_, "_nlp_relaxed", None)}
                         for r_, m_ in (getattr(self.supply_module, "_models", None) or {}).items()}
                 self._outer_history = _hist
