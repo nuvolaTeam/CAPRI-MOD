@@ -184,10 +184,13 @@ class HessianBlock:
         # (RegionalSupplyModel.SOLVE_STATE: the ammonia options' linearisation point, rations, splits, last solutions).
         # Until 27 October 2026 only the _nlp* fields were saved: each shock started from the state the previous shock
         # left (the ammonia options' point differed at 1e-36, rations and splits possibly more)
+        # the _nlp* fields by their declared list (RegionalSupplyModel.NLP_STATE; the prefix "_nlp" until 2 November
+        # 2026, the same set)
         def _state_key(mo_, k_):
+            nlp_ = k_ in getattr(type(mo_), "NLP_STATE", ())
             if not skip:                                   # the measurement as before (cached Hessians keep their keys)
-                return k_.startswith("_nlp")
-            return (k_.startswith("_nlp") and k_ != "_nlp_times") or k_ in getattr(type(mo_), "SOLVE_STATE", ())
+                return nlp_
+            return (nlp_ and k_ != "_nlp_times") or k_ in getattr(type(mo_), "SOLVE_STATE", ())
 
         def _snapshot():
             _c = _cp.deepcopy if skip else _cp.copy

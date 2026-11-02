@@ -2658,7 +2658,34 @@ def test_parallel_regional_solves_match_sequential():
                     {r: dict(v.shadow_prices) for r, v in s["supply"].items()},
                     dict(m.supply_module._nbal_state)))
         assert all(m.supply_module._models[r]._env_for_surplus is m.supply_module._env_for_surplus for r in regs)
+        # the solves' _nlp* fields, also those the workers brought back, are the declared ones (NLP_STATE, S0b)
+        _decl = set(type(m.supply_module._models[regs[0]]).NLP_STATE)
+        for r in regs:
+            assert {k for k in m.supply_module._models[r].__dict__ if k.startswith("_nlp")} <= _decl, r
     assert out[0] == out[1]
+
+
+def test_nlp_state_lists_every_nlp_attribute():
+    """Refactor stage 3, S0b (2 November 2026): the market supply Hessian saves and restores the regional models'
+    _nlp* fields by the declared list RegionalSupplyModel.NLP_STATE (by the prefix "_nlp" before). Every _nlp* instance
+    attribute the code writes (self._nlp_x = ..., obj._nlp_x = ..., __dict__ / setattr with the name) is in it, so the
+    restore keeps the set the prefix gave."""
+    import re
+    from pathlib import Path
+    from capri_mod.supply.supply_module import RegionalSupplyModel
+    root = Path(__file__).resolve().parents[1]
+    pat = re.compile(r"\._(nlp[A-Za-z0-9_]*)\s*=(?!=)|[\"'](_nlp[A-Za-z0-9_]*)[\"']")
+    written = set()
+    for f in root.rglob("*.py"):
+        if "tests" in f.parts:
+            continue
+        for m_ in pat.finditer(f.read_text()):
+            written.add("_" + m_.group(1) if m_.group(1) else m_.group(2))
+    methods = {k for k in dir(RegionalSupplyModel)
+               if k.startswith("_nlp") and callable(getattr(RegionalSupplyModel, k))}
+    prefix = {"_nlp", "_nlp_"}                            # the prefix itself, named in comments
+    missing = sorted(written - methods - set(RegionalSupplyModel.NLP_STATE) - prefix)
+    assert not missing, missing
 
 
 def test_no_synthetic_inputs_reach_the_model(data):

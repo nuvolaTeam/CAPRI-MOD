@@ -519,6 +519,14 @@ class RegionalSupplyModel(LivestockBlock, FertilisationBlock, AbatementBlock, Po
                    "_last_genet_z", "_last_grass_z", "_last_hist_fallow", "_last_land", "_last_npk", "_last_req_duals",
                    "_manure_ni_nh3", "_manure_ni_relief", "_manure_ni_share", "_manure_tech_shares", "_npk_cov",
                    "_price_shock_now", "_wc_solved", "feed_rations")
+    #: the regional NLP's fields (warm starts, calibration, fallbacks and their diagnostics), all named _nlp*: what the
+    #: market supply Hessian restored by the prefix "_nlp" until 2 November 2026 (refactor stage 3, S0b: the same set,
+    #: declared). Every instance attribute named _nlp* must be listed here (test_nlp_state_lists_every_nlp_attribute)
+    NLP_STATE = ("_nlp_abatement", "_nlp_accept_last", "_nlp_base_alloc", "_nlp_cal", "_nlp_cal_check",
+                 "_nlp_cal_store", "_nlp_cols", "_nlp_failed", "_nlp_fallback_log", "_nlp_fb_last", "_nlp_group_caps",
+                 "_nlp_jump", "_nlp_mine_small", "_nlp_n_target_cause", "_nlp_nip", "_nlp_nonoptimal", "_nlp_ok",
+                 "_nlp_path", "_nlp_prev", "_nlp_prev_f", "_nlp_rc", "_nlp_relax_keep", "_nlp_relaxed", "_nlp_status",
+                 "_nlp_times", "_nlp_tol_trace", "_nlp_try_n_relax", "_nlp_y")
 
 
     #: livestock costs from CAPRI's regional total inputs / model heads
