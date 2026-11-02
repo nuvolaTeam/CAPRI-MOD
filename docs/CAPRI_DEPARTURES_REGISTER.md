@@ -144,7 +144,11 @@ switched to CAPRI's form:
 - DEP-43, nurseries (NURS) on permanent-crop land (FRUN) as CAPRI's landTypes_to_pact, in the supply model's land
   balances and the base land data (land_availability.csv: 181.2 kha from arable to permanent land over 213 regions);
   one list of the crops on permanent land for the supply model, the environmental accounts and the base builder
-  (capri_data/codes/model_activity_classes.csv; 2 November 2026, the project lead's decision);
+  (capri_data/codes/model_activity_classes.csv; 2 November 2026, the project lead's decision); mini-EU run against N6's
+  first part (both converged in 6 iterations, the same two relaxed mineral caps): EU arable crops +0.1 to +0.3% in the
+  baseline and the scenario (potatoes most, +0.25% and +0.30%), arable crop area +14.8 kha in the baseline, nurseries'
+  output +0.61% in the scenario, prices up to +0.49% (barley), the largest regional change NL22's set-aside in the
+  baseline (0.488 to 0.456 kha); the mechanism of the arable crops' gain not traced;
 - `market.noneu_supply_nq` and `market.feed_bulk_in_market` (29 October 2026);
 - `market.hessian_scenario_iter` 8 → 0 (25–26 October; K75).
 

@@ -51,3 +51,4 @@ correcting them follows as separate commits after the project lead's decision.
 - Step 1: the tables move as they are (runs identical), the two findings registered: DEP-42 (OFOD one
   crop-diversification group, kept until S1/S2 splits OFOD) and DEP-43 (NURS on arable land).
 - Step 2: NURS goes to permanent-crop land as in CAPRI (its own commit and run, the land data's builder with it).
+  Done 2 November 2026: the mini-EU run's differences are in the register (DEP-43); test suite 279 passed, 2 skipped.
