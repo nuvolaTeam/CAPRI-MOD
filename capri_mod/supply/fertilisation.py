@@ -29,7 +29,7 @@ class FertilisationBlock:
         c_ = getattr(self.par, "ef_min_n2o_cache", None)
         if c_ is None:
             from capri_mod.environmental.environmental_module import GWP_N2O
-            c_ = self.par.ef_min_n2o_cache = sum(self._mineral_n2o_parts()) * 44.0 / 28.0 * GWP_N2O
+            c_ = self.par.ef_min_n2o_cache = sum(self._mineral_n2o_parts()) * M_N2O / M_N2O_N * GWP_N2O
         return c_
 
     def _mineral_n2o_parts(self):
@@ -64,7 +64,7 @@ class FertilisationBlock:
                 L = d.get("leach_ini") if d.get("leach_ini") is not None else (d.get("leach_base") or 0.0)
                 nf = _nc.netf(g, float(g.get("run_surf", 0.0)))
                 c_ = max(0.0, nf["RunTot"] + (1.0 - nf["GasRunTot"] - float(d["exp_imp"])) * float(L)) \
-                    * param("EF5_LEACHING_N2O") * 44.0 / 28.0 * GWP_N2O
+                    * param("EF5_LEACHING_N2O") * M_N2O / M_N2O_N * GWP_N2O
             self.par.ef_lea_cache = c_
         return c_
 
@@ -72,7 +72,7 @@ class FertilisationBlock:
     def _ef_nh3_n2o() -> float:
         """t CO2-eq per t of NH3-N volatilised from manure (the accounts' N2O_IND, CAPRI N2OAMM)."""
         from capri_mod.environmental.environmental_module import EF_SOIL_N2O_INDIRECT, GWP_N2O
-        return EF_SOIL_N2O_INDIRECT * 44.0 / 28.0 * GWP_N2O
+        return EF_SOIL_N2O_INDIRECT * M_N2O / M_N2O_N * GWP_N2O
 
     def _need_yf(self, a, y0, yc, nut: str = "N") -> float:
         """The crop's nutrient need per ha at yield yc relative to its base yield y0, CAPRI's rule
@@ -125,7 +125,7 @@ class FertilisationBlock:
         from capri_mod.environmental.environmental_module import (EF_SOIL_N2O_DIRECT, EF_SOIL_N2O_INDIRECT,
                                                                   GWP_N2O)
         tax = float(getattr(self.seen, "ghg_tax", 0.0) or 0.0)
-        k = 44.0 / 28.0 * GWP_N2O
+        k = M_N2O / M_N2O_N * GWP_N2O
         ef_d, ef_v = EF_SOIL_N2O_DIRECT * k, 0.10 * EF_SOIL_N2O_INDIRECT * k
         h = []
         for (nm_, nmin_, a_, b_, smx_) in ft:

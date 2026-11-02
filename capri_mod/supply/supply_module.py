@@ -37,6 +37,7 @@ from capri_mod.supply.capri_pmp import (
     share_term, ARABLE_ACTIVITIES,
 )
 from capri_mod.params import param, param_table
+from capri_mod.units import M_N2O, M_N2O_N
 from capri_mod.settings import setting, tri_state, current as _settings
 from capri_mod.data.definitions import (
     CROPS, ANIMALS, ALL_ACTIVITIES, FEED_ITEMS, NUTRIENTS,

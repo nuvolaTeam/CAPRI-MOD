@@ -131,7 +131,7 @@ class AbatementBlock:
           inhibitor on manure  the tax value per t of manure N treated without the mineral N it displaces
         Returns (ghg_min for the NLP spec, c)."""
         from capri_mod.environmental.environmental_module import GWP_N2O
-        k = 44.0 / 28.0 * GWP_N2O
+        k = M_N2O / M_N2O_N * GWP_N2O
         # CAPRI's N2OSYN and the mineral part of N2OAMM from the region's MITERRA fractions, as the accounts take them
         # (_mineral_n2o_parts; until 31 October 2026 IPCC's EF1 and 10% x EF4 here while the accounts had moved to
         # MITERRA on 27 October, KNOWN_ISSUES K107)
@@ -447,7 +447,7 @@ class AbatementBlock:
         ammonia cascade multiplier on application N2O held at base)."""
         from capri_mod.environmental.environmental_module import EF_SOIL_N2O_INDIRECT, GWP_N2O
         env_ = getattr(self.seen, "env_for_surplus", None)
-        k = 44.0 / 28.0 * GWP_N2O
+        k = M_N2O / M_N2O_N * GWP_N2O
         v = sub * nman * self._ef_mineral_n2o()
         lit2 = fert_side_value(self.data.region_id, "NITR_INH_MAN", "N2OAPP")
         tot = n2o = nh3x = 0.0
