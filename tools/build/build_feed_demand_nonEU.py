@@ -17,7 +17,7 @@ Before 19 October 2026 the shares came from FAO_agg 2017 (FEDM/DOMM) and the ela
 for trade regions identical to one CAPRI region: ROW, Turkey, South Korea, Morocco and New Zealand had no feed
 function, and their feed use (e.g. 96% of ROW's soybean cake) fell on the generic own-price response (eta).
 
-CAPRI region -> trade region: tools/build/recalibrate_trade_2017.py REGION_MAP (as tools/build/build_processing_nq.py), over
+CAPRI region -> trade region: the market's grouping step, tools/lib/_market_regions.py: codes/model_market_regions.csv (as tools/build/build_processing_nq.py), over
 CAPRI's 80 behavioural regions; EU member states are left out (EU feed comes from the supply models' feed bulks,
 tools/build/build_feed_bulks.py). Norway (trade region NOR since KNOWN_ISSUES K56) has no p_ElasFeed either: its feed
 comes from its supply models through its bulks (feed_bulks_no.csv), as CAPRI's. REGISTERED: CAPRI's other
@@ -59,7 +59,7 @@ def main():
     a = ap.parse_args()
     sys.path.insert(0, str(ROOT)); sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check")]
     from capri_mod.data.definitions import ALL_TRADE_REGIONS
-    from recalibrate_trade_2017 import trade_region
+    from _market_regions import model_region  # the market's grouping step (tools/lib/_market_regions.py)
     import build_bilateral_market as BM
     # every CAPRI market product the model trades (tools/build/build_bilateral_market.py MODEL: model -> CAPRI products)
     g2m = {g: m for m, gs in BM.MODEL.items() for g in gs}
@@ -96,7 +96,7 @@ def main():
     beh = set(_read_csv(ROOT / "capri_data" / "2017" / "market" / "processing_nq_base.csv").rms)
     rms_set = set(el.rms)
     is_eu = lambda r: r[:2] in EU and r.endswith("000000")
-    mreg = trade_region
+    mreg = model_region
     # CAPRI products -> model commodities (several CAPRI products of one commodity: quantities add up, the price
     # columns of one commodity's products add up - one price - and the rows are weighted by their feed below)
     E = defaultdict(lambda: defaultdict(float))

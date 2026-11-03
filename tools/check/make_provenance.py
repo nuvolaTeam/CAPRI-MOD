@@ -47,6 +47,7 @@ SOURCE_DEFAULT = "CAPRI"
 #: tables kept by hand, with a source per row, read as declared (KNOWN_ISSUES K101)
 DECLARED = {"capri_data/shared/capri_member_state_codes.csv", "capri_data/shared/model_parameters.csv",
             "capri_data/codes/model_units.csv", "capri_data/codes/model_trade_regions.csv",
+            "capri_data/codes/model_market_regions.csv",
             "capri_data/codes/model_activity_classes.csv", "capri_data/codes/model_land_types.csv",
             "capri_data/codes/model_cattle_splits.csv", "capri_data/codes/model_price_follows.csv",
             "capri_data/codes/model_activities.csv", "capri_data/codes/results_items.csv"}

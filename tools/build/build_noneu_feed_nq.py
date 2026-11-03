@@ -48,7 +48,7 @@ INPE = 1.019 ** 13
 
 
 def main() -> None:
-    from recalibrate_trade_2017 import REGION_MAP
+    from _market_regions import model_region  # the market's grouping step (tools/lib/_market_regions.py)
     from build_bilateral_market import CAPRI as CAPRI_TO_MODEL
     to_model = dict(CAPRI_TO_MODEL)
     with open(OUT / "noneu_feed_energy.csv", newline="") as f:
@@ -73,7 +73,7 @@ def main() -> None:
         xm = to_model.get(x, "")
         q = num(v)
         if xm and q > 0:
-            k = (REGION_MAP.get(rm_all[r], "ROW"), xm)
+            k = (model_region(rm_all[r]), xm)
             tot[k] = tot.get(k, 0.0) + q
     ep = re.compile(r"^'([^']*)'\.'([^']*)'\.'([^']*)'\.'CAL'\s+(\S+)")
     elas = {(r, x, y): num(v) for r, x, y, v in read_param(ELAS, "p_ElasFeed", ep, lambda m: m.group(1) in regs)}
@@ -82,7 +82,7 @@ def main() -> None:
     rows, base = [], []
     for r in sorted(regs):
         rm = rms_rm[r]
-        tr = REGION_MAP.get(rm, "ROW")
+        tr = model_region(rm)
         feed0 = {x: data[(r, "FEED", x)] for (rr, it, x) in data if rr == r and it == "FEED" and data[(r, "FEED", x)] > 0}
         for x in sorted(feed0):
             base.append((tr, r, x, to_model.get(x, ""), repr(feed0[x]), repr(cal.get(x, 0.0))))

@@ -7,8 +7,7 @@ section 6; per-file source, vintage and units are also in `MANIFEST.json` and `I
 `DATA_SOURCING_REGISTRY.json`. MANIFEST.json is not regenerated automatically and lags the files in places (shapes of
 `world_prices.csv`, `fert_side_effects.csv`; sources of `base_areas.csv`, `yields.csv`).
 
-Files are under `capri_data/<base_year>/<category>/` (only `2017/` exists); `trade_flows.csv` resolves to
-`capri_data/shared/trade_flows_2017.csv` (`capri_mod/data/loaders.py::resolve_data_file`).
+Files are under `capri_data/<base_year>/<category>/` (only `2017/` exists; `capri_mod/data/loaders.py::resolve_data_file`).
 
 ---
 
@@ -53,7 +52,6 @@ Files are under `capri_data/<base_year>/<category>/` (only `2017/` exists); `tra
 
 | File | Content |
 |---|---|
-| `trade_flows_2017.csv` | bilateral trade by exporter and importer (1000 t; 601 rows × 39 commodities); per MANIFEST.json recalibrated from CAPRI capmod `res_0_1717` (2017); not read by the model (an input of tools/check/validate_world_prices.py and tools/build/recalibrate_trade_2017.py); the bilateral market reads `2017/market/bilateral_flows_<year>.csv` |
 | `regional_units.csv` | the model's regions: CAPRI's 221 regional units of the EU27 and Norway (8-character codes), their CAPRI member state and NUTS-0 country (`tools/build/build_regional_units.py`; `capri_mod/data/definitions.py`) |
 | `capri_units_nuts2024.csv` | CAPRI unit → NUTS 2024 region, for reporting: group (connected set of units and regions), Eurostat UAA and the weight of each region in its group (`tools/build/build_nuts2024_reporting.py`; `capri_mod/nuts_reporting.py`) |
 | `nuts_version_correspondence.csv` | CAPRI codes → NUTS codes (kept for reporting; the model reads no region map since 27 October 2026: each region is its own CAPRI region) |

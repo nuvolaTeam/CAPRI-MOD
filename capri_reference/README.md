@@ -1,9 +1,10 @@
 # capri_reference: CAPRI's own files, for the parity tests
 
 These are CAPRI files from the project lead's installation, converted to CSV. They are read-only and are read only by
-the tests and the parity runs, never by the model (docs/design/CAPTRD_MOD.md section 6). One folder is a source of
+the tests and the parity runs, never by the model (docs/design/CAPTRD_MOD.md section 6). Two folders are sources of
 the data pipeline: `sets/simini_21730`, read by `tools/build/build_code_lists.py` (the code lists of
-`capri_data/codes`, 29 October 2026). They are
+`capri_data/codes` and, since 3 November 2026, CAPRI's RMS and RMS_TO_RM in `capri_data/shared`), and
+`captrd_results/1770`, read by `tools/build/build_captrd_trajectory.py` (the CAPTRD 2030 scenario). They are
 large, so they are left out of the zip packages. Each folder is rebuilt from the uploaded originals by the tool
 named below.
 

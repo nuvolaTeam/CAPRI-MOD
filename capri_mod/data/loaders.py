@@ -91,7 +91,9 @@ _FILE_CATEGORY = {
     "nutrient_coefs_regional.csv": "supply",
     "climate_zones.csv": "environment",
 }
-_SHARED_FILES = {"trade_flows.csv": "trade_flows_{BY}.csv"}       # {BY}: the base year (K52f)
+#: the files of capri_data/shared read under another name, {BY} the base year (K52f): none since 3 November 2026
+#: (trade_flows.csv, shared/trade_flows_2017.csv, read by no code, removed with the market's move, stage 1)
+_SHARED_FILES: dict = {}
 #: the scenario data (refactor stage 5): the Green Deal group's data held once in its group folder, the 2030
 #: reference's baseline surplus beside its trajectory (capri_data/scenarios/)
 _SCENARIO_FILES = {"landscape_targets_ms.csv": "scenarios/greendeal_group",

@@ -9,6 +9,10 @@ throughout may follow later). This builder writes:
                                               land and feed energy, RALL all regional units)
   capri_data/codes/capri/FEED_TO_O.csv  CAPRI's feed bulks and their products: feed, row
   capri_data/codes/capri/MS_RU.csv     CAPRI's member states and their regional units (MAP_RR x MS x RU)
+  capri_data/codes/capri/RM.csv, RMTP.csv, RM_TO_RMTP.csv, RMEU_to_RM.csv
+                                       CAPRI's market regions, trade-policy blocks, the block of each market region
+                                              and the EU's two market blocks, in CAPRI's set order (the market's move
+                                              onto CAPRI's regions, MARKET_REGIONS_INVENTORY.md stage 1)
   capri_data/codes/model_commodities.csv the model's 58 market commodities (MARKET_COMMODITIES): code,
                                               capri_code, mapping_source
 
@@ -71,7 +75,13 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--sets", required=True, help="folder of CAPRI's sets (build_capri_sets_reference.py output)")
     a = ap.parse_args()
-    from capri_mod.data import definitions as D
+    # the model's activity and commodity lists read from definitions.py's source, not by importing it: importing
+    # capri_mod.data reads the code lists this builder writes (codes/model_commodities.csv, codes/capri/CACT_TO_NGRP.csv,
+    # PERM_NGRP.csv, FEED_TRD.csv; refactor stages 3-4), so the import made the builder depend on its own outputs and
+    # the data could not be rebuilt from blank (tools/check/rebuild_from_blank.py, 3 November 2026)
+    class D:
+        CROPS, ANIMALS, MARKET_COMMODITIES = (literal("capri_mod/data/definitions.py", n)
+                                              for n in ("CROPS", "ANIMALS", "MARKET_COMMODITIES"))
 
     capri = {s: read_set(a.sets, s) for s in CAPRI_SETS}
     # CAPRI's COLS holds a blank element (' '), DATAOUT's empty dim5 (capmod/set_and_store_dataout.gms l. 53:
@@ -175,8 +185,9 @@ def main():
     xx_of = {}
     for c, x in pairs("AACT_TO_XX"):
         xx_of.setdefault(c, set()).add(x)
-    with open(OUT / "model_commodities.csv", newline="", encoding="utf-8") as fh:
-        comm_capri = {r["code"]: r["capri_code"] for r in csv.DictReader(fh)}
+    # the commodities' CAPRI codes as derived above (written below to codes/model_commodities.csv; until 3 November
+    # 2026 read back from that file, this builder's own output)
+    comm_capri = {c: cc for c, cc, _ in comms}
     for r in classes:
         cc, src = capri_of.get(r["code"], []), r["source"]
         own = lambda col: f"{col} {r[col]}: the model's" in src or f"{col}: the model's" in src or "DEP-" in src
@@ -225,6 +236,32 @@ def main():
             if r["code"] not in lt_mrk:
                 problems.append(f"model_land_types.csv: {r['code']} is not in CAPRI's landTypesMrk")
 
+    # CAPRI's market regions (the market's move onto CAPRI's regions, stage 1: MARKET_REGIONS_INVENTORY.md section 5):
+    # RM (45 market regions), RMTP (42 trade-policy blocks), RM_TO_RMTP, RMEU_to_RM (the EU's two market blocks), in
+    # CAPRI's set order; checked against RALL and against the behavioural regions' map shared/rms_to_rm.csv
+    rm, rmtp = read_set(a.sets, "RM"), read_set(a.sets, "RMTP")
+    rm_to_rmtp, rmeu_to_rm = pairs("RM_TO_RMTP"), pairs("RMEU_to_RM")
+    for name, codes in (("RM", rm), ("RMTP", rmtp)):
+        problems += [f"CAPRI's {name}: {c} is not in RALL" for c in codes if c not in capri["RALL"]]
+    blocks_of = {}
+    for r, t in rm_to_rmtp:
+        blocks_of.setdefault(r, []).append(t)
+        if t not in rmtp:
+            problems.append(f"CAPRI's RM_TO_RMTP: {t} is not in RMTP")
+    problems += [f"CAPRI's RM_TO_RMTP: {r} has {len(blocks_of.get(r, []))} trade-policy blocks, not one"
+                 for r in rm if len(blocks_of.get(r, [])) != 1]
+    problems += [f"CAPRI's RMEU_to_RM: {r} is not in RM" for _, r in rmeu_to_rm if r not in rm]
+    # CAPRI's behavioural regions RMS and their market region RMS_TO_RM, every RMS in one RM: written below to
+    # shared/rms.csv and shared/rms_to_rm.csv (until 3 November 2026 written by build_gl_demand.py, which reads them,
+    # and checked here; the market's grouping step, tools/lib/_market_regions.py, reads them)
+    rms, rms_to_rm = read_set(a.sets, "RMS"), pairs("RMS_TO_RM")
+    rm_of_rms = {}
+    for r, m in rms_to_rm:
+        rm_of_rms.setdefault(r, []).append(m)
+        if m not in rm:
+            problems.append(f"CAPRI's RMS_TO_RM: {m} is not in RM")
+    problems += [f"CAPRI's RMS_TO_RM: {r} has {len(rm_of_rms.get(r, []))} market regions, not one"
+                 for r in rms if len(rm_of_rms.get(r, [])) != 1]
     if problems:
         raise SystemExit("code lists not written:\n  " + "\n  ".join(problems))
     for s, d in capri.items():
@@ -245,6 +282,12 @@ def main():
     write(OUT / "capri" / "landTypes_to_pact.csv", ("land_type", "pact"), sorted(pairs("landTypes_to_pact")))
     write(OUT / "capri" / "cropDivGrps_mCact.csv", ("group", "mcact"), sorted(pairs("cropDivGrps_mCact")))
     write(OUT / "capri" / "MS_RU.csv", ("ms", "ru"), sorted((m, r) for m, r in pairs("Map_RR") if m in ms_ and r in ru_))
+    write(OUT / "capri" / "RM.csv", ("code", "text"), list(rm.items()))
+    write(OUT / "capri" / "RMTP.csv", ("code", "text"), list(rmtp.items()))
+    write(OUT / "capri" / "RM_TO_RMTP.csv", ("rm", "rmtp"), rm_to_rmtp)
+    write(OUT / "capri" / "RMEU_to_RM.csv", ("rmeu", "rm"), rmeu_to_rm)
+    write(ROOT / "capri_data" / "shared" / "rms.csv", ("rms",), [(r,) for r in rms])
+    write(ROOT / "capri_data" / "shared" / "rms_to_rm.csv", ("rms", "rm"), rms_to_rm)
     write(OUT / "model_commodities.csv", ("code", "capri_code", "mapping_source"), comms)
     differ = [(c, cc) for c, cc, _ in comms if c != cc]
     print(f"wrote {OUT.relative_to(ROOT)}: CAPRI's sets {', '.join(f'{s} {len(d)}' for s, d in capri.items())}; "

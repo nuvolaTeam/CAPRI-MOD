@@ -571,7 +571,7 @@ own per-unit premium change of its pair of runs (capri_vcs_effect.csv) and compa
 
 | Item | Depends on | Status | Open decisions | Main source |
 |---|---|---|---|---|
-| Market on 45 RM (stages 1-3, 2017 year, TARV, young-animal timing) | refactor finished; full scenario runs | inventory and decisions done; WBA fix done; stages 1-3 not started | stage of the TARV switch and 2017 rebuild; link of stage 2's young-animal fix with G2g; gate batching | MRI |
+| Market on 45 RM (stages 1-3, 2017 year, TARV, young-animal timing) | refactor finished; full scenario runs | inventory and decisions done; WBA fix done; **stage 1 done 3 November 2026** (MRI "Stage 1, done"); stages 2-3 not started | stage of the TARV switch and 2017 rebuild; link of stage 2's young-animal fix with G2g; gate batching | MRI |
 | Ports (stages 4-7: bilateral and global TRQs, DEP-41, levies, entry prices, land and yield block) | market move stages 1-3 | data activation checked (G3I); not started | ports before G3 or as G3 equations; luc_market not in scope | MRI §5; G3I |
 | 29 non-EU units | market move (MRI §7) | SND steps 1-2 done; step 3 half done (250-unit table on noneu-step3, not merged); steps 4-10 to do | default country list after the build [I] | SND |
 | S1/S2 (and DEP-42) | refactor stages 3-5; N6 | decided 1 Nov (S1 option c; S2 explicit); data and code not started; DEP-42 on n6 branches | none stated | S12 |

@@ -226,7 +226,6 @@ INVOCATIONS: list[tuple[str, list[str], list[Path]]] = [
                                    str(SOURCES / "costsavings/costsavings_max_21730_jul15.csv")], [SOURCES / "costsavings"]),
     ("extract_capri_marginal_terms", [str(REF), "ini"], [REF]),
     ("ingest_capmod_market", ["--dump", str(EXPORTS / "_symbols_base1717.txt")], [EXPORTS / "_symbols_base1717.txt"]),
-    ("recalibrate_trade_2017", [], []),
 ]
 
 #: not audited: utilities and writers of capri_reference/ (not committed) or of inputs held elsewhere
@@ -244,6 +243,7 @@ NOT_AUDITED = {
                                    "writer); its command line edits a file in place",
     "build_animal_yields": "a module: build() is called by build_crop_economics_2017, the one writer of yields.csv",
     "convert_inputs_to_parquet": "a conversion step (Parquet decision deferred), not a builder of data",
+    "recalibrate_trade_2017": "a module: CAPRI's reporting aggregates (AGGREGATES) and the commodity map (COMMODITY_MAP) the market builders read; its matrix, shared/trade_flows_2017.csv, read by no code, removed 3 November 2026",
 }
 
 TOL_REL, TOL_ABS = 1e-12, 1e-15

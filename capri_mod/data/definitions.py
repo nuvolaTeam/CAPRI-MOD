@@ -406,6 +406,24 @@ MS_CODE = {p: m[:2] for p, m in MS_OF_PREFIX.items()}
 _MS_SET = frozenset(MS_OF_PREFIX.values())
 
 
+def _load_market_codes():
+    """CAPRI's market regions (RM) and trade-policy blocks (RMTP) that are not member-state codes: codes capri_ms must
+    not read by their first two letters (BEL Belarus, BGD Bangladesh and SKOR South Korea would read as BL, BG and SK;
+    MARKET_REGIONS_INVENTORY.md section 7, decision 1, before the market takes CAPRI's codes)."""
+    import csv
+    from pathlib import Path
+    d = Path(__file__).resolve().parents[2] / "capri_data" / "codes" / "capri"
+    codes = set()
+    for name in ("RM.csv", "RMTP.csv"):
+        with open(d / name, newline="") as f:
+            codes |= {r["code"] for r in csv.DictReader(f)}
+    return frozenset(codes - _MS_SET)
+
+
+#: CAPRI's market and trade-policy codes that are not member states (UK000000, NO000000 and TUR are both)
+_MARKET_CODES = _load_market_codes()
+
+
 def capri_ms(region: str) -> str:
     """CAPRI member state of a model region (CAPRI's code), a CAPRI member state or a country prefix:
     'BL210000' -> 'BL000000', 'IR010000' -> 'IR000000', 'BE' -> 'BL000000', 'TR100000' -> 'TUR', 'TUR' -> 'TUR'.
@@ -413,6 +431,9 @@ def capri_ms(region: str) -> str:
     r = str(region)
     if r in _MS_SET:
         return r
+    if r in _MARKET_CODES:
+        raise ValueError(f"capri_ms({r!r}): one of CAPRI's market regions or trade-policy blocks, not a member state or "
+                         f"regional unit (its first two letters, {r[:2]!r}, would read as a member state's prefix)")
     p = r[:2]
     return MS_OF_PREFIX.get(p, p + "000000")
 
@@ -420,5 +441,5 @@ def capri_ms(region: str) -> str:
 def is_eu(region: str) -> bool:
     """Whether a model region, a CAPRI member state or a country prefix belongs to the EU: its CAPRI member state is in
     one of CAPRI's EU trade blocks (EU_MS_BLOCK, capri_data/shared/eu_market_blocks.csv). Norway's supply regions are
-    not (they are SUP_NONEU_ALL)."""
+    not (they are SUP_NONEU_ALL). A market region's code raises (capri_ms)."""
     return capri_ms(region) in EU_MS_BLOCK

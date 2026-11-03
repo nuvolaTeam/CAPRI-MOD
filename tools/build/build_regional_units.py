@@ -25,10 +25,12 @@ from __future__ import annotations
 import argparse
 import csv
 import re
+import sys
 from collections import defaultdict
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT))   # capri_mod.settings (the repository's default settings)
 SRC = ROOT / "capri_data" / "sources" / "capri_res" / "gd2030_endotech_ini_nbalance.csv"
 MS_FILE = ROOT / "capri_data" / "shared" / "capri_member_state_codes.csv"
 DEST = ROOT / "capri_data" / "shared" / "regional_units.csv"
@@ -39,10 +41,24 @@ CODE = re.compile(r"^[A-Z]{2}[A-Z0-9]{6}$")
 COUNTRY_OF_UNIT = {"BL400000": "LU"}
 
 
+def modelled_member_states() -> set[str]:
+    """CAPRI's member states whose units the model has: the EU's (shared/eu_market_blocks.csv) and the countries
+    outside the EU with supply models by default (the setting run.supply_countries_outside_eu, read from the
+    repository's defaults so a user's settings file cannot change this file). capri_member_state_codes.csv also lists
+    the UK, Turkey and the Western Balkans (since 30 October 2026, commit 4d58130), whose units are not modelled yet
+    (docs/design/SUPPLY_NONEU_DESIGN.md): until then this builder took every member state of that table except the
+    UK, and its output no longer matched the committed file (found by tools/check/rebuild_from_blank.py, 3 November
+    2026)."""
+    from capri_mod import settings as _settings
+    with open(ROOT / "capri_data" / "shared" / "eu_market_blocks.csv", newline="") as f:
+        eu = {r["ms"] for r in csv.DictReader(f)}
+    return eu | set(_settings.defaults().get("run.supply_countries_outside_eu"))
+
+
 def units() -> list[tuple[str, str, str]]:
     with open(MS_FILE, newline="") as f:
         rows = list(csv.DictReader(f))
-    ms = {r["capri_ms"] for r in rows if r["capri_ms"] != "UK000000"}
+    ms = {r["capri_ms"] for r in rows} & modelled_member_states()
     # CAPRI member state -> NUTS-0 country: the file's first prefix per member state (BL: BE, LU; EL: EL, GR)
     ctry = {}
     for r in rows:

@@ -3500,7 +3500,7 @@
    "columns": 2,
    "origin": {
     "nature": "capri",
-    "builder": "build_code_lists (not in the trace yet)"
+    "builder": "build_code_lists"
    }
   },
   "capri_data/codes/capri/FEED_TO_O.csv": {
@@ -3603,6 +3603,52 @@
     "builder": "build_code_lists"
    }
   },
+  "capri_data/codes/capri/RM.csv": {
+   "description": "CAPRI RM: the market regions of the global market model, in CAPRI's set order (sets.gms; the market's move onto CAPRI's regions, MARKET_REGIONS_INVENTORY.md stage 1)",
+   "kind": "structure",
+   "rows": 45,
+   "columns": 2,
+   "read_by_model": [
+    "capri_mod/data/definitions.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists"
+   }
+  },
+  "capri_data/codes/capri/RMEU_to_RM.csv": {
+   "description": "CAPRI RMEU_to_RM: the EU's market blocks and their market regions (sets.gms)",
+   "kind": "structure",
+   "rows": 2,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists"
+   }
+  },
+  "capri_data/codes/capri/RMTP.csv": {
+   "description": "CAPRI RMTP: the trade-policy blocks of the market model (tariffs and TRQs), in CAPRI's set order (sets.gms)",
+   "kind": "structure",
+   "rows": 42,
+   "columns": 2,
+   "read_by_model": [
+    "capri_mod/data/definitions.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists"
+   }
+  },
+  "capri_data/codes/capri/RM_TO_RMTP.csv": {
+   "description": "CAPRI RM_TO_RMTP: the trade-policy block of each market region (sets.gms)",
+   "kind": "structure",
+   "rows": 45,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists"
+   }
+  },
   "capri_data/codes/capri/ROWS.csv": {
    "description": "CAPRI ROWS, the row items of its data and results arrays DATA and DATAOUT (sets.gms)",
    "kind": "structure",
@@ -3610,7 +3656,7 @@
    "columns": 2,
    "origin": {
     "nature": "capri",
-    "builder": "build_code_lists (not in the trace yet)"
+    "builder": "build_code_lists"
    }
   },
   "capri_data/codes/capri/XX.csv": {
@@ -3723,6 +3769,15 @@
    "read_by_model": [
     "capri_mod/data/definitions.py"
    ],
+   "origin": {
+    "nature": "declared"
+   }
+  },
+  "capri_data/codes/model_market_regions.csv": {
+   "description": "the market's grouping step: each of CAPRI's 45 market regions (RM) and the model's market region it belongs to (26 their own, A_EU_WEST and A_EU_EAST the model's EU27, 17 its ROW); no builder: declared, read by tools/lib/_market_regions.py for every builder of the market's data (MARKET_REGIONS_INVENTORY.md stage 1; stages 2-3 change only this table)",
+   "kind": "structure",
+   "rows": 45,
+   "columns": 3,
    "origin": {
     "nature": "declared"
    }
@@ -4926,7 +4981,7 @@
    "columns": 1,
    "origin": {
     "nature": "capri",
-    "builder": "build_gl_demand"
+    "builder": "build_code_lists"
    }
   },
   "capri_data/shared/rms_to_rm.csv": {
@@ -4940,26 +4995,8 @@
    ],
    "origin": {
     "nature": "capri",
-    "builder": "build_gl_demand"
+    "builder": "build_code_lists"
    }
-  },
-  "capri_data/shared/trade_flows_2017.csv": {
-   "description": "Recalibrate the trade matrix from CAPRI's 2017 capmod result. (tools/build/recalibrate_trade_2017.py)",
-   "kind": "base",
-   "vintage": "2021",
-   "domain": "market",
-   "status": "tools",
-   "rows": 692,
-   "columns": 41,
-   "units": "to be established (value_units: open)",
-   "origin": {
-    "nature": "mixed",
-    "builder": "recalibrate_trade_2017"
-   },
-   "notes": [
-    "CAPRI's 2017 bilateral ImportQ (capmod res_0_1717 cap_after_2014_cal_from_data), mapped to 26 model trade regions (incl. NOR and ROW), with CAPRI's overlapping aggregates excluded. 601 pairs x 39 commodities, 32 with any flow; it includes intra-EU trade (EU27 -> EU27). The market does not read it (it uses 2017/market/bilateral_flows_*.csv). It is loaded only by the data check (validate_data.py:159, a loadability check, as trade_flows.csv via loaders._SHARED_FILES) and read by tools/check/validate_world_prices.py. (checked 2026-10-29)"
-   ],
-   "catalogue_note": "Recalibrated from CAPRI capmod res_0_1717 (2017). The previous 841-row matrix carried a zero diagonal - no intra-EU trade at all - so every commodity showed a 100% extra-EU import share. 547 rows is fewer because CAPRI reports only realised flows, not an exhaustive grid of zeros. | REBUILT 2026-10 on CAPRI's trade partition (the 44 trading regions reproduce ImportQ(World, World) for all 71 traded products, 2017): no EU or rest-of-world double counting, genuine regions no longer dropped, six oilseed-product columns; EU imports match CAPRI's NONEU rows exactly. Not read by the model since the bilateral market (bilateral_flows_<year>.csv) replaced the old Armington aggregator (removed 21 October 2026, an orphan: built from this file, never used); kept as an input of tools/check/validate_world_prices.py and tools/build/recalibrate_trade_2017.py. (not re-checked)"
   },
   "capri_data/sources/baseline_pmp/estnlp_vb.csv": {
    "description": "CAPRI's econometric estimate VB.L(region, group1, group2) from dat/estnlp/results.gdx (around 2004), the crop-group terms CAPRI derives its PMP terms from; kept for the record and for checks (tools/build/build_pmp_2030.py).",
@@ -5775,19 +5812,6 @@
    "origin": {
     "nature": "source-extract"
    }
-  },
-  "capri_data/sources/fao_2021/trade_flows_2021.csv": {
-   "description": "FAOSTAT 2021 bilateral trade (sources/fao_2021/README.md): one row per exporter and importer of 29 trade regions, one column per commodity; no builder; read only by tools/build/recalibrate_trade_2017.py as a comparison.",
-   "kind": "base",
-   "rows": 841,
-   "columns": 34,
-   "units": "to be established (value_units: open)",
-   "origin": {
-    "nature": "source-extract"
-   },
-   "notes": [
-    "FAOSTAT 2021 bilateral trade (per sources/fao_2021/README.md), 29 x 29 trade regions (841 pairs, a full grid), 32 commodity columns, 13 with any flow. The EU27 -> EU27 diagonal is zero, so no intra-EU trade. No builder; it arrived with the first commit. Not read by the model. tools/build/recalibrate_trade_2017.py reads it as the comparison for its extra-EU share report, and also takes its column list as the commodity set of shared/trade_flows_2017.csv. (checked 2026-10-29)"
-   ]
   },
   "capri_data/sources/fao_agg_2017/fao_agg_dairy_products_bas.csv": {
    "description": "CAPRI's FAO_agg base-period balances (p_dataMarket, year BAS: MAPR, DOMM, IMPT, EXPT; tonnes) of the dairy products per CAPRI region, from fao_agg_17_datamarket.txt (tools/build/build_dairy_world_markets.py).",

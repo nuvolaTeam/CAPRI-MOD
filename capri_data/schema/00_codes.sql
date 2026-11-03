@@ -167,6 +167,25 @@ GROUP BY capri_code HAVING count(*) > 1;
 -- rule: a member state of the regional units is its own unit's member state code (ends in 000000)
 SELECT region, capri_ms FROM regional_units WHERE capri_ms NOT LIKE '%000000';
 
+-- file: capri_data/codes/capri/RM.csv
+CREATE TABLE capri_rm (code VARCHAR PRIMARY KEY REFERENCES capri_rall (code), text VARCHAR);
+COMMENT ON TABLE capri_rm IS 'CAPRI RM: the market regions of the global market model, in CAPRI''s set order (sets.gms; the market''s move onto CAPRI''s regions, MARKET_REGIONS_INVENTORY.md stage 1)';
+
+-- file: capri_data/codes/capri/RMTP.csv
+CREATE TABLE capri_rmtp (code VARCHAR PRIMARY KEY REFERENCES capri_rall (code), text VARCHAR);
+COMMENT ON TABLE capri_rmtp IS 'CAPRI RMTP: the trade-policy blocks of the market model (tariffs and TRQs), in CAPRI''s set order (sets.gms)';
+
+-- file: capri_data/codes/capri/RM_TO_RMTP.csv
+CREATE TABLE capri_rm_to_rmtp (
+    rm VARCHAR PRIMARY KEY REFERENCES capri_rm (code),
+    rmtp VARCHAR NOT NULL REFERENCES capri_rmtp (code)
+);
+COMMENT ON TABLE capri_rm_to_rmtp IS 'CAPRI RM_TO_RMTP: the trade-policy block of each market region (sets.gms)';
+
+-- file: capri_data/codes/capri/RMEU_to_RM.csv
+CREATE TABLE capri_rmeu_to_rm (rmeu VARCHAR PRIMARY KEY, rm VARCHAR NOT NULL REFERENCES capri_rm (code));
+COMMENT ON TABLE capri_rmeu_to_rm IS 'CAPRI RMEU_to_RM: the EU''s market blocks and their market regions (sets.gms)';
+
 -- file: capri_data/codes/capri/PERM_NGRP.csv
 CREATE TABLE capri_perm_ngrp (code VARCHAR PRIMARY KEY, text VARCHAR);
 COMMENT ON TABLE capri_perm_ngrp IS 'CAPRI PERM_NGRP: the permanent crop groups of the fertiliser distribution (supply/define_ngrp_sets.gms)';

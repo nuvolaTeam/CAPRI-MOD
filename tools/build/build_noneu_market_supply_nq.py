@@ -36,8 +36,8 @@ function stays at CAPRI's calibration point, as for the regions without supply m
 Sources: CAPRI's NQ supply Hessian at the calibration point (elas_2_1730defaulta.csv: p_hessNQSupp at CAL), the
 regions' producer prices and production there (data_market_1730defaulta.csv: Data_CAL PPRI, PROD at CAL), the 2030
 price of the non-agricultural good (markmarket_greendeal_1730et_base_1717.txt: PPRI INPE 2030), CAPRI's market
-regions (capri_data/shared/rms_to_rm.csv) and the model's trade regions (recalibrate_trade_2017.REGION_MAP, others
-ROW).
+regions (capri_data/shared/rms_to_rm.csv) and the model's trade regions (the market's grouping step,
+tools/lib/_market_regions.py).
 
 Output: capri_data/2017/market/noneu_market_supply_nq.csv
     trade_region, rms, x, y, capri_x, capri_y, h, ppri_y, inpe, h_ratio      (x, y model codes; y empty: held)
@@ -95,7 +95,7 @@ def read_param(path: Path, name: str, pat: re.Pattern, keep) -> list:
 
 
 def main():
-    from recalibrate_trade_2017 import REGION_MAP
+    from _market_regions import model_region  # the market's grouping step (tools/lib/_market_regions.py)
     from build_bilateral_market import CAPRI as CAPRI_TO_MODEL       # CAPRI product -> model commodity
     to_model = dict(CAPRI_TO_MODEL)
     to_model["MILK"] = "MILK"                                        # raw milk: the region's dairy block
@@ -138,10 +138,10 @@ def main():
             # a price CAPRI's calibration data does not carry for the region (FEDE: the feed energy balance's
             # shadow price; young animals priced at RM level): such a column is held, its term not usable
             held[y] += 0.0
-            rows.append((REGION_MAP.get(rm_of[r], "ROW"), r, to_model[x], "", x, y, h, 0.0, inpe[r], 0.0))
+            rows.append((model_region(rm_of[r]), r, to_model[x], "", x, y, h, 0.0, inpe[r], 0.0))
             continue
         ym = to_model.get(y, "") if y != "FEDE" else "FEDE"
-        rows.append((REGION_MAP.get(rm_of[r], "ROW"), r, to_model[x], ym, x, y, h, p, inpe[r], h * p / inpe[r]))
+        rows.append((model_region(rm_of[r]), r, to_model[x], ym, x, y, h, p, inpe[r], h * p / inpe[r]))
         if not ym:
             held[y] += abs(h * p / inpe[r])
     if missing:

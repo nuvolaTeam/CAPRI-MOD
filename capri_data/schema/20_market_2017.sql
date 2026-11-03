@@ -9,6 +9,17 @@ CREATE TABLE model_trade_regions (
 );
 COMMENT ON TABLE model_trade_regions IS 'the bilateral market''s trade regions in their order and the CAPRI region each stands for (market region or trade block of CAPRI''s market data); no builder: a declared code list, read by capri_mod/data/definitions.py (ALL_TRADE_REGIONS, TRADE_REGION_OF_CAPRI) and tools/build/recalibrate_trade_2017.py (REGION_MAP)';
 
+-- file: capri_data/codes/model_market_regions.csv
+CREATE TABLE model_market_regions (
+    rm VARCHAR PRIMARY KEY REFERENCES capri_rm (code),
+    model_region VARCHAR NOT NULL REFERENCES model_trade_regions (code),
+    source VARCHAR NOT NULL                            -- why the market region is in that model region
+);
+COMMENT ON TABLE model_market_regions IS 'the market''s grouping step: each of CAPRI''s 45 market regions (RM) and the model''s market region it belongs to (26 their own, A_EU_WEST and A_EU_EAST the model''s EU27, 17 its ROW); no builder: declared, read by tools/lib/_market_regions.py for every builder of the market''s data (MARKET_REGIONS_INVENTORY.md stage 1; stages 2-3 change only this table)';
+
+-- rule: every one of CAPRI's market regions has its model region
+SELECT code FROM capri_rm WHERE code NOT IN (SELECT rm FROM model_market_regions);
+
 -- file: capri_data/shared/rms_to_rm.csv
 CREATE TABLE rms_to_rm (
     rms VARCHAR PRIMARY KEY REFERENCES capri_rall (code),

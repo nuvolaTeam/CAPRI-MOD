@@ -1,0 +1,46 @@
+code,text
+UK000000,United Kingdom
+NO000000,Norway
+TUR,Turkey
+CH,Switzerland
+REU,Rest of Europe
+RUS,Russia
+UKR,Ukraine
+BEL,Belarus
+KAZ,Kazathan
+FSU,Former Soviet Union without Russia
+MOR,Morocco
+MIDEAST,Middle East
+NGA,Nigeria
+ETH,Ethiopia
+ZAF,South Africa
+AFR_LDC,Africcan LDCs
+AFR_REST,Africa Rest (practically ACP)
+IND,India
+PAK,Pakistan
+BGD,Bangladesh
+CHN,China
+JAP,Japan
+MAL,Malaysia
+INDO,Indonesia
+TAW,Taiwan
+SKOR,South Korea
+VIET,VIET
+THAI,THAI
+ASOCE_LDC,Asian and Ociania LDC
+ASOCE_REST,Rest of Asia
+AUS,Australia
+NZL,New Zealand
+USA,USA
+CAN,Canada
+MEX,Mexico
+ARG,Argentina
+BRA,Brazil
+MSA_ACP,Middle and South America ACP
+RSA,Rest of South and Middle America
+A_EU_WEST,EU West
+A_EU_EAST,EU East
+MED,Other mediterrean countries
+URUPAR,Uruguay and Paraguay
+MER_OTH,"Bolivia, Chile, Venezuela"
+WBA,Western balcans

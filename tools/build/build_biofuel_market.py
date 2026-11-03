@@ -53,8 +53,8 @@ SUGA -> SUGR, TWIN -> WINE, RAPO/SUNO/SOYO -> themselves; palm oil PLMO and othe
 (markets since October 2026; before, no model market and the price held at the 2030 reference). By-products: DDGS at the region's DDGS producer price, glycerine 600 EUR/t
 (arm/store_prices.gms); both held at the reference (no DDGS market in the model; REGISTERED).
 
-CAPRI market regions -> model trade regions: EU member states -> EU27 (CAPRI's trade block EU27yr19);
-the regions of tools/build/recalibrate_trade_2017.REGION_MAP by name; the rest -> ROW. CAPRI's trade-only blocks
+CAPRI market regions -> model trade regions by the market's grouping step, tools/lib/_market_regions.py: codes/model_market_regions.csv (EU member states -> EU27, through
+CAPRI's EU blocks; the regions not modelled on their own -> ROW). CAPRI's trade-only blocks
 (EU27yr19, URUPAR, WBA, MER_OTH, MED) and reporting aggregates carry no functions of their own.
 
 Outputs (capri_data/2017/market/, one set per market year <YEAR>)
@@ -134,9 +134,9 @@ def is_rms(r: str, aggregates) -> bool:
     return not (len(r) == 8 and r[2:].isalnum() and not r.endswith("000000"))
 
 
-def model_region(r: str, region_map) -> str:
-    from recalibrate_trade_2017 import trade_region          # behavioural regions by their market region (WBA)
-    return "EU27" if r in EU_MS else trade_region(r)
+from _market_regions import model_region  # noqa: E402  (the market's grouping step, tools/lib/_market_regions.py:
+#   an EU member state's market region is one of CAPRI's EU blocks, the model's EU27; any other behavioural region by
+#   its market region, RMS_TO_RM; until 3 November 2026 a function of this builder doing the same)
 
 
 def calibrate_supply(ms, fuel, X0, PR0, rmssup):
@@ -183,7 +183,7 @@ def main():
     SRC = SRC_DIR / f"biofuel_dataout_{a.year}.csv.xz"
     HESS = SRC_DIR / f"biofuel_proc_hessian_{a.year}.csv"
     sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check")]
-    from recalibrate_trade_2017 import REGION_MAP, AGGREGATES
+    from recalibrate_trade_2017 import AGGREGATES
     if a.dump.exists():
         src = extract(a.dump, a.year)
         # the market regions, and the EU aggregate EU27yr19 for the EU's use of the feedstocks (biofuel_use_share)
@@ -221,7 +221,7 @@ def main():
                 # DDGS: CAPRI's producer price; glycerine: fixed at 600 EUR/t in CAPRI itself
                 # (arm/store_prices.gms PPRI.GLYC = 600, v_prodPrice.fx in arm/set_start_val.gms)
                 pby = (GLYC_PRICE if by == "GLYC" else v.get((ms, "PPRI", by), 0.0)) if by else 0.0
-                recs.append({"ms": ms, "region": model_region(ms, REGION_MAP), "biofuel": fuel, "feedstock": f,
+                recs.append({"ms": ms, "region": model_region(ms), "biofuel": fuel, "feedstock": f,
                              "commodity": COMMODITY.get(f, ""), "biof_kt": q, "prcb": prcb,
                              "prcby": v.get((ms, "PRCBY", f), 0.0) if by else 0.0,
                              "byproduct": by or "", "feed_price": v.get((ms, "ARM1P", f), float("nan")),
@@ -268,7 +268,7 @@ def main():
             X0, mub = x0.get((ms, fuel), (0.0, 0.0))
             fixed = sum(v.get((ms, k, fuel), 0.0) for k in ("NAGR", "SECG", "EXOG"))
             ppri = v.get((ms, "PPRI", fuel), 0.0)
-            row = dict(ms=ms, region=model_region(ms, REGION_MAP), biofuel=fuel, rmssup=int(rmssup),
+            row = dict(ms=ms, region=model_region(ms), biofuel=fuel, rmssup=int(rmssup),
                        prod_kt=prod, x0_kt=X0, fixed_kt=fixed, ppri=ppri, pmrk=v.get((ms, "PMRK", fuel), 0.0),
                        bfc=mub, pr0=0.0, sup_scale=0.0, sup_alfa=0.0, sup_beta=0.0, sup_slope=0.0, sup_turn=0.0)
             # SupplyBiof_ needs a biofuel price relation and feedstocks
