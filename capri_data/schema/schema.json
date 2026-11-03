@@ -13974,7 +13974,9 @@
      "capri_mod/market/calibration.py"
     ],
     "builders": [],
-    "checks": [],
+    "checks": [
+     "tools/check/check_market_base.py"
+    ],
     "tests": [
      "capri_mod/tests/test_capri.py",
      "capri_mod/tests/test_norway_market.py"
@@ -14246,7 +14248,9 @@
      "capri_mod/market/calibration.py"
     ],
     "builders": [],
-    "checks": [],
+    "checks": [
+     "tools/check/check_market_base.py"
+    ],
     "tests": []
    }
   },

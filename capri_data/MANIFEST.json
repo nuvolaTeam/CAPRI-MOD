@@ -1217,7 +1217,7 @@
    "vintage": "2017",
    "domain": "market",
    "status": "live",
-   "rows": 11862,
+   "rows": 21767,
    "columns": 9,
    "units": "to be established (value_units: open)",
    "read_by_model": [
@@ -1236,7 +1236,7 @@
    "vintage": "2017",
    "domain": "market",
    "status": "live",
-   "rows": 12829,
+   "rows": 23076,
    "columns": 9,
    "units": "to be established (value_units: open)",
    "read_by_model": [
@@ -1255,7 +1255,7 @@
    "vintage": "2030 reference",
    "domain": "market",
    "status": "live",
-   "rows": 11705,
+   "rows": 21414,
    "columns": 9,
    "units": "to be established (value_units: open)",
    "read_by_model": [
@@ -1275,7 +1275,7 @@
    "vintage": "2030 reference",
    "domain": "market",
    "status": "live",
-   "rows": 12670,
+   "rows": 22716,
    "columns": 9,
    "units": "to be established (value_units: open)",
    "read_by_model": [
@@ -1294,7 +1294,7 @@
    "vintage": "2017",
    "domain": "market",
    "status": "live",
-   "rows": 1593,
+   "rows": 2505,
    "columns": 4,
    "units": "to be established (value_units: open)",
    "read_by_model": [
@@ -1313,7 +1313,7 @@
    "vintage": "2017",
    "domain": "market",
    "status": "live",
-   "rows": 1653,
+   "rows": 2565,
    "columns": 4,
    "units": "to be established (value_units: open)",
    "read_by_model": [
@@ -1332,7 +1332,7 @@
    "vintage": "2030 reference",
    "domain": "market",
    "status": "live",
-   "rows": 1592,
+   "rows": 2504,
    "columns": 4,
    "units": "to be established (value_units: open)",
    "read_by_model": [
@@ -1352,7 +1352,7 @@
    "vintage": "2030 reference",
    "domain": "market",
    "status": "live",
-   "rows": 1653,
+   "rows": 2565,
    "columns": 4,
    "units": "to be established (value_units: open)",
    "read_by_model": [
@@ -1371,7 +1371,7 @@
    "vintage": "2017",
    "domain": "market",
    "status": "live",
-   "rows": 65,
+   "rows": 73,
    "columns": 5,
    "units": "to be established (value_units: open)",
    "read_by_model": [
@@ -1389,7 +1389,7 @@
    "vintage": "2030 reference",
    "domain": "market",
    "status": "live",
-   "rows": 67,
+   "rows": 75,
    "columns": 5,
    "units": "to be established (value_units: open)",
    "read_by_model": [
@@ -1516,7 +1516,7 @@
   "capri_data/2017/market/crushing_parameters_2017.csv": {
    "description": "CAPRI's oilseed crushing per model trade region at the 2017 market year: crush = PROC of the seed, oil and cake yields = CAPRI's PRCY, from CAPRI's market data of 2017 (tools/build/build_crushing_parameters.py)",
    "kind": "coefficients",
-   "rows": 70,
+   "rows": 107,
    "columns": 9,
    "units": "to be established (value_units: open)",
    "read_by_model": [
@@ -1530,7 +1530,7 @@
   "capri_data/2017/market/crushing_parameters_2030.csv": {
    "description": "CAPRI's oilseed crushing per model trade region at the 2030 market year: crush = PROC of the seed, oil and cake yields = CAPRI's PRCY, from CAPRI's market data of 2030 (tools/build/build_crushing_parameters.py)",
    "kind": "coefficients",
-   "rows": 70,
+   "rows": 107,
    "columns": 9,
    "units": "to be established (value_units: open)",
    "read_by_model": [
@@ -1629,7 +1629,7 @@
    "vintage": "2030 reference",
    "domain": "market",
    "status": "live",
-   "rows": 890,
+   "rows": 1389,
    "columns": 4,
    "units": "U_1000t",
    "read_by_model": [
@@ -1871,7 +1871,7 @@
    "vintage": "2030 calibration point",
    "domain": "market",
    "status": "live",
-   "rows": 494,
+   "rows": 838,
    "columns": 3,
    "units": "to be established (value_units: open)",
    "read_by_model": [
@@ -1909,7 +1909,7 @@
    "vintage": "2030 calibration point",
    "domain": "market",
    "status": "live",
-   "rows": 11224,
+   "rows": 18848,
    "columns": 4,
    "units": "to be established (value_units: open)",
    "read_by_model": [
@@ -2039,7 +2039,7 @@
   "capri_data/2017/market/noneu_feed_totals.csv": {
    "description": "CAPRI's feed at CAL of every non-EU behavioural region of a trade region per model commodity, the regions with supply models included (tools/build/build_noneu_feed_nq.py)",
    "kind": "base",
-   "rows": 608,
+   "rows": 952,
    "columns": 3,
    "units": "U_1000t",
    "read_by_model": [
@@ -2211,7 +2211,7 @@
    "vintage": "2017",
    "domain": "market",
    "status": "live",
-   "rows": 853,
+   "rows": 1346,
    "columns": 5,
    "units": "U_1000t, U_Elasticity",
    "read_by_model": [
@@ -2263,7 +2263,7 @@
    "vintage": "base period (BAS)",
    "domain": "market",
    "status": "live",
-   "rows": 4709,
+   "rows": 7284,
    "columns": 4,
    "units": "U_1000t",
    "read_by_model": [
@@ -2453,7 +2453,7 @@
   "capri_data/2017/policy/tariffs.csv": {
    "description": "Import protection per trade region and commodity from CAPRI's 2017 market results (Sprint 9r). (tools/build/build_tariffs_2017.py)",
    "kind": "coefficients",
-   "rows": 28,
+   "rows": 44,
    "columns": 53,
    "units": "to be established (value_units: open)",
    "read_by_model": [
@@ -3812,7 +3812,7 @@
   "capri_data/codes/model_trade_regions.csv": {
    "description": "the bilateral market's trade regions in their order and the CAPRI region each stands for (market region or trade block of CAPRI's market data); no builder: a declared code list, read by capri_mod/data/definitions.py (ALL_TRADE_REGIONS, TRADE_REGION_OF_CAPRI) and tools/build/recalibrate_trade_2017.py (REGION_MAP)",
    "kind": "structure",
-   "rows": 28,
+   "rows": 44,
    "columns": 3,
    "read_by_model": [
     "capri_mod/data/definitions.py"

@@ -15,8 +15,9 @@ Rows
         EU's oil extraction, FAO_agg's EU olive oil production (MAPR OLIO BAS of the EU member states of the regional
         units) over CAPRI's EU olives for oil (res_17 OLIV YILD x LEVL of the same member states, kg) in t
   FPRI  FAO_agg has no world price for it: CAPRI's 2017 market, export-weighted market prices of the exporting
-        regions (bilateral_flows_2017.csv, bilateral_regions_2017.csv; written by build_feed_byproducts.py until
-        29 October 2026)
+        market regions, every one of CAPRI's 45 an exporter, the EU's two blocks and their trade with each other
+        included (bilateral_flows_2017_eu2.csv, bilateral_regions_2017_eu2.csv; the project lead's rule (c), 3 November
+        2026; until then the one-EU files; written by build_feed_byproducts.py until 29 October 2026)
 
 Until 29 October 2026 most rows had no builder: written by an earlier one, at 2 decimals (1 for the oilseed oils and
 cakes and for olives), with two placeholder rows of removed markets (FATS 900, OFOD_M 400) and build_feed_byproducts.py
@@ -87,10 +88,10 @@ def olives_for_oil(dumps: Path, member_states) -> float:
 
 
 def fpri_price() -> float:
-    """FPRI: the export-weighted market price of the exporting regions in CAPRI's 2017 market."""
-    fl = _read_csv(MKT / "bilateral_flows_2017.csv")
+    """FPRI: the export-weighted market price of the exporting market regions in CAPRI's 2017 market."""
+    fl = _read_csv(MKT / "bilateral_flows_2017_eu2.csv")
     f = fl[(fl.commodity == "FPRI") & (fl.importer != fl.exporter)]
-    rg = _read_csv(MKT / "bilateral_regions_2017.csv")
+    rg = _read_csv(MKT / "bilateral_regions_2017_eu2.csv")
     pm = rg[rg.commodity == "FPRI"].set_index("region")["pmrk"]
     ex = f.groupby("exporter")["q_kt"].apply(math.fsum)       # exact sums: independent of the regions' order
     return math.fsum(q * float(pm.get(r, 0.0)) for r, q in ex.items()) / math.fsum(ex.values)
@@ -120,7 +121,7 @@ def build(fao: Path = FAO, dumps: Path = DUMPS):
         elif c == "FPRI":
             prices[c] = fpri_price()
             prov[c] = {"capri_code": "FPRI", "source": "CAPRI market_base_1717: export-weighted PMRK of the exporting "
-                       "regions (FAO_agg has no World PMRK for FPRI); tools/build/build_world_prices.py"}
+                       "market regions, the EU's two blocks included (FAO_agg has no World PMRK for FPRI); tools/build/build_world_prices.py"}
         else:
             code = SOURCE_CODE.get(c, capri_code.get(c))
             if code not in world:
