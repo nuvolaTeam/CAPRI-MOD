@@ -576,7 +576,8 @@ installation is. The item converts that material to Parquet and publishes it as 
 can rebuild every model input. **Beyond CAPRI**: CAPRI needs its installation to rebuild its own data.
 
 **Decided (the project lead, 3 November 2026).** The full Parquet set stays out of git and is available for download,
-hosted on Hugging Face (as the dat mirror, hf_capri); the item comes after the market move's stages 2-3.
+hosted on Hugging Face (as the dat mirror, hf_capri) as a gated dataset (each download approved by the project
+lead); the item comes after the market move's stages 2-3.
 
 **Measured** (3 November 2026, three of the largest files, every numeric record kept):
 
@@ -598,8 +599,7 @@ hosted on Hugging Face (as the dat mirror, hf_capri); the item comes after the m
 5. capri_data/sources keeps only the records each builder uses (the extract pattern of build_bilateral_market), so git
    stays small; the model's inputs stay CSV.
 
-**Open decisions.** Who may download it (CAPRI's material: licence and access; for instance a private or gated
-Hugging Face dataset).
+**Open decisions.** None stated (host, access and timing decided 3 November 2026).
 
 ## 13. Summary
 
@@ -619,7 +619,7 @@ Hugging Face dataset).
 | S11 | S1 for T1/T2 averages | not started; per item | which items and exports | SGP S11 |
 | P1 obligatory set-aside | — | not started | when | §12a; supply_model.gms SETA_ |
 | P2 coupled support, Pillar I envelope | — | not started | when; with the premium module's port | §12a |
-| CAPRI's sources as Parquet, for download (beyond CAPRI) | — | decided 3 Nov: outside git, on Hugging Face, after market stages 2-3; sizes measured; not started | access | §12b |
+| CAPRI's sources as Parquet, for download (beyond CAPRI) | — | decided 3 Nov: outside git, gated Hugging Face dataset, after market stages 2-3; sizes measured; not started | none | §12b |
 
 ## 14. Open decisions across all items
 
@@ -645,7 +645,7 @@ Hugging Face dataset).
 16. Not raised in the notes [I]: the position of S1/S2, the G2 stages and S6-S11 relative to the market move and the
     29 units.
 17. P1 and P2 (§12a): when to schedule them.
-18. §12b: who may access the Parquet download (host Hugging Face and timing decided 3 November 2026).
+18. Decided 3 November 2026: §12b's Parquet download on Hugging Face, gated, after the market move's stages 2-3.
 
 ## 15. Notes found out of date while drafting
 
