@@ -75,7 +75,13 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--sets", required=True, help="folder of CAPRI's sets (build_capri_sets_reference.py output)")
     a = ap.parse_args()
-    from capri_mod.data import definitions as D
+    # the model's activity and commodity lists read from definitions.py's source, not by importing it: importing
+    # capri_mod.data reads the code lists this builder writes (codes/model_commodities.csv, codes/capri/CACT_TO_NGRP.csv,
+    # PERM_NGRP.csv, FEED_TRD.csv; refactor stages 3-4), so the import made the builder depend on its own outputs and
+    # the data could not be rebuilt from blank (tools/check/rebuild_from_blank.py, 3 November 2026)
+    class D:
+        CROPS, ANIMALS, MARKET_COMMODITIES = (literal("capri_mod/data/definitions.py", n)
+                                              for n in ("CROPS", "ANIMALS", "MARKET_COMMODITIES"))
 
     capri = {s: read_set(a.sets, s) for s in CAPRI_SETS}
     # CAPRI's COLS holds a blank element (' '), DATAOUT's empty dim5 (capmod/set_and_store_dataout.gms l. 53:
@@ -179,8 +185,9 @@ def main():
     xx_of = {}
     for c, x in pairs("AACT_TO_XX"):
         xx_of.setdefault(c, set()).add(x)
-    with open(OUT / "model_commodities.csv", newline="", encoding="utf-8") as fh:
-        comm_capri = {r["code"]: r["capri_code"] for r in csv.DictReader(fh)}
+    # the commodities' CAPRI codes as derived above (written below to codes/model_commodities.csv; until 3 November
+    # 2026 read back from that file, this builder's own output)
+    comm_capri = {c: cc for c, cc, _ in comms}
     for r in classes:
         cc, src = capri_of.get(r["code"], []), r["source"]
         own = lambda col: f"{col} {r[col]}: the model's" in src or f"{col}: the model's" in src or "DEP-" in src
