@@ -1,172 +1,172 @@
-block,item,item_dim,capri_cols,capri_rows,unit,capri_source
-environmental,arable_land,rows,,,,
-environmental,ghg_enteric,rows,,,,
-environmental,ghg_ggwp,rows,,,,
-environmental,ghg_histosol_n2o,rows,,,,
-environmental,ghg_indirect_n2o,rows,,,,
-environmental,ghg_leaching_n2o,rows,,,,
-environmental,ghg_liming,rows,,,,
-environmental,ghg_manure_ch4,rows,,,,
-environmental,ghg_manure_n2o,rows,,,,
-environmental,ghg_manure_n2o_tech,rows,,,,
-environmental,ghg_non_co2,rows,,,,
-environmental,ghg_residue_n2o,rows,,,,
-environmental,ghg_soil_n2o,rows,,,,
-environmental,ghg_total,rows,,,,
-environmental,ghg_urea,rows,,,,
-environmental,grassland,rows,,,,
-environmental,leach_share,rows,,,,
-environmental,n_animal_products,rows,,,,
-environmental,n_crop_uptake,rows,,,,
-environmental,n_deposition,rows,,,,
-environmental,n_fixation,rows,,,,
-environmental,n_mineral_input,rows,,,,
-environmental,n_organic_input,rows,,,,
-environmental,n_runoff_leached,rows,,,,
-environmental,n_surplus,rows,,,,
-environmental,n_use_efficiency,rows,,,,
-environmental,nh3_livestock,rows,,,,
-environmental,nh3_soils,rows,,,,
-environmental,nh3_total,rows,,,,
-environmental,organic_area,rows,,,,
-environmental,p_crop_residues,rows,,,,
-environmental,p_input,rows,,,,
-environmental,p_manure_excretion,rows,,,,
-environmental,p_manure_net_export,rows,,,,
-environmental,p_mineral_input,rows,,,,
-environmental,p_runoff,rows,,,,
-environmental,p_surplus,rows,,,,
-environmental,p_surplus_soil,rows,,,,
-environmental,p_uptake,rows,,,,
-environmental,permanent_crops,rows,,,,
-environmental,shannon_crop_diversity,rows,,,,
-environmental,uaa_total,rows,,,,
-feed,FCER,rows,,,,
-feed,FCOM,rows,,,,
-feed,FENE,rows,,,,
-feed,FGRA,rows,,,,
-feed,FMAI,rows,,,,
-feed,FMIL,rows,,,,
-feed,FOFA,rows,,,,
-feed,FOTH,rows,,,,
-feed,FPRO,rows,,,,
-feed,FROO,rows,,,,
-feed,FSGM,rows,,,,
-feed,FSTR,rows,,,,
-fert_dist,area_kha,rows,,,,
-fert_dist,cap_scale,rows,,,,
-fert_dist,converged,rows,,,,
-fert_dist,cres_kg_ha,rows,,,,
-fert_dist,excr_kg_ha,rows,,,,
-fert_dist,mine_cap_kg_ha,rows,,,,
-fert_dist,mine_kg_ha,rows,,,,
-fert_npk,t,rows,,,,
-labour,LABF,rows,GROF,LABF,million hours,"baseline/labour_ageline.gms l. 181: GROF LABT = sum of LABT x LEVL x 0.001; simini_21730 DATA DE110000.GROF.LABT (LABF, family labour: the same sum of LABF)"
-labour,LABP,rows,GROF,LABP,million hours,"baseline/labour_ageline.gms l. 181: GROF LABT = sum of LABT x LEVL x 0.001; simini_21730 DATA DE110000.GROF.LABT (LABP, paid labour: the same sum of LABP)"
-labour,LABT,rows,GROF,LABT,million hours,baseline/labour_ageline.gms l. 181: GROF LABT = sum of LABT x LEVL x 0.001; simini_21730 DATA DE110000.GROF.LABT
-luc,ARTART,rows,,,,
-luc,ARTCRP,rows,,,,
-luc,ARTFOR,rows,,,,
-luc,ARTGRS,rows,,,,
-luc,ARTRES,rows,,,,
-luc,ARTWET,rows,,,,
-luc,CRPART,rows,,,,
-luc,CRPCRP,rows,,,,
-luc,CRPFOR,rows,,,,
-luc,CRPGRS,rows,,,,
-luc,CRPRES,rows,,,,
-luc,CRPWET,rows,,,,
-luc,FORART,rows,,,,
-luc,FORCRP,rows,,,,
-luc,FORFOR,rows,,,,
-luc,FORGRS,rows,,,,
-luc,FORRES,rows,,,,
-luc,FORWET,rows,,,,
-luc,GRSART,rows,,,,
-luc,GRSCRP,rows,,,,
-luc,GRSFOR,rows,,,,
-luc,GRSGRS,rows,,,,
-luc,GRSRES,rows,,,,
-luc,GRSWET,rows,,,,
-luc,RESART,rows,,,,
-luc,RESCRP,rows,,,,
-luc,RESFOR,rows,,,,
-luc,RESGRS,rows,,,,
-luc,RESRES,rows,,,,
-luc,RESWET,rows,,,,
-luc,WETART,rows,,,,
-luc,WETCRP,rows,,,,
-luc,WETFOR,rows,,,,
-luc,WETGRS,rows,,,,
-luc,WETRES,rows,,,,
-luc,WETWET,rows,,,,
-market,biofuel,cols,,,,
-market,consumption,cols,,,1000 t,
-market,dairy,cols,,,,
-market,domestic_prices,cols,PMRK,*,EUR/t,"reports/sol_market.gms l. 646: DATA(RM,'PMrk',XX) = v_marketPrice.l"
-market,excess_demand,cols,,,,
-market,net_exports,cols,,,1000 t,
-market,production,cols,PROD,*,1000 t,"reports/sol_market.gms l. 267: DATA(RMS,'Prod',XX1) = v_prodQuant.l"
-market,trade_flows,cols,ImportQ,*,1000 t,"capmod/set_and_store_dataout.gms l. 151: DATAOUT(RMALL,RMALL1,'ImportQ',XX) = p_tradeFlows (importer first)"
-market,wedge_prices,cols,,,EUR/t,
-market,world_prices,cols,,,EUR/t,
-policy,national_budgets,cols,,,,
-policy,pillar1_EUR_billion,cols,,,,
-policy,pillar2_EUR_billion,cols,,,,
-policy,premium_EUR_ha_UAA,cols,,,,
-policy,total_EU_budget_EUR_billion,cols,,,,
-set_aside,FALL,rows,FALL,LEVL,1000 ha,"CAPRI's set-aside activities' levels DATA(RU,act,'LEVL'): simini_21730 DATA DE110000.VSET.LEVL, DE110000.FALL.LEVL"
-set_aside,SETA,rows,,,,
-set_aside,VSET,rows,VSET,LEVL,1000 ha,"CAPRI's set-aside activities' levels DATA(RU,act,'LEVL'): simini_21730 DATA DE110000.VSET.LEVL, DE110000.FALL.LEVL"
-set_aside,labt_FALL,rows,,,,
-set_aside,labt_VSET,rows,,,,
-set_aside,prem_FALL,rows,,,,
-set_aside,prem_VSET,rows,,,,
-supply,activities,rows,*,LEVL,1000 ha (crops); 1000 heads (animals),"DATA(RU,act,'LEVL'): ROWS LEVL 'Activity level'; e.g. simini_21730 DATA DE110000.SWHE.LEVL"
-supply,animal_n_kept,rows,,,,
-supply,animal_n_relief,rows,,,,
-supply,animal_nh3_saved,rows,,,,
-supply,balance_shortfall,rows,,,,
-supply,cattle_shift,rows,,,,
-supply,converged,rows,,,,
-supply,cover_crops,rows,,,,
-supply,dairy_low_shift,rows,,,,
-supply,feed_dm,rows,,,,
-supply,feed_t,rows,,,,
-supply,fert_dist_mode_crops,rows,,,,
-supply,fert_dist_model,rows,,,,
-supply,fert_nmin,rows,,,,
-supply,fert_npk,rows,,,,
-supply,fert_tech_shares,rows,,,,
-supply,genetics_shift,rows,,,,
-supply,grass_ext_shift,rows,,,,
-supply,gross_margin,rows,,,EUR 1000,
-supply,gross_output,rows,,,1000 t,
-supply,histosol_fallow,rows,,,,
-supply,land_types,rows,,,,
-supply,luc,rows,,,,
-supply,manure_availability,rows,,,,
-supply,manure_ni_nh3,rows,,,,
-supply,manure_tech_shares,rows,,,,
-supply,manure_trade,rows,,,,
-supply,mineral_n_alloc,rows,,,,
-supply,n_intensity,rows,,,,
-supply,n_substitution,rows,,,,
-supply,n_target_relaxed,rows,,,,
-supply,nutrient_balance,rows,,,,
-supply,organic_conv,rows,,,,
-supply,shadow_prices,rows,,,,
-supply,yield_price_factor,rows,,,,
-welfare,CSSP,cols,EAAG,CSSP,EUR million,"capmod/reports.gms l. 318: DATA(RMALL,'EAAG',welfpos_Rows) = p_welfareRes(RMALL,'EAAG',welfpos_Rows), the region's total of the position (reports/welfare.gms, e.g. l. 153 CSSP, l. 805 TariffRev); the model's components: capri_mod/market/welfare.py"
-welfare,ProfitAgr,cols,,,EUR million,
-welfare,ProfitDairy,cols,EAAG,PROFITDAIRY,EUR million,"capmod/reports.gms l. 318: DATA(RMALL,'EAAG',welfpos_Rows) = p_welfareRes(RMALL,'EAAG',welfpos_Rows), the region's total of the position (reports/welfare.gms, e.g. l. 153 CSSP, l. 805 TariffRev); the model's components: capri_mod/market/welfare.py"
-welfare,ProfitFeed,cols,EAAG,PROFITFEED,EUR million,"capmod/reports.gms l. 318: DATA(RMALL,'EAAG',welfpos_Rows) = p_welfareRes(RMALL,'EAAG',welfpos_Rows), the region's total of the position (reports/welfare.gms, e.g. l. 153 CSSP, l. 805 TariffRev); the model's components: capri_mod/market/welfare.py"
-welfare,ProfitProc,cols,EAAG,PROFITPROC,EUR million,"capmod/reports.gms l. 318: DATA(RMALL,'EAAG',welfpos_Rows) = p_welfareRes(RMALL,'EAAG',welfpos_Rows), the region's total of the position (reports/welfare.gms, e.g. l. 153 CSSP, l. 805 TariffRev); the model's components: capri_mod/market/welfare.py"
-welfare,TRQRents,cols,EAAG,TRQRents,EUR million,"capmod/reports.gms l. 318: DATA(RMALL,'EAAG',welfpos_Rows) = p_welfareRes(RMALL,'EAAG',welfpos_Rows), the region's total of the position (reports/welfare.gms, e.g. l. 153 CSSP, l. 805 TariffRev); the model's components: capri_mod/market/welfare.py"
-welfare,TariffRev,cols,EAAG,TARIFFREV,EUR million,"capmod/reports.gms l. 318: DATA(RMALL,'EAAG',welfpos_Rows) = p_welfareRes(RMALL,'EAAG',welfpos_Rows), the region's total of the position (reports/welfare.gms, e.g. l. 153 CSSP, l. 805 TariffRev); the model's components: capri_mod/market/welfare.py"
-welfare,Welfare,cols,,,EUR million,
-welfare_supply,MGVA,cols,,,,
-welfare_supply,PSEs,cols,,,,
-welfare_supply,ProfitAgr,cols,,,,
-welfare_supply,ProfitLandUse,cols,,,,
-welfare_supply,RENT,cols,,,,
+block,item,item_dim,capri_cols,capri_rows,applies_to,unit,capri_source
+environmental,arable_land,rows,,,,,
+environmental,ghg_enteric,rows,ImpactGwp,CH4ENT,,kt CO2-eq,"reports/def_indic.gms l. 68: DATA(R,'ImpactGwp',GHGS) = DATA(R,'Impact',GHGS) x p_globWarmPot (the model's GWP_CH4 25, GWP_N2O 298 are CAPRI's: model_parameters.csv); the model's CH4_ENT, CAPRI's GWPCH4ENT_ from the feed mix (environmental/ghg.py)"
+environmental,ghg_ggwp,rows,,,,,
+environmental,ghg_histosol_n2o,rows,ImpactGwp,N2OHIS,,kt CO2-eq,"reports/def_indic.gms l. 68: DATA(R,'ImpactGwp',GHGS) = DATA(R,'Impact',GHGS) x p_globWarmPot (the model's GWP_CH4 25, GWP_N2O 298 are CAPRI's: model_parameters.csv); the model's N2O_HIS (environmental_module.py)"
+environmental,ghg_indirect_n2o,rows,,,,,
+environmental,ghg_leaching_n2o,rows,,,,,
+environmental,ghg_liming,rows,ImpactGwp,CO2LIM,,kt CO2-eq,"reports/def_indic.gms l. 68: DATA(R,'ImpactGwp',GHGS) = DATA(R,'Impact',GHGS) x p_globWarmPot (the model's GWP_CH4 25, GWP_N2O 298 are CAPRI's: model_parameters.csv); the model's CO2_LIME, kt CO2 (GWP 1)"
+environmental,ghg_manure_ch4,rows,ImpactGwp,CH4MAN,,kt CO2-eq,"reports/def_indic.gms l. 68: DATA(R,'ImpactGwp',GHGS) = DATA(R,'Impact',GHGS) x p_globWarmPot (the model's GWP_CH4 25, GWP_N2O 298 are CAPRI's: model_parameters.csv); the model's CH4_MAN (environmental/ghg.py)"
+environmental,ghg_manure_n2o,rows,,,,,
+environmental,ghg_manure_n2o_tech,rows,,,,,
+environmental,ghg_non_co2,rows,,,,,
+environmental,ghg_residue_n2o,rows,ImpactGwp,N2OCRO,,kt CO2-eq,"reports/def_indic.gms l. 68: DATA(R,'ImpactGwp',GHGS) = DATA(R,'Impact',GHGS) x p_globWarmPot (the model's GWP_CH4 25, GWP_N2O 298 are CAPRI's: model_parameters.csv); the model's N2O_CRO, CAPRI's gases.gms N2OCRO (environmental_module.py)"
+environmental,ghg_soil_n2o,rows,,,,,
+environmental,ghg_total,rows,,,,,
+environmental,ghg_urea,rows,,,,,
+environmental,grassland,rows,,,,,
+environmental,leach_share,rows,,,,,
+environmental,n_animal_products,rows,,,,,
+environmental,n_crop_uptake,rows,,,,,
+environmental,n_deposition,rows,,,,,
+environmental,n_fixation,rows,,,,,
+environmental,n_mineral_input,rows,,,,,
+environmental,n_organic_input,rows,,,,,
+environmental,n_runoff_leached,rows,,,,,
+environmental,n_surplus,rows,,,,,
+environmental,n_use_efficiency,rows,,,,,
+environmental,nh3_livestock,rows,,,,,
+environmental,nh3_soils,rows,,,,,
+environmental,nh3_total,rows,,,,,
+environmental,organic_area,rows,,,,,
+environmental,p_crop_residues,rows,,,,,
+environmental,p_input,rows,,,,,
+environmental,p_manure_excretion,rows,,,,,
+environmental,p_manure_net_export,rows,,,,,
+environmental,p_mineral_input,rows,,,,,
+environmental,p_runoff,rows,,,,,
+environmental,p_surplus,rows,,,,,
+environmental,p_surplus_soil,rows,,,,,
+environmental,p_uptake,rows,,,,,
+environmental,permanent_crops,rows,,,,,
+environmental,shannon_crop_diversity,rows,,,,,
+environmental,uaa_total,rows,,,,,
+feed,FCER,rows,,,,,
+feed,FCOM,rows,,,,,
+feed,FENE,rows,,,,,
+feed,FGRA,rows,,,,,
+feed,FMAI,rows,,,,,
+feed,FMIL,rows,,,,,
+feed,FOFA,rows,,,,,
+feed,FOTH,rows,,,,,
+feed,FPRO,rows,,,,,
+feed,FROO,rows,,,,,
+feed,FSGM,rows,,,,,
+feed,FSTR,rows,,,,,
+fert_dist,area_kha,rows,,,,,
+fert_dist,cap_scale,rows,,,,,
+fert_dist,converged,rows,,,,,
+fert_dist,cres_kg_ha,rows,,,,,
+fert_dist,excr_kg_ha,rows,,,,,
+fert_dist,mine_cap_kg_ha,rows,,,,,
+fert_dist,mine_kg_ha,rows,,,,,
+fert_npk,t,rows,,,,,
+labour,LABF,rows,GROF,LABF,,million hours,"baseline/labour_ageline.gms l. 181: GROF LABT = sum of LABT x LEVL x 0.001; simini_21730 DATA DE110000.GROF.LABT (LABF, family labour: the same sum of LABF)"
+labour,LABP,rows,GROF,LABP,,million hours,"baseline/labour_ageline.gms l. 181: GROF LABT = sum of LABT x LEVL x 0.001; simini_21730 DATA DE110000.GROF.LABT (LABP, paid labour: the same sum of LABP)"
+labour,LABT,rows,GROF,LABT,,million hours,baseline/labour_ageline.gms l. 181: GROF LABT = sum of LABT x LEVL x 0.001; simini_21730 DATA DE110000.GROF.LABT
+luc,ARTART,rows,ARTART,LEVL,,1000 ha (changes: per year),"DATA(RU,transition,'LEVL'): the region's land-use change (capri_mod/environmental/luc.py, CAPRI's LUC matrix); CAPRI's 2030 GD reference, DE110000: CRPFOR 0.0697, GRSCRP 1.430, the model's the same"
+luc,ARTCRP,rows,ARTCRP,LEVL,,1000 ha (changes: per year),"DATA(RU,transition,'LEVL'): the region's land-use change (capri_mod/environmental/luc.py, CAPRI's LUC matrix); CAPRI's 2030 GD reference, DE110000: CRPFOR 0.0697, GRSCRP 1.430, the model's the same"
+luc,ARTFOR,rows,ARTFOR,LEVL,,1000 ha (changes: per year),"DATA(RU,transition,'LEVL'): the region's land-use change (capri_mod/environmental/luc.py, CAPRI's LUC matrix); CAPRI's 2030 GD reference, DE110000: CRPFOR 0.0697, GRSCRP 1.430, the model's the same"
+luc,ARTGRS,rows,ARTGRS,LEVL,,1000 ha (changes: per year),"DATA(RU,transition,'LEVL'): the region's land-use change (capri_mod/environmental/luc.py, CAPRI's LUC matrix); CAPRI's 2030 GD reference, DE110000: CRPFOR 0.0697, GRSCRP 1.430, the model's the same"
+luc,ARTRES,rows,ARTRES,LEVL,,1000 ha (changes: per year),"DATA(RU,transition,'LEVL'): the region's land-use change (capri_mod/environmental/luc.py, CAPRI's LUC matrix); CAPRI's 2030 GD reference, DE110000: CRPFOR 0.0697, GRSCRP 1.430, the model's the same"
+luc,ARTWET,rows,ARTWET,LEVL,,1000 ha (changes: per year),"DATA(RU,transition,'LEVL'): the region's land-use change (capri_mod/environmental/luc.py, CAPRI's LUC matrix); CAPRI's 2030 GD reference, DE110000: CRPFOR 0.0697, GRSCRP 1.430, the model's the same"
+luc,CRPART,rows,CRPART,LEVL,,1000 ha (changes: per year),"DATA(RU,transition,'LEVL'): the region's land-use change (capri_mod/environmental/luc.py, CAPRI's LUC matrix); CAPRI's 2030 GD reference, DE110000: CRPFOR 0.0697, GRSCRP 1.430, the model's the same"
+luc,CRPCRP,rows,CRPCRP,LEVL,,1000 ha (changes: per year),"DATA(RU,transition,'LEVL'): the region's land-use change (capri_mod/environmental/luc.py, CAPRI's LUC matrix); CAPRI's 2030 GD reference, DE110000: CRPFOR 0.0697, GRSCRP 1.430, the model's the same"
+luc,CRPFOR,rows,CRPFOR,LEVL,,1000 ha (changes: per year),"DATA(RU,transition,'LEVL'): the region's land-use change (capri_mod/environmental/luc.py, CAPRI's LUC matrix); CAPRI's 2030 GD reference, DE110000: CRPFOR 0.0697, GRSCRP 1.430, the model's the same"
+luc,CRPGRS,rows,CRPGRS,LEVL,,1000 ha (changes: per year),"DATA(RU,transition,'LEVL'): the region's land-use change (capri_mod/environmental/luc.py, CAPRI's LUC matrix); CAPRI's 2030 GD reference, DE110000: CRPFOR 0.0697, GRSCRP 1.430, the model's the same"
+luc,CRPRES,rows,CRPRES,LEVL,,1000 ha (changes: per year),"DATA(RU,transition,'LEVL'): the region's land-use change (capri_mod/environmental/luc.py, CAPRI's LUC matrix); CAPRI's 2030 GD reference, DE110000: CRPFOR 0.0697, GRSCRP 1.430, the model's the same"
+luc,CRPWET,rows,CRPWET,LEVL,,1000 ha (changes: per year),"DATA(RU,transition,'LEVL'): the region's land-use change (capri_mod/environmental/luc.py, CAPRI's LUC matrix); CAPRI's 2030 GD reference, DE110000: CRPFOR 0.0697, GRSCRP 1.430, the model's the same"
+luc,FORART,rows,FORART,LEVL,,1000 ha (changes: per year),"DATA(RU,transition,'LEVL'): the region's land-use change (capri_mod/environmental/luc.py, CAPRI's LUC matrix); CAPRI's 2030 GD reference, DE110000: CRPFOR 0.0697, GRSCRP 1.430, the model's the same"
+luc,FORCRP,rows,FORCRP,LEVL,,1000 ha (changes: per year),"DATA(RU,transition,'LEVL'): the region's land-use change (capri_mod/environmental/luc.py, CAPRI's LUC matrix); CAPRI's 2030 GD reference, DE110000: CRPFOR 0.0697, GRSCRP 1.430, the model's the same"
+luc,FORFOR,rows,FORFOR,LEVL,,1000 ha (changes: per year),"DATA(RU,transition,'LEVL'): the region's land-use change (capri_mod/environmental/luc.py, CAPRI's LUC matrix); CAPRI's 2030 GD reference, DE110000: CRPFOR 0.0697, GRSCRP 1.430, the model's the same"
+luc,FORGRS,rows,FORGRS,LEVL,,1000 ha (changes: per year),"DATA(RU,transition,'LEVL'): the region's land-use change (capri_mod/environmental/luc.py, CAPRI's LUC matrix); CAPRI's 2030 GD reference, DE110000: CRPFOR 0.0697, GRSCRP 1.430, the model's the same"
+luc,FORRES,rows,FORRES,LEVL,,1000 ha (changes: per year),"DATA(RU,transition,'LEVL'): the region's land-use change (capri_mod/environmental/luc.py, CAPRI's LUC matrix); CAPRI's 2030 GD reference, DE110000: CRPFOR 0.0697, GRSCRP 1.430, the model's the same"
+luc,FORWET,rows,FORWET,LEVL,,1000 ha (changes: per year),"DATA(RU,transition,'LEVL'): the region's land-use change (capri_mod/environmental/luc.py, CAPRI's LUC matrix); CAPRI's 2030 GD reference, DE110000: CRPFOR 0.0697, GRSCRP 1.430, the model's the same"
+luc,GRSART,rows,GRSART,LEVL,,1000 ha (changes: per year),"DATA(RU,transition,'LEVL'): the region's land-use change (capri_mod/environmental/luc.py, CAPRI's LUC matrix); CAPRI's 2030 GD reference, DE110000: CRPFOR 0.0697, GRSCRP 1.430, the model's the same"
+luc,GRSCRP,rows,GRSCRP,LEVL,,1000 ha (changes: per year),"DATA(RU,transition,'LEVL'): the region's land-use change (capri_mod/environmental/luc.py, CAPRI's LUC matrix); CAPRI's 2030 GD reference, DE110000: CRPFOR 0.0697, GRSCRP 1.430, the model's the same"
+luc,GRSFOR,rows,GRSFOR,LEVL,,1000 ha (changes: per year),"DATA(RU,transition,'LEVL'): the region's land-use change (capri_mod/environmental/luc.py, CAPRI's LUC matrix); CAPRI's 2030 GD reference, DE110000: CRPFOR 0.0697, GRSCRP 1.430, the model's the same"
+luc,GRSGRS,rows,GRSGRS,LEVL,,1000 ha (changes: per year),"DATA(RU,transition,'LEVL'): the region's land-use change (capri_mod/environmental/luc.py, CAPRI's LUC matrix); CAPRI's 2030 GD reference, DE110000: CRPFOR 0.0697, GRSCRP 1.430, the model's the same"
+luc,GRSRES,rows,GRSRES,LEVL,,1000 ha (changes: per year),"DATA(RU,transition,'LEVL'): the region's land-use change (capri_mod/environmental/luc.py, CAPRI's LUC matrix); CAPRI's 2030 GD reference, DE110000: CRPFOR 0.0697, GRSCRP 1.430, the model's the same"
+luc,GRSWET,rows,GRSWET,LEVL,,1000 ha (changes: per year),"DATA(RU,transition,'LEVL'): the region's land-use change (capri_mod/environmental/luc.py, CAPRI's LUC matrix); CAPRI's 2030 GD reference, DE110000: CRPFOR 0.0697, GRSCRP 1.430, the model's the same"
+luc,RESART,rows,RESART,LEVL,,1000 ha (changes: per year),"DATA(RU,transition,'LEVL'): the region's land-use change (capri_mod/environmental/luc.py, CAPRI's LUC matrix); CAPRI's 2030 GD reference, DE110000: CRPFOR 0.0697, GRSCRP 1.430, the model's the same"
+luc,RESCRP,rows,RESCRP,LEVL,,1000 ha (changes: per year),"DATA(RU,transition,'LEVL'): the region's land-use change (capri_mod/environmental/luc.py, CAPRI's LUC matrix); CAPRI's 2030 GD reference, DE110000: CRPFOR 0.0697, GRSCRP 1.430, the model's the same"
+luc,RESFOR,rows,RESFOR,LEVL,,1000 ha (changes: per year),"DATA(RU,transition,'LEVL'): the region's land-use change (capri_mod/environmental/luc.py, CAPRI's LUC matrix); CAPRI's 2030 GD reference, DE110000: CRPFOR 0.0697, GRSCRP 1.430, the model's the same"
+luc,RESGRS,rows,RESGRS,LEVL,,1000 ha (changes: per year),"DATA(RU,transition,'LEVL'): the region's land-use change (capri_mod/environmental/luc.py, CAPRI's LUC matrix); CAPRI's 2030 GD reference, DE110000: CRPFOR 0.0697, GRSCRP 1.430, the model's the same"
+luc,RESRES,rows,RESRES,LEVL,,1000 ha (changes: per year),"DATA(RU,transition,'LEVL'): the region's land-use change (capri_mod/environmental/luc.py, CAPRI's LUC matrix); CAPRI's 2030 GD reference, DE110000: CRPFOR 0.0697, GRSCRP 1.430, the model's the same"
+luc,RESWET,rows,RESWET,LEVL,,1000 ha (changes: per year),"DATA(RU,transition,'LEVL'): the region's land-use change (capri_mod/environmental/luc.py, CAPRI's LUC matrix); CAPRI's 2030 GD reference, DE110000: CRPFOR 0.0697, GRSCRP 1.430, the model's the same"
+luc,WETART,rows,WETART,LEVL,,1000 ha (changes: per year),"DATA(RU,transition,'LEVL'): the region's land-use change (capri_mod/environmental/luc.py, CAPRI's LUC matrix); CAPRI's 2030 GD reference, DE110000: CRPFOR 0.0697, GRSCRP 1.430, the model's the same"
+luc,WETCRP,rows,WETCRP,LEVL,,1000 ha (changes: per year),"DATA(RU,transition,'LEVL'): the region's land-use change (capri_mod/environmental/luc.py, CAPRI's LUC matrix); CAPRI's 2030 GD reference, DE110000: CRPFOR 0.0697, GRSCRP 1.430, the model's the same"
+luc,WETFOR,rows,WETFOR,LEVL,,1000 ha (changes: per year),"DATA(RU,transition,'LEVL'): the region's land-use change (capri_mod/environmental/luc.py, CAPRI's LUC matrix); CAPRI's 2030 GD reference, DE110000: CRPFOR 0.0697, GRSCRP 1.430, the model's the same"
+luc,WETGRS,rows,WETGRS,LEVL,,1000 ha (changes: per year),"DATA(RU,transition,'LEVL'): the region's land-use change (capri_mod/environmental/luc.py, CAPRI's LUC matrix); CAPRI's 2030 GD reference, DE110000: CRPFOR 0.0697, GRSCRP 1.430, the model's the same"
+luc,WETRES,rows,WETRES,LEVL,,1000 ha (changes: per year),"DATA(RU,transition,'LEVL'): the region's land-use change (capri_mod/environmental/luc.py, CAPRI's LUC matrix); CAPRI's 2030 GD reference, DE110000: CRPFOR 0.0697, GRSCRP 1.430, the model's the same"
+luc,WETWET,rows,WETWET,LEVL,,1000 ha (changes: per year),"DATA(RU,transition,'LEVL'): the region's land-use change (capri_mod/environmental/luc.py, CAPRI's LUC matrix); CAPRI's 2030 GD reference, DE110000: CRPFOR 0.0697, GRSCRP 1.430, the model's the same"
+market,biofuel,cols,,,,,
+market,consumption,cols,,,,1000 t,
+market,dairy,cols,,,,,
+market,domestic_prices,cols,PMRK,*,,EUR/t,"reports/sol_market.gms l. 646: DATA(RM,'PMrk',XX) = v_marketPrice.l"
+market,excess_demand,cols,,,,,
+market,net_exports,cols,,,,1000 t,
+market,production,cols,PROD,*,,1000 t,"reports/sol_market.gms l. 267: DATA(RMS,'Prod',XX1) = v_prodQuant.l"
+market,trade_flows,cols,ImportQ,*,,1000 t,"capmod/set_and_store_dataout.gms l. 151: DATAOUT(RMALL,RMALL1,'ImportQ',XX) = p_tradeFlows (importer first)"
+market,wedge_prices,cols,,,,EUR/t,
+market,world_prices,cols,,,,EUR/t,
+policy,national_budgets,cols,,,,,
+policy,pillar1_EUR_billion,cols,,,,,
+policy,pillar2_EUR_billion,cols,,,,,
+policy,premium_EUR_ha_UAA,cols,,,,,
+policy,total_EU_budget_EUR_billion,cols,,,,,
+set_aside,FALL,rows,FALL,LEVL,,1000 ha,"CAPRI's set-aside activities' levels DATA(RU,act,'LEVL'): simini_21730 DATA DE110000.VSET.LEVL, DE110000.FALL.LEVL"
+set_aside,SETA,rows,,,,,
+set_aside,VSET,rows,VSET,LEVL,,1000 ha,"CAPRI's set-aside activities' levels DATA(RU,act,'LEVL'): simini_21730 DATA DE110000.VSET.LEVL, DE110000.FALL.LEVL"
+set_aside,labt_FALL,rows,,,,,
+set_aside,labt_VSET,rows,,,,,
+set_aside,prem_FALL,rows,,,,,
+set_aside,prem_VSET,rows,,,,,
+supply,activities,rows,*,LEVL,,1000 ha (crops); 1000 heads (animals),"DATA(RU,act,'LEVL'): ROWS LEVL 'Activity level'; e.g. simini_21730 DATA DE110000.SWHE.LEVL"
+supply,animal_n_kept,rows,,,,,
+supply,animal_n_relief,rows,,,,,
+supply,animal_nh3_saved,rows,,,,,
+supply,balance_shortfall,rows,,,,,
+supply,cattle_shift,rows,,,,,
+supply,converged,rows,,,,,
+supply,cover_crops,rows,,,,,
+supply,dairy_low_shift,rows,,,,,
+supply,feed_dm,rows,,,,,
+supply,feed_t,rows,,,,,
+supply,fert_dist_mode_crops,rows,,,,,
+supply,fert_dist_model,rows,,,,,
+supply,fert_nmin,rows,,,,,
+supply,fert_npk,rows,,,,,
+supply,fert_tech_shares,rows,,,,,
+supply,genetics_shift,rows,,,,,
+supply,grass_ext_shift,rows,,,,,
+supply,gross_margin,rows,,,,EUR 1000,
+supply,gross_output,rows,GROF,act,SWHE;DWHE;RYEM;BARL;OATS;CORN;OCER;PARI;OCRO;OIND;NURS;FLOW;POTA;SUGB;SUNF;RAPE;SOYA;OOIL;PULS;TOMA;OVEG;APPL;OFRU;CITR;TAGR;WINE;OLIV;TABO;TOBA;TEXT;MAIF,1000 t,"DATA(RU,'GROF',product): the region's gross production (simini_21730 DATA DE110000.GROF.SWHE); the model's gross output of a crop activity is its product's (CAPRI's 2030 GD reference, DE110000: SWHE 545.4 vs the model's 544.9). Not GRAS (another measure: 4356 vs 970) nor the animals (their products are other codes)"
+supply,histosol_fallow,rows,,,,,
+supply,land_types,rows,,,,,
+supply,luc,rows,,,,,
+supply,manure_availability,rows,,,,,
+supply,manure_ni_nh3,rows,,,,,
+supply,manure_tech_shares,rows,,,,,
+supply,manure_trade,rows,,,,,
+supply,mineral_n_alloc,rows,,,,,
+supply,n_intensity,rows,,,,,
+supply,n_substitution,rows,,,,,
+supply,n_target_relaxed,rows,,,,,
+supply,nutrient_balance,rows,,,,,
+supply,organic_conv,rows,,,,,
+supply,shadow_prices,rows,,,,,
+supply,yield_price_factor,rows,,,,,
+welfare,CSSP,cols,EAAG,CSSP,,EUR million,"capmod/reports.gms l. 318: DATA(RMALL,'EAAG',welfpos_Rows) = p_welfareRes(RMALL,'EAAG',welfpos_Rows), the region's total of the position (reports/welfare.gms, e.g. l. 153 CSSP, l. 805 TariffRev); the model's components: capri_mod/market/welfare.py"
+welfare,ProfitAgr,cols,,,,EUR million,
+welfare,ProfitDairy,cols,EAAG,PROFITDAIRY,,EUR million,"capmod/reports.gms l. 318: DATA(RMALL,'EAAG',welfpos_Rows) = p_welfareRes(RMALL,'EAAG',welfpos_Rows), the region's total of the position (reports/welfare.gms, e.g. l. 153 CSSP, l. 805 TariffRev); the model's components: capri_mod/market/welfare.py"
+welfare,ProfitFeed,cols,EAAG,PROFITFEED,,EUR million,"capmod/reports.gms l. 318: DATA(RMALL,'EAAG',welfpos_Rows) = p_welfareRes(RMALL,'EAAG',welfpos_Rows), the region's total of the position (reports/welfare.gms, e.g. l. 153 CSSP, l. 805 TariffRev); the model's components: capri_mod/market/welfare.py"
+welfare,ProfitProc,cols,EAAG,PROFITPROC,,EUR million,"capmod/reports.gms l. 318: DATA(RMALL,'EAAG',welfpos_Rows) = p_welfareRes(RMALL,'EAAG',welfpos_Rows), the region's total of the position (reports/welfare.gms, e.g. l. 153 CSSP, l. 805 TariffRev); the model's components: capri_mod/market/welfare.py"
+welfare,TRQRents,cols,EAAG,TRQRents,,EUR million,"capmod/reports.gms l. 318: DATA(RMALL,'EAAG',welfpos_Rows) = p_welfareRes(RMALL,'EAAG',welfpos_Rows), the region's total of the position (reports/welfare.gms, e.g. l. 153 CSSP, l. 805 TariffRev); the model's components: capri_mod/market/welfare.py"
+welfare,TariffRev,cols,EAAG,TARIFFREV,,EUR million,"capmod/reports.gms l. 318: DATA(RMALL,'EAAG',welfpos_Rows) = p_welfareRes(RMALL,'EAAG',welfpos_Rows), the region's total of the position (reports/welfare.gms, e.g. l. 153 CSSP, l. 805 TariffRev); the model's components: capri_mod/market/welfare.py"
+welfare,Welfare,cols,,,,EUR million,
+welfare_supply,MGVA,cols,,,,,
+welfare_supply,PSEs,cols,,,,,
+welfare_supply,ProfitAgr,cols,,,,,
+welfare_supply,ProfitLandUse,cols,,,,,
+welfare_supply,RENT,cols,,,,,

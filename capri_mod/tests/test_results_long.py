@@ -56,8 +56,13 @@ def test_the_table_has_dataouts_layout_and_capris_codes():
     # bilateral flows: the importer as region, the exporter in dim5 (DATAOUT(RMALL, RMALL1, "ImportQ", XX))
     r = t[(t.cols == "trade_flows") & (t.region == "NOR") & (t.dim5 == "USA") & (t.rows == "SWHE")].iloc[0]
     assert (r.capri_region, r.capri_dim5, r.capri_cols) == ("NO000000", "USA", "ImportQ")
-    # an aggregated activity (DCOW: CAPRI's DCOL and DCOH) and an unmapped item keep CAPRI's columns empty
-    for m in ((t.cols == "DCOW") & (t.rows == "activities"), t.rows == "gross_margin"):
+    # a crop's gross output is its product's GROF; an animal's is not mapped (applies_to)
+    r = t[(t.block == "supply") & (t.region == "DE110000") & (t.cols == "SWHE") & (t.rows == "gross_output")].iloc[0]
+    assert (r.capri_cols, r.capri_rows, r.value) == ("GROF", "SWHE", 70.0)
+    # an aggregated activity (DCOW: CAPRI's DCOL and DCOH), an animal's gross output and an unmapped item keep CAPRI's
+    # columns empty
+    for m in ((t.cols == "DCOW") & (t.rows == "activities"), (t.cols == "DCOW") & (t.rows == "gross_output"),
+              t.rows == "gross_margin"):
         assert (t[m][["capri_region", "capri_cols", "capri_rows"]] == "").all().all()
     # EU totals as the run script sums them: Norway's regions left out; no total of a share (n_use_efficiency)
     eu = t[(t.region == "EU27") & (t.block == "supply") & (t.rows == "activities")]
@@ -92,7 +97,7 @@ def test_every_capri_code_of_the_items_is_capris():
     for r in it[it.capri_cols != ""].itertuples():
         assert r.capri_rows != "" and r.capri_source, (r.block, r.item)
         assert r.capri_cols == "*" or r.capri_cols in sets["cols"], (r.block, r.item, r.capri_cols)
-        assert r.capri_rows == "*" or r.capri_rows in sets["rows"], (r.block, r.item, r.capri_rows)
+        assert r.capri_rows in ("*", "act") or r.capri_rows in sets["rows"], (r.block, r.item, r.capri_rows)
 
 
 def test_the_reference_is_stored_once_and_the_pickles_blocks_come_back(tmp_path):

@@ -541,7 +541,8 @@ def _item_of(df: pd.DataFrame) -> pd.Series:
 def with_capri_codes(long: pd.DataFrame) -> pd.DataFrame:
     """The long rows with CAPRI's codes and the unit (results_items.csv): an item's CAPRI cols and rows codes as given
     there, "*" taking the model's own coordinate in CAPRI's code (an activity: model_activities.csv capri_codes, when
-    one code; a product: model_commodities.csv); the market region and the exporter from model_trade_regions.csv;
+    one code; a product: model_commodities.csv), "act" the activity's code in rows (a crop's product), applies_to
+    restricting the mapping to the listed activities or products; the market region and the exporter from model_trade_regions.csv;
     regional units keep their code (they are CAPRI's). CAPRI's columns stay empty where a coordinate has no CAPRI code
     (an item CAPRI does not have or not determined, the model's ROW, an aggregated activity). An item not declared in
     results_items.csv raises: the table has no undeclared rows."""
@@ -549,8 +550,8 @@ def with_capri_codes(long: pd.DataFrame) -> pd.DataFrame:
     from capri_mod.data import definitions as D
     items = results_items()
     key = list(zip(long["block"], _item_of(long)))
-    decl = {(b, i): (c, r, u) for b, i, c, r, u in zip(items["block"], items["item"], items["capri_cols"],
-                                                       items["capri_rows"], items["unit"])}
+    decl = {(b, i): (c, r, u, set(a.split(";")) - {""}) for b, i, c, r, u, a in zip(
+        items["block"], items["item"], items["capri_cols"], items["capri_rows"], items["unit"], items["applies_to"])}
     missing = sorted(set(key) - set(decl))
     if missing:
         raise ValueError(f"results_items.csv does not declare {len(missing)} item(s) of the results: {missing[:20]}")
@@ -561,11 +562,16 @@ def with_capri_codes(long: pd.DataFrame) -> pd.DataFrame:
     dc = pd.Series([decl[k][0] for k in key], index=long.index)
     dr = pd.Series([decl[k][1] for k in key], index=long.index)
     out["unit"] = [decl[k][2] for k in key]
-    cols = dc.where(dc != "*", long["cols"].map(lambda a: act.get(a, "")))
+    act_c = long["cols"].map(lambda a: act.get(a, ""))
+    cols = dc.where(dc != "*", act_c)
     rows = dr.where(dr != "*", long["rows"].map(lambda c: D.COMMODITY_CAPRI_CODE.get(c, "")))
+    rows = rows.where(dr != "act", act_c)                # "act": the activity's own CAPRI code (its product)
+    # applies_to: the model codes of the item's other coordinate the mapping holds for (empty: all)
+    other = long["cols"].where(~long["block"].isin(ITEM_IN_COLS), long["rows"])
+    ok = pd.Series([not decl[k][3] or o in decl[k][3] for k, o in zip(key, other)], index=long.index)
     region = long["region"].map(lambda r: rm.get(r, r if r[:2].isalpha() and len(r) == 8 else ""))
     dim5 = long["dim5"].map(lambda r: rm.get(r, ""))
-    has = (cols != "") & (rows != "") & (region != "") & ((long["dim5"] == "") | (dim5 != ""))
+    has = ok & (cols != "") & (rows != "") & (region != "") & ((long["dim5"] == "") | (dim5 != ""))
     out["capri_region"] = region.where(has, "")
     out["capri_dim5"] = dim5.where(has & (long["dim5"] != ""), "")
     out["capri_cols"] = cols.where(has, "")

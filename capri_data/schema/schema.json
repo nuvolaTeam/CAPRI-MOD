@@ -21997,7 +21997,7 @@
    "file": "capri_data/codes/results_items.csv",
    "declared_in": "00_codes.sql",
    "layout": [],
-   "comment": "The items of the long results table (capri_mod/io_results.py) and their CAPRI codes in DATAOUT's cols and rows (\"*\": the model's own coordinate translated; empty: no CAPRI item or not determined)",
+   "comment": "The items of the long results table (capri_mod/io_results.py) and their CAPRI codes in DATAOUT's cols and rows (\"*\": the model's own coordinate translated, \"act\": the activity's code in rows; applies_to: the activities or products the mapping holds for, empty for all; empty codes: no CAPRI item or not determined)",
    "columns": [
     {
      "name": "block",
@@ -22021,6 +22021,11 @@
     },
     {
      "name": "capri_rows",
+     "type": "VARCHAR",
+     "not_null": false
+    },
+    {
+     "name": "applies_to",
      "type": "VARCHAR",
      "not_null": false
     },
