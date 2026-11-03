@@ -141,3 +141,20 @@ def test_the_table_is_read_by_partition(tmp_path):
     part = dt.to_pandas(filters=[("scenario", "=", "ref_x")])
     assert set(part.scenario) == {"ref_x"} and len(part) == len(B)
     assert np.array_equal(np.sort(part.value.to_numpy()), np.sort(B.value.to_numpy()))
+
+
+def test_the_run_metadata_is_declared():
+    """capri_mod/run_meta.py: a key the declaration does not have, or a Hessian record of another source, is refused."""
+    from pydantic import ValidationError
+    from capri_mod.run_meta import HessianRecord, RunManifest
+    HessianRecord(source="computed", products=50, seconds=1.0)
+    with pytest.raises(ValidationError):
+        HessianRecord(source="guessed")
+    with pytest.raises(ValidationError):
+        HessianRecord(source="cache", new_field=1)
+    m = dict(created="2026-11-03 02:00:00 +0100", seconds_recorded=1, git={"commit": "abc", "changed_files": []},
+             software={"python": "3.13"}, environment={}, command=["x"], inputs={"a.csv": {"sha256": "0", "bytes": 1}},
+             external_inputs={})
+    RunManifest(**m)
+    with pytest.raises(ValidationError):
+        RunManifest(**{**m, "inputs": {"a.csv": {"sha256": "0"}}})

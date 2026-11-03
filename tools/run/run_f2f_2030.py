@@ -488,6 +488,10 @@ def main():
     run_settings.save(str(a.out).rsplit(".", 1)[0] + ".settings.toml")
     with open(str(a.out).rsplit(".", 1)[0] + ".manifest.json", "w") as fh_:
         json.dump(out["meta"]["run_manifest"], fh_, indent=1)
+    # the metadata against its declaration (capri_mod/run_meta.py; refactor stage 5): after the pickle is saved, so a
+    # change of the metadata stops the run's table, never its results
+    from capri_mod.run_meta import ResultsMeta
+    ResultsMeta.model_validate(out["meta"])
     _results_dir = str(run_settings.get("run.results_dir") or "")
     if _results_dir:
         # the long results table (capri_mod/io_results.py; refactor stage 5): the scenario's rows and its reference's,
