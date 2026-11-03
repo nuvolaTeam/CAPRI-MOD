@@ -12,7 +12,7 @@ ROOT is found by looking upward for pyproject.toml, so a tool keeps working if i
 CAPRI's own material that the builders read is not in the repository (its size and its licence): it goes in the folder
 capri_sources/ at the repository root (not committed), or in the folder the environment variable CAPRI_SOURCES names.
 Every location is relative to that folder, never to a particular machine; docs/EXTERNAL_SOURCES.md lists each file,
-what it is and where it comes from. CAPRI's files converted for the parity tests stay in capri_reference/ (REFERENCE).
+what it is and where it comes from. CAPRI's files converted for the parity tests are in capri_sources/reference/ (REFERENCE).
 """
 from __future__ import annotations
 
@@ -30,8 +30,10 @@ SOURCES = Path(os.environ["CAPRI_SOURCES"]).expanduser().resolve() if os.environ
     else ROOT / "capri_sources"
 #: CAPRI's exports as delivered (result listings, market and elasticity exports, GAMS-dumped inputs)
 EXPORTS = SOURCES / "exports"
-#: CAPRI's files converted for the parity tests (tools/build/build_*_reference.py; not committed)
-REFERENCE = ROOT / "capri_reference"
+#: CAPRI's files converted for the parity tests (tools/build/build_*_reference.py; not committed): capri_sources/
+#: reference, or $CAPRI_REFERENCE (capri_reference/ at the repository root until 4 November 2026)
+REFERENCE = Path(os.environ["CAPRI_REFERENCE"]).expanduser().resolve() if os.environ.get("CAPRI_REFERENCE") \
+    else SOURCES / "reference"
 
 #: the folders under SOURCES and what each holds (the CAPRI archive or export it is unpacked from)
 LAYOUT = {
@@ -50,6 +52,8 @@ LAYOUT = {
     "fert": "gdxdump of p_CropNutNeedMultFact, multfact_1730.txt (tools/build/build_overfert_factors.py)",
     "costsavings": "CAPRI's cost savings costsavings_{ini,max}_21730_jul15.csv (costsavings_ini_21730_jul15.zip)",
     "dat": "CAPRI's dat folder as parquet (the project's mirror)",
+    "reference": "CAPRI's files converted for the parity tests and two builders (tools/build/build_*_reference.py; "
+                 "docs/EXTERNAL_SOURCES.md, \"The reference folder\")",
     "gdxlib": "the GDX library libgdxcclib64.so (open source, README section 3), for the builders that read .gdx files",
 }
 
@@ -57,13 +61,13 @@ LAYOUT = {
 def hint(path) -> str:
     """Where a file of CAPRI's material belongs and where it comes from ("" for any other file)."""
     p = Path(path)
-    for loc, name in ((REFERENCE, "capri_reference"), (SOURCES, "capri_sources")):
+    for loc, name in ((REFERENCE, "capri_sources/reference"), (SOURCES, "capri_sources")):
         try:
             rel = p.relative_to(loc)
         except ValueError:
             continue
         origin = LAYOUT.get(rel.parts[0], "") if loc == SOURCES and rel.parts else \
-            "CAPRI's files converted for the parity tests (capri_reference/README.md)"
+            "CAPRI's files converted for the parity tests (docs/EXTERNAL_SOURCES.md, \"The reference folder\")"
         return (f"{p} belongs to CAPRI's material, not in git: {name}/" + (f"{rel.parts[0]}/ holds {origin}" if origin
                 else "") + ". See docs/EXTERNAL_SOURCES.md (capri_sources may be elsewhere: CAPRI_SOURCES).")
     return ""

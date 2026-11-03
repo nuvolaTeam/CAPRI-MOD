@@ -11,7 +11,7 @@ taken from a dump. A country present in both forms is taken from the GDX file.
 
 Output (CAPRI's own data: read-only reference, read by the tests and the parity runs, never by the model;
 docs/design/CAPTRD_MOD.md section 6):
-  capri_reference/capreg_base/17/<CC>.csv.gz    region, col, row, t, value, eps   (t = Y)
+  capri_sources/reference/capreg_base/17/<CC>.csv.gz    region, col, row, t, value, eps   (t = Y)
 
 Zeros: a record listed as Eps is written with value 0 and eps = 1; a record not listed is absent.
 
@@ -29,7 +29,15 @@ import zipfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-OUT = ROOT / "capri_reference" / "capreg_base" / "17"
+
+
+def _REFERENCE():
+    """capri_sources/reference or $CAPRI_REFERENCE (tools/lib/paths.py)."""
+    import sys as _s
+    _s.path.insert(0, str(ROOT / "tools" / "lib"))
+    from paths import REFERENCE
+    return REFERENCE
+OUT = _REFERENCE() / "capreg_base" / "17"
 REC = re.compile(r"^'([^']*)'\.'([^']*)'\.'([^']*)'\.'([^']*)'\s+(\S+?),?\s*$")
 
 

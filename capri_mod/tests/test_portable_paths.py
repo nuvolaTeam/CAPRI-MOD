@@ -1,6 +1,6 @@
 """Every file of the repository runs on any machine: no file names a folder of a particular machine.
 
-CAPRI's material outside git is found relative to the repository (capri_sources/, capri_reference/; tools/lib/paths.py,
+CAPRI's material outside git is found relative to the repository (capri_sources/, capri_sources/reference/; tools/lib/paths.py,
 docs/EXTERNAL_SOURCES.md). A path such as /home/<user>/..., /mnt/..., /Users/<user>/..., C:\\Users\\... or a session's
 temporary folder in a delivered file works only where it was written, so the test lists every one.
 """

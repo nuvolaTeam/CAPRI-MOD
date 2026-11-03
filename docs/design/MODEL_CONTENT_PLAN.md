@@ -583,7 +583,7 @@ own per-unit premium change of its pair of runs (capri_vcs_effect.csv) and compa
 
 ## 12b. CAPRI's source material as Parquet, outside git, for download (added 3 November 2026; beyond CAPRI)
 
-**What it is.** The builders read CAPRI's material from capri_sources/ and capri_reference/, outside git (about 9 GB
+**What it is.** The builders read CAPRI's material from capri_sources/ (and capri_reference/, merged into it on 4 November 2026), outside git (about 9 GB
 raw: tools/lib/paths.py, docs/EXTERNAL_SOURCES.md): 114 of the 137 pipeline tasks, writing 233 of the 261 model-input
 files, need it [own check, from the trace of 3 November 2026]. So the data can be rebuilt only where CAPRI's
 installation is. The item converts that material to Parquet and publishes it as a versioned download, so a clean clone
@@ -639,6 +639,16 @@ gated with manual approval, public listing, the card only (no data yet). Access 
 fine-grained token checked the same day; the token is kept outside the repository.
 
 **Open decisions.** None stated (host, access, licence and timing decided 3 November 2026).
+
+**Decided 4 November 2026 (the project lead).**
+- capri_reference/ is gone from the repository: its folders are in capri_sources/reference/ (tools/lib/paths.py
+  REFERENCE, capri_mod/external_paths.py; CAPRI_REFERENCE to put them elsewhere), its README in
+  docs/EXTERNAL_SOURCES.md ("The reference folder"); it goes to the Hugging Face set with the rest of capri_sources.
+- capri_data/sources/ is renamed by one rule, where each file comes from, at the Parquet conversion (step 2 of this
+  section, after the market move), so each file is renamed once: `capri/dat/<CAPRI dat path>/<gams file>__<symbol>`,
+  `capri/gams/<CAPRI gams path>/<gams file>__<symbol>`, `capri/results/<CAPRI run or file>/<content>_<year>` (capreg,
+  capmod, sim_ini, estnlp included), `external/<provider>/<dataset>` (Eurostat, FAO, NUTS, literature); the file under
+  unsourced/ given a source or a builder first. A move: every model input rebuilt identically.
 
 ## 13. Summary
 

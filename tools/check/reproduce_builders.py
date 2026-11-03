@@ -13,7 +13,7 @@ files.
                                                                                  outputs left in the tree to commit)
 
 The working tree must be a clean git checkout: after each builder the tree is reset (git checkout, git clean of
-capri_data). The external inputs (CAPRI's exports and dumps) are looked up under capri_sources/ and capri_reference/
+capri_data). The external inputs (CAPRI's exports and dumps) are looked up under capri_sources/ and capri_sources/reference/
 (tools/lib/paths.py, docs/EXTERNAL_SOURCES.md);
 a builder whose input is absent is reported as not run. INVOCATIONS records the command of every builder.
 
@@ -48,7 +48,7 @@ from paths import EXPORTS, REFERENCE, SOURCES  # noqa: E402  (CAPRI's material: 
 D17 = SOURCES / "capreg"                    # res_17<CC>.txt dumps of CAPREG's 2017 base (DATA2)
 GAMS = SOURCES / "gams"                     # CAPRI's GAMS code
 REF = EXPORTS / "res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv"
-SETS = REFERENCE / "sets" / "simini_21730"  # CAPRI's sets (capri_reference/README.md), not in git
+SETS = REFERENCE / "sets" / "simini_21730"  # CAPRI's sets (docs/EXTERNAL_SOURCES.md), not in git
 BP = "capri_data/sources/baseline_pmp"
 S = "capri_data/2017/supply"
 
@@ -227,17 +227,17 @@ INVOCATIONS: list[tuple[str, list[str], list[Path]]] = [
     ("ingest_capmod_market", ["--dump", str(EXPORTS / "_symbols_base1717.txt")], [EXPORTS / "_symbols_base1717.txt"]),
 ]
 
-#: not audited: utilities and writers of capri_reference/ (not committed) or of inputs held elsewhere
+#: not audited: utilities and writers of capri_sources/reference/ (not committed) or of inputs held elsewhere
 NOT_AUDITED = {
     "gdx_dump_symbol": "utility (dumps one GDX symbol)",
-    "build_capreg_tseries_reference": "writes capri_reference/ (not committed)",
-    "build_capri_sets_reference": "writes capri_reference/ (not committed)",
-    "build_captrd_results_reference": "writes capri_reference/ (not committed)",
+    "build_capreg_tseries_reference": "writes capri_sources/reference/ (not committed)",
+    "build_capri_sets_reference": "writes capri_sources/reference/ (not committed)",
+    "build_captrd_results_reference": "writes capri_sources/reference/ (not committed)",
     "build_eu_outlook_2030": "input (DG AGRI outlook PDF) not held in the workspace",
     "build_n_cascade_validation": "a check, writes a validation table",
     "build_patched_inputs": "superseded one-off (see REGIONAL_UNITS_BUILDERS.md 4.4)",
     "extract_capri_vcs_pair": "input is a GDX inside a zip (cap_after_2014 reference)",
-    "build_captrd_sets": "reads capri_reference/sets (not committed; build_capri_sets_reference writes it)",
+    "build_captrd_sets": "reads capri_sources/reference/sets (not committed; build_capri_sets_reference writes it)",
     "build_trajectory_model_keys": "a module: add_model_keys is called by build_captrd_trajectory (the file's one "
                                    "writer); its command line edits a file in place",
     "build_animal_yields": "a module: build() is called by build_crop_economics_2017, the one writer of yields.csv",
@@ -432,7 +432,7 @@ def snapshot() -> dict:
 
 def reset():
     git("checkout", "--", ".")
-    git("clean", "-fdq", "--", "capri_data", "capri_reference")
+    git("clean", "-fdq", "--", "capri_data")
 
 
 def main():

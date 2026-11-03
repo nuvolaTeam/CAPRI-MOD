@@ -7,7 +7,7 @@ Modules
               prep_data_for_estimation.gms l. 205-247, define_stats_and_supports.gms l. 44-49, 113-132, 177-179)
     supports  the supports from Step 1 and the stored error variance (define_stats_and_supports.gms l. 186-330)
 
-Parity references (CAPRI's own files, read by the tests only): capri_reference/capreg_tseries (CAPREG's time series)
-and capri_reference/captrd_results (CAPTRD's p_result), built by tools/build/build_capreg_tseries_reference.py and
+Parity references (CAPRI's own files, read by the tests only): capri_sources/reference/capreg_tseries (CAPREG's time series)
+and capri_sources/reference/captrd_results (CAPTRD's p_result), built by tools/build/build_capreg_tseries_reference.py and
 tools/build/build_captrd_results_reference.py. Design and status: docs/design/CAPTRD_MOD.md section 12.
 """

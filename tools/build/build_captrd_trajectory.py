@@ -4,7 +4,7 @@ until 31 October 2026) (`--trajectory captrd`; the default is CAPRI's 2030 refer
 The folder's one writer, from blank.
 
 Source: CAPTRD's results of the base-2017 run (results_1770.gdx, p_result, datatype "series": the final reconciled trend
-in projection years), as converted to capri_reference/captrd_results/1770/series.csv.gz
+in projection years), as converted to capri_sources/reference/captrd_results/1770/series.csv.gz
 (tools/build/build_captrd_results_reference.py). The CAPRI-keyed factors are those of
 capri_mod/projection/captrd_import.extract_trajectory (per-activity medians of the per-region cumulative ratios 2030 /
 2017 of YILD and LEVL, band projection.captrd_factor_bounds, per-region factors where the base value is at least 1);
@@ -15,7 +15,7 @@ from CAPTRD's results it reproduces the earlier file's growth factors and every 
 exactly (the entries the projection reads); its CAPRI-keyed regional entries differ where the model-keys step of the
 NUTS-2016 model (four-character model regions) had overwritten them with the model's aliases.
 
-    python tools/build/build_captrd_trajectory.py [--series capri_reference/captrd_results/1770/series.csv.gz]
+    python tools/build/build_captrd_trajectory.py [--series capri_sources/reference/captrd_results/1770/series.csv.gz]
 """
 from __future__ import annotations
 
@@ -53,7 +53,7 @@ def main():
                     out.write(f"'{reg}'.'{col}'.'{row}'.'{t}'.'series' {val}\n")
                     n += 1
         traj = extract_trajectory(sl, vintage="CAPTRD results_1770 (base 2017), the project lead's CAPRI installation")
-    traj["_provenance"]["extracted_from"] = ("capri_reference/captrd_results/1770/series.csv.gz (results_1770.gdx "
+    traj["_provenance"]["extracted_from"] = ("capri_sources/reference/captrd_results/1770/series.csv.gz (results_1770.gdx "
                                              "p_result, series; tools/build/build_captrd_trajectory.py)")
     added = K.add_model_keys(traj)
     from capri_mod.projection import scenario_io

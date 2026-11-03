@@ -5,7 +5,7 @@ base_year = 2017
 target_years = [2030]
 
 [provenance]
-extracted_from = "capri_reference/captrd_results/1770/series.csv.gz (results_1770.gdx p_result, series; tools/build/build_captrd_trajectory.py)"
+extracted_from = "capri_sources/reference/captrd_results/1770/series.csv.gz (results_1770.gdx p_result, series; tools/build/build_captrd_trajectory.py)"
 datatype_read = "series (final reconciled trend in projection years; BASM is a constant base-mean, not the projection)"
 aggregation = "per-activity median of per-region cumulative ratios"
 factor_band = [0.2, 5.0]

@@ -6,9 +6,9 @@ p_result(rall, cols, rows, t, respos) (respos: sets_captrd.gms l. 493-531; CAPTR
 
 Output (CAPRI's own data: read-only reference for the tests and parity runs, never read by the model;
 docs/design/CAPTRD_MOD.md section 6):
-  capri_reference/captrd_results/<tag>/<respos>.csv.gz     region, col, row, t, value, eps
-  capri_reference/captrd_results/<tag>/respos_counts.csv   records per result position (all positions)
-  capri_reference/captrd_results/<tag>/settings.csv        the SETTINGS symbol of the file
+  capri_sources/reference/captrd_results/<tag>/<respos>.csv.gz     region, col, row, t, value, eps
+  capri_sources/reference/captrd_results/<tag>/respos_counts.csv   records per result position (all positions)
+  capri_sources/reference/captrd_results/<tag>/settings.csv        the SETTINGS symbol of the file
 
 Only the positions named with --keep are written (default: the Step 1 and Step 2 ones); Eps is written as 0 with
 eps = 1, an absent record stays absent.
@@ -25,6 +25,14 @@ from collections import Counter
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
+
+
+def _REFERENCE():
+    """capri_sources/reference or $CAPRI_REFERENCE (tools/lib/paths.py)."""
+    import sys as _s
+    _s.path.insert(0, str(ROOT / "tools" / "lib"))
+    from paths import REFERENCE
+    return REFERENCE
 # folder of libgdxcclib64.so (README section 3): --gdxlib or the environment variable CAPRI_GDXLIB
 DEFAULT_GDXLIB = os.environ.get("CAPRI_GDXLIB", "")
 KEEP = ["Step1", "Support", "Support1", "wVarErr", "CoefVarErr", "DATA", "p_data", "BASM", "BAST", "BSY", "coco",
@@ -62,7 +70,7 @@ def main() -> None:
     ap.add_argument("--keep", nargs="*", default=KEEP)
     ap.add_argument("--gdxlib", default=DEFAULT_GDXLIB)
     args = ap.parse_args()
-    out = ROOT / "capri_reference" / "captrd_results" / args.tag
+    out = _REFERENCE() / "captrd_results" / args.tag
     out.mkdir(parents=True, exist_ok=True)
     keep = {k.lower(): k for k in args.keep}
     g, h, eps = _open(Path(args.src), args.gdxlib)

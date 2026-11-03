@@ -33,11 +33,11 @@ from capri_mod.pipeline.captrd import statistics as St
 from capri_mod.pipeline.captrd import timesets as TS
 
 log = logging.getLogger(__name__)
-REF = P.ROOT / "capri_reference"
+from capri_mod.external_paths import REFERENCE as REF  # noqa: E402  (capri_sources/reference)
 
 
 def _cc(ms: str) -> str:
-    """The code of the country's time-series file (capri_reference/capreg_tseries: TUR for TUR)."""
+    """The code of the country's time-series file (capri_sources/reference/capreg_tseries: TUR for TUR)."""
     return ms[:2] if ms.endswith("000000") else ms
 
 

@@ -3,13 +3,13 @@ CAPRI's market regions (docs/design/MARKET_REGIONS_INVENTORY.md section 7 item 4
 sim_ini, extracted to CSV sources") and for the parity checks of the ports (MODEL_CONTENT_PLAN.md sections 1-2).
 
 Source: the project lead's sim_ini_21730.gdx (the endotech Green Deal 2030 run with base year 2017, written at the
-simulation start; the same file as capri_reference/sets/simini_21730). The symbols written are listed, each with the
+simulation start; the same file as capri_sources/reference/sets/simini_21730). The symbols written are listed, each with the
 reason it is needed, in tools/build/simini_reference_symbols.csv; any other symbol can be added there.
 
-Output (CAPRI's own data, read-only; capri_reference/README.md):
-  capri_reference/simini/<tag>/<symbol>.csv.gz   parameters: d0, ..., dn, value, eps
+Output (CAPRI's own data, read-only; capri_sources/reference/README.md):
+  capri_sources/reference/simini/<tag>/<symbol>.csv.gz   parameters: d0, ..., dn, value, eps
                                                  variables:  d0, ..., dn, level, eps, lower, upper, marginal
-  capri_reference/simini/<tag>/_index.csv        symbol, kind, dim, domains, records, description
+  capri_sources/reference/simini/<tag>/_index.csv        symbol, kind, dim, domains, records, description
 
 Values: written with repr (full precision). GAMS Eps is written as 0 with eps = 1 (for a variable, eps flags the level;
 Eps in a bound or a marginal is written as 0). +INF and -INF are written as inf and -inf, NA as nan. A record CAPRI did
@@ -30,6 +30,14 @@ import os
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
+
+
+def _REFERENCE():
+    """capri_sources/reference or $CAPRI_REFERENCE (tools/lib/paths.py)."""
+    import sys as _s
+    _s.path.insert(0, str(ROOT / "tools" / "lib"))
+    from paths import REFERENCE
+    return REFERENCE
 # folder of libgdxcclib64.so (README section 3): --gdxlib or the environment variable CAPRI_GDXLIB
 DEFAULT_GDXLIB = os.environ.get("CAPRI_GDXLIB", "")
 SYMBOLS = ROOT / "tools" / "build" / "simini_reference_symbols.csv"
@@ -110,7 +118,7 @@ def _fmt(v: float) -> str:
 
 
 def write(src: Path, tag: str, gdxlib: str, symbols: Path) -> None:
-    out = ROOT / "capri_reference" / "simini" / tag
+    out = _REFERENCE() / "simini" / tag
     out.mkdir(parents=True, exist_ok=True)
     gdx = _Gdx(src, gdxlib)
     index = []

@@ -20,9 +20,8 @@ DATA2_*.txt
 *.gdx
 .cache/
 
-# CAPRI's own files converted for the parity tests (large; rebuilt by tools/build/build_*_reference.py from the
-# uploads); only their README is versioned
-capri_reference/*/
+# CAPRI's files converted for the parity tests moved into capri_sources/reference on 4 November 2026 (not versioned)
+capri_reference/
 # the data pipeline's store (raw downloads, Delta tables, manifest): relocatable, rebuilt from the manifest
 capri_data/pipeline/store/
 

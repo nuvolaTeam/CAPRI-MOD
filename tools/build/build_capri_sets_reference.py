@@ -5,8 +5,8 @@ Green Deal 2030 run with base year 2017, written at the simulation start). It ho
 global sets.gms and of the modules loaded in that run, with that run's compile-time switches ($ifi) applied.
 
 Output (CAPRI's own data, read-only; docs/design/CAPTRD_MOD.md section 6):
-  capri_reference/sets/<tag>/<SET>.csv      d0, d1, ..., text (one row per element / tuple)
-  capri_reference/sets/<tag>/_index.csv     set, dim, records, description
+  capri_sources/reference/sets/<tag>/<SET>.csv      d0, d1, ..., text (one row per element / tuple)
+  capri_sources/reference/sets/<tag>/_index.csv     set, dim, records, description
 
 Sets defined only inside CAPTRD (sets_captrd.gms: DOMPOS, GRPC, MrkBaleE, breedAct, ...) are not in a CAPMOD file;
 they are ported from sets_captrd.gms separately.
@@ -22,6 +22,14 @@ import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
+
+
+def _REFERENCE():
+    """capri_sources/reference or $CAPRI_REFERENCE (tools/lib/paths.py)."""
+    import sys as _s
+    _s.path.insert(0, str(ROOT / "tools" / "lib"))
+    from paths import REFERENCE
+    return REFERENCE
 # folder of libgdxcclib64.so (README section 3): --gdxlib or the environment variable CAPRI_GDXLIB
 DEFAULT_GDXLIB = os.environ.get("CAPRI_GDXLIB", "")
 
@@ -33,7 +41,7 @@ def main() -> None:
     ap.add_argument("--gdxlib", default=DEFAULT_GDXLIB)
     args = ap.parse_args()
     import gams.core.gdx as g
-    out = ROOT / "capri_reference" / "sets" / args.tag
+    out = _REFERENCE() / "sets" / args.tag
     out.mkdir(parents=True, exist_ok=True)
     h = g.new_gdxHandle_tp()
     ok, msg = g.gdxCreateD(h, args.gdxlib, g.GMS_SSSIZE)

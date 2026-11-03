@@ -1,5 +1,5 @@
 """Parity of CAPTRD's Step-1 supports (capri_mod/pipeline/captrd/supports.py) with CAPTRD's own support1 in 2030
-(capri_reference/captrd_results/1770): the support rules applied to CAPTRD's own Step1, statistics and base values.
+(capri_sources/reference/captrd_results/1770): the support rules applied to CAPTRD's own Step1, statistics and base values.
 
 Excluded: series with external information (expert, COCO, trust level, DG AGRI entries), NTRD and DOMM (reporting
 re-aggregates), crop areas (rescaled to UAAR afterwards, define_stats_and_supports.gms l. 618-622) and the
@@ -10,6 +10,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from capri_mod.external_paths import REFERENCE  # capri_sources/reference (docs/EXTERNAL_SOURCES.md)
+
 import numpy as np
 import pandas as pd
 import pytest
@@ -17,8 +19,8 @@ import pytest
 from capri_mod.pipeline.captrd import supports as SU
 
 ROOT = Path(__file__).resolve().parents[3]
-R = ROOT / "capri_reference" / "captrd_results" / "1770"
-SETS = ROOT / "capri_reference" / "sets" / "simini_21730"
+R = REFERENCE / "captrd_results" / "1770"
+SETS = REFERENCE / "sets" / "simini_21730"
 
 
 @pytest.mark.slow

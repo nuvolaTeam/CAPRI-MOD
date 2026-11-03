@@ -12,7 +12,7 @@ the data against their declarations (capri_data/schema, tools/check/validate_dat
     doit forget; doit         # rerun everything (with the outputs emptied first: the rebuild from blank)
 
 CAPRI's own material (exports, dumps, source tree) is not in git: tools/pipeline/builders.json names it as $EXPORTS,
-$SOURCES and $REFERENCE, which are capri_sources/exports, capri_sources and capri_reference at the repository root
+$SOURCES and $REFERENCE, which are capri_sources/exports, capri_sources and capri_sources/reference at the repository root
 (capri_sources may be elsewhere: the environment variable CAPRI_SOURCES; tools/lib/paths.py, docs/EXTERNAL_SOURCES.md).
 A builder whose external source is missing is reported and not run.
 """

@@ -3,7 +3,7 @@
 Ported in CAPTRD's order from captrd.gms l. 486-898 (load, cleaning) so that Step 1 (step1.py) can run from CAPREG's
 own time series instead of CAPTRD's prepared data. The parity reference is CAPTRD's p_data as its results file stores it
 (p_result(..., "p_data"), written by define_stats_and_supports.gms l. 138-150 after prep_data_for_estimation.gms;
-capri_reference/captrd_results/<run>/P_Data.csv.gz).
+capri_sources/reference/captrd_results/<run>/P_Data.csv.gz).
 
 p_data is held long (region, col, row, t, value), t a calendar year as text or BASM. GAMS semantics kept:
   - a zero is no record (an assignment of 0 deletes), and a $-condition on a value is true where the value is nonzero;
@@ -397,7 +397,7 @@ def labour_household(p: pd.DataFrame) -> pd.DataFrame:
 
 # --- driver ------------------------------------------------------------------------------------------------------
 def read_series(path: Path, sets: CaptrdSets, years: Iterable[int], chunk: int = 2_000_000) -> pd.DataFrame:
-    """One CAPREG time-series file (the layout of capri_reference/capreg_tseries/<tag>/<CC>.csv.gz), loaded as `load`
+    """One CAPREG time-series file (the layout of capri_sources/reference/capreg_tseries/<tag>/<CC>.csv.gz), loaded as `load`
     does, read in chunks."""
     years = list(years)
     parts = [load(c, sets, years)

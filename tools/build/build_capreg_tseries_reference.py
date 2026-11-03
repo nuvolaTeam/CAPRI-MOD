@@ -10,7 +10,7 @@ p_data (captrd.gms l. 504); the non-year entries are kept here unchanged so the 
 
 Output (CAPRI's own data: read-only reference, read by the tests and the parity runs, never by the model;
 docs/design/CAPTRD_MOD.md section 6):
-  capri_reference/capreg_tseries/17/<CC>.csv.gz    region, col, row, t, value
+  capri_sources/reference/capreg_tseries/17/<CC>.csv.gz    region, col, row, t, value
 
 Zeros and missing values: a record stored as GAMS Eps (an explicit zero) is written with value 0 and eps = 1;
 a record not stored in the GDX is absent from the CSV. CAPRI itself treats both as zero; the distinction is kept
@@ -30,7 +30,15 @@ import zipfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-OUT = ROOT / "capri_reference" / "capreg_tseries" / "17"
+
+
+def _REFERENCE():
+    """capri_sources/reference or $CAPRI_REFERENCE (tools/lib/paths.py)."""
+    import sys as _s
+    _s.path.insert(0, str(ROOT / "tools" / "lib"))
+    from paths import REFERENCE
+    return REFERENCE
+OUT = _REFERENCE() / "capreg_tseries" / "17"
 # folder of libgdxcclib64.so (README section 3): --gdxlib, the environment variable CAPRI_GDXLIB or capri_sources/gdxlib
 sys.path.insert(0, str(ROOT / "tools" / "lib"))
 from paths import SOURCES  # noqa: E402  (CAPRI's material outside the repository)

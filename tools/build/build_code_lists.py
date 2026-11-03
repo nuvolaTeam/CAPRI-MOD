@@ -29,9 +29,9 @@ copy of a mapping in the code disagrees (build_dairy_world_markets.COMM and mark
 until that builder was removed with armington_params.csv, 29 October 2026), and checks that every regional unit is one of CAPRI's (RALL).
 
 Source of CAPRI's sets: tools/build/build_capri_sets_reference.py's extract of sim_ini_21730.gdx (a CAPMOD restart file
-of the project lead's installation; capri_reference/README.md), given with --sets.
+of the project lead's installation; docs/EXTERNAL_SOURCES.md), given with --sets.
 
-    python tools/build/build_code_lists.py --sets /path/to/capri_reference/sets/simini_21730
+    python tools/build/build_code_lists.py --sets /path/to/capri_sources/reference/sets/simini_21730
 """
 from __future__ import annotations
 

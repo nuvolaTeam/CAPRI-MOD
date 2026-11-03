@@ -15,7 +15,7 @@ For every CSV under capri_data (archive/ left out) one row of the table provenan
             CAPRI")
   builder   the builder that writes it (tools/build/<builder>.py; several invocations: the task names)
   sources   the files of CAPRI's material its builder chain reads, outside git ($EXPORTS: CAPRI's exports as delivered,
-            $SOURCES: CAPRI's unpacked dumps and source tree, $REFERENCE: capri_reference; tools/lib/paths.py,
+            $SOURCES: CAPRI's unpacked dumps and source tree, $REFERENCE: capri_sources/reference; tools/lib/paths.py,
             docs/EXTERNAL_SOURCES.md), runs of numbered files collapsed (res_17<CC>.txt)
 
 The trace is tools/pipeline/builders.json (tools/check/make_pipeline.py). Files written by no traced builder are

@@ -18,7 +18,7 @@ data_market_1730defaulta.csv).
 
     python tools/build/build_patched_inputs.py [--dump-dir DIR] [--uploads DIR] [--check]
 
---check runs the chain on a copy of the repository (without capri_reference) and reports whether the two files,
+--check runs the chain on a copy of the repository (without capri_sources) and reports whether the two files,
 and the other files the steps write, come out as they are in place (CSV values within 1e-9); nothing in the repository is changed.
 """
 from __future__ import annotations
