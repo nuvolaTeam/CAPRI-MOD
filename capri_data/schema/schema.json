@@ -22217,7 +22217,9 @@
      "capri_mod/data/loaders.py"
     ],
     "builders": [],
-    "checks": [],
+    "checks": [
+     "tools/check/compare_tarv.py"
+    ],
     "tests": [
      "capri_mod/tests/test_norway_market.py"
     ]
