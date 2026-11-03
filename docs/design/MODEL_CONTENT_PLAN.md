@@ -567,6 +567,40 @@ envelope. Part of a port of CAPRI's premium module, which would also allow other
 BPS convergence). Until then tools/run/run_vcs_2030.py stays a supply-response validation test: it applies CAPRI's
 own per-unit premium change of its pair of runs (capri_vcs_effect.csv) and compares the model's response with CAPRI's.
 
+## 12b. CAPRI's source material as Parquet, outside git, for download (added 3 November 2026; beyond CAPRI)
+
+**What it is.** The builders read CAPRI's material from capri_sources/ and capri_reference/, outside git (about 9 GB
+raw: tools/lib/paths.py, docs/EXTERNAL_SOURCES.md): 114 of the 137 pipeline tasks, writing 233 of the 261 model-input
+files, need it [own check, from the trace of 3 November 2026]. So the data can be rebuilt only where CAPRI's
+installation is. The item converts that material to Parquet and publishes it as a versioned download, so a clean clone
+can rebuild every model input. **Beyond CAPRI**: CAPRI needs its installation to rebuild its own data.
+
+**Decided (the project lead, 3 November 2026).** The full Parquet set stays out of git and is available for download.
+
+**Measured** (3 November 2026, three of the largest files, every numeric record kept):
+
+| CAPRI file | Records | Raw text | xz | Parquet (zstd) |
+|---|---|---|---|---|
+| markmarket_greendeal_1730et_base_1717.txt | 6.40 M | 388 MB | 42.0 MB | 38.4 MB |
+| costsavings_ini_21730_jul15.csv | 7.48 M | 359 MB | 6.3 MB | 3.5 MB |
+| res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv | 5.33 M | 330 MB | 34.7 MB | 31.9 MB |
+
+**Steps** [I]:
+1. One converter: a CAPRI listing (gdxdump text, CSV) or GDX to Parquet, one file per GAMS symbol, every record, Eps
+   kept as a flag (as capri_reference's CSVs: value 0, eps 1), checked lossless against the original.
+2. The full set published outside git, versioned; the repository keeps a manifest (file, SHA-256, size, version) and a
+   download step that fetches the pinned version into capri_sources/ (tools/lib/paths.py unchanged for the builders).
+3. CAPRI's GAMS source tree stays text (code: the builders read parameter statements from it,
+   tools/build/convert_sources_to_csv.py).
+4. The builders switched one by one to the Parquet files through one reader, each checked identical
+   (tools/check/reproduce_builders.py; the rebuild from blank, tools/check/rebuild_from_blank.py).
+5. capri_data/sources keeps only the records each builder uses (the extract pattern of build_bilateral_market), so git
+   stays small; the model's inputs stay CSV.
+
+**Open decisions.** Where the download lives (a dataset host such as the one of the dat mirror, hf_capri, or another);
+who may download it (CAPRI's material: licence and access); its place in the order (after the market move's stages 2-3
+is suggested).
+
 ## 13. Summary
 
 | Item | Depends on | Status | Open decisions | Main source |
@@ -585,6 +619,7 @@ own per-unit premium change of its pair of runs (capri_vcs_effect.csv) and compa
 | S11 | S1 for T1/T2 averages | not started; per item | which items and exports | SGP S11 |
 | P1 obligatory set-aside | — | not started | when | §12a; supply_model.gms SETA_ |
 | P2 coupled support, Pillar I envelope | — | not started | when; with the premium module's port | §12a |
+| CAPRI's sources as Parquet, for download (beyond CAPRI) | — | decided 3 Nov: outside git, downloadable; sizes measured; not started | host; access; place in the order | §12b |
 
 ## 14. Open decisions across all items
 
@@ -610,6 +645,7 @@ own per-unit premium change of its pair of runs (capri_vcs_effect.csv) and compa
 16. Not raised in the notes [I]: the position of S1/S2, the G2 stages and S6-S11 relative to the market move and the
     29 units.
 17. P1 and P2 (§12a): when to schedule them.
+18. §12b: where the Parquet download is hosted, who may access it, and where the item goes in the order.
 
 ## 15. Notes found out of date while drafting
 
