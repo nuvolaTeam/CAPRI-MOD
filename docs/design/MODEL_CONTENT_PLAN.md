@@ -611,6 +611,16 @@ pinned set (step 5); the converter written here (step 1).
    from it -> upload as a new tagged version of the gated dataset (a write token; the workspace's
    access to huggingface.co to be checked, else the upload runs on the project lead's side) -> the manifest pinned to
    it -> the inputs rebuilt from blank, reviewed, mini-EU and F2F/GD gates.
+7. The update as one command, `python -m capri_mod.update_data` (stages 1-6 in order, stopping at the first failure,
+   resumable; the upload only after an explicit approval; the Hugging Face token read from the environment or the
+   local token file, never from the repository).
+8. A Claude Code project skill, `.claude/skills/update-capri-data/SKILL.md`, which runs that command with the project
+   lead, reviews the version report and the input diffs, and asks before the upload and any push (interactive
+   `/update-capri-data`, or `claude -p` without the upload).
+
+The Hugging Face side (the converter, the gated dataset under the account nuvolaTeam, its versions and uploads) is
+Claude's work (the project lead, 3 November 2026). Access from the workspace to huggingface.co with the project lead's
+fine-grained token checked the same day; the token is kept outside the repository.
 
 **Open decisions.** None stated (host, access and timing decided 3 November 2026).
 
