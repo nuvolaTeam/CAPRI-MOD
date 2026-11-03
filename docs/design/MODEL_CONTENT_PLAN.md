@@ -619,10 +619,12 @@ pinned set (step 5); the converter written here (step 1).
    `/update-capri-data`, or `claude -p` without the upload).
 
 The Hugging Face side (the converter, the gated dataset under the account nuvolaTeam, its versions and uploads) is
-Claude's work (the project lead, 3 November 2026). Access from the workspace to huggingface.co with the project lead's
+Claude's work (the project lead, 3 November 2026). The dataset is nuvolaTeam/capri-mod-raw
+(https://huggingface.co/datasets/nuvolaTeam/capri-mod-raw): licence GPL-3.0 (the project lead, 3 November 2026),
+gated with manual approval, public listing, the card only (no data yet). Access from the workspace to huggingface.co with the project lead's
 fine-grained token checked the same day; the token is kept outside the repository.
 
-**Open decisions.** None stated (host, access and timing decided 3 November 2026).
+**Open decisions.** None stated (host, access, licence and timing decided 3 November 2026).
 
 ## 13. Summary
 
