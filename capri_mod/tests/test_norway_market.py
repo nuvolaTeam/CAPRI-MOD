@@ -37,12 +37,12 @@ def data():
 
 
 def test_norway_is_a_trade_region_of_its_own():
-    """NO000000 is a trade region of its own (28 since the UK and WBA joined in batch 7), the EU blocks hold no Norwegian
+    """NO000000 is a trade region of its own (44 trade regions since 3 November 2026: CAPRI's 45 market regions, the EU's two blocks one trade region), the EU blocks hold no Norwegian
     country, CAPRI's NO000000 maps to itself (CAPRI's code since 3 November 2026)."""
     from capri_mod.data.definitions import ALL_TRADE_REGIONS, EU_MS_BLOCK, sup_noneu, TRADE_REGION_OF_CAPRI
     sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "check")]
     from _market_regions import model_region          # the market's grouping step (tools/lib)
-    assert len(ALL_TRADE_REGIONS) == 28 and "NO000000" in ALL_TRADE_REGIONS
+    assert len(ALL_TRADE_REGIONS) == 44 and "ROW" not in ALL_TRADE_REGIONS and "NO000000" in ALL_TRADE_REGIONS
     assert TRADE_REGION_OF_CAPRI["NO000000"] == "NO000000" and "NO000000" in ALL_TRADE_REGIONS
     assert sup_noneu() == {"NO000000": ("NO", "NO000000")} and "NO000000" not in EU_MS_BLOCK
     assert model_region("NO000000") == "NO000000"

@@ -685,7 +685,7 @@ def test_dairy_world_blocks(model):
     mm._dairy_world_cache = None
     try:
         w = mm._dairy_world_params()
-        assert {"USA", "NZL", "IND", "ROW"} <= set(w)
+        assert {"USA", "NZL", "IND", "MED", "CH"} <= set(w)          # CAPRI's market regions (ROW split since 3 November 2026)
         for r in ("USA", "NZL"):
             b = mm._dairy_solve(w[r], {}, None, 1.0, "test_" + r)
             assert all(abs(v - 1.0) < 1e-9 for v in b["price_ratio"].values())
@@ -3331,7 +3331,7 @@ def test_greendeal_2030_settings_and_pesticide_rule():
 def test_processing_inpe_and_nonEU_feed_are_capris_2030():
     """CAPRI's ProcNQ_ divides its Hessian by the 2030 price of the non-agricultural good (arm/market1.gms: PPri INPE
     CUR = 1.019^(2030-2017)), as the dairy and biofuel blocks do; the non-EU feed functions are CAPRI's 2030
-    calibration for every trade region (ROW included): feed share = FEED / (HCON+FEED+PROC+BIOF), feed-weighted
+    calibration for every trade region (CAPRI's 45 market regions since 3 November 2026): feed share = FEED / (HCON+FEED+PROC+BIOF), feed-weighted
     p_ElasFeed."""
     import json
     from capri_mod.market.market_module import MarketModule
@@ -3348,7 +3348,7 @@ def test_processing_inpe_and_nonEU_feed_are_capris_2030():
     assert abs(pq["H"]["USA"][("SOYA", "SOYA")] - float(r.h) / inpe_usa) < 1e-9 * float(r.h)
     from capri_mod.data.nested_tables import read_feed_demand
     fd = read_feed_demand(MK / "feed_demand_nonEU.csv")
-    assert "ROW|SOYC" in fd and "SKOR|SOYC" in fd and "EU27|SWHE" not in fd
+    assert "MED|SOYC" in fd and "SKOR|SOYC" in fd and "ROW|SOYC" not in fd and "EU27|SWHE" not in fd
     us = pd.read_csv(DATA_DIR / "sources" / "market" / "feed_demand_nonEU_use_2030.csv")
     u = us[(us.rms == "USA") & (us["product"] == "MAIZ")].set_index("item")["value"]
     assert abs(fd["USA|CORN"]["feed_share"] - u["FEED"] / u[["HCON", "FEED", "PROC", "BIOF"]].sum()) < 1e-4

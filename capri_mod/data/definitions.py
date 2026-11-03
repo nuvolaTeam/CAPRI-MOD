@@ -194,7 +194,8 @@ EU_BLOCKS = tuple(dict.fromkeys(EU_MS_BLOCK.values()))
 
 def _load_trade_regions() -> tuple:
     """The market's trade regions in their order and CAPRI's region code of each (capri_data/codes/
-    model_trade_regions.csv, a declared code list with a source per row; ROW: every CAPRI region not listed). The
+    model_trade_regions.csv, a declared code list with a source per row: CAPRI's market regions, the EU's two as EU27;
+    ROW, CAPRI's 17 other regions together, was split into them on 3 November 2026, market move stage 3). The
     United Kingdom (UK000000) and the Western Balkans (WBA) are trade regions of their own as in CAPRI since batch 7, Norway
     (NO000000) since K56; Egypt, Algeria, Saudi Arabia and Iran, trade regions here without any data until 29 October 2026,
     fold into ROW (KNOWN_ISSUES K45)."""
