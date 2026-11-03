@@ -202,8 +202,9 @@ and its young-animal markets inside the market model (yaniMarket_, arm/market_mo
 market anticipated the EU supply response with its own-price elasticities and the young-animal prices were updated
 between market solves; the Farm-to-Fork runs then left a slow beef / calf price mode (calf price ratio still rising at
 the 25th iteration, the stopping rule reached 1.5-2 points of beef price short of the fixed point). Remaining
-differences: with CAPRI's EU trade blocks (`market.eu_blocks`) the Hessian is summed per block
-(`CAPRIModel._split_hessian`), but the young-animal markets keep the update between market solves. Raw milk:
+differences: with CAPRI's EU trade blocks (`market.eu_blocks`, the default since 3 November 2026) the Hessian is
+summed per block (`CAPRIModel._split_hessian`), and the young-animal markets clear inside the market per block (since
+29 October 2026; until then they were updated between market solves with the blocks). Raw milk:
 since 24 October 2026 (audit M5) each member state's raw milk follows its own milk
 price inside the market, through the Hessian's member-state rows and columns.
 
@@ -263,6 +264,14 @@ market supply Hessian's FEEDBLK rows); before, fixed within a solve. Same fixed 
 CAPRI's non-EU feed demand FeedNQ_ with the feed energy balance FeedBal_ (arm/market_model.gms l. 1018-1048), the
 feed conversion factors of arm/feed_conv.gms and the calorie contents of nutrient_cont_usda; before, constant
 elasticities p_ElasFeed per trade region (the former departure row "non-EU feed demand, M3").
+
+### `market.eu_blocks = true` (3 November 2026; DEP-3 removed; the market's move onto CAPRI's regions, stage 2)
+
+The EU is CAPRI's two market regions, A_EU_WEST and A_EU_EAST (aggregation/defaultA.agg, RMEU_to_RM), with their own
+prices, Armington nests and the trade between them; "EU27" stays in the reports as their sum. Built as an option on 18
+October 2026 (Farm-to-Fork deviation 4.22 -> 4.65 when first tried); the market supply Hessian per block and the
+young-animal markets inside the market per block since 29 October 2026. Mini-EU Farm-to-Fork, two blocks against one
+EU on the same code: both converged in 6 iterations, EU indicators within 0.4 points.
 
 ### `market.sup_milk_in_market = true` (29 October 2026; step F, batch 8)
 
@@ -354,7 +363,6 @@ any change of the default.
 |---|---|---|---|---|
 | `outer_loop.max_outer_iter` | 99 (the GUI's number of iterations for a scenario run, %STEPS%) | 60 | the project lead's choice (28 October 2026): CAPRI's stop rule needs 30 iterations in the Green Deal 2030 scenario (r168), 12 in Farm-to-Fork; 60 keeps a run within the run time | none; a run that does not converge in 60 is reported as such |
 | `supply.fert_slope_with_saving` | the fertiliser options' pmpParSqr with the fertiliser-saving term (envind/ghgMiti.gms l. 1016-1035), and the inhibitor on manure's with the manure-saving term at p_manureShadVal (l. 1036-1050; with this switch since 28 October 2026) | false (the curvature without it) | K77, 25 October 2026: with it and the cost on the N purchases, the 2030 baseline leaves the options' initial shares (FR10 precision farming 0.44; EU 9.6%, run r128); the saving runs through the NLP's fertilisation block, so the base becomes a saddle | kept: the project lead's decision of 31 October 2026 (K77; CAPRI_DEPARTURES_REGISTER DEP-30) keeps the model's calibration of the fertiliser options, each initial share exactly optimal with the model's own value of N, so this entry is no longer to be removed |
-| `market.eu_blocks` | two EU trade blocks, EU_WEST and EU_EAST (aggregation/defaultA.agg) | false (one EU27 block) | built 18 October 2026 as an option; Farm-to-Fork deviation 4.22 → 4.65 when tried | a run; the market supply Hessian (below) is not built for the blocks yet |
 | `supply.use_cattle_member_splits` | replacement heifers (HEIR) and the four calf activities with their own levels; young animals cleared per sex (INPANI_) | false (the model's animals with CAPRI's intensity pairs; pooled young-animal markets) | K65: with them on, the Farm-to-Fork run does not converge (male calves' price above 6 x base, female below zero, r96); no CAPRI per-sex Farm-to-Fork result exists to check against | find why the per-sex prices diverge (calf activities at their zero bounds) |
 | (no setting) the market's demand at the baseline | the market model and the supply models calibrated to the same baseline before the run (the market model in the baseline calibration, arm/market1.gms; the supply models to the same CAPTRD baseline); during a run only the market supply functions are recalibrated to the supply models (simu_calibration_to_supply.gms), the demand functions are not | in the baseline run, every iteration recalibrates the market's demand at the supply models' supply, prices at the reference (market/bilateral_solve.py _bilateral_calibrate: the EU's use rescaled to the supply models' herds and crush, the non-EU use of pooled products scaled within [0.2, 5]); scenarios inherit the calibration frozen at the converged baseline | the model's supply models do not reproduce CAPRI's market baseline exactly (their data and calibration differ from CAPRI's CAPTRD baseline), so without it the reference prices would not clear the baseline market; recorded 29 October 2026 (step F; the code comment had called it CAPRI's) | supply models that reproduce CAPRI's 2030 market baseline quantities at its prices, then the recalibration can be dropped and the baseline run checked against CAPRI's prices |
 | (no setting) irrigated shares of the water indicator (capri_mod/water, tools/build/build_irrigation_2017.py) | crop-specific irrigated areas per EU region from a highest-posterior-density fit to the FSS crop data (p_wdata_fss) and the regional irrigated area IRR2, survey gaps filled by trend estimates (water_database.gms l. 325-640) | the region's IRR2 irrigated area (latest survey up to 2017, the member state's where no regional value) on its irrigable crops: rice entirely, one share for the others; Ireland none (no share in CAPRI's data) | the FSS crop-specific irrigated areas and the CAPREG time series for the trends are not among our sources; 27 October 2026. The adding-up to IRR2 is kept from CAPRI's fit; CAPRI's own rule where crop data are missing (Turkey, Western Balkans) puts the IRR2 share on every crop without it, which leaves about a third of the FSS irrigated area out (7.0 against 11.2 Mha) | the FSS irrigated areas by crop (Eurostat ef_poirrig / ef_mp_irri, as CSV) and CAPRI's HPD fit; CAPRI's water module in supply (irrigated and rainfed activities) is a further step |

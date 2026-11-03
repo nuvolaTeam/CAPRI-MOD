@@ -60,7 +60,6 @@ CAPTRD_MOD.md §12.4).
 |---|---|---|---|---|---|
 | DEP-1 | Outer-loop iteration cap of 60. | GUI STEPS 99 (gui/capri_gui_definition.xml l. 2891-2897, verified) | `outer_loop.max_outer_iter = 60`; 99 | the project lead's choice, 28 Oct 2026 | DEPARTURES_FROM_CAPRI.md |
 | DEP-2 | Fertiliser-option curvature without the saving term. | envind/ghgMiti.gms l. 1016-1050 | `supply.fert_slope_with_saving = false`; `true` | kept with DEP-30 (K77, decision 31 Oct 2026) | DEPARTURES_FROM_CAPRI.md; KNOWN_ISSUES K77 |
-| DEP-3 | One EU27 trade block instead of CAPRI's EU_WEST and EU_EAST. | aggregation/defaultA.agg | `market.eu_blocks = false`; `true` | option since 18 Oct 2026 | DEPARTURES_FROM_CAPRI.md |
 | DEP-4 | Cattle member splits off: young animals pooled across sexes. | INPANI_ per sex; HEIR and calf activities | `supply.use_cattle_member_splits = false`; `true` | K65 open | DEPARTURES_FROM_CAPRI.md; KNOWN_ISSUES K65 |
 
 ### 3.2 Departures without a setting (parts not built, or a different form)
@@ -107,8 +106,7 @@ CAPTRD_MOD.md §12.4).
 | DEP-41 | The EU's bilateral quotas against the policy block MER (ARG + BRA + URUPAR) left out: beef 61.1, sheep and goat meat 33.5, poultry 519.0, sugar 334.1 kt (2030); the builder skips MER as a reporting aggregate. Not binding at the 2030 base (imports 45%, 11%, 5%, 61% of the quotas). | p_trqBilat('EU','MER',...) on RMTP, one quota over MER's members (trqSigmoidFunc_) | tools/build/build_bilateral_market.py build_trq (AGGREGATES holds MER) | in force; registered 1 Nov 2026 (the project lead's decision): removed by the move to CAPRI's market regions, where quotas sit on RMTP | MARKET_REGIONS_INVENTORY.md |
 | DEP-42 | Other fodder (OFOD) is one crop-diversification group. | cropDivGrps_mCact: OFAR (other fodder on arable land) and ROOF (fodder root crops) are groups of their own in cropDivGreening_ | the model's OFOD is OFAR + ROOF, one activity and one group (capri_data/codes/model_activity_classes.csv) | kept until S1/S2 splits OFOD (the project lead's decision, 2 November 2026) | where both are grown the model's largest group can be larger than CAPRI's; not measured |
 
-Two more differences apply only with non-default settings:
-- With `market.eu_blocks = true`, the young-animal markets are updated between market solves instead of inside them.
+One more difference applies only with a non-default setting:
 - `outer_loop.capri_step_special` passes a smoothed price to the member state's models as a departure from its
   market's price. It is empty by default.
 
@@ -141,6 +139,12 @@ ones known to be stale.
 
 The settings switched to CAPRI's form are described in DEPARTURES_FROM_CAPRI.md, "Switched to CAPRI's setting". Also
 switched to CAPRI's form:
+- DEP-3, one EU27 trade block: the EU is CAPRI's two market regions A_EU_WEST and A_EU_EAST (`market.eu_blocks = true`,
+  3 November 2026; the market's move onto CAPRI's regions, MARKET_REGIONS_INVENTORY.md stage 2). The young-animal
+  markets clear inside the market solve per block (since 29 October 2026: the blocks' supply Hessians, the sums of
+  their member states', carry the YANI rows; the note that with the blocks they were updated between solves was out of
+  date). Mini-EU Farm-to-Fork run against the one-EU run of the same code (both converged in 6 iterations): EU
+  indicators within 0.4 points (oilseed production -21.9% against -22.3%, beef price +2.3% against +2.0%).
 - DEP-43, nurseries (NURS) on permanent-crop land (FRUN) as CAPRI's landTypes_to_pact, in the supply model's land
   balances and the base land data (land_availability.csv: 181.2 kha from arable to permanent land over 213 regions);
   one list of the crops on permanent land for the supply model, the environmental accounts and the base builder

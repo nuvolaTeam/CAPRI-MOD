@@ -142,7 +142,7 @@ S151,SupplyModule.SLOW_REGION_SECONDS,capri_mod/supply/supply_module.py:7163,num
 S152,SupplyModule.n_workers / CAPRI_WORKERS,capri_mod/supply/supply_module.py:7486,switch,None (cores),toml:run,run.n_workers,,yes,env CAPRI_WORKERS overrides (:7495); results independent of workers,
 S154,debug env vars (supply),capri_mod/supply/supply_module.py:1560,switch,unset,toml:diagnostics,diagnostics.trace_recal / nlp_dump / trace_yani / fd_dump / cal_debug,,n/a,"also CAPRI_NLP_DUMP :1673, CAPRI_TRACE_YANI :1766, CAPRI_FD_DUMP :2735, CAPRI_CAL_DEBUG :6835",
 S155,physical/unit constants (supply),capri_mod/supply/supply_module.py:759,numeric_constant,"44/28, 17/14, 1e3, 1e6",keep_code,,,yes: physical,group row; also environmental_module.py,
-S156,MarketModule.eu_blocks,capri_mod/market/market_module.py:91,switch,False,toml:market,market.eu_blocks,EU_WEST/EU_EAST (aggregation/defaultA.agg),yes,DEPARTURE FROM CAPRI default aggregation; cli --eu-blocks sets CLASS attr,
+S156,MarketModule.eu_blocks,capri_mod/market/market_module.py:91,switch,True,toml:market,market.eu_blocks,EU_WEST/EU_EAST (aggregation/defaultA.agg),no,CAPRI's setting since 3 Nov 2026 (DEP-3 removed); the option goes with the single-EU form in stage 2 sets CLASS attr,
 S157,MarketModule.EU_BLOCK_REGIONS,capri_mod/market/market_module.py:92,code_list,EU_WEST EU_EAST,mapping_csv,,defaultA.agg,yes,eu_market_blocks.csv already exists,
 S158,MarketModule.SUP_NONEU_*,capri_mod/market/market_module.py:97,table,NOR; NO->NOR; NOR->NO000000,mapping_csv,,RMSSUP outside EU,yes: K56,"rows :97,:99,:101",
 S159,MarketModule._COUNTRY_MS,capri_mod/market/market_module.py:191,table,"BE/LU->BL, IE->IR, GR->EL",mapping_csv,,,yes,duplicate country map,

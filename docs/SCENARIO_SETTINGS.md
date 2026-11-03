@@ -69,7 +69,7 @@ implemented (an error if not 0): dietShift, othPol. The JRC121368 surplus rule a
 | Dairy block (part of the market model, no GUI switch) | always | on: nine products traded, raw milk, fat and protein per member state (no switch; docs/DAIRY_PROCESSING.md) |
 | New Manure Trade Module | true | true (`CAPRIModel.use_manure_market`; a scenario may switch off) |
 | Use inner fertilizer model (`useInnerFertDistModel`) | **true** | true (always, in CAPRI's NLP form): CAPRI's inner fertiliser distribution model on its 2030 priors, per region and crop group, inside the regional model; it carries the crop-specific mineral fertiliser caps (`results["fert_dist"]`; docs/FERTILISER_ALLOCATION.md) |
-| Policy blocks | true | EU tariffs and tariff-rate quotas in the bilateral market. The EU is one market region by default; CAPRI's two EU trade blocks are an option (`market.eu_blocks`, `run_f2f_2030.py --set market.eu_blocks=true`) |
+| Policy blocks | true | EU tariffs and tariff-rate quotas in the bilateral market. The EU is CAPRI's two market regions, EU_WEST and EU_EAST (`market.eu_blocks = true`, CAPRI's setting since 3 November 2026); "EU27" in the reports is their sum |
 | Non-homothetic Armington (`modArmington`) | off | plain CES (as off) |
 | Explicit NTMs | false | none |
 | Trustee land supply | true | CAPRI's land market with its land rules (`supply.use_land_market`; the land rules LandBalNoSlak_ always) |
