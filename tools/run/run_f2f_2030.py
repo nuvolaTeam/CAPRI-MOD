@@ -179,30 +179,24 @@ def main():
             for _f in ("set_aside_requirement", "organic_area_target", "pesticide_reduction", "nutrient_surplus_target",
                        "surplus_rule", "surplus_cut"):
                 setattr(_scen, _f, getattr(_g, _f))
-    # command-line overrides of the scenario's settings
-    if a.surplus_rule:
-        _scen.surplus_rule = a.surplus_rule
-    if a.pesticide_rule:
-        _scen.pesticide_rule = a.pesticide_rule
-    if a.manure_market:
-        _scen.manure_trade = True
-    if a.no_manure_market:
-        _scen.manure_trade = False
-    if a.biofuel_markets:
-        _scen.biofuel_markets = True
-    if a.no_biofuel_markets:
-        _scen.biofuel_markets = False
-    if a.biofuel_mandate is not None:
-        _scen.biofuel_mandate = a.biofuel_mandate
-    if a.mine_redu:
-        _scen.mineral_redu = a.mine_redu
-        if _scen.name.startswith("greendeal"):
-            _scen.name = _scen.name.replace(_scen.name.split("_mine")[1].split("_")[0], a.mine_redu, 1) \
-                if "_mine" in _scen.name else _scen.name
-    if a.carbon_tax is not None:
-        _scen.carbon_tax = float(a.carbon_tax)
-    if a.endotech:
-        _scen.endotech = effective(_et)
+    # command-line overrides of the scenario's settings: the scenario keeps its name (since 3 November 2026, the
+    # project lead's decision; --mine-redu renamed a Green Deal scenario before); each override is recorded in the
+    # run's metadata (meta.scenario_overrides) and in its run id
+    _over = {}
+    for on, field, value in ((a.surplus_rule, "surplus_rule", a.surplus_rule),
+                             (a.pesticide_rule, "pesticide_rule", a.pesticide_rule),
+                             (a.manure_market, "manure_trade", True), (a.no_manure_market, "manure_trade", False),
+                             (a.biofuel_markets, "biofuel_markets", True),
+                             (a.no_biofuel_markets, "biofuel_markets", False),
+                             (a.biofuel_mandate is not None, "biofuel_mandate", a.biofuel_mandate),
+                             (a.mine_redu, "mineral_redu", a.mine_redu),
+                             (a.carbon_tax is not None, "carbon_tax",
+                              float(a.carbon_tax) if a.carbon_tax is not None else None),
+                             (a.endotech, "endotech", effective(_et) if a.endotech else None)):
+        now = effective(_scen.endotech) if field == "endotech" else getattr(_scen, field)
+        if on and now != value:
+            _over[field] = value
+            setattr(_scen, field, value)
     _scen.endotech = effective(_scen.endotech)
     m._progress(f"projection to 2030: baseline, then {_scen.name}")
     res = pmod.run(policy_scenario=_scen, years=[2030], **({"regions": _subset} if _subset else {}))
@@ -432,7 +426,7 @@ def main():
            "meta": {"conv": md.get("outer_converged"), "it": md.get("n_outer_iterations"),
                     "young_animals": (md.get("young_animal_prices"), md.get("young_animal_imbalance")),
                     "young_animal_markets": md.get("young_animal_markets"),
-                    "seconds": round(time.time() - t0), "options": vars(a),
+                    "seconds": round(time.time() - t0), "options": vars(a), "scenario_overrides": _over,
                     # the effective settings of the run (also written next to the pickle as <out>.settings.toml)
                     "settings": run_settings.to_dict(), "settings_changed": run_settings.diff(),
                     "market_supply_hessian": getattr((getattr(pmod, "_last_projected_model", None) or m).res,
@@ -523,6 +517,8 @@ def main():
                           and (not k.startswith("capri_data/scenarios/") or k.startswith(_own))},
                "software": out["meta"]["run_manifest"].get("software")}
         _rid = time.strftime("%Y%m%dT%H%M%S") + "-" + str(_git.get("commit") or "nocommit")[:7]
+        if _over:                                   # a scenario changed on the command line: its run id says so
+            _rid += "-ov" + _IO.fingerprint({"overrides": _over})[:8]
         _rec = _IO.write_run(_IO.with_capri_codes(_IO.to_long(b, "base")), _IO.with_capri_codes(_IO.to_long(s, "scen")),
                              scenario=_scen.name, reference=_ref, year=2030, run_id=_rid, fingerprint_parts=_fp,
                              meta=out["meta"], root=_rroot)

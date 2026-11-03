@@ -72,7 +72,7 @@ def set_aside_10_scenario() -> PolicyScenario:
     )
 
 
-def carbon_tax_scenario(carbon_price: float = 100.0) -> PolicyScenario:
+def carbon_tax_scenario(carbon_price: float = 50.0) -> PolicyScenario:
     """CAPRI's emission tax (pol_input/ecampa/carbtax50_endotech_set12.gms: %ghgTax% on, p_carbonTax(ru, "GGWP") =
     p_ghgEmisTax on the EU regions): EUR per t CO2-eq on agricultural emissions inside the supply models, with the
     mitigation options endogenous (capri_mod/supply/ghg_tax.py). The tax is the scenario's only shock, as in CAPRI's
@@ -100,6 +100,5 @@ def list_scenarios() -> List[str]:
 
 SCENARIO_REGISTRY.update({
     "SET_ASIDE_10PCT":  set_aside_10_scenario,
-    "CARBON_TAX_100":   lambda: carbon_tax_scenario(100.0),
     "CARBON_TAX_50":    lambda: carbon_tax_scenario(50.0),
 })
