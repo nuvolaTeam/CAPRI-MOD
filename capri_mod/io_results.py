@@ -723,12 +723,16 @@ def _jsonable(x):
 
 
 def write_run(base: pd.DataFrame, scen: pd.DataFrame, *, scenario: str, reference: str, year: int, run_id: str,
-              fingerprint_parts: dict, meta: dict, root) -> dict:
+              fingerprint_parts: dict, meta: dict, root, summary: Optional[dict] = None,
+              iterations: Optional[tuple] = None) -> dict:
     """Store a run in the long table (root/long, partitioned by scenario and run id): the scenario's rows as its own
     partition and the reference's as the reference's, once. A stored reference with the same fingerprint is reused
     when its rows are identical to this run's (the run points to it); otherwise the reference is stored as a new
     partition under this run id (a reference with the same fingerprint but other results is recorded in the note).
-    Returns the run's record (root/runs). meta (the run's metadata) is written to root/meta/<scenario>/<run id>/."""
+    Returns the run's record (root/runs). meta (the run's metadata) is written to root/meta/<scenario>/<run id>/.
+    summary (the run script's EU summaries) goes to root/summary with the scenario's partition, iterations (the outer
+    iterations' records of the reference and the scenario) to root/iterations with each one's partition
+    (encode_record's rows)."""
     import pyarrow as pa
     from datetime import datetime as _dt
     from deltalake import write_deltalake
@@ -748,10 +752,10 @@ def write_run(base: pd.DataFrame, scen: pd.DataFrame, *, scenario: str, referenc
                 "stored again")
         print(f"WARNING: {note}", flush=True)
 
-    def put(df, scen_name):
+    def put(df, scen_name, table="long"):
         df = df.copy()
         df["scenario"], df["run_id"] = scen_name, run_id
-        write_deltalake(str(root / "long"), pa.Table.from_pandas(df, preserve_index=False), mode="append",
+        write_deltalake(str(root / table), pa.Table.from_pandas(df, preserve_index=False), mode="append",
                         partition_by=["scenario", "run_id"])
 
     now = _dt.now().astimezone().strftime("%Y-%m-%d %H:%M:%S %z")
@@ -759,11 +763,17 @@ def write_run(base: pd.DataFrame, scen: pd.DataFrame, *, scenario: str, referenc
     recs = []
     if ref_id is None:
         put(b, reference)
+        if iterations is not None:
+            put(encode_record(iterations[0]), reference, "iterations")
         ref_id = run_id
         recs.append({"seq": seq, "scenario": reference, "run_id": run_id, "kind": "reference", "reference": "",
                      "reference_run_id": "", "fingerprint": fp, "created": now, "rows": len(b), "note": note})
     s = _stored(scen, year)
     put(s, scenario)
+    if summary is not None:
+        put(encode_record(summary), scenario, "summary")
+    if iterations is not None:
+        put(encode_record(iterations[1]), scenario, "iterations")
     rec = {"seq": seq + len(recs), "scenario": scenario, "run_id": run_id, "kind": "scenario", "reference": reference,
            "reference_run_id": ref_id, "fingerprint": "", "created": now, "rows": len(s), "note": ""}
     recs.append(rec)
@@ -792,3 +802,148 @@ def read_run(root, scenario: str, run_id: Optional[str] = None) -> tuple:
 def as_points(base: pd.DataFrame, scen: pd.DataFrame) -> tuple:
     """Stored rows back to the long rows of pickle_blocks (the point column restored)."""
     return tuple(d.assign(point=p) for d, p in ((base, "base"), (scen, "scen")))
+
+
+# --------------------------------------------------------------------------- #
+# Nested records beside the long table: the run script's EU summaries and the outer iterations' record
+# --------------------------------------------------------------------------- #
+# Both are the coupling's or the run script's own structures (dicts, tuples, lists of numbers, flags and names), not
+# results by region and item: they are stored as (path, value, text) rows that rebuild them exactly. A path is a JSON
+# list of steps: ["d", key] a dict key (["dt", [...]] a tuple key), ["t", i] a tuple position, ["l", i] a list
+# position, ["a", i] a NumPy array position, ["e"] an empty container of the kind of the step before, and the leaf
+# type last: ["f"] float, ["i"] int, ["b"] bool, ["s"] text (in the text column), ["n"] None, ["x"] NumPy float.
+RECORD_COLUMNS = ("path", "value", "text")
+
+
+def encode_record(x) -> pd.DataFrame:
+    """A nested record as (path, value, text) rows (decode_record rebuilds it)."""
+    import numpy as _np
+    rows: list = []
+
+    def walk(v, path):
+        if isinstance(v, dict):
+            if not v:
+                rows.append((json.dumps(path + [["ed"]]), float("nan"), ""))
+            for k, y in v.items():
+                walk(y, path + [["dt", list(k)] if isinstance(k, tuple) else ["d", k]])
+        elif isinstance(v, (tuple, list, _np.ndarray)):
+            tag = "t" if isinstance(v, tuple) else "l" if isinstance(v, list) else "a"
+            if len(v) == 0:
+                rows.append((json.dumps(path + [["e" + tag]]), float("nan"), ""))
+            for i, y in enumerate(v):
+                walk(y.item() if isinstance(y, _np.generic) and tag == "a" else y, path + [[tag, i]])
+        elif isinstance(v, (bool, _np.bool_)):
+            rows.append((json.dumps(path + [["b"]]), float(v), ""))
+        elif isinstance(v, (int, _np.integer)):
+            rows.append((json.dumps(path + [["i"]]), float(v), ""))
+        elif isinstance(v, _np.floating):
+            rows.append((json.dumps(path + [["x"]]), float(v), ""))
+        elif isinstance(v, float):
+            rows.append((json.dumps(path + [["f"]]), v, ""))
+        elif isinstance(v, str):
+            rows.append((json.dumps(path + [["s"]]), float("nan"), v))
+        elif v is None:
+            rows.append((json.dumps(path + [["n"]]), float("nan"), ""))
+        else:
+            raise TypeError(f"encode_record: {type(v).__name__} at {path}")
+    walk(x, [])
+    return pd.DataFrame(rows, columns=list(RECORD_COLUMNS))
+
+
+def decode_record(df: pd.DataFrame):
+    """The nested record of encode_record's rows (in their order)."""
+    import numpy as _np
+    root: dict = {}
+
+    def leaf(tag, value, text):
+        return {"f": float, "x": _np.float64, "i": lambda v: int(v), "b": lambda v: bool(v)}.get(tag, lambda v: v)(
+            value) if tag in ("f", "x", "i", "b") else text if tag == "s" else None
+
+    # build with dicts keyed by the steps, then turn the tuple, list and array steps into their containers
+    for path, value, text in zip(df["path"], df["value"], df["text"]):
+        steps = json.loads(path)
+        node = root
+        for s in steps[:-2]:
+            node = node.setdefault(("dt", tuple(s[1])) if s[0] == "dt" else tuple(s), {})
+        last, typ = steps[-2] if len(steps) > 1 else None, steps[-1]
+        if typ[0].startswith("e"):
+            container = node if last is None else node.setdefault(
+                ("dt", tuple(last[1])) if last[0] == "dt" else tuple(last), {})
+            container[("empty", typ[0][1:])] = None
+            continue
+        key = ("dt", tuple(last[1])) if last[0] == "dt" else tuple(last)
+        node[key] = ("leaf", leaf(typ[0], value, text))
+
+    def build(node):
+        if isinstance(node, tuple) and len(node) == 2 and node[0] == "leaf":
+            return node[1]
+        keys = list(node)
+        if len(keys) == 1 and keys[0][0] == "empty":
+            return {"d": {}, "t": (), "l": [], "a": _np.array([])}[keys[0][1]]
+        kind = keys[0][0]
+        if kind in ("t", "l", "a"):
+            items = [build(node[k]) for k in sorted(keys, key=lambda k: k[1])]
+            return tuple(items) if kind == "t" else items if kind == "l" else _np.array(items)
+        return {(tuple(k[1]) if k[0] == "dt" else k[1]): build(v) for k, v in node.items()}
+    return build(root)
+
+
+#: the key of the summary record that keeps the label order of the tables rebuilt from the long rows
+LABELS_KEY = "_labels"
+
+
+def summary_of(out: dict) -> dict:
+    """The run script's pickle without the blocks rebuilt from the long rows, the metadata and the iterations' record:
+    what write_run stores as the summary record, with the environmental tables' label order (LABELS_KEY)."""
+    summ = {k: v for k, v in out.items() if k not in LONG_BLOCKS + ("meta", "outer_history")}
+    summ[LABELS_KEY] = {"environmental": tuple((tuple(map(str, t.index)), tuple(map(str, t.columns)))
+                                               for t in out["environmental"])}
+    return summ
+
+
+#: the pickle's blocks rebuilt from the long rows (pickle_blocks); the others are the run script's summaries, stored
+#: as records, and the metadata
+LONG_BLOCKS = ("act", "out", "prod", "environmental", "labour", "set_aside", "act_regional", "base_market",
+               "scen_market")
+
+
+def _record(root, table, scenario, run_id):
+    from deltalake import DeltaTable
+    p = Path(root) / table
+    if not p.exists():
+        return None
+    df = DeltaTable(str(p)).to_pandas(filters=[("scenario", "=", scenario), ("run_id", "=", run_id)])
+    return decode_record(df[list(RECORD_COLUMNS)]) if len(df) else None
+
+
+def load_store(root, scenario: str, run_id: Optional[str] = None) -> dict:
+    """A stored run as the run script's pickle: the blocks rebuilt from the long rows, the summaries, the outer
+    iterations' records (reference, scenario) and the metadata (meta.json: tuple keys as text)."""
+    rb, rs, rec = read_run(root, scenario, run_id)
+    out = pickle_blocks(*as_points(rb, rs))
+    summ = _record(root, "summary", scenario, rec["run_id"]) or {}
+    # the environmental tables' labels in the run's order (the long rows are read in key order)
+    for i, (idx, cols) in enumerate((summ.pop(LABELS_KEY, None) or {}).get("environmental") or ()):
+        t = out["environmental"]
+        out["environmental"] = tuple(x.reindex(index=list(idx), columns=list(cols)) if j == i else x
+                                     for j, x in enumerate(t))
+    out.update(summ)
+    it = (_record(root, "iterations", rec["reference"], rec["reference_run_id"]),
+          _record(root, "iterations", scenario, rec["run_id"]))
+    if it != (None, None):
+        out["outer_history"] = it
+    mp = Path(root) / "meta" / scenario / rec["run_id"] / "meta.json"
+    if mp.exists():
+        out["meta"] = json.loads(mp.read_text())
+    return out
+
+
+def load_run(spec: str) -> dict:
+    """A run for the check tools: a pickle (a path ending in .pkl) or a stored run, "store:ROOT:SCENARIO[:RUN_ID]"
+    (load_store)."""
+    import pickle
+    if spec.startswith("store:"):
+        parts = spec.split(":")
+        return load_store(parts[1], parts[2], parts[3] if len(parts) > 3 and parts[3] else None)
+    with open(spec, "rb") as fh:
+        return pickle.load(fh)

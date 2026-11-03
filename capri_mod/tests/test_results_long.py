@@ -158,3 +158,31 @@ def test_the_run_metadata_is_declared():
     RunManifest(**m)
     with pytest.raises(ValidationError):
         RunManifest(**{**m, "inputs": {"a.csv": {"sha256": "0"}}})
+
+
+def test_a_nested_record_comes_back_exactly():
+    """encode_record / decode_record (the run script's EU summaries and the outer iterations' records): types kept
+    (tuple, list, array, int, bool, NumPy float, text, None, empty containers, tuple keys)."""
+    x = {"a": (1.5, 2, True), "b": [{"k": None, "s": "LU"}, []], ("BULL", "AmmAppHE"): np.float64(0.25),
+         "c": np.array([1.0, 2.0]), "d": {}, "e": ()}
+    y = IO.decode_record(IO.encode_record(x))
+    assert y.keys() == x.keys() and y["a"] == (1.5, 2, True) and type(y["a"][1]) is int and y["a"][2] is True
+    assert y["b"] == [{"k": None, "s": "LU"}, []] and type(y[("BULL", "AmmAppHE")]) is np.float64
+    assert np.array_equal(y["c"], x["c"]) and y["d"] == {} and y["e"] == ()
+
+
+def test_the_pickle_comes_back_from_the_store(tmp_path):
+    """load_store: the blocks rebuilt from the long rows, the summaries (with the environmental tables' label order)
+    and both iteration records."""
+    base, scen = _results(), _results(scale=1.5)
+    B, S = (IO.with_capri_codes(IO.to_long(x, p)) for x, p in ((base, "base"), (scen, "scen")))
+    env = (base["environmental"], scen["environmental"])
+    out = {"environmental": env, "adoption": ({"PRECFARM": 0.1}, {"PRECFARM": 0.2}), "histosol": {"fallow": 1.0}}
+    IO.write_run(B, S, scenario="s", reference="r", year=2030, run_id="a", fingerprint_parts={}, meta={},
+                 root=tmp_path, summary=IO.summary_of({**out, "act": None}),
+                 iterations=([{"it": 1, "signal": {"SWHE": 0.0}}], [{"it": 1}, {"it": 2}]))
+    got = IO.load_run(f"store:{tmp_path}:s")
+    assert got["adoption"] == out["adoption"] and got["histosol"] == {"fallow": 1.0}
+    assert list(got["environmental"][0].index) == list(env[0].index)
+    assert list(got["environmental"][0].columns) == list(env[0].columns)
+    assert got["outer_history"] == ([{"it": 1, "signal": {"SWHE": 0.0}}], [{"it": 1}, {"it": 2}])

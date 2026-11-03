@@ -525,19 +525,29 @@ def main():
             _rid += "-ov" + _IO.fingerprint({"overrides": _over})[:8]
         _rec = _IO.write_run(_IO.with_capri_codes(_IO.to_long(b, "base")), _IO.with_capri_codes(_IO.to_long(s, "scen")),
                              scenario=_scen.name, reference=_ref, year=2030, run_id=_rid, fingerprint_parts=_fp,
-                             meta=out["meta"], root=_rroot)
+                             meta=out["meta"], root=_rroot, summary=_IO.summary_of(out),
+                             iterations=out["outer_history"])
         _md = _rroot / "meta" / _scen.name / _rid
         run_settings.save(str(_md / "settings.toml"))
         with open(_md / "manifest.json", "w") as fh_:
             json.dump(out["meta"]["run_manifest"], fh_, indent=1)
-        _rb, _rs, _ = _IO.read_run(_rroot, _scen.name, _rid)
-        _d = _IO.check_pickle(_IO.pickle_blocks(*_IO.as_points(_rb, _rs)), out)
-        print(f"long table: {_rroot / 'long'} | {_scen.name} {_rid}: {len(_rs)} rows; reference {_ref} "
-              f"{_rec['reference_run_id']}" + (" (reused)" if _rec["reference_reused"] else f": {len(_rb)} rows")
-              + (" | identical to the pickle's blocks" if not _d else f" | {len(_d)} DIFFERENCES from the pickle"),
-              flush=True)
+        # the whole pickle (its metadata apart) rebuilt from the store must equal it exactly: the gate's comparison
+        # (tools/check/compare_pickles_exact.py walk) at tolerance zero
+        import importlib.util as _ilu
+        _sp = _ilu.spec_from_file_location("_cmp", ROOT / "tools" / "check" / "compare_pickles_exact.py")
+        _cmp = _ilu.module_from_spec(_sp)
+        _sp.loader.exec_module(_cmp)
+        _st = _IO.load_store(_rroot, _scen.name, _rid)
+        _d = []
+        for _k in out:
+            if _k != "meta":
+                _cmp.walk(out[_k], _st.get(_k), f"$.{_k}", _d, 0.0, set())
+        print(f"long table: {_rroot / 'long'} | {_scen.name} {_rid}: {_rec['rows']} rows; reference {_ref} "
+              f"{_rec['reference_run_id']}" + (" (reused)" if _rec["reference_reused"] else "")
+              + (" | the pickle rebuilt from the store: identical" if not _d
+                 else f" | {len(_d)} DIFFERENCES between the pickle and the store"), flush=True)
         if _d:
-            print("\n".join(_d[:20]), flush=True)
+            print("\n".join(map(str, _d[:20])), flush=True)
             sys.exit(1)
     _no = out["meta"]["nlp_nonoptimal"]
     print(f"saved {a.out} | converged {out['meta']['conv']} in {out['meta']['it']} iterations, {out['meta']['seconds']} s"

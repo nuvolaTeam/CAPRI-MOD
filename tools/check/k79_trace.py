@@ -23,6 +23,8 @@ import pandas as pd
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 from capri_mod.data.definitions import capri_ms  # noqa: E402
+__import__("sys").path.insert(0, str(__import__("pathlib").Path(__file__).resolve().parents[2]))
+from capri_mod.io_results import load_run  # a run pickle or a stored run, "store:ROOT:SCENARIO[:RUN_ID]"
 
 MIN_CHG, MIN_ABS = 0.05, 0.5
 
@@ -53,7 +55,7 @@ def main():
     ap.add_argument("--top", type=int, default=25)
     ap.add_argument("--csv", default="")
     a = ap.parse_args()
-    d = pickle.load(open(a.run, "rb"))
+    d = load_run(a.run)
     hist = d["outer_history"][1] if isinstance(d["outer_history"], (tuple, list)) and len(d["outer_history"]) == 2 \
         else d["outer_history"]
     print("CAPRI's verdict per scenario iteration (max %, rows above 0.05%, largest rows):")

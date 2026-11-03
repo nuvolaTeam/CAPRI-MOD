@@ -19,6 +19,8 @@ import sys
 from pathlib import Path
 
 import numpy as np
+__import__("sys").path.insert(0, str(__import__("pathlib").Path(__file__).resolve().parents[2]))
+from capri_mod.io_results import load_run  # a run pickle or a stored run, "store:ROOT:SCENARIO[:RUN_ID]"
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
@@ -39,7 +41,7 @@ def main() -> None:
     y0 = np.asarray(d["x_start"], float)
     starts = [("dump start", nlp.start(y0))]
     for p in a.runs:
-        lev = pickle.load(open(p, "rb"))["act_regional"][1].get(a.region) or {}
+        lev = load_run(str(p))["act_regional"][1].get(a.region) or {}
         y = y0.copy()
         n = 0
         for j, c in enumerate(cols[:len(y)]):

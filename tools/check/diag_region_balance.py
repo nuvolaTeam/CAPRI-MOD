@@ -11,6 +11,8 @@ import pickle
 import sys
 
 import pandas as pd
+__import__("sys").path.insert(0, str(__import__("pathlib").Path(__file__).resolve().parents[2]))
+from capri_mod.io_results import load_run  # a run pickle or a stored run, "store:ROOT:SCENARIO[:RUN_ID]"
 
 ITEMS = ["n_mineral_input", "n_organic_input", "n_fixation", "n_deposition", "n_crop_uptake", "n_surplus"]
 SHORT = ["mineral", "manure", "fixation", "deposition", "uptake", "surplus"]
@@ -18,7 +20,7 @@ ANIMALS = ["DCOW", "BCOW", "BULL", "PIGS", "PIGF", "LAYS", "BROI", "SHGM", "SHGF
 
 
 def rows(path, regions):
-    r = pickle.load(open(path, "rb"))
+    r = load_run(path)
     eb, es = r["environmental"]
     ab, as_ = r["act_regional"]
     lam = {k: v.get("lam") for k, v in r["regional"].items()}
