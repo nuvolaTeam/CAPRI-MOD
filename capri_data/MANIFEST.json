@@ -3767,6 +3767,15 @@
     "nature": "declared"
    }
   },
+  "capri_data/codes/model_market_regions.csv": {
+   "description": "the market's grouping step: each of CAPRI's 45 market regions (RM) and the model's market region it belongs to (26 their own, A_EU_WEST and A_EU_EAST the model's EU27, 17 its ROW); no builder: declared, read by tools/lib/_market_regions.py for every builder of the market's data (MARKET_REGIONS_INVENTORY.md stage 1; stages 2-3 change only this table)",
+   "kind": "structure",
+   "rows": 45,
+   "columns": 3,
+   "origin": {
+    "nature": "declared"
+   }
+  },
   "capri_data/codes/model_price_follows.csv": {
    "description": "the activities whose price follows a market commodity's (refactor stage 4: beet follows sugar, durum wheat the wheat market, Norway's raw milk the MILK market); a declared table",
    "kind": "structure",
@@ -4966,7 +4975,7 @@
    "columns": 1,
    "origin": {
     "nature": "capri",
-    "builder": "build_gl_demand"
+    "builder": "build_code_lists"
    }
   },
   "capri_data/shared/rms_to_rm.csv": {
@@ -4980,7 +4989,7 @@
    ],
    "origin": {
     "nature": "capri",
-    "builder": "build_gl_demand"
+    "builder": "build_code_lists"
    }
   },
   "capri_data/shared/trade_flows_2017.csv": {

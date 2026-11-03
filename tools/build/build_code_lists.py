@@ -251,10 +251,17 @@ def main():
     problems += [f"CAPRI's RM_TO_RMTP: {r} has {len(blocks_of.get(r, []))} trade-policy blocks, not one"
                  for r in rm if len(blocks_of.get(r, [])) != 1]
     problems += [f"CAPRI's RMEU_to_RM: {r} is not in RM" for _, r in rmeu_to_rm if r not in rm]
-    with open(ROOT / "capri_data" / "shared" / "rms_to_rm.csv", newline="", encoding="utf-8") as fh:
-        rms_rm = {(r["rms"], r["rm"]) for r in csv.DictReader(fh)}
-    if rms_rm != set(pairs("RMS_TO_RM")):
-        problems.append(f"shared/rms_to_rm.csv is not CAPRI's RMS_TO_RM: {sorted(rms_rm ^ set(pairs('RMS_TO_RM')))[:6]}")
+    # CAPRI's behavioural regions RMS and their market region RMS_TO_RM, every RMS in one RM: written below to
+    # shared/rms.csv and shared/rms_to_rm.csv (until 3 November 2026 written by build_gl_demand.py, which reads them,
+    # and checked here; the market's grouping step, tools/lib/_market_regions.py, reads them)
+    rms, rms_to_rm = read_set(a.sets, "RMS"), pairs("RMS_TO_RM")
+    rm_of_rms = {}
+    for r, m in rms_to_rm:
+        rm_of_rms.setdefault(r, []).append(m)
+        if m not in rm:
+            problems.append(f"CAPRI's RMS_TO_RM: {m} is not in RM")
+    problems += [f"CAPRI's RMS_TO_RM: {r} has {len(rm_of_rms.get(r, []))} market regions, not one"
+                 for r in rms if len(rm_of_rms.get(r, [])) != 1]
     if problems:
         raise SystemExit("code lists not written:\n  " + "\n  ".join(problems))
     for s, d in capri.items():
@@ -279,6 +286,8 @@ def main():
     write(OUT / "capri" / "RMTP.csv", ("code", "text"), list(rmtp.items()))
     write(OUT / "capri" / "RM_TO_RMTP.csv", ("rm", "rmtp"), rm_to_rmtp)
     write(OUT / "capri" / "RMEU_to_RM.csv", ("rmeu", "rm"), rmeu_to_rm)
+    write(ROOT / "capri_data" / "shared" / "rms.csv", ("rms",), [(r,) for r in rms])
+    write(ROOT / "capri_data" / "shared" / "rms_to_rm.csv", ("rms", "rm"), rms_to_rm)
     write(OUT / "model_commodities.csv", ("code", "capri_code", "mapping_source"), comms)
     differ = [(c, cc) for c, cc, _ in comms if c != cc]
     print(f"wrote {OUT.relative_to(ROOT)}: CAPRI's sets {', '.join(f'{s} {len(d)}' for s, d in capri.items())}; "

@@ -50,6 +50,7 @@ import functools as _ft
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
 from _grep import grep  # noqa: E402  (grep -E in Python: any system)
 from paths import EXPORTS, SOURCES  # noqa: E402  (CAPRI's material outside the repository)
+from _market_regions import model_region  # noqa: E402  (the market's grouping step: CAPRI region -> model region)
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 SRC = {2017: EXPORTS / "market_base_1717.txt",
@@ -120,18 +121,18 @@ def extract(year, eu_blocks=False):
     return _read_csv(keep, keep_default_na=False)
 
 
-def build(year, REGION_MAP, AGGREGATES, eu_blocks=False):
+def build(year, AGGREGATES, eu_blocks=False):
     df = extract(year, eu_blocks)
     df["value"] = df["value"].astype(float)
     sfx = "_eu2" if eu_blocks else ""
     if eu_blocks:
-        REGION_MAP = {k: v for k, v in REGION_MAP.items() if k != "EU27yr19"}
-        REGION_MAP.update(EU_BLOCKS)
         AGGREGATES = (set(AGGREGATES) - set(EU_BLOCKS)) | {"EU27yr19"}
         skip = lambda r: r in AGGREGATES or r.startswith(("EU0", "EU_")) or (r.endswith("000000") and r not in ("UK000000", "NO000000"))
     else:
         skip = lambda r: r in AGGREGATES or r.startswith(("EU0", "EU_", "A_EU")) or (r.endswith("000000") and r not in ("UK000000", "NO000000"))
-    mp = lambda r: REGION_MAP.get(r, "ROW")
+    # the model's market region of each CAPRI region: the grouping step (tools/lib/_market_regions.py; until 3 November
+    # 2026 REGION_MAP.get(r, "ROW"), the EU blocks added here)
+    mp = lambda r: model_region(r, eu_as_blocks=eu_blocks)
     pair = defaultdict(dict)
     reg = defaultdict(dict)
     for r in df.itertuples(index=False):
@@ -196,7 +197,7 @@ def build(year, REGION_MAP, AGGREGATES, eu_blocks=False):
     return fl, rg
 
 
-def build_trq(year, REGION_MAP, AGGREGATES):
+def build_trq(year, AGGREGATES):
     """EU tariff-rate quotas per model exporter (CAPRI's bilateral TRQs of the EU policy block 'EU').
 
     Per CAPRI exporter j with an EU quota TrqNT: in-quota price p_in = (Fob + TCost)(1 + TaAppl/100) (+ the
@@ -229,7 +230,7 @@ def build_trq(year, REGION_MAP, AGGREGATES):
             continue
         p_in = (fob + tc) * (1 + v.get("TaAppl", 0.0) / 100.0) + max(0.0, v.get("TsAppl", 0.0))
         p_out = (fob + tc) * (1 + v.get("TAMFN", mfn_a.get(p, 0.0)) / 100.0) + mfn_s.get(p, 0.0)
-        mj = REGION_MAP.get(j, "ROW")
+        mj = model_region(j)
         if mj == "EU27":
             continue
         k = agg[(CAPRI[p], mj)]
@@ -245,13 +246,13 @@ def build_trq(year, REGION_MAP, AGGREGATES):
 
 def main():
     sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check")]
-    from recalibrate_trade_2017 import REGION_MAP, AGGREGATES
+    from recalibrate_trade_2017 import AGGREGATES
     KEEP.mkdir(parents=True, exist_ok=True)
     blocks = "--eu-blocks" in sys.argv
     for y in (2017, 2030):
-        build(y, REGION_MAP, AGGREGATES, eu_blocks=blocks)
+        build(y, AGGREGATES, eu_blocks=blocks)
         if not blocks:
-            build_trq(y, REGION_MAP, AGGREGATES)        # the EU's quotas are the same for one or two EU regions
+            build_trq(y, AGGREGATES)        # the EU's quotas are the same for one or two EU regions
     if blocks:
         return
     rt = rho_table()

@@ -47,7 +47,8 @@ EU_ADDED = ("RYEM", "OATS", "TAGR", "TOBA", "TABO", "TEXT", "PLMO", "OTHO", "FFI
 
 def main():
     from build_bilateral_market import CAPRI
-    from recalibrate_trade_2017 import REGION_MAP, AGGREGATES
+    from recalibrate_trade_2017 import AGGREGATES
+    from _market_regions import model_region       # the market's grouping step (tools/lib/_market_regions.py)
     from capri_mod.data.definitions import ALL_TRADE_REGIONS
     prov = {}                                           # commodity -> {field: value} (the fields it has)
     with open(PROV, newline="", encoding="utf-8") as fh:
@@ -83,7 +84,7 @@ def main():
             pair[(r.product, r.r1, r.r2)][r.item] = float(r.value)
     num, den = defaultdict(float), defaultdict(float)
     for (p, i, j), d in pair.items():
-        mi, mj = REGION_MAP.get(i, "ROW"), REGION_MAP.get(j, "ROW")
+        mi, mj = model_region(i), model_region(j)
         q, ip, fob, tc = d.get("ImportQ", 0.0), d.get("ImportP", 0.0), d.get("Fob", 0.0), d.get("TCost", 0.0)
         if i == j or mi == mj or q <= 1e-6 or ip <= 0 or fob <= 0:
             continue
