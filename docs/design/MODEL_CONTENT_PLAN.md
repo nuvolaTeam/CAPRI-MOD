@@ -114,8 +114,18 @@ Hessian measurements, stage 3 one to two days (MRI §5). Risks listed in MRI §5
 regions before G3; DEP-5's [0.2, 5] factor on 17 new regions; region-keyed results breaking.
 
 **Open decisions.** None of MRI §6's twelve questions is left open (MRI §7). Not stated in the notes: the stage of the
-TARV switch and of the 2017 rebuild; how stage 2's young-animal fix relates to G2g; the gate batching (MRI §5 leaves
-it to the project lead).
+TARV switch and of the 2017 rebuild; how stage 2's young-animal fix relates to G2g.
+
+**Decided 3 November 2026 (the project lead).**
+- Checks. After each behaviour change: a mini-EU run compared with the previous one, with its mean absolute deviation
+  from CAPRI, plus the tests of the changed parts and the generated-file checks; commits stay local. The full suite at
+  the end of each block (market stages 2-3, the ports, the 29 non-EU units), then a push to dev. The Farm-to-Fork and
+  Green Deal gates once, after S1/S2 (with DEP-42).
+- FPRI's world price (build_world_prices, the export-weighted market price of CAPRI's 2017 exporters; FAO_agg has no
+  World PMRK for FPRI): kept on the single-EU 2017 files until stage 3 (250.84 EUR/t); in stage 3, every CAPRI market
+  region an exporter, the two EU blocks included and their trade with each other counted (244.57 EUR/t on today's
+  regions, -2.5%; leaving out West-East trade would give 257.24, +2.6%). The single-EU files, and the renaming of the
+  `_eu2` files to plain names, wait for stage 3 too.
 
 **Sources.** MRI §§1-7; REG DEP-3, DEP-40, DEP-41; RUI §4; AR §3.
 
