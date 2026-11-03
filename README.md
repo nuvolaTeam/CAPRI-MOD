@@ -836,6 +836,18 @@ scen = model.run(custom_scenario=farm_to_fork_scenario())
 delta = model.compare(base, scen)              # activity & price changes
 ```
 
+**The results table (since 3 November 2026).** `tools/run/run_f2f_2030.py` also writes each run to `results/` (setting
+`run.results_dir`): a Delta Lake table in CAPRI's DATAOUT layout (region, dim5, cols, rows, year, value; the model's
+codes and CAPRI's where checked, `capri_data/codes/results_items.csv`), partitioned by scenario and run, the
+reference stored once. Read it with `deltalake`, polars or DuckDB, or rebuild a run's pickle with
+`capri_mod.io_results.load_run("store:results:SCENARIO")`; the check tools take `store:ROOT:SCENARIO[:RUN_ID]` in place
+of a pickle.
+
+```python
+from deltalake import DeltaTable
+t = DeltaTable("results/long").to_pandas(filters=[("scenario", "=", "farm_to_fork_jrc121368")])
+```
+
 ### 7.5 Key `run()` parameters
 
 Arguments left at None take the run's settings (§7.6).

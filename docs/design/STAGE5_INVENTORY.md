@@ -319,6 +319,12 @@ Done (each mini-EU run identical to the one before, meta apart):
   and unit not confirmed), feed (a total per model animal, CAPRI's per head of its own activities), the market's
   consumption and net exports and the supply models' welfare (the CAPRI results file at hand, res_2_1730greendeal_
   refpol_endotech_all_inidefaulta, has no market regions nor regional welfare totals), the model's own diagnostics.
+- The run's metadata declared (capri_mod/run_meta.py: ResultsMeta, HessianRecord, RunManifest; extra keys refused),
+  validated by the run script after the pickle is saved; accepts every mini-EU run since stage 4 and gate runs 15.
+- The run script's EU summaries and both outer-iteration records stored beside the long table as exact records
+  (root/summary, root/iterations); load_store rebuilds the whole pickle (metadata apart) and the run script checks it
+  against the pickle at tolerance zero; the check tools read store:ROOT:SCENARIO[:RUN_ID]. The pickle stays the run's
+  file until the gate has run on the store.
 - Decision 5, part: CARBON_TAX_100 and GREENDEAL_2040_TARGETS removed; run_policy_comparison.py runs a folder;
   command-line overrides recorded (meta.scenario_overrides, run id -ov<hash>), no longer renaming the scenario.
 
