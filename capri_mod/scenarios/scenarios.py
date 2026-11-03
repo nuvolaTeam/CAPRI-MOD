@@ -33,8 +33,10 @@ from capri_mod.policy.policy_module import PolicyScenario
 # Removed 23 October 2026 (the settings inventory; the project lead's decision: no presets without a CAPRI source):
 # CAP_REFORM_2030 ("hypothetical"), WTO_LIB (no source), CAP_2023_2027, N_LIMITS_TIGHTER and WTO_FALCONER (their
 # cited CAPRI files do not hold these numbers), GREEN_DEAL_F2F (a partial proxy superseded by
-# capri_mod.policy.greendeal.farm_to_fork_scenario / greendeal_scenario). SET_ASIDE_10PCT is CAPRI's
-# scen/set_aside/set_aside_10.gms (SETR 10).
+# capri_mod.policy.greendeal.farm_to_fork_scenario / greendeal_scenario). SET_ASIDE_10PCT removed 3 November 2026
+# (the project lead's decision): a 10% floor on all arable land met by voluntary set-aside and fallow, while CAPRI's
+# scen/set_aside/set_aside_10.gms puts 10% on the grandes cultures met by the obligatory set-aside activities (ISET,
+# GSET, TSET: supply/supply_model.gms SETA_), which the model does not have (docs/design/MODEL_CONTENT_PLAN.md).
 
 def baseline_scenario() -> PolicyScenario:
     """Reference baseline scenario (no policy change)."""
@@ -58,18 +60,6 @@ SCENARIO_REGISTRY = {
 }
 
 
-
-
-def set_aside_10_scenario() -> PolicyScenario:
-    """
-    10% mandatory set-aside on arable land.
-    Source: gams/scen/set_aside/set_aside_10.gms
-    """
-    return PolicyScenario(
-        name="SET_ASIDE_10PCT",
-        description="10% mandatory set-aside on all arable land.",
-        set_aside_requirement=0.10,
-    )
 
 
 def carbon_tax_scenario(carbon_price: float = 50.0) -> PolicyScenario:
@@ -99,6 +89,5 @@ def list_scenarios() -> List[str]:
 
 
 SCENARIO_REGISTRY.update({
-    "SET_ASIDE_10PCT":  set_aside_10_scenario,
     "CARBON_TAX_50":    lambda: carbon_tax_scenario(50.0),
 })

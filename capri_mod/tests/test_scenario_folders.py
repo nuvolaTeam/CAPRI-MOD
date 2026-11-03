@@ -12,12 +12,11 @@ from capri_mod.scenarios import definition as D
 
 def _factories():
     from capri_mod.policy.greendeal import farm_to_fork_scenario, greendeal_2030_scenario
-    from capri_mod.scenarios.scenarios import carbon_tax_scenario, set_aside_10_scenario
+    from capri_mod.scenarios.scenarios import carbon_tax_scenario
     return {
         "farm_to_fork_jrc121368": farm_to_fork_scenario,
         "greendeal_lnds8_org18_pest20_mine13crp_surp30_diet00_oth00": greendeal_2030_scenario,
         "CARBON_TAX_50": lambda: carbon_tax_scenario(50.0),
-        "SET_ASIDE_10PCT": set_aside_10_scenario,
     }
 
 

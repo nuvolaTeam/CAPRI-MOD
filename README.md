@@ -758,7 +758,6 @@ measured as a deviation from the baseline of its year.
 | Scenario | Description |
 |---|---|
 | `BASELINE` | calibrated base-year reference |
-| `SET_ASIDE_10PCT` | 10% set-aside (CAPRI scen/set_aside/set_aside_10.gms) |
 | `CARBON_TAX_50` | CAPRI's emission tax on agricultural emissions (pol_input/ecampa/carbtax50_endotech_set12.gms) |
 
 CAPRI's Green Deal scenarios are built by functions, not names: `farm_to_fork_scenario()`,
