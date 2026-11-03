@@ -4085,9 +4085,13 @@
    "args": [],
    "inputs": [
     "capri_data/shared/capri_member_state_codes.csv",
-    "capri_data/sources/capri_res/gd2030_endotech_ini_nbalance.csv"
+    "capri_data/shared/eu_market_blocks.csv",
+    "capri_data/sources/capri_res/gd2030_endotech_ini_nbalance.csv",
+    "capri_mod/settings/defaults.toml"
    ],
    "code": [
+    "capri_mod/__init__.py",
+    "capri_mod/settings/__init__.py",
     "tools/build/build_regional_units.py"
    ],
    "external": [],
