@@ -3500,7 +3500,7 @@
    "columns": 2,
    "origin": {
     "nature": "capri",
-    "builder": "build_code_lists (not in the trace yet)"
+    "builder": "build_code_lists"
    }
   },
   "capri_data/codes/capri/FEED_TO_O.csv": {
@@ -3650,7 +3650,7 @@
    "columns": 2,
    "origin": {
     "nature": "capri",
-    "builder": "build_code_lists (not in the trace yet)"
+    "builder": "build_code_lists"
    }
   },
   "capri_data/codes/capri/XX.csv": {
