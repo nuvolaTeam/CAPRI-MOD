@@ -38,8 +38,9 @@ def test_inputs_follow_the_data_directory_and_base_year(tmp_path):
     assert inp.path("crop_cost_shares.csv", "supply") == tmp_path / "2030" / "supply" / "crop_cost_shares.csv"
     assert inp.path("n_cascade_region.csv", "abatement/ammonia") == tmp_path / "2030" / "abatement" / "ammonia" / \
         "n_cascade_region.csv"
-    assert inp.path("npk_dataout_2030.csv.xz", "sources/environment") == tmp_path / "sources" / "environment" / \
-        "npk_dataout_2030.csv.xz"
+    import pytest as _pt
+    with _pt.raises(ValueError, match="capri_data/sources"):       # the model reads no file under sources/
+        inp.path("npk_dataout_2030.csv.xz", "sources/environment")
     assert inp.csv("crop_cost_shares.csv", "supply", required=False) is None
     import pytest
     with pytest.raises(FileNotFoundError):

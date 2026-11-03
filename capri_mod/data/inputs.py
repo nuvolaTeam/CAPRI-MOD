@@ -37,12 +37,15 @@ class RunInputs:
 
     # -- locations -----------------------------------------------------------------------------------------------
     def path(self, name: str, where: str) -> Path:
-        """where: an area of the base year (AREAS, with a subfolder: "abatement/ammonia"), "shared", "sources/<sub>",
+        """where: an area of the base year (AREAS, with a subfolder: "abatement/ammonia"), "shared",
         "scenarios/<folder>" (a scenario group's or reference's data, refactor stage 5) or "root" (the data
-        directory itself)."""
+        directory itself). Not "sources/<sub>": the model reads no file under capri_data/sources (refused since
+        3 November 2026; the builders read it)."""
         if where == "root":
             return self.root / name
-        if where == "shared" or where.startswith("sources/") or where.startswith("scenarios/"):
+        if where.startswith("sources/") or where == "sources":
+            raise ValueError(f"{where!r}: the model reads no file under capri_data/sources (the builders' extracts of CAPRI's material, capri_data/sources/README.md); a builder writes what the model needs as an input (3 November 2026)")
+        if where == "shared" or where.startswith("scenarios/"):
             return self.root / where / name
         if where.split("/")[0] in AREAS:
             return self.root / self.base_year / where / name

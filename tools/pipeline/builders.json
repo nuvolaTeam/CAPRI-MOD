@@ -3869,6 +3869,7 @@
     "capri_data/2017/environment/fert_dist_priors_npk_2030.csv",
     "capri_data/2017/environment/livestock_manure_k_coef.csv",
     "capri_data/2017/environment/livestock_manure_p_coef.csv",
+    "capri_data/2017/environment/manure_npk_applied_share_2030.csv",
     "capri_data/2017/environment/npk_crop_coefs_2030.csv",
     "capri_data/2017/environment/npk_region_2030.csv",
     "capri_data/sources/environment/npk_dataout_2030.csv.xz"

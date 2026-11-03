@@ -361,6 +361,21 @@ INSERT INTO value_units VALUES
   ('env_npk_region_2030', 'land_kha', NULL, 'open', 'npk_region_2030.land_kha: unit to be established'),
   ('env_npk_region_2030', 'pool_scale', NULL, 'open', 'npk_region_2030.pool_scale: unit to be established');
 
+-- file: capri_data/2017/environment/manure_npk_applied_share_2030.csv
+CREATE TABLE env_manure_npk_applied_share_2030 (
+    capri_region VARCHAR NOT NULL,
+    nutrient VARCHAR NOT NULL CHECK (nutrient IN ('N', 'P', 'K')),
+    excret_kt DOUBLE NOT NULL CHECK (excret_kt > 0),
+    mtrade_kt DOUBLE NOT NULL,                          -- net manure exports (negative: net imports)
+    applied_share DOUBLE NOT NULL CHECK (applied_share >= 0),   -- above 1 for a net importer
+    PRIMARY KEY (capri_region, nutrient)
+);
+COMMENT ON TABLE env_manure_npk_applied_share_2030 IS 'CAPRI''s 2030 manure applied in the region per unit excreted, 1 - MTRADE / EXCRET (supply_model.gms ManureNPK_, manExportOrAppl_), N P K, from its 2030 reference results (tools/build/build_npk_balance_2030.py); read by the fertilisation block and the P balance (capri_mod/fert/npk.manure_applied_share)';
+INSERT INTO value_units VALUES
+  ('env_manure_npk_applied_share_2030', 'excret_kt', 'U_1000t', 'capri', 'CAPRI DATA(R, "EXCRET", NITF/PHOF/POTF), 2030 reference: 1000 t of N, P2O5 or K2O'),
+  ('env_manure_npk_applied_share_2030', 'mtrade_kt', 'U_1000t', 'capri', 'CAPRI DATA(R, "MTRADE", NITF/PHOF/POTF), 2030 reference: 1000 t of N, P2O5 or K2O'),
+  ('env_manure_npk_applied_share_2030', 'applied_share', 'U_ratio', 'builder', '1 - mtrade_kt / excret_kt, at least 0 (t applied per t excreted)');
+
 -- file: capri_data/2017/environment/p_balance_crop_coefs_2030.csv
 CREATE TABLE env_p_balance_crop_coefs_2030 (
     capri_region VARCHAR NOT NULL,

@@ -10176,6 +10176,85 @@
     ]
    }
   },
+  "env_manure_npk_applied_share_2030": {
+   "file": "capri_data/2017/environment/manure_npk_applied_share_2030.csv",
+   "declared_in": "17_environment.sql",
+   "layout": [],
+   "comment": "CAPRI's 2030 manure applied in the region per unit excreted, 1 - MTRADE / EXCRET (supply_model.gms ManureNPK_, manExportOrAppl_), N P K, from its 2030 reference results (tools/build/build_npk_balance_2030.py); read by the fertilisation block and the P balance (capri_mod/fert/npk.manure_applied_share)",
+   "columns": [
+    {
+     "name": "capri_region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "nutrient",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "excret_kt",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "mtrade_kt",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "applied_share",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "capri_region",
+    "nutrient"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [
+    "(nutrient IN ('N', 'P', 'K'))",
+    "(excret_kt > 0)",
+    "(applied_share >= 0)"
+   ],
+   "units": [
+    {
+     "item": "applied_share",
+     "unit": "U_ratio",
+     "status": "builder",
+     "basis": "1 - mtrade_kt / excret_kt, at least 0 (t applied per t excreted)"
+    },
+    {
+     "item": "excret_kt",
+     "unit": "U_1000t",
+     "status": "capri",
+     "basis": "CAPRI DATA(R, \"EXCRET\", NITF/PHOF/POTF), 2030 reference: 1000 t of N, P2O5 or K2O"
+    },
+    {
+     "item": "mtrade_kt",
+     "unit": "U_1000t",
+     "status": "capri",
+     "basis": "CAPRI DATA(R, \"MTRADE\", NITF/PHOF/POTF), 2030 reference: 1000 t of N, P2O5 or K2O"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_npk_balance_2030",
+    "sources": "$EXPORTS/priFertDist_1730defaulta.zip; $EXPORTS/res_2_1730greendeal_refdefaulta.zip; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/AACT_TO_XX.csv; $REFERENCE/sets/simini_21730/CACT_TO_NGRP.csv; $REFERENCE/sets/simini_21730/COLS.csv; $REFERENCE/sets/simini_21730/EPRD_TO_GRP.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FEED_TRD.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/MitiTechAmm.csv; $REFERENCE/sets/simini_21730/OYANI.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/PERM_NGRP.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/RMEU_to_RM.csv; $REFERENCE/sets/simini_21730/RMS.csv; $REFERENCE/sets/simini_21730/RMS_TO_RM.csv; $REFERENCE/sets/simini_21730/RMTP.csv; $REFERENCE/sets/simini_21730/RM_TO_RMTP.csv; $REFERENCE/sets/simini_21730/ROWS.csv; $REFERENCE/sets/simini_21730/SplitActs.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $SOURCES/capreg/res_17<CC>.txt; $SOURCES/capri_export/DATA2_<CC>.txt; $SOURCES/gams/aggregation/defaultA.agg"
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/fert/npk.py"
+    ],
+    "builders": [],
+    "checks": [],
+    "tests": []
+   }
+  },
   "env_manure_pool_centres": {
    "file": "capri_data/2017/environment/manure_pool_centres.csv",
    "declared_in": "17_environment.sql",

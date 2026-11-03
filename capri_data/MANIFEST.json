@@ -926,6 +926,20 @@
     "builder": "build_manure_n2o"
    }
   },
+  "capri_data/2017/environment/manure_npk_applied_share_2030.csv": {
+   "description": "CAPRI's 2030 manure applied in the region per unit excreted, 1 - MTRADE / EXCRET (supply_model.gms ManureNPK_, manExportOrAppl_), N P K, from its 2030 reference results (tools/build/build_npk_balance_2030.py); read by the fertilisation block and the P balance (capri_mod/fert/npk.manure_applied_share)",
+   "kind": "coefficients",
+   "rows": 819,
+   "columns": 5,
+   "units": "U_1000t, U_ratio",
+   "read_by_model": [
+    "capri_mod/fert/npk.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_npk_balance_2030"
+   }
+  },
   "capri_data/2017/environment/manure_pool_centres.csv": {
    "description": "the centre region of each country's manure pool, CAPRI's rManPool_centre (manuremarket/define_manure_market_structure.gms); with manure_pool_costs.csv, from manure_pool_costs.json until 31 October 2026 (tools/build/build_manure_pool_costs.py; capri_mod/data/nested_tables.py)",
    "kind": "structure",
