@@ -149,7 +149,6 @@ INVOCATIONS: list[tuple[str, list[str], list[Path]]] = [
     ("build_active_technologies", [str(GAMS / "pol_input/greendeal/refpol_endotech_all_sup.gms")],
      [GAMS / "pol_input/greendeal/refpol_endotech_all_sup.gms"]),
     ("build_bilateral_market", [], [EXPORTS / "market_base_1717.txt"]),
-    ("build_bilateral_market", ["--eu-blocks"], [EXPORTS / "market_base_1717.txt"]),
     ("build_biofuel_market", ["--year", "2017", "--dump", str(EXPORTS / "market_base_1717.txt"),
                               "--elas", str(EXPORTS / "elas_2_1717defaulta.csv")],
      [EXPORTS / "market_base_1717.txt", EXPORTS / "elas_2_1717defaulta.csv"]),

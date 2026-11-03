@@ -3254,7 +3254,7 @@ def test_eu_trade_blocks_data_and_split(data):
     mm = MarketModule(data)
     assert mm.EU == ("EU_WEST", "EU_EAST") and "EU27" not in mm.regions
     mkt = DATA_DIR / "2017" / "market"
-    fb = pd.read_csv(mkt / "bilateral_flows_2030_eu2.csv")
+    fb = pd.read_csv(mkt / "bilateral_flows_2030.csv")
     we = fb[(fb.commodity == "CORN") & (fb.importer == "EU_WEST") & (fb.exporter == "EU_EAST")].q_kt.sum()
     assert abs(we - 15041.0) < 1.0
     f1 = pd.read_csv(mkt / "bilateral_flows_2030.csv")

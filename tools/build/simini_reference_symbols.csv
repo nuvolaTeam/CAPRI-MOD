@@ -1,6 +1,6 @@
 symbol,kind,used_for
 DATA,par,"the market's quantities and prices per RM and RMS at CAL (PROD, PMRK, HCON, FEED, PROC, BIOF, PRCY, TARV, Arm1P, LEVL, YILD); MARKET_REGIONS_INVENTORY 2.1, 7 items 4 and 6"
-p_tradeFlows,par,"bilateral flows per RM pair at CAL (the _eu2 extract's check); MARKET_REGIONS_INVENTORY 2.1"
+p_tradeFlows,par,"bilateral flows per RM pair at CAL (the market data's check: tools/check/check_market_base.py); MARKET_REGIONS_INVENTORY 2.1"
 p_impPrice,par,"import prices per RM pair; the ports' base check (G3_MARKET_INVENTORY, Armington)"
 p_transpCost,par,"transport costs per RM pair; MARKET_REGIONS_INVENTORY 2.1"
 v_transpCost,var,"transport cost matrix as the market model's variable"

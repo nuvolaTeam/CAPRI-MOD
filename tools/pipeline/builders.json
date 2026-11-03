@@ -516,39 +516,6 @@
    ]
   },
   {
-   "task": "build_bilateral_market:eu-blocks",
-   "builder": "build_bilateral_market",
-   "args": [
-    "--eu-blocks"
-   ],
-   "inputs": [
-    "capri_data/codes/capri/RM.csv",
-    "capri_data/codes/capri/RMEU_to_RM.csv",
-    "capri_data/codes/model_market_regions.csv",
-    "capri_data/codes/model_trade_regions.csv",
-    "capri_data/shared/rms_to_rm.csv"
-   ],
-   "code": [
-    "tools/build/build_bilateral_market.py",
-    "tools/build/recalibrate_trade_2017.py",
-    "tools/lib/_grep.py",
-    "tools/lib/_market_regions.py",
-    "tools/lib/paths.py"
-   ],
-   "external": [
-    "$EXPORTS/market_base_1717.txt",
-    "$EXPORTS/markmarket_greendeal_1730et_base_1717.txt"
-   ],
-   "outputs": [
-    "capri_data/2017/market/bilateral_flows_2017_eu2.csv",
-    "capri_data/2017/market/bilateral_flows_2030_eu2.csv",
-    "capri_data/2017/market/bilateral_regions_2017_eu2.csv",
-    "capri_data/2017/market/bilateral_regions_2030_eu2.csv",
-    "capri_data/sources/market/bilateral_dataout_2017_eu2.csv.xz",
-    "capri_data/sources/market/bilateral_dataout_2030_eu2.csv.xz"
-   ]
-  },
-  {
    "task": "build_biofuel_market:year_2017_dump_market_base_1717.txt_elas_elas_2_1717defaulta.csv",
    "builder": "build_biofuel_market",
    "args": [

@@ -27,7 +27,7 @@ class CalibrationMixin(MarketStateMixin):
         """
         Base production and use of every market region and product from CAPRI's own market data (October 2026):
 
-        - CAPRI's bilateral market of the market year (bilateral_flows/regions_<year>[_eu2].csv, the data of the
+        - CAPRI's bilateral market of the market year (bilateral_flows/regions_<year>.csv, the EU as CAPRI's two market regions; the data of the
           bilateral market itself): production = the region's market production (PROD), use = domestic sales +
           imports;
         - products without bilateral trade (raw milk): CAPRI's FAO_agg world balance (world_market_baseline.csv;
@@ -46,7 +46,7 @@ class CalibrationMixin(MarketStateMixin):
         self.par.base_net_exports_eu = {}
         inp = self._inp()
         year = self._market_year()
-        sfx = "_eu2"                                    # the market data with CAPRI's two EU blocks
+        sfx = ""                                        # the market data, the EU as CAPRI's two blocks
         ff, fr = f"bilateral_flows_{year}{sfx}.csv", f"bilateral_regions_{year}{sfx}.csv"
         if not inp.exists(ff):
             by = inp.base_year                  # the base year's market where the market year has none (K52f)

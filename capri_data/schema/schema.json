@@ -4609,9 +4609,7 @@
    "notes": [],
    "read_by": {
     "model": [],
-    "builders": [
-     "build_bilateral_market"
-    ],
+    "builders": [],
     "checks": [],
     "tests": []
    }
@@ -13627,123 +13625,6 @@
     ]
    }
   },
-  "mkt_bilateral_flows_2017_eu2": {
-   "file": "capri_data/2017/market/bilateral_flows_2017_eu2.csv",
-   "declared_in": "23_market_more.sql",
-   "layout": [],
-   "comment": "CAPRI's bilateral trade data for the model's trade regions (Sprint 8m: CAPRI's full market). (tools/build/build_bilateral_market.py)",
-   "columns": [
-    {
-     "name": "commodity",
-     "type": "VARCHAR",
-     "not_null": true
-    },
-    {
-     "name": "importer",
-     "type": "VARCHAR",
-     "not_null": true
-    },
-    {
-     "name": "exporter",
-     "type": "VARCHAR",
-     "not_null": true
-    },
-    {
-     "name": "q_kt",
-     "type": "DOUBLE",
-     "not_null": true
-    },
-    {
-     "name": "a",
-     "type": "DOUBLE",
-     "not_null": true
-    },
-    {
-     "name": "b",
-     "type": "DOUBLE",
-     "not_null": true
-    },
-    {
-     "name": "a0",
-     "type": "DOUBLE",
-     "not_null": true
-    },
-    {
-     "name": "ta_pct",
-     "type": "DOUBLE",
-     "not_null": true
-    },
-    {
-     "name": "tc",
-     "type": "DOUBLE",
-     "not_null": true
-    }
-   ],
-   "primary_key": [
-    "commodity",
-    "importer",
-    "exporter"
-   ],
-   "unique": [],
-   "foreign_keys": [],
-   "checks": [],
-   "units": [
-    {
-     "item": "a",
-     "unit": null,
-     "status": "open",
-     "basis": "bilateral_flows_2017_eu2.a: unit to be established"
-    },
-    {
-     "item": "a0",
-     "unit": null,
-     "status": "open",
-     "basis": "bilateral_flows_2017_eu2.a0: unit to be established"
-    },
-    {
-     "item": "b",
-     "unit": null,
-     "status": "open",
-     "basis": "bilateral_flows_2017_eu2.b: unit to be established"
-    },
-    {
-     "item": "q_kt",
-     "unit": null,
-     "status": "open",
-     "basis": "bilateral_flows_2017_eu2.q_kt: unit to be established"
-    },
-    {
-     "item": "ta_pct",
-     "unit": null,
-     "status": "open",
-     "basis": "bilateral_flows_2017_eu2.ta_pct: unit to be established"
-    },
-    {
-     "item": "tc",
-     "unit": null,
-     "status": "open",
-     "basis": "bilateral_flows_2017_eu2.tc: unit to be established"
-    }
-   ],
-   "provenance": {
-    "nature": "capri",
-    "origins": "CAPRI",
-    "builder": "build_bilateral_market:eu-blocks",
-    "sources": "$EXPORTS/market_base_1717.txt; $EXPORTS/markmarket_greendeal_1730et_base_1717.txt; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/AACT_TO_XX.csv; $REFERENCE/sets/simini_21730/CACT_TO_NGRP.csv; $REFERENCE/sets/simini_21730/COLS.csv; $REFERENCE/sets/simini_21730/EPRD_TO_GRP.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FEED_TRD.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/MitiTechAmm.csv; $REFERENCE/sets/simini_21730/OYANI.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/PERM_NGRP.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/RMEU_to_RM.csv; $REFERENCE/sets/simini_21730/RMS.csv; $REFERENCE/sets/simini_21730/RMS_TO_RM.csv; $REFERENCE/sets/simini_21730/RMTP.csv; $REFERENCE/sets/simini_21730/RM_TO_RMTP.csv; $REFERENCE/sets/simini_21730/ROWS.csv; $REFERENCE/sets/simini_21730/SplitActs.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $SOURCES/gams/aggregation/defaultA.agg"
-   },
-   "notes": [],
-   "read_by": {
-    "model": [
-     "capri_mod/market/bilateral_solve.py",
-     "capri_mod/market/calibration.py"
-    ],
-    "builders": [],
-    "checks": [],
-    "tests": [
-     "capri_mod/tests/test_norway_market.py"
-    ]
-   }
-  },
   "mkt_bilateral_flows_2030": {
    "file": "capri_data/2017/market/bilateral_flows_2030.csv",
    "declared_in": "23_market_more.sql",
@@ -13856,124 +13737,6 @@
      "capri_mod/market/calibration.py"
     ],
     "builders": [],
-    "checks": [],
-    "tests": [
-     "capri_mod/tests/test_capri.py",
-     "capri_mod/tests/test_norway_market.py"
-    ]
-   }
-  },
-  "mkt_bilateral_flows_2030_eu2": {
-   "file": "capri_data/2017/market/bilateral_flows_2030_eu2.csv",
-   "declared_in": "23_market_more.sql",
-   "layout": [],
-   "comment": "CAPRI's bilateral trade data for the model's trade regions (Sprint 8m: CAPRI's full market). (tools/build/build_bilateral_market.py)",
-   "columns": [
-    {
-     "name": "commodity",
-     "type": "VARCHAR",
-     "not_null": true
-    },
-    {
-     "name": "importer",
-     "type": "VARCHAR",
-     "not_null": true
-    },
-    {
-     "name": "exporter",
-     "type": "VARCHAR",
-     "not_null": true
-    },
-    {
-     "name": "q_kt",
-     "type": "DOUBLE",
-     "not_null": true
-    },
-    {
-     "name": "a",
-     "type": "DOUBLE",
-     "not_null": true
-    },
-    {
-     "name": "b",
-     "type": "DOUBLE",
-     "not_null": true
-    },
-    {
-     "name": "a0",
-     "type": "DOUBLE",
-     "not_null": true
-    },
-    {
-     "name": "ta_pct",
-     "type": "DOUBLE",
-     "not_null": true
-    },
-    {
-     "name": "tc",
-     "type": "DOUBLE",
-     "not_null": true
-    }
-   ],
-   "primary_key": [
-    "commodity",
-    "importer",
-    "exporter"
-   ],
-   "unique": [],
-   "foreign_keys": [],
-   "checks": [],
-   "units": [
-    {
-     "item": "a",
-     "unit": null,
-     "status": "open",
-     "basis": "bilateral_flows_2030_eu2.a: unit to be established"
-    },
-    {
-     "item": "a0",
-     "unit": null,
-     "status": "open",
-     "basis": "bilateral_flows_2030_eu2.a0: unit to be established"
-    },
-    {
-     "item": "b",
-     "unit": null,
-     "status": "open",
-     "basis": "bilateral_flows_2030_eu2.b: unit to be established"
-    },
-    {
-     "item": "q_kt",
-     "unit": null,
-     "status": "open",
-     "basis": "bilateral_flows_2030_eu2.q_kt: unit to be established"
-    },
-    {
-     "item": "ta_pct",
-     "unit": null,
-     "status": "open",
-     "basis": "bilateral_flows_2030_eu2.ta_pct: unit to be established"
-    },
-    {
-     "item": "tc",
-     "unit": null,
-     "status": "open",
-     "basis": "bilateral_flows_2030_eu2.tc: unit to be established"
-    }
-   ],
-   "provenance": {
-    "nature": "capri",
-    "origins": "CAPRI",
-    "builder": "build_bilateral_market:eu-blocks",
-    "sources": "$EXPORTS/market_base_1717.txt; $EXPORTS/markmarket_greendeal_1730et_base_1717.txt; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/AACT_TO_XX.csv; $REFERENCE/sets/simini_21730/CACT_TO_NGRP.csv; $REFERENCE/sets/simini_21730/COLS.csv; $REFERENCE/sets/simini_21730/EPRD_TO_GRP.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FEED_TRD.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/MitiTechAmm.csv; $REFERENCE/sets/simini_21730/OYANI.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/PERM_NGRP.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/RMEU_to_RM.csv; $REFERENCE/sets/simini_21730/RMS.csv; $REFERENCE/sets/simini_21730/RMS_TO_RM.csv; $REFERENCE/sets/simini_21730/RMTP.csv; $REFERENCE/sets/simini_21730/RM_TO_RMTP.csv; $REFERENCE/sets/simini_21730/ROWS.csv; $REFERENCE/sets/simini_21730/SplitActs.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $SOURCES/gams/aggregation/defaultA.agg"
-   },
-   "notes": [],
-   "read_by": {
-    "model": [
-     "capri_mod/market/bilateral_solve.py",
-     "capri_mod/market/calibration.py"
-    ],
-    "builders": [],
     "checks": [
      "tools/check/check_market_base.py"
     ],
@@ -14052,71 +13815,6 @@
     ]
    }
   },
-  "mkt_bilateral_regions_2017_eu2": {
-   "file": "capri_data/2017/market/bilateral_regions_2017_eu2.csv",
-   "declared_in": "23_market_more.sql",
-   "layout": [],
-   "comment": "CAPRI's bilateral trade data for the model's trade regions (Sprint 8m: CAPRI's full market). (tools/build/build_bilateral_market.py)",
-   "columns": [
-    {
-     "name": "commodity",
-     "type": "VARCHAR",
-     "not_null": true
-    },
-    {
-     "name": "region",
-     "type": "VARCHAR",
-     "not_null": true
-    },
-    {
-     "name": "pmrk",
-     "type": "DOUBLE",
-     "not_null": true
-    },
-    {
-     "name": "prod_kt",
-     "type": "DOUBLE",
-     "not_null": true
-    }
-   ],
-   "primary_key": [
-    "commodity",
-    "region"
-   ],
-   "unique": [],
-   "foreign_keys": [],
-   "checks": [],
-   "units": [
-    {
-     "item": "pmrk",
-     "unit": null,
-     "status": "open",
-     "basis": "bilateral_regions_2017_eu2.pmrk: unit to be established"
-    },
-    {
-     "item": "prod_kt",
-     "unit": null,
-     "status": "open",
-     "basis": "bilateral_regions_2017_eu2.prod_kt: unit to be established"
-    }
-   ],
-   "provenance": {
-    "nature": "capri",
-    "origins": "CAPRI",
-    "builder": "build_bilateral_market:eu-blocks",
-    "sources": "$EXPORTS/market_base_1717.txt; $EXPORTS/markmarket_greendeal_1730et_base_1717.txt; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/AACT_TO_XX.csv; $REFERENCE/sets/simini_21730/CACT_TO_NGRP.csv; $REFERENCE/sets/simini_21730/COLS.csv; $REFERENCE/sets/simini_21730/EPRD_TO_GRP.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FEED_TRD.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/MitiTechAmm.csv; $REFERENCE/sets/simini_21730/OYANI.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/PERM_NGRP.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/RMEU_to_RM.csv; $REFERENCE/sets/simini_21730/RMS.csv; $REFERENCE/sets/simini_21730/RMS_TO_RM.csv; $REFERENCE/sets/simini_21730/RMTP.csv; $REFERENCE/sets/simini_21730/RM_TO_RMTP.csv; $REFERENCE/sets/simini_21730/ROWS.csv; $REFERENCE/sets/simini_21730/SplitActs.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $SOURCES/gams/aggregation/defaultA.agg"
-   },
-   "notes": [],
-   "read_by": {
-    "model": [
-     "capri_mod/market/bilateral_solve.py",
-     "capri_mod/market/calibration.py"
-    ],
-    "builders": [],
-    "checks": [],
-    "tests": []
-   }
-  },
   "mkt_bilateral_regions_2030": {
    "file": "capri_data/2017/market/bilateral_regions_2030.csv",
    "declared_in": "23_market_more.sql",
@@ -14181,77 +13879,12 @@
     "builders": [
      "build_feed_byproducts"
     ],
-    "checks": [],
-    "tests": [
-     "capri_mod/tests/test_norway_market.py"
-    ]
-   }
-  },
-  "mkt_bilateral_regions_2030_eu2": {
-   "file": "capri_data/2017/market/bilateral_regions_2030_eu2.csv",
-   "declared_in": "23_market_more.sql",
-   "layout": [],
-   "comment": "CAPRI's bilateral trade data for the model's trade regions (Sprint 8m: CAPRI's full market). (tools/build/build_bilateral_market.py)",
-   "columns": [
-    {
-     "name": "commodity",
-     "type": "VARCHAR",
-     "not_null": true
-    },
-    {
-     "name": "region",
-     "type": "VARCHAR",
-     "not_null": true
-    },
-    {
-     "name": "pmrk",
-     "type": "DOUBLE",
-     "not_null": true
-    },
-    {
-     "name": "prod_kt",
-     "type": "DOUBLE",
-     "not_null": true
-    }
-   ],
-   "primary_key": [
-    "commodity",
-    "region"
-   ],
-   "unique": [],
-   "foreign_keys": [],
-   "checks": [],
-   "units": [
-    {
-     "item": "pmrk",
-     "unit": null,
-     "status": "open",
-     "basis": "bilateral_regions_2030_eu2.pmrk: unit to be established"
-    },
-    {
-     "item": "prod_kt",
-     "unit": null,
-     "status": "open",
-     "basis": "bilateral_regions_2030_eu2.prod_kt: unit to be established"
-    }
-   ],
-   "provenance": {
-    "nature": "capri",
-    "origins": "CAPRI",
-    "builder": "build_bilateral_market:eu-blocks",
-    "sources": "$EXPORTS/market_base_1717.txt; $EXPORTS/markmarket_greendeal_1730et_base_1717.txt; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/AACT_TO_XX.csv; $REFERENCE/sets/simini_21730/CACT_TO_NGRP.csv; $REFERENCE/sets/simini_21730/COLS.csv; $REFERENCE/sets/simini_21730/EPRD_TO_GRP.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FEED_TRD.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/MitiTechAmm.csv; $REFERENCE/sets/simini_21730/OYANI.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/PERM_NGRP.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/RMEU_to_RM.csv; $REFERENCE/sets/simini_21730/RMS.csv; $REFERENCE/sets/simini_21730/RMS_TO_RM.csv; $REFERENCE/sets/simini_21730/RMTP.csv; $REFERENCE/sets/simini_21730/RM_TO_RMTP.csv; $REFERENCE/sets/simini_21730/ROWS.csv; $REFERENCE/sets/simini_21730/SplitActs.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $SOURCES/gams/aggregation/defaultA.agg"
-   },
-   "notes": [],
-   "read_by": {
-    "model": [
-     "capri_mod/market/bilateral_solve.py",
-     "capri_mod/market/calibration.py"
-    ],
-    "builders": [],
     "checks": [
      "tools/check/check_market_base.py"
     ],
-    "tests": []
+    "tests": [
+     "capri_mod/tests/test_norway_market.py"
+    ]
    }
   },
   "mkt_bilateral_trq_2017": {

@@ -36,8 +36,8 @@ Outputs (capri_data/2017/market/):
   bilateral_regions_<year>.csv  commodity, region, pmrk, prod_kt
   armington_rho.csv             commodity, capri, rho1, rho2
 
-    python tools/build/build_bilateral_market.py               (EU as one region, EU27yr19)
-    python tools/build/build_bilateral_market.py --eu-blocks   (CAPRI's two EU trade blocks: *_eu2.csv)
+    python tools/build/build_bilateral_market.py   (CAPRI's two EU market regions; the one-EU form, EU27yr19, and
+                                                    its *_eu2.csv twin names were removed on 3 November 2026)
 """
 from __future__ import annotations
 import re, sys
@@ -97,11 +97,11 @@ def rho_table():
 EU_BLOCKS = {"A_EU_WEST": "EU_WEST", "A_EU_EAST": "EU_EAST"}
 
 
-def extract(year, eu_blocks=False):
-    """eu_blocks: keep CAPRI's two EU trade blocks (A_EU_WEST, A_EU_EAST, defaultA.agg) instead of the EU27yr19
-    reporting block, for the market with the EU as two regions (docs/archive/MARKET_STRUCTURE_PLAN.md step 3)."""
+def extract(year):
+    """CAPRI's market regions with the EU as its two A_EU_WEST and A_EU_EAST (defaultA.agg), not the EU27yr19
+    reporting block (the one-EU extract and its files were removed on 3 November 2026, market move stage 3)."""
     src = SRC[year]
-    keep = KEEP / f"bilateral_dataout_{year}{'_eu2' if eu_blocks else ''}.csv.xz"
+    keep = KEEP / f"bilateral_dataout_{year}.csv.xz"
     if src.exists():
         prods = "|".join(CAPRI)
         pat = re.compile(r"^'([^']*)'\.'([^']*)'\.'(" + "|".join(PAIR_ITEMS + REG_ITEMS) + r")'\.'(" + prods
@@ -111,8 +111,7 @@ def extract(year, eu_blocks=False):
         rows = [m.groups() for m in map(pat.match, txt.splitlines()) if m]
         # keep only what is used: pairs that carry a flow, regions' own items; no reporting aggregates
         from recalibrate_trade_2017 import AGGREGATES as _AG
-        if eu_blocks:
-            _AG = (set(_AG) - set(EU_BLOCKS)) | {"EU27yr19"}
+        _AG = (set(_AG) - set(EU_BLOCKS)) | {"EU27yr19"}
         flow = {(a, b, p) for a, b, it, p, v in rows if it == "ImportQ" and float(v) > 1e-6}
         rows = [r for r in rows if r[0] not in _AG and r[1] not in _AG
                 and (r[1] == "" or (r[0], r[1], r[3]) in flow)]
@@ -121,18 +120,15 @@ def extract(year, eu_blocks=False):
     return _read_csv(keep, keep_default_na=False)
 
 
-def build(year, AGGREGATES, eu_blocks=False):
-    df = extract(year, eu_blocks)
+def build(year, AGGREGATES):
+    df = extract(year)
     df["value"] = df["value"].astype(float)
-    sfx = "_eu2" if eu_blocks else ""
-    if eu_blocks:
-        AGGREGATES = (set(AGGREGATES) - set(EU_BLOCKS)) | {"EU27yr19"}
-        skip = lambda r: r in AGGREGATES or r.startswith(("EU0", "EU_")) or (r.endswith("000000") and r not in ("UK000000", "NO000000"))
-    else:
-        skip = lambda r: r in AGGREGATES or r.startswith(("EU0", "EU_", "A_EU")) or (r.endswith("000000") and r not in ("UK000000", "NO000000"))
+    sfx = ""
+    AGGREGATES = (set(AGGREGATES) - set(EU_BLOCKS)) | {"EU27yr19"}
+    skip = lambda r: r in AGGREGATES or r.startswith(("EU0", "EU_")) or (r.endswith("000000") and r not in ("UK000000", "NO000000"))
     # the model's market region of each CAPRI region: the grouping step (tools/lib/_market_regions.py; until 3 November
     # 2026 REGION_MAP.get(r, "ROW"), the EU blocks added here)
-    mp = lambda r: model_region(r, eu_as_blocks=eu_blocks)
+    mp = lambda r: model_region(r, eu_as_blocks=True)
     pair = defaultdict(dict)
     reg = defaultdict(dict)
     for r in df.itertuples(index=False):
@@ -191,7 +187,7 @@ def build(year, AGGREGATES, eu_blocks=False):
     worst.sort(reverse=True)
     print(f"{year}: {len(fl)} flows, {fl.commodity.nunique()} commodities; supply balance worst: "
           + "; ".join(f"{c} {r} {s:.0f}/{p:.0f}" for _, c, r, s, p in worst[:5]))
-    eur = ("EU_WEST", "EU_EAST") if eu_blocks else ("EU27",)
+    eur = ("EU_WEST", "EU_EAST")
     eu = fl[fl.importer.isin(eur) & ~fl.exporter.isin(eur)].groupby("commodity")["q_kt"].sum()
     print(f"  EU extra-EU imports (kt): " + ", ".join(f"{c} {v:.0f}" for c, v in eu.items() if c in ("BEEF", "PORK", "POUL", "SWHE", "SOYA", "CHES")))
     return fl, rg
@@ -248,13 +244,9 @@ def main():
     sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check")]
     from recalibrate_trade_2017 import AGGREGATES
     KEEP.mkdir(parents=True, exist_ok=True)
-    blocks = "--eu-blocks" in sys.argv
     for y in (2017, 2030):
-        build(y, AGGREGATES, eu_blocks=blocks)
-        if not blocks:
-            build_trq(y, AGGREGATES)        # the EU's quotas are the same for one or two EU regions
-    if blocks:
-        return
+        build(y, AGGREGATES)
+        build_trq(y, AGGREGATES)        # the EU's quotas (the same for one or two EU regions)
     rt = rho_table()
     rows = [dict(commodity=m, capri=cs[0], rho1=rt[cs[0]][1], rho2=rt[cs[0]][2]) for m, cs in MODEL.items()]
     pd.DataFrame(rows).to_csv(ROOT / "capri_data" / "2017" / "market" / "armington_rho.csv", index=False)

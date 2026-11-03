@@ -12,8 +12,9 @@ imports from outside the region (ad valorem + specific tariffs + tariff-rate quo
     tariff[I, c] = 100 x ( sum_(i in I, j not in I) ImportQ x ImportP / sum ImportQ x (Fob + TCost) - 1 )
 
 over CAPRI's bilateral flows in market_base_1717 (the same extract as tools/build/build_bilateral_market.py,
-capri_data/sources/market/bilateral_dataout_2017_eu2.csv.xz: CAPRI's market regions, the EU as its two A_EU_WEST and
-A_EU_EAST, one exporter to the others as EU27; until 3 November 2026 the extract with EU27yr19), CAPRI regions mapped to the model's trade regions as there.
+capri_data/sources/market/bilateral_dataout_2017.csv.xz: CAPRI's market regions, the EU as its two A_EU_WEST and
+A_EU_EAST, one exporter to the others as EU27; until 3 November 2026 the extract with EU27yr19, and its block twin
+bilateral_dataout_2017_eu2.csv.xz), CAPRI regions mapped to the model's trade regions as there.
 The EU row keeps its documented values (eu_tariff_provenance.csv, converted from eu_tariff_provenance.json by
 tools/build/convert_sources_to_csv.py; the same formula on CAPRI's EU27yr19 <- NONEU aggregate); the check printed
 below recomputes it from the member states. Commodities a region does not import, or
@@ -38,7 +39,7 @@ _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT)); sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check")]
 OUT = ROOT / "capri_data" / "2017" / "policy" / "tariffs.csv"
-SRC = ROOT / "capri_data" / "sources" / "market" / "bilateral_dataout_2017_eu2.csv.xz"
+SRC = ROOT / "capri_data" / "sources" / "market" / "bilateral_dataout_2017.csv.xz"
 PROV = ROOT / "capri_data" / "sources" / "market" / "eu_tariff_provenance.csv"
 RES0 = EXPORTS / "res_0_1717cap_after_2014_cal_from_data_caldefaulta.csv"
 #: EU rows added after the documented set, computed from RES0 with the same formula (in eu_tariff_provenance.csv;

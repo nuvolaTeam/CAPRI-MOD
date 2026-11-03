@@ -37,7 +37,7 @@ class BilateralSolveMixin(MarketStateMixin):
         cached = getattr(self, "_bilat_raw_cache", None)
         if cached is not None and cached[0] == year:
             return cached[1]
-        sfx = "_eu2"                                    # CAPRI's two EU trade blocks (build_bilateral_market --eu-blocks)
+        sfx = ""                                        # the EU as CAPRI's two market regions (build_bilateral_market)
         if not inp.exists(f"bilateral_flows_{year}{sfx}.csv"):
             year = int(inp.base_year)
         if not inp.exists(f"bilateral_flows_{year}{sfx}.csv"):

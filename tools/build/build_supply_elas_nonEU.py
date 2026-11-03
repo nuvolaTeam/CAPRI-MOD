@@ -5,7 +5,7 @@ with the Hessian p_hessNQSupp calibrated to p_elasSupp(region, product, product'
 own-price elasticity per product for every non-EU region (CAPRI's EU median, else the Armington eps). This builder
 takes CAPRI's own-price p_elasSupp per CAPRI region (2017/supply/capri_supply_elas_market_1717.csv, from the 2017
 calibration run's elas_2_1717 file) and aggregates it to the model's trade regions with CAPRI's 2017 production
-(sources/market/bilateral_dataout_2017_eu2.csv.xz, item PROD) as weights, through the same region and product maps as the
+(sources/market/bilateral_dataout_2017.csv.xz, item PROD) as weights, through the same region and product maps as the
 bilateral market (the market's grouping step, tools/lib/_market_regions.py: codes/model_market_regions.csv;
 tools/build/build_bilateral_market.py MODEL). Products CAPRI's market produces by processing (dairy products, oils and cakes,
 biofuels, DDGS) have no p_elasSupp and keep the market's previous value.
@@ -33,7 +33,7 @@ sys.path.insert(0, str(ROOT))
 sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check")]
 
 ELAS = ROOT / "capri_data" / "2017" / "supply" / "capri_supply_elas_market_1717.csv"
-PROD = ROOT / "capri_data" / "sources" / "market" / "bilateral_dataout_2017_eu2.csv.xz"
+PROD = ROOT / "capri_data" / "sources" / "market" / "bilateral_dataout_2017.csv.xz"
 OUT = ROOT / "capri_data" / "2017" / "market" / "supply_elas_region.csv"
 
 

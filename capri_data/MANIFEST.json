@@ -1217,7 +1217,7 @@
    "vintage": "2017",
    "domain": "market",
    "status": "live",
-   "rows": 21767,
+   "rows": 23076,
    "columns": 9,
    "units": "to be established (value_units: open)",
    "read_by_model": [
@@ -1228,26 +1228,7 @@
     "nature": "capri",
     "builder": "build_bilateral_market:"
    },
-   "catalogue_note": "CAPRI's bilateral flows aggregated to the model's trade regions with the import price split into exporter-price part a and fixed part b (tools/build/build_bilateral_market.py) Sprint 9f: + FRMI, CREM, COCM, WMIO, CASE (CAPRI's dairy products, traded). (not re-checked)"
-  },
-  "capri_data/2017/market/bilateral_flows_2017_eu2.csv": {
-   "description": "CAPRI's bilateral trade data for the model's trade regions (Sprint 8m: CAPRI's full market). (tools/build/build_bilateral_market.py)",
-   "kind": "base",
-   "vintage": "2017",
-   "domain": "market",
-   "status": "live",
-   "rows": 23076,
-   "columns": 9,
-   "units": "to be established (value_units: open)",
-   "read_by_model": [
-    "capri_mod/market/bilateral_solve.py",
-    "capri_mod/market/calibration.py"
-   ],
-   "origin": {
-    "nature": "capri",
-    "builder": "build_bilateral_market:eu-blocks"
-   },
-   "catalogue_note": "as bilateral_flows_2017.csv with the two EU trade blocks (not re-checked)"
+   "catalogue_note": "CAPRI's bilateral flows aggregated to the model's trade regions (the EU as CAPRI's two market regions EU_WEST, EU_EAST since 3 November 2026; the one-EU files and their _eu2 twins merged) with the import price split into exporter-price part a and fixed part b (tools/build/build_bilateral_market.py) Sprint 9f: + FRMI, CREM, COCM, WMIO, CASE (CAPRI's dairy products, traded). (not re-checked)"
   },
   "capri_data/2017/market/bilateral_flows_2030.csv": {
    "description": "CAPRI's bilateral trade data for the model's trade regions (Sprint 8m: CAPRI's full market). (tools/build/build_bilateral_market.py)",
@@ -1255,7 +1236,7 @@
    "vintage": "2030 reference",
    "domain": "market",
    "status": "live",
-   "rows": 21414,
+   "rows": 22716,
    "columns": 9,
    "units": "to be established (value_units: open)",
    "read_by_model": [
@@ -1269,45 +1250,7 @@
    },
    "catalogue_note": "as bilateral_flows_2017.csv for the 2030 market year Sprint 9f: + FRMI, CREM, COCM, WMIO, CASE (CAPRI's dairy products, traded). (not re-checked)"
   },
-  "capri_data/2017/market/bilateral_flows_2030_eu2.csv": {
-   "description": "CAPRI's bilateral trade data for the model's trade regions (Sprint 8m: CAPRI's full market). (tools/build/build_bilateral_market.py)",
-   "kind": "reference",
-   "vintage": "2030 reference",
-   "domain": "market",
-   "status": "live",
-   "rows": 22716,
-   "columns": 9,
-   "units": "to be established (value_units: open)",
-   "read_by_model": [
-    "capri_mod/market/bilateral_solve.py",
-    "capri_mod/market/calibration.py"
-   ],
-   "origin": {
-    "nature": "capri",
-    "builder": "build_bilateral_market:eu-blocks"
-   },
-   "catalogue_note": "as bilateral_flows_2030.csv with CAPRI's two EU trade blocks A_EU_WEST, A_EU_EAST instead of EU27yr19 (tools/build/build_bilateral_market.py --eu-blocks; option MarketModule.eu_blocks) (not re-checked)"
-  },
   "capri_data/2017/market/bilateral_regions_2017.csv": {
-   "description": "CAPRI's bilateral trade data for the model's trade regions (Sprint 8m: CAPRI's full market). (tools/build/build_bilateral_market.py)",
-   "kind": "base",
-   "vintage": "2017",
-   "domain": "market",
-   "status": "live",
-   "rows": 2505,
-   "columns": 4,
-   "units": "to be established (value_units: open)",
-   "read_by_model": [
-    "capri_mod/market/bilateral_solve.py",
-    "capri_mod/market/calibration.py"
-   ],
-   "origin": {
-    "nature": "capri",
-    "builder": "build_bilateral_market:"
-   },
-   "catalogue_note": "market price and production per model trade region Sprint 9f: + FRMI, CREM, COCM, WMIO, CASE (CAPRI's dairy products, traded). (not re-checked)"
-  },
-  "capri_data/2017/market/bilateral_regions_2017_eu2.csv": {
    "description": "CAPRI's bilateral trade data for the model's trade regions (Sprint 8m: CAPRI's full market). (tools/build/build_bilateral_market.py)",
    "kind": "base",
    "vintage": "2017",
@@ -1322,9 +1265,9 @@
    ],
    "origin": {
     "nature": "capri",
-    "builder": "build_bilateral_market:eu-blocks"
+    "builder": "build_bilateral_market:"
    },
-   "catalogue_note": "as bilateral_regions_2017.csv with the two EU trade blocks (not re-checked)"
+   "catalogue_note": "market price and production per model trade region (the EU as CAPRI's two market regions EU_WEST, EU_EAST since 3 November 2026; the one-EU files and their _eu2 twins merged) Sprint 9f: + FRMI, CREM, COCM, WMIO, CASE (CAPRI's dairy products, traded). (not re-checked)"
   },
   "capri_data/2017/market/bilateral_regions_2030.csv": {
    "description": "CAPRI's bilateral trade data for the model's trade regions (Sprint 8m: CAPRI's full market). (tools/build/build_bilateral_market.py)",
@@ -1332,7 +1275,7 @@
    "vintage": "2030 reference",
    "domain": "market",
    "status": "live",
-   "rows": 2504,
+   "rows": 2565,
    "columns": 4,
    "units": "to be established (value_units: open)",
    "read_by_model": [
@@ -1345,25 +1288,6 @@
     "builder": "build_bilateral_market:"
    },
    "catalogue_note": "market price and production per model trade region, 2030 Sprint 9f: + FRMI, CREM, COCM, WMIO, CASE (CAPRI's dairy products, traded). (not re-checked)"
-  },
-  "capri_data/2017/market/bilateral_regions_2030_eu2.csv": {
-   "description": "CAPRI's bilateral trade data for the model's trade regions (Sprint 8m: CAPRI's full market). (tools/build/build_bilateral_market.py)",
-   "kind": "reference",
-   "vintage": "2030 reference",
-   "domain": "market",
-   "status": "live",
-   "rows": 2565,
-   "columns": 4,
-   "units": "to be established (value_units: open)",
-   "read_by_model": [
-    "capri_mod/market/bilateral_solve.py",
-    "capri_mod/market/calibration.py"
-   ],
-   "origin": {
-    "nature": "capri",
-    "builder": "build_bilateral_market:eu-blocks"
-   },
-   "catalogue_note": "as bilateral_regions_2030.csv with the two EU trade blocks (not re-checked)"
   },
   "capri_data/2017/market/bilateral_trq_2017.csv": {
    "description": "CAPRI's bilateral trade data for the model's trade regions (Sprint 8m: CAPRI's full market). (tools/build/build_bilateral_market.py)",

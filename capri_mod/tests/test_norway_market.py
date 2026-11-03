@@ -77,8 +77,7 @@ def test_norway_market_data_are_capris_no000000():
     nor = rg[rg.region == "NO000000"].set_index("commodity")["prod_kt"]
     for model_c, capri_c in (("BARL", "BARL"), ("SFIS", "SFIS"), ("POUL", "POUM"), ("PORK", "PORK")):
         assert abs(float(nor[model_c]) - float(p[capri_c])) < 1e-4 * max(1.0, float(p[capri_c])), model_c
-    for f in ("bilateral_flows_2017.csv", "bilateral_flows_2030.csv", "bilateral_flows_2017_eu2.csv",
-              "bilateral_flows_2030_eu2.csv"):
+    for f in ("bilateral_flows_2017.csv", "bilateral_flows_2030.csv"):
         fl = pd.read_csv(MKT / f)
         assert ((fl.importer == "NO000000") & (fl.exporter == "NO000000")).any(), f
     tar = pd.read_csv(DATA_DIR / "2017" / "policy" / "tariffs.csv", index_col=0)

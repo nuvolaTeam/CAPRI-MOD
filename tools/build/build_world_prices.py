@@ -16,7 +16,7 @@ Rows
         units) over CAPRI's EU olives for oil (res_17 OLIV YILD x LEVL of the same member states, kg) in t
   FPRI  FAO_agg has no world price for it: CAPRI's 2017 market, export-weighted market prices of the exporting
         market regions, every one of CAPRI's 45 an exporter, the EU's two blocks and their trade with each other
-        included (bilateral_flows_2017_eu2.csv, bilateral_regions_2017_eu2.csv; the project lead's rule (c), 3 November
+        included (bilateral_flows_2017.csv, bilateral_regions_2017.csv; the project lead's rule (c), 3 November
         2026; until then the one-EU files; written by build_feed_byproducts.py until 29 October 2026)
 
 Until 29 October 2026 most rows had no builder: written by an earlier one, at 2 decimals (1 for the oilseed oils and
@@ -89,9 +89,9 @@ def olives_for_oil(dumps: Path, member_states) -> float:
 
 def fpri_price() -> float:
     """FPRI: the export-weighted market price of the exporting market regions in CAPRI's 2017 market."""
-    fl = _read_csv(MKT / "bilateral_flows_2017_eu2.csv")
+    fl = _read_csv(MKT / "bilateral_flows_2017.csv")
     f = fl[(fl.commodity == "FPRI") & (fl.importer != fl.exporter)]
-    rg = _read_csv(MKT / "bilateral_regions_2017_eu2.csv")
+    rg = _read_csv(MKT / "bilateral_regions_2017.csv")
     pm = rg[rg.commodity == "FPRI"].set_index("region")["pmrk"]
     ex = f.groupby("exporter")["q_kt"].apply(math.fsum)       # exact sums: independent of the regions' order
     return math.fsum(q * float(pm.get(r, 0.0)) for r, q in ex.items()) / math.fsum(ex.values)
