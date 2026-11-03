@@ -2,6 +2,9 @@
 the reference run). Floats compared with a relative tolerance (default 1e-10); reports every differing path.
 
     python tools/check/compare_pickles_exact.py REF.pkl NEW.pkl [--rtol 1e-10] [--ignore meta.time_s,...]
+
+A run may also be a stored one, store:ROOT:SCENARIO[:RUN_ID] (capri_mod/io_results.py load_run; the long table and
+its records, written by the run script since refactor stage 5).
 """
 from __future__ import annotations
 
@@ -12,6 +15,8 @@ import sys
 
 import numpy as np
 import pandas as pd
+__import__("sys").path.insert(0, str(__import__("pathlib").Path(__file__).resolve().parents[2]))
+from capri_mod.io_results import load_run  # a run pickle or a stored run, "store:ROOT:SCENARIO[:RUN_ID]"
 
 
 def walk(a, b, path, out, rtol, ignore):
@@ -78,7 +83,7 @@ def main() -> int:
     ap.add_argument("--rtol", type=float, default=1e-10)
     ap.add_argument("--ignore", default="")
     a = ap.parse_args()
-    ref, new = pickle.load(open(a.ref, "rb")), pickle.load(open(a.new, "rb"))
+    ref, new = load_run(a.ref), load_run(a.new)
     ignore = {"$" + ("." + p if p else "") for p in a.ignore.split(",") if p}
     out = []
     walk(ref, new, "$", out, a.rtol, ignore)

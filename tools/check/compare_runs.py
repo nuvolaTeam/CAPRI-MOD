@@ -10,6 +10,8 @@ import argparse
 import pickle
 
 import numpy as np
+__import__("sys").path.insert(0, str(__import__("pathlib").Path(__file__).resolve().parents[2]))
+from capri_mod.io_results import load_run  # a run pickle or a stored run, "store:ROOT:SCENARIO[:RUN_ID]"
 
 # JRC121368 (EUR 30317 EN) Farm-to-Fork combined scenario, EU27, % change from baseline
 CAPRI = {"cereal price": 8, "oilseed price": 11, "veg+perm price": 15, "beef price": 24, "pork price": 43,
@@ -80,7 +82,7 @@ def main():
     ap.add_argument("runs", nargs="+")
     ap.add_argument("--capri", action="store_true")
     a = ap.parse_args()
-    objs = [pickle.load(open(f, "rb")) for f in a.runs]
+    objs = [load_run(f) for f in a.runs]
     res = [indicators(o) for o in objs]
     heads = [f"run{i + 1}" for i in range(len(res))] + (["CAPRI"] if a.capri else [])
     print(f"{'':16s} " + " ".join(f"{h:>8s}" for h in heads) + (f" {'B - A':>8s}" if len(res) == 2 else ""))

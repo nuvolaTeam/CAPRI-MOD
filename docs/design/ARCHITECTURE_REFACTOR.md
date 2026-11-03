@@ -57,7 +57,7 @@ adapter layer is the interface they need.
 | 2a | Market data adapter: `capri_mod/market/inputs.py` (MarketInputs) is the only market code that reads files; it takes the model's data directory and base year (the blocks read a fixed capri_data/2017 path before); the eleven loaders that silently switched a block off on any error now stop the run; test `capri_mod/tests/test_market_layers.py` enforces the rule | done 24 Oct: run r111a identical to r111 within 1e-10 |
 | 2b | Market calibration and state: the parameters each block builds once per base (now ~25 hand-written caches on the module) into a parameters object; the per-evaluation state (~20 attributes passed between supply_response, demand_response and the by-product blocks) into a state object. Blocks that the conformity programme rewrites (section 6) are written in this form directly; the others are moved mechanically with a gate | done 28 Oct (batch 2): MarketParameters (par), MarketEvalState (ev), MarketSolveState (sv), MarketSeen (seen), capri_mod/market/state.py; the old names raise (state.MOVED); mini-EU Farm-to-Fork identical to 1e-12 with and without it (20 units, 7 iterations) |
 | 3 | Supply (`supply_module.py`): the same steps, block by block (feed, fertiliser, land, policy rules, abatement, PMP) | 3a done (RegionalSupplyModel's methods into block mixins, capri_mod/supply/*.py, unchanged; f256e8f), 3b done (the supply package's data adapter, capri_mod/supply/inputs.py; 51de0b8, a missing file stops the run 8152e35); the parameters and state objects (as the market's 2b): the state moves done, 2 November 2026 (capri_mod/supply/state.py, steps S0b-S10b of docs/design/STAGE3B_PLAN.md; the fields by object in docs/design/SUPPLY_STATE_INVENTORY.md; each batch's mini-EU Farm-to-Fork run identical to the previous one at 1e-12); the numbers and code tables (N1-N6) and the separate behaviour changes not done |
-| 4 | Environment and `model.py` (the coupling loop) | 4a done (EnvironmentalModule's methods into block mixins, 273586b), 4b done (the run's data adapter, capri_mod/data/inputs.py, 4e5313c), 4c done (CAPRIModel's coupling methods into capri_mod/coupling mixins, 9ecb4d8); parameters and state objects not done |
+| 4 | Environment and `model.py` (the coupling loop) | 4a done (EnvironmentalModule's methods into block mixins, 273586b), 4b done (the run's data adapter, capri_mod/data/inputs.py, 4e5313c), 4c done (CAPRIModel's coupling methods into capri_mod/coupling mixins, 9ecb4d8); parameters and state objects: done 2 November 2026 (night), batches 1-5 and the first part of 6, each mini-EU run identical (docs/design/ENV_COUPLING_STATE_INVENTORY.md); left: most of the code tables (batch 6, second part) |
 | 5 | Scenario and reporting layers | not started |
 
 **Order and scope of what is left (agreed with the project lead, 31 October 2026).** After the next F2F/GD gate,
@@ -92,6 +92,11 @@ The builders (tools/build) are out of this plan: they are run by the maintainers
   runs come with the format (deltalake; DuckDB reads it too). deltalake moves from the pipeline extra to the model's
   dependencies. capri_mod/io_results.py is the single writer; the gate runner and tools/check/compare_runs.py use it;
   the pickle at most a cache.
+- pydantic (the project lead's decision, 2 November 2026) for the scenario definitions (one typed model per scenario
+  in capri_data/scenarios/<name>/, checked before a run starts) and the run's metadata (the run manifest, the market
+  supply Hessian's record, the metadata stored beside the results table); a declared dependency from then. Not for
+  the settings layer (it checks types and keys already), the state objects (slots on the solves' hot path) or the
+  data tables (the DuckDB schema and its rules). A choice about the Python layer, with no CAPRI counterpart.
 
 ## 4. CAPRI-claim audit
 

@@ -6,6 +6,8 @@ module once model is loaded (capri_mod.coupling.inject); the annotations are not
 """
 from __future__ import annotations
 
+from capri_mod.data.definitions import CROPS, MARKET_COMMODITIES, COMMODITY_CAPRI_CODE, CAPRI_MEMBERS
+
 
 class BridgeBlock:
     def _livestock_products_by_country(self, supply_results):
@@ -58,16 +60,11 @@ class BridgeBlock:
                                       index=supply_agg.index,
                                       columns=MARKET_COMMODITIES)
 
-        # Direct mappings (activity → market commodity)
-        direct_maps = {
-            "BARL": "BARL",
-            "CORN": "CORN", "OCER": "OCER", "RYEM": "RYEM", "OATS": "OATS", "RAPE": "RAPE",
-            "SUNF": "SUNF", "SOYA": "SOYA",
-            "POTA": "POTA", "PULS": "PULS",
-            "TOMA": "TOMA", "OVEG": "OVEG", "APPL": "APPL",
-            "OFRU": "OFRU", "CITR": "CITR", "TAGR": "TAGR", "TOBA": "TOBA", "TABO": "TABO", "TEXT": "TEXT", "WINE": "WINE",
-            # (wheat, olives and paddy rice are bridged below, as CAPRI's wheat, olive oil and milled rice)
-        }
+        # Direct mappings (activity -> market commodity): the crops whose CAPRI activity is the market product's CAPRI
+        # code (codes/model_activities.csv, model_commodities.csv: CORN = MAIZ, WINE = TWIN, ...). Wheat, olives and
+        # paddy rice are not (CAPRI's WHEA, OLIO, RICE): they are bridged below, as CAPRI's wheat, olive oil and milled rice
+        direct_maps = {c: c for c in CROPS
+                       if c in MARKET_COMMODITIES and COMMODITY_CAPRI_CODE.get(c) in CAPRI_MEMBERS[c]}
         # LIVESTOCK (milk is handled by the dairy block below). The meat markets
         # meat, milk and egg supply never moved with the herds: under
         # Farm-to-Fork pig supply fell ~10% while the pork price changed by
@@ -86,7 +83,7 @@ class BridgeBlock:
             "SGMT": ("SHGM", "SHGF"),
         }
         # (Oil and cake supply now comes from crushing inside the market.)
-        _lsc = getattr(self, "_ls_by_country", None)
+        _lsc = getattr(self.ev, "ls_by_country", None)
         for mcomm, acts in livestock_maps.items():
             present = [a for a in acts if a in supply_agg.columns]
             if _lsc is not None and mcomm in _lsc.columns and mcomm in market_supply.columns:
@@ -151,8 +148,7 @@ class BridgeBlock:
             # processing, per tonne of raw milk produced: dairy_processing.csv), replacing FAO EU-average
             # ratios (cheese 0.0456 against CAPRI's 0.068). With the dairy block on, the market replaces
             # these by the block's output.
-            for mc, ck in (("BUTR", "BUTT"), ("SKIM", "SMIP"), ("CHES", "CHES"), ("WHEY", "WHEP"), ("FRMI", "FRMI"),
-                           ("CREM", "CREM"), ("COCM", "COCM"), ("WMIO", "WMIO"), ("CASE", "CASE")):
+            for ck, mc in self.market_module.DAIRY_TRADED.items():     # CAPRI's dairy product -> the model's
                 if mc in market_supply.columns:
                     market_supply[mc] = milk * pd.Series(
                         {r: self._dairy_yield(r, ck) for r in market_supply.index}).reindex(market_supply.index)
@@ -185,7 +181,7 @@ class BridgeBlock:
         areas = d.get("areas")
         run = set(run_regions or [])
         units = [r for r in areas.index if _is_eu(r) and r not in run] if areas is not None else []
-        self._excluded_units = list(units)          # the feed bulks' base (coupling/feed.py) reads them too
+        self.par.excluded_units = list(units)          # the feed bulks' base (coupling/feed.py) reads them too
         if not units:
             return None
         yld, an, oc = d.get("yields"), d.get("animal_numbers"), d.get("livestock_output_coef")
@@ -201,19 +197,19 @@ class BridgeBlock:
                         go[a] = float(an.at[r, a]) * float(oc.at[r, a])
             res[r] = SimpleNamespace(gross_output=pd.Series(go, dtype=float))
         agg = self.supply_module.aggregate_supply(res, by_country=True)
-        saved = getattr(self, "_ls_by_country", None)
+        saved = getattr(self.ev, "ls_by_country", None)
         try:
-            self._ls_by_country = self._livestock_products_by_country(res)
+            self.ev.ls_by_country = self._livestock_products_by_country(res)
             out = self._bridge_supply_to_market(agg)
         finally:
-            self._ls_by_country = saved
+            self.ev.ls_by_country = saved
         return out
 
     def _dairy_yield(self, region: str, product: str) -> float:
         """A dairy product's output less processing per tonne of raw milk (cow + sheep and goat) in the
         region's member state, CAPRI 2030 reference (dairy_processing.csv; Norway: dairy_world_processing.csv, per
         tonne of raw milk delivered); EU ratio where CAPRI has no dairy data for the member state."""
-        tab = getattr(self, "_dairy_yield_cache", None)
+        tab = getattr(self.par, "dairy_yield_cache", None)
         if tab is None:
             from pathlib import Path
             from capri_mod.data.loaders import resolve_data_file
@@ -224,7 +220,7 @@ class BridgeBlock:
             dp = dp.assign(net=net)
             raw = dp[dp["item"].isin(["COMI", "SGMI"])].groupby("ms")["q_kt"].sum()
             tab = {}
-            for k in ("BUTT", "SMIP", "CHES", "WHEP", "FRMI", "CREM", "COCM", "WMIO", "CASE"):
+            for k in self.market_module.DAIRY_TRADED:
                 q = dp[dp["item"] == k].set_index("ms")["net"]
                 tab.update({(ms, k): float(q.get(ms, 0.0)) / float(raw[ms]) for ms in raw.index if raw[ms] > 0})
                 tab[("_EU", k)] = float(q.sum()) / float(raw.sum())
@@ -236,18 +232,18 @@ class BridgeBlock:
                 for ms in sup_noneu():                     # the run's supply-model countries outside the EU
                     g = wp_[wp_["rms"] == ms].set_index("item")
                     if "MILK" in g.index and float(g.at["MILK", "q_kt"]) > 0:
-                        for k in ("BUTT", "SMIP", "CHES", "WHEP", "FRMI", "CREM", "COCM", "WMIO", "CASE"):
+                        for k in self.market_module.DAIRY_TRADED:
                             if k in g.index:
                                 tab[(ms, k)] = float(g.at[k, "q_kt"] - (g.at[k, "proc_kt"] if pd.notna(g.at[k, "proc_kt"])
                                                                        else 0.0)) / float(g.at["MILK", "q_kt"])
-            self._dairy_yield_cache = tab
+            self.par.dairy_yield_cache = tab
         ms = self._CAPRI_MS.get(str(region)[:2], str(region)[:2]) + "000000"
         return tab.get((ms, product), tab[("_EU", product)])
 
     def _processing_yield(self, region: str, raw: str) -> float:
         """CAPRI's olive oil per tonne of olives (member state) and milled rice per tonne of paddy (EU),
         2030 reference (processing_yields.csv)."""
-        tab = getattr(self, "_proc_yield_cache", None)
+        tab = getattr(self.par, "proc_yield_cache", None)
         if tab is None:
             from pathlib import Path
             from capri_mod.data.loaders import resolve_data_file
@@ -255,7 +251,7 @@ class BridgeBlock:
             f = resolve_data_file(base, "processing_yields.csv")
             py = read_input(f)
             tab = {(r["ms"], r["raw"]): float(r["yield"]) for _, r in py.iterrows()}
-            self._proc_yield_cache = tab
+            self.par.proc_yield_cache = tab
         if raw == "PARI":
             return tab[("_EU", "PARI")]
         ms = self._CAPRI_MS.get(str(region)[:2], str(region)[:2]) + "000000"
@@ -264,7 +260,7 @@ class BridgeBlock:
     def _sugar_per_beet(self, region: str) -> float:
         """White sugar per tonne of sugar beet harvested in the region's member state (CAPRI 2030 reference:
         MAPR(SUGA) / GROF(SUGB)); member states without beet in CAPRI take the EU ratio."""
-        tab = getattr(self, "_sugar_rate_cache", None)
+        tab = getattr(self.par, "sugar_rate_cache", None)
         if tab is None:
             sp = self.data.get("sugar_processing")
             tab = {}
@@ -272,7 +268,7 @@ class BridgeBlock:
                 eu = sp[sp.index.isin(list(EU_MS_BLOCK))]                # CAPRI's EU member states
                 tab = {ms: float(r["sugar_per_beet"]) for ms, r in sp.iterrows()}
                 tab["_EU"] = float(eu["sugar_mapr_kt"].sum() / eu["beet_grof_kt"].sum())
-            self._sugar_rate_cache = tab
+            self.par.sugar_rate_cache = tab
         ms = self._CAPRI_MS.get(str(region)[:2], str(region)[:2]) + "000000"
         if ms in tab:
             return tab[ms]

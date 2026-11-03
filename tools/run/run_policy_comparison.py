@@ -15,9 +15,13 @@ convergence. If a subset is ever wanted, it has to be asked for explicitly.
 
 Usage
 -----
-    python tools/run/run_policy_comparison.py                 # all four F2F instruments
-    python tools/run/run_policy_comparison.py --pesticide 0.5 # one instrument
-    python tools/run/run_policy_comparison.py --regions 30    # explicit subset, flagged
+    python tools/run/run_policy_comparison.py                          # Farm-to-Fork (its scenario folder)
+    python tools/run/run_policy_comparison.py --scenario NAME          # another scenario folder
+    python tools/run/run_policy_comparison.py --regions 30             # explicit subset, flagged
+
+The scenario is a folder of capri_data/scenarios (refactor stage 5); until 3 November 2026 the script built its own
+Farm-to-Fork from four instruments (pesticides -50%, organic 25%, set-aside 10% of UAA, the nutrient target), which was
+not JRC121368's scenario (the project lead's decision: removed, the script uses the folder).
 """
 
 from __future__ import annotations
@@ -58,15 +62,12 @@ def main() -> int:
                     help="limit to the first N regions (NOT recommended; the "
                          "first regions in index order are all German/Austrian "
                          "and contain almost no permanent crops)")
-    ap.add_argument("--pesticide", type=float, default=0.50)
-    ap.add_argument("--organic", type=float, default=0.25)
-    ap.add_argument("--set-aside", type=float, default=0.10)
-    ap.add_argument("--no-nutrient", action="store_true")
+    ap.add_argument("--scenario", default="farm_to_fork_jrc121368", help="a scenario folder (capri_data/scenarios)")
     ap.add_argument("--out", default=None, help="write results to this file too")
     args = ap.parse_args()
 
     from capri_mod.model import CAPRIModel
-    from capri_mod.policy.policy_module import PolicyScenario
+    from capri_mod.scenarios import definition as SD
 
     model = CAPRIModel(data_dir=str(_ROOT / "capri_data"), verbose=False)
     regions = list(model.data["areas"].index)
@@ -79,12 +80,7 @@ def main() -> int:
 
     started = time.time()
     base = _totals(model.run(scenario="BASELINE", regions=regions))
-    scenario = PolicyScenario(
-        name="F2F",
-        pesticide_reduction=args.pesticide,
-        organic_area_target=args.organic,
-        set_aside_requirement=args.set_aside,
-        nutrient_surplus_target=not args.no_nutrient)
+    scenario = SD.to_policy_scenario(SD.load(args.scenario))
     shocked = _totals(model.run(custom_scenario=scenario, regions=regions))
 
     lines = []
@@ -94,9 +90,12 @@ def main() -> int:
         if b <= 0:
             continue
         change = (s / b - 1.0) * 100.0
-        capri = CAPRI_F2F[name]
-        lines.append(f"{name:10s} {change:+7.2f}%   CAPRI {capri:+.0f}%   "
-                     f"ratio {change / capri:4.2f}   base {b:9,.0f} kha")
+        if args.scenario == "farm_to_fork_jrc121368":   # JRC121368's published figures are Farm-to-Fork's
+            capri = CAPRI_F2F[name]
+            lines.append(f"{name:10s} {change:+7.2f}%   CAPRI {capri:+.0f}%   "
+                         f"ratio {change / capri:4.2f}   base {b:9,.0f} kha")
+        else:
+            lines.append(f"{name:10s} {change:+7.2f}%   base {b:9,.0f} kha")
     lines.append(f"({len(regions)} regions, {time.time() - started:.0f}s)")
 
     text = "\n".join(lines)

@@ -28,11 +28,11 @@ class PriceStepBlock:
         from capri_mod.utils.capri_stop import CapriStopRule
         if not supply_results:
             return None
-        if getattr(self, "_capri_stop", None) is None:
+        if getattr(self.sv, "capri_stop", None) is None:
             blocks = read_input(Path(getattr(self, "data_dir", None) or Path(__file__).resolve().parents[2] / "capri_data") / "shared" / "eu_market_blocks.csv")
             aggs = {b: list(g["ms"]) for b, g in blocks.groupby("block")}
-            self._capri_stop = CapriStopRule(aggs, yani_rows=(), no_abs_price_rows=())
-        rule = self._capri_stop
+            self.sv.capri_stop = CapriStopRule(aggs, yani_rows=(), no_abs_price_rows=())
+        rule = self.sv.capri_stop
         # production per member state (kt)
         q = self._bridge_supply_to_market(self.supply_module.aggregate_supply(supply_results, by_country=True)).fillna(0.0)
         prod = {}
@@ -42,7 +42,7 @@ class PriceStepBlock:
                 if float(v) > 0:
                     d[str(c)] = d.get(str(c), 0.0) + float(v)
         # feed use per member state (kt): the traded feed bulks
-        traded = ("FCER", "FPRO", "FENE", "FMIL", "FOTH")
+        traded = CAPRI_FEED_TRD            # CAPRI's FEED_TRD (capri_data/codes/capri/FEED_TRD.csv), in its order
         feed = {}
         for r_, res in supply_results.items():
             ft = getattr(res, "feed_t", None) or {}
@@ -94,6 +94,13 @@ class PriceStepBlock:
         """outer_loop.price_update = "capri": every price passed to the supply models is CAPRI's price forecast
         (capmod/define_stepWeights.gms, price_forecast.gms l. 376-397) instead of the adaptive step."""
         return str(_settings().get("outer_loop.price_update")) == "capri"
+
+    @staticmethod
+    def _capri_hist_len() -> int:
+        """The price steps CAPRI's forecast keeps: the longer of its two weight lists (define_stepWeights.gms: 3 steps,
+        4 from the 20th; the histories held 4, written as a literal until refactor stage 4)."""
+        st = _settings()
+        return max(len(st.get("outer_loop.capri_step_weights")), len(st.get("outer_loop.capri_step_weights_late")))
 
     @staticmethod
     def _capri_forecast(hist, outer_iter):

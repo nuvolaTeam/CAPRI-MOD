@@ -58,7 +58,7 @@ def model_elas(pmp: str, ms: str, products, shock: float) -> pd.Series:
     out = {}
     with contextlib.redirect_stdout(io.StringIO()):
         pm.run(scenario="BASELINE", regions=regions, max_outer_iter=1)
-        pol = getattr(pm, "_last_spol", None)
+        pol = getattr(pm.seen, "last_spol", None)
         for p in products:
             q = []
             for s in (shock, -shock):

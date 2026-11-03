@@ -29,7 +29,7 @@ sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "chec
 from _gdx import read_symbol  # noqa: E402
 
 GAMS = SOURCES / "gams"
-OUT = ROOT / "capri_data" / "2017" / "policy"
+OUT = ROOT / "capri_data" / "scenarios" / "greendeal_group"   # the Green Deal group's data (refactor stage 5)
 #: CAPRI's land types of p_organicTargetMS and the file's columns
 ORGANIC_COLS = {"ARA": "arable_pp", "J0000": "grassland_pp", "PECR": "permanent_pp"}
 

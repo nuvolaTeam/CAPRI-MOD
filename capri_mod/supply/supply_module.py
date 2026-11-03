@@ -40,7 +40,7 @@ from capri_mod.params import param, param_table
 from capri_mod.units import M_N2O, M_N2O_N
 from capri_mod.settings import setting, tri_state, current as _settings
 from capri_mod.data.definitions import (
-    CROPS, ANIMALS, ALL_ACTIVITIES, FEED_ITEMS, NUTRIENTS, ACTIVITY_CLASSES, CROPS_ON_LAND, LAND_MARKET_TYPES,
+    CROPS, ANIMALS, ALL_ACTIVITIES, FEED_ITEMS, NUTRIENTS, ACTIVITY_CLASSES, CROPS_ON_LAND, LAND_MARKET_TYPES, CATTLE_SPLITS,
 )
 from capri_mod.data.definitions import MS_CODE, capri_ms, IdentityMap, is_eu
 from capri_mod.tableio import read_input
@@ -862,26 +862,15 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
     # ------------------------------------------------------------------
 
 
-    #: CAPRI's organicCrops (pol_input/greendeal/load_organic_targets.gms l. 201-233; CERE_COLS and OILS_COLS from
-    #: global/fromimpact/sets.gms), in model codes (MAIZ = CORN, TWIN = WINE): the crops whose own organic target
-    #: tops up other inputs (organic_io.gms) and, where grouped, lowers yields (organic_area.gms). Grassland, fodder,
-    #: other oilseeds and the minor crops are not organic crops: only the regional plant-protection and other-input
-    #: changes reach them.
-    ORGANIC_CROPS = ("SWHE", "DWHE", "RYEM", "BARL", "OATS", "CORN", "OCER", "PARI", "RAPE", "SUNF", "SOYA",
-                     "TOMA", "POTA", "OVEG", "PULS", "SUGB", "TEXT", "TOBA",
-                     "APPL", "OFRU", "CITR", "TAGR", "TABO", "WINE", "OLIV")
-    #: p_organicAreaTargetCrops of each organic crop: its NGRP group's target (ngrp_to_organicCrops, l. 240-258, and
-    #: crops_to_ngrp, l. 148-165: the arable groups take Eurostat's arable target, PERM the permanent-crop target, VEGE
-    #: the UAA target, l. 187); organic crops in no group (PARI, TEXT, TOBA) take the UAA target (l. 269-271)
-    ORGANIC_CROP_TARGET = {**{a: "arable_pp" for a in ("SWHE", "DWHE", "BARL", "CORN", "RYEM", "OCER", "OATS", "RAPE",
-                                                       "SUNF", "SOYA", "PULS", "SUGB", "POTA")},
-                           **{a: "permanent_pp" for a in ("APPL", "OFRU", "CITR", "TAGR", "TABO", "WINE", "OLIV")},
-                           **{a: "uaa_pp" for a in ("TOMA", "OVEG", "PARI", "TEXT", "TOBA")}}
-    #: organic crops whose yield takes the organic yield gap: in an NGRP group (organic_area.gms l. 191-193 rescales by
-    #: the group's target, so PARI, TEXT, TOBA get none) and with a gap estimate (pact2yieldGap,
-    #: inputs/load_organic_yieldgap.gms l. 93-140: none for PULS, SUGB)
-    ORGANIC_YIELD_GAP_CROPS = ("SWHE", "DWHE", "CORN", "RYEM", "BARL", "OATS", "OCER", "RAPE", "SUNF", "SOYA",
-                               "TOMA", "POTA", "OVEG", "APPL", "OFRU", "CITR", "TAGR", "TABO", "WINE", "OLIV")
+    #: CAPRI's organic crops (organicCrops, pol_input/greendeal/load_organic_targets.gms l. 201-233) and the target of
+    #: each (p_organicAreaTargetCrops: its NGRP group's, arable_pp, permanent_pp or uaa_pp; l. 148-165, 187, 240-258,
+    #: 269-271): the crops whose own organic target tops up other inputs (organic_io.gms) and, where grouped, lowers
+    #: yields (organic_area.gms); grassland, fodder, other oilseeds and the minor crops are not organic crops. The
+    #: organic crops whose yield takes the organic yield gap (in an NGRP group and in pact2yieldGap,
+    #: inputs/load_organic_yieldgap.gms l. 93-140). Both from capri_data/codes/model_activity_classes.csv (N6; the
+    #: organic module's sets are not among the sim_ini sets, so the rows cite the GAMS lines)
+    ORGANIC_CROP_TARGET = {a: r["organic_target"] for a, r in ACTIVITY_CLASSES.items() if r["organic_target"]}
+    ORGANIC_YIELD_GAP_CROPS = tuple(a for a in CROPS if ACTIVITY_CLASSES[a]["organic_yield_gap"] == "1")
     #: CAPRI-ERROR-FIX (setting supply.greendeal_inputs_keep_tech_change): define_inputs.gms l. 66-73 applies a
     #: scenario's regional input change as (1 + change) x the input-saving progress TF_I only when the global
     #: scenAugmentsTechChange is on. organic_io.gms l. 94 and conventional_io.gms l. 171 set it on, but
@@ -926,7 +915,7 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
     #: acts through the yield of a crop with a producer price; the fodder crops (grass, fodder maize, other fodder,
     #: CAPRI's shift of their output coefficients) and set-aside are not reached (REGISTERED: their yields enter the
     #: fodder balances from CAPRI's data, not from the yields this rule moves)
-    PESTICIDE_AFFECTED = tuple(c for c in CROPS if c not in ("GRAS", "MAIF", "OFOD", "SETA"))
+    PESTICIDE_AFFECTED = tuple(c for c in CROPS if ACTIVITY_CLASSES[c]["pesticide"] == "1")   # classes table (N6)
 
     #: Share of total input cost that is fertiliser (CAPRI FERT, EU-wide, all 27 member states' 2017 data;
     #: tools/build/build_crop_cost_shares.py): FALLBACK for the fertiliser cost per ha of a crop CAPRI does not grow
@@ -971,8 +960,7 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
     #: CAPRI's cattle activities inside the model's animals (tools/build/build_cattle_intensity.py SPLITS): key -> (the CAPRI
     #: activity that gains the stalls z, the one that gives them up); splits of one animal giving up the same activity
     #: share its curvature (cross term) and its bound
-    CATTLE_SPLIT_MEMBERS = {"BULL": ("BULL", "BULH"), "HFRS": ("HEIL", "HEIH"), "HFRS:rep": ("HEIR", "HEIH"),
-                            "CALV:male": ("CAMF", "CAMR"), "CALV:female": ("CAFF", "CAFR"), "CALV:sex": ("CAMR", "CAFR")}
+    CATTLE_SPLIT_MEMBERS = dict(CATTLE_SPLITS)          # capri_data/codes/model_cattle_splits.csv (N6)
     #: the splits that give CAPRI's replacement heifers and calves their own levels, with the young-animal markets per
     #: sex (22 October 2026). OFF by default: with them the Farm-to-Fork 2030 run's young-animal markets did not converge
     #: (KNOWN_ISSUES K65; runs r89-r92). False keeps only the intensity pairs (Sprint 7c), the pooled young-animal
@@ -986,6 +974,9 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
     # (breeding.gms l. 447-458; K67 F2)
 
 
+    #: the model's two classes of CAPRI's histosol options and the land row each acts on: the histosol data's column
+    #: suffix (pmp_sqr_crop, share_grass, ...) and the model's own constraint row label, both internal names of the
+    #: model, so kept in the code (refactor stage 3, N6)
     HISTOSOL_CLASSES = (("crop", "arable_land"), ("grass", "grassland"))
 
 
@@ -1969,15 +1960,12 @@ def _region_costs(data: Dict, region: str) -> pd.Series:
     return eu_mean
 
 
-#: Eurostat country codes where they differ from the model's region prefixes.
-_MS_ALIAS = {"GR": "EL", "UK": "UK"}
-
-
 def _ms_code(region: str) -> str:
-    """The region's country as the per-country tables key it (NUTS-0: BE, LU, IE; definitions.country_of)."""
+    """The region's country as the per-country tables key it (NUTS-0: BE, LU, IE, EL; definitions.country_of). The
+    alias table that stood here ({"GR": "EL", "UK": "UK"}) reached no region: country_of gives EL for Greece, and UK
+    mapped to itself (refactor stage 3, N6)."""
     from capri_mod.data.definitions import country_of
-    c = country_of(region)
-    return _MS_ALIAS.get(c, c)
+    return country_of(region)
 
 
 def _ms_row(table, region):
@@ -2706,12 +2694,7 @@ class SupplyModule(ModuleStateMixin):
     #: animal ever saw a meat, milk or egg price change (the +7% pork price under
     #: Farm-to-Fork never reached pig farmers). Rye and oats earn their own market
     #: prices (RYEM, OATS), as in CAPRI.
-    ACTIVITY_PRICE_SOURCE = {
-        "DCOW": "MILK",
-        "BULL": "BEEF", "BCOW": "BEEF", "HFRS": "BEEF", "CALV": "BEEF",
-        "PIGS": "PORK", "PIGF": "PORK",
-        "BROI": "POUL", "LAYS": "EGGS", "SHGM": "MILK", "SHGF": "SGMT",
-    }
+    ACTIVITY_PRICE_SOURCE = {a: r["price_source"] for a, r in ACTIVITY_CLASSES.items() if r["price_source"]}   # N6
 
     def _activity_signals(self, price_signals):
         """Add activity-keyed entries to a commodity-keyed price signal."""
@@ -3285,7 +3268,7 @@ def _luc_of(model, land_types):
         from capri_mod.environmental.luc import LUCModel
         from capri_mod.fert.inner_fert_dist import InnerFertDist
         env_ = getattr(model.seen, "env_for_surplus", None)
-        inner = env_.__dict__.get("_inner_fert") if env_ is not None else None
+        inner = getattr(env_.par, "inner_fert", None) if env_ is not None else None
         if inner is None:
             inner = InnerFertDist()
         cr = model.data.region_id              # the model's regions are CAPRI's units

@@ -5,15 +5,16 @@ docs/design/ARCHITECTURE_REFACTOR.md); the module-level names they use are envir
 module once environmental_module is loaded (capri_mod.utils.mixins.inject_names); the annotations are not evaluated.
 """
 from __future__ import annotations
+from capri_mod import statekit as _est   # the state objects' helpers (refactor stage 4)
 
 
 class PhosphorusBlock:
     def _p_capri_region(self, region):
         """The CAPRI region of the fertilisation block's data (InnerFertDist.capri_region, as SupplyModel._npk_spec)."""
-        inner = self.__dict__.get("_inner_fert")
+        inner = getattr(self.par, "inner_fert", None)
         if inner is None:
             from capri_mod.fert.inner_fert_dist import InnerFertDist
-            inner = self._inner_fert = InnerFertDist()
+            inner = self.par.inner_fert = InnerFertDist()
         return inner.capri_region(region)
 
     def _p_applied_ratio(self, capri_region):
@@ -37,7 +38,7 @@ class PhosphorusBlock:
         cascade data runs off nothing (CAPRI reports no RUNANI there)."""
         from capri_mod.supply import ammonia_techs as _at, n_cascade as _nc
         self._manure_n2o_tech(region)                 # loads CAPRI's sub-activities (ammonia_tech_model.csv)
-        tm = (getattr(self, "_amm_tm", None) or {}).get(region, {})
+        tm = (getattr(self.par, "amm_tm", None) or {}).get(region, {})
         out = {}
         for a_ in ANIMALS:
             subs = tm.get(a_) or []
@@ -111,11 +112,11 @@ class PhosphorusBlock:
         excret = sum(h[a] * manp[a] for a in ANIMALS)
         npk = getattr(supply_result, "fert_npk", None) or {}
         blk = npk.get("P") if isinstance(npk, dict) else None
-        ratio = self._p_applied_ratio(cr) if bool(getattr(self, "manure_trade_on", True)) else 1.0
+        ratio = self._p_applied_ratio(cr) if bool(getattr(self.seen, "manure_trade_on", True)) else 1.0
         # the need multiplier (kappa) is calibrated at the base and fixed in simulation (CAPRI's
         # v_cropNutNeedMultFact): the regional model's block computes it once, at the run's baseline, with that
         # baseline's manure trade setting; the base manure applied here follows the first setting seen for the region
-        ratio_base = self.__dict__.setdefault("_p_ratio_base", {}).setdefault(cr, ratio)
+        ratio_base = _est.setdefault(self.par, "p_ratio_base", {}).setdefault(cr, ratio)
         if blk is not None:
             applied = sum(float(v) for (g, s_), v in blk["flows"].items() if s_ == "EXCR")
             minfer = float(blk["purchase"])

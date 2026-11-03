@@ -44,7 +44,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 OUT = ROOT / "capri_data" / "codes"
-CAPRI_SETS = ("PACT", "MPACT", "MCACT", "MAACT", "XX", "XX1", "RALL")
+CAPRI_SETS = ("PACT", "MPACT", "MCACT", "MAACT", "XX", "XX1", "RALL", "COLS", "ROWS")
 
 
 def literal(path, name):
@@ -78,6 +78,10 @@ def main():
     from capri_mod.data import definitions as D
 
     capri = {s: read_set(a.sets, s) for s in CAPRI_SETS}
+    # CAPRI's COLS holds a blank element (' '), DATAOUT's empty dim5 (capmod/set_and_store_dataout.gms l. 53:
+    # DATAOUT(RSS,"",ColsOut,RowsOut)): not an item, and the long table's empty dim5 stands for it
+    for s in ("COLS", "ROWS"):
+        capri[s].pop("", None)
     problems = []
 
     def pairs(name):
@@ -168,6 +172,57 @@ def main():
                             f"CAPRI {sorted(grps)}")
         if bool(int(r["fodder"])) != bool(set(cc) & fodcrp) and not declared:
             problems.append(f"model_activity_classes.csv {r['code']}: fodder {r['fodder']}, CAPRI FODCRP {sorted(set(cc) & fodcrp)}")
+    # the further classes (N6, second part): a value that differs from CAPRI's set must say "<column>...: the model's"
+    # in its source (or name its departure)
+    mcact, oyani = set(read_set(a.sets, "MCACT")), set(read_set(a.sets, "OYANI"))
+    eprd = {c for c, _ in pairs("EPRD_TO_GRP")}
+    xx_of = {}
+    for c, x in pairs("AACT_TO_XX"):
+        xx_of.setdefault(c, set()).add(x)
+    with open(OUT / "model_commodities.csv", newline="", encoding="utf-8") as fh:
+        comm_capri = {r["code"]: r["capri_code"] for r in csv.DictReader(fh)}
+    for r in classes:
+        cc, src = capri_of.get(r["code"], []), r["source"]
+        own = lambda col: f"{col} {r[col]}: the model's" in src or f"{col}: the model's" in src or "DEP-" in src
+        if r["code"] in D.CROPS:
+            if bool(int(r["pesticide"])) != bool(set(cc) & mcact) and not own("pesticide"):
+                problems.append(f"model_activity_classes.csv {r['code']}: pesticide {r['pesticide']}, CAPRI MCACT "
+                                f"{sorted(set(cc) & mcact)}")
+            if bool(int(r["share_term_arable"])) != bool(set(cc) & eprd) and not own("share_term_arable"):
+                problems.append(f"model_activity_classes.csv {r['code']}: share_term_arable {r['share_term_arable']}, "
+                                f"CAPRI EPRD_TO_GRP {sorted(set(cc) & eprd)}")
+        if r["price_source"]:
+            px = comm_capri.get(r["price_source"])
+            capri_x = set().union(*(xx_of.get(c, set()) for c in cc)) if cc else set()
+            if px is None:
+                problems.append(f"model_activity_classes.csv {r['code']}: price_source {r['price_source']} is not a commodity")
+            elif px not in capri_x and not own("price_source"):
+                problems.append(f"model_activity_classes.csv {r['code']}: price_source {r['price_source']} ({px}), CAPRI "
+                                f"AACT_TO_XX {sorted(capri_x)}")
+        problems += [f"model_activity_classes.csv {r['code']}: young output {y} is not in CAPRI's OYANI"
+                     for y in filter(None, r["young_outputs"].split(";")) if y not in oyani]
+    # the ammonia technologies the N cascade's equations name (HOUSN_, STORN_, RUNHOUSN_, APPLN_: CAPRI writes the
+    # lists in the equations, supply_model.gms l. 3200 ff., and so does the model): each one of CAPRI's MitiTechAmm
+    amm = set(read_set(a.sets, "MitiTechAmm"))
+    for path, name in (("capri_mod/supply/n_cascade.py", "HOUS_TECHS"), ("capri_mod/supply/n_cascade.py", "STOR_TECHS"),
+                       ("capri_mod/supply/n_cascade.py", "RUNH_TECHS"), ("capri_mod/supply/n_cascade.py", "APPL_TECHS"),
+                       ("capri_mod/supply/n_leaching.py", "APPL")):
+        problems += [f"{path} {name}: {t} is not in CAPRI's MitiTechAmm" for t in literal(path, name) if t not in amm]
+    # the prices that follow a market's (codes/model_price_follows.csv, declared; refactor stage 4)
+    with open(OUT / "model_price_follows.csv", newline="", encoding="utf-8") as fh:
+        for r in csv.DictReader(fh):
+            if r["activity"] not in capri_of:
+                problems.append(f"model_price_follows.csv: {r['activity']} is not a model activity")
+            if r["commodity"] not in comm_capri:
+                problems.append(f"model_price_follows.csv: {r['commodity']} is not a model commodity")
+    split_acts = set(read_set(a.sets, "SplitActs"))
+    with open(OUT / "model_cattle_splits.csv", newline="", encoding="utf-8") as fh:
+        for r in csv.DictReader(fh):
+            for col in ("gains", "gives"):
+                if r[col] not in capri["MAACT"]:
+                    problems.append(f"model_cattle_splits.csv {r['split']}: {r[col]} is not in CAPRI's MAACT")
+            if not {r["gains"], r["gives"]} <= split_acts and "the model's" not in r["source"]:
+                problems.append(f"model_cattle_splits.csv {r['split']}: not in CAPRI's SplitActs and not declared the model's")
     lt_mrk = set(read_set(a.sets, "landTypesMrk"))
     with open(OUT / "model_land_types.csv", newline="", encoding="utf-8") as fh:
         for r in csv.DictReader(fh):
@@ -205,6 +260,11 @@ def main():
     # and of each activity, crop-diversification groups, fodder crops
     write(OUT / "capri" / "landTypesMrk.csv", ("code", "text"), sorted(read_set(a.sets, "landTypesMrk").items()))
     write(OUT / "capri" / "FODCRP.csv", ("code", "text"), sorted(read_set(a.sets, "FODCRP").items()))
+    # CAPRI's permanent crop groups and the crop -> nutrient group map (fertiliser distribution; refactor stage 4)
+    write(OUT / "capri" / "PERM_NGRP.csv", ("code", "text"), list(read_set(a.sets, "PERM_NGRP").items()))
+    write(OUT / "capri" / "CACT_TO_NGRP.csv", ("cact", "ngrp"), pairs("CACT_TO_NGRP"))
+    # CAPRI's traded feed bulks (global/fromimpact/sets.gms FEED_TRD), in CAPRI's set order (refactor stage 4)
+    write(OUT / "capri" / "FEED_TRD.csv", ("code", "text"), list(read_set(a.sets, "FEED_TRD").items()))
     write(OUT / "capri" / "landTypes_to_pact.csv", ("land_type", "pact"), sorted(pairs("landTypes_to_pact")))
     write(OUT / "capri" / "cropDivGrps_mCact.csv", ("group", "mcact"), sorted(pairs("cropDivGrps_mCact")))
     write(OUT / "capri" / "MS_RU.csv", ("ms", "ru"), sorted((m, r) for m, r in pairs("Map_RR") if m in ms_ and r in ru_))

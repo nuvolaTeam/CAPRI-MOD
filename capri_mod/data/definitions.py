@@ -279,6 +279,86 @@ def _load_activity_classes():
 
 
 ACTIVITY_CLASSES, LAND_MARKET_TYPES = _load_activity_classes()
+
+
+def _load_crosswalks():
+    """The model's codes and CAPRI's (capri_data/codes/model_activities.csv capri_codes, model_commodities.csv
+    capri_code; declared, checked against CAPRI's sets by tools/build/build_code_lists.py): CAPRI's activity code ->
+    the model's where they differ (MAIZ -> CORN, OFAR and ROOF -> OFOD, ...), and each market commodity's CAPRI code."""
+    import csv
+    from pathlib import Path
+    d = Path(__file__).resolve().parents[2] / "capri_data" / "codes"
+    with open(d / "model_activities.csv", newline="") as f:
+        rows = list(csv.DictReader(f))
+    acts = {c: r["code"] for r in rows for c in r["capri_codes"].split(";") if c != r["code"]}
+    # each model activity's CAPRI activities, those of CAPRI's data then those of its supply model (CAPMOD), once each
+    members = {r["code"]: tuple(dict.fromkeys(r["capri_codes"].split(";") + r["capmod_codes"].split(";")))
+               for r in rows}
+    capmod = {r["code"]: tuple(r["capmod_codes"].split(";")) for r in rows}
+    with open(d / "model_commodities.csv", newline="") as f:
+        comms = {r["code"]: r["capri_code"] for r in csv.DictReader(f)}
+    return acts, comms, members, capmod
+
+
+#: CAPRI activity code -> the model's, where they differ; model market commodity -> CAPRI's code; each model
+#: activity's CAPRI activities (data and supply model: GRAS = GRAS, GRAE, GRAI; SETA = SETA, FALL, VSET) and those of
+#: CAPRI's supply model alone (GRAS = GRAE, GRAI; DCOW = DCOL, DCOH)
+CAPRI_TO_MODEL_ACTIVITY, COMMODITY_CAPRI_CODE, CAPRI_MEMBERS, CAPMOD_MEMBERS = _load_crosswalks()
+
+
+
+def _load_cattle_splits():
+    """CAPRI's cattle activities inside the model's animals (capri_data/codes/model_cattle_splits.csv, declared; N6):
+    split -> (the CAPRI activity that gains the stalls z, the one that gives them up), in the table's order."""
+    import csv
+    from pathlib import Path
+    with open(Path(__file__).resolve().parents[2] / "capri_data" / "codes" / "model_cattle_splits.csv", newline="") as f:
+        return {r["split"]: (r["gains"], r["gives"]) for r in csv.DictReader(f)}
+
+
+CATTLE_SPLITS = _load_cattle_splits()
+
+
+def _load_price_follows():
+    """The activities whose price follows a market commodity (capri_data/codes/model_price_follows.csv, declared;
+    refactor stage 4): (activity, commodity) in the table's order, those of the EU's markets first-class
+    (eu_market 1: beet follows sugar, durum wheat the wheat market) and all of them (Norway's step adds raw milk)."""
+    import csv
+    from pathlib import Path
+    with open(Path(__file__).resolve().parents[2] / "capri_data" / "codes" / "model_price_follows.csv", newline="") as f:
+        rows = list(csv.DictReader(f))
+    return (tuple((r["activity"], r["commodity"]) for r in rows if r["eu_market"] == "1"),
+            tuple((r["activity"], r["commodity"]) for r in rows))
+
+
+#: (activity, commodity): the price that follows a market's, in the EU's markets and in all (with Norway's raw milk)
+PRICE_FOLLOWS_EU, PRICE_FOLLOWS_ALL = _load_price_follows()
+
+
+def _load_capri_set(name):
+    """One of CAPRI's sets as written by tools/build/build_code_lists.py (capri_data/codes/capri/<name>.csv), its
+    codes in the file's order."""
+    import csv
+    from pathlib import Path
+    with open(Path(__file__).resolve().parents[2] / "capri_data" / "codes" / "capri" / f"{name}.csv", newline="") as f:
+        return tuple(r["code"] for r in csv.DictReader(f))
+
+
+#: CAPRI's traded feed bulks (FEED_TRD), in CAPRI's order
+CAPRI_FEED_TRD = _load_capri_set("FEED_TRD")
+#: CAPRI's permanent crop groups for the fertiliser distribution (supply/define_ngrp_sets.gms PERM_NGRP: GRAS, PERM)
+CAPRI_PERM_NGRP = frozenset(_load_capri_set("PERM_NGRP"))
+
+
+def _load_cact_to_ngrp():
+    """CAPRI's crop activity -> nutrient group (CACT_TO_NGRP, capri_data/codes/capri/CACT_TO_NGRP.csv)."""
+    import csv
+    from pathlib import Path
+    with open(Path(__file__).resolve().parents[2] / "capri_data" / "codes" / "capri" / "CACT_TO_NGRP.csv", newline="") as f:
+        return {r["cact"]: r["ngrp"] for r in csv.DictReader(f)}
+
+
+CAPRI_CACT_TO_NGRP = _load_cact_to_ngrp()
 #: crops on permanent-crop land (FRUN), arable (ARAC) and grassland (GRAS), in the order of CROPS
 CROPS_ON_LAND = {lt: tuple(a for a in CROPS if ACTIVITY_CLASSES[a]["land_type"] == lt) for lt in ("ARAC", "GRAS", "FRUN")}
 

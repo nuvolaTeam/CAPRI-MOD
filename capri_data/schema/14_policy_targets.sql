@@ -1,7 +1,7 @@
 -- CAPRI's Green Deal targets per member state, the organic yield gaps and the yields' price elasticities.
 -- Long files: the unit of each numeric column is in value_units (99_rules.sql).
 
--- file: capri_data/2017/policy/landscape_targets_ms.csv
+-- file: capri_data/scenarios/greendeal_group/landscape_targets_ms.csv
 CREATE TABLE landscape_targets_ms (
     member_state VARCHAR PRIMARY KEY,                   -- NUTS-0 code, as CAPRI's files key them
     landscape_pp DOUBLE CHECK (landscape_pp >= 0 AND landscape_pp <= 100)   -- empty: CAPRI sets no target
@@ -9,7 +9,7 @@ CREATE TABLE landscape_targets_ms (
 COMMENT ON TABLE landscape_targets_ms IS 'CAPRI''s p_landscapeTargets: share of UAA in non-productive landscape elements to reach (gams/pol_input/greendeal/landscape_targets.gdx; tools/build/build_greendeal_targets.py)';
 INSERT INTO value_units VALUES ('landscape_targets_ms', 'landscape_pp', 'U_percent', 'capri', 'p_landscapeTargets, percent of UAA');
 
--- file: capri_data/2017/policy/organic_targets_ms.csv
+-- file: capri_data/scenarios/greendeal_group/organic_targets_ms.csv
 CREATE TABLE organic_targets_ms (
     member_state VARCHAR PRIMARY KEY,
     arable_pp DOUBLE CHECK (arable_pp >= 0 AND arable_pp <= 100),

@@ -30,6 +30,9 @@ from capri_mod.params import param
 
 GASES = ("NH3", "NOX", "N2O")
 NMAT = ("N2O", "NH3", "NOX", "N2")
+# the ammonia technologies each stage's equation names: CAPRI writes these lists inside its equations (HOUSN_,
+# STORN_, RUNHOUSN_, APPLN_: supply/supply_model.gms l. 3200 ff.), so they stay the equations' terms here (the project
+# lead's decision, refactor stage 3, N6); tools/build/build_code_lists.py checks each name against CAPRI's MitiTechAmm
 HOUS_TECHS = ("LowEmHous", "AirPur", "AirPurCovLow", "AirPurCovLowC", "AirPurCovHigh", "ManAcid")
 STOR_TECHS = ("CovStorLow", "CovStorLowCon", "CovStorHigh", "AirPurCovLow", "AirPurCovLowC", "AirPurCovHigh",
               "LowEmHous", "ManAcid")

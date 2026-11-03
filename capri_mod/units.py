@@ -12,3 +12,10 @@ M_N2O = 44.0
 M_N2O_N = 28.0
 #: MJ per Mcal (the International Table calorie: 4.1868 J per cal), as CAPRI's gases.gms converts gross energy
 MJ_PER_MCAL = 4.1868
+#: molar mass of NH3, g per mol, and its nitrogen, g (CAPRI's 17/14 conversion of NH3-N to NH3)
+M_NH3 = 17.0
+M_NH3_N = 14.0
+#: molar mass of CO2, g per mol, and the nitrogen of a mole of urea, CO(NH2)2, g (2 x 14): CAPRI's 44/28 conversion of
+#: urea N to CO2 (envind/gases.gms (17))
+M_CO2 = 44.0
+M_UREA_N = 28.0

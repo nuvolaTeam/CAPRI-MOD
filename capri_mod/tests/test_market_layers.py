@@ -33,10 +33,14 @@ def test_missing_input_names_its_builder(tmp_path):
 
 
 def test_model_does_not_read_delta_tables():
-    """Data formats (ARCHITECTURE_REFACTOR.md): the model reads CSV; Delta Lake is the pipeline's internal format."""
+    """Data formats (ARCHITECTURE_REFACTOR.md): the model reads CSV; Delta Lake is the pipeline's internal format and,
+    since refactor stage 5, the format of the runs' results, written by capri_mod/io_results.py alone (its single
+    writer). No other model code imports deltalake."""
     pkg = MARKET.parent
+    writer = pkg / "io_results.py"
     offenders = [str(p.relative_to(pkg)) for p in pkg.rglob("*.py")
                  if "pipeline" not in p.relative_to(pkg).parts and "tests" not in p.relative_to(pkg).parts
+                 and p != writer
                  and ("import deltalake" in p.read_text() or "from deltalake" in p.read_text())]
     assert offenders == [], offenders
 
@@ -119,12 +123,12 @@ def test_market_supply_hessian_measured_at_base_and_at_scenario_state():
         m = CAPRIModel(data_dir="capri_data", verbose=False)
         m.run(scenario="BASELINE", regions=regs, max_outer_iter=2)
         # a baseline alone does not measure it (28 October 2026): the scenario on it does, first thing
-        assert not getattr(m, "market_supply_hessian_log", None)
+        assert not getattr(m.res, "market_supply_hessian_log", None)
         assert m.market_module.par.supply_hessian is None
         sc = greendeal_scenario(lndscpTarg=10, orgTarg=25, pestRedu=50, surpRedu=50, mineRedu=20)
         m.run(custom_scenario=sc, regions=regs, max_outer_iter=3)
-        base, scen = (dict(d) for d in m.market_supply_hessian_log[-2:])
-        assert len(m.market_supply_hessian_log) == 2
+        base, scen = (dict(d) for d in m.res.market_supply_hessian_log[-2:])
+        assert len(m.res.market_supply_hessian_log) == 2
         assert base.get("source") in ("computed", "cache") and "at_iteration" not in base, base
         assert scen.get("source") in ("computed", "cache") and scen.get("at_iteration") == 2, scen
         assert "scenario_error" not in scen
@@ -147,7 +151,7 @@ def test_hessian_skip_of_unreached_regions_is_exact(monkeypatch):
         # A scenario on the baseline measures it (a world-price shock is a scenario), first thing in its run
         m.run(scenario="BASELINE", regions=regs, max_outer_iter=2)
         m.run(world_price_shock={"SWHE": 0.05}, regions=regs, max_outer_iter=1)
-        info = dict(m.market_supply_hessian_log[0])
+        info = dict(m.res.market_supply_hessian_log[0])
         if info.get("source") == "computed":
             assert info.get("verified", 0) > 0, info
             assert info.get("verify_mismatch") == [], info

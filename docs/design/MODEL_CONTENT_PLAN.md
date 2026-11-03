@@ -544,6 +544,29 @@ of S1) (SGP S11).
 
 ---
 
+## 12a. CAP instruments found missing in refactor stage 5 (added 3 November 2026)
+
+Two scenario definitions could not be written as CAPRI's rules, because the model lacks the instruments; the project
+lead decided (3 November 2026) to remove or keep them as they are and to schedule the ports here.
+
+**P1. Obligatory set-aside.** CAPRI's SETA_ (supply/supply_model.gms l. 2219-2241): sum over the arable activities of
+level x (1 - NONS) x r / (1 - r) = the obligatory set-aside activities (setaPact: ISET, GSET, TSET, NONF), r the
+set-aside rate (DATA SETR), with the cost and income terms of supply/define_const_pmp_param.gms l. 44-76 when the
+obligation binds at calibration. The model has the voluntary set-aside and fallow only (its SETA = VSET + FALL), so it
+needs one obligatory set-aside activity (no output; CAPRI's costs and premium; first check that CAPRI's 2017 data
+carry their coefficients, their levels being zero since 2008), the constraint and the PMP terms. Then
+scen/set_aside/set_aside_10.gms (10% on GRCU) becomes a scenario folder again. SET_ASIDE_10PCT, which put a 10% floor
+on all arable land counted on SETA, was removed (commit 3120071). Estimate: half a day to a day.
+
+**P2. Coupled support and the Pillar I envelope.** CAPRI's scenario without voluntary coupled support
+(cap_after_2014 with voluntaryCoupledSupportFile = void.gms) sets the coupled premium types (PSDPAY_vcs*) to zero and
+its premium module moves the envelope into the decoupled payment (cereal premiums +9 to +11% in CAPRI's pair). The
+model holds Pillar I as one share of each premium (premium_scheme_shares_2030.csv, DPPIL1), so it needs CAPRI's
+coupled-support part of each activity's premium per member state, and the ceiling logic that redistributes the freed
+envelope. Part of a port of CAPRI's premium module, which would also allow other CAP experiments (other VCS levels,
+BPS convergence). Until then tools/run/run_vcs_2030.py stays a supply-response validation test: it applies CAPRI's
+own per-unit premium change of its pair of runs (capri_vcs_effect.csv) and compares the model's response with CAPRI's.
+
 ## 13. Summary
 
 | Item | Depends on | Status | Open decisions | Main source |
@@ -560,6 +583,8 @@ of S1) (SGP S11).
 | S9 | K65 | deferred (no CAPRI per-sex results) | whether to resume | KI K65 |
 | S10 | [I] S1 for no-till's yield | 3-NOP built; UreaSubst parked; NoTill, LegSh not built | whether to build NoTill and LegSh | KI K93 |
 | S11 | S1 for T1/T2 averages | not started; per item | which items and exports | SGP S11 |
+| P1 obligatory set-aside | — | not started | when | §12a; supply_model.gms SETA_ |
+| P2 coupled support, Pillar I envelope | — | not started | when; with the premium module's port | §12a |
 
 ## 14. Open decisions across all items
 
@@ -584,6 +609,7 @@ of S1) (SGP S11).
 15. S11: which items, and which CAPRI exports to request.
 16. Not raised in the notes [I]: the position of S1/S2, the G2 stages and S6-S11 relative to the market move and the
     29 units.
+17. P1 and P2 (§12a): when to schedule them.
 
 ## 15. Notes found out of date while drafting
 

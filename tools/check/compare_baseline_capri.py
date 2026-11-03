@@ -24,6 +24,8 @@ import pickle
 from pathlib import Path
 
 import numpy as np
+__import__("sys").path.insert(0, str(__import__("pathlib").Path(__file__).resolve().parents[2]))
+from capri_mod.io_results import load_run  # a run pickle or a stored run, "store:ROOT:SCENARIO[:RUN_ID]"
 
 ROOT = Path(__file__).resolve().parents[2]
 ACT = {"SWHE": "SWHE", "DWHE": "DWHE", "RYEM": "RYEM", "BARL": "BARL", "OATS": "OATS", "CORN": "MAIZ",
@@ -112,7 +114,7 @@ def main():
     ap.add_argument("run")
     ap.add_argument("--csv", default="")
     a = ap.parse_args()
-    o = pickle.load(open(a.run, "rb"))
+    o = load_run(a.run)
     if not o.get("base_market"):
         raise SystemExit("run has no base_market block: re-run tools/run/run_f2f_2030.py")
     out = rows(o)

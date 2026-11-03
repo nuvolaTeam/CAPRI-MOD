@@ -20,13 +20,12 @@ import numpy as np
 import pandas as pd
 
 from capri_mod.data.definitions import capri_ms
+from capri_mod.params import param
 
 NUTRIENTS = ("N", "P", "K")
-SOURCES = ("MINE", "EXCR", "CRES")
-PERM_NGRP = frozenset({"GRAS", "PERM"})
+from capri_mod.fert.inner_fert_dist import SOURCES   # noqa: E402  CAPRI's nutrient sources, one definition (stage 4)
+from capri_mod.data.definitions import CAPRI_PERM_NGRP as PERM_NGRP   # noqa: E402  CAPRI's set (stage 4)
 
-#: CAPRI's slope of manure N availability on manure N applied per ha of land (fert/endoManAvail.gms), 0 for P and K
-ENDO_MAN_AV_SLOPE = {"N": -0.0015, "P": 0.0, "K": 0.0}
 
 
 def need_multiplier(supply0: float, need0: float, own0: float, gc: float, perm_groups) -> tuple:
@@ -52,14 +51,17 @@ def need_multiplier(supply0: float, need0: float, own0: float, gc: float, perm_g
 def endo_slope(g0: float, m0: float, nut: str) -> float:
     """CAPRI's slope of the endogenous availability (fert/endoManAvail.gms) with its two corrections: availability at
     most max(0.999, g0) at zero application, at least min(0.2, g0) at max(300, m0) kg/ha."""
-    b = ENDO_MAN_AV_SLOPE.get(nut, 0.0)
+    # the slope of manure N availability on manure N applied per ha of land (0 for P and K), the ceiling at zero
+    # application, the floor and the application rate it holds at: parameters ENDO_MAN_AV_* (fert/endoManAvail.gms)
+    b = param("ENDO_MAN_AV_SLOPE_N") if nut == "N" else 0.0
     if b == 0.0 or not (m0 > 0):
         return 0.0
-    if g0 - m0 * b > max(0.999, g0):
-        b = (g0 - max(0.999, g0)) / m0
-    top = max(300.0, m0) - m0
-    if top > 0 and g0 + top * b < min(0.2, g0):
-        b = (min(0.2, g0) - g0) / top
+    ceil_, floor_, at_ = param("ENDO_MAN_AV_CEILING"), param("ENDO_MAN_AV_FLOOR"), param("ENDO_MAN_AV_FLOOR_KG")
+    if g0 - m0 * b > max(ceil_, g0):
+        b = (g0 - max(ceil_, g0)) / m0
+    top = max(at_, m0) - m0
+    if top > 0 and g0 + top * b < min(floor_, g0):
+        b = (min(floor_, g0) - g0) / top
     return b
 
 
