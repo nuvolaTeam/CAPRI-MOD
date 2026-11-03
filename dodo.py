@@ -19,6 +19,7 @@ A builder whose external source is missing is reported and not run.
 from __future__ import annotations
 
 import json
+import os
 import subprocess
 import sys
 import tempfile
@@ -34,6 +35,8 @@ DOIT_CONFIG = {"check_file_uptodate": "md5", "default_tasks": ["build", "validat
 
 
 def _expand(s: str) -> str:
+    if s.startswith("unzip:"):              # "unzip:$EXPORTS/..." (until 3 November 2026 left unexpanded: the task
+        return "unzip:" + _expand(s[6:])     # was reported as missing its zip and skipped)
     for loc, tok in ((EXPORTS, "$EXPORTS"), (REFERENCE, "$REFERENCE"), (SOURCES, "$SOURCES")):
         if s == tok or s.startswith(tok + "/"):
             return str(loc) + s[len(tok):]
@@ -56,7 +59,9 @@ def _run(cmd):
                     full += sorted(str(Path(tmp) / n) for n in z.namelist() if not n.endswith("/"))
             else:
                 full.append(a)
-        return subprocess.run(full, cwd=ROOT).returncode == 0
+        # the hash seed fixed as tools/check/reproduce_builders.py runs the builders: a builder that iterates a set
+        # sums in that order, and its file's last digits followed the seed (until 3 November 2026 not fixed here)
+        return subprocess.run(full, cwd=ROOT, env={**os.environ, "PYTHONHASHSEED": "0"}).returncode == 0
 
 
 def _skipped(task, missing):
