@@ -46,7 +46,7 @@ preferences (arm/market_model.gms). capri-mod uses one number per region and com
 level p_world x (1 + t / 100) (MarketModule.domestic_prices) and for scenario tariff changes; the bilateral market
 itself is calibrated on CAPRI's import prices.
 
-## Recommendation (for the project lead's decision)
+## Recommendation (followed by the project lead, 3 November 2026)
 
 Putting TARV into tariffs.csv as it is would raise the protection of quota and preference trade by up to 245 pp
 (Canada's cheese) and leave out specific tariffs, so it would move the reference price levels away from CAPRI's

@@ -126,6 +126,10 @@ TARV switch and of the 2017 rebuild; how stage 2's young-animal fix relates to G
   region an exporter, the two EU blocks included and their trade with each other counted (244.57 EUR/t on today's
   regions, -2.5%; leaving out West-East trade would give 257.24, +2.6%). The single-EU files, and the renaming of the
   `_eu2` files to plain names, wait for stage 3 too.
+- Tariffs (task 301, docs/design/TARV_COMPARISON.md): tariffs.csv stays in stage 2. CAPRI's TARV, TARS, bilateral
+  TRQs and preferences come in with the ports (stages 4-7), as CAPRI's bilateral wedges on the import price, with
+  CAPRI's Armington and producer prices as the reference price levels (AR 5.1, M1). This replaces the decision of
+  2 November (TARV switch in stage 2).
 
 **Sources.** MRI §§1-7; REG DEP-3, DEP-40, DEP-41; RUI §4; AR §3.
 
