@@ -893,7 +893,7 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
                         if _p_s == _c_s and _a_s in price_signal.index:
                             _dd[_a_s] = _d_s
                 self.sv.capri_special_hist = _hs
-            # NORWAY (CAPRI RMSSUP outside the EU, its own market region NOR; K56): its supply models see its own market's
+            # NORWAY (CAPRI RMSSUP outside the EU, its own market region NO000000; K56): its supply models see its own market's
             # producer prices (raw milk: its dairy block's), relaxed as a price level of their own, as the member states'
             # milk prices above. A departure from the EU signal relaxed toward a departure from the EU target (the first
             # form) dragged Norway's prices along with every move of the EU signal: on a subset run the EU's other-cereal
@@ -1112,7 +1112,7 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
                           f'{" (%s, %s)" % _lr if _lr else ""} | milk MS gap {_ms_gap:.4f}'
                           f'{" %s s %.3f t %.3f w %.2f q %.3f" % getattr(self.res, "milk_ms_worst") if _ms_gap > 0.005 and getattr(self.res, "milk_ms_worst", None) else ""}'
                           f' | gap {_gp.idxmax()} {float(_gp.max()):.4f} | yani {_yv:.4f}'
-                          f' | NOR gap {float(getattr(self.res, "sup_dev_gap", 0.0) or 0.0):.4f} {getattr(self.res, "sup_dev_worst", ("", ""))[1]} (all {getattr(self.res, "sup_dev_gap_all", (0.0, ""))[0]:.4f} {getattr(self.res, "sup_dev_gap_all", (0.0, ""))[1]})'
+                          f' | NO000000 gap {float(getattr(self.res, "sup_dev_gap", 0.0) or 0.0):.4f} {getattr(self.res, "sup_dev_worst", ("", ""))[1]} (all {getattr(self.res, "sup_dev_gap_all", (0.0, ""))[0]:.4f} {getattr(self.res, "sup_dev_gap_all", (0.0, ""))[1]})'
                           f'{" | pool %.4f %s eu %.4f" % (float(getattr(self.res, "pool_imbalance", 0.0) or 0.0), getattr(self.res, "pool_worst_key", "") + ("" if str(getattr(self.res, "pool_solver_status", "Solved")).endswith("Solved") else " [" + str(getattr(self.res, "pool_solver_status", "")) + "]"), float(getattr(self.res, "pool_eu_unaccounted", 0.0) or 0.0)) if getattr(self, "use_manure_market", False) else ""}{" | base cal %.4f" % float(getattr(self.res, "calib_drift", 0.0) or 0.0) if getattr(self.res, "calib_drift", 0.0) else ""}{_top}', flush=True)
                 except Exception:
                     pass

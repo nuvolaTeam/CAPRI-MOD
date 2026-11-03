@@ -44,7 +44,7 @@ UNITS = {
     "RO040000": "small-scale eastern mixed (Sud-Vest Oltenia, CAPRI's 2006 code)",
     "AT330000": "mountain grassland (Tyrol)",
     "FI190000": "northern arable and dairy (Laensi-Suomi)",
-    "NO080000": "Norway's own market (NOR)",
+    "NO080000": "Norway's own market (NO000000)",
 }
 
 

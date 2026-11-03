@@ -3348,7 +3348,7 @@ def test_processing_inpe_and_nonEU_feed_are_capris_2030():
     assert abs(pq["H"]["USA"][("SOYA", "SOYA")] - float(r.h) / inpe_usa) < 1e-9 * float(r.h)
     from capri_mod.data.nested_tables import read_feed_demand
     fd = read_feed_demand(MK / "feed_demand_nonEU.csv")
-    assert "ROW|SOYC" in fd and "KOR|SOYC" in fd and "EU27|SWHE" not in fd
+    assert "ROW|SOYC" in fd and "SKOR|SOYC" in fd and "EU27|SWHE" not in fd
     us = pd.read_csv(DATA_DIR / "sources" / "market" / "feed_demand_nonEU_use_2030.csv")
     u = us[(us.rms == "USA") & (us["product"] == "MAIZ")].set_index("item")["value"]
     assert abs(fd["USA|CORN"]["feed_share"] - u["FEED"] / u[["HCON", "FEED", "PROC", "BIOF"]].sum()) < 1e-4

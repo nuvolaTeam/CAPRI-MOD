@@ -148,7 +148,7 @@ class BilateralSolveMixin(MarketStateMixin):
             if r in self.EU:
                 continue
             o, ck = self.CRUSH_CHAINS[sd]
-            # the cake, or the oil where CAPRI records no cake from the crush (BGD soybeans, THA sunflower)
+            # the cake, or the oil where CAPRI records no cake from the crush (BGD soybeans, THAI sunflower)
             for prod_, y_ in ((ck, prm["yc"]), (o, prm["yo"])):
                 if prod_ in raw and y_ > 0:
                     q = float(self.par.base_production.at[r, prod_]) / y_

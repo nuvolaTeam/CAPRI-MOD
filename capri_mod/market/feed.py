@@ -140,7 +140,7 @@ class FeedMixin(MarketStateMixin):
                    "share_reg": share_reg} if bulks else {}
             # Norway's bulks (CAPRI's feedBlkPrice_, feedShareEqu_ hold for every NUTS0 with supply models, RMSSUP):
             # its supply models' bulk price indices at its own market's prices, and its feed demand per product
-            # following its herds, in its own market region NOR (KNOWN_ISSUES K56; not part of the EU's feed demand).
+            # following its herds, in its own market region NO000000 (KNOWN_ISSUES K56; not part of the EU's feed demand).
             # The feed share of Norway's use per commodity: CAPRI's 2030 feed over its use (HCOM + FEDM + INDM + BIOF
             # + LOSM + PRCM, feed_bulks_no.csv use_kt), as the EU's (feed_bulks_eu_share.csv)
             if out and inp.exists("feed_bulks_no.csv"):

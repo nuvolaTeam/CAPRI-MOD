@@ -195,8 +195,8 @@ EU_BLOCKS = tuple(dict.fromkeys(EU_MS_BLOCK.values()))
 def _load_trade_regions() -> tuple:
     """The market's trade regions in their order and CAPRI's region code of each (capri_data/codes/
     model_trade_regions.csv, a declared code list with a source per row; ROW: every CAPRI region not listed). The
-    United Kingdom (GBR) and the Western Balkans (WBA) are trade regions of their own as in CAPRI since batch 7, Norway
-    (NOR) since K56; Egypt, Algeria, Saudi Arabia and Iran, trade regions here without any data until 29 October 2026,
+    United Kingdom (UK000000) and the Western Balkans (WBA) are trade regions of their own as in CAPRI since batch 7, Norway
+    (NO000000) since K56; Egypt, Algeria, Saudi Arabia and Iran, trade regions here without any data until 29 October 2026,
     fold into ROW (KNOWN_ISSUES K45)."""
     import csv
     from pathlib import Path
@@ -234,7 +234,7 @@ def _supply_model_regions_outside_eu() -> dict:
     return out
 
 
-#: CAPRI member state -> (country, trade region) of every country outside the EU with regional units (Norway: NO, NOR)
+#: CAPRI member state -> (country, trade region) of every country outside the EU with regional units (Norway: NO, NO000000)
 SUP_NONEU_ALL = _supply_model_regions_outside_eu()
 
 

@@ -29,7 +29,7 @@ def _results(scale=1.0):
         v.manure_tech_shares = {("DCOW", "AmmAppHE"): 0.25}
         v.converged = True
         sup[reg] = v
-    regs, coms = ["EU27", "USA", "NOR"], ["SWHE", "MILK"]
+    regs, coms = ["EU27", "USA", "NO000000"], ["SWHE", "MILK"]
     tab = pd.DataFrame([[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]], index=regs, columns=coms) * scale
     flows = pd.DataFrame([[0.5, 0.0]] * 9, columns=coms,
                          index=pd.MultiIndex.from_product([regs, regs], names=["exporter", "importer"]))
@@ -54,7 +54,7 @@ def test_the_table_has_dataouts_layout_and_capris_codes():
     r = t[(t.block == "market") & (t.region == "EU27") & (t.cols == "production") & (t.rows == "SWHE")].iloc[0]
     assert (r.capri_region, r.capri_cols, r.capri_rows) == ("EU27yr19", "PROD", "WHEA")
     # bilateral flows: the importer as region, the exporter in dim5 (DATAOUT(RMALL, RMALL1, "ImportQ", XX))
-    r = t[(t.cols == "trade_flows") & (t.region == "NOR") & (t.dim5 == "USA") & (t.rows == "SWHE")].iloc[0]
+    r = t[(t.cols == "trade_flows") & (t.region == "NO000000") & (t.dim5 == "USA") & (t.rows == "SWHE")].iloc[0]
     assert (r.capri_region, r.capri_dim5, r.capri_cols) == ("NO000000", "USA", "ImportQ")
     # a crop's gross output is its product's GROF; an animal's is not mapped (applies_to)
     r = t[(t.block == "supply") & (t.region == "DE110000") & (t.cols == "SWHE") & (t.rows == "gross_output")].iloc[0]

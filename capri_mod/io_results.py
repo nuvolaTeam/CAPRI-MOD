@@ -81,9 +81,9 @@ def flatten_outputs(results: dict) -> dict:
                     out[f"prod_EU27_{c}"] = float(v)
                 except (TypeError, ValueError):
                     pass
-        if prod is not None and hasattr(prod, "loc") and "NOR" in getattr(prod, "index", []):
+        if prod is not None and hasattr(prod, "loc") and "NO000000" in getattr(prod, "index", []):
             # Norway's market region (its supply models' output; not part of the EU's, KNOWN_ISSUES K56)
-            for c, v in prod.loc["NOR"].items():
+            for c, v in prod.loc["NO000000"].items():
                 try:
                     out[f"prod_NOR_{c}"] = float(v)
                 except (TypeError, ValueError):
@@ -95,8 +95,8 @@ def flatten_outputs(results: dict) -> dict:
                     out[f"price_EU27_{c}"] = float(v)
                 except (TypeError, ValueError):
                     pass
-        if dom is not None and hasattr(dom, "loc") and "NOR" in getattr(dom, "index", []):
-            for c, v in dom.loc["NOR"].items():
+        if dom is not None and hasattr(dom, "loc") and "NO000000" in getattr(dom, "index", []):
+            for c, v in dom.loc["NO000000"].items():
                 try:
                     out[f"price_NOR_{c}"] = float(v)
                 except (TypeError, ValueError):

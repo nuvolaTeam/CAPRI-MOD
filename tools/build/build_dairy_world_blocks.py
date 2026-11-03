@@ -9,7 +9,7 @@ supply elasticity for each dairy product in every non-EU region (armington_param
 moved world dairy prices several times more than in CAPRI.
 
 This builder takes, for every CAPRI market region outside the EU block (the EU member states of
-dairy_processing.csv) that has a dairy Hessian - Norway included (trade region NOR, KNOWN_ISSUES K56: CAPRI's
+dairy_processing.csv) that has a dairy Hessian - Norway included (trade region NO000000, KNOWN_ISSUES K56: CAPRI's
 market region NO000000 with supply models; the market delivers its raw milk from its supply models instead of
 the raw milk supply function, as CAPRI's RMSSUP) - from CAPRI's 2030 Green Deal reference market results and elasticities:
   quantities (PROD, PROC), fat and protein contents, producer prices, INPE, fat and protein prices,

@@ -15,7 +15,7 @@ Code: `capri_mod/market/bilateral.py` (`BilateralCommodity`: one product's trade
 ## Regions and products
 
 - 26 trade regions (`definitions.ALL_TRADE_REGIONS`): EU27, 24 non-EU countries and ROW (Egypt, Algeria, Saudi
-  Arabia and Iran, regions without data, removed on 29 October 2026: KNOWN_ISSUES K45). One of them is Norway (NOR,
+  Arabia and Iran, regions without data, removed on 29 October 2026: KNOWN_ISSUES K45). One of them is Norway (NO000000,
   since 21 October 2026, KNOWN_ISSUES K56): CAPRI's market region NO000000, its own market region in
   `gams/aggregation/defaultA.agg` and linked to supply models (RMSSUP); before, CAPRI's bilateral data folded it into
   ROW while its supply regions NO01-NO07 fed the EU's market supply.
@@ -24,7 +24,7 @@ Code: `capri_mod/market/bilateral.py` (`BilateralCommodity`: one product's trade
   BL) and EU_EAST (EU-13), each with its own market prices and bilateral trade between them
   (`capri_data/shared/eu_market_blocks.csv`, data files `*_eu2.csv`). The EU's common external tariff and the EU's
   tariff-rate quotas apply to both blocks; an `EU27` row (quantities summed, prices production-weighted) is added to
-  the results for reporting (`_with_eu_aggregate`). Norway is its own market region NOR in both settings, as in
+  the results for reporting (`_with_eu_aggregate`). Norway is its own market region NO000000 in both settings, as in
   CAPRI.
 - 58 market commodities (`definitions.MARKET_COMMODITIES`). 57 have CAPRI bilateral flows; raw milk (MILK) has none
   and clears as a pooled market (one price ratio for the non-EU regions); the EU's raw milk is priced by the dairy
@@ -104,7 +104,7 @@ Supply (`supply_response`, region_ratio given):
 - The supply models of Norway see Norway's prices: `model.py` relaxes Norway's departure from the EU signal
   (`_sup_dev`: its producer price ratios, raw milk its dairy block's) as it does the EU trade blocks', and hands it to
   the supply module as a member-state departure (`price_dev_ms["NO000000"]`), to Norway's feed bulk price indices
-  (`feed_bulk_price_ratios`) and to its young-animal market (yaniMarket_ per market region: NOR).
+  (`feed_bulk_price_ratios`) and to its young-animal market (yaniMarket_ per market region: NO000000).
 
 Use (`demand_response`, at the consumer price PA_i): CAPRI's GL food demand on the human-consumption share of use;
 feed (EU and Norway: CAPRI's feed bulks following the supply models' herds, [FEED_MARKETS.md](FEED_MARKETS.md),

@@ -46,7 +46,7 @@ The model has 46 activities (34 in the crop list, fodder and set-aside included,
 commodities and 26 trade regions (27 with CAPRI's two EU blocks), counted from the lists `CROPS`, `ANIMALS`,
 `MARKET_COMMODITIES` and `TRADE_REGIONS` of `capri_mod/data/definitions.py`; 57 of the 58 commodities have CAPRI's
 bilateral flows in the market data (`capri_data/2017/market/bilateral_flows_2017.csv`), raw milk has none. Norway
-(NOR) is its own trade region since 21 October 2026 (KNOWN_ISSUES K56).
+(NO000000) is its own trade region since 21 October 2026 (KNOWN_ISSUES K56).
 
 | Concept | In the model as | Clears a market? |
 |---|---|---|

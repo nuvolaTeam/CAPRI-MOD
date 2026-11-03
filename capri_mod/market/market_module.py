@@ -61,7 +61,7 @@ class MarketModule(NewtonKrylovMixin, CalibrationMixin, BiofuelMixin, DairyMixin
     Generalised Leontief food demand, processing (ProcNQ_, oilseed crushing), the dairy block (fat and
     protein), biofuel markets and feed bulks per member state. Non-EU supply is CAPRI's market supply
     functions (ProdNQ_, own and cross-price terms); EU supply comes from the regional supply models (fixed within one solve), and so does the supply
-    of Norway (NOR, CAPRI's market region NO000000 with supply models; SUP_NONEU_REGIONS, KNOWN_ISSUES K56).
+    of Norway (NO000000, CAPRI's market region NO000000 with supply models; SUP_NONEU_REGIONS, KNOWN_ISSUES K56).
 
     Solve: Newton per commodity on the bilateral system, with Anderson acceleration across the
     commodities' links (solve -> _solve_bilateral_equilibrium -> _solve_bilateral).
@@ -85,7 +85,7 @@ class MarketModule(NewtonKrylovMixin, CalibrationMixin, BiofuelMixin, DairyMixin
         self.n_reg      = len(self.regions)
         # market regions outside the EU whose market supply is their supply models' output (CAPRI's RMSSUP outside
         # the EU; KNOWN_ISSUES K56): the run's supply-model countries outside the EU (definitions.sup_noneu, the
-        # setting run.supply_countries_outside_eu; Norway, NO000000, market region NOR, by default), in their CAPRI
+        # setting run.supply_countries_outside_eu; Norway, NO000000, market region NO000000, by default), in their CAPRI
         # market region. Like the EU's, their supply is fixed within one market solve, anticipated against the prices
         # their models last saw, and the base calibration takes it at the model's own levels; their models see their
         # own market's prices.
@@ -148,20 +148,20 @@ class MarketModule(NewtonKrylovMixin, CalibrationMixin, BiofuelMixin, DairyMixin
 
     def eu_region_of_ms(self, ms: str) -> Optional[str]:
         """The EU market region of a CAPRI member state (BL000000, DE000000, ...): its block; None for the supply-model
-        countries outside the EU (Norway, NO000000: market region NOR)."""
+        countries outside the EU (Norway, NO000000: market region NO000000)."""
         if ms in self.SUP_NONEU_MS.values():
             return None
         return self._ms_block_map().get(ms)
 
     def sup_region_of_country(self, cc: str) -> Optional[str]:
-        """The non-EU market region of a supply-model country (two letters, or a NUTS code): NOR for Norway; None
+        """The non-EU market region of a supply-model country (two letters, or a NUTS code): NO000000 for Norway; None
         for the EU's countries."""
         r = self.SUP_NONEU_COUNTRY.get(str(cc)[:2])
         return r if r in getattr(self, "SUP", ()) else None
 
     def _split_supply(self, exo: Optional[pd.DataFrame]):
         """The supply models' output by country split into the EU's rows (countries x products) and the non-EU
-        market regions' totals ({region: Series}, Norway: NOR). Norway's supply regions are not part of the EU's
+        market regions' totals ({region: Series}, Norway: NO000000). Norway's supply regions are not part of the EU's
         market supply (KNOWN_ISSUES K56)."""
         if exo is None:
             return None, {}

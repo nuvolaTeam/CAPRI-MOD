@@ -27,7 +27,7 @@ Outputs (capri_data/2017/market/)
   feed_bulks_eu.csv         ms, bulk, product, commodity, feed_kt, arm1p, rho
   feed_bulks_no.csv         the same for Norway (its own ARM1P; KNOWN_ISSUES K56), plus use_kt (Norway's use of the
                             product, HCOM + FEDM + INDM + BIOF + LOSM + PRCM): the price indices of its supply models'
-                            feed bulks and its feed demand in its own market region NOR
+                            feed bulks and its feed demand in its own market region NO000000
   feed_bulks_eu_share.csv   commodity, feed_kt, use_kt, share  (EU27 2030 reference: FEDM / (HCOM + FEDM + INDM
                             + BIOF + LOSM + PRCM) of the product group, the part of EU use that is feed;
                             the dairy products' feed is the dairy block's FMIL, not listed)
@@ -162,7 +162,7 @@ def main():
     df = pd.DataFrame(out)
     df.to_csv(DEST / "feed_bulks_eu.csv", index=False)
     # Norway (CAPRI RMSSUP = NUTS0, so feedBlkPrice_ and feedShareEqu_ hold for it too): its bulks at its own Arm1
-    # prices, for its supply models' bulk price indices and its feed demand in its own market region NOR (KNOWN_ISSUES
+    # prices, for its supply models' bulk price indices and its feed demand in its own market region NO000000 (KNOWN_ISSUES
     # K56; Norway is not in the EU's feed demand); use_kt = its use of the product (HCOM + FEDM + INDM + BIOF + LOSM +
     # PRCM, as the EU's feed share of use below), for the feed share of Norway's use
     no = []

@@ -63,7 +63,7 @@ class SupplyMixin(MarketStateMixin):
         """
         Supply quantities by region and commodity (1000 t).
         If exogenous_supply is given (from supply module, one row per country), use it for the EU's market
-        regions (CAPRI's two blocks) and, for Norway's rows, for its own market region NOR (SUP_NONEU_REGIONS).
+        regions (CAPRI's two blocks) and, for Norway's rows, for its own market region NO000000 (SUP_NONEU_REGIONS).
         Otherwise, apply supply elasticity to price signal.
 
         region_ratio (bilateral market): each region's own market price relative to base, region x commodity; the

@@ -29,6 +29,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import math
 import glob
 import re
 import sys
@@ -91,8 +92,8 @@ def fpri_price() -> float:
     f = fl[(fl.commodity == "FPRI") & (fl.importer != fl.exporter)]
     rg = _read_csv(MKT / "bilateral_regions_2017.csv")
     pm = rg[rg.commodity == "FPRI"].set_index("region")["pmrk"]
-    ex = f.groupby("exporter")["q_kt"].sum()
-    return float(sum(q * float(pm.get(r, 0.0)) for r, q in ex.items()) / ex.sum())
+    ex = f.groupby("exporter")["q_kt"].apply(math.fsum)       # exact sums: independent of the regions' order
+    return math.fsum(q * float(pm.get(r, 0.0)) for r, q in ex.items()) / math.fsum(ex.values)
 
 
 def build(fao: Path = FAO, dumps: Path = DUMPS):

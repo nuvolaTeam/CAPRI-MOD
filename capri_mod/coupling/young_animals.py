@@ -12,7 +12,7 @@ from capri_mod import statekit as _cst   # the state objects' helpers (refactor 
 class YoungAnimalBlock:
     def _yani_market_region(self, reg: str) -> str:
         """The young-animal market of a supply region: CAPRI clears young animals per market region (yaniMarket_ per
-        RM): the EU (one region) or its trade block; Norway its own (NOR, K56)."""
+        RM): the EU (one region) or its trade block; Norway its own (NO000000, K56)."""
         mm = self.market_module
         return (mm.sup_region_of_country(reg) if hasattr(mm, "sup_region_of_country") else None) \
             or mm.eu_region_of_country(reg) or mm.EU[0]

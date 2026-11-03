@@ -94,7 +94,7 @@ def main():
     mr = importlib.util.module_from_spec(spec); spec.loader.exec_module(mr)
     # the EU's member states with supply models; Norway (NO000000) is a market region of its own (CAPRI
     # aggregation/defaultA.agg; KNOWN_ISSUES K56): its dairy block is built with the non-EU regions'
-    # (tools/build/build_dairy_world_blocks.py, trade region NOR), with its raw milk from its supply models
+    # (tools/build/build_dairy_world_blocks.py, trade region NO000000), with its raw milk from its supply models
     # (the EU from shared/eu_market_blocks.csv, _model_regions.EU_MS; SUPPLY_NONEU_DESIGN section 2, issue 4: until 31
     # October 2026 the member states of the regional units but Norway, which would take in the UK, Turkey and the
     # Western Balkans)

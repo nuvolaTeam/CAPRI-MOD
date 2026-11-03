@@ -115,7 +115,7 @@ class ProcessingMixin(MarketStateMixin):
         is CAPRI's (ProcO_; until 30 October 2026 the yields were FAO_agg's base-period ones, K106). Every
         pair takes CAPRI's own yields, as CAPRI's market does: a band that dropped
         five pairs whose yields look implausible (UKR, PAK, ZAF rapeseed, PAK
-        soybeans: oil + cake 1.2-1.7 t per t of seed crushed; JPN sunflower) was
+        soybeans: oil + cake 1.2-1.7 t per t of seed crushed; JAP sunflower) was
         removed 23 October 2026 (no proxies; the numbers had no source).
         """
         # The cache is keyed on what it depends on - the BASE prices and tariffs
