@@ -758,8 +758,7 @@ measured as a deviation from the baseline of its year.
 | Scenario | Description |
 |---|---|
 | `BASELINE` | calibrated base-year reference |
-| `SET_ASIDE_10PCT` | 10% set-aside (CAPRI scen/set_aside/set_aside_10.gms) |
-| `CARBON_TAX_50`, `CARBON_TAX_100` | CAPRI's emission tax on agricultural emissions |
+| `CARBON_TAX_50` | CAPRI's emission tax on agricultural emissions (pol_input/ecampa/carbtax50_endotech_set12.gms) |
 
 CAPRI's Green Deal scenarios are built by functions, not names: `farm_to_fork_scenario()`,
 `greendeal_scenario(...)` and `greendeal_2030_scenario()` in `capri_mod/policy/greendeal.py`; pass them as
@@ -835,6 +834,18 @@ from capri_mod.policy.greendeal import farm_to_fork_scenario
 base = model.run(scenario="BASELINE")
 scen = model.run(custom_scenario=farm_to_fork_scenario())
 delta = model.compare(base, scen)              # activity & price changes
+```
+
+**The results table (since 3 November 2026).** `tools/run/run_f2f_2030.py` also writes each run to `results/` (setting
+`run.results_dir`): a Delta Lake table in CAPRI's DATAOUT layout (region, dim5, cols, rows, year, value; the model's
+codes and CAPRI's where checked, `capri_data/codes/results_items.csv`), partitioned by scenario and run, the
+reference stored once. Read it with `deltalake`, polars or DuckDB, or rebuild a run's pickle with
+`capri_mod.io_results.load_run("store:results:SCENARIO")`; the check tools take `store:ROOT:SCENARIO[:RUN_ID]` in place
+of a pickle.
+
+```python
+from deltalake import DeltaTable
+t = DeltaTable("results/long").to_pandas(filters=[("scenario", "=", "farm_to_fork_jrc121368")])
 ```
 
 ### 7.5 Key `run()` parameters

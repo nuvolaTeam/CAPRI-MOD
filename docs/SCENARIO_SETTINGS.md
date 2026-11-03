@@ -42,15 +42,16 @@ Policy shocks, not configurations (scenario only, not its baseline):
 ## CAPRI's Green Deal targets by simulation year
 
 From P. Witzke's production batch for the star 3.0 Green Deal group (section "f2f"); the batch also sets manure
-trade, the inner fertiliser model, Trustee land, endogenous biofuel markets and the policy blocks on. Only the 2030 and
-2040 rows are constants in the code (`GREENDEAL_2030_TARGETS`, `GREENDEAL_2040_TARGETS`).
+trade, the inner fertiliser model, Trustee land, endogenous biofuel markets and the policy blocks on. Only the 2030 row
+is a constant in the code (`GREENDEAL_2030_TARGETS`; its scenario folder: capri_data/scenarios/
+greendeal_lnds8_org18_pest20_mine13crp_surp30_diet00_oth00); the 2040 constant, unused, was removed on 3 November 2026.
 
 | Year | lndscpTarg | orgTarg | pestRedu | mineRedu | surpRedu | capri-mod |
 |---|---|---|---|---|---|---|
 | 2025 | 7 | 15 | 13 | 10crp | 20 | `greendeal_scenario(...)` with these values |
 | 2030 | 8 | 18 | 20 | 13crp | 30 | `greendeal_2030_scenario()`; `run_f2f_2030.py --scenario greendeal2030` |
 | 2035 | 9 | 22 | 26 | 17crp | 40 | `greendeal_scenario(...)` with these values |
-| 2040+ | 10 | 25 | 32 | 20crp | 50 | `greendeal_scenario(**GREENDEAL_2040_TARGETS)` |
+| 2040+ | 10 | 25 | 32 | 20crp | 50 | `greendeal_scenario(...)` with these values |
 
 `greendeal_scenario()` with its defaults (and `run_f2f_2030.py --scenario greendeal`) applies lnds10 org25 pest50
 mine00 surp50 in 2030: stronger than any year of the batch (pestRedu 50 against 32 at the end point). The comparison

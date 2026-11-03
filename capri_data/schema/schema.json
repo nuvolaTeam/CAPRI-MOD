@@ -3310,6 +3310,48 @@
     "tests": []
    }
   },
+  "capri_cols": {
+   "file": "capri_data/codes/capri/COLS.csv",
+   "declared_in": "00_codes.sql",
+   "layout": [],
+   "comment": "CAPRI COLS, the column items of its data and results arrays DATA and DATAOUT (sets.gms)",
+   "columns": [
+    {
+     "name": "code",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "text",
+     "type": "VARCHAR",
+     "not_null": false
+    }
+   ],
+   "primary_key": [
+    "code"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_code_lists (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": [
+     "capri_mod/tests/test_results_long.py"
+    ]
+   }
+  },
   "capri_cropdivgrps_mcact": {
    "file": "capri_data/codes/capri/cropDivGrps_mCact.csv",
    "declared_in": "00_codes.sql",
@@ -4269,6 +4311,48 @@
     "builders": [],
     "checks": [],
     "tests": []
+   }
+  },
+  "capri_rows": {
+   "file": "capri_data/codes/capri/ROWS.csv",
+   "declared_in": "00_codes.sql",
+   "layout": [],
+   "comment": "CAPRI ROWS, the row items of its data and results arrays DATA and DATAOUT (sets.gms)",
+   "columns": [
+    {
+     "name": "code",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "text",
+     "type": "VARCHAR",
+     "not_null": false
+    }
+   ],
+   "primary_key": [
+    "code"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_code_lists (not in the trace yet)",
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": [
+     "capri_mod/tests/test_results_long.py"
+    ]
    }
   },
   "capri_xx": {
@@ -17260,7 +17344,8 @@
    "notes": [],
    "read_by": {
     "model": [
-     "capri_mod/data/definitions.py"
+     "capri_mod/data/definitions.py",
+     "capri_mod/io_results.py"
     ],
     "builders": [
      "build_cap_ceilings_2030",
@@ -21906,6 +21991,81 @@
      "capri_mod/tests/test_data_schema.py",
      "capri_mod/tests/test_nuts_reporting.py"
     ]
+   }
+  },
+  "results_items": {
+   "file": "capri_data/codes/results_items.csv",
+   "declared_in": "00_codes.sql",
+   "layout": [],
+   "comment": "The items of the long results table (capri_mod/io_results.py) and their CAPRI codes in DATAOUT's cols and rows (\"*\": the model's own coordinate translated, \"act\": the activity's code in rows; applies_to: the activities or products the mapping holds for, empty for all; empty codes: no CAPRI item or not determined)",
+   "columns": [
+    {
+     "name": "block",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "item",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "item_dim",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "capri_cols",
+     "type": "VARCHAR",
+     "not_null": false
+    },
+    {
+     "name": "capri_rows",
+     "type": "VARCHAR",
+     "not_null": false
+    },
+    {
+     "name": "applies_to",
+     "type": "VARCHAR",
+     "not_null": false
+    },
+    {
+     "name": "unit",
+     "type": "VARCHAR",
+     "not_null": false
+    },
+    {
+     "name": "capri_source",
+     "type": "VARCHAR",
+     "not_null": false
+    }
+   ],
+   "primary_key": [
+    "block",
+    "item"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [
+    "(item_dim IN ('cols', 'rows'))"
+   ],
+   "units": [],
+   "provenance": {
+    "nature": "declared",
+    "origins": "per row",
+    "builder": null,
+    "sources": null
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/io_results.py"
+    ],
+    "builders": [],
+    "checks": [
+     "tools/check/make_provenance.py"
+    ],
+    "tests": []
    }
   },
   "rms_to_rm": {
@@ -43918,6 +44078,10 @@
    "rule": "an animal's price source is a market commodity of the model"
   },
   {
+   "file": "00_codes.sql",
+   "rule": "a results item's CAPRI codes are both given or both empty, are in CAPRI's COLS and ROWS (\"*\" apart), and cite"
+  },
+  {
    "file": "02_provenance_notes.sql",
    "rule": "a file without a builder has a checked note on its origin"
   },
@@ -44107,7 +44271,7 @@
   "capri-mod/keep": 2,
   "literature/keep": 11,
   "numerical/keep": 23,
-  "open/keep": 8,
+  "open/keep": 4,
   "physical/keep": 10,
   "technical/keep": 29
  },

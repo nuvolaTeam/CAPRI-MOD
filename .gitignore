@@ -43,3 +43,6 @@ capri_data/validation/world_price_divergence.csv
 
 # CAPRI's own material read by the builders (exports, dumps, source tree): not in git, see docs/EXTERNAL_SOURCES.md
 capri_sources
+
+# the runs' long results tables (capri_mod/io_results.py write_run; setting run.results_dir): run outputs, not data
+/results/

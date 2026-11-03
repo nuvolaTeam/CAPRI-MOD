@@ -290,7 +290,7 @@ Open questions for the project lead
    scenario is marked as running on another reference.
 3. **The long table**: both codes, CAPRI's (LEVL, PROD, ...) and the model's, from the crosswalk tables; the EU totals
    the model computes are stored, not recomputed by the readers.
-4. **Green Deal data**: in each scenario's folder.
+4. **Green Deal data**: in each scenario's folder; refined the same day: once per group or reference (capri_data/scenarios/greendeal_group/, the 2030 baseline surplus beside its trajectory in capri_ref_2030/), as CAPRI's group files are included by every scenario of the group (step 4, commit c799397).
 5. **Uncertain definitions**: the 10% set-aside as CAPRI's rule, 10% of the grandes cultures area (GRCU), a behaviour
    change in its own commit and run; the EUR 100 carbon tax removed, CAPRI's carbtax50_endotech_set12.gms with its
    reference to replace it once its data are confirmed; the ad hoc Farm-to-Fork of run_policy_comparison.py removed (the
@@ -298,3 +298,46 @@ Open questions for the project lead
    scenario file), its factors computed at run time; GREENDEAL_2040_TARGETS removed; command-line flags still allowed
    but no longer renaming the scenario, each override recorded in the run's metadata and settings file and part of the
    run id.
+
+## Status (3 November 2026, night)
+
+Done (each mini-EU run identical to the one before, meta apart):
+- Steps 1-5: dependencies; scenario folders and their pydantic definitions; the run script reads folders; the Green
+  Deal group's data held once; users' own scenarios (python -m capri_mod.scenarios new / check; README 6.4).
+- The long results table (capri_mod/io_results.py): to_long, with_capri_codes, write_run, read_run; the run script
+  writes it after the pickle and checks the pickle's blocks against it (exact). Layout and storage as decided (CAPRI's
+  DATAOUT dimensions; the model's and CAPRI's codes; the reference stored once, reused on the same fingerprint and
+  rows; the EU totals the run script computes stored).
+- CAPRI's codes (capri_data/codes/results_items.csv: every item declared; a CAPRI code only where checked against
+  CAPRI's code and its 2030 results, with the source): activity levels (LEVL), crops' gross output (GROF of the
+  product; not GRAS, another measure; not the animals), market production (PROD), market price (PMRK), bilateral
+  flows (ImportQ), labour (GROF.LABT/LABF/LABP), set-aside VSET and FALL (LEVL), the market welfare totals (EAAG.CSSP,
+  PROFITPROC, PROFITDAIRY, PROFITFEED, TARIFFREV, TRQRents), enteric and manure CH4, crop residue and histosol N2O,
+  liming CO2 (ImpactGwp), the 36 land-use transitions (LEVL).
+- Not mapped, with the reason: manure and soil N2O, indirect N2O and the GHG totals (they group CAPRI's positions
+  otherwise: the model's manure N2O is N2OMAN + N2OAPP), leaching N2O (the housing runoff is not in it), NH3 (scope
+  and unit not confirmed), feed (a total per model animal, CAPRI's per head of its own activities), the market's
+  consumption and net exports and the supply models' welfare (the CAPRI results file at hand, res_2_1730greendeal_
+  refpol_endotech_all_inidefaulta, has no market regions nor regional welfare totals), the model's own diagnostics.
+- The run's metadata declared (capri_mod/run_meta.py: ResultsMeta, HessianRecord, RunManifest; extra keys refused),
+  validated by the run script after the pickle is saved; accepts every mini-EU run since stage 4 and gate runs 15.
+- The run script's EU summaries and both outer-iteration records stored beside the long table as exact records
+  (root/summary, root/iterations); load_store rebuilds the whole pickle (metadata apart) and the run script checks it
+  against the pickle at tolerance zero; the check tools read store:ROOT:SCENARIO[:RUN_ID]. The pickle stays the run's
+  file until the gate has run on the store.
+- Decision 5, part: CARBON_TAX_100 and GREENDEAL_2040_TARGETS removed; run_policy_comparison.py runs a folder;
+  command-line overrides recorded (meta.scenario_overrides, run id -ov<hash>), no longer renaming the scenario.
+
+Decided by the project lead the same night (both ports in MODEL_CONTENT_PLAN.md §12a, to schedule): SET_ASIDE_10PCT
+removed (commit 3120071); WITHOUT_VCS not a scenario folder, tools/run/run_vcs_2030.py kept as a validation test.
+The analysis:
+1. **The 10% set-aside as CAPRI's rule.** CAPRI's SETA_ (supply/supply_model.gms l. 2219-2241): sum of the arable
+   activities' levels x (1 - NONS) x r / (1 - r) = the obligatory set-aside activities (setaPact: ISET, GSET, TSET and
+   NONF); set_aside_10.gms sets r = 10 on GRCU (cereals, oilseeds, MAIF, pulses) and eps on VSET, so voluntary
+   set-aside and fallow do not count. The model has no obligatory set-aside activity (its SETA is VSET + FALL), so
+   CAPRI's rule needs a new supply activity with its premium and costs (and CAPRI's PMP terms of define_const_pmp_
+   param.gms l. 44-76 when the obligation binds at calibration).
+2. **WITHOUT_VCS as a rule.** CAPRI's scenario sets the coupled-support premium types to zero and its premium module
+   moves the envelope into the decoupled payment (cereal premiums +9 to +11%). The model's premium data hold Pillar I
+   as one share (premium_scheme_shares_2030.csv DPPIL1, no coupled-support part), so the rule needs CAPRI's
+   coupled-support part of each premium and the redistribution.

@@ -179,30 +179,24 @@ def main():
             for _f in ("set_aside_requirement", "organic_area_target", "pesticide_reduction", "nutrient_surplus_target",
                        "surplus_rule", "surplus_cut"):
                 setattr(_scen, _f, getattr(_g, _f))
-    # command-line overrides of the scenario's settings
-    if a.surplus_rule:
-        _scen.surplus_rule = a.surplus_rule
-    if a.pesticide_rule:
-        _scen.pesticide_rule = a.pesticide_rule
-    if a.manure_market:
-        _scen.manure_trade = True
-    if a.no_manure_market:
-        _scen.manure_trade = False
-    if a.biofuel_markets:
-        _scen.biofuel_markets = True
-    if a.no_biofuel_markets:
-        _scen.biofuel_markets = False
-    if a.biofuel_mandate is not None:
-        _scen.biofuel_mandate = a.biofuel_mandate
-    if a.mine_redu:
-        _scen.mineral_redu = a.mine_redu
-        if _scen.name.startswith("greendeal"):
-            _scen.name = _scen.name.replace(_scen.name.split("_mine")[1].split("_")[0], a.mine_redu, 1) \
-                if "_mine" in _scen.name else _scen.name
-    if a.carbon_tax is not None:
-        _scen.carbon_tax = float(a.carbon_tax)
-    if a.endotech:
-        _scen.endotech = effective(_et)
+    # command-line overrides of the scenario's settings: the scenario keeps its name (since 3 November 2026, the
+    # project lead's decision; --mine-redu renamed a Green Deal scenario before); each override is recorded in the
+    # run's metadata (meta.scenario_overrides) and in its run id
+    _over = {}
+    for on, field, value in ((a.surplus_rule, "surplus_rule", a.surplus_rule),
+                             (a.pesticide_rule, "pesticide_rule", a.pesticide_rule),
+                             (a.manure_market, "manure_trade", True), (a.no_manure_market, "manure_trade", False),
+                             (a.biofuel_markets, "biofuel_markets", True),
+                             (a.no_biofuel_markets, "biofuel_markets", False),
+                             (a.biofuel_mandate is not None, "biofuel_mandate", a.biofuel_mandate),
+                             (a.mine_redu, "mineral_redu", a.mine_redu),
+                             (a.carbon_tax is not None, "carbon_tax",
+                              float(a.carbon_tax) if a.carbon_tax is not None else None),
+                             (a.endotech, "endotech", effective(_et) if a.endotech else None)):
+        now = effective(_scen.endotech) if field == "endotech" else getattr(_scen, field)
+        if on and now != value:
+            _over[field] = value
+            setattr(_scen, field, value)
     _scen.endotech = effective(_scen.endotech)
     m._progress(f"projection to 2030: baseline, then {_scen.name}")
     res = pmod.run(policy_scenario=_scen, years=[2030], **({"regions": _subset} if _subset else {}))
@@ -432,7 +426,7 @@ def main():
            "meta": {"conv": md.get("outer_converged"), "it": md.get("n_outer_iterations"),
                     "young_animals": (md.get("young_animal_prices"), md.get("young_animal_imbalance")),
                     "young_animal_markets": md.get("young_animal_markets"),
-                    "seconds": round(time.time() - t0), "options": vars(a),
+                    "seconds": round(time.time() - t0), "options": vars(a), "scenario_overrides": _over,
                     # the effective settings of the run (also written next to the pickle as <out>.settings.toml)
                     "settings": run_settings.to_dict(), "settings_changed": run_settings.diff(),
                     "market_supply_hessian": getattr((getattr(pmod, "_last_projected_model", None) or m).res,
@@ -494,6 +488,67 @@ def main():
     run_settings.save(str(a.out).rsplit(".", 1)[0] + ".settings.toml")
     with open(str(a.out).rsplit(".", 1)[0] + ".manifest.json", "w") as fh_:
         json.dump(out["meta"]["run_manifest"], fh_, indent=1)
+    # the metadata against its declaration (capri_mod/run_meta.py; refactor stage 5): after the pickle is saved, so a
+    # change of the metadata stops the run's table, never its results
+    from capri_mod.run_meta import ResultsMeta
+    ResultsMeta.model_validate(out["meta"])
+    _results_dir = str(run_settings.get("run.results_dir") or "")
+    if _results_dir:
+        # the long results table (capri_mod/io_results.py; refactor stage 5): the scenario's rows and its reference's,
+        # stored once; read back and checked against this pickle's blocks
+        from capri_mod import io_results as _IO
+        _rroot = Path(_results_dir) if Path(_results_dir).is_absolute() else ROOT / _results_dir
+        _fam = _folder or _short.get(a.scenario) or {"greendeal": _short["greendeal2030"]}.get(a.scenario,
+                                                                                                _short["f2f"])
+        _ref = _SD.load(_fam).reference
+        _git = out["meta"]["run_manifest"].get("git") or {}
+        _own = (f"capri_data/scenarios/{_tf}/", f"capri_data/scenarios/{_ref}/")
+        _fp = {"reference": _ref, "trajectory": _tf, "years": [2030], "regions": _subset,
+               "endotech": dict(_scen.endotech), "manure_trade": _scen.manure_trade,
+               "biofuel_markets": _scen.biofuel_markets,
+               "settings": {sec: {k: v for k, v in kv.items() if (sec, k) not in (("run", "scenarios_dir"),
+                                                                                  ("run", "results_dir"))}
+                            for sec, kv in run_settings.to_dict().items() if sec != "diagnostics"},
+               "commit": _git.get("commit"), "data_tree": _git.get("data_tree"),
+               # git's porcelain lines ("XY path"): an uncommitted file enters by its content
+               "changed_files": {f: (__import__("hashlib").sha256((ROOT / f[2:].strip()).read_bytes()).hexdigest()
+                                     if (ROOT / f[2:].strip()).is_file() else None)
+                                 for f in _git.get("changed_files") or []},
+               # the input files the reference depends on: the scenario folders other than its trajectory's and its
+               # own are read for the scenario, the market Hessian's cache is a cache
+               "inputs": {k: v for k, v in (out["meta"]["run_manifest"].get("inputs") or {}).items()
+                          if not k.startswith(".cache/")
+                          and (not k.startswith("capri_data/scenarios/") or k.startswith(_own))},
+               "software": out["meta"]["run_manifest"].get("software")}
+        _rid = time.strftime("%Y%m%dT%H%M%S") + "-" + str(_git.get("commit") or "nocommit")[:7]
+        if _over:                                   # a scenario changed on the command line: its run id says so
+            _rid += "-ov" + _IO.fingerprint({"overrides": _over})[:8]
+        _rec = _IO.write_run(_IO.with_capri_codes(_IO.to_long(b, "base")), _IO.with_capri_codes(_IO.to_long(s, "scen")),
+                             scenario=_scen.name, reference=_ref, year=2030, run_id=_rid, fingerprint_parts=_fp,
+                             meta=out["meta"], root=_rroot, summary=_IO.summary_of(out),
+                             iterations=out["outer_history"])
+        _md = _rroot / "meta" / _scen.name / _rid
+        run_settings.save(str(_md / "settings.toml"))
+        with open(_md / "manifest.json", "w") as fh_:
+            json.dump(out["meta"]["run_manifest"], fh_, indent=1)
+        # the whole pickle (its metadata apart) rebuilt from the store must equal it exactly: the gate's comparison
+        # (tools/check/compare_pickles_exact.py walk) at tolerance zero
+        import importlib.util as _ilu
+        _sp = _ilu.spec_from_file_location("_cmp", ROOT / "tools" / "check" / "compare_pickles_exact.py")
+        _cmp = _ilu.module_from_spec(_sp)
+        _sp.loader.exec_module(_cmp)
+        _st = _IO.load_store(_rroot, _scen.name, _rid)
+        _d = []
+        for _k in out:
+            if _k != "meta":
+                _cmp.walk(out[_k], _st.get(_k), f"$.{_k}", _d, 0.0, set())
+        print(f"long table: {_rroot / 'long'} | {_scen.name} {_rid}: {_rec['rows']} rows; reference {_ref} "
+              f"{_rec['reference_run_id']}" + (" (reused)" if _rec["reference_reused"] else "")
+              + (" | the pickle rebuilt from the store: identical" if not _d
+                 else f" | {len(_d)} DIFFERENCES between the pickle and the store"), flush=True)
+        if _d:
+            print("\n".join(map(str, _d[:20])), flush=True)
+            sys.exit(1)
     _no = out["meta"]["nlp_nonoptimal"]
     print(f"saved {a.out} | converged {out['meta']['conv']} in {out['meta']['it']} iterations, {out['meta']['seconds']} s"
           f" | non-optimal regional solves kept: baseline {len(_no['baseline'])}, scenario {len(_no['scenario'])}"

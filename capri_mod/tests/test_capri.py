@@ -1403,8 +1403,8 @@ def test_set_aside_requirement_actually_binds(model):
     """A mandatory non-productive share must change the solve.
 
     Regression test for a silent-failure bug: `set_aside_requirement` was
-    defined on PolicyScenario and referenced by four scenarios (including
-    SET_ASIDE_10PCT, the Farm-to-Fork landscape-elements equivalent) but was
+    defined on PolicyScenario and referenced by four scenarios (the Green Deal's
+    landscape elements among them) but was
     never enforced in the supply constraints, so the scenario returned results
     bit-identical to the baseline while reporting success.
     """
@@ -1412,7 +1412,11 @@ def test_set_aside_requirement_actually_binds(model):
     # two outer iterations: the requirement acts in the first regional solve (the test checks that it binds, not the
     # converged equilibrium; 77 s with the full outer loop, 23 October 2026)
     base = model.run(scenario="BASELINE", regions=regions, max_outer_iter=2)
-    sa = model.run(scenario="SET_ASIDE_10PCT", regions=regions, max_outer_iter=2)
+    from capri_mod.policy.policy_module import PolicyScenario
+    # the requirement on its own (the Green Deal's landscape-elements floor; SET_ASIDE_10PCT, which set it, was
+    # removed 3 November 2026)
+    sa = model.run(custom_scenario=PolicyScenario(name="SET_ASIDE_FLOOR_10", set_aside_requirement=0.10),
+                   regions=regions, max_outer_iter=2)
 
     changes, acts_seen = [], []
     for reg, res in base.get("supply", {}).items():

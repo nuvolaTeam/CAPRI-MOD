@@ -1,0 +1,928 @@
+code,text
+ACCUMU,Accumulation of surplus in soil organic matter
+AGGR,Aggregates
+AGGT,Sum
+ALL,
+ANIINT,animal feed intake
+ANIRET,retention in animal products
+ANIYAI,young animal input
+ANIYAO,young animal output
+ANNC,Annual crops
+APPL,Apples  pears and peaches production activity
+ARAA,Abandondent arable land without economic use
+ARAB,Arable crops
+ARAC,"arable crops including paddy, fallow and arable fodder but excluding permanent grassland and other permanent crops "
+ARACAP,Utilized non-grass land agricultural area per capita
+ARAO,(other) arable crops - all arable crops excluding rice and fallow (see also definition of ARAC below)
+AREP,area payments converted in per tom of product
+ARM1,"Domestic consumption, Armington aggregate of domestic sales and import aggregate"
+ARM1P,"Average price in market, weighted from domestic producer and import price"
+ARM2,Armington aggregate of import quantities
+ARM2P,Average import price
+ARTART,Artificial area remaining artificial area
+ARTCRP,Artificial area converted to cropland
+ARTFOR,Artificial area converted to forest land
+ARTGRS,Artificial area converted to grassland
+ARTIF,artificial - buildings or roads landuse columns in capreg beyond agric activities and their aggregates and UNFCCC LND columns
+ARTM,total area including marine waters
+ARTO,total area - total land and inland waters landuse columns in capreg beyond agric activities and their aggregates and UNFCCC LND columns
+ARTRES,Artificial area converted to residual land
+ARTWET,Artificial area converted to Wetlands
+ASYM,Total land potentially available for agriculture
+ATMOSD,Atmospheric deposition
+AVAILA,Nitrogen applied according to availability assessment by the farmer 
+A_AOLI,aggregate for olives Farm type FSS Aggregates
+A_CALF,total calf less than 1 year Farm type FSS Aggregates
+A_CERE,aggregate for cereales Farm type FSS Aggregates
+A_FOAL,aggregate for fodder on arable land Farm type FSS Aggregates
+A_FRUI,aggregate for fruites Farm type FSS Aggregates
+A_GRAS,aggregate for gras production Farm type FSS Aggregates
+A_INS,"aggregate for for industrial crops minus the area of oils, taboco Farm type FSS Aggregates"
+A_INT,aggregate for industrial crops Farm type FSS Aggregates
+A_OAFC,aggregate for other crops on arable land Farm type FSS Aggregates
+A_OILS,aggregate for oils Farm type FSS Aggregates
+A_PIG,total pigs from ori fss Farm type FSS Aggregates
+A_SET1,aggregate without nonf Farm type FSS Aggregates
+A_SETA,aggregate for of seta Farm type FSS Aggregates
+A_VEGA,aggregate for vegetables Farm type FSS Aggregates
+A_WIN,aggregate for win product activities Farm type FSS Aggregates
+AbsoluteChange,"Absolute change, added to the calibration point"
+AbsoluteLevel,Absolute value
+AmberBoxOther,Amber box other
+Amberbox,Amber box
+Arm1V,Value of Armington 1 aggregate  (imports and domestic sales)
+Arm2V,Value of Armington 2 aggregates (trade flows from different importers)
+BARL,Barley production activity
+BEFM,Beef meat production
+BIOF,Processing to biofuels
+BIOFIX,Biological fixation
+BIWE,Basin irrigation water efficiency = WCIRR/WWIRR (ratio)
+BLWO,board leaved wood
+BULF,Male adult fattening activity
+BULH,Male adult fattening activity high final weight
+BULL,Male adult fattening activity low final weight
+BiofFeedCost,Feedstock costs minus secondary product revenues per unit of output
+BiofPriceRel,Revenue from biofuel and secondaries per feedstock divided by feedstock cost
+BlueBox,Blue box payments
+CACR,"Cows, raising activities and calf fattening"
+CAFF,Calves female fattening activity
+CAFR,Calves female raising activity
+CALV,Total calves production activity
+CAMF,Calves male fattening activity
+CAMR,Calves male raising activity
+CARB,carbon sinks
+CAT1,Cattle production activity less than one year (CAPREG)
+CAT2,Cattle production activity above one year (CAPREG)
+CATA,All cattle activities
+CATC,"Catch crop, no area required"
+CEIL,"Ceilings, used in supply model for environmental constraints"
+CER2,Special cereals production activities
+CERE,Common cereals production activity
+CH4A,Methane from animals
+CH4BUL,Methane emissions from land use change due to feed use of european livestock production (IPCC)
+CH4BUR,Methane emissions from land use change (IPCC)
+CH4EN1,Methane emissions from enteric fermentation (IPCC)
+CH4ENER,CH4 from energy use in agriculture as an aggregate
+CH4ENT,Methane emissions from enteric fermentation (IPCC based on feed intake)
+CH4ENTstd,Methane emissions from enteric fermentation (IPCC based on reqfcn = standard methodology)
+CH4F,Methane linked to fertiliser use
+CH4HIS,Methane emissions from cultivation of histosol
+CH4MA1,Methane emissions from manure management (IPCC)
+CH4MAN,Methane emissions from manure management (IPCC)
+CH4RIC,Methane emissions from rice production (IPCC)
+CITR,Citrus fruits production activity
+CMrg,Absolute difference between consumer and average market price
+CNID,Crop net irrigation dose = CWRB*IDEF (accounts for deficit/surplus irrigation) (m3/ha)
+CO2ANI,animal respiration (CO2)
+CO2BIL,Carbon dioxide emissions from land use change due to losses of carbon in biomass and litter caused by feed use of european livestock production(IPCC)
+CO2BIO,Carbon dioxide emissions from land use change due to losses of carbon in biomass and litter (IPCC)
+CO2BIOfrom,Carbon dioxide release (related to LUC) from carbon in earlier land use
+CO2BIOto,Carbon dioxide sequestration (related to LUC) in biomass of new (or remaining) landuse (Gives gains net of losses for remaining LU)
+CO2BUR,Carbon dioxide emissions from burning related to land use change (IPCC)
+CO2DIE,Carbon Dioxide emissions from diesel consumption in machinery use
+CO2DIL,Carbon Dioxide emissions from diesel consumption in machinery use due to livestock production
+CO2ELE,Carbon Dioxide emissions from electricity consumption
+CO2ELL,Carbon Dioxide emissions from electricity consumption due to livestock production
+CO2ENER,CO2 from energy use in agriculture as an aggregate
+CO2F,CO2 linked to fertiliser use
+CO2FES,Carbon dioxide equivalents saved from burning fossile fuels (mitigation from anaerobic digestion)
+CO2FPR,Carbon Dioxide emissions from feed processing
+CO2FTR,Carbon Dioxide emissions from feed transport
+CO2HHD,Carbon Dioxide emissions from final consumer (households)
+CO2HIL,Carbon dioxide emissions from the cultivation of histosols due to livestock production
+CO2HIS,Carbon dioxide emissions from the cultivation of histosols
+CO2IND,Indirect Carbon Dioxide emissions from machinery and buildings
+CO2INL,Indirect Carbon Dioxide emissions from machinery and buildings due to livestock production
+CO2LIM,Carbon dioxide emissions form limestone and dolomit
+CO2MAN,CO2 emissions from manure management
+CO2OFL,Carbon Dioxide emissions from consumption of other fuels due to livestock production
+CO2OFU,Carbon Dioxide emissions from consumption of other fuels
+CO2PAC,Carbon Dioxide emissions from food packaging
+CO2PHO,carbon inputs from CO2 via photosynthesis
+CO2PPL,Carbon Dioxide emissions from plant protection due to livestock production
+CO2PPT,Carbon Dioxide emissions from plant protection
+CO2PRC,Carbon Dioxide emissions from processing after farm gate (except feed processing)
+CO2PRD,Carbon Dioxide emissions during fertilizer production
+CO2PRL,Carbon Dioxide emissions during fertilizer production due to livestock production
+CO2PRS,Carbon Dioxide emissions from anorganic fertilizers production saved due to the application of manure
+CO2RET,Carbon Dioxide emissions from retail
+CO2SEE,Carbon Dioxide emissions from seed production
+CO2SEL,Carbon Dioxide emissions from seed production due to livestock production
+CO2SEQ,Carbon dioxide emissions due to lost carbon sequestration of grassland (for grassland negative)
+CO2SOI,Carbon dioxide emissions from land use change due to soil carbon losses (IPCC)
+CO2SOL,Carbon dioxide emissions from land use change due to soil carbon losses caused by feed use of european livestock production (IPCC)
+CO2SOR,CO2 emissions from soil and root respiration
+CO2SQL,Carbon dioxide emissions due to lost carbon sequestration of grassland (for grassland negative) caused by feed use of european livestock production
+CO2TRA,Carbon Dioxide emissions from transport from farm gate to final consumer
+CO2UREA,Carbon dioxide emissions from urea application
+CONC,Concentrates
+CORF,Correction factor for input distribution
+COWO,coniferous wood
+COWS,Total cows production activity
+CPRI,Consumer price
+CRBSEQ,carbon sequestration in soils
+CRESID,Crop residues
+CROP,crop area  = ARAB - arable and permanent crops but no permanent grassland landuse columns in capreg beyond agric activities and their aggregates and UNFCCC LND columns
+CROPIX,Cropping index to convert harvested area into area use for land balance
+CRPART,Cropland converted to artificial area
+CRPCRP,Cropland remaining cropland
+CRPFOR,Cropland converted to forest land
+CRPGRS,Cropland converted to grassland
+CRPR,Crude protein
+CRPRES,Cropland converted to residual land
+CRPWET,Cropland converted to Wetlands
+CRag,Above-ground residues
+CRagK,K content above ground residues
+CRagN,N conent above ground residues
+CRagP,P content above ground residues
+CRbg,Below-ground residues
+CRbgK,K contnet below ground residues
+CRbgN,N content below ground residues
+CRbgP,P contnet below ground residues
+CRlost,Crop residues used outside agriculture
+CRlostN,N Crop residues used outside agriculture
+CRlostP,P Crop residues used outside agriculture
+CSED,OECD consumer support equivalent direct
+CSEI,OECD consumer support equivalent indirect
+CSSP,Equivalent variation
+CTAX,Consumer taxes
+CWRB,Blue crop water requirements = irrigation water requirements (m3/ha)
+CWRG,Green crop water requirements = effective rainfall (m3/ha)
+CWRT,Total crop water requirements = potential evapotranspiration (m3/ha)
+C_TOST,Shift parameter for intervention stock release function
+C_TOST1,Shift parameter for intervention stock purchase function
+C_TOST2,Scale parameter for intervention stock release and purchase functions
+CarbBordAd,Carbon border adjustment in Euro per ton
+CarbBordEx,Carbon border adjustment export subsidy in Euro per ton
+ChangeFactor,"Change factor applied to to the calibration point, (1.02 = 2% increase)"
+ChangeFactorShareFeedMax,Percentage change applied to min/max feed shares
+ChangeFactorShareFeedMin,Percentage change applied to min/max feed shares
+Corr,Scaler between physical units and Armington aggregator
+D21_HA,
+DCOH,Dairy cows  production activityhigh yield
+DCOL,Dairy cows production activity low yield
+DCOW,Dairy cows production activity
+DECP,decoupling degree of area payments
+DEMD,Demand
+DENITR,Denitrification below rooting zone
+DOMM,Domestic use on market
+DRMA,Dry matter
+DRMN,Dry matter min
+DRMX,Dry matter max
+DSales,Domestic sales
+DWHE,Durum wheat production activity
+DeMinimis,De-minimis payments
+Demand,Aggregate of demand positions
+DomSales,Domestic sales
+EAAB,EAA basic price (current prices)
+EAAG,EAA at gross producer prices
+EAAP,EAA at producer price (current prices)
+EAAQ,EAA quantity
+EAAS,EAA subsidies (current prices)
+EAAT,EAA taxes (current prices)
+EAAU,EAA unit value
+ENMC,Net energy chicken
+ENMH,Net energy horses
+ENMP,Net energy pigs
+ENMR,Net energy raising
+ENNE,Net energy lactation
+EROSOI,C losses from leaching and soil erosion
+EXCHR$,exchange Rate Dollar/Euro
+EXCR2,total excretion version 2
+EXCRET,Nutrients in excretion of animals
+EXLW,"Live exported weight per head, COCO"
+EXOG,bio fuel quantities from agricultural comodities not covered explicetly
+EXPD,Expenditures
+EXPE,Exports from Europe
+EXPL,"Exported live animals (tons: EXPL.PORK, hds: EXPL.IPIG)"
+EXPORTS,Exports
+EXPPRD,Nitrogen export with harvested material and crop residues or animal products
+EXPS,Exports subsidized
+EXPSUB,Per unit export subsidy
+EXPT,Exports total
+EXPW,Exports from the world
+E_HA,
+EntryPrice,
+ExpCost,
+ExpSub1,
+Exporter,
+ExportsUvae,Unit value exports
+ExpsVal,Value of subdidised exports without cut factor
+FAGO,Other plants harvested green from arable land n.e.c.
+FALL,Fallow land
+FARA,Fodder production activity on arable land
+FARM,Farm use
+FATS,Fat content
+FATSVAL,
+FCEO,Other cereals (than green maize) harvested green
+FCLV,Clover and mixtures
+FEDM,Feed use on market
+FEED,Feed use in primary product equivalents
+FEOC,Consumption aid
+FEOE,Exports subsidies
+FEOE_max,Commitment on export subsidy outlays
+FEOF,Aid to feed industry
+FEOG,Costs to tax payer
+FEOI,Aid to processing industry
+FEOP,Premiums
+FEOS,Intervention stock cost
+FEOS_D,
+FEOS_F,
+FEOS_O,
+FEOS_T,
+FERT,Fertilizer aggregate
+FICO,Fiber dairy cows
+FICT,Fiber cattle
+FIDI,Fiber digestible
+FILG,Fiber long
+FISF,Fiber sheep and goat fattening
+FISM,Fiber sheep and goat milk
+FLEG,Leguminous plants (used in capreg)
+FLOW,Flowers production activity
+FLUC,Lucerne
+FODA,Fodder production on arable land
+FODD,Fodder production
+FODDERTYPE,
+FODFAL,Fodder (permanent grassland or fodder on cropland) or fallow (incl set aside land)
+FOOD,Food
+FORART,Forest land converted to artificial area
+FORCRP,Forest land converted to cropland
+FORE,Forest area landuse columns in capreg beyond agric activities and their aggregates and UNFCCC LND columns
+FORFOR,Forest land remaining forest land
+FORGRS,Forest land converted to grassland
+FORP,"Professional managed forest area = FORE, after code change"
+FORRES,Forest land converted to residual land
+FORWET,Forest land converted to Wetlands
+FPEG,Leguminous fodder on arable land (assigned in coco as part of OFAR)
+FPGO,Other perennial green fodder are usually legumes
+FRCT,fruit and citrus
+FRUI,Fruits production activity
+FRUN,"fruits, nursery and (other) permanent crops"
+FRUT,"Fruit trees used in COCO and FSS data an from eurostat agri_prod: Fruits, berries and nuts (excluding citrus fruits, grapes and strawberries)"
+FSEI,Feed support equivalent indirect
+FSTG,bio fuel quantities from first generation
+FallGr,from grass as biomass production
+FeedCal,Feed demand in calibration point
+FeedDiff,
+Fob,Free on board
+G03_HA,
+G04_HA,
+G1_G2,
+GASANI,N in gaseous losses during manure management as NH3 and N2O and N2 and NOX
+GASAPP,
+GASGRA,
+GASHOU,
+GASMIN,Losses in gaseous emissons NH3 and N20 and NOX from mineral fertilizer
+GASRES,Losses in gaseous emissions N2O from crop residues and atmospheric deposition
+GASSTO,
+GASTOT,Gaseous losses of N total
+GCH4,Methane emissions
+GCO2,Carbon dioxide emissions
+GDP,GDP
+GIOLND,"Grassland, inland waters and other land have fuzzy internal borders"
+GLUC,Global warming potential from land use and land use change beyond agriculture [CO2eq]
+GN2O,"Nitrous oxide emissions. Attention - GWP must be applied to kg N2O, the N-budget reports emissions as kg N2O-N. Conversion factor 44/28"
+GNH3,Ammonia emissions. Attention - unit in kg NH3/ha; in the N-budget NH3 is reported as kg N/ha. Conversion 15/12
+GOAT,Goat data from COCO used in reqfcn for weighting
+GPRD,Global warming potential from production of nonagricultural inputs (like fertilisers) to agriculture [CO2eq]
+GRAA,Abandoned gras land without economic use
+GRAE,Gras and grazings production activity extensive
+GRAI,Gras and grazings production activity intensive
+GRANTC,Grassland - no tree cover
+GRAS,Gras and grazings production activity
+GRAT,"temporary grassland (alternative code used for CORINE data, definition identical to TGRA"
+GRATC,Grassland - tree cover
+GRCAP,Granivor units per capita
+GRCU,Grandes cultures production activity
+GROF,Gross production or use
+GROF_A,Total nutrient output from manure
+GRSART,Grassland converted to artificial area
+GRSCRP,Grassland converted to cropland
+GRSFOR,Grassland converted to forest land
+GRSGRS,Grassland remaining grassland
+GRSLND,Grassland includes pastures and meadows (GRAS) but also shrubland = unmanaged mix of non-forest vegetation with gras (UNFCCC type) landuse columns added for linkage to UNFCCC
+GRSRES,Grassland converted  to residual land
+GRSWET,Grassland converted to Wetlands
+GSET,Set aside obligatory used as grass land
+GWPA,Global warming potential from agriculture  [CO2eq] (IPCC)
+GWPT,Global warming potential total (as far as covered)  [CO2eq]
+GreenBox,Green box payments
+HCOM,Human consumption market
+HCON,Human consumption in primary product equivalents
+HCOS,energy share of biofuels in total fuel consumption
+HEIF,Heifers fattening activity
+HEIH,Heifers fattening activity high final weight
+HEIL,Heifers fattening activity low final weight
+HEIR,Heifers raising activity
+HENS,Laying hens production activity
+HGRAS,
+HOLD,number of holdings
+HSTY,historic yields Farm type FSS Aggregates
+IDEF,Crop irrigation deficit = CNID/CWRB  (ratio)
+IHISCR,Idling of former CROP for histosol protection as element of PACT
+IHISGR,Idling of former GRAS for histosol protection as element of PACT
+IMLW,"Live imported weight per head, COCO"
+IMPE,Imports from Europe
+IMPL,"Imported live animals (tons: IMPL.PORK, hds: IMPL.IPIG)"
+IMPORT,Total imports (used in nitrogen balance and for shifting transport cost into some region)
+IMPORTS,Imports
+IMPT,Imports total
+IMPW,Imports from the world
+INCE,Income
+INDM,Industrial use market
+INDMsh,Share of INDM in HCON
+INDU,Industrial crops production activity
+INHA,Inhabitants
+INIART,Initial artificial area
+INICRP,Initial cropland
+INIFOR,Initial forest land
+INIGRS,Initial grassland
+INIRES,Initial residual land
+INIWET,Initial wetlands
+INLW,inland waters landuse columns in capreg beyond agric activities and their aggregates and UNFCCC LND columns
+INPAPP,carbon inputs to soils via manure application
+INPGRA,carbon inputs to soils via manure deposition of grazing animals
+INPLIM,carbon inputs to soils via liming
+INTC,Intervention stock costs per unit
+INTC_T,Technical costs of intervention stocks in Euro per ton
+INTD,Intervention releases
+INTD1,
+INTF,Internal use on farm
+INTK,
+INTM,Max intervention purchases
+INTP,Intervention purchases
+INTP1,
+INTS,Intervention sales
+IRSH,Irrigation share is irrigated land divided by total land per crop (ratio)
+ISCH,Intervention stock change
+ISET,Set aside obligatory idling
+ISTK,Intervention stocks
+Impact,Total impact of environmental indicators
+ImpactGwp,"Total impact of environmental indicators, in GWP"
+ImpactHa,"Total impact of environmental indicators, per ha"
+ImportP,Bilateral import price
+ImportQ,Bilateral import quantity
+ImportsR,Imports under TRQ entering the calculation of the rents
+J07_HEADS,
+J18_HIVE,
+JHOLD,Number holding Farm type FSS Aggregates
+J_LSU,LSU from FSS Farm type FSS Aggregates
+KITC,kitchen garden
+LABT,Labour totals
+LAMB,Lamb data used in COCO
+LAND,"land area - Total (from FAO, used in global_database, not used in Coco)"
+LEACHI,Leaching below rooting zone to groundwater or surface waters
+LEVI,Irrigated level per crop (1000 ha)
+LEVL,Production activity level
+LEVR,Rainfed level per crop (1000 ha)
+LIMDOL,dolomite
+LIMLIM,limestone
+LIMTOT,total lime
+LISI,Lysine
+LOSC,Losses and stock changes
+LOSCsh,Share of losses at consumption stage (distribution + household level) in HCON
+LOSF,Losses on farm
+LOSM,Losses on market
+LOSMsh,Share of LOSM in HCON
+LOST,Losses total
+LSU,one calculared LSU Farm type FSS Aggregates
+LU,Livestock units
+LandRent,Agricultural rent pr ha UAAR
+Lst_Expost,Last expost year in some processing step
+MAIF,Fodder maize production activity
+MAIZ,Grain maize production activity
+MANAPP,
+MANFCN,Manure-C/N ratio in the finally applied manure
+MANFER,Manure-N application to the soil. Losses occurring during housing and manure storage are already subtracted. MANFER=MANLIQ+MANSOL
+MANGRA,Manure-N deposited directly on grazed land.
+MAPR,Domestic marketable production
+MARW,marine waters
+MEAT,Raw data for GROF in COOC (eg GROF.PORK<->MEAT.IPIG)
+MGRAS,
+MGVA_PER_HA,Agricultural income per ha UAAR
+MGVA_PER_HEAD,Agricultural income per capita
+MINFER,Mineral fertilizer applied including some parts lost in runoff or emissions
+MINS,
+MINSAT,Mineralisation from soil organic matter
+MIWO,mixed wood
+MODU,Modulation ammount
+MTRADE,Manure trade
+MTRADE_export,Manure trade export
+MTRADE_import,Manure trade import
+MarketPriceSup,Market price support
+MaxFactor,"Max value expressed relative to the calibration point, (0.9 = max 90% of cali point)"
+MinBordP,Minimum Border price used to determine levies
+MinFactor,"Min value expressed relative to the calibration point, (0.9 = min 90% of cali point)"
+N2Ani,
+N2HOU,NOx losses from manure in housing
+N2MAN,
+N2OAML,Indirect nitrous oxide emissions from ammonia volatilisation due to livestock production
+N2OAMM,Indirect nitrous oxide emissions from ammonia volatilisation (IPCC)
+N2OAPC,Direct nitrous oxide emissions from manure application not including grassland (IPCC)
+N2OAPL,Direct nitrous oxide emissins from manure application on soils (except grazing) due to livestock production
+N2OAPP,Direct nitrous oxide emissions stemming from manure application on soils except grazings per animal activity (IPCC)
+N2OAni,
+N2OBUL,Nitrous oxide emissions from land use change due to feed use of european livestock production (IPCC)
+N2OBUR,Nitrous oxide emissions from land use change (IPCC)
+N2OCRL,Direct nitrous oxide emissions from crop residues due to livestock production
+N2OCRO,Direct nitrous oxide emissions from crop residues (IPCC)
+N2ODEP,Direct nitrous oxide emissions from atmospheric deposition (not included in IPCC methodology
+N2OENER,N2O from energy use in agriculture as an aggregate
+N2OF,N20 linked to fertiliser use
+N2OFIX,Direct nitrous oxide emissions from nitrogen fixing crops (IPCC)
+N2OGRA,Direct nitrous oxide emissions stemming from manure managment on grazings (IPCC)
+N2OHIL,Direct nitrous oxide emissions from cultivation of histosols (IPCC via Miterra) due to livestock production
+N2OHIS,Direct nitrous oxide emissions from cultivation of histosols (IPCC via Miterra)
+N2OHOU,N2O losses from manure in housing
+N2OLEA,Indirect nitrous oxide emissions from leaching (IPCC via Miterra)
+N2OLEL,Indirect nitrous oxide emissions from leaching due to livestock production
+N2OLES,Indirect mitrous oxide emissions from leaching of mineral fertilizer application saved due to the application of manure
+N2OMAN,Direct nitrous oxide emissions stemming from manure management (only housing and storage) (IPCC)
+N2OMIN,N2O losses from mineral fertiliser  --- al - not used???
+N2ONANI,
+N2ONMAN,
+N2ONsoil,
+N2OOTH,
+N2OPRD,Nitrous oxide emissions during fertilizer production (Expert Data)
+N2OPRL,Nitrous oxide emissions during fertilizer production due to livestock production
+N2OPRS,Nitrous oxide emissions from anorganic fertilizers production saved due to the application of manure
+N2OSOI,N2O emissions from land use change due to soil carbon losses (IPCC)
+N2OSOL,N2O emissions from land use change due to soil carbon losses caused by feed use of european livestock production (IPCC)
+N2OSTO,N2O losses from manure in storage sytems
+N2OSYL,Direct nitrous oxide emissions from anorganic fertilizer application due to livestock production
+N2OSYN,Direct nitrous oxide emissions from anorganic fertilizer application (IPCC)
+N2OSYS,Direct nitrous oxide emissions from anorganic fertilizers application saved due to the application of manure
+N2OTOT,
+N2OindAS,Indirect nitrous oxide emissions from ammonia volatilization (IPCC - agricultural soils)
+N2OindMM,Indirect nitrous oxide emissions from ammonia volatilization (IPCC - manure management)
+N2STO,N2 losses from manure in storage sytems
+N2TOT,
+NAGR,non agricultural sourced biofuel production
+NCRD,
+NECR,New energy crops
+NETF,Net production or use EAA
+NETMAN,Supply from manure is excretion net of runoff and gaseous emissions
+NETMAN2,Manure application version 2
+NH3APL,Ammonia emissions from manure application without grazing due to livestock production
+NH3APP,Ammonia emissions from manure application without grazing
+NH3Ani,
+NH3CRL,Ammonia emissions from crop residues due to livestock production
+NH3CRO,Ammonia emissions from crop residues
+NH3GRA,Ammonia emissions from grazing
+NH3HOU,NOx losses from manure in housing
+NH3MAN,Ammonia emissions from manure management
+NH3MIN,NH3 losses from mineral fertiliser
+NH3STO,NH3 losses from manure in storage sytems
+NH3SYL,Ammonia emissions from application of mineral fertilizers due to livestock production
+NH3SYN,Ammonia emissions from application of mineral fertilizers
+NH3SYS,Ammonia emissions from anorganic fertilizers production saved due to the application of manure
+NH3TOT,Ammonia losses total
+NITF,N uptake of crops per ton of product
+NLOSSANI,
+NLOSSMIN,
+NLOSSTOT,
+NMAN,
+NMANAP,
+NMANGR,
+NMIN,
+NMINSL,
+NOCR,Crops with no physical yield
+NONF,Non food production on set-aside
+NOXAPL,NOX emissions from manure application without grazing due to livestock production
+NOXAPP,NOX emissions from manure application without grazing
+NOXAni,
+NOXCRL,NOX emissions from crop residues due to livestock production
+NOXCRO,NOX emissions from crop residues
+NOXGRA,NOX emissions from grazing
+NOXHOU,NOx losses from manure in housing
+NOXMAN,NOX emissions from manure management
+NOXMIN,NOx losses from mineral fertiliser
+NOXSTO,NOX losses from manure in storage sytems
+NOXSYL,NOX emissions from application of mineral fertilizers due to livestock production
+NOXSYN,NOX emissions from application of mineral fertilizers
+NOXSYS,NOX emissions from anorganic fertilizers production saved due to the application of manure
+NOXTOT,
+NRESIDK,K in crop resdiues
+NRESIDN,N content of crop residues
+NRESIDP,P in crop residues
+NRET,
+NRUM,Non ruminants
+NTRD,Net trade
+NUPC,"nursery, energy and other industrial (presumably permanent) crops"
+NUPTK,Nitrogen retention (NRET) in plant product and other above-ground plant material ==> straw+product
+NURS,Nurseries production activity
+N_CA,"Nutrient content, Calcium_mg"
+N_CAL,"Nutrient content, calories"
+N_CAL_PER_EURO,Calories produced per Euro of intermediate cost
+N_CAL_PER_HA,Calories produced per ha of UAAR
+N_FAT,"Nutrient content, fat"
+N_FE,"Nutrient content, Iron_mg"
+N_FIB,"Nutrient content, Fiber_TD_g"
+N_FOLA,"Nutrient content, Folate_Tot_microg"
+N_K,"Nutrient content, Potassium_mg"
+N_MG,"Nutrient content, Magnesium_mg"
+N_MONO,"Nutrient content, FA_Mono_g"
+N_NA,"Nutrient content, Sodium_mg"
+N_POLY,"Nutrient content, FA_Poly_g"
+N_PRO,"Nutrient content, protein"
+N_SATU,"Nutrient content, FA_Sat_g"
+N_SE,"Nutrient content, Selenium_microg"
+N_SUG,"Nutrient content, Sugar_Tot_g"
+N_ZN,"Nutrient content, Zinc_mg"
+NinFLD,
+NinSOI,
+OAFC,Other arable field crops
+OANI,Other animals activity
+OAR1,Arable crops other than cereals and oilseeds (report category)
+OARA,Other arable crops in behavioural functions (PMP group)
+OART, artificial
+OATS,Oats and summer cereal mixes production activity without triticale
+OCER,Other cereals production activity including triticale
+OCRO,Other crops production activity
+OFAR,Fodder other on arable land production activity
+OFFR,Other fresh fuits production activity is part of OFRU
+OFRU,Other fruits production activity
+OILS,Oilseeds production activity
+OIND,Other industrial crops production activity
+OLIV,Olive production activity for the oil industry
+OLIVGR,Olive Groves
+OLND,"other land - shrub, sparsely vegetated or bare landuse columns in capreg beyond agric activities and their aggregates and UNFCCC LND columns"
+OLNDARTIF,other land + artificial (aggregate used by ProdCom)
+OOIL,Other seed production activities for the oil industry
+OSET,Obligatory set-aside
+OSPA,other sparsely vegetated or bare
+OVEG,Other vegetables production activity
+OWIN,
+OWL,other wooded land - shrub with tree cover (definition to be discussed)
+P1,
+P11,
+P1_13_14,
+P2,
+P3,
+P4,
+P41,
+P42,
+P5,
+PADM,Administrative price
+PARI,Paddy rice production activity
+PBio,Total plant biomass = yild+stra+crag+crbg
+PERM,Permanent crops and vegetables
+PESTOTAL,Pesticides (total)
+PGRAS,
+PHOF,Phosphate uptake of crops per ton of product [P2O5]
+PIGF,Pig fattening activity
+PIGS,Pigs
+PKPL,Other animals
+PLANTR,Plant residues left on the fiels (e.g. beet leaves) as given in the table RESID in fertpar.gms
+PMEA,Permanent meadows
+PMRK,Domestic market price
+PMrg,
+PMrkMrg,
+POEU,plantations (wood) and eucalyptus
+POTA,Potatoes production activity
+POTF,Potassium uptake of crops per ton of product [K2O]
+POUF,Poultry fattening activity
+POUL,Poultry
+PPAS,Permanent pastures
+PPRI,Producer price
+PPriCal,Producer price in calibration point
+PRCA,Processing aid in Euro per ton
+PRCB,Processing yield for each product processed to bio fuel
+PRCBY,Processing yield of by-products for each product processed to bio fuel
+PRCC,Processing
+PRCI,Processing to isoglucose (part of industrial use)
+PRCM,Processing to derived products market
+PRCY,Processing yield of product per unit of primary one
+PRIC,Selling price
+PRII,Price index EAA
+PRME_PER_TOOU,Euro premiums per euro outputs
+PROC,Processing (excluding to bio-fuel) in primary product equivalents
+PROCMARG,Revenue from processing minus feedstock costs per unit of output
+PROD,Production or marketable production
+PROD_LO,Lower 2.5% percentile limit of output quantity
+PROD_UP,Upper 2.5% percentile limit of output quantity
+PROFITAGR,Profit of agriculture
+PROFITDAIRY,Profit of the dairy industry
+PROFITFEED,Profit of feed processors
+PROFITPROC,Profit of the processing industry
+PROT,Protein content
+PROTVAL,
+PSED,OECD producer support equivalent direct
+PSEI,OECD producer support equivalent indirect
+PSES,Producer support equivalents in OECD definition (PSEs)
+PSE_A1,A.1 Market price support
+PSE_A2,A.2 Support based on current output of an agricultural commodity
+PSE_B1,B.1 Support related to variable inputs
+PSE_B2,B.2 Support related to fixed capital formation
+PSE_B3,B.3 Support related on farm services
+PSE_C1,C.1 Support Based on current receipts/income
+PSE_C2,C.2 Based on current area/animal numbers
+PSE_C2_IC,"C.2 Based on current area/animal numbers, with constraints on input use"
+PSE_D,"D   Based on not current, production required"
+PSE_E1,"E.1 Based on not current, production not required, variable"
+PSE_E2,"E.2 Based on not current, production not required, fixed"
+PSE_F1,F.1 Long term resource retirement
+PSE_F2,F.2 Non commodity outputs of good and services
+PSE_F3,"F.3 Provided equally to all farmers, such as a flat-rate or lump-sum payment"
+PSE_G,G   Miscellaneous payment
+PSHW,Shadow price of supply balance
+PULS,Pulses production activity
+PercentageChange,"Percentage change compared to the calibration point, defined in points (10=10% increase)"
+Pimp,
+Pimp_adval,
+PrefTrigPrice,Preferential trigger price of EU entry price for fruits and vegs
+ProfitAgrNetTax,Profit of agriculture after any emission net taxation
+ProfitFeed1,
+ProfitLandUse,Profit of non-agricultural land use
+QEXPS,
+QPRI,Quota price
+QUDRA,
+QUDRF,
+QUTA,A-Quota endowments
+QUTB,B-Quota endowments
+QUTE,Quota exports
+QUTI,Quota imports
+QUTS,Quota endowments
+R,
+RAPE,Rape production activity
+RAPN,Rape seed for food and industrial purposes
+RED,Reduction of prefential tariffs compared to MFN ones
+RED_Tarv,
+RESART,Residual land converted to artificial area
+RESCRP,Residual land converted to cropland
+RESFOR,Residual land converted to forest land
+RESGRS,Residual land converted to grassland
+RESLND,Residual land with sparse grass but potentially other vegetation (UNFCCC type) landuse columns added for linkage to UNFCCC
+RESRES,Residual land remaining residual land
+RESWET,Residual land converted to Wetlands
+ROOF,Fodder root crops production activity
+RUCAP,Ruminant units per capita
+RUDE,Ruminant density GRAS
+RUMI,Ruminants
+RUNANI,N in runoff from manure management
+RUNGRA,N from manure deposited by grazind animals in runoff from the soil surface
+RUNHOU,N in runoff from manure management
+RUNMAN,
+RUNMIN,Losses in runoff from mineral fertilizer
+RUNSOI,runoff from soils
+RUNSUR,N in runoff from the soil surface
+RUNTOT,Runoff losses total
+RYEM,Rye and meslin production activity
+Rd,
+Rent,TRQ rent
+Rent_per_unit,TRQ rent per unit of in quota imports
+Rs,
+Rv,
+S1CAL,Self-sufficincy 1 calories
+S1COM,Self-sufficiency 1 commodity
+S1FAT,Self-sufficiency 1 fat
+S1PRO,Self-sufficiency 1 protein
+S2CAL,Self-sufficiency 2 calories
+S2COM,Self-sufficiency 2 commodity
+S2FAT,Self-sufficiency 2 fat
+S2PRO,Self-sufficiency 2 protein
+SADM,Statistical adjustment on markets (difference USAP and GROF)
+SCOW,Suckler cows production activity
+SECG,bio fuel quantities from second generation
+SEDF,Seed use on farm
+SEDM,Seed use on market
+SEDT,Seed use total
+SENO,nonf alone Farm type FSS Aggregates
+SETA,Set aside total
+SETF,Set aside and fallow land
+SETR,Set aside rate Farm type FSS Aggregates
+SHANN,Shannons diversity index
+SHARE,Bio fuel feedstock (or any other kind of) shares
+SHEP,Sheep data from COCO used in reqfcn for weighting
+SHGF,Sheep and goats activity for fattening
+SHGM,Sheep and goats activity for milk production
+SHGT,Sheep and goat
+SHRU,shrub land
+SHRUNTC,shrub land - no tree cover
+SHRUTC,shrub land - tree cover
+SLGH,Slaughtered heads
+SLGT,Slaughtered tons
+SLGW,"Slaughter weight, COCO"
+SOWS,Sows for piglet production
+SOYA,Soya production activity
+STCM,Stock changes on market
+STKCHG,private stock change in CAPRI short run version
+STKFIN,private final stocks in CAPRI short run version
+STKINI,private initial stocks in CAPRI short run version
+STKM,Final stocks on market
+STKS,Intervention stocks
+STRAC,Straw for cereals only
+STRACM,Straw carbon returned to the field e.g. with manure
+STRAN,N content in straw
+STRANL,Straw left on the field as e.g. stubbles and ploughed into the soil
+STRANM,Straw returned to the field e.g. with manure
+STRANR,Straw left on or returned  STRANL to the field STRANM
+STRAWN,Total nitrogen in straw
+SUGB,Sugar beet production activity
+SUM,Sum position Farm type FSS Aggregates
+SUNF,Sunflower production activity
+SURSOI,Surplus to soil
+SURTOT,Total surplus is nutrient input net of exports in products
+SVBA,sparsely vegetated or bare
+SWHE,Soft wheat production activity
+TABO,Table olives production activity
+TAGR,Table grapes production activity
+TAMFN,MFN ad ad valorem tariff
+TAPREF,Preferential ad valorem tariff
+TARIFFREV,Tariff revenues
+TARS,Tariff specific
+TARS_applied,Tariff specific applied
+TARS_bind,Tariff specific binding
+TARV,Tariff ad valorem
+TARV_applied,Tariff ad valorem applied
+TARV_bind,Tariff ad valorem binding
+TCRP,Temporary crops (=ARAC-FALL-OFAR) from FAO 
+TCost,Bilateral transport margin
+TEXT,Flax and hemp production activity
+TGRA,Temporary grazings
+TGRS,Temporary meadows and pastures (~ OFAR) plus fallow from FAO
+TNUT,Tree nuts production activity is part of OFRU
+TOBA,Tobacco production activity
+TOMA,Tomatoes production activity
+TOOU_PER_TOIN,Euro output value per euro intermediate cost
+TOTAPP,
+TOTGRA,
+TOTHOU,
+TOTMIN,
+TOTSTO,
+TRAD,Net trade
+TREE,Permanent crops
+TRQRents,Tariff Rate Quota Rents
+TSET,Set aside obligatory fast growing trees
+TSGM,
+TSMFN,MFN preferential tariff
+TSPREF,Preferential specific tariff
+TWIN,Wine production activity
+TWL,total wooded land - forest + other wooded land
+TaAppl,Applied ad valorem tariff
+TotFAT,maximum of total fat consumption
+TriggerP,Trigger price of EU entry price for fruits and vegs
+TrqImports,Imports under TRQs
+TrqNT,TRQ quota quantity as applied
+TrqNT_notified,TRQ quota quantity as notified
+TsAppl,Applied specific tariff
+UAACAP,Utilized agricultural area per capita
+UAAEQU,UAA defined from equality (no slak)
+UAAR,Usable agricultural area
+UGAR,utilisable agricultural gras land
+USAP,Usable production
+UVAB,Unit value EAA basic price
+UVAD,Unit value consumer price
+UVAE,Unit value exports
+UVAG,Unit value EAA gross producer price
+UVAI,Unit value imports
+UVAN,Unit value as used in iterations
+UVAP,Unit value EAA producer price
+UVTax,production tax on netputs sold
+UvagA,Price for A sugarbeets
+UvagB,Price for B sugarbeets
+UvagC,Price for C sugarbeets
+UvagE,Expected unit value
+VEGE,Vegetables production activity
+VINY,Vineyards production activity
+VIT_A,"Nutrient content, Vit_A_International_Unit"
+VIT_B1,"Nutrient content, Thiamin_VIT_B1_mg"
+VIT_B12,"Nutrient content, Vit_B12_microg"
+VIT_B2,"Nutrient content, Riboflavin_VIT_B2_mg"
+VIT_B6,"Nutrient content, Vit_B6_mg"
+VIT_C,"Nutrient content, Vit_C_mg"
+VIT_D,"Nutrient content, Vit_D_microg"
+VIT_E,"Nutrient content, Vit_E_mg"
+VOCMAN,NMVOC emissions from manure management
+VSET,Set aside voluntary
+WADR,Livestock drinking water
+WASE,Livestock service water
+WATER,inland or marine waters
+WATR,Water surplus
+WAVA,Water withdraw capacity (total water availability (th.m3)
+WELFARE,Total welfare
+WETART,Wetlands converted to artificial area
+WETCRP,Wetlands converted to cropland
+WETFOR,Wetlands converted to forest land
+WETGRS,Wetlands converted to grassland
+WETLND,Wetlands include inland waters and terrestrial wetlands (UNFCCC type) landuse columns added for linkage to UNFCCC
+WETRES,Wetlands converted to residual land
+WETWET,Wetlands remaining Wetlands
+WHEA,Soft and durum wheat
+WIRR,Gross irrigation water use by crop (m3/ha)
+W_IRRI,Water withdrawal for irrigation (th.m3)
+W_NIRR,Water withdrawal for all non-irrigation sectors (th.m3)
+Weights,
+YILD,Main yield coefficient
+YILDB,"Main harvested biomass: grains or seeds, roots, or leaves"
+YILD_LO,Lower 2.5% percentile limit of output coefficient
+YILD_UP,Upper 2.5% percentile limit of output coefficient
+YLDI,Irrigated yield (tons per ha)
+YLDR,Rainfed yield (tons per ha)
+YRATIO,Rainfed to irrigated yield ratio
+Yield,
+adVal_equn,
+adval_equ,Ad valorem equivalent tariff
+adval_equf,
+bioARES,Biofuels  processed from crops residues
+bioDExog,Biodiesel processed from crops not represented in Market model
+bioDOilP,Biodiesel processed from oils
+bioDPlmo,Biodiesel processed from palm oil
+bioDRapo,Biodiesel processed from rape oil
+bioDSoyo,Biodiesel processed from soy oil
+bioDSuno,Biodiesel processed from sunflower oil
+bioDWoiF,Biodiesel processed from Waste (used cooking) oils and Fats
+bioEBarl,Ethanol processed from barley
+bioECere,Ethanol processed from cereals
+bioECgra,Ethanol processed from coursegrains
+bioEExog,Ethanol processed from crops not represented in Market model
+bioEIndu,Ethanol processed from industrial sources
+bioEMaiz,Ethanol processed from maize
+bioEMola,Ethanol processed from molasses
+bioEOats,Ethanol processed from oats
+bioEOcer,Ethanol processed from other cereals
+bioERyem,Ethanol processed from rye and meslin
+bioESuga,Ethanol processed from sugar(beets)
+bioESwhe,Ethanol processed from soft wheat
+bioETwin,Ethanol processed from wine
+bioEWhea,Ethanol processed from wheat
+bioNECR,Biofuels  processed from new energy crops
+bioORES,"Biofuels  processed from forest residues and waste material (forest residues, municipal waste, other waste)"
+budEU,EU contribution total
+budNat,National contribution
+budNatEU,National contribution to EU budget
+budPil1,Pillar I contribution
+budPil2,Pillar II contribution
+budRestEU,Other EU contribution
+buyin_const,
+buyin_share,
+cropDiv,Crop diversity
+cropMiti,Crop related mitigation of ghg emissions as element of PACT
+ecoSetAside,Ecological set-aside
+emiAllowAgr,Allowance for emission tax levied on farms [m Euro]
+emiAllowFrt,Allowance for emission tax levied on the fertiliser industry [m Euro]
+emiAllowOth,Allowance for emission tax levied on downstream sectors  [m Euro]
+emiNetTaxAgr,Emission tax levied on farms after considering an allowance [m Euro]
+emiNetTaxFrt,Emission tax levied on the fertiliser industry after considering an allowance [m Euro]
+emiNetTaxOth,Emission tax levied on downstream sectors after considering an allowance [m Euro]
+emiTaxAgr,Emission tax levied on farms before considering any allowance [m Euro]
+emiTaxFrt,Emission tax levied on the fertiliser industry before considering any allowance [m Euro]
+emiTaxOth,Emission tax levied on downstream sectors before considering any allowance [m Euro]
+foodSh,Share of food (after losses at distribution + household level) in HCOM
+grasMiti,grassland related mitigation of ghg emissions as element of PACT
+idlHis,idling for histosol protection without fertiliser use (aggregate?)
+mi_WinterCov,Prototype activity for treatment of premiums in for mitigation technology winter cover
+mi_ammAppHE,activity for mitigation technology low ammonia application high efficiency
+mi_ammAppLE,activity for mitigation technology low ammonia application low efficiency
+mi_buffer10to30Man,activity for mitigation technology buffer strips from 10 to 30 meters for manure
+mi_buffer10to30Min,activity for mitigation technology buffer strips from 10 to 30 meters for mineral fertilizers
+mi_buffer1to5Man,activity for mitigation technology buffer strips from 1 to 5 meters for manure
+mi_buffer1to5Min,activity for mitigation technology buffer strips from 1 to 5 meters for mineral fertilizers
+mi_buffer5to10Man,activity for mitigation technology buffer strips from 5 to 10 meters for manure
+mi_buffer5to10Min,activity for mitigation technology buffer strips from 5 to 10 meters for mineral fertilizers
+mi_bufferBel1Man,activity for mitigation technology buffer strips up to 1 meter for manure
+mi_bufferBel1Min,activity for mitigation technology buffer strips up to 1 meter for mineral fertilizers
+mi_consTill,activity for mitigation technology conservation tillage
+mi_fallowCr,activity for mitigation technology fallowing histosols on cropland
+mi_fallowGr,activity for mitigation technology fallowing histosols on grassland
+mi_ferttimeMan,activity for mitigation technology beter timing of manure application
+mi_ferttimeMin,activity for mitigation technology beter timing of mineral fertilizer application
+mi_luPerHaLimit,activity for mitigation technology limit for livestock units per ha
+mi_nManLimit,activity for mitigation technology limit to N input from manure
+mi_nMinLimit,activity for mitigation technology limit to N input from mineral fertilizers
+mi_nTotLimit,activity for mitigation technology limit to total N fertilizer input
+mi_nitrInhMan,activity for mitigation technology nitrification inhibitors on manure
+mi_nitrInhMin,activity for mitigation technology nitrification inhibitors on mineral fertilizers
+mi_noTill,activity for mitigation technology no tillage
+mi_precFarm,activity for mitigation technology precision farming
+mi_vrt,activity for mitigation technology variable rate technology
+mitiEff,mitigation efficienct from (endogenous) mitigation efforts
+mitiNetC,net costs from (endogenous) mitigation efforts
+permGras,Maintainance of permanent grass land
+release_const,
+release_share,
+sgm_fc,
+sgm_gr,
+tarMult,
+uaarMiti,uaar related mitigation of ghg emissions as element of PACT
+winterCover,Winter cover in crop land

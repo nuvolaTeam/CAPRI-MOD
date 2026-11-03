@@ -65,8 +65,7 @@ reporter.to_csv_folder("results/")
 | Name | Description |
 |------|-------------|
 | `BASELINE` | Calibrated baseline, no policy change |
-| `SET_ASIDE_10PCT` | 10% set-aside (CAPRI scen/set_aside/set_aside_10.gms) |
-| `CARBON_TAX_50`, `CARBON_TAX_100` | CAPRI's emission tax on agricultural emissions |
+| `CARBON_TAX_50` | CAPRI's emission tax on agricultural emissions (pol_input/ecampa/carbtax50_endotech_set12.gms) |
 
 Custom scenarios:
 ```python
