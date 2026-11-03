@@ -101,21 +101,31 @@ def test_eu_and_norway_rows_are_split(data):
     from capri_mod.market.market_module import MarketModule
     mm = MarketModule(data)
     assert mm.SUP == ("NOR",) and "NOR" in mm.regions
-    assert mm.eu_region_of_ms("NO000000") is None and mm.eu_region_of_ms("DE000000") == "EU27"
+    assert mm.eu_region_of_ms("NO000000") is None and mm.eu_region_of_ms("DE000000") in mm.EU
     assert mm.sup_region_of_country("NO090000") == "NOR" and mm.sup_region_of_country("DE") is None
     exo = pd.DataFrame({"BARL": [10.0, 3.0, 2.0]}, index=["DE", "DK", "NO"])
-    assert mm.eu_rows(exo).loc["EU27", "BARL"] == 13.0
+    assert mm.eu_rows(exo).loc[mm.eu_region_of_ms("DE000000"), "BARL"] == 13.0      # DE and DK: one block
     eu, sup = mm._split_supply(exo)
     assert list(eu.index) == ["DE", "DK"] and float(sup["NOR"]["BARL"]) == 2.0
 
 
+def _eu_countries(mm):
+    """One country per EU market region (CAPRI's two blocks since 3 November 2026): [(region, country)], DE for its
+    block and PL for the other."""
+    out = {}
+    for c in ("DE", "PL"):
+        out.setdefault(mm.eu_region_of_ms(c + "000000"), c)
+    return list(out.items())
+
+
 def _exo_with_norway(mm):
-    """Supply by country: the EU's row at CAPRI's EU base, Norway's 5% above CAPRI's (the supply models' output
-    differs from CAPRI's), with raw milk."""
+    """Supply by country: one country per EU market region at that region's CAPRI base (_eu_countries), Norway's 5%
+    above CAPRI's (the supply models' output differs from CAPRI's), with raw milk."""
     cols = list(mm.commodities)
-    eu = mm.par.base_production.loc["EU27", cols].astype(float)
+    pairs = _eu_countries(mm)
+    rows = [mm.par.base_production.loc[r, cols].astype(float) for r, _ in pairs]
     no = mm.par.base_production.loc["NOR", cols].astype(float) * 1.05
-    return pd.DataFrame([eu, no], index=["DE", "NO"])
+    return pd.DataFrame(rows + [no], index=[c for _, c in pairs] + ["NO"])
 
 
 def test_norway_market_supply_is_its_models_and_the_base_is_reproduced(data):
@@ -133,7 +143,8 @@ def test_norway_market_supply_is_its_models_and_the_base_is_reproduced(data):
     assert max(float(np.max(np.abs(F[c] / size[c]))) for c in mm.par.bilat) < 1e-6
     for c in ("BARL", "SWHE", "BEEF", "POUL", "OATS"):
         assert abs(float(S.at["NOR", c]) - float(exo.at["NO", c])) < 1e-9 * max(1.0, float(exo.at["NO", c])), c
-        assert abs(float(S.at["EU27", c]) - float(exo.at["DE", c])) < 1e-6 * max(1.0, float(exo.at["DE", c])), c
+        for rg, cc in _eu_countries(mm):
+            assert abs(float(S.at[rg, c]) - float(exo.at[cc, c])) < 1e-6 * max(1.0, float(exo.at[cc, c])), (rg, c)
     assert abs(float(D.at["NOR", "MILK"]) - float(exo.at["NO", "MILK"])) < 1e-9 * float(exo.at["NO", "MILK"])
     assert abs(mm.par.sup_milk0["NOR"] - float(exo.at["NO", "MILK"])) < 1e-9
     # Norway's barley 10% dearer than its models saw: Norway's supply follows (own CAPRI elasticity), the EU's not
@@ -142,7 +153,8 @@ def test_norway_market_supply_is_its_models_and_the_base_is_reproduced(data):
     r1.at["NOR", "BARL"] = 1.10
     S1 = mm.supply_response(mm.world_prices_base, exo, region_ratio=r1, crush_dom=mm._dom0())
     assert float(S1.at["NOR", "BARL"]) > float(exo.at["NO", "BARL"]) * 1.001
-    assert abs(float(S1.at["EU27", "BARL"]) - float(exo.at["DE", "BARL"])) < 1e-9 * float(exo.at["DE", "BARL"])
+    for rg, cc in _eu_countries(mm):
+        assert abs(float(S1.at[rg, "BARL"]) - float(exo.at[cc, "BARL"])) < 1e-9 * float(exo.at[cc, "BARL"])
     # ... and once the models have seen that price, the market takes their output as it is
     mm.seen.sup_price_seen = {"NOR": pd.Series(1.0, index=mm.commodities).where(lambda x: x.index != "BARL", 1.10)}
     S2 = mm.supply_response(mm.world_prices_base, exo, region_ratio=r1, crush_dom=mm._dom0())
@@ -153,7 +165,8 @@ def test_norway_market_supply_is_its_models_and_the_base_is_reproduced(data):
     try:
         S3 = mm.supply_response(mm.world_prices_base, exo, region_ratio=r1, crush_dom=mm._dom0())
         assert abs(float(S3.at["NOR", "BARL"]) - (float(exo.at["NO", "BARL"]) + 50.0 * 0.10)) < 1e-6
-        assert abs(float(S3.at["EU27", "BARL"]) - float(exo.at["DE", "BARL"])) < 1e-9 * float(exo.at["DE", "BARL"])
+        for rg, cc in _eu_countries(mm):
+            assert abs(float(S3.at[rg, "BARL"]) - float(exo.at[cc, "BARL"])) < 1e-9 * float(exo.at[cc, "BARL"])
     finally:
         mm.par.supply_hessian = None
 
@@ -228,10 +241,14 @@ def test_norway_young_animals_hessian_and_bulk_prices_are_its_own(data):
     mm = MarketModule(data)
     fake = types.SimpleNamespace(market_module=mm, _sum_frames=CAPRIModel._sum_frames, sv=types.SimpleNamespace())
     assert CAPRIModel._yani_market_region(fake, "NO090000") == "NOR"
-    assert CAPRIModel._yani_market_region(fake, "DE110000") == "EU27"
+    assert CAPRIModel._yani_market_region(fake, "DE110000") == mm.eu_region_of_ms("DE000000")
     h = lambda v: pd.DataFrame([[v]], index=["BARL"], columns=["BARL"])
-    eu, sup, blocks = CAPRIModel._split_hessian(fake, {"DE": h(2.0), "DK": h(1.0), "NO": h(0.5)})
-    assert float(eu.at["BARL", "BARL"]) == 3.0 and float(sup["NOR"].at["BARL", "BARL"]) == 0.5 and blocks == {}
+    mm.eu_blocks = False                     # the one-EU form (removed later in stage 2 of the market move)
+    try:
+        eu, sup, blocks = CAPRIModel._split_hessian(fake, {"DE": h(2.0), "DK": h(1.0), "NO": h(0.5)})
+        assert float(eu.at["BARL", "BARL"]) == 3.0 and float(sup["NOR"].at["BARL", "BARL"]) == 0.5 and blocks == {}
+    finally:
+        del mm.eu_blocks
     # with CAPRI's two EU trade blocks: one Hessian per block, the sum of its member states' (eu_market_blocks.csv)
     mm.eu_blocks = True
     try:
@@ -314,7 +331,8 @@ def test_norway_run_on_its_own_supply_models():
         assert abs(float(P.at["NOR", c]) - float(ex.at["NO", c])) < 1e-6 * max(1.0, float(ex.at["NO", c])), c
         # no EU unit in the run: the EU's supply is its units' base output (K83), Norway's output not in it
         xr = mm._eu_excluded_rows()
-        assert abs(float(P.at["EU27", c]) - float(xr.at["EU27", c])) < 1e-6 * max(1.0, float(P.at["EU27", c])), c
+        for rg in mm.EU:
+            assert abs(float(P.at[rg, c]) - float(xr.at[rg, c])) < 1e-6 * max(1.0, float(P.at[rg, c])), (rg, c)
     assert float(mm._bilat_err) < 1e-6
     assert float((mm.sup_price_ratio - 1.0).abs().max().max()) < 1e-9
 
@@ -337,7 +355,7 @@ def test_norway_prices_follow_its_own_market_in_a_scenario():
     assert "NO000000" in (m.supply_module.seen.price_dev_ms or {})
     rb, rs = b["market"].domestic_prices, s["market"].domestic_prices
     d = (rs / rb - 1.0)
-    assert float((d.loc["NOR"] - d.loc["EU27"]).abs().max()) > 1e-3
+    assert float((d.loc["NOR"] - d.loc[mm.eu_region_of_ms("IR000000")]).abs().max()) > 1e-3
     ex = m._bridge_supply_to_market(m.supply_module.aggregate_supply(s["supply"], by_country=True))
     # Norway's raw milk in the market (market.sup_milk_in_market, step F; simu_calibration_to_supply.gms l. 423-427):
     # its supply models' milk moved by its raw milk supply function, k x (its dairy block's milk price level - the
@@ -351,6 +369,6 @@ def test_norway_prices_follow_its_own_market_in_a_scenario():
     # the member states' response to their milk prices in the dairy block (audit M5, MarketModule.ev.milk_dq_now),
     # with no Norwegian milk in it
     xr = mm._eu_excluded_rows()
-    eu_milk = (float(ex.drop(index="NO")["MILK"].sum()) + float(xr.at["EU27", "MILK"])
+    eu_milk = (float(ex.drop(index="NO")["MILK"].sum()) + float(sum(xr.at[rg, "MILK"] for rg in mm.EU))
                + float(sum((mm.ev.milk_dq_now or {}).values())))
-    assert abs(float(s["market"].production.at["EU27", "MILK"]) - eu_milk) < 1e-6
+    assert abs(float(sum(s["market"].production.at[rg, "MILK"] for rg in mm.EU)) - eu_milk) < 1e-6

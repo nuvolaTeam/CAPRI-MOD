@@ -20,15 +20,17 @@ def test_newton_krylov_reaches_the_default_solves_equilibrium():
     for solver in ("fixed_point", "newton_krylov"):
         with override({"market.solver": solver}):
             mm = MarketModule(data)
-            exo = pd.DataFrame(0.0, index=["EU27"], columns=MARKET_COMMODITIES)
-            for c in MARKET_COMMODITIES:
-                if c in mm.par.base_production.columns:
-                    exo.at["EU27", c] = mm.par.base_production.at["EU27", c]
+            EU = list(mm.EU)                                   # CAPRI's two EU blocks (since 3 November 2026)
+            exo = pd.DataFrame(0.0, index=EU, columns=MARKET_COMMODITIES)
+            for r in EU:
+                for c in MARKET_COMMODITIES:
+                    if c in mm.par.base_production.columns:
+                        exo.at[r, c] = mm.par.base_production.at[r, c]
             eq0 = mm.solve(exogenous_supply=exo)
-            mm.set_eu_base(exo.loc["EU27"], eq0.consumption.loc["EU27"])
+            mm.set_eu_base(exo.loc[EU].sum(), eq0.consumption.loc[EU].sum())
             exo1 = exo.copy()
-            exo1.at["EU27", "BEEF"] *= 0.9
-            exo1.at["EU27", "SWHE"] *= 0.95
+            exo1.loc[EU, "BEEF"] *= 0.9
+            exo1.loc[EU, "SWHE"] *= 0.95
             eq1 = mm.solve(exogenous_supply=exo1)
             assert eq1.converged
             out[solver] = eq1.domestic_prices

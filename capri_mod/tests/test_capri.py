@@ -105,10 +105,12 @@ def test_market_module_reproduces_its_own_prices(data):
     from capri_mod.data.definitions import MARKET_COMMODITIES
 
     mm = MarketModule(data)
-    exo = pd.DataFrame(0.0, index=["EU27"], columns=MARKET_COMMODITIES)
-    for c in MARKET_COMMODITIES:
-        if c in mm.par.base_production.columns:
-            exo.at["EU27", c] = mm.par.base_production.at["EU27", c]
+    # the EU's market regions (CAPRI's two blocks since 3 November 2026) at their base production
+    exo = pd.DataFrame(0.0, index=list(mm.EU), columns=MARKET_COMMODITIES)
+    for r in mm.EU:
+        for c in MARKET_COMMODITIES:
+            if c in mm.par.base_production.columns:
+                exo.at[r, c] = mm.par.base_production.at[r, c]
 
     eq = mm.solve(exogenous_supply=exo)
     assert eq.converged
@@ -544,12 +546,17 @@ def test_all_feed_bulks_and_residual_feeds_follow_capri(model):
     old = (mm.ev.eu_food_ratio, mm.ev.eu_biof_ratio)
     try:
         mm.ev.eu_food_ratio, mm.ev.eu_biof_ratio = {}, {}
-        q0 = mm.eu_feed_byproduct_output()
-        assert abs(q0["FPRI"] / fp["products"]["FPRI"]["prod0"] - 1.0) < 1e-12
-        mm.ev.eu_food_ratio = {mm.EU[0]: {"SWHE": 0.9}}
-        q1 = mm.eu_feed_byproduct_output()
-        w = dict((c, x) for c, u, x in fp["products"]["FPRI"]["parts"])["SWHE"]
-        assert abs(q1["FPRI"] / q0["FPRI"] - (1.0 - 0.1 * w)) < 1e-12 and q1["FENI"] == q0["FENI"]
+        # per EU market region (CAPRI's two blocks since 3 November 2026), each at its own base and parent weights
+        q0 = {r: mm.eu_feed_byproduct_output(r) for r in mm.EU}
+        reg = fp["products"]["FPRI"].get("reg") or {mm.EU[0]: fp["products"]["FPRI"]}
+        for r in mm.EU:
+            assert abs(q0[r]["FPRI"] / reg[r]["prod0"] - 1.0) < 1e-12, r
+        assert abs(sum(q0[r]["FPRI"] for r in mm.EU) / fp["products"]["FPRI"]["prod0"] - 1.0) < 1e-12
+        mm.ev.eu_food_ratio = {r: {"SWHE": 0.9} for r in mm.EU}
+        q1 = {r: mm.eu_feed_byproduct_output(r) for r in mm.EU}
+        for r in mm.EU:
+            w = dict((c, x) for c, u, x in reg[r]["parts"])["SWHE"]
+            assert abs(q1[r]["FPRI"] / q0[r]["FPRI"] - (1.0 - 0.1 * w)) < 1e-12 and q1[r]["FENI"] == q0[r]["FENI"], r
     finally:
         mm.ev.eu_food_ratio, mm.ev.eu_biof_ratio = old
     assert mm.feed_bulk_price_ratio("DE000000", "FENE", {"FENI": 1.2}) > 1.0
@@ -613,15 +620,16 @@ def test_biofuel_markets_follow_capri_functions(model):
     for k, v in bm["use0"].items():
         assert abs(st0["use"][k] - v) < 1e-6 * max(1.0, v), k
     R, C = list(mm.regions), list(mm.commodities)
+    eu = lambda st, k: sum(st[k].get((r, "BIOE"), 0.0) for r in mm.EU)   # the EU's blocks (since 3 November 2026)
     one = pd.DataFrame(1.0, index=R, columns=C)
     up = one.copy(); up.loc[:, "BIOE"] = 1.1
     st1 = mm.biofuel_state(up, up)
-    assert st1["prod"][("EU27", "BIOE")] > st0["prod"][("EU27", "BIOE")]
+    assert eu(st1, "prod") > eu(st0, "prod")
     assert st1["prod"][("USA", "BIOE")] > st0["prod"][("USA", "BIOE")]
-    assert st1["use"][("EU27", "BIOE")] < st0["use"][("EU27", "BIOE")]
+    assert eu(st1, "use") < eu(st0, "use")
     feed = one.copy(); feed.loc[:, ["SWHE", "CORN", "BARL", "OCER", "SUGR"]] = 1.2
     st2 = mm.biofuel_state(one, feed)
-    assert st2["prod"][("EU27", "BIOE")] < st0["prod"][("EU27", "BIOE")]
+    assert eu(st2, "prod") < eu(st0, "prod")
     # the feedstock CES at the higher output uses more of every feedstock at unchanged prices
     old = mm.ev.biof_state
     try:
@@ -635,7 +643,7 @@ def test_biofuel_markets_follow_capri_functions(model):
         # off: output fixed whatever the biofuel price (CAPRI without BIOF_M)
         mm.ev.biof_state = mm.biofuel_state(up, up)
         assert abs(mm.biofuel_feedstock_use({})["by_commodity"]["CORN"] / q0["CORN"] - 1.0) < 1e-6
-        assert abs(mm.ev.biof_state["prod"][("EU27", "BIOE")] / st0["prod"][("EU27", "BIOE")] - 1.0) < 1e-6
+        assert abs(eu(mm.ev.biof_state, "prod") / eu(st0, "prod") - 1.0) < 1e-6
     finally:
         del mm.biofuel_markets                             # back to the setting market.biofuel_markets
         mm.ev.biof_state = old
@@ -3051,14 +3059,17 @@ def test_palm_and_other_vegetable_oils_are_markets(model):
     mm = model.market_module
     cols = list(mm.commodities)
     rr = pd.DataFrame(1.0, index=mm.par.base_production.index, columns=cols)
-    rr.loc["EU27", "OTHO"] = 1.10
+    for r in mm.EU:                                                 # each of the EU's market regions (blocks)
+        rr.loc[r, "OTHO"] = 1.10
     mm.seen.eu_price_seen = pd.Series(1.10, index=cols)            # the supply models saw the same price
     s = mm.supply_response(mm.world_prices_base, None, region_ratio=rr)
-    base = float(mm.par.base_production.at["EU27", "OTHO"])
-    assert base > 0
-    # CAPRI's ProdNQ_ per member state (since 28 October 2026; before: the EU median p_elasSupp, 1.10 ** 0.977)
-    own = sum(h for (x, y), h in mm._eu_market_supply_nq_params()["EU27"].items() if x == "OTHO" and y == "OTHO")
-    assert abs(float(s.at["EU27", "OTHO"]) - (base + own * 0.10)) < 1e-6
+    nq = mm._eu_market_supply_nq_params()
+    for r in mm.EU:
+        base = float(mm.par.base_production.at[r, "OTHO"])
+        assert base > 0
+        # CAPRI's ProdNQ_ per member state (since 28 October 2026; before: the EU median p_elasSupp, 1.10 ** 0.977)
+        own = sum(h for (x, y), h in nq[r].items() if x == "OTHO" and y == "OTHO")
+        assert abs(float(s.at[r, "OTHO"]) - (base + own * 0.10)) < 1e-6
     mm.seen.eu_price_seen = None
 
 
@@ -3206,9 +3217,10 @@ def test_food_demand_is_capris_generalised_leontief(data):
     g = pd.read_csv(mkt / "gl_demand_goods.csv", keep_default_na=False, na_values=[""])
     mm = MarketModule(data)
     prm = mm._gl_params()
-    assert prm and "EU27" in prm["groups"] and len(prm["groups"]["EU27"]) == 26
+    # the EU's 26 member states over its market regions (CAPRI's two blocks since 3 November 2026)
+    assert prm and all(r in prm["groups"] for r in mm.EU) and sum(len(prm["groups"][r]) for r in mm.EU) == 26
     de = g[g.rms == "DE000000"].reset_index(drop=True)
-    e = next(x for x in prm["groups"]["EU27"]
+    e = next(x for r in mm.EU for x in prm["groups"][r]
              if len(x["p0"]) == len(de) and np.allclose(x["p0"] * 1000.0, de.cpri.values))
     x0 = mm._gl_eval(e, e["p0"], 1.0)
     k = {n: i for i, n in enumerate(de.good)}
@@ -3224,9 +3236,10 @@ def test_food_demand_is_capris_generalised_leontief(data):
     assert np.max(np.abs(glr - 1.0)) < 1e-12
     dp = dom0.copy(); dp["PORK"] *= 1.1
     d1 = mm.demand_response(dp, mm.world_prices_base)
+    eu = lambda d, c: float(sum(d.at[r, c] for r in mm.EU))
     for c in ("BEEF", "POUL"):
-        assert d1.at["EU27", c] > d0.at["EU27", c]
-    assert d1.at["EU27", "PORK"] < d0.at["EU27", "PORK"]
+        assert eu(d1, c) > eu(d0, c)
+    assert eu(d1, "PORK") < eu(d0, "PORK")
 
 
 def test_eu_trade_blocks_data_and_split(data):
@@ -3241,7 +3254,8 @@ def test_eu_trade_blocks_data_and_split(data):
     d = dict(data); d["eu_market_blocks"] = True
     mm = MarketModule(d)
     assert mm.EU == ("EU_WEST", "EU_EAST") and "EU27" not in mm.regions
-    mm1 = MarketModule(data)
+    d1 = dict(data); d1["eu_market_blocks"] = False                 # the one-EU form (removed later in stage 2)
+    mm1 = MarketModule(d1)
     assert mm1.EU == ("EU27",)
     mkt = DATA_DIR / "2017" / "market"
     fb = pd.read_csv(mkt / "bilateral_flows_2030_eu2.csv")
@@ -3286,20 +3300,23 @@ def test_fish_and_tropical_products_are_markets_and_processing_is_capris(data):
     for c in new:                                   # base = CAPRI's market: production of the flows' exporters
         assert abs(float(mm.par.base_production[c].sum()) - float(raw[c].X0.sum())) < 1e-6 * max(1.0, float(raw[c].X0.sum()))
     gl = mm._gl_params()
-    assert any((("EU27", mm.commodities.index(c)) in gl["x0"]) for c in ("COFF", "SFIS"))
+    assert any(((r, mm.commodities.index(c)) in gl["x0"]) for r in mm.EU for c in ("COFF", "SFIS"))
     assert "SFIS" in mm._feed_bulk_params()["feed0"]
     pq = mm._proc_nq_params()
-    H = pq["H"]["EU27"]
-    assert H[("RAPE", "RAPE")] > 0 and H[("RAPE", "SOYA")] < 0 and H[("RAPO", "SUNO")] == H[("SUNO", "RAPO")]
-    mm._bilateral_calibrate(mm.par.base_production.loc[["EU27"]].copy())
+    for r in mm.EU:                                  # each of the EU's market regions (CAPRI's two blocks)
+        H = pq["H"][r]
+        assert H[("RAPE", "RAPE")] > 0 and H[("RAPE", "SOYA")] < 0 and H[("RAPO", "SUNO")] == H[("SUNO", "RAPO")]
+    mm._bilateral_calibrate(mm.par.base_production.loc[list(mm.EU)].copy())
     dom0 = mm._dom0()
     d0 = mm.demand_response(dom0, mm.world_prices_base)
     dp = dom0.copy(); dp["SUNO"] *= 1.05
     d1 = mm.demand_response(dp, mm.world_prices_base)
-    assert d1.at["EU27", "RAPO"] > d0.at["EU27", "RAPO"]            # substitution between the oils in processing
+    eu = lambda d, c: float(sum(d.at[r, c] for r in mm.EU))
+    assert eu(d1, "RAPO") > eu(d0, "RAPO")                           # substitution between the oils in processing
     c0 = mm.crush_quantities(dom0)
     dp = dom0.copy(); dp["SOYA"] *= 1.05                             # soybean margin falls: rapeseed crush rises
-    assert mm.crush_quantities(dp)[("EU27", "RAPE")] > c0[("EU27", "RAPE")]
+    c1 = mm.crush_quantities(dp)
+    assert sum(c1[(r, "RAPE")] for r in mm.EU) > sum(c0[(r, "RAPE")] for r in mm.EU)
 
 
 def test_greendeal_2030_settings_and_pesticide_rule():
@@ -3672,7 +3689,7 @@ def test_non_eu_supply_elasticities_are_capri_regional(data):
     for r, c in (("USA", "SWHE"), ("BRA", "SOYA"), ("ARG", "BEEF")):
         v = tab[(tab.region == r) & (tab.commodity == c)].elasticity
         assert len(v) == 1 and abs(EV[regs.index(r), cols.index(c)] - float(v.iloc[0])) < 1e-12
-    assert np.allclose(EV[regs.index("EU27")], el.values)
+    assert all(np.allclose(EV[regs.index(r)], el.values) for r in mm.EU)
     assert not np.allclose(EV[regs.index("USA")], el.values)
 
 
