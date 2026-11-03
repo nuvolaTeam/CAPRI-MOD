@@ -342,7 +342,7 @@ Each stage is a separate commit series; checks as asked. The F2F/GD gate is run 
 | Stage | Content | Kind | Check |
 |---|---|---|---|
 | 0 | Decisions (§6: codes, EU reporting row, order with step G, source of truth) | — | — |
-| 1 | CAPRI's region lists as data: shared/market_regions.csv (RM, label), policy_blocks.csv (RMTP), rm_to_rmtp.csv, rms_to_rm.csv (exists), from sim_ini through a builder (as build_regional_units.py did). One grouping step in recalibrate_trade_2017 (RM → model region, today: identity on 26, A_EU_* → EU27 or blocks, 17 RM → ROW) used by all ~20 builders. Remove shared/trade_flows_2017.csv. | move | **builders reproduce**: every file of §2 identical to today's (as tools/check/compare_rekeyed.py did for the units) |
+| 1 (**done 3 November 2026**, see below) | CAPRI's region lists as data: shared/market_regions.csv (RM, label), policy_blocks.csv (RMTP), rm_to_rmtp.csv, rms_to_rm.csv (exists), from sim_ini through a builder (as build_regional_units.py did). One grouping step in recalibrate_trade_2017 (RM → model region, today: identity on 26, A_EU_* → EU27 or blocks, 17 RM → ROW) used by all ~20 builders. Remove shared/trade_flows_2017.csv. | move | **builders reproduce**: every file of §2 identical to today's (as tools/check/compare_rekeyed.py did for the units) |
 | 1b | WBA fix in build_gl_demand / build_welfare_base | behaviour (small) | rebuilt files differ only in WBA's 6 RMS; mini-EU run |
 | 2 | EU = A_EU_WEST + A_EU_EAST only: `eu_blocks` removed as an option, the single-EU branches (§3.2) deleted, feed-bulk prices per block, EU balances per block from member states, young-animal markets inside the solve (or the departure registered as default) | behaviour (DEP-3) | eu_blocks=true run on today's code reproduced exactly before deleting branches; then **base reproduces** (market alone at CAPRI's 2030 CAL supply: per-RM PROD, PMRK, flows against DATA / p_tradeFlows "CAL"); market Hessians measured per block (about 50 minutes per reference baseline, REGIONAL_UNITS_INVENTORY §4); **mini-EU run** |
 | 3 | ROW → 17 RM (grouping = identity); codes renamed if decided; tests' region names updated (6 files) | behaviour | **base reproduces CAPRI's 2030 calibrated market at sim_ini's state** for all 45 RM (flows: the eu2 extract already matches to 0.16 kt); mini-EU run |
@@ -435,3 +435,25 @@ RMEU_to_RM.csv, in CAPRI's set order, next to CAPRI's other sets, instead of the
 policy_blocks.csv and rm_to_rmtp.csv of §5 stage 1; the builder checks them against RALL and shared/rms_to_rm.csv
 against CAPRI's RMS_TO_RM. No model code reads them yet. The 37 sim_ini symbols the move and the ports need are
 extracted to capri_reference/simini/simini_21730 (tools/build/build_simini_reference.py).
+
+### Stage 1, done (3 November 2026, branch market-rm)
+
+- CAPRI's region lists as code lists from sim_ini's sets (tools/build/build_code_lists.py): codes/capri/RM.csv, RMTP.csv,
+  RM_TO_RMTP.csv, RMEU_to_RM.csv, and CAPRI's RMS and RMS_TO_RM in shared/rms.csv and shared/rms_to_rm.csv (written by
+  build_gl_demand.py before; same bytes). The names differ from the plan's (shared/market_regions.csv, policy_blocks.csv,
+  rm_to_rmtp.csv): CAPRI's own set names, as the other code lists under codes/capri.
+- One grouping step, tools/lib/_market_regions.py, read from the declared table codes/model_market_regions.csv (each of
+  the 45 RM and its model region: 26 their own, A_EU_WEST and A_EU_EAST EU27, 17 ROW); the 16 market builders use it in
+  place of REGION_MAP, trade_region() and their own EU rules. A code neither RM nor RMS raises (it went to ROW before).
+  Stages 2 and 3 change only that table.
+- shared/trade_flows_2017.csv removed (no reader), with FAOSTAT's sources/fao_2021/trade_flows_2021.csv (read only by
+  its builder's comparison); recalibrate_trade_2017.py keeps AGGREGATES and COMMODITY_MAP as a module.
+- capri_ms / is_eu refuse CAPRI's RM and RMTP codes that are not member states (section 7, decision 1).
+- The 2017 market year: its files are built from CAPRI's 2017 market data (market_base_1717, FAO_agg 2017) through the
+  same grouping step, so stages 2 and 3 regroup both years by the table.
+- Checks: every builder reproduces its outputs (82 files of the 16 builders); the data rebuild from blank reproduces all
+  357 outputs; mini-EU run identical to dev (meta only); full suite passed. On the way, the rebuild from blank was
+  repaired (it had stopped since 30 October): build_regional_units restricted to the modelled member states,
+  builders.json re-traced (the code lists capri_mod.data reads on import), build_code_lists no longer reading its own
+  outputs, dodo.py expanding zip arguments and fixing the hash seed.
+
