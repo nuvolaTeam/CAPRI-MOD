@@ -13,7 +13,7 @@ there unchanged): capri_data/sources/policy/minfert_redu_by_crop_p_checkSmallMin
 minfert_redu_by_crop_limCres.csv. This builder reads both and writes them for the model, which picks the rows that
 apply to its simulation year (CAPRI's conditions are strict: simy > YYYY).
 
-Outputs (capri_data/2017/policy/)
+Outputs (capri_data/scenarios/greendeal_group/, the Green Deal group's data)
   mineral_redu_exemptions.csv   capri_region, ngrp, factor, after_year, othpol_high
   mineral_redu_limcres.csv      capri_region, ngrp, add, after_year
 
@@ -25,7 +25,7 @@ from pathlib import Path
 import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[2]
-DEST = ROOT / "capri_data" / "2017" / "policy"
+DEST = ROOT / "capri_data" / "scenarios" / "greendeal_group"
 SRC = ROOT / "capri_data" / "sources" / "policy"
 
 

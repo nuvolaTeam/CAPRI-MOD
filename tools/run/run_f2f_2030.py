@@ -49,14 +49,16 @@ def main():
                     help="CAPRI's emission tax (ghgTax), EUR/t CO2-eq on the EU regions' emissions inside the supply "
                          "models; with --scenario carbontax the only shock (carbtax50_endotech_*.gms), else added to "
                          "the scenario")
-    ap.add_argument("--scenario", default="f2f", choices=("f2f", "greendeal", "greendeal2030", "carbontax"),
+    ap.add_argument("--scenario", default="f2f",
                     help="'f2f' (default): Farm-to-Fork with JRC121368's own settings (tiered surplus rule with its "
                          "36%% cap, no manure trade, milk-yield genomics 0.2: policy.greendeal.farm_to_fork_scenario); "
                          "'greendeal': CAPRI star 3.0's Green Deal group as its files set it (surptot.gms: every "
                          "region's surplus/ha cut by surpRedu%%, manure trade on, genomics 0), with --targets values "
                          "(default: the series' full targets lnds10 org25 pest50 surp50 applied in 2030); "
                          "'greendeal2030': CAPRI's own 2030 step of its Green Deal series (lnds8 org18 pest20 "
-                         "mine13crp surp30, policy.greendeal.GREENDEAL_2030_TARGETS)")
+                         "mine13crp surp30, policy.greendeal.GREENDEAL_2030_TARGETS); or a scenario folder's name "
+                         "(capri_data/scenarios/<name>/; f2f, greendeal2030 and carbontax without --targets are "
+                         "read from their folders)")
     ap.add_argument("--pesticide-rule", default="", choices=("", "jrc121368", "star3"),
                     help="yield effect of the pesticide target: 'jrc121368' (10%% at a 50%% cut) or 'star3' (none, "
                          "CAPRI star 3.0's Green Deal group); default: the scenario's (f2f jrc121368, greendeal star3)")
@@ -78,6 +80,9 @@ def main():
     ap.add_argument("--trajectory", default="capri_ref",
                     help="2030 baseline trajectory: capri_ref (CAPRI's 2030 reference, default), captrd (CAPRI's trend "
                          "projection) or a scenario folder name in capri_data/scenarios")
+    ap.add_argument("--scenarios-dir", default="",
+                    help="a folder of your own scenarios (python -m capri_mod.scenarios new/check), looked in before "
+                         "capri_data/scenarios (the setting run.scenarios_dir)")
     ap.add_argument("--settings", action="append", default=[],
                     help="a TOML settings file (capri_mod/settings/defaults.toml's keys); repeatable, later files win")
     ap.add_argument("--set", action="append", default=[],
@@ -106,6 +111,7 @@ def main():
     ov = {}
     flag_map = [  # (flag on, setting, value); every other setting: --set or --settings
         (bool(a.capped_regions), "supply.jrc_capped_override", a.capped_regions),
+        (bool(a.scenarios_dir), "run.scenarios_dir", a.scenarios_dir),
     ]
     for on, k, v in flag_map:
         if on:
@@ -140,7 +146,25 @@ def main():
     _et = (dict(JRC121368_ENDOTECH) if a.endotech.lower() == "jrc121368"
            else {k: float(v) for k, v in (x.split("=") for x in a.endotech.split(",") if x)})
     from capri_mod.policy.greendeal import farm_to_fork_scenario
-    if a.scenario == "carbontax":
+    # the scenario folders (capri_data/scenarios/<name>/, refactor stage 5): a folder's name, or the short names of
+    # the scenarios defined there when no --targets change them
+    from capri_mod.scenarios import definition as _SD
+    _folders = {k for k, v in _SD.available().items() if v == "scenario"}
+    _short = {"f2f": "farm_to_fork_jrc121368",
+              "greendeal2030": "greendeal_lnds8_org18_pest20_mine13crp_surp30_diet00_oth00",
+              "carbontax": "CARBON_TAX_50"}
+    _folder = a.scenario if a.scenario in _folders else (
+        _short.get(a.scenario) if not kw and not (a.scenario == "carbontax" and a.carbon_tax not in (None, 50.0))
+        else None)
+    if a.scenario not in _folders and a.scenario not in ("f2f", "greendeal", "greendeal2030", "carbontax"):
+        ap.error(f"--scenario {a.scenario!r}: one of f2f, greendeal, greendeal2030, carbontax or a scenario folder "
+                 f"({sorted(_folders)})")
+    if _folder is not None:
+        _sdef = _SD.load(_folder)
+        _scen = _SD.to_policy_scenario(_sdef)
+        if _sdef.reference_note:
+            print(f"note: {_sdef.name}: {_sdef.reference_note}", flush=True)
+    elif a.scenario == "carbontax":
         from capri_mod.scenarios.scenarios import carbon_tax_scenario
         _scen = carbon_tax_scenario(a.carbon_tax if a.carbon_tax is not None else 50.0)
     elif a.scenario == "f2f" and not kw:

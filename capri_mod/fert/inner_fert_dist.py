@@ -286,8 +286,9 @@ class InnerFertDist:
 
     def _rules(self):
         if not hasattr(self, "_exm"):
-            self._exm = self._inp.csv("mineral_redu_exemptions.csv", "policy")
-            self._lim = self._inp.csv("mineral_redu_limcres.csv", "policy")
+            # the Green Deal group's data (capri_data/scenarios/greendeal_group, refactor stage 5)
+            self._exm = self._inp.csv("mineral_redu_exemptions.csv", "scenarios/greendeal_group")
+            self._lim = self._inp.csv("mineral_redu_limcres.csv", "scenarios/greendeal_group")
         return self._exm, self._lim
 
     def mineral_caps(self, region: str, base: dict, reduction: float, year: Optional[int] = None) -> Dict[str, float]:

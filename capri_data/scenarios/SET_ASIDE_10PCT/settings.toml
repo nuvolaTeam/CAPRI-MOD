@@ -1,0 +1,12 @@
+# The set-aside scenario as the model defines it today: a 10% floor on all arable land. CAPRI's file
+# (scen/set_aside/set_aside_10.gms l. 16) sets 10% set-aside on the grandes cultures (GRCU) only: to be changed to
+# CAPRI's rule (the project lead's decision, 3 November 2026), its own commit and run
+[scenario]
+name = "SET_ASIDE_10PCT"
+kind = "scenario"
+description = "10% mandatory set-aside on all arable land."
+capri_files = ["scen/set_aside/set_aside_10.gms"]
+reference = "ref_star3"
+
+[scenario.shocks]
+set_aside_requirement = 0.1

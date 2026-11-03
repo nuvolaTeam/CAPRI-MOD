@@ -38,10 +38,11 @@ class RunInputs:
     # -- locations -----------------------------------------------------------------------------------------------
     def path(self, name: str, where: str) -> Path:
         """where: an area of the base year (AREAS, with a subfolder: "abatement/ammonia"), "shared", "sources/<sub>",
-        or "root" (the data directory itself)."""
+        "scenarios/<folder>" (a scenario group's or reference's data, refactor stage 5) or "root" (the data
+        directory itself)."""
         if where == "root":
             return self.root / name
-        if where == "shared" or where.startswith("sources/"):
+        if where == "shared" or where.startswith("sources/") or where.startswith("scenarios/"):
             return self.root / where / name
         if where.split("/")[0] in AREAS:
             return self.root / self.base_year / where / name

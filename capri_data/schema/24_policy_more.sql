@@ -67,7 +67,7 @@ INSERT INTO value_units VALUES
   ('pol_cap_payments', 'ORGANIC', NULL, 'open', 'cap_payments.ORGANIC: unit to be established'),
   ('pol_cap_payments', 'COUPLED', NULL, 'open', 'cap_payments.COUPLED: unit to be established');
 
--- file: capri_data/2017/policy/capri_baseline_surplus_2030.csv
+-- file: capri_data/scenarios/capri_ref_2030/capri_baseline_surplus_2030.csv
 CREATE TABLE pol_capri_baseline_surplus_2030 (
     region VARCHAR NOT NULL,
     surplus_kg_n_per_ha DOUBLE NOT NULL,
@@ -78,7 +78,7 @@ COMMENT ON TABLE pol_capri_baseline_surplus_2030 IS 'CAPRI''s own baseline gross
 INSERT INTO value_units VALUES
   ('pol_capri_baseline_surplus_2030', 'surplus_kg_n_per_ha', NULL, 'open', 'capri_baseline_surplus_2030.surplus_kg_n_per_ha: unit to be established');
 
--- file: capri_data/2017/policy/mineral_redu_exemptions.csv
+-- file: capri_data/scenarios/greendeal_group/mineral_redu_exemptions.csv
 CREATE TABLE pol_mineral_redu_exemptions (
     capri_region VARCHAR NOT NULL,
     ngrp VARCHAR NOT NULL,
@@ -93,7 +93,7 @@ INSERT INTO value_units VALUES
   ('pol_mineral_redu_exemptions', 'factor', NULL, 'open', 'mineral_redu_exemptions.factor: unit to be established'),
   ('pol_mineral_redu_exemptions', 'othpol_high', NULL, 'open', 'mineral_redu_exemptions.othpol_high: unit to be established');
 
--- file: capri_data/2017/policy/mineral_redu_limcres.csv
+-- file: capri_data/scenarios/greendeal_group/mineral_redu_limcres.csv
 CREATE TABLE pol_mineral_redu_limcres (
     capri_region VARCHAR NOT NULL,
     ngrp VARCHAR NOT NULL,

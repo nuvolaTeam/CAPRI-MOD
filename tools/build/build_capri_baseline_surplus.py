@@ -14,7 +14,7 @@ kg N/ha (CAPRI 48.5) and a 70% cut instead of 26%, Luxembourg 235 (CAPRI 157), S
 Sources: capri_data/2017/environment/capri_gnb_components_2030.csv (SURTOT, from CAPRI's
 res_2_1730greendeal_refdefaulta), capri_data/validation/greendeal_2030/capri_marginal_terms_ini_2030.csv.xz
 (UAAR LEVL, weights).
-Output: capri_data/2017/policy/capri_baseline_surplus_2030.csv (region, surplus_kg_n_per_ha, source)
+Output: capri_data/scenarios/capri_ref_2030/capri_baseline_surplus_2030.csv (a result of CAPRI's 2030 reference run, beside its trajectory) (region, surplus_kg_n_per_ha, source)
 
     python tools/build/build_capri_baseline_surplus.py
 """
@@ -65,7 +65,7 @@ def main():
                    else f"CAPRI 2030 reference, {ms} (CAPRI holds the country as one region)")
         rows.append({"region": reg, "surplus_kg_n_per_ha": v, "source": how})
     out = pd.DataFrame(rows)
-    dest = ROOT / "capri_data" / "2017" / "policy" / "capri_baseline_surplus_2030.csv"
+    dest = ROOT / "capri_data" / "scenarios" / "capri_ref_2030" / "capri_baseline_surplus_2030.csv"
     out.to_csv(dest, index=False)
     kinds = out["source"].str.extract(r"^(CAPRI 2030 reference, NUTS-2|CAPRI 2030 reference, national|"
                                       r"CAPRI 2030 reference, [A-Z]{2}000000|no CAPRI)")[0].value_counts()

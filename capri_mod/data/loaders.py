@@ -64,9 +64,7 @@ _FILE_CATEGORY = {
     "land_market_{BY}.csv": "supply", "land_market_2030.csv": "supply",
     "land_market_{BY}_regions.csv": "supply", "land_market_2030_regions.csv": "supply",
     "nh3_factors_capri.csv": "environment", "nh3_factors_capri_regions.csv": "environment",
-    "landscape_targets_ms.csv": "policy",
     "cap_ceilings_2030.csv": "policy", "premium_scheme_shares_2030.csv": "policy",
-    "capri_baseline_surplus_2030.csv": "policy",
     "n_deposition_regional.csv": "environment",
     "manure_trade_2030.csv": "environment",
     "manure_housing_losses_2030.csv": "environment",
@@ -76,8 +74,6 @@ _FILE_CATEGORY = {
     "crop_co2_coef.csv": "environment",
     # CAPRI's inner fertiliser distribution model and mineRedu (read by capri_mod.fert.inner_fert_dist)
     "fert_dist_priors_2030.csv": "environment", "fert_dist_crop_groups_2030.csv": "environment",
-    "mineral_redu_exemptions.csv": "policy", "mineral_redu_limcres.csv": "policy",
-    "organic_targets_ms.csv": "policy",
     # reference data: not loaded by the model, but registered so the
     # validator can resolve and shape-check it like any other input
     "capri_own_price_elasticities.csv": "supply",
@@ -96,6 +92,13 @@ _FILE_CATEGORY = {
     "climate_zones.csv": "environment",
 }
 _SHARED_FILES = {"trade_flows.csv": "trade_flows_{BY}.csv"}       # {BY}: the base year (K52f)
+#: the scenario data (refactor stage 5): the Green Deal group's data held once in its group folder, the 2030
+#: reference's baseline surplus beside its trajectory (capri_data/scenarios/)
+_SCENARIO_FILES = {"landscape_targets_ms.csv": "scenarios/greendeal_group",
+                   "organic_targets_ms.csv": "scenarios/greendeal_group",
+                   "mineral_redu_exemptions.csv": "scenarios/greendeal_group",
+                   "mineral_redu_limcres.csv": "scenarios/greendeal_group",
+                   "capri_baseline_surplus_2030.csv": "scenarios/capri_ref_2030"}
 
 #: the base year of the load in progress (load_all_data sets it); None: the settings' run.base_year (K52f)
 DEFAULT_BASE_YEAR = None
@@ -122,6 +125,8 @@ def resolve_data_file(data_dir, filename, base_year=None):
         base_year = DEFAULT_BASE_YEAR or default_base_year()
     base_year = str(base_year)
 
+    if filename in _SCENARIO_FILES:
+        return data_dir / _SCENARIO_FILES[filename] / filename
     if filename in _SHARED_FILES:
         shared = data_dir / "shared" / _SHARED_FILES[filename].replace("{BY}", base_year)
         if shared.exists():
