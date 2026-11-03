@@ -575,7 +575,8 @@ files, need it [own check, from the trace of 3 November 2026]. So the data can b
 installation is. The item converts that material to Parquet and publishes it as a versioned download, so a clean clone
 can rebuild every model input. **Beyond CAPRI**: CAPRI needs its installation to rebuild its own data.
 
-**Decided (the project lead, 3 November 2026).** The full Parquet set stays out of git and is available for download.
+**Decided (the project lead, 3 November 2026).** The full Parquet set stays out of git and is available for download,
+hosted on Hugging Face (as the dat mirror, hf_capri); the item comes after the market move's stages 2-3.
 
 **Measured** (3 November 2026, three of the largest files, every numeric record kept):
 
@@ -597,9 +598,8 @@ can rebuild every model input. **Beyond CAPRI**: CAPRI needs its installation to
 5. capri_data/sources keeps only the records each builder uses (the extract pattern of build_bilateral_market), so git
    stays small; the model's inputs stay CSV.
 
-**Open decisions.** Where the download lives (a dataset host such as the one of the dat mirror, hf_capri, or another);
-who may download it (CAPRI's material: licence and access); its place in the order (after the market move's stages 2-3
-is suggested).
+**Open decisions.** Who may download it (CAPRI's material: licence and access; for instance a private or gated
+Hugging Face dataset).
 
 ## 13. Summary
 
@@ -619,7 +619,7 @@ is suggested).
 | S11 | S1 for T1/T2 averages | not started; per item | which items and exports | SGP S11 |
 | P1 obligatory set-aside | — | not started | when | §12a; supply_model.gms SETA_ |
 | P2 coupled support, Pillar I envelope | — | not started | when; with the premium module's port | §12a |
-| CAPRI's sources as Parquet, for download (beyond CAPRI) | — | decided 3 Nov: outside git, downloadable; sizes measured; not started | host; access; place in the order | §12b |
+| CAPRI's sources as Parquet, for download (beyond CAPRI) | — | decided 3 Nov: outside git, on Hugging Face, after market stages 2-3; sizes measured; not started | access | §12b |
 
 ## 14. Open decisions across all items
 
@@ -645,7 +645,7 @@ is suggested).
 16. Not raised in the notes [I]: the position of S1/S2, the G2 stages and S6-S11 relative to the market move and the
     29 units.
 17. P1 and P2 (§12a): when to schedule them.
-18. §12b: where the Parquet download is hosted, who may access it, and where the item goes in the order.
+18. §12b: who may access the Parquet download (host Hugging Face and timing decided 3 November 2026).
 
 ## 15. Notes found out of date while drafting
 
