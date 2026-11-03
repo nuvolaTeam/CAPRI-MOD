@@ -126,15 +126,12 @@ class FeedMixin(MarketStateMixin):
             share = {str(r.commodity): float(r.share) for r in sh.itertuples()
                      if r.commodity in self.commodities and r.commodity in feed0}
             # per EU market region: the region's feed over its use, the EU use (file) split by CAPRI's member-state
-            # use (eu_split); one EU region: the file's share
+            # use (eu_split)
             use_eu = {str(r.commodity): float(r.use_kt) for r in sh.itertuples()}
             share_reg = {}
             for reg in self.EU:
                 share_reg[reg] = {}
                 for c, sh_ in share.items():
-                    if not self.eu_blocks:
-                        share_reg[reg][c] = sh_
-                        continue
                     u = use_eu.get(c, 0.0) * self.eu_split(c)[reg]
                     f = feed0_reg[reg].get(c, 0.0)
                     if u > 0 and f > 0:
@@ -244,9 +241,6 @@ class FeedMixin(MarketStateMixin):
                 # parents' weights from the region's own food + processing (biofuel processing) use of each parent
                 reg = {}
                 for rg, f in self.eu_split(p, "prod_kt").items():
-                    if not self.eu_blocks:
-                        reg[rg] = {"prod0": prods[p]["prod0"], "parts": prods[p]["parts"]}
-                        continue
                     parts = []
                     for r_ in g.itertuples():
                         it = ("biof_kt",) if str(r_.use) == "biofuel" else ("hcon_kt", "proc_kt")

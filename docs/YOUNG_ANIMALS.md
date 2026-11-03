@@ -18,7 +18,7 @@ fixed (`arm/market_model.gms` l. 1579, `yaniMarket_`; `rmsYaniMarket_` per membe
 | Goods | YCAM, YCAF, YBUL, YHEI, YCOW, YPIG, YLAM | calves (YCAM + YCAF), young cattle (YBUL + YHEI), cows (YCOW), piglets (YPIG), lambs (YLAM) |
 | Coefficients | per activity level | per model head: CAPRI's regional flow / the model's head count (`tools/build/build_young_animals.py` → `capri_data/2017/supply/young_animals_2017.csv`) |
 | Supply side | young animals in the supply balance, valued at their price | each activity's margin changes by (price ratio − 1) × CAPRI's base value per head × (output − input) per head (`RegionalSupplyModel._apply_young_animal_prices`) |
-| Market | per market region (RM), net trade fixed | per EU market region (the EU, or each EU trade block with `eu_blocks`); the net balance of each good held at the baseline run's level |
+| Market | per market region (RM), net trade fixed | per EU market region (each EU trade block, EU_WEST and EU_EAST); the net balance of each good held at the baseline run's level |
 | Price update | inside the market model, with normalised-quadratic supply approximations | `CAPRIModel._update_young_animal_prices`, once per outer iteration of a scenario: a Newton step on the price ratios, the supply response approximated from each region's PMP matrix (dx = Q⁻¹ dc), renewed every iteration |
 | Price bounds | ±10 × (abs(level) + 10), widened where binding; negative prices allowed (`arm/set_start_val.gms`, `arm/widen_bounds.gms`) | numeric guard of ±50 × base (`YANI_RATIO_BOUNDS`); negative ratios allowed |
 

@@ -878,12 +878,12 @@ equivalent. Sourced economic parameters are not settings: they are in `capri_dat
 from capri_mod import settings
 s = settings.load(["my_run.toml"], overrides={"supply.pmp_source": "recipe"})   # validated: unknown keys stop
 settings.activate(s)                                   # the settings every module reads
-with settings.override({"market.eu_blocks": True}):    # temporarily, restored on exit
+with settings.override({"market.biofuel_markets": False}):    # temporarily, restored on exit
     model.run(...)
 s.save("my_run.settings.toml")                         # the effective settings
 ```
 
-- From the command line: `tools/run/run_f2f_2030.py OUT.pkl --settings my_run.toml --set market.eu_blocks=true`. The run
+- From the command line: `tools/run/run_f2f_2030.py OUT.pkl --settings my_run.toml --set market.biofuel_markets=false`. The run
   writes its effective settings next to the result (`OUT.settings.toml`, and `meta["settings"]` in the pickle), and
   its run manifest (`OUT.manifest.json`, and `meta["run_manifest"]`; `capri_mod/run_manifest.py`, since 29 October
   2026): the git commit, branch and files changed from it, the software versions, and every input file the run's own
@@ -1533,11 +1533,10 @@ for practical reasons (to be switched to CAPRI's) are listed with these two in d
 ### 10.3 EU27 as a single market region
 
 The market is CAPRI's bilateral market (two Armington nests over CAPRI's bilateral
-flows, transport costs, tariffs and quotas) with the EU27 as one of its 26 trade
-regions, trading bilaterally with the others; trade between member states is not
-resolved, as in CAPRI. CAPRI's own default splits the EU into two trade blocks,
-EU_WEST and EU_EAST; that is an option here (`market.eu_blocks = true`), kept off for
-now (a departure to be removed: docs/DEPARTURES_FROM_CAPRI.md). Member states keep
+flows, transport costs, tariffs and quotas) with the EU as CAPRI's two market regions,
+EU_WEST and EU_EAST (aggregation/defaultA.agg; since 3 November 2026), trading
+bilaterally with each other and the other regions; trade between member states inside
+a block is not resolved, as in CAPRI. "EU27" in the reports is the two blocks' sum. Member states keep
 their own raw milk prices through the dairy block. Earlier versions (before the
 bilateral market) treated the EU as one Armington bloc against the rest of the world,
 with an Armington premium on the world price.

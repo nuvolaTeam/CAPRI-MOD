@@ -368,15 +368,14 @@ class HessianBlock:
         # CAPRI's two EU trade blocks: each block's member states, summed (each member state's models see its own
         # block's prices, so the measured response is to that block's price)
         blocks = {}
-        if getattr(mm, "eu_blocks", False):
-            bmap = mm._ms_block_map()
-            for cc, h in ms_h.items():
-                if sup_of(cc) is not None:
-                    continue
-                b_ = bmap.get(cc) or bmap.get(capri_ms(cc))
-                if b_ is None:
-                    raise ValueError(f"member state {cc} has no EU trade block (eu_market_blocks.csv)")
-                blocks[b_] = h if b_ not in blocks else blocks[b_].add(h, fill_value=0.0)
+        bmap = mm._ms_block_map()
+        for cc, h in ms_h.items():
+            if sup_of(cc) is not None:
+                continue
+            b_ = bmap.get(cc) or bmap.get(capri_ms(cc))
+            if b_ is None:
+                raise ValueError(f"member state {cc} has no EU trade block (eu_market_blocks.csv)")
+            blocks[b_] = h if b_ not in blocks else blocks[b_].add(h, fill_value=0.0)
         return eu, sup, blocks
 
     @staticmethod

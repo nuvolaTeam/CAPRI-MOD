@@ -52,7 +52,7 @@ class ProcessingMixin(MarketStateMixin):
             bb = inp.csv("processing_nq_base.csv", keep_default_na=False, na_values=[""])
 
             def mreg(rms, mr):
-                if mr == "EU27" and self.eu_blocks:
+                if mr == "EU27":
                     return self.eu_region_of_ms(rms) or mr
                 return mr
             # ProcNQ_ divides H by the price of the non-agricultural good, DATA(RMS,"PPri","Inpe","CUR")
@@ -146,7 +146,7 @@ class ProcessingMixin(MarketStateMixin):
         base_dom = self.domestic_prices(self.world_prices_base)
         for key, v in raw.items():
             r, s = key.split("|")
-            if (r not in self.regions and not (r == "EU27" and self.eu_blocks)) or s not in self.CRUSH_CHAINS:
+            if (r not in self.regions and r != "EU27") or s not in self.CRUSH_CHAINS:
                 continue
             yo, yc = float(v["oil_yield"]), float(v["cake_yield"])
             o, c = self.CRUSH_CHAINS[s]
@@ -154,7 +154,7 @@ class ProcessingMixin(MarketStateMixin):
             _ov = (self.par.crush_q0_override or {}).get((r, s))
             if _ov is not None:
                 q0 = float(_ov)       # bilateral market: CAPRI's cake production of the market year / yield
-            if r == "EU27" and self.eu_blocks:
+            if r == "EU27":
                 # CAPRI's two trade blocks: the EU parameters for each block, its crush share of seed use from
                 # CAPRI's member-state processing and use (eu_ms_balance_2030.csv); base crush = share x the
                 # block's aligned seed use (below)
@@ -173,20 +173,6 @@ class ProcessingMixin(MarketStateMixin):
                     out[(rb, s)] = dict(q0=shb * bb, yo=yo, yc=yc, eps=float(v["elasticity"]),
                                         m0=gross - ps, gross=max(gross, 1.0))
                 continue
-            if r == "EU27":
-                # EU base crush = CAPRI's crush SHARE of EU seed use x the
-                # market's own EU base seed use. With all regions modelled
-                # this equals CAPRI's crush exactly; with a subset it scales
-                # consistently (on 12 regions EU rapeseed use is 581 kt -
-                # a fixed 20,955 kt crush made non-crush use negative).
-                share = float(v.get("crush_share_of_use") or 0.0)
-                # the ALIGNED EU seed use: base_consumption is later divided
-                # by the calibration factor (EU exemption), which shifted the
-                # base crush after calibration and moved base prices
-                _al = (self.par.eu_aligned_use or {}).get("EU27", {})
-                b = float(_al.get(s, self.par.base_consumption.at["EU27", s] if s in self.par.base_consumption.columns else 0.0))
-                if share > 0 and b > 0:
-                    q0 = share * b
             ps, po, pc = (float(base_dom.at[r, x]) for x in (s, o, c))
             gross = yo * po + yc * pc               # CAPRI: seed price + margin
             out[(r, s)] = dict(q0=q0, yo=yo, yc=yc, eps=float(v["elasticity"]),

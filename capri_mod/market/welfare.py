@@ -112,7 +112,7 @@ class WelfareMixin:
         inpe = bb.groupby("rms")["inpe"].first().to_dict()
 
         def mreg(rms, mr):
-            if mr == "EU27" and self.eu_blocks:
+            if mr == "EU27":
                 return self.eu_region_of_ms(rms) or mr
             return mr
         H, ap, reg = {}, {}, {}
@@ -441,14 +441,14 @@ class WelfareMixin:
 
     def _welfare_base(self) -> Dict[str, Dict[str, float]]:
         """CAPRI's base value of each component per model region (welfare_base_2030.csv: per CAPRI region, summed
-        to the model's market regions; the EU's member states to their trade block with eu_blocks)."""
+        to the model's market regions; the EU's member states to their trade block)."""
         cached = getattr(self, "_welf_base_cache", None)
         if cached is not None:
             return cached
         bb = self._inp().csv("welfare_base_2030.csv")
         out: Dict[str, Dict[str, float]] = {}
         for rms, mr, comp, v in bb[["rms", "model_region", "component", "value"]].itertuples(index=False):
-            if mr == "EU27" and self.eu_blocks:
+            if mr == "EU27":
                 mr = self.eu_region_of_ms(rms) or mr
             d = out.setdefault(str(mr), {})
             d[str(comp)] = d.get(str(comp), 0.0) + float(v)

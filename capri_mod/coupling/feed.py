@@ -15,7 +15,7 @@ class FeedBlock:
         sig = price_signal if price_signal is not None else {}
         ratio = {c: 1.0 + float(sig.get(c, 0.0)) for c in mm.commodities} if hasattr(sig, "get") else {}
         # EU trade blocks: the member state's block prices (EU signal + the block's departure)
-        _dev = (getattr(self.sv, "eu_dev", None) or {}) if (getattr(mm, "eu_blocks", False) and price_signal is not None) else {}
+        _dev = (getattr(self.sv, "eu_dev", None) or {}) if price_signal is not None else {}
         rr = {rg: {c: v + float(d.get(c, 0.0)) for c, v in ratio.items()} for rg, d in _dev.items()}
         _fb = mm._feed_bulk_params()
         out = {k: mm.feed_bulk_price_ratio(k[0], k[1], rr.get(mm.eu_region_of_ms(k[0]), ratio))

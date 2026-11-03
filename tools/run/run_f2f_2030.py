@@ -9,7 +9,7 @@ and OUT.manifest.json (the run manifest: commit, software, every input read with
 Usage: python tools/run/run_f2f_2030.py OUT.pkl [--scenario f2f|greendeal|greendeal2030|carbontax]
                                             [--targets lndscpTarg=0,orgTarg=0,pestRedu=0,surpRedu=0]
                                             [--settings FILE.toml] [--set section.key=value] ...
-Any setting of capri_mod/settings/defaults.toml is changed with --set (e.g. --set market.eu_blocks=true,
+Any setting of capri_mod/settings/defaults.toml is changed with --set (e.g. --set market.biofuel_markets=false,
 --set diagnostics.trace_outer=true for the outer-loop trace) or a --settings file.
 """
 import os as _os
@@ -86,7 +86,7 @@ def main():
     ap.add_argument("--settings", action="append", default=[],
                     help="a TOML settings file (capri_mod/settings/defaults.toml's keys); repeatable, later files win")
     ap.add_argument("--set", action="append", default=[],
-                    help="one setting, e.g. --set market.eu_blocks=true (after the files and the flags)")
+                    help="one setting, e.g. --set market.biofuel_markets=false (after the files and the flags)")
     ap.add_argument("--base-prices", action="store_true",
                     help="keep 2017 prices in the 2030 baseline (default: CAPRI's 2030 prices in 2017 money)")
     a = ap.parse_args()

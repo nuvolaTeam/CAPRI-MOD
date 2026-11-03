@@ -243,23 +243,15 @@ def test_norway_young_animals_hessian_and_bulk_prices_are_its_own(data):
     assert CAPRIModel._yani_market_region(fake, "NO090000") == "NOR"
     assert CAPRIModel._yani_market_region(fake, "DE110000") == mm.eu_region_of_ms("DE000000")
     h = lambda v: pd.DataFrame([[v]], index=["BARL"], columns=["BARL"])
-    mm.eu_blocks = False                     # the one-EU form (removed later in stage 2 of the market move)
-    try:
-        eu, sup, blocks = CAPRIModel._split_hessian(fake, {"DE": h(2.0), "DK": h(1.0), "NO": h(0.5)})
-        assert float(eu.at["BARL", "BARL"]) == 3.0 and float(sup["NOR"].at["BARL", "BARL"]) == 0.5 and blocks == {}
-    finally:
-        del mm.eu_blocks
-    # with CAPRI's two EU trade blocks: one Hessian per block, the sum of its member states' (eu_market_blocks.csv)
-    mm.eu_blocks = True
-    try:
-        _, _, blocks = CAPRIModel._split_hessian(fake, {"DE": h(2.0), "DK": h(1.0), "PL": h(4.0), "NO": h(0.5)})
-        bm = mm._ms_block_map()
-        exp = {}
-        for cc, v in (("DE000000", 2.0), ("DK000000", 1.0), ("PL000000", 4.0)):
-            exp[bm[cc]] = exp.get(bm[cc], 0.0) + v
-        assert {b: float(H.at["BARL", "BARL"]) for b, H in blocks.items()} == exp
-    finally:
-        del mm.eu_blocks
+    # CAPRI's two EU trade blocks: one Hessian per block, the sum of its member states' (eu_market_blocks.csv);
+    # Norway's on its own; the EU total for reporting
+    eu, sup, blocks = CAPRIModel._split_hessian(fake, {"DE": h(2.0), "DK": h(1.0), "PL": h(4.0), "NO": h(0.5)})
+    assert float(eu.at["BARL", "BARL"]) == 7.0 and float(sup["NOR"].at["BARL", "BARL"]) == 0.5
+    bm = mm._ms_block_map()
+    exp = {}
+    for cc, v in (("DE000000", 2.0), ("DK000000", 1.0), ("PL000000", 4.0)):
+        exp[bm[cc]] = exp.get(bm[cc], 0.0) + v
+    assert {b: float(H.at["BARL", "BARL"]) for b, H in blocks.items()} == exp
     fake.sv.sup_dev = {"NOR": pd.Series({"BARL": 0.2})}
     sig = pd.Series(0.0, index=mm.commodities)
     out = CAPRIModel.feed_bulk_price_ratios(fake, sig)

@@ -56,7 +56,7 @@ class MarketModule(NewtonKrylovMixin, CalibrationMixin, BiofuelMixin, DairyMixin
     """
     CAPRI's global market model for the given EU supply (arm/market_model.gms).
 
-    26 trade regions (or the EU as two blocks, eu_blocks) and 58 commodities: bilateral trade with two
+    The EU as CAPRI's two market regions (EU_WEST, EU_EAST), 25 other trade regions and 58 commodities: bilateral trade with two
     Armington nests, transport costs, tariffs and the EU's tariff-rate quotas (market/bilateral.py),
     Generalised Leontief food demand, processing (ProcNQ_, oilseed crushing), the dairy block (fat and
     protein), biofuel markets and feed bulks per member state. Non-EU supply is CAPRI's market supply
@@ -68,26 +68,19 @@ class MarketModule(NewtonKrylovMixin, CalibrationMixin, BiofuelMixin, DairyMixin
     """
 
 
-    #: CAPRI's EU market structure (docs/archive/MARKET_STRUCTURE_PLAN.md step 3): False - the EU is one market region
-    #: (EU27); True - CAPRI's two trade blocks EU_WEST (EU-14) and EU_EAST (EU-13) of gams/aggregation/defaultA.agg,
-    #: each with its own market and Armington prices and bilateral trade between them, the member states inside
-    #: (capri_data/shared/eu_market_blocks.csv). Read when the module is built (data["eu_market_blocks"] overrides).
-    eu_blocks = setting("market.eu_blocks", run_state=True)
-    #: CAPRI's EU trade blocks (capri_data/shared/eu_market_blocks.csv; definitions.EU_BLOCKS)
+    #: CAPRI's EU market structure: its two market regions A_EU_WEST and A_EU_EAST (gams/aggregation/defaultA.agg), the
+    #: model's EU_WEST (EU-14) and EU_EAST (EU-13), each with its own market and Armington prices and bilateral trade
+    #: between them, the member states inside (capri_data/shared/eu_market_blocks.csv; definitions.EU_BLOCKS). The one
+    #: EU27 region of before (market.eu_blocks = false) was removed on 3 November 2026 (the market's move onto CAPRI's
+    #: regions, stage 2); "EU27" stays a reporting row, the sum of the two (bilateral_solve._with_eu_aggregate).
     EU_BLOCK_REGIONS = _defs.EU_BLOCKS
     def __init__(self, data: dict, inputs: Optional["MarketInputs"] = None):
         self.data       = data
         #: the market's data adapter (inputs.py): every input file is read through it
         self.inputs     = inputs if inputs is not None else MarketInputs()
         self.commodities = MARKET_COMMODITIES
-        _eb = data.get("eu_market_blocks") if isinstance(data, dict) else None
-        self.eu_blocks = bool(type(self).eu_blocks if _eb is None else _eb)
-        if self.eu_blocks:
-            self.regions = [x for r in ALL_TRADE_REGIONS for x in (self.EU_BLOCK_REGIONS if r == "EU27" else (r,))]
-            self.EU = tuple(self.EU_BLOCK_REGIONS)
-        else:
-            self.regions = ALL_TRADE_REGIONS
-            self.EU = ("EU27",)
+        self.regions = [x for r in ALL_TRADE_REGIONS for x in (self.EU_BLOCK_REGIONS if r == "EU27" else (r,))]
+        self.EU = tuple(self.EU_BLOCK_REGIONS)
         self.n_comm     = len(self.commodities)
         self.n_reg      = len(self.regions)
         # market regions outside the EU whose market supply is their supply models' output (CAPRI's RMSSUP outside
@@ -112,7 +105,7 @@ class MarketModule(NewtonKrylovMixin, CalibrationMixin, BiofuelMixin, DairyMixin
             # no invented price (a fixed 200 EUR/t was used here): every market product needs CAPRI's world price
             raise ValueError(f"no base world price for market products {_miss} (capri_data world prices)")
         self.tariffs       = data["tariffs"]
-        if self.eu_blocks and "EU27" in self.tariffs.index:
+        if "EU27" in self.tariffs.index:
             # the EU's common external tariff applies to both blocks (no tariff between them: CAPRI's flows)
             _t = self.tariffs.copy()
             for _b in self.EU:
@@ -144,7 +137,7 @@ class MarketModule(NewtonKrylovMixin, CalibrationMixin, BiofuelMixin, DairyMixin
         return inp
 
     # ------------------------------------------------------------------
-    # EU market regions (one region EU27, or CAPRI's two trade blocks)
+    # EU market regions (CAPRI's two blocks)
     # ------------------------------------------------------------------
     def _ms_block_map(self) -> Dict[str, str]:
         m = getattr(self, "_ms_block_cache", None)
@@ -154,12 +147,10 @@ class MarketModule(NewtonKrylovMixin, CalibrationMixin, BiofuelMixin, DairyMixin
         return m
 
     def eu_region_of_ms(self, ms: str) -> Optional[str]:
-        """The EU market region of a CAPRI member state (BL000000, DE000000, ...): EU27, or its trade block; None for
-        the supply-model countries outside the EU (Norway, NO000000: market region NOR)."""
+        """The EU market region of a CAPRI member state (BL000000, DE000000, ...): its block; None for the supply-model
+        countries outside the EU (Norway, NO000000: market region NOR)."""
         if ms in self.SUP_NONEU_MS.values():
             return None
-        if not self.eu_blocks:
-            return "EU27"
         return self._ms_block_map().get(ms)
 
     def sup_region_of_country(self, cc: str) -> Optional[str]:
@@ -222,9 +213,7 @@ class MarketModule(NewtonKrylovMixin, CalibrationMixin, BiofuelMixin, DairyMixin
 
     def eu_split(self, commodity: str, item: str = "use_kt") -> Dict[str, float]:
         """Each EU market region's part of the EU total of a balance item of a commodity in CAPRI's 2030
-        member-state data ({EU27: 1} with one EU region; equal parts where CAPRI has none of it)."""
-        if not self.eu_blocks:
-            return {"EU27": 1.0}
+        member-state data (equal parts where CAPRI has none of it)."""
         t = self._eu_ms_balance()
         v = {r: (float(t.at[(r, commodity), item]) if (r, commodity) in t.index else 0.0) for r in self.EU}
         tot = sum(v.values())

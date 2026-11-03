@@ -46,7 +46,7 @@ class CalibrationMixin(MarketStateMixin):
         self.par.base_net_exports_eu = {}
         inp = self._inp()
         year = self._market_year()
-        sfx = "_eu2" if self.eu_blocks else ""
+        sfx = "_eu2"                                    # the market data with CAPRI's two EU blocks
         ff, fr = f"bilateral_flows_{year}{sfx}.csv", f"bilateral_regions_{year}{sfx}.csv"
         if not inp.exists(ff):
             by = inp.base_year                  # the base year's market where the market year has none (K52f)
@@ -80,7 +80,7 @@ class CalibrationMixin(MarketStateMixin):
             if c in bil:
                 continue
             for r in regions:
-                if r in self.EU and self.eu_blocks:
+                if r in self.EU:
                     rec = bal.get(f"EU27|{c}", {})
                     sp, su = self.eu_split(c, "prod_kt")[r], self.eu_split(c, "use_kt")[r]
                     p_, u_ = float(rec.get("production", 0.0) or 0.0) * sp, float(rec.get("consumption", 0.0) or 0.0) * su
@@ -145,35 +145,20 @@ class CalibrationMixin(MarketStateMixin):
     #: consumption-to-production ratio, which comes from one source with one set
     #: of definitions, so it is the EU's real self-sufficiency even where levels
     #: differ; and the world balance closes over the OTHER regions.
-    def _fao_eu_rows(self) -> dict:
-        rows = getattr(self, "_fao_eu_cache", None)
-        if rows is not None:
-            return rows
-        rows = {}
-        # CAPRI's own EU balance (FAO_agg, member states summed: production MAPR, domestic use DOMM). The FAO
-        # extract (fao_market_baseline.json) was read first as a fallback; CAPRI's balance covers every EU
-        # commodity it had, so the fallback was inert and was removed (20 October 2026, KNOWN_ISSUES K54-6)
-        for key, rec in (self.par.capri_world_balance or {}).items():
-            r, c = key.split("|")
-            if r == "EU27" and float(rec.get("production", 0) or 0) > 0 and float(rec.get("consumption", 0) or 0) > 0:
-                rows[c] = {"production": float(rec["production"]), "consumption": float(rec["consumption"])}
-        self._fao_eu_cache = rows
-        return rows
+    #: (Until 3 November 2026 the one-EU form took the EU's consumption-to-production ratio from CAPRI's FAO_agg EU
+    #: balance, _fao_eu_rows; with CAPRI's two blocks each block's ratio is its member states' in CAPRI's 2030
+    #: member-state balance, eu_ms_balance_2030.csv, below.)
 
     def _align_eu_base_balance(self, eu_supply: pd.Series, by_country: Optional[pd.DataFrame] = None) -> pd.DataFrame:
-        """Set the EU's base production and consumption consistently, per EU market region (one region: the EU;
-        CAPRI's two trade blocks: each block from its member states' supply-model rows, by_country)."""
-        fao = self._fao_eu_rows()
-        if self.eu_blocks:
-            if by_country is None:
-                raise ValueError("two EU market regions need the supply per country (by_country)")
-            sup = self.eu_rows(by_country)
-        else:
-            sup = pd.DataFrame([eu_supply], index=["EU27"])
+        """Set the EU's base production and consumption consistently, per EU market region (CAPRI's two trade blocks:
+        each block from its member states' supply-model rows, by_country)."""
+        if by_country is None:
+            raise ValueError("two EU market regions need the supply per country (by_country)")
+        sup = self.eu_rows(by_country)
         base_supply = pd.DataFrame(0.0, index=list(self.EU), columns=self.commodities)
         if self.par.eu_aligned_use is None:
             self.par.eu_aligned_use = {}
-        tb = self._eu_ms_balance() if self.eu_blocks else None
+        tb = self._eu_ms_balance()
         for reg in self.EU:
             ne = (self.par.base_net_exports_eu or {}).get(reg, {})
             al = self.par.eu_aligned_use.setdefault(reg, {})
@@ -182,13 +167,9 @@ class CalibrationMixin(MarketStateMixin):
                 if p_model <= 0:
                     base_supply.at[reg, comm] = float(self.par.base_production.at[reg, comm])
                     continue
-                if self.eu_blocks:
-                    k = (reg, comm)
-                    fp = float(tb.at[k, "prod_kt"]) if k in tb.index else 0.0
-                    fc = float(tb.at[k, "use_kt"]) if k in tb.index else 0.0
-                else:
-                    rec = fao.get(comm, {})
-                    fp, fc = float(rec.get("production", 0) or 0), float(rec.get("consumption", 0) or 0)
+                k = (reg, comm)
+                fp = float(tb.at[k, "prod_kt"]) if k in tb.index else 0.0
+                fc = float(tb.at[k, "use_kt"]) if k in tb.index else 0.0
                 if fp > 0 and fc > 0:
                     cons = p_model * fc / fp                 # the source's self-sufficiency
                 else:

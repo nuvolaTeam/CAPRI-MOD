@@ -2883,9 +2883,9 @@ def test_settings_layer_is_the_one_source_of_run_settings():
     with S.override({"supply.use_land_market": False}) as s_:
         assert RegionalSupplyModel.use_land_market is False and s_.diff() == {"supply.use_land_market": False}
     assert RegionalSupplyModel.use_land_market is True
-    t = S.current().replace({"market.eu_blocks": True}).to_toml()
+    t = S.current().replace({"market.biofuel_markets": False}).to_toml()
     assert S.load(overrides={k: v for sec, kv in tomllib.loads(t).items() for k, v in
-                             ((f"{sec}.{k2}", v2) for k2, v2 in kv.items())}).get("market.eu_blocks") is True
+                             ((f"{sec}.{k2}", v2) for k2, v2 in kv.items())}).get("market.biofuel_markets") is False
 
 
 
@@ -3243,7 +3243,7 @@ def test_food_demand_is_capris_generalised_leontief(data):
 
 
 def test_eu_trade_blocks_data_and_split(data):
-    """Step 3 of docs/archive/MARKET_STRUCTURE_PLAN.md: with eu_market_blocks the EU is CAPRI's two trade blocks EU_WEST and
+    """Step 3 of docs/archive/MARKET_STRUCTURE_PLAN.md: the EU is CAPRI's two trade blocks EU_WEST and
     EU_EAST (gams/aggregation/defaultA.agg). Checks: the block flows carry CAPRI's West-East trade (2030: 15.0 Mt of
     maize from East to West) and the same extra-EU flows as the one-region data; the EU's quotas are filled by both
     blocks; the EU-level data split between the blocks add up to the EU's (feed, biofuel feedstocks, residual feeds,
@@ -3251,12 +3251,8 @@ def test_eu_trade_blocks_data_and_split(data):
     import copy
     import numpy as np
     from capri_mod.market.market_module import MarketModule
-    d = dict(data); d["eu_market_blocks"] = True
-    mm = MarketModule(d)
+    mm = MarketModule(data)
     assert mm.EU == ("EU_WEST", "EU_EAST") and "EU27" not in mm.regions
-    d1 = dict(data); d1["eu_market_blocks"] = False                 # the one-EU form (removed later in stage 2)
-    mm1 = MarketModule(d1)
-    assert mm1.EU == ("EU27",)
     mkt = DATA_DIR / "2017" / "market"
     fb = pd.read_csv(mkt / "bilateral_flows_2030_eu2.csv")
     we = fb[(fb.commodity == "CORN") & (fb.importer == "EU_WEST") & (fb.exporter == "EU_EAST")].q_kt.sum()
@@ -3270,11 +3266,11 @@ def test_eu_trade_blocks_data_and_split(data):
     raw = mm._bilateral_raw()
     sc = next(s for s in raw.values() if s.trq_row is not None)
     assert len(np.atleast_1d(sc.trq_row)) == 2
-    fbp, fbp1 = mm._feed_bulk_params(), mm1._feed_bulk_params()
-    for c, q in fbp1["feed0"].items():
+    fbp = mm._feed_bulk_params()
+    for c, q in fbp["feed0"].items():
         assert abs(sum(fbp["feed0_reg"][r].get(c, 0.0) for r in eu) - q) < 1e-6 * max(q, 1.0)
-    bp, bp1 = mm._biofuel_params(), mm1._biofuel_params()
-    for c, q in bp1["q0"].items():
+    bp = mm._biofuel_params()
+    for c, q in bp["q0"].items():
         assert abs(sum(bp["q0_reg"].get((r, c), 0.0) for r in eu) - q) < 1e-6 * max(q, 1.0)
     for p, dd in mm._feed_byproduct_params()["products"].items():
         assert abs(sum(dd["reg"][r]["prod0"] for r in eu) - dd["prod0"]) < 1e-6 * dd["prod0"]
@@ -3344,7 +3340,8 @@ def test_processing_inpe_and_nonEU_feed_are_capris_2030():
     assert np.allclose(pb["inpe"], 1.019 ** 13, rtol=1e-9)
     hh = pd.read_csv(MK / "processing_nq_hessian.csv")
     mm = MarketModule.__new__(MarketModule)          # the parameter reader only needs regions and commodities
-    mm.regions, mm.commodities, mm.eu_blocks, mm.EU = ["USA", "EU27"], list(pd.unique(hh["x"])), False, ("EU27",)
+    mm.regions, mm.commodities, mm.EU = ["USA", "EU_WEST", "EU_EAST"], list(pd.unique(hh["x"])), ("EU_WEST", "EU_EAST")
+    mm.SUP_NONEU_MS = {}                             # no supply-model country outside the EU in this reader test
     pq = mm._proc_nq_params()
     r = hh[(hh.rms == "USA") & (hh.x == "SOYA") & (hh.y == "SOYA")].iloc[0]
     inpe_usa = float(pb[pb.rms == "USA"]["inpe"].iloc[0])

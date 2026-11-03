@@ -51,7 +51,7 @@ class DemandMixin(MarketStateMixin):
             bgr = {r: g for r, g in bb.groupby("rms")}
             for rms, g in goods.groupby("rms", sort=True):
                 mr = str(g["model_region"].iloc[0])
-                if mr == "EU27" and self.eu_blocks:
+                if mr == "EU27":
                     mr = self.eu_region_of_ms(rms) or mr
                 if mr not in Rr or rms not in regs.index or rms not in bgr:
                     continue
@@ -195,7 +195,7 @@ class DemandMixin(MarketStateMixin):
         tot = {}
         for r in t.itertuples(index=False):
             R = r.model_region
-            if R == "EU27" and self.eu_blocks:
+            if R == "EU27":
                 R = self.eu_region_of_ms(r.rms) or R
             if R not in self.regions or r.commodity not in self.commodities:
                 continue
@@ -319,9 +319,9 @@ class DemandMixin(MarketStateMixin):
             _bl = self.ev.bilat_ratio_now
             _pr = ({c: float(_bl.at[_reg, c]) for c in _bl.columns} if (_bl is not None and _reg in _bl.index)
                    else {c: float(PR[ie, j_]) for c, j_ in Cc.items()})
-            bf_ = self.feed_bulk_market_factor(_pr, region=_reg if self.eu_blocks else None)
+            bf_ = self.feed_bulk_market_factor(_pr, region=_reg)
             feed = self.eu_feed_use({c: float(PR[ie, Cc[c]]) for c in fb["feed0"] if c in Cc},
-                                    region=_reg if self.eu_blocks else None, bulk_factor=bf_)
+                                    region=_reg, bulk_factor=bf_)
             self.ev.eu_feed_now_reg[_reg] = feed
             for c, q in feed.items():
                 j = Cc.get(c)

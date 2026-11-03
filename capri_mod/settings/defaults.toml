@@ -267,11 +267,8 @@ hessian_min_supply_kt = 1e-6
 hessian_entry_floor = 1e-9
 # CAPRI's endogenous biofuel markets (BIOF_M; star 3.0 GUI default on); a scenario may set its own
 biofuel_markets = true
-# CAPRI's two EU market regions, A_EU_WEST and A_EU_EAST (aggregation/defaultA.agg; RMEU_to_RM), the model's EU_WEST
-# and EU_EAST: CAPRI's setting since 3 November 2026 (the market's move onto CAPRI's regions, stage 2; DEP-3 removed);
-# false, one EU27 block, until the single-EU form is removed in the same stage. "EU27" stays in the reports, the sum
-# of the two blocks (bilateral_solve._with_eu_aggregate)
-eu_blocks = true
+# (eu_blocks was removed on 3 November 2026: the EU is always CAPRI's two market regions A_EU_WEST and A_EU_EAST,
+# the model's EU_WEST and EU_EAST, aggregation/defaultA.agg; "EU27" stays in the reports, the sum of the two)
 # CAPRI's market supply functions calibrated to the supply models (calibrate_supply.gms, ProdNQ_, recalibrated each
 # iteration by simu_calibration_to_supply.gms); CAPRI's setting since 24 October 2026 (K75). The Hessian is measured
 # once per baseline by price shocks on the supply models and cached on disk (.cache/market_supply_hessian)

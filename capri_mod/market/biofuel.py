@@ -58,7 +58,7 @@ class BiofuelMixin(MarketStateMixin):
             groups = []
             for (ms, fuel), g in f.groupby(["ms", "biofuel"], sort=True):
                 reg = str(g["region"].iloc[0])
-                if reg == "EU27" and self.eu_blocks:
+                if reg == "EU27":
                     reg = self.eu_region_of_ms(ms) or reg
                 if reg not in self.regions:
                     continue
@@ -91,14 +91,11 @@ class BiofuelMixin(MarketStateMixin):
                             q0c[c] = q0c.get(c, 0.0) + float(q)
                 dd0[gr["region"]] = dd0.get(gr["region"], 0.0) + float((gr["q0"] * gr["prcby"] * gr["ddgs"]).sum())
             # biofuel share of use per EU market region: the region's feedstock use over its use (the EU use of the
-            # file split by CAPRI's member-state use); one EU region: the file's share
+            # file split by CAPRI's member-state use)
             use_eu = {str(r.commodity): float(r.use_kt) for r in sh.itertuples()}
             share_reg = {}
             for reg in self.EU:
                 for c, sh_ in share.items():
-                    if not self.eu_blocks:
-                        share_reg[(reg, c)] = sh_
-                        continue
                     u = use_eu.get(c, 0.0) * self.eu_split(c)[reg]
                     q = q0r.get((reg, c), 0.0)
                     if u > 0 and q > 0:
@@ -127,7 +124,7 @@ class BiofuelMixin(MarketStateMixin):
             gidx = {(g["ms"], g["fuel"]): k for k, g in enumerate(self._biofuel_params().get("groups", []))}
             rows = {}
             for r in m.itertuples(index=False):
-                if r.region == "EU27" and self.eu_blocks:
+                if r.region == "EU27":
                     r = r._replace(region=self.eu_region_of_ms(r.ms) or r.region)
                 if r.region not in self.regions or r.biofuel not in self.commodities:
                     continue

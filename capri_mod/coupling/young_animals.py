@@ -194,7 +194,7 @@ class YoungAnimalBlock:
         the one EU market)."""
         mm = self.market_module
         hs = mm.par.supply_hessian or {}
-        hl = list((hs.get("blocks") or {}).values()) if getattr(mm, "eu_blocks", False) else [hs.get("eu")]
+        hl = list((hs.get("blocks") or {}).values())
         return (bool(getattr(self, "market_supply_nq", False)) and len(hl) > 0
                 and all(h is not None and len(h) and any(str(x).startswith("YANI:") for x in h.index) for h in hl))
 
@@ -261,7 +261,7 @@ class YoungAnimalBlock:
         sm = self.supply_module
         sm.seen.yani_price_ratio_m = ratio_m
         # each member state's models see their market's prices; the EU average (production-weighted) for reporting
-        bmap = self.market_module._ms_block_map() if getattr(self.market_module, "eu_blocks", False) else {}
+        bmap = self.market_module._ms_block_map()
         sm.seen.yani_price_ratio_ms = {ms: ratio_m[rg] for ms, rg in bmap.items() if rg in ratio_m} if bmap else None
         # Norway's models: Norway's young-animal market (CAPRI yaniMarket_ per RM; K56)
         _smap = getattr(self.market_module, "SUP_NONEU_MS", {}) or {}

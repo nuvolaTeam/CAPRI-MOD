@@ -62,8 +62,8 @@ class SupplyMixin(MarketStateMixin):
     ) -> pd.DataFrame:
         """
         Supply quantities by region and commodity (1000 t).
-        If exogenous_supply is given (from supply module, one row per country), use it for EU27 (or the EU
-        market regions) and, for Norway's rows, for its own market region NOR (SUP_NONEU_REGIONS).
+        If exogenous_supply is given (from supply module, one row per country), use it for the EU's market
+        regions (CAPRI's two blocks) and, for Norway's rows, for its own market region NOR (SUP_NONEU_REGIONS).
         Otherwise, apply supply elasticity to price signal.
 
         region_ratio (bilateral market): each region's own market price relative to base, region x commodity; the
@@ -81,13 +81,12 @@ class SupplyMixin(MarketStateMixin):
         self.ev.sup_active = set(exo_sup)
         sup_cols = {}
         if exogenous_supply is not None:
-            # Only override the EU27 row with the supply-module output; keep
+            # Only override the EU blocks' rows with the supply-module output; keep
             # all other trade regions (USA, BRA, CHN, ROW, ...) at their
             # calibrated base production. Otherwise global supply collapses to
             # the EU subset and excess demand explodes.
             supply = self.par.base_production.copy()
-            _ex = (self.eu_rows(exogenous_supply) if self.eu_blocks
-                   else pd.DataFrame([exogenous_supply.sum(axis=0)], index=["EU27"]))
+            _ex = self.eu_rows(exogenous_supply)
             # Norway (CAPRI RMSSUP outside the EU, K56): its market supply is its supply models' output, as the EU's
             for reg, ser in exo_sup.items():
                 if reg not in supply.index:
@@ -176,8 +175,8 @@ class SupplyMixin(MarketStateMixin):
             rr = np.maximum(np.where(np.isnan(rr), 1.0, rr), 1e-6)
             ev = el.reindex(cols).to_numpy(dtype=float)
             fac = rr ** EV
-            # the EU market regions' supply before the price response (the supply models' latest output): EU27, or
-            # each of CAPRI's two trade blocks
+            # the EU market regions' supply before the price response (the supply models' latest output): each of
+            # CAPRI's two trade blocks
             s_exo_eu = ({r_: supply.loc[r_, cols].astype(float).copy() for r_ in self.EU if r_ in supply.index}
                         if exogenous_supply is not None else None)
             _sv_eu = {}
@@ -222,13 +221,13 @@ class SupplyMixin(MarketStateMixin):
             # prices, through the supply models' latest output at the prices they saw
             # (arm/simu_calibration_to_supply.gms:360-368), with the cross-price terms; it replaces the own-price
             # anticipation for those products
-            # one Hessian for EU27, or one per trade block (the sum of its member states', CAPRIModel._split_hessian)
+            # one Hessian per EU block (the sum of its member states', CAPRIModel._split_hessian)
             _hs = self.par.supply_hessian or {}
-            _hreg = {"EU27": _hs.get("eu")} if not self.eu_blocks else dict(_hs.get("blocks") or {})
+            _hreg = dict(_hs.get("blocks") or {})
             _hcache = getattr(self, "_hess_cache", None)
             if not isinstance(_hcache, dict):
                 _hcache = {}
-            # per EU market region (EU27, or each trade block): its Hessian's rows, the supply models' output and the
+            # per EU market region (each trade block): its Hessian's rows, the supply models' output and the
             # price change against what they saw
             items_ = {}
             for reg_, H in _hreg.items():
@@ -315,8 +314,7 @@ class SupplyMixin(MarketStateMixin):
         # whey comes from the dairy block at the EU product prices and the milk delivered.
         if self._dairy_params() and all(r in supply.index for r in self.EU):
             if exogenous_supply is not None and "MILK" in exogenous_supply.columns and len(exogenous_supply):
-                Sr = ({r: float(v) for r, v in self.eu_rows(exogenous_supply[["MILK"]])["MILK"].items()} if self.eu_blocks
-                      else {"EU27": float(exogenous_supply["MILK"].sum())})
+                Sr = {r: float(v) for r, v in self.eu_rows(exogenous_supply[["MILK"]])["MILK"].items()}
             else:
                 Sr = None
             # the EU's units outside a run on a subset (K83): their raw milk at its base, moved by their member
@@ -466,10 +464,10 @@ class SupplyMixin(MarketStateMixin):
     #: demand (DairyNQ_) in the dairy block, and its milk price moves the other products' and the young animals'
     #: supply (the Hessian's MILK column per member state; the member states' milk prices their models saw: seen.milk_seen_ms)
 
-    def _milk_terms(self, cols, xs, H, reg="EU27"):
+    def _milk_terms(self, cols, xs, H, reg):
         """The member states' raw milk terms of the market supply Hessian (supply_hessian["ms"], per country summed
-        to CAPRI's member state of the dairy block), for the member states of the EU market region reg (EU27, or one
-        of CAPRI's trade blocks): {"ms": [...], "h": own response (kt per unit of price level),
+        to CAPRI's member state of the dairy block), for the member states of the EU market region reg (one of
+        CAPRI's trade blocks): {"ms": [...], "h": own response (kt per unit of price level),
         "row": member state x cols (MILK's response to the products' prices), "rowY": member state x young-animal
         goods, "col": xs x member state (the products' response to the member state's milk price), "colY": young
         goods x member state, "goods": young-animal goods}; None without data."""
@@ -493,7 +491,7 @@ class SupplyMixin(MarketStateMixin):
             ms = self._DAIRY_MS.get(str(cc)[:2], str(cc)[:2]) + "000000"
             agg[ms] = h if ms not in agg else agg[ms].add(h, fill_value=0.0)
         mss = sorted(m for m in agg if m in self._dairy_params().get("ms", {})
-                     and (not self.eu_blocks or (self.eu_region_of_ms(m) or self.EU[0]) == reg))
+                     and (self.eu_region_of_ms(m) or self.EU[0]) == reg)
         if not mss:
             return None
         yi = ["YANI:" + g for g in goods]
@@ -537,7 +535,7 @@ class SupplyMixin(MarketStateMixin):
             if not pc > 0:
                 out[ms] = (x / base, 0.0)
                 continue
-            reg = self.eu_region_of_ms(ms) if self.eu_blocks else "EU27"
+            reg = self.eu_region_of_ms(ms)
             r_ = ratio_of(reg) if (ratio_of is not None and reg is not None) else None
             t_ms = terms.get(ms, {})
             cross = (sum(h * (float(r_[ci[y]]) - 1.0) for (x_, y), h in t_ms.items()
@@ -548,8 +546,8 @@ class SupplyMixin(MarketStateMixin):
 
     def _milk_and_yani_clear_all(self, regs, cols, world_prices, exogenous_supply, ratio_of=None):
         """The young-animal markets (_yani_clear) and the member states' raw milk (dairy_block with the milk response)
-        cleared together at the current product prices, over every EU market region at once (EU27, or CAPRI's two
-        trade blocks): the milk prices move the young animals' supply and the young-animal prices the milk supply
+        cleared together at the current product prices, over every EU market region at once (CAPRI's two trade
+        blocks): the milk prices move the young animals' supply and the young-animal prices the milk supply
         (CAPRI's ProdNQ_ with p_hessNQSupp, solved jointly in its market model); a few rounds of the two linear
         clearings, the dairy block solved once per round over all member states, each at its own region's prices.
         regs {region: (H, xs, dP, mt)}. Returns {region: the products' supply change from both (rows xs)} and keeps
@@ -620,7 +618,7 @@ class SupplyMixin(MarketStateMixin):
         for m in xr_milk:
             if m in _inS:
                 continue
-            rg_ = self.eu_region_of_ms(m) if self.eu_blocks else "EU27"
+            rg_ = self.eu_region_of_ms(m)
             if rg_ in self.ev.milk_dq_now:
                 self.ev.milk_dq_now[rg_] += (float(res["ms_price_ratio"][m]["milk_delivered"])
                                              - float(mr_all.get(m, 1.0))) * float(_m0.get(m, 0.0))
@@ -635,12 +633,12 @@ class SupplyMixin(MarketStateMixin):
         return exogenous_supply.add(xb.reindex(columns=exogenous_supply.columns).fillna(0.0), fill_value=0.0)
 
     def _eu_excluded_rows(self):
-        """The base output of the EU's units outside the run per EU market region (EU27, or each trade block) and
+        """The base output of the EU's units outside the run per EU market region (each trade block) and
         market commodity (K83); None where the run has every unit."""
         xb = self.seen.eu_excluded_base
         if xb is None:
             return None
-        return (self.eu_rows(xb) if self.eu_blocks else pd.DataFrame([xb.sum(axis=0)], index=["EU27"]))
+        return self.eu_rows(xb)
 
     def _eu_ms_supply_nq(self):
         """CAPRI's market supply functions of the EU member states, every product (ProdNQ_,
@@ -685,7 +683,7 @@ class SupplyMixin(MarketStateMixin):
         add: dict = {}
         for cc, row in xb.iterrows():
             ms = capri_ms(cc)
-            reg = (self.eu_region_of_ms(ms) if self.eu_blocks else "EU27")
+            reg = self.eu_region_of_ms(ms)
             if reg is None or reg not in supply.index:
                 continue
             r_ = ratio_of(reg)

@@ -625,13 +625,13 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
             self.market_module.seen.milk_seen_ms = {
                 ms: 1.0 + _sm_ + float((self.supply_module.seen.milk_price_dev_ms or {}).get(ms, 0.0))
                 for ms in (_dpm.get("ms") or {})} if _dpm else None
-            # CAPRI's two EU trade blocks (MarketModule.eu_blocks): each member state's models get their block's
+            # CAPRI's two EU trade blocks: each member state's models get their block's
             # prices, as the EU signal plus the block's departure from the EU average (relaxed like the signal)
             if outer_iter == 0:
                 self.sv.eu_dev = None
                 self.sv.sup_dev = None
             _dev = getattr(self.sv, "eu_dev", None) or {}
-            _bmap = self.market_module._ms_block_map() if getattr(self.market_module, "eu_blocks", False) else {}
+            _bmap = self.market_module._ms_block_map()
             self.supply_module.seen.price_dev_ms = ({ms: _dev[rg] for ms, rg in _bmap.items() if rg in _dev}
                                                if (outer_iter > 0 and _dev) else {})
             # Norway (CAPRI market region NO000000 with supply models; KNOWN_ISSUES K56): its supply models get its own
@@ -758,16 +758,13 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
             # --- Step 2: Market module ---
             if self.verbose:
                 print("    [Market] Solving spatial equilibrium...")
-            # the EU price (relative to base) at which this iteration's supply was
-            # produced, so the market can anticipate the supply response
-            self.market_module.seen.eu_price_seen = (1.0 + price_signal).reindex(
-                self.market_module.commodities).fillna(1.0)
-            if getattr(self.market_module, "eu_blocks", False):
-                _dv = getattr(self.sv, "eu_dev", None) or {}
-                _cm = self.market_module.commodities
-                self.market_module.seen.eu_price_seen = pd.DataFrame(
-                    {rg: (1.0 + price_signal + _dv.get(rg, 0.0)).reindex(_cm).fillna(1.0)
-                     for rg in self.market_module.EU}).T
+            # the EU price (relative to base) at which this iteration's supply was produced, per EU block (the EU
+            # signal plus the block's departure), so the market can anticipate the supply response
+            _dv = getattr(self.sv, "eu_dev", None) or {}
+            _cm = self.market_module.commodities
+            self.market_module.seen.eu_price_seen = pd.DataFrame(
+                {rg: (1.0 + price_signal + _dv.get(rg, 0.0)).reindex(_cm).fillna(1.0)
+                 for rg in self.market_module.EU}).T
             # Norway's supply models saw Norway's prices (K56)
             _sdv = getattr(self.sv, "sup_dev", None) or {}
             self.market_module.seen.sup_price_seen = {
@@ -845,7 +842,7 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
             # EU trade blocks: each block's target departure from the EU target, relaxed with the same step
             self.res.eu_dev_gap = 0.0
             _mmk = self.market_module
-            if getattr(_mmk, "eu_blocks", False) and getattr(_mmk, "eu_premium_reg", None) is not None:
+            if getattr(_mmk, "eu_premium_reg", None) is not None:
                 _wr = new_prices / base_prices.clip(lower=1.0)
                 _dev0 = getattr(self.sv, "eu_dev", None) or {}
                 _newdev = {}
@@ -879,8 +876,7 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
             _spm = {k_: v_ for k_, v_ in self._capri_step_special().items() if k_[1] != "MILK" and _is_eu(k_[0])}
             if _spm and self._capri_price_update():
                 _hs = (getattr(self.sv, "capri_special_hist", None) or {}) if outer_iter > 0 else {}
-                _bmap_s = (self.market_module._ms_block_map()
-                           if getattr(self.market_module, "eu_blocks", False) else {})
+                _bmap_s = self.market_module._ms_block_map()
                 _bdt = getattr(self.ev, "blockdev_target_now", None) or {}
                 _edv = getattr(self.sv, "eu_dev", None) or {}
                 for (_ms_s, _p_s), _srt in _spm.items():

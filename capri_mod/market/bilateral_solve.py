@@ -37,7 +37,7 @@ class BilateralSolveMixin(MarketStateMixin):
         cached = getattr(self, "_bilat_raw_cache", None)
         if cached is not None and cached[0] == year:
             return cached[1]
-        sfx = "_eu2" if self.eu_blocks else ""          # CAPRI's two EU trade blocks (build_bilateral_market --eu-blocks)
+        sfx = "_eu2"                                    # CAPRI's two EU trade blocks (build_bilateral_market --eu-blocks)
         if not inp.exists(f"bilateral_flows_{year}{sfx}.csv"):
             year = int(inp.base_year)
         if not inp.exists(f"bilateral_flows_{year}{sfx}.csv"):
@@ -594,17 +594,14 @@ class BilateralSolveMixin(MarketStateMixin):
         dom0 = self._dom0()
         reported = dom0.reindex(index=r.index, columns=r.columns) * r
         wedge = dom0.reindex(index=r.index, columns=r.columns) * widx
-        # the EU price farmers see: premium over the world index (model.py: signal = world ratio x premium); with two
-        # EU market regions, per region (eu_premium_reg) and the production-weighted EU average (eu_premium)
+        # the EU price farmers see: premium over the world index (model.py: signal = world ratio x premium), per EU
+        # market region (eu_premium_reg) and the production-weighted EU average (eu_premium)
         self.eu_premium_reg = pd.DataFrame({_rg: (r.loc[_rg] / widx).reindex(self.commodities).fillna(1.0)
                                             for _rg in self.EU}).T
-        if self.eu_blocks:
-            _w = S.loc[list(self.EU)].reindex(columns=self.commodities).fillna(0.0)
-            _ws = _w.sum(axis=0)
-            _avg = (self.eu_premium_reg * _w).sum(axis=0) / _ws.where(_ws > 0, 1.0)
-            self.eu_premium = _avg.where(_ws > 0, self.eu_premium_reg.mean(axis=0))
-        else:
-            self.eu_premium = self.eu_premium_reg.loc["EU27"]
+        _w = S.loc[list(self.EU)].reindex(columns=self.commodities).fillna(0.0)
+        _ws = _w.sum(axis=0)
+        _avg = (self.eu_premium_reg * _w).sum(axis=0) / _ws.where(_ws > 0, 1.0)
+        self.eu_premium = _avg.where(_ws > 0, self.eu_premium_reg.mean(axis=0))
         self.ev.bilat_ratio_now = r
         idx = pd.MultiIndex.from_product([self.regions, self.regions], names=["exporter", "importer"])
         flows = pd.DataFrame(0.0, index=idx, columns=self.commodities)
@@ -618,7 +615,7 @@ class BilateralSolveMixin(MarketStateMixin):
         if self._biofuel_params() and all(x in reported.index for x in self.EU):
             _pr = {_rg: {c: float(PAr.at[_rg, c]) for c in self._biofuel_params()["share"] if c in PAr.columns}
                    for _rg in self.EU}
-            biof = self.biofuel_feedstock_use(_pr if self.eu_blocks else _pr["EU27"])
+            biof = self.biofuel_feedstock_use(_pr)
             # biofuel markets: output, use and prices of every region (BIOF_M); first-generation output and the
             # processing margin (producer price over feedstock cost) of every EU member state
             st = self.ev.biof_state if self.biofuel_endogenous() else None
@@ -641,22 +638,21 @@ class BilateralSolveMixin(MarketStateMixin):
                                                     if (ms, fuel) in st["mub"] else None),
                                          "margin0": float(d["pr0"]) or None}
                         for (ms, fuel), d in bm["rows"].items() if d["region"] in self.EU}
-        if self.eu_blocks:
-            S, D, reported, wedge, flows, world = self._with_eu_aggregate(S, D, reported, wedge, flows, world, dom0)
-            if biof is not None:
-                for k in ("markets",):
-                    for fuel, v in (biof.get(k) or {}).items():
-                        for it in ("production", "use"):
-                            v[it]["EU27"] = sum(v[it].get(x, 0.0) for x in self.EU)
-                        v["price_ratio"]["EU27"] = float(reported.at["EU27", fuel] / dom0.loc[list(self.EU), fuel].mean()) \
-                            if fuel in reported.columns else 1.0
+        S, D, reported, wedge, flows, world = self._with_eu_aggregate(S, D, reported, wedge, flows, world, dom0)
+        if biof is not None:
+            for k in ("markets",):
+                for fuel, v in (biof.get(k) or {}).items():
+                    for it in ("production", "use"):
+                        v[it]["EU27"] = sum(v[it].get(x, 0.0) for x in self.EU)
+                    v["price_ratio"]["EU27"] = float(reported.at["EU27", fuel] / dom0.loc[list(self.EU), fuel].mean()) \
+                        if fuel in reported.columns else 1.0
         return MarketEquilibrium(
             dairy=self.ev.dairy_last if self._dairy_params() else None,
             biofuel=biof, world_prices=world, domestic_prices=reported, wedge_prices=wedge,
             production=S, consumption=D, trade_flows=flows, net_exports=S.subtract(D, fill_value=0),
             welfare=welfare, excess_demand=(D.drop(index="EU27", errors="ignore").sum()
-                                            - S.drop(index="EU27", errors="ignore").sum()) if self.eu_blocks
-            else D.sum() - S.sum(), converged=converged, iterations=iters)
+                                            - S.drop(index="EU27", errors="ignore").sum()),
+            converged=converged, iterations=iters)
 
     def _with_eu_aggregate(self, S, D, reported, wedge, flows, world, dom0):
         """Two EU market regions: an EU27 reporting row (CAPRI's EU27yr19 aggregate) appended to production, use,

@@ -2920,7 +2920,7 @@ class SupplyModule(ModuleStateMixin):
             # EU average (MarketModule.dairy_block, CAPRIModel)
             _ps_r = price_signals
             # CAPRI's EU trade blocks: the member state's block price as a departure from the EU signal
-            # (CAPRIModel, MarketModule.eu_blocks); activity-keyed entries follow their products
+            # (CAPRIModel, MarketModule._ms_block_map); activity-keyed entries follow their products
             _bdev = (getattr(self.seen, "price_dev_ms", None) or {})
             if _bdev and price_signals is not None:
                 _msb = capri_ms(region)

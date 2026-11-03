@@ -141,10 +141,6 @@ class DairyMixin(MarketStateMixin):
             # use the EU's split by CAPRI's member-state human consumption, feed and use; net imports the rest
             reg = {}
             for rg in self.EU:
-                if not self.eu_blocks:
-                    reg[rg] = dict(Q0=out["Q0"], proc0=out["proc0"], hc9=out["hc9"], fd9=out["fd9"],
-                                   cons9=out["cons9"], net_imports0=out["net_imports0"])
-                    continue
                 mss = [ms for ms in out["ms"] if self.eu_region_of_ms(ms) == rg]
                 Q0 = sum((out["ms"][ms]["Q0"] for ms in mss), np.zeros_like(out["Q0"]))
                 pr0 = sum((out["ms"][ms]["proc0"] for ms in mss), np.zeros_like(out["proc0"]))
@@ -483,24 +479,13 @@ class DairyMixin(MarketStateMixin):
     def _dairy_eu_prices(self, world_prices) -> Dict[str, float]:
         """EU prices of the traded dairy products relative to base, as the dairy block sees them: the
         wedge price x the current EU Armington premium (lagged within an outer iteration). With two EU market
-        regions (bilateral market): {region: {product: ratio}}."""
-        dom = self.domestic_prices(world_prices, getattr(self, "_trade_scenario_now", None))
+        regions (bilateral market): {region: {product: ratio}}; 1 before the market's first evaluation."""
         d0 = getattr(self, "_dom0_cache", None)
         if d0 is None:
             d0 = self.domestic_prices(self.world_prices_base)
             self._dom0_cache = d0
         bl = self.ev.bilat_ratio_now
-        if bl is not None and self.eu_blocks:
+        if bl is not None:
             return {rg: {k: float(bl.at[rg, c]) if (c in bl.columns and rg in bl.index) else 1.0
                          for k, c in self.DAIRY_TRADED.items()} for rg in self.EU}
-        if self.eu_blocks:
-            return {rg: {k: 1.0 for k in self.DAIRY_TRADED} for rg in self.EU}
-        if bl is not None and "EU27" in bl.index:
-            return {k: float(bl.at["EU27", c]) if c in bl.columns else 1.0 for k, c in self.DAIRY_TRADED.items()}
-        prem = getattr(self, "eu_premium", None) if self.seen.eu_base_supply is not None else None
-        out = {}
-        for k, c in self.DAIRY_TRADED.items():
-            b = float(d0.at["EU27", c])
-            pr = float(prem.get(c, 1.0)) if prem is not None else 1.0
-            out[k] = float(dom.at["EU27", c]) / b * pr if b > 0 else 1.0
-        return out
+        return {rg: {k: 1.0 for k in self.DAIRY_TRADED} for rg in self.EU}
