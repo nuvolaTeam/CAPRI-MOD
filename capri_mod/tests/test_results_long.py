@@ -83,6 +83,23 @@ def test_an_undeclared_item_stops_the_table():
         IO.with_capri_codes(IO.to_long(r, "base"))
 
 
+def test_every_item_the_supply_module_writes_is_declared():
+    """Every field of SupplyResult and every attribute the supply module sets on a regional result is declared in
+    results_items.csv, whatever the scenario's options: an item filled only under an option (manure trade's P and K,
+    the mineral caps, the nitrate rule) otherwise passes the runs without it and stops the writing of one with it
+    (the Green Deal 2030 gate, 3 November 2026: supply.manure_trade_pk)."""
+    import dataclasses
+    import re
+    import capri_mod.supply.supply_module as SM
+    src = Path(SM.__file__).read_text()
+    written = set(re.findall(r"\bresult\.([a-z_][a-z0-9_]*)\s*=(?!=)", src))
+    fields = {f.name for f in dataclasses.fields(SupplyResult)}
+    it = IO.results_items()
+    declared = set(it.loc[it.block == "supply", "item"])
+    assert written, "no result attribute found in the supply module's source"
+    assert sorted((written | fields) - set(IO._SUPPLY_TEXT) - declared) == []
+
+
 def test_every_capri_code_of_the_items_is_capris():
     """results_items.csv: each CAPRI code is in CAPRI's COLS or ROWS (capri_data/codes/capri), in the dimension the
     item takes, with the place where CAPRI sets it."""
