@@ -103,7 +103,9 @@ def test_every_capri_code_of_the_items_is_capris():
 def test_the_reference_is_stored_once_and_the_pickles_blocks_come_back(tmp_path):
     base, scen = _results(), _results(scale=1.5)
     B, S = (IO.with_capri_codes(IO.to_long(x, p)) for x, p in ((base, "base"), (scen, "scen")))
-    kw = dict(reference="ref_x", year=2030, fingerprint_parts={"code": "a"}, meta={"conv": True}, root=tmp_path)
+    # the run's metadata has tuple keys (the young animals' markets, the Hessian's records): written as text
+    kw = dict(reference="ref_x", year=2030, fingerprint_parts={"code": "a"},
+              meta={"conv": True, "markets": {("EU27", "CALV"): 1.0}}, root=tmp_path)
     r1 = IO.write_run(B, S, scenario="scen_a", run_id="r1", **kw)
     r2 = IO.write_run(B, S, scenario="scen_b", run_id="r2", **kw)
     assert not r1["reference_reused"] and r2["reference_reused"] and r2["reference_run_id"] == "r1"
@@ -114,6 +116,8 @@ def test_the_reference_is_stored_once_and_the_pickles_blocks_come_back(tmp_path)
     assert sorted(runs[runs.kind == "reference"].run_id) == ["r1", "r3"]
     rb, rs, rec = IO.read_run(tmp_path, "scen_a")
     assert rec["run_id"] == "r3" and (tmp_path / "meta" / "scen_a" / "r3" / "meta.json").is_file()
+    import json
+    assert json.loads((tmp_path / "meta" / "scen_a" / "r3" / "meta.json").read_text())["markets"] == {"EU27|CALV": 1.0}
     blocks = IO.pickle_blocks(*IO.as_points(rb, rs))
     assert blocks["act"] == ({"SWHE": 30.0, "DCOW": 9.0}, {"SWHE": 45.0, "DCOW": 9.0})
     assert blocks["base_market"]["prod"] == {"SWHE": 1.0, "MILK": 2.0}

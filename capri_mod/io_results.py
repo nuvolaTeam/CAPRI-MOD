@@ -712,6 +712,16 @@ def _same(a: pd.DataFrame, b: pd.DataFrame) -> bool:
     return bool(_np.array_equal(a["value"].to_numpy(float), b["value"].to_numpy(float), equal_nan=True))
 
 
+def _jsonable(x):
+    """The run's metadata for JSON: tuple and other non-text dict keys as text ("a|b" for a tuple)."""
+    if isinstance(x, dict):
+        return {(k if isinstance(k, str) else "|".join(map(str, k)) if isinstance(k, tuple) else str(k)): _jsonable(v)
+                for k, v in x.items()}
+    if isinstance(x, (list, tuple)):
+        return [_jsonable(v) for v in x]
+    return x
+
+
 def write_run(base: pd.DataFrame, scen: pd.DataFrame, *, scenario: str, reference: str, year: int, run_id: str,
               fingerprint_parts: dict, meta: dict, root) -> dict:
     """Store a run in the long table (root/long, partitioned by scenario and run id): the scenario's rows as its own
@@ -761,7 +771,7 @@ def write_run(base: pd.DataFrame, scen: pd.DataFrame, *, scenario: str, referenc
                     mode="append")
     md = root / "meta" / scenario / run_id
     md.mkdir(parents=True, exist_ok=True)
-    (md / "meta.json").write_text(json.dumps(meta, indent=1, default=str))
+    (md / "meta.json").write_text(json.dumps(_jsonable(meta), indent=1, default=str))
     return {**rec, "reference_reused": ref_id != run_id}
 
 
