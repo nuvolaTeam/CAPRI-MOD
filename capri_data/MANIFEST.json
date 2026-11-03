@@ -3493,6 +3493,16 @@
     "builder": "build_code_lists"
    }
   },
+  "capri_data/codes/capri/COLS.csv": {
+   "description": "CAPRI COLS, the column items of its data and results arrays DATA and DATAOUT (sets.gms)",
+   "kind": "structure",
+   "rows": 927,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
   "capri_data/codes/capri/FEED_TO_O.csv": {
    "description": "CAPRI's FEED_TO_O: the feed bulks and their products (sets.gms)",
    "kind": "structure",
@@ -3593,6 +3603,16 @@
     "builder": "build_code_lists"
    }
   },
+  "capri_data/codes/capri/ROWS.csv": {
+   "description": "CAPRI ROWS, the row items of its data and results arrays DATA and DATAOUT (sets.gms)",
+   "kind": "structure",
+   "rows": 927,
+   "columns": 2,
+   "origin": {
+    "nature": "capri",
+    "builder": "build_code_lists (not in the trace yet)"
+   }
+  },
   "capri_data/codes/capri/XX.csv": {
    "description": "CAPRI XX, the market model's products (arm/arm_sets.gms)",
    "kind": "structure",
@@ -3649,7 +3669,8 @@
    "rows": 46,
    "columns": 5,
    "read_by_model": [
-    "capri_mod/data/definitions.py"
+    "capri_mod/data/definitions.py",
+    "capri_mod/io_results.py"
    ],
    "origin": {
     "nature": "declared"
@@ -3736,6 +3757,18 @@
    "kind": "structure",
    "rows": 9,
    "columns": 3,
+   "origin": {
+    "nature": "declared"
+   }
+  },
+  "capri_data/codes/results_items.csv": {
+   "description": "The items of the long results table (capri_mod/io_results.py) and their CAPRI codes in DATAOUT's cols and rows (\"*\": the model's own coordinate translated; empty: no CAPRI item or not determined)",
+   "kind": "structure",
+   "rows": 171,
+   "columns": 7,
+   "read_by_model": [
+    "capri_mod/io_results.py"
+   ],
    "origin": {
     "nature": "declared"
    }

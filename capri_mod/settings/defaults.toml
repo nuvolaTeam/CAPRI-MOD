@@ -31,6 +31,11 @@ supply_countries_outside_eu = ["NO000000"]
 # a folder of the user's own scenarios (refactor stage 5), looked in before capri_data/scenarios; "" = none. A scenario
 # there may name a reference or group of the repository's (python -m capri_mod.scenarios new / check)
 scenarios_dir = ""
+# where the run's long results table is written (refactor stage 5; capri_mod/io_results.py write_run): a Delta table
+# results_dir/long partitioned by scenario and run id, the reference stored once (results_dir/runs records each
+# partition and its fingerprint), the run's metadata, settings and manifest in results_dir/meta/<scenario>/<run id>/;
+# relative to the repository; "" = not written
+results_dir = "results"
 
 [outer_loop]
 # the supply-market iterations at most (CAPRI's %STEPS%: 99 in its GUI for a scenario run, gui/capri_gui_definition.xml

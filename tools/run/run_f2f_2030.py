@@ -494,6 +494,51 @@ def main():
     run_settings.save(str(a.out).rsplit(".", 1)[0] + ".settings.toml")
     with open(str(a.out).rsplit(".", 1)[0] + ".manifest.json", "w") as fh_:
         json.dump(out["meta"]["run_manifest"], fh_, indent=1)
+    _results_dir = str(run_settings.get("run.results_dir") or "")
+    if _results_dir:
+        # the long results table (capri_mod/io_results.py; refactor stage 5): the scenario's rows and its reference's,
+        # stored once; read back and checked against this pickle's blocks
+        from capri_mod import io_results as _IO
+        _rroot = Path(_results_dir) if Path(_results_dir).is_absolute() else ROOT / _results_dir
+        _fam = _folder or _short.get(a.scenario) or {"greendeal": _short["greendeal2030"]}.get(a.scenario,
+                                                                                                _short["f2f"])
+        _ref = _SD.load(_fam).reference
+        _git = out["meta"]["run_manifest"].get("git") or {}
+        _own = (f"capri_data/scenarios/{_tf}/", f"capri_data/scenarios/{_ref}/")
+        _fp = {"reference": _ref, "trajectory": _tf, "years": [2030], "regions": _subset,
+               "endotech": dict(_scen.endotech), "manure_trade": _scen.manure_trade,
+               "biofuel_markets": _scen.biofuel_markets,
+               "settings": {sec: {k: v for k, v in kv.items() if (sec, k) not in (("run", "scenarios_dir"),
+                                                                                  ("run", "results_dir"))}
+                            for sec, kv in run_settings.to_dict().items() if sec != "diagnostics"},
+               "commit": _git.get("commit"), "data_tree": _git.get("data_tree"),
+               # git's porcelain lines ("XY path"): an uncommitted file enters by its content
+               "changed_files": {f: (__import__("hashlib").sha256((ROOT / f[2:].strip()).read_bytes()).hexdigest()
+                                     if (ROOT / f[2:].strip()).is_file() else None)
+                                 for f in _git.get("changed_files") or []},
+               # the input files the reference depends on: the scenario folders other than its trajectory's and its
+               # own are read for the scenario, the market Hessian's cache is a cache
+               "inputs": {k: v for k, v in (out["meta"]["run_manifest"].get("inputs") or {}).items()
+                          if not k.startswith(".cache/")
+                          and (not k.startswith("capri_data/scenarios/") or k.startswith(_own))},
+               "software": out["meta"]["run_manifest"].get("software")}
+        _rid = time.strftime("%Y%m%dT%H%M%S") + "-" + str(_git.get("commit") or "nocommit")[:7]
+        _rec = _IO.write_run(_IO.with_capri_codes(_IO.to_long(b, "base")), _IO.with_capri_codes(_IO.to_long(s, "scen")),
+                             scenario=_scen.name, reference=_ref, year=2030, run_id=_rid, fingerprint_parts=_fp,
+                             meta=out["meta"], root=_rroot)
+        _md = _rroot / "meta" / _scen.name / _rid
+        run_settings.save(str(_md / "settings.toml"))
+        with open(_md / "manifest.json", "w") as fh_:
+            json.dump(out["meta"]["run_manifest"], fh_, indent=1)
+        _rb, _rs, _ = _IO.read_run(_rroot, _scen.name, _rid)
+        _d = _IO.check_pickle(_IO.pickle_blocks(*_IO.as_points(_rb, _rs)), out)
+        print(f"long table: {_rroot / 'long'} | {_scen.name} {_rid}: {len(_rs)} rows; reference {_ref} "
+              f"{_rec['reference_run_id']}" + (" (reused)" if _rec["reference_reused"] else f": {len(_rb)} rows")
+              + (" | identical to the pickle's blocks" if not _d else f" | {len(_d)} DIFFERENCES from the pickle"),
+              flush=True)
+        if _d:
+            print("\n".join(_d[:20]), flush=True)
+            sys.exit(1)
     _no = out["meta"]["nlp_nonoptimal"]
     print(f"saved {a.out} | converged {out['meta']['conv']} in {out['meta']['it']} iterations, {out['meta']['seconds']} s"
           f" | non-optimal regional solves kept: baseline {len(_no['baseline'])}, scenario {len(_no['scenario'])}"

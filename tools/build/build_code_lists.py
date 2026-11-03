@@ -40,7 +40,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 OUT = ROOT / "capri_data" / "codes"
-CAPRI_SETS = ("PACT", "MPACT", "MCACT", "MAACT", "XX", "XX1", "RALL")
+CAPRI_SETS = ("PACT", "MPACT", "MCACT", "MAACT", "XX", "XX1", "RALL", "COLS", "ROWS")
 
 
 def literal(path, name):
@@ -74,6 +74,10 @@ def main():
     from capri_mod.data import definitions as D
 
     capri = {s: read_set(a.sets, s) for s in CAPRI_SETS}
+    # CAPRI's COLS holds a blank element (' '), DATAOUT's empty dim5 (capmod/set_and_store_dataout.gms l. 53:
+    # DATAOUT(RSS,"",ColsOut,RowsOut)): not an item, and the long table's empty dim5 stands for it
+    for s in ("COLS", "ROWS"):
+        capri[s].pop("", None)
     problems = []
 
     def pairs(name):
