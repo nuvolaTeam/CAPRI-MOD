@@ -322,16 +322,16 @@ Done (each mini-EU run identical to the one before, meta apart):
 - Decision 5, part: CARBON_TAX_100 and GREENDEAL_2040_TARGETS removed; run_policy_comparison.py runs a folder;
   command-line overrides recorded (meta.scenario_overrides, run id -ov<hash>), no longer renaming the scenario.
 
-Open, for the project lead:
+Decided by the project lead the same night (both ports in MODEL_CONTENT_PLAN.md §12a, to schedule): SET_ASIDE_10PCT
+removed (commit 3120071); WITHOUT_VCS not a scenario folder, tools/run/run_vcs_2030.py kept as a validation test.
+The analysis:
 1. **The 10% set-aside as CAPRI's rule.** CAPRI's SETA_ (supply/supply_model.gms l. 2219-2241): sum of the arable
    activities' levels x (1 - NONS) x r / (1 - r) = the obligatory set-aside activities (setaPact: ISET, GSET, TSET and
    NONF); set_aside_10.gms sets r = 10 on GRCU (cereals, oilseeds, MAIF, pulses) and eps on VSET, so voluntary
    set-aside and fallow do not count. The model has no obligatory set-aside activity (its SETA is VSET + FALL), so
    CAPRI's rule needs a new supply activity with its premium and costs (and CAPRI's PMP terms of define_const_pmp_
-   param.gms l. 44-76 when the obligation binds at calibration). Until decided the folder keeps the model's floor
-   (a floor on all arable land, counted on SETA), with its note.
+   param.gms l. 44-76 when the obligation binds at calibration).
 2. **WITHOUT_VCS as a rule.** CAPRI's scenario sets the coupled-support premium types to zero and its premium module
    moves the envelope into the decoupled payment (cereal premiums +9 to +11%). The model's premium data hold Pillar I
    as one share (premium_scheme_shares_2030.csv DPPIL1, no coupled-support part), so the rule needs CAPRI's
-   coupled-support part of each premium and the redistribution. Until decided tools/run/run_vcs_2030.py applies
-   CAPRI's per-unit premium change of its own run (capri_vcs_effect.csv), as before.
+   coupled-support part of each premium and the redistribution.
