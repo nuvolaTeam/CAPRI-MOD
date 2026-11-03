@@ -15,7 +15,8 @@ OATS, MAIZ, OCER, RICE; FPRO PULS, RAPO, SUNO, SOYO, OLIO, OTHO, RAPC, SUNC, SOY
 FFIS, OAQU.
 
 Source: CAPRI 2030 Green Deal reference market results (markmarket_greendeal_1730et_base_1717 dataOut): FEED per
-member state and product, ARM1P of the EU trade block EU27yr19; kept as
+member state and product, ARM1P of the member state's market region (A_EU_WEST or A_EU_EAST, CAPRI's RMS_TO_RM;
+EU27yr19's until 3 November 2026); kept as
 capri_data/sources/market/feed_bulks_dataout_2030.csv.
 
 Model commodity of each product: WHEA -> SWHE, MAIZ -> CORN, RYEM, OATS, OCER as themselves, RICE -> PARI, OLIO -> OLIV,
@@ -89,6 +90,7 @@ GROUPS = {"SWHE": ("SWHE", "DWHE"), "CORN": ("MAIZ",), "OCER": ("OCER",), "RYEM"
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "lib"))
 from _model_regions import EU_MS as _EU_FROM_DATA  # noqa: E402  (capri_data/shared/eu_market_blocks.csv)
 EU_MS = set(_EU_FROM_DATA)                                  # CAPRI's EU member states, from the data
+from _market_regions import market_region  # noqa: E402  (CAPRI's RMS_TO_RM: member state -> A_EU_WEST / A_EU_EAST)
 
 
 #: the FCER cereals weighted in the supply models' feed cereal price level (written to feed_cereal_mix_2030.csv)
@@ -136,7 +138,7 @@ def main():
         pat = re.compile(r"^'([^']+)'\.''\.'(FEED|ARM1P|" + "|".join(USE_ITEMS) + r")'\.'([A-Z]+)'\.'2030'\s+([-\d.Ee+]+)")
         rows = [m.groups() for m in map(pat.match, txt.splitlines()) if m]
         # Norway's balance items (its use per product, for the feed share of its use) are kept for Norway only
-        rows = [r for r in rows if (r[0] in EU_MS or r[0] in ("EU27yr19", "NO000000"))
+        rows = [r for r in rows if (r[0] in EU_MS or r[0] in ("A_EU_WEST", "A_EU_EAST", "NO000000"))
                 and (r[1] in ("FEED", "ARM1P") or r[0] == "NO000000")]
         pd.DataFrame(rows, columns=["region", "item", "product", "value"]).to_csv(SRC, index=False)
         print(f"extracted {len(rows)} rows -> {SRC.relative_to(ROOT)}")
@@ -149,7 +151,7 @@ def main():
             tot = 0.0
             for p in items:
                 q = v.get((ms, "FEED", p), 0.0)
-                pr = v.get(("EU27yr19", "ARM1P", p), 0.0)
+                pr = v.get((market_region(ms), "ARM1P", p), 0.0)   # the member state's block (RMS_TO_RM)
                 if q > 1e-6 and pr > 0:
                     out.append(dict(ms=ms, bulk=b, product=p, commodity=COMMODITY.get(p, ""), feed_kt=q, arm1p=pr,
                                     rho=rho[b]))
