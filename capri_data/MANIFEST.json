@@ -3608,6 +3608,9 @@
    "kind": "structure",
    "rows": 45,
    "columns": 2,
+   "read_by_model": [
+    "capri_mod/data/definitions.py"
+   ],
    "origin": {
     "nature": "capri",
     "builder": "build_code_lists"
@@ -3628,6 +3631,9 @@
    "kind": "structure",
    "rows": 42,
    "columns": 2,
+   "read_by_model": [
+    "capri_mod/data/definitions.py"
+   ],
    "origin": {
     "nature": "capri",
     "builder": "build_code_lists"
