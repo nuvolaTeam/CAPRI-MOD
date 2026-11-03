@@ -5555,26 +5555,6 @@
     "capri_data/sources/capreg/pmp_quad_pact.csv",
     "capri_data/sources/capreg/pmp_quad_techn.csv"
    ]
-  },
-  {
-   "task": "recalibrate_trade_2017",
-   "builder": "recalibrate_trade_2017",
-   "args": [],
-   "inputs": [
-    "capri_data/codes/model_trade_regions.csv",
-    "capri_data/sources/fao_2021/trade_flows_2021.csv"
-   ],
-   "code": [
-    "tools/build/recalibrate_trade_2017.py",
-    "tools/lib/paths.py"
-   ],
-   "external": [
-    "$EXPORTS/res_0_1717cap_after_2014_cal_from_data_caldefaulta.csv"
-   ],
-   "outputs": [
-    "capri_data/shared/trade_flows_2017.csv",
-    "capri_data/validation/trade_recalibration_2017.json"
-   ]
   }
  ]
 }

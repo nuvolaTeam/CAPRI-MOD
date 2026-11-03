@@ -77,17 +77,17 @@ def main() -> None:
             eu_price[c] = float(prod.loc[regs, c].median())
 
     # extra-EU import share, for the expectation
+    # the model's 2017 bilateral flows (tools/build/build_bilateral_market.py, CAPRI's market_base_1717); until
+    # 3 November 2026 shared/trade_flows_2017.csv (capmod res_0_1717 ImportQ), a matrix no model code read, removed
     share = {}
-    tf = dd / "shared" / "trade_flows_2017.csv"
+    tf = dd / "2017" / "market" / "bilateral_flows_2017.csv"
     if tf.exists():
-        flows = _read_csv(tf, index_col=[0, 1])
-        for c in flows.columns:
-            rows = [(e, i) for (e, i) in flows.index if i == "EU27"]
-            tot = float(flows.loc[rows, c].sum()) if rows else 0.0
+        flows = _read_csv(tf)
+        eu = flows[flows.importer == "EU27"]
+        for c, g in eu.groupby("commodity"):
+            tot = float(g.q_kt.sum())
             if tot > 0:
-                intra = (float(flows.at[("EU27", "EU27"), c])
-                         if ("EU27", "EU27") in flows.index else 0.0)
-                share[c] = 100 * (tot - intra) / tot
+                share[c] = 100 * float(g.loc[g.exporter != "EU27", "q_kt"].sum()) / tot
 
     # Excluded from the arbitrage test, with the reason: the producer price is
     # not on the world price's product basis, and the model does not use it.

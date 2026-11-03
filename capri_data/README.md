@@ -18,7 +18,7 @@ capri_data/
 │   └── abatement/         mitigation options: ammonia/ (N cascade, AD, leaching, Nitrates Directive, costs/),
 │                          mitigation/ (feed, genetics, soil options), fertiliser options
 ├── shared/                region maps (region_capri_map.csv, NUTS correspondences), EU trade blocks,
-│                          model_parameters.csv, trade_flows_2017.csv
+│                          model_parameters.csv, CAPRI's behavioural regions (rms.csv, rms_to_rm.csv)
 ├── scenarios/             one folder per scenario: settings.toml (its settings) and its factors as CSV
 │                          (capri_ref_2030, the default; captrd_2030; null, settings only)
 ├── trajectories/          CAPRI's 2030 prices, premiums, rations and fodder
@@ -64,9 +64,9 @@ elasticity calibration removed on 28 October 2026, was removed on 29 October 202
 
 ## File resolution
 
-`capri_mod/data/loaders.py::resolve_data_file` looks a file up in `shared/` (for the files mapped there, e.g.
-`trade_flows.csv` → `shared/trade_flows_2017.csv`), then in `<base_year>/<category>/` from its category table, then
-in a flat `capri_data/<file>` fallback.
+`capri_mod/data/loaders.py::resolve_data_file` looks a file up in `<base_year>/<category>/` from its category table,
+then in a flat `capri_data/<file>` fallback (until 3 November 2026 `trade_flows.csv` was mapped to
+`shared/trade_flows_2017.csv`, a matrix no code read, removed).
 
 ## Checks
 
