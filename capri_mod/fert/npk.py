@@ -28,6 +28,22 @@ from capri_mod.data.definitions import CAPRI_PERM_NGRP as PERM_NGRP   # noqa: E4
 
 
 
+def manure_applied_share() -> Dict[tuple, float]:
+    """CAPRI's 2030 manure applied in the region per unit excreted, 1 - MTRADE / EXCRET, {(capri_region, nutrient):
+    share} for N, P and K (2017/environment/manure_npk_applied_share_2030.csv, tools/build/build_npk_balance_2030.py;
+    regions with CAPRI excretion only). One reading for the fertilisation block (SupplyModel._npk_applied_ratio) and the
+    P balance (environmental/phosphorus.py); until 3 November 2026 each computed it from the extract under
+    capri_data/sources."""
+    from capri_mod.data import inputs as _inputs
+    cache = _inputs.current().cache
+    c = cache.get("npk_applied_ratio")
+    if c is None:
+        t = _inputs.current().csv("manure_npk_applied_share_2030.csv", "environment")
+        c = {(r, n): float(x) for r, n, x in zip(t.capri_region, t.nutrient, t.applied_share)}
+        cache["npk_applied_ratio"] = c
+    return c
+
+
 def need_multiplier(supply0: float, need0: float, own0: float, gc: float, perm_groups) -> tuple:
     """The need multiplier of a region and nutrient, calibrated at the base so that NUTNED_ summed over the crop groups
     closes with the base flows (CAPRI's v_cropNutNeedMultFact, fixed in simulation): (kappa, own_scaled).

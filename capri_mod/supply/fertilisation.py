@@ -580,22 +580,13 @@ class FertilisationBlock:
 
     def _npk_applied_ratio(self, cr, nut):
         """CAPRI 2030: manure P/K applied in the region (net of net exports) per unit excreted (fertDistExcr_ /
-        EXCRET), from the extract of tools/build/build_npk_balance_2030.py."""
-        c = _inputs.current().cache.get("npk_applied_ratio")
-        if c is None:
-            import pandas as _pd
-            s = _inputs.current().csv("npk_dataout_2030.csv.xz", "sources/environment", keep_default_na=False)
-            s = s[(s.item == "") & (s.row.isin(["EXCRET", "MTRADE"]))]
-            v = {(t.region, t.row, t.col): float(t.value) for t in s.itertuples(index=False)}
-            c = {}
-            for (r, row, col), x in v.items():
-                if row == "EXCRET" and x > 0:
-                    c[(r, {"PHOF": "P", "POTF": "K", "NITF": "N"}[col])] = max(0.0, 1.0 - v.get((r, "MTRADE", col), 0.0) / x)
-            _inputs.current().cache["npk_applied_ratio"] = c
+        EXCRET): capri_mod/fert/npk.manure_applied_share (tools/build/build_npk_balance_2030.py)."""
+        from capri_mod.fert.npk import manure_applied_share
+        c = manure_applied_share()
         # every unit of the model has CAPRI's regional value (K74, 29 October 2026: the national value and the 1.0
         # without a source, the fallbacks before, were reached by none)
         if (cr, nut) not in c:
-            raise KeyError(f"{cr}: no CAPRI 2030 manure {nut} excretion in npk_dataout_2030.csv.xz")
+            raise KeyError(f"{cr}: no CAPRI 2030 manure {nut} excretion in manure_npk_applied_share_2030.csv")
         return c[(cr, nut)]
 
     def _crop_mineral_rate(self, a: str) -> float:

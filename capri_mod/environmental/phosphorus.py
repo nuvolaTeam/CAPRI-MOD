@@ -19,13 +19,12 @@ class PhosphorusBlock:
 
     def _p_applied_ratio(self, capri_region):
         """Manure P2O5 applied in the region per unit excreted at CAPRI's 2030 reference, 1 - MTRADE / EXCRET (the
-        fertilisation block's ManureNPK_ for P, SupplyModel._npk_applied_ratio; npk_dataout_2030.csv.xz)."""
+        fertilisation block's ManureNPK_ for P, SupplyModel._npk_applied_ratio: capri_mod/fert/npk.manure_applied_share,
+        tools/build/build_npk_balance_2030.py)."""
         c = getattr(type(self), "_P_APPL", None)
         if c is None:
-            s = _inputs.current().csv("npk_dataout_2030.csv.xz", "sources/environment", keep_default_na=False)
-            s = s[(s.item == "") & (s.col == "PHOF") & (s.row.isin(["EXCRET", "MTRADE"]))]
-            v = {(t.region, t.row): float(t.value) for t in s.itertuples(index=False)}
-            c = {r: max(0.0, 1.0 - v.get((r, "MTRADE"), 0.0) / x) for (r, row), x in v.items() if row == "EXCRET" and x > 0}
+            from capri_mod.fert.npk import manure_applied_share
+            c = {r: x for (r, n), x in manure_applied_share().items() if n == "P"}
             type(self)._P_APPL = c
         return c.get(capri_region, c.get(capri_region[:2] + "000000", 1.0))
 

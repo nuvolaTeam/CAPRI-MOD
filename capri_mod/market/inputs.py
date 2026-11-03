@@ -73,13 +73,14 @@ class MarketInputs:
 
     # -- locations -----------------------------------------------------------------------------------------------
     def path(self, name: str, where: str = "market") -> Path:
-        """where: "market" (the base year's market folder), "shared", or "sources/<sub>"."""
+        """where: "market" (the base year's market folder) or "shared". Not "sources/<sub>": the model reads no file
+        under capri_data/sources (refused since 3 November 2026)."""
         if where == "market":
             return self.root / self.base_year / "market" / name
         if where == "shared":
             return self.root / "shared" / name
-        if where.startswith("sources/"):
-            return self.root / where / name
+        if where.startswith("sources/") or where == "sources":
+            raise ValueError(f"{where!r}: the model reads no file under capri_data/sources (the builders' extracts of CAPRI's material, capri_data/sources/README.md); a builder writes what the model needs as an input (3 November 2026)")
         raise ValueError(f"unknown input location {where!r}")
 
     def exists(self, name: str, where: str = "market") -> bool:

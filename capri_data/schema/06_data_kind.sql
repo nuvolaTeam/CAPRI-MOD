@@ -98,6 +98,7 @@ INSERT INTO data_kind VALUES
   ('capri_data/2017/environment/nh3_factors_capri.csv', 'coefficients', 'by file: emission, loss and nutrient factors'),
   ('capri_data/2017/environment/nh3_factors_capri_regions.csv', 'coefficients', 'by file: emission, loss and nutrient factors'),
   ('capri_data/2017/environment/npk_crop_coefs_2030.csv', 'coefficients', 'by file: CAPRI''s 2030 coefficients (per ha, per t, shares, factors)'),
+  ('capri_data/2017/environment/manure_npk_applied_share_2030.csv', 'coefficients', 'by file: CAPRI''s 2030 coefficients (per ha, per t, shares, factors)'),
   ('capri_data/2017/environment/npk_region_2030.csv', 'coefficients', 'by file: CAPRI''s 2030 coefficients (per ha, per t, shares, factors)'),
   ('capri_data/2017/environment/p_balance_crop_coefs_2030.csv', 'coefficients', 'by file: CAPRI''s 2030 coefficients (per ha, per t, shares, factors)'),
   ('capri_data/2017/feed/feed_cereal_mix_2030.csv', 'coefficients', 'by file: feed shares'),
