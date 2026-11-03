@@ -577,8 +577,8 @@ can rebuild every model input. **Beyond CAPRI**: CAPRI needs its installation to
 
 **Decided (the project lead, 3 November 2026).** The full Parquet set stays out of git and is available for download,
 hosted on Hugging Face (as the dat mirror, hf_capri) as a gated dataset (each download approved by the project
-lead); the item comes after the market move's stages 2-3; capri_data/sources dropped (step 5); the converter written
-here (step 1).
+lead); the item comes after the market move's stages 2-3; capri_data/sources kept, its extracts derived from the
+pinned set (step 5); the converter written here (step 1).
 
 **Measured** (3 November 2026, three of the largest files, every numeric record kept):
 
@@ -597,12 +597,15 @@ here (step 1).
    tools/build/convert_sources_to_csv.py).
 4. The builders switched one by one to the Parquet files through one reader, each checked identical
    (tools/check/reproduce_builders.py; the rebuild from blank, tools/check/rebuild_from_blank.py).
-5. capri_data/sources is dropped (the project lead, 3 November 2026): the builders read the downloaded Parquet set
-   directly; CAPRI's material without a builder and the checks' and tests' reference data move into the set. The
-   model's inputs stay CSV in git.
+5. capri_data/sources is kept (the project lead, 3 November 2026, revising the same day's decision to drop it): it
+   holds the records each builder uses, extracted from the pinned version of the set only (the version recorded in
+   each extract's provenance; the rebuild check refuses an extract of another version), so a clone rebuilds every
+   model input from git alone, without access to the gated set (collaborators, CI), and CAPRI's changes show as diffs
+   of the records the model uses. The everyday rebuild from blank runs from the extracts; the full rebuild from the
+   downloaded set runs before each new version is published. The model's inputs stay CSV in git.
 6. Updating the set: CAPRI's new files (uploaded, or on the project lead's machine) -> the converter -> a version report
-   kept in git (symbols, record counts, largest value changes against the previous version: CAPRI's changes no longer
-   show as diffs of extracts) -> upload as a new tagged version of the gated dataset (a write token; the workspace's
+   kept in git (symbols, record counts, largest value changes against the previous version) -> the extracts rebuilt
+   from it -> upload as a new tagged version of the gated dataset (a write token; the workspace's
    access to huggingface.co to be checked, else the upload runs on the project lead's side) -> the manifest pinned to
    it -> the inputs rebuilt from blank, reviewed, mini-EU and F2F/GD gates.
 
