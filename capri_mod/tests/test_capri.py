@@ -2668,6 +2668,37 @@ def test_histosol_outside_the_eu_as_capris_regional_results():
         assert abs(got - v) <= 1e-5 * max(v, 1e-3), (reg, cls, got, v)
     assert h.loc["NO080000", "pmp_sqr_crop"] > 0 and pd.isna(h.loc["TR100000", "pmp_sqr_crop"])
 
+def test_farm_size_estimate_of_the_balkans_and_turkey_holds_capris_constraints():
+    """tools/build/build_farm_size_noneu.py (CAPRI's m_heads_per_hold, prep_farm_size_data_for_miti.gms): for the six
+    Western Balkan countries and Turkey's 12 units, heads = heads per holding x holdings (dairy and other cattle on the
+    same holdings, their heads pooled), heads per holding within the class bounds x p_corLSUfactor, holdings at most
+    3 x the farm total / 9 x their share; and the farm sizes p_sf within the class bounds (m_fsclass)."""
+    import pandas as pd
+    D = DATA_DIR / "2017" / "abatement" / "ammonia"
+    d = pd.read_csv(D / "farm_size_noneu.csv")
+    sf = pd.read_csv(D / "farm_size_noneu_sf.csv")
+    assert d.region.nunique() == 18 and set(d.ad_activity) == {"DAIRY", "NDAIRY", "SWIN", "HENS", "POUF", "SHEEP"}
+    bounds = {"0_5": (0, 5), "5_10": (5, 10), "10_15": (10, 15), "15_20": (15, 20), "20_50": (20, 50),
+              "50_100": (50, 100), "100_200": (100, 200), "200_500": (200, 500), "h500": (500, float("inf"))}
+    cor = {"HENS": (0, 1.4), "POUF": (0, 1), "NDAIRY": (0.7, 1), "DAIRY": (1, 1), "SHEEP": (0, 1), "SWIN": (0, 1)}
+    tol = 1e-6
+    for r in d.itertuples():
+        lo, hi = bounds[r.size_class]
+        assert r.heads_per_hold >= lo * cor[r.ad_activity][0] - tol and r.heads_per_hold <= hi * cor[r.ad_activity][1] + tol
+        if r.ad_activity not in ("DAIRY", "NDAIRY"):
+            assert abs(r.heads - r.heads_per_hold * r.holdings) <= 1e-5 * max(1.0, r.heads)
+    k = d.set_index(["region", "size_class", "ad_activity"])
+    for (reg, fs), g in d.groupby(["region", "size_class"]):
+        dd, nd = k.loc[(reg, fs, "DAIRY")], k.loc[(reg, fs, "NDAIRY")]
+        assert abs(dd.holdings - nd.holdings) <= 1e-6 * max(1.0, dd.holdings)
+        assert abs(dd.heads + nd.heads - dd.heads_per_hold * dd.holdings) <= 1e-5 * max(1.0, dd.heads + nd.heads)
+    for r in sf.itertuples():
+        lo, hi = bounds[r.size_class]
+        assert lo - tol <= r.sf <= hi + tol
+    # the ammonia cost curves now cover them (CAPRI's ammo_tech.gms on the estimated p_Heads, p_holdLSU)
+    cc = pd.read_parquet(D / "ammonia_cost_curves.parquet")
+    assert set(d.region) <= set(cc.region)
+
 def test_manure_n2o_by_source_and_technology_effects():
     """CAPRI's manure N2O by stage (gases.gms): per t of manure N, housing/storage, application and
     grazing shares near IPCC's 1-2% in total; CAPRI's technology effects as its housing equation applies

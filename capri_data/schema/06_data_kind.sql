@@ -52,6 +52,8 @@ INSERT INTO data_kind VALUES
   ('capri_data/2017/abatement/ammonia/n_cascade_region.csv', 'coefficients', 'by rule: CAPRI''s parameter tables (abatement, environment, fertiliser, policy)'),
   ('capri_data/2017/abatement/ammonia/n_leaching_region.csv', 'coefficients', 'by rule: CAPRI''s parameter tables (abatement, environment, fertiliser, policy)'),
   ('capri_data/2017/abatement/ammonia/p_Heads.csv', 'coefficients', 'by rule: CAPRI''s parameter tables (abatement, environment, fertiliser, policy)'),
+  ('capri_data/2017/abatement/ammonia/farm_size_noneu.csv', 'coefficients', 'by rule: CAPRI''s parameter tables (abatement, environment, fertiliser, policy)'),
+  ('capri_data/2017/abatement/ammonia/farm_size_noneu_sf.csv', 'coefficients', 'by rule: CAPRI''s parameter tables (abatement, environment, fertiliser, policy)'),
   ('capri_data/2017/abatement/ammonia/p_factRunStor.csv', 'coefficients', 'by rule: CAPRI''s parameter tables (abatement, environment, fertiliser, policy)'),
   ('capri_data/2017/abatement/ammonia/p_fracStorType.csv', 'coefficients', 'by rule: CAPRI''s parameter tables (abatement, environment, fertiliser, policy)'),
   ('capri_data/2017/abatement/ammonia/p_holdLSU.csv', 'coefficients', 'by rule: CAPRI''s parameter tables (abatement, environment, fertiliser, policy)'),

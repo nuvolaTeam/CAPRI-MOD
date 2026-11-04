@@ -527,3 +527,30 @@ INSERT INTO value_units VALUES
 
 -- No rule on the region codes: CAPRI's MITERRA files carry codes outside RALL (other NUTS versions: Turkish and
 -- Norwegian NUTS-2 regions, FR9x, HR03/HR04, SI01/SI02, LU000000), which the model's units do not read.
+
+-- file: capri_data/2017/abatement/ammonia/farm_size_noneu.csv
+CREATE TABLE amm_farm_size_noneu (
+    region VARCHAR NOT NULL,
+    ad_activity VARCHAR NOT NULL,
+    size_class VARCHAR NOT NULL,
+    heads DOUBLE NOT NULL,
+    holdings DOUBLE NOT NULL,
+    heads_per_hold DOUBLE NOT NULL,
+    PRIMARY KEY (region, ad_activity, size_class)
+);
+COMMENT ON TABLE amm_farm_size_noneu IS 'CAPRI''s farm structure of the Western Balkans and Turkey''s units, estimated as envind/prep_farm_size_data_for_miti.gms does (m_fsclass, m_heads_per_hold; targets the fallback_Balkan averages of Romania, Bulgaria and Croatia; CAPRI''s 2030 Green Deal animals): p_Heads (heads), p_holdLSU, p_heads_per_hold by animal group and LSU size class (tools/build/build_farm_size_noneu.py)';
+INSERT INTO value_units VALUES
+  ('amm_farm_size_noneu', 'heads', NULL, 'open', 'animals (heads; hens and broilers in CAPRI''s activity units)'),
+  ('amm_farm_size_noneu', 'holdings', NULL, 'open', 'number of holdings'),
+  ('amm_farm_size_noneu', 'heads_per_hold', NULL, 'open', 'heads per holding');
+
+-- file: capri_data/2017/abatement/ammonia/farm_size_noneu_sf.csv
+CREATE TABLE amm_farm_size_noneu_sf (
+    region VARCHAR NOT NULL,
+    size_class VARCHAR NOT NULL,
+    sf DOUBLE NOT NULL,
+    PRIMARY KEY (region, size_class)
+);
+COMMENT ON TABLE amm_farm_size_noneu_sf IS 'CAPRI''s average farm size p_sf of the Western Balkans and Turkey''s units by LSU size class, from m_fsclass (envind/prep_farm_size_data_for_miti.gms l. 481; tools/build/build_farm_size_noneu.py)';
+INSERT INTO value_units VALUES
+  ('amm_farm_size_noneu_sf', 'sf', NULL, 'open', 'livestock units per farm');

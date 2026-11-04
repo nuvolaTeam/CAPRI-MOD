@@ -743,6 +743,7 @@
      "build_ammonia_cost_curves",
      "build_ammonia_tech_model",
      "build_ammonia_technologies",
+     "build_farm_size_noneu",
      "build_fert_side_effects",
      "build_genetics_effects",
      "build_lownfeed_effects",
@@ -875,6 +876,136 @@
     "builders": [
      "build_n_cascade"
     ],
+    "checks": [],
+    "tests": []
+   }
+  },
+  "amm_farm_size_noneu": {
+   "file": "capri_data/2017/abatement/ammonia/farm_size_noneu.csv",
+   "declared_in": "16_ammonia.sql",
+   "layout": [],
+   "comment": "CAPRI's farm structure of the Western Balkans and Turkey's units, estimated as envind/prep_farm_size_data_for_miti.gms does (m_fsclass, m_heads_per_hold; targets the fallback_Balkan averages of Romania, Bulgaria and Croatia; CAPRI's 2030 Green Deal animals): p_Heads (heads), p_holdLSU, p_heads_per_hold by animal group and LSU size class (tools/build/build_farm_size_noneu.py)",
+   "columns": [
+    {
+     "name": "region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "ad_activity",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "size_class",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "heads",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "holdings",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "heads_per_hold",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "region",
+    "ad_activity",
+    "size_class"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [
+    {
+     "item": "heads",
+     "unit": null,
+     "status": "open",
+     "basis": "animals (heads; hens and broilers in CAPRI's activity units)"
+    },
+    {
+     "item": "heads_per_hold",
+     "unit": null,
+     "status": "open",
+     "basis": "heads per holding"
+    },
+    {
+     "item": "holdings",
+     "unit": null,
+     "status": "open",
+     "basis": "number of holdings"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_farm_size_noneu",
+    "sources": "$EXPORTS/LitRevAmmoTech.csv; $EXPORTS/LitRev_input_manStor.csv; $EXPORTS/LitRev_inputs.csv; $EXPORTS/LitRev_non_changeable_parameters.csv; $EXPORTS/gd_full.zip; $EXPORTS/holdingsLSU.csv; $EXPORTS/nvzShare_LU.csv; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $EXPORTS/scen.zip; $SOURCES/gams/aggregation/defaultA.agg; $SOURCES/gams/envind/prep_farm_size_data_for_miti.gms; $SOURCES/gams/sets.gms"
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [],
+    "tests": []
+   }
+  },
+  "amm_farm_size_noneu_sf": {
+   "file": "capri_data/2017/abatement/ammonia/farm_size_noneu_sf.csv",
+   "declared_in": "16_ammonia.sql",
+   "layout": [],
+   "comment": "CAPRI's average farm size p_sf of the Western Balkans and Turkey's units by LSU size class, from m_fsclass (envind/prep_farm_size_data_for_miti.gms l. 481; tools/build/build_farm_size_noneu.py)",
+   "columns": [
+    {
+     "name": "region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "size_class",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "sf",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "region",
+    "size_class"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [
+    {
+     "item": "sf",
+     "unit": null,
+     "status": "open",
+     "basis": "livestock units per farm"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_farm_size_noneu",
+    "sources": "$EXPORTS/LitRevAmmoTech.csv; $EXPORTS/LitRev_input_manStor.csv; $EXPORTS/LitRev_inputs.csv; $EXPORTS/LitRev_non_changeable_parameters.csv; $EXPORTS/gd_full.zip; $EXPORTS/holdingsLSU.csv; $EXPORTS/nvzShare_LU.csv; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $EXPORTS/scen.zip; $SOURCES/gams/aggregation/defaultA.agg; $SOURCES/gams/envind/prep_farm_size_data_for_miti.gms; $SOURCES/gams/sets.gms"
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
     "checks": [],
     "tests": []
    }
@@ -1920,7 +2051,8 @@
     "model": [],
     "builders": [
      "build_ammonia_cost_curves",
-     "build_ammonia_technologies"
+     "build_ammonia_technologies",
+     "build_farm_size_noneu"
     ],
     "checks": [],
     "tests": []
@@ -22490,6 +22622,7 @@
      "build_eu_cake_feed",
      "build_eu_market_supply_nq",
      "build_eu_producer_prices",
+     "build_farm_size_noneu",
      "build_feed_bulks",
      "build_feed_demand_nonEU",
      "build_feed_ration",
@@ -23085,6 +23218,7 @@
      "build_eu_cake_feed",
      "build_eu_market_supply_nq",
      "build_eu_producer_prices",
+     "build_farm_size_noneu",
      "build_feed_bulks",
      "build_feed_demand_nonEU",
      "build_feed_ration",
@@ -23290,6 +23424,7 @@
      "build_eu_market_supply_nq",
      "build_eu_ms_balance",
      "build_eu_producer_prices",
+     "build_farm_size_noneu",
      "build_feed_bulks",
      "build_feed_demand_nonEU",
      "build_feed_ration",
@@ -23643,7 +23778,8 @@
    "read_by": {
     "model": [],
     "builders": [
-     "build_ad_option"
+     "build_ad_option",
+     "build_farm_size_noneu"
     ],
     "checks": [],
     "tests": []
@@ -23835,7 +23971,8 @@
    "read_by": {
     "model": [],
     "builders": [
-     "build_ad_option"
+     "build_ad_option",
+     "build_farm_size_noneu"
     ],
     "checks": [],
     "tests": []
@@ -32003,7 +32140,8 @@
    "read_by": {
     "model": [],
     "builders": [
-     "build_captrd_dat"
+     "build_captrd_dat",
+     "build_farm_size_noneu"
     ],
     "checks": [],
     "tests": []

@@ -2529,6 +2529,36 @@
    ]
   },
   {
+   "task": "build_farm_size_noneu",
+   "builder": "build_farm_size_noneu",
+   "args": [],
+   "inputs": [
+    "capri_data/2017/abatement/ammonia/capri_mann_days_2030.csv",
+    "capri_data/2017/abatement/ammonia/p_holdLSU.csv",
+    "capri_data/shared/capri_member_state_codes.csv",
+    "capri_data/shared/eu_market_blocks.csv",
+    "capri_data/shared/regional_units.csv",
+    "capri_data/sources/capri_dat/ghgtech/AD_basedata_p_Heads.csv",
+    "capri_data/sources/capri_dat/ghgtech/AD_basedata_p_sf.csv",
+    "capri_data/sources/capri_dat/policy/livestock_units_p_LUUnits.csv",
+    "capri_data/validation/greendeal_2030/capri_marginal_terms_ini_2030.csv.xz"
+   ],
+   "code": [
+    "tools/build/build_farm_size_noneu.py",
+    "tools/lib/_model_regions.py",
+    "tools/lib/gams_text.py",
+    "tools/lib/paths.py"
+   ],
+   "external": [
+    "$SOURCES/gams/envind/prep_farm_size_data_for_miti.gms",
+    "$SOURCES/gams/sets.gms"
+   ],
+   "outputs": [
+    "capri_data/2017/abatement/ammonia/farm_size_noneu.csv",
+    "capri_data/2017/abatement/ammonia/farm_size_noneu_sf.csv"
+   ]
+  },
+  {
    "task": "build_intensity_q_2030",
    "builder": "build_intensity_q_2030",
    "args": [],

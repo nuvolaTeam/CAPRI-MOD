@@ -2024,4 +2024,6 @@ FALLOW calibration in CAPRI's cost savings).
 - **Status:** **fixed** 4 November 2026: the region's JRC record only, a missing one zero; grassland without a share
   takes the cropland N2O per ha. After the fix every region matches CAPRI to 2e-6 (the three Greek regions without
   grassland in CAPRI's 2030 have no GRAS row there). Test: test_histosol_n2o_per_ha_as_capris_regional_results.
+  Mini-EU Farm-to-Fork run (91f621c against 202acf5): supply and market identical; only EL140000's histosol N2O
+  changes (baseline 16.7 -> 31.0, scenario 0.4 -> 14.7 kt CO2-eq), the one mini region concerned.
 

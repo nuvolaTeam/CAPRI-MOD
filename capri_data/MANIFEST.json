@@ -130,7 +130,7 @@
   "capri_data/2017/abatement/ammonia/ammonia_tech_model.csv": {
    "description": "the ammonia technologies on the model's animals: CAPRI's options, weights and the N cascade terms (build_ammonia_tech_model.py) (tools/build/build_ammonia_tech_model.py)",
    "kind": "coefficients",
-   "rows": 33027,
+   "rows": 34665,
    "columns": 23,
    "units": "to be established (value_units: open)",
    "read_by_model": [
@@ -145,7 +145,7 @@
   "capri_data/2017/abatement/ammonia/ammonia_technologies.csv": {
    "description": "CAPRI's ammonia technologies p_ghgMiti per CAPRI region and activity (envind/ammo_tech.gms; build_ammonia_technologies.py) (tools/build/build_ammonia_technologies.py)",
    "kind": "coefficients",
-   "rows": 31378,
+   "rows": 32756,
    "columns": 12,
    "units": "to be established (value_units: open)",
    "origin": {
@@ -285,10 +285,32 @@
     "builder": "build_ammonia_cost_tables"
    }
   },
+  "capri_data/2017/abatement/ammonia/farm_size_noneu.csv": {
+   "description": "CAPRI's farm structure of the Western Balkans and Turkey's units, estimated as envind/prep_farm_size_data_for_miti.gms does (m_fsclass, m_heads_per_hold; targets the fallback_Balkan averages of Romania, Bulgaria and Croatia; CAPRI's 2030 Green Deal animals): p_Heads (heads), p_holdLSU, p_heads_per_hold by animal group and LSU size class (tools/build/build_farm_size_noneu.py)",
+   "kind": "coefficients",
+   "rows": 972,
+   "columns": 6,
+   "units": "to be established (value_units: open)",
+   "origin": {
+    "nature": "capri",
+    "builder": "build_farm_size_noneu"
+   }
+  },
+  "capri_data/2017/abatement/ammonia/farm_size_noneu_sf.csv": {
+   "description": "CAPRI's average farm size p_sf of the Western Balkans and Turkey's units by LSU size class, from m_fsclass (envind/prep_farm_size_data_for_miti.gms l. 481; tools/build/build_farm_size_noneu.py)",
+   "kind": "coefficients",
+   "rows": 162,
+   "columns": 3,
+   "units": "to be established (value_units: open)",
+   "origin": {
+    "nature": "capri",
+    "builder": "build_farm_size_noneu"
+   }
+  },
   "capri_data/2017/abatement/ammonia/n_cascade_effects.csv": {
    "description": "the technologies' effects on the N cascade items per region and activity (envind/ghgMiti.gms; build_n_cascade.py) (tools/build/build_n_cascade.py)",
    "kind": "coefficients",
-   "rows": 141889,
+   "rows": 145529,
    "columns": 5,
    "units": "to be established (value_units: open)",
    "read_by_model": [
@@ -915,7 +937,7 @@
    "vintage": "2017",
    "domain": "environment",
    "status": "live",
-   "rows": 7830,
+   "rows": 8120,
    "columns": 5,
    "units": "to be established (value_units: open)",
    "read_by_model": [
