@@ -76,7 +76,7 @@ def main():
         # from this list, so a fresh extract fell back to the components and changed 77 regional factors)
         keep = set(ALL_ACTIVITIES) | {"MAIZ", "TWIN", "SCOW", "HEIF", "HEIR", "SOWS", "HENS", "POUF", "OFAR", "BULF",
                                       "TEXT", "SHGM", "SHGF", "CAMF", "CAFF", "CAMR", "CAFR", "CACR", "ARAC", "FRUN", "GRAS",
-                                      "FALL", "DCOL", "DCOH", "BULH", "HEIL", "HEIH", "PIGF"}
+                                      "FALL", "VSET", "DCOL", "DCOH", "BULH", "HEIL", "HEIH", "PIGF"}
         rows = [r_ for r_ in rows if r_[1] in keep]
         KEEP.parent.mkdir(parents=True, exist_ok=True)
         pd.DataFrame(rows, columns=["capri_region", "activity", "item", "year", "value"]).to_csv(KEEP, index=False)
@@ -84,13 +84,18 @@ def main():
     t = _read_csv(KEEP)
     v = {(r.capri_region, r.activity, r.item, str(r.year)): float(r.value) for r in t.itertuples()}
     # CAPRI's calves are several activities; the model has one (CALV): their
-    # levels as sums (CAPTRD carries the same totals as SHGT and CACR)
-    for comp, parts in (("SHGT", ("SHGM", "SHGF")), ("CACR", ("CAMF", "CAFF", "CAMR", "CAFR"))):
+    # levels as sums (CAPTRD carries the same totals as SHGT and CACR). The model's set-aside SETA is CAPRI's fallow FALL
+    # plus its voluntary set-aside VSET (CAPRI_TO_MODEL_ACTIVITY; the set-aside split, KNOWN_ISSUES K111), while CAPRI's
+    # own SETA row is VSET alone (res_17IT: IT400000 SETA = VSET = 10.70, FALL 7.22): until 4 November 2026 the model's
+    # SETA took that row's growth, or the EU median where a region has no VSET (KNOWN_ISSUES K115)
+    for comp, parts in (("SHGT", ("SHGM", "SHGF")), ("CACR", ("CAMF", "CAFF", "CAMR", "CAFR")),
+                        ("SETA", ("FALL", "VSET"))):
         for reg in {k[0] for k in v}:
             for yr in ("2017", "2030"):
                 xs = [v.get((reg, p_, "LEVL", yr)) for p_ in parts]
                 if any(x is not None for x in xs):
                     v[(reg, comp, "LEVL", yr)] = sum(x for x in xs if x is not None)
+    v = {k: x for k, x in v.items() if k[1] != "VSET"}       # a part of SETA only, not a model activity
     # Yields of the model's livestock activities that CAPRI's 2030 reference splits (Sprint 9p regression, found against
     # the EU outlook 2020-2030): the reference reports DCOL/DCOH, HEIL/HEIH, BULL/BULH, CAMF/CAFF and SHGM/SHGF per region
     # but not the model's aggregates, so DCOW, HFRS, BULL, CALV and SHGP had no regional yield factor and no EU one -

@@ -24,7 +24,7 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K92](#k92) | Farm-to-Fork changes furthest from JRC121368, besides the milk price | open: waiting for CAPRI's scenario results |
 | [K93](#k93) | CAPRI mitigation options not built; documents disagree on which are in | open: no-till and legume share unmeasured; UreaSubst parked; the others not needed for Farm-to-Fork and the Green Deal |
 
-## Resolved (103)
+## Resolved (104)
 
 | # | Issue | Status |
 |---|---|---|
@@ -131,6 +131,7 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K112](#k112) | Histosols: regions without a JRC record took their country's share; Greek grassland had no N2O | fixed |
 | [K113](#k113) | Croatia had no AD option: CAPRI's fallback_Balkan fills its VSER and housing share | fixed |
 | [K114](#k114) | Norway lacked CAPRI's mirrored MITERRA data and Sweden's AD data: no housed liquid manure, no AD | fixed |
+| [K115](#k115) | The 2030 set-aside followed CAPRI's VSET alone, not FALL + VSET: up to half or double CAPRI's per region | fixed |
 
 ## Details
 
@@ -2067,4 +2068,23 @@ option outside the EU (SUPPLY_NONEU step 6). A reproduction error of capri-mod.
   Mini-EU Farm-to-Fork run (d80d7fd, with the winter cover outside the EU, against 4cd6518): NO080000's soil N2O
   106.9 -> 97.2 kt CO2-eq, P run-off 68.6 -> 156.3 t, urea CO2 0 -> 0.03 kt; supply, market and every other region
   unchanged to the solves' tolerance; the mean deviation from CAPRI (20 indicators) 7.81 as before.
+
+### K115: The 2030 set-aside followed CAPRI's VSET alone, not FALL + VSET (found 4 November 2026)
+
+The model's SETA is CAPRI's fallow FALL plus its voluntary set-aside VSET (CAPRI_TO_MODEL_ACTIVITY maps FALL to SETA;
+the set-aside split, K111). tools/build/build_trajectory_capri_ref.py gave it the growth of CAPRI's own SETA row, which
+is VSET alone (CAPREG 2017: IT400000 SETA = VSET = 10.70, FALL 7.22), and the EU median where a region has no VSET.
+Against CAPRI's 2030 reference (res_2_1730greendeal_refpol_endotech_all_ini) the mini run's 2030 baseline had PL12
+55.6 kha against 104.3, IT40 9.7 against 20.3, PT18 43.8 against 20.7, BG02 28.6 against 14.3, IR01 +83%, HR +64%,
+RO04 +31%, ES61 +15%. The EU-level check (BASELINE_REPRODUCTION) did not show it: the regions offset each other. Found
+while preparing SUPPLY_NONEU step 9's comparison per region. A reproduction error of capri-mod.
+
+- **Effect:** the 2030 baseline's set-aside and fallow per region, and through land use the other crops a little; the
+  Green Deal landscape floor and the set-aside split rest on it
+- **Status:** **fixed** 4 November 2026: SETA's levels in the trajectory are FALL + VSET in both years (as SHGT and CACR
+  are sums); VSET is read and not written. 434 regional SETA factors change (191 regions had none and took the EU
+  median). Test: test_set_aside_trajectory_is_fallow_plus_voluntary_set_aside. The mini run to measure it follows.
+  Not changed: the CAPTRD trajectory (scenarios/captrd_2030, not the default) takes CAPTRD's own SETA row as it is
+  (capri_mod/projection/captrd_import.py, no aggregation); whether CAPTRD's SETA is VSET too is to check before that
+  trajectory is used.
 

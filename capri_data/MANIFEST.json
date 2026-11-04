@@ -4842,7 +4842,7 @@
    "vintage": "2030 reference",
    "domain": "projection",
    "status": "live",
-   "rows": 51457,
+   "rows": 51648,
    "columns": 5,
    "units": "to be established (value_units: open)",
    "read_by_model": [

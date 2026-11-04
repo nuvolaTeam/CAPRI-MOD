@@ -2726,6 +2726,16 @@ def test_norway_miterra_mirror_and_ad_option_as_capri():
             # CAPRI reports the solved level, the model's table the initial share it calibrates on: 0.3% apart (DCOL)
             assert abs(a.loc[(reg, act), "ini"] - v) <= 5e-3 * v, (reg, act, a.loc[(reg, act), "ini"])
 
+def test_set_aside_trajectory_is_fallow_plus_voluntary_set_aside():
+    """KNOWN_ISSUES K115: the model's SETA is CAPRI's FALL + VSET, so its 2030 factor is their sum's growth in CAPRI's 2030
+    reference over 2017 (IT400000: (14.21 + 5.72) / (7.22 + 10.70) = 1.1125), not CAPRI's own SETA row, which is VSET
+    alone (0.534), nor the EU median where a region has no VSET (PL120000: FALL's 103.90 / 57.24 = 1.8152)."""
+    import pandas as pd
+    t = pd.read_csv(DATA_DIR / "scenarios" / "capri_ref_2030" / "regional.csv")
+    f = t[(t.block == "herds") & (t["item"] == "SETA")].set_index("region")["factor"]
+    assert abs(f["IT400000"] - 1.1125) < 5e-4 and abs(f["PL120000"] - 1.8152) < 5e-4
+    assert not (t["item"] == "VSET").any()
+
 def test_manure_n2o_by_source_and_technology_effects():
     """CAPRI's manure N2O by stage (gases.gms): per t of manure N, housing/storage, application and
     grazing shares near IPCC's 1-2% in total; CAPRI's technology effects as its housing equation applies
