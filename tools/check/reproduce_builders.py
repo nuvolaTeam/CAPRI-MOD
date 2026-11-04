@@ -215,7 +215,6 @@ INVOCATIONS: list[tuple[str, list[str], list[Path]]] = [
     ("build_processing_yields", [], [EXPORTS / "markmarket_greendeal_1730et_base_1717.txt"]),
     ("build_sugar_processing", [], []),
     ("build_supply_elas_nonEU", [], []),
-    ("build_tariffs_2017", [], []),
     ("build_use_components", [], []),
     ("build_world_market_baseline", [], []),
     # the zip of the other member states' dumps is extracted first (the builder reads text files): see run()

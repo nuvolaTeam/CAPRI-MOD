@@ -268,7 +268,7 @@ class PolicyModule:
 
     Called at the start of each scenario run to:
       1. Compute payment rates → feed to supply module (net revenues)
-      2. Compute tariffs / TRQ status → feed to market module
+      2. Tariff changes and TRQ volumes → the market module (bilateral import prices, CAPRI's TRQs)
       3. Track compliance costs and environmental conditionality
     """
 
@@ -314,23 +314,6 @@ class PolicyModule:
             cap_data=self.data["cap_payments"],
             land_data=self.data["land"],
         )
-
-    def get_effective_tariffs(self) -> pd.DataFrame:
-        """
-        Return the tariff matrix [region × commodity] with the scenario's tariff changes. The EU's tariff-rate
-        quotas act in the bilateral market (market/bilateral.py, CAPRI's TRQ regime; trq_volume_changes).
-        """
-        base_tariffs = self.data["tariffs"].copy()
-
-        # Apply scenario tariff changes
-        for region, changes in self.scenario.tariff_changes.items():
-            for comm, delta in changes.items():
-                if region in base_tariffs.index and comm in base_tariffs.columns:
-                    base_tariffs.at[region, comm] = max(
-                        0, base_tariffs.at[region, comm] + delta
-                    )
-
-        return base_tariffs
 
     def get_supply_policy_adders(self) -> pd.Series:
         """Per-activity premium changes added to net revenues (EUR/ha or EUR/head): the BISS rate change on every

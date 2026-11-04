@@ -104,13 +104,6 @@ class MarketModule(NewtonKrylovMixin, CalibrationMixin, BiofuelMixin, DairyMixin
         if _miss:
             # no invented price (a fixed 200 EUR/t was used here): every market product needs CAPRI's world price
             raise ValueError(f"no base world price for market products {_miss} (capri_data world prices)")
-        self.tariffs       = data["tariffs"]
-        if "EU27" in self.tariffs.index:
-            # the EU's common external tariff applies to both blocks (no tariff between them: CAPRI's flows)
-            _t = self.tariffs.copy()
-            for _b in self.EU:
-                _t.loc[_b] = _t.loc["EU27"]
-            self.tariffs = _t.drop(index="EU27")
         self.par.demand_cal   = None  # set by the bilateral calibration at the first solve
 
         # Compute baseline consumption and production

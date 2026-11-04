@@ -8,7 +8,7 @@ the data against their declarations (capri_data/schema, tools/check/validate_dat
 
     doit list                 # the tasks
     doit                      # bring every output up to date, then check the data
-    doit build:build_tariffs_2017   # one builder (and what it needs)
+    doit build:build_world_prices   # one builder (and what it needs)
     doit forget; doit         # rerun everything (with the outputs emptied first: the rebuild from blank)
 
 CAPRI's own material (exports, dumps, source tree) is not in git: tools/pipeline/builders.json names it as $EXPORTS,

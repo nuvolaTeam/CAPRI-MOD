@@ -118,8 +118,8 @@ class ProcessingMixin(MarketStateMixin):
         soybeans: oil + cake 1.2-1.7 t per t of seed crushed; JAP sunflower) was
         removed 23 October 2026 (no proxies; the numbers had no source).
         """
-        # The cache is keyed on what it depends on - the BASE prices and tariffs
-        # of the oilseed-chain commodities. A plain cache built on first use
+        # The cache is keyed on what it depends on - the BASE prices (world prices and CAPRI's market prices, the
+        # reference levels since 4 November 2026; the aggregate tariffs before) of the oilseed-chain commodities. A plain cache built on first use
         # went stale when that use fell in a run with shifted base prices
         # (a long-lived model then disagreed with a fresh one: the projection
         # null-trajectory test caught a 0.04% difference).
@@ -127,7 +127,7 @@ class ProcessingMixin(MarketStateMixin):
                if c in self.commodities]
         try:
             _key = (tuple(round(float(self.world_prices_base.get(c, 0.0)), 9) for c in _cc),
-                    tuple(map(tuple, self.tariffs.reindex(columns=_cc).fillna(0.0).round(9).values.tolist())),
+                    tuple(map(tuple, self._reference_prices()[_cc].round(9).values.tolist())),
                     tuple(round(float((self.par.eu_aligned_use or {}).get(rg, {}).get(c, 0.0)), 6)
                           for rg in self.EU for c in ("RAPE", "SUNF", "SOYA")))
         except Exception:

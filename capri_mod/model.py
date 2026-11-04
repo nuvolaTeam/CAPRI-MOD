@@ -8,7 +8,7 @@ connecting all modules:
        ↑_______________(price feedback)_____________________|
 
 The iterative loop follows CAPRI's original GAMS implementation:
-  1. Policy module computes CAP payment rates + tariffs
+  1. Policy module computes CAP payment rates (tariff changes act in the market's import prices)
   2. Supply module solves all ~280 regional NLPs given prices + payments
   3. Market module receives EU supply, clears world markets
   4. Market prices fed back to supply module
@@ -503,7 +503,6 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
             .get_supply_policy_adders()
         policy_adders = (self.policy_module.get_supply_policy_adders()
                          - _baseline_adders)
-        effective_tariffs = self.policy_module.get_effective_tariffs()
 
         # Trade scenario for market module
         trade_scenario = None

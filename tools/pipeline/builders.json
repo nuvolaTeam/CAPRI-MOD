@@ -4800,51 +4800,6 @@
    ]
   },
   {
-   "task": "build_tariffs_2017",
-   "builder": "build_tariffs_2017",
-   "args": [],
-   "inputs": [
-    "capri_data/codes/capri/CACT_TO_NGRP.csv",
-    "capri_data/codes/capri/FEED_TRD.csv",
-    "capri_data/codes/capri/PERM_NGRP.csv",
-    "capri_data/codes/capri/RM.csv",
-    "capri_data/codes/capri/RMTP.csv",
-    "capri_data/codes/model_activities.csv",
-    "capri_data/codes/model_activity_classes.csv",
-    "capri_data/codes/model_cattle_splits.csv",
-    "capri_data/codes/model_commodities.csv",
-    "capri_data/codes/model_land_types.csv",
-    "capri_data/codes/model_market_regions.csv",
-    "capri_data/codes/model_price_follows.csv",
-    "capri_data/codes/model_trade_regions.csv",
-    "capri_data/shared/capri_member_state_codes.csv",
-    "capri_data/shared/eu_market_blocks.csv",
-    "capri_data/shared/regional_units.csv",
-    "capri_data/shared/rms_to_rm.csv",
-    "capri_data/sources/market/bilateral_dataout_2017.csv.xz",
-    "capri_data/sources/market/eu_tariff_provenance.csv"
-   ],
-   "code": [
-    "capri_mod/__init__.py",
-    "capri_mod/data/__init__.py",
-    "capri_mod/data/definitions.py",
-    "capri_mod/data/land_market_io.py",
-    "capri_mod/data/loaders.py",
-    "capri_mod/data/nested_tables.py",
-    "capri_mod/tableio.py",
-    "tools/build/build_bilateral_market.py",
-    "tools/build/build_tariffs_2017.py",
-    "tools/build/recalibrate_trade_2017.py",
-    "tools/lib/_grep.py",
-    "tools/lib/_market_regions.py",
-    "tools/lib/paths.py"
-   ],
-   "external": [],
-   "outputs": [
-    "capri_data/2017/policy/tariffs.csv"
-   ]
-  },
-  {
    "task": "build_trajectory_capri_ref",
    "builder": "build_trajectory_capri_ref",
    "args": [],
@@ -5296,7 +5251,6 @@
     "capri_data/sources/envind/orgsoil_share_p_orgsoilori.csv",
     "capri_data/sources/ghgtech/LitRevFertTech_p_litRevFertTechs_all.csv",
     "capri_data/sources/ghgtech/miti_data_jul15_p_ghgMiti.csv",
-    "capri_data/sources/market/eu_tariff_provenance.csv",
     "capri_data/sources/nuts/nuts2013_2016.csv",
     "capri_data/sources/nuts/nuts2016_2021.csv",
     "capri_data/sources/nuts/nuts2021_2024.csv",

@@ -66,7 +66,7 @@ def test_supply_countries_outside_eu_setting():
 
 def test_norway_market_data_are_capris_no000000():
     """Every per-region market file carries Norway from CAPRI's own NO000000 data, and ROW no longer does: production
-    of the bilateral market = CAPRI's PROD of NO000000, tariffs from CAPRI's import prices into NO000000, Norway's GL
+    of the bilateral market = CAPRI's PROD of NO000000, its quotas CAPRI's (bilateral_trq_2030.csv), Norway's GL
     food demand, processing functions and dairy block are NO000000's; the EU's dairy block holds no Norway; Norway has
     no non-EU feed demand function (CAPRI: FeedBal_ only outside RMSSUP)."""
     import json
@@ -80,8 +80,8 @@ def test_norway_market_data_are_capris_no000000():
     for f in ("bilateral_flows_2017.csv", "bilateral_flows_2030.csv"):
         fl = pd.read_csv(MKT / f)
         assert ((fl.importer == "NO000000") & (fl.exporter == "NO000000")).any(), f
-    tar = pd.read_csv(DATA_DIR / "2017" / "policy" / "tariffs.csv", index_col=0)
-    assert "NO000000" in tar.index and float(tar.at["NO000000", "BEEF"]) > 0
+    tq = pd.read_csv(MKT / "bilateral_trq_2030.csv")              # Norway's own quotas (CAPRI's p_trqBilat)
+    assert (tq.importer == "NO000000").sum() == 5
     gl = pd.read_csv(MKT / "gl_demand_regions.csv")
     assert gl.loc[gl.rms == "NO000000", "model_region"].tolist() == ["NO000000"]
     assert "NO000000" in set(pd.read_csv(MKT / "processing_nq_base.csv").query("rms == 'NO000000'").model_region)

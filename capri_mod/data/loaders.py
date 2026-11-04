@@ -87,7 +87,7 @@ _FILE_CATEGORY = {
     "pmp_recipe_{BY}_animals_members.csv": "supply",
     "pmp_own_price_elasticities.csv": "supply",
     "producer_prices.csv": "market", "world_prices.csv": "market",
-    "cap_payments.csv": "policy", "crop_premium.csv": "supply", "tariffs.csv": "policy",
+    "cap_payments.csv": "policy", "crop_premium.csv": "supply",
     "nutrient_coefs_regional.csv": "supply",
     "climate_zones.csv": "environment",
 }
@@ -422,24 +422,6 @@ def load_cap_payments(data_dir: Optional[Path] = None) -> pd.DataFrame:
                             f"(the synthetic generator that stood here was removed, Sprint 9s)")
 
 
-def load_tariffs(data_dir: Optional[Path] = None) -> pd.DataFrame:
-    """
-    Import tariffs (ad valorem %) by trade region and commodity.
-
-    Connect to: WTO tariff database, EUR-Lex combined nomenclature
-    Returns: DataFrame [region × commodity]
-    """
-    if data_dir and (resolve_data_file(data_dir, "tariffs.csv")).exists():
-        return read_input(resolve_data_file(data_dir, "tariffs.csv"), index_col=0)
-    raise FileNotFoundError(f"tariffs.csv not found under {data_dir}: the model runs on CAPRI's data only "
-                            f"(the synthetic generator that stood here was removed, Sprint 9s)")
-
-
-# ---------------------------------------------------------------------------
-# CONVENIENCE: LOAD ALL DATA AT ONCE
-# ---------------------------------------------------------------------------
-
-
 def _load_required_csv(data_dir, filename):
     """Load a region-indexed CSV the model needs; a missing file is an error (the model runs on CAPRI's data only)."""
     path = resolve_data_file(data_dir, filename) if data_dir else None
@@ -703,7 +685,6 @@ def load_all_data(data_dir: Optional[Path] = None, validate: bool = False,
         "land":            load_land_availability(data_dir),
         "world_prices":    load_world_prices(data_dir),
         "cap_payments":    load_cap_payments(data_dir),
-        "tariffs":         load_tariffs(data_dir),
     }
     # cattle genomics at CAPRI star 3.0's default technology settings; CapriModel.run re-scales it to the
     # run's settings (scenario configuration, shared by reference and policy run)

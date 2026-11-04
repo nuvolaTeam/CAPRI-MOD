@@ -2746,7 +2746,7 @@ def test_parallel_regional_solves_match_sequential():
     """Sprint 9r: the regional supply models are solved across worker processes (one per core, CAPRI_WORKERS or
     SupplyModule.n_workers to change it). At given market prices the regions are independent, as in CAPRI, so the
     results are the same, to the last digit, with one worker or several. Two models built in one process agree too:
-    the trade regions' tariffs are CAPRI's (tools/build/build_tariffs_2017.py), no longer drawn at random on each load."""
+    the market's prices are CAPRI's data (no tariff or price drawn at random on a load)."""
     from capri_mod.model import CAPRIModel
     from capri_mod.supply.supply_module import SupplyModule
     from capri_mod.policy.greendeal import farm_to_fork_scenario

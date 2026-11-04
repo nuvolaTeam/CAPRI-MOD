@@ -2,7 +2,9 @@
 
 The comparison asked for before switching policy/tariffs.csv to CAPRI's DATA(RMTP, "TARV", XX, "CAL")
 (MARKET_REGIONS_INVENTORY §7 item 6; MODEL_CONTENT_PLAN §1 item 8). Reproduced by
-`python tools/check/compare_tarv.py [OUT.csv]`.
+tools/check/compare_tarv.py until 4 November 2026, when tariffs.csv, its builder (build_tariffs_2017.py) and this tool
+were removed: the market's reference price levels became CAPRI's own market prices and the tariffs act per flow
+(CAPRI's TARV, TARS, quotas, entry prices and levies in the import prices; PORTS_STAGE4.md).
 
 ## What is compared
 

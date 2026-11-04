@@ -195,26 +195,6 @@ COMMENT ON TABLE src_orgsoil_share_p_orgsoilori IS 'CAPRI''s p_OrgSoilOri(region
 INSERT INTO value_units VALUES
   ('src_orgsoil_share_p_orgsoilori', 'value', NULL, 'open', 'per item (shares and areas)');
 
--- file: capri_data/sources/market/eu_tariff_provenance.csv
-CREATE TABLE src_eu_tariff_provenance (
-    commodity VARCHAR NOT NULL,
-    previous DOUBLE,
-    capri_code VARCHAR,
-    ad_valorem_pct DOUBLE,
-    specific_eur_t DOUBLE,
-    total_ave_pct DOUBLE,
-    eu_imports_kt DOUBLE,
-    kept VARCHAR,
-    PRIMARY KEY (commodity)
-);
-COMMENT ON TABLE src_eu_tariff_provenance IS 'The EU row of the tariffs (tools/build/build_tariffs_2017.py) with its provenance, one row per commodity, the former eu_tariff_provenance.json (its rows; its _source: CAPRI res_0_1717cap_after_2014_cal_from_data_caldefaulta dataOut, EU27yr19 <- NONEU, 2017: total ad-valorem equivalent = ImportP/(Fob+TCost)-1), numbers as written, empty where the JSON had no field or null; converted to CSV by tools/build/convert_sources_to_csv.py; read by tools/build/build_tariffs_2017.py.';
-INSERT INTO value_units VALUES
-  ('src_eu_tariff_provenance', 'previous', 'U_percent', 'builder', 'the EU tariff before the CAPRI values (%, as the JSON''s fields)'),
-  ('src_eu_tariff_provenance', 'ad_valorem_pct', 'U_percent', 'builder', 'the field name'),
-  ('src_eu_tariff_provenance', 'specific_eur_t', 'U_EuPerTon', 'builder', 'the field name'),
-  ('src_eu_tariff_provenance', 'total_ave_pct', 'U_percent', 'builder', 'the field name'),
-  ('src_eu_tariff_provenance', 'eu_imports_kt', 'U_1000t', 'builder', 'the field name');
-
 -- file: capri_data/sources/ghgtech/LitRevFertTech_p_litRevFertTechs_all.csv
 CREATE TABLE src_litrevferttech_p_litrevferttechs_all (
     region VARCHAR NOT NULL,

@@ -2499,20 +2499,6 @@
    },
    "catalogue_note": "tools/build/build_cap_ceilings_2030.py; Pillar II budget changes (PolicyScenario.lfa_/ae_/n2k_budget_change) and the payments report's split by scheme (not re-checked)"
   },
-  "capri_data/2017/policy/tariffs.csv": {
-   "description": "Import protection per trade region and commodity from CAPRI's 2017 market results (Sprint 9r). (tools/build/build_tariffs_2017.py)",
-   "kind": "coefficients",
-   "rows": 44,
-   "columns": 53,
-   "units": "to be established (value_units: open)",
-   "read_by_model": [
-    "capri_mod/data/loaders.py"
-   ],
-   "origin": {
-    "nature": "capri",
-    "builder": "build_tariffs_2017"
-   }
-  },
   "capri_data/2017/supply/animal_numbers.csv": {
    "description": "herd sizes 2017: CAPRI's HERD item (build_capri_base.py HERD_MAP; COWS = DCOW + SCOW; PIGS = CAPRI's SOWS herd, PIGF = the PIGS census less the sows); the loader renames SCOW, HEIF, HENS, POUL (loaders.HERD_ALIASES)",
    "kind": "base",
@@ -6078,17 +6064,6 @@
     "builder": "build_dairy_world_blocks"
    },
    "catalogue_note": "extract of CAPRI's raw file written and read back by tools/build/build_dairy_world_blocks.py, kept so its input can be rebuilt without the raw file (docs/EXTERNAL_SOURCES.md) (not re-checked)"
-  },
-  "capri_data/sources/market/eu_tariff_provenance.csv": {
-   "description": "The EU row of the tariffs (tools/build/build_tariffs_2017.py) with its provenance, one row per commodity, the former eu_tariff_provenance.json (its rows; its _source: CAPRI res_0_1717cap_after_2014_cal_from_data_caldefaulta dataOut, EU27yr19 <- NONEU, 2017: total ad-valorem equivalent = ImportP/(Fob+TCost)-1), numbers as written, empty where the JSON had no field or null; converted to CSV by tools/build/convert_sources_to_csv.py; read by tools/build/build_tariffs_2017.py.",
-   "kind": "base",
-   "rows": 52,
-   "columns": 8,
-   "units": "U_1000t, U_EuPerTon, U_percent",
-   "origin": {
-    "nature": "source-extract",
-    "builder": "convert_sources_to_csv"
-   }
   },
   "capri_data/sources/market/feed_bulks_dataout_2030.csv": {
    "description": "CAPRI's FEED per EU member state and product, ARM1P of the EU trade block EU27yr19 and Norway, and Norway's use items, from markmarket_greendeal_1730et_base_1717 dataOut, 2030 (tools/build/build_feed_bulks.py).",

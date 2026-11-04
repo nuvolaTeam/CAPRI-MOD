@@ -102,7 +102,7 @@ Replace or extend the shipped data by placing CSV files in a directory:
 | `world_prices.csv` | FAOSTAT / OECD Outlook | World prices [commodity], EUR/t |
 | `trade_flows.csv` | UN COMTRADE / BACI | Flows [(exporter, importer) × commodity], 1000 t |
 | `cap_payments.csv` | EU DG-AGRI / IACS | CAP payment rates [region × type], EUR/ha |
-| `tariffs.csv` | WTO tariff database | Import tariffs [region × commodity], % |
+
 
 ```python
 model = CAPRIModel(data_dir="path/to/your/data/")
