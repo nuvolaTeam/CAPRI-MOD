@@ -19429,11 +19429,212 @@
     "tests": []
    }
   },
+  "noneu_land_market": {
+   "file": "capri_data/2017/market/noneu_land_market.csv",
+   "declared_in": "20_market_2017.sql",
+   "layout": [],
+   "comment": "CAPRI's market land block per non-EU market region without supply models (LandSupplyMNL_, LndSupplyEqualsDemand_, rentFromProdpriceLand_, arm/market_model.gms l. 1696-1790): land, rent, MNL constant p_aLU CUR and ARTO - INLW per land type, from sim_ini_21730 (tools/build/build_noneu_market_supply_nq.py build_land_market; PORTS_STAGE4.md stage 7)",
+   "columns": [
+    {
+     "name": "trade_region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "rms",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "lu",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "land_kha",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "rent",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "alu",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "endogenous",
+     "type": "INTEGER",
+     "not_null": true
+    },
+    {
+     "name": "avail_kha",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "rms",
+    "lu"
+   ],
+   "unique": [],
+   "foreign_keys": [
+    {
+     "columns": [
+      "trade_region"
+     ],
+     "references": "model_trade_regions",
+     "ref_columns": [
+      "code"
+     ]
+    },
+    {
+     "columns": [
+      "rms"
+     ],
+     "references": "rms_to_rm",
+     "ref_columns": [
+      "rms"
+     ]
+    }
+   ],
+   "checks": [
+    "(lu IN ('FORE', 'ARTIF', 'OLND', 'TCRP', 'FODFAL', 'FRUN'))",
+    "(land_kha >= 0)",
+    "(endogenous IN (0, 1))",
+    "(avail_kha > 0)"
+   ],
+   "units": [
+    {
+     "item": "alu",
+     "unit": "U_ratio",
+     "status": "capri",
+     "basis": "CAPRI p_aLU CUR, the constant of the MNL exponent (dimensionless)"
+    },
+    {
+     "item": "avail_kha",
+     "unit": "U_1000ha",
+     "status": "capri",
+     "basis": "CAPRI DATA ARTO - INLW LEVL CUR (1000 ha)"
+    },
+    {
+     "item": "endogenous",
+     "unit": "U_1unit",
+     "status": "builder",
+     "basis": "a flag: 1 where the rent is free (v_rentPerHa bounds), 0 fixed"
+    },
+    {
+     "item": "land_kha",
+     "unit": "U_1000ha",
+     "status": "capri",
+     "basis": "CAPRI v_land (1000 ha)"
+    },
+    {
+     "item": "rent",
+     "unit": "U_EuPerHa",
+     "status": "capri",
+     "basis": "CAPRI v_rentPerHa"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_noneu_market_supply_nq",
+    "sources": "$EXPORTS/data_market_1730defaulta.csv; $EXPORTS/elas_2_1730defaulta.csv; $EXPORTS/markmarket_greendeal_1730et_base_1717.txt; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/AACT_TO_XX.csv; $REFERENCE/sets/simini_21730/CACT_TO_NGRP.csv; $REFERENCE/sets/simini_21730/COLS.csv; $REFERENCE/sets/simini_21730/EPRD_TO_GRP.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FEED_TRD.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/MitiTechAmm.csv; $REFERENCE/sets/simini_21730/OYANI.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/PERM_NGRP.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/RMEU_to_RM.csv; $REFERENCE/sets/simini_21730/RMS.csv; $REFERENCE/sets/simini_21730/RMS_TO_RM.csv; $REFERENCE/sets/simini_21730/RMTP.csv; $REFERENCE/sets/simini_21730/RM_TO_RMTP.csv; $REFERENCE/sets/simini_21730/ROWS.csv; $REFERENCE/sets/simini_21730/SplitActs.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $REFERENCE/simini/simini_21730/DATA.csv.gz; $REFERENCE/simini/simini_21730/p_aLU.csv.gz; $REFERENCE/simini/simini_21730/p_bLu.csv.gz; $REFERENCE/simini/simini_21730/p_useSymmetricMNL.csv.gz; $REFERENCE/simini/simini_21730/v_land.csv.gz; $REFERENCE/simini/simini_21730/v_rentPerHa.csv.gz; $SOURCES/gams/aggregation/defaultA.agg"
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/market/inputs.py",
+     "capri_mod/market/supply.py"
+    ],
+    "builders": [],
+    "checks": [],
+    "tests": [
+     "capri_mod/tests/test_capri.py"
+    ]
+   }
+  },
+  "noneu_land_mnl": {
+   "file": "capri_data/2017/market/noneu_land_mnl.csv",
+   "declared_in": "20_market_2017.sql",
+   "layout": [],
+   "comment": "CAPRI's MNL land supply coefficients p_bLu CUR per non-EU market region (the exponent of land type lu in the rent of lu1), from sim_ini_21730 (tools/build/build_noneu_market_supply_nq.py build_land_market)",
+   "columns": [
+    {
+     "name": "rms",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "lu",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "lu1",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "b",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "rms",
+    "lu",
+    "lu1"
+   ],
+   "unique": [],
+   "foreign_keys": [
+    {
+     "columns": [
+      "rms"
+     ],
+     "references": "rms_to_rm",
+     "ref_columns": [
+      "rms"
+     ]
+    }
+   ],
+   "checks": [],
+   "units": [
+    {
+     "item": "b",
+     "unit": "U_ratio",
+     "status": "capri",
+     "basis": "CAPRI p_bLu CUR, per EUR/ha of rent (the exponent is dimensionless)"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_noneu_market_supply_nq",
+    "sources": "$EXPORTS/data_market_1730defaulta.csv; $EXPORTS/elas_2_1730defaulta.csv; $EXPORTS/markmarket_greendeal_1730et_base_1717.txt; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/AACT_TO_XX.csv; $REFERENCE/sets/simini_21730/CACT_TO_NGRP.csv; $REFERENCE/sets/simini_21730/COLS.csv; $REFERENCE/sets/simini_21730/EPRD_TO_GRP.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FEED_TRD.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/MitiTechAmm.csv; $REFERENCE/sets/simini_21730/OYANI.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/PERM_NGRP.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/RMEU_to_RM.csv; $REFERENCE/sets/simini_21730/RMS.csv; $REFERENCE/sets/simini_21730/RMS_TO_RM.csv; $REFERENCE/sets/simini_21730/RMTP.csv; $REFERENCE/sets/simini_21730/RM_TO_RMTP.csv; $REFERENCE/sets/simini_21730/ROWS.csv; $REFERENCE/sets/simini_21730/SplitActs.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $REFERENCE/simini/simini_21730/DATA.csv.gz; $REFERENCE/simini/simini_21730/p_aLU.csv.gz; $REFERENCE/simini/simini_21730/p_bLu.csv.gz; $REFERENCE/simini/simini_21730/p_useSymmetricMNL.csv.gz; $REFERENCE/simini/simini_21730/v_land.csv.gz; $REFERENCE/simini/simini_21730/v_rentPerHa.csv.gz; $SOURCES/gams/aggregation/defaultA.agg"
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/market/inputs.py",
+     "capri_mod/market/supply.py"
+    ],
+    "builders": [],
+    "checks": [],
+    "tests": [
+     "capri_mod/tests/test_capri.py"
+    ]
+   }
+  },
   "noneu_market_supply_nq": {
    "file": "capri_data/2017/market/noneu_market_supply_nq.csv",
    "declared_in": "20_market_2017.sql",
    "layout": [],
-   "comment": "CAPRI's market supply functions of the non-EU market regions (ProdNQ_): p_hessNQSupp at CAL completed as arm/market1.gms, Data_CAL PPRI, INPE 2030 (tools/build/build_noneu_market_supply_nq.py; K54-3)",
+   "comment": "CAPRI's market supply functions of the non-EU market regions (ProdNQ_): p_hessNQSupp at CAL completed as arm/market1.gms, the land demand rows (x TCRP, FODFAL, FRUN) with their sign turned as arm/market1.gms l. 593, Data_CAL PPRI, INPE 2030 (tools/build/build_noneu_market_supply_nq.py; K54-3; the land market, PORTS_STAGE4.md stage 7)",
    "columns": [
     {
      "name": "trade_region",
@@ -19565,7 +19766,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_noneu_market_supply_nq",
-    "sources": "$EXPORTS/data_market_1730defaulta.csv; $EXPORTS/elas_2_1730defaulta.csv; $EXPORTS/markmarket_greendeal_1730et_base_1717.txt; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/AACT_TO_XX.csv; $REFERENCE/sets/simini_21730/CACT_TO_NGRP.csv; $REFERENCE/sets/simini_21730/COLS.csv; $REFERENCE/sets/simini_21730/EPRD_TO_GRP.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FEED_TRD.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/MitiTechAmm.csv; $REFERENCE/sets/simini_21730/OYANI.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/PERM_NGRP.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/RMEU_to_RM.csv; $REFERENCE/sets/simini_21730/RMS.csv; $REFERENCE/sets/simini_21730/RMS_TO_RM.csv; $REFERENCE/sets/simini_21730/RMTP.csv; $REFERENCE/sets/simini_21730/RM_TO_RMTP.csv; $REFERENCE/sets/simini_21730/ROWS.csv; $REFERENCE/sets/simini_21730/SplitActs.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $SOURCES/gams/aggregation/defaultA.agg"
+    "sources": "$EXPORTS/data_market_1730defaulta.csv; $EXPORTS/elas_2_1730defaulta.csv; $EXPORTS/markmarket_greendeal_1730et_base_1717.txt; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/AACT_TO_XX.csv; $REFERENCE/sets/simini_21730/CACT_TO_NGRP.csv; $REFERENCE/sets/simini_21730/COLS.csv; $REFERENCE/sets/simini_21730/EPRD_TO_GRP.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FEED_TRD.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/MitiTechAmm.csv; $REFERENCE/sets/simini_21730/OYANI.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/PERM_NGRP.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/RMEU_to_RM.csv; $REFERENCE/sets/simini_21730/RMS.csv; $REFERENCE/sets/simini_21730/RMS_TO_RM.csv; $REFERENCE/sets/simini_21730/RMTP.csv; $REFERENCE/sets/simini_21730/RM_TO_RMTP.csv; $REFERENCE/sets/simini_21730/ROWS.csv; $REFERENCE/sets/simini_21730/SplitActs.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $REFERENCE/simini/simini_21730/DATA.csv.gz; $REFERENCE/simini/simini_21730/p_aLU.csv.gz; $REFERENCE/simini/simini_21730/p_bLu.csv.gz; $REFERENCE/simini/simini_21730/p_useSymmetricMNL.csv.gz; $REFERENCE/simini/simini_21730/v_land.csv.gz; $REFERENCE/simini/simini_21730/v_rentPerHa.csv.gz; $SOURCES/gams/aggregation/defaultA.agg"
    },
    "notes": [],
    "read_by": {
@@ -43627,7 +43828,11 @@
   },
   {
    "file": "20_market_2017.sql",
-   "rule": "the market supply functions' model codes are market commodities (raw milk included), mapped from CAPRI's; a"
+   "rule": "the market supply functions' model codes are market commodities (raw milk included), mapped from CAPRI's, or"
+  },
+  {
+   "file": "20_market_2017.sql",
+   "rule": "each land market region's land types are in its MNL coefficients"
   },
   {
    "file": "20_market_2017.sql",
@@ -43635,7 +43840,7 @@
   },
   {
    "file": "20_market_2017.sql",
-   "rule": "CAPRI's Hessian is symmetric in prices once completed (h_xy = h_yx: arm/market1.gms l. 574)"
+   "rule": "CAPRI's Hessian is symmetric in prices once completed (h_xy = h_yx: arm/market1.gms l. 574), before the land"
   },
   {
    "file": "20_market_2017.sql",

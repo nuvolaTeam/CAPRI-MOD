@@ -54,6 +54,8 @@ BUILDERS = {
     "welfare_base_2030.csv": "build_welfare_base.py",
     "eu_market_supply_nq.csv": "build_eu_market_supply_nq.py",
     "noneu_market_supply_nq.csv": "build_noneu_market_supply_nq.py",
+    "noneu_land_market.csv": "build_noneu_market_supply_nq.py",
+    "noneu_land_mnl.csv": "build_noneu_market_supply_nq.py",
     "crushing_parameters_{year}.csv": "build_crushing_parameters.py",
     "supply_elas_region.csv": "build_supply_elas_nonEU.py",
     "supply_elas_eu.csv": "build_capri_supply_elas_market.py",

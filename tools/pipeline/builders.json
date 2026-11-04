@@ -3762,9 +3762,17 @@
    "external": [
     "$EXPORTS/data_market_1730defaulta.csv",
     "$EXPORTS/elas_2_1730defaulta.csv",
-    "$EXPORTS/markmarket_greendeal_1730et_base_1717.txt"
+    "$EXPORTS/markmarket_greendeal_1730et_base_1717.txt",
+    "$REFERENCE/simini/simini_21730/DATA.csv.gz",
+    "$REFERENCE/simini/simini_21730/p_aLU.csv.gz",
+    "$REFERENCE/simini/simini_21730/p_bLu.csv.gz",
+    "$REFERENCE/simini/simini_21730/p_useSymmetricMNL.csv.gz",
+    "$REFERENCE/simini/simini_21730/v_land.csv.gz",
+    "$REFERENCE/simini/simini_21730/v_rentPerHa.csv.gz"
    ],
    "outputs": [
+    "capri_data/2017/market/noneu_land_market.csv",
+    "capri_data/2017/market/noneu_land_mnl.csv",
     "capri_data/2017/market/noneu_market_supply_nq.csv"
    ]
   },

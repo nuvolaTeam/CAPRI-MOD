@@ -91,3 +91,38 @@ A_EU_WEST, A_EU_EAST; the rest one to one).
 - Check against CAPRI's calibrated levies (p_flexLevy "CAL", 48 EU flows): largest gap 1.3 EUR/t (RSA sugar, 70 EUR/t).
 - REGISTERED: the 2017 market year has no entry prices nor levies (p_entryPriceFac is only in the 2030 restart file).
   G1/G2a's CasADi systems have neither; the default solve's exact path is not taken for such a commodity.
+
+## Stage 7: the market land block outside the EU (4 November 2026)
+
+CAPRI's equations (gams/arm/market_model.gms, supremaMrk on, as capmod/set_global_variables.gms l. 386 sets it):
+
+- ProdNQ_ (l. 1529-1572) has rows for the land types of the market (xx1Land: TCRP temporary crops, FODFAL fodder and
+  fallow, FRUN fruit and nurseries), their land demand; arm/market1.gms l. 593 turns the sign of these rows after
+  making the Hessian symmetric (they were netputs in the elasticity calibration). The products' rows have terms in the
+  three rents. The land's price in ProdNQ_ is v_prodPrice - PSEd.
+- LandSupplyMNL_ (l. 1737): v_land(l) = (ARTO - INLW) exp(aLU_l + sum_k bLu_lk rent_k) / sum_m exp(...), six land
+  types (FORE, ARTIF, OLND fixed rents; the three agricultural ones free). In a simulation (not BASELINE) CAPRI uses
+  the asymmetric form NumeraireLand_ / LandSupplyRatio_: the same function where no LEVL_1 commitment area is given
+  (none in DATA; p_useSymmetricMNL has no records in sim_ini_21730). v_aLU is fixed at p_aLU "CUR"
+  (capmod/set_start_val.gms l. 236).
+- LndSupplyEqualsDemand_ (l. 1698): v_land = v_prodQuant(land); rentFromProdpriceLand_ (l. 1707): rent = producer
+  price + PSEd (PSEd of the land types, else of LAND: arm/prep_market.gms l. 134; Switzerland 1116.43 EUR/ha).
+- Yield_, LandAgrFromYld_, ScaleLandAgr_ (l. 1795-1860) split the land into crop areas and yields; they do not feed
+  back on quantities or prices (registered as not reported: the model's non-EU crop areas and yields).
+
+Data (tools/build/build_noneu_market_supply_nq.py, build_land_market): noneu_land_market.csv (45 CAPRI regions, 134
+free rents), noneu_land_mnl.csv (p_bLu), and the land rows and rent columns in noneu_market_supply_nq.csv. Checks in
+the builder: the land rows give CAPRI's p_elasSupp (with all other terms, worst 1.35e-14), the MNL at v_rentPerHa
+gives v_land (4.7e-10), the agricultural land equals PROD at CAL (4e-15), the rents PPRI + PSEd at CAL (4e-15).
+
+Model (capri_mod/market/supply.py, `noneu_land_solve`; setting market.noneu_land_market): per CAPRI region the three
+rents solve MNL supply = ProdNQ_ land demand by Newton's method at the evaluation's prices, raw milk prices (the
+latest dairy blocks') and FEDE; the land solve and FeedBal_ (noneu_fede, whose animal output now moves with the rents)
+are solved in turn until both settle. The products' and raw milk's supply then add their terms in the rents. Regions
+with supply models in CAPRI (Norway, the UK, Turkey, the Western Balkans) have no land market (v_prodQuant(land) fixed),
+as in CAPRI.
+
+Checks: tools/check/check_market_base.py (land on: largest change against land off 3.5e-10 of a production, CHN, from
+the MNL data's rounding); unit test test_noneu_land_market_is_capris (the base rents, a 10% crop price rise in the
+United States against the MNL and ProdNQ_ written out from the files). Registered: DEP-43 (the welfare report has no
+land cost or land owner surplus yet).

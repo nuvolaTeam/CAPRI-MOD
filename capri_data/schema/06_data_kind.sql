@@ -157,6 +157,8 @@ INSERT INTO data_kind VALUES
   ('capri_data/2017/market/noneu_feed_nq.csv', 'calibrated', 'by file: calibrated by CAPRI to its base and baseline'),
   ('capri_data/2017/market/noneu_feed_totals.csv', 'base', 'by file: 2017 market data'),
   ('capri_data/2017/market/noneu_market_supply_nq.csv', 'calibrated', 'by file: calibrated by CAPRI to its base and baseline'),
+  ('capri_data/2017/market/noneu_land_market.csv', 'calibrated', 'by file: calibrated by CAPRI to its base and baseline'),
+  ('capri_data/2017/market/noneu_land_mnl.csv', 'calibrated', 'by file: calibrated by CAPRI to its base and baseline'),
   ('capri_data/2017/market/processing_nq_base.csv', 'base', 'by file: 2017 market data'),
   ('capri_data/2017/market/processing_nq_hessian.csv', 'calibrated', 'by file: calibrated by CAPRI to its base and baseline'),
   ('capri_data/2017/market/processing_seeds.csv', 'coefficients', 'by file: CAPRI''s market parameters'),

@@ -4351,3 +4351,44 @@ def test_kkt_step_matches_the_resolve_at_a_small_price_change(model, tmp_path, m
         move = float(np.max(np.abs(y1 - y0[:n])))
         assert move > 0
         assert float(np.max(np.abs(yk - y1))) <= 0.02 * move
+
+
+def test_noneu_land_market_is_capris(data):
+    """CAPRI's market land block outside the EU (arm/market_model.gms LandSupplyMNL_, LndSupplyEqualsDemand_ and
+    ProdNQ_'s land rows; PORTS_STAGE4.md stage 7): at the calibration prices the rents stay CAPRI's (to its data's
+    rounding); with the crop prices of the United States 10% higher the rent of its temporary-crop land rises and the
+    MNL supply, recomputed here from the files, equals the land demand of ProdNQ_ at the solved rents."""
+    import numpy as np
+    from capri_mod.market.market_module import MarketModule
+    d = dict(data)
+    d["market_year"] = 2030
+    mm = MarketModule(d)
+    P = mm._noneu_land_params()
+    assert len(P) == 45 and "USA" in P
+    one = pd.DataFrame(1.0, index=mm.regions, columns=mm.commodities)
+    base = mm.noneu_land_solve(one)
+    for rms, dr in base.items():
+        assert np.max(np.abs(dr) / P[rms]["rent0"][P[rms]["free"]]) < 1e-6, rms
+    up = one.copy()
+    crops = [c for c in ("SWHE", "CORN", "SOYA", "BARL", "RAPE", "SUNF") if c in up.columns]
+    up.loc["USA", crops] = 1.1
+    dr = mm.noneu_land_solve(up)["USA"]
+    p = P["USA"]
+    fl = [p["lu"][i] for i in p["free"]]
+    assert dr[fl.index("TCRP")] > 0
+    lm = pd.read_csv(mm._inp().need("noneu_land_market.csv")).query("rms == 'USA'").set_index("lu")
+    mnl = pd.read_csv(mm._inp().need("noneu_land_mnl.csv")).query("rms == 'USA'")
+    rent = lm.rent.copy()
+    rent[fl] += dr
+    z = {u: lm.at[u, "alu"] + sum(t.b * rent[t.lu1] for t in mnl[mnl.lu == u].itertuples()) for u in lm.index}
+    tot = sum(np.exp(v) for v in z.values())
+    nq = pd.read_csv(mm._inp().need("noneu_market_supply_nq.csv"), keep_default_na=False).query("rms == 'USA'")
+    for u in fl:
+        dem = lm.at[u, "land_kha"]
+        for t in nq[nq.x == u].itertuples():
+            if t.y in fl:
+                dem += t.h / t.inpe * (rent[t.y] - lm.at[t.y, "rent"])
+            elif t.y in crops:
+                dem += t.h_ratio * 0.1
+        sup = lm.avail_kha.iloc[0] * np.exp(z[u]) / tot
+        assert abs(sup - dem) < 1e-8 * lm.at[u, "land_kha"], (u, sup, dem)

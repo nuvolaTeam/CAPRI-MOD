@@ -26,6 +26,12 @@ class SupplyMixin(MarketStateMixin):
     #: form) or one own-price constant elasticity per product (false, until 29 October 2026)
     noneu_supply_nq = setting("market.noneu_supply_nq")
     sup_milk_in_market = setting("market.sup_milk_in_market")
+    #: CAPRI's market land block outside the EU (LandSupplyMNL_, LndSupplyEqualsDemand_, rentFromProdpriceLand_;
+    #: arm/market_model.gms l. 1696-1790): the rents of TCRP, FODFAL, FRUN clear each non-EU region's land market
+    #: (true, CAPRI's form) or are held at calibration (false, until 4 November 2026)
+    noneu_land_market = setting("market.noneu_land_market")
+    #: CAPRI's agricultural land types of the market (xx1Land / luAgrMrk, arm/arm_sets.gms)
+    MARKET_LAND = ("TCRP", "FODFAL", "FRUN")
 
 
     def _region_supply_elas(self, regions, cols, el) -> np.ndarray:
@@ -754,10 +760,13 @@ class SupplyMixin(MarketStateMixin):
             return c
         out: dict = {}
         eu_ = set(self.EU)
+        land = set(self.MARKET_LAND)
         for t in self._inp().csv("noneu_market_supply_nq.csv").itertuples(index=False):
             y = t.y if isinstance(t.y, str) else ""
             if not y or t.trade_region not in self.regions or t.trade_region in eu_:
                 continue
+            if y in land or t.x in land:
+                continue                          # the land market's rows and columns (_noneu_land_params)
             d = out.setdefault(t.trade_region, {"rows": {}, "milk": {}, "fede": {}, "milk_fede": {}})
             if y == "FEDE":
                 if t.x == "MILK":
@@ -787,6 +796,162 @@ class SupplyMixin(MarketStateMixin):
         fede = self.ev.fede_now or {}
         for rms, h in (prm.get("milk_fede") or {}).items():
             out[rms] = out.get(rms, 0.0) + h * (float(fede.get(rms, 1.0)) - 1.0)     # FEDE (audit M3)
+        for rms, dq in self._noneu_land_shift(reg, by_rms=True).get("MILK", {}).items():
+            out[rms] = out.get(rms, 0.0) + dq                                        # the land rents (stage 7)
+        return out
+
+    # ------------------------------------------------------------------
+    # CAPRI's market land block outside the EU (stage 7 of the market move; arm/market_model.gms l. 1529-1572,
+    # 1696-1790)
+    # ------------------------------------------------------------------
+    def _noneu_land_params(self) -> dict:
+        """Per non-EU CAPRI region with a land market (tools/build/build_noneu_market_supply_nq.py
+        build_land_market): {rms: {"tr": trade region, "lu": the MNL's land types, "free": indexes of the free rents
+        (TCRP, FODFAL, FRUN), "alu", "B" (p_bLu, per EUR/ha), "avail" (ARTO - INLW, 1000 ha), "rent0", "L0" (the free
+        types' land at calibration), "H" (free x free: the land demand rows' rent terms, p_hessNQSupp / INPE, 1000 ha
+        per EUR/ha; the rows' sign turned as arm/market1.gms l. 593), "rows" ({lu: {y: h_ratio}}: the land demand's
+        terms in the model prices, MILK and FEDE), "prod" ({x: {lu: h / INPE}}: the products' and raw milk's terms in
+        the rents)}. {} with market.noneu_land_market off."""
+        c = getattr(self, "_noneu_land_cache", None)
+        if c is not None:
+            return c
+        out: dict = {}
+        if not (self.noneu_land_market and self.noneu_supply_nq):
+            self._noneu_land_cache = out
+            return out
+        inp = self._inp()
+        eu_ = set(self.EU)
+        lm = inp.csv("noneu_land_market.csv", keep_default_na=False)
+        for rms, g in lm.groupby("rms", sort=True):
+            tr = str(g.trade_region.iloc[0])
+            if tr not in self.regions or tr in eu_:
+                continue
+            g = g.set_index("lu")
+            lus = [u for u in ("FORE", "ARTIF", "OLND") + self.MARKET_LAND if u in g.index]
+            free = [i for i, u in enumerate(lus) if int(g.at[u, "endogenous"]) == 1]
+            out[rms] = {"tr": tr, "lu": lus, "free": free, "alu": g.loc[lus, "alu"].to_numpy(dtype=float),
+                        "B": np.zeros((len(lus), len(lus))), "avail": float(g.avail_kha.iloc[0]),
+                        "rent0": g.loc[lus, "rent"].to_numpy(dtype=float),
+                        "L0": np.array([float(g.at[lus[i], "land_kha"]) for i in free]),
+                        "H": np.zeros((len(free), len(free))), "rows": {lus[i]: {} for i in free}, "prod": {}}
+        for t in inp.csv("noneu_land_mnl.csv", keep_default_na=False).itertuples(index=False):
+            d = out.get(t.rms)
+            if d is not None and t.lu in d["lu"] and t.lu1 in d["lu"]:
+                d["B"][d["lu"].index(t.lu), d["lu"].index(t.lu1)] = float(t.b)
+        land = set(self.MARKET_LAND)
+        for t in inp.csv("noneu_market_supply_nq.csv", keep_default_na=False).itertuples(index=False):
+            d = out.get(t.rms)
+            if d is None or not t.y:
+                continue
+            fl = [d["lu"][i] for i in d["free"]]
+            if t.x in land:
+                if t.x not in fl:
+                    continue
+                if t.y in land:
+                    if t.y in fl:
+                        d["H"][fl.index(t.x), fl.index(t.y)] += float(t.h) / float(t.inpe)
+                else:
+                    d["rows"][t.x][t.y] = d["rows"][t.x].get(t.y, 0.0) + float(t.h_ratio)
+            elif t.y in fl:
+                p_ = d["prod"].setdefault(t.x, {})
+                p_[t.y] = p_.get(t.y, 0.0) + float(t.h) / float(t.inpe)
+        self._noneu_land_cache = out
+        return out
+
+    def noneu_land_solve(self, ratio: pd.DataFrame, milk_ratio: Optional[dict] = None,
+                         fede: Optional[dict] = None, start: Optional[dict] = None) -> dict:
+        """The rents of the non-EU land markets at the market's prices: per CAPRI region the free rents r (TCRP,
+        FODFAL, FRUN) at which the MNL land supply equals the land demand of ProdNQ_,
+
+            (ARTO - INLW) exp(aLU_l + sum_k bLu_lk r_k) / sum_m exp(aLU_m + sum_k bLu_mk r_k)
+                = L0_l + sum_y h_ly (price ratio_y - 1) + sum_k H_lk (r_k - r0_k)          (l free),
+
+        LandSupplyMNL_ = LndSupplyEqualsDemand_ with ProdNQ_'s land rows (arm/market_model.gms l. 1543-1572, 1696-1745;
+        the rents of FORE, ARTIF, OLND fixed; rent = producer price + PSEd, rentFromProdpriceLand_, so the change of the
+        rent is the change of the land's producer price). Newton's method on the three rents from start (the latest
+        solution) or the calibration point. ratio: the trade regions' producer price ratios (regions x commodities);
+        milk_ratio: {trade region: raw milk price ratio}; fede: {CAPRI region: FEDE ratio}. Returns {rms: the change
+        of the free rents from calibration (EUR/ha), in the order of params["free"]}."""
+        P = self._noneu_land_params()
+        mr = milk_ratio or {}
+        fe = fede or {}
+        st = start or {}
+        out = {}
+        for rms, d in P.items():
+            tr = d["tr"]
+            if tr not in ratio.index or not d["free"]:
+                continue
+            ra = ratio.loc[tr]
+            fl = [d["lu"][i] for i in d["free"]]
+            base = d["L0"].copy()
+            for i, u in enumerate(fl):
+                v = 0.0
+                for y, h in d["rows"][u].items():
+                    if y == "FEDE":
+                        v += h * (float(fe.get(rms, 1.0)) - 1.0)
+                    elif y == "MILK":
+                        v += h * (float(mr.get(tr, 1.0)) - 1.0)
+                    elif y in ra.index:
+                        v += h * (float(ra[y]) - 1.0)
+                base[i] += v
+            fr = np.asarray(d["free"])
+            dr = np.array(st.get(rms, np.zeros(len(fr))), dtype=float)
+            B, a0, H = d["B"], d["alu"], d["H"]
+            scale = np.maximum(d["L0"], 1.0)
+
+            def F(dr_):
+                rent = d["rent0"].copy()
+                rent[fr] += dr_
+                z = a0 + B @ rent
+                e = np.exp(z - z.max())
+                sh = e / e.sum()
+                S = d["avail"] * sh
+                Fv = base + H @ dr_ - S[fr]
+                # dS_l / dr_k = avail sh_l (B_lk - sum_m sh_m B_mk)
+                J = H - (d["avail"] * sh[:, None] * (B - sh @ B))[np.ix_(fr, fr)]
+                return Fv, J
+            Fv, J = F(dr)
+            for _ in range(100):
+                if np.max(np.abs(Fv) / scale) < 1e-13:
+                    break
+                step = np.linalg.solve(J, -Fv)
+                t = 1.0
+                n0 = np.max(np.abs(Fv) / scale)
+                while True:
+                    F1, J1 = F(dr + t * step)
+                    if np.max(np.abs(F1) / scale) < n0 or t < 1e-6:
+                        break
+                    t *= 0.5
+                dr, Fv, J = dr + t * step, F1, J1
+            else:
+                raise RuntimeError(f"market: the land market of {rms} did not clear (residual {np.max(np.abs(Fv)):.3g})")
+            out[rms] = dr
+        return out
+
+    def land_by_type(self, land: Optional[dict]) -> Optional[dict]:
+        """{rms: change of the free rents} (noneu_land_solve) as {rms: {land type: EUR/ha}}; None for None."""
+        if not land:
+            return None
+        P = self._noneu_land_params()
+        return {rms: dict(zip([P[rms]["lu"][i] for i in P[rms]["free"]], (float(x) for x in v)))
+                for rms, v in land.items() if rms in P}
+
+    def _noneu_land_shift(self, reg, by_rms: bool = False) -> dict:
+        """The change of the supply of the trade region's products from its CAPRI regions' land rents (ProdNQ_'s
+        terms in the rents, kt): {x: kt}, or {x: {rms: kt}} with by_rms."""
+        land = self.ev.land_now or {}
+        out: dict = {}
+        for rms, d in self._noneu_land_params().items():
+            if d["tr"] != reg or rms not in land:
+                continue
+            fl = [d["lu"][i] for i in d["free"]]
+            dr = dict(zip(fl, land[rms]))
+            for x, t in d["prod"].items():
+                v = sum(h * dr.get(u, 0.0) for u, h in t.items())
+                if by_rms:
+                    out.setdefault(x, {})[rms] = out.get(x, {}).get(rms, 0.0) + v
+                else:
+                    out[x] = out.get(x, 0.0) + v
         return out
 
     def _noneu_market_supply_nq(self, supply, cols, ratio_of, milk_ratio_of, sup_cols):
@@ -806,6 +971,7 @@ class SupplyMixin(MarketStateMixin):
             fd = d.get("fede") or {}
             fede = self.ev.fede_now or {}
             rec = self._welf_noneu_nq.setdefault(reg, {})
+            lshift = self._noneu_land_shift(reg)
             for x, terms in d["rows"].items():
                 if x not in ci or x in skip or x not in supply.columns:
                     continue
@@ -821,6 +987,7 @@ class SupplyMixin(MarketStateMixin):
                 for rms, fx in fd.items():                     # each CAPRI region's feed energy price (audit M3)
                     if x in fx:
                         dq += fx[x] * (float(fede.get(rms, 1.0)) - 1.0)
+                dq += lshift.get(x, 0.0)
                 supply.at[reg, x] = max(q0 + dq, 0.0)
                 rec[x] = (q0, dq)
 

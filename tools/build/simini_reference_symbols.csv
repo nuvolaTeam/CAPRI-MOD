@@ -47,3 +47,4 @@ v_rentPerHa,var,"land rents per land type at the start of the simulation; stage 
 v_land,var,"land supply per land type; stage 7"
 p_useSymmetricMNL,par,"which form of the land supply MNL a region uses; stage 7"
 p_shFstInSecRmall,par,"shares of the first in the second land classification (ScaleLandAgr_); stage 7"
+p_aLU,par,"the land supply MNL's calibrated constants (set_start_val.gms l. 236: v_aLU = p_aLU CUR); stage 7"

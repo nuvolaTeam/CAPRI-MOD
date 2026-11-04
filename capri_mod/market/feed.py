@@ -319,9 +319,15 @@ class FeedMixin(MarketStateMixin):
                 d["conv"][t.product] = float(t.feed_conv)
                 d["prod0"][t.product] = float(t.prod_kt)
         anim = set(self.ANIM_FEED)
+        land = set(getattr(self, "MARKET_LAND", ()))
         for t in inp.csv("noneu_market_supply_nq.csv", keep_default_na=False).itertuples(index=False):
             d = R.get(t.rms)
             if d is None or t.capri_x not in anim or not t.y:
+                continue
+            if t.y in land:
+                # the animal products' terms in the land rents (h / INPE per EUR/ha; the land market, stage 7)
+                row = d.setdefault("lterms", {}).setdefault(t.capri_x, {})
+                row[t.y] = row.get(t.y, 0.0) + float(t.h) / float(t.inpe)
                 continue
             row = d["sterms"].setdefault(t.capri_x, {})
             row[t.y] = row.get(t.y, 0.0) + float(t.h_ratio)
@@ -330,7 +336,8 @@ class FeedMixin(MarketStateMixin):
         self._nfp_cache = out
         return out
 
-    def noneu_fede(self, arm_ratio: pd.DataFrame, prod_ratio: pd.DataFrame, milk_ratio: Optional[dict] = None) -> dict:
+    def noneu_fede(self, arm_ratio: pd.DataFrame, prod_ratio: pd.DataFrame, milk_ratio: Optional[dict] = None,
+                   land: Optional[dict] = None) -> dict:
         """CAPRI's FeedBal_ per non-EU behavioural region without supply models: the feed energy price (as a ratio to
         its calibration value) at which the energy of the feed used equals the energy its animal output needs,
 
@@ -338,7 +345,9 @@ class FeedMixin(MarketStateMixin):
 
         both linear in FEDE (FeedNQ_, ProdNQ_), so solved directly. arm_ratio, prod_ratio: the trade regions' Arm1 and
         producer price ratios (regions x commodities); milk_ratio: {trade region: raw milk price ratio} of the dairy
-        blocks (the latest evaluation's: the dairy block is solved after this, inside the supply response).
+        blocks (the latest evaluation's: the dairy block is solved after this, inside the supply response); land: the
+        land markets' rent changes {CAPRI region: {land type: EUR/ha}} (noneu_land_solve), whose terms move the animal
+        output.
         {region: FEDE ratio}; 1 where the balance has no FEDE response."""
         P = self._noneu_feed_params()
         mr = milk_ratio or {}
@@ -370,6 +379,10 @@ class FeedMixin(MarketStateMixin):
                         dq += h * (float(mr.get(tr, 1.0)) - 1.0)
                     elif y in rp.index:
                         dq += h * (float(rp[y]) - 1.0)
+                lr = (land or {}).get(rms)
+                if lr:
+                    for u, h in (d.get("lterms") or {}).get(a, {}).items():
+                        dq += h * lr.get(u, 0.0)
                 n0 += cv * (d["prod0"].get(a, 0.0) + dq)
             den = aF - aN
             out[rms] = 1.0 + (n0 - e0) / den if den > 0 else 1.0

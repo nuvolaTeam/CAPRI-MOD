@@ -337,7 +337,7 @@ class WelfareMixin:
             _wl = self.ev.dairy_world_last or {}
             _wp = self._dairy_world_params() or {}
             _mr = {g: 1.0 + float(v["z"][_wp[g]["iM"]]) for g, v in _wl.items() if g in _wp and "z" in v}
-            fede = self.noneu_fede(PRd, r, _mr)
+            fede = self.noneu_fede(PRd, r, _mr, self.land_by_type(self.ev.land_now))
             g = self.noneu_feed_change(PRd, fede)
             dairy_fed = set(self.DAIRY_TRADED.values())
             en = {}

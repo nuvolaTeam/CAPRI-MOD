@@ -278,6 +278,12 @@ market_supply_nq = true
 # KNOWN_ISSUES K54-3); false: one own-price constant elasticity per region and product (CAPRI's p_elasSupp of 2017),
 # the form until 29 October 2026
 noneu_supply_nq = true
+# CAPRI's market land block outside the EU (arm/market_model.gms LandSupplyMNL_, LndSupplyEqualsDemand_,
+# rentFromProdpriceLand_; supremaMrk on): the rents of TCRP, FODFAL and FRUN clear each non-EU region's land market,
+# the MNL land supply against ProdNQ_'s land demand, and move its market supply functions (noneu_land_market.csv,
+# noneu_land_mnl.csv; tools/build/build_noneu_market_supply_nq.py); false: the rents held at calibration (until
+# 4 November 2026). Needs noneu_supply_nq
+noneu_land_market = true
 # CAPRI's feed bulk demand inside the market (feedBlk_, audit M4): the member states' bulks respond to the prices within a
 # market solve from the supply models' bulks at the prices they saw, with the elasticities measured on the supply models
 # (the market supply Hessian's FEEDBLK rows); false: fixed within a solve (until 29 October 2026). Same fixed point

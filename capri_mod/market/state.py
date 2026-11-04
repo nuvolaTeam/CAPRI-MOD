@@ -25,6 +25,10 @@ class MarketEvalState:
     #: the non-EU behavioural regions' feed energy price ratios of the evaluation (CAPRI's FeedBal_, audit M3:
     #: {CAPRI region: FEDE / FEDE at calibration}); None outside an evaluation or with market.noneu_feed_nq off
     fede_now: Any = None
+    #: the non-EU land markets' rents of the evaluation (CAPRI's LandSupplyMNL_ = LndSupplyEqualsDemand_, stage 7:
+    #: {CAPRI region: change of the free rents TCRP, FODFAL, FRUN from calibration, EUR/ha}); None with
+    #: market.noneu_land_market off
+    land_now: Any = None
     #: the non-EU market regions whose supply is the supply models' in this solve
     sup_active: Any = None
     #: the dairy block's solution inside the raw milk clearing (audit M5), for supply_response

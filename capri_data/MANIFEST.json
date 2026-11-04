@@ -2046,13 +2046,51 @@
     "builder": "build_noneu_feed_nq"
    }
   },
-  "capri_data/2017/market/noneu_market_supply_nq.csv": {
-   "description": "CAPRI's market supply functions of the non-EU market regions (ProdNQ_): p_hessNQSupp at CAL completed as arm/market1.gms, Data_CAL PPRI, INPE 2030 (tools/build/build_noneu_market_supply_nq.py; K54-3)",
+  "capri_data/2017/market/noneu_land_market.csv": {
+   "description": "CAPRI's market land block per non-EU market region without supply models (LandSupplyMNL_, LndSupplyEqualsDemand_, rentFromProdpriceLand_, arm/market_model.gms l. 1696-1790): land, rent, MNL constant p_aLU CUR and ARTO - INLW per land type, from sim_ini_21730 (tools/build/build_noneu_market_supply_nq.py build_land_market; PORTS_STAGE4.md stage 7)",
    "kind": "calibrated",
    "vintage": "2030 calibration point",
    "domain": "market",
    "status": "live",
-   "rows": 47577,
+   "rows": 269,
+   "columns": 8,
+   "units": "U_1000ha, U_1unit, U_EuPerHa, U_ratio",
+   "read_by_model": [
+    "capri_mod/market/inputs.py",
+    "capri_mod/market/supply.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_noneu_market_supply_nq"
+   },
+   "catalogue_note": "CAPRI's market land block per non-EU market region: land, rents, MNL constants and available land per land type (PORTS_STAGE4.md stage 7) (not re-checked)"
+  },
+  "capri_data/2017/market/noneu_land_mnl.csv": {
+   "description": "CAPRI's MNL land supply coefficients p_bLu CUR per non-EU market region (the exponent of land type lu in the rent of lu1), from sim_ini_21730 (tools/build/build_noneu_market_supply_nq.py build_land_market)",
+   "kind": "calibrated",
+   "vintage": "2030 calibration point",
+   "domain": "market",
+   "status": "live",
+   "rows": 1609,
+   "columns": 4,
+   "units": "U_ratio",
+   "read_by_model": [
+    "capri_mod/market/inputs.py",
+    "capri_mod/market/supply.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_noneu_market_supply_nq"
+   },
+   "catalogue_note": "CAPRI's MNL land supply coefficients p_bLu per non-EU market region (not re-checked)"
+  },
+  "capri_data/2017/market/noneu_market_supply_nq.csv": {
+   "description": "CAPRI's market supply functions of the non-EU market regions (ProdNQ_): p_hessNQSupp at CAL completed as arm/market1.gms, the land demand rows (x TCRP, FODFAL, FRUN) with their sign turned as arm/market1.gms l. 593, Data_CAL PPRI, INPE 2030 (tools/build/build_noneu_market_supply_nq.py; K54-3; the land market, PORTS_STAGE4.md stage 7)",
+   "kind": "calibrated",
+   "vintage": "2030 calibration point",
+   "domain": "market",
+   "status": "live",
+   "rows": 49209,
    "columns": 10,
    "units": "U_1000tPerEuPerTonOverINPE, U_1000tPerPriceRatio, U_1unit, U_EuPerTon",
    "read_by_model": [
@@ -2064,7 +2102,7 @@
     "nature": "capri",
     "builder": "build_noneu_market_supply_nq"
    },
-   "catalogue_note": "CAPRI's market supply functions (ProdNQ_) of the non-EU market regions with their cross-price terms (tools/build/build_noneu_market_supply_nq.py; K54-3, market step D); y empty: a column without a model price, held at calibration (not re-checked)"
+   "catalogue_note": "CAPRI's market supply functions (ProdNQ_) of the non-EU market regions with their cross-price terms (tools/build/build_noneu_market_supply_nq.py; K54-3, market step D); the land demand rows and rent columns TCRP, FODFAL, FRUN are the land market's (noneu_land_market.csv) (not re-checked)"
   },
   "capri_data/2017/market/policy_blocks.csv": {
    "description": "Each model market region's CAPRI policy block (codes/capri/RM_TO_RMTP.csv; the EU's two market regions in block EU) (tools/build/build_bilateral_market.py build_border_measures).",

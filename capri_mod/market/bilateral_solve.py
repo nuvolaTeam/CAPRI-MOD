@@ -356,7 +356,30 @@ class BilateralSolveMixin(MarketStateMixin):
             _wl = self.ev.dairy_world_last or {}
             _wp = self._dairy_world_params() or {}
             _mr = {g: 1.0 + float(v["z"][_wp[g]["iM"]]) for g, v in _wl.items() if g in _wp and "z" in v}
-            self.ev.fede_now = self.noneu_fede(PAr, r, _mr)
+            self.ev.fede_now = self.noneu_fede(PAr, r, _mr, self.land_by_type(self.ev.land_now))
+        if self._noneu_land_params():
+            # CAPRI's market land block (stage 7): the rents that clear each non-EU region's land market at these
+            # prices, simultaneous with FeedBal_ (FEDE moves the land demand, the rents the animal output): solved in
+            # turn until both settle (the land solve from the latest rents)
+            _wl = self.ev.dairy_world_last or {}
+            _wp = self._dairy_world_params() or {}
+            _mr = {g: 1.0 + float(v["z"][_wp[g]["iM"]]) for g, v in _wl.items() if g in _wp and "z" in v}
+            fed = self.noneu_feed_nq and self.noneu_supply_nq
+            land = self.ev.land_now
+            for _ in range(50):
+                new = self.noneu_land_solve(r, _mr, self.ev.fede_now, start=land)
+                gap = max((float(np.max(np.abs(v - (land or {}).get(k, 0.0)))) for k, v in new.items()), default=0.0)
+                land = new
+                if not fed:
+                    break
+                fe = self.noneu_fede(PAr, r, _mr, self.land_by_type(land))
+                fgap = max((abs(v - (self.ev.fede_now or {}).get(k, 1.0)) for k, v in fe.items()), default=0.0)
+                self.ev.fede_now = fe
+                if gap < 1e-10 and fgap < 1e-13:
+                    break
+            else:
+                raise RuntimeError("market: the land markets and the feed energy balances did not settle together")
+            self.ev.land_now = land
         try:
             S = self.supply_response(world, exogenous_supply, region_ratio=r, crush_dom=dp)
             D = self.demand_response(dp, world)
