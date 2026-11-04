@@ -29,7 +29,9 @@ sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "chec
 import build_capri_base as B  # noqa: E402
 
 OUT = ROOT / "capri_data" / "sources" / "capreg" / "capreg_national_prices.csv"
-REC = re.compile(r"^'([A-Z]{2})000000'\.'([A-Z0-9]+)'\.'MPRI'\.'Y'\s+([^,\s]+)")
+#: the national row: '<MS>000000', or Turkey's 'TUR' (sets.gms; its dump res_17TU.txt), keyed by the two letters as the
+#: dumps are (TU: capri_mod.data.definitions.MS_CODE maps Turkey's units TR... to TU)
+REC = re.compile(r"^'(?:([A-Z]{2})000000|(TU)R)'\.'([A-Z0-9]+)'\.'MPRI'\.'Y'\s+([^,\s]+)")
 
 
 def main(dump_dir: Path) -> None:
@@ -38,7 +40,7 @@ def main(dump_dir: Path) -> None:
         for line in open(f, errors="ignore"):
             m = REC.match(line)
             if m:
-                rows.setdefault(m.group(1), {})[m.group(2)] = B._num(m.group(3))
+                rows.setdefault(m.group(1) or m.group(2), {})[m.group(3)] = B._num(m.group(4))
     df = pd.DataFrame.from_dict(rows, orient="index")
     for model, acts in B.CROP_MAP.items():
         if model not in df.columns and acts[0] in df.columns:

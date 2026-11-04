@@ -90,9 +90,10 @@ def main(gams, dumps):
     for f in sorted(glob.glob(str(Path(dumps) / "res_17*.txt"))):
         txt = open(f, encoding="latin-1").read()
         use = {}
-        for m in re.finditer(r"'(\w{2}000000)'\.'(FEDM|INTF)'\.'(\w+)'\.'Y'\s+([-+0-9.eE]+)", txt):
+        # the national rows: '<MS>000000', or Turkey's 'TUR' (sets.gms; 4 November 2026: Turkey was left out)
+        for m in re.finditer(r"'(\w{2}000000|TUR)'\.'(FEDM|INTF)'\.'(\w+)'\.'Y'\s+([-+0-9.eE]+)", txt):
             use[m.group(3)] = use.get(m.group(3), 0.0) + float(m.group(4))
-        ctrys = set(re.findall(r"'(\w{2}000000)'\.'(?:FEDM|INTF)'", txt))
+        ctrys = set(re.findall(r"'(\w{2}000000|TUR)'\.'(?:FEDM|INTF)'", txt))
         for ctry in ctrys:
             for a, cat in CATTLE.items():
                 hd, et = rce.get((ctry, cat, "HD")), rce.get((ctry, cat, "Et"), 0.0)

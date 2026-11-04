@@ -658,7 +658,7 @@
   "capri_data/2017/environment/enteric_feed_factors.csv": {
    "description": "Inputs of CAPRI's feed-based cattle enteric CH4 (GWPCH4ENT_, envind/gases.gms l. 365-376). (tools/build/build_enteric_feed_factors.py)",
    "kind": "coefficients",
-   "rows": 1530,
+   "rows": 1575,
    "columns": 6,
    "units": "to be established (value_units: open)",
    "read_by_model": [
@@ -5318,7 +5318,7 @@
    "vintage": "2017",
    "domain": "supply",
    "status": "live (builder input)",
-   "rows": 34,
+   "rows": 35,
    "columns": 75,
    "units": "to be established (value_units: open)",
    "origin": {
@@ -6400,7 +6400,7 @@
   "capri_data/validation/greendeal_2030/capri_unit_values_ini_2030.csv": {
    "description": "CAPRI's 2030 unit values UVAG per region and product from the dataOut of res_2_1730greendeal_refpol_endotech_all_inidefaulta (tools/build/extract_capri_marginal_terms.py, tag ini).",
    "kind": "validation",
-   "rows": 2071,
+   "rows": 2131,
    "columns": 3,
    "units": "to be established (value_units: open)",
    "origin": {

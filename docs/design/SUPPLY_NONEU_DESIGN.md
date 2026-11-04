@@ -99,7 +99,10 @@ built. No proxy.
   3. Turkey's code (TUR) and the Western Balkans in the country table; build_regional_units with all 250 units.
   4. The ready builders on the 250 units (done 4 November 2026: the pipeline on all 250 units leaves every EU and
      Norway row identical; the 29 units' rows added; the temporary exclusion in the two completeness rules removed).
-  5. The country lists of section 2.
+  5. The country lists of section 2 (done 4 November 2026: the seven builders 'needing their country list' take the
+     EU from its trade blocks; of the seven 'ready but for TUR', three left Turkey out (its national row is 'TUR'):
+     build_capreg_national_prices, build_enteric_feed_factors, extract_capri_marginal_terms; fixed, so Turkey's units
+     take its national prices where they have no regional one, as CAPRI).
   6. CAPRI's rules for the missing data, read (section 5) and ported.
   7. The exact-reproduction check with the default setting.
   8. The market side: SUP_NONEU one-to-many (WBA). With a country selected, its market region's welfare takes the

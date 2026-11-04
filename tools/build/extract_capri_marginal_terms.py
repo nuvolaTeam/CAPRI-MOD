@@ -52,7 +52,7 @@ def main(src: str, tag: str) -> None:
             continue
         if it.startswith("D_") or it in ITEMS:
             terms.append((reg, a, it, val))
-        elif a == "UVAG" and reg.endswith("000000") and it in UV_PRODUCTS:
+        elif a == "UVAG" and (reg.endswith("000000") or reg == "TUR") and it in UV_PRODUCTS:   # TUR: Turkey's national row
             uv.append((reg, it, val))
     import lzma, io
     with lzma.open(out / f"capri_marginal_terms_{tag}_2030.csv.xz", "wt", newline="") as f:   # xz: package size
