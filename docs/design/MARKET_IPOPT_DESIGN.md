@@ -221,8 +221,7 @@ After the market Newton-Krylov solve's review (KNOWN_ISSUES K110):
 
 Solver roles: the default market solve stays the successive linearisation until G3 is measured against it; the
 Newton-Krylov solve (market.solver = "newton_krylov") stays optional with no further work, as a cross-check of the
-equilibrium; for G3's linear solver MUMPS stays available as an option and as the comparison baseline, while
-alternatives (HSL MA97, SPRAL in OpenMP, section 9) are measured as candidate defaults.
+equilibrium; MUMPS stays available as an option for IPOPT's linear solver (section 9).
 
 ## 8. Found while making the inventory
 
