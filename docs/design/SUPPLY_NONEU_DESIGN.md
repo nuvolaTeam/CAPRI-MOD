@@ -97,7 +97,8 @@ built. No proxy.
   2. The switch (done, see above), and the supply models' "outside the EU" test by definitions.is_eu instead of the
      units' first two letters, which are not the country code for the UK (UK, country GB) or Serbia (CS, RS) (done).
   3. Turkey's code (TUR) and the Western Balkans in the country table; build_regional_units with all 250 units.
-  4. The ready builders on the 250 units.
+  4. The ready builders on the 250 units. Then remove the temporary exclusion of the 29 units from the two
+     completeness rules (10_supply_2017.sql, 13_supply_rents_elas.sql; set with the merge of 4 November 2026).
   5. The country lists of section 2.
   6. CAPRI's rules for the missing data, read (section 5) and ported.
   7. The exact-reproduction check with the default setting.

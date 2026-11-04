@@ -118,7 +118,7 @@ CREATE TABLE regional_units (
     capri_ms VARCHAR NOT NULL REFERENCES capri_rall (code),
     country VARCHAR NOT NULL CHECK (length(country) = 2)
 );
-COMMENT ON TABLE regional_units IS 'CAPRI''s regional units the model runs on (27 October 2026): unit, its member state, country';
+COMMENT ON TABLE regional_units IS 'CAPRI''s regional units of its supply models (EU27, Norway, UK, Turkey, Western Balkans; a run selects the countries outside the EU, run.supply_countries_outside_eu): unit, its member state, country';
 
 -- file: capri_data/codes/units.csv
 CREATE TABLE units (
@@ -163,9 +163,6 @@ WHERE capri_code NOT IN (SELECT code FROM capri_pact);
 SELECT capri_code, list(code) AS model_codes
 FROM (SELECT code, unnest(string_split(capmod_codes, ';')) AS capri_code FROM model_activities)
 GROUP BY capri_code HAVING count(*) > 1;
-
--- rule: a member state of the regional units is its own unit's member state code (ends in 000000)
-SELECT region, capri_ms FROM regional_units WHERE capri_ms NOT LIKE '%000000';
 
 -- file: capri_data/codes/capri/RM.csv
 CREATE TABLE capri_rm (code VARCHAR PRIMARY KEY REFERENCES capri_rall (code), text VARCHAR);

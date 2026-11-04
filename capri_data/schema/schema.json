@@ -22404,7 +22404,7 @@
    "file": "capri_data/shared/regional_units.csv",
    "declared_in": "00_codes.sql",
    "layout": [],
-   "comment": "CAPRI's regional units the model runs on (27 October 2026): unit, its member state, country",
+   "comment": "CAPRI's regional units of its supply models (EU27, Norway, UK, Turkey, Western Balkans; a run selects the countries outside the EU, run.supply_countries_outside_eu): unit, its member state, country",
    "columns": [
     {
      "name": "region",
@@ -43736,10 +43736,6 @@
   },
   {
    "file": "00_codes.sql",
-   "rule": "a member state of the regional units is its own unit's member state code (ends in 000000)"
-  },
-  {
-   "file": "00_codes.sql",
    "rule": "an animal's price source is a market commodity of the model"
   },
   {
@@ -43772,7 +43768,7 @@
   },
   {
    "file": "10_supply_2017.sql",
-   "rule": "every region of the core tables has its crop areas, land, herds, yields and costs (same regional units)"
+   "rule": "every region of the core tables has its crop areas, land, herds, yields and costs (same regional units)."
   },
   {
    "file": "12_supply_pmp.sql",
@@ -43808,7 +43804,7 @@
   },
   {
    "file": "13_supply_rents_elas.sql",
-   "rule": "every model region has its land rents in both years"
+   "rule": "every model region has its land rents in both years (until SUPPLY_NONEU_DESIGN step 4, 4 November 2026, without"
   },
   {
    "file": "14_policy_targets.sql",
@@ -43901,6 +43897,10 @@
   {
    "file": "25_feed.sql",
    "rule": "the animal of each feed column is a model animal and its bulk one of the three"
+  },
+  {
+   "file": "26_shared.sql",
+   "rule": "a regional unit's member state is one of CAPRI's member state codes (this table: XX000000,"
   },
   {
    "file": "99_rules.sql",

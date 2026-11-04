@@ -10,6 +10,10 @@ CREATE TABLE shr_capri_member_state_codes (
 );
 COMMENT ON TABLE shr_capri_member_state_codes IS 'capri_member_state_codes (no builder: a declared table)';
 
+-- rule: a regional unit's member state is one of CAPRI's member state codes (this table: XX000000,
+-- or TUR for Turkey's units, sets.gms MAP_RR TUR.SET.R_TUR)
+SELECT region, capri_ms FROM regional_units WHERE capri_ms NOT IN (SELECT capri_ms FROM shr_capri_member_state_codes);
+
 -- file: capri_data/shared/capri_units_nuts2024.csv
 CREATE TABLE shr_capri_units_nuts2024 (
     capri_unit VARCHAR NOT NULL,

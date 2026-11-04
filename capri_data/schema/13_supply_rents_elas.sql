@@ -110,9 +110,11 @@ UNION ALL
 SELECT 'mineral_n_price', country FROM mineral_n_price m
 WHERE NOT EXISTS (SELECT 1 FROM regional_units r WHERE r.country = m.country);
 
--- rule: every model region has its land rents in both years
+-- rule: every model region has its land rents in both years (until SUPPLY_NONEU_DESIGN step 4, 4 November 2026, without
+-- the units of the UK, Turkey and the Western Balkans, whose data are not built yet; step 4 removes this exclusion)
 SELECT r.region FROM regional_units r
-WHERE r.region NOT IN (SELECT region FROM land_rents_2030) OR r.region NOT IN (SELECT region FROM land_rents_2017);
+WHERE r.capri_ms NOT IN ('UK000000', 'TUR', 'AL000000', 'BA000000', 'CS000000', 'KO000000', 'MK000000', 'MO000000')
+  AND (r.region NOT IN (SELECT region FROM land_rents_2030) OR r.region NOT IN (SELECT region FROM land_rents_2017));
 
 -- file: capri_data/2017/supply/capri_supply_elas_market_1717.csv
 CREATE TABLE sup_capri_supply_elas_market_1717 (

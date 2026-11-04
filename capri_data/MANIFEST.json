@@ -5048,9 +5048,9 @@
    "catalogue_note": "CAPRI's 8-character codes -> NUTS codes across versions (CAPRI's build_general_set_structure.gms with the October 2026 additions); read by tools/lib/_model_regions.py; kept by hand; converted from JSON on 31 October 2026 (capri_mod/data/nested_tables.py), the same values. (not re-checked)"
   },
   "capri_data/shared/regional_units.csv": {
-   "description": "CAPRI's regional units the model runs on (27 October 2026): unit, its member state, country",
+   "description": "CAPRI's regional units of its supply models (EU27, Norway, UK, Turkey, Western Balkans; a run selects the countries outside the EU, run.supply_countries_outside_eu): unit, its member state, country",
    "kind": "structure",
-   "rows": 221,
+   "rows": 250,
    "columns": 3,
    "read_by_model": [
     "capri_mod/data/definitions.py",
