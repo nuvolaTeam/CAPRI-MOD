@@ -2823,6 +2823,42 @@ def test_set_aside_trajectory_is_fallow_plus_voluntary_set_aside():
     assert abs(f["IT400000"] - 1.1125) < 5e-4 and abs(f["PL120000"] - 1.8152) < 5e-4
     assert not (t["item"] == "VSET").any()
 
+def test_capri_reference_trajectory_reproduces_its_crop_levels(data):
+    """The capri_ref_2030 trajectory's level factors are CAPRI's own 2030 over 2017 (no [0.2, 5] band, no 1.0 threshold),
+    a level the reference does not list is 0 (GAMS stores no zero: UK grain maize), and OFOD grows as OFAR + ROOF: the
+    model's 2017 crop levels times its regional factors give CAPRI's 2030 reference levels (the validation file's ini
+    levels, FALL + VSET for SETA) in every EU region, to 1e-6 relative (4 November 2026; until then 96 cells were off by
+    more than 1%, France's pulses 0.2 against CAPRI's 0.112)."""
+    import pandas as pd
+    from capri_mod.data.definitions import CAPRI_TO_MODEL_ACTIVITY as M, CROPS, is_eu
+    A = data["areas"]
+    ini = pd.read_csv(DATA_DIR / "validation" / "greendeal_2030" / "capri_marginal_terms_ini_2030.csv.xz")
+    ini = ini[(ini["item"] == "LEVL") & (ini["activity"] != "SETA")]          # CAPRI's SETA row is VSET (K115)
+    cap = {}
+    for r in ini.itertuples():
+        a = {**M, "VSET": "SETA"}.get(r.activity, r.activity)
+        if a in CROPS:
+            cap[(r.region, a)] = cap.get((r.region, a), 0.0) + float(r.value)
+    t = pd.read_csv(DATA_DIR / "scenarios" / "capri_ref_2030" / "regional.csv")
+    t = t[(t.block == "herds") & (t.region.str.len() == 8)]
+    F = {(r.region, r.item): float(r.factor) for r in t.itertuples()}
+    assert F[("UKJ00000", "CORN")] == 0.0 and abs(F[("FR240000", "PULS")] - 0.815 / 48.62) < 1e-3
+    n = 0
+    for reg in A.index:
+        if not is_eu(reg):
+            continue
+        for a in CROPS:
+            if a not in A.columns or (reg, a) not in F:
+                continue
+            x17 = float(A.at[reg, a]) if pd.notna(A.at[reg, a]) else 0.0
+            c = cap.get((reg, a), 0.0)
+            if x17 <= 0 and c <= 0:
+                continue
+            assert abs(x17 * F[(reg, a)] - c) <= 1e-6 * max(c, 1.0), (reg, a, x17 * F[(reg, a)], c)
+            n += 1
+    assert n > 5000
+
+
 def test_manure_n2o_by_source_and_technology_effects():
     """CAPRI's manure N2O by stage (gases.gms): per t of manure N, housing/storage, application and
     grazing shares near IPCC's 1-2% in total; CAPRI's technology effects as its housing equation applies

@@ -8,7 +8,7 @@ target_years = [2030]
 extracted_from = "capri_data/sources/capri_baseline/capri_ref_levl_yild_2030_2017.csv.xz"
 datatype_read = "CAPMOD reference results 2030 against CAPRI 2017 results"
 aggregation = "per-activity median of per-region ratios (EU fallback)"
-factor_band = [0.2, 5.0]
+factor_band = "none"
 min_cells_per_activity = 3
-regional_detail = "per-region factors where the 2017 level is >= 1.0 (yields > 0)"
+regional_detail = "per-region factors where the 2017 value is > 0; a 2030 level the reference does not list is 0 (GAMS stores no zero)"
 model_keys = "model activity aliases and model regions added by tools/build/build_trajectory_model_keys.py (CAPRI-keyed entries kept)"

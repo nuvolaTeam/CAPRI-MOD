@@ -22910,7 +22910,7 @@
    "foreign_keys": [],
    "checks": [
     "(block IN ('yields', 'demand', 'world_prices', 'herds', 'land'))",
-    "(factor > 0)"
+    "(factor >= 0)"
    ],
    "units": [
     {
@@ -22946,7 +22946,7 @@
    "file": "capri_data/scenarios/capri_ref_2030/regional.csv",
    "declared_in": "35_scenarios.sql",
    "layout": [],
-   "comment": "CAPRI's 2030 reference as per-region growth factors (regions keyed by CAPRI's four-character codes and by the model's regions; the factor where the 2017 level is >= 1.0) (tools/build/build_trajectory_capri_ref.py, build_trajectory_model_keys.py)",
+   "comment": "CAPRI's 2030 reference as per-region growth factors (regions keyed by CAPRI's four-character codes and by the model's regions; the factor where the 2017 value is > 0; 0 for a level the 2030 reference does not list, GAMS storing no zero) (tools/build/build_trajectory_capri_ref.py, build_trajectory_model_keys.py)",
    "columns": [
     {
      "name": "block",
@@ -22984,7 +22984,7 @@
    "foreign_keys": [],
    "checks": [
     "(block IN ('yields', 'demand', 'world_prices', 'herds', 'land'))",
-    "(factor > 0)"
+    "(factor >= 0)"
    ],
    "units": [
     {

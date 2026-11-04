@@ -63,7 +63,9 @@ def add_model_keys(t: dict) -> dict:
                 continue
             entry = dict(src)
             for m, c in al.items():
-                if c in src:
+                # a factor under the model's own name (OFOD = OFAR + ROOF, build_trajectory_capri_ref.py) is kept;
+                # BULL is CAPRI's name for another activity (bulls' raising), so the alias replaces it
+                if c in src and (m not in src or m == "BULL"):
                     entry[m] = dict(src[c])
             if r not in reg:
                 added["regions"] += 1

@@ -4837,12 +4837,12 @@
    "catalogue_note": "CAPRI's 2030 reference: growth factors per block and activity (tools/build/build_trajectory_capri_ref.py). (not re-checked)"
   },
   "capri_data/scenarios/capri_ref_2030/regional.csv": {
-   "description": "CAPRI's 2030 reference as per-region growth factors (regions keyed by CAPRI's four-character codes and by the model's regions; the factor where the 2017 level is >= 1.0) (tools/build/build_trajectory_capri_ref.py, build_trajectory_model_keys.py)",
+   "description": "CAPRI's 2030 reference as per-region growth factors (regions keyed by CAPRI's four-character codes and by the model's regions; the factor where the 2017 value is > 0; 0 for a level the 2030 reference does not list, GAMS storing no zero) (tools/build/build_trajectory_capri_ref.py, build_trajectory_model_keys.py)",
    "kind": "reference",
    "vintage": "2030 reference",
    "domain": "projection",
    "status": "live",
-   "rows": 51648,
+   "rows": 60058,
    "columns": 5,
    "units": "to be established (value_units: open)",
    "read_by_model": [

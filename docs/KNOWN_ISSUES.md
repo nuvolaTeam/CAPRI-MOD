@@ -132,6 +132,7 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K113](#k113) | Croatia had no AD option: CAPRI's fallback_Balkan fills its VSER and housing share | fixed |
 | [K114](#k114) | Norway lacked CAPRI's mirrored MITERRA data and Sweden's AD data: no housed liquid manure, no AD | fixed |
 | [K115](#k115) | The 2030 set-aside followed CAPRI's VSET alone, not FALL + VSET: up to half or double CAPRI's per region | fixed |
+| [K116](#k116) | The CAPRI-reference trajectory kept the trend projection's [0.2, 5] band, 1.0 threshold and missing zeros; OFOD grew as OFAR alone | fixed (data); the runs' effect to measure |
 | [K117](#k117) | The full-EU market did not converge in Farm-to-Fork: the EU's sugar quotas switched on and off at every step | fixed (solve path); the full run to confirm |
 
 ## Details
@@ -2098,6 +2099,33 @@ while preparing SUPPLY_NONEU step 9's comparison per region. A reproduction erro
   Not changed: the CAPTRD trajectory (scenarios/captrd_2030, not the default) takes CAPTRD's own SETA row as it is
   (capri_mod/projection/captrd_import.py, no aggregation); whether CAPTRD's SETA is VSET too is to check before that
   trajectory is used.
+
+<a id="k116"></a>
+### K116: The CAPRI-reference trajectory did not reproduce CAPRI's 2030 levels (found 4 November 2026)
+
+tools/build/build_trajectory_capri_ref.py writes the 2030 baseline's growth from CAPRI's own reference
+(res_2_1730greendeal_refpol_endotech_all_ini over CAPRI's 2017 results), but it kept three rules of the trend
+projection captrd_2030: every factor held in [0.2, 5], regional factors only where the 2017 level is >= 1.0, and a 2030
+level the reference does not list treated as missing (the national or EU factor, about 1) where GAMS lists no zero.
+And the model's OFOD (CAPRI's OFAR + ROOF) took OFAR's growth alone. The model's 2017 levels being CAPRI's, the
+projection then missed CAPRI's 2030 reference in 96 of the EU's 3,587 crop cells with a regional factor by more than 1%
+(139 kha in all): France's pulses at 0.2 against CAPRI's 0.112 (FR24 9.7 kha against 0.8), IT20 rape 13.5 against 22.7,
+UK grain maize 5.6 kha against none. Found from SUPPLY_NONEU step 9's UK maize (about 1 kha per region against 0). A
+reproduction error of capri-mod.
+
+- **Effect:** the 2030 baseline's levels of those cells, and through land the other crops a little; livestock factors
+  outside the band too (SK suckler cows 0.083 against 0.2)
+- **Status:** **fixed** in the data, 4 November 2026 (branch fix-open): level factors are CAPRI's ratio as it is, for any
+  2017 level > 0; a level the reference does not list is 0 where it lists the region and the activity elsewhere (20
+  cells of 2017 level >= 1: DE, ES and IE other oilseeds, PT durum wheat, DK and NL pulses, UK grain maize, FR tobacco, NL
+  fallow); OFOD = OFAR + ROOF (levels, and the level-weighted yield). The EU fallback medians stay over the cells of
+  2017 level >= 1.0 (3 change, by the zeros). The schema allows a zero level factor. 7,870 regional factors added, 193
+  changed. Test: test_capri_reference_trajectory_reproduces_its_crop_levels (every EU crop cell of the trajectory equals
+  CAPRI's 2030 reference level, 6,047 cells). The runs' effect is to be measured.
+- Yields likewise: the band held 18 regional yield factors, all above 5 (Poland's other crops OCRO: CAPRI's yield 11.6
+  in 2017, 206.5 in 2030, 14 to 21-fold per region; Bosnia's apples 5.7-fold), now CAPRI's ratio as it is.
+- **Not changed:** the trajectory's own check on the solved baseline (the PMP and the land reconciliation can still
+  move levels) comes with the run.
 
 <a id="k117"></a>
 ### K117: The full-EU market did not converge in Farm-to-Fork, the EU's sugar quotas switching (found 5 November 2026)
