@@ -135,3 +135,9 @@ def test_capri_special_smoothing_setting_is_checked():
         with override({"outer_loop.capri_step_special": [bad]}):
             with pytest.raises(ValueError):
                 CAPRIModel._capri_step_special()
+
+
+def test_turkey_leaves_the_decision_from_the_15th_step_as_norway():
+    """CAPRI's price_forecast.gms l. 316-318: p_iterChg of NO000000 and of TUR set to 0 from the 15th step."""
+    r = CapriStopRule({})
+    assert r.late_out == {"NO000000": 15, "TUR": 15}

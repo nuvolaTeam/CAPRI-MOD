@@ -11,7 +11,8 @@ Per iteration ("step") CAPRI computes p_iterChg, the relative change (in %) of e
   (0.5 kt) (l. 127-141);
 - feed use per member state (FEED, without straw and fodder), where it moved by more than p_minAbsFeedIterChg
   (2.5 kt) (l. 143-159);
-- Norway (NO000000) out from the 15th step (l. 317).
+- Norway (NO000000) and Turkey (TUR) out from the 15th step (l. 316-318: "Norway reacts very sensitive and seems to jump
+  around"; Turkey since 4 November 2026, when its supply models came in).
 
 Per row the change is the largest over member states and aggregates; the step's maximum leaves out the young
 animals (OIYANI) and manure (l. 328-346); the first step counts at least 1% (l. 363). The loop goes on while the
@@ -47,7 +48,8 @@ class CapriStopRule:
 
     def __init__(self, aggregates: Mapping[str, Iterable[str]], yani_rows: Iterable[str] = (),
                  no_abs_price_rows: Iterable[str] = (), min_abs_prod: float = 0.5, min_abs_feed: float = 2.5, min_abs_price: float = 0.05,
-                 min_iter_chg: float = 0.05, norway: str = "NO000000", norway_last_step: int = 15):
+                 min_iter_chg: float = 0.05, norway: str = "NO000000", norway_last_step: int = 15,
+                 late_out: Optional[Mapping[str, int]] = None):
         self.aggregates = {a: list(ms) for a, ms in aggregates.items()}
         self.yani_rows: Set[str] = set(yani_rows)
         # rows whose prices are given as ratios to base (no price level at hand): p_minAbsPriceIterChg not applied
@@ -55,6 +57,8 @@ class CapriStopRule:
         self.min_abs_prod, self.min_abs_feed = float(min_abs_prod), float(min_abs_feed)
         self.min_abs_price, self.min_iter_chg = float(min_abs_price), float(min_iter_chg)
         self.norway, self.norway_last_step = norway, int(norway_last_step)
+        #: the member states CAPRI leaves out of the decision from a step on (price_forecast.gms l. 316-318)
+        self.late_out = dict(late_out) if late_out is not None else {norway: int(norway_last_step), "TUR": 15}
         self.steps: List[dict] = []
 
     def _agg_prices(self, price: Table, prod: Table, prod1: Table) -> Dict[str, Dict[str, float]]:
@@ -125,10 +129,11 @@ class CapriStopRule:
                         c = chg.setdefault(ms, {})
                         c[r] = max(c.get(r, 0.0), _chg(x, x0))
                         sgn[("feed", ms, r)] = _schg(x, x0)
-            # Norway out from the 15th step (l. 317)
-            if k >= self.norway_last_step:
-                chg.pop(self.norway, None)
-                sgn = {key: v for key, v in sgn.items() if key[1] != self.norway}
+            # Norway and Turkey out from the 15th step (l. 316-318)
+            for who, last in self.late_out.items():
+                if k >= last:
+                    chg.pop(who, None)
+                    sgn = {key: v for key, v in sgn.items() if key[1] != who}
         rec["signed"] = sgn
         # per row: the largest over member states and aggregates (l. 321, 354-355)
         rows: Dict[str, float] = {}
