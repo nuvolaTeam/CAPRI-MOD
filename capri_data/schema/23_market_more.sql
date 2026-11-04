@@ -831,3 +831,23 @@ CREATE TABLE mkt_policy_blocks (
     PRIMARY KEY (region)
 );
 COMMENT ON TABLE mkt_policy_blocks IS 'Each model market region''s CAPRI policy block (codes/capri/RM_TO_RMTP.csv; the EU''s two market regions in block EU) (tools/build/build_bilateral_market.py build_border_measures).';
+
+-- file: capri_data/2017/market/raw_milk_prices_2017.csv
+CREATE TABLE mkt_raw_milk_prices_2017 (
+    region VARCHAR NOT NULL,
+    pmrk DOUBLE NOT NULL,
+    PRIMARY KEY (region)
+);
+COMMENT ON TABLE mkt_raw_milk_prices_2017 IS 'CAPRI''s raw milk market price (DATA PMRK MILK) per market region, 2017: with the bilateral regions'' PMRK the market''s reference price levels (tools/build/build_bilateral_market.py build_raw_milk_prices).';
+INSERT INTO value_units VALUES
+  ('mkt_raw_milk_prices_2017', 'pmrk', 'U_EuPerTon', 'builder', 'CAPRI DATA PMRK MILK');
+
+-- file: capri_data/2017/market/raw_milk_prices_2030.csv
+CREATE TABLE mkt_raw_milk_prices_2030 (
+    region VARCHAR NOT NULL,
+    pmrk DOUBLE NOT NULL,
+    PRIMARY KEY (region)
+);
+COMMENT ON TABLE mkt_raw_milk_prices_2030 IS 'CAPRI''s raw milk market price (DATA PMRK MILK) per market region, 2030: with the bilateral regions'' PMRK the market''s reference price levels (tools/build/build_bilateral_market.py build_raw_milk_prices).';
+INSERT INTO value_units VALUES
+  ('mkt_raw_milk_prices_2030', 'pmrk', 'U_EuPerTon', 'builder', 'CAPRI DATA PMRK MILK');

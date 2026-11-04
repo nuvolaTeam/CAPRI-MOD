@@ -1706,3 +1706,20 @@ COMMENT ON TABLE src_producer_prices_no_builder IS 'EU producer price rows no bu
 INSERT INTO value_units VALUES
   ('src_producer_prices_no_builder', 'price', NULL, 'open', 'producer_prices_no_builder.price: unit to be established');
 
+-- file: capri_data/sources/market/raw_milk_prices_dataout_2017.csv
+CREATE TABLE src_raw_milk_prices_dataout_2017 (
+    region VARCHAR NOT NULL,
+    "value" DOUBLE NOT NULL
+);
+COMMENT ON TABLE src_raw_milk_prices_dataout_2017 IS 'CAPRI''s DATA PMRK MILK of every region of the listing, from market_base_1717 dataOut, 2017 (tools/build/build_bilateral_market.py build_raw_milk_prices).';
+INSERT INTO value_units VALUES
+  ('src_raw_milk_prices_dataout_2017', 'value', 'U_EuPerTon', 'builder', 'CAPRI DATA PMRK MILK');
+
+-- file: capri_data/sources/market/raw_milk_prices_dataout_2030.csv
+CREATE TABLE src_raw_milk_prices_dataout_2030 (
+    region VARCHAR NOT NULL,
+    "value" DOUBLE NOT NULL
+);
+COMMENT ON TABLE src_raw_milk_prices_dataout_2030 IS 'CAPRI''s DATA PMRK MILK of every region of the listing, from markmarket_greendeal_1730et_base_1717 dataOut, 2030 (tools/build/build_bilateral_market.py build_raw_milk_prices).';
+INSERT INTO value_units VALUES
+  ('src_raw_milk_prices_dataout_2030', 'value', 'U_EuPerTon', 'builder', 'CAPRI DATA PMRK MILK');

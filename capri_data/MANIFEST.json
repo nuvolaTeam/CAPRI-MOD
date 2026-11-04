@@ -2178,6 +2178,42 @@
    ],
    "catalogue_note": "29 October 2026: the ten livestock rows of unrecorded origin removed (read by no model code; KNOWN_ISSUES K72) (not re-checked)"
   },
+  "capri_data/2017/market/raw_milk_prices_2017.csv": {
+   "description": "CAPRI's raw milk market price (DATA PMRK MILK) per market region, 2017: with the bilateral regions' PMRK the market's reference price levels (tools/build/build_bilateral_market.py build_raw_milk_prices).",
+   "kind": "base",
+   "vintage": "2017",
+   "domain": "market",
+   "status": "live",
+   "rows": 45,
+   "columns": 2,
+   "units": "U_EuPerTon",
+   "read_by_model": [
+    "capri_mod/market/market_module.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_bilateral_market:"
+   },
+   "catalogue_note": "CAPRI's raw milk market price per market region (not re-checked)"
+  },
+  "capri_data/2017/market/raw_milk_prices_2030.csv": {
+   "description": "CAPRI's raw milk market price (DATA PMRK MILK) per market region, 2030: with the bilateral regions' PMRK the market's reference price levels (tools/build/build_bilateral_market.py build_raw_milk_prices).",
+   "kind": "reference",
+   "vintage": "2030 reference",
+   "domain": "market",
+   "status": "live",
+   "rows": 45,
+   "columns": 2,
+   "units": "U_EuPerTon",
+   "read_by_model": [
+    "capri_mod/market/market_module.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_bilateral_market:"
+   },
+   "catalogue_note": "CAPRI's raw milk market price per market region (not re-checked)"
+  },
   "capri_data/2017/market/sugar_processing.csv": {
    "description": "CAPRI's sugar processing per member state: white sugar from sugar beet (arm/data_cal.gms, set_prices.gms). (tools/build/build_sugar_processing.py)",
    "kind": "coefficients",
@@ -6105,6 +6141,28 @@
     "builder": "build_processing_yields"
    },
    "catalogue_note": "extract of CAPRI's raw file written and read back by tools/build/build_processing_yields.py, kept so its input can be rebuilt without the raw file (docs/EXTERNAL_SOURCES.md) (not re-checked)"
+  },
+  "capri_data/sources/market/raw_milk_prices_dataout_2017.csv": {
+   "description": "CAPRI's DATA PMRK MILK of every region of the listing, from market_base_1717 dataOut, 2017 (tools/build/build_bilateral_market.py build_raw_milk_prices).",
+   "kind": "base",
+   "rows": 100,
+   "columns": 2,
+   "units": "U_EuPerTon",
+   "origin": {
+    "nature": "capri",
+    "builder": "build_bilateral_market:"
+   }
+  },
+  "capri_data/sources/market/raw_milk_prices_dataout_2030.csv": {
+   "description": "CAPRI's DATA PMRK MILK of every region of the listing, from markmarket_greendeal_1730et_base_1717 dataOut, 2030 (tools/build/build_bilateral_market.py build_raw_milk_prices).",
+   "kind": "reference",
+   "rows": 94,
+   "columns": 2,
+   "units": "U_EuPerTon",
+   "origin": {
+    "nature": "capri",
+    "builder": "build_bilateral_market:"
+   }
   },
   "capri_data/sources/market/sugar_processing_dataout_2030.csv": {
    "description": "CAPRI's sugar beet GROF and PRCM and white sugar MAPR and PRCY per member state, from markmarket_greendeal_1730et_base_1717 dataOut, 2030 (tools/build/build_sugar_processing.py).",

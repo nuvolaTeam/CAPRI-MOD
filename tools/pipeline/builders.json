@@ -519,10 +519,14 @@
     "capri_data/2017/market/border_measures_2030.csv",
     "capri_data/2017/market/border_pairs_2030.csv",
     "capri_data/2017/market/policy_blocks.csv",
+    "capri_data/2017/market/raw_milk_prices_2017.csv",
+    "capri_data/2017/market/raw_milk_prices_2030.csv",
     "capri_data/sources/market/bilateral_dataout_2017.csv.xz",
     "capri_data/sources/market/bilateral_dataout_2030.csv.xz",
     "capri_data/sources/market/bilateral_trq_dataout_2017.csv",
-    "capri_data/sources/market/bilateral_trq_dataout_2030.csv"
+    "capri_data/sources/market/bilateral_trq_dataout_2030.csv",
+    "capri_data/sources/market/raw_milk_prices_dataout_2017.csv",
+    "capri_data/sources/market/raw_milk_prices_dataout_2030.csv"
    ]
   },
   {

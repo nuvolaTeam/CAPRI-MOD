@@ -237,32 +237,43 @@ class MarketModule(NewtonKrylovMixin, CalibrationMixin, BiofuelMixin, DairyMixin
         trade_scenario: Optional[Dict] = None,
     ) -> pd.DataFrame:
         """
-        Each region's base-level price of each commodity at the given world prices: p_world x (1 + tariff/100), with
-        the region's aggregate ad-valorem tariff equivalent (no exchange rate is applied). Used as the reference
-        price level of the response functions (dom0 at base world prices) and of the reported prices
-        (docs/design/ARCHITECTURE_REFACTOR.md 5.1, M1: CAPRI uses its Armington and producer prices there).
+        Each region's price level of each commodity at the given world prices: CAPRI's own market price of the region
+        at the base (PMRK of the market year: the bilateral systems' Pd0, raw milk from raw_milk_prices_<year>.csv)
+        moved by the commodity's world price index (world price / base world price). The reference price level of the
+        response functions (dom0 at base world prices: crushing margins, the dairy blocks) and of the reported prices.
 
-        Returns DataFrame [region × commodity].
+        Since 4 November 2026 (the project lead's decision of 3 November, docs/design/TARV_COMPARISON.md): until then
+        world price x (1 + the region's aggregate ad valorem equivalent, policy/tariffs.csv), which put the levels at a
+        median 0.84 of CAPRI's own (a factor beyond 2 in 254 of 2,565 cells). A scenario's tariff change acts through
+        the import prices of the bilateral market (CAPRI's impPrice_: BilateralCommodity.import_prices'
+        tariff_adds), not on this level; trade_scenario is kept for the interface.
+
+        Returns DataFrame [region x commodity].
         """
-        tariffs = self.tariffs.copy()
-        if trade_scenario and "tariff_change" in trade_scenario:
-            # {importing region: {commodity: points}}; "EU" / "EU27" for the EU's market regions (audit M10)
-            for reg, changes in trade_scenario["tariff_change"].items():
-                rows = (list(self.EU) if (reg in ("EU", "EU27", "EU27yr19") or reg in self.EU) else [reg])
-                for rg in rows:
-                    for comm, change in (changes or {}).items():
-                        if rg in tariffs.index and comm in tariffs.columns:
-                            tariffs.at[rg, comm] = max(0.0, float(tariffs.at[rg, comm]) + float(change))
-
-        # Vectorised: this was a region x commodity loop of scalar .at[]
-        # lookups, which dominated the market solve (2.3 million pandas reads
-        # per run). The arithmetic is unchanged.
+        ref = self._reference_prices()
         wp = pd.Series({c: float(world_prices.get(c, self.world_prices_base[c]))
-                        for c in self.commodities})
-        tar = tariffs.reindex(index=self.regions,
-                              columns=self.commodities).fillna(0.0)
-        prices = tar.div(100.0).add(1.0).mul(wp, axis=1)
-        return prices.astype(float)
+                        / max(float(self.world_prices_base[c]), 1e-9) for c in self.commodities})
+        return ref.mul(wp, axis=1).astype(float)
+
+    def _reference_prices(self) -> pd.DataFrame:
+        """CAPRI's market prices at the base per region and commodity (the market year's PMRK), cached; a commodity or
+        region without one stops."""
+        ref = getattr(self, "_ref_price_cache", None)
+        if ref is not None:
+            return ref
+        R, C = list(self.regions), list(self.commodities)
+        ref = pd.DataFrame(np.nan, index=R, columns=C)
+        for c, sc in (self._bilateral_raw() or {}).items():
+            if c in ref.columns:
+                ref[c] = pd.Series(np.asarray(sc.Pd0, float), index=list(sc.regions)).reindex(R)
+        if "MILK" in C:
+            mk = self._inp().csv(f"raw_milk_prices_{self._market_year()}.csv").set_index("region")["pmrk"]
+            ref["MILK"] = mk.reindex(R).astype(float)
+        miss = [(r, c) for r in R for c in C if not (np.isfinite(ref.at[r, c]) and ref.at[r, c] > 0)]
+        if miss:
+            raise ValueError(f"market: no CAPRI market price for {len(miss)} region-commodities, e.g. {miss[:5]}")
+        self._ref_price_cache = ref
+        return ref
 
     # ------------------------------------------------------------------
     # The EU's base supply and demand

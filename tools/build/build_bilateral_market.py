@@ -50,7 +50,7 @@ import functools as _ft
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
 from _grep import grep  # noqa: E402  (grep -E in Python: any system)
 from paths import EXPORTS, SOURCES  # noqa: E402  (CAPRI's material outside the repository)
-from _market_regions import model_region  # noqa: E402  (the market's grouping step: CAPRI region -> model region)
+from _market_regions import model_region, market_regions  # noqa: E402  (the market's grouping step: CAPRI region -> model region)
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 SRC = {2017: EXPORTS / "market_base_1717.txt",
@@ -306,6 +306,28 @@ def build_trq_global(year):
     return out
 
 
+def build_raw_milk_prices(year):
+    """CAPRI's raw milk market price (DATA PMRK MILK) per market region, the one market commodity without bilateral
+    trade: with the bilateral regions' PMRK, the market's reference price levels (MarketModule.domestic_prices; CAPRI's
+    own prices, the project lead's decision of 3 November 2026, docs/design/TARV_COMPARISON.md).
+    Output raw_milk_prices_<year>.csv: region, pmrk (EUR/t)."""
+    src = SRC[year]
+    keep = KEEP / f"raw_milk_prices_dataout_{year}.csv"
+    if src.exists():
+        txt = grep(r"^'[^']*'\.''\.'PMRK'\.'MILK'\.'" + str(year) + "'", str(src))
+        pat = re.compile(r"^'([^']*)'\.''\.'PMRK'\.'MILK'\.'\d+'\s+([-\d.Ee+]+)")
+        rows = [m.groups() for m in map(pat.match, txt.splitlines()) if m]
+        pd.DataFrame(rows, columns=["region", "value"]).to_csv(keep, index=False)
+    df = _read_csv(keep, keep_default_na=False)
+    rm = set(market_regions())
+    out = pd.DataFrame([dict(region=model_region(r.region, eu_as_blocks=True), pmrk=float(r.value))
+                        for r in df.itertuples(index=False) if r.region in rm and float(r.value) > 0])
+    out = out.sort_values("region")
+    out.to_csv(ROOT / "capri_data" / "2017" / "market" / f"raw_milk_prices_{year}.csv", index=False)
+    print(f"{year} raw milk prices: {len(out)} market regions")
+    return out
+
+
 def build_border_measures(year=2030):
     """CAPRI's border measures that replace the specific tariff (stage 6 of the market move, docs/design/PORTS_STAGE4.md):
     the entry price system (DATA TriggerP: EntryPriceDriver_, tarSpecIfEntryPrice_, prefTriggerPrice_) and the
@@ -375,6 +397,7 @@ def main():
         build(y, AGGREGATES)
         build_trq(y, AGGREGATES)        # CAPRI's bilateral quotas of every importer
         build_trq_global(y)             # its global quotas
+        build_raw_milk_prices(y)        # raw milk's market price (the reference price levels)
     build_border_measures(2030)         # entry prices and flexible levies (CAPRI's 2030 restart file only)
     rt = rho_table()
     rows = [dict(commodity=m, capri=cs[0], rho1=rt[cs[0]][1], rho2=rt[cs[0]][2]) for m, cs in MODEL.items()]
