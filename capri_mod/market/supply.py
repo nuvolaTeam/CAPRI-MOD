@@ -735,15 +735,20 @@ class SupplyMixin(MarketStateMixin):
         for rg, terms in P.items():
             if rg not in supply.index:
                 continue
-            r_ = ratio_of(rg)
-            for x in self.EU_MARKET_SUPPLY:
-                if x not in ci or x not in supply.columns:
-                    continue
-                q0 = float(self.par.base_production.at[rg, x]) if x in self.par.base_production.columns else 0.0
-                if q0 <= 0:
-                    continue
-                dq = sum(h * (float(r_[ci[y]]) - 1.0) for (x_, y), h in terms.items() if x_ == x and y in ci)
-                supply.at[rg, x] = max(q0 + dq, 0.0)
+            # CAPRI's ProdNQ_ written once in CasADi (market step G2b, capri_mod/market/supply_ad.py); raw milk as a
+            # price ratio of the market (its column here), as before the move
+            fr = self._nq_rows(("eu", rg), terms, lambda t_: {x: {y: h for (x_, y), h in t_.items() if x_ == x}
+                                                              for x in self.EU_MARKET_SUPPLY}, cols, None)
+            if fr is None:
+                continue
+            f, rows, _rms = fr
+            r_ = np.asarray(ratio_of(rg), dtype=float)
+            q0 = self._nq_q0(rg, rows)
+            q, _dq = f(q0, r_, float(r_[ci["MILK"]]) if "MILK" in ci else 1.0, np.zeros(0), np.zeros(len(rows)))
+            q = np.asarray(q).ravel()
+            for i, x in enumerate(rows):
+                if x in supply.columns and q0[i] > 0:
+                    supply.at[rg, x] = float(q[i])
 
     def _noneu_nq_params(self) -> dict:
         """CAPRI's market supply functions of the non-EU market regions (arm/market_model.gms ProdNQ_; KNOWN_ISSUES
@@ -961,35 +966,49 @@ class SupplyMixin(MarketStateMixin):
         recalibrate to). Norway's supply-model products are its supply models' (left as they are). Replaces the
         own-price constant-elasticity function of each product (market.noneu_supply_nq = false)."""
         P = self._noneu_nq_params()
-        ci = {c: j for j, c in enumerate(cols)}
         for reg, d in P.items():
             if reg not in supply.index:
                 continue
-            r_ = ratio_of(reg)
-            mr = float(milk_ratio_of(reg))
+            # CAPRI's ProdNQ_ written once in CasADi (market step G2b, capri_mod/market/supply_ad.py)
+            fr = self._nq_rows(("noneu", reg), d["rows"], None, cols, d.get("fede") or {})
+            if fr is None:
+                continue
+            f, rows, rms = fr
             skip = sup_cols.get(reg, set())
-            fd = d.get("fede") or {}
-            fede = self.ev.fede_now or {}
+            fede = self.ev.fede_now or {}                      # each CAPRI region's feed energy price (audit M3)
             rec = self._welf_noneu_nq.setdefault(reg, {})
             lshift = self._noneu_land_shift(reg)
-            for x, terms in d["rows"].items():
-                if x not in ci or x in skip or x not in supply.columns:
+            q0 = self._nq_q0(reg, rows)
+            q, dq = f(q0, np.asarray(ratio_of(reg), dtype=float), float(milk_ratio_of(reg)),
+                      np.array([float(fede.get(s_, 1.0)) for s_ in rms]),
+                      np.array([float(lshift.get(x, 0.0)) for x in rows]))
+            q, dq = np.asarray(q).ravel(), np.asarray(dq).ravel()
+            for i, x in enumerate(rows):
+                if x in skip or x not in supply.columns or not q0[i] > 0:
                     continue
-                q0 = float(self.par.base_production.at[reg, x]) if x in self.par.base_production.columns else 0.0
-                if q0 <= 0:
-                    continue
-                dq = 0.0
-                for y, h in terms.items():
-                    if y == "MILK":
-                        dq += h * (mr - 1.0)
-                    elif y in ci:
-                        dq += h * (float(r_[ci[y]]) - 1.0)
-                for rms, fx in fd.items():                     # each CAPRI region's feed energy price (audit M3)
-                    if x in fx:
-                        dq += fx[x] * (float(fede.get(rms, 1.0)) - 1.0)
-                dq += lshift.get(x, 0.0)
-                supply.at[reg, x] = max(q0 + dq, 0.0)
-                rec[x] = (q0, dq)
+                supply.at[reg, x] = float(q[i])
+                rec[x] = (float(q0[i]), float(dq[i]))
+
+    def _nq_rows(self, key, src, regroup, cols, fede_terms):
+        """The compiled ProdNQ_ function of one market region (supply_ad.nq_rows_function), cached per region, its
+        parameter object (src, the cached parameters) and the column list: (Function, rows, CAPRI regions of the feed
+        energy prices) or None when the region has no row. regroup: src to {x: {y: h}} (None: src is that)."""
+        from capri_mod.market.supply_ad import build_rows, nq_rows_function
+        cache = self.__dict__.setdefault("_nq_rows_cache", {})
+        ck = (id(src), tuple(cols))
+        hit = cache.get(key)
+        if hit is None or hit[0] != ck:
+            a = build_rows(regroup(src) if regroup is not None else src, cols, fede_terms)
+            f = (nq_rows_function(f"prodnq_{key[0]}_{key[1]}", len(cols), a["H"], a["hm"], a["HF"])
+                 if a["rows"] else None)
+            hit = (ck, f, a["rows"], a["rms"])
+            cache[key] = hit
+        return None if hit[1] is None else (hit[1], hit[2], hit[3])
+
+    def _nq_q0(self, reg, rows) -> np.ndarray:
+        """The market's base supply of the rows (the constant of ProdNQ_), 0 where the product has no column."""
+        bp = self.par.base_production
+        return np.array([float(bp.at[reg, x]) if x in bp.columns else 0.0 for x in rows])
 
     def _sup_milk_terms(self, reg, Hs, cols, xs, sv):
         """Norway's raw milk in the market (market.sup_milk_in_market, step F): CAPRI keeps ProdNQ_ MILK of the

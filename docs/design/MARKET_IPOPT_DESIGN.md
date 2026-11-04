@@ -155,6 +155,15 @@ Each stage must pass two checks:
    - No solve uses it yet: the NLP of G3 will.
 2. **G2b.** Market supply and pooled commodities: the non-EU supply functions, and the EU's anticipated response
    with the measured Hessian.
+   - **First part, 4 November 2026 (branch step-g2b):** CAPRI's ProdNQ_ of the non-EU market regions and of the
+     EU's products without a supply model (EU_MARKET_SUPPLY) written once, capri_mod/market/supply_ad.py
+     (nq_rows_function per market region: base supply, price ratios, raw milk price, the CAPRI regions' feed energy
+     prices and the land rents' shift as inputs; the floor at 0 an fmax); SupplyMixin._noneu_market_supply_nq and
+     _eu_market_supply_nq evaluate it, the loops removed. capri_mod/tests/test_supply_ad.py: equal to the loops at
+     random prices within 1e-12 relative, the Jacobian equal to finite differences. Mini-EU check to do.
+   - Still to do in G2b: the EU's and the supply-model regions' anticipation factors and the measured Hessian's
+     terms (supply_response), the pooled commodities; the land block (noneu_land_solve's Newton, added with the
+     market move's stage 7 after this inventory) as unknowns with its residual.
 3. **G2c.** Human consumption, the generalised Leontief system. **Built 31 October 2026** (taken before G2b by the
    project lead's decision of that day: G2b's market supply rests on the coupling code that refactor stage 4 is to
    restructure; G2c and G2e are market code no refactor stage touches):
