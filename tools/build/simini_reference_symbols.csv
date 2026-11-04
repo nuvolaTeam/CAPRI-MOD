@@ -36,3 +36,8 @@ p_dpCESBiof,par,"biofuel CES share parameters per RMS; MARKET_REGIONS_INVENTORY 
 p_bioSupPar,par,"biofuel supply parameters; MARKET_REGIONS_INVENTORY 2.1"
 p_bioDemPar,par,"biofuel demand parameters; MARKET_REGIONS_INVENTORY 2.1"
 p_feedBlkElas,par,"feed-bulk elasticities per RMS (feedBlkPrice_, stage 2)"
+v_tarAdVal,var,"ad valorem tariffs per RMTP pair (level and bounds: fixed where CAPRI generates no tarAdval_); the ports' base check, docs/design/PORTS_STAGE4.md"
+v_tarSpec,var,"specific tariffs per RMTP pair (level and bounds: fixed where CAPRI generates no tarSpec_); PORTS_STAGE4.md"
+v_trqSigmoidFunc,var,"each bilateral quota's sigmoid at CAL; PORTS_STAGE4.md"
+v_tradeFlows,var,"flows per RM and RMTP pair at CAL (the quotas' fill, TradeFlowsAgg_); PORTS_STAGE4.md"
+p_doubleZero,par,"pairs with free trade (no tariff); PORTS_STAGE4.md"

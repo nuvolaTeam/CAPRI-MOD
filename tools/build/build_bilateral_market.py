@@ -202,18 +202,20 @@ def build_trq(year, AGGREGATES):
     a rate only where one of its two values is above eps. CAPRI products of one model commodity (none at present with
     quotas on the same pair) would be summed, rates quota-weighted.
     Output bilateral_trq_<year>.csv: importer, exporter (policy blocks), commodity, quota_kt, ta_mfn, ta_pref, ts_mfn,
-    ts_pref, importer_regions, exporter_regions (the blocks' market regions, "|"-joined). Until 4 November 2026 the EU's quotas only, summed per model exporter with a price gap frozen at the base
+    ts_pref, importer_regions, exporter_regions (the blocks' market regions, "|"-joined), regime (bilateral, with_global:
+    the importer also has a global quota on the product, entry_price: a preferential trigger price is set). Until 4 November 2026 the EU's quotas only, summed per model exporter with a price gap frozen at the base
     (DEP-34, DEP-35, DEP-36)."""
     src = SRC[year]
     keep = KEEP / f"bilateral_trq_dataout_{year}.csv"
-    items = ("TRQNT", "TAMFN", "TAPREF", "TSMFN", "TSPREF")
+    items = ("TRQNT", "TAMFN", "TAPREF", "TSMFN", "TSPREF", "PREFTRIGPRICE")
     if src.exists():
         prods = "|".join(CAPRI)
         txt = grep(r"(?i)^'[^']*'\.'[^']*'\.'(" + "|".join(items) + r")'\.'(" + prods + r")'\.'" + str(year) + "'",
                    str(src))
         pat = re.compile(r"^'([^']*)'\.'([^']*)'\.'([A-Za-z]+)'\.'([A-Z]+)'\.'\d+'\s+([-\d.Ee+]+)")
         rows = [m.groups() for m in map(pat.match, txt.splitlines()) if m]
-        rows = [(a, b, it.upper(), pr, v) for a, b, it, pr, v in rows if it.upper() in items]
+        rows = [(a, b, it.upper(), pr, v) for a, b, it, pr, v in rows if it.upper() in items
+                and (b != "World" or it.upper() != "PREFTRIGPRICE")]
         pd.DataFrame(rows, columns=["importer", "exporter", "item", "product", "value"]).to_csv(keep, index=False)
     df = _read_csv(keep, keep_default_na=False)
     d = defaultdict(dict)
@@ -230,6 +232,16 @@ def build_trq(year, AGGREGATES):
             continue
         k = agg[(i, j, CAPRI[p])]
         k["q"] += q
+        # CAPRI's regime of the pair (arm/set_tariffs.gms, market_model.gms): the entry price system where a
+        # preferential trigger price is set (tariffs fixed at TARV and the entry price's specific part: stage 6); with
+        # a global (erga omnes, exporter "World") quota of the importer that has rates, the smaller of the two rates
+        # (ncpcm in tarAdval_, tarSpec_: stage 5); else the bilateral sigmoid alone (stage 4)
+        gl = d.get((i, "World", p), {})
+        has_gl = 0 < gl.get("TRQNT", 0.0) < 1e9 and any(gl.get(x, 0.0) > 0 for x in ("TAMFN", "TAPREF", "TSMFN", "TSPREF"))
+        reg = "entry_price" if v.get("PREFTRIGPRICE", 0.0) > 0 else ("with_global" if has_gl else "bilateral")
+        if k.get("regime", reg) != reg:
+            raise ValueError(f"{i} <- {j} {CAPRI[p]}: CAPRI products of one model commodity in two TRQ regimes")
+        k["regime"] = reg
         for it in ("TAMFN", "TAPREF", "TSMFN", "TSPREF"):
             k[it] += q * v.get(it, 0.0)
     # each policy block's market regions as the model names them (RM_TO_RMTP; the EU's two as EU_WEST, EU_EAST)
@@ -239,12 +251,13 @@ def build_trq(year, AGGREGATES):
             members[r["rmtp"]].append(model_region(r["rm"], eu_as_blocks=True))
     rows = [dict(importer=i, exporter=j, commodity=c, quota_kt=v["q"], ta_mfn=v["TAMFN"] / v["q"],
                  ta_pref=v["TAPREF"] / v["q"], ts_mfn=v["TSMFN"] / v["q"], ts_pref=v["TSPREF"] / v["q"],
-                 importer_regions="|".join(members[i]), exporter_regions="|".join(members[j]))
+                 importer_regions="|".join(members[i]), exporter_regions="|".join(members[j]), regime=v["regime"])
             for (i, j, c), v in agg.items()]
     out = pd.DataFrame(rows).sort_values(["importer", "commodity", "exporter"])
     out.to_csv(ROOT / "capri_data" / "2017" / "market" / f"bilateral_trq_{year}.csv", index=False)
     print(f"{year} bilateral TRQs: {len(out)} quotas; per importer: " + ", ".join(
-        f"{i} {n}" for i, n in out.importer.value_counts().items()))
+        f"{i} {n}" for i, n in out.importer.value_counts().items()) + "; per regime: " + ", ".join(
+        f"{r} {n}" for r, n in out.regime.value_counts().items()))
     return out
 
 

@@ -47,3 +47,32 @@ A_EU_WEST, A_EU_EAST; the rest one to one).
 - Equation-level unit tests: tav and ts against hand-computed values from market_model.gms l. 3275-3475, with fills in
   [0.9, 1.05] where the slope-200 sigmoid is steep (G_REVIEW Q5.2 test C).
 - Mini-EU run with its deviation from CAPRI's Farm-to-Fork figures.
+
+## Findings, 4 November 2026 (before the code)
+
+- The 130 quotas of p_trqBilat "CUR" in the market dump equal sim_ini's to 1e-13 (TrqNT and the four rates).
+- Against CAPRI's own calibrated state (p_trqBilat TaAppl, TsAppl "CAL", ImportsR "CAL"): 119 of 130 quotas have
+  TaAppl = TaPref + (TaMFN - TaPref) Sigmoid(200 (ImportsR / TrqNT - 0.97)) within 0.5 points and the specific rate
+  within 1 EUR/t. The 11 others are explained by the two regimes below: 7 where the importer has a global quota too
+  (CAPRI's rate is the smaller of the two, ncpcm: Norway's beef from the EU, 12.7% instead of 222.5%; the EU's pork,
+  sheep meat, butter), 4 under the entry price system (the EU's tomatoes and citrus from MOR and MED: TaAppl fixed at
+  TARV, set_tariffs.gms l. 249).
+- The market dump's per-pair TaAppl (dataOut) is not the quota's rate: for TUR <- EU it is 0 with the protection in
+  the specific part; the import price itself (a + b) is CAPRI's p_impPrice "CAL" in every case checked.
+- sim_ini holds no levels of v_tarAdVal, v_tarSpec, v_trqSigmoidFunc, v_tradeFlows (0 records: written before the
+  market solve); the calibrated rates are p_trqBilat's TaAppl/TsAppl "CAL".
+- Regimes per quota (bilateral_trq_2030.csv `regime`): bilateral 50, with_global 76, entry_price 4. So stage 5 (global
+  quotas, TRQImports_, tarAdValW_, tarSpecW_, the ncpcm minimum) is written with stage 4: alone, stage 4 would move only
+  50 quotas. The entry price quotas stay at their base tariffs until stage 6.
+
+## Global quotas (stage 5, with stage 4)
+
+- TRQImports_ (l. 3142): imports under the global quota = flows from exporter blocks without a bilateral quota +
+  the overfill of the bilateral ones, -ncpcm(-(flow - TrqNT_b), 0, 1E-3 TrqNT_b) (a smoothed max(0, .)); pairs under
+  p_doubleZero (free trade) excluded.
+- tarAdValW_, tarSpecW_ (l. 3399, 3475): the global rates from the global sigmoid on TRQImports.
+- Flows from exporters without a bilateral quota pay the global rates; flows under a bilateral quota pay
+  ncpcm(global rate, bilateral rate, max(1E-2, 1E-3 |TaMFN - TaPref|)) (ad valorem; specific: max(1E-5, 1E-7 |.|)).
+  ncpcm(x, y, Z) = x - Z ln(1 + exp((x - y) / Z)) (GAMS's Chen-Mangasarian smoothed minimum).
+- In the model the base import prices stay CAPRI's (a + b); each regime adds the change of its rates from their value
+  at the base flows (shift form), so the base is reproduced exactly and the response is CAPRI's equations'.
