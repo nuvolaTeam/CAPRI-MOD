@@ -119,7 +119,7 @@
   "capri_data/2017/abatement/ammonia/ad_option.csv": {
    "description": "CAPRI's anaerobic digestion option AD_AnCh per unit and activity (envind/ammo_tech.gms; build_ad_option.py) (tools/build/build_ad_option.py)",
    "kind": "coefficients",
-   "rows": 3056,
+   "rows": 3224,
    "columns": 14,
    "units": "to be established (value_units: open)",
    "origin": {
@@ -130,7 +130,7 @@
   "capri_data/2017/abatement/ammonia/ammonia_tech_model.csv": {
    "description": "the ammonia technologies on the model's animals: CAPRI's options, weights and the N cascade terms (build_ammonia_tech_model.py) (tools/build/build_ammonia_tech_model.py)",
    "kind": "coefficients",
-   "rows": 35201,
+   "rows": 35369,
    "columns": 23,
    "units": "to be established (value_units: open)",
    "read_by_model": [
@@ -310,7 +310,7 @@
   "capri_data/2017/abatement/ammonia/n_cascade_effects.csv": {
    "description": "the technologies' effects on the N cascade items per region and activity (envind/ghgMiti.gms; build_n_cascade.py) (tools/build/build_n_cascade.py)",
    "kind": "coefficients",
-   "rows": 147119,
+   "rows": 147175,
    "columns": 5,
    "units": "to be established (value_units: open)",
    "read_by_model": [
@@ -338,7 +338,7 @@
   "capri_data/2017/abatement/ammonia/n_cascade_region.csv": {
    "description": "the regional N cascade factors (build_n_cascade.py) (tools/build/build_n_cascade.py)",
    "kind": "coefficients",
-   "rows": 1748,
+   "rows": 1813,
    "columns": 3,
    "units": "to be established (value_units: open)",
    "read_by_model": [
@@ -786,7 +786,7 @@
    "vintage": "2017 (FSS survey up to 2017)",
    "domain": "environment",
    "status": "live",
-   "rows": 4129,
+   "rows": 4365,
    "columns": 7,
    "units": "to be established (value_units: open)",
    "read_by_model": [

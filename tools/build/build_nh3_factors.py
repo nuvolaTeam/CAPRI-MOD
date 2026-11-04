@@ -28,6 +28,9 @@ sys.path[:0] = [str(_ROOT / "tools" / _d) for _d in ("lib", "build", "run", "che
 from build_livestock_output_coef import CAPRI_TO_MODEL  # noqa: E402
 sys.path.insert(0, str(_ROOT))
 from capri_mod.data.nested_tables import write_nh3_factors  # noqa: E402
+import sys as _sys_nc  # noqa: E402
+_sys_nc.path.insert(0, str(__import__("pathlib").Path(__file__).resolve().parents[2] / "tools" / "lib"))
+from _model_regions import national_code as _national_code  # noqa: E402  (TUR for Turkey's units, 4 November 2026)
 
 
 def _read_csv(*a, **k):
@@ -101,7 +104,7 @@ def main() -> None:
     for reg in areas.index:
         c8 = reg_codes.get(reg) or None
         man, mi, tot = factors(c8) if c8 else ({}, None, None)
-        nat = factors(reg[:2] + "000000")
+        nat = factors(_national_code(reg))
         if not man and not nat[0]:
             continue
         rec = {"manure_share": {**nat[0], **man}, "mineral_share": mi if mi is not None else nat[1],

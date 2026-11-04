@@ -40,6 +40,9 @@ import functools as _ft
 import sys  # noqa: E402
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
 from paths import SOURCES  # noqa: E402  (CAPRI's material outside the repository)
+import sys as _sys_nc  # noqa: E402
+_sys_nc.path.insert(0, str(__import__("pathlib").Path(__file__).resolve().parents[2] / "tools" / "lib"))
+from _model_regions import national_code as _national_code  # noqa: E402  (TUR for Turkey's units, 4 November 2026)
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 CAKES = ("SOYC", "RAPC", "SUNC")
@@ -131,9 +134,9 @@ def main() -> None:
     capn = pd.DataFrame(index=cap.index, columns=cap.columns, dtype=float)
     for reg in cap.index:
         src = source(reg)
-        if src is None or (src[:2] + "000000") not in defl and mr.national_code(reg) not in defl:
+        if src is None or (_national_code(src)) not in defl and mr.national_code(reg) not in defl:
             continue
-        df_ = defl.get(mr.national_code(reg), defl.get(src[:2] + "000000"))
+        df_ = defl.get(mr.national_code(reg), defl.get(_national_code(src)))
         for col in cap.columns:
             a = COLMAP.get(col, col)
             v = p30.at[src, a] if a in p30.columns else float("nan")

@@ -124,7 +124,7 @@ class NPKData:
     def crop_coef(self, capri_region: str, nut: str, crop: str, col: str) -> float:
         """A model crop's coefficient (kg/ha); a crop CAPRI does not grow in the region takes the country's, else 0."""
         cache = self.__dict__.setdefault("_crop_dicts", {})
-        for r in (capri_region, capri_region[:2] + "000000"):
+        for r in (capri_region, capri_ms(capri_region)):
             dd = cache.get((r, nut))
             if dd is None:
                 d = self.crop.get((r, nut))
@@ -154,7 +154,7 @@ class NPKData:
             raise RuntimeError("npk_crop_coefs_2030.csv has no main_share/straw_share: rerun "
                                "tools/build/build_npk_balance_2030.py")
         if capri_region:
-            for r in (capri_region, capri_region[:2] + "000000"):
+            for r in (capri_region, capri_ms(capri_region)):
                 d = self.crop.get((r, nut))
                 if d is not None and crop in d.index:
                     m, s_ = float(d.at[crop, "main_share"]), float(d.at[crop, "straw_share"])
@@ -165,13 +165,13 @@ class NPKData:
     def region(self, capri_region: str, nut: str):
         t = self.reg.get((capri_region, nut))
         if t is None:
-            t = self.reg.get((capri_region[:2] + "000000", nut))
+            t = self.reg.get((capri_ms(capri_region), nut))
         return t
 
     def priors(self, capri_region: str, nut: str):
         d = self.pri.get((capri_region, nut))
         if d is None:
-            d = self.pri.get((capri_region[:2] + "000000", nut))
+            d = self.pri.get((capri_ms(capri_region), nut))
         return d
 
     def manure_per_head(self, region: str, nut: str, animal: str) -> float:

@@ -36,6 +36,7 @@ part of the manure N2O factors (f_lea).
 from __future__ import annotations
 
 from capri_mod.params import param
+from capri_mod.data.definitions import capri_ms  # noqa: E402  (TUR for Turkey's units)
 
 # EF5 and winter cover's reduction of the leaching factor (envind/cover_crops.gms l. 402) are the parameters
 # EF5_LEACHING_N2O and WINTERCOV_NO3_REDUCTION (refactor stage 3, N2: one parameter with n_cascade's runoff effect)
@@ -64,7 +65,7 @@ def capri_region(region, data_dir=None):
     state's row where CAPRI's table has no row for the region."""
     rs = str(region)
     if rs not in load(data_dir):
-        ms = rs[:2] + "000000"
+        ms = capri_ms(rs)
         rs = ms if ms in load(data_dir) else rs
     return rs
 

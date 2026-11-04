@@ -55,6 +55,9 @@ from pathlib import Path
 import pandas as pd
 
 import functools as _ft
+import sys as _sys_nc  # noqa: E402
+_sys_nc.path.insert(0, str(__import__("pathlib").Path(__file__).resolve().parents[2] / "tools" / "lib"))
+from _model_regions import national_code as _national_code  # noqa: E402  (TUR for Turkey's units, 4 November 2026)
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 D = ROOT / "capri_data" / "2017" / "abatement" / "ammonia"
@@ -142,7 +145,7 @@ def main():
     for r in t.itertuples():
         if r.activity not in MODEL_ANIMAL or pd.isna(r.CostParLin):
             continue
-        ctry = r.region[:2] + "000000"
+        ctry = _national_code(r.region)
         meta[(r.region, r.activity)] = (r.liquid_share, r.grazing_share, losses(ctry, r.activity, r.liquid_share))
         # CovStorLowCon: the effects of max(CovStorLow, ManStorCon), ManStorCon having none on the gases (l. 2263)
         te = "CovStorLow" if r.technology == "CovStorLowCon" else r.technology

@@ -43,6 +43,9 @@ from pathlib import Path
 import pandas as pd
 
 import functools as _ft
+import sys as _sys_nc  # noqa: E402
+_sys_nc.path.insert(0, str(__import__("pathlib").Path(__file__).resolve().parents[2] / "tools" / "lib"))
+from _model_regions import national_code as _national_code  # noqa: E402  (TUR for Turkey's units, 4 November 2026)
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 ITEMS = ("N2OSYN", "NH3SYN")
@@ -84,7 +87,7 @@ def no3_weighted():
     for reg in sorted({k[0] for k in lit}):
         for it in NO3_MAN:
             acts = {k[1] for k in lit if k[0] == reg and k[3] == it}
-            src = reg if any((reg, a) in w for a in acts) else reg[:2] + "000000"
+            src = reg if any((reg, a) in w for a in acts) else _national_code(reg)
             num = den = 0.0
             for a in acts:
                 wa = float(w.get((src, a), 0.0))

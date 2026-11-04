@@ -57,6 +57,9 @@ import sys  # noqa: E402
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
 from _grep import grep  # noqa: E402  (grep -E in Python: any system)
 from paths import EXPORTS, SOURCES  # noqa: E402  (CAPRI's material outside the repository)
+import sys as _sys_nc  # noqa: E402
+_sys_nc.path.insert(0, str(__import__("pathlib").Path(__file__).resolve().parents[2] / "tools" / "lib"))
+from _model_regions import national_code as _national_code  # noqa: E402  (TUR for Turkey's units, 4 November 2026)
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 SRC = ROOT / "capri_data" / "sources" / "baseline_pmp"
@@ -413,7 +416,7 @@ def main() -> None:
     tech, pact = [], []
     for c in regions:
         t_, p_ = region_terms(c, Y, bas.get(c, {}), ydat.get(c, {}), vb, vd, pela, lq.get(c, {}), not a.no_land_nest,
-                              ydat.get(c[:2] + "000000", {}))
+                              ydat.get(_national_code(c), {}))
         tech += t_
         pact += p_
     pd.DataFrame(tech, columns=["region", "activity", "tech1", "tech2", "value"]).to_csv(

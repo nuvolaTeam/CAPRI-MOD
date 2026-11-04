@@ -34,6 +34,9 @@ import functools as _ft
 import sys  # noqa: E402
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
 from paths import SOURCES  # noqa: E402  (CAPRI's material outside the repository)
+import sys as _sys_nc  # noqa: E402
+_sys_nc.path.insert(0, str(__import__("pathlib").Path(__file__).resolve().parents[2] / "tools" / "lib"))
+from _model_regions import national_code as _national_code  # noqa: E402  (TUR for Turkey's units, 4 November 2026)
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 ITEMS = ("LEVL", "MANN", "N2OMAN", "N2OAPP", "N2OGRA", "N2OLEA")
@@ -110,9 +113,9 @@ def main():
         creg, cact = str(r.sub).split("|")
         w = float(r.weight) * float(r.mann_rel)
         t = COMBO_BASE.get(r.technology, r.technology)
-        rh = E.get((creg, cact, t, "N2OHOU"), E.get((creg[:2] + "000000", cact, t, "N2OHOU"), 0.0)) \
+        rh = E.get((creg, cact, t, "N2OHOU"), E.get((_national_code(creg), cact, t, "N2OHOU"), 0.0)) \
             if r.technology in HOUSN_OPTIONS else 0.0
-        ra = E.get((creg, cact, t, "N2OAPP"), E.get((creg[:2] + "000000", cact, t, "N2OAPP"), 0.0))
+        ra = E.get((creg, cact, t, "N2OAPP"), E.get((_national_code(creg), cact, t, "N2OAPP"), 0.0))
         o = out[(r.region, r.animal, r.technology)]
         o[0] += w; o[1] += w * rh; o[2] += w * ra
     tech = pd.DataFrame([{"region": k[0], "animal": k[1], "technology": k[2], "r_hou": v_[1] / v_[0], "r_app": v_[2] / v_[0]}

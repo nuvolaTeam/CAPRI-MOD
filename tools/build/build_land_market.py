@@ -18,6 +18,9 @@ import numpy as np
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
 from _grep import grep  # noqa: E402  (grep -E in Python: any system)
 from paths import EXPORTS, SOURCES  # noqa: E402  (CAPRI's material outside the repository)
+import sys as _sys_nc  # noqa: E402
+_sys_nc.path.insert(0, str(__import__("pathlib").Path(__file__).resolve().parents[2] / "tools" / "lib"))
+from _model_regions import national_code as _national_code  # noqa: E402  (TUR for Turkey's units, 4 November 2026)
 
 
 def _read_csv(*a, **k):
@@ -131,7 +134,7 @@ def main() -> None:
     for reg, d in lev.items():
         r8s = sorted(r8of[reg])
         r8 = _combine(r8s) or r8s[0]
-        src = r8 if r8 in Q else (r8s[0][:2] + "000000" if r8s[0][:2] + "000000" in Q else None)
+        src = r8 if r8 in Q else (_national_code(r8s[0]) if _national_code(r8s[0]) in Q else None)
         if src is None:
             nodata.append(reg); continue
         M = np.array([[Q[src].get((a, b), Q[src].get((b, a), 0.0)) for b in LT] for a in LT])
@@ -159,7 +162,7 @@ def main() -> None:
     parent = {}
     split_n = nat_n = 0
     for r in unmapped:
-        src = parent.get(r) or (r[:2] + "000000" if r[:2] + "000000" in Q else None)
+        src = parent.get(r) or (_national_code(r) if _national_code(r) in Q else None)
         if src is None:
             continue
         base_src = lev_all.get(src, {})

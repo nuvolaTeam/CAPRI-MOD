@@ -6,6 +6,7 @@ module once environmental_module is loaded (capri_mod.utils.mixins.inject_names)
 """
 from __future__ import annotations
 from capri_mod import statekit as _est   # the state objects' helpers (refactor stage 4)
+from capri_mod.data.definitions import capri_ms  # noqa: E402  (TUR for Turkey's units)
 
 
 class PhosphorusBlock:
@@ -26,7 +27,7 @@ class PhosphorusBlock:
             from capri_mod.fert.npk import manure_applied_share
             c = {r: x for (r, n), x in manure_applied_share().items() if n == "P"}
             type(self)._P_APPL = c
-        return c.get(capri_region, c.get(capri_region[:2] + "000000", 1.0))
+        return c.get(capri_region, c.get(capri_ms(capri_region), 1.0))
 
     def _p_runtot(self, region, ms=None, wc=0.0, fert_mrun=0.0, initial=False) -> Dict[str, float]:
         """CAPRI's runoff share of excreted manure N, v_emiLoss(N, RunTot) = RunHous + RunSurf, per animal through the

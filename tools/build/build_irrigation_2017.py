@@ -46,6 +46,9 @@ import pandas as pd
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 from capri_mod.csvio import read_csv, to_csv  # noqa: E402
+import sys as _sys_nc  # noqa: E402
+_sys_nc.path.insert(0, str(__import__("pathlib").Path(__file__).resolve().parents[2] / "tools" / "lib"))
+from _model_regions import national_code as _national_code  # noqa: E402  (TUR for Turkey's units, 4 November 2026)
 
 SRC = ROOT / "capri_data" / "sources" / "water"
 DEST = ROOT / "capri_data" / "2017" / "environment" / "irrigation_2017.csv"
@@ -81,8 +84,8 @@ def main():
     for u in units:
         if u in latest.index:
             share, year, level = float(latest.at[u, "value"]), int(latest.at[u, "year"]), "regional"
-        elif u[:2] + "000000" in latest.index:
-            n = u[:2] + "000000"
+        elif _national_code(u) in latest.index:
+            n = _national_code(u)
             share, year, level = float(latest.at[n, "value"]), int(latest.at[n, "year"]), "national"
         else:
             none.append(u)

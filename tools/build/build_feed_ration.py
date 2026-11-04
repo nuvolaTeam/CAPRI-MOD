@@ -26,6 +26,9 @@ import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
 from paths import SOURCES  # noqa: E402  (CAPRI's material outside the repository)
+import sys as _sys_nc  # noqa: E402
+_sys_nc.path.insert(0, str(__import__("pathlib").Path(__file__).resolve().parents[2] / "tools" / "lib"))
+from _model_regions import national_code as _national_code  # noqa: E402  (TUR for Turkey's units, 4 November 2026)
 
 _ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(_ROOT))
@@ -127,7 +130,7 @@ def main() -> None:
                 cont[r][(a, it)] = v
 
     def content(r8, nut, feed):
-        for rr in (r8, r8[:2] + "000000"):
+        for rr in (r8, _national_code(r8)):
             if (nut, feed) in cont.get(rr, {}):
                 return cont[rr][(nut, feed)]
         return None

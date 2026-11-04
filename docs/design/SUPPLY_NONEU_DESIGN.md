@@ -133,9 +133,9 @@ built. No proxy.
     takes the one local solution its solver reaches; the builder keeps the best of four IPOPT solves (they differ only
     in the sheep cells of TR10 and TR80, which have no sheep). The AD option takes the same estimate and CAPRI's
     fallback_Balkan VSER, HousShar, SharLiq (done; Croatia gained it too, KNOWN_ISSUES K113). Still to do: Turkey's units
-    have no AD option (n_cascade_factors gives them no housed liquid manure, tsl 0, tsg 1: their RAINS data are keyed
-    by Turkish NUTS 2 codes, TR210000 ..., which build_n_cascade does not map; CAPRI's results have AD_AnCh for them:
-    to read CAPRI's rule). Norway: CAPRI's mirrored MITERRA data and Sweden's AD data ported (KNOWN_ISSUES K114); it
+    have the AD option since 4 November 2026: 15 files (11 builders, 4 model modules) took a unit's country as its first
+    two letters + 000000, TR000000 for Turkey's units where CAPRI's country is TUR; they use national_code / capri_ms
+    now (only Turkey's rows changed: its N cascade from TUR's MITERRA data, its irrigation from TUR's, the AD option). Norway: CAPRI's mirrored MITERRA data and Sweden's AD data ported (KNOWN_ISSUES K114); it
     has no ammonia cost curve, as in CAPRI (no p_holdLSU for Norway).
 
 - **The "EU-wide" price fallback** (build_eu_producer_prices) averages over all model regions. With the 29 it would

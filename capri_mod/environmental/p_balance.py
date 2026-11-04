@@ -22,6 +22,7 @@ from __future__ import annotations
 from typing import Dict, Optional
 
 import pandas as pd
+from capri_mod.data.definitions import capri_ms  # noqa: E402  (TUR for Turkey's units)
 
 ITEMS = ("EXCRET", "MTRADE", "MINFER", "CRESID", "EXPPRD", "RUNANI", "IMPORT", "SURTOT", "SURSOI")
 
@@ -54,7 +55,7 @@ class PCropCoefs:
     def coef(self, capri_region: str, crop: str):
         """(retention, residue output) kg P2O5/ha; a crop CAPRI does not grow in the region takes the country's
         (as NPKData.crop_coef), else (0, 0)."""
-        for r in (capri_region, capri_region[:2] + "000000"):
+        for r in (capri_region, capri_ms(capri_region)):
             v = self.c.get((r, crop))
             if v is not None:
                 return v
