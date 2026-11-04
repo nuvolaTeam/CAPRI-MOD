@@ -5601,16 +5601,13 @@
    "code": [
     "tools/build/extract_capri_dat_local.py",
     "tools/lib/gams_text.py",
-    "tools/lib/_gdx.py",
     "tools/lib/paths.py"
    ],
    "external": [
-    "$SOURCES/dat_local/envind/lulucf_emissions_original_source.gms",
-    "$SOURCES/dat_local/scen/ghgtech/holdingsLSU.gdx"
+    "$SOURCES/dat_local/envind/lulucf_emissions_original_source.gms"
    ],
    "outputs": [
-    "capri_data/sources/capri_dat/envind/lulucf_emissions_original_source_p_PEATSH_def.csv",
-    "capri_data/sources/capri_dat/ghgtech/holdingsLSU_p_holdLSU.csv"
+    "capri_data/sources/capri_dat/envind/lulucf_emissions_original_source_p_PEATSH_def.csv"
    ]
   }
  ]

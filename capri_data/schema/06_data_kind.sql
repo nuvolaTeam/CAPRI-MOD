@@ -406,7 +406,6 @@ INSERT INTO data_kind VALUES
   ('capri_data/sources/capri_dat/policy/livestock_units_p_LUUnits.csv', 'coefficients', 'by rule: CAPRI''s parameter tables (abatement, environment, fertiliser, policy)'),
   ('capri_data/sources/capri_dat/envind/fao_peatland_P.csv', 'coefficients', 'by rule: CAPRI''s parameter tables (abatement, environment, fertiliser, policy)'),
   ('capri_data/sources/capri_dat/envind/lulucf_emissions_original_source_p_PEATSH_def.csv', 'coefficients', 'by rule: CAPRI''s parameter tables (abatement, environment, fertiliser, policy)'),
-  ('capri_data/sources/capri_dat/ghgtech/holdingsLSU_p_holdLSU.csv', 'coefficients', 'by rule: CAPRI''s parameter tables (abatement, environment, fertiliser, policy)'),
   ('capri_data/sources/capri_dat/policy/smal_pshar_p_smallProdShare.csv', 'coefficients', 'by file: policy instruments (premiums, quotas, shares)'),
   ('capri_data/sources/capri_dat/policy/wintercovershare_p_winterCoverShare0.csv', 'coefficients', 'by rule: CAPRI''s parameter tables (abatement, environment, fertiliser, policy)'),
   ('capri_data/sources/capri_dat/sugar/p_PPSQCBuyBack.csv', 'coefficients', 'by file: policy instruments (premiums, quotas, shares)'),

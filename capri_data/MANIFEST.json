@@ -5547,17 +5547,6 @@
     "nature": "source-extract"
    }
   },
-  "capri_data/sources/capri_dat/ghgtech/holdingsLSU_p_holdLSU.csv": {
-   "description": "CAPRI's p_holdLSU(rall, ad_activity, fsclass): holdings per livestock-unit size class and animal group, from dat/scen/ghgtech/holdingsLSU.gdx (read by envind/prep_farm_size_data_for_miti.gms l. 129); EU and UK units only (the Western Balkans and Turkey take CAPRI's fallback_Balkan there). From the project lead's CAPRI installation, not in the Hugging Face mirror (tools/build/extract_capri_dat_local.py).",
-   "kind": "coefficients",
-   "rows": 9597,
-   "columns": 4,
-   "units": "to be established (value_units: open)",
-   "origin": {
-    "nature": "capri",
-    "builder": "extract_capri_dat_local"
-   }
-  },
   "capri_data/sources/capri_dat/policy/livestock_units_p_LUUnits.csv": {
    "description": "CAPRI's p_LUUnits(act) from dat/policy/livestock_units.gms l. 25-82 (\"Livestock units\" per animal and year, Eurostat's LSU glossary; HENS and POUF per 1000 animals), as written, converted to CSV by tools/build/convert_sources_to_csv.py; read (upper-cased) by tools/build/build_captrd_dat.py.",
    "kind": "coefficients",

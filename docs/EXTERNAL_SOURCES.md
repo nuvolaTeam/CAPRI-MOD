@@ -83,7 +83,8 @@ Each folder is listed with what it holds, where it comes from, and the builders 
 `envind/lulucf_emissions_original_source.gms` (p_PEATSH_def), `policy/livestock_units.gms` (p_LUUnits) and
 `scen/ghgtech/holdingsLSU.gdx` (p_holdLSU).
 - From: the project lead's CAPRI installation (4 November 2026).
-- Read by: extract_capri_dat_local (p_PEATSH_def, p_holdLSU); convert_sources_to_csv (p_LUUnits).
+- Read by: extract_capri_dat_local (p_PEATSH_def); convert_sources_to_csv (p_LUUnits). holdingsLSU.gdx confirms
+  capri_data/2017/abatement/ammonia/p_holdLSU.csv (identical records), built from a dump before.
 - Goes to the Hugging Face set with the rest of capri_sources (MODEL_CONTENT_PLAN §12b).
 
 **`gdxlib/`**: GAMS's GDX library, `libgdxcclib64.so`. This is software, not data.

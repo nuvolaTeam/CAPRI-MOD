@@ -286,18 +286,6 @@ COMMENT ON TABLE src_lulucf_emissions_original_source_p_peatsh_def IS 'CAPRI''s 
 INSERT INTO value_units VALUES
   ('src_lulucf_emissions_original_source_p_peatsh_def', 'value', NULL, 'open', 'percent of arable land; no unit code for percent');
 
--- file: capri_data/sources/capri_dat/ghgtech/holdingsLSU_p_holdLSU.csv
-CREATE TABLE src_holdingslsu_p_holdlsu (
-    region VARCHAR NOT NULL,
-    activity VARCHAR NOT NULL,
-    fsclass VARCHAR NOT NULL,
-    "value" DOUBLE NOT NULL,
-    PRIMARY KEY (region, activity, fsclass)
-);
-COMMENT ON TABLE src_holdingslsu_p_holdlsu IS 'CAPRI''s p_holdLSU(rall, ad_activity, fsclass): holdings per livestock-unit size class and animal group, from dat/scen/ghgtech/holdingsLSU.gdx (read by envind/prep_farm_size_data_for_miti.gms l. 129); EU and UK units only (the Western Balkans and Turkey take CAPRI''s fallback_Balkan there). From the project lead''s CAPRI installation, not in the Hugging Face mirror (tools/build/extract_capri_dat_local.py).';
-INSERT INTO value_units VALUES
-  ('src_holdingslsu_p_holdlsu', 'value', NULL, 'open', 'number of holdings; no unit code for it');
-
 -- file: capri_data/sources/capri_dat/envind/fao_peatland_P.csv
 CREATE TABLE src_fao_peatland_p (
     fao_code VARCHAR NOT NULL,
