@@ -2331,7 +2331,7 @@
    "vintage": "2030 calibration point",
    "domain": "market",
    "status": "live",
-   "rows": 330,
+   "rows": 346,
    "columns": 4,
    "units": "to be established (value_units: open)",
    "read_by_model": [

@@ -99,8 +99,14 @@ def main():
     mreg = dict(zip(g.rms, g.model_region))
     r2m = read_csv(ROOT / "capri_data" / "shared" / "rms_to_rm.csv")
     r2m = dict(zip(r2m.rms, r2m.rm))
-    units = read_csv(ROOT / "capri_data" / "shared" / "regional_units.csv")
-    rmssup = set(units.capri_ms) | {"NO000000"}               # the model's regions with supply models
+    # the regions with supply models by default: the EU's member states and the default countries outside it (Norway),
+    # the member states of FALLBACK_UNITS (tools/lib/_model_regions.py). Until 4 November 2026 every member state of
+    # regional_units.csv, which took in the UK, Turkey and the Western Balkans once their units were listed: their rows
+    # (CAPRI's market supply and feed functions) are kept; a run that selects their supply models takes those instead
+    # (SUPPLY_NONEU_DESIGN step 8)
+    sys.path.insert(0, str(ROOT / "tools" / "lib"))
+    from _model_regions import FALLBACK_UNITS, national_code
+    rmssup = {national_code(u) for u in FALLBACK_UNITS}
     xx = {x for (_, it, x) in d if it == "ARM1P"}                 # CAPRI's market products (XX)
     gl = read_csv(ROOT / "capri_data" / "2017" / "market" / "gl_demand_goods.csv")
     val = defaultdict(float)
