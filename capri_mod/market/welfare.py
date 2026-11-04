@@ -417,17 +417,16 @@ class WelfareMixin:
             wedge = p - sc.a0 * rc[None, :] - tc
             n = len(R)
             rent_ij = np.zeros((n, n))
-            if sc.trq_row is not None and sc.trq_Q is not None:
-                rows = sc._rows()
-                for j in np.where(sc.trq_Q > 0)[0]:
-                    xj = float(X[rows, j].sum())
-                    if xj <= 0 or sc.trq_gap[j] <= 0:
-                        continue
-                    q_in = min(float(sc.trq_share[j]) * xj, float(sc.trq_Q[j]))
-                    sig = float(sc._sig(float(sc.trq_share[j]) / float(sc.trq_Q[j]) * xj))
-                    tot = float(sc.trq_gap[j]) * sig * q_in
-                    for i_ in rows:
-                        rent_ij[i_, j] = tot * float(X[i_, j]) / xj
+            # CAPRI's quota rent (reports/sol_market.gms l. 1127): (import price - the in-quota price) x the in-quota
+            # imports min(fill, TrqNT), here per flow: the rates' rise over the preferential ones, sigma x
+            # d price / d sigma, on the flow's share of the in-quota imports
+            for k, q in enumerate(getattr(sc, "trq_quotas", None) or ()):
+                ixq = np.ix_(q["rows"], q["cols"])
+                fill = float(X[ixq].sum())
+                if fill <= 0 or q["Q"] <= 0:
+                    continue
+                unit = np.maximum(sc.trq_unit(rc, q) * float(sc.trq_sigma[k]), 0.0)
+                rent_ij[ixq] = unit * X[ixq] * min(1.0, q["Q"] / fill)
             for i, imp in enumerate(R):
                 for j, exp in enumerate(R):
                     if i == j or X[i, j] <= 0 or (imp in eu and exp in eu):

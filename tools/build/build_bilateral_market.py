@@ -40,7 +40,7 @@ Outputs (capri_data/2017/market/):
                                                     its *_eu2.csv twin names were removed on 3 November 2026)
 """
 from __future__ import annotations
-import re, sys
+import csv, re, sys
 from collections import defaultdict
 from pathlib import Path
 
@@ -194,49 +194,57 @@ def build(year, AGGREGATES):
 
 
 def build_trq(year, AGGREGATES):
-    """EU tariff-rate quotas per model exporter (CAPRI's bilateral TRQs of the EU policy block 'EU').
-
-    Per CAPRI exporter j with an EU quota TrqNT: in-quota price p_in = (Fob + TCost)(1 + TaAppl/100) (+ the
-    applied specific in-quota tariff), out-of-quota price p_out = (Fob + TCost)(1 + TAMFN/100) + TSMFN (MFN).
-    Aggregated to the model exporter: quota = sum TrqNT, gap = quota-weighted p_out - p_in, base imports from
-    the exporters with a quota. Output bilateral_trq_<year>.csv: commodity, exporter, quota_kt, gap_eur_t,
-    imports_kt."""
+    """CAPRI's bilateral tariff-rate quotas of every importer (p_trqBilat: TrqNT with its in- and out-of-quota rates),
+    on CAPRI's policy blocks (RMTP; RM_TO_RMTP), per model commodity (MARKET_REGIONS_INVENTORY §5 stage 4,
+    docs/design/PORTS_STAGE4.md). A quota counts where TrqNT > 0 and below 1E+9 (CAPRI: not 1E+10, free access, nor
+    "prohibitive", an acronym the listing does not print as a number). Rates as CAPRI holds them for the pair: ad
+    valorem TaMFN, TaPref (%), specific TsMFN, TsPref (EUR/t); one missing is 0, as in CAPRI's equations, which switch
+    a rate only where one of its two values is above eps. CAPRI products of one model commodity (none at present with
+    quotas on the same pair) would be summed, rates quota-weighted.
+    Output bilateral_trq_<year>.csv: importer, exporter (policy blocks), commodity, quota_kt, ta_mfn, ta_pref, ts_mfn,
+    ts_pref, importer_regions, exporter_regions (the blocks' market regions, "|"-joined). Until 4 November 2026 the EU's quotas only, summed per model exporter with a price gap frozen at the base
+    (DEP-34, DEP-35, DEP-36)."""
     src = SRC[year]
     keep = KEEP / f"bilateral_trq_dataout_{year}.csv"
-    items = ("TrqNT", "TAMFN", "TSMFN", "TaAppl", "TsAppl", "Fob", "TCost", "ImportQ")
+    items = ("TRQNT", "TAMFN", "TAPREF", "TSMFN", "TSPREF")
     if src.exists():
         prods = "|".join(CAPRI)
-        txt = grep(r"^'EU'\.'[^']*'\.'(" + "|".join(items) + r")'\.'(" + prods + r")'\.'" + str(year) + "'", str(src))
-        pat = re.compile(r"^'EU'\.'([^']*)'\.'([A-Za-z]+)'\.'([A-Z]+)'\.'\d+'\s+([-\d.Ee+]+)")
+        txt = grep(r"(?i)^'[^']*'\.'[^']*'\.'(" + "|".join(items) + r")'\.'(" + prods + r")'\.'" + str(year) + "'",
+                   str(src))
+        pat = re.compile(r"^'([^']*)'\.'([^']*)'\.'([A-Za-z]+)'\.'([A-Z]+)'\.'\d+'\s+([-\d.Ee+]+)")
         rows = [m.groups() for m in map(pat.match, txt.splitlines()) if m]
-        pd.DataFrame(rows, columns=["exporter", "item", "product", "value"]).to_csv(keep, index=False)
+        rows = [(a, b, it.upper(), pr, v) for a, b, it, pr, v in rows if it.upper() in items]
+        pd.DataFrame(rows, columns=["importer", "exporter", "item", "product", "value"]).to_csv(keep, index=False)
     df = _read_csv(keep, keep_default_na=False)
     d = defaultdict(dict)
     for r in df.itertuples(index=False):
-        d[(r.product, r.exporter)][r.item] = float(r.value)
-    mfn_s = {p: d.get((p, "World"), {}).get("TSMFN", 0.0) for p in CAPRI}
-    mfn_a = {p: d.get((p, "World"), {}).get("TAMFN", 0.0) for p in CAPRI}
+        d[(r.importer, r.exporter, r.product)][r.item] = float(r.value)
+    # CAPRI's policy blocks (codes/capri/RMTP.csv); the listing also reports aggregates (World, HI_INC, NONEU_EU,
+    # the EU's market regions A_EU_*), which are not quota holders
+    with open(ROOT / "capri_data" / "codes" / "capri" / "RMTP.csv", newline="") as fh:
+        rmtp = {r["code"] for r in csv.DictReader(fh)}
     agg = defaultdict(lambda: defaultdict(float))
-    for (p, j), v in d.items():
-        q = v.get("TrqNT", 0.0)
-        if q <= 0 or q >= 1e8 or j in AGGREGATES or j in ("World", "") or j.startswith(("EU", "A_EU")):   # 1e10: no quota (free access)
+    for (i, j, p), v in d.items():
+        q = v.get("TRQNT", 0.0)
+        if q <= 0 or q >= 1e9 or i == j or i not in rmtp or j not in rmtp:
             continue
-        fob, tc = v.get("Fob", 0.0), v.get("TCost", 0.0)
-        if fob <= 0:
-            continue
-        p_in = (fob + tc) * (1 + v.get("TaAppl", 0.0) / 100.0) + max(0.0, v.get("TsAppl", 0.0))
-        p_out = (fob + tc) * (1 + v.get("TAMFN", mfn_a.get(p, 0.0)) / 100.0) + mfn_s.get(p, 0.0)
-        mj = model_region(j)
-        if mj == "EU27":
-            continue
-        k = agg[(CAPRI[p], mj)]
-        k["quota"] += q; k["qg"] += q * max(0.0, p_out - p_in); k["imp"] += v.get("ImportQ", 0.0)
-    rows = [dict(commodity=c, exporter=j, quota_kt=v["quota"], gap_eur_t=v["qg"] / v["quota"], imports_kt=v["imp"])
-            for (c, j), v in agg.items() if v["quota"] > 0]
-    out = pd.DataFrame(rows).sort_values(["commodity", "exporter"])
+        k = agg[(i, j, CAPRI[p])]
+        k["q"] += q
+        for it in ("TAMFN", "TAPREF", "TSMFN", "TSPREF"):
+            k[it] += q * v.get(it, 0.0)
+    # each policy block's market regions as the model names them (RM_TO_RMTP; the EU's two as EU_WEST, EU_EAST)
+    members = defaultdict(list)
+    with open(ROOT / "capri_data" / "codes" / "capri" / "RM_TO_RMTP.csv", newline="") as fh:
+        for r in csv.DictReader(fh):
+            members[r["rmtp"]].append(model_region(r["rm"], eu_as_blocks=True))
+    rows = [dict(importer=i, exporter=j, commodity=c, quota_kt=v["q"], ta_mfn=v["TAMFN"] / v["q"],
+                 ta_pref=v["TAPREF"] / v["q"], ts_mfn=v["TSMFN"] / v["q"], ts_pref=v["TSPREF"] / v["q"],
+                 importer_regions="|".join(members[i]), exporter_regions="|".join(members[j]))
+            for (i, j, c), v in agg.items()]
+    out = pd.DataFrame(rows).sort_values(["importer", "commodity", "exporter"])
     out.to_csv(ROOT / "capri_data" / "2017" / "market" / f"bilateral_trq_{year}.csv", index=False)
-    tot = out.groupby("commodity")[["quota_kt", "imports_kt"]].sum()
-    print(f"{year} EU TRQs: " + ", ".join(f"{c} {r.imports_kt:.0f}/{r.quota_kt:.0f}" for c, r in tot.iterrows()))
+    print(f"{year} bilateral TRQs: {len(out)} quotas; per importer: " + ", ".join(
+        f"{i} {n}" for i, n in out.importer.value_counts().items()))
     return out
 
 

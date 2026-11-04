@@ -777,57 +777,85 @@ def test_bilateral_market_reproduces_capri_flows_at_base():
     assert np.all(PA1 / sc.PA0 <= 1.1 + 1e-12)
 
 
+def _trq_toy(x01, q=100.0, dta=50.0, dts=200.0):
+    """One importer (row 0), one exporter (column 1) with a bilateral quota: exporter price 1000, transport 100,
+    in- to out-of-quota rates +dta points ad valorem, +dts EUR/t specific (CAPRI's TaMFN - TaPref, TsMFN - TsPref)."""
+    import numpy as np
+    from capri_mod.market.bilateral import BilateralCommodity
+    X0 = np.array([[100.0, x01], [0.0, 400.0]])
+    a = np.array([[0.0, 1000.0], [0.0, 0.0]]); b = np.array([[0.0, 100.0], [0.0, 0.0]])
+    a0 = np.array([[0.0, 1000.0], [0.0, 0.0]]); tc = np.array([[0.0, 100.0], [0.0, 0.0]])
+    sc = BilateralCommodity("T", ["EU_WEST", "X"], X0, a, b, a0, np.array([1500.0, 1000.0]), 3.5, 7.0, tc=tc)
+    sc.calibrate(np.array([100.0, 400.0 + x01]))
+    sc.trq_quotas = [dict(rows=np.array([0]), cols=np.array([1]), Q=q, Q0=q, dta=dta, dts=dts, importer="EU",
+                          exporter="X")]
+    sc.trq_base()
+    return sc
+
+
+def test_trq_rates_are_capris_sigmoid_and_tariff_equations():
+    """CAPRI's trqSigmoidFunc_, tarAdval_ and tarSpec_ (arm/market_model.gms l. 3275-3475, bilateral quota without a
+    global one): sigma = 1 / (1 + exp(-200 (fill / TrqNT - 0.97))); the flow's import price moves by
+    (Pmrk + TC) (TaMFN - TaPref) / 100 (sigma - sigma0) + (TsMFN - TsPref) (sigma - sigma0), the ad valorem part on
+    the exporter's CURRENT market price (DEP-36 removed). Checked at fills in [0.9, 1.05], where the sigmoid is steep
+    (G_REVIEW Q5.2 test C)."""
+    import numpy as np
+    for fill in (0.90, 0.95, 0.97, 0.99, 1.0, 1.02, 1.05):
+        sc = _trq_toy(100.0 * fill)
+        want = 1.0 / (1.0 + np.exp(-200.0 * (fill - 0.97)))
+        assert abs(float(sc.trq_sigma0[0]) - want) < 1e-12, fill
+        for s, rr in ((0.3, 1.0), (0.9, 1.2)):
+            sc.trq_sigma = np.array([s])
+            r = np.array([1.0, rr])
+            sc.trq_set_offsets(r)
+            off = ((1000.0 * rr + 100.0) * 50.0 / 100.0 + 200.0) * (s - want)
+            assert abs(float(sc.trq_offset[0, 1]) - off) < 1e-9 * max(1.0, abs(off)), (fill, s, rr)
+            p = sc.import_prices(r)
+            assert abs(float(p[0, 1]) - (1000.0 * rr + 100.0 + off)) < 1e-9 * 2000.0
+
+
 def test_trq_tariff_follows_quota_fill():
     """CAPRI's TRQ regime (trqSigmoidFunc_, slope 200 around 97% of the quota): an under-filled quota keeps the
     in-quota tariff; pushing imports past the quota moves the import price toward the out-of-quota tariff."""
     import numpy as np
-    from capri_mod.market.bilateral import BilateralCommodity
-    X0 = np.array([[100.0, 50.0], [0.0, 400.0]])
-    a = np.array([[0.0, 1000.0], [0.0, 0.0]]); b = np.array([[0.0, 100.0], [0.0, 0.0]])
-    sc = BilateralCommodity("T", ["EU27", "X"], X0, a, b, a.copy(), np.array([1500.0, 1000.0]), 3.5, 7.0)
-    sc.calibrate(np.array([100.0, 450.0]))
-    sc.trq_row, sc.trq_Q, sc.trq_gap, sc.trq_share = 0, np.array([0.0, 100.0]), np.array([0.0, 800.0]), np.array([0.0, 1.0])
-    sc.trq_offset = np.zeros(2)
-    p = sc.import_prices(np.ones(2))
-    sc.trq_solve(sc.X0, p)
-    assert abs(sc.trq_offset[1]) < 1e-6                      # 50% fill: in-quota
+    sc = _trq_toy(50.0)
+    r = np.ones(2)
+    p = sc.import_prices(r)
+    sc.trq_solve(sc.X0, p, r)
+    assert abs(sc.trq_offset[0, 1]) < 1e-6                   # 50% fill: in-quota
     X = sc.X0.copy(); X[0, 1] = 130.0
-    sc.trq_solve(X, p)
-    o = sc.trq_offset[1]
-    assert 20.0 < o < 800.0                                  # past the quota: toward the out-of-quota tariff
+    sc.trq_solve(X, p, r)
+    o = sc.trq_offset[0, 1]
+    assert 20.0 < o < 750.0                                  # past the quota: toward the out-of-quota tariffs
     x_o = 130.0 * (p[0, 1] / (p[0, 1] + o)) ** sc.s2         # ... which pushes the flow back to about the quota
     assert 90.0 < x_o < 105.0
 
 
 def test_trq_volume_change_moves_the_quota_not_the_base():
-    """A scenario quota expansion (PolicyScenario.trq_volume_changes, 1000 t) is spread over the commodity's quotas
-    by base volume; the base fill stays at the base quotas, so with base flows the offset is zero and a filled quota
+    """A scenario quota expansion of the EU (PolicyScenario.trq_volume_changes, 1000 t) is spread over its quotas by
+    base volume; the base sigma stays at the base quotas, so with base flows the offset is zero and a filled quota
     turns in-quota (lower import price) once the quota is raised."""
     import numpy as np
-    from capri_mod.market.bilateral import BilateralCommodity
     from capri_mod.market.market_module import MarketModule
-    X0 = np.array([[100.0, 99.0], [0.0, 400.0]])
-    a = np.array([[0.0, 1000.0], [0.0, 0.0]]); b = np.array([[0.0, 100.0], [0.0, 0.0]])
-    sc = BilateralCommodity("T", ["EU27", "X"], X0, a, b, a.copy(), np.array([1500.0, 1000.0]), 3.5, 7.0)
-    sc.calibrate(np.array([100.0, 499.0]))
-    sc.trq_row, sc.trq_Q, sc.trq_gap, sc.trq_share = 0, np.array([0.0, 100.0]), np.array([0.0, 800.0]), np.array([0.0, 1.0])
-    sc.trq_offset = np.zeros(2)
+    sc = _trq_toy(99.0)
+    r = np.ones(2)
     mm = MarketModule.__new__(MarketModule)
     mm.trq_volume_changes = {}
     MarketModule._apply_trq_volumes(mm, {"T": sc})
-    p = sc.import_prices(np.ones(2))
-    sc.trq_solve(sc.X0, p)
-    assert abs(sc.trq_offset[1]) < 1e-6                      # base: no offset
+    p = sc.import_prices(r)
+    sc.trq_solve(sc.X0, p, r)
+    assert abs(sc.trq_offset[0, 1]) < 1e-6                   # base: no offset
     mm.trq_volume_changes = {"T": 50.0}
     MarketModule._apply_trq_volumes(mm, {"T": sc})
-    assert abs(sc.trq_Q[1] - 150.0) < 1e-12 and abs(sc.trq_Q0[1] - 100.0) < 1e-12
-    sc.trq_solve(sc.X0, p)
-    o = sc.trq_offset[1]
+    q = sc.trq_quotas[0]
+    assert abs(q["Q"] - 150.0) < 1e-12 and abs(q["Q0"] - 100.0) < 1e-12
+    sc.trq_solve(sc.X0, p, r)
+    o = sc.trq_offset[0, 1]
     assert o < -10.0                                         # the quota no longer binds: the import price falls ...
     assert 99.0 * (p[0, 1] / (p[0, 1] + o)) ** sc.s2 > 110.0  # ... and imports rise past the old quota
     mm.trq_volume_changes = {}
     MarketModule._apply_trq_volumes(mm, {"T": sc})
-    assert abs(sc.trq_Q[1] - 100.0) < 1e-12                  # a later baseline restores the base quota
+    assert abs(sc.trq_quotas[0]["Q"] - 100.0) < 1e-12        # a later baseline restores the base quota
 
 
 def test_projection_livestock_output_follows_yield(model):
@@ -3271,8 +3299,8 @@ def test_eu_trade_blocks_data_and_split(data):
         b = fb[(fb.commodity == c) & fb.importer.isin(eu) & ~fb.exporter.isin(eu)].q_kt.sum()
         assert abs(a - b) < 1e-6 * max(a, 1.0), (c, a, b)
     raw = mm._bilateral_raw()
-    sc = next(s for s in raw.values() if s.trq_row is not None)
-    assert len(np.atleast_1d(sc.trq_row)) == 2
+    sc = next(s for s in raw.values() if s.trq_quotas and any(q["importer"] == "EU" for q in s.trq_quotas))
+    assert all(len(q["rows"]) == 2 for q in sc.trq_quotas if q["importer"] == "EU")   # filled by both EU blocks
     fbp = mm._feed_bulk_params()
     for c, q in fbp["feed0"].items():
         assert abs(sum(fbp["feed0_reg"][r].get(c, 0.0) for r in eu) - q) < 1e-6 * max(q, 1.0)

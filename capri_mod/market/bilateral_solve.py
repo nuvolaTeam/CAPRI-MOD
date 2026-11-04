@@ -71,25 +71,26 @@ class BilateralSolveMixin(MarketStateMixin):
             out[c] = BilateralCommodity(c, R, X0, a, b, a0, Pd0,
                                         float(rho.at[c, "rho1"]) if c in rho.index else 8.0,
                                         float(rho.at[c, "rho2"]) if c in rho.index else 10.0, tc=tc)
-        # EU tariff-rate quotas (tools/build/build_bilateral_market.py build_trq)
-        if inp.exists(f"bilateral_trq_{year}.csv") and all(r in ix for r in self.EU):
-            tq = inp.csv(f"bilateral_trq_{year}.csv")
-            rows = [ix[r] for r in self.EU]                # the EU's quotas: imports of every EU market region
+        # CAPRI's bilateral tariff-rate quotas of every importer, per pair of policy blocks (tools/build/
+        # build_bilateral_market.py build_trq; docs/design/PORTS_STAGE4.md)
+        if inp.exists(f"bilateral_trq_{year}.csv"):
+            tq = inp.csv(f"bilateral_trq_{year}.csv", keep_default_na=False)
             for c, g in tq.groupby("commodity"):
                 sc = out.get(c)
                 if sc is None:
                     continue
-                Q, gap, sh = np.zeros(n), np.zeros(n), np.zeros(n)
+                qs = []
                 for t in g.itertuples(index=False):
-                    j = ix.get(t.exporter)
-                    if j is None or float(sc.X0[rows, j].sum()) <= 0:
+                    rows = [ix[x] for x in str(t.importer_regions).split("|") if x in ix]
+                    cols = [ix[x] for x in str(t.exporter_regions).split("|") if x in ix]
+                    if not rows or not cols:
                         continue
-                    Q[j], gap[j] = t.quota_kt, t.gap_eur_t
-                    sh[j] = min(1.0, float(t.imports_kt) / float(sc.X0[rows, j].sum()))
-                if (Q > 0).any():
-                    sc.trq_row = rows[0] if len(rows) == 1 else rows
-                    sc.trq_Q, sc.trq_gap, sc.trq_share = Q, gap, sh
-                    sc.trq_offset = np.zeros(n)
+                    qs.append(dict(rows=np.array(rows), cols=np.array(cols), Q=float(t.quota_kt), Q0=float(t.quota_kt),
+                                   dta=float(t.ta_mfn) - float(t.ta_pref), dts=float(t.ts_mfn) - float(t.ts_pref),
+                                   importer=str(t.importer), exporter=str(t.exporter)))
+                if qs:
+                    sc.trq_quotas = qs
+                    sc.trq_base()
         self._bilat_raw_cache = (year, out)
         return out
 
@@ -233,8 +234,7 @@ class BilateralSolveMixin(MarketStateMixin):
                     f"{sorted(_h['non_eu_use'])}; CAPRI's exports above the base supply for {_h['export_share']}",
                     RuntimeWarning)
         for sc in sysd.values():
-            if sc.trq_row is not None:
-                sc.trq_offset = np.zeros(len(R))
+            sc.trq_base()                               # each quota's sigma at the calibrated base flows
         self.par.bilat = sysd
         self.sv.bilat_last_r = None
         self.sv.bilat_local_el = None
@@ -412,21 +412,22 @@ class BilateralSolveMixin(MarketStateMixin):
     trq_volume_changes: dict = {}
 
     def _apply_trq_volumes(self, sysd) -> None:
-        """Set each EU tariff-rate quota to its base volume plus the scenario's change: a commodity's change (1000 t)
-        is spread over its quotas (one per exporter, CAPRI's bilateral TrqNT) in proportion to their base volumes.
-        The base fill, at which the base tariff regime is calibrated, stays at the base quotas (trq_Q0)."""
+        """Set each of the EU's tariff-rate quotas (importer policy block EU) to its base volume plus the scenario's
+        change: a commodity's change (1000 t) is spread over its quotas (one per exporter block, CAPRI's bilateral
+        TrqNT) in proportion to their base volumes. The base sigma, at which the base tariffs are CAPRI's, stays at
+        the base quotas (Q0)."""
         ch = dict(getattr(self, "trq_volume_changes", None) or {})
         for c, sc in (sysd or {}).items():
-            if getattr(sc, "trq_row", None) is None or sc.trq_Q is None:
+            qs = [q for q in (getattr(sc, "trq_quotas", None) or ()) if q["importer"] == "EU"]
+            if not qs:
                 continue
-            if sc.trq_Q0 is None:
-                sc.trq_Q0 = sc.trq_Q.copy()
-            tot = float(sc.trq_Q0.sum())
+            tot = sum(q["Q0"] for q in qs)
             d = float(ch.get(c, 0.0))
-            sc.trq_Q = sc.trq_Q0 * max(0.0, 1.0 + d / tot) if (tot > 0 and d) else sc.trq_Q0.copy()
+            for q in qs:
+                q["Q"] = q["Q0"] * max(0.0, 1.0 + d / tot) if (tot > 0 and d) else q["Q0"]
 
     def trq_commodities(self) -> list:
-        """Commodities with an EU tariff-rate quota in CAPRI's bilateral data for the market year."""
+        """Commodities with a bilateral tariff-rate quota in CAPRI's data for the market year (any importer)."""
         return sorted(c for c, sc in (self._bilateral_raw() or {}).items() if getattr(sc, "trq_row", None) is not None)
 
     def _solve_bilateral(self, exogenous_supply, trade_scenario=None, tol=None, max_outer=None, verbose=False):
@@ -502,8 +503,8 @@ class BilateralSolveMixin(MarketStateMixin):
                     continue
                 X, _ = sc.flows(D[c].values, r[c].values, pc[c])
                 old_off = sc.trq_offset.copy()
-                sc.trq_solve(X, pc[c])
-                trq_moved = max(trq_moved, float(np.max(np.abs(sc.trq_offset - old_off) / np.maximum(float(np.min(sc.Pd0[sc._rows()])), 1.0))))
+                sc.trq_solve(X, pc[c], r[c].values)
+                trq_moved = max(trq_moved, float(np.max(np.abs(sc.trq_offset - old_off) / np.maximum(pc[c], 1.0))))
             if err < tol and trq_moved < tol:
                 converged = True
                 break

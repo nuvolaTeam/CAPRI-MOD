@@ -88,17 +88,20 @@ class BilateralCommodity:
         self._has_imp = M > 0
         self._has_dom = DS > 0
 
-    # EU tariff-rate quotas (CAPRI TRQ regime, bilateral TrqNT): importer row (or rows: the EU's quotas are filled
-    # by the imports of both EU trade blocks), per exporter quota (1000 t), out-of-quota minus in-quota price gap
-    # (EUR/t), share of the flow under the quota regime at base
-    trq_row: Optional[object] = None
-    trq_Q: Optional[np.ndarray] = None
-    trq_gap: Optional[np.ndarray] = None
-    trq_share: Optional[np.ndarray] = None
+    # CAPRI's bilateral tariff-rate quotas (arm/market_model.gms trqSigmoidFunc_, tarSpec_, tarAdval_; stage 4 of the
+    # market move, docs/design/PORTS_STAGE4.md): one per pair of policy blocks (importer RMTP, exporter RMTP), filled
+    # by the flows between their market regions (TradeFlowsAgg_). Each is a dict: rows, cols (the importer's and the
+    # exporter's market regions), Q (TrqNT, 1000 t), Q0 (its base volume), dta (TaMFN - TaPref, points), dts
+    # (TsMFN - TsPref, EUR/t), importer, exporter. Its sigmoid moves the flows' tariffs from the preferential to the MFN
+    # rates: tarAdVal = TaPref + dta sigma, tarSpec = TsPref + dts sigma, the ad valorem on the exporter's current
+    # market price plus the transport cost (impPrice_). The base import prices are CAPRI's (a, b at the base fill's
+    # sigma0); trq_offset (n x n, EUR/t) carries the change: (a0 r + tc) dta/100 (sigma - sigma0) + dts (sigma - sigma0).
+    # Until 4 November 2026 the EU's quotas only, one per model exporter, with a price gap frozen at the base (DEP-34,
+    # DEP-35, DEP-36).
+    trq_quotas: Optional[list] = None
+    trq_sigma: Optional[np.ndarray] = None
+    trq_sigma0: Optional[np.ndarray] = None
     trq_offset: Optional[np.ndarray] = None
-    #: base quotas (1000 t) when a scenario changes the quota volumes (MarketModule._apply_trq_volumes); the base
-    #: fill, at which the base tariff regime is calibrated, is taken at these
-    trq_Q0: Optional[np.ndarray] = None
     #: CAPRI p_trqSigmoidSlope = 200 on (imports - 0.97 quota) / quota: the tariff moves from in- to
     #: out-of-quota within about +-3% of the quota (arm/market_model.gms trqSigmoidFunc_)
     TRQ_SLOPE = param("TRQ_SLOPE")
@@ -107,44 +110,84 @@ class BilateralCommodity:
     #: overflow clip of the sigmoid's argument (numerical)
     TRQ_ARG_CLIP = 60.0
 
-    def _rows(self) -> np.ndarray:
-        return np.atleast_1d(np.asarray(self.trq_row, dtype=int))
+    @property
+    def trq_row(self):
+        """The importer rows under a quota (None without quotas): kept for the callers that only ask whether a
+        commodity has quotas."""
+        if not self.trq_quotas:
+            return None
+        return sorted({int(i) for q in self.trq_quotas for i in q["rows"]})
 
     def _sig(self, f):
         return 1.0 / (1.0 + np.exp(-np.clip(self.TRQ_SLOPE * (f - self.TRQ_FILL_MID), -self.TRQ_ARG_CLIP,
                                             self.TRQ_ARG_CLIP)))
 
-    def trq_solve(self, X: np.ndarray, p: np.ndarray) -> None:
-        """Set each quota's offset consistent with its own flow: o = gap (sig(fill(X(o))) - sig(fill0)), with the
-        flow's local response to its own import price X(o) = X (p / (p + o - o_cur))^s2 (other prices held);
-        bisection, so the steep CAPRI sigmoid is solved without oscillating."""
-        if self.trq_row is None:
+    def trq_fill(self, X: np.ndarray, q: dict) -> float:
+        """The quota's imports (TradeFlowsAgg_): the flows from its exporter's to its importer's market regions."""
+        return float(X[np.ix_(q["rows"], q["cols"])].sum())
+
+    def trq_unit(self, r: np.ndarray, q: dict) -> np.ndarray:
+        """d p / d sigma of the quota's flows (EUR/t per unit of sigma): (a0 r + tc) dta / 100 + dts."""
+        tc = self.tc if self.tc is not None else np.zeros_like(self.a0)
+        base = self.a0[np.ix_(q["rows"], q["cols"])] * r[None, q["cols"]] + tc[np.ix_(q["rows"], q["cols"])]
+        return base * q["dta"] / 100.0 + q["dts"]
+
+    def trq_base(self) -> None:
+        """Each quota's sigma at the base flows (the calibration point, at the base volume) and no offset."""
+        n = len(self.regions)
+        self.trq_offset = np.zeros((n, n))
+        if not self.trq_quotas:
+            self.trq_sigma = self.trq_sigma0 = None
             return
-        rows = self._rows()
-        new = self.trq_offset.copy()
-        for j in np.where(self.trq_Q > 0)[0]:
-            xj = float(X[rows, j].sum())
-            pj = float((X[rows, j] * p[rows, j]).sum() / xj) if xj > 0 else float(p[rows[0], j])
-            oc, g = float(self.trq_offset[j]), float(self.trq_gap[j])
-            if xj <= 0 or pj <= 0 or g <= 0:
+        s0 = np.array([float(self._sig(self.trq_fill(self.X0, q) / q["Q0"])) if q["Q0"] > 0 else 0.0
+                       for q in self.trq_quotas])
+        self.trq_sigma0, self.trq_sigma = s0, s0.copy()
+
+    def trq_set_offsets(self, r: np.ndarray) -> None:
+        """trq_offset from the quotas' current sigma at the exporters' price ratios r."""
+        n = len(self.regions)
+        off = np.zeros((n, n))
+        for k, q in enumerate(self.trq_quotas or ()):
+            off[np.ix_(q["rows"], q["cols"])] = self.trq_unit(r, q) * (self.trq_sigma[k] - self.trq_sigma0[k])
+        self.trq_offset = off
+
+    def trq_solve(self, X: np.ndarray, p: np.ndarray, r: Optional[np.ndarray] = None) -> None:
+        """Each quota's sigma consistent with its own flows: sigma = Sigmoid(slope / Q (fill(sigma) - 0.97 Q)), with
+        the flows' local response to their own import prices, X (p / (p + d (sigma - sigma_now)))^s2 (other prices
+        held); bisection on sigma in [0, 1], so the steep CAPRI sigmoid is solved without oscillating. Then the
+        offsets at the price ratios r (ones if not given)."""
+        if not self.trq_quotas:
+            return
+        r = np.ones(len(self.regions)) if r is None else np.asarray(r, dtype=float)
+        if self.trq_sigma is None:
+            self.trq_base()
+        new = self.trq_sigma.copy()
+        for k, q in enumerate(self.trq_quotas):
+            if q["Q"] <= 0:
+                new[k] = 1.0
                 continue
-            k = self.trq_share[j] / self.trq_Q[j]
-            Qb = float(self.trq_Q0[j]) if self.trq_Q0 is not None else float(self.trq_Q[j])
-            s0 = self._sig(self.trq_share[j] / Qb * float(self.X0[rows, j].sum())) if Qb > 0 else 0.0
+            ix = np.ix_(q["rows"], q["cols"])
+            x, pp, d = X[ix], p[ix], self.trq_unit(r, q)
+            live = (x > 0) & (pp > 0)
+            if not live.any():
+                new[k] = float(self._sig(0.0))
+                continue
+            sc = float(self.trq_sigma[k])
 
-            def h(o):
-                xo = xj * (pj / max(pj + o - oc, 1e-6)) ** self.s2
-                return o - g * (self._sig(k * xo) - s0)
+            def h(s):
+                xo = (x[live] * (pp[live] / np.maximum(pp[live] + d[live] * (s - sc), 1e-6)) ** self.s2).sum()
+                return s - float(self._sig(xo / q["Q"]))
 
-            lo, hi = -g * s0 - 1e-9, g * (1.0 - s0) + 1e-9
+            lo, hi = 0.0, 1.0
             for _ in range(60):
                 mid = 0.5 * (lo + hi)
                 if h(mid) > 0:
                     hi = mid
                 else:
                     lo = mid
-            new[j] = 0.5 * (lo + hi)
-        self.trq_offset = new
+            new[k] = 0.5 * (lo + hi)
+        self.trq_sigma = new
+        self.trq_set_offsets(r)
 
     def import_prices(self, r: np.ndarray, tariff_adds=None) -> np.ndarray:
         """Import prices p_ij at the exporters' price ratios r. tariff_adds: [(importer rows, points of ad valorem
@@ -152,9 +195,8 @@ class BilateralCommodity:
         exporter's market price plus the transport cost; flows between the rows of one importer (the EU's trade
         blocks) carry none."""
         p = self.a * r[None, :] + self.b
-        if self.trq_row is not None and self.trq_offset is not None:
-            rows = self._rows()
-            p[rows] = p[rows] + self.trq_offset[None, :]
+        if self.trq_quotas and self.trq_offset is not None:
+            p = p + self.trq_offset
         for importer, pts in (tariff_adds or ()):
             if not pts:
                 continue

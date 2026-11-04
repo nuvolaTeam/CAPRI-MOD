@@ -142,16 +142,15 @@ class NewtonKrylovMixin:
             err = float(np.max(np.abs(g))) if n else 0.0
             errs = {c: float(np.max(np.abs(F[c] / size(c)))) for c in F}
             self._bilat_errs = errs
-            # EU tariff-rate quotas: the out-of-quota tariff follows the fill at the current flows, as the default solve
+            # CAPRI's bilateral tariff-rate quotas: the tariffs follow the fill at the current flows, as the default solve
             trq_moved = 0.0
             for c, sc in sysd.items():
                 if sc.trq_row is None:
                     continue
                 X, _ = sc.flows(D[c].values, r[c].values, pc[c])
                 old = sc.trq_offset.copy()
-                sc.trq_solve(X, pc[c])
-                trq_moved = max(trq_moved, float(np.max(np.abs(sc.trq_offset - old)
-                                                        / np.maximum(float(np.min(sc.Pd0[sc._rows()])), 1.0))))
+                sc.trq_solve(X, pc[c], r[c].values)
+                trq_moved = max(trq_moved, float(np.max(np.abs(sc.trq_offset - old) / np.maximum(pc[c], 1.0))))
             if verbose:
                 print(f"  market Newton-Krylov step {it}: max rel residual {err:.2e}, evaluations {n_evals}")
             if max(errs.values()) < tol and trq_moved < tol:

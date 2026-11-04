@@ -457,8 +457,8 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
                     _bs, _bpa, _bca, _cov, _eau = _cache[_key][5]
                     _mm.par.bilat = _bs
                     for _sc in (_bs or {}).values():
-                        if getattr(_sc, "trq_row", None) is not None and _sc.trq_offset is not None:
-                            _sc.trq_offset = _sc.trq_offset * 0.0
+                        if getattr(_sc, "trq_quotas", None):
+                            _sc.trq_base()                    # each quota back at its base sigma, no offset
                     _mm.par.base_production = _bpa.copy()
                     _mm.par.base_consumption = _bca.copy()
                     _mm.par.crush_q0_override = dict(_cov)
