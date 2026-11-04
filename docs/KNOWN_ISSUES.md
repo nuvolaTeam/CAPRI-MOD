@@ -24,7 +24,7 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K92](#k92) | Farm-to-Fork changes furthest from JRC121368, besides the milk price | open: waiting for CAPRI's scenario results |
 | [K93](#k93) | CAPRI mitigation options not built; documents disagree on which are in | open: no-till and legume share unmeasured; UreaSubst parked; the others not needed for Farm-to-Fork and the Green Deal |
 
-## Resolved (102)
+## Resolved (103)
 
 | # | Issue | Status |
 |---|---|---|
@@ -130,6 +130,7 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K111](#k111) | The set-aside report booked part of a set-aside increase as VSET where CAPRI has none | fixed |
 | [K112](#k112) | Histosols: regions without a JRC record took their country's share; Greek grassland had no N2O | fixed |
 | [K113](#k113) | Croatia had no AD option: CAPRI's fallback_Balkan fills its VSER and housing share | fixed |
+| [K114](#k114) | Norway lacked CAPRI's mirrored MITERRA data and Sweden's AD data: no housed liquid manure, no AD | fixed |
 
 ## Details
 
@@ -2042,4 +2043,24 @@ HR000000 (about 5e-7, no initial share). Found while porting the same fallback f
   reads CAPRI's (a, b).(c, d) notation). Croatia and the six Western Balkan countries now have the option; Turkey's
   units not yet (their manure-system shares in n_cascade_factors give no housed liquid manure: to check against CAPRI).
   Test: test_ad_option_of_croatia_and_the_balkans_as_capri.
+
+### K114: Norway lacked CAPRI's mirrored MITERRA data and Sweden's AD data: no housed liquid manure, no AD (found 4 November 2026)
+
+CAPRI loads Norway's MITERRA data from dat/miterra/mirror_non_changeable_parameters_norway.gdx and
+mirror_miterra_inputs_norway.gdx and copies them to NO000000 (envind/ammo.gms l. 252-343: RCEmissions, ControlStrategies,
+ReducControlStrategies, FracEmGrazing, ReducEmhouse, ReducEmStorage, FracEmHouse, FracEmStorage, FracEmAppl, EmFracFert,
+FracUseFert, NN_CorrFertFactDeviation, bNumAniRAINS among them), and gives Norway Sweden's AD data (p_SharLiq,
+p_HousShar, p_MitiShar0, p_VSER; ad_data_and_cali.gms l. 257-261). The model's ammonia inputs (converted from the base
+files' dumps) had no Norwegian records but a few base-file ones, so Norway's units had no housed liquid manure (tsl 0,
+tsg 1 in n_cascade_factors: every housing, storage and application factor 0), no AD option, and housing and storage
+reductions from the base files where CAPRI uses the mirror. Norway is in every default run. Found while porting the AD
+option outside the EU (SUPPLY_NONEU step 6). A reproduction error of capri-mod.
+
+- **Effect:** Norway's manure N cascade (NH3, N2O, NOx, N2, run-off), its ammonia technologies and AD option, its urea
+  share; EU, UK, Western Balkan and Turkish rows unchanged (checked file by file)
+- **Status:** **fixed** 4 November 2026: the mirror symbols extracted (tools/build/extract_capri_dat.py) and applied by
+  build_ammonia_tech_inputs (norway_mirror; the pairs read from ammo.gms), Sweden's AD data by build_ad_option (mirror).
+  Norway's AD initial shares are CAPRI's 2030 AD_AnCh to 0.3% (DCOL 0.000209, BULL 0.000077, PIGF 0.000333 in all six
+  units). The regional mirrors (rLFrest, rLFmanureBasis, rLFmanureND, rCorrND) hold the former NUTS 3 codes, none of the
+  units, so CAPRI's assignment gives the units nothing, as here. Test: test_norway_miterra_mirror_and_ad_option_as_capri.
 

@@ -4,6 +4,9 @@ every record (4 November 2026).
   dat/envind/fao_peatland.gdx  P(FAOregions) "Share of peatland in arable land" (FAO), read by envind/lulucf_carbon_decl.gms
       l. 695-697 as p_PEATSH: the organic-soil fallback of the Western Balkans and Turkey (prep_lulucf_carbon.gms l. 255-256)
       -> capri_data/sources/capri_dat/envind/fao_peatland_P.csv  (fao_code, value)
+  dat/miterra/mirror_non_changeable_parameters_norway.gdx, mirror_miterra_inputs_norway.gdx  p_NO_<symbol>: CAPRI's
+      Norwegian MITERRA data, copied to NO000000 by envind/ammo.gms l. 252-343 (the 13 symbols whose targets the model
+      reads) -> capri_data/sources/capri_dat/miterra/<gdx>_p_NO_<symbol>.csv
 
     python tools/build/extract_capri_dat.py [capri_sources/dat]
 """
@@ -21,14 +24,31 @@ from paths import SOURCES  # noqa: E402
 
 OUT = ROOT / "capri_data" / "sources" / "capri_dat"
 #: (Parquet file under dat, output under capri_data/sources/capri_dat, the output's columns)
-SYMBOLS = (("envind/fao_peatland/P.parquet", "envind/fao_peatland_P.csv", ["fao_code", "value"]),)
+_NC, _MI = "miterra/mirror_non_changeable_parameters_norway", "miterra/mirror_miterra_inputs_norway"
+SYMBOLS = (("envind/fao_peatland/P.parquet", "envind/fao_peatland_P.csv", ["fao_code", "value"]),
+           # CAPRI's mirrored MITERRA data of Norway (envind/ammo.gms l. 163-176, 252-343): the symbols whose targets the
+           # model reads (tools/build/build_ammonia_tech_inputs.py READ), columns as those targets' without the region
+           *((f"{d}/p_NO_{s}.parquet", f"{d}_p_NO_{s}.csv", cols + ["value"]) for d, s, cols in (
+               (_NC, "RCEmissions", ["animal_mitt", "item"]),
+               (_NC, "ControlStrategies", ["animal_mitt", "strategy", "item"]),
+               (_NC, "ReducControlStrategies", ["animal_mitt", "strategy", "item"]),
+               (_NC, "FracEmGrazing", ["animal_mitt", "item"]),
+               (_MI, "ReducEmhouse", ["animal_mitt", "gas", "tech_class"]),
+               (_MI, "ReducEmstorage", ["animal_mitt", "gas", "tech_class"]),
+               (_MI, "FracEmHouse", ["animal_mitt", "gas"]),
+               (_MI, "FracEmStorage", ["animal_mitt", "gas"]),
+               (_MI, "FracEmAppl", ["animal_mitt", "gas"]),
+               (_MI, "EmFracFert", ["gas", "fertiliser"]),
+               (_MI, "FracUseFert", ["fertiliser"]),
+               (_MI, "NN_CorrFertFactDeviation", ["fertiliser", "year"]),
+               (_MI, "bNumAniRains", ["animal_mitt", "year"]))))
 
 
 def main(src: Path) -> None:
     for rel, out, cols in SYMBOLS:
         df = pd.read_parquet(src / rel)
         dims, val = list(df.columns[:-1]), df.columns[-1]
-        if len(dims) != len(cols) - 1 or val != "value":
+        if len(dims) != len(cols) - 1 or val != "value":  # noqa: SIM102
             raise ValueError(f"{rel}: columns {list(df.columns)}, expected {len(cols) - 1} dimensions and 'value'")
         dest = OUT / out
         dest.parent.mkdir(parents=True, exist_ok=True)

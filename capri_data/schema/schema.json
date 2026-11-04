@@ -205,7 +205,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_ad_option",
-    "sources": "$EXPORTS/LitRevAmmoTech.csv; $EXPORTS/LitRev_input_manStor.csv; $EXPORTS/LitRev_inputs.csv; $EXPORTS/LitRev_non_changeable_parameters.csv; $EXPORTS/gd_full.zip; $EXPORTS/holdingsLSU.csv; $EXPORTS/nvzShare_LU.csv; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $EXPORTS/scen.zip; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/AACT_TO_XX.csv; $REFERENCE/sets/simini_21730/CACT_TO_NGRP.csv; $REFERENCE/sets/simini_21730/COLS.csv; $REFERENCE/sets/simini_21730/EPRD_TO_GRP.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FEED_TRD.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/MitiTechAmm.csv; $REFERENCE/sets/simini_21730/OYANI.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/PERM_NGRP.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/RMEU_to_RM.csv; $REFERENCE/sets/simini_21730/RMS.csv; $REFERENCE/sets/simini_21730/RMS_TO_RM.csv; $REFERENCE/sets/simini_21730/RMTP.csv; $REFERENCE/sets/simini_21730/RM_TO_RMTP.csv; $REFERENCE/sets/simini_21730/ROWS.csv; $REFERENCE/sets/simini_21730/SplitActs.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $SOURCES/capreg/res_17<CC>.txt; $SOURCES/capri_export/DATA2_<CC>.txt; $SOURCES/gams/aggregation/defaultA.agg; $SOURCES/gams/envind/ad_data_and_cali.gms; $SOURCES/gams/envind/ammo_tech.gms"
+    "sources": "$EXPORTS/LitRevAmmoTech.csv; $EXPORTS/LitRev_input_manStor.csv; $EXPORTS/LitRev_inputs.csv; $EXPORTS/LitRev_non_changeable_parameters.csv; $EXPORTS/gd_full.zip; $EXPORTS/holdingsLSU.csv; $EXPORTS/nvzShare_LU.csv; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $EXPORTS/scen.zip; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/AACT_TO_XX.csv; $REFERENCE/sets/simini_21730/CACT_TO_NGRP.csv; $REFERENCE/sets/simini_21730/COLS.csv; $REFERENCE/sets/simini_21730/EPRD_TO_GRP.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FEED_TRD.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/MitiTechAmm.csv; $REFERENCE/sets/simini_21730/OYANI.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/PERM_NGRP.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/RMEU_to_RM.csv; $REFERENCE/sets/simini_21730/RMS.csv; $REFERENCE/sets/simini_21730/RMS_TO_RM.csv; $REFERENCE/sets/simini_21730/RMTP.csv; $REFERENCE/sets/simini_21730/RM_TO_RMTP.csv; $REFERENCE/sets/simini_21730/ROWS.csv; $REFERENCE/sets/simini_21730/SplitActs.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $SOURCES/capreg/res_17<CC>.txt; $SOURCES/capri_export/DATA2_<CC>.txt; $SOURCES/dat/envind/fao_peatland/P.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_EmFracFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmAppl.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmHouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmStorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracUseFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_NN_CorrFertFactDeviation.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmhouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmstorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_bNumAniRains.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ControlStrategies.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_FracEmGrazing.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_RCEmissions.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ReducControlStrategies.parquet; $SOURCES/gams/aggregation/defaultA.agg; $SOURCES/gams/envind/ad_data_and_cali.gms; $SOURCES/gams/envind/ammo.gms; $SOURCES/gams/envind/ammo_tech.gms"
    },
    "notes": [],
    "read_by": {
@@ -465,7 +465,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_ammonia_tech_model",
-    "sources": "$EXPORTS/LitRevAmmoTech.csv; $EXPORTS/LitRev_input_manStor.csv; $EXPORTS/LitRev_inputs.csv; $EXPORTS/LitRev_non_changeable_parameters.csv; $EXPORTS/gd_full.zip; $EXPORTS/holdingsLSU.csv; $EXPORTS/nvzShare_LU.csv; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $EXPORTS/scen.zip; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/AACT_TO_XX.csv; $REFERENCE/sets/simini_21730/CACT_TO_NGRP.csv; $REFERENCE/sets/simini_21730/COLS.csv; $REFERENCE/sets/simini_21730/EPRD_TO_GRP.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FEED_TRD.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/MitiTechAmm.csv; $REFERENCE/sets/simini_21730/OYANI.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/PERM_NGRP.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/RMEU_to_RM.csv; $REFERENCE/sets/simini_21730/RMS.csv; $REFERENCE/sets/simini_21730/RMS_TO_RM.csv; $REFERENCE/sets/simini_21730/RMTP.csv; $REFERENCE/sets/simini_21730/RM_TO_RMTP.csv; $REFERENCE/sets/simini_21730/ROWS.csv; $REFERENCE/sets/simini_21730/SplitActs.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $SOURCES/capreg/res_17<CC>.txt; $SOURCES/capri_export/DATA2_<CC>.txt; $SOURCES/gams/aggregation/defaultA.agg; $SOURCES/gams/envind/ad_data_and_cali.gms; $SOURCES/gams/envind/ammo_tech.gms"
+    "sources": "$EXPORTS/LitRevAmmoTech.csv; $EXPORTS/LitRev_input_manStor.csv; $EXPORTS/LitRev_inputs.csv; $EXPORTS/LitRev_non_changeable_parameters.csv; $EXPORTS/gd_full.zip; $EXPORTS/holdingsLSU.csv; $EXPORTS/nvzShare_LU.csv; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $EXPORTS/scen.zip; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/AACT_TO_XX.csv; $REFERENCE/sets/simini_21730/CACT_TO_NGRP.csv; $REFERENCE/sets/simini_21730/COLS.csv; $REFERENCE/sets/simini_21730/EPRD_TO_GRP.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FEED_TRD.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/MitiTechAmm.csv; $REFERENCE/sets/simini_21730/OYANI.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/PERM_NGRP.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/RMEU_to_RM.csv; $REFERENCE/sets/simini_21730/RMS.csv; $REFERENCE/sets/simini_21730/RMS_TO_RM.csv; $REFERENCE/sets/simini_21730/RMTP.csv; $REFERENCE/sets/simini_21730/RM_TO_RMTP.csv; $REFERENCE/sets/simini_21730/ROWS.csv; $REFERENCE/sets/simini_21730/SplitActs.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $SOURCES/capreg/res_17<CC>.txt; $SOURCES/capri_export/DATA2_<CC>.txt; $SOURCES/dat/envind/fao_peatland/P.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_EmFracFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmAppl.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmHouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmStorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracUseFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_NN_CorrFertFactDeviation.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmhouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmstorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_bNumAniRains.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ControlStrategies.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_FracEmGrazing.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_RCEmissions.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ReducControlStrategies.parquet; $SOURCES/gams/aggregation/defaultA.agg; $SOURCES/gams/envind/ad_data_and_cali.gms; $SOURCES/gams/envind/ammo.gms; $SOURCES/gams/envind/ammo_tech.gms"
    },
    "notes": [],
    "read_by": {
@@ -613,7 +613,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_ammonia_technologies",
-    "sources": "$EXPORTS/LitRevAmmoTech.csv; $EXPORTS/LitRev_input_manStor.csv; $EXPORTS/LitRev_inputs.csv; $EXPORTS/LitRev_non_changeable_parameters.csv; $EXPORTS/gd_full.zip; $EXPORTS/holdingsLSU.csv; $EXPORTS/nvzShare_LU.csv; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $EXPORTS/scen.zip; $SOURCES/gams/aggregation/defaultA.agg; $SOURCES/gams/envind/ammo_tech.gms"
+    "sources": "$EXPORTS/LitRevAmmoTech.csv; $EXPORTS/LitRev_input_manStor.csv; $EXPORTS/LitRev_inputs.csv; $EXPORTS/LitRev_non_changeable_parameters.csv; $EXPORTS/gd_full.zip; $EXPORTS/holdingsLSU.csv; $EXPORTS/nvzShare_LU.csv; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $EXPORTS/scen.zip; $SOURCES/dat/envind/fao_peatland/P.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_EmFracFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmAppl.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmHouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmStorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracUseFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_NN_CorrFertFactDeviation.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmhouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmstorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_bNumAniRains.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ControlStrategies.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_FracEmGrazing.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_RCEmissions.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ReducControlStrategies.parquet; $SOURCES/gams/aggregation/defaultA.agg; $SOURCES/gams/envind/ammo.gms; $SOURCES/gams/envind/ammo_tech.gms"
    },
    "notes": [],
    "read_by": {
@@ -674,7 +674,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_ammonia_tech_inputs",
-    "sources": "$EXPORTS/LitRevAmmoTech.csv; $EXPORTS/LitRev_input_manStor.csv; $EXPORTS/LitRev_inputs.csv; $EXPORTS/LitRev_non_changeable_parameters.csv; $EXPORTS/holdingsLSU.csv; $EXPORTS/nvzShare_LU.csv"
+    "sources": "$EXPORTS/LitRevAmmoTech.csv; $EXPORTS/LitRev_input_manStor.csv; $EXPORTS/LitRev_inputs.csv; $EXPORTS/LitRev_non_changeable_parameters.csv; $EXPORTS/holdingsLSU.csv; $EXPORTS/nvzShare_LU.csv; $SOURCES/dat/envind/fao_peatland/P.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_EmFracFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmAppl.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmHouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmStorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracUseFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_NN_CorrFertFactDeviation.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmhouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmstorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_bNumAniRains.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ControlStrategies.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_FracEmGrazing.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_RCEmissions.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ReducControlStrategies.parquet; $SOURCES/gams/envind/ammo.gms"
    },
    "notes": [],
    "read_by": {
@@ -809,7 +809,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_ammonia_tech_inputs",
-    "sources": "$EXPORTS/LitRevAmmoTech.csv; $EXPORTS/LitRev_input_manStor.csv; $EXPORTS/LitRev_inputs.csv; $EXPORTS/LitRev_non_changeable_parameters.csv; $EXPORTS/holdingsLSU.csv; $EXPORTS/nvzShare_LU.csv"
+    "sources": "$EXPORTS/LitRevAmmoTech.csv; $EXPORTS/LitRev_input_manStor.csv; $EXPORTS/LitRev_inputs.csv; $EXPORTS/LitRev_non_changeable_parameters.csv; $EXPORTS/holdingsLSU.csv; $EXPORTS/nvzShare_LU.csv; $SOURCES/dat/envind/fao_peatland/P.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_EmFracFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmAppl.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmHouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmStorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracUseFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_NN_CorrFertFactDeviation.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmhouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmstorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_bNumAniRains.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ControlStrategies.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_FracEmGrazing.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_RCEmissions.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ReducControlStrategies.parquet; $SOURCES/gams/envind/ammo.gms"
    },
    "notes": [],
    "read_by": {
@@ -868,7 +868,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_ammonia_tech_inputs",
-    "sources": "$EXPORTS/LitRevAmmoTech.csv; $EXPORTS/LitRev_input_manStor.csv; $EXPORTS/LitRev_inputs.csv; $EXPORTS/LitRev_non_changeable_parameters.csv; $EXPORTS/holdingsLSU.csv; $EXPORTS/nvzShare_LU.csv"
+    "sources": "$EXPORTS/LitRevAmmoTech.csv; $EXPORTS/LitRev_input_manStor.csv; $EXPORTS/LitRev_inputs.csv; $EXPORTS/LitRev_non_changeable_parameters.csv; $EXPORTS/holdingsLSU.csv; $EXPORTS/nvzShare_LU.csv; $SOURCES/dat/envind/fao_peatland/P.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_EmFracFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmAppl.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmHouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmStorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracUseFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_NN_CorrFertFactDeviation.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmhouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmstorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_bNumAniRains.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ControlStrategies.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_FracEmGrazing.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_RCEmissions.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ReducControlStrategies.parquet; $SOURCES/gams/envind/ammo.gms"
    },
    "notes": [],
    "read_by": {
@@ -949,7 +949,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_farm_size_noneu",
-    "sources": "$EXPORTS/LitRevAmmoTech.csv; $EXPORTS/LitRev_input_manStor.csv; $EXPORTS/LitRev_inputs.csv; $EXPORTS/LitRev_non_changeable_parameters.csv; $EXPORTS/gd_full.zip; $EXPORTS/holdingsLSU.csv; $EXPORTS/nvzShare_LU.csv; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $EXPORTS/scen.zip; $SOURCES/gams/aggregation/defaultA.agg; $SOURCES/gams/envind/prep_farm_size_data_for_miti.gms; $SOURCES/gams/sets.gms"
+    "sources": "$EXPORTS/LitRevAmmoTech.csv; $EXPORTS/LitRev_input_manStor.csv; $EXPORTS/LitRev_inputs.csv; $EXPORTS/LitRev_non_changeable_parameters.csv; $EXPORTS/gd_full.zip; $EXPORTS/holdingsLSU.csv; $EXPORTS/nvzShare_LU.csv; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $EXPORTS/scen.zip; $SOURCES/dat/envind/fao_peatland/P.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_EmFracFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmAppl.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmHouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmStorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracUseFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_NN_CorrFertFactDeviation.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmhouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmstorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_bNumAniRains.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ControlStrategies.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_FracEmGrazing.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_RCEmissions.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ReducControlStrategies.parquet; $SOURCES/gams/aggregation/defaultA.agg; $SOURCES/gams/envind/ammo.gms; $SOURCES/gams/envind/prep_farm_size_data_for_miti.gms; $SOURCES/gams/sets.gms"
    },
    "notes": [],
    "read_by": {
@@ -1002,7 +1002,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_farm_size_noneu",
-    "sources": "$EXPORTS/LitRevAmmoTech.csv; $EXPORTS/LitRev_input_manStor.csv; $EXPORTS/LitRev_inputs.csv; $EXPORTS/LitRev_non_changeable_parameters.csv; $EXPORTS/gd_full.zip; $EXPORTS/holdingsLSU.csv; $EXPORTS/nvzShare_LU.csv; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $EXPORTS/scen.zip; $SOURCES/gams/aggregation/defaultA.agg; $SOURCES/gams/envind/prep_farm_size_data_for_miti.gms; $SOURCES/gams/sets.gms"
+    "sources": "$EXPORTS/LitRevAmmoTech.csv; $EXPORTS/LitRev_input_manStor.csv; $EXPORTS/LitRev_inputs.csv; $EXPORTS/LitRev_non_changeable_parameters.csv; $EXPORTS/gd_full.zip; $EXPORTS/holdingsLSU.csv; $EXPORTS/nvzShare_LU.csv; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $EXPORTS/scen.zip; $SOURCES/dat/envind/fao_peatland/P.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_EmFracFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmAppl.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmHouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmStorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracUseFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_NN_CorrFertFactDeviation.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmhouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmstorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_bNumAniRains.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ControlStrategies.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_FracEmGrazing.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_RCEmissions.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ReducControlStrategies.parquet; $SOURCES/gams/aggregation/defaultA.agg; $SOURCES/gams/envind/ammo.gms; $SOURCES/gams/envind/prep_farm_size_data_for_miti.gms; $SOURCES/gams/sets.gms"
    },
    "notes": [],
    "read_by": {
@@ -1061,7 +1061,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_ammonia_tech_inputs",
-    "sources": "$EXPORTS/LitRevAmmoTech.csv; $EXPORTS/LitRev_input_manStor.csv; $EXPORTS/LitRev_inputs.csv; $EXPORTS/LitRev_non_changeable_parameters.csv; $EXPORTS/holdingsLSU.csv; $EXPORTS/nvzShare_LU.csv"
+    "sources": "$EXPORTS/LitRevAmmoTech.csv; $EXPORTS/LitRev_input_manStor.csv; $EXPORTS/LitRev_inputs.csv; $EXPORTS/LitRev_non_changeable_parameters.csv; $EXPORTS/holdingsLSU.csv; $EXPORTS/nvzShare_LU.csv; $SOURCES/dat/envind/fao_peatland/P.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_EmFracFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmAppl.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmHouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmStorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracUseFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_NN_CorrFertFactDeviation.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmhouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmstorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_bNumAniRains.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ControlStrategies.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_FracEmGrazing.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_RCEmissions.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ReducControlStrategies.parquet; $SOURCES/gams/envind/ammo.gms"
    },
    "notes": [],
    "read_by": {
@@ -1121,7 +1121,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_ammonia_tech_inputs",
-    "sources": "$EXPORTS/LitRevAmmoTech.csv; $EXPORTS/LitRev_input_manStor.csv; $EXPORTS/LitRev_inputs.csv; $EXPORTS/LitRev_non_changeable_parameters.csv; $EXPORTS/holdingsLSU.csv; $EXPORTS/nvzShare_LU.csv"
+    "sources": "$EXPORTS/LitRevAmmoTech.csv; $EXPORTS/LitRev_input_manStor.csv; $EXPORTS/LitRev_inputs.csv; $EXPORTS/LitRev_non_changeable_parameters.csv; $EXPORTS/holdingsLSU.csv; $EXPORTS/nvzShare_LU.csv; $SOURCES/dat/envind/fao_peatland/P.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_EmFracFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmAppl.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmHouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmStorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracUseFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_NN_CorrFertFactDeviation.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmhouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmstorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_bNumAniRains.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ControlStrategies.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_FracEmGrazing.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_RCEmissions.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ReducControlStrategies.parquet; $SOURCES/gams/envind/ammo.gms"
    },
    "notes": [],
    "read_by": {
@@ -1181,7 +1181,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_ammonia_tech_inputs",
-    "sources": "$EXPORTS/LitRevAmmoTech.csv; $EXPORTS/LitRev_input_manStor.csv; $EXPORTS/LitRev_inputs.csv; $EXPORTS/LitRev_non_changeable_parameters.csv; $EXPORTS/holdingsLSU.csv; $EXPORTS/nvzShare_LU.csv"
+    "sources": "$EXPORTS/LitRevAmmoTech.csv; $EXPORTS/LitRev_input_manStor.csv; $EXPORTS/LitRev_inputs.csv; $EXPORTS/LitRev_non_changeable_parameters.csv; $EXPORTS/holdingsLSU.csv; $EXPORTS/nvzShare_LU.csv; $SOURCES/dat/envind/fao_peatland/P.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_EmFracFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmAppl.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmHouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmStorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracUseFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_NN_CorrFertFactDeviation.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmhouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmstorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_bNumAniRains.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ControlStrategies.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_FracEmGrazing.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_RCEmissions.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ReducControlStrategies.parquet; $SOURCES/gams/envind/ammo.gms"
    },
    "notes": [],
    "read_by": {
@@ -1241,7 +1241,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_ammonia_tech_inputs",
-    "sources": "$EXPORTS/LitRevAmmoTech.csv; $EXPORTS/LitRev_input_manStor.csv; $EXPORTS/LitRev_inputs.csv; $EXPORTS/LitRev_non_changeable_parameters.csv; $EXPORTS/holdingsLSU.csv; $EXPORTS/nvzShare_LU.csv"
+    "sources": "$EXPORTS/LitRevAmmoTech.csv; $EXPORTS/LitRev_input_manStor.csv; $EXPORTS/LitRev_inputs.csv; $EXPORTS/LitRev_non_changeable_parameters.csv; $EXPORTS/holdingsLSU.csv; $EXPORTS/nvzShare_LU.csv; $SOURCES/dat/envind/fao_peatland/P.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_EmFracFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmAppl.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmHouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmStorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracUseFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_NN_CorrFertFactDeviation.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmhouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmstorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_bNumAniRains.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ControlStrategies.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_FracEmGrazing.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_RCEmissions.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ReducControlStrategies.parquet; $SOURCES/gams/envind/ammo.gms"
    },
    "notes": [],
    "read_by": {
@@ -1307,7 +1307,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_n_cascade",
-    "sources": "$EXPORTS/LitRevAmmoTech.csv; $EXPORTS/LitRev_input_manStor.csv; $EXPORTS/LitRev_inputs.csv; $EXPORTS/LitRev_non_changeable_parameters.csv; $EXPORTS/gd_full.zip; $EXPORTS/holdingsLSU.csv; $EXPORTS/nvzShare_LU.csv; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $EXPORTS/scen.zip; $SOURCES/gams/aggregation/defaultA.agg; $SOURCES/gams/envind/ammo_tech.gms"
+    "sources": "$EXPORTS/LitRevAmmoTech.csv; $EXPORTS/LitRev_input_manStor.csv; $EXPORTS/LitRev_inputs.csv; $EXPORTS/LitRev_non_changeable_parameters.csv; $EXPORTS/gd_full.zip; $EXPORTS/holdingsLSU.csv; $EXPORTS/nvzShare_LU.csv; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $EXPORTS/scen.zip; $SOURCES/dat/envind/fao_peatland/P.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_EmFracFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmAppl.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmHouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmStorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracUseFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_NN_CorrFertFactDeviation.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmhouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmstorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_bNumAniRains.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ControlStrategies.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_FracEmGrazing.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_RCEmissions.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ReducControlStrategies.parquet; $SOURCES/gams/aggregation/defaultA.agg; $SOURCES/gams/envind/ammo.gms; $SOURCES/gams/envind/ammo_tech.gms"
    },
    "notes": [],
    "read_by": {
@@ -1366,7 +1366,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_n_cascade",
-    "sources": "$EXPORTS/LitRevAmmoTech.csv; $EXPORTS/LitRev_input_manStor.csv; $EXPORTS/LitRev_inputs.csv; $EXPORTS/LitRev_non_changeable_parameters.csv; $EXPORTS/gd_full.zip; $EXPORTS/holdingsLSU.csv; $EXPORTS/nvzShare_LU.csv; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $EXPORTS/scen.zip; $SOURCES/gams/aggregation/defaultA.agg; $SOURCES/gams/envind/ammo_tech.gms"
+    "sources": "$EXPORTS/LitRevAmmoTech.csv; $EXPORTS/LitRev_input_manStor.csv; $EXPORTS/LitRev_inputs.csv; $EXPORTS/LitRev_non_changeable_parameters.csv; $EXPORTS/gd_full.zip; $EXPORTS/holdingsLSU.csv; $EXPORTS/nvzShare_LU.csv; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $EXPORTS/scen.zip; $SOURCES/dat/envind/fao_peatland/P.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_EmFracFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmAppl.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmHouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmStorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracUseFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_NN_CorrFertFactDeviation.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmhouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmstorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_bNumAniRains.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ControlStrategies.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_FracEmGrazing.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_RCEmissions.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ReducControlStrategies.parquet; $SOURCES/gams/aggregation/defaultA.agg; $SOURCES/gams/envind/ammo.gms; $SOURCES/gams/envind/ammo_tech.gms"
    },
    "notes": [],
    "read_by": {
@@ -1422,7 +1422,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_n_cascade",
-    "sources": "$EXPORTS/LitRevAmmoTech.csv; $EXPORTS/LitRev_input_manStor.csv; $EXPORTS/LitRev_inputs.csv; $EXPORTS/LitRev_non_changeable_parameters.csv; $EXPORTS/gd_full.zip; $EXPORTS/holdingsLSU.csv; $EXPORTS/nvzShare_LU.csv; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $EXPORTS/scen.zip; $SOURCES/gams/aggregation/defaultA.agg; $SOURCES/gams/envind/ammo_tech.gms"
+    "sources": "$EXPORTS/LitRevAmmoTech.csv; $EXPORTS/LitRev_input_manStor.csv; $EXPORTS/LitRev_inputs.csv; $EXPORTS/LitRev_non_changeable_parameters.csv; $EXPORTS/gd_full.zip; $EXPORTS/holdingsLSU.csv; $EXPORTS/nvzShare_LU.csv; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $EXPORTS/scen.zip; $SOURCES/dat/envind/fao_peatland/P.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_EmFracFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmAppl.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmHouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmStorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracUseFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_NN_CorrFertFactDeviation.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmhouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmstorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_bNumAniRains.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ControlStrategies.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_FracEmGrazing.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_RCEmissions.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ReducControlStrategies.parquet; $SOURCES/gams/aggregation/defaultA.agg; $SOURCES/gams/envind/ammo.gms; $SOURCES/gams/envind/ammo_tech.gms"
    },
    "notes": [],
    "read_by": {
@@ -1495,7 +1495,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_n_leaching",
-    "sources": "$EXPORTS/LitRevAmmoTech.csv; $EXPORTS/LitRev_input_manStor.csv; $EXPORTS/LitRev_inputs.csv; $EXPORTS/LitRev_non_changeable_parameters.csv; $EXPORTS/gd_full.zip; $EXPORTS/holdingsLSU.csv; $EXPORTS/nvzShare_LU.csv; $EXPORTS/res_2_1730greendeal_refdefaulta.zip; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $EXPORTS/scen.zip; $SOURCES/gams/aggregation/defaultA.agg; $SOURCES/gams/envind/ammo_tech.gms"
+    "sources": "$EXPORTS/LitRevAmmoTech.csv; $EXPORTS/LitRev_input_manStor.csv; $EXPORTS/LitRev_inputs.csv; $EXPORTS/LitRev_non_changeable_parameters.csv; $EXPORTS/gd_full.zip; $EXPORTS/holdingsLSU.csv; $EXPORTS/nvzShare_LU.csv; $EXPORTS/res_2_1730greendeal_refdefaulta.zip; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $EXPORTS/scen.zip; $SOURCES/dat/envind/fao_peatland/P.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_EmFracFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmAppl.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmHouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmStorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracUseFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_NN_CorrFertFactDeviation.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmhouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmstorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_bNumAniRains.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ControlStrategies.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_FracEmGrazing.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_RCEmissions.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ReducControlStrategies.parquet; $SOURCES/gams/aggregation/defaultA.agg; $SOURCES/gams/envind/ammo.gms; $SOURCES/gams/envind/ammo_tech.gms"
    },
    "notes": [],
    "read_by": {
@@ -1554,7 +1554,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_ammonia_tech_inputs",
-    "sources": "$EXPORTS/LitRevAmmoTech.csv; $EXPORTS/LitRev_input_manStor.csv; $EXPORTS/LitRev_inputs.csv; $EXPORTS/LitRev_non_changeable_parameters.csv; $EXPORTS/holdingsLSU.csv; $EXPORTS/nvzShare_LU.csv"
+    "sources": "$EXPORTS/LitRevAmmoTech.csv; $EXPORTS/LitRev_input_manStor.csv; $EXPORTS/LitRev_inputs.csv; $EXPORTS/LitRev_non_changeable_parameters.csv; $EXPORTS/holdingsLSU.csv; $EXPORTS/nvzShare_LU.csv; $SOURCES/dat/envind/fao_peatland/P.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_EmFracFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmAppl.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmHouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmStorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracUseFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_NN_CorrFertFactDeviation.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmhouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmstorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_bNumAniRains.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ControlStrategies.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_FracEmGrazing.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_RCEmissions.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ReducControlStrategies.parquet; $SOURCES/gams/envind/ammo.gms"
    },
    "notes": [],
    "read_by": {
@@ -1810,7 +1810,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_ammonia_tech_inputs",
-    "sources": "$EXPORTS/LitRevAmmoTech.csv; $EXPORTS/LitRev_input_manStor.csv; $EXPORTS/LitRev_inputs.csv; $EXPORTS/LitRev_non_changeable_parameters.csv; $EXPORTS/holdingsLSU.csv; $EXPORTS/nvzShare_LU.csv"
+    "sources": "$EXPORTS/LitRevAmmoTech.csv; $EXPORTS/LitRev_input_manStor.csv; $EXPORTS/LitRev_inputs.csv; $EXPORTS/LitRev_non_changeable_parameters.csv; $EXPORTS/holdingsLSU.csv; $EXPORTS/nvzShare_LU.csv; $SOURCES/dat/envind/fao_peatland/P.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_EmFracFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmAppl.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmHouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmStorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracUseFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_NN_CorrFertFactDeviation.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmhouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmstorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_bNumAniRains.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ControlStrategies.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_FracEmGrazing.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_RCEmissions.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ReducControlStrategies.parquet; $SOURCES/gams/envind/ammo.gms"
    },
    "notes": [],
    "read_by": {
@@ -1929,7 +1929,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_ammonia_tech_inputs",
-    "sources": "$EXPORTS/LitRevAmmoTech.csv; $EXPORTS/LitRev_input_manStor.csv; $EXPORTS/LitRev_inputs.csv; $EXPORTS/LitRev_non_changeable_parameters.csv; $EXPORTS/holdingsLSU.csv; $EXPORTS/nvzShare_LU.csv"
+    "sources": "$EXPORTS/LitRevAmmoTech.csv; $EXPORTS/LitRev_input_manStor.csv; $EXPORTS/LitRev_inputs.csv; $EXPORTS/LitRev_non_changeable_parameters.csv; $EXPORTS/holdingsLSU.csv; $EXPORTS/nvzShare_LU.csv; $SOURCES/dat/envind/fao_peatland/P.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_EmFracFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmAppl.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmHouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmStorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracUseFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_NN_CorrFertFactDeviation.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmhouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmstorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_bNumAniRains.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ControlStrategies.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_FracEmGrazing.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_RCEmissions.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ReducControlStrategies.parquet; $SOURCES/gams/envind/ammo.gms"
    },
    "notes": [],
    "read_by": {
@@ -2048,7 +2048,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_ammonia_tech_inputs",
-    "sources": "$EXPORTS/LitRevAmmoTech.csv; $EXPORTS/LitRev_input_manStor.csv; $EXPORTS/LitRev_inputs.csv; $EXPORTS/LitRev_non_changeable_parameters.csv; $EXPORTS/holdingsLSU.csv; $EXPORTS/nvzShare_LU.csv"
+    "sources": "$EXPORTS/LitRevAmmoTech.csv; $EXPORTS/LitRev_input_manStor.csv; $EXPORTS/LitRev_inputs.csv; $EXPORTS/LitRev_non_changeable_parameters.csv; $EXPORTS/holdingsLSU.csv; $EXPORTS/nvzShare_LU.csv; $SOURCES/dat/envind/fao_peatland/P.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_EmFracFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmAppl.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmHouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmStorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracUseFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_NN_CorrFertFactDeviation.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmhouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmstorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_bNumAniRains.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ControlStrategies.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_FracEmGrazing.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_RCEmissions.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ReducControlStrategies.parquet; $SOURCES/gams/envind/ammo.gms"
    },
    "notes": [],
    "read_by": {
@@ -2295,7 +2295,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_ammonia_tech_inputs",
-    "sources": "$EXPORTS/LitRevAmmoTech.csv; $EXPORTS/LitRev_input_manStor.csv; $EXPORTS/LitRev_inputs.csv; $EXPORTS/LitRev_non_changeable_parameters.csv; $EXPORTS/holdingsLSU.csv; $EXPORTS/nvzShare_LU.csv"
+    "sources": "$EXPORTS/LitRevAmmoTech.csv; $EXPORTS/LitRev_input_manStor.csv; $EXPORTS/LitRev_inputs.csv; $EXPORTS/LitRev_non_changeable_parameters.csv; $EXPORTS/holdingsLSU.csv; $EXPORTS/nvzShare_LU.csv; $SOURCES/dat/envind/fao_peatland/P.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_EmFracFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmAppl.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmHouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmStorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracUseFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_NN_CorrFertFactDeviation.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmhouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmstorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_bNumAniRains.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ControlStrategies.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_FracEmGrazing.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_RCEmissions.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ReducControlStrategies.parquet; $SOURCES/gams/envind/ammo.gms"
    },
    "notes": [],
    "read_by": {
@@ -2410,7 +2410,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_ammonia_tech_inputs",
-    "sources": "$EXPORTS/LitRevAmmoTech.csv; $EXPORTS/LitRev_input_manStor.csv; $EXPORTS/LitRev_inputs.csv; $EXPORTS/LitRev_non_changeable_parameters.csv; $EXPORTS/holdingsLSU.csv; $EXPORTS/nvzShare_LU.csv"
+    "sources": "$EXPORTS/LitRevAmmoTech.csv; $EXPORTS/LitRev_input_manStor.csv; $EXPORTS/LitRev_inputs.csv; $EXPORTS/LitRev_non_changeable_parameters.csv; $EXPORTS/holdingsLSU.csv; $EXPORTS/nvzShare_LU.csv; $SOURCES/dat/envind/fao_peatland/P.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_EmFracFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmAppl.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmHouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmStorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracUseFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_NN_CorrFertFactDeviation.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmhouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmstorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_bNumAniRains.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ControlStrategies.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_FracEmGrazing.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_RCEmissions.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ReducControlStrategies.parquet; $SOURCES/gams/envind/ammo.gms"
    },
    "notes": [],
    "read_by": {
@@ -2589,7 +2589,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_ammonia_tech_inputs",
-    "sources": "$EXPORTS/LitRevAmmoTech.csv; $EXPORTS/LitRev_input_manStor.csv; $EXPORTS/LitRev_inputs.csv; $EXPORTS/LitRev_non_changeable_parameters.csv; $EXPORTS/holdingsLSU.csv; $EXPORTS/nvzShare_LU.csv"
+    "sources": "$EXPORTS/LitRevAmmoTech.csv; $EXPORTS/LitRev_input_manStor.csv; $EXPORTS/LitRev_inputs.csv; $EXPORTS/LitRev_non_changeable_parameters.csv; $EXPORTS/holdingsLSU.csv; $EXPORTS/nvzShare_LU.csv; $SOURCES/dat/envind/fao_peatland/P.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_EmFracFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmAppl.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmHouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmStorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracUseFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_NN_CorrFertFactDeviation.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmhouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmstorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_bNumAniRains.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ControlStrategies.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_FracEmGrazing.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_RCEmissions.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ReducControlStrategies.parquet; $SOURCES/gams/envind/ammo.gms"
    },
    "notes": [],
    "read_by": {
@@ -2604,7 +2604,9 @@
      "build_supplement_effects"
     ],
     "checks": [],
-    "tests": []
+    "tests": [
+     "capri_mod/tests/test_capri.py"
+    ]
    }
   },
   "amm_reduccontrolstrategies": {
@@ -2660,7 +2662,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_ammonia_tech_inputs",
-    "sources": "$EXPORTS/LitRevAmmoTech.csv; $EXPORTS/LitRev_input_manStor.csv; $EXPORTS/LitRev_inputs.csv; $EXPORTS/LitRev_non_changeable_parameters.csv; $EXPORTS/holdingsLSU.csv; $EXPORTS/nvzShare_LU.csv"
+    "sources": "$EXPORTS/LitRevAmmoTech.csv; $EXPORTS/LitRev_input_manStor.csv; $EXPORTS/LitRev_inputs.csv; $EXPORTS/LitRev_non_changeable_parameters.csv; $EXPORTS/holdingsLSU.csv; $EXPORTS/nvzShare_LU.csv; $SOURCES/dat/envind/fao_peatland/P.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_EmFracFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmAppl.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmHouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmStorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracUseFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_NN_CorrFertFactDeviation.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmhouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmstorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_bNumAniRains.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ControlStrategies.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_FracEmGrazing.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_RCEmissions.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ReducControlStrategies.parquet; $SOURCES/gams/envind/ammo.gms"
    },
    "notes": [],
    "read_by": {
@@ -2725,7 +2727,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_ammonia_tech_inputs",
-    "sources": "$EXPORTS/LitRevAmmoTech.csv; $EXPORTS/LitRev_input_manStor.csv; $EXPORTS/LitRev_inputs.csv; $EXPORTS/LitRev_non_changeable_parameters.csv; $EXPORTS/holdingsLSU.csv; $EXPORTS/nvzShare_LU.csv"
+    "sources": "$EXPORTS/LitRevAmmoTech.csv; $EXPORTS/LitRev_input_manStor.csv; $EXPORTS/LitRev_inputs.csv; $EXPORTS/LitRev_non_changeable_parameters.csv; $EXPORTS/holdingsLSU.csv; $EXPORTS/nvzShare_LU.csv; $SOURCES/dat/envind/fao_peatland/P.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_EmFracFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmAppl.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmHouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmStorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracUseFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_NN_CorrFertFactDeviation.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmhouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmstorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_bNumAniRains.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ControlStrategies.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_FracEmGrazing.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_RCEmissions.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ReducControlStrategies.parquet; $SOURCES/gams/envind/ammo.gms"
    },
    "notes": [],
    "read_by": {
@@ -2790,7 +2792,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_ammonia_tech_inputs",
-    "sources": "$EXPORTS/LitRevAmmoTech.csv; $EXPORTS/LitRev_input_manStor.csv; $EXPORTS/LitRev_inputs.csv; $EXPORTS/LitRev_non_changeable_parameters.csv; $EXPORTS/holdingsLSU.csv; $EXPORTS/nvzShare_LU.csv"
+    "sources": "$EXPORTS/LitRevAmmoTech.csv; $EXPORTS/LitRev_input_manStor.csv; $EXPORTS/LitRev_inputs.csv; $EXPORTS/LitRev_non_changeable_parameters.csv; $EXPORTS/holdingsLSU.csv; $EXPORTS/nvzShare_LU.csv; $SOURCES/dat/envind/fao_peatland/P.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_EmFracFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmAppl.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmHouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmStorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracUseFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_NN_CorrFertFactDeviation.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmhouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmstorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_bNumAniRains.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ControlStrategies.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_FracEmGrazing.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_RCEmissions.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ReducControlStrategies.parquet; $SOURCES/gams/envind/ammo.gms"
    },
    "notes": [],
    "read_by": {
@@ -2843,7 +2845,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_ammonia_tech_inputs",
-    "sources": "$EXPORTS/LitRevAmmoTech.csv; $EXPORTS/LitRev_input_manStor.csv; $EXPORTS/LitRev_inputs.csv; $EXPORTS/LitRev_non_changeable_parameters.csv; $EXPORTS/holdingsLSU.csv; $EXPORTS/nvzShare_LU.csv"
+    "sources": "$EXPORTS/LitRevAmmoTech.csv; $EXPORTS/LitRev_input_manStor.csv; $EXPORTS/LitRev_inputs.csv; $EXPORTS/LitRev_non_changeable_parameters.csv; $EXPORTS/holdingsLSU.csv; $EXPORTS/nvzShare_LU.csv; $SOURCES/dat/envind/fao_peatland/P.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_EmFracFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmAppl.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmHouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmStorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracUseFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_NN_CorrFertFactDeviation.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmhouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmstorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_bNumAniRains.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ControlStrategies.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_FracEmGrazing.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_RCEmissions.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ReducControlStrategies.parquet; $SOURCES/gams/envind/ammo.gms"
    },
    "notes": [],
    "read_by": {
@@ -8260,7 +8262,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_ghg_coefs_2017",
-    "sources": "$EXPORTS/LitRevAmmoTech.csv; $EXPORTS/LitRev_input_manStor.csv; $EXPORTS/LitRev_inputs.csv; $EXPORTS/LitRev_non_changeable_parameters.csv; $EXPORTS/holdingsLSU.csv; $EXPORTS/nvzShare_LU.csv; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/AACT_TO_XX.csv; $REFERENCE/sets/simini_21730/CACT_TO_NGRP.csv; $REFERENCE/sets/simini_21730/COLS.csv; $REFERENCE/sets/simini_21730/EPRD_TO_GRP.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FEED_TRD.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/MitiTechAmm.csv; $REFERENCE/sets/simini_21730/OYANI.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/PERM_NGRP.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/RMEU_to_RM.csv; $REFERENCE/sets/simini_21730/RMS.csv; $REFERENCE/sets/simini_21730/RMS_TO_RM.csv; $REFERENCE/sets/simini_21730/RMTP.csv; $REFERENCE/sets/simini_21730/RM_TO_RMTP.csv; $REFERENCE/sets/simini_21730/ROWS.csv; $REFERENCE/sets/simini_21730/SplitActs.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $SOURCES/capreg/res_17<CC>.txt; $SOURCES/gams/aggregation/defaultA.agg"
+    "sources": "$EXPORTS/LitRevAmmoTech.csv; $EXPORTS/LitRev_input_manStor.csv; $EXPORTS/LitRev_inputs.csv; $EXPORTS/LitRev_non_changeable_parameters.csv; $EXPORTS/holdingsLSU.csv; $EXPORTS/nvzShare_LU.csv; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/AACT_TO_XX.csv; $REFERENCE/sets/simini_21730/CACT_TO_NGRP.csv; $REFERENCE/sets/simini_21730/COLS.csv; $REFERENCE/sets/simini_21730/EPRD_TO_GRP.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FEED_TRD.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/MitiTechAmm.csv; $REFERENCE/sets/simini_21730/OYANI.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/PERM_NGRP.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/RMEU_to_RM.csv; $REFERENCE/sets/simini_21730/RMS.csv; $REFERENCE/sets/simini_21730/RMS_TO_RM.csv; $REFERENCE/sets/simini_21730/RMTP.csv; $REFERENCE/sets/simini_21730/RM_TO_RMTP.csv; $REFERENCE/sets/simini_21730/ROWS.csv; $REFERENCE/sets/simini_21730/SplitActs.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $SOURCES/capreg/res_17<CC>.txt; $SOURCES/dat/envind/fao_peatland/P.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_EmFracFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmAppl.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmHouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmStorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracUseFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_NN_CorrFertFactDeviation.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmhouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmstorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_bNumAniRains.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ControlStrategies.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_FracEmGrazing.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_RCEmissions.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ReducControlStrategies.parquet; $SOURCES/gams/aggregation/defaultA.agg; $SOURCES/gams/envind/ammo.gms"
    },
    "notes": [],
    "read_by": {
@@ -8394,7 +8396,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_enteric_feed_factors",
-    "sources": "$EXPORTS/LitRevAmmoTech.csv; $EXPORTS/LitRev_input_manStor.csv; $EXPORTS/LitRev_inputs.csv; $EXPORTS/LitRev_non_changeable_parameters.csv; $EXPORTS/holdingsLSU.csv; $EXPORTS/nvzShare_LU.csv; $SOURCES/capreg/res_17<CC>.txt; $SOURCES/gams/envind/create_rawdat_gascoeff_gdx.gms; $SOURCES/gams/envind/def_digestibility.gms"
+    "sources": "$EXPORTS/LitRevAmmoTech.csv; $EXPORTS/LitRev_input_manStor.csv; $EXPORTS/LitRev_inputs.csv; $EXPORTS/LitRev_non_changeable_parameters.csv; $EXPORTS/holdingsLSU.csv; $EXPORTS/nvzShare_LU.csv; $SOURCES/capreg/res_17<CC>.txt; $SOURCES/dat/envind/fao_peatland/P.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_EmFracFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmAppl.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmHouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmStorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracUseFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_NN_CorrFertFactDeviation.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmhouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmstorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_bNumAniRains.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ControlStrategies.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_FracEmGrazing.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_RCEmissions.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ReducControlStrategies.parquet; $SOURCES/gams/envind/ammo.gms; $SOURCES/gams/envind/create_rawdat_gascoeff_gdx.gms; $SOURCES/gams/envind/def_digestibility.gms"
    },
    "notes": [],
    "read_by": {
@@ -9063,7 +9065,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_histosol",
-    "sources": "$EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/AACT_TO_XX.csv; $REFERENCE/sets/simini_21730/CACT_TO_NGRP.csv; $REFERENCE/sets/simini_21730/COLS.csv; $REFERENCE/sets/simini_21730/EPRD_TO_GRP.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FEED_TRD.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/MitiTechAmm.csv; $REFERENCE/sets/simini_21730/OYANI.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/PERM_NGRP.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/RMEU_to_RM.csv; $REFERENCE/sets/simini_21730/RMS.csv; $REFERENCE/sets/simini_21730/RMS_TO_RM.csv; $REFERENCE/sets/simini_21730/RMTP.csv; $REFERENCE/sets/simini_21730/RM_TO_RMTP.csv; $REFERENCE/sets/simini_21730/ROWS.csv; $REFERENCE/sets/simini_21730/SplitActs.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $SOURCES/capreg/res_17<CC>.txt; $SOURCES/capri_export/DATA2_<CC>.txt; $SOURCES/costsavings/costsavings_ini_21730_jul15.csv; $SOURCES/costsavings/costsavings_max_21730_jul15.csv; $SOURCES/dat/envind/fao_peatland/P.parquet; $SOURCES/dat_local/envind/lulucf_emissions_original_source.gms; $SOURCES/gams/aggregation/defaultA.agg; $SOURCES/gams/global/fao_codes_new.gms; $SOURCES/gams/sets.gms"
+    "sources": "$EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/AACT_TO_XX.csv; $REFERENCE/sets/simini_21730/CACT_TO_NGRP.csv; $REFERENCE/sets/simini_21730/COLS.csv; $REFERENCE/sets/simini_21730/EPRD_TO_GRP.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FEED_TRD.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/MitiTechAmm.csv; $REFERENCE/sets/simini_21730/OYANI.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/PERM_NGRP.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/RMEU_to_RM.csv; $REFERENCE/sets/simini_21730/RMS.csv; $REFERENCE/sets/simini_21730/RMS_TO_RM.csv; $REFERENCE/sets/simini_21730/RMTP.csv; $REFERENCE/sets/simini_21730/RM_TO_RMTP.csv; $REFERENCE/sets/simini_21730/ROWS.csv; $REFERENCE/sets/simini_21730/SplitActs.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $SOURCES/capreg/res_17<CC>.txt; $SOURCES/capri_export/DATA2_<CC>.txt; $SOURCES/costsavings/costsavings_ini_21730_jul15.csv; $SOURCES/costsavings/costsavings_max_21730_jul15.csv; $SOURCES/dat/envind/fao_peatland/P.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_EmFracFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmAppl.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmHouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmStorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracUseFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_NN_CorrFertFactDeviation.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmhouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmstorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_bNumAniRains.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ControlStrategies.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_FracEmGrazing.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_RCEmissions.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ReducControlStrategies.parquet; $SOURCES/dat_local/envind/lulucf_emissions_original_source.gms; $SOURCES/gams/aggregation/defaultA.agg; $SOURCES/gams/global/fao_codes_new.gms; $SOURCES/gams/sets.gms"
    },
    "notes": [],
    "read_by": {
@@ -9302,7 +9304,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_ghg_coefs_2017",
-    "sources": "$EXPORTS/LitRevAmmoTech.csv; $EXPORTS/LitRev_input_manStor.csv; $EXPORTS/LitRev_inputs.csv; $EXPORTS/LitRev_non_changeable_parameters.csv; $EXPORTS/holdingsLSU.csv; $EXPORTS/nvzShare_LU.csv; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/AACT_TO_XX.csv; $REFERENCE/sets/simini_21730/CACT_TO_NGRP.csv; $REFERENCE/sets/simini_21730/COLS.csv; $REFERENCE/sets/simini_21730/EPRD_TO_GRP.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FEED_TRD.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/MitiTechAmm.csv; $REFERENCE/sets/simini_21730/OYANI.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/PERM_NGRP.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/RMEU_to_RM.csv; $REFERENCE/sets/simini_21730/RMS.csv; $REFERENCE/sets/simini_21730/RMS_TO_RM.csv; $REFERENCE/sets/simini_21730/RMTP.csv; $REFERENCE/sets/simini_21730/RM_TO_RMTP.csv; $REFERENCE/sets/simini_21730/ROWS.csv; $REFERENCE/sets/simini_21730/SplitActs.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $SOURCES/capreg/res_17<CC>.txt; $SOURCES/gams/aggregation/defaultA.agg"
+    "sources": "$EXPORTS/LitRevAmmoTech.csv; $EXPORTS/LitRev_input_manStor.csv; $EXPORTS/LitRev_inputs.csv; $EXPORTS/LitRev_non_changeable_parameters.csv; $EXPORTS/holdingsLSU.csv; $EXPORTS/nvzShare_LU.csv; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/AACT_TO_XX.csv; $REFERENCE/sets/simini_21730/CACT_TO_NGRP.csv; $REFERENCE/sets/simini_21730/COLS.csv; $REFERENCE/sets/simini_21730/EPRD_TO_GRP.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FEED_TRD.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/MitiTechAmm.csv; $REFERENCE/sets/simini_21730/OYANI.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/PERM_NGRP.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/RMEU_to_RM.csv; $REFERENCE/sets/simini_21730/RMS.csv; $REFERENCE/sets/simini_21730/RMS_TO_RM.csv; $REFERENCE/sets/simini_21730/RMTP.csv; $REFERENCE/sets/simini_21730/RM_TO_RMTP.csv; $REFERENCE/sets/simini_21730/ROWS.csv; $REFERENCE/sets/simini_21730/SplitActs.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $SOURCES/capreg/res_17<CC>.txt; $SOURCES/dat/envind/fao_peatland/P.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_EmFracFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmAppl.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmHouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmStorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracUseFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_NN_CorrFertFactDeviation.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmhouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmstorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_bNumAniRains.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ControlStrategies.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_FracEmGrazing.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_RCEmissions.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ReducControlStrategies.parquet; $SOURCES/gams/aggregation/defaultA.agg; $SOURCES/gams/envind/ammo.gms"
    },
    "notes": [],
    "read_by": {
@@ -9445,7 +9447,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_ghg_coefs_2017",
-    "sources": "$EXPORTS/LitRevAmmoTech.csv; $EXPORTS/LitRev_input_manStor.csv; $EXPORTS/LitRev_inputs.csv; $EXPORTS/LitRev_non_changeable_parameters.csv; $EXPORTS/holdingsLSU.csv; $EXPORTS/nvzShare_LU.csv; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/AACT_TO_XX.csv; $REFERENCE/sets/simini_21730/CACT_TO_NGRP.csv; $REFERENCE/sets/simini_21730/COLS.csv; $REFERENCE/sets/simini_21730/EPRD_TO_GRP.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FEED_TRD.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/MitiTechAmm.csv; $REFERENCE/sets/simini_21730/OYANI.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/PERM_NGRP.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/RMEU_to_RM.csv; $REFERENCE/sets/simini_21730/RMS.csv; $REFERENCE/sets/simini_21730/RMS_TO_RM.csv; $REFERENCE/sets/simini_21730/RMTP.csv; $REFERENCE/sets/simini_21730/RM_TO_RMTP.csv; $REFERENCE/sets/simini_21730/ROWS.csv; $REFERENCE/sets/simini_21730/SplitActs.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $SOURCES/capreg/res_17<CC>.txt; $SOURCES/gams/aggregation/defaultA.agg"
+    "sources": "$EXPORTS/LitRevAmmoTech.csv; $EXPORTS/LitRev_input_manStor.csv; $EXPORTS/LitRev_inputs.csv; $EXPORTS/LitRev_non_changeable_parameters.csv; $EXPORTS/holdingsLSU.csv; $EXPORTS/nvzShare_LU.csv; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/AACT_TO_XX.csv; $REFERENCE/sets/simini_21730/CACT_TO_NGRP.csv; $REFERENCE/sets/simini_21730/COLS.csv; $REFERENCE/sets/simini_21730/EPRD_TO_GRP.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FEED_TRD.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/MitiTechAmm.csv; $REFERENCE/sets/simini_21730/OYANI.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/PERM_NGRP.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/RMEU_to_RM.csv; $REFERENCE/sets/simini_21730/RMS.csv; $REFERENCE/sets/simini_21730/RMS_TO_RM.csv; $REFERENCE/sets/simini_21730/RMTP.csv; $REFERENCE/sets/simini_21730/RM_TO_RMTP.csv; $REFERENCE/sets/simini_21730/ROWS.csv; $REFERENCE/sets/simini_21730/SplitActs.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $SOURCES/capreg/res_17<CC>.txt; $SOURCES/dat/envind/fao_peatland/P.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_EmFracFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmAppl.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmHouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmStorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracUseFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_NN_CorrFertFactDeviation.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmhouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmstorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_bNumAniRains.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ControlStrategies.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_FracEmGrazing.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_RCEmissions.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ReducControlStrategies.parquet; $SOURCES/gams/aggregation/defaultA.agg; $SOURCES/gams/envind/ammo.gms"
    },
    "notes": [],
    "read_by": {
@@ -10224,7 +10226,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_manure_n2o",
-    "sources": "$EXPORTS/LitRevAmmoTech.csv; $EXPORTS/LitRev_input_manStor.csv; $EXPORTS/LitRev_inputs.csv; $EXPORTS/LitRev_non_changeable_parameters.csv; $EXPORTS/gd_full.zip; $EXPORTS/holdingsLSU.csv; $EXPORTS/nvzShare_LU.csv; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $EXPORTS/scen.zip; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/AACT_TO_XX.csv; $REFERENCE/sets/simini_21730/CACT_TO_NGRP.csv; $REFERENCE/sets/simini_21730/COLS.csv; $REFERENCE/sets/simini_21730/EPRD_TO_GRP.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FEED_TRD.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/MitiTechAmm.csv; $REFERENCE/sets/simini_21730/OYANI.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/PERM_NGRP.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/RMEU_to_RM.csv; $REFERENCE/sets/simini_21730/RMS.csv; $REFERENCE/sets/simini_21730/RMS_TO_RM.csv; $REFERENCE/sets/simini_21730/RMTP.csv; $REFERENCE/sets/simini_21730/RM_TO_RMTP.csv; $REFERENCE/sets/simini_21730/ROWS.csv; $REFERENCE/sets/simini_21730/SplitActs.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $SOURCES/capreg/res_17<CC>.txt; $SOURCES/capri_export/DATA2_<CC>.txt; $SOURCES/gams/aggregation/defaultA.agg; $SOURCES/gams/envind/ad_data_and_cali.gms; $SOURCES/gams/envind/ammo_tech.gms"
+    "sources": "$EXPORTS/LitRevAmmoTech.csv; $EXPORTS/LitRev_input_manStor.csv; $EXPORTS/LitRev_inputs.csv; $EXPORTS/LitRev_non_changeable_parameters.csv; $EXPORTS/gd_full.zip; $EXPORTS/holdingsLSU.csv; $EXPORTS/nvzShare_LU.csv; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $EXPORTS/scen.zip; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/AACT_TO_XX.csv; $REFERENCE/sets/simini_21730/CACT_TO_NGRP.csv; $REFERENCE/sets/simini_21730/COLS.csv; $REFERENCE/sets/simini_21730/EPRD_TO_GRP.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FEED_TRD.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/MitiTechAmm.csv; $REFERENCE/sets/simini_21730/OYANI.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/PERM_NGRP.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/RMEU_to_RM.csv; $REFERENCE/sets/simini_21730/RMS.csv; $REFERENCE/sets/simini_21730/RMS_TO_RM.csv; $REFERENCE/sets/simini_21730/RMTP.csv; $REFERENCE/sets/simini_21730/RM_TO_RMTP.csv; $REFERENCE/sets/simini_21730/ROWS.csv; $REFERENCE/sets/simini_21730/SplitActs.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $SOURCES/capreg/res_17<CC>.txt; $SOURCES/capri_export/DATA2_<CC>.txt; $SOURCES/dat/envind/fao_peatland/P.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_EmFracFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmAppl.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmHouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmStorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracUseFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_NN_CorrFertFactDeviation.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmhouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmstorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_bNumAniRains.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ControlStrategies.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_FracEmGrazing.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_RCEmissions.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ReducControlStrategies.parquet; $SOURCES/gams/aggregation/defaultA.agg; $SOURCES/gams/envind/ad_data_and_cali.gms; $SOURCES/gams/envind/ammo.gms; $SOURCES/gams/envind/ammo_tech.gms"
    },
    "notes": [],
    "read_by": {
@@ -10296,7 +10298,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_manure_n2o",
-    "sources": "$EXPORTS/LitRevAmmoTech.csv; $EXPORTS/LitRev_input_manStor.csv; $EXPORTS/LitRev_inputs.csv; $EXPORTS/LitRev_non_changeable_parameters.csv; $EXPORTS/gd_full.zip; $EXPORTS/holdingsLSU.csv; $EXPORTS/nvzShare_LU.csv; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $EXPORTS/scen.zip; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/AACT_TO_XX.csv; $REFERENCE/sets/simini_21730/CACT_TO_NGRP.csv; $REFERENCE/sets/simini_21730/COLS.csv; $REFERENCE/sets/simini_21730/EPRD_TO_GRP.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FEED_TRD.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/MitiTechAmm.csv; $REFERENCE/sets/simini_21730/OYANI.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/PERM_NGRP.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/RMEU_to_RM.csv; $REFERENCE/sets/simini_21730/RMS.csv; $REFERENCE/sets/simini_21730/RMS_TO_RM.csv; $REFERENCE/sets/simini_21730/RMTP.csv; $REFERENCE/sets/simini_21730/RM_TO_RMTP.csv; $REFERENCE/sets/simini_21730/ROWS.csv; $REFERENCE/sets/simini_21730/SplitActs.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $SOURCES/capreg/res_17<CC>.txt; $SOURCES/capri_export/DATA2_<CC>.txt; $SOURCES/gams/aggregation/defaultA.agg; $SOURCES/gams/envind/ad_data_and_cali.gms; $SOURCES/gams/envind/ammo_tech.gms"
+    "sources": "$EXPORTS/LitRevAmmoTech.csv; $EXPORTS/LitRev_input_manStor.csv; $EXPORTS/LitRev_inputs.csv; $EXPORTS/LitRev_non_changeable_parameters.csv; $EXPORTS/gd_full.zip; $EXPORTS/holdingsLSU.csv; $EXPORTS/nvzShare_LU.csv; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $EXPORTS/scen.zip; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/AACT_TO_XX.csv; $REFERENCE/sets/simini_21730/CACT_TO_NGRP.csv; $REFERENCE/sets/simini_21730/COLS.csv; $REFERENCE/sets/simini_21730/EPRD_TO_GRP.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FEED_TRD.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/MitiTechAmm.csv; $REFERENCE/sets/simini_21730/OYANI.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/PERM_NGRP.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/RMEU_to_RM.csv; $REFERENCE/sets/simini_21730/RMS.csv; $REFERENCE/sets/simini_21730/RMS_TO_RM.csv; $REFERENCE/sets/simini_21730/RMTP.csv; $REFERENCE/sets/simini_21730/RM_TO_RMTP.csv; $REFERENCE/sets/simini_21730/ROWS.csv; $REFERENCE/sets/simini_21730/SplitActs.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $SOURCES/capreg/res_17<CC>.txt; $SOURCES/capri_export/DATA2_<CC>.txt; $SOURCES/dat/envind/fao_peatland/P.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_EmFracFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmAppl.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmHouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmStorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracUseFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_NN_CorrFertFactDeviation.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmhouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmstorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_bNumAniRains.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ControlStrategies.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_FracEmGrazing.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_RCEmissions.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ReducControlStrategies.parquet; $SOURCES/gams/aggregation/defaultA.agg; $SOURCES/gams/envind/ad_data_and_cali.gms; $SOURCES/gams/envind/ammo.gms; $SOURCES/gams/envind/ammo_tech.gms"
    },
    "notes": [],
    "read_by": {
@@ -12683,7 +12685,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_fert_side_effects",
-    "sources": "$EXPORTS/LitRevAmmoTech.csv; $EXPORTS/LitRev_input_manStor.csv; $EXPORTS/LitRev_inputs.csv; $EXPORTS/LitRev_non_changeable_parameters.csv; $EXPORTS/gd_full.zip; $EXPORTS/holdingsLSU.csv; $EXPORTS/nvzShare_LU.csv; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $EXPORTS/scen.zip; $SOURCES/gams/aggregation/defaultA.agg; $SOURCES/gams/envind/ammo_tech.gms"
+    "sources": "$EXPORTS/LitRevAmmoTech.csv; $EXPORTS/LitRev_input_manStor.csv; $EXPORTS/LitRev_inputs.csv; $EXPORTS/LitRev_non_changeable_parameters.csv; $EXPORTS/gd_full.zip; $EXPORTS/holdingsLSU.csv; $EXPORTS/nvzShare_LU.csv; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $EXPORTS/scen.zip; $SOURCES/dat/envind/fao_peatland/P.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_EmFracFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmAppl.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmHouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmStorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracUseFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_NN_CorrFertFactDeviation.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmhouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmstorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_bNumAniRains.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ControlStrategies.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_FracEmGrazing.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_RCEmissions.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ReducControlStrategies.parquet; $SOURCES/gams/aggregation/defaultA.agg; $SOURCES/gams/envind/ammo.gms; $SOURCES/gams/envind/ammo_tech.gms"
    },
    "notes": [
     {
@@ -12917,7 +12919,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_genetics_effects",
-    "sources": "$EXPORTS/LitRevAmmoTech.csv; $EXPORTS/LitRev_input_manStor.csv; $EXPORTS/LitRev_inputs.csv; $EXPORTS/LitRev_non_changeable_parameters.csv; $EXPORTS/fedcof.gms; $EXPORTS/gd_full.zip; $EXPORTS/holdingsLSU.csv; $EXPORTS/nvzShare_LU.csv; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $EXPORTS/scen.zip; $EXPORTS/trends_1730.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/AACT_TO_XX.csv; $REFERENCE/sets/simini_21730/CACT_TO_NGRP.csv; $REFERENCE/sets/simini_21730/COLS.csv; $REFERENCE/sets/simini_21730/EPRD_TO_GRP.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FEED_TRD.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/MitiTechAmm.csv; $REFERENCE/sets/simini_21730/OYANI.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/PERM_NGRP.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/RMEU_to_RM.csv; $REFERENCE/sets/simini_21730/RMS.csv; $REFERENCE/sets/simini_21730/RMS_TO_RM.csv; $REFERENCE/sets/simini_21730/RMTP.csv; $REFERENCE/sets/simini_21730/RM_TO_RMTP.csv; $REFERENCE/sets/simini_21730/ROWS.csv; $REFERENCE/sets/simini_21730/SplitActs.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $SOURCES/capreg/res_17<CC>.txt; $SOURCES/capri_export/DATA2_<CC>.txt; $SOURCES/capri_export/quadPact_<CC>.txt; $SOURCES/capri_export/quadTechn_<CC>.txt; $SOURCES/costsavings/costsavings_ini_21730_jul15.csv; $SOURCES/costsavings/costsavings_max_21730_jul15.csv; $SOURCES/feed_export/pmppar_17<CC>_feedpmp.csv; $SOURCES/gams/aggregation/defaultA.agg; $SOURCES/gams/envind/ad_data_and_cali.gms; $SOURCES/gams/envind/ammo_tech.gms; $SOURCES/pmp2030/estnlp_results_<CC>.txt; $SOURCES/pmp2030/estnlp_results_PELA.txt; $SOURCES/pmp2030/pmppar_21730<CC>defaulta.txt"
+    "sources": "$EXPORTS/LitRevAmmoTech.csv; $EXPORTS/LitRev_input_manStor.csv; $EXPORTS/LitRev_inputs.csv; $EXPORTS/LitRev_non_changeable_parameters.csv; $EXPORTS/fedcof.gms; $EXPORTS/gd_full.zip; $EXPORTS/holdingsLSU.csv; $EXPORTS/nvzShare_LU.csv; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $EXPORTS/scen.zip; $EXPORTS/trends_1730.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/AACT_TO_XX.csv; $REFERENCE/sets/simini_21730/CACT_TO_NGRP.csv; $REFERENCE/sets/simini_21730/COLS.csv; $REFERENCE/sets/simini_21730/EPRD_TO_GRP.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FEED_TRD.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/MitiTechAmm.csv; $REFERENCE/sets/simini_21730/OYANI.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/PERM_NGRP.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/RMEU_to_RM.csv; $REFERENCE/sets/simini_21730/RMS.csv; $REFERENCE/sets/simini_21730/RMS_TO_RM.csv; $REFERENCE/sets/simini_21730/RMTP.csv; $REFERENCE/sets/simini_21730/RM_TO_RMTP.csv; $REFERENCE/sets/simini_21730/ROWS.csv; $REFERENCE/sets/simini_21730/SplitActs.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $SOURCES/capreg/res_17<CC>.txt; $SOURCES/capri_export/DATA2_<CC>.txt; $SOURCES/capri_export/quadPact_<CC>.txt; $SOURCES/capri_export/quadTechn_<CC>.txt; $SOURCES/costsavings/costsavings_ini_21730_jul15.csv; $SOURCES/costsavings/costsavings_max_21730_jul15.csv; $SOURCES/dat/envind/fao_peatland/P.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_EmFracFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmAppl.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmHouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmStorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracUseFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_NN_CorrFertFactDeviation.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmhouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmstorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_bNumAniRains.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ControlStrategies.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_FracEmGrazing.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_RCEmissions.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ReducControlStrategies.parquet; $SOURCES/feed_export/pmppar_17<CC>_feedpmp.csv; $SOURCES/gams/aggregation/defaultA.agg; $SOURCES/gams/envind/ad_data_and_cali.gms; $SOURCES/gams/envind/ammo.gms; $SOURCES/gams/envind/ammo_tech.gms; $SOURCES/pmp2030/estnlp_results_<CC>.txt; $SOURCES/pmp2030/estnlp_results_PELA.txt; $SOURCES/pmp2030/pmppar_21730<CC>defaulta.txt"
    },
    "notes": [],
    "read_by": {
@@ -13578,7 +13580,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_ammonia_tech_inputs",
-    "sources": "$EXPORTS/LitRevAmmoTech.csv; $EXPORTS/LitRev_input_manStor.csv; $EXPORTS/LitRev_inputs.csv; $EXPORTS/LitRev_non_changeable_parameters.csv; $EXPORTS/holdingsLSU.csv; $EXPORTS/nvzShare_LU.csv"
+    "sources": "$EXPORTS/LitRevAmmoTech.csv; $EXPORTS/LitRev_input_manStor.csv; $EXPORTS/LitRev_inputs.csv; $EXPORTS/LitRev_non_changeable_parameters.csv; $EXPORTS/holdingsLSU.csv; $EXPORTS/nvzShare_LU.csv; $SOURCES/dat/envind/fao_peatland/P.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_EmFracFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmAppl.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmHouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmStorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracUseFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_NN_CorrFertFactDeviation.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmhouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmstorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_bNumAniRains.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ControlStrategies.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_FracEmGrazing.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_RCEmissions.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ReducControlStrategies.parquet; $SOURCES/gams/envind/ammo.gms"
    },
    "notes": [],
    "read_by": {
@@ -30739,7 +30741,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "extract_capri_dat",
-    "sources": "$SOURCES/dat/envind/fao_peatland/P.parquet"
+    "sources": "$SOURCES/dat/envind/fao_peatland/P.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_EmFracFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmAppl.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmHouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmStorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracUseFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_NN_CorrFertFactDeviation.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmhouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmstorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_bNumAniRains.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ControlStrategies.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_FracEmGrazing.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_RCEmissions.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ReducControlStrategies.parquet"
    },
    "notes": [],
    "read_by": {
@@ -32093,7 +32095,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_fert_side_effects",
-    "sources": "$EXPORTS/LitRevAmmoTech.csv; $EXPORTS/LitRev_input_manStor.csv; $EXPORTS/LitRev_inputs.csv; $EXPORTS/LitRev_non_changeable_parameters.csv; $EXPORTS/gd_full.zip; $EXPORTS/holdingsLSU.csv; $EXPORTS/nvzShare_LU.csv; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $EXPORTS/scen.zip; $SOURCES/gams/aggregation/defaultA.agg; $SOURCES/gams/envind/ammo_tech.gms"
+    "sources": "$EXPORTS/LitRevAmmoTech.csv; $EXPORTS/LitRev_input_manStor.csv; $EXPORTS/LitRev_inputs.csv; $EXPORTS/LitRev_non_changeable_parameters.csv; $EXPORTS/gd_full.zip; $EXPORTS/holdingsLSU.csv; $EXPORTS/nvzShare_LU.csv; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $EXPORTS/scen.zip; $SOURCES/dat/envind/fao_peatland/P.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_EmFracFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmAppl.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmHouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmStorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracUseFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_NN_CorrFertFactDeviation.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmhouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmstorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_bNumAniRains.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ControlStrategies.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_FracEmGrazing.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_RCEmissions.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ReducControlStrategies.parquet; $SOURCES/gams/aggregation/defaultA.agg; $SOURCES/gams/envind/ammo.gms; $SOURCES/gams/envind/ammo_tech.gms"
    },
    "notes": [],
    "read_by": {
@@ -32528,6 +32530,713 @@
     "model": [],
     "builders": [
      "build_captrd_dat"
+    ],
+    "checks": [],
+    "tests": []
+   }
+  },
+  "src_no_mirror_bnumanirains": {
+   "file": "capri_data/sources/capri_dat/miterra/mirror_miterra_inputs_norway_p_NO_bNumAniRains.csv",
+   "declared_in": "34_sources_csv.sql",
+   "layout": [],
+   "comment": "CAPRI's p_NO_bNumAniRains of dat/miterra/mirror_miterra_inputs_norway.gdx: Norway's MITERRA data, copied to NO000000 by envind/ammo.gms l. 252-343 (tools/build/extract_capri_dat.py; applied by tools/build/build_ammonia_tech_inputs.py).",
+   "columns": [
+    {
+     "name": "animal_mitt",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "year",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "value",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "animal_mitt",
+    "year"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [
+    {
+     "item": "value",
+     "unit": null,
+     "status": "open",
+     "basis": "as CAPRI's bNumAniRains"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "extract_capri_dat",
+    "sources": "$SOURCES/dat/envind/fao_peatland/P.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_EmFracFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmAppl.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmHouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmStorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracUseFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_NN_CorrFertFactDeviation.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmhouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmstorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_bNumAniRains.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ControlStrategies.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_FracEmGrazing.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_RCEmissions.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ReducControlStrategies.parquet"
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [
+     "build_ammonia_tech_inputs"
+    ],
+    "checks": [],
+    "tests": []
+   }
+  },
+  "src_no_mirror_controlstrategies": {
+   "file": "capri_data/sources/capri_dat/miterra/mirror_non_changeable_parameters_norway_p_NO_ControlStrategies.csv",
+   "declared_in": "34_sources_csv.sql",
+   "layout": [],
+   "comment": "CAPRI's p_NO_ControlStrategies of dat/miterra/mirror_non_changeable_parameters_norway.gdx: Norway's MITERRA data, copied to NO000000 by envind/ammo.gms l. 252-343 (tools/build/extract_capri_dat.py; applied by tools/build/build_ammonia_tech_inputs.py).",
+   "columns": [
+    {
+     "name": "animal_mitt",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "strategy",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "item",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "value",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "animal_mitt",
+    "strategy",
+    "item"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [
+    {
+     "item": "value",
+     "unit": null,
+     "status": "open",
+     "basis": "as CAPRI's ControlStrategies"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "extract_capri_dat",
+    "sources": "$SOURCES/dat/envind/fao_peatland/P.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_EmFracFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmAppl.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmHouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmStorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracUseFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_NN_CorrFertFactDeviation.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmhouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmstorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_bNumAniRains.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ControlStrategies.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_FracEmGrazing.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_RCEmissions.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ReducControlStrategies.parquet"
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [
+     "build_ammonia_tech_inputs"
+    ],
+    "checks": [],
+    "tests": []
+   }
+  },
+  "src_no_mirror_emfracfert": {
+   "file": "capri_data/sources/capri_dat/miterra/mirror_miterra_inputs_norway_p_NO_EmFracFert.csv",
+   "declared_in": "34_sources_csv.sql",
+   "layout": [],
+   "comment": "CAPRI's p_NO_EmFracFert of dat/miterra/mirror_miterra_inputs_norway.gdx: Norway's MITERRA data, copied to NO000000 by envind/ammo.gms l. 252-343 (tools/build/extract_capri_dat.py; applied by tools/build/build_ammonia_tech_inputs.py).",
+   "columns": [
+    {
+     "name": "gas",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "fertiliser",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "value",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "gas",
+    "fertiliser"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [
+    {
+     "item": "value",
+     "unit": null,
+     "status": "open",
+     "basis": "as CAPRI's EmFracFert"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "extract_capri_dat",
+    "sources": "$SOURCES/dat/envind/fao_peatland/P.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_EmFracFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmAppl.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmHouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmStorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracUseFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_NN_CorrFertFactDeviation.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmhouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmstorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_bNumAniRains.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ControlStrategies.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_FracEmGrazing.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_RCEmissions.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ReducControlStrategies.parquet"
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [
+     "build_ammonia_tech_inputs"
+    ],
+    "checks": [],
+    "tests": []
+   }
+  },
+  "src_no_mirror_fracemappl": {
+   "file": "capri_data/sources/capri_dat/miterra/mirror_miterra_inputs_norway_p_NO_FracEmAppl.csv",
+   "declared_in": "34_sources_csv.sql",
+   "layout": [],
+   "comment": "CAPRI's p_NO_FracEmAppl of dat/miterra/mirror_miterra_inputs_norway.gdx: Norway's MITERRA data, copied to NO000000 by envind/ammo.gms l. 252-343 (tools/build/extract_capri_dat.py; applied by tools/build/build_ammonia_tech_inputs.py).",
+   "columns": [
+    {
+     "name": "animal_mitt",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "gas",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "value",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "animal_mitt",
+    "gas"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [
+    {
+     "item": "value",
+     "unit": null,
+     "status": "open",
+     "basis": "as CAPRI's FracEmAppl"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "extract_capri_dat",
+    "sources": "$SOURCES/dat/envind/fao_peatland/P.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_EmFracFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmAppl.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmHouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmStorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracUseFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_NN_CorrFertFactDeviation.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmhouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmstorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_bNumAniRains.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ControlStrategies.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_FracEmGrazing.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_RCEmissions.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ReducControlStrategies.parquet"
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [
+     "build_ammonia_tech_inputs"
+    ],
+    "checks": [],
+    "tests": []
+   }
+  },
+  "src_no_mirror_fracemgrazing": {
+   "file": "capri_data/sources/capri_dat/miterra/mirror_non_changeable_parameters_norway_p_NO_FracEmGrazing.csv",
+   "declared_in": "34_sources_csv.sql",
+   "layout": [],
+   "comment": "CAPRI's p_NO_FracEmGrazing of dat/miterra/mirror_non_changeable_parameters_norway.gdx: Norway's MITERRA data, copied to NO000000 by envind/ammo.gms l. 252-343 (tools/build/extract_capri_dat.py; applied by tools/build/build_ammonia_tech_inputs.py).",
+   "columns": [
+    {
+     "name": "animal_mitt",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "item",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "value",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "animal_mitt",
+    "item"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [
+    {
+     "item": "value",
+     "unit": null,
+     "status": "open",
+     "basis": "as CAPRI's FracEmGrazing"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "extract_capri_dat",
+    "sources": "$SOURCES/dat/envind/fao_peatland/P.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_EmFracFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmAppl.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmHouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmStorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracUseFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_NN_CorrFertFactDeviation.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmhouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmstorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_bNumAniRains.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ControlStrategies.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_FracEmGrazing.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_RCEmissions.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ReducControlStrategies.parquet"
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [
+     "build_ammonia_tech_inputs"
+    ],
+    "checks": [],
+    "tests": []
+   }
+  },
+  "src_no_mirror_fracemhouse": {
+   "file": "capri_data/sources/capri_dat/miterra/mirror_miterra_inputs_norway_p_NO_FracEmHouse.csv",
+   "declared_in": "34_sources_csv.sql",
+   "layout": [],
+   "comment": "CAPRI's p_NO_FracEmHouse of dat/miterra/mirror_miterra_inputs_norway.gdx: Norway's MITERRA data, copied to NO000000 by envind/ammo.gms l. 252-343 (tools/build/extract_capri_dat.py; applied by tools/build/build_ammonia_tech_inputs.py).",
+   "columns": [
+    {
+     "name": "animal_mitt",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "gas",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "value",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "animal_mitt",
+    "gas"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [
+    {
+     "item": "value",
+     "unit": null,
+     "status": "open",
+     "basis": "as CAPRI's FracEmHouse"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "extract_capri_dat",
+    "sources": "$SOURCES/dat/envind/fao_peatland/P.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_EmFracFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmAppl.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmHouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmStorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracUseFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_NN_CorrFertFactDeviation.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmhouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmstorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_bNumAniRains.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ControlStrategies.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_FracEmGrazing.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_RCEmissions.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ReducControlStrategies.parquet"
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [
+     "build_ammonia_tech_inputs"
+    ],
+    "checks": [],
+    "tests": []
+   }
+  },
+  "src_no_mirror_fracemstorage": {
+   "file": "capri_data/sources/capri_dat/miterra/mirror_miterra_inputs_norway_p_NO_FracEmStorage.csv",
+   "declared_in": "34_sources_csv.sql",
+   "layout": [],
+   "comment": "CAPRI's p_NO_FracEmStorage of dat/miterra/mirror_miterra_inputs_norway.gdx: Norway's MITERRA data, copied to NO000000 by envind/ammo.gms l. 252-343 (tools/build/extract_capri_dat.py; applied by tools/build/build_ammonia_tech_inputs.py).",
+   "columns": [
+    {
+     "name": "animal_mitt",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "gas",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "value",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "animal_mitt",
+    "gas"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [
+    {
+     "item": "value",
+     "unit": null,
+     "status": "open",
+     "basis": "as CAPRI's FracEmStorage"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "extract_capri_dat",
+    "sources": "$SOURCES/dat/envind/fao_peatland/P.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_EmFracFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmAppl.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmHouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmStorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracUseFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_NN_CorrFertFactDeviation.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmhouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmstorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_bNumAniRains.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ControlStrategies.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_FracEmGrazing.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_RCEmissions.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ReducControlStrategies.parquet"
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [
+     "build_ammonia_tech_inputs"
+    ],
+    "checks": [],
+    "tests": []
+   }
+  },
+  "src_no_mirror_fracusefert": {
+   "file": "capri_data/sources/capri_dat/miterra/mirror_miterra_inputs_norway_p_NO_FracUseFert.csv",
+   "declared_in": "34_sources_csv.sql",
+   "layout": [],
+   "comment": "CAPRI's p_NO_FracUseFert of dat/miterra/mirror_miterra_inputs_norway.gdx: Norway's MITERRA data, copied to NO000000 by envind/ammo.gms l. 252-343 (tools/build/extract_capri_dat.py; applied by tools/build/build_ammonia_tech_inputs.py).",
+   "columns": [
+    {
+     "name": "fertiliser",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "value",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "fertiliser"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [
+    {
+     "item": "value",
+     "unit": null,
+     "status": "open",
+     "basis": "as CAPRI's FracUseFert"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "extract_capri_dat",
+    "sources": "$SOURCES/dat/envind/fao_peatland/P.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_EmFracFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmAppl.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmHouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmStorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracUseFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_NN_CorrFertFactDeviation.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmhouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmstorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_bNumAniRains.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ControlStrategies.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_FracEmGrazing.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_RCEmissions.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ReducControlStrategies.parquet"
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [
+     "build_ammonia_tech_inputs"
+    ],
+    "checks": [],
+    "tests": []
+   }
+  },
+  "src_no_mirror_nn_corrfertfactdeviation": {
+   "file": "capri_data/sources/capri_dat/miterra/mirror_miterra_inputs_norway_p_NO_NN_CorrFertFactDeviation.csv",
+   "declared_in": "34_sources_csv.sql",
+   "layout": [],
+   "comment": "CAPRI's p_NO_NN_CorrFertFactDeviation of dat/miterra/mirror_miterra_inputs_norway.gdx: Norway's MITERRA data, copied to NO000000 by envind/ammo.gms l. 252-343 (tools/build/extract_capri_dat.py; applied by tools/build/build_ammonia_tech_inputs.py).",
+   "columns": [
+    {
+     "name": "fertiliser",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "year",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "value",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "fertiliser",
+    "year"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [
+    {
+     "item": "value",
+     "unit": null,
+     "status": "open",
+     "basis": "as CAPRI's NN_CorrFertFactDeviation"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "extract_capri_dat",
+    "sources": "$SOURCES/dat/envind/fao_peatland/P.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_EmFracFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmAppl.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmHouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmStorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracUseFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_NN_CorrFertFactDeviation.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmhouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmstorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_bNumAniRains.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ControlStrategies.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_FracEmGrazing.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_RCEmissions.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ReducControlStrategies.parquet"
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [
+     "build_ammonia_tech_inputs"
+    ],
+    "checks": [],
+    "tests": []
+   }
+  },
+  "src_no_mirror_rcemissions": {
+   "file": "capri_data/sources/capri_dat/miterra/mirror_non_changeable_parameters_norway_p_NO_RCEmissions.csv",
+   "declared_in": "34_sources_csv.sql",
+   "layout": [],
+   "comment": "CAPRI's p_NO_RCEmissions of dat/miterra/mirror_non_changeable_parameters_norway.gdx: Norway's MITERRA data, copied to NO000000 by envind/ammo.gms l. 252-343 (tools/build/extract_capri_dat.py; applied by tools/build/build_ammonia_tech_inputs.py).",
+   "columns": [
+    {
+     "name": "animal_mitt",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "item",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "value",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "animal_mitt",
+    "item"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [
+    {
+     "item": "value",
+     "unit": null,
+     "status": "open",
+     "basis": "as CAPRI's RCEmissions"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "extract_capri_dat",
+    "sources": "$SOURCES/dat/envind/fao_peatland/P.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_EmFracFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmAppl.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmHouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmStorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracUseFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_NN_CorrFertFactDeviation.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmhouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmstorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_bNumAniRains.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ControlStrategies.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_FracEmGrazing.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_RCEmissions.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ReducControlStrategies.parquet"
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [
+     "build_ammonia_tech_inputs"
+    ],
+    "checks": [],
+    "tests": []
+   }
+  },
+  "src_no_mirror_reduccontrolstrategies": {
+   "file": "capri_data/sources/capri_dat/miterra/mirror_non_changeable_parameters_norway_p_NO_ReducControlStrategies.csv",
+   "declared_in": "34_sources_csv.sql",
+   "layout": [],
+   "comment": "CAPRI's p_NO_ReducControlStrategies of dat/miterra/mirror_non_changeable_parameters_norway.gdx: Norway's MITERRA data, copied to NO000000 by envind/ammo.gms l. 252-343 (tools/build/extract_capri_dat.py; applied by tools/build/build_ammonia_tech_inputs.py).",
+   "columns": [
+    {
+     "name": "animal_mitt",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "strategy",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "item",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "value",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "animal_mitt",
+    "strategy",
+    "item"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [
+    {
+     "item": "value",
+     "unit": null,
+     "status": "open",
+     "basis": "as CAPRI's ReducControlStrategies"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "extract_capri_dat",
+    "sources": "$SOURCES/dat/envind/fao_peatland/P.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_EmFracFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmAppl.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmHouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmStorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracUseFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_NN_CorrFertFactDeviation.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmhouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmstorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_bNumAniRains.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ControlStrategies.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_FracEmGrazing.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_RCEmissions.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ReducControlStrategies.parquet"
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [
+     "build_ammonia_tech_inputs"
+    ],
+    "checks": [],
+    "tests": []
+   }
+  },
+  "src_no_mirror_reducemhouse": {
+   "file": "capri_data/sources/capri_dat/miterra/mirror_miterra_inputs_norway_p_NO_ReducEmhouse.csv",
+   "declared_in": "34_sources_csv.sql",
+   "layout": [],
+   "comment": "CAPRI's p_NO_ReducEmhouse of dat/miterra/mirror_miterra_inputs_norway.gdx: Norway's MITERRA data, copied to NO000000 by envind/ammo.gms l. 252-343 (tools/build/extract_capri_dat.py; applied by tools/build/build_ammonia_tech_inputs.py).",
+   "columns": [
+    {
+     "name": "animal_mitt",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "gas",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "tech_class",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "value",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "animal_mitt",
+    "gas",
+    "tech_class"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [
+    {
+     "item": "value",
+     "unit": null,
+     "status": "open",
+     "basis": "as CAPRI's ReducEmhouse"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "extract_capri_dat",
+    "sources": "$SOURCES/dat/envind/fao_peatland/P.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_EmFracFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmAppl.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmHouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmStorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracUseFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_NN_CorrFertFactDeviation.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmhouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmstorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_bNumAniRains.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ControlStrategies.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_FracEmGrazing.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_RCEmissions.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ReducControlStrategies.parquet"
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [
+     "build_ammonia_tech_inputs"
+    ],
+    "checks": [],
+    "tests": []
+   }
+  },
+  "src_no_mirror_reducemstorage": {
+   "file": "capri_data/sources/capri_dat/miterra/mirror_miterra_inputs_norway_p_NO_ReducEmstorage.csv",
+   "declared_in": "34_sources_csv.sql",
+   "layout": [],
+   "comment": "CAPRI's p_NO_ReducEmstorage of dat/miterra/mirror_miterra_inputs_norway.gdx: Norway's MITERRA data, copied to NO000000 by envind/ammo.gms l. 252-343 (tools/build/extract_capri_dat.py; applied by tools/build/build_ammonia_tech_inputs.py).",
+   "columns": [
+    {
+     "name": "animal_mitt",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "gas",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "tech_class",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "value",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "animal_mitt",
+    "gas",
+    "tech_class"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [
+    {
+     "item": "value",
+     "unit": null,
+     "status": "open",
+     "basis": "as CAPRI's ReducEmstorage"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "extract_capri_dat",
+    "sources": "$SOURCES/dat/envind/fao_peatland/P.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_EmFracFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmAppl.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmHouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmStorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracUseFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_NN_CorrFertFactDeviation.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmhouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmstorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_bNumAniRains.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ControlStrategies.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_FracEmGrazing.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_RCEmissions.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ReducControlStrategies.parquet"
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [
+     "build_ammonia_tech_inputs"
     ],
     "checks": [],
     "tests": []
@@ -40589,7 +41298,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_supplement_effects",
-    "sources": "$EXPORTS/LitRevAmmoTech.csv; $EXPORTS/LitRev_input_manStor.csv; $EXPORTS/LitRev_inputs.csv; $EXPORTS/LitRev_non_changeable_parameters.csv; $EXPORTS/animReq_SK.zip; $EXPORTS/fedcof.gms; $EXPORTS/gd_full.zip; $EXPORTS/holdingsLSU.csv; $EXPORTS/nvzShare_LU.csv; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $EXPORTS/scen.zip; $EXPORTS/trends_1730.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/AACT_TO_XX.csv; $REFERENCE/sets/simini_21730/CACT_TO_NGRP.csv; $REFERENCE/sets/simini_21730/COLS.csv; $REFERENCE/sets/simini_21730/EPRD_TO_GRP.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FEED_TRD.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/MitiTechAmm.csv; $REFERENCE/sets/simini_21730/OYANI.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/PERM_NGRP.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/RMEU_to_RM.csv; $REFERENCE/sets/simini_21730/RMS.csv; $REFERENCE/sets/simini_21730/RMS_TO_RM.csv; $REFERENCE/sets/simini_21730/RMTP.csv; $REFERENCE/sets/simini_21730/RM_TO_RMTP.csv; $REFERENCE/sets/simini_21730/ROWS.csv; $REFERENCE/sets/simini_21730/SplitActs.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $SOURCES/capreg/res_17<CC>.txt; $SOURCES/capri_export/DATA2_<CC>.txt; $SOURCES/costsavings/costsavings_ini_21730_jul15.csv; $SOURCES/costsavings/costsavings_max_21730_jul15.csv; $SOURCES/feed_export/pmppar_17<CC>_feedpmp.csv; $SOURCES/gams/aggregation/defaultA.agg; $SOURCES/gams/envind/def_digestibility.gms; $SOURCES/pmp2030/estnlp_results_<CC>.txt; $SOURCES/pmp2030/pmppar_21730<CC>defaulta.txt"
+    "sources": "$EXPORTS/LitRevAmmoTech.csv; $EXPORTS/LitRev_input_manStor.csv; $EXPORTS/LitRev_inputs.csv; $EXPORTS/LitRev_non_changeable_parameters.csv; $EXPORTS/animReq_SK.zip; $EXPORTS/fedcof.gms; $EXPORTS/gd_full.zip; $EXPORTS/holdingsLSU.csv; $EXPORTS/nvzShare_LU.csv; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $EXPORTS/scen.zip; $EXPORTS/trends_1730.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/AACT_TO_XX.csv; $REFERENCE/sets/simini_21730/CACT_TO_NGRP.csv; $REFERENCE/sets/simini_21730/COLS.csv; $REFERENCE/sets/simini_21730/EPRD_TO_GRP.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FEED_TRD.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/MitiTechAmm.csv; $REFERENCE/sets/simini_21730/OYANI.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/PERM_NGRP.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/RMEU_to_RM.csv; $REFERENCE/sets/simini_21730/RMS.csv; $REFERENCE/sets/simini_21730/RMS_TO_RM.csv; $REFERENCE/sets/simini_21730/RMTP.csv; $REFERENCE/sets/simini_21730/RM_TO_RMTP.csv; $REFERENCE/sets/simini_21730/ROWS.csv; $REFERENCE/sets/simini_21730/SplitActs.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $SOURCES/capreg/res_17<CC>.txt; $SOURCES/capri_export/DATA2_<CC>.txt; $SOURCES/costsavings/costsavings_ini_21730_jul15.csv; $SOURCES/costsavings/costsavings_max_21730_jul15.csv; $SOURCES/dat/envind/fao_peatland/P.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_EmFracFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmAppl.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmHouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmStorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracUseFert.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_NN_CorrFertFactDeviation.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmhouse.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmstorage.parquet; $SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_bNumAniRains.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ControlStrategies.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_FracEmGrazing.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_RCEmissions.parquet; $SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ReducControlStrategies.parquet; $SOURCES/feed_export/pmppar_17<CC>_feedpmp.csv; $SOURCES/gams/aggregation/defaultA.agg; $SOURCES/gams/envind/ammo.gms; $SOURCES/gams/envind/def_digestibility.gms; $SOURCES/pmp2030/estnlp_results_<CC>.txt; $SOURCES/pmp2030/pmppar_21730<CC>defaulta.txt"
    },
    "notes": [],
    "read_by": {

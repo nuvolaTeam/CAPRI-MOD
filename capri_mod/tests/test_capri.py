@@ -2711,6 +2711,21 @@ def test_ad_option_of_croatia_and_the_balkans_as_capri():
         assert (g["ini"] == 0).all() and (g["max"] > 0).all()
     assert a.loc[(a.region == "HR000000") & (a.activity == "DCOL"), "vser"].item() == 4.5   # RO and BG's table value
 
+def test_norway_miterra_mirror_and_ad_option_as_capri():
+    """KNOWN_ISSUES K114: CAPRI copies its Norwegian MITERRA data to NO000000 (envind/ammo.gms l. 252-343) and Sweden's
+    AD data to Norway (ad_data_and_cali.gms l. 257-261). With them Norway's units have housed liquid manure and the AD
+    option, whose initial shares are CAPRI's Green Deal 2030 AD_AnCh to 0.5% (res_2_1730greendeal_refpol_endotech_all_ini)."""
+    import pandas as pd
+    D = DATA_DIR / "2017" / "abatement" / "ammonia"
+    rc = pd.read_csv(D / "RCEmissions.csv")
+    assert rc.loc[(rc.region == "NO000000") & (rc.animal_mitt == "DAICOW_L") & (rc.item == "HD"), "value"].item() == 225.0
+    a = pd.read_csv(D / "ad_option.csv").set_index(["region", "activity"])
+    capri = {"DCOL": 0.000208615457157513, "BULL": 7.64329067243917e-05, "PIGF": 0.000332852554101406}
+    for reg in ("NO020000", "NO060000", "NO070000", "NO080000", "NO090000", "NO0A0000"):
+        for act, v in capri.items():
+            # CAPRI reports the solved level, the model's table the initial share it calibrates on: 0.3% apart (DCOL)
+            assert abs(a.loc[(reg, act), "ini"] - v) <= 5e-3 * v, (reg, act, a.loc[(reg, act), "ini"])
+
 def test_manure_n2o_by_source_and_technology_effects():
     """CAPRI's manure N2O by stage (gases.gms): per t of manure N, housing/storage, application and
     grazing shares near IPCC's 1-2% in total; CAPRI's technology effects as its housing equation applies

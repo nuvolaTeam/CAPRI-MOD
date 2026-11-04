@@ -1,0 +1,13 @@
+animal_mitt,strategy,item,value
+LIQUID,N2O,HighEm,-1.0
+LIQUID,N2O,LowEm,-0.6
+LIQUID,NH3,HighEm,0.8
+LIQUID,NH3,LowEm,0.4
+LIQUID,NOx,HighEm,0.8
+LIQUID,NOx,LowEm,0.4
+SOLID,N2O,HighEm,-1.0
+SOLID,N2O,LowEm,-0.6
+SOLID,NH3,HighEm,0.8
+SOLID,NH3,LowEm,0.2
+SOLID,NOx,HighEm,0.8
+SOLID,NOx,LowEm,0.2

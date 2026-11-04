@@ -17,7 +17,7 @@
   "capri_data/2017/abatement/ammonia/ControlStrategies.csv": {
    "description": "MITERRA control strategies by year (LitRev_non_changeable_parameters ControlStrat_TS), percent of animals (tools/build/build_ammonia_tech_inputs.py)",
    "kind": "coefficients",
-   "rows": 2412,
+   "rows": 2479,
    "columns": 5,
    "units": "to be established (value_units: open)",
    "origin": {
@@ -28,7 +28,7 @@
   "capri_data/2017/abatement/ammonia/EmFracFert.csv": {
    "description": "emission fractions of mineral fertiliser by type (p_emFracFert: urea, other) (tools/build/build_ammonia_tech_inputs.py)",
    "kind": "coefficients",
-   "rows": 204,
+   "rows": 210,
    "columns": 4,
    "units": "to be established (value_units: open)",
    "origin": {
@@ -39,7 +39,7 @@
   "capri_data/2017/abatement/ammonia/FracEmAppl.csv": {
    "description": "emission fractions at manure application (LitRev_inputs FracEmAppl) (tools/build/build_ammonia_tech_inputs.py)",
    "kind": "coefficients",
-   "rows": 918,
+   "rows": 951,
    "columns": 4,
    "units": "to be established (value_units: open)",
    "origin": {
@@ -50,7 +50,7 @@
   "capri_data/2017/abatement/ammonia/FracEmGrazing.csv": {
    "description": "emission fractions on grazing (FracEmGrazing) (tools/build/build_ammonia_tech_inputs.py)",
    "kind": "coefficients",
-   "rows": 1770,
+   "rows": 1800,
    "columns": 4,
    "units": "to be established (value_units: open)",
    "origin": {
@@ -61,7 +61,7 @@
   "capri_data/2017/abatement/ammonia/FracEmHouse.csv": {
    "description": "emission fractions in housing (FracEmHouse) (tools/build/build_ammonia_tech_inputs.py)",
    "kind": "coefficients",
-   "rows": 918,
+   "rows": 953,
    "columns": 4,
    "units": "to be established (value_units: open)",
    "origin": {
@@ -72,7 +72,7 @@
   "capri_data/2017/abatement/ammonia/FracEmStorage.csv": {
    "description": "emission fractions in storage (FracEmStorage) (tools/build/build_ammonia_tech_inputs.py)",
    "kind": "coefficients",
-   "rows": 1192,
+   "rows": 1227,
    "columns": 4,
    "units": "to be established (value_units: open)",
    "origin": {
@@ -83,7 +83,7 @@
   "capri_data/2017/abatement/ammonia/FracUseFert.csv": {
    "description": "CAPRI's FracUseFert(region, fertiliser): shares of urea (Ureum) and other mineral N fertiliser per country, which envind/ammo.gms l. 287-292 loads from dat/miterra/LitRev_inputs.gdx (ammoLitRev on) (tools/build/build_ammonia_tech_inputs.py, not in the pipeline trace).",
    "kind": "coefficients",
-   "rows": 66,
+   "rows": 68,
    "columns": 3,
    "units": "to be established (value_units: open)",
    "origin": {
@@ -94,7 +94,7 @@
   "capri_data/2017/abatement/ammonia/NN_CorrFertFactDeviation.csv": {
    "description": "MITERRA correction of the fertiliser factors by year (tools/build/build_ammonia_tech_inputs.py)",
    "kind": "coefficients",
-   "rows": 345,
+   "rows": 348,
    "columns": 4,
    "units": "to be established (value_units: open)",
    "origin": {
@@ -105,7 +105,7 @@
   "capri_data/2017/abatement/ammonia/RCEmissions.csv": {
    "description": "MITERRA emission and excretion coefficients per animal (RCEmissions) (tools/build/build_ammonia_tech_inputs.py)",
    "kind": "coefficients",
-   "rows": 4963,
+   "rows": 5047,
    "columns": 4,
    "units": "to be established (value_units: open)",
    "read_by_model": [
@@ -119,7 +119,7 @@
   "capri_data/2017/abatement/ammonia/ad_option.csv": {
    "description": "CAPRI's anaerobic digestion option AD_AnCh per unit and activity (envind/ammo_tech.gms; build_ad_option.py) (tools/build/build_ad_option.py)",
    "kind": "coefficients",
-   "rows": 2972,
+   "rows": 3056,
    "columns": 14,
    "units": "to be established (value_units: open)",
    "origin": {
@@ -130,7 +130,7 @@
   "capri_data/2017/abatement/ammonia/ammonia_tech_model.csv": {
    "description": "the ammonia technologies on the model's animals: CAPRI's options, weights and the N cascade terms (build_ammonia_tech_model.py) (tools/build/build_ammonia_tech_model.py)",
    "kind": "coefficients",
-   "rows": 34757,
+   "rows": 35201,
    "columns": 23,
    "units": "to be established (value_units: open)",
    "read_by_model": [
@@ -145,7 +145,7 @@
   "capri_data/2017/abatement/ammonia/ammonia_technologies.csv": {
    "description": "CAPRI's ammonia technologies p_ghgMiti per CAPRI region and activity (envind/ammo_tech.gms; build_ammonia_technologies.py) (tools/build/build_ammonia_technologies.py)",
    "kind": "coefficients",
-   "rows": 32756,
+   "rows": 33094,
    "columns": 12,
    "units": "to be established (value_units: open)",
    "origin": {
@@ -156,7 +156,7 @@
   "capri_data/2017/abatement/ammonia/bNumAniRAINS.csv": {
    "description": "animal numbers of the RAINS categories by year (MITERRA) (tools/build/build_ammonia_tech_inputs.py)",
    "kind": "coefficients",
-   "rows": 1869,
+   "rows": 1902,
    "columns": 4,
    "units": "to be established (value_units: open)",
    "origin": {
@@ -310,7 +310,7 @@
   "capri_data/2017/abatement/ammonia/n_cascade_effects.csv": {
    "description": "the technologies' effects on the N cascade items per region and activity (envind/ghgMiti.gms; build_n_cascade.py) (tools/build/build_n_cascade.py)",
    "kind": "coefficients",
-   "rows": 145529,
+   "rows": 147119,
    "columns": 5,
    "units": "to be established (value_units: open)",
    "read_by_model": [
@@ -338,7 +338,7 @@
   "capri_data/2017/abatement/ammonia/n_cascade_region.csv": {
    "description": "the regional N cascade factors (build_n_cascade.py) (tools/build/build_n_cascade.py)",
    "kind": "coefficients",
-   "rows": 1713,
+   "rows": 1748,
    "columns": 3,
    "units": "to be established (value_units: open)",
    "read_by_model": [
@@ -443,7 +443,7 @@
   "capri_data/2017/abatement/ammonia/reducControlStrategies.csv": {
    "description": "emission reductions of the control strategies (reducControlStrategies) (tools/build/build_ammonia_tech_inputs.py)",
    "kind": "coefficients",
-   "rows": 450,
+   "rows": 454,
    "columns": 5,
    "units": "to be established (value_units: open)",
    "origin": {
@@ -454,7 +454,7 @@
   "capri_data/2017/abatement/ammonia/reducEmHouse.csv": {
    "description": "housing emission reductions, percent (reducEmHouse) (tools/build/build_ammonia_tech_inputs.py)",
    "kind": "coefficients",
-   "rows": 544,
+   "rows": 560,
    "columns": 5,
    "units": "to be established (value_units: open)",
    "origin": {
@@ -465,7 +465,7 @@
   "capri_data/2017/abatement/ammonia/reducEmStorage.csv": {
    "description": "storage emission reductions, percent (reducEmStorage) (tools/build/build_ammonia_tech_inputs.py)",
    "kind": "coefficients",
-   "rows": 2256,
+   "rows": 2325,
    "columns": 5,
    "units": "to be established (value_units: open)",
    "origin": {
@@ -937,7 +937,7 @@
    "vintage": "2017",
    "domain": "environment",
    "status": "live",
-   "rows": 8120,
+   "rows": 8197,
    "columns": 5,
    "units": "to be established (value_units: open)",
    "read_by_model": [
@@ -5567,6 +5567,149 @@
    "units": "to be established (value_units: open)",
    "origin": {
     "nature": "source-extract"
+   }
+  },
+  "capri_data/sources/capri_dat/miterra/mirror_miterra_inputs_norway_p_NO_EmFracFert.csv": {
+   "description": "CAPRI's p_NO_EmFracFert of dat/miterra/mirror_miterra_inputs_norway.gdx: Norway's MITERRA data, copied to NO000000 by envind/ammo.gms l. 252-343 (tools/build/extract_capri_dat.py; applied by tools/build/build_ammonia_tech_inputs.py).",
+   "kind": "coefficients",
+   "rows": 6,
+   "columns": 3,
+   "units": "to be established (value_units: open)",
+   "origin": {
+    "nature": "capri",
+    "builder": "extract_capri_dat"
+   }
+  },
+  "capri_data/sources/capri_dat/miterra/mirror_miterra_inputs_norway_p_NO_FracEmAppl.csv": {
+   "description": "CAPRI's p_NO_FracEmAppl of dat/miterra/mirror_miterra_inputs_norway.gdx: Norway's MITERRA data, copied to NO000000 by envind/ammo.gms l. 252-343 (tools/build/extract_capri_dat.py; applied by tools/build/build_ammonia_tech_inputs.py).",
+   "kind": "coefficients",
+   "rows": 33,
+   "columns": 3,
+   "units": "to be established (value_units: open)",
+   "origin": {
+    "nature": "capri",
+    "builder": "extract_capri_dat"
+   }
+  },
+  "capri_data/sources/capri_dat/miterra/mirror_miterra_inputs_norway_p_NO_FracEmHouse.csv": {
+   "description": "CAPRI's p_NO_FracEmHouse of dat/miterra/mirror_miterra_inputs_norway.gdx: Norway's MITERRA data, copied to NO000000 by envind/ammo.gms l. 252-343 (tools/build/extract_capri_dat.py; applied by tools/build/build_ammonia_tech_inputs.py).",
+   "kind": "coefficients",
+   "rows": 35,
+   "columns": 3,
+   "units": "to be established (value_units: open)",
+   "origin": {
+    "nature": "capri",
+    "builder": "extract_capri_dat"
+   }
+  },
+  "capri_data/sources/capri_dat/miterra/mirror_miterra_inputs_norway_p_NO_FracEmStorage.csv": {
+   "description": "CAPRI's p_NO_FracEmStorage of dat/miterra/mirror_miterra_inputs_norway.gdx: Norway's MITERRA data, copied to NO000000 by envind/ammo.gms l. 252-343 (tools/build/extract_capri_dat.py; applied by tools/build/build_ammonia_tech_inputs.py).",
+   "kind": "coefficients",
+   "rows": 35,
+   "columns": 3,
+   "units": "to be established (value_units: open)",
+   "origin": {
+    "nature": "capri",
+    "builder": "extract_capri_dat"
+   }
+  },
+  "capri_data/sources/capri_dat/miterra/mirror_miterra_inputs_norway_p_NO_FracUseFert.csv": {
+   "description": "CAPRI's p_NO_FracUseFert of dat/miterra/mirror_miterra_inputs_norway.gdx: Norway's MITERRA data, copied to NO000000 by envind/ammo.gms l. 252-343 (tools/build/extract_capri_dat.py; applied by tools/build/build_ammonia_tech_inputs.py).",
+   "kind": "coefficients",
+   "rows": 2,
+   "columns": 2,
+   "units": "to be established (value_units: open)",
+   "origin": {
+    "nature": "capri",
+    "builder": "extract_capri_dat"
+   }
+  },
+  "capri_data/sources/capri_dat/miterra/mirror_miterra_inputs_norway_p_NO_NN_CorrFertFactDeviation.csv": {
+   "description": "CAPRI's p_NO_NN_CorrFertFactDeviation of dat/miterra/mirror_miterra_inputs_norway.gdx: Norway's MITERRA data, copied to NO000000 by envind/ammo.gms l. 252-343 (tools/build/extract_capri_dat.py; applied by tools/build/build_ammonia_tech_inputs.py).",
+   "kind": "coefficients",
+   "rows": 3,
+   "columns": 3,
+   "units": "to be established (value_units: open)",
+   "origin": {
+    "nature": "capri",
+    "builder": "extract_capri_dat"
+   }
+  },
+  "capri_data/sources/capri_dat/miterra/mirror_miterra_inputs_norway_p_NO_ReducEmhouse.csv": {
+   "description": "CAPRI's p_NO_ReducEmhouse of dat/miterra/mirror_miterra_inputs_norway.gdx: Norway's MITERRA data, copied to NO000000 by envind/ammo.gms l. 252-343 (tools/build/extract_capri_dat.py; applied by tools/build/build_ammonia_tech_inputs.py).",
+   "kind": "coefficients",
+   "rows": 16,
+   "columns": 4,
+   "units": "to be established (value_units: open)",
+   "origin": {
+    "nature": "capri",
+    "builder": "extract_capri_dat"
+   }
+  },
+  "capri_data/sources/capri_dat/miterra/mirror_miterra_inputs_norway_p_NO_ReducEmstorage.csv": {
+   "description": "CAPRI's p_NO_ReducEmstorage of dat/miterra/mirror_miterra_inputs_norway.gdx: Norway's MITERRA data, copied to NO000000 by envind/ammo.gms l. 252-343 (tools/build/extract_capri_dat.py; applied by tools/build/build_ammonia_tech_inputs.py).",
+   "kind": "coefficients",
+   "rows": 105,
+   "columns": 4,
+   "units": "to be established (value_units: open)",
+   "origin": {
+    "nature": "capri",
+    "builder": "extract_capri_dat"
+   }
+  },
+  "capri_data/sources/capri_dat/miterra/mirror_miterra_inputs_norway_p_NO_bNumAniRains.csv": {
+   "description": "CAPRI's p_NO_bNumAniRains of dat/miterra/mirror_miterra_inputs_norway.gdx: Norway's MITERRA data, copied to NO000000 by envind/ammo.gms l. 252-343 (tools/build/extract_capri_dat.py; applied by tools/build/build_ammonia_tech_inputs.py).",
+   "kind": "coefficients",
+   "rows": 33,
+   "columns": 3,
+   "units": "to be established (value_units: open)",
+   "origin": {
+    "nature": "capri",
+    "builder": "extract_capri_dat"
+   }
+  },
+  "capri_data/sources/capri_dat/miterra/mirror_non_changeable_parameters_norway_p_NO_ControlStrategies.csv": {
+   "description": "CAPRI's p_NO_ControlStrategies of dat/miterra/mirror_non_changeable_parameters_norway.gdx: Norway's MITERRA data, copied to NO000000 by envind/ammo.gms l. 252-343 (tools/build/extract_capri_dat.py; applied by tools/build/build_ammonia_tech_inputs.py).",
+   "kind": "coefficients",
+   "rows": 67,
+   "columns": 4,
+   "units": "to be established (value_units: open)",
+   "origin": {
+    "nature": "capri",
+    "builder": "extract_capri_dat"
+   }
+  },
+  "capri_data/sources/capri_dat/miterra/mirror_non_changeable_parameters_norway_p_NO_FracEmGrazing.csv": {
+   "description": "CAPRI's p_NO_FracEmGrazing of dat/miterra/mirror_non_changeable_parameters_norway.gdx: Norway's MITERRA data, copied to NO000000 by envind/ammo.gms l. 252-343 (tools/build/extract_capri_dat.py; applied by tools/build/build_ammonia_tech_inputs.py).",
+   "kind": "coefficients",
+   "rows": 30,
+   "columns": 3,
+   "units": "to be established (value_units: open)",
+   "origin": {
+    "nature": "capri",
+    "builder": "extract_capri_dat"
+   }
+  },
+  "capri_data/sources/capri_dat/miterra/mirror_non_changeable_parameters_norway_p_NO_RCEmissions.csv": {
+   "description": "CAPRI's p_NO_RCEmissions of dat/miterra/mirror_non_changeable_parameters_norway.gdx: Norway's MITERRA data, copied to NO000000 by envind/ammo.gms l. 252-343 (tools/build/extract_capri_dat.py; applied by tools/build/build_ammonia_tech_inputs.py).",
+   "kind": "coefficients",
+   "rows": 84,
+   "columns": 3,
+   "units": "to be established (value_units: open)",
+   "origin": {
+    "nature": "capri",
+    "builder": "extract_capri_dat"
+   }
+  },
+  "capri_data/sources/capri_dat/miterra/mirror_non_changeable_parameters_norway_p_NO_ReducControlStrategies.csv": {
+   "description": "CAPRI's p_NO_ReducControlStrategies of dat/miterra/mirror_non_changeable_parameters_norway.gdx: Norway's MITERRA data, copied to NO000000 by envind/ammo.gms l. 252-343 (tools/build/extract_capri_dat.py; applied by tools/build/build_ammonia_tech_inputs.py).",
+   "kind": "coefficients",
+   "rows": 12,
+   "columns": 4,
+   "units": "to be established (value_units: open)",
+   "origin": {
+    "nature": "capri",
+    "builder": "extract_capri_dat"
    }
   },
   "capri_data/sources/capri_dat/policy/livestock_units_p_LUUnits.csv": {

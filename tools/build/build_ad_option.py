@@ -41,6 +41,7 @@ from __future__ import annotations
 
 import csv
 import math
+import re
 from collections import defaultdict
 from pathlib import Path
 
@@ -124,9 +125,24 @@ def load():
     nem = defaultdict(dict)
     for r in _rd(A / "n_cascade_factors.csv"):
         nem[(r["region"], r["activity"])][r["factor"]] = float(r["value"])
-    vser, housshar, sharliq = (fallback_balkan(p2(f"AD_basedata_p_{k}.csv")) for k in ("VSER", "HousShar", "SharLiq"))
-    return (heads, sf, p2("AD_basedata_p_MitiShar0.csv"), sharliq, housshar, vser, p2("AD_basedata_p_B0.csv"), gains,
-            clim, nem)
+    tabs = {k: mirror(k, p2(f"AD_basedata_p_{k}.csv")) for k in ("VSER", "HousShar", "SharLiq", "MitiShar0")}
+    vser, housshar, sharliq = (fallback_balkan(tabs[k]) for k in ("VSER", "HousShar", "SharLiq"))
+    return (heads, sf, tabs["MitiShar0"], sharliq, housshar, vser, p2("AD_basedata_p_B0.csv"), gains, clim, nem)
+
+
+def mirror(name: str, tab: dict) -> dict:
+    """CAPRI's copies of one country's AD data to another, read from its code ("Mirror SE to NO",
+    ad_data_and_cali.gms l. 257-261: p_SharLiq, p_HousShar, p_MitiShar0, p_VSER of Norway are Sweden's). Before
+    4 November 2026 not applied: Norway had no AD option (KNOWN_ISSUES K114)."""
+    pat = rf'p_{name}\("(\w+)",\s*Ad_Activity\)\s*=\s*p_{name}\("(\w+)",\s*Ad_Activity\)\s*;'
+    out = dict(tab)
+    for dst, src in re.findall(pat, _gt.read_text(GMS), flags=re.I):
+        for (r, ad), v in tab.items():
+            if r == src:
+                out[(dst, ad)] = v
+        for k in [k for k in out if k[0] == dst and (src, k[1]) not in tab]:
+            del out[k]
+    return out
 
 
 def fallback_balkan(tab: dict) -> dict:

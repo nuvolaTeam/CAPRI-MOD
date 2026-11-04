@@ -295,3 +295,149 @@ CREATE TABLE src_fao_peatland_p (
 COMMENT ON TABLE src_fao_peatland_p IS 'CAPRI''s P(FAOregions) of dat/envind/fao_peatland.gdx, loaded as p_PEATSH "Share of peatland in arable land" (envind/lulucf_carbon_decl.gms l. 695-697): FAO''s share by FAO country code, the organic-soil fallback of the Western Balkans and Turkey (prep_lulucf_carbon.gms l. 255-256). From capri_sources/dat (tools/build/extract_capri_dat.py).';
 INSERT INTO value_units VALUES
   ('src_fao_peatland_p', 'value', NULL, 'open', 'share of arable land (0-1)');
+
+-- file: capri_data/sources/capri_dat/miterra/mirror_miterra_inputs_norway_p_NO_EmFracFert.csv
+CREATE TABLE src_no_mirror_emfracfert (
+    gas VARCHAR NOT NULL,
+    fertiliser VARCHAR NOT NULL,
+    "value" DOUBLE NOT NULL,
+    PRIMARY KEY (gas, fertiliser)
+);
+COMMENT ON TABLE src_no_mirror_emfracfert IS 'CAPRI''s p_NO_EmFracFert of dat/miterra/mirror_miterra_inputs_norway.gdx: Norway''s MITERRA data, copied to NO000000 by envind/ammo.gms l. 252-343 (tools/build/extract_capri_dat.py; applied by tools/build/build_ammonia_tech_inputs.py).';
+INSERT INTO value_units VALUES
+  ('src_no_mirror_emfracfert', 'value', NULL, 'open', 'as CAPRI''s EmFracFert');
+
+-- file: capri_data/sources/capri_dat/miterra/mirror_miterra_inputs_norway_p_NO_FracEmAppl.csv
+CREATE TABLE src_no_mirror_fracemappl (
+    animal_mitt VARCHAR NOT NULL,
+    gas VARCHAR NOT NULL,
+    "value" DOUBLE NOT NULL,
+    PRIMARY KEY (animal_mitt, gas)
+);
+COMMENT ON TABLE src_no_mirror_fracemappl IS 'CAPRI''s p_NO_FracEmAppl of dat/miterra/mirror_miterra_inputs_norway.gdx: Norway''s MITERRA data, copied to NO000000 by envind/ammo.gms l. 252-343 (tools/build/extract_capri_dat.py; applied by tools/build/build_ammonia_tech_inputs.py).';
+INSERT INTO value_units VALUES
+  ('src_no_mirror_fracemappl', 'value', NULL, 'open', 'as CAPRI''s FracEmAppl');
+
+-- file: capri_data/sources/capri_dat/miterra/mirror_miterra_inputs_norway_p_NO_FracEmHouse.csv
+CREATE TABLE src_no_mirror_fracemhouse (
+    animal_mitt VARCHAR NOT NULL,
+    gas VARCHAR NOT NULL,
+    "value" DOUBLE NOT NULL,
+    PRIMARY KEY (animal_mitt, gas)
+);
+COMMENT ON TABLE src_no_mirror_fracemhouse IS 'CAPRI''s p_NO_FracEmHouse of dat/miterra/mirror_miterra_inputs_norway.gdx: Norway''s MITERRA data, copied to NO000000 by envind/ammo.gms l. 252-343 (tools/build/extract_capri_dat.py; applied by tools/build/build_ammonia_tech_inputs.py).';
+INSERT INTO value_units VALUES
+  ('src_no_mirror_fracemhouse', 'value', NULL, 'open', 'as CAPRI''s FracEmHouse');
+
+-- file: capri_data/sources/capri_dat/miterra/mirror_miterra_inputs_norway_p_NO_FracEmStorage.csv
+CREATE TABLE src_no_mirror_fracemstorage (
+    animal_mitt VARCHAR NOT NULL,
+    gas VARCHAR NOT NULL,
+    "value" DOUBLE NOT NULL,
+    PRIMARY KEY (animal_mitt, gas)
+);
+COMMENT ON TABLE src_no_mirror_fracemstorage IS 'CAPRI''s p_NO_FracEmStorage of dat/miterra/mirror_miterra_inputs_norway.gdx: Norway''s MITERRA data, copied to NO000000 by envind/ammo.gms l. 252-343 (tools/build/extract_capri_dat.py; applied by tools/build/build_ammonia_tech_inputs.py).';
+INSERT INTO value_units VALUES
+  ('src_no_mirror_fracemstorage', 'value', NULL, 'open', 'as CAPRI''s FracEmStorage');
+
+-- file: capri_data/sources/capri_dat/miterra/mirror_miterra_inputs_norway_p_NO_FracUseFert.csv
+CREATE TABLE src_no_mirror_fracusefert (
+    fertiliser VARCHAR NOT NULL,
+    "value" DOUBLE NOT NULL,
+    PRIMARY KEY (fertiliser)
+);
+COMMENT ON TABLE src_no_mirror_fracusefert IS 'CAPRI''s p_NO_FracUseFert of dat/miterra/mirror_miterra_inputs_norway.gdx: Norway''s MITERRA data, copied to NO000000 by envind/ammo.gms l. 252-343 (tools/build/extract_capri_dat.py; applied by tools/build/build_ammonia_tech_inputs.py).';
+INSERT INTO value_units VALUES
+  ('src_no_mirror_fracusefert', 'value', NULL, 'open', 'as CAPRI''s FracUseFert');
+
+-- file: capri_data/sources/capri_dat/miterra/mirror_miterra_inputs_norway_p_NO_NN_CorrFertFactDeviation.csv
+CREATE TABLE src_no_mirror_nn_corrfertfactdeviation (
+    fertiliser VARCHAR NOT NULL,
+    year VARCHAR NOT NULL,
+    "value" DOUBLE NOT NULL,
+    PRIMARY KEY (fertiliser, year)
+);
+COMMENT ON TABLE src_no_mirror_nn_corrfertfactdeviation IS 'CAPRI''s p_NO_NN_CorrFertFactDeviation of dat/miterra/mirror_miterra_inputs_norway.gdx: Norway''s MITERRA data, copied to NO000000 by envind/ammo.gms l. 252-343 (tools/build/extract_capri_dat.py; applied by tools/build/build_ammonia_tech_inputs.py).';
+INSERT INTO value_units VALUES
+  ('src_no_mirror_nn_corrfertfactdeviation', 'value', NULL, 'open', 'as CAPRI''s NN_CorrFertFactDeviation');
+
+-- file: capri_data/sources/capri_dat/miterra/mirror_miterra_inputs_norway_p_NO_ReducEmhouse.csv
+CREATE TABLE src_no_mirror_reducemhouse (
+    animal_mitt VARCHAR NOT NULL,
+    gas VARCHAR NOT NULL,
+    tech_class VARCHAR NOT NULL,
+    "value" DOUBLE NOT NULL,
+    PRIMARY KEY (animal_mitt, gas, tech_class)
+);
+COMMENT ON TABLE src_no_mirror_reducemhouse IS 'CAPRI''s p_NO_ReducEmhouse of dat/miterra/mirror_miterra_inputs_norway.gdx: Norway''s MITERRA data, copied to NO000000 by envind/ammo.gms l. 252-343 (tools/build/extract_capri_dat.py; applied by tools/build/build_ammonia_tech_inputs.py).';
+INSERT INTO value_units VALUES
+  ('src_no_mirror_reducemhouse', 'value', NULL, 'open', 'as CAPRI''s ReducEmhouse');
+
+-- file: capri_data/sources/capri_dat/miterra/mirror_miterra_inputs_norway_p_NO_ReducEmstorage.csv
+CREATE TABLE src_no_mirror_reducemstorage (
+    animal_mitt VARCHAR NOT NULL,
+    gas VARCHAR NOT NULL,
+    tech_class VARCHAR NOT NULL,
+    "value" DOUBLE NOT NULL,
+    PRIMARY KEY (animal_mitt, gas, tech_class)
+);
+COMMENT ON TABLE src_no_mirror_reducemstorage IS 'CAPRI''s p_NO_ReducEmstorage of dat/miterra/mirror_miterra_inputs_norway.gdx: Norway''s MITERRA data, copied to NO000000 by envind/ammo.gms l. 252-343 (tools/build/extract_capri_dat.py; applied by tools/build/build_ammonia_tech_inputs.py).';
+INSERT INTO value_units VALUES
+  ('src_no_mirror_reducemstorage', 'value', NULL, 'open', 'as CAPRI''s ReducEmstorage');
+
+-- file: capri_data/sources/capri_dat/miterra/mirror_miterra_inputs_norway_p_NO_bNumAniRains.csv
+CREATE TABLE src_no_mirror_bnumanirains (
+    animal_mitt VARCHAR NOT NULL,
+    year VARCHAR NOT NULL,
+    "value" DOUBLE NOT NULL,
+    PRIMARY KEY (animal_mitt, year)
+);
+COMMENT ON TABLE src_no_mirror_bnumanirains IS 'CAPRI''s p_NO_bNumAniRains of dat/miterra/mirror_miterra_inputs_norway.gdx: Norway''s MITERRA data, copied to NO000000 by envind/ammo.gms l. 252-343 (tools/build/extract_capri_dat.py; applied by tools/build/build_ammonia_tech_inputs.py).';
+INSERT INTO value_units VALUES
+  ('src_no_mirror_bnumanirains', 'value', NULL, 'open', 'as CAPRI''s bNumAniRains');
+
+-- file: capri_data/sources/capri_dat/miterra/mirror_non_changeable_parameters_norway_p_NO_ControlStrategies.csv
+CREATE TABLE src_no_mirror_controlstrategies (
+    animal_mitt VARCHAR NOT NULL,
+    strategy VARCHAR NOT NULL,
+    item VARCHAR NOT NULL,
+    "value" DOUBLE NOT NULL,
+    PRIMARY KEY (animal_mitt, strategy, item)
+);
+COMMENT ON TABLE src_no_mirror_controlstrategies IS 'CAPRI''s p_NO_ControlStrategies of dat/miterra/mirror_non_changeable_parameters_norway.gdx: Norway''s MITERRA data, copied to NO000000 by envind/ammo.gms l. 252-343 (tools/build/extract_capri_dat.py; applied by tools/build/build_ammonia_tech_inputs.py).';
+INSERT INTO value_units VALUES
+  ('src_no_mirror_controlstrategies', 'value', NULL, 'open', 'as CAPRI''s ControlStrategies');
+
+-- file: capri_data/sources/capri_dat/miterra/mirror_non_changeable_parameters_norway_p_NO_FracEmGrazing.csv
+CREATE TABLE src_no_mirror_fracemgrazing (
+    animal_mitt VARCHAR NOT NULL,
+    item VARCHAR NOT NULL,
+    "value" DOUBLE NOT NULL,
+    PRIMARY KEY (animal_mitt, item)
+);
+COMMENT ON TABLE src_no_mirror_fracemgrazing IS 'CAPRI''s p_NO_FracEmGrazing of dat/miterra/mirror_non_changeable_parameters_norway.gdx: Norway''s MITERRA data, copied to NO000000 by envind/ammo.gms l. 252-343 (tools/build/extract_capri_dat.py; applied by tools/build/build_ammonia_tech_inputs.py).';
+INSERT INTO value_units VALUES
+  ('src_no_mirror_fracemgrazing', 'value', NULL, 'open', 'as CAPRI''s FracEmGrazing');
+
+-- file: capri_data/sources/capri_dat/miterra/mirror_non_changeable_parameters_norway_p_NO_RCEmissions.csv
+CREATE TABLE src_no_mirror_rcemissions (
+    animal_mitt VARCHAR NOT NULL,
+    item VARCHAR NOT NULL,
+    "value" DOUBLE NOT NULL,
+    PRIMARY KEY (animal_mitt, item)
+);
+COMMENT ON TABLE src_no_mirror_rcemissions IS 'CAPRI''s p_NO_RCEmissions of dat/miterra/mirror_non_changeable_parameters_norway.gdx: Norway''s MITERRA data, copied to NO000000 by envind/ammo.gms l. 252-343 (tools/build/extract_capri_dat.py; applied by tools/build/build_ammonia_tech_inputs.py).';
+INSERT INTO value_units VALUES
+  ('src_no_mirror_rcemissions', 'value', NULL, 'open', 'as CAPRI''s RCEmissions');
+
+-- file: capri_data/sources/capri_dat/miterra/mirror_non_changeable_parameters_norway_p_NO_ReducControlStrategies.csv
+CREATE TABLE src_no_mirror_reduccontrolstrategies (
+    animal_mitt VARCHAR NOT NULL,
+    strategy VARCHAR NOT NULL,
+    item VARCHAR NOT NULL,
+    "value" DOUBLE NOT NULL,
+    PRIMARY KEY (animal_mitt, strategy, item)
+);
+COMMENT ON TABLE src_no_mirror_reduccontrolstrategies IS 'CAPRI''s p_NO_ReducControlStrategies of dat/miterra/mirror_non_changeable_parameters_norway.gdx: Norway''s MITERRA data, copied to NO000000 by envind/ammo.gms l. 252-343 (tools/build/extract_capri_dat.py; applied by tools/build/build_ammonia_tech_inputs.py).';
+INSERT INTO value_units VALUES
+  ('src_no_mirror_reduccontrolstrategies', 'value', NULL, 'open', 'as CAPRI''s ReducControlStrategies');

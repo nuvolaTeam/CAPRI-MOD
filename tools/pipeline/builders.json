@@ -138,9 +138,24 @@
     "$EXPORTS/holdingsLSU.csv",
     "$EXPORTS/nvzShare_LU.csv"
    ],
-   "inputs": [],
+   "inputs": [
+    "capri_data/sources/capri_dat/miterra/mirror_miterra_inputs_norway_p_NO_EmFracFert.csv",
+    "capri_data/sources/capri_dat/miterra/mirror_miterra_inputs_norway_p_NO_FracEmAppl.csv",
+    "capri_data/sources/capri_dat/miterra/mirror_miterra_inputs_norway_p_NO_FracEmHouse.csv",
+    "capri_data/sources/capri_dat/miterra/mirror_miterra_inputs_norway_p_NO_FracEmStorage.csv",
+    "capri_data/sources/capri_dat/miterra/mirror_miterra_inputs_norway_p_NO_FracUseFert.csv",
+    "capri_data/sources/capri_dat/miterra/mirror_miterra_inputs_norway_p_NO_NN_CorrFertFactDeviation.csv",
+    "capri_data/sources/capri_dat/miterra/mirror_miterra_inputs_norway_p_NO_ReducEmhouse.csv",
+    "capri_data/sources/capri_dat/miterra/mirror_miterra_inputs_norway_p_NO_ReducEmstorage.csv",
+    "capri_data/sources/capri_dat/miterra/mirror_miterra_inputs_norway_p_NO_bNumAniRains.csv",
+    "capri_data/sources/capri_dat/miterra/mirror_non_changeable_parameters_norway_p_NO_ControlStrategies.csv",
+    "capri_data/sources/capri_dat/miterra/mirror_non_changeable_parameters_norway_p_NO_FracEmGrazing.csv",
+    "capri_data/sources/capri_dat/miterra/mirror_non_changeable_parameters_norway_p_NO_RCEmissions.csv",
+    "capri_data/sources/capri_dat/miterra/mirror_non_changeable_parameters_norway_p_NO_ReducControlStrategies.csv"
+   ],
    "code": [
-    "tools/build/build_ammonia_tech_inputs.py"
+    "tools/build/build_ammonia_tech_inputs.py",
+    "tools/lib/paths.py"
    ],
    "external": [
     "$EXPORTS/LitRevAmmoTech.csv",
@@ -148,7 +163,8 @@
     "$EXPORTS/LitRev_inputs.csv",
     "$EXPORTS/LitRev_non_changeable_parameters.csv",
     "$EXPORTS/holdingsLSU.csv",
-    "$EXPORTS/nvzShare_LU.csv"
+    "$EXPORTS/nvzShare_LU.csv",
+    "$SOURCES/gams/envind/ammo.gms"
    ],
    "outputs": [
     "capri_data/2017/abatement/ammonia/ControlStrategies.csv",
@@ -2492,10 +2508,36 @@
     "tools/lib/paths.py"
    ],
    "external": [
-    "$SOURCES/dat/envind/fao_peatland/P.parquet"
+    "$SOURCES/dat/envind/fao_peatland/P.parquet",
+    "$SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_EmFracFert.parquet",
+    "$SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmAppl.parquet",
+    "$SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmHouse.parquet",
+    "$SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracEmStorage.parquet",
+    "$SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_FracUseFert.parquet",
+    "$SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_NN_CorrFertFactDeviation.parquet",
+    "$SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmhouse.parquet",
+    "$SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_ReducEmstorage.parquet",
+    "$SOURCES/dat/miterra/mirror_miterra_inputs_norway/p_NO_bNumAniRains.parquet",
+    "$SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ControlStrategies.parquet",
+    "$SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_FracEmGrazing.parquet",
+    "$SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_RCEmissions.parquet",
+    "$SOURCES/dat/miterra/mirror_non_changeable_parameters_norway/p_NO_ReducControlStrategies.parquet"
    ],
    "outputs": [
-    "capri_data/sources/capri_dat/envind/fao_peatland_P.csv"
+    "capri_data/sources/capri_dat/envind/fao_peatland_P.csv",
+    "capri_data/sources/capri_dat/miterra/mirror_miterra_inputs_norway_p_NO_EmFracFert.csv",
+    "capri_data/sources/capri_dat/miterra/mirror_miterra_inputs_norway_p_NO_FracEmAppl.csv",
+    "capri_data/sources/capri_dat/miterra/mirror_miterra_inputs_norway_p_NO_FracEmHouse.csv",
+    "capri_data/sources/capri_dat/miterra/mirror_miterra_inputs_norway_p_NO_FracEmStorage.csv",
+    "capri_data/sources/capri_dat/miterra/mirror_miterra_inputs_norway_p_NO_FracUseFert.csv",
+    "capri_data/sources/capri_dat/miterra/mirror_miterra_inputs_norway_p_NO_NN_CorrFertFactDeviation.csv",
+    "capri_data/sources/capri_dat/miterra/mirror_miterra_inputs_norway_p_NO_ReducEmhouse.csv",
+    "capri_data/sources/capri_dat/miterra/mirror_miterra_inputs_norway_p_NO_ReducEmstorage.csv",
+    "capri_data/sources/capri_dat/miterra/mirror_miterra_inputs_norway_p_NO_bNumAniRains.csv",
+    "capri_data/sources/capri_dat/miterra/mirror_non_changeable_parameters_norway_p_NO_ControlStrategies.csv",
+    "capri_data/sources/capri_dat/miterra/mirror_non_changeable_parameters_norway_p_NO_FracEmGrazing.csv",
+    "capri_data/sources/capri_dat/miterra/mirror_non_changeable_parameters_norway_p_NO_RCEmissions.csv",
+    "capri_data/sources/capri_dat/miterra/mirror_non_changeable_parameters_norway_p_NO_ReducControlStrategies.csv"
    ]
   },
   {
