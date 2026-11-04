@@ -1488,26 +1488,27 @@ INSERT INTO value_units VALUES
 
 -- file: capri_data/sources/market/bilateral_trq_dataout_2017.csv
 CREATE TABLE src_bilateral_trq_dataout_2017 (
-    exporter VARCHAR NOT NULL,
-    "item" VARCHAR NOT NULL,
-    product VARCHAR NOT NULL,
-    "value" DOUBLE NOT NULL,
-    PRIMARY KEY (exporter, "item", product)
-);
-COMMENT ON TABLE src_bilateral_trq_dataout_2017 IS 'CAPRI''s bilateral TRQ and price items (TrqNT, TAMFN, TSMFN, TaAppl, TsAppl, Fob, TCost, ImportQ) of the EU policy block ''EU'' as importer, per exporter and product, from market_base_1717 dataOut, 2017 (tools/build/build_bilateral_market.py).';
-INSERT INTO value_units VALUES
-  ('src_bilateral_trq_dataout_2017', 'value', NULL, 'open', 'bilateral_trq_dataout_2017.value: unit to be established');
-
--- file: capri_data/sources/market/bilateral_trq_dataout_2030.csv
-CREATE TABLE src_bilateral_trq_dataout_2030 (
+    importer VARCHAR NOT NULL,
     exporter VARCHAR,
     "item" VARCHAR NOT NULL,
     product VARCHAR NOT NULL,
     "value" DOUBLE NOT NULL
 );
-COMMENT ON TABLE src_bilateral_trq_dataout_2030 IS 'CAPRI''s bilateral TRQ and price items (TrqNT, TAMFN, TSMFN, TaAppl, TsAppl, Fob, TCost, ImportQ) of the EU policy block ''EU'' as importer, per exporter and product, from markmarket_greendeal_1730et_base_1717 dataOut, 2030 (tools/build/build_bilateral_market.py).';
+COMMENT ON TABLE src_bilateral_trq_dataout_2017 IS 'CAPRI''s tariff-rate quota items (TRQNT, TAMFN, TAPREF, TSMFN, TSPREF, PREFTRIGPRICE) of every importer and exporter of the listing (policy blocks, market regions and reporting aggregates; exporter World: the global quotas), per product, from market_base_1717 dataOut, 2017 (tools/build/build_bilateral_market.py build_trq).';
 INSERT INTO value_units VALUES
-  ('src_bilateral_trq_dataout_2030', 'value', NULL, 'open', 'bilateral_trq_dataout_2030.value: unit to be established');
+  ('src_bilateral_trq_dataout_2017', 'value', NULL, 'open', 'bilateral_trq_dataout_2017.value: the item''s unit (1000 t, %, EUR/t)');
+
+-- file: capri_data/sources/market/bilateral_trq_dataout_2030.csv
+CREATE TABLE src_bilateral_trq_dataout_2030 (
+    importer VARCHAR NOT NULL,
+    exporter VARCHAR,
+    "item" VARCHAR NOT NULL,
+    product VARCHAR NOT NULL,
+    "value" DOUBLE NOT NULL
+);
+COMMENT ON TABLE src_bilateral_trq_dataout_2030 IS 'CAPRI''s tariff-rate quota items (TRQNT, TAMFN, TAPREF, TSMFN, TSPREF, PREFTRIGPRICE) of every importer and exporter of the listing (policy blocks, market regions and reporting aggregates; exporter World: the global quotas), per product, from markmarket_greendeal_1730et_base_1717 dataOut, 2030 (tools/build/build_bilateral_market.py build_trq).';
+INSERT INTO value_units VALUES
+  ('src_bilateral_trq_dataout_2030', 'value', NULL, 'open', 'bilateral_trq_dataout_2030.value: the item''s unit (1000 t, %, EUR/t)');
 
 -- file: capri_data/sources/market/biofuel_proc_hessian_2030.csv
 CREATE TABLE src_biofuel_proc_hessian_2030 (

@@ -57,8 +57,8 @@ def test_casadi_trade_with_trq_matches(market):
     for c, sc in market.par.bilat.items():
         qk = trq_quotas(sc)
         act = np.where(sc.S0 > 1e-6)[0]
-        if len(qk) == 0 or len(act) == 0:
-            continue
+        if len(qk) == 0 or len(act) == 0 or sc.trq_globals or any(q["regime"] != "bilateral" for q in sc.trq_quotas):
+            continue                                  # G2a: CAPRI's bilateral quotas only (trade_trq_function)
         n = len(sc.regions)
         sig_now, off_now = sc.trq_sigma.copy(), sc.trq_offset.copy()
         rk = np.exp(rng.normal(0, 0.05, n))

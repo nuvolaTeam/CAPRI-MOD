@@ -814,6 +814,42 @@ def test_trq_rates_are_capris_sigmoid_and_tariff_equations():
             assert abs(float(p[0, 1]) - (1000.0 * rr + 100.0 + off)) < 1e-9 * 2000.0
 
 
+def test_trq_global_quota_and_the_smaller_rate():
+    """CAPRI's global quota with a bilateral one (TRQImports_, tarAdValW_, tarAdval_, arm/market_model.gms l. 3142,
+    3417, 3475): the global imports are the flows of the exporters without a bilateral quota plus the bilateral
+    quota's overfill (-ncpcm(-(fill - TrqNT), 0, 1E-3 TrqNT)); the bilateral flow pays ncpcm(global rate, bilateral
+    rate, max(1E-2, 1E-3 |TaMFN - TaPref|)), the exporters without one the global rate."""
+    import numpy as np
+    from capri_mod.market.bilateral import BilateralCommodity
+    X0 = np.array([[100.0, 99.0, 50.0], [0.0, 400.0, 0.0], [0.0, 0.0, 300.0]])
+    a = np.zeros((3, 3)); a[0, 1] = a[0, 2] = 1000.0
+    b = np.zeros((3, 3)); b[0, 1] = b[0, 2] = 100.0
+    sc = BilateralCommodity("T", ["EU_WEST", "X", "Y"], X0, a, b, a.copy(), np.array([1500.0, 1000.0, 1000.0]), 3.5, 7.0,
+                            tc=b.copy())
+    sc.calibrate(np.array([100.0, 499.0, 350.0]))
+    sc.trq_quotas = [dict(rows=np.array([0]), cols=np.array([1]), Q=100.0, Q0=100.0, ta_pref=0.0, dta=60.0, ts_pref=0.0,
+                          dts=0.0, importer="EU", exporter="X", regime="with_global", glob=0)]
+    cover = np.zeros((3, 3), bool); cover[0, 2] = True
+    sc.trq_globals = [dict(rows=np.array([0]), Q=60.0, Q0=60.0, ta_pref=5.0, dta=35.0, ts_pref=0.0, dts=0.0, cover=cover,
+                           bil=[0], importer="EU", has_ta=True, has_ts=False)]
+    sc.trq_base()
+    ncp = lambda x, y, z: x - z * np.log1p(np.exp((x - y) / z))
+    sB = 1 / (1 + np.exp(-200 * (99.0 / 100.0 - 0.97)))
+    over = -ncp(-(99.0 - 100.0), 0.0, 0.1)
+    sW = 1 / (1 + np.exp(-200 * ((50.0 + over) / 60.0 - 0.97)))
+    assert abs(sc.trq_sigma0[0] - sB) < 1e-12 and abs(sc.trq_sigmaW0[0] - sW) < 1e-12
+    ta, ts = sc._trq_rates(sc.trq_sigma0, sc.trq_sigmaW0)
+    assert abs(ta[0, 1] - ncp(5.0 + 35.0 * sW, 60.0 * sB, max(1e-2, 1e-3 * 60.0))) < 1e-9
+    assert abs(ta[0, 2] - (5.0 + 35.0 * sW)) < 1e-12 and np.isnan(ts).all()
+    # the global imports fill past the global quota: its rate rises toward MFN, the bilateral flow's is still the
+    # smaller of the two
+    sc.trq_sigmaW = np.array([1.0])
+    sc.trq_set_offsets(np.ones(3))
+    ta1, _ = sc._trq_rates(sc.trq_sigma, sc.trq_sigmaW)
+    assert abs(sc.trq_offset[0, 2] - (1000.0 + 100.0) * (ta1[0, 2] - ta[0, 2]) / 100.0) < 1e-9
+    assert ta1[0, 1] <= min(40.0, 60.0 * sB) + 1e-9
+
+
 def test_trq_tariff_follows_quota_fill():
     """CAPRI's TRQ regime (trqSigmoidFunc_, slope 200 around 97% of the quota): an under-filled quota keeps the
     in-quota tariff; pushing imports past the quota moves the import price toward the out-of-quota tariff."""

@@ -127,6 +127,10 @@ def trade_trq_function(sc, act):
         these prices (TradeFlowsAgg_), the sigmoid as BilateralCommodity._sig (TRQ_SLOPE, TRQ_FILL_MID, TRQ_ARG_CLIP);
       - J = the Jacobian of g in (z, s).
     The TRQ equation is trq_solve's fixed point with the flows' full response, not its local one."""
+    if getattr(sc, "trq_globals", None) or any(q["regime"] != "bilateral" for q in (sc.trq_quotas or ())):
+        raise NotImplementedError(f"{sc.name}: G2a's trade function has CAPRI's bilateral quotas only; the global quotas "
+                                  "(TRQImports_, the ncpcm minimum) and the entry prices are in the fixed-point solve "
+                                  "(BilateralCommodity.trq_solve) until G3 writes them as equations")
     k_ = ("trq",) + _key(sc, act)
     f = _CACHE.get(k_)
     if f is not None:

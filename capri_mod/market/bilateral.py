@@ -183,6 +183,7 @@ class BilateralCommodity:
         """Every quota's sigma at the base flows (the calibration point, at the base volumes), the rates there and no
         offset."""
         n = len(self.regions)
+        self._trq_hist = None
         self.trq_offset = np.zeros((n, n))
         if not (self.trq_quotas or self.trq_globals):
             self.trq_sigma = self.trq_sigma0 = self.trq_sigmaW = self.trq_sigmaW0 = None
@@ -271,7 +272,28 @@ class BilateralCommodity:
                 w = sW.copy(); w[m] = s
                 return s - float(self._sig(self.trq_global_imports(Xat(self._trq_off(r, sB, w)), g) / g["Q"]))
             sW[m] = bisect(hW)
-        self.trq_sigma, self.trq_sigmaW = sB, sW
+        # Aitken's extrapolation where a quota's sigma converges linearly (the outer fixed point with the market,
+        # slow at the sigmoid's steep part: a contraction of about 0.96 per step near 97% fill): three moves in one
+        # direction shrinking by a steady factor rho in [0.5, 0.99] are extrapolated by rho / (1 - rho) times the
+        # last move, at most 0.05 of sigma and within [0, 1]
+        new = np.concatenate([sB, sW]) if len(sW) else sB.copy()
+        hist = getattr(self, "_trq_hist", None)
+        hist = [] if hist is None or len(hist[-1]) != len(new) else hist
+        hist.append(new.copy())
+        if len(hist) >= 4:
+            d1, d2, d3 = hist[-3] - hist[-4], hist[-2] - hist[-3], hist[-1] - hist[-2]
+            with np.errstate(divide="ignore", invalid="ignore"):
+                rho = np.where(np.abs(d2) > 0, d3 / d2, 0.0)
+                rho0 = np.where(np.abs(d1) > 0, d2 / d1, 0.0)
+            ok = ((np.sign(d1) == np.sign(d2)) & (np.sign(d2) == np.sign(d3)) & (rho >= 0.5) & (rho <= 0.99)
+                  & (np.abs(rho - rho0) < 0.05) & (np.abs(d3) > 0))
+            if ok.any():
+                jump = np.clip(d3 * rho / (1.0 - rho), -0.05, 0.05)
+                new = np.where(ok, np.clip(new + jump, 0.0, 1.0), new)
+                hist = [new.copy()]
+        self._trq_hist = hist[-4:]
+        nb = len(sB)
+        self.trq_sigma, self.trq_sigmaW = new[:nb], new[nb:]
         self.trq_set_offsets(r)
 
     def import_prices(self, r: np.ndarray, tariff_adds=None) -> np.ndarray:

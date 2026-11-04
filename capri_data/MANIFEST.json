@@ -1290,14 +1290,14 @@
    "catalogue_note": "market price and production per model trade region, 2030 Sprint 9f: + FRMI, CREM, COCM, WMIO, CASE (CAPRI's dairy products, traded). (not re-checked)"
   },
   "capri_data/2017/market/bilateral_trq_2017.csv": {
-   "description": "CAPRI's bilateral trade data for the model's trade regions (Sprint 8m: CAPRI's full market). (tools/build/build_bilateral_market.py)",
+   "description": "CAPRI's bilateral tariff-rate quotas of every importer (p_trqBilat TrqNT with TaMFN, TaPref, TsMFN, TsPref) per pair of policy blocks (RMTP) and model commodity, with the blocks' market regions and the regime of the pair (bilateral sigmoid; with the importer's global quota: the smaller rate; entry price system), 2017 (tools/build/build_bilateral_market.py build_trq; docs/design/PORTS_STAGE4.md).",
    "kind": "coefficients",
    "vintage": "2017",
    "domain": "market",
    "status": "live",
-   "rows": 73,
-   "columns": 5,
-   "units": "to be established (value_units: open)",
+   "rows": 128,
+   "columns": 11,
+   "units": "U_1000t, U_EuPerTon, U_percent",
    "read_by_model": [
     "capri_mod/market/bilateral_solve.py"
    ],
@@ -1305,17 +1305,17 @@
     "nature": "capri",
     "builder": "build_bilateral_market:"
    },
-   "catalogue_note": "EU bilateral tariff-rate quotas per model exporter: quota, out- minus in-quota price gap, imports under the quota regime (not re-checked)"
+   "catalogue_note": "CAPRI's bilateral tariff-rate quotas of every importer per pair of policy blocks, with their regime (docs/design/PORTS_STAGE4.md) (not re-checked)"
   },
   "capri_data/2017/market/bilateral_trq_2030.csv": {
-   "description": "CAPRI's bilateral trade data for the model's trade regions (Sprint 8m: CAPRI's full market). (tools/build/build_bilateral_market.py)",
+   "description": "CAPRI's bilateral tariff-rate quotas of every importer (p_trqBilat TrqNT with TaMFN, TaPref, TsMFN, TsPref) per pair of policy blocks (RMTP) and model commodity, with the blocks' market regions and the regime of the pair (bilateral sigmoid; with the importer's global quota: the smaller rate; entry price system), 2030 (tools/build/build_bilateral_market.py build_trq; docs/design/PORTS_STAGE4.md).",
    "kind": "coefficients",
    "vintage": "2030 reference",
    "domain": "market",
    "status": "live",
-   "rows": 75,
-   "columns": 5,
-   "units": "to be established (value_units: open)",
+   "rows": 130,
+   "columns": 11,
+   "units": "U_1000t, U_EuPerTon, U_percent",
    "read_by_model": [
     "capri_mod/data/loaders.py",
     "capri_mod/market/bilateral_solve.py"
@@ -1324,7 +1324,43 @@
     "nature": "capri",
     "builder": "build_bilateral_market:"
    },
-   "catalogue_note": "as bilateral_trq_2017.csv for 2030 (not re-checked)"
+   "catalogue_note": "CAPRI's bilateral tariff-rate quotas of every importer per pair of policy blocks, with their regime (docs/design/PORTS_STAGE4.md) (not re-checked)"
+  },
+  "capri_data/2017/market/bilateral_trq_global_2017.csv": {
+   "description": "CAPRI's global (erga omnes) tariff-rate quotas (p_trqGlobl, the importer's rows with exporter World) per policy block and model commodity, with the market regions of the exporter blocks under free trade (p_doubleZero, from sim_ini_21730: the 2030 agreements), 2017 (tools/build/build_bilateral_market.py build_trq_global; docs/design/PORTS_STAGE4.md).",
+   "kind": "coefficients",
+   "vintage": "2017",
+   "domain": "market",
+   "status": "live",
+   "rows": 70,
+   "columns": 9,
+   "units": "U_1000t, U_EuPerTon, U_percent",
+   "read_by_model": [
+    "capri_mod/market/bilateral_solve.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_bilateral_market:"
+   },
+   "catalogue_note": "CAPRI's global tariff-rate quotas per importer block, with the free-trade exporters (docs/design/PORTS_STAGE4.md) (not re-checked)"
+  },
+  "capri_data/2017/market/bilateral_trq_global_2030.csv": {
+   "description": "CAPRI's global (erga omnes) tariff-rate quotas (p_trqGlobl, the importer's rows with exporter World) per policy block and model commodity, with the market regions of the exporter blocks under free trade (p_doubleZero, from sim_ini_21730: the 2030 agreements), 2030 (tools/build/build_bilateral_market.py build_trq_global; docs/design/PORTS_STAGE4.md).",
+   "kind": "coefficients",
+   "vintage": "2030 reference",
+   "domain": "market",
+   "status": "live",
+   "rows": 70,
+   "columns": 9,
+   "units": "U_1000t, U_EuPerTon, U_percent",
+   "read_by_model": [
+    "capri_mod/market/bilateral_solve.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_bilateral_market:"
+   },
+   "catalogue_note": "CAPRI's global tariff-rate quotas per importer block, with the free-trade exporters (docs/design/PORTS_STAGE4.md) (not re-checked)"
   },
   "capri_data/2017/market/biofuel_feedstock_2017.csv": {
    "description": "Market year 2017: CAPRI's biofuel markets: feedstock demand, biofuel supply and biofuel demand, per CAPRI market region. (tools/build/build_biofuel_market.py)",
@@ -5843,10 +5879,10 @@
    }
   },
   "capri_data/sources/market/bilateral_trq_dataout_2017.csv": {
-   "description": "CAPRI's bilateral TRQ and price items (TrqNT, TAMFN, TSMFN, TaAppl, TsAppl, Fob, TCost, ImportQ) of the EU policy block 'EU' as importer, per exporter and product, from market_base_1717 dataOut, 2017 (tools/build/build_bilateral_market.py).",
+   "description": "CAPRI's tariff-rate quota items (TRQNT, TAMFN, TAPREF, TSMFN, TSPREF, PREFTRIGPRICE) of every importer and exporter of the listing (policy blocks, market regions and reporting aggregates; exporter World: the global quotas), per product, from market_base_1717 dataOut, 2017 (tools/build/build_bilateral_market.py build_trq).",
    "kind": "base",
-   "rows": 9359,
-   "columns": 4,
+   "rows": 8630,
+   "columns": 5,
    "units": "to be established (value_units: open)",
    "origin": {
     "nature": "capri",
@@ -5854,10 +5890,10 @@
    }
   },
   "capri_data/sources/market/bilateral_trq_dataout_2030.csv": {
-   "description": "CAPRI's bilateral TRQ and price items (TrqNT, TAMFN, TSMFN, TaAppl, TsAppl, Fob, TCost, ImportQ) of the EU policy block 'EU' as importer, per exporter and product, from markmarket_greendeal_1730et_base_1717 dataOut, 2030 (tools/build/build_bilateral_market.py).",
+   "description": "CAPRI's tariff-rate quota items (TRQNT, TAMFN, TAPREF, TSMFN, TSPREF, PREFTRIGPRICE) of every importer and exporter of the listing (policy blocks, market regions and reporting aggregates; exporter World: the global quotas), per product, from markmarket_greendeal_1730et_base_1717 dataOut, 2030 (tools/build/build_bilateral_market.py build_trq).",
    "kind": "reference",
-   "rows": 8808,
-   "columns": 4,
+   "rows": 8852,
+   "columns": 5,
    "units": "to be established (value_units: open)",
    "origin": {
     "nature": "capri",

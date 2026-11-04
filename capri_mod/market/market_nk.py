@@ -149,7 +149,7 @@ class NewtonKrylovMixin:
                     continue
                 X, _ = sc.flows(D[c].values, r[c].values, pc[c])
                 old_s = sc.trq_sigmas()
-                sc.trq_solve(X, pc[c], r[c].values, D[c].values)
+                sc.trq_solve(X, pc[c], r[c].values)
                 trq_moved = max(trq_moved, sc.trq_sigma_change(old_s))
             if verbose:
                 print(f"  market Newton-Krylov step {it}: max rel residual {err:.2e}, evaluations {n_evals}")

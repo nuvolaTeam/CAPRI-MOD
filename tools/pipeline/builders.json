@@ -485,6 +485,8 @@
    "args": [],
    "inputs": [
     "capri_data/codes/capri/RM.csv",
+    "capri_data/codes/capri/RMTP.csv",
+    "capri_data/codes/capri/RM_TO_RMTP.csv",
     "capri_data/codes/model_market_regions.csv",
     "capri_data/codes/model_trade_regions.csv",
     "capri_data/shared/rms_to_rm.csv"
@@ -499,6 +501,7 @@
    "external": [
     "$EXPORTS/market_base_1717.txt",
     "$EXPORTS/markmarket_greendeal_1730et_base_1717.txt",
+    "$REFERENCE/simini/simini_21730/p_doubleZero.csv.gz",
     "$SOURCES/gams/special_ch/market1_ch.gms"
    ],
    "outputs": [
@@ -509,6 +512,8 @@
     "capri_data/2017/market/bilateral_regions_2030.csv",
     "capri_data/2017/market/bilateral_trq_2017.csv",
     "capri_data/2017/market/bilateral_trq_2030.csv",
+    "capri_data/2017/market/bilateral_trq_global_2017.csv",
+    "capri_data/2017/market/bilateral_trq_global_2030.csv",
     "capri_data/sources/market/bilateral_dataout_2017.csv.xz",
     "capri_data/sources/market/bilateral_dataout_2030.csv.xz",
     "capri_data/sources/market/bilateral_trq_dataout_2017.csv",

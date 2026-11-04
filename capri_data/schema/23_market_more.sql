@@ -73,33 +73,91 @@ INSERT INTO value_units VALUES
 
 -- file: capri_data/2017/market/bilateral_trq_2017.csv
 CREATE TABLE mkt_bilateral_trq_2017 (
-    commodity VARCHAR NOT NULL,
+    importer VARCHAR NOT NULL,
     exporter VARCHAR NOT NULL,
+    commodity VARCHAR NOT NULL,
     quota_kt DOUBLE NOT NULL,
-    gap_eur_t DOUBLE NOT NULL,
-    imports_kt DOUBLE NOT NULL,
-    PRIMARY KEY (commodity, exporter)
+    ta_mfn DOUBLE NOT NULL,
+    ta_pref DOUBLE NOT NULL,
+    ts_mfn DOUBLE NOT NULL,
+    ts_pref DOUBLE NOT NULL,
+    importer_regions VARCHAR NOT NULL,
+    exporter_regions VARCHAR NOT NULL,
+    regime VARCHAR NOT NULL CHECK (regime IN ('bilateral', 'with_global', 'entry_price')),
+    PRIMARY KEY (importer, exporter, commodity)
 );
-COMMENT ON TABLE mkt_bilateral_trq_2017 IS 'CAPRI''s bilateral trade data for the model''s trade regions (Sprint 8m: CAPRI''s full market). (tools/build/build_bilateral_market.py)';
+COMMENT ON TABLE mkt_bilateral_trq_2017 IS 'CAPRI''s bilateral tariff-rate quotas of every importer (p_trqBilat TrqNT with TaMFN, TaPref, TsMFN, TsPref) per pair of policy blocks (RMTP) and model commodity, with the blocks'' market regions and the regime of the pair (bilateral sigmoid; with the importer''s global quota: the smaller rate; entry price system), 2017 (tools/build/build_bilateral_market.py build_trq; docs/design/PORTS_STAGE4.md).';
 INSERT INTO value_units VALUES
-  ('mkt_bilateral_trq_2017', 'quota_kt', NULL, 'open', 'bilateral_trq_2017.quota_kt: unit to be established'),
-  ('mkt_bilateral_trq_2017', 'gap_eur_t', NULL, 'open', 'bilateral_trq_2017.gap_eur_t: unit to be established'),
-  ('mkt_bilateral_trq_2017', 'imports_kt', NULL, 'open', 'bilateral_trq_2017.imports_kt: unit to be established');
+  ('mkt_bilateral_trq_2017', 'quota_kt', 'U_1000t', 'builder', 'CAPRI p_trqBilat TrqNT'),
+  ('mkt_bilateral_trq_2017', 'ta_mfn', 'U_percent', 'builder', 'CAPRI p_trqBilat TaMFN'),
+  ('mkt_bilateral_trq_2017', 'ta_pref', 'U_percent', 'builder', 'CAPRI p_trqBilat TaPref'),
+  ('mkt_bilateral_trq_2017', 'ts_mfn', 'U_EuPerTon', 'builder', 'CAPRI p_trqBilat TsMFN'),
+  ('mkt_bilateral_trq_2017', 'ts_pref', 'U_EuPerTon', 'builder', 'CAPRI p_trqBilat TsPref');
+
+-- file: capri_data/2017/market/bilateral_trq_global_2017.csv
+CREATE TABLE mkt_bilateral_trq_global_2017 (
+    importer VARCHAR NOT NULL,
+    commodity VARCHAR NOT NULL,
+    quota_kt DOUBLE NOT NULL,
+    ta_mfn DOUBLE NOT NULL,
+    ta_pref DOUBLE NOT NULL,
+    ts_mfn DOUBLE NOT NULL,
+    ts_pref DOUBLE NOT NULL,
+    importer_regions VARCHAR NOT NULL,
+    free_regions VARCHAR,
+    PRIMARY KEY (importer, commodity)
+);
+COMMENT ON TABLE mkt_bilateral_trq_global_2017 IS 'CAPRI''s global (erga omnes) tariff-rate quotas (p_trqGlobl, the importer''s rows with exporter World) per policy block and model commodity, with the market regions of the exporter blocks under free trade (p_doubleZero, from sim_ini_21730: the 2030 agreements), 2017 (tools/build/build_bilateral_market.py build_trq_global; docs/design/PORTS_STAGE4.md).';
+INSERT INTO value_units VALUES
+  ('mkt_bilateral_trq_global_2017', 'quota_kt', 'U_1000t', 'builder', 'CAPRI p_trqGlobl TrqNT'),
+  ('mkt_bilateral_trq_global_2017', 'ta_mfn', 'U_percent', 'builder', 'CAPRI p_trqGlobl TaMFN'),
+  ('mkt_bilateral_trq_global_2017', 'ta_pref', 'U_percent', 'builder', 'CAPRI p_trqGlobl TaPref'),
+  ('mkt_bilateral_trq_global_2017', 'ts_mfn', 'U_EuPerTon', 'builder', 'CAPRI p_trqGlobl TsMFN'),
+  ('mkt_bilateral_trq_global_2017', 'ts_pref', 'U_EuPerTon', 'builder', 'CAPRI p_trqGlobl TsPref');
 
 -- file: capri_data/2017/market/bilateral_trq_2030.csv
 CREATE TABLE mkt_bilateral_trq_2030 (
-    commodity VARCHAR NOT NULL,
+    importer VARCHAR NOT NULL,
     exporter VARCHAR NOT NULL,
+    commodity VARCHAR NOT NULL,
     quota_kt DOUBLE NOT NULL,
-    gap_eur_t DOUBLE NOT NULL,
-    imports_kt DOUBLE NOT NULL,
-    PRIMARY KEY (commodity, exporter)
+    ta_mfn DOUBLE NOT NULL,
+    ta_pref DOUBLE NOT NULL,
+    ts_mfn DOUBLE NOT NULL,
+    ts_pref DOUBLE NOT NULL,
+    importer_regions VARCHAR NOT NULL,
+    exporter_regions VARCHAR NOT NULL,
+    regime VARCHAR NOT NULL CHECK (regime IN ('bilateral', 'with_global', 'entry_price')),
+    PRIMARY KEY (importer, exporter, commodity)
 );
-COMMENT ON TABLE mkt_bilateral_trq_2030 IS 'CAPRI''s bilateral trade data for the model''s trade regions (Sprint 8m: CAPRI''s full market). (tools/build/build_bilateral_market.py)';
+COMMENT ON TABLE mkt_bilateral_trq_2030 IS 'CAPRI''s bilateral tariff-rate quotas of every importer (p_trqBilat TrqNT with TaMFN, TaPref, TsMFN, TsPref) per pair of policy blocks (RMTP) and model commodity, with the blocks'' market regions and the regime of the pair (bilateral sigmoid; with the importer''s global quota: the smaller rate; entry price system), 2030 (tools/build/build_bilateral_market.py build_trq; docs/design/PORTS_STAGE4.md).';
 INSERT INTO value_units VALUES
-  ('mkt_bilateral_trq_2030', 'quota_kt', NULL, 'open', 'bilateral_trq_2030.quota_kt: unit to be established'),
-  ('mkt_bilateral_trq_2030', 'gap_eur_t', NULL, 'open', 'bilateral_trq_2030.gap_eur_t: unit to be established'),
-  ('mkt_bilateral_trq_2030', 'imports_kt', NULL, 'open', 'bilateral_trq_2030.imports_kt: unit to be established');
+  ('mkt_bilateral_trq_2030', 'quota_kt', 'U_1000t', 'builder', 'CAPRI p_trqBilat TrqNT'),
+  ('mkt_bilateral_trq_2030', 'ta_mfn', 'U_percent', 'builder', 'CAPRI p_trqBilat TaMFN'),
+  ('mkt_bilateral_trq_2030', 'ta_pref', 'U_percent', 'builder', 'CAPRI p_trqBilat TaPref'),
+  ('mkt_bilateral_trq_2030', 'ts_mfn', 'U_EuPerTon', 'builder', 'CAPRI p_trqBilat TsMFN'),
+  ('mkt_bilateral_trq_2030', 'ts_pref', 'U_EuPerTon', 'builder', 'CAPRI p_trqBilat TsPref');
+
+-- file: capri_data/2017/market/bilateral_trq_global_2030.csv
+CREATE TABLE mkt_bilateral_trq_global_2030 (
+    importer VARCHAR NOT NULL,
+    commodity VARCHAR NOT NULL,
+    quota_kt DOUBLE NOT NULL,
+    ta_mfn DOUBLE NOT NULL,
+    ta_pref DOUBLE NOT NULL,
+    ts_mfn DOUBLE NOT NULL,
+    ts_pref DOUBLE NOT NULL,
+    importer_regions VARCHAR NOT NULL,
+    free_regions VARCHAR,
+    PRIMARY KEY (importer, commodity)
+);
+COMMENT ON TABLE mkt_bilateral_trq_global_2030 IS 'CAPRI''s global (erga omnes) tariff-rate quotas (p_trqGlobl, the importer''s rows with exporter World) per policy block and model commodity, with the market regions of the exporter blocks under free trade (p_doubleZero, from sim_ini_21730: the 2030 agreements), 2030 (tools/build/build_bilateral_market.py build_trq_global; docs/design/PORTS_STAGE4.md).';
+INSERT INTO value_units VALUES
+  ('mkt_bilateral_trq_global_2030', 'quota_kt', 'U_1000t', 'builder', 'CAPRI p_trqGlobl TrqNT'),
+  ('mkt_bilateral_trq_global_2030', 'ta_mfn', 'U_percent', 'builder', 'CAPRI p_trqGlobl TaMFN'),
+  ('mkt_bilateral_trq_global_2030', 'ta_pref', 'U_percent', 'builder', 'CAPRI p_trqGlobl TaPref'),
+  ('mkt_bilateral_trq_global_2030', 'ts_mfn', 'U_EuPerTon', 'builder', 'CAPRI p_trqGlobl TsMFN'),
+  ('mkt_bilateral_trq_global_2030', 'ts_pref', 'U_EuPerTon', 'builder', 'CAPRI p_trqGlobl TsPref');
 
 -- file: capri_data/2017/market/biofuel_feedstock_2017.csv
 CREATE TABLE mkt_biofuel_feedstock_2017 (
