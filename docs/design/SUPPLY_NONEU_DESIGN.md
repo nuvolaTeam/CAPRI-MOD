@@ -126,7 +126,10 @@ built. No proxy.
     the non-EU rows match CAPRI's Green Deal 2030 N2OHIS per ha to 2e-6), and fallowing outside the EU follows the
     endotech setting fallowInAllRmssup (capri_mod/policy/endotech.py; default 1 as star 3.0's Green Deal reference,
     0 in the JRC121368-era settings). Two EU errors found on the way: KNOWN_ISSUES K112.
-  - Winter cover outside the EU: still to do (winterCovInAllRmssup).
+  - Winter cover outside the EU (4 November 2026): the endotech setting winterCovInAllRmssup (cover_crops.gms
+    l. 428-430; default 1 as the Green Deal reference) lets abatement._catc_spec give the option outside the EU;
+    winter_cover_option.csv already has CAPRI's calibrated terms for the 35 units. Norway is concerned in the default
+    runs.
   - Farm structure of the Western Balkans and Turkey (4 November 2026): CAPRI's estimation ported
     (tools/build/build_farm_size_noneu.py: m_fsclass and m_heads_per_hold per region, CAPRI's fallback_Balkan targets
     and its farm totals read from its code); the ammonia cost curves now cover the 18 regions. Registered: CAPRI

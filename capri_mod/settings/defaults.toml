@@ -376,6 +376,8 @@ ghgTechLineNitr = 1.0
 fixGenetToIni = 1.0
 # %fallowInAllRmssup% (no_histosols.gms l. 22-26): histosol fallowing outside the EU too, 1 on (MitiInAllRmssup on)
 fallowInAllRmssup = 1.0
+# %winterCovInAllRmssup% (cover_crops.gms): the winter cover outside the EU too, 1 on (MitiInAllRmssup on)
+winterCovInAllRmssup = 1.0
 
 [diagnostics]
 verbose = true

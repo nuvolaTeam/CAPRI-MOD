@@ -31,6 +31,9 @@ Settings (refpol_endotech_all_sup.gms):
                refpol_endotech_all_sup.gms l. 49-60) and in pol_input/ecampa/refpol_endotech_set14td*.gms; not set in
                refpol_endotech_set14_ini.gms. JRC121368 does not state it, so its settings take star 3.0's (1), as
                farm_to_fork_scenario does for everything the report does not state.
+  winterCovInAllRmssup  the winter cover (catch crops) in every supply region (envind/cover_crops.gms l. 428-430:
+               "we are not modelling mitigation technologies outside the EU" unless it is on); as fallowInAllRmssup, on in star 3.0's Green Deal reference
+               (MitiInAllRmssup), 1 in both setting sets.
                With it on, the supply models outside the EU (Norway, the UK, the Western Balkans; Turkey has no
                histosols in CAPRI's data) have the fallowing option where CAPRI's calibration has it.
 """
@@ -41,10 +44,12 @@ import pandas as pd
 
 #: CAPRI star 3.0 defaults (pol_input/greendeal/refpol_endotech_all_sup.gms)
 STAR3_DEFAULTS: Dict[str, float] = {"ghgTechMYld": 0.0, "ghgTechFEff": 0.1, "ghgTechLowNFeed": 1.0,
-                                    "ghgTechLineNitr": 1.0, "fixGenetToIni": 1.0, "fallowInAllRmssup": 1.0}
+                                    "ghgTechLineNitr": 1.0, "fixGenetToIni": 1.0, "fallowInAllRmssup": 1.0,
+                                    "winterCovInAllRmssup": 1.0}
 #: the setting of CAPRI's JRC121368-era endotech references (pol_input/ecampa/refpol_endotech_set14_ini.gms)
 JRC121368_ENDOTECH: Dict[str, float] = {"ghgTechMYld": 0.2, "ghgTechFEff": 0.1, "ghgTechLowNFeed": 1.0,
-                                        "ghgTechLineNitr": 1.0, "fixGenetToIni": 1.0, "fallowInAllRmssup": 1.0}
+                                        "ghgTechLineNitr": 1.0, "fixGenetToIni": 1.0, "fallowInAllRmssup": 1.0,
+                                        "winterCovInAllRmssup": 1.0}
 
 _SCALED = ("d_milk_rel", "d_ener_rel", "d_crpr_rel", "d_drmn_rel", "d_drmx_rel", "d_mann_rel")
 

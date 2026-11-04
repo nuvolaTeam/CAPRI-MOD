@@ -2068,10 +2068,12 @@ class SupplyModule(ModuleStateMixin):
 
     def set_mitigation_scope(self, settings) -> None:
         """CAPRI's switches that extend an EU mitigation option to every supply region (capri_mod/policy/endotech.py):
-        %fallowInAllRmssup% for histosol fallowing (no_histosols.gms rmssup_histo)."""
-        on = float(settings["fallowInAllRmssup"]) > 0
+        %fallowInAllRmssup% for histosol fallowing (no_histosols.gms rmssup_histo), %winterCovInAllRmssup% for the
+        winter cover (cover_crops.gms)."""
+        fal, wc = float(settings["fallowInAllRmssup"]) > 0, float(settings["winterCovInAllRmssup"]) > 0
         for m in self._models.values():
-            m.seen.fallow_in_all_rmssup = on
+            m.seen.fallow_in_all_rmssup = fal
+            m.seen.wintercov_in_all_rmssup = wc
 
     def set_genetics_effects(self, table: Optional[dict], settings_key: tuple) -> None:
         """Cattle genomics at the run's technology settings (capri_mod/policy/endotech.py). Each regional model

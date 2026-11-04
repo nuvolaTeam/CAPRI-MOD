@@ -15,3 +15,6 @@ ghgTechFEff = 0.1
 ghgTechLowNFeed = 1.0
 ghgTechLineNitr = 1.0
 fixGenetToIni = 1.0
+# not set in refpol_endotech_set14_ini.gms: star 3.0's Green Deal reference values (capri_mod/policy/endotech.py)
+fallowInAllRmssup = 1.0
+winterCovInAllRmssup = 1.0

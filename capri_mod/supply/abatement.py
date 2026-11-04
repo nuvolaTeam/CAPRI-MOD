@@ -51,13 +51,20 @@ class AbatementBlock:
 
     def _catc_spec(self):
         """The winter cover option of this region for the NLP form ({"uaa", "m0", "lb", "ub", "k1", "lin", "sqr",
-        "biofix", "row", "rhs"}), or None (switch off, outside the EU, no data). UAAR: the region's base crop area
+        "biofix", "row", "rhs"}), or None (switch off, outside the EU without winterCovInAllRmssup, no data). UAAR: the region's base crop area
         (CAPRI's data UAAR, fixed); lb: the Farm-to-Fork requirement's share (e_minCoverCrops), set by the caller in
         the simulation; the winterCover_ row: sum_c winter cover share_c x crop_c + m x UAAR <= UAAR + fallow floor
         (supply_model.gms l. 1979-1992), its right-hand side at least the base point's (REGISTERED: CAPRI's MaxShare
         is from CAPRI's crop levels, the row from the model's)."""
         if not is_eu(self.data.region_id):
-            return None
+            # CAPRI's %winterCovInAllRmssup% (cover_crops.gms): outside the EU only with it on (the run's endotech
+            # settings; until 4 November 2026 never, SUPPLY_NONEU_DESIGN section 4)
+            _all = getattr(self.seen, "wintercov_in_all_rmssup", None)
+            if _all is None:
+                from capri_mod.policy.endotech import effective as _eff
+                _all = float(_eff()["winterCovInAllRmssup"]) > 0
+            if not _all:
+                return None
         opt = _inputs.current().cached(                                   # a missing file is an error (K74)
             "winter_cover_option", lambda inp: inp.csv("winter_cover_option.csv", "abatement/mitigation").set_index("region"))
         cc = getattr(self.data, "cover_crops", None)

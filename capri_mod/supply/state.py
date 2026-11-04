@@ -161,6 +161,7 @@ class RegionalSeen(_Slots):
         "fert_techs_all",     # CAPRI's fertiliser options (NLP form)
         "nlp_cal_check",      # set by CAPRIModel at a baseline: check the NLP calibration at the next solve
         "fallow_in_all_rmssup",  # CAPRI's %fallowInAllRmssup%: histosol fallowing outside the EU (endotech settings)
+        "wintercov_in_all_rmssup",  # CAPRI's %winterCovInAllRmssup%: the winter cover outside the EU (endotech settings)
     )
 
 
