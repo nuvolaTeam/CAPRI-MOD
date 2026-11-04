@@ -2042,7 +2042,8 @@ HR000000 (about 5e-7, no initial share). Found while porting the same fallback f
 - **Status:** **fixed** 4 November 2026: the fallback ported (fallback_balkan in build_ad_option.py; gams_text.set_pairs
   reads CAPRI's (a, b).(c, d) notation). Croatia and the six Western Balkan countries now have the option; Turkey's
   units not yet (their manure-system shares in n_cascade_factors give no housed liquid manure: to check against CAPRI).
-  Test: test_ad_option_of_croatia_and_the_balkans_as_capri.
+  Test: test_ad_option_of_croatia_and_the_balkans_as_capri. Mini-EU Farm-to-Fork run (d80d7fd against 4cd6518):
+  Croatia's results unchanged (the option stays at zero without an incentive on manure CH4).
 
 ### K114: Norway lacked CAPRI's mirrored MITERRA data and Sweden's AD data: no housed liquid manure, no AD (found 4 November 2026)
 
@@ -2063,4 +2064,7 @@ option outside the EU (SUPPLY_NONEU step 6). A reproduction error of capri-mod.
   Norway's AD initial shares are CAPRI's 2030 AD_AnCh to 0.3% (DCOL 0.000209, BULL 0.000077, PIGF 0.000333 in all six
   units). The regional mirrors (rLFrest, rLFmanureBasis, rLFmanureND, rCorrND) hold the former NUTS 3 codes, none of the
   units, so CAPRI's assignment gives the units nothing, as here. Test: test_norway_miterra_mirror_and_ad_option_as_capri.
+  Mini-EU Farm-to-Fork run (d80d7fd, with the winter cover outside the EU, against 4cd6518): NO080000's soil N2O
+  106.9 -> 97.2 kt CO2-eq, P run-off 68.6 -> 156.3 t, urea CO2 0 -> 0.03 kt; supply, market and every other region
+  unchanged to the solves' tolerance; the mean deviation from CAPRI (20 indicators) 7.81 as before.
 
