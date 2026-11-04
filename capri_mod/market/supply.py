@@ -1089,22 +1089,30 @@ class SupplyMixin(MarketStateMixin):
             return 0.0
         cache = self.__dict__.setdefault("_yani_hcache", {})
         ck = (reg, id(H), tuple(cols), tuple(xs), tuple(goods))
-        mats = cache.get(ck)
-        if mats is None:
+        hit = cache.get(ck)
+        if hit is None or hit[0] is not H:
+            # yaniMarket_ in CasADi (supply_ad.yani_function, step G2g), rebuilt when the Hessian or the rows change
+            # (the region's former entries dropped)
+            from capri_mod.market.supply_ad import yani_function
+            for k_ in [k_ for k_ in cache if k_[0] == reg]:
+                del cache[k_]
             yi = ["YANI:" + g for g in goods]
-            mats = (H.reindex(index=yi, columns=cols).fillna(0.0).to_numpy(dtype=float),
-                    H.reindex(index=yi, columns=yi).fillna(0.0).to_numpy(dtype=float),
-                    H.reindex(index=list(xs), columns=yi).fillna(0.0).to_numpy(dtype=float))
-            cache.clear()
-            cache[ck] = mats
-        H_YP, H_YY, H_PY = mats
+            hit = cache[ck] = (H, yani_function(
+                f"yani_{len(goods)}", H.reindex(index=yi, columns=cols).fillna(0.0).to_numpy(dtype=float),
+                H.reindex(index=yi, columns=yi).fillna(0.0).to_numpy(dtype=float),
+                H.reindex(index=list(xs), columns=yi).fillna(0.0).to_numpy(dtype=float)))
+        f = hit[1]
         n_now = np.array([float(st["net"].get(g, 0.0)) for g in goods])
         ref = np.array([float(st["ref"].get(g, 0.0)) for g in goods])
         r_seen = np.array([float(st["seen"].get(g, 1.0)) for g in goods])
         # extra_y: the young animals' supply change from the member states' milk prices (_milk_and_yani_clear_all)
-        rhs = ref - n_now - H_YP @ np.asarray(dP, float) - extra_y
-        dr = np.linalg.lstsq(H_YY, rhs, rcond=None)[0]
+        ex = np.broadcast_to(np.asarray(extra_y, float), n_now.shape)
+        dP = np.asarray(dP, float)
+        z = np.zeros(len(goods))
+        res0, J, _ = f(z, n_now, ref, dP, ex, z)
+        # the clearing prices: linear in dr, least squares where H_YY is singular (as before G2g)
+        dr = np.linalg.lstsq(np.asarray(J, float), -np.asarray(res0, float).ravel(), rcond=None)[0]
         lo, hi = st.get("bounds", (-50.0, 50.0))
         r = np.clip(r_seen + dr, lo, hi)
         self.ev.setdefault("yani_market_now", {})[reg] = dict(zip(goods, (float(v) for v in r)))
-        return H_PY @ (r - r_seen)
+        return np.asarray(f(z, n_now, ref, dP, ex, r - r_seen)[2], float).ravel()

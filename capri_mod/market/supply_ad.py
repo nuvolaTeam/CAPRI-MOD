@@ -130,3 +130,21 @@ def land_residual_function(name: str, d: dict):
     S = float(d["avail"]) * sh
     F = base + ca.mtimes(ca.DM(np.asarray(d["H"], float)), dr) - ca.vertcat(*[S[i] for i in fr])
     return ca.Function(name, [dr, base], [F, ca.jacobian(F, dr)], ["dr", "base"], ["F", "J"])
+
+
+def yani_function(name: str, H_YP: np.ndarray, H_YY: np.ndarray, H_PY: np.ndarray):
+    """CasADi Function (dr[n_y], net[n_y], ref[n_y], dP[n_c], extra[n_y], dlev[n_y]) -> (res[n_y], J[n_y x n_y],
+    eff[n_x]): CAPRI's yaniMarket_ of one market region (arm/market_model.gms l. 1579-1603; step G2g): the net supply
+    of each young-animal good, a normalised-quadratic function of all prices recalibrated to the supply models' latest
+    solution (net), equals its reference, res = net + H_YP dP + H_YY dr + extra - ref, dr the young-animal prices'
+    change from those the models saw, dP the products', extra the change from the member states' milk prices; J its
+    Jacobian in dr (H_YY); eff the products' supply change H_PY dlev at the young-animal prices' change dlev (rows of
+    the market supply Hessian, SupplyMixin._yani_clear)."""
+    import casadi as ca
+    ny, nc = H_YP.shape
+    dr, net, ref = ca.SX.sym("dr", ny), ca.SX.sym("net", ny), ca.SX.sym("ref", ny)
+    dP, extra, dlev = ca.SX.sym("dP", nc), ca.SX.sym("extra", ny), ca.SX.sym("dlev", ny)
+    res = net + ca.mtimes(ca.DM(H_YP), dP) + ca.mtimes(ca.DM(H_YY), dr) + extra - ref
+    eff = ca.mtimes(ca.DM(H_PY), dlev)
+    return ca.Function(name, [dr, net, ref, dP, extra, dlev], [res, ca.jacobian(res, dr), eff],
+                       ["dr", "net", "ref", "dP", "extra", "dlev"], ["res", "J", "eff"])

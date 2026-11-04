@@ -226,7 +226,22 @@ Each stage must pass two checks:
      identical; the Jacobian is the equations' matrix.
    - Left for G3: ProcFudge_ applies where the change is not exactly 0 (an if_else, a jump of about 1e-11 kt), and the
      milk price floor is a switch between two systems (CAPRI: a bound on the price).
-7. **G2g.** Biofuels; young animals and raw milk, lifted.
+7. **G2g.** Biofuels; young animals and raw milk, lifted. **Built 4 November 2026 (branch step-g2b).**
+   - Biofuels, capri_mod/market/biofuel_ad.py: the feedstock CES per group (biofFeedCost_, biofFeedCostAgg_, Biof_,
+     prodBiof_: feed_group_function) and the market equations with their parameters as inputs (SupplyBiof_ with
+     biofPriceRel_, biofDemShare_ with Cpri_ and biofDem_, the own-price ProcNQ_); _biofuel_feed_group and
+     biofuel_state evaluate them, the NumPy code and _sigmoid removed. capri_mod/tests/test_biofuel_ad.py: equal to the
+     former code at random prices with the mandate shifted (1e-12 relative).
+   - Young animals: yaniMarket_ and the products' young-animal terms (supply_ad.yani_function); _yani_clear solves
+     the linear clearing by least squares on its Jacobian (as before, H_YY can be singular) and clips to the bounds.
+     test_supply_ad.py: equal to the former code with a regular and a singular H_YY.
+   - Raw milk: ProdNQ_ MILK enters the dairy blocks' milk row (G2f: the slope kq and the shift mrhs are inputs of
+     dairy_ad.dairy_block_function), so no separate function.
+   - Still a fixed point in the default solve: the young-animal markets and the member states' milk prices are
+     cleared in up to 4 alternating rounds (_milk_and_yani_clear_all), stopped after the 4th even if the milk prices
+     still move by more than 1e-10. In G3 both are equations of the one NLP, so this goes. Possible earlier change
+     (a behaviour change, to measure separately, not part of this move): solve the two jointly, linear in (young-animal
+     prices, the member states' fat, protein and milk prices) apart from the price bounds.
 8. **G3.** IPOPT on the assembled NLP.
    - **Check:** the equilibrium equals the default solve's within `market.tol` at every outer iteration of the F2F
      and GD runs, and the outer loop converges in the same number of iterations or fewer.

@@ -183,3 +183,40 @@ def test_land_residual_function_equals_the_numpy_form(market):
             assert np.allclose(np.asarray(J).reshape(Jr.shape), Jr, rtol=1e-10, atol=1e-12 * float(np.abs(Jr).max())), rms
             n += 1
     assert n > 0
+
+
+@pytest.mark.parametrize("singular", [False, True])
+def test_young_animal_clearing_equals_the_former_code(singular):
+    """yaniMarket_ (supply_ad.yani_function, step G2g) through SupplyMixin._yani_clear equals the NumPy code it had
+    until 4 November 2026 (least squares on H_YY, prices clipped to the bounds), with a singular H_YY too."""
+    from capri_mod.market import supply as msup
+    cls = next(v for k, v in vars(msup).items() if isinstance(v, type) and hasattr(v, "_yani_clear"))
+    stub = cls.__new__(cls)
+    rng = np.random.default_rng(21 + singular)
+    goods = ["calves", "heifers", "piglets", "lambs"]
+    prods = ["BEEF", "PORK", "SGMT", "MILK", "COWS"]
+    yi = ["YANI:" + g for g in goods]
+    idx = prods + yi
+    M = rng.standard_normal((len(idx), len(idx))) * 30
+    H = pd.DataFrame(M + M.T, index=idx, columns=idx)
+    if singular:
+        H.loc[yi[3], yi] = H.loc[yi[2], yi].values             # two equal rows: H_YY singular
+    st = {"goods": goods, "net": {g: float(rng.uniform(50, 150)) for g in goods},
+          "ref": {g: float(rng.uniform(50, 150)) for g in goods},
+          "seen": {g: float(rng.uniform(0.8, 1.2)) for g in goods}, "bounds": (0.5, 1.6)}
+    stub.seen.yani_state = {"EU27": st}
+    cols, xs = prods, ["BEEF", "PORK", "MILK"]
+    for _ in range(4):
+        dP = 0.1 * rng.standard_normal(len(cols))
+        ey = rng.standard_normal(len(goods))
+        out = np.asarray(stub._yani_clear("EU27", H, xs, cols, dP, extra_y=ey), float).ravel()
+        H_YP = H.reindex(index=yi, columns=cols).to_numpy(float)
+        H_YY = H.reindex(index=yi, columns=yi).to_numpy(float)
+        H_PY = H.reindex(index=xs, columns=yi).to_numpy(float)
+        n_now = np.array([st["net"][g] for g in goods]); ref = np.array([st["ref"][g] for g in goods])
+        r_seen = np.array([st["seen"][g] for g in goods])
+        dr = np.linalg.lstsq(H_YY, ref - n_now - H_YP @ dP - ey, rcond=None)[0]
+        r = np.clip(r_seen + dr, 0.5, 1.6)
+        got = np.array([stub.ev.yani_market_now["EU27"][g] for g in goods])
+        assert np.allclose(got, r, rtol=1e-12, atol=1e-12), (got, r)
+        assert np.allclose(out, H_PY @ (r - r_seen), rtol=1e-11, atol=1e-10)
