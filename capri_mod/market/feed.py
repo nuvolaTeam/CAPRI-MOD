@@ -147,6 +147,8 @@ class FeedMixin(MarketStateMixin):
                 pno, f0s, u0s, ms_reg = {}, {}, {}, {ms: k for k, v in self.SUP_NONEU_MS.items() for ms in v}
                 tno = inp.csv("feed_bulks_noneu.csv", keep_default_na=False)
                 for (ms, b), g in tno.groupby(["ms", "bulk"], sort=True):
+                    if ms not in ms_reg:
+                        continue              # a country outside the EU whose supply models are not in the run
                     q0 = g["feed_kt"].astype(float).values
                     v0 = q0 * g["arm1p"].astype(float).values
                     comm = [c if c in self.commodities else "" for c in g["commodity"].astype(str)]

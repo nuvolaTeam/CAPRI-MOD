@@ -1840,7 +1840,7 @@
    "vintage": "2030",
    "domain": "market",
    "status": "live",
-   "rows": 23,
+   "rows": 199,
    "columns": 8,
    "units": "U_1000t, U_Elasticity, U_EuPerTon",
    "read_by_model": [
@@ -6296,7 +6296,7 @@
    "vintage": "2030",
    "domain": "market",
    "status": "source",
-   "rows": 2440,
+   "rows": 3963,
    "columns": 4,
    "units": "to be established (value_units: open)",
    "origin": {
