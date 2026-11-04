@@ -655,6 +655,14 @@ fine-grained token checked the same day; the token is kept outside the repositor
   git for a pipeline cache the pipeline rebuilds; a few may be kept deliberately where worth reviewing. Each of the 50
   classified one by one first (some are extracts made inside a builder, e.g. the PMP terms read from CAPRI's GDX).
   Done with the Parquet conversion of this section.
+- The model's inputs are organised by role, not by a year in the folder name (with the renaming above, so paths change
+  once): capri_data/<base_year>/ holds the base year's data only; capri_data/baselines/capri_ref_2030/ everything taken
+  from CAPRI's 2030 reference run (on 4 November 2026 spread over 40 of the 216 files of capri_data/2017/, e.g. the
+  2030 PMP terms, market state, rents, N coefficients and CAP ceilings, over capri_data/trajectories/ and over
+  capri_data/scenarios/capri_ref_2030/), a CAPTRD-MOD baseline as another package (baselines/captrd_2030/), the run
+  choosing its baseline package; capri_data/scenarios/ the policy scenarios only. A move: each of the 40 files
+  classified first (a _2030 file that is in fact a base-year input is put to the project lead, not moved blindly);
+  loaders, builders, declarations and pipeline outputs follow; every model input rebuilt identically.
 
 ## 13. Summary
 
