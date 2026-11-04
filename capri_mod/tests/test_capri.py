@@ -164,6 +164,7 @@ def test_own_price_response_in_contrasting_regions(model, reg, product, act, str
     assert (q1 > q0 * (1 + 1e-4)) if strict else (q1 >= q0 - 1e-6), f"{reg} {act}: {q0} -> {q1}"
 
 
+@pytest.mark.slow
 def test_supply_no_blowup(model):
     sm = model.supply_module
     for reg in _german_units(8):
@@ -1002,6 +1003,7 @@ def test_option_costsaving_drop_follows_capri(model):
     assert med["genet_eff"] < 0 and med["Nitr_Tot"] > 0 and med["lowNFeed"] > 0
 
 
+@pytest.mark.slow
 def test_genetics_not_adopted_at_base(model):
     """breeding.gms calibration: IniShare 0, so a baseline run adopts (almost) nothing."""
     regions = ["DE110000", "FR520000", "IR010000"]
@@ -3690,6 +3692,7 @@ def test_n_leaching_follows_capri():
         assert nl.b1(agg=-0.1) < 1.0
 
 
+@pytest.mark.slow
 def test_nlp_failure_keeps_ipopts_last_point_as_capri(model, monkeypatch):
     """KNOWN_ISSUES K55-1: where IPOPT fails for a region from every start and the relaxations do not help, CAPRI carries
     on with the non-optimal solve and records it (supply/simu_supply.gms, widen_bounds.gms: p_INFES). IPOPT's last point
@@ -4215,6 +4218,7 @@ def test_dead_worker_does_not_hang_the_regional_solves(monkeypatch):
         assert float((a - b).abs().max()) < 1e-6, g
 
 
+@pytest.mark.slow
 def test_nlp_form_has_capri_fodder_equality_without_lagged_band():
     """CAPRI's fodder balance SUPBAL_ is an equality with the feed columns (capri_regional_nlp); the conic form's band
     rows, which carried the previous solve's fodder per head (K75), are no longer built (27 October 2026)."""

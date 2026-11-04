@@ -304,6 +304,7 @@ def test_norway_has_pig_herds_and_per_head_coefficients():
         assert abs(n - c[act]["LEVL"] * c[act]["MANN"]) < 1e-6 * n, col
 
 
+@pytest.mark.slow
 def test_norway_run_on_its_own_supply_models():
     """A baseline with Norway's supply regions: the EU's market supply holds none of Norway's output, Norway's market
     supply is its models' (pork too, since Norway's regions have pigs, K56), the base is reproduced at the reference
