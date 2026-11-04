@@ -131,6 +131,9 @@ built. No proxy.
     the non-EU rows match CAPRI's Green Deal 2030 N2OHIS per ha to 2e-6), and fallowing outside the EU follows the
     endotech setting fallowInAllRmssup (capri_mod/policy/endotech.py; default 1 as star 3.0's Green Deal reference,
     0 in the JRC121368-era settings). Two EU errors found on the way: KNOWN_ISSUES K112.
+  - Measured (mini-EU Farm-to-Fork, 4cd6518 against 91f621c): NO080000's histosol N2O 0 -> 38.3 kt CO2-eq in the
+    baseline (38.4 in the scenario, no fallowing without an emission tax); every other result within 2e-6 relative
+    (the solves' tolerance).
   - Winter cover outside the EU (4 November 2026): the endotech setting winterCovInAllRmssup (cover_crops.gms
     l. 428-430; default 1 as the Green Deal reference) lets abatement._catc_spec give the option outside the EU;
     winter_cover_option.csv already has CAPRI's calibrated terms for the 35 units. Norway is concerned in the default
