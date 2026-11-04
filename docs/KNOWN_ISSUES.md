@@ -2074,9 +2074,10 @@ option outside the EU (SUPPLY_NONEU step 6). A reproduction error of capri-mod.
 The model's SETA is CAPRI's fallow FALL plus its voluntary set-aside VSET (CAPRI_TO_MODEL_ACTIVITY maps FALL to SETA;
 the set-aside split, K111). tools/build/build_trajectory_capri_ref.py gave it the growth of CAPRI's own SETA row, which
 is VSET alone (CAPREG 2017: IT400000 SETA = VSET = 10.70, FALL 7.22), and the EU median where a region has no VSET.
-Against CAPRI's 2030 reference (res_2_1730greendeal_refpol_endotech_all_ini) the mini run's 2030 baseline had PL12
-55.6 kha against 104.3, IT40 9.7 against 20.3, PT18 43.8 against 20.7, BG02 28.6 against 14.3, IR01 +83%, HR +64%,
-RO04 +31%, ES61 +15%. The EU-level check (BASELINE_REPRODUCTION) did not show it: the regions offset each other. Found
+Against CAPRI's 2030 reference (res_2_1730greendeal_refpol_endotech_all_ini, FALL + VSET as
+capri_data/validation/greendeal_2030/capri_marginal_terms_ini_2030.csv has them) the mini run's 2030 baseline had
+PL12 55.6 kha against 103.9, IT40 9.7 against 19.9, PT18 43.8 against 25.9, BG02 28.6 against 18.3, HR 41.0 against
+25.0, RO04 67.2 against 51.3, ES61 430.3 against 373.3. The EU-level check (BASELINE_REPRODUCTION) did not show it: the regions offset each other. Found
 while preparing SUPPLY_NONEU step 9's comparison per region. A reproduction error of capri-mod.
 
 - **Effect:** the 2030 baseline's set-aside and fallow per region, and through land use the other crops a little; the
@@ -2085,11 +2086,14 @@ while preparing SUPPLY_NONEU step 9's comparison per region. A reproduction erro
   are sums); VSET is read and not written. 434 regional SETA factors change (191 regions had none and took the EU
   median). Test: test_set_aside_trajectory_is_fallow_plus_voluntary_set_aside.
   Mini-EU Farm-to-Fork run (02dcf2b against 0c80e21): the 2030 baseline's SETA against CAPRI's reference (kha) PL12
-  55.6 -> 104.5 (CAPRI 104.3), IT40 9.7 -> 20.0 (20.3), RO04 67.2 -> 51.2 (51.2), HR 41.0 -> 25.6 (25.0), ES61
-  430.3 -> 375.5 (373.3), FI19, DED, NO08 and DE11 within 1%; still apart: EL14 7.1 -> 10.9 (7.2), PT18 43.8 -> 26.1
-  (20.7), BG02 28.6 -> 18.3 (14.3), IR01 8.1 (4.4), FR24 80.0 (85.7), to look into (other parts of the projection:
-  the land reconciliation, the factor band). 132 baseline activity levels move by more than 1% (the land the
-  set-aside frees or takes); the mean deviation from CAPRI's 20 indicators 7.81 as before.
+  55.6 -> 104.5 (CAPRI 103.9), IT40 9.7 -> 20.0 (19.9), RO04 67.2 -> 51.2 (51.3), HR 41.0 -> 25.6 (25.0), ES61
+  430.3 -> 375.5 (373.3), EL14 7.1 -> 10.9 (10.9), PT18 43.8 -> 26.1 (25.9), BG02 28.6 -> 18.3 (18.3), IR01 8.1
+  (8.1), FR24 80.0 (80.3); FI19, DED, NO08 and DE11 within 1%. 132 baseline activity levels move by more than 1% (the
+  land the set-aside frees or takes); the mean deviation from CAPRI's 20 indicators 7.81 as before.
+  Correction (4 November 2026, late): the first version of this entry listed EL14, PT18, BG02, IR01 and FR24 as still
+  apart (CAPRI 7.2, 20.7, 14.3, 4.4, 85.7). Those CAPRI values came from another CAPRI file,
+  markmarket_greendeal_1730et_base_1717.txt, not from the reference's ini levels that the trajectory and the
+  validation file use; against the latter the ten regions are within 0.8%, HR 2.4%.
   Not changed: the CAPTRD trajectory (scenarios/captrd_2030, not the default) takes CAPTRD's own SETA row as it is
   (capri_mod/projection/captrd_import.py, no aggregation); whether CAPTRD's SETA is VSET too is to check before that
   trajectory is used.
