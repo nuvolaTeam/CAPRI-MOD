@@ -207,6 +207,23 @@ The options as they were put:
 4. **Order of the stages.** As in section 6. The TRQ comes first because it is the only outer fixed point left in
    the trade systems.
 
+### 7.1 Order and solver roles (the project lead, 4 November 2026)
+
+After the market Newton-Krylov solve's review (KNOWN_ISSUES K110):
+
+1. First the current plan: the ports block, the 29 non-EU supply units, S1/S2 and the Farm-to-Fork and Green Deal
+   runs.
+2. Then the quotas' sigmas and the dairy blocks' raw milk price inside each market evaluation, solved with the prices
+   (CAPRI: trqSigmoidFunc_ and the dairy equations in the same system). This shortens the default solve's end, which
+   on K110's shock is mostly the quotas settling (40 iterations), and G3 needs these pieces as equations anyway.
+3. Then G3, the whole market as one system in CAPRI's form (section 3.1), solved by IPOPT, so that the comparison with
+   CAPRI is between the same simultaneous form, not only the same equations.
+
+Solver roles: the default market solve stays the successive linearisation until G3 is measured against it; the
+Newton-Krylov solve (market.solver = "newton_krylov") stays optional with no further work, as a cross-check of the
+equilibrium; for G3's linear solver MUMPS stays available as an option and as the comparison baseline, while
+alternatives (HSL MA97, SPRAL in OpenMP, section 9) are measured as candidate defaults.
+
 ## 8. Found while making the inventory
 
 - supply.py, demand.py, dairy.py, feed.py, biofuel.py and processing.py import `fsolve` and never call it (an import

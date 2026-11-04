@@ -1977,5 +1977,7 @@ stopped at its time limit in the full suite of the ports block. What was found:
   every price and 1e-6 for all but five (it was 1e-6 for all, more than the stopping rule guarantees).
 
 Status: fixed. Open, as a possible improvement: solving the quotas' sigmas inside each evaluation (CAPRI solves
-trqSigmoidFunc_ with the rest of the market) would make the end of both solves shorter; not done.
+trqSigmoidFunc_ with the rest of the market) would make the end of both solves shorter; not done. Decided on 4 November 2026
+(docs/design/MARKET_IPOPT_DESIGN.md section 7.1): the Newton-Krylov solve stays optional with no further work; the
+quotas and the raw milk price go inside the evaluation after the Farm-to-Fork and Green Deal runs, then G3.
 
