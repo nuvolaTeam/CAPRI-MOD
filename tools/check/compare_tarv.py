@@ -15,7 +15,7 @@ for l in open(EXPORTS/'data_market_1730defaulta.csv',errors='ignore'):
     m=pat.match(l)
     if m:
         r,it,p,y,v=m.groups(); tv[(r,it,p,y)]=0.0 if v=='Eps' else float(v)
-t=pd.read_csv(ROOT/'capri_data'/'2017'/'policy'/'tariffs.csv',index_col=0)
+t=pd.read_csv(ROOT/'capri_data'/'2017'/'policy'/'tariffs.csv',index_col=0, float_precision="round_trip")
 # model region -> RMTP: same name where it exists
 alias={'EU27':'EU','NOR':'NO000000','UK':'UK000000'}
 rows=[]

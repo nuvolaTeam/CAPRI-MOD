@@ -772,7 +772,7 @@ def test_bilateral_market_reproduces_capri_flows_at_base():
     j = ix["BRA"]
     r1 = r.copy(); r1[j] = 1.1
     X1, PA1 = sc.flows(sc.D0, r1)
-    ie = ix["EU27"]
+    ie = ix["EU_WEST"]                         # the EU as CAPRI's two market regions (3 November 2026)
     assert X1[ie, j] < X0[ie, j]
     assert np.all(PA1 / sc.PA0 <= 1.1 + 1e-12)
 
@@ -3257,12 +3257,19 @@ def test_eu_trade_blocks_data_and_split(data):
     fb = pd.read_csv(mkt / "bilateral_flows_2030.csv")
     we = fb[(fb.commodity == "CORN") & (fb.importer == "EU_WEST") & (fb.exporter == "EU_EAST")].q_kt.sum()
     assert abs(we - 15041.0) < 1.0
-    f1 = pd.read_csv(mkt / "bilateral_flows_2030.csv")
     eu = ("EU_WEST", "EU_EAST")
-    for c in ("SWHE", "BEEF", "SOYA"):
-        a = f1[(f1.commodity == c) & (f1.importer == "EU27") & (f1.exporter != "EU27")].q_kt.sum()
+    # the EU's imports from outside: CAPRI's (its extract, the two blocks' ImportQ from every non-EU market region)
+    import lzma
+    with lzma.open(DATA_DIR / "sources" / "market" / "bilateral_dataout_2030.csv.xz", "rt") as fh:
+        src = pd.read_csv(fh, keep_default_na=False)
+    for c, k in (("SWHE", "WHEA"), ("BEEF", "BEEF"), ("SOYA", "SOYA")):
+        s = src[(src["item"] == "ImportQ") & (src["product"] == k) & src.r1.isin(["A_EU_WEST", "A_EU_EAST"])
+                & ~src.r2.isin(["A_EU_WEST", "A_EU_EAST", ""])
+                & ~(src.r2.str.endswith("000000") & ~src.r2.isin(["UK000000", "NO000000"]))]
+        s = s[~s.r2.str.startswith(("EU0", "EU_"))]
+        a = float(s.value.astype(float).sum())
         b = fb[(fb.commodity == c) & fb.importer.isin(eu) & ~fb.exporter.isin(eu)].q_kt.sum()
-        assert abs(a - b) < 1e-6 * max(a, 1.0)
+        assert abs(a - b) < 1e-6 * max(a, 1.0), (c, a, b)
     raw = mm._bilateral_raw()
     sc = next(s for s in raw.values() if s.trq_row is not None)
     assert len(np.atleast_1d(sc.trq_row)) == 2

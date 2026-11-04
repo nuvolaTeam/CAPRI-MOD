@@ -186,9 +186,15 @@ class MarketModule(NewtonKrylovMixin, CalibrationMixin, BiofuelMixin, DairyMixin
         return self.eu_region_of_ms(self._COUNTRY_MS.get(str(cc)[:2], str(cc)[:2]) + "000000")
 
     def eu_rows(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Supply-model rows (countries) summed per EU market region (regions x columns); rows of countries outside
-        the EU (Norway) are left out."""
-        reg = [self.eu_region_of_country(c) for c in df.index]
+        """Supply-model rows (countries, or the EU's market regions themselves) summed per EU market region (regions x
+        columns); rows of supply-model countries outside the EU (Norway) are left out. Any other row stops (until
+        4 November 2026 a row named after an EU block was read as country "EU" and dropped without a word)."""
+        reg = []
+        for c in df.index:
+            r = str(c) if str(c) in self.EU else self.eu_region_of_country(c)
+            if r is None and self.sup_region_of_country(c) is None:
+                raise ValueError(f"supply row {c!r}: neither a supply-model country nor an EU market region {self.EU}")
+            reg.append(r)
         keep = [r is not None for r in reg]
         df = df.loc[keep]
         reg = [r for r in reg if r is not None]
