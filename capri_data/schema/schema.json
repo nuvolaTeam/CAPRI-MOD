@@ -956,7 +956,9 @@
     "model": [],
     "builders": [],
     "checks": [],
-    "tests": []
+    "tests": [
+     "capri_mod/tests/test_capri.py"
+    ]
    }
   },
   "amm_farm_size_noneu_sf": {
@@ -1007,7 +1009,9 @@
     "model": [],
     "builders": [],
     "checks": [],
-    "tests": []
+    "tests": [
+     "capri_mod/tests/test_capri.py"
+    ]
    }
   },
   "amm_fracemappl": {

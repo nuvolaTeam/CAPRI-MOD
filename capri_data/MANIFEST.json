@@ -119,7 +119,7 @@
   "capri_data/2017/abatement/ammonia/ad_option.csv": {
    "description": "CAPRI's anaerobic digestion option AD_AnCh per unit and activity (envind/ammo_tech.gms; build_ad_option.py) (tools/build/build_ad_option.py)",
    "kind": "coefficients",
-   "rows": 2880,
+   "rows": 2972,
    "columns": 14,
    "units": "to be established (value_units: open)",
    "origin": {
@@ -130,7 +130,7 @@
   "capri_data/2017/abatement/ammonia/ammonia_tech_model.csv": {
    "description": "the ammonia technologies on the model's animals: CAPRI's options, weights and the N cascade terms (build_ammonia_tech_model.py) (tools/build/build_ammonia_tech_model.py)",
    "kind": "coefficients",
-   "rows": 34665,
+   "rows": 34757,
    "columns": 23,
    "units": "to be established (value_units: open)",
    "read_by_model": [

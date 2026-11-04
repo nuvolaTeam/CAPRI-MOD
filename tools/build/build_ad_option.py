@@ -30,6 +30,11 @@ VSER: pigs CAPRI's table (AD_basedata p_VSER), as CAPRI's own fallback gives the
 feed, energy and requirement data of the run (l. 49-116), not in hand: the table value is used and recorded as
 vser_source = "table" (REGISTERED, docs/AD_SPEC.md; CAPRI's run dump p_VSER will replace it).
 
+The Western Balkans and Turkey's units (since 4 November 2026): heads and farm sizes from CAPRI's estimate
+(farm_size_noneu*.csv, tools/build/build_farm_size_noneu.py); VSER, HousShar and SharLiq CAPRI's fallback_Balkan
+averages (l. 353-365); GAINS prices of Croatia (map_gainsCount); climate CAPRI's default cell 10 (gascoeff.gms l. 543-544:
+no climate data for them).
+
 Output: capri_data/2017/abatement/ammonia/ad_option.csv
 """
 from __future__ import annotations
@@ -88,7 +93,9 @@ def _rd(f):
 
 
 def _nat(r):
-    return r[:2] + "000000"
+    """The region's CAPRI country (TUR for Turkey's units; until 4 November 2026 the first two letters + 000000, the same
+    for every other unit)."""
+    return _mr.national_code(r)
 
 
 def _n1(r):
@@ -102,6 +109,12 @@ def load():
     sf = defaultdict(dict)
     for r in _rd(G / "AD_basedata_p_sf.csv"):
         sf[r["dim1"]][r["dim2"]] = float(r["level"])
+    # the Western Balkans and Turkey's units: CAPRI's estimated farm structure (prep_farm_size_data_for_miti.gms, run
+    # before this file: p_Heads in heads from m_heads_per_hold, p_sf from m_fsclass; tools/build/build_farm_size_noneu.py)
+    for r in _rd(A / "farm_size_noneu.csv"):
+        heads[(r["region"], r["ad_activity"])][r["size_class"]] = float(r["heads"])
+    for r in _rd(A / "farm_size_noneu_sf.csv"):
+        sf[r["region"]][r["size_class"]] = float(r["sf"])
     p2 = lambda f: {(r["dim1"], r["dim2"]): float(r["level"]) for r in _rd(G / f)}
     gains = {(r["dim1"], r["dim2"], r["dim3"]): float(r["level"]) for r in _rd(G / "gains_ad_p_gainsdata.csv")}
     clim = defaultdict(dict)
@@ -111,8 +124,29 @@ def load():
     nem = defaultdict(dict)
     for r in _rd(A / "n_cascade_factors.csv"):
         nem[(r["region"], r["activity"])][r["factor"]] = float(r["value"])
-    return (heads, sf, p2("AD_basedata_p_MitiShar0.csv"), p2("AD_basedata_p_SharLiq.csv"),
-            p2("AD_basedata_p_HousShar.csv"), p2("AD_basedata_p_VSER.csv"), p2("AD_basedata_p_B0.csv"), gains, clim, nem)
+    vser, housshar, sharliq = (fallback_balkan(p2(f"AD_basedata_p_{k}.csv")) for k in ("VSER", "HousShar", "SharLiq"))
+    return (heads, sf, p2("AD_basedata_p_MitiShar0.csv"), sharliq, housshar, vser, p2("AD_basedata_p_B0.csv"), gains,
+            clim, nem)
+
+
+def fallback_balkan(tab: dict) -> dict:
+    """CAPRI's fallback for the Western Balkans and Turkey (ad_data_and_cali.gms l. 353-365, p_VSER, p_HousShar,
+    p_SharLiq): a missing value is the unweighted average over Romania, Bulgaria, Croatia and their NUTS 2 units having
+    one (sets.gms fallback_Balkan)."""
+    pairs = _gt.set_pairs(_gt.read_text(SOURCES / "gams" / "sets.gms"), "fallback_Balkan")
+    src = defaultdict(list)
+    for a, b in pairs:
+        src[a].append(b)
+    out = dict(tab)
+    acts = {k[1] for k in tab}
+    for reg, frm in src.items():
+        for ad in acts:
+            if tab.get((reg, ad)):
+                continue
+            vals = [tab[(f, ad)] for f in frm if tab.get((f, ad))]
+            if vals:
+                out[(reg, ad)] = sum(vals) / len(vals)
+    return out
 
 
 def build():

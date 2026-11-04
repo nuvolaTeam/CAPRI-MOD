@@ -2699,6 +2699,18 @@ def test_farm_size_estimate_of_the_balkans_and_turkey_holds_capris_constraints()
     cc = pd.read_parquet(D / "ammonia_cost_curves.parquet")
     assert set(d.region) <= set(cc.region)
 
+def test_ad_option_of_croatia_and_the_balkans_as_capri():
+    """KNOWN_ISSUES K113: CAPRI fills p_VSER, p_HousShar and p_SharLiq of Croatia, the Western Balkans and Turkey with the
+    fallback_Balkan averages (ad_data_and_cali.gms l. 353-365), so they have the AD option; its 2030 Green Deal results
+    show AD_AnCh for HR000000 and the six Balkan countries at about zero (no initial share). Croatia had none before."""
+    import pandas as pd
+    a = pd.read_csv(DATA_DIR / "2017" / "abatement" / "ammonia" / "ad_option.csv")
+    for reg in ("HR000000", "AL000000", "BA000000", "CS000000", "KO000000", "MK000000", "MO000000"):
+        g = a[a.region == reg]
+        assert {"DCOL", "PIGF", "BULL"} <= set(g.activity), reg
+        assert (g["ini"] == 0).all() and (g["max"] > 0).all()
+    assert a.loc[(a.region == "HR000000") & (a.activity == "DCOL"), "vser"].item() == 4.5   # RO and BG's table value
+
 def test_manure_n2o_by_source_and_technology_effects():
     """CAPRI's manure N2O by stage (gases.gms): per t of manure N, housing/storage, application and
     grazing shares near IPCC's 1-2% in total; CAPRI's technology effects as its housing equation applies

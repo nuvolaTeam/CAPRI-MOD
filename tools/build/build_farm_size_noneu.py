@@ -84,9 +84,10 @@ def capri_constants(gams_dir: Path) -> dict:
     m = re.search(r"set\s+fsclass_red\(fsclass\)[^/]*/(.*?)/", t, re.I | re.S)
     c["fs_red"] = [ln.strip() for ln in m.group(1).splitlines() if ln.strip()]
     s = G.read_text(gams_dir / "sets.gms")
-    m = re.search(r"set\s+fallback_Balkan\(rall,rall1\)[^/]*/\s*\((.*?)\)\s*\.\s*\((.*?)\)\s*/", s, re.I | re.S)
+    fb = G.set_pairs(s, "fallback_Balkan")
+    c["fallback_to"] = list(dict.fromkeys(a for a, _b in fb))
+    c["fallback_from"] = list(dict.fromkeys(b for _a, b in fb))
     split = lambda x: [v.strip() for v in x.replace("\n", ",").split(",") if v.strip()]
-    c["fallback_to"], c["fallback_from"] = split(m.group(1)), split(m.group(2))
     m = re.search(r"SET\s+MSnoEU\(RALL\)[^/]*/(.*?)/", s, re.I | re.S)
     c["msnoeu"] = split(m.group(1))
     m = re.search(r"SET\s+NUTS0_WBA6\s*/(.*?)/\s*;", s, re.I | re.S)

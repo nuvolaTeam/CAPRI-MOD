@@ -131,9 +131,11 @@ built. No proxy.
     (tools/build/build_farm_size_noneu.py: m_fsclass and m_heads_per_hold per region, CAPRI's fallback_Balkan targets
     and its farm totals read from its code); the ammonia cost curves now cover the 18 regions. Registered: CAPRI
     takes the one local solution its solver reaches; the builder keeps the best of four IPOPT solves (they differ only
-    in the sheep cells of TR10 and TR80, which have no sheep). Still to do: the AD option (build_ad_option) from the
-    same estimate (p_Heads, p_sf) and its fallback_Balkan VSER, HousShar, SharLiq; Norway has no ammonia cost curve
-    (CAPRI's "special statements" for NO, prep_farm_size_data_for_miti.gms l. 446-447: to read).
+    in the sheep cells of TR10 and TR80, which have no sheep). The AD option takes the same estimate and CAPRI's
+    fallback_Balkan VSER, HousShar, SharLiq (done; Croatia gained it too, KNOWN_ISSUES K113). Still to do: Turkey's units
+    have no AD option (n_cascade_factors gives them no housed liquid manure, tsl 0, tsg 1; CAPRI's results have
+    AD_AnCh for them); Norway has no ammonia cost curve and no AD option though CAPRI's results have AD_AnCh for its
+    units (CAPRI's "special statements" for NO, prep_farm_size_data_for_miti.gms l. 446-447: to read).
 
 - **The "EU-wide" price fallback** (build_eu_producer_prices) averages over all model regions. With the 29 it would
   no longer be the EU's. CAPRI's rule for Turkey's prices is read (section 5: TUR is its own market and supply

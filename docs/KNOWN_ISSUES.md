@@ -24,7 +24,7 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K92](#k92) | Farm-to-Fork changes furthest from JRC121368, besides the milk price | open: waiting for CAPRI's scenario results |
 | [K93](#k93) | CAPRI mitigation options not built; documents disagree on which are in | open: no-till and legume share unmeasured; UreaSubst parked; the others not needed for Farm-to-Fork and the Green Deal |
 
-## Resolved (101)
+## Resolved (102)
 
 | # | Issue | Status |
 |---|---|---|
@@ -129,6 +129,7 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K110](#k110) | The market's Newton-Krylov solve did not converge on a real shock; its test had passed without one | fixed |
 | [K111](#k111) | The set-aside report booked part of a set-aside increase as VSET where CAPRI has none | fixed |
 | [K112](#k112) | Histosols: regions without a JRC record took their country's share; Greek grassland had no N2O | fixed |
+| [K113](#k113) | Croatia had no AD option: CAPRI's fallback_Balkan fills its VSER and housing share | fixed |
 
 ## Details
 
@@ -2026,4 +2027,19 @@ FALLOW calibration in CAPRI's cost savings).
   grassland in CAPRI's 2030 have no GRAS row there). Test: test_histosol_n2o_per_ha_as_capris_regional_results.
   Mini-EU Farm-to-Fork run (91f621c against 202acf5): supply and market identical; only EL140000's histosol N2O
   changes (baseline 16.7 -> 31.0, scenario 0.4 -> 14.7 kt CO2-eq), the one mini region concerned.
+
+### K113: Croatia had no AD option: CAPRI's fallback_Balkan fills its VSER and housing share (found 4 November 2026)
+
+tools/build/build_ad_option.py skipped a region without CAPRI's AD_basedata p_VSER. Croatia has none (nor p_HousShar,
+p_MitiShar0), so it had no AD option. CAPRI fills p_VSER, p_HousShar and p_SharLiq of every region of fallback_Balkan's
+first list, Croatia included, with the unweighted average over Romania, Bulgaria, Croatia and their NUTS 2 units having
+a value (ad_data_and_cali.gms l. 353-365; sets.gms l. 8111-8119), and its Green Deal 2030 results report AD_AnCh for
+HR000000 (about 5e-7, no initial share). Found while porting the same fallback for the Western Balkans and Turkey
+(SUPPLY_NONEU step 6). A reproduction error of capri-mod.
+
+- **Effect:** Croatia's AD option (manure CH4, its cost) in the scenarios; the baseline keeps the share at zero
+- **Status:** **fixed** 4 November 2026: the fallback ported (fallback_balkan in build_ad_option.py; gams_text.set_pairs
+  reads CAPRI's (a, b).(c, d) notation). Croatia and the six Western Balkan countries now have the option; Turkey's
+  units not yet (their manure-system shares in n_cascade_factors give no housed liquid manure: to check against CAPRI).
+  Test: test_ad_option_of_croatia_and_the_balkans_as_capri.
 
