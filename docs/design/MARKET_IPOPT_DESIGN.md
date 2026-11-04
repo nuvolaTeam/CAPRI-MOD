@@ -194,6 +194,13 @@ Each stage must pass two checks:
      1.08e-7, 2e-5 relative) and a regional dual (DK000000, 2e-10 relative), i.e. the regional solver's tolerance;
      the same iterations (6), the same relaxed caps, the EU indicators equal to their printed digits.
 4. **G2d.** Feed, with the feed energy price lifted as an unknown (FeedBal_).
+   - **First part, 4 November 2026 (branch step-g2b):** the non-EU behavioural regions' FeedNQ_ and FeedBal_ written
+     once, capri_mod/market/feed_ad.py (fedebal_function: FEDE's closed form and the balance's residual at any FEDE,
+     the residual being G3's equation with FEDE an unknown; feednq_function); noneu_fede and noneu_feed_change evaluate
+     them, the loops removed. capri_mod/tests/test_feed_ad.py: equal to the loops at random prices (1e-11 relative),
+     FEDE clears the residual. The lag on the dairy price and the land-FEDE fixed point remain until G3.
+   - Still to do in G2d: the EU's and the supply-model regions' feed bulks (feedBlk_, feedBlkPrice_: eu_feed_use,
+     feed_bulk_price_ratio, sup_feed_use, feed_bulk_market_factor).
 5. **G2e.** Processing and crushing. **Built 31 October 2026** (with G2c, same decision):
    capri_mod/market/processing_ad.py.
    - Written once: ProcessingMixin._crush_state (ProcMargO_, ProcNQ_, ProcFudge_, ProcO_, procYield_: crush_function)

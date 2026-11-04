@@ -353,42 +353,33 @@ class FeedMixin(MarketStateMixin):
         {region: FEDE ratio}; 1 where the balance has no FEDE response."""
         P = self._noneu_feed_params()
         mr = milk_ratio or {}
+        cols = list(arm_ratio.columns)
         out = {}
         for rms, d in P["rms"].items():
             tr = d.get("tr")
             if tr is None or tr not in arm_ratio.index:
                 continue
-            ra, rp = arm_ratio.loc[tr], prod_ratio.loc[tr] if tr in prod_ratio.index else arm_ratio.loc[tr]
-            e0 = aF = 0.0
-            for x, q0 in d["feed0"].items():
-                k = d["kcal"].get(x, 0.0)
-                if not k:
-                    continue                                   # no calories (p_noCal): not in the balance
-                dq = 0.0
-                for y, h in d["terms"].get(x, {}).items():
-                    if y == "FEDE":
-                        aF += k * h
-                    elif y in ra.index:
-                        dq += h * (float(ra[y]) - 1.0)
-                e0 += k * (q0 + dq)
-            n0 = aN = 0.0
-            for a, cv in d["conv"].items():
-                dq = 0.0
-                for y, h in d["sterms"].get(a, {}).items():
-                    if y == "FEDE":
-                        aN += cv * h
-                    elif y == "MILK":
-                        dq += h * (float(mr.get(tr, 1.0)) - 1.0)
-                    elif y in rp.index:
-                        dq += h * (float(rp[y]) - 1.0)
-                lr = (land or {}).get(rms)
-                if lr:
-                    for u, h in (d.get("lterms") or {}).get(a, {}).items():
-                        dq += h * lr.get(u, 0.0)
-                n0 += cv * (d["prod0"].get(a, 0.0) + dq)
-            den = aF - aN
-            out[rms] = 1.0 + (n0 - e0) / den if den > 0 else 1.0
+            # FeedBal_ written once in CasADi (market step G2d, capri_mod/market/feed_ad.py)
+            f, lts = self._fedebal_fn(rms, d, cols)
+            ra = arm_ratio.loc[tr].to_numpy(dtype=float)
+            rp = (prod_ratio.loc[tr].reindex(cols).fillna(1.0).to_numpy(dtype=float) if tr in prod_ratio.index else ra)
+            lr = (land or {}).get(rms) or {}
+            star, _res = f(ra, rp, float(mr.get(tr, 1.0)), np.array([float(lr.get(u, 0.0)) for u in lts]), 1.0)
+            out[rms] = float(star)
         return out
+
+    def _fedebal_fn(self, rms, d, cols):
+        """The compiled FeedBal_ of one behavioural region (feed_ad.fedebal_function), cached per region, its
+        parameters and the column list: (Function, the land types of its rent terms)."""
+        from capri_mod.market.feed_ad import fedebal_arrays, fedebal_function
+        cache = self.__dict__.setdefault("_fedebal_cache", {})
+        hit = cache.get(rms)
+        if hit is None or hit[0] is not d or hit[1] != tuple(cols):
+            lts = sorted({u for t in (d.get("lterms") or {}).values() for u in t})
+            a = fedebal_arrays(d, cols, lts)
+            hit = (d, tuple(cols), fedebal_function(f"fedebal_{rms}", a, len(cols), len(lts)), lts)
+            cache[rms] = hit
+        return hit[2], hit[3]
 
     def noneu_feed_change(self, arm_ratio: pd.DataFrame, fede: dict) -> Dict[tuple, float]:
         """{(trade region, model commodity): relative change of its feed use} from CAPRI's FeedNQ_ of its behavioural
@@ -396,23 +387,24 @@ class FeedMixin(MarketStateMixin):
         total base feed (CAPRI's, its members with supply models included, whose feed is held)."""
         P = self._noneu_feed_params()
         dF: Dict[tuple, float] = {}
+        cols = list(arm_ratio.columns)
+        cache = self.__dict__.setdefault("_feednq_cache", {})
         for rms, d in P["rms"].items():
             tr = d.get("tr")
             if tr is None or tr not in arm_ratio.index:
                 continue
-            ra = arm_ratio.loc[tr]
-            ph = float(fede.get(rms, 1.0))
-            for x, q0 in d["feed0"].items():
-                xm = d["xm"].get(x)
-                if not xm:
-                    continue
-                dq = 0.0
-                for y, h in d["terms"].get(x, {}).items():
-                    if y == "FEDE":
-                        dq += h * (ph - 1.0)
-                    elif y in ra.index:
-                        dq += h * (float(ra[y]) - 1.0)
-                dF[(tr, xm)] = dF.get((tr, xm), 0.0) + dq
+            # FeedNQ_ written once in CasADi (market step G2d, capri_mod/market/feed_ad.py)
+            hit = cache.get(rms)
+            if hit is None or hit[0] is not d or hit[1] != tuple(cols):
+                from capri_mod.market.feed_ad import feednq_arrays, feednq_function
+                a = feednq_arrays(d, cols)
+                hit = (d, tuple(cols), feednq_function(f"feednq_{rms}", a, len(cols)) if a["rows"] else None, a["xm"])
+                cache[rms] = hit
+            if hit[2] is None:
+                continue
+            dq = np.asarray(hit[2](arm_ratio.loc[tr].to_numpy(dtype=float), float(fede.get(rms, 1.0)))).ravel()
+            for xm, v in zip(hit[3], dq):
+                dF[(tr, xm)] = dF.get((tr, xm), 0.0) + float(v)
         return {k: v / P["totals"][k] for k, v in dF.items() if P["totals"].get(k, 0.0) > 0}
 
     def _feed_demand_params(self) -> dict:
