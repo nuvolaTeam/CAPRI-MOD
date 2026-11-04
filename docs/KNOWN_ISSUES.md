@@ -1929,3 +1929,20 @@ in 2017 money (CAPRI inflates them; the model takes them before that step), cons
   Deal milk +8.0 (+8.9), cereals +5.7 (+6.4), ammonia -29.7 (-31.0), the rest within 0.3 points. Both converged (12 and
   20 iterations); the scenario iterations take about 1.5 times as long (a first Green Deal run stopped at its
   iteration 6, restarted with the Hessian from the cache)
+
+### K109: The market base of the EU's two market regions: processed products split differently, dairy below CAPRI's (found 3 November 2026, market stage 3; recorded 4 November 2026)
+
+tools/check/check_market_base.py (the market alone at CAPRI's 2030 calibrated state, the EU's and the supply-model
+regions' supply held at base): every price and every one of the 20,705 bilateral flows is CAPRI's (largest relative
+gap 5e-12), and so is the production of every non-EU region (largest 6e-6, Canada's DDGS). Production differs in
+the EU's two market regions only (A_EU_WEST, A_EU_EAST):
+
+- crushing (oils and cakes of rape, sunflower, soya): the EU total is CAPRI's, the split between the two regions is
+  not (EU_EAST rape cake -122.8 kt, EU_WEST +122.8; sunflower oil -22.9 / +22.9): the crush of the member states is
+  allocated to the two regions differently from CAPRI's market data;
+- dairy: cheese -407 kt in EU_WEST (-4.6%) and -19 kt in EU_EAST (-3.9% for the EU), butter -0.4% and -0.5%, casein
+  -31% in EU_EAST (6.1 against 8.9 kt; 2.8 kt) and -1.3% in EU_WEST: the dairy block's base output per member state,
+  summed, is not CAPRI's market data of the two regions.
+
+Not yet traced to the member-state data. Next: compare the member states' crush and dairy output of the base with
+CAPRI's DATA per member state (sim_ini_21730), region by region.
