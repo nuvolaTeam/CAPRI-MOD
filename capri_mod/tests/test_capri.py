@@ -2702,10 +2702,16 @@ def test_model_regions_are_capris_regional_units(data):
     shared/regional_units.csv, each carries its own CAPRI row (no NUTS splits, merges or proxy shares), and the units of
     the member states without regional detail are their member state's code. Per-head values are CAPRI's regional ones
     (Finland's FI18 once carried all of Etelae-Suomi's manure on one part of a split: 990 kg N per dairy cow)."""
+    from capri_mod import settings as S
+    from capri_mod.data.definitions import is_eu
     units = pd.read_csv(DATA_DIR / "shared" / "regional_units.csv")
-    assert len(units) == 221 and set(data["areas"].index) == set(units.region)
+    # all of CAPRI's 250 supply-model units are listed (SUPPLY_NONEU_DESIGN, 4 November 2026); the data are built for
+    # the EU's and the default countries outside it (Norway) until the design's step 4 builds the other 29
+    noneu = set(S.defaults().get("run.supply_countries_outside_eu"))
+    built = units[[is_eu(m) or m in noneu for m in units.capri_ms]]
+    assert len(units) == 250 and len(built) == 221 and set(data["areas"].index) == set(built.region)
     # in the same order: the builders take the unit list from regional_units.csv (tools/lib/_model_regions.py)
-    assert list(data["areas"].index) == list(units.region)
+    assert list(data["areas"].index) == list(built.region)
     assert {"DK000000", "EE000000", "LT000000", "LV000000", "SI000000", "CY000000", "MT000000", "HR000000"} <= set(units.region)
     assert units.set_index("region").at["BL400000", "country"] == "LU"
     mc = data["livestock_manure_n_coef"]
