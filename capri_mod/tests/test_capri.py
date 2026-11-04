@@ -308,26 +308,23 @@ def test_manure_p_and_k_have_markets_of_their_own(model):
     from capri_mod.scenarios.scenarios import carbon_tax_scenario
     regs = [r for r in model.data["areas"].index if r.startswith("BL")][:4]
     b = model.run(scenario="BASELINE", regions=regs, max_outer_iter=3, manure_trade=True)
-    try:
-        sm = model.supply_module
-        for r in regs:
-            mo = sm._models[r]
-            pk = mo.ev.pool_cols_pk
-            assert set(pk) == {"P", "K"} and len({*mo.ev.pool_cols, *pk["P"], *pk["K"]}) == 6
-            Q, c, A, bb, y = mo.res.last_aug
-            for nut, (je, ji) in pk.items():
-                assert abs(float(c[je]) - mo.seen.manure_pool_price_pk[nut]) < 1e-9 and abs(float(c[ji]) + float(c[je])) < 1e-9
-            x0 = mo._base_levels().reindex(mo.acts).fillna(0.0).values
-            xa = np.array([b["supply"][r].activities.get(a, 0.0) for a in mo.acts])
-            assert float(np.max(np.abs(xa - x0) / np.maximum(np.abs(x0), 1.0))) < 1e-4
-            assert all(max(map(abs, v)) < 0.1 for v in b["supply"][r].manure_trade_pk.values())      # t, at base
-        s = model.run(custom_scenario=carbon_tax_scenario(100.0), regions=regs, max_outer_iter=4, manure_trade=True)
-        n_moved = sum(abs(s["supply"][r].manure_trade[0] - s["supply"][r].manure_trade[1]) for r in regs)
-        pk_moved = sum(abs(v[0] - v[1]) for r in regs for v in s["supply"][r].manure_trade_pk.values())
-        assert n_moved > 10.0 and pk_moved < 0.1 * n_moved
-        assert set(model.res.pool_gaps) == {"N", "P", "K"} and max(model.res.pool_gaps.values()) < 0.05
-    finally:
-        model.run(scenario="BASELINE", regions=regs, max_outer_iter=2)
+    sm = model.supply_module
+    for r in regs:
+        mo = sm._models[r]
+        pk = mo.ev.pool_cols_pk
+        assert set(pk) == {"P", "K"} and len({*mo.ev.pool_cols, *pk["P"], *pk["K"]}) == 6
+        Q, c, A, bb, y = mo.res.last_aug
+        for nut, (je, ji) in pk.items():
+            assert abs(float(c[je]) - mo.seen.manure_pool_price_pk[nut]) < 1e-9 and abs(float(c[ji]) + float(c[je])) < 1e-9
+        x0 = mo._base_levels().reindex(mo.acts).fillna(0.0).values
+        xa = np.array([b["supply"][r].activities.get(a, 0.0) for a in mo.acts])
+        assert float(np.max(np.abs(xa - x0) / np.maximum(np.abs(x0), 1.0))) < 1e-4
+        assert all(max(map(abs, v)) < 0.1 for v in b["supply"][r].manure_trade_pk.values())      # t, at base
+    s = model.run(custom_scenario=carbon_tax_scenario(100.0), regions=regs, max_outer_iter=4, manure_trade=True)
+    n_moved = sum(abs(s["supply"][r].manure_trade[0] - s["supply"][r].manure_trade[1]) for r in regs)
+    pk_moved = sum(abs(v[0] - v[1]) for r in regs for v in s["supply"][r].manure_trade_pk.values())
+    assert n_moved > 10.0 and pk_moved < 0.1 * n_moved
+    assert set(model.res.pool_gaps) == {"N", "P", "K"} and max(model.res.pool_gaps.values()) < 0.05
 
 
 @pytest.mark.slow
@@ -341,32 +338,29 @@ def test_manure_market_and_ammonia_options_in_every_eu_solve(model):
     from capri_mod.scenarios.scenarios import carbon_tax_scenario
     regs = ["BL210000", "NO080000"] if "NO080000" in model.data["areas"].index else ["BL210000"]
     b = model.run(scenario="BASELINE", regions=regs, max_outer_iter=2)
-    try:
-        mo = model.supply_module._models["BL210000"]
-        assert mo._mctx() is not None and mo.ev.need_row is not None
-        if model.use_manure_market:
-            je, ji = mo.ev.pool_cols
-            Q, c, A, bb, y = mo.res.last_aug
-            assert abs(float(c[je]) - float(mo.seen.manure_pool_price)) < 1e-9 and abs(float(c[ji]) + float(c[je])) < 1e-9
-        if "NO080000" in regs:
-            assert model.supply_module._models["NO080000"].seen.manure_ctx is None
-        sh0 = dict(b["supply"]["BL210000"].manure_tech_shares)
-        s = model.run(custom_scenario=carbon_tax_scenario(100.0), regions=regs, max_outer_iter=2)
-        co = list(model.par.ghg_coef_cache.values())[-1]["BL210000"]
-        assert co["mtech"] and any(v != 0 for v in co["mtech"].values())
-        tl = mo._tech_list()
-        assert tl and all("ghg" in t for t in tl) and any(t["ghg"] < 0 for t in tl)
-        # the tax prices the options' N2O: those that cut it (acidification, high-efficiency spreading, air
-        # purifiers) rise, low-emission spreading, whose NH3 kept raises application N2O in the cascade (JRC121368
-        # Table 18), falls; the region's manure N2O falls, its ammonia rises (pollution swapping)
-        sh1 = s["supply"]["BL210000"].manure_tech_shares
-        assert any(sh1.get(k, 0.0) > v + 1e-3 for k, v in sh0.items())
-        assert sh1.get(("DCOW", "AmmAppLE"), 0.0) < sh0[("DCOW", "AmmAppLE")]
-        e0, e1 = b["environmental"].loc["BL210000"], s["environmental"].loc["BL210000"]
-        assert float(e1["ghg_manure_n2o"]) < float(e0["ghg_manure_n2o"])
-        assert s["supply"]["BL210000"].animal_nh3_saved
-    finally:
-        model.run(scenario="BASELINE", regions=regs, max_outer_iter=2)
+    mo = model.supply_module._models["BL210000"]
+    assert mo._mctx() is not None and mo.ev.need_row is not None
+    if model.use_manure_market:
+        je, ji = mo.ev.pool_cols
+        Q, c, A, bb, y = mo.res.last_aug
+        assert abs(float(c[je]) - float(mo.seen.manure_pool_price)) < 1e-9 and abs(float(c[ji]) + float(c[je])) < 1e-9
+    if "NO080000" in regs:
+        assert model.supply_module._models["NO080000"].seen.manure_ctx is None
+    sh0 = dict(b["supply"]["BL210000"].manure_tech_shares)
+    s = model.run(custom_scenario=carbon_tax_scenario(100.0), regions=regs, max_outer_iter=2)
+    co = list(model.par.ghg_coef_cache.values())[-1]["BL210000"]
+    assert co["mtech"] and any(v != 0 for v in co["mtech"].values())
+    tl = mo._tech_list()
+    assert tl and all("ghg" in t for t in tl) and any(t["ghg"] < 0 for t in tl)
+    # the tax prices the options' N2O: those that cut it (acidification, high-efficiency spreading, air
+    # purifiers) rise, low-emission spreading, whose NH3 kept raises application N2O in the cascade (JRC121368
+    # Table 18), falls; the region's manure N2O falls, its ammonia rises (pollution swapping)
+    sh1 = s["supply"]["BL210000"].manure_tech_shares
+    assert any(sh1.get(k, 0.0) > v + 1e-3 for k, v in sh0.items())
+    assert sh1.get(("DCOW", "AmmAppLE"), 0.0) < sh0[("DCOW", "AmmAppLE")]
+    e0, e1 = b["environmental"].loc["BL210000"], s["environmental"].loc["BL210000"]
+    assert float(e1["ghg_manure_n2o"]) < float(e0["ghg_manure_n2o"])
+    assert s["supply"]["BL210000"].animal_nh3_saved
 
 
 def test_feed_supplements_follow_capri(model):
@@ -3050,17 +3044,14 @@ def test_jrc_relaxed_n_target_is_kept(model, monkeypatch):
     # cut of its surplus)
     monkeypatch.setattr(RegionalSupplyModel, "tiered_surplus_target", lambda self, sp: 0.05 * sp)
     model.run(scenario="BASELINE", regions=regs, max_outer_iter=1)
-    try:
-        s = model.run(custom_scenario=farm_to_fork_scenario(), regions=regs, max_outer_iter=3)
-        r = s["supply"]["NL120000"]
-        mo = model.supply_module._models["NL120000"]
-        assert "N_balance" in list(mo.ev.row_labels) and r.converged
-        assert getattr(mo.ev, "nlp_fb_last", True) is False                       # the last solve in CAPRI's form
-        fb = s["metadata"]["nlp_fallback"].get("NL120000") or []
-        assert all("relaxed target" in e for e in fb) and len(fb) <= 1, fb
-        assert bool(getattr(r, "n_target_relaxed", False)) == bool(fb)
-    finally:
-        model.run(scenario="BASELINE", regions=regs, max_outer_iter=1)
+    s = model.run(custom_scenario=farm_to_fork_scenario(), regions=regs, max_outer_iter=3)
+    r = s["supply"]["NL120000"]
+    mo = model.supply_module._models["NL120000"]
+    assert "N_balance" in list(mo.ev.row_labels) and r.converged
+    assert getattr(mo.ev, "nlp_fb_last", True) is False                       # the last solve in CAPRI's form
+    fb = s["metadata"]["nlp_fallback"].get("NL120000") or []
+    assert all("relaxed target" in e for e in fb) and len(fb) <= 1, fb
+    assert bool(getattr(r, "n_target_relaxed", False)) == bool(fb)
 
 
 def test_projection_carries_permanent_crops():
