@@ -5,6 +5,11 @@ and crop: LEVL (1000 ha), YILD (kg/ha), NITF (kg N/ha removed, CAPRI e_EXPPRD co
 NCRD (kg N/ha in crop residues), nutNed_biofix (1000 t N fixed); per region the balance items
 EXPPRD and CRESID (1000 t) to scale residues to CAPRI's CRESID (e_CRESID).
 
+Use (capri_mod/environmental/nitrogen.py, _capri_crop_n): per ha x the run's yield / the data's yield. In a 2030 run
+the data are the projected ones (ProjectionModule.project_data scales data["yields"] to 2030), so the factor is about
+1 at the 2030 baseline and CAPRI's 2030 coefficients enter once (checked 4 November 2026 on gate 16's baseline:
+removal per region / CAPRI's EXPPRD median 0.999, EU 0.999; BIOFIX EU 0.987).
+
 Output: capri_data/2017/environment/capri_crop_n_coefs_2030.csv
   capri_region, crop, levl, yild, nitf, ncrd, biofix_t
 Usage: python tools/build/build_capri_crop_n_coefs.py <zip>
