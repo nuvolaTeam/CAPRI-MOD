@@ -2083,7 +2083,13 @@ while preparing SUPPLY_NONEU step 9's comparison per region. A reproduction erro
   Green Deal landscape floor and the set-aside split rest on it
 - **Status:** **fixed** 4 November 2026: SETA's levels in the trajectory are FALL + VSET in both years (as SHGT and CACR
   are sums); VSET is read and not written. 434 regional SETA factors change (191 regions had none and took the EU
-  median). Test: test_set_aside_trajectory_is_fallow_plus_voluntary_set_aside. The mini run to measure it follows.
+  median). Test: test_set_aside_trajectory_is_fallow_plus_voluntary_set_aside.
+  Mini-EU Farm-to-Fork run (02dcf2b against 0c80e21): the 2030 baseline's SETA against CAPRI's reference (kha) PL12
+  55.6 -> 104.5 (CAPRI 104.3), IT40 9.7 -> 20.0 (20.3), RO04 67.2 -> 51.2 (51.2), HR 41.0 -> 25.6 (25.0), ES61
+  430.3 -> 375.5 (373.3), FI19, DED, NO08 and DE11 within 1%; still apart: EL14 7.1 -> 10.9 (7.2), PT18 43.8 -> 26.1
+  (20.7), BG02 28.6 -> 18.3 (14.3), IR01 8.1 (4.4), FR24 80.0 (85.7), to look into (other parts of the projection:
+  the land reconciliation, the factor band). 132 baseline activity levels move by more than 1% (the land the
+  set-aside frees or takes); the mean deviation from CAPRI's 20 indicators 7.81 as before.
   Not changed: the CAPTRD trajectory (scenarios/captrd_2030, not the default) takes CAPTRD's own SETA row as it is
   (capri_mod/projection/captrd_import.py, no aggregation); whether CAPTRD's SETA is VSET too is to check before that
   trajectory is used.
