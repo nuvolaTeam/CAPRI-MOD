@@ -161,8 +161,11 @@ Each stage must pass two checks:
      prices and the land rents' shift as inputs; the floor at 0 an fmax); SupplyMixin._noneu_market_supply_nq and
      _eu_market_supply_nq evaluate it, the loops removed. capri_mod/tests/test_supply_ad.py: equal to the loops at
      random prices within 1e-12 relative, the Jacobian equal to finite differences. Mini-EU check to do.
-   - Still to do in G2b: the EU's and the supply-model regions' anticipation factors and the measured Hessian's
-     terms (supply_response), the pooled commodities; the land block (noneu_land_solve's Newton, added with the
+   - Second part, 4 November 2026: ProdNQ_ with the measured Hessian (the EU's market regions and the non-EU
+     supply-model regions, supply_ad.hess_rows_function: q = max(0, s0 + Hm dP + extra), with the unfloored value for
+     Norway's raw milk cross term) evaluated from CasADi in supply_response. Test: equal to the NumPy form, the
+     Jacobian equal to Hm.
+   - Still to do in G2b: the anticipation factors (rr / sv)^el (supply_response), the pooled commodities; the land block (noneu_land_solve's Newton, added with the
      market move's stage 7 after this inventory) as unknowns with its residual.
 3. **G2c.** Human consumption, the generalised Leontief system. **Built 31 October 2026** (taken before G2b by the
    project lead's decision of that day: G2b's market supply rests on the coupling code that refactor stage 4 is to

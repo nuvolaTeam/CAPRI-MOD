@@ -245,14 +245,14 @@ class SupplyMixin(MarketStateMixin):
                 if hc is None or hc[0] != ck:
                     ex_cols = set(exogenous_supply.columns)
                     xs = [x for x in H.index if x in cols and x in ex_cols]
-                    hc = (ck, xs, [cols.index(x) for x in xs],
-                          H.reindex(index=xs, columns=cols).fillna(0.0).to_numpy(dtype=float))
+                    Hm_ = H.reindex(index=xs, columns=cols).fillna(0.0).to_numpy(dtype=float)
+                    hc = (ck, xs, [cols.index(x) for x in xs], Hm_, self._hess_fn(f"hess_{reg_}", Hm_))
                     _hcache[reg_] = hc
-                _, xs, xj, Hm = hc
+                _, xs, xj, Hm, _hf = hc
                 if xs:
                     s0 = s_exo_eu[reg_].to_numpy(dtype=float)[xj]
                     dP_ = self._nq_price_change(rr[ie_] - _sv_eu[reg_], cols)
-                    items_[reg_] = (H, xs, xj, Hm, s0, dP_, self._milk_terms(cols, xs, H, reg_))
+                    items_[reg_] = (H, xs, xj, _hf, s0, dP_, self._milk_terms(cols, xs, H, reg_))
             # the member states' raw milk inside the market (audit M5) with the young-animal markets, cleared together:
             # once over all EU market regions (the dairy block is one solve over the member states, each at its own
             # region's prices; CAPRI's trade blocks as its one EU, 29 October 2026)
@@ -262,11 +262,12 @@ class SupplyMixin(MarketStateMixin):
                     exogenous_supply, ratio_of=lambda reg_: rr[list(supply.index).index(reg_)])
             else:
                 extra_ = {reg_: self._yani_clear(reg_, it_[0], it_[1], cols, it_[5]) for reg_, it_ in items_.items()}
-            for reg_, (H, xs, xj, Hm, s0, dP_, mt) in items_.items():
-                q = s0 + Hm @ dP_ + extra_[reg_]
+            for reg_, (H, xs, xj, _hf, s0, dP_, mt) in items_.items():
+                # CAPRI's ProdNQ_ with the measured Hessian, written once in CasADi (market step G2b, supply_ad.py)
+                q = np.asarray(_hf(s0, dP_, np.broadcast_to(np.asarray(extra_[reg_], float), s0.shape))[0]).ravel()
                 keep = s0 > 1e-6
                 vals = supply.loc[reg_, cols].to_numpy(dtype=float).copy()
-                vals[np.asarray(xj)[keep]] = np.maximum(q[keep], 0.0)
+                vals[np.asarray(xj)[keep]] = q[keep]
                 supply.loc[reg_, cols] = vals
             self._hess_cache = _hcache
             # the same market supply function for Norway's supply models (its own Hessian, measured on its models)
@@ -279,24 +280,29 @@ class SupplyMixin(MarketStateMixin):
                     continue
                 xj = [cols.index(x) for x in xs]
                 Hm = Hs.reindex(index=xs, columns=cols).fillna(0.0).to_numpy(dtype=float)
+                _hf = self._hess_fn(f"hess_{reg}", Hm)
                 s0 = s_exo_sup[reg].to_numpy(dtype=float)[xj]
                 dP_ = self._nq_price_change(rr[i_] - _sv_sup[reg], cols)
                 mk_ = self._sup_milk_terms(reg, Hs, cols, xs, _sv_sup[reg])
+                # CAPRI's ProdNQ_ with the measured Hessian, written once in CasADi (market step G2b, supply_ad.py); the
+                # floor at 0 applies to the rows kept below, as before
+                _q = lambda dp_: [np.asarray(v_).ravel() for v_ in _hf(s0, dp_, np.broadcast_to(
+                    np.asarray(self._yani_clear(reg, Hs, xs, cols, dp_), float), s0.shape))]
                 if mk_ is not None:
                     # Norway's raw milk inside the market (step F; CAPRI simu_calibration_to_supply.gms l. 423-427):
                     # the MILK row without the milk price (its own term is in the dairy block, _sup_milk_delivered),
                     # then every row with the milk price change from the dairy block's latest price
                     iM_ = xs.index("MILK")
-                    q_nm = s0 + Hm @ dP_ + self._yani_clear(reg, Hs, xs, cols, dP_)
-                    self.ev.sup_milk_cross[reg] = float(q_nm[iM_] - s0[iM_])
+                    q_nm, q_nm_raw = _q(dP_)
+                    self.ev.sup_milk_cross[reg] = float(q_nm_raw[iM_] - s0[iM_])
                     dP_[cols.index("MILK")] = mk_["dL"]
-                    q = s0 + Hm @ dP_ + self._yani_clear(reg, Hs, xs, cols, dP_)
+                    q = _q(dP_)[0]
                     q[iM_] = q_nm[iM_]
                 else:
-                    q = s0 + Hm @ dP_ + self._yani_clear(reg, Hs, xs, cols, dP_)
+                    q = _q(dP_)[0]
                 keep = s0 > 1e-6
                 vals = supply.loc[reg, cols].to_numpy(dtype=float).copy()
-                vals[np.asarray(xj)[keep]] = np.maximum(q[keep], 0.0)
+                vals[np.asarray(xj)[keep]] = q[keep]
                 supply.loc[reg, cols] = vals
             # the EU's units outside a run on a subset (K83): their member states' market supply functions
             self._add_eu_excluded(supply, cols, lambda reg_: rr[list(supply.index).index(reg_)])
@@ -1004,6 +1010,17 @@ class SupplyMixin(MarketStateMixin):
             hit = (ck, f, a["rows"], a["rms"])
             cache[key] = hit
         return None if hit[1] is None else (hit[1], hit[2], hit[3])
+
+    def _hess_fn(self, name, Hm):
+        """The compiled ProdNQ_ of a measured Hessian (supply_ad.hess_rows_function), cached on the matrix's values."""
+        from capri_mod.market.supply_ad import hess_rows_function
+        cache = self.__dict__.setdefault("_hess_fn_cache", {})
+        key = (name, Hm.shape, hash(Hm.tobytes()))
+        f = cache.get(key)
+        if f is None:
+            f = hess_rows_function(name, Hm)
+            cache[key] = f
+        return f
 
     def _nq_q0(self, reg, rows) -> np.ndarray:
         """The market's base supply of the rows (the constant of ProdNQ_), 0 where the product has no column."""

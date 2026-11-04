@@ -110,3 +110,22 @@ def test_prodnq_jacobian_equals_finite_differences(market):
         fd = (np.asarray(f(q0, r0 + e, 1.0, np.ones(len(a["rms"])), np.zeros(len(a["rows"])))[1]).ravel()
               - np.asarray(f(q0, r0 - e, 1.0, np.ones(len(a["rms"])), np.zeros(len(a["rows"])))[1]).ravel()) / (2 * eps)
         assert np.allclose(J[:, j], fd, rtol=1e-6, atol=1e-6)
+
+
+def test_hessian_supply_function_equals_the_numpy_form_and_its_jacobian():
+    """ProdNQ_ with the measured Hessian (supply_ad.hess_rows_function): max(0, s0 + Hm dP + extra) as supply.py had it
+    until 4 November 2026, and the Jacobian in dP equal to Hm where the floor does not bind."""
+    import casadi as ca
+    from capri_mod.market.supply_ad import hess_rows_function
+    rng = np.random.default_rng(7)
+    Hm = rng.standard_normal((9, 30)) * 50
+    f = hess_rows_function("t", Hm)
+    for _ in range(5):
+        s0, dP, ex = rng.uniform(0, 500, 9), 0.2 * rng.standard_normal(30), rng.standard_normal(9)
+        q, qr = (np.asarray(v).ravel() for v in f(s0, dP, ex))
+        assert np.allclose(qr, s0 + Hm @ dP + ex, rtol=1e-13, atol=1e-10)
+        assert np.array_equal(q, np.maximum(qr, 0.0))
+    s0 = np.full(9, 1e4)
+    d = ca.MX.sym("d", 30)
+    J = np.asarray(ca.Function("j", [d], [ca.jacobian(f(s0, d, np.zeros(9))[0], d)])(np.zeros(30)))
+    assert np.allclose(J, Hm, rtol=1e-14)

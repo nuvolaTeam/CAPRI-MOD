@@ -60,3 +60,17 @@ def build_rows(terms: Dict[str, Dict[str, float]], cols: List[str],
         for k, s in enumerate(rms):
             HF[i, k] = float((fede_terms[s] or {}).get(x, 0.0))
     return {"rows": rows, "H": H, "hm": hm, "HF": HF, "rms": rms}
+
+
+def hess_rows_function(name: str, Hm: np.ndarray):
+    """CasADi Function (s0[n_x], dP[n_cols], extra[n_x]) -> (q[n_x], q_raw[n_x]): CAPRI's ProdNQ_ of the supply models' products
+    (the market supply Hessian measured on the supply models at the baseline, arm/simu_calibration_to_supply.gms
+    l. 360-368: the constant re-anchored to the models' latest output s0 at the prices they saw), q = max(0, s0 + Hm dP
+    + extra), dP the price change against the prices the models saw (raw milk's at 0 where the dairy block prices it,
+    NQ_PRICE_AS_SEEN), extra the young animals' and raw milk's terms of their clearing (lifted in G2g); q_raw the same
+    without the floor."""
+    import casadi as ca
+    nx, nc = Hm.shape
+    s0, dP, extra = ca.SX.sym("s0", nx), ca.SX.sym("dP", nc), ca.SX.sym("extra", nx)
+    qr = s0 + ca.mtimes(ca.DM(Hm), dP) + extra
+    return ca.Function(name, [s0, dP, extra], [ca.fmax(qr, 0.0), qr], ["s0", "dP", "extra"], ["q", "q_raw"])
