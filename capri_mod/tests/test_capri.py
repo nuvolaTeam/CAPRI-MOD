@@ -2827,13 +2827,21 @@ def test_capri_reference_trajectory_reproduces_its_crop_levels(data):
     """The capri_ref_2030 trajectory's level factors are CAPRI's own 2030 over 2017 (no [0.2, 5] band, no 1.0 threshold),
     a level the reference does not list is 0 (GAMS stores no zero: UK grain maize), and OFOD grows as OFAR + ROOF: the
     model's 2017 crop levels times its regional factors give CAPRI's 2030 reference levels (the validation file's ini
-    levels, FALL + VSET for SETA) in every EU region, to 1e-6 relative (4 November 2026; until then 96 cells were off by
-    more than 1%, France's pulses 0.2 against CAPRI's 0.112)."""
+    levels, FALL + VSET for SETA) in every region, the 29 units outside the EU and Norway's included, to 1e-6 relative
+    (4 November 2026; until then 96 EU cells were off by more than 1%, France's pulses 0.2 against CAPRI's 0.112, and 247
+    outside the EU)."""
     import pandas as pd
     from capri_mod.data.definitions import CAPRI_TO_MODEL_ACTIVITY as M, CROPS, is_eu
-    A = data["areas"]
+    from capri_mod import settings
+    from capri_mod.data.loaders import load_all_data
+    # the EU's units, Norway's and the other 28 supply units outside the EU (SUPPLY_NONEU_DESIGN)
+    with settings.override({"run.supply_countries_outside_eu": ["NO000000", "UK000000", "TUR", "AL000000", "BA000000",
+                                                                "CS000000", "KO000000", "MK000000", "MO000000"]}):
+        A = load_all_data(str(DATA_DIR))["areas"]
+    assert len(A.index) == 250
     ini = pd.read_csv(DATA_DIR / "validation" / "greendeal_2030" / "capri_marginal_terms_ini_2030.csv.xz")
-    ini = ini[(ini["item"] == "LEVL") & (ini["activity"] != "SETA")]          # CAPRI's SETA row is VSET (K115)
+    # CAPRI's SETA row is VSET (K115); its GRAS row is GRAE + GRAI
+    ini = ini[(ini["item"] == "LEVL") & ~ini["activity"].isin(["SETA", "GRAE", "GRAI"])]
     cap = {}
     for r in ini.itertuples():
         a = {**M, "VSET": "SETA"}.get(r.activity, r.activity)
@@ -2845,8 +2853,6 @@ def test_capri_reference_trajectory_reproduces_its_crop_levels(data):
     assert F[("UKJ00000", "CORN")] == 0.0 and abs(F[("FR240000", "PULS")] - 0.815 / 48.62) < 1e-3
     n = 0
     for reg in A.index:
-        if not is_eu(reg):
-            continue
         for a in CROPS:
             if a not in A.columns or (reg, a) not in F:
                 continue
@@ -2855,7 +2861,7 @@ def test_capri_reference_trajectory_reproduces_its_crop_levels(data):
             if x17 <= 0 and c <= 0:
                 continue
             assert abs(x17 * F[(reg, a)] - c) <= 1e-6 * max(c, 1.0), (reg, a, x17 * F[(reg, a)], c)
-            n += 1
+            n += 1 if is_eu(reg) else 0
     assert n > 5000
 
 

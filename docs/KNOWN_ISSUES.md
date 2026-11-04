@@ -2110,7 +2110,8 @@ level the reference does not list treated as missing (the national or EU factor,
 And the model's OFOD (CAPRI's OFAR + ROOF) took OFAR's growth alone. The model's 2017 levels being CAPRI's, the
 projection then missed CAPRI's 2030 reference in 96 of the EU's 3,587 crop cells with a regional factor by more than 1%
 (139 kha in all): France's pulses at 0.2 against CAPRI's 0.112 (FR24 9.7 kha against 0.8), IT20 rape 13.5 against 22.7,
-UK grain maize 5.6 kha against none. Found from SUPPLY_NONEU step 9's UK maize (about 1 kha per region against 0). A
+UK grain maize 5.6 kha against none. Outside the EU 247 crop cells (UK 123, Norway 58, Turkey 25, the Western
+Balkans 41). Found from SUPPLY_NONEU step 9's UK maize (about 1 kha per region against 0). A
 reproduction error of capri-mod.
 
 - **Effect:** the 2030 baseline's levels of those cells, and through land the other crops a little; livestock factors
@@ -2120,8 +2121,8 @@ reproduction error of capri-mod.
   cells of 2017 level >= 1: DE, ES and IE other oilseeds, PT durum wheat, DK and NL pulses, UK grain maize, FR tobacco, NL
   fallow); OFOD = OFAR + ROOF (levels, and the level-weighted yield). The EU fallback medians stay over the cells of
   2017 level >= 1.0 (3 change, by the zeros). The schema allows a zero level factor. 7,870 regional factors added, 193
-  changed. Test: test_capri_reference_trajectory_reproduces_its_crop_levels (every EU crop cell of the trajectory equals
-  CAPRI's 2030 reference level, 6,047 cells). The runs' effect is to be measured.
+  changed. Test: test_capri_reference_trajectory_reproduces_its_crop_levels (every crop cell of the trajectory equals
+  CAPRI's 2030 reference level: the EU's 6,047, the 30 non-EU units' too). The runs' effect is to be measured.
 - Yields likewise: the band held 18 regional yield factors, all above 5 (Poland's other crops OCRO: CAPRI's yield 11.6
   in 2017, 206.5 in 2030, 14 to 21-fold per region; Bosnia's apples 5.7-fold), now CAPRI's ratio as it is.
 - **Not changed:** the trajectory's own check on the solved baseline (the PMP and the land reconciliation can still
