@@ -93,8 +93,12 @@ class MarketModule(NewtonKrylovMixin, CalibrationMixin, BiofuelMixin, DairyMixin
         self.SUP_NONEU_REGIONS = tuple(dict.fromkeys(tr for _c, tr in _sup.values()))
         #: supply-model country (NUTS-0 of the supply models) -> its non-EU market region
         self.SUP_NONEU_COUNTRY = {c: tr for c, tr in _sup.values()}
-        #: non-EU market region -> CAPRI code of its supply models' country (member-state keyed tables)
-        self.SUP_NONEU_MS = {tr: ms for ms, (_c, tr) in _sup.items()}
+        #: non-EU market region -> CAPRI codes of its supply models' countries (member-state keyed tables), a tuple: one
+        #: country for Norway, the UK and Turkey, six for WBA (CAPRI's RMS_TO_RM; until 4 November 2026 one code per
+        #: region, the last of WBA's six, SUPPLY_NONEU_DESIGN step 8)
+        self.SUP_NONEU_MS = {}
+        for ms, (_c, tr) in _sup.items():
+            self.SUP_NONEU_MS[tr] = self.SUP_NONEU_MS.get(tr, ()) + (ms,)
         #: the non-EU market regions with supply models in this market (SUP_NONEU_REGIONS)
         self.SUP = tuple(r for r in self.SUP_NONEU_REGIONS if r in self.regions)
 
@@ -142,14 +146,18 @@ class MarketModule(NewtonKrylovMixin, CalibrationMixin, BiofuelMixin, DairyMixin
     def eu_region_of_ms(self, ms: str) -> Optional[str]:
         """The EU market region of a CAPRI member state (BL000000, DE000000, ...): its block; None for the supply-model
         countries outside the EU (Norway, NO000000: market region NO000000)."""
-        if ms in self.SUP_NONEU_MS.values():
+        if any(ms in v for v in self.SUP_NONEU_MS.values()):
             return None
         return self._ms_block_map().get(ms)
 
     def sup_region_of_country(self, cc: str) -> Optional[str]:
-        """The non-EU market region of a supply-model country (two letters, or a NUTS code): NO000000 for Norway; None
-        for the EU's countries."""
-        r = self.SUP_NONEU_COUNTRY.get(str(cc)[:2])
+        """The non-EU market region of a supply-model country (its country code, as REGION_TO_COUNTRY, or one of its
+        regional units): NO000000 for Norway, WBA for Serbia (RS, CS000000); None for the EU's countries. A unit's code
+        is read through REGION_TO_COUNTRY (until 4 November 2026 its first two letters, which are not the country code
+        for the UK, UKC00000 / GB, or Serbia, Montenegro and Kosovo)."""
+        cc = str(cc)
+        cc = _defs.REGION_TO_COUNTRY.get(cc, cc[:2])
+        r = self.SUP_NONEU_COUNTRY.get(cc)
         return r if r in getattr(self, "SUP", ()) else None
 
     def _split_supply(self, exo: Optional[pd.DataFrame]):

@@ -641,7 +641,7 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
             if outer_iter > 0 and _sdev:
                 _smap = getattr(self.market_module, "SUP_NONEU_MS", {}) or {}
                 self.supply_module.seen.price_dev_ms = {**self.supply_module.seen.price_dev_ms,
-                                                   **{_smap[rg]: d for rg, d in _sdev.items() if rg in _smap}}
+                                                   **{ms: d for rg, d in _sdev.items() for ms in _smap.get(rg, ())}}
             # CAPRI's slower smoothing for a member state's problem products (outer_loop.capri_step_special)
             _sdm = getattr(self.sv, "special_ms_dev", None) or {}
             if outer_iter > 0 and _sdm:
@@ -946,9 +946,9 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
                         _nf = (getattr(self.sv, "capri_sup_full", None) or {}) if outer_iter > 0 else {}
                         _nf[_rg] = (_nf.get(_rg) or []) + [_tn.where(_has, price_signal)]
                         self.sv.capri_sup_full = _nf
-                        _ms_rg = (getattr(_mmk, "SUP_NONEU_MS", {}) or {}).get(_rg)
+                        _ms_rg = (getattr(_mmk, "SUP_NONEU_MS", {}) or {}).get(_rg, ())
                         for (_rg_s, _p_s), _srt in self._capri_step_special().items():
-                            if _rg_s == _ms_rg and _p_s in _s1.index and bool(_has.get(_p_s, False)):
+                            if _rg_s in _ms_rg and _p_s in _s1.index and bool(_has.get(_p_s, False)):
                                 _s1[_p_s] = float(self._capri_special_forecast([float(x_[_p_s]) for x_ in _nf[_rg]], _srt))
                     _nsd[_rg] = (_s1 - price_signal).where(_has, 0.0)
                     # the gap over the products the region produces, CAPRI's filter (SUP_GAP_MIN_PROD, 5 kt at base):

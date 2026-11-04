@@ -144,7 +144,7 @@ class FeedMixin(MarketStateMixin):
             # The feed share of Norway's use per commodity: CAPRI's 2030 feed over its use (HCOM + FEDM + INDM + BIOF
             # + LOSM + PRCM, feed_bulks_no.csv use_kt), as the EU's (feed_bulks_eu_share.csv)
             if out and inp.exists("feed_bulks_no.csv"):
-                pno, f0s, u0s, ms_reg = {}, {}, {}, {v: k for k, v in self.SUP_NONEU_MS.items()}
+                pno, f0s, u0s, ms_reg = {}, {}, {}, {ms: k for k, v in self.SUP_NONEU_MS.items() for ms in v}
                 tno = inp.csv("feed_bulks_no.csv", keep_default_na=False)
                 for (ms, b), g in tno.groupby(["ms", "bulk"], sort=True):
                     q0 = g["feed_kt"].astype(float).values
@@ -206,10 +206,10 @@ class FeedMixin(MarketStateMixin):
         from its supply models (seen.feed_bulk_index)."""
         fb = self._feed_bulk_params()
         bix = self.seen.feed_bulk_index or {}
-        ms0 = self.SUP_NONEU_MS.get(region)
+        ms0 = self.SUP_NONEU_MS.get(region, ())
         out = {}
         for (ms, b), d in (fb.get("bulks_sup") or {}).items():
-            if ms != ms0:
+            if ms not in ms0:
                 continue
             r = np.array([max(float(price_ratio.get(c, 1.0)), 1e-6) if c else 1.0 for c in d["comm"]])
             rho = d["rho"]

@@ -364,3 +364,21 @@ def test_norway_prices_follow_its_own_market_in_a_scenario():
     eu_milk = (float(ex.drop(index="NO")["MILK"].sum()) + float(sum(xr.at[rg, "MILK"] for rg in mm.EU))
                + float(sum((mm.ev.milk_dq_now or {}).values())))
     assert abs(float(sum(s["market"].production.at[rg, "MILK"] for rg in mm.EU)) - eu_milk) < 1e-6
+
+
+def test_a_market_region_with_several_supply_countries(data):
+    """SUPPLY_NONEU_DESIGN step 8: CAPRI's WBA holds six supply-model countries (RMS_TO_RM). With two of them in the run
+    the market maps WBA to both, the countries' rows (country codes RS, AL or their units, CS000000) to WBA, and the
+    UK's units to no region while the UK is not in the run (a unit's first two letters, UK, are not its country, GB)."""
+    from capri_mod import settings
+    from capri_mod.market.market_module import MarketModule
+    with settings.override({"run.supply_countries_outside_eu": ["NO000000", "CS000000", "AL000000"]}):
+        mm = MarketModule(data)
+    assert mm.SUP_NONEU_MS["WBA"] == ("CS000000", "AL000000") and mm.SUP_NONEU_MS["NO000000"] == ("NO000000",)
+    assert set(mm.SUP) == {"NO000000", "WBA"}
+    assert mm.sup_region_of_country("RS") == "WBA" and mm.sup_region_of_country("CS000000") == "WBA"
+    assert mm.sup_region_of_country("AL") == "WBA" and mm.sup_region_of_country("UKC00000") is None
+    assert mm.eu_region_of_ms("CS000000") is None and mm.eu_region_of_ms("AL000000") is None
+    exo = pd.DataFrame({"BARL": [10.0, 3.0, 2.0, 4.0]}, index=["DE", "RS", "NO", "AL"])
+    eu, sup = mm._split_supply(exo)
+    assert list(eu.index) == ["DE"] and float(sup["WBA"]["BARL"]) == 7.0 and float(sup["NO000000"]["BARL"]) == 2.0

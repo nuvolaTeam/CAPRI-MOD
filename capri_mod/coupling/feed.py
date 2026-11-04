@@ -23,7 +23,7 @@ class FeedBlock:
         # Norway's supply models: its own bulks at its own market's prices (the EU signal plus Norway's departure;
         # K56)
         _sd = (getattr(self.sv, "sup_dev", None) or {}) if price_signal is not None else {}
-        _ms_reg = {v: k for k, v in (getattr(mm, "SUP_NONEU_MS", {}) or {}).items()}
+        _ms_reg = {ms: k for k, v in (getattr(mm, "SUP_NONEU_MS", {}) or {}).items() for ms in v}
         for k in (_fb.get("bulks_sup") or {}):
             d_ = _sd.get(_ms_reg.get(k[0]))
             rs = {c: v + float(d_.get(c, 0.0)) for c, v in ratio.items()} if d_ is not None else ratio

@@ -59,7 +59,7 @@ class PriceStepBlock:
         _mmk = self.market_module
         bmap = _mmk._ms_block_map()
         _smap = getattr(_mmk, "SUP_NONEU_MS", {}) or {}
-        ms_reg = {capri_ms(v): k for k, v in _smap.items()}            # Norway's market region
+        ms_reg = {capri_ms(ms): k for k, v in _smap.items() for ms in v}   # Norway's market region
         eu_reg = [r_ for r_ in _mmk.EU if r_ in dp.index]
         price = {}
         for ms in prod:

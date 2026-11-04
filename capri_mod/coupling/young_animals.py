@@ -265,7 +265,7 @@ class YoungAnimalBlock:
         sm.seen.yani_price_ratio_ms = {ms: ratio_m[rg] for ms, rg in bmap.items() if rg in ratio_m} if bmap else None
         # Norway's models: Norway's young-animal market (CAPRI yaniMarket_ per RM; K56)
         _smap = getattr(self.market_module, "SUP_NONEU_MS", {}) or {}
-        _sms = {_smap[rg]: ratio_m[rg] for rg in _smap if rg in ratio_m}
+        _sms = {ms: ratio_m[rg] for rg in _smap if rg in ratio_m for ms in _smap[rg]}
         if _sms:
             sm.seen.yani_price_ratio_ms = {**(sm.seen.yani_price_ratio_ms or {}), **_sms}
         ratio = {}
