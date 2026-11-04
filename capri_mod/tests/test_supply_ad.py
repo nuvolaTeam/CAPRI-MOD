@@ -129,3 +129,17 @@ def test_hessian_supply_function_equals_the_numpy_form_and_its_jacobian():
     d = ca.MX.sym("d", 30)
     J = np.asarray(ca.Function("j", [d], [ca.jacobian(f(s0, d, np.zeros(9))[0], d)])(np.zeros(30)))
     assert np.allclose(J, Hm, rtol=1e-14)
+
+
+def test_anticipation_function_equals_the_numpy_form():
+    """The own-price response before ProdNQ_ (supply_ad.anticipation_function): max(0, S (RR / SV)^E) as supply.py had
+    it until 4 November 2026 (rr ** EV, the EU's and the supply-model regions' rows against the prices they saw)."""
+    from capri_mod.market.supply_ad import anticipation_function
+    rng = np.random.default_rng(3)
+    S = rng.uniform(-1, 1000, (12, 40))
+    RR, SV = rng.uniform(0.3, 2.0, (12, 40)), rng.uniform(0.3, 2.0, (12, 40))
+    E = rng.uniform(-0.5, 2.0, (12, 40))
+    E[rng.random((12, 40)) < 0.4] = 0.0
+    q = np.asarray(anticipation_function(12, 40)(S, RR, SV, E))
+    ref = np.maximum(S * (RR / SV) ** E, 0.0)
+    assert np.allclose(q, ref, rtol=1e-14, atol=0.0)

@@ -170,9 +170,12 @@ class SupplyMixin(MarketStateMixin):
                 return ratio.reindex(cols).to_numpy(dtype=float)
             v_ = region_ratio.loc[reg_].reindex(cols).to_numpy(dtype=float)
             return np.maximum(np.where(np.isnan(v_), 1.0, v_), 1e-6)
+        from capri_mod.market.supply_ad import anticipation_function
         if region_ratio is None:
-            fac = ratio.reindex(cols).to_numpy(dtype=float)[None, :] ** EV
-            supply[cols] = np.maximum(supply[cols].to_numpy(dtype=float) * fac, 0.0)
+            # the own-price response, written once in CasADi (market step G2b, supply_ad.anticipation_function)
+            _S = supply[cols].to_numpy(dtype=float)
+            supply[cols] = np.asarray(anticipation_function(*_S.shape)(
+                _S, np.tile(ratio.reindex(cols).to_numpy(dtype=float), (_S.shape[0], 1)), np.ones_like(_S), EV))
             self._eu_market_supply_nq(supply, cols, lambda reg_: ratio.reindex(cols).to_numpy(dtype=float))
             self._add_eu_excluded(supply, cols, lambda reg_: ratio.reindex(cols).to_numpy(dtype=float))
         else:
@@ -180,7 +183,8 @@ class SupplyMixin(MarketStateMixin):
             rr = region_ratio.reindex(index=supply.index, columns=cols).to_numpy(dtype=float)
             rr = np.maximum(np.where(np.isnan(rr), 1.0, rr), 1e-6)
             ev = el.reindex(cols).to_numpy(dtype=float)
-            fac = rr ** EV
+            # the own-price response (rr / SV)^E, SV the prices the supply models saw (1 for the other rows)
+            E_, SV_ = EV.copy(), np.ones_like(rr)
             # the EU market regions' supply before the price response (the supply models' latest output): each of
             # CAPRI's two trade blocks
             s_exo_eu = ({r_: supply.loc[r_, cols].astype(float).copy() for r_ in self.EU if r_ in supply.index}
@@ -202,7 +206,7 @@ class SupplyMixin(MarketStateMixin):
                 for j, c in enumerate(cols):
                     if c in self.EU_MARKET_SUPPLY:
                         sv[j] = 1.0
-                fac[ie_] = (rr[ie_] / sv) ** ev
+                E_[ie_], SV_[ie_] = ev, sv
                 _sv_eu[reg] = sv
             # the non-EU market regions with supply models (Norway): the products of their supply models are
             # anticipated against the prices those models last saw (own market's prices), with the region's own
@@ -218,9 +222,10 @@ class SupplyMixin(MarketStateMixin):
                 _sv_sup[reg] = sv
                 for j, c in enumerate(cols):
                     if c in sc_:
-                        fac[i_, j] = (rr[i_, j] / sv[j]) ** EV[i_, j]
+                        SV_[i_, j] = sv[j]
             s_exo_sup = {reg: supply.loc[reg, cols].astype(float).copy() for reg in sup_cols}
-            supply[cols] = np.maximum(supply[cols].to_numpy(dtype=float) * fac, 0.0)
+            # written once in CasADi (market step G2b, supply_ad.anticipation_function)
+            supply[cols] = np.asarray(anticipation_function(*rr.shape)(supply[cols].to_numpy(dtype=float), rr, SV_, E_))
             self._eu_market_supply_nq(supply, cols, lambda reg_: rr[list(supply.index).index(reg_)])
             # CAPRI's market supply function for the supply models' products (arm/market_model.gms ProdNQ_, the
             # Hessian measured on the supply models at the baseline, model._market_supply_hessian): linear in the

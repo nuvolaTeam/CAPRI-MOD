@@ -74,3 +74,22 @@ def hess_rows_function(name: str, Hm: np.ndarray):
     s0, dP, extra = ca.SX.sym("s0", nx), ca.SX.sym("dP", nc), ca.SX.sym("extra", nx)
     qr = s0 + ca.mtimes(ca.DM(Hm), dP) + extra
     return ca.Function(name, [s0, dP, extra], [ca.fmax(qr, 0.0), qr], ["s0", "dP", "extra"], ["q", "q_raw"])
+
+
+_ANT = {}
+
+
+def anticipation_function(n_r: int, n_c: int):
+    """CasADi Function (S[n_r x n_c], RR, SV, E) -> max(0, S (RR / SV)^E) elementwise: the market supply before
+    ProdNQ_, CAPRI's own-price response of the supply models' output anticipated against the prices they saw (EU
+    rows: SV the prices the EU's models last saw, E CAPRI's EU p_elasSupp; supply-model rows outside the EU likewise
+    with the region's own elasticities; the other rows: SV = 1, E their own-price elasticity, 0 where ProdNQ_ applies)."""
+    f = _ANT.get((n_r, n_c))
+    if f is not None:
+        return f
+    import casadi as ca
+    S, RR, SV, E = (ca.SX.sym(n, n_r, n_c) for n in ("S", "RR", "SV", "E"))
+    f = ca.Function(f"anticipation_{n_r}x{n_c}", [S, RR, SV, E], [ca.fmax(S * (RR / SV) ** E, 0.0)],
+                    ["S", "RR", "SV", "E"], ["q"])
+    _ANT[(n_r, n_c)] = f
+    return f

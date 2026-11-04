@@ -165,7 +165,10 @@ Each stage must pass two checks:
      supply-model regions, supply_ad.hess_rows_function: q = max(0, s0 + Hm dP + extra), with the unfloored value for
      Norway's raw milk cross term) evaluated from CasADi in supply_response. Test: equal to the NumPy form, the
      Jacobian equal to Hm.
-   - Still to do in G2b: the anticipation factors (rr / sv)^el (supply_response), the pooled commodities; the land block (noneu_land_solve's Newton, added with the
+   - Third part, 4 November 2026: the own-price response before ProdNQ_, max(0, S (RR / SV)^E) over all market
+     regions (supply_ad.anticipation_function; SV the prices the supply models saw, 1 for the other rows), evaluated
+     from CasADi in supply_response. Test: equal to the NumPy form (relative 1e-14).
+   - Still to do in G2b: the pooled commodities; the land block (noneu_land_solve's Newton, added with the
      market move's stage 7 after this inventory) as unknowns with its residual.
 3. **G2c.** Human consumption, the generalised Leontief system. **Built 31 October 2026** (taken before G2b by the
    project lead's decision of that day: G2b's market supply rests on the coupling code that refactor stage 4 is to
