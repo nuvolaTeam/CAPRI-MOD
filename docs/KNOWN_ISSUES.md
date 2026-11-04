@@ -24,7 +24,7 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K92](#k92) | Farm-to-Fork changes furthest from JRC121368, besides the milk price | open: waiting for CAPRI's scenario results |
 | [K93](#k93) | CAPRI mitigation options not built; documents disagree on which are in | open: no-till and legume share unmeasured; UreaSubst parked; the others not needed for Farm-to-Fork and the Green Deal |
 
-## Resolved (100)
+## Resolved (101)
 
 | # | Issue | Status |
 |---|---|---|
@@ -128,6 +128,7 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K102](#k102) | Data files that no run and no builder reads (census) | fixed |
 | [K110](#k110) | The market's Newton-Krylov solve did not converge on a real shock; its test had passed without one | fixed |
 | [K111](#k111) | The set-aside report booked part of a set-aside increase as VSET where CAPRI has none | fixed |
+| [K112](#k112) | Histosols: regions without a JRC record took their country's share; Greek grassland had no N2O | fixed |
 
 ## Details
 
@@ -2002,4 +2003,25 @@ not "in either year" as first proposed.
 
 Status: fixed (the project lead, 4 November 2026): _set_aside_table takes w = 0 where the VSET share at the run's
 calibration year is 0. Reporting only (the set-aside split, its premiums and labour); supply results unchanged.
+
+### K112: Histosols: regions without a JRC record took their country's share; Greek grassland had no N2O (found 4 November 2026)
+
+tools/build/build_histosol.py compared with CAPRI's regional results (Green Deal 2030 ini run, N2OHIS of ARAB and GRAS,
+kg N2O per ha; res_2_1730greendeal_refpol_endotech_all_inidefaulta): 145 of the 215 regions matched to 2e-6, 70 did not.
+- 65 regions without a record in the JRC organic-soil table (p_OrgSoilOri) took their member state's shares (41 of them
+  non-zero: DE72, DEB1-2, 16 Italian, BL22/24/31, FR61/62/82/83, PT20/30, RO05/07/08, AT21/22). CAPRI treats a missing
+  record as zero for every NUTS 0 but the Western Balkans and Turkey (p_OrgSoilNoGap, envind/prep_lulucf_carbon.gms
+  l. 250-266); its results are zero for all 65.
+- Greece's 13 regions have a JRC cropland share and no grassland one. CAPRI's gases.gms (l. 676-686) gives every crop
+  activity, GRAE and GRAI included (MCACT holds GRSACT), the cropland N2OHIS, overwritten by the grassland one only where
+  that is non-zero: Greek grassland emits the cropland N2O per ha. The model had 0. CO2HIS and CH4HIS are per class in
+  CAPRI (calc_lulucf_carbon.gms), and the grassland fallowing's MaxShare is the grassland share: both unchanged.
+
+A reproduction error of capri-mod, not a registered departure. The fallowing terms are unchanged (the 65 regions have no
+FALLOW calibration in CAPRI's cost savings).
+
+- **Effect:** histosol N2O, CO2 and CH4 (emission reports; the GHG price terms where a tax is on)
+- **Status:** **fixed** 4 November 2026: the region's JRC record only, a missing one zero; grassland without a share
+  takes the cropland N2O per ha. After the fix every region matches CAPRI to 2e-6 (the three Greek regions without
+  grassland in CAPRI's 2030 have no GRAS row there). Test: test_histosol_n2o_per_ha_as_capris_regional_results.
 

@@ -2,7 +2,7 @@
 
 CAPRI (envind/prep_lulucf_carbon.gms, calc_lulucf_carbon.gms, gases.gms, no_histosols.gms):
   * share of cropland and grassland on organic soil: p_shareOrganicSoil(crop) = p_OrgSoilOri(soc_regN2_rk),
-    (grslnd) = sog_regN2_rk; a region with neither takes its member state's cropland share;
+    (grslnd) = sog_regN2_rk of the region; a missing record is zero (EU, UK, Norway: p_OrgSoilNoGap);
   * emissions per ha of the land-use class (p_BioHisBur, t per ha):
         share x sum_climzone p_sharClim(climzone, class) x p_emifacOrganicSoil(class, climzone, gas) x 0.001
         x 44/28 (N2O) or 44/12 (CO2, CH4 as CAPRI writes it);
@@ -20,7 +20,8 @@ CAPRI (envind/prep_lulucf_carbon.gms, calc_lulucf_carbon.gms, gases.gms, no_hist
 Written: capri_data/2017/environment/histosol.csv, per model region and class (crop, grass):
   share_<c>         organic-soil share of the class
   ef_n2o_<c>        kg N2O-N per ha of histosol (climate-weighted IPCC factor)
-  n2o_t_ha_<c>      t N2O per ha of the class (share x factor), as CAPRI's p_BioHisBur
+  n2o_t_ha_<c>      t N2O per ha of the class (share x factor), as CAPRI's p_BioHisBur; grassland without a
+                    share takes the cropland value (gases.gms N2OHIS on GRAE, GRAI)
   co2_t_ha_<c>, ch4_t_ha_<c>   the same for CO2HIS and CH4HIS (reported, land use)
   cs0_<c>, cs1_<c>, maxshare_<c>, pmp_lin_<c>, pmp_sqr_<c>, cost_lin_<c>   (EUR per ha of histosol,
                     2017 money: CAPRI's 2030 marginals over its 2030/2017 input deflator)
@@ -159,10 +160,12 @@ def main():
             # Norway was skipped, the one unit outside the EU then (CAPRI's fallowInAllRmssup: SUPPLY_NONEU_DESIGN step 6)
         ms = mr.national_code(reg)
         c8 = to_c8.get(reg)
-        src = c8 if (c8 in org and ("soc_regN2_rk" in org[c8] or "sog_regN2_rk" in org[c8])) else ms
+        # CAPRI: the JRC share of the region; a missing record is zero for every NUTS 0 of the EU, the UK and Norway
+        # (p_OrgSoilNoGap, prep_lulucf_carbon.gms l. 243-266). Until 4 November 2026 a region with neither share took
+        # its member state's (65 regions, 41 of them with a non-zero national share), where CAPRI's 2030 results have
+        # zero: a reproduction error of capri-mod (KNOWN_ISSUES K112).
+        src = c8
         sh = {"crop": org.get(src, {}).get("soc_regN2_rk"), "grslnd": org.get(src, {}).get("sog_regN2_rk")}
-        if sh["crop"] is None and sh["grslnd"] is None:
-            sh["crop"] = org.get(ms, {}).get("soc_regN2_rk")
         rec = {"region": reg, "capri_region": src}
         for cls in ("crop", "grslnd"):
             t = TAG[cls]
@@ -187,6 +190,13 @@ def main():
                 rs0, rs1, sqr, lin = relsubs_pmp(cs0, cs1, COST_PAR_LIN, 0.0, mx)
                 rec.update({f"cs0_{t}": cs0, f"cs1_{t}": cs1, f"maxshare_{t}": mx, f"cost_lin_{t}": COST_PAR_LIN,
                             f"pmp_lin_{t}": lin, f"pmp_sqr_{t}": sqr})
+        # CAPRI's N2OHIS of the grass activities (gases.gms l. 676-686): every crop activity, GRAE and GRAI included
+        # (MCACT holds GRSACT), takes the cropland factor, overwritten by the grassland one where that is non-zero; so a
+        # region with a cropland share and no grassland share (Greece's: no JRC grassland record) gives its grassland
+        # the cropland N2O per ha, as CAPRI's 2030 results show (KNOWN_ISSUES K112). CO2HIS and CH4HIS stay per class
+        # (calc_lulucf_carbon.gms), as the fallowing (its MaxShare is the grassland share).
+        if rec["n2o_t_ha_grass"] == 0.0 and rec["n2o_t_ha_crop"] > 0.0:
+            rec["n2o_t_ha_grass"] = rec["n2o_t_ha_crop"]
         rows.append(rec)
     out = pd.DataFrame(rows).set_index("region")
     dest = ROOT / "capri_data" / "2017" / "environment" / "histosol.csv"

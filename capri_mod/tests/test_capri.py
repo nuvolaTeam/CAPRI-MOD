@@ -2636,6 +2636,20 @@ def test_histosol_emissions_and_fallowing_calibrated(data):
     assert (h["pmp_sqr_crop"].dropna() > 0).all()
 
 
+def test_histosol_n2o_per_ha_as_capris_regional_results(data):
+    """KNOWN_ISSUES K112: a region without a JRC organic-soil record has no histosols (CAPRI's p_OrgSoilNoGap: a missing
+    record is zero in the EU, the UK and Norway), and a region with a cropland share but no grassland one gives its
+    grassland the cropland N2O per ha (gases.gms l. 676-686). Anchors: CAPRI's Green Deal 2030 ini results, N2OHIS
+    of ARAB and GRAS in kg N2O per ha (res_2_1730greendeal_refpol_endotech_all_inidefaulta)."""
+    h = data["histosol"]
+    capri = {("DE210000", "crop"): 0.840453, ("DE210000", "grass"): 1.013868, ("EL110000", "crop"): 0.381144,
+             ("EL110000", "grass"): 0.381145, ("NL130000", "crop"): 6.390673, ("DE720000", "crop"): 0.0,
+             ("DE720000", "grass"): 0.0, ("IT120000", "crop"): 0.0, ("FR610000", "grass"): 0.0}
+    for (reg, cls), v in capri.items():
+        got = 1000.0 * float(h.loc[reg, f"n2o_t_ha_{cls}"])
+        assert abs(got - v) <= 1e-5 * max(v, 1.0), (reg, cls, got, v)
+    assert h.loc["EL110000", "share_grass"] == 0.0          # the fallowing keeps its class's share
+
 def test_manure_n2o_by_source_and_technology_effects():
     """CAPRI's manure N2O by stage (gases.gms): per t of manure N, housing/storage, application and
     grazing shares near IPCC's 1-2% in total; CAPRI's technology effects as its housing equation applies
