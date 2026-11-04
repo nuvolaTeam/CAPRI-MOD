@@ -37,7 +37,7 @@ OUT = ROOT / "capri_data" / "scenarios" / "capri_ref_2030"
 REF = EXPORTS / "res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv"
 KEEP = ROOT / "capri_data" / "sources" / "capri_baseline" / "capri_ref_levl_yild_2030_2017.csv.xz"
 sys.path.insert(0, str(ROOT / "tools" / "lib"))
-from _model_regions import UNITS  # noqa: E402  (capri_data/shared/regional_units.csv)
+from _model_regions import FALLBACK_UNITS, UNITS  # noqa: E402  (capri_data/shared/regional_units.csv)
 #: the first two letters of the model's regional units (CAPRI's codes: BL, IR, EL, NO ...): the countries whose 2030
 #: reference rows are kept. A set named EU27 until 30 October 2026, which held Norway (HARDCODED_TABLES.md)
 SUPPLY_PREFIXES = frozenset(u[:2] for u in UNITS)
@@ -129,7 +129,9 @@ def main():
         f = min(max(x30 / x17, BAND[0]), BAND[1])
         key = reg[:2] + "00" if reg.endswith("000000") else reg[:4]
         regional[b][key][act] = {"2030": f}
-        if not reg.endswith("000000"):
+        # the EU fallback's medians over the units they were taken over before CAPRI's other 29 were listed
+        # (FALLBACK_UNITS, 4 November 2026)
+        if not reg.endswith("000000") and reg in FALLBACK_UNITS:
             cells[b][act].append(f)
     # land types (the model's land table) from CAPRI's land aggregates: arable crops ARAC, fruit and nurseries FRUN,
     # grassland GRAS, fallow FALL (CAPRI's 2030 reference has 2.1% less UAA than 2017; without it the projection kept

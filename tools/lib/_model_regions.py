@@ -29,6 +29,17 @@ EU_MS2 = frozenset(m[:2] for m in EU_MS)
 UNIT_SET = frozenset(UNITS)
 
 
+def _default_outside_eu() -> frozenset:
+    """The countries outside the EU whose supply models a run has by default (the setting
+    run.supply_countries_outside_eu, read from the repository's defaults so a user's settings file cannot change a
+    builder's output): Norway."""
+    import tomllib
+    with open(ROOT / "capri_mod" / "settings" / "defaults.toml", "rb") as fh:
+        return frozenset(tomllib.load(fh)["run"]["supply_countries_outside_eu"])
+
+
+
+
 def is_unit(code: str) -> bool:
     """A CAPRI regional unit of the model (a NUTS-2 unit, or a member state without regional detail: DK000000)."""
     return code in UNIT_SET
@@ -63,6 +74,13 @@ def national_code(nuts2: str) -> str:
     if nuts2 in _MS_SET:
         return nuts2
     return MS_OF_PREFIX.get(nuts2[:2], nuts2[:2] + "000000")
+
+
+#: the regional units the EU-wide fallbacks, medians and averages of the builders are taken over: the EU's and those of
+#: the default countries outside it (Norway), the units the model had before CAPRI's other 29 were listed (4 November
+#: 2026, docs/design/SUPPLY_NONEU_DESIGN.md). Behaviour as before; the project lead's decision of 31 October 2026 (the
+#: EU's fallback over the EU's member states only, a unit outside the EU its own country's) is a separate change.
+FALLBACK_UNITS = frozenset(u for u in UNITS if national_code(u) in (EU_MS | _default_outside_eu()))
 
 
 #: model region -> CAPRI region(s), for NUTS changes the correspondence file leaves out (it keeps

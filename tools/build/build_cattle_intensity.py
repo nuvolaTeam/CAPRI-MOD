@@ -164,11 +164,14 @@ def main():
             own = sel & (out[qz] > 0) & (out[qb] > 0)
             k = (out.loc[sel, qz] * out.loc[sel, "heads"])
             med_ms = k.groupby(out.loc[sel, "ms"]).median()
-            med_eu = float(k.median())
+            # the EU medians over the units they were taken over before CAPRI's other 29 were listed (FALLBACK_UNITS)
+            fb = out["region"].isin(mr.FALLBACK_UNITS)
+            med_eu = float(k[fb.loc[k.index]].median())
             # the giving-up activity's part of q_z, from the regions with their own terms (country, else EU median)
             fr = (out.loc[own, qb] / out.loc[own, qz])
             fr_ms = fr.groupby(out.loc[own, "ms"]).median()
-            fr_eu = float(fr.median()) if len(fr) else 0.5
+            fr_fb = fr[fb.loc[fr.index]]
+            fr_eu = float(fr_fb.median()) if len(fr_fb) else 0.5
             for i in out.index[sel & ~((out[qz] > 0) & (out[qb] > 0))]:
                 km = med_ms.get(out.at[i, "ms"])
                 km = med_eu if km is None or km != km else km

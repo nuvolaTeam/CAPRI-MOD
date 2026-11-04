@@ -29,6 +29,7 @@ NO_BUILDER = ROOT / "capri_data" / "sources" / "unsourced" / "producer_prices_no
 import sys as _sys  # noqa: E402
 _sys.path[:0] = [str(ROOT / "tools" / "lib"), str(ROOT)]
 import _sheep_goat as SG  # noqa: E402
+from _model_regions import FALLBACK_UNITS  # noqa: E402
 from capri_mod.data import definitions as D  # noqa: E402
 
 
@@ -37,6 +38,11 @@ def main() -> None:
     ylds = _read_csv(SUP / "yields.csv", index_col=0)
     herds = _read_csv(SUP / "animal_numbers.csv", index_col=0)
     prices = _read_csv(ROOT / "capri_data" / "sources" / "capreg" / "capreg_producer_prices.csv", index_col=0)
+    # the EU-wide price over the units it was taken over before CAPRI's other 29 were listed (FALLBACK_UNITS, 4 November
+    # 2026); over the EU's member states only, with a unit outside the EU at its own country's price, is the project
+    # lead's decision of 31 October 2026 (docs/design/SUPPLY_NONEU_DESIGN.md section 4), a separate change
+    keep = [r for r in prices.index if r in FALLBACK_UNITS]
+    prices, herds = prices.loc[keep], herds.loc[[r for r in herds.index if r in FALLBACK_UNITS]]
     rows = {}
     for c in areas.columns:
         # set-aside has no output; other marketable and industrial crops, nurseries and flowers are carried in CAPRI as

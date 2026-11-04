@@ -158,7 +158,8 @@ def main() -> None:
         sa[col] = w.reindex(sa.index)
         ms = pd.Series([mr.national_code(r)[:2] for r in sa.index], index=sa.index)
         med = sa[col].groupby(ms).median()
-        fill = ms.map(med).fillna(float(sa[col].median()))
+        # the EU median over the units it was taken over before CAPRI's other 29 were listed (FALLBACK_UNITS, 4 Nov. 2026)
+        fill = ms.map(med).fillna(float(sa.loc[sa.index.isin(mr.FALLBACK_UNITS), col].median()))
         sa[col] = sa[col].fillna(fill)
     sa.to_csv(ROOT / "capri_data" / "2017" / "supply" / "set_aside_split.csv")
     print(f"labour_coef.csv: {len(lab)} region x activity rows, {lab.region.nunique()} regions; "

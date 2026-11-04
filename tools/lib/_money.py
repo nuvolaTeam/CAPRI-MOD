@@ -25,7 +25,17 @@ def deflator(year: int) -> float:
     if int(year) == BASE_YEAR:
         return 1.0
     p = ROOT / "capri_data" / "trajectories" / f"capri_price_ratios_{int(year)}.csv"
-    d = pd.read_csv(p, float_precision="round_trip")["deflator"].astype(float)
+    t = pd.read_csv(p, float_precision="round_trip")
+    d = t["deflator"].astype(float)
     if d.empty or (d.max() - d.min()) > 1e-12 * d.max():
         raise ValueError(f"{p.name}: the deflator is not one value ({d.min()} to {d.max()})")
-    return float(d.iloc[0])
+    # the member states' values differ in the last digit (each a median of CAPRI's UVAG ratios, 1.019^13 up to
+    # rounding): the first EU member state's in the file's order (AT), so the value does not depend on which countries
+    # outside the EU the file lists (the UK, Turkey and the Western Balkans since 4 November 2026: Albania sorts first)
+    import sys as _sys
+    _sys.path.insert(0, str(ROOT / "tools" / "lib"))
+    from _model_regions import EU_MS2
+    eu = t[t["ms"].isin(EU_MS2)]
+    if eu.empty:
+        raise ValueError(f"{p.name}: no EU member state")
+    return float(eu["deflator"].iloc[0])
