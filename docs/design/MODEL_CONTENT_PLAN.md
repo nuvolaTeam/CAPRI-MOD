@@ -649,6 +649,12 @@ fine-grained token checked the same day; the token is kept outside the repositor
   `capri/gams/<CAPRI gams path>/<gams file>__<symbol>`, `capri/results/<CAPRI run or file>/<content>_<year>` (capreg,
   capmod, sim_ini, estnlp included), `external/<provider>/<dataset>` (Eurostat, FAO, NUTS, literature); the file under
   unsourced/ given a source or a builder first. A move: every model input rebuilt identically.
+- capri_data/sources/ keeps the extracts of external material (CAPRI's files, Eurostat, NUTS, literature) and the
+  declared files: the ones pinned to the Hugging Face version. The files one builder writes for another (on 4 November
+  2026 about 50 of its 109, e.g. baseline_pmp/intensity_q_*, recipe_*_quad_*, capreg/capreg_producer_prices.csv) leave
+  git for a pipeline cache the pipeline rebuilds; a few may be kept deliberately where worth reviewing. Each of the 50
+  classified one by one first (some are extracts made inside a builder, e.g. the PMP terms read from CAPRI's GDX).
+  Done with the Parquet conversion of this section.
 
 ## 13. Summary
 
