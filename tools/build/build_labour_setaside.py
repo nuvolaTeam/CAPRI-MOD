@@ -105,9 +105,19 @@ def main() -> None:
                 if c and c in d and any(k[1] == "LABT" for k in d[c]):
                     src[vt] = c
                     break
-        if not src:
+        # the set-aside's source: the labour's where there is one; else (no labour items in CAPREG's results: Turkey, the
+        # Western Balkans, as Norway's) the first of the same rows with set-aside levels (4 November 2026: before, those
+        # units had no set-aside split although CAPRI has their VSET and FALL)
+        src_sa = dict(src)
+        for vt, d in data.items():
+            if vt not in src_sa:
+                for c in (to_c8.get(reg), mr.national_code(reg)):
+                    if c and c in d and (d[c].get(("VSET", "LEVL"), 0.0) + d[c].get(("FALL", "LEVL"), 0.0)) > 0:
+                        src_sa[vt] = c
+                        break
+        if not src and not src_sa:
             continue
-        for act, mem in MEMBERS.items():
+        for act, mem in (MEMBERS.items() if src else ()):
             rec = {"region": reg, "activity": act}
             ok = False
             for vt, d in data.items():
@@ -131,7 +141,7 @@ def main() -> None:
         # set-aside: CAPRI's VSET and FALL
         rec = {"region": reg}
         for vt, d in data.items():
-            c = src.get(vt)
+            c = src_sa.get(vt)
             if c is None:
                 continue
             dv, df = d[c].get(("VSET", "LEVL"), 0.0), d[c].get(("FALL", "LEVL"), 0.0)

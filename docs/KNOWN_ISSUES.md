@@ -9,7 +9,7 @@ The data sourcing registry's log of checks, fixes and decisions (201 entries, mo
 [KNOWN_ISSUES_REGISTRY_LOG.md](KNOWN_ISSUES_REGISTRY_LOG.md), verbatim, with the triage of its open entries against
 the code: they became K92-K96, joined K73, K80, K91, or were closed or historical.
 
-## Open (10)
+## Open (11)
 
 | # | Issue | Status |
 |---|---|---|
@@ -23,6 +23,7 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K79](#k79) | Member-state production that keeps moving between iterations | open |
 | [K92](#k92) | Farm-to-Fork changes furthest from JRC121368, besides the milk price | open: waiting for CAPRI's scenario results |
 | [K93](#k93) | CAPRI mitigation options not built; documents disagree on which are in | open: no-till and legume share unmeasured; UreaSubst parked; the others not needed for Farm-to-Fork and the Green Deal |
+| [K111](#k111) | The set-aside report books part of a set-aside increase as VSET where CAPRI has none | open: proposed fix (w = 0 where VSET has no level in either year) |
 
 ## Resolved (99)
 
@@ -1980,4 +1981,19 @@ Status: fixed. Open, as a possible improvement: solving the quotas' sigmas insid
 trqSigmoidFunc_ with the rest of the market) would make the end of both solves shorter; not done. Decided on 4 November 2026
 (docs/design/MARKET_IPOPT_DESIGN.md section 7.1): the Newton-Krylov solve stays optional with no further work; the
 quotas and the raw milk price go inside the evaluation after the Farm-to-Fork and Green Deal runs, then G3.
+
+### K111: The set-aside report books part of a set-aside increase as VSET where CAPRI has none (found 4 November 2026)
+
+capri_mod/model.py _set_aside_table splits the model's SETA into CAPRI's VSET and FALL: VSET = s X0 + w (X - X0), s
+CAPRI's VSET share at the calibration year, w the share of a common change CAPRI's PMP terms give VSET
+(tools/build/build_labour_setaside.py). Where the unit has no PMP terms of its own for the two, w is its country's median,
+else the EU median (0.655 in 2017). 60 of the 226 EU and UK units have no VSET in CAPRI in either year (the Bulgarian,
+Cypriot and Czech units among them; share 0 in 2017 and 2030), yet w 0.645-0.662: a scenario that raises set-aside books
+about two thirds of the increase as VSET, an activity these units do not have in CAPRI (an activity without a base level
+stays at zero there). Reporting only (the set-aside's premiums and labour; the supply models solve SETA as one activity).
+The units of Norway, Turkey and the Western Balkans, given a set-aside split on 4 November 2026 (they have FALL only),
+follow the same rule.
+
+Proposed fix: w = 0 where the unit has no VSET in either year (CAPRI's zero level fixes VSET). Changes the set-aside and
+labour reports of those units in scenarios; not yet made.
 
