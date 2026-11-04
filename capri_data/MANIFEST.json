@@ -1473,6 +1473,42 @@
    },
    "catalogue_note": "Share of the EU use of each model market commodity that goes to biofuels (tools/build/build_biofuel_market.py). (not re-checked)"
   },
+  "capri_data/2017/market/border_measures_2030.csv": {
+   "description": "CAPRI's entry prices (DATA TriggerP) and flexible levies (DATA MinBordP) per importer policy block and model commodity, with the bound specific rate DATA TARS and the free-trade exporters (p_doubleZero), from sim_ini_21730 CUR (tools/build/build_bilateral_market.py build_border_measures; docs/design/PORTS_STAGE4.md, stage 6).",
+   "kind": "coefficients",
+   "vintage": "2030 reference",
+   "domain": "market",
+   "status": "live",
+   "rows": 16,
+   "columns": 7,
+   "units": "U_EuPerTon",
+   "read_by_model": [
+    "capri_mod/market/bilateral_solve.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_bilateral_market:"
+   },
+   "catalogue_note": "CAPRI's entry prices and flexible levies (docs/design/PORTS_STAGE4.md, stage 6) (not re-checked)"
+  },
+  "capri_data/2017/market/border_pairs_2030.csv": {
+   "description": "CAPRI's entry price pairs: p_entryPriceFac and the preferential trigger price PrefTrigPrice per pair of policy blocks and model commodity (sim_ini_21730 CUR; the market listing) (tools/build/build_bilateral_market.py build_border_measures).",
+   "kind": "coefficients",
+   "vintage": "2030 reference",
+   "domain": "market",
+   "status": "live",
+   "rows": 147,
+   "columns": 6,
+   "units": "U_EuPerTon, U_ratio",
+   "read_by_model": [
+    "capri_mod/market/bilateral_solve.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_bilateral_market:"
+   },
+   "catalogue_note": "CAPRI's entry price pairs (not re-checked)"
+  },
   "capri_data/2017/market/crushing_parameters_2017.csv": {
    "description": "CAPRI's oilseed crushing per model trade region at the 2017 market year: crush = PROC of the seed, oil and cake yields = CAPRI's PRCY, from CAPRI's market data of 2017 (tools/build/build_crushing_parameters.py)",
    "kind": "coefficients",
@@ -2029,6 +2065,23 @@
     "builder": "build_noneu_market_supply_nq"
    },
    "catalogue_note": "CAPRI's market supply functions (ProdNQ_) of the non-EU market regions with their cross-price terms (tools/build/build_noneu_market_supply_nq.py; K54-3, market step D); y empty: a column without a model price, held at calibration (not re-checked)"
+  },
+  "capri_data/2017/market/policy_blocks.csv": {
+   "description": "Each model market region's CAPRI policy block (codes/capri/RM_TO_RMTP.csv; the EU's two market regions in block EU) (tools/build/build_bilateral_market.py build_border_measures).",
+   "kind": "structure",
+   "vintage": "code",
+   "domain": "market",
+   "status": "live",
+   "rows": 45,
+   "columns": 2,
+   "read_by_model": [
+    "capri_mod/market/bilateral_solve.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_bilateral_market:"
+   },
+   "catalogue_note": "each market region's CAPRI policy block (not re-checked)"
   },
   "capri_data/2017/market/processing_nq_base.csv": {
    "description": "CAPRI's processing demand functions (arm/market_model.gms ProcNQ_) per behavioural region, for the market. (tools/build/build_processing_nq.py)",

@@ -306,6 +306,67 @@ def build_trq_global(year):
     return out
 
 
+def build_border_measures(year=2030):
+    """CAPRI's border measures that replace the specific tariff (stage 6 of the market move, docs/design/PORTS_STAGE4.md):
+    the entry price system (DATA TriggerP: EntryPriceDriver_, tarSpecIfEntryPrice_, prefTriggerPrice_) and the
+    flexible levies under a minimum border price (DATA MinBordP: FlexLevyNotCut_, FlexLevy_), arm/market_model.gms
+    l. 3174-3262, 3365-3390. From CAPRI's 2030 restart file sim_ini_21730 ("CUR": DATA, p_entryPriceFac, p_doubleZero)
+    and the market listing's PrefTrigPrice; no 2017 listing carries p_entryPriceFac, so the 2017 market year has none
+    (REGISTERED in PORTS_STAGE4.md).
+    Outputs (capri_data/2017/market/):
+      border_measures_<year>.csv  importer (policy block), commodity, kind (entry_price, flex_levy), price (TriggerP or
+                                  MinBordP, EUR/t), tars (DATA TARS, EUR/t), importer_regions, free_regions
+      border_pairs_<year>.csv     importer, exporter (policy blocks), commodity, entry_fac (p_entryPriceFac),
+                                  pref_trig (PrefTrigPrice of a quota under the entry price system, EUR/t),
+                                  exporter_regions
+      policy_blocks.csv           region, block: each model market region's policy block (RM_TO_RMTP)"""
+    from paths import REFERENCE
+    sim = REFERENCE / "simini" / "simini_21730"
+    with open(ROOT / "capri_data" / "codes" / "capri" / "RMTP.csv", newline="") as fh:
+        rmtp = {r["code"] for r in csv.DictReader(fh)}
+    members = defaultdict(list)
+    with open(ROOT / "capri_data" / "codes" / "capri" / "RM_TO_RMTP.csv", newline="") as fh:
+        for r in csv.DictReader(fh):
+            members[r["rmtp"]].append(model_region(r["rm"], eu_as_blocks=True))
+    D = _read_csv(sim / "DATA.csv.gz", keep_default_na=False, usecols=["d0", "d1", "d2", "d3", "value"])
+    D = D[(D.d3 == "CUR") & D.d0.isin(rmtp) & D.d2.isin(list(CAPRI))]
+    D = D.assign(d1=D.d1.str.upper())
+    val = {(r.d0, r.d1, r.d2): float(r.value) for r in D[D.d1.isin(["TRIGGERP", "MINBORDP", "TARS"])].itertuples()}
+    dz = _read_csv(sim / "p_doubleZero.csv.gz", keep_default_na=False)
+    dz = dz[(dz.d3 == "CUR") & (dz.value.astype(float) != 0)]
+    free = defaultdict(set)
+    for r in dz.itertuples(index=False):
+        if r.d1 in rmtp:
+            free[(r.d0, r.d2)].add(r.d1)
+    rows = []
+    for (i, it, p), v in val.items():
+        if it == "TARS" or v <= 0:
+            continue
+        rows.append(dict(importer=i, commodity=CAPRI[p], kind="entry_price" if it == "TRIGGERP" else "flex_levy",
+                         price=v, tars=val.get((i, "TARS", p), 0.0), importer_regions="|".join(members[i]),
+                         free_regions="|".join(sorted({x for b in free[(i, p)] for x in members[b]}))))
+    bm = pd.DataFrame(rows).sort_values(["importer", "commodity"])
+    if bm.duplicated(["importer", "commodity"]).any():
+        raise ValueError("CAPRI products of one model commodity with two border measures")
+    bm.to_csv(ROOT / "capri_data" / "2017" / "market" / f"border_measures_{year}.csv", index=False)
+    fac = _read_csv(sim / "p_entryPriceFac.csv.gz", keep_default_na=False)
+    fac = fac[(fac.d3 == "CUR") & fac.d0.isin(rmtp) & fac.d1.isin(rmtp)]
+    tq = _read_csv(KEEP / f"bilateral_trq_dataout_{year}.csv", keep_default_na=False)
+    trig = {(r.importer, r.exporter, r.product): float(r.value) for r in tq[tq["item"] == "PREFTRIGPRICE"].itertuples()}
+    prs = [dict(importer=r.d0, exporter=r.d1, commodity=CAPRI[r.d2], entry_fac=float(r.value),
+                pref_trig=trig.get((r.d0, r.d1, r.d2), 0.0), exporter_regions="|".join(members[r.d1]))
+           for r in fac.itertuples(index=False) if r.d2 in CAPRI]
+    bp = pd.DataFrame(prs).sort_values(["importer", "commodity", "exporter"])
+    bp.to_csv(ROOT / "capri_data" / "2017" / "market" / f"border_pairs_{year}.csv", index=False)
+    # every model market region's policy block (RM_TO_RMTP): CAPRI defines the measures per pair of blocks, at the
+    # block pair's CIF price (TransportCostsAgg_: transport costs weighted by the base flows)
+    pd.DataFrame([dict(region=x, block=b_) for b_ in sorted(members) for x in members[b_]]).to_csv(
+        ROOT / "capri_data" / "2017" / "market" / "policy_blocks.csv", index=False)
+    print(f"{year} border measures: " + ", ".join(f"{r.importer} {r.commodity} {r.kind}" for r in bm.itertuples())
+          + f"; {len(bp)} entry price pairs")
+    return bm, bp
+
+
 def main():
     sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check")]
     from recalibrate_trade_2017 import AGGREGATES
@@ -314,6 +375,7 @@ def main():
         build(y, AGGREGATES)
         build_trq(y, AGGREGATES)        # CAPRI's bilateral quotas of every importer
         build_trq_global(y)             # its global quotas
+    build_border_measures(2030)         # entry prices and flexible levies (CAPRI's 2030 restart file only)
     rt = rho_table()
     rows = [dict(commodity=m, capri=cs[0], rho1=rt[cs[0]][1], rho2=rt[cs[0]][2]) for m, cs in MODEL.items()]
     pd.DataFrame(rows).to_csv(ROOT / "capri_data" / "2017" / "market" / "armington_rho.csv", index=False)

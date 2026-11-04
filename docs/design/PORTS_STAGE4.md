@@ -76,3 +76,18 @@ A_EU_WEST, A_EU_EAST; the rest one to one).
   ncpcm(x, y, Z) = x - Z ln(1 + exp((x - y) / Z)) (GAMS's Chen-Mangasarian smoothed minimum).
 - In the model the base import prices stay CAPRI's (a + b); each regime adds the change of its rates from their value
   at the base flows (shift form), so the base is reproduced exactly and the response is CAPRI's equations'.
+
+## Stage 6: entry prices and flexible levies (4 November 2026)
+
+- Data (build_border_measures, from sim_ini_21730 "CUR"): the entry price system of the EU and the UK (APPL, CITR,
+  TAGR, TOMA; DATA TriggerP), the EU's flexible levies (BARL, CORN, OATS, OCER, PARI, RYEM, SUGR, SWHE; DATA MinBordP),
+  147 entry price pairs (p_entryPriceFac, 100 for all; PrefTrigPrice where the pair has one: the 4 entry price quotas,
+  and MOR's table grapes with an unlimited preference). policy_blocks.csv: each market region's policy block.
+- Model (BilateralCommodity.border_spec, inside import_prices): the measure replaces the flow's specific tariff;
+  CAPRI's equations per pair of policy blocks, at the pair's CIF price weighted by its base flows (TransportCostsAgg_);
+  the entry price under a quota moves with the quota's sigma (prefTriggerPrice_); the levy is cut at the flow's specific
+  tariff, the quota's current rate where the flow has one (FlexLevy_ with v_tarSpec). The change from the base enters
+  the import price, so the base is CAPRI's.
+- Check against CAPRI's calibrated levies (p_flexLevy "CAL", 48 EU flows): largest gap 1.3 EUR/t (RSA sugar, 70 EUR/t).
+- REGISTERED: the 2017 market year has no entry prices nor levies (p_entryPriceFac is only in the 2030 restart file).
+  G1/G2a's CasADi systems have neither; the default solve's exact path is not taken for such a commodity.

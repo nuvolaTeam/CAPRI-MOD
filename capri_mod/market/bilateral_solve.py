@@ -119,9 +119,62 @@ class BilateralSolveMixin(MarketStateMixin):
                 for k in bil:
                     if sc.trq_quotas[k]["regime"] == "with_global":
                         sc.trq_quotas[k]["glob"] = len(gl) - 1
+        # CAPRI's entry prices and flexible levies (build_border_measures; stage 6): they replace the specific tariff
+        if inp.exists(f"border_measures_{year}.csv"):
+            bm = inp.csv(f"border_measures_{year}.csv", keep_default_na=False)
+            bp = inp.csv(f"border_pairs_{year}.csv", keep_default_na=False)
+            for t in bm.itertuples(index=False):
+                sc = out.get(t.commodity)
+                if sc is None:
+                    continue
+                rows = [ix[x] for x in str(t.importer_regions).split("|") if x in ix]
+                excl = set(rows) | {ix[x] for x in str(t.free_regions).split("|") if x in ix}
+                cols = [j for j in range(n) if j not in excl]
+                if not rows or not cols:
+                    continue
+                b = sc.border = sc.border or dict(kind=np.zeros((n, n), int), price=np.zeros((n, n)),
+                                                  tars=np.zeros((n, n)), fac=np.ones((n, n)), pref=np.zeros((n, n)),
+                                                  quota=np.full((n, n), -1))
+                ixb = np.ix_(rows, cols)
+                live = sc.X0[ixb] > 0
+                b["kind"][ixb] = np.where(live, 1 if t.kind == "entry_price" else 2, b["kind"][ixb])
+                b["price"][ixb], b["tars"][ixb] = float(t.price), float(t.tars)
+                if t.kind == "entry_price":
+                    for u in bp[(bp.importer == t.importer) & (bp.commodity == t.commodity)].itertuples(index=False):
+                        cj = [ix[x] for x in str(u.exporter_regions).split("|") if x in ix]
+                        if not cj:
+                            continue
+                        b["fac"][np.ix_(rows, cj)] = float(u.entry_fac)
+                        b["pref"][np.ix_(rows, cj)] = float(u.pref_trig)
+                    for k, q in enumerate(sc.trq_quotas or ()):
+                        if q["regime"] == "entry_price" and q["importer"] == t.importer:
+                            ixq = np.ix_(q["rows"], q["cols"])
+                            b["quota"][ixq] = k
+                            if q["ts_pref"] > 0:                 # tarSpecIfEntryPrice_: TsPref where the quota has one
+                                b["tars"][ixq] = q["ts_pref"]
+        if inp.exists("policy_blocks.csv"):
+            pb = inp.csv("policy_blocks.csv", keep_default_na=False)
+            blk = {}
+            for t in pb.itertuples(index=False):
+                if t.region in ix:
+                    blk.setdefault(str(t.block), []).append(ix[t.region])
+            for sc in out.values():
+                if not sc.border:
+                    continue
+                kind = sc.border["kind"]
+                pairs = []
+                for bi in blk.values():
+                    for bj in blk.values():
+                        ii, jj = np.array(bi), np.array(bj)
+                        sub = kind[np.ix_(ii, jj)] > 0
+                        w = sc.X0[np.ix_(ii, jj)] * sub
+                        if sub.any() and w.sum() > 0 and (len(ii) > 1 or len(jj) > 1):
+                            pairs.append((ii, jj, w))
+                sc.border["pairs"] = pairs
         for sc in out.values():
             if sc.trq_quotas or sc.trq_globals:
                 sc.trq_base()
+            sc.border_base()
         self._bilat_raw_cache = (year, out)
         return out
 
@@ -266,6 +319,7 @@ class BilateralSolveMixin(MarketStateMixin):
                     RuntimeWarning)
         for sc in sysd.values():
             sc.trq_base()                               # each quota's sigma at the calibrated base flows
+            sc.border_base()
         self.par.bilat = sysd
         self.sv.bilat_last_r = None
         self.sv.bilat_local_el = None
@@ -372,7 +426,9 @@ class BilateralSolveMixin(MarketStateMixin):
             return sc.residual(S, D, r, p, pre=pre)[act] / scale
 
         z = np.log(rk[act])
-        if bool(_settings().get("market.exact_jacobian")):
+        if bool(_settings().get("market.exact_jacobian")) and not sc.border:
+            # (a commodity under CAPRI's entry prices or flexible levies takes the default path: G1's CasADi system has
+            # neither, stage 6)
             # step G1: the same residual and its exact Jacobian from CasADi (capri_mod/market/trade_ad.py)
             from capri_mod.market.trade_ad import trade_function, import_price_matrices
             Am, Bm = import_price_matrices(sc, tadd)

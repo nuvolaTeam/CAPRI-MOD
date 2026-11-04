@@ -792,3 +792,42 @@ CREATE TABLE mkt_feed_demand_noneu_capri_regions (
     PRIMARY KEY (region, commodity, capri_region)
 );
 COMMENT ON TABLE mkt_feed_demand_noneu_capri_regions IS 'the CAPRI regions whose feed functions make a trade region''s feed demand of a product (tools/build/build_feed_demand_nonEU.py)';
+
+-- file: capri_data/2017/market/border_measures_2030.csv
+CREATE TABLE mkt_border_measures_2030 (
+    importer VARCHAR NOT NULL,
+    commodity VARCHAR NOT NULL,
+    kind VARCHAR NOT NULL CHECK (kind IN ('entry_price', 'flex_levy')),
+    price DOUBLE NOT NULL,
+    tars DOUBLE NOT NULL,
+    importer_regions VARCHAR NOT NULL,
+    free_regions VARCHAR,
+    PRIMARY KEY (importer, commodity)
+);
+COMMENT ON TABLE mkt_border_measures_2030 IS 'CAPRI''s entry prices (DATA TriggerP) and flexible levies (DATA MinBordP) per importer policy block and model commodity, with the bound specific rate DATA TARS and the free-trade exporters (p_doubleZero), from sim_ini_21730 CUR (tools/build/build_bilateral_market.py build_border_measures; docs/design/PORTS_STAGE4.md, stage 6).';
+INSERT INTO value_units VALUES
+  ('mkt_border_measures_2030', 'price', 'U_EuPerTon', 'builder', 'CAPRI DATA TriggerP or MinBordP'),
+  ('mkt_border_measures_2030', 'tars', 'U_EuPerTon', 'builder', 'CAPRI DATA TARS');
+
+-- file: capri_data/2017/market/border_pairs_2030.csv
+CREATE TABLE mkt_border_pairs_2030 (
+    importer VARCHAR NOT NULL,
+    exporter VARCHAR NOT NULL,
+    commodity VARCHAR NOT NULL,
+    entry_fac DOUBLE NOT NULL,
+    pref_trig DOUBLE NOT NULL,
+    exporter_regions VARCHAR NOT NULL,
+    PRIMARY KEY (importer, exporter, commodity)
+);
+COMMENT ON TABLE mkt_border_pairs_2030 IS 'CAPRI''s entry price pairs: p_entryPriceFac and the preferential trigger price PrefTrigPrice per pair of policy blocks and model commodity (sim_ini_21730 CUR; the market listing) (tools/build/build_bilateral_market.py build_border_measures).';
+INSERT INTO value_units VALUES
+  ('mkt_border_pairs_2030', 'entry_fac', 'U_ratio', 'builder', 'CAPRI p_entryPriceFac, a calibration factor of the entry price driver (dimensionless)'),
+  ('mkt_border_pairs_2030', 'pref_trig', 'U_EuPerTon', 'builder', 'CAPRI p_trqBilat PrefTrigPrice');
+
+-- file: capri_data/2017/market/policy_blocks.csv
+CREATE TABLE mkt_policy_blocks (
+    region VARCHAR NOT NULL,
+    block VARCHAR NOT NULL,
+    PRIMARY KEY (region)
+);
+COMMENT ON TABLE mkt_policy_blocks IS 'Each model market region''s CAPRI policy block (codes/capri/RM_TO_RMTP.csv; the EU''s two market regions in block EU) (tools/build/build_bilateral_market.py build_border_measures).';

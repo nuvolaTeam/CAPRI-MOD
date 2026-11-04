@@ -56,6 +56,8 @@ INSERT INTO code_data_status VALUES
   ('capri_mod/fert/inner_fert_dist.py', 'InnerFertDist.solve', 0.75, 'capri', 'keep', 'gams/supply/set_fert_priors.gms l. 297-299', 'regulation mode share where a cap is given as a plain maximum'),
   ('capri_mod/market/bilateral.py', 'BilateralCommodity.TRQ_FILL_MID', 0.97, 'capri', 'keep', 'gams/arm/market_model.gms l. 3272-3284', 'quota fill at the TRQ sigmoid''s midpoint'),
   ('capri_mod/market/bilateral.py', 'BilateralCommodity.TRQ_ARG_CLIP', 60.0, 'numerical', 'keep', NULL, 'overflow clip of the sigmoid''s argument'),
+  ('capri_mod/market/bilateral.py', 'BilateralCommodity.border_spec', 0.95, 'capri', 'keep', 'gams/arm/market_model.gms l. 3184', 'the entry price driver''s point (0.98 + 0.92) / 2 of the trigger price (EntryPriceDriver_)'),
+  ('capri_mod/market/bilateral.py', 'BilateralCommodity.border_spec', 20.0, 'capri', 'keep', 'gams/arm/market_model.gms l. 3212', 'the asymmetric sigmoid of tarSpecIfEntryPrice_, exp(min(0, d)) / (1 + 20 exp(-|d|))'),
   ('capri_mod/market/bilateral.py', 'BilateralCommodity.trq_solve', -0.05, 'numerical', 'keep', NULL, 'Aitken step of a quota''s sigma at most 0.05 down (the outer fixed point with the market; docs/design/PORTS_STAGE4.md)'),
   ('capri_mod/market/bilateral.py', 'BilateralCommodity.trq_solve', 0.05, 'numerical', 'keep', NULL, 'Aitken step of a quota''s sigma at most 0.05 up; and the largest change of the contraction factor between steps for the step to be taken'),
   ('capri_mod/market/bilateral.py', 'BilateralCommodity.trq_solve', 0.99, 'numerical', 'keep', NULL, 'largest contraction factor for which Aitken''s step is taken (with 0.5 the smallest)'),

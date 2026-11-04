@@ -207,8 +207,10 @@ class BilateralCommodity:
         tc = self.tc if self.tc is not None else np.zeros_like(self.a0)
         base = self.a0 * r[None, :] + tc
         off = np.where(np.isnan(ta), 0.0, base * (ta - np.nan_to_num(self._trq_ta0)) / 100.0)
-        off = off + np.where(np.isnan(ts), 0.0, ts - np.nan_to_num(self._trq_ts0))
-        return off
+        sp = np.where(np.isnan(ts), 0.0, ts - np.nan_to_num(self._trq_ts0))
+        if self.border:
+            sp = np.where(self.border["kind"] == 2, 0.0, sp)   # a levy replaces the specific tariff (border_spec)
+        return off + sp
 
     def trq_sigmas(self) -> np.ndarray:
         """All the quotas' sigmas, bilateral then global (for the solve's convergence test)."""
@@ -257,7 +259,7 @@ class BilateralCommodity:
             return 0.5 * (lo + hi)
 
         for k, q in enumerate(self.trq_quotas or ()):
-            if q["regime"] == "entry_price" or q["Q"] <= 0:
+            if q["Q"] <= 0:
                 continue
 
             def hB(s, k=k, q=q):
@@ -296,6 +298,62 @@ class BilateralCommodity:
         self.trq_sigma, self.trq_sigmaW = new[:nb], new[nb:]
         self.trq_set_offsets(r)
 
+    #: CAPRI's border measures replacing the specific tariff (stage 6, docs/design/PORTS_STAGE4.md): a dict of n x n
+    #: arrays over the flows they apply to: kind (1 entry price, 2 flexible levy, 0 none), price (TriggerP or
+    #: MinBordP), tars (the bound specific rate DATA TARS, or the quota's TsPref under the entry price), fac
+    #: (p_entryPriceFac), pref (PrefTrigPrice: the entry price of an unlimited preference, or the low end of a quota's),
+    #: quota (the index of the flow's bilateral quota under the entry price system, -1 none); S0, the specific part at
+    #: the base, set by border_base()
+    border: Optional[dict] = None
+
+    def border_spec(self, r: np.ndarray) -> np.ndarray:
+        """The specific tariff of the flows under a border measure (EUR/t; 0 elsewhere) at the exporters' ratios r:
+        entry price (EntryPriceDriver_, tarSpecIfEntryPrice_, prefTriggerPrice_): driver d = (E 0.95 - (Pmrk + TC)) /
+        TriggerP x fac, tariff = exp(min(0, d)) / (1 + 20 exp(-|d|)) x (TARS or TsPref), E = TriggerP, or PrefTrigPrice
+        for an unlimited preference, or PrefTrigPrice + (TriggerP - PrefTrigPrice) sigma under the quota; flexible levy
+        (FlexLevyNotCut_, FlexLevy_): ncpcm(-ncpcm(-(MinBordP - (Pmrk + TC)), 0, Z), TARS, Z), Z = 1E-3 MinBordP."""
+        b = self.border
+        out = np.zeros((len(self.regions), len(self.regions)))
+        if not b:
+            return out
+        tc = self.tc if self.tc is not None else np.zeros_like(self.a0)
+        cif = self.a0 * r[None, :] + tc
+        # CAPRI defines the measures per pair of policy blocks (v_marketPrice(RMTP1) + v_transpCost(RMTP, RMTP1),
+        # TransportCostsAgg_: the CIF price weighted by the pair's base flows), the same for every flow of the pair
+        grp = b.get("pairs")
+        if grp:
+            cif = cif.copy()
+            for ii, jj, w in grp:
+                cif[np.ix_(ii, jj)] = float((w * cif[np.ix_(ii, jj)]).sum() / w.sum())
+        k = b["kind"]
+        en = k == 1
+        if en.any():
+            E = np.where(b["pref"] > 0, b["pref"], b["price"])
+            for qi in np.unique(b["quota"][en & (b["quota"] >= 0)]):
+                m = en & (b["quota"] == qi)
+                s_ = float(self.trq_sigma[int(qi)]) if self.trq_sigma is not None else 0.0
+                E = np.where(m, b["pref"] + (b["price"] - b["pref"]) * s_, E)
+            with np.errstate(divide="ignore", invalid="ignore", over="ignore"):
+                d = (E * 0.95 - cif) / np.where(b["price"] > 0, b["price"], 1.0) * b["fac"]
+                g = np.exp(np.minimum(0.0, d)) / (1.0 + 20.0 * np.exp(-np.abs(d)))
+            out = np.where(en, g * b["tars"], out)
+        lv = k == 2
+        if lv.any():
+            # the levy is cut at the flow's specific tariff: the bound rate, or the quota's current rate (v_tarSpec)
+            tars = b["tars"]
+            if self.trq_sigma is not None and (self.trq_quotas or self.trq_globals):
+                _, ts = self._trq_rates(self.trq_sigma, self.trq_sigmaW)
+                tars = np.where(np.isnan(ts), tars, ts)
+            z = 1e-3 * np.where(b["price"] > 0, b["price"], 1.0)
+            notcut = -self.ncpcm(-(b["price"] - cif), 0.0, z)
+            out = np.where(lv, self.ncpcm(notcut, tars, z), out)
+        return out
+
+    def border_base(self) -> None:
+        """The border measures' specific part at the base (r = 1, the quotas at their base sigma)."""
+        if self.border:
+            self.border["S0"] = self.border_spec(np.ones(len(self.regions)))
+
     def import_prices(self, r: np.ndarray, tariff_adds=None) -> np.ndarray:
         """Import prices p_ij at the exporters' price ratios r. tariff_adds: [(importer rows, points of ad valorem
         tariff added)], CAPRI impPrice_ (arm/market_model.gms l. 2849-2882): the ad valorem tariff applies to the
@@ -304,6 +362,8 @@ class BilateralCommodity:
         p = self.a * r[None, :] + self.b
         if (self.trq_quotas or self.trq_globals) and self.trq_offset is not None:
             p = p + self.trq_offset
+        if self.border and "S0" in self.border:
+            p = p + (self.border_spec(np.asarray(r, dtype=float)) - self.border["S0"])
         for importer, pts in (tariff_adds or ()):
             if not pts:
                 continue

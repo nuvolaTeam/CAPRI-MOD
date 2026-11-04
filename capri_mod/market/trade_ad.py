@@ -175,7 +175,10 @@ def trade_trq_function(sc, act):
 def import_price_matrices(sc, tariff_adds=None, offsets: bool = True) -> Tuple[np.ndarray, np.ndarray]:
     """p = A r + B: the import prices of `BilateralCommodity.import_prices` split into the part proportional to the
     exporters' price ratios and the rest (base terms, quota offsets, CAPRI's ad valorem tariff on price plus transport).
-    offsets=False leaves the quota offsets out (trade_trq_function has them as unknowns)."""
+    offsets=False leaves the quota offsets out (trade_trq_function has them as unknowns). CAPRI's entry prices and
+    flexible levies (BilateralCommodity.border_spec, stage 6) are not in A, B: G1's system holds them at their values
+    at r = 1 for a commodity that has them (the Newton-Krylov preconditioner; the default solve's exact path is not
+    taken for such a commodity)."""
     n = len(sc.regions)
     A = np.array(sc.a, float, copy=True)
     B = np.array(sc.b, float, copy=True)

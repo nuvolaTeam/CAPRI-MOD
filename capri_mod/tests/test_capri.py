@@ -850,6 +850,41 @@ def test_trq_global_quota_and_the_smaller_rate():
     assert ta1[0, 1] <= min(40.0, 60.0 * sB) + 1e-9
 
 
+def test_entry_price_and_flexible_levy_are_capris():
+    """CAPRI's entry price system and flexible levies (arm/market_model.gms l. 3174-3262, 3365-3390): the entry price's
+    driver d = (E 0.95 - CIF) / TriggerP x fac and specific tariff exp(min(0, d)) / (1 + 20 exp(-|d|)) x TARS, E the
+    trigger price, or PrefTrig + (TriggerP - PrefTrig) sigma under a quota; the levy
+    ncpcm(-ncpcm(-(MinBordP - CIF), 0, Z), TARS, Z), Z = 1E-3 MinBordP; CIF = exporter price x r + transport."""
+    import numpy as np
+    sc = _trq_toy(50.0)
+    n = 2
+    ncp = lambda x, y, z: x - z * np.log1p(np.exp((x - y) / z))
+    g = lambda d: np.exp(min(0.0, d)) / (1.0 + 20.0 * np.exp(-abs(d)))
+    quotas = sc.trq_quotas
+    for kind in (1, 2):
+        # the levy is cut at the flow's specific tariff: here the bound rate TARS (no quota on the flow)
+        sc.trq_quotas, sc.trq_sigma = (quotas, sc.trq_sigma0) if kind == 1 else (None, None)
+        sc.border = dict(kind=np.array([[0, kind], [0, 0]]), price=np.array([[0.0, 1300.0], [0.0, 0.0]]),
+                         tars=np.array([[0.0, 300.0], [0.0, 0.0]]), fac=np.array([[1.0, 100.0], [1.0, 1.0]]),
+                         pref=np.zeros((n, n)), quota=np.full((n, n), -1))
+        sc.border_base()
+        for rr in (0.8, 1.0, 1.2):
+            S = sc.border_spec(np.array([1.0, rr]))
+            cif = 1000.0 * rr + 100.0
+            want = (g((1300.0 * 0.95 - cif) / 1300.0 * 100.0) * 300.0 if kind == 1
+                    else ncp(-ncp(-(1300.0 - cif), 0.0, 1.3), 300.0, 1.3))
+            assert abs(S[0, 1] - want) < 1e-9 * max(1.0, abs(want)), (kind, rr)
+            p = sc.import_prices(np.array([1.0, rr]))
+            assert abs(p[0, 1] - (1000.0 * rr + 100.0 + want - sc.border["S0"][0, 1])) < 1e-9 * 2000.0
+    # under a quota with a preferential trigger price the entry price moves with the quota's sigma
+    sc.trq_quotas = quotas
+    sc.border["kind"][0, 1], sc.border["pref"][0, 1], sc.border["quota"][0, 1] = 1, 1000.0, 0
+    sc.trq_sigma = np.array([0.25])
+    S = sc.border_spec(np.ones(2))
+    E = 1000.0 + 300.0 * 0.25
+    assert abs(S[0, 1] - g((E * 0.95 - 1100.0) / 1300.0 * 100.0) * 300.0) < 1e-9
+
+
 def test_trq_tariff_follows_quota_fill():
     """CAPRI's TRQ regime (trqSigmoidFunc_, slope 200 around 97% of the quota): an under-filled quota keeps the
     in-quota tariff; pushing imports past the quota moves the import price toward the out-of-quota tariff."""
