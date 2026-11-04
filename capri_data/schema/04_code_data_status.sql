@@ -177,6 +177,7 @@ INSERT INTO code_data_status VALUES
   ('capri_mod/utils/capri_stop.py', 'CapriStopRule', 0.05, 'capri', 'keep', 'gams/capmod.gms l. 386, 388', 'p_minAbsPriceIterChg (EUR) and p_minIterChg (%)'),
   ('capri_mod/utils/capri_stop.py', 'CapriStopRule', 2.5, 'capri', 'keep', 'gams/capmod.gms l. 385', 'p_minAbsFeedIterChg (1000 t)'),
   ('capri_mod/utils/capri_stop.py', 'CapriStopRule', 15.0, 'capri', 'keep', 'gams/capmod/price_forecast.gms l. 317', 'Norway leaves the stop rule from step 15'),
+  ('capri_mod/utils/capri_stop.py', 'CapriStopRule.__init__', 15.0, 'capri', 'keep', 'gams/capmod/price_forecast.gms l. 316-318', 'Turkey (TUR) leaves the stop rule from step 15, as Norway'),
   ('capri_mod/utils/capri_stop.py', '_chg', 200.0, 'capri', 'keep', 'gams/capmod/price_forecast.gms l. 136-141', '2 |x1 - x0| / (x1 + x0) x 100'),
   ('capri_mod/utils/capri_stop.py', '_schg', 200.0, 'capri', 'keep', 'gams/capmod/price_forecast.gms l. 136-141', 'signed form of CAPRI''s change measure (drift report)'),
   ('capri_mod/utils/utils.py', 'ConvergenceTracker', 50.0, 'numerical', 'keep', NULL, 'default iteration limit; the model passes outer_loop.max_outer_iter'),
