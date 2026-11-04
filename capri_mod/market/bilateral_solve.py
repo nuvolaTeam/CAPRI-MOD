@@ -86,11 +86,42 @@ class BilateralSolveMixin(MarketStateMixin):
                     if not rows or not cols:
                         continue
                     qs.append(dict(rows=np.array(rows), cols=np.array(cols), Q=float(t.quota_kt), Q0=float(t.quota_kt),
-                                   dta=float(t.ta_mfn) - float(t.ta_pref), dts=float(t.ts_mfn) - float(t.ts_pref),
-                                   importer=str(t.importer), exporter=str(t.exporter)))
+                                   ta_pref=float(t.ta_pref), dta=float(t.ta_mfn) - float(t.ta_pref),
+                                   ts_pref=float(t.ts_pref), dts=float(t.ts_mfn) - float(t.ts_pref),
+                                   importer=str(t.importer), exporter=str(t.exporter), regime=str(t.regime), glob=None))
                 if qs:
                     sc.trq_quotas = qs
-                    sc.trq_base()
+        # CAPRI's global quotas (TRQImports_, tarAdValW_, tarSpecW_; build_trq_global): the flows from exporters
+        # without a bilateral quota and without free trade pay the global rates; the bilateral quotas' overfill enters
+        # the global imports and, where the global quota has the rate, their rate is the smaller of the two (ncpcm)
+        if inp.exists(f"bilateral_trq_global_{year}.csv"):
+            tg = inp.csv(f"bilateral_trq_global_{year}.csv", keep_default_na=False)
+            for t in tg.itertuples(index=False):
+                sc = out.get(t.commodity)
+                if sc is None:
+                    continue
+                rows = [ix[x] for x in str(t.importer_regions).split("|") if x in ix]
+                if not rows:
+                    continue
+                gl = sc.trq_globals = sc.trq_globals or []
+                bil = [k for k, q in enumerate(sc.trq_quotas or ()) if q["importer"] == str(t.importer)]
+                excl = set(rows) | {ix[x] for x in str(t.free_regions).split("|") if x in ix}
+                for k in bil:
+                    excl |= {int(j) for j in sc.trq_quotas[k]["cols"]}
+                cover = np.zeros((n, n), dtype=bool)
+                cols = [j for j in range(n) if j not in excl]
+                cover[np.ix_(rows, cols)] = True
+                tam, tap, tsm, tsp = (float(t.ta_mfn), float(t.ta_pref), float(t.ts_mfn), float(t.ts_pref))
+                g = dict(rows=np.array(rows), Q=float(t.quota_kt), Q0=float(t.quota_kt), ta_pref=tap, dta=tam - tap,
+                         ts_pref=tsp, dts=tsm - tsp, cover=cover, bil=bil, importer=str(t.importer),
+                         has_ta=(tam > 0 or tap > 0) and tap < tam, has_ts=(tsm > 0 or tsp > 0) and tsp < tsm)
+                gl.append(g)
+                for k in bil:
+                    if sc.trq_quotas[k]["regime"] == "with_global":
+                        sc.trq_quotas[k]["glob"] = len(gl) - 1
+        for sc in out.values():
+            if sc.trq_quotas or sc.trq_globals:
+                sc.trq_base()
         self._bilat_raw_cache = (year, out)
         return out
 
@@ -502,9 +533,9 @@ class BilateralSolveMixin(MarketStateMixin):
                 if sc.trq_row is None:
                     continue
                 X, _ = sc.flows(D[c].values, r[c].values, pc[c])
-                old_off = sc.trq_offset.copy()
-                sc.trq_solve(X, pc[c], r[c].values)
-                trq_moved = max(trq_moved, float(np.max(np.abs(sc.trq_offset - old_off) / np.maximum(pc[c], 1.0))))
+                old_s = sc.trq_sigmas()
+                sc.trq_solve(X, pc[c], r[c].values, D[c].values)
+                trq_moved = max(trq_moved, sc.trq_sigma_change(old_s))
             if err < tol and trq_moved < tol:
                 converged = True
                 break

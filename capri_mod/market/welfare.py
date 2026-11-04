@@ -417,16 +417,27 @@ class WelfareMixin:
             wedge = p - sc.a0 * rc[None, :] - tc
             n = len(R)
             rent_ij = np.zeros((n, n))
-            # CAPRI's quota rent (reports/sol_market.gms l. 1127): (import price - the in-quota price) x the in-quota
-            # imports min(fill, TrqNT), here per flow: the rates' rise over the preferential ones, sigma x
-            # d price / d sigma, on the flow's share of the in-quota imports
-            for k, q in enumerate(getattr(sc, "trq_quotas", None) or ()):
-                ixq = np.ix_(q["rows"], q["cols"])
-                fill = float(X[ixq].sum())
-                if fill <= 0 or q["Q"] <= 0:
-                    continue
-                unit = np.maximum(sc.trq_unit(rc, q) * float(sc.trq_sigma[k]), 0.0)
-                rent_ij[ixq] = unit * X[ixq] * min(1.0, q["Q"] / fill)
+            # CAPRI's quota rents (reports/sol_market.gms l. 1127): (import price - the in-quota price) x the in-quota
+            # imports, min(imports, TrqNT); here per flow: the flow's rates over the quota's preferential ones on its
+            # exporter price plus transport, on the flow's share of the in-quota imports (bilateral quotas, then the
+            # global quotas' flows)
+            if getattr(sc, "trq_sigma", None) is not None:
+                ta, ts = sc._trq_rates(sc.trq_sigma, sc.trq_sigmaW)
+                base = sc.a0 * rc[None, :] + tc
+                for k, q in enumerate(sc.trq_quotas or ()):
+                    ixq = np.ix_(q["rows"], q["cols"])
+                    fill = float(X[ixq].sum())
+                    if fill <= 0 or q["Q"] <= 0:
+                        continue
+                    u = (np.nan_to_num(base[ixq] * (ta[ixq] - q["ta_pref"]) / 100.0)
+                         + np.nan_to_num(ts[ixq] - q["ts_pref"]))
+                    rent_ij[ixq] = np.maximum(u, 0.0) * X[ixq] * min(1.0, q["Q"] / fill)
+                for g in sc.trq_globals or ():
+                    imp = float(X[g["cover"]].sum())
+                    if imp <= 0 or g["Q"] <= 0:
+                        continue
+                    u = (np.nan_to_num(base * (ta - g["ta_pref"]) / 100.0) + np.nan_to_num(ts - g["ts_pref"]))
+                    rent_ij[g["cover"]] = (np.maximum(u, 0.0) * X * min(1.0, g["Q"] / imp))[g["cover"]]
             for i, imp in enumerate(R):
                 for j, exp in enumerate(R):
                     if i == j or X[i, j] <= 0 or (imp in eu and exp in eu):

@@ -787,8 +787,8 @@ def _trq_toy(x01, q=100.0, dta=50.0, dts=200.0):
     a0 = np.array([[0.0, 1000.0], [0.0, 0.0]]); tc = np.array([[0.0, 100.0], [0.0, 0.0]])
     sc = BilateralCommodity("T", ["EU_WEST", "X"], X0, a, b, a0, np.array([1500.0, 1000.0]), 3.5, 7.0, tc=tc)
     sc.calibrate(np.array([100.0, 400.0 + x01]))
-    sc.trq_quotas = [dict(rows=np.array([0]), cols=np.array([1]), Q=q, Q0=q, dta=dta, dts=dts, importer="EU",
-                          exporter="X")]
+    sc.trq_quotas = [dict(rows=np.array([0]), cols=np.array([1]), Q=q, Q0=q, ta_pref=0.0, dta=dta, ts_pref=0.0, dts=dts,
+                          importer="EU", exporter="X", regime="bilateral", glob=None)]
     sc.trq_base()
     return sc
 

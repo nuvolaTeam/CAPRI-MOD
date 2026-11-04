@@ -261,13 +261,59 @@ def build_trq(year, AGGREGATES):
     return out
 
 
+def build_trq_global(year):
+    """CAPRI's global (erga omnes) tariff-rate quotas (p_trqGlobl: in the market listing as the importer's rows with
+    exporter "World") and the free-trade pairs they leave out (p_doubleZero), for the global quotas of the market
+    (TRQImports_, tarAdValW_, tarSpecW_, arm/market_model.gms l. 3142, 3399, 3475; docs/design/PORTS_STAGE4.md).
+    p_doubleZero is in no market listing: it is read from CAPRI's 2030 restart file sim_ini_21730 ("CUR"), for the
+    2017 market year too (the 2030 agreements; REGISTERED in PORTS_STAGE4.md).
+    Output bilateral_trq_global_<year>.csv: importer (policy block), commodity, quota_kt, ta_mfn, ta_pref, ts_mfn,
+    ts_pref, importer_regions, free_regions (the market regions of the exporter blocks with free trade, "|"-joined)."""
+    df = _read_csv(KEEP / f"bilateral_trq_dataout_{year}.csv", keep_default_na=False)
+    df = df[df.exporter == "World"]
+    d = defaultdict(dict)
+    for r in df.itertuples(index=False):
+        d[(r.importer, r.product)][r.item] = float(r.value)
+    from paths import REFERENCE
+    dz = _read_csv(REFERENCE / "simini" / "simini_21730" / "p_doubleZero.csv.gz", keep_default_na=False)
+    dz = dz[(dz.d3 == "CUR") & (dz.value.astype(float) != 0)]
+    free = defaultdict(set)
+    for r in dz.itertuples(index=False):
+        free[(r.d0, r.d2)].add(r.d1)
+    with open(ROOT / "capri_data" / "codes" / "capri" / "RMTP.csv", newline="") as fh:
+        rmtp = {r["code"] for r in csv.DictReader(fh)}
+    members = defaultdict(list)
+    with open(ROOT / "capri_data" / "codes" / "capri" / "RM_TO_RMTP.csv", newline="") as fh:
+        for r in csv.DictReader(fh):
+            members[r["rmtp"]].append(model_region(r["rm"], eu_as_blocks=True))
+    agg = defaultdict(lambda: defaultdict(float))
+    for (i, p), v in d.items():
+        q = v.get("TRQNT", 0.0)
+        if q <= 0 or q >= 1e9 or i not in rmtp:
+            continue
+        k = agg[(i, CAPRI[p])]
+        k["q"] += q
+        for it in ("TAMFN", "TAPREF", "TSMFN", "TSPREF"):
+            k[it] += q * v.get(it, 0.0)
+        k["free"] = "|".join(sorted({x for b in free[(i, p)] if b in rmtp for x in members[b]}))
+    rows = [dict(importer=i, commodity=c, quota_kt=v["q"], ta_mfn=v["TAMFN"] / v["q"], ta_pref=v["TAPREF"] / v["q"],
+                 ts_mfn=v["TSMFN"] / v["q"], ts_pref=v["TSPREF"] / v["q"], importer_regions="|".join(members[i]),
+                 free_regions=v["free"]) for (i, c), v in agg.items()]
+    out = pd.DataFrame(rows).sort_values(["importer", "commodity"])
+    out.to_csv(ROOT / "capri_data" / "2017" / "market" / f"bilateral_trq_global_{year}.csv", index=False)
+    print(f"{year} global TRQs: {len(out)}; per importer: " + ", ".join(
+        f"{i} {n}" for i, n in out.importer.value_counts().items()))
+    return out
+
+
 def main():
     sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check")]
     from recalibrate_trade_2017 import AGGREGATES
     KEEP.mkdir(parents=True, exist_ok=True)
     for y in (2017, 2030):
         build(y, AGGREGATES)
-        build_trq(y, AGGREGATES)        # the EU's quotas (the same for one or two EU regions)
+        build_trq(y, AGGREGATES)        # CAPRI's bilateral quotas of every importer
+        build_trq_global(y)             # its global quotas
     rt = rho_table()
     rows = [dict(commodity=m, capri=cs[0], rho1=rt[cs[0]][1], rho2=rt[cs[0]][2]) for m, cs in MODEL.items()]
     pd.DataFrame(rows).to_csv(ROOT / "capri_data" / "2017" / "market" / "armington_rho.csv", index=False)
