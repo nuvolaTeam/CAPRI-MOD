@@ -9,7 +9,7 @@ The data sourcing registry's log of checks, fixes and decisions (201 entries, mo
 [KNOWN_ISSUES_REGISTRY_LOG.md](KNOWN_ISSUES_REGISTRY_LOG.md), verbatim, with the triage of its open entries against
 the code: they became K92-K96, joined K73, K80, K91, or were closed or historical.
 
-## Open (11)
+## Open (10)
 
 | # | Issue | Status |
 |---|---|---|
@@ -23,9 +23,8 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K79](#k79) | Member-state production that keeps moving between iterations | open |
 | [K92](#k92) | Farm-to-Fork changes furthest from JRC121368, besides the milk price | open: waiting for CAPRI's scenario results |
 | [K93](#k93) | CAPRI mitigation options not built; documents disagree on which are in | open: no-till and legume share unmeasured; UreaSubst parked; the others not needed for Farm-to-Fork and the Green Deal |
-| [K111](#k111) | The set-aside report books part of a set-aside increase as VSET where CAPRI has none | open: proposed fix (w = 0 where VSET has no level in either year) |
 
-## Resolved (99)
+## Resolved (100)
 
 | # | Issue | Status |
 |---|---|---|
@@ -128,6 +127,7 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K100](#k100) | A national nutrient table without builder (nutrient_coefs.csv) filled three crops' coefficients and fallow's mineral N | fixed |
 | [K102](#k102) | Data files that no run and no builder reads (census) | fixed |
 | [K110](#k110) | The market's Newton-Krylov solve did not converge on a real shock; its test had passed without one | fixed |
+| [K111](#k111) | The set-aside report booked part of a set-aside increase as VSET where CAPRI has none | fixed |
 
 ## Details
 
@@ -1994,6 +1994,12 @@ stays at zero there). Reporting only (the set-aside's premiums and labour; the s
 The units of Norway, Turkey and the Western Balkans, given a set-aside split on 4 November 2026 (they have FALL only),
 follow the same rule.
 
-Proposed fix: w = 0 where the unit has no VSET in either year (CAPRI's zero level fixes VSET). Changes the set-aside and
-labour reports of those units in scenarios; not yet made.
+CAPRI (checked 4 November 2026): supply/prep_cal.gms l. 103 sets p_technFact(region, activity, "LEVL") to 0 where the
+activity's level is 0 at the calibration point, which takes it out of the region's model (aggreg.gms l. 25 sets its
+level to 0); set_supply_bounds.gms l. 42-43 bound VSET only where its base level exceeds 1e-6. So VSET stays 0 there and
+a set-aside change is FALL's. What counts is the level at the run's calibration point (the 2030 baseline in a 2030 run),
+not "in either year" as first proposed.
+
+Status: fixed (the project lead, 4 November 2026): _set_aside_table takes w = 0 where the VSET share at the run's
+calibration year is 0. Reporting only (the set-aside split, its premiums and labour); supply results unchanged.
 

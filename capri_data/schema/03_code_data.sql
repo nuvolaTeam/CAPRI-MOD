@@ -61,7 +61,7 @@ INSERT INTO code_data VALUES
   ('capri_mod/market/supply.py', 'SupplyMixin.supply_response', 0.2, 2, '197,216', 'sv = (np.maximum(np.nan_to_num(seen.reindex(cols).to_numpy(dtype=float), nan=1.0), 0.2)'),
   ('capri_mod/market/welfare.py', 'WelfareMixin._welfare_cssp', 0.05, 1, '95', 'p = np.maximum(p, 0.05 * e["p0"])'),
   ('capri_mod/model.py', 'CAPRIModel._pmp_suffix', 2030.0, 1, '1499', 'if _mkt_year(self.data) != 2030:'),
-  ('capri_mod/model.py', '_labour_table', 2030.0, 1, '1567', 'vt = "_2030" if yr == 2030 else ""'),
+  ('capri_mod/model.py', '_labour_table', 2030.0, 1, '1572', 'vt = "_2030" if yr == 2030 else ""'),
   ('capri_mod/model.py', '_set_aside_table', 2030.0, 1, '1534', 'vt = "_2030" if yr == 2030 else ""'),
   ('capri_mod/pipeline/captrd/coco.py', 'DEFAULTS_FROM', 2000.0, 1, '43', 'DEFAULTS_FROM = 2000                                                                   # l. 503-548: 2000 on, and BASM'),
   ('capri_mod/pipeline/captrd/coco.py', 'EXPOST_BIO_FROM', 2002.0, 1, '42', 'EXPOST_BIO_FROM = 2002                                                                 # l. 326: years after 2002'),

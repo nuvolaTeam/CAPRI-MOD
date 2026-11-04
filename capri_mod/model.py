@@ -1545,6 +1545,11 @@ def _set_aside_table(supply_results, data, wsfx=""):
         s_ = float(row.get("share_vset")) if s_ is None or s_ != s_ else float(s_)
         w = row.get("w_vset" + wsfx)
         w = float(row.get("w_vset", 0.5)) if w is None or w != w else float(w)
+        if not s_ > 0:
+            # no VSET at the calibration point: CAPRI takes the activity out of the region's model
+            # (supply/prep_cal.gms l. 103: p_technFact LEVL 0 where the level is 0; set_supply_bounds.gms l. 42-43:
+            # VSET's bounds only where its base level exceeds 1e-6), so it stays 0 and the change is FALL's (K111)
+            w = 0.0
         v = min(max(s_ * X0 + w * (X - X0), 0.0), X) if X > 0 else 0.0
         f_ = X - v
         pv, pf = (float(row.get(k + vt, row.get(k, 0.0)) or 0.0) for k in ("prem_vset", "prem_fall"))
