@@ -168,8 +168,13 @@ Each stage must pass two checks:
    - Third part, 4 November 2026: the own-price response before ProdNQ_, max(0, S (RR / SV)^E) over all market
      regions (supply_ad.anticipation_function; SV the prices the supply models saw, 1 for the other rows), evaluated
      from CasADi in supply_response. Test: equal to the NumPy form (relative 1e-14).
-   - Still to do in G2b: the pooled commodities; the land block (noneu_land_solve's Newton, added with the
-     market move's stage 7 after this inventory) as unknowns with its residual.
+   - Fourth part, 4 November 2026: the pooled commodities' world balance (supply_ad.pooled_residual_function) and
+     the market land block outside the EU (supply_ad.land_residual_function: LandSupplyMNL_ = LndSupplyEqualsDemand_
+     per CAPRI region, residual and exact Jacobian in the free rents), evaluated from CasADi; noneu_land_solve's
+     Newton stays the solver until G3. Tests: equal to the NumPy forms.
+   - G2b's equations are all written once. Left for G3: the rents as unknowns of the NLP (the Newton above, and the
+     land-FEDE fixed point of _bilateral_eval, which G2d's FeedBal_ lifts with them). To do before merging: the
+     mini-EU check (rounding-level differences expected, as G2c and G2e).
 3. **G2c.** Human consumption, the generalised Leontief system. **Built 31 October 2026** (taken before G2b by the
    project lead's decision of that day: G2b's market supply rests on the coupling code that refactor stage 4 is to
    restructure; G2c and G2e are market code no refactor stage touches):

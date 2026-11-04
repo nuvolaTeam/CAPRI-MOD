@@ -912,20 +912,18 @@ class SupplyMixin(MarketStateMixin):
                 base[i] += v
             fr = np.asarray(d["free"])
             dr = np.array(st.get(rms, np.zeros(len(fr))), dtype=float)
-            B, a0, H = d["B"], d["alu"], d["H"]
             scale = np.maximum(d["L0"], 1.0)
+            # the land block's equations written once in CasADi (market step G2b, supply_ad.land_residual_function),
+            # with their exact Jacobian; this Newton is the solver until the market NLP (G3) takes the rents as unknowns
+            lf = self.__dict__.setdefault("_land_fn_cache", {}).get(rms)
+            if lf is None or lf[0] is not d:
+                from capri_mod.market.supply_ad import land_residual_function
+                lf = (d, land_residual_function(f"land_{rms}", d))
+                self._land_fn_cache[rms] = lf
 
             def F(dr_):
-                rent = d["rent0"].copy()
-                rent[fr] += dr_
-                z = a0 + B @ rent
-                e = np.exp(z - z.max())
-                sh = e / e.sum()
-                S = d["avail"] * sh
-                Fv = base + H @ dr_ - S[fr]
-                # dS_l / dr_k = avail sh_l (B_lk - sum_m sh_m B_mk)
-                J = H - (d["avail"] * sh[:, None] * (B - sh @ B))[np.ix_(fr, fr)]
-                return Fv, J
+                Fv, J = lf[1](dr_, base)
+                return np.asarray(Fv).ravel(), np.asarray(J).reshape(len(fr), len(fr))
             Fv, J = F(dr)
             for _ in range(100):
                 if np.max(np.abs(Fv) / scale) < 1e-13:

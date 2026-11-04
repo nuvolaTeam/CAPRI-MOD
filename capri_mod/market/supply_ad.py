@@ -109,3 +109,24 @@ def pooled_residual_function(n_r: int):
         f = ca.Function(f"pooled_{n_r}", [S, D], [ca.sum1(S) - ca.sum1(D)], ["S", "D"], ["F"])
         _POOL[n_r] = f
     return f
+
+
+def land_residual_function(name: str, d: dict):
+    """CasADi Function (dr[n_f], base[n_f]) -> (F[n_f], J[n_f x n_f]): CAPRI's market land block outside the EU for one
+    CAPRI region (LandSupplyMNL_ = LndSupplyEqualsDemand_ with ProdNQ_'s land rows, arm/market_model.gms l. 1543-1572,
+    1696-1745): the free rents' change dr (TCRP, FODFAL, FRUN) against the land demand base (L0 + the terms in the
+    prices, raw milk and feed energy), F = base + H dr - avail * softmax(aLU + bLu rent)[free], J its Jacobian in dr.
+    d: SupplyMixin._noneu_land_params' entry of the region."""
+    import casadi as ca
+    fr = list(d["free"])
+    nf = len(fr)
+    dr, base = ca.SX.sym("dr", nf), ca.SX.sym("base", nf)
+    rent = ca.SX(ca.DM(np.asarray(d["rent0"], float)))
+    for k, i in enumerate(fr):
+        rent[i] = rent[i] + dr[k]
+    z = ca.DM(np.asarray(d["alu"], float)) + ca.mtimes(ca.DM(np.asarray(d["B"], float)), rent)
+    e = ca.exp(z - ca.mmax(z))
+    sh = e / ca.sum1(e)
+    S = float(d["avail"]) * sh
+    F = base + ca.mtimes(ca.DM(np.asarray(d["H"], float)), dr) - ca.vertcat(*[S[i] for i in fr])
+    return ca.Function(name, [dr, base], [F, ca.jacobian(F, dr)], ["dr", "base"], ["F", "J"])

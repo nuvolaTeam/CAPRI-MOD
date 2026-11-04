@@ -152,3 +152,34 @@ def test_pooled_residual_function():
     S, D = rng.uniform(0, 1e4, 45), rng.uniform(0, 1e4, 45)
     F = float(np.asarray(pooled_residual_function(45)(S, D)).ravel()[0])
     assert abs(F - (float(S.sum()) - float(D.sum()))) <= 1e-9 * float(S.sum())
+
+
+def test_land_residual_function_equals_the_numpy_form(market):
+    """The market land block outside the EU (supply_ad.land_residual_function): residual and Jacobian as
+    SupplyMixin.noneu_land_solve had them in NumPy until 4 November 2026 (the analytic Jacobian
+    H - avail sh (B - sh B)), at random rent changes."""
+    from capri_mod.market.supply_ad import land_residual_function
+    P = market._noneu_land_params()
+    if not P:
+        pytest.skip("market.noneu_land_market off")
+    rng = np.random.default_rng(5)
+    n = 0
+    for rms, d in list(P.items())[:25]:
+        fr = np.asarray(d["free"])
+        if not len(fr):
+            continue
+        f = land_residual_function("t", d)
+        for _ in range(3):
+            dr = rng.standard_normal(len(fr)) * 50
+            base = d["L0"] * (1 + 0.1 * rng.standard_normal(len(fr)))
+            rent = d["rent0"].copy(); rent[fr] += dr
+            z = d["alu"] + d["B"] @ rent
+            e = np.exp(z - z.max()); sh = e / e.sum()
+            Fr = base + d["H"] @ dr - (d["avail"] * sh)[fr]
+            Jr = d["H"] - (d["avail"] * sh[:, None] * (d["B"] - sh @ d["B"]))[np.ix_(fr, fr)]
+            Fv, J = f(dr, base)
+            sc = np.maximum(np.abs(Fr), np.maximum(d["L0"], 1.0) * 1e-12)
+            assert np.all(np.abs(np.asarray(Fv).ravel() - Fr) <= 1e-12 * np.maximum(np.abs(base), 1.0) + 1e-9), rms
+            assert np.allclose(np.asarray(J).reshape(Jr.shape), Jr, rtol=1e-10, atol=1e-12 * float(np.abs(Jr).max())), rms
+            n += 1
+    assert n > 0
