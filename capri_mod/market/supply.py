@@ -409,12 +409,12 @@ class SupplyMixin(MarketStateMixin):
                     # Norway: the milk its supply models deliver, moved by its own milk price and the other prices
                     # (the market supply Hessian's MILK row), against its dairies' demand inside its block
                     prm_, shift_ = sm_
-                    res_r = self._dairy_solve(prm_, tr, None, fi_, r, milk_shift=shift_)
+                    res_r = self._dairy_solve(prm_, tr, None, fi_, milk_shift=shift_)
                     q_ = m0_ * float(res_r["milk_supply_ratio"])
                     supply.at[r, "MILK"] = q_
                     self.ev.sup_milk_now[r] = q_
                 else:
-                    res_r = self._dairy_solve(prm, tr, mr_, fi_, r, milk_shift=sum(m_sh.values()))
+                    res_r = self._dairy_solve(prm, tr, mr_, fi_, milk_shift=sum(m_sh.values()))
                 res_r["milk_shift_rms"] = m_sh
                 wl[r] = res_r
                 if mr_ is None and "MILK" in supply.columns and "milk_supply_ratio" in res_r:

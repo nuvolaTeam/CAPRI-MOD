@@ -204,14 +204,6 @@ class ProcessingMixin(MarketStateMixin):
                     base_supply.at[r, prod] = v
         return base_supply
 
-    @staticmethod
-    def _proc_fudge(q: float, q0: float) -> float:
-        """CAPRI ProcFudge_ (market_model.gms l. 1158-1163): v_procQuant = -ncpcm(-q, 0, z) + 1e-11 with
-        z = 0.01 x min(1000, max(1e-11, PROC0)), i.e. a smooth max(q, 0) (ncpcm(x, y, z) = x - z ln(1 + exp((x - y)/z))).
-        Used by the dairy blocks until their step (G2f); crushing and ProcNQ_ have it in processing_ad._fudge."""
-        z = 0.01 * min(1000.0, max(1e-11, float(q0)))
-        return float(q + z * np.logaddexp(0.0, -q / z) + 1e-11)
-
     def _crush_state(self, dom_prices, detail: Optional[dict] = None) -> dict:
         """Crush and oil and cake output per (region, seed) at the given prices (CAPRI ProcMargO_, ProcNQ_,
         ProcFudge_, ProcO_, procYield_; market_model.gms l. 1118-1176, 1480-1520).
@@ -229,7 +221,7 @@ class ProcessingMixin(MarketStateMixin):
         cp = self._crush_params()
         pq = self._proc_nq_params() or {}
         # the block's CasADi function (step G2e, processing_ad.py; until 31 October 2026 the same equations here in
-        # Python with the CET yields of _cet_yields (removed) and _proc_fudge), rebuilt when the parameters change
+        # Python with the CET yields of _cet_yields and _proc_fudge, both removed), rebuilt when the parameters change
         blk = getattr(self, "_crush_block", None)
         if blk is None or blk[0] is not cp or blk[1] is not pq:
             fn, regions, pairs, keys = crush_function(cp, pq.get("seeds", {}), pq.get("Hrms", {}), self.CRUSH_CHAINS)

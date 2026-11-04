@@ -212,7 +212,20 @@ Each stage must pass two checks:
      loops removed. ProcFudge_'s log(1 + exp) is written as NumPy's logaddexp evaluates it.
    - capri_mod/tests/test_processing_ad.py: equal to the former Python code at random prices (welfare detail
      included) and the Jacobians equal to finite differences.
-6. **G2f.** Dairy blocks, lifted.
+6. **G2f.** Dairy blocks, lifted. **Built 4 November 2026 (branch step-g2b):** capri_mod/market/dairy_ad.py.
+   - Written once: one function per block (a member state, or a non-EU trade region's behavioural regions):
+     ProcNQ_ with ProcFudge_ per region, FatsProtBal_ and DairyNQ_ for raw milk as residuals in the unknowns (z_FATS,
+     z_PROT, z_MILK), with the raw milk supply's slope (audit M5 for the member states, CAPRI's ProdNQ_ MILK outside
+     the EU) and the milk price held at its floor as inputs. The system is linear in the unknowns, so the default
+     solve is one Newton step from 0 with the function's Jacobian (dairy_ad.solve_block); dairy_block and
+     _dairy_solve evaluate it. Removed: the dairy Newton loop with its warm starts (sv.dairy_u, sv.dairy_u_all), the
+     products cleared inside a block (DAIRY_DOMESTIC, empty since Sprint 9f: _dairy_solve now raises if any is set),
+     the separate processing pass and ProcessingMixin._proc_fudge (now only the tests' reference).
+   - capri_mod/tests/test_dairy_ad.py: equal to the former solves for every member state (fixed milk, responding milk,
+     price at the floor) and every non-EU block at random prices: z within 4e-15 relative, the processing change
+     identical; the Jacobian is the equations' matrix.
+   - Left for G3: ProcFudge_ applies where the change is not exactly 0 (an if_else, a jump of about 1e-11 kt), and the
+     milk price floor is a switch between two systems (CAPRI: a bound on the price).
 7. **G2g.** Biofuels; young animals and raw milk, lifted.
 8. **G3.** IPOPT on the assembled NLP.
    - **Check:** the equilibrium equals the default solve's within `market.tol` at every outer iteration of the F2F

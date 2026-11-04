@@ -96,15 +96,14 @@ def test_member_state_milk_responds_to_its_price_in_the_dairy_block():
     from capri_mod.market.market_module import MarketModule
     m = MarketModule(load_all_data("capri_data"))
     prm = m._dairy_params()["ms"]
-    cls = type(m)
     ms, p = prm.get("PT000000") and ("PT000000", prm["PT000000"]) or next(iter(prm.items()))
     n = p["G"].shape[1]
     zt = np.zeros(n)
-    z0 = cls._dairy_solve_ms(p, zt, 0.95)
-    z1 = cls._dairy_solve_ms_resp(p, zt, 0.95, 0.0, 1.0)
+    z0 = m._dairy_solve_ms(p, zt, 0.95)["z"]
+    z1 = m._dairy_solve_ms_resp(p, zt, 0.95, 0.0, 1.0)["z"]
     assert np.allclose(z0, z1)
     k, L = 0.4, 1.0
-    z2 = cls._dairy_solve_ms_resp(p, zt, 0.95, k, L)
+    z2 = m._dairy_solve_ms_resp(p, zt, 0.95, k, L)["z"]
     mr = 0.95 + k * (1.0 + z2[p["iM"]] - L)
     # the dairies' demand at z2 equals the delivered milk
     assert abs(float(p["G"][p["iM"]] @ z2) - p["Q0"][p["iM"]] * (mr - 1.0)) < 1e-8 * max(1.0, p["Q0"][p["iM"]])
@@ -179,9 +178,9 @@ def test_milk_price_held_above_zero_unless_the_scenario_allows_negative_prices()
     p = prm["PT000000"]
     zt = np.zeros(p["G"].shape[1])
     # a glut: three times the base milk delivered drives the free price below zero
-    z = cls._dairy_solve_ms(p, zt, 3.0)
+    z = m._dairy_solve_ms(p, zt, 3.0)["z"]
     assert 1.0 + z[p["iM"]] < 0.0
-    za = cls._dairy_solve_ms_at(p, zt, cls.MILK_PRICE_FLOOR)
+    za = m._dairy_solve_ms_at(p, zt, cls.MILK_PRICE_FLOOR)["z"]
     assert abs(1.0 + za[p["iM"]] - cls.MILK_PRICE_FLOOR) < 1e-15
     assert abs(float(p["rowF"] @ za)) < 1e-9 and abs(float(p["rowP"] @ za)) < 1e-9
     # through the block: held and recorded without the switch, free with it
@@ -228,7 +227,7 @@ def test_dairy_processing_follows_capri_procnq_and_balances_fat_and_protein():
         z = res["ms_z"][ms]
         Q = prm["Q0"] + prm["G"] @ z
         part = prm["parts"][0]
-        dproc, _, _ = mm._dairy_proc_change(prm, z)
+        dproc = mm._dairy_proc_change(prm, z)
         net = Q - part["proc0"] - dproc
         iM = prm["iM"]
         for c in ("f", "r"):

@@ -189,8 +189,6 @@ class CalibrationMixin(MarketStateMixin):
             # raw milk delivered per member state at base (the dairy blocks' milk ratios)
             self.par.dairy_S0_ms = self._milk_by_ms(by_country) if by_country is not None else None
             self.par.dairy_S0_reg = {reg: float(sup.at[reg, "MILK"]) if reg in sup.index else 0.0 for reg in self.EU}
-            self.sv.dairy_u = None
-            self.sv.dairy_u_all = {}
             self.ev.eu_milk_supply_now = dict(self.par.dairy_S0_reg)
             for reg in self.EU:
                 m0 = self.par.dairy_S0_reg[reg]

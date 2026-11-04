@@ -17,6 +17,12 @@ def _cet_yields(e, ro, rc):
     return Ao + (S0 - T) / 2.0, Ac + (S0 - T) / 2.0
 
 
+def _proc_fudge(q, q0):
+    """ProcessingMixin._proc_fudge before steps G2e and G2f (CAPRI's ProcFudge_, market_model.gms l. 1158-1163)."""
+    z = 0.01 * min(1000.0, max(1e-11, float(q0)))
+    return float(q + z * np.logaddexp(0.0, -q / z) + 1e-11)
+
+
 def _crush_state_python(mk, dom_prices, detail=None):
     """ProcessingMixin._crush_state before the move (with _cet_yields above and _proc_fudge)."""
     cp = mk._crush_params()
@@ -58,7 +64,7 @@ def _crush_state_python(mk, dom_prices, detail=None):
                 dm_ = (-e["a1"] * ratio(r, s) + e["ppo"] * ratio(r, o) * yo_ + e["ppc"] * ratio(r, c) * yc_) \
                     - (-e["a1"] + e["ppo"] * e["yo0"] + e["ppc"] * e["yc0"])
                 detail[(r, s, e["rms"])] = (k * e["q0"], q - k * e["q0"], dm_)
-            q = mk._proc_fudge(q, k * e["q0"])
+            q = _proc_fudge(q, k * e["q0"])
             yo, yc = _cet_yields(e, ratio(r, o), ratio(r, c))
             crush += q
             oil += q * yo
@@ -88,7 +94,7 @@ def _proc_nq_python(mk, PR, P0):
             jy = Cc.get(y)
             if jy is not None and y not in mk.CRUSH_CHAINS:
                 dq -= hv * (PR[i, jy] - 1.0)
-        P[i, j] = mk._proc_fudge(P0[i, j] + dq, P0[i, j])
+        P[i, j] = _proc_fudge(P0[i, j] + dq, P0[i, j])
     return P
 
 

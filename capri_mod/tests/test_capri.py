@@ -212,7 +212,7 @@ def test_dairy_block_follows_capri_per_member_state(model):
         de, fr = r["ms_price_ratio"]["DE000000"], r["ms_price_ratio"]["FR000000"]
         assert de["MILK"] > 1.05 and abs(fr["MILK"] - 1.0) < 1e-12
         prm = dp["ms"]["DE000000"]
-        z = mm._dairy_solve_ms(prm, np.zeros(len(prm["items"]) + 2), 0.9)
+        z = mm._dairy_solve_ms(prm, np.zeros(len(prm["items"]) + 2), 0.9)["z"]
         assert abs(prm["rowF"] @ z) < 1e-6 * prm["Q0"][prm["iM"]] and abs(prm["rowP"] @ z) < 1e-6 * prm["Q0"][prm["iM"]]
         assert abs((prm["Q0"] + prm["G"] @ z)[prm["iM"]] / prm["Q0"][prm["iM"]] - 0.9) < 1e-9
     finally:
@@ -654,7 +654,6 @@ def test_dairy_block_fat_protein_balance(model):
     fi0, mm.seen.fmil_index = mm.seen.fmil_index, 1.0     # calves' milk feed at base
     dp = mm._dairy_params()
     assert dp
-    mm.sv.dairy_u = None
     b = mm.dairy_block({}, 1.0)
     assert all(abs(v - 1.0) < 1e-9 for v in b["price_ratio"].values())
     r = mm.dairy_block({}, 0.9)
@@ -670,7 +669,6 @@ def test_dairy_block_fat_protein_balance(model):
     # market's feed demand (CES at base prices: every product's feed use falls with the index)
     import numpy as np
     assert np.allclose(mm.dairy_feed_factor(np.ones(9), fi=0.8), 0.8)
-    mm.sv.dairy_u = None
     mm._dairy_cache, mm.seen.fmil_index = None, fi0
 
 
@@ -683,9 +681,9 @@ def test_dairy_world_blocks(model):
         w = mm._dairy_world_params()
         assert {"USA", "NZL", "IND", "MED", "CH"} <= set(w)          # CAPRI's market regions (ROW split since 3 November 2026)
         for r in ("USA", "NZL"):
-            b = mm._dairy_solve(w[r], {}, None, 1.0, "test_" + r)
+            b = mm._dairy_solve(w[r], {}, None, 1.0)
             assert all(abs(v - 1.0) < 1e-9 for v in b["price_ratio"].values())
-            x = mm._dairy_solve(w[r], {k: 1.1 for k in mm.DAIRY_TRADED}, None, 1.0, "test_" + r)
+            x = mm._dairy_solve(w[r], {k: 1.1 for k in mm.DAIRY_TRADED}, None, 1.0)
             assert x["residual"] < 1e-6 and x["milk_supply_ratio"] > 1.0
             for c in ("BUTR", "SKIM", "CHES"):
                 assert x["market_supply"][c] > x["market_supply0"][c]

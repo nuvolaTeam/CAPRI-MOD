@@ -226,9 +226,9 @@ def test_norway_feed_and_dairy_follow_its_supply_models(data):
     assert q1["BARL"] < f0["BARL"] and q1["OATS"] > f0["OATS"]
     w = mm._dairy_world_params()
     assert "NO000000" in w
-    b = mm._dairy_solve(w["NO000000"], {}, 1.0, 1.0, "test_NOR")
+    b = mm._dairy_solve(w["NO000000"], {}, 1.0, 1.0)
     assert all(abs(v - 1.0) < 1e-9 for v in b["price_ratio"].values())
-    x = mm._dairy_solve(w["NO000000"], {}, 0.95, 1.0, "test_NOR")
+    x = mm._dairy_solve(w["NO000000"], {}, 0.95, 1.0)
     assert x["price_ratio"]["MILK"] > 1.0 and x["residual"] < 1e-6
 
 

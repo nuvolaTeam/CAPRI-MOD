@@ -23,7 +23,8 @@ def crush_columns(chains: Dict[str, Tuple[str, str]]) -> List[str]:
 
 
 def _fudge(ca, q, q0):
-    """CAPRI's ProcFudge_ (processing.py _proc_fudge): q0 a number or a CasADi expression."""
+    """CAPRI's ProcFudge_ (market_model.gms l. 1158-1163; processing.py _proc_fudge until G2f): q0 a number or a CasADi
+    expression."""
     if isinstance(q0, (int, float)):
         z = 0.01 * min(1000.0, max(1e-11, float(q0)))
     else:
