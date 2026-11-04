@@ -5445,6 +5445,17 @@
     "builder": "convert_sources_to_csv"
    }
   },
+  "capri_data/sources/capri_dat/envind/lulucf_emissions_original_source_p_PEATSH_def.csv": {
+   "description": "CAPRI's PARAMETER p_PEATSH_def(rAll) \"Share of peatland in arable land\" from dat/envind/lulucf_emissions_original_source.gms l. 688-774 (Carre et al. 2009; the Western Balkans take Croatia's, per the file), as written; the organic-soil fallback of the Western Balkans and Turkey (envind/prep_lulucf_carbon.gms l. 258-259, divided by 100). From the project lead's CAPRI installation, not in the Hugging Face mirror (tools/build/extract_capri_dat_local.py).",
+   "kind": "coefficients",
+   "rows": 78,
+   "columns": 2,
+   "units": "to be established (value_units: open)",
+   "origin": {
+    "nature": "capri",
+    "builder": "extract_capri_dat_local"
+   }
+  },
   "capri_data/sources/capri_dat/ghgtech/AD_basedata_p_B0.csv": {
    "description": "CAPRI's p_B0 (m3 CH4 per kg VS, per docs/AD_SPEC.md) per region (EU000000) and animal group, level and marginal, from dat/scen/ghgtech/AD_basedata.gdx (loaded at envind/ad_data_and_cali.gms l. 239); no builder; read by tools/build/build_ad_option.py.",
    "kind": "coefficients",
@@ -5523,6 +5534,17 @@
    "units": "to be established (value_units: open)",
    "origin": {
     "nature": "source-extract"
+   }
+  },
+  "capri_data/sources/capri_dat/ghgtech/holdingsLSU_p_holdLSU.csv": {
+   "description": "CAPRI's p_holdLSU(rall, ad_activity, fsclass): holdings per livestock-unit size class and animal group, from dat/scen/ghgtech/holdingsLSU.gdx (read by envind/prep_farm_size_data_for_miti.gms l. 129); EU and UK units only (the Western Balkans and Turkey take CAPRI's fallback_Balkan there). From the project lead's CAPRI installation, not in the Hugging Face mirror (tools/build/extract_capri_dat_local.py).",
+   "kind": "coefficients",
+   "rows": 9597,
+   "columns": 4,
+   "units": "to be established (value_units: open)",
+   "origin": {
+    "nature": "capri",
+    "builder": "extract_capri_dat_local"
    }
   },
   "capri_data/sources/capri_dat/policy/livestock_units_p_LUUnits.csv": {

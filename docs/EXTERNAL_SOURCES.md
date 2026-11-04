@@ -79,6 +79,14 @@ Each folder is listed with what it holds, where it comes from, and the builders 
 - From: the project lead.
 - Read by: build_captrd_dat (`dat/baseline/ageline/ageline.parquet`).
 
+**`dat_local/`**: files of CAPRI's `dat` folder the mirror above does not hold, under their paths in `dat`:
+`envind/lulucf_emissions_original_source.gms` (p_PEATSH_def), `policy/livestock_units.gms` (p_LUUnits) and
+`scen/ghgtech/holdingsLSU.gdx` (p_holdLSU).
+- From: the project lead's CAPRI installation (4 November 2026).
+- Read by: extract_capri_dat_local (p_PEATSH_def, p_holdLSU); convert_sources_to_csv (p_LUUnits).
+- Goes to the Hugging Face set with the rest of capri_sources, merged into the `dat` mirror there (MODEL_CONTENT_PLAN
+  §12b).
+
 **`gdxlib/`**: GAMS's GDX library, `libgdxcclib64.so`. This is software, not data.
 - From: built from the open-source GDX library (MIT; README section 3). No GAMS installation or licence is needed.
 - Read by: build_greendeal_targets and build_capreg_tseries_reference. Another folder can be given with `--gdxlib` or

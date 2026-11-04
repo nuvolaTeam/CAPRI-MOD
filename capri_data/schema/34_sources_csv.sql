@@ -275,3 +275,25 @@ CREATE TABLE src_irrishare_p_irrishare (
 COMMENT ON TABLE src_irrishare_p_irrishare IS 'CAPRI''s p_irriShare(region, item, type, year) ("share of irrigable and irrigated area in UAAR (%)": IRRI irrigable, IRR2 irrigated once a year; Eurostat FSS), every record of the gdxdump irrishare.gms (as uploaded), converted from the gdxdump text by tools/build/convert_sources_to_csv.py; read by tools/build/build_irrigation_2017.py (IRR2 IRSH).';
 INSERT INTO value_units VALUES
   ('src_irrishare_p_irrishare', 'value', NULL, 'open', 'the dump says % but holds shares (0.0217): unit to be established');
+
+-- file: capri_data/sources/capri_dat/envind/lulucf_emissions_original_source_p_PEATSH_def.csv
+CREATE TABLE src_lulucf_emissions_original_source_p_peatsh_def (
+    region VARCHAR NOT NULL,
+    "value" DOUBLE NOT NULL,
+    PRIMARY KEY (region)
+);
+COMMENT ON TABLE src_lulucf_emissions_original_source_p_peatsh_def IS 'CAPRI''s PARAMETER p_PEATSH_def(rAll) "Share of peatland in arable land" from dat/envind/lulucf_emissions_original_source.gms l. 688-774 (Carre et al. 2009; the Western Balkans take Croatia''s, per the file), as written; the organic-soil fallback of the Western Balkans and Turkey (envind/prep_lulucf_carbon.gms l. 258-259, divided by 100). From the project lead''s CAPRI installation, not in the Hugging Face mirror (tools/build/extract_capri_dat_local.py).';
+INSERT INTO value_units VALUES
+  ('src_lulucf_emissions_original_source_p_peatsh_def', 'value', NULL, 'open', 'percent of arable land; no unit code for percent');
+
+-- file: capri_data/sources/capri_dat/ghgtech/holdingsLSU_p_holdLSU.csv
+CREATE TABLE src_holdingslsu_p_holdlsu (
+    region VARCHAR NOT NULL,
+    activity VARCHAR NOT NULL,
+    fsclass VARCHAR NOT NULL,
+    "value" DOUBLE NOT NULL,
+    PRIMARY KEY (region, activity, fsclass)
+);
+COMMENT ON TABLE src_holdingslsu_p_holdlsu IS 'CAPRI''s p_holdLSU(rall, ad_activity, fsclass): holdings per livestock-unit size class and animal group, from dat/scen/ghgtech/holdingsLSU.gdx (read by envind/prep_farm_size_data_for_miti.gms l. 129); EU and UK units only (the Western Balkans and Turkey take CAPRI''s fallback_Balkan there). From the project lead''s CAPRI installation, not in the Hugging Face mirror (tools/build/extract_capri_dat_local.py).';
+INSERT INTO value_units VALUES
+  ('src_holdingslsu_p_holdlsu', 'value', NULL, 'open', 'number of holdings; no unit code for it');
