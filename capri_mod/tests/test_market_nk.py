@@ -9,8 +9,8 @@ import pytest
 @pytest.mark.slow
 def test_newton_krylov_reaches_the_default_solves_equilibrium():
     """The full market (every trade region, CAPRI's base data) after a 10% cut of EU beef and 5% of EU soft wheat:
-    the Newton-Krylov solve and the default successive linearisation stop at the same prices (relative 1e-6: both stop
-    at the market tolerance 1e-7 on the residuals)."""
+    the Newton-Krylov solve and the default successive linearisation stop at the same prices (relative 1e-6, 1e-5 in a
+    few thin markets: both stop at the market tolerance 1e-7 on the residuals)."""
     from capri_mod.data.loaders import load_all_data
     from capri_mod.data.definitions import MARKET_COMMODITIES
     from capri_mod.market.market_module import MarketModule
@@ -38,4 +38,11 @@ def test_newton_krylov_reaches_the_default_solves_equilibrium():
     rel = (a - b).abs() / a.abs().clip(lower=1e-9)
     top = rel.stack().sort_values(ascending=False).head(5)
     print("largest differences:", top.to_dict(), {k: (a.loc[k], b.loc[k]) for k in top.index[:3]})
-    assert float(np.nanmax(rel.to_numpy())) < 1e-6
+    # Both solves stop when every relative residual (excess supply / max(S0 + D0, 1)) is below market.tol = 1e-7; in a
+    # thin, inelastic market that leaves room for a larger price gap: Switzerland's casein (S0 + D0 about 1.8 kt, its
+    # supply from the dairy block) differs by 8.4e-6 between the two stops (4 November 2026, KNOWN_ISSUES K110). So the
+    # bound is 1e-5 for every price, and 1e-6 for all but a handful of the 46 x 58 prices.
+    v = rel.to_numpy()
+    v = v[np.isfinite(v)]
+    assert float(v.max()) < 1e-5
+    assert int((v >= 1e-6).sum()) <= 5

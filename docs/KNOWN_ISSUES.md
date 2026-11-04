@@ -1971,6 +1971,11 @@ stopped at its time limit in the full suite of the ports block. What was found:
   slowly, in the default solve as well (40 iterations, 100 evaluations, 295 s): the quota fixed point (bilateral.py
   trq_solve, updated between steps), not either solve, sets the length near the tolerance.
 
+- The two solves then stop at the same prices to 6e-7 relative or better, except Switzerland's casein (9,344.64
+  against 9,344.56 EUR/t, 8.4e-6): a market of about 1.8 kt (0.28 kt own sales, 1.08 kt imports, 0.20 kt exports),
+  where the stopping rule (residual below 1e-7 of S0 + D0) leaves room for that gap. The test's bound became 1e-5 for
+  every price and 1e-6 for all but five (it was 1e-6 for all, more than the stopping rule guarantees).
+
 Status: fixed. Open, as a possible improvement: solving the quotas' sigmas inside each evaluation (CAPRI solves
 trqSigmoidFunc_ with the rest of the market) would make the end of both solves shorter; not done.
 
