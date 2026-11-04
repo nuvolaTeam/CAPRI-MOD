@@ -463,6 +463,32 @@ def _load_pmp_capri_2030(d: Path, stem: str = "pmp_capri_2030"):
     return out
 
 
+def _only_run_units(data: dict) -> dict:
+    """data without the regional units outside the run (definitions.in_run): rows of a table indexed by region (the
+    index's first level) or with a region column, keys of a dict keyed by region, one level of nesting deep
+    ({year: {region: ...}})."""
+    from capri_mod.data.definitions import in_run
+    from capri_mod.data import definitions as _D
+    out_units = {r for r in _D.ALL_REGIONS if not in_run(r)}
+    if not out_units:
+        return data
+
+    def strip(v, depth=0):
+        if isinstance(v, (pd.DataFrame, pd.Series)):
+            idx = v.index.get_level_values(0) if isinstance(v.index, pd.MultiIndex) else v.index
+            drop = idx.isin(out_units)
+            if isinstance(v, pd.DataFrame) and "region" in v.columns:      # a table with its region in a column
+                drop = drop | v["region"].isin(out_units).to_numpy()
+            return v.loc[~drop] if drop.any() else v
+        if isinstance(v, dict):
+            if any(k in out_units for k in v):
+                return {k: x for k, x in v.items() if k not in out_units}
+            if depth < 1:
+                return {k: strip(x, depth + 1) for k, x in v.items()}
+        return v
+    return {k: strip(v) for k, v in data.items()}
+
+
 def load_all_data(data_dir: Optional[Path] = None, validate: bool = False,
                   base_year: Optional[str] = None) -> dict:
     """Load all baseline datasets, returning a nested dict.
@@ -686,6 +712,11 @@ def load_all_data(data_dir: Optional[Path] = None, validate: bool = False,
         "world_prices":    load_world_prices(data_dir),
         "cap_payments":    load_cap_payments(data_dir),
     }
+    # the run's supply-model countries only (CAPRI's per-country switches, the setting run.supply_countries_outside_eu):
+    # the units of the countries outside the EU that are not selected are not loaded, as CAPRI does not load a country
+    # switched off. regional_units.csv lists all 250 of CAPRI's units since 4 November 2026; without this the model's
+    # tables would carry the UK's, Turkey's and the Western Balkans' units in every run (docs/design/SUPPLY_NONEU_DESIGN.md)
+    data = _only_run_units(data)
     # cattle genomics at CAPRI star 3.0's default technology settings; CapriModel.run re-scales it to the
     # run's settings (scenario configuration, shared by reference and policy run)
     from capri_mod.policy.endotech import STAR3_DEFAULTS, scale_genetics

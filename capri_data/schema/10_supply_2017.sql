@@ -132,13 +132,10 @@ WHERE v.tbl IN ('base_areas', 'land_availability', 'animal_numbers', 'yields', '
 -- rule: every declared unit is in the unit catalogue
 SELECT tbl, item, unit FROM value_units WHERE unit IS NOT NULL AND unit NOT IN (SELECT code FROM units);
 
--- rule: every region of the core tables has its crop areas, land, herds, yields and costs (same regional units).
--- Until SUPPLY_NONEU_DESIGN step 4 (4 November 2026) the units of the UK, Turkey and the Western Balkans are left out:
--- regional_units.csv lists them, their data are not built yet; step 4 removes this exclusion.
+-- rule: every region of the core tables has its crop areas, land, herds, yields and costs (same regional units)
 SELECT r.region, list(t.tbl) AS missing_in FROM regional_units r CROSS JOIN
     (VALUES ('base_areas'), ('land_availability'), ('animal_numbers'), ('yields'), ('variable_costs')) t(tbl)
-WHERE r.capri_ms NOT IN ('UK000000', 'TUR', 'AL000000', 'BA000000', 'CS000000', 'KO000000', 'MK000000', 'MO000000')
-  AND NOT EXISTS (SELECT 1 FROM base_areas b WHERE t.tbl = 'base_areas' AND b.region = r.region)
+WHERE NOT EXISTS (SELECT 1 FROM base_areas b WHERE t.tbl = 'base_areas' AND b.region = r.region)
   AND NOT EXISTS (SELECT 1 FROM land_availability b WHERE t.tbl = 'land_availability' AND b.region = r.region)
   AND NOT EXISTS (SELECT 1 FROM animal_numbers b WHERE t.tbl = 'animal_numbers' AND b.region = r.region)
   AND NOT EXISTS (SELECT 1 FROM yields b WHERE t.tbl = 'yields' AND b.region = r.region)

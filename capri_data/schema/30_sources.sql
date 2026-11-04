@@ -172,6 +172,8 @@ INSERT INTO value_units VALUES
   ('src_capmod_world_reference_2017', 'ImportQ', NULL, 'open', 'capmod_world_reference_2017.ImportQ: unit to be established');
 
 -- file: capri_data/sources/capreg/capreg_activity_levels.csv
+-- OCER, PULS, SHGF, SHGM: empty where CAPRI's data have no record, as this file's other columns (the units of the UK,
+-- Turkey and the Western Balkans, 4 November 2026)
 CREATE TABLE src_capreg_activity_levels (
     model_region VARCHAR NOT NULL,
     AGGT DOUBLE NOT NULL,
@@ -254,7 +256,7 @@ CREATE TABLE src_capreg_activity_levels (
     OAR1 DOUBLE NOT NULL,
     OARA DOUBLE NOT NULL,
     OATS DOUBLE,
-    OCER DOUBLE NOT NULL,
+    OCER DOUBLE,
     OCRO DOUBLE,
     OFAR DOUBLE NOT NULL,
     OFRU DOUBLE NOT NULL,
@@ -270,7 +272,7 @@ CREATE TABLE src_capreg_activity_levels (
     POTA DOUBLE,
     POUF DOUBLE,
     PROT DOUBLE,
-    PULS DOUBLE NOT NULL,
+    PULS DOUBLE,
     RAPE DOUBLE,
     RESART DOUBLE NOT NULL,
     RESCRP DOUBLE NOT NULL,
@@ -284,8 +286,8 @@ CREATE TABLE src_capreg_activity_levels (
     RYEM DOUBLE,
     SCOW DOUBLE NOT NULL,
     SETF DOUBLE NOT NULL,
-    SHGF DOUBLE NOT NULL,
-    SHGM DOUBLE NOT NULL,
+    SHGF DOUBLE,
+    SHGM DOUBLE,
     SOWS DOUBLE,
     SOYA DOUBLE,
     SUGB DOUBLE,
@@ -604,6 +606,8 @@ INSERT INTO value_units VALUES
   ('src_capreg_cap_premium', 'VSET', NULL, 'open', 'capreg_cap_premium.VSET: unit to be established');
 
 -- file: capri_data/sources/capreg/capreg_national_prices.csv
+-- OCER, OCRO: empty where CAPRI's data have no record, as this file's other columns (the units of the UK,
+-- Turkey and the Western Balkans, 4 November 2026)
 CREATE TABLE src_capreg_national_prices (
     capri_country VARCHAR NOT NULL,
     AGGT DOUBLE NOT NULL,
@@ -643,8 +647,8 @@ CREATE TABLE src_capreg_national_prices (
     OANI DOUBLE,
     OAR1 DOUBLE NOT NULL,
     OATS DOUBLE,
-    OCER DOUBLE NOT NULL,
-    OCRO DOUBLE NOT NULL,
+    OCER DOUBLE,
+    OCRO DOUBLE,
     OFAR DOUBLE NOT NULL,
     OFOD DOUBLE NOT NULL,
     OFRU DOUBLE NOT NULL,
@@ -760,6 +764,8 @@ INSERT INTO value_units VALUES
   ('src_capreg_national_prices', 'WINE', NULL, 'open', 'capreg_national_prices.WINE: unit to be established');
 
 -- file: capri_data/sources/capreg/capreg_producer_prices.csv
+-- OCER, OCRO, POTA, PULS, SHGF: empty where CAPRI's data have no record, as this file's other columns (the units of the UK,
+-- Turkey and the Western Balkans, 4 November 2026)
 CREATE TABLE src_capreg_producer_prices (
     model_region VARCHAR NOT NULL,
     AGGT DOUBLE NOT NULL,
@@ -798,8 +804,8 @@ CREATE TABLE src_capreg_producer_prices (
     OANI DOUBLE,
     OAR1 DOUBLE NOT NULL,
     OATS DOUBLE,
-    OCER DOUBLE NOT NULL,
-    OCRO DOUBLE NOT NULL,
+    OCER DOUBLE,
+    OCRO DOUBLE,
     OFAR DOUBLE NOT NULL,
     OFRU DOUBLE NOT NULL,
     OILS DOUBLE,
@@ -811,15 +817,15 @@ CREATE TABLE src_capreg_producer_prices (
     PERM DOUBLE NOT NULL,
     PIGF DOUBLE NOT NULL,
     PKPL DOUBLE NOT NULL,
-    POTA DOUBLE NOT NULL,
+    POTA DOUBLE,
     POUF DOUBLE,
-    PULS DOUBLE NOT NULL,
+    PULS DOUBLE,
     RAPE DOUBLE,
     ROOF DOUBLE,
     RUMI DOUBLE NOT NULL,
     RYEM DOUBLE,
     SCOW DOUBLE NOT NULL,
-    SHGF DOUBLE NOT NULL,
+    SHGF DOUBLE,
     SHGM DOUBLE,
     SOWS DOUBLE,
     SOYA DOUBLE,
@@ -914,6 +920,8 @@ INSERT INTO value_units VALUES
   ('src_capreg_producer_prices', 'OFOD', NULL, 'open', 'capreg_producer_prices.OFOD: unit to be established');
 
 -- file: capri_data/sources/capreg/capreg_producer_prices_extract.csv
+-- OCER, PULS, SHGF: empty where CAPRI's data have no record, as this file's other columns (the units of the UK,
+-- Turkey and the Western Balkans, 4 November 2026)
 CREATE TABLE src_capreg_producer_prices_extract (
     model_region VARCHAR NOT NULL,
     AGGT DOUBLE NOT NULL,
@@ -952,7 +960,7 @@ CREATE TABLE src_capreg_producer_prices_extract (
     OANI DOUBLE,
     OAR1 DOUBLE NOT NULL,
     OATS DOUBLE,
-    OCER DOUBLE NOT NULL,
+    OCER DOUBLE,
     OCRO DOUBLE,
     OFAR DOUBLE NOT NULL,
     OFRU DOUBLE NOT NULL,
@@ -967,13 +975,13 @@ CREATE TABLE src_capreg_producer_prices_extract (
     PKPL DOUBLE NOT NULL,
     POTA DOUBLE,
     POUF DOUBLE,
-    PULS DOUBLE NOT NULL,
+    PULS DOUBLE,
     RAPE DOUBLE,
     ROOF DOUBLE,
     RUMI DOUBLE NOT NULL,
     RYEM DOUBLE,
     SCOW DOUBLE NOT NULL,
-    SHGF DOUBLE NOT NULL,
+    SHGF DOUBLE,
     SHGM DOUBLE,
     SOWS DOUBLE,
     SOYA DOUBLE,

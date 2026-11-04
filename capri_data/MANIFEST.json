@@ -130,7 +130,7 @@
   "capri_data/2017/abatement/ammonia/ammonia_tech_model.csv": {
    "description": "the ammonia technologies on the model's animals: CAPRI's options, weights and the N cascade terms (build_ammonia_tech_model.py) (tools/build/build_ammonia_tech_model.py)",
    "kind": "coefficients",
-   "rows": 30823,
+   "rows": 33027,
    "columns": 23,
    "units": "to be established (value_units: open)",
    "read_by_model": [
@@ -471,7 +471,7 @@
    "vintage": "jul15 data",
    "domain": "environment",
    "status": "live",
-   "rows": 1768,
+   "rows": 1920,
    "columns": 5,
    "units": "U_ratio",
    "read_by_model": [
@@ -492,7 +492,7 @@
    "vintage": "2030 reference",
    "domain": "abatement",
    "status": "live",
-   "rows": 1321,
+   "rows": 1490,
    "columns": 17,
    "units": "U_EuPerHd, U_ratio",
    "read_by_model": [
@@ -568,7 +568,7 @@
    "vintage": "2030",
    "domain": "abatement",
    "status": "live",
-   "rows": 221,
+   "rows": 250,
    "columns": 11,
    "units": "U_1000ha, U_EuPerHa, U_ratio",
    "read_by_model": [
@@ -630,7 +630,7 @@
   "capri_data/2017/environment/crop_co2_coef.csv": {
    "description": "CAPRI's manure and enteric methane per head and its CO2 from liming and urea, per model region (Sprint 9s; (tools/build/build_ghg_coefs_2017.py)",
    "kind": "coefficients",
-   "rows": 221,
+   "rows": 250,
    "columns": 3,
    "units": "to be established (value_units: open)",
    "read_by_model": [
@@ -644,7 +644,7 @@
   "capri_data/2017/environment/crop_nut_need_mult_fact_2030.csv": {
    "description": "CAPRI's over-fertilisation factor per region (v_cropNutNeedMultFact, NITF, \"T\"). (tools/build/build_overfert_factors.py)",
    "kind": "calibrated",
-   "rows": 221,
+   "rows": 250,
    "columns": 3,
    "units": "to be established (value_units: open)",
    "read_by_model": [
@@ -658,7 +658,7 @@
   "capri_data/2017/environment/enteric_feed_factors.csv": {
    "description": "Inputs of CAPRI's feed-based cattle enteric CH4 (GWPCH4ENT_, envind/gases.gms l. 365-376). (tools/build/build_enteric_feed_factors.py)",
    "kind": "coefficients",
-   "rows": 1215,
+   "rows": 1530,
    "columns": 6,
    "units": "to be established (value_units: open)",
    "read_by_model": [
@@ -728,7 +728,7 @@
    "vintage": "2030",
    "domain": "environment",
    "status": "live",
-   "rows": 221,
+   "rows": 250,
    "columns": 4,
    "units": "to be established (value_units: open)",
    "read_by_model": [
@@ -764,7 +764,7 @@
    "vintage": "2017 (FSS survey up to 2017)",
    "domain": "environment",
    "status": "live",
-   "rows": 3882,
+   "rows": 4129,
    "columns": 7,
    "units": "to be established (value_units: open)",
    "read_by_model": [
@@ -779,7 +779,7 @@
   "capri_data/2017/environment/livestock_ch4ent_coef.csv": {
    "description": "CAPRI's enteric methane CH4ENT per model head (LEVL x item over the model's heads, tools/build/build_ghg_coefs_2017.py)",
    "kind": "coefficients",
-   "rows": 221,
+   "rows": 250,
    "columns": 12,
    "units": "U_kgperhd",
    "read_by_model": [
@@ -793,7 +793,7 @@
   "capri_data/2017/environment/livestock_ch4man_coef.csv": {
    "description": "CAPRI's manure methane CH4MAN per model head (tools/build/build_ghg_coefs_2017.py)",
    "kind": "coefficients",
-   "rows": 221,
+   "rows": 250,
    "columns": 12,
    "units": "U_kgperhd",
    "read_by_model": [
@@ -807,7 +807,7 @@
   "capri_data/2017/environment/livestock_manure_k_coef.csv": {
    "description": "CAPRI's manure K (MANK) per model head (tools/build/build_npk_balance_2030.py)",
    "kind": "coefficients",
-   "rows": 221,
+   "rows": 250,
    "columns": 12,
    "units": "U_kgperhd",
    "read_by_model": [
@@ -824,7 +824,7 @@
    "vintage": "2017",
    "domain": "environment",
    "status": "live",
-   "rows": 221,
+   "rows": 250,
    "columns": 12,
    "units": "U_kgperhd",
    "read_by_model": [
@@ -839,7 +839,7 @@
   "capri_data/2017/environment/livestock_manure_p_coef.csv": {
    "description": "CAPRI's manure P (MANP) per model head (the regional total over the model's herd, tools/build/build_npk_balance_2030.py)",
    "kind": "coefficients",
-   "rows": 221,
+   "rows": 250,
    "columns": 12,
    "units": "U_kgperhd",
    "read_by_model": [
@@ -853,7 +853,7 @@
   "capri_data/2017/environment/livestock_n_export_coef.csv": {
    "description": "CAPRI's N exported in animal products CRPR_EXPT per model head (fert/calc_nexport.gms; tools/build/build_livestock_n_export_coef.py)",
    "kind": "coefficients",
-   "rows": 221,
+   "rows": 250,
    "columns": 12,
    "units": "U_kgperhd",
    "read_by_model": [
@@ -881,7 +881,7 @@
   "capri_data/2017/environment/manure_housing_losses_2030.csv": {
    "description": "CAPRI's manure N lost in housing and storage, per model region and animal (fertDistExcr_ input). (tools/build/build_manure_losses.py)",
    "kind": "coefficients",
-   "rows": 2431,
+   "rows": 2746,
    "columns": 4,
    "units": "to be established (value_units: open)",
    "read_by_model": [
@@ -898,7 +898,7 @@
    "vintage": "2017",
    "domain": "environment",
    "status": "live",
-   "rows": 2411,
+   "rows": 2726,
    "columns": 7,
    "units": "to be established (value_units: open)",
    "read_by_model": [
@@ -915,7 +915,7 @@
    "vintage": "2017",
    "domain": "environment",
    "status": "live",
-   "rows": 7315,
+   "rows": 7830,
    "columns": 5,
    "units": "to be established (value_units: open)",
    "read_by_model": [
@@ -986,7 +986,7 @@
    "vintage": "2030",
    "domain": "environment",
    "status": "live",
-   "rows": 221,
+   "rows": 250,
    "columns": 4,
    "units": "to be established (value_units: open)",
    "read_by_model": [
@@ -1004,7 +1004,7 @@
    "vintage": "2030",
    "domain": "environment",
    "status": "live",
-   "rows": 221,
+   "rows": 250,
    "columns": 3,
    "units": "to be established (value_units: open)",
    "read_by_model": [
@@ -1022,7 +1022,7 @@
    "vintage": "2030 reference",
    "domain": "environment",
    "status": "live",
-   "rows": 2431,
+   "rows": 2746,
    "columns": 3,
    "units": "to be established (value_units: open)",
    "read_by_model": [
@@ -1041,7 +1041,7 @@
    "vintage": "2030 reference",
    "domain": "environment",
    "status": "live",
-   "rows": 221,
+   "rows": 250,
    "columns": 4,
    "units": "to be established (value_units: open)",
    "read_by_model": [
@@ -1122,7 +1122,7 @@
    "vintage": "2017",
    "domain": "feed",
    "status": "calibration",
-   "rows": 127897,
+   "rows": 143749,
    "columns": 6,
    "units": "to be established (value_units: open)",
    "read_by_model": [
@@ -1143,7 +1143,7 @@
    "vintage": "2017",
    "domain": "feed",
    "status": "live",
-   "rows": 645,
+   "rows": 732,
    "columns": 5,
    "units": "U_TonPerHa",
    "read_by_model": [
@@ -1164,7 +1164,7 @@
    "vintage": "2017",
    "domain": "feed",
    "status": "live",
-   "rows": 4499,
+   "rows": 5087,
    "columns": 4,
    "units": "U_TonPerHd",
    "origin": {
@@ -1179,7 +1179,7 @@
    "vintage": "2017",
    "domain": "feed",
    "status": "live",
-   "rows": 221,
+   "rows": 250,
    "columns": 34,
    "units": "to be established (value_units: open)",
    "read_by_model": [
@@ -2331,7 +2331,7 @@
    "vintage": "2030 calibration point",
    "domain": "market",
    "status": "live",
-   "rows": 346,
+   "rows": 330,
    "columns": 4,
    "units": "to be established (value_units: open)",
    "read_by_model": [
@@ -2439,7 +2439,7 @@
   "capri_data/2017/policy/cap_greening_fleg_ms.csv": {
    "description": "CAPRI's CAP 2014-2020 greening (the policy of CAPRI's 2030 reference, pol_input/cap_after_2014/ref.gms -> (tools/build/build_cap_greening.py)",
    "kind": "coefficients",
-   "rows": 27,
+   "rows": 34,
    "columns": 4,
    "units": "to be established (value_units: open)",
    "read_by_model": [
@@ -2456,7 +2456,7 @@
    "vintage": "2017",
    "domain": "policy",
    "status": "live",
-   "rows": 221,
+   "rows": 250,
    "columns": 6,
    "units": "to be established (value_units: open)",
    "read_by_model": [
@@ -2525,7 +2525,7 @@
    "vintage": "2030",
    "domain": "policy",
    "status": "live",
-   "rows": 8709,
+   "rows": 9558,
    "columns": 8,
    "units": "to be established (value_units: open)",
    "read_by_model": [
@@ -2543,7 +2543,7 @@
    "vintage": "2017",
    "domain": "supply",
    "status": "live",
-   "rows": 221,
+   "rows": 250,
    "columns": 13,
    "units": "U_1000hd, U_Miohd",
    "read_by_model": [
@@ -2565,7 +2565,7 @@
    "vintage": "2017",
    "domain": "supply",
    "status": "live",
-   "rows": 221,
+   "rows": 250,
    "columns": 35,
    "units": "U_1000ha",
    "read_by_model": [
@@ -2587,7 +2587,7 @@
    "vintage": "2017",
    "domain": "supply",
    "status": "live",
-   "rows": 221,
+   "rows": 250,
    "columns": 79,
    "units": "to be established (value_units: open)",
    "read_by_model": [
@@ -2605,7 +2605,7 @@
    "vintage": "2017",
    "domain": "supply",
    "status": "live",
-   "rows": 221,
+   "rows": 250,
    "columns": 12,
    "units": "U_ratio",
    "read_by_model": [
@@ -2676,7 +2676,7 @@
    "vintage": "2017",
    "domain": "supply",
    "status": "live",
-   "rows": 1317,
+   "rows": 1485,
    "columns": 34,
    "units": "to be established (value_units: open)",
    "read_by_model": [
@@ -2695,7 +2695,7 @@
    "domain": "supply",
    "status": "live",
    "vintage_exception": "CAPRI's 2030 catch-crop share of UAAR: the Farm-to-Fork requirement adds to the 2030 baseline",
-   "rows": 221,
+   "rows": 250,
    "columns": 5,
    "units": "to be established (value_units: open)",
    "read_by_model": [
@@ -2726,7 +2726,7 @@
   "capri_data/2017/supply/crop_premium.csv": {
    "description": "Crop yields, producer prices, input costs and CAP premiums for every model region from CAPRI's 2017 results (tools/build/build_crop_economics_2017.py)",
    "kind": "coefficients",
-   "rows": 221,
+   "rows": 250,
    "columns": 35,
    "units": "to be established (value_units: open)",
    "read_by_model": [
@@ -2743,7 +2743,7 @@
    "vintage": "2017",
    "domain": "supply",
    "status": "live",
-   "rows": 221,
+   "rows": 250,
    "columns": 20,
    "units": "to be established (value_units: open)",
    "read_by_model": [
@@ -2758,7 +2758,7 @@
   "capri_data/2017/supply/grass_dm_content.csv": {
    "description": "Crop yields, producer prices, input costs and CAP premiums for every model region from CAPRI's 2017 results (tools/build/build_crop_economics_2017.py)",
    "kind": "coefficients",
-   "rows": 221,
+   "rows": 250,
    "columns": 2,
    "units": "to be established (value_units: open)",
    "read_by_model": [
@@ -2775,7 +2775,7 @@
    "vintage": "2017",
    "domain": "supply",
    "status": "live",
-   "rows": 216,
+   "rows": 245,
    "columns": 16,
    "units": "to be established (value_units: open)",
    "read_by_model": [
@@ -2794,7 +2794,7 @@
    "domain": "supply",
    "status": "live",
    "vintage_exception": "the _2030 columns are CAPRI's 2030 values, used only at the 2030 market year",
-   "rows": 8388,
+   "rows": 8790,
    "columns": 10,
    "units": "to be established (value_units: open)",
    "read_by_model": [
@@ -2812,7 +2812,7 @@
    "vintage": "2017",
    "domain": "supply",
    "status": "live",
-   "rows": 221,
+   "rows": 250,
    "columns": 5,
    "units": "U_1000ha",
    "read_by_model": [
@@ -2832,7 +2832,7 @@
    "vintage": "2017",
    "domain": "supply",
    "status": "live",
-   "rows": 9282,
+   "rows": 10500,
    "columns": 4,
    "units": "to be established (value_units: open)",
    "origin": {
@@ -2844,7 +2844,7 @@
   "capri_data/2017/supply/land_market_2017_regions.csv": {
    "description": "Build CAPRI's land-market data per model region (docs/LAND_USE_FLEXIBILITY.md). (tools/build/build_land_market.py)",
    "kind": "calibrated",
-   "rows": 221,
+   "rows": 250,
    "columns": 4,
    "units": "to be established (value_units: open)",
    "origin": {
@@ -2859,7 +2859,7 @@
    "domain": "supply",
    "status": "live",
    "vintage_exception": "CAPRI's land market at its 2030 calibration point, used only when the model simulates the 2030 market year",
-   "rows": 9282,
+   "rows": 10500,
    "columns": 4,
    "units": "to be established (value_units: open)",
    "read_by_model": [
@@ -2874,7 +2874,7 @@
   "capri_data/2017/supply/land_market_2030_regions.csv": {
    "description": "Build CAPRI's land-market data per model region (docs/LAND_USE_FLEXIBILITY.md). (tools/build/build_land_market.py)",
    "kind": "calibrated",
-   "rows": 221,
+   "rows": 250,
    "columns": 4,
    "units": "to be established (value_units: open)",
    "read_by_model": [
@@ -2891,7 +2891,7 @@
    "vintage": "2017",
    "domain": "supply",
    "status": "live",
-   "rows": 221,
+   "rows": 250,
    "columns": 5,
    "units": "U_EuPerHa",
    "read_by_model": [
@@ -2910,7 +2910,7 @@
    "domain": "supply",
    "status": "live",
    "vintage_exception": "CAPRI's rents at its 2030 calibration point, used when the model simulates the 2030 market year (the 2017 base uses land_rents_2017.csv)",
-   "rows": 221,
+   "rows": 250,
    "columns": 5,
    "units": "U_EuPerHa",
    "read_by_model": [
@@ -2925,7 +2925,7 @@
   "capri_data/2017/supply/livestock_cost_coef.csv": {
    "description": "CAPRI's variable cost per model head (tools/build/build_livestock_output_coef.py)",
    "kind": "coefficients",
-   "rows": 221,
+   "rows": 250,
    "columns": 12,
    "units": "to be established (value_units: open)",
    "read_by_model": [
@@ -2942,7 +2942,7 @@
    "vintage": "2017",
    "domain": "supply",
    "status": "live",
-   "rows": 221,
+   "rows": 250,
    "columns": 15,
    "units": "to be established (value_units: open)",
    "read_by_model": [
@@ -2960,7 +2960,7 @@
    "vintage": "2017",
    "domain": "supply",
    "status": "live",
-   "rows": 221,
+   "rows": 250,
    "columns": 12,
    "units": "to be established (value_units: open)",
    "read_by_model": [
@@ -2975,7 +2975,7 @@
   "capri_data/2017/supply/livestock_output_value_coef.csv": {
    "description": "CAPRI's output value per model head (tools/build/build_livestock_output_coef.py)",
    "kind": "coefficients",
-   "rows": 221,
+   "rows": 250,
    "columns": 12,
    "units": "to be established (value_units: open)",
    "read_by_model": [
@@ -2990,7 +2990,7 @@
   "capri_data/2017/supply/livestock_premium_coef.csv": {
    "description": "CAPRI's premiums per model head (tools/build/build_livestock_premium_coef.py)",
    "kind": "coefficients",
-   "rows": 221,
+   "rows": 250,
    "columns": 12,
    "units": "to be established (value_units: open)",
    "read_by_model": [
@@ -3004,7 +3004,7 @@
   "capri_data/2017/supply/livestock_product_value_by_market_coef.csv": {
    "description": "CAPRI's value of each final product per model head by market commodity (columns ACT.MARKET) (tools/build/build_livestock_products.py)",
    "kind": "coefficients",
-   "rows": 221,
+   "rows": 250,
    "columns": 15,
    "units": "U_EuPerHd",
    "read_by_model": [
@@ -3018,7 +3018,7 @@
   "capri_data/2017/supply/livestock_product_value_coef.csv": {
    "description": "CAPRI's final product value per model head (tools/build/build_livestock_output_coef.py)",
    "kind": "coefficients",
-   "rows": 221,
+   "rows": 250,
    "columns": 12,
    "units": "to be established (value_units: open)",
    "read_by_model": [
@@ -3036,7 +3036,7 @@
    "vintage": "2017",
    "domain": "supply",
    "status": "live",
-   "rows": 221,
+   "rows": 250,
    "columns": 12,
    "units": "to be established (value_units: open)",
    "read_by_model": [
@@ -3058,7 +3058,7 @@
    "vintage": "2017",
    "domain": "supply",
    "status": "live",
-   "rows": 221,
+   "rows": 250,
    "columns": 12,
    "units": "to be established (value_units: open)",
    "read_by_model": [
@@ -3076,7 +3076,7 @@
    "vintage": "2017",
    "domain": "supply",
    "status": "calibration",
-   "rows": 28,
+   "rows": 36,
    "columns": 3,
    "units": "U_EuPerTon",
    "read_by_model": [
@@ -3098,7 +3098,7 @@
    "vintage": "2017",
    "domain": "supply",
    "status": "live",
-   "rows": 6517,
+   "rows": 7265,
    "columns": 5,
    "units": "U_kgperha",
    "read_by_model": [
@@ -3120,7 +3120,7 @@
    "vintage": "2017",
    "domain": "supply",
    "status": "live",
-   "rows": 221,
+   "rows": 250,
    "columns": 35,
    "units": "to be established (value_units: open)",
    "read_by_model": [
@@ -3141,7 +3141,7 @@
    "vintage": "2017",
    "domain": "supply",
    "status": "live",
-   "rows": 8774,
+   "rows": 9774,
    "columns": 13,
    "units": "to be established (value_units: open)",
    "read_by_model": [
@@ -3159,7 +3159,7 @@
    "domain": "supply",
    "status": "live",
    "vintage_exception": "CAPRI's PMP terms at its 2030 calibration point, used only when the model simulates the 2030 market year",
-   "rows": 38634,
+   "rows": 40829,
    "columns": 7,
    "units": "U_1000ha, U_EuPerHa",
    "read_by_model": [
@@ -3183,7 +3183,7 @@
    "domain": "supply",
    "status": "live",
    "vintage_exception": "CAPRI's PMP terms at its 2030 calibration point, used only when the model simulates the 2030 market year",
-   "rows": 2404,
+   "rows": 2716,
    "columns": 6,
    "units": "U_EuPerHd, U_ratio",
    "read_by_model": [
@@ -3205,7 +3205,7 @@
    "domain": "supply",
    "status": "live",
    "vintage_exception": "CAPRI's PMP terms at its 2030 calibration point, used only when the model simulates the 2030 market year",
-   "rows": 2404,
+   "rows": 2716,
    "columns": 6,
    "units": "U_EuPerHd, U_ratio",
    "read_by_model": [
@@ -3247,7 +3247,7 @@
    "vintage": "2017",
    "domain": "supply",
    "status": "live",
-   "rows": 39736,
+   "rows": 42092,
    "columns": 7,
    "units": "U_1000ha, U_EuPerHa",
    "origin": {
@@ -3265,7 +3265,7 @@
    "vintage": "2017",
    "domain": "supply",
    "status": "live",
-   "rows": 2407,
+   "rows": 2719,
    "columns": 6,
    "units": "U_EuPerHd, U_ratio",
    "origin": {
@@ -3280,7 +3280,7 @@
    "vintage": "2017",
    "domain": "supply",
    "status": "live",
-   "rows": 2407,
+   "rows": 2719,
    "columns": 6,
    "units": "U_EuPerHd, U_ratio",
    "origin": {
@@ -3296,7 +3296,7 @@
    "domain": "supply",
    "status": "live",
    "vintage_exception": "the recipe's terms at the 2030 calibration point, used only at the 2030 market year",
-   "rows": 38634,
+   "rows": 40829,
    "columns": 7,
    "units": "U_1000ha, U_EuPerHa",
    "read_by_model": [
@@ -3318,7 +3318,7 @@
    "domain": "supply",
    "status": "live",
    "vintage_exception": "the recipe's terms at the 2030 calibration point, used only at the 2030 market year",
-   "rows": 2404,
+   "rows": 2716,
    "columns": 6,
    "units": "U_EuPerHd, U_ratio",
    "read_by_model": [
@@ -3337,7 +3337,7 @@
    "domain": "supply",
    "status": "live",
    "vintage_exception": "the recipe's terms at the 2030 calibration point, used only at the 2030 market year",
-   "rows": 2404,
+   "rows": 2716,
    "columns": 6,
    "units": "U_EuPerHd, U_ratio",
    "read_by_model": [
@@ -3355,7 +3355,7 @@
    "vintage": "2017",
    "domain": "supply",
    "status": "live",
-   "rows": 221,
+   "rows": 250,
    "columns": 74,
    "units": "to be established (value_units: open)",
    "read_by_model": [
@@ -3375,7 +3375,7 @@
    "domain": "supply",
    "status": "live",
    "vintage_exception": "the _2030 columns are CAPRI's 2030 values, used only at the 2030 market year",
-   "rows": 215,
+   "rows": 226,
    "columns": 14,
    "units": "to be established (value_units: open)",
    "read_by_model": [
@@ -3393,7 +3393,7 @@
    "vintage": "2017",
    "domain": "supply",
    "status": "live",
-   "rows": 198,
+   "rows": 209,
    "columns": 16,
    "units": "U_Elasticity",
    "read_by_model": [
@@ -3415,7 +3415,7 @@
    "vintage": "2017",
    "domain": "supply",
    "status": "live",
-   "rows": 221,
+   "rows": 250,
    "columns": 47,
    "units": "U_EuPerHa, U_EuPerHd",
    "read_by_model": [
@@ -3438,7 +3438,7 @@
    "domain": "supply",
    "status": "live",
    "vintage_exception": "CAPRI's winter cover shares are 2008-2016 statistics (dat/policy/wintercovershare.gms), used as CAPRI uses them",
-   "rows": 3738,
+   "rows": 4231,
    "columns": 4,
    "units": "to be established (value_units: open)",
    "read_by_model": [
@@ -3472,7 +3472,7 @@
    "vintage": "2017",
    "domain": "supply",
    "status": "live",
-   "rows": 221,
+   "rows": 250,
    "columns": 47,
    "units": "U_HdPerHd, U_TonPerHa, U_TonPerHd, U_ValueUnitPerHa, U_kgperha",
    "read_by_model": [
@@ -3494,7 +3494,7 @@
    "vintage": "2017",
    "domain": "supply",
    "status": "live",
-   "rows": 1098,
+   "rows": 1238,
    "columns": 4,
    "units": "to be established (value_units: open)",
    "read_by_model": [
@@ -3515,7 +3515,7 @@
    "vintage": "2017",
    "domain": "supply",
    "status": "live",
-   "rows": 3289,
+   "rows": 3706,
    "columns": 5,
    "units": "U_HdPerHd",
    "origin": {
@@ -3530,7 +3530,7 @@
    "vintage": "2017",
    "domain": "supply",
    "status": "live",
-   "rows": 1535,
+   "rows": 1730,
    "columns": 4,
    "units": "to be established (value_units: open)",
    "read_by_model": [
@@ -3551,7 +3551,7 @@
    "vintage": "2017",
    "domain": "supply",
    "status": "live",
-   "rows": 4168,
+   "rows": 4698,
    "columns": 5,
    "units": "U_HdPerHd",
    "origin": {
@@ -4784,7 +4784,7 @@
    "vintage": "2030",
    "domain": "policy",
    "status": "live",
-   "rows": 221,
+   "rows": 250,
    "columns": 3,
    "units": "to be established (value_units: open)",
    "read_by_model": [
@@ -4820,7 +4820,7 @@
    "vintage": "2030 reference",
    "domain": "projection",
    "status": "live",
-   "rows": 45641,
+   "rows": 51457,
    "columns": 5,
    "units": "to be established (value_units: open)",
    "read_by_model": [
@@ -4863,7 +4863,7 @@
    "vintage": "2030 (CAPTRD)",
    "domain": "projection",
    "status": "live",
-   "rows": 67295,
+   "rows": 71413,
    "columns": 5,
    "units": "to be established (value_units: open)",
    "read_by_model": [
@@ -5121,7 +5121,7 @@
    "vintage": "2030",
    "domain": "sources",
    "status": "source",
-   "rows": 3541,
+   "rows": 3995,
    "columns": 3,
    "units": "to be established (value_units: open)",
    "origin": {
@@ -5136,7 +5136,7 @@
    "vintage": "2017",
    "domain": "sources",
    "status": "source",
-   "rows": 3652,
+   "rows": 4108,
    "columns": 3,
    "units": "to be established (value_units: open)",
    "origin": {
@@ -5151,7 +5151,7 @@
    "vintage": "2030",
    "domain": "sources",
    "status": "source",
-   "rows": 3541,
+   "rows": 3995,
    "columns": 3,
    "units": "to be established (value_units: open)",
    "origin": {
@@ -5226,7 +5226,7 @@
    "vintage": "2017",
    "domain": "sources",
    "status": "source",
-   "rows": 2649,
+   "rows": 2791,
    "columns": 4,
    "units": "to be established (value_units: open)",
    "origin": {
@@ -5241,7 +5241,7 @@
    "vintage": "2017",
    "domain": "sources",
    "status": "source",
-   "rows": 33747,
+   "rows": 37096,
    "columns": 5,
    "units": "to be established (value_units: open)",
    "origin": {
@@ -5256,7 +5256,7 @@
    "vintage": "2030",
    "domain": "sources",
    "status": "source",
-   "rows": 2649,
+   "rows": 2791,
    "columns": 4,
    "units": "to be established (value_units: open)",
    "origin": {
@@ -5293,7 +5293,7 @@
   "capri_data/sources/capreg/capreg_activity_levels.csv": {
    "description": "CAPRI's activity levels LEVL per regional unit (rows) and activity (columns), land categories excluded, from the CAPREG DATA2_<CC>.txt dumps, year column Y; MAIZ renamed CORN (tools/build/extract_remaining_nine.py).",
    "kind": "base",
-   "rows": 221,
+   "rows": 250,
    "columns": 134,
    "units": "to be established (value_units: open)",
    "origin": {
@@ -5304,7 +5304,7 @@
   "capri_data/sources/capreg/capreg_cap_premium.csv": {
    "description": "CAPRI's premium PRME per regional unit (rows) and activity (columns), per ha or per head, from the CAPREG DATA2_<CC>.txt dumps, year column Y; MAIZ renamed CORN (tools/build/extract_remaining_nine.py).",
    "kind": "coefficients",
-   "rows": 221,
+   "rows": 250,
    "columns": 76,
    "units": "to be established (value_units: open)",
    "origin": {
@@ -5318,7 +5318,7 @@
    "vintage": "2017",
    "domain": "supply",
    "status": "live (builder input)",
-   "rows": 27,
+   "rows": 34,
    "columns": 75,
    "units": "to be established (value_units: open)",
    "origin": {
@@ -5333,7 +5333,7 @@
    "vintage": "2017",
    "domain": "supply",
    "status": "live (builder input)",
-   "rows": 221,
+   "rows": 250,
    "columns": 74,
    "units": "to be established (value_units: open)",
    "origin": {
@@ -5345,7 +5345,7 @@
   "capri_data/sources/capreg/capreg_producer_prices_extract.csv": {
    "description": "CAPRI's regional producer price MPRI (EUR/t per the builder) per regional unit (rows) and activity (columns), from the CAPREG DATA2_<CC>.txt dumps; MAIZ renamed CORN (tools/build/extract_all_from_data2.py).",
    "kind": "base",
-   "rows": 221,
+   "rows": 250,
    "columns": 72,
    "units": "to be established (value_units: open)",
    "origin": {
@@ -5370,7 +5370,7 @@
   "capri_data/sources/capreg/pmp_quad_pact.csv": {
    "description": "CAPRI's 2017 crop-group PMP terms p_pmpQuadPact(region, group1, group2) per regional unit, from the quadPact_<CC>.txt dumps of pmppar_17*.gdx (tools/build/ingest_pmp_terms.py).",
    "kind": "calibrated",
-   "rows": 2649,
+   "rows": 2791,
    "columns": 4,
    "units": "to be established (value_units: open)",
    "origin": {
@@ -5381,7 +5381,7 @@
   "capri_data/sources/capreg/pmp_quad_techn.csv": {
    "description": "CAPRI's 2017 own-activity PMP diagonal p_pmpQuadTechn(region, activity, T1, T1) (T.T for animals) per regional unit and activity, from the quadTechn_<CC>.txt dumps of pmppar_17*.gdx; MAIZ renamed CORN (tools/build/ingest_pmp_terms.py).",
    "kind": "calibrated",
-   "rows": 10889,
+   "rows": 12200,
    "columns": 3,
    "units": "to be established (value_units: open)",
    "origin": {
@@ -5693,7 +5693,7 @@
   "capri_data/sources/capri_land_rents/land_rents_capri_2017.csv": {
    "description": "Land rent (EUR/ha) and level (1000 ha) per CAPRI region and land type ARAC, FRUN, GRAS from CAPRI's 2017 results (res_17<MS> dumps, D_AREA, column Y), non-positive rents replaced by CAPRI's calibration rent (cal_land_nests.gms l. 204-226) (tools/build/build_land_rents.py --year 2017).",
    "kind": "base",
-   "rows": 784,
+   "rows": 873,
    "columns": 4,
    "units": "to be established (value_units: open)",
    "origin": {
@@ -5846,7 +5846,7 @@
   "capri_data/sources/envind/res17_mann_crpr_expt.csv": {
    "description": "CAPRI's LEVL, MANN and CRPR_EXPT per region and animal activity from the 2017 dumps res_17*.txt, column Y, used for the low-N feeding option (tools/build/build_lownfeed_effects.py).",
    "kind": "base",
-   "rows": 15240,
+   "rows": 16830,
    "columns": 4,
    "units": "to be established (value_units: open)",
    "origin": {
@@ -5872,7 +5872,7 @@
   "capri_data/sources/estnlp/pela_own_price.csv": {
    "description": "CAPRI's estimated own-price supply elasticities PELA(region, crop, crop, '2005') from dat/estnlp/results.gdx, per regional unit (rows) and crop (columns); MAIZ renamed CORN (tools/build/ingest_pela_gtap.py).",
    "kind": "coefficients",
-   "rows": 198,
+   "rows": 209,
    "columns": 16,
    "units": "to be established (value_units: open)",
    "origin": {
@@ -6291,7 +6291,7 @@
   "capri_data/trajectories/capri_cap_premium_2030.csv": {
    "description": "CAPRI's 2030 prices and premiums for the model's 2030 baseline, in 2017 money. (tools/build/build_price_trajectory_2030.py)",
    "kind": "coefficients",
-   "rows": 221,
+   "rows": 250,
    "columns": 79,
    "units": "to be established (value_units: open)",
    "read_by_model": [
@@ -6305,7 +6305,7 @@
   "capri_data/trajectories/capri_livestock_premium_ratio_2030.csv": {
    "description": "CAPRI's 2030 / 2017 premium ratio per model animal, real, 2017 activity levels as weights (tools/build/build_price_trajectory_2030.py)",
    "kind": "coefficients",
-   "rows": 221,
+   "rows": 250,
    "columns": 12,
    "units": "U_ratio",
    "read_by_model": [
@@ -6319,7 +6319,7 @@
   "capri_data/trajectories/capri_price_ratios_2030.csv": {
    "description": "CAPRI's 2030 prices and premiums for the model's 2030 baseline, in 2017 money. (tools/build/build_price_trajectory_2030.py)",
    "kind": "reference",
-   "rows": 1545,
+   "rows": 1926,
    "columns": 6,
    "units": "to be established (value_units: open)",
    "read_by_model": [
@@ -6333,7 +6333,7 @@
   "capri_data/trajectories/capri_ref_fodder_2030.csv": {
    "description": "CAPRI's 2030 rations and requirements as factors on the model's 2017 rations (Sprint 9q). (tools/build/build_ration_trajectory_2030.py)",
    "kind": "reference",
-   "rows": 650,
+   "rows": 736,
    "columns": 4,
    "units": "to be established (value_units: open)",
    "read_by_model": [
@@ -6347,7 +6347,7 @@
   "capri_data/trajectories/capri_ref_ration_2030.csv": {
    "description": "CAPRI's 2030 rations and requirements as factors on the model's 2017 rations (Sprint 9q). (tools/build/build_ration_trajectory_2030.py)",
    "kind": "reference",
-   "rows": 27949,
+   "rows": 31476,
    "columns": 5,
    "units": "to be established (value_units: open)",
    "read_by_model": [

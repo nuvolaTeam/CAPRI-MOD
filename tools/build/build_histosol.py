@@ -154,8 +154,9 @@ def main():
     to_c8 = _mr_.region_to_capri()          # correspondence + NUTS splits and merges (tools/lib/_model_regions.py)
     rows = []
     for reg in mr.model_regions():
-        if reg.startswith("NO"):
-            continue                  # outside CAPRI's EU histosol option (rmssup_histo: EU)
+        if mr.national_code(reg) not in mr.EU_MS:
+            continue                  # outside CAPRI's EU histosol option (rmssup_histo: EU); until 4 November 2026 only
+            # Norway was skipped, the one unit outside the EU then (CAPRI's fallowInAllRmssup: SUPPLY_NONEU_DESIGN step 6)
         ms = mr.national_code(reg)
         c8 = to_c8.get(reg)
         src = c8 if (c8 in org and ("soc_regN2_rk" in org[c8] or "sog_regN2_rk" in org[c8])) else ms

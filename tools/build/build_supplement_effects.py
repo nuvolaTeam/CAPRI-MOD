@@ -99,8 +99,10 @@ def nop_rows(mr, to_c8, L, rations):
     ms_ru = defaultdict(list)
     for r in _csv.DictReader(open(codes / "MS_RU.csv")):
         ms_ru[r["ms"]].append(r["ru"])
-    eu_ms = {r["capri_ms"] for r in _csv.DictReader(open(ROOT / "capri_data" / "shared" / "regional_units.csv"))
-             if not r["capri_ms"].startswith("NO")}
+    # CAPRI's ms_LiNi: the EU's member states (its EU trade blocks, tools/lib/_model_regions.EU_MS; until 4 November
+    # 2026 every member state of regional_units.csv but Norway, which took in the UK, Turkey and the Western Balkans
+    # once their units were listed)
+    eu_ms = set(mr.EU_MS)
     acts = sorted({x for v in NOP_MAP.values() for x in v})
     comp, mx = {}, {}
     for ms in sorted(eu_ms):

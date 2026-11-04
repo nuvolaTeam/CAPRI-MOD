@@ -39,7 +39,9 @@ def main(dump_dir: Path) -> None:
         prefixes = [p for p, c in codes if c == ms]
         if ms[:2] in prefixes:
             prefixes = [ms[:2]]
-        rows += [(p, ms[:2], repr(v)) for p in prefixes]
+        # CAPRI's national code: two letters + 000000, written as the two letters; Turkey's is TUR itself (sets.gms)
+        code = ms[:2] if ms.endswith("000000") else ms
+        rows += [(p, code, repr(v)) for p in prefixes]
     with open(OUT, "w", newline="") as f:
         w = csv.writer(f, lineterminator="\n")
         w.writerow(["country", "capri_code", "eur_per_t_n"])

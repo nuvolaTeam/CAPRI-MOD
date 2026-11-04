@@ -101,20 +101,20 @@ COMMENT ON TABLE mineral_n_price IS 'CAPRI''s 2017 unit value of mineral N ferti
 INSERT INTO value_units VALUES
   ('mineral_n_price', 'eur_per_t_n', 'U_EuPerTon', 'capri', 'CAPRI''s UVAG of NITF, EUR per t of N');
 
--- rule: the countries are CAPRI's member states (and Norway), as two-letter codes of RALL's national units
+-- rule: the countries are CAPRI's member states (and the countries outside the EU with supply models), as two-letter
+-- codes of RALL's national units (XX000000) or, for Turkey, RALL's own code TUR
 SELECT 'capri_own_price_elasticities' AS tbl, capri_country AS code FROM capri_own_price_elasticities
 WHERE capri_country || '000000' NOT IN (SELECT code FROM capri_rall)
 UNION ALL
-SELECT 'mineral_n_price', capri_code FROM mineral_n_price WHERE capri_code || '000000' NOT IN (SELECT code FROM capri_rall)
+SELECT 'mineral_n_price', capri_code FROM mineral_n_price
+WHERE capri_code || '000000' NOT IN (SELECT code FROM capri_rall) AND capri_code NOT IN (SELECT code FROM capri_rall)
 UNION ALL
 SELECT 'mineral_n_price', country FROM mineral_n_price m
 WHERE NOT EXISTS (SELECT 1 FROM regional_units r WHERE r.country = m.country);
 
--- rule: every model region has its land rents in both years (until SUPPLY_NONEU_DESIGN step 4, 4 November 2026, without
--- the units of the UK, Turkey and the Western Balkans, whose data are not built yet; step 4 removes this exclusion)
+-- rule: every model region has its land rents in both years
 SELECT r.region FROM regional_units r
-WHERE r.capri_ms NOT IN ('UK000000', 'TUR', 'AL000000', 'BA000000', 'CS000000', 'KO000000', 'MK000000', 'MO000000')
-  AND (r.region NOT IN (SELECT region FROM land_rents_2030) OR r.region NOT IN (SELECT region FROM land_rents_2017));
+WHERE r.region NOT IN (SELECT region FROM land_rents_2030) OR r.region NOT IN (SELECT region FROM land_rents_2017);
 
 -- file: capri_data/2017/supply/capri_supply_elas_market_1717.csv
 CREATE TABLE sup_capri_supply_elas_market_1717 (

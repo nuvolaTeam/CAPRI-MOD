@@ -215,7 +215,9 @@ def main(dump_dir: Path):
 
     for df, p in ((areas, AREAS), (land, LAND), (herds, HERDS), (nutrients, NUTRIENTS)):
         df.to_csv(p)
-    eu = [r for r in areas.index if not r.startswith("NO")]
+    sys.path.insert(0, str(_ROOT / "tools" / "lib"))
+    from _model_regions import EU_MS, national_code
+    eu = [r for r in areas.index if national_code(r) in EU_MS]
     print(f"rebuilt {len(spec)} regions | EU crop area {areas.loc[eu].sum().sum():,.0f} kha "
           f"| EU dairy cows {herds.loc[eu, 'DCOW'].sum():,.0f} thousand")
 

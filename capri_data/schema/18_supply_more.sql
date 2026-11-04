@@ -328,6 +328,8 @@ INSERT INTO value_units VALUES
   ('sup_land_market_2030_regions', 'min_eigenvalue', NULL, 'open', 'land_market_2030_regions.min_eigenvalue: unit to be established');
 
 -- file: capri_data/2017/supply/nutrients_regional.csv
+-- OCER, PULS: empty where CAPRI's data have no record, as this file's other columns (the units of the UK,
+-- Turkey and the Western Balkans, 4 November 2026)
 CREATE TABLE sup_nutrients_regional (
     region VARCHAR NOT NULL,
     SWHE DOUBLE,
@@ -336,7 +338,7 @@ CREATE TABLE sup_nutrients_regional (
     BARL DOUBLE NOT NULL,
     OATS DOUBLE,
     CORN DOUBLE,
-    OCER DOUBLE NOT NULL,
+    OCER DOUBLE,
     PARI DOUBLE,
     OCRO DOUBLE,
     OIND DOUBLE,
@@ -348,7 +350,7 @@ CREATE TABLE sup_nutrients_regional (
     RAPE DOUBLE,
     SOYA DOUBLE,
     OOIL DOUBLE,
-    PULS DOUBLE NOT NULL,
+    PULS DOUBLE,
     TOMA DOUBLE NOT NULL,
     OVEG DOUBLE NOT NULL,
     APPL DOUBLE NOT NULL,

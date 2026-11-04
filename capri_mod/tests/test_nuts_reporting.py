@@ -21,7 +21,9 @@ def m():
 
 @pytest.fixture(scope="module")
 def areas():
-    return read_csv(SUPPLY / "base_areas.csv", index_col=0)
+    from capri_mod.data.definitions import in_run
+    a = read_csv(SUPPLY / "base_areas.csv", index_col=0)
+    return a.loc[[r for r in a.index if in_run(r)]]      # the run's units (the default countries outside the EU: Norway)
 
 
 def test_mapping_covers_units_and_current_nuts(m):
@@ -75,7 +77,7 @@ def test_extensive_totals_kept_and_one_to_one_equal(m, areas):
 
 
 def test_intensive_is_the_mapped_ratio(m, areas):
-    yields = read_csv(SUPPLY / "yields.csv", index_col=0)
+    yields = read_csv(SUPPLY / "yields.csv", index_col=0).loc[areas.index]
     cols = [c for c in ("SWHE", "BARL", "CORN", "RAPE") if c in yields.columns and c in areas.columns]
     y, a = yields[cols].reindex(areas.index), areas[cols]
     out = to_nuts2024(y, basis=a)

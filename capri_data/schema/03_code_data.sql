@@ -14,7 +14,7 @@ COMMENT ON TABLE code_data IS 'the numbers in the model code that may be data (t
 INSERT INTO code_data VALUES
   ('capri_mod/data/find_symbol.py', '<module>', 15.0, 1, '31', 'def search(keyword, limit=15):'),
   ('capri_mod/data/inputs.py', 'REPO_DATA', 2.0, 1, '26', 'REPO_DATA = Path(__file__).resolve().parents[2] / "capri_data"'),
-  ('capri_mod/data/loaders.py', 'load_all_data', 2030.0, 2, '617,623', 'Path(data_dir) / by / "supply" / f"land_rents_{y}.csv") for y in (int(by), 2030)},'),
+  ('capri_mod/data/loaders.py', 'load_all_data', 2030.0, 2, '643,649', 'Path(data_dir) / by / "supply" / f"land_rents_{y}.csv") for y in (int(by), 2030)},'),
   ('capri_mod/data/loaders.py', 'load_variable_costs', 50.0, 1, '377', 'if df.shape[0] > 50:'),
   ('capri_mod/data/loaders.py', 'load_variable_costs_regional', 50.0, 1, '360', 'if df.shape[0] > 50:          # region-level file'),
   ('capri_mod/data/validate_data.py', '<module>', -8000.0, 1, '239', 'ARTIFACT_LOSS, ARTIFACT_LOSS_SPECIALTY = -1000.0, -8000.0'),
