@@ -55,7 +55,7 @@ INSERT INTO code_data VALUES
   ('capri_mod/market/demand.py', 'DemandMixin.demand_response', 0.05, 2, '355,371', '_feed = self.dairy_feed_factor(np.maximum(_rho, 0.05))'),
   ('capri_mod/market/demand_ad.py', 'gl_block_function', 0.05, 2, '77,78', 'p = ca.vertcat(*[ca.fmax(p0[k] + (PR[i, int(col[k])] - 1.0) * a1[k], 0.05 * p0[k]) if col[k] >= 0'),
   ('capri_mod/market/inputs.py', 'REPO_DATA', 2.0, 1, '23', 'REPO_DATA = Path(__file__).resolve().parents[2] / "capri_data"'),
-  ('capri_mod/market/market_nk.py', 'NewtonKrylovMixin._nk_solve', 32.0, 1, '192', 'while t >= 1.0 / 32:'),
+  ('capri_mod/market/market_nk.py', 'NewtonKrylovMixin._nk_solve', 32.0, 1, '213', 'while t >= 1.0 / 32:'),
   ('capri_mod/market/supply.py', 'SupplyMixin._yani_clear', -50.0, 1, '1068', 'lo, hi = st.get("bounds", (-50.0, 50.0))'),
   ('capri_mod/market/supply.py', 'SupplyMixin._yani_clear', 50.0, 1, '1068', 'lo, hi = st.get("bounds", (-50.0, 50.0))'),
   ('capri_mod/market/supply.py', 'SupplyMixin.supply_response', 0.2, 2, '197,216', 'sv = (np.maximum(np.nan_to_num(seen.reindex(cols).to_numpy(dtype=float), nan=1.0), 0.2)'),

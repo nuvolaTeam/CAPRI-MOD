@@ -603,8 +603,6 @@ class BilateralSolveMixin(MarketStateMixin):
             self._bilat_errs = errs
             if getattr(self, "_debug_trace", None) is not None:
                 self._debug_trace.append((it, err, max(errs, key=errs.get), damp))
-            if verbose:
-                print(f"  bilateral market iter {it}: max rel residual {err:.2e}")
             # EU tariff-rate quotas: the out-of-quota tariff follows the fill of each quota at the current
             # flows (lagged by one step, damped)
             trq_moved = 0.0
@@ -615,6 +613,8 @@ class BilateralSolveMixin(MarketStateMixin):
                 old_s = sc.trq_sigmas()
                 sc.trq_solve(X, pc[c], r[c].values)
                 trq_moved = max(trq_moved, sc.trq_sigma_change(old_s))
+            if verbose:
+                print(f"  bilateral market iter {it}: max rel residual {err:.2e}, quota rates moved {trq_moved:.2e}")
             if err < tol and trq_moved < tol:
                 converged = True
                 break

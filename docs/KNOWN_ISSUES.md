@@ -24,7 +24,7 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K92](#k92) | Farm-to-Fork changes furthest from JRC121368, besides the milk price | open: waiting for CAPRI's scenario results |
 | [K93](#k93) | CAPRI mitigation options not built; documents disagree on which are in | open: no-till and legume share unmeasured; UreaSubst parked; the others not needed for Farm-to-Fork and the Green Deal |
 
-## Resolved (98)
+## Resolved (99)
 
 | # | Issue | Status |
 |---|---|---|
@@ -126,6 +126,7 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K99](#k99) | A feed table without builder (feed_requirements.csv) as the fallback of the feed costs and bulks | fixed |
 | [K100](#k100) | A national nutrient table without builder (nutrient_coefs.csv) filled three crops' coefficients and fallow's mineral N | fixed |
 | [K102](#k102) | Data files that no run and no builder reads (census) | fixed |
+| [K110](#k110) | The market's Newton-Krylov solve did not converge on a real shock; its test had passed without one | fixed |
 
 ## Details
 
@@ -1946,3 +1947,30 @@ the EU's two market regions only (A_EU_WEST, A_EU_EAST):
 
 Not yet traced to the member-state data. Next: compare the member states' crush and dairy output of the base with
 CAPRI's DATA per member state (sim_ini_21730), region by region.
+
+### K110: The market's Newton-Krylov solve did not converge on a real shock; its test had passed without one (found 4 November 2026, the ports block's full test suite)
+
+test_market_nk.py (a 10% cut of EU beef and 5% of EU soft wheat, the Newton-Krylov solve against the default one)
+stopped at its time limit in the full suite of the ports block. What was found:
+
+- From 3 November 2026 (market stage 3, dae33d3) to 1cfcc2c the test had no shock: the EU supply rows named after an
+  EU block were dropped, so the cut never reached the market (residual at the first step 3e-5) and the test passed in
+  two steps. 1cfcc2c restored the rows; from there the Newton-Krylov solve crawled (residual 6.8e-2 to 1.4e-3 in 13
+  steps and 231 evaluations, the Krylov solve never within its tolerance, the Newton step rejected by the line search
+  and replaced by half the default step), with or without the land market (stage 7) and before the quotas (stages
+  4-5): the same path at 1cfcc2c and at 78f3ed4.
+- Cause: the market evaluation reads state the previous evaluation left (MarketEvalState: the dairy blocks' raw milk
+  price that FeedBal_, the land markets and Norway's milk row use, and the other per-evaluation carriers). The default
+  solve takes it lagged by one step, which settles with the prices; the Newton-Krylov solve's finite differences
+  (steps of 1e-6) saw each evaluation start from a different state, so they were not derivatives of one function.
+- Fix (capri_mod/market/market_nk.py): every evaluation of one Newton step starts from the same copy of that state;
+  the state moves to the accepted point's between steps, as the quotas' rates do; where the prices already clear the
+  markets and only the quotas' rates move, the next step is theirs (one evaluation), not a Newton step. The equations
+  and the stopping rule are unchanged. On the test's shock: the Newton steps bring the residual below 1e-7 in 5 steps
+  (51 evaluations); the whole solve stops after 17 steps and 234 evaluations (397 s) because the quotas' rates settle
+  slowly, in the default solve as well (40 iterations, 100 evaluations, 295 s): the quota fixed point (bilateral.py
+  trq_solve, updated between steps), not either solve, sets the length near the tolerance.
+
+Status: fixed. Open, as a possible improvement: solving the quotas' sigmas inside each evaluation (CAPRI solves
+trqSigmoidFunc_ with the rest of the market) would make the end of both solves shorter; not done.
+
