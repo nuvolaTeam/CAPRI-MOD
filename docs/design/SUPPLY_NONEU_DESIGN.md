@@ -113,8 +113,11 @@ built. No proxy.
   8. The market side: SUP_NONEU one-to-many (WBA). Done 4 November 2026 for the maps: SUP_NONEU_MS holds a tuple of
      countries per market region, its seven users take each; sup_region_of_country reads a unit through
      REGION_TO_COUNTRY (a unit's first two letters are not its country for the UK, GB, and Serbia, Montenegro, Kosovo:
-     RS, ME, XK). Test: test_a_market_region_with_several_supply_countries. Still to do: the selected countries' feed
-     bulks (feed_bulks_no.csv has Norway only) and the welfare rows below. With a country selected, its market region's welfare takes the
+     RS, ME, XK). Test: test_a_market_region_with_several_supply_countries. The feed bulks of every non-EU supply
+     country (feed_bulks_noneu.csv, before feed_bulks_no.csv: CAPRI's 2030 FEED and ARM1P, the rho caps of market1.gms
+     l. 98-100 for Norway, Turkey and the Western Balkans; the market reads the selected countries' only): done
+     4 November 2026, Norway's rows unchanged. The welfare needs no change: market/welfare.py leaves every region of
+     SUP out of the market supply's ProfitAgr and ProfitFeed. With a country selected, its market region's welfare takes the
      supply models' profit instead of welfare_base_2030.csv's market rows (ProfitAgr, ProfitFeed), which are kept for
      the runs that do not select it.
   9. The baseline of the 29 against CAPRI's 2030. To check then: the UK units' set-aside terms (VSET) in
