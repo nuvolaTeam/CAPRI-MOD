@@ -199,8 +199,12 @@ Each stage must pass two checks:
      the residual being G3's equation with FEDE an unknown; feednq_function); noneu_fede and noneu_feed_change evaluate
      them, the loops removed. capri_mod/tests/test_feed_ad.py: equal to the loops at random prices (1e-11 relative),
      FEDE clears the residual. The lag on the dairy price and the land-FEDE fixed point remain until G3.
-   - Still to do in G2d: the EU's and the supply-model regions' feed bulks (feedBlk_, feedBlkPrice_: eu_feed_use,
-     feed_bulk_price_ratio, sup_feed_use, feed_bulk_market_factor).
+   - **Second part, 4 November 2026 (branch step-g2b):** the feed bulks of the member states and of the non-EU
+     countries with supply models (feedBlkPrice_, feedShareEqu_: feedblk_function; feedBlk_'s response within the
+     market solve: feedblk_factor_function), in feed_ad.py; feed_bulk_price_ratio, eu_feed_use, sup_feed_use and
+     feed_bulk_market_factor evaluate them, the loops removed. test_feed_ad.py: equal to the loops at random prices,
+     with the 1e-6 price floor and the left-out terms (1e-12 relative). G2d is complete as functions; FEDE and the
+     bulks become unknowns of the NLP in G3.
 5. **G2e.** Processing and crushing. **Built 31 October 2026** (with G2c, same decision):
    capri_mod/market/processing_ad.py.
    - Written once: ProcessingMixin._crush_state (ProcMargO_, ProcNQ_, ProcFudge_, ProcO_, procYield_: crush_function)

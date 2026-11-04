@@ -84,16 +84,43 @@ class FeedMixin(MarketStateMixin):
         for (ms, b), el in E.items():
             if region is not None and self.eu_region_of_ms(ms) != region:
                 continue
-            s = 0.0
-            for y, e in el.items():
-                r = prices.get(y)
-                if r is None:
-                    continue
-                sv = float(seen.get(y, 1.0)) if seen is not None else 1.0
-                if r > 0 and sv > 0:
-                    s += e * np.log(float(r) / sv)
-            out[(ms, b)] = float(np.exp(s))
+            ys, f = self._feedblk_factor_fn(el)
+            r = np.array([float(prices.get(y, 1.0)) for y in ys])
+            sv = np.array([float(seen.get(y, 1.0)) if seen is not None else 1.0 for y in ys])
+            w = np.array([1.0 if (prices.get(y) is not None and ri > 0 and si > 0) else 0.0
+                          for y, ri, si in zip(ys, r, sv)])
+            out[(ms, b)] = float(f(r, sv, w))
         return out
+
+    def _feedblk_factor_fn(self, el: dict):
+        """(products, CasADi function) of feed_ad.feedblk_factor_function for one bulk's elasticities el (cached on el:
+        _feed_bulk_elas keeps its dicts while its inputs stay)."""
+        c_ = self.__dict__.setdefault("_fblk_factor_fns", {})
+        hit = c_.get(id(el))
+        if hit is not None and hit[0] is el:
+            return hit[1], hit[2]
+        from capri_mod.market.feed_ad import feedblk_factor_function
+        ys = list(el)
+        f = feedblk_factor_function(f"feedblk_factor_{len(c_)}", np.array([float(el[y]) for y in ys]))
+        c_[id(el)] = (el, ys, f)
+        return ys, f
+
+    def _feedblk_fn(self, d: dict):
+        """CasADi function of feed_ad.feedblk_function for one bulk d of _feed_bulk_params (cached on d, which the
+        params' cache keeps)."""
+        c_ = self.__dict__.setdefault("_fblk_fns", {})
+        hit = c_.get(id(d))
+        if hit is not None and hit[0] is d:
+            return hit[1]
+        from capri_mod.market.feed_ad import feedblk_function
+        f = feedblk_function(f"feedblk_{len(c_)}", d["s"], d["rho"], d["q0"])
+        c_[id(d)] = (d, f)
+        return f
+
+    @staticmethod
+    def _blk_ratios(d: dict, price_ratio: Dict[str, float]) -> np.ndarray:
+        """The bulk's products' price ratios (1 for a product without a model market or without a ratio)."""
+        return np.array([float(price_ratio.get(c, 1.0)) if c else 1.0 for c in d["comm"]])
 
 
     def _feed_bulk_params(self) -> dict:
@@ -176,9 +203,7 @@ class FeedMixin(MarketStateMixin):
         d = (fb.get("bulks") or {}).get((ms, bulk)) or (fb.get("bulks_sup") or {}).get((ms, bulk))
         if d is None:
             return 1.0
-        r = np.array([max(float(price_ratio.get(c, 1.0)), 1e-6) if c else 1.0 for c in d["comm"]])
-        rho = d["rho"]
-        return float((d["s"] * r ** (1.0 - rho)).sum()) ** (1.0 / (1.0 - rho))
+        return float(self._feedblk_fn(d)(self._blk_ratios(d, price_ratio), 1.0)[0])
 
     def eu_feed_use(self, price_ratio: Dict[str, float], region: Optional[str] = None,
                     bulk_factor: Optional[Dict[tuple, float]] = None) -> Dict[str, float]:
@@ -193,10 +218,8 @@ class FeedMixin(MarketStateMixin):
         for (ms, b), d in (fb.get("bulks") or {}).items():
             if region is not None and self.eu_region_of_ms(ms) != region:
                 continue
-            r = np.array([max(float(price_ratio.get(c, 1.0)), 1e-6) if c else 1.0 for c in d["comm"]])
-            rho = d["rho"]
-            pb = float((d["s"] * r ** (1.0 - rho)).sum()) ** (1.0 / (1.0 - rho))
-            q = d["q0"] * float(bix.get((ms, b), 1.0)) * float((bulk_factor or {}).get((ms, b), 1.0)) * (pb / r) ** rho
+            k = float(bix.get((ms, b), 1.0)) * float((bulk_factor or {}).get((ms, b), 1.0))
+            q = np.asarray(self._feedblk_fn(d)(self._blk_ratios(d, price_ratio), k)[1]).ravel()
             for c, x in zip(d["comm"], q):
                 if c:
                     out[c] = out.get(c, 0.0) + float(x)
@@ -213,10 +236,7 @@ class FeedMixin(MarketStateMixin):
         for (ms, b), d in (fb.get("bulks_sup") or {}).items():
             if ms not in ms0:
                 continue
-            r = np.array([max(float(price_ratio.get(c, 1.0)), 1e-6) if c else 1.0 for c in d["comm"]])
-            rho = d["rho"]
-            pb = float((d["s"] * r ** (1.0 - rho)).sum()) ** (1.0 / (1.0 - rho))
-            q = d["q0"] * float(bix.get((ms, b), 1.0)) * (pb / r) ** rho
+            q = np.asarray(self._feedblk_fn(d)(self._blk_ratios(d, price_ratio), float(bix.get((ms, b), 1.0)))[1]).ravel()
             for c, x in zip(d["comm"], q):
                 if c:
                     out[c] = out.get(c, 0.0) + float(x)

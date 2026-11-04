@@ -95,3 +95,34 @@ def feednq_function(name: str, a: dict, n_cols: int):
     ra, fede = ca.SX.sym("ra", n_cols), ca.SX.sym("fede")
     dq = ca.mtimes(ca.DM(a["H"]), ra - 1.0) + ca.DM(a["hF"]) * (fede - 1.0)
     return ca.Function(name, [ra, fede], [dq], ["ra", "fede"], ["dq"])
+
+
+def feedblk_function(name: str, s: np.ndarray, rho: float, q0: np.ndarray):
+    """CasADi Function (r[n], k) -> (pb, q[n]): one feed bulk of a member state or of a non-EU country with supply
+    models (CAPRI's arm/market_model.gms feedBlkPrice_, feedShareEqu_; the bulks of FeedMixin._feed_bulk_params):
+
+        feedBlkPrice_   pb = (sum_i s_i r_i^(1 - rho))^(1 / (1 - rho))
+        feedShareEqu_   q_i = q0_i k (pb / r_i)^rho
+
+    r the products' price ratios against the reference (floored at 1e-6, as feed.py; 1 for a product without a model
+    market), k the bulk's change against its base (the supply models' feed_bulk_index times the response within the
+    market solve, feed_bulk_market_factor), s the reference value shares, q0 the 2030 feed quantities (kt)."""
+    import casadi as ca
+    n = len(q0)
+    r, k = ca.SX.sym("r", n), ca.SX.sym("k")
+    rr = ca.fmax(r, 1e-6)
+    pb = ca.dot(ca.DM(np.asarray(s, float)), rr ** (1.0 - rho)) ** (1.0 / (1.0 - rho))
+    q = ca.DM(np.asarray(q0, float)) * k * (pb / rr) ** rho
+    return ca.Function(name, [r, k], [pb, q], ["r", "k"], ["pb", "q"])
+
+
+def feedblk_factor_function(name: str, e: np.ndarray):
+    """CasADi Function (r[n], sv[n], w[n]) -> f: the bulk's response within the market solve (CAPRI's feedBlk_ with
+    its constant at the supply models' bulk, audit M4), f = exp(sum_y w_y e_y log(r_y / sv_y)): e the bulk use's
+    elasticities to the products' prices (FeedMixin._feed_bulk_elas), r the region's price ratios, sv those its supply
+    models saw, w 1 where the price is given and both are positive (the term is left out otherwise, as feed.py)."""
+    import casadi as ca
+    n = len(e)
+    r, sv, w = ca.SX.sym("r", n), ca.SX.sym("sv", n), ca.SX.sym("w", n)
+    t = ca.DM(np.asarray(e, float)) * ca.log(ca.fmax(r, 1e-300) / ca.fmax(sv, 1e-300))
+    return ca.Function(name, [r, sv, w], [ca.exp(ca.dot(w, t))], ["r", "sv", "w"], ["f"])
