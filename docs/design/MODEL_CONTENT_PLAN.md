@@ -655,11 +655,11 @@ fine-grained token checked the same day; the token is kept outside the repositor
   git for a pipeline cache the pipeline rebuilds; a few may be kept deliberately where worth reviewing. Each of the 50
   classified one by one first (some are extracts made inside a builder, e.g. the PMP terms read from CAPRI's GDX).
   Done with the Parquet conversion of this section.
-- The `dat` mirror on Hugging Face (hf_capri) holds CAPRI's GDX files as Parquet only, and not all of them (e.g.
-  holdingsLSU.gdx is missing), and none of the parameters CAPRI writes in its `.gms` data files (e.g. p_PEATSH_def in
-  dat/envind/lulucf_emissions_original_source.gms). The converter (step 1) covers both: the missing GDX files and the
-  data parameters of `dat`'s `.gms` files, one Parquet file per symbol; capri_sources/dat_local/ (the files the project
-  lead supplied on 4 November 2026) merges into `dat` in the published set.
+- The published set is converted from CAPRI's own files (the project lead's installation and exports), not from the
+  JRC's Hugging Face mirror of `dat` (hf_capri), which is not a dependency (the project lead, 4 November 2026). The
+  converter (step 1) therefore covers CAPRI's GDX files and the data parameters CAPRI writes in its `.gms` data files
+  (e.g. p_PEATSH_def in dat/envind/lulucf_emissions_original_source.gms), one Parquet file per symbol;
+  capri_sources/dat_local/ (the files the project lead supplied on 4 November 2026) is part of it.
 - The model's inputs are organised by role, not by a year in the folder name (with the renaming above, so paths change
   once): capri_data/<base_year>/ holds the base year's data only; capri_data/baselines/capri_ref_2030/ everything taken
   from CAPRI's 2030 reference run (on 4 November 2026 spread over 40 of the 216 files of capri_data/2017/, e.g. the

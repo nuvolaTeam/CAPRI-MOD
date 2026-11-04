@@ -84,8 +84,7 @@ Each folder is listed with what it holds, where it comes from, and the builders 
 `scen/ghgtech/holdingsLSU.gdx` (p_holdLSU).
 - From: the project lead's CAPRI installation (4 November 2026).
 - Read by: extract_capri_dat_local (p_PEATSH_def, p_holdLSU); convert_sources_to_csv (p_LUUnits).
-- Goes to the Hugging Face set with the rest of capri_sources, merged into the `dat` mirror there (MODEL_CONTENT_PLAN
-  §12b).
+- Goes to the Hugging Face set with the rest of capri_sources (MODEL_CONTENT_PLAN §12b).
 
 **`gdxlib/`**: GAMS's GDX library, `libgdxcclib64.so`. This is software, not data.
 - From: built from the open-source GDX library (MIT; README section 3). No GAMS installation or licence is needed.
