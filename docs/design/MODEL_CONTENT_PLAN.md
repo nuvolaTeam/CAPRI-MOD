@@ -677,7 +677,7 @@ fine-grained token checked the same day; the token is kept outside the repositor
 | Market on 45 RM (stages 1-3, 2017 year, TARV, young-animal timing) | refactor finished; full scenario runs | inventory and decisions done; WBA fix done; **stage 1 done 3 November 2026** (MRI "Stage 1, done"); stages 2-3 not started | stage of the TARV switch and 2017 rebuild; link of stage 2's young-animal fix with G2g; gate batching | MRI |
 | Ports (stages 4-7: bilateral and global TRQs, DEP-41, levies, entry prices, land and yield block) | market move stages 1-3 | data activation checked (G3I); not started | ports before G3 or as G3 equations; luc_market not in scope | MRI §5; G3I |
 | 29 non-EU units | market move (MRI §7) | SND steps 1-2 done; step 3 half done (250-unit table on noneu-step3, not merged); steps 4-10 to do | default country list after the build [I] | SND |
-| S1/S2 (and DEP-42) | refactor stages 3-5; N6 | decided 1 Nov (S1 option c; S2 explicit); data and code not started; DEP-42 on n6 branches | none stated | S12 |
+| S1/S2 (and DEP-42) | refactor stages 3-5; N6 | decided 1 Nov (S1 option c; S2 explicit); data and code not started; DEP-42 on n6 branches; **the project lead, 4 Nov: close the activity gap with CAPRI** (S2's splits; NECR held fixed as CAPRI's FACT, 251 kha in the EU's 2030; calves and heifers by sex with S9) | none stated | S12 |
 | Step G (G2b, G2d, G2f, G2g; G3) | G2b on refactor stage 4; G3 after market move | G1, G2a, G2c, G2e built; G3 on standby | G3: bound policy, objective with squareness check, validation on sim_ini; fudge activation; scaling | MID; GR; G3I |
 | S3 | — | decided and implemented (narrowed form); base checked; in gate 14's code | none stated | SGP S3 |
 | S5 | — | closed: hold kept (DEP-15) | none | SGP S5 |
