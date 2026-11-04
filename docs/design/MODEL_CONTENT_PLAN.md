@@ -666,7 +666,9 @@ fine-grained token checked the same day; the token is kept outside the repositor
   from CAPRI's 2030 reference run (on 4 November 2026 spread over 40 of the 216 files of capri_data/2017/, e.g. the
   2030 PMP terms, market state, rents, N coefficients and CAP ceilings, over capri_data/trajectories/ and over
   capri_data/scenarios/capri_ref_2030/), a CAPTRD-MOD baseline as another package (baselines/captrd_2030/), the run
-  choosing its baseline package; capri_data/scenarios/ the policy scenarios only. A move: each of the 40 files
+  choosing its baseline package; capri_data/scenarios/ the policy scenarios, and under scenarios/groups/ the data a
+  scenario group shares, as CAPRI's pol_input files (the project lead, 4 November 2026: greendeal_group moves to
+  scenarios/groups/greendeal/, held once, read by every Green Deal scenario). A move: each of the 40 files
   classified first (a _2030 file that is in fact a base-year input is put to the project lead, not moved blindly);
   loaders, builders, declarations and pipeline outputs follow; every model input rebuilt identically.
 
