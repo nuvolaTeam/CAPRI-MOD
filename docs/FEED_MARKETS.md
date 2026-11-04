@@ -49,7 +49,7 @@ The supply models buy feed as bulks; the market splits each member state's bulk 
   use, crushing included); it is applied as a correction of the row, so crushing demand already in the row is kept.
   The dairy products' feed use comes from the FMIL bulks ([DAIRY_PROCESSING.md](DAIRY_PROCESSING.md)).
 - Norway (its own market region NO000000 since 21 October 2026, KNOWN_ISSUES K56; CAPRI's RMSSUP, so `feedBlkPrice_` and
-  `feedShareEqu_` hold for it, `FeedBal_` does not): its bulks (`feed_bulks_no.csv`: CAPRI's 2030 FEED and ARM1P of
+  `feedShareEqu_` hold for it, `FeedBal_` does not): its bulks (`feed_bulks_noneu.csv`: CAPRI's 2030 FEED and ARM1P of
   NO000000, and its use HCOM + FEDM + INDM + BIOF + LOSM + PRCM per product) give its supply models' bulk price
   indices at Norway's prices and its feed use per product at Norway's Arm1 price ratios (`MarketModule.sup_feed_use`),
   following its herds (`_feed_bulk_index` of NO000000, its own FMIL index `_fmil_index_sup`), on CAPRI's feed share of

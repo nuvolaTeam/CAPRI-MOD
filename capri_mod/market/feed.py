@@ -142,10 +142,10 @@ class FeedMixin(MarketStateMixin):
             # its supply models' bulk price indices at its own market's prices, and its feed demand per product
             # following its herds, in its own market region NO000000 (KNOWN_ISSUES K56; not part of the EU's feed demand).
             # The feed share of Norway's use per commodity: CAPRI's 2030 feed over its use (HCOM + FEDM + INDM + BIOF
-            # + LOSM + PRCM, feed_bulks_no.csv use_kt), as the EU's (feed_bulks_eu_share.csv)
-            if out and inp.exists("feed_bulks_no.csv"):
+            # + LOSM + PRCM, feed_bulks_noneu.csv use_kt), as the EU's (feed_bulks_eu_share.csv)
+            if out and inp.exists("feed_bulks_noneu.csv"):
                 pno, f0s, u0s, ms_reg = {}, {}, {}, {ms: k for k, v in self.SUP_NONEU_MS.items() for ms in v}
-                tno = inp.csv("feed_bulks_no.csv", keep_default_na=False)
+                tno = inp.csv("feed_bulks_noneu.csv", keep_default_na=False)
                 for (ms, b), g in tno.groupby(["ms", "bulk"], sort=True):
                     q0 = g["feed_kt"].astype(float).values
                     v0 = q0 * g["arm1p"].astype(float).values

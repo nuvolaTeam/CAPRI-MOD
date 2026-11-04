@@ -209,7 +209,7 @@ def test_norway_raw_milk_responds_inside_the_market(data):
         mm.par.supply_hessian = None
 
 def test_norway_feed_and_dairy_follow_its_supply_models(data):
-    """Norway's feed bulks (feed_bulks_no.csv, CAPRI NO000000 FEED and ARM1P) give its feed use at base, and the feed
+    """Norway's feed bulks (feed_bulks_noneu.csv, CAPRI NO000000 FEED and ARM1P) give its feed use at base, and the feed
     share of its use is CAPRI's (FEED over HCON + FEED + PROC + BIOF + INDM + LOSM); its dairy block takes its raw
     milk from its supply models: less milk raises Norway's raw milk price."""
     from capri_mod.market.market_module import MarketModule

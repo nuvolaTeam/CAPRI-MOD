@@ -20,7 +20,7 @@ function, and their feed use (e.g. 96% of ROW's soybean cake) fell on the generi
 CAPRI region -> trade region: the market's grouping step, tools/lib/_market_regions.py: codes/model_market_regions.csv (as tools/build/build_processing_nq.py), over
 CAPRI's 80 behavioural regions; EU member states are left out (EU feed comes from the supply models' feed bulks,
 tools/build/build_feed_bulks.py). Norway (trade region NO000000 since KNOWN_ISSUES K56) has no p_ElasFeed either: its feed
-comes from its supply models through its bulks (feed_bulks_no.csv), as CAPRI's. REGISTERED: CAPRI's other
+comes from its supply models through its bulks (feed_bulks_noneu.csv), as CAPRI's. REGISTERED: CAPRI's other
 supply-model regions (United Kingdom, the Western Balkans, Turkey) have no p_ElasFeed - their feed comes from CAPRI's
 supply models, which capri-mod does not have for them: in ROW their feed counts in the feed share and follows the
 elasticities of ROW's other regions; Turkey, a trade region of its own, keeps the generic own-price response.

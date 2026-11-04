@@ -25,7 +25,7 @@ since 18 October 2026); OLIC, OTHC have no model market: their prices stay at th
 
 Outputs (capri_data/2017/market/)
   feed_bulks_eu.csv         ms, bulk, product, commodity, feed_kt, arm1p, rho
-  feed_bulks_no.csv         the same for Norway (its own ARM1P; KNOWN_ISSUES K56), plus use_kt (Norway's use of the
+  feed_bulks_noneu.csv         the same for Norway (its own ARM1P; KNOWN_ISSUES K56), plus use_kt (Norway's use of the
                             product, HCOM + FEDM + INDM + BIOF + LOSM + PRCM): the price indices of its supply models'
                             feed bulks and its feed demand in its own market region NO000000
   feed_bulks_eu_share.csv   commodity, feed_kt, use_kt, share  (EU27 2030 reference: FEDM / (HCOM + FEDM + INDM
@@ -61,7 +61,7 @@ BULKS = {"FCER": ("WHEA", "RYEM", "BARL", "OATS", "MAIZ", "OCER", "RICE"),
          "FOTH": ("POTA", "RAPE", "SUNF", "SOYA", "OLIV", "OOIL", "TEXT", "TOMA", "OVEG", "APPL", "OFRU", "CITR",
                   "TAGR", "TABO", "TWIN", "SUGA", "EGGS", "PORK", "BEEF"),
          "FMIL": ("SMIP", "WMIO", "CASE", "WHEP", "BUTT", "CREM", "COCM", "CHES", "FRMI")}
-#: CAPRI's balance items of domestic use (the EU's feed share of use below; Norway's in feed_bulks_no.csv)
+#: CAPRI's balance items of domestic use (the EU's feed share of use below; Norway's in feed_bulks_noneu.csv)
 USE_ITEMS = ("HCOM", "FEDM", "INDM", "BIOF", "LOSM", "PRCM")
 COMMODITY = {"WHEA": "SWHE", "MAIZ": "CORN", "RYEM": "RYEM", "OATS": "OATS", "OCER": "OCER", "RICE": "PARI",
              "OLIO": "OLIV", "BARL": "BARL", "PULS": "PULS", "RAPO": "RAPO", "SUNO": "SUNO", "SOYO": "SOYO",
@@ -177,8 +177,8 @@ def main():
                           for x in GROUPS.get(COMMODITY.get(p, ""), (p,)))
                 no.append(dict(ms="NO000000", bulk=b, product=p, commodity=COMMODITY.get(p, ""), feed_kt=q, arm1p=pr,
                                rho=rho_no[b], use_kt=use))
-    pd.DataFrame(no).to_csv(DEST / "feed_bulks_no.csv", index=False)
-    print(f"feed_bulks_no.csv: {len(no)} rows (Norway's bulks: price indices and feed demand)")
+    pd.DataFrame(no).to_csv(DEST / "feed_bulks_noneu.csv", index=False)
+    print(f"feed_bulks_noneu.csv: {len(no)} rows (Norway's bulks: price indices and feed demand)")
     bal = json.load(open(ROOT / "capri_data" / "validation" / "capri_eu27_market_balance_2030_ref.json"))["products"]
     sh = []
     for c, grp in GROUPS.items():

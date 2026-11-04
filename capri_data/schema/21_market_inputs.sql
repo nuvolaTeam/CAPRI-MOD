@@ -46,8 +46,8 @@ INSERT INTO value_units VALUES
   ('feed_bulks_eu', 'arm1p', 'U_EuPerTon', 'capri', 'CAPRI''s ARM1P (EUR/t)'),
   ('feed_bulks_eu', 'rho', 'U_Elasticity', 'capri', 'CAPRI''s p_rhoFeed, the substitution elasticity of the products in the bulk');
 
--- file: capri_data/2017/market/feed_bulks_no.csv
-CREATE TABLE feed_bulks_no (
+-- file: capri_data/2017/market/feed_bulks_noneu.csv
+CREATE TABLE feed_bulks_noneu (
     ms VARCHAR NOT NULL REFERENCES capri_rall (code),
     bulk VARCHAR NOT NULL CHECK (bulk IN ('FCER', 'FPRO', 'FENE', 'FOTH', 'FMIL')),
     product VARCHAR NOT NULL REFERENCES capri_xx (code),
@@ -58,12 +58,12 @@ CREATE TABLE feed_bulks_no (
     use_kt DOUBLE NOT NULL CHECK (use_kt >= 0),
     PRIMARY KEY (ms, product)
 );
-COMMENT ON TABLE feed_bulks_no IS 'Norway''s feed bulks (KNOWN_ISSUES K56): CAPRI''s 2030 FEED and ARM1P of NO000000 and its use HCOM + FEDM + INDM + BIOF + LOSM + PRCM per product (tools/build/build_feed_bulks.py)';
+COMMENT ON TABLE feed_bulks_noneu IS 'Norway''s feed bulks (KNOWN_ISSUES K56): CAPRI''s 2030 FEED and ARM1P of NO000000 and its use HCOM + FEDM + INDM + BIOF + LOSM + PRCM per product (tools/build/build_feed_bulks.py)';
 INSERT INTO value_units VALUES
-  ('feed_bulks_no', 'feed_kt', 'U_1000t', 'capri', 'CAPRI''s FEED (1000 t)'),
-  ('feed_bulks_no', 'arm1p', 'U_EuPerTon', 'capri', 'CAPRI''s ARM1P (EUR/t)'),
-  ('feed_bulks_no', 'rho', 'U_Elasticity', 'capri', 'CAPRI''s p_rhoFeed'),
-  ('feed_bulks_no', 'use_kt', 'U_1000t', 'capri', 'CAPRI''s HCOM + FEDM + INDM + BIOF + LOSM + PRCM (1000 t)');
+  ('feed_bulks_noneu', 'feed_kt', 'U_1000t', 'capri', 'CAPRI''s FEED (1000 t)'),
+  ('feed_bulks_noneu', 'arm1p', 'U_EuPerTon', 'capri', 'CAPRI''s ARM1P (EUR/t)'),
+  ('feed_bulks_noneu', 'rho', 'U_Elasticity', 'capri', 'CAPRI''s p_rhoFeed'),
+  ('feed_bulks_noneu', 'use_kt', 'U_1000t', 'capri', 'CAPRI''s HCOM + FEDM + INDM + BIOF + LOSM + PRCM (1000 t)');
 
 -- file: capri_data/2017/market/feed_bulks_eu_share.csv
 CREATE TABLE feed_bulks_eu_share (
@@ -121,17 +121,17 @@ WHERE code NOT IN (SELECT code FROM capri_rall);
 
 -- rule: a CAPRI feed product belongs to one bulk and one model commodity, the same in the EU's and Norway's tables
 SELECT product, count(DISTINCT bulk) AS bulks, count(DISTINCT commodity) AS commodities FROM (
-    SELECT product, bulk, commodity FROM feed_bulks_eu UNION ALL SELECT product, bulk, commodity FROM feed_bulks_no) t
+    SELECT product, bulk, commodity FROM feed_bulks_eu UNION ALL SELECT product, bulk, commodity FROM feed_bulks_noneu) t
 GROUP BY product HAVING count(DISTINCT bulk) > 1 OR count(DISTINCT commodity) > 1;
 
 -- rule: a CAPRI feed product's bulk is CAPRI's market one, FEED_TO_XX: FEED_TO_O within the market products plus
 -- wheat WHEA (the market's aggregate of SWHE and DWHE) in FCER (arm/arm_sets.gms l. 508-509)
-SELECT DISTINCT b.bulk, b.product FROM (SELECT bulk, product FROM feed_bulks_eu UNION SELECT bulk, product FROM feed_bulks_no) b
+SELECT DISTINCT b.bulk, b.product FROM (SELECT bulk, product FROM feed_bulks_eu UNION SELECT bulk, product FROM feed_bulks_noneu) b
 WHERE NOT EXISTS (SELECT 1 FROM capri_feed_to_o f WHERE f.feed = b.bulk AND f.row = b.product)
   AND NOT (b.bulk = 'FCER' AND b.product = 'WHEA');
 
 -- rule: one rho per bulk and region (p_rhoFeed is per bulk)
-SELECT ms, bulk FROM (SELECT ms, bulk, rho FROM feed_bulks_eu UNION ALL SELECT ms, bulk, rho FROM feed_bulks_no) t
+SELECT ms, bulk FROM (SELECT ms, bulk, rho FROM feed_bulks_eu UNION ALL SELECT ms, bulk, rho FROM feed_bulks_noneu) t
 GROUP BY ms, bulk HAVING count(DISTINCT rho) > 1;
 
 -- rule: the feed shares' commodities are commodities of the EU's bulks

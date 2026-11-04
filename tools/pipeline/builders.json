@@ -1898,7 +1898,7 @@
     "capri_data/2017/feed/feed_cereal_mix_2030.csv",
     "capri_data/2017/market/feed_bulks_eu.csv",
     "capri_data/2017/market/feed_bulks_eu_share.csv",
-    "capri_data/2017/market/feed_bulks_no.csv",
+    "capri_data/2017/market/feed_bulks_noneu.csv",
     "capri_data/sources/market/feed_bulks_dataout_2030.csv"
    ]
   },

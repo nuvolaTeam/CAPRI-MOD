@@ -1834,7 +1834,7 @@
    },
    "catalogue_note": "Feed share of EU use per model commodity in the bulks (CAPRI 2030 reference FEED / (HCOM+FEDM+INDM+BIOF+LOSM)); tools/build/build_feed_bulks.py. (not re-checked)"
   },
-  "capri_data/2017/market/feed_bulks_no.csv": {
+  "capri_data/2017/market/feed_bulks_noneu.csv": {
    "description": "Norway's feed bulks (KNOWN_ISSUES K56): CAPRI's 2030 FEED and ARM1P of NO000000 and its use HCOM + FEDM + INDM + BIOF + LOSM + PRCM per product (tools/build/build_feed_bulks.py)",
    "kind": "base",
    "vintage": "2030",

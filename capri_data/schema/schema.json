@@ -11663,8 +11663,8 @@
     "tests": []
    }
   },
-  "feed_bulks_no": {
-   "file": "capri_data/2017/market/feed_bulks_no.csv",
+  "feed_bulks_noneu": {
+   "file": "capri_data/2017/market/feed_bulks_noneu.csv",
    "declared_in": "21_market_inputs.sql",
    "layout": [],
    "comment": "Norway's feed bulks (KNOWN_ISSUES K56): CAPRI's 2030 FEED and ARM1P of NO000000 and its use HCOM + FEDM + INDM + BIOF + LOSM + PRCM per product (tools/build/build_feed_bulks.py)",

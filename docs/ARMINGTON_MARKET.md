@@ -108,7 +108,7 @@ Supply (`supply_response`, region_ratio given):
 
 Use (`demand_response`, at the consumer price PA_i): CAPRI's GL food demand on the human-consumption share of use;
 feed (EU and Norway: CAPRI's feed bulks following the supply models' herds, [FEED_MARKETS.md](FEED_MARKETS.md),
-Norway's from `feed_bulks_no.csv` on CAPRI's feed share of its use; other non-EU regions: p_ElasFeed, which CAPRI
+Norway's from `feed_bulks_noneu.csv` on CAPRI's feed share of its use; other non-EU regions: p_ElasFeed, which CAPRI
 has only outside RMSSUP); processing (ProcNQ_);
 crushing; biofuel feedstocks and biofuel use; dairy products; the remaining share of use keeps an own-price response
 QD0 (P/P0)^eta.
