@@ -225,6 +225,7 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
         k = _et_key(settings)
         if getattr(self.par, "endotech_key", None) == k:
             return
+        self.supply_module.set_mitigation_scope(settings)
         tab = scale_genetics(self.data.get("genetics_effects_unit"), settings)
         self.data["genetics_effects"] = tab
         self.supply_module.set_genetics_effects(tab, k)

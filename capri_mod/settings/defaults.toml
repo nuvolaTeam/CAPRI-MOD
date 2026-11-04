@@ -374,6 +374,8 @@ ghgTechLowNFeed = 1.0
 ghgTechLineNitr = 1.0
 # %fixGenet_eff_to_iniValues% (breeding.gms l. 65-77): MaxShare 0.002 of the breeding options
 fixGenetToIni = 1.0
+# %fallowInAllRmssup% (no_histosols.gms l. 22-26): histosol fallowing outside the EU too, 1 on (MitiInAllRmssup on)
+fallowInAllRmssup = 1.0
 
 [diagnostics]
 verbose = true

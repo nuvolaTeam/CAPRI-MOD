@@ -2,7 +2,9 @@
 
 CAPRI (envind/prep_lulucf_carbon.gms, calc_lulucf_carbon.gms, gases.gms, no_histosols.gms):
   * share of cropland and grassland on organic soil: p_shareOrganicSoil(crop) = p_OrgSoilOri(soc_regN2_rk),
-    (grslnd) = sog_regN2_rk of the region; a missing record is zero (EU, UK, Norway: p_OrgSoilNoGap);
+    (grslnd) = sog_regN2_rk of the region; a missing record is zero (EU, UK, Norway: p_OrgSoilNoGap); the Western
+    Balkans and Turkey fill it: the country's JRC share, else FAO's peat share, else p_peatsh_def / 100, grassland
+    taking the cropland share;
   * emissions per ha of the land-use class (p_BioHisBur, t per ha):
         share x sum_climzone p_sharClim(climzone, class) x p_emifacOrganicSoil(class, climzone, gas) x 0.001
         x 44/28 (N2O) or 44/12 (CO2, CH4 as CAPRI writes it);
@@ -27,6 +29,8 @@ Written: capri_data/2017/environment/histosol.csv, per model region and class (c
                     2017 money: CAPRI's 2030 marginals over its 2030/2017 input deflator)
 
 Sources: sources/envind/orgsoil_share_p_orgsoilori.csv, ipcc_wetlands_p_emifacOrganicSoil_ori.csv,
+sources/capri_dat/envind/fao_peatland_P.csv and lulucf_emissions_original_source_p_PEATSH_def.csv (the fallbacks of the
+Western Balkans and Turkey; the WBA6 set from sets.gms),
 fao_landuse_2000_P.csv (the project lead's gdxdumps, converted by tools/build/convert_sources_to_csv.py); FAO
 country codes from the GAMS source (global/fao_codes_new.gms FAORegions_map); sources/ghgtech/capri_costsavings_2030.csv; CROP and GRAS 2030 levels
 from validation/greendeal_2030/capri_marginal_terms_ini_2030.csv.xz; deflator from
@@ -77,18 +81,32 @@ def _load(path):
 
 
 def fao_map(gams_dir: Path) -> dict:
-    """{FAO code: CAPRI member state} from FAORegions_map in global/fao_codes_new.gms."""
+    """{CAPRI country: FAO codes}, CAPRI's Map_FAO_reg (envind/prep_lulucf_carbon.gms l. 28-32): FAORegions_map of
+    global/fao_codes_new.gms (Turkey's code TUR included since 4 November 2026), and FAO's former Serbia and Montenegro
+    (186) for Serbia, Montenegro and Kosovo, FAO's Serbia (272) for Serbia and Kosovo."""
     txt = open(gams_dir / "global" / "fao_codes_new.gms", errors="ignore").read()
     i = txt.index("SET FAORegions_map(")
-    out = {}
+    out = defaultdict(set)
     for line in txt[i:].splitlines()[1:]:
         if line.strip().startswith("/;"):
             break
-        m = re.match(r"^\s*([A-Z]{2}000000)\.\(([^)]*)\)", line)
+        m = re.match(r"^\s*([A-Z]{2}000000|TUR)\.\(([^)]*)\)", line)
         if m:
             for code in m.group(2).split(","):
-                out[code.strip()] = m.group(1)
+                out[m.group(1)].add(code.strip())
+    for ms in ("CS000000", "MO000000", "KO000000"):
+        out[ms].add("186")
+    for ms in ("CS000000", "KO000000"):
+        out[ms].add("272")
     return out
+
+
+def gap_countries(gams_dir: Path) -> set:
+    """CAPRI's countries whose missing organic-soil share is filled (not p_OrgSoilNoGap, prep_lulucf_carbon.gms l. 252):
+    the Western Balkans (sets.gms NUTS0_WBA6) and Turkey; elsewhere a missing JRC record is zero."""
+    txt = open(gams_dir / "sets.gms", errors="ignore").read()
+    m = re.search(r"SET\s+NUTS0_WBA6\s*/(.*?)/\s*;", txt, re.S | re.I)
+    return {ln.split()[0] for ln in m.group(1).splitlines() if ln.strip() and not ln.strip().startswith("*")} | {"TUR"}
 
 
 def relsubs_pmp(cs0, cs1, cpl, ini, mx):
@@ -119,13 +137,27 @@ def main():
     lu = defaultdict(lambda: defaultdict(float))
     for r in _records("fao_landuse_2000_P.csv"):
         lu[r["fao_code"]][(r["climate_zone"], r["land_use"])] += float(r["value"])
-    f2c = fao_map(a.gams_dir)
+    c2f = fao_map(a.gams_dir)
     clim = defaultdict(lambda: defaultdict(float))        # MS -> (zone, lu) -> area
-    for code, rec in lu.items():
-        ms = f2c.get(code)
-        if ms:
-            for k, v in rec.items():
+    for ms, codes in c2f.items():
+        for code in codes:
+            for k, v in lu.get(code, {}).items():
                 clim[ms][k] += v
+    gap = gap_countries(a.gams_dir)
+    peat = {r["fao_code"]: float(r["value"]) for r in csv.DictReader(open(
+        SRC / "capri_dat" / "envind" / "fao_peatland_P.csv", newline=""))}
+    peat_def = {r["region"]: float(r["value"]) for r in csv.DictReader(open(
+        SRC / "capri_dat" / "envind" / "lulucf_emissions_original_source_p_PEATSH_def.csv", newline=""))}
+
+    def national_crop_share(ms):
+        """CAPRI's cropland share of a country that fills its gaps (prep_lulucf_carbon.gms l. 245-259): its JRC record,
+        else FAO's peat share of its FAO regions, else p_peatsh_def / 100."""
+        v = org.get(ms, {}).get("soc_regN2_rk", 0.0)
+        if not v:
+            v = sum(peat.get(c, 0.0) for c in c2f.get(ms, ()))
+        if not v:
+            v = peat_def.get(ms, 0.0) / 100.0
+        return v
 
     def zone_shares(ms, cls):
         rec = clim.get(ms, {})
@@ -155,9 +187,8 @@ def main():
     to_c8 = _mr_.region_to_capri()          # correspondence + NUTS splits and merges (tools/lib/_model_regions.py)
     rows = []
     for reg in mr.model_regions():
-        if mr.national_code(reg) not in mr.EU_MS:
-            continue                  # outside CAPRI's EU histosol option (rmssup_histo: EU); until 4 November 2026 only
-            # Norway was skipped, the one unit outside the EU then (CAPRI's fallowInAllRmssup: SUPPLY_NONEU_DESIGN step 6)
+        # every supply region: the histosol emissions are CAPRI's in all of them; the fallowing outside the EU is a run
+        # setting (fallowInAllRmssup, capri_mod/policy/endotech.py). Until 4 November 2026 EU units only.
         ms = mr.national_code(reg)
         c8 = to_c8.get(reg)
         # CAPRI: the JRC share of the region; a missing record is zero for every NUTS 0 of the EU, the UK and Norway
@@ -166,6 +197,14 @@ def main():
         # zero: a reproduction error of capri-mod (KNOWN_ISSUES K112).
         src = c8
         sh = {"crop": org.get(src, {}).get("soc_regN2_rk"), "grslnd": org.get(src, {}).get("sog_regN2_rk")}
+        if ms in gap:
+            # the Western Balkans and Turkey (prep_lulucf_carbon.gms l. 261-266): a region without either share takes
+            # its country's cropland share; grassland without a share takes the cropland one ("questionable fall back,
+            # but no better information", CAPRI's comment)
+            if not (sh["crop"] or sh["grslnd"]):
+                sh["crop"], src = national_crop_share(ms), ms
+            if not sh["grslnd"]:
+                sh["grslnd"] = sh["crop"]
         rec = {"region": reg, "capri_region": src}
         for cls in ("crop", "grslnd"):
             t = TAG[cls]
@@ -199,6 +238,11 @@ def main():
             rec["n2o_t_ha_grass"] = rec["n2o_t_ha_crop"]
         rows.append(rec)
     out = pd.DataFrame(rows).set_index("region")
+    # the declared column order (capri_data/schema/17_environment.sql), whichever region comes first
+    cols = ["capri_region"] + [f"{k}_{t}" for t in ("crop", "grass") for k in ("ef_n2o", "n2o_t_ha", "co2_t_ha",
+                                                                                "ch4_t_ha", "share")]
+    cols += [f"{k}_{t}" for t in ("grass", "crop") for k in ("cs0", "cs1", "maxshare", "cost_lin", "pmp_lin", "pmp_sqr")]
+    out = out[cols]
     dest = ROOT / "capri_data" / "2017" / "environment" / "histosol.csv"
     out.to_csv(dest)
     print(f"wrote {dest.name}: {len(out)} regions; cropland share median {out.share_crop.median():.4f}, "

@@ -2483,6 +2483,22 @@
    ]
   },
   {
+   "task": "extract_capri_dat",
+   "builder": "extract_capri_dat",
+   "args": [],
+   "inputs": [],
+   "code": [
+    "tools/build/extract_capri_dat.py",
+    "tools/lib/paths.py"
+   ],
+   "external": [
+    "$SOURCES/dat/envind/fao_peatland/P.parquet"
+   ],
+   "outputs": [
+    "capri_data/sources/capri_dat/envind/fao_peatland_P.csv"
+   ]
+  },
+  {
    "task": "build_histosol",
    "builder": "build_histosol",
    "args": [],
@@ -2490,6 +2506,8 @@
     "capri_data/shared/capri_member_state_codes.csv",
     "capri_data/shared/eu_market_blocks.csv",
     "capri_data/shared/regional_units.csv",
+    "capri_data/sources/capri_dat/envind/fao_peatland_P.csv",
+    "capri_data/sources/capri_dat/envind/lulucf_emissions_original_source_p_PEATSH_def.csv",
     "capri_data/sources/envind/fao_landuse_2000_P.csv",
     "capri_data/sources/envind/ipcc_wetlands_p_emifacOrganicSoil_ori.csv",
     "capri_data/sources/envind/orgsoil_share_p_orgsoilori.csv",
@@ -2503,7 +2521,8 @@
     "tools/lib/paths.py"
    ],
    "external": [
-    "$SOURCES/gams/global/fao_codes_new.gms"
+    "$SOURCES/gams/global/fao_codes_new.gms",
+    "$SOURCES/gams/sets.gms"
    ],
    "outputs": [
     "capri_data/2017/environment/histosol.csv"

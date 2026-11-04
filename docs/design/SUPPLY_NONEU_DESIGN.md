@@ -122,6 +122,11 @@ built. No proxy.
   outside the EU (abatement._catc_spec) and build_histosol leaves Norway out. This concerns Norway in today's Green
   Deal runs already. Decision of the project lead (30 October 2026): aligned with CAPRI when the 29 come in, for
   Norway too.
+  - Histosols done (4 November 2026): build_histosol writes every supply region by CAPRI's rules (section 5's row;
+    the non-EU rows match CAPRI's Green Deal 2030 N2OHIS per ha to 2e-6), and fallowing outside the EU follows the
+    endotech setting fallowInAllRmssup (capri_mod/policy/endotech.py; default 1 as star 3.0's Green Deal reference,
+    0 in the JRC121368-era settings). Two EU errors found on the way: KNOWN_ISSUES K112.
+  - Winter cover outside the EU: still to do (winterCovInAllRmssup).
 
 - **The "EU-wide" price fallback** (build_eu_producer_prices) averages over all model regions. With the 29 it would
   no longer be the EU's. CAPRI's rule for Turkey's prices is read (section 5: TUR is its own market and supply

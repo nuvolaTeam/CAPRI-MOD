@@ -2650,6 +2650,24 @@ def test_histosol_n2o_per_ha_as_capris_regional_results(data):
         assert abs(got - v) <= 1e-5 * max(v, 1.0), (reg, cls, got, v)
     assert h.loc["EL110000", "share_grass"] == 0.0          # the fallowing keeps its class's share
 
+def test_histosol_outside_the_eu_as_capris_regional_results():
+    """SUPPLY_NONEU_DESIGN step 6: the histosols of every supply region, CAPRI's rules: the JRC record (Norway, the UK;
+    a missing one zero), and for the Western Balkans and Turkey the country's JRC share, else FAO's peat share (Albania,
+    Bosnia), else p_peatsh_def / 100 (Croatia's 0.06% for Serbia, Montenegro, Kosovo, North Macedonia; Turkey 0),
+    grassland taking the cropland share. Anchors: CAPRI's Green Deal 2030 ini results, N2OHIS of ARAB and GRAS in kg N2O
+    per ha (res_2_1730greendeal_refpol_endotech_all_inidefaulta). The table holds every unit (the run drops those
+    not in it)."""
+    import pandas as pd
+    h = pd.read_csv(DATA_DIR / "2017" / "environment" / "histosol.csv", index_col="region")
+    capri = {("AL000000", "crop"): 0.0100177887, ("AL000000", "grass"): 0.0036218123,
+             ("CS000000", "crop"): 0.0122571306, ("CS000000", "grass"): 0.0044314197,
+             ("NO080000", "crop"): 0.6453195565, ("NO080000", "grass"): 0.0033704466,
+             ("UKJ00000", "crop"): 0.0035678507, ("UKJ00000", "grass"): 0.0040282762, ("TR100000", "crop"): 0.0}
+    for (reg, cls), v in capri.items():
+        got = 1000.0 * float(h.loc[reg, f"n2o_t_ha_{cls}"])
+        assert abs(got - v) <= 1e-5 * max(v, 1e-3), (reg, cls, got, v)
+    assert h.loc["NO080000", "pmp_sqr_crop"] > 0 and pd.isna(h.loc["TR100000", "pmp_sqr_crop"])
+
 def test_manure_n2o_by_source_and_technology_effects():
     """CAPRI's manure N2O by stage (gases.gms): per t of manure N, housing/storage, application and
     grazing shares near IPCC's 1-2% in total; CAPRI's technology effects as its housing equation applies

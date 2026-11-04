@@ -747,7 +747,7 @@
    "vintage": "2017",
    "domain": "environment",
    "status": "live",
-   "rows": 215,
+   "rows": 250,
    "columns": 24,
    "units": "to be established (value_units: open)",
    "read_by_model": [
@@ -5443,6 +5443,17 @@
    "origin": {
     "nature": "source-extract",
     "builder": "convert_sources_to_csv"
+   }
+  },
+  "capri_data/sources/capri_dat/envind/fao_peatland_P.csv": {
+   "description": "CAPRI's P(FAOregions) of dat/envind/fao_peatland.gdx, loaded as p_PEATSH \"Share of peatland in arable land\" (envind/lulucf_carbon_decl.gms l. 695-697): FAO's share by FAO country code, the organic-soil fallback of the Western Balkans and Turkey (prep_lulucf_carbon.gms l. 255-256). From capri_sources/dat (tools/build/extract_capri_dat.py).",
+   "kind": "coefficients",
+   "rows": 164,
+   "columns": 2,
+   "units": "to be established (value_units: open)",
+   "origin": {
+    "nature": "capri",
+    "builder": "extract_capri_dat"
    }
   },
   "capri_data/sources/capri_dat/envind/lulucf_emissions_original_source_p_PEATSH_def.csv": {

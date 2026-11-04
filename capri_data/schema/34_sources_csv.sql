@@ -297,3 +297,13 @@ CREATE TABLE src_holdingslsu_p_holdlsu (
 COMMENT ON TABLE src_holdingslsu_p_holdlsu IS 'CAPRI''s p_holdLSU(rall, ad_activity, fsclass): holdings per livestock-unit size class and animal group, from dat/scen/ghgtech/holdingsLSU.gdx (read by envind/prep_farm_size_data_for_miti.gms l. 129); EU and UK units only (the Western Balkans and Turkey take CAPRI''s fallback_Balkan there). From the project lead''s CAPRI installation, not in the Hugging Face mirror (tools/build/extract_capri_dat_local.py).';
 INSERT INTO value_units VALUES
   ('src_holdingslsu_p_holdlsu', 'value', NULL, 'open', 'number of holdings; no unit code for it');
+
+-- file: capri_data/sources/capri_dat/envind/fao_peatland_P.csv
+CREATE TABLE src_fao_peatland_p (
+    fao_code VARCHAR NOT NULL,
+    "value" DOUBLE NOT NULL,
+    PRIMARY KEY (fao_code)
+);
+COMMENT ON TABLE src_fao_peatland_p IS 'CAPRI''s P(FAOregions) of dat/envind/fao_peatland.gdx, loaded as p_PEATSH "Share of peatland in arable land" (envind/lulucf_carbon_decl.gms l. 695-697): FAO''s share by FAO country code, the organic-soil fallback of the Western Balkans and Turkey (prep_lulucf_carbon.gms l. 255-256). From capri_sources/dat (tools/build/extract_capri_dat.py).';
+INSERT INTO value_units VALUES
+  ('src_fao_peatland_p', 'value', NULL, 'open', 'share of arable land (0-1)');

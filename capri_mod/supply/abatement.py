@@ -530,6 +530,16 @@ class AbatementBlock:
         h = getattr(self.data, "histosol", None)
         if h is None or not hasattr(h, "get"):
             return Qa, ca, Aa, ba, start
+        # CAPRI's rmssup_histo (no_histosols.gms l. 22-26): the EU's supply regions, all of them with %fallowInAllRmssup%
+        # on (the run's endotech settings, set by CAPRIModel before a run; a model solved outside a run takes the
+        # settings file's)
+        if not is_eu(self.data.region_id):
+            _all = getattr(self.seen, "fallow_in_all_rmssup", None)
+            if _all is None:
+                from capri_mod.policy.endotech import effective as _eff
+                _all = float(_eff()["fallowInAllRmssup"]) > 0
+            if not _all:
+                return Qa, ca, Aa, ba, start
         cal = getattr(self.par, "hist_cal", None)
         pend = {}
         for cls, row_lab in self.HISTOSOL_CLASSES:

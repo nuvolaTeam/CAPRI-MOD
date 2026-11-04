@@ -68,6 +68,7 @@ class Endotech(_Strict):
     ghgTechLowNFeed: Optional[float] = None
     ghgTechLineNitr: Optional[float] = None
     fixGenetToIni: Optional[float] = None
+    fallowInAllRmssup: Optional[float] = None
 
     def as_dict(self) -> Dict[str, float]:
         return {k: float(v) for k, v in self.model_dump().items() if v is not None}

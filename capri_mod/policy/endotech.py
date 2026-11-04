@@ -26,6 +26,13 @@ Settings (refpol_endotech_all_sup.gms):
   ghgTechLineNitr  the feed supplements linseed, nitrate and 3-NOP (envind/line_nitr.gms LINE_Tot, Nitr_Tot, 3NOP_Tot): a switch
                (capmod.gms includes line_nitr.gms unless it is 0); default 1, also in the JRC121368-era references
                (pol_input/ecampa/refpol_endotech_set14_ini.gms) (Sprint 9g).
+  fallowInAllRmssup  histosol fallowing in every supply region, not only the EU's (envind/no_histosols.gms l. 22-26:
+               rmssup_histo); a switch, 1 on. On in star 3.0's Green Deal reference (MitiInAllRmssup on,
+               refpol_endotech_all_sup.gms l. 49-60) and in pol_input/ecampa/refpol_endotech_set14td*.gms; not set in
+               refpol_endotech_set14_ini.gms. JRC121368 does not state it, so its settings take star 3.0's (1), as
+               farm_to_fork_scenario does for everything the report does not state.
+               With it on, the supply models outside the EU (Norway, the UK, the Western Balkans; Turkey has no
+               histosols in CAPRI's data) have the fallowing option where CAPRI's calibration has it.
 """
 from __future__ import annotations
 from typing import Dict, Mapping, Optional
@@ -34,10 +41,10 @@ import pandas as pd
 
 #: CAPRI star 3.0 defaults (pol_input/greendeal/refpol_endotech_all_sup.gms)
 STAR3_DEFAULTS: Dict[str, float] = {"ghgTechMYld": 0.0, "ghgTechFEff": 0.1, "ghgTechLowNFeed": 1.0,
-                                    "ghgTechLineNitr": 1.0, "fixGenetToIni": 1.0}
+                                    "ghgTechLineNitr": 1.0, "fixGenetToIni": 1.0, "fallowInAllRmssup": 1.0}
 #: the setting of CAPRI's JRC121368-era endotech references (pol_input/ecampa/refpol_endotech_set14_ini.gms)
 JRC121368_ENDOTECH: Dict[str, float] = {"ghgTechMYld": 0.2, "ghgTechFEff": 0.1, "ghgTechLowNFeed": 1.0,
-                                        "ghgTechLineNitr": 1.0, "fixGenetToIni": 1.0}
+                                        "ghgTechLineNitr": 1.0, "fixGenetToIni": 1.0, "fallowInAllRmssup": 1.0}
 
 _SCALED = ("d_milk_rel", "d_ener_rel", "d_crpr_rel", "d_drmn_rel", "d_drmx_rel", "d_mann_rel")
 
