@@ -234,7 +234,7 @@ file and lines).
 5. Step 7: the exact-reproduction check with the default setting.
 6. Step 8: the market side, SUP_NONEU one-to-many for WBA (about 10 places; SND §3, "The market").
 7. Step 9: the baseline of the 29 against CAPRI's 2030.
-8. Step 10: an F2F/GD gate, agreed with the project lead.
+8. Step 10: an F2F/GD gate: the full F2F and GD runs after §5's Step G (the project lead, 4 November 2026).
 Also from SND §2 and §4: build_histosol to stop skipping Norway (done 4 November 2026: every supply region, the endotech
 setting fallowInAllRmssup), winter cover outside the EU
 as CAPRI's Green Deal file, the dumps' folder for the eight non-EU CAPREG dumps in builders.json.
