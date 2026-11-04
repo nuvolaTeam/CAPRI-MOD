@@ -154,6 +154,7 @@ def test_denmark_base_year_equals_captrds():
 @pytest.mark.slow
 @pytest.mark.skipif(not ((TS / "DK.csv.gz").exists() and (RES / "P_Data.csv.gz").exists()),
                     reason="CAPRI reference files not built")
+@pytest.mark.slow
 def test_denmark_with_the_uvad_of_its_market_aggregate():
     """Denmark with the UVAD averaged over the countries of its market aggregates (A_EU_WEST: read their files)."""
     s = P.read_sets()
@@ -195,6 +196,7 @@ BIOFUEL = REFERENCE / "fao_agg" / "17" / "p_biofuelData.csv.gz"
 @pytest.mark.slow
 @pytest.mark.skipif(not all(f.exists() for f in (TS / "DK.csv.gz", BASE / "DK.csv.gz", COCO, BIOFUEL,
                                                  RES / "P_Data.csv.gz")), reason="CAPRI reference files not built")
+@pytest.mark.slow
 def test_denmark_with_the_coco_data(tmp_path):
     """Denmark through every ported stage (prepare_run.run), the COCO data and the policy data included: the years
     1984-2019 (2019 from COCO) equal CAPTRD's p_data, leaving out the reporting overwrites and what needs the other

@@ -111,6 +111,7 @@ def test_member_state_milk_responds_to_its_price_in_the_dairy_block():
     assert abs(z2[p["iM"]]) < abs(z0[p["iM"]])
 
 
+@pytest.mark.slow
 def test_market_supply_hessian_measured_at_base_and_at_scenario_state():
     """The market supply Hessian (CAPRI's p_hessNQSupp, supply/calibrate_supply.gms) is built at the baseline and,
     under market.hessian_scenario_iter, measured again at the scenario's state with its own cache key. r131 ran
@@ -135,6 +136,7 @@ def test_market_supply_hessian_measured_at_base_and_at_scenario_state():
         assert scen["file"] != base["file"]
 
 
+@pytest.mark.slow
 def test_hessian_skip_of_unreached_regions_is_exact(monkeypatch):
     """The market supply Hessian with the regions a shock does not reach not re-solved (market.hessian_skip_unchanged)
     equals re-solving every region from the baseline's state: with CAPRI_HESSIAN_SKIP_VERIFY=1 the regions that would be

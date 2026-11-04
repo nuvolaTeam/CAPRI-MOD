@@ -81,6 +81,7 @@ def test_capri_forecast_weights():
     assert f([1.0, 2.0, 3.0, 4.0], 19) == pytest.approx(0.4 * 4 + 0.3 * 3 + 0.2 * 2 + 0.1 * 1)
 
 
+@pytest.mark.slow
 def test_model_records_capri_verdict_and_can_stop_on_it():
     from capri_mod.settings import override
     from capri_mod.model import CAPRIModel

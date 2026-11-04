@@ -480,6 +480,7 @@ def test_organic_and_mineral_caps_merge_as_capri():
     assert R._merge_organic_regs(cur, org, small=set())[("PULS", "MINE")][0] == 12.0
 
 
+@pytest.mark.slow
 def test_mineral_fertiliser_cap_binds(model):
     """CAPRI's mineral fertiliser reduction (Green Deal mineRedu "20", minfert_redu_uaa.gms e_synNMax): the
     region's mineral N per ha of land falls to 80% of the baseline's, the cap's shadow price is positive, and the
@@ -1636,6 +1637,7 @@ def test_constraint_instruments_reach_the_solve(data):
             "the SETA floor should enter as a negative bound (-x <= -floor)")
 
 
+@pytest.mark.slow
 def test_no_negative_own_price_elasticities(data):
     """Every crop must respond POSITIVELY to a rise in its own price.
 
@@ -1781,6 +1783,7 @@ def test_organic_area_target_binds_and_is_a_noop_at_zero(model):
         assert 0.2 < ratio < 5.0, f"{a} moved implausibly: x{ratio:.2f}"
 
 
+@pytest.mark.slow
 def test_projection_matches_capri_2030_reference(model):
     """The projection must reproduce CAPRI's own 2030 baseline.
 
@@ -1870,6 +1873,7 @@ def test_projection_starts_from_capri_reference_and_calibrates(model):
                 assert abs(float(x[a]) / tgt - 1.0) < tol, (r, a, float(x[a]), tgt)
 
 
+@pytest.mark.slow
 def test_permanent_crop_base_fidelity(data):
     """Permanent crops must survive the base solve.
 
@@ -2044,6 +2048,7 @@ def test_pesticide_reduction_binds_and_is_a_noop_at_zero(model):
         "a 50% pesticide reduction should lower affected crop areas")
 
 
+@pytest.mark.slow
 def test_unconverged_run_warns_and_is_recorded(model):
     """A run that does not converge must say so, loudly and in metadata.
 
@@ -2110,6 +2115,7 @@ def test_no_bogus_activity_codes_in_crop_groups(data):
         assert "MAIZ" not in affected, "pesticide list names a non-existent activity"
 
 
+@pytest.mark.slow
 def test_land_bounds_do_not_rewrite_the_base_year(data):
     """Neither land bound may cut a crop the base year says exists.
 
@@ -2600,6 +2606,7 @@ def test_cover_crop_requirement_and_winter_cover_row(data):
     model.ev.cover = None
 
 
+@pytest.mark.slow
 def test_dairy_split_column_calibrated_at_base():
     """CAPRI's dairy split (Sprint 7b): the column of cows moved from DCOH to DCOL is calibrated on
     the first baseline solve (linear term from the duals of the rows it enters, the cows'
@@ -2711,6 +2718,7 @@ def test_model_regions_are_capris_regional_units(data):
         assert 0.2 < float(mc.at[r, "LAYS"]) < 1.5, r
 
 
+@pytest.mark.slow
 def test_bull_heifer_split_calibrated_at_base():
     """CAPRI's low/high-intensity bulls and heifers (Sprint 7c): one column per animal, calibrated on
     the first baseline solve like the dairy split, so a second baseline solve keeps the base split; a
@@ -4189,6 +4197,7 @@ def _dying_in_fr10(region):
     return smod.__dict__["_par_solve_region_orig"](region)
 
 
+@pytest.mark.slow
 def test_dead_worker_does_not_hang_the_regional_solves(monkeypatch):
     """A regional-solve worker that dies (killed for memory) must not hang the run: the regions left are solved in
     the parent process, with a warning, and the results equal a run in one process (26 October 2026)."""

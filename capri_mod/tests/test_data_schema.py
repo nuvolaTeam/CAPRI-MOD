@@ -11,6 +11,7 @@ duckdb = pytest.importorskip("duckdb")
 from capri_mod.data import validate_data as V  # noqa: E402
 
 
+@pytest.mark.slow
 def test_the_data_meet_their_declarations():
     assert V.validate(ROOT, verbose=False) == []
 
@@ -44,6 +45,7 @@ def _edit(root, rel, fn):
     p.write_text("\n".join(fn(lines)) + "\n")
 
 
+@pytest.mark.slow
 def test_each_kind_of_violation_is_found_with_its_line(tmp_path):
     root = _copy(tmp_path)
     assert set(V.validate(root, verbose=False)) == set(V.validate(ROOT, verbose=False))   # the copy is the repository
@@ -62,6 +64,7 @@ def test_each_kind_of_violation_is_found_with_its_line(tmp_path):
     assert "fails at lines [2]" in found[(units, "checks")]
 
 
+@pytest.mark.slow
 def test_a_wrong_header_and_a_wrong_type_are_found(tmp_path):
     root = _copy(tmp_path)
     base = V.validate(root, verbose=False)                 # the repository's own violations, if any, left aside
@@ -75,6 +78,7 @@ def test_a_wrong_header_and_a_wrong_type_are_found(tmp_path):
     assert [k for x in V.validate(root, verbose=False) if x not in base for _, k, _ in [x]] == ["columns"]
 
 
+@pytest.mark.slow
 def test_a_wide_file_is_checked_long(tmp_path):
     """A wide file (regions in rows, codes as columns) is read as (region, item, value): a bad value is named with its
     line and column; an unknown column header is a code no list knows, and the unit rule finds the item without unit."""
