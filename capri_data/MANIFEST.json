@@ -6319,7 +6319,7 @@
   "capri_data/trajectories/capri_price_ratios_2030.csv": {
    "description": "CAPRI's 2030 prices and premiums for the model's 2030 baseline, in 2017 money. (tools/build/build_price_trajectory_2030.py)",
    "kind": "reference",
-   "rows": 1926,
+   "rows": 1983,
    "columns": 6,
    "units": "to be established (value_units: open)",
    "read_by_model": [

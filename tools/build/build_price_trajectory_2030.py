@@ -44,7 +44,7 @@ _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to
 ROOT = Path(__file__).resolve().parents[2]
 CAKES = ("SOYC", "RAPC", "SUNC")
 INPUTS = ("EFUL", "ELEC", "EGAS", "ELUB", "NITF", "PHOF", "POTF", "SEED", "PLAP", "REPM", "REPB", "INPO", "IPHA")
-ROW = re.compile(r"^'([A-Z]{2}[0-9A-Z]{6})'\.'([A-Za-z0-9_]+)'\.'([A-Za-z0-9_]+)'\.'Y'\s+(-?\d[\d.]*(?:[Ee][+\-]?\d+)?)")
+ROW = re.compile(r"^'([A-Z]{2}[0-9A-Z]{6}|TUR)'\.'([A-Za-z0-9_]+)'\.'([A-Za-z0-9_]+)'\.'Y'\s+(-?\d[\d.]*(?:[Ee][+\-]?\d+)?)")
 
 
 def _load(path):
@@ -71,7 +71,7 @@ def main() -> None:
             if not m:
                 continue
             reg, a, it, v = m.group(1), m.group(2), m.group(3), float(m.group(4))
-            if a == "UVAG" and reg.endswith("000000") and it in products:
+            if a == "UVAG" and (reg.endswith("000000") or reg == "TUR") and it in products:   # TUR: Turkey's row
                 uv17[(reg, it)] = v
             elif it == "PRME":
                 prme17[reg][a] = v
@@ -80,7 +80,8 @@ def main() -> None:
 
     # --- price ratios per member state
     rows, defl = [], {}
-    nat = uv30[uv30["region"].str.endswith("000000")]
+    # the national rows: '<MS>000000' and Turkey's 'TUR' (left out until 4 November 2026); keyed by the two letters (TU)
+    nat = uv30[uv30["region"].str.endswith("000000") | (uv30["region"] == "TUR")]
     for reg, g in nat.groupby("region"):
         r_in = [float(x.uvag) / uv17[(reg, x.product)] for x in g.itertuples()
                 if x.product in INPUTS and uv17.get((reg, x.product), 0) > 0 and x.uvag > 0]
