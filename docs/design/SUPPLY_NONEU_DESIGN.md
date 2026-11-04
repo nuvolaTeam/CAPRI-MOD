@@ -103,7 +103,12 @@ built. No proxy.
      EU from its trade blocks; of the seven 'ready but for TUR', three left Turkey out (its national row is 'TUR'):
      build_capreg_national_prices, build_enteric_feed_factors, extract_capri_marginal_terms; fixed, so Turkey's units
      take its national prices where they have no regional one, as CAPRI).
-  6. CAPRI's rules for the missing data, read (section 5) and ported.
+  6. CAPRI's rules for the missing data, read (section 5) and ported. Done 4 November 2026: histosols (every supply
+     region, fallowInAllRmssup), winter cover (winterCovInAllRmssup), the farm-structure estimation and the ammonia
+     cost curves and AD option from it, Turkey's country code in 15 files; found on the way and fixed: K112 (EU
+     histosols), K113 (Croatia's AD), K114 (Norway's MITERRA and AD data). Section 5's other rows need no port
+     (irrigation, labour: not in the supply models; tillage: EU-only as CAPRI's Green Deal file; prices and CEILVAL:
+     done in step 5 or absent in CAPRI).
   7. The exact-reproduction check with the default setting.
   8. The market side: SUP_NONEU one-to-many (WBA). With a country selected, its market region's welfare takes the
      supply models' profit instead of welfare_base_2030.csv's market rows (ProfitAgr, ProfitFeed), which are kept for
