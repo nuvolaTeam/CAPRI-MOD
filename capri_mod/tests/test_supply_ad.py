@@ -143,3 +143,12 @@ def test_anticipation_function_equals_the_numpy_form():
     q = np.asarray(anticipation_function(12, 40)(S, RR, SV, E))
     ref = np.maximum(S * (RR / SV) ** E, 0.0)
     assert np.allclose(q, ref, rtol=1e-14, atol=0.0)
+
+
+def test_pooled_residual_function():
+    """The pooled commodities' world balance (supply_ad.pooled_residual_function): sum S - sum D, as before."""
+    from capri_mod.market.supply_ad import pooled_residual_function
+    rng = np.random.default_rng(11)
+    S, D = rng.uniform(0, 1e4, 45), rng.uniform(0, 1e4, 45)
+    F = float(np.asarray(pooled_residual_function(45)(S, D)).ravel()[0])
+    assert abs(F - (float(S.sum()) - float(D.sum()))) <= 1e-9 * float(S.sum())

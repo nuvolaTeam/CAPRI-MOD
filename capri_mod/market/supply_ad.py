@@ -93,3 +93,19 @@ def anticipation_function(n_r: int, n_c: int):
                     ["S", "RR", "SV", "E"], ["q"])
     _ANT[(n_r, n_c)] = f
     return f
+
+
+_POOL = {}
+
+
+def pooled_residual_function(n_r: int):
+    """CasADi Function (S[n_r], D[n_r]) -> F: the world balance of a pooled commodity (one price ratio for all market
+    regions: raw milk outside the dairy blocks, the other oilseeds; capri-mod's departure DEP-31, CAPRI's wldMarket_
+    being m_netTrade's), sum S - sum D."""
+    f = _POOL.get(n_r)
+    if f is None:
+        import casadi as ca
+        S, D = ca.SX.sym("S", n_r), ca.SX.sym("D", n_r)
+        f = ca.Function(f"pooled_{n_r}", [S, D], [ca.sum1(S) - ca.sum1(D)], ["S", "D"], ["F"])
+        _POOL[n_r] = f
+    return f

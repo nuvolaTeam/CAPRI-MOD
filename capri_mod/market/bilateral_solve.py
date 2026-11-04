@@ -389,9 +389,12 @@ class BilateralSolveMixin(MarketStateMixin):
         F = {}
         for c, sc in sysd.items():
             F[c] = sc.residual(S[c].values, D[c].values, r[c].values, pcache[c])
+        from capri_mod.market.supply_ad import pooled_residual_function
         for c in r.columns:
             if c not in sysd:
-                F[c] = np.array([float(S[c].sum()) - float(D[c].sum())])
+                # the pooled commodities' world balance, written once in CasADi (market step G2b, supply_ad.py)
+                F[c] = np.asarray(pooled_residual_function(len(S))(S[c].to_numpy(dtype=float),
+                                                                     D[c].to_numpy(dtype=float))).ravel()
         return S, D, PAr, F, pcache
 
     def _bilateral_world_index(self, r: pd.DataFrame) -> pd.Series:
