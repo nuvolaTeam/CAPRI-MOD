@@ -307,6 +307,11 @@ nq_price_shock = 0.01
 acceleration = "anderson"
 aa_memory = 5
 trade_chord = true
+# CAPRI's tariff-rate quotas solved together with the prices in each commodity's trade system (trqSigmoidFunc_ and
+# TRQImports_ in the same system, as m_globMarket; MARKET_IPOPT_DESIGN §7.1 step 2); false: the quotas' sigmas as an
+# outer fixed point one market step behind the prices (BilateralCommodity.trq_solve, the default until 5 November 2026;
+# KNOWN_ISSUES K117)
+trq_joint = true
 # the trade systems' Newton with the exact Jacobian from CasADi (market programme step G1, capri_mod/market/trade_ad.py)
 # instead of finite differences; same equations and root
 exact_jacobian = false

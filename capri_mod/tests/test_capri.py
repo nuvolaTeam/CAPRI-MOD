@@ -925,12 +925,12 @@ def test_trq_fill_converges_when_the_market_responds_more_than_the_flow():
     assert abs(float(sc.trq_sigma[0]) - float(sc._sig(want(float(sc.trq_offset[0, 1])) / 100.0))) < 1e-9
 
 
-def test_trq_solve_on_quota_cells_equals_full_matrices():
-    """trq_solve's trials on each quota's own cells (_TrqCells) give the full matrices' sigmas and offsets bit for bit,
-    across market steps (the bracketing's state carried), on a system with what the cells must get right: two importers,
-    two bilateral quotas sharing cells (the later writes them last), a quota with only a specific rate, a quota under a
-    global one (its rate the smaller of the two, ncpcm), a global quota with both rates over the flows of the exporters
-    without a bilateral quota, an entry-price quota, and a flexible levy replacing the specific tariff on one flow."""
+def _trq_rich_toy(cells=True, seed=3):
+    """A bilateral system with what the quota code must get right (7 regions): two importers, two bilateral quotas
+    sharing cells (the later writes them last), a quota with only a specific rate, a quota under a global one (its
+    rate the smaller of the two, ncpcm), a global quota with both rates over the flows of the exporters without a
+    bilateral quota, an entry-price quota with its entry prices (PrefTrigPrice + (TriggerP - PrefTrigPrice) sigma), and
+    a flexible levy replacing the specific tariff on one flow. Each quota at its base fill. Returns (system, X0)."""
     import numpy as np
     from capri_mod.market.bilateral import BilateralCommodity
     rng = np.random.default_rng(7)
@@ -938,39 +938,41 @@ def test_trq_solve_on_quota_cells_equals_full_matrices():
     X0 = rng.uniform(5.0, 60.0, (n, n)); np.fill_diagonal(X0, rng.uniform(200.0, 400.0, n))
     a = np.where(np.eye(n) > 0, 0.0, rng.uniform(800.0, 1200.0, (n, n)))
     b = np.where(np.eye(n) > 0, 0.0, rng.uniform(50.0, 150.0, (n, n)))
+    sc = BilateralCommodity("T", [f"R{i}" for i in range(n)], X0.copy(), a, b, a.copy(),
+                            np.random.default_rng(seed).uniform(900.0, 1100.0, n), 3.5, 7.0, tc=b.copy())
+    sc.calibrate(X0.sum(axis=0) * 1.0)
+    q = lambda rows, cols, ta, ts, regime="bilateral", imp="A": dict(
+        rows=np.array(rows), cols=np.array(cols), Q=float(X0[np.ix_(rows, cols)].sum()),
+        Q0=float(X0[np.ix_(rows, cols)].sum()), ta_pref=ta[0], dta=ta[1] - ta[0], ts_pref=ts[0],
+        dts=ts[1] - ts[0], importer=imp, exporter="x", regime=regime, glob=None)
+    sc.trq_quotas = [q([0, 1], [3, 4], (0.0, 40.0), (0.0, 150.0)),
+                     q([0, 1], [4], (5.0, 30.0), (10.0, 90.0)),                  # shares (0..1, 4) with quota 0
+                     q([0, 1], [5], (0.0, 0.0), (0.0, 300.0)),                   # specific rate only
+                     q([0, 1], [6], (0.0, 60.0), (0.0, 0.0), "with_global"),
+                     q([2], [3, 5], (0.0, 0.0), (0.0, 200.0), "entry_price", "B"),
+                     q([2], [4, 6], (2.0, 45.0), (0.0, 120.0), "bilateral", "B")]
+    cover = np.zeros((n, n), bool); cover[np.ix_([0, 1], [2])] = True
+    Qg = float(X0[cover].sum())
+    sc.trq_globals = [dict(rows=np.array([0, 1]), Q=Qg, Q0=Qg, ta_pref=0.0, dta=35.0, ts_pref=0.0, dts=80.0,
+                           cover=cover, bil=[0, 1, 2, 3], importer="A", has_ta=True, has_ts=True)]
+    sc.trq_quotas[3]["glob"] = 0
+    kind = np.zeros((n, n), int); kind[1, 3] = 2; kind[2, 3] = kind[2, 5] = 1
+    quota = np.full((n, n), -1); quota[2, 3] = quota[2, 5] = 4
+    sc.border = dict(kind=kind, price=np.where(kind > 0, 1300.0, 0.0), tars=np.where(kind > 0, 250.0, 0.0),
+                     fac=np.ones((n, n)), pref=np.where(kind == 1, 1100.0, 0.0), quota=quota)
+    sc.trq_base()
+    sc.border_base()
+    sc.TRQ_CELLS = cells
+    return sc, X0
 
-    def system(cells):
-        sc = BilateralCommodity("T", [f"R{i}" for i in range(n)], X0.copy(), a.copy(), b.copy(), a.copy(),
-                                rng0.uniform(900.0, 1100.0, n), 3.5, 7.0, tc=b.copy())
-        sc.calibrate(X0.sum(axis=0) * 1.0)
-        # each quota at its base fill: the steps' flows (x 0.6 to 1.6) cross the sigmoid's steep part
-        q = lambda rows, cols, ta, ts, regime="bilateral", imp="A": dict(
-            rows=np.array(rows), cols=np.array(cols), Q=float(X0[np.ix_(rows, cols)].sum()),
-            Q0=float(X0[np.ix_(rows, cols)].sum()), ta_pref=ta[0], dta=ta[1] - ta[0], ts_pref=ts[0],
-            dts=ts[1] - ts[0], importer=imp, exporter="x", regime=regime, glob=None)
-        sc.trq_quotas = [q([0, 1], [3, 4], (0.0, 40.0), (0.0, 150.0)),
-                         q([0, 1], [4], (5.0, 30.0), (10.0, 90.0)),                  # shares (0..1, 4) with quota 0
-                         q([0, 1], [5], (0.0, 0.0), (0.0, 300.0)),                   # specific rate only
-                         q([0, 1], [6], (0.0, 60.0), (0.0, 0.0), "with_global"),
-                         q([2], [3, 5], (0.0, 0.0), (0.0, 200.0), "entry_price", "B"),
-                         q([2], [4, 6], (2.0, 45.0), (0.0, 120.0), "bilateral", "B")]
-        cover = np.zeros((n, n), bool); cover[np.ix_([0, 1], [2])] = True
-        Qg = float(X0[cover].sum())
-        sc.trq_globals = [dict(rows=np.array([0, 1]), Q=Qg, Q0=Qg, ta_pref=0.0, dta=35.0, ts_pref=0.0, dts=80.0,
-                               cover=cover, bil=[0, 1, 2, 3], importer="A", has_ta=True, has_ts=True)]
-        sc.trq_quotas[3]["glob"] = 0
-        kind = np.zeros((n, n), int); kind[1, 3] = 2
-        sc.border = dict(kind=kind, price=np.where(kind == 2, 1300.0, 0.0), tars=np.where(kind == 2, 250.0, 0.0),
-                         fac=np.ones((n, n)), pref=np.zeros((n, n)), quota=np.full((n, n), -1))
-        sc.border_base()
-        sc.trq_base()
-        sc.TRQ_CELLS = cells
-        return sc
 
-    rng0 = np.random.default_rng(3)
-    full = system(False)
-    rng0 = np.random.default_rng(3)
-    cell = system(True)
+def test_trq_solve_on_quota_cells_equals_full_matrices():
+    """trq_solve's trials on each quota's own cells (_TrqCells) give the full matrices' sigmas and offsets bit for bit,
+    across market steps (the bracketing's state carried), on _trq_rich_toy's system."""
+    import numpy as np
+    full, X0 = _trq_rich_toy(False)
+    cell, _ = _trq_rich_toy(True)
+    n = len(X0)
     steps = np.random.default_rng(11)
     inner = 0
     for _ in range(25):
@@ -983,6 +985,54 @@ def test_trq_solve_on_quota_cells_equals_full_matrices():
         assert full.trq_gap == cell.trq_gap
         inner += int(np.sum((full.trq_sigmas() > 0.05) & (full.trq_sigmas() < 0.95)))
     assert inner >= 10                                           # sigmas on the sigmoid's steep part, not only its ends
+
+
+def test_import_prices_at_trial_sigmas_equal_the_stored_offsets():
+    """import_prices with the sigmas passed (the joint solve's trial point) equals import_prices with the offsets stored
+    by trq_set_offsets at the same sigmas and prices, bit for bit: the quotas' rates, the entry prices under a quota
+    and the levy's cap at the quota's rate (_trq_rich_toy)."""
+    import numpy as np
+    sc, X0 = _trq_rich_toy()
+    rng = np.random.default_rng(5)
+    for _ in range(10):
+        r = rng.uniform(0.8, 1.25, len(X0))
+        sc.trq_sigma = rng.uniform(0.0, 1.0, len(sc.trq_quotas))
+        sc.trq_sigmaW = rng.uniform(0.0, 1.0, len(sc.trq_globals))
+        sc.trq_set_offsets(r)
+        assert np.array_equal(sc.import_prices(r), sc.import_prices(r, sig=(sc.trq_sigma, sc.trq_sigmaW)))
+
+
+def test_joint_trade_solve_meets_the_market_and_the_quota_equations():
+    """market.trq_joint: one commodity's trade system solved with its quotas (MarketModule._bilateral_inner_trq) after a
+    supply shock: every supplying region's balance and every quota's trqSigmoidFunc_ / TRQImports_ equation hold at the
+    solution (supply and use log-linear around the start, as the step's linearisation), with the stored offsets."""
+    import numpy as np
+    from capri_mod.market.market_module import MarketModule
+    sc, X0 = _trq_rich_toy()
+    n = len(X0)
+    for q in sc.trq_quotas:                                      # each quota at the sigmoid's midpoint: sigma 0.5
+        q["Q"] = q["Q0"] = sc.trq_fill(X0, q) / 0.97
+    for g in sc.trq_globals:
+        g["Q"] = g["Q0"] = sc.trq_global_imports(X0, g) / 0.97
+    sc.trq_base()
+    sc.border_base()
+    mm = MarketModule.__new__(MarketModule)
+    rk, PAk = np.ones(n), sc.PA0.copy()
+    Sk = sc.S0 * np.where(np.arange(n) >= 3, 1.3, 1.0)            # the exporters supply 30% more
+    Dk = sc.D0.copy()
+    es, ed = np.full(n, 0.6), np.full(n, -0.4)
+    s_start = sc.trq_sigmas().copy()
+    r = MarketModule._bilateral_inner_trq(mm, sc, Sk, Dk, rk, PAk, es, ed, None)
+    p = sc.import_prices(r)
+    pre = sc.prices(r, p)
+    S = Sk * (r / rk) ** es
+    D = Dk * (pre[2] / PAk) ** ed
+    X, _ = sc.flows(D, r, p, pre=pre)
+    act = np.where(sc.S0 > 1e-6)[0]
+    assert np.max(np.abs((S - X.sum(axis=0))[act] / np.maximum(sc.S0[act] + sc.D0[act], 1.0))) < 1e-10
+    assert sc.trq_equation_gap(X) < 1e-10
+    assert np.max(np.abs(s_start - 0.5)) < 0.05                  # the quotas started on the sigmoid's steep part ...
+    assert np.max(np.abs(sc.trq_sigmas() - s_start)) > 0.2      # ... and the shock moved them along it
 
 
 def test_trq_volume_change_moves_the_quota_not_the_base():

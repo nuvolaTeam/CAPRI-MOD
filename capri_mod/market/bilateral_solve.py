@@ -520,6 +520,86 @@ class BilateralSolveMixin(MarketStateMixin):
         out[act] = np.exp(z)
         return out
 
+    def _bilateral_inner_trq(self, sc, Sk, Dk, rk, PAk, es, ed, tadd):
+        """One commodity's trade system solved together with its tariff-rate quotas (market.trq_joint; MARKET_IPOPT_DESIGN
+        §7.1 step 2), as CAPRI's m_globMarket holds trqSigmoidFunc_ and TRQImports_ with the prices: the unknowns are
+        the supplying regions' log price ratios and, for each quota with a volume, u = the sigmoid's argument
+        (sigma = 1 / (1 + exp(-u))); the equations are the market balances (supply and use log-linear around the current
+        point, as _bilateral_inner) and u = clip(slope (fill / Q - 0.97)), fill from the flows' full Armington response
+        at the trial prices, the quotas' rates, their entry prices and levy caps at the trial sigmas. The same equation
+        as sigma = Sigmoid(...) with the same root, written in u because the sigmoid (slope 200) is nearly a step in
+        sigma and linear in u. Sets the quotas' sigmas and offsets at the solution; returns the price ratios."""
+        act = np.where(sc.S0 > 1e-6)[0]
+        bil, glo = sc.trq_active()
+        if len(act) == 0 or not (bil or glo):
+            return self._bilateral_inner(sc, Sk, Dk, rk, PAk, es, ed, tadd)
+        scale = np.maximum(sc.S0[act] + sc.D0[act], 1.0)
+        sB0 = np.array(sc.trq_sigma, float)
+        sW0 = np.array(sc.trq_sigmaW if sc.trq_sigmaW is not None else np.zeros(0), float)
+        nz, nb, clip = len(act), len(bil), float(sc.TRQ_ARG_CLIP)
+        slope = float(sc.TRQ_SLOPE)
+
+        def sig_of(u):
+            sB, sW = sB0.copy(), sW0.copy()
+            s_ = 1.0 / (1.0 + np.exp(-u))
+            sB[bil] = s_[:nb]
+            sW[glo] = s_[nb:]
+            return sB, sW
+
+        def G(x):
+            r = rk.copy()
+            r[act] = np.exp(x[:nz])
+            p = sc.import_prices(r, tadd, sig=sig_of(x[nz:]))
+            pre = sc.prices(r, p)
+            S = Sk * (r / rk) ** es
+            D = Dk * (pre[2] / PAk) ** ed
+            X, _ = sc.flows(D, r, p, pre=pre)
+            return np.concatenate([(S - X.sum(axis=0))[act] / scale,
+                                   (x[nz:] - sc.trq_arguments(X, (bil, glo))) / slope])
+
+        s0 = np.clip(np.concatenate([sB0[bil], sW0[glo]]), 0.0, 1.0)
+        with np.errstate(divide="ignore"):
+            u0 = np.clip(np.log(s0) - np.log1p(-s0), -clip, clip)
+        x = np.concatenate([np.log(rk[act]), u0])
+        # step limits (log price 0.5, the sigmoid's argument its whole range): the step is scaled as a whole, so its
+        # direction stays Newton's (a cap per component turns it, and the line search then finds no descent)
+        cap = np.concatenate([np.full(nz, 0.5), np.full(len(u0), 2.0 * clip)])
+        g = G(x)
+        J = None
+        prev = None
+        for _ in range(60):
+            nrm = float(np.max(np.abs(g)))
+            if nrm < 1e-12:
+                break
+            if J is None or prev is None or nrm > 0.25 * prev or not self.TRADE_CHORD:
+                m = len(x)
+                J = np.empty((m, m))
+                h = 1e-6
+                for k in range(m):
+                    xk = x.copy(); xk[k] += h
+                    J[:, k] = (G(xk) - g) / h
+            try:
+                dx = np.linalg.solve(J, -g)
+            except np.linalg.LinAlgError:
+                dx = np.linalg.lstsq(J, -g, rcond=None)[0]
+            dx = dx * min(1.0, float(np.min(cap / np.maximum(np.abs(dx), 1e-300))))
+            t = 1.0
+            while t > 1e-3:
+                x1 = x + t * dx
+                x1[nz:] = np.clip(x1[nz:], -clip, clip)
+                g1 = G(x1)
+                if float(np.max(np.abs(g1))) < nrm:
+                    break
+                t *= 0.5
+            prev = nrm
+            x = x1
+            g = g1
+        out = rk.copy()
+        out[act] = np.exp(x[:nz])
+        sc.trq_sigma, sc.trq_sigmaW = sig_of(x[nz:])
+        sc.trq_set_offsets(out)
+        return out
+
     #: scenario change of the EU's tariff-rate quota volumes, {commodity: change in 1000 t} (PolicyScenario.
     #: trq_volume_changes, set by CAPRIModel.run; empty in a baseline run)
     trq_volume_changes: dict = {}
@@ -598,6 +678,7 @@ class BilateralSolveMixin(MarketStateMixin):
         damp = 1.0
         converged = False
         aa = getattr(self, "market_acceleration", None) == "anderson"
+        trq_joint = bool(_st.get("market.trq_joint"))
         aa_z, aa_g = [], []                                  # history: log r and log new (the map's value)
         for it in range(max_outer):
             S, D, PAr, F, pc = self._bilateral_eval(r, exogenous_supply, trade_scenario)
@@ -613,6 +694,11 @@ class BilateralSolveMixin(MarketStateMixin):
                 if sc.trq_row is None:
                     continue
                 X, _ = sc.flows(D[c].values, r[c].values, pc[c])
+                if trq_joint:
+                    # the quotas are solved with the prices (_bilateral_inner_trq): CAPRI's trqSigmoidFunc_ residual at
+                    # this step's flows is the convergence measure
+                    trq_moved = max(trq_moved, sc.trq_equation_gap(X))
+                    continue
                 old_s = sc.trq_sigmas()
                 sc.trq_solve(X, pc[c], r[c].values)
                 trq_moved = max(trq_moved, sc.trq_sigma_change(old_s))
@@ -633,8 +719,10 @@ class BilateralSolveMixin(MarketStateMixin):
             for c in r.columns:
                 if c in sysd:
                     rk = r[c].values
-                    new[c] = self._bilateral_inner(sysd[c], S[c].values, D[c].values, rk, PAr[c].values * sysd[c].PA0,
-                                                   es[c].values, ed[c].values, tadd.get(c))
+                    inner = (self._bilateral_inner_trq if trq_joint and sysd[c].trq_row is not None
+                             else self._bilateral_inner)
+                    new[c] = inner(sysd[c], S[c].values, D[c].values, rk, PAr[c].values * sysd[c].PA0,
+                                   es[c].values, ed[c].values, tadd.get(c))
                 else:
                     # pooled market: one price ratio for all regions
                     s_, d_ = float(S[c].sum()), float(D[c].sum())

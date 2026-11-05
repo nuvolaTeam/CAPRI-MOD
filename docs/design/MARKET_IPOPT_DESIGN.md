@@ -275,6 +275,8 @@ After the market Newton-Krylov solve's review (KNOWN_ISSUES K110):
 2. Then the quotas' sigmas and the dairy blocks' raw milk price inside each market evaluation, solved with the prices
    (CAPRI: trqSigmoidFunc_ and the dairy equations in the same system). This shortens the default solve's end, which
    on K110's shock is mostly the quotas settling (40 iterations), and G3 needs these pieces as equations anyway.
+   Done for the quotas on 5 November 2026 (market.trq_joint, the default; KNOWN_ISSUES K117); the dairy blocks' raw
+   milk price is still updated between solves.
 3. Then G3, the whole market as one system in CAPRI's form (section 3.1), solved by IPOPT, so that the comparison with
    CAPRI is between the same simultaneous form, not only the same equations.
 

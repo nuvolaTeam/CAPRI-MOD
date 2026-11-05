@@ -66,6 +66,7 @@ INSERT INTO code_data_status VALUES
   ('capri_mod/market/bilateral_solve.py', 'BilateralSolveMixin._bilateral_calibrate', 0.2, 'capri-mod', 'keep', NULL, 'lower bound of the non-EU use recalibration factor [0.2, 5]; registered in DEPARTURES_FROM_CAPRI.md (the market''s demand at the baseline; PROXY_AUDIT S185)'),
   ('capri_mod/market/bilateral_solve.py', 'BilateralSolveMixin._bilateral_inner', -0.5, 'numerical', 'keep', NULL, 'Newton step clip in log prices'),
   ('capri_mod/market/bilateral_solve.py', 'BilateralSolveMixin._bilateral_inner', 0.25, 'numerical', 'keep', NULL, 'residual ratio above which the chord Newton refreshes its Jacobian'),
+  ('capri_mod/market/bilateral_solve.py', 'BilateralSolveMixin._bilateral_inner_trq', 0.25, 'numerical', 'keep', NULL, 'residual ratio above which the joint trade-and-quota Newton refreshes its Jacobian (as _bilateral_inner)'),
   ('capri_mod/market/bilateral_solve.py', 'BilateralSolveMixin._bilateral_local_el', -0.5, 'numerical', 'keep', NULL, 'clip of the measured local supply/demand elasticities used for the price update'),
   ('capri_mod/market/bilateral_solve.py', 'BilateralSolveMixin._solve_bilateral', 0.999, 'numerical', 'keep', NULL, 'Anderson acceleration restarts when the error does not fall by 0.1%'),
   ('capri_mod/market/biofuel_ad.py', '_sigmoid', -500.0, 'numerical', 'keep', NULL, 'overflow clip of the sigmoid''s argument'),

@@ -2159,9 +2159,22 @@ that the next step's fixed point was on the other side. CAPRI solves the quotas 
   test_trq_fill_converges_when_the_market_responds_more_than_the_flow (full steps keep swinging, the search converges
   to 1e-10). Confirmed by the full Farm-to-Fork run r213 (5 November 2026): converged in 13 iterations, deviation from
   JRC121368 4.59 (gate 16: 4.18; the beef and poultry prices not yet attributed).
-- **Not changed:** the market's time per solve is still above gate 16's: most solves run to the 100-step cap because
-  the quotas' sigmas settle one step behind the prices (diagnosed 5 November 2026: the residual meets the tolerance by
-  step 70, the quota moves by step 100). The quota bracketing's cost per step was cut by computing each trial on the
-  quota's own cells (commit 3818bc5, identical results: market time about halved in the full run); the sigmas inside
-  the price solve are next (MARKET_IPOPT_DESIGN §7.1 step 2).
+- **Market time:** most solves had still run to the 100-step cap because the quotas' sigmas settled one step behind
+  the prices (diagnosed 5 November 2026: the residual meets the tolerance by step 70, the quota moves by step 100). The
+  quota bracketing's cost per step was cut first by computing each trial on the quota's own cells (commit 3818bc5,
+  identical results, market time about halved in the full run). **Then the sigmas solved with the prices** (5 November
+  2026, `market.trq_joint = true`, the default; MARKET_IPOPT_DESIGN §7.1 step 2 for the quotas): inside each
+  commodity's trade solve the active quotas' sigmoid arguments are unknowns beside the prices, and one Newton system
+  meets the market balances and CAPRI's trqSigmoidFunc_ for every active bilateral and global quota
+  (`BilateralSolveMixin._bilateral_inner_trq`; `BilateralCommodity.trq_arguments`, `trq_equation_gap`). The
+  commodities are still linked by the outer fixed point (G3 solves the whole market as one system). Replay of the
+  full-EU scenario solve that ran to the cap: 33 steps, 116 s, converged (quota gap 3.4e-8), against 100 steps, 228 s,
+  not converged; prices equal within 4.3e-9 in log. Mini-EU Farm-to-Fork against mini_k116 (the same code with the
+  lagged sigmas): the same 6 iterations with the same rows above 0.05% at each, data values apart by at most 5e-5
+  relative (a Croatian grassland dual; DDGS net exports and the CASE price about 1e-5), deviation from JRC121368 7.82 in
+  both; scenario market time 287 s against 712 s. Full Farm-to-Fork against full_k116c: the same 12 iterations and rows,
+  prices within 6.4e-7 in log, deviation 4.56 in both; scenario market time 576 s against 2,421 s, the run 45 minutes
+  against 89 (part of the difference is the machine's speed on the day). `market.trq_joint = false` keeps the lagged
+  sigmas (trq_solve's bracketing). Tests: test_joint_trade_solve_meets_the_market_and_the_quota_equations,
+  test_import_prices_at_trial_sigmas_equal_the_stored_offsets.
 
