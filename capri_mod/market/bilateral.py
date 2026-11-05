@@ -184,6 +184,8 @@ class BilateralCommodity:
         offset."""
         n = len(self.regions)
         self._trq_hist = None
+        self._trq_bracket = None
+        self.trq_gap = 0.0
         self.trq_offset = np.zeros((n, n))
         if not (self.trq_quotas or self.trq_globals):
             self.trq_sigma = self.trq_sigma0 = self.trq_sigmaW = self.trq_sigmaW0 = None
@@ -221,7 +223,9 @@ class BilateralCommodity:
         """The largest move of a quota's sigma since `old` (dimensionless, as the solve's tolerance): CAPRI's
         simultaneous solve stops on the residuals of trqSigmoidFunc_ and TRQImports_, which are in sigma's terms."""
         now = self.trq_sigmas()
-        return float(np.max(np.abs(now - old))) if len(now) and len(old) == len(now) else 0.0
+        mv = float(np.max(np.abs(now - old))) if len(now) and len(old) == len(now) else 0.0
+        # with the bracketing of trq_solve the move can be a fraction of the gap: the gap counts
+        return max(mv, float(getattr(self, "trq_gap", 0.0) or 0.0))
 
     def trq_set_offsets(self, r: np.ndarray) -> None:
         """trq_offset from the quotas' current sigmas at the exporters' price ratios r."""
@@ -240,6 +244,7 @@ class BilateralCommodity:
         if self.trq_sigma is None:
             self.trq_base()
         sB, sW = self.trq_sigma.copy(), self.trq_sigmaW.copy()
+        old = np.concatenate([sB, sW]) if len(sW) else sB.copy()
         off_now = self.trq_offset if self.trq_offset is not None else np.zeros_like(p)
 
         def Xat(off):
@@ -279,6 +284,54 @@ class BilateralCommodity:
         # direction shrinking by a steady factor rho in [0.5, 0.99] are extrapolated by rho / (1 - rho) times the
         # last move, at most 0.05 of sigma and within [0, 1]
         new = np.concatenate([sB, sW]) if len(sW) else sB.copy()
+        # A bracketing root search per quota across the market's steps, where a quota's fixed point is crossed: two
+        # quotas of one importer can flip in turn, each solved full at the other's fill with the prices of the step
+        # (the EU's sugar quotas from AFR_REST, India and South Africa in the full Farm-to-Fork: sigma 0 -> 1 -> 0 at
+        # every step, the out-of-quota tariff 661 EUR/t switched on and off, 100 steps without convergence, 5 November
+        # 2026). g = Sigmoid(fill) - sigma, the fill at the step's prices with the quota's sigma as it was, falls as
+        # sigma rises (a higher out-of-quota rate, less imports); the full step sigma + g is taken until g changes sign,
+        # then the regula falsi point of the bracket (Illinois: the end kept twice has its g halved). CAPRI solves the
+        # quotas and the prices in one system (trqSigmoidFunc_, TRQImports_ in m_globMarket), so it has no such loop;
+        # this changes the path to the fixed point, not the equations. trq_gap, max |g|, is CAPRI's trqSigmoidFunc_
+        # residual and the solve's convergence measure (trq_sigma_change)
+        g = new - old
+        nq = len(g)
+        br = getattr(self, "_trq_bracket", None)
+        if br is None or len(br["lo_s"]) != nq or "run" not in br:
+            br = {k: np.full(nq, np.nan) for k in ("lo_s", "lo_g", "hi_s", "hi_g")}
+            br["side"] = np.zeros(nq)
+            br["run"] = np.zeros(nq)
+        for k in range(nq):
+            if abs(g[k]) <= 1e-12:
+                continue
+            s_ = 1 if g[k] > 0 else -1
+            br["run"][k] = br["run"][k] + 1 if br["side"][k] == s_ else 1
+            # the prices move on with the market's steps, so g is not one function of sigma: an end the search has not
+            # come back to in 4 steps is dropped (the full step again), else the Illinois halving would hold sigma at it
+            if br["run"][k] > 4:
+                for e in (("hi_s", "hi_g") if s_ == 1 else ("lo_s", "lo_g")):
+                    br[e][k] = np.nan
+                br["run"][k] = 1
+            if s_ == 1:                                  # sigma below its fixed point
+                br["lo_s"][k], br["lo_g"][k] = old[k], g[k]
+                if br["side"][k] == 1 and not np.isnan(br["hi_g"][k]):
+                    br["hi_g"][k] *= 0.5                 # Illinois: the other end kept twice
+            else:
+                br["hi_s"][k], br["hi_g"][k] = old[k], g[k]
+                if br["side"][k] == -1 and not np.isnan(br["lo_g"][k]):
+                    br["lo_g"][k] *= 0.5
+            br["side"][k] = s_
+            if not (np.isnan(br["lo_s"][k]) or np.isnan(br["hi_s"][k])):
+                if br["lo_s"][k] >= br["hi_s"][k]:       # a stale end (the prices moved on): keep the newest only
+                    if g[k] > 0:
+                        br["hi_s"][k] = br["hi_g"][k] = np.nan
+                    else:
+                        br["lo_s"][k] = br["lo_g"][k] = np.nan
+                else:
+                    lo_s, lo_g, hi_s, hi_g = br["lo_s"][k], br["lo_g"][k], br["hi_s"][k], br["hi_g"][k]
+                    new[k] = lo_s + lo_g * (hi_s - lo_s) / (lo_g - hi_g)
+        self._trq_bracket = br
+        self.trq_gap = float(np.max(np.abs(g))) if nq else 0.0
         hist = getattr(self, "_trq_hist", None)
         hist = [] if hist is None or len(hist[-1]) != len(new) else hist
         hist.append(new.copy())
@@ -288,9 +341,11 @@ class BilateralCommodity:
                 rho = np.where(np.abs(d2) > 0, d3 / d2, 0.0)
                 rho0 = np.where(np.abs(d1) > 0, d2 / d1, 0.0)
             ok = ((np.sign(d1) == np.sign(d2)) & (np.sign(d2) == np.sign(d3)) & (rho >= 0.5) & (rho <= 0.99)
-                  & (np.abs(rho - rho0) < 0.05) & (np.abs(d3) > 0))
+                  & (np.abs(rho - rho0) < 0.05) & (np.abs(d3) > 0)
+                  & (np.isnan(br["lo_s"]) | np.isnan(br["hi_s"])))   # not where the root is bracketed
             if ok.any():
-                jump = np.clip(d3 * rho / (1.0 - rho), -0.05, 0.05)
+                with np.errstate(divide="ignore", invalid="ignore"):  # rho = 1 where not ok (masked below)
+                    jump = np.clip(d3 * rho / (1.0 - rho), -0.05, 0.05)
                 new = np.where(ok, np.clip(new + jump, 0.0, 1.0), new)
                 hist = [new.copy()]
         self._trq_hist = hist[-4:]

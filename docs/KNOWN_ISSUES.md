@@ -24,7 +24,7 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K92](#k92) | Farm-to-Fork changes furthest from JRC121368, besides the milk price | open: waiting for CAPRI's scenario results |
 | [K93](#k93) | CAPRI mitigation options not built; documents disagree on which are in | open: no-till and legume share unmeasured; UreaSubst parked; the others not needed for Farm-to-Fork and the Green Deal |
 
-## Resolved (104)
+## Resolved (105)
 
 | # | Issue | Status |
 |---|---|---|
@@ -132,6 +132,7 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K113](#k113) | Croatia had no AD option: CAPRI's fallback_Balkan fills its VSER and housing share | fixed |
 | [K114](#k114) | Norway lacked CAPRI's mirrored MITERRA data and Sweden's AD data: no housed liquid manure, no AD | fixed |
 | [K115](#k115) | The 2030 set-aside followed CAPRI's VSET alone, not FALL + VSET: up to half or double CAPRI's per region | fixed |
+| [K117](#k117) | The full-EU market did not converge in Farm-to-Fork: the EU's sugar quotas switched on and off at every step | fixed (solve path); the full run to confirm |
 
 ## Details
 
@@ -2097,4 +2098,32 @@ while preparing SUPPLY_NONEU step 9's comparison per region. A reproduction erro
   Not changed: the CAPTRD trajectory (scenarios/captrd_2030, not the default) takes CAPTRD's own SETA row as it is
   (capri_mod/projection/captrd_import.py, no aggregation); whether CAPTRD's SETA is VSET too is to check before that
   trajectory is used.
+
+<a id="k117"></a>
+### K117: The full-EU market did not converge in Farm-to-Fork, the EU's sugar quotas switching (found 5 November 2026)
+
+The Farm-to-Fork gate run of 4 November (r212, commit 02dcf2b) converged its baseline, but every scenario market solve
+ran its 100 steps without converging, the largest residual on sugar (SUGR, 1.2-1.9%), 411-535 s per solve against 15-38
+s in gate 16; the run could not finish within its time limit and was stopped after 3 iterations. A replay of the
+first scenario solve from its saved state: the residual alternating between about 1.5% and 66% at every step, three of
+the EU's sugar quotas (from AFR_REST 844 kt, India 10 kt, South Africa 274 kt) switching between sigma 0 and 1 in turn.
+trq_solve set each quota's sigma to its fixed point at the flows of the step (a bisection on the sigmoid at fixed
+market prices); with the out-of-quota tariff of 661 EUR/t, above the sugar price, the market's prices then moved so far
+that the next step's fixed point was on the other side. CAPRI solves the quotas with the prices in one system
+(trqSigmoidFunc_, TRQImports_ in m_globMarket) and has no such loop. Came in with the market move's quota stage (stages
+4-5, 4 November), which gate 16 did not include; the mini-EU runs converged, more slowly (market time 50 s before stage
+4, 120-330 s after).
+
+- **Effect:** the full-EU scenario market did not converge; the runs could not finish
+- **Status:** **fixed** 5 November 2026 (branch trq-relax): trq_solve takes the full step only until a quota's gap
+  g = Sigmoid(fill) - sigma changes sign, then the regula falsi point of the bracket (Illinois variant), an end not
+  revisited in 4 steps dropped (the prices move on with the market's steps); trq_gap, max |g| (CAPRI's trqSigmoidFunc_
+  residual), counts in the solve's convergence test with the move. The equations are unchanged. Replay of the stuck solve:
+  residual 1e-9 and quota gap 2e-7 at step 100 (tolerance 1e-7 for both). Mini-EU F2F against the same code without it
+  (mini_k115): the same 6 iterations, market time 680 s against 1011 s, 77 values apart by more than 1e-6 relative
+  (welfare TRQ rents, dairy block z, at most about 5e-6), the deviation from CAPRI 7.81 as before. Test:
+  test_trq_fill_converges_when_the_market_responds_more_than_the_flow (full steps keep swinging, the search converges
+  to 1e-10). The full Farm-to-Fork run to confirm.
+- **Not changed:** the market's time per solve is still above gate 16's (the steps per solve); the market move's other
+  stages (CAPRI's reference prices, the land block outside the EU) raised it too, to look into.
 

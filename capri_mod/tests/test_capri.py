@@ -898,6 +898,35 @@ def test_trq_tariff_follows_quota_fill():
     assert 90.0 < x_o < 105.0
 
 
+def test_trq_fill_converges_when_the_market_responds_more_than_the_flow():
+    """The quota's sigma against a market that answers its tariff more strongly than the flow's own response inside
+    trq_solve (here: 300 kt wanted at the in-quota price, elasticity 25 against the flow's 7). Sigma solved full at each
+    step's flows (as until 5 November 2026; here by clearing the bracket before each step) keeps swinging, the rate
+    switched on and off, as the EU's sugar quotas in the full Farm-to-Fork; with trq_solve's bracketing root search the
+    outer loop converges: trqSigmoidFunc_'s residual (trq_gap) below 1e-10, sigma the sigmoid of the market's fill."""
+    import numpy as np
+
+    def run(full_steps):
+        sc = _trq_toy(50.0)
+        r = np.ones(2)
+        p = sc.import_prices(r)
+        want = lambda off: 300.0 * (p[0, 1] / (p[0, 1] + off)) ** 25.0       # the market's flow at the rate's offset
+        moves = []
+        for _ in range(80):
+            X = sc.X0.copy(); X[0, 1] = want(float(sc.trq_offset[0, 1]))
+            s0 = float(sc.trq_sigma[0])
+            if full_steps:
+                sc._trq_bracket = sc._trq_hist = None
+            sc.trq_solve(X, p, r)
+            moves.append(abs(float(sc.trq_sigma[0]) - s0))
+        return sc, want, moves
+    sc, want, moves = run(True)
+    assert max(moves[-10:]) > 0.2 and sc.trq_gap > 0.2
+    sc, want, moves = run(False)
+    assert sc.trq_gap < 1e-10 and max(moves[-10:]) < 1e-10, (sc.trq_gap, moves[-3:])
+    assert abs(float(sc.trq_sigma[0]) - float(sc._sig(want(float(sc.trq_offset[0, 1])) / 100.0))) < 1e-9
+
+
 def test_trq_volume_change_moves_the_quota_not_the_base():
     """A scenario quota expansion of the EU (PolicyScenario.trq_volume_changes, 1000 t) is spread over its quotas by
     base volume; the base sigma stays at the base quotas, so with base flows the offset is zero and a filled quota
