@@ -132,8 +132,8 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K113](#k113) | Croatia had no AD option: CAPRI's fallback_Balkan fills its VSER and housing share | fixed |
 | [K114](#k114) | Norway lacked CAPRI's mirrored MITERRA data and Sweden's AD data: no housed liquid manure, no AD | fixed |
 | [K115](#k115) | The 2030 set-aside followed CAPRI's VSET alone, not FALL + VSET: up to half or double CAPRI's per region | fixed |
-| [K116](#k116) | The CAPRI-reference trajectory kept the trend projection's [0.2, 5] band, 1.0 threshold and missing zeros; OFOD grew as OFAR alone | fixed (data); the runs' effect to measure |
-| [K117](#k117) | The full-EU market did not converge in Farm-to-Fork: the EU's sugar quotas switched on and off at every step | fixed (solve path); the full run to confirm |
+| [K116](#k116) | The CAPRI-reference trajectory kept the trend projection's [0.2, 5] band, 1.0 threshold and missing zeros; OFOD grew as OFAR alone | fixed |
+| [K117](#k117) | The full-EU market did not converge in Farm-to-Fork: the EU's sugar quotas switched on and off at every step | fixed |
 
 ## Details
 
@@ -2122,7 +2122,12 @@ reproduction error of capri-mod.
   fallow); OFOD = OFAR + ROOF (levels, and the level-weighted yield). The EU fallback medians stay over the cells of
   2017 level >= 1.0 (3 change, by the zeros). The schema allows a zero level factor. 7,870 regional factors added, 193
   changed. Test: test_capri_reference_trajectory_reproduces_its_crop_levels (every crop cell of the trajectory equals
-  CAPRI's 2030 reference level: the EU's 6,047, the 30 non-EU units' too). The runs' effect is to be measured.
+  CAPRI's 2030 reference level: the EU's 6,047, the 30 non-EU units' too).
+- **Effect measured** 5 November 2026. Full Farm-to-Fork run full_k116c against r213 (the same code without K116):
+  converged in 12 iterations (r213: 13); the baseline against CAPRI's 2030 reference (compare_baseline_capri.py): median
+  deviation of activities 0.2% (0.4%), production 0.2% (0.5%), domestic use 0.4% (0.6%), relative prices 12.1% as before;
+  mean absolute deviation from JRC121368 over 20 indicators 4.56 (4.59), every indicator within 0.4 points of r213; the
+  scenario's voluntary set-aside 5,379 kha (5,757). Mini-EU: 6 iterations, deviation 7.82 (7.81).
 - Yields likewise: the band held 18 regional yield factors, all above 5 (Poland's other crops OCRO: CAPRI's yield 11.6
   in 2017, 206.5 in 2030, 14 to 21-fold per region; Bosnia's apples 5.7-fold), now CAPRI's ratio as it is.
 - **Not changed:** the trajectory's own check on the solved baseline (the PMP and the land reconciliation can still
@@ -2152,7 +2157,11 @@ that the next step's fixed point was on the other side. CAPRI solves the quotas 
   (mini_k115): the same 6 iterations, market time 680 s against 1011 s, 77 values apart by more than 1e-6 relative
   (welfare TRQ rents, dairy block z, at most about 5e-6), the deviation from CAPRI 7.81 as before. Test:
   test_trq_fill_converges_when_the_market_responds_more_than_the_flow (full steps keep swinging, the search converges
-  to 1e-10). The full Farm-to-Fork run to confirm.
-- **Not changed:** the market's time per solve is still above gate 16's (the steps per solve); the market move's other
-  stages (CAPRI's reference prices, the land block outside the EU) raised it too, to look into.
+  to 1e-10). Confirmed by the full Farm-to-Fork run r213 (5 November 2026): converged in 13 iterations, deviation from
+  JRC121368 4.59 (gate 16: 4.18; the beef and poultry prices not yet attributed).
+- **Not changed:** the market's time per solve is still above gate 16's: most solves run to the 100-step cap because
+  the quotas' sigmas settle one step behind the prices (diagnosed 5 November 2026: the residual meets the tolerance by
+  step 70, the quota moves by step 100). The quota bracketing's cost per step was cut by computing each trial on the
+  quota's own cells (commit 3818bc5, identical results: market time about halved in the full run); the sigmas inside
+  the price solve are next (MARKET_IPOPT_DESIGN §7.1 step 2).
 
