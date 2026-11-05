@@ -925,6 +925,66 @@ def test_trq_fill_converges_when_the_market_responds_more_than_the_flow():
     assert abs(float(sc.trq_sigma[0]) - float(sc._sig(want(float(sc.trq_offset[0, 1])) / 100.0))) < 1e-9
 
 
+def test_trq_solve_on_quota_cells_equals_full_matrices():
+    """trq_solve's trials on each quota's own cells (_TrqCells) give the full matrices' sigmas and offsets bit for bit,
+    across market steps (the bracketing's state carried), on a system with what the cells must get right: two importers,
+    two bilateral quotas sharing cells (the later writes them last), a quota with only a specific rate, a quota under a
+    global one (its rate the smaller of the two, ncpcm), a global quota with both rates over the flows of the exporters
+    without a bilateral quota, an entry-price quota, and a flexible levy replacing the specific tariff on one flow."""
+    import numpy as np
+    from capri_mod.market.bilateral import BilateralCommodity
+    rng = np.random.default_rng(7)
+    n = 7
+    X0 = rng.uniform(5.0, 60.0, (n, n)); np.fill_diagonal(X0, rng.uniform(200.0, 400.0, n))
+    a = np.where(np.eye(n) > 0, 0.0, rng.uniform(800.0, 1200.0, (n, n)))
+    b = np.where(np.eye(n) > 0, 0.0, rng.uniform(50.0, 150.0, (n, n)))
+
+    def system(cells):
+        sc = BilateralCommodity("T", [f"R{i}" for i in range(n)], X0.copy(), a.copy(), b.copy(), a.copy(),
+                                rng0.uniform(900.0, 1100.0, n), 3.5, 7.0, tc=b.copy())
+        sc.calibrate(X0.sum(axis=0) * 1.0)
+        # each quota at its base fill: the steps' flows (x 0.6 to 1.6) cross the sigmoid's steep part
+        q = lambda rows, cols, ta, ts, regime="bilateral", imp="A": dict(
+            rows=np.array(rows), cols=np.array(cols), Q=float(X0[np.ix_(rows, cols)].sum()),
+            Q0=float(X0[np.ix_(rows, cols)].sum()), ta_pref=ta[0], dta=ta[1] - ta[0], ts_pref=ts[0],
+            dts=ts[1] - ts[0], importer=imp, exporter="x", regime=regime, glob=None)
+        sc.trq_quotas = [q([0, 1], [3, 4], (0.0, 40.0), (0.0, 150.0)),
+                         q([0, 1], [4], (5.0, 30.0), (10.0, 90.0)),                  # shares (0..1, 4) with quota 0
+                         q([0, 1], [5], (0.0, 0.0), (0.0, 300.0)),                   # specific rate only
+                         q([0, 1], [6], (0.0, 60.0), (0.0, 0.0), "with_global"),
+                         q([2], [3, 5], (0.0, 0.0), (0.0, 200.0), "entry_price", "B"),
+                         q([2], [4, 6], (2.0, 45.0), (0.0, 120.0), "bilateral", "B")]
+        cover = np.zeros((n, n), bool); cover[np.ix_([0, 1], [2])] = True
+        Qg = float(X0[cover].sum())
+        sc.trq_globals = [dict(rows=np.array([0, 1]), Q=Qg, Q0=Qg, ta_pref=0.0, dta=35.0, ts_pref=0.0, dts=80.0,
+                               cover=cover, bil=[0, 1, 2, 3], importer="A", has_ta=True, has_ts=True)]
+        sc.trq_quotas[3]["glob"] = 0
+        kind = np.zeros((n, n), int); kind[1, 3] = 2
+        sc.border = dict(kind=kind, price=np.where(kind == 2, 1300.0, 0.0), tars=np.where(kind == 2, 250.0, 0.0),
+                         fac=np.ones((n, n)), pref=np.zeros((n, n)), quota=np.full((n, n), -1))
+        sc.border_base()
+        sc.trq_base()
+        sc.TRQ_CELLS = cells
+        return sc
+
+    rng0 = np.random.default_rng(3)
+    full = system(False)
+    rng0 = np.random.default_rng(3)
+    cell = system(True)
+    steps = np.random.default_rng(11)
+    inner = 0
+    for _ in range(25):
+        r = steps.uniform(0.85, 1.2, n)
+        X = X0 * steps.uniform(0.6, 1.6, (n, n))
+        for sc in (full, cell):
+            sc.trq_solve(X, sc.import_prices(r), r)
+        assert np.array_equal(full.trq_sigmas(), cell.trq_sigmas())
+        assert np.array_equal(full.trq_offset, cell.trq_offset)
+        assert full.trq_gap == cell.trq_gap
+        inner += int(np.sum((full.trq_sigmas() > 0.05) & (full.trq_sigmas() < 0.95)))
+    assert inner >= 10                                           # sigmas on the sigmoid's steep part, not only its ends
+
+
 def test_trq_volume_change_moves_the_quota_not_the_base():
     """A scenario quota expansion of the EU (PolicyScenario.trq_volume_changes, 1000 t) is spread over its quotas by
     base volume; the base sigma stays at the base quotas, so with base flows the offset is zero and a filled quota

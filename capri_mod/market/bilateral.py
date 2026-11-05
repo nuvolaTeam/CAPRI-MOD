@@ -109,6 +109,9 @@ class BilateralCommodity:
     TRQ_FILL_MID = 0.97
     #: overflow clip of the sigmoid's argument (numerical)
     TRQ_ARG_CLIP = 60.0
+    #: trq_solve's trials on the quota's own cells (_TrqCells; the same values as the full matrices, faster); False
+    #: computes every trial on the full matrices (the reference the test compares with)
+    TRQ_CELLS = True
 
     #: CAPRI's global (erga omnes) quotas of the importers (TRQImports_, tarAdValW_, tarSpecW_; stage 5 with stage 4):
     #: dicts rows (the importer's market regions), Q, Q0, ta_pref, dta, ts_pref, dts, cover (n x n bool: the flows that
@@ -263,21 +266,32 @@ class BilateralCommodity:
                     lo = mid
             return 0.5 * (lo + hi)
 
+        # Without D (every caller in the solves) a trial sigma of one quota moves only the rates of the cells that quota
+        # (or, for a global quota, it and its nested bilateral quotas) writes last, and the fill sums only its own cells:
+        # the trial computes those cells alone (_TrqCells), the same element operations in the same order as the full
+        # matrices, so the same values bit for bit; with D the flows of all regions respond, and the full form is kept
+        fast = D is None and self.TRQ_CELLS
         for k, q in enumerate(self.trq_quotas or ()):
             if q["Q"] <= 0:
                 continue
-
-            def hB(s, k=k, q=q):
-                b = sB.copy(); b[k] = s
-                return s - float(self._sig(self.trq_fill(Xat(self._trq_off(r, b, sW)), q) / q["Q"]))
+            if fast:
+                cells = _TrqCells(self, r, p, X, off_now, sB, sW)
+                hB = cells.bilateral_trial(k)
+            else:
+                def hB(s, k=k, q=q):
+                    b = sB.copy(); b[k] = s
+                    return s - float(self._sig(self.trq_fill(Xat(self._trq_off(r, b, sW)), q) / q["Q"]))
             sB[k] = bisect(hB)
         for m, g in enumerate(self.trq_globals or ()):
             if g["Q"] <= 0:
                 continue
-
-            def hW(s, m=m, g=g):
-                w = sW.copy(); w[m] = s
-                return s - float(self._sig(self.trq_global_imports(Xat(self._trq_off(r, sB, w)), g) / g["Q"]))
+            if fast:
+                cells = _TrqCells(self, r, p, X, off_now, sB, sW)
+                hW = cells.global_trial(m)
+            else:
+                def hW(s, m=m, g=g):
+                    w = sW.copy(); w[m] = s
+                    return s - float(self._sig(self.trq_global_imports(Xat(self._trq_off(r, sB, w)), g) / g["Q"]))
             sW[m] = bisect(hW)
         # Aitken's extrapolation where a quota's sigma converges linearly (the outer fixed point with the market,
         # slow at the sigmoid's steep part: a contraction of about 0.96 per step near 97% fill): three moves in one
@@ -459,3 +473,123 @@ class BilateralCommodity:
         """Supply balance of every region's own good: S - DS - exports (1000 t)."""
         X, _ = self.flows(D, r, p, pre=pre)
         return S - X.sum(axis=0)
+
+
+class _TrqCells:
+    """One quota's trial in trq_solve on the cells it needs (without total use D): its own cells for a bilateral quota
+    (TradeFlowsAgg_), the cover and the nested bilateral quotas' cells for a global one (TRQImports_). The rates of a
+    cell come from the quota that writes it last in _trq_rates (globals first, then the bilateral quotas in order; a
+    structure, not a value, so mapped once), and only the cells whose writer moves with the trial sigma are recomputed;
+    the others keep the rates at the current sigmas. Every element operation is _trq_off's and Xat's, in the same
+    order, on arrays laid out as the full matrices' extracts (X[np.ix_(rows, cols)], X[cover]), so the sums and the
+    trial values are the full form's."""
+
+    _G = 1_000_000                                       # a global quota's writer code: _G + its index
+
+    def __init__(self, sc: "BilateralCommodity", r: np.ndarray, p: np.ndarray, X: np.ndarray, off_now: np.ndarray,
+                 sB: np.ndarray, sW: np.ndarray):
+        self.sc, self.sB, self.sW = sc, sB, sW
+        self.p, self.X, self.off_now = p, X, off_now
+        self.ta, self.ts = sc._trq_rates(sB, sW)          # every cell's rates at the current sigmas
+        tc = sc.tc if sc.tc is not None else np.zeros_like(sc.a0)
+        self.base = sc.a0 * r[None, :] + tc
+        self.ta0n, self.ts0n = np.nan_to_num(sc._trq_ta0), np.nan_to_num(sc._trq_ts0)
+        self.kind2 = (sc.border["kind"] == 2) if sc.border else None
+        n = len(sc.regions)
+        wa, ws = np.full((n, n), -1, dtype=np.int64), np.full((n, n), -1, dtype=np.int64)
+        glob = sc.trq_globals or ()
+        for m, g in enumerate(glob):
+            if g["has_ta"]:
+                wa[g["cover"]] = self._G + m
+            if g["has_ts"]:
+                ws[g["cover"]] = self._G + m
+        for k, q in enumerate(sc.trq_quotas or ()):
+            if q["regime"] == "entry_price":
+                continue
+            ixq = np.ix_(q["rows"], q["cols"])
+            g = glob[q["glob"]] if q.get("glob") is not None else None
+            if q["dta"] != 0 or (g is not None and g["has_ta"]):
+                wa[ixq] = k
+            if q["dts"] != 0 or (g is not None and g["has_ts"]):
+                ws[ixq] = k
+        self.wa, self.ws = wa, ws
+
+    def _bil_rates(self, k: int, sb_k, sw_g):
+        """_trq_rates' (tb, sb) of bilateral quota k at its sigma sb_k and its global quota's sigma sw_g."""
+        q = self.sc.trq_quotas[k]
+        tb = q["ta_pref"] + q["dta"] * sb_k
+        sb = q["ts_pref"] + q["dts"] * sb_k
+        g = self.sc.trq_globals[q["glob"]] if q.get("glob") is not None else None
+        if g is not None and g["has_ta"]:
+            tw = g["ta_pref"] + g["dta"] * sw_g
+            tb = self.sc.ncpcm(tw, tb, max(1e-2, 1e-3 * abs(q["dta"])))
+        if g is not None and g["has_ts"]:
+            tw = g["ts_pref"] + g["dts"] * sw_g
+            sb = self.sc.ncpcm(tw, sb, max(1e-5, 1e-7 * abs(q["dts"])))
+        return tb, sb
+
+    def _cells(self, I) -> tuple:
+        """The constant inputs of _xat on the cells I, extracted once per quota's bisection."""
+        return (self.base[I], self.ta0n[I], self.ts0n[I], None if self.kind2 is None else self.kind2[I],
+                self.X[I], self.p[I], self.off_now[I])
+
+    def _xat(self, C: tuple, ta_c: np.ndarray, ts_c: np.ndarray) -> np.ndarray:
+        """_trq_off then Xat on the cells C (_cells)."""
+        base, ta0n, ts0n, kind2, Xc, pc, onow = C
+        off = np.where(np.isnan(ta_c), 0.0, base * (ta_c - ta0n) / 100.0)
+        sp = np.where(np.isnan(ts_c), 0.0, ts_c - ts0n)
+        if kind2 is not None:
+            sp = np.where(kind2, 0.0, sp)
+        off = off + sp
+        with np.errstate(divide="ignore", invalid="ignore"):
+            return np.where(Xc > 0, Xc * (pc / np.maximum(pc + off - onow, 1e-6)) ** self.sc.s2, Xc)
+
+    def bilateral_trial(self, k: int):
+        """h(s) = s - Sigmoid(fill / Q) of bilateral quota k at the trial sigma s."""
+        sc, q = self.sc, self.sc.trq_quotas[k]
+        I = np.ix_(q["rows"], q["cols"])
+        own_a, own_s = self.wa[I] == k, self.ws[I] == k
+        ta_k, ts_k = self.ta[I], self.ts[I]
+        C = self._cells(I)
+        gi = q.get("glob")
+        sw_g = self.sW[gi] if gi is not None else None
+
+        def h(s):
+            tb, sb = self._bil_rates(k, s, sw_g)
+            fill = float(self._xat(C, np.where(own_a, tb, ta_k), np.where(own_s, sb, ts_k)).sum())
+            return s - float(sc._sig(fill / q["Q"]))
+        return h
+
+    def global_trial(self, m: int):
+        """h(s) = s - Sigmoid(imports / Q) of global quota m at the trial sigma s: the cover's flows and the nested
+        bilateral quotas' overfill, -ncpcm(-(fill - Q), 0, 1E-3 Q) (trq_global_imports)."""
+        sc, g = self.sc, self.sc.trq_globals[m]
+        kids = [k for k, q in enumerate(sc.trq_quotas or ())
+                if q.get("glob") == m and q["regime"] != "entry_price"]
+        sets = [g["cover"]] + [np.ix_(sc.trq_quotas[k]["rows"], sc.trq_quotas[k]["cols"]) for k in g["bil"]]
+        pre = []
+        for I in sets:
+            wa_I, ws_I = self.wa[I], self.ws[I]
+            km = [(k, ma, ms) for k, ma, ms in ((k, wa_I == k, ws_I == k) for k in kids) if ma.any() or ms.any()]
+            pre.append((self._cells(I), self.ta[I], self.ts[I], wa_I == self._G + m, ws_I == self._G + m, km))
+
+        def rates(s, ta_c, ts_c, own_a, own_s, kid_masks):
+            if g["has_ta"]:
+                ta_c = np.where(own_a, g["ta_pref"] + g["dta"] * s, ta_c)
+            if g["has_ts"]:
+                ts_c = np.where(own_s, g["ts_pref"] + g["dts"] * s, ts_c)
+            for k, ma, ms in kid_masks:
+                tb, sb = self._bil_rates(k, self.sB[k], s)
+                ta_c = np.where(ma, tb, ta_c)
+                ts_c = np.where(ms, sb, ts_c)
+            return ta_c, ts_c
+
+        def h(s):
+            I, ta_c, ts_c, oa, os_, km = pre[0]
+            tot = float(self._xat(I, *rates(s, ta_c, ts_c, oa, os_, km)).sum())
+            for k, (I, ta_c, ts_c, oa, os_, km) in zip(g["bil"], pre[1:]):
+                q = sc.trq_quotas[k]
+                fk = float(self._xat(I, *rates(s, ta_c, ts_c, oa, os_, km)).sum())
+                tot += float(-sc.ncpcm(-(fk - q["Q"]), 0.0, 1e-3 * q["Q"]))
+            return s - float(sc._sig(tot / g["Q"]))
+        return h
