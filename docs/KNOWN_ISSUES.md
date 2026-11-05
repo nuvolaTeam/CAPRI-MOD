@@ -1988,6 +1988,14 @@ trqSigmoidFunc_ with the rest of the market) would make the end of both solves s
 (docs/design/MARKET_IPOPT_DESIGN.md section 7.1): the Newton-Krylov solve stays optional with no further work; the
 quotas and the raw milk price go inside the evaluation after the Farm-to-Fork and Green Deal runs, then G3.
 
+5 November 2026: the default solve now takes the quotas' sigmas with the prices (market.trq_joint, K117); the Newton-
+Krylov solve keeps them one step behind. Switzerland's casein then differs by 1.37e-5 between the two stops (the test's
+bound 1e-5 failed in the suite; the next largest gap 1.1e-6, Swiss butter). Rerun at market.tol = 1e-9: the default
+solve converged in 116 s; the Newton-Krylov solve reached its 300-step cap without converging (1,787 s); the casein gap
+fell to 4.8e-6 and every other price was within 4e-7. So a stop-point gap in this thin market, not two equilibria; the
+test's bound became 3e-5 for every price, 1e-6 for all but five as before. The Newton-Krylov solve is left as it is
+(optional, no further work, as decided on 4 November).
+
 ### K111: The set-aside report books part of a set-aside increase as VSET where CAPRI has none (found 4 November 2026)
 
 capri_mod/model.py _set_aside_table splits the model's SETA into CAPRI's VSET and FALL: VSET = s X0 + w (X - X0), s
