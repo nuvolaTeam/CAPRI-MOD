@@ -29,6 +29,11 @@ Each folder is listed with what it holds, where it comes from, and the builders 
 
 **`exports/`**: CAPRI's exports as delivered, one file each, not unpacked (list below).
 
+**`datam_mirror_2040/`**: the project lead's extracts of CAPRI's 2040 results from the JRC DataM dashboard MRL_TO_LOQ_2
+(import production standards, pesticides), four `.xlsx` files as uploaded on 5 November 2026 (the dashboard's four
+copies of the area table are identical in levels: one kept).
+- Read by: build_datam_mirror_2040_reference (to the reference folder only; not a model input).
+
 **`capreg/`**: CAPREG's 2017 results, `res_17<MS>.txt`.
 - From: the gdxdump listings of `output/results/capreg/res_17<MS>.gdx`, in `res_17zip.zip` (27 member states) plus single
   files. `tools/gams/dump_capreg_explicit.gms` makes them.
@@ -165,6 +170,7 @@ named below.
 | `captrd_results/1770/<respos>.csv.gz` | `results_1770.gdx` (base 2017, simulation years 2018–2070) | CAPTRD's `p_result(region, col, row, t, respos)`, one file per result position (Step1, support, support1, wVarErr, step2, step3, series, P_Data, data statistics, …); `respos_counts.csv` lists all positions and `settings.csv` the run settings | `tools/build_captrd_results_reference.py --src results_1770.gdx --tag 1770` |
 | `sets/simini_21730/<SET>.csv` | `sim_ini_21730.gdx` (CAPMOD restart file of the endotech Green Deal 2030 run) | the 1,972 CAPRI sets of that run (global sets.gms and loaded modules, with the run's switches applied), one file per set with `_index.csv`; sets defined only in CAPTRD (sets_captrd.gms) are not among them | `tools/build_capri_sets_reference.py --src sim_ini_21730.gdx --tag simini_21730` |
 | `simini/simini_21730/<symbol>.csv.gz` | `sim_ini_21730.gdx` (the same restart file as `sets/simini_21730`) | CAPRI's calibrated 2030 market state for the move onto CAPRI's market regions and the ports' checks: the 37 symbols listed with their use in `tools/build/simini_reference_symbols.csv` (DATA, the trade flows and prices, TRQs, levies, entry prices, Armington and CES parameters, the GL demand and NQ Hessians, the market variables' levels and bounds), with `_index.csv`; parameters `d0…dn, value, eps`, variables `d0…dn, level, eps, lower, upper, marginal`; +INF/-INF as inf/-inf, NA as nan. `--check sim_ini_21730_1.gdx` found the 37 symbols identical in the second upload (2 November 2026) | `tools/build/build_simini_reference.py --src sim_ini_21730.gdx --tag simini_21730` |
+| `datam_mirror_2040/<table>.csv` | the project lead's extracts of the JRC DataM dashboard MRL_TO_LOQ_2 (`capri_sources/datam_mirror_2040/*.xlsx`, uploaded 5 November 2026; data valid as of February 2026 per the dashboard) | CAPRI's 2040 results of the JRC study on aligning import production standards (pesticide active substances not approved in the EU), four scenarios (Baseline, switchX-scaleEFSA_5, switchX-scaleEFSA+min20, noadapt-noscale): utilised area per member state, EU production change per product (scenario not stated in the extract), producer prices per trade region and product, bilateral trade per reporter, product and partner (variable and unit not stated). Not read by the model or the pipeline: a future 2040 check for CAPTRD-MOD (MODEL_CONTENT_PLAN §14 item 19); the shock inputs and CAPRI's scenario code are not in the extracts | `tools/build/build_datam_mirror_2040_reference.py` |
 
 Columns of the data files: `region, col, row, t, value, eps`.
 - A record CAPRI stored as Eps (an explicit zero) has value 0 and eps = 1.

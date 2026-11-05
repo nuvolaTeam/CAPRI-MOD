@@ -54,6 +54,8 @@ LAYOUT = {
     "dat": "CAPRI's dat folder as parquet (the project's mirror)",
     "reference": "CAPRI's files converted for the parity tests and two builders (tools/build/build_*_reference.py; "
                  "docs/EXTERNAL_SOURCES.md, \"The reference folder\")",
+    "datam_mirror_2040": "the project lead's extracts of CAPRI's 2040 results from the JRC DataM dashboard MRL_TO_LOQ_2 "
+                         "(tools/build/build_datam_mirror_2040_reference.py)",
     "gdxlib": "the GDX library libgdxcclib64.so (open source, README section 3), for the builders that read .gdx files",
 }
 

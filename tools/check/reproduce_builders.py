@@ -232,6 +232,7 @@ NOT_AUDITED = {
     "build_capreg_tseries_reference": "writes capri_sources/reference/ (not committed)",
     "build_capri_sets_reference": "writes capri_sources/reference/ (not committed)",
     "build_captrd_results_reference": "writes capri_sources/reference/ (not committed)",
+    "build_datam_mirror_2040_reference": "writes capri_sources/reference/ (not committed)",
     "build_eu_outlook_2030": "input (DG AGRI outlook PDF) not held in the workspace",
     "build_n_cascade_validation": "a check, writes a validation table",
     "build_patched_inputs": "superseded one-off (see REGIONAL_UNITS_BUILDERS.md 4.4)",

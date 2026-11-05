@@ -697,26 +697,33 @@ fine-grained token checked the same day; the token is kept outside the repositor
 1. Decided 2 November 2026: the TARV switch in stage 2, the 2017 rebuild in stage 1.
 2. Decided 2 November 2026: stage 2's young-animal fix in the current solve; G2g later.
 3. Decided 2 November 2026: the F2F/GD gates after stages 1-4 and after stages 5-7.
-4. Ports: written in the current market code, or directly as G3's defining equations (not stated).
-5. Ports: the market's land-use-change estimation (luc_market), on in CAPRI with REPORTS_ENV (G3I findings), is not in
-   this list; whether it is to be ported (not stated).
-6. 29 units: [I] whether the default `run.supply_countries_outside_eu` becomes CAPRI's full list once built.
-7. G3: the bound policy, CAPRI's reproduced or an elastic least-infeasibility formulation (GR Q2.4).
-8. G3: the objective, the decided ½‖z − z₀‖² (MID §7) or zero with a squareness and structural-rank check (GR Q2.4).
-9. G3: validation by reproducing CAPRI's market state from sim_ini (GR Q5.2), and replacing MID §6's acceptance test by
-   G3-R plus G3-C (GR Q5.1).
-10. G3: fudge equations as CAPRI activates them or always on (GR Q1.2); variable scaling (GR Q6.4); the set structure
-    in production and validation (GR Q6.5); beyond CAPRI, a least-infeasibility mode and a Dulmage–Mendelsohn check
-    (GR "Beyond CAPRI").
-11. S6: which DEP-10 items to take on.
-12. S7: whether and when to remove the baseline demand recalibration (DEP-5).
-13. S9: whether to resume K65 without CAPRI's per-sex results.
-14. S10: whether to build NoTill and LegSh.
-15. S11: which items, and which CAPRI exports to request.
+4. Ports: written in the current market code (done 4 November 2026, stages 4-7).
+5. Decided 5 November 2026: the market's land-use-change estimation (luc_market) is ported.
+6. Decided 5 November 2026: the default `run.supply_countries_outside_eu` becomes CAPRI's full list, at the end of the
+   work (too costly in run time now).
+7. Decided 5 November 2026: G3's bound policy is CAPRI's reproduced; the least-infeasibility formulation an optional
+   diagnostic mode (MID §7.2; BEYOND-13).
+8. Decided 5 November 2026: G3's objective is zero, with a squareness and structural-rank check before every solve
+   (MID §7.2).
+9. Decided 5 November 2026: G3-R plus G3-C replace MID §6's acceptance test. Open: the CAPRI market dump for the
+   external validation (GR Q5.2), to be agreed with the project lead.
+10. Decided 5 November 2026: the fudge equations as CAPRI activates them; variables scaled as ratios to base (a
+    registered departure); a Dulmage–Mendelsohn check (BEYOND-12). Open: the set structure in production and
+    validation (GR Q6.5), with G3's design.
+11. Decided 5 November 2026: S6 stays close to CAPRI; each DEP-10 item triaged, with questions to the project lead
+    where CAPRI's form cannot be kept.
+12. Decided 5 November 2026: S7, the baseline demand recalibration (DEP-5) is removed, soon.
+13. Open (5 November 2026): K65 stays deferred unless CAPRI data help; to revisit after S1/S2 (heifers by sex).
+14. Decided 5 November 2026: S10, NoTill and LegSh are ported.
+15. Open (5 November 2026): S11's CAPRI exports, specified to the project lead (2030 feed per head per activity for
+    DEP-22, p_Nemidat, p_digestPar after digestibility.gms; T1/T2 with S1).
 16. Not raised in the notes [I]: the position of S1/S2, the G2 stages and S6-S11 relative to the market move and the
     29 units.
-17. P1 and P2 (§12a): when to schedule them.
-18. Decided 3 November 2026: §12b's Parquet download on Hugging Face, gated, after the market move's stages 2-3.
+17. Decided 5 November 2026: P1 (obligatory set-aside) just before CAPTRD; P2 by porting CAPRI's premium module, scheduled
+    with P1 before CAPTRD.
+18. Decided 3 November 2026: §12b's Parquet download on Hugging Face, gated, after the market move's stages 2-3. Go-ahead confirmed 5 November 2026.
+19. Decided 5 November 2026: the CAPRI 2040 mirror-standard (pesticide) extracts are kept as a future 2040 check for
+    CAPTRD-MOD (capri_reference/), not as a benchmark until the shock inputs and CAPRI's scenario code are available.
 
 ## 15. Notes found out of date while drafting
 
