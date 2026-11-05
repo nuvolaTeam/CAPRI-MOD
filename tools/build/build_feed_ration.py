@@ -25,7 +25,7 @@ import re
 import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
-from paths import SOURCES  # noqa: E402  (CAPRI's material outside the repository)
+from paths import SOURCES, REFERENCE  # noqa: E402  (CAPRI's material outside the repository)
 import sys as _sys_nc  # noqa: E402
 _sys_nc.path.insert(0, str(__import__("pathlib").Path(__file__).resolve().parents[2] / "tools" / "lib"))
 from _model_regions import national_code as _national_code  # noqa: E402  (TUR for Turkey's units, 4 November 2026)
@@ -94,9 +94,83 @@ def _attach_slopes(out, reg8, anim, var, slope_src, key):
     return n_sl
 
 
+#: CAPRI's PMP activities of each model animal in the 2030 weights (sim_ini's DATA at TRD has the bull and heifer
+#: activities by intensity, BULL/BULH and HEIL/HEIH/HEIR, each with its herd; not the BULF and HEIF aggregates)
+PMP_ACTS_2030 = {"DCOL": "DCOW", "DCOH": "DCOW", "SCOW": "BCOW", "BULL": "BULL", "BULH": "BULL",
+                 "HEIR": "HFRS", "HEIL": "HFRS", "HEIH": "HFRS", "CAMF": "CALV", "CAFF": "CALV", "CAMR": "CALV",
+                 "CAFR": "CALV", "SOWS": "PIGS", "PIGF": "PIGF", "HENS": "LAYS", "POUF": "BROI",
+                 "SHGM": "SHGM", "SHGF": "SHGF"}
+
+
+def _tables_2030(path: Path) -> dict:
+    """CAPRI's 2030 herds and rations per (CAPRI region, activity): DATA(region, act, LEVL | feed, "TRD") of CAPRI's
+    2030 calibration (sim_ini_21730, capri_sources/reference/simini; feed in kg per head, LEVL in 1000 heads)."""
+    import gzip
+    import csv as _csv
+    out = collections.defaultdict(dict)
+    with gzip.open(path, "rt", newline="") as fh:
+        for row in _csv.DictReader(fh):
+            if row["d3"] == "TRD" and row["d1"] in PMP_ACTS_2030 and (row["d2"] == "LEVL" or row["d2"] in FEEDS):
+                out[(row["d0"], row["d1"])][row["d2"]] = float(row["value"])
+    return out
+
+
+def _attach_slopes_2030(out, reg8, anim, var, tab30, slope_src, key):
+    """CAPRI's 2030 feed-PMP cost slopes aggregated to the model animal with CAPRI's 2030 weights: the same
+    aggregation as _attach_slopes, slope = sum_i w_i (-SLOP_i) (x_i / xbar)^2 / k, with w_i the 2030 herd shares and
+    x_i the 2030 rations per head of CAPRI's activities (DATA at TRD, _tables_2030), each heifer and bull activity
+    with its own slope and herd. k = model ration / xbar stays the 2017 one: the model's 2030 rations are its 2017
+    rations times CAPRI's 2030/2017 per-head factor (build_ration_trajectory_2030), which keeps that ratio. Where a
+    region has no 2030 rows for any of the animal's activities, the 2017 weights (_attach_slopes); likewise a feed that
+    CAPRI's 2030 rations of the animal no longer hold keeps its slope with the 2017 weights (its 2030 ration is then 0
+    and the slope unused, but the ration model would otherwise reconstruct one by formula). Returns (entries with
+    2030 weights, entries with the 2017 fallback, feed slopes with the 2017 fallback)."""
+    n30 = n17 = nf = 0
+    for reg, acts in out.items():
+        r8 = reg8.get(reg)
+        if not r8:
+            continue
+        for act, rec in acts.items():
+            members = [(tab30[(r8, a)], slope_src[(r8, a)]) for a, m in PMP_ACTS_2030.items()
+                       if m == act and tab30.get((r8, a), {}).get("LEVL", 0) > 0 and slope_src.get((r8, a))]
+            if not members:
+                one = {reg: {act: rec}}
+                n17 += _attach_slopes(one, reg8, anim, var, slope_src, key)
+                continue
+            # the 2017 average ration of the animal's CAPRI activities (k's denominator, as _attach_slopes)
+            m17 = []
+            for a in [k for k, m in PMP_ACTS.items() if m == act]:
+                d = var.get((r8, a), {}) if a in ("BULL", "BULH") else anim.get((r8, a), {})
+                if d.get("LEVL", 0) > 0:
+                    m17.append(d)
+            L, L17 = sum(d["LEVL"] for d, _ in members), sum(d["LEVL"] for d in m17)
+            tmp = {reg: {act: dict(rec)}}
+            _attach_slopes(tmp, reg8, anim, var, slope_src, key)
+            fb = tmp[reg][act].get(key, {})                  # the 2017-weighted slopes, per feed
+            slopes = {}
+            for f, xm in rec["ration"].items():
+                xbar = sum(d["LEVL"] * d.get(f, 0.0) for d, _ in members) / L
+                xbar17 = sum(d["LEVL"] * d.get(f, 0.0) for d in m17) / L17 if L17 > 0 else 0.0
+                if xbar <= 0 or xbar17 <= 0 or xm <= 0:
+                    if f in fb:
+                        slopes[f] = fb[f]
+                        nf += 1
+                    continue
+                k = xm / xbar17
+                sv = sum((d["LEVL"] / L) * sl.get(f, 0.0) * (d.get(f, 0.0) / xbar) ** 2 for d, sl in members)
+                if sv > 0:
+                    slopes[f] = sv / k
+            if slopes:
+                rec[key] = slopes
+                n30 += 1
+    return n30, n17, nf
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--dump-dir", type=Path, default=SOURCES / "capreg")
+    ap.add_argument("--simini-data", type=Path, default=REFERENCE / "simini" / "simini_21730" / "DATA.csv.gz",
+                    help="CAPRI's 2030 calibration data, DATA of sim_ini_21730 (tools/build/build_simini_reference.py)")
     ap.add_argument("--pmp-dir", type=Path, default=SOURCES / "feed_export",
                     help="gdxdump CSVs of p_pmpFeedInpCoeff (pmppar_17XX_feedpmp.csv)")
     args = ap.parse_args()
@@ -226,9 +300,10 @@ def main() -> None:
                 break
             if row["Dim5"] == "SLOP" and row["A"] == "T":
                 slope_src[(row["RALL"], row["MAACT"])][row["FEED"]] = -float(row["Val"])
-    # the same slopes of CAPRI's 2030 baseline calibration (pmppar_21730, tools/build/build_pmp_2030.py), aggregated with the
-    # same 2017 weights (REGISTERED: CAPRI's 2030 rations per activity are not in the export); used at the 2030 market
-    # year with SupplyModule.pmp_source "capri2030" (KNOWN_ISSUES K61)
+    # the same slopes of CAPRI's 2030 baseline calibration (pmppar_21730, tools/build/build_pmp_2030.py), aggregated with
+    # CAPRI's 2030 weights: its 2030 herds and rations per activity (sim_ini_21730's DATA at TRD; DEP-22 until
+    # 5 November 2026, when the 2017 weights were used); used at the 2030 market year with SupplyModule.pmp_source
+    # "capri2030" (KNOWN_ISSUES K61)
     # in the model's 2017 money: CAPRI's 2030 slopes over its inflation to 2030 (tools/lib/_money; KNOWN_ISSUES K108,
     # 31 October 2026: before, CAPRI's 2030 money)
     sys.path.insert(0, str(_ROOT / "tools" / "lib"))
@@ -240,10 +315,15 @@ def main() -> None:
         for row in csv.DictReader(open(_f30)):
             if row["coef"] == "SLOP" and row["tech"] == "T":
                 slope_src_2030[(row["region"], row["activity"])][row["feed"]] = -float(row["value"]) / _m30
-    for _key, _src in (("capri_slope", slope_src), ("capri_slope_2030", slope_src_2030)):
-        if _src:
-            n_sl = _attach_slopes(out, reg8, anim, var, _src, _key)
-            print(f"CAPRI feed-PMP slopes ({_key}) attached to {n_sl} region x animal entries")
+    if slope_src:
+        n_sl = _attach_slopes(out, reg8, anim, var, slope_src, "capri_slope")
+        print(f"CAPRI feed-PMP slopes (capri_slope) attached to {n_sl} region x animal entries")
+    if slope_src_2030:
+        tab30 = _tables_2030(args.simini_data)
+        n30, n17, nf = _attach_slopes_2030(out, reg8, anim, var, tab30, slope_src_2030, "capri_slope_2030")
+        print(f"CAPRI feed-PMP slopes (capri_slope_2030) attached to {n30 + n17} region x animal entries: {n30} with "
+              f"CAPRI's 2030 weights, {n17} with the 2017 weights (no 2030 rows); {nf} feed slopes with the 2017 "
+              f"weights (feeds CAPRI's 2030 rations no longer hold)")
 
     # source: CAPRI 2017 regional results (res_17*, dataOut): rations, requirements per day x DAYS, nutrient contents and
     # unit values; per head = CAPRI total / this model's herd. capri_slope: CAPRI's feed-PMP slopes (pmppar_17*

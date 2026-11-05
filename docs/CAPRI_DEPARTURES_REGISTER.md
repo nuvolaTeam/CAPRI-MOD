@@ -83,7 +83,6 @@ CAPTRD_MOD.md §12.4).
 | DEP-19 | Farm-to-Fork follows JRC121368, not a star 3.0 file: manure trade off; tiered surplus rule with nine capped regions; the tiered N target replaced by JRC121368's EU-average cut (36%); pesticide yield loss 10% at a 50% cut; ghgTechMYld 0.2. A hand-built scenario also gets JRC121368's pesticide rule (`PolicyScenario.pesticide_rule = "jrc121368"`). | policy files of star 3.0 | policy/greendeal.py; policy/policy_module.py | in force | SCENARIO_SETTINGS.md; KNOWN_ISSUES K57 |
 | DEP-20 | Green Deal 2030 targets and 2040 end points taken from a named batch that is not in the workspace (source open). | greendeal_scenarios.gms | policy/greendeal.py | in force; source open (04_code_data_status: open) | 04_code_data_status.sql |
 | DEP-21 | Green Deal input changes act on CAPRI's 2017 coefficients (simulation-year coefficients not held). The organic target's fertiliser part keeps the model's crop mapping instead of CAPRI's NGRP groups. | pol_input/greendeal/*.gms | supply module | in force (registered) | ARCHITECTURE_REFACTOR.md |
-| DEP-22 | Feed PMP slopes: CAPRI's 2030 SLOP aggregated with 2017 weights. | — | tools/build/build_feed_ration.py | in force (registered) | PMP_CAPRI_2030.md |
 | DEP-23 | Activities of a calibrated part without a positive CAPRI own PMP term are held at their level: 71 cells at 2030, at most 2% of an activity's EU level. **Whether this is a departure is unresolved:** MODULE_COUPLING_REVIEW.md calls it "as CAPRI". | — | supply module, `_uncalibrated` | in force | PMP_CAPRI_2030.md |
 | DEP-24 | P balance: removal and residues follow the realised yield; manure P2O5 per head is unchanged by split or option columns; the runoff share is weighted by manure N. | envind P balance | environmental / NLP | in force | P_BALANCE.md |
 | DEP-25 | Winter cover: the row's right-hand side is at least the base point's, and under the tax the purchases' leaching stays at the reference share. | — | supply/capri_regional_nlp.py | in force (registered) | WINTER_COVER.md |
@@ -156,6 +155,15 @@ switched to CAPRI's form:
   baseline and the scenario (potatoes most, +0.25% and +0.30%), arable crop area +14.8 kha in the baseline, nurseries'
   output +0.61% in the scenario, prices up to +0.49% (barley), the largest regional change NL22's set-aside in the
   baseline (0.488 to 0.456 kha); the mechanism of the arable crops' gain not traced;
+- DEP-22, the feed PMP slopes at 2030 aggregated with 2017 weights: CAPRI's 2030 SLOP now aggregated with CAPRI's 2030
+  herd shares and rations per head (sim_ini_21730's DATA at TRD; tools/build/build_feed_ration.py _attach_slopes_2030,
+  6 November 2026). 2,716 entries take the 2030 weights; 714 feed slopes keep the 2017 weights because CAPRI's 2030
+  rations of the animal no longer hold the feed (their 2030 ration is 0, so the ration model does not use them). The
+  aggregation matters only for the model activities that group several CAPRI activities (calves, heifers, bulls, dairy
+  cows): 8,566 slopes moved, median ratio 1.00 (10-90%: 0.96-1.17). Full Farm-to-Fork against the run without it
+  (full_tj): the same 12 iterations, deviation from JRC121368 4.55 against 4.56, prices within 0.8% (dairy products
+  most: whey -0.8%, fresh milk -0.7%, raw milk -0.6%), the indicators within 0.1 point, one region fewer with relaxed
+  mineral caps (PT11);
 - `market.noneu_supply_nq` and `market.feed_bulk_in_market` (29 October 2026);
 - `market.hessian_scenario_iter` 8 → 0 (25–26 October; K75).
 

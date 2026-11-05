@@ -33,6 +33,29 @@ def supply_code_fingerprint() -> str:
     return h.hexdigest()[:16]
 
 
+#: the data folders that cannot change the supply models' price response (the market's own data, the checks' references,
+#: the schema and the documents)
+_NOT_SUPPLY_DATA = ("market", "validation", "schema")
+
+
+@_functools.lru_cache(maxsize=4)
+def supply_data_fingerprint(data_dir=None) -> str:
+    """A hash of the data that can change the supply models' price response: every CSV file under the run's data folder
+    (capri_data when none is given) but the market's, the validation references' and the schema's (path and content).
+    Part of the cached Hessian's key since 5 November 2026 (DEP-22): the 2030 feed PMP slopes changed the price
+    response without moving the base totals the key already holds, so a Hessian measured on the old file would have
+    been reused. Any change of those files means one new measurement."""
+    root = _Path(data_dir) if data_dir else _Path(__file__).resolve().parents[2] / "capri_data"
+    h = _hashlib.sha1()
+    for f in sorted(root.rglob("*.csv")):
+        rel = f.relative_to(root)
+        if any(part in _NOT_SUPPLY_DATA for part in rel.parts):
+            continue
+        h.update(str(rel).encode())
+        h.update(f.read_bytes())
+    return h.hexdigest()[:16]
+
+
 class HessianBlock:
     def _measure_pending_hessian(self, pend) -> None:
         """The market supply Hessian of the baseline that has just run (recorded in _hessian_pending), measured from the
@@ -154,6 +177,7 @@ class HessianBlock:
                             sorted((getattr(sm.seen, "milk_price_dev_ms", None) or {}).items())))
                       if getattr(self.ev, "hessian_at_scenario", False) else ""))
         key_src += repr(("supply-code", supply_code_fingerprint()))
+        key_src += repr(("supply-data", supply_data_fingerprint(getattr(self, "data_dir", None))))
         key = hashlib.sha1(key_src.encode()).hexdigest()[:16]
         cdir = _P(__file__).resolve().parents[2] / ".cache" / "market_supply_hessian"
         # Parquet (binary doubles, exact by construction). The Hessians cached as CSV before 27 October 2026 were

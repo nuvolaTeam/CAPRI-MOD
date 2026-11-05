@@ -24,7 +24,7 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K92](#k92) | Farm-to-Fork changes furthest from JRC121368, besides the milk price | open: waiting for CAPRI's scenario results |
 | [K93](#k93) | CAPRI mitigation options not built; documents disagree on which are in | open: no-till and legume share unmeasured; UreaSubst parked; the others not needed for Farm-to-Fork and the Green Deal |
 
-## Resolved (105)
+## Resolved (106)
 
 | # | Issue | Status |
 |---|---|---|
@@ -134,6 +134,7 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K115](#k115) | The 2030 set-aside followed CAPRI's VSET alone, not FALL + VSET: up to half or double CAPRI's per region | fixed |
 | [K116](#k116) | The CAPRI-reference trajectory kept the trend projection's [0.2, 5] band, 1.0 threshold and missing zeros; OFOD grew as OFAR alone | fixed |
 | [K117](#k117) | The full-EU market did not converge in Farm-to-Fork: the EU's sugar quotas switched on and off at every step | fixed |
+| [K118](#k118) | The market supply Hessian's cache key did not cover the supply data: a data change could reuse a stale Hessian | fixed |
 
 ## Details
 
@@ -2185,4 +2186,17 @@ that the next step's fixed point was on the other side. CAPRI solves the quotas 
   against 89 (part of the difference is the machine's speed on the day). `market.trq_joint = false` keeps the lagged
   sigmas (trq_solve's bracketing). Tests: test_joint_trade_solve_meets_the_market_and_the_quota_equations,
   test_import_prices_at_trial_sigmas_equal_the_stored_offsets.
+
+### K118: The market supply Hessian's cache key did not cover the supply data (found 5 November 2026, with DEP-22)
+
+The market supply Hessian is measured once per baseline and cached on disk (.cache/market_supply_hessian). Its key held the
+supply code's fingerprint (since 30 October 2026), the baseline's totals and the supply settings, but not the data files. DEP-22
+changes the 2030 feed slopes, i.e. the supply models' price response, without moving the baseline's totals: a run after it would
+have taken the Hessian measured on the old slopes from the cache. Not seen in a run (the DEP-22 runs were the first with the
+new data and measured anew); found while preparing them.
+
+- **Effect:** none observed; a stale Hessian after any data change that leaves the baseline's totals unchanged was possible
+- **Status:** **fixed** 5 November 2026: `capri_mod/coupling/hessian.py` supply_data_fingerprint, a hash of every CSV under the
+  run's data folder but the market's, the validation references' and the schema's (path and content), is part of the key.
+  Any change of those files means one new measurement (full EU about 45 minutes).
 

@@ -74,8 +74,9 @@ Under the same switch, at the 2030 market year:
   pmp_capri_parts; grassland GRAE/GRAI with "crops"). Medians 2030 over 2017: dairy 1.8, bulls 1.4, heifers 1.3,
   intensive grassland 1.2, extensive 0.9.
 - **Feed PMP slopes** (`tools/build/build_feed_ration.py`: `capri_slope_2030` beside `capri_slope` in feed_ration_2017.csv):
-  CAPRI's 2030 p_pmpFeedInpCoeff SLOP, aggregated as the 2017 ones (2017 weights, registered); the ration model takes
-  them (`RationModel(slope_key="capri_slope_2030")`).
+  CAPRI's 2030 p_pmpFeedInpCoeff SLOP, aggregated as the 2017 ones but with CAPRI's 2030 herd shares and rations per
+  head (sim_ini_21730's DATA at TRD; DEP-22 removed 6 November 2026; a feed without a 2030 ration keeps the 2017
+  weights, unused); the ration model takes them (`RationModel(slope_key="capri_slope_2030")`).
 - **Land market** (`tools/build/build_land_market.py --year 2030` -> `land_market_2030.csv`): CAPRI's 2030 land-type
   levels and p_pmpQuadLandTypes, with the 2017 file's territory rules (Norway's split regions from NO08 + NO09 + NO0A:
   NO000000's 2030 matrix has no diagonal). The 2017 mode of the builder reproduces land_market_2017.csv exactly.

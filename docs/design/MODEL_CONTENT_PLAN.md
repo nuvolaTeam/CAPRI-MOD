@@ -543,7 +543,8 @@ of S1) (SGP S11).
 
 **CAPRI's form.** CAPRI's internal parameters (SGP S11); no GAMS lines given.
 
-**What exists.** DEP-22 registered (REG; PMP_CAPRI_2030.md). No design note.
+**What exists.** DEP-22 removed 6 November 2026: the 2030 feed slopes take CAPRI's 2030 weights from sim_ini_21730's DATA
+at TRD (REG history; PMP_CAPRI_2030.md), so that export is not needed. No design note for the rest.
 
 **Steps still to do.** Per item; "some close with more exports from the project lead's CAPRI" (SGP S11).
 
