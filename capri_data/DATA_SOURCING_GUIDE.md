@@ -6,18 +6,17 @@ and where a better or newer version would come from.
 ## 1. Current state
 
 The model runs on CAPRI's data only: the loaders raise when a file is missing, and there is no synthetic generator or
-generic fallback left (docs/SYNTHETIC_DATA_AUDIT.md). The validator
-(`python -m capri_mod.data.validate_data capri_data`, or `load_all_data(validate=True)`) reported on 20 October 2026:
-
-- 12 pass, 1 warning (a stale row count in MANIFEST.json for `fert_side_effects.csv`), 0 fail;
-- "no live synthetic data"; provenance of the registry's datasets: 38 CAPRI, 4 FAO, 0 synthetic.
+generic fallback left (docs/SYNTHETIC_DATA_AUDIT.md). The data checks (`python -m capri_mod.data.validate_data`, or
+`load_all_data(validate=True)`) list every violation of the declarations; 0 at each gate. (The MANIFEST.json validator
+they replaced on 31 October 2026 reported on 20 October 2026: 12 pass, 1 warning, a stale row count for
+`fert_side_effects.csv`; "no live synthetic data"; provenance of the registry's datasets: 38 CAPRI, 4 FAO, 0 synthetic.)
 
 | Block | Vintage | Source |
 |---|---|---|
 | Base data: areas, yields, prices, costs, premiums, herds' coefficients, PMP terms, elasticities | 2017 | CAPRI star 3.0's 2017 regional results (`res_17<MS>`, capreg DATA2), estimation outputs (PMP, PELA), FAO_agg |
 | Herds | 2017 | CAPRI's herd sizes (DATA2 HERD), not its activity levels (registered); per-head coefficients are CAPRI's totals over them |
 | Market | 2017 base and CAPRI's 2030 reference | CAPRI's bilateral market (`bilateral_flows_<year>.csv`), FAO_agg balances and prices, CAPRI's demand, processing, dairy, biofuel and feed parameters |
-| Projection | 2030 | CAPRI star 3.0's 2030 Green Deal reference (`trajectories/capri_ref_2030.json`), CAPRI's 2030 prices, premiums, rations and fodder |
+| Projection | 2030 | CAPRI star 3.0's 2030 Green Deal reference (`scenarios/capri_ref_2030`), CAPRI's 2030 prices, premiums, rations and fodder |
 | Mitigation options, N cascade, leaching | CAPRI's Green Deal reference and its option data | CAPRI's mitigation data (`miti_data_jul15`), MITERRA tables, CAPRI's literature review |
 | Constants | – | `shared/model_parameters.csv`, each with its source |
 
@@ -25,19 +24,21 @@ What is still not CAPRI's data, and where it acts: docs/SYNTHETIC_DATA_AUDIT.md,
 
 Known inconsistencies in the metadata (the data themselves are not affected):
 
-- MANIFEST.json still gives `base_areas.csv` and `yields.csv` the source "COCO" and shape notes from before Sprint 9s.
+- the files' catalogue (`schema/05_file_catalogue.sql`, converted from MANIFEST.json on 31 October 2026) still gives
+  `base_areas.csv` and `yields.csv` the source notes from before Sprint 9s: its units and notes are MANIFEST.json's
+  text, not re-checked (each file's checked origin is in `02_provenance_notes.sql`).
 
 ## 2. How the files fit together
 
-- **`schema/`**: the declaration of every CSV in DuckDB SQL, enforced by `tools/check/validate_data.py`; each file's
+- **`schema/`**: the declaration of every CSV in DuckDB SQL, enforced by `capri_mod/data/validate_data.py`; each file's
   provenance (`01_provenance.sql`, generated from the pipeline's trace by `tools/check/make_provenance.py`), the
   statements on its origin and gaps checked against the code and the data (`02_provenance_notes.sql`), the numbers
   held in the model's code and their classification (`03_code_data.sql`, `04_code_data_status.sql`), and
   `schema.json`, the same catalogue as JSON (`tools/check/make_schema_json.py`). These replaced
   `DATA_SOURCING_REGISTRY.json`, `INPUT_SCHEMA.json` and `INPUT_MANIFEST.json` (29 October 2026; the registry's log of
   findings is in docs/KNOWN_ISSUES_REGISTRY_LOG.md).
-- **`MANIFEST.json`**: every live file's source, units, domain and expected shape; the validator compares the files
-  with it.
+- **`schema/05_file_catalogue.sql`**: each file's vintage, domain and status, and the reason a base-year file carries
+  another vintage (from MANIFEST.json, retired on 31 October 2026; the base-year vintage rule is in `99_rules.sql`).
 - **Coverage**: `tools/check/verify_schema.py` counts the non-zero cells of the files the model reads by origin;
   `test_schema_declares_every_input_and_all_files_exist` and `test_schema_coverage_has_not_regressed` hold it.
 - **`FITNESS_FOR_USE.json`**: how far each output can be trusted (`capri_mod/fitness.py`).

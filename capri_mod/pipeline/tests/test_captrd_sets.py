@@ -1,15 +1,17 @@
 """CAPTRD's sets of estimated series (capri_data/pipeline/captrd/sets, tools/build/build_captrd_sets.py) against the series
-CAPTRD actually estimated in the reference run (capri_reference/captrd_results/1770, data position nObs > 0)."""
+CAPTRD actually estimated in the reference run (capri_sources/reference/captrd_results/1770, data position nObs > 0)."""
 from __future__ import annotations
 
 from pathlib import Path
+
+from capri_mod.external_paths import REFERENCE  # capri_sources/reference (docs/EXTERNAL_SOURCES.md)
 
 import pandas as pd
 import pytest
 
 ROOT = Path(__file__).resolve().parents[3]
 SETS = ROOT / "capri_data" / "pipeline" / "captrd" / "sets"
-RES = ROOT / "capri_reference" / "captrd_results" / "1770"
+RES = REFERENCE / "captrd_results" / "1770"
 
 
 def _set(name):

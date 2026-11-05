@@ -14,12 +14,14 @@ Source: CAPRI's 2030 Green Deal reference results, res_2_1730greendeal_refdefaul
 Output: capri_data/2017/environment/manure_housing_losses_2030.csv
         region, animal, loss_share (kg N lost per kg N excreted), source (regional / national)
 
-    python tools/build/build_manure_losses.py [--zip /mnt/user-data/uploads/res_2_1730greendeal_refdefaulta.zip]
+    python tools/build/build_manure_losses.py [--zip capri_sources/exports/res_2_1730greendeal_refdefaulta.zip]
 """
 from __future__ import annotations
 import argparse, importlib.util, re, subprocess, sys, zipfile
 from collections import defaultdict
 from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
+from paths import EXPORTS  # noqa: E402  (CAPRI's material outside the repository)
 
 _ROOT = Path(__file__).resolve().parents[2]
 import sys as _sys
@@ -72,7 +74,7 @@ def read(zpath: Path):
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--zip", type=Path, default=Path("/mnt/user-data/uploads/res_2_1730greendeal_refdefaulta.zip"))
+    ap.add_argument("--zip", type=Path, default=EXPORTS / "res_2_1730greendeal_refdefaulta.zip")
     args = ap.parse_args()
     import pandas as pd
     v = read(args.zip)

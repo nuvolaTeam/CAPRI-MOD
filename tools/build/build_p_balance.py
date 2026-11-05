@@ -43,16 +43,18 @@ from __future__ import annotations
 import argparse
 import csv
 import re
-import subprocess
 from collections import defaultdict
 from pathlib import Path
+import sys  # noqa: E402
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
+from paths import EXPORTS  # noqa: E402  (CAPRI's material outside the repository)
 
 ROOT = Path(__file__).resolve().parents[2]
 SRC_DIR = ROOT / "capri_data" / "sources" / "capri_res"
 SRC_REF = SRC_DIR / "gd2030_ref_pbalance.csv"
 SRC_INI = SRC_DIR / "gd2030_endotech_ini_pbalance.csv"
 OUT = ROOT / "capri_data" / "2017" / "environment" / "p_balance_crop_coefs_2030.csv"
-UP = Path("/mnt/user-data/uploads")
+UP = EXPORTS
 
 ITEMS = ("EXCRET", "MTRADE", "MINFER", "NETF", "CRESID", "EXPPRD", "RUNANI", "IMPORT", "SURTOT", "SURSOI")
 #: CAPRI's elementary crop activities (sets.gms MCACT), as tools/build/build_npk_balance_2030.py
@@ -83,8 +85,11 @@ def _wanted(col: str, row: str, animals: bool) -> bool:
 def extract(dump: Path, out: Path, animals: bool) -> int:
     """The P balance rows of a CAPRI result dump (zip with one csv, or the csv) -> out (region, col, row, value)."""
     if dump.suffix == ".zip":
-        p = subprocess.Popen(["unzip", "-p", str(dump)], stdout=subprocess.PIPE, text=True)
-        lines = p.stdout
+        import io
+        import zipfile
+        z = zipfile.ZipFile(dump)                         # every member in order, as unzip -p
+        lines = (line for name in z.namelist() if not name.endswith("/")
+                 for line in io.TextIOWrapper(z.open(name), encoding="utf-8"))
     else:
         lines = open(dump)
     rows = []

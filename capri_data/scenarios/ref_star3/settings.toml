@@ -1,0 +1,8 @@
+# CAPRI star 3.0's Green Deal reference: its settings as the model's defaults (manure trade and biofuel markets on,
+# the endogenous technologies of refpol_endotech_all_sup.gms), along CAPRI's 2030 reference trajectory
+[scenario]
+name = "ref_star3"
+kind = "reference"
+description = "CAPRI star 3.0 2030 reference with endogenous technologies (the model's default settings)"
+capri_files = ["pol_input/greendeal/refpol_endotech_all_sup.gms", "pol_input/greendeal/ref.gms"]
+trajectory = "capri_ref_2030"

@@ -15,7 +15,8 @@ OATS, MAIZ, OCER, RICE; FPRO PULS, RAPO, SUNO, SOYO, OLIO, OTHO, RAPC, SUNC, SOY
 FFIS, OAQU.
 
 Source: CAPRI 2030 Green Deal reference market results (markmarket_greendeal_1730et_base_1717 dataOut): FEED per
-member state and product, ARM1P of the EU trade block EU27yr19; kept as
+member state and product, ARM1P of the member state's market region (A_EU_WEST or A_EU_EAST, CAPRI's RMS_TO_RM;
+EU27yr19's until 3 November 2026); kept as
 capri_data/sources/market/feed_bulks_dataout_2030.csv.
 
 Model commodity of each product: WHEA -> SWHE, MAIZ -> CORN, RYEM, OATS, OCER as themselves, RICE -> PARI, OLIO -> OLIV,
@@ -24,31 +25,34 @@ since 18 October 2026); OLIC, OTHC have no model market: their prices stay at th
 
 Outputs (capri_data/2017/market/)
   feed_bulks_eu.csv         ms, bulk, product, commodity, feed_kt, arm1p, rho
-  feed_bulks_no.csv         the same for Norway (its own ARM1P; KNOWN_ISSUES K56), plus use_kt (Norway's use of the
+  feed_bulks_noneu.csv         the same for Norway (its own ARM1P; KNOWN_ISSUES K56), plus use_kt (Norway's use of the
                             product, HCOM + FEDM + INDM + BIOF + LOSM + PRCM): the price indices of its supply models'
-                            feed bulks and its feed demand in its own market region NOR
+                            feed bulks and its feed demand in its own market region NO000000
   feed_bulks_eu_share.csv   commodity, feed_kt, use_kt, share  (EU27 2030 reference: FEDM / (HCOM + FEDM + INDM
                             + BIOF + LOSM + PRCM) of the product group, the part of EU use that is feed;
                             the dairy products' feed is the dairy block's FMIL, not listed)
   capri_data/2017/feed/feed_cereal_mix_2030.csv  cereal, fedm_kt  (EU27 FCER feed per cereal with a model producer
                             price; replaces a hand-entered table that had rye and oats inside OCER)
 
-    python tools/build/build_feed_bulks.py [--dump /mnt/user-data/uploads/markmarket_greendeal_1730et_base_1717.txt]
+    python tools/build/build_feed_bulks.py [--dump capri_sources/exports/markmarket_greendeal_1730et_base_1717.txt]
 """
 from __future__ import annotations
 
 import sys
-import argparse, json, re, subprocess
+import argparse, json, re
 from pathlib import Path
 
 import pandas as pd
 
 import functools as _ft
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
+from _grep import grep  # noqa: E402  (grep -E in Python: any system)
+from paths import EXPORTS, SOURCES  # noqa: E402  (CAPRI's material outside the repository)
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 SRC = ROOT / "capri_data" / "sources" / "market" / "feed_bulks_dataout_2030.csv"
 DEST = ROOT / "capri_data" / "2017" / "market"
-GAMS = Path("/home/claude/work/allgms/gams")
+GAMS = SOURCES / "gams"
 BULKS = {"FCER": ("WHEA", "RYEM", "BARL", "OATS", "MAIZ", "OCER", "RICE"),
          "FPRO": ("PULS", "RAPO", "SUNO", "SOYO", "OLIO", "OTHO", "RAPC", "SUNC", "SOYC", "OLIC", "OTHC", "DDGS",
                   "FPRI", "SFIS", "FFIS", "OAQU"),
@@ -57,7 +61,7 @@ BULKS = {"FCER": ("WHEA", "RYEM", "BARL", "OATS", "MAIZ", "OCER", "RICE"),
          "FOTH": ("POTA", "RAPE", "SUNF", "SOYA", "OLIV", "OOIL", "TEXT", "TOMA", "OVEG", "APPL", "OFRU", "CITR",
                   "TAGR", "TABO", "TWIN", "SUGA", "EGGS", "PORK", "BEEF"),
          "FMIL": ("SMIP", "WMIO", "CASE", "WHEP", "BUTT", "CREM", "COCM", "CHES", "FRMI")}
-#: CAPRI's balance items of domestic use (the EU's feed share of use below; Norway's in feed_bulks_no.csv)
+#: CAPRI's balance items of domestic use (the EU's feed share of use below; Norway's in feed_bulks_noneu.csv)
 USE_ITEMS = ("HCOM", "FEDM", "INDM", "BIOF", "LOSM", "PRCM")
 COMMODITY = {"WHEA": "SWHE", "MAIZ": "CORN", "RYEM": "RYEM", "OATS": "OATS", "OCER": "OCER", "RICE": "PARI",
              "OLIO": "OLIV", "BARL": "BARL", "PULS": "PULS", "RAPO": "RAPO", "SUNO": "SUNO", "SOYO": "SOYO",
@@ -86,6 +90,10 @@ GROUPS = {"SWHE": ("SWHE", "DWHE"), "CORN": ("MAIZ",), "OCER": ("OCER",), "RYEM"
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "lib"))
 from _model_regions import EU_MS as _EU_FROM_DATA  # noqa: E402  (capri_data/shared/eu_market_blocks.csv)
 EU_MS = set(_EU_FROM_DATA)                                  # CAPRI's EU member states, from the data
+from _model_regions import UNITS as _UNITS, national_code as _nat_code  # noqa: E402
+#: the supply-model countries outside the EU (CAPRI's RMSSUP outside it), Norway first as before
+NONEU = sorted({_nat_code(u) for u in _UNITS} - EU_MS, key=lambda c: (c != "NO000000", c))
+from _market_regions import market_region  # noqa: E402  (CAPRI's RMS_TO_RM: member state -> A_EU_WEST / A_EU_EAST)
 
 
 #: the FCER cereals weighted in the supply models' feed cereal price level (written to feed_cereal_mix_2030.csv)
@@ -110,7 +118,8 @@ def rho_feed():
 
 def rho_feed_caps(region: str) -> dict:
     """Region-specific caps on p_rhoFeed in arm/market1.gms (l. 96-100: "lower substitution for Norway and Western
-    Balkans"): p_rhoFeed("NO000000",FEED) = min(p_rhoFeed("NO000000",FEED), 2.0) -> {bulk or None: cap}."""
+    Balkans"): p_rhoFeed("NO000000",FEED) = min(p_rhoFeed("NO000000",FEED), 2.0), the same for TUR, and
+    p_rhoFeed(RMSSUP,FEED) $ MAP_RR("WBA",RMSSUP) for the Western Balkans' countries (RMS_TO_RM) -> {bulk or None: cap}."""
     caps = {}
     for line in open(GAMS / "arm" / "market1.gms", errors="ignore"):
         if line.lstrip().startswith("*"):
@@ -118,23 +127,28 @@ def rho_feed_caps(region: str) -> dict:
         m = re.match(r'\s*p_rhoFeed\("([A-Z0-9_]+)",(?:"([A-Z]+)"|FEED)\)\s*=\s*min\(.*,\s*([0-9.]+)\)\s*;', line)
         if m and m.group(1) == region:
             caps[m.group(2)] = float(m.group(3))
+        m = re.match(r'\s*p_rhoFeed\(RMSSUP,FEED\)\s*\$\s*MAP_RR\("([A-Z0-9_]+)",RMSSUP\)\s*=\s*min\(.*,\s*([0-9.]+)\)\s*;',
+                     line)
+        if m and market_region(region) == m.group(1):
+            caps[None] = float(m.group(2))
     return caps
 
 
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--dump", type=Path,
-                    default=Path("/mnt/user-data/uploads/markmarket_greendeal_1730et_base_1717.txt"))
+                    default=EXPORTS / "markmarket_greendeal_1730et_base_1717.txt")
     a = ap.parse_args()
     prods = sorted({p for v in BULKS.values() for p in v} | set(BULKS) | {x for g in GROUPS.values() for x in g})
     if a.dump.exists():
-        txt = subprocess.run(["grep", "-E", r"^'[^']+'\.''\.'(FEED|ARM1P|" + "|".join(USE_ITEMS) + r")'\.'("
-                              + "|".join(prods) + r")'\.'2030'", str(a.dump)], capture_output=True, text=True).stdout
+        txt = grep(r"^'[^']+'\.''\.'(FEED|ARM1P|" + "|".join(USE_ITEMS) + r")'\.'("
+                              + "|".join(prods) + r")'\.'2030'", str(a.dump))
         pat = re.compile(r"^'([^']+)'\.''\.'(FEED|ARM1P|" + "|".join(USE_ITEMS) + r")'\.'([A-Z]+)'\.'2030'\s+([-\d.Ee+]+)")
         rows = [m.groups() for m in map(pat.match, txt.splitlines()) if m]
-        # Norway's balance items (its use per product, for the feed share of its use) are kept for Norway only
-        rows = [r for r in rows if (r[0] in EU_MS or r[0] in ("EU27yr19", "NO000000"))
-                and (r[1] in ("FEED", "ARM1P") or r[0] == "NO000000")]
+        # the balance items of the supply-model countries outside the EU (their use per product, for the feed share of
+        # their use) are kept for them only (Norway only until 4 November 2026)
+        rows = [r for r in rows if (r[0] in EU_MS or r[0] in ("A_EU_WEST", "A_EU_EAST") or r[0] in NONEU)
+                and (r[1] in ("FEED", "ARM1P") or r[0] in NONEU)]
         pd.DataFrame(rows, columns=["region", "item", "product", "value"]).to_csv(SRC, index=False)
         print(f"extracted {len(rows)} rows -> {SRC.relative_to(ROOT)}")
     src = _read_csv(SRC)
@@ -146,7 +160,7 @@ def main():
             tot = 0.0
             for p in items:
                 q = v.get((ms, "FEED", p), 0.0)
-                pr = v.get(("EU27yr19", "ARM1P", p), 0.0)
+                pr = v.get((market_region(ms), "ARM1P", p), 0.0)   # the member state's block (RMS_TO_RM)
                 if q > 1e-6 and pr > 0:
                     out.append(dict(ms=ms, bulk=b, product=p, commodity=COMMODITY.get(p, ""), feed_kt=q, arm1p=pr,
                                     rho=rho[b]))
@@ -157,23 +171,26 @@ def main():
     df = pd.DataFrame(out)
     df.to_csv(DEST / "feed_bulks_eu.csv", index=False)
     # Norway (CAPRI RMSSUP = NUTS0, so feedBlkPrice_ and feedShareEqu_ hold for it too): its bulks at its own Arm1
-    # prices, for its supply models' bulk price indices and its feed demand in its own market region NOR (KNOWN_ISSUES
+    # prices, for its supply models' bulk price indices and its feed demand in its own market region NO000000 (KNOWN_ISSUES
     # K56; Norway is not in the EU's feed demand); use_kt = its use of the product (HCOM + FEDM + INDM + BIOF + LOSM +
     # PRCM, as the EU's feed share of use below), for the feed share of Norway's use
+    # every supply-model country outside the EU, in CAPRI's RMSSUP order of the units' table (Norway first, as before;
+    # the others since 4 November 2026, read by a run that selects them, run.supply_countries_outside_eu)
     no = []
-    capno = rho_feed_caps("NO000000")                 # Norway's cap of 2.0 (market1.gms l. 98)
-    rho_no = {b: min(r_, capno.get(b, capno.get(None, r_))) for b, r_ in rho.items()}
-    for b, items in BULKS.items():
-        for p in items:
-            q = v.get(("NO000000", "FEED", p), 0.0)
-            pr = v.get(("NO000000", "ARM1P", p), 0.0)
-            if q > 1e-6 and pr > 0:
-                use = sum(v.get(("NO000000", k, x), 0.0) for k in USE_ITEMS
-                          for x in GROUPS.get(COMMODITY.get(p, ""), (p,)))
-                no.append(dict(ms="NO000000", bulk=b, product=p, commodity=COMMODITY.get(p, ""), feed_kt=q, arm1p=pr,
-                               rho=rho_no[b], use_kt=use))
-    pd.DataFrame(no).to_csv(DEST / "feed_bulks_no.csv", index=False)
-    print(f"feed_bulks_no.csv: {len(no)} rows (Norway's bulks: price indices and feed demand)")
+    for c in NONEU:
+        cap = rho_feed_caps(c)                        # 2.0 for Norway, Turkey and the Western Balkans (market1.gms l. 98-100)
+        rho_c = {b: min(r_, cap.get(b, cap.get(None, r_))) for b, r_ in rho.items()}
+        for b, items in BULKS.items():
+            for p in items:
+                q = v.get((c, "FEED", p), 0.0)
+                pr = v.get((c, "ARM1P", p), 0.0)
+                if q > 1e-6 and pr > 0:
+                    use = sum(v.get((c, k, x), 0.0) for k in USE_ITEMS
+                              for x in GROUPS.get(COMMODITY.get(p, ""), (p,)))
+                    no.append(dict(ms=c, bulk=b, product=p, commodity=COMMODITY.get(p, ""), feed_kt=q, arm1p=pr,
+                                   rho=rho_c[b], use_kt=use))
+    pd.DataFrame(no).to_csv(DEST / "feed_bulks_noneu.csv", index=False)
+    print(f"feed_bulks_noneu.csv: {len(no)} rows ({len({r['ms'] for r in no})} countries outside the EU)")
     bal = json.load(open(ROOT / "capri_data" / "validation" / "capri_eu27_market_balance_2030_ref.json"))["products"]
     sh = []
     for c, grp in GROUPS.items():

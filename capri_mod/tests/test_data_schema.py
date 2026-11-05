@@ -1,4 +1,4 @@
-"""The data declarations (capri_data/schema, tools/check/validate_data.py; docs/design/DATA_SCHEMA_DUCKDB.md): the
+"""The data declarations (capri_data/schema, capri_mod/data/validate_data.py; docs/design/DATA_SCHEMA_DUCKDB.md): the
 repository's data meet them, and every kind of violation is found, with the CSV line, in a damaged copy."""
 import shutil
 import sys
@@ -7,11 +7,11 @@ from pathlib import Path
 import pytest
 
 ROOT = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(ROOT / "tools" / "check"))
 duckdb = pytest.importorskip("duckdb")
-import validate_data as V  # noqa: E402
+from capri_mod.data import validate_data as V  # noqa: E402
 
 
+@pytest.mark.slow
 def test_the_data_meet_their_declarations():
     assert V.validate(ROOT, verbose=False) == []
 
@@ -26,6 +26,16 @@ def _copy(tmp_path):
             if kind == "table":
                 (root / arg).parent.mkdir(parents=True, exist_ok=True)
                 shutil.copy(ROOT / arg, root / arg)
+    # the catalogue's files that are not CSV (05_file_catalogue.sql: JSON files, a compressed CSV, a folder)
+    con = duckdb.connect()
+    con.execute((ROOT / "capri_data" / "schema" / "05_file_catalogue.sql").read_text())
+    for (f,) in con.execute("SELECT file FROM file_catalogue WHERE file NOT LIKE '%.csv'").fetchall():
+        src, dst = ROOT / f, root / f
+        dst.parent.mkdir(parents=True, exist_ok=True)
+        if src.is_dir():
+            shutil.copytree(src, dst, dirs_exist_ok=True)
+        else:
+            shutil.copy(src, dst)
     return root
 
 
@@ -35,6 +45,7 @@ def _edit(root, rel, fn):
     p.write_text("\n".join(fn(lines)) + "\n")
 
 
+@pytest.mark.slow
 def test_each_kind_of_violation_is_found_with_its_line(tmp_path):
     root = _copy(tmp_path)
     assert set(V.validate(root, verbose=False)) == set(V.validate(ROOT, verbose=False))   # the copy is the repository
@@ -53,6 +64,7 @@ def test_each_kind_of_violation_is_found_with_its_line(tmp_path):
     assert "fails at lines [2]" in found[(units, "checks")]
 
 
+@pytest.mark.slow
 def test_a_wrong_header_and_a_wrong_type_are_found(tmp_path):
     root = _copy(tmp_path)
     base = V.validate(root, verbose=False)                 # the repository's own violations, if any, left aside
@@ -66,6 +78,7 @@ def test_a_wrong_header_and_a_wrong_type_are_found(tmp_path):
     assert [k for x in V.validate(root, verbose=False) if x not in base for _, k, _ in [x]] == ["columns"]
 
 
+@pytest.mark.slow
 def test_a_wide_file_is_checked_long(tmp_path):
     """A wide file (regions in rows, codes as columns) is read as (region, item, value): a bad value is named with its
     line and column; an unknown column header is a code no list knows, and the unit rule finds the item without unit."""
@@ -82,10 +95,29 @@ def test_a_wide_file_is_checked_long(tmp_path):
     assert rule and "('yields', 'SWHE', 'unit declared for an item not in the table')" in rule[0]
 
 
-@pytest.mark.parametrize("tool", ["make_provenance.py", "make_code_data.py", "make_schema_json.py"])
+@pytest.mark.parametrize("tool", ["make_provenance.py", "make_code_data.py", "make_schema_json.py", "make_manifest_json.py"])
 def test_the_generated_declarations_are_up_to_date(tool):
     """01_provenance.sql (from the pipeline's trace), 03_code_data.sql (the numbers in the model's code) and schema.json
     (the declarations as JSON) are generated: each matches what its tool writes today."""
     import subprocess
     r = subprocess.run([sys.executable, str(ROOT / "tools" / "check" / tool), "--check"], capture_output=True, text=True)
     assert r.returncode == 0, r.stdout[-2000:] + r.stderr[-2000:]
+
+
+def test_the_model_reads_no_file_under_sources():
+    """capri_data/sources is the builders' layer (CAPRI's extracts): the model reads its inputs from the base year's
+    folders, shared, codes, trajectories and the pipeline only (31 October 2026: the CAP premium and the regional
+    prices built as inputs, CAPRI's supply elasticities moved; schema.json's reader scan)."""
+    import json
+    t = json.loads((ROOT / "capri_data" / "schema" / "schema.json").read_text())["tables"]
+    read = sorted(v["file"] for v in t.values() if v["file"].startswith("capri_data/sources/") and v["read_by"]["model"])
+    assert not read, read
+
+
+def test_a_missing_premium_or_price_input_stops_the_run(tmp_path):
+    """The model's CAP premium and regional prices are inputs: without them the run stops, naming the file (until
+    31 October 2026 it went on without the premiums and with the EU-wide prices)."""
+    from capri_mod.data import loaders as L
+    for fn in (L.load_cap_premium, L.load_regional_producer_prices):
+        with pytest.raises(FileNotFoundError):
+            fn(str(tmp_path))

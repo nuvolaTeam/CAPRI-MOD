@@ -25,6 +25,7 @@ The world prices of FENI, FPRI and nine other products, which this builder wrote
 """
 from __future__ import annotations
 import json
+import math
 from pathlib import Path
 
 import pandas as pd
@@ -41,11 +42,11 @@ PARENTS = {"FPRI": {"SWHE": ("WHEA", "SWHE", "DWHE"), "BARL": ("BARL",), "CORN":
 
 def main():
     bal = json.load(open(ROOT / "capri_data" / "validation" / "capri_eu27_market_balance_2030_ref.json"))["products"]
-    # the EU's production: the model's EU27 trade region (tools/build/build_bilateral_market.py)
+    # the EU's production: the model's two EU market regions, EU_WEST and EU_EAST (tools/build/build_bilateral_market.py)
     breg = _read_csv(MKT / "bilateral_regions_2030.csv")
     rows = []
     for rp, par in PARENTS.items():
-        p0 = float(breg.loc[(breg.commodity == rp) & (breg.region == "EU27"), "prod_kt"].sum())
+        p0 = math.fsum(breg.loc[(breg.commodity == rp) & (breg.region.isin(["EU_WEST", "EU_EAST"])), "prod_kt"])
         parts = []
         for c, caps in par.items():
             food = sum(float(bal.get(x, {}).get(k, 0.0)) for x in caps for k in ("HCOM", "PRCM"))

@@ -46,19 +46,26 @@ recipe_<Y>_quad_pact.csv
     python tools/build/build_pmp_recipe.py --year 2030|2017
 """
 from __future__ import annotations
-import argparse, glob, math, re, subprocess
+import argparse, glob, math, re
 from collections import defaultdict
 from pathlib import Path
 
 import pandas as pd
 
 import functools as _ft
+import sys  # noqa: E402
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
+from _grep import grep  # noqa: E402  (grep -E in Python: any system)
+from paths import EXPORTS, SOURCES  # noqa: E402  (CAPRI's material outside the repository)
+import sys as _sys_nc  # noqa: E402
+_sys_nc.path.insert(0, str(__import__("pathlib").Path(__file__).resolve().parents[2] / "tools" / "lib"))
+from _model_regions import national_code as _national_code  # noqa: E402  (TUR for Turkey's units, 4 November 2026)
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 SRC = ROOT / "capri_data" / "sources" / "baseline_pmp"
-REF = Path("/mnt/user-data/uploads/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv")
-DUMPS = Path("/home/claude/work/capreg")
-PELA = Path("/home/claude/work/up/pmp2030/estnlp_results_PELA.txt")
+REF = EXPORTS / "res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv"
+DUMPS = SOURCES / "capreg"
+PELA = SOURCES / "pmp2030/estnlp_results_PELA.txt"
 P_INFL, EST_YEAR = 1.019, 2004
 #: CAPRI's technology factors of the outputs (intens/techf.gms l. 84-85): T1 yields 20% above the mean, T2 20% below
 TECH_YIELD_FACTOR = {"T1": 0.2, "T2": -0.2}
@@ -156,7 +163,7 @@ def levels_ref(year: int) -> dict:
     """CAPRI's 2030 reference results (dataOut, '{year}'): every item of the regions' activity and land rows and the
     member states' unit values (UVAG, UVAP), keyed (column, row)."""
     pat = rf"^'[A-Z]{{2}}[0-9A-Z]{{6}}'\.''\.'[A-Z0-9_]+'\.'[A-Z0-9_]+'\.'{year}'"
-    txt = subprocess.run(["grep", "-E", pat, str(REF)], capture_output=True, text=True).stdout
+    txt = grep(pat, str(REF))
     rx = re.compile(rf"^'([A-Z]{{2}}[0-9A-Z]{{6}})'\.''\.'([A-Z0-9_]+)'\.'([A-Z0-9_]+)'\.'{year}'\s+(\S+?),?\s*$")
     out = defaultdict(dict)
     for line in txt.splitlines():
@@ -409,7 +416,7 @@ def main() -> None:
     tech, pact = [], []
     for c in regions:
         t_, p_ = region_terms(c, Y, bas.get(c, {}), ydat.get(c, {}), vb, vd, pela, lq.get(c, {}), not a.no_land_nest,
-                              ydat.get(c[:2] + "000000", {}))
+                              ydat.get(_national_code(c), {}))
         tech += t_
         pact += p_
     pd.DataFrame(tech, columns=["region", "activity", "tech1", "tech2", "value"]).to_csv(

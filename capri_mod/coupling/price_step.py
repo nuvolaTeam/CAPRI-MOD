@@ -28,11 +28,11 @@ class PriceStepBlock:
         from capri_mod.utils.capri_stop import CapriStopRule
         if not supply_results:
             return None
-        if getattr(self, "_capri_stop", None) is None:
+        if getattr(self.sv, "capri_stop", None) is None:
             blocks = read_input(Path(getattr(self, "data_dir", None) or Path(__file__).resolve().parents[2] / "capri_data") / "shared" / "eu_market_blocks.csv")
             aggs = {b: list(g["ms"]) for b, g in blocks.groupby("block")}
-            self._capri_stop = CapriStopRule(aggs, yani_rows=(), no_abs_price_rows=())
-        rule = self._capri_stop
+            self.sv.capri_stop = CapriStopRule(aggs, yani_rows=(), no_abs_price_rows=())
+        rule = self.sv.capri_stop
         # production per member state (kt)
         q = self._bridge_supply_to_market(self.supply_module.aggregate_supply(supply_results, by_country=True)).fillna(0.0)
         prod = {}
@@ -42,7 +42,7 @@ class PriceStepBlock:
                 if float(v) > 0:
                     d[str(c)] = d.get(str(c), 0.0) + float(v)
         # feed use per member state (kt): the traded feed bulks
-        traded = ("FCER", "FPRO", "FENE", "FMIL", "FOTH")
+        traded = CAPRI_FEED_TRD            # CAPRI's FEED_TRD (capri_data/codes/capri/FEED_TRD.csv), in its order
         feed = {}
         for r_, res in supply_results.items():
             ft = getattr(res, "feed_t", None) or {}
@@ -57,9 +57,9 @@ class PriceStepBlock:
         if dp is None or not len(dp):
             return None
         _mmk = self.market_module
-        bmap = _mmk._ms_block_map() if getattr(_mmk, "eu_blocks", False) else {}
+        bmap = _mmk._ms_block_map()
         _smap = getattr(_mmk, "SUP_NONEU_MS", {}) or {}
-        ms_reg = {capri_ms(v): k for k, v in _smap.items()}            # Norway's market region
+        ms_reg = {capri_ms(ms): k for k, v in _smap.items() for ms in v}   # Norway's market region
         eu_reg = [r_ for r_ in _mmk.EU if r_ in dp.index]
         price = {}
         for ms in prod:
@@ -75,7 +75,7 @@ class PriceStepBlock:
                     price[ms]["MILK"] = price[ms]["MILK"] * float(v["MILK"]) / _eu
         ya = self.market_module.ev.yani_market_now or {}
         yrows = set()
-        # a supply-model country outside the EU takes its own market region's young-animal prices (Norway: NOR); the
+        # a supply-model country outside the EU takes its own market region's young-animal prices (Norway: NO000000); the
         # EU's member states, those of the EU's market regions (the run's, definitions.sup_noneu)
         _sup_mr = {ms_: tr_ for ms_, (_c, tr_) in sup_noneu().items()}
         _sup_regions = set(_sup_mr.values())
@@ -94,6 +94,13 @@ class PriceStepBlock:
         """outer_loop.price_update = "capri": every price passed to the supply models is CAPRI's price forecast
         (capmod/define_stepWeights.gms, price_forecast.gms l. 376-397) instead of the adaptive step."""
         return str(_settings().get("outer_loop.price_update")) == "capri"
+
+    @staticmethod
+    def _capri_hist_len() -> int:
+        """The price steps CAPRI's forecast keeps: the longer of its two weight lists (define_stepWeights.gms: 3 steps,
+        4 from the 20th; the histories held 4, written as a literal until refactor stage 4)."""
+        st = _settings()
+        return max(len(st.get("outer_loop.capri_step_weights")), len(st.get("outer_loop.capri_step_weights_late")))
 
     @staticmethod
     def _capri_forecast(hist, outer_iter):

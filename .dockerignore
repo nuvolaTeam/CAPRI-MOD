@@ -9,3 +9,6 @@ qp_solver_comparison.csv
 *.superseded_by_2017
 Dockerfile
 .dockerignore
+# CAPRI's material outside git (docs/EXTERNAL_SOURCES.md): large, mounted when a builder needs it
+capri_sources
+capri_reference/*/

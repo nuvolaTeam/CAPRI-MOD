@@ -23,28 +23,6 @@ INSERT INTO value_units VALUES
   ('mkt_bilateral_flows_2017', 'ta_pct', NULL, 'open', 'bilateral_flows_2017.ta_pct: unit to be established'),
   ('mkt_bilateral_flows_2017', 'tc', NULL, 'open', 'bilateral_flows_2017.tc: unit to be established');
 
--- file: capri_data/2017/market/bilateral_flows_2017_eu2.csv
-CREATE TABLE mkt_bilateral_flows_2017_eu2 (
-    commodity VARCHAR NOT NULL,
-    importer VARCHAR NOT NULL,
-    exporter VARCHAR NOT NULL,
-    q_kt DOUBLE NOT NULL,
-    a DOUBLE NOT NULL,
-    b DOUBLE NOT NULL,
-    a0 DOUBLE NOT NULL,
-    ta_pct DOUBLE NOT NULL,
-    tc DOUBLE NOT NULL,
-    PRIMARY KEY (commodity, importer, exporter)
-);
-COMMENT ON TABLE mkt_bilateral_flows_2017_eu2 IS 'CAPRI''s bilateral trade data for the model''s trade regions (Sprint 8m: CAPRI''s full market). (tools/build/build_bilateral_market.py)';
-INSERT INTO value_units VALUES
-  ('mkt_bilateral_flows_2017_eu2', 'q_kt', NULL, 'open', 'bilateral_flows_2017_eu2.q_kt: unit to be established'),
-  ('mkt_bilateral_flows_2017_eu2', 'a', NULL, 'open', 'bilateral_flows_2017_eu2.a: unit to be established'),
-  ('mkt_bilateral_flows_2017_eu2', 'b', NULL, 'open', 'bilateral_flows_2017_eu2.b: unit to be established'),
-  ('mkt_bilateral_flows_2017_eu2', 'a0', NULL, 'open', 'bilateral_flows_2017_eu2.a0: unit to be established'),
-  ('mkt_bilateral_flows_2017_eu2', 'ta_pct', NULL, 'open', 'bilateral_flows_2017_eu2.ta_pct: unit to be established'),
-  ('mkt_bilateral_flows_2017_eu2', 'tc', NULL, 'open', 'bilateral_flows_2017_eu2.tc: unit to be established');
-
 -- file: capri_data/2017/market/bilateral_flows_2030.csv
 CREATE TABLE mkt_bilateral_flows_2030 (
     commodity VARCHAR NOT NULL,
@@ -67,28 +45,6 @@ INSERT INTO value_units VALUES
   ('mkt_bilateral_flows_2030', 'ta_pct', NULL, 'open', 'bilateral_flows_2030.ta_pct: unit to be established'),
   ('mkt_bilateral_flows_2030', 'tc', NULL, 'open', 'bilateral_flows_2030.tc: unit to be established');
 
--- file: capri_data/2017/market/bilateral_flows_2030_eu2.csv
-CREATE TABLE mkt_bilateral_flows_2030_eu2 (
-    commodity VARCHAR NOT NULL,
-    importer VARCHAR NOT NULL,
-    exporter VARCHAR NOT NULL,
-    q_kt DOUBLE NOT NULL,
-    a DOUBLE NOT NULL,
-    b DOUBLE NOT NULL,
-    a0 DOUBLE NOT NULL,
-    ta_pct DOUBLE NOT NULL,
-    tc DOUBLE NOT NULL,
-    PRIMARY KEY (commodity, importer, exporter)
-);
-COMMENT ON TABLE mkt_bilateral_flows_2030_eu2 IS 'CAPRI''s bilateral trade data for the model''s trade regions (Sprint 8m: CAPRI''s full market). (tools/build/build_bilateral_market.py)';
-INSERT INTO value_units VALUES
-  ('mkt_bilateral_flows_2030_eu2', 'q_kt', NULL, 'open', 'bilateral_flows_2030_eu2.q_kt: unit to be established'),
-  ('mkt_bilateral_flows_2030_eu2', 'a', NULL, 'open', 'bilateral_flows_2030_eu2.a: unit to be established'),
-  ('mkt_bilateral_flows_2030_eu2', 'b', NULL, 'open', 'bilateral_flows_2030_eu2.b: unit to be established'),
-  ('mkt_bilateral_flows_2030_eu2', 'a0', NULL, 'open', 'bilateral_flows_2030_eu2.a0: unit to be established'),
-  ('mkt_bilateral_flows_2030_eu2', 'ta_pct', NULL, 'open', 'bilateral_flows_2030_eu2.ta_pct: unit to be established'),
-  ('mkt_bilateral_flows_2030_eu2', 'tc', NULL, 'open', 'bilateral_flows_2030_eu2.tc: unit to be established');
-
 -- file: capri_data/2017/market/bilateral_regions_2017.csv
 CREATE TABLE mkt_bilateral_regions_2017 (
     commodity VARCHAR NOT NULL,
@@ -101,19 +57,6 @@ COMMENT ON TABLE mkt_bilateral_regions_2017 IS 'CAPRI''s bilateral trade data fo
 INSERT INTO value_units VALUES
   ('mkt_bilateral_regions_2017', 'pmrk', NULL, 'open', 'bilateral_regions_2017.pmrk: unit to be established'),
   ('mkt_bilateral_regions_2017', 'prod_kt', NULL, 'open', 'bilateral_regions_2017.prod_kt: unit to be established');
-
--- file: capri_data/2017/market/bilateral_regions_2017_eu2.csv
-CREATE TABLE mkt_bilateral_regions_2017_eu2 (
-    commodity VARCHAR NOT NULL,
-    region VARCHAR NOT NULL,
-    pmrk DOUBLE NOT NULL,
-    prod_kt DOUBLE NOT NULL,
-    PRIMARY KEY (commodity, region)
-);
-COMMENT ON TABLE mkt_bilateral_regions_2017_eu2 IS 'CAPRI''s bilateral trade data for the model''s trade regions (Sprint 8m: CAPRI''s full market). (tools/build/build_bilateral_market.py)';
-INSERT INTO value_units VALUES
-  ('mkt_bilateral_regions_2017_eu2', 'pmrk', NULL, 'open', 'bilateral_regions_2017_eu2.pmrk: unit to be established'),
-  ('mkt_bilateral_regions_2017_eu2', 'prod_kt', NULL, 'open', 'bilateral_regions_2017_eu2.prod_kt: unit to be established');
 
 -- file: capri_data/2017/market/bilateral_regions_2030.csv
 CREATE TABLE mkt_bilateral_regions_2030 (
@@ -128,48 +71,93 @@ INSERT INTO value_units VALUES
   ('mkt_bilateral_regions_2030', 'pmrk', NULL, 'open', 'bilateral_regions_2030.pmrk: unit to be established'),
   ('mkt_bilateral_regions_2030', 'prod_kt', NULL, 'open', 'bilateral_regions_2030.prod_kt: unit to be established');
 
--- file: capri_data/2017/market/bilateral_regions_2030_eu2.csv
-CREATE TABLE mkt_bilateral_regions_2030_eu2 (
-    commodity VARCHAR NOT NULL,
-    region VARCHAR NOT NULL,
-    pmrk DOUBLE NOT NULL,
-    prod_kt DOUBLE NOT NULL,
-    PRIMARY KEY (commodity, region)
-);
-COMMENT ON TABLE mkt_bilateral_regions_2030_eu2 IS 'CAPRI''s bilateral trade data for the model''s trade regions (Sprint 8m: CAPRI''s full market). (tools/build/build_bilateral_market.py)';
-INSERT INTO value_units VALUES
-  ('mkt_bilateral_regions_2030_eu2', 'pmrk', NULL, 'open', 'bilateral_regions_2030_eu2.pmrk: unit to be established'),
-  ('mkt_bilateral_regions_2030_eu2', 'prod_kt', NULL, 'open', 'bilateral_regions_2030_eu2.prod_kt: unit to be established');
-
 -- file: capri_data/2017/market/bilateral_trq_2017.csv
 CREATE TABLE mkt_bilateral_trq_2017 (
-    commodity VARCHAR NOT NULL,
+    importer VARCHAR NOT NULL,
     exporter VARCHAR NOT NULL,
+    commodity VARCHAR NOT NULL,
     quota_kt DOUBLE NOT NULL,
-    gap_eur_t DOUBLE NOT NULL,
-    imports_kt DOUBLE NOT NULL,
-    PRIMARY KEY (commodity, exporter)
+    ta_mfn DOUBLE NOT NULL,
+    ta_pref DOUBLE NOT NULL,
+    ts_mfn DOUBLE NOT NULL,
+    ts_pref DOUBLE NOT NULL,
+    importer_regions VARCHAR NOT NULL,
+    exporter_regions VARCHAR NOT NULL,
+    regime VARCHAR NOT NULL CHECK (regime IN ('bilateral', 'with_global', 'entry_price')),
+    PRIMARY KEY (importer, exporter, commodity)
 );
-COMMENT ON TABLE mkt_bilateral_trq_2017 IS 'CAPRI''s bilateral trade data for the model''s trade regions (Sprint 8m: CAPRI''s full market). (tools/build/build_bilateral_market.py)';
+COMMENT ON TABLE mkt_bilateral_trq_2017 IS 'CAPRI''s bilateral tariff-rate quotas of every importer (p_trqBilat TrqNT with TaMFN, TaPref, TsMFN, TsPref) per pair of policy blocks (RMTP) and model commodity, with the blocks'' market regions and the regime of the pair (bilateral sigmoid; with the importer''s global quota: the smaller rate; entry price system), 2017 (tools/build/build_bilateral_market.py build_trq; docs/design/PORTS_STAGE4.md).';
 INSERT INTO value_units VALUES
-  ('mkt_bilateral_trq_2017', 'quota_kt', NULL, 'open', 'bilateral_trq_2017.quota_kt: unit to be established'),
-  ('mkt_bilateral_trq_2017', 'gap_eur_t', NULL, 'open', 'bilateral_trq_2017.gap_eur_t: unit to be established'),
-  ('mkt_bilateral_trq_2017', 'imports_kt', NULL, 'open', 'bilateral_trq_2017.imports_kt: unit to be established');
+  ('mkt_bilateral_trq_2017', 'quota_kt', 'U_1000t', 'builder', 'CAPRI p_trqBilat TrqNT'),
+  ('mkt_bilateral_trq_2017', 'ta_mfn', 'U_percent', 'builder', 'CAPRI p_trqBilat TaMFN'),
+  ('mkt_bilateral_trq_2017', 'ta_pref', 'U_percent', 'builder', 'CAPRI p_trqBilat TaPref'),
+  ('mkt_bilateral_trq_2017', 'ts_mfn', 'U_EuPerTon', 'builder', 'CAPRI p_trqBilat TsMFN'),
+  ('mkt_bilateral_trq_2017', 'ts_pref', 'U_EuPerTon', 'builder', 'CAPRI p_trqBilat TsPref');
+
+-- file: capri_data/2017/market/bilateral_trq_global_2017.csv
+CREATE TABLE mkt_bilateral_trq_global_2017 (
+    importer VARCHAR NOT NULL,
+    commodity VARCHAR NOT NULL,
+    quota_kt DOUBLE NOT NULL,
+    ta_mfn DOUBLE NOT NULL,
+    ta_pref DOUBLE NOT NULL,
+    ts_mfn DOUBLE NOT NULL,
+    ts_pref DOUBLE NOT NULL,
+    importer_regions VARCHAR NOT NULL,
+    free_regions VARCHAR,
+    PRIMARY KEY (importer, commodity)
+);
+COMMENT ON TABLE mkt_bilateral_trq_global_2017 IS 'CAPRI''s global (erga omnes) tariff-rate quotas (p_trqGlobl, the importer''s rows with exporter World) per policy block and model commodity, with the market regions of the exporter blocks under free trade (p_doubleZero, from sim_ini_21730: the 2030 agreements), 2017 (tools/build/build_bilateral_market.py build_trq_global; docs/design/PORTS_STAGE4.md).';
+INSERT INTO value_units VALUES
+  ('mkt_bilateral_trq_global_2017', 'quota_kt', 'U_1000t', 'builder', 'CAPRI p_trqGlobl TrqNT'),
+  ('mkt_bilateral_trq_global_2017', 'ta_mfn', 'U_percent', 'builder', 'CAPRI p_trqGlobl TaMFN'),
+  ('mkt_bilateral_trq_global_2017', 'ta_pref', 'U_percent', 'builder', 'CAPRI p_trqGlobl TaPref'),
+  ('mkt_bilateral_trq_global_2017', 'ts_mfn', 'U_EuPerTon', 'builder', 'CAPRI p_trqGlobl TsMFN'),
+  ('mkt_bilateral_trq_global_2017', 'ts_pref', 'U_EuPerTon', 'builder', 'CAPRI p_trqGlobl TsPref');
 
 -- file: capri_data/2017/market/bilateral_trq_2030.csv
 CREATE TABLE mkt_bilateral_trq_2030 (
-    commodity VARCHAR NOT NULL,
+    importer VARCHAR NOT NULL,
     exporter VARCHAR NOT NULL,
+    commodity VARCHAR NOT NULL,
     quota_kt DOUBLE NOT NULL,
-    gap_eur_t DOUBLE NOT NULL,
-    imports_kt DOUBLE NOT NULL,
-    PRIMARY KEY (commodity, exporter)
+    ta_mfn DOUBLE NOT NULL,
+    ta_pref DOUBLE NOT NULL,
+    ts_mfn DOUBLE NOT NULL,
+    ts_pref DOUBLE NOT NULL,
+    importer_regions VARCHAR NOT NULL,
+    exporter_regions VARCHAR NOT NULL,
+    regime VARCHAR NOT NULL CHECK (regime IN ('bilateral', 'with_global', 'entry_price')),
+    PRIMARY KEY (importer, exporter, commodity)
 );
-COMMENT ON TABLE mkt_bilateral_trq_2030 IS 'CAPRI''s bilateral trade data for the model''s trade regions (Sprint 8m: CAPRI''s full market). (tools/build/build_bilateral_market.py)';
+COMMENT ON TABLE mkt_bilateral_trq_2030 IS 'CAPRI''s bilateral tariff-rate quotas of every importer (p_trqBilat TrqNT with TaMFN, TaPref, TsMFN, TsPref) per pair of policy blocks (RMTP) and model commodity, with the blocks'' market regions and the regime of the pair (bilateral sigmoid; with the importer''s global quota: the smaller rate; entry price system), 2030 (tools/build/build_bilateral_market.py build_trq; docs/design/PORTS_STAGE4.md).';
 INSERT INTO value_units VALUES
-  ('mkt_bilateral_trq_2030', 'quota_kt', NULL, 'open', 'bilateral_trq_2030.quota_kt: unit to be established'),
-  ('mkt_bilateral_trq_2030', 'gap_eur_t', NULL, 'open', 'bilateral_trq_2030.gap_eur_t: unit to be established'),
-  ('mkt_bilateral_trq_2030', 'imports_kt', NULL, 'open', 'bilateral_trq_2030.imports_kt: unit to be established');
+  ('mkt_bilateral_trq_2030', 'quota_kt', 'U_1000t', 'builder', 'CAPRI p_trqBilat TrqNT'),
+  ('mkt_bilateral_trq_2030', 'ta_mfn', 'U_percent', 'builder', 'CAPRI p_trqBilat TaMFN'),
+  ('mkt_bilateral_trq_2030', 'ta_pref', 'U_percent', 'builder', 'CAPRI p_trqBilat TaPref'),
+  ('mkt_bilateral_trq_2030', 'ts_mfn', 'U_EuPerTon', 'builder', 'CAPRI p_trqBilat TsMFN'),
+  ('mkt_bilateral_trq_2030', 'ts_pref', 'U_EuPerTon', 'builder', 'CAPRI p_trqBilat TsPref');
+
+-- file: capri_data/2017/market/bilateral_trq_global_2030.csv
+CREATE TABLE mkt_bilateral_trq_global_2030 (
+    importer VARCHAR NOT NULL,
+    commodity VARCHAR NOT NULL,
+    quota_kt DOUBLE NOT NULL,
+    ta_mfn DOUBLE NOT NULL,
+    ta_pref DOUBLE NOT NULL,
+    ts_mfn DOUBLE NOT NULL,
+    ts_pref DOUBLE NOT NULL,
+    importer_regions VARCHAR NOT NULL,
+    free_regions VARCHAR,
+    PRIMARY KEY (importer, commodity)
+);
+COMMENT ON TABLE mkt_bilateral_trq_global_2030 IS 'CAPRI''s global (erga omnes) tariff-rate quotas (p_trqGlobl, the importer''s rows with exporter World) per policy block and model commodity, with the market regions of the exporter blocks under free trade (p_doubleZero, from sim_ini_21730: the 2030 agreements), 2030 (tools/build/build_bilateral_market.py build_trq_global; docs/design/PORTS_STAGE4.md).';
+INSERT INTO value_units VALUES
+  ('mkt_bilateral_trq_global_2030', 'quota_kt', 'U_1000t', 'builder', 'CAPRI p_trqGlobl TrqNT'),
+  ('mkt_bilateral_trq_global_2030', 'ta_mfn', 'U_percent', 'builder', 'CAPRI p_trqGlobl TaMFN'),
+  ('mkt_bilateral_trq_global_2030', 'ta_pref', 'U_percent', 'builder', 'CAPRI p_trqGlobl TaPref'),
+  ('mkt_bilateral_trq_global_2030', 'ts_mfn', 'U_EuPerTon', 'builder', 'CAPRI p_trqGlobl TsMFN'),
+  ('mkt_bilateral_trq_global_2030', 'ts_pref', 'U_EuPerTon', 'builder', 'CAPRI p_trqGlobl TsPref');
 
 -- file: capri_data/2017/market/biofuel_feedstock_2017.csv
 CREATE TABLE mkt_biofuel_feedstock_2017 (
@@ -740,3 +728,126 @@ CREATE TABLE mkt_welfare_base_2030 (
 COMMENT ON TABLE mkt_welfare_base_2030 IS 'CAPRI''s welfare report levels at the calibration point (reports/welfare.gms): the base terms CAPRI adds to each (tools/build/build_welfare_base.py)';
 INSERT INTO value_units VALUES
   ('mkt_welfare_base_2030', 'value', NULL, 'open', 'welfare_base_2030.value: unit to be established');
+
+-- file: capri_data/2017/market/dairy_world_baseline.csv
+CREATE TABLE mkt_dairy_world_baseline (
+    region VARCHAR NOT NULL,
+    commodity VARCHAR NOT NULL,
+    "item" VARCHAR NOT NULL CHECK ("item" IN ('production', 'consumption', 'imports', 'exports')),
+    "value" DOUBLE NOT NULL,
+    PRIMARY KEY (region, commodity, "item")
+);
+COMMENT ON TABLE mkt_dairy_world_baseline IS 'CAPRI''s base-period balances of the dairy products per model trade region (FAO_agg p_dataMarket, fao_agg_17_datamarket, year BAS: MAPR production, DOMM consumption, IMPT, EXPT), EU27 for reference; tools/build/build_dairy_world_markets.py; dairy_world_baseline.json until 31 October 2026 (capri_mod/data/nested_tables.py)';
+INSERT INTO value_units VALUES
+  ('mkt_dairy_world_baseline', 'value', 'U_1000t', 'builder', 'dairy_world_baseline.value: CAPRI''s tonnes / 1000 (the builder)');
+
+-- file: capri_data/2017/market/world_market_baseline.csv
+CREATE TABLE mkt_world_market_baseline (
+    region VARCHAR NOT NULL,
+    commodity VARCHAR NOT NULL,
+    "item" VARCHAR NOT NULL CHECK ("item" IN ('production', 'consumption', 'imports', 'exports')),
+    "value" DOUBLE NOT NULL,
+    PRIMARY KEY (region, commodity, "item")
+);
+COMMENT ON TABLE mkt_world_market_baseline IS 'CAPRI''s base-period balances of the market products per model trade region (FAO_agg p_dataMarket, fao_agg_17_datamarket, year BAS: MAPR production, DOMM consumption, IMPT, EXPT; EU27 the sum of the member states); tools/build/build_world_market_baseline.py; world_market_baseline.json until 31 October 2026 (capri_mod/data/nested_tables.py)';
+INSERT INTO value_units VALUES
+  ('mkt_world_market_baseline', 'value', 'U_1000t', 'builder', 'world_market_baseline.value: CAPRI''s tonnes / 1000 (the builder)');
+
+-- file: capri_data/2017/market/world_market_baseline_products.csv
+CREATE TABLE mkt_world_market_baseline_products (
+    product VARCHAR NOT NULL,
+    capri_product VARCHAR NOT NULL REFERENCES capri_xx (code),
+    PRIMARY KEY (product, capri_product)
+);
+COMMENT ON TABLE mkt_world_market_baseline_products IS 'the model products of world_market_baseline.csv and the CAPRI products whose FAO_agg balances each sums (tools/build/build_world_market_baseline.py MODEL; the "_products" of world_market_baseline.json until 31 October 2026)';
+
+-- file: capri_data/2017/market/feed_demand_nonEU.csv
+CREATE TABLE mkt_feed_demand_noneu (
+    region VARCHAR NOT NULL,
+    commodity VARCHAR NOT NULL,
+    feed_share DOUBLE NOT NULL CHECK (feed_share > 0 AND feed_share <= 1),
+    PRIMARY KEY (region, commodity)
+);
+COMMENT ON TABLE mkt_feed_demand_noneu IS 'non-EU feed demand per model trade region and product at CAPRI''s 2030 calibration point: feed share = sum FEED / sum (HCON + FEED + PROC + BIOF) over the trade region''s CAPRI regions (data_market_1730defaulta CAL); tools/build/build_feed_demand_nonEU.py; feed_demand_nonEU.json until 31 October 2026 (capri_mod/data/nested_tables.py)';
+INSERT INTO value_units VALUES
+  ('mkt_feed_demand_noneu', 'feed_share', NULL, 'open', 'feed_demand_nonEU.feed_share: a share (the builder)');
+
+-- file: capri_data/2017/market/feed_demand_nonEU_elasticities.csv
+CREATE TABLE mkt_feed_demand_noneu_elasticities (
+    region VARCHAR NOT NULL,
+    commodity VARCHAR NOT NULL,
+    price_of VARCHAR NOT NULL,
+    elasticity DOUBLE NOT NULL,
+    PRIMARY KEY (region, commodity, price_of)
+);
+COMMENT ON TABLE mkt_feed_demand_noneu_elasticities IS 'CAPRI''s feed demand elasticities p_ElasFeed(RMS, feed, price-of, ''CAL'') (elas_2_1730defaulta), feed-weighted over the CAPRI regions of a trade region (tools/build/build_feed_demand_nonEU.py)';
+INSERT INTO value_units VALUES
+  ('mkt_feed_demand_noneu_elasticities', 'elasticity', NULL, 'open', 'feed_demand_nonEU_elasticities.elasticity: an elasticity (the builder)');
+
+-- file: capri_data/2017/market/feed_demand_nonEU_capri_regions.csv
+CREATE TABLE mkt_feed_demand_noneu_capri_regions (
+    region VARCHAR NOT NULL,
+    commodity VARCHAR NOT NULL,
+    capri_region VARCHAR NOT NULL,
+    PRIMARY KEY (region, commodity, capri_region)
+);
+COMMENT ON TABLE mkt_feed_demand_noneu_capri_regions IS 'the CAPRI regions whose feed functions make a trade region''s feed demand of a product (tools/build/build_feed_demand_nonEU.py)';
+
+-- file: capri_data/2017/market/border_measures_2030.csv
+CREATE TABLE mkt_border_measures_2030 (
+    importer VARCHAR NOT NULL,
+    commodity VARCHAR NOT NULL,
+    kind VARCHAR NOT NULL CHECK (kind IN ('entry_price', 'flex_levy')),
+    price DOUBLE NOT NULL,
+    tars DOUBLE NOT NULL,
+    importer_regions VARCHAR NOT NULL,
+    free_regions VARCHAR,
+    PRIMARY KEY (importer, commodity)
+);
+COMMENT ON TABLE mkt_border_measures_2030 IS 'CAPRI''s entry prices (DATA TriggerP) and flexible levies (DATA MinBordP) per importer policy block and model commodity, with the bound specific rate DATA TARS and the free-trade exporters (p_doubleZero), from sim_ini_21730 CUR (tools/build/build_bilateral_market.py build_border_measures; docs/design/PORTS_STAGE4.md, stage 6).';
+INSERT INTO value_units VALUES
+  ('mkt_border_measures_2030', 'price', 'U_EuPerTon', 'builder', 'CAPRI DATA TriggerP or MinBordP'),
+  ('mkt_border_measures_2030', 'tars', 'U_EuPerTon', 'builder', 'CAPRI DATA TARS');
+
+-- file: capri_data/2017/market/border_pairs_2030.csv
+CREATE TABLE mkt_border_pairs_2030 (
+    importer VARCHAR NOT NULL,
+    exporter VARCHAR NOT NULL,
+    commodity VARCHAR NOT NULL,
+    entry_fac DOUBLE NOT NULL,
+    pref_trig DOUBLE NOT NULL,
+    exporter_regions VARCHAR NOT NULL,
+    PRIMARY KEY (importer, exporter, commodity)
+);
+COMMENT ON TABLE mkt_border_pairs_2030 IS 'CAPRI''s entry price pairs: p_entryPriceFac and the preferential trigger price PrefTrigPrice per pair of policy blocks and model commodity (sim_ini_21730 CUR; the market listing) (tools/build/build_bilateral_market.py build_border_measures).';
+INSERT INTO value_units VALUES
+  ('mkt_border_pairs_2030', 'entry_fac', 'U_ratio', 'builder', 'CAPRI p_entryPriceFac, a calibration factor of the entry price driver (dimensionless)'),
+  ('mkt_border_pairs_2030', 'pref_trig', 'U_EuPerTon', 'builder', 'CAPRI p_trqBilat PrefTrigPrice');
+
+-- file: capri_data/2017/market/policy_blocks.csv
+CREATE TABLE mkt_policy_blocks (
+    region VARCHAR NOT NULL,
+    block VARCHAR NOT NULL,
+    PRIMARY KEY (region)
+);
+COMMENT ON TABLE mkt_policy_blocks IS 'Each model market region''s CAPRI policy block (codes/capri/RM_TO_RMTP.csv; the EU''s two market regions in block EU) (tools/build/build_bilateral_market.py build_border_measures).';
+
+-- file: capri_data/2017/market/raw_milk_prices_2017.csv
+CREATE TABLE mkt_raw_milk_prices_2017 (
+    region VARCHAR NOT NULL,
+    pmrk DOUBLE NOT NULL,
+    PRIMARY KEY (region)
+);
+COMMENT ON TABLE mkt_raw_milk_prices_2017 IS 'CAPRI''s raw milk market price (DATA PMRK MILK) per market region, 2017: with the bilateral regions'' PMRK the market''s reference price levels (tools/build/build_bilateral_market.py build_raw_milk_prices).';
+INSERT INTO value_units VALUES
+  ('mkt_raw_milk_prices_2017', 'pmrk', 'U_EuPerTon', 'builder', 'CAPRI DATA PMRK MILK');
+
+-- file: capri_data/2017/market/raw_milk_prices_2030.csv
+CREATE TABLE mkt_raw_milk_prices_2030 (
+    region VARCHAR NOT NULL,
+    pmrk DOUBLE NOT NULL,
+    PRIMARY KEY (region)
+);
+COMMENT ON TABLE mkt_raw_milk_prices_2030 IS 'CAPRI''s raw milk market price (DATA PMRK MILK) per market region, 2030: with the bilateral regions'' PMRK the market''s reference price levels (tools/build/build_bilateral_market.py build_raw_milk_prices).';
+INSERT INTO value_units VALUES
+  ('mkt_raw_milk_prices_2030', 'pmrk', 'U_EuPerTon', 'builder', 'CAPRI DATA PMRK MILK');

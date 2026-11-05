@@ -7,7 +7,7 @@ Writes, from CAPRI's 2017 regional results (res_17<MS>.txt):
   capri_data/2017/supply/livestock_product_value_by_market_coef.csv   now with SHGP.MILK (sheep and goat
       milk value moves with the raw milk price)
 
-    python tools/build/build_livestock_products.py [--dump-dir /home/claude/work/capreg]
+    python tools/build/build_livestock_products.py [--dump-dir capri_sources/capreg]
 """
 import argparse, sys
 from pathlib import Path
@@ -15,12 +15,14 @@ from pathlib import Path
 import pandas as pd
 
 import functools as _ft
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
+from paths import SOURCES  # noqa: E402  (CAPRI's material outside the repository)
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
-    ap.add_argument("--dump-dir", default="/home/claude/work/capreg")
+    ap.add_argument("--dump-dir", default=str(SOURCES / "capreg"))
     a = ap.parse_args()
     sys.path.insert(0, str(ROOT)); sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check")]
     import build_livestock_output_coef as B

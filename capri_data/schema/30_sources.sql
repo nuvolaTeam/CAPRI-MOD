@@ -1,28 +1,5 @@
 -- The extracts under capri_data/sources (CAPRI's files and outside sources the builders read), 29 October 2026. Structure (types, NOT NULL, keys) from the files; each table's origin in provenance (01_provenance.sql); units open where no builder or CAPRI file states them.
 
--- file: capri_data/sources/arm/capri_supply_elas_market_1717.csv
-CREATE TABLE src_capri_supply_elas_market_1717 (
-    region VARCHAR NOT NULL,
-    prod VARCHAR NOT NULL,
-    wrt VARCHAR NOT NULL,
-    "value" DOUBLE NOT NULL,
-    PRIMARY KEY (region, prod, wrt)
-);
-COMMENT ON TABLE src_capri_supply_elas_market_1717 IS 'Every record of CAPRI''s p_elasSupp(region, prod, wrt, ''CAL'') from elas1717defaulta.gdx (gdxdump p_elasSupp.txt): the supply elasticity of prod with respect to the price of wrt, per market region (countries and trade regions), 73528 rows (tools/build/build_capri_supply_elas_market.py).';
-INSERT INTO value_units VALUES
-  ('src_capri_supply_elas_market_1717', 'value', NULL, 'open', 'capri_supply_elas_market_1717.value: unit to be established');
-
--- file: capri_data/sources/arm/capri_supply_elas_young_1720.csv
-CREATE TABLE src_capri_supply_elas_young_1720 (
-    region VARCHAR NOT NULL,
-    "item" VARCHAR NOT NULL,
-    "value" DOUBLE NOT NULL,
-    PRIMARY KEY (region, "item")
-);
-COMMENT ON TABLE src_capri_supply_elas_young_1720 IS 'CAPRI''s calibrated supply elasticities of young animals (YCAM, YCAF, YBUL, YHEI, YCOW, YPIG) per member state: p_ElasSupp(MS, item, item, ''CAL'') from results/arm/supply_elas_2_1720<MS>defaulta.gdx, the 2020 calibration (tools/build/build_young_animal_elasticities.py).';
-INSERT INTO value_units VALUES
-  ('src_capri_supply_elas_young_1720', 'value', NULL, 'open', 'capri_supply_elas_young_1720.value: unit to be established');
-
 -- file: capri_data/sources/baseline_pmp/estnlp_vb.csv
 CREATE TABLE src_estnlp_vb (
     region VARCHAR NOT NULL,
@@ -195,6 +172,8 @@ INSERT INTO value_units VALUES
   ('src_capmod_world_reference_2017', 'ImportQ', NULL, 'open', 'capmod_world_reference_2017.ImportQ: unit to be established');
 
 -- file: capri_data/sources/capreg/capreg_activity_levels.csv
+-- OCER, PULS, SHGF, SHGM: empty where CAPRI's data have no record, as this file's other columns (the units of the UK,
+-- Turkey and the Western Balkans, 4 November 2026)
 CREATE TABLE src_capreg_activity_levels (
     model_region VARCHAR NOT NULL,
     AGGT DOUBLE NOT NULL,
@@ -277,7 +256,7 @@ CREATE TABLE src_capreg_activity_levels (
     OAR1 DOUBLE NOT NULL,
     OARA DOUBLE NOT NULL,
     OATS DOUBLE,
-    OCER DOUBLE NOT NULL,
+    OCER DOUBLE,
     OCRO DOUBLE,
     OFAR DOUBLE NOT NULL,
     OFRU DOUBLE NOT NULL,
@@ -293,7 +272,7 @@ CREATE TABLE src_capreg_activity_levels (
     POTA DOUBLE,
     POUF DOUBLE,
     PROT DOUBLE,
-    PULS DOUBLE NOT NULL,
+    PULS DOUBLE,
     RAPE DOUBLE,
     RESART DOUBLE NOT NULL,
     RESCRP DOUBLE NOT NULL,
@@ -307,8 +286,8 @@ CREATE TABLE src_capreg_activity_levels (
     RYEM DOUBLE,
     SCOW DOUBLE NOT NULL,
     SETF DOUBLE NOT NULL,
-    SHGF DOUBLE NOT NULL,
-    SHGM DOUBLE NOT NULL,
+    SHGF DOUBLE,
+    SHGM DOUBLE,
     SOWS DOUBLE,
     SOYA DOUBLE,
     SUGB DOUBLE,
@@ -627,6 +606,8 @@ INSERT INTO value_units VALUES
   ('src_capreg_cap_premium', 'VSET', NULL, 'open', 'capreg_cap_premium.VSET: unit to be established');
 
 -- file: capri_data/sources/capreg/capreg_national_prices.csv
+-- OCER, OCRO: empty where CAPRI's data have no record, as this file's other columns (the units of the UK,
+-- Turkey and the Western Balkans, 4 November 2026)
 CREATE TABLE src_capreg_national_prices (
     capri_country VARCHAR NOT NULL,
     AGGT DOUBLE NOT NULL,
@@ -666,8 +647,8 @@ CREATE TABLE src_capreg_national_prices (
     OANI DOUBLE,
     OAR1 DOUBLE NOT NULL,
     OATS DOUBLE,
-    OCER DOUBLE NOT NULL,
-    OCRO DOUBLE NOT NULL,
+    OCER DOUBLE,
+    OCRO DOUBLE,
     OFAR DOUBLE NOT NULL,
     OFOD DOUBLE NOT NULL,
     OFRU DOUBLE NOT NULL,
@@ -783,6 +764,8 @@ INSERT INTO value_units VALUES
   ('src_capreg_national_prices', 'WINE', NULL, 'open', 'capreg_national_prices.WINE: unit to be established');
 
 -- file: capri_data/sources/capreg/capreg_producer_prices.csv
+-- OCER, OCRO, POTA, PULS, SHGF: empty where CAPRI's data have no record, as this file's other columns (the units of the UK,
+-- Turkey and the Western Balkans, 4 November 2026)
 CREATE TABLE src_capreg_producer_prices (
     model_region VARCHAR NOT NULL,
     AGGT DOUBLE NOT NULL,
@@ -821,8 +804,8 @@ CREATE TABLE src_capreg_producer_prices (
     OANI DOUBLE,
     OAR1 DOUBLE NOT NULL,
     OATS DOUBLE,
-    OCER DOUBLE NOT NULL,
-    OCRO DOUBLE NOT NULL,
+    OCER DOUBLE,
+    OCRO DOUBLE,
     OFAR DOUBLE NOT NULL,
     OFRU DOUBLE NOT NULL,
     OILS DOUBLE,
@@ -834,15 +817,15 @@ CREATE TABLE src_capreg_producer_prices (
     PERM DOUBLE NOT NULL,
     PIGF DOUBLE NOT NULL,
     PKPL DOUBLE NOT NULL,
-    POTA DOUBLE NOT NULL,
+    POTA DOUBLE,
     POUF DOUBLE,
-    PULS DOUBLE NOT NULL,
+    PULS DOUBLE,
     RAPE DOUBLE,
     ROOF DOUBLE,
     RUMI DOUBLE NOT NULL,
     RYEM DOUBLE,
     SCOW DOUBLE NOT NULL,
-    SHGF DOUBLE NOT NULL,
+    SHGF DOUBLE,
     SHGM DOUBLE,
     SOWS DOUBLE,
     SOYA DOUBLE,
@@ -937,6 +920,8 @@ INSERT INTO value_units VALUES
   ('src_capreg_producer_prices', 'OFOD', NULL, 'open', 'capreg_producer_prices.OFOD: unit to be established');
 
 -- file: capri_data/sources/capreg/capreg_producer_prices_extract.csv
+-- OCER, PULS, SHGF: empty where CAPRI's data have no record, as this file's other columns (the units of the UK,
+-- Turkey and the Western Balkans, 4 November 2026)
 CREATE TABLE src_capreg_producer_prices_extract (
     model_region VARCHAR NOT NULL,
     AGGT DOUBLE NOT NULL,
@@ -975,7 +960,7 @@ CREATE TABLE src_capreg_producer_prices_extract (
     OANI DOUBLE,
     OAR1 DOUBLE NOT NULL,
     OATS DOUBLE,
-    OCER DOUBLE NOT NULL,
+    OCER DOUBLE,
     OCRO DOUBLE,
     OFAR DOUBLE NOT NULL,
     OFRU DOUBLE NOT NULL,
@@ -990,13 +975,13 @@ CREATE TABLE src_capreg_producer_prices_extract (
     PKPL DOUBLE NOT NULL,
     POTA DOUBLE,
     POUF DOUBLE,
-    PULS DOUBLE NOT NULL,
+    PULS DOUBLE,
     RAPE DOUBLE,
     ROOF DOUBLE,
     RUMI DOUBLE NOT NULL,
     RYEM DOUBLE,
     SCOW DOUBLE NOT NULL,
-    SHGF DOUBLE NOT NULL,
+    SHGF DOUBLE,
     SHGM DOUBLE,
     SOWS DOUBLE,
     SOYA DOUBLE,
@@ -1441,79 +1426,6 @@ INSERT INTO value_units VALUES
   ('src_ef_lus_main_uaa_nuts2024', 'uaa_ha', NULL, 'open', 'ef_lus_main_uaa_nuts2024.uaa_ha: unit to be established'),
   ('src_ef_lus_main_uaa_nuts2024', 'year', NULL, 'open', 'ef_lus_main_uaa_nuts2024.year: unit to be established');
 
--- file: capri_data/sources/fao_2021/trade_flows_2021.csv
-CREATE TABLE src_trade_flows_2021 (
-    exporter VARCHAR NOT NULL,
-    importer VARCHAR NOT NULL,
-    SWHE DOUBLE NOT NULL,
-    DWHE DOUBLE NOT NULL,
-    BARL DOUBLE NOT NULL,
-    CORN DOUBLE NOT NULL,
-    OCER DOUBLE NOT NULL,
-    RAPE DOUBLE NOT NULL,
-    SUNF DOUBLE NOT NULL,
-    SOYA DOUBLE NOT NULL,
-    OOIL DOUBLE NOT NULL,
-    SUGB DOUBLE NOT NULL,
-    SUGR DOUBLE NOT NULL,
-    POTA DOUBLE NOT NULL,
-    PULS DOUBLE NOT NULL,
-    TOMA DOUBLE NOT NULL,
-    OVEG DOUBLE NOT NULL,
-    APPL DOUBLE NOT NULL,
-    OFRU DOUBLE NOT NULL,
-    CITR DOUBLE NOT NULL,
-    WINE DOUBLE NOT NULL,
-    OLIV DOUBLE NOT NULL,
-    MILK DOUBLE NOT NULL,
-    BUTR DOUBLE NOT NULL,
-    SKIM DOUBLE NOT NULL,
-    CHES DOUBLE NOT NULL,
-    WHEY DOUBLE NOT NULL,
-    BEEF DOUBLE NOT NULL,
-    PORK DOUBLE NOT NULL,
-    POUL DOUBLE NOT NULL,
-    SHGM DOUBLE NOT NULL,
-    EGGS DOUBLE NOT NULL,
-    FATS DOUBLE NOT NULL,
-    OFOD_M DOUBLE NOT NULL,
-    PRIMARY KEY (exporter, importer)
-);
-COMMENT ON TABLE src_trade_flows_2021 IS 'FAOSTAT 2021 bilateral trade (sources/fao_2021/README.md): one row per exporter and importer of 29 trade regions, one column per commodity; no builder; read only by tools/build/recalibrate_trade_2017.py as a comparison.';
-INSERT INTO value_units VALUES
-  ('src_trade_flows_2021', 'SWHE', NULL, 'open', 'trade_flows_2021.SWHE: unit to be established'),
-  ('src_trade_flows_2021', 'DWHE', NULL, 'open', 'trade_flows_2021.DWHE: unit to be established'),
-  ('src_trade_flows_2021', 'BARL', NULL, 'open', 'trade_flows_2021.BARL: unit to be established'),
-  ('src_trade_flows_2021', 'CORN', NULL, 'open', 'trade_flows_2021.CORN: unit to be established'),
-  ('src_trade_flows_2021', 'OCER', NULL, 'open', 'trade_flows_2021.OCER: unit to be established'),
-  ('src_trade_flows_2021', 'RAPE', NULL, 'open', 'trade_flows_2021.RAPE: unit to be established'),
-  ('src_trade_flows_2021', 'SUNF', NULL, 'open', 'trade_flows_2021.SUNF: unit to be established'),
-  ('src_trade_flows_2021', 'SOYA', NULL, 'open', 'trade_flows_2021.SOYA: unit to be established'),
-  ('src_trade_flows_2021', 'OOIL', NULL, 'open', 'trade_flows_2021.OOIL: unit to be established'),
-  ('src_trade_flows_2021', 'SUGB', NULL, 'open', 'trade_flows_2021.SUGB: unit to be established'),
-  ('src_trade_flows_2021', 'SUGR', NULL, 'open', 'trade_flows_2021.SUGR: unit to be established'),
-  ('src_trade_flows_2021', 'POTA', NULL, 'open', 'trade_flows_2021.POTA: unit to be established'),
-  ('src_trade_flows_2021', 'PULS', NULL, 'open', 'trade_flows_2021.PULS: unit to be established'),
-  ('src_trade_flows_2021', 'TOMA', NULL, 'open', 'trade_flows_2021.TOMA: unit to be established'),
-  ('src_trade_flows_2021', 'OVEG', NULL, 'open', 'trade_flows_2021.OVEG: unit to be established'),
-  ('src_trade_flows_2021', 'APPL', NULL, 'open', 'trade_flows_2021.APPL: unit to be established'),
-  ('src_trade_flows_2021', 'OFRU', NULL, 'open', 'trade_flows_2021.OFRU: unit to be established'),
-  ('src_trade_flows_2021', 'CITR', NULL, 'open', 'trade_flows_2021.CITR: unit to be established'),
-  ('src_trade_flows_2021', 'WINE', NULL, 'open', 'trade_flows_2021.WINE: unit to be established'),
-  ('src_trade_flows_2021', 'OLIV', NULL, 'open', 'trade_flows_2021.OLIV: unit to be established'),
-  ('src_trade_flows_2021', 'MILK', NULL, 'open', 'trade_flows_2021.MILK: unit to be established'),
-  ('src_trade_flows_2021', 'BUTR', NULL, 'open', 'trade_flows_2021.BUTR: unit to be established'),
-  ('src_trade_flows_2021', 'SKIM', NULL, 'open', 'trade_flows_2021.SKIM: unit to be established'),
-  ('src_trade_flows_2021', 'CHES', NULL, 'open', 'trade_flows_2021.CHES: unit to be established'),
-  ('src_trade_flows_2021', 'WHEY', NULL, 'open', 'trade_flows_2021.WHEY: unit to be established'),
-  ('src_trade_flows_2021', 'BEEF', NULL, 'open', 'trade_flows_2021.BEEF: unit to be established'),
-  ('src_trade_flows_2021', 'PORK', NULL, 'open', 'trade_flows_2021.PORK: unit to be established'),
-  ('src_trade_flows_2021', 'POUL', NULL, 'open', 'trade_flows_2021.POUL: unit to be established'),
-  ('src_trade_flows_2021', 'SHGM', NULL, 'open', 'trade_flows_2021.SHGM: unit to be established'),
-  ('src_trade_flows_2021', 'EGGS', NULL, 'open', 'trade_flows_2021.EGGS: unit to be established'),
-  ('src_trade_flows_2021', 'FATS', NULL, 'open', 'trade_flows_2021.FATS: unit to be established'),
-  ('src_trade_flows_2021', 'OFOD_M', NULL, 'open', 'trade_flows_2021.OFOD_M: unit to be established');
-
 -- file: capri_data/sources/fao_agg_2017/fao_agg_dairy_products_bas.csv
 CREATE TABLE src_fao_agg_dairy_products_bas (
     region VARCHAR NOT NULL,
@@ -1584,26 +1496,27 @@ INSERT INTO value_units VALUES
 
 -- file: capri_data/sources/market/bilateral_trq_dataout_2017.csv
 CREATE TABLE src_bilateral_trq_dataout_2017 (
-    exporter VARCHAR NOT NULL,
-    "item" VARCHAR NOT NULL,
-    product VARCHAR NOT NULL,
-    "value" DOUBLE NOT NULL,
-    PRIMARY KEY (exporter, "item", product)
-);
-COMMENT ON TABLE src_bilateral_trq_dataout_2017 IS 'CAPRI''s bilateral TRQ and price items (TrqNT, TAMFN, TSMFN, TaAppl, TsAppl, Fob, TCost, ImportQ) of the EU policy block ''EU'' as importer, per exporter and product, from market_base_1717 dataOut, 2017 (tools/build/build_bilateral_market.py).';
-INSERT INTO value_units VALUES
-  ('src_bilateral_trq_dataout_2017', 'value', NULL, 'open', 'bilateral_trq_dataout_2017.value: unit to be established');
-
--- file: capri_data/sources/market/bilateral_trq_dataout_2030.csv
-CREATE TABLE src_bilateral_trq_dataout_2030 (
+    importer VARCHAR NOT NULL,
     exporter VARCHAR,
     "item" VARCHAR NOT NULL,
     product VARCHAR NOT NULL,
     "value" DOUBLE NOT NULL
 );
-COMMENT ON TABLE src_bilateral_trq_dataout_2030 IS 'CAPRI''s bilateral TRQ and price items (TrqNT, TAMFN, TSMFN, TaAppl, TsAppl, Fob, TCost, ImportQ) of the EU policy block ''EU'' as importer, per exporter and product, from markmarket_greendeal_1730et_base_1717 dataOut, 2030 (tools/build/build_bilateral_market.py).';
+COMMENT ON TABLE src_bilateral_trq_dataout_2017 IS 'CAPRI''s tariff-rate quota items (TRQNT, TAMFN, TAPREF, TSMFN, TSPREF, PREFTRIGPRICE) of every importer and exporter of the listing (policy blocks, market regions and reporting aggregates; exporter World: the global quotas), per product, from market_base_1717 dataOut, 2017 (tools/build/build_bilateral_market.py build_trq).';
 INSERT INTO value_units VALUES
-  ('src_bilateral_trq_dataout_2030', 'value', NULL, 'open', 'bilateral_trq_dataout_2030.value: unit to be established');
+  ('src_bilateral_trq_dataout_2017', 'value', NULL, 'open', 'bilateral_trq_dataout_2017.value: the item''s unit (1000 t, %, EUR/t)');
+
+-- file: capri_data/sources/market/bilateral_trq_dataout_2030.csv
+CREATE TABLE src_bilateral_trq_dataout_2030 (
+    importer VARCHAR NOT NULL,
+    exporter VARCHAR,
+    "item" VARCHAR NOT NULL,
+    product VARCHAR NOT NULL,
+    "value" DOUBLE NOT NULL
+);
+COMMENT ON TABLE src_bilateral_trq_dataout_2030 IS 'CAPRI''s tariff-rate quota items (TRQNT, TAMFN, TAPREF, TSMFN, TSPREF, PREFTRIGPRICE) of every importer and exporter of the listing (policy blocks, market regions and reporting aggregates; exporter World: the global quotas), per product, from markmarket_greendeal_1730et_base_1717 dataOut, 2030 (tools/build/build_bilateral_market.py build_trq).';
+INSERT INTO value_units VALUES
+  ('src_bilateral_trq_dataout_2030', 'value', NULL, 'open', 'bilateral_trq_dataout_2030.value: the item''s unit (1000 t, %, EUR/t)');
 
 -- file: capri_data/sources/market/biofuel_proc_hessian_2030.csv
 CREATE TABLE src_biofuel_proc_hessian_2030 (
@@ -1801,3 +1714,20 @@ COMMENT ON TABLE src_producer_prices_no_builder IS 'EU producer price rows no bu
 INSERT INTO value_units VALUES
   ('src_producer_prices_no_builder', 'price', NULL, 'open', 'producer_prices_no_builder.price: unit to be established');
 
+-- file: capri_data/sources/market/raw_milk_prices_dataout_2017.csv
+CREATE TABLE src_raw_milk_prices_dataout_2017 (
+    region VARCHAR NOT NULL,
+    "value" DOUBLE NOT NULL
+);
+COMMENT ON TABLE src_raw_milk_prices_dataout_2017 IS 'CAPRI''s DATA PMRK MILK of every region of the listing, from market_base_1717 dataOut, 2017 (tools/build/build_bilateral_market.py build_raw_milk_prices).';
+INSERT INTO value_units VALUES
+  ('src_raw_milk_prices_dataout_2017', 'value', 'U_EuPerTon', 'builder', 'CAPRI DATA PMRK MILK');
+
+-- file: capri_data/sources/market/raw_milk_prices_dataout_2030.csv
+CREATE TABLE src_raw_milk_prices_dataout_2030 (
+    region VARCHAR NOT NULL,
+    "value" DOUBLE NOT NULL
+);
+COMMENT ON TABLE src_raw_milk_prices_dataout_2030 IS 'CAPRI''s DATA PMRK MILK of every region of the listing, from markmarket_greendeal_1730et_base_1717 dataOut, 2030 (tools/build/build_bilateral_market.py build_raw_milk_prices).';
+INSERT INTO value_units VALUES
+  ('src_raw_milk_prices_dataout_2030', 'value', 'U_EuPerTon', 'builder', 'CAPRI DATA PMRK MILK');

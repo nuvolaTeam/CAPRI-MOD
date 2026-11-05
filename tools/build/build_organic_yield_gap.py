@@ -26,10 +26,13 @@ import argparse
 from pathlib import Path
 
 import pandas as pd
+import sys  # noqa: E402
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
+from paths import EXPORTS, SOURCES  # noqa: E402  (CAPRI's material outside the repository)
 
 ROOT = Path(__file__).resolve().parents[2]
-XLSX = Path("/mnt/user-data/uploads/yield_effects_ppp.xlsx")
-GMS = Path("/home/claude/work/allgms/gams/inputs/load_organic_yieldgap.gms")
+XLSX = EXPORTS / "yield_effects_ppp.xlsx"
+GMS = SOURCES / "gams/inputs/load_organic_yieldgap.gms"
 OUT = ROOT / "capri_data" / "2017" / "policy" / "organic_yield_gap.csv"
 OUT_REG = OUT.with_name("organic_yield_gap_regions.csv")
 OUT_GRP = OUT.with_name("organic_yield_gap_groups.csv")

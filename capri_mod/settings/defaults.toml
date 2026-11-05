@@ -21,11 +21,21 @@ run_environmental = true
 report_biofuel = false
 # IPOPT solver objects kept per region graph (environment variable CAPRI_NLP_CACHE wins if set)
 nlp_cache_size = 64
+# the regional NLP's derivative functions kept (sensitivity and KKT factorisations, each; refactor stage 3, N5)
+nlp_derivative_cache_size = 16
 # the countries outside the EU whose supply models are in the run, by CAPRI member-state code (CAPRI's per-country
 # switches, %CountriesNO000000% ... %CountriesTUR%, capmod/define_regional_sets.gms l. 40-77). Each must have regional
 # units (capri_data/shared/regional_units.csv). Their market region takes its supply from their models; a country
 # left out keeps its market region's supply functions. The EU's member states are always in.
 supply_countries_outside_eu = ["NO000000"]
+# a folder of the user's own scenarios (refactor stage 5), looked in before capri_data/scenarios; "" = none. A scenario
+# there may name a reference or group of the repository's (python -m capri_mod.scenarios new / check)
+scenarios_dir = ""
+# where the run's long results table is written (refactor stage 5; capri_mod/io_results.py write_run): a Delta table
+# results_dir/long partitioned by scenario and run id, the reference stored once (results_dir/runs records each
+# partition and its fingerprint), the run's metadata, settings and manifest in results_dir/meta/<scenario>/<run id>/;
+# relative to the repository; "" = not written
+results_dir = "results"
 
 [outer_loop]
 # the supply-market iterations at most (CAPRI's %STEPS%: 99 in its GUI for a scenario run, gui/capri_gui_definition.xml
@@ -103,6 +113,15 @@ manure_pool_omega_up = 1.25
 manure_pool_omega_down = 0.5
 manure_pool_omega_min = 0.25
 manure_pool_qp_tol = 1e-8
+# numerical (refactor stage 4): the multiplier recovery of a region's stored problem (NNLS on its active rows): a row
+# is active within this relative tolerance, a column at its bound below this level, at most this many iterations per
+# column; the pools' trade cost slopes are divided by kappa, at least this floor; the arcs' ridge as a share of the
+# smallest slope
+manure_pool_active_tol = 1e-6
+manure_pool_bound_tol = 1e-9
+manure_pool_nnls_iter = 60
+manure_pool_kappa_floor = 1e-3
+manure_pool_arc_ridge = 1e-3
 
 [supply]
 # PMP terms: "capri2030" (CAPRI's exported 2030 terms at 2030; CAPRI's recipe at its 2017 point at 2017) or "recipe"
@@ -133,6 +152,16 @@ jrc_capped_override = ""
 # solve tolerance is outer_loop.nlp_tol_final / nlp_tol_early)
 nlp_max_iter = 3000
 nlp_warm_max_iter = 200
+# numerical (refactor stage 3, N5): the ridge weight of the NLP calibration's multiplier fit, relative to the scaled
+# columns (also in the market supply Hessian's cache key); the fit's iteration limit (scipy lsq_linear)
+nlp_cal_ridge = 1e-10
+nlp_cal_lsq_max_iter = 5000
+# numerical (N5): the IPOPT start moved inside the fertiliser regulations' support, to this share of each bound
+nlp_start_regulation_margin = 0.95
+# numerical (N5): an activity at or below this level counts as absent (CAPRI: no p_technFact)
+absent_level = 1e-8
+# numerical (N5): the organic share capped so the conventional share stays positive
+organic_share_cap = 0.99
 # numerical safeguard (not a CAPRI parameter): a warm-started solution whose objective is more than this share worse
 # than the last iteration's is checked against the solves from the previous point and the standard start, keeping the
 # lowest objective; the warm start can end at a worse stationary point of the non-convex per-head feeding (K75)
@@ -156,6 +185,17 @@ nlp_acceptable_tol = 1e-6
 # a slightly different path, so a non-convex regional problem can end at another local optimum
 nlp_linear_solver = "mumps"
 nlp_hsllib = ""
+# another IPOPT library under CasADi's IPOPT interface, in place of CasADi's own: "" (CasADi's) or the path of a
+# libipopt.so.3 (absolute, or relative to the repository root), e.g. IPOPT with SPRAL in OpenMP built by
+# tools/solvers/build_ipopt_spral_omp.py, outside the repository (nlp_linear_solver = "spral" with it). Loaded before the
+# first IPOPT solve of the run (capri_mod/utils/ipopt_library.py: OpenMP's environment, other OpenMP runtimes, forks).
+# Not CAPRI's (register BEYOND-11)
+nlp_ipopt_library = ""
+# OpenMP threads of the linear solver per process with that library: each worker process takes this many; the process
+# that starts the run takes them only when it runs without workers (run.n_workers = 1 or CAPRI_WORKERS=1), one
+# otherwise (a process that ran OpenMP on several threads hangs the workers it forks). Workers x threads should not
+# exceed the machine's cores
+nlp_omp_threads = 1
 # IPOPT's treatment of fixed columns (lower = upper bound): "make_constraint" keeps them as variables held by an
 # equality (trial points may leave the bound), "make_parameter" removes them from the problem (CAPRI: an activity
 # without a level has no variable)
@@ -190,6 +230,11 @@ fert_slope_with_saving = false
 # the inner model's duals widened to +-1000 where CAPRI's +-10 admit no allocation (REGISTERED, CAPRI's own
 # workaround is a slack)
 npk_dual_bound_wide = 1000.0
+# numerical (refactor stage 3, N5): regulated flows kept strictly inside the beta density's support, at this share of
+# its upper end (CAPRI: an open support)
+support_margin = 0.999
+# numerical (refactor stage 4): the mineral caps scaled so the distribution keeps this share of them (0.2% room)
+cap_room = 0.998
 # a crop group whose mineral cap leaves its N need out of reach (NLP infeasible) is exempted as CAPRI exempts groups
 # (minfert_redu_by_crop.gms, p_checkSmallMine): its cap at this multiple of its baseline mineral N per ha (CAPRI: 1.0
 # for its small groups, "no backsliding"; 1.1-1.2 for its listed region x group pairs)
@@ -216,11 +261,14 @@ hessian_skip_unchanged = true
 # set: the exact derivative where CAPRI's is a 1% difference quotient; no change of the active set within the shock).
 # Needs hessian_skip_unchanged (its base re-solve records the base points)
 hessian_method = "capri"
+# numerical (refactor stage 4): a product is shocked only if its base supply exceeds this (kt); Hessian entries below
+# this size are dropped
+hessian_min_supply_kt = 1e-6
+hessian_entry_floor = 1e-9
 # CAPRI's endogenous biofuel markets (BIOF_M; star 3.0 GUI default on); a scenario may set its own
 biofuel_markets = true
-# DEPARTURE: CAPRI's default aggregation has two EU trade blocks (EU_WEST, EU_EAST; aggregation/defaultA.agg);
-# one EU27 block by default so far; to be switched to CAPRI's setting
-eu_blocks = false
+# (eu_blocks was removed on 3 November 2026: the EU is always CAPRI's two market regions A_EU_WEST and A_EU_EAST,
+# the model's EU_WEST and EU_EAST, aggregation/defaultA.agg; "EU27" stays in the reports, the sum of the two)
 # CAPRI's market supply functions calibrated to the supply models (calibrate_supply.gms, ProdNQ_, recalibrated each
 # iteration by simu_calibration_to_supply.gms); CAPRI's setting since 24 October 2026 (K75). The Hessian is measured
 # once per baseline by price shocks on the supply models and cached on disk (.cache/market_supply_hessian)
@@ -230,6 +278,12 @@ market_supply_nq = true
 # KNOWN_ISSUES K54-3); false: one own-price constant elasticity per region and product (CAPRI's p_elasSupp of 2017),
 # the form until 29 October 2026
 noneu_supply_nq = true
+# CAPRI's market land block outside the EU (arm/market_model.gms LandSupplyMNL_, LndSupplyEqualsDemand_,
+# rentFromProdpriceLand_; supremaMrk on): the rents of TCRP, FODFAL and FRUN clear each non-EU region's land market,
+# the MNL land supply against ProdNQ_'s land demand, and move its market supply functions (noneu_land_market.csv,
+# noneu_land_mnl.csv; tools/build/build_noneu_market_supply_nq.py); false: the rents held at calibration (until
+# 4 November 2026). Needs noneu_supply_nq
+noneu_land_market = true
 # CAPRI's feed bulk demand inside the market (feedBlk_, audit M4): the member states' bulks respond to the prices within a
 # market solve from the supply models' bulks at the prices they saw, with the elasticities measured on the supply models
 # (the market supply Hessian's FEEDBLK rows); false: fixed within a solve (until 29 October 2026). Same fixed point
@@ -320,6 +374,10 @@ ghgTechLowNFeed = 1.0
 ghgTechLineNitr = 1.0
 # %fixGenet_eff_to_iniValues% (breeding.gms l. 65-77): MaxShare 0.002 of the breeding options
 fixGenetToIni = 1.0
+# %fallowInAllRmssup% (no_histosols.gms l. 22-26): histosol fallowing outside the EU too, 1 on (MitiInAllRmssup on)
+fallowInAllRmssup = 1.0
+# %winterCovInAllRmssup% (cover_crops.gms): the winter cover outside the EU too, 1 on (MitiInAllRmssup on)
+winterCovInAllRmssup = 1.0
 
 [diagnostics]
 verbose = true
@@ -329,6 +387,10 @@ trace_outer = false
 record_regional_levels = false
 # regions slower than this (s) are reported
 slow_region_seconds = 60.0
+# the regional solves' progress printed every this many regions (verbose runs)
+progress_every_regions = 50
+# the market supply Hessian's progress printed every this many price shocks
+hessian_progress_every = 5
 
 [captrd]
 # CAPTRD-MOD (capri_mod/pipeline/captrd): CAPRI's baseline trend projection (docs/design/CAPTRD_MOD.md).

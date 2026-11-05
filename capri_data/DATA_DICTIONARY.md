@@ -7,8 +7,7 @@ section 6; per-file source, vintage and units are also in `MANIFEST.json` and `I
 `DATA_SOURCING_REGISTRY.json`. MANIFEST.json is not regenerated automatically and lags the files in places (shapes of
 `world_prices.csv`, `fert_side_effects.csv`; sources of `base_areas.csv`, `yields.csv`).
 
-Files are under `capri_data/<base_year>/<category>/` (only `2017/` exists); `trade_flows.csv` resolves to
-`capri_data/shared/trade_flows_2017.csv` (`capri_mod/data/loaders.py::resolve_data_file`).
+Files are under `capri_data/<base_year>/<category>/` (only `2017/` exists; `capri_mod/data/loaders.py::resolve_data_file`).
 
 ---
 
@@ -53,10 +52,9 @@ Files are under `capri_data/<base_year>/<category>/` (only `2017/` exists); `tra
 
 | File | Content |
 |---|---|
-| `trade_flows_2017.csv` | bilateral trade by exporter and importer (1000 t; 601 rows × 39 commodities); per MANIFEST.json recalibrated from CAPRI capmod `res_0_1717` (2017); not read by the model (an input of tools/check/validate_world_prices.py and tools/build/recalibrate_trade_2017.py); the bilateral market reads `2017/market/bilateral_flows_<year>.csv` |
 | `regional_units.csv` | the model's regions: CAPRI's 221 regional units of the EU27 and Norway (8-character codes), their CAPRI member state and NUTS-0 country (`tools/build/build_regional_units.py`; `capri_mod/data/definitions.py`) |
 | `capri_units_nuts2024.csv` | CAPRI unit → NUTS 2024 region, for reporting: group (connected set of units and regions), Eurostat UAA and the weight of each region in its group (`tools/build/build_nuts2024_reporting.py`; `capri_mod/nuts_reporting.py`) |
-| `nuts_version_correspondence.json` | CAPRI codes → NUTS codes (kept for reporting; the model reads no region map since 27 October 2026: each region is its own CAPRI region) |
+| `nuts_version_correspondence.csv` | CAPRI codes → NUTS codes (kept for reporting; the model reads no region map since 27 October 2026: each region is its own CAPRI region) |
 | `capri_member_state_codes.csv` | NUTS country prefix → CAPRI member state (see the row further down) |
 | `rms.csv`, `rms_to_rm.csv` | CAPRI's market regions (RMS) and their trade blocks (RM); written by `tools/build/build_gl_demand.py`, read by the market builders, not by the model |
 | `eu_market_blocks.csv` | member state → CAPRI's EU trade block (EU_WEST, EU_EAST) |
@@ -112,20 +110,20 @@ cake (CAPRI's codes, as the market's).
 
 | File | Content | Source / builder |
 |---|---|---|
-| `2017/feed/fodder_balance_2017.json` | Regional fodder balances: usable fodder per ha, base fodder value, fodder per head | `tools/build/build_fodder_balance.py` (CAPRI rations, UVAG) |
+| `2017/feed/fodder_balance_2017.csv` | Regional fodder balances: usable fodder per ha, base fodder value, fodder per head | `tools/build/build_fodder_balance.py` (CAPRI rations, UVAG) |
 | `2017/supply/land_market_2017.csv` (and `_2030`; `_regions.csv` per-region source) | Land-type base areas (6 types) and CAPRI land-market matrices, long format region,row,col,value (row `base_kha` = levels); 221 regions. JSON until 23 October 2026 | `tools/build/build_land_market.py` (pmppar `p_pmpQuadLandTypes`) |
-| `2017/environment/nh3_factors_capri.json` | Ammonia shares of excreted N per animal and of mineral N (221 regions) | `tools/build/build_nh3_factors.py` (CAPRI 2030 reference) |
-| `2017/supply/young_animals_2017.json` | CAPRI's young-animal flows per model head (calves, young cattle, replacement cows, piglets, lambs: produced and used per head, base net, base value) | `tools/build/build_young_animals.py` (res_17); CAPRI's young-animal markets (`CAPRIModel._update_young_animal_prices`) |
+| `2017/environment/nh3_factors_capri.csv` | Ammonia shares of excreted N per animal and of mineral N (221 regions) | `tools/build/build_nh3_factors.py` (CAPRI 2030 reference) |
+| `2017/supply/young_animals_2017.csv` | CAPRI's young-animal flows per model head (calves, young cattle, replacement cows, piglets, lambs: produced and used per head, base net, base value) | `tools/build/build_young_animals.py` (res_17); CAPRI's young-animal markets (`CAPRIModel._update_young_animal_prices`) |
 | `2017/supply/livestock_product_value_coef.csv`, `livestock_product_value_by_market_coef.csv` | Value of an animal's final products (no young animals) per model head, total and by market (`ACT.MARKET`, e.g. `DCOW.MILK`, `DCOW.BEEF`): CAPRI quantity x national UVAG x LEVL / model heads. What a meat, milk or egg price change moves (quantity x price change) and the product share in livestock supply elasticities | `tools/build/build_shg_split.py` (`coefficient_tables`, through `build_livestock_output_coef.build_product_values_by_market`); the by-market file also by `tools/build/build_livestock_products.py` (res_17) |
 | `2017/supply/mineral_n_price.csv` | Mineral fertiliser N unit value per country; not used by the default model | CAPRI 2017 national UVAG NITF |
-| `2017/environment/manure_pool_costs.json` | CAPRI's 34 manure pools and 930 trade-cost links | `tools/build/build_manure_pool_costs.py` (CAPRI distance matrix) |
+| `2017/environment/manure_pool_costs.csv` | CAPRI's 34 manure pools and 930 trade-cost links | `tools/build/build_manure_pool_costs.py` (CAPRI distance matrix) |
 | `2017/abatement/ammonia/*.csv` | CAPRI's ammonia-technology inputs: control strategies, reduction factors, relative emissions, grazing fractions, Nitrates-Directive shares, peat shares, holdings by size class | `tools/build/build_ammonia_tech_inputs.py` (CAPRI `dat\miterra`, `dat\scen\ghgtech`, `dat\envind` exports); inputs of the builders below, not read by the model, except `RCEmissions.csv` (read by `capri_mod/feed/ration.py`) |
 | `2017/abatement/ammonia/costs/*.csv` | Cost tables of CAPRI's ammonia technologies (investment, storage time, input demands and prices, application costs, grassland shares, N per m3, Nitrates-Directive storage) | `tools/build/build_ammonia_cost_tables.py` (tables A1-A10 in CAPRI `envind/ammo_tech.gms`) |
 | `2017/abatement/ammonia/p_Heads.csv`, `capri_mann_days_2030.csv` | Heads by farm-size class; manure N and days per cycle per CAPRI region and animal activity (2030 reference) | `tools/build/build_ammonia_herd_inputs.py` |
 | `2017/abatement/ammonia/ammonia_cost_curves.parquet` | CAPRI's ammonia-technology cost curves (alpha, beta, lower bound) per region, activity, manure system and technology | `tools/build/build_ammonia_cost_curves.py` (reproduces `ammo_tech.gms` m_CostAmm); an intermediate read by `tools/build/build_ammonia_tech_model.py`, not by the model |
 | `2017/abatement/ammonia/ammonia_technologies.csv`, `ammonia_technology_effects.parquet` | CAPRI's ammonia-option entries of the technology table (costs, initial and maximum shares, applicability, remaining NH3) and their side effects on other gases, per region and animal activity; shares match CAPRI's endotech runs | `tools/build/build_ammonia_technologies.py`; an intermediate read by `tools/build/build_ammonia_tech_model.py`, not by the model |
 | `2017/abatement/ammonia/ammonia_tech_model.csv` | CAPRI's ammonia options per model region, animal and CAPRI sub-activity: weight, stock factor, manure-N weight, group (NH3MAN/NH3APP), cost, CAPRI-calibrated slope and early-adopter threshold, initial and maximum shares, NH3 cuts at housing/storage/application, grazing share and MITERRA loss fractions | `tools/build/build_ammonia_tech_model.py`; `capri_mod/supply/ammonia_techs.py` |
-| `sources/arm/capri_supply_elas_young_1720.csv` | CAPRI's calibrated supply elasticities of young animals per member state (YCAM, YCAF, YBUL, YHEI, YCOW; 2020 calibration) | `tools/build/build_young_animal_elasticities.py`; weights cattle elasticities in `capri_pmp.build_elasticity_table` |
+| `2017/supply/capri_supply_elas_young_1720.csv` | CAPRI's calibrated supply elasticities of young animals per member state (YCAM, YCAF, YBUL, YHEI, YCOW; 2020 calibration) | `tools/build/build_young_animal_elasticities.py`; weights cattle elasticities in `capri_pmp.build_elasticity_table` |
 | `2017/abatement/fert_options_jul15.csv` | CAPRI's fertiliser-efficiency options from miti_data_jul15 (national; regional VRT_SRUC): costs, PMP terms, relative subsidies, shares, QEmitt and no-control QEmitt | `tools/build/build_fert_options_jul15.py` from `sources/ghgtech/miti_data_jul15_p_ghgMiti.csv` (the gdxdump converted by `tools/build/convert_sources_to_csv.py`); `RegionalSupplyModel._fert_techs` |
 | `2017/environment/capri_crop_n_coefs_2030.csv` | CAPRI 2030 reference per region and crop: level, yield, NITF export coefficient, NCRD (residues + deposition, kg/ha), biological fixation (1000 t) | `tools/build/build_capri_crop_n_coefs.py`; `EnvironmentalModule._capri_crop_n` (gross N balance) |
 | `2017/environment/capri_gnb_components_2030.csv` | CAPRI 2030 gross N balance items per region (kg N/ha): EXPPRD, CRESID, ATMOSD, BIOFIX, MINFER, EXCRET, MTRADE, SURTOT, residue unavailability and losses | `tools/build/build_capri_gnb_components.py`; scaling of per-crop coefficients, residue availability |
@@ -137,6 +135,28 @@ cake (CAPRI's codes, as the market's).
 | `2017/environment/crop_nut_need_mult_fact_2030.csv` | CAPRI's over-fertilisation factor x (p_CropNutNeedMultFact, NITF, 2030) per region, limiting the fertiliser-efficiency technologies (Tot_MitFert_, regional maximum shares) | `tools/build/build_overfert_factors.py` (gdxdump of CAPRI `results\fert\priFertDist_<MS>1730defaulta.gdx`) |
 
 
+
+### Scenarios (`scenarios/<name>/`)
+
+One folder per projection scenario (capri_mod/projection/scenario_io.py; until 31 October 2026 one JSON file each in
+`trajectories/`): the scenario's settings and its reference data in separate files.
+
+| File | Content | Built by |
+|---|---|---|
+| `scenarios/<name>/settings.toml` | name, source, vintage, base_year, target_years, notes, [provenance] | the builders below; `null` by hand |
+| `scenarios/<name>/growth.csv` | block, item, year, factor: cumulative growth factor relative to the base year per block (yields, herds, land) and activity or land type | `tools/build/build_trajectory_capri_ref.py` (`capri_ref_2030`), `tools/build/build_captrd_trajectory.py` (`captrd_2030`), both with `build_trajectory_model_keys.py` |
+| `scenarios/<name>/regional.csv` | block, region, item, year, factor: the per-region factors (CAPRI's four-character region keys and the model's regions) | same |
+
+The `null` scenario has settings only (no factors: the identity of the projection).
+
+### Nested inputs as long tables (converted from JSON on 31 October 2026)
+
+Read and written by capri_mod/data/nested_tables.py, which gives the readers the structure they used before. Companion
+files: `manure_pool_centres.csv`; `nh3_factors_capri_regions.csv`; `fodder_balance_2017_use.csv`;
+`world_market_baseline_products.csv`; `feed_demand_nonEU_elasticities.csv`, `feed_demand_nonEU_capri_regions.csv`;
+`young_animals_2017_coef.csv`, `young_animals_by_sex_2017_coef.csv`. `feed_ration_2017.csv` holds one value per row
+(region, animal, block, feed, nutrient, value: the feed empty in the requirements, the nutrient empty in the ration,
+prices and slopes).
 
 ### CAPRI 2030 prices (`trajectories/`)
 
@@ -170,7 +190,7 @@ cake (CAPRI's codes, as the market's).
 | `2017/market/noneu_feed_base.csv` | The same regions' feed per CAPRI product at CAL (kt) with its calories | `tools/build/build_noneu_feed_nq.py` (M3) |
 | `2017/market/noneu_feed_totals.csv` | CAPRI's feed at CAL of every non-EU behavioural region of a trade region per model commodity (kt): the base of the trade region's feed changes | `tools/build/build_noneu_feed_nq.py` (M3) |
 | `2017/market/noneu_feed_conv.csv` | CAPRI's feed conversion factors pv_feedConv per region and animal product, fitted as arm/feed_conv.gms (m_fitFeedConv) at the 2030 calibration data: conv (kg maize energy equivalent), feed_conv = conv x calories (the value FeedBal_ uses) | `tools/build/build_feed_energy.py` (M3) |
-| `2017/market/feed_bulks_no.csv` | Norway's feed bulks (K56): CAPRI's 2030 FEED (kt) and ARM1P (EUR/t) of NO000000 per bulk product, p_rhoFeed, and its use HCOM + FEDM + INDM + BIOF + LOSM + PRCM (kt) | `tools/build/build_feed_bulks.py` |
+| `2017/market/feed_bulks_noneu.csv` | Norway's feed bulks (K56): CAPRI's 2030 FEED (kt) and ARM1P (EUR/t) of NO000000 per bulk product, p_rhoFeed, and its use HCOM + FEDM + INDM + BIOF + LOSM + PRCM (kt) | `tools/build/build_feed_bulks.py` |
 | `2017/market/supply_elas_eu.csv` | The EU rows' own-price supply elasticity per market commodity: CAPRI's p_elasSupp (elas1717, CAL), median over the model's 27 member states (member_states: how many have it), under the model's code with CAPRI's (capri_code) | `tools/build/build_capri_supply_elas_market.py` |
 | `2017/market/supply_elas_region.csv` | CAPRI's own-price market supply elasticities p_elasSupp per non-EU trade region and commodity, production-weighted (prod_kt) over its CAPRI regions; with market.noneu_supply_nq (default) used for Norway's products without a supply model and the setting's off state | `tools/build/build_supply_elas_nonEU.py` |
 | `2017/market/feed_bulks_eu_share.csv` | Feed share of EU use per model commodity in the bulks (CAPRI 2030 reference) | `tools/build/build_feed_bulks.py` |
@@ -182,9 +202,9 @@ cake (CAPRI's codes, as the market's).
 | `2017/market/bilateral_trq_<year>.csv` | EU tariff-rate quotas per model exporter: quota (kt), out- minus in-quota price gap (EUR/t), imports under the quota regime | `tools/build/build_bilateral_market.py` (build_trq) |
 | `2017/market/armington_rho.csv` | Armington substitution elasticities rho1, rho2 per market commodity | `tools/build/build_bilateral_market.py` (market1.gms, market1_ch.gms) |
 | `2017/market/processing_yields.csv` | Olive oil per tonne of olives (member state), milled rice per tonne of paddy (EU) | `tools/build/build_processing_yields.py` |
-| `2017/market/world_market_baseline.json` | Base balances (production, domestic use, imports, exports) of 32 market commodities per model trade region (kt); the EU's base self-sufficiency | `tools/build/build_world_market_baseline.py` (FAO_agg BAS) |
+| `2017/market/world_market_baseline.csv` | Base balances (production, domestic use, imports, exports) of 32 market commodities per model trade region (kt); the EU's base self-sufficiency | `tools/build/build_world_market_baseline.py` (FAO_agg BAS) |
 | `2017/market/sugar_processing.csv` | CAPRI's sugar processing per member state: beet harvested and processed, white sugar, PRCY, sugar per beet | `tools/build/build_sugar_processing.py` (2030 reference) |
-| `2017/market/dairy_world_baseline.json` | World base balances of butter, SMP, cheese, whey per model trade region (kt) | `tools/build/build_dairy_world_markets.py` (FAO_agg BAS) |
+| `2017/market/dairy_world_baseline.csv` | World base balances of butter, SMP, cheese, whey per model trade region (kt) | `tools/build/build_dairy_world_markets.py` (FAO_agg BAS) |
 | `2017/market/dairy_eu_demand_elas.csv` | EU food demand elasticities among the nine dairy products, own and cross (CAPRI p_ElasDem, HCOM-weighted) | `tools/build/build_dairy_processing.py` |
 | `2017/market/dairy_world_processing.csv` | CAPRI's dairy block for the non-EU market regions: products, raw milk, contents, prices, food and feed use, extra-regional trade; MILKSUP = raw milk supply slope | `tools/build/build_dairy_world_blocks.py` |
 | `2017/market/dairy_world_hessian.csv` | Dairy NQ Hessians of the non-EU market regions | `tools/build/build_dairy_world_blocks.py` |

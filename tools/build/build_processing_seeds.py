@@ -27,9 +27,11 @@ from pathlib import Path
 import pandas as pd
 
 import functools as _ft
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
+from paths import EXPORTS  # noqa: E402  (CAPRI's material outside the repository)
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
-DATA = Path("/mnt/user-data/uploads/data_market_1730defaulta.csv")
+DATA = EXPORTS / "data_market_1730defaulta.csv"
 OUT = ROOT / "capri_data" / "2017" / "market" / "processing_seeds.csv"
 CHAINS = {"RAPE": ("RAPO", "RAPC"), "SUNF": ("SUNO", "SUNC"), "SOYA": ("SOYO", "SOYC")}
 RHO_PROC = 0.01                       # arm/market1.gms l. 185: p_rhoProc(RMS,SED) = 0.01
@@ -45,7 +47,7 @@ def num(s: str) -> float:
 
 def main() -> None:
     sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build")]
-    from recalibrate_trade_2017 import trade_region
+    from _market_regions import model_region  # the market's grouping step (tools/lib/_market_regions.py)
     goods = set(CHAINS) | {x for oc in CHAINS.values() for x in oc}
     pat = re.compile(r"^'([^']*)'\.'(PROC|PROD|PRCY|PPRI|ARM1P)'\.'([A-Z]+)'\.'CAL'\s+(\S+)")
     v = {}
@@ -60,7 +62,7 @@ def main() -> None:
     # CAPRI's behavioural regions (set RMS; aggregates such as EU, MER or the trade blocks also carry data rows)
     rms_set = set(_read_csv(ROOT / "capri_data" / "shared" / "rms.csv")["rms"])
     rms_all = sorted({r for (r, it, g) in v if it == "PROC" and r in rms_set})
-    mreg = lambda r: "EU27" if (r[:2] in EU and r.endswith("000000")) else trade_region(r)
+    mreg = model_region
     rows = []
     for r in rms_all:
         for s, (o, c) in CHAINS.items():

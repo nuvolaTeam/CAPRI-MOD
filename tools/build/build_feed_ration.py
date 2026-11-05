@@ -12,16 +12,23 @@ Same construction as livestock_revenue_coef / manure / feed per head, so units
 and vintage match the herds. Input: the res_17*.txt dumps (dataOut, CAPRI 2017).
 
     python tools/build/build_feed_ration.py [--dump-dir DIR]
+
+Writes capri_data/2017/feed/feed_ration_2017.csv (region, animal, block, feed, nutrient, value; capri_mod/data/
+nested_tables.py; a JSON file until 31 October 2026).
 """
 from __future__ import annotations
 
 import argparse
 import collections
 import glob
-import json
 import re
 import sys
 from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
+from paths import SOURCES  # noqa: E402  (CAPRI's material outside the repository)
+import sys as _sys_nc  # noqa: E402
+_sys_nc.path.insert(0, str(__import__("pathlib").Path(__file__).resolve().parents[2] / "tools" / "lib"))
+from _model_regions import national_code as _national_code  # noqa: E402  (TUR for Turkey's units, 4 November 2026)
 
 _ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(_ROOT))
@@ -89,8 +96,8 @@ def _attach_slopes(out, reg8, anim, var, slope_src, key):
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--dump-dir", type=Path, default=Path("/home/claude/work/capreg"))
-    ap.add_argument("--pmp-dir", type=Path, default=Path("/home/claude/work/feedexp/feed_export"),
+    ap.add_argument("--dump-dir", type=Path, default=SOURCES / "capreg")
+    ap.add_argument("--pmp-dir", type=Path, default=SOURCES / "feed_export",
                     help="gdxdump CSVs of p_pmpFeedInpCoeff (pmppar_17XX_feedpmp.csv)")
     args = ap.parse_args()
 
@@ -123,7 +130,7 @@ def main() -> None:
                 cont[r][(a, it)] = v
 
     def content(r8, nut, feed):
-        for rr in (r8, r8[:2] + "000000"):
+        for rr in (r8, _national_code(r8)):
             if (nut, feed) in cont.get(rr, {}):
                 return cont[rr][(nut, feed)]
         return None
@@ -238,16 +245,15 @@ def main() -> None:
             n_sl = _attach_slopes(out, reg8, anim, var, _src, _key)
             print(f"CAPRI feed-PMP slopes ({_key}) attached to {n_sl} region x animal entries")
 
-    dest = _ROOT / "capri_data" / "2017" / "feed" / "feed_ration_2017.json"
-    dest.write_text(json.dumps({
-        "_source": "CAPRI 2017 regional results (res_17*, dataOut): rations, requirements per day x DAYS, "
-                   "nutrient contents and unit values; per head = CAPRI total / this model's herd. capri_slope: CAPRI's "
-                   "feed-PMP slopes (pmppar_17* p_pmpFeedInpCoeff SLOP, sign-converted to a cost slope), aggregated to "
-                   "the model animal; capri_slope_2030: the same from CAPRI's 2030 baseline calibration (pmppar_21730), over CAPRI's inflation "
-                   "to 2030 (the model's 2017 money)",
-        "_units": "ration kg/head/yr; req per head per yr (ENNE energy units, CRPR kg, DMIN/DMAX kg dry matter); "
-                  "content per kg fresh feed; price EUR/kg",
-        "regions": out}, indent=1))
+    # source: CAPRI 2017 regional results (res_17*, dataOut): rations, requirements per day x DAYS, nutrient contents and
+    # unit values; per head = CAPRI total / this model's herd. capri_slope: CAPRI's feed-PMP slopes (pmppar_17*
+    # p_pmpFeedInpCoeff SLOP, sign-converted to a cost slope), aggregated to the model animal; capri_slope_2030: the same
+    # from CAPRI's 2030 baseline calibration (pmppar_21730), over CAPRI's inflation to 2030 (the model's 2017 money).
+    # Units (capri_data/schema/25_feed.sql): ration kg/head/yr; req per head per yr (ENNE energy units, CRPR kg, DMIN/DMAX
+    # kg dry matter); content per kg fresh feed; price EUR/kg
+    from capri_mod.data.nested_tables import write_feed_rations
+    dest = _ROOT / "capri_data" / "2017" / "feed" / "feed_ration_2017.csv"
+    write_feed_rations(dest, out)
     n = sum(len(v) for v in out.values())
     print(f"wrote {dest}: {len(out)} regions, {n} region x animal entries; skipped (missing contents): {len(gaps)}")
 

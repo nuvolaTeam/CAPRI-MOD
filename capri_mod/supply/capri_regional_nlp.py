@@ -42,6 +42,8 @@ from collections import OrderedDict
 
 import numpy as np
 
+from capri_mod.settings import current as _settings   # the numerical settings (refactor stage 3, N5)
+
 
 #: IPOPT solvers by the structure of the problem (SOLVER CACHE). Every data value of the model enters its CasADi graph
 #: as a parameter, so two builds with the same structure (columns, rows, feeds, groups, options) give the same graph
@@ -58,8 +60,7 @@ _SENS: "OrderedDict[str, tuple]" = OrderedDict()
 CACHE_STATS = {"hit": 0, "miss": 0}
 
 
-#: ridge weight of the calibration's multiplier fit (CapriRegionalNLP.calibrate), relative to the scaled columns
-CAL_RIDGE = 1e-10
+# the ridge weight of the calibration's multiplier fit (CapriRegionalNLP.calibrate): the setting supply.nlp_cal_ridge
 
 #: the market supply Hessian from the KKT conditions (market.hessian_method = "kkt"; beyond CAPRI, which re-solves its
 #: supply models at 1% price shocks): None, "record" (the base solve: each successful solve's primal-dual point is kept
@@ -136,23 +137,38 @@ def linear_solver_options() -> dict:
     HSL solver needs its library, and a missing one stops here rather than IPOPT failing in every region (IPOPT returns
     Invalid_Option, which the regional fallbacks would treat as a failed solve)."""
     from capri_mod.settings import current as _settings
+    lib_ = str(_settings().get("supply.nlp_ipopt_library") or "").strip()
+    if lib_:
+        # another IPOPT library (an IPOPT with SPRAL in OpenMP), loaded before the first IPOPT solve of the process
+        # and its OpenMP set up (capri_mod/utils/ipopt_library.py)
+        from capri_mod.utils import ipopt_library as _il
+        _il.ensure_loaded(lib_)
     ls = str(_settings().get("supply.nlp_linear_solver")).strip().lower()
     if ls == "mumps":
+        if lib_:
+            raise ValueError(f"supply.nlp_ipopt_library = {lib_!r} is an IPOPT without MUMPS "
+                             "(tools/solvers/build_ipopt_spral_omp.py): supply.nlp_linear_solver = \"spral\"")
         return {}
     if ls == "spral":
         # SPRAL (BSD licence) is part of CasADi's IPOPT. CasADi 3.8.1 builds it without OpenMP: libipopt carries
-        # SPRAL's omp_* stubs and no OpenMP runtime, so it runs on one thread (checked 30 October 2026). With an IPOPT
-        # built with OpenMP, IPOPT's documentation asks for OMP_CANCELLATION=TRUE and OMP_PROC_BIND=TRUE, and the
-        # model's CAPRI_WORKERS processes each take one thread (OMP_NUM_THREADS=1): set here unless the environment
-        # says otherwise (the OpenMP runtime reads them when it starts)
-        for k_, v_ in (("OMP_CANCELLATION", "TRUE"), ("OMP_PROC_BIND", "TRUE"), ("OMP_NUM_THREADS", "1")):
-            os.environ.setdefault(k_, v_)
+        # SPRAL's omp_* stubs and no OpenMP runtime, so it runs on one thread (checked 30 October 2026); SPRAL in
+        # OpenMP comes with supply.nlp_ipopt_library or with a CasADi built with it (its environment and threads:
+        # ipopt_library.py). Until 31 October 2026 this set OMP_CANCELLATION, OMP_PROC_BIND and OMP_NUM_THREADS here,
+        # which PyPI's CasADi does not read (no OpenMP runtime)
+        if not lib_:
+            from capri_mod.utils import ipopt_library as _il
+            _il.prepare_builtin()
         return {"ipopt.linear_solver": "spral"}
     if ls not in ("ma27", "ma57", "ma77", "ma86", "ma97"):
         raise ValueError(f"supply.nlp_linear_solver = {ls!r}: mumps, spral, ma27, ma57, ma77, ma86 or ma97")
     lib = str(_settings().get("supply.nlp_hsllib")).strip()
     if not lib or not os.path.isfile(lib):
         raise FileNotFoundError(f"supply.nlp_linear_solver = {ls!r} needs the HSL library: supply.nlp_hsllib = {lib!r}")
+    # CoinHSL is compiled with OpenMP (MA86, MA97, and the BLAS it may carry): its OpenMP runtime starts when IPOPT
+    # first loads the library and reads OMP_NUM_THREADS then. The regional solves fork worker processes, and GNU
+    # OpenMP hangs a forked child of a process that has run on several threads (capri_mod/utils/ipopt_library.py), so
+    # one thread unless the user set the variable (2 November 2026, with MA27 the project lead's solver for his runs)
+    os.environ.setdefault("OMP_NUM_THREADS", "1")
     return {"ipopt.linear_solver": ls, "ipopt.hsllib": lib}
 
 
@@ -672,7 +688,7 @@ class CapriRegionalNLP:
                 if (gi, s_) in regs:
                     Y, b1, b2 = regs[(gi, s_)]
                     term = pv(a1 + b1 - 1.0) / u[i] - pv(bm) - pv(m / T) * dual - pv(m * (b2 - 1.0)) / (Y - x[i])
-                    g_rows.append((x[i] - 0.999 * Y) * pv(1.0 / m)); lbg.append(-np.inf); ubg.append(0.0)
+                    g_rows.append((x[i] - float(_settings().get("fertiliser.support_margin")) * Y) * pv(1.0 / m)); lbg.append(-np.inf); ubg.append(0.0)
                 else:
                     term = pv(a1) / u[i] - pv(bm) - pv(m / T) * dual
                 g_rows.append(term); lbg.append(0.0); ubg.append(0.0)
@@ -1038,9 +1054,10 @@ class CapriRegionalNLP:
             # unchanged where the multipliers are determined (CAPRI takes the duals of its calibration solve, unique
             # at the solver's basis)
             nk = Mk.shape[1]
-            Ma = np.vstack([Mk / csc, np.sqrt(CAL_RIDGE) * np.eye(nk)])
+            Ma = np.vstack([Mk / csc, np.sqrt(float(_settings().get("supply.nlp_cal_ridge"))) * np.eye(nk)])
             ra = np.concatenate([rhs, np.zeros(nk)])
-            sol = lsq_linear(Ma, ra, bounds=(lo[keep] * csc, hi[keep] * csc), lsmr_tol="auto", max_iter=5000)
+            sol = lsq_linear(Ma, ra, bounds=(lo[keep] * csc, hi[keep] * csc), lsmr_tol="auto",
+                             max_iter=int(_settings().get("supply.nlp_cal_lsq_max_iter")))
             mult[keep] = sol.x / csc
         else:
             sol = type("S", (), {"status": 0})()
@@ -1125,7 +1142,8 @@ class CapriRegionalNLP:
             Xs = ca.vertcat(ca.DM(x[:o]), xf, ca.DM(x[o1:]))
             gf = ca.Function("gf", [self.X, self.p], [self.g[r0:r1]])(Xs, ca.DM(self.pval))
             S = ca.nlpsol("C", "ipopt", {"x": xf, "f": 0, "g": gf},
-                          {"ipopt.print_level": 0, "print_time": 0, "ipopt.tol": 1e-10, "ipopt.max_iter": 3000,
+                          {"ipopt.print_level": 0, "print_time": 0, "ipopt.tol": 1e-10,
+                           "ipopt.max_iter": int(_settings().get("supply.nlp_max_iter")),
                            **linear_solver_options()})
             r = S(x0=x[o:o1], lbx=self.lbx[o:o1], ubx=self.ubx[o:o1], lbg=self.lbg[r0:r1], ubg=self.ubg[r0:r1])
             if not S.stats()["success"]:
@@ -1158,12 +1176,15 @@ class CapriRegionalNLP:
             x = self.inside_regulations(np.clip(x, self.lbx, self.ubx))
         return np.clip(x, self.lbx, self.ubx)
 
-    def inside_regulations(self, x, margin=0.95, only_outside=False):
+    def inside_regulations(self, x, margin=None, only_outside=False):
         """x with every regulated flow (CAPRI's beta-density regulations) moved inside its support: at most margin x
         its maximum at x's own column levels. A start outside the support (the prior mode above a Green Deal cap)
         leaves IPOPT on the wrong side of the density's pole. With only_outside, a flow is moved (to margin x its
         maximum) only where it lies outside the support; the warm start from the last solution (K79): a solution's
-        flows near their maximum stay where they are, so the point fits the last solution's multipliers."""
+        flows near their maximum stay where they are, so the point fits the last solution's multipliers. margin: the
+        setting supply.nlp_start_regulation_margin unless given."""
+        if margin is None:
+            margin = float(_settings().get("supply.nlp_start_regulation_margin"))
         x = np.asarray(x, float).copy()
         y = x[:self.n0] * self.sc
         for nut, fb in (self.fert or {}).items():
@@ -1298,7 +1319,7 @@ class CapriRegionalNLP:
             jac = ca.Function("jac_g", [self.X, self.p], [ca.jacobian(self.g, self.X)])
             fn = (d["hess_lag"], jac)
             _SENS[key] = fn
-            while len(_SENS) > 16:
+            while len(_SENS) > int(_settings().get("run.nlp_derivative_cache_size")):
                 _SENS.popitem(last=False)
         hess, jac = fn
         x = np.asarray(res["x"], float).ravel()
@@ -1376,7 +1397,7 @@ class CapriRegionalNLP:
                   ca.Function("dgradL", [self.X, self.p, lg, dp], [ca.jtimes(gradL, self.p, dp)]),
                   ca.Function("dg", [self.X, self.p, dp], [ca.jtimes(self.g, self.p, dp)]))
             _KKT[key] = fn
-            while len(_KKT) > 16:
+            while len(_KKT) > int(_settings().get("run.nlp_derivative_cache_size")):
                 _KKT.popitem(last=False)
         hess, jac, dgradL, dgf = fn
         x0, lx0, lg0, p0 = base["x"], base["lam_x"], base["lam_g"], base["pval"]

@@ -35,6 +35,8 @@ Outputs (capri_data/2017/environment/):
                             KNOWN_ISSUES K108), mine_kt, excr_kt, pool_kt, own_kt, need_kt, land_kha
   fert_dist_priors_npk_2030.csv  as fert_dist_priors_2030.csv with a nutrient column (N, P, K): CAPRI's posterior
                             mode per ha of each crop group and source, accuracy 1 (tools/build/build_fert_dist_priors.py)
+  manure_npk_applied_share_2030.csv  capri_region, nutrient (N, P, K), excret_kt, mtrade_kt, applied_share: CAPRI's
+                            manure applied in the region per unit excreted, 1 - MTRADE / EXCRET (applied_share())
   livestock_manure_p_coef.csv, livestock_manure_k_coef.csv   manure P2O5 and K2O per model head (kg), CAPRI's 2017
                             regional total (MANP, MANK) / the model's herd, as livestock_manure_n_coef.csv
                             (tools/build/build_livestock_output_coef.py), from the CAPREG dumps (--capreg-dir)
@@ -45,7 +47,6 @@ from __future__ import annotations
 
 import argparse
 import re
-import subprocess
 import sys
 from pathlib import Path
 
@@ -53,6 +54,9 @@ import numpy as np
 import pandas as pd
 
 import functools as _ft
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
+from _grep import grep  # noqa: E402  (grep -E in Python: any system)
+from paths import EXPORTS, SOURCES  # noqa: E402  (CAPRI's material outside the repository)
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 ENV = ROOT / "capri_data" / "2017" / "environment"
@@ -110,8 +114,7 @@ def extract(dump: Path) -> pd.DataFrame:
            rf"|^'[A-Z0-9]+'\.''\.'({'|'.join(ELEM)})'\.'(LEVL|{nu}|NCRD|PCRD|KCRD|STRA)'\.'2030'"
            rf"|^'[A-Z0-9]+'\.''\.'({'|'.join(BAL)})'\.'({nu})'\.'2030'"
            rf"|^'[A-Z0-9]+'\.''\.'UAAR'\.'LEVL'\.'2030'")
-    p1 = subprocess.Popen(["unzip", "-p", str(dump)], stdout=subprocess.PIPE)
-    out = subprocess.run(["grep", "-E", pat], stdin=p1.stdout, capture_output=True, text=True).stdout
+    out = grep(pat, str(dump))
     rx = re.compile(r"^'([A-Z0-9]+)'\.'([^']*)'\.'([A-Za-z]+)'\.'([A-Z]+)'\.'2030'\s+([-\d.Ee+]+)")
     rows = []
     for line in out.splitlines():
@@ -122,13 +125,30 @@ def extract(dump: Path) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
+def applied_share(src: pd.DataFrame) -> pd.DataFrame:
+    """CAPRI's 2030 manure N, P2O5 and K2O applied in the region per unit excreted, 1 - MTRADE / EXCRET (ManureNPK_,
+    manExportOrAppl_: the region's net manure exports, MTRADE, leave its balance), for every region with EXCRET > 0:
+    capri_region, nutrient (N, P, K), excret_kt, mtrade_kt (0 where CAPRI reports none), applied_share (at least 0).
+    The model's fertilisation block (capri_mod/supply/fertilisation.py) and P balance (capri_mod/environmental/
+    phosphorus.py) read it; until 3 November 2026 each computed it from the extract under capri_data/sources."""
+    s = src[(src.item == "") & (src.row.isin(["EXCRET", "MTRADE"]))]
+    v = {(t.region, t.row, t.col): float(t.value) for t in s.itertuples(index=False)}
+    rows = []
+    for (r, row, col), x in v.items():
+        if row == "EXCRET" and x > 0:
+            m = v.get((r, "MTRADE", col), 0.0)
+            rows.append({"capri_region": r, "nutrient": {"PHOF": "P", "POTF": "K", "NITF": "N"}[col],
+                         "excret_kt": x, "mtrade_kt": m, "applied_share": max(0.0, 1.0 - m / x)})
+    return pd.DataFrame(rows).sort_values(["capri_region", "nutrient"])
+
+
 def main():
     sys.path.insert(0, str(ROOT / "tools" / "lib"))
     import _money
     money = _money.deflator(2030)
     ap = argparse.ArgumentParser()
-    ap.add_argument("--dump", type=Path, default=Path("/mnt/user-data/uploads/res_2_1730greendeal_refdefaulta.zip"))
-    ap.add_argument("--capreg-dir", type=Path, default=Path("/home/claude/work/capreg"))
+    ap.add_argument("--dump", type=Path, default=EXPORTS / "res_2_1730greendeal_refdefaulta.zip")
+    ap.add_argument("--capreg-dir", type=Path, default=SOURCES / "capreg")
     ap.add_argument("--out-dir", type=Path, default=ENV, help="where to write the outputs (default: the data folder)")
     a = ap.parse_args()
     out = a.out_dir
@@ -139,6 +159,7 @@ def main():
         src.to_csv(SRC, index=False)
         print(f"extracted {len(src)} rows -> {SRC.relative_to(ROOT)}")
     src = _read_csv(SRC, keep_default_na=False)
+    applied_share(src).to_csv(out / "manure_npk_applied_share_2030.csv", index=False)
     v = {(r.region, r.item, r.row, r.col): r.value for r in src.itertuples(index=False)}
     regions = sorted({r for r in src.region if len(r) == 8})
     nuts0 = {r for r in regions if r.endswith("000000") and

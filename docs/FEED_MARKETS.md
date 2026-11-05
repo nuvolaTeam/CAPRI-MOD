@@ -48,8 +48,8 @@ The supply models buy feed as bulks; the market splits each member state's bulk 
   (`feed_bulks_eu_share.csv`, including processing in the use, so the oilseeds fed whole get their feed share of total
   use, crushing included); it is applied as a correction of the row, so crushing demand already in the row is kept.
   The dairy products' feed use comes from the FMIL bulks ([DAIRY_PROCESSING.md](DAIRY_PROCESSING.md)).
-- Norway (its own market region NOR since 21 October 2026, KNOWN_ISSUES K56; CAPRI's RMSSUP, so `feedBlkPrice_` and
-  `feedShareEqu_` hold for it, `FeedBal_` does not): its bulks (`feed_bulks_no.csv`: CAPRI's 2030 FEED and ARM1P of
+- Norway (its own market region NO000000 since 21 October 2026, KNOWN_ISSUES K56; CAPRI's RMSSUP, so `feedBlkPrice_` and
+  `feedShareEqu_` hold for it, `FeedBal_` does not): its bulks (`feed_bulks_noneu.csv`: CAPRI's 2030 FEED and ARM1P of
   NO000000, and its use HCOM + FEDM + INDM + BIOF + LOSM + PRCM per product) give its supply models' bulk price
   indices at Norway's prices and its feed use per product at Norway's Arm1 price ratios (`MarketModule.sup_feed_use`),
   following its herds (`_feed_bulk_index` of NO000000, its own FMIL index `_fmil_index_sup`), on CAPRI's feed share of
@@ -61,7 +61,7 @@ The supply models buy feed as bulks; the market splits each member state's bulk 
   elasticity, CAPRI's p_elasSupp of its CAPRI regions (`supply_elas_region.csv`; until 23 October 2026 one value per
   product from `armington_params.csv`, removed on 29 October 2026, KNOWN_ISSUES K72). Non-EU feed demand (the trade
   regions without CAPRI's FeedNQ_ regions, `market.noneu_feed_nq` off, and the dairy products fed): CAPRI's
-  p_ElasFeed (`feed_demand_nonEU.json`; the generic response of `armington_params.csv`'s eta column was removed on 24
+  p_ElasFeed (`feed_demand_nonEU.csv`; the generic response of `armington_params.csv`'s eta column was removed on 24
   October 2026).
 - EU output, `MaprFeed_` (`MarketModule.eu_feed_byproduct_output`, `feed_byproducts.csv`): prod0 × Σ weight × the
   parent's current food response (human consumption and processing) or sugar's biofuel feedstock use relative to the

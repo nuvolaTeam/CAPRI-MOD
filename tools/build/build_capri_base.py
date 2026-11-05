@@ -93,7 +93,9 @@ HERD_MAP = {"DCOW": "DCOW", "SCOW": "SCOW", "BULL": "BULL", "HEIF": "HEIF",
 #: cost columns verified equal to CAPRI TOIN on DE11, FR10 and ES61
 COST_ANIMALS = ("DCOW", "BULL", "PIGF", "OANI")
 COST_EXCLUDE = ("SETA", "WINE")
-PERMANENT_CROPS = ("APPL", "OFRU", "CITR", "TAGR", "WINE", "OLIV", "TABO")
+# the crops on permanent-crop land: the model's classes (capri_data/codes/model_activity_classes.csv, N6), one list
+# with the supply model (DEP-43 fixed, 2 November 2026: nurseries on FRUN as CAPRI)
+PERMANENT_CROPS = _MC.permanent_crops()
 
 _ROW = re.compile(r"'([A-Z]{2}[A-Z0-9]{6})'\.'([A-Z]+)'\.'([A-Z]+)'\.'Y'\s+([^,\s]+)")
 
@@ -213,7 +215,9 @@ def main(dump_dir: Path):
 
     for df, p in ((areas, AREAS), (land, LAND), (herds, HERDS), (nutrients, NUTRIENTS)):
         df.to_csv(p)
-    eu = [r for r in areas.index if not r.startswith("NO")]
+    sys.path.insert(0, str(_ROOT / "tools" / "lib"))
+    from _model_regions import EU_MS, national_code
+    eu = [r for r in areas.index if national_code(r) in EU_MS]
     print(f"rebuilt {len(spec)} regions | EU crop area {areas.loc[eu].sum().sum():,.0f} kha "
           f"| EU dairy cows {herds.loc[eu, 'DCOW'].sum():,.0f} thousand")
 

@@ -20,8 +20,8 @@ def test_casadi_trade_residual_and_jacobian_match(market):
     checked = 0
     for c, sc in list(market.par.bilat.items())[:12]:
         act = np.where(sc.S0 > 1e-6)[0]
-        if len(act) == 0:
-            continue
+        if len(act) == 0 or sc.border:
+            continue                                  # G1's system has no entry prices nor flexible levies
         n = len(sc.regions)
         rk = np.exp(rng.normal(0, 0.05, n))
         _, _, PAk, _ = sc.prices(rk, sc.import_prices(rk))
@@ -48,42 +48,44 @@ def test_casadi_trade_residual_and_jacobian_match(market):
 
 
 def test_casadi_trade_with_trq_matches(market):
-    """Step G2a: the trade system with the EU's tariff-rate quotas inside it (trade_trq_function) equals the numeric
-    one (import_prices with the offsets, flows, CAPRI's sigmoid as BilateralCommodity._sig), Jacobian included."""
-    from capri_mod.market.trade_ad import trade_trq_function, import_price_matrices, trq_exporters, trq_constants
+    """Step G2a: the trade system with CAPRI's bilateral tariff-rate quotas inside it (trade_trq_function) equals the
+    numeric one (import_prices with the quotas' offsets at their sigma, flows, CAPRI's sigmoid as
+    BilateralCommodity._sig), Jacobian included."""
+    from capri_mod.market.trade_ad import trade_trq_function, import_price_matrices, trq_quotas
     rng = np.random.default_rng(2)
     checked = 0
     for c, sc in market.par.bilat.items():
-        quota = trq_exporters(sc)
+        qk = trq_quotas(sc)
         act = np.where(sc.S0 > 1e-6)[0]
-        if len(quota) == 0 or len(act) == 0:
-            continue
+        if (len(qk) == 0 or len(act) == 0 or sc.trq_globals or sc.border
+                or any(q["regime"] != "bilateral" for q in sc.trq_quotas)):
+            continue                                  # G2a: CAPRI's bilateral quotas only (trade_trq_function)
         n = len(sc.regions)
-        rows = sc._rows()
-        off0 = sc.trq_offset.copy()
+        sig_now, off_now = sc.trq_sigma.copy(), sc.trq_offset.copy()
         rk = np.exp(rng.normal(0, 0.05, n))
         _, _, PAk, _ = sc.prices(rk, sc.import_prices(rk))
         Sk = sc.S0 * np.exp(rng.normal(0, 0.05, n)); Dk = sc.D0 * np.exp(rng.normal(0, 0.05, n))
         es = rng.uniform(0.0, 0.8, n); ed = rng.uniform(-0.8, 0.0, n)
         scale = np.maximum(sc.S0[act] + sc.D0[act], 1.0)
-        gap, k, s0 = trq_constants(sc, quota)
 
         def G(x):
-            z, o = x[:len(act)], x[len(act):]
+            z, s_ = x[:len(act)], x[len(act):]
             r = rk.copy(); r[act] = np.exp(z)
-            sc.trq_offset = off0.copy(); sc.trq_offset[quota] = o
             try:
+                sc.trq_sigma = sig_now.copy(); sc.trq_sigma[qk] = s_
+                sc.trq_set_offsets(r)
                 p = sc.import_prices(r); pre = sc.prices(r, p)
                 S = Sk * (r / rk) ** es; D = Dk * (pre[2] / PAk) ** ed
                 X, _ = sc.flows(D, r, p, pre=pre)
                 mk = (S - X.sum(axis=0))[act] / scale
-                tq = (o - gap * (sc._sig(k * X[rows][:, quota].sum(axis=0)) - s0)) / gap
+                tq = [s_[m] - sc._sig(sc.trq_fill(X, sc.trq_quotas[k]) / sc.trq_quotas[k]["Q"]) for m, k in enumerate(qk)]
             finally:
-                sc.trq_offset = off0
-            return np.concatenate([mk, tq])
+                sc.trq_sigma, sc.trq_offset = sig_now, off_now
+            return np.concatenate([mk, np.asarray(tq, float)])
         A, B0 = import_price_matrices(sc, offsets=False)
         fn = trade_trq_function(sc, act)
-        x = np.concatenate([np.log(rk[act]) + rng.normal(0, 0.03, len(act)), off0[quota] + rng.normal(0, 1.0, len(quota))])
+        x = np.concatenate([np.log(rk[act]) + rng.normal(0, 0.03, len(act)),
+                            np.clip(sig_now[qk] + rng.normal(0, 0.05, len(qk)), 0.0, 1.0)])
         g, J = fn(x[:len(act)], x[len(act):], A, B0, Sk, Dk, rk, PAk, es, ed, scale)
         g, J = np.asarray(g).ravel(), np.asarray(J)
         assert np.allclose(g, G(x), rtol=1e-9, atol=1e-11), c

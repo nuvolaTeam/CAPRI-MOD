@@ -10,7 +10,7 @@ Use:
     from capri_mod import settings
     s = settings.load(["my_run.toml"], overrides={"supply.pmp_source": "recipe"})
     settings.activate(s)                     # the process-wide settings every module reads
-    with settings.override({"market.eu_blocks": True}):
+    with settings.override({"supply.pmp_source": "recipe"}):
         model.run(...)                       # temporarily changed, restored on exit
     settings.current().get("outer_loop.outer_tolerance")
     s.save("run.settings.toml")              # the effective settings of a run

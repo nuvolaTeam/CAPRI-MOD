@@ -27,7 +27,7 @@ Written (capri_data/trajectories/):
   capri_livestock_premium_ratio_2030.csv  model region x model animal: 2030/2017 premium ratio (real,
                                        2017 CAPRI activity levels as weights)
 
-    python tools/build/build_price_trajectory_2030.py [--dump-dir /home/claude/work/capreg]
+    python tools/build/build_price_trajectory_2030.py [--dump-dir capri_sources/capreg]
 """
 from __future__ import annotations
 import argparse, glob, importlib.util, json, re, statistics
@@ -37,11 +37,17 @@ from pathlib import Path
 import pandas as pd
 
 import functools as _ft
+import sys  # noqa: E402
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
+from paths import SOURCES  # noqa: E402  (CAPRI's material outside the repository)
+import sys as _sys_nc  # noqa: E402
+_sys_nc.path.insert(0, str(__import__("pathlib").Path(__file__).resolve().parents[2] / "tools" / "lib"))
+from _model_regions import national_code as _national_code  # noqa: E402  (TUR for Turkey's units, 4 November 2026)
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 CAKES = ("SOYC", "RAPC", "SUNC")
 INPUTS = ("EFUL", "ELEC", "EGAS", "ELUB", "NITF", "PHOF", "POTF", "SEED", "PLAP", "REPM", "REPB", "INPO", "IPHA")
-ROW = re.compile(r"^'([A-Z]{2}[0-9A-Z]{6})'\.'([A-Za-z0-9_]+)'\.'([A-Za-z0-9_]+)'\.'Y'\s+(-?\d[\d.]*(?:[Ee][+\-]?\d+)?)")
+ROW = re.compile(r"^'([A-Z]{2}[0-9A-Z]{6}|TUR)'\.'([A-Za-z0-9_]+)'\.'([A-Za-z0-9_]+)'\.'Y'\s+(-?\d[\d.]*(?:[Ee][+\-]?\d+)?)")
 
 
 def _load(path):
@@ -52,7 +58,7 @@ def _load(path):
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--dump-dir", type=Path, default=Path("/home/claude/work/capreg"))
+    ap.add_argument("--dump-dir", type=Path, default=SOURCES / "capreg")
     args = ap.parse_args()
     val = ROOT / "capri_data" / "validation" / "greendeal_2030"
     out = ROOT / "capri_data" / "trajectories"
@@ -68,7 +74,7 @@ def main() -> None:
             if not m:
                 continue
             reg, a, it, v = m.group(1), m.group(2), m.group(3), float(m.group(4))
-            if a == "UVAG" and reg.endswith("000000") and it in products:
+            if a == "UVAG" and (reg.endswith("000000") or reg == "TUR") and it in products:   # TUR: Turkey's row
                 uv17[(reg, it)] = v
             elif it == "PRME":
                 prme17[reg][a] = v
@@ -77,7 +83,8 @@ def main() -> None:
 
     # --- price ratios per member state
     rows, defl = [], {}
-    nat = uv30[uv30["region"].str.endswith("000000")]
+    # the national rows: '<MS>000000' and Turkey's 'TUR' (left out until 4 November 2026); keyed by the two letters (TU)
+    nat = uv30[uv30["region"].str.endswith("000000") | (uv30["region"] == "TUR")]
     for reg, g in nat.groupby("region"):
         r_in = [float(x.uvag) / uv17[(reg, x.product)] for x in g.itertuples()
                 if x.product in INPUTS and uv17.get((reg, x.product), 0) > 0 and x.uvag > 0]
@@ -127,9 +134,9 @@ def main() -> None:
     capn = pd.DataFrame(index=cap.index, columns=cap.columns, dtype=float)
     for reg in cap.index:
         src = source(reg)
-        if src is None or (src[:2] + "000000") not in defl and mr.national_code(reg) not in defl:
+        if src is None or (_national_code(src)) not in defl and mr.national_code(reg) not in defl:
             continue
-        df_ = defl.get(mr.national_code(reg), defl.get(src[:2] + "000000"))
+        df_ = defl.get(mr.national_code(reg), defl.get(_national_code(src)))
         for col in cap.columns:
             a = COLMAP.get(col, col)
             v = p30.at[src, a] if a in p30.columns else float("nan")

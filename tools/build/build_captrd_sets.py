@@ -2,7 +2,7 @@
 
 CAPTRD defines its own sets in gams/captrd/sets_captrd.gms (CAPRI star 3.0) on top of CAPRI's global sets
 (gams/sets.gms). The global ones are taken from CAPRI's own instantiation, exported from a CAPMOD file
-(capri_reference/sets/<tag>, tools/build/build_capri_sets_reference.py); the CAPTRD ones are transcribed below with their
+(capri_sources/reference/sets/<tag>, tools/build/build_capri_sets_reference.py); the CAPTRD ones are transcribed below with their
 line numbers.
 
 Caveat: the global sets come from a CAPMOD run (sim_ini_21730.gdx). sets.gms is shared by CAPTRD and CAPMOD, but
@@ -11,7 +11,7 @@ results (capri_mod/pipeline/tests/test_captrd_sets.py) is the check.
 
 Output: capri_data/pipeline/captrd/sets/<name>.csv (one column per dimension: d0, d1).
 
-    python tools/build/build_captrd_sets.py [--ref capri_reference/sets/simini_21730]
+    python tools/build/build_captrd_sets.py [--ref capri_sources/reference/sets/simini_21730]
 """
 from __future__ import annotations
 
@@ -20,6 +20,14 @@ import csv
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
+
+
+def _REFERENCE():
+    """capri_sources/reference or $CAPRI_REFERENCE (tools/lib/paths.py)."""
+    import sys as _s
+    _s.path.insert(0, str(ROOT / "tools" / "lib"))
+    from paths import REFERENCE
+    return REFERENCE
 OUT = ROOT / "capri_data" / "pipeline" / "captrd" / "sets"
 
 # --- sets_captrd.gms, transcribed -----------------------------------------------------------------------------------
@@ -114,7 +122,7 @@ def _write(name: str, rows, dim: int = 1):
 
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--ref", default=str(ROOT / "capri_reference" / "sets" / "simini_21730"))
+    ap.add_argument("--ref", default=str(_REFERENCE() / "sets" / "simini_21730"))
     args = ap.parse_args()
     ref = Path(args.ref)
 

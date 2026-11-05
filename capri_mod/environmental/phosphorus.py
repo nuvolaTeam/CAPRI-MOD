@@ -5,28 +5,29 @@ docs/design/ARCHITECTURE_REFACTOR.md); the module-level names they use are envir
 module once environmental_module is loaded (capri_mod.utils.mixins.inject_names); the annotations are not evaluated.
 """
 from __future__ import annotations
+from capri_mod import statekit as _est   # the state objects' helpers (refactor stage 4)
+from capri_mod.data.definitions import capri_ms  # noqa: E402  (TUR for Turkey's units)
 
 
 class PhosphorusBlock:
     def _p_capri_region(self, region):
         """The CAPRI region of the fertilisation block's data (InnerFertDist.capri_region, as SupplyModel._npk_spec)."""
-        inner = self.__dict__.get("_inner_fert")
+        inner = getattr(self.par, "inner_fert", None)
         if inner is None:
             from capri_mod.fert.inner_fert_dist import InnerFertDist
-            inner = self._inner_fert = InnerFertDist()
+            inner = self.par.inner_fert = InnerFertDist()
         return inner.capri_region(region)
 
     def _p_applied_ratio(self, capri_region):
         """Manure P2O5 applied in the region per unit excreted at CAPRI's 2030 reference, 1 - MTRADE / EXCRET (the
-        fertilisation block's ManureNPK_ for P, SupplyModel._npk_applied_ratio; npk_dataout_2030.csv.xz)."""
+        fertilisation block's ManureNPK_ for P, SupplyModel._npk_applied_ratio: capri_mod/fert/npk.manure_applied_share,
+        tools/build/build_npk_balance_2030.py)."""
         c = getattr(type(self), "_P_APPL", None)
         if c is None:
-            s = _inputs.current().csv("npk_dataout_2030.csv.xz", "sources/environment", keep_default_na=False)
-            s = s[(s.item == "") & (s.col == "PHOF") & (s.row.isin(["EXCRET", "MTRADE"]))]
-            v = {(t.region, t.row): float(t.value) for t in s.itertuples(index=False)}
-            c = {r: max(0.0, 1.0 - v.get((r, "MTRADE"), 0.0) / x) for (r, row), x in v.items() if row == "EXCRET" and x > 0}
+            from capri_mod.fert.npk import manure_applied_share
+            c = {r: x for (r, n), x in manure_applied_share().items() if n == "P"}
             type(self)._P_APPL = c
-        return c.get(capri_region, c.get(capri_region[:2] + "000000", 1.0))
+        return c.get(capri_region, c.get(capri_ms(capri_region), 1.0))
 
     def _p_runtot(self, region, ms=None, wc=0.0, fert_mrun=0.0, initial=False) -> Dict[str, float]:
         """CAPRI's runoff share of excreted manure N, v_emiLoss(N, RunTot) = RunHous + RunSurf, per animal through the
@@ -37,7 +38,7 @@ class PhosphorusBlock:
         cascade data runs off nothing (CAPRI reports no RUNANI there)."""
         from capri_mod.supply import ammonia_techs as _at, n_cascade as _nc
         self._manure_n2o_tech(region)                 # loads CAPRI's sub-activities (ammonia_tech_model.csv)
-        tm = (getattr(self, "_amm_tm", None) or {}).get(region, {})
+        tm = (getattr(self.par, "amm_tm", None) or {}).get(region, {})
         out = {}
         for a_ in ANIMALS:
             subs = tm.get(a_) or []
@@ -53,8 +54,8 @@ class PhosphorusBlock:
                 if not initial:
                     s_ = {t_: sh.get(t_, v_) for t_, v_ in s_.items()}
                 f, rsurf, eff = cd
-                L = _nc.losses(f, rsurf, s_, eff, m_runsurf=(1.0 - _nc.WINTERCOV_NO3 * wc - fert_mrun, 1.0),
-                               m_appl_run=1.0 - _nc.WINTERCOV_NO3 * wc)
+                L = _nc.losses(f, rsurf, s_, eff, m_runsurf=(1.0 - param("WINTERCOV_NO3_REDUCTION") * wc - fert_mrun, 1.0),
+                               m_appl_run=1.0 - param("WINTERCOV_NO3_REDUCTION") * wc)
                 # CAPRI bounds every loss share to [0, 1] (supply/set_supply_bounds.gms l. 240-243, v_emiLoss.lo/up), so
                 # options cannot drive the runoff below zero; the cascade evaluated at the solution's shares can
                 R += w * (min(max(float(L[("N", "RunHous")]), 0.0), 1.0) + min(max(float(L[("N", "RunSurf")]), 0.0), 1.0))
@@ -111,11 +112,11 @@ class PhosphorusBlock:
         excret = sum(h[a] * manp[a] for a in ANIMALS)
         npk = getattr(supply_result, "fert_npk", None) or {}
         blk = npk.get("P") if isinstance(npk, dict) else None
-        ratio = self._p_applied_ratio(cr) if bool(getattr(self, "manure_trade_on", True)) else 1.0
+        ratio = self._p_applied_ratio(cr) if bool(getattr(self.seen, "manure_trade_on", True)) else 1.0
         # the need multiplier (kappa) is calibrated at the base and fixed in simulation (CAPRI's
         # v_cropNutNeedMultFact): the regional model's block computes it once, at the run's baseline, with that
         # baseline's manure trade setting; the base manure applied here follows the first setting seen for the region
-        ratio_base = self.__dict__.setdefault("_p_ratio_base", {}).setdefault(cr, ratio)
+        ratio_base = _est.setdefault(self.par, "p_ratio_base", {}).setdefault(cr, ratio)
         if blk is not None:
             applied = sum(float(v) for (g, s_), v in blk["flows"].items() if s_ == "EXCR")
             minfer = float(blk["purchase"])
@@ -128,12 +129,12 @@ class PhosphorusBlock:
             hb = {a: max(float(H0.get(a, 0.0) or 0.0), 0.0) for a in ANIMALS}
             E0 = ratio_base * sum(hb[a] * manp[a] for a in ANIMALS)
             applied = ratio * excret
-            mt = getattr(supply_result, "manure_trade", None) if supply_result is not None else None
-            if mt and (abs(float(mt[0])) > 0 or abs(float(mt[1])) > 0):
-                # traded manure carries P in the region's base manure P/N proportion (the block's pool columns)
-                ba = dict(xb); ba.update(hb)
-                rN = float(self.compute_nitrogen_balance(ba, dict(y0), region).get("n_manure_applied", 0.0))
-                applied += (E0 / rN if rN > 0 else 0.0) * (float(mt[1]) - float(mt[0]))
+            mt = ((getattr(supply_result, "manure_trade_pk", None) or {}).get("P")
+                  if supply_result is not None else None)
+            if mt:
+                # the region's trade on CAPRI's P manure market (MANP, its own columns; until 31 October 2026 the N
+                # trade, carried in the region's manure P/N proportion)
+                applied += float(mt[1]) - float(mt[0])
             sh = D.crop_shares(cr)
             col = lambda k: {c: D.crop_coef(cr, "P", c, k) for c in CROPS}
             need, own, pool, mine0 = col("need_kg_ha"), col("own_kg_ha"), col("pool_kg_ha"), col("mine_kg_ha")

@@ -2,12 +2,14 @@
 
 The closed-form WLS of estimate_trends.gms is checked against an independent weighted least squares (numpy lstsq)
 at every grid point; the GAMS domain rules for short series are checked case by case; one test runs on CAPRI's own
-CAPREG time series when the reference CSV is present (capri_reference/, built by
+CAPREG time series when the reference CSV is present (capri_sources/reference/, built by
 tools/build/build_capreg_tseries_reference.py).
 """
 from __future__ import annotations
 
 from pathlib import Path
+
+from capri_mod.external_paths import REFERENCE  # capri_sources/reference (docs/EXTERNAL_SOURCES.md)
 
 import numpy as np
 import pytest
@@ -16,7 +18,7 @@ from capri_mod.pipeline.captrd import step1 as s1
 
 YEARS = list(range(1984, 2019))
 W = s1.trend_variable(YEARS, 1984)
-REF = Path(__file__).resolve().parents[3] / "capri_reference" / "capreg_tseries" / "17"
+REF = REFERENCE / "capreg_tseries" / "17"
 
 
 def _lstsq_fit(x, w, grid):
@@ -152,9 +154,9 @@ def test_runs_on_capri_capreg_series():
     assert ((r.fit.c[ok] >= 0.02 - 1e-12) & (r.fit.c[ok] <= 1.2 + 1e-12)).all()
 
 
-# --- parity with CAPTRD's own Step 1 (capri_reference/captrd_results/1770, tools/build/build_captrd_results_reference.py)
+# --- parity with CAPTRD's own Step 1 (capri_sources/reference/captrd_results/1770, tools/build/build_captrd_results_reference.py)
 
-RES = Path(__file__).resolve().parents[3] / "capri_reference" / "captrd_results" / "1770"
+RES = REFERENCE / "captrd_results" / "1770"
 
 
 def _parity_frame():

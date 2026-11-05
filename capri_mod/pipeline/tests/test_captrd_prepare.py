@@ -1,8 +1,8 @@
 """CAPTRD's data preparation (capri_mod/pipeline/captrd/prepare.py) against CAPTRD's own estimation data.
 
-The reference is CAPTRD's p_data as its results file stores it (capri_reference/captrd_results/1770/P_Data.csv.gz),
+The reference is CAPTRD's p_data as its results file stores it (capri_sources/reference/captrd_results/1770/P_Data.csv.gz),
 for the ex-post years of the series CAPTRD estimated (data position nObs > 0), from CAPREG's time series of the same
-run (capri_reference/capreg_tseries/17). Denmark is one file without NUTS 2 regions; the parity of the regional rules
+run (capri_sources/reference/capreg_tseries/17). Denmark is one file without NUTS 2 regions; the parity of the regional rules
 waits for the full run.
 
 Records the stages not yet ported change, excluded by rule (docs/design/CAPTRD_MOD.md section 12.2):
@@ -24,15 +24,17 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from capri_mod.external_paths import REFERENCE  # capri_sources/reference (docs/EXTERNAL_SOURCES.md)
+
 import pandas as pd
 import pytest
 
 from capri_mod.pipeline.captrd import prepare as P
 
 ROOT = Path(__file__).resolve().parents[3]
-TS = ROOT / "capri_reference" / "capreg_tseries" / "17"
-BASE = ROOT / "capri_reference" / "capreg_base" / "17"
-RES = ROOT / "capri_reference" / "captrd_results" / "1770"
+TS = REFERENCE / "capreg_tseries" / "17"
+BASE = REFERENCE / "capreg_base" / "17"
+RES = REFERENCE / "captrd_results" / "1770"
 BASE_YEAR = 2017                                              # the reference run's base year (settings.csv)
 
 BIOFUEL_COLS = {"BIOF", "PRCB", "PRCBY", "NAGR", "SECG"}       # load_coco1_data.gms l. 321-372, 490-520
@@ -70,7 +72,7 @@ def _reference(s: P.CaptrdSets, region: str, ex) -> pd.DataFrame:
 
 
 def _compare(prepared: pd.DataFrame, s: P.CaptrdSets, region: str, ex, exclude=None) -> pd.DataFrame:
-    oagg = set(pd.read_csv(ROOT / "capri_reference" / "sets" / "simini_21730" / "OAGG.csv", keep_default_na=False).d0)
+    oagg = set(pd.read_csv(REFERENCE / "sets" / "simini_21730" / "OAGG.csv", keep_default_na=False).d0)
     nobs = pd.read_csv(RES / "data.csv.gz")
     nobs = nobs[(nobs.t == "nObs") & (nobs.value > 0) & (nobs.region == region)][["region", "col", "row"]]
     mine = prepared.merge(nobs, on=["region", "col", "row"])
@@ -123,7 +125,7 @@ def test_denmark_prepared_data_equals_captrds():
                          and (RES / "BASM.csv.gz").exists()), reason="CAPRI reference files not built")
 def test_denmark_base_year_equals_captrds():
     s = P.read_sets()
-    oagg = set(pd.read_csv(ROOT / "capri_reference" / "sets" / "simini_21730" / "OAGG.csv", keep_default_na=False).d0)
+    oagg = set(pd.read_csv(REFERENCE / "sets" / "simini_21730" / "OAGG.csv", keep_default_na=False).d0)
     raw = P.read_series(TS / "DK.csv.gz", s, range(1984, 2019))
     ex = P.expost_years(raw, s.ms)
     d2 = pd.read_csv(BASE / "DK.csv.gz", keep_default_na=False)
@@ -152,6 +154,7 @@ def test_denmark_base_year_equals_captrds():
 @pytest.mark.slow
 @pytest.mark.skipif(not ((TS / "DK.csv.gz").exists() and (RES / "P_Data.csv.gz").exists()),
                     reason="CAPRI reference files not built")
+@pytest.mark.slow
 def test_denmark_with_the_uvad_of_its_market_aggregate():
     """Denmark with the UVAD averaged over the countries of its market aggregates (A_EU_WEST: read their files)."""
     s = P.read_sets()
@@ -186,13 +189,14 @@ def test_uvad_average_is_parallel_and_portugal_fills_the_east():
     assert add[east] == pytest.approx(300.0)
 
 
-COCO = ROOT / "capri_reference" / "coco2" / "17" / "coco2_output.csv.gz"
-BIOFUEL = ROOT / "capri_reference" / "fao_agg" / "17" / "p_biofuelData.csv.gz"
+COCO = REFERENCE / "coco2" / "17" / "coco2_output.csv.gz"
+BIOFUEL = REFERENCE / "fao_agg" / "17" / "p_biofuelData.csv.gz"
 
 
 @pytest.mark.slow
 @pytest.mark.skipif(not all(f.exists() for f in (TS / "DK.csv.gz", BASE / "DK.csv.gz", COCO, BIOFUEL,
                                                  RES / "P_Data.csv.gz")), reason="CAPRI reference files not built")
+@pytest.mark.slow
 def test_denmark_with_the_coco_data(tmp_path):
     """Denmark through every ported stage (prepare_run.run), the COCO data and the policy data included: the years
     1984-2019 (2019 from COCO) equal CAPTRD's p_data, leaving out the reporting overwrites and what needs the other
@@ -211,7 +215,7 @@ def test_denmark_with_the_coco_data(tmp_path):
     # the calendar years (prepare_run also writes BASM and, since the statistics stage, nObs, nW, WAve, wVar, BAS, BSY)
     a = a[a.t.astype(str).str.fullmatch(r"\d{4}")]
     ex = sorted({int(t) for t in a.t})
-    oagg = set(pd.read_csv(ROOT / "capri_reference" / "sets" / "simini_21730" / "OAGG.csv", keep_default_na=False).d0)
+    oagg = set(pd.read_csv(REFERENCE / "sets" / "simini_21730" / "OAGG.csv", keep_default_na=False).d0)
     nobs = pd.read_csv(RES / "data.csv.gz")
     nobs = nobs[(nobs.t == "nObs") & (nobs.value > 0) & (nobs.region == "DK000000")][["region", "col", "row"]]
     m = a.merge(nobs, on=["region", "col", "row"]).merge(_reference(s, "DK000000", ex)[P.KEYS + ["value"]], on=P.KEYS,

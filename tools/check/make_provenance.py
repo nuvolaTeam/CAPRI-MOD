@@ -14,8 +14,9 @@ For every CSV under capri_data (archive/ left out) one row of the table provenan
             Eurostat, FAO, EC, unsourced; a source file's own row may name where CAPRI took it from, as "USDA via
             CAPRI")
   builder   the builder that writes it (tools/build/<builder>.py; several invocations: the task names)
-  sources   the files outside the repository its builder chain reads ($UP: the project lead's uploads, $WORK: the work
-            folder of CAPRI's dumps), runs of numbered files collapsed (res_17<CC>.txt)
+  sources   the files of CAPRI's material its builder chain reads, outside git ($EXPORTS: CAPRI's exports as delivered,
+            $SOURCES: CAPRI's unpacked dumps and source tree, $REFERENCE: capri_sources/reference; tools/lib/paths.py,
+            docs/EXTERNAL_SOURCES.md), runs of numbered files collapsed (res_17<CC>.txt)
 
 The trace is tools/pipeline/builders.json (tools/check/make_pipeline.py). Files written by no traced builder are
 looked up in DECLARED, SOURCE_ORIGIN, UNTRACED and NO_BUILDER_ORIGIN below; the rest are "no-builder".
@@ -46,7 +47,10 @@ SOURCE_DEFAULT = "CAPRI"
 #: tables kept by hand, with a source per row, read as declared (KNOWN_ISSUES K101)
 DECLARED = {"capri_data/shared/capri_member_state_codes.csv", "capri_data/shared/model_parameters.csv",
             "capri_data/codes/model_units.csv", "capri_data/codes/model_trade_regions.csv",
-            "capri_data/codes/model_activities.csv"}
+            "capri_data/codes/model_market_regions.csv",
+            "capri_data/codes/model_activity_classes.csv", "capri_data/codes/model_land_types.csv",
+            "capri_data/codes/model_cattle_splits.csv", "capri_data/codes/model_price_follows.csv",
+            "capri_data/codes/model_activities.csv", "capri_data/codes/results_items.csv"}
 #: the origin of the external files the builders read: every one is CAPRI's (its exports, dumps, dat files and
 #: code), checked 29 October 2026 against the builders' docstrings
 EXTERNAL_ORIGIN = "CAPRI"
@@ -56,6 +60,8 @@ UNTRACED = {
     "capri_data/pipeline/captrd/sets/": ("build_captrd_sets", "CAPRI"),
     "capri_data/validation/eu_outlook_2020_2030.csv": ("build_eu_outlook_2030", "EC"),
     "capri_data/validation/n_cascade_capri_gd2030.csv": ("build_n_cascade_validation", "CAPRI"),
+    "capri_data/codes/capri/COLS.csv": ("build_code_lists", "CAPRI"),
+    "capri_data/codes/capri/ROWS.csv": ("build_code_lists", "CAPRI"),
 }
 #: the CSV conversion of the sources that were not CSV (tools/build/convert_sources_to_csv.py, 30 October 2026),
 #: by file or folder prefix: their origin. The converter reads the originals from the repository's history, so the trace
@@ -75,13 +81,15 @@ CONVERTED_ORIGIN = {
     "capri_data/sources/ghgtech/miti_data_jul15_p_ghgMiti.csv": "CAPRI",
     "capri_data/sources/policy/minfert_redu_by_crop_p_checkSmallMine.csv": "CAPRI",
     "capri_data/sources/policy/minfert_redu_by_crop_limCres.csv": "CAPRI",
-    "capri_data/sources/market/eu_tariff_provenance.csv": "CAPRI",
     "capri_data/sources/capri_star/nutrient_cont_usda_p_nutrientCont.csv": "USDA via CAPRI",
     "capri_data/sources/nuts/": "Eurostat",
 }
 #: files without a builder whose origin was established by a check (02_provenance_notes.sql gives the evidence)
 NO_BUILDER_ORIGIN = {
     "capri_data/2017/environment/climate_zones.csv": "CAPRI",
+    # CAPRI's NUTS version correspondence (build_general_set_structure.gms) with the pairs added and removed by hand in
+    # October 2026 (the table's comment, 26_shared.sql); a JSON file until 31 October 2026
+    "capri_data/shared/nuts_version_correspondence.csv": "CAPRI",
     "capri_data/sources/capri_dat/sugar/p_SQuotas.csv": "CAPRI",
     "capri_data/sources/capri_dat/sugar/p_PPSQRenounce.csv": "CAPRI",
     "capri_data/sources/capri_dat/sugar/p_PPSQCBuyBack.csv": "CAPRI",

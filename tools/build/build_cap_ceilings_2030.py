@@ -34,9 +34,11 @@ import sys
 from pathlib import Path
 
 import pandas as pd
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
+from paths import EXPORTS  # noqa: E402  (CAPRI's material outside the repository)
 
 ROOT = Path(__file__).resolve().parents[2]
-SRC = Path("/mnt/user-data/uploads/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv")
+SRC = EXPORTS / "res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv"
 OUT_CEIL = ROOT / "capri_data" / "2017" / "policy" / "cap_ceilings_2030.csv"
 OUT_SHARE = ROOT / "capri_data" / "2017" / "policy" / "premium_scheme_shares_2030.csv"
 SCHEMES = ("DPPIL1", "DPPIL2", "DPRD_LFA", "DPRD_N2K", "DPAE", "DPNAT", "DPTOTAL")

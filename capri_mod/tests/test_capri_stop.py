@@ -81,6 +81,7 @@ def test_capri_forecast_weights():
     assert f([1.0, 2.0, 3.0, 4.0], 19) == pytest.approx(0.4 * 4 + 0.3 * 3 + 0.2 * 2 + 0.1 * 1)
 
 
+@pytest.mark.slow
 def test_model_records_capri_verdict_and_can_stop_on_it():
     from capri_mod.settings import override
     from capri_mod.model import CAPRIModel
@@ -90,16 +91,16 @@ def test_model_records_capri_verdict_and_can_stop_on_it():
         r = m.run(scenario="BASELINE", regions=["DE110000", "FR100000"], max_outer_iter=6)
     cs = r["metadata"]["capri_stop"]
     assert cs is not None and cs["step"] >= 1
-    hist = m._outer_history
+    hist = m.res.outer_history
     assert all(h["conv"]["capri"] is not None for h in hist)
-    last = m._capri_stop.steps[-1]
+    last = m.sv.capri_stop.steps[-1]
     # every item kind is formed: prices at the trade block, production and feed per member state
     assert last["aggp"].get("EU_WEST", {}).get("MILK", 0) > 0 and last["aggp"]["EU_WEST"].get("BEEF", 0) > 0
     assert last["prod"]["DE000000"].get("MILK", 0) > 0 and last["feed"]["FR000000"].get("FCER", 0) > 0
     if r["metadata"]["outer_converged"]:
         assert not cs["go_on"]
     # the drift report (not CAPRI's) is recorded with the verdict, as the stop rule computes it
-    assert cs["drift"] == m._capri_stop.drift(3)
+    assert cs["drift"] == m.sv.capri_stop.drift(3)
     # the jump check's record (K79): one entry per iteration where it acted, its regions a subset of those solved
     jc = r["metadata"]["nlp_jump_check"]
     assert isinstance(jc, list)
@@ -134,3 +135,9 @@ def test_capri_special_smoothing_setting_is_checked():
         with override({"outer_loop.capri_step_special": [bad]}):
             with pytest.raises(ValueError):
                 CAPRIModel._capri_step_special()
+
+
+def test_turkey_leaves_the_decision_from_the_15th_step_as_norway():
+    """CAPRI's price_forecast.gms l. 316-318: p_iterChg of NO000000 and of TUR set to 0 from the 15th step."""
+    r = CapriStopRule({})
+    assert r.late_out == {"NO000000": 15, "TUR": 15}

@@ -1,8 +1,10 @@
-"""CAPRI's trend projection as the model's alternative 2030 trajectory: capri_data/trajectories/captrd_2030.json
-(`--trajectory captrd`; the default is CAPRI's 2030 reference, capri_ref_2030.json). The file's one writer, from blank.
+"""CAPRI's trend projection as the model's alternative 2030 trajectory: the scenario folder capri_data/scenarios/captrd_2030
+(settings.toml, growth.csv, regional.csv; capri_mod/projection/scenario_io.py; capri_data/trajectories/captrd_2030.json
+until 31 October 2026) (`--trajectory captrd`; the default is CAPRI's 2030 reference, capri_data/scenarios/capri_ref_2030).
+The folder's one writer, from blank.
 
 Source: CAPTRD's results of the base-2017 run (results_1770.gdx, p_result, datatype "series": the final reconciled trend
-in projection years), as converted to capri_reference/captrd_results/1770/series.csv.gz
+in projection years), as converted to capri_sources/reference/captrd_results/1770/series.csv.gz
 (tools/build/build_captrd_results_reference.py). The CAPRI-keyed factors are those of
 capri_mod/projection/captrd_import.extract_trajectory (per-activity medians of the per-region cumulative ratios 2030 /
 2017 of YILD and LEVL, band projection.captrd_factor_bounds, per-region factors where the base value is at least 1);
@@ -13,23 +15,24 @@ from CAPTRD's results it reproduces the earlier file's growth factors and every 
 exactly (the entries the projection reads); its CAPRI-keyed regional entries differ where the model-keys step of the
 NUTS-2016 model (four-character model regions) had overwritten them with the model's aliases.
 
-    python tools/build/build_captrd_trajectory.py [--series capri_reference/captrd_results/1770/series.csv.gz]
+    python tools/build/build_captrd_trajectory.py [--series capri_sources/reference/captrd_results/1770/series.csv.gz]
 """
 from __future__ import annotations
 
 import argparse
 import csv
 import gzip
-import json
 import sys
 import tempfile
 from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
+from paths import REFERENCE  # noqa: E402  (CAPRI's material outside the repository)
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build")]
-OUT = ROOT / "capri_data" / "trajectories" / "captrd_2030.json"
-SERIES = Path("/home/claude/work/capri_reference/captrd_results/1770/series.csv.gz")
+OUT = ROOT / "capri_data" / "scenarios" / "captrd_2030"
+SERIES = REFERENCE / "captrd_results/1770/series.csv.gz"
 
 
 def main():
@@ -50,10 +53,11 @@ def main():
                     out.write(f"'{reg}'.'{col}'.'{row}'.'{t}'.'series' {val}\n")
                     n += 1
         traj = extract_trajectory(sl, vintage="CAPTRD results_1770 (base 2017), the project lead's CAPRI installation")
-    traj["_provenance"]["extracted_from"] = ("capri_reference/captrd_results/1770/series.csv.gz (results_1770.gdx "
+    traj["_provenance"]["extracted_from"] = ("capri_sources/reference/captrd_results/1770/series.csv.gz (results_1770.gdx "
                                              "p_result, series; tools/build/build_captrd_trajectory.py)")
     added = K.add_model_keys(traj)
-    OUT.write_text(json.dumps(traj, indent=1))
+    from capri_mod.projection import scenario_io
+    scenario_io.write(OUT, traj)
     print(f"{OUT.relative_to(ROOT)}: {n} series records; {added}")
 
 

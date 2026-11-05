@@ -3,10 +3,10 @@
 CAPRI's market model gives every non-EU region its own supply function (arm/market_model.gms, normalised quadratic
 with the Hessian p_hessNQSupp calibrated to p_elasSupp(region, product, product', "CAL")). capri-mod's market used one
 own-price elasticity per product for every non-EU region (CAPRI's EU median, else the Armington eps). This builder
-takes CAPRI's own-price p_elasSupp per CAPRI region (sources/arm/capri_supply_elas_market_1717.csv, from the 2017
+takes CAPRI's own-price p_elasSupp per CAPRI region (2017/supply/capri_supply_elas_market_1717.csv, from the 2017
 calibration run's elas_2_1717 file) and aggregates it to the model's trade regions with CAPRI's 2017 production
 (sources/market/bilateral_dataout_2017.csv.xz, item PROD) as weights, through the same region and product maps as the
-bilateral market (tools/build/recalibrate_trade_2017.py REGION_MAP, CAPRI regions not mapped there being the model's ROW;
+bilateral market (the market's grouping step, tools/lib/_market_regions.py: codes/model_market_regions.csv;
 tools/build/build_bilateral_market.py MODEL). Products CAPRI's market produces by processing (dairy products, oils and cakes,
 biofuels, DDGS) have no p_elasSupp and keep the market's previous value.
 
@@ -32,13 +32,14 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check")]
 
-ELAS = ROOT / "capri_data" / "sources" / "arm" / "capri_supply_elas_market_1717.csv"
+ELAS = ROOT / "capri_data" / "2017" / "supply" / "capri_supply_elas_market_1717.csv"
 PROD = ROOT / "capri_data" / "sources" / "market" / "bilateral_dataout_2017.csv.xz"
 OUT = ROOT / "capri_data" / "2017" / "market" / "supply_elas_region.csv"
 
 
 def main():
-    from recalibrate_trade_2017 import AGGREGATES, trade_region as _trade_region
+    from recalibrate_trade_2017 import AGGREGATES
+    from _market_regions import model_region  # the market's grouping step (tools/lib/_market_regions.py)
     from build_bilateral_market import MODEL as CAPRI_CODES          # model commodity -> CAPRI product(s)
     from build_feed_bulks import EU_MS
     from capri_mod.data.definitions import MARKET_COMMODITIES
@@ -54,7 +55,7 @@ def main():
     def trade_region(r):
         if r in eu or r in AGGREGATES:
             return None
-        return _trade_region(r)
+        return model_region(r)
 
     rows = []
     for c in MARKET_COMMODITIES:

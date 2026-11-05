@@ -7,9 +7,49 @@ module once model is loaded (capri_mod.coupling.inject); the annotations are not
 from __future__ import annotations
 
 
+from capri_mod import statekit as _cst   # the state objects' helpers (refactor stage 4)
+#: the clearing's state kept per market between outer iterations, as paths in the model's state objects (the N
+#: market's in the model's own sv and res; the P and K markets' copies in sv.pool_pk, swapped in for their clearing)
+_POOL_IMBALANCE, _POOL_WORST_KEY = "res.pool_imbalance", "res.pool_worst_key"
+_POOL_STATE = ("sv.pool_state", "sv.pool_accel", _POOL_IMBALANCE, _POOL_WORST_KEY, "res.pool_solver_status",
+               "res.pool_eu_unaccounted")
+
+
 class ManureBlock:
     def _update_manure_pools(self) -> None:
-        """Clear CAPRI's CONNECTED manure pools on the regions' EXACT schedules.
+        """Clear CAPRI's manure markets, one per nutrient as CAPRI (manuremarket/simu_manure_market.gms: loop over
+        FOUT, MANN, MANP, MANK, each solved on its own): the N market, then the P and K markets of the regions that
+        have their columns. Each market keeps its own state between iterations; the convergence measure is the worst
+        of the three."""
+        sm = self.supply_module
+        self._clear_pool("N")
+        gaps = {"N": float(getattr(self.res, "pool_imbalance", 0.0) or 0.0)}
+        worst_key = {"N": getattr(self.res, "pool_worst_key", "")}
+        held = _cst.setdefault(self.sv, "pool_pk", {})
+        for nut in ("P", "K"):
+            if not any((getattr(mo.ev, "pool_cols_pk", None) or {}).get(nut) for mo in getattr(sm, "_models", {}).values()):
+                continue
+            st = held.setdefault(nut, {_POOL_IMBALANCE: 0.0})
+            n_state = {k: _cst.get_path_or(self, k) for k in _POOL_STATE}
+            for k in _POOL_STATE:
+                _cst.set_path(self, k, st.get(k))
+            try:
+                self._clear_pool(nut)
+            finally:
+                for k in _POOL_STATE:
+                    st[k] = _cst.get_path_or(self, k)
+                for k, v in n_state.items():
+                    _cst.set_path(self, k, v)
+            gaps[nut] = float(st.get(_POOL_IMBALANCE) or 0.0)
+            worst_key[nut] = st.get(_POOL_WORST_KEY) or ""
+        self.res.pool_gaps = gaps
+        w = max(gaps, key=gaps.get)
+        self.res.pool_imbalance = gaps[w]
+        if w != "N":
+            self.res.pool_worst_key = f"{worst_key[w]}:{w}"
+
+    def _clear_pool(self, prod: str = "N") -> None:
+        """Clear one of CAPRI's manure markets (prod N, P or K) on the regions' EXACT schedules.
 
         Each region's solve gives threshold prices for trading, from the
         reduced costs of its trade variables at the solution:
@@ -26,24 +66,29 @@ class ManureBlock:
         (min_p sum_k Phi_k(p_k) s.t. p_k - p_l <= c_kl) was solved with SLSQP before and
         failed on the schedules' kinks.
         """
-        import json as _json
-        from pathlib import Path as _P
         from scipy.optimize import nnls as _nnls, minimize as _min
         sm = self.supply_module
-        pools = dict(getattr(sm, "manure_pool_price", None) or {})
-        cost = getattr(self, "_pool_cost_cache", None)
+        # the market's prices by country: the N market's in manure_pool_price, P and K in manure_pool_price_pk
+        pools = dict((getattr(sm.seen, "manure_pool_price", None) or {}) if prod == "N"
+                     else ((getattr(sm.seen, "manure_pool_price_pk", None) or {}).get(prod) or {}))
+        cost = getattr(self.par, "pool_cost_cache", None)
         if cost is None:
-            f = _P(__file__).resolve().parents[2] / "capri_data" / "2017" / "environment" / "manure_pool_costs.json"
+            from capri_mod.data import inputs as _inputs, nested_tables as _nt
+            # CAPRI's trade costs between the pools (tools/build/build_manure_pool_costs.py); a missing file stops the run
             cost = {}
-            if f.exists():
-                for k, v in _json.load(open(f))["pairs"].items():
-                    a, b = k.split("|"); cost[(a, b)] = v["eur_per_t_n"] / 1000.0
-            self._pool_cost_cache = cost
+            for k, v in _nt.read_manure_pools(_inputs.current().path("manure_pool_costs.csv", "environment"))["pairs"].items():
+                a, b = k.split("|"); cost[(a, b)] = v["eur_per_t_n"] / 1000.0
+            self.par.pool_cost_cache = cost
         sched, es, sup = {}, {}, {}
+        _st_m = _settings()                 # the multiplier recovery's tolerances and iterations (settings)
         for reg, mo in getattr(sm, "_models", {}).items():
-            pc = getattr(mo, "_pool_cols", []) or []
-            aug = getattr(mo, "_last_aug", None)
-            s0 = float(getattr(mo, "_manure_supply0", 0.0) or 0.0)
+            if prod == "N":
+                pc = getattr(mo.ev, "pool_cols", []) or []
+                s0 = float(getattr(mo.res, "manure_supply0", 0.0) or 0.0)
+            else:
+                pc = (getattr(mo.ev, "pool_cols_pk", None) or {}).get(prod) or []
+                s0 = float((getattr(mo.res, "manure_supply0_pk", None) or {}).get(prod, 0.0) or 0.0)
+            aug = getattr(mo.res, "last_aug", None)
             if len(pc) != 2 or aug is None or s0 <= 0:
                 continue
             Q, c, A, b, y = aug
@@ -52,17 +97,17 @@ class ManureBlock:
             # row duals: the regional NLP's own multipliers (its feed block is not in the stored
             # problem, so duals recovered from the stored problem's KKT conditions were wrong and the
             # pools stopped clearing); else recovered by NNLS from the active rows of the stored problem
-            zc = getattr(mo, "_last_duals", None)
+            zc = getattr(mo.ev, "last_duals", None)
             if zc is not None and len(zc) == A.shape[0]:
                 lam = np.maximum(np.asarray(zc, float), 0.0)
             else:
-                act = [r for r in range(A.shape[0]) if A[r] @ y >= b[r] - 1e-6 * max(1.0, abs(float(b[r])))]
-                bnd = [q for q in range(len(y)) if y[q] <= 1e-9]
+                act = [r for r in range(A.shape[0]) if A[r] @ y >= b[r] - _st_m.get("outer_loop.manure_pool_active_tol") * max(1.0, abs(float(b[r])))]
+                bnd = [q for q in range(len(y)) if y[q] <= _st_m.get("outer_loop.manure_pool_bound_tol")]
                 M = np.hstack([A[act].T if act else np.zeros((len(y), 0)), -np.eye(len(y))[:, bnd]])
                 gvec = -(Q @ y + c)
                 if M.shape[1]:
                     sc = np.maximum(np.abs(M).max(axis=0), 1e-12)
-                    mu, _r = _nnls(M / sc, gvec, maxiter=60 * M.shape[1]); mu = mu / sc
+                    mu, _r = _nnls(M / sc, gvec, maxiter=int(_st_m.get("outer_loop.manure_pool_nnls_iter")) * M.shape[1]); mu = mu / sc
                     lam = np.zeros(A.shape[0]); lam[act] = mu[:len(act)]
                 else:
                     lam = np.zeros(A.shape[0])
@@ -70,10 +115,11 @@ class ManureBlock:
             sl = float(Q[je, je])
             # the pool price the region was solved at (its export column's cost also carries the emission tax,
             # which belongs to the threshold, not to the price)
-            pnow = float(getattr(mo, "manure_pool_price", 0.0) or 0.0)
+            pnow = float(getattr(mo.seen, "manure_pool_price", 0.0) or 0.0) if prod == "N" else \
+                float((getattr(mo.seen, "manure_pool_price_pk", None) or {}).get(prod, 0.0) or 0.0)
             rce = max(0.0, float(c[je] + Q[je] @ y + A[:, je] @ lam))
             rci = max(0.0, float(c[ji] + Q[ji] @ y + A[:, ji] @ lam))
-            rc_ = getattr(mo, "_nlp_rc", None)
+            rc_ = getattr(mo.res, "nlp_rc", None)
             if rc_ is not None and max(je, ji) < len(rc_):
                 # the NLP form: IPOPT's own reduced costs (the fertilisation block is not in the stored A rows)
                 rce, rci = max(0.0, float(rc_[je])), max(0.0, float(rc_[ji]))
@@ -83,14 +129,15 @@ class ManureBlock:
             # scales the schedules: slope s / kappa, re-anchored at the current
             # trade and price.
             k_ = self.POOL_OF_PREFIX.get(reg[:2], reg[:2])
-            kap = float(((getattr(self, "_pool_state", None) or {}).get("_kappa") or {}).get(k_, 1.0))
-            sl = sl / max(kap, 1e-3)
+            kap = float(((getattr(self.sv, "pool_state", None) or {}).get("_kappa") or {}).get(k_, 1.0))
+            sl = sl / max(kap, float(_settings().get("outer_loop.manure_pool_kappa_floor")))
             th_e = pnow + sl * float(y[je]) - rce
             th_i = pnow - sl * float(y[ji]) + rci
             # export cap = manure produced at the current solution (a first draft
             # read the LAST row as the cap, but the land rows follow it, so the
             # cap came from the grassland row and exports vanished)
-            ev = getattr(mo, "_pool_manure_vec", None)
+            ev = getattr(mo.res, "pool_manure_vec", None) if prod == "N" else \
+                (getattr(mo.res, "pool_manure_vec_pk", None) or {}).get(prod)
             emax = float(ev @ y[:len(ev)]) if ev is not None else 0.0
             k = self.POOL_OF_PREFIX.get(reg[:2], reg[:2])
             sched.setdefault(k, []).append((th_e, th_i, sl, max(emax, 0.0)))
@@ -98,9 +145,9 @@ class ManureBlock:
             sup[k] = sup.get(k, 0.0) + s0
         keys = sorted(sched)
         if not keys:
-            self._pool_imbalance = 0.0
+            self.res.pool_imbalance = 0.0
             return
-        hist = getattr(self, "_pool_state", None) or {}
+        hist = getattr(self.sv, "pool_state", None) or {}
         plan = hist.get("_plan")
         # Broyden-type update of each pool's response factor: realised change in
         # net exports over the change the previous plan expected
@@ -114,10 +161,10 @@ class ManureBlock:
                     _klo, _khi = _settings().get("outer_loop.manure_pool_kappa_bounds")
                     kappa[k] = float(np.clip(kappa.get(k, 1.0) * realised / planned, _klo, _khi))
         hist["_kappa"] = kappa
-        self._pool_state = hist
+        self.sv.pool_state = hist
         _ratios = {k: (abs(es[k] - plan.get(k, 0.0)) if plan else abs(es[k])) / sup[k] for k in keys}
         worst = max(_ratios.values())
-        self._pool_worst_key = max(_ratios, key=_ratios.get)
+        self.res.pool_worst_key = max(_ratios, key=_ratios.get)
         # ---- PRIMAL spatial equilibrium on the exact schedules (shipment side),
         # solved with the model's own exact QP solver (the dual price problem
         # with SLSQP failed on the kinks and kept stale prices).
@@ -131,7 +178,7 @@ class ManureBlock:
             Qp[q, q] = sl; cp_[q] = -te                   # exporters' benefit (negated)
             Qp[nr + q, nr + q] = sl; cp_[nr + q] = ti     # importers' cost
         for t, (a, b_, cc) in enumerate(arcs):
-            Qp[2 * nr + t, 2 * nr + t] = 1e-3 * min_sl; cp_[2 * nr + t] = cc   # scaled ridge
+            Qp[2 * nr + t, 2 * nr + t] = float(_settings().get("outer_loop.manure_pool_arc_ridge")) * min_sl; cp_[2 * nr + t] = cc   # scaled ridge
         rows, rhs, eqs, eqb = [], [], [], []
         for q, (k, te, ti, sl, em) in enumerate(reg_list):
             r_ = np.zeros(nv); r_[q] = 1.0; rows.append(r_); rhs.append(max(em, 0.0))    # e <= manure produced
@@ -160,8 +207,7 @@ class ManureBlock:
             ok = True
         if _info.get("y") is not None:
             _info["y"] = np.asarray(_info["y"], float) * _sc
-        self._pool_solver = _info
-        self._pool_solver_status = str(_info.get("status", "?"))
+        self.res.pool_solver_status = str(_info.get("status", "?"))
         pnew = {}
         if ok:
             # POOL PRICE = shadow price of the pool's balance equation. For an
@@ -179,8 +225,7 @@ class ManureBlock:
             ship = {k: 0.0 for k in keys}
             for t, (a, b_, cc) in enumerate(arcs):
                 ship[a] += sol[2 * nr + t]; ship[b_] -= sol[2 * nr + t]
-            self._pool_flows = {(a, b_): float(sol[2 * nr + t]) for t, (a, b_, cc) in enumerate(arcs) if sol[2 * nr + t] > 1e-3}
-            self._pool_state = {"_plan": ship, "_kappa": kappa, "_es": dict(es)}
+            self.sv.pool_state = {"_plan": ship, "_kappa": kappa, "_es": dict(es)}
         else:
             pnew = {k: float(pools.get(k, 0.0)) for k in keys}
         # CLEARING test on the REALISED regional trade: net exports of each pool
@@ -195,7 +240,7 @@ class ManureBlock:
         # pool 5.1% -> 4.3% over 12 iterations). Now: full steps while the gap
         # keeps falling (x1.25 per fall, capped at 1), halved (min 0.25) when it
         # rises.
-        acc = getattr(self, "_pool_accel", None) or {}
+        acc = getattr(self.sv, "pool_accel", None) or {}
         om = float(acc.get("_omega", 1.0))
         prev_gap = acc.get("_gap")
         cur_gap = float(max(worst, abs(sum(es.values())) / max(sum(sup.values()), 1e-9)))
@@ -211,17 +256,19 @@ class ManureBlock:
                     p_old = float(pools[reg_[:2]]); break
             if p_old is not None:
                 pnew[k] = p_old + om * (pnew[k] - p_old)
-        self._pool_accel = acc
+        self.sv.pool_accel = acc
         out = {}
         for reg in getattr(sm, "_models", {}):
             k = self.POOL_OF_PREFIX.get(reg[:2], reg[:2])
             if k in pnew:
                 out[reg[:2]] = pnew[k]
-        sm.manure_pool_price = out
+        if prod == "N":
+            sm.seen.manure_pool_price = out
+        else:
+            _sst.setdefault(sm.seen, "manure_pool_price_pk", {})[prod] = out
         # EU-WIDE conservation: realised net exports into all pools should sum
         # to zero; on the full EU it lagged the per-pool measure (200 kt N
         # unaccounted at iteration 6 while every pool was within ~6%)
         eu_unacc = abs(sum(es.values())) / max(sum(sup.values()), 1e-9)
-        self._pool_eu_unaccounted = float(eu_unacc)
-        self._pool_imbalance = float(max(worst, eu_unacc))
-        self._pool_trace = getattr(self, "_pool_trace", []) + [(float(worst), float(eu_unacc))]
+        self.res.pool_eu_unaccounted = float(eu_unacc)
+        self.res.pool_imbalance = float(max(worst, eu_unacc))

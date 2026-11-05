@@ -304,7 +304,7 @@ CAPRI's baseline calibration, not its result; (2) the projection read no land bl
 reconciliation lifted every crop by CAPRI's 2.1% UAA decline. The rest was regional drift in the solve (broilers +7%,
 layers +2-4%, cattle in some regions +3-10%), which CAPRI removes by calibrating its supply models to the baseline.
 
-Done: the reference as trajectory (levels, yields, land types per region; `capri_ref_2030.json`), CAPRI's baseline
+Done: the reference as trajectory (levels, yields, land types per region; `scenarios/capri_ref_2030`), CAPRI's baseline
 calibration (`calibrate_to_base`: linear terms shifted by Q (x − target), rounds until the largest drift stops
 falling, fodder crops excepted), CAPRI's 2030 feed bulk prices in the rations. Result (s91): activities 2.6%,
 production 1.4%, domestic use 1.7% against the reference; regional drift median 0.13% (90th percentile 3.9%).
@@ -1148,7 +1148,7 @@ own slope is about €1.9 per CAPRI head (3.8 per model place, 2017 prices) — 
 real terms. So the same nitrogen cost per pig moves the herd about as much in both models; the pig overshoot comes
 from the nitrogen price the model reaches, as diagnosed above.
 
-**Found: the model's 2030 baseline keeps 2017 prices.** The 2030 trajectory (`captrd_2030.json`) scales yields and
+**Found: the model's 2030 baseline keeps 2017 prices.** The 2030 trajectory (`scenarios/captrd_2030`) scales yields and
 herds only. CAPRI's 2030 reference is in current prices with relative changes (median member state, 2030/2017
 `UVAG`): pork 1.51, cow milk 1.52, beef 1.31, eggs 1.24, poultry 1.09, wheat 1.37, barley 1.23, maize 1.22, rapeseed
 1.43, pulses 1.41, sugar beet 1.04, mineral N 1.28, piglets 1.48. Against mineral fertiliser, pork and milk are

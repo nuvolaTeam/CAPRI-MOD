@@ -32,13 +32,15 @@ from __future__ import annotations
 
 import argparse
 import csv
-import os
+import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 SRC = ROOT / "capri_data" / "sources" / "capri_dat"
 OUT = ROOT / "capri_data" / "pipeline" / "captrd" / "dat"
-AGELINE = Path(os.environ.get("CAPRI_WORK", "/home/claude/work")) / "hf_capri" / "dat" / "baseline" / "ageline" / "ageline.parquet"
+sys.path.insert(0, str(ROOT / "tools" / "lib"))
+from paths import SOURCES  # noqa: E402  (CAPRI's material outside the repository)
+AGELINE = SOURCES / "dat" / "baseline" / "ageline" / "ageline.parquet"
 
 
 def _records(rel: str, cols, upper: int):

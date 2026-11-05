@@ -1,24 +1,29 @@
-"""CAPRI's own 2030 reference as the projection's trajectory (Sprint 9p).
+"""CAPRI's own 2030 reference as the projection's trajectory (Sprint 9p): the scenario folder
+capri_data/scenarios/capri_ref_2030 (settings.toml, growth.csv, regional.csv; capri_mod/projection/scenario_io.py;
+capri_data/trajectories/capri_ref_2030.json until 31 October 2026).
 
 CAPRI simulates every scenario from its calibrated baseline: CAPMOD's reference run for the simulation year (star 3.0:
 `res_2_1730greendeal_refpol_endotech_all_ini`, the 2030 Green Deal reference with endogenous technologies at their
 calibrated shares). The model projected its 2030 baseline with CAPRI's trend projection (CAPTRD `series`,
-captrd_2030.json), which is the INPUT to that calibration, not its result: against the reference the projected data
+capri_data/scenarios/captrd_2030), which is the INPUT to that calibration, not its result: against the reference the projected data
 had cereals 3-4% high, other fruit +21%, pulses +9% (tools/check/compare_baseline_capri.py), before the model solved anything.
 
 This writes the same trajectory structure from the reference itself: per CAPRI region and activity the factor
     LEVL or YILD in the 2030 reference / LEVL or YILD in CAPRI's 2017 results (res_17<MS>.txt)
-for the `herds` block (activity levels, crops included, as in captrd_2030.json) and the `yields` block; regions keyed
+for the `herds` block (activity levels, crops included, as in captrd_2030) and the `yields` block; regions keyed
 by the first four characters of CAPRI's code (national entries XX00), as CAPTRD's; EU growth per activity = median of
 the regional factors (fallback); factors kept in [0.2, 5]; regional factors only where the 2017 value is >= 1.0 (the
-rules of captrd_2030.json). Model activity and region keys are added by tools/build/build_trajectory_model_keys.py.
+rules of captrd_2030). Model activity and region keys are added by tools/build/build_trajectory_model_keys.py.
 
     python tools/build/build_trajectory_capri_ref.py [--ref CSV] [--dump-dir DIR]
 """
 from __future__ import annotations
-import argparse, json, re, statistics, subprocess, sys
+import argparse, re, statistics, subprocess, sys
 from collections import defaultdict
 from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
+from _grep import grep  # noqa: E402  (grep -E in Python: any system)
+from paths import EXPORTS, SOURCES  # noqa: E402  (CAPRI's material outside the repository)
 
 
 def _read_csv(*a, **k):
@@ -28,11 +33,11 @@ def _read_csv(*a, **k):
     return pd.read_csv(*a, **k)
 
 ROOT = Path(__file__).resolve().parents[2]
-OUT = ROOT / "capri_data" / "trajectories" / "capri_ref_2030.json"
-REF = Path("/mnt/user-data/uploads/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv")
+OUT = ROOT / "capri_data" / "scenarios" / "capri_ref_2030"
+REF = EXPORTS / "res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv"
 KEEP = ROOT / "capri_data" / "sources" / "capri_baseline" / "capri_ref_levl_yild_2030_2017.csv.xz"
 sys.path.insert(0, str(ROOT / "tools" / "lib"))
-from _model_regions import UNITS  # noqa: E402  (capri_data/shared/regional_units.csv)
+from _model_regions import FALLBACK_UNITS, UNITS  # noqa: E402  (capri_data/shared/regional_units.csv)
 #: the first two letters of the model's regional units (CAPRI's codes: BL, IR, EL, NO ...): the countries whose 2030
 #: reference rows are kept. A set named EU27 until 30 October 2026, which held Norway (HARDCODED_TABLES.md)
 SUPPLY_PREFIXES = frozenset(u[:2] for u in UNITS)
@@ -42,8 +47,7 @@ BAND = (0.2, 5.0)
 def extract(ref: Path, dump_dir: Path) -> list:
     rows = []
     p30 = re.compile(r"^'([A-Z]{2}[0-9A-Z]{6})'\.''\.'([A-Z0-9]+)'\.'(LEVL|YILD)'\.'2030'\s+([-\d.Ee+]+)")
-    txt = subprocess.run(["grep", "-E", r"^'[A-Z]{2}[0-9A-Z]{6}'\.''\.'[A-Z0-9]+'\.'(LEVL|YILD)'\.'2030'", str(ref)],
-                         capture_output=True, text=True).stdout
+    txt = grep(r"^'[A-Z]{2}[0-9A-Z]{6}'\.''\.'[A-Z0-9]+'\.'(LEVL|YILD)'\.'2030'", str(ref))
     for line in txt.splitlines():
         m = p30.match(line)
         if m and m.group(1)[:2] in SUPPLY_PREFIXES:
@@ -60,7 +64,7 @@ def extract(ref: Path, dump_dir: Path) -> list:
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--ref", type=Path, default=REF)
-    ap.add_argument("--dump-dir", type=Path, default=Path("/home/claude/work/capreg"))
+    ap.add_argument("--dump-dir", type=Path, default=SOURCES / "capreg")
     a = ap.parse_args()
     import pandas as pd
     if a.ref.exists() and a.dump_dir.exists():
@@ -72,7 +76,7 @@ def main():
         # from this list, so a fresh extract fell back to the components and changed 77 regional factors)
         keep = set(ALL_ACTIVITIES) | {"MAIZ", "TWIN", "SCOW", "HEIF", "HEIR", "SOWS", "HENS", "POUF", "OFAR", "BULF",
                                       "TEXT", "SHGM", "SHGF", "CAMF", "CAFF", "CAMR", "CAFR", "CACR", "ARAC", "FRUN", "GRAS",
-                                      "FALL", "DCOL", "DCOH", "BULH", "HEIL", "HEIH", "PIGF"}
+                                      "FALL", "VSET", "DCOL", "DCOH", "BULH", "HEIL", "HEIH", "PIGF"}
         rows = [r_ for r_ in rows if r_[1] in keep]
         KEEP.parent.mkdir(parents=True, exist_ok=True)
         pd.DataFrame(rows, columns=["capri_region", "activity", "item", "year", "value"]).to_csv(KEEP, index=False)
@@ -80,13 +84,18 @@ def main():
     t = _read_csv(KEEP)
     v = {(r.capri_region, r.activity, r.item, str(r.year)): float(r.value) for r in t.itertuples()}
     # CAPRI's calves are several activities; the model has one (CALV): their
-    # levels as sums (CAPTRD carries the same totals as SHGT and CACR)
-    for comp, parts in (("SHGT", ("SHGM", "SHGF")), ("CACR", ("CAMF", "CAFF", "CAMR", "CAFR"))):
+    # levels as sums (CAPTRD carries the same totals as SHGT and CACR). The model's set-aside SETA is CAPRI's fallow FALL
+    # plus its voluntary set-aside VSET (CAPRI_TO_MODEL_ACTIVITY; the set-aside split, KNOWN_ISSUES K111), while CAPRI's
+    # own SETA row is VSET alone (res_17IT: IT400000 SETA = VSET = 10.70, FALL 7.22): until 4 November 2026 the model's
+    # SETA took that row's growth, or the EU median where a region has no VSET (KNOWN_ISSUES K115)
+    for comp, parts in (("SHGT", ("SHGM", "SHGF")), ("CACR", ("CAMF", "CAFF", "CAMR", "CAFR")),
+                        ("SETA", ("FALL", "VSET"))):
         for reg in {k[0] for k in v}:
             for yr in ("2017", "2030"):
                 xs = [v.get((reg, p_, "LEVL", yr)) for p_ in parts]
                 if any(x is not None for x in xs):
                     v[(reg, comp, "LEVL", yr)] = sum(x for x in xs if x is not None)
+    v = {k: x for k, x in v.items() if k[1] != "VSET"}       # a part of SETA only, not a model activity
     # Yields of the model's livestock activities that CAPRI's 2030 reference splits (Sprint 9p regression, found against
     # the EU outlook 2020-2030): the reference reports DCOL/DCOH, HEIL/HEIH, BULL/BULH, CAMF/CAFF and SHGM/SHGF per region
     # but not the model's aggregates, so DCOW, HFRS, BULL, CALV and SHGP had no regional yield factor and no EU one -
@@ -125,7 +134,9 @@ def main():
         f = min(max(x30 / x17, BAND[0]), BAND[1])
         key = reg[:2] + "00" if reg.endswith("000000") else reg[:4]
         regional[b][key][act] = {"2030": f}
-        if not reg.endswith("000000"):
+        # the EU fallback's medians over the units they were taken over before CAPRI's other 29 were listed
+        # (FALLBACK_UNITS, 4 November 2026)
+        if not reg.endswith("000000") and reg in FALLBACK_UNITS:
             cells[b][act].append(f)
     # land types (the model's land table) from CAPRI's land aggregates: arable crops ARAC, fruit and nurseries FRUN,
     # grassland GRAS, fallow FALL (CAPRI's 2030 reference has 2.1% less UAA than 2017; without it the projection kept
@@ -156,7 +167,9 @@ def main():
                            "aggregation": "per-activity median of per-region ratios (EU fallback)",
                            "factor_band": list(BAND), "min_cells_per_activity": 3,
                            "regional_detail": "per-region factors where the 2017 level is >= 1.0 (yields > 0)"}}
-    OUT.write_text(json.dumps(out, separators=(",", ":")))
+    sys.path.insert(0, str(ROOT))
+    from capri_mod.projection import scenario_io
+    scenario_io.write(OUT, out)
     print(f"wrote {OUT.relative_to(ROOT)}: {sum(len(r) for r in regional['herds'].values())} level and "
           f"{sum(len(r) for r in regional['yields'].values())} yield factors")
     subprocess.run([sys.executable, str(ROOT / "tools" / "build" / "build_trajectory_model_keys.py"), str(OUT)], check=True)

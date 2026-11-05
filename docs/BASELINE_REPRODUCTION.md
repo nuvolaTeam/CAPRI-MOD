@@ -44,12 +44,12 @@ The table stored in `capri_data/validation/baseline_reproduction_2030.csv` is ol
 
 Each step is what CAPRI does; the code is in `capri_mod/projection/` and `capri_mod/supply/supply_module.py`.
 
-1. **CAPRI's 2030 reference as the trajectory** (`capri_data/trajectories/capri_ref_2030.json`,
+1. **CAPRI's 2030 reference as the trajectory** (`capri_data/scenarios/capri_ref_2030`,
    `tools/build/build_trajectory_capri_ref.py`). CAPRI simulates from CAPMOD's calibrated reference run, not from its trend
    projection (CAPTRD), which is that calibration's input. The trajectory carries the reference's levels and yields
    over CAPRI's 2017 results, per region and activity (sheep and goats, calves as CAPRI's totals), and the land types
    (ARAC, FRUN, GRAS, FALL; CAPRI's 2030 UAA is 2.1% below 2017). The trend projection stays available
-   (`captrd_2030.json`, `run_f2f_2030.py --trajectory captrd`); it is keyed by CAPRI codes and regions, and
+   (`scenarios/captrd_2030`, `run_f2f_2030.py --trajectory captrd`); it is keyed by CAPRI codes and regions, and
    `tools/build/build_trajectory_model_keys.py` adds model-keyed entries.
 2. **Livestock output per head follows the projected yield** (`ProjectionModule._project_livestock`), and so do the
    requirements (dairy cows: energy, protein and dry matter from `breeding.gms`'s functions, manure N per kg milk;

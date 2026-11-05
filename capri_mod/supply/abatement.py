@@ -12,14 +12,14 @@ class AbatementBlock:
     def _techs_inside(self) -> bool:
         """CAPRI's ammonia technologies are decision variables of the regional model (technologies on, rations
         available)."""
-        return bool(getattr(self, "feed_rations", None) or {})
+        return bool(getattr(self.seen, "feed_rations", None) or {})
 
     def _amm_context(self):
         """(technology blocks per animal, manure N per unit, CAPRI NH3 share, substitution) or None."""
         techs = self._manure_techs()
         _mc = self._mctx()
         man_d = _mc["man_d"] if _mc else None
-        env_ = getattr(self, "_env_for_surplus", None)
+        env_ = getattr(self.seen, "env_for_surplus", None)
         if not techs or man_d is None or env_ is None:
             return None
         try:
@@ -47,17 +47,24 @@ class AbatementBlock:
 
     def _amm_incentive(self, labels) -> bool:
         return ("N_balance" in labels or "mineral_N" in labels
-                or float(getattr(self, "ghg_tax", 0.0) or 0.0) > 0)
+                or float(getattr(self.seen, "ghg_tax", 0.0) or 0.0) > 0)
 
     def _catc_spec(self):
         """The winter cover option of this region for the NLP form ({"uaa", "m0", "lb", "ub", "k1", "lin", "sqr",
-        "biofix", "row", "rhs"}), or None (switch off, outside the EU, no data). UAAR: the region's base crop area
+        "biofix", "row", "rhs"}), or None (switch off, outside the EU without winterCovInAllRmssup, no data). UAAR: the region's base crop area
         (CAPRI's data UAAR, fixed); lb: the Farm-to-Fork requirement's share (e_minCoverCrops), set by the caller in
         the simulation; the winterCover_ row: sum_c winter cover share_c x crop_c + m x UAAR <= UAAR + fallow floor
         (supply_model.gms l. 1979-1992), its right-hand side at least the base point's (REGISTERED: CAPRI's MaxShare
         is from CAPRI's crop levels, the row from the model's)."""
         if not is_eu(self.data.region_id):
-            return None
+            # CAPRI's %winterCovInAllRmssup% (cover_crops.gms): outside the EU only with it on (the run's endotech
+            # settings; until 4 November 2026 never, SUPPLY_NONEU_DESIGN section 4)
+            _all = getattr(self.seen, "wintercov_in_all_rmssup", None)
+            if _all is None:
+                from capri_mod.policy.endotech import effective as _eff
+                _all = float(_eff()["winterCovInAllRmssup"]) > 0
+            if not _all:
+                return None
         opt = _inputs.current().cached(                                   # a missing file is an error (K74)
             "winter_cover_option", lambda inp: inp.csv("winter_cover_option.csv", "abatement/mitigation").set_index("region"))
         cc = getattr(self.data, "cover_crops", None)
@@ -74,7 +81,7 @@ class AbatementBlock:
         m0 = float(opt.at[reg, "ini_share"])
         row = [(j, float(wcs.at[a, "share"])) for j, a in enumerate(self.acts) if a in wcs.index and float(wcs.at[a, "share"]) > 0]
         cov0 = sum(float(base.get(self.acts[j], 0.0) or 0.0) * s for j, s in row)
-        rhs = max(uaa + float(getattr(self, "_fall_floor", 0.0) or 0.0), cov0 + m0 * uaa)
+        rhs = max(uaa + float(getattr(self.ev, "fall_floor", 0.0) or 0.0), cov0 + m0 * uaa)
         # the upper bound CAPRI's MaxShare (supply/set_miti_bounds.gms l. 30-34; K74, 29 October 2026: was
         # max(MaxShare, IniShare), the same in every unit, none has its initial share above the maximum)
         return {"uaa": uaa, "m0": m0, "lb": 0.0, "ub": float(opt.at[reg, "max_share"]),
@@ -99,7 +106,7 @@ class AbatementBlock:
             sc = {a: self._amm_scale(ss, float(man_d.get(a, 0.0) or 0.0), float(nh3.get(a, 0.0) or 0.0))
                   for a, ss in subs.items() if a in self.acts}
             out["amm"] = {"techs": techs, "subs": subs, "sc": sc, "wc": self._winter_cover_shares()}
-        _tl = getattr(self, "_fert_techs_all", None) or []
+        _tl = getattr(self.seen, "fert_techs_all", None) or []
         if _tl:
             ft = [(nm_, nmin_, a_, b_, smx_) for (nm_, nmin_, a_, b_, s0_, smx_) in _tl]
             mr = self._crop_mineral_now()
@@ -114,7 +121,7 @@ class AbatementBlock:
                                     if a_ in self.acts and float(m_ or 0.0) > 0],
                               "nman": float(nip["nman"]), "smax": nip["smax"], "S0": nip["S0"], "slope": nip["slope"],
                               "vtax": nip["v_tax"]}
-                self._nlp_nip = nip
+                self.ev.nlp_nip = nip
         return out
 
     def _nlp_tax_terms(self, tax, c, abat):
@@ -131,7 +138,7 @@ class AbatementBlock:
           inhibitor on manure  the tax value per t of manure N treated without the mineral N it displaces
         Returns (ghg_min for the NLP spec, c)."""
         from capri_mod.environmental.environmental_module import GWP_N2O
-        k = 44.0 / 28.0 * GWP_N2O
+        k = M_N2O / M_N2O_N * GWP_N2O
         # CAPRI's N2OSYN and the mineral part of N2OAMM from the region's MITERRA fractions, as the accounts take them
         # (_mineral_n2o_parts; until 31 October 2026 IPCC's EF1 and 10% x EF4 here while the accounts had moved to
         # MITERRA on 27 October, KNOWN_ISSUES K107)
@@ -144,9 +151,9 @@ class AbatementBlock:
         if l2 is not None and l3 is not None:
             out["nitr"] = (float(l2), float(l3))
         c = np.asarray(c, float).copy()
-        pc = getattr(self, "_pool_cols", None) or []
+        pc = getattr(self.ev, "pool_cols", None) or []
         if len(pc) == 2:
-            g_ = tax * float(getattr(self, "_pool_avail", 0.0) or 0.0) * (self._ef_mineral_n2o() + self._ef_mineral_lea()) \
+            g_ = tax * float(getattr(self.ev, "pool_avail", 0.0) or 0.0) * (self._ef_mineral_n2o() + self._ef_mineral_lea()) \
                 / 1000.0
             if pc[0] < len(c):
                 c[pc[0]] -= g_                       # export: paid the mineral N it was taken to buy
@@ -154,7 +161,7 @@ class AbatementBlock:
                 c[pc[1]] += g_                       # import: credited the mineral N it was taken to save
         if abat.get("amm"):
             abat["amm"]["tax_nh3"] = tax * self._ef_nh3_n2o() / 1000.0
-        nip = getattr(self, "_nlp_nip", None)
+        nip = getattr(self.ev, "nlp_nip", None)
         if abat.get("mni") and nip is not None:
             abat["mni"]["vtax"] = float(abat["mni"]["vtax"]) - tax * float(nip["sub"]) * float(nip["nman"]) \
                 * self._ef_mineral_n2o()
@@ -163,7 +170,7 @@ class AbatementBlock:
     def _cover_n_increment(self) -> float:
         """N (t) from the catch crops added by the Farm-to-Fork requirement: increment (1000 ha)
         x CAPRI's BioFix (t N per ha) x 1000."""
-        cv = getattr(self, "_cover", None)
+        cv = getattr(self.ev, "cover", None)
         return float(cv["delta"]) * float(cv["biofix"]) * 1000.0 if cv else 0.0
 
     def _cover_crop_requirement(self, reduction: float, organic_share) -> None:
@@ -179,7 +186,7 @@ class AbatementBlock:
         and the requirement exceeds the area that can carry a catch crop (its own winterCover_ row,
         with the filled shares) in 100 regions, an infeasible pair. REGISTERED: the filled shares
         (NUTS2 <- member state <- EU, define_greening_limits.gms) in both, and the requirement capped
-        at that potential area at base. Sets self._cover: requirement and increment (1000 ha),
+        at that potential area at base. Sets self.ev.cover: requirement and increment (1000 ha),
         UAAR, catch-crop N per ha and cost per ha."""
         cc = getattr(self.data, "cover_crops", None)
         wcs = getattr(self.data, "winter_cover_share", None)
@@ -195,14 +202,14 @@ class AbatementBlock:
         o = 0.0
         if organic_share:
             v = targets.get("uaa_pp") if (targets is not None and hasattr(targets, "get")) else None
-            o = (float(v) / 100.0 * max(0.0, (100.0 * float(organic_share) - 12.0) / 13.0) if v is not None and not pd.isna(v)
+            o = (float(v) / 100.0 * self._organic_target_scale(float(organic_share)) if v is not None and not pd.isna(v)
                  else max(0.0, float(organic_share) - self._organic_baseline()))
         f = 0.5 * o + 0.5 * max(0.0, reduction - o)
         c0 = float(cc.get("catc_share_2030", 0.0) or 0.0) * uaa
         pot = max(0.0, uaa - covered)
         req = min(f * pot + c0, max(pot, c0))
         bf = cc.get("biofix_t_n_ha")
-        self._cover = {"req": req, "delta": max(0.0, req - c0), "base": c0, "uaa": uaa, "potential": pot,
+        self.ev.cover = {"req": req, "delta": max(0.0, req - c0), "base": c0, "uaa": uaa, "potential": pot,
                        "biofix": float(bf) if bf is not None and not pd.isna(bf) else 0.0,
                        "cost": float(cc.get("catc_cost_eur_ha", 0.0) or 0.0)}
 
@@ -231,15 +238,15 @@ class AbatementBlock:
     def _winter_cover_shares(self):
         """(base, current) winter cover share of the region, CAPRI's v_Miti(CATC, WinterCov): the 2030 catch-crop share
         (cover_crops.csv catc_share_2030, CAPRI's value) and, under the Farm-to-Fork catch-crop requirement, the required
-        area over UAAR (self._cover)."""
+        area over UAAR (self.ev.cover)."""
         cc = getattr(self.data, "cover_crops", None)
         w0 = 0.0
         if cc is not None and hasattr(cc, "get"):
             v = cc.get("catc_share_2030")
             w0 = float(v) if v is not None and not pd.isna(v) else 0.0
-        if getattr(self, "_wc_solved", None) is not None:
-            return w0, float(self._wc_solved)                     # chosen in the NLP form
-        cv = getattr(self, "_cover", None)
+        if getattr(self.sv, "wc_solved", None) is not None:
+            return w0, float(self.sv.wc_solved)                     # chosen in the NLP form
+        cv = getattr(self.ev, "cover", None)
         w1 = float(cv["req"]) / float(cv["uaa"]) if cv and float(cv.get("uaa", 0.0) or 0.0) > 0 else w0
         return w0, w1
 
@@ -248,9 +255,9 @@ class AbatementBlock:
         N relief and NH3 saved per activity unit, extra cost per unit, reported shares (share
         of the animal's units) and the shares for the next linearisation."""
         from capri_mod.supply import ammonia_techs as _at
-        self._animal_n_relief, self._animal_nh3_saved, self._manure_tech_shares = {}, {}, {}
-        self._animal_n_kept = {}
-        self._amm_cost = {}
+        self.ev.animal_n_relief, self.res.animal_nh3_saved, self.res.manure_tech_shares = {}, {}, {}
+        self.res.animal_n_kept = {}
+        self.ev.amm_cost = {}
         ctx = self._amm_context()
         if ctx is None:               # no N balance this solve: base shares, for reporting
             for a, subs in self._manure_techs().items():
@@ -258,7 +265,7 @@ class AbatementBlock:
                     for s in subs:
                         for t in s["techs"]:
                             k = (a, t["tech"])
-                            self._manure_tech_shares[k] = self._manure_tech_shares.get(k, 0.0) + s["w"] * t["ini"]
+                            self.res.manure_tech_shares[k] = self.res.manure_tech_shares.get(k, 0.0) + s["w"] * t["ini"]
             return
         techs, man_d, nh3, sub = ctx
         wc0, wc1 = self._winter_cover_shares()
@@ -279,13 +286,13 @@ class AbatementBlock:
                 cost += s["w"] * s["stock"] * _at.cost(s, sh)
                 for t in s["techs"]:
                     k = (a, t["tech"])
-                    self._manure_tech_shares[k] = self._manure_tech_shares.get(k, 0.0) + s["w"] * sh[t["tech"]]
+                    self.res.manure_tech_shares[k] = self.res.manure_tech_shares.get(k, 0.0) + s["w"] * sh[t["tech"]]
             if abs(saved) > 0 or abs(nh3s) > 0:
-                self._animal_n_relief[a] = sub * saved
-                self._animal_n_kept[a] = saved
-                self._animal_nh3_saved[a] = nh3s
-            self._amm_cost[a] = cost
-        self._amm_last = last
+                self.ev.animal_n_relief[a] = sub * saved
+                self.res.animal_n_kept[a] = saved
+                self.res.animal_nh3_saved[a] = nh3s
+            self.ev.amm_cost[a] = cost
+        self.sv.amm_last = last
 
     def _apply_manure_techs(self, lam: float):
         """CAPRI's ammonia technologies, adopted under the N shadow price
@@ -313,7 +320,7 @@ class AbatementBlock:
                 for s in subs:
                     shares[(a, s["key"])] = _at.choose(s, lam * sub, sc * s["mrel"])
         self._amm_record(shares)
-        for a, c in (getattr(self, "_amm_cost", None) or {}).items():
+        for a, c in (getattr(self.ev, "amm_cost", None) or {}).items():
             if c and a in self.net_revenues.index:
                 self.net_revenues[a] = float(self.net_revenues[a]) - c
 
@@ -328,10 +335,10 @@ class AbatementBlock:
         of manure N: N-balance price x a x NMAN (the mineral N it replaces). Its share is separate
         from the mineral-fertiliser options (TotMitFertMan_), outside Tot_MitFert_.
         REGISTERED: the crop-need floor on mineral N keeps a x manure without the gain."""
-        self._manure_ni_relief, self._manure_ni_nh3, self._manure_ni_share = {}, {}, 0.0
+        self.ev.manure_ni_relief, self.ev.manure_ni_nh3 = {}, {}
         if self._ni_inside():
             return                       # decided inside the regional model
-        tax = float(getattr(self, "ghg_tax", 0.0) or 0.0)
+        tax = float(getattr(self.seen, "ghg_tax", 0.0) or 0.0)
         lam = float(lam or 0.0)
         if lam <= 0 and tax <= 0:
             return
@@ -349,14 +356,13 @@ class AbatementBlock:
             mN = float(man_d.get(a, 0.0) or 0.0)
             if mN <= 0:
                 continue
-            self._manure_ni_relief[a] = sub * nman * sh * mN
+            self.ev.manure_ni_relief[a] = sub * nman * sh * mN
             if a in self.net_revenues.index:
                 # option cost; under the emission tax the tax saved per head at this share (the animal's own
                 # coefficient is taken at no adoption) - the N value reaches the animal through the N row instead
                 self.net_revenues[a] = float(self.net_revenues[a]) - (c_t - v_tax * sh) * mN / 1000.0
             if a in app_nh3:
-                self._manure_ni_nh3[a] = sh * app_nh3[a]      # t NH3-N per activity unit
-        self._manure_ni_share = sh
+                self.ev.manure_ni_nh3[a] = sh * app_nh3[a]      # t NH3-N per activity unit
 
     def _ni_inside(self) -> bool:
         """Inhibitors on manure as a decision of the regional model (no N-price search)."""
@@ -366,7 +372,7 @@ class AbatementBlock:
         """The parameters of CAPRI's inhibitor on manure for this region (see _apply_manure_inhibitor), or None:
         sub, nman, smax, S0, slope (EUR per t of manure N), app_nh3 (t NH3-N per activity unit at full adoption),
         v_tax (EUR per t of manure N treated), man_d (t manure N per activity unit)."""
-        tax = float(getattr(self, "ghg_tax", 0.0) or 0.0)
+        tax = float(getattr(self.seen, "ghg_tax", 0.0) or 0.0)
         # national entry (fert_options_jul15.csv is keyed by CAPRI codes)
         _ms = capri_ms(self.data.region_id)
         ni = next((t for t in fert_option_table().get(_ms, []) if str(t.option).upper() == "NITR_INH"), None)
@@ -380,17 +386,17 @@ class AbatementBlock:
         if sub <= 0:
             return
         q0, k1 = float(ni.QEmitt_noc), float(ni.costParLin)
-        q = 0.9 * q0            # ghgMiti.gms l. 110: QEmitt(NITR_INH) = 0.9 x QEmitt(NOC), also for N2OMAN
+        q = param("NITR_INH_EMISSION_FACTOR") * q0    # ghgMiti.gms l. 110: 0.9 x QEmitt(NOC), also for N2OMAN
         if not (q > 0 and q0 > q and k1 > 0):
             return
-        nman = (q0 / q - 1.0) ** P_FERT_EFF_COR
+        nman = (q0 / q - 1.0) ** param("P_FERT_EFF_COR")
         x = overfert_factor(self.data.region_id)
         if x is not None:
-            cap = x + OVERFERT_MARKUP
+            cap = x + param("OVERFERT_MARKUP")
             if cap <= sub:
                 return
-            if cap < (nman ** (1.0 / P_FERT_EFF_COR) + 1.0) * sub:
-                nman = (cap / sub - 1.0) ** P_FERT_EFF_COR
+            if cap < (nman ** (1.0 / param("P_FERT_EFF_COR")) + 1.0) * sub:
+                nman = (cap / sub - 1.0) ** param("P_FERT_EFF_COR")
         # maximum share: manure N not dropped on pasture (grazing shares of the ammonia data)
         base = self._base_levels()
         tot = graz = 0.0
@@ -403,7 +409,8 @@ class AbatementBlock:
         smax = 1.0 - graz / tot if tot > 0 else 0.0
         if smax <= 0:
             return
-        S0, slope = 0.2 * k1, k1 * (1.2 - 0.2) / smax
+        r0, r1 = param("MITI_RELSUBS0"), param("MITI_RELSUBS1")              # ghgMiti.gms l. 885-887, 904-906
+        S0, slope = r0 * k1, k1 * (r1 - r0) / smax
         if SupplyModule.fert_slope_with_saving:
             # CAPRI's pmpParSqr of the inhibitor on manure (envind/ghgMiti.gms l. 1036-1050), as the mineral options'
             # (_fert_techs, the same switch): + nmE x p_manureShadVal x ((1 + nmE m1)^-2 - (1 + nmE m0)^-2) / (m1 - m0),
@@ -423,7 +430,7 @@ class AbatementBlock:
         from capri_mod.supply import ammonia_techs as _at
         lit = fert_side_value(self.data.region_id, "NITR_INH_MAN", "NH3APP")
         f_app = ((1.0 - lit) * (1.0 + nman) - 1.0) if lit is not None else 0.0
-        last = getattr(self, "_amm_last", None) or {}
+        last = getattr(self.sv, "amm_last", None) or {}
         app_nh3 = {}                                         # t NH3-N per activity unit at full adoption
         for a in self.acts:
             mN = float(man_d.get(a, 0.0) or 0.0)
@@ -446,8 +453,8 @@ class AbatementBlock:
         application NH3 (NH3APP). Weighted over the region's animals by their base manure N (REGISTERED: weights and the
         ammonia cascade multiplier on application N2O held at base)."""
         from capri_mod.environmental.environmental_module import EF_SOIL_N2O_INDIRECT, GWP_N2O
-        env_ = getattr(self, "_env_for_surplus", None)
-        k = 44.0 / 28.0 * GWP_N2O
+        env_ = getattr(self.seen, "env_for_surplus", None)
+        k = M_N2O / M_N2O_N * GWP_N2O
         v = sub * nman * self._ef_mineral_n2o()
         lit2 = fert_side_value(self.data.region_id, "NITR_INH_MAN", "N2OAPP")
         tot = n2o = nh3x = 0.0
@@ -476,8 +483,8 @@ class AbatementBlock:
     # column's emission per unit at the baseline; set by CAPRIModel (ghg_tax, ghg_coef) for EU regions
     # ------------------------------------------------------------------------------------------
     def _ghg_cost(self, kind, key=None) -> float:
-        tax = float(getattr(self, "ghg_tax", 0.0) or 0.0)
-        co = getattr(self, "ghg_coef", None)
+        tax = float(getattr(self.seen, "ghg_tax", 0.0) or 0.0)
+        co = getattr(self.seen, "ghg_coef", None)
         if tax <= 0 or not co:
             return 0.0
         v = co.get(kind)
@@ -488,26 +495,26 @@ class AbatementBlock:
     def _apply_ghg_tax(self) -> None:
         """Activities: net revenue - tax x emission per ha or head (CAPRI's objective term)."""
         # net revenues not rebuilt since the last application (same object): take that one back first
-        prev = getattr(self, "_ghg_applied", None)
-        if prev and getattr(self, "_ghg_nr_obj", None) is self.net_revenues:
+        prev = getattr(self.ev, "ghg_applied", None)
+        if prev and getattr(self.ev, "ghg_nr_obj", None) is self.net_revenues:
             for a, d in prev.items():
                 self.net_revenues[a] = float(self.net_revenues[a]) + d
-        self._ghg_applied = {}
-        self._ghg_nr_obj = self.net_revenues
-        tax = float(getattr(self, "ghg_tax", 0.0) or 0.0)
-        co = getattr(self, "ghg_coef", None)
+        self.ev.ghg_applied = {}
+        self.ev.ghg_nr_obj = self.net_revenues
+        tax = float(getattr(self.seen, "ghg_tax", 0.0) or 0.0)
+        co = getattr(self.seen, "ghg_coef", None)
         if tax <= 0 or not co:
             return
         for a, e in (co.get("act") or {}).items():
             if a in self.net_revenues.index:
                 d = tax * float(e)
                 self.net_revenues[a] = float(self.net_revenues[a]) - d
-                self._ghg_applied[a] = d
+                self.ev.ghg_applied[a] = d
 
     def _ghg_feed_cost(self):
         """Flexible feeds: tax x emission per t fed, in the regional objective's EUR/kg units ({(animal, feed)})."""
-        tax = float(getattr(self, "ghg_tax", 0.0) or 0.0)
-        co = getattr(self, "ghg_coef", None)
+        tax = float(getattr(self.seen, "ghg_tax", 0.0) or 0.0)
+        co = getattr(self.seen, "ghg_coef", None)
         if tax <= 0 or not co or not co.get("feed"):
             return None
         return {k: tax * float(e) / 1000.0 for k, e in co["feed"].items()}
@@ -526,11 +533,21 @@ class AbatementBlock:
         from the base dual of the land row (F = 0 optimal at base, CAPRI's IniShare 0), so fallowing
         rises where the land rent falls - CAPRI's calibration does the same with its own rent in
         costsaving0. Its N2O (and CO2, CH4) on the idled area stop (QEmitt = 1 - p_ghgTechHisto = 0)."""
-        self._hist_cols = {}
+        self.ev.hist_cols = {}
         h = getattr(self.data, "histosol", None)
         if h is None or not hasattr(h, "get"):
             return Qa, ca, Aa, ba, start
-        cal = getattr(self, "_hist_cal", None)
+        # CAPRI's rmssup_histo (no_histosols.gms l. 22-26): the EU's supply regions, all of them with %fallowInAllRmssup%
+        # on (the run's endotech settings, set by CAPRIModel before a run; a model solved outside a run takes the
+        # settings file's)
+        if not is_eu(self.data.region_id):
+            _all = getattr(self.seen, "fallow_in_all_rmssup", None)
+            if _all is None:
+                from capri_mod.policy.endotech import effective as _eff
+                _all = float(_eff()["fallowInAllRmssup"]) > 0
+            if not _all:
+                return Qa, ca, Aa, ba, start
+        cal = getattr(self.par, "hist_cal", None)
         pend = {}
         for cls, row_lab in self.HISTOSOL_CLASSES:
             sqr, sh, mx = h.get(f"pmp_sqr_{cls}"), float(h.get(f"share_{cls}", 0.0) or 0.0), h.get(f"maxshare_{cls}")
@@ -559,18 +576,18 @@ class AbatementBlock:
             Qa = np.pad(Qa, ((0, 1), (0, 1))); Qa[-1, -1] = float(sqr) / H
             ca = np.concatenate([ca, [cal[cls] + self._ghg_cost('hist', cls)]])
             start = np.concatenate([start, [0.0]])
-            self._hist_cols[cls] = Aa.shape[1] - 1
-        self._hist_pending = pend or None
+            self.ev.hist_cols[cls] = Aa.shape[1] - 1
+        self.par.hist_pending = pend or None
         return Qa, ca, Aa, ba, start
 
     def _histosol_calibrate_from_duals(self, duals):
-        pend = getattr(self, "_hist_pending", None)
+        pend = getattr(self.par, "hist_pending", None)
         if not pend:
             return
-        cal = dict(getattr(self, "_hist_cal", None) or {})
+        cal = dict(getattr(self.par, "hist_cal", None) or {})
         if duals is not None:
             for cls, col in pend.items():
                 if len(duals) >= len(col):
                     cal[cls] = -float(np.asarray(duals[:len(col)], float) @ col)
-        self._hist_cal = cal
-        self._hist_pending = None
+        self.par.hist_cal = cal
+        self.par.hist_pending = None

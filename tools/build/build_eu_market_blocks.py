@@ -6,7 +6,7 @@ aggregation file (KNOWN_ISSUES K101).
 Rows: section 4 of gams/aggregation/defaultA.agg (one line per old region: code, name & new region & flag), the
 member states mapped to EU_WEST or EU_EAST, in the file's order: CAPRI's rows only. Until 30 October 2026 Norway was
 added to EU_WEST, capri-mod's former routing of its supply models into the EU market; Norway has been its own market
-region NOR since KNOWN_ISSUES K56, as in CAPRI (NO000000), and the row is gone. Until 29 October 2026 the file had no
+region NO000000 since KNOWN_ISSUES K56, as in CAPRI (NO000000), and the row is gone. Until 29 October 2026 the file had no
 builder.
 
     python tools/build/build_eu_market_blocks.py [--agg FILE]
@@ -17,9 +17,12 @@ import argparse
 import csv
 import re
 from pathlib import Path
+import sys  # noqa: E402
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
+from paths import SOURCES  # noqa: E402  (CAPRI's material outside the repository)
 
 ROOT = Path(__file__).resolve().parents[2]
-AGG = Path("/home/claude/work/allgms/gams/aggregation/defaultA.agg")
+AGG = SOURCES / "gams/aggregation/defaultA.agg"
 OUT = ROOT / "capri_data" / "shared" / "eu_market_blocks.csv"
 BLOCKS = ("EU_WEST", "EU_EAST")
 SOURCE = "gams/aggregation/defaultA.agg"

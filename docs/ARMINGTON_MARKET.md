@@ -15,7 +15,7 @@ Code: `capri_mod/market/bilateral.py` (`BilateralCommodity`: one product's trade
 ## Regions and products
 
 - 26 trade regions (`definitions.ALL_TRADE_REGIONS`): EU27, 24 non-EU countries and ROW (Egypt, Algeria, Saudi
-  Arabia and Iran, regions without data, removed on 29 October 2026: KNOWN_ISSUES K45). One of them is Norway (NOR,
+  Arabia and Iran, regions without data, removed on 29 October 2026: KNOWN_ISSUES K45). One of them is Norway (NO000000,
   since 21 October 2026, KNOWN_ISSUES K56): CAPRI's market region NO000000, its own market region in
   `gams/aggregation/defaultA.agg` and linked to supply models (RMSSUP); before, CAPRI's bilateral data folded it into
   ROW while its supply regions NO01-NO07 fed the EU's market supply.
@@ -24,7 +24,7 @@ Code: `capri_mod/market/bilateral.py` (`BilateralCommodity`: one product's trade
   BL) and EU_EAST (EU-13), each with its own market prices and bilateral trade between them
   (`capri_data/shared/eu_market_blocks.csv`, data files `*_eu2.csv`). The EU's common external tariff and the EU's
   tariff-rate quotas apply to both blocks; an `EU27` row (quantities summed, prices production-weighted) is added to
-  the results for reporting (`_with_eu_aggregate`). Norway is its own market region NOR in both settings, as in
+  the results for reporting (`_with_eu_aggregate`). Norway is its own market region NO000000 in both settings, as in
   CAPRI.
 - 58 market commodities (`definitions.MARKET_COMMODITIES`). 57 have CAPRI bilateral flows; raw milk (MILK) has none
   and clears as a pooled market (one price ratio for the non-EU regions); the EU's raw milk is priced by the dairy
@@ -61,7 +61,7 @@ adds points of ad valorem tariff to the EU's imports (`import_prices`; flows bet
 
 - `bilateral_flows_<year>[_eu2].csv`: per importer, exporter and product the flow (ImportQ) and a, b, a0;
 - `bilateral_regions_<year>[_eu2].csv`: market prices (PMRK) and production per region;
-- `bilateral_trq_<year>.csv`: the EU's bilateral TRQs (below);
+- `bilateral_trq_<year>.csv`, `bilateral_trq_global_<year>.csv`: CAPRI's bilateral and global TRQs (below);
 - `armington_rho.csv`: s1 (rho1) and s2 (rho2) per product. CAPRI's defaults are 8 and 10 (`arm/market1.gms`
   l. 108-109; 3 and 5 for biofuels, l. 119-120), overridden by `special_ch/market1_ch.gms` (CEPII; Fontagné,
   Guimbard and Orefice 2019) as CAPRI includes it, e.g. wheat 3.9 / 7.8, beef 3.5 / 7.1, pork 6.7 / 13.4, butter
@@ -104,11 +104,11 @@ Supply (`supply_response`, region_ratio given):
 - The supply models of Norway see Norway's prices: `model.py` relaxes Norway's departure from the EU signal
   (`_sup_dev`: its producer price ratios, raw milk its dairy block's) as it does the EU trade blocks', and hands it to
   the supply module as a member-state departure (`price_dev_ms["NO000000"]`), to Norway's feed bulk price indices
-  (`feed_bulk_price_ratios`) and to its young-animal market (yaniMarket_ per market region: NOR).
+  (`feed_bulk_price_ratios`) and to its young-animal market (yaniMarket_ per market region: NO000000).
 
 Use (`demand_response`, at the consumer price PA_i): CAPRI's GL food demand on the human-consumption share of use;
 feed (EU and Norway: CAPRI's feed bulks following the supply models' herds, [FEED_MARKETS.md](FEED_MARKETS.md),
-Norway's from `feed_bulks_no.csv` on CAPRI's feed share of its use; other non-EU regions: p_ElasFeed, which CAPRI
+Norway's from `feed_bulks_noneu.csv` on CAPRI's feed share of its use; other non-EU regions: p_ElasFeed, which CAPRI
 has only outside RMSSUP); processing (ProcNQ_);
 crushing; biofuel feedstocks and biofuel use; dairy products; the remaining share of use keeps an own-price response
 QD0 (P/P0)^eta.
@@ -130,20 +130,28 @@ converged baseline supply is frozen and inherited by the scenario (cached with t
 
 ## Tariff-rate quotas
 
-CAPRI's EU bilateral TRQs (`TrqNT` of the EU policy block; `build_trq` → `bilateral_trq_<year>.csv`): per model
-exporter the quota, the gap between the out-of-quota (MFN: TAMFN, TSMFN) and the in-quota price, and the share of the
-flow under the quota regime. The specific tariff on the flow moves with CAPRI's sigmoid, slope 200 on
-(fill − 0.97) (p_trqSigmoidSlope, `arm/market_model.gms` l. 339; `TRQ_SLOPE` in `model_parameters.csv`), relative to the
-base fill so that the base is reproduced. Each quota's tariff is solved by bisection consistently with its own flow
-at every market step (`trq_solve`); the market solve stops only when the tariffs have stopped moving. Always on (the switch `MarketModule.use_trq` was removed on 27 October
-2026).
+CAPRI's tariff-rate quotas on its policy blocks (RMTP), since 4 November 2026 (market move stages 4-5,
+docs/design/PORTS_STAGE4.md; `build_trq`, `build_trq_global` → `bilateral_trq_<year>.csv`, `bilateral_trq_global_<year>.csv`):
 
-In CAPRI's 2030 reference (`bilateral_trq_2030.csv`) the EU's meat quotas are far from filled: beef 13 of 157 kt,
-poultry 108 of 422 kt from the exporters with bilateral quotas. In the Farm-to-Fork runs of Sprint 8m (October 2026)
-they did not bind.
+- the 130 bilateral quotas of every importer (EU 81, MOR 16, TUR 15, MED 11, NO000000 5, RUS 2), each filled by the
+  flows between the two blocks' market regions (TradeFlowsAgg_; the EU's quotas by both EU blocks, those on MER by ARG,
+  BRA and URUPAR); its sigmoid (trqSigmoidFunc_, slope 200 on fill / TrqNT - 0.97) moves the ad valorem and specific
+  rates from TaPref, TsPref to TaMFN, TsMFN (tarAdval_, tarSpec_), the ad valorem part on the exporter's current market
+  price plus the transport cost (impPrice_);
+- the 70 global quotas (TRQImports_, tarAdValW_, tarSpecW_): their imports are the flows of the exporters without a
+  bilateral quota and without free trade (p_doubleZero) plus the bilateral quotas' overfill; those exporters pay the
+  global rates, and a bilateral quota's flows pay the smaller of the two (ncpcm, GAMS's smoothed minimum);
+- the 4 quotas under the EU's entry price system (tomatoes and citrus from MOR and MED) keep their base tariffs until
+  stage 6.
 
-REGISTERED: global (erga omnes) quotas, in-quota specific tariffs other than CAPRI's applied ones, and CAPRI's
-augmented-CES commitment terms of the second nest (p_arm2Commit) are not represented.
+The base import prices are CAPRI's; each regime adds the change of its rates from their value at the base flows, so
+the base is reproduced exactly. The quotas' sigmas are solved by bisection at every market step with the flows' own
+price response (`trq_solve`), with a guarded Aitken step where a sigma converges linearly; the market solve stops when
+the residuals and the sigmas have stopped moving. Quota rents as CAPRI's (reports/sol_market.gms l. 1127). G2a's CasADi
+trade function (`trade_trq_function`) has the bilateral quotas only.
+
+REGISTERED: CAPRI's augmented-CES commitment terms of the second nest (p_arm2Commit) are not represented; p_doubleZero
+for the 2017 market year is the 2030 agreements (sim_ini_21730; no 2017 listing carries it).
 
 ## Reported prices and the price signal
 

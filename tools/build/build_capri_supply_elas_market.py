@@ -1,7 +1,7 @@
 """CAPRI's market supply elasticities p_elasSupp at its 2017 calibration (elas1717defaulta.gdx) and their EU medians
 (KNOWN_ISSUES K101).
 
-    capri_data/sources/arm/capri_supply_elas_market_1717.csv   region, prod, wrt, value
+    capri_data/2017/supply/capri_supply_elas_market_1717.csv   region, prod, wrt, value
         every record of p_elasSupp(region, prod, wrt, 'CAL') of the gdxdump p_elasSupp.txt, in its order; read by
         capri_mod/supply/capri_pmp.py (the livestock elasticities of the elasticity-calibrated PMP)
     capri_data/2017/market/supply_elas_eu.csv                  commodity, capri_code, elasticity, member_states
@@ -29,10 +29,12 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "lib"))
 from _model_regions import EU_MS  # noqa: E402  CAPRI's EU member states (shared/eu_market_blocks.csv)
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
+from paths import EXPORTS  # noqa: E402  (CAPRI's material outside the repository)
 
 ROOT = Path(__file__).resolve().parents[2]
-SRC = Path("/mnt/user-data/uploads/p_elasSupp.txt")
-OUT = ROOT / "capri_data" / "sources" / "arm"
+SRC = EXPORTS / "p_elasSupp.txt"
+OUT = ROOT / "capri_data" / "2017" / "supply"
 REC = re.compile(r"^'([^']+)'\.'([^']+)'\.'([^']+)'\.'CAL'\s+([^,\s]+)")
 
 

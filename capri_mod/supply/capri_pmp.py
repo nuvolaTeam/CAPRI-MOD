@@ -23,9 +23,10 @@ The four pieces
    share of the region's arable land gets a flatter response. Non-crop
    activities take 1.0.
 
-3. Crop-to-group mapping (EPRD_TO_GRP), needed to attach the cross-group PMP
-   terms. Taken verbatim from gams/sets.gms; the variant in gams/capdis/sets.gms
-   uses a different group set and must not be used here.
+3. Crop-to-group mapping (EPRD_TO_GRP, gams/sets.gms; the variant in gams/capdis/sets.gms uses a different group
+   set and must not be used here): the share term's arable activities, read from
+   capri_data/codes/model_activity_classes.csv (share_term_arable), checked against CAPRI's set by
+   tools/build/build_code_lists.py (refactor stage 3, N6).
 
 4. Provenance. Every region x activity elasticity is recorded as REGIONAL_CAPRI, PMP_CAPRI,
    CAPRI_COUNTRY (member state's calibrated value), CAPRI_CAL_PRODUCT (livestock: the product's
@@ -40,80 +41,42 @@ from typing import Dict, Optional, Tuple
 import numpy as np
 import pandas as pd
 from capri_mod.params import param, param_table
-from capri_mod.data.definitions import MS_CODE
+from capri_mod.data.definitions import MS_CODE, ACTIVITY_CLASSES, CAPRI_TO_MODEL_ACTIVITY, COMMODITY_CAPRI_CODE
 
 # --- 1. dampening ----------------------------------------------------------
 
-ELAS_HIGH = param("ELAS_HIGH")      # p_elasHigh
-ELAS_CAP = param("ELAS_CAP")        # MIN(8, ...)
-
-
 def dampen_elasticity(eps):
-    """CAPRI's heuristic upper bound. Values at or below ELAS_HIGH pass through."""
+    """CAPRI's heuristic upper bound. Values at or below p_elasHigh (the parameter ELAS_HIGH) pass through; the
+    bound is MIN(8, ...) (ELAS_CAP). Both read through the run's inputs (refactor stage 3, N1)."""
+    elas_high, elas_cap = param("ELAS_HIGH"), param("ELAS_CAP")
     e = np.asarray(eps, dtype=float)
-    damped = np.minimum(ELAS_CAP, np.sqrt(np.maximum(e, 0.0))
-                        + ELAS_HIGH - np.sqrt(ELAS_HIGH))
-    return np.where(e > ELAS_HIGH, damped, e)
+    damped = np.minimum(elas_cap, np.sqrt(np.maximum(e, 0.0))
+                        + elas_high - np.sqrt(elas_high))
+    return np.where(e > elas_high, damped, e)
 
 
 # --- 2. share term ---------------------------------------------------------
-
-SHARE_COEF = param("SHARE_COEF")
-
 
 def share_term(activity_levels: pd.Series, arable_total: float,
                crop_activities: set) -> pd.Series:
     """1 - 0.2*sqrt(share of arable) for crops, 1.0 otherwise."""
     out = pd.Series(1.0, index=activity_levels.index, dtype=float)
+    share_coef = param("SHARE_COEF")
     if arable_total and arable_total > 0:
         for a in activity_levels.index:
             if a in crop_activities:
                 share = max(float(activity_levels.get(a, 0.0)), 0.0) / arable_total
-                out[a] = max(1.0 - SHARE_COEF * np.sqrt(min(share, 1.0)), 0.1)
+                out[a] = max(1.0 - share_coef * np.sqrt(min(share, 1.0)), 0.1)
     return out
 
 
-# --- 3. crop -> PMP group (gams/sets.gms:2918) -----------------------------
+# --- 3. the share term's arable activities -----------------------------------
 
-EPRD_TO_GRP: Dict[str, str] = {
-    "SWHE": "CERE", "DWHE": "CERE", "RYEM": "CERE", "BARL": "CERE", "OATS": "CERE",
-    "MAIZ": "CER2", "CORN": "CER2", "OCER": "CER2", "PARI": "CER2",
-    "RAPE": "OILS", "SUNF": "OILS", "SOYA": "OILS",
-    "PULS": "OARA", "POTA": "OARA", "SUGB": "OARA",
-    "MAIF": "FARA", "ROOF": "FARA", "OFAR": "FARA",
-    "OFOD": "FARA",          # the model's OFOD is CAPRI's OFAR (other fodder on arable land)
-}
-
-# Activities on arable land, used for the share term denominator. Permanent
-# crops, grassland and livestock are excluded.
-ARABLE_ACTIVITIES = set(EPRD_TO_GRP) | {"SETA", "OFOD", "TEXT", "TOBA"}
-
-
-# --- 4a. synthetic-anchor guard --------------------------------------------
-
-def detect_synthetic_base_activities(base_areas: pd.DataFrame,
-                                     min_regions: int = 30) -> set:
-    """
-    Activities whose base level is a constant placeholder across all regions.
-
-    A real elasticity calibrated around a fake base level produces a real-looking
-    but meaningless response: PMP curvature scales as 1/(eps * x0), so a small
-    invented x0 combined with a large genuine eps makes the activity explode under
-    any shock. In this dataset COTT, OFIB, OFOD and SETA are flat constants
-    (1.0, 2.0, 3.0, 5.0 kha in every region), and OFOD carries a real CAPRI
-    elasticity of 4.27 against a default of 0.12 — a 35x jump on a fictional
-    anchor, which drove a +128% acreage response in the shock test.
-
-    Note that the lognormal fingerprint detector cannot see these: it looks for
-    a coefficient of variation near 0.10, and these columns have a CV of exactly
-    zero.
-    """
-    synthetic = set()
-    for col in base_areas.columns:
-        v = base_areas[col].replace(0, np.nan).dropna()
-        if len(v) >= min_regions and float(v.std()) < 1e-9:
-            synthetic.add(col)
-    return synthetic
+# Activities on arable land, used for the share term denominator: CAPRI's crop groups EPRD_TO_GRP (gams/sets.gms
+# l. 2918 ff.; CERE, CER2, OILS, OARA, FARA) through the crosswalk (MAIZ = CORN, OFAR and ROOF = OFOD), plus set-aside,
+# textiles and tobacco (the model's); capri_data/codes/model_activity_classes.csv share_term_arable (refactor stage 3,
+# N6). Permanent crops, grassland and livestock are excluded.
+ARABLE_ACTIVITIES = tuple(a for a, r in ACTIVITY_CLASSES.items() if r["share_term_arable"] == "1")   # in CROPS order
 
 
 # --- 4b. provenance-tracked elasticity table --------------------------------
@@ -126,20 +89,30 @@ REGIONAL_FILE = "supply_elasticities_regional.csv"
 PMP_ELAS_FILE = "pmp_own_price_elasticities.csv"
 COUNTRY_ELAS_FILE = "capri_own_price_elasticities.csv"
 #: the country file's CAPRI codes -> model activities (animal products and young animals are not activities)
-COUNTRY_ELAS_ALIASES = {"MAIZ": "CORN", "TWIN": "WINE"}
+COUNTRY_ELAS_ALIASES = CAPRI_TO_MODEL_ACTIVITY        # MAIZ = CORN, TWIN = WINE (codes/model_activities.csv, N6)
 
 # CAPRI names grain maize MAIZ; the model calls it CORN. Fodder on arable land OFAR is the model's OFOD (OFAR + ROOF;
 # CAPRI's sources carry OFAR only): without the alias the 14 Mha of other fodder stayed on the literature default
 # 0.12 against CAPRI's median 1.05 (K32).
-ACTIVITY_ALIASES = {"MAIZ": "CORN", "OFAR": "OFOD"}
-LIVESTOCK_ELAS_FILE = "sources/arm/capri_supply_elas_market_1717.csv"
-LIVESTOCK_PRODUCT = {"DCOW": "MILK", "BCOW": "BEEF", "BULL": "BEEF", "HFRS": "BEEF", "CALV": "BEEF",
-                     "PIGS": "PORK", "PIGF": "PORK", "LAYS": "EGGS", "BROI": "POUM", "SHGM": "MILK", "SHGF": "SGMT"}
+ACTIVITY_ALIASES = CAPRI_TO_MODEL_ACTIVITY            # MAIZ = CORN, OFAR = OFOD (codes/model_activities.csv, N6)
+LIVESTOCK_ELAS_FILE = "capri_supply_elas_market_1717.csv"   # in the base year's supply inputs
+#: the CAPRI market product of each animal: its price source (model_activity_classes.csv) in CAPRI's code (N6)
+LIVESTOCK_PRODUCT = {a: COMMODITY_CAPRI_CODE[r["price_source"]] for a, r in ACTIVITY_CLASSES.items() if r["price_source"]}
 LIVESTOCK_MS = MS_CODE
-YOUNG_ELAS_FILE = "sources/arm/capri_supply_elas_young_1720.csv"
+YOUNG_ELAS_FILE = "capri_supply_elas_young_1720.csv"       # in the base year's supply inputs
 #: young animals produced by each cattle activity (CAPRI YCAM/YCAF, YBUL/YHEI, YCOW)
-LIVESTOCK_YOUNG = {"DCOW": ("YCAM", "YCAF"), "BCOW": ("YCAM", "YCAF"), "CALV": ("YBUL", "YHEI"), "HFRS": ("YCOW",),
-                   "PIGS": ("YPIG",)}   # sows: piglets
+LIVESTOCK_YOUNG = {a: tuple(r["young_outputs"].split(";")) for a, r in ACTIVITY_CLASSES.items() if r["young_outputs"]}
+
+
+def _to_model_codes(codes, aliases, what):
+    """CAPRI codes renamed to the model's; two CAPRI codes of one model activity in one source (OFAR and ROOF) stop
+    the build instead of overwriting each other."""
+    seen = {}
+    for c in codes:
+        m = aliases.get(c, c)
+        if m in seen and seen[m] != c:
+            raise ValueError(f"{what}: {seen[m]} and {c} are both the model's {m}")
+        seen[m] = c
 
 
 def build_elasticity_table(
@@ -148,7 +121,7 @@ def build_elasticity_table(
     activities,
     defaults: pd.Series,
     base_areas: Optional[pd.DataFrame] = None,
-    base_year: str = "2017",
+    base_year: Optional[str] = None,
     inputs=None,
 ) -> Tuple[pd.DataFrame, pd.DataFrame, dict]:
     """
@@ -167,9 +140,9 @@ def build_elasticity_table(
     from capri_mod.supply.inputs import SupplyInputs
     inp = inputs if inputs is not None else SupplyInputs(data_dir, base_year)
     apply_dampening = True        # CAPRI's dampening (impose_upper_bound_on_elasticity.gms)
-    # (The runtime guard against activities anchored on a constant placeholder base, detect_synthetic_base_activities,
-    # blocked none since the synthetic data was replaced and was removed from here on 23 October 2026; the function
-    # stays as a data check, test_capri.py.)
+    # (The runtime guard against activities anchored on a constant placeholder base blocked none since the synthetic
+    # data was replaced and was removed from here on 23 October 2026; the check lives in its test,
+    # test_capri.py test_synthetic_base_activities_excluded_from_elasticity_wiring: refactor stage 3, N5.)
     # no literature defaults (23 October 2026): a cell without a CAPRI value stays NaN, provenance NO_CAPRI_VALUE
     eps = pd.DataFrame(
         np.tile(defaults.reindex(activities).values.astype(float), (len(regions), 1)),
@@ -183,6 +156,7 @@ def build_elasticity_table(
     # CAPRI row is missing takes its member state's national row
     to8 = {r: r for r in regions}
     df = inp.read(pmp_path)
+    _to_model_codes(set(df["crop"]), ACTIVITY_ALIASES, PMP_ELAS_FILE)
     df["activity"] = df["crop"].replace(ACTIVITY_ALIASES)
     df = df[df.activity.isin(set(activities))]
     vals = df["own_price_elas"].values
@@ -207,6 +181,7 @@ def build_elasticity_table(
     reg_path = inp.need(inp.resolve(REGIONAL_FILE))
     n_reg = 0
     rdf = inp.read(reg_path, index_col=0)
+    _to_model_codes(rdf.columns, ACTIVITY_ALIASES, REGIONAL_FILE)
     rdf = rdf.rename(columns=ACTIVITY_ALIASES)
     common_r = [r for r in rdf.index if r in set(regions)]
     common_a = [c for c in rdf.columns if c in set(activities)]
@@ -229,7 +204,9 @@ def build_elasticity_table(
     # source (values at or below the threshold pass unchanged); a crop the member state does not have keeps the default.
     n_cty = 0
     cty_path = inp.need(inp.resolve(COUNTRY_ELAS_FILE))
-    cdf = inp.read(cty_path, index_col=0).rename(columns=COUNTRY_ELAS_ALIASES)
+    cdf = inp.read(cty_path, index_col=0)
+    _to_model_codes(cdf.columns, COUNTRY_ELAS_ALIASES, COUNTRY_ELAS_FILE)
+    cdf = cdf.rename(columns=COUNTRY_ELAS_ALIASES)
     covered = {a for a in prov.columns if prov[a].isin(["PMP_CAPRI", "REGIONAL_CAPRI"]).any()}
     cols_ = [c for c in cdf.columns if c in set(activities) and c not in covered]
     for r in regions:
@@ -245,14 +222,14 @@ def build_elasticity_table(
 
     # --- livestock: CAPRI's calibrated supply elasticities of the animal products ---
     # (results/arm/elas_2_1717*: p_elasSupp(MS, product, product, "CAL"), the elasticities
-    # CAPRI's supply models are calibrated to reproduce; sources/arm/
+    # CAPRI's supply models are calibrated to reproduce; capri_data/2017/supply/
     # capri_supply_elas_market_1717.csv). Each animal activity takes its product's
     # own-price value for its member state: dairy cows - milk; suckler cows, bulls, heifers,
     # calves - beef; pigs - pork; hens - eggs; broilers - poultry meat; sheep and goats for
     # fattening (SHGF) - sheep and goat meat; for milk (SHGM) - raw milk (CAPRI's MILK market holds cow
     # and sheep-goat milk; p_elasSupp has no separate SGMI). Replaces the literature priors (0.10-0.25; CAPRI 0.47-0.82).
     n_lsk = 0
-    lsk_path = inp.need(inp.path(LIVESTOCK_ELAS_FILE, "root"))
+    lsk_path = inp.need(inp.path(LIVESTOCK_ELAS_FILE, "supply"))
     ldf = inp.read(lsk_path)
     ldf = ldf[(ldf["prod"] == ldf["wrt"]) & ldf["prod"].isin(set(LIVESTOCK_PRODUCT.values()))]
     ms_val = {(r, p_): float(v) for r, p_, v in zip(ldf.region, ldf["prod"], ldf.value)}
@@ -261,7 +238,7 @@ def build_elasticity_table(
     # elasticities as well. Each activity's elasticity is the value-weighted mean of its
     # final product's and its young animals' (suckler cows: 89% calves in Duesseldorf).
     yel = {}
-    ypath = inp.need(inp.path(YOUNG_ELAS_FILE, "root"))
+    ypath = inp.need(inp.path(YOUNG_ELAS_FILE, "supply"))
     for r_, i_, v_ in inp.read(ypath).itertuples(index=False):
         yel[(r_, i_)] = float(v_)
     mrev = inp.csv("livestock_revenue_coef.csv", "supply", index_col=0)

@@ -8,11 +8,13 @@ the data against their declarations (capri_data/schema, tools/check/validate_dat
 
     doit list                 # the tasks
     doit                      # bring every output up to date, then check the data
-    doit build:build_tariffs_2017   # one builder (and what it needs)
+    doit build:build_world_prices   # one builder (and what it needs)
     doit forget; doit         # rerun everything (with the outputs emptied first: the rebuild from blank)
 
-CAPRI's exports and dumps live outside the repository: $UP (CAPRI_UPLOADS, default /mnt/user-data/uploads) and $WORK
-(CAPRI_WORK, default /home/claude/work). A builder whose external source is missing here is reported and not run.
+CAPRI's own material (exports, dumps, source tree) is not in git: tools/pipeline/builders.json names it as $EXPORTS,
+$SOURCES and $REFERENCE, which are capri_sources/exports, capri_sources and capri_sources/reference at the repository root
+(capri_sources may be elsewhere: the environment variable CAPRI_SOURCES; tools/lib/paths.py, docs/EXTERNAL_SOURCES.md).
+A builder whose external source is missing is reported and not run.
 """
 from __future__ import annotations
 
@@ -25,15 +27,20 @@ import zipfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
-UP = os.environ.get("CAPRI_UPLOADS", "/mnt/user-data/uploads")
-WORK = os.environ.get("CAPRI_WORK", "/home/claude/work")
+sys.path.insert(0, str(ROOT / "tools" / "lib"))
+from paths import EXPORTS, REFERENCE, SOURCES  # noqa: E402
 PIPELINE = ROOT / "tools" / "pipeline" / "builders.json"
 
 DOIT_CONFIG = {"check_file_uptodate": "md5", "default_tasks": ["build", "validate"], "verbosity": 1}
 
 
 def _expand(s: str) -> str:
-    return s.replace("$UP", UP).replace("$WORK", WORK)
+    if s.startswith("unzip:"):              # "unzip:$EXPORTS/..." (until 3 November 2026 left unexpanded: the task
+        return "unzip:" + _expand(s[6:])     # was reported as missing its zip and skipped)
+    for loc, tok in ((EXPORTS, "$EXPORTS"), (REFERENCE, "$REFERENCE"), (SOURCES, "$SOURCES")):
+        if s == tok or s.startswith(tok + "/"):
+            return str(loc) + s[len(tok):]
+    return s
 
 
 def _tasks():
@@ -52,7 +59,15 @@ def _run(cmd):
                     full += sorted(str(Path(tmp) / n) for n in z.namelist() if not n.endswith("/"))
             else:
                 full.append(a)
-        return subprocess.run(full, cwd=ROOT).returncode == 0
+        # the hash seed fixed as tools/check/reproduce_builders.py runs the builders: a builder that iterates a set
+        # sums in that order, and its file's last digits followed the seed (until 3 November 2026 not fixed here)
+        return subprocess.run(full, cwd=ROOT, env={**os.environ, "PYTHONHASHSEED": "0"}).returncode == 0
+
+
+def _skipped(task, missing):
+    """A task whose CAPRI source is missing: reported, not run (a Python action, so it works on any system)."""
+    print(f"skipped {task}: missing {missing}", file=sys.stderr)
+    return True
 
 
 def task_build():
@@ -65,7 +80,7 @@ def task_build():
         deps = [str(ROOT / f) for f in t["inputs"] + t["code"]] + [x for x in ext if Path(x).is_file()]
         cmd = [sys.executable, str(ROOT / "tools" / "build" / f"{t['builder']}.py")] + args
         if missing:
-            yield {"name": t["task"], "actions": [f"echo 'skipped {t['task']}: missing {missing[0]}' >&2"],
+            yield {"name": t["task"], "actions": [(_skipped, [t["task"], missing[0]])],
                    "file_dep": [d for d in deps if Path(d).exists()], "uptodate": [False], "verbosity": 2}
             continue
         yield {"name": t["task"], "actions": [(_run, [cmd])], "file_dep": deps,

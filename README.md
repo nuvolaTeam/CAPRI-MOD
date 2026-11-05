@@ -17,18 +17,15 @@ commodities**. Every input is traceable to a source, and each module's output
 has been compared with CAPRI's own data or scenario results; §8 says which
 outputs hold up and which do not.
 
-**Scope.** The project tests whether a large policy model, CAPRI in this case,
-can be reimplemented in a form that is transparent, reusable, reproducible,
-interoperable and AI-ready (§9). In practice, each equation cites the CAPRI code
+In practice, each equation cites the CAPRI code
 it follows and each departure is registered, the code is open Python on CSV inputs
 with their provenance and CAPRI's own codes, and every run's settings, result
 quality and decisions are recorded in machine-readable form.
 
-It is a feasibility test, not a replacement for CAPRI: §8 and §11 say how far
-it has got.
-
-It is an independent implementation of CAPRI's *methods and calibration data*,
-not a copy of its code.
+The project tests whether a large policy model, CAPRI in this case,
+can be reimplemented in a form that is transparent, reusable, reproducible,
+interoperable and AI-ready (§9). It is a feasibility test and independent implementation of CAPRI's *methods and calibration data*,
+not a copy of its code. §8 and §11 say how far it has got.
 
 ---
 
@@ -118,10 +115,12 @@ three minutes — see [§8](#8-validation).
 ### The base year is a parameter, not a fixed assumption
 
 Inputs are organised under `capri_data/<base_year>/` and selected via
-`load_all_data(base_year=...)`. The only populated base year is **2017**, and several modules read
-`capri_data/2017` directly, so `CAPRIModel(base_year=...)` refuses any other year (KNOWN_ISSUES K52f).
-Re-basing to a newer year requires extracting that year's CAPRI data into a new `capri_data/<year>/` folder
-and making those modules follow `base_year`.
+`load_all_data(base_year=...)`. The only populated base year is **2017**. The base year is a parameter of the run
+(`CAPRIModel(base_year=...)` or the setting `run.base_year`): every reader takes its folder and file names from it,
+and a base year without a data folder stops with an error naming the years that have one (KNOWN_ISSUES K52f). The
+builders (`tools/build`) still write 2017.
+Re-basing to a newer year requires extracting that year's CAPRI data into a new `capri_data/<year>/` folder,
+with the base year in the file names as in the 2017 folder.
 
 **2017 is CAPRI's own vintage, not a lag on our side.** The CAPRI star-3.0
 installation this model was built from is itself 2017-based: its `capreg`
@@ -148,6 +147,12 @@ ships with the repository: CAPRI's 221 regional units, 46 activities, market dat
 trade regions (the EU27 and 25 others). `pip install -r requirements.txt` and a two-region baseline runs in a
 few minutes; a full EU Farm-to-Fork 2030 run takes about 50 minutes on 2 cores
 (§1, At a glance). No GAMS licence, no proprietary solver.
+
+**Any machine.** No file of the repository names a folder of a particular machine (a test checks it:
+`capri_mod/tests/test_portable_paths.py`); every path is relative to the repository. The runs and tests are made on
+Linux. On Windows, which has no `fork`, the regional solves run in one process, so a run is slower; Windows and macOS
+have not been tested. Rebuilding the data from CAPRI's own exports needs those exports, placed as
+docs/EXTERNAL_SOURCES.md describes; running the model does not.
 
 **You do need one to re-derive the validation.** Every comparison in §8 was made
 against CAPRI output or published CAPRI-based studies. The *results* of those
@@ -181,7 +186,6 @@ files record how they map to this model's names.
 | Supply method | CAPRI's regional models as NLPs, PMP-calibrated (CAPRI's 2030 terms) |
 | Market method | CAPRI's bilateral Armington market: 26 trade regions (27 with CAPRI's EU blocks, optional), transport costs, tariffs, TRQs; dairy block, GL food demand, young animals, CAPRI's market supply functions; Newton + Anderson to < 1e-7 |
 | Data validator | 13 pass, 0 warn, 0 fail |
-| Convergence | all 221 regional models solve (one Dutch unit, NL320000, at JRC121368's relaxed N target); under CAPRI's stop rule Farm-to-Fork 2030 converges in 10 iterations, Green Deal 2030 in 21 (reference runs r188, r189, 29 October 2026, batch 6, on CAPRI's regional units; the Green Deal's iteration count depends on the path, K79: 17 in r187, 37 in r181) |
 | Test suite | 252 tests (gate of 30 October 2026, batch 9: 250 passed, 1 skipped; test_denmark_with_the_coco_data, skipped at the earlier gates, corrected after the full run and rerun on its own) |
 | On by default, as in CAPRI | land market and land rules, endogenous feed rations, fodder equality, ammonia technologies |
 | Optional | manure market (`use_manure_market`) |
@@ -351,15 +355,16 @@ pip install -r requirements.txt        # the model, tests, data pipeline and ref
 python tools/run/run_tests.py
 ```
 
-`requirements.txt` holds every package in sections: the model, the tests (pytest, pytest-xdist for
-`python -m pytest -n 2`, coverage), the data pipeline (requests, deltalake, pyarrow: about 300 MB, not needed to run
-the model) and the reference-building tools. The same sets are the dependencies and the `dev`, `pipeline` and
+`requirements.txt` holds every package in sections: the model (with deltalake for the runs' results table and
+pydantic for the scenario definitions, since refactor stage 5), the tests (pytest, pytest-xdist for
+`python -m pytest -n 2`, coverage), the data pipeline (requests; not needed to run the model) and the
+reference-building tools. The same sets are the dependencies and the `dev`, `pipeline` and
 `tools` extras of `pyproject.toml`.
 
 The reference-building tools (`tools/build/*`, which turn CAPRI's GDX files into the reference CSVs) read GDX files
 through the GAMS Python API (`gamsapi`) and the GDX library, which is open source (MIT) and needs no GAMS installation
-or licence. The library is built once with CMake and its folder passed as `--gdxlib` or the environment variable
-`CAPRI_GDXLIB`:
+or licence. The library is built once with CMake and placed in `capri_sources/gdxlib` (docs/EXTERNAL_SOURCES.md), or
+its folder passed as `--gdxlib` or the environment variable `CAPRI_GDXLIB`:
 
 ```shell
 git clone https://github.com/GAMS-dev/gdx.git && cd gdx    # built here from commit 9e2a8c8
@@ -391,11 +396,11 @@ one process).
 Then, in Python — validate the data layer and run a minimal base scenario:
 
 ```python
-from capri_mod.data.validate_data import validate_data
+from capri_mod.data.validate_data import validate
 from capri_mod.model import CAPRIModel
 
-# validate the data layer
-print(validate_data("capri_data").summary())
+# check the data against their declarations (DuckDB, the dev extra): a list of violations, empty when all hold
+assert validate(".", verbose=True) == []
 
 # a minimal base run
 model = CAPRIModel(data_dir="capri_data")
@@ -428,9 +433,9 @@ capri_data/
 │                              fao_agg_2017, estnlp, nuts, gams (CSV)
 ├── trajectories/              projection paths (captrd 2030)
 ├── validation/                REGRESSION_ANCHORS.json, VALIDATION.md
-├── schema/                    the declarations of every CSV (DuckDB SQL), their provenance, the numbers in
-│                              the code, and schema.json (the same, as JSON, generated)
-└── MANIFEST.json              expected row and column counts of the live files
+└── schema/                    the declarations of every CSV (DuckDB SQL), their provenance, the files'
+                               catalogue (vintages), the numbers in the code, and schema.json (the same, as
+                               JSON, generated)
 ```
 
 Each folder under the base year feeds the module named on its right. Anything in
@@ -480,26 +485,21 @@ Count the non-zero cells of the files the model reads by origin (from the declar
 python tools/check/verify_schema.py
 ```
 
-Run the full data validator (margins, coverage, consistency) in Python:
-
-```python
-from capri_mod.data.validate_data import validate_data
-
-print(validate_data("capri_data").summary())
-```
-
-Check the data against their declarations in DuckDB (types, keys, code lists, ranges, units, provenance;
-`capri_data/schema`, docs/design/DATA_SCHEMA_DUCKDB.md; every CSV under `capri_data`):
+Check the data against their declarations in DuckDB (types, keys, code lists, ranges, units, provenance, the
+files' catalogue with their vintages, and the crops' gross margins at the base; `capri_data/schema`,
+docs/design/DATA_SCHEMA_DUCKDB.md; every CSV under `capri_data`; code in `capri_mod/data/validate_data.py`):
 
 ```shell
-python tools/check/validate_data.py
+python -m capri_mod.data.validate_data          # or: python tools/check/validate_data.py
 ```
 
-Rebuild the data with doit (`dodo.py`; docs/design/DATA_PIPELINE_DOIT.md). Each of the 117 builder invocations is a
+Rebuild the data with doit (`dodo.py`; docs/design/DATA_PIPELINE_DOIT.md). Each of the 136 builder invocations is a
 task with the files it reads and writes, as traced (`tools/pipeline/builders.json`): every file has one writer, no
 builder reads its own output, and doit reruns only what a changed input, a changed CAPRI source or a changed builder
-affects. CAPRI's exports are looked up under `CAPRI_UPLOADS` and `CAPRI_WORK`; a task whose source is missing is
-reported and skipped.
+affects. CAPRI's own material that the builders read (its exports, dumps and source tree, not in git) goes in
+`capri_sources/` at the repository root, or in the folder named by the environment variable `CAPRI_SOURCES`; the files
+and the archives they come from are listed in docs/EXTERNAL_SOURCES.md. A task whose source is missing is reported and
+skipped; the model itself needs none of it.
 
 ```shell
 python -m doit list                          # the tasks
@@ -758,8 +758,7 @@ measured as a deviation from the baseline of its year.
 | Scenario | Description |
 |---|---|
 | `BASELINE` | calibrated base-year reference |
-| `SET_ASIDE_10PCT` | 10% set-aside (CAPRI scen/set_aside/set_aside_10.gms) |
-| `CARBON_TAX_50`, `CARBON_TAX_100` | CAPRI's emission tax on agricultural emissions |
+| `CARBON_TAX_50` | CAPRI's emission tax on agricultural emissions (pol_input/ecampa/carbtax50_endotech_set12.gms) |
 
 CAPRI's Green Deal scenarios are built by functions, not names: `farm_to_fork_scenario()`,
 `greendeal_scenario(...)` and `greendeal_2030_scenario()` in `capri_mod/policy/greendeal.py`; pass them as
@@ -773,6 +772,28 @@ A scenario is a set of shocks: CAP premium changes (per activity, `CROPS`,
 `LIVESTOCK`, or `ALL`), world-price shocks, or CAPRI's N-balance target. Build a
 `PolicyScenario` object or pass shocks directly to `run()` (see
 [§7](#7-running-the-model)).
+
+### 6.4 Your own scenario, as data (since 3 November 2026)
+
+Scenarios and their references are folders, `capri_data/scenarios/<name>/settings.toml` (refactor stage 5): a
+reference names its trajectory; a scenario names its reference (and its group, for CAPRI's Green Deal group) and gives
+its switches and shocks; tables of shocks are CSV files beside it. As CAPRI's scenario files include their reference,
+a scenario takes its reference's settings (manure trade, biofuel markets, endogenous technologies) unless it gives its
+own. Your scenarios can live in a folder of your own (`--dir`, the setting `run.scenarios_dir`) and name a reference
+of the repository's. A worked example, a carbon tax of EUR 80 on the Green Deal reference:
+
+```shell
+python -m capri_mod.scenarios list                                   # references, groups, scenarios
+python -m capri_mod.scenarios new carbon_tax_80 --reference ref_star3 --dir ~/my_scenarios
+# edit ~/my_scenarios/carbon_tax_80/settings.toml: under [scenario.shocks], carbon_tax = 80.0
+python -m capri_mod.scenarios check carbon_tax_80 --dir ~/my_scenarios   # every error with its key, no run
+python tools/run/run_f2f_2030.py out.pkl --scenario carbon_tax_80 --scenarios-dir ~/my_scenarios
+```
+
+`new --group greendeal_group` writes the Green Deal switches with their allowed values (CAPRI's GUI). The tables a
+folder may hold: `coupled_support.csv` (activity,value), `premium_factors.csv` (region,activity,factor),
+`tariff_changes.csv` (region,commodity,change_pct), `trq_volume_changes.csv` (commodity,change_kt); a code the model
+does not have stops the check.
 
 ---
 
@@ -815,6 +836,18 @@ scen = model.run(custom_scenario=farm_to_fork_scenario())
 delta = model.compare(base, scen)              # activity & price changes
 ```
 
+**The results table (since 3 November 2026).** `tools/run/run_f2f_2030.py` also writes each run to `results/` (setting
+`run.results_dir`): a Delta Lake table in CAPRI's DATAOUT layout (region, dim5, cols, rows, year, value; the model's
+codes and CAPRI's where checked, `capri_data/codes/results_items.csv`), partitioned by scenario and run, the
+reference stored once. Read it with `deltalake`, polars or DuckDB, or rebuild a run's pickle with
+`capri_mod.io_results.load_run("store:results:SCENARIO")`; the check tools take `store:ROOT:SCENARIO[:RUN_ID]` in place
+of a pickle.
+
+```python
+from deltalake import DeltaTable
+t = DeltaTable("results/long").to_pandas(filters=[("scenario", "=", "farm_to_fork_jrc121368")])
+```
+
 ### 7.5 Key `run()` parameters
 
 Arguments left at None take the run's settings (§7.6).
@@ -845,12 +878,12 @@ equivalent. Sourced economic parameters are not settings: they are in `capri_dat
 from capri_mod import settings
 s = settings.load(["my_run.toml"], overrides={"supply.pmp_source": "recipe"})   # validated: unknown keys stop
 settings.activate(s)                                   # the settings every module reads
-with settings.override({"market.eu_blocks": True}):    # temporarily, restored on exit
+with settings.override({"market.biofuel_markets": False}):    # temporarily, restored on exit
     model.run(...)
 s.save("my_run.settings.toml")                         # the effective settings
 ```
 
-- From the command line: `tools/run/run_f2f_2030.py OUT.pkl --settings my_run.toml --set market.eu_blocks=true`. The run
+- From the command line: `tools/run/run_f2f_2030.py OUT.pkl --settings my_run.toml --set market.biofuel_markets=false`. The run
   writes its effective settings next to the result (`OUT.settings.toml`, and `meta["settings"]` in the pickle), and
   its run manifest (`OUT.manifest.json`, and `meta["run_manifest"]`; `capri_mod/run_manifest.py`, since 29 October
   2026): the git commit, branch and files changed from it, the software versions, and every input file the run's own
@@ -1293,8 +1326,8 @@ and review), and statistical or machine-learning methods that learn from its inp
 ### 9.3 AI readiness: what is in place
 
 - **Inputs a machine can check.** Every input is a CSV file declared in DuckDB SQL under `capri_data/schema` (types,
-  keys, code lists, ranges, units, provenance; as JSON in `schema.json`), with its expected shape in `MANIFEST.json`
-  (§12). The data pipeline
+  keys, code lists, ranges, units, provenance; as JSON in `schema.json`), and the files' vintages are in the
+  declared catalogue `05_file_catalogue.sql` (§12). The data pipeline
   (`capri_mod/pipeline`) keeps every download as a version in Delta tables, each row tagged with the download it came
   from, and keeps a missing observation apart from a true zero.
 - **One settings file.** Every switch, tolerance and algorithm choice is in `capri_mod/settings/defaults.toml`, read
@@ -1414,11 +1447,13 @@ equilibrium. Given a policy scenario, each year is solved **twice**, baseline an
 scenario, so the policy increment stays separable from baseline drift at every
 step rather than being entangled in a single 2030 number.
 
-Three trajectories ship: `capri_ref_2030.json` (default in `tools/run/run_f2f_2030.py`) — CAPRI star 3.0's own 2030
-reference (CAPMOD's reference run over CAPRI's 2017 results: levels, yields and land types per region;
-`tools/build/build_trajectory_capri_ref.py`), the point CAPRI's own scenarios start from; `captrd_2030.json` — CAPRI's
-captrd trend results, the input of CAPRI's baseline calibration; and `null.json` (no drift). A trajectory of one's own
-follows the same JSON format (`TEMPLATE.json`, removed 30 October 2026 as read by no code, is in git history).
+Three trajectories ship, each a scenario folder under `capri_data/scenarios/` (`settings.toml` with the name, source,
+vintage, years and provenance; `growth.csv` and `regional.csv` with the factors; `capri_mod/projection/scenario_io.py`;
+JSON files in `capri_data/trajectories/` until 31 October 2026): `capri_ref_2030` (default in
+`tools/run/run_f2f_2030.py`) — CAPRI star 3.0's own 2030 reference (CAPMOD's reference run over CAPRI's 2017 results:
+levels, yields and land types per region; `tools/build/build_trajectory_capri_ref.py`), the point CAPRI's own
+scenarios start from; `captrd_2030` — CAPRI's captrd trend results, the input of CAPRI's baseline calibration; and
+`null` (no drift, settings only). A trajectory of one's own is a folder of the same form.
 
 **Baseline calibration (Sprint 9p).** As CAPMOD calibrates its supply models to the simulation year's baseline, the
 baseline of a projected year shifts each region's linear cost terms by Q (x − target) until the region reproduces its
@@ -1431,7 +1466,7 @@ requirements and usable fodder per ha (Sprint 9q) the calibrated baseline reprod
 ```python
 from capri_mod.projection import ProjectionModule, BaselineTrajectory
 
-traj  = BaselineTrajectory.from_file("capri_data/trajectories/capri_ref_2030.json")
+traj  = BaselineTrajectory.from_file("capri_data/scenarios/capri_ref_2030")
 proj  = ProjectionModule(model, traj)
 
 result = proj.run(regions=regions)                      # baseline path
@@ -1498,11 +1533,10 @@ for practical reasons (to be switched to CAPRI's) are listed with these two in d
 ### 10.3 EU27 as a single market region
 
 The market is CAPRI's bilateral market (two Armington nests over CAPRI's bilateral
-flows, transport costs, tariffs and quotas) with the EU27 as one of its 26 trade
-regions, trading bilaterally with the others; trade between member states is not
-resolved, as in CAPRI. CAPRI's own default splits the EU into two trade blocks,
-EU_WEST and EU_EAST; that is an option here (`market.eu_blocks = true`), kept off for
-now (a departure to be removed: docs/DEPARTURES_FROM_CAPRI.md). Member states keep
+flows, transport costs, tariffs and quotas) with the EU as CAPRI's two market regions,
+EU_WEST and EU_EAST (aggregation/defaultA.agg; since 3 November 2026), trading
+bilaterally with each other and the other regions; trade between member states inside
+a block is not resolved, as in CAPRI. "EU27" in the reports is the two blocks' sum. Member states keep
 their own raw milk prices through the dairy block. Earlier versions (before the
 bilateral market) treated the EU as one Armington bloc against the rest of the world,
 with an Armington premium on the world price.
@@ -1644,11 +1678,10 @@ principled reason and extension path.
 - `capri_data/schema/` — the declarations of every data file (DuckDB SQL) with their provenance and checked notes,
   the numbers held in the code, and `schema.json` (the same as JSON, generated). The hand-kept `INPUT_SCHEMA.json`,
   `INPUT_MANIFEST.json` and `DATA_SOURCING_REGISTRY.json` were retired on 29 October 2026 (their checked content is in
-  the declarations; the registry's log is in `docs/KNOWN_ISSUES_REGISTRY_LOG.md`).
+  the declarations; the registry's log is in `docs/KNOWN_ISSUES_REGISTRY_LOG.md`), and `MANIFEST.json` with its
+  validator on 31 October 2026 (its catalogue is `05_file_catalogue.sql`, its checks rules of the declarations).
 - `capri_data/validation/` — validation artifacts: the Green Deal comparison
   (`greendeal_2030/`) and the world-price divergence report (`tools/check/report_world_price_divergence.py`).
-- `capri_data/MANIFEST.json` — expected row and column counts for every live
-  file, so a missing or truncated input is caught rather than absorbed.
 - `tools/check/verify_schema.py`, `tools/run/run_tests.py` — coverage and test gates.
 - `tools/check/check_regression.py` — the regression anchors; `--update` rewrites them
   with a recorded reason.

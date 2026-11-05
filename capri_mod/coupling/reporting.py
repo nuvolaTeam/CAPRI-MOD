@@ -13,14 +13,14 @@ class ReportingBlock:
         iteration (max over the columns of |dy| / max(|y|, 1% of the region's largest column)), with the starts IPOPT
         used (warm / prev / start, then a relaxation) and its iterations, and the counts of each path."""
         import numpy as _np
-        prev = getattr(self, "_trace_nlp_prev", None) or {}
+        prev = getattr(self.sv, "trace_nlp_prev", None) or {}
         cur, rows, paths = {}, [], {}
         for r_, m_ in (self.supply_module._models or {}).items():
-            y_ = getattr(m_, "_nlp_y", None)
+            y_ = getattr(m_.sv, "nlp_y", None)
             if y_ is None:
                 continue
             cur[r_] = y_
-            p_ = getattr(m_, "_nlp_path", None) or ("?", 0)
+            p_ = getattr(m_.res, "nlp_path", None) or ("?", 0)
             paths[p_[0]] = paths.get(p_[0], 0) + 1
             y0 = prev.get(r_)
             if y0 is not None and len(y0) == len(y_):
@@ -28,15 +28,15 @@ class ReportingBlock:
                 d_ = _np.abs(y_ - y0) / _np.maximum(_np.abs(y0), max(0.01 * float(_np.max(_np.abs(y0))), 1e-6))
                 j_ = int(_np.argmax(d_))
                 rows.append((float(d_[j_]), r_, j_, p_))
-        self._trace_nlp_prev = cur
+        self.sv.trace_nlp_prev = cur
         import time as _t
         _now = _t.time()
-        _dt = _now - getattr(self, "_trace_nlp_t", _now)
-        self._trace_nlp_t = _now
+        _dt = _now - getattr(self.sv, "trace_nlp_t", _now)
+        self.sv.trace_nlp_t = _now
         if not cur:
             return
         rows.sort(reverse=True)
-        cols = lambda r_, j_: (list(getattr(self.supply_module._models[r_], "_nlp_cols", None) or [])[j_:j_ + 1] or [j_])[0]
+        cols = lambda r_, j_: (list(getattr(self.supply_module._models[r_].sv, "nlp_cols", None) or [])[j_:j_ + 1] or [j_])[0]
         print(f"    [nlp] {_dt:.0f} s | paths " + ", ".join(f"{k} {v}" for k, v in sorted(paths.items()))
               + (" | moved " + "; ".join(f"{r_} {cols(r_, j_)} {d:.3f} ({p_[0]}, {p_[1]} it)" for d, r_, j_, p_ in rows[:top])
                  if rows else ""), flush=True)

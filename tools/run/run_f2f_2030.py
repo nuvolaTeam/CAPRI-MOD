@@ -9,7 +9,7 @@ and OUT.manifest.json (the run manifest: commit, software, every input read with
 Usage: python tools/run/run_f2f_2030.py OUT.pkl [--scenario f2f|greendeal|greendeal2030|carbontax]
                                             [--targets lndscpTarg=0,orgTarg=0,pestRedu=0,surpRedu=0]
                                             [--settings FILE.toml] [--set section.key=value] ...
-Any setting of capri_mod/settings/defaults.toml is changed with --set (e.g. --set market.eu_blocks=true,
+Any setting of capri_mod/settings/defaults.toml is changed with --set (e.g. --set market.biofuel_markets=false,
 --set diagnostics.trace_outer=true for the outer-loop trace) or a --settings file.
 """
 import os as _os
@@ -49,14 +49,16 @@ def main():
                     help="CAPRI's emission tax (ghgTax), EUR/t CO2-eq on the EU regions' emissions inside the supply "
                          "models; with --scenario carbontax the only shock (carbtax50_endotech_*.gms), else added to "
                          "the scenario")
-    ap.add_argument("--scenario", default="f2f", choices=("f2f", "greendeal", "greendeal2030", "carbontax"),
+    ap.add_argument("--scenario", default="f2f",
                     help="'f2f' (default): Farm-to-Fork with JRC121368's own settings (tiered surplus rule with its "
                          "36%% cap, no manure trade, milk-yield genomics 0.2: policy.greendeal.farm_to_fork_scenario); "
                          "'greendeal': CAPRI star 3.0's Green Deal group as its files set it (surptot.gms: every "
                          "region's surplus/ha cut by surpRedu%%, manure trade on, genomics 0), with --targets values "
                          "(default: the series' full targets lnds10 org25 pest50 surp50 applied in 2030); "
                          "'greendeal2030': CAPRI's own 2030 step of its Green Deal series (lnds8 org18 pest20 "
-                         "mine13crp surp30, policy.greendeal.GREENDEAL_2030_TARGETS)")
+                         "mine13crp surp30, policy.greendeal.GREENDEAL_2030_TARGETS); or a scenario folder's name "
+                         "(capri_data/scenarios/<name>/; f2f, greendeal2030 and carbontax without --targets are "
+                         "read from their folders)")
     ap.add_argument("--pesticide-rule", default="", choices=("", "jrc121368", "star3"),
                     help="yield effect of the pesticide target: 'jrc121368' (10%% at a 50%% cut) or 'star3' (none, "
                          "CAPRI star 3.0's Green Deal group); default: the scenario's (f2f jrc121368, greendeal star3)")
@@ -77,11 +79,14 @@ def main():
                          "CAPRI baseline surpluses per ha (comma list; '+' prefix adds to the nine)")
     ap.add_argument("--trajectory", default="capri_ref",
                     help="2030 baseline trajectory: capri_ref (CAPRI's 2030 reference, default), captrd (CAPRI's trend "
-                         "projection) or a file name in capri_data/trajectories")
+                         "projection) or a scenario folder name in capri_data/scenarios")
+    ap.add_argument("--scenarios-dir", default="",
+                    help="a folder of your own scenarios (python -m capri_mod.scenarios new/check), looked in before "
+                         "capri_data/scenarios (the setting run.scenarios_dir)")
     ap.add_argument("--settings", action="append", default=[],
                     help="a TOML settings file (capri_mod/settings/defaults.toml's keys); repeatable, later files win")
     ap.add_argument("--set", action="append", default=[],
-                    help="one setting, e.g. --set market.eu_blocks=true (after the files and the flags)")
+                    help="one setting, e.g. --set market.biofuel_markets=false (after the files and the flags)")
     ap.add_argument("--base-prices", action="store_true",
                     help="keep 2017 prices in the 2030 baseline (default: CAPRI's 2030 prices in 2017 money)")
     a = ap.parse_args()
@@ -106,6 +111,7 @@ def main():
     ov = {}
     flag_map = [  # (flag on, setting, value); every other setting: --set or --settings
         (bool(a.capped_regions), "supply.jrc_capped_override", a.capped_regions),
+        (bool(a.scenarios_dir), "run.scenarios_dir", a.scenarios_dir),
     ]
     for on, k, v in flag_map:
         if on:
@@ -131,8 +137,8 @@ def main():
     t0 = time.time()
     # CAPRI simulates from its calibrated 2030 reference (CAPMOD's reference run); the trend projection (CAPTRD) is
     # that calibration's input and stays available (--trajectory captrd)
-    _tf = {"capri_ref": "capri_ref_2030.json", "captrd": "captrd_2030.json"}.get(a.trajectory, a.trajectory)
-    traj = BaselineTrajectory.from_file(str(ROOT / "capri_data" / "trajectories" / _tf))
+    _tf = {"capri_ref": "capri_ref_2030", "captrd": "captrd_2030"}.get(a.trajectory, a.trajectory)
+    traj = BaselineTrajectory.from_file(str(ROOT / "capri_data" / "scenarios" / _tf))
     kw = {k: (v if k == "mineRedu" else int(v)) for k, v in (x.split("=") for x in a.targets.split(",") if x)}
     _pdir = None if a.base_prices else str(ROOT / "capri_data" / "trajectories")
     pmod = ProjectionModule(m, traj, capri_prices_dir=_pdir)
@@ -140,7 +146,25 @@ def main():
     _et = (dict(JRC121368_ENDOTECH) if a.endotech.lower() == "jrc121368"
            else {k: float(v) for k, v in (x.split("=") for x in a.endotech.split(",") if x)})
     from capri_mod.policy.greendeal import farm_to_fork_scenario
-    if a.scenario == "carbontax":
+    # the scenario folders (capri_data/scenarios/<name>/, refactor stage 5): a folder's name, or the short names of
+    # the scenarios defined there when no --targets change them
+    from capri_mod.scenarios import definition as _SD
+    _folders = {k for k, v in _SD.available().items() if v == "scenario"}
+    _short = {"f2f": "farm_to_fork_jrc121368",
+              "greendeal2030": "greendeal_lnds8_org18_pest20_mine13crp_surp30_diet00_oth00",
+              "carbontax": "CARBON_TAX_50"}
+    _folder = a.scenario if a.scenario in _folders else (
+        _short.get(a.scenario) if not kw and not (a.scenario == "carbontax" and a.carbon_tax not in (None, 50.0))
+        else None)
+    if a.scenario not in _folders and a.scenario not in ("f2f", "greendeal", "greendeal2030", "carbontax"):
+        ap.error(f"--scenario {a.scenario!r}: one of f2f, greendeal, greendeal2030, carbontax or a scenario folder "
+                 f"({sorted(_folders)})")
+    if _folder is not None:
+        _sdef = _SD.load(_folder)
+        _scen = _SD.to_policy_scenario(_sdef)
+        if _sdef.reference_note:
+            print(f"note: {_sdef.name}: {_sdef.reference_note}", flush=True)
+    elif a.scenario == "carbontax":
         from capri_mod.scenarios.scenarios import carbon_tax_scenario
         _scen = carbon_tax_scenario(a.carbon_tax if a.carbon_tax is not None else 50.0)
     elif a.scenario == "f2f" and not kw:
@@ -155,30 +179,24 @@ def main():
             for _f in ("set_aside_requirement", "organic_area_target", "pesticide_reduction", "nutrient_surplus_target",
                        "surplus_rule", "surplus_cut"):
                 setattr(_scen, _f, getattr(_g, _f))
-    # command-line overrides of the scenario's settings
-    if a.surplus_rule:
-        _scen.surplus_rule = a.surplus_rule
-    if a.pesticide_rule:
-        _scen.pesticide_rule = a.pesticide_rule
-    if a.manure_market:
-        _scen.manure_trade = True
-    if a.no_manure_market:
-        _scen.manure_trade = False
-    if a.biofuel_markets:
-        _scen.biofuel_markets = True
-    if a.no_biofuel_markets:
-        _scen.biofuel_markets = False
-    if a.biofuel_mandate is not None:
-        _scen.biofuel_mandate = a.biofuel_mandate
-    if a.mine_redu:
-        _scen.mineral_redu = a.mine_redu
-        if _scen.name.startswith("greendeal"):
-            _scen.name = _scen.name.replace(_scen.name.split("_mine")[1].split("_")[0], a.mine_redu, 1) \
-                if "_mine" in _scen.name else _scen.name
-    if a.carbon_tax is not None:
-        _scen.carbon_tax = float(a.carbon_tax)
-    if a.endotech:
-        _scen.endotech = effective(_et)
+    # command-line overrides of the scenario's settings: the scenario keeps its name (since 3 November 2026, the
+    # project lead's decision; --mine-redu renamed a Green Deal scenario before); each override is recorded in the
+    # run's metadata (meta.scenario_overrides) and in its run id
+    _over = {}
+    for on, field, value in ((a.surplus_rule, "surplus_rule", a.surplus_rule),
+                             (a.pesticide_rule, "pesticide_rule", a.pesticide_rule),
+                             (a.manure_market, "manure_trade", True), (a.no_manure_market, "manure_trade", False),
+                             (a.biofuel_markets, "biofuel_markets", True),
+                             (a.no_biofuel_markets, "biofuel_markets", False),
+                             (a.biofuel_mandate is not None, "biofuel_mandate", a.biofuel_mandate),
+                             (a.mine_redu, "mineral_redu", a.mine_redu),
+                             (a.carbon_tax is not None, "carbon_tax",
+                              float(a.carbon_tax) if a.carbon_tax is not None else None),
+                             (a.endotech, "endotech", effective(_et) if a.endotech else None)):
+        now = effective(_scen.endotech) if field == "endotech" else getattr(_scen, field)
+        if on and now != value:
+            _over[field] = value
+            setattr(_scen, field, value)
     _scen.endotech = effective(_scen.endotech)
     m._progress(f"projection to 2030: baseline, then {_scen.name}")
     res = pmod.run(policy_scenario=_scen, years=[2030], **({"regions": _subset} if _subset else {}))
@@ -400,7 +418,7 @@ def main():
                               # (0, the N balance's shortfall): the first item was the landscape floor's, which is
                               # no longer relaxed (K84, 27 October 2026); kept so earlier runs compare
                               "shortfall": (0.0, float(getattr(v, "balance_shortfall", 0.0) or 0.0)),
-                              "manure_pool_price": float((getattr((getattr(pmod, "_last_projected_model", None) or m).supply_module, "manure_pool_price", None) or {}).get(reg[:2], 0.0) or 0.0)}
+                              "manure_pool_price": float((getattr((getattr(pmod, "_last_projected_model", None) or m).supply_module.seen, "manure_pool_price", None) or {}).get(reg[:2], 0.0) or 0.0)}
                         for reg, v in s["supply"].items()},
            # baseline manure trade per region (t N exported, imported), for the check against CAPRI's MTRADE
            "manure_trade_base": {reg: tuple(float(t_) for t_ in (getattr(v, "manure_trade", None) or (0.0, 0.0)))
@@ -408,12 +426,12 @@ def main():
            "meta": {"conv": md.get("outer_converged"), "it": md.get("n_outer_iterations"),
                     "young_animals": (md.get("young_animal_prices"), md.get("young_animal_imbalance")),
                     "young_animal_markets": md.get("young_animal_markets"),
-                    "seconds": round(time.time() - t0), "options": vars(a),
+                    "seconds": round(time.time() - t0), "options": vars(a), "scenario_overrides": _over,
                     # the effective settings of the run (also written next to the pickle as <out>.settings.toml)
                     "settings": run_settings.to_dict(), "settings_changed": run_settings.diff(),
-                    "market_supply_hessian": getattr(getattr(pmod, "_last_projected_model", None) or m,
+                    "market_supply_hessian": getattr((getattr(pmod, "_last_projected_model", None) or m).res,
                                                      "market_supply_hessian_info", None),
-                    "market_supply_hessian_log": getattr(getattr(pmod, "_last_projected_model", None) or m,
+                    "market_supply_hessian_log": getattr((getattr(pmod, "_last_projected_model", None) or m).res,
                                                          "market_supply_hessian_log", None),
                     "base_iterations": b.get("metadata", {}).get("n_outer_iterations"),
                     # CAPRI's stop rule at the last iteration, baseline and scenario (capri_mod/utils/capri_stop.py)
@@ -453,12 +471,16 @@ def main():
             md_ = _pm.supply_module._models.get(r_)
             if md_ is None:
                 continue
-            _d[r_] = {k_: getattr(md_, k_, None) for k_ in ("_last_aug", "_last_plain", "_row_labels", "_last_duals",
-                                                            "_land_types_used", "_fert_tech_shares", "_n_intensity",
-                                                            "_cover", "_fall_floor", "_last_grass_z")}
+            # the model's fields by attribute name or by their path in its state objects (refactor stage 3); the
+            # dump's keys are the field names without the object and the leading underscore
+            _d[r_] = {k_.rpartition(".")[2].lstrip("_"):
+                      getattr(getattr(md_, k_.rpartition(".")[0]) if "." in k_ else md_, k_.rpartition(".")[2], None)
+                      for k_ in ("res.last_aug", "res.last_plain", "ev.row_labels", "ev.land_types_used",
+                                 "res.fert_tech_shares", "ev.n_intensity", "ev.cover", "ev.fall_floor", "res.last_grass_z",
+                                 "ev.last_duals")}
             _d[r_].update({"acts": list(md_.acts), "Q": md_.Q, "f": md_.f, "net_revenues": md_.net_revenues.copy(),
-                           "base": md_._base_levels(), "nb_price": getattr(_pm.supply_module, "_nbal_state", {}).get(r_),
-                           "surplus_row": getattr(md_, "_surplus_row", None),
+                           "base": md_._base_levels(), "nb_price": getattr(_pm.supply_module.sv, "nbal_state", {}).get(r_),
+                           "surplus_row": getattr(md_.ev, "surplus_row", None),
                            "balance_coefs": _pm.supply_module._balance_coefs(r_, md_)})
         pickle.dump(_d, open(a.out.replace(".pkl", "_dump.pkl"), "wb"))
     out["meta"]["run_manifest"] = run_manifest.finish()
@@ -466,6 +488,67 @@ def main():
     run_settings.save(str(a.out).rsplit(".", 1)[0] + ".settings.toml")
     with open(str(a.out).rsplit(".", 1)[0] + ".manifest.json", "w") as fh_:
         json.dump(out["meta"]["run_manifest"], fh_, indent=1)
+    # the metadata against its declaration (capri_mod/run_meta.py; refactor stage 5): after the pickle is saved, so a
+    # change of the metadata stops the run's table, never its results
+    from capri_mod.run_meta import ResultsMeta
+    ResultsMeta.model_validate(out["meta"])
+    _results_dir = str(run_settings.get("run.results_dir") or "")
+    if _results_dir:
+        # the long results table (capri_mod/io_results.py; refactor stage 5): the scenario's rows and its reference's,
+        # stored once; read back and checked against this pickle's blocks
+        from capri_mod import io_results as _IO
+        _rroot = Path(_results_dir) if Path(_results_dir).is_absolute() else ROOT / _results_dir
+        _fam = _folder or _short.get(a.scenario) or {"greendeal": _short["greendeal2030"]}.get(a.scenario,
+                                                                                                _short["f2f"])
+        _ref = _SD.load(_fam).reference
+        _git = out["meta"]["run_manifest"].get("git") or {}
+        _own = (f"capri_data/scenarios/{_tf}/", f"capri_data/scenarios/{_ref}/")
+        _fp = {"reference": _ref, "trajectory": _tf, "years": [2030], "regions": _subset,
+               "endotech": dict(_scen.endotech), "manure_trade": _scen.manure_trade,
+               "biofuel_markets": _scen.biofuel_markets,
+               "settings": {sec: {k: v for k, v in kv.items() if (sec, k) not in (("run", "scenarios_dir"),
+                                                                                  ("run", "results_dir"))}
+                            for sec, kv in run_settings.to_dict().items() if sec != "diagnostics"},
+               "commit": _git.get("commit"), "data_tree": _git.get("data_tree"),
+               # git's porcelain lines ("XY path"): an uncommitted file enters by its content
+               "changed_files": {f: (__import__("hashlib").sha256((ROOT / f[2:].strip()).read_bytes()).hexdigest()
+                                     if (ROOT / f[2:].strip()).is_file() else None)
+                                 for f in _git.get("changed_files") or []},
+               # the input files the reference depends on: the scenario folders other than its trajectory's and its
+               # own are read for the scenario, the market Hessian's cache is a cache
+               "inputs": {k: v for k, v in (out["meta"]["run_manifest"].get("inputs") or {}).items()
+                          if not k.startswith(".cache/")
+                          and (not k.startswith("capri_data/scenarios/") or k.startswith(_own))},
+               "software": out["meta"]["run_manifest"].get("software")}
+        _rid = time.strftime("%Y%m%dT%H%M%S") + "-" + str(_git.get("commit") or "nocommit")[:7]
+        if _over:                                   # a scenario changed on the command line: its run id says so
+            _rid += "-ov" + _IO.fingerprint({"overrides": _over})[:8]
+        _rec = _IO.write_run(_IO.with_capri_codes(_IO.to_long(b, "base")), _IO.with_capri_codes(_IO.to_long(s, "scen")),
+                             scenario=_scen.name, reference=_ref, year=2030, run_id=_rid, fingerprint_parts=_fp,
+                             meta=out["meta"], root=_rroot, summary=_IO.summary_of(out),
+                             iterations=out["outer_history"])
+        _md = _rroot / "meta" / _scen.name / _rid
+        run_settings.save(str(_md / "settings.toml"))
+        with open(_md / "manifest.json", "w") as fh_:
+            json.dump(out["meta"]["run_manifest"], fh_, indent=1)
+        # the whole pickle (its metadata apart) rebuilt from the store must equal it exactly: the gate's comparison
+        # (tools/check/compare_pickles_exact.py walk) at tolerance zero
+        import importlib.util as _ilu
+        _sp = _ilu.spec_from_file_location("_cmp", ROOT / "tools" / "check" / "compare_pickles_exact.py")
+        _cmp = _ilu.module_from_spec(_sp)
+        _sp.loader.exec_module(_cmp)
+        _st = _IO.load_store(_rroot, _scen.name, _rid)
+        _d = []
+        for _k in out:
+            if _k != "meta":
+                _cmp.walk(out[_k], _st.get(_k), f"$.{_k}", _d, 0.0, set())
+        print(f"long table: {_rroot / 'long'} | {_scen.name} {_rid}: {_rec['rows']} rows; reference {_ref} "
+              f"{_rec['reference_run_id']}" + (" (reused)" if _rec["reference_reused"] else "")
+              + (" | the pickle rebuilt from the store: identical" if not _d
+                 else f" | {len(_d)} DIFFERENCES between the pickle and the store"), flush=True)
+        if _d:
+            print("\n".join(map(str, _d[:20])), flush=True)
+            sys.exit(1)
     _no = out["meta"]["nlp_nonoptimal"]
     print(f"saved {a.out} | converged {out['meta']['conv']} in {out['meta']['it']} iterations, {out['meta']['seconds']} s"
           f" | non-optimal regional solves kept: baseline {len(_no['baseline'])}, scenario {len(_no['scenario'])}"

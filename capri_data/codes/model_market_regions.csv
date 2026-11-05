@@ -1,0 +1,46 @@
+rm,model_region,source
+UK000000,UK000000,its own trade region (codes/model_trade_regions.csv)
+NO000000,NO000000,its own trade region (codes/model_trade_regions.csv)
+TUR,TUR,its own trade region (codes/model_trade_regions.csv)
+CH,CH,"its own trade region (codes/model_trade_regions.csv; part of ROW until 3 November 2026, market move stage 3)"
+REU,REU,"its own trade region (codes/model_trade_regions.csv; part of ROW until 3 November 2026, market move stage 3)"
+RUS,RUS,its own trade region (codes/model_trade_regions.csv)
+UKR,UKR,its own trade region (codes/model_trade_regions.csv)
+BEL,BEL,"its own trade region (codes/model_trade_regions.csv; part of ROW until 3 November 2026, market move stage 3)"
+KAZ,KAZ,"its own trade region (codes/model_trade_regions.csv; part of ROW until 3 November 2026, market move stage 3)"
+FSU,FSU,"its own trade region (codes/model_trade_regions.csv; part of ROW until 3 November 2026, market move stage 3)"
+MOR,MOR,its own trade region (codes/model_trade_regions.csv)
+MIDEAST,MIDEAST,"its own trade region (codes/model_trade_regions.csv; part of ROW until 3 November 2026, market move stage 3)"
+NGA,NGA,its own trade region (codes/model_trade_regions.csv)
+ETH,ETH,its own trade region (codes/model_trade_regions.csv)
+ZAF,ZAF,its own trade region (codes/model_trade_regions.csv)
+AFR_LDC,AFR_LDC,"its own trade region (codes/model_trade_regions.csv; part of ROW until 3 November 2026, market move stage 3)"
+AFR_REST,AFR_REST,"its own trade region (codes/model_trade_regions.csv; part of ROW until 3 November 2026, market move stage 3)"
+IND,IND,its own trade region (codes/model_trade_regions.csv)
+PAK,PAK,its own trade region (codes/model_trade_regions.csv)
+BGD,BGD,its own trade region (codes/model_trade_regions.csv)
+CHN,CHN,its own trade region (codes/model_trade_regions.csv)
+JAP,JAP,its own trade region (codes/model_trade_regions.csv)
+MAL,MAL,"its own trade region (codes/model_trade_regions.csv; part of ROW until 3 November 2026, market move stage 3)"
+INDO,INDO,its own trade region (codes/model_trade_regions.csv)
+TAW,TAW,"its own trade region (codes/model_trade_regions.csv; part of ROW until 3 November 2026, market move stage 3)"
+SKOR,SKOR,its own trade region (codes/model_trade_regions.csv)
+VIET,VIET,its own trade region (codes/model_trade_regions.csv)
+THAI,THAI,its own trade region (codes/model_trade_regions.csv)
+ASOCE_LDC,ASOCE_LDC,"its own trade region (codes/model_trade_regions.csv; part of ROW until 3 November 2026, market move stage 3)"
+ASOCE_REST,ASOCE_REST,"its own trade region (codes/model_trade_regions.csv; part of ROW until 3 November 2026, market move stage 3)"
+AUS,AUS,its own trade region (codes/model_trade_regions.csv)
+NZL,NZL,its own trade region (codes/model_trade_regions.csv)
+USA,USA,its own trade region (codes/model_trade_regions.csv)
+CAN,CAN,its own trade region (codes/model_trade_regions.csv)
+MEX,MEX,its own trade region (codes/model_trade_regions.csv)
+ARG,ARG,its own trade region (codes/model_trade_regions.csv)
+BRA,BRA,its own trade region (codes/model_trade_regions.csv)
+MSA_ACP,MSA_ACP,"its own trade region (codes/model_trade_regions.csv; part of ROW until 3 November 2026, market move stage 3)"
+RSA,RSA,"its own trade region (codes/model_trade_regions.csv; part of ROW until 3 November 2026, market move stage 3)"
+A_EU_WEST,EU27,one of CAPRI's two EU market blocks (RMEU_to_RM: EU_WEST); the model's single EU region (MARKET_REGIONS_INVENTORY.md stage 2 makes the blocks its regions)
+A_EU_EAST,EU27,one of CAPRI's two EU market blocks (RMEU_to_RM: EU_EAST); the model's single EU region (MARKET_REGIONS_INVENTORY.md stage 2 makes the blocks its regions)
+MED,MED,"its own trade region (codes/model_trade_regions.csv; part of ROW until 3 November 2026, market move stage 3)"
+URUPAR,URUPAR,"its own trade region (codes/model_trade_regions.csv; part of ROW until 3 November 2026, market move stage 3)"
+MER_OTH,MER_OTH,"its own trade region (codes/model_trade_regions.csv; part of ROW until 3 November 2026, market move stage 3)"
+WBA,WBA,its own trade region (codes/model_trade_regions.csv)

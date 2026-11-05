@@ -21,8 +21,8 @@ request).
    collapsed). Columns: share_vset, w_vset (2017: the recipe's 2017 terms, as CAPREG's file has one technology's
    term; _capri2030 / _recipe2030: the 2030 terms), the premiums PRME (EUR/ha) and labour LABT (h/ha) of each.
 
-Sources: CAPRI 2017 results /home/claude/work/capreg/res_17*.txt; CAPRI's 2030 reference
-/mnt/user-data/uploads/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; PMP terms
+Sources: CAPRI 2017 results capri_sources/capreg/res_17*.txt; CAPRI's 2030 reference
+capri_sources/exports/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; PMP terms
 capri_data/sources/capreg/pmp_quad_techn.csv and sources/baseline_pmp/intensity_q_*.csv.
 
     python tools/build/build_labour_setaside.py
@@ -32,7 +32,6 @@ from __future__ import annotations
 import glob
 import importlib.util
 import re
-import subprocess
 from collections import defaultdict
 import sys
 from pathlib import Path
@@ -40,10 +39,13 @@ from pathlib import Path
 import pandas as pd
 
 import functools as _ft
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
+from _grep import grep  # noqa: E402  (grep -E in Python: any system)
+from paths import EXPORTS, SOURCES  # noqa: E402  (CAPRI's material outside the repository)
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
-DUMPS = Path("/home/claude/work/capreg")
-REF = Path("/mnt/user-data/uploads/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv")
+DUMPS = SOURCES / "capreg"
+REF = EXPORTS / "res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv"
 ITEMS = ("LEVL", "LABT", "LABF", "LABP", "PRME")
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "lib"))
 import _model_codes as _MC  # noqa: E402  the model's activities and their CAPRI activities (codes/model_activities.csv)
@@ -66,7 +68,7 @@ def read_2017() -> dict:
 
 def read_2030() -> dict:
     pat = r"^'[A-Z]{2}[0-9A-Z]{6}'\.''\.'[A-Z0-9]+'\.'(" + "|".join(ITEMS) + r")'\.'2030'"
-    txt = subprocess.run(["grep", "-E", pat, str(REF)], capture_output=True, text=True).stdout
+    txt = grep(pat, str(REF))
     rx = re.compile(r"^'([A-Z]{2}[0-9A-Z]{6})'\.''\.'([A-Z0-9]+)'\.'([A-Z]+)'\.'2030'\s+([-\d.Ee+]+)")
     out = defaultdict(dict)
     for line in txt.splitlines():
@@ -103,9 +105,19 @@ def main() -> None:
                 if c and c in d and any(k[1] == "LABT" for k in d[c]):
                     src[vt] = c
                     break
-        if not src:
+        # the set-aside's source: the labour's where there is one; else (no labour items in CAPREG's results: Turkey, the
+        # Western Balkans, as Norway's) the first of the same rows with set-aside levels (4 November 2026: before, those
+        # units had no set-aside split although CAPRI has their VSET and FALL)
+        src_sa = dict(src)
+        for vt, d in data.items():
+            if vt not in src_sa:
+                for c in (to_c8.get(reg), mr.national_code(reg)):
+                    if c and c in d and (d[c].get(("VSET", "LEVL"), 0.0) + d[c].get(("FALL", "LEVL"), 0.0)) > 0:
+                        src_sa[vt] = c
+                        break
+        if not src and not src_sa:
             continue
-        for act, mem in MEMBERS.items():
+        for act, mem in (MEMBERS.items() if src else ()):
             rec = {"region": reg, "activity": act}
             ok = False
             for vt, d in data.items():
@@ -129,7 +141,7 @@ def main() -> None:
         # set-aside: CAPRI's VSET and FALL
         rec = {"region": reg}
         for vt, d in data.items():
-            c = src.get(vt)
+            c = src_sa.get(vt)
             if c is None:
                 continue
             dv, df = d[c].get(("VSET", "LEVL"), 0.0), d[c].get(("FALL", "LEVL"), 0.0)
@@ -156,7 +168,8 @@ def main() -> None:
         sa[col] = w.reindex(sa.index)
         ms = pd.Series([mr.national_code(r)[:2] for r in sa.index], index=sa.index)
         med = sa[col].groupby(ms).median()
-        fill = ms.map(med).fillna(float(sa[col].median()))
+        # the EU median over the units it was taken over before CAPRI's other 29 were listed (FALLBACK_UNITS, 4 Nov. 2026)
+        fill = ms.map(med).fillna(float(sa.loc[sa.index.isin(mr.FALLBACK_UNITS), col].median()))
         sa[col] = sa[col].fillna(fill)
     sa.to_csv(ROOT / "capri_data" / "2017" / "supply" / "set_aside_split.csv")
     print(f"labour_coef.csv: {len(lab)} region x activity rows, {lab.region.nunique()} regions; "

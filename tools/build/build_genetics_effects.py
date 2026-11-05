@@ -39,16 +39,19 @@ Output: capri_data/2017/abatement/mitigation/genetics_effects.csv
   parameter)), relsubs0, relsubs1, max_share, dsav (CAPRI's cost-saving drop between its ini and max calibration
   runs, EUR per model head adopting per unit of the parameter; tools/lib/_capri_costsavings.py)
 
-    python tools/build/build_genetics_effects.py [--dump-dir /home/claude/work/capreg]
+    python tools/build/build_genetics_effects.py [--dump-dir capri_sources/capreg]
 """
 from __future__ import annotations
-import argparse, glob, importlib.util, json, re
+import argparse, glob, importlib.util, re
 from collections import defaultdict
 from pathlib import Path
 
 import pandas as pd
 
 import functools as _ft
+import sys  # noqa: E402
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
+from paths import SOURCES  # noqa: E402  (CAPRI's material outside the repository)
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 import sys as _sys
@@ -76,7 +79,7 @@ CTRY = MS_CODE
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--dump-dir", type=Path, default=Path("/home/claude/work/capreg"))
+    ap.add_argument("--dump-dir", type=Path, default=SOURCES / "capreg")
     a = ap.parse_args()
     spec = importlib.util.spec_from_file_location("_mr", ROOT / "tools" / "lib" / "_model_regions.py")
     mr = importlib.util.module_from_spec(spec); spec.loader.exec_module(mr)
@@ -113,7 +116,9 @@ def main():
     if "split" in ci.columns:
         ci = ci[ci.split.fillna("int") == "int"]
     heif = {r.region: float(r.share_low) + float(r.share_high) for r in ci[ci.animal == "HFRS"].itertuples()}
-    rations = json.load(open(ROOT / "capri_data" / "2017" / "feed" / "feed_ration_2017.json"))["regions"]
+    sys.path.insert(0, str(ROOT))
+    from capri_mod.data.nested_tables import read_feed_rations
+    rations = read_feed_rations(ROOT / "capri_data" / "2017" / "feed" / "feed_ration_2017.csv")
     # CAPRI's cost per animal PLACE (GHG_Mit_Cost_: v_Miti x LEVL x DAYS / 365; the floors 2 and 20 EUR of
     # breeding.gms are per place) -> per model head: x places per model head = stock factor (DAYS / 365 per CAPRI
     # level unit, the sub-activities' level-weighted mean, ammonia_tech_model.csv) / capri_level_ratio (model heads per

@@ -122,6 +122,35 @@ READ = {"ControlStrategies", "reducControlStrategies", "RCEmissions", "FracEmGra
         "FracUseFert"}
 
 
+MIRROR = Path(__file__).resolve().parents[2] / "capri_data" / "sources" / "capri_dat" / "miterra"
+
+
+def norway_mirror(symbols: dict, ammo_gms: Path) -> dict:
+    """CAPRI's mirrored MITERRA data of Norway (envind/ammo.gms l. 252-343): X("NO000000", ...) = p_NO_X(...), which
+    replaces every NO000000 record of X (the assignment covers X's whole domain for NO000000). The pairs are read from
+    CAPRI's code; the mirror records from their extracts (tools/build/extract_capri_dat.py). Only the symbols this file
+    writes (READ). Until 4 November 2026 not applied: Norway's MITERRA data were missing or the base files' (KNOWN_ISSUES
+    K114). The regional mirrors (rLFrest ... $ R_NO_NUTS2) are not: they hold the former NUTS 3 codes (NO012000 ...),
+    none of Norway's units, so CAPRI's assignment leaves the units without values, as here."""
+    txt = ammo_gms.read_text(encoding="latin-1")
+    pairs = re.findall(r'^\s*(\w+)\(\s*"NO000000"\s*,[^=]*=\s*p_NO_(\w+)\(', txt, flags=re.M | re.I)
+    by_lower = {n.lower(): n for n in symbols}
+    out = dict(symbols)
+    for target, mirror in pairs:
+        name = by_lower.get(target.lower())
+        if name is None or name not in READ:
+            continue
+        f = [q for q in MIRROR.glob("*_p_NO_*.csv") if q.stem.split("_p_NO_")[1].lower() == mirror.lower()]
+        if len(f) != 1:
+            raise FileNotFoundError(f"the mirror of {name} (p_NO_{mirror}): {f}")
+        with open(f[0], newline="") as fh:
+            rd = csv.reader(fh)
+            next(rd)
+            recs = [(("NO000000", *row[:-1]), float(row[-1])) for row in rd]
+        out[name] = [r for r in symbols[name] if r[0][0] != "NO000000"] + recs
+    return out
+
+
 def write(symbols: dict) -> list:
     OUT.mkdir(parents=True, exist_ok=True)
     written = []
@@ -143,8 +172,11 @@ def write(symbols: dict) -> list:
 
 
 if __name__ == "__main__":
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))
+    from paths import SOURCES  # noqa: E402
     allsym = {}
     for a in sys.argv[1:]:
         allsym.update(parse_dump(Path(a)))
+    allsym = norway_mirror(allsym, SOURCES / "gams" / "envind" / "ammo.gms")
     for name, n, cols in write(allsym):
         print(f"{name:34s} {n:7d} rows  columns: {', '.join(cols)}")

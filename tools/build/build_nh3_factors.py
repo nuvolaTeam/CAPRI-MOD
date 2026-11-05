@@ -7,16 +7,30 @@ From CAPRI's 2030 reference run (dataOut, res_2_1730greendeal_refdefaulta):
   * per region: NH3MIN / MINFER -> share of mineral N lost as NH3-N.
 Regions without regional rows use the national (CC000000) factors.
 
-    python tools/build/build_nh3_factors.py --rows nh3_rows.txt
+    python tools/build/build_nh3_factors.py [--zip capri_sources/exports/res_2_1730greendeal_refdefaulta.zip]
+    python tools/build/build_nh3_factors.py --rows nh3_rows.txt     (the same rows, extracted beforehand)
+
+The rows read are those of KEEP (until 31 October 2026 they came from nh3_rows.txt, extracted from the zip with grep;
+reading the zip gives the same rows: 80,303, byte-identical).
+
+Writes capri_data/2017/environment/nh3_factors_capri.csv (region, animal, manure_share) and nh3_factors_capri_regions.csv
+(region, mineral_share, source, capri_nh3_total_ktN), capri_mod/data/nested_tables.py (a JSON file until 31 October 2026).
 """
 from __future__ import annotations
-import argparse, json, re, sys
+import argparse, re, sys
 from collections import defaultdict
 from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
+from paths import EXPORTS, need  # noqa: E402  (CAPRI's material outside the repository)
 
 _ROOT = Path(__file__).resolve().parents[2]
 sys.path[:0] = [str(_ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check")]
 from build_livestock_output_coef import CAPRI_TO_MODEL  # noqa: E402
+sys.path.insert(0, str(_ROOT))
+from capri_mod.data.nested_tables import write_nh3_factors  # noqa: E402
+import sys as _sys_nc  # noqa: E402
+_sys_nc.path.insert(0, str(__import__("pathlib").Path(__file__).resolve().parents[2] / "tools" / "lib"))
+from _model_regions import national_code as _national_code  # noqa: E402  (TUR for Turkey's units, 4 November 2026)
 
 
 def _read_csv(*a, **k):
@@ -26,15 +40,37 @@ def _read_csv(*a, **k):
     return pd.read_csv(*a, **k)
 
 
+#: the rows used: per region (NUTS code) the activities' NH3 losses, levels and excreted N, and the mineral N applied
+#: with its NH3 loss and the total
+KEEP = re.compile(r"^'[A-Z]{2}[0-9A-Z]{6}'\.''\.'(?:[A-Z0-9]+'\.'(?:GNH3|LEVL|MANN)|(?:MINFER|NH3MIN|NH3TOT)'\.'NITF)'\.'2030' ")
+
+
+def _lines(zip_path: Path, rows: Path | None):
+    """The KEEP rows: of the zip's CSV, or of an extracted rows file."""
+    if rows is not None:
+        yield from open(need(rows, "--rows"), errors="ignore")
+        return
+    import io
+    import zipfile
+    with zipfile.ZipFile(need(zip_path, "CAPRI's 2030 reference")) as z:
+        name = next(n for n in z.namelist() if n.lower().endswith(".csv"))
+        with z.open(name) as fh:
+            for line in io.TextIOWrapper(fh, encoding="latin-1", errors="ignore"):
+                if KEEP.match(line):
+                    yield line
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--rows", type=Path, default=Path("/home/claude/work/nh3/nh3_rows.txt"))
+    ap.add_argument("--zip", type=Path, default=EXPORTS / "res_2_1730greendeal_refdefaulta.zip",
+                    help="CAPRI's 2030 reference (dataOut as GAMS text, one CSV in the zip)")
+    ap.add_argument("--rows", type=Path, default=None, help="the KEEP rows extracted beforehand (instead of --zip)")
     args = ap.parse_args()
     import pandas as pd
     areas = _read_csv(_ROOT / "capri_data" / "2017" / "supply" / "base_areas.csv", index_col=0)
     pat = re.compile(r"^'([A-Z]{2}[0-9A-Z]{6})'\.''\.'([A-Z0-9]+)'\.'([A-Za-z0-9]+)'\.'2030'\s+(-?\d[\d.Ee+\-]*)")
     v = defaultdict(dict)
-    for line in open(args.rows, errors="ignore"):
+    for line in _lines(args.zip, args.rows):
         m = pat.match(line)
         if m:
             v[m.group(1)][(m.group(2), m.group(3))] = float(m.group(4))
@@ -68,18 +104,18 @@ def main() -> None:
     for reg in areas.index:
         c8 = reg_codes.get(reg) or None
         man, mi, tot = factors(c8) if c8 else ({}, None, None)
-        nat = factors(reg[:2] + "000000")
+        nat = factors(_national_code(reg))
         if not man and not nat[0]:
             continue
         rec = {"manure_share": {**nat[0], **man}, "mineral_share": mi if mi is not None else nat[1],
                "source": "regional" if c8 and man else "national", "capri_nh3_total_ktN": tot}
         out[reg] = rec
         src[rec["source"]] += 1
-    dest = _ROOT / "capri_data" / "2017" / "environment" / "nh3_factors_capri.json"
-    dest.write_text(json.dumps({"_source": "CAPRI res_2_1730greendeal_refdefaulta dataOut: GNH3/MANN per animal (weighted by excreted N), "
-                                "NH3MIN/MINFER per region; national rows where regional are missing",
-                                "_units": "kg NH3-N per kg N excreted (manure_share) or applied as mineral fertiliser (mineral_share)",
-                                "regions": out}, indent=1))
+    # source: CAPRI res_2_1730greendeal_refdefaulta dataOut: GNH3/MANN per animal (weighted by excreted N), NH3MIN/MINFER
+    # per region; national rows where regional are missing. Units: kg NH3-N per kg N excreted (manure_share) or applied
+    # as mineral fertiliser (mineral_share) (capri_data/schema/17_environment.sql)
+    dest = _ROOT / "capri_data" / "2017" / "environment" / "nh3_factors_capri.csv"
+    write_nh3_factors(dest, out)
     print(f"wrote {dest}: {len(out)} regions ({dict(src)})")
 
 

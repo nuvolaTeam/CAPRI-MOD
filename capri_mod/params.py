@@ -1,4 +1,4 @@
-"""The model's parameters, from one file: capri_data/shared/model_parameters.csv.
+"""The model's parameters, from one file: <data_dir>/shared/model_parameters.csv (capri_data's for the repository).
 
 Every constant the model's economics or accounting rests on - CAPRI's parameters, the IPCC factors as CAPRI uses
 them, JRC121368's assumptions, the few model settings that are not CAPRI data - is a row there, with its unit, kind
@@ -12,26 +12,19 @@ convergence tolerances) stay in the code: they are not economics. A test checks 
 """
 from __future__ import annotations
 
-import csv
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Dict
 
+#: the repository's file (the run's is <data_dir>/shared/model_parameters.csv, through capri_mod.data.inputs)
 FILE = Path(__file__).resolve().parents[1] / "capri_data" / "shared" / "model_parameters.csv"
-_TAB: Optional[Dict[tuple, float]] = None
 
 
 def _load() -> Dict[tuple, float]:
-    global _TAB
-    if _TAB is None:
-        tab = {}
-        with open(FILE, newline="") as f:
-            for r in csv.DictReader(f):
-                k = (r["name"], r.get("key") or "")
-                if k in tab:
-                    raise ValueError(f"model_parameters.csv: duplicate {k}")
-                tab[k] = float(r["value"])
-        _TAB = tab
-    return _TAB
+    """The run's parameters: the file of the data directory the run's inputs follow (capri_mod.data.inputs.current();
+    the repository's data until a model sets them). A name read at import (a module constant) takes the repository's
+    file; the supply's parameters are read where they are used (refactor stage 3, N1)."""
+    from capri_mod.data import inputs as _inputs
+    return _inputs.current().parameters()
 
 
 def param(name: str) -> float:
@@ -39,14 +32,14 @@ def param(name: str) -> float:
     try:
         return _load()[(name, "")]
     except KeyError:
-        raise KeyError(f"parameter {name!r} is not in {FILE.name}") from None
+        raise KeyError(f"parameter {name!r} is not in the run's {FILE.name}") from None
 
 
 def param_table(name: str) -> Dict[str, float]:
     """A keyed parameter as {key: value}; raises if it is not in the file."""
     out = {k: v for (n, k), v in _load().items() if n == name and k}
     if not out:
-        raise KeyError(f"parameter table {name!r} is not in {FILE.name}")
+        raise KeyError(f"parameter table {name!r} is not in the run's {FILE.name}")
     return out
 
 

@@ -18,7 +18,7 @@ NITF equals NRET, the N requirement, not the mineral N applied, NMIN: nutrients_
 
 Output: capri_data/2017/supply/nutrient_coefs_regional.csv (region, activity, N, P2O5, K2O), the one writer.
 
-    python tools/build/build_nutrient_coefs_regional.py [dump dir, default /home/claude/work/capreg]
+    python tools/build/build_nutrient_coefs_regional.py [dump dir, default capri_sources/capreg]
 """
 from __future__ import annotations
 
@@ -27,6 +27,8 @@ from collections import defaultdict
 from pathlib import Path
 
 import pandas as pd
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
+from paths import SOURCES  # noqa: E402  (CAPRI's material outside the repository)
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check")]
@@ -88,4 +90,4 @@ def main(dump_dir: Path) -> None:
 
 
 if __name__ == "__main__":
-    main(Path(sys.argv[1]) if len(sys.argv) > 1 else Path("/home/claude/work/capreg"))
+    main(Path(sys.argv[1]) if len(sys.argv) > 1 else SOURCES / "capreg")

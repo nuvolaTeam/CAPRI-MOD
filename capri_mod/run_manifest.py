@@ -101,6 +101,12 @@ def _versions() -> dict:
         mod = sys.modules.get(m)
         if mod is not None:
             out[m] = getattr(mod, "__version__", "")
+    il = sys.modules.get("capri_mod.utils.ipopt_library")
+    if il is not None and il.loaded():
+        # another IPOPT library in place of CasADi's (supply.nlp_ipopt_library): the file, and the OpenMP threads of
+        # the main process (the workers': supply.nlp_omp_threads)
+        out["ipopt_library"] = {"path": il.loaded(), "sha256": _sha256(il.loaded()),
+                                "omp_threads_main_process": il.threads()}
     return out
 
 
@@ -124,7 +130,8 @@ def finish() -> dict:
                 "data_tree": _git("rev-parse", "HEAD:capri_data"), "changed_files": status},
         "software": _versions(),
         "environment": {"platform": platform.platform(), "cpus": os.cpu_count(),
-                        **{k: os.environ.get(k) for k in ("CAPRI_WORKERS", "PYTHONHASHSEED") if k in os.environ}},
+                        **{k: os.environ.get(k) for k in ("CAPRI_WORKERS", "PYTHONHASHSEED", "OMP_CANCELLATION",
+                                                           "OMP_PROC_BIND", "OMP_NUM_THREADS") if k in os.environ}},
         "command": list(sys.argv),
         "inputs": inputs,
         "external_inputs": external,

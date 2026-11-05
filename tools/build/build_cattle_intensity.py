@@ -22,7 +22,7 @@ Sources: CAPRI 2017 results res_17<MS>.txt; capri_data/sources/capreg/pmp_quad_t
 their CAPRI region through tools/lib/_model_regions.py (splits and merges), else the national row.
 Output: capri_data/2017/supply/cattle_intensity.csv (region, animal, ...)
 
-    python tools/build/build_cattle_intensity.py [--dump-dir /home/claude/work/capreg]
+    python tools/build/build_cattle_intensity.py [--dump-dir capri_sources/capreg]
 """
 from __future__ import annotations
 import argparse, glob, importlib.util, re
@@ -32,6 +32,9 @@ from pathlib import Path
 import pandas as pd
 
 import functools as _ft
+import sys  # noqa: E402
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
+from paths import SOURCES  # noqa: E402  (CAPRI's material outside the repository)
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 #: (column suffix, terms per model region): the base year's (CAPREG), CAPRI's 2030 calibration and capri-mod's
@@ -64,7 +67,7 @@ GOODS_USE = {"calves_m": ("ICAM",), "calves_f": ("ICAF",), "young_m": ("IBUL",),
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--dump-dir", type=Path, default=Path("/home/claude/work/capreg"))
+    ap.add_argument("--dump-dir", type=Path, default=SOURCES / "capreg")
     a = ap.parse_args()
     v = defaultdict(dict)
     for f in glob.glob(str(a.dump_dir / "res_17*.txt")):
@@ -161,11 +164,14 @@ def main():
             own = sel & (out[qz] > 0) & (out[qb] > 0)
             k = (out.loc[sel, qz] * out.loc[sel, "heads"])
             med_ms = k.groupby(out.loc[sel, "ms"]).median()
-            med_eu = float(k.median())
+            # the EU medians over the units they were taken over before CAPRI's other 29 were listed (FALLBACK_UNITS)
+            fb = out["region"].isin(mr.FALLBACK_UNITS)
+            med_eu = float(k[fb.loc[k.index]].median())
             # the giving-up activity's part of q_z, from the regions with their own terms (country, else EU median)
             fr = (out.loc[own, qb] / out.loc[own, qz])
             fr_ms = fr.groupby(out.loc[own, "ms"]).median()
-            fr_eu = float(fr.median()) if len(fr) else 0.5
+            fr_fb = fr[fb.loc[fr.index]]
+            fr_eu = float(fr_fb.median()) if len(fr_fb) else 0.5
             for i in out.index[sel & ~((out[qz] > 0) & (out[qb] > 0))]:
                 km = med_ms.get(out.at[i, "ms"])
                 km = med_eu if km is None or km != km else km

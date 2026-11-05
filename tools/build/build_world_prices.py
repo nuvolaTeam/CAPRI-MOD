@@ -15,8 +15,9 @@ Rows
         EU's oil extraction, FAO_agg's EU olive oil production (MAPR OLIO BAS of the EU member states of the regional
         units) over CAPRI's EU olives for oil (res_17 OLIV YILD x LEVL of the same member states, kg) in t
   FPRI  FAO_agg has no world price for it: CAPRI's 2017 market, export-weighted market prices of the exporting
-        regions (bilateral_flows_2017.csv, bilateral_regions_2017.csv; written by build_feed_byproducts.py until
-        29 October 2026)
+        market regions, every one of CAPRI's 45 an exporter, the EU's two blocks and their trade with each other
+        included (bilateral_flows_2017.csv, bilateral_regions_2017.csv; the project lead's rule (c), 3 November
+        2026; until then the one-EU files; written by build_feed_byproducts.py until 29 October 2026)
 
 Until 29 October 2026 most rows had no builder: written by an earlier one, at 2 decimals (1 for the oilseed oils and
 cakes and for olives), with two placeholder rows of removed markets (FATS 900, OFOD_M 400) and build_feed_byproducts.py
@@ -29,6 +30,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import math
 import glob
 import re
 import sys
@@ -37,6 +39,8 @@ from pathlib import Path
 import pandas as pd
 
 import functools as _ft
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
+from paths import EXPORTS, SOURCES  # noqa: E402  (CAPRI's material outside the repository)
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
@@ -45,9 +49,8 @@ from capri_mod.data import definitions as D  # noqa: E402
 MKT = ROOT / "capri_data" / "2017" / "market"
 OUT = MKT / "world_prices.csv"
 CODES = ROOT / "capri_data" / "codes" / "model_commodities.csv"
-UNITS = ROOT / "capri_data" / "shared" / "regional_units.csv"
-FAO = Path("/mnt/user-data/uploads/fao_agg_17_datamarket.txt")
-DUMPS = Path("/home/claude/work/capreg")
+FAO = EXPORTS / "fao_agg_17_datamarket.txt"
+DUMPS = SOURCES / "capreg"
 FAO_SRC = "FAO_agg_17_defaulta p_dataMarket 'World'.'PMRK'.'BAS'"
 #: the CAPRI product whose world price a row takes where it is not the commodity's CAPRI code (model_commodities.csv),
 #: and the rows that are not market commodities
@@ -85,21 +88,25 @@ def olives_for_oil(dumps: Path, member_states) -> float:
 
 
 def fpri_price() -> float:
-    """FPRI: the export-weighted market price of the exporting regions in CAPRI's 2017 market."""
+    """FPRI: the export-weighted market price of the exporting market regions in CAPRI's 2017 market."""
     fl = _read_csv(MKT / "bilateral_flows_2017.csv")
     f = fl[(fl.commodity == "FPRI") & (fl.importer != fl.exporter)]
     rg = _read_csv(MKT / "bilateral_regions_2017.csv")
     pm = rg[rg.commodity == "FPRI"].set_index("region")["pmrk"]
-    ex = f.groupby("exporter")["q_kt"].sum()
-    return float(sum(q * float(pm.get(r, 0.0)) for r, q in ex.items()) / ex.sum())
+    ex = f.groupby("exporter")["q_kt"].apply(math.fsum)       # exact sums: independent of the regions' order
+    return math.fsum(q * float(pm.get(r, 0.0)) for r, q in ex.items()) / math.fsum(ex.values)
 
 
 def build(fao: Path = FAO, dumps: Path = DUMPS):
     world, olio = fao_market(fao)
     with open(CODES, newline="", encoding="utf-8") as fh:
         capri_code = {r["code"]: r["capri_code"] for r in csv.DictReader(fh)}
-    with open(UNITS, newline="", encoding="utf-8") as fh:
-        ms = sorted({r["capri_ms"] for r in csv.DictReader(fh) if r["country"] != "NO"})
+    # the EU's member states (shared/eu_market_blocks.csv through tools/lib/_model_regions.EU_MS; SUPPLY_NONEU_DESIGN
+    # section 2, issue 4: until 31 October 2026 the member states of regional_units.csv but Norway, which would take in
+    # the UK's, Turkey's and the Western Balkans' units)
+    sys.path.insert(0, str(ROOT / "tools" / "lib"))
+    from _model_regions import EU_MS
+    ms = sorted(EU_MS)
     prices, prov, missing = {}, {}, []
     for c in list(D.MARKET_COMMODITIES) + ["DWHE", "SUGB"]:
         if c == "OLIV":
@@ -114,7 +121,7 @@ def build(fao: Path = FAO, dumps: Path = DUMPS):
         elif c == "FPRI":
             prices[c] = fpri_price()
             prov[c] = {"capri_code": "FPRI", "source": "CAPRI market_base_1717: export-weighted PMRK of the exporting "
-                       "regions (FAO_agg has no World PMRK for FPRI); tools/build/build_world_prices.py"}
+                       "market regions, the EU's two blocks included (FAO_agg has no World PMRK for FPRI); tools/build/build_world_prices.py"}
         else:
             code = SOURCE_CODE.get(c, capri_code.get(c))
             if code not in world:

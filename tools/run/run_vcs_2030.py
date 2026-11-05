@@ -13,6 +13,11 @@ factor = sum L PRME_novcs / sum L PRME_ref. Model regions take their CAPRI regio
 national row (as in the other builders).
 
     python tools/run/run_vcs_2030.py OUT.pkl [--verbose]
+
+A validation test, not a scenario: the premium change it applies is CAPRI's own result for this pair of runs. A
+"without VCS" scenario as CAPRI defines it (the coupled premium types at zero, the envelope moved into the decoupled
+payment) needs the coupled-support part of each premium and CAPRI's ceiling logic, which the model does not have
+(docs/design/MODEL_CONTENT_PLAN.md §12a P2; the project lead's decision, 3 November 2026).
 """
 from __future__ import annotations
 import os as _os
@@ -116,7 +121,7 @@ def main():
     fac = premium_factors(list(m.data["areas"].index))
     scen = PolicyScenario(name="WITHOUT_VCS", description="CAPRI cap_after_2014 without voluntary coupled support",
                           premium_factor_regional=fac)
-    traj = BaselineTrajectory.from_file(str(ROOT / "capri_data" / "trajectories" / "captrd_2030.json"))
+    traj = BaselineTrajectory.from_file(str(ROOT / "capri_data" / "scenarios" / "captrd_2030"))
     pmod = ProjectionModule(m, traj, capri_prices_dir=str(ROOT / "capri_data" / "trajectories"))
     res = pmod.run(policy_scenario=scen, years=[2030])
     b, s = res.baseline[2030], res.scenario[2030]

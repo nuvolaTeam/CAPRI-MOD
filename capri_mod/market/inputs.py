@@ -43,12 +43,19 @@ BUILDERS = {
     "feed_bulks_eu.csv": "build_feed_bulks.py",
     "feed_bulks_eu_share.csv": "build_feed_bulks.py",
     "feed_byproducts.csv": "build_feed_byproducts.py",
-    "feed_demand_nonEU.json": "build_feed_demand_nonEU.py",
+    "feed_demand_nonEU.csv": "build_feed_demand_nonEU.py",
+    "feed_demand_nonEU_elasticities.csv": "build_feed_demand_nonEU.py",
+    "feed_demand_nonEU_capri_regions.csv": "build_feed_demand_nonEU.py",
+    "world_market_baseline.csv": "build_world_market_baseline.py",
+    "world_market_baseline_products.csv": "build_world_market_baseline.py",
+    "dairy_world_baseline.csv": "build_dairy_world_markets.py",
     "processing_nq_hessian.csv": "build_processing_nq.py",
     "processing_nq_base.csv": "build_processing_nq.py",
     "welfare_base_2030.csv": "build_welfare_base.py",
     "eu_market_supply_nq.csv": "build_eu_market_supply_nq.py",
     "noneu_market_supply_nq.csv": "build_noneu_market_supply_nq.py",
+    "noneu_land_market.csv": "build_noneu_market_supply_nq.py",
+    "noneu_land_mnl.csv": "build_noneu_market_supply_nq.py",
     "crushing_parameters_{year}.csv": "build_crushing_parameters.py",
     "supply_elas_region.csv": "build_supply_elas_nonEU.py",
     "supply_elas_eu.csv": "build_capri_supply_elas_market.py",
@@ -61,19 +68,21 @@ BUILDERS = {
 class MarketInputs:
     """Paths and readers of the market's inputs for one data directory and base year."""
 
-    def __init__(self, data_dir: Optional[Path] = None, base_year: str = "2017"):
+    def __init__(self, data_dir: Optional[Path] = None, base_year: Optional[str] = None):
+        from capri_mod.data.inputs import default_base_year
         self.root = Path(data_dir) if data_dir else REPO_DATA
-        self.base_year = str(base_year)
+        self.base_year = str(base_year) if base_year is not None else default_base_year()
 
     # -- locations -----------------------------------------------------------------------------------------------
     def path(self, name: str, where: str = "market") -> Path:
-        """where: "market" (the base year's market folder), "shared", or "sources/<sub>"."""
+        """where: "market" (the base year's market folder) or "shared". Not "sources/<sub>": the model reads no file
+        under capri_data/sources (refused since 3 November 2026)."""
         if where == "market":
             return self.root / self.base_year / "market" / name
         if where == "shared":
             return self.root / "shared" / name
-        if where.startswith("sources/"):
-            return self.root / where / name
+        if where.startswith("sources/") or where == "sources":
+            raise ValueError(f"{where!r}: the model reads no file under capri_data/sources (the builders' extracts of CAPRI's material, capri_data/sources/README.md); a builder writes what the model needs as an input (3 November 2026)")
         raise ValueError(f"unknown input location {where!r}")
 
     def exists(self, name: str, where: str = "market") -> bool:
@@ -84,6 +93,12 @@ class MarketInputs:
             b = next((v for k, v in BUILDERS.items() if k == name or (("{" in k) and name.startswith(k.split("{")[0]))),
                      None)
             raise FileNotFoundError(f"market input {p} is missing" + (f" (written by tools/build/{b})" if b else ""))
+
+    def need(self, name: str, where: str = "market") -> Path:
+        """The path of a required input; a missing file raises FileNotFoundError naming it and its builder."""
+        p = self.path(name, where)
+        self._require(p, name)
+        return p
 
     # -- readers -------------------------------------------------------------------------------------------------
     def csv(self, name: str, where: str = "market", required: bool = True, **read_kw) -> Optional[pd.DataFrame]:

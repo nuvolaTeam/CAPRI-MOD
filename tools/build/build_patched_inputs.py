@@ -18,7 +18,7 @@ data_market_1730defaulta.csv).
 
     python tools/build/build_patched_inputs.py [--dump-dir DIR] [--uploads DIR] [--check]
 
---check runs the chain on a copy of the repository (without capri_reference) and reports whether the two files,
+--check runs the chain on a copy of the repository (without capri_sources) and reports whether the two files,
 and the other files the steps write, come out as they are in place (CSV values within 1e-9); nothing in the repository is changed.
 """
 from __future__ import annotations
@@ -30,6 +30,8 @@ import subprocess
 import sys
 import tempfile
 from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
+from paths import EXPORTS, SOURCES  # noqa: E402  (CAPRI's material outside the repository)
 
 
 def _read_csv(*a, **k):
@@ -89,8 +91,8 @@ def run(root: Path, dump: str, up: str) -> bool:
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--dump-dir", default="/home/claude/work/capreg")
-    ap.add_argument("--uploads", default="/mnt/user-data/uploads")
+    ap.add_argument("--dump-dir", default=str(SOURCES / "capreg"))
+    ap.add_argument("--uploads", default=str(EXPORTS))
     ap.add_argument("--check", action="store_true")
     a = ap.parse_args()
     if not a.check:

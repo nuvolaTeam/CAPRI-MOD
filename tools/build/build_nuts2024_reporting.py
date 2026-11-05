@@ -100,8 +100,11 @@ def main():
         download()
     sp = importlib.util.spec_from_file_location("_mr", ROOT / "tools" / "lib" / "_model_regions.py")
     mr = importlib.util.module_from_spec(sp); sp.loader.exec_module(mr)
-    units = mr.UNITS
-    ctry = {u: c for u, c in zip(units, pd.read_csv(ROOT / "capri_data" / "shared" / "regional_units.csv", dtype=str).country)}
+    # the EU's units and Norway's (FALLBACK_UNITS): the units of the UK, Turkey and the Western Balkans, listed since 4
+    # November 2026, are not in the NUTS-2024 reporting
+    units = [u for u in mr.UNITS if u in mr.FALLBACK_UNITS]
+    _ru = pd.read_csv(ROOT / "capri_data" / "shared" / "regional_units.csv", dtype=str)
+    ctry = {u: c for u, c in zip(_ru.region, _ru.country) if u in set(units)}
 
     t13 = pd.read_csv(NUTS / "nuts2013_2016.csv", dtype=str).fillna("")
     n16 = sorted(level2(t13.code_2016) & {c for c in t13.code_2016 if c[:2] in set(ctry.values()) | {"EL"}})

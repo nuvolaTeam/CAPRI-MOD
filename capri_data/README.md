@@ -18,9 +18,10 @@ capri_data/
 │   └── abatement/         mitigation options: ammonia/ (N cascade, AD, leaching, Nitrates Directive, costs/),
 │                          mitigation/ (feed, genetics, soil options), fertiliser options
 ├── shared/                region maps (region_capri_map.csv, NUTS correspondences), EU trade blocks,
-│                          model_parameters.csv, trade_flows_2017.csv
-├── trajectories/          capri_ref_2030.json (default), captrd_2030.json, null.json, CAPRI's 2030
-│                          prices, premiums, rations and fodder
+│                          model_parameters.csv, CAPRI's behavioural regions (rms.csv, rms_to_rm.csv)
+├── scenarios/             one folder per scenario: settings.toml (its settings) and its factors as CSV
+│                          (capri_ref_2030, the default; captrd_2030; null, settings only)
+├── trajectories/          CAPRI's 2030 prices, premiums, rations and fodder
 ├── validation/            CAPRI reference results used by the tests and comparison tools
 ├── sources/               the extracts the builders read (CAPRI result rows, MITERRA tables, literature review);
 │                          not read by the model
@@ -31,7 +32,6 @@ capri_data/
 │                          units and the model's own, model_units.csv), CAPRI's sets (capri/), the model's activities,
 │                          commodities and trade regions with their CAPRI codes (model_trade_regions.csv is also
 │                          read by the model)
-├── MANIFEST.json                                           expected files and shapes
 ├── FITNESS_FOR_USE.json                                    how far each output can be trusted (capri_mod/fitness.py)
 └── *.md                                                    this file and the guides below
 ```
@@ -64,12 +64,13 @@ elasticity calibration removed on 28 October 2026, was removed on 29 October 202
 
 ## File resolution
 
-`capri_mod/data/loaders.py::resolve_data_file` looks a file up in `shared/` (for the files mapped there, e.g.
-`trade_flows.csv` → `shared/trade_flows_2017.csv`), then in `<base_year>/<category>/` from its category table, then
-in a flat `capri_data/<file>` fallback.
+`capri_mod/data/loaders.py::resolve_data_file` looks a file up in `<base_year>/<category>/` from its category table,
+then in a flat `capri_data/<file>` fallback (until 3 November 2026 `trade_flows.csv` was mapped to
+`shared/trade_flows_2017.csv`, a matrix no code read, removed).
 
 ## Checks
 
-`python -m capri_mod.data.validate_data capri_data` (files, shapes against MANIFEST.json, vintages, sanity,
-provenance; 20 October 2026: 12 pass, 1 warning, a stale MANIFEST row count for `fert_side_effects.csv`),
-`python tools/check/verify_schema.py`, `python tools/check/check_regression.py`.
+`python -m capri_mod.data.validate_data` (the declarations of `schema/`: every CSV's columns, types, keys, code lists,
+ranges and units, the rules, provenance, the files' catalogue with their vintages, and the crops' gross margins at the
+base; it replaced the MANIFEST.json validator on 31 October 2026), `python tools/check/verify_schema.py`,
+`python tools/check/check_regression.py`.

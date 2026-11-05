@@ -30,7 +30,7 @@ Written (capri_data/2017/supply/):
 Model crops that sum several CAPRI activities take their shares weighted by CAPRI's 2030 levels in the
 region (OFOD: OFAR, ROOF; SETA: SETA, FALL; GRAS: GRAE, GRAI; olives OLIV and table olives TABO separate).
 
-    python tools/build/build_cover_crops.py [--gams-dir /home/claude/work/allgms/gams]
+    python tools/build/build_cover_crops.py [--gams-dir capri_sources/gams]
 """
 from __future__ import annotations
 import argparse, csv, importlib.util, json, re
@@ -40,6 +40,9 @@ from pathlib import Path
 import pandas as pd
 
 import functools as _ft
+import sys  # noqa: E402
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
+from paths import SOURCES  # noqa: E402  (CAPRI's material outside the repository)
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 import sys as _sys
@@ -82,7 +85,7 @@ def read_cinput(path: Path) -> dict:
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--gams-dir", type=Path, default=Path("/home/claude/work/allgms/gams"))
+    ap.add_argument("--gams-dir", type=Path, default=SOURCES / "gams")
     a = ap.parse_args()
     terms = _read_csv(ROOT / "capri_data" / "validation" / "greendeal_2030" / "capri_marginal_terms_ini_2030.csv.xz",
                         header=None, names=["region", "act", "item", "value"], dtype=str)

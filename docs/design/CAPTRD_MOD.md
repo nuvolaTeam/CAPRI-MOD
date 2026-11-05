@@ -106,7 +106,7 @@ The pipeline adds to it; it doesn't replace or change it:
 - **New outputs sit beside the current ones.** A new base year goes in its own folder (`capri_data/<year>/`), and
   a CAPTRD-MOD projection is a new trajectory file in the existing trajectory format (e.g.
   `trajectories/captrdmod_<year>.json`). They are selected by an option; the defaults stay `capri_data/2017/` and
-  `capri_ref_2030.json`.
+  `scenarios/capri_ref_2030`.
 - **Changes to existing code are behaviour-neutral.** This includes the prerequisite fix of the hard-wired 2017
   paths. Accepted only if the full test suite passes unchanged and the reference runs reproduce their results with
   the new layer off: Farm-to-Fork 2030 with CAPRI's terms and with the recipe terms, compared through
@@ -119,7 +119,7 @@ The pipeline adds to it; it doesn't replace or change it:
 
 It is not CAPTRD:
 - It takes CAPRI's own 2030 results as a path given from outside. The default is CAPRI's 2030 reference
-  (`capri_ref_2030.json`); CAPRI's own CAPTRD output (`captrd_2030.json`) is the alternative.
+  (`scenarios/capri_ref_2030`); CAPRI's own CAPTRD output (`scenarios/captrd_2030`) is the alternative.
 - It scales the 2017 data along that path, restores the accounting identities with a simplified least-squares step
   (`reconcile.py`), and solves each target year comparative-static.
 - It estimates no trends of its own. Nothing is carried from year to year except perennial crop areas.
@@ -146,7 +146,7 @@ It is not CAPTRD:
    - The NUTS-2 breakdown happens inside this second solve.
    - The breakdown by farm type is a separate CAPRI program (captrdfrm.gms), left out at first.
 
-**Parity test.** Give CAPTRD-MOD the inputs CAPRI used, and compare its result with `captrd_2030.json`, CAPRI's own
+**Parity test.** Give CAPTRD-MOD the inputs CAPRI used, and compare its result with `scenarios/captrd_2030`, CAPRI's own
 CAPTRD output. The exact list of files needed from the CAPRI installation comes with the detailed design (from
 CAPTRD_MAP.md section 2). It includes:
 - CAPRI's stored Eurostat download;
@@ -398,7 +398,7 @@ Each candidate gives a prior and a variance by horizon. All feed the unchanged s
 ### 8.3 CAPTRD defects: fixed (decided)
 
 Each defect gets a fix, and a parity switch reproduces CAPRI's behaviour.
-- **Why the switch:** only with CAPRI's behaviour can the parity test against `captrd_2030.json` measure our
+- **Why the switch:** only with CAPRI's behaviour can the parity test against `scenarios/captrd_2030` measure our
   implementation rather than the fixes.
 - **Reporting:** the effect of each fix is reported separately, against the parity run.
 
@@ -545,7 +545,7 @@ runs pass before it enters a package.
 2. Data download layer (section 7) with its documentation. In progress since 23 October 2026: the Eurostat adapter,
    the store, the manifest, the command line and the catalogue of COCO's inputs (docs/DATA_PIPELINE.md).
 3. COCO-like and CAPREG-like databases (layers 2–3).
-4. CAPTRD-MOD (layer 4), with the parity test against `captrd_2030.json`.
+4. CAPTRD-MOD (layer 4), with the parity test against `scenarios/captrd_2030`.
 5. Scenario modes (layer 5).
 
 ## 11. Decision log

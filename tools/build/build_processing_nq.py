@@ -32,11 +32,13 @@ from pathlib import Path
 import pandas as pd
 
 import functools as _ft
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
+from paths import EXPORTS  # noqa: E402  (CAPRI's material outside the repository)
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
-ELAS = Path("/mnt/user-data/uploads/elas_2_1730defaulta.csv")
-DATA = Path("/mnt/user-data/uploads/data_market_1730defaulta.csv")
-DUMP = Path("/mnt/user-data/uploads/markmarket_greendeal_1730et_base_1717.txt")
+ELAS = EXPORTS / "elas_2_1730defaulta.csv"
+DATA = EXPORTS / "data_market_1730defaulta.csv"
+DUMP = EXPORTS / "markmarket_greendeal_1730et_base_1717.txt"
 OUT = ROOT / "capri_data" / "2017" / "market"
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "lib"))
 from _model_regions import EU_MS2 as _EU_FROM_DATA  # noqa: E402  (capri_data/shared/eu_market_blocks.csv)
@@ -52,7 +54,7 @@ def num(s: str) -> float:
 def main() -> None:
     sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check")]
     import build_bilateral_market as BM
-    from recalibrate_trade_2017 import trade_region
+    from _market_regions import model_region  # the market's grouping step (tools/lib/_market_regions.py)
     g2m = {g: m for m, gs in BM.MODEL.items() for g in gs}
     h = []
     cur = None
@@ -88,7 +90,7 @@ def main() -> None:
     missing = sorted(r for r in regs if r not in inpe)
     if missing:
         raise SystemExit(f"no 2030 PPRI INPE in the dump for {missing}")
-    mreg = lambda r: "EU27" if (r[:2] in EU and r.endswith("000000")) else trade_region(r)
+    mreg = model_region
     a1 = lambda r, g: v.get((r2m.get(r, r), "ARM1P", g), float("nan"))
     rows_h = [(r, mreg(r), g2m[x], g2m[y], val, a1(r, x), a1(r, y)) for r, x, y, val in h
               if x in g2m and y in g2m and val != 0.0]

@@ -25,6 +25,7 @@ equilibrium is the same; the path differs.
 """
 from __future__ import annotations
 
+import copy
 from typing import Dict, List, Tuple
 
 import numpy as np
@@ -84,13 +85,21 @@ class NewtonKrylovMixin:
                     a[act, ci[c]] = v
             return pd.DataFrame(a, index=base.index, columns=base.columns)
 
+        # The evaluation carries state from one call to the next (MarketEvalState: the dairy blocks' raw milk prices
+        # that FeedBal_, the land markets and Norway's milk row read, feed use, biofuels, young animals). The default
+        # solve takes it lagged by one step, which settles with the prices. Here every evaluation of one Newton step
+        # starts from the same state (`frozen_ev`), so R is one function of z within the step and the finite
+        # differences are its derivatives; the state moves to the accepted point's between steps, as the quotas do.
+        frozen_ev = [copy.deepcopy(self.ev)]
+
         def resid(rr: pd.DataFrame):
+            self.__dict__["_ev"] = copy.deepcopy(frozen_ev[0])
             S, D, PAr, F, pc = self._bilateral_eval(rr, exogenous_supply, trade_scenario)
             g = np.empty(n)
             for k, (c, act) in enumerate(lay):
                 sz = size(c)
                 g[offs[k]:offs[k + 1]] = (F[c] / sz) if act[0] < 0 else (F[c][act] / sz[act])
-            return g, (S, D, PAr, F, pc)
+            return g, (S, D, PAr, F, pc), self.ev
 
         frozen = np.zeros(n, dtype=bool)                       # the unknowns held (precond_blocks marks them)
 
@@ -133,7 +142,7 @@ class NewtonKrylovMixin:
             return out
 
         z = pack(r)
-        g, ev = resid(r)
+        g, ev, post = resid(r)
         converged = False
         it = 0
         n_evals = 1
@@ -142,25 +151,36 @@ class NewtonKrylovMixin:
             err = float(np.max(np.abs(g))) if n else 0.0
             errs = {c: float(np.max(np.abs(F[c] / size(c)))) for c in F}
             self._bilat_errs = errs
-            # EU tariff-rate quotas: the out-of-quota tariff follows the fill at the current flows, as the default solve
+            # CAPRI's bilateral tariff-rate quotas: the tariffs follow the fill at the current flows, as the default solve
             trq_moved = 0.0
             for c, sc in sysd.items():
                 if sc.trq_row is None:
                     continue
                 X, _ = sc.flows(D[c].values, r[c].values, pc[c])
-                old = sc.trq_offset.copy()
-                sc.trq_solve(X, pc[c])
-                trq_moved = max(trq_moved, float(np.max(np.abs(sc.trq_offset - old)
-                                                        / np.maximum(float(np.min(sc.Pd0[sc._rows()])), 1.0))))
+                old_s = sc.trq_sigmas()
+                sc.trq_solve(X, pc[c], r[c].values)
+                trq_moved = max(trq_moved, sc.trq_sigma_change(old_s))
             if verbose:
-                print(f"  market Newton-Krylov step {it}: max rel residual {err:.2e}, evaluations {n_evals}")
+                print(f"  market Newton-Krylov step {it}: max rel residual {err:.2e}, quota rates moved {trq_moved:.2e}, "
+                      f"evaluations {n_evals}")
             if max(errs.values()) < tol and trq_moved < tol:
                 converged = True
                 break
-            if trq_moved > 0:
-                g, ev = resid(r)                                   # the quotas moved: the residual at the new tariffs
+            if trq_moved > 0 or it > 0:
+                # the residual at the new tariffs and at the state the accepted point left (the lagged blocks')
+                frozen_ev[0] = post
+                g, ev, post = resid(r)
                 n_evals += 1
                 S, D, PAr, F, pc = ev
+                errs = {c: float(np.max(np.abs(F[c] / size(c)))) for c in F}
+                self._bilat_errs = errs
+                if max(errs.values()) < tol and trq_moved < tol:
+                    converged = True
+                    break
+                if max(errs.values()) < tol:
+                    # the prices clear the markets at these tariffs: only the quotas' rates still move, so the next
+                    # step is theirs (one evaluation, as in the default solve), not a Newton step
+                    continue
             blocks = precond_blocks(r, S, D, PAr)
             g0 = g.copy()
 
@@ -172,7 +192,7 @@ class NewtonKrylovMixin:
                 if nv == 0:
                     return np.where(frozen, v, 0.0)
                 eps = h / nv
-                g1, _ = resid(unpack(z + eps * vf, r))
+                g1, _, _ = resid(unpack(z + eps * vf, r))
                 n_evals += 1
                 return np.where(frozen, v, (g1 - g0) / eps)
             J = LinearOperator((n, n), matvec=jv, dtype=float)
@@ -192,7 +212,7 @@ class NewtonKrylovMixin:
             t, acc = 1.0, False
             while t >= 1.0 / 32:
                 rt = unpack(z + t * dz, r)
-                gt, evt = resid(rt)
+                gt, evt, pt = resid(rt)
                 n_evals += 1
                 if np.all(np.isfinite(gt)) and float(np.dot(gt, gt)) <= (1.0 - 1e-4 * t) * f0:
                     acc = True
@@ -202,11 +222,13 @@ class NewtonKrylovMixin:
                 # no descent along the Newton direction: the default solve's (preconditioner) step, damped
                 dz = np.clip(np.where(frozen, 0.0, -apply_prec(blocks, g0)), np.log(sclip[0]), np.log(sclip[1]))
                 rt = unpack(z + 0.5 * dz, r)
-                gt, evt = resid(rt)
+                gt, evt, pt = resid(rt)
                 n_evals += 1
                 t = 0.5
+            if verbose:
+                print(f"    Krylov info {info}, step length {t}, Newton step accepted {acc}")
             z = z + t * dz
-            r, g, ev = rt, gt, evt
+            r, g, ev, post = rt, gt, evt, pt
         S, D, PAr, F, pc = ev
         self._bilat_err = float(max((float(np.max(np.abs(F[c] / size(c)))) for c in F), default=0.0))
         self.sv.bilat_last_r = r.copy()

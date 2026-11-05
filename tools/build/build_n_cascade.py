@@ -40,6 +40,9 @@ from pathlib import Path
 import pandas as pd
 
 import functools as _ft
+import sys as _sys_nc  # noqa: E402
+_sys_nc.path.insert(0, str(__import__("pathlib").Path(__file__).resolve().parents[2] / "tools" / "lib"))
+from _model_regions import national_code as _national_code  # noqa: E402  (TUR for Turkey's units, 4 November 2026)
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 D = ROOT / "capri_data" / "2017" / "abatement" / "ammonia"
@@ -106,7 +109,7 @@ def _effects(pairs, _unused, rows_a, frs):
         f = F.get((reg, act))
         if f is None:
             continue
-        tl, ms = f["tsl"], reg[:2] + "000000"
+        tl, ms = f["tsl"], _national_code(reg)
         e = dict(E.get((reg, act)) or E.get((ms, act)) or {})
         for it in GAS_ITEMS:
             if act in SWINPOUL:
@@ -175,7 +178,7 @@ def build():
     ms_seen = set()
     regions = sorted({r for r, _ in pairs})
     for reg, act in pairs:
-        ms = reg[:2] + "000000"
+        ms = _national_code(reg)
         lq, sd = MITT[act]
         L = bn.get((ms, lq, SCEN_YEAR), 0.0) if lq else 0.0
         S = bn.get((ms, sd, SCEN_YEAR), 0.0) if lq else 0.0
@@ -205,7 +208,7 @@ def build():
             rows_a.append([reg, act, k, v])
         ms_seen.add(ms)
     for reg in regions:
-        ms = reg[:2] + "000000"
+        ms = _national_code(reg)
         r_ = rlf.get(reg, {})
         out = {}
         if "LFsurface" in r_:
@@ -222,7 +225,7 @@ def build():
             rows_r.append([reg, k, v])
     rows_e = _effects(pairs, {(r[0], r[1]): None for r in rows_a}, rows_a, frs)
     for reg in regions:
-        ms = reg[:2] + "000000"
+        ms = _national_code(reg)
         share = {ft: nn.get((ms, ft, SCEN_YEAR)) for ft in ("Ureum", "Other")}
         if any(v is not None for v in share.values()) and (ms, "NH3", "Ureum") in ef:
             # urea substitution (ammo_tech.gms l. 2352-2361): othImpact nh3syn = EF(urea) - EF(other), maximum share

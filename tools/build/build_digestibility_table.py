@@ -9,13 +9,15 @@ reads it (a value belongs to the column whose header it overlaps; lines starting
                                                                                  NDF, ADF, LI, ASH, CAT)
   capri_data/sources/envind/capri_digest_default_prd.csv  default, feed         (DEF_PRD: feed takes default's values)
 
-    python tools/build/build_digestibility_table.py [CAPRI gams folder, default /home/claude/work/allgms/gams]
+    python tools/build/build_digestibility_table.py [CAPRI gams folder, default capri_sources/gams]
 """
 from __future__ import annotations
 
 import re
 import sys
 from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
+from paths import SOURCES  # noqa: E402  (CAPRI's material outside the repository)
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
@@ -74,4 +76,4 @@ def main(gams: Path):
 
 
 if __name__ == "__main__":
-    main(Path(sys.argv[1]) if len(sys.argv) > 1 else Path("/home/claude/work/allgms/gams"))
+    main(Path(sys.argv[1]) if len(sys.argv) > 1 else SOURCES / "gams")

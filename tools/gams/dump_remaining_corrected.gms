@@ -1,4 +1,7 @@
 $TITLE CAPRI-Python -- corrected dumps for the remaining sources
+* CAPRI's installation folder is given on the command line (no machine's folder in this file):
+*     gams dump_remaining_corrected.gms --CAPRI=C:\path\to\capri-star3.0
+$if not set CAPRI $abort "Give CAPRI's installation folder: gams dump_remaining_corrected.gms --CAPRI=<folder>"
 $ONTEXT
 
   Corrected against the symbol listings. Two of my earlier guesses were wrong.
@@ -27,7 +30,7 @@ $ONTEXT
 
 $OFFTEXT
 
-$call 'cmd /c if not exist "C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\capri_export" mkdir "C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\capri_export"'
+$call 'cmd /c if not exist "%CAPRI%\capri_export" mkdir "%CAPRI%\capri_export"'
 
 *--------------------------------------------------------------------------
 * SECTION 1 -- estnlp: elasticities and estimated PMP terms
@@ -38,20 +41,20 @@ $call 'cmd /c if not exist "C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\c
 *
 * PELAGRP is the same at crop-group level and pairs with the VB terms.
 *--------------------------------------------------------------------------
-execute 'gdxdump C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\dat\estnlp\results.gdx symb=PELA output=C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\capri_export\estnlp_PELA.txt';
-execute 'gdxdump C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\dat\estnlp\results.gdx symb=PELAGRP output=C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\capri_export\estnlp_PELAGRP.txt';
-execute 'gdxdump C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\dat\estnlp\results.gdx symb=VD output=C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\capri_export\estnlp_VD.txt';
-execute 'gdxdump C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\dat\estnlp\results.gdx symb=VB output=C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\capri_export\estnlp_VB.txt';
-execute 'gdxdump C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\dat\estnlp\results.gdx symb=VA output=C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\capri_export\estnlp_VA.txt';
+execute 'gdxdump %CAPRI%\dat\estnlp\results.gdx symb=PELA output=%CAPRI%\capri_export\estnlp_PELA.txt';
+execute 'gdxdump %CAPRI%\dat\estnlp\results.gdx symb=PELAGRP output=%CAPRI%\capri_export\estnlp_PELAGRP.txt';
+execute 'gdxdump %CAPRI%\dat\estnlp\results.gdx symb=VD output=%CAPRI%\capri_export\estnlp_VD.txt';
+execute 'gdxdump %CAPRI%\dat\estnlp\results.gdx symb=VB output=%CAPRI%\capri_export\estnlp_VB.txt';
+execute 'gdxdump %CAPRI%\dat\estnlp\results.gdx symb=VA output=%CAPRI%\capri_export\estnlp_VA.txt';
 
 *--------------------------------------------------------------------------
 * SECTION 2 -- GTAP Armington elasticities (corrected names)
 *--------------------------------------------------------------------------
-execute 'gdxdump C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\dat\arm\GTP57_134.gdx symb=esubd output=C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\capri_export\gtap_esubd.txt';
-execute 'gdxdump C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\dat\arm\GTP57_134.gdx symb=esubm output=C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\capri_export\gtap_esubm.txt';
-execute 'gdxdump C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\dat\arm\GTP57_134.gdx symb=etrae output=C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\capri_export\gtap_etrae.txt';
-execute 'gdxdump C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\dat\arm\GTP57_134.gdx symb=eta output=C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\capri_export\gtap_eta.txt';
-execute 'gdxdump C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\dat\arm\GTP57_134.gdx symb=epsilon output=C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\capri_export\gtap_epsilon.txt';
+execute 'gdxdump %CAPRI%\dat\arm\GTP57_134.gdx symb=esubd output=%CAPRI%\capri_export\gtap_esubd.txt';
+execute 'gdxdump %CAPRI%\dat\arm\GTP57_134.gdx symb=esubm output=%CAPRI%\capri_export\gtap_esubm.txt';
+execute 'gdxdump %CAPRI%\dat\arm\GTP57_134.gdx symb=etrae output=%CAPRI%\capri_export\gtap_etrae.txt';
+execute 'gdxdump %CAPRI%\dat\arm\GTP57_134.gdx symb=eta output=%CAPRI%\capri_export\gtap_eta.txt';
+execute 'gdxdump %CAPRI%\dat\arm\GTP57_134.gdx symb=epsilon output=%CAPRI%\capri_export\gtap_epsilon.txt';
 
 *--------------------------------------------------------------------------
 * SECTION 3 -- bilateral trade flows
@@ -59,9 +62,9 @@ execute 'gdxdump C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\dat\arm\GTP5
 * The symbol inside this file is Result1, confirmed at
 * enerind/capreg_global.gms:30 -- not p_tradeFlows.
 *--------------------------------------------------------------------------
-execute 'gdxdump C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\dat\global\trade_flows_ori.gdx symb=Result1 output=C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\capri_export\trade_flows_ori.txt';
+execute 'gdxdump %CAPRI%\dat\global\trade_flows_ori.gdx symb=Result1 output=%CAPRI%\capri_export\trade_flows_ori.txt';
 
 *--------------------------------------------------------------------------
 * SECTION 4 -- report
 *--------------------------------------------------------------------------
-execute 'cmd /c dir /b "C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\capri_export" > "C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\capri_export\_produced_final.txt"';
+execute 'cmd /c dir /b "%CAPRI%\capri_export" > "%CAPRI%\capri_export\_produced_final.txt"';

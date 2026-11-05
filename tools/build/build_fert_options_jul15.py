@@ -16,6 +16,9 @@ Output: capri_data/2017/abatement/fert_options_jul15.csv
 import csv
 from collections import defaultdict
 from pathlib import Path
+import sys as _sys_nc  # noqa: E402
+_sys_nc.path.insert(0, str(__import__("pathlib").Path(__file__).resolve().parents[2] / "tools" / "lib"))
+from _model_regions import national_code as _national_code  # noqa: E402  (TUR for Turkey's units, 4 November 2026)
 
 ROOT = Path(__file__).resolve().parents[2]
 SRC = ROOT / "capri_data" / "sources" / "ghgtech" / "miti_data_jul15_p_ghgMiti.csv"
@@ -33,7 +36,7 @@ def main():
     reg_q = defaultdict(list)
     for (r, o), d in v.items():
         if o == "VRT_SRUC" and not r.endswith("000000") and "QEmitt" in d:
-            reg_q[r[:2] + "000000"].append(d["QEmitt"])
+            reg_q[_national_code(r)].append(d["QEmitt"])
     for ms, qs in reg_q.items():
         v[(ms, "VRT_SRUC")].setdefault("QEmitt", sum(qs) / len(qs))
     noc = {r: d.get("QEmitt") for (r, o), d in v.items() if o == "NOC"}
@@ -41,7 +44,7 @@ def main():
     for (r, o), d in sorted(v.items()):
         if o == "NOC":
             continue
-        q0 = noc.get(r) or noc.get(r[:2] + "000000")
+        q0 = noc.get(r) or noc.get(_national_code(r))
         rows.append([r, o] + [d.get(c, "") for c in COLS] + [q0 if q0 is not None else ""])
     with open(OUT, "w", newline="") as fh:
         w = csv.writer(fh); w.writerow(["region", "option"] + COLS + ["QEmitt_noc"]); w.writerows(rows)

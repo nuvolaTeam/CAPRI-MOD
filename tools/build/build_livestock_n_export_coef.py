@@ -7,18 +7,20 @@ of CAPRI and model regions covering the same territory - the construction of liv
 tools/build/build_livestock_output_coef.build. Used for the report item n_animal_products (until 23 October 2026: 25% of
 excreted N; PROXY_AUDIT S199). Simulated years: the per-head value scales with the animal's output per head.
 
-    python tools/build/build_livestock_n_export_coef.py [--dump-dir /home/claude/work/capreg]
+    python tools/build/build_livestock_n_export_coef.py [--dump-dir capri_sources/capreg]
 """
 import argparse
 import sys
 from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
+from paths import SOURCES  # noqa: E402  (CAPRI's material outside the repository)
 
 ROOT = Path(__file__).resolve().parents[2]
 
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--dump-dir", default="/home/claude/work/capreg")
+    ap.add_argument("--dump-dir", default=str(SOURCES / "capreg"))
     a = ap.parse_args()
     sys.path.insert(0, str(ROOT)); sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check")]
     import build_livestock_output_coef as B

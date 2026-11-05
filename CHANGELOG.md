@@ -32,6 +32,76 @@ and `docs/KNOWN_ISSUES.md`.
 
 ---
 
+## 2 November 2026 (night): refactor stage 4, second half (batches 1-6, first part)
+
+- The environment's and the coupling's state in declared objects (capri_mod/environmental/state.py: par, ev, seen,
+  res; capri_mod/coupling/state.py: par, sv, ev, seen, res), the old names raising through MOVED_ENV / MOVED_MODEL;
+  the state kit shared in capri_mod/statekit.py. Seven write-only fields removed. The manure pools' state swapped by
+  paths. docs/design/ENV_COUPLING_STATE_INVENTORY.md has the inventory, the moves and what is left.
+- Numbers: NH3/N and urea N/CO2 in units.py; parameters ENDO_MAN_AV_SLOPE_N, ENDO_MAN_AV_CEILING, ENDO_MAN_AV_FLOOR,
+  ENDO_MAN_AV_FLOOR_KG (fert/endoManAvail.gms l. 61-81), NITRATE_CH4_REDUCTION (envind/line_nitr.gms l. 100-102),
+  FRAC_GASF (IPCC 2006); nine numerical settings (Hessian thresholds and progress, the manure pools' recovery, the
+  mineral caps' room). One definition of the manure availability slope (fert/npk.endo_slope).
+- Tables: "price follows" (beet, durum wheat, Norway's raw milk) as capri_data/codes/model_price_follows.csv; CAPRI's
+  FEED_TRD exported and read by the price step; the nutrient sources defined once.
+- Every batch's mini-EU run identical to the previous one at 1e-12. Not yet in a full Farm-to-Fork / Green Deal run.
+
+## 2 November 2026 (evening): refactor stage 3, N6 second part; the sim_ini extract
+
+- The supply's remaining code tables as data (docs/design/N6_CODE_TABLES.md, second part): model_activity_classes.csv
+  gains the organic target group and yield gap, the pesticide yield loss, the animals' price source, the PMP share
+  term's arable set and the young-animal outputs; model_cattle_splits.csv; capri_pmp's code aliases from
+  model_activities.csv. build_code_lists checks them against CAPRI's MCACT, EPRD_TO_GRP, AACT_TO_XX, OYANI, MAACT and
+  SplitActs, and the N cascade's technology lists (kept in the equations, as CAPRI writes them) against MitiTechAmm.
+  Removed: ORGANIC_CROPS (read by no code) and _MS_ALIAS (it reached no region). Finding recorded: sheep and goat milk
+  (SHGM) earns the cow milk price in the model, CAPRI's AACT_TO_XX gives SGMT.
+- Mini-EU run identical to the previous one at 1e-12 (only the run metadata differ).
+- tools/build/build_simini_reference.py: CAPRI's calibrated 2030 market state from sim_ini as CSV (37 symbols), for the
+  market's move onto CAPRI's regions; the two sim_ini uploads are identical on all 37.
+
+## 2 November 2026: refactor stage 3, N6 first part; nurseries on permanent-crop land (DEP-43)
+
+- The supply's land and crop classes as data: `capri_data/codes/model_activity_classes.csv` (fixed activities, the
+  crops on each land type, the fodder flag, the crop-diversification group) and `model_land_types.csv`, checked by
+  build_code_lists against CAPRI's sets (landTypesMrk, FODCRP, landTypes_to_pact, cropDivGrps_mCact) through the
+  model_activities crosswalk (docs/design/N6_CODE_TABLES.md). The land market's land types read from its data.
+  Mini-EU run identical to the previous one at 1e-12.
+- DEP-42 registered: OFOD (OFAR + ROOF) one crop-diversification group, kept until S1/S2 splits OFOD.
+- DEP-43 fixed (a behaviour change, the project lead's decision): nurseries on permanent-crop land as CAPRI's
+  landTypes_to_pact, in the supply model, the environmental accounts and the base builder (land_availability.csv:
+  181.2 kha from arable to permanent land). Mini-EU differences in the register (DEP-43).
+- The builders' tests back in the suite (revert of 07db727, the project lead's decision).
+- docs/design/MODEL_CONTENT_PLAN.md: the model-content work after the refactor in one plan; the revised order in
+  ARCHITECTURE_REFACTOR §3.
+- Checks: test suite 279 passed, 2 skipped. Not yet in a full Farm-to-Fork / Green Deal run (those follow stage 5).
+
+## 2 November 2026: refactor stage 3, the supply's parameters and state objects (batches 1-4)
+
+- capri_mod/supply/state.py: each regional model and the supply module hold what they keep between calls in declared
+  slot objects, `par`, `sv`, `ev`, `seen`, `res` (docs/design/STAGE3B_PLAN.md, the project lead's decisions of
+  2 November 2026; the fields in docs/design/SUPPLY_STATE_INVENTORY.md). A former attribute name raises RuntimeError
+  (MOVED); a test scans the code for the private ones used as strings.
+- The market supply Hessian saves and restores the regional models' fields by declared lists (NLP_STATE, SOLVE_STATE;
+  the prefix "_nlp" before), as names or paths; the workers' per-region state and caches (_PAR_STATE, _PAR_CACHES) as
+  paths. The sets and the copies are those before the moves.
+- Removed: twelve attributes written and never read (eleven on the regional models, one on the supply module), two
+  reads that always took their default, and the dairy output's scaling by `_dairy_yield_base` (its writer went in
+  3a264a2). The class defaults of `yani_price_ratio` and `_manure_ctx` went with their moves (every read has the
+  default None).
+- The run script's CAPRI_DUMP_REGIONS dump reads the fields by name or path; its keys lose the leading underscore.
+- Checks: each batch's mini-EU Farm-to-Fork run identical to the previous one at 1e-12 (only the run metadata differ);
+  the test suite after every step. Batch 1 was gated with the K79 change (gate 14, KNOWN_ISSUES K79); batches 2-4
+  with full runs (gate 15: Farm-to-Fork and Green Deal identical to gate 14's, largest difference 0).
+- The numbers as data (N1, N2, N4, N5): the model's parameters through the run's inputs
+  (`<data_dir>/shared/model_parameters.csv`), the supply's parameters read where used; the supply's 22 CAPRI constants
+  as sixteen parameters with their GAMS citations (the organic target scaling written once); the physical constants
+  named in `capri_mod/units.py`; the numerical and technical numbers in `defaults.toml`. Not done yet: N3 (stage 5)
+  and N6 (the code tables).
+- The three changes left out of the moves (docs/design/STAGE3_BEHAVIOUR_CHANGES.md, the project lead's decision):
+  `sv.n_relax_sticky` restored by the Hessian, `ev.ghg_nr_obj` out of its restore list, `use_fert_allocation` passed as
+  an argument instead of an instance copy; no effect on the default runs.
+- `CITATION.cff`: the project lead's text.
+
 ## 30 October 2026 (batch 9, one gate): the refactor's stages 3b-4c, the data sources as CSV, CAPTRD's fixes and statistics, the region tables from the data, the SQL declarations apart from the code lists
 
 **Refactor (moves, each checked by a Farm-to-Fork run equal to r190 to the last digit).**

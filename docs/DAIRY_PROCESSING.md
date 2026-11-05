@@ -57,7 +57,7 @@ EU use of the nine products (`demand_response`):
 
 Non-EU blocks (`_dairy_world_params`, `tools/build/build_dairy_world_blocks.py`): CAPRI's block for the 54 non-EU CAPRI
 market regions with a dairy Hessian, grouped into 25 model trade regions (`dairy_world_*.csv`; Norway, NO000000, is
-trade region NOR). In each, raw milk comes from CAPRI's own supply function (`p_hessNQSupp` MILK), the block is
+trade region NO000000). In each, raw milk comes from CAPRI's own supply function (`p_hessNQSupp` MILK), the block is
 solved at the region's market prices of the nine products, and the region's supply of each product moves with the
 block's relative change. Use: food as in the EU (GL share, p_ElasDem), feed with the FMIL CES at a fixed FMIL index
 (the model has no non-EU herds). Norway, with supply models (CAPRI RMSSUP), differs as CAPRI's does: its raw milk is

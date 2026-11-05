@@ -65,8 +65,7 @@ reporter.to_csv_folder("results/")
 | Name | Description |
 |------|-------------|
 | `BASELINE` | Calibrated baseline, no policy change |
-| `SET_ASIDE_10PCT` | 10% set-aside (CAPRI scen/set_aside/set_aside_10.gms) |
-| `CARBON_TAX_50`, `CARBON_TAX_100` | CAPRI's emission tax on agricultural emissions |
+| `CARBON_TAX_50` | CAPRI's emission tax on agricultural emissions (pol_input/ecampa/carbtax50_endotech_set12.gms) |
 
 Custom scenarios:
 ```python
@@ -103,7 +102,7 @@ Replace or extend the shipped data by placing CSV files in a directory:
 | `world_prices.csv` | FAOSTAT / OECD Outlook | World prices [commodity], EUR/t |
 | `trade_flows.csv` | UN COMTRADE / BACI | Flows [(exporter, importer) × commodity], 1000 t |
 | `cap_payments.csv` | EU DG-AGRI / IACS | CAP payment rates [region × type], EUR/ha |
-| `tariffs.csv` | WTO tariff database | Import tariffs [region × commodity], % |
+
 
 ```python
 model = CAPRIModel(data_dir="path/to/your/data/")

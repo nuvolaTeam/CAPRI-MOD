@@ -3,18 +3,23 @@
     from _gdx import read_symbol
     rows = read_symbol(path, "p_landscapeTargets", gdxlib)      # [(key1, ..., value), ...], EPS as 0.0
 
-The library's folder: the argument, else the environment variable CAPRI_GDXLIB.
+The library's folder: the argument, else the environment variable CAPRI_GDXLIB, else capri_sources/gdxlib
+(tools/lib/paths.py, docs/EXTERNAL_SOURCES.md).
 """
 from __future__ import annotations
 
 import os
+import sys
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from paths import SOURCES  # noqa: E402
 
 
 def read_symbol(path, name: str, gdxlib: str | None = None) -> list[tuple]:
     """The records of symbol name in the GDX file path: (keys..., level value), EPS as 0.0; UNDF and NA raise."""
     import gams.core.gdx as g
-    lib = gdxlib or os.environ.get("CAPRI_GDXLIB", "")
+    lib = gdxlib or os.environ.get("CAPRI_GDXLIB") or str(SOURCES / "gdxlib")
     h = g.new_gdxHandle_tp()
     ok, msg = g.gdxCreateD(h, lib, g.GMS_SSSIZE)
     if not ok:

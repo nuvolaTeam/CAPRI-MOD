@@ -33,10 +33,14 @@ def test_missing_input_names_its_builder(tmp_path):
 
 
 def test_model_does_not_read_delta_tables():
-    """Data formats (ARCHITECTURE_REFACTOR.md): the model reads CSV; Delta Lake is the pipeline's internal format."""
+    """Data formats (ARCHITECTURE_REFACTOR.md): the model reads CSV; Delta Lake is the pipeline's internal format and,
+    since refactor stage 5, the format of the runs' results, written by capri_mod/io_results.py alone (its single
+    writer). No other model code imports deltalake."""
     pkg = MARKET.parent
+    writer = pkg / "io_results.py"
     offenders = [str(p.relative_to(pkg)) for p in pkg.rglob("*.py")
                  if "pipeline" not in p.relative_to(pkg).parts and "tests" not in p.relative_to(pkg).parts
+                 and p != writer
                  and ("import deltalake" in p.read_text() or "from deltalake" in p.read_text())]
     assert offenders == [], offenders
 
@@ -92,21 +96,21 @@ def test_member_state_milk_responds_to_its_price_in_the_dairy_block():
     from capri_mod.market.market_module import MarketModule
     m = MarketModule(load_all_data("capri_data"))
     prm = m._dairy_params()["ms"]
-    cls = type(m)
     ms, p = prm.get("PT000000") and ("PT000000", prm["PT000000"]) or next(iter(prm.items()))
     n = p["G"].shape[1]
     zt = np.zeros(n)
-    z0 = cls._dairy_solve_ms(p, zt, 0.95)
-    z1 = cls._dairy_solve_ms_resp(p, zt, 0.95, 0.0, 1.0)
+    z0 = m._dairy_solve_ms(p, zt, 0.95)["z"]
+    z1 = m._dairy_solve_ms_resp(p, zt, 0.95, 0.0, 1.0)["z"]
     assert np.allclose(z0, z1)
     k, L = 0.4, 1.0
-    z2 = cls._dairy_solve_ms_resp(p, zt, 0.95, k, L)
+    z2 = m._dairy_solve_ms_resp(p, zt, 0.95, k, L)["z"]
     mr = 0.95 + k * (1.0 + z2[p["iM"]] - L)
     # the dairies' demand at z2 equals the delivered milk
     assert abs(float(p["G"][p["iM"]] @ z2) - p["Q0"][p["iM"]] * (mr - 1.0)) < 1e-8 * max(1.0, p["Q0"][p["iM"]])
     assert abs(z2[p["iM"]]) < abs(z0[p["iM"]])
 
 
+@pytest.mark.slow
 def test_market_supply_hessian_measured_at_base_and_at_scenario_state():
     """The market supply Hessian (CAPRI's p_hessNQSupp, supply/calibrate_supply.gms) is built at the baseline and,
     under market.hessian_scenario_iter, measured again at the scenario's state with its own cache key. r131 ran
@@ -119,18 +123,19 @@ def test_market_supply_hessian_measured_at_base_and_at_scenario_state():
         m = CAPRIModel(data_dir="capri_data", verbose=False)
         m.run(scenario="BASELINE", regions=regs, max_outer_iter=2)
         # a baseline alone does not measure it (28 October 2026): the scenario on it does, first thing
-        assert not getattr(m, "market_supply_hessian_log", None)
+        assert not getattr(m.res, "market_supply_hessian_log", None)
         assert m.market_module.par.supply_hessian is None
         sc = greendeal_scenario(lndscpTarg=10, orgTarg=25, pestRedu=50, surpRedu=50, mineRedu=20)
         m.run(custom_scenario=sc, regions=regs, max_outer_iter=3)
-        base, scen = (dict(d) for d in m.market_supply_hessian_log[-2:])
-        assert len(m.market_supply_hessian_log) == 2
+        base, scen = (dict(d) for d in m.res.market_supply_hessian_log[-2:])
+        assert len(m.res.market_supply_hessian_log) == 2
         assert base.get("source") in ("computed", "cache") and "at_iteration" not in base, base
         assert scen.get("source") in ("computed", "cache") and scen.get("at_iteration") == 2, scen
         assert "scenario_error" not in scen
         assert scen["file"] != base["file"]
 
 
+@pytest.mark.slow
 def test_hessian_skip_of_unreached_regions_is_exact(monkeypatch):
     """The market supply Hessian with the regions a shock does not reach not re-solved (market.hessian_skip_unchanged)
     equals re-solving every region from the baseline's state: with CAPRI_HESSIAN_SKIP_VERIFY=1 the regions that would be
@@ -147,7 +152,7 @@ def test_hessian_skip_of_unreached_regions_is_exact(monkeypatch):
         # A scenario on the baseline measures it (a world-price shock is a scenario), first thing in its run
         m.run(scenario="BASELINE", regions=regs, max_outer_iter=2)
         m.run(world_price_shock={"SWHE": 0.05}, regions=regs, max_outer_iter=1)
-        info = dict(m.market_supply_hessian_log[0])
+        info = dict(m.res.market_supply_hessian_log[0])
         if info.get("source") == "computed":
             assert info.get("verified", 0) > 0, info
             assert info.get("verify_mismatch") == [], info
@@ -173,9 +178,9 @@ def test_milk_price_held_above_zero_unless_the_scenario_allows_negative_prices()
     p = prm["PT000000"]
     zt = np.zeros(p["G"].shape[1])
     # a glut: three times the base milk delivered drives the free price below zero
-    z = cls._dairy_solve_ms(p, zt, 3.0)
+    z = m._dairy_solve_ms(p, zt, 3.0)["z"]
     assert 1.0 + z[p["iM"]] < 0.0
-    za = cls._dairy_solve_ms_at(p, zt, cls.MILK_PRICE_FLOOR)
+    za = m._dairy_solve_ms_at(p, zt, cls.MILK_PRICE_FLOOR)["z"]
     assert abs(1.0 + za[p["iM"]] - cls.MILK_PRICE_FLOOR) < 1e-15
     assert abs(float(p["rowF"] @ za)) < 1e-9 and abs(float(p["rowP"] @ za)) < 1e-9
     # through the block: held and recorded without the switch, free with it
@@ -222,7 +227,7 @@ def test_dairy_processing_follows_capri_procnq_and_balances_fat_and_protein():
         z = res["ms_z"][ms]
         Q = prm["Q0"] + prm["G"] @ z
         part = prm["parts"][0]
-        dproc, _, _ = mm._dairy_proc_change(prm, z)
+        dproc = mm._dairy_proc_change(prm, z)
         net = Q - part["proc0"] - dproc
         iM = prm["iM"]
         for c in ("f", "r"):
@@ -249,15 +254,16 @@ def test_eu_fish_and_other_oils_supply_as_capri_prodnq():
     m = CAPRIModel(data_dir="capri_data", verbose=False, regions=["DE110000"])
     mm = m.market_module
     P = mm._eu_market_supply_nq_params()
-    assert set(x for (x, _) in P["EU27"]) == set(mm.EU_MARKET_SUPPLY)
+    assert set(x for rg in mm.EU for (x, _) in P[rg]) == set(mm.EU_MARKET_SUPPLY)   # over CAPRI's two EU blocks
     cols = list(mm.commodities)
     sup = mm.par.base_production.reindex(columns=cols).fillna(0.0).copy()
     r = np.ones(len(cols)); r[cols.index("FFIS")] = 1.10
     mm._eu_market_supply_nq(sup, cols, lambda rg: r)
-    q0 = float(mm.par.base_production.at["EU27", "FFIS"])
-    own = sum(h for (x, y), h in P["EU27"].items() if x == "FFIS" and y == "FFIS")
-    assert abs(float(sup.at["EU27", "FFIS"]) - (q0 + own * 0.10)) < 1e-9
-    assert float(sup.at["EU27", "OTHO"]) == float(mm.par.base_production.at["EU27", "OTHO"])    # its prices unchanged
+    for rg in mm.EU:
+        q0 = float(mm.par.base_production.at[rg, "FFIS"])
+        own = sum(h for (x, y), h in P[rg].items() if x == "FFIS" and y == "FFIS")
+        assert abs(float(sup.at[rg, "FFIS"]) - (q0 + own * 0.10)) < 1e-9
+        assert float(sup.at[rg, "OTHO"]) == float(mm.par.base_production.at[rg, "OTHO"])    # its prices unchanged
     t = read_csv("capri_data/2017/market/eu_market_supply_nq.csv")
     fr = t[(t.ms == "FR000000") & (t.x == "OTHO") & (t.y == "OTHO")].iloc[0]
     assert abs(fr.h * fr.ppri_y / fr.inpe - fr.h_ratio) < 1e-9 and abs(fr.inpe - 1.019 ** 13) < 1e-3

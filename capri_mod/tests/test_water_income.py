@@ -19,6 +19,7 @@ def data():
 
 def test_irrigation_table_adds_up_to_fss_irrigated_area(data):
     t = read_csv(DATA_DIR / "2017" / "environment" / "irrigation_2017.csv")
+    t = t[t.region.isin(data["areas"].index)]                  # the run's units (data: the default countries' only)
     assert set(t.region) == set(data["areas"].index) - {"IR010000", "IR020000"}   # no Irish share in CAPRI's data
     assert (t[t.activity == "PARI"].irrigated_share == 1.0).all()
     assert t.irrigated_share.between(0.001, 1.0).all()

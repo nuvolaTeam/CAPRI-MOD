@@ -3,7 +3,7 @@
 How each claim was checked:
 - **[T]** = I tested it myself with a live API call or download on 22 Oct 2026.
 - **[R]** = I read it from the cited web page or document but did not test it.
-- **[C]** = I read it in the local CAPRI STAR 3.0 GAMS source at `/home/claude/work/allgms/gams/` (coco/, capreg/, coco1.gms, capreg.gms).
+- **[C]** = I read it in the local CAPRI STAR 3.0 GAMS source at `capri_sources/gams` (coco/, capreg/, coco1.gms, capreg.gms).
 - **[I]** = my own inference, not stated in any source.
 
 The source URLs are numbered [n] and listed at the end.

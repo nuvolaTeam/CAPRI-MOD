@@ -1,4 +1,7 @@
 $TITLE CAPRI-Python -- dump p_elasSupp from the clean base-year GDX
+* CAPRI's installation folder is given on the command line (no machine's folder in this file):
+*     gams dump_elas1717.gms --CAPRI=C:\path\to\capri-star3.0
+$if not set CAPRI $abort "Give CAPRI's installation folder: gams dump_elas1717.gms --CAPRI=<folder>"
 $ONTEXT
 
   This replaces the Excel export (elas1717defaulta_export.xlsx) with a direct
@@ -17,16 +20,16 @@ $ONTEXT
 
 $OFFTEXT
 
-$call 'cmd /c if not exist "C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\capri_export" mkdir "C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\capri_export"'
+$call 'cmd /c if not exist "%CAPRI%\capri_export" mkdir "%CAPRI%\capri_export"'
 
 * symbol listing first -- confirms dimensions and the exact set names
-execute 'gdxdump C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\output\results\arm\elas1717defaulta.gdx > C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\capri_export\_symbols_elas1717.txt';
+execute 'gdxdump %CAPRI%\output\results\arm\elas1717defaulta.gdx > %CAPRI%\capri_export\_symbols_elas1717.txt';
 
 * the supply elasticities
-execute 'gdxdump C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\output\results\arm\elas1717defaulta.gdx symb=p_elasSupp output=C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\capri_export\elas1717_p_elasSupp.txt';
+execute 'gdxdump %CAPRI%\output\results\arm\elas1717defaulta.gdx symb=p_elasSupp output=%CAPRI%\capri_export\elas1717_p_elasSupp.txt';
 
 * two companions worth having from the same file, at no extra run cost:
 *   p_hessNQSupp -- the Hessian CAPRI actually uses in the supply NQ function
-execute 'gdxdump C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\output\results\arm\elas1717defaulta.gdx symb=p_hessNQSupp output=C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\capri_export\elas1717_p_hessNQSupp.txt';
+execute 'gdxdump %CAPRI%\output\results\arm\elas1717defaulta.gdx symb=p_hessNQSupp output=%CAPRI%\capri_export\elas1717_p_hessNQSupp.txt';
 
-execute 'cmd /c dir /b "C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\capri_export\elas1717_*.txt" > "C:\Users\DELL\Desktop\CAPRI\star_3.0\capri-star3.0\capri_export\_produced_elas.txt"';
+execute 'cmd /c dir /b "%CAPRI%\capri_export\elas1717_*.txt" > "%CAPRI%\capri_export\_produced_elas.txt"';

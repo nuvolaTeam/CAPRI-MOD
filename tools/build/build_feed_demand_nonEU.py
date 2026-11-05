@@ -17,32 +17,35 @@ Before 19 October 2026 the shares came from FAO_agg 2017 (FEDM/DOMM) and the ela
 for trade regions identical to one CAPRI region: ROW, Turkey, South Korea, Morocco and New Zealand had no feed
 function, and their feed use (e.g. 96% of ROW's soybean cake) fell on the generic own-price response (eta).
 
-CAPRI region -> trade region: tools/build/recalibrate_trade_2017.py REGION_MAP (as tools/build/build_processing_nq.py), over
+CAPRI region -> trade region: the market's grouping step, tools/lib/_market_regions.py: codes/model_market_regions.csv (as tools/build/build_processing_nq.py), over
 CAPRI's 80 behavioural regions; EU member states are left out (EU feed comes from the supply models' feed bulks,
-tools/build/build_feed_bulks.py). Norway (trade region NOR since KNOWN_ISSUES K56) has no p_ElasFeed either: its feed
-comes from its supply models through its bulks (feed_bulks_no.csv), as CAPRI's. REGISTERED: CAPRI's other
+tools/build/build_feed_bulks.py). Norway (trade region NO000000 since KNOWN_ISSUES K56) has no p_ElasFeed either: its feed
+comes from its supply models through its bulks (feed_bulks_noneu.csv), as CAPRI's. REGISTERED: CAPRI's other
 supply-model regions (United Kingdom, the Western Balkans, Turkey) have no p_ElasFeed - their feed comes from CAPRI's
 supply models, which capri-mod does not have for them: in ROW their feed counts in the feed share and follows the
 elasticities of ROW's other regions; Turkey, a trade region of its own, keeps the generic own-price response.
 
-Output: capri_data/2017/market/feed_demand_nonEU.json {"_source", "parameters": {"REGION|COMM": {feed_share,
-elasticities}}}; source extracts capri_data/sources/market/feed_demand_nonEU_{elas,use}_2030.csv.
+Output: capri_data/2017/market/feed_demand_nonEU.csv (region, commodity, feed_share),
+feed_demand_nonEU_elasticities.csv (region, commodity, price_of, elasticity) and feed_demand_nonEU_capri_regions.csv
+(region, commodity, capri_region) (capri_mod/data/nested_tables.py; a JSON file until 31 October 2026); source extracts capri_data/sources/market/feed_demand_nonEU_{elas,use}_2030.csv.
 
     python tools/build/build_feed_demand_nonEU.py
 """
 from __future__ import annotations
-import argparse, json, re, sys
+import argparse, re, sys
 from collections import defaultdict
 from pathlib import Path
 
 import pandas as pd
 
 import functools as _ft
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
+from paths import EXPORTS  # noqa: E402  (CAPRI's material outside the repository)
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 KEEP_E = ROOT / "capri_data" / "sources" / "market" / "feed_demand_nonEU_elas_2030.csv"
 KEEP_U = ROOT / "capri_data" / "sources" / "market" / "feed_demand_nonEU_use_2030.csv"
-DEST = ROOT / "capri_data" / "2017" / "market" / "feed_demand_nonEU.json"
+DEST = ROOT / "capri_data" / "2017" / "market" / "feed_demand_nonEU.csv"
 USES = ("HCON", "FEED", "PROC", "BIOF")
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "lib"))
 from _model_regions import EU_MS2 as _EU_FROM_DATA  # noqa: E402  (capri_data/shared/eu_market_blocks.csv)
@@ -51,12 +54,12 @@ EU = set(_EU_FROM_DATA)                                  # CAPRI's EU member sta
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--elas", type=Path, default=Path("/mnt/user-data/uploads/elas_2_1730defaulta.csv"))
-    ap.add_argument("--data", type=Path, default=Path("/mnt/user-data/uploads/data_market_1730defaulta.csv"))
+    ap.add_argument("--elas", type=Path, default=EXPORTS / "elas_2_1730defaulta.csv")
+    ap.add_argument("--data", type=Path, default=EXPORTS / "data_market_1730defaulta.csv")
     a = ap.parse_args()
     sys.path.insert(0, str(ROOT)); sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check")]
     from capri_mod.data.definitions import ALL_TRADE_REGIONS
-    from recalibrate_trade_2017 import trade_region
+    from _market_regions import model_region  # the market's grouping step (tools/lib/_market_regions.py)
     import build_bilateral_market as BM
     # every CAPRI market product the model trades (tools/build/build_bilateral_market.py MODEL: model -> CAPRI products)
     g2m = {g: m for m, gs in BM.MODEL.items() for g in gs}
@@ -93,7 +96,7 @@ def main():
     beh = set(_read_csv(ROOT / "capri_data" / "2017" / "market" / "processing_nq_base.csv").rms)
     rms_set = set(el.rms)
     is_eu = lambda r: r[:2] in EU and r.endswith("000000")
-    mreg = trade_region
+    mreg = model_region
     # CAPRI products -> model commodities (several CAPRI products of one commodity: quantities add up, the price
     # columns of one commodity's products add up - one price - and the rows are weighted by their feed below)
     E = defaultdict(lambda: defaultdict(float))
@@ -148,12 +151,14 @@ def main():
         params[f"{R}|{c}"] = {"feed_share": f / u,
                               "elasticities": {c2: v / fe for c2, v in wel[(R, c)].items()},
                               "capri_regions": sorted(members[(R, c)])}
-    src = ("CAPRI 2030 calibration: feed share = sum FEED / sum (HCON + FEED + PROC + BIOF) over the trade region's "
-           "CAPRI regions (data_market_1730defaulta CAL); elasticities = p_ElasFeed(RMS, feed, price-of, 'CAL') from "
-           "elas_2_1730defaulta, feed-weighted over the CAPRI regions of an aggregate, every product with a CAPRI feed "
-           "function that the model trades (CAPRI -> model products: tools/build/build_bilateral_market.py MODEL). Non-EU regions only: EU feed comes from the supply models' feed "
-           "bulks (tools/build/build_feed_bulks.py). tools/build/build_feed_demand_nonEU.py")
-    json.dump({"_source": src, "parameters": params}, open(DEST, "w"), indent=1)
+    # source: CAPRI 2030 calibration: feed share = sum FEED / sum (HCON + FEED + PROC + BIOF) over the trade region's
+    # CAPRI regions (data_market_1730defaulta CAL); elasticities = p_ElasFeed(RMS, feed, price-of, 'CAL') from
+    # elas_2_1730defaulta, feed-weighted over the CAPRI regions of an aggregate, every product with a CAPRI feed function
+    # that the model trades (CAPRI -> model products: tools/build/build_bilateral_market.py MODEL). Non-EU regions only:
+    # EU feed comes from the supply models' feed bulks (tools/build/build_feed_bulks.py)
+    sys.path.insert(0, str(ROOT))
+    from capri_mod.data.nested_tables import write_feed_demand
+    write_feed_demand(DEST, params)
     regs = sorted({k.split("|")[0] for k in params})
     print(f"wrote {DEST.relative_to(ROOT)}: {len(params)} entries, {len(regs)} regions {regs}")
     miss = sorted(trade - set(regs))

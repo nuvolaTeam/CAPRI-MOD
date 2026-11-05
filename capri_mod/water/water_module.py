@@ -57,14 +57,15 @@ class WaterDemandModule:
     """Irrigation water requirement by region and crop.
 
     data: the model data dict (base areas, data["areas"], 1000 ha).
-    irrigation_path: the irrigation table; default the run's environment/irrigation_2017.csv (capri_mod/data/inputs.py).
+    irrigation_path: the irrigation table; default the run's environment/irrigation_<base year>.csv
+    (capri_mod/data/inputs.py).
     """
 
     def __init__(self, data: dict, irrigation_path: Optional[Path] = None):
         self.data = data
         from capri_mod.data.inputs import current
         inp = current()
-        self.table = inp.read(Path(irrigation_path)) if irrigation_path else inp.csv("irrigation_2017.csv", "environment")
+        self.table = inp.read(Path(irrigation_path)) if irrigation_path else inp.csv(f"irrigation_{inp.base_year}.csv", "environment")
 
     def _areas(self, supply_results: Optional[Dict]) -> pd.DataFrame:
         base = self.data["areas"]

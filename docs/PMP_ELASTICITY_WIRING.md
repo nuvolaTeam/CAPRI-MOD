@@ -17,7 +17,7 @@ Every region x activity elasticity is recorded with its source (`SupplyModule.el
 | `REGIONAL_CAPRI` | `supply_elasticities_regional.csv` (bounded at 4.5 upstream) | model regions in the file |
 | `PMP_CAPRI` | `pmp_own_price_elasticities.csv` (CAPRI region codes, raw, dampened on load) | mapped through `shared/region_capri_map.csv`, else the NUTS crosswalk; a region without a row takes its member state's national row (K32); CAPRI's OFAR is the model's OFOD, MAIZ its CORN |
 | `CAPRI_COUNTRY` | `capri_own_price_elasticities.csv` (CAPRI's calibrated p_ElasSupp per member state) | only activities neither regional source covers in any region: permanent crops, vegetables, tobacco, textile crops, table olives (K30) |
-| `CAPRI_CAL_PRODUCT` | `sources/arm/capri_supply_elas_market_1717.csv` (p_elasSupp of the animal products per member state), weighted with the young animals' elasticities (`capri_supply_elas_young_1720.csv`) by their share of output value | animal activities |
+| `CAPRI_CAL_PRODUCT` | `2017/supply/capri_supply_elas_market_1717.csv` (p_elasSupp of the animal products per member state), weighted with the young animals' elasticities (`capri_supply_elas_young_1720.csv`) by their share of output value | animal activities |
 | `LITERATURE_DEFAULT` | EU-wide defaults (`utils.calibrate_supply_elasticities`) | the rest: grass, set-aside, olives for oil, minor crops CAPRI has no elasticity for, Norway (K32) |
 
 (The legacy mode `SupplyModule(data, eps, use_capri_elasticities=False)`, EU-wide defaults everywhere and no share

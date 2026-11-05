@@ -71,7 +71,7 @@ EU 2030 reference (`biofuel_market.csv`): bio-ethanol 6,904 kt produced (first g
   enters the ethanol plants' feedstock cost, so DDGS revenue feeds back into ethanol supply. DDGS stays a market
   product with the biofuel markets off, as in CAPRI (only BIOE and BIOD leave the market without `BIOF_M`). As feed:
   EU through CAPRI's FPRO bulk ([FEED_MARKETS.md](FEED_MARKETS.md)); non-EU with CAPRI's p_ElasFeed
-  (`feed_demand_nonEU.json`, `tools/build/build_feed_demand_nonEU.py`, CAPRI's 2030 calibration; e.g. USA own −1.12, to
+  (`feed_demand_nonEU.csv`, `tools/build/build_feed_demand_nonEU.py`, CAPRI's 2030 calibration; e.g. USA own −1.12, to
   soybean cake +1.19); regions without a CAPRI feed function keep the generic own-price response (armington eta,
   −2.14 for DDGS; KNOWN_ISSUES K43, K44).
 - Mandates are a scenario shock as in CAPRI's `scen/bio_fuels/change_biof_mandate.gms`: `PolicyScenario.biofuel_mandate`

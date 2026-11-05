@@ -39,6 +39,9 @@ import numpy as np
 import pandas as pd
 
 import functools as _ft
+import sys  # noqa: E402
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
+from paths import EXPORTS  # noqa: E402  (CAPRI's material outside the repository)
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 SRC_M = ROOT / "capri_data" / "sources" / "market" / "dairy_dataout_2030.csv"
@@ -77,8 +80,8 @@ def extract(dump: Path, elas: Path):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--dump", type=Path, default=Path("/mnt/user-data/uploads/markmarket_greendeal_1730et_base_1717.txt"))
-    ap.add_argument("--elas", type=Path, default=Path("/mnt/user-data/uploads/elas_2_1730defaulta.csv"))
+    ap.add_argument("--dump", type=Path, default=EXPORTS / "markmarket_greendeal_1730et_base_1717.txt")
+    ap.add_argument("--elas", type=Path, default=EXPORTS / "elas_2_1730defaulta.csv")
     a = ap.parse_args()
     if a.dump.exists() and a.elas.exists():
         SRC_M.parent.mkdir(parents=True, exist_ok=True)
@@ -91,8 +94,11 @@ def main():
     mr = importlib.util.module_from_spec(spec); spec.loader.exec_module(mr)
     # the EU's member states with supply models; Norway (NO000000) is a market region of its own (CAPRI
     # aggregation/defaultA.agg; KNOWN_ISSUES K56): its dairy block is built with the non-EU regions'
-    # (tools/build/build_dairy_world_blocks.py, trade region NOR), with its raw milk from its supply models
-    eu_ms = sorted({mr.national_code(r) for r in mr.model_regions()} - {"NO000000"})
+    # (tools/build/build_dairy_world_blocks.py, trade region NO000000), with its raw milk from its supply models
+    # (the EU from shared/eu_market_blocks.csv, _model_regions.EU_MS; SUPPLY_NONEU_DESIGN section 2, issue 4: until 31
+    # October 2026 the member states of the regional units but Norway, which would take in the UK, Turkey and the
+    # Western Balkans)
+    eu_ms = sorted(mr.EU_MS)
 
     rows, hrows, checks = [], [], []
     for ms in eu_ms:

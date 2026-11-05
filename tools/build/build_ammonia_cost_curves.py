@@ -20,7 +20,8 @@ zones weighted by the region's zone share). Animal categories without a farm-siz
 (HENS, POUF, SHGF, SHGM) are costed at h500 only and get no regression (CAPRI does the same).
 
 SIMPLIFICATION (registered): where a region has no heads data, CAPRI falls back to its NUTS-1
-parent; this builder falls back to the national figures.
+parent; this builder falls back to the national figures. The Western Balkans and Turkey's units take CAPRI's estimated
+farm structure (farm_size_noneu.csv, tools/build/build_farm_size_noneu.py).
 
 Output: capri_data/2017/abatement/ammonia/ammonia_cost_curves.parquet (an intermediate)
 """
@@ -106,13 +107,20 @@ def load():
             HOLD[(r.region, g)]["200_500"] = HOLD[(r.region, g)].get("200_500", 0) + r.value * 3 / 4
         else:
             HOLD[(r.region, g)][r.size_class] = HOLD[(r.region, g)].get(r.size_class, 0) + r.value
+    # the Western Balkans and Turkey's units: CAPRI's estimated farm structure (prep_farm_size_data_for_miti.gms sets
+    # p_Heads and p_holdLSU of its loop regions from m_heads_per_hold; tools/build/build_farm_size_noneu.py)
+    for r in _read_csv(D / "farm_size_noneu.csv").itertuples():
+        HEADS[(r.region, r.ad_activity)][r.size_class] = r.heads
+        HOLD[(r.region, r.ad_activity)][r.size_class] = r.holdings
     md = _read_csv(D / "capri_mann_days_2030.csv")
     MD = {(r.region, r.activity, r.item): r.value for r in md.itertuples()}
     return INV, ADD, FOP, PRICE, STOR, MIN, KGN, nvz, HEADS, HOLD, MD
 
 
 def nat(region):
-    return region[:2] + "000000"
+    """The region's CAPRI country (TUR for Turkey's units; until 4 November 2026 the first two letters + 000000, which
+    is the same for every other unit)."""
+    return _mr.national_code(region)
 
 
 def stor_months(region, sysm, cat, STOR, MIN, nvz):

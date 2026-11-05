@@ -25,6 +25,10 @@ class MarketEvalState:
     #: the non-EU behavioural regions' feed energy price ratios of the evaluation (CAPRI's FeedBal_, audit M3:
     #: {CAPRI region: FEDE / FEDE at calibration}); None outside an evaluation or with market.noneu_feed_nq off
     fede_now: Any = None
+    #: the non-EU land markets' rents of the evaluation (CAPRI's LandSupplyMNL_ = LndSupplyEqualsDemand_, stage 7:
+    #: {CAPRI region: change of the free rents TCRP, FODFAL, FRUN from calibration, EUR/ha}); None with
+    #: market.noneu_land_market off
+    land_now: Any = None
     #: the non-EU market regions whose supply is the supply models' in this solve
     sup_active: Any = None
     #: the dairy block's solution inside the raw milk clearing (audit M5), for supply_response
@@ -78,10 +82,6 @@ class MarketSolveState:
     bilat_last_r: Any = None
     #: local supply and demand elasticities of the bilateral solve, measured at the first scenario solve
     bilat_local_el: Any = None
-    #: the dairy blocks' last solutions per region (warm start)
-    dairy_u_all: Any = None
-    #: "unset", or None when a caller asks the EU dairy block to drop its warm start (dairy.py)
-    dairy_u: Any = "unset"
 
 
 @dataclass
@@ -167,8 +167,8 @@ MOVED = {
     "_dairy_S0_reg": "par.dairy_S0_reg",
     "_dairy_last": "ev.dairy_last",
     "_dairy_m5_now": "ev.dairy_m5_now",
-    "_dairy_u": "sv.dairy_u",
-    "_dairy_u_all": "sv.dairy_u_all",
+    "_dairy_u": "nothing (removed with step G2f: the dairy blocks are linear in their unknowns, no warm start)",
+    "_dairy_u_all": "nothing (removed with step G2f: the dairy blocks are linear in their unknowns, no warm start)",
     "_dairy_world_last": "ev.dairy_world_last",
     "_demand_cal": "par.demand_cal",
     "_demand_cal_frozen": "par.demand_cal_frozen",

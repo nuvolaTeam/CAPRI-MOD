@@ -12,18 +12,34 @@ RUS,RUS,CAPRI's market data (capmod results): region code RUS
 UKR,UKR,CAPRI's market data (capmod results): region code UKR
 TUR,TUR,CAPRI's market data (capmod results): region code TUR
 MEX,MEX,CAPRI's market data (capmod results): region code MEX
-IDN,INDO,CAPRI's market data (capmod results): region code INDO
-JPN,JAP,CAPRI's market data (capmod results): region code JAP
-KOR,SKOR,CAPRI's market data (capmod results): region code SKOR
-THA,THAI,CAPRI's market data (capmod results): region code THAI
-VNM,VIET,CAPRI's market data (capmod results): region code VIET
+INDO,INDO,CAPRI's market data (capmod results): region code INDO; the model's code is CAPRI's since 3 November 2026 (market move stage 3)
+JAP,JAP,CAPRI's market data (capmod results): region code JAP; the model's code is CAPRI's since 3 November 2026 (market move stage 3)
+SKOR,SKOR,CAPRI's market data (capmod results): region code SKOR; the model's code is CAPRI's since 3 November 2026 (market move stage 3)
+THAI,THAI,CAPRI's market data (capmod results): region code THAI; the model's code is CAPRI's since 3 November 2026 (market move stage 3)
+VIET,VIET,CAPRI's market data (capmod results): region code VIET; the model's code is CAPRI's since 3 November 2026 (market move stage 3)
 PAK,PAK,CAPRI's market data (capmod results): region code PAK
 BGD,BGD,CAPRI's market data (capmod results): region code BGD
 NGA,NGA,CAPRI's market data (capmod results): region code NGA
 ZAF,ZAF,CAPRI's market data (capmod results): region code ZAF
 ETH,ETH,CAPRI's market data (capmod results): region code ETH
-MAR,MOR,CAPRI's market data (capmod results): region code MOR
-NOR,NO000000,"CAPRI's market region NO000000, its own in gams/aggregation/defaultA.agg (KNOWN_ISSUES K56)"
-GBR,UK000000,"CAPRI's market region UK000000, its own in gams/aggregation/defaultA.agg (batch 7)"
+MOR,MOR,CAPRI's market data (capmod results): region code MOR; the model's code is CAPRI's since 3 November 2026 (market move stage 3)
+NO000000,NO000000,"CAPRI's market region NO000000, its own in gams/aggregation/defaultA.agg (KNOWN_ISSUES K56); the model's code is CAPRI's since 3 November 2026 (market move stage 3)"
+UK000000,UK000000,"CAPRI's market region UK000000, its own in gams/aggregation/defaultA.agg (batch 7); the model's code is CAPRI's since 3 November 2026 (market move stage 3)"
 WBA,WBA,"CAPRI's trade block WBA (AL, BA, CS, KO, MK, MO) of gams/aggregation/defaultA.agg (batch 7)"
-ROW,,every CAPRI region not listed in this table
+CH,CH,"CAPRI's market region CH (Switzerland), gams/aggregation/defaultA.agg; part of ROW until 3 November 2026 (market move stage 3)"
+REU,REU,"CAPRI's market region REU (Rest of Europe), gams/aggregation/defaultA.agg; part of ROW until 3 November 2026 (market move stage 3)"
+BEL,BEL,"CAPRI's market region BEL (Belarus), gams/aggregation/defaultA.agg; part of ROW until 3 November 2026 (market move stage 3)"
+KAZ,KAZ,"CAPRI's market region KAZ (Kazathan), gams/aggregation/defaultA.agg; part of ROW until 3 November 2026 (market move stage 3)"
+FSU,FSU,"CAPRI's market region FSU (Former Soviet Union without Russia), gams/aggregation/defaultA.agg; part of ROW until 3 November 2026 (market move stage 3)"
+MIDEAST,MIDEAST,"CAPRI's market region MIDEAST (Middle East), gams/aggregation/defaultA.agg; part of ROW until 3 November 2026 (market move stage 3)"
+AFR_LDC,AFR_LDC,"CAPRI's market region AFR_LDC (Africcan LDCs), gams/aggregation/defaultA.agg; part of ROW until 3 November 2026 (market move stage 3)"
+AFR_REST,AFR_REST,"CAPRI's market region AFR_REST (Africa Rest (practically ACP)), gams/aggregation/defaultA.agg; part of ROW until 3 November 2026 (market move stage 3)"
+MAL,MAL,"CAPRI's market region MAL (Malaysia), gams/aggregation/defaultA.agg; part of ROW until 3 November 2026 (market move stage 3)"
+TAW,TAW,"CAPRI's market region TAW (Taiwan), gams/aggregation/defaultA.agg; part of ROW until 3 November 2026 (market move stage 3)"
+ASOCE_LDC,ASOCE_LDC,"CAPRI's market region ASOCE_LDC (Asian and Ociania LDC), gams/aggregation/defaultA.agg; part of ROW until 3 November 2026 (market move stage 3)"
+ASOCE_REST,ASOCE_REST,"CAPRI's market region ASOCE_REST (Rest of Asia), gams/aggregation/defaultA.agg; part of ROW until 3 November 2026 (market move stage 3)"
+MSA_ACP,MSA_ACP,"CAPRI's market region MSA_ACP (Middle and South America ACP), gams/aggregation/defaultA.agg; part of ROW until 3 November 2026 (market move stage 3)"
+RSA,RSA,"CAPRI's market region RSA (Rest of South and Middle America), gams/aggregation/defaultA.agg; part of ROW until 3 November 2026 (market move stage 3)"
+MED,MED,"CAPRI's market region MED (Other mediterrean countries), gams/aggregation/defaultA.agg; part of ROW until 3 November 2026 (market move stage 3)"
+URUPAR,URUPAR,"CAPRI's market region URUPAR (Uruguay and Paraguay), gams/aggregation/defaultA.agg; part of ROW until 3 November 2026 (market move stage 3)"
+MER_OTH,MER_OTH,"CAPRI's market region MER_OTH (Bolivia, Chile, Venezuela), gams/aggregation/defaultA.agg; part of ROW until 3 November 2026 (market move stage 3)"

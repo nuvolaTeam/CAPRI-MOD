@@ -1,8 +1,9 @@
 # CAPRI AD_AnCh (anaerobic digestion, `%ad_type% = anch`): specification for the port
 
-Status: read-only research. CAPRI source is `/home/claude/work/allgms/gams` (all paths below are relative to it).
+Status: read-only research. CAPRI source is `capri_sources/gams` (all paths below are relative to it).
 Line numbers were checked against that tree. Reproduction script:
-`/tmp/claude-0/-home-claude/d5c56fed-b04a-5752-ba56-1dd3c6831b93/scratchpad/ad/ad_check.py`.
+a one-off check script of 20 October 2026 (not delivered); the AD option is now built by
+`tools/build/build_ad_option.py` and checked by its tests.
 
 Labels: **[V]** checked numerically against CAPRI output; **[S]** read from source, not checked numerically; **[U]** uncertain or inferred.
 
@@ -11,7 +12,7 @@ Labels: **[V]** checked numerically against CAPRI output; **[S]** read from sour
 ## 0. Key findings
 
 1. **`res2_sample.txt` comes from the *ini* calibration run, not from a simulation run.** It is byte-identical to
-   `/mnt/user-data/uploads/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv` (policy file
+   `capri_sources/exports/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv` (policy file
    `pol_input/greendeal/refpol_endotech_all_ini.gms`, which sets `ghgTechCali ini`, l.45). In that run:
    - the AD share is fixed at `IniShare − 1e-6` (`supply/set_miti_bounds.gms:176-192`);
    - `costParLin` is overwritten with 1e-10 (`envind/ad_data_and_cali.gms:802-805`);
@@ -311,7 +312,7 @@ Inputs not in these CSVs:
 | `fallback_Balkan`, `p_farmsTotal`, `p_LUUnits`, `data levl/days` for non-EU NLP `m_fsclass` (prep l.439-495) | prep file, `dat\policy\livestock_units.gms` | needed only for MSnoEU/Turkey |
 | `ghgInvData.gdx p_shareADInv` | not present | needed only if `storgrazInv on` (default off) |
 
-Nothing in `/mnt/user-data/uploads` adds AD inputs beyond the above:
+Nothing in `capri_sources/exports` adds AD inputs beyond the above:
 - `scen.zip` contains the same AD_basedata symbols.
 - `costsavings_ini/max_21730_jul15.csv` contain `v_Miti` levels and bounds. These are useful for validation, not as inputs.
 

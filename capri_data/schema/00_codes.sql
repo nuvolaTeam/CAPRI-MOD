@@ -45,6 +45,65 @@ CREATE TABLE model_activities (
 );
 COMMENT ON TABLE model_activities IS 'the model''s activities (capri_mod/data/definitions.py CROPS, ANIMALS) and their CAPRI activities: a declared code list, a source per row (tools/lib/_model_codes.py reads it for the builders)';
 
+-- file: capri_data/codes/capri/landTypesMrk.csv
+CREATE TABLE capri_landtypesmrk (code VARCHAR PRIMARY KEY, text VARCHAR);
+COMMENT ON TABLE capri_landtypesmrk IS 'CAPRI landTypesMrk: the land types of the land market (sets.gms)';
+
+-- file: capri_data/codes/capri/FODCRP.csv
+CREATE TABLE capri_fodcrp (code VARCHAR PRIMARY KEY, text VARCHAR);
+COMMENT ON TABLE capri_fodcrp IS 'CAPRI FODCRP: the fodder crops (sets.gms)';
+
+-- file: capri_data/codes/capri/landTypes_to_pact.csv
+CREATE TABLE capri_landtypes_to_pact (land_type VARCHAR NOT NULL, pact VARCHAR NOT NULL, PRIMARY KEY (land_type, pact));
+COMMENT ON TABLE capri_landtypes_to_pact IS 'CAPRI landTypes_to_pact: the land type of each production activity (sets.gms)';
+
+-- file: capri_data/codes/capri/cropDivGrps_mCact.csv
+CREATE TABLE capri_cropdivgrps_mcact ("group" VARCHAR NOT NULL, mcact VARCHAR NOT NULL, PRIMARY KEY ("group", mcact));
+COMMENT ON TABLE capri_cropdivgrps_mcact IS 'CAPRI cropDivGrps_mCact: the crop-diversification group of each annual crop (sets.gms)';
+
+-- file: capri_data/codes/model_activity_classes.csv
+CREATE TABLE model_activity_classes (
+    code VARCHAR PRIMARY KEY REFERENCES model_activities (code),
+    land_type VARCHAR,                     -- ARAC, GRAS or FRUN for a crop, empty for an animal
+    cropdiv_group VARCHAR,                 -- the crop-diversification group of an annual crop
+    fodder INTEGER NOT NULL CHECK (fodder IN (0, 1)),
+    fixed INTEGER NOT NULL CHECK (fixed IN (0, 1)),
+    organic_target VARCHAR CHECK (organic_target IN ('arable_pp', 'permanent_pp', 'uaa_pp')),   -- empty: not an organic crop
+    organic_yield_gap INTEGER NOT NULL CHECK (organic_yield_gap IN (0, 1)),
+    pesticide INTEGER NOT NULL CHECK (pesticide IN (0, 1)),
+    price_source VARCHAR,                  -- the market whose price an animal earns (a model_commodities code)
+    share_term_arable INTEGER NOT NULL CHECK (share_term_arable IN (0, 1)),
+    young_outputs VARCHAR,                 -- the young animals in the activity's outputs (CAPRI OYANI), ';'-separated
+    source VARCHAR NOT NULL
+);
+COMMENT ON TABLE model_activity_classes IS 'the model''s activity classes (refactor stage 3, N6): land type, crop-diversification group, fodder and fixed flags, the organic target group and yield gap, the pesticide yield loss, the price source, the PMP share term''s arable set and the young-animal outputs; a declared table, checked against CAPRI''s sets by build_code_lists (a row that differs names its departure)';
+
+-- file: capri_data/codes/model_cattle_splits.csv
+CREATE TABLE model_cattle_splits (
+    split VARCHAR PRIMARY KEY,             -- the model's animal and split (BULL, HFRS:rep, CALV:male, ...)
+    gains VARCHAR NOT NULL REFERENCES capri_maact (code),
+    gives VARCHAR NOT NULL REFERENCES capri_maact (code),
+    source VARCHAR NOT NULL
+);
+COMMENT ON TABLE model_cattle_splits IS 'CAPRI''s cattle activities inside the model''s animals (refactor stage 3, N6): per split the CAPRI activity that gains the stalls and the one that gives them up; a declared table, checked against CAPRI''s MAACT and SplitActs by build_code_lists';
+
+-- file: capri_data/codes/model_price_follows.csv
+CREATE TABLE model_price_follows (
+    activity VARCHAR PRIMARY KEY REFERENCES model_activities (code),
+    commodity VARCHAR NOT NULL,            -- the market commodity whose price the activity's follows
+    eu_market INTEGER NOT NULL CHECK (eu_market IN (0, 1)),   -- 1: in the EU's markets' price step too
+    source VARCHAR NOT NULL
+);
+COMMENT ON TABLE model_price_follows IS 'the activities whose price follows a market commodity''s (refactor stage 4: beet follows sugar, durum wheat the wheat market, Norway''s raw milk the MILK market); a declared table';
+
+-- file: capri_data/codes/model_land_types.csv
+CREATE TABLE model_land_types (
+    code VARCHAR PRIMARY KEY REFERENCES capri_landtypesmrk (code),
+    in_land_market INTEGER NOT NULL CHECK (in_land_market IN (0, 1)),
+    source VARCHAR NOT NULL
+);
+COMMENT ON TABLE model_land_types IS 'the land types of the model''s land market, in its column order (refactor stage 3, N6)';
+
 -- file: capri_data/codes/model_commodities.csv
 CREATE TABLE model_commodities (
     code VARCHAR PRIMARY KEY,
@@ -59,7 +118,7 @@ CREATE TABLE regional_units (
     capri_ms VARCHAR NOT NULL REFERENCES capri_rall (code),
     country VARCHAR NOT NULL CHECK (length(country) = 2)
 );
-COMMENT ON TABLE regional_units IS 'CAPRI''s regional units the model runs on (27 October 2026): unit, its member state, country';
+COMMENT ON TABLE regional_units IS 'CAPRI''s regional units of its supply models (EU27, Norway, UK, Turkey, Western Balkans; a run selects the countries outside the EU, run.supply_countries_outside_eu): unit, its member state, country';
 
 -- file: capri_data/codes/units.csv
 CREATE TABLE units (
@@ -105,8 +164,36 @@ SELECT capri_code, list(code) AS model_codes
 FROM (SELECT code, unnest(string_split(capmod_codes, ';')) AS capri_code FROM model_activities)
 GROUP BY capri_code HAVING count(*) > 1;
 
--- rule: a member state of the regional units is its own unit's member state code (ends in 000000)
-SELECT region, capri_ms FROM regional_units WHERE capri_ms NOT LIKE '%000000';
+-- file: capri_data/codes/capri/RM.csv
+CREATE TABLE capri_rm (code VARCHAR PRIMARY KEY REFERENCES capri_rall (code), text VARCHAR);
+COMMENT ON TABLE capri_rm IS 'CAPRI RM: the market regions of the global market model, in CAPRI''s set order (sets.gms; the market''s move onto CAPRI''s regions, MARKET_REGIONS_INVENTORY.md stage 1)';
+
+-- file: capri_data/codes/capri/RMTP.csv
+CREATE TABLE capri_rmtp (code VARCHAR PRIMARY KEY REFERENCES capri_rall (code), text VARCHAR);
+COMMENT ON TABLE capri_rmtp IS 'CAPRI RMTP: the trade-policy blocks of the market model (tariffs and TRQs), in CAPRI''s set order (sets.gms)';
+
+-- file: capri_data/codes/capri/RM_TO_RMTP.csv
+CREATE TABLE capri_rm_to_rmtp (
+    rm VARCHAR PRIMARY KEY REFERENCES capri_rm (code),
+    rmtp VARCHAR NOT NULL REFERENCES capri_rmtp (code)
+);
+COMMENT ON TABLE capri_rm_to_rmtp IS 'CAPRI RM_TO_RMTP: the trade-policy block of each market region (sets.gms)';
+
+-- file: capri_data/codes/capri/RMEU_to_RM.csv
+CREATE TABLE capri_rmeu_to_rm (rmeu VARCHAR PRIMARY KEY, rm VARCHAR NOT NULL REFERENCES capri_rm (code));
+COMMENT ON TABLE capri_rmeu_to_rm IS 'CAPRI RMEU_to_RM: the EU''s market blocks and their market regions (sets.gms)';
+
+-- file: capri_data/codes/capri/PERM_NGRP.csv
+CREATE TABLE capri_perm_ngrp (code VARCHAR PRIMARY KEY, text VARCHAR);
+COMMENT ON TABLE capri_perm_ngrp IS 'CAPRI PERM_NGRP: the permanent crop groups of the fertiliser distribution (supply/define_ngrp_sets.gms)';
+
+-- file: capri_data/codes/capri/CACT_TO_NGRP.csv
+CREATE TABLE capri_cact_to_ngrp (cact VARCHAR PRIMARY KEY, ngrp VARCHAR NOT NULL);
+COMMENT ON TABLE capri_cact_to_ngrp IS 'CAPRI CACT_TO_NGRP: the nutrient group of each crop activity (supply/define_ngrp_sets.gms)';
+
+-- file: capri_data/codes/capri/FEED_TRD.csv
+CREATE TABLE capri_feed_trd (code VARCHAR PRIMARY KEY, text VARCHAR);
+COMMENT ON TABLE capri_feed_trd IS 'CAPRI FEED_TRD: the traded feed bulks, in CAPRI''s set order (global/fromimpact/sets.gms)';
 
 -- file: capri_data/codes/capri/MS_RU.csv
 CREATE TABLE capri_ms_ru (
@@ -115,3 +202,37 @@ CREATE TABLE capri_ms_ru (
     PRIMARY KEY (ms, ru)
 );
 COMMENT ON TABLE capri_ms_ru IS 'CAPRI''s member states and their regional units (MAP_RR restricted to MS x RU)';
+
+-- rule: an animal's price source is a market commodity of the model
+SELECT code, price_source FROM model_activity_classes
+WHERE price_source IS NOT NULL AND price_source NOT IN (SELECT code FROM model_commodities);
+
+-- file: capri_data/codes/capri/COLS.csv
+CREATE TABLE capri_cols (code VARCHAR PRIMARY KEY, text VARCHAR);
+COMMENT ON TABLE capri_cols IS 'CAPRI COLS, the column items of its data and results arrays DATA and DATAOUT (sets.gms)';
+
+-- file: capri_data/codes/capri/ROWS.csv
+CREATE TABLE capri_rows (code VARCHAR PRIMARY KEY, text VARCHAR);
+COMMENT ON TABLE capri_rows IS 'CAPRI ROWS, the row items of its data and results arrays DATA and DATAOUT (sets.gms)';
+
+-- file: capri_data/codes/results_items.csv
+CREATE TABLE results_items (
+    block VARCHAR NOT NULL,
+    item VARCHAR NOT NULL,
+    item_dim VARCHAR NOT NULL CHECK (item_dim IN ('cols', 'rows')),
+    capri_cols VARCHAR,
+    capri_rows VARCHAR,
+    applies_to VARCHAR,
+    unit VARCHAR,
+    capri_source VARCHAR,
+    PRIMARY KEY (block, item)
+);
+COMMENT ON TABLE results_items IS 'The items of the long results table (capri_mod/io_results.py) and their CAPRI codes in DATAOUT''s cols and rows ("*": the model''s own coordinate translated, "act": the activity''s code in rows; applies_to: the activities or products the mapping holds for, empty for all; empty codes: no CAPRI item or not determined)';
+
+-- rule: a results item's CAPRI codes are both given or both empty, are in CAPRI's COLS and ROWS ("*" apart), and cite
+-- where CAPRI sets them
+SELECT block, item, capri_cols, capri_rows FROM results_items
+WHERE (capri_cols = '') <> (capri_rows = '')
+   OR (capri_cols <> '' AND (capri_source IS NULL OR capri_source = ''))
+   OR (capri_cols NOT IN ('', '*') AND capri_cols NOT IN (SELECT code FROM capri_cols))
+   OR (capri_rows NOT IN ('', '*', 'act') AND capri_rows NOT IN (SELECT code FROM capri_rows));

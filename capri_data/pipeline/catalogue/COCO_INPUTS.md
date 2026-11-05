@@ -1,6 +1,6 @@
 # COCO input datasets: catalogue v1 (23 October 2026)
 
-Companion to `datasets_catalogue.csv` (108 rows). File paths are relative to `/home/claude/work/allgms/gams`. Eurostat existence and dimensions were checked on 23-10-2026 against the TOC (12,286 lines) and the SDMX dataflow/DSD endpoints. Anything not checked is marked *unknown* or *inferred*.
+Companion to `datasets_catalogue.csv` (108 rows). File paths are relative to `capri_sources/gams`. Eurostat existence and dimensions were checked on 23-10-2026 against the TOC (12,286 lines) and the SDMX dataflow/DSD endpoints. Anything not checked is marked *unknown* or *inferred*.
 
 ## 1. How COCO gets its raw data
 
@@ -25,7 +25,7 @@ COCO does not read Eurostat directly. There are two stages.
    - `faodata.gdx` is built by `prepare_faostat_database.gms` → `fao/fao_balance_consolidation.gms`, which consolidates FAO GDX extracts stored in `dat/fao/`.
    - After loading, COCO rescales to 1000 t / 1000 ha and rebooks DEMD→DOMM, RICE→PARI (/0.666) and TABO→OLIV (coco1_load_fao_data_mapped.gms:38-70).
 
-**Consequence for the download layer:** the "stored copy" that CAPRI relies on for discontinued tables is `dat/eurostat_raw/*.csv` together with `dat/coco/zpa1_march2010.gdx`. Neither is in `/home/claude/work/allgms`. They must be obtained from the user's CAPRI installation (open question 1).
+**Consequence for the download layer:** the "stored copy" that CAPRI relies on for discontinued tables is `dat/eurostat_raw/*.csv` together with `dat/coco/zpa1_march2010.gdx`. Neither is in `capri_sources/gams`. They must be obtained from the user's CAPRI installation (open question 1).
 
 ## 2. Datasets by CAPRI block
 

@@ -42,7 +42,7 @@ CH4 per head adopting, and shr_of_dm.
     python tools/build/build_supplement_effects.py
 """
 from __future__ import annotations
-import importlib.util, json
+import importlib.util
 from collections import defaultdict
 import sys
 from pathlib import Path
@@ -50,12 +50,14 @@ from pathlib import Path
 import pandas as pd
 
 import functools as _ft
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
+from paths import SOURCES  # noqa: E402  (CAPRI's material outside the repository)
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 M = ROOT / "capri_data" / "2017" / "abatement" / "mitigation"
 LEV = ROOT / "capri_data" / "sources" / "envind" / "res17_mann_crpr_expt.csv"
 #: CAPRI's 2017 regional results (CAPREG text dumps res_17<MS>.txt): the rations and feed data 3-NOP's effect needs
-DUMPS = Path("/home/claude/work/capreg")
+DUMPS = SOURCES / "capreg"
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "lib"))
 import _model_codes as _MC  # noqa: E402  the model's activities and their CAPRI activities (codes/model_activities.csv)
 MAP = {a: _MC.ANIMALS[a] for a in ("DCOW", "BCOW", "BULL", "HFRS", "CALV")}
@@ -97,8 +99,10 @@ def nop_rows(mr, to_c8, L, rations):
     ms_ru = defaultdict(list)
     for r in _csv.DictReader(open(codes / "MS_RU.csv")):
         ms_ru[r["ms"]].append(r["ru"])
-    eu_ms = {r["capri_ms"] for r in _csv.DictReader(open(ROOT / "capri_data" / "shared" / "regional_units.csv"))
-             if not r["capri_ms"].startswith("NO")}
+    # CAPRI's ms_LiNi: the EU's member states (its EU trade blocks, tools/lib/_model_regions.EU_MS; until 4 November
+    # 2026 every member state of regional_units.csv but Norway, which took in the UK, Turkey and the Western Balkans
+    # once their units were listed)
+    eu_ms = set(mr.EU_MS)
     acts = sorted({x for v in NOP_MAP.values() for x in v})
     comp, mx = {}, {}
     for ms in sorted(eu_ms):
@@ -157,7 +161,9 @@ def main():
     nut = _read_csv(M / "p_nutCont.csv")
     ooil = {r.nutrient: float(r.value) for r in nut[nut.feed == "OOIL"].itertuples()}
     tot_fat = RAPE_EE / 100.0 * RAPE_DM / 100.0
-    rations = json.load(open(ROOT / "capri_data" / "2017" / "feed" / "feed_ration_2017.json"))["regions"]
+    sys.path.insert(0, str(ROOT))
+    from capri_mod.data.nested_tables import read_feed_rations
+    rations = read_feed_rations(ROOT / "capri_data" / "2017" / "feed" / "feed_ration_2017.csv")
 
     rows, nskip = [], 0
     for reg in mr.model_regions():

@@ -13,7 +13,10 @@ ROOT = Path(__file__).resolve().parents[2]
 # CAPRI member-state codes (sets.gms NUTS0: BL = Belgium and Luxembourg, IR, EL, UK), the table the model uses
 # (capri_mod.data.definitions.MS_CODE)
 with open(ROOT / "capri_data" / "shared" / "capri_member_state_codes.csv", newline="") as _f:
-    CTRY = {r["nuts_prefix"]: r["capri_ms"][:2] for r in csv.DictReader(_f)}
+    MS_OF_PREFIX = {r["nuts_prefix"]: r["capri_ms"] for r in csv.DictReader(_f)}
+#: country prefix -> the two letters of CAPRI's member state (BE -> BL; TR -> TU, as in CAPREG's dump res_17TU)
+CTRY = {p: m[:2] for p, m in MS_OF_PREFIX.items()}
+_MS_SET = frozenset(MS_OF_PREFIX.values())
 
 
 with open(ROOT / "capri_data" / "shared" / "regional_units.csv", newline="") as _f:
@@ -24,6 +27,17 @@ with open(ROOT / "capri_data" / "shared" / "eu_market_blocks.csv", newline="") a
     EU_MS = frozenset(r["ms"] for r in csv.DictReader(_f))
 EU_MS2 = frozenset(m[:2] for m in EU_MS)
 UNIT_SET = frozenset(UNITS)
+
+
+def _default_outside_eu() -> frozenset:
+    """The countries outside the EU whose supply models a run has by default (the setting
+    run.supply_countries_outside_eu, read from the repository's defaults so a user's settings file cannot change a
+    builder's output): Norway."""
+    import tomllib
+    with open(ROOT / "capri_mod" / "settings" / "defaults.toml", "rb") as fh:
+        return frozenset(tomllib.load(fh)["run"]["supply_countries_outside_eu"])
+
+
 
 
 def is_unit(code: str) -> bool:
@@ -55,7 +69,18 @@ def model_regions():
 
 
 def national_code(nuts2: str) -> str:
-    return CTRY.get(nuts2[:2], nuts2[:2]) + "000000"
+    """CAPRI member state of a unit, a member state or a country prefix (the same rule as
+    capri_mod.data.definitions.capri_ms): 'BL210000' -> 'BL000000', 'TR100000' -> 'TUR'."""
+    if nuts2 in _MS_SET:
+        return nuts2
+    return MS_OF_PREFIX.get(nuts2[:2], nuts2[:2] + "000000")
+
+
+#: the regional units the EU-wide fallbacks, medians and averages of the builders are taken over: the EU's and those of
+#: the default countries outside it (Norway), the units the model had before CAPRI's other 29 were listed (4 November
+#: 2026, docs/design/SUPPLY_NONEU_DESIGN.md). Behaviour as before; the project lead's decision of 31 October 2026 (the
+#: EU's fallback over the EU's member states only, a unit outside the EU its own country's) is a separate change.
+FALLBACK_UNITS = frozenset(u for u in UNITS if national_code(u) in (EU_MS | _default_outside_eu()))
 
 
 #: model region -> CAPRI region(s), for NUTS changes the correspondence file leaves out (it keeps
@@ -72,9 +97,19 @@ SPLITS_MERGES = {
     "HU11": ("HU100000",), "HU12": ("HU100000",),
     "IE04": ("IR010000",), "IE05": ("IR020000",), "IE06": ("IR010000", "IR020000"),
 }
-#: wrong entries in nuts_version_correspondence.json: FI19 (Laensi-Suomi) is unchanged since 2006;
+#: wrong entries in nuts_version_correspondence.csv: FI19 (Laensi-Suomi) is unchanged since 2006;
 #: FI1C comes from FI18, not FI19
 CORR_FIXES = {"FI190000": ["FI19"], "FI180000": ["FI18"]}
+
+
+def _nuts_correspondence():
+    """CAPRI's NUTS version correspondence {capri code: [NUTS codes]} (capri_data/shared/nuts_version_correspondence.csv,
+    read by capri_mod/data/nested_tables.py, loaded from its file: this module runs without the package on the path)."""
+    import importlib.util
+    sp = importlib.util.spec_from_file_location("_nested_tables", ROOT / "capri_mod" / "data" / "nested_tables.py")
+    nt = importlib.util.module_from_spec(sp)
+    sp.loader.exec_module(nt)
+    return nt.read_nuts_correspondence(ROOT / "capri_data" / "shared" / "nuts_version_correspondence.csv")
 
 
 def capri_groups(model_regions=None):
@@ -90,8 +125,7 @@ def capri_groups(model_regions=None):
     if _all_units(regs):                       # CAPRI's units: each region is its own group
         out = {i: ({r}, {r}) for i, r in enumerate(sorted(regs))}
         return {r: i for i, (cs, _) in out.items() for r in cs}, out
-    import json
-    corr = json.loads((ROOT / "capri_data" / "shared" / "nuts_version_correspondence.json").read_text())["capri8_to_nuts"]
+    corr = _nuts_correspondence()
     corr = {**corr, **CORR_FIXES}
     edges = []
     for c8, lst in corr.items():
@@ -136,8 +170,7 @@ def region_to_capri():
     identity."""
     if _all_units(model_regions_list()):
         return {r: r for r in model_regions_list()}
-    import json
-    corr = json.loads((ROOT / "capri_data" / "shared" / "nuts_version_correspondence.json").read_text())["capri8_to_nuts"]
+    corr = _nuts_correspondence()
     corr = {**corr, **CORR_FIXES}
     out = {}
     for c8, lst in corr.items():

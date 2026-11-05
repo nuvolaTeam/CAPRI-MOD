@@ -95,8 +95,8 @@
 
 # Spec: how CAPRI builds the p_Nemidat entries used by the supply-model N-loss cascade
 
-GAMS root: `/home/claude/work/allgms/gams` (all paths below are relative to it unless stated).
-CSV root: `/home/claude/work/capri-mod-proto/capri_data/2017/abatement/ammonia/` (called `AMM/` below).
+GAMS root: `capri_sources/gams` (all paths below are relative to it unless stated).
+CSV root: `capri_data/2017/abatement/ammonia/` (of the capri-mod-proto package) (called `AMM/` below).
 This is a read-only investigation. Line numbers come from the files as they stand now.
 
 ---------------------------------------------------------------------------------------------------
@@ -400,7 +400,7 @@ These caveats remain:
 3. **factRunStor variant.** `AMM/p_factRunStor.csv` is the LitRev file (`prep_data_LitRev.gms:940-958` rescaled the SOLID
    HighEm/LowEm rows to 3.68/7.36/7.36). `ammo.gms:364` (ManuType runoff, p_emiLoss path) reads the original
    `input_manStor.gdx` instead (SOLID HighEm/LowEm: fieldStor 10, othStor 2, no concrStor).
-   * The original is **not in capri_data**. A raw GAMS text dump exists at `/mnt/user-data/uploads/input_manStor.csv`.
+   * The original is **not in capri_data**. A raw GAMS text dump exists at `capri_sources/exports/input_manStor.csv`.
    * This does not matter for the AV path (it uses only the normal/othStor rows, which are identical). It matters only if
      the ghgAbatement-off p_emiLoss path is ported.
 4. **p_shareLiquidInv / p_shareGrazInv** (`ghgInvData.gdx`): not in capri_data. They are needed only for storgrazInv=on
@@ -416,7 +416,7 @@ These caveats remain:
 
 Searched outside `AMM/` (grep -ril over capri_data for LitRev, miterra, ghgInvData, input_manStor, emiloss, nemidat): no
 other copy of these inputs was found. There are only mentions in DATA_DICTIONARY.md, DATA_SOURCING_REGISTRY.json,
-INPUT_MANIFEST.json and sources/gams/gams_extracted/*. Raw dumps also sit in `/mnt/user-data/uploads/` (LitRev_inputs.csv,
+INPUT_MANIFEST.json and sources/gams/gams_extracted/*. Raw dumps also sit in `capri_sources/exports` (LitRev_inputs.csv,
 LitRev_non_changeable_parameters.csv, LitRev_input_manStor.csv, miterra_inputs.csv, non_changeable_parameters.csv,
 input_manStor.csv), all GAMS text format. I found no Norway mirror files.
 
@@ -448,20 +448,20 @@ input_manStor.csv), all GAMS text format. I found no Norway mirror files.
   * **Caution:** the EU-level NH3APP NITF (5.89) and NH3GRA NITF (1.54) are implausibly small compared with the
     per-activity rows. Do not use those two aggregate rows without checking them.
 * Derived ratio files from CAPRI 2030 results, `capri_data/2017/environment/`:
-  * nh3_factors_capri.json (GNH3/MANN and NH3MIN/MINFER)
+  * nh3_factors_capri.csv (GNH3/MANN and NH3MIN/MINFER)
   * manure_housing_losses_2030.csv
   * manure_n2o_factors.csv (from res_17)
   * capri_gnb_components_2030.csv
   * capri_regional_n_balance_2030.csv
 
 ### Better dumps outside capri_data (NUTS2, includes the stage rows)
-* `/mnt/user-data/uploads/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv` (330 MB; the max run is in the
+* `capri_sources/exports/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv` (330 MB; the max run is in the
   matching zip). This is ghgAbatement ON (`pol_input/greendeal/refpol_endotech_all_ini.gms:36`), so it exercises exactly
   these equations.
   * layout `'REG8'.'<''|CUR|…>'.'<COL>'.'<ROW>'.'2030' value`
   * per-activity rows MANN, LEVL, NH3MAN, NOXMAN, N2OMAN, NH3GRA, NOXGRA, N2OGRA, NH3APP, NOXAPP, N2OAPP, GASANI, RUNANI
   * regional NITF rows NH3HOU, NH3STO, NH3GRA, NH3APP, NH3MIN, GASANI, GASMIN, RUNANI, RUNMIN, LEACHI, SURSOI, EXCRET
-* `/mnt/user-data/uploads/res_2_1730greendeal_refdefaulta.zip` (ghgAbatement OFF, so the p_emiLoss path). Same layout.
+* `capri_sources/exports/res_2_1730greendeal_refdefaulta.zip` (ghgAbatement OFF, so the p_emiLoss path). Same layout.
 
 ### Checks done here (all exact to ~1e-13 against the CSVs)
 * **GRAZN_ chain**, DE110000 endotech-ini 2030:
@@ -472,7 +472,7 @@ input_manStor.csv), all GAMS text format. I found no Norway mirror files.
 * **NETF gaseous loss and runoff**, refdefaulta DE110000:
   * NH3MIN/MINFER = 0.03632973. This equals 0.157998·0.15 + 0.842002·0.015 (NN_CorrFertFactDeviation 2020). FracUseFert.csv
     would give 0.036330.
-  * FR10 in nh3_factors_capri.json = 0.047733154, matching NN (FracUseFert would give 0.046444).
+  * FR10 in nh3_factors_capri.csv = 0.047733154, matching NN (FracUseFert would give 0.046444).
   * GASMIN/MINFER = 0.05000384 = NH3 + NOx + 0.011111·(1−NH3−NOx).
   * RUNMIN/MINFER = (1−0.05000384)·LFsurface(DE110000)/100 = 0.03466217.
 * **Leaching**, refdefaulta: LEACHI/SURSOI = 0.114217 (DE110000), 0.087275 (AT110000) and 0.132151 (FR100000). These are

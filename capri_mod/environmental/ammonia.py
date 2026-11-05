@@ -6,13 +6,16 @@ module once environmental_module is loaded (capri_mod.utils.mixins.inject_names)
 """
 from __future__ import annotations
 
+from capri_mod.units import M_NH3, M_NH3_N
+
 
 class AmmoniaBlock:
     def _nh3_factors(self) -> dict:
-        d = self.__dict__.get("_nh3_fac_cache")
+        d = getattr(self.par, "nh3_fac_cache", None)
         if d is None:
-            d = _inputs.current().json("nh3_factors_capri.json", "environment")["regions"]
-            self._nh3_fac_cache = d
+            from capri_mod.data.nested_tables import read_nh3_factors
+            d = read_nh3_factors(_inputs.current().path("nh3_factors_capri.csv", "environment"))
+            self.par.nh3_fac_cache = d
         return d
 
     def compute_ammonia(
@@ -40,8 +43,8 @@ class AmmoniaBlock:
                         * self._n_excretion(region, a) * activities.get(a, 0.0) * 1000 / 1e6
                         for a in ANIMALS)                                   # kt NH3-N
             min_n = float(fac.get("mineral_share") or 0.0) * float(mineral_n_kt or 0.0)
-            return {"nh3_livestock": man_n * 17 / 14, "nh3_soils": min_n * 17 / 14,
-                    "nh3_total": (man_n + min_n) * 17 / 14}
+            return {"nh3_livestock": man_n * M_NH3 / M_NH3_N, "nh3_soils": min_n * M_NH3 / M_NH3_N,
+                    "nh3_total": (man_n + min_n) * M_NH3 / M_NH3_N}
         # no CAPRI factors: only where there is no farming (Brussels); anything else fails loudly
         if any(activities.get(a, 0.0) > 0 for a in ANIMALS) or float(mineral_n_kt or 0.0) > 0:
             raise RuntimeError(f"no CAPRI ammonia factors for {region} (tools/build/build_nh3_factors.py)")

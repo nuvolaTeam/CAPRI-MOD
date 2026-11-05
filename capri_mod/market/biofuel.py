@@ -58,7 +58,7 @@ class BiofuelMixin(MarketStateMixin):
             groups = []
             for (ms, fuel), g in f.groupby(["ms", "biofuel"], sort=True):
                 reg = str(g["region"].iloc[0])
-                if reg == "EU27" and self.eu_blocks:
+                if reg == "EU27":
                     reg = self.eu_region_of_ms(ms) or reg
                 if reg not in self.regions:
                     continue
@@ -91,14 +91,11 @@ class BiofuelMixin(MarketStateMixin):
                             q0c[c] = q0c.get(c, 0.0) + float(q)
                 dd0[gr["region"]] = dd0.get(gr["region"], 0.0) + float((gr["q0"] * gr["prcby"] * gr["ddgs"]).sum())
             # biofuel share of use per EU market region: the region's feedstock use over its use (the EU use of the
-            # file split by CAPRI's member-state use); one EU region: the file's share
+            # file split by CAPRI's member-state use)
             use_eu = {str(r.commodity): float(r.use_kt) for r in sh.itertuples()}
             share_reg = {}
             for reg in self.EU:
                 for c, sh_ in share.items():
-                    if not self.eu_blocks:
-                        share_reg[(reg, c)] = sh_
-                        continue
                     u = use_eu.get(c, 0.0) * self.eu_split(c)[reg]
                     q = q0r.get((reg, c), 0.0)
                     if u > 0 and q > 0:
@@ -127,7 +124,7 @@ class BiofuelMixin(MarketStateMixin):
             gidx = {(g["ms"], g["fuel"]): k for k, g in enumerate(self._biofuel_params().get("groups", []))}
             rows = {}
             for r in m.itertuples(index=False):
-                if r.region == "EU27" and self.eu_blocks:
+                if r.region == "EU27":
                     r = r._replace(region=self.eu_region_of_ms(r.ms) or r.region)
                 if r.region not in self.regions or r.biofuel not in self.commodities:
                     continue
@@ -159,33 +156,22 @@ class BiofuelMixin(MarketStateMixin):
         return bool(getattr(self, "biofuel_markets", True)) and getattr(self, "market_structure", "") == "bilateral" \
             and all(b in self.commodities for b in self.BIOFUELS) and bool(self._biofuel_market_params())
 
-    @staticmethod
-    def _sigmoid(x):
-        return 1.0 / (1.0 + np.exp(-np.clip(x, -500.0, 500.0)))
-
     def _biofuel_feed_group(self, g, ratio: Dict[str, float], X: Optional[float] = None, ddgs_ratio: float = 1.0):
         """One CAPRI region's feedstock CES for one biofuel at feedstock price ratios (Arm1 prices relative to
         the reference): returns (q per feedstock, mu_b). X = first-generation output (default: the reference
         output x biofuel_output_scale); ddgs_ratio = the region's DDGS producer price relative to the reference.
-
-            mu_f = p_f0 x ratio_c - PRCBY_f x p_by          (biofFeedCost_; DDGS at its producer price, glycerine
-                                                             fixed at 600 EUR/t as in CAPRI)
-            mu_b = (sum_f dp_f mu_f^(1-rho))^(1/(1-rho))    (biofFeedCostAgg_)
-            q_f  = dp_f X (mu_b / mu_f)^rho, f not the numeraire (Biof_)
-            q_num = (X - sum_f q_f PRCB_f) / PRCB_num        (prodBiof_)
-        """
+        CAPRI's biofFeedCost_, biofFeedCostAgg_, Biof_ and prodBiof_ in biofuel_ad.feed_group_function (step G2g;
+        DDGS at its producer price, glycerine fixed at 600 EUR/t as in CAPRI)."""
+        c_ = self.__dict__.setdefault("_biof_fg_fns", {})
+        hit = c_.get(id(g))
+        if hit is None or hit[0] is not g:
+            from capri_mod.market.biofuel_ad import feed_group_function
+            hit = c_[id(g)] = (g, feed_group_function(f"biof_feed_{len(c_)}", g))
         r = np.array([float(ratio.get(c, 1.0)) if c else 1.0 for c in g["comm"]])
-        by = g["by"] * np.where(g["ddgs"], float(ddgs_ratio), 1.0)
-        mu = np.maximum(g["p0"] * r - by, 1e-6)
-        rho = g["rho"]
-        mub = float((g["dp"] * mu ** (1.0 - rho)).sum()) ** (1.0 / (1.0 - rho))
         if X is None:
             X = g["X0"] * float((self.biofuel_output_scale or {}).get(g["fuel"], 1.0))
-        q = g["dp"] * X * (mub / mu) ** rho
-        n = g["num"]
-        rest = float((q * g["prcb"]).sum() - q[n] * g["prcb"][n])
-        q[n] = max(0.0, (X - rest) / g["prcb"][n])
-        return q, mub
+        q, mub = hit[1](r, float(X), float(ddgs_ratio))
+        return np.asarray(q, float).ravel(), float(mub)
 
     def biofuel_state(self, prod_ratio: Optional[pd.DataFrame], arm_ratio: Optional[pd.DataFrame],
                       endogenous: Optional[bool] = None, use_only: bool = False) -> dict:
@@ -237,6 +223,9 @@ class BiofuelMixin(MarketStateMixin):
 
         X, MUB, prod, use, proc, ddgs, drat = {}, {}, {}, {}, {}, {}, {}
         rows = bm.get("rows", {})
+        # CAPRI's equations in CasADi (biofuel_ad.py, step G2g)
+        from capri_mod.market.biofuel_ad import demand_function, proc_function, supply_function
+        f_sup, f_dem, f_proc = supply_function(), demand_function(), proc_function()
         # first-generation output and feedstock cost of every feedstock group (not needed for use and processing)
         for g in ([] if use_only else groups):
             reg, key = g["region"], (g["ms"], g["fuel"])
@@ -248,10 +237,8 @@ class BiofuelMixin(MarketStateMixin):
             x = g["X0"] * float(scale.get(g["fuel"], 1.0))
             if endo and d is not None and float(d["pr0"]) > 0:
                 rb = float(_pa[_pi[reg], _pc[g["fuel"]]]) if prod_ratio is not None else 1.0
-                PR = float(d["ppri"]) * rb / mub
-                x = float(d["sup_scale"]) * PR + np.exp(float(d["sup_alfa"]) + float(d["sup_beta"]) * np.log(PR + 1e-2)) \
-                    * float(self._sigmoid(float(d["sup_slope"]) * (PR - float(d["sup_turn"]))))
-                x = max(0.0, x)
+                x = float(f_sup(rb, mub, *(float(d[k]) for k in ("ppri", "sup_scale", "sup_alfa", "sup_beta",
+                                                                  "sup_slope", "sup_turn"))))
             X[key] = x
             ddgs[reg] = ddgs.get(reg, 0.0) + float((q1 * x * g["prcby"] * g["ddgs"]).sum())
         # output, use and processing of every CAPRI market region
@@ -262,15 +249,14 @@ class BiofuelMixin(MarketStateMixin):
             prod[(reg, fuel)] = prod.get((reg, fuel), 0.0) + x + float(d["fixed_kt"])
             u = float(d["biof_kt"])
             if endo and float(d["dem_slope"]) != 0.0 and float(d["fossil_cpri"]) > 0:
-                cp = max(1e-6, float(d["cpri"]) + float(d["arm1p"]) * (ra - 1.0))
                 quts = float(d["quts"]) * (mand if d["mandate_region"] else 1.0)
-                share = quts + float(d["dem_max"]) * float(
-                    self._sigmoid(float(d["dem_slope"]) * (cp / float(d["fossil_cpri"]) - float(d["dem_turn"]))))
-                u = share * float(d["hcon_kt"]) * float(d["oil_eq_fossil"]) / float(d["oil_eq"])
+                u = float(f_dem(ra, float(d["cpri"]), float(d["arm1p"]), quts,
+                                *(float(d[k]) for k in ("dem_max", "dem_slope", "fossil_cpri", "dem_turn", "hcon_kt",
+                                                        "oil_eq_fossil", "oil_eq"))))
             use[(reg, fuel)] = use.get((reg, fuel), 0.0) + u
             pc = float(d["proc_kt"])
             if endo and pc > 0 and float(d["proc_hess"]) != 0.0 and float(d["inpe"]) > 0:
-                pc = max(0.0, pc - float(d["proc_hess"]) * float(d["arm1p"]) * (ra - 1.0) / float(d["inpe"]))
+                pc = float(f_proc(ra, pc, float(d["proc_hess"]), float(d["arm1p"]), float(d["inpe"])))
             proc[(reg, fuel)] = proc.get((reg, fuel), 0.0) + pc
         return {"X": X, "mub": MUB, "prod": prod, "use": use, "proc": proc, "ddgs": ddgs, "ddgs_ratio": drat,
                 "endogenous": endo}

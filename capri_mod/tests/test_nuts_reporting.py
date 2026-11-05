@@ -21,14 +21,21 @@ def m():
 
 @pytest.fixture(scope="module")
 def areas():
-    return read_csv(SUPPLY / "base_areas.csv", index_col=0)
+    from capri_mod.data.definitions import in_run
+    a = read_csv(SUPPLY / "base_areas.csv", index_col=0)
+    return a.loc[[r for r in a.index if in_run(r)]]      # the run's units (the default countries outside the EU: Norway)
 
 
 def test_mapping_covers_units_and_current_nuts(m):
-    units = read_csv(ROOT / "capri_data" / "shared" / "regional_units.csv").region
+    from capri_mod.data.definitions import is_eu
+    ru = read_csv(ROOT / "capri_data" / "shared" / "regional_units.csv")
+    # the reporting covers the EU's units and Norway's (build_nuts2024_reporting); the units of the UK, Turkey and the
+    # Western Balkans (listed since 4 November 2026, SUPPLY_NONEU_DESIGN) are not in it
+    ru = ru[[is_eu(x) or x == "NO000000" for x in ru.capri_ms]]
+    units = ru.region
     assert set(m.capri_unit) == set(units)
     n24 = read_csv(ROOT / "capri_data" / "sources" / "nuts" / "nuts2024.csv", dtype=str)
-    countries = set(read_csv(ROOT / "capri_data" / "shared" / "regional_units.csv").country)
+    countries = set(ru.country)
     eu = {c for c, lv in zip(n24.code, n24.level) if str(lv) == "2" and c[:2] in countries and not c.endswith("ZZ")}
     eu |= {n for n in m.nuts2024 if n.startswith("NO")}                    # Norway: 2021 statistical regions
     assert eu - set(m.nuts2024) == NO_UNIT - {"NO0B"}
@@ -70,7 +77,7 @@ def test_extensive_totals_kept_and_one_to_one_equal(m, areas):
 
 
 def test_intensive_is_the_mapped_ratio(m, areas):
-    yields = read_csv(SUPPLY / "yields.csv", index_col=0)
+    yields = read_csv(SUPPLY / "yields.csv", index_col=0).loc[areas.index]
     cols = [c for c in ("SWHE", "BARL", "CORN", "RAPE") if c in yields.columns and c in areas.columns]
     y, a = yields[cols].reindex(areas.index), areas[cols]
     out = to_nuts2024(y, basis=a)

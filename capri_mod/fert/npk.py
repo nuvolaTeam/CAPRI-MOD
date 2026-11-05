@@ -20,26 +20,64 @@ import numpy as np
 import pandas as pd
 
 from capri_mod.data.definitions import capri_ms
+from capri_mod.params import param
 
 NUTRIENTS = ("N", "P", "K")
-SOURCES = ("MINE", "EXCR", "CRES")
-PERM_NGRP = frozenset({"GRAS", "PERM"})
+from capri_mod.fert.inner_fert_dist import SOURCES   # noqa: E402  CAPRI's nutrient sources, one definition (stage 4)
+from capri_mod.data.definitions import CAPRI_PERM_NGRP as PERM_NGRP   # noqa: E402  CAPRI's set (stage 4)
 
-#: CAPRI's slope of manure N availability on manure N applied per ha of land (fert/endoManAvail.gms), 0 for P and K
-ENDO_MAN_AV_SLOPE = {"N": -0.0015, "P": 0.0, "K": 0.0}
+
+
+def manure_applied_share() -> Dict[tuple, float]:
+    """CAPRI's 2030 manure applied in the region per unit excreted, 1 - MTRADE / EXCRET, {(capri_region, nutrient):
+    share} for N, P and K (2017/environment/manure_npk_applied_share_2030.csv, tools/build/build_npk_balance_2030.py;
+    regions with CAPRI excretion only). One reading for the fertilisation block (SupplyModel._npk_applied_ratio) and the
+    P balance (environmental/phosphorus.py); until 3 November 2026 each computed it from the extract under
+    capri_data/sources."""
+    from capri_mod.data import inputs as _inputs
+    cache = _inputs.current().cache
+    c = cache.get("npk_applied_ratio")
+    if c is None:
+        t = _inputs.current().csv("manure_npk_applied_share_2030.csv", "environment")
+        c = {(r, n): float(x) for r, n, x in zip(t.capri_region, t.nutrient, t.applied_share)}
+        cache["npk_applied_ratio"] = c
+    return c
+
+
+def need_multiplier(supply0: float, need0: float, own0: float, gc: float, perm_groups) -> tuple:
+    """The need multiplier of a region and nutrient, calibrated at the base so that NUTNED_ summed over the crop groups
+    closes with the base flows (CAPRI's v_cropNutNeedMultFact, fixed in simulation): (kappa, own_scaled).
+
+    CAPRI's form: the multiplier on the need alone, the permanent groups' own residues (and deposition for N) on the
+    supply side as they are, kappa x need0 = supply0 + gc x (their own residues), with supply0 = eff x MINE0 + g0 x EXCR0 + gc x CRES0.
+    It is used wherever it leaves every permanent group (perm_groups: its base (need, own residues)) a positive need
+    for its mineral and manure flows. Where it does not (the model's base supplies less than CAPRI's 2030 relative to
+    the need while the grassland's own residues cover most of its need; STRUCTURAL_GAPS_PLAN S3), the need net of
+    the own residues is scaled together, kappa x (need0 - gc x own0) = supply0, own_scaled True (REGISTERED, K50
+    departure 1; until 31 October 2026 in every region)."""
+    if need0 > 0:
+        # the own residues on the supply side are the permanent groups' (NUTNED_ rows of PERM_NGRP)
+        k = (supply0 + gc * sum(og for _, og in perm_groups)) / need0
+        if all(k * ng - gc * og > 0.0 for ng, og in perm_groups if ng > 0):
+            return k, False
+    net0 = need0 - gc * own0
+    return (supply0 / net0 if net0 > 0 else 1.0), True
 
 
 def endo_slope(g0: float, m0: float, nut: str) -> float:
     """CAPRI's slope of the endogenous availability (fert/endoManAvail.gms) with its two corrections: availability at
     most max(0.999, g0) at zero application, at least min(0.2, g0) at max(300, m0) kg/ha."""
-    b = ENDO_MAN_AV_SLOPE.get(nut, 0.0)
+    # the slope of manure N availability on manure N applied per ha of land (0 for P and K), the ceiling at zero
+    # application, the floor and the application rate it holds at: parameters ENDO_MAN_AV_* (fert/endoManAvail.gms)
+    b = param("ENDO_MAN_AV_SLOPE_N") if nut == "N" else 0.0
     if b == 0.0 or not (m0 > 0):
         return 0.0
-    if g0 - m0 * b > max(0.999, g0):
-        b = (g0 - max(0.999, g0)) / m0
-    top = max(300.0, m0) - m0
-    if top > 0 and g0 + top * b < min(0.2, g0):
-        b = (min(0.2, g0) - g0) / top
+    ceil_, floor_, at_ = param("ENDO_MAN_AV_CEILING"), param("ENDO_MAN_AV_FLOOR"), param("ENDO_MAN_AV_FLOOR_KG")
+    if g0 - m0 * b > max(ceil_, g0):
+        b = (g0 - max(ceil_, g0)) / m0
+    top = max(at_, m0) - m0
+    if top > 0 and g0 + top * b < min(floor_, g0):
+        b = (min(floor_, g0) - g0) / top
     return b
 
 
@@ -86,7 +124,7 @@ class NPKData:
     def crop_coef(self, capri_region: str, nut: str, crop: str, col: str) -> float:
         """A model crop's coefficient (kg/ha); a crop CAPRI does not grow in the region takes the country's, else 0."""
         cache = self.__dict__.setdefault("_crop_dicts", {})
-        for r in (capri_region, capri_region[:2] + "000000"):
+        for r in (capri_region, capri_ms(capri_region)):
             dd = cache.get((r, nut))
             if dd is None:
                 d = self.crop.get((r, nut))
@@ -116,7 +154,7 @@ class NPKData:
             raise RuntimeError("npk_crop_coefs_2030.csv has no main_share/straw_share: rerun "
                                "tools/build/build_npk_balance_2030.py")
         if capri_region:
-            for r in (capri_region, capri_region[:2] + "000000"):
+            for r in (capri_region, capri_ms(capri_region)):
                 d = self.crop.get((r, nut))
                 if d is not None and crop in d.index:
                     m, s_ = float(d.at[crop, "main_share"]), float(d.at[crop, "straw_share"])
@@ -127,13 +165,13 @@ class NPKData:
     def region(self, capri_region: str, nut: str):
         t = self.reg.get((capri_region, nut))
         if t is None:
-            t = self.reg.get((capri_region[:2] + "000000", nut))
+            t = self.reg.get((capri_ms(capri_region), nut))
         return t
 
     def priors(self, capri_region: str, nut: str):
         d = self.pri.get((capri_region, nut))
         if d is None:
-            d = self.pri.get((capri_region[:2] + "000000", nut))
+            d = self.pri.get((capri_ms(capri_region), nut))
         return d
 
     def manure_per_head(self, region: str, nut: str, animal: str) -> float:

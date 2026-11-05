@@ -32,7 +32,7 @@ class FeedMixin(MarketStateMixin):
     #: with supply models each behavioural region's feed is its normalised-quadratic feed function of the Arm1 prices and
     #: its feed energy price FEDE, which clears its feed energy balance against its animal output (the market supply
     #: functions, whose FEDE column moves with it). false: one constant-elasticity function per trade region and
-    #: product (p_ElasFeed, feed_demand_nonEU.json) and FEDE held (until 29 October 2026)
+    #: product (p_ElasFeed, feed_demand_nonEU*.csv) and FEDE held (until 29 October 2026)
     noneu_feed_nq = setting("market.noneu_feed_nq")
     #: arm/arm_sets.gms XX_ANIM_FEED: the animal products whose output needs feed energy (CAPRI's codes)
     ANIM_FEED = ("BEEF", "PORK", "SGMT", "POUM", "EGGS", "MILK")
@@ -84,16 +84,43 @@ class FeedMixin(MarketStateMixin):
         for (ms, b), el in E.items():
             if region is not None and self.eu_region_of_ms(ms) != region:
                 continue
-            s = 0.0
-            for y, e in el.items():
-                r = prices.get(y)
-                if r is None:
-                    continue
-                sv = float(seen.get(y, 1.0)) if seen is not None else 1.0
-                if r > 0 and sv > 0:
-                    s += e * np.log(float(r) / sv)
-            out[(ms, b)] = float(np.exp(s))
+            ys, f = self._feedblk_factor_fn(el)
+            r = np.array([float(prices.get(y, 1.0)) for y in ys])
+            sv = np.array([float(seen.get(y, 1.0)) if seen is not None else 1.0 for y in ys])
+            w = np.array([1.0 if (prices.get(y) is not None and ri > 0 and si > 0) else 0.0
+                          for y, ri, si in zip(ys, r, sv)])
+            out[(ms, b)] = float(f(r, sv, w))
         return out
+
+    def _feedblk_factor_fn(self, el: dict):
+        """(products, CasADi function) of feed_ad.feedblk_factor_function for one bulk's elasticities el (cached on el:
+        _feed_bulk_elas keeps its dicts while its inputs stay)."""
+        c_ = self.__dict__.setdefault("_fblk_factor_fns", {})
+        hit = c_.get(id(el))
+        if hit is not None and hit[0] is el:
+            return hit[1], hit[2]
+        from capri_mod.market.feed_ad import feedblk_factor_function
+        ys = list(el)
+        f = feedblk_factor_function(f"feedblk_factor_{len(c_)}", np.array([float(el[y]) for y in ys]))
+        c_[id(el)] = (el, ys, f)
+        return ys, f
+
+    def _feedblk_fn(self, d: dict):
+        """CasADi function of feed_ad.feedblk_function for one bulk d of _feed_bulk_params (cached on d, which the
+        params' cache keeps)."""
+        c_ = self.__dict__.setdefault("_fblk_fns", {})
+        hit = c_.get(id(d))
+        if hit is not None and hit[0] is d:
+            return hit[1]
+        from capri_mod.market.feed_ad import feedblk_function
+        f = feedblk_function(f"feedblk_{len(c_)}", d["s"], d["rho"], d["q0"])
+        c_[id(d)] = (d, f)
+        return f
+
+    @staticmethod
+    def _blk_ratios(d: dict, price_ratio: Dict[str, float]) -> np.ndarray:
+        """The bulk's products' price ratios (1 for a product without a model market or without a ratio)."""
+        return np.array([float(price_ratio.get(c, 1.0)) if c else 1.0 for c in d["comm"]])
 
 
     def _feed_bulk_params(self) -> dict:
@@ -126,15 +153,12 @@ class FeedMixin(MarketStateMixin):
             share = {str(r.commodity): float(r.share) for r in sh.itertuples()
                      if r.commodity in self.commodities and r.commodity in feed0}
             # per EU market region: the region's feed over its use, the EU use (file) split by CAPRI's member-state
-            # use (eu_split); one EU region: the file's share
+            # use (eu_split)
             use_eu = {str(r.commodity): float(r.use_kt) for r in sh.itertuples()}
             share_reg = {}
             for reg in self.EU:
                 share_reg[reg] = {}
                 for c, sh_ in share.items():
-                    if not self.eu_blocks:
-                        share_reg[reg][c] = sh_
-                        continue
                     u = use_eu.get(c, 0.0) * self.eu_split(c)[reg]
                     f = feed0_reg[reg].get(c, 0.0)
                     if u > 0 and f > 0:
@@ -143,13 +167,15 @@ class FeedMixin(MarketStateMixin):
                    "share_reg": share_reg} if bulks else {}
             # Norway's bulks (CAPRI's feedBlkPrice_, feedShareEqu_ hold for every NUTS0 with supply models, RMSSUP):
             # its supply models' bulk price indices at its own market's prices, and its feed demand per product
-            # following its herds, in its own market region NOR (KNOWN_ISSUES K56; not part of the EU's feed demand).
+            # following its herds, in its own market region NO000000 (KNOWN_ISSUES K56; not part of the EU's feed demand).
             # The feed share of Norway's use per commodity: CAPRI's 2030 feed over its use (HCOM + FEDM + INDM + BIOF
-            # + LOSM + PRCM, feed_bulks_no.csv use_kt), as the EU's (feed_bulks_eu_share.csv)
-            if out and inp.exists("feed_bulks_no.csv"):
-                pno, f0s, u0s, ms_reg = {}, {}, {}, {v: k for k, v in self.SUP_NONEU_MS.items()}
-                tno = inp.csv("feed_bulks_no.csv", keep_default_na=False)
+            # + LOSM + PRCM, feed_bulks_noneu.csv use_kt), as the EU's (feed_bulks_eu_share.csv)
+            if out and inp.exists("feed_bulks_noneu.csv"):
+                pno, f0s, u0s, ms_reg = {}, {}, {}, {ms: k for k, v in self.SUP_NONEU_MS.items() for ms in v}
+                tno = inp.csv("feed_bulks_noneu.csv", keep_default_na=False)
                 for (ms, b), g in tno.groupby(["ms", "bulk"], sort=True):
+                    if ms not in ms_reg:
+                        continue              # a country outside the EU whose supply models are not in the run
                     q0 = g["feed_kt"].astype(float).values
                     v0 = q0 * g["arm1p"].astype(float).values
                     comm = [c if c in self.commodities else "" for c in g["commodity"].astype(str)]
@@ -177,9 +203,7 @@ class FeedMixin(MarketStateMixin):
         d = (fb.get("bulks") or {}).get((ms, bulk)) or (fb.get("bulks_sup") or {}).get((ms, bulk))
         if d is None:
             return 1.0
-        r = np.array([max(float(price_ratio.get(c, 1.0)), 1e-6) if c else 1.0 for c in d["comm"]])
-        rho = d["rho"]
-        return float((d["s"] * r ** (1.0 - rho)).sum()) ** (1.0 / (1.0 - rho))
+        return float(self._feedblk_fn(d)(self._blk_ratios(d, price_ratio), 1.0)[0])
 
     def eu_feed_use(self, price_ratio: Dict[str, float], region: Optional[str] = None,
                     bulk_factor: Optional[Dict[tuple, float]] = None) -> Dict[str, float]:
@@ -194,10 +218,8 @@ class FeedMixin(MarketStateMixin):
         for (ms, b), d in (fb.get("bulks") or {}).items():
             if region is not None and self.eu_region_of_ms(ms) != region:
                 continue
-            r = np.array([max(float(price_ratio.get(c, 1.0)), 1e-6) if c else 1.0 for c in d["comm"]])
-            rho = d["rho"]
-            pb = float((d["s"] * r ** (1.0 - rho)).sum()) ** (1.0 / (1.0 - rho))
-            q = d["q0"] * float(bix.get((ms, b), 1.0)) * float((bulk_factor or {}).get((ms, b), 1.0)) * (pb / r) ** rho
+            k = float(bix.get((ms, b), 1.0)) * float((bulk_factor or {}).get((ms, b), 1.0))
+            q = np.asarray(self._feedblk_fn(d)(self._blk_ratios(d, price_ratio), k)[1]).ravel()
             for c, x in zip(d["comm"], q):
                 if c:
                     out[c] = out.get(c, 0.0) + float(x)
@@ -209,15 +231,12 @@ class FeedMixin(MarketStateMixin):
         from its supply models (seen.feed_bulk_index)."""
         fb = self._feed_bulk_params()
         bix = self.seen.feed_bulk_index or {}
-        ms0 = self.SUP_NONEU_MS.get(region)
+        ms0 = self.SUP_NONEU_MS.get(region, ())
         out = {}
         for (ms, b), d in (fb.get("bulks_sup") or {}).items():
-            if ms != ms0:
+            if ms not in ms0:
                 continue
-            r = np.array([max(float(price_ratio.get(c, 1.0)), 1e-6) if c else 1.0 for c in d["comm"]])
-            rho = d["rho"]
-            pb = float((d["s"] * r ** (1.0 - rho)).sum()) ** (1.0 / (1.0 - rho))
-            q = d["q0"] * float(bix.get((ms, b), 1.0)) * (pb / r) ** rho
+            q = np.asarray(self._feedblk_fn(d)(self._blk_ratios(d, price_ratio), float(bix.get((ms, b), 1.0)))[1]).ravel()
             for c, x in zip(d["comm"], q):
                 if c:
                     out[c] = out.get(c, 0.0) + float(x)
@@ -244,9 +263,6 @@ class FeedMixin(MarketStateMixin):
                 # parents' weights from the region's own food + processing (biofuel processing) use of each parent
                 reg = {}
                 for rg, f in self.eu_split(p, "prod_kt").items():
-                    if not self.eu_blocks:
-                        reg[rg] = {"prod0": prods[p]["prod0"], "parts": prods[p]["parts"]}
-                        continue
                     parts = []
                     for r_ in g.itertuples():
                         it = ("biof_kt",) if str(r_.use) == "biofuel" else ("hcon_kt", "proc_kt")
@@ -325,9 +341,15 @@ class FeedMixin(MarketStateMixin):
                 d["conv"][t.product] = float(t.feed_conv)
                 d["prod0"][t.product] = float(t.prod_kt)
         anim = set(self.ANIM_FEED)
+        land = set(getattr(self, "MARKET_LAND", ()))
         for t in inp.csv("noneu_market_supply_nq.csv", keep_default_na=False).itertuples(index=False):
             d = R.get(t.rms)
             if d is None or t.capri_x not in anim or not t.y:
+                continue
+            if t.y in land:
+                # the animal products' terms in the land rents (h / INPE per EUR/ha; the land market, stage 7)
+                row = d.setdefault("lterms", {}).setdefault(t.capri_x, {})
+                row[t.y] = row.get(t.y, 0.0) + float(t.h) / float(t.inpe)
                 continue
             row = d["sterms"].setdefault(t.capri_x, {})
             row[t.y] = row.get(t.y, 0.0) + float(t.h_ratio)
@@ -336,7 +358,8 @@ class FeedMixin(MarketStateMixin):
         self._nfp_cache = out
         return out
 
-    def noneu_fede(self, arm_ratio: pd.DataFrame, prod_ratio: pd.DataFrame, milk_ratio: Optional[dict] = None) -> dict:
+    def noneu_fede(self, arm_ratio: pd.DataFrame, prod_ratio: pd.DataFrame, milk_ratio: Optional[dict] = None,
+                   land: Optional[dict] = None) -> dict:
         """CAPRI's FeedBal_ per non-EU behavioural region without supply models: the feed energy price (as a ratio to
         its calibration value) at which the energy of the feed used equals the energy its animal output needs,
 
@@ -344,42 +367,39 @@ class FeedMixin(MarketStateMixin):
 
         both linear in FEDE (FeedNQ_, ProdNQ_), so solved directly. arm_ratio, prod_ratio: the trade regions' Arm1 and
         producer price ratios (regions x commodities); milk_ratio: {trade region: raw milk price ratio} of the dairy
-        blocks (the latest evaluation's: the dairy block is solved after this, inside the supply response).
+        blocks (the latest evaluation's: the dairy block is solved after this, inside the supply response); land: the
+        land markets' rent changes {CAPRI region: {land type: EUR/ha}} (noneu_land_solve), whose terms move the animal
+        output.
         {region: FEDE ratio}; 1 where the balance has no FEDE response."""
         P = self._noneu_feed_params()
         mr = milk_ratio or {}
+        cols = list(arm_ratio.columns)
         out = {}
         for rms, d in P["rms"].items():
             tr = d.get("tr")
             if tr is None or tr not in arm_ratio.index:
                 continue
-            ra, rp = arm_ratio.loc[tr], prod_ratio.loc[tr] if tr in prod_ratio.index else arm_ratio.loc[tr]
-            e0 = aF = 0.0
-            for x, q0 in d["feed0"].items():
-                k = d["kcal"].get(x, 0.0)
-                if not k:
-                    continue                                   # no calories (p_noCal): not in the balance
-                dq = 0.0
-                for y, h in d["terms"].get(x, {}).items():
-                    if y == "FEDE":
-                        aF += k * h
-                    elif y in ra.index:
-                        dq += h * (float(ra[y]) - 1.0)
-                e0 += k * (q0 + dq)
-            n0 = aN = 0.0
-            for a, cv in d["conv"].items():
-                dq = 0.0
-                for y, h in d["sterms"].get(a, {}).items():
-                    if y == "FEDE":
-                        aN += cv * h
-                    elif y == "MILK":
-                        dq += h * (float(mr.get(tr, 1.0)) - 1.0)
-                    elif y in rp.index:
-                        dq += h * (float(rp[y]) - 1.0)
-                n0 += cv * (d["prod0"].get(a, 0.0) + dq)
-            den = aF - aN
-            out[rms] = 1.0 + (n0 - e0) / den if den > 0 else 1.0
+            # FeedBal_ written once in CasADi (market step G2d, capri_mod/market/feed_ad.py)
+            f, lts = self._fedebal_fn(rms, d, cols)
+            ra = arm_ratio.loc[tr].to_numpy(dtype=float)
+            rp = (prod_ratio.loc[tr].reindex(cols).fillna(1.0).to_numpy(dtype=float) if tr in prod_ratio.index else ra)
+            lr = (land or {}).get(rms) or {}
+            star, _res = f(ra, rp, float(mr.get(tr, 1.0)), np.array([float(lr.get(u, 0.0)) for u in lts]), 1.0)
+            out[rms] = float(star)
         return out
+
+    def _fedebal_fn(self, rms, d, cols):
+        """The compiled FeedBal_ of one behavioural region (feed_ad.fedebal_function), cached per region, its
+        parameters and the column list: (Function, the land types of its rent terms)."""
+        from capri_mod.market.feed_ad import fedebal_arrays, fedebal_function
+        cache = self.__dict__.setdefault("_fedebal_cache", {})
+        hit = cache.get(rms)
+        if hit is None or hit[0] is not d or hit[1] != tuple(cols):
+            lts = sorted({u for t in (d.get("lterms") or {}).values() for u in t})
+            a = fedebal_arrays(d, cols, lts)
+            hit = (d, tuple(cols), fedebal_function(f"fedebal_{rms}", a, len(cols), len(lts)), lts)
+            cache[rms] = hit
+        return hit[2], hit[3]
 
     def noneu_feed_change(self, arm_ratio: pd.DataFrame, fede: dict) -> Dict[tuple, float]:
         """{(trade region, model commodity): relative change of its feed use} from CAPRI's FeedNQ_ of its behavioural
@@ -387,23 +407,24 @@ class FeedMixin(MarketStateMixin):
         total base feed (CAPRI's, its members with supply models included, whose feed is held)."""
         P = self._noneu_feed_params()
         dF: Dict[tuple, float] = {}
+        cols = list(arm_ratio.columns)
+        cache = self.__dict__.setdefault("_feednq_cache", {})
         for rms, d in P["rms"].items():
             tr = d.get("tr")
             if tr is None or tr not in arm_ratio.index:
                 continue
-            ra = arm_ratio.loc[tr]
-            ph = float(fede.get(rms, 1.0))
-            for x, q0 in d["feed0"].items():
-                xm = d["xm"].get(x)
-                if not xm:
-                    continue
-                dq = 0.0
-                for y, h in d["terms"].get(x, {}).items():
-                    if y == "FEDE":
-                        dq += h * (ph - 1.0)
-                    elif y in ra.index:
-                        dq += h * (float(ra[y]) - 1.0)
-                dF[(tr, xm)] = dF.get((tr, xm), 0.0) + dq
+            # FeedNQ_ written once in CasADi (market step G2d, capri_mod/market/feed_ad.py)
+            hit = cache.get(rms)
+            if hit is None or hit[0] is not d or hit[1] != tuple(cols):
+                from capri_mod.market.feed_ad import feednq_arrays, feednq_function
+                a = feednq_arrays(d, cols)
+                hit = (d, tuple(cols), feednq_function(f"feednq_{rms}", a, len(cols)) if a["rows"] else None, a["xm"])
+                cache[rms] = hit
+            if hit[2] is None:
+                continue
+            dq = np.asarray(hit[2](arm_ratio.loc[tr].to_numpy(dtype=float), float(fede.get(rms, 1.0)))).ravel()
+            for xm, v in zip(hit[3], dq):
+                dF[(tr, xm)] = dF.get((tr, xm), 0.0) + float(v)
         return {k: v / P["totals"][k] for k, v in dF.items() if P["totals"].get(k, 0.0) > 0}
 
     def _feed_demand_params(self) -> dict:
@@ -412,8 +433,10 @@ class FeedMixin(MarketStateMixin):
         if cached is not None:
             return cached
         out = {}
+        from capri_mod.data.nested_tables import read_feed_demand
+        params = read_feed_demand(self._inp().need("feed_demand_nonEU.csv"))   # a missing file: FileNotFoundError
         try:
-            for key, v in self._inp().json("feed_demand_nonEU.json")["parameters"].items():
+            for key, v in params.items():
                 r, c = key.split("|")
                 if r in self.regions and r not in self.EU and r != "EU27" and c in self.commodities:
                     out[(r, c)] = {"feed_share": float(v["feed_share"]),

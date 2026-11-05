@@ -18,6 +18,8 @@ import pickle
 import subprocess
 import sys
 from pathlib import Path
+__import__("sys").path.insert(0, str(__import__("pathlib").Path(__file__).resolve().parents[2]))
+from capri_mod.io_results import load_run  # a run pickle or a stored run, "store:ROOT:SCENARIO[:RUN_ID]"
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -42,7 +44,7 @@ UNITS = {
     "RO040000": "small-scale eastern mixed (Sud-Vest Oltenia, CAPRI's 2006 code)",
     "AT330000": "mountain grassland (Tyrol)",
     "FI190000": "northern arable and dairy (Laensi-Suomi)",
-    "NO080000": "Norway's own market (NOR)",
+    "NO080000": "Norway's own market (NO000000)",
 }
 
 
@@ -61,7 +63,7 @@ def main():
     if a.reference:
         subprocess.run([sys.executable, str(ROOT / "tools" / "check" / "compare_runs.py"), a.reference, a.out],
                        cwd=ROOT, env=env)
-        ref, new = (pickle.load(open(f, "rb")) for f in (a.reference, a.out))
+        ref, new = (load_run(f) for f in (a.reference, a.out))
         diffs = []
         for i, key in enumerate(("baseline", "scenario")):
             for reg, acts in new["act_regional"][i].items():

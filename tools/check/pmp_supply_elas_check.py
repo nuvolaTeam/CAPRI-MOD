@@ -14,6 +14,8 @@ The CAPRI values are for 2020, not 2030: a guide to magnitudes, not a target to 
 from __future__ import annotations
 import argparse, contextlib, io, re, sys, warnings
 from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
+from paths import EXPORTS, SOURCES  # noqa: E402  (CAPRI's material outside the repository)
 
 warnings.filterwarnings("ignore")
 ROOT = Path(__file__).resolve().parents[2]
@@ -29,7 +31,7 @@ CAPRI_CODE = {"CORN": "MAIZ", "WINE": "TWIN"}
 def capri_elas(ms: str, products) -> pd.Series:
     cc = MS_CODE.get(ms, ms)
     cands = [Path(d) / f"supply_elas_2_1720{cc}defaulta.txt" for d in
-             ("/mnt/user-data/uploads", "/home/claude/work/up/supelas")]      # the second: the REMAINING zip unpacked
+             (str(EXPORTS), str(SOURCES / "supelas"))]      # the second: the REMAINING zip unpacked
     f = next((c for c in cands if c.exists()), cands[0])
     out = {}
     if not f.exists():
@@ -48,7 +50,7 @@ def model_elas(pmp: str, ms: str, products, shock: float) -> pd.Series:
     from capri_mod import settings as _S
     _S.activate(_S.current().replace({"supply.pmp_source": pmp}))
     m = CAPRIModel(data_dir=str(ROOT / "capri_data"), verbose=False)
-    traj = BaselineTrajectory.from_file(str(ROOT / "capri_data" / "trajectories" / "capri_ref_2030.json"))
+    traj = BaselineTrajectory.from_file(str(ROOT / "capri_data" / "scenarios" / "capri_ref_2030"))
     pmod = ProjectionModule(m, traj, capri_prices_dir=str(ROOT / "capri_data" / "trajectories"))
     data, _ = pmod.project_data(2030)
     pm = pmod._model_for(data)
@@ -56,7 +58,7 @@ def model_elas(pmp: str, ms: str, products, shock: float) -> pd.Series:
     out = {}
     with contextlib.redirect_stdout(io.StringIO()):
         pm.run(scenario="BASELINE", regions=regions, max_outer_iter=1)
-        pol = getattr(pm, "_last_spol", None)
+        pol = getattr(pm.seen, "last_spol", None)
         for p in products:
             q = []
             for s in (shock, -shock):

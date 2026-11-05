@@ -26,8 +26,8 @@ Outputs (capri_data/2017/environment/)
   fert_dist_crop_groups_2030.csv  capri_region, model_crop, ngrp, share   (model crop -> CAPRI group, area shares;
                                   OFOD = OFAR + ROOF)
 
-    python tools/build/build_fert_dist_priors.py [--dump /mnt/user-data/uploads/res_2_1730greendeal_refdefaulta.zip]
-                                           [--prifertdist /mnt/user-data/uploads/priFertDist_1730defaulta.zip]
+    python tools/build/build_fert_dist_priors.py [--dump capri_sources/exports/res_2_1730greendeal_refdefaulta.zip]
+                                           [--prifertdist capri_sources/exports/priFertDist_1730defaulta.zip]
 """
 from __future__ import annotations
 import argparse, io, re, zipfile
@@ -36,6 +36,10 @@ from pathlib import Path
 import pandas as pd
 
 import functools as _ft
+import sys  # noqa: E402
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
+from _grep import grep  # noqa: E402  (grep -E in Python: any system)
+from paths import EXPORTS  # noqa: E402  (CAPRI's material outside the repository)
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 ENV = ROOT / "capri_data" / "2017" / "environment"
@@ -97,13 +101,11 @@ CROPS = tuple(sorted(set(GROUP) | {"OIND", "NURS", "TEXT", "TOBA", "FALL", "NECR
 
 
 def extract(dump: Path) -> pd.DataFrame:
-    import subprocess
     pat = (r"^'[A-Z0-9]+'\.'(fertDist_mine|fertDist_excr|fertDist_cres)'\.'(" + "|".join(CROPS) + r")'\.'NITF'\.'2030'"
            r"|^'[A-Z0-9]+'\.''\.'(" + "|".join(CROPS) + r")'\.'LEVL'\.'2030'"
            r"|^'[A-Z0-9]+'\.'(nutNed_mine_loss_gasRunTot_perha|fertDist_mine_perha|nutNed_excr_unavailable_perha|"
            r"fertDist_excr_perha)'\.'AGGT'\.'NITF'\.'2030'")
-    p1 = subprocess.Popen(["unzip", "-p", str(dump)], stdout=subprocess.PIPE)
-    out = subprocess.run(["grep", "-E", pat], stdin=p1.stdout, capture_output=True, text=True).stdout
+    out = grep(pat, str(dump))
     rx = re.compile(r"^'([A-Z0-9]+)'\.'([^']*)'\.'([A-Z]+)'\.'([A-Z]+)'\.'2030'\s+([-\d.Ee+]+)")
     rows = []
     for line in out.splitlines():
@@ -116,8 +118,8 @@ def extract(dump: Path) -> pd.DataFrame:
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--dump", type=Path, default=Path("/mnt/user-data/uploads/res_2_1730greendeal_refdefaulta.zip"))
-    ap.add_argument("--prifertdist", type=Path, default=Path("/mnt/user-data/uploads/priFertDist_1730defaulta.zip"))
+    ap.add_argument("--dump", type=Path, default=EXPORTS / "res_2_1730greendeal_refdefaulta.zip")
+    ap.add_argument("--prifertdist", type=Path, default=EXPORTS / "priFertDist_1730defaulta.zip")
     a = ap.parse_args()
     if a.dump.exists():
         src = extract(a.dump)

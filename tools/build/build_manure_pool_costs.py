@@ -8,19 +8,27 @@ pure nutrient = that / mean nutrient content 7.97% (cattle 4.95, pigs 6.91,
 poultry 15.89, other 4.14) x 100. CAPRI inflates the haul cost from its base to
 the simulation year; kept at 0.18 here (REGISTERED).
 
+Writes capri_data/2017/environment/manure_pool_costs.csv (from, to, km, eur_per_t_n) and manure_pool_centres.csv
+(pool, region), capri_mod/data/nested_tables.py (a JSON file until 31 October 2026).
+
     python tools/build/build_manure_pool_costs.py --dist nuts2_center_distance.csv
 """
 from __future__ import annotations
-import argparse, csv, json, re
+import argparse, csv, re
 from pathlib import Path
+import sys  # noqa: E402
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
+from paths import EXPORTS, SOURCES  # noqa: E402  (CAPRI's material outside the repository)
 
 _ROOT = Path(__file__).resolve().parents[2]
-GMS = Path("/home/claude/work/allgms/gams/manuremarket/define_manure_market_structure.gms")
+sys.path.insert(0, str(_ROOT))
+from capri_mod.data.nested_tables import write_manure_pools  # noqa: E402
+GMS = SOURCES / "gams/manuremarket/define_manure_market_structure.gms"
 
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--dist", type=Path, default=Path("/home/claude/work/nuts2_center_distance.csv"))
+    ap.add_argument("--dist", type=Path, default=EXPORTS / "nuts2_center_distance.csv")
     args = ap.parse_args()
     txt = GMS.read_text(errors="ignore").replace("\r", "")
     blk = txt[txt.index("set rManPool_centre(rall,rall)"):]
@@ -44,10 +52,10 @@ def main() -> None:
             if km:
                 out[f"{a}|{b}"] = {"km": km,
                                    "eur_per_t_n": (1.0 + 0.18 * km) / content * 100.0}
-    dest = _ROOT / "capri_data" / "2017" / "environment" / "manure_pool_costs.json"
-    dest.write_text(json.dumps({"_source": "CAPRI define_manure_market_structure.gms (rManPool_centre, p_mPoolTradeCost) with "
-                                "nuts2_center_distance.gdx (supplied by the project lead)",
-                                "_units": "km; EUR per t N", "centre": centre, "pairs": out}, indent=1))
+    # source: CAPRI define_manure_market_structure.gms (rManPool_centre, p_mPoolTradeCost) with nuts2_center_distance.gdx
+    # (supplied by the project lead); units km and EUR per t N (capri_data/schema/17_environment.sql)
+    dest = _ROOT / "capri_data" / "2017" / "environment" / "manure_pool_costs.csv"
+    write_manure_pools(dest, centre, out)
     print(f"wrote {dest}: {len(centre)} pools, {len(out)} connected pairs")
 
 

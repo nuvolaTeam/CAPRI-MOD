@@ -100,7 +100,22 @@ Beyond CAPRI (for the project lead to note): range checks, and enforcement at lo
    activities' LEVL units only (crops 1000 ha, animals 1000 heads, hens and poultry million heads, OANI an index).
 2. `MANIFEST.json` and `INPUT_SCHEMA.json`: retired once their content is in the declarations; `verify_schema.py`'s
    coverage count moves onto the declarations. **INPUT_SCHEMA.json done 29 October 2026** (see "Provenance, the numbers
-   in the code and the JSON catalogue" below); MANIFEST.json still to do.
+   in the code and the JSON catalogue" below). **MANIFEST.json done 31 October 2026**: its vintage, domain, status,
+   vintage exceptions, units and notes in `05_file_catalogue.sql` (units and notes as written, not re-checked), its
+   checks as rules (the catalogued CSVs declared, the base-year vintage group in `99_rules.sql`, the beef/wheat price
+   check in `21_market_inputs.sql`) and validator checks (the catalogue's other files present, the crops' gross
+   margins); its row counts were not carried over (fixed numbers that went stale with rebuilds, e.g.
+   fert_side_effects.csv; a file that must cover every unit needs a rule saying so); the validator
+   moved to `capri_mod/data/validate_data.py`, `tools/check/validate_data.py` keeping its command line.
+   **Kind of data, 31 October 2026:** `06_data_kind.sql` gives every declared file its kind (base, reference,
+   coefficients, calibrated, parameters, structure, validation: what has to be redone when the base year, the
+   baseline or the estimates change) with the basis of the classification (by file or by rule; a first
+   classification, to be reviewed); two rules keep it complete; `MANIFEST.json` shows it per file. The project lead's
+   rules: a parameter is one value, with its concept and meaning; a file of more than one value is a dataset; a
+   coefficient belongs to the scenario. On that day: 41 base, 28 reference, 200 coefficients,
+   39 calibrated, 1 parameters (shared/model_parameters.csv), 95 structure, 5 validation.
+   With the 22 CSV files of the JSON conversion (31 October 2026: capri_mod/data/nested_tables.py, the scenario
+   folders): 45 base, 32 reference, 210 coefficients, 39 calibrated, 1 parameters, 99 structure, 5 validation.
 3. `DATA_SOURCING_REGISTRY.json` (276 entries): the 37 that name a file give their provenance to the table comments.
    The other 239 are not data declarations but a log of the project's checks and decisions: 143 closed (fixed,
    implemented, retired), 59 with another status (validations, diagnoses, settings, "comparison pending"), 37 without
@@ -157,6 +172,7 @@ The nine validation files without a builder were settled by the project lead (29
 the seven read by no code removed, with three unread source extracts (their builders no longer write them); the two
 read by the baseline check given a builder (tools/build/build_capri_eu27_levels.py, the 2030 file reproduced exactly,
 the 2017 file at full precision). `validate_data.py --db FILE` keeps the database it builds (a copy for querying,
-rebuilt from the CSVs; not in git). Still to move: `MANIFEST.json`, `FITNESS_FOR_USE.json` and `DATA_DICTIONARY.md`
+rebuilt from the CSVs; not in git). Still to move: `FITNESS_FOR_USE.json` and `DATA_DICTIONARY.md` (`MANIFEST.json`
+moved 31 October 2026)
 (`DATA_CATALOG.json` and `SYMBOL_EXTRACTION_MAP.json`, read by no code, were removed 30 October 2026, the project lead's
 decision).

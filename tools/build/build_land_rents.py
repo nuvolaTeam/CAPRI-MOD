@@ -28,12 +28,15 @@ money: the 2030 rents over CAPRI's inflation to 2030, KNOWN_ISSUES K108), and pe
 sources/capri_land_rents/land_rents_capri_<year>.csv in CAPRI's money of the year (the recipe's input).
 """
 from __future__ import annotations
-import argparse, csv, importlib.util, re, subprocess, sys
+import argparse, csv, importlib.util, re, sys
 from collections import defaultdict
 from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
+from _grep import grep  # noqa: E402  (grep -E in Python: any system)
+from paths import EXPORTS, SOURCES  # noqa: E402  (CAPRI's material outside the repository)
 
 ROOT = Path(__file__).resolve().parents[2]
-REF = Path("/mnt/user-data/uploads/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv")
+REF = EXPORTS / "res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv"
 OUT = ROOT / "capri_data" / "2017" / "supply" / "land_rents_2030.csv"
 SRC_OUT = ROOT / "capri_data" / "sources" / "capri_land_rents" / "land_rents_capri_2030.csv"
 TYPES = ("ARAC", "FRUN", "GRAS")
@@ -48,7 +51,7 @@ ARAC_ACTS = ("SWHE", "DWHE", "RYEM", "BARL", "OATS", "MAIZ", "OCER", "PARI", "RA
 ACTS_OF = {"ARAC": ARAC_ACTS, "FRUN": FRUN_ACTS, "GRAS": GRAS_ACTS}
 
 
-DUMPS = Path("/home/claude/work/capreg")
+DUMPS = SOURCES / "capreg"
 
 
 def read_items(year: int, ref: Path) -> dict:
@@ -66,7 +69,7 @@ def read_items(year: int, ref: Path) -> dict:
         files = sorted(str(f) for f in DUMPS.glob("res_17*.txt") if re.fullmatch(r"res_17[A-Z]{2}\.txt", f.name))
     v = defaultdict(dict)
     for f in files:
-        txt = subprocess.run(["grep", "-hE", pat, f], capture_output=True, text=True).stdout
+        txt = grep(pat, f)
         for line in txt.splitlines():
             m = rx.match(line)
             if m:

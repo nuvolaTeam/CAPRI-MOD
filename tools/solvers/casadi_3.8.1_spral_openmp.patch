@@ -1,0 +1,31 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 3a550c3..42d1be3 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -383,7 +383,7 @@ option(ENABLE_EXPORT_ALL "Export all symbols to a shared library" OFF)
+ option(ENABLE_STATIC "Compile static libraries (.a on Linux)" OFF)
+ option(ENABLE_SHARED "Compile shared libraries (.so on Linux)" ON)
+ option(SWIG_EXPORT "Export SWIG" OFF)
+-option(SWIG_IMPORT "Import SWIG" OFF)
++option(SWIG_IMPORT "Import SWIG" ON)
+ option(RELOCATABLE "Avoid any usage of absolute paths" ON)
+ 
+ # enabling OpenMP support if requested
+@@ -1896,7 +1896,7 @@ if(WITH_SPRAL)
+         DEPENDS ${LAPACK_DEPENDS_TARGET} metis::metis
+         PREFIX "${CMAKE_BINARY_DIR}/external_projects"
+         UPDATE_COMMAND ""
+-        CONFIGURE_COMMAND ${SPRAL_RECONFIG_CMD} ${AUTOTOOLS_SHELL} <SOURCE_DIR>/configure ${CROSS_FLAGS_CONFIGURE} --disable-gpu --prefix=<INSTALL_DIR> --disable-openmp "--with-metis-inc-dir=${METIS_INCLUDE_DIR}" "--with-metis=-L${METIS_LIB_DIR} -l${METIS_LIB_NAME} -lm" "--with-lapack=${LAPACK_LFLAGS}" "--with-blas=${LAPACK_LFLAGS}" ${CROSS_FLAGS_FORTRAN}
++        CONFIGURE_COMMAND ${SPRAL_RECONFIG_CMD} ${AUTOTOOLS_SHELL} <SOURCE_DIR>/configure ${CROSS_FLAGS_CONFIGURE} --disable-gpu --prefix=<INSTALL_DIR> "--with-metis-inc-dir=${METIS_INCLUDE_DIR}" "--with-metis=-L${METIS_LIB_DIR} -l${METIS_LIB_NAME} -lm" "--with-lapack=${LAPACK_LFLAGS}" "--with-blas=${LAPACK_LFLAGS}" ${CROSS_FLAGS_FORTRAN}
+         "CFLAGS=-fPIC ${EXTERNAL_PROJECT_CFLAGS}"
+         "CXXFLAGS=-fPIC ${EXTERNAL_PROJECT_CXXFLAGS}"
+         "FFLAGS=-fPIC ${EXTERNAL_PROJECT_FFLAGS}"
+@@ -1905,7 +1905,7 @@ if(WITH_SPRAL)
+         )
+     set(SPRAL_DEPENDS_TARGET spral-external)
+     set(SPRAL_FLAGS "--with-spral-cflags=-I${CMAKE_BINARY_DIR}/external_projects/include"
+-        "--with-spral-lflags=-L${CMAKE_BINARY_DIR}/external_projects/lib -lspral -lgfortran -lm -lcoinmetis ${LAPACK_LFLAGS}")
++        "--with-spral-lflags=-L${CMAKE_BINARY_DIR}/external_projects/lib -lspral -lgfortran -lgomp -lm -lcoinmetis ${LAPACK_LFLAGS}")
+   else()
+     set(SPRAL_DEPENDS_TARGET spral::spral)
+   endif()

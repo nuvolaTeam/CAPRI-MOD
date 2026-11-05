@@ -112,7 +112,7 @@ class WelfareMixin:
         inpe = bb.groupby("rms")["inpe"].first().to_dict()
 
         def mreg(rms, mr):
-            if mr == "EU27" and self.eu_blocks:
+            if mr == "EU27":
                 return self.eu_region_of_ms(rms) or mr
             return mr
         H, ap, reg = {}, {}, {}
@@ -337,7 +337,7 @@ class WelfareMixin:
             _wl = self.ev.dairy_world_last or {}
             _wp = self._dairy_world_params() or {}
             _mr = {g: 1.0 + float(v["z"][_wp[g]["iM"]]) for g, v in _wl.items() if g in _wp and "z" in v}
-            fede = self.noneu_fede(PRd, r, _mr)
+            fede = self.noneu_fede(PRd, r, _mr, self.land_by_type(self.ev.land_now))
             g = self.noneu_feed_change(PRd, fede)
             dairy_fed = set(self.DAIRY_TRADED.values())
             en = {}
@@ -417,17 +417,27 @@ class WelfareMixin:
             wedge = p - sc.a0 * rc[None, :] - tc
             n = len(R)
             rent_ij = np.zeros((n, n))
-            if sc.trq_row is not None and sc.trq_Q is not None:
-                rows = sc._rows()
-                for j in np.where(sc.trq_Q > 0)[0]:
-                    xj = float(X[rows, j].sum())
-                    if xj <= 0 or sc.trq_gap[j] <= 0:
+            # CAPRI's quota rents (reports/sol_market.gms l. 1127): (import price - the in-quota price) x the in-quota
+            # imports, min(imports, TrqNT); here per flow: the flow's rates over the quota's preferential ones on its
+            # exporter price plus transport, on the flow's share of the in-quota imports (bilateral quotas, then the
+            # global quotas' flows)
+            if getattr(sc, "trq_sigma", None) is not None:
+                ta, ts = sc._trq_rates(sc.trq_sigma, sc.trq_sigmaW)
+                base = sc.a0 * rc[None, :] + tc
+                for k, q in enumerate(sc.trq_quotas or ()):
+                    ixq = np.ix_(q["rows"], q["cols"])
+                    fill = float(X[ixq].sum())
+                    if fill <= 0 or q["Q"] <= 0:
                         continue
-                    q_in = min(float(sc.trq_share[j]) * xj, float(sc.trq_Q[j]))
-                    sig = float(sc._sig(float(sc.trq_share[j]) / float(sc.trq_Q[j]) * xj))
-                    tot = float(sc.trq_gap[j]) * sig * q_in
-                    for i_ in rows:
-                        rent_ij[i_, j] = tot * float(X[i_, j]) / xj
+                    u = (np.nan_to_num(base[ixq] * (ta[ixq] - q["ta_pref"]) / 100.0)
+                         + np.nan_to_num(ts[ixq] - q["ts_pref"]))
+                    rent_ij[ixq] = np.maximum(u, 0.0) * X[ixq] * min(1.0, q["Q"] / fill)
+                for g in sc.trq_globals or ():
+                    imp = float(X[g["cover"]].sum())
+                    if imp <= 0 or g["Q"] <= 0:
+                        continue
+                    u = (np.nan_to_num(base * (ta - g["ta_pref"]) / 100.0) + np.nan_to_num(ts - g["ts_pref"]))
+                    rent_ij[g["cover"]] = (np.maximum(u, 0.0) * X * min(1.0, g["Q"] / imp))[g["cover"]]
             for i, imp in enumerate(R):
                 for j, exp in enumerate(R):
                     if i == j or X[i, j] <= 0 or (imp in eu and exp in eu):
@@ -441,14 +451,14 @@ class WelfareMixin:
 
     def _welfare_base(self) -> Dict[str, Dict[str, float]]:
         """CAPRI's base value of each component per model region (welfare_base_2030.csv: per CAPRI region, summed
-        to the model's market regions; the EU's member states to their trade block with eu_blocks)."""
+        to the model's market regions; the EU's member states to their trade block)."""
         cached = getattr(self, "_welf_base_cache", None)
         if cached is not None:
             return cached
         bb = self._inp().csv("welfare_base_2030.csv")
         out: Dict[str, Dict[str, float]] = {}
         for rms, mr, comp, v in bb[["rms", "model_region", "component", "value"]].itertuples(index=False):
-            if mr == "EU27" and self.eu_blocks:
+            if mr == "EU27":
                 mr = self.eu_region_of_ms(rms) or mr
             d = out.setdefault(str(mr), {})
             d[str(comp)] = d.get(str(comp), 0.0) + float(v)

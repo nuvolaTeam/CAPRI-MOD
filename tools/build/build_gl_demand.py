@@ -30,10 +30,12 @@ import numpy as np
 import pandas as pd
 
 import functools as _ft
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
+from paths import EXPORTS  # noqa: E402  (CAPRI's material outside the repository)
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
-ELAS = Path("/mnt/user-data/uploads/elas_2_1730defaulta.csv")
-DATA = Path("/mnt/user-data/uploads/data_market_1730defaulta.csv")
+ELAS = EXPORTS / "elas_2_1730defaulta.csv"
+DATA = EXPORTS / "data_market_1730defaulta.csv"
 OUT = ROOT / "capri_data" / "2017" / "market"
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "lib"))
 from _model_regions import EU_MS2 as _EU_FROM_DATA  # noqa: E402  (capri_data/shared/eu_market_blocks.csv)
@@ -82,27 +84,19 @@ def read_data(regions):
 def model_maps():
     sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check")]
     import build_bilateral_market as BM
-    from recalibrate_trade_2017 import REGION_MAP
     good_to_model = {}
     for mc, goods in BM.MODEL.items():
         for g in goods:
             good_to_model.setdefault(g, mc)
-    return good_to_model, REGION_MAP
+    return good_to_model
 
 
-#: CAPRI's mapping of behavioural regions to market regions (set RMS_TO_RM of CAPRI's own instantiation,
-#: capri_reference/sets/simini_21730, tools/build/build_capri_sets_reference.py), kept as model input
-RMS_TO_RM_SRC = ROOT / "capri_reference" / "sets" / "simini_21730" / "RMS_TO_RM.csv"
+#: CAPRI's mapping of behavioural regions to market regions (set RMS_TO_RM of CAPRI's own instantiation), written by
+#: tools/build/build_code_lists.py with CAPRI's other code lists (by this builder until 3 November 2026)
 RMS_TO_RM = ROOT / "capri_data" / "shared" / "rms_to_rm.csv"
 
 
 def rms_to_rm() -> dict:
-    if RMS_TO_RM_SRC.exists():
-        m = _read_csv(RMS_TO_RM_SRC)[["d0", "d1"]].rename(columns={"d0": "rms", "d1": "rm"})
-        m.to_csv(RMS_TO_RM, index=False)
-        # CAPRI's behavioural regions (set RMS), for the builders that read CAPRI's data rows per region
-        _read_csv(RMS_TO_RM_SRC.parent / "RMS.csv")[["d0"]].rename(columns={"d0": "rms"}) \
-            .to_csv(RMS_TO_RM.parent / "rms.csv", index=False)
     m = _read_csv(RMS_TO_RM)
     return dict(zip(m.rms, m.rm))
 
@@ -112,13 +106,16 @@ def main() -> None:
     r2m = rms_to_rm()
     regions = sorted(d)
     v = read_data(set(regions))
-    g2m, rmap = model_maps()
+    g2m = model_maps()
+    from _market_regions import model_region  # the market's grouping step (tools/lib/_market_regions.py)
     rows_g, rows_b, rows_r = [], [], []
     for r in regions:
         goods = list(d[r])
         if not goods:
             continue
-        mr = "EU27" if r[:2] in EU and r.endswith("000000") else rmap.get(r, "ROW")
+        # the model's market region (the grouping step: a behavioural region by its market region, RMS_TO_RM, as
+        # the Western Balkan countries of WBA; an EU member state's is one of CAPRI's EU blocks, the model's EU27)
+        mr = model_region(r)
         inha = v.get((r, "INHA", "LEVL"), 0.0)
         Y = v.get((r, "INCE", "LEVL"), 0.0) / inha if inha > 0 else 0.0
         idx = {g: i for i, g in enumerate(goods)}

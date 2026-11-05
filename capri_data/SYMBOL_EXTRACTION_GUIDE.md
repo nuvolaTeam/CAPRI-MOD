@@ -33,4 +33,4 @@ nutrient contents, and `feed_agri` holds feed use, not feed requirements.
 
 `tools/build/gdx_dump_symbol.py GDX SYMBOL OUT.csv` does the export in Python (needs the `gamsapi` package and GAMS's gdx
 library; `--nonzero` keeps non-zero rows only). After adding or replacing a file, run
-`python -m capri_mod.data.validate_data capri_data`.
+`python -m capri_mod.data.validate_data`.

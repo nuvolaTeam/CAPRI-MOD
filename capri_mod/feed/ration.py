@@ -27,13 +27,13 @@ there; here they are held at their base quantity.
 """
 from __future__ import annotations
 
-import json
 from pathlib import Path
 
 import numpy as np
 from capri_mod.params import param_table
 from capri_mod.data.definitions import capri_ms
 from capri_mod.tableio import read_input
+from capri_mod.data.inputs import base_year as _base_year, market_year as _market_year   # K52f
 
 #: CAPRI supply/pmp_elas.gms: FODDI (incl. straw, overridden) and named feeds
 FEED_ELAS = {"FGRA": -10.0, "FMAI": -10.0, "FOFA": -10.0, "FROO": -10.0, "FCOM": -10.0,
@@ -219,7 +219,7 @@ class Ration:
 
 
 class RationModel:
-    """All EU region-animal rations, from feed_ration_2017.json."""
+    """All EU region-animal rations, from feed_ration_2017.csv (capri_mod/data/nested_tables.py)."""
 
     def __init__(self, data_dir: str | Path = None, scale: dict = None, price_scale: dict = None,
                  factor: dict = None, slope_key: str = "capri_slope"):
@@ -227,8 +227,9 @@ class RationModel:
         (capri_mod/projection: output per head follows the projected yield); the base ration is scaled by
         the largest factor so it stays feasible, and the ration is calibrated to it."""
         root = Path(data_dir) if data_dir else Path(__file__).resolve().parents[2] / "capri_data"
-        f = root / "2017" / "feed" / "feed_ration_2017.json"
-        raw = json.load(open(f))["regions"] if f.exists() else {}
+        from capri_mod.data.nested_tables import read_feed_rations
+        by = _base_year()                                                     # the run's base year (K52f)
+        raw = read_feed_rations(root / by / "feed" / f"feed_ration_{by}.csv")      # a missing file stops the run
         self.rations = {}
         ctx = self._contexts(root, raw)
         scale = scale or {}
@@ -292,7 +293,7 @@ class RationModel:
         """
         import pandas as pd
         try:
-            herds = read_input(Path(root) / "2017" / "supply" / "animal_numbers.csv", index_col=0)
+            herds = read_input(Path(root) / _base_year() / "supply" / "animal_numbers.csv", index_col=0)
         except Exception:
             return {}
         out, ms_dm, ms_foth = {}, {}, {}
@@ -341,7 +342,7 @@ def ration_model_for(data, data_dir=None, pmp_source: str = "capri2030", pmp_cap
     was removed 27 October 2026.) With CAPRI's 2030 PMP terms for feed, the feed-PMP slopes of CAPRI's 2030 baseline
     calibration (K61)."""
     d = data if isinstance(data, dict) else {}
-    slope_key = ("capri_slope_2030" if int(d.get("market_year", 2017) or 2017) == 2030
+    slope_key = ("capri_slope_2030" if _market_year(d) == 2030
                  and str(pmp_source) in ("capri2030", "recipe") and "feed" in tuple(pmp_capri_parts or ())
                  else "capri_slope")
     return RationModel(data_dir, scale=d.get("ration_scale"), price_scale=d.get("ration_bulk_price"),

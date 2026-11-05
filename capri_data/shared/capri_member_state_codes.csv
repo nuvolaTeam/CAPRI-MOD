@@ -1,5 +1,7 @@
 nuts_prefix,capri_ms,source
+AL,AL000000,sets.gms NUTS0_WBA6 (l. 6067ff): same code
 AT,AT000000,sets.gms NUTS0 (l. 5893ff): same code
+BA,BA000000,sets.gms NUTS0_WBA6 (l. 6067ff): same code (no NUTS code; Eurostat's country code)
 BE,BL000000,sets.gms NUTS0 (l. 5893ff): Belgium and Luxembourg
 BG,BG000000,sets.gms NUTS0 (l. 5893ff): same code
 CY,CY000000,sets.gms NUTS0 (l. 5893ff): same code
@@ -20,12 +22,17 @@ IT,IT000000,sets.gms NUTS0 (l. 5893ff): same code
 LT,LT000000,sets.gms NUTS0 (l. 5893ff): same code
 LU,BL000000,sets.gms NUTS0 (l. 5893ff): Belgium and Luxembourg
 LV,LV000000,sets.gms NUTS0 (l. 5893ff): same code
+ME,MO000000,sets.gms NUTS0_WBA6 (l. 6067ff): Montenegro
+MK,MK000000,sets.gms NUTS0_WBA6 (l. 6067ff): same code
 MT,MT000000,sets.gms NUTS0 (l. 5893ff): same code
 NL,NL000000,sets.gms NUTS0 (l. 5893ff): same code
 NO,NO000000,sets.gms NUTS0 (l. 5893ff): same code
 PL,PL000000,sets.gms NUTS0 (l. 5893ff): same code
 PT,PT000000,sets.gms NUTS0 (l. 5893ff): same code
 RO,RO000000,sets.gms NUTS0 (l. 5893ff): same code
+RS,CS000000,sets.gms NUTS0_WBA6 (l. 6067ff): Serbia
 SE,SE000000,sets.gms NUTS0 (l. 5893ff): same code
 SI,SI000000,sets.gms NUTS0 (l. 5893ff): same code
 SK,SK000000,sets.gms NUTS0 (l. 5893ff): same code
+TR,TUR,"sets.gms NUTS0_RALL (l. 6099): Turkey, whose units TR100000 ... TRC00000 are mapped by MAP_RR TUR.SET.R_TUR (l. 7653)"
+XK,KO000000,sets.gms NUTS0_WBA6 (l. 6067ff): Kosovo (no NUTS code; Eurostat's country code)

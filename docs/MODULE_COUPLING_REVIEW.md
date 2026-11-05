@@ -46,7 +46,7 @@ The model has 46 activities (34 in the crop list, fodder and set-aside included,
 commodities and 26 trade regions (27 with CAPRI's two EU blocks), counted from the lists `CROPS`, `ANIMALS`,
 `MARKET_COMMODITIES` and `TRADE_REGIONS` of `capri_mod/data/definitions.py`; 57 of the 58 commodities have CAPRI's
 bilateral flows in the market data (`capri_data/2017/market/bilateral_flows_2017.csv`), raw milk has none. Norway
-(NOR) is its own trade region since 21 October 2026 (KNOWN_ISSUES K56).
+(NO000000) is its own trade region since 21 October 2026 (KNOWN_ISSUES K56).
 
 | Concept | In the model as | Clears a market? |
 |---|---|---|
@@ -84,7 +84,7 @@ What remains different from CAPRI (README §10; docs/DEPARTURES_FROM_CAPRI.md; `
 | Livestock coefficients | CAPRI's 2017 totals over CAPRI's herd sizes (DATA2 HERD), not its activity levels | per-unit coefficients on CAPRI's units (totals match) |
 | Purchased feed FENE, FMIL in projected years | price index 1 (no CAPRI unit value; registered) | feedBlkPrice_ |
 | PMP terms at 2030 | CAPRI's own 2030 terms for crops, animals (herds and intensity splits), feed and land (default since 22 October 2026, `pmp_source = "capri2030"`; technologies collapsed per activity, group terms at full size); capri-mod's own terms by CAPRI's recipe with the land-nest adjustment (`"recipe"`); an activity without a positive own PMP term is held at its level, as CAPRI (the elasticity calibration was removed on 28 October 2026, audit S13) (K61, docs/PMP_CAPRI_2030.md) | p_pmpQuadTechn, p_pmpQuadPact, p_pmpQuadLandTypes, p_pmpFeedInpCoeff of its 2030 calibration |
-| Ammonia options without a policy incentive on N | held at their base shares in the regional NLP (no N-surplus row, mineral cap or emission tax; re-solved so where the N-surplus row is slack; `RegionalSupplyModel._amm_incentive`, K63) | in the model; costsavings0 makes the base a first-order point and CONOPT stays there |
+| Ammonia options without a policy incentive on N | held at their base shares in the regional NLP (no N-surplus row, mineral cap or emission tax; `RegionalSupplyModel._amm_incentive`, K63; the re-solve with them held where the N-surplus row is slack removed on 1 November 2026, as CAPRI, K79) | in the model; costsavings0 makes the base a first-order point and CONOPT stays there |
 
 Rows of the 22 October register that now follow CAPRI and were removed: the market supply between iterations
 (CAPRI's market supply functions on by default since 24 October 2026), Norway's prices in the iteration (CAPRI's price

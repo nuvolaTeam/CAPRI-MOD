@@ -15,6 +15,12 @@ import argparse, csv, glob, json, re, sys
 from collections import defaultdict
 from pathlib import Path
 import numpy as np
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
+from _grep import grep  # noqa: E402  (grep -E in Python: any system)
+from paths import EXPORTS, SOURCES  # noqa: E402  (CAPRI's material outside the repository)
+import sys as _sys_nc  # noqa: E402
+_sys_nc.path.insert(0, str(__import__("pathlib").Path(__file__).resolve().parents[2] / "tools" / "lib"))
+from _model_regions import national_code as _national_code  # noqa: E402  (TUR for Turkey's units, 4 November 2026)
 
 
 def _read_csv(*a, **k):
@@ -31,14 +37,14 @@ LT = ["ARAC", "GRAS", "FRUN", "FORE", "OLND", "ARTIF"]
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--dump-dir", type=Path, default=Path("/home/claude/work/capreg"))
-    ap.add_argument("--pmp-dir", type=Path, default=Path("/home/claude/work/landexp/land_export"))
+    ap.add_argument("--dump-dir", type=Path, default=SOURCES / "capreg")
+    ap.add_argument("--pmp-dir", type=Path, default=SOURCES / "land_export")
     ap.add_argument("--year", type=int, choices=(2017, 2030), default=2017,
                     help="2017: CAPRI's base-year calibration (res_17 LEVL, pmppar_17 exports); 2030: its 2030 baseline "
                          "calibration (LEVL of the 2030 reference, pmppar_21730 p_pmpQuadLandTypes, "
                          "capri_data/sources/baseline_pmp/pmp_quad_landtypes_2030.csv)")
     ap.add_argument("--ref", type=Path,
-                    default=Path("/mnt/user-data/uploads/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv"))
+                    default=EXPORTS / "res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv")
     args = ap.parse_args()
     import pandas as pd
     areas = _read_csv(_ROOT / "capri_data" / "2017" / "supply" / "base_areas.csv", index_col=0)
@@ -56,9 +62,8 @@ def main() -> None:
         return next(iter(regs_g)) if len(regs_g) == 1 else None
     # land-type levels (CAPRI code, land type, 1000 ha) of the calibration point
     if args.year == 2030:
-        import subprocess as _sp2
         _pat = r"^'[A-Z]{2}[0-9A-Z]{6}'\.''\.'(ARAC|GRAS|FRUN|FORE|OLND|ARTIF)'\.'LEVL'\.'2030'"
-        _txt = _sp2.run(["grep", "-E", _pat, str(args.ref)], capture_output=True, text=True).stdout
+        _txt = grep(_pat, str(args.ref))
         _rx = re.compile(r"^'([A-Z]{2}[0-9A-Z]{6})'\.''\.'(ARAC|GRAS|FRUN|FORE|OLND|ARTIF)'\.'LEVL'\.'2030'\s+(-?\d[\d.Ee+\-]*)")
         LEVROWS = [(m.group(1), m.group(2), float(m.group(3))) for m in map(_rx.match, _txt.splitlines()) if m]
     else:
@@ -129,7 +134,7 @@ def main() -> None:
     for reg, d in lev.items():
         r8s = sorted(r8of[reg])
         r8 = _combine(r8s) or r8s[0]
-        src = r8 if r8 in Q else (r8s[0][:2] + "000000" if r8s[0][:2] + "000000" in Q else None)
+        src = r8 if r8 in Q else (_national_code(r8s[0]) if _national_code(r8s[0]) in Q else None)
         if src is None:
             nodata.append(reg); continue
         M = np.array([[Q[src].get((a, b), Q[src].get((b, a), 0.0)) for b in LT] for a in LT])
@@ -157,7 +162,7 @@ def main() -> None:
     parent = {}
     split_n = nat_n = 0
     for r in unmapped:
-        src = parent.get(r) or (r[:2] + "000000" if r[:2] + "000000" in Q else None)
+        src = parent.get(r) or (_national_code(r) if _national_code(r) in Q else None)
         if src is None:
             continue
         base_src = lev_all.get(src, {})
@@ -192,7 +197,7 @@ def main() -> None:
     src_txt = ("CAPRI res_17 LEVL of land types; pmppar_17XX p_pmpQuadLandTypes" if args.year == 2017 else
                "CAPRI 2030 reference LEVL of land types (res_2_1730greendeal_refpol_endotech_all_inidefaulta); "
                "pmppar_21730XX p_pmpQuadLandTypes of the 2030 baseline calibration (tools/build/build_pmp_2030.py)")
-    io.write(dest, out, LT)        # CSV (capri_mod/data/land_market_io.py); source: src_txt, recorded in MANIFEST.json
+    io.write(dest, out, LT)        # CSV (capri_mod/data/land_market_io.py); its source printed below (src_txt)
     print(f"wrote {dest}.csv ({src_txt}): {len(out)} regions | without CAPRI quad: {len(nodata)} | not positive definite: {len(notpd)} {notpd[:5]}")
 
 

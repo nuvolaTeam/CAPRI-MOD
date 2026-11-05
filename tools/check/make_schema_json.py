@@ -19,8 +19,8 @@ what a program or a person needs to know about each table without reading SQL:
 
 read_by: builders from the pipeline's trace (tools/pipeline/builders.json, exact); model, checks and tests from a
 static scan of the Python files under capri_mod and tools/check for a string that names the file (a literal ending
-in its name, or an f-string that matches it and whose fixed text, the extension aside, has three letters or more in
-its last path part; docstrings left out). The scan finds a file named in the code, not a
+in its name, or an f-string that matches it, a placeholder standing for one name part without "_", and whose fixed
+text, the extension aside, has three letters or more in its last path part; docstrings left out). The scan finds a file named in the code, not a
 file read at run time: a name assembled otherwise is missed, and a name in a comment string or a write counts.
 
     python tools/check/make_schema_json.py           # writes capri_data/schema/schema.json
@@ -61,13 +61,21 @@ def _names_in_code(root: Path):
             if isinstance(n, ast.Constant) and isinstance(n.value, str) and id(n) not in docs and ".csv" in n.value:
                 lits.add(n.value)
             elif isinstance(n, ast.JoinedStr):
-                parts, fixed = [], ""
-                for v in n.values:
-                    if isinstance(v, ast.Constant):
+                # a placeholder stands for one name part without "_" (a year, a country, a variant): f"land_rents_{y}.csv"
+                # names land_rents_2017.csv, not land_rents_capri_2017.csv (until 31 October 2026 any text, which
+                # attributed CAPRI's land rents and TRQ extracts to the model); several placeholders in a row may
+                # stand for parts joined by "_" (f"bilateral_flows_{year}{suffix}.csv": bilateral_flows_2017_eu2.csv)
+                parts, fixed, run = [], "", 0
+                for v in list(n.values) + [None]:
+                    if v is not None and not isinstance(v, ast.Constant):
+                        run += 1
+                        continue
+                    if run:
+                        parts.append("[^/_]+" if run == 1 else "[^/]+")
+                        run = 0
+                    if v is not None:
                         parts.append(re.escape(str(v.value)))
                         fixed += str(v.value)
-                    else:
-                        parts.append("[^/]+")
                 pat = "".join(parts)
                 # an f-string whose fixed text names little more than the extension (f"{name}.csv") names no file
                 stem = fixed.rsplit("/", 1)[-1].replace(".csv", "")

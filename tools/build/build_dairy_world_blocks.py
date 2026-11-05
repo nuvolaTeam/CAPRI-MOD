@@ -9,14 +9,14 @@ supply elasticity for each dairy product in every non-EU region (armington_param
 moved world dairy prices several times more than in CAPRI.
 
 This builder takes, for every CAPRI market region outside the EU block (the EU member states of
-dairy_processing.csv) that has a dairy Hessian - Norway included (trade region NOR, KNOWN_ISSUES K56: CAPRI's
+dairy_processing.csv) that has a dairy Hessian - Norway included (trade region NO000000, KNOWN_ISSUES K56: CAPRI's
 market region NO000000 with supply models; the market delivers its raw milk from its supply models instead of
 the raw milk supply function, as CAPRI's RMSSUP) - from CAPRI's 2030 Green Deal reference market results and elasticities:
   quantities (PROD, PROC), fat and protein contents, producer prices, INPE, fat and protein prices,
   food use HCON, feed use FEED, extra-region trade (Imports_noIntra, Exports_noIntra) of the products,
   p_hessNQDairy (symmetric, MILK row reversed as in arm/market1.gms), p_hessNQSupp(MILK, MILK) (raw milk
   supply), p_ElasDem among the nine products,
-and maps each region to the model's trade region (tools/build/recalibrate_trade_2017.py REGION_MAP; others ROW).
+and maps each region to the model's trade region (the market's grouping step, tools/lib/_market_regions.py: codes/model_market_regions.csv).
 
 Outputs (capri_data/2017/market/):
   dairy_world_processing.csv   trade_region, rms, item, q_kt, proc_kt, fats_pct, prot_pct, price, hcon_kt,
@@ -35,6 +35,8 @@ from pathlib import Path
 import pandas as pd
 
 import functools as _ft
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  # tools/lib/paths.py
+from paths import EXPORTS  # noqa: E402  (CAPRI's material outside the repository)
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 SRC_M = ROOT / "capri_data" / "sources" / "market" / "dairy_world_dataout_2030.csv"
@@ -70,12 +72,12 @@ def extract(dump: Path, elas: Path):
 
 
 def main():
-    dump = Path("/mnt/user-data/uploads/markmarket_greendeal_1730et_base_1717.txt")
-    elas = Path("/mnt/user-data/uploads/elas_2_1730defaulta.csv")
+    dump = EXPORTS / "markmarket_greendeal_1730et_base_1717.txt"
+    elas = EXPORTS / "elas_2_1730defaulta.csv"
     if dump.exists() and elas.exists():
         extract(dump, elas)
     sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check")]
-    from recalibrate_trade_2017 import trade_region
+    from _market_regions import model_region  # the market's grouping step (tools/lib/_market_regions.py)
     eu_block = set(_read_csv(ROOT / "capri_data" / "2017" / "market" / "dairy_processing.csv")["ms"])
     src = _read_csv(SRC_M)
     v = {(r.region, r.item, r.product): float(r.value) for r in src.itertuples()}
@@ -85,7 +87,7 @@ def main():
                      and v.get((r, "PPRI", "INPE")))
     rows, hrows, erows = [], [], []
     for r in rms_all:
-        tr = trade_region(r)
+        tr = model_region(r)
         inpe = v[(r, "PPRI", "INPE")]
         rows += [{"trade_region": tr, "rms": r, "item": x, "price": v.get((r, "PPRI", x), 0.0)} for x in ("INPE", "FATS", "PROT")]
         hs = el[(el.param == "p_hessNQSupp") & (el.rms == r)]

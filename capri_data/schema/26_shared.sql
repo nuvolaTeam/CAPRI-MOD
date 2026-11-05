@@ -10,6 +10,10 @@ CREATE TABLE shr_capri_member_state_codes (
 );
 COMMENT ON TABLE shr_capri_member_state_codes IS 'capri_member_state_codes (no builder: a declared table)';
 
+-- rule: a regional unit's member state is one of CAPRI's member state codes (this table: XX000000,
+-- or TUR for Turkey's units, sets.gms MAP_RR TUR.SET.R_TUR)
+SELECT region, capri_ms FROM regional_units WHERE capri_ms NOT IN (SELECT capri_ms FROM shr_capri_member_state_codes);
+
 -- file: capri_data/shared/capri_units_nuts2024.csv
 CREATE TABLE shr_capri_units_nuts2024 (
     capri_unit VARCHAR NOT NULL,
@@ -55,89 +59,20 @@ CREATE TABLE shr_rms (
 );
 COMMENT ON TABLE shr_rms IS 'rms (no builder: a declared table)';
 
--- file: capri_data/shared/trade_flows_2017.csv
-CREATE TABLE shr_trade_flows_2017 (
-    exporter VARCHAR NOT NULL,
-    importer VARCHAR NOT NULL,
-    SWHE DOUBLE NOT NULL,
-    DWHE DOUBLE NOT NULL,
-    BARL DOUBLE NOT NULL,
-    CORN DOUBLE NOT NULL,
-    OCER DOUBLE NOT NULL,
-    RAPE DOUBLE NOT NULL,
-    SUNF DOUBLE NOT NULL,
-    SOYA DOUBLE NOT NULL,
-    OOIL DOUBLE NOT NULL,
-    SUGB DOUBLE NOT NULL,
-    SUGR DOUBLE NOT NULL,
-    POTA DOUBLE NOT NULL,
-    PULS DOUBLE NOT NULL,
-    TOMA DOUBLE NOT NULL,
-    OVEG DOUBLE NOT NULL,
-    APPL DOUBLE NOT NULL,
-    OFRU DOUBLE NOT NULL,
-    CITR DOUBLE NOT NULL,
-    WINE DOUBLE NOT NULL,
-    OLIV DOUBLE NOT NULL,
-    MILK DOUBLE NOT NULL,
-    BUTR DOUBLE NOT NULL,
-    SKIM DOUBLE NOT NULL,
-    CHES DOUBLE NOT NULL,
-    WHEY DOUBLE NOT NULL,
-    BEEF DOUBLE NOT NULL,
-    PORK DOUBLE NOT NULL,
-    POUL DOUBLE NOT NULL,
-    SHGM DOUBLE NOT NULL,
-    EGGS DOUBLE NOT NULL,
-    FATS DOUBLE NOT NULL,
-    OFOD_M DOUBLE NOT NULL,
-    SGMT DOUBLE NOT NULL,
-    RAPO DOUBLE NOT NULL,
-    SUNO DOUBLE NOT NULL,
-    SOYO DOUBLE NOT NULL,
-    RAPC DOUBLE NOT NULL,
-    SUNC DOUBLE NOT NULL,
-    SOYC DOUBLE NOT NULL,
-    PRIMARY KEY (exporter, importer)
+-- file: capri_data/shared/nuts_version_correspondence.csv
+CREATE TABLE shr_nuts_version_correspondence (
+    capri_code VARCHAR NOT NULL,
+    nuts_code VARCHAR,
+    UNIQUE (capri_code, nuts_code)
 );
-COMMENT ON TABLE shr_trade_flows_2017 IS 'Recalibrate the trade matrix from CAPRI''s 2017 capmod result. (tools/build/recalibrate_trade_2017.py)';
+COMMENT ON TABLE shr_nuts_version_correspondence IS 'CAPRI''s 8-character region codes and their NUTS codes across coding-scheme versions, in order (a code can have several: IT110000 -> IT11 and ITC1; an empty nuts_code for a code without one), from CAPRI''s gams/compile_rdp_data/build_general_set_structure.gms, with 75 NUTS-2 pairs added in October 2026 (each verified by CAPRI''s total agricultural area against the model region''s base area and a second variable), NO090000 -> NO03 and PL500000 -> PL81 removed as unconfirmed, and FI190000 -> FI1C removed; read by tools/lib/_model_regions.py (with its CORR_FIXES, SPLITS_MERGES). nuts_version_correspondence.json until 31 October 2026, kept by hand (capri_mod/data/nested_tables.py)';
+
+-- the flags of the code tables declared in 00_codes.sql (value_units exists from here)
 INSERT INTO value_units VALUES
-  ('shr_trade_flows_2017', 'SWHE', NULL, 'open', 'trade_flows_2017.SWHE: unit to be established'),
-  ('shr_trade_flows_2017', 'DWHE', NULL, 'open', 'trade_flows_2017.DWHE: unit to be established'),
-  ('shr_trade_flows_2017', 'BARL', NULL, 'open', 'trade_flows_2017.BARL: unit to be established'),
-  ('shr_trade_flows_2017', 'CORN', NULL, 'open', 'trade_flows_2017.CORN: unit to be established'),
-  ('shr_trade_flows_2017', 'OCER', NULL, 'open', 'trade_flows_2017.OCER: unit to be established'),
-  ('shr_trade_flows_2017', 'RAPE', NULL, 'open', 'trade_flows_2017.RAPE: unit to be established'),
-  ('shr_trade_flows_2017', 'SUNF', NULL, 'open', 'trade_flows_2017.SUNF: unit to be established'),
-  ('shr_trade_flows_2017', 'SOYA', NULL, 'open', 'trade_flows_2017.SOYA: unit to be established'),
-  ('shr_trade_flows_2017', 'OOIL', NULL, 'open', 'trade_flows_2017.OOIL: unit to be established'),
-  ('shr_trade_flows_2017', 'SUGB', NULL, 'open', 'trade_flows_2017.SUGB: unit to be established'),
-  ('shr_trade_flows_2017', 'SUGR', NULL, 'open', 'trade_flows_2017.SUGR: unit to be established'),
-  ('shr_trade_flows_2017', 'POTA', NULL, 'open', 'trade_flows_2017.POTA: unit to be established'),
-  ('shr_trade_flows_2017', 'PULS', NULL, 'open', 'trade_flows_2017.PULS: unit to be established'),
-  ('shr_trade_flows_2017', 'TOMA', NULL, 'open', 'trade_flows_2017.TOMA: unit to be established'),
-  ('shr_trade_flows_2017', 'OVEG', NULL, 'open', 'trade_flows_2017.OVEG: unit to be established'),
-  ('shr_trade_flows_2017', 'APPL', NULL, 'open', 'trade_flows_2017.APPL: unit to be established'),
-  ('shr_trade_flows_2017', 'OFRU', NULL, 'open', 'trade_flows_2017.OFRU: unit to be established'),
-  ('shr_trade_flows_2017', 'CITR', NULL, 'open', 'trade_flows_2017.CITR: unit to be established'),
-  ('shr_trade_flows_2017', 'WINE', NULL, 'open', 'trade_flows_2017.WINE: unit to be established'),
-  ('shr_trade_flows_2017', 'OLIV', NULL, 'open', 'trade_flows_2017.OLIV: unit to be established'),
-  ('shr_trade_flows_2017', 'MILK', NULL, 'open', 'trade_flows_2017.MILK: unit to be established'),
-  ('shr_trade_flows_2017', 'BUTR', NULL, 'open', 'trade_flows_2017.BUTR: unit to be established'),
-  ('shr_trade_flows_2017', 'SKIM', NULL, 'open', 'trade_flows_2017.SKIM: unit to be established'),
-  ('shr_trade_flows_2017', 'CHES', NULL, 'open', 'trade_flows_2017.CHES: unit to be established'),
-  ('shr_trade_flows_2017', 'WHEY', NULL, 'open', 'trade_flows_2017.WHEY: unit to be established'),
-  ('shr_trade_flows_2017', 'BEEF', NULL, 'open', 'trade_flows_2017.BEEF: unit to be established'),
-  ('shr_trade_flows_2017', 'PORK', NULL, 'open', 'trade_flows_2017.PORK: unit to be established'),
-  ('shr_trade_flows_2017', 'POUL', NULL, 'open', 'trade_flows_2017.POUL: unit to be established'),
-  ('shr_trade_flows_2017', 'SHGM', NULL, 'open', 'trade_flows_2017.SHGM: unit to be established'),
-  ('shr_trade_flows_2017', 'EGGS', NULL, 'open', 'trade_flows_2017.EGGS: unit to be established'),
-  ('shr_trade_flows_2017', 'FATS', NULL, 'open', 'trade_flows_2017.FATS: unit to be established'),
-  ('shr_trade_flows_2017', 'OFOD_M', NULL, 'open', 'trade_flows_2017.OFOD_M: unit to be established'),
-  ('shr_trade_flows_2017', 'SGMT', NULL, 'open', 'trade_flows_2017.SGMT: unit to be established'),
-  ('shr_trade_flows_2017', 'RAPO', NULL, 'open', 'trade_flows_2017.RAPO: unit to be established'),
-  ('shr_trade_flows_2017', 'SUNO', NULL, 'open', 'trade_flows_2017.SUNO: unit to be established'),
-  ('shr_trade_flows_2017', 'SOYO', NULL, 'open', 'trade_flows_2017.SOYO: unit to be established'),
-  ('shr_trade_flows_2017', 'RAPC', NULL, 'open', 'trade_flows_2017.RAPC: unit to be established'),
-  ('shr_trade_flows_2017', 'SUNC', NULL, 'open', 'trade_flows_2017.SUNC: unit to be established'),
-  ('shr_trade_flows_2017', 'SOYC', NULL, 'open', 'trade_flows_2017.SOYC: unit to be established');
+  ('model_activity_classes', 'fodder', NULL, 'open', 'a flag (1: a fodder crop)'),
+  ('model_activity_classes', 'fixed', NULL, 'open', 'a flag (1: held at its base level)'),
+  ('model_activity_classes', 'organic_yield_gap', NULL, 'open', 'a flag (1: the organic yield gap applies)'),
+  ('model_price_follows', 'eu_market', NULL, 'open', 'a flag (1: in the EU markets'' price step)'),
+  ('model_activity_classes', 'pesticide', NULL, 'open', 'a flag (1: the pesticide yield loss reaches the crop)'),
+  ('model_activity_classes', 'share_term_arable', NULL, 'open', 'a flag (1: in the PMP share term''s arable denominator)'),
+  ('model_land_types', 'in_land_market', NULL, 'open', 'a flag (1: a column of the land market)');

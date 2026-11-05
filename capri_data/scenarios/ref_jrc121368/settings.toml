@@ -1,0 +1,20 @@
+# The reference of the Farm-to-Fork study JRC121368 (the 2020 CAPRI): no manure trade (report p. 24: "all manure
+# generated in a region has to be used within that region"), milk-yield genomics 0.2 (the endotech references of
+# that time, pol_input/ecampa/refpol_endotech_set14_ini.gms; report Table 17), along CAPRI's 2030 reference trajectory
+[scenario]
+name = "ref_jrc121368"
+kind = "reference"
+description = "The JRC121368 Farm-to-Fork reference: no manure trade, milk-yield genomics 0.2"
+capri_files = ["pol_input/ecampa/refpol_endotech_set14_ini.gms"]
+trajectory = "capri_ref_2030"
+manure_trade = false
+
+[scenario.endotech]
+ghgTechMYld = 0.2
+ghgTechFEff = 0.1
+ghgTechLowNFeed = 1.0
+ghgTechLineNitr = 1.0
+fixGenetToIni = 1.0
+# not set in refpol_endotech_set14_ini.gms: star 3.0's Green Deal reference values (capri_mod/policy/endotech.py)
+fallowInAllRmssup = 1.0
+winterCovInAllRmssup = 1.0

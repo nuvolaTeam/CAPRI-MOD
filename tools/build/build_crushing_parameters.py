@@ -51,12 +51,11 @@ def region_map():
     """{CAPRI behavioural region (RMS, outside the EU): model trade region}. Behavioural regions, not market regions:
     CAPRI's trade blocks (MED, MER_OTH, URUPAR, WBA) hold PROD but not PROC and PRCY, which sit at their members (until
     30 October 2026 the blocks' crushing was missed, ROW's oils and cakes falling short of CAPRI's production)."""
-    sp = importlib.util.spec_from_file_location("_rt", ROOT / "tools" / "build" / "recalibrate_trade_2017.py")
-    m = importlib.util.module_from_spec(sp); sp.loader.exec_module(m)
+    from _market_regions import model_region      # the market's grouping step (tools/lib/_market_regions.py)
     eu = set(EU_MS)
     with open(ROOT / "capri_data" / "shared" / "rms.csv", newline="") as f:
         rms = [r["rms"] for r in csv.DictReader(f)]
-    return {r: m.trade_region(r) for r in rms if r not in eu}
+    return {r: model_region(r) for r in rms if r not in eu}
 
 
 def read_market(path: Path, year: str, regions):

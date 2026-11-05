@@ -5,7 +5,7 @@ to text (uploads supply_elas_2_1720{DE,ES,FR,IT,PL}defaulta.txt and the zip of t
 countries). The base-year file elas_2_1717 carries the dummy value 1 for young animals (CAPRI
 deletes it in supply/calibrate_supply.gms), so the calibrated 2020 values are used (REGISTERED).
 
-Output: capri_data/sources/arm/capri_supply_elas_young_1720.csv (region, item, value) for YCAM,
+Output: capri_data/2017/supply/capri_supply_elas_young_1720.csv (region, item, value) for YCAM,
 YCAF, YBUL, YHEI, YCOW, YPIG.
 Usage: python tools/build/build_young_animal_elasticities.py <dump files ...>
 """
@@ -15,7 +15,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-OUT = ROOT / "capri_data" / "sources" / "arm" / "capri_supply_elas_young_1720.csv"
+OUT = ROOT / "capri_data" / "2017" / "supply" / "capri_supply_elas_young_1720.csv"
 PAT = re.compile(r"'([^']+)'\.'([^']+)'\.'([^']+)'\.'CAL'\s+([-0-9.eE+]+)")
 ITEMS = {"YCAM", "YCAF", "YBUL", "YHEI", "YCOW", "YPIG"}
 

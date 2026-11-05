@@ -15,12 +15,12 @@ Base production and use per market region are set in `MarketModule._calibrate_ba
    of the run (2017, or CAPRI's 2030 reference in a projection). The EU's rows are then set from the supply models
    and the bilateral calibration closes every region (ARMINGTON_MARKET.md, "Calibration").
 2. Products without bilateral flows (raw milk): CAPRI's FAO_agg base-period balance,
-   `capri_data/2017/market/world_market_baseline.json` (`tools/build/build_world_market_baseline.py`), and
-   `dairy_world_baseline.json` for the dairy products where needed. With CAPRI's two EU trade blocks the EU row is split
+   `capri_data/2017/market/world_market_baseline.csv` (`tools/build/build_world_market_baseline.py`), and
+   `dairy_world_baseline.csv` for the dairy products where needed. With CAPRI's two EU trade blocks the EU row is split
    by CAPRI's 2030 member-state production and use (`eu_ms_balance_2030.csv`).
 3. Neither: zero (no invented totals; a product without a world price raises an error).
 
-`world_market_baseline.json` holds CAPRI's FAO_agg base-period balances (MAPR, DOMM, IMPT, EXPT) of every CAPRI
+`world_market_baseline.csv` holds CAPRI's FAO_agg base-period balances (MAPR, DOMM, IMPT, EXPT) of every CAPRI
 behavioural region, mapped to the model's trade regions (concordance of `tools/build/recalibrate_trade_2017.py`), under the
 model's codes (SWHE ← WHEA, CORN ← MAIZ, SUGR ← SUGA, POUL ← POUM, WINE ← TWIN, the rest by name; rye, oats and other
 cereals separate as in CAPRI). Its EU row also gives the EU's self-sufficiency (use / production) applied to the

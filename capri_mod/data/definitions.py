@@ -194,9 +194,10 @@ EU_BLOCKS = tuple(dict.fromkeys(EU_MS_BLOCK.values()))
 
 def _load_trade_regions() -> tuple:
     """The market's trade regions in their order and CAPRI's region code of each (capri_data/codes/
-    model_trade_regions.csv, a declared code list with a source per row; ROW: every CAPRI region not listed). The
-    United Kingdom (GBR) and the Western Balkans (WBA) are trade regions of their own as in CAPRI since batch 7, Norway
-    (NOR) since K56; Egypt, Algeria, Saudi Arabia and Iran, trade regions here without any data until 29 October 2026,
+    model_trade_regions.csv, a declared code list with a source per row: CAPRI's market regions, the EU's two as EU27;
+    ROW, CAPRI's 17 other regions together, was split into them on 3 November 2026, market move stage 3). The
+    United Kingdom (UK000000) and the Western Balkans (WBA) are trade regions of their own as in CAPRI since batch 7, Norway
+    (NO000000) since K56; Egypt, Algeria, Saudi Arabia and Iran, trade regions here without any data until 29 October 2026,
     fold into ROW (KNOWN_ISSUES K45)."""
     import csv
     from pathlib import Path
@@ -234,7 +235,7 @@ def _supply_model_regions_outside_eu() -> dict:
     return out
 
 
-#: CAPRI member state -> (country, trade region) of every country outside the EU with regional units (Norway: NO, NOR)
+#: CAPRI member state -> (country, trade region) of every country outside the EU with regional units (Norway: NO, NO000000)
 SUP_NONEU_ALL = _supply_model_regions_outside_eu()
 
 
@@ -262,13 +263,105 @@ def in_run(region: str, countries=None) -> bool:
 # LAND USE TYPES
 # ---------------------------------------------------------------------------
 
-LAND_TYPES = [
-    "ARABLE",       # Arable land (UAA)
-    "PERMANENT",    # Permanent crops (orchards, vineyards, olives)
-    "GRASSLAND",    # Permanent grassland
-    "FALLOW",       # Fallow land (includes set-aside)
-    "OTHER_AG",     # Other agricultural land
-]
+def _load_activity_classes():
+    """The model's activity classes (capri_data/codes/model_activity_classes.csv, declared; refactor stage 3, N6): per
+    activity its land type, crop-diversification group, fodder and fixed flags, a source per row; checked against
+    CAPRI's sets by tools/build/build_code_lists.py (a row that differs names its departure). And the land types of the
+    land market (model_land_types.csv, CAPRI's landTypesMrk). The list LAND_TYPES that stood here (ARABLE, PERMANENT,
+    ...) was read by no code and is gone."""
+    import csv
+    from pathlib import Path
+    d = Path(__file__).resolve().parents[2] / "capri_data" / "codes"
+    with open(d / "model_activity_classes.csv", newline="") as f:
+        classes = {r["code"]: r for r in csv.DictReader(f)}
+    with open(d / "model_land_types.csv", newline="") as f:
+        land = [r["code"] for r in csv.DictReader(f) if r["in_land_market"] == "1"]
+    return classes, land
+
+
+ACTIVITY_CLASSES, LAND_MARKET_TYPES = _load_activity_classes()
+
+
+def _load_crosswalks():
+    """The model's codes and CAPRI's (capri_data/codes/model_activities.csv capri_codes, model_commodities.csv
+    capri_code; declared, checked against CAPRI's sets by tools/build/build_code_lists.py): CAPRI's activity code ->
+    the model's where they differ (MAIZ -> CORN, OFAR and ROOF -> OFOD, ...), and each market commodity's CAPRI code."""
+    import csv
+    from pathlib import Path
+    d = Path(__file__).resolve().parents[2] / "capri_data" / "codes"
+    with open(d / "model_activities.csv", newline="") as f:
+        rows = list(csv.DictReader(f))
+    acts = {c: r["code"] for r in rows for c in r["capri_codes"].split(";") if c != r["code"]}
+    # each model activity's CAPRI activities, those of CAPRI's data then those of its supply model (CAPMOD), once each
+    members = {r["code"]: tuple(dict.fromkeys(r["capri_codes"].split(";") + r["capmod_codes"].split(";")))
+               for r in rows}
+    capmod = {r["code"]: tuple(r["capmod_codes"].split(";")) for r in rows}
+    with open(d / "model_commodities.csv", newline="") as f:
+        comms = {r["code"]: r["capri_code"] for r in csv.DictReader(f)}
+    return acts, comms, members, capmod
+
+
+#: CAPRI activity code -> the model's, where they differ; model market commodity -> CAPRI's code; each model
+#: activity's CAPRI activities (data and supply model: GRAS = GRAS, GRAE, GRAI; SETA = SETA, FALL, VSET) and those of
+#: CAPRI's supply model alone (GRAS = GRAE, GRAI; DCOW = DCOL, DCOH)
+CAPRI_TO_MODEL_ACTIVITY, COMMODITY_CAPRI_CODE, CAPRI_MEMBERS, CAPMOD_MEMBERS = _load_crosswalks()
+
+
+
+def _load_cattle_splits():
+    """CAPRI's cattle activities inside the model's animals (capri_data/codes/model_cattle_splits.csv, declared; N6):
+    split -> (the CAPRI activity that gains the stalls z, the one that gives them up), in the table's order."""
+    import csv
+    from pathlib import Path
+    with open(Path(__file__).resolve().parents[2] / "capri_data" / "codes" / "model_cattle_splits.csv", newline="") as f:
+        return {r["split"]: (r["gains"], r["gives"]) for r in csv.DictReader(f)}
+
+
+CATTLE_SPLITS = _load_cattle_splits()
+
+
+def _load_price_follows():
+    """The activities whose price follows a market commodity (capri_data/codes/model_price_follows.csv, declared;
+    refactor stage 4): (activity, commodity) in the table's order, those of the EU's markets first-class
+    (eu_market 1: beet follows sugar, durum wheat the wheat market) and all of them (Norway's step adds raw milk)."""
+    import csv
+    from pathlib import Path
+    with open(Path(__file__).resolve().parents[2] / "capri_data" / "codes" / "model_price_follows.csv", newline="") as f:
+        rows = list(csv.DictReader(f))
+    return (tuple((r["activity"], r["commodity"]) for r in rows if r["eu_market"] == "1"),
+            tuple((r["activity"], r["commodity"]) for r in rows))
+
+
+#: (activity, commodity): the price that follows a market's, in the EU's markets and in all (with Norway's raw milk)
+PRICE_FOLLOWS_EU, PRICE_FOLLOWS_ALL = _load_price_follows()
+
+
+def _load_capri_set(name):
+    """One of CAPRI's sets as written by tools/build/build_code_lists.py (capri_data/codes/capri/<name>.csv), its
+    codes in the file's order."""
+    import csv
+    from pathlib import Path
+    with open(Path(__file__).resolve().parents[2] / "capri_data" / "codes" / "capri" / f"{name}.csv", newline="") as f:
+        return tuple(r["code"] for r in csv.DictReader(f))
+
+
+#: CAPRI's traded feed bulks (FEED_TRD), in CAPRI's order
+CAPRI_FEED_TRD = _load_capri_set("FEED_TRD")
+#: CAPRI's permanent crop groups for the fertiliser distribution (supply/define_ngrp_sets.gms PERM_NGRP: GRAS, PERM)
+CAPRI_PERM_NGRP = frozenset(_load_capri_set("PERM_NGRP"))
+
+
+def _load_cact_to_ngrp():
+    """CAPRI's crop activity -> nutrient group (CACT_TO_NGRP, capri_data/codes/capri/CACT_TO_NGRP.csv)."""
+    import csv
+    from pathlib import Path
+    with open(Path(__file__).resolve().parents[2] / "capri_data" / "codes" / "capri" / "CACT_TO_NGRP.csv", newline="") as f:
+        return {r["cact"]: r["ngrp"] for r in csv.DictReader(f)}
+
+
+CAPRI_CACT_TO_NGRP = _load_cact_to_ngrp()
+#: crops on permanent-crop land (FRUN), arable (ARAC) and grassland (GRAS), in the order of CROPS
+CROPS_ON_LAND = {lt: tuple(a for a in CROPS if ACTIVITY_CLASSES[a]["land_type"] == lt) for lt in ("ARAC", "GRAS", "FRUN")}
 
 # ---------------------------------------------------------------------------
 # NUTRIENT / ENVIRONMENTAL SETS
@@ -304,21 +397,50 @@ def _load_ms_codes():
     from pathlib import Path
     p = Path(__file__).resolve().parents[2] / "capri_data" / "shared" / "capri_member_state_codes.csv"
     with open(p, newline="") as f:
-        return {r["nuts_prefix"]: r["capri_ms"][:2] for r in csv.DictReader(f)}
+        return {r["nuts_prefix"]: r["capri_ms"] for r in csv.DictReader(f)}
 
 
-MS_CODE = _load_ms_codes()
+#: country prefix -> CAPRI member state, as CAPRI codes it (BE -> BL000000; TR -> TUR, Turkey's code in sets.gms)
+MS_OF_PREFIX = _load_ms_codes()
+#: country prefix -> the two letters of CAPRI's member state (BE -> BL; TR -> TU, as in CAPREG's dump res_17TU)
+MS_CODE = {p: m[:2] for p, m in MS_OF_PREFIX.items()}
+_MS_SET = frozenset(MS_OF_PREFIX.values())
+
+
+def _load_market_codes():
+    """CAPRI's market regions (RM) and trade-policy blocks (RMTP) that are not member-state codes: codes capri_ms must
+    not read by their first two letters (BEL Belarus, BGD Bangladesh and SKOR South Korea would read as BL, BG and SK;
+    MARKET_REGIONS_INVENTORY.md section 7, decision 1, before the market takes CAPRI's codes)."""
+    import csv
+    from pathlib import Path
+    d = Path(__file__).resolve().parents[2] / "capri_data" / "codes" / "capri"
+    codes = set()
+    for name in ("RM.csv", "RMTP.csv"):
+        with open(d / name, newline="") as f:
+            codes |= {r["code"] for r in csv.DictReader(f)}
+    return frozenset(codes - _MS_SET)
+
+
+#: CAPRI's market and trade-policy codes that are not member states (UK000000, NO000000 and TUR are both)
+_MARKET_CODES = _load_market_codes()
 
 
 def capri_ms(region: str) -> str:
-    """CAPRI member state of a model region (CAPRI's code) or a country prefix: 'BL210000' -> 'BL000000',
-    'IR010000' -> 'IR000000', 'BE' -> 'BL000000'."""
-    p = str(region)[:2]
-    return MS_CODE.get(p, p) + "000000"
+    """CAPRI member state of a model region (CAPRI's code), a CAPRI member state or a country prefix:
+    'BL210000' -> 'BL000000', 'IR010000' -> 'IR000000', 'BE' -> 'BL000000', 'TR100000' -> 'TUR', 'TUR' -> 'TUR'.
+    A prefix not in the table is CAPRI's own (DE, UK, CS): its member state is the prefix + 000000."""
+    r = str(region)
+    if r in _MS_SET:
+        return r
+    if r in _MARKET_CODES:
+        raise ValueError(f"capri_ms({r!r}): one of CAPRI's market regions or trade-policy blocks, not a member state or "
+                         f"regional unit (its first two letters, {r[:2]!r}, would read as a member state's prefix)")
+    p = r[:2]
+    return MS_OF_PREFIX.get(p, p + "000000")
 
 
 def is_eu(region: str) -> bool:
     """Whether a model region, a CAPRI member state or a country prefix belongs to the EU: its CAPRI member state is in
     one of CAPRI's EU trade blocks (EU_MS_BLOCK, capri_data/shared/eu_market_blocks.csv). Norway's supply regions are
-    not (they are SUP_NONEU_ALL)."""
+    not (they are SUP_NONEU_ALL). A market region's code raises (capri_ms)."""
     return capri_ms(region) in EU_MS_BLOCK

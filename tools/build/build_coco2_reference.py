@@ -10,7 +10,7 @@ The listing carries 15 significant digits (the GDX file 17).
 
 Output (CAPRI's own data: read-only reference, read by the tests and the parity runs, never by the model;
 docs/design/CAPTRD_MOD.md section 6):
-  capri_reference/coco2/17/coco2_output.csv.gz    region, item, col, row, t, value, eps
+  capri_sources/reference/coco2/17/coco2_output.csv.gz    region, item, col, row, t, value, eps
 
 Zeros: a record listed as Eps is written with value 0 and eps = 1; a record not listed is absent.
 
@@ -27,7 +27,15 @@ import zipfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-OUT = ROOT / "capri_reference" / "coco2" / "17" / "coco2_output.csv.gz"
+
+
+def _REFERENCE():
+    """capri_sources/reference or $CAPRI_REFERENCE (tools/lib/paths.py)."""
+    import sys as _s
+    _s.path.insert(0, str(ROOT / "tools" / "lib"))
+    from paths import REFERENCE
+    return REFERENCE
+OUT = _REFERENCE() / "coco2" / "17" / "coco2_output.csv.gz"
 REC = re.compile(r"^'([^']*)'\.'([^']*)'\.'([^']*)'\.'([^']*)'\.'([^']*)'\s+(\S+?)\s*,?$")
 
 

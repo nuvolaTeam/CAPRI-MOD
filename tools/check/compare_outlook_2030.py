@@ -19,6 +19,8 @@ from pathlib import Path
 import pandas as pd
 
 import functools as _ft
+__import__("sys").path.insert(0, str(__import__("pathlib").Path(__file__).resolve().parents[2]))
+from capri_mod.io_results import load_run  # a run pickle or a stored run, "store:ROOT:SCENARIO[:RUN_ID]"
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 VAL = ROOT / "capri_data" / "validation"
@@ -92,7 +94,7 @@ def main(run, out_csv=None):
     ol = _read_csv(VAL / "eu_outlook_2020_2030.csv", dtype=str)
     capri = json.load(open(VAL / "capri_eu27_market_balance_2030_ref.json"))["products"]
     lvl = _read_csv(VAL / "capri_eu27_levels_2030_ref.csv", index_col=0)["val"].to_dict()
-    d = pickle.load(open(run, "rb"))
+    d = load_run(run)
     act, outq = d["act"][0], d["out"][0]
     bm = d["base_market"]
     rows = []

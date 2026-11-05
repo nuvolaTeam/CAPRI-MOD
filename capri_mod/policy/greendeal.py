@@ -143,8 +143,6 @@ def farm_to_fork_scenario() -> PolicyScenario:
 #: _diet00_oth00defaultA, named in the batch as the reference of the 2035 step). Settings of that batch not in the
 #: GUI group: manure trade on, inner fertiliser model on.
 GREENDEAL_2030_TARGETS = dict(lndscpTarg=8, orgTarg=18, pestRedu=20, mineRedu="13crp", surpRedu=30)
-#: the full targets of the series, reached in 2040 (surplus -50%, 20crp, organic 25%, pesticides -32%, landscape 10%)
-GREENDEAL_2040_TARGETS = dict(lndscpTarg=10, orgTarg=25, pestRedu=32, mineRedu="20crp", surpRedu=50)
 
 
 def greendeal_2030_scenario(**kw) -> PolicyScenario:
