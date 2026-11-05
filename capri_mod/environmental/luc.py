@@ -52,7 +52,6 @@ class LUCModel:
         v = self.v.get(capri_region)
         if v is None:
             return None
-        from scipy.optimize import minimize
         f = float(v.get("step", 1.0))
         final = {c: float(v.get(c, 0.0)) for c in CLS.values()}
         dl = {k: float(d_land.get(k, 0.0) or 0.0) for k in LAND_MARKET_TYPES}   # codes/model_land_types.csv
@@ -96,10 +95,11 @@ class LUCModel:
         from capri_mod.settings import current as _settings
         from capri_mod.supply.capri_regional_nlp import linear_solver_options as _linear_solver_options
         S = ca.nlpsol("L", "ipopt", {"x": z, "f": obj, "g": g},
-                      {"ipopt.print_level": 0, "print_time": 0,
+                      {"ipopt.print_level": int(_settings().get("diagnostics.ipopt_print_level")), "print_time": 0,
                        "ipopt.tol": float(_settings().get("environment.luc_ipopt_tol")),
                        "ipopt.max_iter": int(_settings().get("environment.luc_max_iter")),
-                       "ipopt.bound_relax_factor": 0.0, **_linear_solver_options()})
+                       "ipopt.bound_relax_factor": float(_settings().get("environment.luc_bound_relax_factor")),
+                       **_linear_solver_options()})
         sol = S(x0=np.ones(len(m)), lbx=1e-8 / np.maximum(m, 1e-12), ubx=np.inf, lbg=rhs, ubg=rhs)
         zz = np.asarray(sol["x"]).ravel()
         res = type("R", (), {"success": S.stats()["success"], "x": zz})()

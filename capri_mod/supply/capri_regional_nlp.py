@@ -1056,7 +1056,7 @@ class CapriRegionalNLP:
             nk = Mk.shape[1]
             Ma = np.vstack([Mk / csc, np.sqrt(float(_settings().get("supply.nlp_cal_ridge"))) * np.eye(nk)])
             ra = np.concatenate([rhs, np.zeros(nk)])
-            sol = lsq_linear(Ma, ra, bounds=(lo[keep] * csc, hi[keep] * csc), lsmr_tol="auto",
+            sol = lsq_linear(Ma, ra, bounds=(lo[keep] * csc, hi[keep] * csc),
                              max_iter=int(_settings().get("supply.nlp_cal_lsq_max_iter")))
             mult[keep] = sol.x / csc
         else:
@@ -1142,7 +1142,8 @@ class CapriRegionalNLP:
             Xs = ca.vertcat(ca.DM(x[:o]), xf, ca.DM(x[o1:]))
             gf = ca.Function("gf", [self.X, self.p], [self.g[r0:r1]])(Xs, ca.DM(self.pval))
             S = ca.nlpsol("C", "ipopt", {"x": xf, "f": 0, "g": gf},
-                          {"ipopt.print_level": 0, "print_time": 0, "ipopt.tol": 1e-10,
+                          {"ipopt.print_level": int(_settings().get("diagnostics.ipopt_print_level")), "print_time": 0,
+                           "ipopt.tol": float(_settings().get("supply.nlp_fert_check_tol")),
                            "ipopt.max_iter": int(_settings().get("supply.nlp_max_iter")),
                            **linear_solver_options()})
             r = S(x0=x[o:o1], lbx=self.lbx[o:o1], ubx=self.ubx[o:o1], lbg=self.lbg[r0:r1], ubg=self.ubg[r0:r1])
@@ -1260,17 +1261,30 @@ class CapriRegionalNLP:
             _SOLVERS.move_to_end(key)
         return S
 
-    def solve(self, x0, max_iter=None, tol=1e-8, print_level=0, lam=None):
+    def solve(self, x0, max_iter=None, tol=None, print_level=None, lam=None):
         """IPOPT from x0; with lam = (lam_x, lam_g) of a previous solve of the same structure, IPOPT's warm start from
-        that primal-dual point (CAPRI's CONOPT also restarts from the last solution, its basis included)."""
+        that primal-dual point (CAPRI's CONOPT also restarts from the last solution, its basis included). tol is
+        required: until 5 November 2026 a default of 1e-8 served the retries with relaxed fertiliser caps, now the
+        setting supply.nlp_relax_try_tol."""
         import time as _t
         from capri_mod.settings import current as _settings
         _st = _settings()
         if max_iter is None:
             max_iter = int(_st.get("supply.nlp_max_iter"))
+        if tol is None:
+            raise ValueError("CapriRegionalNLP.solve needs its tolerance (outer_loop.nlp_tol_final or "
+                             "supply.nlp_relax_try_tol): no default")
+        if print_level is None:
+            print_level = int(_st.get("diagnostics.ipopt_print_level"))
         t0 = _t.time()
         opts = {"ipopt.print_level": print_level, "print_time": 0, "ipopt.max_iter": max_iter, "ipopt.tol": tol,
-                "ipopt.acceptable_tol": float(_st.get("supply.nlp_acceptable_tol")), "ipopt.mu_strategy": "adaptive",
+                "ipopt.acceptable_tol": float(_st.get("supply.nlp_acceptable_tol")), "ipopt.mu_strategy": str(_st.get("supply.nlp_mu_strategy")),
+                "ipopt.honor_original_bounds": str(_st.get("supply.nlp_honor_original_bounds")),
+                "ipopt.constr_viol_tol": float(_st.get("supply.nlp_constr_viol_tol")),
+                "ipopt.acceptable_iter": int(_st.get("supply.nlp_acceptable_iter")),
+                "ipopt.bound_relax_factor": float(_st.get("supply.nlp_bound_relax_factor")),
+                "ipopt.nlp_scaling_method": str(_st.get("supply.nlp_scaling_method")),
+                "ipopt.nlp_scaling_max_gradient": float(_st.get("supply.nlp_scaling_max_gradient")),
                 "ipopt.fixed_variable_treatment": str(_st.get("supply.nlp_fixed_variable_treatment")),
                 # a guard: a regional solve normally takes well under a second; one that stalls is cut and the caller's
                 # next start (or fallback) follows
@@ -1281,9 +1295,11 @@ class CapriRegionalNLP:
             # active set no longer fits can take over a thousand (DEB2 1,252 in the Green Deal baseline), where the
             # cold start from the same point (the caller's next start) takes a few hundred at most
             opts["ipopt.max_iter"] = min(int(max_iter), int(_st.get("supply.nlp_warm_max_iter")))
-            opts.update({"ipopt.warm_start_init_point": "yes", "ipopt.mu_init": 1e-6,
-                         "ipopt.warm_start_bound_push": 1e-9, "ipopt.warm_start_mult_bound_push": 1e-9,
-                         "ipopt.warm_start_slack_bound_push": 1e-9})
+            opts.update({"ipopt.warm_start_init_point": "yes",
+                         "ipopt.mu_init": float(_st.get("supply.nlp_warm_start_mu_init")),
+                         "ipopt.warm_start_bound_push": float(_st.get("supply.nlp_warm_start_bound_push")),
+                         "ipopt.warm_start_mult_bound_push": float(_st.get("supply.nlp_warm_start_mult_bound_push")),
+                         "ipopt.warm_start_slack_bound_push": float(_st.get("supply.nlp_warm_start_slack_bound_push"))})
         S = self._get_solver(opts)
         self._solver = S
         self.build_s = _t.time() - t0

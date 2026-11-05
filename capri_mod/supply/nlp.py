@@ -284,7 +284,7 @@ class NLPBlock:
                 _crn.SOLVE_PROBE(_crn.problem_fingerprint(
                     spec, {"x_start": np.asarray(x_start, float), "prev": getattr(self.sv, "nlp_prev", None),
                            "f_prev": getattr(self.sv, "nlp_prev_f", None), "keep": _keep},
-                    {"tol": float(getattr(type(self), "nlp_tol", 1e-8)),
+                    {"tol": float(type(self).nlp_tol),
                      "warm_check": float(getattr(type(self), "nlp_warm_check", 0.01)),
                      "jump_check": float(getattr(type(self), "nlp_jump_check", 0.0) or 0.0),
                      "jump_gain": float(getattr(type(self), "nlp_jump_gain", 0.0) or 0.0)}))
@@ -321,7 +321,7 @@ class NLPBlock:
         starts.append(("start", nlp.start(np.asarray(x_start, float)), None))
         res = None
         kinds = []
-        _tol = float(getattr(type(self), "nlp_tol", 1e-8))
+        _tol = float(type(self).nlp_tol)
         _tried = []
         _km = _crn.KKT_MODE
         _kb = _st.setdefault(self.sv, "kkt_base", {}) if _km else None
@@ -400,7 +400,8 @@ class NLPBlock:
         def _try(sp_):
             try:
                 nlp_ = CapriRegionalNLP(sp_)
-                return nlp_, _nsolve(nlp_, nlp_.start(np.asarray(x_start, float)))
+                return nlp_, _nsolve(nlp_, nlp_.start(np.asarray(x_start, float)),
+                                     tol=float(_settings().get("supply.nlp_relax_try_tol")))
             except Exception:
                 return None, None
         if (not _ok(res) and _fp is not None and _todo and getattr(self.ev, "nlp_try_n_relax", False)

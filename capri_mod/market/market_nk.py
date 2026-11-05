@@ -59,6 +59,7 @@ class NewtonKrylovMixin:
         sclip = tuple(st.get("market.step_clip"))
         h = float(st.get("market.nk_fd_step"))
         kmax = int(st.get("market.nk_max_krylov"))
+        eta_lo, eta_hi = float(st.get("market.nk_forcing_min")), float(st.get("market.nk_forcing_max"))
         sysd = self.par.bilat
         tadd = self._tariff_adds(trade_scenario)
         lay = self._nk_layout(r, sysd)
@@ -198,7 +199,7 @@ class NewtonKrylovMixin:
             J = LinearOperator((n, n), matvec=jv, dtype=float)
             M = LinearOperator((n, n), matvec=lambda v: apply_prec(blocks, v), dtype=float)
             rhs = np.where(frozen, 0.0, -g0)
-            eta = min(0.1, max(float(np.linalg.norm(rhs)), 1e-3))
+            eta = min(eta_hi, max(float(np.linalg.norm(rhs)), eta_lo))
             try:
                 dz, info = gmres(J, rhs, M=M, rtol=eta, restart=kmax, maxiter=1)
             except TypeError:                                      # SciPy before 1.12 names the tolerance tol

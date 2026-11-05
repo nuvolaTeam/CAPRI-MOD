@@ -13,7 +13,7 @@ from __future__ import annotations
 import numpy as np
 
 
-def solve_convex_qp(Q, c, A=None, b=None, Aeq=None, beq=None, tol: float = 1e-9):
+def solve_convex_qp(Q, c, A=None, b=None, Aeq=None, beq=None, *, tol: float):
     n = len(c)
     A = np.zeros((0, n)) if A is None else np.asarray(A, float)
     b = np.zeros(0) if b is None else np.asarray(b, float)
@@ -35,7 +35,8 @@ def _clarabel(Q, c, A, b, Aeq, beq, tol):
         cones.append(clarabel.ZeroConeT(len(beq)))
     cones.append(clarabel.NonnegativeConeT(len(b) + n))
     st = clarabel.DefaultSettings()
-    st.verbose = False
+    from capri_mod.settings import current as _settings
+    st.verbose = bool(_settings().get("diagnostics.clarabel_verbose"))
     st.tol_gap_abs = st.tol_gap_rel = st.tol_feas = tol
     sol = clarabel.DefaultSolver(P, np.asarray(c, float), A_cl, b_cl, cones, st).solve()
     ok = str(sol.status) in ("Solved", "SolverStatus.Solved")

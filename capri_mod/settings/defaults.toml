@@ -201,6 +201,34 @@ nlp_omp_threads = 1
 # without a level has no variable)
 nlp_fixed_variable_treatment = "make_constraint"
 nlp_max_cpu_time = 60.0
+# IPOPT's other options in the regional models (not CAPRI parameters: CAPRI solves with CONOPT). The barrier
+# parameter's update: "adaptive" (IPOPT's default "monotone")
+nlp_mu_strategy = "adaptive"
+# the warm start from a previous solve's primal-dual point (CapriRegionalNLP.solve with lam, CAPRI's CONOPT restarting
+# from its last solution): the barrier parameter's start (IPOPT's default 0.1) and how far the start and its
+# multipliers and slacks are pushed inside their bounds (IPOPT's defaults 1e-3), small so that the solve starts where
+# the previous one ended
+nlp_warm_start_mu_init = 1e-6
+nlp_warm_start_bound_push = 1e-9
+nlp_warm_start_mult_bound_push = 1e-9
+nlp_warm_start_slack_bound_push = 1e-9
+# IPOPT's options the regional models left at IPOPT's own defaults until 5 November 2026, written out with those
+# defaults (IPOPT 3.14.19 as built for CasADi): the solution may sit up to the bound relaxation outside a bound ("no"),
+# the constraint violation the termination test allows (1e-4, unscaled; the overall tolerance nlp_tol_final applies
+# to the scaled problem as well), the iterations at the acceptable level before IPOPT stops there (15), the bounds'
+# relaxation (1e-8), the problem's scaling ("gradient-based", the largest gradient scaled to 100)
+nlp_honor_original_bounds = "no"
+nlp_constr_viol_tol = 1e-4
+nlp_acceptable_iter = 15
+nlp_bound_relax_factor = 1e-8
+nlp_scaling_method = "gradient-based"
+nlp_scaling_max_gradient = 100.0
+# IPOPT's tolerance in the check that each fertiliser block is feasible at the base (CapriRegionalNLP's calibration)
+nlp_fert_check_tol = 1e-10
+# IPOPT's tolerance in the retries with relaxed mineral fertiliser caps (the regional model's fallback when its solve
+# fails at the regulations; SupplyModule's _try): 1e-8, IPOPT's own default, which the solve's default argument gave
+# them until 5 November 2026
+nlp_relax_try_tol = 1e-8
 nlp_cal_tol = 1e-6
 # inner loop of the supply module: N-balance price
 nbal_tol_abs = 0.01
@@ -324,6 +352,10 @@ solver = "fixed_point"
 # Newton-Krylov: step of the directional differences in log prices; Krylov vectors per Newton step
 nk_fd_step = 1e-6
 nk_max_krylov = 30
+# Newton-Krylov: GMRES's relative tolerance per Newton step (the forcing term) is the residual's norm, kept within
+# [nk_forcing_min, nk_forcing_max]
+nk_forcing_min = 1e-3
+nk_forcing_max = 0.1
 max_iter = 100
 tol = 1e-7
 damping_increase_threshold = 0.999
@@ -358,6 +390,8 @@ ammapp_sign = "consistent"
 # LUC solve: IPOPT tolerance and iterations
 luc_ipopt_tol = 1e-12
 luc_max_iter = 500
+# IPOPT's relaxation of the bounds in the LUC solve: 0, the bounds held exactly (IPOPT's default 1e-8)
+luc_bound_relax_factor = 0.0
 
 [projection]
 # CAPRI's baseline calibration in projected years: rounds, tolerance, stall ratio (fodder crops held by their balances)
@@ -396,6 +430,10 @@ slow_region_seconds = 60.0
 progress_every_regions = 50
 # the market supply Hessian's progress printed every this many price shocks
 hessian_progress_every = 5
+# the solvers' own output (output only, the results do not depend on it): IPOPT's print level (0: none) in every
+# IPOPT solve, Clarabel's progress printout
+ipopt_print_level = 0
+clarabel_verbose = false
 
 [captrd]
 # CAPTRD-MOD (capri_mod/pipeline/captrd): CAPRI's baseline trend projection (docs/design/CAPTRD_MOD.md).

@@ -66,7 +66,7 @@ class ManureBlock:
         (min_p sum_k Phi_k(p_k) s.t. p_k - p_l <= c_kl) was solved with SLSQP before and
         failed on the schedules' kinks.
         """
-        from scipy.optimize import nnls as _nnls, minimize as _min
+        from scipy.optimize import nnls as _nnls
         sm = self.supply_module
         # the market's prices by country: the N market's in manure_pool_price, P and K in manure_pool_price_pk
         pools = dict((getattr(sm.seen, "manure_pool_price", None) or {}) if prod == "N"
