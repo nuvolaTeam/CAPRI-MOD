@@ -17,7 +17,7 @@ capri-mod has no tillage, buffer strips, biodiversity or biochar options: B2 is 
 Deal reference with endogenous technologies (the 'ini' run): R = leach_ini / (leach_base x B1 at CAPRI's initial
 shares), computed in capri_mod/supply/n_leaching.py from this file's leach_ini (REGISTERED).
 
-Data read: capri_data/sources/capri_res/gd2030_endotech_ini_nbalance.csv, CAPRI's regional N balance of the run
+Data read: capri_data/sources/intermediate/capri_res/gd2030_endotech_ini_nbalance.csv, CAPRI's regional N balance of the run
 (tools/build/extract_gd2030_nbalance.py; this builder extracted it until 29 October 2026)
 
 Data written
@@ -34,7 +34,7 @@ import csv
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-SRC = ROOT / "capri_data" / "sources" / "capri_res" / "gd2030_endotech_ini_nbalance.csv"
+SRC = ROOT / "capri_data" / "sources" / "intermediate" / "capri_res" / "gd2030_endotech_ini_nbalance.csv"
 OUT = ROOT / "capri_data" / "2017" / "abatement" / "ammonia" / "n_leaching_region.csv"
 
 

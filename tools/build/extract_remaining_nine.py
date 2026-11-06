@@ -81,7 +81,7 @@ def main() -> None:
     df = df.dropna(subset=["model_region"])
     df["activity"] = df.activity.replace({"MAIZ": "CORN"})
 
-    out = args.data_dir / "sources" / "capreg"
+    out = args.data_dir / "sources" / "intermediate" / "capreg"
     out.mkdir(parents=True, exist_ok=True)
     summary = {}
 

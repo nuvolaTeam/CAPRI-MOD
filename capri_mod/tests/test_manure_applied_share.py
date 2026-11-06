@@ -13,7 +13,7 @@ ROOT = Path(__file__).resolve().parents[2]
 def test_the_input_is_capris_share_exactly():
     from capri_mod.csvio import read_csv
     from capri_mod.fert.npk import manure_applied_share
-    s = read_csv(ROOT / "capri_data" / "sources" / "environment" / "npk_dataout_2030.csv.xz", keep_default_na=False)
+    s = read_csv(ROOT / "capri_data" / "sources" / "raw" / "capri" / "results" / "res_2_1730greendeal_refdefaulta" / "npk_dataout_2030.csv.xz", keep_default_na=False)
     s = s[(s.item == "") & (s.row.isin(["EXCRET", "MTRADE"]))]
     v = {(t.region, t.row, t.col): float(t.value) for t in s.itertuples(index=False)}
     want = {(r, {"PHOF": "P", "POTF": "K", "NITF": "N"}[col]): max(0.0, 1.0 - v.get((r, "MTRADE", col), 0.0) / x)

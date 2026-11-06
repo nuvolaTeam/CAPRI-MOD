@@ -9,7 +9,7 @@ and relaxes the "limCres" regulation (crop residues to a group at most 1.3 x bas
 listed pairs, again by simulation year.
 
 The file's statements were converted to CSV by tools/build/convert_sources_to_csv.py (its parse of the file, moved
-there unchanged): capri_data/sources/policy/minfert_redu_by_crop_p_checkSmallMine.csv and
+there unchanged): capri_data/sources/raw/capri/dat/policy/minfert_redu_by_crop_p_checkSmallMine.csv and
 minfert_redu_by_crop_limCres.csv. This builder reads both and writes them for the model, which picks the rows that
 apply to its simulation year (CAPRI's conditions are strict: simy > YYYY).
 
@@ -26,7 +26,7 @@ import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[2]
 DEST = ROOT / "capri_data" / "scenarios" / "greendeal_group"
-SRC = ROOT / "capri_data" / "sources" / "policy"
+SRC = ROOT / "capri_data" / "sources" / "raw" / "capri" / "dat" / "policy"
 
 
 def main():

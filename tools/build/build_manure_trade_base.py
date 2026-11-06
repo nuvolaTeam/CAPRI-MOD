@@ -31,7 +31,7 @@ from _grep import grep  # noqa: E402  (grep -E in Python: any system)
 from paths import EXPORTS  # noqa: E402  (CAPRI's material outside the repository)
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
-KEEP = ROOT / "capri_data" / "sources" / "environment" / "capri_manure_trade_2030.csv"
+KEEP = ROOT / "capri_data" / "sources" / "raw" / "capri" / "results" / "res_2_1730greendeal_refpol_endotech_all_inidefaulta" / "capri_manure_trade_2030.csv"
 DEST = ROOT / "capri_data" / "2017" / "environment" / "manure_trade_2030.csv"
 
 

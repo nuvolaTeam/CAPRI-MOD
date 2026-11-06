@@ -6,7 +6,7 @@ than the requirement function asks (p_animReq > p_animReqLit). CAPRI's definitio
 
   excess  e_C = p_animReq / p_animReqLit - 1 for crude protein (CRPR), e_E the same for energy (ENNE)
           = CAPRI's requirement correction factors p_animReqCorrFac (capmod/load_feed.gms loads them from the reqrel
-            results as p_animReqCorrFac1; capri_data/sources/envind/anim_req_corr_2017.csv)
+            results as p_animReqCorrFac1; capri_data/sources/intermediate/envind/anim_req_corr_2017.csv)
   cut     p_LowNFeedCut = 0.15 x max(0, e_C) / (1 + 0.5 max(0, e_E)) x ghgTechLowNFeed      (EU regions, e_C > 0)
   effects crude protein (and lysine) requirement x (1 - cut x share); manure N x (1 - cut x (MANN + CRPR_EXPT) /
           MANN x share) (the protein not fed is not excreted; CRPR_EXPT = N leaving in products)
@@ -43,7 +43,7 @@ from paths import EXPORTS, SOURCES  # noqa: E402  (CAPRI's material outside the 
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 M = ROOT / "capri_data" / "2017" / "abatement" / "mitigation"
-SRC = ROOT / "capri_data" / "sources" / "envind"
+SRC = ROOT / "capri_data" / "sources" / "intermediate" / "envind"
 CORR = SRC / "anim_req_corr_2017.csv"
 LEV = SRC / "res17_mann_crpr_expt.csv"
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "lib"))
@@ -94,7 +94,7 @@ def main():
     C = {(r.region, r.activity, r.item): float(r.value) for r in cr.itertuples()}
     lv = _read_csv(LEV)
     D = {(r.region, r.activity, r.item): float(r.value) for r in lv.itertuples()}
-    cs = _read_csv(ROOT / "capri_data" / "sources" / "ghgtech" / "capri_costsavings_2030.csv")
+    cs = _read_csv(ROOT / "capri_data" / "sources" / "intermediate" / "ghgtech" / "capri_costsavings_2030.csv")
     cs = cs[cs.technology.str.lower() == "lownfeed"]
     MX = {(r.region, r.activity): float(r.level) for r in cs[cs.run == "max"].itertuples() if pd.notna(r.level)}
     sys.path.insert(0, str(ROOT))

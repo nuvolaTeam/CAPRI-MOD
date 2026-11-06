@@ -32,7 +32,7 @@ from paths import EXPORTS  # noqa: E402  (CAPRI's material outside the repositor
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 DUMP = EXPORTS / "markmarket_greendeal_1730et_base_1717.txt"
-SRC_KEEP = ROOT / "capri_data" / "sources" / "market" / "sugar_processing_dataout_2030.csv"
+SRC_KEEP = ROOT / "capri_data" / "sources" / "raw" / "capri" / "results" / "markmarket_greendeal_1730et_base_1717" / "sugar_processing_dataout_2030.csv"
 KEYS = {("GROF", "SUGB"), ("PRCM", "SUGB"), ("MAPR", "SUGA"), ("PRCY", "SUGA")}
 
 

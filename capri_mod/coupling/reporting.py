@@ -50,7 +50,7 @@ class ReportingBlock:
                     (EUR/ha; CAPRI's UAAR x d_area, reports/sol_simy.gms l. 181)
           ProfitAgr      the farms' profit, MGVA - RENT, and ProfitLandUse the land owners', RENT: CAPRI's accounts
                     with its land market (welfare.gms supremaMrk), as in CAPRI's 2030 reference run (EU27: MGVA
-                    302,113 - rents 58,994 = ProfitAgr 243,119; capri_data/sources/capri_res/ref2030_welfare.csv)
+                    302,113 - rents 58,994 = ProfitAgr 243,119; capri_data/sources/raw/capri/results/ref2030_welfare.csv)
           PSEs      the budget's cost of the premiums, minus the premiums paid (CAPRI -FEOP, -FEOG of the products
                     without a market)
         The market's agents' components are in results["market"].welfare. A failure here does not stop the run:

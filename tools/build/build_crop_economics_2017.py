@@ -27,7 +27,7 @@ Outputs (this builder is the one writer of the three tables, 29 October 2026):
       build_animal_yields.build(); the animal costs of DCOW, BULL, PIGF, OANI from build_capri_base.intensive_values
       (TOIN) and of SHGM, SHGF from tools/lib/_sheep_goat.costs
   capri_data/2017/supply/crop_premium.csv               (new: region x model crop, EUR/ha)
-  capri_data/sources/capreg/capreg_producer_prices.csv  CAPRI's extract (capreg_producer_prices_extract.csv) with
+  capri_data/sources/intermediate/capreg/capreg_producer_prices.csv  CAPRI's extract (capreg_producer_prices_extract.csv) with
       the model-coded crop columns written for all regions and the four animal columns from intensive_values (MPRI)
   capri_data/2017/policy/cap_payments.csv               (the payment engine's per-region rates: BPS = CAPRI's
       premiums per ha of UAA, UAAR PRME; ANC, AES, ORGANIC, COUPLED = 0 - CAPRI's results carry no split by
@@ -58,7 +58,7 @@ sys.path.insert(0, str(ROOT))
 from capri_mod.data import definitions as D  # noqa: E402
 
 #: CAPRI's regional producer prices as extracted (tools/build/extract_all_from_data2.py), CAPRI's codes
-PRICES_EXTRACT = ROOT / "capri_data" / "sources" / "capreg" / "capreg_producer_prices_extract.csv"
+PRICES_EXTRACT = ROOT / "capri_data" / "sources" / "intermediate" / "capreg" / "capreg_producer_prices_extract.csv"
 
 ITEMS = ("LEVL", "YILD", "TOIN", "MPRI", "PRME", "MREV", "GRAS")
 GRASS_DM = ROOT / "capri_data" / "2017" / "supply" / "grass_dm_content.csv"

@@ -39,8 +39,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  
 from paths import EXPORTS  # noqa: E402  (CAPRI's material outside the repository)
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
-SRC_M = ROOT / "capri_data" / "sources" / "market" / "dairy_world_dataout_2030.csv"
-SRC_E = ROOT / "capri_data" / "sources" / "market" / "dairy_world_elasticities_2030.csv"
+SRC_M = ROOT / "capri_data" / "sources" / "raw" / "capri" / "results" / "markmarket_greendeal_1730et_base_1717" / "dairy_world_dataout_2030.csv"
+SRC_E = ROOT / "capri_data" / "sources" / "raw" / "capri" / "results" / "elas_2_1730defaulta" / "dairy_world_elasticities_2030.csv"
 PRODUCTS = ("BUTT", "SMIP", "CHES", "FRMI", "CREM", "COCM", "WMIO", "CASE", "WHEP")
 MLK = PRODUCTS + ("MILK",)
 ITEMS = ("PROD", "PROC", "FATS", "PROT", "PPRI", "HCON", "FEED", "Imports_noIntra", "Exports_noIntra")

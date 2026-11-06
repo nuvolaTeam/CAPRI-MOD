@@ -6,7 +6,7 @@ each crop group's terms. Reported: the ratio recipe / CAPRI by activity (median 
 regions, share of regions within 5%) and for the group terms.
 
 With --year 2017 the recipe's 2017 terms are compared with CAPRI's base-year (CAPREG) terms of the model's regions
-(capri_data/sources/capreg/pmp_quad_techn.csv: the first technology's diagonal term, Q(T1, T1) or Q(T, T); the group
+(capri_data/sources/intermediate/capreg/pmp_quad_techn.csv: the first technology's diagonal term, Q(T1, T1) or Q(T, T); the group
 terms pmp_quad_pact.csv).
 
     python tools/check/pmp_recipe_check.py [--year 2030|2017] [--out FILE]
@@ -21,7 +21,7 @@ import pandas as pd
 import functools as _ft
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
-SRC = ROOT / "capri_data" / "sources" / "baseline_pmp"
+SRC = ROOT / "capri_data" / "sources" / "intermediate" / "baseline_pmp"
 
 
 def collapsed(t: pd.DataFrame) -> pd.Series:
@@ -74,7 +74,7 @@ def main() -> None:
 
 
 def check_2017(a) -> None:
-    cap = _read_csv(ROOT / "capri_data" / "sources" / "capreg" / "pmp_quad_techn.csv")
+    cap = _read_csv(ROOT / "capri_data" / "sources" / "intermediate" / "capreg" / "pmp_quad_techn.csv")
     rec = _read_csv(SRC / "recipe_2017_quad_techn.csv")
     rec = rec[(rec.tech1 == rec.tech2) & rec.tech1.isin(["T1", "T"])].drop_duplicates(["region", "activity"]).copy()
     rec["model_region"] = rec.region            # the model's regions are CAPRI's units since 27 October 2026
@@ -87,7 +87,7 @@ def check_2017(a) -> None:
     print(tab.round(3).to_string())
     print(f"all: {len(j)} pairs, within 5%: {((j.ratio - 1).abs() < 0.05).mean():.1%}, "
           f"within 20%: {((j.ratio - 1).abs() < 0.2).mean():.1%}")
-    cp = _read_csv(ROOT / "capri_data" / "sources" / "capreg" / "pmp_quad_pact.csv")
+    cp = _read_csv(ROOT / "capri_data" / "sources" / "intermediate" / "capreg" / "pmp_quad_pact.csv")
     rp = _read_csv(SRC / "recipe_2017_quad_pact.csv")
     rp["model_region"] = rp.region
     k = cp.merge(rp, on=["model_region", "group1", "group2"])

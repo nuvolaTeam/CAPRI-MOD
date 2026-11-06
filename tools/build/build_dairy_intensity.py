@@ -10,7 +10,7 @@ DCOL = s0 x DCOW + z), with per-head changes relative to the average cow (DCOW):
                      ENNE (net energy need), CRPR (crude protein need), DRMN, DRMX (dry matter
                      intake limits; DRMX is stored negative by CAPRI, magnitudes used)
   q_low, q_high      CAPRI's own PMP diagonal terms of DCOL and DCOH (p_pmpQuadTechn,
-                     capri_data/sources/capreg/pmp_quad_techn.csv); regions without them: the
+                     capri_data/sources/intermediate/capreg/pmp_quad_techn.csv); regions without them: the
                      country's median of q x heads over the region's heads (REGISTERED fallback,
                      column q_source), as for the grassland split (tools/build/build_grass_intensity.py)
 
@@ -37,9 +37,9 @@ ROOT = Path(__file__).resolve().parents[2]
 #: (column suffix, terms per model region): the base year's (CAPREG), CAPRI's 2030 calibration and capri-mod's
 #: recipe at 2030 (tools/build/build_intensity_q_2030.py); the model takes the suffix of its PMP source at the 2030 market
 #: year (KNOWN_ISSUES K61)
-Q_SOURCES = (("", ROOT / "capri_data" / "sources" / "capreg" / "pmp_quad_techn.csv"),
-             ("_capri2030", ROOT / "capri_data" / "sources" / "baseline_pmp" / "intensity_q_capri2030.csv"),
-             ("_recipe2030", ROOT / "capri_data" / "sources" / "baseline_pmp" / "intensity_q_recipe2030.csv"))
+Q_SOURCES = (("", ROOT / "capri_data" / "sources" / "intermediate" / "capreg" / "pmp_quad_techn.csv"),
+             ("_capri2030", ROOT / "capri_data" / "sources" / "intermediate" / "baseline_pmp" / "intensity_q_capri2030.csv"),
+             ("_recipe2030", ROOT / "capri_data" / "sources" / "intermediate" / "baseline_pmp" / "intensity_q_recipe2030.csv"))
 ITEMS = ("LEVL", "COMI", "MANN", "ENNE", "CRPR", "DRMN", "DRMX")
 ROW = re.compile(r"^'([A-Z]{2}[0-9A-Z]{6})'\.'(DCOL|DCOH|DCOW)'\.'(" + "|".join(ITEMS)
                  + r")'\.'Y'\s+(-?\d[\d.]*(?:[Ee][+\-]?\d+)?)")

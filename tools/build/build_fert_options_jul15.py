@@ -3,8 +3,8 @@ Green Deal runs use.
 
 Source: dat/scen/ghgtech/miti_data_jul15.gdx, symbol p_ghgMiti (miti_data_type = _jul15 in
 pol_input/greendeal/refpol_endotech_all_sup.gms), dumped with gdxdump by the project lead ->
-capri_data/sources/ghgtech/miti_data_jul15_p_ghgMiti.txt, converted to capri_data/sources/ghgtech/
-miti_data_jul15_p_ghgMiti.csv by tools/build/convert_sources_to_csv.py. National entries for the options without
+capri_data/sources/ghgtech/miti_data_jul15_p_ghgMiti.txt (in the repository's history), converted to
+capri_data/sources/raw/capri/dat/scen/ghgtech/miti_data_jul15_p_ghgMiti.csv by tools/build/convert_sources_to_csv.py. National entries for the options without
 farm-size cost curves; regional (NUTS 2) entries for VRT_SRUC (farm-size dependent, its own QEmitt,
 costParSqr and pmpParSqr; envind/ghgMiti.gms l. 52-57 forms its national QEmitt as the mean of the
 regional ones).
@@ -21,7 +21,7 @@ _sys_nc.path.insert(0, str(__import__("pathlib").Path(__file__).resolve().parent
 from _model_regions import national_code as _national_code  # noqa: E402  (TUR for Turkey's units, 4 November 2026)
 
 ROOT = Path(__file__).resolve().parents[2]
-SRC = ROOT / "capri_data" / "sources" / "ghgtech" / "miti_data_jul15_p_ghgMiti.csv"
+SRC = ROOT / "capri_data" / "sources" / "raw" / "capri" / "dat" / "scen" / "ghgtech" / "miti_data_jul15_p_ghgMiti.csv"
 OUT = ROOT / "capri_data" / "2017" / "abatement" / "fert_options_jul15.csv"
 COLS = ["costParLin", "costParSqr", "pmpParSqr", "revenue", "relSubs0", "relSubs1", "IniShare", "MaxShare", "QEmitt"]
 

@@ -1,6 +1,6 @@
 """
 Count the bilateral trade flows of the capmod base-year result (validation/capmod_market_extraction.json, not kept in
-git). Until 30 October 2026 it wrote them to sources/capmod/capmod_trade_flows_2017.csv.xz; nothing read that file
+git). Until 30 October 2026 it wrote them to sources/raw/capri/capmod/capmod_trade_flows_2017.csv.xz; nothing read that file
 (the model's bilateral trade comes from tools/build/build_bilateral_market.py) and it was removed, the project lead's
 decision (KNOWN_ISSUES K103).
 
@@ -84,7 +84,7 @@ def main() -> None:
           f"{df.importer.nunique()} importers, {df.commodity.nunique()} commodities")
 
     # ---- bilateral trade, excluding the World aggregate: counted for the summary only (written to
-    # sources/capmod/capmod_trade_flows_2017.csv.xz until 30 October 2026; nothing read it - the model's trade comes
+    # sources/raw/capri/capmod/capmod_trade_flows_2017.csv.xz until 30 October 2026; nothing read it - the model's trade comes
     # from tools/build/build_bilateral_market.py - and the file was removed, the project lead's decision: K103)
     bil = df[(df.item == "ImportQ") & (df.exporter != WORLD)]
     print(f"\nbilateral trade : {len(bil):,} flows, "

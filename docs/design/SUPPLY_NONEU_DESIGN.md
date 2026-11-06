@@ -121,7 +121,7 @@ built. No proxy.
      supply models' profit instead of welfare_base_2030.csv's market rows (ProfitAgr, ProfitFeed), which are kept for
      the runs that do not select it.
   9. The baseline of the 29 against CAPRI's 2030. To check then: the UK units' set-aside terms (VSET) in
-     sources/baseline_pmp/recipe_2030_quad_techn.csv moved by about x1250 when the 29 units' data came in (UKJ00000
+     sources/intermediate/baseline_pmp/recipe_2030_quad_techn.csv moved by about x1250 when the 29 units' data came in (UKJ00000
      0.67 -> 839.8; 640 UK rows; 4 November 2026): which is CAPRI's (its UK terms in pmp_quad_techn_2030).
   10. A gate with Farm-to-Fork and the Green Deal, agreed with the project lead: the full F2F and GD runs after
       MODEL_CONTENT_PLAN §5's Step G (G2b, G2d, G2f, G2g; G3 on standby), not before (the project lead,

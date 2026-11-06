@@ -40,9 +40,9 @@ merges, national copies, the 13 empty rows); their values are now CAPRI's own an
 - Removed: `shared/nuts_crosswalk.json` and `tools/build/build_nuts_crosswalk.py`, `shared/region_capri_map.csv` and
   `tools/build/build_region_map.py`, `shared/capri_regio_concordance.json` (read by nothing),
   `tools/build/build_norway_pigs.py`, `build_ssb_pigs.py` and `sources/ssb/` (Norway's 2016 regions), the sources of
-  the removed splits (`sources/capreg/p_REGIO.csv.gz`, `sources/eurostat/ef_lsk_bovine_nuts2.csv`,
+  the removed splits (`sources/capreg/p_REGIO.csv.gz`, `sources/raw/eurostat/ef_lsk_bovine_nuts2.csv`,
   `tgs00045_bovines_nuts2.csv`), and three orphans: `2017/supply/land_rent_regional.csv` (loaded, never read; with
-  `sources/eurostat/apri_lrnt.csv`), `2017/environment/capri_regional_n_balance_2030.csv` (listed by the loader, read by
+  `sources/raw/eurostat/apri_lrnt.csv`), `2017/environment/capri_regional_n_balance_2030.csv` (listed by the loader, read by
   nothing), the OTHER_AG column of land_availability.csv (no builder; read only by the HNV indicator's land total).
   Kept: `shared/nuts_version_correspondence.json` (CAPRI codes -> NUTS codes, for reporting on current NUTS, task 237).
 
@@ -87,7 +87,7 @@ Differences, each explained:
 version; variable_costs.csv now holds CAPRI's costs there), `sources/capreg/capreg_feed_availability_regional.csv` (read
 by nothing, written by nothing), `sources/capreg/capreg_levels.csv`, `capreg_yields.csv`, `derived_elasticities_from_pmp.csv`
 and their scripts `ingest_capreg_data2.py`, `derive_elasticities_from_pmp.py` (read only by each other),
-`sources/capri_dat/policy/shannon_index_nuts2_ifmcap.csv` (read by nothing; the model computes its own Shannon index).
+`sources/raw/capri/dat/policy/shannon_index_nuts2_ifmcap.csv` (read by nothing; the model computes its own Shannon index).
 Kept: `sources/ifs/` (Integrated Farm Statistics 2010/2020 by CAPRI region and activity, supplied by the project lead,
 recorded as a source not yet used; `Mapping_reg_IFSCAPRI_201020.csv` is that data set's region key). The builders'
 loads of `nuts_version_correspondence.json` that were never used removed (11 builders); build_young_animals.py

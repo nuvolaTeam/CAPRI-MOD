@@ -5,14 +5,14 @@ Until 31 October 2026 the model read capri_data/sources/capreg/ at run time and 
 work moved here, unchanged, and the model reads the two files this builder writes.
 
   capri_data/2017/supply/cap_premium_activity.csv
-      CAPRI's premium PRME per regional unit and activity (sources/capreg/capreg_cap_premium.csv, CAPREG DATA2, per ha
+      CAPRI's premium PRME per regional unit and activity (sources/intermediate/capreg/capreg_cap_premium.csv, CAPREG DATA2, per ha
       or per head), the crop columns replaced by the model-coded crop premiums of every region
       (2017/supply/crop_premium.csv, tools/build/build_crop_economics_2017.py): the CAPREG file covers 192 regions in
       CAPRI's codes, so 56 regions, and fodder, set-aside, wine and fibre everywhere, had no crop premium of their own.
   capri_data/2017/supply/producer_prices_regional.csv
-      CAPRI's regional producer prices MPRI (sources/capreg/capreg_producer_prices.csv, EUR/t) with two of CAPRI's own
+      CAPRI's regional producer prices MPRI (sources/intermediate/capreg/capreg_producer_prices.csv, EUR/t) with two of CAPRI's own
       corrections: the five crops CAPRI codes otherwise take its columns (TWIN for WINE, OFAR for OFOD), and a region
-      without a regional price takes its country's national price (sources/capreg/capreg_national_prices.csv) before
+      without a regional price takes its country's national price (sources/intermediate/capreg/capreg_national_prices.csv) before
       the EU-wide one (wine: 95.5 EUR/t in eleven vine-growing regions before, against CAPRI's national 1,362-1,923).
 
     python tools/build/build_model_premium_prices.py
@@ -29,7 +29,7 @@ sys.path.insert(0, str(ROOT))
 from capri_mod.data.definitions import MS_CODE  # noqa: E402
 from capri_mod.tableio import read_input  # noqa: E402
 
-SRC = ROOT / "capri_data" / "sources" / "capreg"
+SRC = ROOT / "capri_data" / "sources" / "intermediate" / "capreg"
 SUP = ROOT / "capri_data" / "2017" / "supply"
 PREMIUM = SUP / "cap_premium_activity.csv"
 PRICES = SUP / "producer_prices_regional.csv"

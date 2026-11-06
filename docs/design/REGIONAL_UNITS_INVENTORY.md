@@ -12,7 +12,7 @@ country, plus one unit for each country without regional detail: DK, EE, LT, LV,
 agriculture (urbanNUTS: BL100000, DE300000, DE500000, DE600000, ES630000, ES640000, AT130000, UKI00000) carry UAA 0
 (capreg/cons_levls.gms l. 1519-1520) and have no results.
 
-The units of CAPRI's Green Deal 2030 run (sources/capri_res/gd2030_endotech_ini_nbalance.csv: 270 codes, of which 250
+The units of CAPRI's Green Deal 2030 run (sources/intermediate/capri_res/gd2030_endotech_ini_nbalance.csv: 270 codes, of which 250
 are SRNUTS2 units and 20 country totals): **221 for EU27 + Norway** (EU27 215, Norway 6), plus UK 11, Turkey 12 and
 the Western Balkans 6. CAPRI's codes follow older NUTS vintages in places (e.g. France 22, Poland 16 units).
 
@@ -65,7 +65,7 @@ is spread over several model regions, the builders split it on proxies (cattle s
   stay; only the builders' mapping step changes.
 - **JSON files with model codes** (11): 2017/environment/nh3_factors_capri.json, 2017/feed/feed_ration_2017.json,
   fodder_balance_2017.json, 2017/supply/young_animals_2017.json, young_animals_by_sex_2017.json,
-  trajectories/capri_ref_2030.json, captrd_2030.json, sources/estnlp/pela_cross_by_region.json,
+  trajectories/capri_ref_2030.json, captrd_2030.json, sources/intermediate/estnlp/pela_cross_by_region.json,
   sources/residual_cost_calibration.json, and the two crosswalks (shared/nuts_crosswalk.json,
   nuts_version_correspondence.json), which the move makes unnecessary for EU27 + Norway.
 

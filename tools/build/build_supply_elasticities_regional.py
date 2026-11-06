@@ -1,6 +1,6 @@
 """Regional own-price supply elasticities of the 15 arable crops: CAPRI's PELA with CAPRI's upper-bound rule.
 
-Input: capri_data/sources/estnlp/pela_own_price.csv, the own-price slice (2005) of PELA in CAPRI's supply estimation
+Input: capri_data/sources/intermediate/estnlp/pela_own_price.csv, the own-price slice (2005) of PELA in CAPRI's supply estimation
 results (dat/estnlp/results.gdx, symbol PELA, region x crop x crop x year), by model region; written by
 tools/build/ingest_pela_gtap.py from a gdxdump of that file.
 Rule: CAPRI's heuristic bound on high elasticities (gams/supply/pmp_terms/impose_upper_bound_on_elasticity.gms,
@@ -24,7 +24,7 @@ import pandas as pd
 import functools as _ft
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
-SRC = ROOT / "capri_data" / "sources" / "estnlp" / "pela_own_price.csv"
+SRC = ROOT / "capri_data" / "sources" / "intermediate" / "estnlp" / "pela_own_price.csv"
 OUT = ROOT / "capri_data" / "2017" / "supply" / "supply_elasticities_regional.csv"
 
 

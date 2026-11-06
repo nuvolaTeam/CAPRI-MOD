@@ -41,7 +41,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  
 from paths import EXPORTS  # noqa: E402  (CAPRI's material outside the repository)
 
 ROOT = Path(__file__).resolve().parents[2]
-SRC_KEEP = ROOT / "capri_data" / "sources" / "fao_agg_2017" / "fao_agg_market_balances_bas.csv"
+SRC_KEEP = ROOT / "capri_data" / "sources" / "raw" / "capri" / "results" / "fao_agg_17_datamarket" / "fao_agg_market_balances_bas.csv"
 MODEL = {
     "SWHE": ("WHEA",), "BARL": ("BARL",), "CORN": ("MAIZ",), "OCER": ("OCER",), "RYEM": ("RYEM",), "OATS": ("OATS",),
     "RAPE": ("RAPE",), "SUNF": ("SUNF",), "SOYA": ("SOYA",), "SUGR": ("SUGA",), "POTA": ("POTA",),

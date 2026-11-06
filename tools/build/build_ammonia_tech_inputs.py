@@ -122,7 +122,7 @@ READ = {"ControlStrategies", "reducControlStrategies", "RCEmissions", "FracEmGra
         "FracUseFert"}
 
 
-MIRROR = Path(__file__).resolve().parents[2] / "capri_data" / "sources" / "capri_dat" / "miterra"
+MIRROR = Path(__file__).resolve().parents[2] / "capri_data" / "sources" / "raw" / "capri" / "dat" / "miterra"
 
 
 def norway_mirror(symbols: dict, ammo_gms: Path) -> dict:
@@ -140,7 +140,7 @@ def norway_mirror(symbols: dict, ammo_gms: Path) -> dict:
         name = by_lower.get(target.lower())
         if name is None or name not in READ:
             continue
-        f = [q for q in MIRROR.glob("*_p_NO_*.csv") if q.stem.split("_p_NO_")[1].lower() == mirror.lower()]
+        f = [q for q in MIRROR.rglob("*_p_NO_*.csv") if q.stem.split("_p_NO_")[1].lower() == mirror.lower()]
         if len(f) != 1:
             raise FileNotFoundError(f"the mirror of {name} (p_NO_{mirror}): {f}")
         with open(f[0], newline="") as fh:

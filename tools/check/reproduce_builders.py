@@ -49,13 +49,17 @@ D17 = SOURCES / "capreg"                    # res_17<CC>.txt dumps of CAPREG's 2
 GAMS = SOURCES / "gams"                     # CAPRI's GAMS code
 REF = EXPORTS / "res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv"
 SETS = REFERENCE / "sets" / "simini_21730"  # CAPRI's sets (docs/EXTERNAL_SOURCES.md), not in git
-BP = "capri_data/sources/baseline_pmp"
+BP = "capri_data/sources/intermediate/baseline_pmp"
 S = "capri_data/2017/supply"
 
 #: (builder, arguments, external inputs that must exist). Order: REGIONAL_UNITS_BUILDERS.md section 3, then the rest.
 INVOCATIONS: list[tuple[str, list[str], list[Path]]] = [
     # the CSV conversion of the sources that were not CSV (reads the originals from git history)
     ("convert_sources_to_csv", [], []),
+    # CAPRI's dat GDX symbols (as Parquet in capri_sources/dat) and the dat files of the project lead's installation
+    # (capri_sources/dat_local), to CSV (added to this list 6 November 2026; written by hand into builders.json before)
+    ("extract_capri_dat", [], [SOURCES / "dat"]),
+    ("extract_capri_dat_local", [], [SOURCES / "dat_local"]),
     ("extract_gd2030_nbalance", [], [REF]),
     ("build_regional_units", [], []),
     ("build_code_lists", ["--sets", str(SETS)], [SETS]),
@@ -94,6 +98,9 @@ INVOCATIONS: list[tuple[str, list[str], list[Path]]] = [
                                                          "LitRev_input_manStor.csv", "LitRevAmmoTech.csv",
                                                          "holdingsLSU.csv", "nvzShare_LU.csv")],
      [EXPORTS / "LitRev_inputs.csv"]),
+    # the non-EU farm structure (envind/prep_farm_size_data_for_miti.gms), from the herd and holding inputs above; read
+    # by the cost curves, the technologies and the AD option (added to this list 6 November 2026)
+    ("build_farm_size_noneu", [], [GAMS / "envind/prep_farm_size_data_for_miti.gms"]),
     ("build_ammonia_cost_curves", [], []),
     ("build_ammonia_technologies", [], []),
     ("build_n_cascade", [], []),

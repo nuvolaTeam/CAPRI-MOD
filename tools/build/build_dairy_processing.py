@@ -15,7 +15,7 @@ arm/market1.gms; in simulation CUR = CAL. FATS/PROT are contents in % (p_fat, p_
 Sources (CAPRI 2030 Green Deal reference): market results markmarket_greendeal_1730et_base_1717 (dataOut,
 member states and EU): PROD, PROC, PRCM, GROF, HCOM, FEDM, INDM, LOSM, PPRI, FATS, PROT, CSEI, INPE,
 Imports_noIntra / Exports_noIntra; elasticities elas_2_1730defaulta (p_hessNQDairy, p_ElasDair, p_ElasDem).
-The rows used are kept under capri_data/sources/market/ so the build reruns without the dumps.
+The rows used are kept under capri_data/sources/raw/capri/results/<CAPRI file>/ so the build reruns without the dumps.
 
 Outputs (capri_data/2017/market/):
   dairy_processing.csv   ms, item, q_kt, proc_kt, fats_pct, prot_pct, price, csei   (item: products, MILK,
@@ -44,8 +44,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  
 from paths import EXPORTS  # noqa: E402  (CAPRI's material outside the repository)
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
-SRC_M = ROOT / "capri_data" / "sources" / "market" / "dairy_dataout_2030.csv"
-SRC_E = ROOT / "capri_data" / "sources" / "market" / "dairy_elasticities_2030.csv"
+SRC_M = ROOT / "capri_data" / "sources" / "raw" / "capri" / "results" / "markmarket_greendeal_1730et_base_1717" / "dairy_dataout_2030.csv"
+SRC_E = ROOT / "capri_data" / "sources" / "raw" / "capri" / "results" / "elas_2_1730defaulta" / "dairy_elasticities_2030.csv"
 PRODUCTS = ("BUTT", "SMIP", "CHES", "FRMI", "CREM", "COCM", "WMIO", "CASE", "WHEP")
 MLK = PRODUCTS + ("MILK",)
 ITEMS = ("PROD", "PROC", "PRCM", "GROF", "HCOM", "FEDM", "INDM", "LOSM", "PPRI", "FATS", "PROT", "CSEI",

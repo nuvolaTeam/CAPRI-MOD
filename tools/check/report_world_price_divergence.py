@@ -46,7 +46,7 @@ def main() -> None:
     ap.add_argument("--data-dir", type=Path, default=Path("capri_data"))
     args = ap.parse_args()
 
-    ref_path = args.data_dir / "sources/capmod/capmod_world_reference_2017.csv"
+    ref_path = args.data_dir / "sources/raw/capri/capmod/capmod_world_reference_2017.csv"
     if not ref_path.exists():
         raise SystemExit(f"not found: {ref_path}\n"
                          "Run tools/build/ingest_capmod_market.py first.")

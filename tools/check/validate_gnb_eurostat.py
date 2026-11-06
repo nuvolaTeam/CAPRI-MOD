@@ -5,7 +5,7 @@ biological fixation, deposition and the surplus per ha. Eurostat's balance diffe
 definition (crop residues left on the field are neither input nor output in Eurostat; CAPRI counts them
 on both sides; manure coefficients are national), so components are compared, not only the surplus.
 
-Data: capri_data/sources/eurostat/aei_pr_gnb_nitrogen.csv (Eurostat AEI_PR_GNB, N, tonnes and kg/ha;
+Data: capri_data/sources/raw/eurostat/aei_pr_gnb_nitrogen.csv (Eurostat AEI_PR_GNB, N, tonnes and kg/ha;
 supplied by the project lead). Usage: python tools/check/validate_gnb_eurostat.py [year]
 """
 import sys
@@ -27,7 +27,7 @@ def main(year=2017):
     from capri_mod.data.definitions import ANIMALS
     d = load_all_data(str(ROOT / "capri_data"))
     e = EnvironmentalModule(d)
-    es = _read_csv(ROOT / "capri_data" / "sources" / "eurostat" / "aei_pr_gnb_nitrogen.csv")
+    es = _read_csv(ROOT / "capri_data" / "sources" / "raw" / "eurostat" / "aei_pr_gnb_nitrogen.csv")
     es = es[es.year == year].pivot_table(index="geo", columns="indic_ag", values="value")
     H = d["animal_numbers"]
     rows = {}

@@ -10,7 +10,7 @@ Source: CAPRI's 2030 Green Deal reference results (res_2_1730greendeal_refdefaul
 flows to each crop, fertDist_mine / fertDist_excr / fertDist_cres (1000 t N; summed to the groups - the dump's rows
 named CERE, PERM, GRAS are reporting aggregates over a different crop set, not the NGRP groups), the crop areas
 (LEVL) and the region's mineral losses and manure N not available (AGGT, kg/ha) - the baseline's posterior; kept
-as capri_data/sources/environment/fert_dist_dataout_2030.csv.xz. Per hectare these ARE CAPRI's posterior modes:
+as capri_data/sources/raw/capri/results/res_2_1730greendeal_refdefaulta/fert_dist_dataout_2030.csv.xz. Per hectare these ARE CAPRI's posterior modes:
 the priFertDist results at hand (DE, FR, NL, BL, DK, IT; priFertDist_<MS>1730defaulta) carry the same values
 (postModePerHa, 2030) and accuracy 1 for every region, group and source; this builder checks both.
 
@@ -92,7 +92,7 @@ def check_dumps(zpath: Path, pri: pd.DataFrame):
     print(f"postModePerHa against the extract: {n} values, worst relative difference {worst:.2e}")
 
 
-SRC = ROOT / "capri_data" / "sources" / "environment" / "fert_dist_dataout_2030.csv.xz"
+SRC = ROOT / "capri_data" / "sources" / "raw" / "capri" / "results" / "res_2_1730greendeal_refdefaulta" / "fert_dist_dataout_2030.csv.xz"
 NGRPS = ("WHEA", "BARL", "MAIZ", "CERE", "RAPN", "SUNF", "SOYA", "PULS", "POTA", "SUGB", "MAIF", "ROOF", "OFAR",
          "GRAS", "OAFC", "VEGE", "PERM")
 #: CAPRI crops (MCACT) whose LEVL make up the group areas; GRAS = GRAE + GRAI

@@ -32,7 +32,7 @@ type's rent (capri_data/2017/supply/land_rents_2030.csv at 2030; D_AREA of res_1
 
 REGISTERED differences from CAPRI's recipe, measured against CAPRI's exported 2030 terms by
 tools/check/pmp_recipe_check.py: (a) the land-nest adjustment's land-type elasticities are recomputed from CAPRI's exported
-land matrix (2030: pmp_quad_landtypes_2030.csv; 2017: capri_data/sources/capreg/pmp_quad_landtypes_2017.csv), levels
+land matrix (2030: pmp_quad_landtypes_2030.csv; 2017: capri_data/sources/raw/capri/capreg/pmp_quad_landtypes_2017.csv), levels
 and rents, not read from CAPRI's estimation (v_posterior_elasticity is not exported; the estimation makes it an exact
 function of the same matrix); (b) revenue per technology is the
 activity's TOOU x (1 + CAPRI's technology factor, +-20%; intens/techf.gms) - CAPRI: outputs x (1 + factor) x unit
@@ -40,7 +40,7 @@ values (until 23 October 2026 the factor was left out, so CAPRI's elasticity cap
 the 0.84-0.88 ratios in the estimated crops); (c) costs + rent stand in
 for CAPRI's |linear objective contribution|.
 
-Output (CAPRI codes, the format of tools/build/build_pmp_2030.py): capri_data/sources/baseline_pmp/recipe_<Y>_quad_techn.csv,
+Output (CAPRI codes, the format of tools/build/build_pmp_2030.py): capri_data/sources/intermediate/baseline_pmp/recipe_<Y>_quad_techn.csv,
 recipe_<Y>_quad_pact.csv
 
     python tools/build/build_pmp_recipe.py --year 2030|2017
@@ -62,7 +62,7 @@ _sys_nc.path.insert(0, str(__import__("pathlib").Path(__file__).resolve().parent
 from _model_regions import national_code as _national_code  # noqa: E402  (TUR for Turkey's units, 4 November 2026)
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
-SRC = ROOT / "capri_data" / "sources" / "baseline_pmp"
+SRC = ROOT / "capri_data" / "sources" / "intermediate" / "baseline_pmp"
 REF = EXPORTS / "res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv"
 DUMPS = SOURCES / "capreg"
 PELA = SOURCES / "pmp2030/estnlp_results_PELA.txt"
@@ -196,7 +196,7 @@ def rents(year: int, dat: dict, region: str) -> dict:
     (tools/build/build_land_rents.py --year: the reported D_AREA, CAPRI's rule of cal_land_nests.gms l. 204-226 where it is
     not positive; before 23 October 2026 non-positive cells were left out here, and 2017 grassland had none)."""
     if year not in _RENTS:
-        f = ROOT / "capri_data" / "sources" / "capri_land_rents" / f"land_rents_capri_{year}.csv"
+        f = ROOT / "capri_data" / "sources" / "intermediate" / "capri_land_rents" / f"land_rents_capri_{year}.csv"
         tab = defaultdict(dict)
         for r in _read_csv(f).itertuples():
             tab[r.capri_region][r.land_type] = float(r.rent_eur_ha)
@@ -207,7 +207,7 @@ def rents(year: int, dat: dict, region: str) -> dict:
 def land_quad(year: int) -> dict:
     """CAPRI's p_pmpQuadLandTypes per CAPRI region at the calibration point."""
     f = (SRC / "pmp_quad_landtypes_2030.csv" if year == 2030
-         else ROOT / "capri_data" / "sources" / "capreg" / "pmp_quad_landtypes_2017.csv")
+         else ROOT / "capri_data" / "sources" / "raw" / "capri" / "capreg" / "pmp_quad_landtypes_2017.csv")
     out = defaultdict(dict)
     for r in _read_csv(f).itertuples():
         out[r.region][(r.landtype1, r.landtype2)] = float(r.value)

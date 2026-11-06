@@ -16,11 +16,11 @@ Symbols (supply/supply_model.gms QUADRA_ l. 5284, GRPLEVL_ l. 4892, LandMarket_ 
                                  (supply/define_pmp_terms.gms); kept for the record and for checks
 
 Writes (CAPRI region codes, CAPRI activity codes; nothing mapped or changed here):
-  capri_data/sources/baseline_pmp/pmp_quad_techn_2030.csv      region, activity, tech1, tech2, value
-  capri_data/sources/baseline_pmp/pmp_quad_pact_2030.csv       region, group1, group2, value
-  capri_data/sources/baseline_pmp/pmp_quad_landtypes_2030.csv  region, landtype1, landtype2, value
-  capri_data/sources/baseline_pmp/pmp_feed_inp_coeff_2030.csv region, activity, tech, feed, coef (CNST / SLOP), value
-  capri_data/sources/baseline_pmp/estnlp_vb.csv, estnlp_vd.csv region, ..., level (VB.L, VD.L)
+  capri_data/sources/intermediate/baseline_pmp/pmp_quad_techn_2030.csv      region, activity, tech1, tech2, value
+  capri_data/sources/intermediate/baseline_pmp/pmp_quad_pact_2030.csv       region, group1, group2, value
+  capri_data/sources/intermediate/baseline_pmp/pmp_quad_landtypes_2030.csv  region, landtype1, landtype2, value
+  capri_data/sources/intermediate/baseline_pmp/pmp_feed_inp_coeff_2030.csv region, activity, tech, feed, coef (CNST / SLOP), value
+  capri_data/sources/intermediate/baseline_pmp/estnlp_vb.csv, estnlp_vd.csv region, ..., level (VB.L, VD.L)
 The linear terms p_pmpCnst and p_pmpCnstLandTypes were written to pmp_cnst_2030.csv and pmp_cnst_landtypes_2030.csv
 until 30 October 2026; nothing read them (the model derives its linear terms from its own calibration, docs/
 PMP_CAPRI_2030.md) and they were removed, the project lead's decision (KNOWN_ISSUES K103).
@@ -35,7 +35,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  
 from paths import SOURCES  # noqa: E402  (CAPRI's material outside the repository)
 
 ROOT = Path(__file__).resolve().parents[2]
-OUT = ROOT / "capri_data" / "sources" / "baseline_pmp"
+OUT = ROOT / "capri_data" / "sources" / "intermediate" / "baseline_pmp"
 SYMBOLS = {"p_pmpQuadTechn": ("pmp_quad_techn_2030.csv", ["region", "activity", "tech1", "tech2", "value"]),
            "p_pmpQuadPact": ("pmp_quad_pact_2030.csv", ["region", "group1", "group2", "value"]),
            "p_pmpQuadLandTypes": ("pmp_quad_landtypes_2030.csv", ["region", "landtype1", "landtype2", "value"]),

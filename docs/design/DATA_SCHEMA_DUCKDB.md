@@ -163,7 +163,7 @@ file has its provenance and no provenance row is left without a declared file; e
 ; a file without a builder has a checked note
 on its origin; every number in the code has its classification and no classification is left without its number.
 
-Two source files in GAMS text form, `sources/water/cropwat.csv` and `irrishare.csv`, were CSV only by name; they were
+Two source files in GAMS text form, `sources/raw/capri/dat/water/cropwat.csv` and `irrishare.csv`, were CSV only by name; they were
 renamed `.gms` (the builder's output unchanged, byte for byte), and on 30 October 2026 converted to CSV with every
 other non-CSV source: `water/cropwat_p_cropwatReq.csv`, `water/irrishare_p_irriShare.csv` (`tools/build/convert_sources_to_csv.py`, declared
 in `34_sources_csv.sql`).

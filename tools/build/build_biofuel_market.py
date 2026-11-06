@@ -46,7 +46,7 @@ NAGR, SECG, EXOG, QUTS (%), BiofFeedCost, HCOM of gasoline and diesel, CPRI of g
 The dump's HCOM of the fossil fuels is the FOSSIL part; CAPRI's HCON in the calibration is total fuel use
 (fossil + biofuel in fossil equivalents): HCON = HCOM + BIOF oilEqu_b / oilEqu_f, which reproduces CAPRI's
 data_market_1730defaulta HCON (CAL) and its HCOS share. The rows used are kept as
-capri_data/sources/market/biofuel_dataout_<YEAR>.csv.xz.
+capri_data/sources/raw/capri/results/<CAPRI file>/biofuel_dataout_<YEAR>.csv.xz.
 
 Feedstock -> model market commodity: WHEA -> SWHE, BARL -> BARL, MAIZ -> CORN, RYEM, OATS, OCER as themselves,
 SUGA -> SUGR, TWIN -> WINE, RAPO/SUNO/SOYO -> themselves; palm oil PLMO and other vegetable oils OTHO -> themselves
@@ -80,7 +80,9 @@ import pandas as pd
 import functools as _ft
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
-SRC_DIR = ROOT / "capri_data" / "sources" / "market"
+# the kept extracts, in the folders of the CAPRI dump and elasticity files they come from (DATA_LAYOUT.md)
+DUMP_DIR = {"2017": ROOT / "capri_data" / "sources" / "raw" / "capri" / "results" / "market_base_1717", "2030": ROOT / "capri_data" / "sources" / "raw" / "capri" / "results" / "markmarket_greendeal_1730et_base_1717"}
+ELAS_DIR = {"2017": ROOT / "capri_data" / "sources" / "raw" / "capri" / "results" / "elas_2_1717defaulta", "2030": ROOT / "capri_data" / "sources" / "raw" / "capri" / "results" / "elas_2_1730defaulta"}
 DEST = ROOT / "capri_data" / "2017" / "market"
 FUEL = {"BIOE": ("WHEA", "BARL", "MAIZ", "RYEM", "OATS", "OCER", "SUGA", "TWIN"),
         "BIOD": ("RAPO", "SUNO", "SOYO", "PLMO", "OTHO")}
@@ -180,8 +182,8 @@ def main():
     ap.add_argument("--dump", type=Path, required=True)
     ap.add_argument("--elas", type=Path, required=True)
     a = ap.parse_args()
-    SRC = SRC_DIR / f"biofuel_dataout_{a.year}.csv.xz"
-    HESS = SRC_DIR / f"biofuel_proc_hessian_{a.year}.csv"
+    SRC = DUMP_DIR[str(a.year)] / f"biofuel_dataout_{a.year}.csv.xz"
+    HESS = ELAS_DIR[str(a.year)] / f"biofuel_proc_hessian_{a.year}.csv"
     sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check")]
     from recalibrate_trade_2017 import AGGREGATES
     if a.dump.exists():

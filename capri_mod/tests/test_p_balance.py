@@ -16,7 +16,7 @@ import pytest
 
 ROOT = Path(__file__).resolve().parents[2]
 DATA_DIR = ROOT / "capri_data"
-SRC = DATA_DIR / "sources" / "capri_res"
+SRC = DATA_DIR / "sources" / "intermediate" / "capri_res"
 REGIONS = ("DE110000", "NL220000", "PL220000", "DK000000")
 #: CAPRI's elementary activities (tools/build/build_p_balance.py)
 CAPRI_CROPS = ("SWHE", "DWHE", "RYEM", "BARL", "OATS", "MAIZ", "OCER", "PARI", "RAPE", "SUNF", "SOYA", "OOIL", "OIND",

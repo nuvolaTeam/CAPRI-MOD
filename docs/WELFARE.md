@@ -57,7 +57,7 @@ models' ProfitAgr, ProfitLandUse and PSEs.
 4. **Not represented**: market PSE/CSE/FSE wedges, processing aids, export subsidies and intervention costs (the model
    has none); the land owners of the regions without supply models (no land market); CAPRI's emission tax revenues
    (not in CAPRI's total either, welfare.gms l. 790-795).
-5. **CAPRI's welfare at hand: the 2030 reference's levels only** (capri_data/sources/capri_res/ref2030_welfare.csv,
+5. **CAPRI's welfare at hand: the 2030 reference's levels only** (capri_data/sources/raw/capri/results/ref2030_welfare.csv,
    from scen_ref_2030.txt). The Green Deal file of the same pair and the res_2_1730greendeal... files carry no welfare
    rows, so no scenario change can be compared with CAPRI's. The levels the model also reports as levels can be
    compared with the model's baseline: TariffRev (EU27 4,228), TRQRents (EU27 407), the supply models' MGVA (EU27

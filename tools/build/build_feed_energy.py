@@ -34,7 +34,7 @@ FEDE at the calibration point (arm/market1.gms l. 402-408): quantity = sum_xx fe
 arm1P_xx / quantity (EUR per kcal, the region's market region's Arm1 prices).
 
 Calorie contents (arm/market_model.gms l. 300-313): p_calContent(XX1) = p_nutrientCont(xx, "Energ_cal") of CAPRI's
-dat/arm/nutrient_cont_usda.gdx (kcal per kg; capri_data/sources/capri_star/nutrient_cont_usda_p_nutrientCont.csv, the
+dat/arm/nutrient_cont_usda.gdx (kcal per kg; capri_data/sources/raw/capri/dat/arm/nutrient_cont_usda_p_nutrientCont.csv, the
 GDX's Excel export nutrient_cont_usda_export.xlsx converted by tools/build/convert_sources_to_csv.py); a product
 without one counts no energy (p_noCal).
 
@@ -68,7 +68,7 @@ from build_noneu_market_supply_nq import EU_RM, UNITS, num, read_param  # noqa: 
 
 UP = EXPORTS
 DATA = UP / "data_market_1730defaulta.csv"
-CAL = ROOT / "capri_data" / "sources" / "capri_star" / "nutrient_cont_usda_p_nutrientCont.csv"
+CAL = ROOT / "capri_data" / "sources" / "raw" / "capri" / "dat" / "arm" / "nutrient_cont_usda_p_nutrientCont.csv"
 OUT = ROOT / "capri_data" / "2017" / "market"
 #: arm/arm_sets.gms XX_ANIM_FEED (MEAT_DEF + EGGS + MILK)
 ANIM = ("BEEF", "PORK", "SGMT", "POUM", "EGGS", "MILK")

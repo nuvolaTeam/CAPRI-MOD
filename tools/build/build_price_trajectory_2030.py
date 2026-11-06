@@ -13,7 +13,7 @@ Premiums the same way: CAPRI's 2030 PRME per activity unit over the deflator (CA
 nominal and fall in 2030 in CAPRI's reference: soft wheat in Brittany EUR 288 -> 226 per ha).
 
 Oilcakes (no UVAG in CAPRI's 2017 results): producer prices PPRI at the market baseline's base (2017)
-and 2030 calibration points, capri_data/sources/capri_baseline/capri_market_prices_1730.csv.
+and 2030 calibration points, capri_data/sources/raw/capri/capri_baseline/capri_market_prices_1730.csv.
 The reference run's 2030 output prices equal CAPRI's own calibrated 2030 baseline (p_uvagStore,
 results/baseline/data_uvag1730defaulta; capri_uvag_store_1730.csv): ratio 1.000 for every traded product.
 
@@ -98,7 +98,7 @@ def main() -> None:
     # oilcakes: CAPRI's 2017 results carry no oilcake UVAG; the market baseline
     # (results/baseline/data_market_1730defaulta: PPRI at the base point BAS = 2017 and at the 2030
     # calibration point CAL) gives the same producer-price concept at both points
-    mk = _read_csv(ROOT / "capri_data" / "sources" / "capri_baseline" / "capri_market_prices_1730.csv")
+    mk = _read_csv(ROOT / "capri_data" / "sources" / "raw" / "capri" / "capri_baseline" / "capri_market_prices_1730.csv")
     mk = mk[(mk["item"] == "PPRI") & mk["product"].isin(CAKES)].pivot_table(
         index=["region", "product"], columns="point", values="value")
     for (reg, prod), v in mk.iterrows():

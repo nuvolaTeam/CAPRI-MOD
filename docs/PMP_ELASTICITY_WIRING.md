@@ -46,8 +46,8 @@ term, was removed on 27 October 2026.)
   or recipe: QUADRA_ with GRPLEVL_, only between crops of CAPRI's crop groups); a crop without CAPRI terms in the region
   has a diagonal row, as in CAPRI's QUADRA_. `CROSS_TERMS = "none"` drops CAPRI's off-diagonals too (diagonal only).
   Until then, crops without CAPRI terms (and every crop when `pmp_capri_parts` left out "crops") could take a PELA
-  activity-level cross-price elasticity (`sources/estnlp/pela_cross_by_region.json`) or CAPRI's group term
-  p_pmpQuadPact (`sources/capreg/pmp_quad_pact.csv`), each as sign x min(|value|, 0.05) x sqrt(Q_ii Q_jj): capri-mod's
+  activity-level cross-price elasticity (`sources/intermediate/estnlp/pela_cross_by_region.json`) or CAPRI's group term
+  p_pmpQuadPact (`sources/intermediate/capreg/pmp_quad_pact.csv`), each as sign x min(|value|, 0.05) x sqrt(Q_ii Q_jj): capri-mod's
   caps (PROXY_AUDIT S065), then each row's off-diagonal sum scaled down to at most half its diagonal; removed with the
   JSON file (CAPRI's terms, set after, were never scaled); and "none" did not act on CAPRI's terms.
 - What the structure changes (tools/check/pmp_cross_term_check.py, CAPRI's decomposition experiment, 2008 documentation

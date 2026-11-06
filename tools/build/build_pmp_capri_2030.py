@@ -24,7 +24,7 @@ CAPRI's territory group gets the curvature of its share, so each region's relati
 Animals keep the model's elasticity-calibrated terms (CAPRI's animal terms include intensity variants DCOL/DCOH,
 BULL/BULH and CAPRI's feed PMP terms, a separate step).
 
-Sources: capri_data/sources/baseline_pmp/pmp_quad_techn_2030.csv, pmp_quad_pact_2030.csv (tools/build/build_pmp_2030.py,
+Sources: capri_data/sources/intermediate/baseline_pmp/pmp_quad_techn_2030.csv, pmp_quad_pact_2030.csv (tools/build/build_pmp_2030.py,
 exported from the project lead's CAPRI 2030 baseline calibration); CAPRI 2030 levels LEVL from the 2030 reference
 the model's trajectory is built from (res_2_1730greendeal_refpol_endotech_all_inidefaulta).
 Output: capri_data/2017/supply/pmp_capri_2030.csv (region, act_i, act_j, g, x_i, x_j, capri_regions); g in the
@@ -48,7 +48,7 @@ from _grep import grep  # noqa: E402  (grep -E in Python: any system)
 from paths import EXPORTS, SOURCES  # noqa: E402  (CAPRI's material outside the repository)
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
-SRC = ROOT / "capri_data" / "sources" / "baseline_pmp"
+SRC = ROOT / "capri_data" / "sources" / "intermediate" / "baseline_pmp"
 OUT = ROOT / "capri_data" / "2017" / "supply" / "pmp_capri_2030.csv"
 REF = EXPORTS / "res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv"
 

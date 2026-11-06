@@ -9,7 +9,7 @@ The data sourcing registry's log of checks, fixes and decisions (201 entries, mo
 [KNOWN_ISSUES_REGISTRY_LOG.md](KNOWN_ISSUES_REGISTRY_LOG.md), verbatim, with the triage of its open entries against
 the code: they became K92-K96, joined K73, K80, K91, or were closed or historical.
 
-## Open (10)
+## Open (11)
 
 | # | Issue | Status |
 |---|---|---|
@@ -23,6 +23,7 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K79](#k79) | Member-state production that keeps moving between iterations | open |
 | [K92](#k92) | Farm-to-Fork changes furthest from JRC121368, besides the milk price | open: waiting for CAPRI's scenario results |
 | [K93](#k93) | CAPRI mitigation options not built; documents disagree on which are in | open: no-till and legume share unmeasured; UreaSubst parked; the others not needed for Farm-to-Fork and the Green Deal |
+| [K119](#k119) | The CAPTRD trajectory's regional factors are stale since K116 (468 PIGS yield rows) | open: to decide whether CAPTRD's PIGS is the model's PIGS |
 
 ## Resolved (106)
 
@@ -773,7 +774,7 @@ r103 and r105 stopped at 25 iterations, with the EU sugar price cycling with per
 <a id="k70"></a>
 ### K70: Data files that no builder reproduces as they are (found in the tools inventory, 23 October 2026; fixed 24 October)
 
-Four cases: (1) `supply_elasticities_regional.csv`: it is CAPRI's PELA 2005 own-price slice (`sources/estnlp/pela_own_price.csv`) with CAPRI's upper-bound rule, cell for cell; new builder `tools/build/build_supply_elasticities_regional.py` (`--check`: reproduced). (2) The files patched in place by several builders: new driver `tools/build/build_patched_inputs.py` runs build_crop_economics_2017, build_eu_producer_prices, build_animal_yields, build_dairy_trade_params, build_demand_elas_capri, build_feed_byproducts, build_feed_demand_nonEU in that order (feed_demand_nonEU must follow feed_byproducts, which resets FENI/FPRI); `--check` on a copy reproduces yields.csv, producer_prices.csv, armington_params.csv and every other file the steps write (values within 1e-9). (3) `manure_n2o_tech.csv` rebuilt with build_manure_n2o: the old file lacked 29 AirPurCovHigh rows for pigs in 15 EU regions (BE10, CZ01, DE30, DE50, DE60, DK01-05, ES63, ES64, FI20, LT01, LT02) that ammonia_tech_model.csv offers; every other row equal; the Norway guard in build_norway_pigs is now empty. (4) `compare_qp_solvers.py` wrote to the repository root (fixed: capri_data/validation/). Not covered by any builder (see K72): 146 of armington_params.csv's 248 cells and the livestock rows of producer_prices.csv
+Four cases: (1) `supply_elasticities_regional.csv`: it is CAPRI's PELA 2005 own-price slice (`sources/intermediate/estnlp/pela_own_price.csv`) with CAPRI's upper-bound rule, cell for cell; new builder `tools/build/build_supply_elasticities_regional.py` (`--check`: reproduced). (2) The files patched in place by several builders: new driver `tools/build/build_patched_inputs.py` runs build_crop_economics_2017, build_eu_producer_prices, build_animal_yields, build_dairy_trade_params, build_demand_elas_capri, build_feed_byproducts, build_feed_demand_nonEU in that order (feed_demand_nonEU must follow feed_byproducts, which resets FENI/FPRI); `--check` on a copy reproduces yields.csv, producer_prices.csv, armington_params.csv and every other file the steps write (values within 1e-9). (3) `manure_n2o_tech.csv` rebuilt with build_manure_n2o: the old file lacked 29 AirPurCovHigh rows for pigs in 15 EU regions (BE10, CZ01, DE30, DE50, DE60, DK01-05, ES63, ES64, FI20, LT01, LT02) that ammonia_tech_model.csv offers; every other row equal; the Norway guard in build_norway_pigs is now empty. (4) `compare_qp_solvers.py` wrote to the repository root (fixed: capri_data/validation/). Not covered by any builder (see K72): 146 of armington_params.csv's 248 cells and the livestock rows of producer_prices.csv
 
 - **Effect:** reproducibility of these inputs
 - **In 9t:** –
@@ -1666,7 +1667,7 @@ into the file.
 | market/capri_oilseed_products_baseline.json | CAPRI's FAO_agg p_dataMarket | replaced: only the EU's three cake feed uses were read (the cake index's weights): market/eu_cake_feed_bas.csv, build_eu_cake_feed.py, same values; the JSON removed |
 | supply/capri_own_price_elasticities.csv | CAPRI's p_ElasSupp 'CAL' of its 2020 supply-model calibration per member state (supply_elas_2_1720<MS>defaulta.txt and the REMAINI_NG zip) | built: build_capri_own_price_elasticities.py, same values (columns in the files' order of appearance); read by the elasticity-calibrated PMP only |
 | 2017/supply/capri_supply_elas_market_1717.csv, supply_elas_eu_all.json | CAPRI's elas1717defaulta.gdx p_elasSupp (gdxdump p_elasSupp.txt) | built: build_capri_supply_elas_market.py, both byte-identical as committed; then, at the project lead's decision (29 October 2026), the JSON replaced by 2017/market/supply_elas_eu.csv: the median over the model's 27 member states (was CAPRI's EU28, the UK included), every market commodity under the model's code (OLIV, PARI, SUGR, WINE now found; INPE dropped), full precision. Changes the EU rows' own-price anticipation: run pending (batch-6 gate) |
-| sources/capreg/capreg_national_prices.csv | CAPRI's res_17 national MPRI | built: build_capreg_national_prices.py, same values; adds MAIZ, OAR1 and the model's CORN (the 17 regions without a regional maize price grow none), drops COTT and OFIB (copies of TEXT under old codes, read by nothing) |
+| sources/intermediate/capreg/capreg_national_prices.csv | CAPRI's res_17 national MPRI | built: build_capreg_national_prices.py, same values; adds MAIZ, OAR1 and the model's CORN (the 17 regions without a regional maize price grow none), drops COTT and OFIB (copies of TEXT under old codes, read by nothing) |
 | shared/model_parameters.csv | each row with its CAPRI or literature source | kept as the declared parameter table (the scalars CAPRI sets in its code); five rows checked against CAPRI's code, all as stated: p_OverFertMarkUp 0.1 and p_fertEffCor 1.1 (envind/ghgMiti.gms), p_trqSigmoidSlope 200 (arm/market_model.gms l. 339, the simulation's; trim_trqs.gms's 50 and 10 are the calibration's), p_elasHigh 4.5 (impose_upper_bound_on_elasticity.gms), p_rhoFeed FMIL 0.5 (arm/market1.gms l. 90) |
 | shared/capri_member_state_codes.csv | CAPRI's sets.gms NUTS0 codes and the NUTS prefixes' aliases (BE, LU -> BL; IE -> IR; GR -> EL; GB -> UK) | kept as a declared code map, each row with its source: the aliases are a convention between NUTS and CAPRI, not in CAPRI's sets |
 
@@ -1730,7 +1731,7 @@ capri_data/2017 and shared/, 46 files are in neither. By kind:
   build_crop_economics_2017.py). NUTS2021.xlsx is converted (nuts2016_2021.csv, read by build_nuts2024_reporting.py).
   The converter writes only what code reads: the miti_data_jul15 dump's four sets, three of the biofuel file's
   parameters (p_secgConv, p_oilEqu, p_density) and the NUTS 2021 classification and change sheets are not written; the
-  unread second LitRevFertTech dump (sources/capri_dat/ghgtech, see K103) was removed with them.
+  unread second LitRevFertTech dump (sources/raw/capri/dat/scen/ghgtech, see K103) was removed with them.
 
 ### K103: Data files without a known origin or read by no code (data declarations, found 29 October 2026)
 
@@ -1748,9 +1749,9 @@ note explains:
 
 The check of the registry's notes (02_provenance_notes.sql) found three source extracts read by no code:
 sources/capreg/capreg_nutrient_coefs.csv (build_nutrient_coefs_regional reads CAPRI's dumps directly),
-capreg_manure_nutrients.csv and sources/capmod/capmod_world_prices_2017.csv (the world-price checks read
-capmod_world_reference_2017.csv). sources/capri_dat/ghgtech/LitRevFertTech_p_litRevFertTechs.csv is a second, fuller
-dump of the table that sources/ghgtech/LitRevFertTech_p_litRevFertTechs.csv holds (the one build_fert_side_effects
+capreg_manure_nutrients.csv and sources/raw/capri/capmod/capmod_world_prices_2017.csv (the world-price checks read
+capmod_world_reference_2017.csv). sources/raw/capri/dat/scen/ghgtech/LitRevFertTech_p_litRevFertTechs.csv is a second, fuller
+dump of the table that sources/raw/capri/dat/scen/ghgtech/LitRevFertTech_p_litRevFertTechs.csv holds (the one build_fert_side_effects
 reads); no code names the first.
 
 - **Effect:** none on results
@@ -1759,16 +1760,16 @@ reads); no code names the first.
   three unread extracts removed (extract_all_from_data2, extract_remaining_nine and ingest_capmod_market no longer
   write them); the two reference files given a builder, tools/build/build_capri_eu27_levels.py (2030: dataOut EU27yr19
   LEVL of markmarket_greendeal_1730et_base_1717, reproduced exactly; 2017: the 26 CAPREG dumps summed, equal to the
-  old file's four decimals, now at full precision). sources/capri_dat/ghgtech/LitRevFertTech_p_litRevFertTechs.csv
+  old file's four decimals, now at full precision). sources/raw/capri/dat/scen/ghgtech/LitRevFertTech_p_litRevFertTechs.csv
   (unread second dump) removed 30 October 2026 (K102); further builder outputs that no code reads remain to be settled (see the census in
   capri_data/schema/schema.json, read_by).
   **Removed 30 October 2026, the project lead's decision, read by no code** (an audit of the files read neither by the
   runs r190/r191 nor by a builder; each grepped again across code, tests, docs, schema and the pipeline trace), their
-  writers stopped: sources/baseline_pmp/pmp_cnst_2030.csv and pmp_cnst_landtypes_2030.csv (build_pmp_2030),
-  sources/baseline_pmp/simini_21730_data.csv (no writer; its reader build_pmp_recipe.calibration_point_2030, never
-  called, removed too), sources/capmod/capmod_trade_flows_2017.csv.xz (ingest_capmod_market, which now writes only its
+  writers stopped: sources/intermediate/baseline_pmp/pmp_cnst_2030.csv and pmp_cnst_landtypes_2030.csv (build_pmp_2030),
+  sources/intermediate/baseline_pmp/simini_21730_data.csv (no writer; its reader build_pmp_recipe.calibration_point_2030, never
+  called, removed too), sources/raw/capri/capmod/capmod_trade_flows_2017.csv.xz (ingest_capmod_market, which now writes only its
   uncommitted summary JSON), sources/capreg/capreg_cost_components.csv.xz (extract_all_from_data2),
-  capreg_feed_use.csv, capreg_herds.csv, capreg_land.csv (extract_remaining_nine), sources/estnlp/gtap_armington.csv
+  capreg_feed_use.csv, capreg_herds.csv, capreg_land.csv (extract_remaining_nine), sources/intermediate/estnlp/gtap_armington.csv
   (ingest_pela_gtap, its GTAP part removed), validation/greendeal_2030/capri_marginal_terms_max_2030.csv.xz and
   capri_unit_values_max_2030.csv (extract_capri_marginal_terms: the max invocation removed from the pipeline trace
   and reproduce_builders), sources/world_price_provenance.csv (build_world_prices; its content summarised in the
@@ -1818,7 +1819,7 @@ October 2026):
   where they exceed the base supply, which no cell does after the 30 October rebuild: 0 of 1,228 cells off by more than
   1e-4);
 - PMPCalibrator.calibrate's 0.05 cap on PELA / p_pmpQuadPact cross terms of crops without CAPRI's terms (S065):
-  **removed** with the path, its two inputs' loading and sources/estnlp/pela_cross_by_region.json (no longer written);
+  **removed** with the path, its two inputs' loading and sources/intermediate/estnlp/pela_cross_by_region.json (no longer written);
   such crops have diagonal rows, as in CAPRI's QUADRA_; default runs unchanged (with CAPRI's terms the path was
   skipped). Found with it: supply.pmp_cross_terms = "none" did not act on CAPRI's terms (the default ones); it does now;
 - CAPRIModel._run_scenario's adaptive price step for Norway (1.25, 0.5, 0.1) now reads outer_loop.relax_step_up,
@@ -2187,6 +2188,7 @@ that the next step's fixed point was on the other side. CAPRI solves the quotas 
   sigmas (trq_solve's bracketing). Tests: test_joint_trade_solve_meets_the_market_and_the_quota_equations,
   test_import_prices_at_trial_sigmas_equal_the_stored_offsets.
 
+<a id="k118"></a>
 ### K118: The market supply Hessian's cache key did not cover the supply data (found 5 November 2026, with DEP-22)
 
 The market supply Hessian is measured once per baseline and cached on disk (.cache/market_supply_hessian). Its key held the
@@ -2200,3 +2202,22 @@ new data and measured anew); found while preparing them.
   run's data folder but the market's, the validation references' and the schema's (path and content), is part of the key.
   Any change of those files means one new measurement (full EU about 45 minutes).
 
+<a id="k119"></a>
+### K119: The CAPTRD trajectory's regional factors are stale since K116 (found 6 November 2026)
+
+`tools/check/reproduce_builders.py` (the data-layout move's rebuild check) found
+`capri_data/scenarios/captrd_2030/regional.csv` different from what `tools/build/build_captrd_trajectory.py` writes
+today: 468 rows, all `yields` of PIGS (factor up to 32% apart, e.g. AT21 1.0117 committed against 1.1544 rebuilt).
+Deterministic (the same under two hash seeds) and the same on dev without the move.
+
+Cause, likely: K116 (9d7d251, 4 November 2026) changed the shared `tools/build/build_trajectory_model_keys.py`: a
+factor under the model's own name is kept instead of being replaced by its alias (for the CAPRI-reference trajectory,
+OFOD = OFAR + ROOF). `capri_ref_2030` was rebuilt with it; `captrd_2030` was not. In the CAPTRD series a PIGS key exists
+under the model's own name, so the rebuilt file keeps it instead of the alias's factor.
+
+- **Effect:** only runs on the CAPTRD trajectory (`--trajectory captrd`; `tools/run/run_vcs_2030.py` uses it). The
+  Farm-to-Fork and Green Deal runs use `capri_ref_2030` by default and are not affected.
+- **To decide before rebuilding:** whether CAPTRD's PIGS is the model's PIGS (then the rebuilt factors are right and the
+  file is rebuilt) or another item (then the alias must win for this trajectory, as before K116, and the key builder
+  needs the distinction).
+- **Status:** open.

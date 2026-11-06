@@ -106,24 +106,24 @@ def write(rel: str, header, rows, crlf: bool = False) -> None:
 #: original -> {symbol: (CSV, columns)}; every symbol of the dump is converted
 GDXDUMP = {
     "envind/fao_landuse_2000_P.txt": {
-        "P": ("envind/fao_landuse_2000_P.csv", ["fao_code", "climate_zone", "land_use", "value"])},
+        "P": ("raw/capri/dat/envind/fao_landuse_2000_P.csv", ["fao_code", "climate_zone", "land_use", "value"])},
     "envind/ipcc_wetlands_p_emifacOrganicSoil_ori.txt": {
-        "p_emifacOrganicSoil_ori": ("envind/ipcc_wetlands_p_emifacOrganicSoil_ori.csv",
+        "p_emifacOrganicSoil_ori": ("raw/capri/dat/envind/ipcc_wetlands_p_emifacOrganicSoil_ori.csv",
                                     ["gas", "land_use", "climate_zone", "value"])},
     "envind/orgsoil_share_p_orgsoilori.txt": {
-        "p_OrgSoilOri": ("envind/orgsoil_share_p_orgsoilori.csv", ["region", "item", "value"])},
+        "p_OrgSoilOri": ("raw/capri/dat/envind/orgsoil_share_p_orgsoilori.csv", ["region", "item", "value"])},
     "ghgtech/LitRevFertTech_p_litRevFertTechs.txt": {
-        "p_litRevFertTechs": ("ghgtech/LitRevFertTech_p_litRevFertTechs_all.csv",
+        "p_litRevFertTechs": ("raw/capri/dat/scen/ghgtech/LitRevFertTech_p_litRevFertTechs_all.csv",
                               ["region", "technology", "activity", "system", "item", "value"])},
     "ghgtech/miti_data_jul15_p_ghgMiti.txt": {
-        "p_ghgMiti": ("ghgtech/miti_data_jul15_p_ghgMiti.csv",
+        "p_ghgMiti": ("raw/capri/dat/scen/ghgtech/miti_data_jul15_p_ghgMiti.csv",
                       ["region", "activity", "technology", "target", "info", "value"]),
         # the dump's sets, read by no code (the project lead's rule: only what a builder or the model reads)
         "allMitiTech": None, "mitiTech_map": None, "mitiTarget": None, "mitiInfo": None},
     "water/cropwat.gms": {
-        "p_cropwatReq": ("water/cropwat_p_cropwatReq.csv", ["region", "crop", "item", "value"])},
+        "p_cropwatReq": ("raw/capri/dat/water/cropwat_p_cropwatReq.csv", ["region", "crop", "item", "value"])},
     "water/irrishare.gms": {
-        "p_irriShare": ("water/irrishare_p_irriShare.csv", ["region", "item", "type", "year", "value"])},
+        "p_irriShare": ("raw/capri/dat/water/irrishare_p_irriShare.csv", ["region", "item", "type", "year", "value"])},
 }
 
 
@@ -146,27 +146,27 @@ def convert_gdxdumps() -> None:
 #: original -> [(symbol, kind, row dims, CSV, columns)]
 GAMS_DATA = {
     "capri_dat/biofuel/biofuel_technology_params.gms": [
-        ("p_ExtrRates", "parameter", 2, "capri_dat/biofuel/biofuel_technology_params_p_ExtrRates.csv",
+        ("p_ExtrRates", "parameter", 2, "raw/capri/dat/biofuel/biofuel_technology_params_p_ExtrRates.csv",
          ["fuel", "stock", "value"]),
-        ("p_ByProduct", "parameter", 2, "capri_dat/biofuel/biofuel_technology_params_p_ByProduct.csv",
+        ("p_ByProduct", "parameter", 2, "raw/capri/dat/biofuel/biofuel_technology_params_p_ByProduct.csv",
          ["byproduct", "stock", "value"]),
         ],
     "capri_dat/coco/milk_quota_dat.gms": [
-        ("p_MQuotaDat", "table", 2, "capri_dat/coco/milk_quota_dat_p_MQuotaDat.csv",
+        ("p_MQuotaDat", "table", 2, "raw/capri/dat/coco/milk_quota_dat_p_MQuotaDat.csv",
          ["region", "info", "year", "value"])],
     "capri_dat/policy/livestock_units.gms": [
-        ("p_LUUnits", "parameter", 1, "capri_dat/policy/livestock_units_p_LUUnits.csv", ["act", "value"])],
+        ("p_LUUnits", "parameter", 1, "raw/capri/dat/policy/livestock_units_p_LUUnits.csv", ["act", "value"])],
     "capri_dat/policy/smal_pshar.gms": [
-        ("p_smallProdShare", "table", 1, "capri_dat/policy/smal_pshar_p_smallProdShare.csv",
+        ("p_smallProdShare", "table", 1, "raw/capri/dat/policy/smal_pshar_p_smallProdShare.csv",
          ["year", "region", "value"])],
     "capri_dat/policy/wintercovershare.gms": [
-        ("p_winterCoverShare0", "parameter", 2, "capri_dat/policy/wintercovershare_p_winterCoverShare0.csv",
+        ("p_winterCoverShare0", "parameter", 2, "raw/capri/dat/policy/wintercovershare_p_winterCoverShare0.csv",
          ["region", "act", "value"])],
     "capri_gams/baseline/labour_ageline.gms": [
-        ("p_minLabourPerAct", "parameter", 1, "capri_gams/baseline/labour_ageline_p_minLabourPerAct.csv",
+        ("p_minLabourPerAct", "parameter", 1, "raw/capri/gams/baseline/labour_ageline_p_minLabourPerAct.csv",
          ["act", "value"])],
     "capri_gams/pol_input/mquota_update.gms": [
-        ("PMQuotaReg", "table", 2, "capri_gams/pol_input/mquota_update_PMQuotaReg.csv",
+        ("PMQuotaReg", "table", 2, "raw/capri/gams/pol_input/mquota_update_PMQuotaReg.csv",
          ["region", "info", "year", "value"])],
 }
 
@@ -293,22 +293,22 @@ def _write_frame(rel: str, df: pd.DataFrame) -> None:
 
 def convert_gams_code() -> None:
     txt = read_text(original("capri_gams/envind/gascoeff.gms"), "utf-8")
-    write("capri_gams/envind/gascoeff_p_nutContCropOutput_STRA.csv", ["output", "nutrient", "value"],
+    write("raw/capri/gams/envind/gascoeff_p_nutContCropOutput_STRA.csv", ["output", "nutrient", "value"],
           [("STRA", k, v) for k, v in straw_content(txt)])
     txt = read_text(original("capri_gams/fert/fertpar.gms"), "utf-8")
     maxf, dbl = need_bounds(txt)
-    write("capri_gams/fert/fertpar_MAXF.csv", ["nutrient", "value", "multiplier"], maxf)
-    write("capri_gams/fert/fertpar_doubleMaxf.csv", ["activity"], [(a,) for a in dbl])
+    write("raw/capri/gams/fert/fertpar_MAXF.csv", ["nutrient", "value", "multiplier"], maxf)
+    write("raw/capri/gams/fert/fertpar_doubleMaxf.csv", ["activity"], [(a,) for a in dbl])
     rates, grae = nfix_rates(txt)
-    write("capri_gams/fert/fertpar_p_nfixRate_gras.csv", ["region", "value"], rates)
-    write("capri_gams/fert/fertpar_p_nitrFact_RALL_GRAE_BioFix.csv", ["region", "activity", "factor", "value"],
+    write("raw/capri/gams/fert/fertpar_p_nfixRate_gras.csv", ["region", "value"], rates)
+    write("raw/capri/gams/fert/fertpar_p_nitrFact_RALL_GRAE_BioFix.csv", ["region", "activity", "factor", "value"],
           [("RALL", "GRAE", "BioFix", grae)])
     txt = read_text(original("capri_gams/inputs/yieldIY.gms"), "utf-8")
-    write("capri_gams/inputs/yieldIY_p_inputDemandFactor.csv", ["activity", "input", "value"],
+    write("raw/capri/gams/inputs/yieldIY_p_inputDemandFactor.csv", ["activity", "input", "value"],
           input_demand_factors(txt))
     exm, lim = parse_minfert(read_text(original("policy/minfert_redu_by_crop.gms"), "utf-8"))
-    _write_frame("policy/minfert_redu_by_crop_p_checkSmallMine.csv", exm)
-    _write_frame("policy/minfert_redu_by_crop_limCres.csv", lim)
+    _write_frame("raw/capri/dat/policy/minfert_redu_by_crop_p_checkSmallMine.csv", exm)
+    _write_frame("raw/capri/dat/policy/minfert_redu_by_crop_limCres.csv", lim)
 
 
 # --- Excel ---------------------------------------------------------------------------------------------------------
@@ -345,22 +345,22 @@ def _named(rows, header_row: int, cols, key_cols, strip=False):
 
 def convert_excel() -> None:
     rows = _sheets("capri_star/nutrient_cont_usda_export.xlsx")["p_nutrientCont"]
-    write("capri_star/nutrient_cont_usda_p_nutrientCont.csv", ["product", "item", "value"],
+    write("raw/capri/dat/arm/nutrient_cont_usda_p_nutrientCont.csv", ["product", "item", "value"],
           [[_cell(v) for v in r] for r in rows])
     # NUTS 2013 -> 2016 (nuts2013_2016.csv as committed before)
     sh = _sheets("nuts/NUTS2013-NUTS2016__1_.xlsx")
-    write("nuts/nuts2013_2016.csv", ["code_2013", "code_2016", "country", "level1", "level2", "level3", "change"],
+    write("raw/nuts/nuts2013_2016.csv", ["code_2013", "code_2016", "country", "level1", "level2", "level3", "change"],
           _named(sh["NUTS2013-NUTS2016"], 1, range(1, 8), (1, 2)), crlf=True)
     # NUTS 2021 (classification) and 2016 -> 2021 (nuts2016_2021.csv as committed before)
     sh = _sheets("nuts/NUTS2021.xlsx")
-    write("nuts/nuts2016_2021.csv", ["code_2016", "code_2021", "country", "level1", "level2", "level3",
+    write("raw/nuts/nuts2016_2021.csv", ["code_2016", "code_2021", "country", "level1", "level2", "level3",
                                      "change_codes", "change_comments"],
           _named(sh["Changes detailed NUTS 2016-2021"], 0, range(8), (0, 1), strip=True), crlf=True)
     # NUTS 2024 (classification) and 2021 -> 2024 (nuts2024.csv and nuts2021_2024.csv as committed before)
     sh = _sheets("nuts/NUTS2021-NUTS2024.xlsx")
-    write("nuts/nuts2024.csv", ["country", "code", "label", "level"], _named(sh["NUTS2024"], 0, range(4), (1,)),
+    write("raw/nuts/nuts2024.csv", ["country", "code", "label", "level"], _named(sh["NUTS2024"], 0, range(4), (1,)),
           crlf=True)
-    write("nuts/nuts2021_2024.csv", ["country", "code_2021", "code_2024", "level1", "level2", "level3", "change"],
+    write("raw/nuts/nuts2021_2024.csv", ["country", "code_2021", "code_2024", "level1", "level2", "level3", "change"],
           _named(sh["NUTS2021- NUTS2024"], 0, range(1, 8), (2, 3), strip=True), crlf=True)
 
 

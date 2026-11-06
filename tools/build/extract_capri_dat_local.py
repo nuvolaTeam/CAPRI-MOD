@@ -7,7 +7,7 @@ CAPRI installation (C:\\capri-star3.0\\dat\\...) and are kept in capri_sources/d
   dat/envind/lulucf_emissions_original_source.gms  PARAMETER p_PEATSH_def(rAll) "Share of peatland in arable land"
       (percent; Carre et al. 2009 via JRC; the Western Balkans take Croatia's, per the file's comment), read by
       envind/prep_lulucf_carbon.gms l. 258-259 as the organic-soil fallback of the Western Balkans and Turkey
-      -> capri_data/sources/capri_dat/envind/lulucf_emissions_original_source_p_PEATSH_def.csv  (region, value)
+      -> capri_data/sources/raw/capri/dat_local/envind/lulucf_emissions_original_source_p_PEATSH_def.csv  (region, value)
 
 dat/scen/ghgtech/holdingsLSU.gdx, also from the installation, is not extracted here: its p_holdLSU is already a model
 input, capri_data/2017/abatement/ammonia/p_holdLSU.csv (build_ammonia_tech_inputs.py, from a dump), and the 9,597
@@ -29,7 +29,7 @@ sys.path.insert(0, str(ROOT / "tools" / "lib"))
 import gams_text as G  # noqa: E402
 from paths import SOURCES  # noqa: E402
 
-OUT = ROOT / "capri_data" / "sources" / "capri_dat"
+OUT = ROOT / "capri_data" / "sources" / "raw" / "capri" / "dat_local"
 
 
 def main(src: Path) -> None:

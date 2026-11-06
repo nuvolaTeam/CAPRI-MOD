@@ -25,7 +25,7 @@ by system and is written as the plain mean (the model keeps no manure-applicatio
 it is recorded, not used - REGISTERED). Fertiliser timing on manure (FERTTIME) is not carried: the
 model has no such option.
 
-Source: capri_data/sources/ghgtech/LitRevFertTech_p_litRevFertTechs.csv (the records used, from the
+Source: capri_data/sources/raw/capri/dat/scen/ghgtech/LitRevFertTech_p_litRevFertTechs.csv (the records used, from the
 gdxdump of the installation's LitRevFertTech.gdx; the full dump is LitRevFertTech_p_litRevFertTechs_all.csv beside
 it, converted from the gdxdump text by tools/build/convert_sources_to_csv.py; the NO3 records are read from the full
 dump into LitRevFertTech_p_litRevFertTechs_no3.csv). Model regions take their CAPRI region, else the national entry,
@@ -52,15 +52,16 @@ ITEMS = ("N2OSYN", "NH3SYN")
 MAN_ITEMS = ("NH3APP", "N2OAPP")
 NO3_MIN = ("NO3SLEA", "NO3SRUN")
 NO3_MAN = ("NO3MLEA", "NO3MRUN")
-SRC = ROOT / "capri_data" / "sources" / "ghgtech"
+RAW = ROOT / "capri_data" / "sources" / "raw" / "capri" / "dat" / "scen" / "ghgtech"
+INTER = ROOT / "capri_data" / "sources" / "intermediate" / "ghgtech"
 
 
 def no3_records():
     """The NO3 records of NITR_INH from the full dump (LitRevFertTech_p_litRevFertTechs_all.csv, the gdxdump converted
     by tools/build/convert_sources_to_csv.py) -> LitRevFertTech_p_litRevFertTechs_no3.csv (region, technology,
     activity, system, item, value)."""
-    out = SRC / "LitRevFertTech_p_litRevFertTechs_no3.csv"
-    full = pd.read_csv(SRC / "LitRevFertTech_p_litRevFertTechs_all.csv", dtype=str, keep_default_na=False)
+    out = INTER / "LitRevFertTech_p_litRevFertTechs_no3.csv"
+    full = pd.read_csv(RAW / "LitRevFertTech_p_litRevFertTechs_all.csv", dtype=str, keep_default_na=False)
     full = full[(full["technology"] == "NITR_INH") & full["item"].str.fullmatch(r"NO3[A-Z]+")]
     full.astype({"value": float}).to_csv(out, index=False)
     return _read_csv(out)
@@ -104,7 +105,7 @@ def no3_weighted():
 def main():
     spec = importlib.util.spec_from_file_location("_mr", ROOT / "tools" / "lib" / "_model_regions.py")
     mr = importlib.util.module_from_spec(spec); spec.loader.exec_module(mr)
-    raw = _read_csv(ROOT / "capri_data" / "sources" / "ghgtech" / "LitRevFertTech_p_litRevFertTechs.csv")
+    raw = _read_csv(ROOT / "capri_data" / "sources" / "raw" / "capri" / "dat" / "scen" / "ghgtech" / "LitRevFertTech_p_litRevFertTechs.csv")
     m = raw[(raw["system"] == "Mineral") & raw["item"].isin(ITEMS)][["region", "technology", "item", "value"]]
     mm = raw[(raw["technology"] == "NITR_INH") & raw["system"].isin(["LIQUID", "SOLID"]) & raw["item"].isin(MAN_ITEMS)]
     mm = mm.groupby(["region", "item"], as_index=False)["value"].mean().assign(technology="NITR_INH_MAN")

@@ -7,7 +7,7 @@ tomatoes 33.5, olives 49.5, tobacco 43.8, wine 95.5). They are rewritten as CAPR
 the model regions: sum(area x yield x price) / sum(area x yield), CAPRI's 2017 values. This builder is the table's one
 writer (29 October 2026), built from scratch: the crop rows above; SHGM and SHGF, CAPREG's prices weighted by the herds
 (tools/lib/_sheep_goat.py, as the retired build_shg_split.py); the rows no builder computes from
-sources/unsourced/producer_prices_no_builder.csv (set-aside's 0). The ten livestock rows of unrecorded origin that file
+sources/raw/unsourced/producer_prices_no_builder.csv (set-aside's 0). The ten livestock rows of unrecorded origin that file
 held were removed on 29 October 2026 (KNOWN_ISSUES K72): no model code reads an animal's EU producer price (livestock
 revenue is CAPRI's output value per head, livestock_output_value_coef.csv). Rows in the model's activity order. Grass keeps its own price basis (dry matter, build_crop_economics).
 Other marketable and industrial crops, nurseries and flowers get no row (CAPRI carries them as values).
@@ -25,7 +25,7 @@ ROOT = Path(__file__).resolve().parents[2]
 SUP = ROOT / "capri_data" / "2017" / "supply"
 DEST = ROOT / "capri_data" / "2017" / "market" / "producer_prices.csv"
 #: the rows no builder computes (set-aside's 0 by convention; the livestock rows of unrecorded origin, KNOWN_ISSUES K72)
-NO_BUILDER = ROOT / "capri_data" / "sources" / "unsourced" / "producer_prices_no_builder.csv"
+NO_BUILDER = ROOT / "capri_data" / "sources" / "raw" / "unsourced" / "producer_prices_no_builder.csv"
 import sys as _sys  # noqa: E402
 _sys.path[:0] = [str(ROOT / "tools" / "lib"), str(ROOT)]
 import _sheep_goat as SG  # noqa: E402
@@ -37,7 +37,7 @@ def main() -> None:
     areas = _read_csv(SUP / "base_areas.csv", index_col=0)
     ylds = _read_csv(SUP / "yields.csv", index_col=0)
     herds = _read_csv(SUP / "animal_numbers.csv", index_col=0)
-    prices = _read_csv(ROOT / "capri_data" / "sources" / "capreg" / "capreg_producer_prices.csv", index_col=0)
+    prices = _read_csv(ROOT / "capri_data" / "sources" / "intermediate" / "capreg" / "capreg_producer_prices.csv", index_col=0)
     # the EU-wide price over the units it was taken over before CAPRI's other 29 were listed (FALLBACK_UNITS, 4 November
     # 2026); over the EU's member states only, with a unit outside the EU at its own country's price, is the project
     # lead's decision of 31 October 2026 (docs/design/SUPPLY_NONEU_DESIGN.md section 4), a separate change

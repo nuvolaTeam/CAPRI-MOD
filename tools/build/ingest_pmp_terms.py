@@ -73,7 +73,7 @@ def main() -> None:
     # CAPRI names grain maize MAIZ; the model calls it CORN.
     dt["activity"] = dt.activity.replace({"MAIZ": "CORN"})
 
-    out = args.data_dir / "sources" / "capreg"
+    out = args.data_dir / "sources" / "intermediate" / "capreg"
     out.mkdir(parents=True, exist_ok=True)
     dt[["model_region", "activity", "value"]].to_csv(
         out / "pmp_quad_techn.csv", index=False)

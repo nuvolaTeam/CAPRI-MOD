@@ -25,7 +25,7 @@ member state's (national) rent (REGISTERED, as elsewhere in the model).
 Writes capri_data/2017/supply/land_rents_2030.csv (or land_rents_2017.csv from CAPRI's 2017 results, res_17<MS> dumps:
 D_AREA 'Y'; 23 October 2026) with region, capri_source, rent_arac, rent_frun, rent_gras (EUR/ha, in the model's 2017
 money: the 2030 rents over CAPRI's inflation to 2030, KNOWN_ISSUES K108), and per CAPRI region
-sources/capri_land_rents/land_rents_capri_<year>.csv in CAPRI's money of the year (the recipe's input).
+sources/intermediate/capri_land_rents/land_rents_capri_<year>.csv in CAPRI's money of the year (the recipe's input).
 """
 from __future__ import annotations
 import argparse, csv, importlib.util, re, sys
@@ -38,7 +38,7 @@ from paths import EXPORTS, SOURCES  # noqa: E402  (CAPRI's material outside the 
 ROOT = Path(__file__).resolve().parents[2]
 REF = EXPORTS / "res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv"
 OUT = ROOT / "capri_data" / "2017" / "supply" / "land_rents_2030.csv"
-SRC_OUT = ROOT / "capri_data" / "sources" / "capri_land_rents" / "land_rents_capri_2030.csv"
+SRC_OUT = ROOT / "capri_data" / "sources" / "intermediate" / "capri_land_rents" / "land_rents_capri_2030.csv"
 TYPES = ("ARAC", "FRUN", "GRAS")
 #: CAPRI's FADN land-rent regression (pol_input/ghg/carbcali_fin_endotech_noc.gms l. 259-261)
 RENT_INTERCEPT, RENT_COEF_TOOU, RENT_COEF_PRME = 0.0, 0.084295555, 0.700023526

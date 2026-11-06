@@ -80,7 +80,7 @@ than read, it says so.
 
 ## 3. The data
 
-- CAPRI's 2030 quadratic technology blocks are in the repository (capri_data/sources/baseline_pmp/
+- CAPRI's 2030 quadratic technology blocks are in the repository (capri_data/sources/intermediate/baseline_pmp/
   pmp_quad_techn_2030.csv: T1-T1 5,624 rows, T1-T2 and T2-T2 5,417 each, T-T 6,294).
 - The linear terms per technology are in the PMP export (capri_sources/pmp2030/pmppar_21730<CC>defaulta.txt), not
   yet extracted.

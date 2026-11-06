@@ -1,6 +1,6 @@
 -- The CSV conversion of the sources that were not CSV (the project lead's decision, 30 October 2026: input data in .csv), written by tools/build/convert_sources_to_csv.py from the originals in git history (commit 6d25163). Structure (types, NOT NULL, keys) from the files; units open where the source states none.
 
--- file: capri_data/sources/capri_dat/biofuel/biofuel_technology_params_p_ByProduct.csv
+-- file: capri_data/sources/raw/capri/dat/biofuel/biofuel_technology_params_p_ByProduct.csv
 CREATE TABLE src_biofuel_technology_params_p_byproduct (
     byproduct VARCHAR NOT NULL,
     stock VARCHAR NOT NULL,
@@ -11,7 +11,7 @@ COMMENT ON TABLE src_biofuel_technology_params_p_byproduct IS 'CAPRI''s p_ByProd
 INSERT INTO value_units VALUES
   ('src_biofuel_technology_params_p_byproduct', 'value', 'U_ratio', 'capri', 't of by-product per t of feedstock (the file: Conversion coefficients for biofuel by-products (t/t))');
 
--- file: capri_data/sources/capri_dat/biofuel/biofuel_technology_params_p_ExtrRates.csv
+-- file: capri_data/sources/raw/capri/dat/biofuel/biofuel_technology_params_p_ExtrRates.csv
 CREATE TABLE src_biofuel_technology_params_p_extrrates (
     fuel VARCHAR NOT NULL,
     stock VARCHAR NOT NULL,
@@ -22,7 +22,7 @@ COMMENT ON TABLE src_biofuel_technology_params_p_extrrates IS 'CAPRI''s p_ExtrRa
 INSERT INTO value_units VALUES
   ('src_biofuel_technology_params_p_extrrates', 'value', 'U_ratio', 'capri', 't of biofuel per t of feedstock (the file: Conversion coefficients ... (t/t))');
 
--- file: capri_data/sources/capri_dat/coco/milk_quota_dat_p_MQuotaDat.csv
+-- file: capri_data/sources/raw/capri/dat/coco/milk_quota_dat_p_MQuotaDat.csv
 CREATE TABLE src_milk_quota_dat_p_mquotadat (
     region VARCHAR NOT NULL,
     info VARCHAR NOT NULL,
@@ -34,7 +34,7 @@ COMMENT ON TABLE src_milk_quota_dat_p_mquotadat IS 'CAPRI''s TABLE p_MQuotaDat(r
 INSERT INTO value_units VALUES
   ('src_milk_quota_dat_p_mquotadat', 'value', NULL, 'open', 'milk_quota_dat_p_MQuotaDat.value: the file states no unit');
 
--- file: capri_data/sources/capri_dat/policy/livestock_units_p_LUUnits.csv
+-- file: capri_data/sources/raw/capri/dat/policy/livestock_units_p_LUUnits.csv
 CREATE TABLE src_livestock_units_p_luunits (
     act VARCHAR NOT NULL,
     "value" DOUBLE NOT NULL,
@@ -44,7 +44,7 @@ COMMENT ON TABLE src_livestock_units_p_luunits IS 'CAPRI''s p_LUUnits(act) from 
 INSERT INTO value_units VALUES
   ('src_livestock_units_p_luunits', 'value', NULL, 'open', 'livestock units per head (per 1000 head for HENS, POUF); no unit code for it');
 
--- file: capri_data/sources/capri_dat/policy/smal_pshar_p_smallProdShare.csv
+-- file: capri_data/sources/raw/capri/dat/policy/smal_pshar_p_smallProdShare.csv
 CREATE TABLE src_smal_pshar_p_smallprodshare (
     "year" BIGINT NOT NULL,
     region VARCHAR NOT NULL,
@@ -55,7 +55,7 @@ COMMENT ON TABLE src_smal_pshar_p_smallprodshare IS 'CAPRI''s TABLE p_smallProdS
 INSERT INTO value_units VALUES
   ('src_smal_pshar_p_smallprodshare', 'value', 'U_ratio', 'capri', 'a share (the file: Share of small producers ...)');
 
--- file: capri_data/sources/capri_dat/policy/wintercovershare_p_winterCoverShare0.csv
+-- file: capri_data/sources/raw/capri/dat/policy/wintercovershare_p_winterCoverShare0.csv
 CREATE TABLE src_wintercovershare_p_wintercovershare0 (
     region VARCHAR NOT NULL,
     act VARCHAR NOT NULL,
@@ -64,7 +64,7 @@ CREATE TABLE src_wintercovershare_p_wintercovershare0 (
 );
 COMMENT ON TABLE src_wintercovershare_p_wintercovershare0 IS 'CAPRI''s p_winterCoverShare0(region, act) from dat/policy/wintercovershare.gms l. 18-221 ("Share of crop in a region which provides winter cover"; EU, member-state and some NUTS 2 entries), as written: value is a number or eps (GAMS''s explicit zero, kept as text); converted to CSV by tools/build/convert_sources_to_csv.py (capri_gams/wintercovershare.gms was the same file); read by tools/build/build_cover_crops.py (read_wcs: eps -> 0, act upper-cased) and tools/build/build_winter_cover_option.py.';
 
--- file: capri_data/sources/capri_gams/baseline/labour_ageline_p_minLabourPerAct.csv
+-- file: capri_data/sources/raw/capri/gams/baseline/labour_ageline_p_minLabourPerAct.csv
 CREATE TABLE src_labour_ageline_p_minlabourperact (
     act VARCHAR NOT NULL,
     "value" DOUBLE NOT NULL,
@@ -74,7 +74,7 @@ COMMENT ON TABLE src_labour_ageline_p_minlabourperact IS 'CAPRI''s p_minLabourPe
 INSERT INTO value_units VALUES
   ('src_labour_ageline_p_minlabourperact', 'value', NULL, 'open', 'hours per activity unit (ha or head) (the file''s comment); no single unit code');
 
--- file: capri_data/sources/capri_gams/envind/gascoeff_p_nutContCropOutput_STRA.csv
+-- file: capri_data/sources/raw/capri/gams/envind/gascoeff_p_nutContCropOutput_STRA.csv
 CREATE TABLE src_gascoeff_p_nutcontcropoutput_stra (
     output VARCHAR NOT NULL,
     nutrient VARCHAR NOT NULL,
@@ -85,7 +85,7 @@ COMMENT ON TABLE src_gascoeff_p_nutcontcropoutput_stra IS 'CAPRI''s p_nutContCro
 INSERT INTO value_units VALUES
   ('src_gascoeff_p_nutcontcropoutput_stra', 'value', NULL, 'open', 'kg per t of straw (the table''s text); no unit code for it');
 
--- file: capri_data/sources/capri_gams/fert/fertpar_MAXF.csv
+-- file: capri_data/sources/raw/capri/gams/fert/fertpar_MAXF.csv
 CREATE TABLE src_fertpar_maxf (
     nutrient VARCHAR NOT NULL,
     "value" DOUBLE NOT NULL,
@@ -97,14 +97,14 @@ INSERT INTO value_units VALUES
   ('src_fertpar_maxf', 'value', NULL, 'open', 'fertpar.gms states no unit'),
   ('src_fertpar_maxf', 'multiplier', 'U_ratio', 'capri', 'a factor (l. 391)');
 
--- file: capri_data/sources/capri_gams/fert/fertpar_doubleMaxf.csv
+-- file: capri_data/sources/raw/capri/gams/fert/fertpar_doubleMaxf.csv
 CREATE TABLE src_fertpar_doublemaxf (
     activity VARCHAR NOT NULL,
     PRIMARY KEY (activity)
 );
 COMMENT ON TABLE src_fertpar_doublemaxf IS 'CAPRI''s set doubleMaxf(PACT) from gams/fert/fertpar.gms l. 393 ("Activities for which the above maximum loads are doubled"), extracted by the pattern of tools/build/build_npk_balance_2030.py (moved to tools/build/convert_sources_to_csv.py), which reads it.';
 
--- file: capri_data/sources/capri_gams/fert/fertpar_p_nfixRate_gras.csv
+-- file: capri_data/sources/raw/capri/gams/fert/fertpar_p_nfixRate_gras.csv
 CREATE TABLE src_fertpar_p_nfixrate_gras (
     region VARCHAR NOT NULL,
     "value" DOUBLE NOT NULL,
@@ -114,7 +114,7 @@ COMMENT ON TABLE src_fertpar_p_nfixrate_gras IS 'CAPRI''s p_nfixRate_gras(RALL) 
 INSERT INTO value_units VALUES
   ('src_fertpar_p_nfixrate_gras', 'value', NULL, 'open', 'fertpar.gms states no unit (a rate)');
 
--- file: capri_data/sources/capri_gams/fert/fertpar_p_nitrFact_RALL_GRAE_BioFix.csv
+-- file: capri_data/sources/raw/capri/gams/fert/fertpar_p_nitrFact_RALL_GRAE_BioFix.csv
 CREATE TABLE src_fertpar_p_nitrfact_rall_grae_biofix (
     region VARCHAR NOT NULL,
     activity VARCHAR NOT NULL,
@@ -126,7 +126,7 @@ COMMENT ON TABLE src_fertpar_p_nitrfact_rall_grae_biofix IS 'CAPRI''s p_nitrFact
 INSERT INTO value_units VALUES
   ('src_fertpar_p_nitrfact_rall_grae_biofix', 'value', NULL, 'open', 'fertpar.gms states no unit (a rate)');
 
--- file: capri_data/sources/capri_gams/inputs/yieldIY_p_inputDemandFactor.csv
+-- file: capri_data/sources/raw/capri/gams/inputs/yieldIY_p_inputDemandFactor.csv
 CREATE TABLE src_yieldiy_p_inputdemandfactor (
     activity VARCHAR NOT NULL,
     input VARCHAR NOT NULL,
@@ -137,7 +137,7 @@ COMMENT ON TABLE src_yieldiy_p_inputdemandfactor IS 'CAPRI''s TABLE p_inputDeman
 INSERT INTO value_units VALUES
   ('src_yieldiy_p_inputdemandfactor', 'value', 'U_ratio', 'capri', 'a share of the input (yieldIY.gms l. 24-27)');
 
--- file: capri_data/sources/capri_gams/pol_input/mquota_update_PMQuotaReg.csv
+-- file: capri_data/sources/raw/capri/gams/pol_input/mquota_update_PMQuotaReg.csv
 CREATE TABLE src_mquota_update_pmquotareg (
     region VARCHAR NOT NULL,
     info VARCHAR NOT NULL,
@@ -149,7 +149,7 @@ COMMENT ON TABLE src_mquota_update_pmquotareg IS 'CAPRI''s TABLE PMQuotaReg(regi
 INSERT INTO value_units VALUES
   ('src_mquota_update_pmquotareg', 'value', NULL, 'open', 'mquota_update.gms states no unit (build_captrd_dat.py: 1000 t)');
 
--- file: capri_data/sources/capri_star/nutrient_cont_usda_p_nutrientCont.csv
+-- file: capri_data/sources/raw/capri/dat/arm/nutrient_cont_usda_p_nutrientCont.csv
 CREATE TABLE src_nutrient_cont_usda_p_nutrientcont (
     product VARCHAR NOT NULL,
     "item" VARCHAR NOT NULL,
@@ -160,7 +160,7 @@ COMMENT ON TABLE src_nutrient_cont_usda_p_nutrientcont IS 'CAPRI''s p_nutrientCo
 INSERT INTO value_units VALUES
   ('src_nutrient_cont_usda_p_nutrientcont', 'value', NULL, 'open', 'per item, named in the item (Water_g, Energ_cal, Protein_g, ...)');
 
--- file: capri_data/sources/envind/fao_landuse_2000_P.csv
+-- file: capri_data/sources/raw/capri/dat/envind/fao_landuse_2000_P.csv
 CREATE TABLE src_fao_landuse_2000_p (
     fao_code VARCHAR NOT NULL,
     climate_zone VARCHAR NOT NULL,
@@ -172,7 +172,7 @@ COMMENT ON TABLE src_fao_landuse_2000_p IS 'P(fao_code, climate_zone, land_use) 
 INSERT INTO value_units VALUES
   ('src_fao_landuse_2000_p', 'value', NULL, 'open', 'the dump states no unit (an area)');
 
--- file: capri_data/sources/envind/ipcc_wetlands_p_emifacOrganicSoil_ori.csv
+-- file: capri_data/sources/raw/capri/dat/envind/ipcc_wetlands_p_emifacOrganicSoil_ori.csv
 CREATE TABLE src_ipcc_wetlands_p_emifacorganicsoil_ori (
     gas VARCHAR NOT NULL,
     land_use VARCHAR NOT NULL,
@@ -184,7 +184,7 @@ COMMENT ON TABLE src_ipcc_wetlands_p_emifacorganicsoil_ori IS 'CAPRI''s p_emifac
 INSERT INTO value_units VALUES
   ('src_ipcc_wetlands_p_emifacorganicsoil_ori', 'value', NULL, 'open', 'per gas (kg N2O-N, ... per ha); the dump states no unit');
 
--- file: capri_data/sources/envind/orgsoil_share_p_orgsoilori.csv
+-- file: capri_data/sources/raw/capri/dat/envind/orgsoil_share_p_orgsoilori.csv
 CREATE TABLE src_orgsoil_share_p_orgsoilori (
     region VARCHAR NOT NULL,
     "item" VARCHAR NOT NULL,
@@ -195,7 +195,7 @@ COMMENT ON TABLE src_orgsoil_share_p_orgsoilori IS 'CAPRI''s p_OrgSoilOri(region
 INSERT INTO value_units VALUES
   ('src_orgsoil_share_p_orgsoilori', 'value', NULL, 'open', 'per item (shares and areas)');
 
--- file: capri_data/sources/ghgtech/LitRevFertTech_p_litRevFertTechs_all.csv
+-- file: capri_data/sources/raw/capri/dat/scen/ghgtech/LitRevFertTech_p_litRevFertTechs_all.csv
 CREATE TABLE src_litrevferttech_p_litrevferttechs_all (
     region VARCHAR NOT NULL,
     technology VARCHAR NOT NULL,
@@ -209,7 +209,7 @@ COMMENT ON TABLE src_litrevferttech_p_litrevferttechs_all IS 'CAPRI''s p_litRevF
 INSERT INTO value_units VALUES
   ('src_litrevferttech_p_litrevferttechs_all', 'value', NULL, 'open', 'relative changes of emissions (the dump states no unit)');
 
--- file: capri_data/sources/ghgtech/miti_data_jul15_p_ghgMiti.csv
+-- file: capri_data/sources/raw/capri/dat/scen/ghgtech/miti_data_jul15_p_ghgMiti.csv
 CREATE TABLE src_miti_data_jul15_p_ghgmiti (
     region VARCHAR NOT NULL,
     activity VARCHAR NOT NULL,
@@ -223,7 +223,7 @@ COMMENT ON TABLE src_miti_data_jul15_p_ghgmiti IS 'CAPRI''s p_ghgMiti(region, ac
 INSERT INTO value_units VALUES
   ('src_miti_data_jul15_p_ghgmiti', 'value', NULL, 'open', 'per info (shares, costs, QEmitt)');
 
--- file: capri_data/sources/policy/minfert_redu_by_crop_limCres.csv
+-- file: capri_data/sources/raw/capri/dat/policy/minfert_redu_by_crop_limCres.csv
 CREATE TABLE src_minfert_redu_by_crop_limcres (
     capri_region VARCHAR NOT NULL,
     ngrp VARCHAR NOT NULL,
@@ -236,7 +236,7 @@ INSERT INTO value_units VALUES
   ('src_minfert_redu_by_crop_limcres', 'add', 'U_ratio', 'capri', 'added to the factor 1.3 of the baseline residues per ha'),
   ('src_minfert_redu_by_crop_limcres', 'after_year', NULL, 'open', 'a year (no unit)');
 
--- file: capri_data/sources/policy/minfert_redu_by_crop_p_checkSmallMine.csv
+-- file: capri_data/sources/raw/capri/dat/policy/minfert_redu_by_crop_p_checkSmallMine.csv
 CREATE TABLE src_minfert_redu_by_crop_p_checksmallmine (
     capri_region VARCHAR NOT NULL,
     ngrp VARCHAR NOT NULL,
@@ -251,7 +251,7 @@ INSERT INTO value_units VALUES
   ('src_minfert_redu_by_crop_p_checksmallmine', 'after_year', NULL, 'open', 'a year (no unit)'),
   ('src_minfert_redu_by_crop_p_checksmallmine', 'othpol_high', NULL, 'open', 'a flag (no unit)');
 
--- file: capri_data/sources/water/cropwat_p_cropwatReq.csv
+-- file: capri_data/sources/raw/capri/dat/water/cropwat_p_cropwatReq.csv
 CREATE TABLE src_cropwat_p_cropwatreq (
     region VARCHAR NOT NULL,
     crop VARCHAR NOT NULL,
@@ -263,7 +263,7 @@ COMMENT ON TABLE src_cropwat_p_cropwatreq IS 'CAPRI''s p_cropwatReq(region, crop
 INSERT INTO value_units VALUES
   ('src_cropwat_p_cropwatreq', 'value', NULL, 'open', 'mm for CPET, CRAIN, CNIR; ratios for YRATIO, YFACT');
 
--- file: capri_data/sources/water/irrishare_p_irriShare.csv
+-- file: capri_data/sources/raw/capri/dat/water/irrishare_p_irriShare.csv
 CREATE TABLE src_irrishare_p_irrishare (
     region VARCHAR NOT NULL,
     "item" VARCHAR NOT NULL,
@@ -276,7 +276,7 @@ COMMENT ON TABLE src_irrishare_p_irrishare IS 'CAPRI''s p_irriShare(region, item
 INSERT INTO value_units VALUES
   ('src_irrishare_p_irrishare', 'value', NULL, 'open', 'the dump says % but holds shares (0.0217): unit to be established');
 
--- file: capri_data/sources/capri_dat/envind/lulucf_emissions_original_source_p_PEATSH_def.csv
+-- file: capri_data/sources/raw/capri/dat_local/envind/lulucf_emissions_original_source_p_PEATSH_def.csv
 CREATE TABLE src_lulucf_emissions_original_source_p_peatsh_def (
     region VARCHAR NOT NULL,
     "value" DOUBLE NOT NULL,
@@ -286,7 +286,7 @@ COMMENT ON TABLE src_lulucf_emissions_original_source_p_peatsh_def IS 'CAPRI''s 
 INSERT INTO value_units VALUES
   ('src_lulucf_emissions_original_source_p_peatsh_def', 'value', NULL, 'open', 'percent of arable land; no unit code for percent');
 
--- file: capri_data/sources/capri_dat/envind/fao_peatland_P.csv
+-- file: capri_data/sources/raw/capri/dat/envind/fao_peatland/fao_peatland_P.csv
 CREATE TABLE src_fao_peatland_p (
     fao_code VARCHAR NOT NULL,
     "value" DOUBLE NOT NULL,
@@ -296,7 +296,7 @@ COMMENT ON TABLE src_fao_peatland_p IS 'CAPRI''s P(FAOregions) of dat/envind/fao
 INSERT INTO value_units VALUES
   ('src_fao_peatland_p', 'value', NULL, 'open', 'share of arable land (0-1)');
 
--- file: capri_data/sources/capri_dat/miterra/mirror_miterra_inputs_norway_p_NO_EmFracFert.csv
+-- file: capri_data/sources/raw/capri/dat/miterra/mirror_miterra_inputs_norway/mirror_miterra_inputs_norway_p_NO_EmFracFert.csv
 CREATE TABLE src_no_mirror_emfracfert (
     gas VARCHAR NOT NULL,
     fertiliser VARCHAR NOT NULL,
@@ -307,7 +307,7 @@ COMMENT ON TABLE src_no_mirror_emfracfert IS 'CAPRI''s p_NO_EmFracFert of dat/mi
 INSERT INTO value_units VALUES
   ('src_no_mirror_emfracfert', 'value', NULL, 'open', 'as CAPRI''s EmFracFert');
 
--- file: capri_data/sources/capri_dat/miterra/mirror_miterra_inputs_norway_p_NO_FracEmAppl.csv
+-- file: capri_data/sources/raw/capri/dat/miterra/mirror_miterra_inputs_norway/mirror_miterra_inputs_norway_p_NO_FracEmAppl.csv
 CREATE TABLE src_no_mirror_fracemappl (
     animal_mitt VARCHAR NOT NULL,
     gas VARCHAR NOT NULL,
@@ -318,7 +318,7 @@ COMMENT ON TABLE src_no_mirror_fracemappl IS 'CAPRI''s p_NO_FracEmAppl of dat/mi
 INSERT INTO value_units VALUES
   ('src_no_mirror_fracemappl', 'value', NULL, 'open', 'as CAPRI''s FracEmAppl');
 
--- file: capri_data/sources/capri_dat/miterra/mirror_miterra_inputs_norway_p_NO_FracEmHouse.csv
+-- file: capri_data/sources/raw/capri/dat/miterra/mirror_miterra_inputs_norway/mirror_miterra_inputs_norway_p_NO_FracEmHouse.csv
 CREATE TABLE src_no_mirror_fracemhouse (
     animal_mitt VARCHAR NOT NULL,
     gas VARCHAR NOT NULL,
@@ -329,7 +329,7 @@ COMMENT ON TABLE src_no_mirror_fracemhouse IS 'CAPRI''s p_NO_FracEmHouse of dat/
 INSERT INTO value_units VALUES
   ('src_no_mirror_fracemhouse', 'value', NULL, 'open', 'as CAPRI''s FracEmHouse');
 
--- file: capri_data/sources/capri_dat/miterra/mirror_miterra_inputs_norway_p_NO_FracEmStorage.csv
+-- file: capri_data/sources/raw/capri/dat/miterra/mirror_miterra_inputs_norway/mirror_miterra_inputs_norway_p_NO_FracEmStorage.csv
 CREATE TABLE src_no_mirror_fracemstorage (
     animal_mitt VARCHAR NOT NULL,
     gas VARCHAR NOT NULL,
@@ -340,7 +340,7 @@ COMMENT ON TABLE src_no_mirror_fracemstorage IS 'CAPRI''s p_NO_FracEmStorage of 
 INSERT INTO value_units VALUES
   ('src_no_mirror_fracemstorage', 'value', NULL, 'open', 'as CAPRI''s FracEmStorage');
 
--- file: capri_data/sources/capri_dat/miterra/mirror_miterra_inputs_norway_p_NO_FracUseFert.csv
+-- file: capri_data/sources/raw/capri/dat/miterra/mirror_miterra_inputs_norway/mirror_miterra_inputs_norway_p_NO_FracUseFert.csv
 CREATE TABLE src_no_mirror_fracusefert (
     fertiliser VARCHAR NOT NULL,
     "value" DOUBLE NOT NULL,
@@ -350,7 +350,7 @@ COMMENT ON TABLE src_no_mirror_fracusefert IS 'CAPRI''s p_NO_FracUseFert of dat/
 INSERT INTO value_units VALUES
   ('src_no_mirror_fracusefert', 'value', NULL, 'open', 'as CAPRI''s FracUseFert');
 
--- file: capri_data/sources/capri_dat/miterra/mirror_miterra_inputs_norway_p_NO_NN_CorrFertFactDeviation.csv
+-- file: capri_data/sources/raw/capri/dat/miterra/mirror_miterra_inputs_norway/mirror_miterra_inputs_norway_p_NO_NN_CorrFertFactDeviation.csv
 CREATE TABLE src_no_mirror_nn_corrfertfactdeviation (
     fertiliser VARCHAR NOT NULL,
     year VARCHAR NOT NULL,
@@ -361,7 +361,7 @@ COMMENT ON TABLE src_no_mirror_nn_corrfertfactdeviation IS 'CAPRI''s p_NO_NN_Cor
 INSERT INTO value_units VALUES
   ('src_no_mirror_nn_corrfertfactdeviation', 'value', NULL, 'open', 'as CAPRI''s NN_CorrFertFactDeviation');
 
--- file: capri_data/sources/capri_dat/miterra/mirror_miterra_inputs_norway_p_NO_ReducEmhouse.csv
+-- file: capri_data/sources/raw/capri/dat/miterra/mirror_miterra_inputs_norway/mirror_miterra_inputs_norway_p_NO_ReducEmhouse.csv
 CREATE TABLE src_no_mirror_reducemhouse (
     animal_mitt VARCHAR NOT NULL,
     gas VARCHAR NOT NULL,
@@ -373,7 +373,7 @@ COMMENT ON TABLE src_no_mirror_reducemhouse IS 'CAPRI''s p_NO_ReducEmhouse of da
 INSERT INTO value_units VALUES
   ('src_no_mirror_reducemhouse', 'value', NULL, 'open', 'as CAPRI''s ReducEmhouse');
 
--- file: capri_data/sources/capri_dat/miterra/mirror_miterra_inputs_norway_p_NO_ReducEmstorage.csv
+-- file: capri_data/sources/raw/capri/dat/miterra/mirror_miterra_inputs_norway/mirror_miterra_inputs_norway_p_NO_ReducEmstorage.csv
 CREATE TABLE src_no_mirror_reducemstorage (
     animal_mitt VARCHAR NOT NULL,
     gas VARCHAR NOT NULL,
@@ -385,7 +385,7 @@ COMMENT ON TABLE src_no_mirror_reducemstorage IS 'CAPRI''s p_NO_ReducEmstorage o
 INSERT INTO value_units VALUES
   ('src_no_mirror_reducemstorage', 'value', NULL, 'open', 'as CAPRI''s ReducEmstorage');
 
--- file: capri_data/sources/capri_dat/miterra/mirror_miterra_inputs_norway_p_NO_bNumAniRains.csv
+-- file: capri_data/sources/raw/capri/dat/miterra/mirror_miterra_inputs_norway/mirror_miterra_inputs_norway_p_NO_bNumAniRains.csv
 CREATE TABLE src_no_mirror_bnumanirains (
     animal_mitt VARCHAR NOT NULL,
     year VARCHAR NOT NULL,
@@ -396,7 +396,7 @@ COMMENT ON TABLE src_no_mirror_bnumanirains IS 'CAPRI''s p_NO_bNumAniRains of da
 INSERT INTO value_units VALUES
   ('src_no_mirror_bnumanirains', 'value', NULL, 'open', 'as CAPRI''s bNumAniRains');
 
--- file: capri_data/sources/capri_dat/miterra/mirror_non_changeable_parameters_norway_p_NO_ControlStrategies.csv
+-- file: capri_data/sources/raw/capri/dat/miterra/mirror_non_changeable_parameters_norway/mirror_non_changeable_parameters_norway_p_NO_ControlStrategies.csv
 CREATE TABLE src_no_mirror_controlstrategies (
     animal_mitt VARCHAR NOT NULL,
     strategy VARCHAR NOT NULL,
@@ -408,7 +408,7 @@ COMMENT ON TABLE src_no_mirror_controlstrategies IS 'CAPRI''s p_NO_ControlStrate
 INSERT INTO value_units VALUES
   ('src_no_mirror_controlstrategies', 'value', NULL, 'open', 'as CAPRI''s ControlStrategies');
 
--- file: capri_data/sources/capri_dat/miterra/mirror_non_changeable_parameters_norway_p_NO_FracEmGrazing.csv
+-- file: capri_data/sources/raw/capri/dat/miterra/mirror_non_changeable_parameters_norway/mirror_non_changeable_parameters_norway_p_NO_FracEmGrazing.csv
 CREATE TABLE src_no_mirror_fracemgrazing (
     animal_mitt VARCHAR NOT NULL,
     item VARCHAR NOT NULL,
@@ -419,7 +419,7 @@ COMMENT ON TABLE src_no_mirror_fracemgrazing IS 'CAPRI''s p_NO_FracEmGrazing of 
 INSERT INTO value_units VALUES
   ('src_no_mirror_fracemgrazing', 'value', NULL, 'open', 'as CAPRI''s FracEmGrazing');
 
--- file: capri_data/sources/capri_dat/miterra/mirror_non_changeable_parameters_norway_p_NO_RCEmissions.csv
+-- file: capri_data/sources/raw/capri/dat/miterra/mirror_non_changeable_parameters_norway/mirror_non_changeable_parameters_norway_p_NO_RCEmissions.csv
 CREATE TABLE src_no_mirror_rcemissions (
     animal_mitt VARCHAR NOT NULL,
     item VARCHAR NOT NULL,
@@ -430,7 +430,7 @@ COMMENT ON TABLE src_no_mirror_rcemissions IS 'CAPRI''s p_NO_RCEmissions of dat/
 INSERT INTO value_units VALUES
   ('src_no_mirror_rcemissions', 'value', NULL, 'open', 'as CAPRI''s RCEmissions');
 
--- file: capri_data/sources/capri_dat/miterra/mirror_non_changeable_parameters_norway_p_NO_ReducControlStrategies.csv
+-- file: capri_data/sources/raw/capri/dat/miterra/mirror_non_changeable_parameters_norway/mirror_non_changeable_parameters_norway_p_NO_ReducControlStrategies.csv
 CREATE TABLE src_no_mirror_reduccontrolstrategies (
     animal_mitt VARCHAR NOT NULL,
     strategy VARCHAR NOT NULL,

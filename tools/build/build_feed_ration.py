@@ -310,7 +310,7 @@ def main() -> None:
     import _money
     _m30 = _money.deflator(2030)
     slope_src_2030 = collections.defaultdict(dict)
-    _f30 = _ROOT / "capri_data" / "sources" / "baseline_pmp" / "pmp_feed_inp_coeff_2030.csv"
+    _f30 = _ROOT / "capri_data" / "sources" / "intermediate" / "baseline_pmp" / "pmp_feed_inp_coeff_2030.csv"
     if _f30.exists():
         for row in csv.DictReader(open(_f30)):
             if row["coef"] == "SLOP" and row["tech"] == "T":

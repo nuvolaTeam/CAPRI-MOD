@@ -27,7 +27,7 @@ elasticities of ROW's other regions; Turkey, a trade region of its own, keeps th
 
 Output: capri_data/2017/market/feed_demand_nonEU.csv (region, commodity, feed_share),
 feed_demand_nonEU_elasticities.csv (region, commodity, price_of, elasticity) and feed_demand_nonEU_capri_regions.csv
-(region, commodity, capri_region) (capri_mod/data/nested_tables.py; a JSON file until 31 October 2026); source extracts capri_data/sources/market/feed_demand_nonEU_{elas,use}_2030.csv.
+(region, commodity, capri_region) (capri_mod/data/nested_tables.py; a JSON file until 31 October 2026); source extracts capri_data/sources/raw/capri/results/{elas_2_1730defaulta,data_market_1730defaulta}/feed_demand_nonEU_{elas,use}_2030.csv.
 
     python tools/build/build_feed_demand_nonEU.py
 """
@@ -43,8 +43,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  
 from paths import EXPORTS  # noqa: E402  (CAPRI's material outside the repository)
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
-KEEP_E = ROOT / "capri_data" / "sources" / "market" / "feed_demand_nonEU_elas_2030.csv"
-KEEP_U = ROOT / "capri_data" / "sources" / "market" / "feed_demand_nonEU_use_2030.csv"
+KEEP_E = ROOT / "capri_data" / "sources" / "raw" / "capri" / "results" / "elas_2_1730defaulta" / "feed_demand_nonEU_elas_2030.csv"
+KEEP_U = ROOT / "capri_data" / "sources" / "raw" / "capri" / "results" / "data_market_1730defaulta" / "feed_demand_nonEU_use_2030.csv"
 DEST = ROOT / "capri_data" / "2017" / "market" / "feed_demand_nonEU.csv"
 USES = ("HCON", "FEED", "PROC", "BIOF")
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "lib"))

@@ -1,7 +1,7 @@
 """CAPRI's regional N balance of its Green Deal 2030 run with endogenous technologies ('ini'), from the run's results.
 
 Data written
-  capri_data/sources/capri_res/gd2030_endotech_ini_nbalance.csv  region, item, value: CAPRI's regional N balance
+  capri_data/sources/intermediate/capri_res/gd2030_endotech_ini_nbalance.csv  region, item, value: CAPRI's regional N balance
       items of the run (dataOut '' . item . NITF . 2030, 1000 t N): MINFER GASMIN RUNMIN NH3MIN EXPPRD IMPORT ATMOSD
       CRESID BIOFIX EXCRET GASANI RUNANI MTRADE SURSOI LEACHI; UAAR LEVL (1000 ha) and UAAR N2OLEA (kg N2O per ha)
 
@@ -21,7 +21,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  
 from paths import EXPORTS  # noqa: E402  (CAPRI's material outside the repository)
 
 ROOT = Path(__file__).resolve().parents[2]
-OUT = ROOT / "capri_data" / "sources" / "capri_res" / "gd2030_endotech_ini_nbalance.csv"
+OUT = ROOT / "capri_data" / "sources" / "intermediate" / "capri_res" / "gd2030_endotech_ini_nbalance.csv"
 ITEMS = ("MINFER", "GASMIN", "RUNMIN", "NH3MIN", "EXPPRD", "IMPORT", "ATMOSD", "CRESID", "BIOFIX", "EXCRET", "GASANI",
          "RUNANI", "MTRADE", "SURSOI", "LEACHI")
 DUMP = str(EXPORTS / "res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv")

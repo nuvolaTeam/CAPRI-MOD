@@ -28,11 +28,11 @@ Written: capri_data/2017/environment/histosol.csv, per model region and class (c
   cs0_<c>, cs1_<c>, maxshare_<c>, pmp_lin_<c>, pmp_sqr_<c>, cost_lin_<c>   (EUR per ha of histosol,
                     2017 money: CAPRI's 2030 marginals over its 2030/2017 input deflator)
 
-Sources: sources/envind/orgsoil_share_p_orgsoilori.csv, ipcc_wetlands_p_emifacOrganicSoil_ori.csv,
-sources/capri_dat/envind/fao_peatland_P.csv and lulucf_emissions_original_source_p_PEATSH_def.csv (the fallbacks of the
+Sources: sources/raw/capri/dat/envind/orgsoil_share_p_orgsoilori.csv, ipcc_wetlands_p_emifacOrganicSoil_ori.csv,
+sources/raw/capri/dat/envind/fao_peatland/fao_peatland_P.csv and lulucf_emissions_original_source_p_PEATSH_def.csv (the fallbacks of the
 Western Balkans and Turkey; the WBA6 set from sets.gms),
 fao_landuse_2000_P.csv (the project lead's gdxdumps, converted by tools/build/convert_sources_to_csv.py); FAO
-country codes from the GAMS source (global/fao_codes_new.gms FAORegions_map); sources/ghgtech/capri_costsavings_2030.csv; CROP and GRAS 2030 levels
+country codes from the GAMS source (global/fao_codes_new.gms FAORegions_map); sources/intermediate/ghgtech/capri_costsavings_2030.csv; CROP and GRAS 2030 levels
 from validation/greendeal_2030/capri_marginal_terms_ini_2030.csv.xz; deflator from
 trajectories/capri_price_ratios_2030.csv.
 
@@ -68,8 +68,8 @@ TAG = {"crop": "crop", "grslnd": "grass"}
 
 
 def _records(name):
-    """The records of a gdxdump converted to CSV (capri_data/sources/envind, tools/build/convert_sources_to_csv.py)."""
-    with open(SRC / "envind" / name, newline="", encoding="utf-8") as fh:
+    """The records of a gdxdump converted to CSV (capri_data/sources/raw/capri/dat/envind, tools/build/convert_sources_to_csv.py)."""
+    with open(SRC / "raw" / "capri" / "dat" / "envind" / name, newline="", encoding="utf-8") as fh:
         rows = list(csv.DictReader(fh))
     return rows
 
@@ -145,9 +145,9 @@ def main():
                 clim[ms][k] += v
     gap = gap_countries(a.gams_dir)
     peat = {r["fao_code"]: float(r["value"]) for r in csv.DictReader(open(
-        SRC / "capri_dat" / "envind" / "fao_peatland_P.csv", newline=""))}
+        SRC / "raw" / "capri" / "dat" / "envind" / "fao_peatland" / "fao_peatland_P.csv", newline=""))}
     peat_def = {r["region"]: float(r["value"]) for r in csv.DictReader(open(
-        SRC / "capri_dat" / "envind" / "lulucf_emissions_original_source_p_PEATSH_def.csv", newline=""))}
+        SRC / "raw" / "capri" / "dat_local" / "envind" / "lulucf_emissions_original_source_p_PEATSH_def.csv", newline=""))}
 
     def national_crop_share(ms):
         """CAPRI's cropland share of a country that fills its gaps (prep_lulucf_carbon.gms l. 245-259): its JRC record,
@@ -171,7 +171,7 @@ def main():
         t = sum(z.values())
         return {k: v / t for k, v in z.items()} if t > 0 else {}
 
-    cs = _read_csv(SRC / "ghgtech" / "capri_costsavings_2030.csv")
+    cs = _read_csv(SRC / "intermediate" / "ghgtech" / "capri_costsavings_2030.csv")
     cs = cs[cs["technology"] == "FALLOW"]
     terms = _read_csv(ROOT / "capri_data" / "validation" / "greendeal_2030" / "capri_marginal_terms_ini_2030.csv.xz",
                         header=None, names=["region", "act", "item", "value"], dtype=str)

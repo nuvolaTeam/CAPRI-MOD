@@ -23,7 +23,7 @@ request).
 
 Sources: CAPRI 2017 results capri_sources/capreg/res_17*.txt; CAPRI's 2030 reference
 capri_sources/exports/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; PMP terms
-capri_data/sources/capreg/pmp_quad_techn.csv and sources/baseline_pmp/intensity_q_*.csv.
+capri_data/sources/intermediate/capreg/pmp_quad_techn.csv and sources/intermediate/baseline_pmp/intensity_q_*.csv.
 
     python tools/build/build_labour_setaside.py
 """
@@ -159,9 +159,9 @@ def main() -> None:
     # w = q_FALL / (q_VSET + q_FALL) of each PMP source (the model region's terms; else the country's median w)
     # base year: the recipe's 2017 terms (both technologies; CAPREG's file holds one diagonal term per activity, the
     # first technology's, which is not VSET's curvature on its level)
-    for sfx, f in (("", ROOT / "capri_data" / "sources" / "baseline_pmp" / "intensity_q_recipe2017.csv"),
-                   ("_capri2030", ROOT / "capri_data" / "sources" / "baseline_pmp" / "intensity_q_capri2030.csv"),
-                   ("_recipe2030", ROOT / "capri_data" / "sources" / "baseline_pmp" / "intensity_q_recipe2030.csv")):
+    for sfx, f in (("", ROOT / "capri_data" / "sources" / "intermediate" / "baseline_pmp" / "intensity_q_recipe2017.csv"),
+                   ("_capri2030", ROOT / "capri_data" / "sources" / "intermediate" / "baseline_pmp" / "intensity_q_capri2030.csv"),
+                   ("_recipe2030", ROOT / "capri_data" / "sources" / "intermediate" / "baseline_pmp" / "intensity_q_recipe2030.csv")):
         q = _read_csv(f).pivot_table(index="model_region", columns="activity", values="value")
         w = (q["FALL"] / (q["VSET"] + q["FALL"])).where((q["VSET"] > 0) & (q["FALL"] > 0))
         col = "w_vset" + sfx

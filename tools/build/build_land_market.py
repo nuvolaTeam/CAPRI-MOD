@@ -42,7 +42,7 @@ def main() -> None:
     ap.add_argument("--year", type=int, choices=(2017, 2030), default=2017,
                     help="2017: CAPRI's base-year calibration (res_17 LEVL, pmppar_17 exports); 2030: its 2030 baseline "
                          "calibration (LEVL of the 2030 reference, pmppar_21730 p_pmpQuadLandTypes, "
-                         "capri_data/sources/baseline_pmp/pmp_quad_landtypes_2030.csv)")
+                         "capri_data/sources/intermediate/baseline_pmp/pmp_quad_landtypes_2030.csv)")
     ap.add_argument("--ref", type=Path,
                     default=EXPORTS / "res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv")
     args = ap.parse_args()
@@ -80,7 +80,7 @@ def main() -> None:
                 r8of.setdefault(reg, set()).add(c8)
     Q = defaultdict(dict)
     if args.year == 2030:
-        for r in csv.DictReader(open(_ROOT / "capri_data" / "sources" / "baseline_pmp" / "pmp_quad_landtypes_2030.csv")):
+        for r in csv.DictReader(open(_ROOT / "capri_data" / "sources" / "intermediate" / "baseline_pmp" / "pmp_quad_landtypes_2030.csv")):
             if r["landtype1"] in LT and r["landtype2"] in LT:
                 Q[r["region"]][(r["landtype1"], r["landtype2"])] = float(r["value"])
     else:

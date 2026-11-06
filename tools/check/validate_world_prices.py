@@ -58,9 +58,9 @@ def main() -> None:
 
     model_wp = _read_csv(dd / "2017/market/world_prices.csv", index_col=0)
     wcol = model_wp.columns[0]
-    capri = _read_csv(dd / "sources/capmod/capmod_world_reference_2017.csv",
+    capri = _read_csv(dd / "sources/raw/capri/capmod/capmod_world_reference_2017.csv",
                         index_col=0)
-    prod = _read_csv(dd / "sources/capreg/capreg_producer_prices.csv", index_col=0)
+    prod = _read_csv(dd / "sources/intermediate/capreg/capreg_producer_prices.csv", index_col=0)
     areas = _read_csv(dd / "2017/supply/base_areas.csv", index_col=0)
 
     # EU producer price: median across regions where the activity is grown.

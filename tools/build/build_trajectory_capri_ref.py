@@ -37,7 +37,7 @@ def _read_csv(*a, **k):
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / "capri_data" / "scenarios" / "capri_ref_2030"
 REF = EXPORTS / "res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv"
-KEEP = ROOT / "capri_data" / "sources" / "capri_baseline" / "capri_ref_levl_yild_2030_2017.csv.xz"
+KEEP = ROOT / "capri_data" / "sources" / "raw" / "capri" / "results" / "res_2_1730greendeal_refpol_endotech_all_inidefaulta" / "capri_ref_levl_yild_2030_2017.csv.xz"
 sys.path.insert(0, str(ROOT / "tools" / "lib"))
 from _model_regions import FALLBACK_UNITS, UNITS  # noqa: E402  (capri_data/shared/regional_units.csv)
 #: the first two letters of the model's regional units (CAPRI's codes: BL, IR, EL, NO ...): the countries whose 2030

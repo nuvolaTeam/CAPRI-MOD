@@ -17,7 +17,7 @@ FFIS, OAQU.
 Source: CAPRI 2030 Green Deal reference market results (markmarket_greendeal_1730et_base_1717 dataOut): FEED per
 member state and product, ARM1P of the member state's market region (A_EU_WEST or A_EU_EAST, CAPRI's RMS_TO_RM;
 EU27yr19's until 3 November 2026); kept as
-capri_data/sources/market/feed_bulks_dataout_2030.csv.
+capri_data/sources/raw/capri/results/markmarket_greendeal_1730et_base_1717/feed_bulks_dataout_2030.csv.
 
 Model commodity of each product: WHEA -> SWHE, MAIZ -> CORN, RYEM, OATS, OCER as themselves, RICE -> PARI, OLIO -> OLIV,
 BARL, PULS, RAPO, SUNO, SOYO, RAPC, SUNC, SOYC, DDGS, OTHO and the fish products SFIS, FFIS, OAQU by name (markets
@@ -50,7 +50,7 @@ from _grep import grep  # noqa: E402  (grep -E in Python: any system)
 from paths import EXPORTS, SOURCES  # noqa: E402  (CAPRI's material outside the repository)
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
-SRC = ROOT / "capri_data" / "sources" / "market" / "feed_bulks_dataout_2030.csv"
+SRC = ROOT / "capri_data" / "sources" / "raw" / "capri" / "results" / "markmarket_greendeal_1730et_base_1717" / "feed_bulks_dataout_2030.csv"
 DEST = ROOT / "capri_data" / "2017" / "market"
 GAMS = SOURCES / "gams"
 BULKS = {"FCER": ("WHEA", "RYEM", "BARL", "OATS", "MAIZ", "OCER", "RICE"),

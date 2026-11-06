@@ -41,7 +41,7 @@ activities as in tools/build/build_capri_base.py (CROP_MAP), weighted by CAPRI's
 
 Source: CAPRI 2017 results res_17<MS>.txt (PLAP, INPO, FERT, EFUL, TOIN, LEVL, YILD and the IY inputs per activity;
 their UVAG); CAPRI's 2030 reference yields (res_2_1730greendeal_refdefaulta, --dump-2030, extracted to
-capri_data/sources/capri_res/yild_2030_ref.csv.xz).
+capri_data/sources/raw/capri/results/res_2_1730greendeal_refdefaulta/yild_2030_ref.csv.xz).
 Output: capri_data/2017/supply/plant_protection_cost.csv
     (region, activity, plap_eur_ha, inpo_eur_ha, fert_eur_ha, eful_eur_ha, eful_inpo_eur_ha, inpo_toin_share,
      capri_region)
@@ -74,13 +74,13 @@ import _model_codes as _MC  # noqa: E402  the model's activities and their CAPRI
 ANIMALS = dict(_MC.ANIMALS)
 COLS = ["region", "activity", "plap_eur_ha", "inpo_eur_ha", "fert_eur_ha", "eful_eur_ha", "eful_inpo_eur_ha",
         "yd_rest_eur_ha", "yd_plap_eur_ha", "yd_inpo_eur_ha", "yield_growth", "inpo_toin_share", "capri_region"]
-YIELD_IY = ROOT / "capri_data" / "sources" / "capri_gams" / "inputs" / "yieldIY_p_inputDemandFactor.csv"
-YILD30 = ROOT / "capri_data" / "sources" / "capri_res" / "yild_2030_ref.csv.xz"
+YIELD_IY = ROOT / "capri_data" / "sources" / "raw" / "capri" / "gams" / "inputs" / "yieldIY_p_inputDemandFactor.csv"
+YILD30 = ROOT / "capri_data" / "sources" / "raw" / "capri" / "results" / "res_2_1730greendeal_refdefaulta" / "yild_2030_ref.csv.xz"
 
 
 def yields_2030(dump: Path) -> dict:
     """CAPRI's 2030 reference yields per CAPRI region and activity (kg/ha, YILD of res_2_1730greendeal_refdefaulta),
-    extracted from the dump when given, else read from the extract (capri_data/sources/capri_res/yild_2030_ref.csv.xz)."""
+    extracted from the dump when given, else read from the extract (capri_data/sources/raw/capri/results/res_2_1730greendeal_refdefaulta/yild_2030_ref.csv.xz)."""
     if dump is not None and dump.exists():
         out = grep(r"^'[A-Z0-9]{8}'\.''\.'[A-Z]+'\.'YILD'\.'2030'", str(dump))
         rx = re.compile(r"^'([A-Z0-9]{8})'\.''\.'([A-Z]+)'\.'YILD'\.'2030'\s+([-\d.Ee+]+)")

@@ -28,7 +28,7 @@ Q = h / (w r^2): the elasticity of CAPRI's territory, with the model's revenue p
 The splits' own curvature (q_low, q_high, q_z in dairy_intensity.csv, cattle_intensity.csv) takes the 2030 terms at the
 2030 market year (q_<x>_capri2030 / _recipe2030, tools/build/build_intensity_q_2030.py).
 
-Sources: capri_data/sources/baseline_pmp/pmp_quad_techn_2030.csv (tools/build/build_pmp_2030.py); CAPRI 2030 levels LEVL of
+Sources: capri_data/sources/intermediate/baseline_pmp/pmp_quad_techn_2030.csv (tools/build/build_pmp_2030.py); CAPRI 2030 levels LEVL of
 res_2_1730greendeal_refpol_endotech_all_inidefaulta. Output: capri_data/2017/supply/pmp_capri_2030_animals.csv
 (region, animal, g, x_capri, level_ratio, capri_regions)
 
@@ -47,7 +47,7 @@ from _grep import grep  # noqa: E402  (grep -E in Python: any system)
 from paths import EXPORTS, SOURCES  # noqa: E402  (CAPRI's material outside the repository)
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
-SRC = ROOT / "capri_data" / "sources" / "baseline_pmp" / "pmp_quad_techn_2030.csv"
+SRC = ROOT / "capri_data" / "sources" / "intermediate" / "baseline_pmp" / "pmp_quad_techn_2030.csv"
 OUT = ROOT / "capri_data" / "2017" / "supply" / "pmp_capri_2030_animals.csv"
 REF = EXPORTS / "res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv"
 #: model animal -> members; a tuple is an intensity pair whose split the model carries

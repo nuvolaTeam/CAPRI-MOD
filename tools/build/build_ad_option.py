@@ -53,7 +53,7 @@ _sp_mr = _ilu.spec_from_file_location("_mr", Path(__file__).resolve().parents[2]
 _mr = _ilu.module_from_spec(_sp_mr); _sp_mr.loader.exec_module(_mr)
 
 ROOT = Path(__file__).resolve().parents[2]
-G = ROOT / "capri_data" / "sources" / "capri_dat" / "ghgtech"
+G = ROOT / "capri_data" / "sources" / "raw" / "capri" / "dat" / "scen" / "ghgtech"
 A = ROOT / "capri_data" / "2017" / "abatement" / "ammonia"
 CLIM = ROOT / "capri_data" / "2017" / "environment" / "climate_zones.csv"
 

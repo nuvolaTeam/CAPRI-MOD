@@ -3,10 +3,10 @@ every record (4 November 2026).
 
   dat/envind/fao_peatland.gdx  P(FAOregions) "Share of peatland in arable land" (FAO), read by envind/lulucf_carbon_decl.gms
       l. 695-697 as p_PEATSH: the organic-soil fallback of the Western Balkans and Turkey (prep_lulucf_carbon.gms l. 255-256)
-      -> capri_data/sources/capri_dat/envind/fao_peatland_P.csv  (fao_code, value)
+      -> capri_data/sources/raw/capri/dat/envind/fao_peatland/fao_peatland_P.csv  (fao_code, value)
   dat/miterra/mirror_non_changeable_parameters_norway.gdx, mirror_miterra_inputs_norway.gdx  p_NO_<symbol>: CAPRI's
       Norwegian MITERRA data, copied to NO000000 by envind/ammo.gms l. 252-343 (the 13 symbols whose targets the model
-      reads) -> capri_data/sources/capri_dat/miterra/<gdx>_p_NO_<symbol>.csv
+      reads) -> capri_data/sources/raw/capri/dat/miterra/<gdx>/<gdx>_p_NO_<symbol>.csv
 
     python tools/build/extract_capri_dat.py [capri_sources/dat]
 """
@@ -22,8 +22,9 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "tools" / "lib"))
 from paths import SOURCES  # noqa: E402
 
-OUT = ROOT / "capri_data" / "sources" / "capri_dat"
-#: (Parquet file under dat, output under capri_data/sources/capri_dat, the output's columns)
+OUT = ROOT / "capri_data" / "sources" / "raw" / "capri" / "dat"
+#: (Parquet file under dat, output file name, the output's columns); the output in sources/raw/capri/dat/<the Parquet
+#: file's folder> (DATA_LAYOUT.md: the path mirrors the origin)
 _NC, _MI = "miterra/mirror_non_changeable_parameters_norway", "miterra/mirror_miterra_inputs_norway"
 SYMBOLS = (("envind/fao_peatland/P.parquet", "envind/fao_peatland_P.csv", ["fao_code", "value"]),
            # CAPRI's mirrored MITERRA data of Norway (envind/ammo.gms l. 163-176, 252-343): the symbols whose targets the
@@ -50,7 +51,7 @@ def main(src: Path) -> None:
         dims, val = list(df.columns[:-1]), df.columns[-1]
         if len(dims) != len(cols) - 1 or val != "value":  # noqa: SIM102
             raise ValueError(f"{rel}: columns {list(df.columns)}, expected {len(cols) - 1} dimensions and 'value'")
-        dest = OUT / out
+        dest = OUT / Path(rel).parent / Path(out).name
         dest.parent.mkdir(parents=True, exist_ok=True)
         with open(dest, "w", newline="") as f:
             w = csv.writer(f, lineterminator="\n")

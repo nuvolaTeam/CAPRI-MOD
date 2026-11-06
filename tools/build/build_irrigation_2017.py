@@ -3,12 +3,12 @@ water-demand indicator (capri_mod/water).
 
 Sources (CAPRI's water database inputs, gams/water_database.gms, as uploaded; gdxdumps converted to CSV by
 tools/build/convert_sources_to_csv.py):
-  capri_data/sources/water/irrishare_p_irriShare.csv   p_irriShare(region, IRRI|IRR2, IRSH, year): share of
+  capri_data/sources/raw/capri/dat/water/irrishare_p_irriShare.csv   p_irriShare(region, IRRI|IRR2, IRSH, year): share of
                                            irrigable (IRRI) and irrigated (IRR2, 'irrigated once a year') area in UAAR,
                                            Eurostat FSS
-  capri_data/sources/water/cropwat_p_cropwatReq.csv   p_cropwatReq(region, crop, CPET|CRAIN|CNIR|YRATIO|YFACT):
+  capri_data/sources/raw/capri/dat/water/cropwat_p_cropwatReq.csv   p_cropwatReq(region, crop, CPET|CRAIN|CNIR|YRATIO|YFACT):
                                            CROPWAT crop water requirements, mm
-  capri_data/sources/capreg/capreg_activity_levels.csv   CAPRI's 2017 levels (ROOF and OFAR, the model's OFOD)
+  capri_data/sources/intermediate/capreg/capreg_activity_levels.csv   CAPRI's 2017 levels (ROOF and OFAR, the model's OFOD)
 
 Method. CAPRI's water database (water_database.gms) estimates each EU region's irrigated area per crop with a
 highest-posterior-density fit (lines 513-640) to the FSS irrigated area of the region (IRR2, 'irrigated once a year':
@@ -50,7 +50,7 @@ import sys as _sys_nc  # noqa: E402
 _sys_nc.path.insert(0, str(__import__("pathlib").Path(__file__).resolve().parents[2] / "tools" / "lib"))
 from _model_regions import national_code as _national_code  # noqa: E402  (TUR for Turkey's units, 4 November 2026)
 
-SRC = ROOT / "capri_data" / "sources" / "water"
+SRC = ROOT / "capri_data" / "sources" / "raw" / "capri" / "dat" / "water"
 DEST = ROOT / "capri_data" / "2017" / "environment" / "irrigation_2017.csv"
 BASE_YEAR = 2017
 #: sets_water.gms MAP_AA: crops with rainfed and irrigated variants (ROOF, OFAR, TEXT with WaterDB on)
@@ -77,7 +77,7 @@ def main():
     latest = sh.sort_values("year").groupby("region").last()
     cw = records("cropwat_p_cropwatReq.csv")
     cnir = cw[cw["item"] == "CNIR"].astype({"value": float}).pivot_table(index="region", columns="crop", values="value")
-    lev = read_csv(ROOT / "capri_data" / "sources" / "capreg" / "capreg_activity_levels.csv", index_col=0)
+    lev = read_csv(ROOT / "capri_data" / "sources" / "intermediate" / "capreg" / "capreg_activity_levels.csv", index_col=0)
 
     uaa = read_csv(ROOT / "capri_data" / "2017" / "supply" / "base_areas.csv", index_col=0).sum(axis=1)
     rows, none, unplaced = [], [], {}

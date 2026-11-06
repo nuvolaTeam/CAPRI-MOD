@@ -1,7 +1,7 @@
 """CAPRI's national producer prices (MPRI) per member state and activity: the regional prices' fallback where a region
 has no price of its own (capri_mod/data/loaders.py _national_capri_prices; KNOWN_ISSUES K101).
 
-    capri_data/sources/capreg/capreg_national_prices.csv   capri_country, <activity>...
+    capri_data/sources/intermediate/capreg/capreg_national_prices.csv   capri_country, <activity>...
 
 MPRI of the national row '<MS>000000' of each 2017 dump (res_17<MS>.txt, 'Y' column), every activity with a price, under
 CAPRI's code; and under the model's code where it differs (build_capri_base.CROP_MAP, the crop's first CAPRI activity:
@@ -28,7 +28,7 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check")]
 import build_capri_base as B  # noqa: E402
 
-OUT = ROOT / "capri_data" / "sources" / "capreg" / "capreg_national_prices.csv"
+OUT = ROOT / "capri_data" / "sources" / "intermediate" / "capreg" / "capreg_national_prices.csv"
 #: the national row: '<MS>000000', or Turkey's 'TUR' (sets.gms; its dump res_17TU.txt), keyed by the two letters as the
 #: dumps are (TU: capri_mod.data.definitions.MS_CODE maps Turkey's units TR... to TU)
 REC = re.compile(r"^'(?:([A-Z]{2})000000|(TU)R)'\.'([A-Z0-9]+)'\.'MPRI'\.'Y'\s+([^,\s]+)")

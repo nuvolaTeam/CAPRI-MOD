@@ -34,7 +34,7 @@ def test_mapping_covers_units_and_current_nuts(m):
     ru = ru[[is_eu(x) or x == "NO000000" for x in ru.capri_ms]]
     units = ru.region
     assert set(m.capri_unit) == set(units)
-    n24 = read_csv(ROOT / "capri_data" / "sources" / "nuts" / "nuts2024.csv", dtype=str)
+    n24 = read_csv(ROOT / "capri_data" / "sources" / "raw" / "nuts" / "nuts2024.csv", dtype=str)
     countries = set(ru.country)
     eu = {c for c, lv in zip(n24.code, n24.level) if str(lv) == "2" and c[:2] in countries and not c.endswith("ZZ")}
     eu |= {n for n in m.nuts2024 if n.startswith("NO")}                    # Norway: 2021 statistical regions

@@ -22,9 +22,9 @@ Sources
          their initial shares, the run the N cascade and leaching checks use: tools/build/build_n_leaching.py)
 
 Data written
-  capri_data/sources/capri_res/gd2030_ref_pbalance.csv          region, col, row, value: the extract of --ref (the
+  capri_data/sources/intermediate/capri_res/gd2030_ref_pbalance.csv          region, col, row, value: the extract of --ref (the
       regional items above for PHOF, UAAR LEVL, and per elementary crop LEVL, PRET, PCRD); the input of this builder
-  capri_data/sources/capri_res/gd2030_endotech_ini_pbalance.csv  the same for --ini, plus per elementary animal activity
+  capri_data/sources/intermediate/capri_res/gd2030_endotech_ini_pbalance.csv  the same for --ini, plus per elementary animal activity
       LEVL, MANP, MANN, RUNANI (kg per head, RUNANI/MANN = CAPRI's v_emiLoss(N, RunTot)); validation only
       (capri_mod/tests/test_p_balance.py)
   capri_data/2017/environment/p_balance_crop_coefs_2030.csv  capri_region, model_crop, levl_kha, pret_kg_ha, pcrd_kg_ha:
@@ -50,7 +50,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  
 from paths import EXPORTS  # noqa: E402  (CAPRI's material outside the repository)
 
 ROOT = Path(__file__).resolve().parents[2]
-SRC_DIR = ROOT / "capri_data" / "sources" / "capri_res"
+SRC_DIR = ROOT / "capri_data" / "sources" / "intermediate" / "capri_res"
 SRC_REF = SRC_DIR / "gd2030_ref_pbalance.csv"
 SRC_INI = SRC_DIR / "gd2030_endotech_ini_pbalance.csv"
 OUT = ROOT / "capri_data" / "2017" / "environment" / "p_balance_crop_coefs_2030.csv"

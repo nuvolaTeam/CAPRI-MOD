@@ -7,7 +7,7 @@ from intensive to extensive grassland, z (1000 ha; z = 0 at base, GRAE = s0 x GR
   share_ext      s0, GRAE's share of GRAS area (CAPRI 2017, LEVL)
   yield_ext_rel  GRAE yield / average GRAS yield, yield_int_rel likewise (CAPRI 2017, YILD)
   q_ext, q_int   CAPRI's own PMP diagonal terms of GRAE and GRAI (p_pmpQuadTechn, EUR/ha per 1000 ha;
-                 capri_data/sources/capreg/pmp_quad_techn.csv). Regions without them: the country's
+                 capri_data/sources/intermediate/capreg/pmp_quad_techn.csv). Regions without them: the country's
                  median of q x area (= margin / elasticity for a constant-elasticity PMP term) over
                  the region's area of the activity (REGISTERED fallback, column q_source)
 
@@ -35,9 +35,9 @@ ROOT = Path(__file__).resolve().parents[2]
 #: (column suffix, terms per model region): the base year's (CAPREG), CAPRI's 2030 calibration and capri-mod's
 #: recipe at 2030 (tools/build/build_intensity_q_2030.py); the model takes the suffix of its PMP source at the 2030 market
 #: year (KNOWN_ISSUES K61)
-Q_SOURCES = (("", ROOT / "capri_data" / "sources" / "capreg" / "pmp_quad_techn.csv"),
-             ("_capri2030", ROOT / "capri_data" / "sources" / "baseline_pmp" / "intensity_q_capri2030.csv"),
-             ("_recipe2030", ROOT / "capri_data" / "sources" / "baseline_pmp" / "intensity_q_recipe2030.csv"))
+Q_SOURCES = (("", ROOT / "capri_data" / "sources" / "intermediate" / "capreg" / "pmp_quad_techn.csv"),
+             ("_capri2030", ROOT / "capri_data" / "sources" / "intermediate" / "baseline_pmp" / "intensity_q_capri2030.csv"),
+             ("_recipe2030", ROOT / "capri_data" / "sources" / "intermediate" / "baseline_pmp" / "intensity_q_recipe2030.csv"))
 ROW = re.compile(r"^'([A-Z]{2}[0-9A-Z]{6})'\.'(GRAE|GRAI)'\.'(LEVL|YILD)'\.'Y'\s+(-?\d[\d.]*(?:[Ee][+\-]?\d+)?)")
 
 

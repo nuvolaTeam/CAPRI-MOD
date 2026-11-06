@@ -1122,7 +1122,7 @@ in the supply models. So the prices are CAPRI's baseline, whichever file they ar
 trend projection (`trends_1730`, DATA2); CAPRI sets them in its policy module, so the reference run is their source.
 Oilcake prices now follow the market baseline's producer prices at its 2017 and 2030 points (`data_market_1730defaulta`,
 PPRI BAS/CAL; median real ratio soya cake 1.15, rape cake 1.20, sunflower cake 0.91): gap 6.66 → 6.68, no visible effect.
-Extracts: `capri_data/sources/capri_baseline/capri_uvag_store_1730.csv`, `capri_market_prices_1730.csv`.
+Extracts: `capri_data/sources/raw/capri/capri_baseline/capri_uvag_store_1730.csv`, `capri_market_prices_1730.csv`.
 
 **Technologies in CAPRI cut the surplus little.** With every technology at its maximum (`_max` against `_ini`), CAPRI's
 gross N surplus falls 4.1% in the EU (Brittany 14%, Weser-Ems 18%, Denmark 5%, Dutch regions 1–2%): mineral N −15%,
@@ -1223,7 +1223,7 @@ vs −20.7%, pork price +55.6 vs +60.3%, beef price +24.4% vs +26.9%; CAPRI −9
 
 ## External check: the base balance against Eurostat (aei_pr_gnb, 2017)
 
-`tools/check/validate_gnb_eurostat.py` (data: `capri_data/sources/eurostat/aei_pr_gnb_nitrogen.csv`, supplied by the
+`tools/check/validate_gnb_eurostat.py` (data: `capri_data/sources/raw/eurostat/aei_pr_gnb_nitrogen.csv`, supplied by the
 project lead) compares the model's base-year balance with Eurostat's by member state, 20 countries:
 
 | Component | Model | Eurostat | Ratio |

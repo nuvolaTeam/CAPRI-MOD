@@ -282,7 +282,7 @@ These are all at **RUNR level, with no MS fallback**. Parameters are set in `amm
 
 ## 3. Inputs vs available CSVs
 
-`capri_data/sources/capri_dat/ghgtech/` (format `dim1,…,level,marginal`):
+`capri_data/sources/raw/capri/dat/scen/ghgtech/` (format `dim1,…,level,marginal`):
 
 | GAMS symbol (source) | CSV | Used by anch? | Notes |
 |---|---|---|---|

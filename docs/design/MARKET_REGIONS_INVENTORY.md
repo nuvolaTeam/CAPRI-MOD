@@ -88,8 +88,8 @@ CAPRI's codes must not route market codes through these functions.
 61 CSV files in capri_data/2017/market [V]: **13 carry no region key**, **9 are keyed by member state only**, **5 by
 behavioural region only (CAPRI codes)**, **34 by capri-mod's trade regions** (often next to an RMS column). Plus four
 outside that folder. Builders: tools/pipeline/builders.json (no DATA_SOURCING_REGISTRY.json exists on this branch;
-capri_data/MANIFEST.json gives reader and builder per file) [V]. The extract files under capri_data/sources/market
-(bilateral_dataout_*.csv.xz, bilateral_trq_dataout_*.csv, ...) are keyed by CAPRI codes and stay.
+capri_data/MANIFEST.json gives reader and builder per file) [V]. The extract files under capri_data/sources/market (since 6 November 2026
+capri_data/sources/raw/capri/results/<CAPRI file>/: bilateral_dataout_*.csv.xz, bilateral_trq_dataout_*.csv, ...) are keyed by CAPRI codes and stay.
 
 Rebuild class: **D** direct from CAPRI's RM-level data (the region map becomes the identity); **R** regrouping of the
 behavioural-region rows the builder already reads (`model_region`/`trade_region` := RMS_TO_RM(rms)); **N** new
@@ -273,7 +273,7 @@ policy.py:33-35) [V]; the supply side's 221 units are unaffected.
 2. **ROW split into 17 RM**: each gets its own market price, Armington nests and policy; trade between them, today
    ROW's domestic sales, becomes bilateral trade with transport costs and tariffs. Size [V]: 49,871 kt of the
    1,234,408 kt of flows between distinct CAPRI regions in the 2030 extract with the EU as EU27yr19
-   (sources/market/bilateral_dataout_2030.csv.xz, 44 regions; 4.0%, tonnes summed over products); ROW takes 27%
+   (sources/raw/capri/results/markmarket_greendeal_1730et_base_1717/bilateral_dataout_2030.csv.xz, 44 regions; 4.0%, tonnes summed over products); ROW takes 27%
    of capri-mod's inter-region imports in bilateral_flows_2030.csv and holds a median 12% of world production (above
    30% for 8 of 57 products, e.g. cocoa 69%, palm oil 34%). Non-EU supply, feed, processing and GL demand of the 23
    RMS respond to their own RM's prices instead of one ROW price. At the base point nothing should move; in

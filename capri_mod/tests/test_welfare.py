@@ -110,7 +110,7 @@ def test_market_welfare_at_base_and_after_a_supply_shock():
         for c in mm.WELFARE_COMPONENTS:
             if c not in ("TariffRev", "TRQRents"):
                 assert abs(w0.at[reg, c] - base.get(reg, {}).get(c, 0.0)) < 1e-6 * max(1.0, abs(w0.at[reg, c])), (reg, c)
-    ref = pd.read_csv(Path(__file__).resolve().parents[2] / "capri_data" / "sources" / "capri_res" / "ref2030_welfare.csv")
+    ref = pd.read_csv(Path(__file__).resolve().parents[2] / "capri_data" / "sources" / "raw" / "capri" / "results" / "ref2030_welfare.csv")
     ref = ref[(ref["col"].str.upper() == "CSSP") & (ref["row"].str.upper() == "INCE")].set_index("region")["value"]
     gl = pd.read_csv(Path(__file__).resolve().parents[2] / "capri_data" / "2017" / "market" / "gl_demand_goods.csv")
     eu_rms = sorted(set(gl.loc[gl.model_region == "EU27", "rms"]))

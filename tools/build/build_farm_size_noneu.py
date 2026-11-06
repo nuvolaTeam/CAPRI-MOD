@@ -121,10 +121,10 @@ def targets(c: dict):
     """CAPRI's l. 200-266 for the fallback regions: {name: {cell: value}} shared by every loop region (none has data
     of its own)."""
     heads = defaultdict(dict)
-    for r in _rd(SRC / "capri_dat" / "ghgtech" / "AD_basedata_p_Heads.csv"):
+    for r in _rd(SRC / "raw" / "capri" / "dat" / "scen" / "ghgtech" / "AD_basedata_p_Heads.csv"):
         heads[r["dim1"]][(r["dim2"].upper(), r["dim3"])] = float(r["level"])
     sf = defaultdict(dict)
-    for r in _rd(SRC / "capri_dat" / "ghgtech" / "AD_basedata_p_sf.csv"):
+    for r in _rd(SRC / "raw" / "capri" / "dat" / "scen" / "ghgtech" / "AD_basedata_p_sf.csv"):
         sf[r["dim1"]][r["dim2"]] = float(r["level"])
     hold = defaultdict(lambda: defaultdict(float))
     for r in _rd(AMM / "p_holdLSU.csv"):
@@ -280,7 +280,7 @@ def main():
     a = ap.parse_args()
     c = capri_constants(a.gams_dir)
     tg, A, F = targets(c)
-    lu = {r["act"].upper(): float(r["value"]) for r in _rd(SRC / "capri_dat" / "policy" / "livestock_units_p_LUUnits.csv")}
+    lu = {r["act"].upper(): float(r["value"]) for r in _rd(SRC / "raw" / "capri" / "dat" / "policy" / "livestock_units_p_LUUnits.csv")}
     t = pd.read_csv(LEVELS, dtype=str)
     t = t[t["item"] == "LEVL"]
     lev = {(r.region, r.activity): float(r.value) for r in t.itertuples()}

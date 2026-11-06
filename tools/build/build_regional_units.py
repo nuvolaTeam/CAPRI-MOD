@@ -8,7 +8,7 @@ each member state without regional detail (DK, EE, LT, LV, SI, CY, MT, HR), whos
 (DK000000). Units without agriculture (urbanNUTS: BL100000, DE300000, DE500000, DE600000, ES630000, ES640000,
 AT130000) carry no results and are not units of a run.
 
-Source: the units of CAPRI's Green Deal 2030 run (sources/capri_res/gd2030_endotech_ini_nbalance.csv, CAPRI's own
+Source: the units of CAPRI's Green Deal 2030 run (sources/intermediate/capri_res/gd2030_endotech_ini_nbalance.csv, CAPRI's own
 results): a code ending in 000000 is a member state total, kept as a unit only where the member state has no other
 code. Member states: capri_data/shared/capri_member_state_codes.csv, a unit's member state as
 tools/lib/_model_regions.national_code gives it (TR100000 -> TUR, Turkey's code in sets.gms, MAP_RR TUR.SET.R_TUR).
@@ -36,7 +36,7 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "tools" / "lib"))
 from _model_regions import EU_MS, national_code  # noqa: E402  (shared/eu_market_blocks.csv, capri_member_state_codes.csv)
 
-SRC = ROOT / "capri_data" / "sources" / "capri_res" / "gd2030_endotech_ini_nbalance.csv"
+SRC = ROOT / "capri_data" / "sources" / "intermediate" / "capri_res" / "gd2030_endotech_ini_nbalance.csv"
 MS_FILE = ROOT / "capri_data" / "shared" / "capri_member_state_codes.csv"
 DEST = ROOT / "capri_data" / "shared" / "regional_units.csv"
 CODE = re.compile(r"^[A-Z]{2}[A-Z0-9]{6}$")

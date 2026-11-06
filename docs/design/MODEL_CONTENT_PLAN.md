@@ -274,7 +274,7 @@ commented out [own check].
 - The design and the decision (S12 §5, 1 November 2026): S1 option (c), one mix column z per crop (T1 = X/2 + z,
   T2 = X/2 - z, |z| <= X/2), CAPRI's quadratic blocks and linear terms carried over by the change of variables; S2 the
   three pairs as activities of their own. Nothing implemented (S12 status line).
-- Data in hand: CAPRI's 2030 quadratic technology blocks (capri_data/sources/baseline_pmp/pmp_quad_techn_2030.csv;
+- Data in hand: CAPRI's 2030 quadratic technology blocks (capri_data/sources/intermediate/baseline_pmp/pmp_quad_techn_2030.csv;
   S12 §3). Not yet extracted: the linear terms per technology (capri_sources/pmp2030/pmppar_21730<CC>defaulta.txt).
   Not in any export: the factors p_technFact (fixed rules in CAPRI's code). The split activities' levels are in
   CAPREG's 2017 results and the 2030 reference (S12 §3).

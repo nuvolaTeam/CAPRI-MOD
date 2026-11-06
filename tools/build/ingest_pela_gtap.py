@@ -27,7 +27,7 @@ is defensible, but it should be stated.
 GTAP
 ----
 Until 30 October 2026 it also wrote the GTAP Armington elasticities (esubd, esubm of dat/arm/GTP57_134.gdx) per model
-commodity through a GTAP-sector concordance to sources/estnlp/gtap_armington.csv. Nothing read that file (the
+commodity through a GTAP-sector concordance to sources/intermediate/estnlp/gtap_armington.csv. Nothing read that file (the
 model's Armington terms come from tools/build/build_bilateral_market.py, armington_rho.csv) and it was removed with
 that part of this tool, the project lead's decision (KNOWN_ISSUES K103).
 
@@ -66,7 +66,7 @@ def main() -> None:
     ap.add_argument("--data-dir", type=Path, default=Path("capri_data"))
     args = ap.parse_args()
 
-    out = args.data_dir / "sources" / "estnlp"
+    out = args.data_dir / "sources" / "intermediate" / "estnlp"
     out.mkdir(parents=True, exist_ok=True)
 
     # the model's regions are CAPRI's regional units (shared/regional_units.csv): each CAPRI code is its own region

@@ -3,7 +3,7 @@
 CAPRI's envind/digestibility.gms (the standard path, GHGLCA off), per regional unit ru and cattle activity:
 
   1. the feeds' composition: CAPRI's table p_digestPar("EU", "DCOL", product, item) (envind/def_digestibility.gms,
-     capri_data/sources/envind/capri_digestpar.csv), missing items filled from the default products DEF_PRD (l. 37);
+     capri_data/sources/intermediate/envind/capri_digestpar.csv), missing items filled from the default products DEF_PRD (l. 37);
   2. grass: by the activity's grazing share GRAZ (p_NEMIDAT TypeShare, envind/ammo.gms l. 604-613) and the member
      state's grass N-fixation rate (fert/fertpar.gms p_nfixRate_gras, default 0.05, at most 0.75), pasture (GRPS,
      LGPS) or half silage (GRSI, LGSI), half hay (GRHA, LGHA), grass or legumes (l. 43-54); other fodder (OFAR) the
@@ -27,9 +27,9 @@ from collections import defaultdict
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-ENV = ROOT / "capri_data" / "sources" / "envind"
+ENV = ROOT / "capri_data" / "sources" / "intermediate" / "envind"
 #: fert/fertpar.gms's statements, converted to CSV by tools/build/convert_sources_to_csv.py
-FERTPAR = ROOT / "capri_data" / "sources" / "capri_gams" / "fert"
+FERTPAR = ROOT / "capri_data" / "sources" / "raw" / "capri" / "gams" / "fert"
 _ROW = re.compile(r"^'([^']*)'\.'([^']*)'\.'([^']*)'\.'Y'\s+(\S+)")
 
 

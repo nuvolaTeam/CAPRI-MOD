@@ -27,7 +27,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "lib"))  
 from paths import EXPORTS  # noqa: E402  (CAPRI's material outside the repository)
 
 ROOT = Path(__file__).resolve().parents[2]
-SRC_KEEP = ROOT / "capri_data" / "sources" / "fao_agg_2017" / "fao_agg_dairy_products_bas.csv"
+SRC_KEEP = ROOT / "capri_data" / "sources" / "raw" / "capri" / "results" / "fao_agg_17_datamarket" / "fao_agg_dairy_products_bas.csv"
 COMM = {"BUTT": "BUTR", "SMIP": "SKIM", "CHES": "CHES", "WHEP": "WHEY",
         # Sprint 9f: CAPRI's other dairy products, traded bilaterally as in CAPRI (model codes = CAPRI codes)
         "FRMI": "FRMI", "CREM": "CREM", "COCM": "COCM", "WMIO": "WMIO", "CASE": "CASE"}

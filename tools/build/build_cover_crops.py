@@ -17,7 +17,7 @@ CAPRI (envind/cover_crops.gms, supply/supply_model.gms, pol_input/greendeal/*_io
     NUTS2 <- member state <- EU (policy/define_greening_limits.gms). Both are written.
 
 Sources: capri_data/validation/greendeal_2030/capri_marginal_terms_ini_2030.csv.xz (CATC LEVL and TOIN, UAAR
-LEVL, crop LEVL; CAPRI's 2030 reference with technologies), capri_data/sources/capri_dat/policy/
+LEVL, crop LEVL; CAPRI's 2030 reference with technologies), capri_data/sources/raw/capri/dat/policy/
 wintercovershare_p_winterCoverShare0.csv (dat/policy/wintercovershare.gms, converted to CSV by
 tools/build/convert_sources_to_csv.py), the GAMS source reports/def_cbalance.gms (p_cInput).
 
@@ -50,7 +50,7 @@ _sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "che
 from _model_regions import CTRY as MS_CODE  # noqa: E402  CAPRI member-state codes (capri_member_state_codes.csv)
 CTRY_CAPRI = MS_CODE
 #: CAPRI's p_winterCoverShare0 (dat/policy/wintercovershare.gms as CSV)
-WCS = ROOT / "capri_data" / "sources" / "capri_dat" / "policy" / "wintercovershare_p_winterCoverShare0.csv"
+WCS = ROOT / "capri_data" / "sources" / "raw" / "capri" / "dat" / "policy" / "wintercovershare_p_winterCoverShare0.csv"
 
 
 def _load(path):

@@ -1,6 +1,6 @@
 -- The extracts under capri_data/sources (CAPRI's files and outside sources the builders read), 29 October 2026. Structure (types, NOT NULL, keys) from the files; each table's origin in provenance (01_provenance.sql); units open where no builder or CAPRI file states them.
 
--- file: capri_data/sources/baseline_pmp/estnlp_vb.csv
+-- file: capri_data/sources/intermediate/baseline_pmp/estnlp_vb.csv
 CREATE TABLE src_estnlp_vb (
     region VARCHAR NOT NULL,
     group1 VARCHAR NOT NULL,
@@ -12,7 +12,7 @@ COMMENT ON TABLE src_estnlp_vb IS 'CAPRI''s econometric estimate VB.L(region, gr
 INSERT INTO value_units VALUES
   ('src_estnlp_vb', 'level', NULL, 'open', 'estnlp_vb.level: unit to be established');
 
--- file: capri_data/sources/baseline_pmp/estnlp_vd.csv
+-- file: capri_data/sources/intermediate/baseline_pmp/estnlp_vd.csv
 CREATE TABLE src_estnlp_vd (
     region VARCHAR NOT NULL,
     activity VARCHAR NOT NULL,
@@ -23,7 +23,7 @@ COMMENT ON TABLE src_estnlp_vd IS 'CAPRI''s econometric estimate VD.L(region, ac
 INSERT INTO value_units VALUES
   ('src_estnlp_vd', 'level', NULL, 'open', 'estnlp_vd.level: unit to be established');
 
--- file: capri_data/sources/baseline_pmp/intensity_q_capri2030.csv
+-- file: capri_data/sources/intermediate/baseline_pmp/intensity_q_capri2030.csv
 CREATE TABLE src_intensity_q_capri2030 (
     model_region VARCHAR NOT NULL,
     activity VARCHAR NOT NULL,
@@ -34,7 +34,7 @@ COMMENT ON TABLE src_intensity_q_capri2030 IS 'Per model region (a CAPRI regiona
 INSERT INTO value_units VALUES
   ('src_intensity_q_capri2030', 'value', NULL, 'open', 'intensity_q_capri2030.value: unit to be established');
 
--- file: capri_data/sources/baseline_pmp/intensity_q_recipe2017.csv
+-- file: capri_data/sources/intermediate/baseline_pmp/intensity_q_recipe2017.csv
 CREATE TABLE src_intensity_q_recipe2017 (
     model_region VARCHAR NOT NULL,
     activity VARCHAR NOT NULL,
@@ -45,7 +45,7 @@ COMMENT ON TABLE src_intensity_q_recipe2017 IS 'Per model region (a CAPRI region
 INSERT INTO value_units VALUES
   ('src_intensity_q_recipe2017', 'value', NULL, 'open', 'intensity_q_recipe2017.value: unit to be established');
 
--- file: capri_data/sources/baseline_pmp/intensity_q_recipe2030.csv
+-- file: capri_data/sources/intermediate/baseline_pmp/intensity_q_recipe2030.csv
 CREATE TABLE src_intensity_q_recipe2030 (
     model_region VARCHAR NOT NULL,
     activity VARCHAR NOT NULL,
@@ -56,7 +56,7 @@ COMMENT ON TABLE src_intensity_q_recipe2030 IS 'Per model region (a CAPRI region
 INSERT INTO value_units VALUES
   ('src_intensity_q_recipe2030', 'value', NULL, 'open', 'intensity_q_recipe2030.value: unit to be established');
 
--- file: capri_data/sources/baseline_pmp/pmp_feed_inp_coeff_2030.csv
+-- file: capri_data/sources/intermediate/baseline_pmp/pmp_feed_inp_coeff_2030.csv
 CREATE TABLE src_pmp_feed_inp_coeff_2030 (
     region VARCHAR NOT NULL,
     activity VARCHAR NOT NULL,
@@ -70,7 +70,7 @@ COMMENT ON TABLE src_pmp_feed_inp_coeff_2030 IS 'CAPRI''s feed input coefficient
 INSERT INTO value_units VALUES
   ('src_pmp_feed_inp_coeff_2030', 'value', NULL, 'open', 'pmp_feed_inp_coeff_2030.value: unit to be established');
 
--- file: capri_data/sources/baseline_pmp/pmp_quad_landtypes_2030.csv
+-- file: capri_data/sources/intermediate/baseline_pmp/pmp_quad_landtypes_2030.csv
 CREATE TABLE src_pmp_quad_landtypes_2030 (
     region VARCHAR NOT NULL,
     landtype1 VARCHAR NOT NULL,
@@ -82,7 +82,7 @@ COMMENT ON TABLE src_pmp_quad_landtypes_2030 IS 'CAPRI''s quadratic land-supply 
 INSERT INTO value_units VALUES
   ('src_pmp_quad_landtypes_2030', 'value', NULL, 'open', 'pmp_quad_landtypes_2030.value: unit to be established');
 
--- file: capri_data/sources/baseline_pmp/pmp_quad_pact_2030.csv
+-- file: capri_data/sources/intermediate/baseline_pmp/pmp_quad_pact_2030.csv
 CREATE TABLE src_pmp_quad_pact_2030 (
     region VARCHAR NOT NULL,
     group1 VARCHAR NOT NULL,
@@ -94,7 +94,7 @@ COMMENT ON TABLE src_pmp_quad_pact_2030 IS 'CAPRI''s quadratic PMP terms on crop
 INSERT INTO value_units VALUES
   ('src_pmp_quad_pact_2030', 'value', NULL, 'open', 'pmp_quad_pact_2030.value: unit to be established');
 
--- file: capri_data/sources/baseline_pmp/pmp_quad_techn_2030.csv
+-- file: capri_data/sources/intermediate/baseline_pmp/pmp_quad_techn_2030.csv
 CREATE TABLE src_pmp_quad_techn_2030 (
     region VARCHAR NOT NULL,
     activity VARCHAR NOT NULL,
@@ -107,7 +107,7 @@ COMMENT ON TABLE src_pmp_quad_techn_2030 IS 'CAPRI''s quadratic PMP terms p_pmpQ
 INSERT INTO value_units VALUES
   ('src_pmp_quad_techn_2030', 'value', NULL, 'open', 'pmp_quad_techn_2030.value: unit to be established');
 
--- file: capri_data/sources/baseline_pmp/recipe_2017_quad_pact.csv
+-- file: capri_data/sources/intermediate/baseline_pmp/recipe_2017_quad_pact.csv
 CREATE TABLE src_recipe_2017_quad_pact (
     region VARCHAR NOT NULL,
     group1 VARCHAR NOT NULL,
@@ -119,7 +119,7 @@ COMMENT ON TABLE src_recipe_2017_quad_pact IS 'capri-mod''s own crop-group PMP t
 INSERT INTO value_units VALUES
   ('src_recipe_2017_quad_pact', 'value', NULL, 'open', 'recipe_2017_quad_pact.value: unit to be established');
 
--- file: capri_data/sources/baseline_pmp/recipe_2017_quad_techn.csv
+-- file: capri_data/sources/intermediate/baseline_pmp/recipe_2017_quad_techn.csv
 CREATE TABLE src_recipe_2017_quad_techn (
     region VARCHAR NOT NULL,
     activity VARCHAR NOT NULL,
@@ -132,7 +132,7 @@ COMMENT ON TABLE src_recipe_2017_quad_techn IS 'capri-mod''s own activity PMP te
 INSERT INTO value_units VALUES
   ('src_recipe_2017_quad_techn', 'value', NULL, 'open', 'recipe_2017_quad_techn.value: unit to be established');
 
--- file: capri_data/sources/baseline_pmp/recipe_2030_quad_pact.csv
+-- file: capri_data/sources/intermediate/baseline_pmp/recipe_2030_quad_pact.csv
 CREATE TABLE src_recipe_2030_quad_pact (
     region VARCHAR NOT NULL,
     group1 VARCHAR NOT NULL,
@@ -144,7 +144,7 @@ COMMENT ON TABLE src_recipe_2030_quad_pact IS 'capri-mod''s own crop-group PMP t
 INSERT INTO value_units VALUES
   ('src_recipe_2030_quad_pact', 'value', NULL, 'open', 'recipe_2030_quad_pact.value: unit to be established');
 
--- file: capri_data/sources/baseline_pmp/recipe_2030_quad_techn.csv
+-- file: capri_data/sources/intermediate/baseline_pmp/recipe_2030_quad_techn.csv
 CREATE TABLE src_recipe_2030_quad_techn (
     region VARCHAR NOT NULL,
     activity VARCHAR NOT NULL,
@@ -157,7 +157,7 @@ COMMENT ON TABLE src_recipe_2030_quad_techn IS 'capri-mod''s own activity PMP te
 INSERT INTO value_units VALUES
   ('src_recipe_2030_quad_techn', 'value', NULL, 'open', 'recipe_2030_quad_techn.value: unit to be established');
 
--- file: capri_data/sources/capmod/capmod_world_reference_2017.csv
+-- file: capri_data/sources/raw/capri/capmod/capmod_world_reference_2017.csv
 CREATE TABLE src_capmod_world_reference_2017 (
     commodity VARCHAR NOT NULL,
     Fob DOUBLE NOT NULL,
@@ -171,7 +171,7 @@ INSERT INTO value_units VALUES
   ('src_capmod_world_reference_2017', 'ImportP', NULL, 'open', 'capmod_world_reference_2017.ImportP: unit to be established'),
   ('src_capmod_world_reference_2017', 'ImportQ', NULL, 'open', 'capmod_world_reference_2017.ImportQ: unit to be established');
 
--- file: capri_data/sources/capreg/capreg_activity_levels.csv
+-- file: capri_data/sources/intermediate/capreg/capreg_activity_levels.csv
 -- OCER, PULS, SHGF, SHGM: empty where CAPRI's data have no record, as this file's other columns (the units of the UK,
 -- Turkey and the Western Balkans, 4 November 2026)
 CREATE TABLE src_capreg_activity_levels (
@@ -447,7 +447,7 @@ INSERT INTO value_units VALUES
   ('src_capreg_activity_levels', 'WETRES', NULL, 'open', 'capreg_activity_levels.WETRES: unit to be established'),
   ('src_capreg_activity_levels', 'WETWET', NULL, 'open', 'capreg_activity_levels.WETWET: unit to be established');
 
--- file: capri_data/sources/capreg/capreg_cap_premium.csv
+-- file: capri_data/sources/intermediate/capreg/capreg_cap_premium.csv
 CREATE TABLE src_capreg_cap_premium (
     model_region VARCHAR NOT NULL,
     AGGT DOUBLE NOT NULL,
@@ -605,7 +605,7 @@ INSERT INTO value_units VALUES
   ('src_capreg_cap_premium', 'TWIN', NULL, 'open', 'capreg_cap_premium.TWIN: unit to be established'),
   ('src_capreg_cap_premium', 'VSET', NULL, 'open', 'capreg_cap_premium.VSET: unit to be established');
 
--- file: capri_data/sources/capreg/capreg_national_prices.csv
+-- file: capri_data/sources/intermediate/capreg/capreg_national_prices.csv
 -- OCER, OCRO: empty where CAPRI's data have no record, as this file's other columns (the units of the UK,
 -- Turkey and the Western Balkans, 4 November 2026)
 CREATE TABLE src_capreg_national_prices (
@@ -763,7 +763,7 @@ INSERT INTO value_units VALUES
   ('src_capreg_national_prices', 'UAAR', NULL, 'open', 'capreg_national_prices.UAAR: unit to be established'),
   ('src_capreg_national_prices', 'WINE', NULL, 'open', 'capreg_national_prices.WINE: unit to be established');
 
--- file: capri_data/sources/capreg/capreg_producer_prices.csv
+-- file: capri_data/sources/intermediate/capreg/capreg_producer_prices.csv
 -- OCER, OCRO, POTA, PULS, SHGF: empty where CAPRI's data have no record, as this file's other columns (the units of the UK,
 -- Turkey and the Western Balkans, 4 November 2026)
 CREATE TABLE src_capreg_producer_prices (
@@ -919,7 +919,7 @@ INSERT INTO value_units VALUES
   ('src_capreg_producer_prices', 'WINE', NULL, 'open', 'capreg_producer_prices.WINE: unit to be established'),
   ('src_capreg_producer_prices', 'OFOD', NULL, 'open', 'capreg_producer_prices.OFOD: unit to be established');
 
--- file: capri_data/sources/capreg/capreg_producer_prices_extract.csv
+-- file: capri_data/sources/intermediate/capreg/capreg_producer_prices_extract.csv
 -- OCER, PULS, SHGF: empty where CAPRI's data have no record, as this file's other columns (the units of the UK,
 -- Turkey and the Western Balkans, 4 November 2026)
 CREATE TABLE src_capreg_producer_prices_extract (
@@ -1071,7 +1071,7 @@ INSERT INTO value_units VALUES
   ('src_capreg_producer_prices_extract', 'TWIN', NULL, 'open', 'capreg_producer_prices_extract.TWIN: unit to be established'),
   ('src_capreg_producer_prices_extract', 'UAAR', NULL, 'open', 'capreg_producer_prices_extract.UAAR: unit to be established');
 
--- file: capri_data/sources/capreg/pmp_quad_landtypes_2017.csv
+-- file: capri_data/sources/raw/capri/capreg/pmp_quad_landtypes_2017.csv
 CREATE TABLE src_pmp_quad_landtypes_2017 (
     region VARCHAR NOT NULL,
     landtype1 VARCHAR NOT NULL,
@@ -1083,7 +1083,7 @@ COMMENT ON TABLE src_pmp_quad_landtypes_2017 IS 'CAPRI''s 2017 quadratic land-su
 INSERT INTO value_units VALUES
   ('src_pmp_quad_landtypes_2017', 'value', NULL, 'open', 'pmp_quad_landtypes_2017.value: unit to be established');
 
--- file: capri_data/sources/capreg/pmp_quad_pact.csv
+-- file: capri_data/sources/intermediate/capreg/pmp_quad_pact.csv
 CREATE TABLE src_pmp_quad_pact (
     model_region VARCHAR NOT NULL,
     group1 VARCHAR NOT NULL,
@@ -1095,7 +1095,7 @@ COMMENT ON TABLE src_pmp_quad_pact IS 'CAPRI''s 2017 crop-group PMP terms p_pmpQ
 INSERT INTO value_units VALUES
   ('src_pmp_quad_pact', 'value', NULL, 'open', 'pmp_quad_pact.value: unit to be established');
 
--- file: capri_data/sources/capreg/pmp_quad_techn.csv
+-- file: capri_data/sources/intermediate/capreg/pmp_quad_techn.csv
 CREATE TABLE src_pmp_quad_techn (
     model_region VARCHAR NOT NULL,
     activity VARCHAR NOT NULL,
@@ -1106,7 +1106,7 @@ COMMENT ON TABLE src_pmp_quad_techn IS 'CAPRI''s 2017 own-activity PMP diagonal 
 INSERT INTO value_units VALUES
   ('src_pmp_quad_techn', 'value', NULL, 'open', 'pmp_quad_techn.value: unit to be established');
 
--- file: capri_data/sources/capri_baseline/capri_market_prices_1730.csv
+-- file: capri_data/sources/raw/capri/capri_baseline/capri_market_prices_1730.csv
 CREATE TABLE src_capri_market_prices_1730 (
     region VARCHAR NOT NULL,
     "item" VARCHAR NOT NULL,
@@ -1119,7 +1119,7 @@ COMMENT ON TABLE src_capri_market_prices_1730 IS 'CAPRI''s market prices PPRI an
 INSERT INTO value_units VALUES
   ('src_capri_market_prices_1730', 'value', NULL, 'open', 'capri_market_prices_1730.value: unit to be established');
 
--- file: capri_data/sources/capri_baseline/capri_uvag_store_1730.csv
+-- file: capri_data/sources/raw/capri/capri_baseline/capri_uvag_store_1730.csv
 CREATE TABLE src_capri_uvag_store_1730 (
     region VARCHAR NOT NULL,
     product VARCHAR NOT NULL,
@@ -1130,7 +1130,7 @@ COMMENT ON TABLE src_capri_uvag_store_1730 IS 'CAPRI''s calibrated 2030 unit val
 INSERT INTO value_units VALUES
   ('src_capri_uvag_store_1730', 'uvag_2030', NULL, 'open', 'capri_uvag_store_1730.uvag_2030: unit to be established');
 
--- file: capri_data/sources/capri_dat/ghgtech/AD_basedata_p_B0.csv
+-- file: capri_data/sources/raw/capri/dat/scen/ghgtech/AD_basedata_p_B0.csv
 CREATE TABLE src_ad_basedata_p_b0 (
     dim1 VARCHAR NOT NULL,
     dim2 VARCHAR NOT NULL,
@@ -1143,7 +1143,7 @@ INSERT INTO value_units VALUES
   ('src_ad_basedata_p_b0', 'level', NULL, 'open', 'AD_basedata_p_B0.level: unit to be established'),
   ('src_ad_basedata_p_b0', 'marginal', NULL, 'open', 'AD_basedata_p_B0.marginal: unit to be established');
 
--- file: capri_data/sources/capri_dat/ghgtech/AD_basedata_p_Heads.csv
+-- file: capri_data/sources/raw/capri/dat/scen/ghgtech/AD_basedata_p_Heads.csv
 CREATE TABLE src_ad_basedata_p_heads (
     dim1 VARCHAR NOT NULL,
     dim2 VARCHAR NOT NULL,
@@ -1157,7 +1157,7 @@ INSERT INTO value_units VALUES
   ('src_ad_basedata_p_heads', 'level', NULL, 'open', 'AD_basedata_p_Heads.level: unit to be established'),
   ('src_ad_basedata_p_heads', 'marginal', NULL, 'open', 'AD_basedata_p_Heads.marginal: unit to be established');
 
--- file: capri_data/sources/capri_dat/ghgtech/AD_basedata_p_HousShar.csv
+-- file: capri_data/sources/raw/capri/dat/scen/ghgtech/AD_basedata_p_HousShar.csv
 CREATE TABLE src_ad_basedata_p_housshar (
     dim1 VARCHAR NOT NULL,
     dim2 VARCHAR NOT NULL,
@@ -1170,7 +1170,7 @@ INSERT INTO value_units VALUES
   ('src_ad_basedata_p_housshar', 'level', NULL, 'open', 'AD_basedata_p_HousShar.level: unit to be established'),
   ('src_ad_basedata_p_housshar', 'marginal', NULL, 'open', 'AD_basedata_p_HousShar.marginal: unit to be established');
 
--- file: capri_data/sources/capri_dat/ghgtech/AD_basedata_p_MitiShar0.csv
+-- file: capri_data/sources/raw/capri/dat/scen/ghgtech/AD_basedata_p_MitiShar0.csv
 CREATE TABLE src_ad_basedata_p_mitishar0 (
     dim1 VARCHAR NOT NULL,
     dim2 VARCHAR NOT NULL,
@@ -1183,7 +1183,7 @@ INSERT INTO value_units VALUES
   ('src_ad_basedata_p_mitishar0', 'level', NULL, 'open', 'AD_basedata_p_MitiShar0.level: unit to be established'),
   ('src_ad_basedata_p_mitishar0', 'marginal', NULL, 'open', 'AD_basedata_p_MitiShar0.marginal: unit to be established');
 
--- file: capri_data/sources/capri_dat/ghgtech/AD_basedata_p_SharLiq.csv
+-- file: capri_data/sources/raw/capri/dat/scen/ghgtech/AD_basedata_p_SharLiq.csv
 CREATE TABLE src_ad_basedata_p_sharliq (
     dim1 VARCHAR NOT NULL,
     dim2 VARCHAR NOT NULL,
@@ -1196,7 +1196,7 @@ INSERT INTO value_units VALUES
   ('src_ad_basedata_p_sharliq', 'level', NULL, 'open', 'AD_basedata_p_SharLiq.level: unit to be established'),
   ('src_ad_basedata_p_sharliq', 'marginal', NULL, 'open', 'AD_basedata_p_SharLiq.marginal: unit to be established');
 
--- file: capri_data/sources/capri_dat/ghgtech/AD_basedata_p_VSER.csv
+-- file: capri_data/sources/raw/capri/dat/scen/ghgtech/AD_basedata_p_VSER.csv
 CREATE TABLE src_ad_basedata_p_vser (
     dim1 VARCHAR NOT NULL,
     dim2 VARCHAR NOT NULL,
@@ -1209,7 +1209,7 @@ INSERT INTO value_units VALUES
   ('src_ad_basedata_p_vser', 'level', NULL, 'open', 'AD_basedata_p_VSER.level: unit to be established'),
   ('src_ad_basedata_p_vser', 'marginal', NULL, 'open', 'AD_basedata_p_VSER.marginal: unit to be established');
 
--- file: capri_data/sources/capri_dat/ghgtech/AD_basedata_p_sf.csv
+-- file: capri_data/sources/raw/capri/dat/scen/ghgtech/AD_basedata_p_sf.csv
 CREATE TABLE src_ad_basedata_p_sf (
     dim1 VARCHAR NOT NULL,
     dim2 VARCHAR NOT NULL,
@@ -1222,7 +1222,7 @@ INSERT INTO value_units VALUES
   ('src_ad_basedata_p_sf', 'level', NULL, 'open', 'AD_basedata_p_sf.level: unit to be established'),
   ('src_ad_basedata_p_sf', 'marginal', NULL, 'open', 'AD_basedata_p_sf.marginal: unit to be established');
 
--- file: capri_data/sources/capri_dat/ghgtech/gains_ad_p_gainsdata.csv
+-- file: capri_data/sources/raw/capri/dat/scen/ghgtech/gains_ad_p_gainsdata.csv
 CREATE TABLE src_gains_ad_p_gainsdata (
     dim1 VARCHAR NOT NULL,
     dim2 VARCHAR NOT NULL,
@@ -1236,7 +1236,7 @@ INSERT INTO value_units VALUES
   ('src_gains_ad_p_gainsdata', 'level', NULL, 'open', 'gains_ad_p_gainsdata.level: unit to be established'),
   ('src_gains_ad_p_gainsdata', 'marginal', NULL, 'open', 'gains_ad_p_gainsdata.marginal: unit to be established');
 
--- file: capri_data/sources/capri_land_rents/land_rents_capri_2017.csv
+-- file: capri_data/sources/intermediate/capri_land_rents/land_rents_capri_2017.csv
 CREATE TABLE src_land_rents_capri_2017 (
     capri_region VARCHAR NOT NULL,
     land_type VARCHAR NOT NULL,
@@ -1249,7 +1249,7 @@ INSERT INTO value_units VALUES
   ('src_land_rents_capri_2017', 'rent_eur_ha', NULL, 'open', 'land_rents_capri_2017.rent_eur_ha: unit to be established'),
   ('src_land_rents_capri_2017', 'levl_kha', NULL, 'open', 'land_rents_capri_2017.levl_kha: unit to be established');
 
--- file: capri_data/sources/capri_land_rents/land_rents_capri_2030.csv
+-- file: capri_data/sources/intermediate/capri_land_rents/land_rents_capri_2030.csv
 CREATE TABLE src_land_rents_capri_2030 (
     capri_region VARCHAR NOT NULL,
     land_type VARCHAR NOT NULL,
@@ -1262,7 +1262,7 @@ INSERT INTO value_units VALUES
   ('src_land_rents_capri_2030', 'rent_eur_ha', NULL, 'open', 'land_rents_capri_2030.rent_eur_ha: unit to be established'),
   ('src_land_rents_capri_2030', 'levl_kha', NULL, 'open', 'land_rents_capri_2030.levl_kha: unit to be established');
 
--- file: capri_data/sources/capri_res/gd2030_endotech_ini_nbalance.csv
+-- file: capri_data/sources/intermediate/capri_res/gd2030_endotech_ini_nbalance.csv
 CREATE TABLE src_gd2030_endotech_ini_nbalance (
     region VARCHAR NOT NULL,
     "item" VARCHAR NOT NULL,
@@ -1273,7 +1273,7 @@ COMMENT ON TABLE src_gd2030_endotech_ini_nbalance IS 'CAPRI''s regional N balanc
 INSERT INTO value_units VALUES
   ('src_gd2030_endotech_ini_nbalance', 'value', NULL, 'open', 'gd2030_endotech_ini_nbalance.value: unit to be established');
 
--- file: capri_data/sources/capri_res/gd2030_endotech_ini_pbalance.csv
+-- file: capri_data/sources/intermediate/capri_res/gd2030_endotech_ini_pbalance.csv
 CREATE TABLE src_gd2030_endotech_ini_pbalance (
     region VARCHAR NOT NULL,
     col VARCHAR NOT NULL,
@@ -1285,7 +1285,7 @@ COMMENT ON TABLE src_gd2030_endotech_ini_pbalance IS 'CAPRI''s P2O5 balance item
 INSERT INTO value_units VALUES
   ('src_gd2030_endotech_ini_pbalance', 'value', NULL, 'open', 'gd2030_endotech_ini_pbalance.value: unit to be established');
 
--- file: capri_data/sources/capri_res/gd2030_ref_pbalance.csv
+-- file: capri_data/sources/intermediate/capri_res/gd2030_ref_pbalance.csv
 CREATE TABLE src_gd2030_ref_pbalance (
     region VARCHAR NOT NULL,
     col VARCHAR NOT NULL,
@@ -1297,7 +1297,7 @@ COMMENT ON TABLE src_gd2030_ref_pbalance IS 'CAPRI''s P2O5 balance items (1000 t
 INSERT INTO value_units VALUES
   ('src_gd2030_ref_pbalance', 'value', NULL, 'open', 'gd2030_ref_pbalance.value: unit to be established');
 
--- file: capri_data/sources/capri_res/ref2030_welfare.csv
+-- file: capri_data/sources/raw/capri/results/ref2030_welfare.csv
 CREATE TABLE src_ref2030_welfare (
     region VARCHAR NOT NULL,
     col VARCHAR NOT NULL,
@@ -1309,7 +1309,7 @@ COMMENT ON TABLE src_ref2030_welfare IS 'CAPRI''s welfare items of the 2030 refe
 INSERT INTO value_units VALUES
   ('src_ref2030_welfare', 'value', NULL, 'open', 'ref2030_welfare.value: unit to be established');
 
--- file: capri_data/sources/envind/anim_req_corr_2017.csv
+-- file: capri_data/sources/intermediate/envind/anim_req_corr_2017.csv
 CREATE TABLE src_anim_req_corr_2017 (
     region VARCHAR NOT NULL,
     activity VARCHAR NOT NULL,
@@ -1321,7 +1321,7 @@ COMMENT ON TABLE src_anim_req_corr_2017 IS 'CAPRI''s requirement correction fact
 INSERT INTO value_units VALUES
   ('src_anim_req_corr_2017', 'value', NULL, 'open', 'anim_req_corr_2017.value: unit to be established');
 
--- file: capri_data/sources/envind/capri_digest_default_prd.csv
+-- file: capri_data/sources/intermediate/envind/capri_digest_default_prd.csv
 CREATE TABLE src_capri_digest_default_prd (
     "default" VARCHAR NOT NULL,
     feed VARCHAR NOT NULL,
@@ -1329,7 +1329,7 @@ CREATE TABLE src_capri_digest_default_prd (
 );
 COMMENT ON TABLE src_capri_digest_default_prd IS 'CAPRI''s set DEF_PRD: per row, a feed and the default product whose values fill the feed''s missing digestibility items, from envind/def_digestibility.gms (tools/build/build_digestibility_table.py).';
 
--- file: capri_data/sources/envind/capri_digestpar.csv
+-- file: capri_data/sources/intermediate/envind/capri_digestpar.csv
 CREATE TABLE src_capri_digestpar (
     feed VARCHAR NOT NULL,
     "item" VARCHAR NOT NULL,
@@ -1340,7 +1340,7 @@ COMMENT ON TABLE src_capri_digestpar IS 'CAPRI''s feed composition p_digestPar('
 INSERT INTO value_units VALUES
   ('src_capri_digestpar', 'value', NULL, 'open', 'capri_digestpar.value: unit to be established');
 
--- file: capri_data/sources/envind/res17_mann_crpr_expt.csv
+-- file: capri_data/sources/intermediate/envind/res17_mann_crpr_expt.csv
 CREATE TABLE src_res17_mann_crpr_expt (
     region VARCHAR NOT NULL,
     activity VARCHAR NOT NULL,
@@ -1352,7 +1352,7 @@ COMMENT ON TABLE src_res17_mann_crpr_expt IS 'CAPRI''s LEVL, MANN and CRPR_EXPT 
 INSERT INTO value_units VALUES
   ('src_res17_mann_crpr_expt', 'value', NULL, 'open', 'res17_mann_crpr_expt.value: unit to be established');
 
--- file: capri_data/sources/environment/capri_manure_trade_2030.csv
+-- file: capri_data/sources/raw/capri/results/res_2_1730greendeal_refpol_endotech_all_inidefaulta/capri_manure_trade_2030.csv
 CREATE TABLE src_capri_manure_trade_2030 (
     capri_region VARCHAR NOT NULL,
     "item" VARCHAR NOT NULL,
@@ -1363,7 +1363,7 @@ COMMENT ON TABLE src_capri_manure_trade_2030 IS 'CAPRI''s manure N excretion EXC
 INSERT INTO value_units VALUES
   ('src_capri_manure_trade_2030', 'kt_n', NULL, 'open', 'capri_manure_trade_2030.kt_n: unit to be established');
 
--- file: capri_data/sources/estnlp/pela_own_price.csv
+-- file: capri_data/sources/intermediate/estnlp/pela_own_price.csv
 CREATE TABLE src_pela_own_price (
     model_region VARCHAR NOT NULL,
     BARL DOUBLE,
@@ -1401,7 +1401,7 @@ INSERT INTO value_units VALUES
   ('src_pela_own_price', 'SUNF', NULL, 'open', 'pela_own_price.SUNF: unit to be established'),
   ('src_pela_own_price', 'SWHE', NULL, 'open', 'pela_own_price.SWHE: unit to be established');
 
--- file: capri_data/sources/eurostat/aei_pr_gnb_nitrogen.csv
+-- file: capri_data/sources/raw/eurostat/aei_pr_gnb_nitrogen.csv
 CREATE TABLE src_aei_pr_gnb_nitrogen (
     geo VARCHAR NOT NULL,
     indic_ag VARCHAR NOT NULL,
@@ -1413,7 +1413,7 @@ COMMENT ON TABLE src_aei_pr_gnb_nitrogen IS 'Eurostat gross nitrogen balance aei
 INSERT INTO value_units VALUES
   ('src_aei_pr_gnb_nitrogen', 'value', NULL, 'open', 'aei_pr_gnb_nitrogen.value: unit to be established');
 
--- file: capri_data/sources/eurostat/ef_lus_main_uaa_nuts2024.csv
+-- file: capri_data/sources/raw/eurostat/ef_lus_main_uaa_nuts2024.csv
 CREATE TABLE src_ef_lus_main_uaa_nuts2024 (
     nuts VARCHAR NOT NULL,
     uaa_ha DOUBLE NOT NULL,
@@ -1426,7 +1426,7 @@ INSERT INTO value_units VALUES
   ('src_ef_lus_main_uaa_nuts2024', 'uaa_ha', NULL, 'open', 'ef_lus_main_uaa_nuts2024.uaa_ha: unit to be established'),
   ('src_ef_lus_main_uaa_nuts2024', 'year', NULL, 'open', 'ef_lus_main_uaa_nuts2024.year: unit to be established');
 
--- file: capri_data/sources/fao_agg_2017/fao_agg_dairy_products_bas.csv
+-- file: capri_data/sources/raw/capri/results/fao_agg_17_datamarket/fao_agg_dairy_products_bas.csv
 CREATE TABLE src_fao_agg_dairy_products_bas (
     region VARCHAR NOT NULL,
     "item" VARCHAR NOT NULL,
@@ -1438,7 +1438,7 @@ COMMENT ON TABLE src_fao_agg_dairy_products_bas IS 'CAPRI''s FAO_agg base-period
 INSERT INTO value_units VALUES
   ('src_fao_agg_dairy_products_bas', 'tonnes', NULL, 'open', 'fao_agg_dairy_products_bas.tonnes: unit to be established');
 
--- file: capri_data/sources/fao_agg_2017/fao_agg_market_balances_bas.csv
+-- file: capri_data/sources/raw/capri/results/fao_agg_17_datamarket/fao_agg_market_balances_bas.csv
 CREATE TABLE src_fao_agg_market_balances_bas (
     region VARCHAR NOT NULL,
     "item" VARCHAR NOT NULL,
@@ -1450,7 +1450,7 @@ COMMENT ON TABLE src_fao_agg_market_balances_bas IS 'CAPRI''s FAO_agg base-perio
 INSERT INTO value_units VALUES
   ('src_fao_agg_market_balances_bas', 'tonnes', NULL, 'open', 'fao_agg_market_balances_bas.tonnes: unit to be established');
 
--- file: capri_data/sources/ghgtech/LitRevFertTech_p_litRevFertTechs.csv
+-- file: capri_data/sources/raw/capri/dat/scen/ghgtech/LitRevFertTech_p_litRevFertTechs.csv
 CREATE TABLE src_litrevferttech_p_litrevferttechs (
     region VARCHAR NOT NULL,
     technology VARCHAR NOT NULL,
@@ -1464,7 +1464,7 @@ COMMENT ON TABLE src_litrevferttech_p_litrevferttechs IS 'CAPRI''s p_litRevFertT
 INSERT INTO value_units VALUES
   ('src_litrevferttech_p_litrevferttechs', 'value', NULL, 'open', 'LitRevFertTech_p_litRevFertTechs.value: unit to be established');
 
--- file: capri_data/sources/ghgtech/LitRevFertTech_p_litRevFertTechs_no3.csv
+-- file: capri_data/sources/intermediate/ghgtech/LitRevFertTech_p_litRevFertTechs_no3.csv
 CREATE TABLE src_litrevferttech_p_litrevferttechs_no3 (
     region VARCHAR NOT NULL,
     technology VARCHAR NOT NULL,
@@ -1478,7 +1478,7 @@ COMMENT ON TABLE src_litrevferttech_p_litrevferttechs_no3 IS 'The nitrate leachi
 INSERT INTO value_units VALUES
   ('src_litrevferttech_p_litrevferttechs_no3', 'value', NULL, 'open', 'LitRevFertTech_p_litRevFertTechs_no3.value: unit to be established');
 
--- file: capri_data/sources/ghgtech/capri_costsavings_2030.csv
+-- file: capri_data/sources/intermediate/ghgtech/capri_costsavings_2030.csv
 CREATE TABLE src_capri_costsavings_2030 (
     region VARCHAR NOT NULL,
     activity VARCHAR NOT NULL,
@@ -1494,7 +1494,7 @@ INSERT INTO value_units VALUES
   ('src_capri_costsavings_2030', 'level', NULL, 'open', 'capri_costsavings_2030.level: unit to be established'),
   ('src_capri_costsavings_2030', 'marginal', NULL, 'open', 'capri_costsavings_2030.marginal: unit to be established');
 
--- file: capri_data/sources/market/bilateral_trq_dataout_2017.csv
+-- file: capri_data/sources/raw/capri/results/market_base_1717/bilateral_trq_dataout_2017.csv
 CREATE TABLE src_bilateral_trq_dataout_2017 (
     importer VARCHAR NOT NULL,
     exporter VARCHAR,
@@ -1506,7 +1506,7 @@ COMMENT ON TABLE src_bilateral_trq_dataout_2017 IS 'CAPRI''s tariff-rate quota i
 INSERT INTO value_units VALUES
   ('src_bilateral_trq_dataout_2017', 'value', NULL, 'open', 'bilateral_trq_dataout_2017.value: the item''s unit (1000 t, %, EUR/t)');
 
--- file: capri_data/sources/market/bilateral_trq_dataout_2030.csv
+-- file: capri_data/sources/raw/capri/results/markmarket_greendeal_1730et_base_1717/bilateral_trq_dataout_2030.csv
 CREATE TABLE src_bilateral_trq_dataout_2030 (
     importer VARCHAR NOT NULL,
     exporter VARCHAR,
@@ -1518,7 +1518,7 @@ COMMENT ON TABLE src_bilateral_trq_dataout_2030 IS 'CAPRI''s tariff-rate quota i
 INSERT INTO value_units VALUES
   ('src_bilateral_trq_dataout_2030', 'value', NULL, 'open', 'bilateral_trq_dataout_2030.value: the item''s unit (1000 t, %, EUR/t)');
 
--- file: capri_data/sources/market/biofuel_proc_hessian_2030.csv
+-- file: capri_data/sources/raw/capri/results/elas_2_1730defaulta/biofuel_proc_hessian_2030.csv
 CREATE TABLE src_biofuel_proc_hessian_2030 (
     region VARCHAR NOT NULL,
     product VARCHAR NOT NULL,
@@ -1530,7 +1530,7 @@ COMMENT ON TABLE src_biofuel_proc_hessian_2030 IS 'CAPRI''s p_hessNQProc(region,
 INSERT INTO value_units VALUES
   ('src_biofuel_proc_hessian_2030', 'value', NULL, 'open', 'biofuel_proc_hessian_2030.value: unit to be established');
 
--- file: capri_data/sources/market/biofuel_proc_hessian_2017.csv
+-- file: capri_data/sources/raw/capri/results/elas_2_1717defaulta/biofuel_proc_hessian_2017.csv
 CREATE TABLE src_biofuel_proc_hessian_2017 (
     region VARCHAR NOT NULL,
     product VARCHAR NOT NULL,
@@ -1542,7 +1542,7 @@ COMMENT ON TABLE src_biofuel_proc_hessian_2017 IS 'CAPRI''s p_hessNQProc(region,
 INSERT INTO value_units VALUES
   ('src_biofuel_proc_hessian_2017', 'value', NULL, 'open', 'biofuel_proc_hessian_2017.value: unit to be established');
 
--- file: capri_data/sources/market/dairy_dataout_2030.csv
+-- file: capri_data/sources/raw/capri/results/markmarket_greendeal_1730et_base_1717/dairy_dataout_2030.csv
 CREATE TABLE src_dairy_dataout_2030 (
     region VARCHAR NOT NULL,
     "item" VARCHAR NOT NULL,
@@ -1554,7 +1554,7 @@ COMMENT ON TABLE src_dairy_dataout_2030 IS 'CAPRI''s dairy market items (PROD, P
 INSERT INTO value_units VALUES
   ('src_dairy_dataout_2030', 'value', NULL, 'open', 'dairy_dataout_2030.value: unit to be established');
 
--- file: capri_data/sources/market/dairy_elasticities_2030.csv
+-- file: capri_data/sources/raw/capri/results/elas_2_1730defaulta/dairy_elasticities_2030.csv
 CREATE TABLE src_dairy_elasticities_2030 (
     param VARCHAR NOT NULL,
     ms VARCHAR NOT NULL,
@@ -1567,7 +1567,7 @@ COMMENT ON TABLE src_dairy_elasticities_2030 IS 'CAPRI''s dairy parameters p_hes
 INSERT INTO value_units VALUES
   ('src_dairy_elasticities_2030', 'value', NULL, 'open', 'dairy_elasticities_2030.value: unit to be established');
 
--- file: capri_data/sources/market/dairy_world_dataout_2030.csv
+-- file: capri_data/sources/raw/capri/results/markmarket_greendeal_1730et_base_1717/dairy_world_dataout_2030.csv
 CREATE TABLE src_dairy_world_dataout_2030 (
     region VARCHAR NOT NULL,
     "item" VARCHAR NOT NULL,
@@ -1579,7 +1579,7 @@ COMMENT ON TABLE src_dairy_world_dataout_2030 IS 'CAPRI''s dairy market items (P
 INSERT INTO value_units VALUES
   ('src_dairy_world_dataout_2030', 'value', NULL, 'open', 'dairy_world_dataout_2030.value: unit to be established');
 
--- file: capri_data/sources/market/dairy_world_elasticities_2030.csv
+-- file: capri_data/sources/raw/capri/results/elas_2_1730defaulta/dairy_world_elasticities_2030.csv
 CREATE TABLE src_dairy_world_elasticities_2030 (
     param VARCHAR NOT NULL,
     rms VARCHAR NOT NULL,
@@ -1592,7 +1592,7 @@ COMMENT ON TABLE src_dairy_world_elasticities_2030 IS 'CAPRI''s p_hessNQDairy, p
 INSERT INTO value_units VALUES
   ('src_dairy_world_elasticities_2030', 'value', NULL, 'open', 'dairy_world_elasticities_2030.value: unit to be established');
 
--- file: capri_data/sources/market/feed_bulks_dataout_2030.csv
+-- file: capri_data/sources/raw/capri/results/markmarket_greendeal_1730et_base_1717/feed_bulks_dataout_2030.csv
 CREATE TABLE src_feed_bulks_dataout_2030 (
     region VARCHAR NOT NULL,
     "item" VARCHAR NOT NULL,
@@ -1604,7 +1604,7 @@ COMMENT ON TABLE src_feed_bulks_dataout_2030 IS 'CAPRI''s FEED per EU member sta
 INSERT INTO value_units VALUES
   ('src_feed_bulks_dataout_2030', 'value', NULL, 'open', 'feed_bulks_dataout_2030.value: unit to be established');
 
--- file: capri_data/sources/market/feed_demand_nonEU_elas_2030.csv
+-- file: capri_data/sources/raw/capri/results/elas_2_1730defaulta/feed_demand_nonEU_elas_2030.csv
 CREATE TABLE src_feed_demand_noneu_elas_2030 (
     rms VARCHAR NOT NULL,
     feed VARCHAR NOT NULL,
@@ -1616,7 +1616,7 @@ COMMENT ON TABLE src_feed_demand_noneu_elas_2030 IS 'CAPRI''s feed demand elasti
 INSERT INTO value_units VALUES
   ('src_feed_demand_noneu_elas_2030', 'value', NULL, 'open', 'feed_demand_nonEU_elas_2030.value: unit to be established');
 
--- file: capri_data/sources/market/feed_demand_nonEU_use_2030.csv
+-- file: capri_data/sources/raw/capri/results/data_market_1730defaulta/feed_demand_nonEU_use_2030.csv
 CREATE TABLE src_feed_demand_noneu_use_2030 (
     rms VARCHAR NOT NULL,
     "item" VARCHAR NOT NULL,
@@ -1628,7 +1628,7 @@ COMMENT ON TABLE src_feed_demand_noneu_use_2030 IS 'CAPRI''s uses HCON, FEED, PR
 INSERT INTO value_units VALUES
   ('src_feed_demand_noneu_use_2030', 'value', NULL, 'open', 'feed_demand_nonEU_use_2030.value: unit to be established');
 
--- file: capri_data/sources/market/processing_yields_dataout_2030.csv
+-- file: capri_data/sources/raw/capri/results/markmarket_greendeal_1730et_base_1717/processing_yields_dataout_2030.csv
 CREATE TABLE src_processing_yields_dataout_2030 (
     ms VARCHAR NOT NULL,
     "item" VARCHAR NOT NULL,
@@ -1640,7 +1640,7 @@ COMMENT ON TABLE src_processing_yields_dataout_2030 IS 'CAPRI''s GROF of olives 
 INSERT INTO value_units VALUES
   ('src_processing_yields_dataout_2030', 'value', NULL, 'open', 'processing_yields_dataout_2030.value: unit to be established');
 
--- file: capri_data/sources/market/sugar_processing_dataout_2030.csv
+-- file: capri_data/sources/raw/capri/results/markmarket_greendeal_1730et_base_1717/sugar_processing_dataout_2030.csv
 CREATE TABLE src_sugar_processing_dataout_2030 (
     ms VARCHAR NOT NULL,
     "item" VARCHAR NOT NULL,
@@ -1652,7 +1652,7 @@ COMMENT ON TABLE src_sugar_processing_dataout_2030 IS 'CAPRI''s sugar beet GROF 
 INSERT INTO value_units VALUES
   ('src_sugar_processing_dataout_2030', 'value', NULL, 'open', 'sugar_processing_dataout_2030.value: unit to be established');
 
--- file: capri_data/sources/nuts/nuts2013_2016.csv
+-- file: capri_data/sources/raw/nuts/nuts2013_2016.csv
 CREATE TABLE src_nuts2013_2016 (
     code_2013 VARCHAR,
     code_2016 VARCHAR,
@@ -1664,7 +1664,7 @@ CREATE TABLE src_nuts2013_2016 (
 );
 COMMENT ON TABLE src_nuts2013_2016 IS 'Correspondence NUTS 2013 to NUTS 2016 (codes, names by level, change), from Eurostat''s workbook NUTS2013-NUTS2016__1_.xlsx (removed 30 October 2026, read from git history; sheet ''NUTS2013-NUTS2016'', the rows with a code, columns B-H, text as written, CRLF line ends as committed before), written by tools/build/convert_sources_to_csv.py; read by tools/build/build_nuts2024_reporting.py.';
 
--- file: capri_data/sources/nuts/nuts2016_2021.csv
+-- file: capri_data/sources/raw/nuts/nuts2016_2021.csv
 CREATE TABLE src_nuts2016_2021 (
     code_2016 VARCHAR,
     code_2021 VARCHAR,
@@ -1679,7 +1679,7 @@ COMMENT ON TABLE src_nuts2016_2021 IS 'Correspondence NUTS 2016 to NUTS 2021 (co
 INSERT INTO value_units VALUES
   ('src_nuts2016_2021', 'change_codes', NULL, 'open', 'nuts2016_2021.change_codes: unit to be established');
 
--- file: capri_data/sources/nuts/nuts2021_2024.csv
+-- file: capri_data/sources/raw/nuts/nuts2021_2024.csv
 CREATE TABLE src_nuts2021_2024 (
     country VARCHAR NOT NULL,
     code_2021 VARCHAR,
@@ -1691,7 +1691,7 @@ CREATE TABLE src_nuts2021_2024 (
 );
 COMMENT ON TABLE src_nuts2021_2024 IS 'Correspondence NUTS 2021 to NUTS 2024 (country, codes, names by level, change), from Eurostat''s workbook NUTS2021-NUTS2024.xlsx (removed 30 October 2026, read from git history; sheet ''NUTS2021- NUTS2024'', the rows with a code, columns B-H, the text stripped of surrounding white space as committed before), written by tools/build/convert_sources_to_csv.py; read by tools/build/build_nuts2024_reporting.py.';
 
--- file: capri_data/sources/nuts/nuts2024.csv
+-- file: capri_data/sources/raw/nuts/nuts2024.csv
 CREATE TABLE src_nuts2024 (
     country VARCHAR NOT NULL,
     code VARCHAR NOT NULL,
@@ -1703,7 +1703,7 @@ COMMENT ON TABLE src_nuts2024 IS 'NUTS 2024 codes with country, label and level,
 INSERT INTO value_units VALUES
   ('src_nuts2024', 'level', NULL, 'open', 'nuts2024.level: unit to be established');
 
--- file: capri_data/sources/unsourced/producer_prices_no_builder.csv
+-- file: capri_data/sources/raw/unsourced/producer_prices_no_builder.csv
 CREATE TABLE src_producer_prices_no_builder (
     activity VARCHAR NOT NULL,
     price DOUBLE NOT NULL,
@@ -1714,7 +1714,7 @@ COMMENT ON TABLE src_producer_prices_no_builder IS 'EU producer price rows no bu
 INSERT INTO value_units VALUES
   ('src_producer_prices_no_builder', 'price', NULL, 'open', 'producer_prices_no_builder.price: unit to be established');
 
--- file: capri_data/sources/market/raw_milk_prices_dataout_2017.csv
+-- file: capri_data/sources/raw/capri/results/market_base_1717/raw_milk_prices_dataout_2017.csv
 CREATE TABLE src_raw_milk_prices_dataout_2017 (
     region VARCHAR NOT NULL,
     "value" DOUBLE NOT NULL
@@ -1723,7 +1723,7 @@ COMMENT ON TABLE src_raw_milk_prices_dataout_2017 IS 'CAPRI''s DATA PMRK MILK of
 INSERT INTO value_units VALUES
   ('src_raw_milk_prices_dataout_2017', 'value', 'U_EuPerTon', 'builder', 'CAPRI DATA PMRK MILK');
 
--- file: capri_data/sources/market/raw_milk_prices_dataout_2030.csv
+-- file: capri_data/sources/raw/capri/results/markmarket_greendeal_1730et_base_1717/raw_milk_prices_dataout_2030.csv
 CREATE TABLE src_raw_milk_prices_dataout_2030 (
     region VARCHAR NOT NULL,
     "value" DOUBLE NOT NULL

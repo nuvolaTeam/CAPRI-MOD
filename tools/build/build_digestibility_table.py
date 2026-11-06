@@ -5,9 +5,9 @@ feed, item) (NRC 2001, partly INRA 2002; the commented alternatives are not CAPR
 products whose values fill a feed's missing items (digestibility.gms l. 37-38). This builder reads the table as GAMS
 reads it (a value belongs to the column whose header it overlaps; lines starting with * are comments) and writes:
 
-  capri_data/sources/envind/capri_digestpar.csv           feed, item, value     (items PAF, DM, CP, NDICP, ADICP, EE,
+  capri_data/sources/intermediate/envind/capri_digestpar.csv           feed, item, value     (items PAF, DM, CP, NDICP, ADICP, EE,
                                                                                  NDF, ADF, LI, ASH, CAT)
-  capri_data/sources/envind/capri_digest_default_prd.csv  default, feed         (DEF_PRD: feed takes default's values)
+  capri_data/sources/intermediate/envind/capri_digest_default_prd.csv  default, feed         (DEF_PRD: feed takes default's values)
 
     python tools/build/build_digestibility_table.py [CAPRI gams folder, default capri_sources/gams]
 """
@@ -25,7 +25,7 @@ from capri_mod.csvio import to_csv  # noqa: E402
 
 import pandas as pd  # noqa: E402
 
-OUT = ROOT / "capri_data" / "sources" / "envind"
+OUT = ROOT / "capri_data" / "sources" / "intermediate" / "envind"
 
 
 def parse_table(text: str) -> list:

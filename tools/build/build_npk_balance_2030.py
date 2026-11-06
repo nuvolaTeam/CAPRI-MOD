@@ -28,7 +28,7 @@ Outputs (capri_data/2017/environment/):
                             main output's yield and the straw yield (fert/fertned.gms: need = MIN(cap, MAX(15, O_HP x
                             need per t + STRA x straw content)); 0 for crops at the floor or the cap), with CAPRI's straw
                             content and caps from envind/gascoeff.gms and fert/fertpar.gms (their statements converted
-                            to CSV in capri_data/sources/capri_gams by tools/build/convert_sources_to_csv.py)
+                            to CSV in capri_data/sources/raw/capri/gams by tools/build/convert_sources_to_csv.py)
   npk_region_2030.csv       capri_region, nutrient, mine_eff (1 + loss / mineral), excr_avail (1 + unavailable /
                             manure), cres_avail (1 + (unavailable + loss) / (pooled + own residues)), uvag_eur_t (CAPRI's
                             2030 unit value of NITF/PHOF/POTF over its inflation to 2030: the model's 2017 money,
@@ -60,7 +60,7 @@ from paths import EXPORTS, SOURCES  # noqa: E402  (CAPRI's material outside the 
 _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to the last digit (K82)
 ROOT = Path(__file__).resolve().parents[2]
 ENV = ROOT / "capri_data" / "2017" / "environment"
-SRC = ROOT / "capri_data" / "sources" / "environment" / "npk_dataout_2030.csv.xz"
+SRC = ROOT / "capri_data" / "sources" / "raw" / "capri" / "results" / "res_2_1730greendeal_refdefaulta" / "npk_dataout_2030.csv.xz"
 sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check")]
 from build_fert_dist_priors import GROUP, PERM_NGRP, NGRPS, ngrp  # noqa: E402
 
@@ -77,11 +77,11 @@ MODEL = {"CORN": ("MAIZ",), "WINE": ("TWIN",), "GRAS": ("GRAE", "GRAI"), "OFOD":
 FLOWS = ("fertDist_mine", "fertDist_excr", "fertDist_cres", "perm_cres", "nutNed_mine_loss_gasRunTot",
          "nutNed_cres_loss_gasRunTot", "nutNed_excr_unavailable", "nutNed_cres_unavailable", "nutNed_lhs")
 BAL = ("EXCRET", "MTRADE", "GASANI", "RUNANI", "NETF", "UVAG")
-GMS = ROOT / "capri_data" / "sources" / "capri_gams"
+GMS = ROOT / "capri_data" / "sources" / "raw" / "capri" / "gams"
 
 
 def _gms_csv(name):
-    """A statement of CAPRI's GAMS code converted to CSV (capri_data/sources/capri_gams,
+    """A statement of CAPRI's GAMS code converted to CSV (capri_data/sources/raw/capri/gams,
     tools/build/convert_sources_to_csv.py)."""
     return pd.read_csv(GMS / name, dtype=str, keep_default_na=False)
 
