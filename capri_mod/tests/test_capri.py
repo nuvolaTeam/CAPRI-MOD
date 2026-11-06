@@ -3795,18 +3795,20 @@ def test_nlp_solver_cache_is_exact(model, tmp_path, monkeypatch):
     spec = dict(d["spec"])
     x0 = np.asarray(d["x_start"], float)
     N1 = C.CapriRegionalNLP(spec)
-    r1 = N1.solve(N1.start(x0))
+    # the tolerance the solve's default gave until 5 November 2026 (IPOPT's own default)
+    TOL = 1e-8
+    r1 = N1.solve(N1.start(x0), tol=TOL)
     h0 = C.CACHE_STATS["hit"]
     N2 = C.CapriRegionalNLP(spec)
-    r2 = N2.solve(N2.start(x0))
+    r2 = N2.solve(N2.start(x0), tol=TOL)
     assert C.CACHE_STATS["hit"] == h0 + 1 and N2._solver is N1._solver
     assert r1["success"] and r2["success"] and abs(r1["f"] - r2["f"]) <= 1e-9 * abs(r1["f"])
     spec3 = dict(spec, c=np.asarray(spec["c"], float) * 1.05)
     N3 = C.CapriRegionalNLP(spec3)
-    r3 = N3.solve(N3.start(x0))
+    r3 = N3.solve(N3.start(x0), tol=TOL)
     C._SOLVERS.clear()
     N4 = C.CapriRegionalNLP(spec3)
-    r4 = N4.solve(N4.start(x0))
+    r4 = N4.solve(N4.start(x0), tol=TOL)
     assert N3.structure_key({"a": 1}) == N1.structure_key({"a": 1})
     assert r3["success"] and r4["success"] and abs(r3["f"] - r4["f"]) <= 1e-7 * abs(r4["f"])
     assert abs(r3["f"] - r1["f"]) > 1e-6 * abs(r1["f"])
@@ -4548,11 +4550,12 @@ def test_warm_start_from_the_last_solution_as_it_is(model, tmp_path, monkeypatch
     model.run(scenario="BASELINE", regions=["DE110000"], max_outer_iter=1)
     d = pickle.load(open(tmp_path / "DE110000.pkl", "rb"))
     N = C.CapriRegionalNLP(dict(d["spec"]))
-    r = N.solve(N.start(np.asarray(d["x_start"], float)))
+    TOL = 1e-8          # the tolerance the solve's default gave until 5 November 2026 (IPOPT's own default)
+    r = N.solve(N.start(np.asarray(d["x_start"], float)), tol=TOL)
     assert r["success"]
     x = np.clip(r["x"], N.lbx, N.ubx)
     assert np.array_equal(N.inside_regulations(x, only_outside=True), x)
-    w = N.solve(N.inside_regulations(x, only_outside=True), lam=(r["lam_x"], r["lam_g"]))
+    w = N.solve(N.inside_regulations(x, only_outside=True), lam=(r["lam_x"], r["lam_g"]), tol=TOL)
     assert w["success"] and w["iterations"] <= 10 and abs(w["f"] - r["f"]) <= 1e-7 * abs(r["f"])
 
 
