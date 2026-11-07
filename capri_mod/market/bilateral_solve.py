@@ -214,10 +214,16 @@ class BilateralSolveMixin(MarketStateMixin):
             self._dom0_cache = d0
         return d0
 
-    def _bilateral_calibrate(self, exogenous_supply) -> None:
+    def _bilateral_calibrate(self, exogenous_supply, at_capri: bool = False) -> None:
         """Base of the bilateral market at the model's own supply (CAPRI's flows kept, domestic sales absorb
         the difference), demand calibration 1 for bilateral commodities, the world clearing calibration for
-        the pooled ones (raw milk, other oilseeds)."""
+        the pooled ones (raw milk, other oilseeds).
+
+        at_capri (market.demand_calibration = "capri", S7): at CAPRI's own 2030 market supply instead, every region's
+        (the EU's and Norway's included), as CAPRI calibrates its market at the calibration point
+        (arm/prep_market.gms cal_cnst_terms, recalibrate_commitments): no alignment of the EU's or Norway's base to the
+        supply models, no export scaling (CAPRI's flows are its own supply's), raw milk at CAPRI's 2030 marketed milk
+        (_capri_milk_point)."""
         import copy as _copy
         raw = self._bilateral_raw()
         R = list(self.regions)
@@ -244,11 +250,22 @@ class BilateralSolveMixin(MarketStateMixin):
         self._crush_cache = None
         self.par.demand_cal = pd.Series(1.0, index=self.commodities)
         exo_eu, exo_sup = self._split_supply(exogenous_supply)
-        # the EU's base supply with the base output of its units outside a run on a subset (K83)
-        exo_eu = self._with_eu_excluded(exo_eu)
-        base_supply = self._align_eu_base_balance(exo_eu.sum(axis=0), exo_eu) \
-            if exogenous_supply is not None else None
-        self._align_sup_base(exo_sup)
+        if at_capri:
+            # CAPRI's own supply: the market's base tables as read (calibration.py _calibrate_baseline: CAPRI's 2030
+            # flows and regions), raw milk at CAPRI's marketed milk; the supply models do not enter the calibration,
+            # nor do the units outside a run on a subset (K83: CAPRI's tables already hold the whole EU; their base
+            # output is added back for the solve, below)
+            exogenous_supply, exo_sup = None, {}
+            _x_saved = self.seen.eu_excluded_base
+            self.seen.eu_excluded_base = None
+            self._capri_milk_point()
+            base_supply = self.par.base_production.copy()
+        else:
+            # the EU's base supply with the base output of its units outside a run on a subset (K83)
+            exo_eu = self._with_eu_excluded(exo_eu)
+            base_supply = self._align_eu_base_balance(exo_eu.sum(axis=0), exo_eu) \
+                if exogenous_supply is not None else None
+            self._align_sup_base(exo_sup)
         if base_supply is not None:
             self._align_eu_crush_products(base_supply)
         one = self._bilateral_ratio_frame()
@@ -292,7 +309,7 @@ class BilateralSolveMixin(MarketStateMixin):
         D = self.demand_response(dom0, self.world_prices_base)
         # the regions whose use is set by the supply models (the EU; Norway with its supply models, whose raw milk
         # goes to its own dairies) keep it; the others' use is calibrated so that the world clears
-        fixed = list(self.EU) + [r for r in self.SUP if r in exo_sup]
+        fixed = list(self.EU) + [r for r in self.SUP if r in exo_sup or at_capri]
         others = [r for r in R if r not in fixed]
         cal = pd.Series(1.0, index=self.commodities)
         # where the bounds [0.2, 5] (not CAPRI's: PROXY_AUDIT S185) bind: {commodity: unbounded factor}; and the
@@ -321,6 +338,8 @@ class BilateralSolveMixin(MarketStateMixin):
             sc.trq_base()                               # each quota's sigma at the calibrated base flows
             sc.border_base()
         self.par.bilat = sysd
+        if at_capri:
+            self.seen.eu_excluded_base = _x_saved
         self.sv.bilat_last_r = None
         self.sv.bilat_local_el = None
 
@@ -639,7 +658,15 @@ class BilateralSolveMixin(MarketStateMixin):
         # supply models' baseline differs from CAPRI's market baseline, so the demand is calibrated to it. Each outer
         # iteration of the baseline recalibrates, so the calibration a scenario inherits is the one at the
         # converged baseline supply. Scenario runs keep it frozen.
-        if self.seen.eu_base_supply is None or self.par.demand_cal_frozen is None:
+        _capri_cal = str(_st.get("market.demand_calibration")) == "capri"
+        if _capri_cal and self.par.demand_cal_frozen is None:
+            # S7, CAPRI's form (arm/prep_market.gms l. 635-749): the behavioural functions calibrated once per run at
+            # CAPRI's own 2030 market data, not at the supply models' output; then the market is solved, the baseline
+            # included (no return at the reference prices): only the supply side follows the supply models
+            self._bilateral_calibrate(exogenous_supply, at_capri=True)
+            self._apply_trq_volumes(self.par.bilat)
+            self.par.demand_cal_frozen = self.par.demand_cal.copy()
+        elif not _capri_cal and (self.seen.eu_base_supply is None or self.par.demand_cal_frozen is None):
             self._bilateral_calibrate(exogenous_supply)
             self._apply_trq_volumes(self.par.bilat)
             self.par.demand_cal_frozen = self.par.demand_cal.copy()
@@ -685,6 +712,12 @@ class BilateralSolveMixin(MarketStateMixin):
             errs = {c: float(np.max(np.abs(F[c] / size(c)))) for c in F}
             err = max(errs.values())
             self._bilat_errs = errs
+            _wc = max(errs, key=errs.get)
+            _wi = int(np.argmax(np.abs(F[_wc] / size(_wc))))
+            _wr = R[_wi] if (_wc in sysd and _wi < len(R)) else "world"
+            self._bilat_worst = (_wc, _wr, float(np.asarray(F[_wc]).ravel()[_wi]),
+                                 float(S.at[_wr, _wc]) if _wr in S.index else float(S[_wc].sum()),
+                                 float(D.at[_wr, _wc]) if _wr in D.index else float(D[_wc].sum()))
             if getattr(self, "_debug_trace", None) is not None:
                 self._debug_trace.append((it, err, max(errs, key=errs.get), damp))
             # EU tariff-rate quotas: the out-of-quota tariff follows the fill of each quota at the current
@@ -761,8 +794,11 @@ class BilateralSolveMixin(MarketStateMixin):
             import warnings as _w
             errs = getattr(self, "_bilat_errs", {}) or {}
             worst = max(errs, key=errs.get) if errs else "-"
+            _wd = getattr(self, "_bilat_worst", None)
+            _wtxt = (f"; in {_wd[1]}: excess {_wd[2]:.4g} kt, supply {_wd[3]:.4g} kt, use {_wd[4]:.4g} kt"
+                     if _wd and _wd[0] == worst else "")
             _w.warn(f"bilateral market did not converge in {iters} steps: largest relative residual "
-                    f"{float(getattr(self, '_bilat_err', float('nan'))):.2e} ({worst})", RuntimeWarning)
+                    f"{float(getattr(self, '_bilat_err', float('nan'))):.2e} ({worst}{_wtxt})", RuntimeWarning)
         sysd = self.par.bilat
         # CAPRI's welfare report (market/welfare.py) at the solution, at the prices the market's functions saw
         welfare = self._capri_welfare(r, PAr, S, D, pc)

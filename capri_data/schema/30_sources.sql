@@ -1731,3 +1731,16 @@ CREATE TABLE src_raw_milk_prices_dataout_2030 (
 COMMENT ON TABLE src_raw_milk_prices_dataout_2030 IS 'CAPRI''s DATA PMRK MILK of every region of the listing, from markmarket_greendeal_1730et_base_1717 dataOut, 2030 (tools/build/build_bilateral_market.py build_raw_milk_prices).';
 INSERT INTO value_units VALUES
   ('src_raw_milk_prices_dataout_2030', 'value', 'U_EuPerTon', 'builder', 'CAPRI DATA PMRK MILK');
+
+-- file: capri_data/sources/raw/capri/results/sim_ini_21730/data_prod_grof_rmssup.csv
+CREATE TABLE src_data_prod_grof_rmssup (
+    capri_ms VARCHAR NOT NULL,
+    "item" VARCHAR NOT NULL,
+    "row" VARCHAR NOT NULL,
+    col VARCHAR NOT NULL,
+    "value" DOUBLE NOT NULL,
+    PRIMARY KEY (capri_ms, "item", "row", col)
+);
+COMMENT ON TABLE src_data_prod_grof_rmssup IS 'CAPRI''s DATA(RMSSUP, "PROD", row, "CAL") and DATA(RMSSUP, "GROF", row, "TRD") of the market products of the supply models and their gross rows, from sim_ini_21730.gdx (tools/build/build_market_prod_grof_2030.py).';
+INSERT INTO value_units VALUES
+  ('src_data_prod_grof_rmssup', 'value', 'U_1000t', 'capri', 'CAPRI''s production (1000 t)');

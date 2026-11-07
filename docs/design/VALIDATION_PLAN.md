@@ -81,10 +81,11 @@ What the model needs before the completion gate, in the agreed order (MODEL_CONT
 1. The market: the quotas inside the price solve; the baseline demand recalibration removed (S7).
 2. The model's content: the activity gap (S1/S2), no-till and legume share (S10), the market's land-use change
    (luc_market), the regional NLP departures one by one (S6).
-3. Before CAPTRD-MOD: the premium module (P2) with obligatory set-aside (P1); the data layout by role.
+3. Before CAPTRD-MOD: the premium module (P2) with obligatory set-aside (P1); the data layout by role; G3, the whole
+   market as one IPOPT system, as decided (MARKET_IPOPT_DESIGN §7.2; before CAPTRD-MOD, the project lead's correction of
+   6 November 2026).
 4. CAPTRD-MOD with its parity mode, then the projection layer.
-5. At the end: CAPRI's full list of non-EU supply countries as the default (D2); G3 as decided (MARKET_IPOPT_DESIGN
-   §7.2).
+5. At the end: CAPRI's full list of non-EU supply countries as the default (D2).
 
 ## 3. External phase 1 (University of Bonn)
 

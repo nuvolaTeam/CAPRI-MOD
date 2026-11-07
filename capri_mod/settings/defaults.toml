@@ -113,6 +113,12 @@ manure_pool_omega_up = 1.25
 manure_pool_omega_down = 0.5
 manure_pool_omega_min = 0.25
 manure_pool_qp_tol = 1e-8
+# the price the manure pools send back to the regional models: "capri" (CAPRI's, manuremarket/simu_manure_market.gms
+# l. 214-226: the weighted average of the pools' clearing prices of the last steps with CAPRI's price-forecast weights,
+# capri_step_weights; the default since 7 November 2026, the project lead's decision) or "damped" (capri-mod's own
+# before: a step towards the new clearing prices, the omega bounds above). Mini-EU Green Deal 2030 in the S7 form:
+# "capri" 23 iterations, "damped" 14, indicators equal to 0.1 point (KNOWN_ISSUES K120)
+manure_pool_price_update = "capri"
 # numerical (refactor stage 4): the multiplier recovery of a region's stored problem (NNLS on its active rows): a row
 # is active within this relative tolerance, a column at its bound below this level, at most this many iterations per
 # column; the pools' trade cost slopes are divided by kappa, at least this floor; the arcs' ridge as a share of the
@@ -340,6 +346,19 @@ trade_chord = true
 # outer fixed point one market step behind the prices (BilateralCommodity.trq_solve, the default until 5 November 2026;
 # KNOWN_ISSUES K117)
 trq_joint = true
+# the market's demand calibration (S7, docs/design/S7_DEMAND_CALIBRATION.md): "capri" as CAPRI, the behavioural
+# functions calibrated once per run at CAPRI's own 2030 market data and only the supply side following the supply
+# models each iteration (their gross production times CAPRI's marketed share, grofNEprod), the baseline a market
+# solution; "supply" the form until 6 November 2026 (register DEP-5): the demand calibrated to the supply models'
+# output in every baseline iteration, the baseline's prices the reference by construction. "supply" stays the default
+# until the full Farm-to-Fork run validates "capri"; then "capri" becomes the default and "supply" is removed
+demand_calibration = "supply"
+# the non-EU land markets' Newton (MarketModule land rents, supply.py): the residual, relative to each land use's
+# base area (floor 1 kha), below which the solve is accepted when 100 Newton steps have not met the 1e-13 target (the
+# line search no longer reduces it: round-off); otherwise the run stops as before. 1e-8: the order of CONOPT's
+# default feasibility tolerance (CAPRI solves the rents inside m_globMarket with CONOPT). Added 6 November 2026 (S7:
+# away from the reference prices NZL stopped at 2e-9 kha, about 2 m2)
+land_stall_tol = 1e-8
 # the trade systems' Newton with the exact Jacobian from CasADi (market programme step G1, capri_mod/market/trade_ad.py)
 # instead of finite differences; same equations and root
 exact_jacobian = false

@@ -2497,7 +2497,14 @@ class SupplyModule(ModuleStateMixin):
             if os.environ.get("CAPRI_CAL_DEBUG"):
                 _j = int(np.argmax(np.where(big, np.abs(d) / np.maximum(xb, 1e-9), 0.0)))
                 print(f"[cal] round {rnd} {region} drift {w_r:.4f} at {acts[_j]} x {xs[_j]:.2f} target {xb[_j]:.2f}", flush=True)
-            if rnd > 0 and region in prev_r and w_r > float(_settings().get("projection.base_cal_stall_ratio")) * prev_r[region]:
+            # A drift above the tolerance after a round that found the region within it is new drift (the prices moved
+            # since), not a correction that failed: the region is corrected, not left (K120: in S7's "capri" the
+            # baseline's first round finds every region at its target, so the next round's drift, 4% for Dresden's
+            # pulses, stalled every region and the baseline stopped uncorrected)
+            _tol_cal = float(_settings().get("projection.base_cal_tol"))
+            if (rnd > 0 and region in prev_r
+                    and w_r > float(_settings().get("projection.base_cal_stall_ratio")) * prev_r[region]
+                    and not (prev_r[region] <= _tol_cal < w_r)):
                 stalled.add(region)
                 continue
             prev_r[region] = w_r

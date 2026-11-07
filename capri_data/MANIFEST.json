@@ -1997,6 +1997,26 @@
    },
    "catalogue_note": "income per head, inhabitants and the reproduction check of each behavioural region (not re-checked)"
   },
+  "capri_data/2017/market/market_prod_grof_2030.csv": {
+   "description": "CAPRI's marketed over gross production at the 2030 calibration point per country with supply models and market product (grofNEprod; arm/simu_calibration_to_supply.gms l. 219-247; tools/build/build_market_prod_grof_2030.py)",
+   "kind": "coefficients",
+   "vintage": "2030 reference",
+   "domain": "market",
+   "status": "live",
+   "rows": 799,
+   "columns": 5,
+   "units": "U_1000t, U_ratio",
+   "read_by_model": [
+    "capri_mod/coupling/bridge.py",
+    "capri_mod/data/loaders.py",
+    "capri_mod/market/calibration.py"
+   ],
+   "origin": {
+    "nature": "capri",
+    "builder": "build_market_prod_grof_2030"
+   },
+   "catalogue_note": "CAPRI's marketed over gross production per country with supply models and market product, grofNEprod (tools/build/build_market_prod_grof_2030.py) (not re-checked)"
+  },
   "capri_data/2017/market/noneu_feed_base.csv": {
    "description": "the same regions' feed per CAPRI product at CAL (Data_CAL FEED of data_market_1730defaulta) with its calories (tools/build/build_noneu_feed_nq.py)",
    "kind": "base",
@@ -4885,7 +4905,7 @@
    "vintage": "2030 (CAPTRD)",
    "domain": "projection",
    "status": "live",
-   "rows": 71413,
+   "rows": 71394,
    "columns": 5,
    "units": "to be established (value_units: open)",
    "read_by_model": [
@@ -6402,6 +6422,21 @@
     "builder": "build_manure_trade_base"
    },
    "catalogue_note": "extract of CAPRI's raw file written and read back by tools/build/build_manure_trade_base.py, kept so its input can be rebuilt without the raw file (docs/EXTERNAL_SOURCES.md) (not re-checked)"
+  },
+  "capri_data/sources/raw/capri/results/sim_ini_21730/data_prod_grof_rmssup.csv": {
+   "description": "CAPRI's DATA(RMSSUP, \"PROD\", row, \"CAL\") and DATA(RMSSUP, \"GROF\", row, \"TRD\") of the market products of the supply models and their gross rows, from sim_ini_21730.gdx (tools/build/build_market_prod_grof_2030.py).",
+   "kind": "coefficients",
+   "vintage": "2030",
+   "domain": "market",
+   "status": "source",
+   "rows": 1671,
+   "columns": 5,
+   "units": "U_1000t",
+   "origin": {
+    "nature": "capri",
+    "builder": "build_market_prod_grof_2030"
+   },
+   "catalogue_note": "extract of CAPRI's sim_ini_21730.gdx DATA (PROD at CAL, GROF at TRD) written and read back by tools/build/build_market_prod_grof_2030.py, kept so its input can be rebuilt without the raw file (docs/EXTERNAL_SOURCES.md) (not re-checked)"
   },
   "capri_data/sources/raw/eurostat/aei_pr_gnb_nitrogen.csv": {
    "description": "Eurostat gross nitrogen balance aei_pr_gnb per country, indicator, year (1985-2023), value and flag (tonnes and kg/ha, per capri_data/DATA_DICTIONARY.md); supplied by the project lead, no builder; read by tools/check/validate_gnb_eurostat.py.",

@@ -241,21 +241,43 @@ class ManureBlock:
         # keeps falling (x1.25 per fall, capped at 1), halved (min 0.25) when it
         # rises.
         acc = getattr(self.sv, "pool_accel", None) or {}
-        om = float(acc.get("_omega", 1.0))
-        prev_gap = acc.get("_gap")
-        cur_gap = float(max(worst, abs(sum(es.values())) / max(sum(sup.values()), 1e-9)))
-        if prev_gap is not None:
-            _st_ = _settings()
-            om = (min(1.0, om * _st_.get("outer_loop.manure_pool_omega_up")) if cur_gap < prev_gap
-                  else max(_st_.get("outer_loop.manure_pool_omega_min"), om * _st_.get("outer_loop.manure_pool_omega_down")))
-        acc["_omega"], acc["_gap"] = om, cur_gap
-        for k in list(pnew):
-            p_old = None
-            for reg_ in getattr(sm, "_models", {}):
-                if self.POOL_OF_PREFIX.get(reg_[:2], reg_[:2]) == k and reg_[:2] in pools:
-                    p_old = float(pools[reg_[:2]]); break
-            if p_old is not None:
-                pnew[k] = p_old + om * (pnew[k] - p_old)
+        _st_ = _settings()
+        _pu = str(_st_.get("outer_loop.manure_pool_price_update"))
+        if _pu not in ("damped", "capri"):
+            raise ValueError(f'outer_loop.manure_pool_price_update = "{_pu}": "damped" or "capri"')
+        if _pu == "capri":
+            # CAPRI's (manuremarket/simu_manure_market.gms l. 214-226): the price sent back to the supply models
+            # (p_exoDemand(pool, "UVAG", nutrient), read by supply_model.gms l. 4652) is the weighted average of the
+            # pool's market prices (the balance's shadow prices, PMRK) of the last steps, with the weights of CAPRI's
+            # price forecast (capmod/define_stepWeights.gms: 0.55 / 0.30 / 0.15, 0.4 / 0.3 / 0.2 / 0.1 from step 20),
+            # normalised over the steps available; a failed clearing adds no step (its old prices are kept)
+            ph = acc.setdefault("_phist", {})
+            it1 = int(getattr(self.ev, "outer_iter_now", 0) or 0) + 1
+            wts = tuple(_st_.get("outer_loop.capri_step_weights")
+                        if it1 < int(_st_.get("outer_loop.capri_step_weights_late_from"))
+                        else _st_.get("outer_loop.capri_step_weights_late"))
+            n_keep = max(len(_st_.get("outer_loop.capri_step_weights")), len(_st_.get("outer_loop.capri_step_weights_late")))
+            if ok:
+                for k in list(pnew):
+                    h_ = (ph.get(k) or []) + [float(pnew[k])]
+                    ph[k] = h_[-n_keep:]
+                    use = list(reversed(ph[k]))[:len(wts)]
+                    pnew[k] = sum(w_ * v_ for w_, v_ in zip(wts, use)) / sum(wts[:len(use)])
+        else:
+            om = float(acc.get("_omega", 1.0))
+            prev_gap = acc.get("_gap")
+            cur_gap = float(max(worst, abs(sum(es.values())) / max(sum(sup.values()), 1e-9)))
+            if prev_gap is not None:
+                om = (min(1.0, om * _st_.get("outer_loop.manure_pool_omega_up")) if cur_gap < prev_gap
+                      else max(_st_.get("outer_loop.manure_pool_omega_min"), om * _st_.get("outer_loop.manure_pool_omega_down")))
+            acc["_omega"], acc["_gap"] = om, cur_gap
+            for k in list(pnew):
+                p_old = None
+                for reg_ in getattr(sm, "_models", {}):
+                    if self.POOL_OF_PREFIX.get(reg_[:2], reg_[:2]) == k and reg_[:2] in pools:
+                        p_old = float(pools[reg_[:2]]); break
+                if p_old is not None:
+                    pnew[k] = p_old + om * (pnew[k] - p_old)
         self.sv.pool_accel = acc
         out = {}
         for reg in getattr(sm, "_models", {}):

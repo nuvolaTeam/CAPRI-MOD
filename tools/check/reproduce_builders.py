@@ -220,6 +220,8 @@ INVOCATIONS: list[tuple[str, list[str], list[Path]]] = [
                                           EXPORTS / "markmarket_greendeal_1730et_base_1717.txt"]),
     ("build_processing_seeds", [], []),
     ("build_processing_yields", [], [EXPORTS / "markmarket_greendeal_1730et_base_1717.txt"]),
+    # CAPRI's marketed over gross production at the 2030 calibration point (S7, grofNEprod), from sim_ini_21730's DATA
+    ("build_market_prod_grof_2030", [], [REFERENCE / "simini" / "simini_21730" / "DATA.csv.gz"]),
     ("build_sugar_processing", [], []),
     ("build_supply_elas_nonEU", [], []),
     ("build_use_components", [], []),

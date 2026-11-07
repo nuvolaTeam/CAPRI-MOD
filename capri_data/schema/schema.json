@@ -13486,6 +13486,111 @@
     "tests": []
    }
   },
+  "market_prod_grof_2030": {
+   "file": "capri_data/2017/market/market_prod_grof_2030.csv",
+   "declared_in": "21_market_inputs.sql",
+   "layout": [],
+   "comment": "CAPRI's marketed over gross production at the 2030 calibration point per country with supply models and market product (grofNEprod; arm/simu_calibration_to_supply.gms l. 219-247; tools/build/build_market_prod_grof_2030.py)",
+   "columns": [
+    {
+     "name": "capri_ms",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "product",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "prod_kt",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "grof_kt",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "ratio",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "capri_ms",
+    "product"
+   ],
+   "unique": [],
+   "foreign_keys": [
+    {
+     "columns": [
+      "capri_ms"
+     ],
+     "references": "capri_rall",
+     "ref_columns": [
+      "code"
+     ]
+    },
+    {
+     "columns": [
+      "product"
+     ],
+     "references": "capri_xx",
+     "ref_columns": [
+      "code"
+     ]
+    }
+   ],
+   "checks": [
+    "(prod_kt > 0)",
+    "(grof_kt > 0)",
+    "(ratio > 0)",
+    "(abs((ratio - (prod_kt / grof_kt))) <= (1e-9 * ratio))"
+   ],
+   "units": [
+    {
+     "item": "grof_kt",
+     "unit": "U_1000t",
+     "status": "capri",
+     "basis": "the sum of DATA(RMSSUP, \"GROF\", row, \"TRD\") over the rows CAPRI maps to the product (1000 t)"
+    },
+    {
+     "item": "prod_kt",
+     "unit": "U_1000t",
+     "status": "capri",
+     "basis": "DATA(RMSSUP, \"Prod\", XX, \"CAL\") of sim_ini_21730 (1000 t)"
+    },
+    {
+     "item": "ratio",
+     "unit": "U_ratio",
+     "status": "builder",
+     "basis": "prod_kt / grof_kt"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_market_prod_grof_2030",
+    "sources": "$REFERENCE/sets/simini_21730/CAP_TO_TRD.csv; $REFERENCE/sets/simini_21730/RMSSUP.csv; $REFERENCE/sets/simini_21730/XX_SUPPLY.csv; $REFERENCE/sets/simini_21730/xxOmYani.csv; $REFERENCE/simini/simini_21730/DATA.csv.gz"
+   },
+   "notes": [],
+   "read_by": {
+    "model": [
+     "capri_mod/coupling/bridge.py",
+     "capri_mod/data/loaders.py",
+     "capri_mod/market/calibration.py"
+    ],
+    "builders": [],
+    "checks": [
+     "tools/check/compare_baseline_capri.py"
+    ],
+    "tests": [
+     "capri_mod/tests/test_compare_baseline_capri.py"
+    ]
+   }
+  },
   "mineral_n_price": {
    "file": "capri_data/2017/supply/mineral_n_price.csv",
    "declared_in": "13_supply_rents_elas.sql",
@@ -30374,6 +30479,69 @@
     "origins": "CAPRI",
     "builder": "build_dairy_world_blocks",
     "sources": "$EXPORTS/elas_2_1730defaulta.csv; $EXPORTS/markmarket_greendeal_1730et_base_1717.txt; $EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/AACT_TO_XX.csv; $REFERENCE/sets/simini_21730/CACT_TO_NGRP.csv; $REFERENCE/sets/simini_21730/COLS.csv; $REFERENCE/sets/simini_21730/EPRD_TO_GRP.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FEED_TRD.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/MitiTechAmm.csv; $REFERENCE/sets/simini_21730/OYANI.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/PERM_NGRP.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/RMEU_to_RM.csv; $REFERENCE/sets/simini_21730/RMS.csv; $REFERENCE/sets/simini_21730/RMS_TO_RM.csv; $REFERENCE/sets/simini_21730/RMTP.csv; $REFERENCE/sets/simini_21730/RM_TO_RMTP.csv; $REFERENCE/sets/simini_21730/ROWS.csv; $REFERENCE/sets/simini_21730/SplitActs.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $SOURCES/gams/aggregation/defaultA.agg"
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [],
+    "tests": []
+   }
+  },
+  "src_data_prod_grof_rmssup": {
+   "file": "capri_data/sources/raw/capri/results/sim_ini_21730/data_prod_grof_rmssup.csv",
+   "declared_in": "30_sources.sql",
+   "layout": [],
+   "comment": "CAPRI's DATA(RMSSUP, \"PROD\", row, \"CAL\") and DATA(RMSSUP, \"GROF\", row, \"TRD\") of the market products of the supply models and their gross rows, from sim_ini_21730.gdx (tools/build/build_market_prod_grof_2030.py).",
+   "columns": [
+    {
+     "name": "capri_ms",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "item",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "row",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "col",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "value",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "capri_ms",
+    "item",
+    "row",
+    "col"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [
+    {
+     "item": "value",
+     "unit": "U_1000t",
+     "status": "capri",
+     "basis": "CAPRI's production (1000 t)"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_market_prod_grof_2030",
+    "sources": "$REFERENCE/sets/simini_21730/CAP_TO_TRD.csv; $REFERENCE/sets/simini_21730/RMSSUP.csv; $REFERENCE/sets/simini_21730/XX_SUPPLY.csv; $REFERENCE/sets/simini_21730/xxOmYani.csv; $REFERENCE/simini/simini_21730/DATA.csv.gz"
    },
    "notes": [],
    "read_by": {

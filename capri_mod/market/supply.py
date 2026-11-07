@@ -925,6 +925,7 @@ class SupplyMixin(MarketStateMixin):
                 Fv, J = lf[1](dr_, base)
                 return np.asarray(Fv).ravel(), np.asarray(J).reshape(len(fr), len(fr))
             Fv, J = F(dr)
+            _stall_tol = float(_settings().get("market.land_stall_tol"))
             for _ in range(100):
                 if np.max(np.abs(Fv) / scale) < 1e-13:
                     break
@@ -938,7 +939,10 @@ class SupplyMixin(MarketStateMixin):
                     t *= 0.5
                 dr, Fv, J = dr + t * step, F1, J1
             else:
-                raise RuntimeError(f"market: the land market of {rms} did not clear (residual {np.max(np.abs(Fv)):.3g})")
+                # the 1e-13 target not met in 100 steps: accepted where the residual is within market.land_stall_tol
+                # (round-off: the line search no longer reduces it), else the run stops
+                if not np.max(np.abs(Fv) / scale) < _stall_tol:
+                    raise RuntimeError(f"market: the land market of {rms} did not clear (residual {np.max(np.abs(Fv)):.3g})")
             out[rms] = dr
         return out
 

@@ -32,6 +32,15 @@ ALIASES = {
 }
 
 
+#: model names that are CAPRI's names for another item: the alias replaces them, and where the alias has no factor the
+#: model name gets none either (the region falls back to the EU factor, itself the alias's), never the other item's.
+#: BULL: CAPRI's bulls' raising, the model's bull fattening is BULF. PIGS (KNOWN_ISSUES K119, the project lead's
+#: decision of 6 November 2026): CAPRI's "Pigs total" aggregate (PIGF + SOWS + piglets; reports/aggreg_sets.gms l. 101,
+#: 132; CAPTRD's aggreg_and_report.gms l. 262-283, a yield mixing tonnes of pork and heads of piglets), the model's
+#: PIGS is CAPRI's SOWS (codes/model_activities.csv)
+CAPRI_OTHER = ("BULL", "PIGS")
+
+
 def add_model_keys(t: dict) -> dict:
     """The model's activity and region keys added to a CAPRI-keyed trajectory (in place; returns the counts)."""
     sys.path[:0] = [str(ROOT / "tools" / _d) for _d in ("lib", "build", "run", "check")]
@@ -51,8 +60,10 @@ def add_model_keys(t: dict) -> dict:
     for block, al in ALIASES.items():
         g = t["growth"].get(block, {})
         for m, c in al.items():
-            if c in g and (m not in g or m in ("BULL",)):
+            if c in g and (m not in g or m in CAPRI_OTHER):
                 g[m] = dict(g[c]); added["growth"] += 1
+            elif m in CAPRI_OTHER and m in g and c not in g:
+                del g[m]
     for block in list(t.get("regional", {})):
         reg = t["regional"][block]
         al = ALIASES.get(block, {})
@@ -64,9 +75,11 @@ def add_model_keys(t: dict) -> dict:
             entry = dict(src)
             for m, c in al.items():
                 # a factor under the model's own name (OFOD = OFAR + ROOF, build_trajectory_capri_ref.py) is kept;
-                # BULL is CAPRI's name for another activity (bulls' raising), so the alias replaces it
-                if c in src and (m not in src or m == "BULL"):
+                # a model name that is CAPRI's name for another item (CAPRI_OTHER) takes the alias or nothing
+                if c in src and (m not in src or m in CAPRI_OTHER):
                     entry[m] = dict(src[c])
+                elif m in CAPRI_OTHER and m in entry and c not in src:
+                    del entry[m]
             if r not in reg:
                 added["regions"] += 1
             reg[r] = entry

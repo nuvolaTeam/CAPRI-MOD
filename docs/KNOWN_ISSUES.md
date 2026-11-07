@@ -23,9 +23,9 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K79](#k79) | Member-state production that keeps moving between iterations | open |
 | [K92](#k92) | Farm-to-Fork changes furthest from JRC121368, besides the milk price | open: waiting for CAPRI's scenario results |
 | [K93](#k93) | CAPRI mitigation options not built; documents disagree on which are in | open: no-till and legume share unmeasured; UreaSubst parked; the others not needed for Farm-to-Fork and the Green Deal |
-| [K119](#k119) | The CAPTRD trajectory's regional factors are stale since K116 (468 PIGS yield rows) | open: to decide whether CAPTRD's PIGS is the model's PIGS |
+| [K120](#k120) | S7 ("capri"): the market supply Hessian measured after the first supply solve had lost most of its response; the baseline calibration's stall rule stopped it uncorrected | fixed: 20 and 37 units, full EU Farm-to-Fork and Green Deal (7 November 2026); open in S7: the baseline calibration's first-round drift |
 
-## Resolved (106)
+## Resolved (107)
 
 | # | Issue | Status |
 |---|---|---|
@@ -136,6 +136,7 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K116](#k116) | The CAPRI-reference trajectory kept the trend projection's [0.2, 5] band, 1.0 threshold and missing zeros; OFOD grew as OFAR alone | fixed |
 | [K117](#k117) | The full-EU market did not converge in Farm-to-Fork: the EU's sugar quotas switched on and off at every step | fixed |
 | [K118](#k118) | The market supply Hessian's cache key did not cover the supply data: a data change could reuse a stale Hessian | fixed |
+| [K119](#k119) | The CAPTRD trajectory took CAPRI's "Pigs total" aggregate for the model's PIGS (CAPRI's SOWS) since K116 | fixed |
 
 ## Details
 
@@ -2203,21 +2204,100 @@ new data and measured anew); found while preparing them.
   Any change of those files means one new measurement (full EU about 45 minutes).
 
 <a id="k119"></a>
-### K119: The CAPTRD trajectory's regional factors are stale since K116 (found 6 November 2026)
+### K119: The CAPTRD trajectory took CAPRI's "Pigs total" aggregate for the model's PIGS (found 6 November 2026)
 
 `tools/check/reproduce_builders.py` (the data-layout move's rebuild check) found
-`capri_data/scenarios/captrd_2030/regional.csv` different from what `tools/build/build_captrd_trajectory.py` writes
-today: 468 rows, all `yields` of PIGS (factor up to 32% apart, e.g. AT21 1.0117 committed against 1.1544 rebuilt).
-Deterministic (the same under two hash seeds) and the same on dev without the move.
+`capri_data/scenarios/captrd_2030/regional.csv` different from what `tools/build/build_captrd_trajectory.py` wrote:
+468 rows of PIGS (246 yields, 222 herds; e.g. AT21 yields 1.0117 committed against 1.1544 rebuilt, herds 0.9983
+against 0.8482), deterministic and the same on dev before the move.
 
-Cause, likely: K116 (9d7d251, 4 November 2026) changed the shared `tools/build/build_trajectory_model_keys.py`: a
-factor under the model's own name is kept instead of being replaced by its alias (for the CAPRI-reference trajectory,
-OFOD = OFAR + ROOF). `capri_ref_2030` was rebuilt with it; `captrd_2030` was not. In the CAPTRD series a PIGS key exists
-under the model's own name, so the rebuilt file keeps it instead of the alias's factor.
+- **Cause:** K116 (9d7d251, 4 November 2026) changed the shared `tools/build/build_trajectory_model_keys.py` so that a
+  factor under the model's own name is kept instead of its alias's (for the CAPRI-reference trajectory, OFOD = OFAR +
+  ROOF), with BULL excepted. CAPTRD's series hold a PIGS key, and it is another item: CAPRI's "Pigs total" aggregate,
+  (PIGF,SOWS).PIGS (reports/aggreg_sets.gms l. 101, 132), which CAPTRD computes after its estimation as LEVL = PIGF +
+  SOWS + piglets produced and YILD = (pork in 1000 t + piglets in 1000 heads) / LEVL x 1000, units mixed
+  (captrd/aggreg_and_report.gms l. 262-283; AT21 2017: LEVL 361.06, PROD 175.66, YILD 486.5). The model's PIGS is
+  CAPRI's SOWS (codes/model_activities.csv: piglets per sow in yields.csv, sows in animal_numbers.csv). The aggregate's
+  factor follows the herd mix, not the output per animal (AT21: +15% against +1-5% for SOWS and PIGF). An older part of
+  the same error, not from K116: where SOWS had no factor, the region already took the aggregate's (yields DEA2, DEB1,
+  FI20, SK03; herds 15 regions), and the EU fallback factors were the aggregate's (yields 1.006 against SOWS 1.0794,
+  herds 0.9079 against 0.8367).
+- **Effect:** runs on the CAPTRD trajectory (`--trajectory captrd`; `tools/run/run_vcs_2030.py`); the Farm-to-Fork and
+  Green Deal runs on `capri_ref_2030` were not affected (that trajectory holds no PIGS key under CAPRI's name; rebuilt
+  unchanged).
+- **Status:** **fixed** 6 November 2026 (the project lead's decision: PIGS keyed to SOWS, as CAPRI): PIGS joins BULL as
+  a model name that is CAPRI's name for another item (`CAPRI_OTHER` in the key builder): the alias replaces it in the
+  regional and EU blocks, and where the alias has no factor the model name gets none (the region falls back to the EU
+  factor, itself SOWS's). Rebuilt: the 468 rows equal the committed file; the EU PIGS factors now SOWS's; 19 regional
+  entries that had the aggregate's factor dropped (4 yields, 15 herds). The VCS pair to be rerun on it.
 
-- **Effect:** only runs on the CAPTRD trajectory (`--trajectory captrd`; `tools/run/run_vcs_2030.py` uses it). The
-  Farm-to-Fork and Green Deal runs use `capri_ref_2030` by default and are not affected.
-- **To decide before rebuilding:** whether CAPTRD's PIGS is the model's PIGS (then the rebuilt factors are right and the
-  file is rebuilt) or another item (then the alias must win for this trajectory, as before K116, and the key builder
-  needs the distinction).
-- **Status:** open.
+<a id="k120"></a>
+### K120: The market supply Hessian measured after the baseline's first supply solve had lost most of its response (found 6 November 2026, S7)
+
+In CAPRI's coupling form (market.demand_calibration = "capri") the market supply Hessian was moved from the baseline's
+end to the calibration point, measured right after the baseline's first supply solve (uncommitted S7 step, 6 November
+2026, to stop the full-EU baseline's oscillation). With it the baseline converged in 3 iterations (37 units), but the
+Farm-to-Fork scenario diverged from its second iteration in the 37- and the 20-unit runs (young-animal imbalance
+0.10 -> 52 -> 117; Norway's whey and skimmed-milk-powder markets unsolved: 189,000 kt and 34,000 kt of supply against
+92 kt and 56 kt of use). The same 20 units had converged in 6 iterations with the Hessian measured after the baseline.
+
+- **Cause:** a regional model's calibration is complete only at its second solve. The dairy, cattle and genetics
+  split columns (supply/nlp.py, the "_late" columns grass_z, dairy_z, cattle_z_, genet_z_, hist_) enter after the
+  region's first solve, and a solve that finds them recalibrates the region at the prices it is given. The Hessian's
+  price shocks each start from the state the first solve left (restored before every shock), so each shock's solve
+  recalibrated its regions at the shocked price and cancelled the response. Measured: Dresden (DED00000) recalibrated
+  in 46 of its shock solves; the 20 units' Hessian had a response for 19 of 35 prices, none for milk, meat, eggs, fruit,
+  wine, olives or the young animals, and Germany's wheat 626 against 6,004 measured after the baseline. In the
+  baseline, whose prices hardly move, the missing response mattered little; under the Farm-to-Fork shock the market
+  saw almost no supply response for those products.
+- **Effect:** the uncommitted S7 runs of 6 November 2026 (37 and 20 units); no committed run.
+- **Status:** **fixed** (checked on 20 and 37 units and the full EU, below): in "capri", the baseline's regional models are solved once more
+  at the reference prices before the measurement, so the measurement starts from calibrated models (CAPRI measures on
+  its calibrated supply models, supply/calibrate_supply.gms). Dresden: no recalibration during the measurement, 30
+  prices with a response, wheat 4,702 against 4,967 after the baseline; 20 units: all 35 prices respond (Germany's wheat
+  5,683, milk 715). The loop goes on with the first iteration's own supply results. 20 units, Farm-to-Fork: converged in 6 iterations
+  (540 s), the indicators within 0.2 points of the run with the Hessian measured after the baseline (mini_s7c1).
+- **Found with it: the baseline calibration's stall rule.** SupplyModule.calibrate_to_base leaves a region whose
+  drift a round does not reduce by 5% (projection.base_cal_stall_ratio). With the Hessian measured on calibrated models,
+  the baseline's first round finds every region at its target (drift 0) and the next round sees the drift of the prices
+  moved since (Dresden's pulses 4.2%, Ile-de-France's sugar beet 1.6%): read as a failed correction, every region was
+  left and the baseline stopped uncorrected (20 units: baseline activities up to 1.5% from the earlier run). Fixed: a
+  drift above projection.base_cal_tol after a round within it is corrected, not left (Dresden and Ile-de-France: 4.2%,
+  0.6%, 0.3% over the rounds). A region whose drift stays below the tolerance stalls as before, so the supply mode's
+  runs are unchanged where that case did not arise (checked: the mini-EU Farm-to-Fork run in the
+  supply mode is identical to 962a907's, rtol 0). The residual drift after the four rounds (20 units): Hungary's
+  set-aside 2.8% (25.3 against 26.0 kha; set-aside is held by its rules, the correction overshoots and stalls), Norway's
+  bulls 1.6%, all others below 0.9%; the largest at the first round, Norway's bulls 12.3% (3.82 against 3.40 thousand
+  heads), Italy's set-aside 7.7%. Before, the recalibration at the second solve absorbed these drifts.
+
+- **Full-EU check (7 November 2026, commit b2b7422, local):** Farm-to-Fork converged in 12 iterations (baseline 8,
+  3,932 s); its baseline prices are within a median 0.08% of the supply-mode run's (full_d22), none above 5%, and the
+  indicators within 0.5 points (milk price +21.2% against +20.7%). Green Deal converged in 34 iterations (6,260 s; the
+  supply-mode Green Deal runs took 18-21), on the same baseline as the Farm-to-Fork run (prices, production and use
+  within 1e-5 relative). Its indicators are within 0.5 points of the supply-mode Green Deal run r211_gd_gate16 except
+  the beef price (+13.5% against +11.2%) and the poultry price (+8.6% against +7.3%); that run is at an older commit
+  (65cd4d8, 122 inputs differing), so the gap is not attributable to the coupling alone. The Green Deal's long tail is
+  CAPRI's stop rule (rows above 0.05%), not the prices: the EU prices are unchanged to 0.01 points from iteration 16,
+  while member-state minor and feed cereals (OATS, OCER, RYEM, FCER in Bulgaria, Hungary, Greece, Slovakia) move by
+  0.1-2.9% between iterations, the pattern of [K79](#k79). Still open in S7: the baseline calibration's first-round drift
+  (94% in the full EU, then 11.8% and 2.5%), not explained yet.
+- **The same-commit pair (7 November 2026):** Green Deal in "supply" at 803c4cf (b2b7422 and a documentation change;
+  inputs identical, full_sup_gd): converged in 21 iterations (3,545 s, the Hessian from the cache), against 34 in
+  "capri". The EU indicators agree within 0.3 points (beef price +13.4% against +13.5%, poultry +8.5% against +8.6%,
+  cereals production -6.2% against -6.5%): the beef and poultry gaps against r211 come from the 125 commits between,
+  not from the coupling form. The rows that keep CAPRI's stop rule going in the tail are the same in both forms
+  (Bulgaria's other cereals, Greece's maize and feed bulks, Ireland's feed cereals in "supply"), so they are the
+  model's under the Green Deal, not the new form's; "capri" takes 13 more iterations to bring them under 0.05%. Why it
+  damps them more slowly is not measured (one candidate: its market supply Hessian is measured at the calibration point,
+  "supply"'s at the baseline's solution). Subsets do not show the tail: 20 units 14 iterations, 47 units (every unit of
+  BG, HU, EL, SK and the mini-EU's) 15, in "capri".
+- **Farm-to-Fork, the same-commit pair (7 November 2026):** "supply" at 803c4cf (full_sup_f2f): scenario 12 iterations,
+  baseline 2 (3,355 s); "capri" (full_s7): scenario 12, baseline 8 (3,932 s). The 24 indicators within 0.5 points (milk
+  price +21.2% against +20.7%, cereal price +10.5% against +10.8%, beef +30.1% against +30.3%); the deviation from
+  JRC121368 over 20 indicators 4.54 against 4.55; set-aside and labour equal to 0.1%.
+- **The manure pools' price, CAPRI's (7 November 2026):** CAPRI sends its regional models the weighted average of the
+  pools' clearing prices of the last steps (manuremarket/simu_manure_market.gms l. 214-226); capri-mod sent a damped step
+  towards the new clearing prices. outer_loop.manure_pool_price_update: "capri" the default since 7 November 2026 (the
+  project lead's decision), "damped" capri-mod's own. Mini-EU Green Deal 2030 in "capri": 23 iterations with CAPRI's
+  price against 14 damped, indicators equal to 0.1 point, final pool gap 0.03% against 0.6%; "damped" reproduces the
+  earlier run exactly (rtol 0). The full-EU Green Deal with it is to be measured.

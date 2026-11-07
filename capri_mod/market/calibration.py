@@ -226,6 +226,40 @@ class CalibrationMixin(MarketStateMixin):
                 self.par.base_consumption.at[reg, "MILK"] = m0
         self.ev.sup_milk_now = dict(self.par.sup_milk0)
 
+    def _capri_milk_point(self) -> None:
+        """Raw milk at CAPRI's calibration point (market.demand_calibration = "capri", S7): each country's marketed raw
+        milk DATA(RMSSUP, "Prod", "MILK", "CAL") (market_prod_grof_2030.csv, prod_kt), as CAPRI's dairy block and
+        market are calibrated (the supply models' milk enters each iteration in proportion, arm/simu_calibration_to_
+        supply.gms l. 240-243). The EU blocks' raw milk production and use (CAPRI does not trade raw milk: delivered to
+        the member state's own dairies), the dairy block's base delivery per member state and block; Norway's
+        (and any non-EU market region with supply models) the same. Replaces the FAO base-period raw milk of
+        _calibrate_baseline for these regions."""
+        t = self._inp().csv("market_prod_grof_2030.csv")
+        milk = {str(r["capri_ms"]): float(r["prod_kt"]) for _, r in t[t["product"] == "MILK"].iterrows()}
+        eu_ms = {m: q for m, q in milk.items() if self.eu_region_of_ms(m) in self.EU}
+        reg = {rg: 0.0 for rg in self.EU}
+        for m, q in eu_ms.items():
+            reg[self.eu_region_of_ms(m)] += q
+        if "MILK" in self.par.base_production.columns:
+            for rg, q in reg.items():
+                self.par.base_production.at[rg, "MILK"] = q
+                self.par.base_consumption.at[rg, "MILK"] = q
+                if self.par.eu_aligned_use is None:
+                    self.par.eu_aligned_use = {}
+                self.par.eu_aligned_use.setdefault(rg, {})["MILK"] = q
+        self.par.dairy_S0 = float(sum(reg.values()))
+        self.par.dairy_S0_ms = dict(eu_ms)
+        self.par.dairy_S0_reg = dict(reg)
+        self.ev.eu_milk_supply_now = dict(reg)
+        self.par.sup_milk0 = {}
+        for rg in getattr(self, "SUP", ()):
+            q = sum(milk.get(m, 0.0) for m in (getattr(self, "SUP_NONEU_MS", {}) or {}).get(rg, (rg,)))
+            if q > 0 and rg in self.par.base_production.index and "MILK" in self.par.base_production.columns:
+                self.par.sup_milk0[rg] = q
+                self.par.base_production.at[rg, "MILK"] = q
+                self.par.base_consumption.at[rg, "MILK"] = q
+        self.ev.sup_milk_now = dict(self.par.sup_milk0)
+
     def _demand_cal_factor(self, comm: str) -> float:
         cal = self.par.demand_cal
         if cal is not None and comm in cal.index:

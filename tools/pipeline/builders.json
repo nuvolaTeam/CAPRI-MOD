@@ -3788,6 +3788,27 @@
    ]
   },
   {
+   "task": "build_market_prod_grof_2030",
+   "builder": "build_market_prod_grof_2030",
+   "args": [],
+   "inputs": [],
+   "code": [
+    "tools/build/build_market_prod_grof_2030.py",
+    "tools/lib/paths.py"
+   ],
+   "external": [
+    "$REFERENCE/sets/simini_21730/CAP_TO_TRD.csv",
+    "$REFERENCE/sets/simini_21730/RMSSUP.csv",
+    "$REFERENCE/sets/simini_21730/XX_SUPPLY.csv",
+    "$REFERENCE/sets/simini_21730/xxOmYani.csv",
+    "$REFERENCE/simini/simini_21730/DATA.csv.gz"
+   ],
+   "outputs": [
+    "capri_data/2017/market/market_prod_grof_2030.csv",
+    "capri_data/sources/raw/capri/results/sim_ini_21730/data_prod_grof_rmssup.csv"
+   ]
+  },
+  {
    "task": "build_mineral_n_price",
    "builder": "build_mineral_n_price",
    "args": [
