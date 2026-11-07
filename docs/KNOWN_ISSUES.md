@@ -2300,4 +2300,12 @@ Farm-to-Fork scenario diverged from its second iteration in the 37- and the 20-u
   towards the new clearing prices. outer_loop.manure_pool_price_update: "capri" the default since 7 November 2026 (the
   project lead's decision), "damped" capri-mod's own. Mini-EU Green Deal 2030 in "capri": 23 iterations with CAPRI's
   price against 14 damped, indicators equal to 0.1 point, final pool gap 0.03% against 0.6%; "damped" reproduces the
-  earlier run exactly (rtol 0). The full-EU Green Deal with it is to be measured.
+  earlier run exactly (rtol 0). Full-EU Green Deal 2030 in "capri" (results store f802d7469075, commit 9598b3e):
+  converged in 47 iterations, 6568 s, against 34 iterations, 6260 s, damped (9fce879f41b2, commit b2b7422; the two
+  runs had different package versions, pandas 2.3.3 against 3.0.5, so the times are not a clean pair); the 24
+  indicators of compare_runs.py within 0.2 point. With CAPRI's price the pools' gap stays between 1% and 12% after
+  iteration 20 (damped: below 2.3% from iteration 14); the iterations where it rises (34, 39, 44) are those where the
+  rows above CAPRI's 0.05% rise again (to 20, 17, 13). The rows most often among the five largest after iteration 14
+  are Bulgaria's cereals (OCER, FCER, OATS), Greece's feed (FPRO, FCER) and Ireland's cereals with CAPRI's price;
+  Hungary's cereals (OCER, BARL), Greece's maize and feed and Bulgaria's OCER damped. Whether the pools' price drives
+  the relapses or only moves with them is not established.
