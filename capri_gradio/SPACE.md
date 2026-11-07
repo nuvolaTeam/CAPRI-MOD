@@ -27,7 +27,7 @@ pinned: false
 ```
 
 `sdk_version` may be added to pin gradio (the draft is tested with 5.49.1). The Python version is to be checked
-against those Spaces offer: capri-mod needs 3.10 or later and is tested here on 3.13.
+against those Spaces offer: capri-mod needs 3.11 or later (tomllib) and is tested here on 3.13; the Space runs 3.12.
 
 ## Variables and secrets (the Space's settings page)
 
