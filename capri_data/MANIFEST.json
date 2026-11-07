@@ -5202,6 +5202,21 @@
    },
    "catalogue_note": "curvature of the intensity splits at 2030 (columns q_<x>_recipe2030 of dairy/cattle/grass_intensity.csv) (not re-checked)"
   },
+  "capri_data/sources/intermediate/baseline_pmp/pmp_cnst_techn_2030.csv": {
+   "description": "CAPRI's linear PMP terms p_pmpCnst(region, activity, tech) of its 2030 baseline calibration (crops T1/T2, others T), from the sim_ini_21730 restart file, which loads them from pmppar_21730<CC> (capmod/create_sim_ini_gdx.gms l. 491-492); CAPRI's 2030 money (tools/build/build_techn_2030.py).",
+   "kind": "calibrated",
+   "vintage": "2030",
+   "domain": "sources",
+   "status": "source",
+   "rows": 16734,
+   "columns": 4,
+   "units": "to be established (value_units: open)",
+   "origin": {
+    "nature": "capri",
+    "builder": "build_techn_2030"
+   },
+   "catalogue_note": "tools/build/build_techn_2030.py (CAPRI codes, unchanged values; CAPRI's 2030 money) (not re-checked)"
+  },
   "capri_data/sources/intermediate/baseline_pmp/pmp_feed_inp_coeff_2030.csv": {
    "description": "CAPRI's feed input coefficients of its 2030 baseline calibration per region, animal activity, tech and feed, with coef CNST or SLOP, from pmppar_21730<CC>defaulta.gdx; CAPRI codes, unchanged (tools/build/build_pmp_2030.py).",
    "kind": "calibrated",
@@ -5566,6 +5581,21 @@
     "nature": "capri",
     "builder": "extract_capri_costsavings"
    }
+  },
+  "capri_data/sources/intermediate/technology/techn_fact_2030.csv": {
+   "description": "CAPRI's technology factors p_technFact(region, activity, row, tech) at its 2030 simulation start (intens/techf.gms, fert/fertned.gms, sugar/techf.gms, policy/rd_logic.gms): row LEVL the technology's share of the activity at the calibration point, the other rows the relative change of the coefficient against the mean; from the sim_ini_21730 restart file (tools/build/build_techn_2030.py).",
+   "kind": "coefficients",
+   "vintage": "2030",
+   "domain": "sources",
+   "status": "source",
+   "rows": 392259,
+   "columns": 5,
+   "units": "U_ratio",
+   "origin": {
+    "nature": "capri",
+    "builder": "build_techn_2030"
+   },
+   "catalogue_note": "tools/build/build_techn_2030.py (CAPRI codes, unchanged values) (not re-checked)"
   },
   "capri_data/sources/raw/capri/capmod/capmod_world_reference_2017.csv": {
    "description": "Per CAPRI market commodity: Fob, ImportP and ImportQ (71 rows); no builder. Read by tools/check/validate_world_prices.py and report_world_price_divergence.py; the latter describes it as the (World, World) cell of capmod's 2017 base result; how it was extracted is not documented.",

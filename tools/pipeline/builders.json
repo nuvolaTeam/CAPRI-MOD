@@ -5249,6 +5249,26 @@
    ]
   },
   {
+   "task": "build_techn_2030",
+   "builder": "build_techn_2030",
+   "args": [],
+   "inputs": [
+    "capri_data/sources/intermediate/baseline_pmp/pmp_quad_techn_2030.csv"
+   ],
+   "code": [
+    "tools/build/build_techn_2030.py",
+    "tools/lib/paths.py"
+   ],
+   "external": [
+    "$REFERENCE/simini/simini_21730/p_pmpCnst.csv.gz",
+    "$REFERENCE/simini/simini_21730/p_technFact.csv.gz"
+   ],
+   "outputs": [
+    "capri_data/sources/intermediate/baseline_pmp/pmp_cnst_techn_2030.csv",
+    "capri_data/sources/intermediate/technology/techn_fact_2030.csv"
+   ]
+  },
+  {
    "task": "build_trajectory_capri_ref",
    "builder": "build_trajectory_capri_ref",
    "args": [],

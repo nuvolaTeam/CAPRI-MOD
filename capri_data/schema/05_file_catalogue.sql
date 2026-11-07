@@ -173,6 +173,8 @@ INSERT INTO file_catalogue VALUES
   ('capri_data/sources/intermediate/baseline_pmp/pmp_quad_landtypes_2030.csv', '2030', 'sources', 'source', 'CAPRI units', NULL, 'tools/build/build_pmp_2030.py (CAPRI codes, unchanged values)'),
   ('capri_data/sources/intermediate/baseline_pmp/pmp_quad_pact_2030.csv', '2030', 'sources', 'source', 'CAPRI units', NULL, 'tools/build/build_pmp_2030.py (CAPRI codes, unchanged values)'),
   ('capri_data/sources/intermediate/baseline_pmp/pmp_quad_techn_2030.csv', '2030', 'sources', 'source', 'CAPRI units', NULL, 'tools/build/build_pmp_2030.py (CAPRI codes, unchanged values)'),
+  ('capri_data/sources/intermediate/baseline_pmp/pmp_cnst_techn_2030.csv', '2030', 'sources', 'source', 'CAPRI units', NULL, 'tools/build/build_techn_2030.py (CAPRI codes, unchanged values; CAPRI''s 2030 money)'),
+  ('capri_data/sources/intermediate/technology/techn_fact_2030.csv', '2030', 'sources', 'source', 'share', NULL, 'tools/build/build_techn_2030.py (CAPRI codes, unchanged values)'),
   ('capri_data/sources/intermediate/baseline_pmp/recipe_2017_quad_pact.csv', '2017', 'sources', 'source', 'CAPRI units', NULL, 'checked against CAPRI''s terms by tools/check/pmp_recipe_check.py'),
   ('capri_data/sources/intermediate/baseline_pmp/recipe_2017_quad_techn.csv', '2017', 'sources', 'source', 'CAPRI units', NULL, 'checked against CAPRI''s terms by tools/check/pmp_recipe_check.py'),
   ('capri_data/sources/intermediate/baseline_pmp/recipe_2030_quad_pact.csv', '2030', 'sources', 'source', 'CAPRI units', NULL, 'checked against CAPRI''s terms by tools/check/pmp_recipe_check.py'),

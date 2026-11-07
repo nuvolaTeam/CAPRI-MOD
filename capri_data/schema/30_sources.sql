@@ -107,6 +107,31 @@ COMMENT ON TABLE src_pmp_quad_techn_2030 IS 'CAPRI''s quadratic PMP terms p_pmpQ
 INSERT INTO value_units VALUES
   ('src_pmp_quad_techn_2030', 'value', NULL, 'open', 'pmp_quad_techn_2030.value: unit to be established');
 
+-- file: capri_data/sources/intermediate/baseline_pmp/pmp_cnst_techn_2030.csv
+CREATE TABLE src_pmp_cnst_techn_2030 (
+    region VARCHAR NOT NULL,
+    activity VARCHAR NOT NULL,
+    tech VARCHAR NOT NULL,
+    "value" DOUBLE NOT NULL,
+    PRIMARY KEY (region, activity, tech)
+);
+COMMENT ON TABLE src_pmp_cnst_techn_2030 IS 'CAPRI''s linear PMP terms p_pmpCnst(region, activity, tech) of its 2030 baseline calibration (crops T1/T2, others T), from the sim_ini_21730 restart file, which loads them from pmppar_21730<CC> (capmod/create_sim_ini_gdx.gms l. 491-492); CAPRI''s 2030 money (tools/build/build_techn_2030.py).';
+INSERT INTO value_units VALUES
+  ('src_pmp_cnst_techn_2030', 'value', NULL, 'open', 'pmp_cnst_techn_2030.value: CAPRI''s 2030 money per unit of activity level; unit to be established');
+
+-- file: capri_data/sources/intermediate/technology/techn_fact_2030.csv
+CREATE TABLE src_techn_fact_2030 (
+    region VARCHAR NOT NULL,
+    activity VARCHAR NOT NULL,
+    "row" VARCHAR NOT NULL,
+    tech VARCHAR NOT NULL,
+    "value" DOUBLE NOT NULL,
+    PRIMARY KEY (region, activity, "row", tech)
+);
+COMMENT ON TABLE src_techn_fact_2030 IS 'CAPRI''s technology factors p_technFact(region, activity, row, tech) at its 2030 simulation start (intens/techf.gms, fert/fertned.gms, sugar/techf.gms, policy/rd_logic.gms): row LEVL the technology''s share of the activity at the calibration point, the other rows the relative change of the coefficient against the mean; from the sim_ini_21730 restart file (tools/build/build_techn_2030.py).';
+INSERT INTO value_units VALUES
+  ('src_techn_fact_2030', 'value', 'U_ratio', 'capri', 'LEVL: share of the activity level; other rows: relative change of the coefficient (0.2 = +20%), intens/techf.gms');
+
 -- file: capri_data/sources/intermediate/baseline_pmp/recipe_2017_quad_pact.csv
 CREATE TABLE src_recipe_2017_quad_pact (
     region VARCHAR NOT NULL,

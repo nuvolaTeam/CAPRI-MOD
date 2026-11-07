@@ -380,6 +380,8 @@ INSERT INTO data_kind VALUES
   ('capri_data/sources/intermediate/baseline_pmp/pmp_quad_landtypes_2030.csv', 'calibrated', 'by rule: CAPRI''s PMP, land-market or curvature terms'),
   ('capri_data/sources/intermediate/baseline_pmp/pmp_quad_pact_2030.csv', 'calibrated', 'by rule: CAPRI''s PMP, land-market or curvature terms'),
   ('capri_data/sources/intermediate/baseline_pmp/pmp_quad_techn_2030.csv', 'calibrated', 'by rule: CAPRI''s PMP, land-market or curvature terms'),
+  ('capri_data/sources/intermediate/baseline_pmp/pmp_cnst_techn_2030.csv', 'calibrated', 'by rule: CAPRI''s PMP, land-market or curvature terms'),
+  ('capri_data/sources/intermediate/technology/techn_fact_2030.csv', 'coefficients', 'by file: CAPRI''s technology factors (intens/techf.gms)'),
   ('capri_data/sources/intermediate/baseline_pmp/recipe_2017_quad_pact.csv', 'calibrated', 'by rule: CAPRI''s PMP, land-market or curvature terms'),
   ('capri_data/sources/intermediate/baseline_pmp/recipe_2017_quad_techn.csv', 'calibrated', 'by rule: CAPRI''s PMP, land-market or curvature terms'),
   ('capri_data/sources/intermediate/baseline_pmp/recipe_2030_quad_pact.csv', 'calibrated', 'by rule: CAPRI''s PMP, land-market or curvature terms'),

@@ -34009,6 +34009,63 @@
     "tests": []
    }
   },
+  "src_pmp_cnst_techn_2030": {
+   "file": "capri_data/sources/intermediate/baseline_pmp/pmp_cnst_techn_2030.csv",
+   "declared_in": "30_sources.sql",
+   "layout": [],
+   "comment": "CAPRI's linear PMP terms p_pmpCnst(region, activity, tech) of its 2030 baseline calibration (crops T1/T2, others T), from the sim_ini_21730 restart file, which loads them from pmppar_21730<CC> (capmod/create_sim_ini_gdx.gms l. 491-492); CAPRI's 2030 money (tools/build/build_techn_2030.py).",
+   "columns": [
+    {
+     "name": "region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "activity",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "tech",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "value",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "region",
+    "activity",
+    "tech"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [
+    {
+     "item": "value",
+     "unit": null,
+     "status": "open",
+     "basis": "pmp_cnst_techn_2030.value: CAPRI's 2030 money per unit of activity level; unit to be established"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_techn_2030",
+    "sources": "$REFERENCE/simini/simini_21730/p_pmpCnst.csv.gz; $REFERENCE/simini/simini_21730/p_technFact.csv.gz; $SOURCES/pmp2030/estnlp_results_<CC>.txt; $SOURCES/pmp2030/pmppar_21730<CC>defaulta.txt"
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [],
+    "tests": []
+   }
+  },
   "src_pmp_feed_inp_coeff_2030": {
    "file": "capri_data/sources/intermediate/baseline_pmp/pmp_feed_inp_coeff_2030.csv",
    "declared_in": "30_sources.sql",
@@ -34448,7 +34505,8 @@
     "builders": [
      "build_animal_pmp_capri_2030",
      "build_intensity_q_2030",
-     "build_pmp_capri_2030"
+     "build_pmp_capri_2030",
+     "build_techn_2030"
     ],
     "checks": [
      "tools/check/pmp_recipe_check.py"
@@ -35141,6 +35199,69 @@
     "origins": "CAPRI",
     "builder": "build_sugar_processing",
     "sources": "$EXPORTS/markmarket_greendeal_1730et_base_1717.txt"
+   },
+   "notes": [],
+   "read_by": {
+    "model": [],
+    "builders": [],
+    "checks": [],
+    "tests": []
+   }
+  },
+  "src_techn_fact_2030": {
+   "file": "capri_data/sources/intermediate/technology/techn_fact_2030.csv",
+   "declared_in": "30_sources.sql",
+   "layout": [],
+   "comment": "CAPRI's technology factors p_technFact(region, activity, row, tech) at its 2030 simulation start (intens/techf.gms, fert/fertned.gms, sugar/techf.gms, policy/rd_logic.gms): row LEVL the technology's share of the activity at the calibration point, the other rows the relative change of the coefficient against the mean; from the sim_ini_21730 restart file (tools/build/build_techn_2030.py).",
+   "columns": [
+    {
+     "name": "region",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "activity",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "row",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "tech",
+     "type": "VARCHAR",
+     "not_null": true
+    },
+    {
+     "name": "value",
+     "type": "DOUBLE",
+     "not_null": true
+    }
+   ],
+   "primary_key": [
+    "region",
+    "activity",
+    "row",
+    "tech"
+   ],
+   "unique": [],
+   "foreign_keys": [],
+   "checks": [],
+   "units": [
+    {
+     "item": "value",
+     "unit": "U_ratio",
+     "status": "capri",
+     "basis": "LEVL: share of the activity level; other rows: relative change of the coefficient (0.2 = +20%), intens/techf.gms"
+    }
+   ],
+   "provenance": {
+    "nature": "capri",
+    "origins": "CAPRI",
+    "builder": "build_techn_2030",
+    "sources": "$REFERENCE/simini/simini_21730/p_pmpCnst.csv.gz; $REFERENCE/simini/simini_21730/p_technFact.csv.gz; $SOURCES/pmp2030/estnlp_results_<CC>.txt; $SOURCES/pmp2030/pmppar_21730<CC>defaulta.txt"
    },
    "notes": [],
    "read_by": {
