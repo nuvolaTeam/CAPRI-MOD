@@ -2,9 +2,11 @@
 "<date>T<time>-<commit>", meta/<scenario>/<run id>/) to the current one (capri_mod/io_results.py: each run under the
 SHA-256 of its results and its definition, unpartitioned tables, meta/<run id>/).
 
-    python tools/run/migrate_results_store.py OLD_STORE NEW_STORE
+    python tools/run/migrate_results_store.py OLD_STORE NEW_STORE [--into] [--run OLD_RUN_ID ...]
 
-NEW_STORE must not exist. Every scenario run of OLD_STORE is written again with io_results.write_run, oldest first:
+NEW_STORE must not exist, unless --into: then the runs are added to that store of the current layout (a run already
+there, the same id, is stored once). --run converts only the scenario runs of those old ids. Every scenario run of
+OLD_STORE (or of --run) is written again with io_results.write_run, oldest first:
 its rows, its reference's rows, the summary and iteration records, its metadata (meta.json, settings.toml,
 manifest.json) and its record's creation time. The reference keeps its stored fingerprint (reference_fingerprint);
 what the scenario adds (scenario_parts) is taken from its metadata as the run script takes it (the overrides on the
@@ -44,13 +46,21 @@ def _points(df: pd.DataFrame, point: str) -> pd.DataFrame:
     return df.drop(columns=["scenario", "run_id"]).assign(point=point)
 
 
-def migrate(old: Path, new: Path) -> list:
-    if new.exists():
-        raise SystemExit(f"{new} exists: give a new folder")
+def migrate(old: Path, new: Path, into: bool = False, only: tuple = ()) -> list:
+    if new.exists() and not into:
+        raise SystemExit(f"{new} exists: give a new folder (or --into to add to it)")
+    if into and not (new / "runs").is_dir():
+        raise SystemExit(f"{new} is not a results store (no runs table)")
     runs = DeltaTable(str(old / "runs")).to_pandas()
     refs = runs[runs["kind"] == "reference"].set_index(["scenario", "run_id"])
+    sel = runs[runs["kind"] == "scenario"]
+    if only:
+        missing = set(only) - set(sel["run_id"])
+        if missing:
+            raise SystemExit(f"not scenario runs of {old}: {sorted(missing)}")
+        sel = sel[sel["run_id"].isin(only)]
     out = []
-    for rec in runs[runs["kind"] == "scenario"].sort_values("seq").to_dict("records"):
+    for rec in sel.sort_values("seq").to_dict("records"):
         s, rid, ref, ref_id = rec["scenario"], rec["run_id"], rec["reference"], rec["reference_run_id"]
         base = _old_rows(old, "long", ref, ref_id)
         scen = _old_rows(old, "long", s, rid)
@@ -118,8 +128,15 @@ def check(old: Path, new: Path, pairs: list) -> list:
 
 
 def main():
-    old, new = Path(sys.argv[1]), Path(sys.argv[2])
-    pairs = migrate(old, new)
+    import argparse
+    ap = argparse.ArgumentParser()
+    ap.add_argument("old")
+    ap.add_argument("new")
+    ap.add_argument("--into", action="store_true")
+    ap.add_argument("--run", nargs="+", default=())
+    a = ap.parse_args()
+    old, new = Path(a.old), Path(a.new)
+    pairs = migrate(old, new, a.into, tuple(a.run))
     for s, rid, nid, ref_id, nref in pairs:
         print(f"{s}: {rid} -> {nid}  (reference {ref_id} -> {nref})")
     bad = check(old, new, pairs)
