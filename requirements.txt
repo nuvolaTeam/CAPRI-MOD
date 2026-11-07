@@ -38,3 +38,8 @@ requests>=2.28
 # GAMS Python API (MIT), used only for its GDX bindings; no GAMS installation or licence is needed, but the GDX
 # library itself (libgdxcclib64.so, MIT, github.com/GAMS-dev/gdx) is built separately: README section 3
 gamsapi>=54
+
+# --- the GUI (capri_gradio/: results browser with maps and charts, scenario editor, runs; not needed to run the model) ---
+# Gradio (Apache-2.0) and Plotly (MIT)
+gradio>=5.0
+plotly>=5.0

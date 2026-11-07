@@ -848,6 +848,22 @@ from deltalake import DeltaTable
 t = DeltaTable("results/long").to_pandas(filters=[("scenario", "=", "farm_to_fork_jrc121368")])
 ```
 
+**Browsing the results (since 6 November 2026).** `python capri_gradio/results_browser.py [--store DIR ...]` opens a
+local, read-only web page over one or more stores (default `run.results_dir`; `pip install ".[gui]"` for gradio):
+the runs with their convergence, settings changed and code version; a run's scenario against its baseline and two runs
+against each other as pivot tables (one dimension down, one across, single stored rows, no sums) and bar charts, with a
+CSV download; the baseline against CAPRI's 2030 reference and the Farm-to-Fork indicators against JRC121368, computed
+by `tools/check/compare_baseline_capri.py` and `tools/check/compare_runs.py`.
+
+**The GUI (draft, since 7 November 2026).** `python capri_gradio/capri_gui.py [--llm none|openai|anthropic]
+[--llm-model NAME] [--llm-base-url URL] [--llm-key-env VAR]` opens a local page in the spirit of CAPRI's GUI: an
+assistant that writes scenarios through checked tool calls (the language model is not chosen yet: any server with the
+OpenAI chat-completions API, the Anthropic API, or none), the same scenario as a form (a reference, then the Green Deal
+group's switches or policy shocks), a Run tab (full EU or the 20 mini-EU units, one run at a time) and the results
+browser. Every scenario is checked against `capri_mod/scenarios/definition.py` and read back as a run reads it; it is
+written to the user's folder (`run.scenarios_dir`, else `user_scenarios/`), never to `capri_data/scenarios`. The model
+cannot start a run: the user does.
+
 ### 7.5 Key `run()` parameters
 
 Arguments left at None take the run's settings (§7.6).
