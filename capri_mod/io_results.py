@@ -783,7 +783,7 @@ def _jsonable(x):
 def write_run(base: pd.DataFrame, scen: pd.DataFrame, *, scenario: str, reference: str, year: int,
               fingerprint_parts: dict, meta: dict, root, summary: Optional[dict] = None,
               iterations: Optional[tuple] = None, scenario_parts: Optional[dict] = None,
-              created: Optional[str] = None) -> dict:
+              created: Optional[str] = None, reference_fingerprint: Optional[str] = None) -> dict:
     """Store a run: the reference's rows and the scenario's rows each as its own partition of root/long, named by its
     run id (run_id_of: the SHA-256 of its results and its definition). The reference's definition is
     fingerprint(fingerprint_parts) (its inputs); the scenario's is fingerprint({"reference": that fingerprint,
@@ -793,13 +793,15 @@ def write_run(base: pd.DataFrame, scen: pd.DataFrame, *, scenario: str, referenc
     the same id is not stored again (the record returned says "duplicate"). summary (the run script's EU summaries)
     goes to root/summary and iterations (the outer iterations' records of the reference and the scenario) to
     root/iterations under the partitions' run ids (encode_record's rows); meta (the run's metadata) to
-    meta_dir(root, run id)/meta.json. Returns the scenario's record (root/runs)."""
+    meta_dir(root, run id)/meta.json. reference_fingerprint, when given, is the reference's fingerprint itself in place
+    of fingerprint(fingerprint_parts) (a store converted from an older layout keeps its references' fingerprints:
+    tools/run/migrate_results_store.py). Returns the scenario's record (root/runs)."""
     import pyarrow as pa
     from datetime import datetime as _dt
     from deltalake import write_deltalake
     root = Path(root)
     root.mkdir(parents=True, exist_ok=True)
-    fp = fingerprint(fingerprint_parts)
+    fp = reference_fingerprint or fingerprint(fingerprint_parts)
     fp_s = fingerprint({"reference": fp, **(scenario_parts or {})})
     commit = str(fingerprint_parts.get("commit") or "")
     runs = _runs(root)
