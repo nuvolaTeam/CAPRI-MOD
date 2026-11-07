@@ -348,7 +348,7 @@ solver, and every intermediate quantity inspectable.
 
 ## 3. Installation & quick start
 
-Install the dependencies (Python 3.10 or later) and run the test suite from the command line:
+Install the dependencies (Python 3.11 or later: the settings are read with tomllib; the code parses under 3.11, the tests are run on 3.13) and run the test suite from the command line:
 
 ```shell
 pip install -r requirements.txt        # the model, tests, data pipeline and reference tools

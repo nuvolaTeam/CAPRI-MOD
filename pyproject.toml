@@ -7,7 +7,7 @@ name = "capri-mod"
 version = "0.1.0"
 description = "A Python reimplementation of the CAPRI star 3.0 agricultural economic model"
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 license = { text = "GPL-3.0-only" }
 dependencies = [
     "pandas>=2.0",
