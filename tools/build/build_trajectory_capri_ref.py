@@ -89,10 +89,10 @@ def main():
     # plus its voluntary set-aside VSET (CAPRI_TO_MODEL_ACTIVITY; the set-aside split, KNOWN_ISSUES K111), while CAPRI's
     # own SETA row is VSET alone (res_17IT: IT400000 SETA = VSET = 10.70, FALL 7.22): until 4 November 2026 the model's
     # SETA took that row's growth, or the EU median where a region has no VSET (KNOWN_ISSUES K115)
-    # The model's other fodder OFOD is CAPRI's OFAR plus its fodder roots ROOF (CAPRI_TO_MODEL_ACTIVITY): until 4
-    # November 2026 it took OFAR's growth alone (53 regions off CAPRI's 2030 level by more than 1%)
+    # (The model's other fodder OFOD was CAPRI's OFAR plus its fodder roots ROOF until S2, 7 November 2026; OFAR and
+    # ROOF are the model's own activities since, with CAPRI's own trajectories.)
     for comp, parts in (("SHGT", ("SHGM", "SHGF")), ("CACR", ("CAMF", "CAFF", "CAMR", "CAFR")),
-                        ("SETA", ("FALL", "VSET")), ("OFOD", ("OFAR", "ROOF"))):
+                        ("SETA", ("FALL", "VSET"))):
         for reg in {k[0] for k in v}:
             for yr in ("2017", "2030"):
                 xs = [v.get((reg, p_, "LEVL", yr)) for p_ in parts]
@@ -106,8 +106,7 @@ def main():
     # DCOW YILD is not the milk yield (beef per cow) while the model's DCOW yield is milk per cow. The others take
     # CAPRI's aggregate where it exists in both years (national entries), else the components.
     for comp, parts, always in (("DCOW", ("DCOL", "DCOH"), True), ("HEIF", ("HEIL", "HEIH"), False),
-                                ("BULF", ("BULL", "BULH"), False), ("CACR", ("CAMF", "CAFF"), False),
-                                ("OFOD", ("OFAR", "ROOF"), True)):
+                                ("BULF", ("BULL", "BULH"), False), ("CACR", ("CAMF", "CAFF"), False)):
         for reg in {k[0] for k in v}:
             if not always and all((reg, comp, "YILD", yr) in v for yr in ("2017", "2030")):
                 continue
@@ -124,7 +123,7 @@ def main():
                 v[(reg, comp, "YILD", "2030")] = comp_y["2030"]
     # sheep and goats: the model's activities are CAPRI's SHGM (milk; YILD = milk per head) and SHGF (fattening; YILD =
     # meat per head) since October 2026 (tools/build/build_shg_split.py); their factors are CAPRI's own, no alias needed
-    v = {k: x for k, x in v.items() if k[1] not in ("VSET", "ROOF")}   # parts of SETA and OFOD only
+    v = {k: x for k, x in v.items() if k[1] not in ("VSET",)}   # parts of SETA only
     # CAPRI's zeros: GAMS stores no zero, so an activity level the 2030 reference does not list is 0 where the
     # reference reports the region and the activity elsewhere (UK grain maize MAIZ 5.6 kha in 2017, none in 2030; ES
     # other oilseeds OOIL, PT durum wheat DWHE, DK pulses PULS: 20 cells of 2017 level >= 1). Until 4 November 2026

@@ -3242,7 +3242,7 @@
      "basis": "CAPRI's LEVL of crop activities (CAPRIunits.gdx P_CAPRIunits: U_1000ha)"
     },
     {
-     "item": "OFOD",
+     "item": "OFAR",
      "unit": "U_1000ha",
      "status": "capri",
      "basis": "CAPRI's LEVL of crop activities (CAPRIunits.gdx P_CAPRIunits: U_1000ha)"
@@ -3297,6 +3297,12 @@
     },
     {
      "item": "RAPE",
+     "unit": "U_1000ha",
+     "status": "capri",
+     "basis": "CAPRI's LEVL of crop activities (CAPRIunits.gdx P_CAPRIunits: U_1000ha)"
+    },
+    {
+     "item": "ROOF",
      "unit": "U_1000ha",
      "status": "capri",
      "basis": "CAPRI's LEVL of crop activities (CAPRIunits.gdx P_CAPRIunits: U_1000ha)"
@@ -12076,7 +12082,7 @@
     }
    ],
    "checks": [
-    "(fodder IN ('FGRA', 'FMAI', 'FOFA'))"
+    "(fodder IN ('FGRA', 'FMAI', 'FOFA', 'FROO'))"
    ],
    "units": [
     {
@@ -12171,7 +12177,7 @@
     }
    ],
    "checks": [
-    "(fodder IN ('FGRA', 'FMAI', 'FOFA'))"
+    "(fodder IN ('FGRA', 'FMAI', 'FOFA', 'FROO'))"
    ],
    "units": [
     {
@@ -22489,7 +22495,7 @@
      "basis": "revenue over production of CAPRI's YILD x MPRI (build_crop_economics_2017.py: EUR/t)"
     },
     {
-     "item": "OFOD",
+     "item": "OFAR",
      "unit": "U_EuPerTon",
      "status": "builder",
      "basis": "revenue over production of CAPRI's YILD x MPRI (build_crop_economics_2017.py: EUR/t)"
@@ -22538,6 +22544,12 @@
     },
     {
      "item": "RAPE",
+     "unit": "U_EuPerTon",
+     "status": "builder",
+     "basis": "revenue over production of CAPRI's YILD x MPRI (build_crop_economics_2017.py: EUR/t)"
+    },
+    {
+     "item": "ROOF",
      "unit": "U_EuPerTon",
      "status": "builder",
      "basis": "revenue over production of CAPRI's YILD x MPRI (build_crop_economics_2017.py: EUR/t)"
@@ -27342,11 +27354,6 @@
      "not_null": true
     },
     {
-     "name": "OFOD",
-     "type": "DOUBLE",
-     "not_null": true
-    },
-    {
      "name": "OFRU",
      "type": "DOUBLE",
      "not_null": true
@@ -27758,12 +27765,6 @@
      "unit": null,
      "status": "open",
      "basis": "capreg_national_prices.OFAR: unit to be established"
-    },
-    {
-     "item": "OFOD",
-     "unit": null,
-     "status": "open",
-     "basis": "capreg_national_prices.OFOD: unit to be established"
     },
     {
      "item": "OFRU",
@@ -28350,11 +28351,6 @@
      "name": "WINE",
      "type": "DOUBLE",
      "not_null": false
-    },
-    {
-     "name": "OFOD",
-     "type": "DOUBLE",
-     "not_null": true
     }
    ],
    "primary_key": [
@@ -28597,12 +28593,6 @@
      "unit": null,
      "status": "open",
      "basis": "capreg_producer_prices.OFAR: unit to be established"
-    },
-    {
-     "item": "OFOD",
-     "unit": null,
-     "status": "open",
-     "basis": "capreg_producer_prices.OFOD: unit to be established"
     },
     {
      "item": "OFRU",
@@ -35543,7 +35533,12 @@
      "not_null": false
     },
     {
-     "name": "OFOD",
+     "name": "OFAR",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "ROOF",
      "type": "DOUBLE",
      "not_null": false
     },
@@ -35698,11 +35693,6 @@
      "not_null": false
     },
     {
-     "name": "OFAR",
-     "type": "DOUBLE",
-     "not_null": false
-    },
-    {
      "name": "OILS",
      "type": "DOUBLE",
      "not_null": false
@@ -35724,11 +35714,6 @@
     },
     {
      "name": "POUF",
-     "type": "DOUBLE",
-     "not_null": false
-    },
-    {
-     "name": "ROOF",
      "type": "DOUBLE",
      "not_null": false
     },
@@ -36031,12 +36016,6 @@
      "unit": null,
      "status": "open",
      "basis": "cap_premium_activity.OFAR: unit to be established (per ha for crops, per head for animals)"
-    },
-    {
-     "item": "OFOD",
-     "unit": null,
-     "status": "open",
-     "basis": "cap_premium_activity.OFOD: unit to be established (per ha for crops, per head for animals)"
     },
     {
      "item": "OFRU",
@@ -37056,7 +37035,12 @@
      "not_null": true
     },
     {
-     "name": "OFOD",
+     "name": "OFAR",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "ROOF",
      "type": "DOUBLE",
      "not_null": true
     },
@@ -37146,10 +37130,10 @@
      "basis": "crop_premium.OCRO: unit to be established"
     },
     {
-     "item": "OFOD",
+     "item": "OFAR",
      "unit": null,
      "status": "open",
-     "basis": "crop_premium.OFOD: unit to be established"
+     "basis": "crop_premium.OFAR: unit to be established"
     },
     {
      "item": "OFRU",
@@ -37204,6 +37188,12 @@
      "unit": null,
      "status": "open",
      "basis": "crop_premium.RAPE: unit to be established"
+    },
+    {
+     "item": "ROOF",
+     "unit": null,
+     "status": "open",
+     "basis": "crop_premium.ROOF: unit to be established"
     },
     {
      "item": "RYEM",
@@ -39534,9 +39524,14 @@
      "not_null": false
     },
     {
-     "name": "OFOD",
+     "name": "OFAR",
      "type": "DOUBLE",
      "not_null": true
+    },
+    {
+     "name": "ROOF",
+     "type": "DOUBLE",
+     "not_null": false
     },
     {
      "name": "SETA",
@@ -39624,10 +39619,10 @@
      "basis": "nutrients_regional.OCRO: unit to be established"
     },
     {
-     "item": "OFOD",
+     "item": "OFAR",
      "unit": null,
      "status": "open",
-     "basis": "nutrients_regional.OFOD: unit to be established"
+     "basis": "nutrients_regional.OFAR: unit to be established"
     },
     {
      "item": "OFRU",
@@ -39682,6 +39677,12 @@
      "unit": null,
      "status": "open",
      "basis": "nutrients_regional.RAPE: unit to be established"
+    },
+    {
+     "item": "ROOF",
+     "unit": null,
+     "status": "open",
+     "basis": "nutrients_regional.ROOF: unit to be established"
     },
     {
      "item": "RYEM",
@@ -39941,7 +39942,7 @@
    "file": "capri_data/2017/supply/producer_prices_regional.csv",
    "declared_in": "18_supply_more.sql",
    "layout": [],
-   "comment": "CAPRI's regional producer prices MPRI (EUR/t) per regional unit and activity (sources/capreg/capreg_producer_prices.csv), CAPRI's TWIN and OFAR columns for WINE and OFOD where those are empty, and a missing regional price filled with the country's national price (sources/capreg/capreg_national_prices.csv; tools/build/build_model_premium_prices.py; done by the model's loader at run time until 31 October 2026)",
+   "comment": "CAPRI's regional producer prices MPRI (EUR/t) per regional unit and activity (sources/capreg/capreg_producer_prices.csv), CAPRI's TWIN column for WINE where it is empty (and OFAR for OFOD until S2, 7 November 2026), and a missing regional price filled with the country's national price (sources/capreg/capreg_national_prices.csv; tools/build/build_model_premium_prices.py; done by the model's loader at run time until 31 October 2026)",
    "columns": [
     {
      "name": "model_region",
@@ -40307,11 +40308,6 @@
      "name": "WINE",
      "type": "DOUBLE",
      "not_null": false
-    },
-    {
-     "name": "OFOD",
-     "type": "DOUBLE",
-     "not_null": false
     }
    ],
    "primary_key": [
@@ -40554,12 +40550,6 @@
      "unit": null,
      "status": "open",
      "basis": "producer_prices_regional.OFAR: EUR/t as CAPRI's MPRI, to be confirmed per column"
-    },
-    {
-     "item": "OFOD",
-     "unit": null,
-     "status": "open",
-     "basis": "producer_prices_regional.OFOD: EUR/t as CAPRI's MPRI, to be confirmed per column"
     },
     {
      "item": "OFRU",
@@ -42149,7 +42139,12 @@
      "not_null": false
     },
     {
-     "name": "OFOD",
+     "name": "OFAR",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "ROOF",
      "type": "DOUBLE",
      "not_null": false
     },
@@ -42304,11 +42299,6 @@
      "not_null": false
     },
     {
-     "name": "OFAR",
-     "type": "DOUBLE",
-     "not_null": false
-    },
-    {
      "name": "OILS",
      "type": "DOUBLE",
      "not_null": false
@@ -42330,11 +42320,6 @@
     },
     {
      "name": "POUF",
-     "type": "DOUBLE",
-     "not_null": false
-    },
-    {
-     "name": "ROOF",
      "type": "DOUBLE",
      "not_null": false
     },
@@ -42637,12 +42622,6 @@
      "unit": null,
      "status": "open",
      "basis": "capri_cap_premium_2030.OFAR: unit to be established"
-    },
-    {
-     "item": "OFOD",
-     "unit": null,
-     "status": "open",
-     "basis": "capri_cap_premium_2030.OFOD: unit to be established"
     },
     {
      "item": "OFRU",
@@ -43876,7 +43855,7 @@
      "basis": "CAPRI's TOIN per ha (build_crop_economics_2017.py: EUR/ha)"
     },
     {
-     "item": "OFOD",
+     "item": "OFAR",
      "unit": "U_EuPerHa",
      "status": "builder",
      "basis": "CAPRI's TOIN per ha (build_crop_economics_2017.py: EUR/ha)"
@@ -43943,6 +43922,12 @@
     },
     {
      "item": "RAPE",
+     "unit": "U_EuPerHa",
+     "status": "builder",
+     "basis": "CAPRI's TOIN per ha (build_crop_economics_2017.py: EUR/ha)"
+    },
+    {
+     "item": "ROOF",
      "unit": "U_EuPerHa",
      "status": "builder",
      "basis": "CAPRI's TOIN per ha (build_crop_economics_2017.py: EUR/ha)"
@@ -44523,7 +44508,7 @@
      "basis": "CAPRI's YILD / 1000: a value-measured crop, CAPRI's MPRI an index near 1000 and MREV = YILD / 1000 x MPRI as for every crop (checked in res_17NL: NL320000)"
     },
     {
-     "item": "OFOD",
+     "item": "OFAR",
      "unit": "U_TonPerHa",
      "status": "builder",
      "basis": "CAPRI's YILD / 1000 (build_crop_economics_2017.py: t/ha)"
@@ -44590,6 +44575,12 @@
     },
     {
      "item": "RAPE",
+     "unit": "U_TonPerHa",
+     "status": "builder",
+     "basis": "CAPRI's YILD / 1000 (build_crop_economics_2017.py: t/ha)"
+    },
+    {
+     "item": "ROOF",
      "unit": "U_TonPerHa",
      "status": "builder",
      "basis": "CAPRI's YILD / 1000 (build_crop_economics_2017.py: t/ha)"

@@ -316,7 +316,7 @@ def load_cap_premium(data_dir=None):
 
 def load_regional_producer_prices(data_dir=None):
     """CAPRI regional producer prices (DATA2 item MPRI, EUR/t): 2017/supply/producer_prices_regional.csv
-    (tools/build/build_model_premium_prices.py: CAPRI's TWIN and OFAR columns for WINE and OFOD, a missing regional
+    (tools/build/build_model_premium_prices.py: CAPRI's TWIN column for WINE, a missing regional
     price filled with the country's national price; until 31 October 2026 done here at run time from the CAPREG
     extracts in capri_data/sources).
 

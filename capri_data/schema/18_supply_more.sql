@@ -127,7 +127,8 @@ CREATE TABLE sup_crop_premium (
     TEXT DOUBLE NOT NULL,
     GRAS DOUBLE NOT NULL,
     MAIF DOUBLE NOT NULL,
-    OFOD DOUBLE NOT NULL,
+    OFAR DOUBLE NOT NULL,
+    ROOF DOUBLE NOT NULL,
     SETA DOUBLE NOT NULL,
     PRIMARY KEY (region)
 );
@@ -165,7 +166,8 @@ INSERT INTO value_units VALUES
   ('sup_crop_premium', 'SOYA', NULL, 'open', 'crop_premium.SOYA: unit to be established'),
   ('sup_crop_premium', 'OOIL', NULL, 'open', 'crop_premium.OOIL: unit to be established'),
   ('sup_crop_premium', 'TEXT', NULL, 'open', 'crop_premium.TEXT: unit to be established'),
-  ('sup_crop_premium', 'OFOD', NULL, 'open', 'crop_premium.OFOD: unit to be established'),
+  ('sup_crop_premium', 'OFAR', NULL, 'open', 'crop_premium.OFAR: unit to be established'),
+  ('sup_crop_premium', 'ROOF', NULL, 'open', 'crop_premium.ROOF: unit to be established'),
   ('sup_crop_premium', 'SETA', NULL, 'open', 'crop_premium.SETA: unit to be established');
 
 -- file: capri_data/2017/supply/dairy_intensity.csv
@@ -364,7 +366,8 @@ CREATE TABLE sup_nutrients_regional (
     TEXT DOUBLE,
     GRAS DOUBLE,
     MAIF DOUBLE,
-    OFOD DOUBLE NOT NULL,
+    OFAR DOUBLE NOT NULL,
+    ROOF DOUBLE,
     SETA DOUBLE,
     PRIMARY KEY (region)
 );
@@ -402,7 +405,8 @@ INSERT INTO value_units VALUES
   ('sup_nutrients_regional', 'SOYA', NULL, 'open', 'nutrients_regional.SOYA: unit to be established'),
   ('sup_nutrients_regional', 'OOIL', NULL, 'open', 'nutrients_regional.OOIL: unit to be established'),
   ('sup_nutrients_regional', 'TEXT', NULL, 'open', 'nutrients_regional.TEXT: unit to be established'),
-  ('sup_nutrients_regional', 'OFOD', NULL, 'open', 'nutrients_regional.OFOD: unit to be established'),
+  ('sup_nutrients_regional', 'OFAR', NULL, 'open', 'nutrients_regional.OFAR: unit to be established'),
+  ('sup_nutrients_regional', 'ROOF', NULL, 'open', 'nutrients_regional.ROOF: unit to be established'),
   ('sup_nutrients_regional', 'SETA', NULL, 'open', 'nutrients_regional.SETA: unit to be established');
 
 -- file: capri_data/2017/supply/plant_protection_cost.csv
@@ -616,7 +620,8 @@ CREATE TABLE sup_cap_premium_activity (
     TEXT DOUBLE,
     GRAS DOUBLE,
     MAIF DOUBLE,
-    OFOD DOUBLE,
+    OFAR DOUBLE,
+    ROOF DOUBLE,
     SETA DOUBLE,
     AGGT DOUBLE,
     ANNC DOUBLE,
@@ -647,13 +652,11 @@ CREATE TABLE sup_cap_premium_activity (
     MODU DOUBLE,
     OANI DOUBLE,
     OAR1 DOUBLE,
-    OFAR DOUBLE,
     OILS DOUBLE,
     PERM DOUBLE,
     PIGF DOUBLE,
     PKPL DOUBLE,
     POUF DOUBLE,
-    ROOF DOUBLE,
     RUMI DOUBLE,
     SCOW DOUBLE,
     SETF DOUBLE,
@@ -698,7 +701,6 @@ INSERT INTO value_units VALUES
   ('sup_cap_premium_activity', 'TEXT', NULL, 'open', 'cap_premium_activity.TEXT: unit to be established (per ha for crops, per head for animals)'),
   ('sup_cap_premium_activity', 'GRAS', NULL, 'open', 'cap_premium_activity.GRAS: unit to be established (per ha for crops, per head for animals)'),
   ('sup_cap_premium_activity', 'MAIF', NULL, 'open', 'cap_premium_activity.MAIF: unit to be established (per ha for crops, per head for animals)'),
-  ('sup_cap_premium_activity', 'OFOD', NULL, 'open', 'cap_premium_activity.OFOD: unit to be established (per ha for crops, per head for animals)'),
   ('sup_cap_premium_activity', 'SETA', NULL, 'open', 'cap_premium_activity.SETA: unit to be established (per ha for crops, per head for animals)'),
   ('sup_cap_premium_activity', 'AGGT', NULL, 'open', 'cap_premium_activity.AGGT: unit to be established (per ha for crops, per head for animals)'),
   ('sup_cap_premium_activity', 'ANNC', NULL, 'open', 'cap_premium_activity.ANNC: unit to be established (per ha for crops, per head for animals)'),
@@ -820,10 +822,9 @@ CREATE TABLE sup_producer_prices_regional (
     TWIN DOUBLE,
     UAAR DOUBLE,
     WINE DOUBLE,
-    OFOD DOUBLE,
     PRIMARY KEY (model_region)
 );
-COMMENT ON TABLE sup_producer_prices_regional IS 'CAPRI''s regional producer prices MPRI (EUR/t) per regional unit and activity (sources/capreg/capreg_producer_prices.csv), CAPRI''s TWIN and OFAR columns for WINE and OFOD where those are empty, and a missing regional price filled with the country''s national price (sources/capreg/capreg_national_prices.csv; tools/build/build_model_premium_prices.py; done by the model''s loader at run time until 31 October 2026)';
+COMMENT ON TABLE sup_producer_prices_regional IS 'CAPRI''s regional producer prices MPRI (EUR/t) per regional unit and activity (sources/capreg/capreg_producer_prices.csv), CAPRI''s TWIN column for WINE where it is empty (and OFAR for OFOD until S2, 7 November 2026), and a missing regional price filled with the country''s national price (sources/capreg/capreg_national_prices.csv; tools/build/build_model_premium_prices.py; done by the model''s loader at run time until 31 October 2026)';
 INSERT INTO value_units VALUES
   ('sup_producer_prices_regional', 'AGGT', NULL, 'open', 'producer_prices_regional.AGGT: EUR/t as CAPRI''s MPRI, to be confirmed per column'),
   ('sup_producer_prices_regional', 'APPL', NULL, 'open', 'producer_prices_regional.APPL: EUR/t as CAPRI''s MPRI, to be confirmed per column'),
@@ -896,8 +897,7 @@ INSERT INTO value_units VALUES
   ('sup_producer_prices_regional', 'TOMA', NULL, 'open', 'producer_prices_regional.TOMA: EUR/t as CAPRI''s MPRI, to be confirmed per column'),
   ('sup_producer_prices_regional', 'TWIN', NULL, 'open', 'producer_prices_regional.TWIN: EUR/t as CAPRI''s MPRI, to be confirmed per column'),
   ('sup_producer_prices_regional', 'UAAR', NULL, 'open', 'producer_prices_regional.UAAR: EUR/t as CAPRI''s MPRI, to be confirmed per column'),
-  ('sup_producer_prices_regional', 'WINE', NULL, 'open', 'producer_prices_regional.WINE: EUR/t as CAPRI''s MPRI, to be confirmed per column'),
-  ('sup_producer_prices_regional', 'OFOD', NULL, 'open', 'producer_prices_regional.OFOD: EUR/t as CAPRI''s MPRI, to be confirmed per column');
+  ('sup_producer_prices_regional', 'WINE', NULL, 'open', 'producer_prices_regional.WINE: EUR/t as CAPRI''s MPRI, to be confirmed per column');
 
 -- file: capri_data/2017/supply/young_animals_2017.csv
 CREATE TABLE sup_young_animals_2017 (

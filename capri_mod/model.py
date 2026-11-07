@@ -1116,7 +1116,7 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
                               "milk_ms": {k_: {kk: float(vv) for kk, vv in v_.items()} for k_, v_ in (_dlh.get("ms_price_ratio") or {}).items()},
                               "herd": _herd,
                               "herd_regional": {r_: {a_: round(float(getattr(x_, "activities", pd.Series(dtype=float)).get(a_, 0.0)), 4)
-                                                     for a_ in ("BCOW", "DCOW", "CALV", "BULL", "HFRS", "GRAS", "MAIF", "OFOD")}
+                                                     for a_ in ("BCOW", "DCOW", "CALV", "BULL", "HFRS", "GRAS", "MAIF", "OFAR", "ROOF")}
                                                 for r_, x_ in _sr_.items()}})
                 # the regions whose jump check acted at this iteration (supply.nlp_jump_check, K79): the largest move, the
                 # starts solved, the one kept and the objectives

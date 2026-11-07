@@ -53,7 +53,7 @@ class LandBlock:
         li = {t: j for j, t in enumerate(self.LAND_TYPES)}
         rowmap = {"arable_land": [(li["ARAC"], 1.0)],
                   # CAPRI LandBalNoSlak_(GRAS): grassland activities = grassland. Arable fodder
-                  # (MAIF, OFOD) sits on ARABLE land, in the arable row; see _build_constraints
+                  # (MAIF, OFAR, ROOF) sits on ARABLE land, in the arable row; see _build_constraints
                   "grassland": [(li["GRAS"], 1.0)],
                   "permanent_land": [(li["FRUN"], 1.0)]}
         rows = []

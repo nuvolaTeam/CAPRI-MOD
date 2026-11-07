@@ -73,7 +73,7 @@ def share_term(activity_levels: pd.Series, arable_total: float,
 # --- 3. the share term's arable activities -----------------------------------
 
 # Activities on arable land, used for the share term denominator: CAPRI's crop groups EPRD_TO_GRP (gams/sets.gms
-# l. 2918 ff.; CERE, CER2, OILS, OARA, FARA) through the crosswalk (MAIZ = CORN, OFAR and ROOF = OFOD), plus set-aside,
+# l. 2918 ff.; CERE, CER2, OILS, OARA, FARA) through the crosswalk (MAIZ = CORN), plus set-aside,
 # textiles and tobacco (the model's); capri_data/codes/model_activity_classes.csv share_term_arable (refactor stage 3,
 # N6). Permanent crops, grassland and livestock are excluded.
 ARABLE_ACTIVITIES = tuple(a for a, r in ACTIVITY_CLASSES.items() if r["share_term_arable"] == "1")   # in CROPS order
@@ -91,10 +91,10 @@ COUNTRY_ELAS_FILE = "capri_own_price_elasticities.csv"
 #: the country file's CAPRI codes -> model activities (animal products and young animals are not activities)
 COUNTRY_ELAS_ALIASES = CAPRI_TO_MODEL_ACTIVITY        # MAIZ = CORN, TWIN = WINE (codes/model_activities.csv, N6)
 
-# CAPRI names grain maize MAIZ; the model calls it CORN. Fodder on arable land OFAR is the model's OFOD (OFAR + ROOF;
-# CAPRI's sources carry OFAR only): without the alias the 14 Mha of other fodder stayed on the literature default
-# 0.12 against CAPRI's median 1.05 (K32).
-ACTIVITY_ALIASES = CAPRI_TO_MODEL_ACTIVITY            # MAIZ = CORN, OFAR = OFOD (codes/model_activities.csv, N6)
+# CAPRI names grain maize MAIZ; the model calls it CORN (until S2, 7 November 2026, also OFAR = OFOD: without that
+# alias the 14 Mha of other fodder stayed on the literature default 0.12 against CAPRI's median 1.05, K32; OFAR and ROOF
+# are the model's own activities since).
+ACTIVITY_ALIASES = CAPRI_TO_MODEL_ACTIVITY            # MAIZ = CORN, TWIN = WINE (codes/model_activities.csv, N6)
 LIVESTOCK_ELAS_FILE = "capri_supply_elas_market_1717.csv"   # in the base year's supply inputs
 #: the CAPRI market product of each animal: its price source (model_activity_classes.csv) in CAPRI's code (N6)
 LIVESTOCK_PRODUCT = {a: COMMODITY_CAPRI_CODE[r["price_source"]] for a, r in ACTIVITY_CLASSES.items() if r["price_source"]}

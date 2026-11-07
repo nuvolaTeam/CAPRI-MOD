@@ -24,7 +24,7 @@ Outputs (capri_data/2017/environment/)
                                   model regions without a CAPRI region), ngrp, perm, area_kha, mine_kg_ha, excr_kg_ha,
                                   cres_kg_ha, accuracy, mine_eff, excr_avail
   fert_dist_crop_groups_2030.csv  capri_region, model_crop, ngrp, share   (model crop -> CAPRI group, area shares;
-                                  OFOD = OFAR + ROOF)
+                                  OFAR and ROOF their own since S2, 7 November 2026)
 
     python tools/build/build_fert_dist_priors.py [--dump capri_sources/exports/res_2_1730greendeal_refdefaulta.zip]
                                            [--prifertdist capri_sources/exports/priFertDist_1730defaulta.zip]
@@ -53,7 +53,7 @@ PERM_NGRP = {"GRAS", "PERM"}
 AGGREGATES = {"AGGT", "ARAB", "CERE", "FODD", "OAR1", "OILS", "PERM", "SETF", "UAAR", "GRAS"}
 #: model crop -> CAPRI crops (environmental_module._CAPRI_CROP and the model's names)
 MODEL = {"CORN": ("MAIZ",), "WINE": ("TWIN",), "GRAS": ("GRAE", "GRAI"),
-         "OFOD": ("OFAR", "ROOF"), "SETA": ("SETA", "FALL", "VSET")}
+         "SETA": ("SETA", "FALL", "VSET")}   # OFAR and ROOF the model's own since S2 (7 November 2026)
 
 
 def ngrp(c: str) -> str:

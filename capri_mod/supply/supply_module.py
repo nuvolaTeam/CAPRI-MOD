@@ -1024,7 +1024,7 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
         # 1. Arable land constraint
         #
         # Every activity that occupies ARABLE land must be in this row, including
-        # fodder on arable land (MAIF, OFOD) and fallow / set-aside (SETA). All
+        # fodder on arable land (MAIF, OFAR, ROOF) and fallow / set-aside (SETA). All
         # three used to be left out, with two consequences:
         #   - the right-hand side (arable land) counted the fodder area while the
         #     sum did not, so the row carried ~14 Mha of built-in slack and could
@@ -1924,7 +1924,7 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
 def _region_nutrients(d: dict, region: str) -> pd.DataFrame:
     """CAPRI's fertiliser coefficients of the region's crops (NITF, PHOF, POTF; nutrient_coefs_regional.csv), crops
     CAPRI has nowhere in the member state left out (no fertiliser). Until 29 October 2026 a national table without
-    builder (nutrient_coefs.csv) under them, which OFOD, SETA and WINE kept in every region (KNOWN_ISSUES K100)."""
+    builder (nutrient_coefs.csv) under them, which OFOD (OFAR and ROOF since S2), SETA and WINE kept in every region (KNOWN_ISSUES K100)."""
     reg = d["nutrients_regional"]
     if region not in reg.index.get_level_values(0):
         return pd.DataFrame(columns=["N", "P2O5", "K2O"], dtype=float)
@@ -2449,9 +2449,9 @@ class SupplyModule(ModuleStateMixin):
 
     #: CAPRI's baseline calibration (Sprint 9p): at most this many correction rounds per baseline run
     BASE_CAL_ROUNDS = setting("projection.base_cal_rounds")
-    #: CAPRI sets.gms l. 5606, FODF / OFAR, GRAS, ROOF, MAIF / (the model's OFOD = CAPRI's OFAR plus ROOF)
+    #: CAPRI sets.gms l. 5606, FODF / OFAR, GRAS, ROOF, MAIF / (OFAR and ROOF the model's own since S2, 7 November 2026)
     FODDER_ACTS = tuple(a for a, r in ACTIVITY_CLASSES.items() if r["fodder"] == "1")   # model_activity_classes.csv (N6;
-    # CAPRI's FODCRP through the crosswalk: GRAS, MAIF, OFOD; the ROOF listed here before is not a model activity)
+    # CAPRI's FODCRP: GRAS, MAIF, OFAR, ROOF)
 
     def calibrate_to_base(self, results: dict, reset: bool = False) -> float:
         """CAPRI's calibration of the supply models to the baseline (CAPMOD calibrates its PMP terms so that the

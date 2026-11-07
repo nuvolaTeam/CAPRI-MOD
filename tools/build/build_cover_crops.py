@@ -28,7 +28,7 @@ Written (capri_data/2017/supply/):
   winter_cover_share.csv   region, crop, share (filled), share0 (as given; 0 where not given)
 
 Model crops that sum several CAPRI activities take their shares weighted by CAPRI's 2030 levels in the
-region (OFOD: OFAR, ROOF; SETA: SETA, FALL; GRAS: GRAE, GRAI; olives OLIV and table olives TABO separate).
+region (SETA: SETA, FALL; GRAS: GRAE, GRAI; olives OLIV and table olives TABO separate).
 
     python tools/build/build_cover_crops.py [--gams-dir capri_sources/gams]
 """

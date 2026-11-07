@@ -47,7 +47,8 @@ CROPS = [
     "TEXT",  # Textile crops (CAPRI TEXT: cotton in EL, ES, BG, flax and hemp elsewhere; a market product of its own)
     "GRAS",  # Grass / fodder (permanent grassland)
     "MAIF",  # Maize for forage / silage
-    "OFOD",  # Other fodder crops
+    "OFAR",  # Fodder other on arable land (CAPRI OFAR; with ROOF the model's OFOD until S2, 7 November 2026)
+    "ROOF",  # Fodder root crops (CAPRI ROOF)
     "SETA",  # Set-aside
 ]
 
@@ -119,7 +120,7 @@ MARKET_COMMODITIES = [
 FEED_ITEMS = [
     "SWHE", "BARL", "CORN", "OCER",        # Grain feeds
     "RAPC", "SOYC", "SUNC",                 # Oilseed cakes (CAPRI's codes)
-    "GRAS", "MAIF", "OFOD",                 # Roughages
+    "GRAS", "MAIF", "OFAR", "ROOF",         # Roughages
     "MILK",                                  # Milk for calves
 ]
 
@@ -285,7 +286,7 @@ ACTIVITY_CLASSES, LAND_MARKET_TYPES = _load_activity_classes()
 def _load_crosswalks():
     """The model's codes and CAPRI's (capri_data/codes/model_activities.csv capri_codes, model_commodities.csv
     capri_code; declared, checked against CAPRI's sets by tools/build/build_code_lists.py): CAPRI's activity code ->
-    the model's where they differ (MAIZ -> CORN, OFAR and ROOF -> OFOD, ...), and each market commodity's CAPRI code."""
+    the model's where they differ (MAIZ -> CORN, TWIN -> WINE, ...), and each market commodity's CAPRI code."""
     import csv
     from pathlib import Path
     d = Path(__file__).resolve().parents[2] / "capri_data" / "codes"

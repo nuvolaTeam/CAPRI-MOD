@@ -24,6 +24,7 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K92](#k92) | Farm-to-Fork changes furthest from JRC121368, besides the milk price | open: waiting for CAPRI's scenario results |
 | [K93](#k93) | CAPRI mitigation options not built; documents disagree on which are in | open: no-till and legume share unmeasured; UreaSubst parked; the others not needed for Farm-to-Fork and the Green Deal |
 | [K120](#k120) | S7 ("capri"): the market supply Hessian measured after the first supply solve had lost most of its response; the baseline calibration's stall rule stopped it uncorrected | fixed: 20 and 37 units, full EU Farm-to-Fork and Green Deal (7 November 2026); open in S7: the baseline calibration's first-round drift (located: set-aside and pulses, the ecological set-aside row) |
+| [K121](#k121) | S2 step 1a: other fodder split into CAPRI's OFAR and ROOF; the fodder roots' feed (FROO) tied to their land for the first time | done on mini-EU (7 November 2026); the full runs and the suite to come |
 
 ## Resolved (107)
 
@@ -2323,3 +2324,35 @@ Farm-to-Fork scenario diverged from its second iteration in the 37- and the 20-u
   dual and activity in those regions at round 1. The gaps are small in area (the largest 4.3 thousand ha, ES430000 PULS), so the effect on the
   EU indicators is likely small (not measured). An earlier guess, Luxembourg's set-aside (the largest move in the
   [nlp] trace), was wrong: its level is below the 1-thousand-ha threshold of the drift measure.
+
+### K121: Other fodder split into CAPRI's OFAR and ROOF (S2 step 1a, 7 November 2026)
+
+Until 7 November 2026 the model had one other-fodder activity, OFOD = CAPRI's OFAR (other fodder on arable land) +
+ROOF (fodder root crops), one crop-diversification group (DEP-42) and one fodder balance (FOFA); CAPRI's fodder root
+crops' feed FROO was in the rations but tied to no land. S2 step 1a (claude/s1_s2_implementation_plan.md, the project
+lead's decisions of 1 and 7 November 2026) makes OFAR and ROOF the model's own activities, as CAPRI's:
+- codes/model_activities.csv and model_activity_classes.csv (two crop-diversification groups, CAPRI's
+  cropDivGrps_mCact; both in FODCRP, landTypes_to_pact ARAC and EPRD_TO_GRP FARA), definitions.CROPS;
+- the fodder balances as CAPRI's SUPBAL_ of FODF: FOFA from OFAR and FROO from ROOF (tools/build/build_fodder_balance.py);
+- the ecological set-aside row: OFAR at CAPRI's weight times the member state's legume share, ROOF not counted
+  (supply/policy.py; before, OFOD at that weight scaled by OFAR's share of OFOD);
+- the builders' mappings (base areas, fertiliser groups, N and P balances, irrigation, prices, trajectories: no OFOD
+  composite left); the data rebuilt by the pipeline (doit) on the restored CAPRI sources: every changed file is
+  identical outside OFOD/OFAR/ROOF (FOFA/FROO) rows and columns to 1e-9, and OFAR + ROOF equals the former OFOD to
+  6e-14 (EU: OFAR 17,173, ROOF 174 thousand ha).
+- ROOF has no CAPRI elasticity estimate in the sources (supply_elas, PELA, the PMP elasticities carry OFAR only), so its
+  provenance is NO_CAPRI_VALUE in all 192 regions that grow it; it is not held at its level, because CAPRI's 2030 PMP
+  terms cover it (pmp_capri_2030.csv), as in CAPRI. OFAR's curvature is unchanged (Q of OFAR = Q of the former OFOD,
+  median ratio 1.0000001 over the mini-EU's units).
+
+Mini-EU Farm-to-Fork (S7 form, 20 units; commit after f10a8dd, local): converged in 6 iterations, baseline 5, as the dev
+run (mini_f2f_store_v2, commit d113d69, same environment); the 24 indicators within 0.9 point. The largest changes:
+cereal production -17.7% against -16.8% (CAPRI -15.0), oilseed production -22.5% against -22.1%, fertiliser N2O
+-38.5% against -38.2%; other fodder falls less (OFAR + ROOF -13.6% against OFOD -17.0%) and the cereal area more (-4.9%
+against -4.0%). Why other fodder falls less is not measured: one candidate, not checked, is the feeding (FROO now costs
+ROOF's land, so the rations may move from FROO to FOFA, which OFAR supplies).
+
+Found with it, not caused by it: build_farm_size_noneu does not reproduce farm_size_noneu.csv after the container's
+package change of 7 November 2026 (casadi 3.8.1 to 3.8.2): cells near zero of an estimate that is not unique (Turkey's
+TR800000 sheep holdings 15-20 head 5e-50 against 845); the committed file kept, the builder's output not used.
+

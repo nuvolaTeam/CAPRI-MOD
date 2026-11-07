@@ -35,7 +35,7 @@ CREATE TABLE supply_elasticities_regional (
     model_region VARCHAR NOT NULL REFERENCES regional_units (region),
     crop VARCHAR NOT NULL CHECK (crop IN ('BARL', 'CORN', 'DWHE', 'MAIF', 'OATS', 'OCER', 'OFAR', 'POTA', 'PULS', 'RAPE',
                                           'RYEM', 'SOYA', 'SUGB', 'SUNF', 'SWHE')),
-                                          -- model codes, except CAPRI's OFAR (read as the model's OFOD, loaders l. 339)
+                                          -- model codes (OFAR the model's own since S2, 7 November 2026)
     value DOUBLE CHECK (value > 0 AND value <= 8),     -- empty: PELA has none; <= 8: CAPRI's bound min(8, ...)
     PRIMARY KEY (model_region, crop)
 );

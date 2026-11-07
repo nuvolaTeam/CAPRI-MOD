@@ -128,16 +128,16 @@ def main():
     # FODDER per ha (the fodder balance's usable fodder, u = fed quantity / area): CAPRI's FEDM over LEVL of the
     # fodder crop, 2030 over 2017 (yield, losses and the non-feed use, e.g. silage maize for biogas in Germany: INDM
     # 3.6 of 6.9 Mt in Upper Bavaria's 2030 reference); per group, else member state
-    fcrop = {"GRAS": "GRAS", "MAIF": "MAIF", "OFOD": "OFAR"}
+    fcrop = {"GRAS": "GRAS", "MAIF": "MAIF", "OFAR": "OFAR", "ROOF": "ROOF"}   # (OFOD: OFAR alone until S2, 7 Nov 2026)
     fdat = {"2017": {}, "2030": {}}
-    pf30 = re.compile(r"^'([A-Z]{2}[0-9A-Z]{6})'\.''\.'(FEDM|LEVL)'\.'(GRAS|MAIF|OFAR)'\.'2030'\s+(-?[\d.Ee+\-]+)")
-    txt = grep(r"^'[A-Z]{2}[0-9A-Z]{6}'\.''\.'(FEDM|LEVL)'\.'(GRAS|MAIF|OFAR)'\.'2030'", str(a.ref))
+    pf30 = re.compile(r"^'([A-Z]{2}[0-9A-Z]{6})'\.''\.'(FEDM|LEVL)'\.'(GRAS|MAIF|OFAR|ROOF)'\.'2030'\s+(-?[\d.Ee+\-]+)")
+    txt = grep(r"^'[A-Z]{2}[0-9A-Z]{6}'\.''\.'(FEDM|LEVL)'\.'(GRAS|MAIF|OFAR|ROOF)'\.'2030'", str(a.ref))
     for line in txt.splitlines():
         m = pf30.match(line)
         if m:
             fdat["2030"][(m.group(1), m.group(3), m.group(2))] = float(m.group(4))
-    pl30 = re.compile(r"^'([A-Z]{2}[0-9A-Z]{6})'\.''\.'(GRAS|MAIF|OFAR)'\.'LEVL'\.'2030'\s+(-?[\d.Ee+\-]+)")
-    txt = grep(r"^'[A-Z]{2}[0-9A-Z]{6}'\.''\.'(GRAS|MAIF|OFAR)'\.'LEVL'\.'2030'", str(a.ref))
+    pl30 = re.compile(r"^'([A-Z]{2}[0-9A-Z]{6})'\.''\.'(GRAS|MAIF|OFAR|ROOF)'\.'LEVL'\.'2030'\s+(-?[\d.Ee+\-]+)")
+    txt = grep(r"^'[A-Z]{2}[0-9A-Z]{6}'\.''\.'(GRAS|MAIF|OFAR|ROOF)'\.'LEVL'\.'2030'", str(a.ref))
     for line in txt.splitlines():
         m = pl30.match(line)
         if m:

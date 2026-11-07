@@ -675,7 +675,6 @@ CREATE TABLE src_capreg_national_prices (
     OCER DOUBLE,
     OCRO DOUBLE,
     OFAR DOUBLE NOT NULL,
-    OFOD DOUBLE NOT NULL,
     OFRU DOUBLE NOT NULL,
     OILS DOUBLE,
     OIND DOUBLE,
@@ -753,7 +752,6 @@ INSERT INTO value_units VALUES
   ('src_capreg_national_prices', 'OCER', NULL, 'open', 'capreg_national_prices.OCER: unit to be established'),
   ('src_capreg_national_prices', 'OCRO', NULL, 'open', 'capreg_national_prices.OCRO: unit to be established'),
   ('src_capreg_national_prices', 'OFAR', NULL, 'open', 'capreg_national_prices.OFAR: unit to be established'),
-  ('src_capreg_national_prices', 'OFOD', NULL, 'open', 'capreg_national_prices.OFOD: unit to be established'),
   ('src_capreg_national_prices', 'OFRU', NULL, 'open', 'capreg_national_prices.OFRU: unit to be established'),
   ('src_capreg_national_prices', 'OILS', NULL, 'open', 'capreg_national_prices.OILS: unit to be established'),
   ('src_capreg_national_prices', 'OIND', NULL, 'open', 'capreg_national_prices.OIND: unit to be established'),
@@ -865,7 +863,6 @@ CREATE TABLE src_capreg_producer_prices (
     TWIN DOUBLE,
     UAAR DOUBLE NOT NULL,
     WINE DOUBLE,
-    OFOD DOUBLE NOT NULL,
     PRIMARY KEY (model_region)
 );
 COMMENT ON TABLE src_capreg_producer_prices IS 'Producer prices (EUR/t) per regional unit and activity: CAPRI''s MPRI extract (capreg_producer_prices_extract.csv) with the model-coded crop columns written for all regions and the animal columns DCOW, BULL, PIGF, OANI (MPRI) from CAPRI''s 2017 dumps (tools/build/build_crop_economics_2017.py).';
@@ -941,8 +938,7 @@ INSERT INTO value_units VALUES
   ('src_capreg_producer_prices', 'TOMA', NULL, 'open', 'capreg_producer_prices.TOMA: unit to be established'),
   ('src_capreg_producer_prices', 'TWIN', NULL, 'open', 'capreg_producer_prices.TWIN: unit to be established'),
   ('src_capreg_producer_prices', 'UAAR', NULL, 'open', 'capreg_producer_prices.UAAR: unit to be established'),
-  ('src_capreg_producer_prices', 'WINE', NULL, 'open', 'capreg_producer_prices.WINE: unit to be established'),
-  ('src_capreg_producer_prices', 'OFOD', NULL, 'open', 'capreg_producer_prices.OFOD: unit to be established');
+  ('src_capreg_producer_prices', 'WINE', NULL, 'open', 'capreg_producer_prices.WINE: unit to be established');
 
 -- file: capri_data/sources/intermediate/capreg/capreg_producer_prices_extract.csv
 -- OCER, PULS, SHGF: empty where CAPRI's data have no record, as this file's other columns (the units of the UK,

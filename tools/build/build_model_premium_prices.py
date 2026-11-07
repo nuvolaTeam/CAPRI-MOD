@@ -11,7 +11,7 @@ work moved here, unchanged, and the model reads the two files this builder write
       CAPRI's codes, so 56 regions, and fodder, set-aside, wine and fibre everywhere, had no crop premium of their own.
   capri_data/2017/supply/producer_prices_regional.csv
       CAPRI's regional producer prices MPRI (sources/intermediate/capreg/capreg_producer_prices.csv, EUR/t) with two of CAPRI's own
-      corrections: the five crops CAPRI codes otherwise take its columns (TWIN for WINE, OFAR for OFOD), and a region
+      corrections: the five crops CAPRI codes otherwise take its columns (TWIN for WINE; OFAR for OFOD until S2), and a region
       without a regional price takes its country's national price (sources/intermediate/capreg/capreg_national_prices.csv) before
       the EU-wide one (wine: 95.5 EUR/t in eleven vine-growing regions before, against CAPRI's national 1,362-1,923).
 
@@ -34,7 +34,7 @@ SUP = ROOT / "capri_data" / "2017" / "supply"
 PREMIUM = SUP / "cap_premium_activity.csv"
 PRICES = SUP / "producer_prices_regional.csv"
 #: CAPRI's activity codes of crops the model names otherwise (the price columns)
-CAPRI_PRICE_ALIASES = {"TWIN": ["WINE"], "OFAR": ["OFOD"]}
+CAPRI_PRICE_ALIASES = {"TWIN": ["WINE"]}   # OFAR the model's own since S2 (7 November 2026; before OFAR -> OFOD)
 
 
 def cap_premium() -> pd.DataFrame:

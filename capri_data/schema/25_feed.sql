@@ -46,7 +46,7 @@ INSERT INTO value_units VALUES
 -- file: capri_data/2017/feed/fodder_balance_2017.csv
 CREATE TABLE feed_fodder_balance_2017 (
     region VARCHAR NOT NULL REFERENCES regional_units (region),
-    fodder VARCHAR NOT NULL CHECK (fodder IN ('FGRA', 'FMAI', 'FOFA')),
+    fodder VARCHAR NOT NULL CHECK (fodder IN ('FGRA', 'FMAI', 'FOFA', 'FROO')),
     crop VARCHAR NOT NULL REFERENCES model_activities (code),
     u_t_per_ha DOUBLE NOT NULL,
     value_eur_t DOUBLE NOT NULL,
@@ -60,7 +60,7 @@ INSERT INTO value_units VALUES
 -- file: capri_data/2017/feed/fodder_balance_2017_use.csv
 CREATE TABLE feed_fodder_balance_2017_use (
     region VARCHAR NOT NULL REFERENCES regional_units (region),
-    fodder VARCHAR NOT NULL CHECK (fodder IN ('FGRA', 'FMAI', 'FOFA')),
+    fodder VARCHAR NOT NULL CHECK (fodder IN ('FGRA', 'FMAI', 'FOFA', 'FROO')),
     animal VARCHAR NOT NULL REFERENCES model_activities (code),
     use_t_head DOUBLE NOT NULL,
     PRIMARY KEY (region, fodder, animal)

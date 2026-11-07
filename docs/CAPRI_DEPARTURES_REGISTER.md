@@ -103,7 +103,6 @@ CAPTRD_MOD.md §12.4).
 | DEP-39 | Hard floors (max/min) in the market code: market supply max(q0 + dq, 0), feed and processing at least 0, use clipped at 0, import price at least 1e-9, price ratios at least 1e-6. | lower bounds and, after widen_bounds, the fudge equations | market/supply.py, demand.py, trade_ad.py (MARKET_IPOPT_DESIGN.md, non-smooth terms) | in force; review 1 Nov 2026 | G_REVIEW Q3, Q6.7 |
 | DEP-40 | One Armington elasticity per commodity (both nests). No effect at the 2030 baseline: CAPRI's sim_ini has the same p_rhoArm1 and p_rhoArm2 in all 45 market regions, and armington_rho.csv matches them (MARKET_REGIONS_INVENTORY.md); kept so that a scenario with regional values would show. | p_rhoArm1, p_rhoArm2 per market region and commodity | market/bilateral.py (s1, s2) | in force; kept 2 Nov 2026 (the project lead) | G_REVIEW Q6.7 |
 | DEP-41 | The EU's bilateral quotas against the policy block MER (ARG + BRA + URUPAR) left out: beef 61.1, sheep and goat meat 33.5, poultry 519.0, sugar 334.1 kt (2030); the builder skips MER as a reporting aggregate. Not binding at the 2030 base (imports 45%, 11%, 5%, 61% of the quotas). | p_trqBilat('EU','MER',...) on RMTP, one quota over MER's members (trqSigmoidFunc_) | tools/build/build_bilateral_market.py build_trq (AGGREGATES holds MER) | **removed 4 November 2026** (stage 4: the EU's quotas on MER, over ARG, BRA and URUPAR; PORTS_STAGE4.md) | MARKET_REGIONS_INVENTORY.md |
-| DEP-42 | Other fodder (OFOD) is one crop-diversification group. | cropDivGrps_mCact: OFAR (other fodder on arable land) and ROOF (fodder root crops) are groups of their own in cropDivGreening_ | the model's OFOD is OFAR + ROOF, one activity and one group (capri_data/codes/model_activity_classes.csv) | kept until S1/S2 splits OFOD (the project lead's decision, 2 November 2026) | where both are grown the model's largest group can be larger than CAPRI's; not measured |
 | DEP-43 | Welfare of the non-EU regions with a land market: ProfitAgr integrates the products' supply only (the land rents' change as a cost is not deducted) and the land owners' surplus is not reported. | reports/welfare.gms l. 290-400: ProfitAgr over all netputs with the land rows (rents deducted), and the land owner revenue change from shifting one rent after another | market/welfare.py `_welfare_agr_feed` | in force since 4 November 2026 (stage 7 brought the land rents in; the welfare report follows later) | PORTS_STAGE4.md stage 7 |
 
 One more difference applies only with a non-default setting:
@@ -141,6 +140,8 @@ ones known to be stale.
 
 The settings switched to CAPRI's form are described in DEPARTURES_FROM_CAPRI.md, "Switched to CAPRI's setting". Also
 switched to CAPRI's form:
+- DEP-42, other fodder one crop-diversification group: OFAR and ROOF are the model's own activities and groups, as
+  CAPRI's cropDivGrps_mCact (S2 step 1a, 7 November 2026; KNOWN_ISSUES K121).
 - DEP-3, one EU27 trade block: the EU is CAPRI's two market regions A_EU_WEST and A_EU_EAST (`market.eu_blocks = true`,
   3 November 2026; the market's move onto CAPRI's regions, MARKET_REGIONS_INVENTORY.md stage 2). The young-animal
   markets clear inside the market solve per block (since 29 October 2026: the blocks' supply Hessians, the sums of

@@ -8,7 +8,7 @@ CAPRI's PMP terms (supply/supply_model.gms QUADRA_ l. 5284, GRPLEVL_ l. 4892; p_
     L_grp = sum of the levels of the group's crops (EPRD_TO_GRP: CERE, CER2, OILS, OARA, FARA)
 
 The model has one activity per crop where CAPRI has two technologies (T1 high-yield, T2 low-yield, capmod.gms
-l. 246), and some model activities sum several CAPRI ones (OFOD = OFAR + ROOF, GRAS = GRAE + GRAI, SETA = VSET + FALL).
+l. 246), and some model activities sum several CAPRI ones (GRAS = GRAE + GRAI, SETA = VSET + FALL; OFOD = OFAR + ROOF until S2, 7 November 2026).
 Its curvature on the model's activity levels is derived exactly for a quadratic cost whose linear terms adjust:
   1. technologies: the cost of a crop's level X split optimally over its technologies is 1/2 c X^2 with
      c = 1 / (1' Qt^-1 1) (Qt the crop's technology block; c = Qt for a crop with one technology T);

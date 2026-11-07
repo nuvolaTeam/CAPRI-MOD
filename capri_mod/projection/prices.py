@@ -37,7 +37,7 @@ CROP_PRODUCT = {c: c for c in (
     "NURS", "FLOW", "OCRO", "OIND")}
 CROP_PRODUCT.update({"CORN": "MAIZ", "MAIZ": "MAIZ", "WINE": "TWIN"})
 #: fodder crops of the fodder balance -> CAPRI product (unit value = fodder shadow price)
-FODDER_PRODUCT = {"GRAS": "GRAS", "MAIF": "MAIF", "OFOD": "OFAR", "ROOF": "ROOF"}
+FODDER_PRODUCT = {"GRAS": "GRAS", "MAIF": "MAIF", "OFAR": "OFAR", "ROOF": "ROOF"}
 #: livestock markets -> CAPRI product
 MARKET_PRODUCT = {"MILK": "COMI", "BEEF": "BEEF", "PORK": "PORK", "POUL": "POUM", "EGGS": "EGGS",
                   "SGMT": "SGMT"}

@@ -30,7 +30,7 @@ Data written
   capri_data/2017/environment/p_balance_crop_coefs_2030.csv  capri_region, model_crop, levl_kha, pret_kg_ha, pcrd_kg_ha:
       CAPRI's P2O5 retention (removal, EXPPRD) and crop residue output (CRESID) per ha of the model's crops (CAPRI crops
       pooled into model crops by area as tools/build/build_npk_balance_2030.py does: CORN = MAIZ, WINE = TWIN,
-      GRAS = GRAE + GRAI, OFOD = OFAR + ROOF, SETA = FALL + VSET + ISET + GSET + TSET), and GRAE and GRAI on their own
+      GRAS = GRAE + GRAI, SETA = FALL + VSET + ISET + GSET + TSET), and GRAE and GRAI on their own
       (the model's grassland split column)
 
 The builder checks the identities above on both runs (every region with a UAAR): the sums of the crop and animal
@@ -66,7 +66,7 @@ CROPS = ("SWHE", "DWHE", "RYEM", "BARL", "OATS", "MAIZ", "OCER", "PARI", "RAPE",
 ANIMALS = ("DCOL", "DCOH", "BULL", "BULH", "HEIL", "HEIH", "HEIR", "CAFF", "CAFR", "CAMF", "CAMR", "SCOW", "SHGM", "SHGF",
            "PIGF", "SOWS", "HENS", "POUF")
 #: model crop <- CAPRI crops (tools/build/build_npk_balance_2030.py MODEL)
-MODEL = {"CORN": ("MAIZ",), "WINE": ("TWIN",), "GRAS": ("GRAE", "GRAI"), "OFOD": ("OFAR", "ROOF"),
+MODEL = {"CORN": ("MAIZ",), "WINE": ("TWIN",), "GRAS": ("GRAE", "GRAI"),
          "SETA": ("FALL", "VSET", "ISET", "GSET", "TSET")}
 
 RX = re.compile(r"^'([A-Z0-9]{8})'\.''\.'([A-Za-z0-9_]+)'\.'([A-Za-z0-9_]+)'\.'2030'\s+([-\d.Ee+]+)")

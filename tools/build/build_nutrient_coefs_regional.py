@@ -5,7 +5,7 @@ The supply models' nutrient coefficients (RegionData.nutrient_coefs: the nutrien
 organic and fertiliser-technology instruments' scaling of the N column) were a national table without builder
 (nutrient_coefs.csv, one value per crop for every region) overridden by CAPRI's regional extract
 (sources/capreg/capreg_nutrient_coefs.csv, tools/build/extract_all_from_data2.py) where the extract has the model's code.
-The extract is keyed by CAPRI's activities, so the model's OFOD (CAPRI's OFAR + ROOF), SETA (SETA + FALL) and WINE (TWIN)
+The extract is keyed by CAPRI's activities, so the model's SETA (SETA + FALL) and WINE (TWIN)
 never matched and kept the national values in every region. This builder writes the coefficients on the model's
 activities, as tools/build/build_crop_economics_2017.py does for yields and costs (build_capri_base.CROP_MAP):
 

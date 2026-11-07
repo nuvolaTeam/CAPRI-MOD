@@ -51,18 +51,10 @@ class PolicyBlock:
             r = st.get(("setaside_rate_pct", "ARAB"), 0.0) / 100.0
             ms = self.data.region_id[:2]
             ms = MS_CODE.get(ms, ms)
-            ofar = 1.0
-            env_ = getattr(self.seen, "env_for_surplus", None)
-            try:
-                from capri_mod.fert.npk import NPKData
-                cr = env_.par.inner_fert.capri_region(self.data.region_id) if env_ is not None and \
-                    getattr(env_.par, "inner_fert", None) is not None else None
-                if cr is not None:
-                    ofar = float(NPKData.get().crop_shares(cr).get("OFOD", {}).get("OFAR", 1.0))
-            except Exception:
-                pass
+            # OFAR at CAPRI's weight times the member state's legume share (ROOF does not count); until S2 (7 November
+            # 2026) the model's OFOD = OFAR + ROOF carried it scaled by OFAR's share of the two
             w = {"SETA": st.get(("weight", "FALL"), 0.0), "PULS": st.get(("weight", "PULS"), 0.0),
-                 "OFOD": st.get(("weight", "OFAR"), 0.0) * float(fleg.get(ms, 0.0)) * ofar}
+                 "OFAR": st.get(("weight", "OFAR"), 0.0) * float(fleg.get(ms, 0.0))}
             row = []
             for j, a in enumerate(acts):
                 if a in CROPS and a != "GRAS":

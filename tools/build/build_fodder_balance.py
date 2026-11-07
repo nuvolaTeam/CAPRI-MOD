@@ -1,7 +1,8 @@
 """Build the regional fodder balance data (docs/FODDER_BALANCE.md).
 
 Per region and non-tradable fodder (grass, fodder maize, other fodder):
-  crop          the supply activity producing it (GRAS, MAIF, OFOD)
+  crop          the supply activity producing it (GRAS, MAIF, OFAR, ROOF: CAPRI's FODCRP; until S2, 7 November
+                2026, OFOD = OFAR + ROOF produced FOFA and fodder root crops FROO had no balance)
   u_t_per_ha    usable fresh fodder per ha = CAPRI base fodder use / base area
                 (CAPRI SUPBAL_: use = production x (1 - on-farm share); the
                 coefficient embeds CAPRI's loss share and yield)
@@ -29,7 +30,7 @@ _read_csv = _ft.partial(pd.read_csv, float_precision="round_trip")   # floats to
 _ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(_ROOT))
 from capri_mod.data.nested_tables import read_feed_rations, write_fodder_balances  # noqa: E402
-FODDER = {"FGRA": "GRAS", "FMAI": "MAIF", "FOFA": "OFOD"}
+FODDER = {"FGRA": "GRAS", "FMAI": "MAIF", "FOFA": "OFAR", "FROO": "ROOF"}   # CAPRI's SUPBAL_ of FODF
 
 
 def main() -> None:

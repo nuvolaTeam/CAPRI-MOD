@@ -5,7 +5,7 @@ has no price of its own (capri_mod/data/loaders.py _national_capri_prices; KNOWN
 
 MPRI of the national row '<MS>000000' of each 2017 dump (res_17<MS>.txt, 'Y' column), every activity with a price, under
 CAPRI's code; and under the model's code where it differs (build_capri_base.CROP_MAP, the crop's first CAPRI activity:
-CORN = MAIZ, WINE = TWIN, OFOD = OFAR), the code the model's price table uses. Rows: CAPRI's two-letter country codes,
+CORN = MAIZ, WINE = TWIN), the code the model's price table uses. Rows: CAPRI's two-letter country codes,
 sorted; columns sorted.
 
 Until 29 October 2026 the file had no builder: the same values, without MAIZ and OAR1 and without the CORN column

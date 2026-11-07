@@ -1366,7 +1366,7 @@ def test_synthetic_base_activities_excluded_from_elasticity_wiring():
         "regions); every activity should now come from CAPRI")
 
     # and the activities that were placeholders must now vary across regions
-    for act in ("TEXT", "OFOD"):
+    for act in ("TEXT", "OFAR", "ROOF"):
         if act in areas.columns and float(areas[act].sum()) > 0:
             assert areas[act].nunique() > 5, (
                 f"{act} takes only {areas[act].nunique()} distinct values")
@@ -1996,12 +1996,12 @@ def test_projection_starts_from_capri_reference_and_calibrates(model):
     assert res["metadata"]["outer_converged"]
     for r in ("FR520000", "IR010000", "DE210000"):
         x = res["supply"][r].activities
-        for a in ("BROI", "LAYS", "PIGF", "DCOW", "SWHE", "OFOD", "MAIF", "GRAS"):
+        for a in ("BROI", "LAYS", "PIGF", "DCOW", "SWHE", "OFAR", "ROOF", "MAIF", "GRAS"):
             tgt = float((data["areas"] if a in data["areas"].columns else data["animal_numbers"]).at[r, a])
             # fodder crops are not calibrated (the fodder balances hold them, see the docstring): their split follows
             # the herds' fodder use and the crops' elasticities (IE04 silage maize -2.9% with CAPRI's fodder
             # elasticities, K32), so they get a looser bound than the calibrated activities
-            tol = 0.05 if a in ("OFOD", "MAIF", "GRAS") else 0.015
+            tol = 0.05 if a in ("OFAR", "ROOF", "MAIF", "GRAS") else 0.015
             if tgt > 1:
                 assert abs(float(x[a]) / tgt - 1.0) < tol, (r, a, float(x[a]), tgt)
 
@@ -2875,7 +2875,7 @@ def test_set_aside_trajectory_is_fallow_plus_voluntary_set_aside():
 
 def test_capri_reference_trajectory_reproduces_its_crop_levels(data):
     """The capri_ref_2030 trajectory's level factors are CAPRI's own 2030 over 2017 (no [0.2, 5] band, no 1.0 threshold),
-    a level the reference does not list is 0 (GAMS stores no zero: UK grain maize), and OFOD grows as OFAR + ROOF: the
+    a level the reference does not list is 0 (GAMS stores no zero: UK grain maize), OFAR and ROOF grow as their own: the
     model's 2017 crop levels times its regional factors give CAPRI's 2030 reference levels (the validation file's ini
     levels, FALL + VSET for SETA) in every region, the 29 units outside the EU and Norway's included, to 1e-6 relative
     (4 November 2026; until then 96 EU cells were off by more than 1%, France's pulses 0.2 against CAPRI's 0.112, and 247
@@ -3543,7 +3543,7 @@ def test_supply_elasticities_reach_every_region_from_capri(data):
     assert prov.at["ES610000", "TOBA"] == "CAPRI_COUNTRY" and 0.43 < eps.at["ES610000", "TOBA"] < 0.46
     for r in ("DK000000", "DED00000"):
         assert prov.at[r, "SWHE"] in ("PMP_CAPRI", "REGIONAL_CAPRI"), r
-    assert (prov["OFOD"] != "NO_CAPRI_VALUE").sum() > 200
+    assert (prov["OFAR"] != "NO_CAPRI_VALUE").sum() > 200
     grown_default = sum(A.at[r, a] for r in A.index for a in ("SWHE", "BARL", "CORN", "RAPE")
                         if prov.at[r, a] == "NO_CAPRI_VALUE" and A.at[r, a] > 0)
     assert grown_default < 800                                                      # kha (before K32: 7,900)

@@ -2,7 +2,7 @@
 
 The trajectory carries CAPRI's codes: activities as CAPRI names them (MAIZ, TWIN, SCOW, BULF, SOWS, HENS, POUF,
 SHGT, OFAR ...) and regions as the first four characters of CAPRI's region code (DE11, FR24, BL00 ...). The
-projection looks factors up by the MODEL's names (CORN, WINE, BCOW, BULL, PIGS, LAYS, BROI, SHGP, OFOD) and
+projection looks factors up by the MODEL's names (CORN, WINE, BCOW, BULL, PIGS, LAYS, BROI, SHGP) and
 model regions (NUTS 2021: FRB0, IE04 ...), so every name that differs fell back to the activity default
 (maize yield +3.6% instead of CAPRI's +1.8%, bulls' herd 1.0 instead of 0.93) and every recoded region to the
 EU median. This adds model-keyed entries next to CAPRI's (which are kept): activity aliases below, regions
@@ -22,10 +22,10 @@ ROOT = Path(__file__).resolve().parents[2]
 #: model name -> CAPRI key, per block
 ALIASES = {
     "yields": {"CORN": "MAIZ", "WINE": "TWIN", "BCOW": "SCOW", "HFRS": "HEIF", "CALV": "CACR",
-               "PIGS": "SOWS", "LAYS": "HENS", "BROI": "POUF", "OFOD": "OFAR", "BULL": "BULF"},
+               "PIGS": "SOWS", "LAYS": "HENS", "BROI": "POUF", "BULL": "BULF"},
     # the herds block carries CAPRI's activity levels (LEVL), crops included: model crop names too
     "herds": {"BULL": "BULF", "PIGS": "SOWS", "POUL": "POUF", "SCOW": "SCOW", "HEIF": "HEIF",
-              "CORN": "MAIZ", "WINE": "TWIN", "OFOD": "OFAR",
+              "CORN": "MAIZ", "WINE": "TWIN",   # (OFOD = OFAR until S2, 7 November 2026: OFAR and ROOF their own)
               # the model's own animal names (animal_numbers columns) had no herd factor: suckler cows, heifers,
               # laying hens, broilers, calves, sheep and goats stayed at 2017 in the projected data (K12)
               "BCOW": "SCOW", "HFRS": "HEIF", "LAYS": "HENS", "BROI": "POUF", "CALV": "CACR"},
@@ -74,7 +74,7 @@ def add_model_keys(t: dict) -> dict:
                 continue
             entry = dict(src)
             for m, c in al.items():
-                # a factor under the model's own name (OFOD = OFAR + ROOF, build_trajectory_capri_ref.py) is kept;
+                # a factor under the model's own name (e.g. SETA = FALL + VSET, build_trajectory_capri_ref.py) is kept;
                 # a model name that is CAPRI's name for another item (CAPRI_OTHER) takes the alias or nothing
                 if c in src and (m not in src or m in CAPRI_OTHER):
                     entry[m] = dict(src[c])

@@ -8,7 +8,7 @@ tools/build/convert_sources_to_csv.py):
                                            Eurostat FSS
   capri_data/sources/raw/capri/dat/water/cropwat_p_cropwatReq.csv   p_cropwatReq(region, crop, CPET|CRAIN|CNIR|YRATIO|YFACT):
                                            CROPWAT crop water requirements, mm
-  capri_data/sources/intermediate/capreg/capreg_activity_levels.csv   CAPRI's 2017 levels (ROOF and OFAR, the model's OFOD)
+  capri_data/sources/intermediate/capreg/capreg_activity_levels.csv   CAPRI's 2017 levels
 
 Method. CAPRI's water database (water_database.gms) estimates each EU region's irrigated area per crop with a
 highest-posterior-density fit (lines 513-640) to the FSS irrigated area of the region (IRR2, 'irrigated once a year':
@@ -28,7 +28,8 @@ estimates, lines 325-440; 2017 itself has regional values for 8 units only); a u
 takes its member state's (CAPRI's rule where data are national only, line 658).
 The water requirement per irrigated ha is CROPWAT's net irrigation requirement CNIR (CAPRI's CWRB = 10 x CNIR m3/ha).
 
-Model activities: CORN = CAPRI's MAIZ, WINE = TWIN, OFOD = ROOF + OFAR (CNIR weighted by CAPRI's 2017 levels).
+Model activities: CORN = CAPRI's MAIZ, WINE = TWIN; ROOF and OFAR their own (until S2, 7 November 2026, OFOD = ROOF +
+OFAR, CNIR weighted by CAPRI's 2017 levels).
 Grassland, rye, oats, other cereals and tobacco are not irrigable in CAPRI's water module (no WAggAct).
 
 Output: capri_data/2017/environment/irrigation_2017.csv
@@ -57,8 +58,8 @@ BASE_YEAR = 2017
 WAGG = ["SWHE", "DWHE", "BARL", "MAIZ", "RAPE", "SUNF", "SOYA", "MAIF", "ROOF", "OFAR", "PARI", "OLIV", "PULS", "POTA",
         "SUGB", "TEXT", "TOMA", "OVEG", "APPL", "OFRU", "CITR", "TAGR", "TABO", "TWIN"]
 #: model activity -> CAPRI activities
-MODEL = {**{c: (c,) for c in WAGG if c not in ("MAIZ", "TWIN", "ROOF", "OFAR")},
-         "CORN": ("MAIZ",), "WINE": ("TWIN",), "OFOD": ("ROOF", "OFAR")}
+MODEL = {**{c: (c,) for c in WAGG if c not in ("MAIZ", "TWIN")},
+         "CORN": ("MAIZ",), "WINE": ("TWIN",)}   # ROOF and OFAR the model's own since S2 (7 November 2026)
 #: capreg_activity_levels.csv names CAPRI's MAIZ as the model does
 LEVEL_COL = {"MAIZ": "CORN"}
 IRSH_MIN = 0.001      # water_database.gms line 668: max(0.001, IRR2 share)
