@@ -23,7 +23,7 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K79](#k79) | Member-state production that keeps moving between iterations | open |
 | [K92](#k92) | Farm-to-Fork changes furthest from JRC121368, besides the milk price | open: waiting for CAPRI's scenario results |
 | [K93](#k93) | CAPRI mitigation options not built; documents disagree on which are in | open: no-till and legume share unmeasured; UreaSubst parked; the others not needed for Farm-to-Fork and the Green Deal |
-| [K120](#k120) | S7 ("capri"): the market supply Hessian measured after the first supply solve had lost most of its response; the baseline calibration's stall rule stopped it uncorrected | fixed: 20 and 37 units, full EU Farm-to-Fork and Green Deal (7 November 2026); open in S7: the baseline calibration's first-round drift |
+| [K120](#k120) | S7 ("capri"): the market supply Hessian measured after the first supply solve had lost most of its response; the baseline calibration's stall rule stopped it uncorrected | fixed: 20 and 37 units, full EU Farm-to-Fork and Green Deal (7 November 2026); open in S7: the baseline calibration's first-round drift (located: set-aside and pulses, the ecological set-aside row) |
 
 ## Resolved (107)
 
@@ -2280,7 +2280,7 @@ Farm-to-Fork scenario diverged from its second iteration in the 37- and the 20-u
   CAPRI's stop rule (rows above 0.05%), not the prices: the EU prices are unchanged to 0.01 points from iteration 16,
   while member-state minor and feed cereals (OATS, OCER, RYEM, FCER in Bulgaria, Hungary, Greece, Slovakia) move by
   0.1-2.9% between iterations, the pattern of [K79](#k79). Still open in S7: the baseline calibration's first-round drift
-  (94% in the full EU, then 11.8% and 2.5%), not explained yet.
+  (94% in the full EU, then 11.8% and 2.5%); located below (7 November 2026), not yet resolved.
 - **The same-commit pair (7 November 2026):** Green Deal in "supply" at 803c4cf (b2b7422 and a documentation change;
   inputs identical, full_sup_gd): converged in 21 iterations (3,545 s, the Hessian from the cache), against 34 in
   "capri". The EU indicators agree within 0.3 points (beef price +13.4% against +13.5%, poultry +8.5% against +8.6%,
@@ -2309,3 +2309,17 @@ Farm-to-Fork scenario diverged from its second iteration in the 37- and the 20-u
   are Bulgaria's cereals (OCER, FCER, OATS), Greece's feed (FPRO, FCER) and Ireland's cereals with CAPRI's price;
   Hungary's cereals (OCER, BARL), Greece's maize and feed and Bulgaria's OCER damped. Whether the pools' price drives
   the relapses or only moves with them is not established.
+- **The baseline calibration's first-round drift, located (7 November 2026):** a full-EU baseline with CAPRI_CAL_DEBUG
+  (Green Deal settings, commit 9598b3e, stopped after the baseline's 8 iterations; the same calibration trace as the
+  Green Deal run, 0.21%, 93.9%, 11.8%, 2.5%). Round 0 finds every region within 0.21% of its targets. Round 1, after
+  the first market solve, has 37 regions above 5%: 19 of them at set-aside (SETA) and 12 at pulses (PULS), the two
+  crops that count towards the greening ecological set-aside row (ecoSetAside: SETA at FALL's weight, PULS at its own;
+  supply/policy.py). The largest: Aquitaine (FR610000) SETA 2.26 against 1.16 thousand ha (93.9%), Extremadura
+  (ES430000) PULS 10.10 against 5.78 (74.9%), Mazowieckie (PL220000) SETA 6.06 against 5.06 (19.9%). The rounds do not
+  settle them: at the fourth and last round ES430000 PULS 6.56 (13.6% above its target, after 5.40, 6.6% below, at the
+  third) and FR610000 SETA 1.31 (13.0%); after it the rounds are used up and the remaining drift is not measured. My
+  reading, not checked: where the ecological set-aside row binds, SETA and PULS substitute for each other along a
+  linear row, so a small price change moves them far and the linear shift's correction overshoots. To check: the row's
+  dual and activity in those regions at round 1. The gaps are small in area (the largest 4.3 thousand ha, ES430000 PULS), so the effect on the
+  EU indicators is likely small (not measured). An earlier guess, Luxembourg's set-aside (the largest move in the
+  [nlp] trace), was wrong: its level is below the 1-thousand-ha threshold of the drift measure.
