@@ -32,9 +32,10 @@ supply_countries_outside_eu = ["NO000000"]
 # there may name a reference or group of the repository's (python -m capri_mod.scenarios new / check)
 scenarios_dir = ""
 # where the run's long results table is written (refactor stage 5; capri_mod/io_results.py write_run): a Delta table
-# results_dir/long partitioned by scenario and run id, the reference stored once (results_dir/runs records each
-# partition and its fingerprint), the run's metadata, settings and manifest in results_dir/meta/<scenario>/<run id>/;
-# relative to the repository; "" = not written
+# results_dir/long, each reference and scenario under its run id (the SHA-256 of its results and its definition,
+# io_results.run_id_of; scenario and run_id are columns, the tables are not partitioned), the reference stored once
+# (results_dir/runs records each one with its fingerprint), the run's metadata, settings and manifest in
+# results_dir/meta/<run id>/; relative to the repository; "" = not written
 results_dir = "results"
 
 [outer_loop]

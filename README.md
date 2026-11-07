@@ -838,8 +838,11 @@ delta = model.compare(base, scen)              # activity & price changes
 
 **The results table (since 3 November 2026).** `tools/run/run_f2f_2030.py` also writes each run to `results/` (setting
 `run.results_dir`): a Delta Lake table in CAPRI's DATAOUT layout (region, dim5, cols, rows, year, value; the model's
-codes and CAPRI's where checked, `capri_data/codes/results_items.csv`), partitioned by scenario and run, the
-reference stored once. Read it with `deltalake`, polars or DuckDB, or rebuild a run's pickle with
+codes and CAPRI's where checked, `capri_data/codes/results_items.csv`), the reference stored once. Each reference
+and scenario is stored under its run id, the SHA-256 of its results and its definition (since 7 November 2026:
+`capri_mod.io_results.run_id_of`, recomputed by `verify_run`); `scenario` and `run_id` are columns (the tables are not
+partitioned), the run's metadata, settings and manifest are in `results/meta/<run id>/`, and a unique prefix of an id
+(12 characters, as for git commits) names a run. Read it with `deltalake`, polars or DuckDB, or rebuild a run's pickle with
 `capri_mod.io_results.load_run("store:results:SCENARIO")`; the check tools take `store:ROOT:SCENARIO[:RUN_ID]` in place
 of a pickle.
 

@@ -1,5 +1,6 @@
 """The long results table (refactor stage 5; capri_mod/io_results.py): CAPRI's DATAOUT layout, CAPRI's codes declared
-in capri_data/codes/results_items.csv, the reference stored once in the Delta store, the pickle's blocks rebuilt.
+in capri_data/codes/results_items.csv, the reference stored once in the Delta store, each run under the SHA-256 of
+its results and definition, the pickle's blocks rebuilt.
 
 The run script checks every run's table against its pickle (tools/run/run_f2f_2030.py: "identical to the pickle's
 blocks"); these tests check the mechanics on a small set of results in the shape of the model's."""
@@ -118,23 +119,24 @@ def test_every_capri_code_of_the_items_is_capris():
 
 
 def test_the_reference_is_stored_once_and_the_pickles_blocks_come_back(tmp_path):
+    import json
     base, scen = _results(), _results(scale=1.5)
     B, S = (IO.with_capri_codes(IO.to_long(x, p)) for x, p in ((base, "base"), (scen, "scen")))
     # the run's metadata has tuple keys (the young animals' markets, the Hessian's records): written as text
     kw = dict(reference="ref_x", year=2030, fingerprint_parts={"code": "a"},
               meta={"conv": True, "markets": {("EU27", "CALV"): 1.0}}, root=tmp_path)
-    r1 = IO.write_run(B, S, scenario="scen_a", run_id="r1", **kw)
-    r2 = IO.write_run(B, S, scenario="scen_b", run_id="r2", **kw)
-    assert not r1["reference_reused"] and r2["reference_reused"] and r2["reference_run_id"] == "r1"
-    # another fingerprint (other code or data) stores the reference again
-    r3 = IO.write_run(B, S, scenario="scen_a", run_id="r3", **{**kw, "fingerprint_parts": {"code": "b"}})
-    assert not r3["reference_reused"]
+    r1 = IO.write_run(B, S, scenario="scen_a", **kw)
+    r2 = IO.write_run(B, S, scenario="scen_b", **kw)
+    assert not r1["reference_reused"] and r2["reference_reused"]
+    assert r2["reference_run_id"] == r1["reference_run_id"] != r1["run_id"]
+    # another fingerprint (other code or data) stores the reference again, under another id
+    r3 = IO.write_run(B, S, scenario="scen_a", **{**kw, "fingerprint_parts": {"code": "b"}})
+    assert not r3["reference_reused"] and r3["reference_run_id"] != r1["reference_run_id"]
     runs = IO._runs(tmp_path)
-    assert sorted(runs[runs.kind == "reference"].run_id) == ["r1", "r3"]
+    assert sorted(runs[runs.kind == "reference"].run_id) == sorted([r1["reference_run_id"], r3["reference_run_id"]])
     rb, rs, rec = IO.read_run(tmp_path, "scen_a")
-    assert rec["run_id"] == "r3" and (tmp_path / "meta" / "scen_a" / "r3" / "meta.json").is_file()
-    import json
-    assert json.loads((tmp_path / "meta" / "scen_a" / "r3" / "meta.json").read_text())["markets"] == {"EU27|CALV": 1.0}
+    assert rec["run_id"] == r3["run_id"] and (IO.meta_dir(tmp_path, r3["run_id"]) / "meta.json").is_file()
+    assert json.loads((IO.meta_dir(tmp_path, r3["run_id"]) / "meta.json").read_text())["markets"] == {"EU27|CALV": 1.0}
     blocks = IO.pickle_blocks(*IO.as_points(rb, rs))
     assert blocks["act"] == ({"SWHE": 30.0, "DCOW": 9.0}, {"SWHE": 45.0, "DCOW": 9.0})
     assert blocks["base_market"]["prod"] == {"SWHE": 1.0, "MILK": 2.0}
@@ -147,17 +149,47 @@ def test_the_reference_is_stored_once_and_the_pickles_blocks_come_back(tmp_path)
     assert IO.check_pickle(blocks, out) and not IO.check_pickle(blocks, blocks)
 
 
-def test_the_table_is_read_by_partition(tmp_path):
-    """The store is a Delta table partitioned by scenario and run id: a reader takes one partition without the rest."""
+def test_run_ids_are_the_sha256_of_results_and_definition(tmp_path):
+    """Each partition's run id is run_id_of its kind, name, reference, definition and rows (64 hex characters),
+    recomputed by verify_run from the store; a changed number, another definition or another scenario name gives
+    another id; the same run stored twice is stored once."""
+    B, S = (IO.with_capri_codes(IO.to_long(_results(s_), p)) for s_, p in ((1.0, "base"), (1.5, "scen")))
+    kw = dict(scenario="scen_a", reference="ref_x", year=2030, fingerprint_parts={"code": "a"}, meta={},
+              root=tmp_path)
+    r = IO.write_run(B, S, **kw)
+    assert len(r["run_id"]) == 64 and int(r["run_id"], 16) >= 0 and not r["duplicate"]
+    assert IO.verify_run(tmp_path, r["run_id"]) and IO.verify_run(tmp_path, r["reference_run_id"])
+    # the id is the recipe's: recomputed here from the rows and the record
+    rows = IO.read_partition(tmp_path, "scen_a", r["run_id"])
+    assert IO.run_id_of("scenario", "scen_a", r["fingerprint"], IO.rows_digest(rows), r["reference_run_id"]) == r["run_id"]
+    # the rows' digest does not depend on their order
+    assert IO.rows_digest(rows) == IO.rows_digest(rows.iloc[::-1])
+    again = IO.write_run(B, S, **kw)
+    assert again["duplicate"] and again["run_id"] == r["run_id"] and len(IO._runs(tmp_path)) == 2
+    S2 = S.copy()
+    S2.loc[S2.index[0], "value"] = S2["value"].iloc[0] + 1e-12
+    assert IO.write_run(B, S2, **kw)["run_id"] != r["run_id"]
+    assert IO.write_run(B, S, **{**kw, "scenario_parts": {"overrides": {"x": 1}}})["run_id"] != r["run_id"]
+    assert IO.write_run(B, S, **{**kw, "scenario": "scen_b"})["run_id"] != r["run_id"]
+    # a run is named by a unique prefix of its id
+    assert IO.read_run(tmp_path, "scen_a", r["run_id"][:12])[2]["run_id"] == r["run_id"]
+
+
+def test_the_tables_are_not_partitioned_and_a_run_is_read_alone(tmp_path):
+    """No scenario=/run_id= folders: the tables are unpartitioned Delta tables with scenario and run_id as columns; a
+    reader takes one run by its id without the rest; the metadata folder is meta/<run id>/."""
     from deltalake import DeltaTable
     B, S = (IO.with_capri_codes(IO.to_long(_results(), p)) for p in ("base", "scen"))
-    IO.write_run(B, S, scenario="scen_a", reference="ref_x", year=2030, run_id="r1", fingerprint_parts={},
-                 meta={}, root=tmp_path)
-    dt = DeltaTable(str(tmp_path / "long"))
-    assert dt.metadata().partition_columns == ["scenario", "run_id"]
-    part = dt.to_pandas(filters=[("scenario", "=", "ref_x")])
+    r = IO.write_run(B, S, scenario="scen_a", reference="ref_x", year=2030, fingerprint_parts={}, meta={},
+                     root=tmp_path, summary={"a": 1.0}, iterations=([{"it": 1}], [{"it": 1}, {"it": 2}]))
+    for t in ("long", "summary", "iterations", "runs"):
+        dt = DeltaTable(str(tmp_path / t))
+        assert dt.metadata().partition_columns == []
+        assert not [p for p in (tmp_path / t).iterdir() if "=" in p.name]
+    part = DeltaTable(str(tmp_path / "long")).to_pandas(filters=[("run_id", "=", r["reference_run_id"])])
     assert set(part.scenario) == {"ref_x"} and len(part) == len(B)
     assert np.array_equal(np.sort(part.value.to_numpy()), np.sort(B.value.to_numpy()))
+    assert sorted(p.name for p in (tmp_path / "meta").iterdir()) == [r["run_id"]]
 
 
 def test_the_run_metadata_is_declared():
@@ -195,7 +227,7 @@ def test_the_pickle_comes_back_from_the_store(tmp_path):
     B, S = (IO.with_capri_codes(IO.to_long(x, p)) for x, p in ((base, "base"), (scen, "scen")))
     env = (base["environmental"], scen["environmental"])
     out = {"environmental": env, "adoption": ({"PRECFARM": 0.1}, {"PRECFARM": 0.2}), "histosol": {"fallow": 1.0}}
-    IO.write_run(B, S, scenario="s", reference="r", year=2030, run_id="a", fingerprint_parts={}, meta={},
+    IO.write_run(B, S, scenario="s", reference="r", year=2030, fingerprint_parts={}, meta={},
                  root=tmp_path, summary=IO.summary_of({**out, "act": None}),
                  iterations=([{"it": 1, "signal": {"SWHE": 0.0}}], [{"it": 1}, {"it": 2}]))
     got = IO.load_run(f"store:{tmp_path}:s")

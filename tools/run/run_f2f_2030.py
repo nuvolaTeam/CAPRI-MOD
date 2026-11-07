@@ -520,17 +520,24 @@ def main():
                           if not k.startswith(".cache/")
                           and (not k.startswith("capri_data/scenarios/") or k.startswith(_own))},
                "software": out["meta"]["run_manifest"].get("software")}
-        _rid = time.strftime("%Y%m%dT%H%M%S") + "-" + str(_git.get("commit") or "nocommit")[:7]
-        if _over:                                   # a scenario changed on the command line: its run id says so
-            _rid += "-ov" + _IO.fingerprint({"overrides": _over})[:8]
+        # what the scenario adds to its reference's definition: the overrides on the command line and the scenario
+        # files read (the reference's fingerprint leaves them out); with the results they make the run id
+        _sparts = {"overrides": _over,
+                   "inputs": {k: v for k, v in (out["meta"]["run_manifest"].get("inputs") or {}).items()
+                              if k.startswith("capri_data/scenarios/")}}
         _rec = _IO.write_run(_IO.with_capri_codes(_IO.to_long(b, "base")), _IO.with_capri_codes(_IO.to_long(s, "scen")),
-                             scenario=_scen.name, reference=_ref, year=2030, run_id=_rid, fingerprint_parts=_fp,
-                             meta=out["meta"], root=_rroot, summary=_IO.summary_of(out),
-                             iterations=out["outer_history"])
-        _md = _rroot / "meta" / _scen.name / _rid
-        run_settings.save(str(_md / "settings.toml"))
-        with open(_md / "manifest.json", "w") as fh_:
-            json.dump(out["meta"]["run_manifest"], fh_, indent=1)
+                             scenario=_scen.name, reference=_ref, year=2030, fingerprint_parts=_fp,
+                             scenario_parts=_sparts, meta=out["meta"], root=_rroot, summary=_IO.summary_of(out),
+                             iterations=out["outer_history"],
+                             created=(out["meta"]["run_manifest"].get("created") or None))
+        _rid = _rec["run_id"]
+        if _rec.get("duplicate"):
+            print(f"long table: {_scen.name} {_rid[:12]} already stored (the same results and definition)", flush=True)
+        _md = _IO.meta_dir(_rroot, _rid)
+        if not _rec.get("duplicate"):               # an identical run keeps the first one's metadata
+            run_settings.save(str(_md / "settings.toml"))
+            with open(_md / "manifest.json", "w") as fh_:
+                json.dump(out["meta"]["run_manifest"], fh_, indent=1)
         # the whole pickle (its metadata apart) rebuilt from the store must equal it exactly: the gate's comparison
         # (tools/check/compare_pickles_exact.py walk) at tolerance zero
         import importlib.util as _ilu

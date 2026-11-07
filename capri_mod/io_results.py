@@ -687,29 +687,87 @@ def _stored(rows: pd.DataFrame, year: int) -> pd.DataFrame:
     return out[list(STORED_COLUMNS)]
 
 
+# --------------------------------------------------------------------------- #
+# Run ids (the store's layout of 7 November 2026, the project lead's decision): every stored partition, a reference's
+# or a scenario's, is named by the SHA-256 of what it is - its results and its definition - so the id identifies
+# exactly those rows and anyone can recompute it from the store (run_id_of, verify_run). The tables are not
+# partitioned (no scenario=/run_id= folders): scenario and run_id are columns, each run appended as its own files.
+# --------------------------------------------------------------------------- #
+#: the recipe's version, the first line hashed: a change of the recipe changes every id
+RUN_ID_RECIPE = "capri-mod run id 1"
+RUNS_COLUMNS = ("seq", "scenario", "run_id", "kind", "reference", "reference_run_id", "fingerprint", "commit",
+                "created", "rows", "note")
+
+
+def rows_digest(rows: pd.DataFrame) -> str:
+    """The SHA-256 of a partition's rows (STORED_COLUMNS), independent of their order: each row as a JSON list (the text
+    columns as text, an empty text for a missing one; the year as an integer; the value as float.hex, "nan" for a
+    missing one), the lines sorted and joined by newlines, UTF-8."""
+    import hashlib
+    import math
+    text_cols = [c for c in STORED_COLUMNS if c not in ("year", "value")]
+    cols = {c: rows[c].tolist() for c in STORED_COLUMNS}
+
+    def txt(v):
+        return "" if v is None or (isinstance(v, float) and math.isnan(v)) or v is pd.NA else str(v)
+
+    def num(v):
+        v = float(v)
+        return "nan" if math.isnan(v) else v.hex()
+    lines = sorted(json.dumps([txt(cols[c][i]) for c in text_cols] + [int(cols["year"][i]), num(cols["value"][i])],
+                              ensure_ascii=False, separators=(",", ":"))
+                   for i in range(len(rows)))
+    return hashlib.sha256("\n".join(lines).encode("utf-8")).hexdigest()
+
+
+def run_id_of(kind: str, name: str, definition: str, rows_sha: str, reference_run_id: str = "") -> str:
+    """A partition's run id: the SHA-256 of RUN_ID_RECIPE, its kind ("reference" or "scenario"), its name, the run id
+    of its reference (a scenario's; empty for a reference), the fingerprint of its definition (the runs table's
+    fingerprint) and its rows' digest (rows_digest), one per line."""
+    import hashlib
+    return hashlib.sha256("\n".join((RUN_ID_RECIPE, kind, name, reference_run_id, definition, rows_sha))
+                          .encode("utf-8")).hexdigest()
+
+
+def meta_dir(root, run_id: str) -> Path:
+    """A scenario run's metadata folder: root/meta/<run id>/ (meta.json; the run script adds settings.toml and
+    manifest.json)."""
+    return Path(root) / "meta" / run_id
+
+
 def _runs(root: Path) -> pd.DataFrame:
     from deltalake import DeltaTable
     p = root / "runs"
-    return DeltaTable(str(p)).to_pandas() if p.exists() else pd.DataFrame(
-        columns=["seq", "scenario", "run_id", "kind", "reference", "reference_run_id", "fingerprint", "created",
-                 "rows", "note"])
+    return DeltaTable(str(p)).to_pandas() if p.exists() else pd.DataFrame(columns=list(RUNS_COLUMNS))
+
+
+def _rows_of(root, table: str, run_id: str) -> pd.DataFrame:
+    from deltalake import DeltaTable
+    p = Path(root) / table
+    if not p.exists():
+        return pd.DataFrame()
+    return DeltaTable(str(p)).to_pandas(filters=[("run_id", "=", run_id)])
 
 
 def read_partition(root, scenario: str, run_id: str) -> pd.DataFrame:
-    """One stored partition (a reference's or a scenario's rows) of results_dir/long."""
-    from deltalake import DeltaTable
-    dt = DeltaTable(str(Path(root) / "long"))
-    df = dt.to_pandas(filters=[("scenario", "=", scenario), ("run_id", "=", run_id)])
+    """One stored partition (a reference's or a scenario's rows) of results_dir/long, by its run id (the scenario is
+    checked)."""
+    df = _rows_of(root, "long", run_id)
+    if len(df) and set(df["scenario"]) != {scenario}:
+        raise KeyError(f"{root}: run {run_id} is {sorted(set(df['scenario']))}, not {scenario}")
     return df.drop(columns=["scenario", "run_id"]).sort_values(_KEY).reset_index(drop=True)
 
 
-def _same(a: pd.DataFrame, b: pd.DataFrame) -> bool:
-    import numpy as _np
-    a = a.sort_values(_KEY).reset_index(drop=True)
-    b = b.sort_values(_KEY).reset_index(drop=True)
-    if len(a) != len(b) or not a[_KEY].astype(str).equals(b[_KEY].astype(str)):
-        return False
-    return bool(_np.array_equal(a["value"].to_numpy(float), b["value"].to_numpy(float), equal_nan=True))
+def verify_run(root, run_id: str) -> bool:
+    """Recompute a stored partition's run id from its rows and its record in the runs table."""
+    runs = _runs(Path(root))
+    r = runs[runs["run_id"] == run_id]
+    if len(r) != 1:
+        raise KeyError(f"{root}: {len(r)} records of run {run_id}")
+    rec = r.iloc[0]
+    rows = read_partition(root, rec["scenario"], run_id)
+    return run_id_of(rec["kind"], rec["scenario"], rec["fingerprint"], rows_digest(rows),
+                     rec["reference_run_id"] or "") == run_id
 
 
 def _jsonable(x):
@@ -722,76 +780,87 @@ def _jsonable(x):
     return x
 
 
-def write_run(base: pd.DataFrame, scen: pd.DataFrame, *, scenario: str, reference: str, year: int, run_id: str,
+def write_run(base: pd.DataFrame, scen: pd.DataFrame, *, scenario: str, reference: str, year: int,
               fingerprint_parts: dict, meta: dict, root, summary: Optional[dict] = None,
-              iterations: Optional[tuple] = None) -> dict:
-    """Store a run in the long table (root/long, partitioned by scenario and run id): the scenario's rows as its own
-    partition and the reference's as the reference's, once. A stored reference with the same fingerprint is reused
-    when its rows are identical to this run's (the run points to it); otherwise the reference is stored as a new
-    partition under this run id (a reference with the same fingerprint but other results is recorded in the note).
-    Returns the run's record (root/runs). meta (the run's metadata) is written to root/meta/<scenario>/<run id>/.
-    summary (the run script's EU summaries) goes to root/summary with the scenario's partition, iterations (the outer
-    iterations' records of the reference and the scenario) to root/iterations with each one's partition
-    (encode_record's rows)."""
+              iterations: Optional[tuple] = None, scenario_parts: Optional[dict] = None,
+              created: Optional[str] = None) -> dict:
+    """Store a run: the reference's rows and the scenario's rows each as its own partition of root/long, named by its
+    run id (run_id_of: the SHA-256 of its results and its definition). The reference's definition is
+    fingerprint(fingerprint_parts) (its inputs); the scenario's is fingerprint({"reference": that fingerprint,
+    **scenario_parts}) (scenario_parts: what the scenario adds, e.g. overrides on the command line). A reference
+    already stored with the same id (the same definition and identical rows) is reused; a reference with the same
+    fingerprint but other rows is stored as its own partition and the note says so. A scenario already stored with
+    the same id is not stored again (the record returned says "duplicate"). summary (the run script's EU summaries)
+    goes to root/summary and iterations (the outer iterations' records of the reference and the scenario) to
+    root/iterations under the partitions' run ids (encode_record's rows); meta (the run's metadata) to
+    meta_dir(root, run id)/meta.json. Returns the scenario's record (root/runs)."""
     import pyarrow as pa
     from datetime import datetime as _dt
     from deltalake import write_deltalake
     root = Path(root)
     root.mkdir(parents=True, exist_ok=True)
     fp = fingerprint(fingerprint_parts)
+    fp_s = fingerprint({"reference": fp, **(scenario_parts or {})})
+    commit = str(fingerprint_parts.get("commit") or "")
     runs = _runs(root)
-    b = _stored(base, year)
-    note, ref_id = "", None
-    same_fp = runs[(runs["kind"] == "reference") & (runs["scenario"] == reference) & (runs["fingerprint"] == fp)]
-    for rid in same_fp["run_id"]:
-        if _same(read_partition(root, reference, rid), b):
-            ref_id = rid
-            break
-    if ref_id is None and len(same_fp):
-        note = (f"reference {reference}: same fingerprint as run(s) {list(same_fp['run_id'])}, other results; "
-                "stored again")
-        print(f"WARNING: {note}", flush=True)
+    b, s = _stored(base, year), _stored(scen, year)
+    ref_id = run_id_of("reference", reference, fp, rows_digest(b))
+    scen_id = run_id_of("scenario", scenario, fp_s, rows_digest(s), ref_id)
+    have = runs[runs["run_id"] == scen_id]
+    if len(have):
+        return {**have.iloc[0].to_dict(), "reference_reused": True, "duplicate": True}
+    note = ""
+    ref_new = not (runs["run_id"] == ref_id).any()
+    if ref_new:
+        same_fp = runs[(runs["kind"] == "reference") & (runs["scenario"] == reference) & (runs["fingerprint"] == fp)]
+        if len(same_fp):
+            note = (f"reference {reference}: same fingerprint as run(s) {list(same_fp['run_id'])}, other results; "
+                    "stored as its own run")
+            print(f"WARNING: {note}", flush=True)
 
-    def put(df, scen_name, table="long"):
+    def put(df, scen_name, rid, table="long"):
         df = df.copy()
-        df["scenario"], df["run_id"] = scen_name, run_id
-        write_deltalake(str(root / table), pa.Table.from_pandas(df, preserve_index=False), mode="append",
-                        partition_by=["scenario", "run_id"])
+        if table != "long":
+            df["pos"] = range(len(df))        # a record's row order (decode_record rebuilds in it)
+        df["scenario"], df["run_id"] = scen_name, rid
+        write_deltalake(str(root / table), pa.Table.from_pandas(df, preserve_index=False), mode="append")
 
-    now = _dt.now().astimezone().strftime("%Y-%m-%d %H:%M:%S %z")
+    now = created or _dt.now().astimezone().strftime("%Y-%m-%d %H:%M:%S %z")
     seq = int(runs["seq"].max()) + 1 if len(runs) else 0
     recs = []
-    if ref_id is None:
-        put(b, reference)
+    if ref_new:
+        put(b, reference, ref_id)
         if iterations is not None:
-            put(encode_record(iterations[0]), reference, "iterations")
-        ref_id = run_id
-        recs.append({"seq": seq, "scenario": reference, "run_id": run_id, "kind": "reference", "reference": "",
-                     "reference_run_id": "", "fingerprint": fp, "created": now, "rows": len(b), "note": note})
-    s = _stored(scen, year)
-    put(s, scenario)
+            put(encode_record(iterations[0]), reference, ref_id, "iterations")
+        recs.append({"seq": seq, "scenario": reference, "run_id": ref_id, "kind": "reference", "reference": "",
+                     "reference_run_id": "", "fingerprint": fp, "commit": commit, "created": now, "rows": len(b),
+                     "note": note})
+    put(s, scenario, scen_id)
     if summary is not None:
-        put(encode_record(summary), scenario, "summary")
+        put(encode_record(summary), scenario, scen_id, "summary")
     if iterations is not None:
-        put(encode_record(iterations[1]), scenario, "iterations")
-    rec = {"seq": seq + len(recs), "scenario": scenario, "run_id": run_id, "kind": "scenario", "reference": reference,
-           "reference_run_id": ref_id, "fingerprint": "", "created": now, "rows": len(s), "note": ""}
+        put(encode_record(iterations[1]), scenario, scen_id, "iterations")
+    rec = {"seq": seq + len(recs), "scenario": scenario, "run_id": scen_id, "kind": "scenario", "reference": reference,
+           "reference_run_id": ref_id, "fingerprint": fp_s, "commit": commit, "created": now, "rows": len(s),
+           "note": ""}
     recs.append(rec)
-    write_deltalake(str(root / "runs"), pa.Table.from_pandas(pd.DataFrame(recs), preserve_index=False),
-                    mode="append")
-    md = root / "meta" / scenario / run_id
+    write_deltalake(str(root / "runs"), pa.Table.from_pandas(pd.DataFrame(recs)[list(RUNS_COLUMNS)],
+                                                             preserve_index=False), mode="append")
+    md = meta_dir(root, scen_id)
     md.mkdir(parents=True, exist_ok=True)
     (md / "meta.json").write_text(json.dumps(_jsonable(meta), indent=1, default=str))
-    return {**rec, "reference_reused": ref_id != run_id}
+    return {**rec, "reference_reused": not ref_new, "duplicate": False}
 
 
 def read_run(root, scenario: str, run_id: Optional[str] = None) -> tuple:
     """A stored scenario run and its reference: (reference rows, scenario rows, the run's record); the latest run of
-    the scenario when run_id is not given."""
+    the scenario when run_id is not given (a unique prefix of the id is enough)."""
     runs = _runs(Path(root))
     r = runs[(runs["scenario"] == scenario) & (runs["kind"] == "scenario")]
     if run_id is not None:
-        r = r[r["run_id"] == run_id]
+        r = r[r["run_id"].astype(str).str.startswith(run_id)]
+        if len(r) > 1:
+            raise KeyError(f"{root}: run id prefix {run_id} matches {len(r)} runs of {scenario}")
     if r.empty:
         raise KeyError(f"{root}: no stored run of {scenario}" + (f" {run_id}" if run_id else ""))
     rec = r.sort_values("seq").iloc[-1].to_dict()
@@ -908,12 +977,12 @@ LONG_BLOCKS = ("act", "out", "prod", "environmental", "labour", "set_aside", "ac
 
 
 def _record(root, table, scenario, run_id):
-    from deltalake import DeltaTable
-    p = Path(root) / table
-    if not p.exists():
+    df = _rows_of(root, table, run_id)
+    if not len(df):
         return None
-    df = DeltaTable(str(p)).to_pandas(filters=[("scenario", "=", scenario), ("run_id", "=", run_id)])
-    return decode_record(df[list(RECORD_COLUMNS)]) if len(df) else None
+    if "pos" in df.columns:
+        df = df.sort_values("pos", kind="stable")
+    return decode_record(df[list(RECORD_COLUMNS)].reset_index(drop=True))
 
 
 def load_store(root, scenario: str, run_id: Optional[str] = None) -> dict:
@@ -932,7 +1001,7 @@ def load_store(root, scenario: str, run_id: Optional[str] = None) -> dict:
           _record(root, "iterations", scenario, rec["run_id"]))
     if it != (None, None):
         out["outer_history"] = it
-    mp = Path(root) / "meta" / scenario / rec["run_id"] / "meta.json"
+    mp = meta_dir(root, rec["run_id"]) / "meta.json"
     if mp.exists():
         out["meta"] = json.loads(mp.read_text())
     return out

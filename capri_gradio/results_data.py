@@ -1,10 +1,12 @@
 """The results browser's reading layer (capri_gradio/results_browser.py): read-only over a results store.
 
 A results store (the run script's run.results_dir; capri_mod/io_results.py) holds
-  runs/                 one record per stored partition (a reference's or a scenario's)
-  long/                 the results in CAPRI's DATAOUT layout, partitioned by scenario and run id
-  iterations/           the outer iterations' records (encode_record's rows), per partition
-  meta/<scenario>/<run id>/meta.json, settings.toml, manifest.json
+  runs/                 one record per stored run (a reference's or a scenario's), its run id the SHA-256 of its
+                        results and its definition (io_results.run_id_of)
+  long/                 the results in CAPRI's DATAOUT layout, scenario and run_id as columns (not partitioned)
+  summary/, iterations/ the run script's EU summaries and the outer iterations' records (encode_record's rows)
+  meta/<run id>/        meta.json, settings.toml, manifest.json
+The page shows a run id's first ID_SHOWN characters; a unique prefix names a run.
 This module turns them into the tables the browser shows; it writes nothing. The comparisons with CAPRI use the check
 tools' own code and references (tools/check/compare_baseline_capri.py, tools/check/compare_runs.py), so the browser
 shows the same numbers they print.
@@ -40,13 +42,18 @@ def default_store() -> Path:
 # --------------------------------------------------------------------------- #
 # Runs and their metadata
 # --------------------------------------------------------------------------- #
+def _full(root, scenario: str, run_id: str) -> str:
+    """A scenario run's whole id from a unique prefix (the labels' ID_SHOWN characters)."""
+    return run_id if len(run_id) == 64 else run_record(root, scenario, run_id)["run_id"]
+
+
 def read_meta(root, scenario: str, run_id: str) -> dict:
-    p = Path(root) / "meta" / scenario / run_id / "meta.json"
+    p = IO.meta_dir(root, _full(root, scenario, run_id)) / "meta.json"
     return json.loads(p.read_text()) if p.is_file() else {}
 
 
 def read_settings(root, scenario: str, run_id: str) -> str:
-    p = Path(root) / "meta" / scenario / run_id / "settings.toml"
+    p = IO.meta_dir(root, _full(root, scenario, run_id)) / "settings.toml"
     return p.read_text() if p.is_file() else ""
 
 
@@ -95,8 +102,12 @@ def runs(root) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
+#: the characters of a run id shown in the page's labels (a unique prefix names a run, as a git commit's)
+ID_SHOWN = 12
+
+
 def run_label(scenario: str, run_id: str) -> str:
-    return f"{scenario} | {run_id}"
+    return f"{scenario} | {run_id[:ID_SHOWN]}"
 
 
 def parse_label(label: str) -> tuple:
@@ -105,10 +116,11 @@ def parse_label(label: str) -> tuple:
 
 
 def run_record(root, scenario: str, run_id: str) -> dict:
+    """A scenario run's record, by its id or a unique prefix of it (the labels show ID_SHOWN characters)."""
     r = IO._runs(Path(root))
-    r = r[(r["scenario"] == scenario) & (r["run_id"] == run_id) & (r["kind"] == "scenario")]
-    if r.empty:
-        raise KeyError(f"{root}: no stored scenario run {scenario} {run_id}")
+    r = r[(r["scenario"] == scenario) & (r["run_id"].astype(str).str.startswith(run_id)) & (r["kind"] == "scenario")]
+    if len(r) != 1:
+        raise KeyError(f"{root}: {len(r)} stored scenario runs {scenario} {run_id}")
     return r.iloc[0].to_dict()
 
 
@@ -142,14 +154,7 @@ CONV_MEASURES = {"last_change": "largest price change since the last iteration",
 
 
 def _iter_record(root, scenario: str, run_id: str) -> list:
-    from deltalake import DeltaTable
-    p = Path(root) / "iterations"
-    if not p.exists():
-        return []
-    df = DeltaTable(str(p)).to_pandas(filters=[("scenario", "=", scenario), ("run_id", "=", run_id)])
-    if df.empty:
-        return []
-    rec = IO.decode_record(df.drop(columns=["scenario", "run_id"]))
+    rec = IO._record(root, "iterations", scenario, run_id)
     return rec if isinstance(rec, list) else []
 
 
@@ -158,7 +163,8 @@ def iterations(root, scenario: str, run_id: str) -> pd.DataFrame:
     line chart): point, it, measure, value."""
     rec = run_record(root, scenario, run_id)
     rows = []
-    for point, (s, r) in (("baseline", (rec["reference"], rec["reference_run_id"])), ("scenario", (scenario, run_id))):
+    for point, (s, r) in (("baseline", (rec["reference"], rec["reference_run_id"])),
+                          ("scenario", (scenario, rec["run_id"]))):
         for x in _iter_record(root, s, r):
             c = x.get("conv") or {}
             vals = {k: c.get(k) for k in CONV_MEASURES if "." not in k}
@@ -184,7 +190,7 @@ def points(root, scenario: str, run_id: str) -> tuple:
     """(baseline rows, scenario rows) of a stored scenario run."""
     rec = run_record(root, scenario, run_id)
     return (_partition(str(root), rec["reference"], rec["reference_run_id"]),
-            _partition(str(root), scenario, run_id))
+            _partition(str(root), scenario, rec["run_id"]))
 
 
 def _filtered(df: pd.DataFrame, block: Optional[str], filters: dict) -> pd.DataFrame:
