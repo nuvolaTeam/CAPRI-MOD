@@ -1177,13 +1177,17 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
                     _sr = getattr(self.seen, "last_supply_results", None) or {}
                     _go = {r_: float(getattr(x_, "gross_output", pd.Series(dtype=float)).get(_gc, 0.0)) for r_, x_ in _sr.items()}
                     _lv = {r_: float(x_.activities.get(_gc, 0.0)) for r_, x_ in _sr.items()}
-                    _gprev = getattr(self.sv, "trace_go_prev", None) or {}
+                    # the previous iteration's gross output of the same product (each region's whole gross output is
+                    # kept: the gap's product changes between iterations)
+                    _gprev_all = getattr(self.sv, "trace_go_prev", None) or {}
+                    _gprev = {r_: float(s_.get(_gc, 0.0)) for r_, s_ in _gprev_all.items()}
                     if _gprev:
                         _dd = sorted(((abs(_go[r_] - _gprev.get(r_, 0.0)), r_) for r_ in _go), reverse=True)[:5]
                         print(f'    [gap {_gc} output] EU {sum(_go.values()):.1f} (prev {sum(_gprev.values()):.1f}) | '
                               + ', '.join(f'{r_} {_gprev.get(r_, 0.0):.1f}->{_go[r_]:.1f} (lvl {_lv.get(r_, float("nan")):.2f})'
                                           for _, r_ in _dd), flush=True)
-                    self.sv.trace_go_prev = _go
+                    self.sv.trace_go_prev = {r_: getattr(x_, "gross_output", pd.Series(dtype=float)).copy()
+                                             for r_, x_ in _sr.items()}
                     print(f'    [gap {_gc}->{_mc}] EU supply {float(agg_qty.get(_mc, float("nan"))):.1f}'
                           f' (beet {float(agg_qty.get("SUGB", float("nan"))):.1f}) | world ratio {float((_dv + 1.0).get(_mc, float("nan"))):.4f}'
                           f' | premium {float(_pr.get(_mc, float("nan"))) if _pr is not None else float("nan"):.4f}'
