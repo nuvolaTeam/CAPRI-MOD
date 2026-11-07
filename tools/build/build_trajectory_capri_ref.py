@@ -91,8 +91,8 @@ def main():
     # SETA took that row's growth, or the EU median where a region has no VSET (KNOWN_ISSUES K115)
     # (The model's other fodder OFOD was CAPRI's OFAR plus its fodder roots ROOF until S2, 7 November 2026; OFAR and
     # ROOF are the model's own activities since, with CAPRI's own trajectories.)
-    for comp, parts in (("SHGT", ("SHGM", "SHGF")), ("CACR", ("CAMF", "CAFF", "CAMR", "CAFR")),
-                        ("SETA", ("FALL", "VSET"))):
+    # (and SETA = FALL + VSET until S2, 7 November 2026: VSET and FALL the model's own since)
+    for comp, parts in (("SHGT", ("SHGM", "SHGF")), ("CACR", ("CAMF", "CAFF", "CAMR", "CAFR"))):
         for reg in {k[0] for k in v}:
             for yr in ("2017", "2030"):
                 xs = [v.get((reg, p_, "LEVL", yr)) for p_ in parts]
@@ -123,7 +123,6 @@ def main():
                 v[(reg, comp, "YILD", "2030")] = comp_y["2030"]
     # sheep and goats: the model's activities are CAPRI's SHGM (milk; YILD = milk per head) and SHGF (fattening; YILD =
     # meat per head) since October 2026 (tools/build/build_shg_split.py); their factors are CAPRI's own, no alias needed
-    v = {k: x for k, x in v.items() if k[1] not in ("VSET",)}   # parts of SETA only
     # CAPRI's zeros: GAMS stores no zero, so an activity level the 2030 reference does not list is 0 where the
     # reference reports the region and the activity elsewhere (UK grain maize MAIZ 5.6 kha in 2017, none in 2030; ES
     # other oilseeds OOIL, PT durum wheat DWHE, DK pulses PULS: 20 cells of 2017 level >= 1). Until 4 November 2026

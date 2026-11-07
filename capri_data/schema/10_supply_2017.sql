@@ -95,12 +95,13 @@ CREATE TABLE producer_prices (
     activity VARCHAR PRIMARY KEY REFERENCES model_activities (code),
     price DOUBLE NOT NULL CHECK (price >= 0)
 );
-COMMENT ON TABLE producer_prices IS 'EU producer prices 2017 (build_eu_producer_prices.py): crops from CAPRI''s regional prices; SHGM, SHGF from tools/lib/_sheep_goat.eu_prices; SETA''s 0 from sources/unsourced/producer_prices_no_builder.csv';
+COMMENT ON TABLE producer_prices IS 'EU producer prices 2017 (build_eu_producer_prices.py): crops from CAPRI''s regional prices; SHGM, SHGF from tools/lib/_sheep_goat.eu_prices; VSET''s and FALL''s 0 (SETA''s until S2, 7 November 2026) from sources/unsourced/producer_prices_no_builder.csv';
 INSERT INTO value_units SELECT 'producer_prices', code, 'U_EuPerTon', 'builder', 'revenue over production of CAPRI''s YILD x MPRI (build_crop_economics_2017.py: EUR/t)'
-FROM model_activities WHERE kind = 'crop' AND code NOT IN ('GRAS', 'SETA', 'OCRO', 'OIND', 'NURS', 'FLOW');
+FROM model_activities WHERE kind = 'crop' AND code NOT IN ('GRAS', 'VSET', 'FALL', 'OCRO', 'OIND', 'NURS', 'FLOW');
 INSERT INTO value_units VALUES
   ('producer_prices', 'GRAS', 'U_EuPerTon', 'builder', 'CAPRI''s MREV over the dry-matter yield (build_crop_economics_2017.py): EUR per t of dry matter'),
-  ('producer_prices', 'SETA', 'U_EuPerTon', 'builder', '0 by convention (producer_prices_no_builder.csv)');
+  ('producer_prices', 'VSET', 'U_EuPerTon', 'builder', '0 by convention (producer_prices_no_builder.csv)'),
+  ('producer_prices', 'FALL', 'U_EuPerTon', 'builder', '0 by convention (producer_prices_no_builder.csv)');
 -- (OCRO, OIND, NURS, FLOW have no EU producer price row)
 INSERT INTO value_units VALUES
   ('producer_prices', 'SHGM', NULL, 'open', 'CAPREG''s regional prices of the activity weighted by the herds (tools/lib/_sheep_goat.py); the product and unit are to be checked'),

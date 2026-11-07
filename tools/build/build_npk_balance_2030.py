@@ -23,7 +23,7 @@ Outputs (capri_data/2017/environment/):
                             arable residue pool, fertDistCres_; non-permanent crops), own_kg_ha (permanent crops' own
                             residues, perm_cres), mine_kg_ha (CAPRI's mineral flow), levl_kha; CAPRI crops pooled into
                             the model's crops by area (CORN = MAIZ, WINE = TWIN, GRAS = GRAE + GRAI,
-                            SETA = FALL + VSET + ISET + GSET + TSET), and GRAE and GRAI on their own (the model's
+                            and GRAE and GRAI on their own (the model's
                             grassland split column); main_share and straw_share, the parts of the need that follow the
                             main output's yield and the straw yield (fert/fertned.gms: need = MIN(cap, MAX(15, O_HP x
                             need per t + STRA x straw content)); 0 for crops at the floor or the cap), with CAPRI's straw
@@ -72,8 +72,9 @@ ELEM = ("SWHE", "DWHE", "RYEM", "BARL", "OATS", "MAIZ", "OCER", "PARI", "RAPE", 
         "FLOW", "OCRO", "NECR", "MAIF", "ROOF", "OFAR", "GRAE", "GRAI", "PULS", "POTA", "SUGB", "TEXT", "TOBA", "TOMA",
         "OVEG", "APPL", "OFRU", "CITR", "TAGR", "TABO", "TWIN", "OLIV", "FALL", "ISET", "GSET", "TSET", "VSET", "NONF")
 #: model crop <- CAPRI crops
-MODEL = {"CORN": ("MAIZ",), "WINE": ("TWIN",), "GRAS": ("GRAE", "GRAI"),
-         "SETA": ("FALL", "VSET", "ISET", "GSET", "TSET")}
+MODEL = {"CORN": ("MAIZ",), "WINE": ("TWIN",), "GRAS": ("GRAE", "GRAI")}
+#  (VSET and FALL the model's own since S2, 7 November 2026; before SETA = FALL + VSET + ISET + GSET + TSET; ISET, GSET
+#  and TSET have no area in CAPRI's 2017 and 2030 data)
 FLOWS = ("fertDist_mine", "fertDist_excr", "fertDist_cres", "perm_cres", "nutNed_mine_loss_gasRunTot",
          "nutNed_cres_loss_gasRunTot", "nutNed_excr_unavailable", "nutNed_cres_unavailable", "nutNed_lhs")
 BAL = ("EXCRET", "MTRADE", "GASANI", "RUNANI", "NETF", "UVAG")

@@ -325,7 +325,7 @@ class PolicyModule:
         d = float(self.scenario.biss_rate_change or 0.0)
         if d:
             for crop in CROPS:
-                if crop != "SETA":
+                if crop not in ("VSET", "FALL"):        # set-aside (the model's SETA until S2, 7 November 2026)
                     adders[crop] += d
         for comm, rate in self.scenario.coupled_support.items():
             if comm in adders.index:

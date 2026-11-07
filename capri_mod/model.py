@@ -1397,7 +1397,7 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
             "luc": _luc_table(supply_results),
             # CAPRI's labour accounts (million hours; GROF LABT = sum LABT x LEVL / 1000) and its set-aside split
             # VSET / FALL with their premiums (tools/build/build_labour_setaside.py)
-            "set_aside": _set_aside_table(supply_results, self.data, self._pmp_suffix()),
+            "set_aside": _set_aside_table(supply_results, self.data),
             "labour": None,
             # the NLP form's mineral N, P2O5, K2O purchases and flows per region and crop group (t)
             "fert_npk": _npk_table(supply_results),
@@ -1456,7 +1456,7 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
             reporter.print_summary()
             print(f"  Run completed in {t_elapsed:.1f}s")
 
-        results["labour"] = _labour_table(supply_results, self.data, results.get("set_aside"))
+        results["labour"] = _labour_table(supply_results, self.data)
         results["welfare_supply"] = self._welfare_supply(supply_results)
         return results
 
@@ -1549,15 +1549,6 @@ class CAPRIModel(ModelStateMixin, HessianBlock, FeedBlock, YoungAnimalBlock, Pri
         """List all available built-in scenarios."""
         return list_scenarios()
 
-    def _pmp_suffix(self) -> str:
-        """The PMP terms' column suffix of the set-aside split's weights: the 2030 terms at the 2030 market year
-        (CAPRI's or the recipe's, as SupplyModule.pmp_source; CAPRI's for the elasticity calibration), else the base
-        year's."""
-        from capri_mod.supply.supply_module import SupplyModule
-        if _mkt_year(self.data) != 2030:
-            return ""
-        return "_recipe2030" if str(getattr(SupplyModule, "pmp_source", "")) == "recipe" else "_capri2030"
-
 
 def _luc_table(supply_results):
     """Region x transition (1000 ha per year for changes, remaining in full) from the regional results, or None."""
@@ -1580,48 +1571,33 @@ def _npk_table(supply_results):
     return pd.DataFrame(rows) if rows else None
 
 
-def _set_aside_table(supply_results, data, wsfx=""):
-    """CAPRI's two set-aside activities in the model's SETA, per region (1000 ha; premiums million EUR): VSET = s X0 +
-    w (X - X0), FALL = X - VSET (tools/build/build_labour_setaside.py: s CAPRI's VSET share at the calibration year, w the
-    share of a common change CAPRI's PMP terms give VSET; X0 the region's base SETA). None without the data."""
+def _set_aside_table(supply_results, data):
+    """CAPRI's two set-aside activities, VSET and FALL, per region (1000 ha; premiums million EUR), the model's own
+    activities since S2 (7 November 2026; before, the model's SETA split by CAPRI's VSET share and PMP terms, K111):
+    their levels and premiums per ha (tools/build/build_labour_setaside.py, set_aside_split.csv prem_vset, prem_fall,
+    the 2030 values at the 2030 market year). None without the data."""
     import pandas as pd
-    sa, ar = data.get("set_aside_split"), data.get("areas")
-    if sa is None or ar is None or "SETA" not in getattr(ar, "columns", []):
+    sa = data.get("set_aside_split")
+    if sa is None:
         return None
     yr = _mkt_year(data)
     vt = "_2030" if yr == 2030 else ""
     rows = {}
     for r, res in (supply_results or {}).items():
-        if r not in sa.index or r not in ar.index:
-            continue
         x = getattr(res, "activities", None)
-        if x is None or "SETA" not in x.index:
+        if x is None or r not in sa.index or not ("VSET" in x.index or "FALL" in x.index):
             continue
-        X, X0 = float(x["SETA"]), float(ar.at[r, "SETA"])
         row = sa.loc[r]
-        s_ = row.get("share_vset" + vt)
-        s_ = float(row.get("share_vset")) if s_ is None or s_ != s_ else float(s_)
-        w = row.get("w_vset" + wsfx)
-        w = float(row.get("w_vset", 0.5)) if w is None or w != w else float(w)
-        if not s_ > 0:
-            # no VSET at the calibration point: CAPRI takes the activity out of the region's model
-            # (supply/prep_cal.gms l. 103: p_technFact LEVL 0 where the level is 0; set_supply_bounds.gms l. 42-43:
-            # VSET's bounds only where its base level exceeds 1e-6), so it stays 0 and the change is FALL's (K111)
-            w = 0.0
-        v = min(max(s_ * X0 + w * (X - X0), 0.0), X) if X > 0 else 0.0
-        f_ = X - v
+        v, f_ = (float(x.get(a, 0.0)) for a in ("VSET", "FALL"))
         pv, pf = (float(row.get(k + vt, row.get(k, 0.0)) or 0.0) for k in ("prem_vset", "prem_fall"))
-        lv, lf = (float(row.get(k + vt, row.get(k, 0.0)) or 0.0) for k in ("labt_vset", "labt_fall"))
-        rows[r] = {"SETA": X, "VSET": v, "FALL": f_, "prem_VSET": v * pv / 1000.0, "prem_FALL": f_ * pf / 1000.0,
-                   "labt_VSET": v * lv / 1000.0, "labt_FALL": f_ * lf / 1000.0}
+        rows[r] = {"SETA": v + f_, "VSET": v, "FALL": f_, "prem_VSET": v * pv / 1000.0, "prem_FALL": f_ * pf / 1000.0}
     return pd.DataFrame.from_dict(rows, orient="index") if rows else None
 
 
-def _labour_table(supply_results, data, set_aside=None):
+def _labour_table(supply_results, data):
     """CAPRI's labour accounts per region (million hours): total LABT, family LABF, paid LABP, as CAPRI's GROF =
     sum over activities of the level x labour per unit / 1000 (tools/build/build_labour_setaside.py; the 2030 coefficients
-    at the 2030 market year). The set-aside's total labour from its VSET / FALL split where available. None without
-    the data."""
+    at the 2030 market year; VSET and FALL their own activities since S2, 7 November 2026). None without the data."""
     import pandas as pd
     lc = data.get("labour_coef")
     if lc is None:
@@ -1645,13 +1621,6 @@ def _labour_table(supply_results, data, set_aside=None):
                 c = row.get(it.lower()) if c is None or c != c else c
                 if c is not None and c == c:
                     tot[it] += float(lev) * float(c) / 1000.0
-        if set_aside is not None and r in set_aside.index and (r, "SETA") in lc.index:
-            row = lc.loc[(r, "SETA")]
-            c = row.get("labt" + vt)
-            c = row.get("labt") if c is None or c != c else c
-            if c is not None and c == c:
-                tot["LABT"] += (float(set_aside.at[r, "labt_VSET"]) + float(set_aside.at[r, "labt_FALL"])
-                                - float(x["SETA"]) * float(c) / 1000.0)
         rows[r] = tot
     return pd.DataFrame.from_dict(rows, orient="index") if rows else None
 

@@ -2795,9 +2795,6 @@
     "capri_data/shared/capri_member_state_codes.csv",
     "capri_data/shared/eu_market_blocks.csv",
     "capri_data/shared/regional_units.csv",
-    "capri_data/sources/intermediate/baseline_pmp/intensity_q_capri2030.csv",
-    "capri_data/sources/intermediate/baseline_pmp/intensity_q_recipe2017.csv",
-    "capri_data/sources/intermediate/baseline_pmp/intensity_q_recipe2030.csv",
     "capri_data/trajectories/capri_price_ratios_2030.csv",
     "capri_mod/settings/defaults.toml"
    ],

@@ -1,2 +1,3 @@
 activity,price,note
-SETA,0.0,set-aside has no output: 0 by convention
+VSET,0.0,voluntary set-aside has no output: 0 by convention (SETA until S2; 7 November 2026)
+FALL,0.0,fallow has no output: 0 by convention (SETA until S2; 7 November 2026)

@@ -129,7 +129,8 @@ CREATE TABLE sup_crop_premium (
     MAIF DOUBLE NOT NULL,
     OFAR DOUBLE NOT NULL,
     ROOF DOUBLE NOT NULL,
-    SETA DOUBLE NOT NULL,
+    VSET DOUBLE NOT NULL,
+    FALL DOUBLE NOT NULL,
     PRIMARY KEY (region)
 );
 COMMENT ON TABLE sup_crop_premium IS 'Crop yields, producer prices, input costs and CAP premiums for every model region from CAPRI''s 2017 results (tools/build/build_crop_economics_2017.py)';
@@ -168,7 +169,8 @@ INSERT INTO value_units VALUES
   ('sup_crop_premium', 'TEXT', NULL, 'open', 'crop_premium.TEXT: unit to be established'),
   ('sup_crop_premium', 'OFAR', NULL, 'open', 'crop_premium.OFAR: unit to be established'),
   ('sup_crop_premium', 'ROOF', NULL, 'open', 'crop_premium.ROOF: unit to be established'),
-  ('sup_crop_premium', 'SETA', NULL, 'open', 'crop_premium.SETA: unit to be established');
+  ('sup_crop_premium', 'VSET', NULL, 'open', 'crop_premium.VSET: unit to be established'),
+  ('sup_crop_premium', 'FALL', NULL, 'open', 'crop_premium.FALL: unit to be established');
 
 -- file: capri_data/2017/supply/dairy_intensity.csv
 CREATE TABLE sup_dairy_intensity (
@@ -368,7 +370,8 @@ CREATE TABLE sup_nutrients_regional (
     MAIF DOUBLE,
     OFAR DOUBLE NOT NULL,
     ROOF DOUBLE,
-    SETA DOUBLE,
+    VSET DOUBLE,
+    FALL DOUBLE,
     PRIMARY KEY (region)
 );
 COMMENT ON TABLE sup_nutrients_regional IS 'Rebuild every region''s base data from CAPRI. (tools/build/build_capri_base.py)';
@@ -407,7 +410,8 @@ INSERT INTO value_units VALUES
   ('sup_nutrients_regional', 'TEXT', NULL, 'open', 'nutrients_regional.TEXT: unit to be established'),
   ('sup_nutrients_regional', 'OFAR', NULL, 'open', 'nutrients_regional.OFAR: unit to be established'),
   ('sup_nutrients_regional', 'ROOF', NULL, 'open', 'nutrients_regional.ROOF: unit to be established'),
-  ('sup_nutrients_regional', 'SETA', NULL, 'open', 'nutrients_regional.SETA: unit to be established');
+  ('sup_nutrients_regional', 'VSET', NULL, 'open', 'nutrients_regional.VSET: unit to be established'),
+  ('sup_nutrients_regional', 'FALL', NULL, 'open', 'nutrients_regional.FALL: unit to be established');
 
 -- file: capri_data/2017/supply/plant_protection_cost.csv
 CREATE TABLE sup_plant_protection_cost (
@@ -442,36 +446,18 @@ INSERT INTO value_units VALUES
 -- file: capri_data/2017/supply/set_aside_split.csv
 CREATE TABLE sup_set_aside_split (
     region VARCHAR NOT NULL,
-    share_vset DOUBLE NOT NULL,
     prem_vset DOUBLE NOT NULL,
-    labt_vset DOUBLE NOT NULL,
     prem_fall DOUBLE NOT NULL,
-    labt_fall DOUBLE NOT NULL,
-    share_vset_2030 DOUBLE NOT NULL,
     prem_vset_2030 DOUBLE NOT NULL,
-    labt_vset_2030 DOUBLE NOT NULL,
     prem_fall_2030 DOUBLE NOT NULL,
-    labt_fall_2030 DOUBLE NOT NULL,
-    w_vset DOUBLE NOT NULL,
-    w_vset_capri2030 DOUBLE NOT NULL,
-    w_vset_recipe2030 DOUBLE NOT NULL,
     PRIMARY KEY (region)
 );
-COMMENT ON TABLE sup_set_aside_split IS 'CAPRI''s labour accounts and its two set-aside activities, per model region (22 October 2026, the project lead''s (tools/build/build_labour_setaside.py)';
+COMMENT ON TABLE sup_set_aside_split IS 'CAPRI''s premiums PRME (EUR/ha) of its two set-aside activities VSET and FALL per model region, 2017 and 2030 (the 2030 values in the model''s 2017 money), for the set-aside report (tools/build/build_labour_setaside.py; until S2, 7 November 2026, also the split of the model''s SETA and its labour)';
 INSERT INTO value_units VALUES
-  ('sup_set_aside_split', 'share_vset', NULL, 'open', 'set_aside_split.share_vset: unit to be established'),
-  ('sup_set_aside_split', 'prem_vset', NULL, 'open', 'set_aside_split.prem_vset: unit to be established'),
-  ('sup_set_aside_split', 'labt_vset', NULL, 'open', 'set_aside_split.labt_vset: unit to be established'),
-  ('sup_set_aside_split', 'prem_fall', NULL, 'open', 'set_aside_split.prem_fall: unit to be established'),
-  ('sup_set_aside_split', 'labt_fall', NULL, 'open', 'set_aside_split.labt_fall: unit to be established'),
-  ('sup_set_aside_split', 'share_vset_2030', NULL, 'open', 'set_aside_split.share_vset_2030: unit to be established'),
-  ('sup_set_aside_split', 'prem_vset_2030', NULL, 'open', 'set_aside_split.prem_vset_2030: unit to be established'),
-  ('sup_set_aside_split', 'labt_vset_2030', NULL, 'open', 'set_aside_split.labt_vset_2030: unit to be established'),
-  ('sup_set_aside_split', 'prem_fall_2030', NULL, 'open', 'set_aside_split.prem_fall_2030: unit to be established'),
-  ('sup_set_aside_split', 'labt_fall_2030', NULL, 'open', 'set_aside_split.labt_fall_2030: unit to be established'),
-  ('sup_set_aside_split', 'w_vset', NULL, 'open', 'set_aside_split.w_vset: unit to be established'),
-  ('sup_set_aside_split', 'w_vset_capri2030', NULL, 'open', 'set_aside_split.w_vset_capri2030: unit to be established'),
-  ('sup_set_aside_split', 'w_vset_recipe2030', NULL, 'open', 'set_aside_split.w_vset_recipe2030: unit to be established');
+  ('sup_set_aside_split', 'prem_vset', 'U_EuPerHa', 'capri', 'CAPRI''s PRME of VSET'),
+  ('sup_set_aside_split', 'prem_fall', 'U_EuPerHa', 'capri', 'CAPRI''s PRME of FALL'),
+  ('sup_set_aside_split', 'prem_vset_2030', 'U_EuPerHa', 'capri', 'CAPRI''s 2030 PRME of VSET over CAPRI''s inflation to 2030'),
+  ('sup_set_aside_split', 'prem_fall_2030', 'U_EuPerHa', 'capri', 'CAPRI''s 2030 PRME of FALL over CAPRI''s inflation to 2030');
 
 -- file: capri_data/2017/supply/winter_cover_share.csv
 CREATE TABLE sup_winter_cover_share (
@@ -622,7 +608,8 @@ CREATE TABLE sup_cap_premium_activity (
     MAIF DOUBLE,
     OFAR DOUBLE,
     ROOF DOUBLE,
-    SETA DOUBLE,
+    VSET DOUBLE,
+    FALL DOUBLE,
     AGGT DOUBLE,
     ANNC DOUBLE,
     ARAC DOUBLE,
@@ -664,7 +651,6 @@ CREATE TABLE sup_cap_premium_activity (
     SHGM DOUBLE,
     SOWS DOUBLE,
     TWIN DOUBLE,
-    VSET DOUBLE,
     PRIMARY KEY (region)
 );
 COMMENT ON TABLE sup_cap_premium_activity IS 'CAPRI''s CAP premium PRME per regional unit and activity (per ha or per head): the crop columns from crop_premium.csv (every region, model codes), the others from CAPREG''s DATA2 extract sources/capreg/capreg_cap_premium.csv (tools/build/build_model_premium_prices.py; the model read the extract and joined them at run time until 31 October 2026)';
@@ -701,7 +687,7 @@ INSERT INTO value_units VALUES
   ('sup_cap_premium_activity', 'TEXT', NULL, 'open', 'cap_premium_activity.TEXT: unit to be established (per ha for crops, per head for animals)'),
   ('sup_cap_premium_activity', 'GRAS', NULL, 'open', 'cap_premium_activity.GRAS: unit to be established (per ha for crops, per head for animals)'),
   ('sup_cap_premium_activity', 'MAIF', NULL, 'open', 'cap_premium_activity.MAIF: unit to be established (per ha for crops, per head for animals)'),
-  ('sup_cap_premium_activity', 'SETA', NULL, 'open', 'cap_premium_activity.SETA: unit to be established (per ha for crops, per head for animals)'),
+  ('sup_cap_premium_activity', 'FALL', NULL, 'open', 'cap_premium_activity.FALL: unit to be established (per ha for crops, per head for animals)'),
   ('sup_cap_premium_activity', 'AGGT', NULL, 'open', 'cap_premium_activity.AGGT: unit to be established (per ha for crops, per head for animals)'),
   ('sup_cap_premium_activity', 'ANNC', NULL, 'open', 'cap_premium_activity.ANNC: unit to be established (per ha for crops, per head for animals)'),
   ('sup_cap_premium_activity', 'ARAC', NULL, 'open', 'cap_premium_activity.ARAC: unit to be established (per ha for crops, per head for animals)'),

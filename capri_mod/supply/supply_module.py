@@ -1024,7 +1024,7 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
         # 1. Arable land constraint
         #
         # Every activity that occupies ARABLE land must be in this row, including
-        # fodder on arable land (MAIF, OFAR, ROOF) and fallow / set-aside (SETA). All
+        # fodder on arable land (MAIF, OFAR, ROOF) and fallow / set-aside (VSET, FALL). All
         # three used to be left out, with two consequences:
         #   - the right-hand side (arable land) counted the fodder area while the
         #     sum did not, so the row carried ~14 Mha of built-in slack and could
@@ -1073,7 +1073,10 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
         # so it fits the upper-bound form. A negative requirement (a scenario
         # REMOVING an existing obligation) is skipped rather than inverted into
         # a nonsensical ceiling.
-        if set_aside_requirement and set_aside_requirement > 0 and "SETA" in acts_idx:
+        # the set-aside activities of CAPRI's e_setaLandscape (setaFallow: VSET and FALL; ISET, GSET, TSET have no
+        # area in CAPRI's 2017 and 2030 data); one activity, SETA = VSET + FALL, until S2 (7 November 2026)
+        _seta_acts = [a for a in ("VSET", "FALL") if a in acts_idx]
+        if set_aside_requirement and set_aside_requirement > 0 and _seta_acts:
             uaa_total = (self._land_of("ARABLE")
                          + self._land_of("PERMANENT")
                          + self._land_of("GRASSLAND")
@@ -1088,13 +1091,14 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
                 # set-aside is added on top. A member state with no entry is
                 # already at the target. The requested share scales the
                 # ambition exactly as CAPRI's lndscpTarg does (10% = full).
-                _seta0 = float(self._base_levels().get("SETA", 0.0))
+                _seta0 = sum(float(self._base_levels().get(a, 0.0)) for a in _seta_acts)   # CAPRI's SETF
                 floor = (set_aside_requirement / 0.10) * (_pp / 100.0) * uaa_total + _seta0
             else:
                 floor = set_aside_requirement * uaa_total
             self.ev.fall_floor = float(floor)
             row_seta = np.zeros(n)
-            row_seta[acts_idx["SETA"]] = -1.0
+            for a in _seta_acts:
+                row_seta[acts_idx[a]] = -1.0
             A_rows.append(row_seta)
             self.ev.row_labels.append("landscape_floor")
             b_rows.append(-floor)
@@ -1362,13 +1366,14 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
         # prep_sim.gms): LO = max(0.1 x level, 1e-8), UP = max(10 x level, level + 100), level = the data level of the
         # simulation (here the region's base). Without them an activity could leave its calibration range entirely
         # (K27: Dutch fattening sheep 10 -> 2,923 thousand head, dairy cows to 0 under Farm-to-Fork). CAPRI's own
-        # exemption: set-aside (VSET 1e-6 .. 1e5; the model's SETA). The additive 100 is in CAPRI's units: 1000 ha
+        # exemption: voluntary set-aside (VSET 1e-6 .. 1e5, set_supply_bounds.gms l. 42-43; FALL takes the rule, as in
+        # CAPRI; until S2, 7 November 2026, the model's SETA = VSET + FALL was exempt). The additive 100 is in CAPRI's units: 1000 ha
         # (crops, as the model) or 1000 head of CAPRI's activity (LEVL), converted to the model's herd units by
         # CAPRI's LEVL per model head in 2017 (capri_level_ratio.csv: poultry in thousand head against CAPRI's million,
         # fattening sheep, bulls and heifers counted as census stock against CAPRI's activity level).
         _lr = getattr(self.data, "capri_level_ratio", None)
         for i, a in enumerate(self.acts):
-            if (a in FIXED_ACTIVITIES or (a in _unc and float(_x0f.get(a, 0.0)) > 1e-8) or a == "SETA"
+            if (a in FIXED_ACTIVITIES or (a in _unc and float(_x0f.get(a, 0.0)) > 1e-8) or a == "VSET"
                     or (a not in CROPS and a not in ANIMALS)):
                 continue
             v = float(_x0f.get(a, 0.0))
@@ -1924,7 +1929,7 @@ class RegionalSupplyModel(RegionalStateMixin, LivestockBlock, FertilisationBlock
 def _region_nutrients(d: dict, region: str) -> pd.DataFrame:
     """CAPRI's fertiliser coefficients of the region's crops (NITF, PHOF, POTF; nutrient_coefs_regional.csv), crops
     CAPRI has nowhere in the member state left out (no fertiliser). Until 29 October 2026 a national table without
-    builder (nutrient_coefs.csv) under them, which OFOD (OFAR and ROOF since S2), SETA and WINE kept in every region (KNOWN_ISSUES K100)."""
+    builder (nutrient_coefs.csv) under them, which OFOD (OFAR and ROOF since S2), SETA (VSET and FALL since S2) and WINE kept in every region (KNOWN_ISSUES K100)."""
     reg = d["nutrients_regional"]
     if region not in reg.index.get_level_values(0):
         return pd.DataFrame(columns=["N", "P2O5", "K2O"], dtype=float)

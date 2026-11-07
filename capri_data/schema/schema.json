@@ -3200,6 +3200,12 @@
      "basis": "CAPRI's LEVL of crop activities (CAPRIunits.gdx P_CAPRIunits: U_1000ha)"
     },
     {
+     "item": "FALL",
+     "unit": "U_1000ha",
+     "status": "capri",
+     "basis": "CAPRI's LEVL of crop activities (CAPRIunits.gdx P_CAPRIunits: U_1000ha)"
+    },
+    {
      "item": "FLOW",
      "unit": "U_1000ha",
      "status": "capri",
@@ -3314,12 +3320,6 @@
      "basis": "CAPRI's LEVL of crop activities (CAPRIunits.gdx P_CAPRIunits: U_1000ha)"
     },
     {
-     "item": "SETA",
-     "unit": "U_1000ha",
-     "status": "capri",
-     "basis": "CAPRI's LEVL of crop activities (CAPRIunits.gdx P_CAPRIunits: U_1000ha)"
-    },
-    {
      "item": "SOYA",
      "unit": "U_1000ha",
      "status": "capri",
@@ -3369,6 +3369,12 @@
     },
     {
      "item": "TOMA",
+     "unit": "U_1000ha",
+     "status": "capri",
+     "basis": "CAPRI's LEVL of crop activities (CAPRIunits.gdx P_CAPRIunits: U_1000ha)"
+    },
+    {
+     "item": "VSET",
      "unit": "U_1000ha",
      "status": "capri",
      "basis": "CAPRI's LEVL of crop activities (CAPRIunits.gdx P_CAPRIunits: U_1000ha)"
@@ -22408,7 +22414,7 @@
    "layout": [
     "unnamed"
    ],
-   "comment": "EU producer prices 2017 (build_eu_producer_prices.py): crops from CAPRI's regional prices; SHGM, SHGF from tools/lib/_sheep_goat.eu_prices; SETA's 0 from sources/unsourced/producer_prices_no_builder.csv",
+   "comment": "EU producer prices 2017 (build_eu_producer_prices.py): crops from CAPRI's regional prices; SHGM, SHGF from tools/lib/_sheep_goat.eu_prices; VSET's and FALL's 0 (SETA's until S2, 7 November 2026) from sources/unsourced/producer_prices_no_builder.csv",
    "columns": [
     {
      "name": "activity",
@@ -22469,6 +22475,12 @@
      "unit": "U_EuPerTon",
      "status": "builder",
      "basis": "revenue over production of CAPRI's YILD x MPRI (build_crop_economics_2017.py: EUR/t)"
+    },
+    {
+     "item": "FALL",
+     "unit": "U_EuPerTon",
+     "status": "builder",
+     "basis": "0 by convention (producer_prices_no_builder.csv)"
     },
     {
      "item": "GRAS",
@@ -22561,12 +22573,6 @@
      "basis": "revenue over production of CAPRI's YILD x MPRI (build_crop_economics_2017.py: EUR/t)"
     },
     {
-     "item": "SETA",
-     "unit": "U_EuPerTon",
-     "status": "builder",
-     "basis": "0 by convention (producer_prices_no_builder.csv)"
-    },
-    {
      "item": "SHGF",
      "unit": null,
      "status": "open",
@@ -22631,6 +22637,12 @@
      "unit": "U_EuPerTon",
      "status": "builder",
      "basis": "revenue over production of CAPRI's YILD x MPRI (build_crop_economics_2017.py: EUR/t)"
+    },
+    {
+     "item": "VSET",
+     "unit": "U_EuPerTon",
+     "status": "builder",
+     "basis": "0 by convention (producer_prices_no_builder.csv)"
     },
     {
      "item": "WINE",
@@ -31661,8 +31673,7 @@
     "builders": [
      "build_cattle_intensity",
      "build_dairy_intensity",
-     "build_grass_intensity",
-     "build_labour_setaside"
+     "build_grass_intensity"
     ],
     "checks": [],
     "tests": []
@@ -31714,9 +31725,7 @@
    "notes": [],
    "read_by": {
     "model": [],
-    "builders": [
-     "build_labour_setaside"
-    ],
+    "builders": [],
     "checks": [],
     "tests": []
    }
@@ -31770,8 +31779,7 @@
     "builders": [
      "build_cattle_intensity",
      "build_dairy_intensity",
-     "build_grass_intensity",
-     "build_labour_setaside"
+     "build_grass_intensity"
     ],
     "checks": [],
     "tests": []
@@ -35543,7 +35551,12 @@
      "not_null": false
     },
     {
-     "name": "SETA",
+     "name": "VSET",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "FALL",
      "type": "DOUBLE",
      "not_null": false
     },
@@ -35751,11 +35764,6 @@
      "name": "TWIN",
      "type": "DOUBLE",
      "not_null": false
-    },
-    {
-     "name": "VSET",
-     "type": "DOUBLE",
-     "not_null": false
     }
    ],
    "primary_key": [
@@ -35902,6 +35910,12 @@
      "unit": null,
      "status": "open",
      "basis": "cap_premium_activity.EAAG: unit to be established (per ha for crops, per head for animals)"
+    },
+    {
+     "item": "FALL",
+     "unit": null,
+     "status": "open",
+     "basis": "cap_premium_activity.FALL: unit to be established (per ha for crops, per head for animals)"
     },
     {
      "item": "FLOW",
@@ -36124,12 +36138,6 @@
      "unit": null,
      "status": "open",
      "basis": "cap_premium_activity.SCOW: unit to be established (per ha for crops, per head for animals)"
-    },
-    {
-     "item": "SETA",
-     "unit": null,
-     "status": "open",
-     "basis": "cap_premium_activity.SETA: unit to be established (per ha for crops, per head for animals)"
     },
     {
      "item": "SETF",
@@ -37045,7 +37053,12 @@
      "not_null": true
     },
     {
-     "name": "SETA",
+     "name": "VSET",
+     "type": "DOUBLE",
+     "not_null": true
+    },
+    {
+     "name": "FALL",
      "type": "DOUBLE",
      "not_null": true
     }
@@ -37086,6 +37099,12 @@
      "unit": null,
      "status": "open",
      "basis": "crop_premium.DWHE: unit to be established"
+    },
+    {
+     "item": "FALL",
+     "unit": null,
+     "status": "open",
+     "basis": "crop_premium.FALL: unit to be established"
     },
     {
      "item": "FLOW",
@@ -37202,12 +37221,6 @@
      "basis": "crop_premium.RYEM: unit to be established"
     },
     {
-     "item": "SETA",
-     "unit": null,
-     "status": "open",
-     "basis": "crop_premium.SETA: unit to be established"
-    },
-    {
      "item": "SOYA",
      "unit": null,
      "status": "open",
@@ -37260,6 +37273,12 @@
      "unit": null,
      "status": "open",
      "basis": "crop_premium.TOMA: unit to be established"
+    },
+    {
+     "item": "VSET",
+     "unit": null,
+     "status": "open",
+     "basis": "crop_premium.VSET: unit to be established"
     },
     {
      "item": "WINE",
@@ -37847,7 +37866,7 @@
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_labour_setaside",
-    "sources": "$EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/AACT_TO_XX.csv; $REFERENCE/sets/simini_21730/CACT_TO_NGRP.csv; $REFERENCE/sets/simini_21730/COLS.csv; $REFERENCE/sets/simini_21730/EPRD_TO_GRP.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FEED_TRD.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/MitiTechAmm.csv; $REFERENCE/sets/simini_21730/OYANI.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/PERM_NGRP.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/RMEU_to_RM.csv; $REFERENCE/sets/simini_21730/RMS.csv; $REFERENCE/sets/simini_21730/RMS_TO_RM.csv; $REFERENCE/sets/simini_21730/RMTP.csv; $REFERENCE/sets/simini_21730/RM_TO_RMTP.csv; $REFERENCE/sets/simini_21730/ROWS.csv; $REFERENCE/sets/simini_21730/SplitActs.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $SOURCES/capreg/res_17<CC>.txt; $SOURCES/capri_export/DATA2_<CC>.txt; $SOURCES/gams/aggregation/defaultA.agg; $SOURCES/pmp2030/estnlp_results_<CC>.txt; $SOURCES/pmp2030/estnlp_results_PELA.txt; $SOURCES/pmp2030/pmppar_21730<CC>defaulta.txt"
+    "sources": "$EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/AACT_TO_XX.csv; $REFERENCE/sets/simini_21730/CACT_TO_NGRP.csv; $REFERENCE/sets/simini_21730/COLS.csv; $REFERENCE/sets/simini_21730/EPRD_TO_GRP.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FEED_TRD.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/MitiTechAmm.csv; $REFERENCE/sets/simini_21730/OYANI.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/PERM_NGRP.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/RMEU_to_RM.csv; $REFERENCE/sets/simini_21730/RMS.csv; $REFERENCE/sets/simini_21730/RMS_TO_RM.csv; $REFERENCE/sets/simini_21730/RMTP.csv; $REFERENCE/sets/simini_21730/RM_TO_RMTP.csv; $REFERENCE/sets/simini_21730/ROWS.csv; $REFERENCE/sets/simini_21730/SplitActs.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $SOURCES/capreg/res_17<CC>.txt; $SOURCES/capri_export/DATA2_<CC>.txt; $SOURCES/gams/aggregation/defaultA.agg"
    },
    "notes": [],
    "read_by": {
@@ -39534,7 +39553,12 @@
      "not_null": false
     },
     {
-     "name": "SETA",
+     "name": "VSET",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "FALL",
      "type": "DOUBLE",
      "not_null": false
     }
@@ -39575,6 +39599,12 @@
      "unit": null,
      "status": "open",
      "basis": "nutrients_regional.DWHE: unit to be established"
+    },
+    {
+     "item": "FALL",
+     "unit": null,
+     "status": "open",
+     "basis": "nutrients_regional.FALL: unit to be established"
     },
     {
      "item": "FLOW",
@@ -39691,12 +39721,6 @@
      "basis": "nutrients_regional.RYEM: unit to be established"
     },
     {
-     "item": "SETA",
-     "unit": null,
-     "status": "open",
-     "basis": "nutrients_regional.SETA: unit to be established"
-    },
-    {
      "item": "SOYA",
      "unit": null,
      "status": "open",
@@ -39749,6 +39773,12 @@
      "unit": null,
      "status": "open",
      "basis": "nutrients_regional.TOMA: unit to be established"
+    },
+    {
+     "item": "VSET",
+     "unit": null,
+     "status": "open",
+     "basis": "nutrients_regional.VSET: unit to be established"
     },
     {
      "item": "WINE",
@@ -40771,7 +40801,7 @@
    "file": "capri_data/2017/supply/set_aside_split.csv",
    "declared_in": "18_supply_more.sql",
    "layout": [],
-   "comment": "CAPRI's labour accounts and its two set-aside activities, per model region (22 October 2026, the project lead's (tools/build/build_labour_setaside.py)",
+   "comment": "CAPRI's premiums PRME (EUR/ha) of its two set-aside activities VSET and FALL per model region, 2017 and 2030 (the 2030 values in the model's 2017 money), for the set-aside report (tools/build/build_labour_setaside.py; until S2, 7 November 2026, also the split of the model's SETA and its labour)",
    "columns": [
     {
      "name": "region",
@@ -40779,17 +40809,7 @@
      "not_null": true
     },
     {
-     "name": "share_vset",
-     "type": "DOUBLE",
-     "not_null": true
-    },
-    {
      "name": "prem_vset",
-     "type": "DOUBLE",
-     "not_null": true
-    },
-    {
-     "name": "labt_vset",
      "type": "DOUBLE",
      "not_null": true
     },
@@ -40799,47 +40819,12 @@
      "not_null": true
     },
     {
-     "name": "labt_fall",
-     "type": "DOUBLE",
-     "not_null": true
-    },
-    {
-     "name": "share_vset_2030",
-     "type": "DOUBLE",
-     "not_null": true
-    },
-    {
      "name": "prem_vset_2030",
      "type": "DOUBLE",
      "not_null": true
     },
     {
-     "name": "labt_vset_2030",
-     "type": "DOUBLE",
-     "not_null": true
-    },
-    {
      "name": "prem_fall_2030",
-     "type": "DOUBLE",
-     "not_null": true
-    },
-    {
-     "name": "labt_fall_2030",
-     "type": "DOUBLE",
-     "not_null": true
-    },
-    {
-     "name": "w_vset",
-     "type": "DOUBLE",
-     "not_null": true
-    },
-    {
-     "name": "w_vset_capri2030",
-     "type": "DOUBLE",
-     "not_null": true
-    },
-    {
-     "name": "w_vset_recipe2030",
      "type": "DOUBLE",
      "not_null": true
     }
@@ -40852,89 +40837,35 @@
    "checks": [],
    "units": [
     {
-     "item": "labt_fall",
-     "unit": null,
-     "status": "open",
-     "basis": "set_aside_split.labt_fall: unit to be established"
-    },
-    {
-     "item": "labt_fall_2030",
-     "unit": null,
-     "status": "open",
-     "basis": "set_aside_split.labt_fall_2030: unit to be established"
-    },
-    {
-     "item": "labt_vset",
-     "unit": null,
-     "status": "open",
-     "basis": "set_aside_split.labt_vset: unit to be established"
-    },
-    {
-     "item": "labt_vset_2030",
-     "unit": null,
-     "status": "open",
-     "basis": "set_aside_split.labt_vset_2030: unit to be established"
-    },
-    {
      "item": "prem_fall",
-     "unit": null,
-     "status": "open",
-     "basis": "set_aside_split.prem_fall: unit to be established"
+     "unit": "U_EuPerHa",
+     "status": "capri",
+     "basis": "CAPRI's PRME of FALL"
     },
     {
      "item": "prem_fall_2030",
-     "unit": null,
-     "status": "open",
-     "basis": "set_aside_split.prem_fall_2030: unit to be established"
+     "unit": "U_EuPerHa",
+     "status": "capri",
+     "basis": "CAPRI's 2030 PRME of FALL over CAPRI's inflation to 2030"
     },
     {
      "item": "prem_vset",
-     "unit": null,
-     "status": "open",
-     "basis": "set_aside_split.prem_vset: unit to be established"
+     "unit": "U_EuPerHa",
+     "status": "capri",
+     "basis": "CAPRI's PRME of VSET"
     },
     {
      "item": "prem_vset_2030",
-     "unit": null,
-     "status": "open",
-     "basis": "set_aside_split.prem_vset_2030: unit to be established"
-    },
-    {
-     "item": "share_vset",
-     "unit": null,
-     "status": "open",
-     "basis": "set_aside_split.share_vset: unit to be established"
-    },
-    {
-     "item": "share_vset_2030",
-     "unit": null,
-     "status": "open",
-     "basis": "set_aside_split.share_vset_2030: unit to be established"
-    },
-    {
-     "item": "w_vset",
-     "unit": null,
-     "status": "open",
-     "basis": "set_aside_split.w_vset: unit to be established"
-    },
-    {
-     "item": "w_vset_capri2030",
-     "unit": null,
-     "status": "open",
-     "basis": "set_aside_split.w_vset_capri2030: unit to be established"
-    },
-    {
-     "item": "w_vset_recipe2030",
-     "unit": null,
-     "status": "open",
-     "basis": "set_aside_split.w_vset_recipe2030: unit to be established"
+     "unit": "U_EuPerHa",
+     "status": "capri",
+     "basis": "CAPRI's 2030 PRME of VSET over CAPRI's inflation to 2030"
     }
    ],
    "provenance": {
     "nature": "capri",
     "origins": "CAPRI",
     "builder": "build_labour_setaside",
-    "sources": "$EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/AACT_TO_XX.csv; $REFERENCE/sets/simini_21730/CACT_TO_NGRP.csv; $REFERENCE/sets/simini_21730/COLS.csv; $REFERENCE/sets/simini_21730/EPRD_TO_GRP.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FEED_TRD.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/MitiTechAmm.csv; $REFERENCE/sets/simini_21730/OYANI.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/PERM_NGRP.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/RMEU_to_RM.csv; $REFERENCE/sets/simini_21730/RMS.csv; $REFERENCE/sets/simini_21730/RMS_TO_RM.csv; $REFERENCE/sets/simini_21730/RMTP.csv; $REFERENCE/sets/simini_21730/RM_TO_RMTP.csv; $REFERENCE/sets/simini_21730/ROWS.csv; $REFERENCE/sets/simini_21730/SplitActs.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $SOURCES/capreg/res_17<CC>.txt; $SOURCES/capri_export/DATA2_<CC>.txt; $SOURCES/gams/aggregation/defaultA.agg; $SOURCES/pmp2030/estnlp_results_<CC>.txt; $SOURCES/pmp2030/estnlp_results_PELA.txt; $SOURCES/pmp2030/pmppar_21730<CC>defaulta.txt"
+    "sources": "$EXPORTS/res_2_1730greendeal_refpol_endotech_all_inidefaulta.csv; $REFERENCE/sets/simini_21730/<CC>.csv; $REFERENCE/sets/simini_21730/AACT_TO_XX.csv; $REFERENCE/sets/simini_21730/CACT_TO_NGRP.csv; $REFERENCE/sets/simini_21730/COLS.csv; $REFERENCE/sets/simini_21730/EPRD_TO_GRP.csv; $REFERENCE/sets/simini_21730/FEED_TO_O.csv; $REFERENCE/sets/simini_21730/FEED_TRD.csv; $REFERENCE/sets/simini_21730/FODCRP.csv; $REFERENCE/sets/simini_21730/MAACT.csv; $REFERENCE/sets/simini_21730/MCACT.csv; $REFERENCE/sets/simini_21730/MPACT.csv; $REFERENCE/sets/simini_21730/Map_RR.csv; $REFERENCE/sets/simini_21730/MitiTechAmm.csv; $REFERENCE/sets/simini_21730/OYANI.csv; $REFERENCE/sets/simini_21730/PACT.csv; $REFERENCE/sets/simini_21730/PERM_NGRP.csv; $REFERENCE/sets/simini_21730/RALL.csv; $REFERENCE/sets/simini_21730/RMEU_to_RM.csv; $REFERENCE/sets/simini_21730/RMS.csv; $REFERENCE/sets/simini_21730/RMS_TO_RM.csv; $REFERENCE/sets/simini_21730/RMTP.csv; $REFERENCE/sets/simini_21730/RM_TO_RMTP.csv; $REFERENCE/sets/simini_21730/ROWS.csv; $REFERENCE/sets/simini_21730/SplitActs.csv; $REFERENCE/sets/simini_21730/XX1.csv; $REFERENCE/sets/simini_21730/cropDivGrps_mCact.csv; $REFERENCE/sets/simini_21730/landTypesMrk.csv; $REFERENCE/sets/simini_21730/landTypes_to_pact.csv; $SOURCES/capreg/res_17<CC>.txt; $SOURCES/capri_export/DATA2_<CC>.txt; $SOURCES/gams/aggregation/defaultA.agg"
    },
    "notes": [],
    "read_by": {
@@ -42149,7 +42080,12 @@
      "not_null": false
     },
     {
-     "name": "SETA",
+     "name": "VSET",
+     "type": "DOUBLE",
+     "not_null": false
+    },
+    {
+     "name": "FALL",
      "type": "DOUBLE",
      "not_null": false
     },
@@ -42357,11 +42293,6 @@
      "name": "TWIN",
      "type": "DOUBLE",
      "not_null": false
-    },
-    {
-     "name": "VSET",
-     "type": "DOUBLE",
-     "not_null": false
     }
    ],
    "primary_key": [
@@ -42508,6 +42439,12 @@
      "unit": null,
      "status": "open",
      "basis": "capri_cap_premium_2030.EAAG: unit to be established"
+    },
+    {
+     "item": "FALL",
+     "unit": null,
+     "status": "open",
+     "basis": "capri_cap_premium_2030.FALL: unit to be established"
     },
     {
      "item": "FLOW",
@@ -42730,12 +42667,6 @@
      "unit": null,
      "status": "open",
      "basis": "capri_cap_premium_2030.SCOW: unit to be established"
-    },
-    {
-     "item": "SETA",
-     "unit": null,
-     "status": "open",
-     "basis": "capri_cap_premium_2030.SETA: unit to be established"
     },
     {
      "item": "SETF",
@@ -43795,6 +43726,12 @@
      "basis": "CAPRI's TOIN per ha (build_crop_economics_2017.py: EUR/ha)"
     },
     {
+     "item": "FALL",
+     "unit": "U_EuPerHa",
+     "status": "builder",
+     "basis": "CAPRI's TOIN per ha (build_crop_economics_2017.py: EUR/ha)"
+    },
+    {
      "item": "FLOW",
      "unit": "U_EuPerHa",
      "status": "builder",
@@ -43939,12 +43876,6 @@
      "basis": "CAPRI's TOIN per ha (build_crop_economics_2017.py: EUR/ha)"
     },
     {
-     "item": "SETA",
-     "unit": "U_EuPerHa",
-     "status": "builder",
-     "basis": "CAPRI's TOIN per ha (build_crop_economics_2017.py: EUR/ha)"
-    },
-    {
      "item": "SHGF",
      "unit": "U_EuPerHd",
      "status": "builder",
@@ -44006,6 +43937,12 @@
     },
     {
      "item": "TOMA",
+     "unit": "U_EuPerHa",
+     "status": "builder",
+     "basis": "CAPRI's TOIN per ha (build_crop_economics_2017.py: EUR/ha)"
+    },
+    {
+     "item": "VSET",
      "unit": "U_EuPerHa",
      "status": "builder",
      "basis": "CAPRI's TOIN per ha (build_crop_economics_2017.py: EUR/ha)"
@@ -44448,6 +44385,12 @@
      "basis": "CAPRI's YILD / 1000 (build_crop_economics_2017.py: t/ha)"
     },
     {
+     "item": "FALL",
+     "unit": "U_TonPerHa",
+     "status": "builder",
+     "basis": "CAPRI's YILD / 1000 (build_crop_economics_2017.py: t/ha)"
+    },
+    {
      "item": "FLOW",
      "unit": "U_ValueUnitPerHa",
      "status": "builder",
@@ -44592,12 +44535,6 @@
      "basis": "CAPRI's YILD / 1000 (build_crop_economics_2017.py: t/ha)"
     },
     {
-     "item": "SETA",
-     "unit": "U_TonPerHa",
-     "status": "builder",
-     "basis": "CAPRI's YILD / 1000 (build_crop_economics_2017.py: t/ha)"
-    },
-    {
      "item": "SHGF",
      "unit": "U_TonPerHd",
      "status": "builder",
@@ -44659,6 +44596,12 @@
     },
     {
      "item": "TOMA",
+     "unit": "U_TonPerHa",
+     "status": "builder",
+     "basis": "CAPRI's YILD / 1000 (build_crop_economics_2017.py: t/ha)"
+    },
+    {
+     "item": "VSET",
      "unit": "U_TonPerHa",
      "status": "builder",
      "basis": "CAPRI's YILD / 1000 (build_crop_economics_2017.py: t/ha)"

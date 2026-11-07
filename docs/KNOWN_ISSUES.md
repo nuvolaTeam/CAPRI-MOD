@@ -25,6 +25,7 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K93](#k93) | CAPRI mitigation options not built; documents disagree on which are in | open: no-till and legume share unmeasured; UreaSubst parked; the others not needed for Farm-to-Fork and the Green Deal |
 | [K120](#k120) | S7 ("capri"): the market supply Hessian measured after the first supply solve had lost most of its response; the baseline calibration's stall rule stopped it uncorrected | fixed: 20 and 37 units, full EU Farm-to-Fork and Green Deal (7 November 2026); open in S7: the baseline calibration's first-round drift (located: set-aside and pulses, the ecological set-aside row) |
 | [K121](#k121) | S2 step 1a: other fodder split into CAPRI's OFAR and ROOF; the fodder roots' feed (FROO) tied to their land for the first time | done on mini-EU (7 November 2026); the full runs and the suite to come |
+| [K122](#k122) | S2 step 1b: set-aside split into CAPRI's VSET and FALL; the winter-cover option's potential counted set-aside CAPRI fills | done on mini-EU (7 November 2026); the full runs and the suite to come |
 
 ## Resolved (107)
 
@@ -129,7 +130,7 @@ the code: they became K92-K96, joined K73, K80, K91, or were closed or historica
 | [K100](#k100) | A national nutrient table without builder (nutrient_coefs.csv) filled three crops' coefficients and fallow's mineral N | fixed |
 | [K102](#k102) | Data files that no run and no builder reads (census) | fixed |
 | [K110](#k110) | The market's Newton-Krylov solve did not converge on a real shock; its test had passed without one | fixed |
-| [K111](#k111) | The set-aside report booked part of a set-aside increase as VSET where CAPRI has none | fixed |
+| [K111](#k111) | The set-aside report booked part of a set-aside increase as VSET where CAPRI has none | fixed; the split itself removed with K122 |
 | [K112](#k112) | Histosols: regions without a JRC record took their country's share; Greek grassland had no N2O | fixed |
 | [K113](#k113) | Croatia had no AD option: CAPRI's fallback_Balkan fills its VSER and housing share | fixed |
 | [K114](#k114) | Norway lacked CAPRI's mirrored MITERRA data and Sweden's AD data: no housed liquid manure, no AD | fixed |
@@ -2355,4 +2356,33 @@ ROOF's land, so the rations may move from FROO to FOFA, which OFAR supplies).
 Found with it, not caused by it: build_farm_size_noneu does not reproduce farm_size_noneu.csv after the container's
 package change of 7 November 2026 (casadi 3.8.1 to 3.8.2): cells near zero of an estimate that is not unique (Turkey's
 TR800000 sheep holdings 15-20 head 5e-50 against 845); the committed file kept, the builder's output not used.
+
+### K122: Set-aside split into CAPRI's VSET and FALL (S2 step 1b, 7 November 2026)
+
+Until 7 November 2026 the model had one set-aside activity, SETA = CAPRI's VSET (voluntary set-aside) + FALL (fallow),
+with VSET's exemption from the calibration bounds, and the report split a SETA level into VSET and FALL by CAPRI's VSET
+share at base and the share of a change CAPRI's PMP terms give VSET (K111). S2 step 1b makes VSET and FALL the model's
+own activities, as CAPRI's:
+- codes/model_activities.csv and model_activity_classes.csv (both CAPRI's crop-diversification group OSET,
+  landTypes_to_pact ARAC), definitions.CROPS;
+- the landscape floor on both (CAPRI's e_setaLandscape over setaFallow, supply_model.gms l. 2315-2321; its SETF the base
+  VSET + FALL), the ecological set-aside row with each at its own weight (1 and 1);
+- the calibration bounds: VSET exempt (set_supply_bounds.gms l. 42-43), FALL under the rule (0.1 to 10 times its level,
+  at least + 100), as CAPRI; before, SETA was exempt as a whole;
+- the BISS adder and the EU price rows (0) on both; the set-aside and labour reports from the two levels directly
+  (set_aside_split.csv keeps CAPRI's premiums per ha only; its split columns and the PMP weights' helper removed);
+- the builders' mappings (no SETA composite left; CAPRI's ISET, GSET and TSET, which have no area in its 2017 and 2030
+  data, no longer mapped); the data rebuilt: every changed file identical outside the set-aside rows and columns to 1e-9,
+  except the winter-cover option (below).
+
+Found with it: the winter-cover option's maximal share (build_winter_cover_option.py) counted the set-aside area as open
+to catch crops, because CAPRI's wintercovershare.gms gives VSET a filled share of 1 and the builder looked the share up
+under the model's SETA, which CAPRI's file does not have (so 0). With VSET's own share the maximal share falls where
+there is voluntary set-aside (AT110000 0.529 to 0.473); 660 cells of winter_cover_option.csv change.
+
+Mini-EU Farm-to-Fork (20 units, against step 1a): converged in 6 iterations, baseline 5; the 24 indicators within 0.6
+point (poultry -18.4% against -17.8%, manure N2O -22.3% against -21.9%). Set-aside and fallow 2,405 thousand ha against
+2,418; VSET 1,032 against the reported split's 698, FALL 1,373 against 1,720 (now the models' choice under FALL's bounds);
+labour -7.9% against -7.0% (VSET's and FALL's own labour coefficients). CAPRI's own split under Farm-to-Fork is not at
+hand to compare.
 

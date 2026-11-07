@@ -69,7 +69,7 @@ COSTS = SUPPLY / "variable_costs.csv"
 NUTRIENTS = SUPPLY / "nutrients_regional.csv"
 #: the layouts of the tables written (columns in the committed files' order)
 AREA_COLS = ["SWHE", "DWHE", "RYEM", "BARL", "OATS", "CORN", "OCER", "PARI", "PULS", "SUGB", "POTA", "TOMA", "OVEG",
-             "APPL", "OFRU", "CITR", "TAGR", "WINE", "OLIV", "TABO", "GRAS", "TOBA", "TEXT", "MAIF", "OFAR", "ROOF", "SETA",
+             "APPL", "OFRU", "CITR", "TAGR", "WINE", "OLIV", "TABO", "GRAS", "TOBA", "TEXT", "MAIF", "OFAR", "ROOF", "VSET", "FALL",
              "RAPE", "SUNF", "SOYA", "OOIL", "OCRO", "OIND", "NURS", "FLOW"]
 LAND_COLS = ["ARABLE", "PERMANENT", "GRASSLAND", "FALLOW"]
 HERD_COLS = ["DCOW", "SCOW", "COWS", "BULL", "HEIF", "CALV", "PIGS", "PIGF", "HENS", "POUL", "SHGM", "SHGF"]
@@ -92,7 +92,7 @@ HERD_MAP = {"DCOW": "DCOW", "SCOW": "SCOW", "BULL": "BULL", "HEIF": "HEIF",
 
 #: cost columns verified equal to CAPRI TOIN on DE11, FR10 and ES61
 COST_ANIMALS = ("DCOW", "BULL", "PIGF", "OANI")
-COST_EXCLUDE = ("SETA", "WINE")
+COST_EXCLUDE = ("VSET", "FALL", "WINE")   # (SETA until S2, 7 November 2026)
 # the crops on permanent-crop land: the model's classes (capri_data/codes/model_activity_classes.csv, N6), one list
 # with the supply model (DEP-43 fixed, 2 November 2026: nurseries on FRUN as CAPRI)
 PERMANENT_CROPS = _MC.permanent_crops()
@@ -208,7 +208,7 @@ def main(dump_dir: Path):
         # ---- land from the rebuilt areas
         v = areas.loc[reg]
         perm = float(v[[c for c in PERMANENT_CROPS if c in v.index]].sum())
-        grass, fallow = float(v.get("GRAS", 0.0)), float(v.get("SETA", 0.0))
+        grass, fallow = float(v.get("GRAS", 0.0)), float(v.get("VSET", 0.0)) + float(v.get("FALL", 0.0))
         land.at[reg, "PERMANENT"], land.at[reg, "GRASSLAND"] = perm, grass
         land.at[reg, "FALLOW"] = fallow
         land.at[reg, "ARABLE"] = float(v.sum()) - perm - grass - fallow

@@ -74,7 +74,7 @@ def add_model_keys(t: dict) -> dict:
                 continue
             entry = dict(src)
             for m, c in al.items():
-                # a factor under the model's own name (e.g. SETA = FALL + VSET, build_trajectory_capri_ref.py) is kept;
+                # a factor under the model's own name (e.g. SHGT = SHGM + SHGF, build_trajectory_capri_ref.py) is kept;
                 # a model name that is CAPRI's name for another item (CAPRI_OTHER) takes the alias or nothing
                 if c in src and (m not in src or m in CAPRI_OTHER):
                     entry[m] = dict(src[c])

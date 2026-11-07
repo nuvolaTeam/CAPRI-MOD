@@ -16,7 +16,7 @@ class PolicyBlock:
           ecoSetAside  sum(crops but grassland) x r / (1 - r) <= sum(EFA activities x weight)  (r = 5%, efabasis
                        UAAR; weights FALL/VSET (SETA) 1, PULS 0.7, OFAR 0.7 x legume share, catch crops 0.3 where the
                        winter cover option is in the NLP; ISET 0, GSET/TSET none: CAPRI's 2017 and 2030 data have no
-                       area under them, so SETA = FALL + VSET at weight 1)
+                       area under them; VSET and FALL each at its own weight, 1, since S2, 7 November 2026: before, SETA = FALL + VSET)
           cropDiv      Shannon index of the annual crop groups >= its base value
         Where the base does not meet the ecological set-aside rule (the model's base data, not CAPRI's calibrated
         base), the rule is held at the base's own value (REGISTERED)."""
@@ -53,7 +53,8 @@ class PolicyBlock:
             ms = MS_CODE.get(ms, ms)
             # OFAR at CAPRI's weight times the member state's legume share (ROOF does not count); until S2 (7 November
             # 2026) the model's OFOD = OFAR + ROOF carried it scaled by OFAR's share of the two
-            w = {"SETA": st.get(("weight", "FALL"), 0.0), "PULS": st.get(("weight", "PULS"), 0.0),
+            w = {"VSET": st.get(("weight", "VSET"), 0.0), "FALL": st.get(("weight", "FALL"), 0.0),
+                 "PULS": st.get(("weight", "PULS"), 0.0),
                  "OFAR": st.get(("weight", "OFAR"), 0.0) * float(fleg.get(ms, 0.0))}
             row = []
             for j, a in enumerate(acts):

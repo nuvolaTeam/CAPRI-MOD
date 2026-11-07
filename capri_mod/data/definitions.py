@@ -49,7 +49,8 @@ CROPS = [
     "MAIF",  # Maize for forage / silage
     "OFAR",  # Fodder other on arable land (CAPRI OFAR; with ROOF the model's OFOD until S2, 7 November 2026)
     "ROOF",  # Fodder root crops (CAPRI ROOF)
-    "SETA",  # Set-aside
+    "VSET",  # Set-aside voluntary (CAPRI VSET; with FALL the model's SETA until S2, 7 November 2026)
+    "FALL",  # Fallow land (CAPRI FALL)
 ]
 
 # Animal activities

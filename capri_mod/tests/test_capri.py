@@ -1684,7 +1684,7 @@ def test_set_aside_requirement_actually_binds(model):
     # version of this test averaged everything together and so encoded the
     # superseded mechanism, in which set-aside was modelled as a cut to arable
     # land rather than a floor on the non-productive activity.
-    productive = [c for a, c in zip(acts_seen, changes) if a != "SETA"]
+    productive = [c for a, c in zip(acts_seen, changes) if a not in ("VSET", "FALL")]
     assert productive, "no productive activities compared"
     assert sum(productive) / len(productive) < 0, (
         "a 10% non-productive requirement should reduce PRODUCTIVE area on average")
@@ -1724,7 +1724,7 @@ def test_policy_instruments_are_not_inert(data):
             "supply policy adders, so it cannot affect the solve")
     # a BISS cut reaches each crop in full, not inflated by an eco-scheme share (eco-schemes are inside Pillar I)
     d_ = PolicyModule(data, payment_instruments["biss_rate_change"]).get_supply_policy_adders() - base_adders
-    assert abs(float(d_["SWHE"]) + 100.0) < 1e-9 and float(d_["SETA"]) == 0.0
+    assert abs(float(d_["SWHE"]) + 100.0) < 1e-9 and float(d_["VSET"]) == 0.0 and float(d_["FALL"]) == 0.0
     # Pillar II budget changes act per region and activity through CAPRI's premium split by scheme (2030 PRME)
     for name, scen in {"lfa_budget_change": PolicyScenario(name="t", lfa_budget_change=-0.5),
                        "ae_budget_change": PolicyScenario(name="t", ae_budget_change=0.5),
@@ -1761,7 +1761,7 @@ def test_constraint_instruments_reach_the_solve(data):
     # It therefore ADDS a constraint row rather than tightening the arable bound.
     A_base, b_base, _, _ = model._build_constraints()
     A_sa, b_sa, _, _ = model._build_constraints(set_aside_requirement=0.10)
-    if "SETA" in model.acts:
+    if "VSET" in model.acts or "FALL" in model.acts:
         assert len(b_sa) > len(b_base), (
             "set_aside_requirement did not add the landscape-elements floor")
         # locate the floor row by its signature (a negative bound) rather than
@@ -2863,21 +2863,23 @@ def test_norway_miterra_mirror_and_ad_option_as_capri():
             # CAPRI reports the solved level, the model's table the initial share it calibrates on: 0.3% apart (DCOL)
             assert abs(a.loc[(reg, act), "ini"] - v) <= 5e-3 * v, (reg, act, a.loc[(reg, act), "ini"])
 
-def test_set_aside_trajectory_is_fallow_plus_voluntary_set_aside():
-    """KNOWN_ISSUES K115: the model's SETA is CAPRI's FALL + VSET, so its 2030 factor is their sum's growth in CAPRI's 2030
-    reference over 2017 (IT400000: (14.21 + 5.72) / (7.22 + 10.70) = 1.1125), not CAPRI's own SETA row, which is VSET
-    alone (0.534), nor the EU median where a region has no VSET (PL120000: FALL's 103.90 / 57.24 = 1.8152)."""
+def test_set_aside_trajectories_are_fallow_and_voluntary_set_aside():
+    """KNOWN_ISSUES K115, K122: VSET and FALL are the model's own activities since S2 (7 November 2026; before, SETA =
+    FALL + VSET), each with its own 2030 factor from CAPRI's 2030 reference over 2017 (IT400000: VSET 5.72 / 10.70 =
+    0.534, FALL 14.21 / 7.22 = 1.968; PL120000: FALL 103.90 / 57.24 = 1.8152), and no SETA left."""
     import pandas as pd
     t = pd.read_csv(DATA_DIR / "scenarios" / "capri_ref_2030" / "regional.csv")
-    f = t[(t.block == "herds") & (t["item"] == "SETA")].set_index("region")["factor"]
-    assert abs(f["IT400000"] - 1.1125) < 5e-4 and abs(f["PL120000"] - 1.8152) < 5e-4
-    assert not (t["item"] == "VSET").any()
+    h = t[t.block == "herds"]
+    f = h.set_index(["item", "region"])["factor"]
+    assert abs(f[("VSET", "IT400000")] - 5.72 / 10.70) < 5e-3 and abs(f[("FALL", "IT400000")] - 14.21 / 7.22) < 5e-3
+    assert abs(f[("FALL", "PL120000")] - 1.8152) < 5e-4
+    assert not (h["item"] == "SETA").any()
 
 def test_capri_reference_trajectory_reproduces_its_crop_levels(data):
     """The capri_ref_2030 trajectory's level factors are CAPRI's own 2030 over 2017 (no [0.2, 5] band, no 1.0 threshold),
     a level the reference does not list is 0 (GAMS stores no zero: UK grain maize), OFAR and ROOF grow as their own: the
     model's 2017 crop levels times its regional factors give CAPRI's 2030 reference levels (the validation file's ini
-    levels, FALL + VSET for SETA) in every region, the 29 units outside the EU and Norway's included, to 1e-6 relative
+    levels) in every region, the 29 units outside the EU and Norway's included, to 1e-6 relative
     (4 November 2026; until then 96 EU cells were off by more than 1%, France's pulses 0.2 against CAPRI's 0.112, and 247
     outside the EU)."""
     import pandas as pd
@@ -2890,11 +2892,11 @@ def test_capri_reference_trajectory_reproduces_its_crop_levels(data):
         A = load_all_data(str(DATA_DIR))["areas"]
     assert len(A.index) == 250
     ini = pd.read_csv(DATA_DIR / "validation" / "greendeal_2030" / "capri_marginal_terms_ini_2030.csv.xz")
-    # CAPRI's SETA row is VSET (K115); its GRAS row is GRAE + GRAI
+    # CAPRI's SETA row is VSET (K115), its GRAS row GRAE + GRAI
     ini = ini[(ini["item"] == "LEVL") & ~ini["activity"].isin(["SETA", "GRAE", "GRAI"])]
     cap = {}
     for r in ini.itertuples():
-        a = {**M, "VSET": "SETA"}.get(r.activity, r.activity)
+        a = M.get(r.activity, r.activity)
         if a in CROPS:
             cap[(r.region, a)] = cap.get((r.region, a), 0.0) + float(r.value)
     t = pd.read_csv(DATA_DIR / "scenarios" / "capri_ref_2030" / "regional.csv")
@@ -3568,7 +3570,8 @@ def test_capri_activity_bounds(data):
         up, lo = b[lab.index(f"bound_{a}_up")], -b[lab.index(f"bound_{a}_lo")]
         k = float(data["capri_level_ratio"].at["NL120000", a]) if a in data["capri_level_ratio"].columns else 1.0
         assert abs(up - max(10 * v, v + 100 * k)) < 1e-9 and abs(lo - 0.1 * v) < 1e-9, (a, up, lo, v, k)
-    assert not any(l in lab for l in ("bound_SETA_up",) + tuple(f"bound_{f}_up" for f in FIXED_ACTIVITIES))
+    # CAPRI exempts VSET (set_supply_bounds.gms l. 42-43); FALL takes the rule since S2 (7 November 2026)
+    assert not any(l in lab for l in ("bound_VSET_up",) + tuple(f"bound_{f}_up" for f in FIXED_ACTIVITIES))
 
 
 def test_lamb_balance_links_sheep_activities():
@@ -3821,7 +3824,7 @@ def test_npk_crop_need_is_the_crops_own():
     import pandas as _pd
     t = _pd.read_csv(DATA_DIR / "2017" / "environment" / "npk_crop_coefs_2030.csv")
     d = t[(t.capri_region == "DE210000") & (t.nutrient == "N")].set_index("model_crop").need_kg_ha
-    assert d["SETA"] < 10.0 < d["SWHE"]
+    assert d["FALL"] < 10.0 < d["SWHE"]
     assert d["GRAE"] < 0.5 * d["GRAI"]
     assert abs(d["GRAS"] - 0.5 * (d["GRAE"] + d["GRAI"])) < 1.0          # equal areas at the 2030 reference
 
@@ -4354,11 +4357,11 @@ def test_cattle_activities_and_young_animals_per_sex_as_capri():
     assert (ct.q_z > ct.q_b).all() and (ct.q_b > 0).all()
 
 
-def test_labour_accounts_and_set_aside_split_as_capri(data):
+def test_labour_accounts_and_set_aside_as_capri(data):
     """22 October 2026: CAPRI's labour accounts (GROF LABT = sum of LABT x LEVL / 1000, million hours) and its two
-    set-aside activities in the model's SETA (tools/build/build_labour_setaside.py). At the base levels the accounts give
-    CAPRI's own regional total (DE11 2017: 20.66 million hours in res_17DE, where the dump is at hand; within 3%); VSET takes
-    CAPRI's share of SETA at base and w of a change, FALL the rest, the premiums CAPRI's per ha."""
+    set-aside activities VSET and FALL, the model's own since S2 (7 November 2026; tools/build/build_labour_setaside.py).
+    At the base levels the accounts give CAPRI's own regional total (DE11 2017: 20.66 million hours in res_17DE, where the
+    dump is at hand; within 3%); the set-aside table reports the two levels and the premiums CAPRI's per ha."""
     import types
     from capri_mod.model import _labour_table, _set_aside_table
     reg = "DE110000"
@@ -4366,15 +4369,11 @@ def test_labour_accounts_and_set_aside_split_as_capri(data):
     x = x[~x.index.duplicated()]
     res = {reg: types.SimpleNamespace(activities=x)}
     d17 = dict(data, market_year=2017)
-    sa = _set_aside_table(res, d17, "")
+    sa = _set_aside_table(res, d17)
     row = data["set_aside_split"].loc[reg]
-    assert abs(sa.at[reg, "VSET"] - row["share_vset"] * x["SETA"]) < 1e-9
-    assert abs(sa.at[reg, "VSET"] + sa.at[reg, "FALL"] - x["SETA"]) < 1e-9
-    assert abs(sa.at[reg, "prem_VSET"] - sa.at[reg, "VSET"] * row["prem_vset"] / 1000.0) < 1e-12
-    x2 = x.copy(); x2["SETA"] = x["SETA"] + 10.0
-    sa2 = _set_aside_table({reg: types.SimpleNamespace(activities=x2)}, d17, "")
-    assert abs(sa2.at[reg, "VSET"] - sa.at[reg, "VSET"] - 10.0 * row["w_vset"]) < 1e-9
-    lab = _labour_table(res, d17, sa)
+    assert abs(sa.at[reg, "VSET"] - x["VSET"]) < 1e-12 and abs(sa.at[reg, "FALL"] - x["FALL"]) < 1e-12
+    assert abs(sa.at[reg, "prem_VSET"] - x["VSET"] * row["prem_vset"] / 1000.0) < 1e-12
+    lab = _labour_table(res, d17)
     assert set(lab.columns) == {"LABT", "LABF", "LABP"} and abs(lab.at[reg, "LABF"] + lab.at[reg, "LABP"] - lab.at[reg, "LABT"]) < 0.02 * lab.at[reg, "LABT"]
     import re
     dump = SOURCES / "capreg" / "res_17DE.txt"

@@ -40,7 +40,8 @@ CREATE TABLE traj_capri_cap_premium_2030 (
     MAIF DOUBLE,
     OFAR DOUBLE,
     ROOF DOUBLE,
-    SETA DOUBLE,
+    VSET DOUBLE,
+    FALL DOUBLE,
     AGGT DOUBLE,
     ANNC DOUBLE,
     ARAC DOUBLE,
@@ -82,7 +83,6 @@ CREATE TABLE traj_capri_cap_premium_2030 (
     SHGM DOUBLE,
     SOWS DOUBLE,
     TWIN DOUBLE,
-    VSET DOUBLE,
     PRIMARY KEY (region)
 );
 COMMENT ON TABLE traj_capri_cap_premium_2030 IS 'CAPRI''s 2030 prices and premiums for the model''s 2030 baseline, in 2017 money. (tools/build/build_price_trajectory_2030.py)';
@@ -119,7 +119,7 @@ INSERT INTO value_units VALUES
   ('traj_capri_cap_premium_2030', 'SOYA', NULL, 'open', 'capri_cap_premium_2030.SOYA: unit to be established'),
   ('traj_capri_cap_premium_2030', 'OOIL', NULL, 'open', 'capri_cap_premium_2030.OOIL: unit to be established'),
   ('traj_capri_cap_premium_2030', 'TEXT', NULL, 'open', 'capri_cap_premium_2030.TEXT: unit to be established'),
-  ('traj_capri_cap_premium_2030', 'SETA', NULL, 'open', 'capri_cap_premium_2030.SETA: unit to be established'),
+  ('traj_capri_cap_premium_2030', 'FALL', NULL, 'open', 'capri_cap_premium_2030.FALL: unit to be established'),
   ('traj_capri_cap_premium_2030', 'AGGT', NULL, 'open', 'capri_cap_premium_2030.AGGT: unit to be established'),
   ('traj_capri_cap_premium_2030', 'ANNC', NULL, 'open', 'capri_cap_premium_2030.ANNC: unit to be established'),
   ('traj_capri_cap_premium_2030', 'ARAC', NULL, 'open', 'capri_cap_premium_2030.ARAC: unit to be established'),

@@ -233,7 +233,7 @@ def catalogue_files(con, root):
 #: fodder and other non-marketed activities are left out; a staple crop whose gross margin with its CAP payments falls
 #: below ARTIFACT_LOSS EUR/ha is a violation (a data error, as the sugar-price bug once was); specialty crops are
 #: reported below their looser threshold, not counted as violations
-NON_MARKET = {"GRAS", "MAIF", "OFAR", "ROOF", "SETA"}
+NON_MARKET = {"GRAS", "MAIF", "OFAR", "ROOF", "VSET", "FALL"}
 STAPLES = {"SWHE", "DWHE", "BARL", "CORN", "RYEM", "OATS", "RAPE", "SUNF", "SOYA", "POTA", "SUGB", "PULS"}
 SPECIALTY = {"OVEG", "TOMA", "APPL", "OFRU", "CITR", "OLIV", "PULS", "TAGR", "TWIN", "TABO", "WINE"}
 ARTIFACT_LOSS, ARTIFACT_LOSS_SPECIALTY = -1000.0, -8000.0
