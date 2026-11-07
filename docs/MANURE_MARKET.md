@@ -68,8 +68,13 @@ Pools (`CAPRIModel._update_manure_pools`): CAPRI's 34 country pools and 930 link
    a built-in primal-dual method where Clarabel is missing), pool balances as equalities; pool prices = the balances'
    duals;
 3. a Broyden-type correction of each pool's response (regions respond less than the schedule says, because their own
-   N shadow price moves as they trade) and adaptive damping of the price move (full steps while the gap falls, halved,
-   to at least 0.25, when it rises).
+   N shadow price moves as they trade);
+4. the price sent back to the regional models (`outer_loop.manure_pool_price_update`): "capri", the default since
+   7 November 2026 (the project lead's decision), CAPRI's weighted average of the pool's clearing prices of the last
+   steps with the price forecast's weights (manuremarket/simu_manure_market.gms l. 214-226; 0.55 / 0.30 / 0.15, then
+   0.4 / 0.3 / 0.2 / 0.1 from step 20); "damped", capri-mod's own, kept as an option: a step towards the new clearing
+   prices, full while the gap falls, halved, to at least 0.25, when it rises. Full-EU Green Deal 2030: 47 iterations
+   in "capri", 34 in "damped", the indicators within 0.2 point (KNOWN_ISSUES K120).
 
 Convergence: every pool within `manure_pool_tolerance` (0.03) of its manure supply and EU-wide conservation within the
 same tolerance; with trade on, the outer-iteration cap is raised to `manure_max_outer_iter` (60) when it is 25 or more.
